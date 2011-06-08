@@ -1,0 +1,29 @@
+
+0. Make sure the wnmodules folder has the read,write,execute permissions for user,group and others.
+
+1. After installing wnframework using the INSTALL.txt file from that project, do the following:
+	edit the defs.py file and set the variables as the templates there say.	
+
+2. Install dateutil module (apt-get install python-dateutil)
+		
+3. Unzip master.sql.gz in the modules folder
+
+4. goto  cgi-bin folder in wnframework and execute
+   python webnotes/install_lib/install.py root dbrootpassword dbname -s modules/master.sql
+
+   where:
+      root is the root database login
+      dbrootpassword is the root password
+      dbname is the name of the database you want to create for the ERP
+
+5. Login 
+   Set permissions through Profile(on top toolbar)-->Roles
+   Permission: System Manager, Sales User etc.
+   Tools-->Clear Cache, and refresh your browser.
+
+6. Go to Control Panel --> Set Company Name  --> Clear Cache --> Refresh the system  --> Go to Home  --> Enter Company Abbr, Year begin date, currency and Save it.
+
+7. Go to Setup-->System-->Global Defaults, save it.
+
+
+

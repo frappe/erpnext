@@ -1,0 +1,26 @@
+[
+	{
+		'content': None,
+		'creation': '2011-03-21 12:12:32',
+		'docstatus': 0,
+		'doctype': 'Page',
+		'icon': None,
+		'idx': None,
+		'menu_index': None,
+		'modified': '2011-03-21 12:13:39',
+		'modified_by': 'Administrator',
+		'module': 'Setup',
+		'name': 'people',
+		'owner': 'Administrator',
+		'page_name': 'People',
+		'parent': None,
+		'parent_node': None,
+		'parentfield': None,
+		'parenttype': None,
+		'script': None,
+		'show_in_menu': None,
+		'standard': 'Yes',
+		'static_content': None,
+		'style': None
+	}
+]

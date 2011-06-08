@@ -1,0 +1,1 @@
+[{'modified_by': 'Administrator', 'name': 'Sales Manager', 'parent': None, 'creation': '2010-04-08 12:07:36', 'modified': '2010-04-08 12:07:36', 'module': 'Roles', 'doctype': 'Role', 'idx': None, 'parenttype': None, 'role_name': 'Sales Manager', 'owner': 'Administrator', 'docstatus': 0, 'parentfield': None}]

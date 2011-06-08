@@ -1,0 +1,7 @@
+colwidths[col_idx['ID']]='120px'
+colwidths[col_idx['Employee Name']]='150px' 
+colwidths[col_idx['Department']] = '150px'
+#colwidths[col_idx['Employee Code']]='120px' 
+#colwidths[col_idx['Employee Number']] ='120px'
+colwidths[col_idx['Date of Birth']]='110px' 
+colwidths[col_idx['Month of Birth']]='120px' 

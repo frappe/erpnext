@@ -1,0 +1,17 @@
+[
+	{
+		'creation': '2011-02-12 15:07:26',
+		'docstatus': 0,
+		'doctype': 'Role',
+		'idx': None,
+		'modified': '2011-02-14 14:05:55',
+		'modified_by': 'Administrator',
+		'module': 'Roles',
+		'name': 'Employee',
+		'owner': 'Administrator',
+		'parent': None,
+		'parentfield': None,
+		'parenttype': None,
+		'role_name': 'Employee'
+	}
+]

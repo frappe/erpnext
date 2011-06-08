@@ -1,0 +1,40 @@
+body {
+	background-color: #e2e2e2;
+}
+
+div.layout_wrapper {
+	padding: 13px;
+	margin: 7px;
+	-moz-box-shadow: 1px 1px 6px #AAA;
+	-webkit-box-shadow: 1px 1px 6px #AAA;
+	box-shadow: 1px 1px 6px #AAA;
+	background-color: #FFF;
+}
+
+#birthday_area {
+	display: none;
+	padding: 4px;
+	margin-bottom: 8px;
+	background-color: #FDD;
+	padding: 4px;
+	color: #644;
+}
+
+.module-icons {
+   background: url(images/user/module-icons.png) no-repeat top left;
+   width:16px;
+   height:16px;
+}
+
+.module-icons-accounts{ background-position: 0 0;  } 
+.module-icons-analysis{ background-position: 0 -66px;  } 
+.module-icons-buying{ background-position: 0 -132px;  } 
+.module-icons-home{ background-position: 0 -198px;  } 
+.module-icons-hr{ background-position: 0 -264px;  } 
+.module-icons-people{ background-position: 0 -330px;  } 
+.module-icons-production{ background-position: 0 -396px;  } 
+.module-icons-projects{ background-position: 0 -462px;  } 
+.module-icons-selling{ background-position: 0 -528px;  } 
+.module-icons-setup{ background-position: 0 -594px;  } 
+.module-icons-stock{ background-position: 0 -660px;  } 
+.module-icons-support{ background-position: 0 -726px;  } 

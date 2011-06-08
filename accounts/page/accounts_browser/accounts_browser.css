@@ -1,0 +1,9 @@
+h1 { padding: 8px 0px; margin: 0px; }
+#ledger_area { padding: 16px;}
+.ac_head { display: none; }
+.ac_head div { padding: 2px; }
+.ac_ledger { display: none; padding: 8px; margin-top: 8px; border-top: 1px solid #DDD; }
+.ac_balance { margin-left: 4px; font-size: 16px; font-weight: bold; background-color: #FFFAB0; }
+
+.ac_page_sel_tab { width:90%; background-color: #EEE; margin-bottom: 8px }
+.ac_page_sel_tab td { vertical-align: middle; padding: 3px; }

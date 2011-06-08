@@ -1,0 +1,1 @@
+[{'modified_by': 'ashwini@webnotestech.com', 'name': 'Maintenance Manager', 'parent': None, 'creation': '2010-07-22 15:19:33', 'modified': '2010-07-22 15:19:33', 'module': 'Roles', 'doctype': 'Role', 'idx': None, 'parenttype': None, 'role_name': 'Maintenance Manager', 'owner': 'ashwini@webnotestech.com', 'docstatus': 0, 'parentfield': None}]

@@ -1,0 +1,1 @@
+[{'modified_by': 'Administrator', 'name': 'QA Inspection Report', 'parent': None, 'dt_label': 'Quality Inspection', 'creation': '2010-06-28 12:56:06', 'modified': '2010-06-28 12:56:06', 'module': 'Accounts', 'doctype': 'DocType Label', 'idx': None, 'parenttype': None, 'owner': 'Administrator', 'docstatus': 0, 'dt': 'QA Inspection Report', 'parentfield': None}]

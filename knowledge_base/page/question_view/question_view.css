@@ -1,0 +1,49 @@
+.qv-body {
+	padding: 13px;
+}
+
+
+.qv-input {
+	font-size: 14px;
+	height: 2.5em;
+	width: 100%;
+}
+
+.qv-text {
+	font-size: 20px;
+	font-weight: bold;
+}
+
+.qv-ans-input {
+	height: 5em;
+}
+
+.qv-ans-text {
+	color: #444;
+	line-height: 1.7em;
+}
+
+.qv-question-wrapper {
+	margin: 7px 0px 13px 0px;
+	padding-bottom: 7px;
+	border-bottom: 1px solid #CCC;
+}
+
+.qv-add-answer {
+	width: 50%;
+	margin: 7px 0px;
+	padding: 7px;
+	background-color: #E2E2EE;
+	display: none;
+}
+
+.qv-add-answer textarea {
+	height: 17em;
+	font-size: 12px;
+}
+
+.qv-answer {
+	margin: 7px 0px 7px 0px;
+	padding-bottom: 7px;
+	border-bottom: 1px solid #CCC;	
+}

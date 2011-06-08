@@ -1,0 +1,1 @@
+SELECT DISTINCT `tabAttendance`.employee, `tabAttendance`.employee_name FROM `tabAttendance` WHERE `tabAttendance`.fiscal_year like '%(fiscal_year)s%%' AND `tabAttendance`.`company` like '%(company)s%%' AND `tabAttendance`.`employee` like '%(employee)s%%'

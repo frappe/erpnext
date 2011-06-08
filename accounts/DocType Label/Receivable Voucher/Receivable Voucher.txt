@@ -1,0 +1,1 @@
+[{'modified_by': 'Administrator', 'name': 'Receivable Voucher', 'parent': None, 'dt_label': 'Sales Invoice', 'creation': '2010-06-10 10:44:40', 'modified': '2010-06-10 10:44:40', 'module': 'Accounts', 'doctype': 'DocType Label', 'idx': None, 'parenttype': None, 'owner': 'Administrator', 'docstatus': 0, 'dt': 'Receivable Voucher', 'parentfield': None}]

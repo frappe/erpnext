@@ -1,0 +1,1 @@
+[{'modified_by': 'Guest', 'name': 'Accounts User', 'parent': None, 'creation': '2010-04-08 12:05:21', 'modified': '2010-04-08 12:05:21', 'module': 'Roles', 'doctype': 'Role', 'idx': None, 'parenttype': None, 'role_name': 'Accounts User', 'owner': 'Administrator', 'docstatus': 0, 'parentfield': None}]

@@ -1,0 +1,82 @@
+/* item */
+
+div.my-company-member-item-selected {
+	background-color: #BBC;
+}
+
+
+
+/* profile */
+.my-company-name-head {
+	font-size: 14px;
+	font-weight: bold;
+	margin-bottom: 7px;
+}
+
+.my-company-email {
+	margin-bottom: 7px;
+	color: #888;
+}
+
+.my-company-online-status {
+	font-weight: bold;
+	margin-left: 7px;
+}
+
+.my-company-status {
+	margin-bottom: 7px;	
+	color: #888;
+	font-style: italics;
+}
+
+.my-company-bio {
+	margin-bottom: 7px;	
+}
+
+.my-company-toolbar {
+	margin: 7px 0px;	
+}
+
+/* conversation */
+
+.my-company-input-wrapper {
+	color: #555;
+	padding: 13px;
+}
+
+.my-company-input-wrapper td {
+	vertical-align: bottom;
+}
+
+.my-company-input-wrapper textarea {
+	height: 3em;
+	font-size: 14px;
+	width: 100%;
+	margin: 7px 0px 3px 0px;
+}
+
+.my-company-input-wrapper button {
+	margin: 0px;
+}
+
+.my-company-conversation {
+	border-top: 1px solid #DDD;
+}
+.my-company-comment-wrapper {
+	padding: 7px;
+	border-bottom: 1px solid #DDD;
+}
+
+.my-company-timestamp {
+	color: #888;
+	font-size: 11px;
+	margin: 3px;
+}
+
+.my-company-conversation-head {
+	padding: 3px;
+	background-color: #DEDEDE;
+	color: #555;
+	font-size: 14px;
+	text-align: center;
+}

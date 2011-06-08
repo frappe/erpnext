@@ -1,0 +1,17 @@
+div.home-status {
+	margin: 7px;
+	padding: 5px;
+	color: #666;
+}
+
+span.home-status-link {
+	cursor: pointer;
+	text-decoration: underline;
+}
+
+span.home-status-unread {
+	padding: 2px 3px;
+	font-size: 11px;
+	color: #FFF;
+	background-color: RED;
+}

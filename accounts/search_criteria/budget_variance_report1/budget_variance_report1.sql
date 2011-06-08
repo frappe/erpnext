@@ -1,0 +1,1 @@
+select t2.name, t1.account, t1.budget_allocated, t1.distribution_id from `tabBudget Detail` t1, `tabCost Center` t2 where t1.fiscal_year = '%(fiscal_year)s' and t1.parent = t2.name and t2.name like '%(cost_center)s%%' and t1.account like '%(account_head)s%%' and t2.docstatus != 2

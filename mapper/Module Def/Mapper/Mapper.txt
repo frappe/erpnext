@@ -1,0 +1,29 @@
+[
+	{
+		'_last_update': None,
+		'creation': '2010-11-30 22:41:12',
+		'disabled': None,
+		'docstatus': 0,
+		'doctype': 'Module Def',
+		'doctype_list': None,
+		'file_list': None,
+		'idx': None,
+		'is_hidden': None,
+		'last_updated_date': '2010-11-29 12:02:02',
+		'modified': '2010-09-25 00:00:00',
+		'modified_by': 'Administrator',
+		'module_desc': 'Mapper',
+		'module_icon': None,
+		'module_label': 'Mapper',
+		'module_name': 'Mapper',
+		'module_page': None,
+		'module_seq': None,
+		'name': 'Mapper',
+		'owner': 'saumil@webnotestech.com',
+		'parent': None,
+		'parentfield': None,
+		'parenttype': None,
+		'trash_reason': None,
+		'widget_code': None
+	}
+]

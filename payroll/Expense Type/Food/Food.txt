@@ -1,0 +1,1 @@
+[{'modified_by': 'harshada@webnotestech.com', 'name': 'Food', 'parent': None, 'description': None, 'creation': '2010-08-23 18:26:30', 'modified': '2010-08-23 18:26:30', 'module': 'Payroll', 'doctype': 'Expense Type', 'idx': None, 'parenttype': None, 'owner': 'harshada@webnotestech.com', 'docstatus': 0, 'expense_type': 'Food', 'parentfield': None}]

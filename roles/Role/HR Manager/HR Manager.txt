@@ -1,0 +1,1 @@
+[{'modified_by': 'Administrator', 'name': 'HR Manager', 'parent': None, 'creation': '2010-04-01 14:14:39', 'modified': '2010-04-01 10:19:09', 'module': 'Roles', 'doctype': 'Role', 'idx': None, 'parenttype': None, 'role_name': 'HR Manager', 'owner': 'Administrator', 'docstatus': 0, 'parentfield': None}]

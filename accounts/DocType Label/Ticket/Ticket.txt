@@ -1,0 +1,1 @@
+[{'modified_by': 'Administrator', 'name': 'Ticket', 'parent': None, 'dt_label': 'Task', 'creation': '2010-06-28 12:55:47', 'modified': '2010-06-28 12:55:47', 'module': 'Accounts', 'doctype': 'DocType Label', 'idx': None, 'parenttype': None, 'owner': 'Administrator', 'docstatus': 0, 'dt': 'Ticket', 'parentfield': None}]

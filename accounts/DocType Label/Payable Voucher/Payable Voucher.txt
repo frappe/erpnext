@@ -1,0 +1,1 @@
+[{'modified_by': 'Administrator', 'name': 'Payable Voucher', 'parent': None, 'dt_label': 'Purchase Invoice', 'creation': '2010-06-10 10:44:55', 'modified': '2010-06-10 10:44:55', 'module': 'Accounts', 'doctype': 'DocType Label', 'idx': None, 'parenttype': None, 'owner': 'Administrator', 'docstatus': 0, 'dt': 'Payable Voucher', 'parentfield': None}]

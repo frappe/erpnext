@@ -1,0 +1,31 @@
+<div class="layout_wrapper">
+<div id="fs_header"></div>
+</div>
+<!--  table.statement td {    vertical-align: middle;  }  table.statement td select {    width: 100px;  }  table.stmt_table {    table-layout: fixed;    border-collapse: collapse;  }  table.stmt_table td {    vertical-align: middle;    padding: 2px;  }  td.stmt_level0 {    font-weight: bold;    font-size: 14px;    border-bottom: 1px solid #AAA;  }  td.stmt_level1 {    font-weight: bold;    font-size: 12px;  }  td.stmt_level2 {    font-size: 11px;  }  td.stmt_level3 {    font-size: 11px;  }  td.stmt_level4 {    font-size: 12px;    font-weight: bold;    border-bottom: 1px solid #000;  }  td.stmt_level5 {    color: BLUE;    font-size: 11px;  }  --> <!--
+<div style="border: 1px solid #cccccc; padding: 4px; margin-top: 8px; background-color: #eeeeee; width: 98%;">
+<table class="statement" border="0" cellspacing="2px">
+<tbody>
+<tr>
+<td>Statement:</td>
+<td style="padding-right: 8px;" mce_style="padding-right: 8px;"><select id="stmt_type"></select></td>
+<td>Company:</td>
+<td style="padding-right: 8px;" mce_style="padding-right: 8px;"><select id="stmt_company"></select></td>
+<td>Period Type:</td>
+<td style="padding-right: 8px;" mce_style="padding-right: 8px;"><select id="stmt_period"></select></td>
+<td>Fiscal Year:</td>
+<td style="padding-right: 8px;" mce_style="padding-right: 8px;"><select id="stmt_fiscal_year"></select></td>
+<td style="padding-right: 8px;" mce_style="padding-right: 8px;">
+<div id="stmt_new"></div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+--> <!--
+<div style="margin:10px 0px 10px 0px" mce_style="margin:10px 0px 10px 0px"><button class="button" onclick="pscript.print_statement();">Print</button></div>
+-->
+<div id="print_html">
+<div id="stmt_title1" style="margin:16px 0px 4px 0px; font-size: 16px; font-weight: bold; color: #888;"></div>
+<div id="stmt_title2" style="margin:0px 0px 8px 0px; font-size: 16px; font-weight: bold;"></div>
+<div id="stmt_tree" style="margin: 0px 0px 16px; overflow: auto; display: none; width: 100%;"></div>
+</div>

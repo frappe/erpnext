@@ -1,0 +1,29 @@
+div.kb-search-wrapper textarea {
+	height: 2.2em;
+	width: 80%;
+	font-size: 14px;
+	padding: 3px;
+	margin-bottom: 7px;
+}
+
+.kb-question-wrapper {
+	border-bottom: 1px solid #AAA;
+	padding-bottom: 3px;
+	margin-bottom: 3px;
+}
+
+.kb-questions {
+	color: #000;
+}
+
+.kb-question-details {
+	margin: 11px 0px 11px 29px;
+}
+
+.kb-tag-filter-area {
+	padding: 7px;
+	background-color: #F2F2E8;
+	color: #222;
+	margin: 7px 0px;
+	display: none;
+}

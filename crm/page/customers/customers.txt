@@ -1,0 +1,26 @@
+[
+	{
+		'content': None,
+		'creation': '2011-03-25 13:48:50',
+		'docstatus': 0,
+		'doctype': 'Page',
+		'icon': None,
+		'idx': None,
+		'menu_index': None,
+		'modified': '2011-03-25 13:48:50',
+		'modified_by': 'Administrator',
+		'module': 'CRM',
+		'name': 'customers',
+		'owner': 'Administrator',
+		'page_name': 'Customers',
+		'parent': None,
+		'parent_node': None,
+		'parentfield': None,
+		'parenttype': None,
+		'script': None,
+		'show_in_menu': None,
+		'standard': 'Yes',
+		'static_content': None,
+		'style': None
+	}
+]

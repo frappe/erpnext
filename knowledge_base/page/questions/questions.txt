@@ -1,0 +1,26 @@
+[
+	{
+		'content': None,
+		'creation': '2011-05-09 11:04:37',
+		'docstatus': 0,
+		'doctype': 'Page',
+		'icon': None,
+		'idx': None,
+		'menu_index': None,
+		'modified': '2011-03-29 13:53:57',
+		'modified_by': 'Administrator',
+		'module': 'Knowledge Base',
+		'name': 'Questions',
+		'owner': 'Administrator',
+		'page_name': 'Questions',
+		'parent': None,
+		'parent_node': None,
+		'parentfield': None,
+		'parenttype': None,
+		'script': None,
+		'show_in_menu': None,
+		'standard': 'Yes',
+		'static_content': None,
+		'style': None
+	}
+]
