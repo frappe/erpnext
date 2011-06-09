@@ -35,20 +35,10 @@ cur_frm.cscript.onload_post_render = function(doc, dt, dn) {
 cur_frm.cscript.refresh = function(doc, cdt, cdn) { 
 
   cur_frm.clear_custom_buttons();
-
-  var ch = getchildren('Delivery Note Detail',doc.name,'delivery_note_details');
-  var is_billed = 1; // assume all qty's are billed
-  var is_installed = 1; //assume all qty's are installed
+ 
+  if(doc.per_billed < 100 && doc.docstatus==1) cur_frm.add_custom_button('Make Invoice', cur_frm.cscript['Make Sales Invoice']);
   
-  for(var i in ch){    
-    if(ch[i].billed_qty < ch[i].qty) is_billed = 0;
-    if(ch[i].installed_qty < ch[i].qty) is_installed = 0;
-    if(ch[i].billed_amt < ch[i].amount) is_billed = 0;
-  }
-   
-  if(is_billed==0 && doc.docstatus==1) cur_frm.add_custom_button('Make Invoice', cur_frm.cscript['Make Sales Invoice']);
-  
-  if(is_installed==0 && doc.docstatus==1) cur_frm.add_custom_button('Make Installation Note', cur_frm.cscript['Make Installation Note']);
+  if(doc.per_installed < 100 && doc.docstatus==1) cur_frm.add_custom_button('Make Installation Note', cur_frm.cscript['Make Installation Note']);
 
   if (doc.docstatus!=1) {
     hide_field(['SMS', 'Send SMS', 'message', 'customer_mobile_no', 'Repair Delivery Note']);
