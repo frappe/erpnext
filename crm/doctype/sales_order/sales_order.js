@@ -20,9 +20,7 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
   
   if(doc.__islocal){
     hide_field(['customer_address','contact_person','customer_name','address_display','contact_display','contact_mobile','contact_email','territory','customer_group','shipping_address']);
-  }   
-  
-
+  }
 }
 
 cur_frm.cscript.onload_post_render = function(doc, cdt, cdn) {
@@ -33,33 +31,20 @@ cur_frm.cscript.onload_post_render = function(doc, cdt, cdn) {
   } 
 }
 
-// REFRESH
-// ================================================================================================
-cur_frm.cscript.get_open_status = function(doc) {
-  var open_delivery = 0; var open_invoicing=0;
-  var ch = getchildren('Sales Order Detail',doc.name,'sales_order_details');
-  for(var i in ch){
-  	if(ch[i].qty > ch[i].delivered_qty) open_delivery = 1;
-  	if(ch[i].qty > ch[i].billed_qty) open_invoicing = 1;
-    if(ch[i].amount > ch[i].billed_amt) open_invoicing = 1;
-  }	
-  return [open_delivery, open_invoicing];
-}
-
-
+// Refresh
+//==================
 cur_frm.cscript.refresh = function(doc, cdt, cdn) {
   cur_frm.clear_custom_buttons();
   
-  var open_status = cur_frm.cscript.get_open_status(doc);
   if(doc.docstatus==1) {
   	if(doc.status != 'Stopped') {
 	    cur_frm.add_custom_button('Send SMS', cur_frm.cscript['Send SMS']);
   	  // delivery note
-  	  if(open_status[0] && doc.order_type!='Maintenance')
+  	  if(doc.per_delivered < 100 && doc.order_type!='Maintenance')
         cur_frm.add_custom_button('Make Delivery', cur_frm.cscript['Make Delivery Note']);
   	  
   	  // maintenance
-  	  if(open_status[0] && doc.order_type=='Maintenance') {
+  	  if(doc.per_delivered < 100 && doc.order_type=='Maintenance') {
         cur_frm.add_custom_button('Make Maint. Visit', cur_frm.cscript['Make Maintenance Visit']);
         cur_frm.add_custom_button('Make Maint. Schedule', cur_frm.cscript['Make Maintenance Schedule']);
   	  }
@@ -69,11 +54,11 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
         cur_frm.add_custom_button('Make Indent', cur_frm.cscript['Make Indent']);
   	  
       // sales invoice
-  	  if(open_status[1])
+  	  if(doc.per_billed < 100)
         cur_frm.add_custom_button('Make Invoice', cur_frm.cscript['Make Sales Invoice']);
       
       // stop
-      if(open_status[0] || open_status[1])
+      if(doc.per_delivered < 100 || doc.per_billed < 100)
         cur_frm.add_custom_button('Stop!', cur_frm.cscript['Stop Sales Order']);
   } else {
   	
