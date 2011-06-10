@@ -22,7 +22,7 @@ class DocType:
       self.doc.name = self.doc.first_name + (self.doc.last_name and ' ' + self.doc.last_name or '') + '-' + self.doc.sales_partner  
     
     # filter out bad characters in name
-    self.doc.name = self.doc.name.replace('&','and').replace('.','').replace("'",'').replace('"','').replace(',','')      
+    #self.doc.name = self.doc.name.replace('&','and').replace('.','').replace("'",'').replace('"','').replace(',','')      
 
 #----------------------
 # Call to Validate
