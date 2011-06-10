@@ -25,7 +25,8 @@ class DocType:
     if cust_master_name == 'Customer Name':
    
       # filter out bad characters in name
-      cust = self.doc.customer_name.replace('&','and').replace('.','').replace("'",'').replace('"','').replace(',','').replace('`','')
+      #cust = self.doc.customer_name.replace('&','and').replace('.','').replace("'",'').replace('"','').replace(',','').replace('`','')
+      cust = self.doc.customer_name
 
       supp = sql("select name from `tabSupplier` where name = %s", (cust))
       supp = supp and supp[0][0] or ''
