@@ -137,13 +137,14 @@ cur_frm.fields_dict['mtn_details'].grid.get_field('batch_no').get_query= functio
 
 cur_frm.cscript.item_code = function(doc, cdt, cdn) {
   var d = locals[cdt][cdn];
-  cal_back = function(r, rt){ /*cur_frm.cscript.calc_amount(doc)*/}
   // get values
   args = {
-  	item_code: d.item_code,
-  	warehouse: cstr(d.s_warehouse)
+  	'item_code'		: d.item_code,
+  	'warehouse'		: cstr(d.s_warehouse),
+  	'transfer_qty'	: d.transfer_qty,
+  	'serial_no'		: d.serial_no
   };
-  get_server_fields('get_item_details',JSON.stringify(args),'mtn_details',doc,cdt,cdn,1,cal_back);
+  get_server_fields('get_item_details',JSON.stringify(args),'mtn_details',doc,cdt,cdn,1);
 }
 
 //==================================================================================================================

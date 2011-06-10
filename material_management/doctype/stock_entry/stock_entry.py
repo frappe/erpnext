@@ -33,25 +33,25 @@ class DocType:
 	# get item details
 	# ----------------
 	def get_item_details(self, arg):
-		arg, bin, in_rate = eval(arg), None, 0
-		item = sql("select stock_uom, description, item_name from `tabItem` where name = %s and (ifnull(end_of_life,'')='' or end_of_life ='0000-00-00' or end_of_life >	now())", (arg['item_code']), as_dict = 1)
-		if not item:
-			if arg['item_code']: 
-				msgprint("Item is not active. You can restore it from Trash")
-			raise webnotes.ValidationError
+		arg, actual_qty, in_rate = eval(arg), 0, 0
+
+		item = sql("select stock_uom, description, item_name from `tabItem` where name = %s and (ifnull(end_of_life,'')='' or end_of_life ='0000-00-00' or end_of_life >	now())", (arg.get('item_code')), as_dict = 1)
+		if not item: 
+			msgprint("Item is not active", raise_exception=1)
 			
-		if arg['warehouse']:
-			bin = sql("select actual_qty from `tabBin` where item_code = %s and warehouse = %s", (arg['item_code'], arg['warehouse']), as_dict = 1)
-			in_rate = get_obj('Valuation Control').get_incoming_rate(self.doc.posting_date, self.doc.posting_time, arg['item_code'],arg['warehouse'])
+		if arg.get('warehouse'):
+			actual_qty = self.get_as_on_stock(arg.get('item_code'), arg.get('warehouse'), self.doc.posting_date, self.doc.posting_time)
+			in_rate = self.get_incoming_rate(arg.get('item_code'), arg.get('warehouse'), self.doc.posting_date, self.doc.posting_time, arg.get('transfer_qty'), arg.get('serial_no')) or 0
+			
 		ret = {
 			'uom'			      	: item and item[0]['stock_uom'] or '',
 			'stock_uom'			  	: item and item[0]['stock_uom'] or '',
 			'description'		  	: item and item[0]['description'] or '',
 			'item_name' 		  	: item and item[0]['item_name'] or '',
-			'actual_qty'		  	: bin and flt(bin[0]['actual_qty']) or 0,
+			'actual_qty'		  	: actual_qty,
 			'qty'					: 0,
 			'transfer_qty'			: 0,
-			'incoming_rate'	  		: flt(in_rate),
+			'incoming_rate'	  		: in_rate,
 			'conversion_factor'		: 1,
      		'batch_no'          	: ''
 		}
@@ -73,32 +73,42 @@ class DocType:
 		return str(ret)
 
 		
-	# get rate of FG item 
-	#---------------------------
-	def get_in_rate(self, pro_obj):
-		# calculate_cost for production item
-		get_obj('BOM Control').calculate_cost(pro_obj.doc.bom_no)
-		# return cost
-		return flt(get_obj('Bill Of Materials', pro_obj.doc.bom_no).doc.cost_as_per_mar)
-
-	# get current_stock
-	# ----------------
-	def get_current_stock(self, pro_obj = ''):
+	# get stock and incoming rate on posting date
+	# ---------------------------------------------
+	def get_stock_and_rate(self, bom_no = ''):
 		for d in getlist(self.doclist, 'mtn_details'):
-			d.s_warehouse = (self.doc.purpose != 'Production Order') and	self.doc.from_warehouse or cstr(d.s_warehouse)
-			d.t_warehouse = (self.doc.purpose != 'Production Order') and	self.doc.to_warehouse or cstr(d.t_warehouse)
+			# assign parent warehouse
+			d.s_warehouse = cstr(d.s_warehouse) or self.doc.purpose != 'Production Order' and self.doc.from_warehouse or ''
+			d.t_warehouse = cstr(d.t_warehouse) or self.doc.purpose != 'Production Order' and self.doc.to_warehouse or ''
 			
-			if d.s_warehouse:
-				bin = sql("select actual_qty from `tabBin` where item_code = %s and warehouse = %s", (d.item_code, d.s_warehouse), as_dict = 1)
-				d.actual_qty = bin and flt(bin[0]['actual_qty']) or 0
-			else: 
-				d.actual_qty = 0
-			if d.fg_item:
-				d.incoming_rate = pro_obj and self.get_in_rate(pro_obj) or ''
-			elif self.doc.purpose not in ['Material Receipt', 'Sales Return'] and not d.incoming_rate and d.s_warehouse:
-				d.incoming_rate = flt(get_obj('Valuation Control').get_incoming_rate(self.doc.posting_date, self.doc.posting_time, d.item_code, d.s_warehouse, d.transfer_qty, d.serial_no))
-			d.save()
+			# get current stock at source warehouse
+			d.actual_qty = d.s_warehouse and self.get_as_on_stock(d.item_code, d.s_warehouse, self.doc.posting_date, self.doc.posting_time) or 0
 
+			# get incoming rate
+			if not flt(d.incoming_rate):
+				d.incoming_rate = self.get_incoming_rate(d.item_code, d.s_warehouse, self.doc.posting_date, self.doc.posting_time, d.transfer_qty, d.serial_no, d.fg_item, bom_no)
+			
+	# Get stock qty on any date
+	# ---------------------------
+	def get_as_on_stock(self, item, wh, dt, tm):
+		bin = sql("select name from tabBin where item_code = %s and warehouse = %s", (item, wh))
+		bin_id = bin and bin[0][0] or ''
+		prev_sle = get_obj('Bin', bin_id).get_prev_sle(dt, tm)
+		qty = flt(prev_sle.get('bin_aqat', 0))
+		return qty
+
+	# Get incoming rate
+	# -------------------
+	def get_incoming_rate(self, item, wh, dt, tm, qty = 0, serial_no = '', fg_item = 'No', bom_no = ''):
+		in_rate = 0
+		if fg_item == 'Yes':
+			# re-calculate cost for production item from bom
+			get_obj('BOM Control').calculate_cost(bom_no)
+			in_rate = get_value('Bill Of Materials', bom_no, 'cost_as_per_mar')
+		elif wh:
+			in_rate = get_obj('Valuation Control').get_incoming_rate(dt, tm, item, wh, qty, serial_no)
+		
+		return in_rate
 
 	# makes dict of unique items with it's qty
 	#-----------------------------------------
@@ -242,7 +252,7 @@ class DocType:
 		self.validate_for_production_order(pro_obj)
 		self.validate_incoming_rate()
 		self.validate_warehouse(pro_obj)
-		self.get_current_stock(pro_obj)
+		self.get_current_stock(pro_obj.doc.bom_no)
 		self.calc_amount()
 		get_obj('Sales Common').validate_fiscal_year(self.doc.fiscal_year,self.doc.posting_date,'Posting Date')
 				

@@ -23,31 +23,23 @@ class DocType:
 
 	# Get FIFO Rate from Stack
 	# -------------------------
-	def get_fifo_rate(self, fcfs_bal, qty):
-		if qty:
-			fcfs_val = 0
-			withdraw = flt(qty)
-			while withdraw:
-				if not fcfs_bal:
-					break # nothing in store
-					 
-				batch = fcfs_bal[0]
-					
-				if batch[0] < withdraw:
-					# not enough in current batch, clear batch
-					withdraw -= batch[0]
-					fcfs_val += (flt(batch[0]) * flt(batch[1]))
-					fcfs_bal.pop(0)
-				else:
-					# all from current batch
-					fcfs_val += (flt(withdraw) * flt(batch[1]))
-					batch[0] -= withdraw
-					withdraw = 0
-			fcfs_rate = flt(fcfs_val) / flt(qty)
-			return fcfs_rate
-		else:
-			return fcfs_bal and fcfs_bal[0][1] or 0
-
+	def get_fifo_rate(self, fcfs_stack, qty):
+		fcfs_val = 0
+		withdraw = flt(qty)
+		while withdraw:
+			batch = fcfs_stack[0]				
+			if batch[0] <= withdraw:
+				# not enough or exactly same qty in current batch, clear batch
+				withdraw -= batch[0]
+				fcfs_val += (flt(batch[0]) * flt(batch[1]))
+				fcfs_stack.pop(0)
+			else:
+				# all from current batch
+				fcfs_val += (flt(withdraw) * flt(batch[1]))
+				batch[0] -= withdraw
+				withdraw = 0
+		fcfs_rate = flt(fcfs_val) / flt(qty)
+		return fcfs_rate
 
 	# --------------------------------
 	# get serializable inventory rate
@@ -76,15 +68,17 @@ class DocType:
 	def get_incoming_rate(self, posting_date, posting_time, item, warehouse, qty = 0, serial_no = ''):
 		in_rate = 0
 		val_method = self.get_valuation_method(item)
+		bin_obj = get_obj('Warehouse',warehouse).get_bin(item)
+		
 		if serial_no:
 			in_rate = self.get_serializable_inventory_rate(serial_no)
 		elif val_method == 'FIFO':
-			bin_obj = get_obj('Warehouse',warehouse).get_bin(item)
-			prev_sle = bin_obj.get_prev_sle('',posting_date, posting_time)
-			fcfs_stack = eval(prev_sle.get('fcfs_stack', '[]') or '[]')
-			in_rate = fcfs_stack and self.get_fifo_rate(fcfs_stack, qty) or 0
+			in_rate = 0
+			if qty:
+				prev_sle = bin_obj.get_prev_sle(posting_date, posting_time)
+				fcfs_stack = eval(prev_sle.get('fcfs_stack', '[]') or '[]')
+				in_rate = fcfs_stack and self.get_fifo_rate(fcfs_stack, qty) or 0				
 		elif val_method == 'Moving Average':
-			bin_obj = get_obj('Warehouse',warehouse).get_bin(item)
-			prev_sle = bin_obj.get_prev_sle('',posting_date, posting_time)
+			prev_sle = bin_obj.get_prev_sle(posting_date, posting_time)
 			in_rate = prev_sle and prev_sle.get('valuation_rate', 0) or 0
-		return in_rate 
+		return in_rate

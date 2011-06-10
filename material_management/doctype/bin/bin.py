@@ -25,7 +25,7 @@ class DocType:
 	# -------------
 	# stock update
 	# -------------
-	def update_stock(self, actual_qty=0, reserved_qty=0, ordered_qty=0, indented_qty=0, planned_qty=0, dt=None, sle_id='', posting_time='', serial_no = ''):
+	def update_stock(self, actual_qty=0, reserved_qty=0, ordered_qty=0, indented_qty=0, planned_qty=0, dt=None, sle_id='', posting_time='', serial_no = '', is_cancelled = 'No'):
 
 		if not dt: dt = nowdate()
 		# update the stock values (for current quantities)
@@ -40,10 +40,10 @@ class DocType:
 
 		# update valuation for post dated entry
 		if actual_qty:
-			prev_sle = self.get_prev_sle(sle_id, dt, posting_time, serial_no)
+			prev_sle = self.get_prev_sle(dt, posting_time, sle_id)
 			cqty = flt(prev_sle.get('bin_aqat', 0))
 			# Block if actual qty becomes negative
-			if (flt(cqty) + flt(actual_qty)) < 0 and flt(actual_qty) < 0:
+			if (flt(cqty) + flt(actual_qty)) < 0 and flt(actual_qty) < 0 and is_cancelled == 'No':
 				msgprint('Not enough quantity (requested: %s, current: %s) for Item <b>%s</b> in Warehouse <b>%s</b> as on %s %s' % (flt(actual_qty), flt(cqty), self.doc.item_code, self.doc.warehouse, dt, posting_time), raise_exception = 1)
 
 			self.update_item_valuation(sle_id, dt, posting_time, serial_no, prev_sle)
@@ -57,6 +57,7 @@ class DocType:
 			select * from `tabStock Ledger Entry`
 			where item_code = %s
 			and warehouse = %s
+			and ifnull(is_cancelled, 'No') = 'No'
 			order by timestamp(posting_date, posting_time) asc, name asc
 			limit 1
 		""", (self.doc.item_code, self.doc.warehouse), as_dict=1)
@@ -66,7 +67,7 @@ class DocType:
 	# get previous stock ledger entry
 	# --------------------------------
 			
-	def get_prev_sle(self, sle_id, posting_date, posting_time, serial_no = ''):
+	def get_prev_sle(self, posting_date, posting_time, sle_id = ''):
 		# this function will only be called for a live entry
 		# for which the "name" will be the latest (even for the same timestamp)
 		# and even for a back-dated entry
@@ -84,6 +85,7 @@ class DocType:
 			where item_code = %s
 			and warehouse = %s
 			and name != %s
+			and ifnull(is_cancelled, 'No') = 'No'
 			and timestamp(posting_date, posting_time) <= timestamp(%s, %s)
 			order by timestamp(posting_date, posting_time) desc, name desc
 			limit 1
@@ -101,8 +103,8 @@ class DocType:
 		if cqty + s['actual_qty'] < 0 and s['is_cancelled'] != 'Yes':
 			msgprint(cqty)
 			msgprint(s['actual_qty'])
-			msgprint('Cannot complete this transaction because stock will become negative for Item <b>%s</b> in Warehouse <b>%s</b> on Posting Date <b>%s</b>' % \
-				(self.doc.item_code, self.doc.warehouse, s['posting_date']))
+			msgprint('Cannot complete this transaction because stock will become negative in future transaction for Item <b>%s</b> in Warehouse <b>%s</b> on <b>%s %s</b>' % \
+				(self.doc.item_code, self.doc.warehouse, s['posting_date'], s['posting_time']))
 			raise Exception
 
 	# ------------------------------------
@@ -148,14 +150,13 @@ class DocType:
 	# --------------------------
 	# get fifo inventory values
 	# --------------------------
-	def get_fifo_inventory_values(self, val_rate, in_rate, actual_qty, incoming_rate):
+	def get_fifo_inventory_values(self, in_rate, actual_qty):
 		# add batch to fcfs balance
 		if actual_qty > 0:
 			self.fcfs_bal.append([flt(actual_qty), flt(in_rate)])
-			val_rate = incoming_rate
+
 		# remove from fcfs balance
 		else:
-			fcfs_val = 0
 			withdraw = flt(abs(actual_qty))
 			while withdraw:
 				if not self.fcfs_bal:
@@ -163,20 +164,20 @@ class DocType:
 				
 				batch = self.fcfs_bal[0]
 			 
-				if batch[0] < withdraw:
-					# not enough in current batch, clear batch
+				if batch[0] <= withdraw:
+					# not enough or exactly same qty in current batch, clear batch
 					withdraw -= batch[0]
-					fcfs_val += (flt(batch[0]) * flt(batch[1]))
 					self.fcfs_bal.pop(0)
 				else:
 					# all from current batch
-					fcfs_val += (flt(withdraw) * flt(batch[1]))
 					batch[0] -= withdraw
 					withdraw = 0
-			val_rate = flt(fcfs_val) / flt(abs(actual_qty))
 
+		fcfs_val = sum([flt(d[0])*flt(d[1]) for d in self.fcfs_bal])
+		fcfs_qty = sum([flt(d[0]) for d in self.fcfs_bal])
+		val_rate = fcfs_qty and fcfs_val / fcfs_qty or 0
+		
 		return val_rate
-
 
 	# -------------------
 	# get valuation rate
@@ -187,7 +188,7 @@ class DocType:
 		elif val_method == 'Moving Average':
 			val_rate, stock_val = self.get_moving_average_inventory_values(val_rate, in_rate, opening_qty = cqty, actual_qty = s['actual_qty'], is_cancelled = s['is_cancelled'])
 		elif val_method == 'FIFO':
-			val_rate = self.get_fifo_inventory_values(val_rate, in_rate, actual_qty = s['actual_qty'], incoming_rate = s['incoming_rate'])
+			val_rate = self.get_fifo_inventory_values(in_rate, actual_qty = s['actual_qty'])
 		return val_rate, stock_val
 
 
@@ -198,8 +199,7 @@ class DocType:
 		if val_method == 'Moving Average' or serial_nos:
 			stock_val = flt(stock_val) * flt(cqty)
 		elif val_method == 'FIFO':
-			for d in self.fcfs_bal:
-				stock_val += (flt(d[0]) * flt(d[1]))
+			stock_val = sum([flt(d[0])*flt(d[1]) for d in self.fcfs_bal])
 		return stock_val
 
 	# ----------------------
@@ -227,19 +227,20 @@ class DocType:
 			from `tabStock Ledger Entry` 
 			where item_code = %s 
 			and warehouse = %s 
+			and ifnull(is_cancelled, 'No') = 'No'
 			and timestamp(posting_date, posting_time) > timestamp(%s, %s)
 			order by timestamp(posting_date, posting_time) asc, name asc""", \
 				(self.doc.item_code, self.doc.warehouse, posting_date, posting_time), as_dict = 1)
 
 		# if in live entry - update the values of the current sle
 		if sle_id:
-			sll = sql("select * from `tabStock Ledger Entry` where name=%s", sle_id, as_dict=1) + sll
+			sll = sql("select * from `tabStock Ledger Entry` where name=%s and ifnull(is_cancelled, 'No') = 'No'", sle_id, as_dict=1) + sll
 		for s in sll:
 			# block if stock level goes negative on any date
 			self.validate_negative_stock(cqty, s)
 
 			stock_val, in_rate = 0, s['incoming_rate'] # IN
-			serial_nos = "'"+"', '".join(cstr(s["serial_no"]).split('\n')) + "'"
+			serial_nos = s["serial_no"] and ("'"+"', '".join(cstr(s["serial_no"]).split('\n')) + "'") or ''
 
 			# Get valuation rate
 			val_rate, stock_val = self.get_valuation_rate(val_method, serial_nos, val_rate, in_rate, stock_val, cqty, s) 
@@ -249,7 +250,6 @@ class DocType:
 
 			# Stock Value upto the sle
 			stock_val = self.get_stock_value(val_method, cqty, stock_val, serial_nos) 
-
 			# update current sle --> will it be good to update incoming rate in sle for outgoing stock entry?????
 			sql("""update `tabStock Ledger Entry` 
 			set bin_aqat=%s, valuation_rate=%s, fcfs_stack=%s, stock_value=%s 

@@ -217,7 +217,7 @@ class DocType:
 			if v["actual_qty"]:
 				sle_id = self.make_entry(v)
 
-			get_obj('Warehouse', v["warehouse"]).update_bin(flt(v["actual_qty"]), 0, 0, 0, 0, v["item_code"], v["posting_date"], sle_id, v["posting_time"], '')
+			get_obj('Warehouse', v["warehouse"]).update_bin(flt(v["actual_qty"]), 0, 0, 0, 0, v["item_code"], v["posting_date"], sle_id, v["posting_time"], '', v["is_cancelled"])
 
 
 	# -----------
