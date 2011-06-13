@@ -23,7 +23,7 @@ MyProfile = function(wrapper) {
 	}
 	
 	this.load_details = function() {
-		$c_page('event_updates','profile_settings','get_user_details','',function(r, rt) {
+		$c_page('home','profile_settings','get_user_details','',function(r, rt) {
 			me.form.set_values(r.message);
 		})
 	}
@@ -46,7 +46,7 @@ MyProfile = function(wrapper) {
 			if(v) {
 				this.set_working();
 				var btn = this;
-				$c_page('event_updates','profile_settings','set_user_details',v,function(r, rt) {
+				$c_page('home','profile_settings','set_user_details',v,function(r, rt) {
 					btn.done_working();
 				})
 			}
@@ -75,7 +75,7 @@ MyProfile = function(wrapper) {
 					msgprint('Passwords must match'); return;
 				}
 				this.set_working();
-				$c_page('event_updates','profile_settings','change_password',v,function(r,rt) {
+				$c_page('home','profile_settings','change_password',v,function(r,rt) {
 					if(!r.message && r.exc) { msgprint(r.exc); return; }
 					d.hide();
 				})
