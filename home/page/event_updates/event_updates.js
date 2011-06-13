@@ -610,7 +610,7 @@ pscript.home_make_status = function() {
 	var wrapper = page_body.pages['Event Updates'];
 
 	// get values
-	$c_page('event_updates', 'event_updates', 'get_status_details', user,
+	$c_page('home', 'event_updates', 'get_status_details', user,
 		function(r,rt) { 
 			
 			home_status_bar.render(r.message);
@@ -640,7 +640,7 @@ pscript.convert_to_paid = function() {
 		if(r.exc) { msgprint(r.exc); return; }
 		$(pscript.trial_box).slideUp();
 	}
-	$c_page('event_updates','event_updates','convert_to_paid','',callback)	
+	$c_page('home','event_updates','convert_to_paid','',callback)	
 }
 
 // show system message

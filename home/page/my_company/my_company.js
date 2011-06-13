@@ -34,7 +34,7 @@ pscript.myc_show_erpnext_message = function() {
 		+ ' users enabled out of ' + r.message.max_user 
 		+ '. Go to <a href="javascript:pscript.go_to_account_settings()">Account Settings</a> to increase the number of users');
 	}
-	$c_page('my_company', 'my_company', 'get_max_users', '', callback)
+	$c_page('home', 'my_company', 'get_max_users', '', callback)
 }
 
 //
@@ -54,7 +54,7 @@ pscript.myc_add_user = function() {
 		v = d.get_values();
 		if(v) {
 			d.fields_dict.add.input.set_working();
-			$c_page('my_company', 'my_company', 'add_user', v, function(r,rt) {
+			$c_page('home', 'my_company', 'add_user', v, function(r,rt) {
 				if(r.exc) { msgprint(r.exc); return; }
 				else {
 					d.hide();
@@ -99,7 +99,7 @@ MemberList = function(parent) {
 	if(pscript.online_users) {
 		this.make_list();		
 	} else {
-		$c_page('event_updates', 'event_updates', 'get_online_users', '', function(r,rt) {
+		$c_page('home', 'event_updates', 'get_online_users', '', function(r,rt) {
 			pscript.online_users = r.message;
 			me.make_list();
 		})
@@ -333,7 +333,7 @@ MemberProfile = function(parent, uid, member_item) {
 				pscript.myc_refresh()
 				msgprint("User Deleted Successfully");
 			}
-			$c_page('my_company', 'my_company', 'delete_user', {'user': me.uid}, callback);
+			$c_page('home', 'my_company', 'delete_user', {'user': me.uid}, callback);
 		}
 		d.show();
 	}
@@ -354,7 +354,7 @@ MemberProfile = function(parent, uid, member_item) {
 					me.refresh_enable_disable();
 				}
 				this.set_working();
-				$c_page('my_company','my_company', this.innerHTML.toLowerCase()+'_profile',me.profile.name, callback);
+				$c_page('home','my_company', this.innerHTML.toLowerCase()+'_profile',me.profile.name, callback);
 			}, null, null, 1);
 		}
 		if(this.uid==user) $dh(this.status_button); else $di(this.status_button);
@@ -473,7 +473,7 @@ MemberConversation = function(parent, uid, fullname) {
 		// set all messages
 		// as "read" (docstatus = 0)
 		if(user==uid) {
-			$c_page('my_company', 'my_company', 'set_read_all_messages', '', function(r,rt) { });	
+			$c_page('home', 'my_company', 'set_read_all_messages', '', function(r,rt) { });	
 		}
 	}
 	
@@ -505,7 +505,7 @@ MemberConversation = function(parent, uid, fullname) {
 			msgprint('Please write a message first!'); return;
 		}
 		this.post.set_working();
-		$c_page('my_company', 'my_company', 'post_comment', {
+		$c_page('home', 'my_company', 'post_comment', {
 			uid: uid,
 			comment: $(me.input).val(),
 			notify: me.notify_check.checked ? 1 : 0
