@@ -1,0 +1,28 @@
+[
+	{
+		'creation': '2011-06-09 16:14:42',
+		'disabled': 'No',
+		'docstatus': 0,
+		'doctype': 'Module Def',
+		'doctype_list': None,
+		'file_list': None,
+		'idx': None,
+		'is_hidden': 'No',
+		'last_updated_date': None,
+		'modified': '2011-06-09 16:57:36',
+		'modified_by': 'Administrator',
+		'module_desc': None,
+		'module_icon': None,
+		'module_label': 'Home',
+		'module_name': 'Home',
+		'module_page': 'Event Updates',
+		'module_seq': -1,
+		'name': 'Home',
+		'owner': 'Administrator',
+		'parent': None,
+		'parentfield': None,
+		'parenttype': None,
+		'trash_reason': None,
+		'widget_code': None
+	}
+]

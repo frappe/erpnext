@@ -1,6 +1,6 @@
 # REMEMBER to update this
 # ========================
-last_patch = 276
+last_patch = 277
 
 #-------------------------------------------
 
@@ -1097,3 +1097,15 @@ def execute(patch_no):
 		for d in sn:
 			delete_doc('Search Criteria', d[0])
 		reload_doc('crm', 'search_criteria', 'sales_personwise_transaction_summary')
+	elif patch_no == 277:
+		webnotes.model.delete_doc('DocType','HomePage Settings')
+		webnotes.model.delete_doc('DocType','Badge Settings')
+		sql("update tabDocType set module='Home' where module in ('Event Updates', 'My Company')")
+		sql("update tabPage set module='Home' where module in ('Event Updates', 'My Company')")
+		sql("update `tabSearch Criteria` set module='Home' where module in ('Event Updates', 'My Company')")
+
+
+		delete_pages = ('Chat User Gallery', 'Badge Info', 'Home', 'Website Setup', 'Test Page', 'Setup Masters', 'Service', 'Selling', 'Sales Reports', 'Organize','My Cart', 'My Activity', 'Manage Users', 'Maintenance', 'Getting Started', 'Gantt Test', 'Custom Reports - Stock', 'Custom Reports - Selling', 'Custom Reports - Production', 'Custom Reports - Payroll', 'Custom Reports - Maintenance', 'Custom Reports - Buying', 'Custom Reports - Accounts', 'CRM Setup', 'CRM Reports')
+		for p in delete_pages:
+		  webnotes.model.delete_doc('Page',p)
+		
