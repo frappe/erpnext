@@ -1,6 +1,6 @@
 # REMEMBER to update this
 # ========================
-last_patch = 277
+last_patch = 278
 
 #-------------------------------------------
 
@@ -1108,4 +1108,5 @@ def execute(patch_no):
 		delete_pages = ('Chat User Gallery', 'Badge Info', 'Home', 'Website Setup', 'Test Page', 'Setup Masters', 'Service', 'Selling', 'Sales Reports', 'Organize','My Cart', 'My Activity', 'Manage Users', 'Maintenance', 'Getting Started', 'Gantt Test', 'Custom Reports - Stock', 'Custom Reports - Selling', 'Custom Reports - Production', 'Custom Reports - Payroll', 'Custom Reports - Maintenance', 'Custom Reports - Buying', 'Custom Reports - Accounts', 'CRM Setup', 'CRM Reports')
 		for p in delete_pages:
 		  webnotes.model.delete_doc('Page',p)
-		
+	elif patch_no == 278:
+		sql("update tabDocTrigger set method = 'home.update_feed' where method = 'event_updates.update_feed'")
