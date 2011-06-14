@@ -16,7 +16,6 @@ convert_to_lists = webnotes.conn.convert_to_lists
 	
 # -----------------------------------------------------------------------------------------
 
-
 class DocType:
 	def __init__(self, doc, doclist=[]):
 		self.doc = doc
@@ -59,6 +58,7 @@ class DocType:
 
 
 	# Get UOM Details
+	# ----------------
 	def get_uom_details(self, arg = ''):
 		arg, ret = eval(arg), {}
 		uom = sql("select conversion_factor from `tabUOM Conversion Detail` where parent = %s and uom = %s", (arg['item_code'],arg['uom']), as_dict = 1)
@@ -252,7 +252,7 @@ class DocType:
 		self.validate_for_production_order(pro_obj)
 		self.validate_incoming_rate()
 		self.validate_warehouse(pro_obj)
-		self.get_current_stock(pro_obj.doc.bom_no)
+		self.get_stock_and_rate(pro_obj and pro_obj.doc.bom_no or '')
 		self.calc_amount()
 		get_obj('Sales Common').validate_fiscal_year(self.doc.fiscal_year,self.doc.posting_date,'Posting Date')
 				

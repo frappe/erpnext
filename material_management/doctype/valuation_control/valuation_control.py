@@ -69,7 +69,6 @@ class DocType:
 		in_rate = 0
 		val_method = self.get_valuation_method(item)
 		bin_obj = get_obj('Warehouse',warehouse).get_bin(item)
-		
 		if serial_no:
 			in_rate = self.get_serializable_inventory_rate(serial_no)
 		elif val_method == 'FIFO':
@@ -77,7 +76,7 @@ class DocType:
 			if qty:
 				prev_sle = bin_obj.get_prev_sle(posting_date, posting_time)
 				fcfs_stack = eval(prev_sle.get('fcfs_stack', '[]') or '[]')
-				in_rate = fcfs_stack and self.get_fifo_rate(fcfs_stack, qty) or 0				
+				in_rate = fcfs_stack and self.get_fifo_rate(fcfs_stack, qty) or 0
 		elif val_method == 'Moving Average':
 			prev_sle = bin_obj.get_prev_sle(posting_date, posting_time)
 			in_rate = prev_sle and prev_sle.get('valuation_rate', 0) or 0
