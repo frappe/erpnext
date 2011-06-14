@@ -98,9 +98,3 @@ class DocType:
       tot=flt(tot)+flt(d.total_tax_deposited)
     
     self.doc.total_amount = flt(tot)
-
-  # on update
-  def on_update(self):
-    obj = get_obj('Feed Control', 'Feed Control')
-    
-    obj.make_feed(self.doc)
