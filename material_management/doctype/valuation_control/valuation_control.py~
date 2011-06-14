@@ -1,0 +1,87 @@
+# Please edit this list and import only required elements
+import webnotes
+
+from webnotes.utils import add_days, add_months, add_years, cint, cstr, date_diff, default_fields, flt, fmt_money, formatdate, generate_hash, getTraceback, get_defaults, get_first_day, get_last_day, getdate, has_common, month_name, now, nowdate, replace_newlines, sendmail, set_default, str_esc_quote, user_format, validate_email_add
+from webnotes.model import db_exists
+from webnotes.model.doc import Document, addchild, removechild, getchildren, make_autoname, SuperDocType
+from webnotes.model.doclist import getlist, copy_doclist
+from webnotes.model.code import get_obj, get_server_obj, run_server_obj, updatedb, check_syntax
+from webnotes import session, form, is_testing, msgprint, errprint
+
+set = webnotes.conn.set
+sql = webnotes.conn.sql
+get_value = webnotes.conn.get_value
+in_transaction = webnotes.conn.in_transaction
+convert_to_lists = webnotes.conn.convert_to_lists
+	
+# -----------------------------------------------------------------------------------------
+
+
+class DocType:
+	def __init__(self, d, dl):
+		self.doc, self.doclist = d, dl
+
+	# Get FIFO Rate from Stack
+	# -------------------------
+	def get_fifo_rate(self, fcfs_stack, qty):
+		fcfs_val = 0
+		withdraw = flt(qty)
+		while withdraw:
+			batch = fcfs_stack[0]				
+			if batch[0] <= withdraw:
+				# not enough or exactly same qty in current batch, clear batch
+				withdraw -= batch[0]
+				fcfs_val += (flt(batch[0]) * flt(batch[1]))
+				fcfs_stack.pop(0)
+			else:
+				# all from current batch
+				fcfs_val += (flt(withdraw) * flt(batch[1]))
+				batch[0] -= withdraw
+				withdraw = 0
+		fcfs_rate = flt(fcfs_val) / flt(qty)
+		return fcfs_rate
+
+	# --------------------------------
+	# get serializable inventory rate
+	# --------------------------------
+	def get_serializable_inventory_rate(self, serial_no):
+		sr_nos = get_obj("Stock Ledger").get_sr_no_list(serial_no)
+		tot = 0
+		for s in sr_nos:
+			serial_no = s.strip()
+			tot += flt(get_value('Serial No', serial_no, 'purchase_rate'))
+		return tot / len(sr_nos)
+
+
+	# ---------------------
+	# get valuation method
+	# ---------------------
+	def get_valuation_method(self, item_code):
+		val_method = webnotes.conn.get_value('Item', item_code, 'valuation_method')
+		if not val_method:
+			val_method = get_defaults().get('valuation_method', 'FIFO')
+		return val_method
+		
+
+	# Get Incoming Rate based on valuation method
+	# --------------------------------------------
+	def get_incoming_rate(self, posting_date, posting_time, item, warehouse, qty = 0, serial_no = ''):
+		msgprint(1)
+		in_rate = 0
+		val_method = self.get_valuation_method(item)
+		bin_obj = get_obj('Warehouse',warehouse).get_bin(item)
+		if serial_no:
+			in_rate = self.get_serializable_inventory_rate(serial_no)
+		elif val_method == 'FIFO':
+			in_rate = 0
+			if qty:
+				prev_sle = bin_obj.get_prev_sle(posting_date, posting_time)
+				msgprint(prev_sle)
+				fcfs_stack = eval(prev_sle.get('fcfs_stack', '[]') or '[]')
+				msgprint(fcfs_stack)
+				in_rate = fcfs_stack and self.get_fifo_rate(fcfs_stack, qty) or 0
+				msgprint(in_rate)
+		elif val_method == 'Moving Average':
+			prev_sle = bin_obj.get_prev_sle(posting_date, posting_time)
+			in_rate = prev_sle and prev_sle.get('valuation_rate', 0) or 0
+		return in_rate
