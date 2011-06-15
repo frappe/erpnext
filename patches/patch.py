@@ -1,6 +1,6 @@
 # REMEMBER to update this
 # ========================
-last_patch = 278
+last_patch = 279
 
 #-------------------------------------------
 
@@ -1110,3 +1110,15 @@ def execute(patch_no):
 		  webnotes.model.delete_doc('Page',p)
 	elif patch_no == 278:
 		sql("update tabDocTrigger set method = 'home.update_feed' where method = 'event_updates.update_feed'")
+	elif patch_no == 279:
+		dt = ['GL Entry', 'Stock Ledger Entry']
+		for t in dt:
+			rec = sql("select voucher_type, voucher_no, ifnull(is_cancelled, 'No') from `tab%s` where modified >= '2011-06-15 01:00:00' group by voucher_no" % t)
+			for d in rec:
+				sql("update `tab%s` set docstatus = %s where name = '%s'" % (d[0], d[2]=='No' and 1 or 2, d[1]))
+			
+		other_dt = ['Enquiry', 'Quotation', 'Sales Order', 'Indent', 'Purchase Order', 'Production Order', 'Customer Issue', 'Installation Note']
+		for dt in other_dt:
+			rec = sql("select name, status from `tab%s` where modified >= '2011-06-15 01:00:00'" % dt)
+			for r in rec:
+				sql("update `tab%s` set docstatus = %s where name = '%s'" % (dt, (r[1] in ['Submitted', 'Closed'] and 1 or r[1]=='Cancelled' and 2 or 0), r[0]))
