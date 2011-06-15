@@ -71,7 +71,7 @@ class DocType:
     import datetime
     if self.doc.from_date and self.doc.to_date and self.doc.tds_category:      
       tot=0.0
-      party_tds_list=sql("select t2.amount_paid,t2.date_of_payment,t2.tds_amount,t2.cess_on_tds, t2.total_tax_amount, t1.cheque_no, t1.bsr_code, t1.date_of_receipt, t1.challan_no from `tabTDS Payment` t1, `tabTDS Payment Detail` t2 where t1.tds_category='%s' and t2.party_name='%s' and t1.from_date >= '%s' and t1.to_date <= '%s' and t2.total_tax_amount>0 and t2.parent=t1.name and t1.docstatus=1" % (self.doc.tds_category,self.doc.party_name,self.doc.from_date,self.doc.to_date))
+      party_tds_list=sql("select t2.amount_paid,t2.date_of_payment,t2.tds_amount,t2.cess_on_tds, t2.total_tax_amount, t1.cheque_no, t1.bsr_code, t1.date_of_receipt, t1.challan_id from `tabTDS Payment` t1, `tabTDS Payment Detail` t2 where t1.tds_category='%s' and t2.party_name='%s' and t1.from_date >= '%s' and t1.to_date <= '%s' and t2.total_tax_amount>0 and t2.parent=t1.name and t1.docstatus=1" % (self.doc.tds_category,self.doc.party_name,self.doc.from_date,self.doc.to_date))
       for s in party_tds_list:
         child = addchild(self.doc, 'form_16A_tax_details', 'Form 16A Tax Detail', 1, self.doclist)
         child.amount_paid = s and flt(s[0]) or ''
