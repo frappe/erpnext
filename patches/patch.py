@@ -1,6 +1,6 @@
 # REMEMBER to update this
 # ========================
-last_patch = 280
+last_patch = 281
 
 #-------------------------------------------
 
@@ -1124,3 +1124,9 @@ def execute(patch_no):
 				sql("update `tab%s` set docstatus = %s where name = '%s'" % (dt, (r[1] in ['Submitted', 'Closed'] and 1 or r[1]=='Cancelled' and 2 or 0), r[0]))
 	elif patch_no == 280:
 		reload_doc('accounts', 'doctype', 'form_16a')
+	elif patch_no == 281:
+		dt_list = ['Delivery Note', 'Purchase Receipt']
+		for dt in dt_list:
+			webnotes.msgprint("update `tab%s` set status = 'Submitted' where docstatus = 1 and modified >='2011-06-15 01:00:00'" % dt)
+			sql("update `tab%s` set status = 'Submitted' where docstatus = 1 and modified >='2011-06-15 01:00:00'" % dt)
+			sql("update `tab%s` set status = 'Cancelled' where docstatus = 2 and modified >='2011-06-15 01:00:00'" % dt)
