@@ -1122,3 +1122,5 @@ def execute(patch_no):
 			rec = sql("select name, status from `tab%s` where modified >= '2011-06-15 01:00:00'" % dt)
 			for r in rec:
 				sql("update `tab%s` set docstatus = %s where name = '%s'" % (dt, (r[1] in ['Submitted', 'Closed'] and 1 or r[1]=='Cancelled' and 2 or 0), r[0]))
+	elif patch_no == 280:
+		reload_doc('accounts', 'doctype', 'form_16a')

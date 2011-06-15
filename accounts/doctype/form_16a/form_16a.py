@@ -98,3 +98,4 @@ class DocType:
       tot=flt(tot)+flt(d.total_tax_deposited)
     
     self.doc.total_amount = flt(tot)
+    self.doc.in_words = get_obj('Sales Common').get_total_in_words(get_defaults()['currency'], self.doc.total_amount)
