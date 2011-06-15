@@ -1,6 +1,4 @@
 cur_frm.cscript.onload = function(doc,cdt,cdn){
-  if(doc.company)get_server_fields('get_pan_tan','','',doc,cdt,cdn,1);
-  
   cur_frm.cscript.refresh(doc, cdt, cdn);
 }
 
