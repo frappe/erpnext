@@ -1127,6 +1127,5 @@ def execute(patch_no):
 	elif patch_no == 281:
 		dt_list = ['Delivery Note', 'Purchase Receipt']
 		for dt in dt_list:
-			webnotes.msgprint("update `tab%s` set status = 'Submitted' where docstatus = 1 and modified >='2011-06-15 01:00:00'" % dt)
 			sql("update `tab%s` set status = 'Submitted' where docstatus = 1 and modified >='2011-06-15 01:00:00'" % dt)
 			sql("update `tab%s` set status = 'Cancelled' where docstatus = 2 and modified >='2011-06-15 01:00:00'" % dt)
