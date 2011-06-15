@@ -1,6 +1,6 @@
 # REMEMBER to update this
 # ========================
-last_patch = 281
+last_patch = 282
 
 #-------------------------------------------
 
@@ -1129,3 +1129,9 @@ def execute(patch_no):
 		for dt in dt_list:
 			sql("update `tab%s` set status = 'Submitted' where docstatus = 1 and modified >='2011-06-15 01:00:00'" % dt)
 			sql("update `tab%s` set status = 'Cancelled' where docstatus = 2 and modified >='2011-06-15 01:00:00'" % dt)
+	elif patch_no == 282:
+		dt_list = ['Enquiry', 'Quotation', 'Sales Order', 'Indent', 'Purchase Order', 'Production Order', 'Customer Issue', 'Installation Note', 'Receivable Voucher', 'Payable Voucher', 'Delivery Note', 'Purchase Receipt', 'Journal Voucher', 'Stock Entry']
+		for d in dt_list:
+			tbl = sql("select options from `tabDocField` where fieldtype = 'Table' and parent = '%s'" % d)
+			for t in tbl:
+				sql("update `tab%s` t1, `tab%s` t2 set t1.docstatus = t2.docstatus where t1.parent = t2.name" % (t[0], d))
