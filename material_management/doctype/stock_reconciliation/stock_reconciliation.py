@@ -135,31 +135,32 @@ class DocType:
 			self.update_item_valuation_pre_date(d)
 
 			if not qty_diff:
-				self.update_item_valuation_post_date()
+				self.update_item_valuation_post_date(d)
 				
 	# update valuation rate as csv file in all sle before reconciliation date
 	# ------------------------------------------------------------------------
 	def update_item_valuation_pre_date(self, d):
 		mar = flt(d[self.label['mar']])		
-				
+
 		# previous sle
 		prev_sle = sql("""
 			select name, fcfs_stack
 			from `tabStock Ledger Entry`
-			where item_code = '%s'
-			and warehouse = '%s'
+			where item_code = %s
+			and warehouse = %s
+			and ifnull(is_cancelled, 'No') = 'No'
 			and timestamp(posting_date, posting_time) <= timestamp(%s, %s)
 			""", (d[self.label['item_code']], d[self.label['warehouse']], self.doc.reconciliation_date, self.doc.reconciliation_time))
 
 		for each in prev_sle:
 			# updated fifo stack
-			fstack = [[i[0], mar] for i in each]
-			
+			fstack = each[1] and [[i[0], mar] for i in eval(each[1])] or ''
+
 			# update incoming rate, valuation rate, stock value and fifo stack
-			sql(""" update `tabStock Ledger Entry` 
+			sql("""update `tabStock Ledger Entry` 
 			set incoming_rate = %s, valuation_rate = %s, stock_value = bin_aqat*%s, fcfs_stack = %s 
-			where name = '%s'
-			""", (mar, mar, mar, fstack, each[0]))
+			where name = %s
+			""", (mar, mar, mar, cstr(fstack), each[0]))
 			
 				
 	# Update item valuation in all sle after the reconcliation date
