@@ -22,9 +22,6 @@ class DocType:
     self.doc = doc
     self.doclist = doclist
     
-    # Notification objects    
-    self.badge_obj = get_obj('Badge Settings','Badge Settings','','',1)
-  
   #autoname function
   def autoname(self):
     self.doc.name = make_autoname(self.doc.naming_series+'.#####')

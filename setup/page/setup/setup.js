@@ -170,8 +170,6 @@ SetupData = function(cnty){
     ['Web Forms',2,'Webforms','', 'Code to embed forms in yor website'],
     ['Permissions Manager',2,'Permission Engine','', 'Manage all permissions from one tool (beta)'],
     ['Property Setter',1,'Property Setter','', 'Customize properties of a Form (DocType) or Field'],
-    //['Badge Settings',3,'Badge Settings','','Define rules for assigning badges to users'],
-    //['Social Badge',1,'Social Badge','id'+NEWLINE+'badge_image'+NEWLINE+'badge_description'+NEWLINE+'badge_points','Social badge master'],
     ['Letter Head',1,'Letter Head','','Manage different letter heads for Prints'],
     ['SMS Settings',3,'SMS Settings','','Integrate your personalized SMS gateway which support http web service'],
     ['SMS Center',3,'SMS Center','','Send mass sms to your leads, contacts and partners']
