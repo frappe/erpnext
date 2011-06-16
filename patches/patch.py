@@ -1,6 +1,6 @@
 # REMEMBER to update this
 # ========================
-last_patch = 282
+last_patch = 283
 
 #-------------------------------------------
 
@@ -1135,3 +1135,7 @@ def execute(patch_no):
 			tbl = sql("select options from `tabDocField` where fieldtype = 'Table' and parent = '%s'" % d)
 			for t in tbl:
 				sql("update `tab%s` t1, `tab%s` t2 set t1.docstatus = t2.docstatus where t1.parent = t2.name" % (t[0], d))
+	elif patch_no == 283:
+		rec = sql("select voucher_type, voucher_no, ifnull(is_cancelled, 'No') from `tabGL Entry` where modified >= '2011-06-15 01:00:00' order by name ASC")
+		for d in rec:
+			sql("update `tab%s` set docstatus = %s where name = '%s'" % (d[0], d[2]=='No' and 1 or 2, d[1]))
