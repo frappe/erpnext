@@ -68,7 +68,7 @@ def add_profile(email):
 	sql = webnotes.conn.sql
 	
 	if not email:
-		email = webnotes.form_dict.get('user')
+		email = webnotes.form.get('user')
 	if not validate_email_add(email):
 		raise Exception
 		return 'Invalid Email Id'
