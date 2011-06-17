@@ -20,7 +20,7 @@ class SupportMailbox(POP3Mailbox):
 		"""
 			Updates message from support email as either new or reply
 		"""
-		from event_updates import update_feed
+		from home import update_feed
 
 		content, content_type = '[Blank Email]', 'text/plain'
 		if mail.text_content:
