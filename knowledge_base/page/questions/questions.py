@@ -13,7 +13,7 @@ def add_question(arg):
 	d.save(1)
 	
 	if args['suggest']:
-		from my_company.page.my_company.my_company import post_comment
+		from home.page.my_company.my_company import post_comment
 		for s in args['suggest']:
 			if s:
 				post_comment({

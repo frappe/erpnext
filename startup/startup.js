@@ -1,4 +1,4 @@
-if(user == 'Guest'){
+fif(user == 'Guest'){
   $dh(page_body.left_sidebar);
 }
 
@@ -476,7 +476,7 @@ pscript.go_to_account_settings = function() {
 		else { msgprint('<a href="' + r.message + '" target="_blank">'
 			+ 'Click here to open Account Settings in a new page</a>') }
 	}
-	$c_page('my_company', 'my_company', 'get_account_settings_url', '', callback)
+	$c_page('home', 'my_company', 'get_account_settings_url', '', callback)
 }
 
 // chart of accounts
