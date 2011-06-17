@@ -1,4 +1,4 @@
-fif(user == 'Guest'){
+if(user == 'Guest'){
   $dh(page_body.left_sidebar);
 }
 
