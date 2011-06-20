@@ -1,6 +1,6 @@
 # REMEMBER to update this
 # ========================
-last_patch = 285
+last_patch = 286
 
 #-------------------------------------------
 
@@ -1142,6 +1142,6 @@ def execute(patch_no):
 	elif patch_no == 284:
 		reload_doc('maintenance', 'doctype', 'support_ticket')
 		sql("update `tabDocField` set in_filter = 1 where fieldname in ('raised_by', 'subject') and parent = 'Support Ticket'")
-	elif patch_no == 285:
+	elif patch_no == 286:
 		reload_doc('accounts', 'search_criteria', 'itemwise_sales_register')
 		reload_doc('accounts', 'search_criteria', 'itemwise_purchase_register')
