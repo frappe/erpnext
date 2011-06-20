@@ -214,8 +214,17 @@ class DocType:
     #create address and contact from lead    
     self.create_lead_address_contact()
 
+  def delete_customer_address(self):
+    for rec in sql("select * from `tabAddress` where customer='%s'" %(self.doc.name), as_dict=1):      
+      sql("delete from `tabAddress` where name=%s",(rec['name']))
+  
+  def delete_customer_contact(self):
+    for rec in sql("select * from `tabContact` where customer='%s'" %(self.doc.name), as_dict=1):      
+      sql("delete from `tabContact` where name=%s",(rec['name']))
   
 # ******************************************************* on trash *********************************************************
-  def on_trash(self):
+  def on_trash(self):    
+    self.delete_customer_address()
+    self.delete_customer_contact()
     if self.doc.lead_name:
       sql("update `tabLead` set status='Interested' where name=%s",self.doc.lead_name)
