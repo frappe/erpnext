@@ -1,6 +1,6 @@
 # REMEMBER to update this
 # ========================
-last_patch = 283
+last_patch = 284
 
 #-------------------------------------------
 
@@ -1139,3 +1139,6 @@ def execute(patch_no):
 		rec = sql("select voucher_type, voucher_no, ifnull(is_cancelled, 'No') from `tabGL Entry` where modified >= '2011-06-15 01:00:00' order by name ASC")
 		for d in rec:
 			sql("update `tab%s` set docstatus = %s where name = '%s'" % (d[0], d[2]=='No' and 1 or 2, d[1]))
+	elif patch_no == 284:
+		reload_doc('maintenance', 'doctype', 'support_ticket')
+		sql("update `tabDocField` set in_filter = 1 where fieldname in ('raised_by', 'subject') and parent = 'Support Ticket'")
