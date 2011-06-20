@@ -8,7 +8,7 @@ def on_login(login_manager):
 
 	# login as
 	if login_manager.user == 'Administrator':
-		user = webnotes.form.getvalue('login_as')
+		user = webnotes.form.get('login_as')
 	   
 		if user:
 			# create if missing (due to some bug)
@@ -26,13 +26,13 @@ def on_login(login_manager):
 #
 def update_account_details():
 	# additional details (if from gateway)
-	if webnotes.form_dict.get('is_trial'):
-		webnotes.conn.set_global('is_trial', cint(webnotes.form_dict.get('is_trial')))
+	if webnotes.form.get('is_trial'):
+		webnotes.conn.set_global('is_trial', cint(webnotes.form.get('is_trial')))
 
-	if webnotes.form_dict.get('days_to_expiry'):
-		webnotes.conn.set_global('days_to_expiry', webnotes.form_dict.get('days_to_expiry'))
+	if webnotes.form.get('days_to_expiry'):
+		webnotes.conn.set_global('days_to_expiry', webnotes.form.get('days_to_expiry'))
 
-	if webnotes.form_dict.get('first_name'):
+	if webnotes.form.get('first_name'):
 		from server_tools.server_tools.gateway_utils import update_user_details
 		update_user_details()
 		
@@ -41,8 +41,8 @@ def update_account_details():
 #
 def on_login_post_session(login_manager):
 	# login from
-	if webnotes.form_dict.get('login_from'):
-		webnotes.session['data']['login_from'] = webnotes.form.getvalue('login_from')
+	if webnotes.form.get('login_from'):
+		webnotes.session['data']['login_from'] = webnotes.form.get('login_from')
 
 	update_account_details()
 
@@ -73,8 +73,8 @@ def login_as(user, login_manager):
 			import webnotes.utils.webservice    
 
 			p = Document('Profile')
-			p.first_name = webnotes.form_dict.get('first_name')
-			p.last_name = webnotes.form_dict.get('last_name')
+			p.first_name = webnotes.form.get('first_name')
+			p.last_name = webnotes.form.get('last_name')
 			p.email = user
 			p.name = user
 			p.enabled = 1

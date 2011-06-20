@@ -119,8 +119,8 @@ class DocType:
     def upload_many(self,form):
         import os
         # from file browser
-        if form.getvalue('form_name') == 'File Browser':
-            if form.getvalue('filedata'):
+        if form.get('form_name') == 'File Browser':
+            if form.get('filedata'):
                 i = form['filedata']
 
                 #creat file data                
@@ -128,7 +128,7 @@ class DocType:
                 fd.blob_content = i.file.read()
                 fd.file_name = i.filename
                 
-                file_det = form.getvalue('file_det').split('~~')
+                file_det = form.get('file_det').split('~~')
                 
                 if(file_det[0] == 'NIL'):
                     file_desc = ''
