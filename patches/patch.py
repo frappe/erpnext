@@ -1,6 +1,6 @@
 # REMEMBER to update this
 # ========================
-last_patch = 286
+last_patch = 287
 
 #-------------------------------------------
 
@@ -1145,3 +1145,5 @@ def execute(patch_no):
 	elif patch_no == 286:
 		reload_doc('accounts', 'search_criteria', 'itemwise_sales_register')
 		reload_doc('accounts', 'search_criteria', 'itemwise_purchase_register')
+	elif patch_no == 287:
+		sql("update `tabDocField` set no_copy = 1 where firlname in ('per_received', 'per_billed', 'per_delivered') and parent in ('Purchase Order', 'Purchase Receipt', 'Sales Order', 'Delivery Note')")
