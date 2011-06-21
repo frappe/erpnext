@@ -1,6 +1,6 @@
 # REMEMBER to update this
 # ========================
-last_patch = 288
+last_patch = 289
 
 #-------------------------------------------
 
@@ -1149,3 +1149,6 @@ def execute(patch_no):
 		sql("update `tabDocField` set no_copy = 1 where fieldname in ('per_received', 'per_billed', 'per_delivered') and parent in ('Purchase Order', 'Purchase Receipt', 'Sales Order', 'Delivery Note')")
 	elif patch_no == 288:
 		reload_doc('accounts', 'doctype', 'payable_voucher')
+	elif patch_no == 289:
+		sql("update `tabDocType` set subject = 'From %(supplier_name)s worth %(grand_total)s due on %(due_date)s | %(outstanding_amount)s outstanding' where name = 'Payable Voucher'")
+		sql("update `tabDocType` set search_fields = 'status,transaction_date,customer,lead,order_type' where name = 'Quotation'")		
