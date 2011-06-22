@@ -182,6 +182,7 @@ SetupData = function(cnty){
     ['Currency',1,'Currency','','Manage list of currencies'],
     ['Country',1,'Country','','Country master'],
     ['State',1,'State','','State master'],
+    ['Rename Tool',3,'Rename Tool','','Rename a record'],
     ['Activty Type',1,'Activity Type','','Types of activities that you can select in your Timesheet'],
     ['City',1,'City','','City master']]};
   

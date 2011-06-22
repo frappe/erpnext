@@ -1,6 +1,6 @@
 # REMEMBER to update this
 # ========================
-last_patch = 290
+last_patch = 291
 
 #-------------------------------------------
 
@@ -1160,3 +1160,6 @@ def execute(patch_no):
 			md.module_name = 'Home'
 			md.module_label = 'Home'
 			md.save(1)
+	elif patch_no == 291:
+		relaod_doc('tools','doctype','rename_tool')
+		
