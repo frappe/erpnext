@@ -1153,7 +1153,7 @@ def execute(patch_no):
 		sql("update `tabDocType` set subject = 'From %(supplier_name)s worth %(grand_total)s due on %(due_date)s | %(outstanding_amount)s outstanding' where name = 'Payable Voucher'")
 		sql("update `tabDocType` set search_fields = 'status,transaction_date,customer,lead,order_type' where name = 'Quotation'")		
 	elif patch_no == 290:
-	count = sql("""SELECT * FROM  `tabModule Def` 
+		count = sql("""SELECT * FROM  `tabModule Def` 
 			   WHERE `module_name` LIKE 'Home'""")
 		if not count:
 			md = Document('Module Def')
