@@ -1,6 +1,6 @@
 # REMEMBER to update this
 # ========================
-last_patch = 289
+last_patch = 290
 
 #-------------------------------------------
 
@@ -1152,3 +1152,11 @@ def execute(patch_no):
 	elif patch_no == 289:
 		sql("update `tabDocType` set subject = 'From %(supplier_name)s worth %(grand_total)s due on %(due_date)s | %(outstanding_amount)s outstanding' where name = 'Payable Voucher'")
 		sql("update `tabDocType` set search_fields = 'status,transaction_date,customer,lead,order_type' where name = 'Quotation'")		
+	elif patch_no == 290:
+		count = sql("""SELECT * FROM  `tabModule Def` 
+			   WHERE `module_name` LIKE 'Home'""")
+		if not count:
+			md = Document('Module Def')
+			md.module_name = 'Home'
+			md.module_label = 'Home'
+			md.save(1)
