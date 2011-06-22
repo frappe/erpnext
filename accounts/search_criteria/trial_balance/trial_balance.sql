@@ -1,0 +1,1 @@
+SELECT CONCAT( REPEAT('   ', COUNT(parent.name) - 1), node.name) AS name FROM tabAccount AS node,tabAccount AS parent WHERE node.lft BETWEEN parent.lft AND parent.rgt and node.company = '%(company)s' and node.docstatus != 2 GROUP BY node.name ORDER BY node.lft
