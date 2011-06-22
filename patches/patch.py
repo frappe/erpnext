@@ -1,6 +1,6 @@
 # REMEMBER to update this
 # ========================
-last_patch = 287
+last_patch = 288
 
 #-------------------------------------------
 
@@ -1147,3 +1147,11 @@ def execute(patch_no):
 		reload_doc('accounts', 'search_criteria', 'itemwise_purchase_register')
 	elif patch_no == 287:
 		sql("update `tabDocField` set no_copy = 1 where fieldname in ('per_received', 'per_billed', 'per_delivered') and parent in ('Purchase Order', 'Purchase Receipt', 'Sales Order', 'Delivery Note')")
+	elif patch_no == 288:
+		count = sql("""SELECT * FROM  `tabModule Def` 
+			   WHERE `module_name` LIKE 'Home'""")
+		if not count:
+			md = Document('Module Def')
+			md.module_name = 'Home'
+			md.module_label = 'Home'
+			md.save(1)
