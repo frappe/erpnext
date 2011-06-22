@@ -235,3 +235,10 @@ class DocType:
 		sle_obj.validate()
 		sle.save(new = 1)
 		return sle.name
+		
+	def repost(self):
+		"""
+		Repost everything!
+		"""
+		for wh in sql("select name from tabWarehouse"):
+			get_obj('Warehouse', wh[0]).repost_stock()
