@@ -259,18 +259,7 @@ class DocType:
 		if sll:
 			sql("update `tabBin` set valuation_rate=%s, actual_qty=%s, stock_value = %s where name=%s", \
 				(flt(val_rate), cqty, flt(stock_val), self.doc.name))
-		
-	# item re-order
-	# -------------
-	def reorder_item(self):
-		projected_qty = flt(self.doc.actual_qty) + flt(self.doc.indented_qty) + flt(self.doc.ordered_qty)
-		item_reorder_level = sql("select reorder_level from `%sItem` where name = '%s'" % (self.prefix, self.doc.item_code))[0][0] or 0
-		if flt(item_reorder_level) > flt(projected_qty):
-			msgprint("Item: " + self.doc.item_code + " is to be re-ordered. Indent raised (Not Implemented).")
-	
-	# validate
-	def validate(self):
-		self.validate_mandatory()
+
 
 	# item re-order
 	# -------------
