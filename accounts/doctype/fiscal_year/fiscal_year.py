@@ -100,7 +100,9 @@ class DocType:
 	def post_entries(self):
 		sql("LOCK TABLE `tabGL Entry` WRITE")
 		# post each gl entry (batch or complete)
-		gle = sql("select name, account, debit, credit, is_opening, posting_date from `tabGL Entry` where fiscal_year=%s and ifnull(is_cancelled,'No')='No' and company=%s", (self.doc.name, self.doc.company))
+		gle = sql("select name, account, debit, credit, is_opening, posting_date from `tabGL Entry` where fiscal_year=%s and ifnull(is_cancelled,'No')='No' and company=%s
+		
+		", (self.doc.name, self.doc.company))
 		account_details = {}
 
 		cnt = 0
@@ -163,7 +165,7 @@ class DocType:
 		# Clear outstanding
 		self.clear_outstanding()
 		sql("LOCK TABLE `tabGL Entry` WRITE")
-		against_voucher = sql("select against_voucher, against_voucher_type from `tabGL Entry` where fiscal_year=%s and is_cancelled='No' and company=%s group by against_voucher, against_voucher_type for update", (self.doc.name, self.doc.company))
+		against_voucher = sql("select against_voucher, against_voucher_type from `tabGL Entry` where fiscal_year=%s and is_cancelled='No' and company=%s and ifnull(against_voucher, '') != '' and ifnull(against_voucher_type, '') != '' group by against_voucher, against_voucher_type", (self.doc.name, self.doc.company))
 		for d in against_voucher:
 			# get voucher balance
 			bal = sql("select sum(debit)-sum(credit) from `tabGL Entry` where against_voucher=%s and against_voucher_type=%s", (d[0], d[1]))
