@@ -1,4 +1,3 @@
-
 # Columns
 #----------
 cl = [['Account','Data', '200px'],['Debit/Credit', 'Data', '100px'], ['Group/Ledger', 'Data', '100px'], ['Is PL Account', 'Data', '100px'], ['Opening','Data', '100px'],['Debit', 'Data', '100px'],['Credit', 'Data', '100px'],['Closing', 'Data', '100px']]
@@ -42,7 +41,7 @@ total_debit, total_credit = 0,0
 glc = get_obj('GL Control')
 
 # Main logic
-# ----------------
+# ----------
 for r in res:
 	# Fetch account details
 	acc = r[col_idx['Account']].strip()
@@ -51,11 +50,11 @@ for r in res:
 	r.append(acc_det[0][4])
 	r.append(acc_det[0][1])
 	
-	# if group, check user input
-	if acc_det[0][4] == 'Group' and filter_values.get('show_group_balance') == 'No':
+	#if shows group and ledger both but without group balance
+	if filter_values.get('show_group_ledger') == 'Both But Without Group Balance' and acc_det[0][4] == 'Group':
 		for i in range(4):
 			r.append('')
-		continue	
+		continue
 
 	# opening balance
 	if from_date_year:
@@ -70,7 +69,7 @@ for r in res:
 	if from_date_year == to_date_year:
 		debit = flt(debit_on_todate) - flt(debit_on_fromdate)
 		credit = flt(credit_on_todate) - flt(credit_on_fromdate)
-	else: # may be wrong
+	else: # if from date is start date of the year
 		debit = flt(debit_on_todate)
 		credit = flt(credit_on_todate)
 		
@@ -89,20 +88,18 @@ for r in res:
 	r.append(flt(closing))
 
 
-# Remove accounts if closing bal = debit = credit = 0
-# -----------------------------------------------------
-
 out =[]
 for r in res:
-	if r[col_idx['Opening']] or r[col_idx['Debit']] or r[col_idx['Credit']] or r[col_idx['Closing']]:
+	# Remove accounts if opening bal = debit = credit = closing bal = 0
+	# ------------------------------------------------------------------
+	if filter_values.get('show_zero_balance') != 'No':
 		out.append(r)
-
-	if r[col_idx['Group/Ledger']] == 'Group' and filter_values.get('show_group_balance') == 'No':
+	elif r[col_idx['Opening']] or r[col_idx['Debit']] or r[col_idx['Credit']] or r[col_idx['Closing']] or (r[col_idx['Group/Ledger']] == 'Group' and filter_values.get('show_group_ledger') == 'Both But Without Group Balance'):
 		out.append(r)
 		
 # Total Debit / Credit
 # --------------------------
-if filter_values.get('show_group_balance') == 'No':
+if filter_values.get('show_group_ledger') in ['Only Ledgers', 'Both But Without Group Balance']:
 	t_row = ['' for i in range(len(colnames))]
 	t_row[col_idx['Account']] = 'Total'
 	t_row[col_idx['Debit']] = total_debit
