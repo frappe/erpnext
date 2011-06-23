@@ -34,13 +34,13 @@ def get_values(msgprint, flt, posting_date, item_code = '', warehouse = ''):
   if item_code and not warehouse:
     war_list = sql("select distinct warehouse from `tabStock Ledger Entry` where item_code = %s", item_code)
     for d in war_list:
-      act = sql("select bin_aqat, stock_value from `tabStock Ledger Entry` where item_code = %s and warehouse = %s and posting_date <= %s Order by posting_date DESC, posting_time DESC, name DESC LIMIT 1", (item_code, d[0], posting_date))
+      act = sql("select bin_aqat, stock_value from `tabStock Ledger Entry` where item_code = %s and warehouse = %s and ifnull(is_cancelled, 'No') = 'No' and timestamp(posting_date, posting_time) <= timestamp(%s, %s) Order by timestamp(posting_date, posting_time) DESC, name DESC LIMIT 1", (item_code, d[0], posting_date, '23:55'))
       cl_bal += act and flt(act[0][0]) or 0.00
       stock_val += act and flt(act[0][1]) or 0.00
   elif warehouse and not item_code:
     item_list = sql("select distinct item_code from `tabStock Ledger Entry` where warehouse = %s", warehouse)
     for d in item_list:
-      act = sql("select bin_aqat, stock_value from `tabStock Ledger Entry` where item_code = %s and warehouse = %s and posting_date <= %s Order by posting_date DESC, posting_time DESC, name DESC LIMIT 1", (d[0], warehouse, posting_date))
+      act = sql("select bin_aqat, stock_value from `tabStock Ledger Entry` where item_code = %s and warehouse = %s and ifnull(is_cancelled, 'No') = 'No' and timestamp(posting_date, posting_time) <= timestamp(%s, %s) Order by timestamp(posting_date, posting_time) DESC, name DESC LIMIT 1", (d[0], warehouse, posting_date, '23:55'))
       cl_bal += act and flt(act[0][0]) or 0.00
       stock_val += act and flt(act[0][1]) or 0.00
   return cl_bal, stock_val
@@ -55,7 +55,8 @@ for r in res:
     r.append(closing_balance)
     r.append(stock_value)
   else:
-    det = sql("select bin_aqat, stock_value from `tabStock Ledger Entry` where item_code = %s and warehouse = %s and posting_date <= %s Order by posting_date DESC, posting_time DESC, name DESC LIMIT 1", (r[col_idx['Item Code']], r[col_idx['Warehouse']], posting_date))
+    det = sql("select bin_aqat, stock_value from `tabStock Ledger Entry` where item_code = %s and warehouse = %s and ifnull(is_cancelled, 'No') = 'No' and timestamp(posting_date, posting_time) <= timestamp(%s, %s) Order by timestamp(posting_date, posting_time) DESC, name DESC LIMIT 1", (r[col_idx['Item Code']], r[col_idx['Warehouse']], posting_date, '23:55'))
+    
     r.append(det and flt(det[0][0]) or 0.00)
     r.append(det and flt(det[0][1]) or 0.00)
   cl_bal += flt(r[col_idx['Closing Balance']])

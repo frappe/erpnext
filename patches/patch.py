@@ -1,6 +1,6 @@
 # REMEMBER to update this
 # ========================
-last_patch = 291
+last_patch = 293
 
 #-------------------------------------------
 
@@ -1161,5 +1161,9 @@ def execute(patch_no):
 			md.module_label = 'Home'
 			md.save(1)
 	elif patch_no == 291:
-		relaod_doc('tools','doctype','rename_tool')
-		
+		reload_doc('tools','doctype','rename_tool')
+	elif patch_no == 292:
+		reload_doc('accounts', 'search_criteria', 'trial_balance')
+	elif patch_no == 293:
+		sql("delete from tabDocField where parent='Account' and fieldname='address'")
+		reload_doc('accounts', 'doctype', 'account')

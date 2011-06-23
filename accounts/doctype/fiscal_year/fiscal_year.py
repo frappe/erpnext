@@ -22,6 +22,9 @@ class DocType:
 		self.doc, self.doclist = d,dl
 		
 	def repost(self):
+		if not self.doc.company:
+			msgprint("Please select company", raise_exception=1)
+			
 		if not in_transaction:
 			sql("start transaction")
 				
@@ -100,9 +103,7 @@ class DocType:
 	def post_entries(self):
 		sql("LOCK TABLE `tabGL Entry` WRITE")
 		# post each gl entry (batch or complete)
-		gle = sql("select name, account, debit, credit, is_opening, posting_date from `tabGL Entry` where fiscal_year=%s and ifnull(is_cancelled,'No')='No' and company=%s
-		
-		", (self.doc.name, self.doc.company))
+		gle = sql("select name, account, debit, credit, is_opening, posting_date from `tabGL Entry` where fiscal_year=%s and ifnull(is_cancelled,'No')='No' and company=%s", (self.doc.name, self.doc.company))
 		account_details = {}
 
 		cnt = 0
