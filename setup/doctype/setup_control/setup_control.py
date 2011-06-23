@@ -142,23 +142,27 @@ class DocType:
   # Create Profile
   # --------------
   def create_profile(self, user_email, user_fname, user_lname):
-    roles_list = ['System Manager','Sales Manager','Sales User','Purchase Manager','Purchase User','Material Manager','Material User','Accounts Manager','Accounts User','HR Manager','HR User','Production Manager','Production User','Sales Master Manager','Purchase Master Manager','Material Master Manager','Quality Manager','Maintenance User','Maintenance Manager']
     pr = Document('Profile')
     pr.first_name = user_fname
     pr.last_name = user_lname
     pr.email = user_email
     pr.enabled = 1
     pr.save(1)
+	self.add_roles(pr)
+
+  def add_roles(self, pr):
+    roles_list = ['System Manager','Sales Manager','Sales User','Purchase Manager','Purchase User','Material Manager','Material User','Accounts Manager','Accounts User','HR Manager','HR User','Production Manager','Production User','Sales Master Manager','Purchase Master Manager','Material Master Manager','Quality Manager','Maintenance User','Maintenance Manager']
     for r in roles_list:
       d = addchild(pr, 'userroles', 'UserRole', 1)
       d.role = r
-      d.save()
+      d.save(1)
+
     # Add roles to Administrator profile
     pr_obj = get_obj('Profile','Administrator')
     for r in roles_list:
       d = addchild(pr_obj.doc,'userroles', 'UserRole', 1)
       d.role = r
-      d.save()
+      d.save(1)
   
   # Update WN ERP Client Control
   # -----------------------------
