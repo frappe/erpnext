@@ -110,13 +110,13 @@ class DocType:
 	def repair_all_bins(self):
 		bins = sql("select name from tabBin")
 		cnt = 0
-		for bin in bins[0]:
+		for bin in bins:
 			if cnt % 20 == 0: 
 				sql("commit")
 				sql("start transaction")
 			cnt += 1
 			
-			self.repair_bin(bin)
+			self.repair_bin(bin[0])
 
 	# =============================================================================
 	def repair_opening_bal(self, d, acc_obj, past_yr, fiscal_yr):
