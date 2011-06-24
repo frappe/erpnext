@@ -1,6 +1,6 @@
 # REMEMBER to update this
 # ========================
-last_patch = 294
+last_patch = 295
 
 #-------------------------------------------
 
@@ -1173,4 +1173,6 @@ def execute(patch_no):
 		# if one user and one user has no roles
 		if len(ul)==1 and not sql("select parent from tabUserRole where role='System Manager' and parent=%s", ul[0][0]):
 			get_obj('Setup Control').add_roles(Document('Profile', ul[0][0]))
-		
+	elif patch_no == 295:
+		sql("update `tabDocField` set options = 'Delivered\nNot Delivered\nPartly Delivered\nClosed\nNot Applicable' where parent = 'Sales Order' and fieldname = 'delivery_status'")
+		sql("update `tabDocField` set options = 'Billed\nNot Billed\nPartly Billed\nClosed' where parent = 'Sales Order' and fieldname = 'billing_status'")
