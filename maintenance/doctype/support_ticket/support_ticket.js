@@ -27,6 +27,8 @@ $.extend(cur_frm.cscript, {
 				]
 			})			
 		}
+		
+		if(!doc.customer) hide_field(['customer_name','address_display','contact_display','contact_mobile','contact_email']);		
 	},
 	
 	refresh: function(doc) {
@@ -76,6 +78,15 @@ $.extend(cur_frm.cscript, {
 			refresh_field('new_response');
 			cs.make_listing(doc);
 		});
+	},
+	
+	customer: function(doc, dt, dn) {
+		var callback = function(r,rt) {
+			var doc = locals[cur_frm.doctype][cur_frm.docname];
+			cur_frm.refresh();
+		}
+		if(doc.customer) $c_obj(make_doclist(doc.doctype, doc.name), 'get_default_customer_address', '', callback);
+		if(doc.customer) unhide_field(['customer_name','address_display','contact_display','contact_mobile','contact_email']);
 	}
 })
 

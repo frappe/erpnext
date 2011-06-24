@@ -1,6 +1,8 @@
 import webnotes
 
-class DocType:
+from utilities.transaction_base import TransactionBase
+
+class DocType(TransactionBase):
 	def __init__(self, doc, doclist=[]):
 		self.doc = doc
 		self.doclist = doclist
