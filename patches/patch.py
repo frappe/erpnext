@@ -1176,6 +1176,5 @@ def execute(patch_no):
 	elif patch_no == 295:
 		sql("update `tabDocField` set options = 'Delivered\nNot Delivered\nPartly Delivered\nClosed\nNot Applicable' where parent = 'Sales Order' and fieldname = 'delivery_status'")
 		sql("update `tabDocField` set options = 'Billed\nNot Billed\nPartly Billed\nClosed' where parent = 'Sales Order' and fieldname = 'billing_status'")
-	elif patch_no == 296:
 		sql("delete from tabDocField where parent='Support Ticket' and fieldname='contact_no'")
 		reload_doc('maintenance', 'doctype', 'support_ticket')
