@@ -1,6 +1,6 @@
 # REMEMBER to update this
 # ========================
-last_patch = 293
+last_patch = 294
 
 #-------------------------------------------
 
@@ -1167,3 +1167,10 @@ def execute(patch_no):
 	elif patch_no == 293:
 		sql("delete from tabDocField where parent='Account' and fieldname='address'")
 		reload_doc('accounts', 'doctype', 'account')
+	elif patch_no == 294:
+		# new account profile fix
+		ul = sql("select name from tabProfile where ifnull(name,'') not in ('Administrator', 'Guest', '')")
+		# if one user and one user has no roles
+		if len(ul)==1 and not sql("select parent from tabUserRole where role='System Manager' and parent=%s", ul[0][0]):
+			get_obj('Setup Control').add_roles(Document('Profile', ul[0][0]))
+		

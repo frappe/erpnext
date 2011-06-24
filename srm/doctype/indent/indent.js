@@ -9,10 +9,13 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
   if (!doc.transaction_date) doc.transaction_date = dateutil.obj_to_str(new Date())
   if (!doc.status) doc.status = 'Draft';
   
+}
+
+cur_frm.cscript.onload_post_render = function(doc, cdt, cdn) {
   // second call
   if(doc.__islocal){ 
     cur_frm.cscript.get_item_defaults(doc);
-  }
+  }	
 }
 
 cur_frm.cscript.get_item_defaults = function(doc) {

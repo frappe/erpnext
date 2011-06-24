@@ -21,11 +21,6 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
   //if(!doc.price_list_name && sys_defaults.price_list_name) set_multiple(cdt,cdn,{price_list_name:sys_defaults.price_list_name});
   if(!doc.company && sys_defaults.company) set_multiple(cdt,cdn,{company:sys_defaults.company});
   if(!doc.fiscal_year && sys_defaults.fiscal_year) set_multiple(cdt,cdn,{fiscal_year:sys_defaults.fiscal_year});
-
-  // load default charges
-  if(doc.__islocal && !getchildren('RV Tax Detail', doc.name, 'other_charges', doc.doctype).length) cur_frm.cscript.load_taxes(doc, cdt, cdn);
-
-  if(doc.__islocal==1){  cur_frm.cscript.price_list_name(doc, cdt, cdn);}
   
   if(doc.quotation_to) {
     if(doc.quotation_to == 'Customer') {
@@ -35,6 +30,12 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
       hide_field(['customer','customer_address','contact_person', 'customer_name','contact_display', 'customer_group']);
     }
   }
+}
+
+cur_frm.cscript.onload_post_render = function(doc, dt, dn) {
+  // load default charges
+  if(doc.__islocal && !getchildren('RV Tax Detail', doc.name, 'other_charges', doc.doctype).length) 
+    cur_frm.cscript.load_taxes(doc, cdt, cdn);
 }
 
 // hide - unhide fields based on lead or customer..
