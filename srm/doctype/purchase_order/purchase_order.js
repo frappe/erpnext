@@ -15,14 +15,16 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
   if(!doc.currency) doc.currency = sys_defaults.currency;
   if(!doc.status) set_multiple(cdt,cdn,{status:'Draft'});
   if(!doc.transaction_date) set_multiple(cdt,cdn,{transaction_date:get_today()});
-    
-  if(doc.__islocal){ 
-    cur_frm.cscript.get_default_schedule_date(doc);
-  }
   
   if(doc.__islocal){
     hide_field(['supplier_name','supplier_address','contact_person','address_display','contact_display','contact_mobile','contact_email']);
   }
+}
+
+cur_frm.cscript.onload_post_render = function(doc, cdt, cdn) {
+  if(doc.__islocal){ 
+    cur_frm.cscript.get_default_schedule_date(doc);
+  }	
 }
 
 // ================================== Refresh ==========================================
