@@ -1,6 +1,6 @@
 # REMEMBER to update this
 # ========================
-last_patch = 297
+last_patch = 298
 
 #-------------------------------------------
 
@@ -1186,3 +1186,7 @@ def execute(patch_no):
 		reload_doc('payroll', 'doctype', 'appraisal')
 		reload_doc('payroll', 'doctype', 'salary_structure')
 		reload_doc('payroll', 'doctype', 'salary_slip')
+	elif patch_no == 298:
+		sql("update `tabDocField` set options = 'Link:Company' where parent = 'Attendance' and fieldname = 'company'")
+		sql("update `tabDocField` set options = 'Link:Company' where parent = 'Expense Voucher' and fieldname = 'company'")
+		sql("update `tabDocField` set options = 'Link:Company' where parent = 'Appraisal' and fieldname = 'company'")
