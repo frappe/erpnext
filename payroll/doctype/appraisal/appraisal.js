@@ -1,3 +1,5 @@
+cur_frm.add_fetch('employee', 'company', 'company');
+
 cur_frm.cscript.onload = function(doc,cdt,cdn){
   if(!doc.status) set_multiple(dt,dn,{status:'Draft'});
   if(doc.employee) cur_frm.cscript.employee(doc,cdt,cdn);

@@ -1,5 +1,7 @@
+cur_frm.add_fetch('employee', 'company', 'company');
+
 cur_frm.cscript.onload = function(doc,cdt,cdn){
-  cur_frm.cscript.get_tips(doc, cdt, cdn);
+  //cur_frm.cscript.get_tips(doc, cdt, cdn);
   if(!doc.approval_status) set_multiple(cdt,cdn,{approval_status:'Draft'});
   if(doc.employee) cur_frm.cscript.employee(doc,cdt,cdn);
   
