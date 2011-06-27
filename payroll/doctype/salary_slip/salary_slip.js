@@ -1,3 +1,5 @@
+cur_frm.add_fetch('employee', 'company', 'company');
+
 // On load
 // -------------------------------------------------------------------
 cur_frm.cscript.onload = function(doc,dt,dn){

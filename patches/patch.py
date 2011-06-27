@@ -1,6 +1,6 @@
 # REMEMBER to update this
 # ========================
-last_patch = 296
+last_patch = 297
 
 #-------------------------------------------
 
@@ -1179,3 +1179,10 @@ def execute(patch_no):
 	elif patch_no == 296:
 		sql("delete from tabDocField where parent='Support Ticket' and fieldname='contact_no'")
 		reload_doc('maintenance', 'doctype', 'support_ticket')
+	elif patch_no == 297:
+		reload_doc('payroll', 'doctype', 'employee')
+		reload_doc('payroll', 'doctype', 'attendance')
+		reload_doc('payroll', 'doctype', 'expense_voucher')
+		reload_doc('payroll', 'doctype', 'appraisal')
+		reload_doc('payroll', 'doctype', 'salary_structure')
+		reload_doc('payroll', 'doctype', 'salary_slip')
