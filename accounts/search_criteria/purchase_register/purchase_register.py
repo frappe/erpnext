@@ -14,14 +14,13 @@ for i in expense_acc:
 	coloptions.append('')
 
 # Add tax head columns
-tax_acc = [c[0] for c in sql("select distinct account_head from `tabPurchase Tax Detail` where parenttype='Payable Voucher' and category in ('For Total', 'For Both') and add_deduct_tax = 'Add' and docstatus=1 order by idx asc")]
-
-"""select distinct account_head 
-						   from `tabPurchase Tax Detail` 
-						   where parenttype = 'Payable Voucher' 
-						   and add_deduct_tax = 'Add' 
-						   and category != 'For Valuation' 
-						   order by account_head asc"""
+tax_acc = [c[0] for c in sql("""select distinct account_head 
+							    from `tabPurchase Tax Detail` 
+							    where parenttype = 'Payable Voucher' 
+							    and add_deduct_tax = 'Add' 
+							    and category in ('For Total', 'For Both')
+							    and docstatus=1
+							    order by account_head asc""")]
 						   
 tax_acc.append('Total Tax')
 tax_acc.append('GrandTotal')
@@ -69,12 +68,12 @@ for r in res:
 
 	#Get tax for account heads
 	acc_head_tax = sql("""select account_head, tax_amount 
-							  from `tabPurchase Tax Detail` 
-							  where parent = '%s' 
-							  and parenttype = 'Payable Voucher' 
-							  and add_deduct_tax = 'Add' 
-							  and category in ('For Total', 'For Both')""" %(r[col_idx['ID']],))
-	
+						  from `tabPurchase Tax Detail` 
+						  where parent = '%s' 
+						  and parenttype = 'Payable Voucher' 
+						  and add_deduct_tax = 'Add' 
+						  and category in ('For Total', 'For Both')""" %(r[col_idx['ID']],))
+
 	#Convert the result to dictionary for easy retrieval
 	acc_head_tax_dict = {}
 	for a in acc_head_tax:
