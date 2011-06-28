@@ -707,7 +707,7 @@ class StatusUpdater:
 						set 
 							%(target_field)s = (select sum(qty) from `tab%(source_dt)s` where `%(join_field)s`="%(detail_id)s" and (docstatus=1 %(cond)s))
 						where
-							name="%(detail_id)s" 
+							name="%(detail_id)s"            
 					""" % args)			
 		
 		# get unique transactions to update
