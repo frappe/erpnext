@@ -584,7 +584,7 @@ class StatusUpdater:
 	
 		if overflow_percent - tolerance > 0.0001:
 			item['max_allowed'] = flt(item['qty'] * (100+tolerance)/100)
-			item['reduce_by'] = cint(item[args['compare_field']] - item['max_allowed'])
+			item['reduce_by'] = item[args['compare_field']] - item['max_allowed']
 		
 			msgprint("""
 				Row #%(idx)s: Max qty allowed for <b>Item %(item_code)s</b> against <b>%(parenttype)s %(parent)s</b> is <b>%(max_allowed)s</b>. 
@@ -721,7 +721,8 @@ class StatusUpdater:
 						`tab%(target_parent_dt)s` 
 					set 
 						%(target_parent_field)s = 
-							(select sum(if(qty > ifnull(%(target_field)s, 0), %(target_field)s, qty))/sum(qty)*100 from `tab%(target_dt)s` where parent="%(name)s")
+							(select sum(if(qty > ifnull(%(target_field)s, 0), %(target_field)s, qty))/sum(qty)*100 from `tab%(target_dt)s` where parent="%(name)s"), 
+						modified = now()
 						where
 							name="%(name)s"
 					""" % args)
