@@ -145,7 +145,7 @@ class DocType:
 		pr = Document('Profile')
 		pr.first_name = user_fname
 		pr.last_name = user_lname
-		pr.email = user_email
+		pr.name = pr.email = user_email
 		pr.enabled = 1
 		pr.save(1)
 		self.add_roles(pr)
@@ -158,9 +158,9 @@ class DocType:
 			d.save(1)
 
 		# Add roles to Administrator profile
-		pr_obj = get_obj('Profile','Administrator')
+		pr = Document('Profile','Administrator')
 		for r in roles_list:
-			d = addchild(pr_obj.doc,'userroles', 'UserRole', 1)
+			d = addchild(pr,'userroles', 'UserRole', 1)
 			d.role = r
 			d.save(1)
 	
