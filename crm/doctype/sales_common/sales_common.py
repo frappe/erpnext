@@ -707,7 +707,7 @@ class StatusUpdater:
 						set 
 							%(target_field)s = (select sum(qty) from `tab%(source_dt)s` where `%(join_field)s`="%(detail_id)s" and (docstatus=1 %(cond)s))
 						where
-							name="%(detail_id)s"
+							name="%(detail_id)s" 
 					""" % args)			
 		
 		# get unique transactions to update
@@ -716,33 +716,15 @@ class StatusUpdater:
 				args['name'] = name
 				
 				# update percent complete in the parent table
-				if args.get('source_dt')!='Installed Item Details':
-					sql("""
-						update 
-							`tab%(target_parent_dt)s` 
-						set 
-							%(target_parent_field)s = (
-								(select sum(amount) from `tab%(source_dt)s` where `%(percent_join_field)s`="%(name)s" and (docstatus=1 %(cond)s)) 
-								/ net_total
-								* 100
-							)
-							where
-								name="%(name)s"
-						""" % args)
-				else:
-					sql("""
-						update 
-							`tab%(target_parent_dt)s` 
-						set 
-							%(target_parent_field)s = (
-								(select sum(qty) from `tab%(source_dt)s` where `%(percent_join_field)s`="%(name)s" and (docstatus=1 %(cond)s)) 
-								/ (select sum(qty) from `tab%(target_dt)s` where parent="%(name)s" and docstatus=1) 
-								* 100
-							)
-							where
-								name="%(name)s"
-						""" % args)
-					
+				sql("""
+					update 
+						`tab%(target_parent_dt)s` 
+					set 
+						%(target_parent_field)s = 
+							(select sum(if(qty > ifnull(%(target_field)s, 0), %(target_field)s, qty))/sum(qty)*100 from `tab%(target_dt)s` where parent="%(name)s")
+						where
+							name="%(name)s"
+					""" % args)
 
 				# update field
 				if args['status_field']:
@@ -756,4 +738,3 @@ class StatusUpdater:
 						where
 							name="%(name)s"
 					""" % args)
-

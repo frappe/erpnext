@@ -1,6 +1,6 @@
 # REMEMBER to update this
 # ========================
-last_patch = 299
+last_patch = 300
 
 #-------------------------------------------
 
@@ -1192,3 +1192,6 @@ def execute(patch_no):
 		sql("update `tabDocField` set options = 'Link:Company' where parent = 'Appraisal' and fieldname = 'company'")
 	elif patch_no == 299:
 		sql("update `tabDocPerm` set `match` = NULL where parent = 'Employee' and role = 'Employee'")
+	elif patch_no == 300:
+		from patches.delivery_billing_status_patch import run_patch
+		run_patch()
