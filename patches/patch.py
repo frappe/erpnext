@@ -1,6 +1,6 @@
 # REMEMBER to update this
 # ========================
-last_patch = 302
+last_patch = 303
 
 #-------------------------------------------
 
@@ -1200,3 +1200,8 @@ def execute(patch_no):
 		run_patch()
 	elif patch_no == 302:
 		sql("update `tabDocField` set no_copy = 1 where fieldname = 'naming_series'")
+	elif patch_no == 303:
+		for dt in sql("SELECT name FROM `tabJournal Voucher` where docstatus != 2 order by modified desc"):			
+			obj = get_obj('Journal Voucher',dt[0])
+			obj.set_print_format_fields()
+			obj.doc.save()
