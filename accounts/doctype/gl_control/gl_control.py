@@ -31,9 +31,12 @@ class DocType:
     #for r in ret:
     #  inc = get_value('Account','Income - '+r[1], 'balance')
     #  exp = get_value('Account','Expenses - '+r[1], 'balance')
-    #  pl[r[0]] = flt(flt(inc) - flt(exp))
-    
+    #  pl[r[0]] = flt(flt(inc) - flt(exp))    
     return {'cl':[r[0] for r in ret]}#, 'pl':pl}
+    
+  def get_company_currency(self,arg=''):  
+    ret = sql("select default_currency from tabCompany where name=%s and docstatus != 2", arg)    
+    return ret[0]
 
   # Get current balance
   # --------------------
