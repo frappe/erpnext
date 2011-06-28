@@ -30,7 +30,7 @@ class DocType:
 		if not dt: dt = nowdate()
 		# update the stock values (for current quantities)
 		self.doc.actual_qty = flt(self.doc.actual_qty) + flt(actual_qty)
-		self.doc.ordered_qty = flt(self.doc.ordered_qty) + flt(ordered_qty)						
+		self.doc.ordered_qty = flt(self.doc.ordered_qty) + flt(ordered_qty)
 		self.doc.reserved_qty = flt(self.doc.reserved_qty) + flt(reserved_qty)
 		self.doc.indented_qty = flt(self.doc.indented_qty) + flt(indented_qty)
 		self.doc.planned_qty = flt(self.doc.planned_qty) + flt(planned_qty)
