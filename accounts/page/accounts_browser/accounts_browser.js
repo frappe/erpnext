@@ -68,15 +68,15 @@ pscript.make_chart = function(b) {
 
   // select company
   add_sel_options(sel, ['Loading...']);
-  var callback = function(r,rt) {
+  var callback = function(r,rt) {    
     empty_select(sel); 
-    add_sel_options(sel,r.message.cl,sys_defaults.company);
+    add_sel_options(sel,r.message.cl,sys_defaults.company);    
     set_tree();
     sel.onchange = function() { set_tree(); }
   }
   $c_obj('GL Control', 'get_companies', '', callback);
-
-  pscript.ab_company_sel = sel;
+  
+  pscript.ab_company_sel = sel; 
 
   pscript.make_ac_head();
   pscript.make_group_area();
@@ -175,15 +175,20 @@ pscript.make_ac_head = function() {
 // Group / Ledger Area - set properties in the right column
 //---------------------------------------------------------
 
-pscript.set_ac_head = function(parent_account, r,type) {
-  var d = pscript.ac_head_area;
+pscript.set_ac_head = function(parent_account, r,type) {  
+  var d = pscript.ac_head_area;  
   d.main_head.innerHTML = r.account_name;
   $ds(d.sub_head);
-  $ds(d.balance_area);
-
+  $ds(d.balance_area);  
+  
+  var callback = function(r,rt) {
+   dcc = r.message;
+  }
+  $c_obj('GL Control', 'get_company_currency', pscript.ab_company_sel.value, callback);	        
+ 
   if(r.name!='Root Node') {
     // Account group/ledger area
-    if(type=='Account'){
+    if(type=='Account'){      
       d.sub_head.dt = 'Account'; d.sub_head.dn = r.name
 
       d.sub_head1.innerHTML = r.debit_or_credit + ' - ' + r.group_or_ledger;
@@ -198,8 +203,14 @@ pscript.set_ac_head = function(parent_account, r,type) {
         $ds(pscript.group_area);
         $ds(pscript.acc_add_btn);
         $dh(pscript.cc_add_btn);
-      }
-      d.balance.innerHTML = (sys_defaults.currency ? sys_defaults.currency :'Rs')+ ' ' + (r.balance ? fmt_money(r.balance) :'0.00');
+      }           
+	  
+	  var callback = function(r,rt) {
+	   dcc = r.message;	   
+	  }
+	  $c_obj('GL Control', 'get_company_currency', pscript.ab_company_sel.value, callback);	        
+	  
+      d.balance.innerHTML = (dcc ? dcc : sys_defaults.currency)+ ' ' + (r.balance ? fmt_money(r.balance) :'0.00');
     }
     //cost center group/ledger area
     else{
