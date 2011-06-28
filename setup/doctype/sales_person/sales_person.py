@@ -6,6 +6,7 @@ from webnotes.model.doclist import getlist
 from webnotes.model.code import get_obj
 from webnotes import session, form, is_testing, msgprint, errprint
 
+
 sql = webnotes.conn.sql
 convert_to_lists = webnotes.conn.convert_to_lists
 	
@@ -36,7 +37,7 @@ class DocType:
 
 
   def validate(self): 
-
+	from webnotes.utils import flt
     for d in getlist(self.doclist, 'target_details'):
       if not flt(d.target_qty) and not flt(d.target_amount):
         msgprint("Either target qty or target amount is mandatory.")

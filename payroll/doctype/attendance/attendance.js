@@ -1,3 +1,5 @@
+cur_frm.add_fetch('employee', 'company', 'company');	
+
 //get employee's name based on employee id selected
 cur_frm.cscript.employee = function(doc,cdt,cdn){
   if(doc.employee) get_server_fields('get_emp_name', '', '', doc, cdt, cdn, 1);

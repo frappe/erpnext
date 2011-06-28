@@ -13,10 +13,6 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
   if (!doc.posting_date) doc.posting_date = dateutil.obj_to_str(new Date());
   if (!doc.transaction_date) doc.transaction_date = dateutil.obj_to_str(new Date());
   if (!doc.status) doc.status = 'Draft';
-
-  if(doc.__islocal){ 
-    cur_frm.cscript.get_default_schedule_date(doc);
-  }  
   
   if(doc.__islocal){
     hide_field(['supplier_name','supplier_address','contact_person','address_display','contact_display','contact_mobile','contact_email']);
@@ -24,6 +20,12 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
   
   if(doc.supplier) unhide_field(['supplier_name','supplier_address','contact_person','address_display','contact_display','contact_mobile','contact_email']);
   
+}
+
+cur_frm.cscript.onload_post_render = function(doc, dt, dn) {
+	if(doc.__islocal){ 
+		cur_frm.cscript.get_default_schedule_date(doc);
+	}	
 }
 
 //========================== Refresh ===============================================================

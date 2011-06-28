@@ -42,15 +42,16 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
       hide_field(['customer', 'customer_address', 'contact_person', 'customer_name', 'contact_display', 'customer_group']);
     }
   } 
-  
-  if(doc.enquiry_from == 'Lead' && doc.lead) {
-    cur_frm.cscript.lead(doc,cdt,cdn);
-  } 
 
   // setup fetch
   cur_frm.cscript.set_fetch();
 }
 
+cur_frm.cscript.onload_post_render = function(doc, cdt, cdn) {
+	if(doc.enquiry_from == 'Lead' && doc.lead) {
+	 	cur_frm.cscript.lead(doc,cdt,cdn);
+	}
+}
 
 // fetch
 // ===============================================================

@@ -1,6 +1,6 @@
 # REMEMBER to update this
 # ========================
-last_patch = 290
+last_patch = 299
 
 #-------------------------------------------
 
@@ -1160,3 +1160,35 @@ def execute(patch_no):
 			md.module_name = 'Home'
 			md.module_label = 'Home'
 			md.save(1)
+	elif patch_no == 291:
+		reload_doc('tools','doctype','rename_tool')
+	elif patch_no == 292:
+		reload_doc('accounts', 'search_criteria', 'trial_balance')
+	elif patch_no == 293:
+		sql("delete from tabDocField where parent='Account' and fieldname='address'")
+		reload_doc('accounts', 'doctype', 'account')
+	elif patch_no == 294:
+		# new account profile fix
+		ul = sql("select name from tabProfile where ifnull(name,'') not in ('Administrator', 'Guest', '')")
+		# if one user and one user has no roles
+		if len(ul)==1 and not sql("select parent from tabUserRole where role='System Manager' and parent=%s", ul[0][0]):
+			get_obj('Setup Control').add_roles(Document('Profile', ul[0][0]))
+	elif patch_no == 295:
+		sql("update `tabDocField` set options = 'Delivered\nNot Delivered\nPartly Delivered\nClosed\nNot Applicable' where parent = 'Sales Order' and fieldname = 'delivery_status'")
+		sql("update `tabDocField` set options = 'Billed\nNot Billed\nPartly Billed\nClosed' where parent = 'Sales Order' and fieldname = 'billing_status'")
+	elif patch_no == 296:
+		sql("delete from tabDocField where parent='Support Ticket' and fieldname='contact_no'")
+		reload_doc('maintenance', 'doctype', 'support_ticket')
+	elif patch_no == 297:
+		reload_doc('payroll', 'doctype', 'employee')
+		reload_doc('payroll', 'doctype', 'attendance')
+		reload_doc('payroll', 'doctype', 'expense_voucher')
+		reload_doc('payroll', 'doctype', 'appraisal')
+		reload_doc('payroll', 'doctype', 'salary_structure')
+		reload_doc('payroll', 'doctype', 'salary_slip')
+	elif patch_no == 298:
+		sql("update `tabDocField` set options = 'Link:Company' where parent = 'Attendance' and fieldname = 'company'")
+		sql("update `tabDocField` set options = 'Link:Company' where parent = 'Expense Voucher' and fieldname = 'company'")
+		sql("update `tabDocField` set options = 'Link:Company' where parent = 'Appraisal' and fieldname = 'company'")
+	elif patch_no == 299:
+		sql("update `tabDocPerm` set `match` = NULL where parent = 'Employee' and role = 'Employee'")
