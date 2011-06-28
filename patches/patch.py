@@ -1,6 +1,6 @@
 # REMEMBER to update this
 # ========================
-last_patch = 300
+last_patch = 301
 
 #-------------------------------------------
 
@@ -1193,5 +1193,8 @@ def execute(patch_no):
 	elif patch_no == 299:
 		sql("update `tabDocPerm` set `match` = NULL where parent = 'Employee' and role = 'Employee'")
 	elif patch_no == 300:
+		sql("""DELETE FROM `tabSearch Criteria` WHERE name IN
+			   ('sales_register1', 'sales_register2', 'purchase_register1')""")
+	elif patch_no == 301:
 		from patches.delivery_billing_status_patch import run_patch
 		run_patch()
