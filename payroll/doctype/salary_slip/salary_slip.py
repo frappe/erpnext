@@ -15,9 +15,9 @@ in_transaction = webnotes.conn.in_transaction
 convert_to_lists = webnotes.conn.convert_to_lists
 	
 # -----------------------------------------------------------------------------------------
+from utilities.transaction_base import TransactionBase
 
-
-class DocType:
+class DocType(TransactionBase):
   def __init__(self,doc,doclist=[]):
     self.doc = doc
     self.doclist = doclist
@@ -118,7 +118,8 @@ class DocType:
   #=======================================================
   def validate(self):
     self.check_existing()
-    self.doc.total_in_words  = get_obj('Sales Common').get_total_in_words(get_defaults()['currency'], self.doc.rounded_total)
+    dcc = TransactionBase().get_company_currency(self.doc.company)
+    self.doc.total_in_words  = get_obj('Sales Common').get_total_in_words(dcc, self.doc.rounded_total)
     
   # ON SUBMIT
   #=======================================================

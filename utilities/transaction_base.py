@@ -1,5 +1,5 @@
 import webnotes
-from webnotes.utils import load_json, cint, cstr, flt
+from webnotes.utils import load_json, cint, cstr, flt, get_defaults
 from webnotes.model.doc import Document, addchild, removechild, getchildren
 from webnotes.model.doclist import getlist, copy_doclist
 from webnotes import msgprint
@@ -202,3 +202,10 @@ class TransactionBase:
 			ch.incentives = d and flt(d[3]) or 0
 			ch.idx = idx
 			idx += 1
+			
+	# Get Company Specific Default Currency
+	# -------------------------------------
+	def get_company_currency(self, name):
+		ret = sql("select default_currency from tabCompany where name = '%s'" %(name))
+		dcc = ret and ret[0][0] or get_defaults()['currency']						
+		return dcc	

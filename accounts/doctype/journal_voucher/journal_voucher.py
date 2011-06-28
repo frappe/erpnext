@@ -15,7 +15,7 @@ in_transaction = webnotes.conn.in_transaction
 convert_to_lists = webnotes.conn.convert_to_lists
 	
 # -----------------------------------------------------------------------------------------
-
+from utilities.transaction_base import TransactionBase
 
 class DocType:
   def __init__(self,d,dl):
@@ -238,7 +238,7 @@ class DocType:
       if self.doc.total_debit > 0:
         self.get_tds_category_account()
         if self.doc.supplier_account and self.doc.tds_category:
-          get_obj('TDS Control').get_tds_amount(self)
+          get_obj('TDS Control').get_tds_amount(self)          
 
         
   #--------------------------------------------------------------------------------------------------------
@@ -333,6 +333,7 @@ class DocType:
   # ------------------------
   def set_print_format_fields(self):
     for d in getlist(self.doclist, 'entries'):
+      #msgprint(self.doc.company)
       chk_type = sql("select master_type, account_type from `tabAccount` where name='%s'" % d.account)
       master_type, acc_type = chk_type and cstr(chk_type[0][0]) or '', chk_type and cstr(chk_type[0][1]) or ''
       if master_type in ['Supplier', 'Customer']:
@@ -340,9 +341,10 @@ class DocType:
           self.doc.pay_to_recd_from = get_value(master_type, ' - '.join(d.account.split(' - ')[:-1]), master_type == 'Customer' and 'customer_name' or 'supplier_name')
       
       if acc_type == 'Bank or Cash':
-        amt = cint(d.debit) and d.debit or d.credit
-        self.doc.total_amount = get_defaults()['currency']+'. '+ cstr(amt)
-        self.doc.total_amount_in_words = get_obj('Sales Common').get_total_in_words(get_defaults()['currency'], cstr(amt))
+        dcc = TransactionBase().get_company_currency(self.doc.company)
+        amt = cint(d.debit) and d.debit or d.credit	
+        self.doc.total_amount = dcc +' '+ cstr(amt)
+        self.doc.total_amount_in_words = get_obj('Sales Common').get_total_in_words(dcc, cstr(amt))
 
 
   # --------------------------------

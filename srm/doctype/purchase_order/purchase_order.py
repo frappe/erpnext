@@ -133,7 +133,8 @@ class DocType(TransactionBase):
     
       
      # get total in words
-    self.doc.in_words = pc_obj.get_total_in_words(get_defaults().get('currency') and get_defaults()['currency'] or 'INR', self.doc.grand_total)
+    dcc = TransactionBase().get_company_currency(self.doc.company)
+    self.doc.in_words = pc_obj.get_total_in_words(dcc, self.doc.grand_total)
     self.doc.in_words_import = pc_obj.get_total_in_words(self.doc.currency, self.doc.grand_total_import)
   
   # update bin

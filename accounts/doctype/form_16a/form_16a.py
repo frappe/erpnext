@@ -15,9 +15,9 @@ in_transaction = webnotes.conn.in_transaction
 convert_to_lists = webnotes.conn.convert_to_lists
 	
 # -----------------------------------------------------------------------------------------
+from utilities.transaction_base import TransactionBase
 
-
-class DocType:
+class DocType(TransactionBase):
   def __init__(self,d,dl):
     self.doc, self.doclist = d, dl
   
@@ -97,5 +97,6 @@ class DocType:
     for d in getlist(self.doclist,'form_16A_tax_details'):
       tot=flt(tot)+flt(d.total_tax_deposited)
     
-    self.doc.total_amount = flt(tot)
-    self.doc.in_words = get_obj('Sales Common').get_total_in_words(get_defaults()['currency'], self.doc.total_amount)
+    dcc = TransactionBase().get_company_currency(self.doc.company)
+    self.doc.total_amount = flt(tot)    
+    self.doc.in_words = get_obj('Sales Common').get_total_in_words(dcc, self.doc.total_amount)

@@ -15,7 +15,7 @@ in_transaction = webnotes.conn.in_transaction
 convert_to_lists = webnotes.conn.convert_to_lists
 	
 # -----------------------------------------------------------------------------------------
-
+from utilities.transaction_base import TransactionBase
 
 class DocType:
   def __init__(self,d,dl):
@@ -34,9 +34,9 @@ class DocType:
     #  pl[r[0]] = flt(flt(inc) - flt(exp))    
     return {'cl':[r[0] for r in ret]}#, 'pl':pl}
     
-  def get_company_currency(self,arg=''):  
-    ret = sql("select default_currency from tabCompany where name=%s and docstatus != 2", arg)    
-    return ret[0]
+  def get_company_currency(self,arg=''):      
+    dcc = TransactionBase().get_company_currency(arg)    
+    return dcc
 
   # Get current balance
   # --------------------

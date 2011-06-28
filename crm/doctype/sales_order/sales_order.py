@@ -305,7 +305,8 @@ class DocType(TransactionBase):
     sales_com_obj.make_packing_list(self,'sales_order_details')
     
         # get total in words
-    self.doc.in_words = sales_com_obj.get_total_in_words(get_defaults()['currency'], self.doc.rounded_total)
+    dcc = TransactionBase().get_company_currency(self.doc.company)    
+    self.doc.in_words = sales_com_obj.get_total_in_words(dcc, self.doc.rounded_total)
     self.doc.in_words_export = sales_com_obj.get_total_in_words(self.doc.currency, self.doc.rounded_total_export)
     
     # set SO status

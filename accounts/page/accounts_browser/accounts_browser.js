@@ -210,7 +210,7 @@ pscript.set_ac_head = function(parent_account, r,type) {
 	  }
 	  $c_obj('GL Control', 'get_company_currency', pscript.ab_company_sel.value, callback);	  	        
 	  
-      d.balance.innerHTML = (dcc ? dcc : sys_defaults.currency)+ ' ' + (r.balance ? fmt_money(r.balance) :'0.00');
+      d.balance.innerHTML = (dcc)+ ' ' + (r.balance ? fmt_money(r.balance) :'0.00');
     }
     //cost center group/ledger area
     else{

@@ -175,7 +175,8 @@ class DocType(TransactionBase):
     sales_com_obj.get_allocated_sum(self)  # this is to verify that the allocated % of sales persons is 100%    
     sales_com_obj.check_conversion_rate(self)
     # ::::::: Get total in Words ::::::::
-    self.doc.in_words = sales_com_obj.get_total_in_words(get_defaults()['currency'], self.doc.rounded_total)
+    dcc = TransactionBase().get_company_currency(self.doc.company)
+    self.doc.in_words = sales_com_obj.get_total_in_words(dcc, self.doc.rounded_total)
     self.doc.in_words_export = sales_com_obj.get_total_in_words(self.doc.currency, self.doc.rounded_total_export)
     
     # ::::::: Set actual qty for each item in selected warehouse :::::::

@@ -311,7 +311,8 @@ class DocType(TransactionBase):
 	# Set totals in words
 	#--------------------
 	def set_in_words(self):
-		self.doc.in_words = get_obj('Sales Common').get_total_in_words(get_defaults()['currency'], self.doc.rounded_total)
+		dcc = TransactionBase().get_company_currency(self.doc.company)
+		self.doc.in_words = get_obj('Sales Common').get_total_in_words(dcc, self.doc.rounded_total)
 		self.doc.in_words_export = get_obj('Sales Common').get_total_in_words(self.doc.currency, self.doc.rounded_total_export)
 
 	# Clear Advances
