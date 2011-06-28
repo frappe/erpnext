@@ -102,11 +102,6 @@ class DocType:
 			if bom and bom[0][0]:
 				msgprint("%s should be 'Yes'. As Item %s is present in one or many Active BOMs." % (cstr(check), cstr(self.doc.name)))
 				raise Exception
-		if check in ['Is Active', 'Is Pro Applicable']:
-			flat_bom = sql("select distinct t1.parent from `tabFlat BOM Detail` t1, `tabBill Of Materials` t2 where t1.item_code ='%s' and t2.name = t1.parent and t2.is_active = 'Yes' and t2.docstatus = 1 and t1.docstatus =1 and t1.is_pro_applicable = 'Yes'" % self.doc.name )
-			if flat_bom and flat_bom[0][0]:
-				msgprint(" %s should be 'Yes'. As Item %s is present in one or many Active BOMs." % (cstr(check), cstr(self.doc.name)))
-				raise Exception
 		
 	def validate(self):
 		fl = {'is_manufactured_item'	:'Is Manufactured Item',

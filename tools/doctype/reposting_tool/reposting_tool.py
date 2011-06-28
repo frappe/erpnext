@@ -57,7 +57,7 @@ class DocType:
 		
 
 		# get reserved_qty
-		res_qty =sql("select sum(if ( ifnull(t2.qty, 0) > ifnull(t2.delivered_qty, 0), ifnull(t2.qty, 0) - ifnull(t2.delivered_qty, 0) , 0) ) from `tabSales Order` t1, `tabSales Order Detail` t2 where	t1.name = t2.parent and t1.docstatus = 1 and t2.reserved_warehouse = '%s' and t2.item_code = '%s' " % (wh, item))
+		res_qty =sql("select sum(if ( ifnull(t2.qty, 0) > ifnull(t2.delivered_qty, 0), ifnull(t2.qty, 0) - ifnull(t2.delivered_qty, 0) , 0) ) from `tabSales Order` t1, `tabSales Order Detail` t2 where t1.name = t2.parent and t1.docstatus = 1 and t2.reserved_warehouse = '%s' and t2.item_code = '%s' " % (wh, item))
 		res_qty = res_qty and flt(res_qty[0][0]) or 0
 
 		# get planned_qty 
@@ -95,8 +95,9 @@ class DocType:
 			# check bin qty
 			self.check_bin_qty(bin_obj, qty_dict)
 
+			projected_qty = flt(qty_dict['indented_qty']) + flt(qty_dict['ordered_qty']) - flt(qty_dict['reserved_qty']) + flt(qty_dict['planned_qty']) + flt(qty_dict['actual_qty'])
 			# update indented_qty, ordered_qty, reserved_qty, planned_qty
-			sql("update `tabBin` set indented_qty = '%s', ordered_qty = '%s', reserved_qty = '%s', planned_qty = '%s' where warehouse = '%s' and item_code = '%s'" % ( flt(qty_dict['indented_qty']), flt(qty_dict['ordered_qty']), flt(qty_dict['reserved_qty']), flt(qty_dict['planned_qty']),	bin_obj.doc.warehouse, bin_obj.doc.item_code))
+			sql("update `tabBin` set indented_qty = '%s', ordered_qty = '%s', reserved_qty = '%s', planned_qty = '%s', projected_qty = '%s' where warehouse = '%s' and item_code = '%s'" % ( flt(qty_dict['indented_qty']), flt(qty_dict['ordered_qty']), flt(qty_dict['reserved_qty']), flt(qty_dict['planned_qty']), projected_qty, bin_obj.doc.warehouse, bin_obj.doc.item_code))
  
 			# update projected_qty
 			sql("update `tabBin` set projected_qty = ifnull(indented_qty, 0) + ifnull(ordered_qty,0) + ifnull(actual_qty, 0) + ifnull(planned_qty, 0) - ifnull(reserved_qty,0) where warehouse = '%s' and item_code = '%s' " % (bin_obj.doc.warehouse, bin_obj.doc.item_code))
@@ -115,7 +116,7 @@ class DocType:
 				sql("commit")
 				sql("start transaction")
 			cnt += 1
-			
+	
 			self.repair_bin(bin[0])
 
 	# =============================================================================

@@ -1,6 +1,6 @@
 # REMEMBER to update this
 # ========================
-last_patch = 300
+last_patch = 302
 
 #-------------------------------------------
 
@@ -1195,3 +1195,8 @@ def execute(patch_no):
 	elif patch_no == 300:
 		sql("""DELETE FROM `tabSearch Criteria` WHERE name IN
 			   ('sales_register1', 'sales_register2', 'purchase_register1')""")
+	elif patch_no == 301:
+		from patches.delivery_billing_status_patch import run_patch
+		run_patch()
+	elif patch_no == 302:
+		sql("update `tabDocField` set no_copy = 1 where fieldname = 'naming_series'")
