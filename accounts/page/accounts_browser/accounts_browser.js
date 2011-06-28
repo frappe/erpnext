@@ -208,7 +208,7 @@ pscript.set_ac_head = function(parent_account, r,type) {
 	  var callback = function(r,rt) {
 	   dcc = r.message;	   
 	  }
-	  $c_obj('GL Control', 'get_company_currency', pscript.ab_company_sel.value, callback);	        
+	  $c_obj('GL Control', 'get_company_currency', pscript.ab_company_sel.value, callback);	  	        
 	  
       d.balance.innerHTML = (dcc ? dcc : sys_defaults.currency)+ ' ' + (r.balance ? fmt_money(r.balance) :'0.00');
     }
