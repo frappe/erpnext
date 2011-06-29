@@ -1203,4 +1203,5 @@ def execute(patch_no):
 	elif patch_no == 303:
 		pass
 	elif patch_no == 304:
-		reload_doc('setup', 'doctype', 'company')				
+	    sql("delete from `tabDocField` where parent = 'company' and label = 'Trash Company' and fieldtype = 'button'")
+		reload_doc('setup', 'doctype', 'company')
