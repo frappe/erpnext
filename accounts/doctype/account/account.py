@@ -120,7 +120,7 @@ class DocType:
 	# check if child exists
 	# ==================================================================
 	def check_if_child_exists(self):
-		return sql("select name from `tabAccount` where parent_account = %s and docstatus<2", self.doc.name)
+		return sql("select name from `tabAccount` where parent_account = %s and docstatus != 2", self.doc.name, debug=0)
 	
 	# Update balance
 	# ==================================================================
@@ -234,23 +234,26 @@ class DocType:
 		if flt(self.get_curr_bal()) != 0:
 			msgprint("Account with existing balance can not be trashed", raise_exception=1)
 		if self.check_if_child_exists():
-			msgprint("Child account exists for this account. You can not make trash this account.", raise_exception=1)
+			msgprint("Child account exists for this account. You can not trash this account.", raise_exception=1)
 
 
 	# get current year balance
 	# ==================================================================
 	def get_curr_bal(self):
-		bal = sql("select balance from `tabAccount Balance` where period = '%s' and parent = '%s'" % (get_defaults()['fiscal_year'], self.doc.name))
+		bal = sql("select balance from `tabAccount Balance` where period = '%s' and parent = '%s'" % (get_defaults()['fiscal_year'], self.doc.name),debug=0)
 		return bal and flt(bal[0][0]) or 0
 
 	# On Trash
 	# ==================================================================
 	def on_trash(self): 
 		# Check balance before trash
-		self.check_balance_before_trash()
+		self.check_balance_before_trash()		
 		# rebuild tree
 		set(self.doc,'old_parent', '')
 		self.update_nsm_model()
+
+		#delete Account Balance
+		sql("delete from `tabAccount Balance` where account = %s", self.doc.name)
 
 	# On restore
 	# ==================================================================

@@ -24,8 +24,7 @@ class DocType:
         
   def autoname(self):
     #company_abbr = sql("select abbr from tabCompany where name=%s", self.doc.company)[0][0]
-    self.doc.name = self.doc.cost_center_name + ' - ' + self.doc.company_abbr   
- 
+    self.doc.name = self.doc.cost_center_name + ' - ' + self.doc.company_abbr    
       
   def get_abbr(self):
     abbr = sql("select abbr from tabCompany where company_name='%s'"%(self.doc.company_name))[0][0] or ''
@@ -35,10 +34,8 @@ class DocType:
     return cstr(ret)
 
   def validate(self): 
-
     # Cost Center name must be unique
     # ---------------------------
-
     if (self.doc.__islocal or (not self.doc.name)) and sql("select name from `tabCost Center` where cost_center_name = %s and company_name=%s", (self.doc.cost_center_name, self.doc.company_name)):
       msgprint("Cost Center Name already exists, please rename")
       raise Exception
@@ -55,4 +52,17 @@ class DocType:
     import webnotes
     import webnotes.utils.nestedset
     # update Node Set Model
-    webnotes.utils.nestedset.update_nsm(self)
+    webnotes.utils.nestedset.update_nsm(self)  
+    
+  def check_if_child_exists(self):
+    return sql("select name from `tabCost Center` where parent_cost_center = %s and docstatus != 2", self.doc.name, debug=1)
+    
+  # On Trash
+  # --------
+  def on_trash(self):
+    if self.check_if_child_exists():
+      msgprint("Child exists for this cost center. You can not trash this account.", raise_exception=1)      
+      
+    # rebuild tree
+    set(self.doc,'old_parent', '')
+    self.update_nsm_model()

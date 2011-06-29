@@ -202,17 +202,35 @@ class DocType:
 
   # Trash accounts and cost centers for this company
   # ---------------------------------------------------
-  def on_trash(self):
-    acc = sql("select name from tabAccount where company = '%s' and docstatus = 1" % self.doc.name)
-    for each in acc:
-      get_obj('Account', each[0]).on_trash()
+  #def on_trash1(self):
+  #  acc = sql("select name from tabAccount where company = '%s' and docstatus != 2 order by lft desc, rgt desc limit 2" % self.doc.name, debug=1)
+  #  for each in acc:
+  #    get_obj('Account', each[0]).on_trash()
       
-    cc = sql("select name from `tabCost Center` where company_name = '%s' and docstatus = 1" % self.doc.name)
-    for each in cc:
-      get_obj('Cost Center', each[0]).on_trash()
+  #  cc = sql("select name from `tabCost Center` where company_name = '%s' and docstatus != 2" % self.doc.name)
+  #  for each in cc:
+  #    get_obj('Cost Center', each[0]).on_trash()
     
-    msgprint("Company trashed. All the accounts and cost centers related to this company also trashed. You can restore it anytime from Setup -> Manage Trash")
-
+  #  msgprint("Company trashed. All the accounts and cost centers related to this company also trashed. You can restore it anytime from Setup -> Manage Trash")
+    
+  def on_trash(self):    
+    rec = sql("SELECT sum(ab.opening), sum(ab.balance), sum(ab.debit), sum(ab.credit) FROM `tabAccount Balance` ab, `tabAccount` a WHERE ab.account = a.name and a.company = %s", self.doc.name)
+    if rec[0][0] == 0 and rec[0][1] == 0 and rec[0][2] == 0 and rec[0][3] == 0:
+      #delete tabAccount Balance
+      sql("delete ab.* from `tabAccount Balance` ab, `tabAccount` a where ab.account = a.name and a.company = %s", self.doc.name)
+      #delete tabAccount
+      sql("delete from `tabAccount` where company = %s order by lft desc, rgt desc", self.doc.name)
+      
+      #delete cost center child table - budget detail
+      sql("delete bd.* from `tabBudget Detail` bd, `tabCost Center` cc where bd.parent = cc.name and cc.company_name = %s", self.doc.name)
+      #delete cost center
+      sql("delete from `tabCost Center` WHERE company_name = %s order by lft desc, rgt desc", self.doc.name)
+      
+      #update value as blank for tabDefaultValue defkey=company
+      sql("update `tabDefaultValue` set defvalue = '' where defkey='company' and defvalue = %s", self.doc.name)
+      
+      #update value as blank for tabSingles Manage Account
+      sql("update `tabSingles` set value = '' where doctype='Manage Account' and field = 'default_company' and value = %s", self.doc.name)
 
   # Restore accounts and cost centers for this company  
   # ---------------------------------------------------
