@@ -1,6 +1,6 @@
 # REMEMBER to update this
 # ========================
-last_patch = 303
+last_patch = 304
 
 #-------------------------------------------
 
@@ -1201,4 +1201,6 @@ def execute(patch_no):
 	elif patch_no == 302:
 		sql("update `tabDocField` set no_copy = 1 where fieldname = 'naming_series'")
 	elif patch_no == 303:
-		pass			
+		pass
+	elif patch_no == 304:
+		reload_doc('setup', 'doctype', 'company')				
