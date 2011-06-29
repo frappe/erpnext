@@ -55,7 +55,7 @@ class DocType:
     webnotes.utils.nestedset.update_nsm(self)  
     
   def check_if_child_exists(self):
-    return sql("select name from `tabCost Center` where parent_cost_center = %s and docstatus != 2", self.doc.name, debug=1)
+    return sql("select name from `tabCost Center` where parent_cost_center = %s and docstatus != 2", self.doc.name, debug=0)
     
   # On Trash
   # --------
