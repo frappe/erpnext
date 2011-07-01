@@ -1,0 +1,28 @@
+# Module Def, Utilities
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2011-07-01 17:46:25',
+		'docstatus': 0,
+		'modified': '2011-07-01 17:47:34',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all Module Def
+	{
+		'disabled': 'No',
+		'doctype': 'Module Def',
+		'is_hidden': 'No',
+		'module_label': 'Utilities',
+		'module_name': 'Utilities',
+		'name': '__common__'
+	},
+
+	# Module Def, Utilities
+	{
+		'doctype': 'Module Def',
+		'name': 'Utilities'
+	}
+]

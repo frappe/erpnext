@@ -68,7 +68,7 @@ def rename_merge_modules():
 	rename_lst = [['CRM', 'Selling'], ['SRM','Buying'], ['Material Management', 'Stock'], ['Payroll','HR'], ['Maintenance', 'Support']]
 	for d in rename_lst:
 		# create new module manually and export to file???????
-		reload_doc(d[1], 'module_def', d[1])
+		reload_doc(d[1].lower(), 'Module Def', d[1])
 
 	merge_lst = [['Tools', 'Utilities'], ['Application Internal', 'Utilities'], ['Settings', 'Setup']]
 	# settings hardcoded in my_company
@@ -80,7 +80,7 @@ def rename_merge_modules():
 	for d in lst:
 		update_module(d[0], d[1])
 		delete_doc('Module Def', d[0])
-		
+	reload_doc('Utilities', 'Module Def', 'Utilities')
 	
 def update_module(from_mod, to_mod):
 	for t in ['DocType', 'Page', 'Search Criteria', 'DocType Mapper', 'Print Format', 'Role']:
