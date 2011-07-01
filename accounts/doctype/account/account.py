@@ -260,3 +260,16 @@ class DocType:
 	def on_restore(self):
 		# rebuild tree
 		self.update_nsm_model()
+	
+	# on rename
+	# ---------
+	def on_rename(self,newdn,olddn):
+		company_abbr = sql("select tc.abbr from `tabAccount` ta, `tabCompany` tc where ta.company = tc.name and ta.name=%s", olddn)[0][0]
+		
+		newdnchk = newdn.split(" - ")	
+
+		if newdnchk[-1].lower() != company_abbr.lower():			
+			msgprint("Please add company abbreviation <b>%s</b>" %(company_abbr), raise_exception=1)
+		else:
+			account_name = " - ".join(newdnchk[:-1])
+			sql("update `tabAccount` set account_name = '%s' where name = '%s'" %(account_name,olddn))				
