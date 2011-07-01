@@ -1,37 +1,37 @@
+# Search Criteria, pending_po_items_to_bill
 [
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2011-03-30 11:03:20',
+		'docstatus': 0,
+		'modified': '2011-03-29 14:26:49',
+		'modified_by': 'Administrator',
+		'owner': 'dhanalekshmi@webnotestech.com'
+	},
+
+	# These values are common for all Search Criteria
 	{
 		'add_col': '(CASE WHEN (`tabPO Detail`.qty- ifnull(`tabPO Detail`.billed_qty, 0) > 0 ) THEN (`tabPO Detail`.qty-ifnull(`tabPO Detail`.billed_qty, 0) ) ELSE 0 END) AS "Pending To Bill"',
 		'add_cond': '(`tabPO Detail`.qty - ifnull(`tabPO Detail`.received_qty, 0) > 0 or `tabPO Detail`.qty - ifnull(`tabPO Detail`.billed_qty, 0) > 0)\n`tabPurchase Order`.status != "Stopped"',
-		'add_tab': None,
 		'columns': 'Purchase Order\x01ID,Purchase Order\x01Supplier,Purchase Order\x01Supplier Name,Purchase Order\x01Status,Purchase Order\x01PO Date,Purchase Order\x01Fiscal Year,PO Detail\x01Indent No,PO Detail\x01Item Code,PO Detail\x01Item Name,PO Detail\x01Description,PO Detail\x01Quantity,PO Detail\x01UOM,PO Detail\x01Received Qty',
-		'creation': '2011-05-09 11:04:19',
 		'criteria_name': 'Pending PO Items To Bill',
-		'custom_query': '',
 		'description': 'Pending PO Items To Bill',
-		'dis_filters': None,
-		'disabled': None,
 		'doc_type': 'PO Detail',
-		'docstatus': 0,
 		'doctype': 'Search Criteria',
 		'filters': "{'Purchase Order\x01Saved':1,'Purchase Order\x01Submitted':1,'Purchase Order\x01Status':'','Purchase Order\x01Fiscal Year':''}",
-		'graph_series': None,
-		'graph_values': None,
-		'group_by': None,
-		'idx': None,
-		'modified': '2011-03-29 14:26:49',
-		'modified_by': 'Administrator',
-		'module': 'SRM',
-		'name': 'pending_po_items_to_bill',
-		'owner': 'dhanalekshmi@webnotestech.com',
+		'module': 'Buying',
+		'name': '__common__',
 		'page_len': 50,
-		'parent': None,
 		'parent_doc_type': 'Purchase Order',
-		'parentfield': None,
-		'parenttype': None,
-		'report_script': None,
-		'server_script': None,
 		'sort_by': '`tabPurchase Order`.`name`',
 		'sort_order': 'DESC',
 		'standard': 'Yes'
+	},
+
+	# Search Criteria, pending_po_items_to_bill
+	{
+		'doctype': 'Search Criteria',
+		'name': 'pending_po_items_to_bill'
 	}
 ]

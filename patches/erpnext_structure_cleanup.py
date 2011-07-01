@@ -13,7 +13,7 @@ sql = webnotes.conn.sql
 def delete_unwanted_doctypes():
 	"deletes doctypes which are not used anymore"
 	
-	lst = ['Zone',  'WN Account Control', 'Wiki Page', 'Wiki History', 'Wiki Control', 'While You Were Out', 'Web Visitor', 'Tweet', 'Transfer Utility', 'Transfer Module', 'Transfer Control', 'Transfer Account', 'Tips Common', 'TestTabDT', 'TestDT', 'Test Type', 'Test Run', 'Test Record Detail', 'Test Record', 'Test Case', 'Supplier TDS Category Detail', 'Shopping Cart Control', 'Service Series', 'Series Detail', 'Rule Engine', 'RFQ', 'Report Filter Detail', 'Report Field Detail','Report Control', 'Rating Widget Record', 'Rating Widget Control', 'Rating Template Detail', 'Rating Template', 'PV Ded Tax Detail', 'PV Add Tax Detail', 'Product Variant', 'Product Variance', 'Product Group', 'Product Feature', 'Payroll Tips Common', 'Payroll Rule', 'Password Control', 'Page Visit', 'Patch', 'Multiple Transfer', 'Module Tip Control', 'Module Setter', 'Module Manager', 'Module Import', 'Module Detail', 'Message Control', 'Message', 'Mail Participant Details', 'Mail', 'Leave Type Detail', 'Leave Detail', 'Leave Applicable Detail', 'Lead Item Detail', 'Lead Attachment Detail', 'Item Attachments Detail', 'Instant Message', 'Impact Analysis', 'Forum Topic', 'Forum Control', 'Form Settings', 'Follower', 'ERP Setup', 'Enquiry Attachment Detail', 'Documentation', 'Condition Detail', 'Complaint Note', 'Code History', 'Code Editor', 'Code Backup Control', 'Code Backup', 'City', 'Change Log', 'Business Letter Type', 'Business Letter Template', 'Business Letter', 'Badge Settings Detail', 'Application Type', 'Application', 'Action Detail', 'Accounts Setup', 'Stock Common', 'Job Application', 'Service Schedule', ]
+	lst = ['Zone',  'WN Account Control', 'Wiki Page', 'Wiki History', 'Wiki Control', 'While You Were Out', 'Web Visitor', 'Tweet', 'Transfer Utility', 'Transfer Module', 'Transfer Control', 'Transfer Account', 'Tips Common', 'TestTabDT', 'TestDT', 'Test Type', 'Test Run', 'Test Record Detail', 'Test Record', 'Test Case', 'Supplier TDS Category Detail', 'Shopping Cart Control', 'Service Series', 'Series Detail', 'Rule Engine', 'RFQ', 'Report Filter Detail', 'Report Field Detail','Report Control', 'Rating Widget Record', 'Rating Widget Control', 'Rating Template Detail', 'Rating Template', 'PV Ded Tax Detail', 'PV Add Tax Detail', 'Product Variant', 'Product Variance', 'Product Group', 'Product Feature', 'Payroll Tips Common', 'Payroll Rule', 'Password Control', 'Page Visit', 'Patch', 'Multiple Transfer', 'Module Tip Control', 'Module Setter', 'Module Manager', 'Module Import', 'Module Detail', 'Message Control', 'Message', 'Mail Participant Details', 'Mail', 'Leave Type Detail', 'Leave Detail', 'Leave Applicable Detail', 'Lead Item Detail', 'Lead Attachment Detail', 'Item Attachments Detail', 'Instant Message', 'Impact Analysis', 'Forum Topic', 'Forum Control', 'Form Settings', 'Follower', 'ERP Setup', 'Enquiry Attachment Detail', 'Documentation', 'Condition Detail', 'Complaint Note', 'Code History', 'Code Editor', 'Code Backup Control', 'Code Backup', 'City', 'Change Log', 'Business Letter Type', 'Business Letter Template', 'Business Letter', 'Badge Settings Detail', 'Application Type', 'Application', 'Action Detail', 'Accounts Setup', 'Stock Common', 'Job Application', 'Service Schedule', 'Comment Control', 'Bank', 'Tag Widget Control'] # bank
 	for d in lst:
 		sql("delete from `tabProperty Setter` where select_doctype = '%s'" % d)
 		sql("delete from `tabCustom Script` where dt = '%s'" % d)
@@ -33,7 +33,7 @@ def delete_tables(lst):
 	
 def delete_unwanted_pages():
 	"deletes pages which are not used anymore"
-	lst = ['Transaction Authorization', 'Prduct Display', 'Data Import', 'Partner Home', 'Product Display']
+	lst = ['Transaction Authorization', 'Prduct Display', 'Data Import', 'Partner Home', 'Product Display', 'Module Settings']
 	for d in lst:
 		delete_doc('Page', d)
 	
@@ -55,7 +55,7 @@ def delete_unwanted_mappers():
 		
 def delete_unwanted_modules():
 	"deletes unwanted modules"
-	lst = ['Developent', 'Recycle Bin', 'Testing', 'Testing System', 'Test', 'System', 'Partner Updates', 'My Company', 'Event Updates', 'E-Commerce']
+	lst = ['Development', 'Recycle Bin', 'Testing', 'Testing System', 'Test', 'System', 'Partner Updates', 'My Company', 'Event Updates', 'E-Commerce']
 	for d in lst:
 		delete_doc('Module Def', d)
 
@@ -129,7 +129,8 @@ def sync_mapper():
 	delete_doc('Module Def', 'Mapper')
 	
 # --------------------------------------
-def export_docs():
+# function below will be run only in localhost
+'''def export_docs():
 	"""
 		Export all documents where module has been changed
 	"""
@@ -137,10 +138,11 @@ def export_docs():
 		lst = sql("select name, module from `tab%s`" % dtype)
 		for rec in lst:
 			webnotes.msgprint(rec)
-			export_to_files(record_list = [[dtype, rec[0]]], record_module = rec[1])
+			if rec and rec[0] and rec[1]:
+				export_to_files(record_list = [[dtype, rec[0]]], record_module = rec[1])
 
 	#grep test company
-
+'''
 
 #---------------------------------------
 def run_patches():
@@ -158,7 +160,10 @@ def run_patches():
 
 	# landed cost wizard link in stock
 	reload_doc('stock', 'Module Def', 'stock')
-	sql("update `tabDocType` set module = 'stock' where name in ('LC PR Detail', 'Landed Cost Detail')")
-
-	export_docs()
+	
+	# update module
+	dt_module = {'LC PR Detail':'Stock', 'Landed Cost Detail':'Stock', 'Comment Widget Record': 'Core', 'Tag':'Core', 'Tag Detail': 'Core'}
+	for d in dt_module.keys():
+		sql("update `tabDocType` set module = '%s' where name = '%s'" % (dt_module[d], d))
+	
 	sql("commit")

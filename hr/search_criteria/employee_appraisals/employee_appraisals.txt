@@ -1,37 +1,33 @@
+# Search Criteria, employee_appraisals
 [
+
+	# These values are common in all dictionaries
 	{
-		'add_col': None,
-		'add_cond': None,
-		'add_tab': None,
-		'columns': 'Appraisal\x01ID,Appraisal\x01Status,Appraisal\x01Employee,Appraisal\x01Employee Name,Appraisal\x01Start Date,Appraisal\x01End Date,Appraisal\x01Approver,Appraisal\x01Total Score',
-		'creation': '2010-09-01 15:47:57',
-		'criteria_name': 'Employee Appraisals',
-		'custom_query': '',
-		'description': None,
-		'dis_filters': None,
-		'disabled': None,
-		'doc_type': 'Appraisal',
+		'creation': '2010-09-01 15:48:09',
 		'docstatus': 0,
-		'doctype': 'Search Criteria',
-		'filters': "{'Appraisal\x01Saved':1,'Appraisal\x01Submitted':1,'Appraisal\x01Status':'','Appraisal\x01Fiscal Year':''}",
-		'graph_series': None,
-		'graph_values': None,
-		'group_by': None,
-		'idx': None,
 		'modified': '2010-09-01 14:18:42',
 		'modified_by': 'Administrator',
-		'module': 'Payroll',
-		'name': 'employee_appraisals',
-		'owner': 'ashwini@webnotestech.com',
+		'owner': 'ashwini@webnotestech.com'
+	},
+
+	# These values are common for all Search Criteria
+	{
+		'columns': 'Appraisal\x01ID,Appraisal\x01Status,Appraisal\x01Employee,Appraisal\x01Employee Name,Appraisal\x01Start Date,Appraisal\x01End Date,Appraisal\x01Approver,Appraisal\x01Total Score',
+		'criteria_name': 'Employee Appraisals',
+		'doc_type': 'Appraisal',
+		'doctype': 'Search Criteria',
+		'filters': "{'Appraisal\x01Saved':1,'Appraisal\x01Submitted':1,'Appraisal\x01Status':'','Appraisal\x01Fiscal Year':''}",
+		'module': 'HR',
+		'name': '__common__',
 		'page_len': 50,
-		'parent': None,
-		'parent_doc_type': None,
-		'parentfield': None,
-		'parenttype': None,
-		'report_script': '',
-		'server_script': None,
 		'sort_by': '`tabAppraisal`.`name`',
 		'sort_order': 'DESC',
 		'standard': 'Yes'
+	},
+
+	# Search Criteria, employee_appraisals
+	{
+		'doctype': 'Search Criteria',
+		'name': 'employee_appraisals'
 	}
 ]

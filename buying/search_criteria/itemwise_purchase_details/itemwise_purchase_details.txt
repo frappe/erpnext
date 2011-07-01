@@ -1,37 +1,33 @@
+# Search Criteria, itemwise_purchase_details
 [
+
+	# These values are common in all dictionaries
 	{
-		'add_col': None,
-		'add_cond': None,
-		'add_tab': None,
-		'columns': 'Purchase Order\x01ID,Purchase Order\x01PO Date,Purchase Order\x01Grand Total,PO Detail\x01Item Code,PO Detail\x01Item Name,PO Detail\x01Quantity,PO Detail\x01Stock UOM,PO Detail\x01Purchase Rate,PO Detail\x01Amount,PO Detail\x01Warehouse',
 		'creation': '2010-08-08 17:09:31',
-		'criteria_name': 'Itemwise Purchase Details',
-		'custom_query': '',
-		'description': None,
-		'dis_filters': None,
-		'disabled': None,
-		'doc_type': 'PO Detail',
 		'docstatus': 0,
-		'doctype': 'Search Criteria',
-		'filters': "{'Purchase Order\x01Saved':1,'Purchase Order\x01Submitted':1,'Purchase Order\x01Status':'','Purchase Order\x01Company Name':''}",
-		'graph_series': None,
-		'graph_values': None,
-		'group_by': None,
-		'idx': None,
 		'modified': '2010-03-31 12:39:57',
 		'modified_by': 'Administrator',
-		'module': 'SRM',
-		'name': 'itemwise_purchase_details',
-		'owner': 'Administrator',
-		'page_len': None,
-		'parent': None,
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all Search Criteria
+	{
+		'columns': 'Purchase Order\x01ID,Purchase Order\x01PO Date,Purchase Order\x01Grand Total,PO Detail\x01Item Code,PO Detail\x01Item Name,PO Detail\x01Quantity,PO Detail\x01Stock UOM,PO Detail\x01Purchase Rate,PO Detail\x01Amount,PO Detail\x01Warehouse',
+		'criteria_name': 'Itemwise Purchase Details',
+		'doc_type': 'PO Detail',
+		'doctype': 'Search Criteria',
+		'filters': "{'Purchase Order\x01Saved':1,'Purchase Order\x01Submitted':1,'Purchase Order\x01Status':'','Purchase Order\x01Company Name':''}",
+		'module': 'Buying',
+		'name': '__common__',
 		'parent_doc_type': 'Purchase Order',
-		'parentfield': None,
-		'parenttype': None,
-		'report_script': None,
-		'server_script': None,
 		'sort_by': '`tabPurchase Order`.`name`',
 		'sort_order': 'DESC',
 		'standard': 'Yes'
+	},
+
+	# Search Criteria, itemwise_purchase_details
+	{
+		'doctype': 'Search Criteria',
+		'name': 'itemwise_purchase_details'
 	}
 ]

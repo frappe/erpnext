@@ -1,37 +1,34 @@
+# Search Criteria, target_variance_report
 [
+
+	# These values are common in all dictionaries
 	{
-		'add_col': None,
-		'add_cond': None,
-		'add_tab': None,
-		'columns': 'Sales Person\x01ID,Sales Person\x01Owner,Sales Person\x01Sales Person,Sales Person\x01Country,Sales Person\x01State,Target Detail\x01Item Group,Target Detail\x01Fiscal Year,Target Detail\x01Target  Amount',
 		'creation': '2010-08-08 17:09:32',
-		'criteria_name': 'Target Variance Report',
-		'custom_query': '',
-		'description': None,
-		'dis_filters': None,
-		'disabled': 0,
-		'doc_type': 'Target Detail',
 		'docstatus': 0,
-		'doctype': 'Search Criteria',
-		'filters': "{'Sales Person\x01Saved':1,'Sales Person\x01Submitted':1,'Sales Person\x01Country':'','Sales Person\x01State':'','Target Detail\x01Fiscal Year':''}",
-		'graph_series': None,
-		'graph_values': None,
-		'group_by': None,
-		'idx': None,
 		'modified': '2010-06-23 12:27:37',
 		'modified_by': 'Administrator',
-		'module': 'CRM',
-		'name': 'target_variance_report',
-		'owner': 'harshada@webnotestech.com',
+		'owner': 'harshada@webnotestech.com'
+	},
+
+	# These values are common for all Search Criteria
+	{
+		'columns': 'Sales Person\x01ID,Sales Person\x01Owner,Sales Person\x01Sales Person,Sales Person\x01Country,Sales Person\x01State,Target Detail\x01Item Group,Target Detail\x01Fiscal Year,Target Detail\x01Target  Amount',
+		'criteria_name': 'Target Variance Report',
+		'disabled': 0,
+		'doc_type': 'Target Detail',
+		'doctype': 'Search Criteria',
+		'filters': "{'Sales Person\x01Saved':1,'Sales Person\x01Submitted':1,'Sales Person\x01Country':'','Sales Person\x01State':'','Target Detail\x01Fiscal Year':''}",
+		'module': 'Selling',
+		'name': '__common__',
 		'page_len': 50,
-		'parent': None,
 		'parent_doc_type': 'Sales Person',
-		'parentfield': None,
-		'parenttype': None,
-		'report_script': None,
-		'server_script': None,
-		'sort_by': '',
 		'sort_order': 'DESC',
 		'standard': 'Yes'
+	},
+
+	# Search Criteria, target_variance_report
+	{
+		'doctype': 'Search Criteria',
+		'name': 'target_variance_report'
 	}
 ]

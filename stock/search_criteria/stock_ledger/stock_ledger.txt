@@ -1,37 +1,33 @@
+# Search Criteria, stock_ledger
 [
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-10-14 08:43:05',
+		'docstatus': 0,
+		'modified': '2010-10-14 08:31:40',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all Search Criteria
 	{
 		'add_col': '`tabItem`.`item_name`\n`tabItem`.`description`',
 		'add_cond': '`tabItem`.`name` = `tabStock Ledger Entry`.`item_code`',
 		'add_tab': '`tabItem`',
 		'columns': 'Stock Ledger Entry\x01Item Code,Stock Ledger Entry\x01Warehouse,Stock Ledger Entry\x01Posting Date,Stock Ledger Entry\x01Voucher Detail No,Stock Ledger Entry\x01Actual Quantity,Stock Ledger Entry\x01Bin Actual Qty After Transaction',
-		'creation': '2010-10-14 08:43:04',
 		'criteria_name': 'Stock Ledger',
-		'custom_query': '',
-		'description': None,
-		'dis_filters': None,
-		'disabled': None,
 		'doc_type': 'Stock Ledger Entry',
-		'docstatus': 0,
 		'doctype': 'Search Criteria',
 		'filters': "{'Stock Ledger Entry\x01Is Cancelled':'','Stock Ledger Entry\x01Is Stock Entry':''}",
-		'graph_series': None,
-		'graph_values': None,
-		'group_by': None,
-		'idx': None,
-		'modified': '2010-10-14 08:31:40',
-		'modified_by': 'Administrator',
-		'module': 'Material Management',
-		'name': 'stock_ledger',
-		'owner': 'Administrator',
-		'page_len': None,
-		'parent': None,
-		'parent_doc_type': None,
-		'parentfield': None,
-		'parenttype': None,
-		'report_script': None,
-		'server_script': None,
-		'sort_by': None,
-		'sort_order': None,
+		'module': 'Stock',
+		'name': '__common__',
 		'standard': 'Yes'
+	},
+
+	# Search Criteria, stock_ledger
+	{
+		'doctype': 'Search Criteria',
+		'name': 'stock_ledger'
 	}
 ]

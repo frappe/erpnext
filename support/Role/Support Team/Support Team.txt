@@ -1,1 +1,26 @@
-[{'modified_by': 'Administrator', 'name': 'Support Team', 'parent': None, 'creation': '2010-12-28 15:19:11', 'modified': '2010-12-28 15:19:11', 'module': 'Roles', 'doctype': 'Role', 'idx': None, 'parenttype': None, 'role_name': 'Support Team', 'owner': 'Administrator', 'docstatus': 0, 'parentfield': None}]
+# Role, Support Team
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-12-28 17:02:39',
+		'docstatus': 0,
+		'modified': '2010-12-28 15:19:11',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all Role
+	{
+		'doctype': 'Role',
+		'module': 'Support',
+		'name': '__common__',
+		'role_name': 'Support Team'
+	},
+
+	# Role, Support Team
+	{
+		'doctype': 'Role',
+		'name': 'Support Team'
+	}
+]

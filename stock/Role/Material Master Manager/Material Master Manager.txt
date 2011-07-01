@@ -1,1 +1,26 @@
-[{'modified_by': 'Administrator', 'name': 'Material Master Manager', 'parent': None, 'creation': '2010-04-08 13:49:58', 'modified': '2010-04-08 13:49:58', 'module': 'Roles', 'doctype': 'Role', 'idx': None, 'parenttype': None, 'role_name': 'Material Master Manager', 'owner': 'Administrator', 'docstatus': 0, 'parentfield': None}]
+# Role, Material Master Manager
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-08-08 17:08:51',
+		'docstatus': 0,
+		'modified': '2010-04-08 13:49:58',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all Role
+	{
+		'doctype': 'Role',
+		'module': 'Stock',
+		'name': '__common__',
+		'role_name': 'Material Master Manager'
+	},
+
+	# Role, Material Master Manager
+	{
+		'doctype': 'Role',
+		'name': 'Material Master Manager'
+	}
+]

@@ -1,37 +1,34 @@
+# Search Criteria, lead-to_follow_up
 [
+
+	# These values are common in all dictionaries
 	{
-		'add_col': None,
-		'add_cond': "`tabLead`.status!='Converted' \n`tabLead`.status!='Lead Lost' \n`tabLead`.status!='Not Interested'",
-		'add_tab': None,
-		'columns': 'Lead\x01ID,Lead\x01Status,Lead\x01Lead Name,Lead\x01Lead Date,Lead\x01Lead Owner,Lead\x01Next Contact Date',
-		'creation': '2010-09-01 15:47:57',
-		'criteria_name': 'Lead-To follow up',
-		'custom_query': '',
-		'description': None,
-		'dis_filters': None,
-		'disabled': None,
-		'doc_type': 'Lead',
+		'creation': '2010-09-01 15:48:09',
 		'docstatus': 0,
-		'doctype': 'Search Criteria',
-		'filters': "{'Lead\x01Status':'','Lead\x01Source':'','Lead\x01Expected Month':'','Lead\x01Industry':'','Lead\x01Market Segment':'','Lead\x01Rating':''}",
-		'graph_series': None,
-		'graph_values': None,
-		'group_by': None,
-		'idx': None,
 		'modified': '2010-08-30 12:01:19',
 		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all Search Criteria
+	{
+		'add_cond': "`tabLead`.status!='Converted' \n`tabLead`.status!='Lead Lost' \n`tabLead`.status!='Not Interested'",
+		'columns': 'Lead\x01ID,Lead\x01Status,Lead\x01Lead Name,Lead\x01Lead Date,Lead\x01Lead Owner,Lead\x01Next Contact Date',
+		'criteria_name': 'Lead-To follow up',
+		'doc_type': 'Lead',
+		'doctype': 'Search Criteria',
+		'filters': "{'Lead\x01Status':'','Lead\x01Source':'','Lead\x01Expected Month':'','Lead\x01Industry':'','Lead\x01Market Segment':'','Lead\x01Rating':''}",
 		'module': 'Home',
-		'name': 'lead-to_follow_up',
-		'owner': 'Administrator',
+		'name': '__common__',
 		'page_len': 50,
-		'parent': None,
-		'parent_doc_type': None,
-		'parentfield': None,
-		'parenttype': None,
-		'report_script': '',
-		'server_script': None,
 		'sort_by': '`tabLead`.`name`',
 		'sort_order': 'DESC',
 		'standard': 'Yes'
+	},
+
+	# Search Criteria, lead-to_follow_up
+	{
+		'doctype': 'Search Criteria',
+		'name': 'lead-to_follow_up'
 	}
 ]

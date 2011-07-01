@@ -1,37 +1,34 @@
+# Search Criteria, timesheet_report
 [
+
+	# These values are common in all dictionaries
 	{
-		'add_col': None,
-		'add_cond': None,
-		'add_tab': None,
-		'columns': 'Timesheet\x01ID,Timesheet\x01Timesheet Date,Timesheet\x01Timesheet by,Timesheet Detail\x01Project Name,Timesheet Detail\x01Task Id,Timesheet Detail\x01Task Name,Timesheet Detail\x01Actual Start Time,Timesheet Detail\x01Actual End Time,Timesheet Detail\x01Total Hours (Actual)',
-		'creation': '2010-12-14 10:33:09',
-		'criteria_name': 'Timesheet Report',
-		'custom_query': '',
-		'description': None,
-		'dis_filters': None,
-		'disabled': None,
-		'doc_type': 'Timesheet Detail',
+		'creation': '2010-12-14 10:23:31',
 		'docstatus': 0,
-		'doctype': 'Search Criteria',
-		'filters': "{'Timesheet\x01Saved':1,'Timesheet\x01Submitted':1}",
-		'graph_series': None,
-		'graph_values': None,
-		'group_by': None,
-		'idx': None,
 		'modified': '2010-11-05 20:44:03',
 		'modified_by': 'Administrator',
+		'owner': 'ashwini@webnotestech.com'
+	},
+
+	# These values are common for all Search Criteria
+	{
+		'columns': 'Timesheet\x01ID,Timesheet\x01Timesheet Date,Timesheet\x01Timesheet by,Timesheet Detail\x01Project Name,Timesheet Detail\x01Task Id,Timesheet Detail\x01Task Name,Timesheet Detail\x01Actual Start Time,Timesheet Detail\x01Actual End Time,Timesheet Detail\x01Total Hours (Actual)',
+		'criteria_name': 'Timesheet Report',
+		'doc_type': 'Timesheet Detail',
+		'doctype': 'Search Criteria',
+		'filters': "{'Timesheet\x01Saved':1,'Timesheet\x01Submitted':1}",
 		'module': 'Projects',
-		'name': 'timesheet_report',
-		'owner': 'ashwini@webnotestech.com',
+		'name': '__common__',
 		'page_len': 50,
-		'parent': None,
 		'parent_doc_type': 'Timesheet',
-		'parentfield': None,
-		'parenttype': None,
-		'report_script': None,
-		'server_script': None,
 		'sort_by': '`tabTimesheet`.`name`',
 		'sort_order': 'DESC',
 		'standard': 'Yes'
+	},
+
+	# Search Criteria, timesheet_report
+	{
+		'doctype': 'Search Criteria',
+		'name': 'timesheet_report'
 	}
 ]

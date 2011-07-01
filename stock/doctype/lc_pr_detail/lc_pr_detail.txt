@@ -15,7 +15,7 @@
 		'colour': 'White:FFF',
 		'doctype': 'DocType',
 		'istable': 1,
-		'module': 'stock',
+		'module': 'Stock',
 		'name': '__common__',
 		'section_style': 'Simple',
 		'server_code_error': ' ',

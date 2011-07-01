@@ -1,37 +1,33 @@
+# Search Criteria, variance_report
 [
+
+	# These values are common in all dictionaries
 	{
-		'add_col': None,
-		'add_cond': None,
-		'add_tab': None,
-		'columns': '',
 		'creation': '2010-08-08 17:09:31',
-		'criteria_name': 'Variance Report',
-		'custom_query': None,
-		'description': None,
-		'dis_filters': None,
-		'disabled': None,
-		'doc_type': 'Target Detail',
 		'docstatus': 0,
-		'doctype': 'Search Criteria',
-		'filters': "{'Territory\x01State':'','Target Detail\x01Fiscal Year':'2009-2010','Target Detail\x01Based On':'Territory','Target Detail\x01Company':'Alpha Company','Target Detail\x01Period':'Quarterly','Target Detail\x01Under':'Sales Order'}",
-		'graph_series': None,
-		'graph_values': None,
-		'group_by': None,
-		'idx': None,
 		'modified': '2010-05-05 11:13:12',
 		'modified_by': 'Administrator',
-		'module': 'CRM',
-		'name': 'variance_report',
-		'owner': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all Search Criteria
+	{
+		'criteria_name': 'Variance Report',
+		'doc_type': 'Target Detail',
+		'doctype': 'Search Criteria',
+		'filters': "{'Territory\x01State':'','Target Detail\x01Fiscal Year':'2009-2010','Target Detail\x01Based On':'Territory','Target Detail\x01Company':'Alpha Company','Target Detail\x01Period':'Quarterly','Target Detail\x01Under':'Sales Order'}",
+		'module': 'Selling',
+		'name': '__common__',
 		'page_len': 50,
-		'parent': None,
 		'parent_doc_type': 'Territory',
-		'parentfield': None,
-		'parenttype': None,
-		'report_script': None,
-		'server_script': None,
 		'sort_by': 'ID',
 		'sort_order': 'DESC',
 		'standard': 'Yes'
+	},
+
+	# Search Criteria, variance_report
+	{
+		'doctype': 'Search Criteria',
+		'name': 'variance_report'
 	}
 ]

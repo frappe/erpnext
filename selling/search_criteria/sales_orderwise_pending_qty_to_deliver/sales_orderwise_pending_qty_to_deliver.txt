@@ -1,37 +1,38 @@
+# Search Criteria, sales_orderwise_pending_qty_to_deliver
 [
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2011-03-30 11:03:20',
+		'docstatus': 0,
+		'modified': '2011-03-29 14:02:58',
+		'modified_by': 'Administrator',
+		'owner': 'dhanalekshmi@webnotestech.com'
+	},
+
+	# These values are common for all Search Criteria
 	{
 		'add_col': 'SUM(`tabSales Order Detail`.`qty` - ifnull(`tabSales Order Detail`.`delivered_qty`, 0)) AS "Pending Qty"',
 		'add_cond': '`tabSales Order`.status != "Stopped"\n`tabSales Order Detail`.`qty` > ifnull(`tabSales Order Detail`.`delivered_qty`, 0)',
-		'add_tab': None,
 		'columns': 'Sales Order\x01ID,Sales Order\x01Customer,Sales Order\x01Customer Name,Sales Order\x01Customer Address,Sales Order\x01Status,Sales Order\x01%  Delivered,Sales Order\x01% Billed,Sales Order\x01Sales Order Date,Sales Order\x01Territory,Sales Order\x01Email Id',
-		'creation': '2011-05-09 11:04:19',
 		'criteria_name': 'Sales Orderwise Pending Qty To Deliver',
-		'custom_query': '',
 		'description': 'Sales Orderwise Pending Qty To Deliver',
-		'dis_filters': None,
-		'disabled': None,
 		'doc_type': 'Sales Order Detail',
-		'docstatus': 0,
 		'doctype': 'Search Criteria',
 		'filters': "{'Sales Order\x01Saved':1,'Sales Order\x01Submitted':1,'Sales Order\x01Status':'','Sales Order\x01Fiscal Year':''}",
-		'graph_series': None,
-		'graph_values': None,
 		'group_by': '`tabSales Order`.`name`',
-		'idx': None,
-		'modified': '2011-03-29 14:02:58',
-		'modified_by': 'Administrator',
-		'module': 'CRM',
-		'name': 'sales_orderwise_pending_qty_to_deliver',
-		'owner': 'dhanalekshmi@webnotestech.com',
+		'module': 'Selling',
+		'name': '__common__',
 		'page_len': 50,
-		'parent': None,
 		'parent_doc_type': 'Sales Order',
-		'parentfield': None,
-		'parenttype': None,
-		'report_script': '',
-		'server_script': None,
 		'sort_by': '`tabSales Order`.`name`',
 		'sort_order': 'DESC',
 		'standard': 'Yes'
+	},
+
+	# Search Criteria, sales_orderwise_pending_qty_to_deliver
+	{
+		'doctype': 'Search Criteria',
+		'name': 'sales_orderwise_pending_qty_to_deliver'
 	}
 ]

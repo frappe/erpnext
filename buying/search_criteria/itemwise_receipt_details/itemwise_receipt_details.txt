@@ -1,37 +1,34 @@
+# Search Criteria, itemwise_receipt_details
 [
+
+	# These values are common in all dictionaries
 	{
-		'add_col': None,
-		'add_cond': None,
-		'add_tab': None,
-		'columns': 'Purchase Receipt\x01ID,Purchase Receipt\x01Posting Date,Purchase Receipt Detail\x01Item Code,Purchase Receipt Detail\x01Item Name,Purchase Receipt Detail\x01Accepted Quantity,Purchase Receipt Detail\x01Rejected Quantity,Purchase Receipt Detail\x01Accepted Warehouse,Purchase Receipt Detail\x01Rejected Warehouse,Purchase Receipt Detail\x01Amount',
-		'creation': '2010-12-14 10:33:08',
-		'criteria_name': 'Itemwise Receipt Details',
-		'custom_query': '',
-		'description': None,
-		'dis_filters': None,
-		'disabled': None,
-		'doc_type': 'Purchase Receipt Detail',
+		'creation': '2010-12-14 10:23:19',
 		'docstatus': 0,
-		'doctype': 'Search Criteria',
-		'filters': "{'Purchase Receipt\x01Saved':1,'Purchase Receipt\x01Submitted':1,'Purchase Receipt\x01Status':'','Purchase Receipt\x01Fiscal Year':''}",
-		'graph_series': None,
-		'graph_values': None,
-		'group_by': None,
-		'idx': None,
 		'modified': '2010-10-22 14:36:11',
 		'modified_by': 'Administrator',
-		'module': 'SRM',
-		'name': 'itemwise_receipt_details',
-		'owner': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all Search Criteria
+	{
+		'columns': 'Purchase Receipt\x01ID,Purchase Receipt\x01Posting Date,Purchase Receipt Detail\x01Item Code,Purchase Receipt Detail\x01Item Name,Purchase Receipt Detail\x01Accepted Quantity,Purchase Receipt Detail\x01Rejected Quantity,Purchase Receipt Detail\x01Accepted Warehouse,Purchase Receipt Detail\x01Rejected Warehouse,Purchase Receipt Detail\x01Amount',
+		'criteria_name': 'Itemwise Receipt Details',
+		'doc_type': 'Purchase Receipt Detail',
+		'doctype': 'Search Criteria',
+		'filters': "{'Purchase Receipt\x01Saved':1,'Purchase Receipt\x01Submitted':1,'Purchase Receipt\x01Status':'','Purchase Receipt\x01Fiscal Year':''}",
+		'module': 'Buying',
+		'name': '__common__',
 		'page_len': 50,
-		'parent': None,
 		'parent_doc_type': 'Purchase Receipt',
-		'parentfield': None,
-		'parenttype': None,
-		'report_script': None,
-		'server_script': None,
 		'sort_by': '`tabPurchase Receipt`.`name`',
 		'sort_order': 'DESC',
 		'standard': 'Yes'
+	},
+
+	# Search Criteria, itemwise_receipt_details
+	{
+		'doctype': 'Search Criteria',
+		'name': 'itemwise_receipt_details'
 	}
 ]

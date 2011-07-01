@@ -1,37 +1,32 @@
+# Search Criteria, warranty-amc_summary
 [
+
+	# These values are common in all dictionaries
 	{
-		'add_col': None,
-		'add_cond': None,
-		'add_tab': None,
-		'columns': '',
-		'creation': '2010-12-14 17:56:43',
-		'criteria_name': 'Warranty/AMC Summary',
-		'custom_query': None,
-		'description': None,
-		'dis_filters': None,
-		'disabled': None,
-		'doc_type': 'Serial No',
+		'creation': '2010-10-12 15:19:31',
 		'docstatus': 0,
-		'doctype': 'Search Criteria',
-		'filters': "{'Serial No\x01Saved':1,'Serial No\x01Status':''}",
-		'graph_series': None,
-		'graph_values': None,
-		'group_by': None,
-		'idx': None,
 		'modified': '2010-09-25 12:14:49',
 		'modified_by': 'Administrator',
-		'module': 'Maintenance',
-		'name': 'warranty-amc_summary',
-		'owner': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all Search Criteria
+	{
+		'criteria_name': 'Warranty/AMC Summary',
+		'doc_type': 'Serial No',
+		'doctype': 'Search Criteria',
+		'filters': "{'Serial No\x01Saved':1,'Serial No\x01Status':''}",
+		'module': 'Support',
+		'name': '__common__',
 		'page_len': 50,
-		'parent': None,
-		'parent_doc_type': None,
-		'parentfield': None,
-		'parenttype': None,
-		'report_script': None,
-		'server_script': None,
 		'sort_by': 'name',
 		'sort_order': 'DESC',
 		'standard': 'Yes'
+	},
+
+	# Search Criteria, warranty-amc_summary
+	{
+		'doctype': 'Search Criteria',
+		'name': 'warranty-amc_summary'
 	}
 ]

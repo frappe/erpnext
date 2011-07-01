@@ -1,37 +1,34 @@
+# Search Criteria, itemwise_sales_details
 [
+
+	# These values are common in all dictionaries
 	{
-		'add_col': None,
-		'add_cond': None,
-		'add_tab': None,
-		'columns': 'Sales Order\x01ID,Sales Order\x01Customer,Sales Order Detail\x01Item Code,Sales Order Detail\x01Item Name,Sales Order Detail\x01Quantity,Sales Order Detail\x01Basic Rate*,Sales Order Detail\x01Amount*,Sales Order Detail\x01Delivered Qty,Sales Order Detail\x01Billed Qty,Sales Order\x01Company',
-		'creation': '2010-09-01 15:47:57',
-		'criteria_name': 'Itemwise Sales Details',
-		'custom_query': '',
-		'description': None,
-		'dis_filters': None,
-		'disabled': None,
-		'doc_type': 'Sales Order Detail',
+		'creation': '2010-09-01 15:48:09',
 		'docstatus': 0,
-		'doctype': 'Search Criteria',
-		'filters': "{'Sales Order\x01Submitted':1,'Sales Order\x01Status':'','Sales Order\x01Fiscal Year':''}",
-		'graph_series': None,
-		'graph_values': None,
-		'group_by': '',
-		'idx': None,
 		'modified': '2010-08-30 12:22:47',
 		'modified_by': 'Administrator',
-		'module': 'CRM',
-		'name': 'itemwise_sales_details',
-		'owner': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all Search Criteria
+	{
+		'columns': 'Sales Order\x01ID,Sales Order\x01Customer,Sales Order Detail\x01Item Code,Sales Order Detail\x01Item Name,Sales Order Detail\x01Quantity,Sales Order Detail\x01Basic Rate*,Sales Order Detail\x01Amount*,Sales Order Detail\x01Delivered Qty,Sales Order Detail\x01Billed Qty,Sales Order\x01Company',
+		'criteria_name': 'Itemwise Sales Details',
+		'doc_type': 'Sales Order Detail',
+		'doctype': 'Search Criteria',
+		'filters': "{'Sales Order\x01Submitted':1,'Sales Order\x01Status':'','Sales Order\x01Fiscal Year':''}",
+		'module': 'Selling',
+		'name': '__common__',
 		'page_len': 50,
-		'parent': None,
 		'parent_doc_type': 'Sales Order',
-		'parentfield': None,
-		'parenttype': None,
-		'report_script': None,
-		'server_script': None,
 		'sort_by': '`tabSales Order`.`name`',
 		'sort_order': 'DESC',
 		'standard': 'Yes'
+	},
+
+	# Search Criteria, itemwise_sales_details
+	{
+		'doctype': 'Search Criteria',
+		'name': 'itemwise_sales_details'
 	}
 ]

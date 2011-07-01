@@ -1,37 +1,37 @@
+# Search Criteria, delivery_plan
 [
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-09-01 15:48:09',
+		'docstatus': 0,
+		'modified': '2010-08-30 14:06:22',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all Search Criteria
 	{
 		'add_col': "SUM(`tabSales Order Detail`.`pending_qty` * `tabSales Order Detail`.`basic_rate` ) AS 'Amount'",
 		'add_cond': "`tabSales Order Detail`.pending_qty > 0 and (`tabSales Order Detail`.confirmation_date is not null or `tabSales Order Detail`.confirmation_date!='' or `tabSales Order Detail`.confirmation_date != '00-00-0000')",
-		'add_tab': None,
 		'columns': 'Sales Order\x01ID,Sales Order\x01Customer,Sales Order\x01Customer Name',
-		'creation': '2010-09-01 15:47:57',
 		'criteria_name': 'Delivery Plan',
-		'custom_query': '',
-		'description': None,
-		'dis_filters': None,
-		'disabled': None,
 		'doc_type': 'Sales Order Detail',
-		'docstatus': 0,
 		'doctype': 'Search Criteria',
 		'filters': "{'Sales Order\x01Saved':1,'Sales Order\x01Submitted':1,'Sales Order\x01Status':'','Sales Order\x01Fiscal Year':''}",
-		'graph_series': None,
-		'graph_values': None,
 		'group_by': '`tabSales Order Detail`.`confirmation_date`, `tabSales Order`.`name`',
-		'idx': None,
-		'modified': '2010-08-30 14:06:22',
-		'modified_by': 'Administrator',
 		'module': 'Production',
-		'name': 'delivery_plan',
-		'owner': 'Administrator',
+		'name': '__common__',
 		'page_len': 50,
-		'parent': None,
 		'parent_doc_type': 'Sales Order',
-		'parentfield': None,
-		'parenttype': None,
-		'report_script': None,
-		'server_script': '',
 		'sort_by': '`tabSales Order`.`name`',
 		'sort_order': 'DESC',
 		'standard': 'Yes'
+	},
+
+	# Search Criteria, delivery_plan
+	{
+		'doctype': 'Search Criteria',
+		'name': 'delivery_plan'
 	}
 ]

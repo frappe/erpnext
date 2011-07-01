@@ -1,37 +1,33 @@
+# Search Criteria, shortage_to_indent
 [
+
+	# These values are common in all dictionaries
 	{
-		'add_col': None,
-		'add_cond': None,
-		'add_tab': None,
-		'columns': 'Item\x01ID,Item\x01Item Name,Item\x01Description,Item\x01Lead Time Days',
-		'creation': '2011-05-25 12:44:22',
-		'criteria_name': 'Shortage To Indent',
-		'custom_query': '',
-		'description': None,
-		'dis_filters': None,
-		'disabled': None,
-		'doc_type': 'Item',
+		'creation': '2011-05-18 11:48:54',
 		'docstatus': 0,
+		'modified': '2011-05-18 11:52:59',
+		'modified_by': 'Administrator',
+		'owner': 'wasim@webnotestech.com'
+	},
+
+	# These values are common for all Search Criteria
+	{
+		'columns': 'Item\x01ID,Item\x01Item Name,Item\x01Description,Item\x01Lead Time Days',
+		'criteria_name': 'Shortage To Indent',
+		'doc_type': 'Item',
 		'doctype': 'Search Criteria',
 		'filters': "{'Item\x01Saved':1}",
-		'graph_series': None,
-		'graph_values': None,
-		'group_by': None,
-		'idx': None,
-		'modified': '2011-05-18 11:52:59',
-		'modified_by': 'Guest',
-		'module': 'Material Management',
-		'name': 'shortage_to_indent',
-		'owner': 'wasim@webnotestech.com',
+		'module': 'Stock',
+		'name': '__common__',
 		'page_len': 50,
-		'parent': None,
-		'parent_doc_type': None,
-		'parentfield': None,
-		'parenttype': None,
-		'report_script': None,
-		'server_script': None,
 		'sort_by': '`tabItem`.`name`',
 		'sort_order': 'DESC',
 		'standard': 'Yes'
+	},
+
+	# Search Criteria, shortage_to_indent
+	{
+		'doctype': 'Search Criteria',
+		'name': 'shortage_to_indent'
 	}
 ]

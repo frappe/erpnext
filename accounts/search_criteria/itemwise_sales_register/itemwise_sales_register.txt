@@ -1,37 +1,34 @@
+# Search Criteria, itemwise_sales_register
 [
+
+	# These values are common in all dictionaries
 	{
-		'add_col': None,
-		'add_cond': None,
-		'add_tab': None,
-		'columns': 'RV Detail\x01Item,RV Detail\x01Item Name,RV Detail\x01Item Group,Receivable Voucher\x01ID,Receivable Voucher\x01Voucher Date,Receivable Voucher\x01Posting Date,Receivable Voucher\x01Debit To,RV Detail\x01Cost Center,Receivable Voucher\x01Territory,RV Detail\x01Income Account,RV Detail\x01Qty,RV Detail\x01Basic Rate*,RV Detail\x01Amount*',
 		'creation': '2011-01-19 17:33:33',
-		'criteria_name': 'Itemwise Sales Register',
-		'custom_query': '',
-		'description': None,
-		'dis_filters': None,
-		'disabled': None,
-		'doc_type': 'RV Detail',
 		'docstatus': 0,
-		'doctype': 'Search Criteria',
-		'filters': "{'Receivable Voucher\x01Submitted':1,'Receivable Voucher\x01From Posting Date\x01lower':'','Receivable Voucher\x01To Posting Date\x01upper':'','Receivable Voucher\x01Is Opening':'','Receivable Voucher\x01Company':'','Receivable Voucher\x01Fiscal Year':''}",
-		'graph_series': None,
-		'graph_values': None,
-		'group_by': None,
-		'idx': None,
 		'modified': '2011-06-20 16:30:41',
 		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all Search Criteria
+	{
+		'columns': 'RV Detail\x01Item,RV Detail\x01Item Name,RV Detail\x01Item Group,Receivable Voucher\x01ID,Receivable Voucher\x01Voucher Date,Receivable Voucher\x01Posting Date,Receivable Voucher\x01Debit To,RV Detail\x01Cost Center,Receivable Voucher\x01Territory,RV Detail\x01Income Account,RV Detail\x01Qty,RV Detail\x01Basic Rate*,RV Detail\x01Amount*',
+		'criteria_name': 'Itemwise Sales Register',
+		'doc_type': 'RV Detail',
+		'doctype': 'Search Criteria',
+		'filters': "{'Receivable Voucher\x01Submitted':1,'Receivable Voucher\x01From Posting Date\x01lower':'','Receivable Voucher\x01To Posting Date\x01upper':'','Receivable Voucher\x01Is Opening':'','Receivable Voucher\x01Company':'','Receivable Voucher\x01Fiscal Year':''}",
 		'module': 'Accounts',
-		'name': 'itemwise_sales_register',
-		'owner': 'Administrator',
+		'name': '__common__',
 		'page_len': 50,
-		'parent': None,
 		'parent_doc_type': 'Receivable Voucher',
-		'parentfield': None,
-		'parenttype': None,
-		'report_script': None,
-		'server_script': None,
 		'sort_by': '`tabRV Detail`.`income_account`',
 		'sort_order': 'DESC',
 		'standard': 'Yes'
+	},
+
+	# Search Criteria, itemwise_sales_register
+	{
+		'doctype': 'Search Criteria',
+		'name': 'itemwise_sales_register'
 	}
 ]

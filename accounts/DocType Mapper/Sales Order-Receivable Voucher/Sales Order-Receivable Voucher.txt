@@ -1,1345 +1,714 @@
+# DocType Mapper, Sales Order-Receivable Voucher
 [
+
+	# These values are common in all dictionaries
 	{
-		'_last_update': None,
-		'_user_tags': None,
 		'creation': '2010-08-08 17:09:36',
 		'docstatus': 0,
-		'doctype': u'DocType Mapper',
-		'from_doctype': 'Sales Order',
-		'idx': None,
 		'modified': '2011-05-16 17:34:21',
 		'modified_by': 'Administrator',
-		'module': 'Mapper',
-		'name': 'Sales Order-Receivable Voucher',
-		'owner': 'Administrator',
-		'parent': None,
-		'parentfield': None,
-		'parenttype': None,
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all Table Mapper Detail
+	{
+		'doctype': 'Table Mapper Detail',
+		'name': '__common__',
+		'parent': 'Sales Order-Receivable Voucher',
+		'parentfield': 'table_mapper_details',
+		'parenttype': 'DocType Mapper'
+	},
+
+	# These values are common for all Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'map': 'Yes',
+		'name': '__common__',
+		'parent': 'Sales Order-Receivable Voucher',
+		'parentfield': 'field_mapper_details',
+		'parenttype': 'DocType Mapper'
+	},
+
+	# These values are common for all DocType Mapper
+	{
+		'doctype': 'DocType Mapper',
+		'from_doctype': 'Sales Order',
+		'module': 'Accounts',
+		'name': '__common__',
 		'ref_doc_submitted': 1,
 		'to_doctype': 'Receivable Voucher'
 	},
+
+	# DocType Mapper, Sales Order-Receivable Voucher
+	{
+		'doctype': 'DocType Mapper',
+		'name': 'Sales Order-Receivable Voucher'
+	},
+
+	# Field Mapper Detail
 	{
 		'checking_operator': '=',
-		'creation': '2010-08-08 17:09:36',
-		'docstatus': 0,
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'customer',
 		'idx': 1,
-		'map': 'Yes',
 		'match_id': 0,
-		'modified': '2011-05-20 15:54:28',
-		'modified_by': 'Administrator',
-		'name': 'FMD/00427',
-		'owner': 'Administrator',
-		'parent': 'Sales Order-Receivable Voucher',
-		'parentfield': 'field_mapper_details',
-		'parenttype': 'DocType Mapper',
 		'to_field': 'customer'
 	},
+
+	# Field Mapper Detail
 	{
-		'checking_operator': None,
-		'creation': '2010-08-08 17:09:36',
-		'docstatus': 0,
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'customer_address',
 		'idx': 2,
-		'map': 'Yes',
 		'match_id': 0,
-		'modified': '2011-05-20 15:54:28',
-		'modified_by': 'Administrator',
-		'name': 'FMD/00428',
-		'owner': 'Administrator',
-		'parent': 'Sales Order-Receivable Voucher',
-		'parentfield': 'field_mapper_details',
-		'parenttype': 'DocType Mapper',
 		'to_field': 'customer_address'
 	},
+
+	# Field Mapper Detail
 	{
-		'checking_operator': None,
-		'creation': '2011-05-20 15:54:28',
-		'docstatus': 0,
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'contact_person',
 		'idx': 3,
-		'map': 'Yes',
 		'match_id': 0,
-		'modified': '2011-05-20 15:54:28',
-		'modified_by': 'Administrator',
-		'name': '000003528',
-		'owner': 'Administrator',
-		'parent': 'Sales Order-Receivable Voucher',
-		'parentfield': 'field_mapper_details',
-		'parenttype': 'DocType Mapper',
 		'to_field': 'contact_person'
 	},
+
+	# Field Mapper Detail
 	{
-		'checking_operator': None,
-		'creation': '2010-09-25 12:28:22',
-		'docstatus': 0,
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'customer_name',
 		'idx': 4,
-		'map': 'Yes',
 		'match_id': 0,
-		'modified': '2011-05-20 15:54:28',
-		'modified_by': 'Administrator',
-		'name': 'FMD/00595',
-		'owner': 'harshada@webnotestech.com',
-		'parent': 'Sales Order-Receivable Voucher',
-		'parentfield': 'field_mapper_details',
-		'parenttype': 'DocType Mapper',
 		'to_field': 'customer_name'
 	},
+
+	# Field Mapper Detail
 	{
-		'checking_operator': None,
-		'creation': '2011-05-20 15:54:28',
-		'docstatus': 0,
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'address_display',
 		'idx': 5,
-		'map': 'Yes',
 		'match_id': 0,
-		'modified': '2011-05-20 15:54:28',
-		'modified_by': 'Administrator',
-		'name': '000003529',
-		'owner': 'Administrator',
-		'parent': 'Sales Order-Receivable Voucher',
-		'parentfield': 'field_mapper_details',
-		'parenttype': 'DocType Mapper',
 		'to_field': 'address_display'
 	},
+
+	# Field Mapper Detail
 	{
-		'checking_operator': None,
-		'creation': '2011-05-20 15:54:28',
-		'docstatus': 0,
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'contact_display',
 		'idx': 6,
-		'map': 'Yes',
 		'match_id': 0,
-		'modified': '2011-05-20 15:54:28',
-		'modified_by': 'Administrator',
-		'name': '000003530',
-		'owner': 'Administrator',
-		'parent': 'Sales Order-Receivable Voucher',
-		'parentfield': 'field_mapper_details',
-		'parenttype': 'DocType Mapper',
 		'to_field': 'contact_display'
 	},
+
+	# Field Mapper Detail
 	{
-		'checking_operator': None,
-		'creation': '2011-05-20 15:54:28',
-		'docstatus': 0,
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'contact_mobile',
 		'idx': 7,
-		'map': 'Yes',
 		'match_id': 0,
-		'modified': '2011-05-20 15:54:28',
-		'modified_by': 'Administrator',
-		'name': '000003531',
-		'owner': 'Administrator',
-		'parent': 'Sales Order-Receivable Voucher',
-		'parentfield': 'field_mapper_details',
-		'parenttype': 'DocType Mapper',
 		'to_field': 'contact_mobile'
 	},
+
+	# Field Mapper Detail
 	{
-		'checking_operator': None,
-		'creation': '2011-05-20 15:54:28',
-		'docstatus': 0,
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'contact_email',
 		'idx': 8,
-		'map': 'Yes',
 		'match_id': 0,
-		'modified': '2011-05-20 15:54:28',
-		'modified_by': 'Administrator',
-		'name': '000003532',
-		'owner': 'Administrator',
-		'parent': 'Sales Order-Receivable Voucher',
-		'parentfield': 'field_mapper_details',
-		'parenttype': 'DocType Mapper',
 		'to_field': 'contact_email'
 	},
+
+	# Field Mapper Detail
 	{
-		'checking_operator': None,
-		'creation': '2011-05-20 15:54:28',
-		'docstatus': 0,
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'customer_group',
 		'idx': 10,
-		'map': 'Yes',
 		'match_id': 0,
-		'modified': '2011-05-20 15:54:28',
-		'modified_by': 'Administrator',
-		'name': '000003533',
-		'owner': 'Administrator',
-		'parent': 'Sales Order-Receivable Voucher',
-		'parentfield': 'field_mapper_details',
-		'parenttype': 'DocType Mapper',
 		'to_field': 'customer_group'
 	},
+
+	# Field Mapper Detail
 	{
-		'checking_operator': None,
-		'creation': '2010-08-08 17:09:36',
-		'docstatus': 0,
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'company',
 		'idx': 11,
-		'map': 'Yes',
 		'match_id': 0,
-		'modified': '2011-05-20 15:54:28',
-		'modified_by': 'Administrator',
-		'name': 'FMD/00429',
-		'owner': 'Administrator',
-		'parent': 'Sales Order-Receivable Voucher',
-		'parentfield': 'field_mapper_details',
-		'parenttype': 'DocType Mapper',
 		'to_field': 'company'
 	},
+
+	# Field Mapper Detail
 	{
-		'checking_operator': None,
-		'creation': '2010-08-08 17:09:36',
-		'docstatus': 0,
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'fiscal_year',
 		'idx': 12,
-		'map': 'Yes',
 		'match_id': 0,
-		'modified': '2011-05-20 15:54:28',
-		'modified_by': 'Administrator',
-		'name': 'FMD/00430',
-		'owner': 'Administrator',
-		'parent': 'Sales Order-Receivable Voucher',
-		'parentfield': 'field_mapper_details',
-		'parenttype': 'DocType Mapper',
 		'to_field': 'fiscal_year'
 	},
+
+	# Field Mapper Detail
 	{
-		'checking_operator': None,
-		'creation': '2010-08-08 17:09:36',
-		'docstatus': 0,
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'charge',
 		'idx': 13,
-		'map': 'Yes',
 		'match_id': 0,
-		'modified': '2011-05-20 15:54:28',
-		'modified_by': 'Administrator',
-		'name': 'FMD/00431',
-		'owner': 'Administrator',
-		'parent': 'Sales Order-Receivable Voucher',
-		'parentfield': 'field_mapper_details',
-		'parenttype': 'DocType Mapper',
 		'to_field': 'charge'
 	},
+
+	# Field Mapper Detail
 	{
-		'checking_operator': None,
-		'creation': '2010-08-08 17:09:36',
-		'docstatus': 0,
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'conversion_rate',
 		'idx': 14,
-		'map': 'Yes',
 		'match_id': 0,
-		'modified': '2011-05-20 15:54:28',
-		'modified_by': 'Administrator',
-		'name': 'FMD/00432',
-		'owner': 'Administrator',
-		'parent': 'Sales Order-Receivable Voucher',
-		'parentfield': 'field_mapper_details',
-		'parenttype': 'DocType Mapper',
 		'to_field': 'conversion_rate'
 	},
+
+	# Field Mapper Detail
 	{
-		'checking_operator': None,
-		'creation': '2010-08-08 17:09:36',
-		'docstatus': 0,
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'price_list_name',
 		'idx': 15,
-		'map': 'Yes',
 		'match_id': 0,
-		'modified': '2011-05-20 15:54:28',
-		'modified_by': 'Administrator',
-		'name': 'FMD/00433',
-		'owner': 'Administrator',
-		'parent': 'Sales Order-Receivable Voucher',
-		'parentfield': 'field_mapper_details',
-		'parenttype': 'DocType Mapper',
 		'to_field': 'price_list_name'
 	},
+
+	# Field Mapper Detail
 	{
-		'checking_operator': None,
-		'creation': '2010-08-08 17:09:36',
-		'docstatus': 0,
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'currency',
 		'idx': 16,
-		'map': 'Yes',
 		'match_id': 0,
-		'modified': '2011-05-20 15:54:28',
-		'modified_by': 'Administrator',
-		'name': 'FMD/00434',
-		'owner': 'Administrator',
-		'parent': 'Sales Order-Receivable Voucher',
-		'parentfield': 'field_mapper_details',
-		'parenttype': 'DocType Mapper',
 		'to_field': 'currency'
 	},
+
+	# Field Mapper Detail
 	{
-		'checking_operator': None,
-		'creation': '2010-08-08 17:09:36',
-		'docstatus': 0,
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'item_code',
 		'idx': 17,
-		'map': 'Yes',
 		'match_id': 1,
-		'modified': '2011-05-20 15:54:28',
-		'modified_by': 'Administrator',
-		'name': 'FMD/00435',
-		'owner': 'Administrator',
-		'parent': 'Sales Order-Receivable Voucher',
-		'parentfield': 'field_mapper_details',
-		'parenttype': 'DocType Mapper',
 		'to_field': 'item_code'
 	},
+
+	# Field Mapper Detail
 	{
-		'checking_operator': None,
-		'creation': '2010-08-08 17:09:36',
-		'docstatus': 0,
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'item_name',
 		'idx': 18,
-		'map': 'Yes',
 		'match_id': 1,
-		'modified': '2011-05-20 15:54:28',
-		'modified_by': 'Administrator',
-		'name': 'FMD/00436',
-		'owner': 'Administrator',
-		'parent': 'Sales Order-Receivable Voucher',
-		'parentfield': 'field_mapper_details',
-		'parenttype': 'DocType Mapper',
 		'to_field': 'item_name'
 	},
+
+	# Field Mapper Detail
 	{
-		'checking_operator': None,
-		'creation': '2010-08-08 17:09:36',
-		'docstatus': 0,
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'brand',
 		'idx': 19,
-		'map': 'Yes',
 		'match_id': 1,
-		'modified': '2011-05-20 15:54:28',
-		'modified_by': 'Administrator',
-		'name': 'FMD/00437',
-		'owner': 'Administrator',
-		'parent': 'Sales Order-Receivable Voucher',
-		'parentfield': 'field_mapper_details',
-		'parenttype': 'DocType Mapper',
 		'to_field': 'brand'
 	},
+
+	# Field Mapper Detail
 	{
-		'checking_operator': None,
-		'creation': '2010-08-08 17:09:36',
-		'docstatus': 0,
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'description',
 		'idx': 20,
-		'map': 'Yes',
 		'match_id': 1,
-		'modified': '2011-05-20 15:54:28',
-		'modified_by': 'Administrator',
-		'name': 'FMD/00438',
-		'owner': 'Administrator',
-		'parent': 'Sales Order-Receivable Voucher',
-		'parentfield': 'field_mapper_details',
-		'parenttype': 'DocType Mapper',
 		'to_field': 'description'
 	},
+
+	# Field Mapper Detail
 	{
-		'checking_operator': None,
-		'creation': '2010-08-08 17:09:36',
-		'docstatus': 0,
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'eval: flt(obj.qty) - flt(obj.billed_qty)',
 		'idx': 21,
-		'map': 'Yes',
 		'match_id': 1,
-		'modified': '2011-05-20 15:54:28',
-		'modified_by': 'Administrator',
-		'name': 'FMD/00439',
-		'owner': 'Administrator',
-		'parent': 'Sales Order-Receivable Voucher',
-		'parentfield': 'field_mapper_details',
-		'parenttype': 'DocType Mapper',
 		'to_field': 'qty'
 	},
+
+	# Field Mapper Detail
 	{
-		'checking_operator': None,
-		'creation': '2010-08-08 17:09:36',
-		'docstatus': 0,
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'base_ref_rate',
 		'idx': 22,
-		'map': 'Yes',
 		'match_id': 1,
-		'modified': '2011-05-20 15:54:28',
-		'modified_by': 'Administrator',
-		'name': 'FMD/00440',
-		'owner': 'Administrator',
-		'parent': 'Sales Order-Receivable Voucher',
-		'parentfield': 'field_mapper_details',
-		'parenttype': 'DocType Mapper',
 		'to_field': 'base_ref_rate'
 	},
+
+	# Field Mapper Detail
 	{
-		'checking_operator': None,
-		'creation': '2010-08-08 17:09:36',
-		'docstatus': 0,
 		'doctype': 'Field Mapper Detail',
-		'from_field': 'export_rate',
+		'from_field': 'name',
 		'idx': 22,
-		'map': 'Yes',
 		'match_id': 1,
-		'modified': '2011-02-15 16:03:10',
-		'modified_by': 'Administrator',
-		'name': 'FMD/00447',
-		'owner': 'Administrator',
-		'parent': 'Sales Order-Receivable Voucher',
-		'parentfield': 'field_mapper_details',
-		'parenttype': 'DocType Mapper',
-		'to_field': 'export_rate'
+		'to_field': 'so_detail'
 	},
+
+	# Field Mapper Detail
 	{
-		'checking_operator': None,
-		'creation': '2010-08-08 17:09:36',
-		'docstatus': 0,
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'ref_rate',
 		'idx': 23,
-		'map': 'Yes',
 		'match_id': 1,
-		'modified': '2011-05-20 15:54:28',
-		'modified_by': 'Administrator',
-		'name': 'FMD/00441',
-		'owner': 'Administrator',
-		'parent': 'Sales Order-Receivable Voucher',
-		'parentfield': 'field_mapper_details',
-		'parenttype': 'DocType Mapper',
 		'to_field': 'ref_rate'
 	},
+
+	# Field Mapper Detail
 	{
-		'checking_operator': None,
-		'creation': '2010-08-08 17:09:36',
-		'docstatus': 0,
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'export_rate',
+		'idx': 23,
+		'match_id': 1,
+		'to_field': 'export_rate'
+	},
+
+	# Field Mapper Detail
+	{
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'basic_rate',
 		'idx': 24,
-		'map': 'Yes',
 		'match_id': 1,
-		'modified': '2011-05-20 15:54:28',
-		'modified_by': 'Administrator',
-		'name': 'FMD/00442',
-		'owner': 'Administrator',
-		'parent': 'Sales Order-Receivable Voucher',
-		'parentfield': 'field_mapper_details',
-		'parenttype': 'DocType Mapper',
 		'to_field': 'basic_rate'
 	},
+
+	# Field Mapper Detail
 	{
-		'checking_operator': None,
-		'creation': '2010-08-08 17:09:36',
-		'docstatus': 0,
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'item_group',
 		'idx': 25,
-		'map': 'Yes',
 		'match_id': 1,
-		'modified': '2011-05-20 15:54:28',
-		'modified_by': 'Administrator',
-		'name': 'FMD/00443',
-		'owner': 'Administrator',
-		'parent': 'Sales Order-Receivable Voucher',
-		'parentfield': 'field_mapper_details',
-		'parenttype': 'DocType Mapper',
 		'to_field': 'item_group'
 	},
+
+	# Field Mapper Detail
 	{
-		'checking_operator': None,
-		'creation': '2010-08-08 17:09:36',
-		'docstatus': 0,
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'parent',
 		'idx': 26,
-		'map': 'Yes',
 		'match_id': 1,
-		'modified': '2011-05-20 15:54:28',
-		'modified_by': 'Administrator',
-		'name': 'FMD/00445',
-		'owner': 'Administrator',
-		'parent': 'Sales Order-Receivable Voucher',
-		'parentfield': 'field_mapper_details',
-		'parenttype': 'DocType Mapper',
 		'to_field': 'sales_order'
 	},
+
+	# Field Mapper Detail
 	{
-		'checking_operator': None,
-		'creation': '2011-03-15 14:26:12',
-		'docstatus': 0,
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'stock_uom',
 		'idx': 27,
-		'map': 'Yes',
 		'match_id': 1,
-		'modified': '2011-05-20 15:54:28',
-		'modified_by': 'Administrator',
-		'name': '000001851',
-		'owner': 'Administrator',
-		'parent': 'Sales Order-Receivable Voucher',
-		'parentfield': 'field_mapper_details',
-		'parenttype': 'DocType Mapper',
 		'to_field': 'stock_uom'
 	},
+
+	# Field Mapper Detail
 	{
-		'checking_operator': None,
-		'creation': '2010-08-08 17:09:36',
-		'docstatus': 0,
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'name',
 		'idx': 29,
-		'map': 'Yes',
 		'match_id': 1,
-		'modified': '2011-05-20 15:54:28',
-		'modified_by': 'Administrator',
-		'name': 'FMD/00446',
-		'owner': 'Administrator',
-		'parent': 'Sales Order-Receivable Voucher',
-		'parentfield': 'field_mapper_details',
-		'parenttype': 'DocType Mapper',
-		'to_field': 'so_detail'
+		'to_field': 'export_rate'
 	},
+
+	# Field Mapper Detail
 	{
-		'checking_operator': None,
-		'creation': '2010-08-08 17:09:36',
-		'docstatus': 0,
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'export_rate',
 		'idx': 30,
-		'map': 'Yes',
 		'match_id': 1,
-		'modified': '2011-05-20 15:54:28',
-		'modified_by': 'Administrator',
-		'name': 'FMD/00444',
-		'owner': 'Administrator',
-		'parent': 'Sales Order-Receivable Voucher',
-		'parentfield': 'field_mapper_details',
-		'parenttype': 'DocType Mapper',
 		'to_field': 'export_rate'
 	},
+
+	# Field Mapper Detail
 	{
-		'checking_operator': None,
-		'creation': '2010-08-08 17:09:36',
-		'docstatus': 0,
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'eval: (flt(obj.qty) - flt(obj.billed_qty)) * flt(obj.basic_rate)',
 		'idx': 31,
-		'map': 'Yes',
 		'match_id': 1,
-		'modified': '2011-05-20 15:54:28',
-		'modified_by': 'Administrator',
-		'name': 'FMD/00448',
-		'owner': 'wasim@webnotestech.com',
-		'parent': 'Sales Order-Receivable Voucher',
-		'parentfield': 'field_mapper_details',
-		'parenttype': 'DocType Mapper',
 		'to_field': 'amount'
 	},
+
+	# Field Mapper Detail
 	{
-		'checking_operator': None,
-		'creation': '2010-08-08 17:09:36',
-		'docstatus': 0,
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'eval: (flt(obj.qty) - flt(obj.billed_qty)) * flt(obj.export_rate)',
 		'idx': 32,
-		'map': 'Yes',
 		'match_id': 1,
-		'modified': '2011-05-20 15:54:28',
-		'modified_by': 'Administrator',
-		'name': 'FMD/00449',
-		'owner': 'Administrator',
-		'parent': 'Sales Order-Receivable Voucher',
-		'parentfield': 'field_mapper_details',
-		'parenttype': 'DocType Mapper',
 		'to_field': 'export_amount'
 	},
+
+	# Field Mapper Detail
 	{
-		'checking_operator': None,
-		'creation': '2010-08-08 17:09:36',
-		'docstatus': 0,
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'adj_rate',
 		'idx': 33,
-		'map': 'Yes',
 		'match_id': 1,
-		'modified': '2011-05-20 15:54:28',
-		'modified_by': 'Administrator',
-		'name': 'FMD/00450',
-		'owner': 'Administrator',
-		'parent': 'Sales Order-Receivable Voucher',
-		'parentfield': 'field_mapper_details',
-		'parenttype': 'DocType Mapper',
 		'to_field': 'adj_rate'
 	},
+
+	# Field Mapper Detail
 	{
-		'checking_operator': None,
-		'creation': '2010-08-08 17:09:36',
-		'docstatus': 0,
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'item_tax_rate',
 		'idx': 34,
-		'map': 'Yes',
 		'match_id': 1,
-		'modified': '2011-05-20 15:54:28',
-		'modified_by': 'Administrator',
-		'name': 'FMD/00451',
-		'owner': 'Administrator',
-		'parent': 'Sales Order-Receivable Voucher',
-		'parentfield': 'field_mapper_details',
-		'parenttype': 'DocType Mapper',
 		'to_field': 'item_tax_rate'
 	},
+
+	# Field Mapper Detail
 	{
-		'checking_operator': None,
-		'creation': '2010-08-08 17:09:36',
-		'docstatus': 0,
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'charge_type',
 		'idx': 35,
-		'map': 'Yes',
 		'match_id': 2,
-		'modified': '2011-05-20 15:54:28',
-		'modified_by': 'Administrator',
-		'name': 'FMD/00452',
-		'owner': 'Administrator',
-		'parent': 'Sales Order-Receivable Voucher',
-		'parentfield': 'field_mapper_details',
-		'parenttype': 'DocType Mapper',
 		'to_field': 'charge_type'
 	},
+
+	# Field Mapper Detail
 	{
-		'checking_operator': None,
-		'creation': '2010-08-08 17:09:36',
-		'docstatus': 0,
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'row_id',
 		'idx': 36,
-		'map': 'Yes',
 		'match_id': 2,
-		'modified': '2011-05-20 15:54:28',
-		'modified_by': 'Administrator',
-		'name': 'FMD/00453',
-		'owner': 'Administrator',
-		'parent': 'Sales Order-Receivable Voucher',
-		'parentfield': 'field_mapper_details',
-		'parenttype': 'DocType Mapper',
 		'to_field': 'row_id'
 	},
+
+	# Field Mapper Detail
 	{
-		'checking_operator': None,
-		'creation': '2010-08-08 17:09:36',
-		'docstatus': 0,
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'description',
 		'idx': 37,
-		'map': 'Yes',
 		'match_id': 2,
-		'modified': '2011-05-20 15:54:28',
-		'modified_by': 'Administrator',
-		'name': 'FMD/00454',
-		'owner': 'Administrator',
-		'parent': 'Sales Order-Receivable Voucher',
-		'parentfield': 'field_mapper_details',
-		'parenttype': 'DocType Mapper',
 		'to_field': 'description'
 	},
+
+	# Field Mapper Detail
 	{
-		'checking_operator': None,
-		'creation': '2010-08-08 17:09:36',
-		'docstatus': 0,
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'account_head',
 		'idx': 38,
-		'map': 'Yes',
 		'match_id': 2,
-		'modified': '2011-05-20 15:54:28',
-		'modified_by': 'Administrator',
-		'name': 'FMD/00455',
-		'owner': 'Administrator',
-		'parent': 'Sales Order-Receivable Voucher',
-		'parentfield': 'field_mapper_details',
-		'parenttype': 'DocType Mapper',
 		'to_field': 'account_head'
 	},
+
+	# Field Mapper Detail
 	{
-		'checking_operator': None,
-		'creation': '2010-08-08 17:09:36',
-		'docstatus': 0,
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'total_amount',
 		'idx': 39,
-		'map': 'Yes',
 		'match_id': 2,
-		'modified': '2011-05-20 15:54:28',
-		'modified_by': 'Administrator',
-		'name': 'FMD/00456',
-		'owner': 'Administrator',
-		'parent': 'Sales Order-Receivable Voucher',
-		'parentfield': 'field_mapper_details',
-		'parenttype': 'DocType Mapper',
 		'to_field': 'total_amount'
 	},
+
+	# Field Mapper Detail
 	{
-		'checking_operator': None,
-		'creation': '2010-08-08 17:09:36',
-		'docstatus': 0,
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'territory',
 		'idx': 39,
-		'map': 'Yes',
 		'match_id': 0,
-		'modified': '2011-05-20 15:54:28',
-		'modified_by': 'Administrator',
-		'name': 'FMD/00463',
-		'owner': 'Administrator',
-		'parent': 'Sales Order-Receivable Voucher',
-		'parentfield': 'field_mapper_details',
-		'parenttype': 'DocType Mapper',
 		'to_field': 'territory'
 	},
+
+	# Field Mapper Detail
 	{
-		'checking_operator': None,
-		'creation': '2010-08-08 17:09:36',
-		'docstatus': 0,
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'total_tax_amount',
 		'idx': 40,
-		'map': 'Yes',
 		'match_id': 2,
-		'modified': '2011-05-20 15:54:28',
-		'modified_by': 'Administrator',
-		'name': 'FMD/00457',
-		'owner': 'Administrator',
-		'parent': 'Sales Order-Receivable Voucher',
-		'parentfield': 'field_mapper_details',
-		'parenttype': 'DocType Mapper',
 		'to_field': 'total_tax_amount'
 	},
+
+	# Field Mapper Detail
 	{
-		'checking_operator': None,
-		'creation': '2010-08-08 17:09:36',
-		'docstatus': 0,
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'item_wise_tax_detail',
 		'idx': 41,
-		'map': 'Yes',
 		'match_id': 2,
-		'modified': '2011-05-20 15:54:28',
-		'modified_by': 'Administrator',
-		'name': 'FMD/00458',
-		'owner': 'Administrator',
-		'parent': 'Sales Order-Receivable Voucher',
-		'parentfield': 'field_mapper_details',
-		'parenttype': 'DocType Mapper',
 		'to_field': 'item_wise_tax_detail'
 	},
+
+	# Field Mapper Detail
 	{
-		'checking_operator': None,
-		'creation': '2010-08-08 17:09:36',
-		'docstatus': 0,
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'cost_center_other_charges',
 		'idx': 42,
-		'map': 'Yes',
 		'match_id': 2,
-		'modified': '2011-05-20 15:54:28',
-		'modified_by': 'Administrator',
-		'name': 'FMD/00459',
-		'owner': 'Administrator',
-		'parent': 'Sales Order-Receivable Voucher',
-		'parentfield': 'field_mapper_details',
-		'parenttype': 'DocType Mapper',
 		'to_field': 'cost_center_other_charges'
 	},
+
+	# Field Mapper Detail
 	{
-		'checking_operator': None,
-		'creation': '2010-08-08 17:09:36',
-		'docstatus': 0,
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'rate',
 		'idx': 43,
-		'map': 'Yes',
 		'match_id': 2,
-		'modified': '2011-05-20 15:54:28',
-		'modified_by': 'Administrator',
-		'name': 'FMD/00460',
-		'owner': 'Administrator',
-		'parent': 'Sales Order-Receivable Voucher',
-		'parentfield': 'field_mapper_details',
-		'parenttype': 'DocType Mapper',
 		'to_field': 'rate'
 	},
+
+	# Field Mapper Detail
 	{
-		'checking_operator': None,
-		'creation': '2010-08-08 17:09:36',
-		'docstatus': 0,
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'tax_amount',
 		'idx': 44,
-		'map': 'Yes',
 		'match_id': 2,
-		'modified': '2011-05-20 15:54:28',
-		'modified_by': 'Administrator',
-		'name': 'FMD/00461',
-		'owner': 'Administrator',
-		'parent': 'Sales Order-Receivable Voucher',
-		'parentfield': 'field_mapper_details',
-		'parenttype': 'DocType Mapper',
 		'to_field': 'tax_amount'
 	},
+
+	# Field Mapper Detail
 	{
-		'checking_operator': None,
-		'creation': '2010-08-08 17:09:36',
-		'docstatus': 0,
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'total',
 		'idx': 45,
-		'map': 'Yes',
 		'match_id': 2,
-		'modified': '2011-05-20 15:54:28',
-		'modified_by': 'Administrator',
-		'name': 'FMD/00462',
-		'owner': 'Administrator',
-		'parent': 'Sales Order-Receivable Voucher',
-		'parentfield': 'field_mapper_details',
-		'parenttype': 'DocType Mapper',
 		'to_field': 'total'
 	},
+
+	# Field Mapper Detail
 	{
-		'checking_operator': None,
-		'creation': '2010-08-08 17:09:36',
-		'docstatus': 0,
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'source',
 		'idx': 46,
-		'map': 'Yes',
 		'match_id': 0,
-		'modified': '2011-05-20 15:54:28',
-		'modified_by': 'Administrator',
-		'name': 'FMD/00464',
-		'owner': 'Administrator',
-		'parent': 'Sales Order-Receivable Voucher',
-		'parentfield': 'field_mapper_details',
-		'parenttype': 'DocType Mapper',
 		'to_field': 'source'
 	},
+
+	# Field Mapper Detail
 	{
-		'checking_operator': None,
-		'creation': '2010-08-08 17:09:36',
-		'docstatus': 0,
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'campaign',
 		'idx': 47,
-		'map': 'Yes',
 		'match_id': 0,
-		'modified': '2011-05-20 15:54:28',
-		'modified_by': 'Administrator',
-		'name': 'FMD/00465',
-		'owner': 'Administrator',
-		'parent': 'Sales Order-Receivable Voucher',
-		'parentfield': 'field_mapper_details',
-		'parenttype': 'DocType Mapper',
 		'to_field': 'campaign'
 	},
+
+	# Field Mapper Detail
 	{
-		'checking_operator': None,
-		'creation': '2010-08-08 17:09:36',
-		'docstatus': 0,
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'tc_name',
 		'idx': 48,
-		'map': 'Yes',
 		'match_id': 0,
-		'modified': '2011-05-20 15:54:28',
-		'modified_by': 'Administrator',
-		'name': 'FMD/00466',
-		'owner': 'Administrator',
-		'parent': 'Sales Order-Receivable Voucher',
-		'parentfield': 'field_mapper_details',
-		'parenttype': 'DocType Mapper',
 		'to_field': 'tc_name'
 	},
+
+	# Field Mapper Detail
 	{
-		'checking_operator': None,
-		'creation': '2010-08-08 17:09:36',
-		'docstatus': 0,
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'select_print_heading',
 		'idx': 49,
-		'map': 'Yes',
 		'match_id': 0,
-		'modified': '2011-05-20 15:54:28',
-		'modified_by': 'Administrator',
-		'name': 'FMD/00467',
-		'owner': 'Administrator',
-		'parent': 'Sales Order-Receivable Voucher',
-		'parentfield': 'field_mapper_details',
-		'parenttype': 'DocType Mapper',
 		'to_field': 'select_print_heading'
 	},
+
+	# Field Mapper Detail
 	{
-		'checking_operator': None,
-		'creation': '2010-08-08 17:09:36',
-		'docstatus': 0,
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'terms',
 		'idx': 50,
-		'map': 'Yes',
 		'match_id': 0,
-		'modified': '2011-05-20 15:54:28',
-		'modified_by': 'Administrator',
-		'name': 'FMD/00468',
-		'owner': 'Administrator',
-		'parent': 'Sales Order-Receivable Voucher',
-		'parentfield': 'field_mapper_details',
-		'parenttype': 'DocType Mapper',
 		'to_field': 'terms'
 	},
+
+	# Field Mapper Detail
 	{
-		'checking_operator': None,
-		'creation': '2010-08-08 17:09:36',
-		'docstatus': 0,
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'net_total',
 		'idx': 51,
-		'map': 'Yes',
 		'match_id': 0,
-		'modified': '2011-05-20 15:54:28',
-		'modified_by': 'Administrator',
-		'name': 'FMD/00469',
-		'owner': 'Administrator',
-		'parent': 'Sales Order-Receivable Voucher',
-		'parentfield': 'field_mapper_details',
-		'parenttype': 'DocType Mapper',
 		'to_field': 'net_total'
 	},
+
+	# Field Mapper Detail
 	{
-		'checking_operator': None,
-		'creation': '2010-08-08 17:09:36',
-		'docstatus': 0,
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'grand_total',
 		'idx': 52,
-		'map': 'Yes',
 		'match_id': 0,
-		'modified': '2011-05-20 15:54:28',
-		'modified_by': 'Administrator',
-		'name': 'FMD/00470',
-		'owner': 'Administrator',
-		'parent': 'Sales Order-Receivable Voucher',
-		'parentfield': 'field_mapper_details',
-		'parenttype': 'DocType Mapper',
 		'to_field': 'grand_total'
 	},
+
+	# Field Mapper Detail
 	{
-		'checking_operator': None,
-		'creation': '2010-08-08 17:09:36',
-		'docstatus': 0,
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'other_charges_total',
 		'idx': 53,
-		'map': 'Yes',
 		'match_id': 0,
-		'modified': '2011-05-20 15:54:28',
-		'modified_by': 'Administrator',
-		'name': 'FMD/00471',
-		'owner': 'Administrator',
-		'parent': 'Sales Order-Receivable Voucher',
-		'parentfield': 'field_mapper_details',
-		'parenttype': 'DocType Mapper',
 		'to_field': 'other_charges_total'
 	},
+
+	# Field Mapper Detail
 	{
-		'checking_operator': None,
-		'creation': '2010-08-08 17:09:36',
-		'docstatus': 0,
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'rounded_total',
 		'idx': 54,
-		'map': 'Yes',
 		'match_id': 0,
-		'modified': '2011-05-20 15:54:28',
-		'modified_by': 'Administrator',
-		'name': 'FMD/00472',
-		'owner': 'Administrator',
-		'parent': 'Sales Order-Receivable Voucher',
-		'parentfield': 'field_mapper_details',
-		'parenttype': 'DocType Mapper',
 		'to_field': 'rounded_total'
 	},
+
+	# Field Mapper Detail
 	{
-		'checking_operator': None,
-		'creation': '2010-08-08 17:09:36',
-		'docstatus': 0,
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'in_words',
 		'idx': 55,
-		'map': 'Yes',
 		'match_id': 0,
-		'modified': '2011-05-20 15:54:28',
-		'modified_by': 'Administrator',
-		'name': 'FMD/00473',
-		'owner': 'Administrator',
-		'parent': 'Sales Order-Receivable Voucher',
-		'parentfield': 'field_mapper_details',
-		'parenttype': 'DocType Mapper',
 		'to_field': 'in_words'
 	},
+
+	# Field Mapper Detail
 	{
-		'checking_operator': None,
-		'creation': '2010-08-08 17:09:36',
-		'docstatus': 0,
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'grand_total_export',
 		'idx': 56,
-		'map': 'Yes',
 		'match_id': 0,
-		'modified': '2011-05-20 15:54:28',
-		'modified_by': 'Administrator',
-		'name': 'FMD/00474',
-		'owner': 'Administrator',
-		'parent': 'Sales Order-Receivable Voucher',
-		'parentfield': 'field_mapper_details',
-		'parenttype': 'DocType Mapper',
 		'to_field': 'grand_total_export'
 	},
+
+	# Field Mapper Detail
 	{
-		'checking_operator': None,
-		'creation': '2011-03-15 14:26:12',
-		'docstatus': 0,
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'contact_no',
-		'idx': 57,
-		'map': 'Yes',
-		'match_id': 3,
-		'modified': '2011-05-20 15:54:28',
-		'modified_by': 'Administrator',
-		'name': '000001852',
-		'owner': 'Administrator',
-		'parent': 'Sales Order-Receivable Voucher',
-		'parentfield': 'field_mapper_details',
-		'parenttype': 'DocType Mapper',
-		'to_field': 'contact_no'
-	},
-	{
-		'checking_operator': None,
-		'creation': '2010-08-08 17:09:36',
-		'docstatus': 0,
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'rounded_total_export',
 		'idx': 57,
-		'map': 'Yes',
 		'match_id': 0,
-		'modified': '2011-05-20 15:54:28',
-		'modified_by': 'Administrator',
-		'name': 'FMD/00475',
-		'owner': 'Administrator',
-		'parent': 'Sales Order-Receivable Voucher',
-		'parentfield': 'field_mapper_details',
-		'parenttype': 'DocType Mapper',
 		'to_field': 'rounded_total_export'
 	},
+
+	# Field Mapper Detail
 	{
-		'checking_operator': None,
-		'creation': '2010-08-08 17:09:36',
-		'docstatus': 0,
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'in_words_export',
 		'idx': 58,
-		'map': 'Yes',
 		'match_id': 0,
-		'modified': '2011-05-20 15:54:28',
-		'modified_by': 'Administrator',
-		'name': 'FMD/00476',
-		'owner': 'Administrator',
-		'parent': 'Sales Order-Receivable Voucher',
-		'parentfield': 'field_mapper_details',
-		'parenttype': 'DocType Mapper',
 		'to_field': 'in_words_export'
 	},
+
+	# Field Mapper Detail
 	{
 		'checking_operator': '=',
-		'creation': '2010-09-01 15:48:10',
-		'docstatus': 0,
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'project_name',
 		'idx': 59,
-		'map': 'Yes',
 		'match_id': 0,
-		'modified': '2011-05-20 15:54:28',
-		'modified_by': 'Administrator',
-		'name': 'FMD/00591',
-		'owner': 'harshada@webnotestech.com',
-		'parent': 'Sales Order-Receivable Voucher',
-		'parentfield': 'field_mapper_details',
-		'parenttype': 'DocType Mapper',
 		'to_field': 'project_name'
 	},
+
+	# Field Mapper Detail
 	{
-		'checking_operator': None,
-		'creation': '2011-02-15 18:38:11',
-		'docstatus': 0,
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'sales_partner',
 		'idx': 60,
-		'map': 'Yes',
 		'match_id': 0,
-		'modified': '2011-05-20 15:54:28',
-		'modified_by': 'Administrator',
-		'name': 'FMD/00663',
-		'owner': 'Administrator',
-		'parent': 'Sales Order-Receivable Voucher',
-		'parentfield': 'field_mapper_details',
-		'parenttype': 'DocType Mapper',
 		'to_field': 'sales_partner'
 	},
+
+	# Field Mapper Detail
 	{
-		'checking_operator': None,
-		'creation': '2011-02-15 18:38:11',
-		'docstatus': 0,
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'sales_designation',
 		'idx': 61,
-		'map': 'Yes',
 		'match_id': 3,
-		'modified': '2011-05-20 15:54:28',
-		'modified_by': 'Administrator',
-		'name': 'FMD/00667',
-		'owner': 'Administrator',
-		'parent': 'Sales Order-Receivable Voucher',
-		'parentfield': 'field_mapper_details',
-		'parenttype': 'DocType Mapper',
 		'to_field': 'sales_designation'
 	},
+
+	# Field Mapper Detail
 	{
-		'checking_operator': None,
-		'creation': '2011-02-15 18:38:11',
-		'docstatus': 0,
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'commission_rate',
 		'idx': 62,
-		'map': 'Yes',
 		'match_id': 0,
-		'modified': '2011-05-20 15:54:28',
-		'modified_by': 'Administrator',
-		'name': 'FMD/00664',
-		'owner': 'Administrator',
-		'parent': 'Sales Order-Receivable Voucher',
-		'parentfield': 'field_mapper_details',
-		'parenttype': 'DocType Mapper',
 		'to_field': 'commission_rate'
 	},
+
+	# Field Mapper Detail
 	{
-		'checking_operator': None,
-		'creation': '2011-02-15 18:38:11',
-		'docstatus': 0,
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'total_commission',
 		'idx': 63,
-		'map': 'Yes',
 		'match_id': 0,
-		'modified': '2011-05-20 15:54:28',
-		'modified_by': 'Administrator',
-		'name': 'FMD/00665',
-		'owner': 'Administrator',
-		'parent': 'Sales Order-Receivable Voucher',
-		'parentfield': 'field_mapper_details',
-		'parenttype': 'DocType Mapper',
 		'to_field': 'total_commission'
 	},
+
+	# Field Mapper Detail
 	{
-		'checking_operator': None,
-		'creation': '2011-02-15 18:38:11',
-		'docstatus': 0,
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'allocated_percentage',
 		'idx': 64,
-		'map': 'Yes',
 		'match_id': 3,
-		'modified': '2011-05-20 15:54:28',
-		'modified_by': 'Administrator',
-		'name': 'FMD/00668',
-		'owner': 'Administrator',
-		'parent': 'Sales Order-Receivable Voucher',
-		'parentfield': 'field_mapper_details',
-		'parenttype': 'DocType Mapper',
 		'to_field': 'allocated_percentage'
 	},
+
+	# Field Mapper Detail
 	{
-		'checking_operator': None,
-		'creation': '2011-02-15 18:38:11',
-		'docstatus': 0,
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'sales_person',
 		'idx': 65,
-		'map': 'Yes',
 		'match_id': 3,
-		'modified': '2011-05-20 15:54:28',
-		'modified_by': 'Administrator',
-		'name': 'FMD/00666',
-		'owner': 'Administrator',
-		'parent': 'Sales Order-Receivable Voucher',
-		'parentfield': 'field_mapper_details',
-		'parenttype': 'DocType Mapper',
 		'to_field': 'sales_person'
 	},
+
+	# Field Mapper Detail
 	{
-		'checking_operator': None,
-		'creation': '2011-02-15 18:38:11',
-		'docstatus': 0,
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'allocated_amount',
 		'idx': 66,
-		'map': 'Yes',
 		'match_id': 3,
-		'modified': '2011-05-20 15:54:28',
-		'modified_by': 'Administrator',
-		'name': 'FMD/00669',
-		'owner': 'Administrator',
-		'parent': 'Sales Order-Receivable Voucher',
-		'parentfield': 'field_mapper_details',
-		'parenttype': 'DocType Mapper',
 		'to_field': 'allocated_amount'
 	},
+
+	# Field Mapper Detail
 	{
-		'checking_operator': None,
-		'creation': '2011-02-15 18:38:11',
-		'docstatus': 0,
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'incentives',
 		'idx': 67,
-		'map': 'Yes',
 		'match_id': 3,
-		'modified': '2011-05-20 15:54:28',
-		'modified_by': 'Administrator',
-		'name': 'FMD/00670',
-		'owner': 'Administrator',
-		'parent': 'Sales Order-Receivable Voucher',
-		'parentfield': 'field_mapper_details',
-		'parenttype': 'DocType Mapper',
 		'to_field': 'incentives'
 	},
+
+	# Field Mapper Detail
 	{
-		'checking_operator': None,
-		'creation': '2011-05-06 17:41:54',
-		'docstatus': 0,
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'reserved_warehouse',
 		'idx': 68,
-		'map': 'Yes',
 		'match_id': 1,
-		'modified': '2011-05-20 15:54:28',
-		'modified_by': 'Administrator',
-		'name': '000002943',
-		'owner': 'Administrator',
-		'parent': 'Sales Order-Receivable Voucher',
-		'parentfield': 'field_mapper_details',
-		'parenttype': 'DocType Mapper',
 		'to_field': 'warehouse'
 	},
+
+	# Table Mapper Detail
 	{
-		'creation': '2010-08-08 17:09:36',
-		'docstatus': 0,
 		'doctype': 'Table Mapper Detail',
-		'from_field': None,
 		'from_table': 'Sales Order',
 		'idx': 1,
 		'match_id': 0,
-		'modified': '2011-05-20 15:54:28',
-		'modified_by': 'Administrator',
-		'name': 'TMD/0000047',
-		'owner': 'Administrator',
-		'parent': 'Sales Order-Receivable Voucher',
-		'parentfield': 'table_mapper_details',
-		'parenttype': 'DocType Mapper',
-		'reference_doctype_key': None,
-		'reference_key': None,
-		'to_field': None,
 		'to_table': 'Receivable Voucher',
 		'validation_logic': 'docstatus=1'
 	},
+
+	# Table Mapper Detail
 	{
-		'creation': '2010-08-08 17:09:36',
-		'docstatus': 0,
 		'doctype': 'Table Mapper Detail',
 		'from_field': 'sales_order_detail',
 		'from_table': 'Sales Order Detail',
 		'idx': 2,
 		'match_id': 1,
-		'modified': '2011-05-20 15:54:28',
-		'modified_by': 'Administrator',
-		'name': 'TMD/0000048',
-		'owner': 'Administrator',
-		'parent': 'Sales Order-Receivable Voucher',
-		'parentfield': 'table_mapper_details',
-		'parenttype': 'DocType Mapper',
-		'reference_doctype_key': None,
-		'reference_key': None,
 		'to_field': 'entries',
 		'to_table': 'RV Detail',
 		'validation_logic': '(qty > ifnull(billed_qty, 0) or amount > ifnull(billed_amt, 0)) and docstatus = 1'
 	},
+
+	# Table Mapper Detail
 	{
-		'creation': '2010-08-08 17:09:36',
-		'docstatus': 0,
 		'doctype': 'Table Mapper Detail',
 		'from_field': 'other_charges',
 		'from_table': 'RV Tax Detail',
 		'idx': 3,
 		'match_id': 2,
-		'modified': '2011-05-20 15:54:28',
-		'modified_by': 'Administrator',
-		'name': 'TMD/0000049',
-		'owner': 'Administrator',
-		'parent': 'Sales Order-Receivable Voucher',
-		'parentfield': 'table_mapper_details',
-		'parenttype': 'DocType Mapper',
-		'reference_doctype_key': None,
-		'reference_key': None,
 		'to_field': 'other_charges',
 		'to_table': 'RV Tax Detail',
 		'validation_logic': 'name is not null'
 	},
+
+	# Table Mapper Detail
 	{
-		'creation': '2011-02-15 18:38:11',
-		'docstatus': 0,
 		'doctype': 'Table Mapper Detail',
 		'from_field': 'sales_team',
 		'from_table': 'Sales Team',
 		'idx': 4,
 		'match_id': 3,
-		'modified': '2011-05-20 15:54:28',
-		'modified_by': 'Administrator',
-		'name': 'TMD/0000070',
-		'owner': 'Administrator',
-		'parent': 'Sales Order-Receivable Voucher',
-		'parentfield': 'table_mapper_details',
-		'parenttype': 'DocType Mapper',
-		'reference_doctype_key': None,
-		'reference_key': None,
 		'to_field': 'sales_team',
 		'to_table': 'Sales Team',
 		'validation_logic': 'name is not null'

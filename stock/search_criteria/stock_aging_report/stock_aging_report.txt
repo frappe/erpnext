@@ -1,37 +1,34 @@
+# Search Criteria, stock_aging_report
 [
+
+	# These values are common in all dictionaries
 	{
-		'add_col': '',
-		'add_cond': "`tabSerial No`.status = 'In Store'",
-		'add_tab': None,
-		'columns': 'Serial No\x01ID,Serial No\x01Item Code,Serial No\x01Description,Serial No\x01Item Group,Serial No\x01Purchase Date',
-		'creation': '2010-09-01 15:47:57',
-		'criteria_name': 'Stock Aging Report',
-		'custom_query': '',
-		'description': None,
-		'dis_filters': None,
-		'disabled': None,
-		'doc_type': 'Serial No',
+		'creation': '2010-09-01 15:48:09',
 		'docstatus': 0,
-		'doctype': 'Search Criteria',
-		'filters': "{'Serial No\x01Saved':1,'Serial No\x01Submitted':1,'Serial No\x01Status':'In Store','Serial No\x01Maintenance Status':''}",
-		'graph_series': None,
-		'graph_values': None,
-		'group_by': None,
-		'idx': None,
 		'modified': '2010-08-16 13:42:24',
 		'modified_by': 'Administrator',
-		'module': 'Material Management',
-		'name': 'stock_aging_report',
-		'owner': 'ashwini@webnotestech.com',
+		'owner': 'ashwini@webnotestech.com'
+	},
+
+	# These values are common for all Search Criteria
+	{
+		'add_cond': "`tabSerial No`.status = 'In Store'",
+		'columns': 'Serial No\x01ID,Serial No\x01Item Code,Serial No\x01Description,Serial No\x01Item Group,Serial No\x01Purchase Date',
+		'criteria_name': 'Stock Aging Report',
+		'doc_type': 'Serial No',
+		'doctype': 'Search Criteria',
+		'filters': "{'Serial No\x01Saved':1,'Serial No\x01Submitted':1,'Serial No\x01Status':'In Store','Serial No\x01Maintenance Status':''}",
+		'module': 'Stock',
+		'name': '__common__',
 		'page_len': 1000,
-		'parent': None,
-		'parent_doc_type': None,
-		'parentfield': None,
-		'parenttype': None,
-		'report_script': None,
-		'server_script': None,
 		'sort_by': '`tabSerial No`.`name`',
 		'sort_order': 'DESC',
 		'standard': 'Yes'
+	},
+
+	# Search Criteria, stock_aging_report
+	{
+		'doctype': 'Search Criteria',
+		'name': 'stock_aging_report'
 	}
 ]

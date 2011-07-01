@@ -1,37 +1,35 @@
+# Search Criteria, amc_summary
 [
+
+	# These values are common in all dictionaries
 	{
-		'add_col': None,
-		'add_cond': "`tabSerial No`.`territory` is not null\n`tabSerial No`.`territory` != ''\n`tabSerial No`.`status` not in ('In Store', 'Scrapped')",
-		'add_tab': None,
-		'columns': 'Serial No\x01Territory',
 		'creation': '2010-08-08 17:09:32',
-		'criteria_name': 'AMC Summary',
-		'custom_query': '',
-		'description': None,
-		'dis_filters': None,
-		'disabled': None,
-		'doc_type': 'Serial No',
 		'docstatus': 0,
-		'doctype': 'Search Criteria',
-		'filters': "{'Serial No\x01Saved':1,'Serial No\x01Status':''}",
-		'graph_series': None,
-		'graph_values': None,
-		'group_by': '`tabSerial No`.`cost_center`',
-		'idx': None,
 		'modified': '2010-07-15 16:00:11',
 		'modified_by': 'Administrator',
-		'module': 'Maintenance',
-		'name': 'amc_summary',
-		'owner': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all Search Criteria
+	{
+		'add_cond': "`tabSerial No`.`territory` is not null\n`tabSerial No`.`territory` != ''\n`tabSerial No`.`status` not in ('In Store', 'Scrapped')",
+		'columns': 'Serial No\x01Territory',
+		'criteria_name': 'AMC Summary',
+		'doc_type': 'Serial No',
+		'doctype': 'Search Criteria',
+		'filters': "{'Serial No\x01Saved':1,'Serial No\x01Status':''}",
+		'group_by': '`tabSerial No`.`cost_center`',
+		'module': 'Support',
+		'name': '__common__',
 		'page_len': 50,
-		'parent': None,
-		'parent_doc_type': None,
-		'parentfield': None,
-		'parenttype': None,
-		'report_script': None,
-		'server_script': None,
 		'sort_by': '`tabSerial No`.`cost_center`',
 		'sort_order': 'ASC',
 		'standard': 'Yes'
+	},
+
+	# Search Criteria, amc_summary
+	{
+		'doctype': 'Search Criteria',
+		'name': 'amc_summary'
 	}
 ]

@@ -1,1 +1,26 @@
-[{'modified_by': 'Administrator', 'name': 'Sales User', 'parent': None, 'creation': '2010-04-08 12:07:44', 'modified': '2010-04-08 12:07:44', 'module': 'Roles', 'doctype': 'Role', 'idx': None, 'parenttype': None, 'role_name': 'Sales User', 'owner': 'Administrator', 'docstatus': 0, 'parentfield': None}]
+# Role, Sales User
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-08-08 17:08:51',
+		'docstatus': 0,
+		'modified': '2010-04-08 12:07:44',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all Role
+	{
+		'doctype': 'Role',
+		'module': 'Selling',
+		'name': '__common__',
+		'role_name': 'Sales User'
+	},
+
+	# Role, Sales User
+	{
+		'doctype': 'Role',
+		'name': 'Sales User'
+	}
+]

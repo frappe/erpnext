@@ -1,37 +1,31 @@
+# Search Criteria, debtors_ledger
 [
+
+	# These values are common in all dictionaries
 	{
-		'add_col': None,
-		'add_cond': None,
-		'add_tab': None,
-		'columns': '',
-		'creation': '2010-12-14 10:33:09',
-		'criteria_name': "Debtor's Ledger",
-		'custom_query': None,
-		'description': None,
-		'dis_filters': None,
-		'disabled': None,
-		'doc_type': 'GL Entry',
+		'creation': '2010-12-14 10:23:28',
 		'docstatus': 0,
-		'doctype': 'Search Criteria',
-		'filters': "{'GL Entry\x01Voucher Type':'','GL Entry\x01Is Cancelled':'No','GL Entry\x01Is Opening':'','GL Entry\x01Fiscal Year':''}",
-		'graph_series': None,
-		'graph_values': None,
-		'group_by': None,
-		'idx': None,
 		'modified': '2010-11-22 17:02:05',
 		'modified_by': 'Administrator',
+		'owner': 'nabin@webnotestech.com'
+	},
+
+	# These values are common for all Search Criteria
+	{
+		'criteria_name': "Debtor's Ledger",
+		'doc_type': 'GL Entry',
+		'doctype': 'Search Criteria',
+		'filters': "{'GL Entry\x01Voucher Type':'','GL Entry\x01Is Cancelled':'No','GL Entry\x01Is Opening':'','GL Entry\x01Fiscal Year':''}",
 		'module': 'Accounts',
-		'name': 'debtors_ledger',
-		'owner': 'nabin@webnotestech.com',
+		'name': '__common__',
 		'page_len': 50,
-		'parent': None,
-		'parent_doc_type': None,
-		'parentfield': None,
-		'parenttype': None,
-		'report_script': None,
-		'server_script': None,
-		'sort_by': '',
 		'sort_order': 'DESC',
 		'standard': 'Yes'
+	},
+
+	# Search Criteria, debtors_ledger
+	{
+		'doctype': 'Search Criteria',
+		'name': 'debtors_ledger'
 	}
 ]

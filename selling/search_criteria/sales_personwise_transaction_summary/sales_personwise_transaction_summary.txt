@@ -1,37 +1,33 @@
+# Search Criteria, sales_personwise_transaction_summary
 [
+
+	# These values are common in all dictionaries
 	{
-		'add_col': None,
-		'add_cond': None,
-		'add_tab': None,
-		'columns': 'Sales Person\x01ID',
-		'creation': '2011-06-07 16:58:27',
-		'criteria_name': 'Sales Personwise Transaction Summary',
-		'custom_query': '',
-		'description': None,
-		'dis_filters': None,
-		'disabled': None,
-		'doc_type': 'Sales Person',
+		'creation': '2011-06-08 11:00:34',
 		'docstatus': 0,
-		'doctype': 'Search Criteria',
-		'filters': "{'Sales Person\x01Saved':1,'Sales Person\x01Submitted':1,'Sales Person\x01Country':'','Sales Person\x01State':''}",
-		'graph_series': None,
-		'graph_values': None,
-		'group_by': None,
-		'idx': None,
 		'modified': '2011-02-24 17:35:32',
 		'modified_by': 'Administrator',
-		'module': 'CRM',
-		'name': 'sales_personwise_transaction_summary',
-		'owner': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all Search Criteria
+	{
+		'columns': 'Sales Person\x01ID',
+		'criteria_name': 'Sales Personwise Transaction Summary',
+		'doc_type': 'Sales Person',
+		'doctype': 'Search Criteria',
+		'filters': "{'Sales Person\x01Saved':1,'Sales Person\x01Submitted':1,'Sales Person\x01Country':'','Sales Person\x01State':''}",
+		'module': 'Selling',
+		'name': '__common__',
 		'page_len': 50,
-		'parent': None,
-		'parent_doc_type': None,
-		'parentfield': None,
-		'parenttype': None,
-		'report_script': None,
-		'server_script': None,
 		'sort_by': '`tabSales Person`.`name`',
 		'sort_order': 'DESC',
 		'standard': 'Yes'
+	},
+
+	# Search Criteria, sales_personwise_transaction_summary
+	{
+		'doctype': 'Search Criteria',
+		'name': 'sales_personwise_transaction_summary'
 	}
 ]

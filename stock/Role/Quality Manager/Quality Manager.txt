@@ -1,1 +1,26 @@
-[{'modified_by': 'Administrator', 'name': 'Quality Manager', 'parent': None, 'creation': '2010-05-04 13:12:27', 'modified': '2010-05-04 13:12:27', 'module': 'Roles', 'doctype': 'Role', 'idx': None, 'parenttype': None, 'role_name': 'Quality Manager', 'owner': 'Administrator', 'docstatus': 0, 'parentfield': None}]
+# Role, Quality Manager
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-08-08 17:08:51',
+		'docstatus': 0,
+		'modified': '2010-05-04 13:12:27',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all Role
+	{
+		'doctype': 'Role',
+		'module': 'Stock',
+		'name': '__common__',
+		'role_name': 'Quality Manager'
+	},
+
+	# Role, Quality Manager
+	{
+		'doctype': 'Role',
+		'name': 'Quality Manager'
+	}
+]

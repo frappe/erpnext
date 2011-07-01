@@ -1,37 +1,37 @@
+# Search Criteria, consumption_against_production
 [
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-08-08 17:09:32',
+		'docstatus': 0,
+		'modified': '2010-06-11 16:32:48',
+		'modified_by': 'Administrator',
+		'owner': 'jai@webnotestech.com'
+	},
+
+	# These values are common for all Search Criteria
 	{
 		'add_col': '`tabProduction Order`.consider_sa_items',
 		'add_cond': '`tabProduction Order`.name = `tabStock Entry`.production_order',
 		'add_tab': '`tabProduction Order`',
 		'columns': 'Stock Entry\x01ID,Stock Entry\x01Production Order,Stock Entry\x01Process,Stock Entry\x01Posting Date,Stock Entry\x01Company,Stock Entry Detail\x01Source Warehouse,Stock Entry Detail\x01Target Warehouse,Stock Entry Detail\x01FG Item,Stock Entry Detail\x01Item Code,Stock Entry Detail\x01Description,Stock Entry Detail\x01Reqd Qty,Stock Entry Detail\x01Transfer Quantity',
-		'creation': '2010-08-08 17:09:32',
 		'criteria_name': 'Consumption Against Production',
-		'custom_query': '',
-		'description': None,
-		'dis_filters': None,
-		'disabled': None,
 		'doc_type': 'Stock Entry Detail',
-		'docstatus': 0,
 		'doctype': 'Search Criteria',
 		'filters': "{'Stock Entry\x01Submitted':1,'Stock Entry\x01Purpose':'Production Order','Stock Entry\x01Process':''}",
-		'graph_series': None,
-		'graph_values': None,
-		'group_by': None,
-		'idx': None,
-		'modified': '2010-06-11 16:32:48',
-		'modified_by': 'Administrator',
 		'module': 'Production',
-		'name': 'consumption_against_production',
-		'owner': 'jai@webnotestech.com',
+		'name': '__common__',
 		'page_len': 50,
-		'parent': None,
 		'parent_doc_type': 'Stock Entry',
-		'parentfield': None,
-		'parenttype': None,
-		'report_script': '',
-		'server_script': None,
 		'sort_by': '`tabStock Entry`.`name`',
 		'sort_order': 'DESC',
 		'standard': 'Yes'
+	},
+
+	# Search Criteria, consumption_against_production
+	{
+		'doctype': 'Search Criteria',
+		'name': 'consumption_against_production'
 	}
 ]

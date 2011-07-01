@@ -1,1 +1,125 @@
-[{'modified_by': 'jai@webnotestech.com', 'name': 'Production Forecast-Production Planning Tool', 'parent': None, 'to_doctype': 'Production Planning Tool', 'creation': '2010-02-12 12:27:36', 'modified': '2010-02-12 12:41:03', 'module': 'Mapper', 'doctype': 'DocType Mapper', 'idx': None, 'parenttype': None, 'ref_doc_submitted': None, 'owner': 'jai@webnotestech.com', 'docstatus': 0, 'from_doctype': 'Production Forecast', 'parentfield': None}, {'map': 'Yes', 'modified_by': 'jai@webnotestech.com', 'name': 'FMD/00686', 'parent': 'Production Forecast-Production Planning Tool', 'to_field': 'item_code', 'creation': '2010-02-12 12:27:36', 'modified': '2010-02-12 12:41:03', 'doctype': 'Field Mapper Detail', 'match_id': 1, 'idx': 1, 'parenttype': 'DocType Mapper', 'checking_operator': None, 'check_reference_value': None, 'owner': 'jai@webnotestech.com', 'docstatus': 0, 'from_field': 'item_code', 'parentfield': 'field_mapper_details'}, {'map': 'Yes', 'modified_by': 'jai@webnotestech.com', 'name': 'FMD/00687', 'parent': 'Production Forecast-Production Planning Tool', 'to_field': 'description', 'creation': '2010-02-12 12:27:36', 'modified': '2010-02-12 12:41:03', 'doctype': 'Field Mapper Detail', 'match_id': 1, 'idx': 2, 'parenttype': 'DocType Mapper', 'checking_operator': None, 'check_reference_value': None, 'owner': 'jai@webnotestech.com', 'docstatus': 0, 'from_field': 'description', 'parentfield': 'field_mapper_details'}, {'map': 'Yes', 'modified_by': 'jai@webnotestech.com', 'name': 'FMD/00688', 'parent': 'Production Forecast-Production Planning Tool', 'to_field': 'stock_uom', 'creation': '2010-02-12 12:27:36', 'modified': '2010-02-12 12:41:03', 'doctype': 'Field Mapper Detail', 'match_id': 1, 'idx': 3, 'parenttype': 'DocType Mapper', 'checking_operator': None, 'check_reference_value': None, 'owner': 'jai@webnotestech.com', 'docstatus': 0, 'from_field': 'stock_uom', 'parentfield': 'field_mapper_details'}, {'map': 'Yes', 'modified_by': 'jai@webnotestech.com', 'name': 'FMD/00689', 'parent': 'Production Forecast-Production Planning Tool', 'to_field': 'prevdoc_reqd_qty', 'creation': '2010-02-12 12:27:36', 'modified': '2010-02-12 12:41:03', 'doctype': 'Field Mapper Detail', 'match_id': 1, 'idx': 4, 'parenttype': 'DocType Mapper', 'checking_operator': None, 'check_reference_value': None, 'owner': 'jai@webnotestech.com', 'docstatus': 0, 'from_field': 'eval:flt(obj.qty)-flt(obj.planned_qty)', 'parentfield': 'field_mapper_details'}, {'map': 'Yes', 'modified_by': 'jai@webnotestech.com', 'name': 'FMD/00690', 'parent': 'Production Forecast-Production Planning Tool', 'to_field': 'source_doctype', 'creation': '2010-02-12 12:27:36', 'modified': '2010-02-12 12:41:03', 'doctype': 'Field Mapper Detail', 'match_id': 1, 'idx': 5, 'parenttype': 'DocType Mapper', 'checking_operator': None, 'check_reference_value': None, 'owner': 'jai@webnotestech.com', 'docstatus': 0, 'from_field': 'parenttype', 'parentfield': 'field_mapper_details'}, {'map': 'Yes', 'modified_by': 'jai@webnotestech.com', 'name': 'FMD/00691', 'parent': 'Production Forecast-Production Planning Tool', 'to_field': 'source_docname', 'creation': '2010-02-12 12:27:36', 'modified': '2010-02-12 12:41:03', 'doctype': 'Field Mapper Detail', 'match_id': 1, 'idx': 6, 'parenttype': 'DocType Mapper', 'checking_operator': None, 'check_reference_value': None, 'owner': 'jai@webnotestech.com', 'docstatus': 0, 'from_field': 'parent', 'parentfield': 'field_mapper_details'}, {'map': 'Yes', 'modified_by': 'jai@webnotestech.com', 'name': 'FMD/00692', 'parent': 'Production Forecast-Production Planning Tool', 'to_field': 'confirmation_date', 'creation': '2010-02-12 12:27:36', 'modified': '2010-02-12 12:41:03', 'doctype': 'Field Mapper Detail', 'match_id': 1, 'idx': 7, 'parenttype': 'DocType Mapper', 'checking_operator': None, 'check_reference_value': None, 'owner': 'jai@webnotestech.com', 'docstatus': 0, 'from_field': 'end_date', 'parentfield': 'field_mapper_details'}, {'reference_key': '', 'modified_by': 'jai@webnotestech.com', 'name': 'TMD/0000066', 'parent': 'Production Forecast-Production Planning Tool', 'is_reference_table': None, 'to_field': None, 'creation': '2010-02-12 12:27:36', 'reference_doctype_key': '', 'modified': '2010-02-12 12:41:03', 'doctype': 'Table Mapper Detail', 'match_id': 0, 'idx': 1, 'parenttype': 'DocType Mapper', 'from_table': 'Production Forecast', 'owner': 'jai@webnotestech.com', 'docstatus': 0, 'to_table': 'Production Planning Tool', 'from_field': None, 'validation_logic': 'docstatus =1', 'parentfield': 'table_mapper_details'}, {'reference_key': '', 'modified_by': 'jai@webnotestech.com', 'name': 'TMD/0000067', 'parent': 'Production Forecast-Production Planning Tool', 'is_reference_table': None, 'to_field': 'pp_details', 'creation': '2010-02-12 12:27:36', 'reference_doctype_key': '', 'modified': '2010-02-12 12:41:03', 'doctype': 'Table Mapper Detail', 'match_id': 1, 'idx': 2, 'parenttype': 'DocType Mapper', 'from_table': 'PF Detail', 'owner': 'jai@webnotestech.com', 'docstatus': 0, 'to_table': 'PP Detail', 'from_field': 'pf_details', 'validation_logic': 'docstatus =1 and qty > planned_qty ', 'parentfield': 'table_mapper_details'}]
+# DocType Mapper, Production Forecast-Production Planning Tool
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-08-08 17:09:35',
+		'docstatus': 0,
+		'modified': '2010-02-12 12:41:03',
+		'modified_by': 'Administrator',
+		'owner': 'jai@webnotestech.com'
+	},
+
+	# These values are common for all Table Mapper Detail
+	{
+		'doctype': 'Table Mapper Detail',
+		'name': '__common__',
+		'parent': 'Production Forecast-Production Planning Tool',
+		'parentfield': 'table_mapper_details',
+		'parenttype': 'DocType Mapper'
+	},
+
+	# These values are common for all Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'map': 'Yes',
+		'match_id': 1,
+		'name': '__common__',
+		'parent': 'Production Forecast-Production Planning Tool',
+		'parentfield': 'field_mapper_details',
+		'parenttype': 'DocType Mapper'
+	},
+
+	# These values are common for all DocType Mapper
+	{
+		'doctype': 'DocType Mapper',
+		'from_doctype': 'Production Forecast',
+		'module': 'Production',
+		'name': '__common__',
+		'to_doctype': 'Production Planning Tool'
+	},
+
+	# DocType Mapper, Production Forecast-Production Planning Tool
+	{
+		'doctype': 'DocType Mapper',
+		'name': 'Production Forecast-Production Planning Tool'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'item_code',
+		'idx': 1,
+		'to_field': 'item_code'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'description',
+		'idx': 2,
+		'to_field': 'description'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'stock_uom',
+		'idx': 3,
+		'to_field': 'stock_uom'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'eval:flt(obj.qty)-flt(obj.planned_qty)',
+		'idx': 4,
+		'to_field': 'prevdoc_reqd_qty'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'parenttype',
+		'idx': 5,
+		'to_field': 'source_doctype'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'parent',
+		'idx': 6,
+		'to_field': 'source_docname'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'end_date',
+		'idx': 7,
+		'to_field': 'confirmation_date'
+	},
+
+	# Table Mapper Detail
+	{
+		'doctype': 'Table Mapper Detail',
+		'from_table': 'Production Forecast',
+		'idx': 1,
+		'match_id': 0,
+		'to_table': 'Production Planning Tool',
+		'validation_logic': 'docstatus =1'
+	},
+
+	# Table Mapper Detail
+	{
+		'doctype': 'Table Mapper Detail',
+		'from_field': 'pf_details',
+		'from_table': 'PF Detail',
+		'idx': 2,
+		'match_id': 1,
+		'to_field': 'pp_details',
+		'to_table': 'PP Detail',
+		'validation_logic': 'docstatus =1 and qty > planned_qty '
+	}
+]

@@ -1,37 +1,33 @@
+# Search Criteria, employeewise_balance_leave_report
 [
+
+	# These values are common in all dictionaries
 	{
-		'add_col': None,
-		'add_cond': None,
-		'add_tab': None,
-		'columns': 'Employee\x01ID',
-		'creation': '2010-12-14 10:33:09',
-		'criteria_name': 'Employeewise Balance Leave Report',
-		'custom_query': '',
-		'description': None,
-		'dis_filters': None,
-		'disabled': None,
-		'doc_type': 'Employee',
+		'creation': '2010-12-14 10:23:25',
 		'docstatus': 0,
-		'doctype': 'Search Criteria',
-		'filters': "{'Employee\x01Saved':1,'Employee\x01Submitted':1,'Employee\x01Gender':'','Employee\x01Month of Birth':'','Employee\x01Status':'Active'}",
-		'graph_series': None,
-		'graph_values': None,
-		'group_by': None,
-		'idx': None,
 		'modified': '2010-12-01 10:39:56',
 		'modified_by': 'Administrator',
-		'module': 'Payroll',
-		'name': 'employeewise_balance_leave_report',
-		'owner': 'harshada@webnotestech.com',
+		'owner': 'harshada@webnotestech.com'
+	},
+
+	# These values are common for all Search Criteria
+	{
+		'columns': 'Employee\x01ID',
+		'criteria_name': 'Employeewise Balance Leave Report',
+		'doc_type': 'Employee',
+		'doctype': 'Search Criteria',
+		'filters': "{'Employee\x01Saved':1,'Employee\x01Submitted':1,'Employee\x01Gender':'','Employee\x01Month of Birth':'','Employee\x01Status':'Active'}",
+		'module': 'HR',
+		'name': '__common__',
 		'page_len': 100,
-		'parent': None,
-		'parent_doc_type': None,
-		'parentfield': None,
-		'parenttype': None,
-		'report_script': None,
-		'server_script': None,
 		'sort_by': '`tabEmployee`.`name`',
 		'sort_order': 'ASC',
 		'standard': 'Yes'
+	},
+
+	# Search Criteria, employeewise_balance_leave_report
+	{
+		'doctype': 'Search Criteria',
+		'name': 'employeewise_balance_leave_report'
 	}
 ]

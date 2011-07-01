@@ -1,1 +1,26 @@
-[{'modified_by': 'Administrator', 'name': 'Purchase Manager', 'parent': None, 'creation': '2010-04-08 12:07:53', 'modified': '2010-04-08 12:07:53', 'module': 'Roles', 'doctype': 'Role', 'idx': None, 'parenttype': None, 'role_name': 'Purchase Manager', 'owner': 'Administrator', 'docstatus': 0, 'parentfield': None}]
+# Role, Purchase Manager
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-08-08 17:08:51',
+		'docstatus': 0,
+		'modified': '2010-04-08 12:07:53',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all Role
+	{
+		'doctype': 'Role',
+		'module': 'Buying',
+		'name': '__common__',
+		'role_name': 'Purchase Manager'
+	},
+
+	# Role, Purchase Manager
+	{
+		'doctype': 'Role',
+		'name': 'Purchase Manager'
+	}
+]
