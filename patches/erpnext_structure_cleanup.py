@@ -146,6 +146,11 @@ def sync_mapper():
 
 #---------------------------------------
 def run_patches():
+	# update module
+	dt_module = {'LC PR Detail':'Stock', 'Landed Cost Detail':'Stock', 'Comment Widget Record': 'Core', 'Tag':'Core', 'Tag Detail': 'Core'}
+	for d in dt_module.keys():
+		sql("update `tabDocType` set module = '%s' where name = '%s'" % (dt_module[d], d))
+	sql("update `tabSearch Criteria` set module = 'Selling' where name = 'sales_orderwise_pending_packing_item_summary'")
 	delete_unwanted_doctypes()
 	sql("start transaction")
 	delete_unwanted_pages()
@@ -160,10 +165,5 @@ def run_patches():
 
 	# landed cost wizard link in stock
 	reload_doc('stock', 'Module Def', 'stock')
-	
-	# update module
-	dt_module = {'LC PR Detail':'Stock', 'Landed Cost Detail':'Stock', 'Comment Widget Record': 'Core', 'Tag':'Core', 'Tag Detail': 'Core'}
-	for d in dt_module.keys():
-		sql("update `tabDocType` set module = '%s' where name = '%s'" % (dt_module[d], d))
 	
 	sql("commit")
