@@ -1,0 +1,30 @@
+# DocType, Authorization Control
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-08-08 17:08:52',
+		'docstatus': 0,
+		'modified': '2010-12-16 23:57:05',
+		'modified_by': 'nabin@webnotestech.com',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all DocType
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocType',
+		'issingle': 1,
+		'module': 'Setup',
+		'name': '__common__',
+		'section_style': 'Tabbed',
+		'server_code_error': ' ',
+		'version': 216
+	},
+
+	# DocType, Authorization Control
+	{
+		'doctype': 'DocType',
+		'name': 'Authorization Control'
+	}
+]

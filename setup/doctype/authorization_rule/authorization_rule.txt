@@ -1,0 +1,223 @@
+# DocType, Authorization Rule
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-08-08 17:08:52',
+		'docstatus': 0,
+		'modified': '2010-12-02 18:06:28',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all DocType
+	{
+		'_last_update': '1308741898',
+		'allow_trash': 1,
+		'autoname': 'AR.####',
+		'colour': 'White:FFF',
+		'doctype': 'DocType',
+		'document_type': 'Master',
+		'module': 'Setup',
+		'name': '__common__',
+		'search_fields': 'transaction,based_on,system_user,system_role,approving_user,approving_role',
+		'section_style': 'Simple',
+		'server_code_error': ' ',
+		'version': 58
+	},
+
+	# These values are common for all DocField
+	{
+		'doctype': 'DocField',
+		'name': '__common__',
+		'parent': 'Authorization Rule',
+		'parentfield': 'fields',
+		'parenttype': 'DocType',
+		'permlevel': 0
+	},
+
+	# These values are common for all DocPerm
+	{
+		'cancel': 1,
+		'create': 1,
+		'doctype': 'DocPerm',
+		'name': '__common__',
+		'parent': 'Authorization Rule',
+		'parentfield': 'permissions',
+		'parenttype': 'DocType',
+		'permlevel': 0,
+		'read': 1,
+		'role': 'System Manager',
+		'write': 1
+	},
+
+	# DocType, Authorization Rule
+	{
+		'doctype': 'DocType',
+		'name': 'Authorization Rule'
+	},
+
+	# DocPerm
+	{
+		'doctype': 'DocPerm',
+		'idx': 1
+	},
+
+	# DocPerm
+	{
+		'doctype': 'DocPerm',
+		'idx': 2
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'company',
+		'fieldtype': 'Link',
+		'idx': 1,
+		'label': 'Company',
+		'oldfieldname': 'company',
+		'oldfieldtype': 'Link',
+		'options': 'Company',
+		'reqd': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'transaction',
+		'fieldtype': 'Select',
+		'idx': 2,
+		'label': 'Transaction',
+		'oldfieldname': 'transaction',
+		'oldfieldtype': 'Select',
+		'options': '\nDelivery Note\nPurchase Invoice\nPurchase Order\nPurchase Receipt\nQuotation\nSales Invoice\nSales Order\nStock Entry\nExpense Voucher\nAppraisal',
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'based_on',
+		'fieldtype': 'Select',
+		'idx': 3,
+		'label': 'Based On',
+		'oldfieldname': 'based_on',
+		'oldfieldtype': 'Select',
+		'options': '\nGrand Total\nAverage Discount\nCustomerwise Discount\nItemwise Discount\nTotal Claimed Amount\nNot Applicable',
+		'reqd': 1,
+		'trigger': 'Client'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'master_name',
+		'fieldtype': 'Link',
+		'idx': 4,
+		'label': 'Customer / Item Name',
+		'oldfieldname': 'master_name',
+		'oldfieldtype': 'Link',
+		'trigger': 'Client'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'system_role',
+		'fieldtype': 'Link',
+		'idx': 5,
+		'label': 'Applicable To (Role)',
+		'oldfieldname': 'system_role',
+		'oldfieldtype': 'Link',
+		'options': 'Role'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldname': 'system_user',
+		'fieldtype': 'Link',
+		'idx': 6,
+		'label': 'Applicable To (User)',
+		'oldfieldname': 'system_user',
+		'oldfieldtype': 'Link',
+		'options': 'Profile'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'description': 'This will be used for setting rule in HR module',
+		'doctype': 'DocField',
+		'fieldname': 'to_emp',
+		'fieldtype': 'Link',
+		'idx': 7,
+		'label': 'Applicable To (Employee)',
+		'oldfieldname': 'to_emp',
+		'oldfieldtype': 'Link',
+		'options': 'Employee'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'description': 'This will be used for setting rule in HR module',
+		'doctype': 'DocField',
+		'fieldname': 'to_designation',
+		'fieldtype': 'Link',
+		'idx': 8,
+		'label': 'Applicable To (Designation)',
+		'oldfieldname': 'to_designation',
+		'oldfieldtype': 'Link',
+		'options': 'Designation'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'approving_role',
+		'fieldtype': 'Link',
+		'idx': 9,
+		'label': 'Approving Role',
+		'oldfieldname': 'approving_role',
+		'oldfieldtype': 'Link',
+		'options': 'Role'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'approving_user',
+		'fieldtype': 'Link',
+		'idx': 10,
+		'label': 'Approving User',
+		'oldfieldname': 'approving_user',
+		'oldfieldtype': 'Link',
+		'options': 'Profile'
+	},
+
+	# DocField
+	{
+		'default': '0.00',
+		'doctype': 'DocField',
+		'fieldname': 'value',
+		'fieldtype': 'Currency',
+		'idx': 11,
+		'label': 'Above Value',
+		'oldfieldname': 'value',
+		'oldfieldtype': 'Currency'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'trash_reason',
+		'fieldtype': 'Small Text',
+		'idx': 12,
+		'label': 'Trash Reason',
+		'oldfieldname': 'trash_reason',
+		'oldfieldtype': 'Small Text'
+	}
+]

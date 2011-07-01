@@ -1,0 +1,31 @@
+# DocType, Sales Common
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-08-08 17:09:21',
+		'docstatus': 0,
+		'modified': '2011-01-03 11:21:04',
+		'modified_by': 'nabin@webnotestech.com',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all DocType
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocType',
+		'issingle': 1,
+		'module': 'Selling',
+		'name': '__common__',
+		'section_style': 'Simple',
+		'server_code_error': ' ',
+		'show_in_menu': 0,
+		'version': 290
+	},
+
+	# DocType, Sales Common
+	{
+		'doctype': 'DocType',
+		'name': 'Sales Common'
+	}
+]

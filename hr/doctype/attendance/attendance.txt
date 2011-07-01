@@ -1,0 +1,226 @@
+# DocType, Attendance
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-09-23 10:26:03',
+		'docstatus': 0,
+		'modified': '2011-06-27 14:39:08',
+		'modified_by': 'Administrator',
+		'owner': 'ashwini@webnotestech.com'
+	},
+
+	# These values are common for all DocType
+	{
+		'_last_update': '1308808105',
+		'colour': 'White:FFF',
+		'doctype': 'DocType',
+		'document_type': 'Master',
+		'module': 'HR',
+		'name': '__common__',
+		'search_fields': 'employee, employee_name, att_date, status',
+		'section_style': 'Simple',
+		'server_code_error': ' ',
+		'show_in_menu': 0,
+		'version': 74
+	},
+
+	# These values are common for all DocField
+	{
+		'doctype': 'DocField',
+		'name': '__common__',
+		'parent': 'Attendance',
+		'parentfield': 'fields',
+		'parenttype': 'DocType',
+		'permlevel': 0
+	},
+
+	# These values are common for all DocPerm
+	{
+		'cancel': 1,
+		'create': 1,
+		'doctype': 'DocPerm',
+		'name': '__common__',
+		'parent': 'Attendance',
+		'parentfield': 'permissions',
+		'parenttype': 'DocType',
+		'permlevel': 0,
+		'read': 1,
+		'submit': 1,
+		'write': 1
+	},
+
+	# DocType, Attendance
+	{
+		'doctype': 'DocType',
+		'name': 'Attendance'
+	},
+
+	# DocPerm
+	{
+		'doctype': 'DocPerm',
+		'role': 'HR User'
+	},
+
+	# DocPerm
+	{
+		'doctype': 'DocPerm',
+		'role': 'HR Manager'
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'doctype': 'DocPerm',
+		'idx': 1,
+		'role': 'System Manager'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Section Break',
+		'idx': 1,
+		'label': 'Attendance Details',
+		'oldfieldtype': 'Section Break',
+		'options': 'Simple'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'naming_series',
+		'fieldtype': 'Select',
+		'idx': 2,
+		'label': 'Naming Series',
+		'no_copy': 1,
+		'oldfieldname': 'naming_series',
+		'oldfieldtype': 'Select',
+		'options': 'ATT',
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldname': 'employee',
+		'fieldtype': 'Link',
+		'idx': 3,
+		'in_filter': 1,
+		'label': 'Employee',
+		'oldfieldname': 'employee',
+		'oldfieldtype': 'Link',
+		'options': 'Employee',
+		'reqd': 1,
+		'search_index': 1,
+		'trigger': 'Client'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'employee_name',
+		'fieldtype': 'Data',
+		'idx': 4,
+		'label': 'Employee Name',
+		'oldfieldname': 'employee_name',
+		'oldfieldtype': 'Data'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldname': 'status',
+		'fieldtype': 'Select',
+		'idx': 5,
+		'in_filter': 1,
+		'label': 'Status',
+		'oldfieldname': 'status',
+		'oldfieldtype': 'Select',
+		'options': '\nPresent\nAbsent\nHalf Day',
+		'reqd': 1,
+		'search_index': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'shifts',
+		'fieldtype': 'Select',
+		'idx': 6,
+		'label': 'Shifts',
+		'oldfieldname': 'shifts',
+		'oldfieldtype': 'Select',
+		'options': '\nDay\nNight',
+		'reqd': 0
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldname': 'leave_type',
+		'fieldtype': 'Link',
+		'hidden': 1,
+		'idx': 7,
+		'label': 'Leave Type',
+		'oldfieldname': 'leave_type',
+		'oldfieldtype': 'Link',
+		'options': 'Leave Type',
+		'print_hide': 1,
+		'report_hide': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Column Break',
+		'idx': 8,
+		'oldfieldtype': 'Column Break',
+		'width': '50%'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'att_date',
+		'fieldtype': 'Date',
+		'idx': 9,
+		'in_filter': 1,
+		'label': 'Attendance Date',
+		'oldfieldname': 'att_date',
+		'oldfieldtype': 'Date',
+		'reqd': 1,
+		'search_index': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'fiscal_year',
+		'fieldtype': 'Select',
+		'idx': 10,
+		'in_filter': 1,
+		'label': 'Fiscal Year',
+		'oldfieldname': 'fiscal_year',
+		'oldfieldtype': 'Select',
+		'options': 'link:Fiscal Year',
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'company',
+		'fieldtype': 'Select',
+		'idx': 11,
+		'in_filter': 1,
+		'label': 'Company',
+		'oldfieldname': 'company',
+		'oldfieldtype': 'Link',
+		'options': 'link:Company',
+		'reqd': 1
+	}
+]

@@ -1,0 +1,124 @@
+# DocType, WN ERP Client Control
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-08-08 17:09:30',
+		'docstatus': 0,
+		'modified': '2010-09-20 14:06:57',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all DocType
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocType',
+		'issingle': 1,
+		'istable': 0,
+		'module': 'Utilities',
+		'name': '__common__',
+		'read_only': 1,
+		'section_style': 'Simple',
+		'server_code_error': ' ',
+		'show_in_menu': 1,
+		'version': 137
+	},
+
+	# These values are common for all DocField
+	{
+		'doctype': 'DocField',
+		'name': '__common__',
+		'parent': 'WN ERP Client Control',
+		'parentfield': 'fields',
+		'parenttype': 'DocType',
+		'permlevel': 0
+	},
+
+	# These values are common for all DocPerm
+	{
+		'doctype': 'DocPerm',
+		'name': '__common__',
+		'parent': 'WN ERP Client Control',
+		'parentfield': 'permissions',
+		'parenttype': 'DocType',
+		'read': 1,
+		'role': 'System Manager'
+	},
+
+	# DocType, WN ERP Client Control
+	{
+		'doctype': 'DocType',
+		'name': 'WN ERP Client Control'
+	},
+
+	# DocPerm
+	{
+		'create': 1,
+		'doctype': 'DocPerm',
+		'idx': 1,
+		'permlevel': 0,
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'doctype': 'DocPerm',
+		'idx': 2,
+		'permlevel': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'account_start_date',
+		'fieldtype': 'Date',
+		'idx': 1,
+		'label': 'Account Start Date'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'billing_cycle_date',
+		'fieldtype': 'Date',
+		'idx': 2,
+		'label': 'Billing Cycle Date'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'total_users',
+		'fieldtype': 'Int',
+		'idx': 3,
+		'label': 'Total Users'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'credit_balance',
+		'fieldtype': 'Int',
+		'idx': 4,
+		'label': 'Credit Balance'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'is_trial_account',
+		'fieldtype': 'Check',
+		'idx': 5,
+		'label': 'Is Trial Account'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'last_deduction_date',
+		'fieldtype': 'Date',
+		'idx': 6,
+		'label': 'Last Credit Deduction Date'
+	}
+]

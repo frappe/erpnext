@@ -1,0 +1,485 @@
+# DocType, Customer
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-08-08 17:08:56',
+		'docstatus': 0,
+		'modified': '2011-05-26 17:31:31',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all DocType
+	{
+		'_last_update': '1306834669',
+		'allow_print': 0,
+		'allow_trash': 1,
+		'colour': 'White:FFF',
+		'doctype': 'DocType',
+		'document_type': 'Master',
+		'module': 'Selling',
+		'name': '__common__',
+		'search_fields': 'customer_name,customer_group,country,territory',
+		'section_style': 'Tabbed',
+		'server_code_error': ' ',
+		'show_in_menu': 0,
+		'subject': "eval:'%(customer_name)s'=='%(name)s' ? ' ' : '%(customer_name)s'",
+		'tag_fields': 'customer_group,customer_type',
+		'version': 431
+	},
+
+	# These values are common for all DocField
+	{
+		'doctype': 'DocField',
+		'name': '__common__',
+		'parent': 'Customer',
+		'parentfield': 'fields',
+		'parenttype': 'DocType'
+	},
+
+	# These values are common for all DocPerm
+	{
+		'amend': 0,
+		'doctype': 'DocPerm',
+		'name': '__common__',
+		'parent': 'Customer',
+		'parentfield': 'permissions',
+		'parenttype': 'DocType',
+		'read': 1,
+		'submit': 0
+	},
+
+	# DocType, Customer
+	{
+		'doctype': 'DocType',
+		'name': 'Customer'
+	},
+
+	# DocPerm
+	{
+		'cancel': 0,
+		'create': 0,
+		'doctype': 'DocPerm',
+		'idx': 1,
+		'permlevel': 1,
+		'role': 'Sales Manager',
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'cancel': 0,
+		'create': 0,
+		'doctype': 'DocPerm',
+		'idx': 2,
+		'permlevel': 0,
+		'role': 'Sales Manager',
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'cancel': 0,
+		'create': 0,
+		'doctype': 'DocPerm',
+		'idx': 3,
+		'permlevel': 1,
+		'role': 'Sales User',
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'cancel': 0,
+		'create': 0,
+		'doctype': 'DocPerm',
+		'idx': 4,
+		'permlevel': 0,
+		'role': 'Sales User',
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'cancel': 1,
+		'create': 1,
+		'doctype': 'DocPerm',
+		'idx': 5,
+		'permlevel': 0,
+		'role': 'Sales Master Manager',
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'cancel': 0,
+		'create': 0,
+		'doctype': 'DocPerm',
+		'idx': 6,
+		'permlevel': 1,
+		'role': 'Sales Master Manager',
+		'write': 0
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'description': 'Note: You Can Manage Multiple Address or Contacts via Addresses & Contacts',
+		'doctype': 'DocField',
+		'fieldtype': 'Section Break',
+		'idx': 1,
+		'label': 'Basic Info',
+		'oldfieldtype': 'Section Break',
+		'permlevel': 0,
+		'reqd': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'customer_name',
+		'fieldtype': 'Data',
+		'hidden': 0,
+		'idx': 2,
+		'in_filter': 1,
+		'label': 'Customer Name',
+		'no_copy': 1,
+		'oldfieldname': 'customer_name',
+		'oldfieldtype': 'Data',
+		'permlevel': 0,
+		'print_hide': 0,
+		'report_hide': 0,
+		'reqd': 1,
+		'search_index': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'customer_type',
+		'fieldtype': 'Select',
+		'idx': 3,
+		'label': 'Customer Type',
+		'oldfieldname': 'customer_type',
+		'oldfieldtype': 'Select',
+		'options': '\nCompany\nIndividual',
+		'permlevel': 0,
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'naming_series',
+		'fieldtype': 'Select',
+		'idx': 4,
+		'label': 'Series',
+		'no_copy': 1,
+		'options': '\nCUST\nCUSTMUM',
+		'permlevel': 0,
+		'print_hide': 0
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'description': 'Fetch lead which will be converted into customer.',
+		'doctype': 'DocField',
+		'fieldname': 'lead_name',
+		'fieldtype': 'Link',
+		'hidden': 0,
+		'idx': 5,
+		'in_filter': 1,
+		'label': 'Lead Ref',
+		'no_copy': 1,
+		'oldfieldname': 'lead_name',
+		'oldfieldtype': 'Link',
+		'options': 'Lead',
+		'permlevel': 0,
+		'print_hide': 1,
+		'report_hide': 1,
+		'trigger': 'Client'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Column Break',
+		'idx': 6,
+		'permlevel': 0,
+		'width': '50%'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'description': '<a href="javascript:cur_frm.cscript.CGHelp();">To manage Customer Groups, click here</a>',
+		'doctype': 'DocField',
+		'fieldname': 'customer_group',
+		'fieldtype': 'Link',
+		'hidden': 0,
+		'idx': 7,
+		'in_filter': 1,
+		'label': 'Customer Group',
+		'oldfieldname': 'customer_group',
+		'oldfieldtype': 'Link',
+		'options': 'Customer Group',
+		'permlevel': 0,
+		'print_hide': 0,
+		'reqd': 1,
+		'search_index': 1,
+		'trigger': 'Client'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'description': '<a href="javascript:cur_frm.cscript.TerritoryHelp();">To manage Territory, click here</a>',
+		'doctype': 'DocField',
+		'fieldname': 'territory',
+		'fieldtype': 'Link',
+		'idx': 8,
+		'label': 'Territory',
+		'oldfieldname': 'territory',
+		'oldfieldtype': 'Link',
+		'options': 'Territory',
+		'permlevel': 0,
+		'print_hide': 1,
+		'reqd': 1,
+		'trigger': 'Client'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldtype': 'Section Break',
+		'idx': 9,
+		'label': 'Address & Contacts',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'depends_on': 'eval:doc.__islocal',
+		'doctype': 'DocField',
+		'fieldtype': 'HTML',
+		'idx': 10,
+		'label': 'Address Desc',
+		'options': '<em>Addresses will appear only when you save the customer</em>',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldtype': 'HTML',
+		'idx': 11,
+		'label': 'Address HTML',
+		'permlevel': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Column Break',
+		'idx': 12,
+		'permlevel': 0,
+		'width': '50%'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'depends_on': 'eval:doc.__islocal',
+		'doctype': 'DocField',
+		'fieldtype': 'HTML',
+		'idx': 13,
+		'label': 'Contact Desc',
+		'options': '<em>Contact Details will appear only when you save the customer</em>',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldtype': 'HTML',
+		'idx': 14,
+		'label': 'Contact HTML',
+		'oldfieldtype': 'HTML',
+		'permlevel': 1
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldtype': 'Section Break',
+		'idx': 15,
+		'label': 'More Info',
+		'oldfieldtype': 'Section Break',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'description': 'To create an Account Head under a different company, then set the company and click the button below.',
+		'doctype': 'DocField',
+		'fieldname': 'company',
+		'fieldtype': 'Link',
+		'idx': 16,
+		'in_filter': 1,
+		'label': 'Company',
+		'oldfieldname': 'company',
+		'oldfieldtype': 'Link',
+		'options': 'Company',
+		'permlevel': 0,
+		'reqd': 1,
+		'search_index': 1
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'description': "Your Customer's TAX registration numbers (if applicable) or any general information",
+		'doctype': 'DocField',
+		'fieldname': 'customer_details',
+		'fieldtype': 'Text',
+		'idx': 17,
+		'label': 'Customer Details',
+		'oldfieldname': 'customer_details',
+		'oldfieldtype': 'Code',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Column Break',
+		'idx': 18,
+		'permlevel': 0,
+		'width': '50%'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'credit_days',
+		'fieldtype': 'Int',
+		'idx': 19,
+		'label': 'Credit Days',
+		'oldfieldname': 'credit_days',
+		'oldfieldtype': 'Int',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'credit_limit',
+		'fieldtype': 'Currency',
+		'idx': 20,
+		'label': 'Credit Limit',
+		'oldfieldname': 'credit_limit',
+		'oldfieldtype': 'Currency',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'website',
+		'fieldtype': 'Data',
+		'idx': 21,
+		'label': 'Website',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Section Break',
+		'idx': 22,
+		'label': 'Sales Team',
+		'oldfieldtype': 'Section Break',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'default_sales_partner',
+		'fieldtype': 'Link',
+		'idx': 23,
+		'label': 'Default Sales Partner',
+		'oldfieldname': 'default_sales_partner',
+		'oldfieldtype': 'Link',
+		'options': 'Sales Partner',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'default_commission_rate',
+		'fieldtype': 'Currency',
+		'idx': 24,
+		'label': 'Default Commission Rate',
+		'oldfieldname': 'default_commission_rate',
+		'oldfieldtype': 'Currency',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'sales_team',
+		'fieldtype': 'Table',
+		'idx': 25,
+		'label': 'Sales Team Details',
+		'oldfieldname': 'sales_team',
+		'oldfieldtype': 'Table',
+		'options': 'Sales Team',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'depends_on': 'eval:!doc.__islocal',
+		'doctype': 'DocField',
+		'fieldtype': 'Section Break',
+		'idx': 26,
+		'label': 'Transaction History',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'depends_on': 'eval:!doc.__islocal',
+		'doctype': 'DocField',
+		'fieldtype': 'HTML',
+		'idx': 27,
+		'label': 'History HTML',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldname': 'trash_reason',
+		'fieldtype': 'Small Text',
+		'idx': 28,
+		'label': 'Trash Reason',
+		'oldfieldname': 'trash_reason',
+		'oldfieldtype': 'Small Text',
+		'permlevel': 1
+	}
+]

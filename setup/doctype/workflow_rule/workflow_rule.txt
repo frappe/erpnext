@@ -1,0 +1,258 @@
+# DocType, Workflow Rule
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-08-08 17:09:31',
+		'docstatus': 0,
+		'modified': '2010-09-20 14:06:57',
+		'modified_by': 'Administrator',
+		'owner': 'swarnalata@webnotestech.com'
+	},
+
+	# These values are common for all DocType
+	{
+		'_last_update': '1308741898',
+		'autoname': 'field:rule_name',
+		'colour': 'White:FFF',
+		'doctype': 'DocType',
+		'document_type': 'Master',
+		'module': 'Setup',
+		'name': '__common__',
+		'search_fields': 'select_form,rule_status',
+		'section_style': 'Tray',
+		'server_code_error': ' ',
+		'show_in_menu': 0,
+		'version': 30
+	},
+
+	# These values are common for all DocField
+	{
+		'doctype': 'DocField',
+		'name': '__common__',
+		'parent': 'Workflow Rule',
+		'parentfield': 'fields',
+		'parenttype': 'DocType',
+		'permlevel': 0
+	},
+
+	# These values are common for all DocPerm
+	{
+		'create': 1,
+		'doctype': 'DocPerm',
+		'idx': 1,
+		'name': '__common__',
+		'parent': 'Workflow Rule',
+		'parentfield': 'permissions',
+		'parenttype': 'DocType',
+		'permlevel': 0,
+		'read': 1,
+		'role': 'System Manager',
+		'write': 1
+	},
+
+	# DocType, Workflow Rule
+	{
+		'doctype': 'DocType',
+		'name': 'Workflow Rule'
+	},
+
+	# DocPerm
+	{
+		'doctype': 'DocPerm'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Section Break',
+		'idx': 1,
+		'label': 'Rule Definition',
+		'oldfieldtype': 'Section Break'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'HTML',
+		'idx': 2,
+		'label': 'Intro HTML',
+		'oldfieldtype': 'HTML',
+		'options': '<b>Select form for which you want to define rules,set priority & status.</b>'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'rule_name',
+		'fieldtype': 'Data',
+		'idx': 3,
+		'label': 'Rule Name',
+		'oldfieldname': 'rule_name',
+		'oldfieldtype': 'Data',
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldname': 'rule_status',
+		'fieldtype': 'Select',
+		'idx': 4,
+		'in_filter': 1,
+		'label': 'Rule Status',
+		'oldfieldname': 'rule_status',
+		'oldfieldtype': 'Select',
+		'options': '\nActive\nInactive',
+		'reqd': 1,
+		'search_index': 1
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldname': 'select_form',
+		'fieldtype': 'Link',
+		'idx': 5,
+		'in_filter': 1,
+		'label': 'Select Form',
+		'oldfieldname': 'select_form',
+		'oldfieldtype': 'Link',
+		'options': 'DocType',
+		'reqd': 1,
+		'search_index': 1,
+		'trigger': 'Client'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'rule_priority',
+		'fieldtype': 'Int',
+		'idx': 6,
+		'label': 'Rule Priority',
+		'oldfieldname': 'rule_priority',
+		'oldfieldtype': 'Int',
+		'reqd': 0
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldtype': 'Section Break',
+		'idx': 7,
+		'label': 'Define Rule',
+		'oldfieldtype': 'Section Break',
+		'options': 'Simple'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'workflow_rule_details',
+		'fieldtype': 'Table',
+		'idx': 8,
+		'label': 'Workflow Rule Details',
+		'oldfieldname': 'workflow_rule_details',
+		'oldfieldtype': 'Table',
+		'options': 'Workflow Rule Detail',
+		'width': '100px'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldname': 'extra_condition',
+		'fieldtype': 'Code',
+		'hidden': 1,
+		'idx': 9,
+		'label': 'Extra Condition',
+		'oldfieldname': 'extra_condition',
+		'oldfieldtype': 'Code',
+		'print_hide': 1
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldtype': 'Section Break',
+		'idx': 10,
+		'label': 'Action Detail',
+		'oldfieldtype': 'Section Break'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'HTML',
+		'idx': 11,
+		'label': 'Action html',
+		'oldfieldtype': 'HTML',
+		'options': '<b>Specify actions to be taken  when conditions hold satisfied</b>'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'workflow_action_details',
+		'fieldtype': 'Table',
+		'idx': 12,
+		'label': 'Workflow Action Details',
+		'oldfieldname': 'workflow_action_details',
+		'oldfieldtype': 'Table',
+		'options': 'Workflow Action Detail'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldtype': 'HTML',
+		'hidden': 1,
+		'idx': 13,
+		'label': 'Reject HTML',
+		'no_copy': 1,
+		'oldfieldtype': 'HTML',
+		'options': "<b>If any condition holds false the following message will be displayed . If you wish to stop rule engine when condition holds false then set 'Raise Exception' as 'Yes' otherwise keep this field blank or 'No'.</b>",
+		'print_hide': 1,
+		'report_hide': 1
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldname': 'message',
+		'fieldtype': 'Text',
+		'hidden': 1,
+		'idx': 14,
+		'label': 'Enter message',
+		'no_copy': 1,
+		'oldfieldname': 'message',
+		'oldfieldtype': 'Text',
+		'print_hide': 1,
+		'report_hide': 1
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldname': 'raise_exception',
+		'fieldtype': 'Select',
+		'hidden': 1,
+		'idx': 15,
+		'label': 'Raise Exception',
+		'no_copy': 1,
+		'oldfieldname': 'raise_exception',
+		'oldfieldtype': 'Select',
+		'options': '\nYes\nNo',
+		'print_hide': 1,
+		'report_hide': 1
+	}
+]

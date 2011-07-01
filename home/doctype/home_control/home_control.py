@@ -287,7 +287,7 @@ class DocType:
 	# module settings
 	# -------------------------------------------------------------------------------------------------------
 	def get_module_order(self):
-		show_list = ['Event Updates','My Company','Setup','Accounts','CRM','SRM','Maintenance','Material Management','Payroll','Projects','Analysis','Production']
+		show_list = ['Home','Setup','Accounts','Selling','Buying','Support','Stock','HR','Projects','Analysis','Production']
 		ml = filter(lambda x: x[0] in show_list, \
 			sql("select name, module_label, module_seq, is_hidden from `tabModule Def` where docstatus<2 order by module_seq asc, module_label asc"))
 		return convert_to_lists(ml)

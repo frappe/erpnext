@@ -1,0 +1,232 @@
+# DocType, Landed Cost Wizard
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-08-08 17:09:07',
+		'docstatus': 0,
+		'modified': '2011-06-30 18:47:46',
+		'modified_by': 'Administrator',
+		'owner': 'wasim@webnotestech.com'
+	},
+
+	# These values are common for all DocType
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocType',
+		'issingle': 1,
+		'module': 'Stock',
+		'name': '__common__',
+		'section_style': 'Simple',
+		'server_code_error': ' ',
+		'show_in_menu': 1,
+		'version': 31
+	},
+
+	# These values are common for all DocField
+	{
+		'doctype': 'DocField',
+		'name': '__common__',
+		'parent': 'Landed Cost Wizard',
+		'parentfield': 'fields',
+		'parenttype': 'DocType',
+		'permlevel': 0
+	},
+
+	# These values are common for all DocPerm
+	{
+		'doctype': 'DocPerm',
+		'name': '__common__',
+		'parent': 'Landed Cost Wizard',
+		'parentfield': 'permissions',
+		'parenttype': 'DocType',
+		'read': 1
+	},
+
+	# DocType, Landed Cost Wizard
+	{
+		'doctype': 'DocType',
+		'name': 'Landed Cost Wizard'
+	},
+
+	# DocPerm
+	{
+		'doctype': 'DocPerm',
+		'idx': 1,
+		'permlevel': 0,
+		'role': 'All',
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 1,
+		'doctype': 'DocPerm',
+		'idx': 2,
+		'permlevel': 0,
+		'role': 'Purchase Manager',
+		'submit': 0,
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'create': 1,
+		'doctype': 'DocPerm',
+		'idx': 3,
+		'permlevel': 0,
+		'role': 'System Manager',
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'create': 1,
+		'doctype': 'DocPerm',
+		'idx': 4,
+		'permlevel': 0,
+		'role': 'Purchase User',
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'doctype': 'DocPerm',
+		'idx': 5,
+		'permlevel': 1,
+		'role': 'All'
+	},
+
+	# DocPerm
+	{
+		'doctype': 'DocPerm',
+		'idx': 6,
+		'permlevel': 1,
+		'role': 'System Manager'
+	},
+
+	# DocPerm
+	{
+		'doctype': 'DocPerm',
+		'idx': 7,
+		'permlevel': 1,
+		'role': 'Purchase User'
+	},
+
+	# DocPerm
+	{
+		'doctype': 'DocPerm',
+		'idx': 8,
+		'permlevel': 1,
+		'role': 'Purchase Manager'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'from_pr_date',
+		'fieldtype': 'Date',
+		'idx': 1,
+		'label': 'From PR Date',
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'to_pr_date',
+		'fieldtype': 'Date',
+		'idx': 2,
+		'label': 'To PR Date',
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'currency',
+		'fieldtype': 'Select',
+		'idx': 3,
+		'label': 'Currency',
+		'options': 'link:Currency',
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Button',
+		'idx': 4,
+		'label': 'Get Purchase Receipt',
+		'options': 'get_purchase_receipts'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Section Break',
+		'idx': 5,
+		'label': 'LC PR Detail',
+		'options': 'Simple'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'lc_pr_details',
+		'fieldtype': 'Table',
+		'idx': 6,
+		'label': 'LC PR Details',
+		'options': 'LC PR Detail'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Section Break',
+		'idx': 7,
+		'label': 'Landed Cost Detail',
+		'options': 'Simple'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'landed_cost',
+		'fieldtype': 'Link',
+		'idx': 8,
+		'label': 'Select Landed Cost Details Master',
+		'options': 'Landed Cost Master'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldtype': 'Button',
+		'idx': 9,
+		'label': 'Get Details',
+		'options': 'get_landed_cost_master_details'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'landed_cost_details',
+		'fieldtype': 'Table',
+		'idx': 10,
+		'label': 'Landed Cost Details',
+		'options': 'Landed Cost Detail'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Button',
+		'idx': 11,
+		'label': 'Update PR',
+		'options': 'update_pr_lc_se'
+	}
+]

@@ -1,1 +1,44 @@
-[{'creation': '2010-01-07 10:44:43', 'module': 'Setup', 'doctype': 'Page', 'owner': 'saumil@webnotestech.com', 'style': None, 'modified_by': 'Administrator', 'script': None, 'show_in_menu': 1, 'content': None, 'page_name': 'Permission Engine', 'menu_index': None, 'docstatus': 0, 'parent': None, 'standard': 'Yes', 'icon': None, 'name': 'Permission Engine', 'idx': None, 'static_content': None, 'modified': '2010-11-18 20:24:21', 'parenttype': None, 'parent_node': None, 'parentfield': None}, {'modified_by': 'Administrator', 'name': 'PR000107', 'parent': 'Permission Engine', 'creation': '2010-01-07 11:10:21', 'modified': '2010-11-18 20:24:21', 'doctype': 'Page Role', 'idx': 1, 'parenttype': 'Page', 'role': 'System Manager', 'owner': 'saumil@webnotestech.com', 'docstatus': 0, 'parentfield': 'roles'}]
+# Page, Permission Engine
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-12-14 10:23:18',
+		'docstatus': 0,
+		'modified': '2011-01-04 13:11:17',
+		'modified_by': 'Administrator',
+		'owner': 'saumil@webnotestech.com'
+	},
+
+	# These values are common for all Page
+	{
+		'doctype': 'Page',
+		'module': 'Setup',
+		'name': '__common__',
+		'page_name': 'Permission Engine',
+		'show_in_menu': 1,
+		'standard': 'Yes'
+	},
+
+	# These values are common for all Page Role
+	{
+		'doctype': 'Page Role',
+		'idx': 1,
+		'name': '__common__',
+		'parent': 'Permission Engine',
+		'parentfield': 'roles',
+		'parenttype': 'Page',
+		'role': 'System Manager'
+	},
+
+	# Page, Permission Engine
+	{
+		'doctype': 'Page',
+		'name': 'Permission Engine'
+	},
+
+	# Page Role
+	{
+		'doctype': 'Page Role'
+	}
+]

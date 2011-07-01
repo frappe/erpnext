@@ -1,0 +1,96 @@
+# DocType, Reposting Tool
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-08-08 17:09:19',
+		'docstatus': 0,
+		'modified': '2011-04-19 11:50:09',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all DocType
+	{
+		'_last_update': '1308741898',
+		'allow_copy': 1,
+		'allow_email': 1,
+		'allow_print': 1,
+		'colour': 'Light Blue:DEF',
+		'doctype': 'DocType',
+		'hide_toolbar': 1,
+		'in_create': 0,
+		'issingle': 1,
+		'module': 'Utilities',
+		'name': '__common__',
+		'read_only': 1,
+		'section_style': 'Simple',
+		'server_code_error': ' ',
+		'show_in_menu': 1,
+		'version': 174
+	},
+
+	# These values are common for all DocField
+	{
+		'doctype': 'DocField',
+		'name': '__common__',
+		'parent': 'Reposting Tool',
+		'parentfield': 'fields',
+		'parenttype': 'DocType',
+		'permlevel': 0
+	},
+
+	# These values are common for all DocPerm
+	{
+		'create': 1,
+		'doctype': 'DocPerm',
+		'idx': 1,
+		'name': '__common__',
+		'parent': 'Reposting Tool',
+		'parentfield': 'permissions',
+		'parenttype': 'DocType',
+		'permlevel': 0,
+		'read': 1,
+		'role': 'System Manager',
+		'write': 1
+	},
+
+	# DocType, Reposting Tool
+	{
+		'doctype': 'DocType',
+		'name': 'Reposting Tool'
+	},
+
+	# DocPerm
+	{
+		'doctype': 'DocPerm'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'recalculate_mar_&_actual_qty',
+		'fieldtype': 'Data',
+		'idx': 1,
+		'label': 'Recalculate MAR & Actual Qty'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldtype': 'Button',
+		'idx': 2,
+		'label': 'Repost Bin',
+		'trigger': 'Client'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Button',
+		'idx': 3,
+		'label': 'Repost Account Balances',
+		'trigger': 'Client'
+	}
+]

@@ -1,6 +1,6 @@
 # REMEMBER to update this
 # ========================
-last_patch = 305
+last_patch = 306
 
 #-------------------------------------------
 
@@ -1207,3 +1207,6 @@ def execute(patch_no):
 		reload_doc('setup', 'doctype', 'company')
 	elif patch_no == 305:
 		sql("update `tabDocField` set options = 'link:Company' where options='link:Company' and fieldname='company' and fieldtype='Select'")
+	elif patch_no == 306:
+		from erpnext_structure_cleanup import run_patches
+		run_patches()

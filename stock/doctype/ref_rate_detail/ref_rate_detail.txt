@@ -1,0 +1,84 @@
+# DocType, Ref Rate Detail
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-08-08 17:09:19',
+		'docstatus': 0,
+		'modified': '2010-09-20 14:06:57',
+		'modified_by': 'umair@iwebnotes.com',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all DocType
+	{
+		'autoname': 'RFD/.#####',
+		'colour': 'White:FFF',
+		'doctype': 'DocType',
+		'in_create': 1,
+		'istable': 1,
+		'module': 'Stock',
+		'name': '__common__',
+		'read_only': 0,
+		'section_style': 'Tray',
+		'server_code_error': ' ',
+		'show_in_menu': 0,
+		'version': 2
+	},
+
+	# These values are common for all DocField
+	{
+		'doctype': 'DocField',
+		'in_filter': 1,
+		'name': '__common__',
+		'parent': 'Ref Rate Detail',
+		'parentfield': 'fields',
+		'parenttype': 'DocType',
+		'permlevel': 0,
+		'search_index': 1
+	},
+
+	# DocType, Ref Rate Detail
+	{
+		'doctype': 'DocType',
+		'name': 'Ref Rate Detail'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'price_list_name',
+		'fieldtype': 'Select',
+		'idx': 1,
+		'label': 'Price List Name',
+		'oldfieldname': 'price_list_name',
+		'oldfieldtype': 'Select',
+		'options': 'link:Price List',
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'ref_rate',
+		'fieldtype': 'Currency',
+		'idx': 2,
+		'label': 'Ref Rate',
+		'oldfieldname': 'ref_rate',
+		'oldfieldtype': 'Currency',
+		'reqd': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'ref_currency',
+		'fieldtype': 'Select',
+		'idx': 3,
+		'label': 'Currency',
+		'oldfieldname': 'ref_currency',
+		'oldfieldtype': 'Select',
+		'options': 'link:Currency',
+		'reqd': 1
+	}
+]

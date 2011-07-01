@@ -1,0 +1,32 @@
+# DocType, Trash Control
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-08-08 17:09:29',
+		'docstatus': 0,
+		'modified': '2010-12-30 11:44:36',
+		'modified_by': 'umair@iwebnotes.com',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all DocType
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocType',
+		'in_create': 1,
+		'issingle': 1,
+		'module': 'Utilities',
+		'name': '__common__',
+		'read_only': 1,
+		'section_style': 'Simple',
+		'server_code_error': ' ',
+		'version': 35
+	},
+
+	# DocType, Trash Control
+	{
+		'doctype': 'DocType',
+		'name': 'Trash Control'
+	}
+]

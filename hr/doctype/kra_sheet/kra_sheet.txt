@@ -1,0 +1,68 @@
+# DocType, KRA Sheet
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-09-01 15:48:06',
+		'docstatus': 0,
+		'modified': '2010-09-20 14:06:57',
+		'modified_by': 'Administrator',
+		'owner': 'ashwini@webnotestech.com'
+	},
+
+	# These values are common for all DocType
+	{
+		'autoname': 'KSHEET.#####',
+		'colour': 'White:FFF',
+		'doctype': 'DocType',
+		'istable': 1,
+		'module': 'HR',
+		'name': '__common__',
+		'section_style': 'Simple',
+		'server_code_error': ' ',
+		'version': 6
+	},
+
+	# These values are common for all DocField
+	{
+		'doctype': 'DocField',
+		'name': '__common__',
+		'parent': 'KRA Sheet',
+		'parentfield': 'fields',
+		'parenttype': 'DocType',
+		'permlevel': 0,
+		'reqd': 1
+	},
+
+	# DocType, KRA Sheet
+	{
+		'doctype': 'DocType',
+		'name': 'KRA Sheet'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'description': 'Key Performance Area',
+		'doctype': 'DocField',
+		'fieldname': 'kra',
+		'fieldtype': 'Small Text',
+		'idx': 1,
+		'label': 'KRA',
+		'oldfieldname': 'kra',
+		'oldfieldtype': 'Small Text',
+		'width': '200px'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'per_weightage',
+		'fieldtype': 'Currency',
+		'idx': 2,
+		'label': 'Weightage (%)',
+		'oldfieldname': 'per_weightage',
+		'oldfieldtype': 'Currency',
+		'width': '100px'
+	}
+]

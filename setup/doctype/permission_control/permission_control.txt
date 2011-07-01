@@ -1,0 +1,33 @@
+# DocType, Permission Control
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-08-08 17:09:12',
+		'docstatus': 0,
+		'modified': '2010-12-20 15:09:18',
+		'modified_by': 'sneha@webnotestech.com',
+		'owner': 'saumil@webnotestech.com'
+	},
+
+	# These values are common for all DocType
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocType',
+		'in_create': 1,
+		'issingle': 1,
+		'module': 'Setup',
+		'name': '__common__',
+		'read_only': 1,
+		'section_style': 'Simple',
+		'server_code_error': ' ',
+		'show_in_menu': 0,
+		'version': 15
+	},
+
+	# DocType, Permission Control
+	{
+		'doctype': 'DocType',
+		'name': 'Permission Control'
+	}
+]

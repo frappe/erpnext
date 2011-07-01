@@ -1,0 +1,191 @@
+# DocType, PR Raw Material Detail
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-08-08 17:09:13',
+		'docstatus': 0,
+		'modified': '2010-09-20 14:06:57',
+		'modified_by': 'sneha@webnotestech.com',
+		'owner': 'wasim@webnotestech.com'
+	},
+
+	# These values are common for all DocType
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocType',
+		'hide_toolbar': 0,
+		'istable': 1,
+		'module': 'Buying',
+		'name': '__common__',
+		'section_style': 'Simple',
+		'server_code_error': ' ',
+		'show_in_menu': 0,
+		'version': 17
+	},
+
+	# These values are common for all DocField
+	{
+		'doctype': 'DocField',
+		'name': '__common__',
+		'parent': 'PR Raw Material Detail',
+		'parentfield': 'fields',
+		'parenttype': 'DocType'
+	},
+
+	# DocType, PR Raw Material Detail
+	{
+		'doctype': 'DocType',
+		'name': 'PR Raw Material Detail'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'reference_name',
+		'fieldtype': 'Data',
+		'hidden': 0,
+		'idx': 1,
+		'in_filter': 0,
+		'label': 'Reference Name',
+		'oldfieldname': 'reference_name',
+		'oldfieldtype': 'Data',
+		'permlevel': 1,
+		'search_index': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'bom_detail_no',
+		'fieldtype': 'Data',
+		'idx': 2,
+		'label': 'BOM Detail No',
+		'oldfieldname': 'bom_detail_no',
+		'oldfieldtype': 'Data',
+		'permlevel': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'main_item_code',
+		'fieldtype': 'Data',
+		'idx': 3,
+		'label': 'Item Code',
+		'oldfieldname': 'main_item_code',
+		'oldfieldtype': 'Data',
+		'permlevel': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'rm_item_code',
+		'fieldtype': 'Data',
+		'idx': 4,
+		'label': 'Raw Material Item Code',
+		'oldfieldname': 'rm_item_code',
+		'oldfieldtype': 'Data',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'description',
+		'fieldtype': 'Data',
+		'idx': 5,
+		'label': 'Description',
+		'oldfieldname': 'description',
+		'oldfieldtype': 'Data',
+		'permlevel': 1,
+		'width': '300px'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'required_qty',
+		'fieldtype': 'Currency',
+		'idx': 7,
+		'label': 'Required Qty',
+		'oldfieldname': 'required_qty',
+		'oldfieldtype': 'Currency',
+		'permlevel': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'consumed_qty',
+		'fieldtype': 'Currency',
+		'idx': 8,
+		'label': 'Consumed Qty',
+		'oldfieldname': 'consumed_qty',
+		'oldfieldtype': 'Currency',
+		'permlevel': 0,
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'rate',
+		'fieldtype': 'Currency',
+		'idx': 10,
+		'label': 'Rate',
+		'oldfieldname': 'rate',
+		'oldfieldtype': 'Currency',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'conversion_factor',
+		'fieldtype': 'Currency',
+		'hidden': 1,
+		'idx': 11,
+		'label': 'Conversion Factor',
+		'oldfieldname': 'conversion_factor',
+		'oldfieldtype': 'Currency',
+		'permlevel': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'amount',
+		'fieldtype': 'Currency',
+		'idx': 11,
+		'label': 'Amount',
+		'oldfieldname': 'amount',
+		'oldfieldtype': 'Currency',
+		'permlevel': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'stock_uom',
+		'fieldtype': 'Data',
+		'idx': 12,
+		'label': 'Stock Uom',
+		'oldfieldname': 'stock_uom',
+		'oldfieldtype': 'Data',
+		'permlevel': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'current_stock',
+		'fieldtype': 'Currency',
+		'idx': 12,
+		'label': 'Current Stock',
+		'oldfieldname': 'current_stock',
+		'oldfieldtype': 'Currency',
+		'permlevel': 1
+	}
+]

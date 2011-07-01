@@ -1,0 +1,67 @@
+# DocType, Support Ticket Response
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2011-05-23 14:50:48',
+		'docstatus': 0,
+		'modified': '2011-05-24 10:17:30',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all DocType
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocType',
+		'istable': 1,
+		'module': 'Support',
+		'name': '__common__',
+		'section_style': 'Simple',
+		'show_in_menu': 0,
+		'version': 4
+	},
+
+	# These values are common for all DocField
+	{
+		'doctype': 'DocField',
+		'name': '__common__',
+		'parent': 'Support Ticket Response',
+		'parentfield': 'fields',
+		'parenttype': 'DocType',
+		'permlevel': 0
+	},
+
+	# DocType, Support Ticket Response
+	{
+		'doctype': 'DocType',
+		'name': 'Support Ticket Response'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'mail',
+		'fieldtype': 'Text',
+		'idx': 1,
+		'label': 'Mail'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'from_email',
+		'fieldtype': 'Data',
+		'idx': 2,
+		'label': 'From Email'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'content_type',
+		'fieldtype': 'Data',
+		'idx': 3,
+		'label': 'Content Type'
+	}
+]

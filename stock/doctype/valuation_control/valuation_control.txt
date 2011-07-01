@@ -1,0 +1,31 @@
+# DocType, Valuation Control
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-08-08 17:09:30',
+		'docstatus': 0,
+		'modified': '2010-12-23 11:18:22',
+		'modified_by': 'umair@iwebnotes.com',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all DocType
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocType',
+		'in_create': 1,
+		'issingle': 1,
+		'module': 'Stock',
+		'name': '__common__',
+		'section_style': 'Simple',
+		'server_code_error': ' ',
+		'version': 4
+	},
+
+	# DocType, Valuation Control
+	{
+		'doctype': 'DocType',
+		'name': 'Valuation Control'
+	}
+]

@@ -1,0 +1,65 @@
+# DocType, UOM Conversion Detail
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-08-08 17:09:29',
+		'docstatus': 0,
+		'modified': '2010-09-20 14:06:57',
+		'modified_by': 'umair@iwebnotes.com',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all DocType
+	{
+		'autoname': 'UCDD/.#####',
+		'colour': 'White:FFF',
+		'doctype': 'DocType',
+		'istable': 1,
+		'module': 'Stock',
+		'name': '__common__',
+		'section_style': 'Tray',
+		'server_code_error': ' ',
+		'show_in_menu': 0,
+		'version': 1
+	},
+
+	# These values are common for all DocField
+	{
+		'doctype': 'DocField',
+		'name': '__common__',
+		'parent': 'UOM Conversion Detail',
+		'parentfield': 'fields',
+		'parenttype': 'DocType',
+		'permlevel': 0
+	},
+
+	# DocType, UOM Conversion Detail
+	{
+		'doctype': 'DocType',
+		'name': 'UOM Conversion Detail'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'uom',
+		'fieldtype': 'Link',
+		'idx': 10,
+		'label': 'UOM',
+		'oldfieldname': 'uom',
+		'oldfieldtype': 'Link',
+		'options': 'UOM'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'conversion_factor',
+		'fieldtype': 'Float',
+		'idx': 11,
+		'label': 'Conversion Factor',
+		'oldfieldname': 'conversion_factor',
+		'oldfieldtype': 'Float'
+	}
+]

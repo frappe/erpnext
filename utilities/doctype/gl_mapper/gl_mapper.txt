@@ -1,0 +1,98 @@
+# DocType, GL Mapper
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-08-08 17:09:03',
+		'docstatus': 0,
+		'modified': '2011-05-10 11:16:01',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all DocType
+	{
+		'_last_update': '1305006361',
+		'autoname': 'field:doc_type',
+		'colour': 'White:FFF',
+		'doctype': 'DocType',
+		'module': 'Utilities',
+		'name': '__common__',
+		'section_style': 'Simple',
+		'server_code_error': ' ',
+		'show_in_menu': 0,
+		'version': 3
+	},
+
+	# These values are common for all DocField
+	{
+		'doctype': 'DocField',
+		'name': '__common__',
+		'parent': 'GL Mapper',
+		'parentfield': 'fields',
+		'parenttype': 'DocType',
+		'permlevel': 0
+	},
+
+	# These values are common for all DocPerm
+	{
+		'doctype': 'DocPerm',
+		'name': '__common__',
+		'parent': 'GL Mapper',
+		'parentfield': 'permissions',
+		'parenttype': 'DocType',
+		'permlevel': 0,
+		'read': 1
+	},
+
+	# DocType, GL Mapper
+	{
+		'doctype': 'DocType',
+		'name': 'GL Mapper'
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
+		'doctype': 'DocPerm',
+		'idx': 1,
+		'role': 'Accounts User',
+		'submit': 0,
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'create': 1,
+		'doctype': 'DocPerm',
+		'idx': 2,
+		'role': 'System Manager',
+		'write': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'doc_type',
+		'fieldtype': 'Data',
+		'idx': 1,
+		'label': 'Doc Type',
+		'oldfieldname': 'doc_type',
+		'oldfieldtype': 'Link',
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'fields',
+		'fieldtype': 'Table',
+		'idx': 2,
+		'label': 'Fields',
+		'oldfieldname': 'fields',
+		'oldfieldtype': 'Table',
+		'options': 'GL Mapper Detail'
+	}
+]
