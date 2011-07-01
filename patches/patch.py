@@ -1,6 +1,6 @@
 # REMEMBER to update this
 # ========================
-last_patch = 305
+last_patch = 306
 
 #-------------------------------------------
 
@@ -1187,9 +1187,9 @@ def execute(patch_no):
 		reload_doc('payroll', 'doctype', 'salary_structure')
 		reload_doc('payroll', 'doctype', 'salary_slip')
 	elif patch_no == 298:
-		sql("update `tabDocField` set options = 'Link:Company' where parent = 'Attendance' and fieldname = 'company'")
-		sql("update `tabDocField` set options = 'Link:Company' where parent = 'Expense Voucher' and fieldname = 'company'")
-		sql("update `tabDocField` set options = 'Link:Company' where parent = 'Appraisal' and fieldname = 'company'")
+		sql("update `tabDocField` set options = 'link:Company' where parent = 'Attendance' and fieldname = 'company'")
+		sql("update `tabDocField` set options = 'link:Company' where parent = 'Expense Voucher' and fieldname = 'company'")
+		sql("update `tabDocField` set options = 'link:Company' where parent = 'Appraisal' and fieldname = 'company'")
 	elif patch_no == 299:
 		sql("update `tabDocPerm` set `match` = NULL where parent = 'Employee' and role = 'Employee'")
 	elif patch_no == 300:
@@ -1207,3 +1207,9 @@ def execute(patch_no):
 		reload_doc('setup', 'doctype', 'company')
 	elif patch_no == 305:
 		sql("update `tabDocField` set options = 'link:Company' where options='link:Company' and fieldname='company' and fieldtype='Select'")
+	elif patch_no == 306:
+		sql("update `tabDocField` set options = '\nAccount\nCompany\nCustomer\nSupplier\nEmployee\nWarehouse\nItem' where parent = 'Rename Tool' and fieldname = 'select_doctype'")
+		sql("update `tabDocField` set options = 'link:Item' where parent = 'Raw Materials Supplied' and fieldname = 'po_item'")
+		sql("update `tabDocField` set options = 'Sales Order' where parent = 'Indent Detail' and fieldname = 'sales_order_no'")
+		sql("update `tabDocField` set options = 'link:Company', fieldtype = 'Select' where parent = 'Stock Ledger Entry' and fieldname = 'company'")
+		reload_doc('tools', 'doctype', 'rename_tool')		

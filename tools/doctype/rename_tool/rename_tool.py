@@ -12,9 +12,9 @@ class DocType:
 		# call on_rename method if exists
 		obj = get_obj(self.doc.select_doctype, self.doc.document_to_rename)
 		if hasattr(obj, 'on_rename'):
-			obj.on_rename(self.doc.new_name)
-		
-		# rename the document
+			obj.on_rename(self.doc.new_name,self.doc.document_to_rename)
+			
+		# rename the document		
 		webnotes.model.rename(self.doc.select_doctype, self.doc.document_to_rename, self.doc.new_name)
 		
-		webnotes.msgprint("Item renamed successfully")
+		webnotes.msgprint("Successfully renamed "+self.doc.select_doctype+" : '"+self.doc.document_to_rename+"' to <b>"+self.doc.new_name+"</b>")
