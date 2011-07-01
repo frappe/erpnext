@@ -1,6 +1,6 @@
 # REMEMBER to update this
 # ========================
-last_patch = 306
+last_patch = 307
 
 #-------------------------------------------
 
@@ -1212,4 +1212,7 @@ def execute(patch_no):
 		sql("update `tabDocField` set options = 'link:Item' where parent = 'Raw Materials Supplied' and fieldname = 'po_item'")
 		sql("update `tabDocField` set options = 'Sales Order' where parent = 'Indent Detail' and fieldname = 'sales_order_no'")
 		sql("update `tabDocField` set options = 'link:Company', fieldtype = 'Select' where parent = 'Stock Ledger Entry' and fieldname = 'company'")
-		reload_doc('tools', 'doctype', 'rename_tool')		
+		reload_doc('tools', 'doctype', 'rename_tool')
+	elif patch_no == 307:
+		sql("delete from `tabDocField` where parent = 'company' and label = 'Trash Company' and fieldtype = 'Button'")
+		reload_doc('setup', 'doctype', 'company')
