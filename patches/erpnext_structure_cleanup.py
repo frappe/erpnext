@@ -100,7 +100,7 @@ def sync_roles():
 	
 	# roles
 	roles = {
-		'Accounts'	:		"'Accounts Manager', 'Accounts User'", 
+		'Accounts'	:		"'Accounts Manager', 'Accounts User', 'Auditor'", 
 		'Selling'	: 		"'Customer', 'Sales User', 'Sales Manager', 'Sales Master Manager', 'Partner'", 
 		'Buying'	:		"'Supplier', 'Purchase User', 'Purchase Manager', 'Purchase Master Manager'", 
 		'Stock'		:		"'Material User', 'Material Master Manager', 'Material Manager', 'Quality Manager'", 
