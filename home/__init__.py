@@ -78,16 +78,23 @@ def make_feed(doc, subject, color):
 	f.color = color
 	f.save(1)
 	
+#def update_feed(doc):   
+#	"adds a new feed"
+#	prop_rec = webnotes.conn.sql("select value from `tabProperty Setter` where doc_type = %s and property = 'subject'", (doc.doctype))
+#	if prop_rec:		
+#		subject = prop_rec[0][0]
+#	else:	
+#		rec = webnotes.conn.sql("select subject from tabDocType where name=%s", (doc.doctype))
+#		subject = rec[0][0]
+#	
+#	subject, color = [subject, feed_dict_color.get(doc.doctype)]
+#	if subject:
+#		subject = subject % doc.fields
+#		make_feed(doc, subject, color)
+		
 def update_feed(doc):   
 	"adds a new feed"
-	prop_rec = webnotes.conn.sql("select value from `tabProperty Setter` where doc_type = %s and property = 'subject'", (doc.doctype))
-	if prop_rec:		
-		subject = prop_rec[0][0]
-	else:	
-		rec = webnotes.conn.sql("select subject from tabDocType where name=%s", (doc.doctype))
-		subject = rec[0][0]
-	
-	subject, color = [subject, feed_dict_color.get(doc.doctype)]
+	subject, color = feed_dict.get(doc.doctype, [None, None])
 	if subject:
-		subject = subject % doc.fields
-		make_feed(doc, subject, color)
+     subject = subject % doc.fields
+     make_feed(doc, subject, color)
