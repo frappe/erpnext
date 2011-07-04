@@ -150,7 +150,7 @@ def sync_mapper():
 #---------------------------------------
 def run_patches():
 	# update module
-	dt_module = {'LC PR Detail':'Stock', 'Landed Cost Detail':'Stock', 'Comment Widget Record': 'Core', 'Tag':'Core', 'Tag Detail': 'Core', 'POS Settings': 'Accounts'}
+	dt_module = {'LC PR Detail':'Stock', 'Landed Cost Detail':'Stock', 'Comment Widget Record': 'Core', 'Tag':'Core', 'Tag Detail': 'Core', 'POS Settings': 'Accounts', 'Menu Item': 'Setup', 'Menu Item Role': 'Setup'}
 	for d in dt_module.keys():
 		sql("update `tabDocType` set module = '%s' where name = '%s'" % (dt_module[d], d))
 	delete_unwanted_mappers()
