@@ -3,7 +3,7 @@ from webnotes import msgprint
 
 feed_dict = {
 	# Project
-	'Ticket':		       ['[%(status)s] %(subject)s', '#000080'],
+	'Project':		       ['[%(status)s] %(subject)s', '#000080'],
 
 	# Sales
 	'Lead':			 ['%(lead_name)s', '#000080'],
@@ -30,8 +30,7 @@ feed_dict = {
 	# Support
 	'Customer Issue':       ['[%(status)s] %(description)s by %(customer_name)s', '#000080'],
 	'Maintenance Visit':['To %(customer_name)s', '#4169E1'],
-	#'Support Ticket':       ['[%(status)s] %(subject)s', '#000080']
-	'Support Ticket':       '#000080'
+	'Support Ticket':       ['[%(status)s] %(subject)s', '#000080']	
 }
 
 feed_dict_color = {
@@ -77,20 +76,20 @@ def make_feed(doc, subject, color):
 	f.subject = subject
 	f.color = color
 	f.save(1)
+
+def update_feed1(doc):   
+	"adds a new feed"
+	prop_rec = webnotes.conn.sql("select value from `tabProperty Setter` where doc_type = %s and property = 'subject'", (doc.doctype))
+	if prop_rec:		
+		subject = prop_rec[0][0]
+	else:	
+		rec = webnotes.conn.sql("select subject from tabDocType where name=%s", (doc.doctype))
+		subject = rec[0][0]
 	
-#def update_feed(doc):   
-#	"adds a new feed"
-#	prop_rec = webnotes.conn.sql("select value from `tabProperty Setter` where doc_type = %s and property = 'subject'", (doc.doctype))
-#	if prop_rec:		
-#		subject = prop_rec[0][0]
-#	else:	
-#		rec = webnotes.conn.sql("select subject from tabDocType where name=%s", (doc.doctype))
-#		subject = rec[0][0]
-#	
-#	subject, color = [subject, feed_dict_color.get(doc.doctype)]
-#	if subject:
-#		subject = subject % doc.fields
-#		make_feed(doc, subject, color)
+	subject, color = [subject, feed_dict_color.get(doc.doctype)]
+	if subject:
+		subject = subject % doc.fields
+		make_feed(doc, subject, color)
 		
 def update_feed(doc):   
 	"adds a new feed"
