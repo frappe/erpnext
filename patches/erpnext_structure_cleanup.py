@@ -162,12 +162,12 @@ def run_patches():
 	delete_unwanted_pages()
 
 	delete_unwanted_search_criteria()
-	delete_unwanted_modules()
+
 	
 	rename_merge_modules()
 	sync_roles()
 	sync_mapper()
-	
+	delete_unwanted_modules()
 	# landed cost wizard link in stock
 	reload_doc('stock', 'Module Def', 'stock')
 	
