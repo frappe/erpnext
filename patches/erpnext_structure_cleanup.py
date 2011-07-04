@@ -63,7 +63,7 @@ def delete_unwanted_mappers():
 		
 def delete_unwanted_modules():
 	"deletes unwanted modules"
-	lst = ['Development', 'Recycle Bin', 'Testing', 'Testing System', 'Test', 'System', 'Partner Updates', 'My Company', 'Event Updates', 'E-Commerce']
+	lst = ['Development', 'Recycle Bin', 'Testing', 'Testing System', 'Test', 'Partner Updates', 'My Company', 'Event Updates', 'E-Commerce']
 	for d in lst:
 		delete_doc('Module Def', d)
 
