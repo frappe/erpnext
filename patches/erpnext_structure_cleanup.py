@@ -150,11 +150,11 @@ def run_patches():
 	dt_module = {'LC PR Detail':'Stock', 'Landed Cost Detail':'Stock', 'Comment Widget Record': 'Core', 'Tag':'Core', 'Tag Detail': 'Core'}
 	for d in dt_module.keys():
 		sql("update `tabDocType` set module = '%s' where name = '%s'" % (dt_module[d], d))
-
+	delete_unwanted_mappers()
 	delete_unwanted_doctypes()
 	sql("start transaction")
 	delete_unwanted_pages()
-	delete_unwanted_mappers()
+
 	delete_unwanted_search_criteria()
 	delete_unwanted_modules()
 
