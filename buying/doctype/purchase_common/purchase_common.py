@@ -527,22 +527,7 @@ class DocType:
 		#msgprint(ret)
 		return cstr(ret)
 
-	# Check Approving Authority
-	# -------------------------
-	def check_approving_authority(self, doctype_name, grand_total):
-		det = sql("select amount from `tabApproval Structure` where doctype_name = '%s' and parent = 'Authorization Rules' and amount <= '%s'" % (doctype_name, grand_total))
-		amt_list, auth_users = [], []
-		if det:
-			for x in det:
-				amt_list.append(flt(x[0]))
-			max_amount = max(amt_list)
-			# Get names of all approving authority with max amount
-			for d in sql("select approving_authority from `tabApproval Structure` where doctype_name = '%s' and parent = 'Authorization Rules' and amount = '%s'" % (doctype_name, flt(max_amount))): auth_users.append(d[0])
-			for x in sql("select approving_authority from `tabApproval Structure` where doctype_name = '%s' and parent = 'Authorization Rules' and amount > '%s'" % (doctype_name, grand_total)): auth_users.append(x[0])
-			if not has_common(auth_users, session['data']['profile']['roles']):
-				msgprint("You do not have an authority to submit this %s. Only %s can submit since amount exceeds %s. %s" % (doctype_name, auth_users, get_defaults()['currency'], flt(max_amount)))
-				raise Exception
-				
+
 				
 	# Get total in words
 	# ==================================================================	
