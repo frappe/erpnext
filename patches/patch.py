@@ -1,6 +1,6 @@
 # REMEMBER to update this
 # ========================
-last_patch = 307
+last_patch = 308
 
 #-------------------------------------------
 
@@ -1216,3 +1216,5 @@ def execute(patch_no):
 	elif patch_no == 307:
 		sql("delete from `tabDocField` where parent = 'company' and label = 'Trash Company' and fieldtype = 'Button'")
 		reload_doc('setup', 'doctype', 'company')
+	elif patch_no == 308:
+		sql("update `tabDocField` set reqd = 0 where fieldname = 'select_item' and parent = 'Property Setter'")
