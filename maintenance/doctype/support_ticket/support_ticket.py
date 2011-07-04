@@ -1,6 +1,7 @@
 import webnotes
 
 from utilities.transaction_base import TransactionBase
+from home import update_feed
 
 class DocType(TransactionBase):
 	def __init__(self, doc, doclist=[]):
@@ -46,3 +47,11 @@ class DocType(TransactionBase):
 		d.mail = response
 		d.content_type = content_type
 		d.save(1)
+		
+	def close_ticket(self):
+		webnotes.conn.set(self.doc,'status','Closed')
+		update_feed(self.doc)
+
+	def reopen_ticket(self):
+		webnotes.conn.set(self.doc,'status','Open')		
+		update_feed(self.doc)		

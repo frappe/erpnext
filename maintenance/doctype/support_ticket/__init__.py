@@ -54,7 +54,8 @@ class SupportMailbox(POP3Mailbox):
 			d.save(1)
 
 		# update feed
-		update_feed(d)
+		update_feed(d)	
+		
 
 def get_support_mails():
 	"""
