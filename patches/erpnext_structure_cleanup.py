@@ -49,7 +49,7 @@ def delete_unwanted_search_criteria():
 def delete_unwanted_mappers():
 	"deletes unwanted mappers"
 	
-	lst = ['Customer Issue-Maintenance Report', 'Enquiry-Service Quotation', 'Sales Order-Maintenance Report', 'Service Quotation-Service Order', 'Supplier Quotation-Purchase Order', 'Visit Schedule-Maintenance Report']
+	lst = ['Customer Issue-Maintenance Report', 'Enquiry-Service Quotation', 'Sales Order-Maintenance Report', 'Service Quotation-Service Order', 'Supplier Quotation-Purchase Order', 'Visit Schedule-Maintenance Report', 'RFQ-Supplier Quotation']
 	for d in lst:
 		delete_doc('DocType Mapper', d)
 		
