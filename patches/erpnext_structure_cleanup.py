@@ -40,6 +40,8 @@ def delete_unwanted_pages():
 def delete_unwanted_search_criteria():
 	"deletes search criteria which are not used anymore"
 	
+	sql("update `tabSearch Criteria` set module = 'HR' where name = 'salary_structure_details'")
+	
 	lst = ['_SRCH00002', '_SRCH00001', 'warranty-amc_summary1', 'test_so4', 'test_so3', 'test_so2', 'test_so1', 'test_so', 'test5', 'target_variance_report1', 'STDSRCH/00006', 'STDSRCH/00005', 'STDSRCH/00004', 'STDSRCH/00003', 'STDSRCH/00002', 'STDSRCH/00001', 'so_pending_items_6', 'so_pending_items_5', 'so_pending_items_3', 'so_pending_items_34', 'scrap', 'sales_report_test', 'salary_structure_details1', 'salary_structure_details2', 'salary_structure_details3', 'salary_slips1', 'projectwise_pending_qty_and_costs2', 'projectwise_pending_qty_and_costs1', 'projectwise_delivered_qty_and_costs1', 'projectwise_delivered_qty_and_costs2', 'New Search Criteria 1', 'monthly_salary_register2', 'monthly_salary_register1', 'installed_items','follow_up_history', 'follow_up_report', 'employee_in_company_experience2', 'employee_in_company_experience1', 'employee_in_company_experience', 'employee_details', 'employee_details1', 'employee_details2', 'employees_birthday1', 'draft_so_pending_items', 'draft_sales_orders', 'delivery_notewise_pending_qty_to_install', 'datewise_leave_report2', 'datewise_leave_report1', 'datewise_leave_report', 'customer_issues1', 'cancelled_so_pending_items1', 'cancelled_so_pending_items', 'budget_variance_report3', 'budget_variance_report1', 'account_-_inputs_rg_23_a_-_part_ii_wrong_one', 'territory_item_group_wise_gp', 'sales_orderwise_pending_packing_item_summary', 'itemwise_trend', 'monthly_attendance_details_old', 'projectwise_contribution_report', 'projectwise_delivery_and_material_cost', 'projectwise_delivery_and_mat_cost_report']
 	
 	for d in lst:
@@ -148,7 +150,7 @@ def sync_mapper():
 #---------------------------------------
 def run_patches():
 	# update module
-	dt_module = {'LC PR Detail':'Stock', 'Landed Cost Detail':'Stock', 'Comment Widget Record': 'Core', 'Tag':'Core', 'Tag Detail': 'Core', 'POS Settings': 'Accounts', 'Salary Structure Details': 'HR'}
+	dt_module = {'LC PR Detail':'Stock', 'Landed Cost Detail':'Stock', 'Comment Widget Record': 'Core', 'Tag':'Core', 'Tag Detail': 'Core', 'POS Settings': 'Accounts'}
 	for d in dt_module.keys():
 		sql("update `tabDocType` set module = '%s' where name = '%s'" % (dt_module[d], d))
 	delete_unwanted_mappers()
@@ -158,12 +160,11 @@ def run_patches():
 
 	delete_unwanted_search_criteria()
 	delete_unwanted_modules()
-
+	
 	rename_merge_modules()
 	sync_roles()
 	sync_mapper()
 	
-
 	# landed cost wizard link in stock
 	reload_doc('stock', 'Module Def', 'stock')
 	
