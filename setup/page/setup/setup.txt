@@ -5,8 +5,8 @@
 	{
 		'creation': '2010-12-16 23:46:03',
 		'docstatus': 0,
-		'modified': '2010-12-18 13:30:38',
-		'modified_by': 'yogesh@webnotestech.com',
+		'modified': '2011-07-04 16:58:27',
+		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
 

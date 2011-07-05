@@ -1,4 +1,4 @@
-$import(Tips Common)
+ 
 
 //Account filtering for cost center
 cur_frm.fields_dict['budget_details'].grid.get_field('account').get_query = function(doc) {

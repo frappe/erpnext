@@ -13,7 +13,7 @@ def replace_code(old, new):
 			print 'Found in %s' % t
 	
 if __name__=='__main__':
-	old = """\.button("""
-	new = ""
+	old = """$import(Tips Common)"""
+	new = " "
 	replace_code(old, new)
 			

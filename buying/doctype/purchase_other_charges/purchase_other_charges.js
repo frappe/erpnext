@@ -1,4 +1,4 @@
-//$import(Tips Common)
+// 
 
 //--------- ONLOAD -------------
 cur_frm.cscript.onload = function(doc, cdt, cdn) {

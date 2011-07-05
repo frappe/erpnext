@@ -1,4 +1,4 @@
-$import(Tips Common)
+ 
 
 cur_frm.cscript.onload = function(){
   cur_frm.cscript.get_tips(doc, cdt, cdn);
