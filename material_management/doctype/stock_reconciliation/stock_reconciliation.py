@@ -127,15 +127,18 @@ class DocType:
 	# update mar
 	# -----------
 	def update_mar(self, d, qty_diff):
+		"""
+			update item valuation in previous date and also on post date if no qty diff
+		"""
+		
+		self.update_item_valuation_pre_date(d)
+		
 		if not flt(d[self.label['qty']]) and not flt(d[self.label['actual_qty']]):
-			 # seems like a special condition when there is no actual quanitity but there is a rate, may be only for setting a rate!
-			 self.make_sl_entry(1,d,1)
-			 self.make_sl_entry(1,d,-1)
-		else:
-			self.update_item_valuation_pre_date(d)
-
-			if not qty_diff:
-				self.update_item_valuation_post_date(d)
+			# seems like a special condition when there is no actual quanitity but there is a rate, may be only for setting a rate!
+			self.make_sl_entry(1,d,1)
+			self.make_sl_entry(1,d,-1)
+		elif not qty_diff:
+			self.update_item_valuation_post_date(d)
 				
 	# update valuation rate as csv file in all sle before reconciliation date
 	# ------------------------------------------------------------------------
