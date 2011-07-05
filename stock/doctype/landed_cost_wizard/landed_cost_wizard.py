@@ -77,6 +77,7 @@ class DocType:
 				else:
 					obj = get_obj('Purchase Receipt', name)
 					sql("update `tabPurchase Tax Detail` set rate = %s, tax_amount = %s where name = %s and parent = %s",(flt(flt(lc.amount) * flt(obj.doc.net_total/ amt)),flt(flt(lc.amount) * flt(obj.doc.net_total/ amt)),pr_oc_det[0][0],name))
+					
 				self.calc_pr_other_charges(name)
 				obj = get_obj('Purchase Receipt', name, with_children = 1)
 				for d in getlist(obj.doclist, 'purchase_receipt_details'):
@@ -84,6 +85,7 @@ class DocType:
 						d.valuation_rate = (flt(d.purchase_rate) + (flt(d.rm_supp_cost) / flt(d.qty)) + (flt(d.item_tax_amount)/flt(d.qty))) / flt(d.conversion_factor)
 						d.save()
 					sql("update `tabStock Ledger Entry` set incoming_rate = '%s' where voucher_detail_no = '%s'"%(flt(d.valuation_rate), d.name))
+
 					bin_name = sql("select t1.name, t2.name, t2.posting_date, t2.posting_time from `tabBin` t1, `tabStock Ledger Entry` t2 where t2.voucher_detail_no = '%s' and t2.item_code = t1.item_code and t2.warehouse = t1.warehouse LIMIT 1"%(d.name))
 					if bin_name and bin_name[0][0]:
 						obj = get_obj('Bin', bin_name[0][0]).update_item_valuation(bin_name[0][1], bin_name[0][2], bin_name[0][3])

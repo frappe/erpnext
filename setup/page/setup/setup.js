@@ -224,8 +224,7 @@ SetupData = function(cnty){
     ['Price List',1,'Price List','','Price list master'],
     ['UOM',1,'UOM','','Unit of measure (UOM) master'],
     ['Warehouse Type',1,'Warehouse Type','','Warehouse classifications'],
-    ['Warehouse',1,'Warehouse','','Warehouse master'],
-    ['Landed Cost Master', 1, 'Landed Cost Master', '', 'You can create master template for landed cost wizard']]};
+    ['Warehouse',1,'Warehouse','','Warehouse master']]};
   
   this.buying = {'Buying':[['Supplier Type',1,'Supplier Type','','Manage supplier classifications'],
     ['Supplier',1,'Supplier','id'+NEWLINE+'supplier_type'+NEWLINE+'supplier_status'+NEWLINE+'company','Supplier master']]};

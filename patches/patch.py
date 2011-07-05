@@ -1,7 +1,7 @@
 # REMEMBER to update this
 # ========================
 
-last_patch = 309
+last_patch = 310
 
 #-------------------------------------------
 
@@ -1222,3 +1222,5 @@ def execute(patch_no):
 		run_patches()
 	elif patch_no == 309:
 		sql("delete from `tabDocField` where fieldname = 'item_attachments_details' and parent = 'Item'")
+	elif patch_no == 310:
+		sql("delete from `tabModule Def Item` where parent = 'Stock' and doc_name = 'Landed Cost Wizard'")
