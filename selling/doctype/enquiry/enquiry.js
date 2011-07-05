@@ -2,7 +2,7 @@ $import(SMS Control)
 
 cur_frm.cscript.refresh = function(doc, cdt, cdn){
 
-  //cur_frm.cscript.get_tips(doc, cdt, cdn);
+  // 
 
   if(!doc.docstatus){
     hide_field(['Update Follow up']);

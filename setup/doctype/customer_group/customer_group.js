@@ -1,7 +1,7 @@
  
 
 cur_frm.cscript.onload = function(){
-  cur_frm.cscript.get_tips(doc, cdt, cdn);
+   
   if(doc.__islocal){
     doc.parent_customer_group = 'Root';
     refresh('parent_customer_group');
@@ -9,7 +9,7 @@ cur_frm.cscript.onload = function(){
 }
 
 cur_frm.cscript.refresh = function(doc, cdt, cdn) {
-  cur_frm.cscript.get_tips(doc, cdt, cdn);
+   
 }
 
 //get query select Customer Group

@@ -13,7 +13,7 @@ def replace_code(old, new):
 			print 'Found in %s' % t
 	
 if __name__=='__main__':
-	old = """$import(Tips Common)"""
+	old = """cur_frm.cscript.get_tips(doc, cdt, cdn);"""
 	new = " "
 	replace_code(old, new)
 			

@@ -1,7 +1,7 @@
  
 
 cur_frm.cscript.onload = function(){
-  cur_frm.cscript.get_tips(doc, cdt, cdn);
+   
   if(doc.__islocal){
     doc.parent_item_group = 'Root';
     refresh('parent_item_group');
@@ -14,5 +14,5 @@ cur_frm.fields_dict['parent_item_group'].get_query = function(doc,cdt,cdn) {
 }
 
 cur_frm.cscript.refresh = function(doc, cdt, cdn) {
-  cur_frm.cscript.get_tips(doc, cdt, cdn);
+   
 }

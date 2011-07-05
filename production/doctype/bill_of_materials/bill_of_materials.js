@@ -3,13 +3,13 @@ $import(Production Tips Common)
 // ONLOAD
 cur_frm.cscript.onload = function(doc,cdt,cdn){
 
-  cur_frm.cscript.get_tips(doc, cdt, cdn);
+   
 }
 
 // On REFRESH
 cur_frm.cscript.refresh = function(doc,cdt,cdn){
 
-  cur_frm.cscript.get_tips(doc, cdt, cdn);
+   
 
   // Hide - Un Hide Buttons
   if (!doc.is_default && doc.__islocal!=1) unhide_field('Set as Default BOM');

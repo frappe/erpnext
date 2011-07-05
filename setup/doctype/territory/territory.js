@@ -1,11 +1,11 @@
  
 
 cur_frm.cscript.refresh = function(doc, cdt, cdn) {
-  cur_frm.cscript.get_tips(doc, cdt, cdn);
+   
 }
 
 cur_frm.cscript.onload = function(){
-  cur_frm.cscript.get_tips(doc, cdt, cdn);
+   
   if(doc.__islocal){
     doc.parent_territory = 'All Territories';
     refresh('parent_territory');

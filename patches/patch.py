@@ -1,7 +1,7 @@
 # REMEMBER to update this
 # ========================
 
-last_patch = 308
+last_patch = 309
 
 #-------------------------------------------
 
@@ -1220,3 +1220,5 @@ def execute(patch_no):
 	elif patch_no == 308:
 		from erpnext_structure_cleanup import run_patches
 		run_patches()
+	elif patch_no == 309:
+		sql("delete from `tabDocField` where fieldname = 'item_attachments_details' and parent = 'Item'")

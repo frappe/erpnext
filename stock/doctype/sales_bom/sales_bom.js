@@ -1,12 +1,12 @@
  
 
 cur_frm.cscript.onload = function(doc, cdt, cdn) {
-  cur_frm.cscript.get_tips(doc, cdt, cdn); 
+    
   if(!doc.price_list) set_multiple(cdt,cdn,{price_list:sys_defaults.price_list_name});
 }
 
 cur_frm.cscript.refresh = function(doc, cdt, cdn) {
-  cur_frm.cscript.get_tips(doc, cdt, cdn);
+   
 }
 
 /* Get Item Code */

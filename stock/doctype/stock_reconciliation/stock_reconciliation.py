@@ -127,10 +127,10 @@ class DocType:
 	# update mar
 	# -----------
 	def update_mar(self, d, qty_diff):
-		if not d[self.label['qty']] and not d[self.label['actual_qty']]:
+		if not flt(d[self.label['qty']]) and not flt(d[self.label['actual_qty']]):
 			 # seems like a special condition when there is no actual quanitity but there is a rate, may be only for setting a rate!
-			 self.make_sl_entry(1,d,1)
-			 self.make_sl_entry(-1,d,1)
+			self.make_sl_entry(1,d,1)
+			self.make_sl_entry(1,d,-1)
 		else:
 			self.update_item_valuation_pre_date(d)
 

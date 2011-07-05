@@ -2,13 +2,13 @@
 
 //--------- ONLOAD -------------
 cur_frm.cscript.onload = function(doc, cdt, cdn) {
-  cur_frm.cscript.get_tips(doc, cdt, cdn);
+   
 }
 
 // Settings Module
 
 cur_frm.cscript.refresh = function(doc,cdt,cdn){
-  cur_frm.cscript.get_tips(doc, cdt, cdn);
+   
 
   if(doc.based_on == 'Grand Total' || doc.based_on == 'Average Discount' || doc.based_on == 'Total Claimed Amount' || doc.based_on == 'Not Applicable') hide_field('master_name');
   else  unhide_field('master_name');

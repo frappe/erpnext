@@ -24,7 +24,7 @@
 		'parentfield': None,
 		'parenttype': None,
 		'trash_reason': None,
-		'widget_code': "var acc_set_tips = function() {\n  $c_obj('Module Tip Control', 'get_tip', 'accounts', function(r,rt) { \n    if(r.message) {\n      $(parent.tip_area).html('<b>Tip: </b>' + r.message).css('display','block');\n    }\n  } );\n}\n\nacc_set_tips();"
+		'widget_code': ""
 	},
 	{
 		'click_function': "show_chart_browser('Accounts Browser','Account')",
