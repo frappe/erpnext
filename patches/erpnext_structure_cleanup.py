@@ -45,8 +45,12 @@ def delete_unwanted_pages():
 	"deletes pages which are not used anymore"
 	lst = ['Transaction Authorization', 'Prduct Display', 'Data Import', 'Partner Home', 'Product Display', 'Module Settings', 'About Us', 'Custom Reports', 'MIS', 'MIS - Comparison Report', 'Monthly MIS', 'MyReports', 'Navigation Page', 'Point Race', 'Tag Widget', 'Widget Test', 'Yearly MIS']
 	for d in lst:
-		delete_doc('Page', d)
-	
+		try:
+			delete_doc('Page', d)
+		except:
+			pass
+			
+			
 def delete_unwanted_search_criteria():
 	"deletes search criteria which are not used anymore"
 	
@@ -56,7 +60,10 @@ def delete_unwanted_search_criteria():
 	
 	for d in lst:
 		if sql("select name from `tabSearch Criteria` where ifnull(standard, 'Yes') = 'Yes' and name = '%s'" % d):
-			delete_doc('Search Criteria', d)
+			try:
+				delete_doc('Search Criteria', d)
+			except:
+				pass
 		
 	
 def delete_unwanted_mappers():
@@ -64,14 +71,19 @@ def delete_unwanted_mappers():
 	
 	lst = ['Customer Issue-Maintenance Report', 'Enquiry-Service Quotation', 'Sales Order-Maintenance Report', 'Service Quotation-Service Order', 'Supplier Quotation-Purchase Order', 'Visit Schedule-Maintenance Report', 'RFQ-Supplier Quotation', 'Indent-RFQ']
 	for d in lst:
-		delete_doc('DocType Mapper', d)
-		
+		try:
+			delete_doc('DocType Mapper', d)
+		except:
+			pass	
+			
 def delete_unwanted_modules():
 	"deletes unwanted modules"
 	lst = ['Development', 'Recycle Bin', 'Testing', 'Testing System', 'Test', 'Partner Updates', 'My Company', 'Event Updates', 'E-Commerce']
 	for d in lst:
-		delete_doc('Module Def', d)
-
+		try:
+			delete_doc('Module Def', d)
+		except:
+			pass
 
 #---------------------------------------------	
 
