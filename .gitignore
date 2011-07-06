@@ -1,3 +1,5 @@
 *.pyc
 *.comp.js
 .DS_Store
+server_tools
+patch.log
