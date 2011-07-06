@@ -43,14 +43,3 @@ def get_status_details(arg=None):
 		'is_trial': webnotes.conn.get_global('is_trial'),
 		'days_to_expiry': (webnotes.conn.get_global('days_to_expiry') or '0')
 	}
-
-#
-# Convert to a paid account
-#	
-def convert_to_paid():
-	from server_tools.server_tools.gateway_utils import convert_to_paid_gateway
-	r = convert_to_paid_gateway()
-	if r['exc']:
-		webnotes.msgprint(r['exc'])
-		raise Exception, r['exc']
-	webnotes.msgprint('Thank you for choosing to convert to a Paid Account!')	

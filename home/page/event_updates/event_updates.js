@@ -618,29 +618,12 @@ pscript.home_make_status = function() {
 			// system_messages
 			if(r.message.system_message)
 				pscript.show_system_message(wrapper, r.message.system_message);
-				
-			// trial
-			if(pscript.is_erpnext_saas && cint(r.message.is_trial) && in_list(user_roles, 'System Manager')) {
-				pscript.trial_box = $a(div, 'div', 'help_box', {margin:'2px 8px 2px 0px'}, "Your Free Trial expires in " +
-				r.message.days_to_expiry + " days. When you are satisfied, please <span class='link_type' onclick='pscript.convert_to_paid()'>please click here</span> to convert to a paid account." + 
-				"<br>To get help, view <a href='http://erpnext.blogspot.com/2011/02/getting-started-with-your-erpnext.html' target='_blank'>Getting Started with Your System</a> (opens in a new page)");
-			}
-			
+							
 			// render online users
 			pscript.online_users_obj.render(r.message.online_users);
 			pscript.online_users = r.message.online_users;
 		}
 	);	
-}
-
-// show system message
-// -------------------
-pscript.convert_to_paid = function() {
-	var callback = function(r,rt) {
-		if(r.exc) { msgprint(r.exc); return; }
-		$(pscript.trial_box).slideUp();
-	}
-	$c_page('home','event_updates','convert_to_paid','',callback)	
 }
 
 // show system message
