@@ -1,7 +1,7 @@
 # REMEMBER to update this
 # ========================
 
-last_patch = 313
+last_patch = 314
 
 #-------------------------------------------
 
@@ -1255,3 +1255,7 @@ def execute(patch_no):
 			tbl = sql("select options from `tabDocField` where fieldtype = 'Table' and parent = '%s'" % d)
 			for t in tbl:
 				sql("update `tab%s` t1, `tab%s` t2 set t1.docstatus = t2.docstatus where t1.parent = t2.name" % (t[0], d))
+				
+	elif patch_no == 314:
+		# delete double feed
+		sql("delete from tabFeed where subject like 'New %'")
