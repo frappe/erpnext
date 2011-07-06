@@ -104,7 +104,10 @@ def rename_merge_modules():
 	lst = rename_lst + merge_lst
 	for d in lst:
 		update_module(d[0], d[1])
-		delete_doc('Module Def', d[0])
+		try:
+			delete_doc('Module Def', d[0])
+		except:
+			pass
 	reload_doc('Utilities', 'Module Def', 'Utilities')
 	
 def update_module(from_mod, to_mod):
@@ -132,8 +135,11 @@ def sync_roles():
 		sql("update `tabRole` set module = '%s' where name in (%s)" % (mod, roles[mod]))
 		
 	sql("update `tabDocType` set module = 'Setup' where name = 'Role'")
-	delete_doc('Module Def', 'Roles')
-
+	try:
+	
+		delete_doc('Module Def', 'Roles')
+	except:
+		pass
 #------------------------------------ 
 def sync_mapper():
 	"Put mappers into corresponding module"
@@ -150,9 +156,10 @@ def sync_mapper():
 	
 	for mod in mappers.keys():
 		sql("update `tabDocType Mapper` set module = '%s' where name in %s" % (mod, mappers[mod]))
-	
-	delete_doc('Module Def', 'Mapper')
-	
+	try:
+		delete_doc('Module Def', 'Mapper')
+	except:
+		pass
 # --------------------------------------
 # function below will be run only in localhost
 '''def export_docs():
