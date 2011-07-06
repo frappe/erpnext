@@ -1,0 +1,34 @@
+# Search Criteria, itemwise_delivery_details
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-11-10 15:04:43',
+		'docstatus': 0,
+		'modified': '2010-10-26 09:10:53',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all Search Criteria
+	{
+		'columns': 'Delivery Note\x01ID,Delivery Note Detail\x01Item Code,Delivery Note Detail\x01Item Name,Delivery Note Detail\x01Quantity,Delivery Note Detail\x01Rate*,Delivery Note Detail\x01Amount*,Delivery Note Detail\x01Billed Qty,Delivery Note\x01Company',
+		'criteria_name': 'Itemwise Delivery Details',
+		'doc_type': 'Delivery Note Detail',
+		'doctype': 'Search Criteria',
+		'filters': "{'Delivery Note\x01Submitted':1,'Delivery Note\x01Status':'','Delivery Note\x01From Voucher Date\x01lower':'','Delivery Note\x01To Voucher Date\x01upper':'','Delivery Note\x01Fiscal Year':''}",
+		'module': 'Selling',
+		'name': '__common__',
+		'page_len': 50,
+		'parent_doc_type': 'Delivery Note',
+		'sort_by': '`tabDelivery Note`.`name`',
+		'sort_order': 'DESC',
+		'standard': 'Yes'
+	},
+
+	# Search Criteria, itemwise_delivery_details
+	{
+		'doctype': 'Search Criteria',
+		'name': 'itemwise_delivery_details'
+	}
+]

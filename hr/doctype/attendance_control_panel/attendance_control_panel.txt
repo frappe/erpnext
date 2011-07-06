@@ -1,0 +1,229 @@
+# DocType, Attendance Control Panel
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-10-19 11:19:24',
+		'docstatus': 0,
+		'modified': '2011-01-04 13:33:33',
+		'modified_by': 'rahul@webnotestech.com',
+		'owner': 'harshada@webnotestech.com'
+	},
+
+	# These values are common for all DocType
+	{
+		'_last_update': '1294312182',
+		'allow_attach': 1,
+		'colour': 'White:FFF',
+		'doctype': 'DocType',
+		'issingle': 1,
+		'max_attachments': 1,
+		'module': 'HR',
+		'name': '__common__',
+		'section_style': 'Simple',
+		'server_code_error': ' ',
+		'version': 122
+	},
+
+	# These values are common for all DocField
+	{
+		'doctype': 'DocField',
+		'name': '__common__',
+		'parent': 'Attendance Control Panel',
+		'parentfield': 'fields',
+		'parenttype': 'DocType'
+	},
+
+	# These values are common for all DocPerm
+	{
+		'doctype': 'DocPerm',
+		'name': '__common__',
+		'parent': 'Attendance Control Panel',
+		'parentfield': 'permissions',
+		'parenttype': 'DocType',
+		'read': 1
+	},
+
+	# DocType, Attendance Control Panel
+	{
+		'doctype': 'DocType',
+		'name': 'Attendance Control Panel'
+	},
+
+	# DocPerm
+	{
+		'create': 1,
+		'doctype': 'DocPerm',
+		'idx': 1,
+		'permlevel': 0,
+		'role': 'System Manager',
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'create': 1,
+		'doctype': 'DocPerm',
+		'idx': 2,
+		'permlevel': 0,
+		'role': 'HR User',
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'create': 1,
+		'doctype': 'DocPerm',
+		'idx': 3,
+		'permlevel': 0,
+		'role': 'HR Manager',
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'doctype': 'DocPerm',
+		'idx': 4,
+		'permlevel': 1,
+		'role': 'HR User'
+	},
+
+	# DocPerm
+	{
+		'doctype': 'DocPerm',
+		'idx': 5,
+		'permlevel': 1,
+		'role': 'HR Manager'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'description': "Get the template of the Attendance for which you want to import in CSV (Comma seperated values) format.\nFill data in the template. Save the template in CSV format.\nAll attendance dates inbetween 'Attendance From Date' and 'Attendance To Date' will come in the template with employees list.",
+		'doctype': 'DocField',
+		'fieldtype': 'Section Break',
+		'idx': 1,
+		'label': 'Download Template',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'description': 'Selected Attendance date will comes in the attendance template.',
+		'doctype': 'DocField',
+		'fieldname': 'att_fr_date',
+		'fieldtype': 'Date',
+		'idx': 2,
+		'label': 'Attendance From Date',
+		'oldfieldname': 'attenadnce_date',
+		'oldfieldtype': 'Date',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldtype': 'Button',
+		'idx': 3,
+		'label': 'Get Template',
+		'oldfieldtype': 'Button',
+		'permlevel': 0,
+		'trigger': 'Client'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Column Break',
+		'idx': 4,
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'description': 'All attendance dates inbetween selected Attendance From Date and Attendance To Date will come in the template with employees list.',
+		'doctype': 'DocField',
+		'fieldname': 'att_to_date',
+		'fieldtype': 'Date',
+		'idx': 5,
+		'label': 'Attendance To Date',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'description': 'To import attendance data, click on "Add" button, select the saved CSV file and click on "Upload".\nSelect the date format as attendance date format in CSV file.\nClick on "Import".',
+		'doctype': 'DocField',
+		'fieldtype': 'Section Break',
+		'idx': 6,
+		'label': 'Upload Attendance Data',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'import_date_format',
+		'fieldtype': 'Select',
+		'idx': 7,
+		'label': 'Import Date Format ',
+		'options': 'yyyy-mm-dd\nmm/dd/yyyy\nmm/dd/yy\ndd-mm-yyyy\ndd/mm/yyyy',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldname': 'overwrite',
+		'fieldtype': 'Check',
+		'idx': 8,
+		'label': 'Overwrite',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldtype': 'Button',
+		'idx': 9,
+		'label': 'Import',
+		'permlevel': 0,
+		'trigger': 'Client'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'file_list',
+		'fieldtype': 'Text',
+		'hidden': 1,
+		'idx': 10,
+		'label': 'File List',
+		'permlevel': 1,
+		'print_hide': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Section Break',
+		'idx': 11,
+		'label': 'Import Log',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'HTML',
+		'idx': 12,
+		'label': 'Import Log1',
+		'permlevel': 0
+	}
+]

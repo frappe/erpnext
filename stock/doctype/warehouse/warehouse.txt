@@ -1,0 +1,460 @@
+# DocType, Warehouse
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-08-08 17:09:30',
+		'docstatus': 0,
+		'modified': '2010-12-16 23:57:04',
+		'modified_by': 'nabin@webnotestech.com',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all DocType
+	{
+		'_last_update': '1300788639',
+		'allow_trash': 1,
+		'autoname': 'field:warehouse_name',
+		'colour': 'White:FFF',
+		'doctype': 'DocType',
+		'document_type': 'Master',
+		'module': 'Stock',
+		'name': '__common__',
+		'search_fields': 'warehouse_type',
+		'section_style': 'Tabbed',
+		'server_code_error': ' ',
+		'show_in_menu': 0,
+		'version': 55
+	},
+
+	# These values are common for all DocField
+	{
+		'doctype': 'DocField',
+		'name': '__common__',
+		'parent': 'Warehouse',
+		'parentfield': 'fields',
+		'parenttype': 'DocType'
+	},
+
+	# These values are common for all DocPerm
+	{
+		'doctype': 'DocPerm',
+		'name': '__common__',
+		'parent': 'Warehouse',
+		'parentfield': 'permissions',
+		'parenttype': 'DocType',
+		'read': 1
+	},
+
+	# DocType, Warehouse
+	{
+		'doctype': 'DocType',
+		'name': 'Warehouse'
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
+		'doctype': 'DocPerm',
+		'idx': 1,
+		'permlevel': 2,
+		'role': 'Material User',
+		'submit': 0,
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
+		'doctype': 'DocPerm',
+		'idx': 2,
+		'permlevel': 0,
+		'role': 'Material User',
+		'submit': 0,
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
+		'doctype': 'DocPerm',
+		'idx': 3,
+		'permlevel': 1,
+		'role': 'Material User',
+		'submit': 0,
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
+		'doctype': 'DocPerm',
+		'idx': 4,
+		'permlevel': 2,
+		'role': 'Material Manager',
+		'submit': 0,
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
+		'doctype': 'DocPerm',
+		'idx': 5,
+		'permlevel': 0,
+		'role': 'Material Manager',
+		'submit': 0,
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
+		'doctype': 'DocPerm',
+		'idx': 6,
+		'permlevel': 1,
+		'role': 'Material Manager',
+		'submit': 0,
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'doctype': 'DocPerm',
+		'idx': 7,
+		'permlevel': 1,
+		'role': 'All'
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 1,
+		'create': 1,
+		'doctype': 'DocPerm',
+		'idx': 8,
+		'permlevel': 0,
+		'role': 'Material Master Manager',
+		'submit': 0,
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'doctype': 'DocPerm',
+		'idx': 9,
+		'permlevel': 1,
+		'role': 'Material Master Manager'
+	},
+
+	# DocPerm
+	{
+		'cancel': 1,
+		'create': 1,
+		'doctype': 'DocPerm',
+		'idx': 10,
+		'permlevel': 0,
+		'role': 'System Manager',
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'create': 0,
+		'doctype': 'DocPerm',
+		'idx': 11,
+		'permlevel': 2,
+		'role': 'System Manager',
+		'write': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'trash_reason',
+		'fieldtype': 'Small Text',
+		'idx': 1,
+		'label': 'Trash Reason',
+		'oldfieldname': 'trash_reason',
+		'oldfieldtype': 'Small Text',
+		'permlevel': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Section Break',
+		'idx': 2,
+		'label': 'Warehouse Detail',
+		'oldfieldtype': 'Section Break',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'warehouse_name',
+		'fieldtype': 'Data',
+		'idx': 3,
+		'label': 'Warehouse Name',
+		'oldfieldname': 'warehouse_name',
+		'oldfieldtype': 'Data',
+		'permlevel': 0,
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldname': 'warehouse_type',
+		'fieldtype': 'Link',
+		'idx': 4,
+		'label': 'Warehouse Type',
+		'oldfieldname': 'warehouse_type',
+		'oldfieldtype': 'Link',
+		'options': 'Warehouse Type',
+		'permlevel': 0,
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'description': 'The valuation of items in this warehouse will be considered for the company that is specified',
+		'doctype': 'DocField',
+		'fieldname': 'company',
+		'fieldtype': 'Link',
+		'idx': 5,
+		'in_filter': 1,
+		'label': 'Company',
+		'oldfieldname': 'company',
+		'oldfieldtype': 'Link',
+		'options': 'Company',
+		'permlevel': 0,
+		'search_index': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'email_id',
+		'fieldtype': 'Data',
+		'hidden': 1,
+		'idx': 6,
+		'label': 'Email Id',
+		'oldfieldname': 'email_id',
+		'oldfieldtype': 'Data',
+		'permlevel': 0,
+		'print_hide': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'auto_indent_mail',
+		'fieldtype': 'Select',
+		'hidden': 1,
+		'idx': 7,
+		'label': 'Send Reorder Alert Mail ',
+		'no_copy': 1,
+		'oldfieldname': 'auto_indent_mail',
+		'oldfieldtype': 'Select',
+		'options': 'No\nYes',
+		'permlevel': 0,
+		'print_hide': 1,
+		'report_hide': 1,
+		'reqd': 0,
+		'trigger': 'Client'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'phone_no',
+		'fieldtype': 'Int',
+		'idx': 8,
+		'label': 'Phone No',
+		'oldfieldname': 'phone_no',
+		'oldfieldtype': 'Int',
+		'options': 'Phone',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'mobile_no',
+		'fieldtype': 'Int',
+		'idx': 9,
+		'label': 'Mobile No',
+		'oldfieldname': 'mobile_no',
+		'oldfieldtype': 'Int',
+		'options': 'Phone',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Column Break',
+		'idx': 10,
+		'oldfieldtype': 'Column Break',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'address_line_1',
+		'fieldtype': 'Data',
+		'idx': 11,
+		'label': 'Address Line 1',
+		'oldfieldname': 'address_line_1',
+		'oldfieldtype': 'Data',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'address_line_2',
+		'fieldtype': 'Data',
+		'idx': 12,
+		'label': 'Address Line 2',
+		'oldfieldname': 'address_line_2',
+		'oldfieldtype': 'Data',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'allow_on_submit': 0,
+		'doctype': 'DocField',
+		'fieldname': 'country',
+		'fieldtype': 'Link',
+		'hidden': 0,
+		'idx': 13,
+		'in_filter': 0,
+		'label': 'Country',
+		'no_copy': 0,
+		'oldfieldname': 'country',
+		'oldfieldtype': 'Link',
+		'options': 'Country',
+		'permlevel': 0,
+		'print_hide': 0,
+		'report_hide': 0,
+		'reqd': 0,
+		'search_index': 0,
+		'trigger': 'Client'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldname': 'state',
+		'fieldtype': 'Select',
+		'idx': 14,
+		'label': 'State',
+		'oldfieldname': 'state',
+		'oldfieldtype': 'Select',
+		'options': '\nSelect country first',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'city',
+		'fieldtype': 'Data',
+		'idx': 15,
+		'label': 'City',
+		'oldfieldname': 'city',
+		'oldfieldtype': 'Data',
+		'permlevel': 0,
+		'reqd': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'pin',
+		'fieldtype': 'Int',
+		'idx': 16,
+		'label': 'PIN',
+		'oldfieldname': 'pin',
+		'oldfieldtype': 'Int',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Section Break',
+		'idx': 17,
+		'label': 'Repost Stock',
+		'oldfieldtype': 'Section Break',
+		'permlevel': 2
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Button',
+		'hidden': 0,
+		'idx': 18,
+		'label': 'Repost Stock Ledger',
+		'oldfieldtype': 'Button',
+		'options': 'repost_stock',
+		'permlevel': 2
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'test_field2',
+		'fieldtype': 'Data',
+		'idx': 19,
+		'label': 'Test Field2',
+		'oldfieldname': 'test_field2',
+		'oldfieldtype': 'Data',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'test_field1',
+		'fieldtype': 'Data',
+		'idx': 20,
+		'label': 'Test Field1',
+		'oldfieldname': 'test_field1',
+		'oldfieldtype': 'Data',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'test_field',
+		'fieldtype': 'Data',
+		'idx': 21,
+		'label': 'Test Field',
+		'oldfieldname': 'test_field',
+		'oldfieldtype': 'Data',
+		'permlevel': 0
+	}
+]

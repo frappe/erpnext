@@ -1,0 +1,34 @@
+# Search Criteria, maintenance_schedule_details
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-09-01 15:48:09',
+		'docstatus': 0,
+		'modified': '2010-08-30 13:18:23',
+		'modified_by': 'Administrator',
+		'owner': 'nabin@webnotestech.com'
+	},
+
+	# These values are common for all Search Criteria
+	{
+		'columns': 'Maintenance Schedule Detail\x01Item Code,Maintenance Schedule Detail\x01Item Name,Maintenance Schedule Detail\x01Serial No,Maintenance Schedule Detail\x01Incharge Name,Maintenance Schedule Detail\x01Scheduled Date,Maintenance Schedule\x01Customer Name,Maintenance Schedule\x01Address,Maintenance Schedule\x01Sales Order No',
+		'criteria_name': 'Maintenance Schedule Details',
+		'doc_type': 'Maintenance Schedule Detail',
+		'doctype': 'Search Criteria',
+		'filters': "{'Maintenance Schedule\x01Submitted':1,'Maintenance Schedule\x01Status':''}",
+		'module': 'Support',
+		'name': '__common__',
+		'page_len': 50,
+		'parent_doc_type': 'Maintenance Schedule',
+		'sort_by': '`tabMaintenance Schedule Detail`.`item_code`',
+		'sort_order': 'DESC',
+		'standard': 'Yes'
+	},
+
+	# Search Criteria, maintenance_schedule_details
+	{
+		'doctype': 'Search Criteria',
+		'name': 'maintenance_schedule_details'
+	}
+]

@@ -1,0 +1,101 @@
+# DocType, Expense Type
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-09-03 16:45:08',
+		'docstatus': 0,
+		'modified': '2010-09-20 14:06:57',
+		'modified_by': 'Administrator',
+		'owner': 'harshada@webnotestech.com'
+	},
+
+	# These values are common for all DocType
+	{
+		'autoname': 'field:expense_type',
+		'colour': 'White:FFF',
+		'doctype': 'DocType',
+		'document_type': 'Master',
+		'module': 'HR',
+		'name': '__common__',
+		'section_style': 'Simple',
+		'server_code_error': ' ',
+		'version': 5
+	},
+
+	# These values are common for all DocField
+	{
+		'doctype': 'DocField',
+		'name': '__common__',
+		'parent': 'Expense Type',
+		'parentfield': 'fields',
+		'parenttype': 'DocType',
+		'permlevel': 0
+	},
+
+	# These values are common for all DocPerm
+	{
+		'create': 1,
+		'doctype': 'DocPerm',
+		'name': '__common__',
+		'parent': 'Expense Type',
+		'parentfield': 'permissions',
+		'parenttype': 'DocType',
+		'permlevel': 0,
+		'read': 1,
+		'write': 1
+	},
+
+	# DocType, Expense Type
+	{
+		'doctype': 'DocType',
+		'name': 'Expense Type'
+	},
+
+	# DocPerm
+	{
+		'doctype': 'DocPerm',
+		'idx': 1,
+		'role': 'System Manager'
+	},
+
+	# DocPerm
+	{
+		'doctype': 'DocPerm',
+		'idx': 2,
+		'role': 'HR Manager'
+	},
+
+	# DocPerm
+	{
+		'doctype': 'DocPerm',
+		'idx': 3,
+		'role': 'System Manager'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'expense_type',
+		'fieldtype': 'Data',
+		'idx': 1,
+		'in_filter': 0,
+		'label': 'Expense Type',
+		'oldfieldname': 'expense_type',
+		'oldfieldtype': 'Data',
+		'reqd': 1,
+		'search_index': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'description',
+		'fieldtype': 'Small Text',
+		'idx': 2,
+		'label': 'Description',
+		'oldfieldname': 'description',
+		'oldfieldtype': 'Small Text',
+		'width': '300px'
+	}
+]

@@ -13,6 +13,8 @@ sql = webnotes.conn.sql
 get_value = webnotes.conn.get_value
 in_transaction = webnotes.conn.in_transaction
 convert_to_lists = webnotes.conn.convert_to_lists
+
+from server_tools.gateway_utils import update_client_control, get_total_users
 	
 # -----------------------------------------------------------------------------------------
 
@@ -36,10 +38,10 @@ class DocType:
 	#-----------------------
 	def set_account_details(self, args):
 		args = eval(args)
-		
-		self.set_cp_defaults(args['company_name'], args['industry'], args['time_zone'], args['country'], args['account_name'])
+		#webnotes.logger.error("args in set_account_details of setup_control: " + str(args))
+		self.set_cp_defaults(args['company'], args['industry'], args['time_zone'], args['country'], args['account_name'])
 		self.create_profile(args['user'], args['first_name'], args['last_name'])	
-		self.update_client_control()
+		update_client_control(args['total_users'])
 		
 	
 	# Account Setup
@@ -163,15 +165,7 @@ class DocType:
 			d = addchild(pr,'userroles', 'UserRole', 1)
 			d.role = r
 			d.save(1)
-	
-	# Update WN ERP Client Control
-	# -----------------------------
-	def update_client_control(self):
-		cl = Document('WN ERP Client Control','WN ERP Client Control')
-		cl.account_start_date = nowdate()
-		cl.total_users = 1
-		cl.is_trial_account = 1
-		cl.save()
+			
 
 	# Sync DB
 	# -------
@@ -179,3 +173,30 @@ class DocType:
 		import webnotes.model.db_schema
 		sql("delete from `tabDocType Update Register`")
 		webnotes.model.db_schema.sync_all()
+		
+	
+	def is_setup_okay(self, args):
+		"""
+		Validates if setup has been performed after database allocation
+		"""
+		
+		args = eval(args)
+		#webnotes.logger.error("args in set_account_details of setup_control: " + str(args))
+		
+		cp_defaults = webnotes.conn.get_value('Control Panel', None, 'account_id')
+		
+		user_profile = webnotes.conn.get_value('Profile', args['user'], 'name')
+		
+		from webnotes.utils import cint
+		
+		total_users = get_total_users()
+		
+		#webnotes.logger.error("setup_control.is_setup_okay: " + cp_defaults + " " + user_profile + " " + str(total_users))
+		
+		#webnotes.logger.error("setup_control.is_setup_okay: Passed Values:" + args['account_name'] + " " + args['user'] + " " + str(args['total_users']))
+		
+		
+		if (cp_defaults==args['account_name']) and user_profile and \
+		   (total_users==cint(args['total_users'])):
+		   return 'True'
+		

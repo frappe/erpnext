@@ -1,0 +1,116 @@
+# DocType, Earn Deduction Detail
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-08-08 17:08:59',
+		'docstatus': 0,
+		'modified': '2010-09-20 14:06:57',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all DocType
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocType',
+		'istable': 1,
+		'module': 'HR',
+		'name': '__common__',
+		'section_style': 'Simple',
+		'show_in_menu': 0,
+		'version': 4
+	},
+
+	# These values are common for all DocField
+	{
+		'doctype': 'DocField',
+		'name': '__common__',
+		'parent': 'Earn Deduction Detail',
+		'parentfield': 'fields',
+		'parenttype': 'DocType',
+		'permlevel': 0
+	},
+
+	# These values are common for all DocPerm
+	{
+		'create': 1,
+		'doctype': 'DocPerm',
+		'idx': 1,
+		'name': '__common__',
+		'parent': 'Earn Deduction Detail',
+		'parentfield': 'permissions',
+		'parenttype': 'DocType',
+		'permlevel': 0,
+		'read': 1,
+		'role': 'All',
+		'write': 1
+	},
+
+	# DocType, Earn Deduction Detail
+	{
+		'doctype': 'DocType',
+		'name': 'Earn Deduction Detail'
+	},
+
+	# DocPerm
+	{
+		'doctype': 'DocPerm'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'earn_deduction_name',
+		'fieldtype': 'Data',
+		'idx': 1,
+		'label': 'Earn/Deduction Name',
+		'oldfieldname': 'earn_deduction_name',
+		'oldfieldtype': 'Data'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'mode',
+		'fieldtype': 'Select',
+		'idx': 2,
+		'label': 'Mode',
+		'oldfieldname': 'mode',
+		'oldfieldtype': 'Select',
+		'options': '\n%\nRs'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'per',
+		'fieldtype': 'Data',
+		'idx': 3,
+		'label': 'Per.(%)',
+		'oldfieldname': 'per',
+		'oldfieldtype': 'Data'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'amount',
+		'fieldtype': 'Data',
+		'idx': 4,
+		'label': 'Amount',
+		'oldfieldname': 'amount',
+		'oldfieldtype': 'Data'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'type',
+		'fieldtype': 'Data',
+		'idx': 5,
+		'label': 'Type',
+		'oldfieldname': 'type',
+		'oldfieldtype': 'Data'
+	}
+]

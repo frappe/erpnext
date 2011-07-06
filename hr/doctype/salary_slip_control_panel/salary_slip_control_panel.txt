@@ -1,0 +1,286 @@
+# DocType, Salary Slip Control Panel
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-08-08 17:09:20',
+		'docstatus': 0,
+		'modified': '2010-12-29 18:02:38',
+		'modified_by': 'umair@iwebnotes.com',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all DocType
+	{
+		'_last_update': '1294312182',
+		'allow_copy': 1,
+		'allow_email': 1,
+		'allow_print': 1,
+		'colour': 'White:FFF',
+		'doctype': 'DocType',
+		'hide_heading': 0,
+		'hide_toolbar': 0,
+		'in_create': 0,
+		'issingle': 1,
+		'module': 'HR',
+		'name': '__common__',
+		'read_only': 1,
+		'section_style': 'Simple',
+		'server_code_error': ' ',
+		'show_in_menu': 0,
+		'use_template': 0,
+		'version': 113
+	},
+
+	# These values are common for all DocField
+	{
+		'doctype': 'DocField',
+		'name': '__common__',
+		'parent': 'Salary Slip Control Panel',
+		'parentfield': 'fields',
+		'parenttype': 'DocType',
+		'permlevel': 0
+	},
+
+	# These values are common for all DocPerm
+	{
+		'create': 1,
+		'doctype': 'DocPerm',
+		'name': '__common__',
+		'parent': 'Salary Slip Control Panel',
+		'parentfield': 'permissions',
+		'parenttype': 'DocType',
+		'permlevel': 0,
+		'read': 1,
+		'write': 1
+	},
+
+	# DocType, Salary Slip Control Panel
+	{
+		'doctype': 'DocType',
+		'name': 'Salary Slip Control Panel'
+	},
+
+	# DocPerm
+	{
+		'doctype': 'DocPerm',
+		'idx': 1,
+		'role': 'System Manager'
+	},
+
+	# DocPerm
+	{
+		'doctype': 'DocPerm',
+		'idx': 2,
+		'role': 'HR User'
+	},
+
+	# DocPerm
+	{
+		'doctype': 'DocPerm',
+		'idx': 3,
+		'role': 'HR Manager'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Section Break',
+		'idx': 1,
+		'label': 'Salary Slip Control Panel'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'employee_type',
+		'fieldtype': 'Select',
+		'idx': 2,
+		'label': 'Employment Type',
+		'oldfieldname': 'employee_type',
+		'oldfieldtype': 'Select',
+		'options': 'link:Employment Type'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'grade',
+		'fieldtype': 'Select',
+		'idx': 3,
+		'label': 'Grade',
+		'oldfieldname': 'grade',
+		'oldfieldtype': 'Select',
+		'options': 'link:Grade'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'branch',
+		'fieldtype': 'Select',
+		'idx': 4,
+		'label': 'Branch',
+		'oldfieldname': 'branch',
+		'oldfieldtype': 'Select',
+		'options': 'link:Branch'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'department',
+		'fieldtype': 'Select',
+		'idx': 5,
+		'label': 'Department',
+		'oldfieldname': 'department',
+		'oldfieldtype': 'Select',
+		'options': 'link:Department'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'designation',
+		'fieldtype': 'Select',
+		'idx': 6,
+		'label': 'Designation',
+		'oldfieldname': 'designation',
+		'oldfieldtype': 'Select',
+		'options': 'link:Designation'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldtype': 'Column Break',
+		'idx': 7,
+		'oldfieldtype': 'Column Break'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'fiscal_year',
+		'fieldtype': 'Select',
+		'idx': 8,
+		'in_filter': 1,
+		'label': 'Fiscal Year',
+		'oldfieldname': 'fiscal_year',
+		'oldfieldtype': 'Select',
+		'options': 'link:Fiscal Year'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'month',
+		'fieldtype': 'Select',
+		'idx': 9,
+		'label': 'Month',
+		'oldfieldname': 'month',
+		'oldfieldtype': 'Select',
+		'options': '\n01\n02\n03\n04\n05\n06\n07\n08\n09\n10\n11\n12'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'year',
+		'fieldtype': 'Select',
+		'idx': 10,
+		'label': 'Year',
+		'oldfieldname': 'year',
+		'oldfieldtype': 'Select',
+		'options': '\n2009\n2010\n2011\n2012'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'week_off',
+		'fieldtype': 'Currency',
+		'idx': 11,
+		'label': 'Week Off',
+		'oldfieldname': 'week_off',
+		'oldfieldtype': 'Currency'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'arrear_amount',
+		'fieldtype': 'Currency',
+		'idx': 12,
+		'label': 'Arrear Amount',
+		'oldfieldname': 'arrear_amount',
+		'oldfieldtype': 'Currency'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldname': 'email_check',
+		'fieldtype': 'Check',
+		'idx': 13,
+		'label': 'Email',
+		'oldfieldname': 'email_check',
+		'oldfieldtype': 'Check'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Section Break',
+		'idx': 14,
+		'oldfieldtype': 'Section Break'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldtype': 'Button',
+		'idx': 15,
+		'label': 'Process Payroll',
+		'oldfieldtype': 'Button',
+		'trigger': 'Client'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'HTML',
+		'idx': 16,
+		'label': 'Salary Slip HTML'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Column Break',
+		'idx': 17
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldtype': 'Button',
+		'idx': 18,
+		'label': 'Submit Salary Slip',
+		'oldfieldtype': 'Button',
+		'trigger': 'Client'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Button',
+		'idx': 19,
+		'label': 'Make Bank Voucher',
+		'trigger': 'Client'
+	}
+]

@@ -1,0 +1,33 @@
+# Search Criteria, sales_personwise_transaction_summary
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2011-06-08 11:00:34',
+		'docstatus': 0,
+		'modified': '2011-02-24 17:35:32',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all Search Criteria
+	{
+		'columns': 'Sales Person\x01ID',
+		'criteria_name': 'Sales Personwise Transaction Summary',
+		'doc_type': 'Sales Person',
+		'doctype': 'Search Criteria',
+		'filters': "{'Sales Person\x01Saved':1,'Sales Person\x01Submitted':1,'Sales Person\x01Country':'','Sales Person\x01State':''}",
+		'module': 'Selling',
+		'name': '__common__',
+		'page_len': 50,
+		'sort_by': '`tabSales Person`.`name`',
+		'sort_order': 'DESC',
+		'standard': 'Yes'
+	},
+
+	# Search Criteria, sales_personwise_transaction_summary
+	{
+		'doctype': 'Search Criteria',
+		'name': 'sales_personwise_transaction_summary'
+	}
+]

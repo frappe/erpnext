@@ -1,1 +1,292 @@
-[{'section_style': 'Simple', 'is_transaction_doc': None, 'creation': '2010-08-13 14:25:35', 'search_fields': 'posting_date, fiscal_year', 'module': 'Accounts', 'doctype': 'DocType', 'change_log': None, 'print_outline': '', 'owner': 'jai@webnotestech.com', 'in_dialog': None, 'in_create': None, 'read_only': None, 'allow_email': None, 'dt_template': None, 'hide_heading': None, 'issingle': None, 'allow_rename': None, 'smallicon': None, 'allow_attach': None, 'show_in_menu': None, 'max_attachments': None, 'version': 121, 'menu_index': None, 'docstatus': 0, 'allow_copy': None, 'istable': None, 'description': None, 'parent': None, 'server_code': None, 'allow_trash': None, 'allow_print': None, 'autoname': 'PCE/.###', 'client_script_core': None, 'client_string': None, 'use_template': None, 'modified_by': 'Administrator', 'document_type': '', 'name': 'Period Closing Voucher', 'idx': None, 'hide_toolbar': None, 'colour': 'White:FFF', 'client_script': None, 'modified': '2010-10-25 17:19:32', 'server_code_error': ' ', 'name_case': '', 'parenttype': None, 'read_only_onload': None, 'server_code_core': None, 'server_code_compiled': None, 'parent_node': None, 'parentfield': None}, {'cancel': 1, 'amend': 1, 'execute': None, 'modified_by': 'Administrator', 'name': 'PERM01120', 'parent': 'Period Closing Voucher', 'read': 1, 'create': 1, 'creation': '2010-08-13 14:25:35', 'modified': '2010-10-25 17:19:32', 'submit': 1, 'doctype': 'DocPerm', 'write': 1, 'idx': 1, 'parenttype': 'DocType', 'role': 'Administrator', 'owner': 'jai@webnotestech.com', 'docstatus': 0, 'permlevel': 0, 'match': None, 'parentfield': 'permissions'}, {'cancel': 1, 'amend': None, 'execute': None, 'modified_by': 'Administrator', 'name': 'PERM01226', 'parent': 'Period Closing Voucher', 'read': 1, 'create': 1, 'creation': '2010-10-22 17:27:59', 'modified': '2010-10-25 17:19:32', 'submit': 1, 'doctype': 'DocPerm', 'write': 1, 'idx': 2, 'parenttype': 'DocType', 'role': 'Accounts Manager', 'owner': 'Administrator', 'docstatus': 0, 'permlevel': 0, 'match': None, 'parentfield': 'permissions'}, {'no_copy': None, 'oldfieldtype': 'Column Break', 'creation': '2010-08-18 11:07:26', 'doctype': 'DocField', 'oldfieldname': None, 'owner': 'jai@webnotestech.com', 'reqd': None, 'in_filter': None, 'print_hide': None, 'modified_by': 'Administrator', 'label': '', 'width': '50%', 'trigger': None, 'depends_on': None, 'docstatus': 0, 'hidden': None, 'permlevel': 0, 'description': None, 'parent': 'Period Closing Voucher', 'search_index': None, 'allow_on_submit': None, 'icon': None, 'name': 'FL05939', 'idx': 1, 'default': None, 'colour': None, 'modified': '2010-10-25 17:19:32', 'parenttype': 'DocType', 'fieldname': None, 'fieldtype': 'Column Break', 'options': None, 'report_hide': None, 'parentfield': 'fields'}, {'no_copy': None, 'oldfieldtype': 'Date', 'creation': '2010-08-13 14:25:35', 'doctype': 'DocField', 'oldfieldname': 'transaction_date', 'owner': 'jai@webnotestech.com', 'reqd': None, 'in_filter': None, 'print_hide': None, 'modified_by': 'Administrator', 'label': 'Transaction Date', 'width': None, 'trigger': None, 'depends_on': None, 'docstatus': 0, 'hidden': None, 'permlevel': 0, 'description': None, 'parent': 'Period Closing Voucher', 'search_index': None, 'allow_on_submit': None, 'icon': None, 'name': 'FL05895', 'idx': 2, 'default': None, 'colour': None, 'modified': '2010-10-25 17:19:32', 'parenttype': 'DocType', 'fieldname': 'transaction_date', 'fieldtype': 'Date', 'options': None, 'report_hide': None, 'parentfield': 'fields'}, {'no_copy': None, 'oldfieldtype': 'Date', 'creation': '2010-08-13 14:25:35', 'doctype': 'DocField', 'oldfieldname': 'posting_date', 'owner': 'jai@webnotestech.com', 'reqd': 1, 'in_filter': None, 'print_hide': None, 'modified_by': 'Administrator', 'label': 'Posting Date', 'width': None, 'trigger': None, 'depends_on': None, 'docstatus': 0, 'hidden': None, 'permlevel': 0, 'description': None, 'parent': 'Period Closing Voucher', 'search_index': None, 'allow_on_submit': None, 'icon': None, 'name': 'FL05894', 'idx': 3, 'default': None, 'colour': None, 'modified': '2010-10-25 17:19:32', 'parenttype': 'DocType', 'fieldname': 'posting_date', 'fieldtype': 'Date', 'options': None, 'report_hide': None, 'parentfield': 'fields'}, {'no_copy': None, 'oldfieldtype': 'Select', 'creation': '2010-08-13 14:29:39', 'doctype': 'DocField', 'oldfieldname': 'fiscal_year', 'owner': 'jai@webnotestech.com', 'reqd': 1, 'in_filter': None, 'print_hide': None, 'modified_by': 'Administrator', 'label': 'Closing Fiscal Year', 'width': None, 'trigger': None, 'depends_on': None, 'docstatus': 0, 'hidden': None, 'permlevel': 0, 'description': None, 'parent': 'Period Closing Voucher', 'search_index': None, 'allow_on_submit': None, 'icon': None, 'name': 'FL05899', 'idx': 4, 'default': None, 'colour': None, 'modified': '2010-10-25 17:19:32', 'parenttype': 'DocType', 'fieldname': 'fiscal_year', 'fieldtype': 'Select', 'options': 'link:Fiscal Year', 'report_hide': None, 'parentfield': 'fields'}, {'no_copy': None, 'oldfieldtype': 'Data', 'creation': '2010-08-17 17:08:20', 'doctype': 'DocField', 'oldfieldname': 'amended_from', 'owner': 'jai@webnotestech.com', 'reqd': None, 'in_filter': None, 'print_hide': None, 'modified_by': 'Administrator', 'label': 'Amended From', 'width': None, 'trigger': None, 'depends_on': None, 'docstatus': 0, 'hidden': None, 'permlevel': 1, 'description': None, 'parent': 'Period Closing Voucher', 'search_index': None, 'allow_on_submit': None, 'icon': None, 'name': 'FL05923', 'idx': 5, 'default': None, 'colour': None, 'modified': '2010-10-25 17:19:32', 'parenttype': 'DocType', 'fieldname': 'amended_from', 'fieldtype': 'Data', 'options': None, 'report_hide': None, 'parentfield': 'fields'}, {'no_copy': None, 'oldfieldtype': 'Date', 'creation': '2010-08-17 17:08:20', 'doctype': 'DocField', 'oldfieldname': 'amendment_date', 'owner': 'jai@webnotestech.com', 'reqd': None, 'in_filter': None, 'print_hide': None, 'modified_by': 'Administrator', 'label': 'Amendment Date', 'width': None, 'trigger': None, 'depends_on': None, 'docstatus': 0, 'hidden': None, 'permlevel': 1, 'description': None, 'parent': 'Period Closing Voucher', 'search_index': None, 'allow_on_submit': None, 'icon': None, 'name': 'FL05924', 'idx': 6, 'default': None, 'colour': None, 'modified': '2010-10-25 17:19:32', 'parenttype': 'DocType', 'fieldname': 'amendment_date', 'fieldtype': 'Date', 'options': None, 'report_hide': None, 'parentfield': 'fields'}, {'no_copy': None, 'oldfieldtype': 'Select', 'creation': '2010-08-13 14:29:39', 'doctype': 'DocField', 'oldfieldname': 'company', 'owner': 'jai@webnotestech.com', 'reqd': 1, 'in_filter': None, 'print_hide': None, 'modified_by': 'Administrator', 'label': 'Company', 'width': None, 'trigger': None, 'depends_on': None, 'docstatus': 0, 'hidden': None, 'permlevel': 0, 'description': None, 'parent': 'Period Closing Voucher', 'search_index': None, 'allow_on_submit': None, 'icon': None, 'name': 'FL05901', 'idx': 7, 'default': None, 'colour': None, 'modified': '2010-10-25 17:19:32', 'parenttype': 'DocType', 'fieldname': 'company', 'fieldtype': 'Select', 'options': 'link:Company', 'report_hide': None, 'parentfield': 'fields'}, {'no_copy': None, 'oldfieldtype': 'Column Break', 'creation': '2010-08-18 11:03:44', 'doctype': 'DocField', 'oldfieldname': '', 'owner': 'jai@webnotestech.com', 'reqd': None, 'in_filter': None, 'print_hide': None, 'modified_by': 'Administrator', 'label': '', 'width': None, 'trigger': None, 'depends_on': None, 'docstatus': 0, 'hidden': None, 'permlevel': 0, 'description': None, 'parent': 'Period Closing Voucher', 'search_index': None, 'allow_on_submit': None, 'icon': None, 'name': 'FL05936', 'idx': 8, 'default': None, 'colour': None, 'modified': '2010-10-25 17:19:32', 'parenttype': 'DocType', 'fieldname': '', 'fieldtype': 'Column Break', 'options': None, 'report_hide': None, 'parentfield': 'fields'}, {'no_copy': None, 'oldfieldtype': 'Link', 'creation': '2010-08-13 14:25:35', 'doctype': 'DocField', 'oldfieldname': 'closing_account_head', 'owner': 'jai@webnotestech.com', 'reqd': 1, 'in_filter': None, 'print_hide': None, 'modified_by': 'Administrator', 'label': 'Closing Account Head', 'width': None, 'trigger': 'Client', 'depends_on': None, 'docstatus': 0, 'hidden': None, 'permlevel': 0, 'description': None, 'parent': 'Period Closing Voucher', 'search_index': None, 'allow_on_submit': None, 'icon': None, 'name': 'FL05897', 'idx': 9, 'default': None, 'colour': 'White:FFF', 'modified': '2010-10-25 17:19:32', 'parenttype': 'DocType', 'fieldname': 'closing_account_head', 'fieldtype': 'Link', 'options': 'Account', 'report_hide': None, 'parentfield': 'fields'}, {'no_copy': None, 'oldfieldtype': 'HTML', 'creation': '2010-10-14 08:21:03', 'doctype': 'DocField', 'oldfieldname': None, 'owner': 'Administrator', 'reqd': None, 'in_filter': None, 'print_hide': None, 'modified_by': 'Administrator', 'label': 'CoA Help', 'width': None, 'trigger': None, 'depends_on': None, 'docstatus': 0, 'hidden': None, 'permlevel': 0, 'description': None, 'parent': 'Period Closing Voucher', 'search_index': None, 'allow_on_submit': None, 'icon': None, 'name': 'FL06305', 'idx': 10, 'default': None, 'colour': None, 'modified': '2010-10-25 17:19:32', 'parenttype': 'DocType', 'fieldname': None, 'fieldtype': 'HTML', 'options': '<a href="javascript:cur_frm.cscript.acc_help();">To create Account Head, click here</a>', 'report_hide': None, 'parentfield': 'fields'}, {'no_copy': None, 'oldfieldtype': 'Small Text', 'creation': '2010-08-13 14:25:35', 'doctype': 'DocField', 'oldfieldname': 'remarks', 'owner': 'jai@webnotestech.com', 'reqd': 1, 'in_filter': None, 'print_hide': None, 'modified_by': 'Administrator', 'label': 'Remarks', 'width': None, 'trigger': None, 'depends_on': None, 'docstatus': 0, 'hidden': None, 'permlevel': 0, 'description': None, 'parent': 'Period Closing Voucher', 'search_index': None, 'allow_on_submit': None, 'icon': None, 'name': 'FL05896', 'idx': 11, 'default': None, 'colour': None, 'modified': '2010-10-25 17:19:32', 'parenttype': 'DocType', 'fieldname': 'remarks', 'fieldtype': 'Small Text', 'options': None, 'report_hide': None, 'parentfield': 'fields'}, {'no_copy': None, 'oldfieldtype': 'Small Text', 'creation': '2010-10-13 10:39:21', 'doctype': 'DocField', 'oldfieldname': 'cancel_reason', 'owner': 'Administrator', 'reqd': None, 'in_filter': None, 'print_hide': 1, 'modified_by': 'Administrator', 'label': 'Cancel Reason', 'width': None, 'trigger': None, 'depends_on': None, 'docstatus': 0, 'hidden': 1, 'permlevel': 0, 'description': None, 'parent': 'Period Closing Voucher', 'search_index': 0, 'allow_on_submit': None, 'icon': None, 'name': 'FL06291', 'idx': 12, 'default': None, 'colour': None, 'modified': '2010-10-25 17:19:32', 'parenttype': 'DocType', 'fieldname': 'cancel_reason', 'fieldtype': 'Small Text', 'options': None, 'report_hide': None, 'parentfield': 'fields'}, {'no_copy': None, 'oldfieldtype': 'Section Break', 'creation': '2010-08-18 11:03:44', 'doctype': 'DocField', 'oldfieldname': '', 'owner': 'jai@webnotestech.com', 'reqd': None, 'in_filter': None, 'print_hide': None, 'modified_by': 'Administrator', 'label': 'Repost Account Balances', 'width': None, 'trigger': None, 'depends_on': None, 'docstatus': 0, 'hidden': None, 'permlevel': 0, 'description': None, 'parent': 'Period Closing Voucher', 'search_index': None, 'allow_on_submit': None, 'icon': None, 'name': 'FL05937', 'idx': 13, 'default': None, 'colour': None, 'modified': '2010-10-25 17:19:32', 'parenttype': 'DocType', 'fieldname': '', 'fieldtype': 'Section Break', 'options': 'Simple', 'report_hide': None, 'parentfield': 'fields'}, {'no_copy': None, 'oldfieldtype': 'Select', 'creation': '2010-08-13 14:29:39', 'doctype': 'DocField', 'oldfieldname': 'next_fiscal_year', 'owner': 'jai@webnotestech.com', 'reqd': None, 'in_filter': None, 'print_hide': None, 'modified_by': 'Administrator', 'label': 'Fiscal Year (For Reposting)', 'width': None, 'trigger': None, 'depends_on': None, 'docstatus': 0, 'hidden': None, 'permlevel': 0, 'description': None, 'parent': 'Period Closing Voucher', 'search_index': None, 'allow_on_submit': 1, 'icon': None, 'name': 'FL05900', 'idx': 14, 'default': None, 'colour': None, 'modified': '2010-10-25 17:19:32', 'parenttype': 'DocType', 'fieldname': 'next_fiscal_year', 'fieldtype': 'Select', 'options': 'link:Fiscal Year', 'report_hide': None, 'parentfield': 'fields'}, {'no_copy': None, 'oldfieldtype': 'Button', 'creation': '2010-08-13 14:29:39', 'doctype': 'DocField', 'oldfieldname': None, 'owner': 'jai@webnotestech.com', 'reqd': None, 'in_filter': None, 'print_hide': None, 'modified_by': 'Administrator', 'label': 'Repost', 'width': None, 'trigger': '', 'depends_on': None, 'docstatus': 0, 'hidden': None, 'permlevel': 0, 'description': None, 'parent': 'Period Closing Voucher', 'search_index': None, 'allow_on_submit': 1, 'icon': None, 'name': 'FL05902', 'idx': 15, 'default': None, 'colour': 'White:FFF', 'modified': '2010-10-25 17:19:32', 'parenttype': 'DocType', 'fieldname': None, 'fieldtype': 'Button', 'options': 'repost_account_balances', 'report_hide': None, 'parentfield': 'fields'}]
+# DocType, Period Closing Voucher
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-10-25 17:25:22',
+		'docstatus': 0,
+		'modified': '2010-12-23 13:34:27',
+		'modified_by': 'umair@iwebnotes.com',
+		'owner': 'jai@webnotestech.com'
+	},
+
+	# These values are common for all DocType
+	{
+		'autoname': 'PCE/.###',
+		'colour': 'White:FFF',
+		'doctype': 'DocType',
+		'module': 'Accounts',
+		'name': '__common__',
+		'search_fields': 'posting_date, fiscal_year',
+		'section_style': 'Simple',
+		'server_code_error': ' ',
+		'version': 121
+	},
+
+	# These values are common for all DocField
+	{
+		'doctype': 'DocField',
+		'name': '__common__',
+		'parent': 'Period Closing Voucher',
+		'parentfield': 'fields',
+		'parenttype': 'DocType'
+	},
+
+	# These values are common for all DocPerm
+	{
+		'doctype': 'DocPerm',
+		'name': '__common__',
+		'parent': 'Period Closing Voucher',
+		'parentfield': 'permissions',
+		'parenttype': 'DocType',
+		'read': 1
+	},
+
+	# DocType, Period Closing Voucher
+	{
+		'doctype': 'DocType',
+		'name': 'Period Closing Voucher'
+	},
+
+	# DocPerm
+	{
+		'doctype': 'DocPerm',
+		'permlevel': 1,
+		'role': 'System Manager'
+	},
+
+	# DocPerm
+	{
+		'doctype': 'DocPerm',
+		'permlevel': 1,
+		'role': 'Accounts Manager'
+	},
+
+	# DocPerm
+	{
+		'doctype': 'DocPerm',
+		'permlevel': 1,
+		'role': 'System Manager'
+	},
+
+	# DocPerm
+	{
+		'doctype': 'DocPerm',
+		'permlevel': 1,
+		'role': 'Accounts Manager'
+	},
+
+	# DocPerm
+	{
+		'amend': 1,
+		'cancel': 1,
+		'create': 1,
+		'doctype': 'DocPerm',
+		'idx': 1,
+		'permlevel': 0,
+		'role': 'System Manager',
+		'submit': 1,
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'cancel': 1,
+		'create': 1,
+		'doctype': 'DocPerm',
+		'idx': 2,
+		'permlevel': 0,
+		'role': 'Accounts Manager',
+		'submit': 1,
+		'write': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Column Break',
+		'idx': 1,
+		'oldfieldtype': 'Column Break',
+		'permlevel': 0,
+		'width': '50%'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'transaction_date',
+		'fieldtype': 'Date',
+		'idx': 2,
+		'label': 'Transaction Date',
+		'oldfieldname': 'transaction_date',
+		'oldfieldtype': 'Date',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'posting_date',
+		'fieldtype': 'Date',
+		'idx': 3,
+		'label': 'Posting Date',
+		'oldfieldname': 'posting_date',
+		'oldfieldtype': 'Date',
+		'permlevel': 0,
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'fiscal_year',
+		'fieldtype': 'Select',
+		'idx': 4,
+		'label': 'Closing Fiscal Year',
+		'oldfieldname': 'fiscal_year',
+		'oldfieldtype': 'Select',
+		'options': 'link:Fiscal Year',
+		'permlevel': 0,
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'amended_from',
+		'fieldtype': 'Data',
+		'idx': 5,
+		'label': 'Amended From',
+		'oldfieldname': 'amended_from',
+		'oldfieldtype': 'Data',
+		'permlevel': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'amendment_date',
+		'fieldtype': 'Date',
+		'idx': 6,
+		'label': 'Amendment Date',
+		'oldfieldname': 'amendment_date',
+		'oldfieldtype': 'Date',
+		'permlevel': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'company',
+		'fieldtype': 'Select',
+		'idx': 7,
+		'label': 'Company',
+		'oldfieldname': 'company',
+		'oldfieldtype': 'Select',
+		'options': 'link:Company',
+		'permlevel': 0,
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Column Break',
+		'idx': 8,
+		'oldfieldtype': 'Column Break',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldname': 'closing_account_head',
+		'fieldtype': 'Link',
+		'idx': 9,
+		'label': 'Closing Account Head',
+		'oldfieldname': 'closing_account_head',
+		'oldfieldtype': 'Link',
+		'options': 'Account',
+		'permlevel': 0,
+		'reqd': 1,
+		'trigger': 'Client'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'HTML',
+		'idx': 10,
+		'label': 'CoA Help',
+		'oldfieldtype': 'HTML',
+		'options': '<a href="javascript:cur_frm.cscript.acc_help();">To create Account Head, click here</a>',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'remarks',
+		'fieldtype': 'Small Text',
+		'idx': 11,
+		'label': 'Remarks',
+		'oldfieldname': 'remarks',
+		'oldfieldtype': 'Small Text',
+		'permlevel': 0,
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'cancel_reason',
+		'fieldtype': 'Small Text',
+		'hidden': 1,
+		'idx': 12,
+		'label': 'Cancel Reason',
+		'oldfieldname': 'cancel_reason',
+		'oldfieldtype': 'Small Text',
+		'permlevel': 0,
+		'print_hide': 1,
+		'search_index': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Section Break',
+		'idx': 13,
+		'label': 'Repost Account Balances',
+		'oldfieldtype': 'Section Break',
+		'options': 'Simple',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'allow_on_submit': 1,
+		'doctype': 'DocField',
+		'fieldname': 'next_fiscal_year',
+		'fieldtype': 'Select',
+		'idx': 14,
+		'label': 'Fiscal Year (For Reposting)',
+		'oldfieldname': 'next_fiscal_year',
+		'oldfieldtype': 'Select',
+		'options': 'link:Fiscal Year',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'allow_on_submit': 1,
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldtype': 'Button',
+		'idx': 15,
+		'label': 'Repost',
+		'oldfieldtype': 'Button',
+		'options': 'repost_account_balances',
+		'permlevel': 0
+	}
+]

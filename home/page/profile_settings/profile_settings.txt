@@ -1,36 +1,27 @@
+# Page, profile-settings
 [
+
+	# These values are common in all dictionaries
 	{
-		'author': None,
-		'category': 'Standard',
-		'content': None,
-		'creation': '2011-04-13 12:08:59',
+		'creation': '2011-04-18 10:19:10',
 		'docstatus': 0,
-		'doctype': 'Page',
-		'file_list': None,
-		'icon': None,
-		'idx': None,
-		'keywords': None,
-		'menu_index': None,
 		'modified': '2011-04-13 12:08:59',
 		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all Page
+	{
+		'doctype': 'Page',
 		'module': 'Home',
-		'name': 'profile-settings',
-		'owner': 'Administrator',
+		'name': '__common__',
 		'page_name': 'Profile Settings',
-		'page_title': None,
-		'parent': None,
-		'parent_node': None,
-		'parentfield': None,
-		'parenttype': None,
-		'publish': None,
-		'script': None,
-		'show_in_menu': None,
-		'site_description': None,
-		'standard': 'Yes',
-		'static_content': None,
-		'style': None,
-		'stylesheet': None,
-		'template': None,
-		'write_content': None
+		'standard': 'Yes'
+	},
+
+	# Page, profile-settings
+	{
+		'doctype': 'Page',
+		'name': 'profile-settings'
 	}
 ]

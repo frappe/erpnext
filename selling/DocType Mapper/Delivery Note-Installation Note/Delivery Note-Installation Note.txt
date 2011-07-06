@@ -1,0 +1,273 @@
+# DocType Mapper, Delivery Note-Installation Note
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-08-08 17:09:34',
+		'docstatus': 0,
+		'modified': '2011-05-17 11:42:57',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all Table Mapper Detail
+	{
+		'doctype': 'Table Mapper Detail',
+		'name': '__common__',
+		'parent': 'Delivery Note-Installation Note',
+		'parentfield': 'table_mapper_details',
+		'parenttype': 'DocType Mapper'
+	},
+
+	# These values are common for all Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'map': 'Yes',
+		'name': '__common__',
+		'parent': 'Delivery Note-Installation Note',
+		'parentfield': 'field_mapper_details',
+		'parenttype': 'DocType Mapper'
+	},
+
+	# These values are common for all DocType Mapper
+	{
+		'doctype': 'DocType Mapper',
+		'from_doctype': 'Delivery Note',
+		'module': 'Selling',
+		'name': '__common__',
+		'ref_doc_submitted': 1,
+		'to_doctype': 'Installation Note'
+	},
+
+	# DocType Mapper, Delivery Note-Installation Note
+	{
+		'doctype': 'DocType Mapper',
+		'name': 'Delivery Note-Installation Note'
+	},
+
+	# Field Mapper Detail
+	{
+		'checking_operator': '=',
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'company',
+		'idx': 1,
+		'match_id': 0,
+		'to_field': 'company'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'fiscal_year',
+		'idx': 2,
+		'match_id': 0,
+		'to_field': 'fiscal_year'
+	},
+
+	# Field Mapper Detail
+	{
+		'checking_operator': '=',
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'customer',
+		'idx': 3,
+		'match_id': 0,
+		'to_field': 'customer'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'customer_address',
+		'idx': 4,
+		'match_id': 0,
+		'to_field': 'customer_address'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'contact_person',
+		'idx': 5,
+		'match_id': 0,
+		'to_field': 'contact_person'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'customer_name',
+		'idx': 6,
+		'match_id': 0,
+		'to_field': 'customer_name'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'address_display',
+		'idx': 7,
+		'match_id': 0,
+		'to_field': 'address_display'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'contact_display',
+		'idx': 8,
+		'match_id': 0,
+		'to_field': 'contact_display'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'contact_mobile',
+		'idx': 9,
+		'match_id': 0,
+		'to_field': 'contact_mobile'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'contact_email',
+		'idx': 10,
+		'match_id': 0,
+		'to_field': 'contact_email'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'territory',
+		'idx': 11,
+		'match_id': 0,
+		'to_field': 'territory'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'customer_group',
+		'idx': 12,
+		'match_id': 0,
+		'to_field': 'customer_group'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'name',
+		'idx': 13,
+		'match_id': 0,
+		'to_field': 'delivery_note_no'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'name',
+		'idx': 14,
+		'match_id': 1,
+		'to_field': 'prevdoc_detail_docname'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'parent',
+		'idx': 15,
+		'match_id': 1,
+		'to_field': 'prevdoc_docname'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'parenttype',
+		'idx': 16,
+		'match_id': 1,
+		'to_field': 'prevdoc_doctype'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'item_code',
+		'idx': 17,
+		'match_id': 1,
+		'to_field': 'item_code'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'description',
+		'idx': 18,
+		'match_id': 1,
+		'to_field': 'description'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'eval: flt(obj.qty) - flt(obj.installed_qty)',
+		'idx': 19,
+		'match_id': 1,
+		'to_field': 'qty'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'serial_no',
+		'idx': 20,
+		'match_id': 1,
+		'to_field': 'serial_no'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'posting_date',
+		'idx': 21,
+		'match_id': 2,
+		'to_field': 'prevdoc_date'
+	},
+
+	# Table Mapper Detail
+	{
+		'doctype': 'Table Mapper Detail',
+		'from_field': 'delivery_note_details',
+		'from_table': 'Delivery Note Detail',
+		'idx': 1,
+		'match_id': 1,
+		'to_field': 'installed_item_details',
+		'to_table': 'Installed Item Details',
+		'validation_logic': 'qty > ifnull(installed_qty,0) and docstatus = 1'
+	},
+
+	# Table Mapper Detail
+	{
+		'doctype': 'Table Mapper Detail',
+		'from_table': 'Delivery Note',
+		'idx': 2,
+		'match_id': 0,
+		'to_table': 'Installation Note',
+		'validation_logic': 'docstatus = 1'
+	},
+
+	# Table Mapper Detail
+	{
+		'doctype': 'Table Mapper Detail',
+		'from_table': 'Delivery Note',
+		'idx': 3,
+		'match_id': 2,
+		'reference_doctype_key': 'prevdoc_doctype',
+		'reference_key': 'prevdoc_docname',
+		'to_field': 'installed_item_details',
+		'to_table': 'Installed Item Details',
+		'validation_logic': 'docstatus = 1'
+	}
+]

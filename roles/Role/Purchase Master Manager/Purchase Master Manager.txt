@@ -1,1 +1,0 @@
-[{'modified_by': 'Administrator', 'name': 'Purchase Master Manager', 'parent': None, 'creation': '2010-04-08 13:50:20', 'modified': '2010-04-08 13:50:20', 'module': 'Roles', 'doctype': 'Role', 'idx': None, 'parenttype': None, 'role_name': 'Purchase Master Manager', 'owner': 'Administrator', 'docstatus': 0, 'parentfield': None}]

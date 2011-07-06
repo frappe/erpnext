@@ -1,0 +1,484 @@
+# DocType Mapper, Purchase Order-Purchase Receipt
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-08-08 17:09:35',
+		'docstatus': 0,
+		'modified': '2011-05-13 12:42:57',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all Table Mapper Detail
+	{
+		'doctype': 'Table Mapper Detail',
+		'name': '__common__',
+		'parent': 'Purchase Order-Purchase Receipt',
+		'parentfield': 'table_mapper_details',
+		'parenttype': 'DocType Mapper'
+	},
+
+	# These values are common for all Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'map': 'Yes',
+		'name': '__common__',
+		'parent': 'Purchase Order-Purchase Receipt',
+		'parentfield': 'field_mapper_details',
+		'parenttype': 'DocType Mapper'
+	},
+
+	# These values are common for all DocType Mapper
+	{
+		'doctype': 'DocType Mapper',
+		'from_doctype': 'Purchase Order',
+		'module': 'Stock',
+		'name': '__common__',
+		'ref_doc_submitted': 1,
+		'to_doctype': 'Purchase Receipt'
+	},
+
+	# DocType Mapper, Purchase Order-Purchase Receipt
+	{
+		'doctype': 'DocType Mapper',
+		'name': 'Purchase Order-Purchase Receipt'
+	},
+
+	# Field Mapper Detail
+	{
+		'checking_operator': '=',
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'supplier',
+		'idx': 1,
+		'match_id': 0,
+		'to_field': 'supplier'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'supplier_address',
+		'idx': 2,
+		'match_id': 0,
+		'to_field': 'supplier_address'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'supplier_name',
+		'idx': 4,
+		'match_id': 0,
+		'to_field': 'supplier_name'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'address_display',
+		'idx': 5,
+		'match_id': 0,
+		'to_field': 'address_display'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'contact_display',
+		'idx': 6,
+		'match_id': 0,
+		'to_field': 'contact_display'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'contact_mobile',
+		'idx': 7,
+		'match_id': 0,
+		'to_field': 'contact_mobile'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'contact_email',
+		'idx': 8,
+		'match_id': 0,
+		'to_field': 'contact_email'
+	},
+
+	# Field Mapper Detail
+	{
+		'checking_operator': '=',
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'company',
+		'idx': 9,
+		'match_id': 0,
+		'to_field': 'company'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'fiscal_year',
+		'idx': 10,
+		'match_id': 0,
+		'to_field': 'fiscal_year'
+	},
+
+	# Field Mapper Detail
+	{
+		'checking_operator': '=',
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'currency',
+		'idx': 11,
+		'match_id': 0,
+		'to_field': 'currency'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'warehouse',
+		'idx': 12,
+		'match_id': 1,
+		'to_field': 'warehouse'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'terms',
+		'idx': 13,
+		'match_id': 0,
+		'to_field': 'terms'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'conversion_factor',
+		'idx': 14,
+		'match_id': 1,
+		'to_field': 'conversion_factor'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'stock_uom',
+		'idx': 15,
+		'match_id': 1,
+		'to_field': 'stock_uom'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'name',
+		'idx': 16,
+		'match_id': 1,
+		'to_field': 'prevdoc_detail_docname'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'parent',
+		'idx': 17,
+		'match_id': 1,
+		'to_field': 'prevdoc_docname'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'parenttype',
+		'idx': 18,
+		'match_id': 1,
+		'to_field': 'prevdoc_doctype'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'uom',
+		'idx': 19,
+		'match_id': 1,
+		'to_field': 'uom'
+	},
+
+	# Field Mapper Detail
+	{
+		'checking_operator': '=',
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'item_code',
+		'idx': 20,
+		'match_id': 1,
+		'to_field': 'item_code'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'brand',
+		'idx': 21,
+		'match_id': 1,
+		'to_field': 'brand'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'item_name',
+		'idx': 22,
+		'match_id': 1,
+		'to_field': 'item_name'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'eval:(flt(obj.qty) - flt(obj.received_qty)) ',
+		'idx': 23,
+		'match_id': 1,
+		'to_field': 'received_qty'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'eval:(flt(obj.qty) - flt(obj.received_qty)) ',
+		'idx': 24,
+		'match_id': 1,
+		'to_field': 'qty'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'eval:(flt(obj.qty) - flt(obj.received_qty)) * flt(obj.conversion_factor)',
+		'idx': 25,
+		'match_id': 1,
+		'to_field': 'stock_qty'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'purchase_rate',
+		'idx': 26,
+		'match_id': 1,
+		'to_field': 'purchase_rate'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'description',
+		'idx': 27,
+		'match_id': 1,
+		'to_field': 'description'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'item_group',
+		'idx': 28,
+		'match_id': 1,
+		'to_field': 'item_group'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'import_rate',
+		'idx': 29,
+		'match_id': 1,
+		'to_field': 'import_rate'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'eval:(flt(obj.qty) - flt(obj.received_qty)) * flt(obj.import_rate)',
+		'idx': 30,
+		'match_id': 1,
+		'to_field': 'import_amount'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'schedule_date',
+		'idx': 31,
+		'match_id': 1,
+		'to_field': 'schedule_date'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'eval:(flt(obj.qty) - flt(obj.received_qty)) * flt(obj.purchase_rate)',
+		'idx': 32,
+		'match_id': 1,
+		'to_field': 'amount'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'item_tax_rate',
+		'idx': 33,
+		'match_id': 1,
+		'to_field': 'item_tax_rate'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'conversion_rate',
+		'idx': 34,
+		'match_id': 0,
+		'to_field': 'conversion_rate'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'category',
+		'idx': 35,
+		'match_id': 2,
+		'to_field': 'category'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'add_deduct_tax',
+		'idx': 36,
+		'match_id': 2,
+		'to_field': 'add_deduct_tax'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'charge_type',
+		'idx': 37,
+		'match_id': 2,
+		'to_field': 'charge_type'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'row_id',
+		'idx': 38,
+		'match_id': 2,
+		'to_field': 'row_id'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'item_wise_tax_detail',
+		'idx': 39,
+		'match_id': 2,
+		'to_field': 'item_wise_tax_detail'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'contact_person',
+		'idx': 39,
+		'match_id': 0,
+		'to_field': 'contact_person'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'description',
+		'idx': 40,
+		'match_id': 2,
+		'to_field': 'description'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'account_head',
+		'idx': 41,
+		'match_id': 2,
+		'to_field': 'account_head'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'cost_center',
+		'idx': 42,
+		'match_id': 2,
+		'to_field': 'cost_center'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'rate',
+		'idx': 43,
+		'match_id': 2,
+		'to_field': 'rate'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'project_name',
+		'idx': 44,
+		'match_id': 0,
+		'to_field': 'project_name'
+	},
+
+	# Table Mapper Detail
+	{
+		'doctype': 'Table Mapper Detail',
+		'from_field': 'po_details',
+		'from_table': 'PO Detail',
+		'idx': 1,
+		'match_id': 1,
+		'reference_doctype_key': 'prevdoc_doctype',
+		'reference_key': 'prevdoc_detail_docname',
+		'to_field': 'purchase_receipt_details',
+		'to_table': 'Purchase Receipt Detail',
+		'validation_logic': 'docstatus=1 and qty > ifnull(received_qty,0)'
+	},
+
+	# Table Mapper Detail
+	{
+		'doctype': 'Table Mapper Detail',
+		'from_table': 'Purchase Order',
+		'idx': 2,
+		'match_id': 0,
+		'reference_key': 'prevdoc_docname',
+		'to_table': 'Purchase Receipt',
+		'validation_logic': 'docstatus = 1'
+	},
+
+	# Table Mapper Detail
+	{
+		'doctype': 'Table Mapper Detail',
+		'from_field': 'purchase_tax_details',
+		'from_table': 'Purchase Tax Detail',
+		'idx': 3,
+		'match_id': 2,
+		'to_field': 'purchase_tax_details',
+		'to_table': 'Purchase Tax Detail',
+		'validation_logic': 'docstatus = 1'
+	}
+]

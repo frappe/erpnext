@@ -1,0 +1,90 @@
+# DocType Mapper, Project-Receivable Voucher
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-09-01 15:48:10',
+		'docstatus': 0,
+		'modified': '2010-09-01 14:24:38',
+		'modified_by': 'Administrator',
+		'owner': 'ashwini@webnotestech.com'
+	},
+
+	# These values are common for all Table Mapper Detail
+	{
+		'doctype': 'Table Mapper Detail',
+		'from_table': 'Project',
+		'idx': 1,
+		'match_id': 0,
+		'name': '__common__',
+		'parent': 'Project-Receivable Voucher',
+		'parentfield': 'table_mapper_details',
+		'parenttype': 'DocType Mapper',
+		'to_table': 'Receivable Voucher',
+		'validation_logic': 'name is not null'
+	},
+
+	# These values are common for all Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'map': 'Yes',
+		'match_id': 0,
+		'name': '__common__',
+		'parent': 'Project-Receivable Voucher',
+		'parentfield': 'field_mapper_details',
+		'parenttype': 'DocType Mapper'
+	},
+
+	# These values are common for all DocType Mapper
+	{
+		'doctype': 'DocType Mapper',
+		'from_doctype': 'Project',
+		'module': 'Accounts',
+		'name': '__common__',
+		'to_doctype': 'Receivable Voucher'
+	},
+
+	# DocType Mapper, Project-Receivable Voucher
+	{
+		'doctype': 'DocType Mapper',
+		'name': 'Project-Receivable Voucher'
+	},
+
+	# Field Mapper Detail
+	{
+		'checking_operator': '=',
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'customer',
+		'idx': 1,
+		'to_field': 'customer'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'customer_name',
+		'idx': 2,
+		'to_field': 'customer_name'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'customer_address',
+		'idx': 3,
+		'to_field': 'customer_address'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'territory',
+		'idx': 4,
+		'to_field': 'territory'
+	},
+
+	# Table Mapper Detail
+	{
+		'doctype': 'Table Mapper Detail'
+	}
+]

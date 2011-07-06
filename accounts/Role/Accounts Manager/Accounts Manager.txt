@@ -1,0 +1,26 @@
+# Role, Accounts Manager
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-08-08 17:08:51',
+		'docstatus': 0,
+		'modified': '2009-03-19 14:57:46',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all Role
+	{
+		'doctype': 'Role',
+		'module': 'Accounts',
+		'name': '__common__',
+		'role_name': 'Accounts Manager'
+	},
+
+	# Role, Accounts Manager
+	{
+		'doctype': 'Role',
+		'name': 'Accounts Manager'
+	}
+]

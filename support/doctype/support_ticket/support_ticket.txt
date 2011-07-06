@@ -1,0 +1,421 @@
+# DocType, Support Ticket
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2011-05-23 14:50:46',
+		'docstatus': 0,
+		'modified': '2011-07-06 09:25:53',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all DocType
+	{
+		'_last_update': '1309771514',
+		'allow_trash': 1,
+		'autoname': 'SUP.######',
+		'colour': 'White:FFF',
+		'doctype': 'DocType',
+		'module': 'Support',
+		'name': '__common__',
+		'search_fields': 'status,customer,allocated_to,subject,raised_by',
+		'section_style': 'Tray',
+		'server_code_error': ' ',
+		'show_in_menu': 0,
+		'subject': '%(subject)s',
+		'tag_fields': 'status,allocated_to',
+		'version': 150
+	},
+
+	# These values are common for all DocField
+	{
+		'doctype': 'DocField',
+		'name': '__common__',
+		'parent': 'Support Ticket',
+		'parentfield': 'fields',
+		'parenttype': 'DocType'
+	},
+
+	# These values are common for all DocPerm
+	{
+		'doctype': 'DocPerm',
+		'name': '__common__',
+		'parent': 'Support Ticket',
+		'parentfield': 'permissions',
+		'parenttype': 'DocType',
+		'read': 1
+	},
+
+	# DocType, Support Ticket
+	{
+		'doctype': 'DocType',
+		'name': 'Support Ticket'
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 1,
+		'doctype': 'DocPerm',
+		'idx': 1,
+		'permlevel': 0,
+		'role': 'Guest',
+		'submit': 0,
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'create': 1,
+		'doctype': 'DocPerm',
+		'idx': 2,
+		'match': 'customer',
+		'permlevel': 0,
+		'role': 'Customer',
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'cancel': 1,
+		'create': 1,
+		'doctype': 'DocPerm',
+		'idx': 3,
+		'permlevel': 0,
+		'role': 'Support Team',
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'cancel': 0,
+		'create': 0,
+		'doctype': 'DocPerm',
+		'idx': 4,
+		'match': 'allocated_to',
+		'permlevel': 1,
+		'role': 'Support Team',
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'doctype': 'DocPerm',
+		'idx': 5,
+		'permlevel': 2,
+		'role': 'Support Team'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'default': 'Open',
+		'doctype': 'DocField',
+		'fieldname': 'status',
+		'fieldtype': 'Select',
+		'idx': 1,
+		'in_filter': 0,
+		'label': 'Status',
+		'no_copy': 1,
+		'oldfieldname': 'status',
+		'oldfieldtype': 'Select',
+		'options': '\nOpen\nTo Reply\nWaiting for Customer\nHold\nClosed',
+		'permlevel': 1,
+		'reqd': 0,
+		'search_index': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'subject',
+		'fieldtype': 'Small Text',
+		'idx': 2,
+		'in_filter': 1,
+		'label': 'Subject',
+		'permlevel': 0,
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		'depends_on': 'eval:doc.__islocal',
+		'doctype': 'DocField',
+		'fieldname': 'raised_by',
+		'fieldtype': 'Data',
+		'idx': 3,
+		'in_filter': 1,
+		'label': 'Raised By (Email)',
+		'oldfieldname': 'raised_by',
+		'oldfieldtype': 'Data',
+		'permlevel': 0,
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		'depends_on': 'eval:doc.__islocal',
+		'doctype': 'DocField',
+		'fieldname': 'description',
+		'fieldtype': 'Text',
+		'idx': 4,
+		'label': 'Description',
+		'oldfieldname': 'problem_description',
+		'oldfieldtype': 'Text',
+		'permlevel': 0,
+		'reqd': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'problem_description',
+		'fieldtype': 'Text',
+		'idx': 5,
+		'label': 'Problem Description',
+		'oldfieldname': 'problem_description',
+		'oldfieldtype': 'Text',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'depends_on': 'eval:!doc.__islocal',
+		'doctype': 'DocField',
+		'fieldtype': 'HTML',
+		'idx': 6,
+		'label': 'Thread HTML',
+		'permlevel': 1
+	},
+
+	# DocField
+	{
+		'depends_on': 'eval:!doc.__islocal',
+		'doctype': 'DocField',
+		'fieldname': 'new_response',
+		'fieldtype': 'Text',
+		'idx': 7,
+		'label': 'New Response',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'depends_on': 'eval:!doc.__islocal',
+		'doctype': 'DocField',
+		'fieldtype': 'Button',
+		'idx': 8,
+		'label': 'Send',
+		'options': 'send_response',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldtype': 'Section Break',
+		'idx': 9,
+		'label': 'Additional Info',
+		'permlevel': 1
+	},
+
+	# DocField
+	{
+		'depends_on': 'eval:!doc.__islocal',
+		'doctype': 'DocField',
+		'fieldtype': 'Column Break',
+		'idx': 10,
+		'oldfieldtype': 'Column Break',
+		'permlevel': 1,
+		'width': '50%'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldname': 'customer',
+		'fieldtype': 'Link',
+		'idx': 11,
+		'in_filter': 1,
+		'label': 'Customer',
+		'oldfieldname': 'customer',
+		'oldfieldtype': 'Link',
+		'options': 'Customer',
+		'permlevel': 1,
+		'print_hide': 1,
+		'reqd': 0,
+		'search_index': 1,
+		'trigger': 'Client'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'customer_name',
+		'fieldtype': 'Data',
+		'idx': 12,
+		'in_filter': 1,
+		'label': 'Customer Name',
+		'oldfieldname': 'customer_name',
+		'oldfieldtype': 'Data',
+		'permlevel': 2,
+		'reqd': 0,
+		'search_index': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'address_display',
+		'fieldtype': 'Small Text',
+		'idx': 13,
+		'label': 'Address',
+		'permlevel': 2
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'contact_display',
+		'fieldtype': 'Data',
+		'idx': 14,
+		'label': 'Contact Name',
+		'permlevel': 2
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'contact_mobile',
+		'fieldtype': 'Data',
+		'idx': 15,
+		'label': 'Mobile No',
+		'permlevel': 2
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'contact_email',
+		'fieldtype': 'Data',
+		'idx': 16,
+		'label': 'Contact Email',
+		'oldfieldname': 'contact_no',
+		'oldfieldtype': 'Data',
+		'permlevel': 2
+	},
+
+	# DocField
+	{
+		'default': 'Today',
+		'doctype': 'DocField',
+		'fieldname': 'opening_date',
+		'fieldtype': 'Date',
+		'idx': 17,
+		'label': 'Opening Date',
+		'no_copy': 1,
+		'oldfieldname': 'opening_date',
+		'oldfieldtype': 'Date',
+		'permlevel': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'opening_time',
+		'fieldtype': 'Time',
+		'idx': 18,
+		'label': 'Opening Time',
+		'no_copy': 1,
+		'oldfieldname': 'opening_time',
+		'oldfieldtype': 'Time',
+		'permlevel': 1
+	},
+
+	# DocField
+	{
+		'depends_on': 'eval:!doc.__islocal',
+		'doctype': 'DocField',
+		'fieldtype': 'Column Break',
+		'idx': 19,
+		'oldfieldtype': 'Column Break',
+		'permlevel': 1
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'depends_on': 'eval:!doc.__islocal',
+		'doctype': 'DocField',
+		'fieldname': 'allocated_to',
+		'fieldtype': 'Link',
+		'idx': 20,
+		'in_filter': 1,
+		'label': 'Allocated To',
+		'oldfieldname': 'allocated_to',
+		'oldfieldtype': 'Link',
+		'options': 'Profile',
+		'permlevel': 1,
+		'search_index': 1
+	},
+
+	# DocField
+	{
+		'depends_on': 'eval:!doc.__islocal',
+		'doctype': 'DocField',
+		'fieldname': 'resolution_details',
+		'fieldtype': 'Small Text',
+		'idx': 21,
+		'label': 'Resolution Details',
+		'no_copy': 1,
+		'oldfieldname': 'resolution_details',
+		'oldfieldtype': 'Text',
+		'permlevel': 1
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'depends_on': 'eval:!doc.__islocal',
+		'doctype': 'DocField',
+		'fieldname': 'resolution_date',
+		'fieldtype': 'Date',
+		'idx': 22,
+		'in_filter': 0,
+		'label': 'Resolution Date',
+		'no_copy': 1,
+		'oldfieldname': 'resolution_date',
+		'oldfieldtype': 'Date',
+		'permlevel': 1,
+		'search_index': 1
+	},
+
+	# DocField
+	{
+		'depends_on': 'eval:!doc.__islocal',
+		'doctype': 'DocField',
+		'fieldname': 'resolution_time',
+		'fieldtype': 'Time',
+		'idx': 23,
+		'label': 'Resolution Time',
+		'oldfieldname': 'resolution_time',
+		'oldfieldtype': 'Time',
+		'permlevel': 1
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldname': 'content_type',
+		'fieldtype': 'Data',
+		'hidden': 1,
+		'idx': 24,
+		'label': 'Content Type',
+		'permlevel': 0
+	}
+]

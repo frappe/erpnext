@@ -1,0 +1,26 @@
+# Role, Customer
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-08-08 17:08:51',
+		'docstatus': 0,
+		'modified': '2009-06-26 14:42:33',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all Role
+	{
+		'doctype': 'Role',
+		'module': 'Selling',
+		'name': '__common__',
+		'role_name': 'Customer'
+	},
+
+	# Role, Customer
+	{
+		'doctype': 'Role',
+		'name': 'Customer'
+	}
+]

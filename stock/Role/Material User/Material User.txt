@@ -1,0 +1,26 @@
+# Role, Material User
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-08-08 17:08:51',
+		'docstatus': 0,
+		'modified': '2010-04-08 12:08:13',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all Role
+	{
+		'doctype': 'Role',
+		'module': 'Stock',
+		'name': '__common__',
+		'role_name': 'Material User'
+	},
+
+	# Role, Material User
+	{
+		'doctype': 'Role',
+		'name': 'Material User'
+	}
+]

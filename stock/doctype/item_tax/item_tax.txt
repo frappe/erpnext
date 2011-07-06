@@ -1,0 +1,66 @@
+# DocType, Item Tax
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-08-08 17:09:06',
+		'docstatus': 0,
+		'modified': '2010-09-20 14:06:57',
+		'modified_by': 'umair@iwebnotes.com',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all DocType
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocType',
+		'istable': 1,
+		'module': 'Stock',
+		'name': '__common__',
+		'section_style': 'Tray',
+		'server_code_error': ' ',
+		'show_in_menu': 0
+	},
+
+	# These values are common for all DocField
+	{
+		'doctype': 'DocField',
+		'name': '__common__',
+		'parent': 'Item Tax',
+		'parentfield': 'fields',
+		'parenttype': 'DocType',
+		'permlevel': 0
+	},
+
+	# DocType, Item Tax
+	{
+		'doctype': 'DocType',
+		'name': 'Item Tax'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'tax_type',
+		'fieldtype': 'Link',
+		'idx': 1,
+		'label': 'Tax',
+		'oldfieldname': 'tax_type',
+		'oldfieldtype': 'Link',
+		'options': 'Account',
+		'reqd': 1,
+		'trigger': 'Client'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'tax_rate',
+		'fieldtype': 'Currency',
+		'idx': 2,
+		'label': 'Tax Rate',
+		'oldfieldname': 'tax_rate',
+		'oldfieldtype': 'Currency',
+		'reqd': 0
+	}
+]

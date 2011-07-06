@@ -1,0 +1,127 @@
+# DocType, Previous Experience Detail
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-08-08 17:09:13',
+		'docstatus': 0,
+		'modified': '2010-09-20 14:06:57',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all DocType
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocType',
+		'istable': 1,
+		'module': 'HR',
+		'name': '__common__',
+		'section_style': 'Simple',
+		'server_code_error': ' ',
+		'show_in_menu': 0,
+		'version': 3
+	},
+
+	# These values are common for all DocField
+	{
+		'doctype': 'DocField',
+		'name': '__common__',
+		'parent': 'Previous Experience Detail',
+		'parentfield': 'fields',
+		'parenttype': 'DocType',
+		'permlevel': 0
+	},
+
+	# These values are common for all DocPerm
+	{
+		'create': 1,
+		'doctype': 'DocPerm',
+		'idx': 1,
+		'name': '__common__',
+		'parent': 'Previous Experience Detail',
+		'parentfield': 'permissions',
+		'parenttype': 'DocType',
+		'permlevel': 0,
+		'read': 1,
+		'role': 'All',
+		'write': 1
+	},
+
+	# DocType, Previous Experience Detail
+	{
+		'doctype': 'DocType',
+		'name': 'Previous Experience Detail'
+	},
+
+	# DocPerm
+	{
+		'doctype': 'DocPerm'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'company_name',
+		'fieldtype': 'Data',
+		'idx': 1,
+		'label': 'Company',
+		'oldfieldname': 'company_name',
+		'oldfieldtype': 'Data'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'designation',
+		'fieldtype': 'Data',
+		'idx': 2,
+		'label': 'Designation',
+		'oldfieldname': 'designation',
+		'oldfieldtype': 'Data'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'salary',
+		'fieldtype': 'Currency',
+		'idx': 3,
+		'label': 'Salary',
+		'oldfieldname': 'salary',
+		'oldfieldtype': 'Currency'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'address',
+		'fieldtype': 'Small Text',
+		'idx': 4,
+		'label': 'Address',
+		'oldfieldname': 'address',
+		'oldfieldtype': 'Small Text'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'contact',
+		'fieldtype': 'Data',
+		'idx': 5,
+		'label': 'Contact',
+		'oldfieldname': 'contact',
+		'oldfieldtype': 'Data'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'total_experience',
+		'fieldtype': 'Data',
+		'idx': 6,
+		'label': 'Total Experience',
+		'oldfieldname': 'total_experience',
+		'oldfieldtype': 'Data'
+	}
+]

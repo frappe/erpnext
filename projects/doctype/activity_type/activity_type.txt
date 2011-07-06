@@ -1,136 +1,78 @@
+# DocType, Activity Type
 [
+
+	# These values are common in all dictionaries
 	{
-		'allow_attach': None,
-		'allow_copy': None,
-		'allow_email': None,
-		'allow_print': None,
-		'allow_rename': None,
-		'allow_trash': None,
-		'autoname': 'field:activity_type',
-		'change_log': None,
-		'client_script': None,
-		'client_script_core': None,
-		'client_string': None,
-		'colour': 'White:FFF',
-		'creation': '2011-02-21 15:43:40',
-		'description': None,
+		'creation': '2011-02-23 11:22:28',
 		'docstatus': 0,
-		'doctype': 'DocType',
-		'document_type': None,
-		'dt_template': None,
-		'hide_heading': None,
-		'hide_toolbar': None,
-		'idx': None,
-		'in_create': None,
-		'in_dialog': 1,
-		'is_transaction_doc': None,
-		'issingle': None,
-		'istable': None,
-		'max_attachments': None,
-		'menu_index': None,
 		'modified': '2011-02-21 15:43:40',
 		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all DocType
+	{
+		'autoname': 'field:activity_type',
+		'colour': 'White:FFF',
+		'doctype': 'DocType',
+		'in_dialog': 1,
 		'module': 'Projects',
-		'name': 'Activity Type',
-		'name_case': None,
-		'owner': 'Administrator',
-		'parent': None,
-		'parent_node': None,
-		'parentfield': None,
-		'parenttype': None,
-		'print_outline': None,
-		'read_only': None,
-		'read_only_onload': None,
-		'search_fields': None,
+		'name': '__common__',
 		'section_style': 'Simple',
-		'server_code': None,
-		'server_code_compiled': None,
-		'server_code_core': None,
 		'server_code_error': ' ',
-		'show_in_menu': None,
-		'smallicon': None,
-		'use_template': None,
 		'version': 12
 	},
+
+	# These values are common for all DocField
 	{
-		'amend': None,
-		'cancel': None,
-		'create': 1,
-		'creation': '2011-02-21 15:43:40',
-		'docstatus': 0,
-		'doctype': 'DocPerm',
-		'execute': None,
-		'idx': 1,
-		'match': None,
-		'modified': '2011-02-21 15:43:40',
-		'modified_by': 'Administrator',
-		'name': 'PERM00739',
-		'owner': 'Administrator',
-		'parent': 'Activity Type',
-		'parentfield': 'permissions',
-		'parenttype': 'DocType',
-		'permlevel': 0,
-		'read': 1,
-		'role': 'System Manager',
-		'submit': None,
-		'write': 1
-	},
-	{
-		'amend': None,
-		'cancel': None,
-		'create': 1,
-		'creation': '2011-02-21 15:43:40',
-		'docstatus': 0,
-		'doctype': 'DocPerm',
-		'execute': None,
-		'idx': 2,
-		'match': None,
-		'modified': '2011-02-21 15:43:40',
-		'modified_by': 'Administrator',
-		'name': 'PERM00740',
-		'owner': 'Administrator',
-		'parent': 'Activity Type',
-		'parentfield': 'permissions',
-		'parenttype': 'DocType',
-		'permlevel': 0,
-		'read': 1,
-		'role': 'Projects User',
-		'submit': None,
-		'write': 1
-	},
-	{
-		'allow_on_submit': None,
-		'colour': None,
-		'creation': '2011-02-21 15:43:40',
-		'default': None,
-		'depends_on': None,
-		'description': None,
-		'docstatus': 0,
 		'doctype': 'DocField',
 		'fieldname': 'activity_type',
 		'fieldtype': 'Data',
-		'hidden': None,
-		'icon': None,
 		'idx': 1,
-		'in_filter': None,
 		'label': 'Activity Type',
-		'modified': '2011-02-21 15:43:40',
-		'modified_by': 'Administrator',
-		'name': 'FL04231',
-		'no_copy': None,
-		'oldfieldname': None,
-		'oldfieldtype': None,
-		'options': None,
-		'owner': 'Administrator',
+		'name': '__common__',
 		'parent': 'Activity Type',
 		'parentfield': 'fields',
 		'parenttype': 'DocType',
 		'permlevel': 0,
-		'print_hide': None,
-		'report_hide': None,
-		'reqd': 1,
-		'search_index': None,
-		'trigger': None,
-		'width': None
+		'reqd': 1
+	},
+
+	# These values are common for all DocPerm
+	{
+		'create': 1,
+		'doctype': 'DocPerm',
+		'name': '__common__',
+		'parent': 'Activity Type',
+		'parentfield': 'permissions',
+		'parenttype': 'DocType',
+		'permlevel': 0,
+		'read': 1,
+		'write': 1
+	},
+
+	# DocType, Activity Type
+	{
+		'doctype': 'DocType',
+		'name': 'Activity Type'
+	},
+
+	# DocPerm
+	{
+		'doctype': 'DocPerm',
+		'idx': 1,
+		'role': 'System Manager'
+	},
+
+	# DocPerm
+	{
+		'doctype': 'DocPerm',
+		'idx': 2,
+		'role': 'Projects User'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField'
 	}
 ]

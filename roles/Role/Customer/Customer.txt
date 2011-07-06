@@ -1,1 +1,0 @@
-[{'modified_by': 'Administrator', 'name': 'Customer', 'parent': None, 'creation': '2009-06-26 14:42:33', 'modified': '2009-06-26 14:42:33', 'module': 'Roles', 'doctype': 'Role', 'idx': None, 'parenttype': None, 'role_name': 'Customer', 'owner': 'Administrator', 'docstatus': 0, 'parentfield': None}]

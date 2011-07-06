@@ -1,1 +1,298 @@
-[{'section_style': 'Simple', 'is_transaction_doc': None, 'creation': '2009-03-12 12:09:19', 'search_fields': 'name,parent_cost_center', 'module': 'Accounts', 'doctype': 'DocType', 'change_log': None, 'print_outline': '', 'owner': 'Administrator', 'in_dialog': None, 'in_create': 1, 'read_only': None, 'allow_email': None, 'dt_template': None, 'hide_heading': None, 'issingle': None, 'allow_rename': None, 'smallicon': '', 'allow_attach': None, 'show_in_menu': 0, 'max_attachments': None, 'version': 108, 'menu_index': None, 'docstatus': 0, 'allow_copy': 1, 'istable': None, 'description': None, 'parent': None, 'server_code': '', 'allow_trash': 1, 'allow_print': None, 'autoname': 'field:cost_center_name', 'client_script_core': None, 'client_string': None, 'use_template': None, 'modified_by': 'nabin@webnotestech.com', 'document_type': 'Master', 'name': 'Cost Center', 'idx': None, 'hide_toolbar': None, 'colour': 'White:FFF', 'client_script': '', 'modified': '2010-11-30 18:18:39', 'server_code_error': ' ', 'name_case': '', 'parenttype': None, 'read_only_onload': None, 'server_code_core': None, 'server_code_compiled': None, 'parent_node': None, 'parentfield': None}, {'cancel': 0, 'amend': 0, 'execute': None, 'modified_by': 'nabin@webnotestech.com', 'name': 'PERM00852', 'parent': 'Cost Center', 'read': 1, 'create': 0, 'creation': '2010-04-26 16:27:45', 'modified': '2010-11-30 18:18:39', 'submit': 0, 'doctype': 'DocPerm', 'write': 0, 'idx': 1, 'parenttype': 'DocType', 'role': 'Accounts Manager', 'owner': 'Administrator', 'docstatus': 0, 'permlevel': 1, 'match': None, 'parentfield': 'permissions'}, {'cancel': 1, 'amend': 0, 'execute': None, 'modified_by': 'nabin@webnotestech.com', 'name': 'PERM00853', 'parent': 'Cost Center', 'read': 1, 'create': 1, 'creation': '2010-04-26 16:27:45', 'modified': '2010-11-30 18:18:39', 'submit': 0, 'doctype': 'DocPerm', 'write': 1, 'idx': 2, 'parenttype': 'DocType', 'role': 'Accounts Manager', 'owner': 'Administrator', 'docstatus': 0, 'permlevel': 0, 'match': None, 'parentfield': 'permissions'}, {'cancel': 0, 'amend': 0, 'execute': None, 'modified_by': 'nabin@webnotestech.com', 'name': 'PERM00862', 'parent': 'Cost Center', 'read': 1, 'create': 0, 'creation': '2010-04-26 16:47:40', 'modified': '2010-11-30 18:18:39', 'submit': 0, 'doctype': 'DocPerm', 'write': 0, 'idx': 3, 'parenttype': 'DocType', 'role': 'Accounts User', 'owner': 'Administrator', 'docstatus': 0, 'permlevel': 1, 'match': None, 'parentfield': 'permissions'}, {'cancel': 0, 'amend': 0, 'execute': None, 'modified_by': 'nabin@webnotestech.com', 'name': 'PERM00151', 'parent': 'Cost Center', 'read': 1, 'create': 0, 'creation': '2009-03-12 14:05:37', 'modified': '2010-11-30 18:18:39', 'submit': 0, 'doctype': 'DocPerm', 'write': 0, 'idx': 4, 'parenttype': 'DocType', 'role': 'Accounts User', 'owner': 'Administrator', 'docstatus': 0, 'permlevel': 0, 'match': '', 'parentfield': 'permissions'}, {'cancel': 1, 'amend': None, 'execute': None, 'modified_by': 'nabin@webnotestech.com', 'name': 'PERM00310', 'parent': 'Cost Center', 'read': 1, 'create': 1, 'creation': '2009-06-08 11:37:06', 'modified': '2010-11-30 18:18:39', 'submit': None, 'doctype': 'DocPerm', 'write': 1, 'idx': 5, 'parenttype': 'DocType', 'role': 'Administrator', 'owner': 'Administrator', 'docstatus': 0, 'permlevel': 0, 'match': None, 'parentfield': 'permissions'}, {'cancel': None, 'amend': None, 'execute': None, 'modified_by': 'nabin@webnotestech.com', 'name': 'PERM00311', 'parent': 'Cost Center', 'read': 1, 'create': None, 'creation': '2009-06-08 11:37:06', 'modified': '2010-11-30 18:18:39', 'submit': None, 'doctype': 'DocPerm', 'write': None, 'idx': 6, 'parenttype': 'DocType', 'role': 'All', 'owner': 'Administrator', 'docstatus': 0, 'permlevel': 1, 'match': None, 'parentfield': 'permissions'}, {'no_copy': None, 'oldfieldtype': 'Small Text', 'creation': '2010-04-20 14:06:44', 'doctype': 'DocField', 'oldfieldname': 'trash_reason', 'owner': 'Administrator', 'reqd': None, 'in_filter': None, 'print_hide': None, 'modified_by': 'nabin@webnotestech.com', 'label': 'Trash Reason', 'width': None, 'trigger': None, 'depends_on': None, 'docstatus': 0, 'hidden': None, 'permlevel': 1, 'description': None, 'parent': 'Cost Center', 'search_index': None, 'allow_on_submit': None, 'icon': None, 'name': 'FL04835', 'idx': 1, 'default': None, 'colour': None, 'modified': '2010-11-30 18:18:39', 'parenttype': 'DocType', 'fieldname': 'trash_reason', 'fieldtype': 'Small Text', 'options': None, 'report_hide': None, 'parentfield': 'fields'}, {'no_copy': 1, 'oldfieldtype': 'Data', 'creation': '2009-03-12 12:09:19', 'doctype': 'DocField', 'oldfieldname': 'cost_center_name', 'owner': 'Administrator', 'reqd': 1, 'in_filter': 0, 'print_hide': None, 'modified_by': 'nabin@webnotestech.com', 'label': 'Cost Center Name', 'width': None, 'trigger': None, 'depends_on': None, 'docstatus': 0, 'hidden': None, 'permlevel': 0, 'description': None, 'parent': 'Cost Center', 'search_index': 0, 'allow_on_submit': None, 'icon': None, 'name': 'FL00338', 'idx': 2, 'default': None, 'colour': None, 'modified': '2010-11-30 18:18:39', 'parenttype': 'DocType', 'fieldname': 'cost_center_name', 'fieldtype': 'Data', 'options': None, 'report_hide': None, 'parentfield': 'fields'}, {'no_copy': None, 'oldfieldtype': 'Link', 'creation': '2009-03-12 12:09:19', 'doctype': 'DocField', 'oldfieldname': 'parent_cost_center', 'owner': 'Administrator', 'reqd': 1, 'in_filter': None, 'print_hide': None, 'modified_by': 'nabin@webnotestech.com', 'label': 'Parent Cost Center', 'width': None, 'trigger': 'Client', 'depends_on': None, 'docstatus': 0, 'hidden': None, 'permlevel': 0, 'description': 'Select company name first.', 'parent': 'Cost Center', 'search_index': None, 'allow_on_submit': None, 'icon': None, 'name': 'FL00339', 'idx': 3, 'default': None, 'colour': None, 'modified': '2010-11-30 18:18:39', 'parenttype': 'DocType', 'fieldname': 'parent_cost_center', 'fieldtype': 'Link', 'options': 'Cost Center', 'report_hide': None, 'parentfield': 'fields'}, {'no_copy': None, 'oldfieldtype': 'Link', 'creation': '2009-06-08 10:49:36', 'doctype': 'DocField', 'oldfieldname': 'company_name', 'owner': 'Administrator', 'reqd': 1, 'in_filter': None, 'print_hide': None, 'modified_by': 'nabin@webnotestech.com', 'label': 'Company', 'width': None, 'trigger': 'Client', 'depends_on': None, 'docstatus': 0, 'hidden': None, 'permlevel': 0, 'description': None, 'parent': 'Cost Center', 'search_index': None, 'allow_on_submit': None, 'icon': None, 'name': 'FL02281', 'idx': 4, 'default': None, 'colour': 'White:FFF', 'modified': '2010-11-30 18:18:39', 'parenttype': 'DocType', 'fieldname': 'company_name', 'fieldtype': 'Link', 'options': 'Company', 'report_hide': None, 'parentfield': 'fields'}, {'no_copy': None, 'oldfieldtype': 'Data', 'creation': '2009-06-08 10:49:36', 'doctype': 'DocField', 'oldfieldname': 'company_abbr', 'owner': 'Administrator', 'reqd': None, 'in_filter': None, 'print_hide': None, 'modified_by': 'nabin@webnotestech.com', 'label': 'Company Abbr', 'width': None, 'trigger': '', 'depends_on': None, 'docstatus': 0, 'hidden': None, 'permlevel': 1, 'description': None, 'parent': 'Cost Center', 'search_index': None, 'allow_on_submit': None, 'icon': None, 'name': 'FL02280', 'idx': 5, 'default': None, 'colour': None, 'modified': '2010-11-30 18:18:39', 'parenttype': 'DocType', 'fieldname': 'company_abbr', 'fieldtype': 'Data', 'options': None, 'report_hide': None, 'parentfield': 'fields'}, {'no_copy': 1, 'oldfieldtype': 'Select', 'creation': '2009-08-10 17:03:04', 'doctype': 'DocField', 'oldfieldname': 'group_or_ledger', 'owner': 'Administrator', 'reqd': 1, 'in_filter': None, 'print_hide': 1, 'modified_by': 'nabin@webnotestech.com', 'label': 'Group or Ledger', 'width': None, 'trigger': 'Client', 'depends_on': None, 'docstatus': 0, 'hidden': 1, 'permlevel': 0, 'description': None, 'parent': 'Cost Center', 'search_index': None, 'allow_on_submit': None, 'icon': None, 'name': 'FL02706', 'idx': 6, 'default': None, 'colour': 'White:FFF', 'modified': '2010-11-30 18:18:39', 'parenttype': 'DocType', 'fieldname': 'group_or_ledger', 'fieldtype': 'Select', 'options': '\nGroup\nLedger', 'report_hide': 1, 'parentfield': 'fields'}, {'no_copy': None, 'oldfieldtype': 'Link', 'creation': '2010-07-28 13:17:53', 'doctype': 'DocField', 'oldfieldname': 'distribution_id', 'owner': 'harshada@webnotestech.com', 'reqd': None, 'in_filter': None, 'print_hide': None, 'modified_by': 'nabin@webnotestech.com', 'label': 'Distribution Id', 'width': None, 'trigger': None, 'depends_on': None, 'docstatus': 0, 'hidden': None, 'permlevel': 0, 'description': None, 'parent': 'Cost Center', 'search_index': None, 'allow_on_submit': None, 'icon': None, 'name': 'FL05721', 'idx': 7, 'default': None, 'colour': None, 'modified': '2010-11-30 18:18:39', 'parenttype': 'DocType', 'fieldname': 'distribution_id', 'fieldtype': 'Link', 'options': 'Budget Distribution', 'report_hide': None, 'parentfield': 'fields'}, {'no_copy': None, 'oldfieldtype': 'Table', 'creation': '2009-06-05 16:46:56', 'doctype': 'DocField', 'oldfieldname': 'budget_details', 'owner': 'Administrator', 'reqd': None, 'in_filter': None, 'print_hide': None, 'modified_by': 'nabin@webnotestech.com', 'label': 'Budget Details', 'width': None, 'trigger': None, 'depends_on': None, 'docstatus': 0, 'hidden': None, 'permlevel': 0, 'description': None, 'parent': 'Cost Center', 'search_index': None, 'allow_on_submit': None, 'icon': None, 'name': 'FL02267', 'idx': 8, 'default': None, 'colour': None, 'modified': '2010-11-30 18:18:39', 'parenttype': 'DocType', 'fieldname': 'budget_details', 'fieldtype': 'Table', 'options': 'Budget Detail', 'report_hide': None, 'parentfield': 'fields'}, {'no_copy': 1, 'oldfieldtype': 'Int', 'creation': '2009-03-12 12:09:19', 'doctype': 'DocField', 'oldfieldname': 'lft', 'owner': 'Administrator', 'reqd': None, 'in_filter': 1, 'print_hide': 1, 'modified_by': 'nabin@webnotestech.com', 'label': 'lft', 'width': None, 'trigger': None, 'depends_on': None, 'docstatus': 0, 'hidden': 1, 'permlevel': 0, 'description': None, 'parent': 'Cost Center', 'search_index': 1, 'allow_on_submit': None, 'icon': None, 'name': 'FL00343', 'idx': 9, 'default': None, 'colour': None, 'modified': '2010-11-30 18:18:39', 'parenttype': 'DocType', 'fieldname': 'lft', 'fieldtype': 'Int', 'options': None, 'report_hide': 1, 'parentfield': 'fields'}, {'no_copy': 1, 'oldfieldtype': 'Int', 'creation': '2009-03-12 12:09:19', 'doctype': 'DocField', 'oldfieldname': 'rgt', 'owner': 'Administrator', 'reqd': 0, 'in_filter': 1, 'print_hide': 1, 'modified_by': 'nabin@webnotestech.com', 'label': 'rgt', 'width': None, 'trigger': None, 'depends_on': None, 'docstatus': 0, 'hidden': 1, 'permlevel': 0, 'description': None, 'parent': 'Cost Center', 'search_index': 1, 'allow_on_submit': None, 'icon': None, 'name': 'FL00344', 'idx': 10, 'default': None, 'colour': None, 'modified': '2010-11-30 18:18:39', 'parenttype': 'DocType', 'fieldname': 'rgt', 'fieldtype': 'Int', 'options': None, 'report_hide': 1, 'parentfield': 'fields'}, {'no_copy': 1, 'oldfieldtype': 'Data', 'creation': '2009-03-12 12:09:19', 'doctype': 'DocField', 'oldfieldname': 'old_parent', 'owner': 'Administrator', 'reqd': None, 'in_filter': None, 'print_hide': 1, 'modified_by': 'nabin@webnotestech.com', 'label': 'old_parent', 'width': None, 'trigger': None, 'depends_on': None, 'docstatus': 0, 'hidden': 1, 'permlevel': 0, 'description': None, 'parent': 'Cost Center', 'search_index': None, 'allow_on_submit': None, 'icon': None, 'name': 'FL00345', 'idx': 11, 'default': None, 'colour': None, 'modified': '2010-11-30 18:18:39', 'parenttype': 'DocType', 'fieldname': 'old_parent', 'fieldtype': 'Data', 'options': None, 'report_hide': 1, 'parentfield': 'fields'}]
+# DocType, Cost Center
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-08-08 17:08:56',
+		'docstatus': 0,
+		'modified': '2010-12-29 18:18:55',
+		'modified_by': 'umair@iwebnotes.com',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all DocType
+	{
+		'_last_update': '1308741898',
+		'allow_copy': 1,
+		'allow_trash': 1,
+		'autoname': 'field:cost_center_name',
+		'colour': 'White:FFF',
+		'doctype': 'DocType',
+		'document_type': 'Master',
+		'in_create': 1,
+		'module': 'Accounts',
+		'name': '__common__',
+		'search_fields': 'name,parent_cost_center',
+		'section_style': 'Simple',
+		'server_code_error': ' ',
+		'show_in_menu': 0,
+		'version': 104
+	},
+
+	# These values are common for all DocField
+	{
+		'doctype': 'DocField',
+		'name': '__common__',
+		'parent': 'Cost Center',
+		'parentfield': 'fields',
+		'parenttype': 'DocType'
+	},
+
+	# These values are common for all DocPerm
+	{
+		'doctype': 'DocPerm',
+		'name': '__common__',
+		'parent': 'Cost Center',
+		'parentfield': 'permissions',
+		'parenttype': 'DocType',
+		'read': 1
+	},
+
+	# DocType, Cost Center
+	{
+		'doctype': 'DocType',
+		'name': 'Cost Center'
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
+		'doctype': 'DocPerm',
+		'idx': 1,
+		'permlevel': 1,
+		'role': 'Accounts Manager',
+		'submit': 0,
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 1,
+		'create': 1,
+		'doctype': 'DocPerm',
+		'idx': 2,
+		'permlevel': 0,
+		'role': 'Accounts Manager',
+		'submit': 0,
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
+		'doctype': 'DocPerm',
+		'idx': 3,
+		'permlevel': 1,
+		'role': 'Accounts User',
+		'submit': 0,
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
+		'doctype': 'DocPerm',
+		'idx': 4,
+		'permlevel': 0,
+		'role': 'Accounts User',
+		'submit': 0,
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'cancel': 1,
+		'create': 1,
+		'doctype': 'DocPerm',
+		'idx': 5,
+		'permlevel': 0,
+		'role': 'System Manager',
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'doctype': 'DocPerm',
+		'idx': 6,
+		'permlevel': 1,
+		'role': 'All'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'trash_reason',
+		'fieldtype': 'Small Text',
+		'idx': 1,
+		'label': 'Trash Reason',
+		'oldfieldname': 'trash_reason',
+		'oldfieldtype': 'Small Text',
+		'permlevel': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'cost_center_name',
+		'fieldtype': 'Data',
+		'idx': 2,
+		'in_filter': 0,
+		'label': 'Cost Center Name',
+		'no_copy': 1,
+		'oldfieldname': 'cost_center_name',
+		'oldfieldtype': 'Data',
+		'permlevel': 0,
+		'reqd': 1,
+		'search_index': 0
+	},
+
+	# DocField
+	{
+		'description': 'Select company name first.',
+		'doctype': 'DocField',
+		'fieldname': 'parent_cost_center',
+		'fieldtype': 'Link',
+		'idx': 3,
+		'label': 'Parent Cost Center',
+		'oldfieldname': 'parent_cost_center',
+		'oldfieldtype': 'Link',
+		'options': 'Cost Center',
+		'permlevel': 0,
+		'reqd': 1,
+		'trigger': 'Client'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldname': 'company_name',
+		'fieldtype': 'Link',
+		'idx': 4,
+		'label': 'Company',
+		'oldfieldname': 'company_name',
+		'oldfieldtype': 'Link',
+		'options': 'Company',
+		'permlevel': 0,
+		'reqd': 1,
+		'trigger': 'Client'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'company_abbr',
+		'fieldtype': 'Data',
+		'idx': 5,
+		'label': 'Company Abbr',
+		'oldfieldname': 'company_abbr',
+		'oldfieldtype': 'Data',
+		'permlevel': 1
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldname': 'group_or_ledger',
+		'fieldtype': 'Select',
+		'hidden': 1,
+		'idx': 6,
+		'label': 'Group or Ledger',
+		'no_copy': 1,
+		'oldfieldname': 'group_or_ledger',
+		'oldfieldtype': 'Select',
+		'options': '\nGroup\nLedger',
+		'permlevel': 0,
+		'print_hide': 1,
+		'report_hide': 1,
+		'reqd': 1,
+		'trigger': 'Client'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'distribution_id',
+		'fieldtype': 'Link',
+		'idx': 7,
+		'label': 'Distribution Id',
+		'oldfieldname': 'distribution_id',
+		'oldfieldtype': 'Link',
+		'options': 'Budget Distribution',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'budget_details',
+		'fieldtype': 'Table',
+		'idx': 8,
+		'label': 'Budget Details',
+		'oldfieldname': 'budget_details',
+		'oldfieldtype': 'Table',
+		'options': 'Budget Detail',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'lft',
+		'fieldtype': 'Int',
+		'hidden': 1,
+		'idx': 9,
+		'in_filter': 1,
+		'label': 'lft',
+		'no_copy': 1,
+		'oldfieldname': 'lft',
+		'oldfieldtype': 'Int',
+		'permlevel': 0,
+		'print_hide': 1,
+		'report_hide': 1,
+		'search_index': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'rgt',
+		'fieldtype': 'Int',
+		'hidden': 1,
+		'idx': 10,
+		'in_filter': 1,
+		'label': 'rgt',
+		'no_copy': 1,
+		'oldfieldname': 'rgt',
+		'oldfieldtype': 'Int',
+		'permlevel': 0,
+		'print_hide': 1,
+		'report_hide': 1,
+		'reqd': 0,
+		'search_index': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'old_parent',
+		'fieldtype': 'Data',
+		'hidden': 1,
+		'idx': 11,
+		'label': 'old_parent',
+		'no_copy': 1,
+		'oldfieldname': 'old_parent',
+		'oldfieldtype': 'Data',
+		'permlevel': 0,
+		'print_hide': 1,
+		'report_hide': 1
+	}
+]

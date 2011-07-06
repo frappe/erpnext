@@ -1,0 +1,779 @@
+# DocType, Stock Entry
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-08-08 17:09:25',
+		'docstatus': 0,
+		'modified': '2011-06-14 12:50:12',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all DocType
+	{
+		'_last_update': '1308741898',
+		'colour': 'White:FFF',
+		'doctype': 'DocType',
+		'module': 'Stock',
+		'name': '__common__',
+		'print_outline': 'No',
+		'search_fields': 'transfer_date, from_warehouse, to_warehouse, purpose, remarks',
+		'section_style': 'Tabbed',
+		'server_code_error': ' ',
+		'show_in_menu': 0,
+		'subject': '%(remarks)s',
+		'tag_fields': 'purpose',
+		'version': 243
+	},
+
+	# These values are common for all DocField
+	{
+		'doctype': 'DocField',
+		'name': '__common__',
+		'parent': 'Stock Entry',
+		'parentfield': 'fields',
+		'parenttype': 'DocType'
+	},
+
+	# These values are common for all DocPerm
+	{
+		'doctype': 'DocPerm',
+		'name': '__common__',
+		'parent': 'Stock Entry',
+		'parentfield': 'permissions',
+		'parenttype': 'DocType',
+		'read': 1
+	},
+
+	# DocType, Stock Entry
+	{
+		'doctype': 'DocType',
+		'name': 'Stock Entry'
+	},
+
+	# DocPerm
+	{
+		'amend': 1,
+		'cancel': 1,
+		'create': 1,
+		'doctype': 'DocPerm',
+		'idx': 1,
+		'permlevel': 0,
+		'role': 'Material Manager',
+		'submit': 1,
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
+		'doctype': 'DocPerm',
+		'idx': 2,
+		'permlevel': 1,
+		'role': 'Material Manager',
+		'submit': 0,
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'amend': 1,
+		'cancel': 1,
+		'create': 1,
+		'doctype': 'DocPerm',
+		'idx': 3,
+		'permlevel': 0,
+		'role': 'Material User',
+		'submit': 1,
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
+		'doctype': 'DocPerm',
+		'idx': 4,
+		'permlevel': 1,
+		'role': 'Material User',
+		'submit': 0,
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'amend': 1,
+		'cancel': 1,
+		'create': 1,
+		'doctype': 'DocPerm',
+		'idx': 5,
+		'permlevel': 0,
+		'role': 'Production User',
+		'submit': 1,
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'doctype': 'DocPerm',
+		'idx': 6,
+		'permlevel': 1,
+		'role': 'Production User'
+	},
+
+	# DocPerm
+	{
+		'create': 0,
+		'doctype': 'DocPerm',
+		'idx': 7,
+		'permlevel': 2,
+		'role': 'Production User',
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'amend': 1,
+		'cancel': 1,
+		'create': 1,
+		'doctype': 'DocPerm',
+		'idx': 8,
+		'permlevel': 0,
+		'role': 'Production Manager',
+		'submit': 1,
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'doctype': 'DocPerm',
+		'idx': 9,
+		'permlevel': 1,
+		'role': 'Production Manager'
+	},
+
+	# DocPerm
+	{
+		'doctype': 'DocPerm',
+		'idx': 10,
+		'permlevel': 2,
+		'role': 'Production Manager',
+		'write': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Section Break',
+		'idx': 1,
+		'label': 'Warehouse',
+		'oldfieldtype': 'Section Break',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Column Break',
+		'idx': 2,
+		'oldfieldtype': 'Column Break',
+		'permlevel': 0,
+		'width': '50%'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'description': 'To manage multiple series please go to Setup > Manage Series',
+		'doctype': 'DocField',
+		'fieldname': 'naming_series',
+		'fieldtype': 'Select',
+		'idx': 3,
+		'label': 'Series',
+		'no_copy': 1,
+		'oldfieldname': 'naming_series',
+		'oldfieldtype': 'Select',
+		'options': 'STE',
+		'permlevel': 0,
+		'print_hide': 1,
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		'description': 'The date at which current entry is corrected in the system.',
+		'doctype': 'DocField',
+		'fieldname': 'amendment_date',
+		'fieldtype': 'Date',
+		'idx': 4,
+		'label': 'Amendment Date',
+		'no_copy': 1,
+		'oldfieldname': 'amendment_date',
+		'oldfieldtype': 'Date',
+		'permlevel': 0,
+		'print_hide': 1
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldname': 'purpose',
+		'fieldtype': 'Select',
+		'idx': 5,
+		'in_filter': 1,
+		'label': 'Purpose',
+		'oldfieldname': 'purpose',
+		'oldfieldtype': 'Select',
+		'options': 'Material Issue\nMaterial Receipt\nMaterial Transfer\nSales Return\nPurchase Return\nSubcontracting\nProduction Order',
+		'permlevel': 0,
+		'reqd': 1,
+		'trigger': 'Client'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldname': 'delivery_note_no',
+		'fieldtype': 'Link',
+		'hidden': 1,
+		'idx': 6,
+		'label': 'Delivery Note No',
+		'oldfieldname': 'delivery_note_no',
+		'oldfieldtype': 'Link',
+		'options': 'Delivery Note',
+		'permlevel': 0,
+		'print_hide': 1,
+		'trigger': 'Client'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldname': 'purchase_receipt_no',
+		'fieldtype': 'Link',
+		'hidden': 1,
+		'idx': 7,
+		'label': 'Purchase Receipt No',
+		'oldfieldname': 'purchase_receipt_no',
+		'oldfieldtype': 'Link',
+		'options': 'Purchase Receipt',
+		'permlevel': 0,
+		'print_hide': 1,
+		'trigger': 'Client'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'sales_invoice_no',
+		'fieldtype': 'Link',
+		'hidden': 1,
+		'idx': 8,
+		'label': 'Sales Invoice No',
+		'options': 'Receivable Voucher',
+		'permlevel': 0,
+		'print_hide': 1
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldname': 'supplier',
+		'fieldtype': 'Link',
+		'hidden': 1,
+		'idx': 9,
+		'label': 'Supplier',
+		'oldfieldname': 'supplier',
+		'oldfieldtype': 'Link',
+		'options': 'Supplier',
+		'permlevel': 0,
+		'print_hide': 1,
+		'trigger': 'Client'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'supplier_name',
+		'fieldtype': 'Data',
+		'idx': 10,
+		'label': 'Supplier Name',
+		'oldfieldname': 'supplier_name',
+		'oldfieldtype': 'Data',
+		'permlevel': 1
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldname': 'supplier_address',
+		'fieldtype': 'Small Text',
+		'hidden': 1,
+		'idx': 11,
+		'label': 'Supplier Address',
+		'oldfieldname': 'supplier_address',
+		'oldfieldtype': 'Small Text',
+		'permlevel': 0,
+		'trigger': 'Client'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldname': 'customer',
+		'fieldtype': 'Link',
+		'hidden': 1,
+		'idx': 12,
+		'label': 'Customer',
+		'oldfieldname': 'customer',
+		'oldfieldtype': 'Link',
+		'options': 'Customer',
+		'permlevel': 0,
+		'print_hide': 1,
+		'trigger': 'Client'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'customer_name',
+		'fieldtype': 'Data',
+		'hidden': 1,
+		'idx': 13,
+		'label': 'Customer Name',
+		'oldfieldname': 'customer_name',
+		'oldfieldtype': 'Data',
+		'permlevel': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'customer_address',
+		'fieldtype': 'Small Text',
+		'hidden': 1,
+		'idx': 14,
+		'label': 'Customer Address',
+		'oldfieldname': 'customer_address',
+		'oldfieldtype': 'Small Text',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldname': 'process',
+		'fieldtype': 'Select',
+		'hidden': 1,
+		'idx': 15,
+		'in_filter': 1,
+		'label': 'Process',
+		'oldfieldname': 'process',
+		'oldfieldtype': 'Select',
+		'options': '\nMaterial Transfer\nBackflush',
+		'permlevel': 2,
+		'print_hide': 1,
+		'trigger': 'Client'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldname': 'production_order',
+		'fieldtype': 'Link',
+		'hidden': 1,
+		'idx': 16,
+		'in_filter': 1,
+		'label': 'Production Order',
+		'oldfieldname': 'production_order',
+		'oldfieldtype': 'Link',
+		'options': 'Production Order',
+		'permlevel': 2,
+		'print_hide': 1,
+		'trigger': 'Client'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'fg_completed_qty',
+		'fieldtype': 'Currency',
+		'idx': 17,
+		'label': 'FG Completed Qty',
+		'oldfieldname': 'fg_completed_qty',
+		'oldfieldtype': 'Currency',
+		'permlevel': 2,
+		'print_hide': 1,
+		'trigger': 'Client'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldtype': 'HTML',
+		'idx': 18,
+		'label': 'Warehouse HTML',
+		'no_copy': 0,
+		'oldfieldtype': 'HTML',
+		'options': "<div class='columnHeading'>Warehouse</div>",
+		'permlevel': 0,
+		'print_hide': 1
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldname': 'from_warehouse',
+		'fieldtype': 'Link',
+		'idx': 19,
+		'label': 'Source Warehouse',
+		'oldfieldname': 'from_warehouse',
+		'oldfieldtype': 'Link',
+		'options': 'Warehouse',
+		'permlevel': 0,
+		'print_hide': 1,
+		'reqd': 0,
+		'trigger': 'Client'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'description': '<b>Notes:</b> Either Source or Target is Mandatory',
+		'doctype': 'DocField',
+		'fieldname': 'to_warehouse',
+		'fieldtype': 'Link',
+		'idx': 20,
+		'in_filter': 0,
+		'label': 'Target Warehouse',
+		'oldfieldname': 'to_warehouse',
+		'oldfieldtype': 'Link',
+		'options': 'Warehouse',
+		'permlevel': 0,
+		'print_hide': 1,
+		'reqd': 0,
+		'search_index': 1,
+		'trigger': 'Client'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Column Break',
+		'idx': 21,
+		'oldfieldtype': 'Column Break',
+		'permlevel': 0,
+		'width': '50%'
+	},
+
+	# DocField
+	{
+		'default': 'Today',
+		'doctype': 'DocField',
+		'fieldname': 'transfer_date',
+		'fieldtype': 'Date',
+		'idx': 22,
+		'in_filter': 1,
+		'label': 'Transfer Date',
+		'no_copy': 1,
+		'oldfieldname': 'transfer_date',
+		'oldfieldtype': 'Date',
+		'permlevel': 0,
+		'print_hide': 0,
+		'reqd': 1,
+		'search_index': 1
+	},
+
+	# DocField
+	{
+		'description': 'The date at which current entry will get or has actually executed.',
+		'doctype': 'DocField',
+		'fieldname': 'posting_date',
+		'fieldtype': 'Date',
+		'idx': 23,
+		'in_filter': 1,
+		'label': 'Posting Date',
+		'no_copy': 1,
+		'oldfieldname': 'posting_date',
+		'oldfieldtype': 'Date',
+		'permlevel': 0,
+		'print_hide': 1,
+		'reqd': 1,
+		'search_index': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'posting_time',
+		'fieldtype': 'Time',
+		'idx': 24,
+		'in_filter': 0,
+		'label': 'Posting Time',
+		'no_copy': 1,
+		'oldfieldname': 'posting_time',
+		'oldfieldtype': 'Time',
+		'permlevel': 0,
+		'print_hide': 1,
+		'reqd': 1,
+		'search_index': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'amended_from',
+		'fieldtype': 'Link',
+		'idx': 25,
+		'label': 'Amended From',
+		'no_copy': 1,
+		'oldfieldname': 'amended_from',
+		'oldfieldtype': 'Link',
+		'options': 'Stock Entry',
+		'permlevel': 1,
+		'print_hide': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'transporter',
+		'fieldtype': 'Data',
+		'idx': 26,
+		'label': 'Transporter',
+		'oldfieldname': 'transporter',
+		'oldfieldtype': 'Data',
+		'permlevel': 0,
+		'print_hide': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'is_excisable_goods',
+		'fieldtype': 'Select',
+		'idx': 27,
+		'label': 'Is Excisable Goods',
+		'oldfieldname': 'is_excisable_goods',
+		'oldfieldtype': 'Select',
+		'options': '\nYes\nNo',
+		'permlevel': 0,
+		'print_hide': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'excisable_goods',
+		'fieldtype': 'Select',
+		'idx': 28,
+		'label': 'Excisable Goods',
+		'oldfieldname': 'excisable_goods',
+		'oldfieldtype': 'Select',
+		'options': '\nReturnable\nNon-Returnable',
+		'permlevel': 0,
+		'print_hide': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'under_rule',
+		'fieldtype': 'Select',
+		'hidden': 1,
+		'idx': 29,
+		'label': 'Under Rule',
+		'oldfieldname': 'under_rule',
+		'oldfieldtype': 'Select',
+		'options': '\nOrdinary\n57 AC (5) a\n57 F (2) Non-Exc.',
+		'permlevel': 0,
+		'print_hide': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'remarks',
+		'fieldtype': 'Text',
+		'idx': 30,
+		'label': 'Remarks',
+		'no_copy': 1,
+		'oldfieldname': 'remarks',
+		'oldfieldtype': 'Text',
+		'permlevel': 0,
+		'print_hide': 1,
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'cancel_reason',
+		'fieldtype': 'Data',
+		'hidden': 1,
+		'idx': 31,
+		'in_filter': 0,
+		'label': 'Cancel Reason',
+		'no_copy': 1,
+		'oldfieldname': 'cancel_reason',
+		'oldfieldtype': 'Data',
+		'permlevel': 1,
+		'print_hide': 1,
+		'reqd': 0,
+		'search_index': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Section Break',
+		'idx': 32,
+		'label': 'Items',
+		'oldfieldtype': 'Section Break',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Button',
+		'idx': 33,
+		'label': 'Get Stock and Rate',
+		'oldfieldtype': 'Button',
+		'options': 'get_stock_and_rate',
+		'permlevel': 0,
+		'print_hide': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Column Break',
+		'idx': 34,
+		'oldfieldtype': 'Column Break',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldtype': 'Button',
+		'hidden': 0,
+		'idx': 35,
+		'label': 'Get Items',
+		'oldfieldtype': 'Button',
+		'options': 'get_items',
+		'permlevel': 2,
+		'print_hide': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Section Break',
+		'idx': 36,
+		'oldfieldtype': 'Section Break',
+		'options': 'Simple',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldname': 'mtn_details',
+		'fieldtype': 'Table',
+		'idx': 37,
+		'label': 'MTN Details',
+		'oldfieldname': 'mtn_details',
+		'oldfieldtype': 'Table',
+		'options': 'Stock Entry Detail',
+		'permlevel': 0,
+		'print_hide': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'total_amount',
+		'fieldtype': 'Currency',
+		'idx': 38,
+		'label': 'Total Amount',
+		'oldfieldname': 'total_amount',
+		'oldfieldtype': 'Currency',
+		'permlevel': 1,
+		'print_hide': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Section Break',
+		'idx': 39,
+		'label': 'Other Details',
+		'oldfieldtype': 'Section Break',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'company',
+		'fieldtype': 'Link',
+		'idx': 40,
+		'in_filter': 1,
+		'label': 'Company',
+		'oldfieldname': 'company',
+		'oldfieldtype': 'Link',
+		'options': 'Company',
+		'permlevel': 0,
+		'print_hide': 1,
+		'reqd': 1,
+		'search_index': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'fiscal_year',
+		'fieldtype': 'Select',
+		'idx': 41,
+		'in_filter': 0,
+		'label': 'Fiscal Year',
+		'oldfieldname': 'fiscal_year',
+		'oldfieldtype': 'Select',
+		'options': 'link:Fiscal Year',
+		'permlevel': 0,
+		'print_hide': 1,
+		'reqd': 1,
+		'search_index': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'select_print_heading',
+		'fieldtype': 'Link',
+		'idx': 42,
+		'label': 'Select Print Heading',
+		'oldfieldname': 'select_print_heading',
+		'oldfieldtype': 'Link',
+		'options': 'Print Heading',
+		'permlevel': 0
+	}
+]

@@ -1,0 +1,33 @@
+# Search Criteria, employee_information
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-12-14 10:23:25',
+		'docstatus': 0,
+		'modified': '2010-10-26 12:03:08',
+		'modified_by': 'Administrator',
+		'owner': 'harshada@webnotestech.com'
+	},
+
+	# These values are common for all Search Criteria
+	{
+		'columns': 'Employee\x01ID,Employee\x01Employee Name,Employee\x01Employee Number,Employee\x01Date of Joining,Employee\x01Gender,Employee\x01Date of Birth,Employee\x01Employment Type,Employee\x01Scheduled Confirmation Date,Employee\x01Contract End Date,Employee\x01Status,Employee\x01Branch,Employee\x01Department,Employee\x01Designation,Employee\x01Grade,Employee\x01Reports to,Employee\x01Email (By company),Employee\x01Bank Name,Employee\x01Relieving Date',
+		'criteria_name': 'Employee Information',
+		'doc_type': 'Employee',
+		'doctype': 'Search Criteria',
+		'filters': "{'Employee\x01Saved':1,'Employee\x01Submitted':1,'Employee\x01Gender':'','Employee\x01Month of Birth':'','Employee\x01Status':''}",
+		'module': 'HR',
+		'name': '__common__',
+		'page_len': 50,
+		'sort_by': '`tabEmployee`.`name`',
+		'sort_order': 'DESC',
+		'standard': 'Yes'
+	},
+
+	# Search Criteria, employee_information
+	{
+		'doctype': 'Search Criteria',
+		'name': 'employee_information'
+	}
+]

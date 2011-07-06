@@ -1,0 +1,65 @@
+# DocType, LC PR Detail
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-08-08 17:09:07',
+		'docstatus': 0,
+		'modified': '2011-06-30 18:47:22',
+		'modified_by': 'Administrator',
+		'owner': 'wasim@webnotestech.com'
+	},
+
+	# These values are common for all DocType
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocType',
+		'istable': 1,
+		'module': 'Stock',
+		'name': '__common__',
+		'section_style': 'Simple',
+		'server_code_error': ' ',
+		'show_in_menu': 0,
+		'version': 2
+	},
+
+	# These values are common for all DocField
+	{
+		'doctype': 'DocField',
+		'name': '__common__',
+		'parent': 'LC PR Detail',
+		'parentfield': 'fields',
+		'parenttype': 'DocType',
+		'permlevel': 0
+	},
+
+	# DocType, LC PR Detail
+	{
+		'doctype': 'DocType',
+		'name': 'LC PR Detail'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'purchase_receipt_no',
+		'fieldtype': 'Link',
+		'idx': 1,
+		'label': 'Purchase Receipt No',
+		'oldfieldname': 'purchase_receipt_no',
+		'oldfieldtype': 'Link',
+		'options': 'Purchase Receipt'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'include_in_landed_cost',
+		'fieldtype': 'Check',
+		'idx': 2,
+		'label': 'Include In Landed Cost',
+		'oldfieldname': 'include_in_landed_cost',
+		'oldfieldtype': 'Check',
+		'width': '150px'
+	}
+]

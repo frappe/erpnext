@@ -1,0 +1,483 @@
+# DocType, Salary Structure
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-12-14 16:50:05',
+		'docstatus': 0,
+		'modified': '2011-06-27 14:39:11',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all DocType
+	{
+		'_last_update': '1308808105',
+		'colour': 'White:FFF',
+		'doctype': 'DocType',
+		'module': 'HR',
+		'name': '__common__',
+		'section_style': 'Simple',
+		'server_code_error': ' ',
+		'show_in_menu': 0,
+		'subject': 'For %(employee_name)s',
+		'version': 586
+	},
+
+	# These values are common for all DocField
+	{
+		'doctype': 'DocField',
+		'name': '__common__',
+		'parent': 'Salary Structure',
+		'parentfield': 'fields',
+		'parenttype': 'DocType'
+	},
+
+	# These values are common for all DocPerm
+	{
+		'doctype': 'DocPerm',
+		'name': '__common__',
+		'parent': 'Salary Structure',
+		'parentfield': 'permissions',
+		'parenttype': 'DocType'
+	},
+
+	# DocType, Salary Structure
+	{
+		'doctype': 'DocType',
+		'name': 'Salary Structure'
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
+		'doctype': 'DocPerm',
+		'match': 'owner',
+		'permlevel': 0,
+		'read': 1,
+		'submit': 0,
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
+		'doctype': 'DocPerm',
+		'match': 'owner',
+		'permlevel': 0,
+		'read': 1,
+		'submit': 0,
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
+		'doctype': 'DocPerm',
+		'match': 'owner',
+		'permlevel': 0,
+		'read': 1,
+		'submit': 0,
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
+		'doctype': 'DocPerm',
+		'match': 'owner',
+		'permlevel': 0,
+		'read': 1,
+		'submit': 0,
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'doctype': 'DocPerm',
+		'permlevel': 0,
+		'role': 'Sales User'
+	},
+
+	# DocPerm
+	{
+		'doctype': 'DocPerm',
+		'idx': 2,
+		'permlevel': 1,
+		'read': 1,
+		'role': 'All',
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'create': 1,
+		'doctype': 'DocPerm',
+		'idx': 3,
+		'permlevel': 0,
+		'read': 1,
+		'role': 'HR User',
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'create': 1,
+		'doctype': 'DocPerm',
+		'idx': 4,
+		'permlevel': 0,
+		'read': 1,
+		'role': 'HR Manager',
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'doctype': 'DocPerm',
+		'idx': 5,
+		'permlevel': 1,
+		'read': 1,
+		'role': 'HR Manager'
+	},
+
+	# DocPerm
+	{
+		'doctype': 'DocPerm',
+		'idx': 6,
+		'permlevel': 1,
+		'read': 1,
+		'role': 'HR User'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Section Break',
+		'idx': 1,
+		'label': 'Basic Info',
+		'oldfieldname': 'basic_info',
+		'oldfieldtype': 'Section Break',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Column Break',
+		'idx': 2,
+		'permlevel': 0,
+		'width': '50%'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldname': 'employee',
+		'fieldtype': 'Link',
+		'idx': 3,
+		'in_filter': 1,
+		'label': 'Employee',
+		'oldfieldname': 'employee',
+		'oldfieldtype': 'Link',
+		'options': 'Employee',
+		'permlevel': 0,
+		'reqd': 1,
+		'trigger': 'Client'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'employee_name',
+		'fieldtype': 'Data',
+		'idx': 4,
+		'label': 'Employee Name',
+		'oldfieldname': 'employee_name',
+		'oldfieldtype': 'Data',
+		'permlevel': 1
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldname': 'branch',
+		'fieldtype': 'Select',
+		'idx': 5,
+		'in_filter': 1,
+		'label': 'Branch',
+		'oldfieldname': 'branch',
+		'oldfieldtype': 'Select',
+		'options': 'link:Branch',
+		'permlevel': 1,
+		'reqd': 0
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldname': 'designation',
+		'fieldtype': 'Select',
+		'idx': 6,
+		'in_filter': 1,
+		'label': 'Designation',
+		'oldfieldname': 'designation',
+		'oldfieldtype': 'Select',
+		'options': 'link:Designation',
+		'permlevel': 1,
+		'reqd': 0
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldname': 'department',
+		'fieldtype': 'Select',
+		'idx': 7,
+		'in_filter': 1,
+		'label': 'Department',
+		'oldfieldname': 'department',
+		'oldfieldtype': 'Select',
+		'options': 'link:Department',
+		'permlevel': 1,
+		'reqd': 0
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldname': 'grade',
+		'fieldtype': 'Select',
+		'idx': 8,
+		'in_filter': 1,
+		'label': 'Grade',
+		'oldfieldname': 'grade',
+		'oldfieldtype': 'Select',
+		'options': 'link:Grade',
+		'permlevel': 1,
+		'reqd': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Column Break',
+		'idx': 9,
+		'permlevel': 0,
+		'width': '50%'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'default': 'Yes',
+		'doctype': 'DocField',
+		'fieldname': 'is_active',
+		'fieldtype': 'Select',
+		'idx': 10,
+		'in_filter': 1,
+		'label': 'Is Active',
+		'oldfieldname': 'is_active',
+		'oldfieldtype': 'Select',
+		'options': '\nYes\nNo',
+		'permlevel': 0,
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'from_date',
+		'fieldtype': 'Date',
+		'idx': 11,
+		'label': 'From Date',
+		'oldfieldname': 'from_date',
+		'oldfieldtype': 'Date',
+		'permlevel': 0,
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'to_date',
+		'fieldtype': 'Date',
+		'idx': 12,
+		'label': 'To Date',
+		'oldfieldname': 'to_date',
+		'oldfieldtype': 'Date',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'description': 'Cost to Company',
+		'doctype': 'DocField',
+		'fieldname': 'ctc',
+		'fieldtype': 'Currency',
+		'idx': 13,
+		'in_filter': 1,
+		'label': 'CTC',
+		'oldfieldname': 'ctc',
+		'oldfieldtype': 'Currency',
+		'permlevel': 0,
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'company',
+		'fieldtype': 'Select',
+		'idx': 14,
+		'in_filter': 1,
+		'label': 'Company',
+		'options': 'link:Company',
+		'permlevel': 0,
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		'description': 'You can create more earning and deduction type from Setup --> HR',
+		'doctype': 'DocField',
+		'fieldtype': 'Section Break',
+		'idx': 15,
+		'label': 'Earning & Deduction',
+		'oldfieldname': 'earning_deduction',
+		'oldfieldtype': 'Section Break',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldtype': 'Column Break',
+		'hidden': 0,
+		'idx': 16,
+		'label': 'Earning',
+		'oldfieldname': 'col_brk2',
+		'oldfieldtype': 'Column Break',
+		'permlevel': 0,
+		'width': '50%'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldname': 'earning_details',
+		'fieldtype': 'Table',
+		'hidden': 0,
+		'idx': 17,
+		'label': 'Earning1',
+		'oldfieldname': 'earning_details',
+		'oldfieldtype': 'Table',
+		'options': 'Earning Detail',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldtype': 'Column Break',
+		'hidden': 0,
+		'idx': 18,
+		'label': 'Deduction',
+		'oldfieldname': 'col_brk3',
+		'oldfieldtype': 'Column Break',
+		'permlevel': 0,
+		'width': '50%'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldname': 'deduction_details',
+		'fieldtype': 'Table',
+		'hidden': 0,
+		'idx': 19,
+		'label': 'Deduction1',
+		'oldfieldname': 'deduction_details',
+		'oldfieldtype': 'Table',
+		'options': 'Deduction Detail',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Section Break',
+		'idx': 20,
+		'options': 'Simple',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Column Break',
+		'idx': 21,
+		'permlevel': 0,
+		'width': '50%'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'total_earning',
+		'fieldtype': 'Currency',
+		'idx': 22,
+		'label': 'Total Earning',
+		'oldfieldname': 'total_earning',
+		'oldfieldtype': 'Currency',
+		'permlevel': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'total_deduction',
+		'fieldtype': 'Currency',
+		'idx': 23,
+		'label': 'Total Deduction',
+		'oldfieldname': 'total_deduction',
+		'oldfieldtype': 'Currency',
+		'permlevel': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Column Break',
+		'idx': 24,
+		'permlevel': 0,
+		'width': '50%'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'net_pay',
+		'fieldtype': 'Currency',
+		'idx': 25,
+		'label': 'Net Pay',
+		'permlevel': 1
+	}
+]

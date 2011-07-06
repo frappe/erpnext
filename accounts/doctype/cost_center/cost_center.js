@@ -1,4 +1,4 @@
-$import(Tips Common)
+ 
 
 //Account filtering for cost center
 cur_frm.fields_dict['budget_details'].grid.get_field('account').get_query = function(doc) {
@@ -24,7 +24,7 @@ cur_frm.cscript.company_name = function(doc,cdt,cdn){
 
 //onload if cost center is group
 cur_frm.cscript.onload = function(doc, cdt, cdn) {
-  cur_frm.cscript.get_tips(doc, cdt, cdn);
+   
   if(!doc.__islocal && doc.docstatus == 0){
     get_field(doc.doctype,'group_or_ledger',doc.name).permlevel = 1;
     refresh_field('group_or_ledger');
@@ -35,5 +35,5 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 }
 
 cur_frm.cscript.refresh = function(doc, cdt, cdn) {
-  cur_frm.cscript.get_tips(doc, cdt, cdn);
+   
 }

@@ -1,0 +1,33 @@
+# Search Criteria, salary_slips
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-08-08 17:09:32',
+		'docstatus': 0,
+		'modified': '2010-08-04 13:07:29',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all Search Criteria
+	{
+		'columns': 'Salary Slip\x01ID,Salary Slip\x01Fiscal Year,Salary Slip\x01Month,Salary Slip\x01Employee,Salary Slip\x01Employee Name,Salary Slip\x01Department,Salary Slip\x01Designation,Salary Slip\x01Branch,Salary Slip\x01Grade,Salary Slip\x01PF No.,Salary Slip\x01ESIC No.,Salary Slip\x01Leave Without Pay,Salary Slip\x01Bank Name,Salary Slip\x01Bank Account No.,Salary Slip\x01Payment days,Salary Slip\x01Arrear Amount,Salary Slip\x01Encashment Amount,Salary Slip\x01Gross Pay,Salary Slip\x01Total Deduction,Salary Slip\x01Net Pay',
+		'criteria_name': 'Salary Slips',
+		'doc_type': 'Salary Slip',
+		'doctype': 'Search Criteria',
+		'filters': "{'Salary Slip\x01Saved':1,'Salary Slip\x01Submitted':1}",
+		'module': 'HR',
+		'name': '__common__',
+		'page_len': 50,
+		'sort_by': '`tabSalary Slip`.`name`',
+		'sort_order': 'DESC',
+		'standard': 'Yes'
+	},
+
+	# Search Criteria, salary_slips
+	{
+		'doctype': 'Search Criteria',
+		'name': 'salary_slips'
+	}
+]

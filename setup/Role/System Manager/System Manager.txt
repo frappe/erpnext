@@ -1,0 +1,26 @@
+# Role, System Manager
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-08-08 17:08:51',
+		'docstatus': 0,
+		'modified': '2009-07-07 17:00:24',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all Role
+	{
+		'doctype': 'Role',
+		'module': 'Setup',
+		'name': '__common__',
+		'role_name': 'System Manager'
+	},
+
+	# Role, System Manager
+	{
+		'doctype': 'Role',
+		'name': 'System Manager'
+	}
+]

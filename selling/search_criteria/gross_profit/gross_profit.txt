@@ -1,0 +1,35 @@
+# Search Criteria, gross_profit
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-12-14 10:23:21',
+		'docstatus': 0,
+		'modified': '2010-11-10 12:39:03',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all Search Criteria
+	{
+		'columns': 'Delivery Note\x01ID,Delivery Note\x01Posting Date,Delivery Note\x01Posting Time,Delivery Note Detail\x01Item Code,Delivery Note Detail\x01Item Name,Delivery Note Detail\x01Description,Delivery Note\x01Project Name,Delivery Note Detail\x01Quantity,Delivery Note Detail\x01Rate*,Delivery Note Detail\x01Amount*',
+		'criteria_name': 'Gross Profit',
+		'description': 'Invoice wise',
+		'doc_type': 'Delivery Note Detail',
+		'doctype': 'Search Criteria',
+		'filters': "{'Delivery Note\x01Submitted':1,'Delivery Note\x01Status':'','Delivery Note\x01Fiscal Year':''}",
+		'module': 'Selling',
+		'name': '__common__',
+		'page_len': 50,
+		'parent_doc_type': 'Delivery Note',
+		'sort_by': '`tabDelivery Note`.`name`',
+		'sort_order': 'DESC',
+		'standard': 'Yes'
+	},
+
+	# Search Criteria, gross_profit
+	{
+		'doctype': 'Search Criteria',
+		'name': 'gross_profit'
+	}
+]

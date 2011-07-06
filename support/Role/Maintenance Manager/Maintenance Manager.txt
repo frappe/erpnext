@@ -1,0 +1,26 @@
+# Role, Maintenance Manager
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-08-08 17:08:51',
+		'docstatus': 0,
+		'modified': '2010-07-22 15:19:33',
+		'modified_by': 'Administrator',
+		'owner': 'ashwini@webnotestech.com'
+	},
+
+	# These values are common for all Role
+	{
+		'doctype': 'Role',
+		'module': 'Support',
+		'name': '__common__',
+		'role_name': 'Maintenance Manager'
+	},
+
+	# Role, Maintenance Manager
+	{
+		'doctype': 'Role',
+		'name': 'Maintenance Manager'
+	}
+]

@@ -1,1 +1,0 @@
-[{'modified_by': 'Administrator', 'name': 'Quality Manager', 'parent': None, 'creation': '2010-05-04 13:12:27', 'modified': '2010-05-04 13:12:27', 'module': 'Roles', 'doctype': 'Role', 'idx': None, 'parenttype': None, 'role_name': 'Quality Manager', 'owner': 'Administrator', 'docstatus': 0, 'parentfield': None}]

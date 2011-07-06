@@ -1,0 +1,26 @@
+# Role, Production Manager
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-08-08 17:08:51',
+		'docstatus': 0,
+		'modified': '2009-09-23 16:35:35',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all Role
+	{
+		'doctype': 'Role',
+		'module': 'Production',
+		'name': '__common__',
+		'role_name': 'Production Manager'
+	},
+
+	# Role, Production Manager
+	{
+		'doctype': 'Role',
+		'name': 'Production Manager'
+	}
+]

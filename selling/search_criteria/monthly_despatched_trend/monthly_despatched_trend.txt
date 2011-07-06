@@ -1,0 +1,38 @@
+# Search Criteria, monthly_despatched_trend
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-08-08 17:09:31',
+		'docstatus': 0,
+		'modified': '2010-06-07 15:19:13',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all Search Criteria
+	{
+		'add_col': "month(`tabDelivery Note`.posting_date) AS 'Sales Month'\nsum(`tabDelivery Note`.net_total) AS 'Total Despatched'",
+		'add_cond': '`tabDelivery Note`.net_total > 10',
+		'criteria_name': 'Monthly Despatched Trend',
+		'description': 'Monthly Despatched Trend',
+		'doc_type': 'Delivery Note',
+		'doctype': 'Search Criteria',
+		'filters': "{'Delivery Note\x01Submitted':1,'Delivery Note\x01Status':'','Delivery Note\x01Chargeable':'Yes','Delivery Note\x01Department':'','Delivery Note\x01Type':'','Delivery Note\x01Company Name':'Janak Healthcare Pvt Ltd','Delivery Note\x01Fiscal Year':'2009-2010'}",
+		'graph_series': 'Despatched Month',
+		'graph_values': 'Total Despatched',
+		'group_by': 'month(`tabDelivery Note`.Posting_date)',
+		'module': 'Selling',
+		'name': '__common__',
+		'page_len': 50,
+		'sort_by': '`Sales Month`',
+		'sort_order': 'DESC',
+		'standard': 'Yes'
+	},
+
+	# Search Criteria, monthly_despatched_trend
+	{
+		'doctype': 'Search Criteria',
+		'name': 'monthly_despatched_trend'
+	}
+]

@@ -1,0 +1,33 @@
+# Search Criteria, salary_register
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-12-29 12:30:57',
+		'docstatus': 0,
+		'modified': '2010-12-29 12:11:18',
+		'modified_by': 'Administrator',
+		'owner': 'harshada@webnotestech.com'
+	},
+
+	# These values are common for all Search Criteria
+	{
+		'columns': 'Salary Slip\x01ID,Salary Slip\x01Employee,Salary Slip\x01Employee Name,Salary Slip\x01Year,Salary Slip\x01Month,Salary Slip\x01Total days in month,Salary Slip\x01Payment days',
+		'criteria_name': 'Salary Register',
+		'doc_type': 'Salary Slip',
+		'doctype': 'Search Criteria',
+		'filters': "{'Salary Slip\x01Submitted':1,'Salary Slip\x01Month':''}",
+		'module': 'HR',
+		'name': '__common__',
+		'page_len': 50,
+		'sort_by': '`tabSalary Slip`.`name`',
+		'sort_order': 'DESC',
+		'standard': 'Yes'
+	},
+
+	# Search Criteria, salary_register
+	{
+		'doctype': 'Search Criteria',
+		'name': 'salary_register'
+	}
+]

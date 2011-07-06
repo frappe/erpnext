@@ -1,0 +1,94 @@
+# DocType, Follow up
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-08-08 17:09:02',
+		'docstatus': 0,
+		'modified': '2010-10-13 12:06:26',
+		'modified_by': 'yogesh@webnotestech.com',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all DocType
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocType',
+		'istable': 1,
+		'module': 'Selling',
+		'name': '__common__',
+		'section_style': 'Tray',
+		'server_code_error': ' ',
+		'show_in_menu': 0,
+		'version': 10
+	},
+
+	# These values are common for all DocField
+	{
+		'allow_on_submit': 1,
+		'doctype': 'DocField',
+		'name': '__common__',
+		'parent': 'Follow up',
+		'parentfield': 'fields',
+		'parenttype': 'DocType',
+		'permlevel': 0
+	},
+
+	# DocType, Follow up
+	{
+		'doctype': 'DocType',
+		'name': 'Follow up'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'date',
+		'fieldtype': 'Date',
+		'idx': 1,
+		'in_filter': 1,
+		'label': 'Date',
+		'oldfieldname': 'date',
+		'oldfieldtype': 'Date'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'notes',
+		'fieldtype': 'Small Text',
+		'idx': 2,
+		'in_filter': 0,
+		'label': 'Notes',
+		'oldfieldname': 'notes',
+		'oldfieldtype': 'Small Text',
+		'width': '300px'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldname': 'follow_up_type',
+		'fieldtype': 'Select',
+		'idx': 3,
+		'in_filter': 1,
+		'label': 'Follow up type',
+		'oldfieldname': 'follow_up_type',
+		'oldfieldtype': 'Select',
+		'options': '\nPhone\nEmail\nSMS\nVisit\nOther'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'follow_up_by',
+		'fieldtype': 'Link',
+		'idx': 4,
+		'in_filter': 1,
+		'label': 'Follow up by',
+		'oldfieldname': 'follow_up_by',
+		'oldfieldtype': 'Link',
+		'options': 'Sales Person'
+	}
+]

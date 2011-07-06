@@ -1,0 +1,110 @@
+# DocType, Experience In Company Detail
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-08-08 17:09:01',
+		'docstatus': 0,
+		'modified': '2010-09-20 14:06:57',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all DocType
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocType',
+		'istable': 1,
+		'module': 'HR',
+		'name': '__common__',
+		'section_style': 'Simple',
+		'show_in_menu': 0,
+		'version': 6
+	},
+
+	# These values are common for all DocField
+	{
+		'doctype': 'DocField',
+		'name': '__common__',
+		'parent': 'Experience In Company Detail',
+		'parentfield': 'fields',
+		'parenttype': 'DocType',
+		'permlevel': 0
+	},
+
+	# DocType, Experience In Company Detail
+	{
+		'doctype': 'DocType',
+		'name': 'Experience In Company Detail'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'branch',
+		'fieldtype': 'Select',
+		'idx': 1,
+		'label': 'Branch',
+		'oldfieldname': 'branch',
+		'oldfieldtype': 'Select',
+		'options': 'link:Branch'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'department',
+		'fieldtype': 'Select',
+		'idx': 2,
+		'label': 'Department',
+		'oldfieldname': 'department',
+		'oldfieldtype': 'Select',
+		'options': 'link:Department'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'designation',
+		'fieldtype': 'Select',
+		'idx': 3,
+		'label': 'Designation',
+		'oldfieldname': 'designation',
+		'oldfieldtype': 'Select',
+		'options': 'link:Designation'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'grade',
+		'fieldtype': 'Select',
+		'idx': 4,
+		'label': 'Grade',
+		'oldfieldname': 'grade',
+		'oldfieldtype': 'Select',
+		'options': 'link:Grade'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'from_date',
+		'fieldtype': 'Date',
+		'idx': 5,
+		'label': 'From Date',
+		'oldfieldname': 'from_date',
+		'oldfieldtype': 'Date'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'to_date',
+		'fieldtype': 'Date',
+		'idx': 6,
+		'label': 'To Date',
+		'oldfieldname': 'to_date',
+		'oldfieldtype': 'Date'
+	}
+]

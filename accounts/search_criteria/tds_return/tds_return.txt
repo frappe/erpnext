@@ -1,37 +1,31 @@
+# Search Criteria, tds_return
 [
+
+	# These values are common in all dictionaries
 	{
-		'add_col': '',
-		'add_cond': '',
-		'add_tab': '',
-		'columns': '',
 		'creation': '2010-08-08 17:09:31',
-		'criteria_name': 'TDS Return',
-		'custom_query': None,
-		'description': None,
-		'dis_filters': 'fiscal_year',
-		'disabled': None,
-		'doc_type': 'TDS Payment Detail',
 		'docstatus': 0,
-		'doctype': 'Search Criteria',
-		'filters': "{'TDS Payment\x01Submitted':1}",
-		'graph_series': None,
-		'graph_values': None,
-		'group_by': None,
-		'idx': None,
 		'modified': '2010-06-30 14:38:18',
 		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all Search Criteria
+	{
+		'criteria_name': 'TDS Return',
+		'dis_filters': 'fiscal_year',
+		'doc_type': 'TDS Payment Detail',
+		'doctype': 'Search Criteria',
+		'filters': "{'TDS Payment\x01Submitted':1}",
 		'module': 'Accounts',
-		'name': 'tds_return',
-		'owner': 'Administrator',
-		'page_len': None,
-		'parent': None,
+		'name': '__common__',
 		'parent_doc_type': 'TDS Payment',
-		'parentfield': None,
-		'parenttype': None,
-		'report_script': None,
-		'server_script': None,
-		'sort_by': '',
-		'sort_order': '',
 		'standard': 'Yes'
+	},
+
+	# Search Criteria, tds_return
+	{
+		'doctype': 'Search Criteria',
+		'name': 'tds_return'
 	}
 ]

@@ -1,0 +1,34 @@
+# Search Criteria, follow-up_report
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-09-01 15:48:09',
+		'docstatus': 0,
+		'modified': '2010-08-12 16:33:19',
+		'modified_by': 'Administrator',
+		'owner': 'ashwini@webnotestech.com'
+	},
+
+	# These values are common for all Search Criteria
+	{
+		'columns': 'Lead\x01ID,Follow up\x01Date,Follow up\x01Notes,Follow up\x01Follow up type',
+		'criteria_name': 'Follow-up Report',
+		'doc_type': 'Follow up',
+		'doctype': 'Search Criteria',
+		'filters': "{'Lead\x01Status':'','Lead\x01Source':'','Lead\x01Lead Type':'','Lead\x01Rating':'','Lead\x01Market Segment':'','Lead\x01Fiscal Year':''}",
+		'module': 'Selling',
+		'name': '__common__',
+		'page_len': 50,
+		'parent_doc_type': 'Lead',
+		'sort_by': '`tabLead`.`name`',
+		'sort_order': 'DESC',
+		'standard': 'Yes'
+	},
+
+	# Search Criteria, follow-up_report
+	{
+		'doctype': 'Search Criteria',
+		'name': 'follow-up_report'
+	}
+]

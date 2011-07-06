@@ -1,0 +1,33 @@
+# Search Criteria, territory_sales_-_variance_report
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-08-08 17:09:31',
+		'docstatus': 0,
+		'modified': '2010-03-30 16:48:42',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all Search Criteria
+	{
+		'columns': 'Territory\x01ID',
+		'criteria_name': 'Territory Sales - Variance Report',
+		'doc_type': 'Territory',
+		'doctype': 'Search Criteria',
+		'filters': "{'Territory\x01State':'','Territory\x01Based On':'Sales Order','Territory\x01Fiscal Year':'2009-2010','Territory\x01Company':'Alpha Company','Territory\x01Period':'Quarterly'}",
+		'module': 'Selling',
+		'name': '__common__',
+		'page_len': 50,
+		'sort_by': 'ID',
+		'sort_order': 'DESC',
+		'standard': 'Yes'
+	},
+
+	# Search Criteria, territory_sales_-_variance_report
+	{
+		'doctype': 'Search Criteria',
+		'name': 'territory_sales_-_variance_report'
+	}
+]

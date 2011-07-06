@@ -1,0 +1,89 @@
+# DocType, Industry Type
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-08-08 17:09:04',
+		'docstatus': 0,
+		'modified': '2010-09-20 14:06:57',
+		'modified_by': 'Administrator',
+		'owner': 'harshada@webnotestech.com'
+	},
+
+	# These values are common for all DocType
+	{
+		'autoname': 'field:industry',
+		'colour': 'White:FFF',
+		'doctype': 'DocType',
+		'document_type': 'Master',
+		'module': 'Selling',
+		'name': '__common__',
+		'section_style': 'Simple',
+		'server_code_error': ' ',
+		'version': 4
+	},
+
+	# These values are common for all DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'industry',
+		'fieldtype': 'Data',
+		'idx': 1,
+		'label': 'Industry',
+		'name': '__common__',
+		'oldfieldname': 'industry',
+		'oldfieldtype': 'Data',
+		'parent': 'Industry Type',
+		'parentfield': 'fields',
+		'parenttype': 'DocType',
+		'permlevel': 0,
+		'reqd': 1
+	},
+
+	# These values are common for all DocPerm
+	{
+		'doctype': 'DocPerm',
+		'name': '__common__',
+		'parent': 'Industry Type',
+		'parentfield': 'permissions',
+		'parenttype': 'DocType',
+		'permlevel': 0,
+		'read': 1
+	},
+
+	# DocType, Industry Type
+	{
+		'doctype': 'DocType',
+		'name': 'Industry Type'
+	},
+
+	# DocPerm
+	{
+		'create': 1,
+		'doctype': 'DocPerm',
+		'idx': 1,
+		'role': 'Sales Manager',
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'doctype': 'DocPerm',
+		'idx': 2,
+		'role': 'Sales User'
+	},
+
+	# DocPerm
+	{
+		'create': 1,
+		'doctype': 'DocPerm',
+		'idx': 3,
+		'role': 'Sales Master Manager',
+		'write': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField'
+	}
+]

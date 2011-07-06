@@ -1,1 +1,82 @@
-[{'section_style': 'Simple', 'is_transaction_doc': None, 'creation': '2010-04-16 12:55:19', 'search_fields': None, 'module': 'Setup', 'doctype': 'DocType', 'change_log': None, 'print_outline': '', 'owner': 'Administrator', 'in_dialog': None, 'in_create': 1, 'read_only': 0, 'allow_email': None, 'dt_template': None, 'hide_heading': None, 'issingle': None, 'allow_rename': None, 'smallicon': None, 'allow_attach': None, 'show_in_menu': None, 'max_attachments': None, 'version': 4, 'menu_index': None, 'docstatus': 0, 'allow_copy': None, 'istable': None, 'description': None, 'parent': None, 'server_code': None, 'allow_trash': None, 'allow_print': None, 'autoname': '__NSO.#####', 'client_script_core': None, 'client_string': None, 'use_template': None, 'modified_by': 'Administrator', 'document_type': None, 'name': 'Naming Series Options', 'idx': None, 'hide_toolbar': None, 'colour': 'White:FFF', 'client_script': None, 'modified': '2010-09-20 14:06:57', 'server_code_error': ' ', 'name_case': '', 'parenttype': None, 'read_only_onload': None, 'server_code_core': None, 'server_code_compiled': None, 'parent_node': None, 'parentfield': None}, {'cancel': None, 'amend': None, 'execute': None, 'modified_by': 'Administrator', 'name': 'PERM01027', 'parent': 'Naming Series Options', 'read': 1, 'create': None, 'creation': '2010-06-03 11:30:14', 'modified': '2010-06-03 11:40:21', 'submit': None, 'doctype': 'DocPerm', 'write': None, 'idx': 1, 'parenttype': 'DocType', 'role': 'Administrator', 'owner': 'Administrator', 'docstatus': 0, 'permlevel': 0, 'match': None, 'parentfield': 'permissions'}, {'no_copy': None, 'oldfieldtype': 'Data', 'creation': '2010-04-16 12:55:19', 'doctype': 'DocField', 'oldfieldname': 'doc_type', 'owner': 'Administrator', 'reqd': None, 'in_filter': None, 'print_hide': None, 'modified_by': 'Administrator', 'label': 'Doc Type', 'width': None, 'trigger': None, 'depends_on': None, 'docstatus': 0, 'hidden': None, 'permlevel': 0, 'description': None, 'parent': 'Naming Series Options', 'search_index': None, 'allow_on_submit': None, 'icon': None, 'name': 'FL04662', 'idx': 1, 'default': None, 'colour': None, 'modified': '2010-06-03 11:40:21', 'parenttype': 'DocType', 'fieldname': 'doc_type', 'fieldtype': 'Data', 'options': None, 'report_hide': None, 'parentfield': 'fields'}, {'no_copy': None, 'oldfieldtype': 'Text', 'creation': '2010-04-16 12:55:19', 'doctype': 'DocField', 'oldfieldname': 'series_options', 'owner': 'Administrator', 'reqd': None, 'in_filter': None, 'print_hide': None, 'modified_by': 'Administrator', 'label': 'Series Options', 'width': None, 'trigger': None, 'depends_on': None, 'docstatus': 0, 'hidden': None, 'permlevel': 0, 'description': None, 'parent': 'Naming Series Options', 'search_index': None, 'allow_on_submit': None, 'icon': None, 'name': 'FL04663', 'idx': 2, 'default': None, 'colour': None, 'modified': '2010-06-03 11:40:21', 'parenttype': 'DocType', 'fieldname': 'series_options', 'fieldtype': 'Text', 'options': None, 'report_hide': None, 'parentfield': 'fields'}]
+# DocType, Naming Series Options
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-12-14 10:23:17',
+		'docstatus': 0,
+		'modified': '2010-09-20 14:06:57',
+		'modified_by': 'yogesh@webnotestech.com',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all DocType
+	{
+		'autoname': '__NSO.#####',
+		'colour': 'White:FFF',
+		'doctype': 'DocType',
+		'in_create': 1,
+		'module': 'Setup',
+		'name': '__common__',
+		'read_only': 0,
+		'section_style': 'Simple',
+		'server_code_error': ' ',
+		'version': 4
+	},
+
+	# These values are common for all DocField
+	{
+		'doctype': 'DocField',
+		'name': '__common__',
+		'parent': 'Naming Series Options',
+		'parentfield': 'fields',
+		'parenttype': 'DocType',
+		'permlevel': 0
+	},
+
+	# These values are common for all DocPerm
+	{
+		'doctype': 'DocPerm',
+		'idx': 1,
+		'name': '__common__',
+		'parent': 'Naming Series Options',
+		'parentfield': 'permissions',
+		'parenttype': 'DocType',
+		'permlevel': 0,
+		'read': 1,
+		'role': 'System Manager'
+	},
+
+	# DocType, Naming Series Options
+	{
+		'doctype': 'DocType',
+		'name': 'Naming Series Options'
+	},
+
+	# DocPerm
+	{
+		'doctype': 'DocPerm'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'doc_type',
+		'fieldtype': 'Data',
+		'idx': 1,
+		'label': 'Doc Type',
+		'oldfieldname': 'doc_type',
+		'oldfieldtype': 'Data'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'series_options',
+		'fieldtype': 'Text',
+		'idx': 2,
+		'label': 'Series Options',
+		'oldfieldname': 'series_options',
+		'oldfieldtype': 'Text'
+	}
+]

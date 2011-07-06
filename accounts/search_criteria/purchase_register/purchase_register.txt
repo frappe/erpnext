@@ -1,37 +1,31 @@
+# Search Criteria, purchase_register
 [
+
+	# These values are common in all dictionaries
 	{
-		'add_col': None,
-		'add_cond': "`tabPayable Voucher`.is_opening != 'Yes'\n`tabPayable Voucher`.name not like 'OP/%'",
-		'add_tab': None,
-		'columns': 'Payable Voucher\x01ID,Payable Voucher\x01Voucher Date,Payable Voucher\x01Posting Date,Payable Voucher\x01Credit To,Payable Voucher\x01Expense Head',
 		'creation': '2010-12-15 08:39:24',
-		'criteria_name': 'Purchase Register',
-		'custom_query': '',
-		'description': None,
-		'dis_filters': None,
-		'disabled': None,
-		'doc_type': 'Payable Voucher',
 		'docstatus': 0,
-		'doctype': 'Search Criteria',
-		'filters': "{'Payable Voucher\x01Submitted':1}",
-		'graph_series': None,
-		'graph_values': None,
-		'group_by': None,
-		'idx': None,
 		'modified': '2011-06-06 14:37:00',
 		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all Search Criteria
+	{
+		'add_cond': "`tabPayable Voucher`.is_opening != 'Yes'\n`tabPayable Voucher`.name not like 'OP/%'",
+		'columns': 'Payable Voucher\x01ID,Payable Voucher\x01Voucher Date,Payable Voucher\x01Posting Date,Payable Voucher\x01Credit To,Payable Voucher\x01Expense Head',
+		'criteria_name': 'Purchase Register',
+		'doc_type': 'Payable Voucher',
+		'doctype': 'Search Criteria',
+		'filters': "{'Payable Voucher\x01Submitted':1}",
 		'module': 'Accounts',
-		'name': 'purchase_register',
-		'owner': 'Administrator',
-		'page_len': None,
-		'parent': None,
-		'parent_doc_type': None,
-		'parentfield': None,
-		'parenttype': None,
-		'report_script': '',
-		'server_script': None,
-		'sort_by': None,
-		'sort_order': None,
+		'name': '__common__',
 		'standard': 'Yes'
+	},
+
+	# Search Criteria, purchase_register
+	{
+		'doctype': 'Search Criteria',
+		'name': 'purchase_register'
 	}
 ]

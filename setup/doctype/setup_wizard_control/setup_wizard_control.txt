@@ -1,0 +1,50 @@
+# DocType, Setup Wizard Control
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-08-08 17:09:24',
+		'docstatus': 0,
+		'modified': '2011-07-04 17:10:23',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all DocType
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocType',
+		'issingle': 1,
+		'module': 'Setup',
+		'name': '__common__',
+		'section_style': 'Simple',
+		'server_code_error': ' ',
+		'show_in_menu': 0,
+		'version': 110
+	},
+
+	# These values are common for all DocPerm
+	{
+		'doctype': 'DocPerm',
+		'idx': 1,
+		'name': '__common__',
+		'parent': 'Setup Wizard Control',
+		'parentfield': 'permissions',
+		'parenttype': 'DocType',
+		'permlevel': 0,
+		'read': 1,
+		'role': 'All',
+		'write': 1
+	},
+
+	# DocType, Setup Wizard Control
+	{
+		'doctype': 'DocType',
+		'name': 'Setup Wizard Control'
+	},
+
+	# DocPerm
+	{
+		'doctype': 'DocPerm'
+	}
+]

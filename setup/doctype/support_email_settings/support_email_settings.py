@@ -11,8 +11,8 @@ class DocType:
 		"""
 		if cint(self.doc.integrate_incoming):
 			from webnotes.utils.scheduler import set_event
-			set_event('maintenance.doctype.support_ticket.get_support_mails', 60*5, 1)
+			set_event('support.doctype.support_ticket.get_support_mails', 60*5, 1)
 		else:
 			from webnotes.utils.scheduler import cancel_event
-			cancel_event('maintenance.doctype.support_ticket.get_support_mails')
+			cancel_event('support.doctype.support_ticket.get_support_mails')
 			

@@ -1,0 +1,33 @@
+# Search Criteria, monthly_salary_register
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-12-14 10:33:12',
+		'docstatus': 0,
+		'modified': '2010-04-05 14:43:08',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all Search Criteria
+	{
+		'columns': 'Salary Slip\x01ID,Salary Slip\x01Employee,Salary Slip\x01Employee Name,Salary Slip\x01Leave Without Pay,Salary Slip\x01Arrear Amount',
+		'criteria_name': 'Monthly Salary Register',
+		'doc_type': 'Salary Slip',
+		'doctype': 'Search Criteria',
+		'filters': "{'Salary Slip\x01Month':'','Salary Slip\x01Year':''}",
+		'module': 'HR',
+		'name': '__common__',
+		'page_len': 50,
+		'sort_by': 'ID',
+		'sort_order': 'DESC',
+		'standard': 'Yes'
+	},
+
+	# Search Criteria, monthly_salary_register
+	{
+		'doctype': 'Search Criteria',
+		'name': 'monthly_salary_register'
+	}
+]

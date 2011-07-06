@@ -1,0 +1,26 @@
+# Role, Projects User
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-08-08 17:08:51',
+		'docstatus': 0,
+		'modified': '2010-05-08 09:40:07',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all Role
+	{
+		'doctype': 'Role',
+		'module': 'Projects',
+		'name': '__common__',
+		'role_name': 'Projects User'
+	},
+
+	# Role, Projects User
+	{
+		'doctype': 'Role',
+		'name': 'Projects User'
+	}
+]

@@ -1,0 +1,34 @@
+# Search Criteria, itemwise_receipt_details
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-12-14 10:23:19',
+		'docstatus': 0,
+		'modified': '2010-10-22 14:36:11',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all Search Criteria
+	{
+		'columns': 'Purchase Receipt\x01ID,Purchase Receipt\x01Posting Date,Purchase Receipt Detail\x01Item Code,Purchase Receipt Detail\x01Item Name,Purchase Receipt Detail\x01Accepted Quantity,Purchase Receipt Detail\x01Rejected Quantity,Purchase Receipt Detail\x01Accepted Warehouse,Purchase Receipt Detail\x01Rejected Warehouse,Purchase Receipt Detail\x01Amount',
+		'criteria_name': 'Itemwise Receipt Details',
+		'doc_type': 'Purchase Receipt Detail',
+		'doctype': 'Search Criteria',
+		'filters': "{'Purchase Receipt\x01Saved':1,'Purchase Receipt\x01Submitted':1,'Purchase Receipt\x01Status':'','Purchase Receipt\x01Fiscal Year':''}",
+		'module': 'Buying',
+		'name': '__common__',
+		'page_len': 50,
+		'parent_doc_type': 'Purchase Receipt',
+		'sort_by': '`tabPurchase Receipt`.`name`',
+		'sort_order': 'DESC',
+		'standard': 'Yes'
+	},
+
+	# Search Criteria, itemwise_receipt_details
+	{
+		'doctype': 'Search Criteria',
+		'name': 'itemwise_receipt_details'
+	}
+]

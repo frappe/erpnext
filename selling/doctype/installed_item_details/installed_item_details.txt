@@ -1,0 +1,159 @@
+# DocType, Installed Item Details
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-08-08 17:09:05',
+		'docstatus': 0,
+		'modified': '2010-09-20 14:06:57',
+		'modified_by': 'abhishek@webnotestech.com',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all DocType
+	{
+		'autoname': 'IID/.#####',
+		'colour': 'White:FFF',
+		'doctype': 'DocType',
+		'istable': 1,
+		'module': 'Selling',
+		'name': '__common__',
+		'section_style': 'Simple',
+		'server_code_error': ' ',
+		'version': 24
+	},
+
+	# These values are common for all DocField
+	{
+		'doctype': 'DocField',
+		'name': '__common__',
+		'parent': 'Installed Item Details',
+		'parentfield': 'fields',
+		'parenttype': 'DocType'
+	},
+
+	# DocType, Installed Item Details
+	{
+		'doctype': 'DocType',
+		'name': 'Installed Item Details'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'item_code',
+		'fieldtype': 'Link',
+		'idx': 1,
+		'label': 'Item Code',
+		'oldfieldname': 'item_code',
+		'oldfieldtype': 'Link',
+		'options': 'Item',
+		'permlevel': 0,
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'description',
+		'fieldtype': 'Data',
+		'idx': 2,
+		'label': 'Description',
+		'oldfieldname': 'description',
+		'oldfieldtype': 'Data',
+		'permlevel': 1,
+		'width': '300px'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'prevdoc_date',
+		'fieldtype': 'Date',
+		'hidden': 0,
+		'idx': 3,
+		'label': 'Delivery Date',
+		'oldfieldname': 'prevdoc_date',
+		'oldfieldtype': 'Date',
+		'permlevel': 1,
+		'print_hide': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'serial_no',
+		'fieldtype': 'Small Text',
+		'idx': 5,
+		'label': 'Serial No',
+		'oldfieldname': 'serial_no',
+		'oldfieldtype': 'Small Text',
+		'permlevel': 0,
+		'width': '180px'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'prevdoc_detail_docname',
+		'fieldtype': 'Data',
+		'hidden': 1,
+		'idx': 6,
+		'label': 'Against Document Detail No',
+		'no_copy': 1,
+		'oldfieldname': 'prevdoc_detail_docname',
+		'oldfieldtype': 'Data',
+		'permlevel': 1,
+		'print_hide': 1,
+		'width': '150px'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'prevdoc_docname',
+		'fieldtype': 'Data',
+		'hidden': 1,
+		'idx': 7,
+		'in_filter': 1,
+		'label': 'Against Document No',
+		'no_copy': 1,
+		'oldfieldname': 'prevdoc_docname',
+		'oldfieldtype': 'Data',
+		'permlevel': 1,
+		'print_hide': 1,
+		'search_index': 1,
+		'width': '150px'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'prevdoc_doctype',
+		'fieldtype': 'Data',
+		'hidden': 1,
+		'idx': 8,
+		'in_filter': 1,
+		'label': 'Document Type',
+		'no_copy': 1,
+		'oldfieldname': 'prevdoc_doctype',
+		'oldfieldtype': 'Data',
+		'permlevel': 1,
+		'print_hide': 1,
+		'search_index': 1,
+		'width': '150px'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'qty',
+		'fieldtype': 'Currency',
+		'idx': 9,
+		'label': 'Installed Qty',
+		'oldfieldname': 'qty',
+		'oldfieldtype': 'Currency',
+		'permlevel': 0,
+		'reqd': 1
+	}
+]

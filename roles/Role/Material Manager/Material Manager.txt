@@ -1,1 +1,0 @@
-[{'modified_by': 'Administrator', 'name': 'Material Manager', 'parent': None, 'creation': '2009-03-12 12:09:44', 'modified': '2009-03-19 14:56:51', 'module': 'Roles', 'doctype': 'Role', 'idx': None, 'parenttype': None, 'role_name': 'Material Manager', 'owner': 'Administrator', 'docstatus': 0, 'parentfield': None}]

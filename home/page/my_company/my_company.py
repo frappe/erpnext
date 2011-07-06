@@ -108,7 +108,7 @@ def post_comment(arg):
 			fn = webnotes.user.name
 
 		from webnotes.utils.email_lib import sendmail
-		from settings.doctype.notification_control.notification_control import get_formatted_message
+		from setup.doctype.notification_control.notification_control import get_formatted_message
 		
 		message = '''A new comment has been posted on your page by %s:
 		

@@ -1,1 +1,129 @@
-[{'section_style': 'Simple', 'is_transaction_doc': None, 'creation': '2009-10-16 16:29:24', 'search_fields': None, 'module': 'Production', 'doctype': 'DocType', 'change_log': None, 'print_outline': '', 'owner': 'jai@webnotestech.com', 'in_dialog': None, 'in_create': None, 'read_only': None, 'allow_email': None, 'dt_template': None, 'hide_heading': None, 'issingle': None, 'allow_rename': None, 'smallicon': None, 'allow_attach': None, 'show_in_menu': 0, 'max_attachments': None, 'version': 5, 'menu_index': None, 'docstatus': 0, 'allow_copy': None, 'istable': 1, 'description': None, 'parent': None, 'server_code': None, 'allow_trash': None, 'allow_print': None, 'autoname': None, 'client_script_core': None, 'client_string': None, 'use_template': None, 'modified_by': 'jai@webnotestech.com', 'document_type': None, 'name': 'PRO PP Detail', 'idx': None, 'hide_toolbar': None, 'colour': 'White:FFF', 'client_script': None, 'modified': '2010-09-20 14:06:57', 'server_code_error': None, 'name_case': '', 'parenttype': None, 'read_only_onload': None, 'server_code_core': None, 'server_code_compiled': None, 'parent_node': None, 'parentfield': None}, {'no_copy': None, 'oldfieldtype': 'Data', 'creation': '2009-10-16 16:34:49', 'doctype': 'DocField', 'oldfieldname': 'source_doctype', 'owner': 'jai@webnotestech.com', 'reqd': None, 'in_filter': None, 'print_hide': None, 'modified_by': 'jai@webnotestech.com', 'label': 'Source Doctype', 'width': None, 'trigger': None, 'depends_on': None, 'docstatus': 0, 'hidden': None, 'permlevel': 0, 'description': None, 'parent': 'PRO PP Detail', 'search_index': None, 'allow_on_submit': None, 'icon': None, 'name': 'FL03242', 'idx': 1, 'default': None, 'colour': None, 'modified': '2009-11-02 01:01:26', 'parenttype': 'DocType', 'fieldname': 'source_doctype', 'fieldtype': 'Data', 'options': None, 'report_hide': None, 'parentfield': 'fields'}, {'no_copy': None, 'oldfieldtype': 'Data', 'creation': '2009-10-16 16:34:49', 'doctype': 'DocField', 'oldfieldname': 'source_docname', 'owner': 'jai@webnotestech.com', 'reqd': None, 'in_filter': None, 'print_hide': None, 'modified_by': 'jai@webnotestech.com', 'label': 'Source Docname', 'width': None, 'trigger': None, 'depends_on': None, 'docstatus': 0, 'hidden': None, 'permlevel': 0, 'description': None, 'parent': 'PRO PP Detail', 'search_index': None, 'allow_on_submit': None, 'icon': None, 'name': 'FL03243', 'idx': 2, 'default': None, 'colour': None, 'modified': '2009-11-02 01:01:26', 'parenttype': 'DocType', 'fieldname': 'source_docname', 'fieldtype': 'Data', 'options': None, 'report_hide': None, 'parentfield': 'fields'}, {'no_copy': None, 'oldfieldtype': 'Data', 'creation': '2009-11-02 01:01:26', 'doctype': 'DocField', 'oldfieldname': 'source_detail_docname', 'owner': 'jai@webnotestech.com', 'reqd': None, 'in_filter': None, 'print_hide': None, 'modified_by': 'jai@webnotestech.com', 'label': 'Source Detail Docname ', 'width': None, 'trigger': None, 'depends_on': None, 'docstatus': 0, 'hidden': None, 'permlevel': 0, 'description': None, 'parent': 'PRO PP Detail', 'search_index': None, 'allow_on_submit': None, 'icon': None, 'name': 'FL03264', 'idx': 3, 'default': None, 'colour': None, 'modified': '2009-11-02 01:01:26', 'parenttype': 'DocType', 'fieldname': 'source_detail_docname', 'fieldtype': 'Data', 'options': None, 'report_hide': None, 'parentfield': 'fields'}, {'no_copy': None, 'oldfieldtype': 'Data', 'creation': '2009-10-16 16:34:49', 'doctype': 'DocField', 'oldfieldname': 'prevdoc_detail_docname', 'owner': 'jai@webnotestech.com', 'reqd': None, 'in_filter': None, 'print_hide': None, 'modified_by': 'jai@webnotestech.com', 'label': 'Prevdoc Detail Docname', 'width': None, 'trigger': None, 'depends_on': None, 'docstatus': 0, 'hidden': None, 'permlevel': 0, 'description': None, 'parent': 'PRO PP Detail', 'search_index': None, 'allow_on_submit': None, 'icon': None, 'name': 'FL03246', 'idx': 4, 'default': None, 'colour': None, 'modified': '2009-11-02 01:01:26', 'parenttype': 'DocType', 'fieldname': 'prevdoc_detail_docname', 'fieldtype': 'Data', 'options': None, 'report_hide': None, 'parentfield': 'fields'}, {'no_copy': None, 'oldfieldtype': 'Date', 'creation': '2009-10-16 16:37:17', 'doctype': 'DocField', 'oldfieldname': 'confirm_date', 'owner': 'jai@webnotestech.com', 'reqd': None, 'in_filter': None, 'print_hide': None, 'modified_by': 'jai@webnotestech.com', 'label': 'Confirm Date', 'width': None, 'trigger': None, 'depends_on': None, 'docstatus': 0, 'hidden': None, 'permlevel': 0, 'description': None, 'parent': 'PRO PP Detail', 'search_index': None, 'allow_on_submit': None, 'icon': None, 'name': 'FL03247', 'idx': 5, 'default': None, 'colour': None, 'modified': '2009-11-02 01:01:26', 'parenttype': 'DocType', 'fieldname': 'confirm_date', 'fieldtype': 'Date', 'options': None, 'report_hide': None, 'parentfield': 'fields'}, {'no_copy': None, 'oldfieldtype': 'Currency', 'creation': '2009-10-16 16:37:17', 'doctype': 'DocField', 'oldfieldname': 'qty_reqd', 'owner': 'jai@webnotestech.com', 'reqd': None, 'in_filter': None, 'print_hide': None, 'modified_by': 'jai@webnotestech.com', 'label': 'Qty Reqd', 'width': None, 'trigger': None, 'depends_on': None, 'docstatus': 0, 'hidden': None, 'permlevel': 0, 'description': None, 'parent': 'PRO PP Detail', 'search_index': None, 'allow_on_submit': None, 'icon': None, 'name': 'FL03248', 'idx': 6, 'default': None, 'colour': None, 'modified': '2009-11-02 01:01:26', 'parenttype': 'DocType', 'fieldname': 'qty_reqd', 'fieldtype': 'Currency', 'options': None, 'report_hide': None, 'parentfield': 'fields'}, {'no_copy': None, 'oldfieldtype': 'Currency', 'creation': '2009-10-16 16:37:17', 'doctype': 'DocField', 'oldfieldname': 'produced_qty', 'owner': 'jai@webnotestech.com', 'reqd': None, 'in_filter': None, 'print_hide': None, 'modified_by': 'jai@webnotestech.com', 'label': 'Produced Qty', 'width': None, 'trigger': None, 'depends_on': None, 'docstatus': 0, 'hidden': None, 'permlevel': 0, 'description': None, 'parent': 'PRO PP Detail', 'search_index': None, 'allow_on_submit': None, 'icon': None, 'name': 'FL03249', 'idx': 7, 'default': None, 'colour': None, 'modified': '2009-11-02 01:01:26', 'parenttype': 'DocType', 'fieldname': 'produced_qty', 'fieldtype': 'Currency', 'options': None, 'report_hide': None, 'parentfield': 'fields'}, {'no_copy': None, 'oldfieldtype': 'Check', 'creation': '2009-10-23 06:54:42', 'doctype': 'DocField', 'oldfieldname': 'update', 'owner': 'Administrator', 'reqd': None, 'in_filter': None, 'print_hide': None, 'modified_by': 'jai@webnotestech.com', 'label': 'Update', 'width': None, 'trigger': None, 'depends_on': None, 'docstatus': 0, 'hidden': None, 'permlevel': 0, 'description': None, 'parent': 'PRO PP Detail', 'search_index': None, 'allow_on_submit': 1, 'icon': None, 'name': 'FL03258', 'idx': 8, 'default': None, 'colour': None, 'modified': '2009-11-02 01:01:26', 'parenttype': 'DocType', 'fieldname': 'update', 'fieldtype': 'Check', 'options': None, 'report_hide': None, 'parentfield': 'fields'}]
+# DocType, PRO PP Detail
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-08-08 17:09:13',
+		'docstatus': 0,
+		'modified': '2010-09-20 14:06:57',
+		'modified_by': 'Administrator',
+		'owner': 'jai@webnotestech.com'
+	},
+
+	# These values are common for all DocType
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocType',
+		'istable': 1,
+		'module': 'Production',
+		'name': '__common__',
+		'section_style': 'Simple',
+		'show_in_menu': 0,
+		'version': 5
+	},
+
+	# These values are common for all DocField
+	{
+		'doctype': 'DocField',
+		'name': '__common__',
+		'parent': 'PRO PP Detail',
+		'parentfield': 'fields',
+		'parenttype': 'DocType',
+		'permlevel': 0
+	},
+
+	# DocType, PRO PP Detail
+	{
+		'doctype': 'DocType',
+		'name': 'PRO PP Detail'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'source_doctype',
+		'fieldtype': 'Data',
+		'idx': 1,
+		'label': 'Source Doctype',
+		'oldfieldname': 'source_doctype',
+		'oldfieldtype': 'Data'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'source_docname',
+		'fieldtype': 'Data',
+		'idx': 2,
+		'label': 'Source Docname',
+		'oldfieldname': 'source_docname',
+		'oldfieldtype': 'Data'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'source_detail_docname',
+		'fieldtype': 'Data',
+		'idx': 3,
+		'label': 'Source Detail Docname ',
+		'oldfieldname': 'source_detail_docname',
+		'oldfieldtype': 'Data'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'prevdoc_detail_docname',
+		'fieldtype': 'Data',
+		'idx': 4,
+		'label': 'Prevdoc Detail Docname',
+		'oldfieldname': 'prevdoc_detail_docname',
+		'oldfieldtype': 'Data'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'confirm_date',
+		'fieldtype': 'Date',
+		'idx': 5,
+		'label': 'Confirm Date',
+		'oldfieldname': 'confirm_date',
+		'oldfieldtype': 'Date'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'qty_reqd',
+		'fieldtype': 'Currency',
+		'idx': 6,
+		'label': 'Qty Reqd',
+		'oldfieldname': 'qty_reqd',
+		'oldfieldtype': 'Currency'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'produced_qty',
+		'fieldtype': 'Currency',
+		'idx': 7,
+		'label': 'Produced Qty',
+		'oldfieldname': 'produced_qty',
+		'oldfieldtype': 'Currency'
+	},
+
+	# DocField
+	{
+		'allow_on_submit': 1,
+		'doctype': 'DocField',
+		'fieldname': 'update',
+		'fieldtype': 'Check',
+		'idx': 8,
+		'label': 'Update',
+		'oldfieldname': 'update',
+		'oldfieldtype': 'Check'
+	}
+]

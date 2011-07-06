@@ -1,0 +1,607 @@
+# DocType, Supplier Quotation
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-10-27 12:55:42',
+		'docstatus': 0,
+		'modified': '2011-01-28 11:41:36',
+		'modified_by': 'rakesh@iwebnotes.com',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all DocType
+	{
+		'autoname': 'SQ.#####',
+		'colour': 'White:FFF',
+		'doctype': 'DocType',
+		'in_create': 1,
+		'module': 'Buying',
+		'name': '__common__',
+		'read_only': 1,
+		'section_style': 'Tabbed',
+		'server_code_error': ' ',
+		'show_in_menu': 0,
+		'version': 241
+	},
+
+	# These values are common for all DocField
+	{
+		'doctype': 'DocField',
+		'name': '__common__',
+		'parent': 'Supplier Quotation',
+		'parentfield': 'fields',
+		'parenttype': 'DocType'
+	},
+
+	# These values are common for all DocPerm
+	{
+		'doctype': 'DocPerm',
+		'name': '__common__',
+		'parent': 'Supplier Quotation',
+		'parentfield': 'permissions',
+		'parenttype': 'DocType',
+		'read': 1
+	},
+
+	# DocType, Supplier Quotation
+	{
+		'doctype': 'DocType',
+		'name': 'Supplier Quotation'
+	},
+
+	# DocPerm
+	{
+		'amend': 1,
+		'cancel': 1,
+		'create': 1,
+		'doctype': 'DocPerm',
+		'idx': 1,
+		'permlevel': 0,
+		'role': 'System Manager',
+		'submit': 1,
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'amend': 1,
+		'cancel': 1,
+		'create': 1,
+		'doctype': 'DocPerm',
+		'idx': 2,
+		'permlevel': 0,
+		'role': 'Supplier',
+		'submit': 1,
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'amend': 1,
+		'cancel': 1,
+		'create': 1,
+		'doctype': 'DocPerm',
+		'idx': 3,
+		'permlevel': 0,
+		'role': 'Purchase User',
+		'submit': 1,
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'doctype': 'DocPerm',
+		'idx': 4,
+		'permlevel': 0,
+		'role': 'Purchase Manager'
+	},
+
+	# DocPerm
+	{
+		'doctype': 'DocPerm',
+		'idx': 5,
+		'permlevel': 1,
+		'role': 'All'
+	},
+
+	# DocPerm
+	{
+		'cancel': 0,
+		'doctype': 'DocPerm',
+		'idx': 6,
+		'permlevel': 2,
+		'role': 'Purchase User',
+		'submit': 0,
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'cancel': 0,
+		'doctype': 'DocPerm',
+		'idx': 7,
+		'permlevel': 2,
+		'role': 'Purchase Manager',
+		'submit': 0,
+		'write': 1
+	},
+
+	# DocField
+	{
+		'allow_on_submit': 1,
+		'doctype': 'DocField',
+		'fieldtype': 'Button',
+		'idx': 1,
+		'label': 'Create PO',
+		'oldfieldtype': 'Button',
+		'permlevel': 2,
+		'trigger': 'Client'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'description': 'Enter item rates and details of supplier who is providing quotation',
+		'doctype': 'DocField',
+		'fieldtype': 'Section Break',
+		'idx': 2,
+		'label': 'Basic Info',
+		'oldfieldtype': 'Section Break',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Column Break',
+		'idx': 3,
+		'oldfieldtype': 'Column Break',
+		'permlevel': 0,
+		'width': '50%'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'naming_series',
+		'fieldtype': 'Select',
+		'idx': 4,
+		'in_filter': 1,
+		'label': 'Series',
+		'no_copy': 1,
+		'oldfieldname': 'naming_series',
+		'oldfieldtype': 'Select',
+		'options': '\nSQTN',
+		'permlevel': 0,
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'default': 'Draft',
+		'doctype': 'DocField',
+		'fieldname': 'status',
+		'fieldtype': 'Select',
+		'idx': 5,
+		'in_filter': 1,
+		'label': 'Status',
+		'oldfieldname': 'status',
+		'oldfieldtype': 'Select',
+		'options': '\nDraft\nQuotation Sent\nOrder Confirmed\nCancelled',
+		'permlevel': 1,
+		'reqd': 1,
+		'search_index': 1
+	},
+
+	# DocField
+	{
+		'default': 'Today',
+		'description': 'The date at which current entry is made in system.',
+		'doctype': 'DocField',
+		'fieldname': 'transaction_date',
+		'fieldtype': 'Date',
+		'idx': 6,
+		'in_filter': 1,
+		'label': 'Quotation Date',
+		'oldfieldname': 'transaction_date',
+		'oldfieldtype': 'Date',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'activity_log_text',
+		'fieldtype': 'Text',
+		'idx': 7,
+		'label': 'Activity Log Text',
+		'oldfieldname': 'activity_log_text',
+		'oldfieldtype': 'Text',
+		'permlevel': 2
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'company',
+		'fieldtype': 'Link',
+		'idx': 8,
+		'in_filter': 1,
+		'label': 'For Company',
+		'oldfieldname': 'company',
+		'oldfieldtype': 'Link',
+		'options': 'Company',
+		'permlevel': 0,
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'fiscal_year',
+		'fieldtype': 'Select',
+		'idx': 9,
+		'in_filter': 1,
+		'label': 'Fiscal Year',
+		'oldfieldname': 'fiscal_year',
+		'oldfieldtype': 'Select',
+		'options': 'link:Fiscal Year',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'amended_from',
+		'fieldtype': 'Data',
+		'hidden': 1,
+		'idx': 10,
+		'label': 'Amended From',
+		'no_copy': 1,
+		'oldfieldname': 'amended_from',
+		'oldfieldtype': 'Data',
+		'permlevel': 1,
+		'print_hide': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'amendment_date',
+		'fieldtype': 'Date',
+		'hidden': 1,
+		'idx': 11,
+		'label': 'Amendment Date',
+		'no_copy': 1,
+		'oldfieldname': 'amendment_date',
+		'oldfieldtype': 'Date',
+		'permlevel': 1,
+		'print_hide': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Column Break',
+		'idx': 12,
+		'oldfieldtype': 'Column Break',
+		'permlevel': 0,
+		'width': '50%'
+	},
+
+	# DocField
+	{
+		'allow_on_submit': 0,
+		'description': 'You can create PO when quotation gets approved.',
+		'doctype': 'DocField',
+		'fieldname': 'approval_status',
+		'fieldtype': 'Select',
+		'idx': 13,
+		'label': 'Approval Status',
+		'oldfieldname': 'approval_status',
+		'oldfieldtype': 'Select',
+		'options': '\nApproved\nNot Approved',
+		'permlevel': 2
+	},
+
+	# DocField
+	{
+		'allow_on_submit': 1,
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldtype': 'Button',
+		'idx': 14,
+		'label': 'Approve / Unapprove',
+		'oldfieldtype': 'Button',
+		'permlevel': 2,
+		'trigger': 'Client'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldname': 'supplier',
+		'fieldtype': 'Link',
+		'idx': 15,
+		'in_filter': 1,
+		'label': 'Supplier',
+		'oldfieldname': 'supplier',
+		'oldfieldtype': 'Link',
+		'options': 'Supplier',
+		'permlevel': 0,
+		'reqd': 1,
+		'trigger': 'Client'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'supplier_name',
+		'fieldtype': 'Data',
+		'idx': 16,
+		'in_filter': 1,
+		'label': 'Supplier Name',
+		'oldfieldname': 'supplier_name',
+		'oldfieldtype': 'Data',
+		'permlevel': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'supplier_address',
+		'fieldtype': 'Text',
+		'idx': 17,
+		'label': 'Supplier Address',
+		'oldfieldname': 'supplier_address',
+		'oldfieldtype': 'Text',
+		'permlevel': 1
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldname': 'contact_person',
+		'fieldtype': 'Link',
+		'idx': 18,
+		'in_filter': 0,
+		'label': 'Contact Person',
+		'oldfieldname': 'contact_person',
+		'oldfieldtype': 'Link',
+		'permlevel': 0,
+		'trigger': 'Client'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'contact_no',
+		'fieldtype': 'Data',
+		'idx': 19,
+		'label': 'Contact No',
+		'oldfieldname': 'contact_no',
+		'oldfieldtype': 'Data',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'email',
+		'fieldtype': 'Data',
+		'idx': 20,
+		'label': 'Email',
+		'oldfieldname': 'email',
+		'oldfieldtype': 'Data',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Section Break',
+		'idx': 21,
+		'label': 'Item Details',
+		'oldfieldtype': 'Section Break',
+		'options': 'Simple',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'rfq_no',
+		'fieldtype': 'Link',
+		'hidden': 1,
+		'idx': 22,
+		'label': 'RFQ No',
+		'oldfieldname': 'rfq_no',
+		'oldfieldtype': 'Link',
+		'options': 'RFQ',
+		'permlevel': 0,
+		'print_hide': 1,
+		'report_hide': 1,
+		'trigger': 'Client'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Button',
+		'idx': 23,
+		'label': 'Get Items',
+		'oldfieldtype': 'Button',
+		'options': 'get_rfq_details',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Column Break',
+		'idx': 24,
+		'oldfieldtype': 'Column Break',
+		'permlevel': 0,
+		'width': '50%'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'description': "Supplier's currency",
+		'doctype': 'DocField',
+		'fieldname': 'currency',
+		'fieldtype': 'Select',
+		'idx': 25,
+		'label': 'Currency',
+		'oldfieldname': 'currency',
+		'oldfieldtype': 'Select',
+		'options': 'link:Currency',
+		'permlevel': 0,
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'default': '1',
+		'description': "Rate at which supplier's currency is converted to your currency",
+		'doctype': 'DocField',
+		'fieldname': 'conversion_rate',
+		'fieldtype': 'Currency',
+		'idx': 26,
+		'label': 'Conversion Rate',
+		'no_copy': 1,
+		'oldfieldname': 'conversion_rate',
+		'oldfieldtype': 'Currency',
+		'permlevel': 0,
+		'print_hide': 1,
+		'reqd': 1,
+		'trigger': 'Client'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Section Break',
+		'idx': 27,
+		'oldfieldtype': 'Section Break',
+		'options': 'Simple',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'supplier_quotation_details',
+		'fieldtype': 'Table',
+		'idx': 28,
+		'label': 'Quotation Details1',
+		'oldfieldname': 'supplier_quotation_details',
+		'oldfieldtype': 'Table',
+		'options': 'Supplier Quotation Detail',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'net_total',
+		'fieldtype': 'Currency',
+		'idx': 29,
+		'label': 'Net Total',
+		'oldfieldname': 'net_total',
+		'oldfieldtype': 'Currency',
+		'permlevel': 1
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'description': 'Enter terms and conditions which you want to include',
+		'doctype': 'DocField',
+		'fieldtype': 'Section Break',
+		'idx': 30,
+		'label': 'Terms',
+		'oldfieldtype': 'Section Break',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'tc_name',
+		'fieldtype': 'Link',
+		'idx': 31,
+		'label': 'Select Terms',
+		'oldfieldname': 'tc_name',
+		'oldfieldtype': 'Link',
+		'options': 'Term',
+		'permlevel': 0,
+		'print_hide': 1,
+		'report_hide': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Button',
+		'idx': 32,
+		'label': 'Get Terms',
+		'oldfieldtype': 'Button',
+		'options': 'get_tc_details',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'HTML',
+		'idx': 33,
+		'label': 'Terms HTML',
+		'oldfieldtype': 'HTML',
+		'options': 'You can add Terms and Notes that will be printed in the Transaction',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'terms',
+		'fieldtype': 'Text Editor',
+		'idx': 34,
+		'label': 'Terms and Conditions',
+		'oldfieldname': 'terms',
+		'oldfieldtype': 'Text Editor',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'description': "Next steps will be visible when you submit the supplier quotation and approval status is 'Approved'",
+		'doctype': 'DocField',
+		'fieldtype': 'Section Break',
+		'idx': 35,
+		'label': 'Next Steps',
+		'oldfieldtype': 'Section Break',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'allow_on_submit': 1,
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldtype': 'Button',
+		'idx': 36,
+		'label': 'Get Report',
+		'oldfieldtype': 'Button',
+		'permlevel': 0,
+		'trigger': 'Client'
+	}
+]

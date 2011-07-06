@@ -2,7 +2,7 @@ $import(Production Tips Common)
 
 cur_frm.cscript.onload = function(doc, cdt, cdn) {
 
-  cur_frm.cscript.get_tips(doc, cdt, cdn);
+   
 
   if (!doc.fiscal_year && doc.__islocal){ set_default_values(doc);}
   if (!doc.transaction_date) doc.transaction_date = dateutil.obj_to_str(new Date());
@@ -20,7 +20,7 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 // ================================== Refresh ==========================================
 cur_frm.cscript.refresh = function(doc, cdt, cdn) { 
 
-  cur_frm.cscript.get_tips(doc, cdt, cdn);
+   
   cfn_set_fields(doc, cdt, cdn);
 }
 

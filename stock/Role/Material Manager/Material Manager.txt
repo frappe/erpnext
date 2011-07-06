@@ -1,0 +1,26 @@
+# Role, Material Manager
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-08-08 17:08:51',
+		'docstatus': 0,
+		'modified': '2009-03-19 14:56:51',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all Role
+	{
+		'doctype': 'Role',
+		'module': 'Stock',
+		'name': '__common__',
+		'role_name': 'Material Manager'
+	},
+
+	# Role, Material Manager
+	{
+		'doctype': 'Role',
+		'name': 'Material Manager'
+	}
+]

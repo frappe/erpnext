@@ -1,0 +1,33 @@
+# Search Criteria, new_or_left_employees_for_a_month
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-12-14 10:23:25',
+		'docstatus': 0,
+		'modified': '2010-12-01 09:54:34',
+		'modified_by': 'Administrator',
+		'owner': 'harshada@webnotestech.com'
+	},
+
+	# These values are common for all Search Criteria
+	{
+		'columns': 'Employee\x01ID',
+		'criteria_name': 'New or left employees for a month',
+		'doc_type': 'Employee',
+		'doctype': 'Search Criteria',
+		'filters': "{'Employee\x01Saved':1,'Employee\x01Submitted':1,'Employee\x01Gender':'','Employee\x01Month of Birth':'','Employee\x01Status':''}",
+		'module': 'HR',
+		'name': '__common__',
+		'page_len': 50,
+		'sort_by': '`tabEmployee`.`name`',
+		'sort_order': 'DESC',
+		'standard': 'Yes'
+	},
+
+	# Search Criteria, new_or_left_employees_for_a_month
+	{
+		'doctype': 'Search Criteria',
+		'name': 'new_or_left_employees_for_a_month'
+	}
+]

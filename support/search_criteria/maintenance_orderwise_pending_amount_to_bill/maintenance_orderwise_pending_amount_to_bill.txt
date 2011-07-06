@@ -1,0 +1,36 @@
+# Search Criteria, maintenance_orderwise_pending_amount_to_bill
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-09-01 15:48:09',
+		'docstatus': 0,
+		'modified': '2010-08-30 13:40:44',
+		'modified_by': 'Administrator',
+		'owner': 'ashwini@webnotestech.com'
+	},
+
+	# These values are common for all Search Criteria
+	{
+		'add_col': "SUM((`tabSales Order Detail`.`qty` - `tabSales Order Detail`.`billed_qty`) * `tabSales Order Detail`.`basic_rate`) AS 'Pending Amount'",
+		'add_cond': "`tabSales Order`.status != 'Stopped'\n`tabSales Order`.order_type='Maintenance'",
+		'columns': 'Sales Order\x01ID,Sales Order\x01Customer,Sales Order\x01Customer Name,Sales Order\x01Customer Address,Sales Order\x01Status,Sales Order\x01% Billed,Sales Order\x01Sales Order Date',
+		'criteria_name': 'Maintenance Orderwise Pending Amount To Bill',
+		'doc_type': 'Sales Order Detail',
+		'doctype': 'Search Criteria',
+		'filters': "{'Sales Order\x01Saved':1,'Sales Order\x01Submitted':1,'Sales Order\x01Status':'','Sales Order\x01Fiscal Year':''}",
+		'module': 'Support',
+		'name': '__common__',
+		'page_len': 50,
+		'parent_doc_type': 'Sales Order',
+		'sort_by': '`tabSales Order`.`name`',
+		'sort_order': 'DESC',
+		'standard': 'Yes'
+	},
+
+	# Search Criteria, maintenance_orderwise_pending_amount_to_bill
+	{
+		'doctype': 'Search Criteria',
+		'name': 'maintenance_orderwise_pending_amount_to_bill'
+	}
+]

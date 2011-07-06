@@ -1,0 +1,102 @@
+# DocType, Rename Tool
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2011-06-23 11:03:25',
+		'docstatus': 0,
+		'modified': '2011-07-01 17:46:42',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all DocType
+	{
+		'_last_update': '1308739509',
+		'allow_email': 1,
+		'allow_print': 1,
+		'colour': 'White:FFF',
+		'doctype': 'DocType',
+		'hide_heading': 0,
+		'hide_toolbar': 0,
+		'issingle': 1,
+		'module': 'Utilities',
+		'name': '__common__',
+		'section_style': 'Simple',
+		'show_in_menu': 0,
+		'version': 7
+	},
+
+	# These values are common for all DocField
+	{
+		'doctype': 'DocField',
+		'name': '__common__',
+		'parent': 'Rename Tool',
+		'parentfield': 'fields',
+		'parenttype': 'DocType',
+		'permlevel': 0
+	},
+
+	# These values are common for all DocPerm
+	{
+		'create': 1,
+		'doctype': 'DocPerm',
+		'idx': 1,
+		'name': '__common__',
+		'parent': 'Rename Tool',
+		'parentfield': 'permissions',
+		'parenttype': 'DocType',
+		'permlevel': 0,
+		'read': 1,
+		'role': 'System Manager',
+		'write': 1
+	},
+
+	# DocType, Rename Tool
+	{
+		'doctype': 'DocType',
+		'name': 'Rename Tool'
+	},
+
+	# DocPerm
+	{
+		'doctype': 'DocPerm'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'select_doctype',
+		'fieldtype': 'Select',
+		'idx': 1,
+		'label': 'Select DocType',
+		'options': 'link:DocType'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'document_to_rename',
+		'fieldtype': 'Link',
+		'idx': 2,
+		'label': 'Document to rename'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'new_name',
+		'fieldtype': 'Data',
+		'idx': 3,
+		'label': 'New Name'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Button',
+		'idx': 4,
+		'label': 'Rename',
+		'options': 'rename'
+	}
+]

@@ -1,0 +1,34 @@
+# Search Criteria, itemwise_price_list
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-08-20 12:20:56',
+		'docstatus': 0,
+		'modified': '2010-08-20 12:15:17',
+		'modified_by': 'Administrator',
+		'owner': 'harshada@webnotestech.com'
+	},
+
+	# These values are common for all Search Criteria
+	{
+		'columns': 'Item\x01Item Name,Item\x01Item Group,Ref Rate Detail\x01Price List Name,Ref Rate Detail\x01Ref Rate,Ref Rate Detail\x01Currency',
+		'criteria_name': 'Itemwise Price List',
+		'doc_type': 'Ref Rate Detail',
+		'doctype': 'Search Criteria',
+		'filters': "{'Item\x01Saved':1,'Ref Rate Detail\x01Price List Name':'','Ref Rate Detail\x01Currency':''}",
+		'module': 'Stock',
+		'name': '__common__',
+		'page_len': 50,
+		'parent_doc_type': 'Item',
+		'sort_by': '`tabItem`.`item_name`',
+		'sort_order': 'DESC',
+		'standard': 'Yes'
+	},
+
+	# Search Criteria, itemwise_price_list
+	{
+		'doctype': 'Search Criteria',
+		'name': 'itemwise_price_list'
+	}
+]

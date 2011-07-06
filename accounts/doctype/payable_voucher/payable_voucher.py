@@ -35,7 +35,7 @@ class DocType(TransactionBase):
   # Credit To
   # ----------
   def get_credit_to(self):
-    acc_head = sql("select name, credit_days from `tabAccount` where name = %s", (cstr(self.doc.supplier) + " - " + self.get_company_abbr()))    
+    acc_head = sql("select name, credit_days from `tabAccount` where (name = %s or (master_name = %s and master_type = 'supplier')) and docstatus != 2", (cstr(self.doc.supplier) + " - " + self.get_company_abbr(),self.doc.supplier))    
     #supp_detail = sql("select supplier_name,address from `tabSupplier` where name = %s", self.doc.supplier, as_dict =1)
     #ret = {
     #  'supplier_name' : supp_detail and supp_detail[0]['supplier_name'] or '',

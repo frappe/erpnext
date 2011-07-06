@@ -1,0 +1,142 @@
+# DocType, ToDo Item
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2009-05-12 11:19:11',
+		'docstatus': 0,
+		'modified': '2010-09-20 14:06:57',
+		'modified_by': 'yogesh@webnotestech.com',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all DocType
+	{
+		'autoname': 'TDI.########',
+		'colour': 'White:FFF',
+		'doctype': 'DocType',
+		'in_create': 1,
+		'module': 'Utilities',
+		'name': '__common__',
+		'read_only': 1,
+		'section_style': 'Simple',
+		'server_code_error': ' ',
+		'show_in_menu': 0
+	},
+
+	# These values are common for all DocField
+	{
+		'doctype': 'DocField',
+		'name': '__common__',
+		'parent': 'ToDo Item',
+		'parentfield': 'fields',
+		'parenttype': 'DocType',
+		'permlevel': 0
+	},
+
+	# These values are common for all DocPerm
+	{
+		'create': 1,
+		'doctype': 'DocPerm',
+		'idx': 1,
+		'name': '__common__',
+		'parent': 'ToDo Item',
+		'parentfield': 'permissions',
+		'parenttype': 'DocType',
+		'permlevel': 0,
+		'read': 1,
+		'role': 'All'
+	},
+
+	# DocType, ToDo Item
+	{
+		'doctype': 'DocType',
+		'name': 'ToDo Item'
+	},
+
+	# DocPerm
+	{
+		'doctype': 'DocPerm'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'description',
+		'fieldtype': 'Text',
+		'idx': 1,
+		'label': 'Description',
+		'oldfieldname': 'description',
+		'oldfieldtype': 'Text',
+		'width': '300px'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'date',
+		'fieldtype': 'Date',
+		'idx': 2,
+		'label': 'Date',
+		'oldfieldname': 'date',
+		'oldfieldtype': 'Date',
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'priority',
+		'fieldtype': 'Data',
+		'idx': 3,
+		'label': 'Priority',
+		'oldfieldname': 'priority',
+		'oldfieldtype': 'Data',
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'reference_type',
+		'fieldtype': 'Data',
+		'idx': 4,
+		'label': 'Reference Type',
+		'oldfieldname': 'reference_type',
+		'oldfieldtype': 'Data'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'reference_name',
+		'fieldtype': 'Data',
+		'idx': 5,
+		'label': 'Reference Name',
+		'oldfieldname': 'reference_name',
+		'oldfieldtype': 'Data'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'checked',
+		'fieldtype': 'Check',
+		'idx': 6,
+		'label': 'Checked',
+		'oldfieldname': 'checked',
+		'oldfieldtype': 'Check'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'role',
+		'fieldtype': 'Link',
+		'idx': 7,
+		'label': 'Role',
+		'oldfieldname': 'role',
+		'oldfieldtype': 'Link',
+		'options': 'Role'
+	}
+]

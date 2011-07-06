@@ -1,0 +1,32 @@
+# Search Criteria, warranty-amc_summary
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-10-12 15:19:31',
+		'docstatus': 0,
+		'modified': '2010-09-25 12:14:49',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all Search Criteria
+	{
+		'criteria_name': 'Warranty/AMC Summary',
+		'doc_type': 'Serial No',
+		'doctype': 'Search Criteria',
+		'filters': "{'Serial No\x01Saved':1,'Serial No\x01Status':''}",
+		'module': 'Support',
+		'name': '__common__',
+		'page_len': 50,
+		'sort_by': 'name',
+		'sort_order': 'DESC',
+		'standard': 'Yes'
+	},
+
+	# Search Criteria, warranty-amc_summary
+	{
+		'doctype': 'Search Criteria',
+		'name': 'warranty-amc_summary'
+	}
+]

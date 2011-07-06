@@ -1,58 +1,31 @@
+# DocType, Company Control
 [
+
+	# These values are common in all dictionaries
 	{
-		'_last_update': None,
-		'allow_attach': None,
-		'allow_copy': None,
-		'allow_email': None,
-		'allow_print': None,
-		'allow_rename': None,
-		'allow_trash': None,
-		'autoname': None,
-		'change_log': None,
-		'client_script': None,
-		'client_script_core': '',
-		'client_string': None,
-		'colour': 'White:FFF',
 		'creation': '2010-08-08 17:08:55',
-		'description': None,
 		'docstatus': 0,
-		'doctype': 'DocType',
-		'document_type': None,
-		'dt_template': None,
-		'hide_heading': None,
-		'hide_toolbar': None,
-		'idx': None,
-		'in_create': None,
-		'in_dialog': None,
-		'is_transaction_doc': None,
-		'issingle': 1,
-		'istable': None,
-		'max_attachments': None,
-		'menu_index': None,
-		'modified': '2010-11-17 16:25:34',
+		'modified': '2011-01-13 12:14:36',
 		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all DocType
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocType',
+		'issingle': 1,
 		'module': 'Home',
-		'name': 'Company Control',
-		'name_case': '',
-		'owner': 'Administrator',
-		'parent': None,
-		'parent_node': None,
-		'parentfield': None,
-		'parenttype': None,
-		'print_outline': '',
-		'read_only': None,
-		'read_only_onload': None,
-		'search_fields': None,
+		'name': '__common__',
 		'section_style': 'Simple',
-		'server_code': None,
-		'server_code_compiled': None,
-		'server_code_core': None,
+		'server_code': '\n\n\t# Update roles of given user\n\tdef update_roles(self,arg):\n\t\targ = eval(arg)\n\t\tsql("delete from `tabUserRole` where parenttype=\'Profile\' and parent =\'%s\'" % (cstr(arg[\'usr\'])))\n\t\trole_list = arg[\'role_list\'].split(\',\')\n\t\tmsgprint(sql("select role from tabUserRole where parent = \'%s\'" % cstr(arg[\'usr\'])))\n\t\tmsgprint(role_list)\n\t\tfor r in role_list:\n\t\t\tpr=Document(\'UserRole\')\n\t\t\tpr.parent = arg[\'usr\']\n\t\t\tpr.parenttype = \'Profile\'\n\t\t\tpr.role = r\n\t\t\tpr.parentfield = \'userroles\'\n\t\t\tpr.save(1)\n\t\tmsgprint(sql("select role from tabUserRole where parent = \'%s\'" % cstr(arg[\'usr\'])))\n\n\n  # Create New Profile\n  # ====================\n\tdef create_new_profile(self, arg):\n\t\tp = Document(\'Profile\')\n\t\tp.first_name = arg.get(\'first_name\') or arg.get(\'email_id\')\n\t\tp.last_name = arg.get(\'last_name\')\n\t\tp.email = arg.get(\'email_id\')\n\t\tp.name = arg.get(\'email_id\')\n\t\tp.user_type = arg.get(\'user_type\') or \'System User\'\n\t\tp.enabled = 0\t\n\t\tp.save(new=1)\n\t\tp_obj = get_obj(\'Profile\', p.name)\n\t\tp_obj.on_update()',
 		'server_code_error': ' ',
-		'show_in_menu': None,
-		'smallicon': None,
-		'subject': None,
-		'tag_fields': None,
-		'use_template': None,
-		'version': 7
+		'version': 13
+	},
+
+	# DocType, Company Control
+	{
+		'doctype': 'DocType',
+		'name': 'Company Control'
 	}
 ]

@@ -1,0 +1,161 @@
+# DocType Mapper, Lead-Enquiry
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-08-08 17:09:34',
+		'docstatus': 0,
+		'modified': '2010-08-05 20:21:54',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all Table Mapper Detail
+	{
+		'doctype': 'Table Mapper Detail',
+		'from_table': 'Lead',
+		'idx': 1,
+		'match_id': 0,
+		'name': '__common__',
+		'parent': 'Lead-Enquiry',
+		'parentfield': 'table_mapper_details',
+		'parenttype': 'DocType Mapper',
+		'to_table': 'Enquiry',
+		'validation_logic': 'name is not null'
+	},
+
+	# These values are common for all Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'map': 'Yes',
+		'match_id': 0,
+		'name': '__common__',
+		'parent': 'Lead-Enquiry',
+		'parentfield': 'field_mapper_details',
+		'parenttype': 'DocType Mapper'
+	},
+
+	# These values are common for all DocType Mapper
+	{
+		'doctype': 'DocType Mapper',
+		'from_doctype': 'Lead',
+		'module': 'Selling',
+		'name': '__common__',
+		'to_doctype': 'Enquiry'
+	},
+
+	# DocType Mapper, Lead-Enquiry
+	{
+		'doctype': 'DocType Mapper',
+		'name': 'Lead-Enquiry'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'source',
+		'idx': 1,
+		'to_field': 'source'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'campaign_name',
+		'idx': 2,
+		'to_field': 'campaign'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'contact_by',
+		'idx': 3,
+		'to_field': 'contact_by'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'last_contact_date',
+		'idx': 4,
+		'to_field': 'last_contact_date'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'contact_date_ref',
+		'idx': 5,
+		'to_field': 'contact_date_ref'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'contact_date',
+		'idx': 6,
+		'to_field': 'contact_date'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'doctype',
+		'idx': 7,
+		'to_field': 'enquiry_from'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'lead_name',
+		'idx': 8,
+		'to_field': 'lead_name'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'name',
+		'idx': 9,
+		'to_field': 'lead'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'address',
+		'idx': 10,
+		'to_field': 'address'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'contact_no',
+		'idx': 11,
+		'to_field': 'contact_no'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'email_id',
+		'idx': 12,
+		'to_field': 'email_id'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'territory',
+		'idx': 13,
+		'to_field': 'territory'
+	},
+
+	# Table Mapper Detail
+	{
+		'doctype': 'Table Mapper Detail'
+	}
+]

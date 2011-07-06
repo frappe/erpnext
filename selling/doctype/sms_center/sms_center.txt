@@ -1,0 +1,195 @@
+# DocType, SMS Center
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2011-01-11 17:52:26',
+		'docstatus': 0,
+		'modified': '2011-02-15 17:06:33',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all DocType
+	{
+		'_last_update': '1300788634',
+		'allow_attach': 0,
+		'allow_copy': 1,
+		'allow_email': 1,
+		'allow_print': 1,
+		'colour': 'White:FFF',
+		'doctype': 'DocType',
+		'hide_heading': 0,
+		'hide_toolbar': 0,
+		'in_create': 0,
+		'issingle': 1,
+		'menu_index': 4,
+		'module': 'Selling',
+		'name': '__common__',
+		'read_only': 1,
+		'section_style': 'Simple',
+		'server_code_error': ' ',
+		'show_in_menu': 1,
+		'version': 39
+	},
+
+	# These values are common for all DocField
+	{
+		'doctype': 'DocField',
+		'name': '__common__',
+		'parent': 'SMS Center',
+		'parentfield': 'fields',
+		'parenttype': 'DocType',
+		'permlevel': 0
+	},
+
+	# These values are common for all DocPerm
+	{
+		'doctype': 'DocPerm',
+		'name': '__common__',
+		'parent': 'SMS Center',
+		'parentfield': 'permissions',
+		'parenttype': 'DocType',
+		'read': 1,
+		'role': 'System Manager'
+	},
+
+	# DocType, SMS Center
+	{
+		'doctype': 'DocType',
+		'name': 'SMS Center'
+	},
+
+	# DocPerm
+	{
+		'create': 1,
+		'doctype': 'DocPerm',
+		'idx': 1,
+		'permlevel': 0,
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'create': 0,
+		'doctype': 'DocPerm',
+		'idx': 2,
+		'permlevel': 1,
+		'write': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'column_break1',
+		'fieldtype': 'Column Break',
+		'idx': 1,
+		'width': '50%'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'send_to',
+		'fieldtype': 'Select',
+		'idx': 2,
+		'label': 'Send To',
+		'options': '\nAll Contact\nAll Customer Contact\nAll Supplier Contact\nAll Sales Partner Contact\nAll Lead (Open)\nAll Employee (Active)\nAll Sales Person',
+		'trigger': 'Client'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'depends_on': "eval:doc.send_to=='All Customer Contact'",
+		'doctype': 'DocField',
+		'fieldname': 'customer',
+		'fieldtype': 'Link',
+		'idx': 3,
+		'label': 'Customer',
+		'options': 'Customer'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'depends_on': "eval:doc.send_to=='All Supplier Contact'",
+		'doctype': 'DocField',
+		'fieldname': 'supplier',
+		'fieldtype': 'Link',
+		'idx': 4,
+		'label': 'Supplier',
+		'options': 'Supplier'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'depends_on': "eval:doc.send_to=='All Employee (Active)'",
+		'doctype': 'DocField',
+		'fieldname': 'department',
+		'fieldtype': 'Select',
+		'idx': 5,
+		'label': 'Department',
+		'options': 'link:Department'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'depends_on': "eval:doc.send_to=='All Employee (Active)'",
+		'doctype': 'DocField',
+		'fieldname': 'branch',
+		'fieldtype': 'Select',
+		'idx': 6,
+		'label': 'Branch',
+		'options': 'link:Branch'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Button',
+		'idx': 7,
+		'label': 'Create Receiver List',
+		'options': 'create_receiver_list'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'receiver_list',
+		'fieldtype': 'Code',
+		'idx': 8,
+		'label': 'Receiver List'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'column_break9',
+		'fieldtype': 'Column Break',
+		'idx': 9,
+		'width': '50%'
+	},
+
+	# DocField
+	{
+		'description': 'Message greater than 160 character will be splitted into multiple mesage',
+		'doctype': 'DocField',
+		'fieldname': 'message',
+		'fieldtype': 'Text',
+		'idx': 10,
+		'label': 'Message',
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Button',
+		'idx': 11,
+		'label': 'Send SMS',
+		'options': 'send_sms'
+	}
+]

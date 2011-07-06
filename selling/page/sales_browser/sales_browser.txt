@@ -1,0 +1,51 @@
+# Page, Sales Browser
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-12-14 10:23:21',
+		'docstatus': 0,
+		'modified': '2010-12-24 11:56:34',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all Page
+	{
+		'doctype': 'Page',
+		'module': 'Selling',
+		'name': '__common__',
+		'page_name': 'Sales Browser',
+		'show_in_menu': 0,
+		'standard': 'Yes'
+	},
+
+	# These values are common for all Page Role
+	{
+		'doctype': 'Page Role',
+		'name': '__common__',
+		'parent': 'Sales Browser',
+		'parentfield': 'roles',
+		'parenttype': 'Page'
+	},
+
+	# Page, Sales Browser
+	{
+		'doctype': 'Page',
+		'name': 'Sales Browser'
+	},
+
+	# Page Role
+	{
+		'doctype': 'Page Role',
+		'idx': 1,
+		'role': 'Sales Master Manager'
+	},
+
+	# Page Role
+	{
+		'doctype': 'Page Role',
+		'idx': 2,
+		'role': 'Material Master Manager'
+	}
+]

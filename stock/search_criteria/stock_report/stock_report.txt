@@ -1,0 +1,33 @@
+# Search Criteria, stock_report
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-11-02 15:37:37',
+		'docstatus': 0,
+		'modified': '2010-11-02 15:35:12',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all Search Criteria
+	{
+		'columns': 'Stock Ledger Entry\x01ID',
+		'criteria_name': 'Stock Report',
+		'doc_type': 'Stock Ledger Entry',
+		'doctype': 'Search Criteria',
+		'filters': "{'Stock Ledger Entry\x01Is Cancelled':'','Stock Ledger Entry\x01Is Stock Entry':''}",
+		'module': 'Stock',
+		'name': '__common__',
+		'page_len': 50,
+		'sort_by': '`tabStock Ledger Entry`.`name`',
+		'sort_order': 'DESC',
+		'standard': 'Yes'
+	},
+
+	# Search Criteria, stock_report
+	{
+		'doctype': 'Search Criteria',
+		'name': 'stock_report'
+	}
+]

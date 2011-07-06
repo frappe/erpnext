@@ -1,37 +1,34 @@
+# Search Criteria, enquiry-to_follow_up
 [
+
+	# These values are common in all dictionaries
 	{
-		'add_col': '',
-		'add_cond': "`tabEnquiry`.name=`tabQuotation`.enq_no\n`tabEnquiry`.docstatus=1\n`tabQuotation`.status='Submitted'",
-		'add_tab': None,
-		'columns': 'Enquiry\x01ID,Enquiry\x01Owner,Enquiry\x01Company,Enquiry\x01Fiscal Year',
-		'creation': '2010-09-01 15:47:57',
-		'criteria_name': 'Enquiry-To follow up',
-		'custom_query': '',
-		'description': None,
-		'dis_filters': None,
-		'disabled': None,
-		'doc_type': 'Enquiry',
+		'creation': '2010-09-01 15:48:09',
 		'docstatus': 0,
-		'doctype': 'Search Criteria',
-		'filters': "{'Enquiry\x01Fiscal Year':''}",
-		'graph_series': None,
-		'graph_values': None,
-		'group_by': None,
-		'idx': None,
 		'modified': '2010-08-30 12:08:00',
 		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all Search Criteria
+	{
+		'add_cond': "`tabEnquiry`.name=`tabQuotation`.enq_no\n`tabEnquiry`.docstatus=1\n`tabQuotation`.status='Submitted'",
+		'columns': 'Enquiry\x01ID,Enquiry\x01Owner,Enquiry\x01Company,Enquiry\x01Fiscal Year',
+		'criteria_name': 'Enquiry-To follow up',
+		'doc_type': 'Enquiry',
+		'doctype': 'Search Criteria',
+		'filters': "{'Enquiry\x01Fiscal Year':''}",
 		'module': 'Home',
-		'name': 'enquiry-to_follow_up',
-		'owner': 'Administrator',
+		'name': '__common__',
 		'page_len': 50,
-		'parent': None,
-		'parent_doc_type': None,
-		'parentfield': None,
-		'parenttype': None,
-		'report_script': '',
-		'server_script': None,
 		'sort_by': '`tabEnquiry`.`name`',
 		'sort_order': 'DESC',
 		'standard': 'Yes'
+	},
+
+	# Search Criteria, enquiry-to_follow_up
+	{
+		'doctype': 'Search Criteria',
+		'name': 'enquiry-to_follow_up'
 	}
 ]

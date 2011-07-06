@@ -1,26 +1,27 @@
+# Page, question-view
 [
+
+	# These values are common in all dictionaries
 	{
-		'content': None,
-		'creation': '2011-05-09 11:04:37',
+		'creation': '2011-05-04 11:09:50',
 		'docstatus': 0,
-		'doctype': 'Page',
-		'icon': None,
-		'idx': None,
-		'menu_index': None,
 		'modified': '2011-03-29 13:54:27',
 		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all Page
+	{
+		'doctype': 'Page',
 		'module': 'Knowledge Base',
-		'name': 'Question View',
-		'owner': 'Administrator',
+		'name': '__common__',
 		'page_name': 'Question View',
-		'parent': None,
-		'parent_node': None,
-		'parentfield': None,
-		'parenttype': None,
-		'script': None,
-		'show_in_menu': None,
-		'standard': 'Yes',
-		'static_content': None,
-		'style': None
+		'standard': 'Yes'
+	},
+
+	# Page, question-view
+	{
+		'doctype': 'Page',
+		'name': 'question-view'
 	}
 ]

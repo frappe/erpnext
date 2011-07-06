@@ -1,0 +1,33 @@
+# Search Criteria, employeewise_leave_transaction_details
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-08-08 17:09:32',
+		'docstatus': 0,
+		'modified': '2010-08-04 08:56:43',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all Search Criteria
+	{
+		'columns': 'Leave Transaction\x01ID,Leave Transaction\x01Fiscal Year,Leave Transaction\x01Employee,Leave Transaction\x01Leave Type,Leave Transaction\x01Previous Balance,Leave Transaction\x01Leave Transaction Type,Leave Transaction\x01Allocation Type,Leave Transaction\x01Deduction Type,Leave Transaction\x01Half Day,Leave Transaction\x01From Date,Leave Transaction\x01To Date,Leave Transaction\x01Encashment Date,Leave Transaction\x01Total Leave Days,Leave Transaction\x01Status',
+		'criteria_name': 'Employeewise Leave Transaction Details',
+		'doc_type': 'Leave Transaction',
+		'doctype': 'Search Criteria',
+		'filters': "{'Leave Transaction\x01Saved':1,'Leave Transaction\x01Submitted':1}",
+		'module': 'HR',
+		'name': '__common__',
+		'page_len': 50,
+		'sort_by': '`tabLeave Transaction`.`name`',
+		'sort_order': 'DESC',
+		'standard': 'Yes'
+	},
+
+	# Search Criteria, employeewise_leave_transaction_details
+	{
+		'doctype': 'Search Criteria',
+		'name': 'employeewise_leave_transaction_details'
+	}
+]

@@ -1,0 +1,33 @@
+# Search Criteria, pending_appraisals
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-09-01 15:48:09',
+		'docstatus': 0,
+		'modified': '2010-09-01 14:19:02',
+		'modified_by': 'Administrator',
+		'owner': 'ashwini@webnotestech.com'
+	},
+
+	# These values are common for all Search Criteria
+	{
+		'criteria_name': 'Pending Appraisals',
+		'disabled': 0,
+		'doc_type': 'Appraisal',
+		'doctype': 'Search Criteria',
+		'filters': "{'Appraisal\x01Submitted':1,'Appraisal\x01Status':'Submitted','Appraisal\x01Fiscal Year':'','Appraisal\x01Approver':''}",
+		'module': 'HR',
+		'name': '__common__',
+		'page_len': 50,
+		'sort_by': '`tabAppraisal`.`name`',
+		'sort_order': 'DESC',
+		'standard': 'Yes'
+	},
+
+	# Search Criteria, pending_appraisals
+	{
+		'doctype': 'Search Criteria',
+		'name': 'pending_appraisals'
+	}
+]

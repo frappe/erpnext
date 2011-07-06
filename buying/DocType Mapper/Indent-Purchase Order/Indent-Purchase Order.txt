@@ -1,0 +1,225 @@
+# DocType Mapper, Indent-Purchase Order
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-08-08 17:09:34',
+		'docstatus': 0,
+		'modified': '2009-12-30 16:55:33',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all Table Mapper Detail
+	{
+		'doctype': 'Table Mapper Detail',
+		'name': '__common__',
+		'parent': 'Indent-Purchase Order',
+		'parentfield': 'table_mapper_details',
+		'parenttype': 'DocType Mapper'
+	},
+
+	# These values are common for all Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'map': 'Yes',
+		'name': '__common__',
+		'parent': 'Indent-Purchase Order',
+		'parentfield': 'field_mapper_details',
+		'parenttype': 'DocType Mapper'
+	},
+
+	# These values are common for all DocType Mapper
+	{
+		'doctype': 'DocType Mapper',
+		'from_doctype': 'Indent',
+		'module': 'Buying',
+		'name': '__common__',
+		'ref_doc_submitted': 1,
+		'to_doctype': 'Purchase Order'
+	},
+
+	# DocType Mapper, Indent-Purchase Order
+	{
+		'doctype': 'DocType Mapper',
+		'name': 'Indent-Purchase Order'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'fiscal_year',
+		'idx': 1,
+		'match_id': 0,
+		'to_field': 'fiscal_year'
+	},
+
+	# Field Mapper Detail
+	{
+		'checking_operator': '=',
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'company',
+		'idx': 2,
+		'match_id': 0,
+		'to_field': 'company'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'parenttype',
+		'idx': 3,
+		'match_id': 1,
+		'to_field': 'prevdoc_doctype'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'parent',
+		'idx': 4,
+		'match_id': 1,
+		'to_field': 'prevdoc_docname'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'name',
+		'idx': 5,
+		'match_id': 1,
+		'to_field': 'prevdoc_detail_docname'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'uom',
+		'idx': 6,
+		'match_id': 1,
+		'to_field': 'stock_uom'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'eval:flt(1)',
+		'idx': 7,
+		'match_id': 1,
+		'to_field': 'conversion_factor'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'uom',
+		'idx': 8,
+		'match_id': 1,
+		'to_field': 'uom'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'warehouse',
+		'idx': 9,
+		'match_id': 1,
+		'to_field': 'warehouse'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'schedule_date',
+		'idx': 10,
+		'match_id': 1,
+		'to_field': 'schedule_date'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'item_code',
+		'idx': 11,
+		'match_id': 1,
+		'to_field': 'item_code'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'item_name',
+		'idx': 12,
+		'match_id': 1,
+		'to_field': 'item_name'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'brand',
+		'idx': 13,
+		'match_id': 1,
+		'to_field': 'brand'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'description',
+		'idx': 14,
+		'match_id': 1,
+		'to_field': 'description'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'item_group',
+		'idx': 15,
+		'match_id': 1,
+		'to_field': 'item_group'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'eval:flt(obj.qty) - flt(obj.ordered_qty)',
+		'idx': 16,
+		'match_id': 1,
+		'to_field': 'stock_qty'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'eval:flt(obj.qty) - flt(obj.ordered_qty)',
+		'idx': 17,
+		'match_id': 1,
+		'to_field': 'qty'
+	},
+
+	# Table Mapper Detail
+	{
+		'doctype': 'Table Mapper Detail',
+		'from_table': 'Indent',
+		'idx': 1,
+		'match_id': 0,
+		'reference_key': 'prevdoc_docname',
+		'to_table': 'Purchase Order',
+		'validation_logic': 'docstatus = 1'
+	},
+
+	# Table Mapper Detail
+	{
+		'doctype': 'Table Mapper Detail',
+		'from_field': 'indent_details',
+		'from_table': 'Indent Detail',
+		'idx': 2,
+		'match_id': 1,
+		'reference_doctype_key': 'prevdoc_doctype',
+		'to_field': 'po_details',
+		'to_table': 'PO Detail',
+		'validation_logic': 'qty > ifnull(ordered_qty,0) and docstatus =1'
+	}
+]

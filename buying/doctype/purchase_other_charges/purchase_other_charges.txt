@@ -1,0 +1,123 @@
+# DocType, Purchase Other Charges
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-08-08 17:09:15',
+		'docstatus': 0,
+		'modified': '2010-09-20 17:30:25',
+		'modified_by': 'Administrator',
+		'owner': 'wasim@webnotestech.com'
+	},
+
+	# These values are common for all DocType
+	{
+		'allow_trash': 1,
+		'autoname': 'field:title',
+		'colour': 'White:FFF',
+		'doctype': 'DocType',
+		'document_type': 'Master',
+		'module': 'Buying',
+		'name': '__common__',
+		'section_style': 'Simple',
+		'server_code_error': ' ',
+		'show_in_menu': 0,
+		'version': 16
+	},
+
+	# These values are common for all DocField
+	{
+		'doctype': 'DocField',
+		'name': '__common__',
+		'parent': 'Purchase Other Charges',
+		'parentfield': 'fields',
+		'parenttype': 'DocType',
+		'permlevel': 0
+	},
+
+	# These values are common for all DocPerm
+	{
+		'doctype': 'DocPerm',
+		'name': '__common__',
+		'parent': 'Purchase Other Charges',
+		'parentfield': 'permissions',
+		'parenttype': 'DocType',
+		'read': 1
+	},
+
+	# DocType, Purchase Other Charges
+	{
+		'doctype': 'DocType',
+		'name': 'Purchase Other Charges'
+	},
+
+	# DocPerm
+	{
+		'doctype': 'DocPerm',
+		'idx': 1,
+		'permlevel': 1,
+		'role': 'All'
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
+		'doctype': 'DocPerm',
+		'idx': 2,
+		'permlevel': 0,
+		'role': 'Purchase Manager',
+		'submit': 0,
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'cancel': 1,
+		'create': 1,
+		'doctype': 'DocPerm',
+		'idx': 3,
+		'permlevel': 0,
+		'role': 'System Manager',
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'cancel': 1,
+		'create': 1,
+		'doctype': 'DocPerm',
+		'idx': 4,
+		'permlevel': 0,
+		'role': 'Purchase Master Manager',
+		'submit': 0,
+		'write': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'title',
+		'fieldtype': 'Data',
+		'idx': 1,
+		'in_filter': 1,
+		'label': 'Title',
+		'oldfieldname': 'title',
+		'oldfieldtype': 'Data',
+		'reqd': 1,
+		'search_index': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'purchase_tax_details',
+		'fieldtype': 'Table',
+		'idx': 2,
+		'label': 'Purchase Tax Details',
+		'oldfieldname': 'purchase_tax_details',
+		'oldfieldtype': 'Table',
+		'options': 'Purchase Tax Detail'
+	}
+]

@@ -1,0 +1,33 @@
+# Search Criteria, expense_vouchers
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-09-03 16:45:09',
+		'docstatus': 0,
+		'modified': '2010-09-02 11:05:37',
+		'modified_by': 'Administrator',
+		'owner': 'ashwini@webnotestech.com'
+	},
+
+	# These values are common for all Search Criteria
+	{
+		'columns': 'Expense Voucher\x01ID,Expense Voucher\x01Approval Status,Expense Voucher\x01From Employee,Expense Voucher\x01Employee Name,Expense Voucher\x01Approver,Expense Voucher\x01Posting Date,Expense Voucher\x01Total Claimed Amount,Expense Voucher\x01Total Sanctioned Amount',
+		'criteria_name': 'Expense Vouchers',
+		'doc_type': 'Expense Voucher',
+		'doctype': 'Search Criteria',
+		'filters': "{'Expense Voucher\x01Saved':1,'Expense Voucher\x01Submitted':1,'Expense Voucher\x01Approval Status':'','Expense Voucher\x01Fiscal Year':''}",
+		'module': 'HR',
+		'name': '__common__',
+		'page_len': 50,
+		'sort_by': '`tabExpense Voucher`.`name`',
+		'sort_order': 'DESC',
+		'standard': 'Yes'
+	},
+
+	# Search Criteria, expense_vouchers
+	{
+		'doctype': 'Search Criteria',
+		'name': 'expense_vouchers'
+	}
+]

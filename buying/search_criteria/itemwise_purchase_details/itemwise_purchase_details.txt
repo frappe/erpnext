@@ -1,0 +1,33 @@
+# Search Criteria, itemwise_purchase_details
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-08-08 17:09:31',
+		'docstatus': 0,
+		'modified': '2010-03-31 12:39:57',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all Search Criteria
+	{
+		'columns': 'Purchase Order\x01ID,Purchase Order\x01PO Date,Purchase Order\x01Grand Total,PO Detail\x01Item Code,PO Detail\x01Item Name,PO Detail\x01Quantity,PO Detail\x01Stock UOM,PO Detail\x01Purchase Rate,PO Detail\x01Amount,PO Detail\x01Warehouse',
+		'criteria_name': 'Itemwise Purchase Details',
+		'doc_type': 'PO Detail',
+		'doctype': 'Search Criteria',
+		'filters': "{'Purchase Order\x01Saved':1,'Purchase Order\x01Submitted':1,'Purchase Order\x01Status':'','Purchase Order\x01Company Name':''}",
+		'module': 'Buying',
+		'name': '__common__',
+		'parent_doc_type': 'Purchase Order',
+		'sort_by': '`tabPurchase Order`.`name`',
+		'sort_order': 'DESC',
+		'standard': 'Yes'
+	},
+
+	# Search Criteria, itemwise_purchase_details
+	{
+		'doctype': 'Search Criteria',
+		'name': 'itemwise_purchase_details'
+	}
+]

@@ -1,0 +1,31 @@
+# DocType, Menu Control
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2009-06-09 13:43:49',
+		'docstatus': 0,
+		'modified': '2011-01-03 12:01:42',
+		'modified_by': 'sneha@webnotestech.com',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all DocType
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocType',
+		'issingle': 1,
+		'module': 'Utilities',
+		'name': '__common__',
+		'section_style': 'Simple',
+		'server_code_error': ' ',
+		'show_in_menu': 0,
+		'version': 38
+	},
+
+	# DocType, Menu Control
+	{
+		'doctype': 'DocType',
+		'name': 'Menu Control'
+	}
+]

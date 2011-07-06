@@ -1,0 +1,77 @@
+# DocType, Landed Cost Detail
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-08-08 17:09:06',
+		'docstatus': 0,
+		'modified': '2011-06-30 18:47:46',
+		'modified_by': 'Administrator',
+		'owner': 'wasim@webnotestech.com'
+	},
+
+	# These values are common for all DocType
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocType',
+		'istable': 1,
+		'module': 'Stock',
+		'name': '__common__',
+		'section_style': 'Simple',
+		'server_code_error': ' ',
+		'show_in_menu': 0,
+		'version': 2
+	},
+
+	# These values are common for all DocField
+	{
+		'doctype': 'DocField',
+		'name': '__common__',
+		'parent': 'Landed Cost Detail',
+		'parentfield': 'fields',
+		'parenttype': 'DocType',
+		'permlevel': 0,
+		'reqd': 1
+	},
+
+	# DocType, Landed Cost Detail
+	{
+		'doctype': 'DocType',
+		'name': 'Landed Cost Detail'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'account_head',
+		'fieldtype': 'Link',
+		'idx': 1,
+		'label': 'Account Head',
+		'oldfieldname': 'account_head',
+		'oldfieldtype': 'Link',
+		'options': 'Account'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'description',
+		'fieldtype': 'Data',
+		'idx': 2,
+		'label': 'Description',
+		'oldfieldname': 'description',
+		'oldfieldtype': 'Data',
+		'width': '300px'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'amount',
+		'fieldtype': 'Currency',
+		'idx': 3,
+		'label': 'Amount',
+		'oldfieldname': 'amount',
+		'oldfieldtype': 'Currency'
+	}
+]

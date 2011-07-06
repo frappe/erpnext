@@ -1,37 +1,31 @@
+# Search Criteria, projectwise_sales_details
 [
+
+	# These values are common in all dictionaries
 	{
-		'add_col': None,
-		'add_cond': None,
-		'add_tab': None,
-		'columns': '',
-		'creation': '2010-12-14 10:33:09',
-		'criteria_name': 'Projectwise Sales Details',
-		'custom_query': '',
-		'description': None,
-		'dis_filters': None,
-		'disabled': None,
-		'doc_type': 'Sales Order',
+		'creation': '2010-12-14 10:23:31',
 		'docstatus': 0,
-		'doctype': 'Search Criteria',
-		'filters': "{'Sales Order\x01Saved':1,'Sales Order\x01Submitted':1,'Sales Order\x01Status':''}",
-		'graph_series': None,
-		'graph_values': None,
-		'group_by': None,
-		'idx': None,
 		'modified': '2010-11-12 09:21:11',
 		'modified_by': 'Administrator',
+		'owner': 'harshada@webnotestech.com'
+	},
+
+	# These values are common for all Search Criteria
+	{
+		'criteria_name': 'Projectwise Sales Details',
+		'doc_type': 'Sales Order',
+		'doctype': 'Search Criteria',
+		'filters': "{'Sales Order\x01Saved':1,'Sales Order\x01Submitted':1,'Sales Order\x01Status':''}",
 		'module': 'Projects',
-		'name': 'projectwise_sales_details',
-		'owner': 'harshada@webnotestech.com',
+		'name': '__common__',
 		'page_len': 50,
-		'parent': None,
-		'parent_doc_type': None,
-		'parentfield': None,
-		'parenttype': None,
-		'report_script': None,
-		'server_script': None,
-		'sort_by': '',
 		'sort_order': 'DESC',
 		'standard': 'Yes'
+	},
+
+	# Search Criteria, projectwise_sales_details
+	{
+		'doctype': 'Search Criteria',
+		'name': 'projectwise_sales_details'
 	}
 ]

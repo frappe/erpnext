@@ -1,0 +1,108 @@
+# DocType, Expense Voucher Detail
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-09-03 16:45:08',
+		'docstatus': 0,
+		'modified': '2010-09-20 14:06:57',
+		'modified_by': 'Administrator',
+		'owner': 'harshada@webnotestech.com'
+	},
+
+	# These values are common for all DocType
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocType',
+		'istable': 1,
+		'module': 'HR',
+		'name': '__common__',
+		'section_style': 'Simple',
+		'server_code_error': ' ',
+		'version': 5
+	},
+
+	# These values are common for all DocField
+	{
+		'doctype': 'DocField',
+		'name': '__common__',
+		'parent': 'Expense Voucher Detail',
+		'parentfield': 'fields',
+		'parenttype': 'DocType',
+		'permlevel': 0
+	},
+
+	# DocType, Expense Voucher Detail
+	{
+		'doctype': 'DocType',
+		'name': 'Expense Voucher Detail'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'expense_date',
+		'fieldtype': 'Date',
+		'idx': 1,
+		'label': 'Expense Date',
+		'oldfieldname': 'expense_date',
+		'oldfieldtype': 'Date',
+		'reqd': 0,
+		'width': '150px'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'expense_type',
+		'fieldtype': 'Link',
+		'idx': 2,
+		'label': 'Expense Type',
+		'oldfieldname': 'expense_type',
+		'oldfieldtype': 'Link',
+		'options': 'Expense Type',
+		'reqd': 1,
+		'width': '150px'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'description',
+		'fieldtype': 'Small Text',
+		'idx': 3,
+		'label': 'Description',
+		'oldfieldname': 'description',
+		'oldfieldtype': 'Small Text',
+		'width': '300px'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'claim_amount',
+		'fieldtype': 'Currency',
+		'idx': 4,
+		'label': 'Claim Amount',
+		'oldfieldname': 'claim_amount',
+		'oldfieldtype': 'Currency',
+		'reqd': 1,
+		'trigger': 'Client',
+		'width': '150px'
+	},
+
+	# DocField
+	{
+		'allow_on_submit': 1,
+		'doctype': 'DocField',
+		'fieldname': 'sanctioned_amount',
+		'fieldtype': 'Currency',
+		'idx': 5,
+		'label': 'Sanctioned Amount',
+		'no_copy': 1,
+		'oldfieldname': 'sanctioned_amount',
+		'oldfieldtype': 'Currency',
+		'trigger': 'Client',
+		'width': '150px'
+	}
+]

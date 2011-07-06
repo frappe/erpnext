@@ -1,0 +1,125 @@
+# DocType Mapper, Production Forecast-Production Planning Tool
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-08-08 17:09:35',
+		'docstatus': 0,
+		'modified': '2010-02-12 12:41:03',
+		'modified_by': 'Administrator',
+		'owner': 'jai@webnotestech.com'
+	},
+
+	# These values are common for all Table Mapper Detail
+	{
+		'doctype': 'Table Mapper Detail',
+		'name': '__common__',
+		'parent': 'Production Forecast-Production Planning Tool',
+		'parentfield': 'table_mapper_details',
+		'parenttype': 'DocType Mapper'
+	},
+
+	# These values are common for all Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'map': 'Yes',
+		'match_id': 1,
+		'name': '__common__',
+		'parent': 'Production Forecast-Production Planning Tool',
+		'parentfield': 'field_mapper_details',
+		'parenttype': 'DocType Mapper'
+	},
+
+	# These values are common for all DocType Mapper
+	{
+		'doctype': 'DocType Mapper',
+		'from_doctype': 'Production Forecast',
+		'module': 'Production',
+		'name': '__common__',
+		'to_doctype': 'Production Planning Tool'
+	},
+
+	# DocType Mapper, Production Forecast-Production Planning Tool
+	{
+		'doctype': 'DocType Mapper',
+		'name': 'Production Forecast-Production Planning Tool'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'item_code',
+		'idx': 1,
+		'to_field': 'item_code'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'description',
+		'idx': 2,
+		'to_field': 'description'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'stock_uom',
+		'idx': 3,
+		'to_field': 'stock_uom'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'eval:flt(obj.qty)-flt(obj.planned_qty)',
+		'idx': 4,
+		'to_field': 'prevdoc_reqd_qty'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'parenttype',
+		'idx': 5,
+		'to_field': 'source_doctype'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'parent',
+		'idx': 6,
+		'to_field': 'source_docname'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'end_date',
+		'idx': 7,
+		'to_field': 'confirmation_date'
+	},
+
+	# Table Mapper Detail
+	{
+		'doctype': 'Table Mapper Detail',
+		'from_table': 'Production Forecast',
+		'idx': 1,
+		'match_id': 0,
+		'to_table': 'Production Planning Tool',
+		'validation_logic': 'docstatus =1'
+	},
+
+	# Table Mapper Detail
+	{
+		'doctype': 'Table Mapper Detail',
+		'from_field': 'pf_details',
+		'from_table': 'PF Detail',
+		'idx': 2,
+		'match_id': 1,
+		'to_field': 'pp_details',
+		'to_table': 'PP Detail',
+		'validation_logic': 'docstatus =1 and qty > planned_qty '
+	}
+]

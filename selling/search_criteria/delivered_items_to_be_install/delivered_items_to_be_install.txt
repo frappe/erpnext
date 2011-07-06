@@ -1,0 +1,37 @@
+# Search Criteria, delivered_items_to_be_install
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2011-03-30 11:03:20',
+		'docstatus': 0,
+		'modified': '2011-03-29 14:08:46',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all Search Criteria
+	{
+		'add_col': "(`tabDelivery Note Detail`.`qty`- ifnull(`tabDelivery Note Detail`.`installed_qty`, 0)) AS 'Pending to Install'",
+		'add_cond': '`tabDelivery Note Detail`.`qty` > ifnull(`tabDelivery Note Detail`.`installed_qty`, 0)',
+		'columns': 'Delivery Note\x01ID,Delivery Note\x01Status,Delivery Note\x01Customer,Delivery Note\x01Customer Name,Delivery Note\x01Contact Person,Delivery Note\x01Voucher Date,Delivery Note Detail\x01Item Code,Delivery Note Detail\x01Item Name,Delivery Note Detail\x01Quantity,Delivery Note Detail\x01Installed Qty,Delivery Note\x01% Installed',
+		'criteria_name': 'Delivered Items to be Install',
+		'description': 'Delivered Items to be Install',
+		'doc_type': 'Delivery Note Detail',
+		'doctype': 'Search Criteria',
+		'filters': "{'Delivery Note\x01Saved':1,'Delivery Note\x01Submitted':1,'Delivery Note\x01Status':'','Delivery Note\x01Fiscal Year':''}",
+		'module': 'Selling',
+		'name': '__common__',
+		'page_len': 50,
+		'parent_doc_type': 'Delivery Note',
+		'sort_by': '`tabDelivery Note`.`name`',
+		'sort_order': 'DESC',
+		'standard': 'Yes'
+	},
+
+	# Search Criteria, delivered_items_to_be_install
+	{
+		'doctype': 'Search Criteria',
+		'name': 'delivered_items_to_be_install'
+	}
+]

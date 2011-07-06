@@ -1,0 +1,188 @@
+# DocType, QA Specification Detail
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-08-08 17:09:17',
+		'docstatus': 0,
+		'modified': '2010-09-20 14:06:57',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all DocType
+	{
+		'autoname': 'QASD/.#####',
+		'colour': 'White:FFF',
+		'doctype': 'DocType',
+		'istable': 1,
+		'module': 'Buying',
+		'name': '__common__',
+		'section_style': 'Tray',
+		'server_code_error': ' ',
+		'show_in_menu': 0,
+		'version': 2
+	},
+
+	# These values are common for all DocField
+	{
+		'doctype': 'DocField',
+		'name': '__common__',
+		'parent': 'QA Specification Detail',
+		'parentfield': 'fields',
+		'parenttype': 'DocType',
+		'permlevel': 0
+	},
+
+	# DocType, QA Specification Detail
+	{
+		'doctype': 'DocType',
+		'name': 'QA Specification Detail'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'specification',
+		'fieldtype': 'Data',
+		'idx': 1,
+		'label': 'Parameter',
+		'oldfieldname': 'specification',
+		'oldfieldtype': 'Data',
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'value',
+		'fieldtype': 'Data',
+		'idx': 2,
+		'label': 'Acceptance Criteria',
+		'oldfieldname': 'value',
+		'oldfieldtype': 'Data'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'reading_1',
+		'fieldtype': 'Data',
+		'idx': 3,
+		'label': 'Reading 1',
+		'oldfieldname': 'reading_1',
+		'oldfieldtype': 'Data'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'reading_2',
+		'fieldtype': 'Data',
+		'idx': 4,
+		'label': 'Reading 2',
+		'oldfieldname': 'reading_2',
+		'oldfieldtype': 'Data'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'reading_3',
+		'fieldtype': 'Data',
+		'idx': 5,
+		'label': 'Reading 3',
+		'oldfieldname': 'reading_3',
+		'oldfieldtype': 'Data'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'reading_4',
+		'fieldtype': 'Data',
+		'idx': 6,
+		'label': 'Reading 4',
+		'oldfieldname': 'reading_4',
+		'oldfieldtype': 'Data'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'reading_5',
+		'fieldtype': 'Data',
+		'idx': 7,
+		'label': 'Reading 5',
+		'oldfieldname': 'reading_5',
+		'oldfieldtype': 'Data'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'reading_6',
+		'fieldtype': 'Data',
+		'idx': 8,
+		'label': 'Reading 6',
+		'oldfieldname': 'reading_6',
+		'oldfieldtype': 'Data'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'reading_7',
+		'fieldtype': 'Data',
+		'idx': 9,
+		'label': 'Reading 7',
+		'oldfieldname': 'reading_7',
+		'oldfieldtype': 'Data'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'reading_8',
+		'fieldtype': 'Data',
+		'idx': 10,
+		'label': 'Reading 8',
+		'oldfieldname': 'reading_8',
+		'oldfieldtype': 'Data'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'reading_9',
+		'fieldtype': 'Data',
+		'idx': 11,
+		'label': 'Reading 9',
+		'oldfieldname': 'reading_9',
+		'oldfieldtype': 'Data'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'reading_10',
+		'fieldtype': 'Data',
+		'idx': 12,
+		'label': 'Reading 10',
+		'oldfieldname': 'reading_10',
+		'oldfieldtype': 'Data'
+	},
+
+	# DocField
+	{
+		'default': 'Accepted',
+		'doctype': 'DocField',
+		'fieldname': 'status',
+		'fieldtype': 'Select',
+		'idx': 13,
+		'label': 'Status',
+		'oldfieldname': 'status',
+		'oldfieldtype': 'Select',
+		'options': 'Accepted\nRejected'
+	}
+]

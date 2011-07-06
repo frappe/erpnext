@@ -1,0 +1,30 @@
+# DocType, Activity Dashboard Control
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-08-08 17:08:51',
+		'docstatus': 0,
+		'modified': '2010-09-20 14:06:57',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all DocType
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocType',
+		'issingle': 1,
+		'module': 'Utilities',
+		'name': '__common__',
+		'section_style': 'Simple',
+		'server_code_error': ' ',
+		'version': 42
+	},
+
+	# DocType, Activity Dashboard Control
+	{
+		'doctype': 'DocType',
+		'name': 'Activity Dashboard Control'
+	}
+]

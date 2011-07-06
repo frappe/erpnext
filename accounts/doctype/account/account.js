@@ -72,6 +72,7 @@ cur_frm.fields_dict['master_name'].get_query=function(doc){
   else alert("Please select master type");
 }
 
+/*
 // Get customer/supplier address
 // -----------------------------------------
 cur_frm.cscript.master_name = function(doc,cdt,cdn){
@@ -79,6 +80,7 @@ cur_frm.cscript.master_name = function(doc,cdt,cdn){
     get_server_fields('get_address','','',doc,cdt,cdn);
   }
 }
+*/
 
 // parent account get query
 // -----------------------------------------
