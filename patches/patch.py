@@ -1,7 +1,7 @@
 # REMEMBER to update this
 # ========================
 
-last_patch = 312
+last_patch = 313
 
 #-------------------------------------------
 
@@ -1236,7 +1236,7 @@ def execute(patch_no):
 		for t in dt:
 			rec = sql("select voucher_type, voucher_no, ifnull(is_cancelled, 'No') from `tab%s` where modified >= '2011-07-06 10:00:00' group by voucher_no" % t)
 			for d in rec:
-				sql("update `tab%s` set docstatus = %s, ststus = %s where name = '%s'" % (d[0], d[2]=='No' and 1 or 2,d[2]=='No' and 'Submitted' or 'Cancelled', d[1]))
+				sql("update `tab%s` set docstatus = %s where name = '%s'" % (d[0], d[2]=='No' and 1 or 2, d[1]))
 			
 		other_dt = ['Enquiry', 'Quotation', 'Sales Order', 'Indent', 'Purchase Order', 'Production Order', 'Customer Issue', 'Installation Note']
 		for dt in other_dt:
