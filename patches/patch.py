@@ -1,7 +1,7 @@
 # REMEMBER to update this
 # ========================
 
-last_patch = 310
+last_patch = 312
 
 #-------------------------------------------
 
@@ -1225,3 +1225,9 @@ def execute(patch_no):
 	elif patch_no == 310:
 		from erpnext_structure_cleanup import run_patches
 		run_patches()
+	elif patch_no == 311:
+		sql("update `tabDocField` set reqd = 0 where fieldname = 'select_item' and parent = 'Property Setter'")
+		reload_doc('core', 'doctype', 'property_setter')
+	elif patch_no == 312:
+		sql("delete from `tabSessions`")
+		sql("delete from `__SessionCache`")
