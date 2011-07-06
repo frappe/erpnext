@@ -48,16 +48,16 @@ class DocType:
 		act_qty = act_qty and flt(act_qty[0][0]) or 0
 	
 		# get indented_qty 
-		ind_qty = sql("select sum(if( ifnull(t2.qty, 0) > ifnull(t2.ordered_qty, 0), ifnull(t2.qty, 0) - ifnull(t2.ordered_qty, 0), 0) ) from `tabIndent` t1, `tabIndent Detail`t2 where t1.name = t2.parent and t1.docstatus = 1 and t2.warehouse = '%s' and t2.item_code = '%s'" % (wh, item))
+		ind_qty = sql("select sum(if( ifnull(t2.qty, 0) > ifnull(t2.ordered_qty, 0), ifnull(t2.qty, 0) - ifnull(t2.ordered_qty, 0), 0) ) from `tabIndent` t1, `tabIndent Detail`t2 where t1.name = t2.parent and t1.docstatus = 1 and t2.warehouse = '%s' and t2.item_code = '%s' and status != 'Stopped'" % (wh, item))
 		ind_qty = ind_qty and flt(ind_qty[0][0]) or 0
 		
 		# get ordered_qty
-		ord_qty = sql("select sum(if ( ifnull(t2.qty, 0) > ifnull(t2.received_qty, 0), (ifnull(t2.qty, 0) - ifnull(t2.received_qty, 0)) * ifnull(t2.conversion_factor, 0) , 0) ) from `tabPurchase Order` t1, `tabPO Detail` t2 where t1.name = t2.parent and t1.docstatus = 1 and t2.warehouse = '%s' and t2.item_code = '%s'" % (wh, item))
+		ord_qty = sql("select sum(if ( ifnull(t2.qty, 0) > ifnull(t2.received_qty, 0), (ifnull(t2.qty, 0) - ifnull(t2.received_qty, 0)) * ifnull(t2.conversion_factor, 0) , 0) ) from `tabPurchase Order` t1, `tabPO Detail` t2 where t1.name = t2.parent and t1.docstatus = 1 and t2.warehouse = '%s' and t2.item_code = '%s' and status != 'Stopped'" % (wh, item))
 		ord_qty = ord_qty and flt(ord_qty[0][0]) or 0
 		
 
 		# get reserved_qty
-		res_qty =sql("select sum(if ( ifnull(t2.qty, 0) > ifnull(t2.delivered_qty, 0), ifnull(t2.qty, 0) - ifnull(t2.delivered_qty, 0) , 0) ) from `tabSales Order` t1, `tabSales Order Detail` t2 where t1.name = t2.parent and t1.docstatus = 1 and t2.reserved_warehouse = '%s' and t2.item_code = '%s' " % (wh, item))
+		res_qty =sql("select sum(if ( ifnull(t2.qty, 0) > ifnull(t2.delivered_qty, 0), ifnull(t2.qty, 0) - ifnull(t2.delivered_qty, 0) , 0) ) from `tabSales Order` t1, `tabSales Order Detail` t2 where t1.name = t2.parent and t1.docstatus = 1 and t2.reserved_warehouse = '%s' and t2.item_code = '%s' and status != 'Stopped'" % (wh, item))
 		res_qty = res_qty and flt(res_qty[0][0]) or 0
 
 		# get planned_qty 

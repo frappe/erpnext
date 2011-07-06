@@ -33,8 +33,14 @@ $.extend(cur_frm.cscript, {
 	
 	refresh: function(doc) {
 		cs.make_listing(doc);
-		if(!doc.__islocal) {
-			// can't change the main message & subject once set
+		if(!doc.__islocal) {					
+			
+			if(doc.allocated_to) 
+			  set_field_permlevel('status',2);
+			  if(user==doc.allocated_to && doc.status!='Closed') cur_frm.add_custom_button('Close Ticket', cs['Close Ticket']);
+			  if(doc.status=='Closed') cur_frm.add_custom_button('Re-Open Ticket', cs['Re-Open Ticket']);
+			
+			// can't change the main message & subject once set  
 			set_field_permlevel('subject',2);
 			set_field_permlevel('description',2);
 			set_field_permlevel('raised_by',2);
@@ -87,8 +93,35 @@ $.extend(cur_frm.cscript, {
 		}
 		if(doc.customer) $c_obj(make_doclist(doc.doctype, doc.name), 'get_default_customer_address', '', callback);
 		if(doc.customer) unhide_field(['customer_name','address_display','contact_display','contact_mobile','contact_email']);
+	}, 
+	
+	'Close Ticket': function() {
+		var doc = cur_frm.doc
+		
+		var answer = confirm("Close Ticket "+doc.name+"?\n\nAllocated To: "+doc.allocated_to+"\n\nSubject: "+doc.subject+"");
+		if(answer) {
+			if(doc.name) 
+				$c_obj([doc],'close_ticket','',function(r,rt) {
+					cur_frm.refresh();
+				});
+		}
+	},
+	
+	'Re-Open Ticket': function() {
+		var doc = cur_frm.doc
+		
+		var answer = confirm("Re-Open Ticket "+doc.name+"?\n\nAllocated To: "+doc.allocated_to+"\n\nSubject: "+doc.subject+"");
+		if(answer) {
+			if(doc.name) 
+				$c_obj([doc],'reopen_ticket','',function(r,rt) {
+					cur_frm.refresh();
+				});
+		}
 	}
+
+	
 })
+
 
 
 EmailMessage = function(parent, args, list, idx) {

@@ -1218,9 +1218,10 @@ def execute(patch_no):
 		sql("delete from `tabDocField` where parent = 'company' and label = 'Trash Company' and fieldtype = 'Button'")
 		reload_doc('setup', 'doctype', 'company')
 	elif patch_no == 308:
-		from erpnext_structure_cleanup import run_patches
-		run_patches()
+		sql("update `tabDocField` set reqd = 0 where fieldname = 'select_item' and parent = 'Property Setter'")
 	elif patch_no == 309:
 		sql("delete from `tabDocField` where fieldname = 'item_attachments_details' and parent = 'Item'")
-	elif patch_no == 310:
 		sql("delete from `tabModule Def Item` where parent = 'Stock' and doc_name = 'Landed Cost Wizard'")
+	elif patch_no == 310:
+		from erpnext_structure_cleanup import run_patches
+		run_patches()

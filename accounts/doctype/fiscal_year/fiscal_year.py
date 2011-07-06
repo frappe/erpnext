@@ -168,7 +168,7 @@ class DocType:
 		against_voucher = sql("select against_voucher, against_voucher_type from `tabGL Entry` where fiscal_year=%s and ifnull(is_cancelled, 'No')='No' and company=%s and ifnull(against_voucher, '') != '' and ifnull(against_voucher_type, '') != '' group by against_voucher, against_voucher_type", (self.doc.name, self.doc.company))
 		for d in against_voucher:
 			# get voucher balance
-			bal = sql("select sum(debit)-sum(credit) from `tabGL Entry` where against_voucher=%s and against_voucher_type=%s and ifnull(is_cancelled, 'No')='No'", (d[0], d[1]))
+			bal = sql("select sum(debit)-sum(credit) from `tabGL Entry` where against_voucher=%s and against_voucher_type=%s and ifnull(is_cancelled, 'No') = 'No'", (d[0], d[1]))
 			bal = bal and flt(bal[0][0]) or 0.0
 			if d[1] == 'Payable Voucher':
 				bal = -bal
