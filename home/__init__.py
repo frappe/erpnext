@@ -3,7 +3,7 @@ from webnotes import msgprint
 
 feed_dict = {
 	# Project
-	'Project':		       ['[%(status)s] %(subject)s', '#000080'],
+	'Project':		       ['[%(status)s]', '#000080'],
 
 	# Sales
 	'Lead':			 ['%(lead_name)s', '#000080'],
