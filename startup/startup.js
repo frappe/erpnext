@@ -448,7 +448,7 @@ pscript.startup_setup_toolbar = function() {
 		// Manage account
 		// --------------
 		if(is_system_manager) {
-			$td(menu_tab,0,3).innerHTML = '<a style="font-weight: bold; color: #FFF;" href="javascript:pscript.go_to_account_settings()">Billing</a>';
+			$td(menu_tab,0,3).innerHTML = '<a style="font-weight: bold; color: #FFF;" href="#!billing">Billing</a>';
 		}
 	}
 	else{
@@ -466,17 +466,6 @@ pscript.startup_setup_toolbar = function() {
 	cell.innerHTML = '<a style="font-weight: bold; color: #FFF" href="http://erpnext.blogspot.com/2011/03/erpnext-help.html" target="_blank">Help</a>';
 	$y(cell, page_body.wntoolbar.right_table_style);
 
-}
-
-// ====================================================================
-
-pscript.go_to_account_settings = function() {
-	callback = function(r, rt) {
-		if(r.exc) { msgprint(r.exc); }
-		else { msgprint('<a href="' + r.message + '" target="_blank">'
-			+ 'Click here to open Account Settings in a new page</a>') }
-	}
-	$c_page('home', 'my_company', 'get_account_settings_url', '', callback)
 }
 
 // chart of accounts
