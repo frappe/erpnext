@@ -1227,7 +1227,7 @@ def execute(patch_no):
 		run_patches()
 	elif patch_no == 311:
 		sql("update `tabDocField` set reqd = 0 where fieldname = 'select_item' and parent = 'Property Setter'")
-		reload_doc('core', 'doctype', 'property_setter')
+		#reload_doc('core', 'doctype', 'property_setter')
 	elif patch_no == 312:
 		sql("delete from `tabSessions`")
 		sql("delete from `__SessionCache`")
