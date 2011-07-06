@@ -1231,3 +1231,27 @@ def execute(patch_no):
 	elif patch_no == 312:
 		sql("delete from `tabSessions`")
 		sql("delete from `__SessionCache`")
+	elif patch_no == 313:
+		dt = ['GL Entry', 'Stock Ledger Entry']
+		for t in dt:
+			rec = sql("select voucher_type, voucher_no, ifnull(is_cancelled, 'No') from `tab%s` where modified >= '2011-07-06 10:00:00' group by voucher_no" % t)
+			for d in rec:
+				sql("update `tab%s` set docstatus = %s, ststus = %s where name = '%s'" % (d[0], d[2]=='No' and 1 or 2,d[2]=='No' and 'Submitted' or 'Cancelled', d[1]))
+			
+		other_dt = ['Enquiry', 'Quotation', 'Sales Order', 'Indent', 'Purchase Order', 'Production Order', 'Customer Issue', 'Installation Note']
+		for dt in other_dt:
+			rec = sql("select name, status from `tab%s` where modified >= '2011-07-06 10:00:00'" % dt)
+			for r in rec:
+				sql("update `tab%s` set docstatus = %s where name = '%s'" % (dt, (r[1] in ['Submitted', 'Closed'] and 1 or r[1]=='Cancelled' and 2 or 0), r[0]))
+				
+				
+		dt_list = ['Delivery Note', 'Purchase Receipt']
+		for dt in dt_list:
+			sql("update `tab%s` set status = 'Submitted' where docstatus = 1 and modified >='2011-07-06 10:00:00'" % dt)
+			sql("update `tab%s` set status = 'Cancelled' where docstatus = 2 and modified >='2011-07-06 10:00:00'" % dt)
+
+		dt_list = ['Enquiry', 'Quotation', 'Sales Order', 'Indent', 'Purchase Order', 'Production Order', 'Customer Issue', 'Installation Note', 'Receivable Voucher', 'Payable Voucher', 'Delivery Note', 'Purchase Receipt', 'Journal Voucher', 'Stock Entry']
+		for d in dt_list:
+			tbl = sql("select options from `tabDocField` where fieldtype = 'Table' and parent = '%s'" % d)
+			for t in tbl:
+				sql("update `tab%s` t1, `tab%s` t2 set t1.docstatus = t2.docstatus where t1.parent = t2.name" % (t[0], d))
