@@ -1,7 +1,7 @@
 # REMEMBER to update this
 # ========================
 
-last_patch = 314
+last_patch = 315
 
 #-------------------------------------------
 
@@ -1259,3 +1259,15 @@ def execute(patch_no):
 	elif patch_no == 314:
 		# delete double feed
 		sql("delete from tabFeed where subject like 'New %'")
+	elif patch_no == 315:
+		# delete double feed
+		sql("delete from tabFeed where doc_name like 'New %'")
+		reload_doc('core', 'doctype', 'property_setter')
+
+		from webnotes.model.doc import Document
+		m = Document('Module Def Role')
+		m.role = 'All'
+		m.parent = 'Home'
+		m.parenttype = 'Module Def'
+		m.parentfield = 'roles'
+		m.save(1)
