@@ -6,14 +6,14 @@ try: import json
 except: import simplejson as json
 
 def get_account_settings_url(arg=''):
-	import server_tools.server_tools.gateway_utils
-	return server_tools.server_tools.gateway_utils.get_account_settings_url()
+	import server_tools.gateway_utils
+	return server_tools.gateway_utils.get_account_settings_url()
 
 #
 # set max users
 #
 def get_max_users(arg=''):
-	from server_tools.server_tools.gateway_utils import get_max_users_gateway
+	from server_tools.gateway_utils import get_max_users_gateway
 	return {
 		'max_users': get_max_users_gateway(),
 		'enabled': cint(webnotes.conn.sql("select count(*) from tabProfile where ifnull(enabled,0)=1 and name not in ('Administrator', 'Guest')")[0][0])
@@ -44,7 +44,7 @@ def delete_user(args):
 	webnotes.conn.sql("update tabProfile set enabled=0, docstatus=2 where name=%s", args['user'])
 	# erpnext-saas
 	if cint(webnotes.conn.get_value('Control Panel', None, 'sync_with_gateway')):
-		from server_tools.server_tools.gateway_utils import remove_user_gateway
+		from server_tools.gateway_utils import remove_user_gateway
 		remove_user_gateway(args['user'])
 
 #
@@ -55,7 +55,7 @@ def add_user(args):
 	add_profile(args['user'])
 	# erpnext-saas
 	if cint(webnotes.conn.get_value('Control Panel', None, 'sync_with_gateway')):
-		from server_tools.server_tools.gateway_utils import add_user_gateway
+		from server_tools.gateway_utils import add_user_gateway
 		add_user_gateway(args['user'])
 	
 #
