@@ -1,7 +1,7 @@
 # REMEMBER to update this
 # ========================
 
-last_patch = 316
+last_patch = 317
 
 #-------------------------------------------
 
@@ -1272,4 +1272,7 @@ def execute(patch_no):
 		m.parentfield = 'roles'
 		m.save(1)
 	elif patch_no == 316:
-		sql("update `tabPage` set name = 'page-settings' where page_name = 'Profile Settings'")
+		pass
+	elif patch_no == 317:
+		sql("update `tabPage` set name = 'profile-settings' where page_name = 'Profile Settings'")	
+	
