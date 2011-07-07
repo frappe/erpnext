@@ -38,8 +38,7 @@ class DocType:
 						
 						webnotes.conn.begin()
 						webnotes.model.rename(self.doc.rename_doctype, rec[0]['name'], new_name)						
-						sql("update `tabAccount` set account_name = '%s' where name = '%s'" %(line[1],new_name))
-						msgprint(new_name)						
+						sql("update `tabAccount` set account_name = '%s' where name = '%s'" %(line[1],new_name))						
 						webnotes.conn.commit()												
 						
 						updated += 1			
@@ -49,16 +48,15 @@ class DocType:
 			for line in data:
 				if len(line)==2:
 				
-					# call on_rename method if exists
+					webnotes.conn.begin()				
+
 					obj = get_obj(self.doc.rename_doctype, line[0])
 					if hasattr(obj, 'on_rename'):
-						obj.on_rename(line[1],line[0])
-			
-					# rename the document
+						obj.on_rename(line[1],line[0])			
+
 					webnotes.model.rename(self.doc.rename_doctype, line[0], line[1])
 					
-					sql("commit")
-					sql("start transaction")
+					webnotes.conn.commit()
 						
 					updated += 1
 				else:
