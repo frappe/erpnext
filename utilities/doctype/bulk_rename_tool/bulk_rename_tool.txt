@@ -1,0 +1,99 @@
+# DocType, Bulk Rename Tool
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2011-07-07 16:14:45',
+		'docstatus': 0,
+		'modified': '2011-07-07 16:16:16',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all DocType
+	{
+		'_last_update': '1310035501',
+		'allow_attach': 1,
+		'autoname': 'field:rename_doctype',
+		'colour': 'White:FFF',
+		'doctype': 'DocType',
+		'module': 'Utilities',
+		'name': '__common__',
+		'section_style': 'Simple',
+		'show_in_menu': 0,
+		'version': 4
+	},
+
+	# These values are common for all DocField
+	{
+		'doctype': 'DocField',
+		'name': '__common__',
+		'parent': 'Bulk Rename Tool',
+		'parentfield': 'fields',
+		'parenttype': 'DocType',
+		'permlevel': 0
+	},
+
+	# These values are common for all DocPerm
+	{
+		'doctype': 'DocPerm',
+		'name': '__common__',
+		'parent': 'Bulk Rename Tool',
+		'parentfield': 'permissions',
+		'parenttype': 'DocType',
+		'read': 1,
+		'role': 'System Manager'
+	},
+
+	# DocType, Bulk Rename Tool
+	{
+		'doctype': 'DocType',
+		'name': 'Bulk Rename Tool'
+	},
+
+	# DocPerm
+	{
+		'create': 1,
+		'doctype': 'DocPerm',
+		'idx': 1,
+		'permlevel': 0,
+		'submit': 1,
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'doctype': 'DocPerm',
+		'idx': 2,
+		'permlevel': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'rename_doctype',
+		'fieldtype': 'Data',
+		'idx': 1,
+		'label': 'Rename DocType',
+		'options': 'Suggest',
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'file_list',
+		'fieldtype': 'Text',
+		'idx': 2,
+		'label': 'File List'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Button',
+		'idx': 3,
+		'label': 'Rename',
+		'options': 'do_rename'
+	}
+]
