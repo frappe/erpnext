@@ -3,11 +3,11 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2011-07-07 16:14:45',
+		'creation': '2011-07-07 18:05:53',
 		'docstatus': 0,
-		'modified': '2011-07-07 16:16:16',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2011-07-07 18:05:53',
+		'modified_by': 'Guest',
+		'owner': 'Guest'
 	},
 
 	# These values are common for all DocType
