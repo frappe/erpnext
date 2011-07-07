@@ -1,7 +1,7 @@
 # REMEMBER to update this
 # ========================
 
-last_patch = 318
+last_patch = 319
 
 #-------------------------------------------
 
@@ -1277,3 +1277,6 @@ def execute(patch_no):
 		sql("update `tabPage` set name = 'profile-settings' where page_name = 'Profile Settings'")	
 	elif patch_no == 318:
 		reload_doc('utilities', 'doctype', 'bulk_rename_tool')
+	elif patch_no == 319:
+		sql("delete from tabFeed where doc_name like 'New %'")
+

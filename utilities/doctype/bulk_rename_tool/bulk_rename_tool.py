@@ -63,7 +63,7 @@ class DocType:
 					msgprint("[Ignored] Incorrect format: %s" % str(line))
 		
 		
-		msgprint("<b>%s</b> items updated" % updated)	
+		msgprint("<b>%s</b> items updated" % updated)		
 
 	# Update CSV data
 	def get_csv_data(self):
