@@ -1,7 +1,7 @@
 # REMEMBER to update this
 # ========================
 
-last_patch = 319
+last_patch = 320
 
 #-------------------------------------------
 
@@ -1279,4 +1279,5 @@ def execute(patch_no):
 		reload_doc('utilities', 'doctype', 'bulk_rename_tool')
 	elif patch_no == 319:
 		sql("delete from tabFeed where doc_name like 'New %'")
-
+	elif patch_no == 320:
+		reload_doc('setup', 'doctype', 'series_detail')
