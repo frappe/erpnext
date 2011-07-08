@@ -58,7 +58,8 @@ class DocType:
 		
 		# Company
 		master_dict = {'Company':{'company_name':company_name,
-															'abbr':comp_abbr															
+								  'abbr':comp_abbr,
+								  'default_currency':currency
 															}}
 		self.create_records(master_dict)
 		
