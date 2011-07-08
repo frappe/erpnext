@@ -75,7 +75,9 @@ class DocType:
 								'pr_required':'No',
 								'emp_created_by':'Naming Series',
 								'cust_master_name':'Customer Name', 
-								'supp_master_name':'Supplier Name'}
+								'supp_master_name':'Supplier Name',
+								'default_currency_format': (currency=='INR') and 'Lacs' or 'Millions'
+					}
 
 		# Set 
 		self.set_defaults(def_args)
