@@ -35,7 +35,7 @@ class SupportMailbox(POP3Mailbox):
 			
 			st = get_obj('Support Ticket', thread_id)
 			st.make_response_record(content, mail.mail['From'], content_type)
-			webnotes.conn.set(st.doc, 'status', 'To Reply')
+			webnotes.conn.set(st.doc, 'status', 'Open')
 			update_feed(st.doc)
 			return
 				
