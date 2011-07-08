@@ -39,12 +39,12 @@ class DocType(TransactionBase):
 				'company_address': cstr(comp_det[0][0]),
 				'registration_details': cstr(comp_det[0][1])
 			}	 
-		return cstr(ret)
-
+		return cstr(ret)		
+    
 	# Get party details
 	#------------------
 	def get_party_det(self):		
-		party_det=sql("select master_type, master_name, pan_number from `tabAccount` where name='%s'" % self.doc.party_name)
+		party_det=sql("select master_type, master_name from `tabAccount` where name='%s'" % self.doc.party_name)
 		if party_det and party_det[0][0]=='Supplier':			
 			try:
 				rec = sql("select name, address_line1, address_line2, city, country, pincode, state from `tabAddress` where supplier = '%s' and docstatus != 2 order by is_primary_address desc limit 1" %(party_det[0][1]), as_dict = 1)
@@ -53,7 +53,6 @@ class DocType(TransactionBase):
 				address_display = ''
 				
 		ret = {
-			'pan_number': cstr(party_det[0][2]) ,
 			'party_address': cstr(address_display)
 		}
           	
