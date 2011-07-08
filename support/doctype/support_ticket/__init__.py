@@ -54,7 +54,7 @@ class SupportMailbox(POP3Mailbox):
 			d.save(1)
 
 		# update feed
-		update_feed(d)	
+		update_feed(d)
 		
 
 def get_support_mails():
@@ -62,3 +62,9 @@ def get_support_mails():
 		Gets new emails from support inbox and updates / creates Support Ticket records
 	"""
 	SupportMailbox().get_messages()
+
+def auto_close_tickets():
+	"""
+		Auto Closes Waiting for Customer Support Ticket after 15 days
+	"""
+	webnotes.conn.sql("update `tabSupport Ticket` set status = 'Closed' where status = 'Waiting for Customer' and date_sub(curdate(),interval 15 Day) > modified")
