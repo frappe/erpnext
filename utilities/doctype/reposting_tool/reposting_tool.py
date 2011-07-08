@@ -44,7 +44,7 @@ class DocType:
 	# =============================================================================
 	def get_bin_qty(self, wh, item):
 		# get actual_qty
-		act_qty = sql("select ifnull(actual_qty, 0) from `tabBin` where warehouse = '%s' and item_code = '%s'" % (wh, item))
+		act_qty = sql("select sum(actual_qty) from `tabStock Ledger Entry` where warehouse = '%s' and item_code = '%s' and ifnull(is_cancelled, 'No') = 'No'" % (wh, item))
 		act_qty = act_qty and flt(act_qty[0][0]) or 0
 	
 		# get indented_qty 
@@ -119,6 +119,17 @@ class DocType:
 	
 			self.repair_bin(bin[0])
 
+	# =============================================================================
+	def repair_bins_for_illegal_cancelled(self, after_date = '2011-01-01'):
+		bins = sql("select name from tabBin where modified >= %s", after_date)
+		cnt = 0
+		for bin in bins:
+			if cnt % 20 == 0: 
+				sql("commit")
+				sql("start transaction")
+			cnt += 1
+	
+			self.repair_bin(bin[0])
 	# =============================================================================
 	def repair_opening_bal(self, d, acc_obj, past_yr, fiscal_yr):
 		# check opening balance
