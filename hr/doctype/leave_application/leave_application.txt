@@ -3,16 +3,16 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2011-02-10 14:10:08',
+		'creation': '2011-02-17 13:25:56',
 		'docstatus': 0,
-		'modified': '2011-02-17 13:44:37',
+		'modified': '2011-07-08 13:28:15',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1305714022',
+		'_last_update': '1310019491',
 		'autoname': 'LAP/.#####',
 		'colour': 'White:FFF',
 		'doctype': 'DocType',
@@ -24,7 +24,7 @@
 		'show_in_menu': 0,
 		'subject': 'From %(employee_name)s, %(designation)s',
 		'tag_fields': 'leave_type',
-		'version': 18
+		'version': 17
 	},
 
 	# These values are common for all DocField
@@ -54,37 +54,24 @@
 
 	# DocPerm
 	{
-		'amend': 1,
-		'cancel': 1,
+		'amend': 0,
+		'cancel': 0,
 		'create': 1,
 		'doctype': 'DocPerm',
 		'idx': 1,
-		'match': 'owner',
 		'permlevel': 0,
-		'submit': 1,
+		'role': 'Employee',
+		'submit': 0,
 		'write': 1
 	},
 
 	# DocPerm
 	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		'doctype': 'DocPerm',
-		'idx': 2,
-		'match': 'owner',
-		'permlevel': 0,
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
 		'amend': 1,
 		'cancel': 1,
 		'create': 1,
 		'doctype': 'DocPerm',
-		'idx': 3,
+		'idx': 2,
 		'permlevel': 0,
 		'role': 'HR User',
 		'submit': 1,
@@ -97,7 +84,7 @@
 		'cancel': 1,
 		'create': 1,
 		'doctype': 'DocPerm',
-		'idx': 4,
+		'idx': 3,
 		'permlevel': 0,
 		'role': 'HR Manager',
 		'submit': 1,
@@ -106,24 +93,33 @@
 
 	# DocPerm
 	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
 		'doctype': 'DocPerm',
-		'idx': 5,
+		'idx': 4,
 		'permlevel': 1,
-		'role': 'HR User'
+		'role': 'HR User',
+		'submit': 0,
+		'write': 0
 	},
 
 	# DocPerm
 	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
 		'doctype': 'DocPerm',
-		'idx': 6,
+		'idx': 5,
 		'permlevel': 1,
-		'role': 'HR Manager'
+		'role': 'HR Manager',
+		'submit': 0,
+		'write': 0
 	},
 
 	# DocField
 	{
 		'doctype': 'DocField',
-		'fieldname': 'column_break1',
 		'fieldtype': 'Column Break',
 		'idx': 1,
 		'permlevel': 0,
@@ -211,7 +207,6 @@
 	# DocField
 	{
 		'doctype': 'DocField',
-		'fieldname': 'column_break8',
 		'fieldtype': 'Column Break',
 		'idx': 8,
 		'permlevel': 0,
@@ -278,9 +273,20 @@
 	# DocField
 	{
 		'doctype': 'DocField',
+		'fieldname': 'letter_head',
+		'fieldtype': 'Link',
+		'idx': 14,
+		'label': 'Letter Head',
+		'options': 'Letter Head',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
 		'fieldname': 'amended_from',
 		'fieldtype': 'Data',
-		'idx': 14,
+		'idx': 15,
 		'label': 'Amended From',
 		'permlevel': 1
 	},
@@ -290,7 +296,7 @@
 		'doctype': 'DocField',
 		'fieldname': 'amendment_date',
 		'fieldtype': 'Date',
-		'idx': 15,
+		'idx': 16,
 		'label': 'Amendment Date',
 		'permlevel': 1
 	}

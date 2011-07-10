@@ -1,7 +1,7 @@
 # REMEMBER to update this
 # ========================
 
-last_patch = 320
+last_patch = 322
 
 #-------------------------------------------
 
@@ -1281,3 +1281,7 @@ def execute(patch_no):
 		sql("delete from tabFeed where doc_name like 'New %'")
 	elif patch_no == 320:
 		reload_doc('setup', 'doctype', 'series_detail')
+	elif patch_no == 321:
+		reload_doc('hr','doctype','leave_application')
+	elif patch_no == 322:
+		sql("delete from `tabDocField` where parent = 'Leave Application' and fieldname = 'latter_head'")
