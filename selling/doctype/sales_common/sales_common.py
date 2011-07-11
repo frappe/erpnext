@@ -15,8 +15,9 @@ convert_to_lists = webnotes.conn.convert_to_lists
 	
 # -----------------------------------------------------------------------------------------
 
+from utilities.transaction_base import TransactionBase
 
-class DocType:
+class DocType(TransactionBase):
 	def __init__(self,d,dl):
 		self.doc, self.doclist = d,dl
 
@@ -262,10 +263,11 @@ class DocType:
 	# Check Conversion Rate (i.e. it will not allow conversion rate to be 1 for Currency other than default currency set in Global Defaults)
 	# ===========================================================================
 	def check_conversion_rate(self, obj):
-		default_currency = get_obj('Manage Account').doc.default_currency
-		company_currency = sql("select default_currency from `tabCompany` where name = '%s'" % obj.doc.company)
-		curr = company_currency and cstr(company_currency[0][0]) or default_currency
-		if (obj.doc.currency == curr and flt(obj.doc.conversion_rate) != 1.00) or not obj.doc.conversion_rate or (obj.doc.currency != curr and flt(obj.doc.conversion_rate) == 1.00):
+		default_currency = TransactionBase().get_company_currency(obj.doc.company)
+		if not default_currency:
+			msgprint('Message: Please enter default currency in Company Master')
+			raise Exception		
+		if (obj.doc.currency == default_currency and flt(obj.doc.conversion_rate) != 1.00) or not obj.doc.conversion_rate or (obj.doc.currency != default_currency and flt(obj.doc.conversion_rate) == 1.00):
 			msgprint("Please Enter Appropriate Conversion Rate.")
 			raise Exception
 	
