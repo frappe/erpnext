@@ -15,9 +15,9 @@ in_transaction = webnotes.conn.in_transaction
 convert_to_lists = webnotes.conn.convert_to_lists
 	
 # -----------------------------------------------------------------------------------------
+from utilities.transaction_base import TransactionBase
 
-
-class DocType:
+class DocType(TransactionBase):
 	def __init__(self, doc, doclist=[]):
 		self.doc = doc
 		self.doclist = doclist
@@ -268,14 +268,11 @@ class DocType:
 
 	# validate conversion rate
 	def validate_conversion_rate(self, obj):
-		default_currency = get_obj('Manage Account').doc.default_currency
+		default_currency = TransactionBase().get_company_currency(obj.doc.company)			
 		if not default_currency:
-			msgprint('Message: Please enter default currency in Global Defaults')
+			msgprint('Message: Please enter default currency in Company Master')
 			raise Exception
-
-		company_currency = sql("select default_currency from `tabCompany` where name = '%s'" % obj.doc.company)
-		curr = company_currency and cstr(company_currency[0][0]) or default_currency
-		if (obj.doc.currency == curr and flt(obj.doc.conversion_rate) != 1.00) or not obj.doc.conversion_rate or (obj.doc.currency != curr and flt(obj.doc.conversion_rate) == 1.00):
+		if (obj.doc.currency == default_currency and flt(obj.doc.conversion_rate) != 1.00) or not obj.doc.conversion_rate or (obj.doc.currency != default_currency and flt(obj.doc.conversion_rate) == 1.00):
 			msgprint("Message: Please Enter Appropriate Conversion Rate.")
 			raise Exception
 

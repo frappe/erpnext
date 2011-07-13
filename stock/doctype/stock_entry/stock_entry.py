@@ -250,9 +250,9 @@ class DocType:
 		if self.doc.production_order:
 			pro_obj = get_obj('Production Order', self.doc.production_order)
 		self.validate_for_production_order(pro_obj)
+		self.get_stock_and_rate(pro_obj and pro_obj.doc.bom_no or '')
 		self.validate_incoming_rate()
 		self.validate_warehouse(pro_obj)
-		self.get_stock_and_rate(pro_obj and pro_obj.doc.bom_no or '')
 		self.calc_amount()
 		get_obj('Sales Common').validate_fiscal_year(self.doc.fiscal_year,self.doc.posting_date,'Posting Date')
 				

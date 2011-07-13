@@ -1,0 +1,63 @@
+# DocType, Series Detail
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2011-07-08 13:20:10',
+		'docstatus': 0,
+		'modified': '2011-07-08 13:20:34',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all DocType
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocType',
+		'istable': 1,
+		'module': 'Setup',
+		'name': '__common__',
+		'section_style': 'Tray',
+		'show_in_menu': 0,
+		'version': 3
+	},
+
+	# These values are common for all DocField
+	{
+		'doctype': 'DocField',
+		'name': '__common__',
+		'parent': 'Series Detail',
+		'parentfield': 'fields',
+		'parenttype': 'DocType',
+		'permlevel': 0
+	},
+
+	# DocType, Series Detail
+	{
+		'doctype': 'DocType',
+		'name': 'Series Detail'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'series',
+		'fieldtype': 'Read Only',
+		'idx': 1,
+		'label': 'Series',
+		'oldfieldname': 'series',
+		'oldfieldtype': 'Read Only'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'remove',
+		'fieldtype': 'Check',
+		'idx': 2,
+		'label': 'Remove',
+		'oldfieldname': 'remove',
+		'oldfieldtype': 'Check',
+		'trigger': 'Client'
+	}
+]

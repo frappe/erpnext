@@ -405,18 +405,23 @@ In Account := %s User := %s has Repaired Outstanding Amount For %s : %s and foll
 			Find vouchers that are not cancelled correctly and repost them
 		"""
 		vl = sql("""
-		select voucher_type, voucher_no, sum(debit) as sum_debit, sum(credit) as sum_credit
-		from `tabGL Entry` 
-		where is_cancelled='Yes' and creation > %s
-		group by voucher_type, voucher_no
-		""", after_date, as_dict=1))
+			select voucher_type, voucher_no, account, sum(debit) as sum_debit, sum(credit) as sum_credit
+			from `tabGL Entry` 
+			where is_cancelled='Yes' and creation > %s
+			group by voucher_type, voucher_no, account
+			""", after_date, as_dict=1)
+		
 		ac_list = []
 		for v in vl:
-			if c['sum_debit'] != 0 or c['sum_credit'] != 0:
-				ac_list += [a[0] for a in sql("""
-					select distinct account from `tabGL Entry` 
-					where voucher_type=%s and voucher_no = %s
-					""", (c['voucher_type'], c['voucher_no']))]
+			if v['sum_debit'] != 0 or v['sum_credit'] != 0:
+				ac_list.append(v['account'])
+		
+		fy_list = sql("""select name from `tabFiscal Year` 
+		where (%s between year_start_date and date_sub(date_add(year_start_date,interval 1 year), interval 1 day)) 
+		or year_start_date > %s 
+		order by year_start_date ASC""", (after_date, after_date))
 
-		for a in set(ac_list):
-			get_obj('Account', a).respost()
+		for fy in fy_list:
+			fy_obj = get_obj('Fiscal Year', fy[0])
+			for a in set(ac_list):
+				fy_obj.repost(a)

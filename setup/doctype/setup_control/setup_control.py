@@ -57,7 +57,8 @@ class DocType:
 		
 		# Company
 		master_dict = {'Company':{'company_name':company_name,
-															'abbr':comp_abbr															
+								  'abbr':comp_abbr,
+								  'default_currency':currency
 															}}
 		self.create_records(master_dict)
 		
@@ -73,7 +74,9 @@ class DocType:
 								'pr_required':'No',
 								'emp_created_by':'Naming Series',
 								'cust_master_name':'Customer Name', 
-								'supp_master_name':'Supplier Name'}
+								'supp_master_name':'Supplier Name',
+								'default_currency_format': (currency=='INR') and 'Lacs' or 'Millions'
+					}
 
 		# Set 
 		self.set_defaults(def_args)
