@@ -14,7 +14,6 @@ get_value = webnotes.conn.get_value
 in_transaction = webnotes.conn.in_transaction
 convert_to_lists = webnotes.conn.convert_to_lists
 
-from server_tools.gateway_utils import update_client_control, get_total_users
 	
 # -----------------------------------------------------------------------------------------
 
@@ -179,6 +178,8 @@ class DocType:
 		"""
 		Validates if setup has been performed after database allocation
 		"""
+
+		from server_tools.gateway_utils import update_client_control, get_total_users
 		
 		args = eval(args)
 		#webnotes.logger.error("args in set_account_details of setup_control: " + str(args))
@@ -194,7 +195,6 @@ class DocType:
 		#webnotes.logger.error("setup_control.is_setup_okay: " + cp_defaults + " " + user_profile + " " + str(total_users))
 		
 		#webnotes.logger.error("setup_control.is_setup_okay: Passed Values:" + args['account_name'] + " " + args['user'] + " " + str(args['total_users']))
-		
 		
 		if (cp_defaults==args['account_name']) and user_profile and \
 		   (total_users==cint(args['total_users'])):
