@@ -1,7 +1,7 @@
 # REMEMBER to update this
 # ========================
 
-last_patch = 323
+last_patch = 324
 
 #-------------------------------------------
 
@@ -1289,3 +1289,5 @@ def execute(patch_no):
 		reload_doc('stock', 'doctype', 'stock_entry')
 		sql("update `tabDocField` set options = 'get_stock_and_rate' where parent = 'Stock Entry' and label = 'Get Stock and Rate'")
 		sql("delete from `tabDocField` where label = 'Get Current Stock' and parent = 'Stock Entry'")
+	elif patch_no == 324:
+		sql("delete from `tabDocField` where fieldname = 'test_field' and parent = 'Customer'")
