@@ -33,12 +33,14 @@ $.extend(cur_frm.cscript, {
 	
 	refresh: function(doc) {
 		cs.make_listing(doc);
-		if(!doc.__islocal) {					
-			
-			if(doc.allocated_to) 
+		if(!doc.__islocal) {											
+			if(in_list(user_roles,'System Manager')) {
+		      if(doc.status!='Closed') cur_frm.add_custom_button('Close Ticket', cs['Close Ticket']);	
+			  if(doc.status=='Closed') cur_frm.add_custom_button('Re-Open Ticket', cs['Re-Open Ticket']);		
+			}else if(doc.allocated_to) {
 			  set_field_permlevel('status',2);
 			  if(user==doc.allocated_to && doc.status!='Closed') cur_frm.add_custom_button('Close Ticket', cs['Close Ticket']);
-			  if(doc.status=='Closed') cur_frm.add_custom_button('Re-Open Ticket', cs['Re-Open Ticket']);
+			}
 			
 			// can't change the main message & subject once set  
 			set_field_permlevel('subject',2);
