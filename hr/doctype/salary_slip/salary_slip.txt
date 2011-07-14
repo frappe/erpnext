@@ -5,14 +5,14 @@
 	{
 		'creation': '2010-08-08 17:09:20',
 		'docstatus': 0,
-		'modified': '2011-06-27 14:39:16',
+		'modified': '2011-07-13 17:38:55',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1308808105',
+		'_last_update': '1310019491',
 		'colour': 'White:FFF',
 		'doctype': 'DocType',
 		'module': 'HR',
@@ -21,7 +21,7 @@
 		'server_code_error': ' ',
 		'show_in_menu': 0,
 		'subject': 'For %(employee_name)s, %(designation)s',
-		'version': 388
+		'version': 392
 	},
 
 	# These values are common for all DocField
@@ -51,58 +51,24 @@
 
 	# DocPerm
 	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		'doctype': 'DocPerm',
-		'match': 'owner',
-		'permlevel': 0,
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		'doctype': 'DocPerm',
-		'match': 'owner',
-		'permlevel': 0,
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		'doctype': 'DocPerm',
-		'match': 'owner',
-		'permlevel': 0,
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		'doctype': 'DocPerm',
-		'match': 'owner',
-		'permlevel': 0,
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
+		'amend': 1,
+		'cancel': 1,
 		'create': 1,
 		'doctype': 'DocPerm',
-		'idx': 3,
+		'idx': 1,
+		'permlevel': 0,
+		'role': 'System Manager',
+		'submit': 1,
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 1,
+		'doctype': 'DocPerm',
+		'idx': 2,
 		'permlevel': 0,
 		'role': 'HR User',
 		'submit': 1,
@@ -111,11 +77,11 @@
 
 	# DocPerm
 	{
-		'amend': 1,
-		'cancel': 1,
+		'amend': 0,
+		'cancel': 0,
 		'create': 1,
 		'doctype': 'DocPerm',
-		'idx': 4,
+		'idx': 3,
 		'permlevel': 0,
 		'role': 'HR Manager',
 		'submit': 1,
@@ -124,18 +90,28 @@
 
 	# DocPerm
 	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
 		'doctype': 'DocPerm',
-		'idx': 5,
+		'idx': 4,
 		'permlevel': 1,
-		'role': 'HR User'
+		'role': 'HR User',
+		'submit': 0,
+		'write': 0
 	},
 
 	# DocPerm
 	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
 		'doctype': 'DocPerm',
-		'idx': 6,
+		'idx': 5,
 		'permlevel': 1,
-		'role': 'HR Manager'
+		'role': 'HR Manager',
+		'submit': 0,
+		'write': 0
 	},
 
 	# DocField
@@ -288,28 +264,6 @@
 	# DocField
 	{
 		'doctype': 'DocField',
-		'fieldname': 'letter_head',
-		'fieldtype': 'Link',
-		'idx': 11,
-		'label': 'Letter Head',
-		'options': 'Letter Head',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldname': 'letter_head',
-		'fieldtype': 'Link',
-		'idx': 11,
-		'label': 'Letter Head',
-		'options': 'Letter Head',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
 		'fieldtype': 'Column Break',
 		'idx': 12,
 		'oldfieldtype': 'Column Break',
@@ -349,32 +303,6 @@
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'company',
-		'fieldtype': 'Select',
-		'idx': 14,
-		'in_filter': 1,
-		'label': 'Company',
-		'options': 'link:Company',
-		'permlevel': 0,
-		'reqd': 1
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldname': 'company',
-		'fieldtype': 'Select',
-		'idx': 14,
-		'in_filter': 1,
-		'label': 'Company',
-		'options': 'link:Company',
-		'permlevel': 0,
-		'reqd': 1
-	},
-
-	# DocField
-	{
 		'colour': 'White:FFF',
 		'doctype': 'DocField',
 		'fieldname': 'month',
@@ -396,7 +324,7 @@
 	{
 		'doctype': 'DocField',
 		'fieldname': 'total_days_in_month',
-		'fieldtype': 'Int',
+		'fieldtype': 'Data',
 		'idx': 16,
 		'label': 'Total days in month',
 		'oldfieldname': 'total_days_in_month',
