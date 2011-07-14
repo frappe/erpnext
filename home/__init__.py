@@ -91,7 +91,7 @@ def update_feed1(doc):
 		subject = subject % doc.fields
 		make_feed(doc, subject, color)
 		
-def update_feed(doc, method):   
+def update_feed(doc, method=None):   
 	"adds a new feed"
 	if method=='validate':
 		return

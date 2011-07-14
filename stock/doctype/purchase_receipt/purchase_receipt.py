@@ -140,7 +140,8 @@ class DocType(TransactionBase):
     self.check_for_stopped_status(pc_obj)
 
     # get total in words
-    self.doc.in_words = pc_obj.get_total_in_words(get_defaults().get('currency') or 'INR', self.doc.grand_total)
+    dcc = TransactionBase().get_company_currency(self.doc.company)    
+    self.doc.in_words = pc_obj.get_total_in_words(dcc, self.doc.grand_total)
     self.doc.in_words_import = pc_obj.get_total_in_words(self.doc.currency, self.doc.grand_total_import)
     # update valuation rate
     self.update_valuation_rate()

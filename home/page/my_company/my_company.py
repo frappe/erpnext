@@ -52,11 +52,12 @@ def delete_user(args):
 #
 def add_user(args):
 	args = json.loads(args)
-	add_profile(args['user'])
 	# erpnext-saas
 	if cint(webnotes.conn.get_value('Control Panel', None, 'sync_with_gateway')):
 		from server_tools.gateway_utils import add_user_gateway
 		add_user_gateway(args['user'])
+	
+	add_profile(args['user'])
 	
 #
 # add profile record

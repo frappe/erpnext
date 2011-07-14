@@ -21,31 +21,34 @@ class DocType:
 	def __init__(self, d, dl):
 		self.doc, self.doclist = d,dl
 		
-	def repost(self):
+	def repost(self, account = ''):
 		if not self.doc.company:
 			msgprint("Please select company", raise_exception=1)
 			
 		if not in_transaction:
 			sql("start transaction")
 				
-		self.clear_account_balances()
-		self.create_account_balances()
-		self.update_opening()
-		self.post_entries()
+		self.clear_account_balances(account)
+		self.create_account_balances(account)
+		self.update_opening(account)
+		self.post_entries(account)
 		sql("commit")
-		msgprint("Account balance reposted")
+		
+		msg_cond = account and " and account: " + account or ""
+		msgprint("Account balance reposted for fiscal year: " + self.doc.name + msg_cond)
 
-	def clear_account_balances(self):
+	def clear_account_balances(self, account = ''):
 		# balances clear - `tabAccount Balance` for fiscal year
-		sql("update `tabAccount Balance` set opening=0, balance=0, debit=0, credit=0 where fiscal_year=%s", self.doc.name)
+		cond = account and (" and account = '" + account + "'") or ''
+		sql("update `tabAccount Balance` set opening=0, balance=0, debit=0, credit=0 where fiscal_year=%s %s", (self.doc.name, cond))
 
-	def create_account_balances(self):
+	def create_account_balances(self, account = ''):
 		# get periods
 		period_list = self.get_period_list()
 		cnt = 0
 		
 		# get accounts
-		al = sql("select name from tabAccount")
+		al = account and [[account]] or sql("select name from tabAccount")
 		
 		for a in al:
 			# check
@@ -80,9 +83,14 @@ class DocType:
 		return periods
 
 	# ====================================================================================
-	def update_opening(self):
-		# set opening from last year closing
-		abl = sql("select t1.account, t1.balance from `tabAccount Balance` t1, tabAccount t2 where t1.period=%s and t2.company=%s and ifnull(t2.is_pl_account, 'No') = 'No' and t1.account = t2.name for update", (self.doc.past_year, self.doc.company))
+	def update_opening(self, account = ''):
+		"""
+			set opening from last year closing
+		
+		"""
+		cond = account and (" and t2.name = '" + account + "'") or ''
+		
+		abl = sql("select t1.account, t1.balance from `tabAccount Balance` t1, tabAccount t2 where t1.period= '%s' and t2.company= '%s' and ifnull(t2.is_pl_account, 'No') = 'No' and t1.account = t2.name %s for update" % (self.doc.past_year, self.doc.company, cond))
 		
 		cnt = 0
 		for ab in abl:
@@ -100,10 +108,11 @@ class DocType:
 		return sql("select debit_or_credit, lft, rgt, is_pl_account from tabAccount where name=%s", account)[0]
 
 	# ====================================================================================
-	def post_entries(self):
+	def post_entries(self, account = ''):
 		sql("LOCK TABLE `tabGL Entry` WRITE")
+		cond = account and (" and account = '" + account + "'") or ''
 		# post each gl entry (batch or complete)
-		gle = sql("select name, account, debit, credit, is_opening, posting_date from `tabGL Entry` where fiscal_year=%s and ifnull(is_cancelled,'No')='No' and company=%s", (self.doc.name, self.doc.company))
+		gle = sql("select name, account, debit, credit, is_opening, posting_date from `tabGL Entry` where fiscal_year=%s and ifnull(is_cancelled,'No')='No' and company=%s %s", (self.doc.name, self.doc.company, cond))
 		account_details = {}
 
 		cnt = 0
@@ -151,7 +160,6 @@ class DocType:
 						and ab.fiscal_year = '%(fiscal_year)s' """ % p)
 
 		sql("UNLOCK TABLES")
-
 
 
 	# Clear PV/RV outstanding

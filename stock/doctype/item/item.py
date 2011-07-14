@@ -170,3 +170,11 @@ Total Available Qty: %s
 			
 		}
 		return str(ret)
+		
+	def check_if_sle_exists(self):
+		"""
+			checks if any stock ledger entry exists for this item
+		"""
+
+		sle = sql("select name from `tabStock Ledger Entry` where item_code = %s and ifnull(is_cancelled, 'No') = 'No'", self.doc.name)
+		return sle and 'exists' or 'not exists'

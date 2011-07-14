@@ -1,7 +1,7 @@
 # REMEMBER to update this
 # ========================
 
-last_patch = 315
+last_patch = 325
 
 #-------------------------------------------
 
@@ -1271,3 +1271,26 @@ def execute(patch_no):
 		m.parenttype = 'Module Def'
 		m.parentfield = 'roles'
 		m.save(1)
+	elif patch_no == 316:
+		pass
+	elif patch_no == 317:
+		sql("update `tabPage` set name = 'profile-settings' where page_name = 'Profile Settings'")	
+	elif patch_no == 318:
+		reload_doc('utilities', 'doctype', 'bulk_rename_tool')
+	elif patch_no == 319:
+		sql("delete from tabFeed where doc_name like 'New %'")
+	elif patch_no == 320:
+		reload_doc('setup', 'doctype', 'series_detail')
+	elif patch_no == 321:
+		reload_doc('hr','doctype','leave_application')
+	elif patch_no == 322:
+		sql("delete from `tabDocField` where parent = 'Leave Application' and fieldname = 'latter_head'")
+	elif patch_no == 323:
+		reload_doc('stock', 'doctype', 'stock_entry')
+		sql("update `tabDocField` set options = 'get_stock_and_rate' where parent = 'Stock Entry' and label = 'Get Stock and Rate'")
+		sql("delete from `tabDocField` where label = 'Get Current Stock' and parent = 'Stock Entry'")
+	elif patch_no == 324:
+		sql("delete from `tabDocField` where fieldname = 'test_field' and parent = 'Customer'")
+	elif patch_no == 325:
+		sql("update `tabDocField` set fieldtype = 'Data' where parent = 'Salary Slip' and fieldname = 'total_days_in_month'")
+		reload_doc('hr', 'doctype', 'salary_slip')
