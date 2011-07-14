@@ -14,7 +14,7 @@ cur_frm.cscript.has_special_chars = function(t) {
 
 cur_frm.cscript.company_name = function(doc){
   if(doc.company_name && cur_frm.cscript.has_special_chars(doc.company_name)){   
-    msgprint("<font color=red>Special Characters are not allowed for</font>\nCompany Name <b>" + doc.company_name +"</b>")        
+    msgprint("<font color=red>Special Characters <b>! @ # $ % ^ * + = - [ ] ' ; , / { } | : < > ?</b> are not allowed for</font>\nCompany Name <b>" + doc.company_name +"</b>")        
     doc.company_name = '';
     refresh_field('company_name');
   }
@@ -22,7 +22,7 @@ cur_frm.cscript.company_name = function(doc){
 
 cur_frm.cscript.abbr = function(doc){
   if(doc.abbr && cur_frm.cscript.has_special_chars(doc.abbr)){   
-    msgprint("<font color=red>Special Characters are not allowed for</font>\nAbbr <b>" + doc.abbr +"</b>")        
+    msgprint("<font color=red>Special Characters <b>! @ # $ % ^ * + = - [ ] ' ; , / { } | : < > ?</b> are not allowed for</font>\nAbbr <b>" + doc.abbr +"</b>")        
     doc.abbr = '';
     refresh_field('abbr');
   }
