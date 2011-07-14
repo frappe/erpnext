@@ -2,6 +2,7 @@ pscript['onload_My Company'] = function() {
 	var wrapper = page_body.pages['My Company'];
 	
 	// body
+	wrapper.className = 'layout_wrapper';
 	wrapper.head = new PageHeader(wrapper, 'People');
 	wrapper.body = $a(wrapper, 'div', '', {marginRight:'11px', marginTop:'11px'});
 	
@@ -91,7 +92,10 @@ MemberList = function(parent) {
 	this.cur_profile = null;
 	
 	this.list_wrapper = $a($td(parent.tab,0,0), 'div', '', {marginLeft:'11px'});
-	this.profile_wrapper = $a($td(parent.tab,0,1), 'div', 'layout_wrapper', {marginLeft:'0px', height:'100%'});
+	var cell = $td(parent.tab,0,1);
+	$y(cell, { border: '1px solid #aaa' });
+	cell.className = 'layout_wrapper';
+	this.profile_wrapper = $a(cell, 'div');
 	
 	this.no_user_selected = $a(this.profile_wrapper, 'div', 'help_box', null, 'Please select a user to view profile');
 	
@@ -213,7 +217,7 @@ MemberItem = function(parent, det, mlist) {
 		this.fullname = det[1] ? det[1] : det[0];
 		var div = $a($td(this.tab, 0, 1), 'div', '', {fontWeight: 'bold',padding:'2px 0px'});
 		this.name_link = $a(div,'span','link_type');
-		this.name_link.innerHTML = this.fullname;
+		this.name_link.innerHTML = crop(this.fullname, 15);
 		this.name_link.onclick = function() {
 			mlist.show_profile(me.det[0], me);
 		}
