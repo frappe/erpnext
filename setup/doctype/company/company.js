@@ -3,7 +3,7 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 }
 
 cur_frm.cscript.has_special_chars = function(t) {
-  var iChars = "!@#$%^&*+=-[]\\\';,/{}|\":<>?";
+  var iChars = "!@#$%^*+=-[]\\\';,/{}|\":<>?";
   for (var i = 0; i < t.length; i++) {
     if (iChars.indexOf(t.charAt(i)) != -1) {
       return true;
