@@ -1,0 +1,144 @@
+# DocType, Loan
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2011-07-12 10:50:19',
+		'docstatus': 0,
+		'modified': '2011-07-14 11:22:32',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all DocType
+	{
+		'_last_update': '1310622631',
+		'colour': 'White:FFF',
+		'doctype': 'DocType',
+		'module': 'Accounts',
+		'name': '__common__',
+		'section_style': 'Simple',
+		'show_in_menu': 0,
+		'version': 11
+	},
+
+	# These values are common for all DocField
+	{
+		'doctype': 'DocField',
+		'name': '__common__',
+		'parent': 'Loan',
+		'parentfield': 'fields',
+		'parenttype': 'DocType',
+		'permlevel': 0
+	},
+
+	# These values are common for all DocPerm
+	{
+		'cancel': 1,
+		'create': 1,
+		'doctype': 'DocPerm',
+		'idx': 1,
+		'name': '__common__',
+		'parent': 'Loan',
+		'parentfield': 'permissions',
+		'parenttype': 'DocType',
+		'permlevel': 0,
+		'read': 1,
+		'role': 'Accounts User',
+		'submit': 1,
+		'write': 1
+	},
+
+	# DocType, Loan
+	{
+		'doctype': 'DocType',
+		'name': 'Loan'
+	},
+
+	# DocPerm
+	{
+		'doctype': 'DocPerm'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'naming_series',
+		'fieldtype': 'Select',
+		'idx': 1,
+		'label': 'Naming Series',
+		'options': '\nLOAN',
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'account',
+		'fieldtype': 'Link',
+		'idx': 2,
+		'label': 'Account',
+		'options': 'Account',
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'loan_amount',
+		'fieldtype': 'Currency',
+		'idx': 3,
+		'label': 'Loan Amount',
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'start_date',
+		'fieldtype': 'Date',
+		'idx': 4,
+		'label': 'Start Date',
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'no_of_installments',
+		'fieldtype': 'Int',
+		'idx': 5,
+		'label': 'No of Installments',
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldtype': 'Button',
+		'idx': 6,
+		'label': 'Generate',
+		'trigger': 'Client'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'installments',
+		'fieldtype': 'Table',
+		'idx': 7,
+		'label': 'Installments',
+		'options': 'Loan Installment'
+	},
+
+	# DocField
+	{
+		'allow_on_submit': 1,
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldtype': 'Button',
+		'idx': 8,
+		'label': 'Installment Reciept'
+	}
+]
