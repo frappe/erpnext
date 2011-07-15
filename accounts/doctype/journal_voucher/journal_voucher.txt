@@ -5,23 +5,14 @@
 	{
 		'creation': '2010-08-08 17:09:06',
 		'docstatus': 0,
-		'modified': '2011-04-06 14:41:47',
+		'modified': '2011-07-15 14:37:05',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
 
-	# These values are common for all DocField
-	{
-		'doctype': 'DocField',
-		'name': '__common__',
-		'parent': 'Journal Voucher',
-		'parentfield': 'fields',
-		'parenttype': 'DocType'
-	},
-
 	# These values are common for all DocType
 	{
-		'_last_update': '1305714002',
+		'_last_update': '1310533805',
 		'colour': 'White:FFF',
 		'doctype': 'DocType',
 		'module': 'Accounts',
@@ -32,15 +23,15 @@
 		'show_in_menu': 0,
 		'subject': ' ',
 		'tag_fields': 'voucher_type',
-		'version': 307
+		'version': 308
 	},
 
-	# These values are common for all DocFormat
+	# These values are common for all DocField
 	{
-		'doctype': 'DocFormat',
+		'doctype': 'DocField',
 		'name': '__common__',
 		'parent': 'Journal Voucher',
-		'parentfield': 'formats',
+		'parentfield': 'fields',
 		'parenttype': 'DocType'
 	},
 
@@ -112,20 +103,6 @@
 		'write': 0
 	},
 
-	# DocFormat
-	{
-		'doctype': 'DocFormat',
-		'format': 'Payment Receipt Voucher',
-		'idx': 1
-	},
-
-	# DocFormat
-	{
-		'doctype': 'DocFormat',
-		'format': 'Cheque Printing Format',
-		'idx': 2
-	},
-
 	# DocField
 	{
 		'doctype': 'DocField',
@@ -167,7 +144,7 @@
 		'label': 'Voucher Type',
 		'oldfieldname': 'voucher_type',
 		'oldfieldtype': 'Select',
-		'options': '\nJournal Entry\nBank Voucher\nCash Voucher\nCredit Card Voucher\nDebit Note\nCredit Note\nContra Voucher\nExcise Voucher\nWrite Off Voucher',
+		'options': '\nJournal Entry\nBank Voucher\nCash Voucher\nCredit Card Voucher\nDebit Note\nCredit Note\nContra Voucher\nExcise Voucher\nWrite Off Voucher\nLoan Receipt',
 		'permlevel': 0,
 		'print_hide': 0,
 		'search_index': 1

@@ -13,9 +13,10 @@ $.extend(cur_frm.cscript, {
 	},
 	hide_show_buttons: function(doc) {
 		if(doc.docstatus==0) {
-			hide_field('Installment Reciept'); show_field('Generate');
+			hide_field('Installment Reciept');// show_field('Generate');
 		} else if (doc.docstatus==1) {
-			show_field('Installment Reciept'); hide_field('Generate');			
+//			show_field('Installment Reciept'); 
+hide_field('Generate');			
 		}
 	},
 	clear_installments: function(doc) {
@@ -30,16 +31,18 @@ $.extend(cur_frm.cscript, {
 			width: 500,
 			title: 'Add a new payment installment',
 			fields: [
-				{fieldtype:'Data', label:'Check Number', fieldname:'check_number', reqd:1},
-				{fieldtype:'Date', label:'Check Date', fieldname:'check_date', reqd:1},
+				{fieldtype:'Data', label:'Cheque Number', fieldname:'cheque_number', reqd:1},
+				{fieldtype:'Date', label:'Cheque Date', fieldname:'cheque_date', reqd:1},
+				{fieldtype:'Link', label:'Bank Account', fieldname:'bank_account', reqd:1, options:'Account'},
 				{fieldtype:'Button', label:'Update',fieldname:'update'}
 			]
 		})
 		d.show();
 		d.fields_dict.update.input.onclick = function() {
 			var data = d.get_values();
+			
 			if(data) {
-				$c_obj()
+				$c_obj(make_doclist(dt,dn),'loan_post',data,function(){cur_frm.refresh(); d.hide();});
 			}
 		}
 	}

@@ -5,7 +5,7 @@
 	{
 		'creation': '2011-07-15 10:36:42',
 		'docstatus': 0,
-		'modified': '2011-07-15 10:36:42',
+		'modified': '2011-07-15 15:48:34',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
@@ -19,7 +19,7 @@
 		'name': '__common__',
 		'section_style': 'Simple',
 		'show_in_menu': 0,
-		'version': 1
+		'version': 4
 	},
 
 	# These values are common for all DocField
@@ -28,8 +28,7 @@
 		'name': '__common__',
 		'parent': 'Loan Installment',
 		'parentfield': 'fields',
-		'parenttype': 'DocType',
-		'permlevel': 0
+		'parenttype': 'DocType'
 	},
 
 	# DocType, Loan Installment
@@ -44,7 +43,8 @@
 		'fieldname': 'amount',
 		'fieldtype': 'Currency',
 		'idx': 1,
-		'label': 'Amount'
+		'label': 'Amount',
+		'permlevel': 0
 	},
 
 	# DocField
@@ -53,25 +53,28 @@
 		'fieldname': 'due_date',
 		'fieldtype': 'Date',
 		'idx': 2,
-		'label': 'Due Date'
+		'label': 'Due Date',
+		'permlevel': 0
 	},
 
 	# DocField
 	{
 		'doctype': 'DocField',
-		'fieldname': 'check_number',
-		'fieldtype': 'Int',
+		'fieldname': 'cheque_number',
+		'fieldtype': 'Data',
 		'idx': 3,
-		'label': 'Check Number'
+		'label': 'Cheque Number',
+		'permlevel': 0
 	},
 
 	# DocField
 	{
 		'doctype': 'DocField',
-		'fieldname': 'check_date',
+		'fieldname': 'cheque_date',
 		'fieldtype': 'Date',
 		'idx': 4,
-		'label': 'Check Date'
+		'label': 'Cheque Date',
+		'permlevel': 0
 	},
 
 	# DocField
@@ -80,7 +83,8 @@
 		'fieldname': 'deposit_date',
 		'fieldtype': 'Date',
 		'idx': 5,
-		'label': 'Deposit Date'
+		'label': 'Deposit Date',
+		'permlevel': 0
 	},
 
 	# DocField
@@ -89,6 +93,19 @@
 		'fieldname': 'realized_date',
 		'fieldtype': 'Date',
 		'idx': 6,
-		'label': 'Realized Date'
+		'label': 'Realized Date',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'jv_number',
+		'fieldtype': 'Link',
+		'hidden': 0,
+		'idx': 7,
+		'label': 'JV Number',
+		'options': 'Journal Voucher',
+		'permlevel': 1
 	}
 ]

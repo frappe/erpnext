@@ -5,21 +5,21 @@
 	{
 		'creation': '2011-07-15 10:35:26',
 		'docstatus': 0,
-		'modified': '2011-07-15 10:35:26',
+		'modified': '2011-07-15 15:51:10',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1310622631',
+		'_last_update': '1310706327',
 		'colour': 'White:FFF',
 		'doctype': 'DocType',
 		'module': 'Accounts',
 		'name': '__common__',
 		'section_style': 'Simple',
 		'show_in_menu': 0,
-		'version': 11
+		'version': 12
 	},
 
 	# These values are common for all DocField
@@ -34,19 +34,13 @@
 
 	# These values are common for all DocPerm
 	{
-		'cancel': 1,
-		'create': 1,
 		'doctype': 'DocPerm',
-		'idx': 1,
 		'name': '__common__',
 		'parent': 'Loan',
 		'parentfield': 'permissions',
 		'parenttype': 'DocType',
-		'permlevel': 0,
 		'read': 1,
-		'role': 'Accounts User',
-		'submit': 1,
-		'write': 1
+		'role': 'Accounts User'
 	},
 
 	# DocType, Loan
@@ -57,7 +51,20 @@
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm'
+		'cancel': 1,
+		'create': 1,
+		'doctype': 'DocPerm',
+		'idx': 1,
+		'permlevel': 0,
+		'submit': 1,
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'doctype': 'DocPerm',
+		'idx': 2,
+		'permlevel': 1
 	},
 
 	# DocField
