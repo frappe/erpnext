@@ -1,7 +1,7 @@
 # REMEMBER to update this
 # ========================
 
-last_patch = 325
+last_patch = 326
 
 #-------------------------------------------
 
@@ -1294,3 +1294,7 @@ def execute(patch_no):
 	elif patch_no == 325:
 		sql("update `tabDocField` set fieldtype = 'Data' where parent = 'Salary Slip' and fieldname = 'total_days_in_month'")
 		reload_doc('hr', 'doctype', 'salary_slip')
+	elif patch_no == 326:
+		# load the new billing page
+		if cint(webnotes.conn.get_value('Control Panel',None,'sync_with_gateway')):
+			reload_doc('server_tools','page','billing')
