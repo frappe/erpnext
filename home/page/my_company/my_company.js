@@ -143,7 +143,10 @@ MemberList.prototype.make_list = function() {
 			var c1 = repl(' AND (first_name LIKE "%(txt)s" OR last_name LIKE "%(txt)s" OR name LIKE "%(txt)s")', {txt:'%' + me.search_inp.value + '%'});
 		}
 		
-		this.query = repl("SELECT distinct ifnull(name,''), ifnull(concat_ws(' ', first_name, last_name),''), ifnull(messanger_status,''), ifnull(gender,''), ifnull(file_list,''), 0, enabled from tabProfile where docstatus != 2 AND name not in ('Guest','Administrator') %(cond)s ORDER BY name asc",{cond:c1});
+		this.query = repl("SELECT distinct ifnull(name,''), ifnull(concat_ws(' ', first_name, last_name),''), \
+			ifnull(messanger_status,''), ifnull(gender,''), ifnull(file_list,''), 0, enabled, last_login \
+			from tabProfile where docstatus != 2 AND name not in ('Guest','Administrator') %(cond)s \
+			ORDER BY name asc",{cond:c1});
 	}
 	this.lst.make(this.lst_area);
 	this.lst.show_cell= function(cell, ri, ci, d) {
