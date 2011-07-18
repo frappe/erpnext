@@ -46,7 +46,7 @@ function startup_setup() {
 	// for logout and payment
 	var callback = function(r,rt) {
 		if(r.message){
-			login_file = r.message;
+			login_file = 'http://' + r.message;
 		}
 		else {
 			
