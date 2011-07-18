@@ -43,6 +43,7 @@ def on_login_post_session(login_manager):
 	# login from
 	if webnotes.form_dict.get('login_from'):
 		webnotes.session['data']['login_from'] = webnotes.form.getvalue('login_from')
+		webnotes.session_obj.update()
 
 	update_account_details()
 
