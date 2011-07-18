@@ -51,7 +51,7 @@ def on_login_post_session(login_manager):
 #
 def on_logout(login_manager):
 	if cint(webnotes.conn.get_value('Control Panel', None, 'sync_with_gateway')):
-		from server_tools.server_tools.gateway_utils import logout_sso
+		from server_tools.gateway_utils import logout_sso
 		logout_sso()
 
 #

@@ -50,7 +50,7 @@ function startup_setup() {
 		}
 		else {
 			
-			login_file = 'https://www.erpnext.com';
+			login_file = 'http://www.erpnext.com';
 			}
 		// setup toolbar
 		pscript.startup_setup_toolbar();
