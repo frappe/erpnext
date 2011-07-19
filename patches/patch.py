@@ -1,7 +1,7 @@
 # REMEMBER to update this
 # ========================
 
-last_patch = 326
+last_patch = 327
 
 #-------------------------------------------
 
@@ -1298,3 +1298,6 @@ def execute(patch_no):
 		# load the new billing page
 		if cint(webnotes.conn.get_value('Control Panel',None,'sync_with_gateway')):
 			reload_doc('server_tools','page','billing')
+	elif patch_no == 327:
+		if webnotes.conn.get_value('Control Panel', None, 'account_id') != 'axjanak2011':
+			sql("delete from `tabDocField` where fieldname = 'supplier_status' and parent = 'Supplier'")
