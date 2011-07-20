@@ -267,7 +267,7 @@ def create_proper_index():
 						'Print Heading': [], 
 						'TDS Rate Detail': ['category']
 					}
-	sql("commit")
+	#sql("commit") # only required if run from login
 	exist_dt = [cstr(d[0]) for d in sql("select name from `tabDocType`")]
 	
 	for dt in [d for d in dt_index_fields.keys() if d in exist_dt]:

@@ -183,6 +183,7 @@ SetupData = function(cnty){
     ['Country',1,'Country','','Country master'],
     ['State',1,'State','','State master'],
     ['Rename Tool',3,'Rename Tool','','Rename a record'],
+    ['Bulk Rename Tool',3,'Bulk Rename Tool','','Rename multiple records at a time'],
     ['Activty Type',1,'Activity Type','','Types of activities that you can select in your Timesheet'],
     ['City',1,'City','','City master']]};
   

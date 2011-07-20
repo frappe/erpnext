@@ -1,7 +1,7 @@
 # REMEMBER to update this
 # ========================
 
-last_patch = 328
+last_patch = 329
 
 #-------------------------------------------
 
@@ -1304,3 +1304,6 @@ def execute(patch_no):
 	elif patch_no == 328:
 		from index_patch import create_proper_index
 		create_proper_index()
+	elif patch_no == 329:
+		reload_doc('utilities', 'doctype', 'rename_tool')
+		reload_doc('utilities', 'doctype', 'bulk_rename_tool')
