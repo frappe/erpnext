@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2011-02-17 13:25:56',
+		'creation': '2011-02-10 14:10:08',
 		'docstatus': 0,
-		'modified': '2011-07-08 13:28:15',
+		'modified': '2011-07-11 12:48:49',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
@@ -54,28 +54,28 @@
 
 	# DocPerm
 	{
-		'amend': 0,
-		'cancel': 0,
+		'amend': 1,
+		'cancel': 1,
 		'create': 1,
 		'doctype': 'DocPerm',
 		'idx': 1,
+		'match': 'owner',
 		'permlevel': 0,
-		'role': 'Employee',
-		'submit': 0,
+		'submit': 1,
 		'write': 1
 	},
 
 	# DocPerm
 	{
-		'amend': 1,
-		'cancel': 1,
-		'create': 1,
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
 		'doctype': 'DocPerm',
 		'idx': 2,
+		'match': 'owner',
 		'permlevel': 0,
-		'role': 'HR User',
-		'submit': 1,
-		'write': 1
+		'submit': 0,
+		'write': 0
 	},
 
 	# DocPerm
@@ -86,6 +86,19 @@
 		'doctype': 'DocPerm',
 		'idx': 3,
 		'permlevel': 0,
+		'role': 'HR User',
+		'submit': 1,
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'amend': 1,
+		'cancel': 1,
+		'create': 1,
+		'doctype': 'DocPerm',
+		'idx': 4,
+		'permlevel': 0,
 		'role': 'HR Manager',
 		'submit': 1,
 		'write': 1
@@ -93,28 +106,18 @@
 
 	# DocPerm
 	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
 		'doctype': 'DocPerm',
-		'idx': 4,
+		'idx': 5,
 		'permlevel': 1,
-		'role': 'HR User',
-		'submit': 0,
-		'write': 0
+		'role': 'HR User'
 	},
 
 	# DocPerm
 	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
 		'doctype': 'DocPerm',
-		'idx': 5,
+		'idx': 6,
 		'permlevel': 1,
-		'role': 'HR Manager',
-		'submit': 0,
-		'write': 0
+		'role': 'HR Manager'
 	},
 
 	# DocField
@@ -149,7 +152,7 @@
 		'in_filter': 1,
 		'label': 'Employee Name',
 		'permlevel': 1,
-		'search_index': 1
+		'search_index': 0
 	},
 
 	# DocField
@@ -201,7 +204,7 @@
 		'options': 'link:Fiscal Year',
 		'permlevel': 0,
 		'reqd': 1,
-		'search_index': 1
+		'search_index': 0
 	},
 
 	# DocField
@@ -234,6 +237,7 @@
 		'idx': 10,
 		'label': 'From Date',
 		'permlevel': 0,
+		'search_index': 1,
 		'trigger': 'Client'
 	},
 
@@ -246,6 +250,7 @@
 		'idx': 11,
 		'label': 'To Date',
 		'permlevel': 0,
+		'search_index': 1,
 		'trigger': 'Client'
 	},
 

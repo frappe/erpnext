@@ -48,7 +48,8 @@
 		'label': 'Purchase Receipt No',
 		'oldfieldname': 'purchase_receipt_no',
 		'oldfieldtype': 'Link',
-		'options': 'Purchase Receipt'
+		'options': 'Purchase Receipt',
+		'search_index': 1
 	},
 
 	# DocField

@@ -264,7 +264,7 @@
 		'oldfieldtype': 'Data',
 		'permlevel': 2,
 		'reqd': 0,
-		'search_index': 1
+		'search_index': 0
 	},
 
 	# DocField
@@ -391,7 +391,7 @@
 		'oldfieldname': 'resolution_date',
 		'oldfieldtype': 'Date',
 		'permlevel': 1,
-		'search_index': 1
+		'search_index': 0
 	},
 
 	# DocField

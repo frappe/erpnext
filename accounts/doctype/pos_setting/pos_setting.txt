@@ -172,7 +172,8 @@
 		'oldfieldname': 'company',
 		'oldfieldtype': 'Link',
 		'options': 'Company',
-		'reqd': 1
+		'reqd': 1,
+		'search_index': 0
 	},
 
 	# DocField
@@ -193,7 +194,8 @@
 		'oldfieldname': 'customer_account',
 		'oldfieldtype': 'Link',
 		'options': 'Account',
-		'reqd': 0
+		'reqd': 0,
+		'search_index': 0
 	},
 
 	# DocField
@@ -206,7 +208,8 @@
 		'oldfieldname': 'cash_bank_account',
 		'oldfieldtype': 'Link',
 		'options': 'Account',
-		'reqd': 1
+		'reqd': 1,
+		'search_index': 0
 	},
 
 	# DocField
@@ -219,7 +222,8 @@
 		'oldfieldname': 'income_account',
 		'oldfieldtype': 'Link',
 		'options': 'Account',
-		'reqd': 1
+		'reqd': 1,
+		'search_index': 0
 	},
 
 	# DocField
@@ -232,7 +236,8 @@
 		'oldfieldname': 'warehouse',
 		'oldfieldtype': 'Link',
 		'options': 'Warehouse',
-		'reqd': 1
+		'reqd': 1,
+		'search_index': 0
 	},
 
 	# DocField
@@ -245,7 +250,8 @@
 		'oldfieldname': 'cost_center',
 		'oldfieldtype': 'Link',
 		'options': 'Cost Center',
-		'reqd': 1
+		'reqd': 1,
+		'search_index': 0
 	},
 
 	# DocField
@@ -257,7 +263,8 @@
 		'label': 'Charge',
 		'oldfieldname': 'charge',
 		'oldfieldtype': 'Link',
-		'options': 'Other Charges'
+		'options': 'Other Charges',
+		'search_index': 0
 	},
 
 	# DocField
@@ -282,7 +289,8 @@
 		'label': 'Terms',
 		'oldfieldname': 'tc_name',
 		'oldfieldtype': 'Link',
-		'options': 'Term'
+		'options': 'Term',
+		'search_index': 0
 	},
 
 	# DocField

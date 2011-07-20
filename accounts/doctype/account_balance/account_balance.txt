@@ -174,7 +174,7 @@
 		'oldfieldname': 'fiscal_year',
 		'oldfieldtype': 'Link',
 		'options': 'Fiscal Year',
-		'search_index': 1
+		'search_index': 0
 	},
 
 	# DocField

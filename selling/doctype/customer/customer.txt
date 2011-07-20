@@ -12,7 +12,7 @@
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1306834669',
+		'_last_update': '1309508837',
 		'allow_print': 0,
 		'allow_trash': 1,
 		'colour': 'White:FFF',
@@ -176,7 +176,7 @@
 		'idx': 4,
 		'label': 'Series',
 		'no_copy': 1,
-		'options': '\nCUST\nCUSTMUM',
+		'options': '\nCUST\nCUSTMUM\nCUSTOM',
 		'permlevel': 0,
 		'print_hide': 0
 	},
@@ -340,7 +340,7 @@
 		'options': 'Company',
 		'permlevel': 0,
 		'reqd': 1,
-		'search_index': 1
+		'search_index': 0
 	},
 
 	# DocField

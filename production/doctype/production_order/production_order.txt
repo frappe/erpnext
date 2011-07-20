@@ -180,6 +180,7 @@
 		'options': 'Bill Of Materials',
 		'permlevel': 1,
 		'reqd': 1,
+		'search_index': 0,
 		'trigger': 'Client'
 	},
 
@@ -306,7 +307,8 @@
 		'oldfieldtype': 'Link',
 		'options': 'Warehouse',
 		'permlevel': 0,
-		'reqd': 1
+		'reqd': 1,
+		'search_index': 0
 	},
 
 	# DocField
@@ -323,7 +325,8 @@
 		'oldfieldtype': 'Link',
 		'options': 'Warehouse',
 		'permlevel': 0,
-		'reqd': 1
+		'reqd': 1,
+		'search_index': 0
 	},
 
 	# DocField
@@ -367,7 +370,8 @@
 		'oldfieldtype': 'Link',
 		'options': 'Company',
 		'permlevel': 0,
-		'reqd': 1
+		'reqd': 1,
+		'search_index': 0
 	},
 
 	# DocField

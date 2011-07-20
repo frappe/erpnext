@@ -1,7 +1,7 @@
 # REMEMBER to update this
 # ========================
 
-last_patch = 327
+last_patch = 328
 
 #-------------------------------------------
 
@@ -1301,3 +1301,6 @@ def execute(patch_no):
 	elif patch_no == 327:
 		if webnotes.conn.get_value('Control Panel', None, 'account_id') != 'axjanak2011':
 			sql("delete from `tabDocField` where fieldname = 'supplier_status' and parent = 'Supplier'")
+	elif patch_no == 328:
+		from index_patch import create_proper_index
+		create_proper_index()

@@ -12,7 +12,7 @@
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1308829300',
+		'_last_update': '1309508836',
 		'allow_copy': 1,
 		'allow_trash': 1,
 		'colour': 'White:FFF',
@@ -179,7 +179,7 @@
 		'oldfieldtype': 'Data',
 		'permlevel': 1,
 		'reqd': 1,
-		'search_index': 1
+		'search_index': 0
 	},
 
 	# DocField
@@ -225,7 +225,7 @@
 		'options': '\nLedger\nGroup',
 		'permlevel': 1,
 		'reqd': 1,
-		'search_index': 1
+		'search_index': 0
 	},
 
 	# DocField
@@ -259,7 +259,7 @@
 		'oldfieldname': 'debit_or_credit',
 		'oldfieldtype': 'Data',
 		'permlevel': 1,
-		'search_index': 1
+		'search_index': 0
 	},
 
 	# DocField
@@ -274,7 +274,7 @@
 		'oldfieldtype': 'Select',
 		'options': 'Yes\nNo',
 		'permlevel': 1,
-		'search_index': 1
+		'search_index': 0
 	},
 
 	# DocField
@@ -344,7 +344,7 @@
 		'options': 'Company',
 		'permlevel': 1,
 		'reqd': 1,
-		'search_index': 1
+		'search_index': 0
 	},
 
 	# DocField

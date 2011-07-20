@@ -12,7 +12,7 @@
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1307707462',
+		'_last_update': '1309508840',
 		'allow_attach': 1,
 		'colour': 'White:FFF',
 		'doctype': 'DocType',
@@ -131,7 +131,8 @@
 		'oldfieldname': 'reconciliation_date',
 		'oldfieldtype': 'Date',
 		'permlevel': 0,
-		'reqd': 1
+		'reqd': 1,
+		'search_index': 1
 	},
 
 	# DocField
@@ -185,7 +186,7 @@
 		'oldfieldtype': 'Link',
 		'options': 'Company',
 		'permlevel': 0,
-		'search_index': 1
+		'search_index': 0
 	},
 
 	# DocField
@@ -200,7 +201,7 @@
 		'oldfieldtype': 'Select',
 		'options': 'link:Fiscal Year',
 		'permlevel': 0,
-		'search_index': 1
+		'search_index': 0
 	},
 
 	# DocField

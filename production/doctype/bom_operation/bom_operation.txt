@@ -114,6 +114,7 @@
 		'options': 'Workstation',
 		'permlevel': 0,
 		'reqd': 1,
+		'search_index': 0,
 		'trigger': 'Client'
 	},
 

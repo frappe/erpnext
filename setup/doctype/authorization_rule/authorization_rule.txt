@@ -79,7 +79,8 @@
 		'oldfieldname': 'company',
 		'oldfieldtype': 'Link',
 		'options': 'Company',
-		'reqd': 0
+		'reqd': 0,
+		'search_index': 0
 	},
 
 	# DocField
@@ -157,7 +158,8 @@
 		'label': 'Applicable To (Employee)',
 		'oldfieldname': 'to_emp',
 		'oldfieldtype': 'Link',
-		'options': 'Employee'
+		'options': 'Employee',
+		'search_index': 0
 	},
 
 	# DocField
@@ -171,7 +173,8 @@
 		'label': 'Applicable To (Designation)',
 		'oldfieldname': 'to_designation',
 		'oldfieldtype': 'Link',
-		'options': 'Designation'
+		'options': 'Designation',
+		'search_index': 0
 	},
 
 	# DocField

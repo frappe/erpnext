@@ -140,7 +140,7 @@
 		'oldfieldtype': 'Data',
 		'permlevel': 1,
 		'print_hide': 1,
-		'search_index': 1,
+		'search_index': 0,
 		'width': '150px'
 	},
 

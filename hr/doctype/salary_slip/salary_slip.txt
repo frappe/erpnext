@@ -5,7 +5,7 @@
 	{
 		'creation': '2010-08-08 17:09:20',
 		'docstatus': 0,
-		'modified': '2011-07-13 17:38:55',
+		'modified': '2011-07-18 15:30:04',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
@@ -51,38 +51,72 @@
 
 	# DocPerm
 	{
-		'amend': 1,
-		'cancel': 1,
-		'create': 1,
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
 		'doctype': 'DocPerm',
-		'idx': 1,
+		'match': 'owner',
 		'permlevel': 0,
-		'role': 'System Manager',
-		'submit': 1,
-		'write': 1
+		'submit': 0,
+		'write': 0
 	},
 
 	# DocPerm
 	{
 		'amend': 0,
 		'cancel': 0,
-		'create': 1,
+		'create': 0,
 		'doctype': 'DocPerm',
-		'idx': 2,
+		'match': 'owner',
 		'permlevel': 0,
-		'role': 'HR User',
-		'submit': 1,
-		'write': 1
+		'submit': 0,
+		'write': 0
 	},
 
 	# DocPerm
 	{
 		'amend': 0,
 		'cancel': 0,
+		'create': 0,
+		'doctype': 'DocPerm',
+		'match': 'owner',
+		'permlevel': 0,
+		'submit': 0,
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
+		'doctype': 'DocPerm',
+		'match': 'owner',
+		'permlevel': 0,
+		'submit': 0,
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
 		'create': 1,
 		'doctype': 'DocPerm',
 		'idx': 3,
 		'permlevel': 0,
+		'role': 'HR User',
+		'submit': 1,
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'amend': 1,
+		'cancel': 1,
+		'create': 1,
+		'doctype': 'DocPerm',
+		'idx': 4,
+		'permlevel': 0,
 		'role': 'HR Manager',
 		'submit': 1,
 		'write': 1
@@ -90,28 +124,18 @@
 
 	# DocPerm
 	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
 		'doctype': 'DocPerm',
-		'idx': 4,
+		'idx': 5,
 		'permlevel': 1,
-		'role': 'HR User',
-		'submit': 0,
-		'write': 0
+		'role': 'HR User'
 	},
 
 	# DocPerm
 	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
 		'doctype': 'DocPerm',
-		'idx': 5,
+		'idx': 6,
 		'permlevel': 1,
-		'role': 'HR Manager',
-		'submit': 0,
-		'write': 0
+		'role': 'HR Manager'
 	},
 
 	# DocField
@@ -148,7 +172,7 @@
 		'options': 'Employee',
 		'permlevel': 0,
 		'reqd': 1,
-		'search_index': 0
+		'search_index': 1
 	},
 
 	# DocField
@@ -178,7 +202,7 @@
 		'options': 'Department',
 		'permlevel': 1,
 		'reqd': 0,
-		'search_index': 1
+		'search_index': 0
 	},
 
 	# DocField
@@ -193,7 +217,7 @@
 		'oldfieldtype': 'Link',
 		'options': 'Designation',
 		'permlevel': 1,
-		'search_index': 1
+		'search_index': 0
 	},
 
 	# DocField
@@ -208,7 +232,7 @@
 		'oldfieldtype': 'Link',
 		'options': 'Branch',
 		'permlevel': 1,
-		'search_index': 1
+		'search_index': 0
 	},
 
 	# DocField
@@ -223,7 +247,7 @@
 		'oldfieldtype': 'Link',
 		'options': 'Grade',
 		'permlevel': 1,
-		'search_index': 1
+		'search_index': 0
 	},
 
 	# DocField
@@ -264,6 +288,28 @@
 	# DocField
 	{
 		'doctype': 'DocField',
+		'fieldname': 'letter_head',
+		'fieldtype': 'Link',
+		'idx': 11,
+		'label': 'Letter Head',
+		'options': 'Letter Head',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'letter_head',
+		'fieldtype': 'Link',
+		'idx': 11,
+		'label': 'Letter Head',
+		'options': 'Letter Head',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
 		'fieldtype': 'Column Break',
 		'idx': 12,
 		'oldfieldtype': 'Column Break',
@@ -285,7 +331,33 @@
 		'options': 'Fiscal Year',
 		'permlevel': 0,
 		'reqd': 1,
-		'search_index': 1
+		'search_index': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'company',
+		'fieldtype': 'Select',
+		'idx': 14,
+		'in_filter': 1,
+		'label': 'Company',
+		'options': 'link:Company',
+		'permlevel': 0,
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'company',
+		'fieldtype': 'Select',
+		'idx': 14,
+		'in_filter': 1,
+		'label': 'Company',
+		'options': 'link:Company',
+		'permlevel': 0,
+		'reqd': 1
 	},
 
 	# DocField

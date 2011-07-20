@@ -338,7 +338,7 @@
 		'oldfieldtype': 'Date',
 		'permlevel': 0,
 		'reqd': 1,
-		'search_index': 1,
+		'search_index': 0,
 		'trigger': 'Client',
 		'width': '100px'
 	},
@@ -359,7 +359,7 @@
 		'permlevel': 1,
 		'print_hide': 1,
 		'reqd': 1,
-		'search_index': 1,
+		'search_index': 0,
 		'width': '150px'
 	},
 
@@ -888,7 +888,7 @@
 		'permlevel': 0,
 		'print_hide': 1,
 		'reqd': 1,
-		'search_index': 1,
+		'search_index': 0,
 		'width': '150px'
 	},
 
@@ -906,7 +906,7 @@
 		'permlevel': 0,
 		'print_hide': 1,
 		'reqd': 1,
-		'search_index': 1,
+		'search_index': 0,
 		'width': '150px'
 	},
 
