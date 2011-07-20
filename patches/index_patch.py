@@ -291,10 +291,5 @@ def create_proper_index():
 				sql("start transaction")
 				sql("UPDATE `tabDocField` SET search_index = 1 WHERE fieldname = '%s' AND parent = '%s'" % (d, dt))
 				sql("commit")
-
-			sql("start transaction")
-			dt_module = sql("select module from `tabDocType` where name = '%s'" % dt)[0][0]
-			export_to_files(record_list = [['DocType', dt]], record_module = dt_module)
-			sql("commit")
 		except:
 			continue

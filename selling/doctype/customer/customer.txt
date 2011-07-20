@@ -5,7 +5,7 @@
 	{
 		'creation': '2010-08-08 17:08:56',
 		'docstatus': 0,
-		'modified': '2011-05-26 17:31:31',
+		'modified': '2011-07-20 10:42:05',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
@@ -26,7 +26,7 @@
 		'show_in_menu': 0,
 		'subject': "eval:'%(customer_name)s'=='%(name)s' ? ' ' : '%(customer_name)s'",
 		'tag_fields': 'customer_group,customer_type',
-		'version': 431
+		'version': 433
 	},
 
 	# These values are common for all DocField
