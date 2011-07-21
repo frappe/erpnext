@@ -5,21 +5,21 @@
 	{
 		'creation': '2011-07-15 10:35:26',
 		'docstatus': 0,
-		'modified': '2011-07-15 15:51:10',
+		'modified': '2011-07-18 12:12:19',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1310706327',
+		'_last_update': '1310963215',
 		'colour': 'White:FFF',
 		'doctype': 'DocType',
 		'module': 'Accounts',
 		'name': '__common__',
 		'section_style': 'Simple',
 		'show_in_menu': 0,
-		'version': 12
+		'version': 15
 	},
 
 	# These values are common for all DocField
@@ -92,9 +92,30 @@
 	# DocField
 	{
 		'doctype': 'DocField',
+		'fieldname': 'receivable_account',
+		'fieldtype': 'Link',
+		'idx': 3,
+		'label': 'Receivable Account',
+		'options': 'Account'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'invoice',
+		'fieldtype': 'Link',
+		'idx': 4,
+		'label': 'Invoice',
+		'options': 'Receivable Voucher',
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
 		'fieldname': 'loan_amount',
 		'fieldtype': 'Currency',
-		'idx': 3,
+		'idx': 5,
 		'label': 'Loan Amount',
 		'reqd': 1
 	},
@@ -104,7 +125,7 @@
 		'doctype': 'DocField',
 		'fieldname': 'start_date',
 		'fieldtype': 'Date',
-		'idx': 4,
+		'idx': 6,
 		'label': 'Start Date',
 		'reqd': 1
 	},
@@ -114,7 +135,7 @@
 		'doctype': 'DocField',
 		'fieldname': 'no_of_installments',
 		'fieldtype': 'Int',
-		'idx': 5,
+		'idx': 7,
 		'label': 'No of Installments',
 		'reqd': 1
 	},
@@ -124,7 +145,7 @@
 		'colour': 'White:FFF',
 		'doctype': 'DocField',
 		'fieldtype': 'Button',
-		'idx': 6,
+		'idx': 8,
 		'label': 'Generate',
 		'trigger': 'Client'
 	},
@@ -134,7 +155,7 @@
 		'doctype': 'DocField',
 		'fieldname': 'installments',
 		'fieldtype': 'Table',
-		'idx': 7,
+		'idx': 9,
 		'label': 'Installments',
 		'options': 'Loan Installment'
 	},
@@ -145,7 +166,7 @@
 		'colour': 'White:FFF',
 		'doctype': 'DocField',
 		'fieldtype': 'Button',
-		'idx': 8,
+		'idx': 10,
 		'label': 'Installment Reciept'
 	}
 ]

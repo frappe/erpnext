@@ -8,19 +8,24 @@ $.extend(cur_frm.cscript, {
 		}
 		cur_frm.refresh();
 	},
+/*	submit:function(doc){
+		data=doc.get_values();
+
+		data['']=
+		$c_obj(make_doclist(dt,dn),'loan_post',data,function(){});
+	},*/
 	refresh: function(doc) {
 		cur_frm.cscript.hide_show_buttons(doc);
 	},
 	hide_show_buttons: function(doc) {
 		if(doc.docstatus==0) {
-			hide_field('Installment Reciept');// show_field('Generate');
+			hide_field('Installment Reciept'); show_field('Generate');
 		} else if (doc.docstatus==1) {
-//			show_field('Installment Reciept'); 
-hide_field('Generate');			
+			show_field('Installment Reciept');hide_field('Generate');
 		}
 	},
 	clear_installments: function(doc) {
-		$.each(getchildren('Loan Installment', doc.name, 'installments', 'Loan'), 
+		$.each(getchildren('Loan Installment', doc.name, 'installments', 'Loan'),
 			function(i, d) {
 				LocalDB.delete_doc('Loan Installment', d.name);
 			}
@@ -40,9 +45,9 @@ hide_field('Generate');
 		d.show();
 		d.fields_dict.update.input.onclick = function() {
 			var data = d.get_values();
-			
+
 			if(data) {
-				$c_obj(make_doclist(dt,dn),'loan_post',data,function(){cur_frm.refresh(); d.hide();});
+				$c_obj(make_doclist(dt,dn),'loan_installment_post',data,function(){cur_frm.refresh(); d.hide();});
 			}
 		}
 	}
