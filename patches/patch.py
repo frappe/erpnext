@@ -7,7 +7,6 @@ last_patch = 327
 
 def execute(patch_no):
 	import webnotes
-	from webnotes.modules.import_module import import_from_files
 	from webnotes.modules.module_manager import reload_doc
 
 	from webnotes.model.code import get_obj
