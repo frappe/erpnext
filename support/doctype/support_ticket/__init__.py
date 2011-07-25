@@ -93,7 +93,7 @@ We will get back to you as soon as possible
 			recipients = [d.raised_by], \
 			sender = self.email_settings.support_email, \
 			subject = '['+d.name+'] ' + d.subject, \
-			msg= autoresponse)
+			msg = response)
 		
 	def auto_close_tickets(self):
 		"""
