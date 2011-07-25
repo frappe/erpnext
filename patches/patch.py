@@ -1,7 +1,7 @@
 # REMEMBER to update this
 # ========================
 
-last_patch = 326
+last_patch = 327
 
 #-------------------------------------------
 
@@ -1308,6 +1308,7 @@ def execute(patch_no):
 			'support_host':'host',
 			'support_username': 'username',
 			'support_password': 'password',
+			'support_use_ssl': 'use_ssl',
 			'sync_support_mails': 'integrate_incoming',
 			'signature': 'support_signature'
 		}
@@ -1320,4 +1321,4 @@ def execute(patch_no):
 		from webnotes.model import delete_doc
 		delete_doc('DocType', 'Support Email Settings')
 
-		# delete description field
+		reload_doc('support','doctype','support_ticket')
