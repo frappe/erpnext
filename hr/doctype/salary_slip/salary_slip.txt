@@ -5,7 +5,7 @@
 	{
 		'creation': '2010-08-08 17:09:20',
 		'docstatus': 0,
-		'modified': '2011-07-13 17:38:55',
+		'modified': '2011-07-14 16:07:20',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
@@ -51,38 +51,50 @@
 
 	# DocPerm
 	{
-		'amend': 1,
-		'cancel': 1,
-		'create': 1,
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
 		'doctype': 'DocPerm',
-		'idx': 1,
+		'match': 'owner',
 		'permlevel': 0,
-		'role': 'System Manager',
-		'submit': 1,
-		'write': 1
+		'role': 'Employee',
+		'submit': 0,
+		'write': 0
 	},
 
 	# DocPerm
 	{
 		'amend': 0,
 		'cancel': 0,
-		'create': 1,
+		'create': 0,
 		'doctype': 'DocPerm',
-		'idx': 2,
+		'match': 'owner',
 		'permlevel': 0,
-		'role': 'HR User',
-		'submit': 1,
-		'write': 1
+		'role': 'Employee',
+		'submit': 0,
+		'write': 0
 	},
 
 	# DocPerm
 	{
 		'amend': 0,
-		'cancel': 0,
 		'create': 1,
 		'doctype': 'DocPerm',
 		'idx': 3,
 		'permlevel': 0,
+		'role': 'HR User',
+		'submit': 1,
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'amend': 1,
+		'cancel': 1,
+		'create': 1,
+		'doctype': 'DocPerm',
+		'idx': 4,
+		'permlevel': 0,
 		'role': 'HR Manager',
 		'submit': 1,
 		'write': 1
@@ -90,28 +102,18 @@
 
 	# DocPerm
 	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
 		'doctype': 'DocPerm',
-		'idx': 4,
+		'idx': 5,
 		'permlevel': 1,
-		'role': 'HR User',
-		'submit': 0,
-		'write': 0
+		'role': 'HR User'
 	},
 
 	# DocPerm
 	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
 		'doctype': 'DocPerm',
-		'idx': 5,
+		'idx': 6,
 		'permlevel': 1,
-		'role': 'HR Manager',
-		'submit': 0,
-		'write': 0
+		'role': 'HR Manager'
 	},
 
 	# DocField

@@ -1,11 +1,26 @@
-SELECT DISTINCT `tabGL Entry`.`Aging_date`,`tabGL Entry`.`transaction_date`,`tabGL Entry`.`account`, `tabGL Entry`.`against_voucher_type`, `tabGL Entry`.`against_voucher`,`tabGL Entry`.`voucher_type`,`tabGL Entry`.`voucher_no`, `tabGL Entry`.remarks
-FROM `tabGL Entry`,`tabAccount` 
-WHERE `tabGL Entry`.`posting_date`>= '%(posting_date)s'
- AND `tabGL Entry`.`posting_date`<= '%(posting_date1)s'
- AND `tabGL Entry`.`account` LIKE '%(account)s%%'
- AND `tabGL Entry`.`company` LIKE '%(company)s%%'
- AND ((ifnull(`tabGL Entry`.voucher_type,'') = 'Payable Voucher' and `tabGL Entry`.credit>0) OR `tabGL Entry`.voucher_type = 'Journal Voucher')
- AND `tabGL Entry`.`is_cancelled` = 'No'
- AND `tabAccount`.master_type = 'Supplier'
- AND `tabAccount`.name = `tabGL Entry`.account
- ORDER BY `tabGL Entry`.`posting_date`
+SELECT *
+FROM (
+
+SELECT a.posting_date, a.voucher_no, a.account, a.credit AS inv_amount, ifnull( a.credit, 0 ) - ifnull( b.debit, 0 ) AS outstanding
+FROM (
+
+SELECT gl . *
+FROM `tabGL Entry` gl, `tabAccount` acc
+WHERE gl.account = acc.name
+AND acc.master_type = 'Supplier'
+AND ifnull( gl.is_cancelled, 'No' ) = 'No'
+AND gl.credit >0
+AND gl.posting_date <= current_date
+)a
+LEFT JOIN (
+
+SELECT against_voucher, account, sum( debit ) AS debit
+FROM `tabGL Entry`
+WHERE ifnull( is_cancelled, 'No' ) = 'No'
+AND posting_date <= current_date
+GROUP BY against_voucher, account
+)b ON a.voucher_no = b.against_voucher
+AND a.account = b.account
+)c
+WHERE outstanding !=0
+ORDER BY posting_date, voucher_no
