@@ -1321,3 +1321,4 @@ def execute(patch_no):
 		delete_doc('DocType', 'Support Email Settings')
 
 		reload_doc('support','doctype','support_ticket')
+		sql("delete from tabDocField where fieldname='problem_description' and parent='Support Ticket'")
