@@ -33,7 +33,7 @@ def update_account_details():
 		webnotes.conn.set_global('days_to_expiry', webnotes.form_dict.get('days_to_expiry'))
 
 	if webnotes.form_dict.get('first_name'):
-		from server_tools.server_tools.gateway_utils import update_user_details
+		from server_tools.gateway_utils import update_user_details
 		update_user_details()
 		
 #
@@ -43,6 +43,7 @@ def on_login_post_session(login_manager):
 	# login from
 	if webnotes.form_dict.get('login_from'):
 		webnotes.session['data']['login_from'] = webnotes.form.getvalue('login_from')
+		webnotes.session_obj.update()
 
 	update_account_details()
 
@@ -51,7 +52,7 @@ def on_login_post_session(login_manager):
 #
 def on_logout(login_manager):
 	if cint(webnotes.conn.get_value('Control Panel', None, 'sync_with_gateway')):
-		from server_tools.server_tools.gateway_utils import logout_sso
+		from server_tools.gateway_utils import logout_sso
 		logout_sso()
 
 #

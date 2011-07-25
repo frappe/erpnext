@@ -2,7 +2,7 @@ body {
 	background-color: #e2e2e2;
 }
 
-div.layout_wrapper {
+.layout_wrapper {
 	padding: 13px;
 	margin: 7px;
 	-moz-box-shadow: 1px 1px 6px #AAA;

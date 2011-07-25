@@ -13,7 +13,6 @@ sql = webnotes.conn.sql
 get_value = webnotes.conn.get_value
 in_transaction = webnotes.conn.in_transaction
 convert_to_lists = webnotes.conn.convert_to_lists
-
 	
 # -----------------------------------------------------------------------------------------
 
@@ -37,9 +36,11 @@ class DocType:
 	#-----------------------
 	def set_account_details(self, args):
 		args = eval(args)
-		#webnotes.logger.error("args in set_account_details of setup_control: " + str(args))
+
 		self.set_cp_defaults(args['company'], args['industry'], args['time_zone'], args['country'], args['account_name'])
 		self.create_profile(args['user'], args['first_name'], args['last_name'])	
+	
+		from server_tools.gateway_utils import update_client_control
 		update_client_control(args['total_users'])
 		
 	
@@ -182,7 +183,7 @@ class DocType:
 		Validates if setup has been performed after database allocation
 		"""
 
-		from server_tools.gateway_utils import update_client_control, get_total_users
+		from server_tools.gateway_utils import get_total_users
 		
 		args = eval(args)
 		#webnotes.logger.error("args in set_account_details of setup_control: " + str(args))

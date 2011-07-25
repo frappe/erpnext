@@ -46,11 +46,11 @@ function startup_setup() {
 	// for logout and payment
 	var callback = function(r,rt) {
 		if(r.message){
-			login_file = r.message;
+			login_file = 'http://' + r.message;
 		}
 		else {
 			
-			login_file = 'https://www.erpnext.com';
+			login_file = 'http://www.erpnext.com';
 			}
 		// setup toolbar
 		pscript.startup_setup_toolbar();
