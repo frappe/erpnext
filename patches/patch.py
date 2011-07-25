@@ -1298,3 +1298,26 @@ def execute(patch_no):
 		# load the new billing page
 		if cint(webnotes.conn.get_value('Control Panel',None,'sync_with_gateway')):
 			reload_doc('server_tools','page','billing')
+	elif patch_no == 327:
+		# patch for support email settings now moved to email settings
+		reload_doc('setup','doctype','email_settings')
+		
+		# map fields from support to email settings
+		field_map = {
+			'support_email': 'email',
+			'support_host':'host',
+			'support_username': 'username',
+			'support_password': 'password',
+			'sync_support_mails': 'integrate_incoming',
+			'signature': 'support_signature'
+		}
+		
+		for key in field_map:
+			webnotes.conn.set_value('Email Settings',None,key, \
+				webnotes.conn.get_value('Support Email Settings',None,field_map[key]))
+		
+		# delete support email settings
+		from webnotes.model import delete_doc
+		delete_doc('DocType', 'Support Email Settings')
+
+		# delete description field

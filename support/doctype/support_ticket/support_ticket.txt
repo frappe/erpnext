@@ -24,7 +24,7 @@
 		'server_code_error': ' ',
 		'show_in_menu': 0,
 		'subject': '%(subject)s',
-		'tag_fields': 'status,allocated_to',
+		'tag_fields': 'status',
 		'version': 150
 	},
 
