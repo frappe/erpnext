@@ -5,7 +5,7 @@
 	{
 		'creation': '2010-09-25 10:50:34',
 		'docstatus': 0,
-		'modified': '2011-07-15 10:43:04',
+		'modified': '2011-07-26 18:14:48',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
@@ -40,7 +40,7 @@
 		'module_icon': 'Accounts.gif',
 		'module_label': 'Accounts',
 		'module_name': 'Accounts',
-		'module_seq': 5,
+		'module_seq': 3,
 		'name': '__common__'
 	},
 
@@ -107,8 +107,9 @@
 
 	# Module Def Item
 	{
-		'display_name': 'Loan',
-		'doc_name': 'Loan',
+		'description': 'Lease Agreement for Vehicles',
+		'display_name': 'Lease Agreement',
+		'doc_name': 'Lease Agreement',
 		'doc_type': 'Forms',
 		'doctype': 'Module Def Item',
 		'idx': 6
@@ -352,6 +353,15 @@
 		'doc_type': 'Reports',
 		'doctype': 'Module Def Item',
 		'idx': 32
+	},
+
+	# Module Def Item
+	{
+		'display_name': 'Lease Agreement List',
+		'doc_name': 'Lease Agreement List',
+		'doc_type': 'Reports',
+		'doctype': 'Module Def Item',
+		'idx': 33
 	},
 
 	# Module Def Role
