@@ -1,13 +1,12 @@
 # REMEMBER to update this
 # ========================
 
-last_patch = 329
+last_patch = 330
 
 #-------------------------------------------
 
 def execute(patch_no):
 	import webnotes
-	from webnotes.modules.import_module import import_from_files
 	from webnotes.modules.module_manager import reload_doc
 
 	from webnotes.model.code import get_obj
@@ -1299,11 +1298,36 @@ def execute(patch_no):
 		if cint(webnotes.conn.get_value('Control Panel',None,'sync_with_gateway')):
 			reload_doc('server_tools','page','billing')
 	elif patch_no == 327:
+		# patch for support email settings now moved to email settings
+		reload_doc('setup','doctype','email_settings')
+		
+		# map fields from support to email settings
+		field_map = {
+			'support_email': 'email',
+			'support_host':'host',
+			'support_username': 'username',
+			'support_password': 'password',
+			'support_use_ssl': 'use_ssl',
+			'sync_support_mails': 'integrate_incoming',
+			'signature': 'support_signature'
+		}
+		
+		for key in field_map:
+			webnotes.conn.set_value('Email Settings',None,key, \
+				webnotes.conn.get_value('Support Email Settings',None,field_map[key]))
+		
+		# delete support email settings
+		from webnotes.model import delete_doc
+		delete_doc('DocType', 'Support Email Settings')
+
+		reload_doc('support','doctype','support_ticket')
+		sql("delete from tabDocField where fieldname='problem_description' and parent='Support Ticket'")
+	elif patch_no == 328:
 		if webnotes.conn.get_value('Control Panel', None, 'account_id') != 'axjanak2011':
 			sql("delete from `tabDocField` where fieldname = 'supplier_status' and parent = 'Supplier'")
-	elif patch_no == 328:
+	elif patch_no == 329:
 		from index_patch import create_proper_index
 		create_proper_index()
-	elif patch_no == 329:
+	elif patch_no == 330:
 		reload_doc('utilities', 'doctype', 'rename_tool')
 		reload_doc('utilities', 'doctype', 'bulk_rename_tool')

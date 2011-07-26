@@ -19,7 +19,7 @@ class DocType(TransactionBase):
 		
 		response = self.doc.new_response + '\n\n[Please do not change the subject while responding.]'
 
-		signature = webnotes.conn.get_value('Support Email Settings',None,'signature')
+		signature = webnotes.conn.get_value('Email Settings',None,'support_signature')
 		if signature:
 			response += '\n\n' + signature
 
@@ -27,7 +27,7 @@ class DocType(TransactionBase):
 		
 		sendmail(\
 			recipients = [self.doc.raised_by], \
-			sender=webnotes.conn.get_value('Support Email Settings',None,'email'), \
+			sender=webnotes.conn.get_value('Email Settings',None,'support_email'), \
 			subject=subject, \
 			msg=response)
 
