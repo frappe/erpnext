@@ -173,7 +173,7 @@
 		'label': 'Fiscal Year',
 		'oldfieldname': 'fiscal_year',
 		'reqd': 1,
-		'search_index': 1
+		'search_index': 0
 	},
 
 	# DocField
@@ -202,7 +202,7 @@
 		'in_filter': 1,
 		'label': 'Company',
 		'oldfieldname': 'company',
-		'search_index': 1
+		'search_index': 0
 	},
 
 	# DocField

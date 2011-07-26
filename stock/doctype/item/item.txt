@@ -12,7 +12,7 @@
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1308741898',
+		'_last_update': '1309508838',
 		'allow_attach': 1,
 		'allow_trash': 1,
 		'autoname': 'field:item_code',
@@ -197,7 +197,7 @@
 		'oldfieldtype': 'Data',
 		'permlevel': 0,
 		'reqd': 1,
-		'search_index': 1
+		'search_index': 0
 	},
 
 	# DocField
@@ -241,7 +241,8 @@
 		'options': 'Brand',
 		'permlevel': 0,
 		'print_hide': 1,
-		'reqd': 0
+		'reqd': 0,
+		'search_index': 0
 	},
 
 	# DocField
@@ -312,7 +313,8 @@
 		'oldfieldtype': 'Link',
 		'options': 'UOM',
 		'permlevel': 0,
-		'reqd': 1
+		'reqd': 1,
+		'search_index': 0
 	},
 
 	# DocField
@@ -355,7 +357,8 @@
 		'oldfieldname': 'default_warehouse',
 		'oldfieldtype': 'Link',
 		'options': 'Warehouse',
-		'permlevel': 0
+		'permlevel': 0,
+		'search_index': 0
 	},
 
 	# DocField
@@ -556,6 +559,7 @@
 		'oldfieldtype': 'Link',
 		'options': 'Account',
 		'permlevel': 0,
+		'search_index': 0,
 		'trigger': 'Client'
 	},
 
@@ -571,7 +575,8 @@
 		'oldfieldname': 'cost_center',
 		'oldfieldtype': 'Link',
 		'options': 'Cost Center',
-		'permlevel': 0
+		'permlevel': 0,
+		'search_index': 0
 	},
 
 	# DocField
@@ -719,7 +724,8 @@
 		'idx': 43,
 		'label': 'Default Income Account',
 		'options': 'Account',
-		'permlevel': 0
+		'permlevel': 0,
+		'search_index': 0
 	},
 
 	# DocField
@@ -730,7 +736,8 @@
 		'idx': 44,
 		'label': 'Cost Center',
 		'options': 'Cost Center',
-		'permlevel': 0
+		'permlevel': 0,
+		'search_index': 0
 	},
 
 	# DocField
@@ -872,7 +879,8 @@
 		'oldfieldname': 'default_bom',
 		'oldfieldtype': 'Link',
 		'options': 'Bill Of Materials',
-		'permlevel': 1
+		'permlevel': 1,
+		'search_index': 0
 	},
 
 	# DocField
@@ -907,19 +915,6 @@
 		'options': '\nYes\nNo',
 		'permlevel': 0,
 		'reqd': 1
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldname': 'item_attachments_details',
-		'fieldtype': 'Table',
-		'idx': 58,
-		'label': 'Item Attachments Details',
-		'oldfieldname': 'item_attachments_details',
-		'oldfieldtype': 'Table',
-		'options': 'Item Attachments Detail',
-		'permlevel': 0
 	},
 
 	# DocField

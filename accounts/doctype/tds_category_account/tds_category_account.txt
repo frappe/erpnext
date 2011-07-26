@@ -51,7 +51,7 @@
 		'label': 'Company',
 		'oldfieldname': 'company',
 		'options': 'Company',
-		'search_index': 1
+		'search_index': 0
 	},
 
 	# DocField

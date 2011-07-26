@@ -112,7 +112,7 @@
 		'options': 'Sales Person',
 		'permlevel': 0,
 		'reqd': 1,
-		'search_index': 1
+		'search_index': 0
 	},
 
 	# DocField

@@ -12,6 +12,7 @@
 
 	# These values are common for all DocType
 	{
+		'_last_update': '1309508838',
 		'autoname': 'field:title',
 		'colour': 'White:FFF',
 		'doctype': 'DocType',

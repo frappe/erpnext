@@ -34,8 +34,7 @@
 		'parent': 'Ref Rate Detail',
 		'parentfield': 'fields',
 		'parenttype': 'DocType',
-		'permlevel': 0,
-		'search_index': 1
+		'permlevel': 0
 	},
 
 	# DocType, Ref Rate Detail
@@ -54,7 +53,8 @@
 		'oldfieldname': 'price_list_name',
 		'oldfieldtype': 'Select',
 		'options': 'link:Price List',
-		'reqd': 1
+		'reqd': 1,
+		'search_index': 1
 	},
 
 	# DocField
@@ -66,7 +66,8 @@
 		'label': 'Ref Rate',
 		'oldfieldname': 'ref_rate',
 		'oldfieldtype': 'Currency',
-		'reqd': 0
+		'reqd': 0,
+		'search_index': 0
 	},
 
 	# DocField
@@ -79,6 +80,7 @@
 		'oldfieldname': 'ref_currency',
 		'oldfieldtype': 'Select',
 		'options': 'link:Currency',
-		'reqd': 1
+		'reqd': 1,
+		'search_index': 1
 	}
 ]

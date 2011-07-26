@@ -86,7 +86,8 @@
 		'oldfieldname': 'state',
 		'oldfieldtype': 'Link',
 		'options': 'State',
-		'permlevel': 0
+		'permlevel': 0,
+		'search_index': 0
 	},
 
 	# DocField
@@ -100,7 +101,8 @@
 		'oldfieldtype': 'Link',
 		'options': 'Territory',
 		'permlevel': 1,
-		'print_hide': 1
+		'print_hide': 1,
+		'search_index': 0
 	},
 
 	# DocField

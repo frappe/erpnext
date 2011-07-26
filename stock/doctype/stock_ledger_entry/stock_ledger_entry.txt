@@ -12,7 +12,7 @@
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1307707462',
+		'_last_update': '1309508840',
 		'autoname': 'SLE/.########',
 		'colour': 'White:FFF',
 		'doctype': 'DocType',
@@ -163,7 +163,7 @@
 		'oldfieldtype': 'Select',
 		'options': 'link:Warehouse Type',
 		'permlevel': 1,
-		'search_index': 1
+		'search_index': 0
 	},
 
 	# DocField
@@ -194,7 +194,7 @@
 		'oldfieldname': 'posting_time',
 		'oldfieldtype': 'Time',
 		'permlevel': 1,
-		'search_index': 0,
+		'search_index': 1,
 		'width': '100px'
 	},
 
@@ -210,7 +210,7 @@
 		'oldfieldname': 'transaction_date',
 		'oldfieldtype': 'Date',
 		'permlevel': 1,
-		'search_index': 1,
+		'search_index': 0,
 		'width': '100px'
 	},
 
@@ -225,7 +225,7 @@
 		'oldfieldname': 'voucher_type',
 		'oldfieldtype': 'Data',
 		'permlevel': 1,
-		'search_index': 1,
+		'search_index': 0,
 		'width': '150px'
 	},
 
@@ -240,7 +240,7 @@
 		'oldfieldname': 'voucher_no',
 		'oldfieldtype': 'Data',
 		'permlevel': 1,
-		'search_index': 1,
+		'search_index': 0,
 		'width': '150px'
 	},
 
@@ -394,7 +394,7 @@
 		'oldfieldname': 'company',
 		'oldfieldtype': 'Data',
 		'permlevel': 1,
-		'search_index': 1,
+		'search_index': 0,
 		'width': '150px'
 	},
 
@@ -409,7 +409,7 @@
 		'oldfieldname': 'fiscal_year',
 		'oldfieldtype': 'Data',
 		'permlevel': 1,
-		'search_index': 1,
+		'search_index': 0,
 		'width': '150px'
 	},
 
@@ -425,7 +425,7 @@
 		'oldfieldtype': 'Select',
 		'options': '\nYes\nNo',
 		'permlevel': 1,
-		'search_index': 1,
+		'search_index': 0,
 		'width': '100px'
 	},
 
@@ -441,7 +441,7 @@
 		'oldfieldtype': 'Select',
 		'options': '\nYes\nNo',
 		'permlevel': 1,
-		'search_index': 1,
+		'search_index': 0,
 		'width': '100px'
 	}
 ]

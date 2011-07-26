@@ -188,7 +188,7 @@
 		'options': "\nExisting Customer\nReference\nAdvertisement\nCold Calling\nExhibition\nSupplier Reference\nMass Mailing\nCustomer's Vendor\nCampaign\nWebsite",
 		'permlevel': 0,
 		'reqd': 1,
-		'search_index': 1,
+		'search_index': 0,
 		'trigger': 'Client'
 	},
 
@@ -239,7 +239,7 @@
 		'oldfieldtype': 'Data',
 		'permlevel': 0,
 		'reqd': 0,
-		'search_index': 1,
+		'search_index': 0,
 		'trigger': 'Client'
 	},
 
@@ -350,7 +350,7 @@
 		'options': '\nHot\nWarm\nCold',
 		'permlevel': 0,
 		'reqd': 0,
-		'search_index': 1
+		'search_index': 0
 	},
 
 	# DocField
@@ -616,7 +616,7 @@
 		'oldfieldtype': 'Link',
 		'options': 'Profile',
 		'permlevel': 0,
-		'search_index': 1
+		'search_index': 0
 	},
 
 	# DocField
@@ -633,7 +633,7 @@
 		'options': '\nLower Income\nMiddle Income\nUpper Income',
 		'permlevel': 0,
 		'reqd': 0,
-		'search_index': 1
+		'search_index': 0
 	},
 
 	# DocField

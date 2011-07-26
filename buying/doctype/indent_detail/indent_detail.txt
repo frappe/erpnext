@@ -85,7 +85,7 @@
 		'oldfieldtype': 'Data',
 		'permlevel': 0,
 		'reqd': 1,
-		'search_index': 1,
+		'search_index': 0,
 		'width': '100px'
 	},
 
@@ -132,6 +132,7 @@
 		'options': 'Brand',
 		'permlevel': 1,
 		'print_hide': 1,
+		'search_index': 0,
 		'width': '100px'
 	},
 
@@ -151,7 +152,7 @@
 		'permlevel': 1,
 		'print_hide': 1,
 		'reqd': 0,
-		'search_index': 1
+		'search_index': 0
 	},
 
 	# DocField
@@ -199,6 +200,7 @@
 		'options': 'UOM',
 		'permlevel': 1,
 		'reqd': 1,
+		'search_index': 0,
 		'width': '50px'
 	},
 

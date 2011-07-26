@@ -285,7 +285,8 @@
 		'oldfieldtype': 'Link',
 		'options': 'Batch',
 		'permlevel': 0,
-		'print_hide': 1
+		'print_hide': 1,
+		'search_index': 0
 	},
 
 	# DocField
@@ -299,7 +300,8 @@
 		'oldfieldtype': 'Link',
 		'options': 'Item Group',
 		'permlevel': 1,
-		'print_hide': 1
+		'print_hide': 1,
+		'search_index': 0
 	},
 
 	# DocField
@@ -314,6 +316,7 @@
 		'options': 'Brand',
 		'permlevel': 1,
 		'print_hide': 1,
+		'search_index': 0,
 		'width': '150px'
 	},
 
@@ -423,7 +426,7 @@
 		'oldfieldtype': 'Data',
 		'permlevel': 1,
 		'print_hide': 1,
-		'search_index': 1,
+		'search_index': 0,
 		'width': '150px'
 	},
 
@@ -455,7 +458,7 @@
 		'oldfieldtype': 'Data',
 		'permlevel': 1,
 		'print_hide': 1,
-		'search_index': 0,
+		'search_index': 1,
 		'width': '150px'
 	},
 

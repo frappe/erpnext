@@ -162,7 +162,7 @@
 		'label': 'Reserved Quantity',
 		'oldfieldname': 'reserved_qty',
 		'oldfieldtype': 'Currency',
-		'search_index': 1
+		'search_index': 0
 	},
 
 	# DocField
@@ -176,7 +176,7 @@
 		'label': 'Actual Quantity',
 		'oldfieldname': 'actual_qty',
 		'oldfieldtype': 'Currency',
-		'search_index': 1
+		'search_index': 0
 	},
 
 	# DocField
@@ -190,7 +190,7 @@
 		'label': 'Ordered Quantity',
 		'oldfieldname': 'ordered_qty',
 		'oldfieldtype': 'Currency',
-		'search_index': 1
+		'search_index': 0
 	},
 
 	# DocField
@@ -204,7 +204,7 @@
 		'label': 'Indented Quantity',
 		'oldfieldname': 'indented_qty',
 		'oldfieldtype': 'Currency',
-		'search_index': 1
+		'search_index': 0
 	},
 
 	# DocField
@@ -217,7 +217,7 @@
 		'label': 'Planned Qty',
 		'oldfieldname': 'planned_qty',
 		'oldfieldtype': 'Currency',
-		'search_index': 1
+		'search_index': 0
 	},
 
 	# DocField
@@ -258,7 +258,7 @@
 		'label': 'UOM',
 		'oldfieldname': 'stock_uom',
 		'oldfieldtype': 'Data',
-		'search_index': 1
+		'search_index': 0
 	},
 
 	# DocField

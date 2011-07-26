@@ -80,7 +80,8 @@
 		'oldfieldname': 'cost_center_other_charges',
 		'oldfieldtype': 'Link',
 		'options': 'Cost Center',
-		'permlevel': 0
+		'permlevel': 0,
+		'search_index': 0
 	},
 
 	# DocField
