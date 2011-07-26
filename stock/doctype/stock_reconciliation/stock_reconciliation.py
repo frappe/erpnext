@@ -118,7 +118,7 @@ class DocType:
 	# ------------------
 	def get_current_stock(self, item_code, warehouse):
 		bin = sql("select name from `tabBin` where item_code = '%s' and warehouse = '%s'" % (item_code, warehouse))
-		prev_sle = bin and get_obj('Bin', bin[0][0]).get_prev_sle(self.doc.reconciliation_date,self.doc.reconciliation_time) or 0
+		prev_sle = bin and get_obj('Bin', bin[0][0]).get_prev_sle(self.doc.reconciliation_date,self.doc.reconciliation_time) or {}
 		stock_uom = sql("select stock_uom from `tabItem` where name = %s",item_code)
 		return {'actual_qty': prev_sle.get('bin_aqat', 0), 'stock_uom': stock_uom[0][0]}
 

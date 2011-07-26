@@ -73,7 +73,7 @@
 		'permlevel': 0,
 		'print_hide': 1,
 		'reqd': 1,
-		'search_index': 1,
+		'search_index': 0,
 		'width': '150px'
 	},
 
@@ -260,7 +260,7 @@
 		'options': 'Item Group',
 		'permlevel': 1,
 		'print_hide': 1,
-		'search_index': 1
+		'search_index': 0
 	},
 
 	# DocField
@@ -276,7 +276,7 @@
 		'options': 'Brand',
 		'permlevel': 1,
 		'print_hide': 1,
-		'search_index': 1,
+		'search_index': 0,
 		'width': '150px'
 	},
 

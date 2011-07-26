@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2009-05-12 16:46:45',
+		'creation': '2010-08-08 17:09:25',
 		'docstatus': 0,
-		'modified': '2011-07-10 14:12:39',
+		'modified': '2011-07-11 12:48:52',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
@@ -76,7 +76,7 @@
 		'doctype': 'DocPerm',
 		'idx': 1,
 		'permlevel': 0,
-		'role': 'Material User',
+		'role': 'Material Manager',
 		'submit': 1,
 		'write': 1
 	},
@@ -89,28 +89,35 @@
 		'doctype': 'DocPerm',
 		'idx': 2,
 		'permlevel': 1,
-		'role': 'Material User',
+		'role': 'Material Manager',
 		'submit': 0,
 		'write': 0
 	},
 
 	# DocPerm
 	{
-		'create': 0,
+		'amend': 1,
+		'cancel': 1,
+		'create': 1,
 		'doctype': 'DocPerm',
 		'idx': 3,
-		'permlevel': 2,
-		'role': 'Production User',
+		'permlevel': 0,
+		'role': 'Material User',
+		'submit': 1,
 		'write': 1
 	},
 
 	# DocPerm
 	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
 		'doctype': 'DocPerm',
 		'idx': 4,
-		'permlevel': 2,
-		'role': 'Production Manager',
-		'write': 1
+		'permlevel': 1,
+		'role': 'Material User',
+		'submit': 0,
+		'write': 0
 	},
 
 	# DocPerm
@@ -136,11 +143,21 @@
 
 	# DocPerm
 	{
+		'create': 0,
+		'doctype': 'DocPerm',
+		'idx': 7,
+		'permlevel': 2,
+		'role': 'Production User',
+		'write': 1
+	},
+
+	# DocPerm
+	{
 		'amend': 1,
 		'cancel': 1,
 		'create': 1,
 		'doctype': 'DocPerm',
-		'idx': 7,
+		'idx': 8,
 		'permlevel': 0,
 		'role': 'Production Manager',
 		'submit': 1,
@@ -150,34 +167,17 @@
 	# DocPerm
 	{
 		'doctype': 'DocPerm',
-		'idx': 8,
+		'idx': 9,
 		'permlevel': 1,
 		'role': 'Production Manager'
 	},
 
 	# DocPerm
 	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		'doctype': 'DocPerm',
-		'idx': 9,
-		'permlevel': 1,
-		'role': 'Material Manager',
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'amend': 1,
-		'cancel': 1,
-		'create': 1,
 		'doctype': 'DocPerm',
 		'idx': 10,
-		'permlevel': 0,
-		'role': 'Material Manager',
-		'submit': 1,
+		'permlevel': 2,
+		'role': 'Production Manager',
 		'write': 1
 	},
 
@@ -209,14 +209,13 @@
 		'doctype': 'DocField',
 		'fieldname': 'naming_series',
 		'fieldtype': 'Select',
-		'hidden': 0,
 		'idx': 3,
 		'in_filter': 0,
 		'label': 'Series',
 		'no_copy': 1,
 		'oldfieldname': 'naming_series',
 		'oldfieldtype': 'Select',
-		'options': '\nSTE',
+		'options': 'STE',
 		'permlevel': 0,
 		'print_hide': 1,
 		'report_hide': 0,
@@ -231,7 +230,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'amendment_date',
 		'fieldtype': 'Date',
-		'hidden': 0,
 		'idx': 4,
 		'in_filter': 0,
 		'label': 'Amendment Date',
@@ -241,7 +239,6 @@
 		'permlevel': 0,
 		'print_hide': 1,
 		'report_hide': 0,
-		'reqd': 0,
 		'search_index': 0
 	},
 
@@ -252,7 +249,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'purpose',
 		'fieldtype': 'Select',
-		'hidden': 0,
 		'idx': 5,
 		'in_filter': 1,
 		'label': 'Purpose',
@@ -261,7 +257,6 @@
 		'oldfieldtype': 'Select',
 		'options': 'Material Issue\nMaterial Receipt\nMaterial Transfer\nSales Return\nPurchase Return\nSubcontracting\nProduction Order',
 		'permlevel': 0,
-		'print_hide': 0,
 		'report_hide': 0,
 		'reqd': 1,
 		'search_index': 0,
@@ -286,8 +281,7 @@
 		'permlevel': 0,
 		'print_hide': 1,
 		'report_hide': 0,
-		'reqd': 0,
-		'search_index': 0,
+		'search_index': 1,
 		'trigger': 'Client'
 	},
 
@@ -309,8 +303,7 @@
 		'permlevel': 0,
 		'print_hide': 1,
 		'report_hide': 0,
-		'reqd': 0,
-		'search_index': 0,
+		'search_index': 1,
 		'trigger': 'Client'
 	},
 
@@ -345,7 +338,6 @@
 		'permlevel': 0,
 		'print_hide': 1,
 		'report_hide': 0,
-		'reqd': 0,
 		'search_index': 0,
 		'trigger': 'Client'
 	},
@@ -356,7 +348,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'supplier_name',
 		'fieldtype': 'Data',
-		'hidden': 0,
 		'idx': 10,
 		'in_filter': 0,
 		'label': 'Supplier Name',
@@ -364,9 +355,7 @@
 		'oldfieldname': 'supplier_name',
 		'oldfieldtype': 'Data',
 		'permlevel': 1,
-		'print_hide': 0,
 		'report_hide': 0,
-		'reqd': 0,
 		'search_index': 0
 	},
 
@@ -385,9 +374,7 @@
 		'oldfieldname': 'supplier_address',
 		'oldfieldtype': 'Small Text',
 		'permlevel': 0,
-		'print_hide': 0,
 		'report_hide': 0,
-		'reqd': 0,
 		'search_index': 0,
 		'trigger': 'Client'
 	},
@@ -410,7 +397,6 @@
 		'permlevel': 0,
 		'print_hide': 1,
 		'report_hide': 0,
-		'reqd': 0,
 		'search_index': 0,
 		'trigger': 'Client'
 	},
@@ -429,9 +415,7 @@
 		'oldfieldname': 'customer_name',
 		'oldfieldtype': 'Data',
 		'permlevel': 1,
-		'print_hide': 0,
 		'report_hide': 0,
-		'reqd': 0,
 		'search_index': 0
 	},
 
@@ -449,9 +433,7 @@
 		'oldfieldname': 'customer_address',
 		'oldfieldtype': 'Small Text',
 		'permlevel': 0,
-		'print_hide': 0,
 		'report_hide': 0,
-		'reqd': 0,
 		'search_index': 0
 	},
 
@@ -473,7 +455,6 @@
 		'permlevel': 2,
 		'print_hide': 1,
 		'report_hide': 0,
-		'reqd': 0,
 		'search_index': 0,
 		'trigger': 'Client'
 	},
@@ -496,8 +477,7 @@
 		'permlevel': 2,
 		'print_hide': 1,
 		'report_hide': 0,
-		'reqd': 0,
-		'search_index': 0,
+		'search_index': 1,
 		'trigger': 'Client'
 	},
 
@@ -507,7 +487,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'fg_completed_qty',
 		'fieldtype': 'Currency',
-		'hidden': 0,
 		'idx': 17,
 		'in_filter': 0,
 		'label': 'FG Completed Qty',
@@ -517,7 +496,6 @@
 		'permlevel': 2,
 		'print_hide': 1,
 		'report_hide': 0,
-		'reqd': 0,
 		'search_index': 0,
 		'trigger': 'Client'
 	},
@@ -527,15 +505,13 @@
 		'colour': 'White:FFF',
 		'doctype': 'DocField',
 		'fieldtype': 'HTML',
-		'hidden': 0,
 		'idx': 18,
 		'label': 'Warehouse HTML',
 		'no_copy': 0,
 		'oldfieldtype': 'HTML',
 		'options': "<div class='columnHeading'>Warehouse</div>",
 		'permlevel': 0,
-		'print_hide': 1,
-		'reqd': 0
+		'print_hide': 1
 	},
 
 	# DocField
@@ -545,7 +521,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'from_warehouse',
 		'fieldtype': 'Link',
-		'hidden': 0,
 		'idx': 19,
 		'in_filter': 0,
 		'label': 'Source Warehouse',
@@ -569,7 +544,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'to_warehouse',
 		'fieldtype': 'Link',
-		'hidden': 0,
 		'idx': 20,
 		'in_filter': 0,
 		'label': 'Target Warehouse',
@@ -581,7 +555,7 @@
 		'print_hide': 1,
 		'report_hide': 0,
 		'reqd': 0,
-		'search_index': 1,
+		'search_index': 0,
 		'trigger': 'Client'
 	},
 
@@ -616,7 +590,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'transfer_date',
 		'fieldtype': 'Date',
-		'hidden': 0,
 		'idx': 23,
 		'in_filter': 1,
 		'label': 'Transfer Date',
@@ -627,7 +600,7 @@
 		'print_hide': 0,
 		'report_hide': 0,
 		'reqd': 1,
-		'search_index': 1
+		'search_index': 0
 	},
 
 	# DocField
@@ -637,7 +610,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'posting_date',
 		'fieldtype': 'Date',
-		'hidden': 0,
 		'idx': 24,
 		'in_filter': 1,
 		'label': 'Posting Date',
@@ -657,7 +629,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'posting_time',
 		'fieldtype': 'Time',
-		'hidden': 0,
 		'idx': 25,
 		'in_filter': 0,
 		'label': 'Posting Time',
@@ -677,7 +648,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'amended_from',
 		'fieldtype': 'Link',
-		'hidden': 0,
 		'idx': 26,
 		'in_filter': 0,
 		'label': 'Amended From',
@@ -688,7 +658,6 @@
 		'permlevel': 1,
 		'print_hide': 1,
 		'report_hide': 0,
-		'reqd': 0,
 		'search_index': 0
 	},
 
@@ -698,7 +667,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'transporter',
 		'fieldtype': 'Data',
-		'hidden': 0,
 		'idx': 27,
 		'in_filter': 0,
 		'label': 'Transporter',
@@ -708,7 +676,6 @@
 		'permlevel': 0,
 		'print_hide': 1,
 		'report_hide': 0,
-		'reqd': 0,
 		'search_index': 0
 	},
 
@@ -718,7 +685,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'is_excisable_goods',
 		'fieldtype': 'Select',
-		'hidden': 0,
 		'idx': 28,
 		'in_filter': 0,
 		'label': 'Is Excisable Goods',
@@ -729,7 +695,6 @@
 		'permlevel': 0,
 		'print_hide': 1,
 		'report_hide': 0,
-		'reqd': 0,
 		'search_index': 0
 	},
 
@@ -739,7 +704,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'excisable_goods',
 		'fieldtype': 'Select',
-		'hidden': 0,
 		'idx': 29,
 		'in_filter': 0,
 		'label': 'Excisable Goods',
@@ -750,7 +714,6 @@
 		'permlevel': 0,
 		'print_hide': 1,
 		'report_hide': 0,
-		'reqd': 0,
 		'search_index': 0
 	},
 
@@ -771,7 +734,6 @@
 		'permlevel': 0,
 		'print_hide': 1,
 		'report_hide': 0,
-		'reqd': 0,
 		'search_index': 0
 	},
 
@@ -781,7 +743,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'remarks',
 		'fieldtype': 'Text',
-		'hidden': 0,
 		'idx': 31,
 		'in_filter': 0,
 		'label': 'Remarks',
@@ -839,25 +800,6 @@
 
 	# DocField
 	{
-		'allow_on_submit': 0,
-		'doctype': 'DocField',
-		'fieldtype': 'Button',
-		'hidden': 0,
-		'idx': 35,
-		'in_filter': 0,
-		'label': 'Get Current Stock',
-		'no_copy': 0,
-		'oldfieldtype': 'Button',
-		'options': 'get_stock_and_rate',
-		'permlevel': 0,
-		'print_hide': 1,
-		'report_hide': 0,
-		'reqd': 0,
-		'search_index': 0
-	},
-
-	# DocField
-	{
 		'doctype': 'DocField',
 		'fieldtype': 'Column Break',
 		'idx': 36,
@@ -881,7 +823,6 @@
 		'permlevel': 2,
 		'print_hide': 1,
 		'report_hide': 0,
-		'reqd': 0,
 		'search_index': 0
 	},
 
@@ -902,7 +843,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'mtn_details',
 		'fieldtype': 'Table',
-		'hidden': 0,
 		'idx': 39,
 		'in_filter': 0,
 		'label': 'MTN Details',
@@ -913,7 +853,6 @@
 		'permlevel': 0,
 		'print_hide': 0,
 		'report_hide': 0,
-		'reqd': 0,
 		'search_index': 0
 	},
 
@@ -923,7 +862,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'total_amount',
 		'fieldtype': 'Currency',
-		'hidden': 0,
 		'idx': 40,
 		'in_filter': 0,
 		'label': 'Total Amount',
@@ -933,7 +871,6 @@
 		'permlevel': 1,
 		'print_hide': 1,
 		'report_hide': 0,
-		'reqd': 0,
 		'search_index': 0
 	},
 
@@ -953,7 +890,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'company',
 		'fieldtype': 'Link',
-		'hidden': 0,
 		'idx': 42,
 		'in_filter': 1,
 		'label': 'Company',
@@ -965,7 +901,7 @@
 		'print_hide': 1,
 		'report_hide': 0,
 		'reqd': 1,
-		'search_index': 1
+		'search_index': 0
 	},
 
 	# DocField
@@ -974,7 +910,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'fiscal_year',
 		'fieldtype': 'Select',
-		'hidden': 0,
 		'idx': 43,
 		'in_filter': 0,
 		'label': 'Fiscal Year',
@@ -986,7 +921,7 @@
 		'print_hide': 1,
 		'report_hide': 0,
 		'reqd': 1,
-		'search_index': 1
+		'search_index': 0
 	},
 
 	# DocField
@@ -995,7 +930,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'select_print_heading',
 		'fieldtype': 'Link',
-		'hidden': 0,
 		'idx': 44,
 		'in_filter': 0,
 		'label': 'Select Print Heading',
@@ -1004,9 +938,7 @@
 		'oldfieldtype': 'Link',
 		'options': 'Print Heading',
 		'permlevel': 0,
-		'print_hide': 0,
 		'report_hide': 0,
-		'reqd': 0,
 		'search_index': 0
 	}
 ]

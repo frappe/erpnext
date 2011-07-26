@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2011-06-23 11:03:25',
+		'creation': '2011-06-27 10:52:02',
 		'docstatus': 0,
-		'modified': '2011-07-01 17:46:42',
+		'modified': '2011-07-26 00:59:27',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
@@ -70,7 +70,7 @@
 		'fieldtype': 'Select',
 		'idx': 1,
 		'label': 'Select DocType',
-		'options': 'link:DocType'
+		'options': '\nAccount\nCompany\nCustomer\nSupplier\nEmployee\nWarehouse\nItem'
 	},
 
 	# DocField

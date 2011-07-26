@@ -115,7 +115,8 @@
 		'label': 'Tag 1',
 		'oldfieldname': 'tag_1',
 		'oldfieldtype': 'Link',
-		'options': 'Question Tag'
+		'options': 'Question Tag',
+		'search_index': 0
 	},
 
 	# DocField
@@ -136,7 +137,8 @@
 		'label': 'Tag 2',
 		'oldfieldname': 'tag_2',
 		'oldfieldtype': 'Link',
-		'options': 'Question Tag'
+		'options': 'Question Tag',
+		'search_index': 0
 	},
 
 	# DocField
@@ -148,7 +150,8 @@
 		'label': 'Tag 3',
 		'oldfieldname': 'tag_3',
 		'oldfieldtype': 'Link',
-		'options': 'Question Tag'
+		'options': 'Question Tag',
+		'search_index': 0
 	},
 
 	# DocField

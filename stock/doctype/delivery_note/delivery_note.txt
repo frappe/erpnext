@@ -332,7 +332,7 @@
 		'permlevel': 0,
 		'print_hide': 0,
 		'reqd': 1,
-		'search_index': 1,
+		'search_index': 0,
 		'width': '100px'
 	},
 
@@ -352,7 +352,7 @@
 		'permlevel': 1,
 		'print_hide': 1,
 		'reqd': 1,
-		'search_index': 1,
+		'search_index': 0,
 		'width': '150px'
 	},
 
@@ -372,7 +372,7 @@
 		'oldfieldtype': 'Currency',
 		'permlevel': 1,
 		'print_hide': 1,
-		'search_index': 1
+		'search_index': 0
 	},
 
 	# DocField
@@ -391,7 +391,7 @@
 		'oldfieldtype': 'Currency',
 		'permlevel': 1,
 		'print_hide': 1,
-		'search_index': 1
+		'search_index': 0
 	},
 
 	# DocField
@@ -439,7 +439,7 @@
 		'permlevel': 0,
 		'print_hide': 1,
 		'reqd': 1,
-		'search_index': 1
+		'search_index': 0
 	},
 
 	# DocField
@@ -453,7 +453,7 @@
 		'options': 'Customer Group',
 		'permlevel': 0,
 		'print_hide': 1,
-		'search_index': 1
+		'search_index': 0
 	},
 
 	# DocField
@@ -1014,7 +1014,7 @@
 		'permlevel': 0,
 		'print_hide': 1,
 		'reqd': 1,
-		'search_index': 1,
+		'search_index': 0,
 		'width': '150px'
 	},
 
@@ -1032,7 +1032,7 @@
 		'permlevel': 0,
 		'print_hide': 1,
 		'reqd': 1,
-		'search_index': 1,
+		'search_index': 0,
 		'width': '150px'
 	},
 

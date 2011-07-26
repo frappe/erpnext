@@ -189,7 +189,7 @@
 		'oldfieldname': 'employee_name',
 		'oldfieldtype': 'Data',
 		'permlevel': 1,
-		'search_index': 1,
+		'search_index': 0,
 		'width': '150px'
 	},
 

@@ -131,7 +131,7 @@
 		'oldfieldtype': 'Date',
 		'permlevel': 0,
 		'reqd': 1,
-		'search_index': 1,
+		'search_index': 0,
 		'width': '100px'
 	},
 
@@ -146,6 +146,7 @@
 		'oldfieldtype': 'Link',
 		'options': 'Bill Of Materials',
 		'permlevel': 0,
+		'search_index': 0,
 		'width': '100px'
 	},
 

@@ -394,7 +394,7 @@
 		'options': 'Brand',
 		'permlevel': 1,
 		'print_hide': 1,
-		'search_index': 1
+		'search_index': 0
 	},
 
 	# DocField
@@ -410,7 +410,7 @@
 		'options': 'Item Group',
 		'permlevel': 1,
 		'print_hide': 1,
-		'search_index': 1
+		'search_index': 0
 	},
 
 	# DocField

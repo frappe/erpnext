@@ -54,7 +54,7 @@
 		'permlevel': 0,
 		'print_hide': 1,
 		'reqd': 1,
-		'search_index': 1
+		'search_index': 0
 	},
 
 	# DocField
@@ -89,7 +89,7 @@
 		'permlevel': 0,
 		'print_hide': 1,
 		'reqd': 1,
-		'search_index': 1
+		'search_index': 0
 	},
 
 	# DocField
@@ -182,6 +182,7 @@
 		'permlevel': 0,
 		'print_hide': 0,
 		'reqd': 1,
+		'search_index': 0,
 		'trigger': 'Client',
 		'width': '100px'
 	},
@@ -331,7 +332,8 @@
 		'oldfieldtype': 'Link',
 		'options': 'Brand',
 		'permlevel': 1,
-		'print_hide': 1
+		'print_hide': 1,
+		'search_index': 0
 	},
 
 	# DocField
@@ -348,7 +350,7 @@
 		'options': 'Item Group',
 		'permlevel': 1,
 		'print_hide': 1,
-		'search_index': 1
+		'search_index': 0
 	},
 
 	# DocField

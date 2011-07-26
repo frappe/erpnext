@@ -282,6 +282,7 @@
 		'oldfieldtype': 'Data',
 		'options': 'Sales Order',
 		'permlevel': 0,
+		'search_index': 0,
 		'width': '100px'
 	},
 
@@ -338,7 +339,7 @@
 		'permlevel': 0,
 		'print_hide': 1,
 		'reqd': 1,
-		'search_index': 1,
+		'search_index': 0,
 		'width': '150px'
 	},
 
@@ -357,7 +358,7 @@
 		'permlevel': 0,
 		'print_hide': 1,
 		'reqd': 1,
-		'search_index': 1,
+		'search_index': 0,
 		'width': '150px'
 	},
 
@@ -487,7 +488,8 @@
 		'options': 'Term',
 		'permlevel': 0,
 		'print_hide': 1,
-		'report_hide': 1
+		'report_hide': 1,
+		'search_index': 0
 	},
 
 	# DocField
