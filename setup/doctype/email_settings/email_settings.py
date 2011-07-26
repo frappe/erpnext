@@ -1,6 +1,7 @@
 import webnotes
 sql = webnotes.conn.sql
 	
+from webnotes.utils import cint, cstr
 
 class DocType:
 	def __init__(self,doc,doclist):
@@ -26,10 +27,14 @@ class DocType:
 			Sets or cancels the event in the scheduler
 		"""
 		# update control panel
-		map(self.set_cp_value, 'outgoing_mail_server', 'mail_login', 'mail_password', 'auto_email_id', 'mail_port', 'use_ssl')
+		for f in ('outgoing_mail_server', 'mail_login', 'mail_password', 'auto_email_id', 'mail_port', 'use_ssl'):
+			self.set_cp_value(f)
 
 		# setup scheduler for support emails
 		if cint(self.doc.sync_support_mails):
+			if not (self.doc.support_host and self.doc.support_username and self.doc.support_password):
+				webnotes.msgprint("You must give the incoming POP3 settings for support emails to activiate mailbox integration", raise_exception=1)
+			
 			from webnotes.utils.scheduler import set_event
 			set_event('support.doctype.support_ticket.get_support_mails', 60*5, 1)
 		else:
