@@ -5,7 +5,7 @@
 	{
 		'creation': '2010-09-25 10:50:34',
 		'docstatus': 0,
-		'modified': '2011-07-26 18:14:48',
+		'modified': '2011-07-27 11:43:40',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
@@ -362,6 +362,60 @@
 		'doc_type': 'Reports',
 		'doctype': 'Module Def Item',
 		'idx': 33
+	},
+
+	# Module Def Item
+	{
+		'display_name': 'Lease Monthly Future Installment Inflows',
+		'doc_name': 'Lease Monthly Future Installment Inflows',
+		'doc_type': 'Reports',
+		'doctype': 'Module Def Item',
+		'idx': 34
+	},
+
+	# Module Def Item
+	{
+		'display_name': 'Lease Overdue Age Wise',
+		'doc_name': 'Lease Overdue Age Wise',
+		'doc_type': 'Reports',
+		'doctype': 'Module Def Item',
+		'idx': 35
+	},
+
+	# Module Def Item
+	{
+		'display_name': 'Lease Overdue List',
+		'doc_name': 'Lease Overdue List',
+		'doc_type': 'Reports',
+		'doctype': 'Module Def Item',
+		'idx': 36
+	},
+
+	# Module Def Item
+	{
+		'display_name': 'Lease Receipts Client Wise',
+		'doc_name': 'Lease Receipts Client Wise',
+		'doc_type': 'Reports',
+		'doctype': 'Module Def Item',
+		'idx': 37
+	},
+
+	# Module Def Item
+	{
+		'display_name': 'Lease Receipt Summary Year to Date',
+		'doc_name': 'Lease Receipt Summary Year to Date',
+		'doc_type': 'Reports',
+		'doctype': 'Module Def Item',
+		'idx': 38
+	},
+
+	# Module Def Item
+	{
+		'display_name': 'Lease Yearly Future Installment Inflows',
+		'doc_name': 'Lease Yearly Future Installment Inflows',
+		'doc_type': 'Reports',
+		'doctype': 'Module Def Item',
+		'idx': 39
 	},
 
 	# Module Def Role
