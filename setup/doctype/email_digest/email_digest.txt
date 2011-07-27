@@ -5,14 +5,14 @@
 	{
 		'creation': '2011-07-27 14:23:09',
 		'docstatus': 0,
-		'modified': '2011-07-27 15:22:11',
+		'modified': '2011-07-27 17:32:27',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1311759390',
+		'_last_update': '1311760331',
 		'colour': 'White:FFF',
 		'doctype': 'DocType',
 		'issingle': 1,
@@ -20,7 +20,7 @@
 		'name': '__common__',
 		'section_style': 'Simple',
 		'show_in_menu': 0,
-		'version': 3
+		'version': 4
 	},
 
 	# These values are common for all DocField
@@ -72,6 +72,7 @@
 		'doctype': 'DocField',
 		'fieldname': 'content_config',
 		'fieldtype': 'Text',
+		'hidden': 1,
 		'idx': 2,
 		'label': 'Content Config'
 	},
@@ -81,6 +82,7 @@
 		'doctype': 'DocField',
 		'fieldname': 'email_config',
 		'fieldtype': 'Text',
+		'hidden': 1,
 		'idx': 3,
 		'label': 'Email Config'
 	}
