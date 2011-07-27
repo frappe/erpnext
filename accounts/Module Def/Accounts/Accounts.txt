@@ -1,722 +1,387 @@
+# Module Def, Accounts
 [
+
+	# These values are common in all dictionaries
 	{
-		'_last_update': None,
-		'creation': '2010-09-25 10:50:37',
-		'disabled': 'No',
+		'creation': '2010-09-25 10:50:34',
 		'docstatus': 0,
-		'doctype': u'Module Def',
+		'modified': '2011-07-26 18:14:48',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all Module Def Role
+	{
+		'doctype': 'Module Def Role',
+		'name': '__common__',
+		'parent': 'Accounts',
+		'parentfield': 'roles',
+		'parenttype': 'Module Def'
+	},
+
+	# These values are common for all Module Def Item
+	{
+		'doctype': 'Module Def Item',
+		'name': '__common__',
+		'parent': 'Accounts',
+		'parentfield': 'items',
+		'parenttype': 'Module Def'
+	},
+
+	# These values are common for all Module Def
+	{
+		'disabled': 'No',
+		'doctype': 'Module Def',
 		'doctype_list': 'GL Mapper, Journal Voucher\nGL Mapper, Payable Voucher\nGL Mapper, Receivable Voucher\nDocType Label, Receivable Voucher\nDocType Label, Payable Voucher',
 		'file_list': 'finance.gif,FileData/00210',
-		'idx': None,
 		'is_hidden': 'No',
 		'last_updated_date': '2010-12-08 10:13:30',
-		'modified': '2011-07-01 09:36:04',
-		'modified_by': 'Administrator',
 		'module_desc': 'Data about your payables, receivables and books of accounts',
 		'module_icon': 'Accounts.gif',
 		'module_label': 'Accounts',
 		'module_name': 'Accounts',
-		'module_page': None,
-		'module_seq': 6,
-		'name': 'Accounts',
-		'owner': 'Administrator',
-		'parent': None,
-		'parentfield': None,
-		'parenttype': None,
-		'trash_reason': None,
-		'widget_code': ""
+		'module_seq': 3,
+		'name': '__common__'
 	},
+
+	# Module Def, Accounts
+	{
+		'doctype': 'Module Def',
+		'name': 'Accounts'
+	},
+
+	# Module Def Item
 	{
 		'click_function': "show_chart_browser('Accounts Browser','Account')",
-		'creation': '2010-10-04 17:16:24',
 		'description': 'Manage your accounts',
 		'display_name': 'Chart of Accounts',
 		'doc_name': 'Accounts Browser',
 		'doc_type': 'Pages',
-		'docstatus': 0,
 		'doctype': 'Module Def Item',
-		'fields': None,
-		'hide': None,
-		'icon': None,
-		'idx': 1,
-		'modified': '2011-07-01 09:36:04',
-		'modified_by': 'Administrator',
-		'name': 'MDI01178',
-		'owner': 'harshada@webnotestech.com',
-		'parent': 'Accounts',
-		'parentfield': 'items',
-		'parenttype': 'Module Def'
+		'idx': 1
 	},
+
+	# Module Def Item
 	{
 		'click_function': "show_chart_browser('Accounts Browser','Cost Center')",
-		'creation': '2010-10-05 12:51:20',
 		'description': 'Manage your cost centers',
 		'display_name': 'Chart of Cost Centers',
 		'doc_name': 'Accounts Browser',
 		'doc_type': 'Pages',
-		'docstatus': 0,
 		'doctype': 'Module Def Item',
-		'fields': None,
-		'hide': None,
-		'icon': None,
-		'idx': 2,
-		'modified': '2011-07-01 09:36:04',
-		'modified_by': 'Administrator',
-		'name': 'MDI01183',
-		'owner': 'harshada@webnotestech.com',
-		'parent': 'Accounts',
-		'parentfield': 'items',
-		'parenttype': 'Module Def'
+		'idx': 2
 	},
+
+	# Module Def Item
 	{
-		'click_function': None,
-		'creation': '2010-09-25 10:50:37',
 		'description': 'Regular journal entry',
 		'display_name': 'Journal Voucher',
 		'doc_name': 'Journal Voucher',
 		'doc_type': 'Forms',
-		'docstatus': 0,
 		'doctype': 'Module Def Item',
 		'fields': 'voucher_type\nvoucher_date\nfiscal_year\ntotal_debit\ntotal_credit',
-		'hide': None,
-		'icon': None,
-		'idx': 3,
-		'modified': '2011-07-01 09:36:04',
-		'modified_by': 'Administrator',
-		'name': 'MDI01012',
-		'owner': 'Administrator',
-		'parent': 'Accounts',
-		'parentfield': 'items',
-		'parenttype': 'Module Def'
+		'idx': 3
 	},
+
+	# Module Def Item
 	{
-		'click_function': None,
-		'creation': '2010-09-25 10:50:37',
 		'description': 'Outgoing Invoice to your customers',
 		'display_name': 'Sales Invoice',
 		'doc_name': 'Receivable Voucher',
 		'doc_type': 'Forms',
-		'docstatus': 0,
 		'doctype': 'Module Def Item',
 		'fields': 'voucher_date\ndue_date\ndebit_to\ngrand_total\noutstanding_amount',
-		'hide': None,
-		'icon': None,
-		'idx': 4,
-		'modified': '2011-07-01 09:36:04',
-		'modified_by': 'Administrator',
-		'name': 'MDI01013',
-		'owner': 'Administrator',
-		'parent': 'Accounts',
-		'parentfield': 'items',
-		'parenttype': 'Module Def'
+		'idx': 4
 	},
+
+	# Module Def Item
 	{
-		'click_function': None,
-		'creation': '2010-09-25 10:50:37',
 		'description': 'Incoming invoice from your service providers',
 		'display_name': 'Purchase Invoice',
 		'doc_name': 'Payable Voucher',
 		'doc_type': 'Forms',
-		'docstatus': 0,
 		'doctype': 'Module Def Item',
 		'fields': 'voucher_date\ncredit_to\nbill_no\ngrand_total\noutstanding_amount',
-		'hide': None,
-		'icon': None,
-		'idx': 5,
-		'modified': '2011-07-01 09:36:04',
-		'modified_by': 'Administrator',
-		'name': 'MDI01014',
-		'owner': 'Administrator',
-		'parent': 'Accounts',
-		'parentfield': 'items',
-		'parenttype': 'Module Def'
+		'idx': 5
 	},
+
+	# Module Def Item
 	{
-		'click_function': None,
-		'creation': '2010-09-25 10:50:37',
+		'description': 'Lease Agreement for Vehicles',
+		'display_name': 'Lease Agreement',
+		'doc_name': 'Lease Agreement',
+		'doc_type': 'Forms',
+		'doctype': 'Module Def Item',
+		'idx': 6
+	},
+
+	# Module Def Item
+	{
 		'description': 'Profit & Loss and Balance Sheet builder',
 		'display_name': 'Financial Statements',
 		'doc_name': 'Financial Statements',
 		'doc_type': 'Pages',
-		'docstatus': 0,
 		'doctype': 'Module Def Item',
-		'fields': None,
-		'hide': None,
 		'icon': 'table.gif',
-		'idx': 6,
-		'modified': '2011-07-01 09:36:04',
-		'modified_by': 'Administrator',
-		'name': 'MDI01015',
-		'owner': 'Administrator',
-		'parent': 'Accounts',
-		'parentfield': 'items',
-		'parenttype': 'Module Def'
+		'idx': 7
 	},
+
+	# Module Def Item
 	{
-		'click_function': None,
-		'creation': '2010-09-25 10:50:37',
 		'description': 'Update your actual clearance dates and find out if bank ledger tallies with your bank statement.',
 		'display_name': 'Bank Reconciliation',
 		'doc_name': 'Bank Reconciliation',
 		'doc_type': 'Single DocType',
-		'docstatus': 0,
 		'doctype': 'Module Def Item',
-		'fields': None,
-		'hide': None,
-		'icon': None,
-		'idx': 7,
-		'modified': '2011-07-01 09:36:04',
-		'modified_by': 'Administrator',
-		'name': 'MDI01016',
-		'owner': 'saumil@webnotestech.com',
-		'parent': 'Accounts',
-		'parentfield': 'items',
-		'parenttype': 'Module Def'
+		'idx': 8
 	},
+
+	# Module Def Item
 	{
-		'click_function': None,
-		'creation': '2010-09-25 10:50:37',
-		'description': None,
 		'display_name': 'TDS Payment',
 		'doc_name': 'TDS Payment',
 		'doc_type': 'Setup Forms',
-		'docstatus': 0,
 		'doctype': 'Module Def Item',
-		'fields': None,
-		'hide': None,
-		'icon': None,
-		'idx': 8,
-		'modified': '2011-07-01 09:36:04',
-		'modified_by': 'Administrator',
-		'name': 'MDI01017',
-		'owner': 'Administrator',
-		'parent': 'Accounts',
-		'parentfield': 'items',
-		'parenttype': 'Module Def'
+		'idx': 9
 	},
+
+	# Module Def Item
 	{
-		'click_function': None,
-		'creation': '2010-09-25 10:50:37',
-		'description': None,
 		'display_name': 'TDS Return Acknowledgement',
 		'doc_name': 'TDS Return Acknowledgement',
 		'doc_type': 'Setup Forms',
-		'docstatus': 0,
 		'doctype': 'Module Def Item',
-		'fields': None,
-		'hide': None,
-		'icon': None,
-		'idx': 9,
-		'modified': '2011-07-01 09:36:04',
-		'modified_by': 'Administrator',
-		'name': 'MDI01018',
-		'owner': 'nabin@webnotestech.com',
-		'parent': 'Accounts',
-		'parentfield': 'items',
-		'parenttype': 'Module Def'
+		'idx': 10
 	},
+
+	# Module Def Item
 	{
-		'click_function': None,
-		'creation': '2010-09-25 10:50:37',
-		'description': None,
 		'display_name': 'Form 16A',
 		'doc_name': 'Form 16A',
 		'doc_type': 'Setup Forms',
-		'docstatus': 0,
 		'doctype': 'Module Def Item',
-		'fields': None,
-		'hide': None,
-		'icon': None,
-		'idx': 10,
-		'modified': '2011-07-01 09:36:04',
-		'modified_by': 'Administrator',
-		'name': 'MDI01019',
-		'owner': 'Administrator',
-		'parent': 'Accounts',
-		'parentfield': 'items',
-		'parenttype': 'Module Def'
+		'idx': 11
 	},
+
+	# Module Def Item
 	{
-		'click_function': None,
-		'creation': '2010-10-25 17:25:22',
 		'description': 'Account closing entry (Profit Booking) on any date',
 		'display_name': 'Period Closing Voucher',
 		'doc_name': 'Period Closing Voucher',
 		'doc_type': 'Setup Forms',
-		'docstatus': 0,
 		'doctype': 'Module Def Item',
-		'fields': None,
-		'hide': None,
-		'icon': None,
-		'idx': 11,
-		'modified': '2011-07-01 09:36:04',
-		'modified_by': 'Administrator',
-		'name': 'MDI01188',
-		'owner': 'Administrator',
-		'parent': 'Accounts',
-		'parentfield': 'items',
-		'parenttype': 'Module Def'
+		'idx': 12
 	},
+
+	# Module Def Item
 	{
-		'click_function': None,
-		'creation': '2011-05-24 14:47:53',
 		'description': 'You can export balance of selected ledgers within a specific period',
 		'display_name': 'Ledger Balance Export',
 		'doc_name': 'Ledger Balance Export',
 		'doc_type': 'Single DocType',
-		'docstatus': 0,
 		'doctype': 'Module Def Item',
-		'fields': None,
-		'hide': None,
-		'icon': None,
-		'idx': 12,
-		'modified': '2011-07-01 09:36:04',
-		'modified_by': 'Administrator',
-		'name': 'MDI01283',
-		'owner': 'Administrator',
-		'parent': 'Accounts',
-		'parentfield': 'items',
-		'parenttype': 'Module Def'
+		'idx': 13
 	},
+
+	# Module Def Item
 	{
-		'click_function': None,
-		'creation': '2010-09-25 10:50:37',
-		'description': None,
 		'display_name': 'General Ledger',
 		'doc_name': 'GL Entry',
 		'doc_type': 'Reports',
-		'docstatus': 0,
 		'doctype': 'Module Def Item',
-		'fields': None,
-		'hide': None,
-		'icon': None,
-		'idx': 13,
-		'modified': '2011-07-01 09:36:04',
-		'modified_by': 'Administrator',
-		'name': 'MDI01021',
-		'owner': 'Administrator',
-		'parent': 'Accounts',
-		'parentfield': 'items',
-		'parenttype': 'Module Def'
+		'idx': 14
 	},
+
+	# Module Def Item
 	{
-		'click_function': None,
-		'creation': '2010-09-25 10:50:37',
-		'description': None,
 		'display_name': 'Accounts Receivable',
 		'doc_name': 'GL Entry',
 		'doc_type': 'Reports',
-		'docstatus': 0,
 		'doctype': 'Module Def Item',
-		'fields': None,
-		'hide': None,
-		'icon': None,
-		'idx': 14,
-		'modified': '2011-07-01 09:36:04',
-		'modified_by': 'Administrator',
-		'name': 'MDI01022',
-		'owner': 'Administrator',
-		'parent': 'Accounts',
-		'parentfield': 'items',
-		'parenttype': 'Module Def'
+		'idx': 15
 	},
+
+	# Module Def Item
 	{
-		'click_function': None,
-		'creation': '2010-09-25 10:50:37',
-		'description': None,
 		'display_name': 'Accounts Payable',
 		'doc_name': 'GL Entry',
 		'doc_type': 'Reports',
-		'docstatus': 0,
 		'doctype': 'Module Def Item',
-		'fields': None,
-		'hide': None,
-		'icon': None,
-		'idx': 15,
-		'modified': '2011-07-01 09:36:04',
-		'modified_by': 'Administrator',
-		'name': 'MDI01023',
-		'owner': 'Administrator',
-		'parent': 'Accounts',
-		'parentfield': 'items',
-		'parenttype': 'Module Def'
+		'idx': 16
 	},
+
+	# Module Def Item
 	{
-		'click_function': None,
-		'creation': '2010-09-25 10:50:37',
-		'description': None,
 		'display_name': 'Bank Reconciliation Statement',
 		'doc_name': 'Journal Voucher Detail',
 		'doc_type': 'Reports',
-		'docstatus': 0,
 		'doctype': 'Module Def Item',
-		'fields': None,
-		'hide': None,
-		'icon': None,
-		'idx': 16,
-		'modified': '2011-07-01 09:36:04',
-		'modified_by': 'Administrator',
-		'name': 'MDI01024',
-		'owner': 'Administrator',
-		'parent': 'Accounts',
-		'parentfield': 'items',
-		'parenttype': 'Module Def'
+		'idx': 17
 	},
+
+	# Module Def Item
 	{
-		'click_function': None,
-		'creation': '2010-09-25 10:50:37',
-		'description': None,
 		'display_name': 'Trial Balance',
 		'doc_name': 'Account',
 		'doc_type': 'Reports',
-		'docstatus': 0,
 		'doctype': 'Module Def Item',
-		'fields': None,
-		'hide': None,
-		'icon': None,
-		'idx': 17,
-		'modified': '2011-07-01 09:36:04',
-		'modified_by': 'Administrator',
-		'name': 'MDI01025',
-		'owner': 'Administrator',
-		'parent': 'Accounts',
-		'parentfield': 'items',
-		'parenttype': 'Module Def'
+		'idx': 18
 	},
+
+	# Module Def Item
 	{
-		'click_function': None,
-		'creation': '2010-09-25 10:50:37',
-		'description': None,
 		'display_name': 'Sales Register',
 		'doc_name': 'Receivable Voucher',
 		'doc_type': 'Reports',
-		'docstatus': 0,
 		'doctype': 'Module Def Item',
-		'fields': None,
-		'hide': None,
-		'icon': None,
-		'idx': 18,
-		'modified': '2011-07-01 09:36:04',
-		'modified_by': 'Administrator',
-		'name': 'MDI01026',
-		'owner': 'Administrator',
-		'parent': 'Accounts',
-		'parentfield': 'items',
-		'parenttype': 'Module Def'
+		'idx': 19
 	},
+
+	# Module Def Item
 	{
-		'click_function': None,
-		'creation': '2010-09-25 10:50:37',
-		'description': None,
 		'display_name': 'Purchase Register',
 		'doc_name': 'Payable Voucher',
 		'doc_type': 'Reports',
-		'docstatus': 0,
 		'doctype': 'Module Def Item',
-		'fields': None,
-		'hide': None,
-		'icon': None,
-		'idx': 19,
-		'modified': '2011-07-01 09:36:04',
-		'modified_by': 'Administrator',
-		'name': 'MDI01027',
-		'owner': 'Administrator',
-		'parent': 'Accounts',
-		'parentfield': 'items',
-		'parenttype': 'Module Def'
+		'idx': 20
 	},
+
+	# Module Def Item
 	{
-		'click_function': None,
-		'creation': '2010-09-25 10:50:37',
-		'description': None,
 		'display_name': 'Bank Clearance report',
 		'doc_name': 'Journal Voucher Detail',
 		'doc_type': 'Reports',
-		'docstatus': 0,
 		'doctype': 'Module Def Item',
-		'fields': None,
-		'hide': None,
-		'icon': None,
-		'idx': 20,
-		'modified': '2011-07-01 09:36:04',
-		'modified_by': 'Administrator',
-		'name': 'MDI01028',
-		'owner': 'Administrator',
-		'parent': 'Accounts',
-		'parentfield': 'items',
-		'parenttype': 'Module Def'
+		'idx': 21
 	},
+
+	# Module Def Item
 	{
-		'click_function': None,
-		'creation': '2010-09-25 10:50:37',
-		'description': None,
 		'display_name': 'Monthly Ledger Summary Report',
 		'doc_name': 'GL Entry',
 		'doc_type': 'Reports',
-		'docstatus': 0,
 		'doctype': 'Module Def Item',
-		'fields': None,
-		'hide': None,
-		'icon': None,
-		'idx': 21,
-		'modified': '2011-07-01 09:36:04',
-		'modified_by': 'Administrator',
-		'name': 'MDI01031',
-		'owner': 'Administrator',
-		'parent': 'Accounts',
-		'parentfield': 'items',
-		'parenttype': 'Module Def'
+		'idx': 22
 	},
+
+	# Module Def Item
 	{
-		'click_function': None,
-		'creation': '2010-09-25 10:50:37',
-		'description': None,
 		'display_name': 'Collection Report',
 		'doc_name': 'Journal Voucher Detail',
 		'doc_type': 'Reports',
-		'docstatus': 0,
 		'doctype': 'Module Def Item',
-		'fields': None,
-		'hide': None,
-		'icon': None,
-		'idx': 22,
-		'modified': '2011-07-01 09:36:04',
-		'modified_by': 'Administrator',
-		'name': 'MDI01032',
-		'owner': 'Administrator',
-		'parent': 'Accounts',
-		'parentfield': 'items',
-		'parenttype': 'Module Def'
+		'idx': 23
 	},
+
+	# Module Def Item
 	{
-		'click_function': None,
-		'creation': '2010-09-25 10:50:37',
-		'description': None,
 		'display_name': 'Total amout collection for a period - Customerwise',
 		'doc_name': 'Account',
 		'doc_type': 'Reports',
-		'docstatus': 0,
 		'doctype': 'Module Def Item',
-		'fields': None,
-		'hide': None,
-		'icon': None,
-		'idx': 23,
-		'modified': '2011-07-01 09:36:04',
-		'modified_by': 'Administrator',
-		'name': 'MDI01033',
-		'owner': 'Administrator',
-		'parent': 'Accounts',
-		'parentfield': 'items',
-		'parenttype': 'Module Def'
+		'idx': 24
 	},
+
+	# Module Def Item
 	{
-		'click_function': None,
-		'creation': '2010-09-25 10:50:37',
-		'description': None,
 		'display_name': 'Payment Report',
 		'doc_name': 'Journal Voucher Detail',
 		'doc_type': 'Reports',
-		'docstatus': 0,
 		'doctype': 'Module Def Item',
-		'fields': None,
-		'hide': None,
-		'icon': None,
-		'idx': 24,
-		'modified': '2011-07-01 09:36:04',
-		'modified_by': 'Administrator',
-		'name': 'MDI01034',
-		'owner': 'Administrator',
-		'parent': 'Accounts',
-		'parentfield': 'items',
-		'parenttype': 'Module Def'
+		'idx': 25
 	},
+
+	# Module Def Item
 	{
-		'click_function': None,
-		'creation': '2011-01-19 17:41:27',
-		'description': None,
 		'display_name': 'Itemwise Sales Register',
 		'doc_name': 'RV Detail',
 		'doc_type': 'Reports',
-		'docstatus': 0,
 		'doctype': 'Module Def Item',
-		'fields': None,
-		'hide': None,
-		'icon': None,
-		'idx': 25,
-		'modified': '2011-07-01 09:36:04',
-		'modified_by': 'Administrator',
-		'name': 'MDI01267',
-		'owner': 'Administrator',
-		'parent': 'Accounts',
-		'parentfield': 'items',
-		'parenttype': 'Module Def'
+		'idx': 26
 	},
+
+	# Module Def Item
 	{
-		'click_function': None,
-		'creation': '2010-09-25 10:50:37',
-		'description': None,
 		'display_name': 'Itemwise Purchase Register',
 		'doc_name': 'PV Detail',
 		'doc_type': 'Reports',
-		'docstatus': 0,
 		'doctype': 'Module Def Item',
-		'fields': None,
-		'hide': None,
-		'icon': None,
-		'idx': 26,
-		'modified': '2011-07-01 09:36:04',
-		'modified_by': 'Administrator',
-		'name': 'MDI01035',
-		'owner': 'Administrator',
-		'parent': 'Accounts',
-		'parentfield': 'items',
-		'parenttype': 'Module Def'
+		'idx': 27
 	},
+
+	# Module Def Item
 	{
-		'click_function': None,
-		'creation': '2010-09-25 10:50:37',
-		'description': None,
 		'display_name': 'Cost Center wise Expense',
 		'doc_name': 'GL Entry',
 		'doc_type': 'Reports',
-		'docstatus': 0,
 		'doctype': 'Module Def Item',
-		'fields': None,
-		'hide': None,
-		'icon': None,
-		'idx': 27,
-		'modified': '2011-07-01 09:36:04',
-		'modified_by': 'Administrator',
-		'name': 'MDI01036',
-		'owner': 'Administrator',
-		'parent': 'Accounts',
-		'parentfield': 'items',
-		'parenttype': 'Module Def'
+		'idx': 28
 	},
+
+	# Module Def Item
 	{
-		'click_function': None,
-		'creation': '2010-09-25 10:50:37',
-		'description': None,
 		'display_name': 'TDS Return',
 		'doc_name': 'TDS Payment Detail',
 		'doc_type': 'Reports',
-		'docstatus': 0,
 		'doctype': 'Module Def Item',
-		'fields': None,
-		'hide': None,
-		'icon': None,
-		'idx': 28,
-		'modified': '2011-07-01 09:36:04',
-		'modified_by': 'Administrator',
-		'name': 'MDI01038',
-		'owner': 'Administrator',
-		'parent': 'Accounts',
-		'parentfield': 'items',
-		'parenttype': 'Module Def'
+		'idx': 29
 	},
+
+	# Module Def Item
 	{
-		'click_function': None,
-		'creation': '2010-09-25 10:50:37',
-		'description': None,
 		'display_name': 'Budget Variance Report',
 		'doc_name': 'Budget Detail',
 		'doc_type': 'Reports',
-		'docstatus': 0,
 		'doctype': 'Module Def Item',
-		'fields': None,
-		'hide': None,
-		'icon': None,
-		'idx': 29,
-		'modified': '2011-07-01 09:36:04',
-		'modified_by': 'Administrator',
-		'name': 'MDI01039',
-		'owner': 'jai@webnotestech.com',
-		'parent': 'Accounts',
-		'parentfield': 'items',
-		'parenttype': 'Module Def'
+		'idx': 30
 	},
+
+	# Module Def Item
 	{
-		'click_function': None,
-		'creation': '2010-09-25 10:50:37',
-		'description': None,
 		'display_name': 'Payment Receipt Report',
 		'doc_name': 'GL Entry',
 		'doc_type': 'Reports',
-		'docstatus': 0,
 		'doctype': 'Module Def Item',
-		'fields': None,
-		'hide': None,
-		'icon': None,
-		'idx': 30,
-		'modified': '2011-07-01 09:36:04',
-		'modified_by': 'Administrator',
-		'name': 'MDI01040',
-		'owner': 'jai@webnotestech.com',
-		'parent': 'Accounts',
-		'parentfield': 'items',
-		'parenttype': 'Module Def'
+		'idx': 31
 	},
+
+	# Module Def Item
 	{
-		'click_function': None,
-		'creation': '2010-09-25 10:50:37',
 		'description': 'Track total commission given to your Business Associate',
 		'display_name': 'Business Associate Commission Report',
 		'doc_name': 'Receivable Voucher',
 		'doc_type': 'Reports',
-		'docstatus': 0,
 		'doctype': 'Module Def Item',
-		'fields': None,
-		'hide': None,
-		'icon': None,
-		'idx': 31,
-		'modified': '2011-07-01 09:36:04',
-		'modified_by': 'Administrator',
-		'name': 'MDI01041',
-		'owner': 'saumil@webnotestech.com',
-		'parent': 'Accounts',
-		'parentfield': 'items',
-		'parenttype': 'Module Def'
+		'idx': 32
 	},
+
+	# Module Def Item
 	{
-		'creation': '2010-09-25 10:50:37',
-		'docstatus': 0,
+		'display_name': 'Lease Agreement List',
+		'doc_name': 'Lease Agreement List',
+		'doc_type': 'Reports',
+		'doctype': 'Module Def Item',
+		'idx': 33
+	},
+
+	# Module Def Role
+	{
 		'doctype': 'Module Def Role',
 		'idx': 1,
-		'modified': '2011-07-01 09:36:04',
-		'modified_by': 'Administrator',
-		'name': 'MDR00302',
-		'owner': 'Administrator',
-		'parent': 'Accounts',
-		'parentfield': 'roles',
-		'parenttype': 'Module Def',
 		'role': 'Accounts Manager'
 	},
+
+	# Module Def Role
 	{
-		'creation': '2010-09-25 10:50:37',
-		'docstatus': 0,
 		'doctype': 'Module Def Role',
 		'idx': 2,
-		'modified': '2011-07-01 09:36:04',
-		'modified_by': 'Administrator',
-		'name': 'MDR00303',
-		'owner': 'Administrator',
-		'parent': 'Accounts',
-		'parentfield': 'roles',
-		'parenttype': 'Module Def',
 		'role': 'Accounts User'
 	},
+
+	# Module Def Role
 	{
-		'creation': '2010-09-25 10:50:37',
-		'docstatus': 0,
 		'doctype': 'Module Def Role',
 		'idx': 3,
-		'modified': '2011-07-01 09:36:04',
-		'modified_by': 'Administrator',
-		'name': 'MDR00304',
-		'owner': 'Administrator',
-		'parent': 'Accounts',
-		'parentfield': 'roles',
-		'parenttype': 'Module Def',
 		'role': 'Administrator'
 	}
 ]
