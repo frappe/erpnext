@@ -5,21 +5,21 @@
 	{
 		'creation': '2011-07-22 17:47:57',
 		'docstatus': 0,
-		'modified': '2011-07-25 06:36:04',
+		'modified': '2011-07-27 12:54:48',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1311348373',
+		'_last_update': '1311555967',
 		'colour': 'White:FFF',
 		'doctype': 'DocType',
 		'module': 'Accounts',
 		'name': '__common__',
 		'section_style': 'Simple',
 		'show_in_menu': 0,
-		'version': 19
+		'version': 20
 	},
 
 	# These values are common for all DocField
@@ -38,8 +38,7 @@
 		'parent': 'Lease Agreement',
 		'parentfield': 'permissions',
 		'parenttype': 'DocType',
-		'read': 1,
-		'role': 'Accounts User'
+		'read': 1
 	},
 
 	# DocType, Lease Agreement
@@ -55,6 +54,7 @@
 		'doctype': 'DocPerm',
 		'idx': 1,
 		'permlevel': 0,
+		'role': 'Accounts User',
 		'submit': 1,
 		'write': 1
 	},
@@ -63,7 +63,28 @@
 	{
 		'doctype': 'DocPerm',
 		'idx': 2,
-		'permlevel': 1
+		'permlevel': 1,
+		'role': 'Accounts User'
+	},
+
+	# DocPerm
+	{
+		'cancel': 1,
+		'create': 1,
+		'doctype': 'DocPerm',
+		'idx': 3,
+		'permlevel': 0,
+		'role': 'Accounts Manager',
+		'submit': 1,
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'doctype': 'DocPerm',
+		'idx': 4,
+		'permlevel': 1,
+		'role': 'Accounts Manager'
 	},
 
 	# DocField
