@@ -1339,3 +1339,5 @@ def execute(patch_no):
 		reload_doc('accounts', 'search_criteria', 'lease_receipts_client_wise')
 		reload_doc('accounts', 'search_criteria', 'lease_receipt_summary_year_to_date')
 		reload_doc('accounts', 'search_criteria', 'lease_yearly_future_installment_inflows')
+
+		reload_doc('accounts', 'Module Def', 'Accounts')
