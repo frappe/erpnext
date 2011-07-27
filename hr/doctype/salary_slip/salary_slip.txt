@@ -5,7 +5,7 @@
 	{
 		'creation': '2010-08-08 17:09:20',
 		'docstatus': 0,
-		'modified': '2011-07-14 16:07:20',
+		'modified': '2011-07-27 13:10:28',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
@@ -21,7 +21,7 @@
 		'server_code_error': ' ',
 		'show_in_menu': 0,
 		'subject': 'For %(employee_name)s, %(designation)s',
-		'version': 392
+		'version': 393
 	},
 
 	# These values are common for all DocField
@@ -55,19 +55,7 @@
 		'cancel': 0,
 		'create': 0,
 		'doctype': 'DocPerm',
-		'match': 'owner',
-		'permlevel': 0,
-		'role': 'Employee',
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		'doctype': 'DocPerm',
+		'idx': 1,
 		'match': 'owner',
 		'permlevel': 0,
 		'role': 'Employee',
@@ -80,7 +68,7 @@
 		'amend': 0,
 		'create': 1,
 		'doctype': 'DocPerm',
-		'idx': 3,
+		'idx': 2,
 		'permlevel': 0,
 		'role': 'HR User',
 		'submit': 1,
@@ -93,7 +81,7 @@
 		'cancel': 1,
 		'create': 1,
 		'doctype': 'DocPerm',
-		'idx': 4,
+		'idx': 3,
 		'permlevel': 0,
 		'role': 'HR Manager',
 		'submit': 1,
@@ -103,7 +91,7 @@
 	# DocPerm
 	{
 		'doctype': 'DocPerm',
-		'idx': 5,
+		'idx': 4,
 		'permlevel': 1,
 		'role': 'HR User'
 	},
@@ -111,7 +99,7 @@
 	# DocPerm
 	{
 		'doctype': 'DocPerm',
-		'idx': 6,
+		'idx': 5,
 		'permlevel': 1,
 		'role': 'HR Manager'
 	},
@@ -150,7 +138,7 @@
 		'options': 'Employee',
 		'permlevel': 0,
 		'reqd': 1,
-		'search_index': 0
+		'search_index': 1
 	},
 
 	# DocField
@@ -180,7 +168,7 @@
 		'options': 'Department',
 		'permlevel': 1,
 		'reqd': 0,
-		'search_index': 1
+		'search_index': 0
 	},
 
 	# DocField
@@ -195,7 +183,7 @@
 		'oldfieldtype': 'Link',
 		'options': 'Designation',
 		'permlevel': 1,
-		'search_index': 1
+		'search_index': 0
 	},
 
 	# DocField
@@ -210,7 +198,7 @@
 		'oldfieldtype': 'Link',
 		'options': 'Branch',
 		'permlevel': 1,
-		'search_index': 1
+		'search_index': 0
 	},
 
 	# DocField
@@ -225,7 +213,7 @@
 		'oldfieldtype': 'Link',
 		'options': 'Grade',
 		'permlevel': 1,
-		'search_index': 1
+		'search_index': 0
 	},
 
 	# DocField
@@ -287,7 +275,7 @@
 		'options': 'Fiscal Year',
 		'permlevel': 0,
 		'reqd': 1,
-		'search_index': 1
+		'search_index': 0
 	},
 
 	# DocField

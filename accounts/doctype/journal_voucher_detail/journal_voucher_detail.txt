@@ -69,7 +69,7 @@
 		'oldfieldtype': 'Link',
 		'options': 'Cost Center',
 		'permlevel': 0,
-		'search_index': 1,
+		'search_index': 0,
 		'width': '180px'
 	},
 

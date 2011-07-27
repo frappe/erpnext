@@ -182,6 +182,7 @@
 		'options': 'Company',
 		'permlevel': 0,
 		'reqd': 1,
+		'search_index': 0,
 		'trigger': 'Client'
 	},
 
@@ -227,7 +228,8 @@
 		'oldfieldname': 'distribution_id',
 		'oldfieldtype': 'Link',
 		'options': 'Budget Distribution',
-		'permlevel': 0
+		'permlevel': 0,
+		'search_index': 0
 	},
 
 	# DocField

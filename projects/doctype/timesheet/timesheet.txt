@@ -145,7 +145,8 @@
 		'oldfieldtype': 'Link',
 		'options': 'Profile',
 		'permlevel': 0,
-		'reqd': 1
+		'reqd': 1,
+		'search_index': 0
 	},
 
 	# DocField

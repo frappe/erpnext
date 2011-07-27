@@ -244,7 +244,7 @@
 		'oldfieldtype': 'Link',
 		'options': 'Company',
 		'permlevel': 0,
-		'search_index': 1
+		'search_index': 0
 	},
 
 	# DocField

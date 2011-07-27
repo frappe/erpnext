@@ -191,7 +191,7 @@
 		'oldfieldtype': 'Select',
 		'options': '\nChannel Partner\nDistributor\nDealer\nAgent\nRetailer\nImplementation Partner\nReseller',
 		'permlevel': 0,
-		'search_index': 1
+		'search_index': 0
 	},
 
 	# DocField

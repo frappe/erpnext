@@ -193,7 +193,7 @@
 		'oldfieldtype': 'Data',
 		'permlevel': 0,
 		'reqd': 1,
-		'search_index': 1
+		'search_index': 0
 	},
 
 	# DocField
@@ -628,7 +628,7 @@
 		'oldfieldtype': 'Select',
 		'options': '\nUnder Warranty\nOut of Warranty\nUnder AMC\nOut of AMC',
 		'permlevel': 0,
-		'search_index': 1,
+		'search_index': 0,
 		'width': '150px'
 	},
 
@@ -715,7 +715,7 @@
 		'options': 'link:Company',
 		'permlevel': 0,
 		'reqd': 1,
-		'search_index': 1
+		'search_index': 0
 	},
 
 	# DocField
@@ -729,7 +729,7 @@
 		'options': 'link:Fiscal Year',
 		'permlevel': 0,
 		'reqd': 1,
-		'search_index': 1
+		'search_index': 0
 	},
 
 	# DocField

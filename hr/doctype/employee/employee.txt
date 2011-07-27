@@ -173,7 +173,8 @@
 		'oldfieldname': 'employee_name',
 		'oldfieldtype': 'Data',
 		'permlevel': 0,
-		'reqd': 1
+		'reqd': 1,
+		'search_index': 1
 	},
 
 	# DocField
@@ -275,7 +276,7 @@
 		'options': '\nActive\nLeft',
 		'permlevel': 0,
 		'reqd': 1,
-		'search_index': 1
+		'search_index': 0
 	},
 
 	# DocField
@@ -408,7 +409,8 @@
 		'oldfieldtype': 'Link',
 		'options': 'Department',
 		'permlevel': 0,
-		'reqd': 1
+		'reqd': 1,
+		'search_index': 1
 	},
 
 	# DocField

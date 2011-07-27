@@ -75,6 +75,7 @@
 		'options': 'Activity Type',
 		'permlevel': 0,
 		'reqd': 1,
+		'search_index': 0,
 		'width': '200px'
 	},
 

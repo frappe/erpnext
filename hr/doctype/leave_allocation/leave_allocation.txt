@@ -136,7 +136,7 @@
 		'in_filter': 1,
 		'label': 'Employee Name',
 		'permlevel': 1,
-		'search_index': 1
+		'search_index': 0
 	},
 
 	# DocField

@@ -99,6 +99,7 @@
 		'oldfieldname': 'bom_created',
 		'oldfieldtype': 'Link',
 		'options': 'Bill Of Materials',
-		'permlevel': 1
+		'permlevel': 1,
+		'search_index': 0
 	}
 ]

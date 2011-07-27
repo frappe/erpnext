@@ -12,6 +12,7 @@
 
 	# These values are common for all DocType
 	{
+		'_last_update': '1309508837',
 		'allow_attach': 0,
 		'allow_copy': 0,
 		'allow_email': 0,

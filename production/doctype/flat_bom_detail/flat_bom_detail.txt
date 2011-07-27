@@ -162,7 +162,8 @@
 		'label': 'Stock UOM',
 		'oldfieldname': 'stock_uom',
 		'oldfieldtype': 'Link',
-		'options': 'UOM'
+		'options': 'UOM',
+		'search_index': 0
 	},
 
 	# DocField

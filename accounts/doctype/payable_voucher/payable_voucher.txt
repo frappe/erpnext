@@ -12,7 +12,7 @@
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1308741898',
+		'_last_update': '1309508838',
 		'colour': 'White:FFF',
 		'doctype': 'DocType',
 		'module': 'Accounts',
@@ -221,6 +221,7 @@
 		'options': 'Supplier',
 		'permlevel': 0,
 		'print_hide': 1,
+		'search_index': 1,
 		'trigger': 'Client'
 	},
 
@@ -326,7 +327,7 @@
 		'oldfieldtype': 'Date',
 		'permlevel': 0,
 		'reqd': 1,
-		'search_index': 1
+		'search_index': 0
 	},
 
 	# DocField
@@ -342,7 +343,7 @@
 		'oldfieldtype': 'Date',
 		'permlevel': 0,
 		'print_hide': 0,
-		'search_index': 1
+		'search_index': 0
 	},
 
 	# DocField
@@ -378,7 +379,7 @@
 		'permlevel': 0,
 		'print_hide': 1,
 		'reqd': 1,
-		'search_index': 1
+		'search_index': 0
 	},
 
 	# DocField
@@ -394,7 +395,7 @@
 		'permlevel': 0,
 		'print_hide': 1,
 		'reqd': 0,
-		'search_index': 1
+		'search_index': 0
 	},
 
 	# DocField
@@ -690,7 +691,7 @@
 		'options': 'No\nYes',
 		'permlevel': 0,
 		'print_hide': 1,
-		'search_index': 1,
+		'search_index': 0,
 		'trigger': 'Client'
 	},
 
@@ -768,7 +769,7 @@
 		'permlevel': 0,
 		'print_hide': 1,
 		'reqd': 1,
-		'search_index': 1
+		'search_index': 0
 	},
 
 	# DocField
@@ -785,7 +786,7 @@
 		'permlevel': 0,
 		'print_hide': 1,
 		'reqd': 1,
-		'search_index': 1
+		'search_index': 0
 	},
 
 	# DocField
@@ -1084,7 +1085,7 @@
 		'oldfieldtype': 'Currency',
 		'permlevel': 1,
 		'print_hide': 1,
-		'search_index': 1
+		'search_index': 0
 	},
 
 	# DocField

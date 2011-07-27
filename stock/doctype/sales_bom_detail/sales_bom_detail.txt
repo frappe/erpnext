@@ -114,6 +114,7 @@
 		'oldfieldname': 'uom',
 		'oldfieldtype': 'Link',
 		'options': 'UOM',
-		'permlevel': 1
+		'permlevel': 1,
+		'search_index': 0
 	}
 ]

@@ -75,7 +75,7 @@
 		'oldfieldtype': 'Select',
 		'options': '\nGraduate\nPost Graduate\nUnder Graduate',
 		'reqd': 0,
-		'search_index': 1
+		'search_index': 0
 	},
 
 	# DocField

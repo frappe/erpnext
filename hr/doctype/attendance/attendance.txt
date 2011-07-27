@@ -141,7 +141,7 @@
 		'oldfieldtype': 'Select',
 		'options': '\nPresent\nAbsent\nHalf Day',
 		'reqd': 1,
-		'search_index': 1
+		'search_index': 0
 	},
 
 	# DocField
@@ -193,7 +193,7 @@
 		'oldfieldname': 'att_date',
 		'oldfieldtype': 'Date',
 		'reqd': 1,
-		'search_index': 0
+		'search_index': 1
 	},
 
 	# DocField
