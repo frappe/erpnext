@@ -2,6 +2,9 @@
 	This patch removes wrong indexs and add proper indexes in tables
 """
 
+import webnotes
+sql = webnotes.conn.sql
+from webnotes.utils import cint, cstr
 
 def create_proper_index():
 	from webnotes.modules.export_module import export_to_files
@@ -264,29 +267,29 @@ def create_proper_index():
 						'Print Heading': [], 
 						'TDS Rate Detail': ['category']
 					}
-				
-	for dt in dt_index_fields.keys():
-		current_index = sql("show indexes from `tab%s`" % dt)
+	#sql("commit") # only required if run from login
+	exist_dt = [cstr(d[0]) for d in sql("select name from `tabDocType`")]
 	
-		proper_index = dt_index_fields[dt]
+	for dt in [d for d in dt_index_fields.keys() if d in exist_dt]:
+		try:
+			current_index = sql("show indexes from `tab%s`" % dt)
 	
-		for d in current_index:
-			if d[4] not in ['name', 'parent', 'parenttype']:
-				if d[4] not in proper_index:
-					sql("ALTER TABLE `tab%s` DROP INDEX %s" % (dt, d[4]))
-					sql("start transaction")
-					sql("UPDATE `tabDocField` SET search_index = 0 WHERE fieldname = '%s' AND parent = '%s'" % (d[4], dt))
-					sql("commit")
-				else:
-					proper_index.remove(d[4])
+			proper_index = dt_index_fields[dt]
 	
-		for d in proper_index:
-			sql("ALTER TABLE `tab%s` ADD INDEX ( `%s` ) " % (dt, d))
-			sql("start transaction")
-			sql("UPDATE `tabDocField` SET search_index = 1 WHERE fieldname = '%s' AND parent = '%s'" % (d, dt))
-			sql("commit")
-
-		sql("start transaction")		
-		dt_module = sql("select module from `tabDocType` where name = '%s'" % dt)[0][0]
-		export_to_files(record_list = [['DocType', dt]], record_module = dt_module)
-		sql("commit")
+			for d in current_index:
+				if d[4] not in ['name', 'parent', 'parenttype']:
+					if d[4] not in proper_index:
+						sql("ALTER TABLE `tab%s` DROP INDEX %s" % (dt, d[4]))
+						sql("start transaction")
+						sql("UPDATE `tabDocField` SET search_index = 0 WHERE fieldname = '%s' AND parent = '%s'" % (d[4], dt))
+						sql("commit")
+					else:
+						proper_index.remove(d[4])
+	
+			for d in proper_index:
+				sql("ALTER TABLE `tab%s` ADD INDEX ( `%s` ) " % (dt, d))
+				sql("start transaction")
+				sql("UPDATE `tabDocField` SET search_index = 1 WHERE fieldname = '%s' AND parent = '%s'" % (d, dt))
+				sql("commit")
+		except:
+			continue

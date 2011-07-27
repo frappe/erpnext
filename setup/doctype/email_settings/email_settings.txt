@@ -5,14 +5,14 @@
 	{
 		'creation': '2010-08-08 17:08:59',
 		'docstatus': 0,
-		'modified': '2011-01-04 11:21:25',
-		'modified_by': 'umair@iwebnotes.com',
+		'modified': '2011-07-25 15:03:51',
+		'modified_by': 'Administrator',
 		'owner': 'harshada@webnotestech.com'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1307707462',
+		'_last_update': '1311586371',
 		'allow_copy': 1,
 		'allow_email': 1,
 		'allow_print': 1,
@@ -24,7 +24,7 @@
 		'name': '__common__',
 		'section_style': 'Simple',
 		'server_code_error': ' ',
-		'version': 27
+		'version': 34
 	},
 
 	# These values are common for all DocField
@@ -72,9 +72,26 @@
 	# DocField
 	{
 		'doctype': 'DocField',
+		'fieldtype': 'Section Break',
+		'idx': 1,
+		'label': 'Outgoing Mails'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'HTML',
+		'idx': 2,
+		'label': '1',
+		'options': '<div class="help_box">Set your outgoing mail settings here. All system generated notifications, emails will go from this mail server</div>'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
 		'fieldname': 'outgoing_mail_server',
 		'fieldtype': 'Data',
-		'idx': 1,
+		'idx': 3,
 		'label': 'Outgoing Mail Server'
 	},
 
@@ -83,7 +100,7 @@
 		'doctype': 'DocField',
 		'fieldname': 'mail_port',
 		'fieldtype': 'Data',
-		'idx': 2,
+		'idx': 4,
 		'label': 'Mail Port'
 	},
 
@@ -92,7 +109,7 @@
 		'doctype': 'DocField',
 		'fieldname': 'use_ssl',
 		'fieldtype': 'Check',
-		'idx': 3,
+		'idx': 5,
 		'label': 'Use SSL'
 	},
 
@@ -101,7 +118,7 @@
 		'doctype': 'DocField',
 		'fieldname': 'mail_login',
 		'fieldtype': 'Data',
-		'idx': 4,
+		'idx': 6,
 		'label': 'Login Id'
 	},
 
@@ -110,7 +127,7 @@
 		'doctype': 'DocField',
 		'fieldname': 'mail_password',
 		'fieldtype': 'Password',
-		'idx': 5,
+		'idx': 7,
 		'label': 'Mail Password'
 	},
 
@@ -119,7 +136,122 @@
 		'doctype': 'DocField',
 		'fieldname': 'auto_email_id',
 		'fieldtype': 'Data',
-		'idx': 6,
+		'idx': 8,
 		'label': 'Auto Email Id'
+	},
+
+	# DocField
+	{
+		'description': 'Set the POP3 email settings to pull emails directly from a mailbox and create Support Tickets',
+		'doctype': 'DocField',
+		'fieldtype': 'Section Break',
+		'idx': 9,
+		'label': 'Support Ticket Mail Settings'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'HTML',
+		'idx': 10,
+		'label': '2',
+		'options': '<div class="help_box">To automatically create Support Tickets from your incoming mail, set your pop3 settings here.</div>'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Section Break',
+		'idx': 11,
+		'options': 'Simple'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'description': 'Check this to pull emails from your mailbox',
+		'doctype': 'DocField',
+		'fieldname': 'sync_support_mails',
+		'fieldtype': 'Check',
+		'idx': 12,
+		'label': 'Sync Support Mails'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'description': 'Your support email id - must be a valid email - this is where your emails will come!',
+		'doctype': 'DocField',
+		'fieldname': 'support_email',
+		'fieldtype': 'Data',
+		'idx': 13,
+		'label': 'Support Email'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'description': 'POP3 mail server (e.g. pop.gmail.com)',
+		'doctype': 'DocField',
+		'fieldname': 'support_host',
+		'fieldtype': 'Data',
+		'idx': 14,
+		'label': 'POP3 Mail Server'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'support_use_ssl',
+		'fieldtype': 'Check',
+		'idx': 15,
+		'label': 'Use SSL'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'support_username',
+		'fieldtype': 'Data',
+		'idx': 16,
+		'label': 'User Name'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'support_password',
+		'fieldtype': 'Password',
+		'idx': 17,
+		'label': 'Support Password'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Column Break',
+		'idx': 18
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'description': 'Signature to be appended at the end of every email',
+		'doctype': 'DocField',
+		'fieldname': 'support_signature',
+		'fieldtype': 'Text',
+		'idx': 19,
+		'label': 'Signature'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'description': 'Autoreply when a new mail is received',
+		'doctype': 'DocField',
+		'fieldname': 'support_autoreply',
+		'fieldtype': 'Text',
+		'idx': 20,
+		'label': 'Autoreply'
 	}
 ]

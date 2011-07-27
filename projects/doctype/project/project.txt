@@ -94,7 +94,8 @@
 		'oldfieldname': 'project_name',
 		'oldfieldtype': 'Data',
 		'permlevel': 0,
-		'reqd': 1
+		'reqd': 1,
+		'search_index': 1
 	},
 
 	# DocField
@@ -112,7 +113,7 @@
 		'options': 'Open\nCompleted\nCancelled',
 		'permlevel': 0,
 		'reqd': 1,
-		'search_index': 1
+		'search_index': 0
 	},
 
 	# DocField
@@ -356,7 +357,7 @@
 		'oldfieldname': 'customer_name',
 		'oldfieldtype': 'Data',
 		'permlevel': 1,
-		'search_index': 1
+		'search_index': 0
 	},
 
 	# DocField
@@ -401,6 +402,7 @@
 		'options': 'Territory',
 		'permlevel': 0,
 		'reqd': 0,
+		'search_index': 0,
 		'trigger': 'Client'
 	},
 
@@ -438,7 +440,8 @@
 		'oldfieldname': 'customer_group',
 		'oldfieldtype': 'Link',
 		'options': 'Customer Group',
-		'permlevel': 1
+		'permlevel': 1,
+		'search_index': 0
 	},
 
 	# DocField

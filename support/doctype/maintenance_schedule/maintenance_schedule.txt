@@ -167,7 +167,7 @@
 		'oldfieldtype': 'Data',
 		'permlevel': 1,
 		'reqd': 0,
-		'search_index': 1
+		'search_index': 0
 	},
 
 	# DocField
@@ -252,7 +252,7 @@
 		'options': '\nDraft\nSubmitted\nCancelled',
 		'permlevel': 1,
 		'reqd': 1,
-		'search_index': 1
+		'search_index': 0
 	},
 
 	# DocField
@@ -297,7 +297,7 @@
 		'options': 'Company',
 		'permlevel': 0,
 		'reqd': 1,
-		'search_index': 1
+		'search_index': 0
 	},
 
 	# DocField
@@ -313,7 +313,7 @@
 		'options': 'Territory',
 		'permlevel': 0,
 		'reqd': 1,
-		'search_index': 1
+		'search_index': 0
 	},
 
 	# DocField

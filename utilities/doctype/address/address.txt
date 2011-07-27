@@ -117,7 +117,7 @@
 		'label': 'City/Town',
 		'permlevel': 0,
 		'reqd': 1,
-		'search_index': 1
+		'search_index': 0
 	},
 
 	# DocField
@@ -129,7 +129,7 @@
 		'in_filter': 1,
 		'label': 'Pincode',
 		'permlevel': 0,
-		'search_index': 1
+		'search_index': 0
 	},
 
 	# DocField
@@ -144,7 +144,7 @@
 		'options': 'link:Country',
 		'permlevel': 0,
 		'reqd': 1,
-		'search_index': 1,
+		'search_index': 0,
 		'trigger': 'Client'
 	},
 
@@ -214,6 +214,7 @@
 		'label': 'Customer',
 		'options': 'Customer',
 		'permlevel': 0,
+		'search_index': 1,
 		'trigger': 'Client'
 	},
 
@@ -240,6 +241,7 @@
 		'label': 'Supplier',
 		'options': 'Supplier',
 		'permlevel': 0,
+		'search_index': 1,
 		'trigger': 'Client'
 	},
 

@@ -106,7 +106,7 @@
 		'oldfieldtype': 'Select',
 		'options': '\nActive\nInactive',
 		'reqd': 1,
-		'search_index': 1
+		'search_index': 0
 	},
 
 	# DocField

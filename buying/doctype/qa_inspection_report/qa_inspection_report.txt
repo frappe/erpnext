@@ -206,7 +206,8 @@
 		'oldfieldtype': 'Link',
 		'options': 'Serial No',
 		'permlevel': 0,
-		'print_hide': 0
+		'print_hide': 0,
+		'search_index': 0
 	},
 
 	# DocField
@@ -219,7 +220,8 @@
 		'oldfieldname': 'batch_no',
 		'oldfieldtype': 'Link',
 		'options': 'Batch',
-		'permlevel': 0
+		'permlevel': 0,
+		'search_index': 0
 	},
 
 	# DocField
@@ -255,7 +257,7 @@
 		'options': 'Delivery Note',
 		'permlevel': 0,
 		'print_hide': 0,
-		'search_index': 1
+		'search_index': 0
 	},
 
 	# DocField

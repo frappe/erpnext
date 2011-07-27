@@ -20,9 +20,9 @@ $.extend(cur_frm.cscript, {
 				items: [
 					{
 						column: 0,
-						label:'Support Email Settings',
+						label:'Email Settings',
 						description:'Integrate your incoming support emails to support ticket',
-						onclick: function() { loaddoc('Support Email Settings','Support Email Settings'); }
+						onclick: function() { loaddoc('Email Settings','Email Settings'); }
 					}, 					
 				]
 			})			

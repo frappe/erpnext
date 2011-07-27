@@ -268,6 +268,7 @@
 		'oldfieldname': 'stock_uom',
 		'oldfieldtype': 'Link',
 		'options': 'UOM',
-		'permlevel': 0
+		'permlevel': 0,
+		'search_index': 0
 	}
 ]

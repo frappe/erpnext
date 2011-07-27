@@ -5,14 +5,14 @@
 	{
 		'creation': '2010-08-08 17:08:56',
 		'docstatus': 0,
-		'modified': '2011-05-26 17:31:31',
+		'modified': '2011-07-20 10:42:05',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1306834669',
+		'_last_update': '1309508837',
 		'allow_print': 0,
 		'allow_trash': 1,
 		'colour': 'White:FFF',
@@ -26,7 +26,7 @@
 		'show_in_menu': 0,
 		'subject': "eval:'%(customer_name)s'=='%(name)s' ? ' ' : '%(customer_name)s'",
 		'tag_fields': 'customer_group,customer_type',
-		'version': 431
+		'version': 433
 	},
 
 	# These values are common for all DocField
@@ -176,7 +176,7 @@
 		'idx': 4,
 		'label': 'Series',
 		'no_copy': 1,
-		'options': '\nCUST\nCUSTMUM',
+		'options': '\nCUST\nCUSTMUM\nCUSTOM',
 		'permlevel': 0,
 		'print_hide': 0
 	},
@@ -340,7 +340,7 @@
 		'options': 'Company',
 		'permlevel': 0,
 		'reqd': 1,
-		'search_index': 1
+		'search_index': 0
 	},
 
 	# DocField

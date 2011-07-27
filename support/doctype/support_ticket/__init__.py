@@ -6,14 +6,26 @@ class SupportMailbox(POP3Mailbox):
 	def __init__(self):
 		"""
 			settings_doc must contain
-			is_ssl, host, username, password
+			use_ssl, host, username, password
 		"""
-		POP3Mailbox.__init__(self, 'Support Email Settings')
+		from webnotes.model.doc import Document
+
+		# extract email settings
+		self.email_settings = Document('Email Settings','Email Settings')
+		
+		s = Document('Support Email Settings')
+		s.use_ssl = self.email_settings.support_use_ssl
+		s.host = self.email_settings.support_host
+		s.username = self.email_settings.support_username
+		s.password = self.email_settings.support_password
+		
+		POP3Mailbox.__init__(self, s)
 	
 	def check_mails(self):
 		"""
 			returns true if there are active sessions
 		"""
+		self.auto_close_tickets()
 		return webnotes.conn.sql("select user from tabSessions where time_to_sec(timediff(now(), lastupdate)) < 1800")
 	
 	def process_message(self, mail):
@@ -56,6 +68,39 @@ class SupportMailbox(POP3Mailbox):
 		# update feed
 		update_feed(d)
 		
+		# send auto reply
+		self.send_auto_reply(d)
+		
+	def send_auto_reply(self, d):
+		"""
+			Send auto reply to emails
+		"""
+		signature = self.email_settings.support_signature
+
+		response = self.email_settings.support_autoreply or ("""
+A new Ticket has been raised for your query. If you have any additional information, please
+reply back to this mail.
+		
+We will get back to you as soon as possible
+
+[This is an automatic response]
+
+		""" + signature)
+
+		from webnotes.utils.email_lib import sendmail
+		
+		sendmail(\
+			recipients = [d.raised_by], \
+			sender = self.email_settings.support_email, \
+			subject = '['+d.name+'] ' + d.subject, \
+			msg = response)
+		
+	def auto_close_tickets(self):
+		"""
+			Auto Closes Waiting for Customer Support Ticket after 15 days
+		"""
+		webnotes.conn.sql("update `tabSupport Ticket` set status = 'Closed' where status = 'Waiting for Customer' and date_sub(curdate(),interval 15 Day) > modified")
+
 
 def get_support_mails():
 	"""
@@ -63,8 +108,3 @@ def get_support_mails():
 	"""
 	SupportMailbox().get_messages()
 
-def auto_close_tickets():
-	"""
-		Auto Closes Waiting for Customer Support Ticket after 15 days
-	"""
-	webnotes.conn.sql("update `tabSupport Ticket` set status = 'Closed' where status = 'Waiting for Customer' and date_sub(curdate(),interval 15 Day) > modified")
