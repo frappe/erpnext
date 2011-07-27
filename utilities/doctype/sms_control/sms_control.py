@@ -58,7 +58,7 @@ class DocType:
 	def connect_gateway(self):
 		"login to gateway"
 		from webnotes.utils.webservice import FrameworkServer
-		fw = FrameworkServer('www.erpnext.com', '/', '__system@webnotestech.com', 'password')
+		fw = FrameworkServer('www.erpnext.com', '/', '__system@webnotestech.com', 'password', https=1)
 		return fw
 
 	def get_sender_name(self):

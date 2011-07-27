@@ -1,0 +1,111 @@
+# DocType, Loan Installment
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2011-07-15 10:36:42',
+		'docstatus': 0,
+		'modified': '2011-07-15 15:48:34',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all DocType
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocType',
+		'istable': 1,
+		'module': 'Accounts',
+		'name': '__common__',
+		'section_style': 'Simple',
+		'show_in_menu': 0,
+		'version': 4
+	},
+
+	# These values are common for all DocField
+	{
+		'doctype': 'DocField',
+		'name': '__common__',
+		'parent': 'Loan Installment',
+		'parentfield': 'fields',
+		'parenttype': 'DocType'
+	},
+
+	# DocType, Loan Installment
+	{
+		'doctype': 'DocType',
+		'name': 'Loan Installment'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'amount',
+		'fieldtype': 'Currency',
+		'idx': 1,
+		'label': 'Amount',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'due_date',
+		'fieldtype': 'Date',
+		'idx': 2,
+		'label': 'Due Date',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'cheque_number',
+		'fieldtype': 'Data',
+		'idx': 3,
+		'label': 'Cheque Number',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'cheque_date',
+		'fieldtype': 'Date',
+		'idx': 4,
+		'label': 'Cheque Date',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'deposit_date',
+		'fieldtype': 'Date',
+		'idx': 5,
+		'label': 'Deposit Date',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'realized_date',
+		'fieldtype': 'Date',
+		'idx': 6,
+		'label': 'Realized Date',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'jv_number',
+		'fieldtype': 'Link',
+		'hidden': 0,
+		'idx': 7,
+		'label': 'JV Number',
+		'options': 'Journal Voucher',
+		'permlevel': 1
+	}
+]
