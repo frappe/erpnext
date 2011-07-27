@@ -1,0 +1,91 @@
+# DocType, Lease Installment
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2011-07-22 17:49:33',
+		'docstatus': 0,
+		'modified': '2011-07-22 17:49:33',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all DocType
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocType',
+		'istable': 1,
+		'module': 'Accounts',
+		'name': '__common__',
+		'section_style': 'Simple',
+		'show_in_menu': 0,
+		'version': 5
+	},
+
+	# These values are common for all DocField
+	{
+		'doctype': 'DocField',
+		'name': '__common__',
+		'parent': 'Lease Installment',
+		'parentfield': 'fields',
+		'parenttype': 'DocType'
+	},
+
+	# DocType, Lease Installment
+	{
+		'doctype': 'DocType',
+		'name': 'Lease Installment'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'amount',
+		'fieldtype': 'Currency',
+		'idx': 1,
+		'label': 'Amount',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'due_date',
+		'fieldtype': 'Date',
+		'idx': 2,
+		'label': 'Due Date',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'cheque_number',
+		'fieldtype': 'Data',
+		'idx': 3,
+		'label': 'Cheque Number',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'cheque_date',
+		'fieldtype': 'Date',
+		'idx': 4,
+		'label': 'Cheque Date',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'jv_number',
+		'fieldtype': 'Link',
+		'hidden': 0,
+		'idx': 5,
+		'label': 'JV Number',
+		'options': 'Journal Voucher',
+		'permlevel': 1
+	}
+]
