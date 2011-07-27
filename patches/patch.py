@@ -1341,3 +1341,8 @@ def execute(patch_no):
 		reload_doc('accounts', 'search_criteria', 'lease_yearly_future_installment_inflows')
 
 		reload_doc('accounts', 'Module Def', 'Accounts')
+	elif patch_no == 331:
+		p = get_obj('Patch Util')
+		# permission
+		p.add_permission('Lease Agreement', 'Accounts Manager', 0, read = 1, write=1,submit=1, cancel=1,amend=1)
+		p.add_permission('Lease Agreement', 'Accounts Manager', 1, read = 1)
