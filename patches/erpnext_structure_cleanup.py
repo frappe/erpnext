@@ -195,6 +195,6 @@ def run_patches():
 	sync_mapper()
 	delete_unwanted_modules()
 	# landed cost wizard link in stock
-	reload_doc('stock', 'Module Def', 'stock')
+	reload_doc('stock', 'Module Def', 'Stock')
 	
 	sql("commit")
