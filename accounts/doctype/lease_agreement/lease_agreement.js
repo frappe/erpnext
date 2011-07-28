@@ -1,5 +1,17 @@
 $.extend(cur_frm.cscript, {
-	Generate: function(doc, dt, dn) {
+	Generate: function(doc, dt, dn) {msgprint(doc);
+		if(doc.installment_amount==''){
+			msgprint('Set Installment Amount before generating schedule');
+			return;
+		}
+		if(doc.no_of_installments==''){
+			msgprint('Set Number of Installments before generating schedule');
+			return;
+		}
+		if(doc.start_date==''){
+			msgprint('Set Start Date before generating schedule');
+			return;
+		}
 		cur_frm.cscript.clear_installments(doc);
 		tot=0;i=0;
 		while(tot<flt(doc.invoice_amount)-flt(doc.down_payment)){
