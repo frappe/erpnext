@@ -12,7 +12,7 @@
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1310035501',
+		'_last_update': '1311622167',
 		'allow_attach': 1,
 		'autoname': 'field:rename_doctype',
 		'colour': 'White:FFF',
@@ -21,7 +21,7 @@
 		'name': '__common__',
 		'section_style': 'Simple',
 		'show_in_menu': 0,
-		'version': 6
+		'version': 7
 	},
 
 	# These values are common for all DocField
