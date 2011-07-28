@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2011-07-27 13:14:29',
+		'creation': '2011-07-28 12:13:41',
 		'docstatus': 0,
-		'modified': '2011-07-27 13:14:29',
+		'modified': '2011-07-28 12:56:47',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
@@ -13,12 +13,13 @@
 	# These values are common for all Search Criteria
 	{
 		'columns': 'GL Entry\x01ID,GL Entry\x01Owner,GL Entry\x01Posting Date,GL Entry\x01Aging Date,GL Entry\x01Account,GL Entry\x01Cost Center,GL Entry\x01Against,GL Entry\x01Against Voucher,GL Entry\x01Voucher Type,GL Entry\x01Voucher No,GL Entry\x01Remarks,GL Entry\x01Is Cancelled,GL Entry\x01Is Opening,GL Entry\x01Fiscal Year,GL Entry\x01Company',
-		'criteria_name': 'Lease Receipts Client wise',
+		'criteria_name': 'Lease Receipts Client Wise',
 		'doc_type': 'GL Entry',
 		'doctype': 'Search Criteria',
 		'filters': "{'GL Entry\x01Voucher Type':'','GL Entry\x01Is Cancelled':'','GL Entry\x01Is Opening':'','GL Entry\x01Fiscal Year':''}",
 		'module': 'Accounts',
 		'name': '__common__',
+		'page_len': 50,
 		'standard': 'Yes'
 	},
 

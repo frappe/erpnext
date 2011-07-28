@@ -56,8 +56,7 @@ def execute(patch_no):
 		pass
 
 	elif patch_no == 40:
-
-		import_from_files(record_list=[['material_management','doctype','item']])
+		import_from_files(record_list=[['stock','doctype','item']])
 	elif patch_no == 42:
 		acc = sql("select name, lft, rgt from tabAccount where account_name in ('Incomes', 'Expenses')")
 		for d in acc:
@@ -125,8 +124,7 @@ def execute(patch_no):
 	elif patch_no == 56:
 		sql("delete from `tabModule Def Item` where parent = 'CRM' and doc_type = 'Reports' and doc_name = 'Delivery Note' and display_name = 'Territory, Item Group wise GP'")
 	elif patch_no == 57:
-
-		import_from_files(record_list=[['crm','doctype','sales_order_detail']])
+		import_from_files(record_list=[['selling','doctype','sales_order_detail']])
 	elif patch_no == 58:
 		# module def patches
 		sql("update `tabModule Def` set module_page = NULL where name not in ('Event Updates', 'Setup', 'My Company')")
@@ -160,8 +158,7 @@ def execute(patch_no):
 		sql("delete from `tabTDS Category Account` where company not in (select name from tabCompany)")
 	elif patch_no == 62:
 		# Import Supplier Quotation
-
-		import_from_files(record_list=[['srm','doctype','supplier_quotation']])
+		import_from_files(record_list=[['buying','doctype','supplier_quotation']])
 		# Adding Status Filter
 		sql("update tabDocType set search_fields = concat('status,',search_fields) where name IN ('Delivery Note','Leave Transaction')")
 		# Import Other Charges
@@ -169,8 +166,7 @@ def execute(patch_no):
 		import_from_files(record_list=[['setup','doctype','other_charges']])
 	elif patch_no == 63:
 		sql("update `tabDocField` set permlevel = 1 where fieldname in ('return_date', 'return_details') and parent = 'Sales and Purchase Return Wizard'")
-
-		import_from_files(record_list = [['accounts', 'doctype', 'rv_detail'], ['material_management', 'doctype', 'sales_and_purchase_return_wizard'], ['material_management', 'doctype', 'stock_entry']])
+		import_from_files(record_list = [['accounts', 'doctype', 'rv_detail'], ['stock', 'doctype', 'sales_and_purchase_return_wizard'], ['stock', 'doctype', 'stock_entry']])
 	elif patch_no == 64:
 		sql("update tabDocField set `hidden` = 1, `print_hide` = 1, `report_hide` = 1 where options in ('RFQ','Supplier Quotation')")
 		sql("update tabDocType set `read_only` = 1, in_create = 1 where name in ('RFQ','Supplier Quotation')")
@@ -192,7 +188,7 @@ def execute(patch_no):
 		sql("delete from `tabModule Def Item` where (display_name = 'Sales Invoice' and parent = 'CRM') or (display_name = 'Purchase Invoice' and parent = 'SRM')")
 	elif patch_no == 68:
 		from webnotes.modules.import_module import import_from_files
-		import_from_files(record_list=[['payroll','doctype','employee'],['roles','Role','Employee']])
+		import_from_files(record_list=[['hr','doctype','employee'],['roles','Role','Employee']])
 	elif patch_no == 69:
 		# delete flds from employee master
 		p = get_obj('Patch Util')
@@ -252,7 +248,7 @@ def execute(patch_no):
 
 		# import Contact, Employee
 		from webnotes.modules.import_module import import_from_files
-		import_from_files(record_list=[['tools','doctype','contact']])
+		import_from_files(record_list=[['utilities','doctype','contact']])
 
 
 		# remove last_contact_date from Lead
@@ -294,7 +290,7 @@ def execute(patch_no):
 		#sal structure patch
 		# import
 		from webnotes.modules.import_module import import_from_files
-		import_from_files(record_list=[['payroll','doctype','salary_structure'], ['payroll','doctype','earning_detail'],['payroll','doctype','deduction_detail']])
+		import_from_files(record_list=[['hr','doctype','salary_structure'], ['hr','doctype','earning_detail'],['hr','doctype','deduction_detail']])
 	elif patch_no == 76:
 		# property
 		p = get_obj('Patch Util')
@@ -321,7 +317,7 @@ def execute(patch_no):
 		# sal slip patch
 		# import
 		from webnotes.modules.import_module import import_from_files
-		import_from_files(record_list=[['payroll','doctype','salary_slip'], ['payroll','doctype','ss_earning_detail'],['payroll','doctype','ss_deduction_detail'], ['mapper', 'DocType Mapper', 'Salary Structure-Salary Slip']])
+		import_from_files(record_list=[['hr','doctype','salary_slip'], ['hr','doctype','ss_earning_detail'],['hr','doctype','ss_deduction_detail'], ['mapper', 'DocType Mapper', 'Salary Structure-Salary Slip']])
 	elif patch_no == 78:
 		p = get_obj('Patch Util')
 		# delete
@@ -351,8 +347,7 @@ def execute(patch_no):
 		p.add_permission('Salary Slip', 'Employee', 1, read = 1, match = 'owner')
 	elif patch_no == 79:
 		# Import Modules
-
-		import_from_files(record_list=[['payroll','doctype','leave_application'],['payroll','doctype','leave_allocation'],['payroll','doctype','leave_control_panel'],['payroll','doctype','holiday_list'],['payroll','doctype','holiday_list_detail'],['payroll','Module Def','Payroll']])
+		import_from_files(record_list=[['hr','doctype','leave_application'],['hr','doctype','leave_allocation'],['hr','doctype','leave_control_panel'],['hr','doctype','holiday_list'],['hr','doctype','holiday_list_detail'],['hr','Module Def','Payroll']])
 	elif patch_no == 80:
 		# Holiday List
 		sql("update `tabHoliday List Detail` set description = holiday_name")
@@ -405,8 +400,7 @@ def execute(patch_no):
 
 	elif patch_no == 81:
 		# Import Modules
-
-		import_from_files(record_list=[['payroll','Module Def','Payroll']])
+		import_from_files(record_list=[['hr','Module Def','Payroll']])
 	elif patch_no == 82:
 		sql("update tabDocType set search_fields = 'employee,leave_type,total_leaves_allocated,fiscal_year' where name = 'Leave Allocation'")
 		sql("update tabDocType set search_fields = 'employee,leave_type,from_date,to_date,total_leave_days,fiscal_year' where name = 'Leave Application'")
@@ -432,14 +426,12 @@ def execute(patch_no):
 		sql("update tabDocPerm set `match` = '' where parent = 'Leave Application' and role = 'HR User'")
 	elif patch_no == 86:
 		# Import Modules
-
-		import_from_files(record_list=[['payroll','doctype','leave_type']])
+		import_from_files(record_list=[['hr','doctype','leave_type']])
 	elif patch_no == 87:
 		sql("update `tabLeave Type` set is_lwp = 1 where name = 'Leave Without Pay'")
 	elif patch_no == 88:
 		# Import Modules
-
-		import_from_files(record_list=[['payroll','doctype','leave_allocation']])
+		import_from_files(record_list=[['hr','doctype','leave_allocation']])
 	elif patch_no == 89:
 		sql("delete from `tabModule Def Item` where doc_type = 'Setup Forms' and doc_name in ('Payroll Rule', 'IT Checklist', 'Employee Profile') and parent = 'Payroll'")
 		sql("update `tabDocField` set `hidden` = 1, `print_hide` = 1, `report_hide` = 1 where parent = 'Leave Type' and fieldname = 'is_encash'")
@@ -457,10 +449,8 @@ def execute(patch_no):
 		sql("update `tabTable Mapper Detail` set validation_logic = 'qty > ifnull(billed_qty,0) and docstatus = 1' where parent = 'Sales Order-Receivable Voucher' and from_table = 'Sales Order Detail'")
 		sql("update `tabField Mapper Detail` set from_field = 'customer' where to_field = 'customer' and parent = 'Sales Order-Receivable Voucher'")
 	elif patch_no == 94:
-
-		import_from_files(record_list=[['crm','doctype','sms_center']])
+		import_from_files(record_list=[['selling','doctype','sms_center']])
 	elif patch_no == 95:
-
 		import_from_files(record_list=[['mapper','DocType Mapper','Sales Order-Receivable Voucher'], ['mapper','DocType Mapper','Delivery Note-Receivable Voucher']])
 	elif patch_no == 96:
 		sql("delete from `tabModule Def Item` where doc_type = 'Reports' and display_name = 'Cenvat Credit - Input or Capital Goods' and parent = 'Accounts'")
@@ -490,8 +480,7 @@ def execute(patch_no):
 	elif patch_no == 103:
 		sql("update tabDocField set fieldname = '' where fieldtype = 'HTML'")
 	elif patch_no == 104:
-
-		import_from_files(record_list=[['payroll','search_criteria','stdsrch_00001'],['payroll','search_criteria','stdsrch_00002'],['payroll','search_criteria','stdsrch_00003'],['payroll','Module Def','Payroll'],['payroll','doctype','leave_application'],['payroll','doctype','leave_allocation']])
+		import_from_files(record_list=[['hr','search_criteria','stdsrch_00001'],['hr','search_criteria','stdsrch_00002'],['hr','search_criteria','stdsrch_00003'],['hr','Module Def','Payroll'],['hr','doctype','leave_application'],['hr','doctype','leave_allocation']])
 	elif patch_no == 105:
 		# Employee Leave Balance
 		sql("delete from `tabModule Def Item` where parent = 'Payroll' and doc_type = 'Reports' and display_name IN ('Employeewise Leave Transaction Details','Employeewise Balance Leave Report')")
@@ -508,11 +497,11 @@ def execute(patch_no):
 	elif patch_no == 107:
 		sql("delete from `tabDocField` where fieldname = 'fiscal_year' and parent = 'Employee'")
 	elif patch_no == 108:
-		import_from_files(record_list=[['payroll','search_criteria','srch_std_00013']])
+		import_from_files(record_list=[['hr','search_criteria','srch_std_00013']])
 	elif patch_no == 109:
-		import_from_files(record_list=[['payroll','search_criteria','srch_std_00015']])
+		import_from_files(record_list=[['hr','search_criteria','srch_std_00015']])
 	elif patch_no == 110:
-		import_from_files(record_list=[['payroll','doctype','salary_structure'], ['payroll', 'doctype', 'salary_slip']])
+		import_from_files(record_list=[['hr','doctype','salary_structure'], ['hr', 'doctype', 'salary_slip']])
 	elif patch_no == 111:
 		sql("update tabDocType set search_fields = 'transfer_date, from_warehouse, to_warehouse, purpose, remarks' where name = 'Stock Entry'")
 	elif patch_no == 112:
@@ -582,7 +571,7 @@ def execute(patch_no):
 		p.add_permission('Expense Voucher', 'HR User', 0, read = 1, write = 1, create = 1, submit = 1, cancel = 1, amend = 1)
 	elif patch_no == 128:
 		from webnotes.modules import import_module
-		import_module.import_from_files(record_list=[['crm','doctype','sales_order'], ['crm','doctype','sales_order_detail'],  ['material_management','doctype','delivery_note'], ['material_management','doctype','delivery_note_detail']])
+		import_module.import_from_files(record_list=[['selling','doctype','sales_order'], ['selling','doctype','sales_order_detail'],  ['stock','doctype','delivery_note'], ['stock','doctype','delivery_note_detail']])
 	elif patch_no == 129:
 		sql("update `tabTable Mapper Detail` set validation_logic = '(qty > ifnull(billed_qty, 0) or amount > ifnull(billed_amt, 0)) and docstatus = 1' where parent = 'Sales Order-Receivable Voucher' and from_table = 'Sales Order Detail' and to_table = 'RV Detail'")
 		sql("update `tabTable Mapper Detail` set validation_logic = '(qty > ifnull(billed_qty, 0) or amount > ifnull(billed_amt, 0)) and docstatus = 1' where parent = 'Delivery Note-Receivable Voucher' and from_table = 'Delivery Note Detail' and to_table = 'RV Detail'")
@@ -680,11 +669,11 @@ def execute(patch_no):
 		sql("delete from tabDocField where label = 'Add / Manage Contacts' and fieldtype = 'Button' and parent = 'Customer'")
 		sql("delete from `tabField Mapper Detail` where parent = 'Sales Order-Delivery Note' and from_field = 'note' and to_field = 'note'")
 	elif patch_no == 152:
-		import_from_files(record_list=[['crm','doctype','sales_order'], ['material_management','doctype','delivery_note'], ['crm','doctype','customer'], ['crm','doctype','shipping_address'], ['mapper', 'DocType Mapper', 'Sales Order-Delivery Note']])
+		import_from_files(record_list=[['selling','doctype','sales_order'], ['stock','doctype','delivery_note'], ['selling','doctype','customer'], ['selling','doctype','shipping_address'], ['mapper', 'DocType Mapper', 'Sales Order-Delivery Note']])
 	elif patch_no == 153:
 		sql("delete from `tabDocField` where fieldname = 'sales_person' and parent = 'Customer'")
 	elif patch_no == 154:
-		import_from_files(record_list=[['material_management','doctype','serial_no'], ['maintenance','doctype','customer_issue']])
+		import_from_files(record_list=[['stock','doctype','serial_no'], ['support','doctype','customer_issue']])
 	elif patch_no == 155:
 		for d in sql("select name, item_code from `tabSerial No`"):
 			sql("COMMIT")
@@ -707,16 +696,16 @@ def execute(patch_no):
 		sql("update tabDocType set autoname = 'field:batch_id' where name = 'Batch'")
 		sql("update tabDocField set no_copy = 1 where parent = 'Batch' and fieldname = 'batch_id'")
 	elif patch_no == 162:
-		import_from_files(record_list=[['crm', 'search_criteria', 'sales_order_pending_items1']])
+		import_from_files(record_list=[['selling', 'search_criteria', 'sales_order_pending_items1']])
 	elif patch_no == 163:
 		sql("delete from `tabModule Def Item` where display_name = 'Sales Orderwise Pending Packing Item Summary' and parent = 'CRM'")
-		import_from_files(record_list=[['crm', 'search_criteria', 'sales_orderwise_pending_qty_to_deliver'], ['crm', 'search_criteria', 'sales_orderwise_pending_amount_to_bill'], ['crm', 'search_criteria', 'delivered_items_to_be_install']])
+		import_from_files(record_list=[['selling', 'search_criteria', 'sales_orderwise_pending_qty_to_deliver'], ['selling', 'search_criteria', 'sales_orderwise_pending_amount_to_bill'], ['selling', 'search_criteria', 'delivered_items_to_be_install']])
 	elif patch_no == 164:
-		import_from_files(record_list=[['srm', 'search_criteria', 'pending_po_items_to_receive'], ['srm', 'search_criteria', 'pending_po_items_to_bill']])
+		import_from_files(record_list=[['buying', 'search_criteria', 'pending_po_items_to_receive'], ['buying', 'search_criteria', 'pending_po_items_to_bill']])
 	elif patch_no == 165:
 		pass
 	elif patch_no == 166:
-		import_from_files(record_list=[['srm', 'doctype', 'purchase_order']])
+		import_from_files(record_list=[['buying', 'doctype', 'purchase_order']])
 	elif patch_no == 167:
 		if webnotes.conn.get_value('Control Panel', None, 'account_id') not in ['ax0000956', 'ax0001338']:
 			sql("delete from tabDocField where parent = 'Purchase Order' and fieldname in ('test_certificate_required', 'estimated_cost', 'transport', 'vendor_reference', 'transportation_required', 'mode_of_dispatch', 'octroi')")
@@ -727,7 +716,7 @@ def execute(patch_no):
 	elif patch_no == 170:
 		import_from_files(record_list=[['mapper', 'DocType Mapper', 'Delivery Note-Receivable Voucher']])
 	elif patch_no == 171:
-		import_from_files(record_list=[['srm', 'doctype', 'supplier']])
+		import_from_files(record_list=[['buying', 'doctype', 'supplier']])
 	elif patch_no == 172:
 		import webnotes
 		webnotes.conn.set_global("system_message", """<b>Welcome to the new financial year 2011-2012 !!! </b><br><br> So obvious question in your mind is how to start Entries in the New Fiscal Year in ERPNext? What are the changes you have to make in the system? <br>We have made some guidelines regarding the basic steps you should follow. Please click on link <a href='http://erpnext.blogspot.com/2011/03/how-to-start-entries-in-new-fiscal-year.html'>How to start Entries in the New Fiscal Year in ERPNext?</a>""")
@@ -749,7 +738,7 @@ def execute(patch_no):
 		sql("delete from `tabDocField` where label = 'Next Steps' and parent = 'Purchase Order'")
 		sql("update tabDocField set options = 'Material Issue\nMaterial Receipt\nMaterial Transfer\nSales Return\nPurchase Return\nSubcontracting\nProduction Order' where parent = 'Stock Entry' and fieldname = 'purpose'")
 	elif patch_no == 178:
-		import_from_files(record_list = [['payroll', 'doctype', 'salary_slip']])
+		import_from_files(record_list = [['hr', 'doctype', 'salary_slip']])
 	elif patch_no == 179:
 		from webnotes.utils import get_defaults
 		sl = sql("select name, net_pay from `tabSalary Slip`")
@@ -792,21 +781,21 @@ def execute(patch_no):
 	elif patch_no == 187:
 		sql("update tabDocType set autoname = '' where name = 'QA Inspection Report'")
 	elif patch_no == 188:
-		import_from_files(record_list = [['srm', 'doctype', 'qa_inspection_report']])
+		import_from_files(record_list = [['buying', 'doctype', 'qa_inspection_report']])
 	elif patch_no == 189:
 		sql("update `tabDocField` set allow_on_submit = 1 where fieldname in ('entries', 'other_charges') and parent = 'Receivable Voucher'")
 	elif patch_no == 190:
 		sql("update tabDocField set permlevel=0 where fieldname = 'fiscal_year' and parent = 'Stock Entry'")
 	elif patch_no == 191:
-		import_from_files(record_list = [['maintenance', 'doctype', 'customer_issue']])
+		import_from_files(record_list = [['support', 'doctype', 'customer_issue']])
 	elif patch_no == 192:
 		sql("delete from `tabModule Def Item` where parent = 'Material Management' and doc_name = 'Landed Cost Wizard' and display_name = 'Landed Cost Wizard'")
-		import_from_files(record_list = [['srm', 'Module Def', 'SRM']])
+		import_from_files(record_list = [['buying', 'Module Def', 'SRM']])
 	elif patch_no == 193:
 		sql("update tabDocField set fieldtype='Button', `trigger`='Client' where parent='Letter Head' and fieldname='set_from_image'")
 	elif patch_no == 194:
 		sql("delete from `tabModule Def Item` where parent = 'SRM' and doc_name = 'Landed Cost Wizard' and display_name = 'Landed Cost Wizard'")
-		import_from_files(record_list = [['material_management', 'Module Def', 'Material Management']])
+		import_from_files(record_list = [['stock', 'Module Def', 'Material Management']])
 	elif patch_no == 195:
 		from webnotes.modules.module_manager import reload_doc
 		reload_doc('setup','doctype','manage_account')
@@ -814,7 +803,7 @@ def execute(patch_no):
 		sql("update `tabModule Def` set module_page = null where name = 'Material Management'")
 	elif patch_no == 197:
 		sql("update `tabDocField` set permlevel = 0, in_filter = 1 where fieldname = 'warranty_amc_status' and parent = 'Customer Issue'")
-		import_from_files(record_list = [['maintenance', 'doctype', 'customer_issue']])
+		import_from_files(record_list = [['support', 'doctype', 'customer_issue']])
 	elif patch_no == 198:
 		sql("delete from `tabDocField` where (label in ('SMS', 'Send SMS') or fieldname in ('message', 'customer_mobile_no')) and parent in ('Quoattion', 'Sales Order', 'Delivery Note', 'Receivable Voucher')")
 		sql("delete from `tabDocField` where label in ('SMS', 'Send SMS') and parent = 'Purchase Order'")
@@ -842,7 +831,7 @@ def execute(patch_no):
 	elif patch_no == 205:
 		sql("update `tabDocField` set `default` = '' where fieldname = 'naming_series' and parent = 'Installation Note'")
 	elif patch_no == 206:
-		reload_doc('crm','doctype','installation_note')
+		reload_doc('selling','doctype','installation_note')
 	elif patch_no == 207:
 		import_from_files(record_list = [['setup', 'doctype', 'company']])
 	elif patch_no == 208:
@@ -857,17 +846,17 @@ def execute(patch_no):
 		# reload company because of disturbed UI
 		import_from_files(record_list = [['setup', 'doctype', 'company']])
 	elif patch_no == 213:
-		reload_doc('crm','doctype','lead')
+		reload_doc('selling','doctype','lead')
 		reload_doc('setup','doctype','company')
 	elif patch_no == 214:
-		reload_doc('crm','doctype','sales_order')
+		reload_doc('selling','doctype','sales_order')
 	elif patch_no == 215:
 		# patch for item and image in description
 		sql("update tabDocField set width = '300px' where fieldname='description'")
-		reload_doc('material_management', 'doctype', 'item')
+		reload_doc('stock', 'doctype', 'item')
 		sql("delete from __DocTypeCache")
 	elif patch_no == 216:
-		import_from_files(record_list = [['material_management', 'doctype', 'serial_no'], ['material_management', 'doctype', 'stock_ledger_entry']])
+		import_from_files(record_list = [['stock', 'doctype', 'serial_no'], ['stock', 'doctype', 'stock_ledger_entry']])
 	elif patch_no == 217:
 		sql("update tabDocField set options = '\nIn Store\nDelivered\nNot in Use' where fieldname = 'status' and parent = 'Serial No'")
 		sql("update tabDocField set no_copy = 1 where fieldname = 'serial_no' and parent = 'Delivery Note Detail'")
@@ -901,13 +890,13 @@ def execute(patch_no):
 		sql("update tabDocField set hidden = 0 where fieldname in ('pay_to_recd_from', 'total_amount', 'total_amount_in_words') and parent = 'Journal Voucher'")
 		sql("update tabDocField set permlevel = 0 where fieldname = 'pay_to_recd_from' and parent = 'Journal Voucher'")
 	elif patch_no == 224:
-		import_from_files(record_list = [['material_management', 'doctype', 'delivery_note_packing_detail'], ['accounts', 'Print Format', 'Payment Receipt Voucher']])
+		import_from_files(record_list = [['stock', 'doctype', 'delivery_note_packing_detail'], ['accounts', 'Print Format', 'Payment Receipt Voucher']])
 	elif patch_no == 225:
-		import_from_files(record_list = [['material_management', 'doctype', 'delivery_note_packing_detail']])
+		import_from_files(record_list = [['stock', 'doctype', 'delivery_note_packing_detail']])
 	elif patch_no == 226:
-		import_from_files(record_list = [['material_management', 'doctype', 'delivery_note_packing_detail']])
+		import_from_files(record_list = [['stock', 'doctype', 'delivery_note_packing_detail']])
 	elif patch_no == 227:
-		reload_doc('material_management', 'doctype', 'item')
+		reload_doc('stock', 'doctype', 'item')
 		if webnotes.conn.get_value('Control Panel', None, 'account_id') != 'axjanak2011':
 			sql("delete from tabDocField where parent = 'Item' and fieldname='alternate_description' limit 1")
 	elif patch_no == 228:
@@ -920,8 +909,8 @@ def execute(patch_no):
 	elif patch_no == 229:
 		reload_doc('knowledge_base', 'page', 'question_view')
 	elif patch_no == 230:
-		reload_doc('srm', 'doctype', 'indent')
-		reload_doc('srm', 'doctype', 'indent_detail')
+		reload_doc('buying', 'doctype', 'indent')
+		reload_doc('buying', 'doctype', 'indent_detail')
 		reload_doc('Mapper', 'DocType Mapper', 'Sales Order-Indent')
 	elif patch_no == 231:
 		reload_doc('Mapper', 'DocType Mapper', 'Sales Order-Indent')
@@ -951,12 +940,11 @@ def execute(patch_no):
 	elif patch_no == 239:
 		reload_doc('core', 'doctype', 'docfield')
 		reload_doc('core', 'doctype', 'doctype')
-
-		from patches.feed_patch import set_subjects_and_tagfields
+		from patches.old_patches.feed_patch import set_subjects_and_tagfields
 		set_subjects_and_tagfields()
 	elif patch_no == 240:
 		# again for sales order (status)
-		from patches.feed_patch import set_subjects_and_tagfields
+		from patches.old_patches.feed_patch import set_subjects_and_tagfields
 		set_subjects_and_tagfields()
 	elif patch_no == 241:
 		sql("update `tabDocField` set fieldtype = 'Text', options = '', in_filter = '' where fieldname = 'serial_no' and parent = 'Stock Ledger Entry'")
@@ -975,12 +963,12 @@ def execute(patch_no):
 		webnotes.conn.set_value('DocType', 'Custom Field', 'module', 'Core')
 		reload_doc('setup', 'doctype', 'company')
 	elif patch_no == 244:
-		reload_doc('material_management', 'search_criteria', 'shortage_to_indent')
+		reload_doc('stock', 'search_criteria', 'shortage_to_indent')
 	elif patch_no == 245:
-		from patches.doctype_permission_patch import set_doctype_permissions
+		from patches.old_patches.doctype_permission_patch import set_doctype_permissions
 		set_doctype_permissions()
 
-		from patches.feed_patch import set_subjects_and_tagfields
+		from patches.old_patches.feed_patch import set_subjects_and_tagfields
 		set_subjects_and_tagfields()
 	elif patch_no == 246:
 		webnotes.conn.set_value('DocType','Stock Entry','tag_fields','purpose')
@@ -992,16 +980,16 @@ def execute(patch_no):
 	elif patch_no == 249:
 		sql("update `tabDocPerm` t1, `tabDocType` t2 set t1.role = 'System Manager' where t1.role = 'Administrator' and t1.parent = t2.name and t2.module != 'Core'")
 	elif patch_no == 250:
-		from patches.feed_patch  import support_patch
+		from patches.old_patches.feed_patch  import support_patch
 		support_patch()
 	elif patch_no == 251:
 		from webnotes.model import db_schema
 		db_schema.remove_all_foreign_keys()
-		from patches.customer_address import run_patch
+		from patches.old_patches.customer_address import run_patch
 		run_patch()
 	elif patch_no == 252:
-		reload_doc('maintenance','doctype','support_ticket')
-		reload_doc('maintenance','doctype','support_ticket_response')
+		reload_doc('support','doctype','support_ticket')
+		reload_doc('support','doctype','support_ticket_response')
 	elif patch_no == 253:
 		reload_doc('accounts','doctype','ledger_balance_export')
 		reload_doc('accounts','doctype','ledger_detail')
@@ -1011,21 +999,21 @@ def execute(patch_no):
 		updatedb('Ledger Balance Export')
 		updatedb('Ledger Detail')
 	elif patch_no == 254:
-		reload_doc('settings', 'doctype', 'sms_settings')
-		reload_doc('settings', 'doctype', 'static_parameter_detail')
+		reload_doc('setup', 'doctype', 'sms_settings')
+		reload_doc('setup', 'doctype', 'static_parameter_detail')
 
 		from webnotes.model.db_schema import updatedb
 		updatedb('SMS Settings')
 		updatedb('Static Parameter Detail')
 	elif patch_no == 255:
-		from patches.customer_address import run_old_data_sync_patch
+		from patches.old_patches.customer_address import run_old_data_sync_patch
 		run_old_data_sync_patch()
 	elif patch_no == 256:
 		sql("update `tabLetter Head` set content = replace(content, 'http://46.4.50.84/v170-test/', '')")
 		sql("update `tabSingles` set value = replace(value, 'http://46.4.50.84/v170-test/', '') where field in ('letter_head', 'client_name') and doctype = 'Control Panel'")
 		sql("update `tabItem` set description_html = replace(description_html, 'http://46.4.50.84/v170-test/', '')")
 	elif patch_no == 257:
-		from patches.customer_address import run_old_data_sync_patch
+		from patches.old_patches.customer_address import run_old_data_sync_patch
 		run_old_data_sync_patch()
 	elif patch_no == 258:
 		sql("update tabDocField set `default`=NULL where fieldname = 'naming_series'")
@@ -1045,7 +1033,7 @@ def execute(patch_no):
 	elif patch_no == 261:
 		sql("update `tabPrint Format` set html = replace(html, 'customer_address', 'address_display')")
 	elif patch_no == 262:
-		from patches.customer_address import sync_lead_phone
+		from patches.old_patches.customer_address import sync_lead_phone
 		sync_lead_phone()
 	elif patch_no == 263:
 		ol = ['','Open','To Reply','Waiting for Customer','Hold','Closed']
@@ -1074,8 +1062,8 @@ def execute(patch_no):
 			except: pass
 	elif patch_no == 271:
 		# tags patch
-		reload_doc('crm','doctype','sales_order')
-		reload_doc('material_management','doctype','delivery_note')
+		reload_doc('selling','doctype','sales_order')
+		reload_doc('stock','doctype','delivery_note')
 		sql("delete from tabDocField where fieldname='per_amt_billed' and parent in ('Sales Order', 'Delivery Note')")
 
 		sql("""update `tabSales Order` set delivery_status = if(ifnull(per_delivered,0) < 0.001, 'Not Delivered',
@@ -1096,7 +1084,7 @@ def execute(patch_no):
 		sn = sql("select name from `tabSearch Criteria` where criteria_name = 'Sales Personwise Transaction Summary'")
 		for d in sn:
 			delete_doc('Search Criteria', d[0])
-		reload_doc('crm', 'search_criteria', 'sales_personwise_transaction_summary')
+		reload_doc('selling', 'search_criteria', 'sales_personwise_transaction_summary')
 	elif patch_no == 277:
 		webnotes.model.delete_doc('DocType','HomePage Settings')
 		webnotes.model.delete_doc('DocType','Badge Settings')
@@ -1140,7 +1128,7 @@ def execute(patch_no):
 		for d in rec:
 			sql("update `tab%s` set docstatus = %s where name = '%s'" % (d[0], d[2]=='No' and 1 or 2, d[1]))
 	elif patch_no == 284:
-		reload_doc('maintenance', 'doctype', 'support_ticket')
+		reload_doc('support', 'doctype', 'support_ticket')
 		sql("update `tabDocField` set in_filter = 1 where fieldname in ('raised_by', 'subject') and parent = 'Support Ticket'")
 	elif patch_no == 286:
 		reload_doc('accounts', 'search_criteria', 'itemwise_sales_register')
@@ -1161,7 +1149,7 @@ def execute(patch_no):
 			md.module_label = 'Home'
 			md.save(1)
 	elif patch_no == 291:
-		reload_doc('tools','doctype','rename_tool')
+		reload_doc('utilities','doctype','rename_tool')
 	elif patch_no == 292:
 		reload_doc('accounts', 'search_criteria', 'trial_balance')
 	elif patch_no == 293:
@@ -1178,14 +1166,14 @@ def execute(patch_no):
 		sql("update `tabDocField` set options = 'Billed\nNot Billed\nPartly Billed\nClosed' where parent = 'Sales Order' and fieldname = 'billing_status'")
 	elif patch_no == 296:
 		sql("delete from tabDocField where parent='Support Ticket' and fieldname='contact_no'")
-		reload_doc('maintenance', 'doctype', 'support_ticket')
+		reload_doc('support', 'doctype', 'support_ticket')
 	elif patch_no == 297:
-		reload_doc('payroll', 'doctype', 'employee')
-		reload_doc('payroll', 'doctype', 'attendance')
-		reload_doc('payroll', 'doctype', 'expense_voucher')
-		reload_doc('payroll', 'doctype', 'appraisal')
-		reload_doc('payroll', 'doctype', 'salary_structure')
-		reload_doc('payroll', 'doctype', 'salary_slip')
+		reload_doc('hr', 'doctype', 'employee')
+		reload_doc('hr', 'doctype', 'attendance')
+		reload_doc('hr', 'doctype', 'expense_voucher')
+		reload_doc('hr', 'doctype', 'appraisal')
+		reload_doc('hr', 'doctype', 'salary_structure')
+		reload_doc('hr', 'doctype', 'salary_slip')
 	elif patch_no == 298:
 		sql("update `tabDocField` set options = 'link:Company' where parent = 'Attendance' and fieldname = 'company'")
 		sql("update `tabDocField` set options = 'link:Company' where parent = 'Expense Voucher' and fieldname = 'company'")
@@ -1212,7 +1200,7 @@ def execute(patch_no):
 		sql("update `tabDocField` set options = 'link:Item' where parent = 'Raw Materials Supplied' and fieldname = 'po_item'")
 		sql("update `tabDocField` set options = 'Sales Order' where parent = 'Indent Detail' and fieldname = 'sales_order_no'")
 		sql("update `tabDocField` set options = 'link:Company', fieldtype = 'Select' where parent = 'Stock Ledger Entry' and fieldname = 'company'")
-		reload_doc('tools', 'doctype', 'rename_tool')
+		reload_doc('utilities', 'doctype', 'rename_tool')
 	elif patch_no == 307:
 		sql("delete from `tabDocField` where parent = 'company' and label = 'Trash Company' and fieldtype = 'Button'")
 		reload_doc('setup', 'doctype', 'company')
@@ -1335,7 +1323,7 @@ def execute(patch_no):
 		reload_doc('accounts', 'search_criteria', 'lease_agreement_list')
 		reload_doc('accounts', 'search_criteria', 'lease_monthly_future_installment_inflows')
 		reload_doc('accounts', 'search_criteria', 'lease_overdue_age_wise')
-		reload_doc('accounts', 'search_criteria', 'lease_overdue_list')
+		reload_doc('accounts', 'search_criteria', 'lease_over_due_list')
 		reload_doc('accounts', 'search_criteria', 'lease_receipts_client_wise')
 		reload_doc('accounts', 'search_criteria', 'lease_receipt_summary_year_to_date')
 		reload_doc('accounts', 'search_criteria', 'lease_yearly_future_installment_inflows')
