@@ -1,0 +1,30 @@
+# Search Criteria, lease_receipt_summary_month_wise
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2011-07-27 18:48:29',
+		'docstatus': 0,
+		'modified': '2011-07-28 12:56:35',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all Search Criteria
+	{
+		'columns': 'GL Entry\x01ID,GL Entry\x01Owner,GL Entry\x01Posting Date,GL Entry\x01Aging Date,GL Entry\x01Account,GL Entry\x01Cost Center,GL Entry\x01Against,GL Entry\x01Against Voucher,GL Entry\x01Voucher Type,GL Entry\x01Voucher No,GL Entry\x01Remarks,GL Entry\x01Is Cancelled,GL Entry\x01Is Opening,GL Entry\x01Fiscal Year,GL Entry\x01Company',
+		'criteria_name': 'Lease Receipt Summary Month Wise',
+		'doc_type': 'GL Entry',
+		'doctype': 'Search Criteria',
+		'filters': "{'GL Entry\x01Voucher Type':'','GL Entry\x01Is Cancelled':'','GL Entry\x01Is Opening':'','GL Entry\x01Fiscal Year':''}",
+		'module': 'Accounts',
+		'name': '__common__',
+		'standard': 'Yes'
+	},
+
+	# Search Criteria, lease_receipt_summary_month_wise
+	{
+		'doctype': 'Search Criteria',
+		'name': 'lease_receipt_summary_month_wise'
+	}
+]
