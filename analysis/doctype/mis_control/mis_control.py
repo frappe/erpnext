@@ -195,7 +195,7 @@ class DocType:
   # Get Children
   # ------------
   def get_children(self, parent_account, level, pl, company, fy):
-    cl = sql("select distinct account_name, name, debit_or_credit, lft, rgt from `tabAccount` where ifnull(parent_account, '') = %s and ifnull(is_pl_account, 'No')=%s and company=%s order by name asc", (parent_account, pl, company))
+    cl = sql("select distinct account_name, name, debit_or_credit, lft, rgt from `tabAccount` where ifnull(parent_account, '') = %s and ifnull(is_pl_account, 'No')=%s and company=%s and docstatus != 2 order by name asc", (parent_account, pl, company))
     level0_diff = [0 for p in self.period_list]
     if pl=='Yes' and level==0: # switch for income & expenses
       cl = [c for c in cl]
@@ -295,7 +295,7 @@ class DocType:
         sd = self.ysd.strftime('%Y-%m-%d')
         cond = ""
 
-      bal = sql("select SUM(t1.debit), SUM(t1.credit) from `tabGL Entry` t1, `tabAccount` t2 WHERE t1.posting_date >= '%s' AND t1.posting_date <= '%s' AND t1.company = '%s' AND t1.account = t2.name AND t2.lft >= %s AND t2.rgt <= %s and ifnull(is_opening,'No') = 'No' %s" % (sd,ed,company,lft,rgt, cond))
+      bal = sql("select SUM(t1.debit), SUM(t1.credit) from `tabGL Entry` t1, `tabAccount` t2 WHERE t1.posting_date >= '%s' AND t1.posting_date <= '%s' AND t1.company = '%s' AND t1.account = t2.name AND t2.lft >= %s AND t2.rgt <= %s and ifnull(t1.is_opening,'No') = 'No' and ifnull(t1.is_cancelled, 'No') = 'No' %s" % (sd,ed,company,lft,rgt, cond))
       
       
       bal = bal and (flt(bal[0][0]) - flt(bal[0][1])) or 0
@@ -316,7 +316,7 @@ class DocType:
     a = sql("select account_name, name, debit_or_credit, lft, rgt, is_pl_account from `tabAccount` where account_name=%s and company=%s", (acc, company), as_dict=1)
     if a:
       a = a[0]
-      bal = sql("select SUM(IFNULL(t1.debit,0)), SUM(IFNULL(t1.credit,0)) from `tabGL Entry` t1, `tabAccount` t2 WHERE t1.posting_date >= %s AND t1.posting_date <= %s AND t1.account = t2.name AND t2.lft >= %s AND t2.rgt <= %s and ifnull(is_opening, 'No') = 'No'", (sd,ed,a['lft'],a['rgt']))
+      bal = sql("select SUM(IFNULL(t1.debit,0)), SUM(IFNULL(t1.credit,0)) from `tabGL Entry` t1, `tabAccount` t2 WHERE t1.posting_date >= %s AND t1.posting_date <= %s AND t1.account = t2.name AND t2.lft >= %s AND t2.rgt <= %s and ifnull(is_opening, 'No') = 'No' and ifnull(t1.is_cancelled, 'No') = 'No'", (sd,ed,a['lft'],a['rgt']))
       if a['debit_or_credit']=='Debit':
         bal = flt(flt(bal[0][0]) - flt(bal[0][1]))
       else:
@@ -341,13 +341,13 @@ class DocType:
     rec_grp = sql("select receivables_group from tabCompany where name=%s", company)
     if rec_grp:
       pa_lft_rgt = sql("select lft, rgt from tabAccount where name=%s and company=%s", (rec_grp[0][0], company))[0]
-      return sql("select t1.account_name, SUM(t2.debit) from tabAccount t1, `tabGL Entry` t2 where t1.lft > %s and t1.rgt < %s and t2.account = t1.name GROUP BY t1.name ORDER BY SUM(t2.debit) desc limit 5", (pa_lft_rgt[0], pa_lft_rgt[1]))
+      return sql("select t1.account_name, SUM(t2.debit) from tabAccount t1, `tabGL Entry` t2 where t1.lft > %s and t1.rgt < %s and t2.account = t1.name  and ifnull(t2.is_cancelled, 'No') = 'No' GROUP BY t1.name ORDER BY SUM(t2.debit) desc limit 5", (pa_lft_rgt[0], pa_lft_rgt[1]))
     else:
       return []
 
   def get_top_5_exp(self, company):
     a = sql("select distinct account_name, name, debit_or_credit, lft, rgt from `tabAccount` where account_name=%s and company=%s", ('Expenses', company), as_dict=1)[0]
-    return sql("select t1.account_name, SUM(t2.debit) from tabAccount t1, `tabGL Entry` t2 where t1.lft>%s and t1.rgt<%s and t1.group_or_ledger = 'Ledger' and t2.account = t1.name and t2.voucher_type != 'Period Closing Voucher' GROUP BY t1.name ORDER BY SUM(t2.debit) desc limit 5", (a['lft'],a['rgt']))
+    return sql("select t1.account_name, SUM(t2.debit) from tabAccount t1, `tabGL Entry` t2 where t1.lft>%s and t1.rgt<%s and t1.group_or_ledger = 'Ledger' and t2.account = t1.name  and ifnull(t2.is_cancelled, 'No') = 'No' and t2.voucher_type != 'Period Closing Voucher' GROUP BY t1.name ORDER BY SUM(t2.debit) desc limit 5", (a['lft'],a['rgt']))
   
   def bl(self, acc, company):
     dt = getdate(nowdate())
