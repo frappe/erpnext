@@ -1,5 +1,5 @@
 $.extend(cur_frm.cscript, {
-	Generate: function(doc, dt, dn) {msgprint(doc);
+	Generate: function(doc, dt, dn) {
 		if(doc.installment_amount==''){
 			msgprint('Set Installment Amount before generating schedule');
 			return;
