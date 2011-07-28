@@ -1,7 +1,7 @@
 # REMEMBER to update this
 # ========================
 
-last_patch = 329
+last_patch = 332
 
 #-------------------------------------------
 
@@ -46,7 +46,7 @@ def execute(patch_no):
 		for d in path_list:
 			doclist = eval(open(d,'r').read())
 			webnotes.conn.sql("update `tab%s` set module = '%s' where name = '%s'" % (doclist[0]['doctype'], doclist[0]['module'], doclist[0]['name']))
-	
+
 	elif patch_no==38:
 		import webnotes
 		webnotes.conn.set_global("system_message", "System Updates: Hello! You would have noticed some changes on the Home Page. As a part of our commitment to make the system more friendly and social, we have re-designed the feed so that now you will only see feed that is relevant to you (either you have created something or you have been mentioned in the document).<br><br>On the individual listings, you can add tags and also color them!<br><br>You will also get time-to-time updates from our side here. Do keep sending your feedback at support@erpnext.com.")
@@ -56,7 +56,6 @@ def execute(patch_no):
 		pass
 
 	elif patch_no == 40:
-		
 		import_from_files(record_list=[['stock','doctype','item']])
 	elif patch_no == 42:
 		acc = sql("select name, lft, rgt from tabAccount where account_name in ('Incomes', 'Expenses')")
@@ -65,7 +64,7 @@ def execute(patch_no):
 	elif patch_no == 43:
 		import webnotes.model
 		webnotes.model.delete_doc('Page', 'Module Manager')
-	
+
 	# cleanup of Service, Customer Support, Utilities Modules
 	# -------------------------------------------------------
 	elif patch_no == 44:
@@ -86,7 +85,7 @@ def execute(patch_no):
 
 		# remove utilities
 		webnotes.conn.sql('delete from `tabModule Def` where name in ("Customer Support", "Utilities")')
-		
+
 	elif patch_no == 45:
 		webnotes.conn.sql('delete from tabDocField where options="Ticket Response Detail"')
 
@@ -125,7 +124,6 @@ def execute(patch_no):
 	elif patch_no == 56:
 		sql("delete from `tabModule Def Item` where parent = 'CRM' and doc_type = 'Reports' and doc_name = 'Delivery Note' and display_name = 'Territory, Item Group wise GP'")
 	elif patch_no == 57:
-		
 		import_from_files(record_list=[['selling','doctype','sales_order_detail']])
 	elif patch_no == 58:
 		# module def patches
@@ -133,24 +131,24 @@ def execute(patch_no):
 		sql("delete from `tabModule Def Item` where doc_type in ('Separator', 'Setup Forms', 'More Reports')")
 		sql("delete from `tabModule Def Item` where doc_name = 'Project Activity'")
 		sql("update `tabModule Def` set module_label = 'People', disabled='No', is_hidden='No' where name = 'My Company'")
-		
+
 		# insert new module items
 		from webnotes.model.doc import make_autoname
 		if not sql("select name from `tabModule Def Item` where parent='Projects' and doc_name='Ticket'"):
-			sql("""insert into `tabModule Def Item` 
-				(name, parent, parenttype, parentfield, docstatus, doc_type, doc_name, display_name, idx) values 
+			sql("""insert into `tabModule Def Item`
+				(name, parent, parenttype, parentfield, docstatus, doc_type, doc_name, display_name, idx) values
 				(%s, 'Projects', 'Module Def', 'items', 0, 'Forms', 'Ticket', 'Task', 1)""", make_autoname('MDI.#####'))
 
 		if not sql("select name from `tabModule Def Item` where parent='Projects' and doc_name='Timesheet'"):
-			sql("""insert into `tabModule Def Item` 
-				(name, parent, parenttype, parentfield, docstatus, doc_type, doc_name, display_name, idx) values 
+			sql("""insert into `tabModule Def Item`
+				(name, parent, parenttype, parentfield, docstatus, doc_type, doc_name, display_name, idx) values
 				(%s, 'Projects', 'Module Def', 'items', 0, 'Forms', 'Timesheet', 'Timesheet', 2)""", make_autoname('MDI.#####'))
-			
+
 		if not sql("select name from `tabModule Def Item` where parent='Projects' and doc_name='Projects'"):
-			sql("""insert into `tabModule Def Item` 
-				(name, parent, parenttype, parentfield, docstatus, doc_type, doc_name, display_name, idx) values 
+			sql("""insert into `tabModule Def Item`
+				(name, parent, parenttype, parentfield, docstatus, doc_type, doc_name, display_name, idx) values
 				(%s, 'Projects', 'Module Def', 'items', 0, 'Pages', 'Projects', 'Gantt Chart', 1)""", make_autoname('MDI.#####'))
-				
+
 	elif patch_no == 59:
 		webnotes.conn.set_value('Control Panel',None,'mail_footer','')
 		webnotes.conn.set_global('global_mail_footer','<div style="margin-top:8px; padding: 8px; font-size: 11px; text-align:right; border-top: 1px solid #AAA">Sent via <a href="https://www.erpnext.com">ERPNext</a></div>')
@@ -160,16 +158,14 @@ def execute(patch_no):
 		sql("delete from `tabTDS Category Account` where company not in (select name from tabCompany)")
 	elif patch_no == 62:
 		# Import Supplier Quotation
-		
 		import_from_files(record_list=[['buying','doctype','supplier_quotation']])
 		# Adding Status Filter
 		sql("update tabDocType set search_fields = concat('status,',search_fields) where name IN ('Delivery Note','Leave Transaction')")
 		# Import Other Charges
-		
+
 		import_from_files(record_list=[['setup','doctype','other_charges']])
 	elif patch_no == 63:
 		sql("update `tabDocField` set permlevel = 1 where fieldname in ('return_date', 'return_details') and parent = 'Sales and Purchase Return Wizard'")
-		
 		import_from_files(record_list = [['accounts', 'doctype', 'rv_detail'], ['stock', 'doctype', 'sales_and_purchase_return_wizard'], ['stock', 'doctype', 'stock_entry']])
 	elif patch_no == 64:
 		sql("update tabDocField set `hidden` = 1, `print_hide` = 1, `report_hide` = 1 where options in ('RFQ','Supplier Quotation')")
@@ -183,7 +179,7 @@ def execute(patch_no):
 		import webnotes
 		webnotes.conn.set_global("system_message", """<h3>UI Updates</h3>Based on user feedback, we have made a couple of changes in the UI:<ul><li>Sidebar menus are now collapsable</li><li>Forms are now scrollable (we removed the confusing tabs)</li><li>Feed is a lot more descriptive</li></ul>Do send us your feedback!""")
 		webnotes.conn.set_global("system_message_id", "4")
-		
+
 		sql("update `tabModule Def Item` set doc_type = 'Setup Forms' where doc_name in ('TDS Payment', 'TDS Return Acknowledgement', 'Form 16A', 'Period Closing Voucher', 'IT Checklist')")
 		from webnotes.session_cache import clear_cache
 		clear_cache(webnotes.session['user'])
@@ -212,7 +208,7 @@ def execute(patch_no):
 			for d in fld_map:
 				emp_obj.doc.fields[d] = prof_obj.doc.fields[d]
 			emp_obj.doc.current_accommodation_type = prof_obj.doc.present_accommodation_type
-		 
+
 			# address
 			per_addr = cstr(e[2]) + '\n' + cstr(e[3]) + '\n' + cstr(e[4]) + '\n' + cstr(e[5]) + ', ' + cstr(e[6]) + '\n' + 'PIN - ' + cstr(e[7]) + '\n' + 'Ph. No' + cstr(e[8])
 			cur_addr = cstr(e[9]) + '\n' + cstr(e[10]) + '\n' + cstr(e[11]) + '\n' + cstr(e[12]) + ', ' + cstr(e[13]) + '\n' + 'PIN - ' + cstr(e[14]) + '\n' + 'Ph. No' + cstr(e[15])
@@ -244,7 +240,7 @@ def execute(patch_no):
 	elif patch_no == 70:
 		# update search criteria module -> System
 		sql("update tabDocType set module='System' where name='Search Criteria'")
-		
+
 		# Cleanups to Contact
 		sql("update tabDocField set fieldtype='Data' where options='Designation' and parent='Contact'")
 		sql("update tabDocField set fieldtype='Data' where options='Department' and parent='Contact'")
@@ -254,10 +250,10 @@ def execute(patch_no):
 		from webnotes.modules.import_module import import_from_files
 		import_from_files(record_list=[['utilities','doctype','contact']])
 
-		
+
 		# remove last_contact_date from Lead
 		sql("delete from tabDocField where fieldname='last_contact_date' and parent='Lead'")
-		
+
 	elif patch_no == 71:
 		# Make Stock Qty and Conversion Factor field editable. Also no need to mention Conversion factor in table can do it directly
 		sql("update `tabDocField` set `permlevel` = 0, `width` = '100px', `trigger` = 'Client' where parent IN ('PO Detail','Purchase Receipt Detail') and fieldname in ('stock_qty','conversion_factor')")
@@ -266,18 +262,18 @@ def execute(patch_no):
 	elif patch_no == 72:
 		# Core Patch
 		# ----------
-		
+
 		from webnotes.modules.import_module import import_from_files
-		
+
 		# import module def
 		import_from_files(record_list = [['core', 'Module Def', 'Core']])
 	elif patch_no == 73:
 		# set module in DocTypes
 		sql("update tabDocType set module='Core' where name in ('DocType', 'DocField', 'DocPerm', 'Role', 'UserRole', 'Profile', 'Print Format', 'DocFormat', 'Control Panel', 'Event', 'Event Role', 'Event User', 'DefaultValue', 'Default Home Page', 'File', 'File Group', 'File Data', 'Letter Head', 'Module Def', 'Module Def Item', 'Module Def Role', 'Page', 'Page Role', 'Search Criteria', 'DocType Label', 'DocType Mapper', 'Field Mapper Detail', 'Table Mapper Detail')")
-		
+
 		# set module in Page
 		sql("update tabPage set module='Core' where name='Login Page'")
-		
+
 		# move file browser to Tools
 		sql("update tabPage set module='Tools' where name='File Browser'")
 		sql("update tabDocType set module='Tools' where name='File Browser Control'")
@@ -351,7 +347,6 @@ def execute(patch_no):
 		p.add_permission('Salary Slip', 'Employee', 1, read = 1, match = 'owner')
 	elif patch_no == 79:
 		# Import Modules
-		
 		import_from_files(record_list=[['hr','doctype','leave_application'],['hr','doctype','leave_allocation'],['hr','doctype','leave_control_panel'],['hr','doctype','holiday_list'],['hr','doctype','holiday_list_detail'],['hr','Module Def','Payroll']])
 	elif patch_no == 80:
 		# Holiday List
@@ -405,7 +400,6 @@ def execute(patch_no):
 
 	elif patch_no == 81:
 		# Import Modules
-		
 		import_from_files(record_list=[['hr','Module Def','Payroll']])
 	elif patch_no == 82:
 		sql("update tabDocType set search_fields = 'employee,leave_type,total_leaves_allocated,fiscal_year' where name = 'Leave Allocation'")
@@ -432,13 +426,11 @@ def execute(patch_no):
 		sql("update tabDocPerm set `match` = '' where parent = 'Leave Application' and role = 'HR User'")
 	elif patch_no == 86:
 		# Import Modules
-		
 		import_from_files(record_list=[['hr','doctype','leave_type']])
 	elif patch_no == 87:
 		sql("update `tabLeave Type` set is_lwp = 1 where name = 'Leave Without Pay'")
 	elif patch_no == 88:
 		# Import Modules
-		
 		import_from_files(record_list=[['hr','doctype','leave_allocation']])
 	elif patch_no == 89:
 		sql("delete from `tabModule Def Item` where doc_type = 'Setup Forms' and doc_name in ('Payroll Rule', 'IT Checklist', 'Employee Profile') and parent = 'Payroll'")
@@ -457,10 +449,8 @@ def execute(patch_no):
 		sql("update `tabTable Mapper Detail` set validation_logic = 'qty > ifnull(billed_qty,0) and docstatus = 1' where parent = 'Sales Order-Receivable Voucher' and from_table = 'Sales Order Detail'")
 		sql("update `tabField Mapper Detail` set from_field = 'customer' where to_field = 'customer' and parent = 'Sales Order-Receivable Voucher'")
 	elif patch_no == 94:
-		
 		import_from_files(record_list=[['selling','doctype','sms_center']])
 	elif patch_no == 95:
-		
 		import_from_files(record_list=[['mapper','DocType Mapper','Sales Order-Receivable Voucher'], ['mapper','DocType Mapper','Delivery Note-Receivable Voucher']])
 	elif patch_no == 96:
 		sql("delete from `tabModule Def Item` where doc_type = 'Reports' and display_name = 'Cenvat Credit - Input or Capital Goods' and parent = 'Accounts'")
@@ -490,7 +480,6 @@ def execute(patch_no):
 	elif patch_no == 103:
 		sql("update tabDocField set fieldname = '' where fieldtype = 'HTML'")
 	elif patch_no == 104:
-		
 		import_from_files(record_list=[['hr','search_criteria','stdsrch_00001'],['hr','search_criteria','stdsrch_00002'],['hr','search_criteria','stdsrch_00003'],['hr','Module Def','Payroll'],['hr','doctype','leave_application'],['hr','doctype','leave_allocation']])
 	elif patch_no == 105:
 		# Employee Leave Balance
@@ -535,7 +524,7 @@ def execute(patch_no):
 		# patch for timesheet cleanup
 		from webnotes.model import delete_doc
 		delete_doc('DocType', 'Timesheet Detail')
-		
+
 		from webnotes.modules.import_module import import_from_files
 		import_from_files(record_list = [['Projects', 'DocType', 'Timesheet'], ['Projects', 'DocType', 'Timesheet Detail'], ['Projects', 'DocType', 'Activity Type']])
 
@@ -543,7 +532,7 @@ def execute(patch_no):
 		# again!
 		from webnotes.model import delete_doc
 		delete_doc('DocType', 'Timesheet Detail')
-		
+
 		from webnotes.modules.import_module import import_from_files
 		import_from_files(record_list = [['Projects', 'DocType', 'Timesheet Detail']])
 	elif patch_no == 117:
@@ -646,13 +635,13 @@ def execute(patch_no):
 	elif patch_no == 142:
 		# fixes to letter head and personalize
 		from webnotes.model import delete_doc
-		
+
 		delete_doc('DocType', 'Batch Settings')
 		delete_doc('DocType', 'Batch Settings Detail')
 		delete_doc('DocType', 'Social Badge')
 		delete_doc('Page', 'Personalize Page')
 		delete_doc('DocType', 'Personalize Page Control')
-		
+
 		import_from_files(record_list=[['core','doctype','letter_head'], ['setup','doctype','personalize']])
 	elif patch_no == 144:
 		webnotes.conn.sql("update tabDocField set fieldtype='Code' where parent='Letter Head' and fieldname='content'")
@@ -917,7 +906,7 @@ def execute(patch_no):
 		reload_doc('knowledge_base', 'page', 'questions')
 		reload_doc('knowledge_base', 'Module Def', 'Knowledge Base')
 		sql("update `tabModule Def` set disabled='No' where name='Knowledge Base'")
-	elif patch_no == 229:		
+	elif patch_no == 229:
 		reload_doc('knowledge_base', 'page', 'question_view')
 	elif patch_no == 230:
 		reload_doc('buying', 'doctype', 'indent')
@@ -933,7 +922,7 @@ def execute(patch_no):
 	elif patch_no == 234:
 		sql("update `tabTable Mapper Detail` set validation_logic = 'docstatus=1' where parent = 'Sales Order-Indent' and from_table = 'Sales Order Detail'")
 	elif patch_no == 235:
-		for sc in sql("""select name from `tabSearch Criteria` where ifnull(name,'') 
+		for sc in sql("""select name from `tabSearch Criteria` where ifnull(name,'')
 			like 'srch%' or ifnull(name,'') like '%stdsrch'"""):
 			try:
 				get_obj('Search Criteria', sc[0]).rename()
@@ -951,7 +940,6 @@ def execute(patch_no):
 	elif patch_no == 239:
 		reload_doc('core', 'doctype', 'docfield')
 		reload_doc('core', 'doctype', 'doctype')
-		
 		from patches.old_patches.feed_patch import set_subjects_and_tagfields
 		set_subjects_and_tagfields()
 	elif patch_no == 240:
@@ -1026,7 +1014,7 @@ def execute(patch_no):
 		sql("update `tabItem` set description_html = replace(description_html, 'http://46.4.50.84/v170-test/', '')")
 	elif patch_no == 257:
 		from patches.old_patches.customer_address import run_old_data_sync_patch
-		run_old_data_sync_patch()	
+		run_old_data_sync_patch()
 	elif patch_no == 258:
 		sql("update tabDocField set `default`=NULL where fieldname = 'naming_series'")
 	elif patch_no == 259:
@@ -1050,7 +1038,7 @@ def execute(patch_no):
 	elif patch_no == 263:
 		ol = ['','Open','To Reply','Waiting for Customer','Hold','Closed']
 		sql("update tabDocField set options=%s where parent=%s and fieldname=%s", ('\n'.join(ol), 'Support Ticket', 'status'))
-	elif patch_no == 264:	
+	elif patch_no == 264:
 		sql("delete from tabDocField where parent = 'Customer Issue' and (fieldname = 'issue_in' or fieldname = 'issue_category')")
 		sql("update tabDocField set options=NULL where parent='Support Ticket' and label = 'Send'")
 	elif patch_no == 266:
@@ -1077,12 +1065,12 @@ def execute(patch_no):
 		reload_doc('selling','doctype','sales_order')
 		reload_doc('stock','doctype','delivery_note')
 		sql("delete from tabDocField where fieldname='per_amt_billed' and parent in ('Sales Order', 'Delivery Note')")
-		
-		sql("""update `tabSales Order` set delivery_status = if(ifnull(per_delivered,0) < 0.001, 'Not Delivered', 
+
+		sql("""update `tabSales Order` set delivery_status = if(ifnull(per_delivered,0) < 0.001, 'Not Delivered',
 				if(per_delivered >= 99.99, 'Fully Delivered', 'Partly Delivered'))""")
-		sql("""update `tabSales Order` set billing_status = if(ifnull(per_billed,0) < 0.001, 'Not Billed', 
+		sql("""update `tabSales Order` set billing_status = if(ifnull(per_billed,0) < 0.001, 'Not Billed',
 				if(per_billed >= 99.99, 'Fully Billed', 'Partly Billed'))""")
-		sql("""update `tabDelivery Note` set billing_status = if(ifnull(per_billed,0) < 0.001, 'Not Billed', 
+		sql("""update `tabDelivery Note` set billing_status = if(ifnull(per_billed,0) < 0.001, 'Not Billed',
 				if(per_billed >= 99.99, 'Fully Billed', 'Partly Billed'))""")
 	elif patch_no == 272:
 		from webnotes.model import delete_doc
@@ -1116,7 +1104,7 @@ def execute(patch_no):
 			rec = sql("select voucher_type, voucher_no, ifnull(is_cancelled, 'No') from `tab%s` where modified >= '2011-06-15 01:00:00' group by voucher_no" % t)
 			for d in rec:
 				sql("update `tab%s` set docstatus = %s where name = '%s'" % (d[0], d[2]=='No' and 1 or 2, d[1]))
-			
+
 		other_dt = ['Enquiry', 'Quotation', 'Sales Order', 'Indent', 'Purchase Order', 'Production Order', 'Customer Issue', 'Installation Note']
 		for dt in other_dt:
 			rec = sql("select name, status from `tab%s` where modified >= '2011-06-15 01:00:00'" % dt)
@@ -1151,9 +1139,9 @@ def execute(patch_no):
 		reload_doc('accounts', 'doctype', 'payable_voucher')
 	elif patch_no == 289:
 		sql("update `tabDocType` set subject = 'From %(supplier_name)s worth %(grand_total)s due on %(due_date)s | %(outstanding_amount)s outstanding' where name = 'Payable Voucher'")
-		sql("update `tabDocType` set search_fields = 'status,transaction_date,customer,lead,order_type' where name = 'Quotation'")		
+		sql("update `tabDocType` set search_fields = 'status,transaction_date,customer,lead,order_type' where name = 'Quotation'")
 	elif patch_no == 290:
-		count = sql("""SELECT * FROM  `tabModule Def` 
+		count = sql("""SELECT * FROM  `tabModule Def`
 			   WHERE `module_name` LIKE 'Home'""")
 		if not count:
 			md = Document('Module Def')
@@ -1236,14 +1224,14 @@ def execute(patch_no):
 			rec = sql("select voucher_type, voucher_no, ifnull(is_cancelled, 'No') from `tab%s` where modified >= '2011-07-06 10:00:00' group by voucher_no" % t)
 			for d in rec:
 				sql("update `tab%s` set docstatus = %s where name = '%s'" % (d[0], d[2]=='No' and 1 or 2, d[1]))
-			
+
 		other_dt = ['Enquiry', 'Quotation', 'Sales Order', 'Indent', 'Purchase Order', 'Production Order', 'Customer Issue', 'Installation Note']
 		for dt in other_dt:
 			rec = sql("select name, status from `tab%s` where modified >= '2011-07-06 10:00:00'" % dt)
 			for r in rec:
 				sql("update `tab%s` set docstatus = %s where name = '%s'" % (dt, (r[1] in ['Submitted', 'Closed'] and 1 or r[1]=='Cancelled' and 2 or 0), r[0]))
-				
-				
+
+
 		dt_list = ['Delivery Note', 'Purchase Receipt']
 		for dt in dt_list:
 			sql("update `tab%s` set status = 'Submitted' where docstatus = 1 and modified >='2011-07-06 10:00:00'" % dt)
@@ -1254,7 +1242,7 @@ def execute(patch_no):
 			tbl = sql("select options from `tabDocField` where fieldtype = 'Table' and parent = '%s'" % d)
 			for t in tbl:
 				sql("update `tab%s` t1, `tab%s` t2 set t1.docstatus = t2.docstatus where t1.parent = t2.name" % (t[0], d))
-				
+
 	elif patch_no == 314:
 		# delete double feed
 		sql("delete from tabFeed where subject like 'New %'")
@@ -1273,7 +1261,7 @@ def execute(patch_no):
 	elif patch_no == 316:
 		pass
 	elif patch_no == 317:
-		sql("update `tabPage` set name = 'profile-settings' where page_name = 'Profile Settings'")	
+		sql("update `tabPage` set name = 'profile-settings' where page_name = 'Profile Settings'")
 	elif patch_no == 318:
 		reload_doc('utilities', 'doctype', 'bulk_rename_tool')
 	elif patch_no == 319:
@@ -1300,7 +1288,7 @@ def execute(patch_no):
 	elif patch_no == 327:
 		# patch for support email settings now moved to email settings
 		reload_doc('setup','doctype','email_settings')
-		
+
 		# map fields from support to email settings
 		field_map = {
 			'support_email': 'email',
@@ -1311,11 +1299,11 @@ def execute(patch_no):
 			'sync_support_mails': 'integrate_incoming',
 			'signature': 'support_signature'
 		}
-		
+
 		for key in field_map:
 			webnotes.conn.set_value('Email Settings',None,key, \
 				webnotes.conn.get_value('Support Email Settings',None,field_map[key]))
-		
+
 		# delete support email settings
 		from webnotes.model import delete_doc
 		delete_doc('DocType', 'Support Email Settings')
@@ -1328,3 +1316,23 @@ def execute(patch_no):
 	elif patch_no == 329:
 		reload_doc('utilities', 'doctype', 'rename_tool')
 		reload_doc('utilities', 'doctype', 'bulk_rename_tool')
+	elif patch_no == 330:
+		reload_doc('accounts', 'doctype', 'lease_agreement')
+		reload_doc('accounts', 'doctype', 'lease_installment')
+
+		reload_doc('accounts', 'search_criteria', 'lease_agreement_list')
+		reload_doc('accounts', 'search_criteria', 'lease_monthly_future_installment_inflows')
+		reload_doc('accounts', 'search_criteria', 'lease_overdue_age_wise')
+		reload_doc('accounts', 'search_criteria', 'lease_over_due_list')
+		reload_doc('accounts', 'search_criteria', 'lease_receipts_client_wise')
+		reload_doc('accounts', 'search_criteria', 'lease_receipt_summary_year_to_date')
+		reload_doc('accounts', 'search_criteria', 'lease_yearly_future_installment_inflows')
+
+		reload_doc('accounts', 'Module Def', 'Accounts')
+	elif patch_no == 331:
+		p = get_obj('Patch Util')
+		# permission
+		p.add_permission('Lease Agreement', 'Accounts Manager', 0, read = 1, write=1,submit=1, cancel=1,amend=1)
+		p.add_permission('Lease Agreement', 'Accounts Manager', 1, read = 1)
+	elif patch_no == 332:
+		sql("update `tabDocField` set permlevel=1, hidden = 1 where parent = 'Bulk Rename Tool' and fieldname = 'file_list'")

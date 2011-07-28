@@ -1,0 +1,126 @@
+# DocType, Upload Accounts Transactions
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2011-07-18 14:56:48',
+		'docstatus': 0,
+		'modified': '2011-07-19 12:19:13',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all DocType
+	{
+		'_last_update': '1310985428',
+		'allow_attach': 1,
+		'colour': 'White:FFF',
+		'doctype': 'DocType',
+		'issingle': 1,
+		'max_attachments': 1,
+		'module': 'Setup',
+		'name': '__common__',
+		'section_style': 'Simple',
+		'show_in_menu': 1,
+		'version': 5
+	},
+
+	# These values are common for all DocField
+	{
+		'doctype': 'DocField',
+		'name': '__common__',
+		'parent': 'Upload Accounts Transactions',
+		'parentfield': 'fields',
+		'parenttype': 'DocType',
+		'permlevel': 0
+	},
+
+	# These values are common for all DocPerm
+	{
+		'cancel': 1,
+		'create': 1,
+		'doctype': 'DocPerm',
+		'execute': 1,
+		'idx': 1,
+		'name': '__common__',
+		'parent': 'Upload Accounts Transactions',
+		'parentfield': 'permissions',
+		'parenttype': 'DocType',
+		'permlevel': 0,
+		'read': 1,
+		'role': 'Accounts Manager',
+		'submit': 1,
+		'write': 1
+	},
+
+	# DocType, Upload Accounts Transactions
+	{
+		'doctype': 'DocType',
+		'name': 'Upload Accounts Transactions'
+	},
+
+	# DocPerm
+	{
+		'doctype': 'DocPerm'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'HTML',
+		'idx': 1,
+		'label': 'Usage',
+		'options': '<div class="help_box">\n<b>Upload Account Transactions Help</b>\n<p>To update the account transactions, upload a CSV file with five columns Date, Transaction Number, Account Name, Credit and Debit amount and click on the "Upload Account Transactions" button. The system will add the transactions.\n</div>'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'fiscal_year',
+		'fieldtype': 'Link',
+		'idx': 2,
+		'label': 'Fiscal Year',
+		'options': 'Fiscal Year',
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'company',
+		'fieldtype': 'Link',
+		'idx': 3,
+		'label': 'Company',
+		'options': 'Company',
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'default_cost_center',
+		'fieldtype': 'Link',
+		'idx': 4,
+		'label': 'Default Cost Center',
+		'options': 'Cost Center',
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'file_list',
+		'fieldtype': 'Small Text',
+		'hidden': 1,
+		'idx': 5,
+		'label': 'File List'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Button',
+		'idx': 6,
+		'label': 'Upload Accounts Transactions'
+	}
+]

@@ -5,7 +5,7 @@
 	{
 		'creation': '2010-08-08 17:09:20',
 		'docstatus': 0,
-		'modified': '2011-07-18 15:30:04',
+		'modified': '2011-07-27 13:10:28',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
@@ -21,7 +21,7 @@
 		'server_code_error': ' ',
 		'show_in_menu': 0,
 		'subject': 'For %(employee_name)s, %(designation)s',
-		'version': 392
+		'version': 393
 	},
 
 	# These values are common for all DocField
@@ -55,44 +55,10 @@
 		'cancel': 0,
 		'create': 0,
 		'doctype': 'DocPerm',
+		'idx': 1,
 		'match': 'owner',
 		'permlevel': 0,
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		'doctype': 'DocPerm',
-		'match': 'owner',
-		'permlevel': 0,
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		'doctype': 'DocPerm',
-		'match': 'owner',
-		'permlevel': 0,
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		'doctype': 'DocPerm',
-		'match': 'owner',
-		'permlevel': 0,
+		'role': 'Employee',
 		'submit': 0,
 		'write': 0
 	},
@@ -102,7 +68,7 @@
 		'amend': 0,
 		'create': 1,
 		'doctype': 'DocPerm',
-		'idx': 3,
+		'idx': 2,
 		'permlevel': 0,
 		'role': 'HR User',
 		'submit': 1,
@@ -115,7 +81,7 @@
 		'cancel': 1,
 		'create': 1,
 		'doctype': 'DocPerm',
-		'idx': 4,
+		'idx': 3,
 		'permlevel': 0,
 		'role': 'HR Manager',
 		'submit': 1,
@@ -125,7 +91,7 @@
 	# DocPerm
 	{
 		'doctype': 'DocPerm',
-		'idx': 5,
+		'idx': 4,
 		'permlevel': 1,
 		'role': 'HR User'
 	},
@@ -133,7 +99,7 @@
 	# DocPerm
 	{
 		'doctype': 'DocPerm',
-		'idx': 6,
+		'idx': 5,
 		'permlevel': 1,
 		'role': 'HR Manager'
 	},
@@ -288,28 +254,6 @@
 	# DocField
 	{
 		'doctype': 'DocField',
-		'fieldname': 'letter_head',
-		'fieldtype': 'Link',
-		'idx': 11,
-		'label': 'Letter Head',
-		'options': 'Letter Head',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldname': 'letter_head',
-		'fieldtype': 'Link',
-		'idx': 11,
-		'label': 'Letter Head',
-		'options': 'Letter Head',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
 		'fieldtype': 'Column Break',
 		'idx': 12,
 		'oldfieldtype': 'Column Break',
@@ -332,32 +276,6 @@
 		'permlevel': 0,
 		'reqd': 1,
 		'search_index': 0
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldname': 'company',
-		'fieldtype': 'Select',
-		'idx': 14,
-		'in_filter': 1,
-		'label': 'Company',
-		'options': 'link:Company',
-		'permlevel': 0,
-		'reqd': 1
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldname': 'company',
-		'fieldtype': 'Select',
-		'idx': 14,
-		'in_filter': 1,
-		'label': 'Company',
-		'options': 'link:Company',
-		'permlevel': 0,
-		'reqd': 1
 	},
 
 	# DocField
