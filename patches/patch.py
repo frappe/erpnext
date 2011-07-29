@@ -1,7 +1,7 @@
 # REMEMBER to update this
 # ========================
 
-last_patch = 333
+last_patch = 332
 
 #-------------------------------------------
 
@@ -1336,7 +1336,3 @@ def execute(patch_no):
 		p.add_permission('Lease Agreement', 'Accounts Manager', 1, read = 1)
 	elif patch_no == 332:
 		sql("update `tabDocField` set permlevel=1, hidden = 1 where parent = 'Bulk Rename Tool' and fieldname = 'file_list'")
-	elif patch_no == 333:
-		cp = Document('Control Panel','Control Panel')
-		cp.account_id = str(webnotes.cookies['account_id']).split('=')[-1]
-		cp.save()
