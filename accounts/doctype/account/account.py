@@ -94,8 +94,8 @@ class DocType:
 	def convert_group_to_ledger(self):
 		if self.check_if_child_exists():
 			msgprint("Account: %s has existing child. You can not convert this account to ledger" % (self.doc.name), raise_exception=1)
-		elif self.check_prev_bal_exists():
-			msgprint("Account with balance can not be converted to ledger.", raise_exception=1)
+		elif self.check_gle_exists():
+			msgprint("Account with existing transaction can not be converted to ledger.", raise_exception=1)
 		else:
 			self.doc.group_or_ledger = 'Ledger'
 			self.doc.save()
@@ -104,8 +104,8 @@ class DocType:
 	# Convert ledger to group
 	# ==================================================================
 	def convert_ledger_to_group(self):
-		if self.check_prev_bal_exists():
-			msgprint("Account with balance can not be converted to group.", raise_exception=1)
+		if self.check_gle_exists():
+			msgprint("Account with existing transaction can not be converted to group.", raise_exception=1)
 		else:
 			self.doc.group_or_ledger = 'Group'
 			self.doc.save()
@@ -113,9 +113,9 @@ class DocType:
 
 	# Check if any previous balance exists
 	# ==================================================================
-	def check_prev_bal_exists(self):
-		bal = sql("select balance from `tabAccount Balance` where parent = '%s' and ifnull(balance, 0) > 0" % (self.doc.name))
-		return bal and flt(bal[0][0]) or 0
+	def check_gle_exists(self):
+		exists = sql("select name from `tabGL Entry` where account = '%s' and ifnull(is_cancelled, 'No') = 'No'" % (self.doc.name))
+		return exists and exists[0][0] or ''
 
 	# check if child exists
 	# ==================================================================
@@ -231,8 +231,8 @@ class DocType:
 	# Account with balance cannot be inactive
 	# ==================================================================
 	def check_balance_before_trash(self):
-		if flt(self.get_curr_bal()) != 0:
-			msgprint("Account with existing balance can not be trashed", raise_exception=1)
+		if self.check_gle_exists():
+			msgprint("Account with existing transaction can not be trashed", raise_exception=1)
 		if self.check_if_child_exists():
 			msgprint("Child account exists for this account. You can not trash this account.", raise_exception=1)
 

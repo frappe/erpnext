@@ -5,7 +5,7 @@
 	{
 		'creation': '2010-09-25 10:50:34',
 		'docstatus': 0,
-		'modified': '2011-07-27 11:43:40',
+		'modified': '2011-07-28 12:01:10',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
@@ -358,7 +358,7 @@
 	# Module Def Item
 	{
 		'display_name': 'Lease Agreement List',
-		'doc_name': 'Lease Agreement List',
+		'doc_name': 'GL Entry',
 		'doc_type': 'Reports',
 		'doctype': 'Module Def Item',
 		'idx': 33
@@ -367,7 +367,7 @@
 	# Module Def Item
 	{
 		'display_name': 'Lease Monthly Future Installment Inflows',
-		'doc_name': 'Lease Monthly Future Installment Inflows',
+		'doc_name': 'GL Entry',
 		'doc_type': 'Reports',
 		'doctype': 'Module Def Item',
 		'idx': 34
@@ -376,7 +376,7 @@
 	# Module Def Item
 	{
 		'display_name': 'Lease Overdue Age Wise',
-		'doc_name': 'Lease Overdue Age Wise',
+		'doc_name': 'GL Entry',
 		'doc_type': 'Reports',
 		'doctype': 'Module Def Item',
 		'idx': 35
@@ -385,7 +385,7 @@
 	# Module Def Item
 	{
 		'display_name': 'Lease Overdue List',
-		'doc_name': 'Lease Overdue List',
+		'doc_name': 'GL Entry',
 		'doc_type': 'Reports',
 		'doctype': 'Module Def Item',
 		'idx': 36
@@ -394,7 +394,7 @@
 	# Module Def Item
 	{
 		'display_name': 'Lease Receipts Client Wise',
-		'doc_name': 'Lease Receipts Client Wise',
+		'doc_name': 'GL Entry',
 		'doc_type': 'Reports',
 		'doctype': 'Module Def Item',
 		'idx': 37
@@ -402,8 +402,8 @@
 
 	# Module Def Item
 	{
-		'display_name': 'Lease Receipt Summary Year to Date',
-		'doc_name': 'Lease Receipt Summary Year to Date',
+		'display_name': 'Lease Receipt Summary Month Wise',
+		'doc_name': 'GL Entry',
 		'doc_type': 'Reports',
 		'doctype': 'Module Def Item',
 		'idx': 38
@@ -412,7 +412,7 @@
 	# Module Def Item
 	{
 		'display_name': 'Lease Yearly Future Installment Inflows',
-		'doc_name': 'Lease Yearly Future Installment Inflows',
+		'doc_name': 'GL Entry',
 		'doc_type': 'Reports',
 		'doctype': 'Module Def Item',
 		'idx': 39
