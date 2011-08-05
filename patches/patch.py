@@ -1346,4 +1346,5 @@ def execute(patch_no):
 	elif patch_no == 334:
 		reload_doc('knowledge_base', 'doctype', 'answer')
 	elif patch_no == 335:
-		sql("update `tabDocField` set fieldtype = 'Link', options = 'Account' where fieldname = 'old_parent' and parent = 'Account'")
+		for dt in ['Account', 'Cost Center', 'Territory', 'Item Group', 'Customer Group']:
+			sql("update `tabDocField` set fieldtype = 'Link', options = %s where fieldname = 'old_parent' and parent = %s", (dt, dt))
