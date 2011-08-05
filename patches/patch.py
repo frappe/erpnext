@@ -1,7 +1,7 @@
 # REMEMBER to update this
 # ========================
 
-last_patch = 332
+last_patch = 333
 
 #-------------------------------------------
 
@@ -1336,3 +1336,10 @@ def execute(patch_no):
 		p.add_permission('Lease Agreement', 'Accounts Manager', 1, read = 1)
 	elif patch_no == 332:
 		sql("update `tabDocField` set permlevel=1, hidden = 1 where parent = 'Bulk Rename Tool' and fieldname = 'file_list'")
+	elif patch_no == 333:
+		sql("update `tabDocPerm` set create  =1 where role = 'Accounts Manager' and parent = 'Lease Agreement'")
+		
+		p = get_obj('Patch Util')
+		p.add_permission('DocType Mapper', 'System Manager', 0, read = 1, write=1, create=1)
+		p.add_permission('Role', 'System Manager', 0, read = 1, write=1, create=1)
+		p.add_permission('Print Format', 'System Manager', 0, read = 1, write=1, create=1)
