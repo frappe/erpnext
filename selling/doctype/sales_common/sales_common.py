@@ -329,6 +329,28 @@ class DocType(TransactionBase):
 				il.append([warehouse, d.item_code, qty, reserved_qty, d.stock_uom, d.batch_no, d.serial_no])
 		return il
 
+	# ---------------------------------------------------------------------------------------------
+	# get qty, amount already billed or delivered against curr line item for current doctype
+	# For Eg: SO-RV get total qty, amount from SO and also total qty, amount against that SO in RV
+	# ---------------------------------------------------------------------------------------------
+	def get_curr_and_ref_doc_details(self, curr_doctype, ref_tab_fname, ref_tab_dn, ref_doc_tname, curr_parent_name, curr_parent_doctype):
+		# Get total qty, amt of current doctype (eg RV) except for qty, amt of this transaction
+		if curr_parent_doctype == 'Installation Note':
+			curr_det = sql("select sum(qty) from `tab%s` where %s = '%s' and docstatus = 1 and parent != '%s'"% (curr_doctype, ref_tab_fname, ref_tab_dn, curr_parent_name))
+			qty, amt = curr_det and flt(curr_det[0][0]) or 0, 0
+		else:
+			curr_det = sql("select sum(qty), sum(amount) from `tab%s` where %s = '%s' and docstatus = 1 and parent != '%s'"% (curr_doctype, ref_tab_fname, ref_tab_dn, curr_parent_name))
+			qty, amt = curr_det and flt(curr_det[0][0]) or 0, curr_det and flt(curr_det[0][1]) or 0
+
+		# get total qty of ref doctype
+		ref_det = sql("select qty, amount from `tab%s` where name = '%s' and docstatus = 1"% (ref_doc_tname, ref_tab_dn))
+		max_qty, max_amt = ref_det and flt(ref_det[0][0]) or 0, ref_det and flt(ref_det[0][1]) or 0
+
+		return qty, max_qty, amt, max_amt
+
+
+
+
 
 	# -----------------------
 	# add packing list items
@@ -457,26 +479,6 @@ class DocType(TransactionBase):
 
 	def update_prevdoc_detail(self, is_submit, obj):
 		StatusUpdater(obj, is_submit).update()
-
-	# ---------------------------------------------------------------------------------------------
-	# get qty, amount already billed or delivered against curr line item for current doctype
-	# For Eg: SO-RV get total qty, amount from SO and also total qty, amount against that SO in RV
-	# ---------------------------------------------------------------------------------------------
-	def get_curr_and_ref_doc_details(self, curr_doctype, ref_tab_fname, ref_tab_dn, ref_doc_tname, curr_parent_name, curr_parent_doctype):
-		# Get total qty, amt of current doctype (eg RV) except for qty, amt of this transaction
-		if curr_parent_doctype == 'Installation Note':
-			curr_det = sql("select sum(qty) from `tab%s` where %s = '%s' and docstatus = 1 and parent != '%s'"% (curr_doctype, ref_tab_fname, ref_tab_dn, curr_parent_name))
-			qty, amt = curr_det and flt(curr_det[0][0]) or 0, 0
-		else:
-			curr_det = sql("select sum(qty), sum(amount) from `tab%s` where %s = '%s' and docstatus = 1 and parent != '%s'"% (curr_doctype, ref_tab_fname, ref_tab_dn, curr_parent_name))
-			qty, amt = curr_det and flt(curr_det[0][0]) or 0, curr_det and flt(curr_det[0][1]) or 0
-
-		# get total qty of ref doctype
-		ref_det = sql("select qty, amount from `tab%s` where name = '%s' and docstatus = 1"% (ref_doc_tname, ref_tab_dn))
-		max_qty, max_amt = ref_det and flt(ref_det[0][0]) or 0, ref_det and flt(ref_det[0][1]) or 0
-
-		return qty, max_qty, amt, max_amt
-
 
 
 
