@@ -1,7 +1,7 @@
 # REMEMBER to update this
 # ========================
 
-last_patch = 333
+last_patch = 334
 
 #-------------------------------------------
 
@@ -1343,3 +1343,5 @@ def execute(patch_no):
 		p.add_permission('DocType Mapper', 'System Manager', 0, read = 1, write=1, create=1)
 		p.add_permission('Role', 'System Manager', 0, read = 1, write=1, create=1)
 		p.add_permission('Print Format', 'System Manager', 0, read = 1, write=1, create=1)
+	elif patch_no == 334:
+		reload_doc('knowledge_base', 'doctype', 'answer')
