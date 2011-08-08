@@ -1,7 +1,7 @@
 # REMEMBER to update this
 # ========================
 
-last_patch = 334
+last_patch = 335
 
 #-------------------------------------------
 
@@ -1352,3 +1352,6 @@ def execute(patch_no):
 		p.add_permission('Print Format', 'System Manager', 0, read = 1, write=1, create=1)
 	elif patch_no == 334:
 		reload_doc('knowledge_base', 'doctype', 'answer')
+	elif patch_no == 335:
+		for dt in ['Account', 'Cost Center', 'Territory', 'Item Group', 'Customer Group']:
+			sql("update `tabDocField` set fieldtype = 'Link', options = %s where fieldname = 'old_parent' and parent = %s", (dt, dt))
