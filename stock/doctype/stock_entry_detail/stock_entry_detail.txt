@@ -253,7 +253,8 @@
 		'no_copy': 1,
 		'oldfieldname': 'serial_no',
 		'oldfieldtype': 'Text',
-		'permlevel': 0
+		'permlevel': 0,
+		'reqd': 0
 	},
 
 	# DocField

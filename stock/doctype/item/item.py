@@ -178,3 +178,7 @@ Total Available Qty: %s
 
 		sle = sql("select name from `tabStock Ledger Entry` where item_code = %s and ifnull(is_cancelled, 'No') = 'No'", self.doc.name)
 		return sle and 'exists' or 'not exists'
+		
+	def on_rename(self,newdn,olddn):
+		sql("update tabItem set item_code = %s where name = %s", (newdn, olddn))	
+		
