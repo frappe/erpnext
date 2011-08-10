@@ -1,7 +1,7 @@
 # REMEMBER to update this
 # ========================
 
-last_patch = 337
+last_patch = 338
 
 #-------------------------------------------
 
@@ -1373,3 +1373,31 @@ def execute(patch_no):
 							sp_acx[i+1] = '"'.join(sp_quot)
 					html = "acx=".join(sp_acx)
 					webnotes.conn.sql("""UPDATE tabItem SET description_html=%s WHERE name=%s""", (html, item))
+	elif patch_no == 338:
+		# Patch for billing status based on amount
+		# reload so and dn
+		reload_doc('selling','doctype','sales_order')
+		reload_doc('stock','doctype','delivery_note')
+		
+		# delete billed_qty field
+		sql("delete from `tabDocField` where fieldname = 'billed_qty' and parent in ('Sales Order Detail', 'Delivery Note Detail')")
+		
+		# update billed amt in item table in so and dn
+		sql("""	update `tabSales Order Detail` so
+				set billed_amt = (select sum(amount) from `tabRV Detail` where `so_detail`= so.name and docstatus=1 and parent not like 'old%%'), modified = now()""")
+		
+		sql(""" update `tabDelivery Note Detail` dn
+				set billed_amt = (select sum(amount) from `tabRV Detail` where `dn_detail`= dn.name and docstatus=1 and parent not like 'old%%'), modified = now()""")
+		
+		# calculate % billed based on item table
+		sql("""	update `tabSales Order` so
+				set per_billed = (select sum(if(amount > ifnull(billed_amt, 0), billed_amt, amount))/sum(amount)*100 from `tabSales Order Detail` where parent = so.name), modified = now()""")
+		
+		sql("""	update `tabDelivery Note` dn
+				set per_billed = (select sum(if(amount > ifnull(billed_amt, 0), billed_amt, amount))/sum(amount)*100 from `tabDelivery Note Detail` where parent = dn.name), modified = now()""")
+
+		# update billing status based on % billed
+		sql("""update `tabSales Order` set billing_status = if(ifnull(per_billed,0) < 0.001, 'Not Billed',
+				if(per_billed >= 99.99, 'Fully Billed', 'Partly Billed'))""")
+		sql("""update `tabDelivery Note` set billing_status = if(ifnull(per_billed,0) < 0.001, 'Not Billed',
+				if(per_billed >= 99.99, 'Fully Billed', 'Partly Billed'))""")
