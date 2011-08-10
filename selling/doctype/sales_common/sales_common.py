@@ -498,7 +498,7 @@ class StatusUpdater:
 			- Validate over delivery
 			
 		From Receivable Voucher 
-			- Update Billed Qty
+			- Update Billed Amt
 			- Update Percent
 			- Validate over billing
 			
@@ -526,23 +526,33 @@ class StatusUpdater:
 			self.validate_qty({
 				'source_dt'		:'Delivery Note Detail',
 				'compare_field'	:'delivered_qty',
+				'compare_ref_field'	:'qty',
 				'target_dt'		:'Sales Order Detail',
 				'join_field'	:'prevdoc_detail_docname'
 			})
 		elif self.obj.doc.doctype=='Receivable Voucher':
 			self.validate_qty({
 				'source_dt'		:'RV Detail',
-				'compare_field'	:'billed_qty',
+				'compare_field'	:'billed_amt',
+				'compare_ref_field'	:'amount',
 				'target_dt'		:'Sales Order Detail',
 				'join_field'	:'so_detail'
 			})
+			self.validate_qty({
+				'source_dt'		:'RV Detail',
+				'compare_field'	:'billed_amt',
+				'compare_ref_field'	:'amount',
+				'target_dt'		:'Delivery Note Detail',
+				'join_field'	:'dn_detail'
+			}, no_tolerance =1)
 		elif self.obj.doc.doctype=='Installation Note':
 			self.validate_qty({
 				'source_dt'		:'Installation Item Details',
 				'compare_field'	:'installed_qty',
+				'compare_ref_field'	:'qty',
 				'target_dt'		:'Delivery Note Detail',
 				'join_field'	:'dn_detail'
-			}, no_tolerance =1);
+			}, no_tolerance =1)
 
 	
 	def get_tolerance_for(self, item_code):
@@ -569,22 +579,22 @@ class StatusUpdater:
 		
 		# check if overflow is within tolerance
 		tolerance = self.get_tolerance_for(item['item_code'])
-		overflow_percent = ((item[args['compare_field']] - item['qty']) / item['qty'] * 100)
+		overflow_percent = ((item[args['compare_field']] - item[args['compare_ref_field']]) / item[args['compare_ref_field']] * 100)
 	
 		if overflow_percent - tolerance > 0.0001:
-			item['max_allowed'] = flt(item['qty'] * (100+tolerance)/100)
+			item['max_allowed'] = flt(item[args['compare_ref_field']] * (100+tolerance)/100)
 			item['reduce_by'] = item[args['compare_field']] - item['max_allowed']
 		
 			msgprint("""
-				Row #%(idx)s: Max qty allowed for <b>Item %(item_code)s</b> against <b>%(parenttype)s %(parent)s</b> is <b>%(max_allowed)s</b>. 
+				Row #%(idx)s: Max %(compare_ref_field)s allowed for <b>Item %(item_code)s</b> against <b>%(parenttype)s %(parent)s</b> is <b>%(max_allowed)s</b>. 
 				
 				If you want to increase your overflow tolerance, please increase tolerance %% in Global Defaults or Item master. 
 				
-				Or, you must reduce the qty by %(reduce_by)s""" % item, raise_exception=1)
+				Or, you must reduce the %(compare_ref_field)s by %(reduce_by)s""" % item, raise_exception=1)
 
 	def validate_qty(self, args, no_tolerance=None):
 		"""
-			Updates qty at row level
+			Validates qty at row level
 		"""
 		# get unique transactions to update
 		for d in self.obj.doclist:
@@ -593,22 +603,23 @@ class StatusUpdater:
 
 				# get all qty where qty > compare_field
 				item = sql("""
-					select item_code, qty, `%(compare_field)s`, parenttype, parent from `tab%(target_dt)s` 
-					where qty < `%(compare_field)s` and name="%(name)s" and docstatus=1
+					select item_code, `%(compare_ref_field)s`, `%(compare_field)s`, parenttype, parent from `tab%(target_dt)s` 
+					where `%(compare_ref_field)s` < `%(compare_field)s` and name="%(name)s" and docstatus=1
 					""" % args, as_dict=1)
 				
 				if item:
 					item = item[0]
 					item['idx'] = d.idx
-					
+					item['compare_ref_field'] = args['compare_ref_field']
 					if no_tolerance:
-						item['reduce_by'] = item[args['compare_field']] - item['qty']
+						item['reduce_by'] = item[args['compare_field']] - item[args['compare_ref_field']]
 						msgprint("""
-							Row #%(idx)s: Max qty allowed for <b>Item %(item_code)s</b> against 
-							<b>%(parenttype)s %(parent)s</b> is <b>%(qty)s</b>. 
+							Row #%(idx)s: Max %(compare_ref_field)s allowed for <b>Item %(item_code)s</b> against 
+							<b>%(parenttype)s %(parent)s</b> is <b>""" % item 
+							+ cstr(item[args['compare_ref_field']]) + """</b>. 
 							
-							You must reduce the qty by %(reduce_by)s""" % item, raise_exception=1)
-						
+							You must reduce the %(compare_ref_field)s by %(reduce_by)s""" % item, raise_exception=1)
+					
 					else:
 						self.check_overflow_with_tolerance(item, args)
 						
@@ -623,6 +634,7 @@ class StatusUpdater:
 				'target_dt'				:'Sales Order Detail',
 				'target_parent_dt'		:'Sales Order',
 				'target_parent_field'	:'per_delivered',
+				'target_ref_field'		:'qty',
 				'source_dt'				:'Delivery Note Detail',
 				'source_field'			:'qty',
 				'join_field'			:'prevdoc_detail_docname',
@@ -633,12 +645,13 @@ class StatusUpdater:
 			
 		elif self.obj.doc.doctype=='Receivable Voucher':
 			self.update_qty({
-				'target_field'			:'billed_qty',
+				'target_field'			:'billed_amt',
 				'target_dt'				:'Sales Order Detail',
 				'target_parent_dt'		:'Sales Order',
 				'target_parent_field'	:'per_billed',
+				'target_ref_field'		:'amount',
 				'source_dt'				:'RV Detail',
-				'source_field'			:'qty',
+				'source_field'			:'amount',
 				'join_field'			:'so_detail',
 				'percent_join_field'	:'sales_order',
 				'status_field'			:'billing_status',
@@ -646,12 +659,13 @@ class StatusUpdater:
 			})
 
 			self.update_qty({
-				'target_field'			:'billed_qty',
+				'target_field'			:'billed_amt',
 				'target_dt'				:'Delivery Note Detail',
 				'target_parent_dt'		:'Delivery Note',
 				'target_parent_field'	:'per_billed',
+				'target_ref_field'		:'amount',
 				'source_dt'				:'RV Detail',
-				'source_field'			:'qty',
+				'source_field'			:'amount',
 				'join_field'			:'dn_detail',
 				'percent_join_field'	:'delivery_note',
 				'status_field'			:'billing_status',
@@ -664,6 +678,7 @@ class StatusUpdater:
 				'target_dt'				:'Delivery Note Detail',
 				'target_parent_dt'		:'Delivery Note',
 				'target_parent_field'	:'per_installed',
+				'target_ref_field'		:'qty',
 				'source_dt'				:'Installed Item Details',
 				'source_field'			:'qty',
 				'join_field'			:'prevdoc_detail_docname',
@@ -694,7 +709,7 @@ class StatusUpdater:
 						update 
 							`tab%(target_dt)s` 
 						set 
-							%(target_field)s = (select sum(qty) from `tab%(source_dt)s` where `%(join_field)s`="%(detail_id)s" and (docstatus=1 %(cond)s))
+							%(target_field)s = (select sum(%(source_field)s) from `tab%(source_dt)s` where `%(join_field)s`="%(detail_id)s" and (docstatus=1 %(cond)s))
 						where
 							name="%(detail_id)s"            
 					""" % args)			
@@ -710,10 +725,10 @@ class StatusUpdater:
 						`tab%(target_parent_dt)s` 
 					set 
 						%(target_parent_field)s = 
-							(select sum(if(qty > ifnull(%(target_field)s, 0), %(target_field)s, qty))/sum(qty)*100 from `tab%(target_dt)s` where parent="%(name)s"), 
+							(select sum(if(%(target_ref_field)s > ifnull(%(target_field)s, 0), %(target_field)s, %(target_ref_field)s))/sum(%(target_ref_field)s)*100 from `tab%(target_dt)s` where parent="%(name)s"), 
 						modified = now()
-						where
-							name="%(name)s"
+					where
+						name="%(name)s"
 					""" % args)
 
 				# update field
