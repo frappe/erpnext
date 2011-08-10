@@ -1,7 +1,7 @@
 # REMEMBER to update this
 # ========================
 
-last_patch = 335
+last_patch = 336
 
 #-------------------------------------------
 
@@ -1355,3 +1355,5 @@ def execute(patch_no):
 	elif patch_no == 335:
 		for dt in ['Account', 'Cost Center', 'Territory', 'Item Group', 'Customer Group']:
 			sql("update `tabDocField` set fieldtype = 'Link', options = %s where fieldname = 'old_parent' and parent = %s", (dt, dt))
+	elif patch_no == 336:
+		reload_doc('server_tools','page','billing')
