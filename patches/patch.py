@@ -1344,7 +1344,7 @@ def execute(patch_no):
 	elif patch_no == 332:
 		sql("update `tabDocField` set permlevel=1, hidden = 1 where parent = 'Bulk Rename Tool' and fieldname = 'file_list'")
 	elif patch_no == 333:
-		sql("update `tabDocPerm` set create  =1 where role = 'Accounts Manager' and parent = 'Lease Agreement'")
+		sql("update `tabDocPerm` set `create`  =1 where role = 'Accounts Manager' and parent = 'Lease Agreement'")
 		
 		p = get_obj('Patch Util')
 		p.add_permission('DocType Mapper', 'System Manager', 0, read = 1, write=1, create=1)
@@ -1372,5 +1372,4 @@ def execute(patch_no):
 							if len(sp_quot) > 1: sp_quot[0] = str(ac_id[0][0])
 							sp_acx[i+1] = '"'.join(sp_quot)
 					html = "acx=".join(sp_acx)
-					webnotes.conn.sql("""UPDATE tabItem SET description_html=%s WHERE name=%s""", (html, item))							
-						
+					webnotes.conn.sql("""UPDATE tabItem SET description_html=%s WHERE name=%s""", (html, item))
