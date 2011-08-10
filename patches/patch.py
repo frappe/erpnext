@@ -1,7 +1,7 @@
 # REMEMBER to update this
 # ========================
 
-last_patch = 332
+last_patch = 337
 
 #-------------------------------------------
 
@@ -1343,3 +1343,33 @@ def execute(patch_no):
 		p.add_permission('Lease Agreement', 'Accounts Manager', 1, read = 1)
 	elif patch_no == 332:
 		sql("update `tabDocField` set permlevel=1, hidden = 1 where parent = 'Bulk Rename Tool' and fieldname = 'file_list'")
+	elif patch_no == 333:
+		sql("update `tabDocPerm` set `create`  =1 where role = 'Accounts Manager' and parent = 'Lease Agreement'")
+		
+		p = get_obj('Patch Util')
+		p.add_permission('DocType Mapper', 'System Manager', 0, read = 1, write=1, create=1)
+		p.add_permission('Role', 'System Manager', 0, read = 1, write=1, create=1)
+		p.add_permission('Print Format', 'System Manager', 0, read = 1, write=1, create=1)
+	elif patch_no == 334:
+		reload_doc('knowledge_base', 'doctype', 'answer')
+	elif patch_no == 335:
+		for dt in ['Account', 'Cost Center', 'Territory', 'Item Group', 'Customer Group']:
+			sql("update `tabDocField` set fieldtype = 'Link', options = %s where fieldname = 'old_parent' and parent = %s", (dt, dt))
+	elif patch_no == 336:
+		reload_doc('server_tools','page','billing')
+	elif patch_no == 337:
+		item_list = webnotes.conn.sql("""SELECT name, description_html 
+									FROM tabItem""")
+		if item_list:
+			for item, html in item_list:
+				if html and "getfile" in html and "acx" in html:
+					ac_id = webnotes.conn.sql("""SELECT value FROM `tabSingles` WHERE doctype='Control Panel' AND field='account_id'""")
+					sp_acx = html.split("acx=")
+					l_acx = len(sp_acx)
+					if l_acx > 1: 
+						for i in range(l_acx-1):
+							sp_quot = sp_acx[i+1].split('"')
+							if len(sp_quot) > 1: sp_quot[0] = str(ac_id[0][0])
+							sp_acx[i+1] = '"'.join(sp_quot)
+					html = "acx=".join(sp_acx)
+					webnotes.conn.sql("""UPDATE tabItem SET description_html=%s WHERE name=%s""", (html, item))
