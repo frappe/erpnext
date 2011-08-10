@@ -52,12 +52,12 @@ cur_frm.cscript.from_date = function(doc, dt, dn) {
 // to date
 // --------
 cur_frm.cscript.to_date = function(doc, dt, dn) {
-  if(cint(doc.half_day) == 1 && doc.from_date && doc.from_date != doc.to_date){
+  if(cint(doc.half_day) == 1 && cstr(doc.from_date) && doc.from_date != doc.to_date){
     msgprint("To Date should be same as From Date for Half Day leave");
-    return;
+    set_multiple(dt,dn,{to_date:doc.from_date});    
   }
   if(cint(doc.half_day) == 1){
-    set_multiple(dt,dn,{to_date:doc.from_date});
+    
   }
   calculate_total_days(doc, dt, dn);
 }

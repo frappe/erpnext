@@ -29,7 +29,7 @@ cur_frm.cscript.month = cur_frm.cscript.employee = cur_frm.cscript.fiscal_year;
 // Calculate total if lwp exists
 // ------------------------------------------------------------------------
 cur_frm.cscript.leave_without_pay = function(doc,dt,dn){
-  doc.payment_days = cint(doc.total_days_in_month) - cint(doc.leave_without_pay);
+  doc.payment_days = flt(doc.total_days_in_month) - flt(doc.leave_without_pay);
   refresh_field('payment_days');
   calculate_all(doc, dt, dn);
 }
