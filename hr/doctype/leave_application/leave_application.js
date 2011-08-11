@@ -56,9 +56,6 @@ cur_frm.cscript.to_date = function(doc, dt, dn) {
     msgprint("To Date should be same as From Date for Half Day leave");
     set_multiple(dt,dn,{to_date:doc.from_date});    
   }
-  if(cint(doc.half_day) == 1){
-    
-  }
   calculate_total_days(doc, dt, dn);
 }
 
