@@ -324,7 +324,7 @@ class DocType(TransactionBase):
 			
 			if self.has_sales_bom(d.item_code):
 				for i in self.get_sales_bom_items(d.item_code):
-					il.append([warehouse, i[0], flt(flt(i[1])* qty), reserved_qty, i[2], d.batch_no, d.serial_no])
+					il.append([warehouse, i[0], flt(flt(i[1])* qty), flt(flt(i[1])*reserved_qty), i[2], d.batch_no, d.serial_no])
 			else:
 				il.append([warehouse, d.item_code, qty, reserved_qty, d.stock_uom, d.batch_no, d.serial_no])
 		return il
