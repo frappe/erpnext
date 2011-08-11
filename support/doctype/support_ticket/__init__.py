@@ -85,7 +85,7 @@ We will get back to you as soon as possible
 
 [This is an automatic response]
 
-		""" + signature)
+		""" + (signature or ''))
 
 		from webnotes.utils.email_lib import sendmail
 		
