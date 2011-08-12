@@ -13,7 +13,7 @@ class DocType:
 		for r in res:
 			ret[cstr(r[0])]=r[1] and cstr(r[1]) or ''
 				
-		return str(ret)
+		return ret
 
 	def set_cp_value(self, key):
 		"""

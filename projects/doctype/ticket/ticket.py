@@ -22,18 +22,18 @@ class DocType:
     cust = sql("select customer, customer_name from `tabProject` where name = %s", self.doc.project)
     if cust:
       ret = {'customer': cust and cust[0][0] or '', 'customer_name': cust and cust[0][1] or ''}
-      return cstr(ret)
+      return ret
   
   def get_customer_details(self):
     cust = sql("select customer_name from `tabCustomer` where name=%s", self.doc.customer)
     if cust:
       ret = {'customer_name': cust and cust[0][0] or ''}
-      return cstr(ret)
+      return ret
   
   def get_allocated_to_name(self):
     as_em = sql("select first_name, last_name from `tabProfile` where name=%s",self.doc.allocated_to)
     ret = { 'allocated_to_name' : as_em and (as_em[0][0] + ' ' + as_em[0][1]) or ''}
-    return cstr(ret)
+    return ret
 
   # validate
   #--------------------------------------------   

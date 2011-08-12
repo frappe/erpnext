@@ -118,21 +118,21 @@ class DocType(TransactionBase):
 		t = {}
 		for x in tax: t[x[0]] = flt(x[1])
 		ret = {
-			'description'								 : item and item[0]['description_html'] or item[0]['description'],
-			'item_group'									: item and item[0]['item_group'] or '',
-			'item_name'									 : item and item[0]['item_name'] or '',
-			'brand'											 : item and item[0]['brand'] or '',
-			'stock_uom'									 : item and item[0]['stock_uom'] or '',
-			'reserved_warehouse'					: item and item[0]['default_warehouse'] or '',
-			'warehouse'									 : item and item[0]['default_warehouse'] or '',
-			'income_account'							: item and item[0]['default_income_account'] or '',
-			'cost_center'								 : item and item[0]['default_sales_cost_center'] or '',
-			'qty'												 : 1.00,	 # this is done coz if item once fetched is fetched again thn its qty shld be reset to 1
-			'adj_rate'										: 0,
-			'amount'											: 0,
-			'export_amount'							 : 0,
-			'item_tax_rate'							 : str(t),
-			'batch_no'										: ''
+			'description'			: item and item[0]['description_html'] or item[0]['description'],
+			'item_group'			: item and item[0]['item_group'] or '',
+			'item_name'				: item and item[0]['item_name'] or '',
+			'brand'					: item and item[0]['brand'] or '',
+			'stock_uom'				: item and item[0]['stock_uom'] or '',
+			'reserved_warehouse'	: item and item[0]['default_warehouse'] or '',
+			'warehouse'				: item and item[0]['default_warehouse'] or '',
+			'income_account'		: item and item[0]['default_income_account'] or '',
+			'cost_center'			: item and item[0]['default_sales_cost_center'] or '',
+			'qty'					: 1.00,	 # this is done coz if item once fetched is fetched again thn its qty shld be reset to 1
+			'adj_rate'				: 0,
+			'amount'				: 0,
+			'export_amount'			: 0,
+			'item_tax_rate'			: str(t),
+			'batch_no'				: ''
 		}
 		if(obj.doc.price_list_name and item):	#this is done to fetch the changed BASIC RATE and REF RATE based on PRICE LIST
 			ref_rate =	self.get_ref_rate(item_code, obj.doc.price_list_name, obj.doc.currency)
@@ -143,7 +143,8 @@ class DocType(TransactionBase):
 			
 		if obj.doc.doctype == 'Receivable Voucher':
 			return ret
-		return str(ret)
+			
+		return ret
 	
 	# ***************** Get Ref rate as entered in Item Master ********************
 	def get_ref_rate(self, item_code, price_list_name, currency):
@@ -160,7 +161,6 @@ class DocType(TransactionBase):
 			d.basic_rate = flt(ref_rate) * flt(obj.doc.conversion_rate)
 			d.base_ref_rate = flt(ref_rate) * flt(obj.doc.conversion_rate)
 			d.export_rate = flt(ref_rate)
-
 
 	# Load Default Taxes
 	# ====================
@@ -203,7 +203,7 @@ class DocType(TransactionBase):
 		ret = {
 			'item_tax_rate'		:	tax and str(t) or ''
 		}
-		return str(ret)
+		return ret
 
 	# Get Serial No Details
 	# ==========================================================================
@@ -220,7 +220,7 @@ class DocType(TransactionBase):
 			'description'			: item and item[0]['description'] or '',
 			'item_tax_rate'		: str(t)
 		}
-		return str(ret)
+		return ret
 		
 	# Get Commission rate
 	# =======================================================================
@@ -233,7 +233,7 @@ class DocType(TransactionBase):
 				'commission_rate'		 :	comm_rate and flt(comm_rate[0]['commission_rate']) or 0,
 				'total_commission'		:	flt(total_comm)
 			}
-			return str(ret)
+			return ret
 		else:
 			msgprint("Business Associate : %s does not exist in the system." % (sales_partner))
 			raise Exception
@@ -287,7 +287,7 @@ class DocType(TransactionBase):
 			ret = {
 				'rate'	:	rate and flt(rate[0]['tax_rate']) or 0
 			}
-		return cstr(ret)
+		return ret
 		
 
 	# Make Packing List from Sales BOM

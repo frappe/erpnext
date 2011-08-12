@@ -54,7 +54,7 @@ class DocType:
 			'conversion_factor'		: 1,
      		'batch_no'          	: ''
 		}
-		return str(ret)
+		return ret
 
 
 	# Get UOM Details
@@ -70,7 +70,7 @@ class DocType:
 				'conversion_factor'		: flt(uom[0]['conversion_factor']),
 				'transfer_qty'			: flt(arg['qty']) * flt(uom[0]['conversion_factor']),
 			}
-		return str(ret)
+		return ret
 
 		
 	# get stock and incoming rate on posting date
@@ -396,7 +396,7 @@ class DocType:
 			'customer_name'		: res and res[0][1] or '',
 			'customer_address' : res and res[0][2] or ''}
 
-		return str(ret)
+		return ret
 
 
 	def get_cust_addr(self):
@@ -405,7 +405,7 @@ class DocType:
 			'customer_name'		: res and res[0][0] or '',
 			'customer_address' : res and res[0][1] or ''}
 
-		return str(ret)
+		return ret
 
 
 		
@@ -415,7 +415,7 @@ class DocType:
 			'supplier' : res and res[0][0] or '',
 			'supplier_name' :res and res[0][1] or '',
 			'supplier_address' : res and res[0][2] or ''}
-		return str(ret)
+		return ret
 		
 
 	def get_supp_addr(self):
@@ -423,4 +423,4 @@ class DocType:
 		ret = {
 			'supplier_name' : res and res[0][0] or '',
 			'supplier_address' : res and res[0][1] or ''}
-		return str(ret)
+		return ret

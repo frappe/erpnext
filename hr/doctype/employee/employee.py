@@ -41,7 +41,7 @@ class DocType:
     if self.doc.date_of_birth:
       dt = getdate(self.doc.date_of_birth) + datetime.timedelta(21915)
       ret = {'date_of_retirement': dt.strftime('%Y-%m-%d')}
-    return str(ret)
+    return ret
 
   # check if salary structure exists
   #========================================================================================================

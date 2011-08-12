@@ -36,7 +36,7 @@ class DocType:
     ret={
       'description'   : item and item[0]['description'] or ''
     }
-    return cstr(ret)
+    return ret
 
   def get_workstation_details(self,workstation):
     ws = sql("select hour_rate, capacity from `tabWorkstation` where name = %s",workstation , as_dict = 1)
@@ -44,7 +44,7 @@ class DocType:
       'hour_rate'            : ws and flt(ws[0]['hour_rate']) or '',
       'workstation_capacity' : ws and flt(ws[0]['capacity']) or ''
     }
-    return cstr(ret)
+    return ret
 
   def get_bom_material_detail(self, arg):
     arg = eval(arg)
@@ -106,7 +106,7 @@ class DocType:
             'standard_rate'      : 0
             }
           ret_item.update(ret_bom_rates)
-    return cstr(ret_item)
+    return ret_item
   
   def set_as_default_bom(self):
     # set Is Default as 1

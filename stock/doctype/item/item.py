@@ -27,7 +27,7 @@ class DocType:
 		ret = {
 			'tax_rate'	:	rate and flt(rate[0][0]) or 0
 		}
-		return str(ret)
+		return ret
 
 	def on_update(self):
 		bin = sql("select stock_uom from `tabBin` where item_code = '%s' " % self.doc.item_code)

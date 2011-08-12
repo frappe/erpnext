@@ -48,14 +48,14 @@ class DocType(TransactionBase):
 				ret['due_date'] = add_days(cstr(self.doc.posting_date), acc_head and cint(acc_head[0][1]) or 0)
 		elif not acc_head:
 			msgprint("%s does not have an Account Head in %s. You must first create it from the Supplier Master" % (self.doc.supplier, self.doc.company))
-		return cstr(ret)
+		return ret
 		
 	def get_cust(self):
 		ret = {}
 		if self.doc.credit_to:			
 			ret['supplier'] = get_value('Account',self.doc.credit_to,'master_name')
 			
-		return cstr(ret)	
+		return ret
 
 
 	# Get Default Cost Center and Expense Head from Item Master
@@ -70,7 +70,7 @@ class DocType(TransactionBase):
 			if not args['cost_center'] or args['cost_center'] == 'undefined':
 				cost_center = sql("select cost_center from `tabItem` where name = '%s'" % args['item_code'])
 				ret['cost_center'] = cost_center and cost_center[0][0] or ''
-		return cstr(ret)
+		return ret
 		 
 	
 	# Get Items based on PO or PR
@@ -115,7 +115,7 @@ class DocType(TransactionBase):
 			'cost_center' : item_det and item_det[0]['cost_center'] or '',
 			'item_tax_rate'			: str(t)
 		}
-		return cstr(ret)
+		return ret
 		
 	# Advance Allocation
 	# -------------------
@@ -139,7 +139,7 @@ class DocType(TransactionBase):
 	def get_rate1(self,acc):
 		rate = sql("select tax_rate from `tabAccount` where name='%s'"%(acc))
 		ret={'add_tax_rate' :rate and flt(rate[0][0]) or 0 }
-		return cstr(ret)
+		return ret
 	
 
 # *************************** Server Utility Functions *****************************
