@@ -15,7 +15,7 @@
 		'doctype': 'Page',
 		'module': 'Knowledge Base',
 		'name': '__common__',
-		'page_name': 'Questions',
+		'page_name': 'questions',
 		'standard': 'Yes'
 	},
 

@@ -174,4 +174,4 @@ KBAnswer = function(body, data) {
 }
 
 
-$import(knowledge_base.kb_common);
+$import(knowledge_base/page/kb_common/kb_common.js);

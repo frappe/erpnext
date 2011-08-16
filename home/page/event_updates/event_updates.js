@@ -24,8 +24,8 @@ pscript.home_make_body = function() {
 	wrapper.head = $a(wrapper.body, 'div');
 	
 	wrapper.banner_area = $a(wrapper.head, 'div');
-	wrapper.toolbar_area = $a(wrapper.head, 'div');
 
+	wrapper.setup_wizard_area = $a(wrapper.body, 'div', 'setup-wizard')
 
 	wrapper.system_message_area = $a(wrapper.body, 'div', '', 
 		{marginBottom:'16px', padding:'8px', backgroundColor:'#FFD', border:'1px dashed #AA6', display:'none'})
@@ -612,7 +612,6 @@ pscript.home_make_status = function() {
 	// get values
 	$c_page('home', 'event_updates', 'get_status_details', user,
 		function(r,rt) { 
-			
 			home_status_bar.render(r.message);
 			
 			// system_messages
@@ -622,6 +621,11 @@ pscript.home_make_status = function() {
 			// render online users
 			pscript.online_users_obj.render(r.message.online_users);
 			pscript.online_users = r.message.online_users;
+			
+			// setup wizard
+			if(r.message.setup_status) {
+				new SetupWizard(r.message.setup_status)
+			}
 		}
 	);	
 }
@@ -633,7 +637,7 @@ pscript.show_system_message = function(wrapper, msg) {
 	var txt = $a(wrapper.system_message_area, 'div', '', {lineHeight:'1.6em'});
 	txt.innerHTML = msg;
 	
-	var span = $ln($a(wrapper.system_message_area, 'div'), 'Dismiss', 
+	var span = $ln($a(wrapper.system_message_area, 'div', '', {textAlign:'right'}), 'Dismiss'.bold(), 
 		function(me) { 
 			me.set_working();
 			$c_obj('Home Control', 'dismiss_message', '', function(r,rt) { 
@@ -728,4 +732,54 @@ pscript.validate_fields = function(d)
 
 	if(!flag)  alert(msg);
 	return flag;
+}
+
+SetupWizard = function(status) { 
+	var me = this;
+	$.extend(this, {
+		make: function(status) {
+			me.status = status;
+			me.wrapper = page_body.pages['Event Updates'].setup_wizard_area;
+			$ds(me.wrapper);
+			me.make_percent(status.percent);
+			me.make_suggestion(status.ret);
+		},
+		make_percent: function(percent) {
+			$a(me.wrapper, 'div', 'header', {}, 'Your setup is '+percent+'% complete');
+			var o = $a(me.wrapper, 'div', 'percent-outer');
+			$a(o, 'div', 'percent-inner', {width:percent + '%'});
+		},
+		make_suggestion: function(ret) {
+			me.suggest_area = $a(me.wrapper, 'div', 'suggestion');
+			if(me.status.ret.length>1) {
+				me.prev_next = $a(me.wrapper, 'div', 'prev-next');
+
+				// next
+				me.next = $a(me.prev_next, 'span', 'link_type', null, 'Next Suggestion',
+					function() { me.show_suggestion(me.cur_sugg+1) });
+
+				// prev
+				me.prev = $a(me.prev_next, 'span', 'link_type', null, 'Previous Suggestion',
+					function() { me.show_suggestion(me.cur_sugg-1) });
+
+			}
+			if(me.status.ret.length) {
+				me.show_suggestion(0);
+			} else {
+				me.suggest_area.innerHTML = 'Congratulations: '.bold() + 'You are now on your track... Good luck';
+			}
+		},
+		show_suggestion: function(idx) {
+			me.cur_sugg = idx;
+			me.suggest_area.innerHTML = 'What you can do next: '.bold() + me.status.ret[idx];
+
+			// show hide prev, next
+			if(me.status.ret.length>1) {
+				$dh(me.prev); $dh(me.next);
+				if(idx>0) $ds(me.prev);
+				if(idx<me.status.ret.length-1) $ds(me.next);			
+			}
+		}
+	})
+	this.make(status); 
 }

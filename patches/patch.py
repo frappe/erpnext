@@ -1,7 +1,7 @@
 # REMEMBER to update this
 # ========================
 
-last_patch = 337
+last_patch = 338
 
 #-------------------------------------------
 
@@ -1373,3 +1373,7 @@ def execute(patch_no):
 							sp_acx[i+1] = '"'.join(sp_quot)
 					html = "acx=".join(sp_acx)
 					webnotes.conn.sql("""UPDATE tabItem SET description_html=%s WHERE name=%s""", (html, item))
+	elif patch_no == 338:
+		# update name of questions page
+		sql("update tabPage set name='questions' where name='Questions'")
+		sql("update tabPage set name='question-view' where name='Question View'")	
