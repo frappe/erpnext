@@ -34,7 +34,7 @@
 		'section_style': 'Tabbed',
 		'server_code_error': ' ',
 		'show_in_menu': 0,
-		'subject': '%(item_code)s',
+		'subject': '%(item)s',
 		'version': 170
 	},
 

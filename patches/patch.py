@@ -1,7 +1,7 @@
 # REMEMBER to update this
 # ========================
 
-last_patch = 332
+last_patch = 333
 
 #-------------------------------------------
 
@@ -1348,3 +1348,5 @@ def execute(patch_no):
 		p.add_permission('Lease Agreement', 'Accounts Manager', 1, read = 1)
 	elif patch_no == 332:
 		sql("update `tabDocField` set permlevel=1, hidden = 1 where parent = 'Bulk Rename Tool' and fieldname = 'file_list'")
+	elif patch_no == 333:
+		reload_doc('production','doctype','bill_of_materials')
