@@ -66,7 +66,7 @@ class DocType:
       'carry_forwarded_leaves'  :  prev_bal,
       'total_leaves_allocated'   :  flt(prev_bal) + flt(self.doc.new_leaves_allocated)
     }
-    return str(ret)
+    return ret
 
 
 # ********************************************** validate *****************************************************

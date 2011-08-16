@@ -129,7 +129,7 @@ class DocType:
 
     # save
     le.save(1)
-    le_obj.on_update(adv_adj = '')
+    le_obj.on_update(adv_adj = '', cancel = '')
     
 
   # Reposting Balances

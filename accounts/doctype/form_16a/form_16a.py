@@ -39,7 +39,7 @@ class DocType(TransactionBase):
 				'company_address': cstr(comp_det[0][0]),
 				'registration_details': cstr(comp_det[0][1])
 			}	 
-		return cstr(ret)		
+		return ret
     
 	# Get party details
 	#------------------

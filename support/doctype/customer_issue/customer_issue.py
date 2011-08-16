@@ -27,37 +27,6 @@ class DocType(TransactionBase):
   def autoname(self):
     #self.doc.name = make_autoname('CI/' + self.doc.fiscal_year + '/.######')
     self.doc.name = make_autoname(self.doc.naming_series + '.######')
-
-  #def get_customer_details(self):
-  #  details = sql("select address, territory, customer_group, customer_name from `tabCustomer` where name = '%s' and docstatus != 2" %(self.doc.customer), as_dict = 1)
-  #  if details:
-  #    ret = {
-  #      'customer_address'  :  details and details[0]['address'] or '',
-  #      'customer_name'  :  details and details[0]['customer_name'] or '',
-  #      'territory'       :  details and details[0]['territory'] or '',
-  #      'customer_group'    :  details and details[0]['customer_group'] or ''
-  #    }
-  #    # ********** get primary contact details (this is done separately coz. , in case there is no primary contact thn it would not be able to fetch customer details in case of join query)
-  #    contact_det = sql("select contact_name, contact_no, email_id from `tabContact` where customer_name = '%s' and is_customer = 1 and is_primary_contact = 'Yes' and docstatus != 2" %(self.doc.customer), as_dict = 1)
-  #    ret['contact_person'] = contact_det and contact_det[0]['contact_name'] or ''
-  #    ret['contact_no']     = contact_det and contact_det[0]['contact_no'] or ''
-  #    ret['email_id']       = contact_det and contact_det[0]['email_id'] or ''
-  #  
-  #    return cstr(ret)
-  #  else:
-  #    msgprint("Customer : %s does not exist in system." % (name))
-  #    raise Exception
-
-  # Get customer's contact person details
-  # ==============================================================
-  #def get_contact_details(self):
-  #  contact = sql("select contact_no, email_id from `tabContact` where contact_name = '%s' and customer_name = '%s' and docstatus != 2" %(self.doc.contact_person, self.doc.customer), as_dict = 1)
-  #  ret = {
-  #    'contact_no'       :    contact and contact[0]['contact_no'] or '',
-  #    'email_id'         :    contact and contact[0]['email_id'] or ''
-  #  }
-  #  return str(ret)
-    
     
 #check if maintenance schedule already generated
 #============================================
@@ -66,7 +35,7 @@ class DocType(TransactionBase):
     nm = nm and nm[0][0] or ''
     
     if not nm:
-      return cstr('No')    
+      return 'No'
   
   def on_submit(self):
     if session['user'] != 'Guest':

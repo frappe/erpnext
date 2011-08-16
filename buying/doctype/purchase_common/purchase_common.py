@@ -84,7 +84,7 @@ class DocType(TransactionBase):
 			# ********** get primary contact details (this is done separately coz. , in case there is no primary contact thn it would not be able to fetch customer details in case of join query)
 			contact_det = sql("select contact_name, contact_no, email_id from `tabContact` where supplier = '%s' and is_supplier = 1 and is_primary_contact = 'Yes' and docstatus != 2" %(name), as_dict = 1)
 			ret['contact_person'] = contact_det and contact_det[0]['contact_name'] or ''
-			return cstr(ret)
+			return ret
 		else:
 			msgprint("Supplier : %s does not exists" % (name))
 			raise Exception
@@ -142,14 +142,14 @@ class DocType(TransactionBase):
 			ret['purchase_rate'] = item and flt(item[0]['last_purchase_rate']) or 0
 			ret['import_rate'] = flt(item and flt(item[0]['last_purchase_rate']) or 0) / flt(obj.doc.fields.has_key('conversion_rate') and flt(obj.doc.conversion_rate) or 1)
 		
-		return cstr(ret)
+		return ret
 
 	# Get Available Qty at Warehouse
 	def get_bin_details( self, arg = ''):
 		arg = eval(arg)
 		bin = sql("select projected_qty from `tabBin` where item_code = %s and warehouse = %s", (arg['item_code'], arg['warehouse']), as_dict=1)
 		ret = { 'projected_qty' : bin and flt(bin[0]['projected_qty']) or 0 }
-		return str(ret)
+		return ret
 
 	# Get UOM Details
 	def get_uom_details(self, arg = ''):
@@ -163,7 +163,7 @@ class DocType(TransactionBase):
 				'purchase_rate'		 : (lpr and flt(lpr[0]['last_purchase_rate']) * flt(uom[0]['conversion_factor'])) or 0
 			}
 		
-		return str(ret)
+		return ret
 
 	# get last purchase rate
 	def get_last_purchase_rate( self, obj):
@@ -522,7 +522,7 @@ class DocType(TransactionBase):
 				'rate'	:	rate and (rate[0]['account_type'] == 'Tax' and not arg['charge_type'] == 'Actual') and flt(rate[0]['tax_rate']) or 0
 		}
 		#msgprint(ret)
-		return cstr(ret)
+		return ret
 
 
 				

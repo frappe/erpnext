@@ -1,9 +1,5 @@
 cur_frm.cscript.onload = function(doc, cdt, cdn) {
   var cp = locals['Control Panel']['Control Panel'];
-  if(doc.__islocal){
-    doc.clearance_date ='';
-    refresh_field('clearance_date');
-  }
   
   if (!doc.voucher_date) doc.voucher_date = dateutil.obj_to_str(new Date());
 

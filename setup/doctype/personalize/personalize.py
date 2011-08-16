@@ -28,4 +28,4 @@ class DocType:
 	#
 	def set_html_from_image(self):
 		file_name = self.doc.file_list.split(',')[0]
-		self.doc.header_html = '<div><img src="cgi-bin/getfile.cgi?name=' + file_name + '"/></div>'
+		self.doc.header_html = '<div><img style="max-height: 120px; max-width: 600px" src="index.cgi?cmd=get_file&fname=' + file_name + '"/></div>'

@@ -27,7 +27,7 @@ class DocType:
 		ret = {
 			'tax_rate'	:	rate and flt(rate[0][0]) or 0
 		}
-		return str(ret)
+		return ret
 
 	def on_update(self):
 		bin = sql("select stock_uom from `tabBin` where item_code = '%s' " % self.doc.item_code)
@@ -178,3 +178,7 @@ Total Available Qty: %s
 
 		sle = sql("select name from `tabStock Ledger Entry` where item_code = %s and ifnull(is_cancelled, 'No') = 'No'", self.doc.name)
 		return sle and 'exists' or 'not exists'
+		
+	def on_rename(self,newdn,olddn):
+		sql("update tabItem set item_code = %s where name = %s", (newdn, olddn))	
+		

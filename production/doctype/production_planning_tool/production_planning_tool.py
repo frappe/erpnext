@@ -32,7 +32,7 @@ class DocType:
              'stock_uom'   : item and item[0]['stock_uom'],
              'bom_no'      : item and item[0]['default_bom']
       }
-      return cstr(ret)
+      return ret
     else:
       msgprint("Item %s does not exist in system." %(args['item_code']))
       raise Exception

@@ -42,18 +42,15 @@ class DocType(TransactionBase):
 #-----------------Validation For Fiscal Year------------------------
   def validate_fiscal_year(self):
     get_obj(dt = 'Purchase Common').validate_fiscal_year(self.doc.fiscal_year,self.doc.transaction_date,'Transaction Date')
-    
-  # Get Supplier Details 
-  #def get_supplier_details(self, name = ''):
-  #  return cstr(get_obj(dt='Purchase Common').get_supplier_details(name))
+   
   
   # Get Item Details
   def get_item_details(self, arg = ''):
-    return cstr(get_obj(dt='Purchase Common').get_item_details(self,arg))
+    return get_obj(dt='Purchase Common').get_item_details(self,arg)
   
   # Get UOM Details
   def get_uom_details(self, arg = ''):
-    return cstr(get_obj(dt='Purchase Common').get_uom_details(arg))
+    return get_obj(dt='Purchase Common').get_uom_details(arg)
   
   # GET TERMS & CONDITIONS
   # =====================================================================================
@@ -62,7 +59,7 @@ class DocType(TransactionBase):
 
   # get available qty at warehouse
   def get_bin_details(self, arg = ''):
-    return cstr(get_obj(dt='Purchase Common').get_bin_details(arg))
+    return get_obj(dt='Purchase Common').get_bin_details(arg)f
 
   # Pull Purchase Order
   def get_po_details(self):
