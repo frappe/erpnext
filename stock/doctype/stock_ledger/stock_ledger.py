@@ -13,7 +13,7 @@ sql = webnotes.conn.sql
 get_value = webnotes.conn.get_value
 in_transaction = webnotes.conn.in_transaction
 convert_to_lists = webnotes.conn.convert_to_lists
-	
+
 # -----------------------------------------------------------------------------------------
 
 def get_sr_no_list(sr_nos, qty = 0):
@@ -55,15 +55,17 @@ class DocType:
 				serial_nos = self.get_sr_no_list(d.serial_no)
 				for s in serial_nos:
 					s = s.strip()
-					sr_war =	sql("select warehouse from `tabSerial No` where name = '%s'" % (s))
+					sr_war = sql("select warehouse,name from `tabSerial No` where name = '%s'" % (s))
 					if not sr_war:
+						msgprint("Serial No %s does not exists",s, raise_exception = 1)
+					elif not sr_war[0][0]:
 						msgprint("Please set a warehouse in the Serial No <b>%s</b>" % s, raise_exception = 1)
-					if sr_war[0][0] != d.warehouse:
+					elif sr_war[0][0] != d.warehouse:
 						msgprint("Serial No : %s for Item : %s doesn't exists in Warehouse : %s" % (s, d.item_code, d.warehouse), raise_exception = 1)
-					
+
 
 	# ------------------------------------
-	# check whether serial no is required	
+	# check whether serial no is required
 	# ------------------------------------
 	def validate_serial_no(self, obj, fname):
 		for d in getlist(obj.doclist, fname):
@@ -76,9 +78,9 @@ class DocType:
 					msgprint("If serial no required, please select 'Yes' in 'Has Serial No' in Item :" + d.item_code + ', otherwise please remove serial no', raise_exception=1)
 			elif ar_required == 'Yes' and not d.serial_no:
 				msgprint("Serial no is mandatory for item: "+ d.item_code, raise_exception = 1)
-			
 
-	
+
+
 	# -------------------
 	# get serial no list
 	# -------------------
@@ -90,27 +92,27 @@ class DocType:
 	# ---------------------
 	def set_pur_serial_no_values(self, obj, serial_no, d, s, new_rec):
 		item_details = sql("select item_group, warranty_period from `tabItem` where name = '%s' and (ifnull(end_of_life,'')='' or end_of_life = '0000-00-00' or end_of_life > now()) " %(d.item_code), as_dict=1)
-		s.purchase_document_type =	 obj.doc.doctype
-		s.purchase_document_no	 =	 obj.doc.name
-		s.purchase_date					=	 obj.doc.posting_date
-		s.purchase_time					=	 obj.doc.posting_time
-		s.purchase_rate					=	 d.purchase_rate or d.incoming_rate
-		s.item_code						=	 d.item_code
-		s.brand							=	 d.brand
-		s.description					=	 d.description
-		s.item_group					=	 item_details and item_details[0]['item_group'] or ''
-		s.warranty_period				=	 item_details and item_details[0]['warranty_period'] or 0
-		s.supplier						=	 obj.doc.supplier
-		s.supplier_name					=	 obj.doc.supplier_name
-		s.supplier_address			 	=	 obj.doc.supplier_address
-		s.warehouse						=	 d.warehouse or d.t_warehouse
-		s.docstatus						=	 0
-		s.status						=	 'In Store'
-		s.modified						=	 nowdate()
-		s.modified_by					=	 session['user']
-		s.serial_no						=	 serial_no
-		s.fiscal_year					=	 obj.doc.fiscal_year
-		s.company						=	 obj.doc.company
+		s.purchase_document_type=	 obj.doc.doctype
+		s.purchase_document_no	=	 obj.doc.name
+		s.purchase_date		=	 obj.doc.posting_date
+		s.purchase_time		=	 obj.doc.posting_time
+		s.purchase_rate		=	 d.purchase_rate or d.incoming_rate
+		s.item_code		=	 d.item_code
+		s.brand			=	 d.brand
+		s.description		=	 d.description
+		s.item_group		=	 item_details and item_details[0]['item_group'] or ''
+		s.warranty_period	=	 item_details and item_details[0]['warranty_period'] or 0
+		s.supplier		=	 obj.doc.supplier
+		s.supplier_name		=	 obj.doc.supplier_name
+		s.supplier_address	=	 obj.doc.supplier_address
+		s.warehouse		=	 d.warehouse or d.t_warehouse
+		s.docstatus		=	 0
+		s.status		=	 'In Store'
+		s.modified		=	 nowdate()
+		s.modified_by		=	 session['user']
+		s.serial_no		=	 serial_no
+		s.fiscal_year		=	 obj.doc.fiscal_year
+		s.company		=	 obj.doc.company
 		s.save(new_rec)
 
 
@@ -227,7 +229,7 @@ class DocType:
 		sle = Document(doctype = 'Stock Ledger Entry')
 		for k in args.keys():
 			# adds warehouse_type
-			if k == 'warehouse': 
+			if k == 'warehouse':
 				sle.fields['warehouse_type'] = get_value('Warehouse' , args[k], 'warehouse_type')
 			sle.fields[k] = args[k]
 		sle_obj = get_obj(doc=sle)
@@ -235,7 +237,7 @@ class DocType:
 		sle_obj.validate()
 		sle.save(new = 1)
 		return sle.name
-		
+
 	def repost(self):
 		"""
 		Repost everything!
