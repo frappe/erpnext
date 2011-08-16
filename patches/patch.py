@@ -1401,3 +1401,7 @@ def execute(patch_no):
 				if(per_billed >= 99.99, 'Fully Billed', 'Partly Billed'))""")
 		sql("""update `tabDelivery Note` set billing_status = if(ifnull(per_billed,0) < 0.001, 'Not Billed',
 				if(per_billed >= 99.99, 'Fully Billed', 'Partly Billed'))""")
+
+		# update name of questions page
+		sql("update tabPage set name='questions' where name='Questions'")
+		sql("update tabPage set name='question-view' where name='Question View'")	
