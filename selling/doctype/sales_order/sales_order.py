@@ -102,8 +102,7 @@ class DocType(TransactionBase):
 			 'projected_qty' : tot_avail_qty and flt(tot_avail_qty[0]['projected_qty']) or 0,
 			 'actual_qty' : tot_avail_qty and flt(tot_avail_qty[0]['actual_qty']) or 0
 		}
-		return cstr(ret)
-	
+		return ret
 	
 # OTHER CHARGES TRIGGER FUNCTIONS
 # ====================================================================================
@@ -136,7 +135,7 @@ class DocType(TransactionBase):
 		nm = nm and nm[0][0] or ''
 		
 		if not nm:
-			return cstr('No')
+			return 'No'
 
 #check if maintenance visit already generated
 #============================================
@@ -145,7 +144,7 @@ class DocType(TransactionBase):
 		nm = nm and nm[0][0] or ''
 		
 		if not nm:
-			return cstr('No')
+			return 'No'
 
 # VALIDATE
 # =====================================================================================

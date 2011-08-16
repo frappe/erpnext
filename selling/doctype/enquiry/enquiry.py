@@ -50,7 +50,7 @@ class DocType(TransactionBase):
       ret['contact_no']     = contact_det and contact_det[0]['contact_no'] or ''
       ret['email_id']       = contact_det and contact_det[0]['email_id'] or ''
     
-      return cstr(ret)
+      return ret
     else:
       msgprint("Customer : %s does not exist in system." % (name))
       raise Exception
@@ -64,7 +64,7 @@ class DocType(TransactionBase):
       'contact_no' : contact and contact[0]['contact_no'] or '',
       'email_id' : contact and contact[0]['email_id'] or ''
     }
-    return str(ret)   
+    return ret
     
   # ====================================================================================================================
   def on_update(self):
@@ -184,7 +184,7 @@ class DocType(TransactionBase):
     else:
       set(self.doc, 'status', 'Enquiry Lost')
       set(self.doc, 'order_lost_reason', arg)
-      return cstr('true')
+      return 'true'
     
   # ====================================================================================================================  
   def update_follow_up(self):

@@ -51,7 +51,7 @@ class DocType:
       'description': it and it[0][3] or '',
       'uom' : it and it[0][4] or ''
       }
-      return cstr(ret)
+      return ret
   
   def validate(self):
     import string

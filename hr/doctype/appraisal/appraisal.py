@@ -26,7 +26,7 @@ class DocType:
     emp_nm = sql("select employee_name from `tabEmployee` where name=%s", self.doc.employee)
     emp_nm= emp_nm and emp_nm[0][0] or ''
     self.doc.employee_name = emp_nm
-    return cstr(emp_nm)
+    return emp_nm
   
   def fetch_kra(self):
     if not self.doc.kra_template:
@@ -88,7 +88,7 @@ class DocType:
       if d.score:
         total = total + flt(d.score_earned)
     ret={'total_score':flt(total)}
-    return cstr(ret)
+    return ret
   
   def declare_completed(self):
     ret={}

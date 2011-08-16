@@ -90,7 +90,7 @@ class DocType(TransactionBase):
 	def get_debit_to(self):
 		acc_head = self.get_customer_account()
 		if acc_head:
-			return cstr({ 'debit_to' : acc_head })
+			return { 'debit_to' : acc_head }
 
 
 	# Set Due Date = Posting Date + Credit Days
@@ -515,7 +515,7 @@ class DocType(TransactionBase):
 		ret = {
 			 'actual_qty' : actual_qty and flt(actual_qty[0]['actual_qty']) or 0
 		}
-		return cstr(ret)
+		return ret
 
 	# Make GL Entries
 	# -------------------------

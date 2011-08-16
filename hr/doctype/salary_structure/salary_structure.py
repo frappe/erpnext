@@ -42,7 +42,7 @@ class DocType:
         'grade'          : cstr(det[0][4]),
         'backup_employee': cstr(self.doc.employee)
       }
-    return cstr(ret)
+    return ret
     
 
   # Set Salary structure field values
@@ -53,7 +53,7 @@ class DocType:
             'bank_ac_no'  : basic_info and basic_info[0][1] or '',
             'esic_no'     : basic_info and basic_info[0][2] or '',
             'pf_no'       : basic_info and basic_info[0][3] or ''}
-    return cstr(ret)
+    return ret
    
   # Make earning and deduction table    
   #---------------------------------------------------------
