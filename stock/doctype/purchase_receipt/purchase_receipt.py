@@ -13,7 +13,7 @@ sql = webnotes.conn.sql
 get_value = webnotes.conn.get_value
 in_transaction = webnotes.conn.in_transaction
 convert_to_lists = webnotes.conn.convert_to_lists
-	
+
 # -----------------------------------------------------------------------------------------
 
 from utilities.transaction_base import TransactionBase
@@ -38,20 +38,20 @@ class DocType(TransactionBase):
 
   def get_default_schedule_date(self):
     get_obj(dt = 'Purchase Common').get_default_schedule_date(self)
-    
+
 #-----------------Validation For Fiscal Year------------------------
   def validate_fiscal_year(self):
     get_obj(dt = 'Purchase Common').validate_fiscal_year(self.doc.fiscal_year,self.doc.transaction_date,'Transaction Date')
-   
-  
+
+
   # Get Item Details
   def get_item_details(self, arg = ''):
     return get_obj(dt='Purchase Common').get_item_details(self,arg)
-  
+
   # Get UOM Details
   def get_uom_details(self, arg = ''):
     return get_obj(dt='Purchase Common').get_uom_details(arg)
-  
+
   # GET TERMS & CONDITIONS
   # =====================================================================================
   def get_tc_details(self):
@@ -59,16 +59,16 @@ class DocType(TransactionBase):
 
   # get available qty at warehouse
   def get_bin_details(self, arg = ''):
-    return get_obj(dt='Purchase Common').get_bin_details(arg)f
+    return get_obj(dt='Purchase Common').get_bin_details(arg)
 
   # Pull Purchase Order
   def get_po_details(self):
     self.validate_prev_docname()
     get_obj('DocType Mapper', 'Purchase Order-Purchase Receipt').dt_map('Purchase Order', 'Purchase Receipt', self.doc.purchase_order_no, self.doc, self.doclist, "[['Purchase Order','Purchase Receipt'],['PO Detail', 'Purchase Receipt Detail'],['Purchase Tax Detail','Purchase Tax Detail']]")
-  
+
   # validate if PO has been pulled twice
   def validate_prev_docname(self):
-    for d in getlist(self.doclist, 'purchase_receipt_details'): 
+    for d in getlist(self.doclist, 'purchase_receipt_details'):
       if self.doc.purchase_order_no and d.prevdoc_docname and self.doc.purchase_order_no == d.prevdoc_docname:
         msgprint(cstr(self.doc.purchase_order_no) + " Purchase Order details have already been pulled. ")
         raise Exception
@@ -79,15 +79,15 @@ class DocType(TransactionBase):
   # validate accepted and rejected qty
   def validate_accepted_rejected_qty(self):
     for d in getlist(self.doclist, "purchase_receipt_details"):
-      
-      # If Reject Qty than Rejected warehouse is mandatory    
+
+      # If Reject Qty than Rejected warehouse is mandatory
       if flt(d.rejected_qty) and (not self.doc.rejected_warehouse):
         msgprint("Rejected Warehouse is necessary if there are rejections. See 'Receipt Items'")
         raise Exception
 
-      # Check Received Qty = Accepted Qty + Rejected Qty 
+      # Check Received Qty = Accepted Qty + Rejected Qty
       if ((flt(d.qty) + flt(d.rejected_qty)) != flt(d.received_qty)):
-        
+
         msgprint("Sum of Accepted Qty and Rejected Qty must be equal to Received quantity. Error for Item: " + cstr(d.item_code))
         raise Exception
 
@@ -99,8 +99,8 @@ class DocType(TransactionBase):
       if flt(self.doc.net_total) and flt(d.qty):
         #d.valuation_rate = (flt(d.purchase_rate) + ((flt(d.amount) * (total_b_cost)) / (self.doc.net_total * flt(d.qty))) + (flt(d.rm_supp_cost) / flt(d.qty))) / flt(d.conversion_factor)
         d.valuation_rate = (flt(d.purchase_rate) + ((flt(d.amount) * (total_b_cost)) / (self.doc.net_total * flt(d.qty))) + (flt(d.rm_supp_cost) / flt(d.qty)) + (flt(d.item_tax_amount)/flt(d.qty))) / flt(d.conversion_factor)
-  
-  # Check for Stopped status 
+
+  # Check for Stopped status
   def check_for_stopped_status(self, pc_obj):
     check_list =[]
     for d in getlist(self.doclist, 'purchase_receipt_details'):
@@ -117,8 +117,8 @@ class DocType(TransactionBase):
          if not d.prevdoc_docname:
            msgprint("Purchse Order No. required against item %s"%d.item_code)
            raise Exception
-    
-   
+
+
   # validate
   def validate(self):
     self.po_required()
@@ -137,20 +137,20 @@ class DocType(TransactionBase):
     self.check_for_stopped_status(pc_obj)
 
     # get total in words
-    dcc = TransactionBase().get_company_currency(self.doc.company)    
+    dcc = TransactionBase().get_company_currency(self.doc.company)
     self.doc.in_words = pc_obj.get_total_in_words(dcc, self.doc.grand_total)
     self.doc.in_words_import = pc_obj.get_total_in_words(self.doc.currency, self.doc.grand_total_import)
     # update valuation rate
     self.update_valuation_rate()
 
-  
+
   # On Update
-  # ----------------------------------------------------------------------------------------------------    
+  # ----------------------------------------------------------------------------------------------------
   def on_update(self):
     if self.doc.rejected_warehouse:
       for d in getlist(self.doclist,'purchase_receipt_details'):
         d.rejected_warehouse = self.doc.rejected_warehouse
-    
+
     self.update_rw_material_detail()
     get_obj('Stock Ledger').scrub_serial_nos(self)
 
@@ -166,23 +166,23 @@ class DocType(TransactionBase):
       # Check if is_stock_item == 'Yes'
       if sql("select is_stock_item from tabItem where name=%s", d.item_code)[0][0]=='Yes':
         ord_qty = 0
-        pr_qty = flt(d.qty) * flt(d.conversion_factor) 
-        
-        # Check If Prevdoc Doctype is Purchase Order  
+        pr_qty = flt(d.qty) * flt(d.conversion_factor)
+
+        # Check If Prevdoc Doctype is Purchase Order
         if cstr(d.prevdoc_doctype) == 'Purchase Order':
-          # get qty and pending_qty of prevdoc 
+          # get qty and pending_qty of prevdoc
           curr_ref_qty = pc_obj.get_qty( d.doctype, 'prevdoc_detail_docname', d.prevdoc_detail_docname, 'PO Detail', 'Purchase Order - Purchase Receipt', self.doc.name)
           max_qty, qty, curr_qty = flt(curr_ref_qty.split('~~~')[1]), flt(curr_ref_qty.split('~~~')[0]), 0
-          
+
           if flt(qty) + flt(pr_qty) > flt(max_qty):
             curr_qty = (flt(max_qty) - flt(qty)) * flt(d.conversion_factor)
           else:
             curr_qty = flt(pr_qty)
-          
+
           ord_qty = -flt(curr_qty)
           # update order qty in bin
           bin = get_obj('Warehouse', d.warehouse).update_bin(0, 0, (is_submit and 1 or -1) * flt(ord_qty), 0, 0, d.item_code, self.doc.transaction_date)
-        
+
         # UPDATE actual qty to warehouse by pr_qty
         self.make_sl_entry(d, d.warehouse, flt(pr_qty), d.valuation_rate, is_submit)
         # UPDATE actual to rejected warehouse by rejected qty
@@ -205,8 +205,8 @@ class DocType(TransactionBase):
       'posting_time'        : self.doc.posting_time,
       'voucher_type'        : 'Purchase Receipt',
       'voucher_no'          : self.doc.name,
-      'voucher_detail_no'   : d.name, 
-      'actual_qty'          : qty, 
+      'voucher_detail_no'   : d.name,
+      'actual_qty'          : qty,
       'stock_uom'           : d.stock_uom,
       'incoming_rate'       : in_value,
       'company'             : self.doc.company,
@@ -220,11 +220,11 @@ class DocType(TransactionBase):
   def validate_inspection(self):
     for d in getlist(self.doclist, 'purchase_receipt_details'):     #Enter inspection date for all items that require inspection
       ins_reqd = sql("select inspection_required from `tabItem` where name = %s", (d.item_code), as_dict = 1)
-      ins_reqd = ins_reqd and ins_reqd[0]['inspection_required'] or 'No'        
+      ins_reqd = ins_reqd and ins_reqd[0]['inspection_required'] or 'No'
       if ins_reqd == 'Yes' and not d.qa_no:
         msgprint("Item: " + d.item_code + " requires QA Inspection. Please enter QA No or report to authorized person to create QA Inspection Report")
 
-  # Check for Stopped status 
+  # Check for Stopped status
   def check_for_stopped_status(self, pc_obj):
     check_list =[]
     for d in getlist(self.doclist, 'purchase_receipt_details'):
@@ -233,7 +233,7 @@ class DocType(TransactionBase):
         pc_obj.check_for_stopped_status( d.prevdoc_doctype, d.prevdoc_docname)
 
 
-  # on submit        
+  # on submit
   def on_submit(self):
     # Check for Approving Authority
     get_obj('Authorization Control').validate_approving_authority(self.doc.doctype, self.doc.company, self.doc.grand_total)
@@ -241,19 +241,19 @@ class DocType(TransactionBase):
     # Set status as Submitted
     set(self.doc,'status', 'Submitted')
     pc_obj = get_obj('Purchase Common')
-      
+
     # Update Previous Doc i.e. update pending_qty and Status accordingly
     pc_obj.update_prevdoc_detail(self, is_submit = 1)
-        
+
     # Update Serial Record
     get_obj('Stock Ledger').update_serial_record(self, 'purchase_receipt_details', is_submit = 1, is_incoming = 1)
 
-    # Update Stock 
+    # Update Stock
     self.update_stock(is_submit = 1)
-    
-    # Update last purchase rate 
+
+    # Update last purchase rate
     pc_obj.update_last_purchase_rate(self, 1)
-  
+
     # on submit notification
     get_obj('Notification Control').notify_contact('Purchase Receipt', self.doc.doctype,self.doc.name, self.doc.email_id, self.doc.contact_person)
 
@@ -271,11 +271,11 @@ class DocType(TransactionBase):
 
   def on_cancel(self):
     pc_obj = get_obj('Purchase Common')
-    
+
     self.check_for_stopped_status(pc_obj)
     # 1.Check if Payable Voucher has been submitted against current Purchase Order
     # pc_obj.check_docstatus(check = 'Next', doctype = 'Payable Voucher', docname = self.doc.name, detail_doctype = 'PV Detail')
-    
+
     submitted = sql("select t1.name from `tabPayable Voucher` t1,`tabPV Detail` t2 where t1.name = t2.parent and t2.purchase_receipt = '%s' and t1.docstatus = 1" % self.doc.name)
     if submitted:
       msgprint("Purchase Invoice : " + cstr(submitted[0][0]) + " has already been submitted !")
@@ -283,27 +283,27 @@ class DocType(TransactionBase):
 
     # 2.Set Status as Cancelled
     set(self.doc,'status','Cancelled')
-    
-    # 3. Cancel Serial No   
+
+    # 3. Cancel Serial No
     get_obj('Stock Ledger').update_serial_record(self, 'purchase_receipt_details', is_submit = 0, is_incoming = 1)
 
-    # 4.Update Bin  
+    # 4.Update Bin
     self.update_stock(is_submit = 0)
-    
-    # 5.Update Indents Pending Qty and accordingly it's Status 
+
+    # 5.Update Indents Pending Qty and accordingly it's Status
     pc_obj.update_prevdoc_detail(self, is_submit = 0)
 
-    # 6. Update last purchase rate 
+    # 6. Update last purchase rate
     pc_obj.update_last_purchase_rate(self, 0)
 
-        
+
 #----------- code for Sub-contracted Items -------------------
   #--------check for sub-contracted items and accordingly update PR raw material detail table--------
   def update_rw_material_detail(self):
-  
+
     for d in getlist(self.doclist,'purchase_receipt_details'):
       item_det = sql("select is_sub_contracted_item, is_purchase_item from `tabItem` where name = '%s'"%(d.item_code))
-      
+
       if item_det[0][0] == 'Yes':
         if item_det[0][1] == 'Yes':
           if not self.doc.is_subcontracted:
@@ -312,7 +312,7 @@ class DocType(TransactionBase):
           if self.doc.is_subcontracted == 'Yes':
             if not self.doc.supplier_warehouse:
               msgprint("Please Enter Supplier Warehouse for subcontracted Items")
-              raise Exception         
+              raise Exception
             self.add_bom(d)
           else:
             self.doc.clear_table(self.doclist,'pr_raw_material_details',1)
@@ -322,7 +322,7 @@ class DocType(TransactionBase):
             msgprint("Please Enter Supplier Warehouse for subcontracted Items")
             raise Exception
           self.add_bom(d)
-        
+
       self.delete_irrelevant_raw_material()
       #---------------calculate amt in  PR Raw Material Detail-------------
       self.calculate_amount(d)
@@ -338,7 +338,7 @@ class DocType(TransactionBase):
       #-------------- add child function--------------------
       chgd_rqd_qty = []
       for i in bom_det:
-        
+
         if i and not sql("select name from `tabPR Raw Material Detail` where reference_name = '%s' and bom_detail_no = '%s' and parent = '%s' " %(d.name, i[6], self.doc.name)):
 
           rm_child = addchild(self.doc, 'pr_raw_material_details', 'PR Raw Material Detail', 1, self.doclist)
@@ -347,7 +347,7 @@ class DocType(TransactionBase):
           rm_child.bom_detail_no = i and i[6] or ''
           rm_child.main_item_code = i and i[0] or ''
           rm_child.rm_item_code = i and i[1] or ''
-          rm_child.description = i and i[7] or ''          
+          rm_child.description = i and i[7] or ''
           rm_child.stock_uom = i and i[5] or ''
           rm_child.rate = i and flt(i[3]) or flt(i[4])
           rm_child.conversion_factor = d.conversion_factor
@@ -363,7 +363,7 @@ class DocType(TransactionBase):
               chgd_rqd_qty.append(cstr(i[1]))
               pr_rmd.main_item_code = i[0]
               pr_rmd.rm_item_code = i[1]
-              pr_rmd.description = i[7]              
+              pr_rmd.description = i[7]
               pr_rmd.stock_uom = i[5]
               pr_rmd.required_qty = flt(act_qty)
               pr_rmd.consumed_qty = flt(act_qty)
@@ -372,20 +372,20 @@ class DocType(TransactionBase):
               pr_rmd.save()
       if chgd_rqd_qty:
         msgprint("Please check consumed quantity for Raw Material Item Code: '%s'in Raw materials Detail Table" % ((len(chgd_rqd_qty) > 1 and ','.join(chgd_rqd_qty[:-1]) +' and ' + cstr(chgd_rqd_qty[-1:][0]) ) or cstr(chgd_rqd_qty[0])))
-              
+
 
   # Delete irrelevant raw material from PR Raw material details
-  #--------------------------------------------------------------  
+  #--------------------------------------------------------------
   def delete_irrelevant_raw_material(self):
     for d in getlist(self.doclist,'pr_raw_material_details'):
       if not sql("select name from `tabPurchase Receipt Detail` where name = '%s' and parent = '%s' and item_code = '%s'" % (d.reference_name, self.doc.name, d.main_item_code)):
         d.parent = 'old_par:'+self.doc.name
         d.save()
-    
+
   def calculate_amount(self, d):
     amt = 0
     for i in getlist(self.doclist,'pr_raw_material_details'):
-      
+
       if(i.reference_name == d.name):
         #if i.consumed_qty == 0:
          # msgprint("consumed qty cannot be 0. Please Enter consumed qty ")
@@ -394,7 +394,7 @@ class DocType(TransactionBase):
         amt += i.amount
     d.rm_supp_cost = amt
     d.save()
-    
+
 
   # --------------- Back Flush function called on submit and on cancel from update stock
   def bk_flush_supp_wh(self, is_submit):
@@ -402,7 +402,7 @@ class DocType(TransactionBase):
       #--------- -ve quantity is passed as raw material qty has to be decreased when PR is submitted and it has to be increased when PR is cancelled
       consumed_qty = - flt(d.consumed_qty)
       self.make_sl_entry(d, self.doc.supplier_warehouse, flt(consumed_qty), 0, is_submit)
-      
+
 
   # get current_stock
   # ----------------
@@ -411,13 +411,13 @@ class DocType(TransactionBase):
       if self.doc.supplier_warehouse:
         bin = sql("select actual_qty from `tabBin` where item_code = %s and warehouse = %s", (d.rm_item_code, self.doc.supplier_warehouse), as_dict = 1)
         d.current_stock = bin and flt(bin[0]['actual_qty']) or 0
-        
-        
-        
+
+
+
 
 # OTHER CHARGES TRIGGER FUNCTIONS
 # ====================================================================================
-  
+
   # *********** Get Tax rate if account type is TAX ********************
   def get_rate(self,arg):
     return get_obj('Purchase Common').get_rate(arg,self)

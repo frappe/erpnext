@@ -1405,5 +1405,5 @@ def execute(patch_no):
 		# update name of questions page
 		sql("update tabPage set name='questions' where name='Questions'")
 		sql("update tabPage set name='question-view' where name='Question View'")
-	elif patch_no == 339
+	elif patch_no == 339:
 		reload_doc('production','doctype','bill_of_materials')
