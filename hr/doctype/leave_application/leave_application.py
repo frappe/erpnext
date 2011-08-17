@@ -33,7 +33,7 @@ class DocType:
     leave_app = sql("select total_leave_days from `tabLeave Application` where employee = '%s' and leave_type = '%s' and fiscal_year = '%s' and docstatus = 1" % (self.doc.employee, self.doc.leave_type, self.doc.fiscal_year))
     leave_app = leave_app and flt(leave_app[0][0]) or 0
     ret = {'leave_balance':leave_all - leave_app}
-    return str(ret)
+    return ret
 
 
 # ************************************************ utilities *************************************************
@@ -55,7 +55,7 @@ class DocType:
     tot_days = date_diff(self.doc.to_date, self.doc.from_date) + 1
     holidays = self.get_holidays()
     ret = {'total_leave_days':flt(tot_days)-flt(holidays)}
-    return str(ret)
+    return ret
 
 
 # ************************************************ validate *************************************************

@@ -345,7 +345,7 @@ class DocType(TransactionBase):
 	# get tds rate
 	# -------------
 	def get_tds_rate(self):
-		return str({'rate' : flt(get_value('Account', self.doc.tax_code, 'tax_rate'))})
+		return {'rate' : flt(get_value('Account', self.doc.tax_code, 'tax_rate'))}
 
 	# set aging date
 	#-------------------

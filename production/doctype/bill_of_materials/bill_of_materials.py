@@ -106,7 +106,7 @@ class DocType:
             'standard_rate'      : 0
             }
           ret_item.update(ret_bom_rates)
-    return cstr(ret_item)
+    return ret_item
 
   def set_as_default_bom(self):
     # set Is Default as 1

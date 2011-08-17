@@ -52,7 +52,7 @@ class DocType:
         'contact_no' : contact and contact[0]['contact_no'] or '',
         'email_id' : contact and contact[0]['email_id'] or ''
       }
-      return str(ret)
+      return ret
     else:
       msgprint("Contact Person : %s does not exist in the system." % (self.doc,contact_person))
       raise Exception

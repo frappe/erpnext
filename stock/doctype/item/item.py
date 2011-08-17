@@ -169,7 +169,7 @@ Total Available Qty: %s
 			'description'	:	file and file[0]['description'] or ''
 			
 		}
-		return str(ret)
+		return ret
 		
 	def check_if_sle_exists(self):
 		"""
