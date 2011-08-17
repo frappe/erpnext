@@ -69,7 +69,7 @@ class DocType:
             'name'  :   f_obj.doc.name,
             'label' :   f_obj.doc.file_name
         }
-        return cstr(ret)
+        return ret
     
     # Update changes done to selected file group.
     def update_grp(self,arg):
@@ -160,7 +160,7 @@ class DocType:
                     'file_name' :   f.file_name
                 }
                     
-                return cstr(ret)
+                return ret
             else:
                 return 'No file found.'
         else:

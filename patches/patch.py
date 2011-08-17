@@ -1,7 +1,7 @@
 # REMEMBER to update this
 # ========================
 
-last_patch = 338
+last_patch = 339
 
 #-------------------------------------------
 
@@ -1345,7 +1345,7 @@ def execute(patch_no):
 		sql("update `tabDocField` set permlevel=1, hidden = 1 where parent = 'Bulk Rename Tool' and fieldname = 'file_list'")
 	elif patch_no == 333:
 		sql("update `tabDocPerm` set `create`  =1 where role = 'Accounts Manager' and parent = 'Lease Agreement'")
-		
+
 		p = get_obj('Patch Util')
 		p.add_permission('DocType Mapper', 'System Manager', 0, read = 1, write=1, create=1)
 		p.add_permission('Role', 'System Manager', 0, read = 1, write=1, create=1)
@@ -1358,7 +1358,7 @@ def execute(patch_no):
 	elif patch_no == 336:
 		reload_doc('server_tools','page','billing')
 	elif patch_no == 337:
-		item_list = webnotes.conn.sql("""SELECT name, description_html 
+		item_list = webnotes.conn.sql("""SELECT name, description_html
 									FROM tabItem""")
 		if item_list:
 			for item, html in item_list:
@@ -1366,7 +1366,7 @@ def execute(patch_no):
 					ac_id = webnotes.conn.sql("""SELECT value FROM `tabSingles` WHERE doctype='Control Panel' AND field='account_id'""")
 					sp_acx = html.split("acx=")
 					l_acx = len(sp_acx)
-					if l_acx > 1: 
+					if l_acx > 1:
 						for i in range(l_acx-1):
 							sp_quot = sp_acx[i+1].split('"')
 							if len(sp_quot) > 1: sp_quot[0] = str(ac_id[0][0])
@@ -1378,21 +1378,21 @@ def execute(patch_no):
 		# reload so and dn
 		reload_doc('selling','doctype','sales_order')
 		reload_doc('stock','doctype','delivery_note')
-		
+
 		# delete billed_qty field
 		sql("delete from `tabDocField` where fieldname = 'billed_qty' and parent in ('Sales Order Detail', 'Delivery Note Detail')")
-		
+
 		# update billed amt in item table in so and dn
 		sql("""	update `tabSales Order Detail` so
 				set billed_amt = (select sum(amount) from `tabRV Detail` where `so_detail`= so.name and docstatus=1 and parent not like 'old%%'), modified = now()""")
-		
+
 		sql(""" update `tabDelivery Note Detail` dn
 				set billed_amt = (select sum(amount) from `tabRV Detail` where `dn_detail`= dn.name and docstatus=1 and parent not like 'old%%'), modified = now()""")
-		
+
 		# calculate % billed based on item table
 		sql("""	update `tabSales Order` so
 				set per_billed = (select sum(if(amount > ifnull(billed_amt, 0), billed_amt, amount))/sum(amount)*100 from `tabSales Order Detail` where parent = so.name), modified = now()""")
-		
+
 		sql("""	update `tabDelivery Note` dn
 				set per_billed = (select sum(if(amount > ifnull(billed_amt, 0), billed_amt, amount))/sum(amount)*100 from `tabDelivery Note Detail` where parent = dn.name), modified = now()""")
 
@@ -1404,4 +1404,6 @@ def execute(patch_no):
 
 		# update name of questions page
 		sql("update tabPage set name='questions' where name='Questions'")
-		sql("update tabPage set name='question-view' where name='Question View'")	
+		sql("update tabPage set name='question-view' where name='Question View'")
+	elif patch_no == 339:
+		reload_doc('production','doctype','bill_of_materials')

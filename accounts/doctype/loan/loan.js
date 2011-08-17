@@ -19,9 +19,9 @@ $.extend(cur_frm.cscript, {
 	},
 	hide_show_buttons: function(doc) {
 		if(doc.docstatus==0) {
-			hide_field('Installment Reciept'); show_field('Generate');
+			hide_field('Installment Reciept'); unhide_field('Generate');
 		} else if (doc.docstatus==1) {
-			show_field('Installment Reciept');hide_field('Generate');
+			unhide_field('Installment Reciept');hide_field('Generate');
 		}
 	},
 	clear_installments: function(doc) {

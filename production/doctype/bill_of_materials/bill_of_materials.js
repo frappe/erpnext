@@ -1,20 +1,22 @@
-$import(Production Tips Common)
+//$import(Production Tips Common)
 
 // ONLOAD
 cur_frm.cscript.onload = function(doc,cdt,cdn){
 
-   
+
 }
 
 // On REFRESH
 cur_frm.cscript.refresh = function(doc,cdt,cdn){
 
-   
+
 
   // Hide - Un Hide Buttons
   if (!doc.is_default && doc.__islocal!=1) unhide_field('Set as Default BOM');
   else hide_field('Set as Default BOM');
-  
+  if (doc.is_default && doc.__islocal!=1) unhide_field('Unset as Default BOM');
+  else hide_field('Unset as Default BOM');
+
   if(doc.__islocal!=1){
     set_field_permlevel('item',1);
   }
@@ -76,9 +78,20 @@ cur_frm.cscript['Set as Default BOM'] = function(doc,cdt,cdn) {
   if (check) {
     $c('runserverobj', args={'method':'set_as_default_bom', 'docs': compress_doclist([doc])}, function(r,rt) {
     refresh_field('is_default');
-    hide_field('Set as Default BOM');
+    hide_field('Set as Default BOM');unhide_field('Unset as Default BOM');
     refresh_field('Set as Default BOM');
-    });	
+    });
+  }
+}
+
+cur_frm.cscript['Unset as Default BOM'] = function(doc,cdt,cdn) {
+  var check = confirm("Do you Really want to Unset BOM " + doc.name + " as default for Item " + doc.item);
+  if (check) {
+    $c('runserverobj', args={'method':'unset_as_default_bom', 'docs': compress_doclist([doc])}, function(r,rt) {
+    refresh_field('is_default');
+    hide_field('Unset as Default BOM');unhide_field('Set as Default BOM');
+    refresh_field('Unset as Default BOM');
+    });
   }
 }
 
@@ -88,8 +101,15 @@ cur_frm.cscript['Activate BOM'] = function(doc,cdt,cdn) {
   if (check) {
     $c('runserverobj', args={'method':'activate_inactivate_bom', 'arg': 'Activate', 'docs': compress_doclist(make_doclist(doc.doctype, doc.name))}, function(r,rt) {
       cur_frm.refresh();
-    });	
+    });
   }
+}
+
+cur_frm.cscript['Test Flat BOM'] = function(doc,cdt,cdn) {
+
+    $c('runserverobj', args={'method':'get_current_flat_bom_items', 'docs': compress_doclist(make_doclist(doc.doctype, doc.name))}, function(r,rt) {
+      cur_frm.refresh();
+    });
 }
 
 cur_frm.cscript['Inactivate BOM'] = function(doc,cdt,cdn) {
@@ -98,6 +118,6 @@ cur_frm.cscript['Inactivate BOM'] = function(doc,cdt,cdn) {
   if (check) {
     $c('runserverobj', args={'method':'activate_inactivate_bom', 'arg': 'Inactivate', 'docs': compress_doclist(make_doclist(doc.doctype, doc.name))}, function(r,rt) {
       cur_frm.refresh();
-    });	
+    });
   }
 }

@@ -31,7 +31,7 @@ class DocType:
 	def get_address(self):		
 		add=sql("Select address from `tab%s` where name='%s'"%(self.doc.master_type,self.doc.master_name))
 		ret={'address':add[0][0]}
-		return cstr(ret)
+		return ret
 
 
 	# check whether master name entered for supplier/customer
