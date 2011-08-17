@@ -56,7 +56,8 @@ def get_setup_status():
 	percent = 20
 	ret = []
 	
-	if not webnotes.conn.get_value('Personalize', None, 'header_html'):
+	header = webnotes.conn.get_value('Control Panel', None, 'client_name') or ''
+	if header.startswith('<div style="padding:4px; font-size:20px;">'):
 		ret.append('<a href="#!Form/Personalize/Personalize">Upload your company banner</a>')
 	else:
 		percent += 20
