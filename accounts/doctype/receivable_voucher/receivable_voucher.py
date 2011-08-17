@@ -162,7 +162,7 @@ class DocType(TransactionBase):
 			if ret['warehouse']:
 				actual_qty = sql("select actual_qty from `tabBin` where item_code = '%s' and warehouse = '%s'" % (item_code, ret['warehouse']))		
 				ret['actual_qty']= actual_qty and flt(actual_qty[0][0]) or 0
-		return str(ret)
+		return ret
  
 
 	# Get tax rate if account type is tax
