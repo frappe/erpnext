@@ -16,39 +16,19 @@ class DocType(TransactionBase):
 		self.doc = doc
 		self.doclist = doclist
 
-
-# ********************************* validate warranty / amc status ***************************************
-
-	# --------------------
-	# validate amc status
-	# --------------------
 	def validate_amc_status(self):
-		if self.doc.amc_expiry_date and getdate(self.doc.amc_expiry_date) >= datetime.date.today() and self.doc.maintenance_status == 'Out of AMC':
-			msgprint("AMC expiry date and maintenance status mismatch. Please verify")
-			raise Exception
-		elif (not self.doc.amc_expiry_date or getdate(self.doc.amc_expiry_date) < datetime.date.today()) and self.doc.maintenance_status == 'Under AMC':
-			msgprint("AMC expiry date and maintenance status mismatch. Please verify")
-			raise Exception
+		"""
+			validate amc status
+		"""
+		if (self.doc.maintenance_status == 'Out of AMC' and self.doc.amc_expiry_date and getdate(self.doc.amc_expiry_date) >= datetime.date.today()) or (self.doc.maintenance_status == 'Under AMC' and (not self.doc.amc_expiry_date or getdate(self.doc.amc_expiry_date) < datetime.date.today())):
+			msgprint("AMC expiry date and maintenance status mismatch. Please verify", raise_exception=1)
 
-
-	# -------------------------
-	# validate warranty status
-	# -------------------------
 	def validate_warranty_status(self):
-		if self.doc.warranty_expiry_date and getdate(self.doc.warranty_expiry_date) >= datetime.date.today() and self.doc.maintenance_status == 'Out of Warranty':
-			msgprint("Warranty expiry date and maintenance status mismatch. Please verify")
-			raise Exception
-		elif (not self.doc.warranty_expiry_date or getdate(self.doc.warranty_expiry_date) < datetime.date.today()) and self.doc.maintenance_status == 'Under Warranty':
-			msgprint("Warranty expiry date and maintenance status mismatch. Please verify")
-			raise Exception
-
-
-	# -------------------------------
-	# validate warranty / amc status
-	# -------------------------------
-	def validate_warranty_amc_status(self):
-		self.validate_warranty_status()
-		self.validate_amc_status()
+		"""
+			validate warranty status	
+		"""
+		if (self.doc.maintenance_status == 'Out of Warranty' and self.doc.warranty_expiry_date and getdate(self.doc.warranty_expiry_date) >= datetime.date.today()) or (self.doc.maintenance_status == 'Under Warranty' and (not self.doc.warranty_expiry_date or getdate(self.doc.warranty_expiry_date) < datetime.date.today())):
+			msgprint("Warranty expiry date and maintenance status mismatch. Please verify", raise_exception=1)
 
 
 	def validate_warehouse(self):
@@ -56,6 +36,9 @@ class DocType(TransactionBase):
 			msgprint("Warehouse is mandatory if this Serial No is <b>In Store</b>", raise_exception=1)
 
 	def validate_item(self):
+		"""
+			Validate whether serial no is required for this item
+		"""
 		item = sql("select name, has_serial_no from tabItem where name = '%s'" % self.doc.item_code)
 		if not item:
 			msgprint("Item is not exists in the system", raise_exception=1)
@@ -67,7 +50,8 @@ class DocType(TransactionBase):
 	# validate
 	# ---------
 	def validate(self):
-		self.validate_warranty_amc_status()
+		self.validate_warranty_status()
+		self.validate_amc_status()
 		self.validate_warehouse()
 		self.validate_item()
 
@@ -102,7 +86,7 @@ class DocType(TransactionBase):
 	# on update
 	# ----------
 	def on_update(self):
-		if self.doc.warehouse and not sql("select name from `tabStock Ledger Entry` where serial_no = '%s'" % (self.doc.name)) and self.doc.status == 'In Store':
+		if self.doc.localname and self.doc.warehouse and self.doc.status == 'In Store' and not sql("select name from `tabStock Ledger Entry` where serial_no = '%s' and ifnull(is_cancelled, 'No') = 'No'" % (self.doc.name)):
 			self.make_stock_ledger_entry(update_stock = 1)
 
 
