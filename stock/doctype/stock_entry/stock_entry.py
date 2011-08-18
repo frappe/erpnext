@@ -355,6 +355,8 @@ class DocType:
 	# ----------------------------------
 	def update_serial_no(self, is_submit):
 		sl_obj = get_obj('Stock Ledger')
+		sl_obj.validate_serial_no_warehouse(self, 'mtn_details')
+		
 		for d in getlist(self.doclist, 'mtn_details'):
 			if d.serial_no:
 				serial_nos = sl_obj.get_sr_no_list(d.serial_no)
@@ -363,7 +365,7 @@ class DocType:
 					if d.s_warehouse:
 						sl_obj.update_serial_delivery_details(self, d, serial_no, is_submit)
 					if d.t_warehouse:
-						sl_obj.update_serial_purchase_details(self, d, serial_no, is_submit, (self.doc.purpose in ['Material Transfer', 'Sales Return']) and 1 or 0)
+						sl_obj.update_serial_purchase_details(self, d, serial_no, is_submit, self.doc.purpose)
 					
 					if self.doc.purpose == 'Purchase Return':
 						delete_doc("Serial No", serial_no)

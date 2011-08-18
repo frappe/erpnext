@@ -57,11 +57,11 @@ class DocType:
 					s = s.strip()
 					sr_war = sql("select warehouse,name from `tabSerial No` where name = '%s'" % (s))
 					if not sr_war:
-						msgprint("Serial No %s does not exists",s, raise_exception = 1)
+						msgprint("Serial No %s does not exists"%s, raise_exception = 1)
 					elif not sr_war[0][0]:
-						msgprint("Please set a warehouse in the Serial No <b>%s</b>" % s, raise_exception = 1)
-					elif sr_war[0][0] != d.warehouse:
-						msgprint("Serial No : %s for Item : %s doesn't exists in Warehouse : %s" % (s, d.item_code, d.warehouse), raise_exception = 1)
+						msgprint("Warehouse not mentioned in the Serial No <b>%s</b>" % s, raise_exception = 1)
+					elif (d.warehouse and sr_war[0][0] != d.warehouse) or (d.s_warehouse and sr_war[0][0] != d.s_warehouse):
+						msgprint("Serial No : %s for Item : %s doesn't exists in Warehouse : %s" % (s, d.item_code, d.warehouse or d.s_warehouse), raise_exception = 1)
 
 
 	# ------------------------------------
@@ -119,10 +119,10 @@ class DocType:
 	# ----------------------------------
 	# update serial no purchase details
 	# ----------------------------------
-	def update_serial_purchase_details(self, obj, d, serial_no, is_submit, is_transfer = 0):
+	def update_serial_purchase_details(self, obj, d, serial_no, is_submit, purpose = ''):
 		exists = sql("select name, status, docstatus from `tabSerial No` where name = '%s'" % (serial_no))
 		if is_submit:
-			if exists and exists[0][2] != 2 and not is_transfer:
+			if exists and exists[0][2] != 2 and purpose not in ['Material Transfer', 'Sales Return']:
 				msgprint("Serial No: %s already %s" % (serial_no, exists and exists[0][1]), raise_exception = 1)
 			elif exists:
 				s = Document('Serial No', exists and exists[0][0])
@@ -133,8 +133,10 @@ class DocType:
 		else:
 			if exists and exists[0][1] == 'Delivered' and exists[0][2] != 2:
 				msgprint("Serial No: %s is already delivered, you can not cancel the document." % serial_no, raise_exception=1)
+			elif purpose in ['Material Transfer', 'Sales Return']:
+				sql("update `tabSerial No` set status = '%s', purchase_document_type = '', purchase_document_no = '', warehouse = '%s' where name = '%s'" % (purpose == 'Material Transfer' and 'In Store' or 'Delivered', d.s_warehouse, serial_no))				
 			else:
-				sql("update `tabSerial No` set docstatus = '%s', status = '%s', purchase_document_type = '', purchase_document_no = '', purchase_date = '', purchase_rate = '', supplier = null, supplier_name = '', supplier_address = '', warehouse = null where name = '%s'" % (not is_transfer and 2 or 0, is_transfer and 'In Store' or 'Not in Use', serial_no))
+				sql("update `tabSerial No` set docstatus = 2, status = 'Not in Use', purchase_document_type = '', purchase_document_no = '', purchase_date = '', purchase_rate = '', supplier = null, supplier_name = '', supplier_address = '', warehouse = '' where name = '%s'" % serial_no)
 
 
 	# -------------------------------
@@ -233,6 +235,7 @@ class DocType:
 				sle.fields['warehouse_type'] = get_value('Warehouse' , args[k], 'warehouse_type')
 			sle.fields[k] = args[k]
 		sle_obj = get_obj(doc=sle)
+		
 		# validate
 		sle_obj.validate()
 		sle.save(new = 1)
