@@ -355,7 +355,8 @@ class DocType:
 	# ----------------------------------
 	def update_serial_no(self, is_submit):
 		sl_obj = get_obj('Stock Ledger')
-		sl_obj.validate_serial_no_warehouse(self, 'mtn_details')
+		if is_submit:
+			sl_obj.validate_serial_no_warehouse(self, 'mtn_details')
 		
 		for d in getlist(self.doclist, 'mtn_details'):
 			if d.serial_no:
