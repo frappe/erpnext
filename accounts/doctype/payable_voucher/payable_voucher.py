@@ -84,7 +84,7 @@ class DocType(TransactionBase):
 			self.validate_duplicate_docname('purchase_order')
 			self.doclist = get_obj('DocType Mapper', 'Purchase Order-Payable Voucher').dt_map('Purchase Order', 'Payable Voucher', self.doc.purchase_order_main, self.doc, self.doclist, "[['Purchase Order', 'Payable Voucher'],['PO Detail', 'PV Detail']]")
 		
-		ret = eval(self.get_credit_to())
+		ret = self.get_credit_to()
 		#self.doc.supplier_name = ret['supplier_name']
 		#self.doc.supplier_address = ret['supplier_address']
 		
