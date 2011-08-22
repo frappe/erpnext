@@ -37,7 +37,10 @@ class DocType:
 		self.doc.projected_qty = flt(self.doc.actual_qty) + flt(self.doc.ordered_qty) + flt(self.doc.indented_qty) + flt(self.doc.planned_qty) - flt(self.doc.reserved_qty)
 
 		self.doc.save()
-
+			
+		# check actual qty with total number of serial no
+		self.check_qty_with_serial_no()
+		
 		# update valuation for post dated entry
 		if actual_qty:
 			prev_sle = self.get_prev_sle(dt, posting_time, sle_id)
@@ -47,6 +50,18 @@ class DocType:
 				msgprint('Not enough quantity (requested: %s, current: %s) for Item <b>%s</b> in Warehouse <b>%s</b> as on %s %s' % (flt(actual_qty), flt(cqty), self.doc.item_code, self.doc.warehouse, dt, posting_time), raise_exception = 1)
 
 			self.update_item_valuation(sle_id, dt, posting_time, serial_no, prev_sle)
+
+	def check_qty_with_serial_no(self):
+		"""
+			check actual qty with total number of serial no in store
+			Temporary validation added on: 18-07-2011
+		"""
+		if sql("select name from `tabItem` where ifnull(has_serial_no, 'No') = 'Yes' and name = '%s'" % self.doc.item_code):
+			sr_count = sql("select count(name) from `tabSerial No` where item_code = '%s' and warehouse = '%s' and status  ='In Store' and docstatus != 2" % (self.doc.item_code, self.doc.warehouse))[0][0]
+			if sr_count != self.doc.actual_qty:
+				msg = "Actual Qty in Bin is mismatched with total number of serial no in store for item: '%s' and warehouse: '%s'" % (self.doc.item_code, self.doc.warehouse)
+				msgprint(msg, raise_exception=1)
+				sendmail(['developer@iwebnotes.com'], sender='automail@webnotestech.com', subject='Serial No Count vs Bin Actual Qty', parts=[['text/plain', msg]])			
 
 	# --------------------------------
 	# get first stock ledger entry
