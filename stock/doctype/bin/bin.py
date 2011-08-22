@@ -38,11 +38,12 @@ class DocType:
 
 		self.doc.save()
 			
-		# check actual qty with total number of serial no
-		self.check_qty_with_serial_no()
 		
 		# update valuation for post dated entry
 		if actual_qty:
+			# check actual qty with total number of serial no
+			self.check_qty_with_serial_no()
+			
 			prev_sle = self.get_prev_sle(dt, posting_time, sle_id)
 			cqty = flt(prev_sle.get('bin_aqat', 0))
 			# Block if actual qty becomes negative
@@ -59,7 +60,7 @@ class DocType:
 		if sql("select name from `tabItem` where ifnull(has_serial_no, 'No') = 'Yes' and name = '%s'" % self.doc.item_code):
 			sr_count = sql("select count(name) from `tabSerial No` where item_code = '%s' and warehouse = '%s' and status  ='In Store' and docstatus != 2" % (self.doc.item_code, self.doc.warehouse))[0][0]
 			if sr_count != self.doc.actual_qty:
-				msg = "Actual Qty in Bin is mismatched with total number of serial no in store for item: '%s' and warehouse: '%s'" % (self.doc.item_code, self.doc.warehouse)
+				msg = "Actual Qty(%s) in Bin is mismatched with total number(%s) of serial no in store for item: '%s' and warehouse: '%s'" % (self.doc.actual_qty, sr_count, self.doc.item_code, self.doc.warehouse)
 				msgprint(msg, raise_exception=1)
 				sendmail(['developer@iwebnotes.com'], sender='automail@webnotestech.com', subject='Serial No Count vs Bin Actual Qty', parts=[['text/plain', msg]])			
 
