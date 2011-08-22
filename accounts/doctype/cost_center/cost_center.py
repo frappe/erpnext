@@ -31,7 +31,7 @@ class DocType:
     ret = {
       'company_abbr'  : abbr
     }
-    return cstr(ret)
+    return ret
 
   def validate(self): 
     # Cost Center name must be unique

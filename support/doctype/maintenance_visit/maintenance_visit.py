@@ -31,20 +31,7 @@ class DocType(TransactionBase):
       'item_name' : item and item[0]['item_name'] or '',
       'description' : item and item[0]['description'] or ''
     }
-    return str(ret)
-  
-  #get customer details
-  #-----------------------
-  #def get_customer_details(self):
-  #  det = sql("select t1.customer_name,t1.address,t1.territory,t2.contact_name from `tabCustomer` t1, `tabContact` t2 where t1.name = %s and t1.name=t2.customer and t2.is_primary_contact = 'Yes'", self.doc.customer, as_dict=1)
-  #  
-  #  ret = {
-  #    'customer_name' :  det and det[0]['customer_name'] or '',
-  #    'address'  :  det and det[0]['address'] or '',
-  #    'territory':  det and det[0]['territory'] or '',
-  #    'contact_person' : det and det[0]['contact_name'] or ''
-  #  }
-  #  return str(ret)
+    return ret
   
   # fetch details of resp Sales order or customer issue
   #-----------------------------------------------------------

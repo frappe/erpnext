@@ -13,7 +13,7 @@ sql = webnotes.conn.sql
 get_value = webnotes.conn.get_value
 in_transaction = webnotes.conn.in_transaction
 convert_to_lists = webnotes.conn.convert_to_lists
-	
+
 # -----------------------------------------------------------------------------------------
 
 
@@ -21,14 +21,14 @@ class DocType:
   def __init__(self, doc, doclist=[]):
     self.doc = doc
     self.doclist = doclist
-    
+
   def autoname(self):
     last_name = sql("select max(name) from `tabBill Of Materials` where name like 'BOM/%s/%%'" % self.doc.item)
     if last_name:
       idx = cint(cstr(last_name[0][0]).split('/')[-1]) + 1
     else:
       idx = 1
-    self.doc.name = 'BOM/' + self.doc.item + ('/%.3i' % idx) 
+    self.doc.name = 'BOM/' + self.doc.item + ('/%.3i' % idx)
 
   #----------- Client Trigger function ----------
   def get_item_detail(self, item_code):
@@ -36,7 +36,7 @@ class DocType:
     ret={
       'description'   : item and item[0]['description'] or ''
     }
-    return cstr(ret)
+    return ret
 
   def get_workstation_details(self,workstation):
     ws = sql("select hour_rate, capacity from `tabWorkstation` where name = %s",workstation , as_dict = 1)
@@ -44,7 +44,7 @@ class DocType:
       'hour_rate'            : ws and flt(ws[0]['hour_rate']) or '',
       'workstation_capacity' : ws and flt(ws[0]['capacity']) or ''
     }
-    return cstr(ret)
+    return ret
 
   def get_bom_material_detail(self, arg):
     arg = eval(arg)
@@ -53,15 +53,15 @@ class DocType:
       raise Exception
     if arg['item_code']:
       item = sql("select is_asset_item, is_purchase_item, docstatus, is_sub_contracted_item, description, stock_uom, default_bom from `tabItem` where item_code = %s", (arg['item_code']), as_dict = 1)
-      
+
       # Check for Asset Item
       if item and item[0]['is_asset_item'] == 'Yes':
         msgprint("Sorry!!! Item " + arg['item_code'] + " is an Asset of the company. Entered in BOM := " + cstr(self.doc.name))
         raise Exception
-        
+
       if item and item[0]['docstatus'] == 2:
         msgprint("Item %s does not exist in system" % cstr(args['item_code']))
- 
+
       ret_item = {
                  'description' : item and item[0]['description'] or '',
                  'stock_uom'   : item and item[0]['stock_uom'] or '',
@@ -78,15 +78,15 @@ class DocType:
     if arg['bom_no'] or not ret_item['bom_no'] =='':
       if arg['bom_no']:
         bom = sql("select name, dir_mat_as_per_mar,dir_mat_as_per_lpr,dir_mat_as_per_sr, operating_cost, quantity from `tabBill Of Materials` where is_active = 'Yes' and name = %s", (arg['bom_no']), as_dict=1)
-      else:      
-        # get recent direct material cost, operating_cost, cost from Default BOM of Item 
+      else:
+        # get recent direct material cost, operating_cost, cost from Default BOM of Item
         bom = sql("select name, dir_mat_as_per_mar, dir_mat_as_per_lpr, dir_mat_as_per_sr, operating_cost, quantity from `tabBill Of Materials` where is_active = 'Yes' and name = %s", (ret_item['bom_no']), as_dict=1)
-      
-      # get recent direct material cost, operating_cost, cost from Entered BOM of Item 
+
+      # get recent direct material cost, operating_cost, cost from Entered BOM of Item
       ret_item['bom_no'] = bom and bom[0]['name'] or ''
 
       if bom and bom[0]['name']:
-        ret_bom = { 
+        ret_bom = {
         'dir_mat_as_per_mar' : flt(bom[0]['dir_mat_as_per_mar']) / flt(bom[0]['quantity']) or 0.00,
         'dir_mat_as_per_lpr' : flt(bom[0]['dir_mat_as_per_lpr']) / flt(bom[0]['quantity']) or 0.00,
         'dir_mat_as_per_sr'  : flt(bom[0]['dir_mat_as_per_sr']) / flt(bom[0]['quantity']) or 0.00,
@@ -106,15 +106,15 @@ class DocType:
             'standard_rate'      : 0
             }
           ret_item.update(ret_bom_rates)
-    return cstr(ret_item)
-  
+    return ret_item
+
   def set_as_default_bom(self):
     # set Is Default as 1
     set(self.doc,'is_default', flt(1))
 
     # get previous default bom from Item Master
     prev_def_bom = sql("select default_bom from `tabItem` where name = %s", self.doc.item,as_dict = 1)
-    
+
     if prev_def_bom[0]['default_bom'] and prev_def_bom[0]['default_bom'] != self.doc.name:
       # update Is Default as 0 in Previous Default BOM
       msgprint(cstr(prev_def_bom[0]['default_bom']) + "is no longer Default BOM for item" + cstr(self.doc.item))
@@ -124,12 +124,20 @@ class DocType:
     sql("update `tabItem` set default_bom = '%s' where name = '%s'" % (self.doc.name,self.doc.item))
     msgprint(cstr(self.doc.name) + "has been set as Default BOM for Item "+cstr(self.doc.item))
 
+  def unset_as_default_bom(self):
+    # set Is Default as 1
+    set(self.doc,'is_default', flt(0))
+
+    # update current BOM as default bom in Item Master
+    sql("update `tabItem` set default_bom = null where name = '%s'" % (self.doc.item))
+    msgprint(cstr(self.doc.name) + "has been unset as Default BOM for Item "+cstr(self.doc.item))
+
   def check_active_parent_boms(self):
     act_pbom = sql("select distinct t1.parent from `tabBOM Material` t1, `tabBill Of Materials` t2 where t1.bom_no ='%s' and t2.name = t1.parent and t2.is_active = 'Yes' and t2.docstatus = 1 and t1.docstatus =1 " % self.doc.name )
     if act_pbom and act_pbom[0][0]:
       msgprint("Sorry cannot Inactivate as BOM %s is child of one or many other active parent BOMs" % self.doc.name)
       raise Exception
-      
+
   def activate_inactivate_bom(self, action):
     if cstr(action) == 'Activate':
       self.validate()
@@ -141,11 +149,11 @@ class DocType:
   #------ On Validation Of Document ----------
   def validate_main_item(self):
     item = sql("select is_manufactured_item, is_sub_contracted_item from `tabItem` where name = %s and (ifnull(end_of_life,'')='' or end_of_life = '0000-00-00' or end_of_life >  now())", self.doc.item, as_dict = 1)
-    
+
     if not item:
       msgprint("Item %s do not exists in the system. Entered in BOM := %s" % (cstr(self.doc.item), cstr(self.doc.name)))
       raise Exception
-      
+
     elif not item[0]['is_manufactured_item'] == 'Yes' and not item[0]['is_sub_contracted_item'] == 'Yes':
       msgprint("Sorry cannot make Bill Of Materials for Item %s. As it is not a manufactured / sub-contracted item. Entered in BOM := %s " % (cstr(self.doc.item), cstr(self.doc.name)))
       raise Exception
@@ -156,7 +164,7 @@ class DocType:
     if not o.operation_no:
       msgprint("Please Enter Operation No at Row " + cstr(o.idx)+" in BOM := " +cstr(self.doc.name))
       raise Exception
-      
+
     if not o.workstation:
       msgprint("Please Enter Workstation for Operation No. " + cstr(o.operation_no) + " in BOM NO. " + self.doc.name)
       raise Exception
@@ -172,7 +180,7 @@ class DocType:
 
       # add operation in op list
     self.op.append(cstr(o.operation_no))
- 
+
   # Validate materials
   #-------------------------------------------------
 
@@ -196,7 +204,7 @@ class DocType:
     if not item:
       msgprint("Item %s is not present in Item Master." % m.item_code)
       raise Exception
-      
+
     if item[0]['is_manufactured_item'] == 'Yes' or item[0]['is_sub_contracted_item'] == 'Yes':
       bom = sql("select name, is_active, docstatus from `tabBill Of Materials` where item = %s", m.item_code, as_dict =1)
       if bom and bom[0]['name']:
@@ -209,17 +217,17 @@ class DocType:
             if cstr(m.bom_no) == cstr(b['name']):
               if b['is_active'] != 'Yes':
                 msgprint("BOM %s NOT ACTIVE BOM. Entered in BOM := %s at row no := %s" % (cstr(m.bom_no), cstr(self.doc.name), m.idx))
-                raise Exception  
-              
+                raise Exception
+
               #if flt(b['docstatus']) != 1:
               #  msgprint("BOM %s is NOT SUBMITTED."% cstr(m.bom_no))
               #  raise Exception
-              
+
               match = 1
           if not match:
             msgprint("Item %s does not belongs to Bill Of Material %s or Bill Of Material %s is NOT ACTIVE BOM. Entered in BOM := %s at row no := %s" % (cstr(m.item_code),cstr(m.bom_no), cstr(m.bom_no), self.doc.name, m.idx))
             raise Exception
-    
+
     if not item[0]['is_manufactured_item'] == 'Yes' and not item[0]['is_sub_contracted_item']== 'Yes':
       if m.bom_no:
         msgprint("As in Item Master of Item %s Is Manufactured Item / Is Sub-Contracted Item  is not 'Yes' hence there should be no BOM.In BOm := %s at row no := %s" % (m.item_code, cstr(self.doc.name), m.idx))
@@ -235,22 +243,23 @@ class DocType:
 
   # Calculate Cost
   #-----------------------------------------------
-    
+
   def calculate_cost(self, validate = 0):
     self.op, op_cost, dir_mat_as_per_mar, dir_mat_as_per_lpr, dir_mat_as_per_sr, count_mat = [], 0.0, 0.0,0.0,0.0, 0
     # --------  Calculate Cost Of BOM  -------------
     # --- calculate operating cost from BOM Operations ----
     for o in getlist(self.doclist, 'bom_operations'):
-      # --- Validation for enteries in BOM Operations ---- 
+      # --- Validation for enteries in BOM Operations ----
       if validate:
         self.validate_operations(o)
-        
+
       o.operating_cost = flt(flt(o.time_in_mins)/60) * flt(o.hour_rate)
       if validate != 1:
         o.save()
+        msgprint('Operation saved')
 
       op_cost = flt(op_cost) + flt(o.operating_cost)
-    
+
     # --- calculate operating cost and direct material cost from BOM Material ---
     for m in getlist(self.doclist, 'bom_materials'):
       # --- Validation for enteries in BOM Material --- '''
@@ -259,12 +268,12 @@ class DocType:
         self.validate_materials(m)
 
       if m.bom_no:
-        # add operating cost of child boms 
+        # add operating cost of child boms
         op_cost += flt(m.operating_cost)
-        
+
         # update dir_mat, op_cost, value from child bom
         self.update_childs_dir_op_value(m, child_bom_cost = 1)
-        
+
         # check for is_sub_contracted_item
         item = sql("select is_sub_contracted_item from `tabItem` where name = '%s'" % m.item_code, as_dict =1)
         if item and item[0]['is_sub_contracted_item'] == 'Yes':
@@ -275,13 +284,13 @@ class DocType:
           # calculate Direct Material
           dir_mat_as_per_mar, dir_mat_as_per_lpr, dir_mat_as_per_sr = self.calculate_dir_mat(m, dir_mat_as_per_mar, dir_mat_as_per_lpr, dir_mat_as_per_sr, has_bom = 1, is_sub_cont =1)
         else:
-          # update mar,lpr,sr as 0 
+          # update mar,lpr,sr as 0
           self.update_mar_lpr_sr( m, mar = 0, lpr = 0, sr = 0)
           # calculate amount
           self.calculate_amount( m, has_bom = 1, is_sub_cont = 0)
           # calculate Direct Material
           dir_mat_as_per_mar, dir_mat_as_per_lpr, dir_mat_as_per_sr = self.calculate_dir_mat(m, dir_mat_as_per_mar, dir_mat_as_per_lpr, dir_mat_as_per_sr, has_bom = 1, is_sub_cont =0)
-   
+
       else :
         # update dir_mat,op_cost, value as 0
         self.update_childs_dir_op_value(m, child_bom_cost = 0)
@@ -291,7 +300,7 @@ class DocType:
         self.calculate_amount(m, has_bom = 0, is_sub_cont = 0)
         # calculate Direct Material
         dir_mat_as_per_mar, dir_mat_as_per_lpr, dir_mat_as_per_sr = self.calculate_dir_mat(m, dir_mat_as_per_mar, dir_mat_as_per_lpr, dir_mat_as_per_sr, has_bom =0, is_sub_cont =0)
-        
+
       # update qty_consumed_per_unit
       m.qty_consumed_per_unit = flt(m.qty) / flt(self.doc.quantity)
       m.save()
@@ -314,12 +323,12 @@ class DocType:
   def update_childs_dir_op_value(self, m, child_bom_cost = 0):
     #msgprint("IN UPDATE CHILDS DIR OP VALUE")
     if child_bom_cost:
-      # get recent direct material cost, operating cost, cost from child bom 
+      # get recent direct material cost, operating cost, cost from child bom
       child_bom_cost = sql("select dir_mat_as_per_mar, dir_mat_as_per_lpr, dir_mat_as_per_sr, operating_cost, cost_as_per_mar, cost_as_per_lpr, cost_as_per_sr, quantity from `tabBill Of Materials` where  name = %s", m.bom_no, as_dict = 1)
-    
+
     # operating_cost
     m.operating_cost = child_bom_cost and flt(child_bom_cost[0]['operating_cost']) / flt(child_bom_cost[0]['quantity']) or 0.00
-    
+
     val_dir_dict = {'value_as_per_mar': 'cost_as_per_mar', 'dir_mat_as_per_mar': 'dir_mat_as_per_mar',
                     'value_as_per_lpr': 'cost_as_per_lpr', 'dir_mat_as_per_lpr': 'dir_mat_as_per_lpr',
                     'value_as_per_sr' : 'cost_as_per_sr' , 'dir_mat_as_per_sr' : 'dir_mat_as_per_sr'  }
@@ -353,7 +362,7 @@ class DocType:
       dir_mat_as_per_mar += flt(m.amount_as_per_mar)
       dir_mat_as_per_lpr += flt(m.amount_as_per_lpr)
       dir_mat_as_per_sr  += flt(m.amount_as_per_sr)
-    #msgprint(cstr(m.item_code))  
+    #msgprint(cstr(m.item_code))
     #msgprint("dir_mat_as_per_mar < ==> " + cstr(dir_mat_as_per_mar) + "***" + "dir_mat_as_per_lpr < ==> " + cstr(dir_mat_as_per_lpr) + "***" + "dir_mat_as_per_sr < ==> " + cstr(dir_mat_as_per_sr) + "***")
     return dir_mat_as_per_mar, dir_mat_as_per_lpr, dir_mat_as_per_sr
 
@@ -367,9 +376,9 @@ class DocType:
       while withdraw:
         if not fcfs_bal:
           break # nothing in store
-           
+
         batch = fcfs_bal[0]
-          
+
         if batch[0] < withdraw:
           # not enough in current batch, clear batch
           withdraw -= batch[0]
@@ -424,8 +433,8 @@ class DocType:
       #ma_rate = sql("select ifnull(sum(ma_rate), 0)/ ifnull(count(*),1) from `tabBin` where item_code = '%s' and ifnull(ma_rate, 0) > 0" % cstr(item_code))
       #ma_rate = flt(ma_rate and ma_rate[0][0]) or 0
       ma_rate = self.get_valuation_rate(item_code, qty)
-      
-    # get recent last purchase rate 
+
+    # get recent last purchase rate
     lpr_rate = lpr and flt(sql("select last_purchase_rate from `tabItem` where name = '%s'" % item_code)[0][0]) or 0.00
     # get recent standard rate
     sr_rate = sr and flt(sql("select standard_rate from `tabItem` where name = '%s'" % item_code)[0][0]) or 0.00
@@ -440,13 +449,14 @@ class DocType:
         raise Exception
       else:
         check_list.append(cstr(d.item_code))
-  
-  #----- Document on Save function------  
+
+  #----- Document on Save function------
   def validate(self):
+    #msgprint(len(getlist(self.doclist, 'bom_materials')))
     self.validate_main_item()
     self.validate_duplicate_items()
     self.calculate_cost(validate = 1)
-   
+
   def check_recursion(self):
     check_list = [['parent', 'bom_no', 'parent'], ['bom_no', 'parent', 'child']]
     for d in check_list:
@@ -466,10 +476,10 @@ class DocType:
       msgprint("Cannot change Item once the Bill Of Material is created.")
       raise Exception
     self.check_recursion()
-    
+
 
 # ********************************************** Submit *************************************************************
-  
+
   # Add Flat BOM Details
   # -----------------------
   def add_to_flat_bom_detail(self, is_submit = 0):
@@ -486,9 +496,11 @@ class DocType:
 
   #Get Child Flat BOM Items
   #----------------------------------------
-  def get_child_flat_bom_items(self, item, d):   
+  def get_child_flat_bom_items(self, item, d):
+
     child_flat_bom_items=[]
     if item and (item[0]['is_sub_contracted_item'] == 'Yes' or item[0]['is_pro_applicable'] == 'Yes'):
+
       child_flat_bom_items = sql("select item_code, description, qty_consumed_per_unit, stock_uom, moving_avg_rate, last_purchase_rate, standard_rate, '%s' as parent_bom, bom_mat_no, 'No' as is_pro_applicable from `tabFlat BOM Detail` where parent = '%s' and is_pro_applicable = 'No' and docstatus = 1" % ( d.bom_no, cstr(d.bom_no)))
       self.cur_flat_bom_items.append([d.item_code, d.description, flt(d.qty), d.stock_uom, flt(d.moving_avg_rate), flt(d.amount_as_per_mar), flt(d.last_purchase_rate), flt(d.amount_as_per_lpr), flt(d.standard_rate), flt(d.amount_as_per_sr), flt(d.qty_consumed_per_unit), (item[0]['is_sub_contracted_item'] == 'Yes') and d.parent or d.bom_no, d.name, (item[0]['is_sub_contracted_item'] == 'Yes') and 'No' or 'Yes'])
 
@@ -500,20 +512,22 @@ class DocType:
       raise Exception
     else:
       return child_flat_bom_items
-  
-  
+
+
   # Get Current Flat BOM Items
   # -----------------------------
   def get_current_flat_bom_items(self):
+
     self.cur_flat_bom_items = []
-    
+
     cfb_lbl = {'item_code': 0, 'description': 1, 'qty_consumed_per_unit': 2, 'stock_uom': 3, 'moving_avg_rate': 4, 'last_purchase_rate': 5, 'standard_rate': 6, 'parent_bom': 7, 'bom_mat_no': 8, 'is_pro_applicable': 9}
-    
-    for d in getlist(self.doclist, 'bom_materials'):  
+
+    for d in getlist(self.doclist, 'bom_materials'):
+
       if d.bom_no:
         item = sql("select is_sub_contracted_item, is_pro_applicable from `tabItem` where name = '%s'" % d.item_code, as_dict = 1)
         child_flat_bom_items = self.get_child_flat_bom_items(item,d)
-        
+
         for c in child_flat_bom_items:
           self.cur_flat_bom_items.append([c[cfb_lbl['item_code']], c[cfb_lbl['description']], flt(d.qty) * flt(c[cfb_lbl['qty_consumed_per_unit']]), c[cfb_lbl['stock_uom']], flt(c[cfb_lbl['moving_avg_rate']]), flt(d.qty) * flt(c[cfb_lbl['qty_consumed_per_unit']]) * flt(c[cfb_lbl['moving_avg_rate']]) ,flt(c[cfb_lbl['last_purchase_rate']]), flt(d.qty) * flt(c[cfb_lbl['qty_consumed_per_unit']]) * flt(c[cfb_lbl['last_purchase_rate']]), flt(c[cfb_lbl['standard_rate']]), flt(d.qty) * flt(c[cfb_lbl['qty_consumed_per_unit']]) * flt(c[cfb_lbl['standard_rate']]), flt(d.qty_consumed_per_unit) * flt(c[cfb_lbl['qty_consumed_per_unit']]), c[cfb_lbl['parent_bom']], c[cfb_lbl['bom_mat_no']], c[cfb_lbl['is_pro_applicable']]])
       else:
@@ -521,10 +535,10 @@ class DocType:
         self.cur_flat_bom_items.append([d.item_code, d.description, flt(d.qty), d.stock_uom, flt(d.moving_avg_rate), flt(d.amount_as_per_mar), flt(d.last_purchase_rate), flt(d.amount_as_per_lpr), flt(d.standard_rate), flt(d.amount_as_per_sr), flt(d.qty_consumed_per_unit), d.parent, d.name, 'No' ])
 
   # Update Flat BOM Engine
-  # ------------------------  
+  # ------------------------
   def update_flat_bom_engine(self, is_submit = 0):
     # following will be correct data
-    # get correct / updated flat bom data    
+    # get correct / updated flat bom data
     self.get_current_flat_bom_items()
     # insert to curr flat bom data
     self.add_to_flat_bom_detail(is_submit)
@@ -533,9 +547,9 @@ class DocType:
   # On Submit
   # -----------
   def on_submit(self):
-    self.update_flat_bom_engine()
+    self.update_flat_bom_engine(1)
 
-        
+
   def get_parent_bom_list(self, bom_no):
     p_bom = sql("select parent from `tabBOM Material` where bom_no = '%s'" % bom_no)
     return p_bom and [i[0] for i in p_bom] or []

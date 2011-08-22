@@ -40,15 +40,10 @@ class DocType(TransactionBase):
   def validate_fiscal_year(self):
     get_obj('Sales Common').validate_fiscal_year(self.doc.fiscal_year,self.doc.posting_date,'Posting Date')
 
-  # ******************* Get Customer Details ***********************
-  #def get_customer_details(self):
-  #  sales_com_obj = get_obj('Sales Common')
-  #  sales_com_obj.get_customer_details(self)
-  #  sales_com_obj.get_shipping_details(self)
 
   # ****** Get contact person details based on customer selected ****
   def get_contact_details(self):
-    return cstr(get_obj('Sales Common').get_contact_details(self,0))
+    return get_obj('Sales Common').get_contact_details(self,0)
 
   # *********** Get Commission rate of Sales Partner ****************
   def get_comm_rate(self, sales_partner):
@@ -122,7 +117,7 @@ class DocType(TransactionBase):
     ret = {
        'actual_qty' : actual_qty and flt(actual_qty[0]['actual_qty']) or 0
     }
-    return cstr(ret)
+    return ret
 
     
 # OTHER CHARGES TRIGGER FUNCTIONS
