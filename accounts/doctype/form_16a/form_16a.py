@@ -56,7 +56,7 @@ class DocType(TransactionBase):
 			'party_address': cstr(address_display)
 		}
           	
-		return cstr(ret)
+		return ret
 	
 	# Get TDS Return acknowledgement
 	#-------------------------------

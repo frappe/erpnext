@@ -90,12 +90,12 @@ class DocType:
 	# get item details
 	# ---------------------------------
 	def get_item_details(self, arg =''):
-		return cstr( get_obj(dt='Purchase Common').get_item_details(self,arg) )
+		return get_obj(dt='Purchase Common').get_item_details(self,arg)
 
 	# Get UOM Details
 	# ---------------------------------
 	def get_uom_details(self, arg = ''):
-		return cstr(get_obj(dt='Purchase Common').get_uom_details(arg))
+		return get_obj(dt='Purchase Common').get_uom_details(arg)
 
 	# GET TERMS & CONDITIONS
 	#-----------------------------
