@@ -1,7 +1,7 @@
 # REMEMBER to update this
 # ========================
 
-last_patch = 339
+last_patch = 340
 
 #-------------------------------------------
 
@@ -1407,3 +1407,5 @@ def execute(patch_no):
 		sql("update tabPage set name='question-view' where name='Question View'")
 	elif patch_no == 339:
 		reload_doc('production','doctype','bill_of_materials')
+	elif patch_no == 340:
+		sql("update `tabDocField` set permlevel = 0 where (fieldname in ('process', 'production_order', 'fg_completed_qty') or label = 'Get Items') and parent = 'Stock Entry'")
