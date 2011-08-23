@@ -1,7 +1,7 @@
 # REMEMBER to update this
 # ========================
 
-last_patch = 342
+last_patch = 343
 
 #-------------------------------------------
 
@@ -1422,4 +1422,6 @@ def execute(patch_no):
 			ch.format = 'Delivery Note Packing List Wise'
 			ch.save(1)
 	elif patch_no == 342:
+		sql("update `tabDocField` set permlevel = 0 where parent = 'Stock Entry Detail' and fieldname in ('s_warehouse', 't_warehouse', 'fg_item')")
+	elif patch_no == 343:
 		reload_doc('stock','doctype','item_customer_detail')
