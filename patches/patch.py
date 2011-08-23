@@ -1411,8 +1411,8 @@ def execute(patch_no):
 		sql("update `tabDocField` set permlevel = 0 where (fieldname in ('process', 'production_order', 'fg_completed_qty') or label = 'Get Items') and parent = 'Stock Entry'")
 	elif patch_no == 341:
 		reload_doc('stock','doctype','delivery_note')
-		reload_doc('stock','doc_type','item')
-		reload_doc('selling','doc_type','quotation')
+		reload_doc('stock','doctype','item')
+		reload_doc('selling','doctype','quotation')
 		reload_doc('stock','Print Format','Delivery Note Packing List Wise')
 
 		if not sql("select format from `tabDocFormat` where name = 'Delivery Note Packing List Wise' and parent = 'Delivery Note'"):
