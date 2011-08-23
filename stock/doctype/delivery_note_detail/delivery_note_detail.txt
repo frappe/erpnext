@@ -5,7 +5,7 @@
 	{
 		'creation': '2010-08-08 17:08:58',
 		'docstatus': 0,
-		'modified': '2011-03-01 10:35:06',
+		'modified': '2011-08-22 12:11:51',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
@@ -21,7 +21,7 @@
 		'section_style': 'Tray',
 		'server_code_error': ' ',
 		'show_in_menu': 0,
-		'version': 35
+		'version': 38
 	},
 
 	# These values are common for all DocField
@@ -104,25 +104,11 @@
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'no_of_packs',
-		'fieldtype': 'Int',
-		'idx': 5,
-		'label': 'No of Packs',
-		'oldfieldname': 'no_of_packs',
-		'oldfieldtype': 'Int',
-		'permlevel': 0,
-		'print_hide': 1,
-		'width': '100px'
-	},
-
-	# DocField
-	{
 		'default': '0.00',
 		'doctype': 'DocField',
 		'fieldname': 'qty',
 		'fieldtype': 'Currency',
-		'idx': 6,
+		'idx': 5,
 		'label': 'Quantity',
 		'oldfieldname': 'qty',
 		'oldfieldtype': 'Currency',
@@ -138,7 +124,7 @@
 		'doctype': 'DocField',
 		'fieldname': 'ref_rate',
 		'fieldtype': 'Currency',
-		'idx': 7,
+		'idx': 6,
 		'label': 'Ref Rate',
 		'no_copy': 0,
 		'oldfieldname': 'ref_rate',
@@ -156,7 +142,7 @@
 		'doctype': 'DocField',
 		'fieldname': 'adj_rate',
 		'fieldtype': 'Float',
-		'idx': 8,
+		'idx': 7,
 		'label': 'Discount (%)',
 		'oldfieldname': 'adj_rate',
 		'oldfieldtype': 'Float',
@@ -171,7 +157,7 @@
 		'doctype': 'DocField',
 		'fieldname': 'export_rate',
 		'fieldtype': 'Currency',
-		'idx': 9,
+		'idx': 8,
 		'label': 'Rate',
 		'oldfieldname': 'export_rate',
 		'oldfieldtype': 'Currency',
@@ -187,7 +173,7 @@
 		'doctype': 'DocField',
 		'fieldname': 'export_amount',
 		'fieldtype': 'Currency',
-		'idx': 10,
+		'idx': 9,
 		'label': 'Amount',
 		'oldfieldname': 'export_amount',
 		'oldfieldtype': 'Currency',
@@ -202,7 +188,7 @@
 		'doctype': 'DocField',
 		'fieldname': 'base_ref_rate',
 		'fieldtype': 'Currency',
-		'idx': 11,
+		'idx': 10,
 		'label': 'Ref Rate*',
 		'oldfieldname': 'base_ref_rate',
 		'oldfieldtype': 'Currency',
@@ -217,7 +203,7 @@
 		'doctype': 'DocField',
 		'fieldname': 'basic_rate',
 		'fieldtype': 'Currency',
-		'idx': 12,
+		'idx': 11,
 		'label': 'Rate*',
 		'oldfieldname': 'basic_rate',
 		'oldfieldtype': 'Currency',
@@ -233,7 +219,7 @@
 		'doctype': 'DocField',
 		'fieldname': 'amount',
 		'fieldtype': 'Currency',
-		'idx': 13,
+		'idx': 12,
 		'label': 'Amount*',
 		'oldfieldname': 'amount',
 		'oldfieldtype': 'Currency',
@@ -248,7 +234,7 @@
 		'doctype': 'DocField',
 		'fieldname': 'warehouse',
 		'fieldtype': 'Link',
-		'idx': 14,
+		'idx': 13,
 		'label': 'Warehouse',
 		'oldfieldname': 'warehouse',
 		'oldfieldtype': 'Link',
@@ -264,7 +250,8 @@
 		'doctype': 'DocField',
 		'fieldname': 'serial_no',
 		'fieldtype': 'Text',
-		'idx': 15,
+		'idx': 14,
+		'in_filter': 1,
 		'label': 'Serial No',
 		'no_copy': 1,
 		'oldfieldname': 'serial_no',
@@ -279,14 +266,13 @@
 		'doctype': 'DocField',
 		'fieldname': 'batch_no',
 		'fieldtype': 'Link',
-		'idx': 16,
+		'idx': 15,
 		'label': 'Batch No',
 		'oldfieldname': 'batch_no',
 		'oldfieldtype': 'Link',
 		'options': 'Batch',
 		'permlevel': 0,
-		'print_hide': 1,
-		'search_index': 0
+		'print_hide': 1
 	},
 
 	# DocField
@@ -294,14 +280,13 @@
 		'doctype': 'DocField',
 		'fieldname': 'item_group',
 		'fieldtype': 'Link',
-		'idx': 17,
+		'idx': 16,
 		'label': 'Item Group',
 		'oldfieldname': 'item_group',
 		'oldfieldtype': 'Link',
 		'options': 'Item Group',
 		'permlevel': 1,
-		'print_hide': 1,
-		'search_index': 0
+		'print_hide': 1
 	},
 
 	# DocField
@@ -309,15 +294,69 @@
 		'doctype': 'DocField',
 		'fieldname': 'brand',
 		'fieldtype': 'Link',
-		'idx': 18,
+		'idx': 17,
 		'label': 'Brand Name',
 		'oldfieldname': 'brand',
 		'oldfieldtype': 'Link',
 		'options': 'Brand',
 		'permlevel': 1,
 		'print_hide': 1,
-		'search_index': 0,
 		'width': '150px'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'pack_no',
+		'fieldtype': 'Data',
+		'idx': 18,
+		'label': 'Pack No',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'pack_gross_wt',
+		'fieldtype': 'Float',
+		'idx': 19,
+		'label': 'Pack Gross Wt',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'weight_uom',
+		'fieldtype': 'Link',
+		'idx': 20,
+		'label': 'Weight UOM',
+		'options': 'UOM',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'pack_nett_wt',
+		'fieldtype': 'Float',
+		'idx': 21,
+		'label': 'Pack Nett Wt',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'no_of_packs',
+		'fieldtype': 'Int',
+		'idx': 22,
+		'label': 'No of Packs',
+		'oldfieldname': 'no_of_packs',
+		'oldfieldtype': 'Int',
+		'permlevel': 0,
+		'print_hide': 1,
+		'width': '100px'
 	},
 
 	# DocField
@@ -325,7 +364,7 @@
 		'doctype': 'DocField',
 		'fieldname': 'pack_unit',
 		'fieldtype': 'Data',
-		'idx': 19,
+		'idx': 23,
 		'label': 'Pack Unit',
 		'oldfieldname': 'pack_unit',
 		'oldfieldtype': 'Data',
@@ -339,7 +378,7 @@
 		'doctype': 'DocField',
 		'fieldname': 'installed_qty',
 		'fieldtype': 'Currency',
-		'idx': 20,
+		'idx': 24,
 		'label': 'Installed Qty',
 		'no_copy': 1,
 		'oldfieldname': 'installed_qty',
@@ -354,7 +393,7 @@
 		'doctype': 'DocField',
 		'fieldname': 'actual_qty',
 		'fieldtype': 'Currency',
-		'idx': 21,
+		'idx': 25,
 		'label': 'Available Qty at Warehouse',
 		'no_copy': 1,
 		'oldfieldname': 'actual_qty',
@@ -366,27 +405,10 @@
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'default': '0.00',
-		'doctype': 'DocField',
-		'fieldname': 'billed_qty',
-		'fieldtype': 'Currency',
-		'idx': 22,
-		'label': 'Billed Qty',
-		'no_copy': 1,
-		'oldfieldname': 'billed_qty',
-		'oldfieldtype': 'Currency',
-		'permlevel': 1,
-		'print_hide': 1,
-		'width': '100px'
-	},
-
-	# DocField
-	{
 		'doctype': 'DocField',
 		'fieldname': 'billed_amt',
 		'fieldtype': 'Currency',
-		'idx': 23,
+		'idx': 26,
 		'label': 'Billed Amt',
 		'no_copy': 1,
 		'permlevel': 1,
@@ -401,7 +423,7 @@
 		'fieldname': 'prevdoc_docname',
 		'fieldtype': 'Data',
 		'hidden': 0,
-		'idx': 24,
+		'idx': 27,
 		'in_filter': 1,
 		'label': 'Against Document No',
 		'no_copy': 1,
@@ -419,14 +441,14 @@
 		'fieldname': 'prevdoc_doctype',
 		'fieldtype': 'Data',
 		'hidden': 1,
-		'idx': 25,
+		'idx': 28,
 		'in_filter': 1,
 		'label': 'Document Type',
 		'oldfieldname': 'prevdoc_doctype',
 		'oldfieldtype': 'Data',
 		'permlevel': 1,
 		'print_hide': 1,
-		'search_index': 0,
+		'search_index': 1,
 		'width': '150px'
 	},
 
@@ -436,7 +458,7 @@
 		'fieldname': 'prevdoc_date',
 		'fieldtype': 'Date',
 		'hidden': 1,
-		'idx': 26,
+		'idx': 29,
 		'in_filter': 1,
 		'label': 'Against Document Date',
 		'oldfieldname': 'prevdoc_date',
@@ -451,14 +473,14 @@
 		'fieldname': 'prevdoc_detail_docname',
 		'fieldtype': 'Data',
 		'hidden': 1,
-		'idx': 27,
+		'idx': 30,
 		'in_filter': 1,
 		'label': 'Against Document Detail No',
 		'oldfieldname': 'prevdoc_detail_docname',
 		'oldfieldtype': 'Data',
 		'permlevel': 1,
 		'print_hide': 1,
-		'search_index': 1,
+		'search_index': 0,
 		'width': '150px'
 	},
 
@@ -468,7 +490,7 @@
 		'fieldname': 'item_tax_rate',
 		'fieldtype': 'Small Text',
 		'hidden': 1,
-		'idx': 28,
+		'idx': 31,
 		'label': 'Item Tax Rate',
 		'oldfieldname': 'item_tax_rate',
 		'oldfieldtype': 'Small Text',
@@ -482,7 +504,7 @@
 		'doctype': 'DocField',
 		'fieldname': 'page_break',
 		'fieldtype': 'Check',
-		'idx': 29,
+		'idx': 32,
 		'label': 'Page Break',
 		'oldfieldname': 'page_break',
 		'oldfieldtype': 'Check',
