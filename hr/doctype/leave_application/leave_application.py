@@ -82,7 +82,7 @@ class DocType:
     if not self.is_lwp():
       bal = self.get_leave_balance()
       tot_leaves = self.get_total_leave_days()
-      bal, tot_leaves = bal, tot_leaves
+      bal, tot_leaves = eval(bal), eval(tot_leaves)
       set(self.doc,'leave_balance',flt(bal['leave_balance']))
       set(self.doc,'total_leave_days',flt(tot_leaves['total_leave_days']))
       if flt(bal['leave_balance']) < flt(tot_leaves['total_leave_days']):

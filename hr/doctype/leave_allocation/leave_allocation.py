@@ -75,7 +75,7 @@ class DocType:
   # get total allocated leaves
   # ---------------------------
   def get_total_allocated_leaves(self):
-    leave_det = self.get_carry_forwarded_leaves()
+    leave_det = eval(self.get_carry_forwarded_leaves())
     set(self.doc,'carry_forwarded_leaves',flt(leave_det['carry_forwarded_leaves']))
     set(self.doc,'total_leaves_allocated',flt(leave_det['total_leaves_allocated']))
 
