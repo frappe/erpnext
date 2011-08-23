@@ -5,14 +5,23 @@
 	{
 		'creation': '2011-04-18 15:58:20',
 		'docstatus': 0,
-		'modified': '2011-08-09 17:10:45',
+		'modified': '2011-08-23 15:26:57',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
 
+	# These values are common for all DocField
+	{
+		'doctype': 'DocField',
+		'name': '__common__',
+		'parent': 'Delivery Note',
+		'parentfield': 'fields',
+		'parenttype': 'DocType'
+	},
+
 	# These values are common for all DocType
 	{
-		'_last_update': '1311621379',
+		'_last_update': '1313665263',
 		'colour': 'White:FFF',
 		'doctype': 'DocType',
 		'document_type': 'Transaction',
@@ -27,15 +36,16 @@
 		'show_in_menu': 0,
 		'subject': 'To %(customer_name)s on %(transaction_date)s | %(per_billed)s% billed',
 		'tag_fields': 'billing_status',
-		'version': 446
+		'version': 449
 	},
 
-	# These values are common for all DocField
+	# These values are common for all DocFormat
 	{
-		'doctype': 'DocField',
+		'doctype': 'DocFormat',
+		'format': 'Delivery Note Packing List Wise',
 		'name': '__common__',
 		'parent': 'Delivery Note',
-		'parentfield': 'fields',
+		'parentfield': 'formats',
 		'parenttype': 'DocType'
 	},
 
@@ -109,21 +119,8 @@
 
 	# DocPerm
 	{
-		'amend': 1,
-		'cancel': 1,
-		'create': 1,
 		'doctype': 'DocPerm',
 		'idx': 5,
-		'permlevel': 0,
-		'role': 'Sales Manager',
-		'submit': 1,
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'doctype': 'DocPerm',
-		'idx': 6,
 		'permlevel': 1,
 		'role': 'All'
 	},
@@ -131,9 +128,21 @@
 	# DocPerm
 	{
 		'doctype': 'DocPerm',
-		'idx': 7,
+		'idx': 6,
 		'permlevel': 2,
 		'role': 'All'
+	},
+
+	# DocFormat
+	{
+		'doctype': 'DocFormat',
+		'idx': 1
+	},
+
+	# DocFormat
+	{
+		'doctype': 'DocFormat',
+		'idx': 2
 	},
 
 	# DocField
@@ -1471,5 +1480,18 @@
 		'options': 'repair_delivery_note',
 		'permlevel': 0,
 		'print_hide': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'print_packing_slip',
+		'fieldtype': 'Text',
+		'hidden': 1,
+		'idx': 95,
+		'in_filter': 0,
+		'label': 'Print Packing Slip',
+		'permlevel': 0,
+		'print_hide': 0
 	}
 ]
