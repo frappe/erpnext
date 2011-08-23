@@ -1,7 +1,7 @@
 # REMEMBER to update this
 # ========================
 
-last_patch = 340
+last_patch = 341
 
 #-------------------------------------------
 
@@ -1409,3 +1409,15 @@ def execute(patch_no):
 		reload_doc('production','doctype','bill_of_materials')
 	elif patch_no == 340:
 		sql("update `tabDocField` set permlevel = 0 where (fieldname in ('process', 'production_order', 'fg_completed_qty') or label = 'Get Items') and parent = 'Stock Entry'")
+	elif patch_no == 341:
+		reload_doc('stock','doctype','delivery_note')
+		reload_doc('stock','doc_type','item')
+		reload_doc('selling','doc_type','quotation')
+		reload_doc('stock','Print Format','Delivery Note Packing List Wise')
+
+		if not sql("select format from `tabDocFormat` where name = 'Delivery Note Packing List Wise' and parent = 'Delivery Note'"):
+			from webnotes.model.doc import addchild
+			dt_obj = get_obj('DocType', 'Delivery Note', with_children = 1)
+			ch = addchild(dt_obj.doc, 'formats', 'DocFormat', 1)
+			ch.format = 'Delivery Note Packing List Wise'
+			ch.save(1)

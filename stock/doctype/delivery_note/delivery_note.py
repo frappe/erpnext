@@ -174,6 +174,9 @@ class DocType(TransactionBase):
     self.doc.in_words = sales_com_obj.get_total_in_words(dcc, self.doc.rounded_total)
     self.doc.in_words_export = sales_com_obj.get_total_in_words(self.doc.currency, self.doc.rounded_total_export)
 
+    # ::::::: Set Net Weight of each Packing
+    self.update_pack_nett_weight()
+    self.print_packing_slip()
     # ::::::: Set actual qty for each item in selected warehouse :::::::
     self.update_current_stock()
     # :::::: set DN status :::::::
@@ -181,7 +184,6 @@ class DocType(TransactionBase):
     self.doc.status = 'Draft'
     if not self.doc.billing_status: self.doc.billing_status = 'Not Billed'
     if not self.doc.installation_status: self.doc.installation_status = 'Not Installed'
-
 
   # ************** Validate Mandatory *************************
   def validate_mandatory(self):
@@ -439,4 +441,41 @@ class DocType(TransactionBase):
 
   # Packing Slip Related
   # ==========================================
-  #def get
+  def update_pack_nett_weight(self):
+      for d in getlist(self.doclist, 'delivery_note_details'):
+        if d.item_name:
+          item_wt = sql("select nett_weight from `tabItem` where item_name = '%s'" % (d.item_name))
+          d.pack_nett_wt = item_wt and flt(item_wt[0][0])*flt(d.qty) or 0
+
+  # ==========================================
+  def print_packing_slip(self):
+    prev_pack='0'
+    sno=0
+    html=''
+    tot_nett_wt,tot_gross_wt=0,0
+    for d in getlist(self.doclist, 'delivery_note_details'):
+      sno=sno+1
+      if sno!=1:#Footer goes here
+        html+='</table><table width="100%"><tr><td>CASE NO</td><td>'+cstr(d.pack_no)+'</td><td>NETT WT</td><td>'+cstr(tot_nett_wt)+'</td><td>CHECKED BY</td><td></td></tr><tr><td>SIZE</td><td></td><td>GROSS WT</td><td>'+cstr(tot_gross_wt)+'</td><td>PACKED BY</td><td></td></tr></table>'
+      if prev_pack!=d.pack_no: #Prepare Header Here
+        #Header code goes here
+        html+='<div align="center">[HEADER GOES HERE]</div><div><center><h2>Packing Slip</h2></center></div> <table width="100%"><tr><td>Order No.</td><td>'+cstr(self.doc.sales_order_no)+'</td><td>Shipping Marks</td><td>'+cstr(d.pack_no)+'</td></tr></table>'
+        html+='<table class="cust_tbl" style="page-break-after:always" width="100%"><tr><td>S.NO.</td><td>QUANTITY</td><td>CS.NO.</td><td>DESCRIPTION</td><td>WEIGHT</td><tr>'
+        sno=0
+        tot_nett_wt,to_gross_wt=flt(d.pack_nett_wt),flt(d.pack_gross_wt)
+      #Body code goes here
+      html+='<tr><td>'+cstr(sno+1)+'</td><td>'+cstr(d.qty)+'</td><td></td><td>'+d.item_code+'</td><td>'+cstr(d.pack_nett_wt)+'</td></tr>'
+      prev_pack=d.pack_no
+      tot_nett_wt+=flt(d.pack_nett_wt)
+      tot_gross_wt+=flt(d.pack_gross_wt)
+    html+='</html>'
+    self.doc.print_packing_slip=html
+
+
+
+
+
+
+
+
+
