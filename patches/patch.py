@@ -1422,4 +1422,4 @@ def execute(patch_no):
 			ch.format = 'Delivery Note Packing List Wise'
 			ch.save(1)
 	elif patch_no == 342:
-		sql("update `tabDocField` set permlevel = 0 where parent = 'Stock Entry' and fieldname in ('s_warehouse', 't_warehouse', 'fg_item')")
+		sql("update `tabDocField` set permlevel = 0 where parent = 'Stock Entry Detail' and fieldname in ('s_warehouse', 't_warehouse', 'fg_item')")
