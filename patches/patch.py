@@ -1,7 +1,7 @@
 # REMEMBER to update this
 # ========================
 
-last_patch = 341
+last_patch = 342
 
 #-------------------------------------------
 
@@ -1421,3 +1421,5 @@ def execute(patch_no):
 			ch = addchild(dt_obj.doc, 'formats', 'DocFormat', 1)
 			ch.format = 'Delivery Note Packing List Wise'
 			ch.save(1)
+	elif patch_no == 342:
+		sql("update `tabDocField` set permlevel = 0 where parent = 'Stock Entry' and fieldname in ('s_warehouse', 't_warehouse', 'fg_item')")
