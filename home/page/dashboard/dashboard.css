@@ -1,0 +1,12 @@
+div.dashboard_table td {
+	width: 50%;
+}
+
+div.dashboard-title {
+	font-weight: bold;
+	padding: '3px 0px';
+}
+
+div.dashboard-graph {
+	height: 180px;
+}
