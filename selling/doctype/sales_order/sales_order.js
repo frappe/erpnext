@@ -28,7 +28,7 @@ cur_frm.cscript.onload_post_render = function(doc, cdt, cdn) {
     if(doc.quotation) cur_frm.cscript['Pull Quotation Details'](doc,cdt,cdn);
   } else {
 	cur_frm.cscript.load_taxes(doc, cdt, cdn);
-  } 
+  }
 }
 
 // Refresh
@@ -70,7 +70,7 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
   } else {
   	hide_field(['Repair Sales Order', 'Send SMS', 'message', 'customer_mobile_no'])
   }
-
+  pscript.apply_feature_settings();
 }
 
 //customer
