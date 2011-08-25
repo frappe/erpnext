@@ -48,10 +48,9 @@ function startup_setup() {
 		if(r.message){
 			login_file = 'http://' + r.message;
 		}
-		else {
-			
+		else if(pscript.is_erpnext_saas) {
 			login_file = 'http://www.erpnext.com';
-			}
+		}
 		// setup toolbar
 		pscript.startup_setup_toolbar();
 	}
@@ -539,3 +538,5 @@ pscript.set_user_fullname = function(ele,username,get_latest){
 
 // ====================================================================
 startup_setup();
+
+$(document).bind('form_refresh', function() { })
