@@ -156,7 +156,7 @@ class DashboardWidget:
 			and t1.posting_date between %s and %s
 		""", (debit_or_credit, start, end))[0]
 		
-		return debit_or_credit=='Credit' and (ret[1]-ret[0]) or (ret[0]-ret[1])
+		return debit_or_credit=='Credit' and float(ret[1]-ret[0]) or float(ret[0]-ret[1])
 
 	def value(self, opts, start, end):
 		"""
