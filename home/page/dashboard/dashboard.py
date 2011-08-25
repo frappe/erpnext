@@ -136,7 +136,7 @@ class DashboardWidget:
 			select count(*) from `tab%s` where creation between %s and %s and docstatus=1
 		""" % (doctype, '%s','%s'), (start, end))[0][0])
 
-	def get_account_amt(self, acc, start, end):
+	def get_account_amt(self, acc, start, end, debit_or_credit):
 		"""
 			Get debit, credit over a period
 		"""
@@ -154,9 +154,9 @@ class DashboardWidget:
 			and t2.debit_or_credit=%s
 			and ifnull(t1.is_cancelled, 'No')='No'
 			and t1.posting_date between %s and %s
-		""", (acc=='Income' and 'Credit' or 'Debit', start, end))[0]
+		""", (debit_or_credit, start, end))[0]
 		
-		return acc=='Income' and (ret[1]-ret[0]) or (ret[0]-ret[1])
+		return debit_or_credit=='Credit' and (ret[1]-ret[0]) or (ret[0]-ret[1])
 
 	def value(self, opts, start, end):
 		"""
@@ -164,7 +164,11 @@ class DashboardWidget:
 		"""
 		import webnotes
 		if opts['type']=='account':
-			bal = self.get_account_amt(opts['account'], start, end)
+			debit_or_credit = 'Debit'
+			if opts['account']=='Income':
+				debit_or_credit = 'Credit'
+
+			return self.get_account_amt(opts['account'], start, end, debit_or_credit)
 		
 		elif opts['type']=='from_company':
 			acc = webnotes.conn.get_value('Company', self.company, \
@@ -174,9 +178,9 @@ class DashboardWidget:
 						
 		elif opts['type']=='cash':
 			if opts['debit_or_credit']=='Credit':
-				return sum([self.get_account_balance(acc, start)[1] for acc in self.cash_accounts]) or 0
+				return sum([self.get_account_amt(acc, start, end, opts['debit_or_credit']) for acc in self.cash_accounts]) or 0
 			elif opts['debit_or_credit']=='Debit':
-				return sum([self.get_account_balance(acc, start)[0] for acc in self.cash_accounts]) or 0
+				return sum([self.get_account_amt(acc, start, end, opts['debit_or_credit']) for acc in self.cash_accounts]) or 0
 			
 		elif opts['type']=='creation':
 			return self.get_creation_trend(opts['doctype'], start, end)
