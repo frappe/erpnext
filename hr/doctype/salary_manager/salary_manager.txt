@@ -5,14 +5,14 @@
 	{
 		'creation': '2011-08-11 16:40:04',
 		'docstatus': 0,
-		'modified': '2011-08-12 14:08:33',
+		'modified': '2011-08-25 12:02:57',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1313129645',
+		'_last_update': '1314179318',
 		'allow_copy': 1,
 		'allow_email': 1,
 		'allow_print': 1,
@@ -24,7 +24,7 @@
 		'name': '__common__',
 		'section_style': 'Simple',
 		'show_in_menu': 1,
-		'version': 15
+		'version': 29
 	},
 
 	# These values are common for all DocField
@@ -79,9 +79,26 @@
 
 	# DocField
 	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldtype': 'HTML',
+		'idx': 1,
+		'label': 'Document Description',
+		'options': '<div class="field_description">You can generate multiple salary slips based on the selected criteria, submit and mail those to the employee directly from here</div>'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Section Break',
+		'idx': 2
+	},
+
+	# DocField
+	{
 		'doctype': 'DocField',
 		'fieldtype': 'Column Break',
-		'idx': 1,
+		'idx': 3,
 		'width': '50%'
 	},
 
@@ -90,9 +107,10 @@
 		'doctype': 'DocField',
 		'fieldname': 'company',
 		'fieldtype': 'Select',
-		'idx': 2,
+		'idx': 4,
 		'label': 'Company',
-		'options': 'link:Company'
+		'options': 'link:Company',
+		'reqd': 1
 	},
 
 	# DocField
@@ -100,7 +118,7 @@
 		'doctype': 'DocField',
 		'fieldname': 'branch',
 		'fieldtype': 'Link',
-		'idx': 3,
+		'idx': 5,
 		'label': 'Branch',
 		'options': 'Branch'
 	},
@@ -110,7 +128,7 @@
 		'doctype': 'DocField',
 		'fieldname': 'department',
 		'fieldtype': 'Link',
-		'idx': 4,
+		'idx': 6,
 		'label': 'Department',
 		'options': 'Department'
 	},
@@ -120,7 +138,7 @@
 		'doctype': 'DocField',
 		'fieldname': 'designation',
 		'fieldtype': 'Link',
-		'idx': 5,
+		'idx': 7,
 		'label': 'Designation',
 		'options': 'Designation'
 	},
@@ -129,7 +147,7 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Column Break',
-		'idx': 6,
+		'idx': 8,
 		'width': '50%'
 	},
 
@@ -138,7 +156,7 @@
 		'doctype': 'DocField',
 		'fieldname': 'grade',
 		'fieldtype': 'Select',
-		'idx': 7,
+		'idx': 9,
 		'label': 'Grade',
 		'options': 'link:Grade'
 	},
@@ -148,7 +166,7 @@
 		'doctype': 'DocField',
 		'fieldname': 'employment_type',
 		'fieldtype': 'Select',
-		'idx': 8,
+		'idx': 10,
 		'label': 'Employment Type',
 		'options': 'link:Employment Type'
 	},
@@ -159,7 +177,7 @@
 		'doctype': 'DocField',
 		'fieldname': 'fiscal_year',
 		'fieldtype': 'Select',
-		'idx': 9,
+		'idx': 11,
 		'label': 'Fiscal Year',
 		'options': 'link:Fiscal Year',
 		'reqd': 1
@@ -171,7 +189,7 @@
 		'doctype': 'DocField',
 		'fieldname': 'month',
 		'fieldtype': 'Select',
-		'idx': 10,
+		'idx': 12,
 		'label': 'Month',
 		'options': '\n01\n02\n03\n04\n05\n06\n07\n08\n09\n10\n11\n12',
 		'reqd': 1
@@ -184,7 +202,7 @@
 		'doctype': 'DocField',
 		'fieldname': 'send_email',
 		'fieldtype': 'Check',
-		'idx': 11,
+		'idx': 13,
 		'label': 'Send Email'
 	},
 
@@ -192,14 +210,14 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Section Break',
-		'idx': 12
+		'idx': 14
 	},
 
 	# DocField
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Column Break',
-		'idx': 13,
+		'idx': 15,
 		'width': '50%'
 	},
 
@@ -209,28 +227,9 @@
 		'description': 'Creates salary slip for above mentioned criteria.',
 		'doctype': 'DocField',
 		'fieldtype': 'Button',
-		'idx': 14,
-		'label': 'Create Salary Slip',
-		'options': 'create_sal_slip'
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldtype': 'Column Break',
-		'idx': 15,
-		'width': '25%'
-	},
-
-	# DocField
-	{
-		'colour': 'White:FFF',
-		'description': 'Submit all salary slips for the particular year and month',
-		'doctype': 'DocField',
-		'fieldtype': 'Button',
 		'idx': 16,
-		'label': 'Submit Salary Slip',
-		'options': 'submit_salary_slip'
+		'label': 'Create Salary Slip',
+		'trigger': 'Client'
 	},
 
 	# DocField
@@ -244,11 +243,45 @@
 	# DocField
 	{
 		'colour': 'White:FFF',
-		'description': 'Create Bank Voucher for the total salary paid in the particular month and year',
+		'description': 'Submit all salary slips for the above selected criteria',
 		'doctype': 'DocField',
 		'fieldtype': 'Button',
 		'idx': 18,
+		'label': 'Submit Salary Slip',
+		'trigger': 'Client'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Column Break',
+		'idx': 19,
+		'width': '25%'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'description': 'Create Bank Voucher for the total salary paid for the above selected criteria',
+		'doctype': 'DocField',
+		'fieldtype': 'Button',
+		'idx': 20,
 		'label': 'Make Bank Voucher',
-		'options': 'make_bank_voucher'
+		'trigger': 'Client'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Section Break',
+		'idx': 21
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'HTML',
+		'idx': 22,
+		'label': 'Activity Log'
 	}
 ]

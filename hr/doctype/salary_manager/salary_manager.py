@@ -64,7 +64,14 @@ class DocType:
 			Creates salary slip for selected employees if already not created
 		
 		"""
+		
 		emp_list = self.get_emp_list()
+		log = ""
+		if emp_list:
+			log = "<table><tr><td>Following Salary Slip has been created: </td></tr><tr><td><u>SAL SLIP ID</u></td><td><u>EMPLOYEE NAME</u></td></tr>"
+		else:
+			log = "<table><tr><td>No employee found for the above selected criteria</td></tr>"
+			
 		for emp in emp_list:
 			if not sql("""select name from `tabSalary Slip` 
 					where docstatus!= 2 and employee = %s and month = %s and fiscal_year = %s and company = %s
@@ -87,7 +94,10 @@ class DocType:
 					d.save()
 				for d in getlist(ss_obj.doclist, 'deduction_details'):
 					d.save()
-				
+					
+				log += '<tr><td>' + ss.name + '</td><td>' + ss_obj.doc.employee_name + '</td></tr>'
+		log += '</table>'
+		return log	
 				
 	def get_sal_slip_list(self):
 		"""
@@ -107,10 +117,20 @@ class DocType:
 			Submit all salary slips based on selected criteria
 		"""
 		ss_list = self.get_sal_slip_list()
+		log = ""
+		if ss_list:
+			log = "<table><tr><td>Following Salary Slip has been submitted: </td></tr><tr><td><u>SAL SLIP ID</u></td><td><u>EMPLOYEE NAME</u></td></tr>"
+		else:
+			log = "<table><tr><td>No salary slip found to submit for the above selected criteria</td></tr>"
+			
 		for ss in ss_list:
 			ss_obj = get_obj("Salary Slip",ss[0],with_children=1)
 			set(ss_obj.doc, 'docstatus', 1)
 			ss_obj.on_submit()
+			
+			log += '<tr><td>' + ss[0] + '</td><td>' + ss_obj.doc.employee_name + '</td></tr>'
+		log += '</table>'	
+		return log	
 			
 			
 	def get_total_salary(self):
@@ -133,8 +153,8 @@ class DocType:
 		amt = self.get_total_salary()
 		com = sql("select default_bank_account,default_salary_acount from `tabCompany` where name = '%s'" % self.doc.company)
 		
-		#if not com[0][0] or not com[0][1]:
-			#msgprint("You can set Default Salary Head and Default Bank Account in Setup --> Global Defaults.")
+		if not com[0][0] or not com[0][1]:
+			msgprint("You can set Default Salary Head and Default Bank Account in Setup --> Global Defaults.")
 
 		ret = {
 			'def_bank_acc' : com and com[0][0] or '',
