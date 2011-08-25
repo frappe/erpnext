@@ -6,7 +6,7 @@
 		'creation': '2010-08-08 17:09:34',
 		'docstatus': 0,
 		'modified': '2011-05-18 13:37:43',
-		'modified_by': 'Administrator',
+		'modified_by': 'umair@iwebnotes.com',
 		'owner': 'ashwini@webnotestech.com'
 	},
 
@@ -53,7 +53,6 @@
 		'checking_operator': '=',
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'customer',
-		'idx': 1,
 		'match_id': 0,
 		'to_field': 'customer'
 	},
@@ -61,107 +60,7 @@
 	# Field Mapper Detail
 	{
 		'doctype': 'Field Mapper Detail',
-		'from_field': 'customer_address',
-		'idx': 2,
-		'match_id': 0,
-		'to_field': 'customer_address'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'contact_person',
-		'idx': 3,
-		'match_id': 0,
-		'to_field': 'contact_person'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'customer_name',
-		'idx': 4,
-		'match_id': 0,
-		'to_field': 'customer_name'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'address_display',
-		'idx': 5,
-		'match_id': 0,
-		'to_field': 'address_display'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'contact_display',
-		'idx': 6,
-		'match_id': 0,
-		'to_field': 'contact_display'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'contact_mobile',
-		'idx': 7,
-		'match_id': 0,
-		'to_field': 'contact_mobile'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'contact_email',
-		'idx': 8,
-		'match_id': 0,
-		'to_field': 'contact_email'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'territory',
-		'idx': 9,
-		'match_id': 0,
-		'to_field': 'territory'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'customer_group',
-		'idx': 10,
-		'match_id': 0,
-		'to_field': 'customer_group'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'company',
-		'idx': 11,
-		'match_id': 0,
-		'to_field': 'company'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'fiscal_year',
-		'idx': 12,
-		'match_id': 0,
-		'to_field': 'fiscal_year'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
 		'from_field': 'name',
-		'idx': 13,
 		'match_id': 0,
 		'to_field': 'customer_issue_no'
 	},
@@ -171,7 +70,6 @@
 		'checking_operator': '=',
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'complaint',
-		'idx': 14,
 		'match_id': 1,
 		'to_field': 'description'
 	},
@@ -179,26 +77,7 @@
 	# Field Mapper Detail
 	{
 		'doctype': 'Field Mapper Detail',
-		'from_field': 'item_code',
-		'idx': 15,
-		'match_id': 1,
-		'to_field': 'item_code'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'item_name',
-		'idx': 16,
-		'match_id': 1,
-		'to_field': 'item_name'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
 		'from_field': 'doctype',
-		'idx': 17,
 		'match_id': 1,
 		'to_field': 'prevdoc_doctype'
 	},
@@ -207,7 +86,6 @@
 	{
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'name',
-		'idx': 18,
 		'match_id': 1,
 		'to_field': 'prevdoc_docname'
 	},
@@ -215,7 +93,6 @@
 	# Table Mapper Detail
 	{
 		'doctype': 'Table Mapper Detail',
-		'idx': 1,
 		'match_id': 1,
 		'reference_doctype_key': 'prevdoc_doctype',
 		'to_field': 'maintenance_visit_details',
@@ -225,7 +102,6 @@
 	# Table Mapper Detail
 	{
 		'doctype': 'Table Mapper Detail',
-		'idx': 2,
 		'match_id': 0,
 		'to_table': 'Maintenance Visit'
 	}

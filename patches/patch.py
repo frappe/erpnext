@@ -1,7 +1,7 @@
 # REMEMBER to update this
 # ========================
 
-last_patch = 346
+last_patch = 347
 #-------------------------------------------
 
 def execute(patch_no):
@@ -256,5 +256,5 @@ def execute(patch_no):
 	elif patch_no == 346:
 		delete_doc('DocType', 'Profile')
 		reload_doc('core', 'doctype', 'profile')
-		
-		
+	elif patch_no == 347:
+		sql("delete from `tabField Mapper Detail` where from_field = to_field and map = 'Yes' and ifnull(checking_operator, '') = ''")
