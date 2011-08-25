@@ -68,9 +68,9 @@ class DocType:
 		emp_list = self.get_emp_list()
 		log = ""
 		if emp_list:
-			log = "<table><tr><td>Following Salary Slip has been created: </td></tr><tr><td><u>SAL SLIP ID</u></td><td><u>EMPLOYEE NAME</u></td></tr>"
+			log = "<table><tr><td colspan = 2>Following Salary Slip has been created: </td></tr><tr><td><u>SAL SLIP ID</u></td><td><u>EMPLOYEE NAME</u></td></tr>"
 		else:
-			log = "<table><tr><td>No employee found for the above selected criteria</td></tr>"
+			log = "<table><tr><td colspan = 2>No employee found for the above selected criteria</td></tr>"
 			
 		for emp in emp_list:
 			if not sql("""select name from `tabSalary Slip` 
@@ -119,9 +119,17 @@ class DocType:
 		ss_list = self.get_sal_slip_list()
 		log = ""
 		if ss_list:
-			log = "<table><tr><td>Following Salary Slip has been submitted: </td></tr><tr><td><u>SAL SLIP ID</u></td><td><u>EMPLOYEE NAME</u></td></tr>"
+			log = 	"""<table>
+						<tr>
+							<td colspan = 2>Following Salary Slip has been submitted: </td>
+						</tr>
+						<tr>
+							<td><u>SAL SLIP ID</u></td>
+							<td><u>EMPLOYEE NAME</u></td>
+						</tr>
+					"""
 		else:
-			log = "<table><tr><td>No salary slip found to submit for the above selected criteria</td></tr>"
+			log = "<table><tr><td colspan = 2>No salary slip found to submit for the above selected criteria</td></tr>"
 			
 		for ss in ss_list:
 			ss_obj = get_obj("Salary Slip",ss[0],with_children=1)
