@@ -57,7 +57,7 @@ class TestSalarySlip(unittest.TestCase):
 		self.assertTrue(ss[0][0]==67)
 
 	def test_submit(self):
-		self.sm.submit_sal_slip()
+		self.sm.submit_salary_slip()
 		ss = webnotes.conn.sql("""
 			select docstatus 
 			from `tabSalary Slip` 
@@ -112,7 +112,8 @@ emp1 = Document(fielddata={
 	'grade':'grade1',
 	'naming_series':'EMP/',
 	'status':'Active',
-	'docstatus':0
+	'docstatus':0,
+	'employee_name':'emp1'
 })
 
 emp2 = Document(fielddata={
@@ -135,7 +136,8 @@ ss1 = [
 		'employee':'emp1',
 		'is_active':'Yes',
 		'department': 'dep1',
-		'designation' : 'des1'
+		'designation' : 'des1',
+		'employee_name': 'emp1'
 	}),
 	Document(fielddata={
 		'parenttype':'Salary Structure',
