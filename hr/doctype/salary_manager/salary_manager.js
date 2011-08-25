@@ -46,10 +46,10 @@ cur_frm.cscript.make_jv = function(doc, dt, dn) {
 		var jv = LocalDB.create('Journal Voucher');
 		jv = locals['Journal Voucher'][jv];
 		jv.voucher_type = 'Bank Voucher';
-		jv.remark = 'Payment of salary for month: ' + doc.month + 'and fiscal year: ' + doc.fiscal_year;
+		jv.user_remark = 'Payment of salary for the month: ' + doc.month + 'and fiscal year: ' + doc.fiscal_year;
 		jv.fiscal_year = doc.fiscal_year;
 		jv.company = doc.company;
-		jv.posting_date = new Date();
+		jv.posting_date = dateutil.obj_to_str(new Date());
 
 		// credit to bank
 		var d1 = LocalDB.add_child(jv, 'Journal Voucher Detail', 'entries');
@@ -60,7 +60,7 @@ cur_frm.cscript.make_jv = function(doc, dt, dn) {
 		var d2 = LocalDB.add_child(jv, 'Journal Voucher Detail', 'entries');
 		d2.account = r.message['default_salary_account'];
 		d2.debit = r.message['amount']
-		
+
 		loaddoc('Journal Voucher', jv.name);
 	}
 	$c_obj(make_doclist(dt,dn),'get_acc_details','',call_back);

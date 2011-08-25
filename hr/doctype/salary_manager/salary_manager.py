@@ -140,10 +140,10 @@ class DocType:
 		cond = self.get_filter_condition()
 		tot = sql("""
 			select sum(rounded_total) from `tabSalary Slip` t1 
-			where t1.docstatus = 0 and month = '%s' and fiscal_year = '%s' %s
+			where t1.docstatus = 1 and month = '%s' and fiscal_year = '%s' %s
 		""" % (self.doc.month, self.doc.fiscal_year, cond))
 		
-		return flt(tot)
+		return flt(tot[0][0])
 		
 		
 	def get_acc_details(self):
@@ -151,10 +151,10 @@ class DocType:
 			get default bank account,default salary acount from company
 		"""
 		amt = self.get_total_salary()
-		com = sql("select default_bank_account,default_salary_acount from `tabCompany` where name = '%s'" % self.doc.company)
+		com = sql("select default_bank_account from `tabCompany` where name = '%s'" % self.doc.company)
 		
 		if not com[0][0] or not com[0][1]:
-			msgprint("You can set Default Salary Head and Default Bank Account in Setup --> Global Defaults.")
+			msgprint("You can set Default Bank Account in Company master.")
 
 		ret = {
 			'def_bank_acc' : com and com[0][0] or '',
