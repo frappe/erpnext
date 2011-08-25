@@ -14,7 +14,7 @@ def execute(patch_no):
 	from webnotes.model.doc import Document
 	from webnotes.model import delete_doc
 
-	elif patch_no == 301:
+	if patch_no == 301:
 		from patches.delivery_billing_status_patch import run_patch
 		run_patch()
 	elif patch_no == 302:

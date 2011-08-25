@@ -538,3 +538,5 @@ pscript.set_user_fullname = function(ele,username,get_latest){
 
 // ====================================================================
 startup_setup();
+
+$(document).bind('form_refresh', function() { })
