@@ -1,7 +1,7 @@
 # REMEMBER to update this
 # ========================
 
-last_patch = 343
+last_patch = 344
 
 #-------------------------------------------
 
@@ -1425,3 +1425,6 @@ def execute(patch_no):
 		sql("update `tabDocField` set permlevel = 0 where parent = 'Stock Entry Detail' and fieldname in ('s_warehouse', 't_warehouse', 'fg_item')")
 	elif patch_no == 343:
 		reload_doc('stock','doctype','item_customer_detail')
+	elif patch_no == 344:
+		sql("delete from `tabModule Def Item` where display_name = 'Salary Slip Control Panel' and parent = 'HR'")
+		reload_doc('hr','Module Def','HR')

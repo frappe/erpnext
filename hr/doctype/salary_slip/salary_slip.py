@@ -68,7 +68,7 @@ class DocType(TransactionBase):
 	# Get leave details
 	#=======================================================
 	def get_leave_details(self):
-		m = self.get_month_details()		
+		m = self.get_month_details()
 		lwp = self.calculate_lwp(m)
 		self.doc.total_days_in_month = m[3]
 		self.doc.leave_without_pay = lwp
@@ -129,12 +129,45 @@ class DocType(TransactionBase):
 		self.check_existing()
 		dcc = TransactionBase().get_company_currency(self.doc.company)
 		self.doc.total_in_words	= get_obj('Sales Common').get_total_in_words(dcc, self.doc.rounded_total)
+
+
+	def calculate_earning_total(self):
+		"""
+			Calculates total earnings considering lwp
+		"""
+		self.doc.gross_pay = flt(self.doc.arrear_amount) + flt(self.doc.leave_encashment_amount)
+		for d in getlist(self.doclist, 'earning_details'):
+			if cint(d.e_depends_on_lwp) == 1:
+				d.e_modified_amount = round(flt(d.e_amount)*flt(self.doc.payment_days)/cint(self.doc.total_days_in_month), 2)
+			self.doc.gross_pay += d.e_modified_amount
+	
+	def calculate_ded_total(self):
+		"""
+			Calculates total deduction considering lwp
+		"""
+		self.doc.total_deduction = 0
+		for d in getlist(self.doclist, 'deduction_details'):
+			if cint(d.d_depends_on_lwp) == 1:
+				d.d_modified_amount = round(flt(d.d_amount)*flt(self.doc.payment_days)/cint(self.doc.total_days_in_month), 2)
+			self.doc.total_deduction += d.d_modified_amount
+				
+	def calculate_net_pay(self):
+		"""
+			Calculate net payment
+		"""
+		self.calculate_earning_total()
+		self.calculate_ded_total()
+		self.doc.net_pay = flt(self.doc.gross_pay) - flt(self.doc.total_deduction)
+		self.doc.rounded_total = round(self.doc.net_pay)
 		
 	# ON SUBMIT
 	#=======================================================
 	def on_submit(self):
 		if(self.doc.email_check == 1):			
 			self.send_mail_funct()
+			
+	
+
 
 	# Send mail
 	#=======================================================
@@ -148,8 +181,7 @@ class DocType(TransactionBase):
 		 
 			earn_table = ''
 			ded_table = ''
-			if earn_ret:
-			
+			if earn_ret:			
 				earn_table += "<table cellspacing= '5' cellpadding='5' >"
 				
 				for e in earn_ret:
