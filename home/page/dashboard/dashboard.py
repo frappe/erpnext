@@ -173,9 +173,9 @@ class DashboardWidget:
 			return self.get_account_balance(acc, start)[2]
 						
 		elif opts['type']=='cash':
-			if type=='Credit':
+			if opts['debit_or_credit']=='Credit':
 				return sum([self.get_account_balance(acc, start)[1] for acc in self.cash_accounts]) or 0
-			if type=='Debit':
+			elif opts['debit_or_credit']=='Debit':
 				return sum([self.get_account_balance(acc, start)[0] for acc in self.cash_accounts]) or 0
 			
 		elif opts['type']=='creation':
