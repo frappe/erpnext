@@ -59,7 +59,7 @@ class DocType(TransactionBase):
 	# ------------------------
 	# make stock ledger entry
 	# ------------------------
-	def make_stock_ledger_entry(self, update_stock):
+	def make_stock_ledger_entry(self, qty):
 		from webnotes.model.code import get_obj
 		values = [{
 			'item_code'				: self.doc.item_code,
@@ -70,12 +70,12 @@ class DocType(TransactionBase):
 			'voucher_type'			: 'Serial No',
 			'voucher_no'			: self.doc.name,
 			'voucher_detail_no'	 	: '', 
-			'actual_qty'			: 1, 
+			'actual_qty'			: qty, 
 			'stock_uom'				: webnotes.conn.get_value('Item', self.doc.item_code, 'stock_uom'),
 			'incoming_rate'			: self.doc.purchase_rate,
 			'company'				: self.doc.company,
 			'fiscal_year'			: self.doc.fiscal_year,
-			'is_cancelled'			: update_stock and 'No' or 'Yes',
+			'is_cancelled'			: 'No',
 			'batch_no'				: '',
 			'serial_no'				: self.doc.name
 		}]
@@ -87,7 +87,7 @@ class DocType(TransactionBase):
 	# ----------
 	def on_update(self):
 		if self.doc.localname and self.doc.warehouse and self.doc.status == 'In Store' and not sql("select name from `tabStock Ledger Entry` where serial_no = '%s' and ifnull(is_cancelled, 'No') = 'No'" % (self.doc.name)):
-			self.make_stock_ledger_entry(update_stock = 1)
+			self.make_stock_ledger_entry(1)
 
 
 	# ---------
@@ -98,7 +98,7 @@ class DocType(TransactionBase):
 			msgprint("Cannot trash Serial No : %s as it is already Delivered" % (self.doc.name), raise_exception = 1)
 		else:
 			webnotes.conn.set(self.doc, 'status', 'Not in Use')
-			self.make_stock_ledger_entry(update_stock = 0)
+			self.make_stock_ledger_entry(-1)
 
 
 	def on_cancel(self):
@@ -108,4 +108,4 @@ class DocType(TransactionBase):
 	# on restore
 	# -----------
 	def on_restore(self):
-		self.make_stock_ledger_entry(update_stock = 1)
+		self.make_stock_ledger_entry(1)
