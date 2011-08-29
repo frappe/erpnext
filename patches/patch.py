@@ -260,3 +260,12 @@ def execute(patch_no):
 		sql("delete from `tabField Mapper Detail` where from_field = to_field and map = 'Yes' and ifnull(checking_operator, '') = ''")
 	elif patch_no == 348:
 		sql("update `tabStock Ledger Entry` set is_cancelled = 'No' where voucher_type = 'Serial No'")
+	elif patch_no == 349:
+		delete_doc('Custom Script', 'Update Series-Server')
+		delete_doc('Custom Script', 'Profile-Client')
+		delete_doc('Custom Script', 'Event-Client')
+		delete_doc('Custom Script', 'File-Server')
+		
+		reload_doc('core', 'doctype', 'event')
+		reload_doc('setup', 'doctype', 'update_series')
+		reload_doc('core', 'doctype', 'file')
