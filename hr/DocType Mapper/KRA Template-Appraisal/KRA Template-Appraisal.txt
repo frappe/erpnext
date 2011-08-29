@@ -15,7 +15,6 @@
 		'doctype': 'Table Mapper Detail',
 		'from_field': 'kra_sheet',
 		'from_table': 'KRA Sheet',
-		'idx': 1,
 		'match_id': 0,
 		'name': '__common__',
 		'parent': 'KRA Template-Appraisal',
@@ -24,17 +23,6 @@
 		'to_field': 'appraisal_details',
 		'to_table': 'Appraisal Detail',
 		'validation_logic': 'name is not Null'
-	},
-
-	# These values are common for all Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'map': 'Yes',
-		'match_id': 0,
-		'name': '__common__',
-		'parent': 'KRA Template-Appraisal',
-		'parentfield': 'field_mapper_details',
-		'parenttype': 'DocType Mapper'
 	},
 
 	# These values are common for all DocType Mapper
@@ -50,22 +38,6 @@
 	{
 		'doctype': 'DocType Mapper',
 		'name': 'KRA Template-Appraisal'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'kra',
-		'idx': 1,
-		'to_field': 'kra'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'per_weightage',
-		'idx': 2,
-		'to_field': 'per_weightage'
 	},
 
 	# Table Mapper Detail
