@@ -49,7 +49,7 @@ function startup_setup() {
 			login_file = 'http://' + r.message;
 		}
 		else if(pscript.is_erpnext_saas) {
-			login_file = 'http://www.erpnext.com';
+			login_file = 'https://www.erpnext.com';
 		}
 		// setup toolbar
 		pscript.startup_setup_toolbar();
