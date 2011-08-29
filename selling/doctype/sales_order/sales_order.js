@@ -70,7 +70,6 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
   } else {
   	hide_field(['Repair Sales Order', 'Send SMS', 'message', 'customer_mobile_no'])
   }
-  pscript.apply_feature_settings();
 }
 
 //customer

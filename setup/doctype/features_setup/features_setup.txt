@@ -1,0 +1,152 @@
+# DocType, Features Setup
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2011-08-25 16:53:56',
+		'docstatus': 0,
+		'modified': '2011-08-29 13:16:51',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all DocType
+	{
+		'_last_update': '1314601410',
+		'colour': 'White:FFF',
+		'doctype': 'DocType',
+		'issingle': 1,
+		'module': 'Setup',
+		'name': '__common__',
+		'section_style': 'Simple',
+		'show_in_menu': 1,
+		'version': 6
+	},
+
+	# These values are common for all DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Check',
+		'name': '__common__',
+		'parent': 'Features Setup',
+		'parentfield': 'fields',
+		'parenttype': 'DocType',
+		'permlevel': 0
+	},
+
+	# These values are common for all DocPerm
+	{
+		'create': 1,
+		'doctype': 'DocPerm',
+		'name': '__common__',
+		'parent': 'Features Setup',
+		'parentfield': 'permissions',
+		'parenttype': 'DocType',
+		'permlevel': 0,
+		'read': 1,
+		'write': 1
+	},
+
+	# DocType, Features Setup
+	{
+		'doctype': 'DocType',
+		'name': 'Features Setup'
+	},
+
+	# DocPerm
+	{
+		'doctype': 'DocPerm',
+		'role': 'System Manager'
+	},
+
+	# DocPerm
+	{
+		'doctype': 'DocPerm',
+		'role': 'Administrator'
+	},
+
+	# DocField
+	{
+		'description': 'Available in \nBill Of Materials, Delivery Note, Payable Voucher, Production Order, Purchase Order, Purchase Receipt, Receivable Voucher, Sales Order, Stock Entry, Timesheet',
+		'doctype': 'DocField',
+		'fieldname': 'projects',
+		'label': 'Projects'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'description': 'Available in Delivery Note and Sales Order',
+		'doctype': 'DocField',
+		'fieldname': 'packing_details',
+		'label': 'Packing Detials'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'description': 'Available in Delivery Note, Quotation, Receivable Voucher, Sales Order',
+		'doctype': 'DocField',
+		'fieldname': 'discounts',
+		'label': 'Discounts'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'description': 'Availble in Delivery Note, Enuiry, Indent, Item, Purchase Order, Purchase Voucher, Purchaser Receipt, Quotation, Receivable Voucher, Sales BOM, Sales Order, Serial No',
+		'doctype': 'DocField',
+		'fieldname': 'brands',
+		'label': 'Brands'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'after_sale_installations',
+		'label': 'After Sale Installations'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'warehouses',
+		'label': 'Warehouses'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'item_batch_nos',
+		'label': 'Item Batch Nos'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'item_searial_nos',
+		'label': 'Item Serial Nos'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldname': 'page_break',
+		'label': 'Page Break'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'item_groups_in_groups',
+		'label': 'Item Groups in Details'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'ref_rates',
+		'label': 'Ref Rates'
+	}
+]
