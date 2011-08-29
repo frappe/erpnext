@@ -254,8 +254,7 @@ def execute(patch_no):
 		sql("delete from `tabModule Def Item` where display_name = 'Salary Slip Control Panel' and parent = 'HR'")
 		reload_doc('hr','Module Def','HR')
 	elif patch_no == 346:
-		delete_doc('DocType', 'Profile')
-		reload_doc('core', 'doctype', 'profile')
+		pass
 	elif patch_no == 347:
 		sql("delete from `tabField Mapper Detail` where from_field = to_field and map = 'Yes' and ifnull(checking_operator, '') = ''")
 	elif patch_no == 348:
@@ -265,7 +264,8 @@ def execute(patch_no):
 		delete_doc('Custom Script', 'Profile-Client')
 		delete_doc('Custom Script', 'Event-Client')
 		delete_doc('Custom Script', 'File-Server')
+	
+		# reload profile with new fields for security
+		delete_doc('DocType', 'Profile')
+		reload_doc('core', 'doctype', 'profile')
 		
-		reload_doc('core', 'doctype', 'event')
-		reload_doc('setup', 'doctype', 'update_series')
-		reload_doc('core', 'doctype', 'file')
