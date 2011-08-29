@@ -5,7 +5,7 @@
 	{
 		'creation': '2010-08-08 17:09:34',
 		'docstatus': 0,
-		'modified': '2011-06-15 14:42:33',
+		'modified': '2011-08-09 11:14:09',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
@@ -23,6 +23,7 @@
 	{
 		'doctype': 'Field Mapper Detail',
 		'map': 'Yes',
+		'match_id': 1,
 		'name': '__common__',
 		'parent': 'Delivery Note-Receivable Voucher',
 		'parentfield': 'field_mapper_details',
@@ -48,261 +49,14 @@
 	# Field Mapper Detail
 	{
 		'doctype': 'Field Mapper Detail',
-		'from_field': 'contact_person',
-		'idx': 1,
-		'match_id': 0,
-		'to_field': 'contact_person'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'customer',
-		'idx': 2,
-		'match_id': 0,
-		'to_field': 'customer'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'customer',
-		'idx': 3,
-		'match_id': 0,
-		'to_field': 'customer'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'customer_name',
-		'idx': 4,
-		'match_id': 0,
-		'to_field': 'customer_name'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'address_display',
-		'idx': 5,
-		'match_id': 0,
-		'to_field': 'address_display'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'contact_display',
-		'idx': 6,
-		'match_id': 0,
-		'to_field': 'contact_display'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'contact_mobile',
-		'idx': 7,
-		'match_id': 0,
-		'to_field': 'contact_mobile'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'contact_email',
-		'idx': 8,
-		'match_id': 0,
-		'to_field': 'contact_email'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'customer_group',
-		'idx': 9,
-		'match_id': 0,
-		'to_field': 'customer_group'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'currency',
-		'idx': 10,
-		'match_id': 0,
-		'to_field': 'currency'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'conversion_rate',
-		'idx': 11,
-		'match_id': 0,
-		'to_field': 'conversion_rate'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'company',
-		'idx': 12,
-		'match_id': 0,
-		'to_field': 'company'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'fiscal_year',
-		'idx': 13,
-		'match_id': 0,
-		'to_field': 'fiscal_year'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'price_list_name',
-		'idx': 14,
-		'match_id': 0,
-		'to_field': 'price_list_name'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'charge',
-		'idx': 15,
-		'match_id': 0,
-		'to_field': 'charge'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'item_code',
-		'idx': 16,
-		'match_id': 1,
-		'to_field': 'item_code'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'terms',
-		'idx': 17,
-		'match_id': 0,
-		'to_field': 'terms'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'item_name',
-		'idx': 18,
-		'match_id': 1,
-		'to_field': 'item_name'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'brand',
-		'idx': 19,
-		'match_id': 1,
-		'to_field': 'brand'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'description',
-		'idx': 20,
-		'match_id': 1,
-		'to_field': 'description'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'batch_no',
-		'idx': 21,
-		'match_id': 1,
-		'to_field': 'batch_no'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'serial_no',
-		'idx': 22,
-		'match_id': 1,
-		'to_field': 'serial_no'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'item_group',
-		'idx': 23,
-		'match_id': 1,
-		'to_field': 'item_group'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'eval: flt(obj.qty) - flt(obj.billed_qty)',
-		'idx': 24,
-		'match_id': 1,
+		'from_field': 'eval: (flt(obj.amount) - flt(obj.billed_amt)) / flt(obj.basic_rate)',
 		'to_field': 'qty'
 	},
 
 	# Field Mapper Detail
 	{
 		'doctype': 'Field Mapper Detail',
-		'from_field': 'export_rate',
-		'idx': 25,
-		'match_id': 1,
-		'to_field': 'export_rate'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'base_ref_rate',
-		'idx': 26,
-		'match_id': 1,
-		'to_field': 'base_ref_rate'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'ref_rate',
-		'idx': 27,
-		'match_id': 1,
-		'to_field': 'ref_rate'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'basic_rate',
-		'idx': 28,
-		'match_id': 1,
-		'to_field': 'basic_rate'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
 		'from_field': 'parent',
-		'idx': 29,
-		'match_id': 1,
 		'to_field': 'delivery_note'
 	},
 
@@ -310,8 +64,6 @@
 	{
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'name',
-		'idx': 30,
-		'match_id': 1,
 		'to_field': 'dn_detail'
 	},
 
@@ -319,8 +71,6 @@
 	{
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'prevdoc_docname',
-		'idx': 31,
-		'match_id': 1,
 		'to_field': 'sales_order'
 	},
 
@@ -328,286 +78,27 @@
 	{
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'prevdoc_detail_docname',
-		'idx': 32,
-		'match_id': 1,
 		'to_field': 'so_detail'
 	},
 
 	# Field Mapper Detail
 	{
 		'doctype': 'Field Mapper Detail',
-		'from_field': 'export_rate',
-		'idx': 33,
-		'match_id': 1,
-		'to_field': 'export_rate'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'stock_uom',
-		'idx': 34,
-		'match_id': 1,
-		'to_field': 'stock_uom'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'eval: (flt(obj.qty) - flt(obj.billed_qty)) * flt(obj.basic_rate)',
-		'idx': 35,
-		'match_id': 1,
+		'from_field': 'eval: flt(obj.amount) - flt(obj.billed_amt)',
 		'to_field': 'amount'
 	},
 
 	# Field Mapper Detail
 	{
 		'doctype': 'Field Mapper Detail',
-		'from_field': 'eval: (flt(obj.qty) - flt(obj.billed_qty)) * flt(obj.export_rate)',
-		'idx': 36,
-		'match_id': 1,
+		'from_field': 'eval: (flt(obj.amount) - flt(obj.billed_amt)) * flt(obj.export_rate)/flt(obj.basic_rate)',
 		'to_field': 'export_amount'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'adj_rate',
-		'idx': 37,
-		'match_id': 1,
-		'to_field': 'adj_rate'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'item_tax_rate',
-		'idx': 38,
-		'match_id': 1,
-		'to_field': 'item_tax_rate'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'charge_type',
-		'idx': 39,
-		'match_id': 2,
-		'to_field': 'charge_type'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'row_id',
-		'idx': 40,
-		'match_id': 2,
-		'to_field': 'row_id'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'item_wise_tax_detail',
-		'idx': 41,
-		'match_id': 2,
-		'to_field': 'item_wise_tax_detail'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'description',
-		'idx': 42,
-		'match_id': 2,
-		'to_field': 'description'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'account_head',
-		'idx': 43,
-		'match_id': 2,
-		'to_field': 'account_head'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'rate',
-		'idx': 44,
-		'match_id': 2,
-		'to_field': 'rate'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'tax_amount',
-		'idx': 45,
-		'match_id': 2,
-		'to_field': 'tax_amount'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'total',
-		'idx': 46,
-		'match_id': 2,
-		'to_field': 'total'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'sales_person',
-		'idx': 47,
-		'match_id': 3,
-		'to_field': 'sales_person'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'sales_designation',
-		'idx': 48,
-		'match_id': 3,
-		'to_field': 'sales_designation'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'allocated_percentage',
-		'idx': 49,
-		'match_id': 3,
-		'to_field': 'allocated_percentage'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'allocated_amount',
-		'idx': 50,
-		'match_id': 3,
-		'to_field': 'allocated_amount'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'incentives',
-		'idx': 51,
-		'match_id': 3,
-		'to_field': 'incentives'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'source',
-		'idx': 52,
-		'match_id': 0,
-		'to_field': 'source'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'campaign',
-		'idx': 53,
-		'match_id': 0,
-		'to_field': 'campaign'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'territory',
-		'idx': 54,
-		'match_id': 0,
-		'to_field': 'territory'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'sales_partner',
-		'idx': 55,
-		'match_id': 0,
-		'to_field': 'sales_partner'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'commission_rate',
-		'idx': 56,
-		'match_id': 0,
-		'to_field': 'commission_rate'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'total_commission',
-		'idx': 57,
-		'match_id': 0,
-		'to_field': 'total_commission'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'customer_address',
-		'idx': 58,
-		'match_id': 0,
-		'to_field': 'customer_address'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'net_total',
-		'idx': 59,
-		'match_id': 0,
-		'to_field': 'net_total'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'grand_total',
-		'idx': 60,
-		'match_id': 0,
-		'to_field': 'grand_total'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'project_name',
-		'idx': 61,
-		'match_id': 0,
-		'to_field': 'project_name'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'warehouse',
-		'idx': 62,
-		'match_id': 1,
-		'to_field': 'warehouse'
 	},
 
 	# Table Mapper Detail
 	{
 		'doctype': 'Table Mapper Detail',
 		'from_table': 'Delivery Note',
-		'idx': 1,
 		'match_id': 0,
 		'to_table': 'Receivable Voucher',
 		'validation_logic': 'docstatus=1'
@@ -618,11 +109,10 @@
 		'doctype': 'Table Mapper Detail',
 		'from_field': 'delivery_note_details',
 		'from_table': 'Delivery Note Detail',
-		'idx': 2,
 		'match_id': 1,
 		'to_field': 'entries',
 		'to_table': 'RV Detail',
-		'validation_logic': '(qty > ifnull(billed_qty, 0) or amount > ifnull(billed_amt, 0)) and docstatus = 1'
+		'validation_logic': 'amount > ifnull(billed_amt, 0) and docstatus = 1'
 	},
 
 	# Table Mapper Detail
@@ -630,7 +120,6 @@
 		'doctype': 'Table Mapper Detail',
 		'from_field': 'other_charges',
 		'from_table': 'RV Tax Detail',
-		'idx': 3,
 		'match_id': 2,
 		'to_field': 'other_charges',
 		'to_table': 'RV Tax Detail',
@@ -642,7 +131,6 @@
 		'doctype': 'Table Mapper Detail',
 		'from_field': 'sales_team',
 		'from_table': 'Sales Team',
-		'idx': 4,
 		'match_id': 3,
 		'to_field': 'sales_team',
 		'to_table': 'Sales Team',
