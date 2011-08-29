@@ -1,7 +1,7 @@
 # REMEMBER to update this
 # ========================
 
-last_patch = 347
+last_patch = 348
 #-------------------------------------------
 
 def execute(patch_no):
@@ -258,3 +258,5 @@ def execute(patch_no):
 		reload_doc('core', 'doctype', 'profile')
 	elif patch_no == 347:
 		sql("delete from `tabField Mapper Detail` where from_field = to_field and map = 'Yes' and ifnull(checking_operator, '') = ''")
+	elif patch_no == 348:
+		sql("update `tabStock Ledger Entry` set is_cancelled = 'No' where voucher_type = 'Serial No'")

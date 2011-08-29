@@ -75,7 +75,7 @@ class DocType(TransactionBase):
 			'incoming_rate'			: self.doc.purchase_rate,
 			'company'				: self.doc.company,
 			'fiscal_year'			: self.doc.fiscal_year,
-			'is_cancelled'			: 'No',
+			'is_cancelled'			: 'No', # is_cancelled is always 'No' because while deleted it can not find creation entry if it not created directly, voucher no != serial no.
 			'batch_no'				: '',
 			'serial_no'				: self.doc.name
 		}]
