@@ -66,7 +66,7 @@ class DocType:
       'carry_forwarded_leaves'  :  prev_bal,
       'total_leaves_allocated'   :  flt(prev_bal) + flt(self.doc.new_leaves_allocated)
     }
-    return str(ret)
+    return ret
 
 
 # ********************************************** validate *****************************************************
@@ -75,7 +75,7 @@ class DocType:
   # get total allocated leaves
   # ---------------------------
   def get_total_allocated_leaves(self):
-    leave_det = eval(self.get_carry_forwarded_leaves())
+    leave_det = self.get_carry_forwarded_leaves()
     set(self.doc,'carry_forwarded_leaves',flt(leave_det['carry_forwarded_leaves']))
     set(self.doc,'total_leaves_allocated',flt(leave_det['total_leaves_allocated']))
 

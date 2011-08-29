@@ -39,7 +39,7 @@ class DocType(TransactionBase):
 				'company_address': cstr(comp_det[0][0]),
 				'registration_details': cstr(comp_det[0][1])
 			}	 
-		return cstr(ret)		
+		return ret
     
 	# Get party details
 	#------------------
@@ -56,7 +56,7 @@ class DocType(TransactionBase):
 			'party_address': cstr(address_display)
 		}
           	
-		return cstr(ret)
+		return ret
 	
 	# Get TDS Return acknowledgement
 	#-------------------------------

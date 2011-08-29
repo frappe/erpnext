@@ -36,7 +36,7 @@ class DocType:
 		# result initiatlization
 		header = 'Ledger Balances Between ' + getdate(self.doc.from_date).strftime('%d-%m-%Y') + ' and ' + getdate(self.doc.to_date).strftime('%d-%m-%Y')
 		res = [[header], ['Account', 'Posting Date', 'Voucher Type', 'Voucher No', 'Debit', 'Credit', 'Remarks']]
-		glc = get_obj('GL Control')	
+		glc = get_obj('GL Control')
 
 		for d in getlist(self.doclist, 'ledger_details'):
 			# Fetch acc details
@@ -59,5 +59,5 @@ class DocType:
 			res.append(['', '', '', 'Total Debit/Credit', debit, credit])
 			res.append(['', '', '', 'Opening Balance', opening])
 			res.append(['', '', '', 'Closing Balance', closing])
-			
+
 		return res

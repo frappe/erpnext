@@ -53,7 +53,7 @@ class TransactionBase:
 			'contact_email' : contact_email,
 			'contact_mobile' : contact_mobile
 		}
-		return cstr(ret)	
+		return ret	
 			
 	# Get Address Text
 	# -----------------------
@@ -125,7 +125,7 @@ class TransactionBase:
 			'shipping_address_name' : details and details[0]['name'] or '',
 			'shipping_address' : address_display
 		}
-		return cstr(ret)
+		return ret
 		
 	# Get Lead Details
 	# -----------------------
@@ -144,7 +144,7 @@ class TransactionBase:
 			'contact_mobile' : extract('mobile_no'),
 			'contact_email' : extract('email_id')
 		}
-		return cstr(ret)
+		return ret
 		
 		
 	# Get Supplier Default Primary Address - first load
@@ -162,7 +162,7 @@ class TransactionBase:
 			'contact_mobile' : contact_mobile						
 		}
 		ret.update(self.get_supplier_details(args['supplier']))
-		return cstr(ret)
+		return ret
 		
 	# Get Supplier Address
 	# -----------------------
@@ -178,7 +178,7 @@ class TransactionBase:
 			'contact_email' : contact_email,
 			'contact_mobile' : contact_mobile
 		}
-		return cstr(ret)	
+		return ret
 	
 	# Get Supplier Details
 	# -----------------------

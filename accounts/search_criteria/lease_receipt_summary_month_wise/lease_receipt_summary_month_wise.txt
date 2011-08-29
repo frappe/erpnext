@@ -1,4 +1,4 @@
-# Search Criteria, lease_receipt_summary_year_to_date
+# Search Criteria, lease_receipt_summary_month_wise
 [
 
 	# These values are common in all dictionaries
@@ -13,21 +13,18 @@
 	# These values are common for all Search Criteria
 	{
 		'columns': 'GL Entry\x01ID,GL Entry\x01Owner,GL Entry\x01Posting Date,GL Entry\x01Aging Date,GL Entry\x01Account,GL Entry\x01Cost Center,GL Entry\x01Against,GL Entry\x01Against Voucher,GL Entry\x01Voucher Type,GL Entry\x01Voucher No,GL Entry\x01Remarks,GL Entry\x01Is Cancelled,GL Entry\x01Is Opening,GL Entry\x01Fiscal Year,GL Entry\x01Company',
-		'criteria_name': 'Lease Receipt Summary (Year to date)',
+		'criteria_name': 'Lease Receipt Summary Month Wise',
 		'doc_type': 'GL Entry',
 		'doctype': 'Search Criteria',
 		'filters': "{'GL Entry\x01Voucher Type':'','GL Entry\x01Is Cancelled':'','GL Entry\x01Is Opening':'','GL Entry\x01Fiscal Year':''}",
 		'module': 'Accounts',
 		'name': '__common__',
-		'page_len': 50,
-		'sort_by': '`tabGL Entry`.`company`',
-		'sort_order': 'DESC',
 		'standard': 'Yes'
 	},
 
-	# Search Criteria, lease_receipt_summary_year_to_date
+	# Search Criteria, lease_receipt_summary_month_wise
 	{
 		'doctype': 'Search Criteria',
-		'name': 'lease_receipt_summary_year_to_date'
+		'name': 'lease_receipt_summary_month_wise'
 	}
 ]

@@ -61,15 +61,15 @@ class SupportMailbox(POP3Mailbox):
 		d.status = 'Open'
 		try:
 			d.save(1)
+			# update feed
+			update_feed(d)
+
+			# send auto reply
+			self.send_auto_reply(d)
+
 		except:
 			d.description = 'Unable to extract message'
 			d.save(1)
-
-		# update feed
-		update_feed(d)
-		
-		# send auto reply
-		self.send_auto_reply(d)
 		
 	def send_auto_reply(self, d):
 		"""
@@ -85,14 +85,14 @@ We will get back to you as soon as possible
 
 [This is an automatic response]
 
-		""" + signature)
+		""" + (signature or ''))
 
 		from webnotes.utils.email_lib import sendmail
 		
 		sendmail(\
 			recipients = [d.raised_by], \
 			sender = self.email_settings.support_email, \
-			subject = '['+d.name+'] ' + d.subject, \
+			subject = '['+d.name+'] ' + str(d.subject or ''), \
 			msg = response)
 		
 	def auto_close_tickets(self):

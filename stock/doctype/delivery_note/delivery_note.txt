@@ -3,16 +3,25 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:08:57',
+		'creation': '2011-04-18 15:58:20',
 		'docstatus': 0,
-		'modified': '2011-06-27 16:42:01',
+		'modified': '2011-08-23 15:26:57',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
 
+	# These values are common for all DocField
+	{
+		'doctype': 'DocField',
+		'name': '__common__',
+		'parent': 'Delivery Note',
+		'parentfield': 'fields',
+		'parenttype': 'DocType'
+	},
+
 	# These values are common for all DocType
 	{
-		'_last_update': '1309173122',
+		'_last_update': '1313665263',
 		'colour': 'White:FFF',
 		'doctype': 'DocType',
 		'document_type': 'Transaction',
@@ -27,15 +36,16 @@
 		'show_in_menu': 0,
 		'subject': 'To %(customer_name)s on %(transaction_date)s | %(per_billed)s% billed',
 		'tag_fields': 'billing_status',
-		'version': 444
+		'version': 449
 	},
 
-	# These values are common for all DocField
+	# These values are common for all DocFormat
 	{
-		'doctype': 'DocField',
+		'doctype': 'DocFormat',
+		'format': 'Delivery Note Packing List Wise',
 		'name': '__common__',
 		'parent': 'Delivery Note',
-		'parentfield': 'fields',
+		'parentfield': 'formats',
 		'parenttype': 'DocType'
 	},
 
@@ -70,15 +80,15 @@
 
 	# DocPerm
 	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
+		'amend': 1,
+		'cancel': 1,
+		'create': 1,
 		'doctype': 'DocPerm',
 		'idx': 2,
-		'permlevel': 1,
-		'role': 'Material User',
-		'submit': 0,
-		'write': 0
+		'permlevel': 0,
+		'role': 'Sales User',
+		'submit': 1,
+		'write': 1
 	},
 
 	# DocPerm
@@ -89,22 +99,9 @@
 		'doctype': 'DocPerm',
 		'idx': 3,
 		'permlevel': 0,
-		'role': 'Material Manager',
+		'role': 'Material Master Manager',
 		'submit': 1,
 		'write': 1
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		'doctype': 'DocPerm',
-		'idx': 4,
-		'permlevel': 1,
-		'role': 'Material Manager',
-		'submit': 0,
-		'write': 0
 	},
 
 	# DocPerm
@@ -113,62 +110,39 @@
 		'cancel': 1,
 		'create': 1,
 		'doctype': 'DocPerm',
-		'idx': 5,
+		'idx': 4,
 		'permlevel': 0,
-		'role': 'Sales User',
+		'role': 'Material Manager',
 		'submit': 1,
 		'write': 1
 	},
 
 	# DocPerm
 	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
+		'doctype': 'DocPerm',
+		'idx': 5,
+		'permlevel': 1,
+		'role': 'All'
+	},
+
+	# DocPerm
+	{
 		'doctype': 'DocPerm',
 		'idx': 6,
-		'permlevel': 1,
-		'role': 'Sales User',
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'cancel': 0,
-		'create': 0,
-		'doctype': 'DocPerm',
-		'idx': 7,
-		'permlevel': 0,
-		'role': 'Accounts User',
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'doctype': 'DocPerm',
-		'idx': 8,
-		'permlevel': 1,
-		'role': 'Accounts User'
-	},
-
-	# DocPerm
-	{
-		'doctype': 'DocPerm',
-		'idx': 9,
-		'match': 'customer_name',
-		'permlevel': 0,
-		'role': 'Customer'
-	},
-
-	# DocPerm
-	{
-		'doctype': 'DocPerm',
-		'idx': 10,
 		'permlevel': 2,
-		'role': 'All',
-		'write': 1
+		'role': 'All'
+	},
+
+	# DocFormat
+	{
+		'doctype': 'DocFormat',
+		'idx': 1
+	},
+
+	# DocFormat
+	{
+		'doctype': 'DocFormat',
+		'idx': 2
 	},
 
 	# DocField
@@ -332,7 +306,7 @@
 		'permlevel': 0,
 		'print_hide': 0,
 		'reqd': 1,
-		'search_index': 0,
+		'search_index': 1,
 		'width': '100px'
 	},
 
@@ -352,7 +326,7 @@
 		'permlevel': 1,
 		'print_hide': 1,
 		'reqd': 1,
-		'search_index': 0,
+		'search_index': 1,
 		'width': '150px'
 	},
 
@@ -366,13 +340,13 @@
 		'fieldtype': 'Currency',
 		'idx': 15,
 		'in_filter': 1,
-		'label': '% Qty Billed',
+		'label': '% Amount Billed',
 		'no_copy': 1,
 		'oldfieldname': 'per_billed',
 		'oldfieldtype': 'Currency',
 		'permlevel': 1,
 		'print_hide': 1,
-		'search_index': 0
+		'search_index': 1
 	},
 
 	# DocField
@@ -391,7 +365,7 @@
 		'oldfieldtype': 'Currency',
 		'permlevel': 1,
 		'print_hide': 1,
-		'search_index': 0
+		'search_index': 1
 	},
 
 	# DocField
@@ -439,7 +413,7 @@
 		'permlevel': 0,
 		'print_hide': 1,
 		'reqd': 1,
-		'search_index': 0
+		'search_index': 1
 	},
 
 	# DocField
@@ -453,7 +427,7 @@
 		'options': 'Customer Group',
 		'permlevel': 0,
 		'print_hide': 1,
-		'search_index': 0
+		'search_index': 1
 	},
 
 	# DocField
@@ -1014,7 +988,7 @@
 		'permlevel': 0,
 		'print_hide': 1,
 		'reqd': 1,
-		'search_index': 0,
+		'search_index': 1,
 		'width': '150px'
 	},
 
@@ -1032,7 +1006,7 @@
 		'permlevel': 0,
 		'print_hide': 1,
 		'reqd': 1,
-		'search_index': 0,
+		'search_index': 1,
 		'width': '150px'
 	},
 
@@ -1506,5 +1480,18 @@
 		'options': 'repair_delivery_note',
 		'permlevel': 0,
 		'print_hide': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'print_packing_slip',
+		'fieldtype': 'Text',
+		'hidden': 1,
+		'idx': 95,
+		'in_filter': 0,
+		'label': 'Print Packing Slip',
+		'permlevel': 0,
+		'print_hide': 0
 	}
 ]

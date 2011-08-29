@@ -34,7 +34,7 @@ class DocType:
             'stock_uom'   : item and item[0]['stock_uom'] or '',
             'default_bom' : item and item[0]['default_bom'] or ''
     }
-    return cstr(ret)
+    return ret
     
   def validate(self):
     if not self.doc.production_item :

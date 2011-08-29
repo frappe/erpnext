@@ -118,21 +118,21 @@ class DocType(TransactionBase):
 		t = {}
 		for x in tax: t[x[0]] = flt(x[1])
 		ret = {
-			'description'								 : item and item[0]['description_html'] or item[0]['description'],
-			'item_group'									: item and item[0]['item_group'] or '',
-			'item_name'									 : item and item[0]['item_name'] or '',
-			'brand'											 : item and item[0]['brand'] or '',
-			'stock_uom'									 : item and item[0]['stock_uom'] or '',
-			'reserved_warehouse'					: item and item[0]['default_warehouse'] or '',
-			'warehouse'									 : item and item[0]['default_warehouse'] or '',
-			'income_account'							: item and item[0]['default_income_account'] or '',
-			'cost_center'								 : item and item[0]['default_sales_cost_center'] or '',
-			'qty'												 : 1.00,	 # this is done coz if item once fetched is fetched again thn its qty shld be reset to 1
-			'adj_rate'										: 0,
-			'amount'											: 0,
-			'export_amount'							 : 0,
-			'item_tax_rate'							 : str(t),
-			'batch_no'										: ''
+			'description'			: item and item[0]['description_html'] or item[0]['description'],
+			'item_group'			: item and item[0]['item_group'] or '',
+			'item_name'				: item and item[0]['item_name'] or '',
+			'brand'					: item and item[0]['brand'] or '',
+			'stock_uom'				: item and item[0]['stock_uom'] or '',
+			'reserved_warehouse'	: item and item[0]['default_warehouse'] or '',
+			'warehouse'				: item and item[0]['default_warehouse'] or '',
+			'income_account'		: item and item[0]['default_income_account'] or '',
+			'cost_center'			: item and item[0]['default_sales_cost_center'] or '',
+			'qty'					: 1.00,	 # this is done coz if item once fetched is fetched again thn its qty shld be reset to 1
+			'adj_rate'				: 0,
+			'amount'				: 0,
+			'export_amount'			: 0,
+			'item_tax_rate'			: str(t),
+			'batch_no'				: ''
 		}
 		if(obj.doc.price_list_name and item):	#this is done to fetch the changed BASIC RATE and REF RATE based on PRICE LIST
 			ref_rate =	self.get_ref_rate(item_code, obj.doc.price_list_name, obj.doc.currency)
@@ -143,7 +143,8 @@ class DocType(TransactionBase):
 			
 		if obj.doc.doctype == 'Receivable Voucher':
 			return ret
-		return str(ret)
+			
+		return ret
 	
 	# ***************** Get Ref rate as entered in Item Master ********************
 	def get_ref_rate(self, item_code, price_list_name, currency):
@@ -160,7 +161,6 @@ class DocType(TransactionBase):
 			d.basic_rate = flt(ref_rate) * flt(obj.doc.conversion_rate)
 			d.base_ref_rate = flt(ref_rate) * flt(obj.doc.conversion_rate)
 			d.export_rate = flt(ref_rate)
-
 
 	# Load Default Taxes
 	# ====================
@@ -203,7 +203,7 @@ class DocType(TransactionBase):
 		ret = {
 			'item_tax_rate'		:	tax and str(t) or ''
 		}
-		return str(ret)
+		return ret
 
 	# Get Serial No Details
 	# ==========================================================================
@@ -220,7 +220,7 @@ class DocType(TransactionBase):
 			'description'			: item and item[0]['description'] or '',
 			'item_tax_rate'		: str(t)
 		}
-		return str(ret)
+		return ret
 		
 	# Get Commission rate
 	# =======================================================================
@@ -233,7 +233,7 @@ class DocType(TransactionBase):
 				'commission_rate'		 :	comm_rate and flt(comm_rate[0]['commission_rate']) or 0,
 				'total_commission'		:	flt(total_comm)
 			}
-			return str(ret)
+			return ret
 		else:
 			msgprint("Business Associate : %s does not exist in the system." % (sales_partner))
 			raise Exception
@@ -287,7 +287,7 @@ class DocType(TransactionBase):
 			ret = {
 				'rate'	:	rate and flt(rate[0]['tax_rate']) or 0
 			}
-		return cstr(ret)
+		return ret
 		
 
 	# Make Packing List from Sales BOM
@@ -324,10 +324,32 @@ class DocType(TransactionBase):
 			
 			if self.has_sales_bom(d.item_code):
 				for i in self.get_sales_bom_items(d.item_code):
-					il.append([warehouse, i[0], flt(flt(i[1])* qty), reserved_qty, i[2], d.batch_no, d.serial_no])
+					il.append([warehouse, i[0], flt(flt(i[1])* qty), flt(flt(i[1])*reserved_qty), i[2], d.batch_no, d.serial_no])
 			else:
 				il.append([warehouse, d.item_code, qty, reserved_qty, d.stock_uom, d.batch_no, d.serial_no])
 		return il
+
+	# ---------------------------------------------------------------------------------------------
+	# get qty, amount already billed or delivered against curr line item for current doctype
+	# For Eg: SO-RV get total qty, amount from SO and also total qty, amount against that SO in RV
+	# ---------------------------------------------------------------------------------------------
+	def get_curr_and_ref_doc_details(self, curr_doctype, ref_tab_fname, ref_tab_dn, ref_doc_tname, curr_parent_name, curr_parent_doctype):
+		# Get total qty, amt of current doctype (eg RV) except for qty, amt of this transaction
+		if curr_parent_doctype == 'Installation Note':
+			curr_det = sql("select sum(qty) from `tab%s` where %s = '%s' and docstatus = 1 and parent != '%s'"% (curr_doctype, ref_tab_fname, ref_tab_dn, curr_parent_name))
+			qty, amt = curr_det and flt(curr_det[0][0]) or 0, 0
+		else:
+			curr_det = sql("select sum(qty), sum(amount) from `tab%s` where %s = '%s' and docstatus = 1 and parent != '%s'"% (curr_doctype, ref_tab_fname, ref_tab_dn, curr_parent_name))
+			qty, amt = curr_det and flt(curr_det[0][0]) or 0, curr_det and flt(curr_det[0][1]) or 0
+
+		# get total qty of ref doctype
+		ref_det = sql("select qty, amount from `tab%s` where name = '%s' and docstatus = 1"% (ref_doc_tname, ref_tab_dn))
+		max_qty, max_amt = ref_det and flt(ref_det[0][0]) or 0, ref_det and flt(ref_det[0][1]) or 0
+
+		return qty, max_qty, amt, max_amt
+
+
+
 
 
 	# -----------------------
@@ -458,26 +480,6 @@ class DocType(TransactionBase):
 	def update_prevdoc_detail(self, is_submit, obj):
 		StatusUpdater(obj, is_submit).update()
 
-	# ---------------------------------------------------------------------------------------------
-	# get qty, amount already billed or delivered against curr line item for current doctype
-	# For Eg: SO-RV get total qty, amount from SO and also total qty, amount against that SO in RV
-	# ---------------------------------------------------------------------------------------------
-	def get_curr_and_ref_doc_details(self, curr_doctype, ref_tab_fname, ref_tab_dn, ref_doc_tname, curr_parent_name, curr_parent_doctype):
-		# Get total qty, amt of current doctype (eg RV) except for qty, amt of this transaction
-		if curr_parent_doctype == 'Installation Note':
-			curr_det = sql("select sum(qty) from `tab%s` where %s = '%s' and docstatus = 1 and parent != '%s'"% (curr_doctype, ref_tab_fname, ref_tab_dn, curr_parent_name))
-			qty, amt = curr_det and flt(curr_det[0][0]) or 0, 0
-		else:
-			curr_det = sql("select sum(qty), sum(amount) from `tab%s` where %s = '%s' and docstatus = 1 and parent != '%s'"% (curr_doctype, ref_tab_fname, ref_tab_dn, curr_parent_name))
-			qty, amt = curr_det and flt(curr_det[0][0]) or 0, curr_det and flt(curr_det[0][1]) or 0
-
-		# get total qty of ref doctype
-		ref_det = sql("select qty, amount from `tab%s` where name = '%s' and docstatus = 1"% (ref_doc_tname, ref_tab_dn))
-		max_qty, max_amt = ref_det and flt(ref_det[0][0]) or 0, ref_det and flt(ref_det[0][1]) or 0
-
-		return qty, max_qty, amt, max_amt
-
-
 
 
 
@@ -496,7 +498,7 @@ class StatusUpdater:
 			- Validate over delivery
 			
 		From Receivable Voucher 
-			- Update Billed Qty
+			- Update Billed Amt
 			- Update Percent
 			- Validate over billing
 			
@@ -524,23 +526,33 @@ class StatusUpdater:
 			self.validate_qty({
 				'source_dt'		:'Delivery Note Detail',
 				'compare_field'	:'delivered_qty',
+				'compare_ref_field'	:'qty',
 				'target_dt'		:'Sales Order Detail',
 				'join_field'	:'prevdoc_detail_docname'
 			})
 		elif self.obj.doc.doctype=='Receivable Voucher':
 			self.validate_qty({
 				'source_dt'		:'RV Detail',
-				'compare_field'	:'billed_qty',
+				'compare_field'	:'billed_amt',
+				'compare_ref_field'	:'amount',
 				'target_dt'		:'Sales Order Detail',
 				'join_field'	:'so_detail'
 			})
+			self.validate_qty({
+				'source_dt'		:'RV Detail',
+				'compare_field'	:'billed_amt',
+				'compare_ref_field'	:'amount',
+				'target_dt'		:'Delivery Note Detail',
+				'join_field'	:'dn_detail'
+			}, no_tolerance =1)
 		elif self.obj.doc.doctype=='Installation Note':
 			self.validate_qty({
 				'source_dt'		:'Installation Item Details',
 				'compare_field'	:'installed_qty',
+				'compare_ref_field'	:'qty',
 				'target_dt'		:'Delivery Note Detail',
 				'join_field'	:'dn_detail'
-			}, no_tolerance =1);
+			}, no_tolerance =1)
 
 	
 	def get_tolerance_for(self, item_code):
@@ -567,22 +579,22 @@ class StatusUpdater:
 		
 		# check if overflow is within tolerance
 		tolerance = self.get_tolerance_for(item['item_code'])
-		overflow_percent = ((item[args['compare_field']] - item['qty']) / item['qty'] * 100)
+		overflow_percent = ((item[args['compare_field']] - item[args['compare_ref_field']]) / item[args['compare_ref_field']] * 100)
 	
 		if overflow_percent - tolerance > 0.0001:
-			item['max_allowed'] = flt(item['qty'] * (100+tolerance)/100)
+			item['max_allowed'] = flt(item[args['compare_ref_field']] * (100+tolerance)/100)
 			item['reduce_by'] = item[args['compare_field']] - item['max_allowed']
 		
 			msgprint("""
-				Row #%(idx)s: Max qty allowed for <b>Item %(item_code)s</b> against <b>%(parenttype)s %(parent)s</b> is <b>%(max_allowed)s</b>. 
+				Row #%(idx)s: Max %(compare_ref_field)s allowed for <b>Item %(item_code)s</b> against <b>%(parenttype)s %(parent)s</b> is <b>%(max_allowed)s</b>. 
 				
 				If you want to increase your overflow tolerance, please increase tolerance %% in Global Defaults or Item master. 
 				
-				Or, you must reduce the qty by %(reduce_by)s""" % item, raise_exception=1)
+				Or, you must reduce the %(compare_ref_field)s by %(reduce_by)s""" % item, raise_exception=1)
 
 	def validate_qty(self, args, no_tolerance=None):
 		"""
-			Updates qty at row level
+			Validates qty at row level
 		"""
 		# get unique transactions to update
 		for d in self.obj.doclist:
@@ -591,22 +603,23 @@ class StatusUpdater:
 
 				# get all qty where qty > compare_field
 				item = sql("""
-					select item_code, qty, `%(compare_field)s`, parenttype, parent from `tab%(target_dt)s` 
-					where qty < `%(compare_field)s` and name="%(name)s" and docstatus=1
+					select item_code, `%(compare_ref_field)s`, `%(compare_field)s`, parenttype, parent from `tab%(target_dt)s` 
+					where `%(compare_ref_field)s` < `%(compare_field)s` and name="%(name)s" and docstatus=1
 					""" % args, as_dict=1)
 				
 				if item:
 					item = item[0]
 					item['idx'] = d.idx
-					
+					item['compare_ref_field'] = args['compare_ref_field']
 					if no_tolerance:
-						item['reduce_by'] = item[args['compare_field']] - item['qty']
+						item['reduce_by'] = item[args['compare_field']] - item[args['compare_ref_field']]
 						msgprint("""
-							Row #%(idx)s: Max qty allowed for <b>Item %(item_code)s</b> against 
-							<b>%(parenttype)s %(parent)s</b> is <b>%(qty)s</b>. 
+							Row #%(idx)s: Max %(compare_ref_field)s allowed for <b>Item %(item_code)s</b> against 
+							<b>%(parenttype)s %(parent)s</b> is <b>""" % item 
+							+ cstr(item[args['compare_ref_field']]) + """</b>. 
 							
-							You must reduce the qty by %(reduce_by)s""" % item, raise_exception=1)
-						
+							You must reduce the %(compare_ref_field)s by %(reduce_by)s""" % item, raise_exception=1)
+					
 					else:
 						self.check_overflow_with_tolerance(item, args)
 						
@@ -621,6 +634,7 @@ class StatusUpdater:
 				'target_dt'				:'Sales Order Detail',
 				'target_parent_dt'		:'Sales Order',
 				'target_parent_field'	:'per_delivered',
+				'target_ref_field'		:'qty',
 				'source_dt'				:'Delivery Note Detail',
 				'source_field'			:'qty',
 				'join_field'			:'prevdoc_detail_docname',
@@ -631,12 +645,13 @@ class StatusUpdater:
 			
 		elif self.obj.doc.doctype=='Receivable Voucher':
 			self.update_qty({
-				'target_field'			:'billed_qty',
+				'target_field'			:'billed_amt',
 				'target_dt'				:'Sales Order Detail',
 				'target_parent_dt'		:'Sales Order',
 				'target_parent_field'	:'per_billed',
+				'target_ref_field'		:'amount',
 				'source_dt'				:'RV Detail',
-				'source_field'			:'qty',
+				'source_field'			:'amount',
 				'join_field'			:'so_detail',
 				'percent_join_field'	:'sales_order',
 				'status_field'			:'billing_status',
@@ -644,12 +659,13 @@ class StatusUpdater:
 			})
 
 			self.update_qty({
-				'target_field'			:'billed_qty',
+				'target_field'			:'billed_amt',
 				'target_dt'				:'Delivery Note Detail',
 				'target_parent_dt'		:'Delivery Note',
 				'target_parent_field'	:'per_billed',
+				'target_ref_field'		:'amount',
 				'source_dt'				:'RV Detail',
-				'source_field'			:'qty',
+				'source_field'			:'amount',
 				'join_field'			:'dn_detail',
 				'percent_join_field'	:'delivery_note',
 				'status_field'			:'billing_status',
@@ -662,6 +678,7 @@ class StatusUpdater:
 				'target_dt'				:'Delivery Note Detail',
 				'target_parent_dt'		:'Delivery Note',
 				'target_parent_field'	:'per_installed',
+				'target_ref_field'		:'qty',
 				'source_dt'				:'Installed Item Details',
 				'source_field'			:'qty',
 				'join_field'			:'prevdoc_detail_docname',
@@ -692,7 +709,7 @@ class StatusUpdater:
 						update 
 							`tab%(target_dt)s` 
 						set 
-							%(target_field)s = (select sum(qty) from `tab%(source_dt)s` where `%(join_field)s`="%(detail_id)s" and (docstatus=1 %(cond)s))
+							%(target_field)s = (select sum(%(source_field)s) from `tab%(source_dt)s` where `%(join_field)s`="%(detail_id)s" and (docstatus=1 %(cond)s))
 						where
 							name="%(detail_id)s"            
 					""" % args)			
@@ -708,10 +725,10 @@ class StatusUpdater:
 						`tab%(target_parent_dt)s` 
 					set 
 						%(target_parent_field)s = 
-							(select sum(if(qty > ifnull(%(target_field)s, 0), %(target_field)s, qty))/sum(qty)*100 from `tab%(target_dt)s` where parent="%(name)s"), 
+							(select sum(if(%(target_ref_field)s > ifnull(%(target_field)s, 0), %(target_field)s, %(target_ref_field)s))/sum(%(target_ref_field)s)*100 from `tab%(target_dt)s` where parent="%(name)s"), 
 						modified = now()
-						where
-							name="%(name)s"
+					where
+						name="%(name)s"
 					""" % args)
 
 				# update field

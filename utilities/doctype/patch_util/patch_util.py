@@ -85,7 +85,8 @@ class DocType:
 			d.parent = doctype
 			d.parenttype = 'DocType'
 			d.parentfield = 'permissions'
-		
+			
+		d.permlevel = level
 		d.role = role
 		d.read = read
 		d.write = write

@@ -38,9 +38,9 @@ class DocType:
     args = eval(args)
     o_s = sql("select outstanding_amount from `tab%s` where name = '%s'" % (args['doctype'],args['docname']))
     if args['doctype'] == 'Payable Voucher':
-      return cstr({'debit': o_s and flt(o_s[0][0]) or 0})
+      return {'debit': o_s and flt(o_s[0][0]) or 0}
     if args['doctype'] == 'Receivable Voucher':
-      return cstr({'credit': o_s and flt(o_s[0][0]) or 0})
+      return {'credit': o_s and flt(o_s[0][0]) or 0}
 
   #--------------------------------------------------------------------------------------------------------
   # Create remarks

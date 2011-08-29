@@ -90,7 +90,7 @@ class DocType(TransactionBase):
 	def get_debit_to(self):
 		acc_head = self.get_customer_account()
 		if acc_head:
-			return cstr({ 'debit_to' : acc_head })
+			return { 'debit_to' : acc_head }
 
 
 	# Set Due Date = Posting Date + Credit Days
@@ -128,7 +128,7 @@ class DocType(TransactionBase):
 			get_obj('DocType Mapper', 'Sales Order-Receivable Voucher').dt_map('Sales Order', 'Receivable Voucher', self.doc.sales_order_main, self.doc, self.doclist, "[['Sales Order', 'Receivable Voucher'],['Sales Order Detail', 'RV Detail'],['RV Tax Detail','RV Tax Detail'], ['Sales Team', 'Sales Team']]")
 			self.get_income_account('entries')
 			
-		ret = eval(self.get_debit_to())	
+		ret = self.get_debit_to()
 		if ret.has_key('debit_to'):
 			self.doc.debit_to = ret['debit_to']
 					
@@ -162,7 +162,7 @@ class DocType(TransactionBase):
 			if ret['warehouse']:
 				actual_qty = sql("select actual_qty from `tabBin` where item_code = '%s' and warehouse = '%s'" % (item_code, ret['warehouse']))		
 				ret['actual_qty']= actual_qty and flt(actual_qty[0][0]) or 0
-		return str(ret)
+		return ret
  
 
 	# Get tax rate if account type is tax
@@ -515,7 +515,7 @@ class DocType(TransactionBase):
 		ret = {
 			 'actual_qty' : actual_qty and flt(actual_qty[0]['actual_qty']) or 0
 		}
-		return cstr(ret)
+		return ret
 
 	# Make GL Entries
 	# -------------------------

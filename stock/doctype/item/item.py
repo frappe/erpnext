@@ -13,7 +13,7 @@ sql = webnotes.conn.sql
 get_value = webnotes.conn.get_value
 in_transaction = webnotes.conn.in_transaction
 convert_to_lists = webnotes.conn.convert_to_lists
-	
+
 # -----------------------------------------------------------------------------------------
 
 
@@ -21,13 +21,13 @@ class DocType:
 	def __init__(self, doc, doclist=[]):
 		self.doc = doc
 		self.doclist = doclist
-		
+
 	def get_tax_rate(self, tax_type):
 		rate = sql("select tax_rate from tabAccount where name = %s", tax_type)
 		ret = {
 			'tax_rate'	:	rate and flt(rate[0][0]) or 0
 		}
-		return str(ret)
+		return ret
 
 	def on_update(self):
 		bin = sql("select stock_uom from `tabBin` where item_code = '%s' " % self.doc.item_code)
@@ -39,14 +39,14 @@ class DocType:
 			if not self.doc.stock_uom:
 				msgprint("Please enter Stock UOM first.")
 				raise Exception
-			
+
 			if cstr(d.uom) in check_list:
 				msgprint("UOM %s has been entered more than once in Conversion Factor Details." % cstr(d.uom))
 				raise Exception
-			
+
 			if not cstr(d.uom) in check_list:
 				check_list.append(cstr(d.uom))
-							
+
 			if cstr(d.uom) == cstr(self.doc.stock_uom):
 				if flt(d.conversion_factor) != 1:
 					msgprint("Conversion Fator of UOM : %s should be equal to 1. As UOM : %s is Stock UOM of Item: %s." % ( cstr(d.uom), cstr(d.uom), cstr(self.doc.name)))
@@ -56,14 +56,14 @@ class DocType:
 			elif cstr(d.uom) != cstr(self.doc.stock_uom) and flt(d.conversion_factor) == 1:
 				msgprint("Conversion Factor of UOM : %s should not be equal to 1. As UOM : %s is not Stock UOM of Item: %s." % ( cstr(d.uom), cstr(d.uom), cstr(self.doc.name)))
 				raise Exception
-		
+
 		if not cstr(self.doc.stock_uom) in check_list :
 			child = addchild( self.doc, 'uom_conversion_details', 'UOM Conversion Detail', 1, self.doclist)
 			child.uom = self.doc.stock_uom
 			child.conversion_factor = 1
 			child.save()
 
-	
+
 	# Check whether Ref Rate is not entered twice for same Price List and Currency
 	def check_ref_rate_detail(self):
 		check_list=[]
@@ -73,7 +73,13 @@ class DocType:
 				raise Exception
 			else:
 				check_list.append([cstr(d.price_list_name),cstr(d.ref_currency)])
-				
+
+	# Append all the customer codes and insert into "customer_code" field of item table
+	def fill_customer_code(self):
+		cust_code=[]
+		for d in getlist(self.doclist,'item_customer_details'):
+			cust_code.append(d.ref_code)
+		self.doc.customer_code=','.join(cust_code)
 
 	# Check whether Tax Rate is not entered twice for same Tax Type
 	def check_item_tax(self):
@@ -89,7 +95,7 @@ class DocType:
 					msgprint("Rate is entered twice for Tax : '%s'." % (d.tax_type))
 					raise Exception
 				else:
-					check_list.append(d.tax_type)				
+					check_list.append(d.tax_type)
 
 	def check_for_active_boms(self, check):
 		if check in ['Is Active', 'Is Purchase Item']:
@@ -102,7 +108,7 @@ class DocType:
 			if bom and bom[0][0]:
 				msgprint("%s should be 'Yes'. As Item %s is present in one or many Active BOMs." % (cstr(check), cstr(self.doc.name)))
 				raise Exception
-		
+
 	def validate(self):
 		fl = {'is_manufactured_item'	:'Is Manufactured Item',
 					'is_sub_contracted_item':'Is Sub Contracted Item',
@@ -112,18 +118,19 @@ class DocType:
 			if cstr(self.doc.fields[d]) != 'Yes':
 				self.check_for_active_boms(check = fl[d])
 		self.check_ref_rate_detail()
+		self.fill_customer_code()
 		self.check_item_tax()
 		if not self.doc.min_order_qty:
 			self.doc.min_order_qty = 0
 		self.check_non_asset_warehouse()
-		
+
 		if self.doc.is_pro_applicable == 'Yes' and self.doc.is_manufactured_item != 'Yes':
 			msgprint("If making Production Order is allowed then, it should also allow to make Bill of Materials. Refer Manufacturing section.")
 			raise Exception
-			
+
 		if self.doc.is_pro_applicable == 'Yes' and self.doc.is_stock_item == 'No':
 			msgprint("As Production Order can be made for this Item, then Is Stock Item Should be 'Yes' as we maintain it's stock. Refer Manufacturing and Inventory section.", raise_exception=1)
-			
+
 		if self.doc.is_stock_item == "Yes" and not self.doc.default_warehouse:
 			msgprint("As we maintain stock of this item, its better to maintain default warehouse. To add default warehouse please go to 'Inventory' section. It will be fetched automatically while making Sales Order, Delivery Note, etc.. ", 1)
 
@@ -146,7 +153,7 @@ class DocType:
 			if flt(total_qty) < flt(self.doc.minimum_inventory_level):
 				msgprint("Your minimum inventory level is reached")
 				send_to = []
-				send = sql("select t1.email from `tabProfile` t1,`tabUserRole` t2 where t2.role IN ('Material Master Manager','Purchase Manager') and t2.parent = t1.name") 
+				send = sql("select t1.email from `tabProfile` t1,`tabUserRole` t2 where t2.role IN ('Material Master Manager','Purchase Manager') and t2.parent = t1.name")
 				for d in send:
 					send_to.append(d[0])
 				msg = '''
@@ -167,10 +174,10 @@ Total Available Qty: %s
 		ret = {
 			'file_group'	:	file and file[0]['file_group'] or '',
 			'description'	:	file and file[0]['description'] or ''
-			
+
 		}
-		return str(ret)
-		
+		return ret
+
 	def check_if_sle_exists(self):
 		"""
 			checks if any stock ledger entry exists for this item
@@ -178,3 +185,7 @@ Total Available Qty: %s
 
 		sle = sql("select name from `tabStock Ledger Entry` where item_code = %s and ifnull(is_cancelled, 'No') = 'No'", self.doc.name)
 		return sle and 'exists' or 'not exists'
+
+	def on_rename(self,newdn,olddn):
+		sql("update tabItem set item_code = %s where name = %s", (newdn, olddn))
+

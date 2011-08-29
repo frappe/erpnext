@@ -54,7 +54,7 @@ class DocType:
 			'conversion_factor'		: 1,
      		'batch_no'          	: ''
 		}
-		return str(ret)
+		return ret
 
 
 	# Get UOM Details
@@ -70,7 +70,7 @@ class DocType:
 				'conversion_factor'		: flt(uom[0]['conversion_factor']),
 				'transfer_qty'			: flt(arg['qty']) * flt(uom[0]['conversion_factor']),
 			}
-		return str(ret)
+		return ret
 
 		
 	# get stock and incoming rate on posting date
@@ -355,6 +355,9 @@ class DocType:
 	# ----------------------------------
 	def update_serial_no(self, is_submit):
 		sl_obj = get_obj('Stock Ledger')
+		if is_submit:
+			sl_obj.validate_serial_no_warehouse(self, 'mtn_details')
+		
 		for d in getlist(self.doclist, 'mtn_details'):
 			if d.serial_no:
 				serial_nos = sl_obj.get_sr_no_list(d.serial_no)
@@ -363,7 +366,7 @@ class DocType:
 					if d.s_warehouse:
 						sl_obj.update_serial_delivery_details(self, d, serial_no, is_submit)
 					if d.t_warehouse:
-						sl_obj.update_serial_purchase_details(self, d, serial_no, is_submit, (self.doc.purpose in ['Material Transfer', 'Sales Return']) and 1 or 0)
+						sl_obj.update_serial_purchase_details(self, d, serial_no, is_submit, self.doc.purpose)
 					
 					if self.doc.purpose == 'Purchase Return':
 						delete_doc("Serial No", serial_no)
@@ -396,7 +399,7 @@ class DocType:
 			'customer_name'		: res and res[0][1] or '',
 			'customer_address' : res and res[0][2] or ''}
 
-		return str(ret)
+		return ret
 
 
 	def get_cust_addr(self):
@@ -405,7 +408,7 @@ class DocType:
 			'customer_name'		: res and res[0][0] or '',
 			'customer_address' : res and res[0][1] or ''}
 
-		return str(ret)
+		return ret
 
 
 		
@@ -415,7 +418,7 @@ class DocType:
 			'supplier' : res and res[0][0] or '',
 			'supplier_name' :res and res[0][1] or '',
 			'supplier_address' : res and res[0][2] or ''}
-		return str(ret)
+		return ret
 		
 
 	def get_supp_addr(self):
@@ -423,4 +426,4 @@ class DocType:
 		ret = {
 			'supplier_name' : res and res[0][0] or '',
 			'supplier_address' : res and res[0][1] or ''}
-		return str(ret)
+		return ret

@@ -6,7 +6,7 @@ from webnotes import msgprint, errprint
 
 def make_address():
 	from webnotes.modules.module_manager import reload_doc
-	reload_doc('tools','doctype','address')
+	reload_doc('utilities','doctype','address')
 	
 	from webnotes.model.db_schema import updatedb
 	updatedb('Address')
@@ -113,24 +113,24 @@ def delete_unwanted_fields():
 
 def reload_doc_files():
 	from webnotes.modules.module_manager import reload_doc	
-	reload_doc('tools', 'doctype', 'contact')
-	reload_doc('crm', 'doctype', 'customer')
-	reload_doc('maintenance', 'doctype', 'customer_issue')
-	reload_doc('material_management', 'doctype', 'delivery_note')
-	reload_doc('crm', 'doctype', 'enquiry')
-	reload_doc('crm', 'doctype', 'installation_note')
-	reload_doc('crm', 'doctype', 'lead')
-	reload_doc('maintenance', 'doctype', 'maintenance_schedule')
-	reload_doc('maintenance', 'doctype', 'maintenance_visit')
-	reload_doc('srm', 'doctype', 'purchase_order')
-	reload_doc('material_management', 'doctype', 'purchase_receipt')
-	reload_doc('crm', 'doctype', 'quotation')
+	reload_doc('utilities', 'doctype', 'contact')
+	reload_doc('selling', 'doctype', 'customer')
+	reload_doc('support', 'doctype', 'customer_issue')
+	reload_doc('stock', 'doctype', 'delivery_note')
+	reload_doc('selling', 'doctype', 'enquiry')
+	reload_doc('selling', 'doctype', 'installation_note')
+	reload_doc('selling', 'doctype', 'lead')
+	reload_doc('support', 'doctype', 'maintenance_schedule')
+	reload_doc('support', 'doctype', 'maintenance_visit')
+	reload_doc('buying', 'doctype', 'purchase_order')
+	reload_doc('stock', 'doctype', 'purchase_receipt')
+	reload_doc('selling', 'doctype', 'quotation')
 	reload_doc('accounts', 'doctype', 'receivable_voucher')
 	reload_doc('accounts', 'doctype', 'payable_voucher')	
-	reload_doc('crm', 'doctype', 'sales_order')
+	reload_doc('selling', 'doctype', 'sales_order')
 	reload_doc('setup', 'doctype', 'sales_partner')
-	reload_doc('material_management', 'doctype', 'serial_no')
-	reload_doc('srm', 'doctype', 'supplier')
+	reload_doc('stock', 'doctype', 'serial_no')
+	reload_doc('buying', 'doctype', 'supplier')
 	
 def reload_mapper_files():
 	from webnotes.modules.module_manager import reload_doc	

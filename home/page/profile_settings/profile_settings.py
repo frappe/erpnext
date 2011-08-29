@@ -17,7 +17,7 @@ def change_password(arg):
 			webnotes.msgprint('Old password is not correct', raise_exception=1)
 			
 		from webnotes.utils import nowdate
-		webnotes.conn.sql("update tabProfile set password=password(%s), password_last_updated=%s where name=%s",(arg['new_password'], nowdate(), webnotes.session['user']))
+		webnotes.conn.sql("update tabProfile set password=password(%s) where name=%s",(arg['new_password'], nowdate(), webnotes.session['user']))
 		webnotes.msgprint('Password Updated');
 
 def get_user_details(arg=None):

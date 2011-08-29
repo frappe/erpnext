@@ -38,7 +38,7 @@ class DocType:
       ret['contact_person'] = contact_det and contact_det[0]['contact_name'] or ''
       ret['contact_no'] = contact_det and contact_det[0]['contact_no'] or ''
       ret['email_id'] = contact_det and contact_det[0]['email_id'] or ''    
-      return cstr(ret)
+      return ret
     else:
       msgprint("Customer : %s does not exist in system." % (self.doc.customer))
       raise Exception  
@@ -52,7 +52,7 @@ class DocType:
         'contact_no' : contact and contact[0]['contact_no'] or '',
         'email_id' : contact and contact[0]['email_id'] or ''
       }
-      return str(ret)
+      return ret
     else:
       msgprint("Contact Person : %s does not exist in the system." % (self.doc,contact_person))
       raise Exception
@@ -65,7 +65,7 @@ class DocType:
     #if pft > 0:
     per_pft = (flt(pft) / flt(self.doc.project_value)) * 100
     ret = {'gross_margin_value': pft, 'per_gross_margin': per_pft}
-    return cstr(ret)
+    return ret
     
   # validate
   #================================================

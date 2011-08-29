@@ -18,7 +18,7 @@ class DocType:
       'supplier_name'   : cd and cd[0][4] or '',
       'supplier_address': cd and cd[0][5] or ''
     }
-    return cstr(ret)
+    return ret
 
   def get_rfq_details(self):
     self.doc.clear_table(self.doclist, 'supplier_quotation_details')
@@ -28,12 +28,12 @@ class DocType:
   def update_approval_status(self):
     if not self.doc.approval_status or self.doc.approval_status == 'Not Approved':
       set(self.doc, 'approval_status','Approved')
-      return cstr(self.doc.approval_status)
+      return self.doc.approval_status
     elif self.doc.approval_status == 'Approved':
       pc_obj = get_obj('Purchase Common')
       pc_obj.check_docstatus(check = 'Next', doctype = 'Purchase Order', docname = self.doc.name, detail_doctype = 'PO Detail')
       set(self.doc, 'approval_status', 'Not Approved')
-      return cstr(self.doc.approval_status)
+      return self.doc.approval_status
   
   def validate_item_list(self):
     if not getlist(self.doclist, 'supplier_quotation_details'):
@@ -101,4 +101,4 @@ class DocType:
   # Get Supplier Details
   # --------------------
   def get_supplier_details(self, name = ''):
-    return cstr(get_obj('Purchase Common').get_supplier_details(name))
+    return get_obj('Purchase Common').get_supplier_details(name)
