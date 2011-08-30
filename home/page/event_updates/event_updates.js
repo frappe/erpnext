@@ -25,12 +25,7 @@ pscript.home_make_body = function() {
 	
 	wrapper.banner_area = $a(wrapper.head, 'div');
 
-	wrapper.setup_wizard_area = $a(wrapper.body, 'div', 'setup-wizard')
-
-	wrapper.system_message_area = $a(wrapper.body, 'div', '', 
-		{marginBottom:'16px', padding:'8px', backgroundColor:'#FFD', border:'1px dashed #AA6', display:'none'})
-	
-	
+	wrapper.setup_wizard_area = $a(wrapper.body, 'div', 'setup-wizard');	
 }
 
 // ==================================
@@ -613,11 +608,7 @@ pscript.home_make_status = function() {
 	$c_page('home', 'event_updates', 'get_status_details', user,
 		function(r,rt) { 
 			home_status_bar.render(r.message);
-			
-			// system_messages
-			if(r.message.system_message)
-				pscript.show_system_message(wrapper, r.message.system_message);
-							
+										
 			// render online users
 			pscript.online_users_obj.render(r.message.online_users);
 			pscript.online_users = r.message.online_users;
@@ -628,24 +619,6 @@ pscript.home_make_status = function() {
 			}
 		}
 	);	
-}
-
-// show system message
-// -------------------
-pscript.show_system_message = function(wrapper, msg) {
-	$ds(wrapper.system_message_area);
-	var txt = $a(wrapper.system_message_area, 'div', '', {lineHeight:'1.6em'});
-	txt.innerHTML = msg;
-	
-	var span = $ln($a(wrapper.system_message_area, 'div', '', {textAlign:'right'}), 'Dismiss'.bold(), 
-		function(me) { 
-			me.set_working();
-			$c_obj('Home Control', 'dismiss_message', '', function(r,rt) { 
-				me.done_working(); 
-				$(wrapper.system_message_area).slideUp(); 
-			});
-		}, {fontSize:'11px'}
-	)
 }
 
 // complete my company registration

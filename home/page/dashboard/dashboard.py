@@ -2,58 +2,63 @@ dashboards = [
 	{
 		'type': 'account',
 		'account': 'Income',
-		'title': 'Income'
+		'title': 'Income',
+		'fillColor': '#90EE90'
 	},
 	
 	{
 		'type': 'account',
 		'account': 'Expenses',
-		'title': 'Expenses'
+		'title': 'Expenses',
+		'fillColor': '#90EE90'
 	},
 
 	{
-		'type': 'from_company',
-		'account': 'receivables_group',
-		'title': 'Receivables'
+		'type': 'receivables',
+		'title': 'Receivables',
+		'fillColor': '#FFE4B5'
 	},
 
 	{
-		'type': 'from_company',
-		'account': 'payables_group',
-		'title': 'Payables'
+		'type': 'payables',
+		'title': 'Payables',
+		'fillColor': '#FFE4B5'
 	},
 
 	{
-		'type': 'cash',
-		'debit_or_credit': 'Debit',
-		'title': 'Cash Inflow'
+		'type': 'collection',
+		'title': 'Collection',
+		'comment':'This info comes from the accounts your have marked as "Bank or Cash"',
+		'fillColor': '#DDA0DD'
 	},
 
 	{
-		'type': 'cash',
-		'debit_or_credit': 'Credit',
-		'title': 'Cash Outflow'
+		'type': 'payments',
+		'title': 'Payments',
+		'comment':'This info comes from the accounts your have marked as "Bank or Cash"',
+		'fillColor': '#DDA0DD'
 	},
 
 	{
 		'type': 'creation',
 		'doctype': 'Quotation',
-		'title': 'New Quotations'
+		'title': 'New Quotations',
+		'fillColor': '#ADD8E6'
 	},
 	
 	{
 		'type': 'creation',
 		'doctype': 'Sales Order',
-		'title': 'New Orders'
+		'title': 'New Orders',
+		'fillColor': '#ADD8E6'
 	}
 ]
 
-
 class DashboardWidget:
 	def __init__(self, company, start, end, interval):
-		import webnotes
 		from webnotes.utils import getdate
 		from webnotes.model.code import get_obj
+		import webnotes
 		
 		self.company = company
 		self.abbr = webnotes.conn.get_value('Company', company, 'abbr')
@@ -61,17 +66,20 @@ class DashboardWidget:
 		self.end = getdate(end)
 		
 		self.interval = interval
-		self.fiscal_year = webnotes.conn.sql("""
-			select name from `tabFiscal Year` 
-			where year_start_date <= %s and
-			DATE_ADD(year_start_date, INTERVAL 1 YEAR) >= %s
-			""", (start, start))[0][0]
+
 		self.glc = get_obj('GL Control')
 		self.cash_accounts = [d[0] for d in webnotes.conn.sql("""
 			select name from tabAccount 
 			where account_type='Bank or Cash'
 			and company = %s and docstatus = 0 
 			""", company)]
+			
+		self.receivables_group = webnotes.conn.get_value('Company', company,'receivables_group')
+		self.payables_group = webnotes.conn.get_value('Company', company,'payables_group')
+		
+		# list of bank and cash accounts
+		self.bc_list = [s[0] for s in webnotes.conn.sql("select name from tabAccount where account_type='Bank or Cash'")]
+
 		
 	def timeline(self):
 		"""
@@ -125,8 +133,19 @@ class DashboardWidget:
 			print acc
 			raise e
 		
-		return self.glc.get_as_on_balance(acc, self.fiscal_year, start, debit_or_credit, lft, rgt)
+		return self.glc.get_as_on_balance(acc, self.get_fiscal_year(start), start, debit_or_credit, lft, rgt)
 
+	def get_fiscal_year(self, dt):
+		"""
+			get fiscal year from date
+		"""
+		import webnotes
+		self.fiscal_year = webnotes.conn.sql("""
+			select name from `tabFiscal Year` 
+			where year_start_date <= %s and
+			DATE_ADD(year_start_date, INTERVAL 1 YEAR) >= %s
+			""", (dt, dt))[0][0]
+			
 	def get_creation_trend(self, doctype, start, end):
 		"""
 			Get creation # of creations in period
@@ -158,6 +177,26 @@ class DashboardWidget:
 		
 		return debit_or_credit=='Credit' and float(ret[1]-ret[0]) or float(ret[0]-ret[1])
 
+	def get_bank_amt(self, debit_or_credit, master_type, start, end):
+		"""
+			Get collection (reduction in receivables over a period)
+		"""
+		import webnotes
+
+		reg = '('+'|'.join(self.bc_list) + ')'
+
+		return webnotes.conn.sql("""
+		select sum(t1.%s)
+		from `tabGL Entry` t1, tabAccount t2
+		where t1.account = t2.name
+		and t2.master_type='%s'
+		and t1.%s > 0
+		and t1.against REGEXP '%s'
+		and ifnull(t1.is_cancelled, 'No')='No'
+		and t1.posting_date between '%s' and '%s'
+		""" % (debit_or_credit, master_type, debit_or_credit, reg, start, end))[0][0]
+
+
 	def value(self, opts, start, end):
 		"""
 			Value of the series on a particular date
@@ -170,17 +209,17 @@ class DashboardWidget:
 
 			return self.get_account_amt(opts['account'], start, end, debit_or_credit)
 		
-		elif opts['type']=='from_company':
-			acc = webnotes.conn.get_value('Company', self.company, \
-				opts['account'].split('.')[-1])
+		elif opts['type']=='receivables':
+			return self.get_account_balance(self.receivables_group, end)[2]
 			
-			return self.get_account_balance(acc, start)[2]
-						
-		elif opts['type']=='cash':
-			if opts['debit_or_credit']=='Credit':
-				return sum([self.get_account_amt(acc, start, end, opts['debit_or_credit']) for acc in self.cash_accounts]) or 0
-			elif opts['debit_or_credit']=='Debit':
-				return sum([self.get_account_amt(acc, start, end, opts['debit_or_credit']) for acc in self.cash_accounts]) or 0
+		elif opts['type']=='payables':
+			return self.get_account_balance(self.payables_group, end)[2]
+
+		elif opts['type']=='collection':
+			return self.get_bank_amt('credit', 'Customer', start, end)
+
+		elif opts['type']=='payments':
+			return self.get_bank_amt('credit', 'Supplier', start, end)
 			
 		elif opts['type']=='creation':
 			return self.get_creation_trend(opts['doctype'], start, end)
