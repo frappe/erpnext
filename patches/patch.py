@@ -2,6 +2,7 @@
 # ========================
 
 last_patch = 349
+
 #-------------------------------------------
 
 def execute(patch_no):
@@ -268,4 +269,4 @@ def execute(patch_no):
 		# reload profile with new fields for security
 		delete_doc('DocType', 'Profile')
 		reload_doc('core', 'doctype', 'profile')
-		
+
