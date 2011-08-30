@@ -141,7 +141,7 @@ class DashboardWidget:
 			get fiscal year from date
 		"""
 		import webnotes
-		self.fiscal_year = webnotes.conn.sql("""
+		return webnotes.conn.sql("""
 			select name from `tabFiscal Year` 
 			where year_start_date <= %s and
 			DATE_ADD(year_start_date, INTERVAL 1 YEAR) >= %s
@@ -220,7 +220,7 @@ class DashboardWidget:
 			return self.get_bank_amt('credit', 'Customer', start, end)
 
 		elif opts['type']=='payments':
-			return self.get_bank_amt('credit', 'Supplier', start, end)
+			return self.get_bank_amt('debit', 'Supplier', start, end)
 			
 		elif opts['type']=='creation':
 			return self.get_creation_trend(opts['doctype'], start, end)
