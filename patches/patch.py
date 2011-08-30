@@ -1,7 +1,7 @@
 # REMEMBER to update this
 # ========================
 
-last_patch = 346
+last_patch = 349
 #-------------------------------------------
 
 def execute(patch_no):
@@ -254,7 +254,18 @@ def execute(patch_no):
 		sql("delete from `tabModule Def Item` where display_name = 'Salary Slip Control Panel' and parent = 'HR'")
 		reload_doc('hr','Module Def','HR')
 	elif patch_no == 346:
+		pass
+	elif patch_no == 347:
+		sql("delete from `tabField Mapper Detail` where from_field = to_field and map = 'Yes' and ifnull(checking_operator, '') = ''")
+	elif patch_no == 348:
+		sql("update `tabStock Ledger Entry` set is_cancelled = 'No' where voucher_type = 'Serial No'")
+	elif patch_no == 349:
+		delete_doc('Custom Script', 'Update Series-Server')
+		delete_doc('Custom Script', 'Profile-Client')
+		delete_doc('Custom Script', 'Event-Client')
+		delete_doc('Custom Script', 'File-Server')
+	
+		# reload profile with new fields for security
 		delete_doc('DocType', 'Profile')
 		reload_doc('core', 'doctype', 'profile')
-		
 		

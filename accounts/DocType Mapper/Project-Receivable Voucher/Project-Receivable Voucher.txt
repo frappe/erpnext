@@ -14,7 +14,6 @@
 	{
 		'doctype': 'Table Mapper Detail',
 		'from_table': 'Project',
-		'idx': 1,
 		'match_id': 0,
 		'name': '__common__',
 		'parent': 'Project-Receivable Voucher',
@@ -26,13 +25,16 @@
 
 	# These values are common for all Field Mapper Detail
 	{
+		'checking_operator': '=',
 		'doctype': 'Field Mapper Detail',
+		'from_field': 'customer',
 		'map': 'Yes',
 		'match_id': 0,
 		'name': '__common__',
 		'parent': 'Project-Receivable Voucher',
 		'parentfield': 'field_mapper_details',
-		'parenttype': 'DocType Mapper'
+		'parenttype': 'DocType Mapper',
+		'to_field': 'customer'
 	},
 
 	# These values are common for all DocType Mapper
@@ -52,35 +54,7 @@
 
 	# Field Mapper Detail
 	{
-		'checking_operator': '=',
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'customer',
-		'idx': 1,
-		'to_field': 'customer'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'customer_name',
-		'idx': 2,
-		'to_field': 'customer_name'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'customer_address',
-		'idx': 3,
-		'to_field': 'customer_address'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'territory',
-		'idx': 4,
-		'to_field': 'territory'
+		'doctype': 'Field Mapper Detail'
 	},
 
 	# Table Mapper Detail
