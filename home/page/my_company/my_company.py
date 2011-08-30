@@ -129,3 +129,19 @@ def set_read_all_messages(arg=''):
 	WHERE comment_doctype = 'My Company'
 	AND comment_docname = %s
 	""", webnotes.user.name)
+
+def update_security(args=''):
+	import json
+	args = json.loads(args)
+	webnotes.conn.set_value('Profile', args['user'], 'restrict_ip', args.get('restrict_ip'))
+	webnotes.conn.set_value('Profile', args['user'], 'login_after', args.get('login_after'))
+	webnotes.conn.set_value('Profile', args['user'], 'login_before', args.get('login_before'))
+
+	if 'new_password' in args:
+		if cint(webnotes.conn.get_value('Control Panel',None,'sync_with_gateway')):
+			import server_tools.gateway_utils
+			webnotes.msgprint(server_tools.gateway_utils.change_password('', args['new_password'])['message'])
+		else:
+			webnotes.conn.sql("update tabProfile set password=password(%s) where name=%s", (args['new_password'], args['user']))
+
+	webnotes.msgprint('Settings Updated')

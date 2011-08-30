@@ -1,0 +1,73 @@
+# DocType, Item Customer Detail
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2011-08-18 11:38:43',
+		'docstatus': 0,
+		'modified': '2011-08-18 11:54:36',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all DocType
+	{
+		'autoname': 'ITEMCUST/.#####',
+		'colour': 'White:FFF',
+		'description': 'For the convenience of customers, these codes can be used in print formats like Invoices and Delivery Notes',
+		'doctype': 'DocType',
+		'in_create': 1,
+		'istable': 1,
+		'module': 'Stock',
+		'name': '__common__',
+		'read_only': 0,
+		'section_style': 'Tray',
+		'server_code_error': ' ',
+		'show_in_menu': 0,
+		'version': 7
+	},
+
+	# These values are common for all DocField
+	{
+		'doctype': 'DocField',
+		'in_filter': 1,
+		'name': '__common__',
+		'parent': 'Item Customer Detail',
+		'parentfield': 'fields',
+		'parenttype': 'DocType',
+		'permlevel': 0,
+		'reqd': 1,
+		'search_index': 1
+	},
+
+	# DocType, Item Customer Detail
+	{
+		'doctype': 'DocType',
+		'name': 'Item Customer Detail'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'customer_name',
+		'fieldtype': 'Link',
+		'idx': 1,
+		'label': 'Customer Name',
+		'oldfieldname': 'price_list_name',
+		'oldfieldtype': 'Select',
+		'options': 'Customer',
+		'width': '180px'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'ref_code',
+		'fieldtype': 'Data',
+		'idx': 2,
+		'label': 'Ref Code',
+		'oldfieldname': 'ref_rate',
+		'oldfieldtype': 'Currency',
+		'width': '120px'
+	}
+]

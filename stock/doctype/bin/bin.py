@@ -61,8 +61,8 @@ class DocType:
 			sr_count = sql("select count(name) from `tabSerial No` where item_code = '%s' and warehouse = '%s' and status  ='In Store' and docstatus != 2" % (self.doc.item_code, self.doc.warehouse))[0][0]
 			if sr_count != self.doc.actual_qty:
 				msg = "Actual Qty(%s) in Bin is mismatched with total number(%s) of serial no in store for item: '%s' and warehouse: '%s'" % (self.doc.actual_qty, sr_count, self.doc.item_code, self.doc.warehouse)
-				msgprint(msg, raise_exception=1)
 				sendmail(['developer@iwebnotes.com'], sender='automail@webnotestech.com', subject='Serial No Count vs Bin Actual Qty', parts=[['text/plain', msg]])			
+				msgprint(msg, raise_exception=1)
 
 	# --------------------------------
 	# get first stock ledger entry

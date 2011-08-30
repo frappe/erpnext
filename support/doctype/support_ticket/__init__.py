@@ -61,15 +61,15 @@ class SupportMailbox(POP3Mailbox):
 		d.status = 'Open'
 		try:
 			d.save(1)
+			# update feed
+			update_feed(d)
+
+			# send auto reply
+			self.send_auto_reply(d)
+
 		except:
 			d.description = 'Unable to extract message'
 			d.save(1)
-
-		# update feed
-		update_feed(d)
-		
-		# send auto reply
-		self.send_auto_reply(d)
 		
 	def send_auto_reply(self, d):
 		"""

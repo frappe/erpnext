@@ -47,19 +47,9 @@
 
 	# Field Mapper Detail
 	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'fiscal_year',
-		'idx': 1,
-		'match_id': 0,
-		'to_field': 'fiscal_year'
-	},
-
-	# Field Mapper Detail
-	{
 		'checking_operator': '=',
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'company',
-		'idx': 2,
 		'match_id': 0,
 		'to_field': 'company'
 	},
@@ -68,7 +58,6 @@
 	{
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'parenttype',
-		'idx': 3,
 		'match_id': 1,
 		'to_field': 'prevdoc_doctype'
 	},
@@ -77,7 +66,6 @@
 	{
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'parent',
-		'idx': 4,
 		'match_id': 1,
 		'to_field': 'prevdoc_docname'
 	},
@@ -86,7 +74,6 @@
 	{
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'name',
-		'idx': 5,
 		'match_id': 1,
 		'to_field': 'prevdoc_detail_docname'
 	},
@@ -95,7 +82,6 @@
 	{
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'uom',
-		'idx': 6,
 		'match_id': 1,
 		'to_field': 'stock_uom'
 	},
@@ -104,7 +90,6 @@
 	{
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'eval:flt(1)',
-		'idx': 7,
 		'match_id': 1,
 		'to_field': 'conversion_factor'
 	},
@@ -112,80 +97,7 @@
 	# Field Mapper Detail
 	{
 		'doctype': 'Field Mapper Detail',
-		'from_field': 'uom',
-		'idx': 8,
-		'match_id': 1,
-		'to_field': 'uom'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'warehouse',
-		'idx': 9,
-		'match_id': 1,
-		'to_field': 'warehouse'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'schedule_date',
-		'idx': 10,
-		'match_id': 1,
-		'to_field': 'schedule_date'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'item_code',
-		'idx': 11,
-		'match_id': 1,
-		'to_field': 'item_code'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'item_name',
-		'idx': 12,
-		'match_id': 1,
-		'to_field': 'item_name'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'brand',
-		'idx': 13,
-		'match_id': 1,
-		'to_field': 'brand'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'description',
-		'idx': 14,
-		'match_id': 1,
-		'to_field': 'description'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'item_group',
-		'idx': 15,
-		'match_id': 1,
-		'to_field': 'item_group'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
 		'from_field': 'eval:flt(obj.qty) - flt(obj.ordered_qty)',
-		'idx': 16,
 		'match_id': 1,
 		'to_field': 'stock_qty'
 	},
@@ -194,7 +106,6 @@
 	{
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'eval:flt(obj.qty) - flt(obj.ordered_qty)',
-		'idx': 17,
 		'match_id': 1,
 		'to_field': 'qty'
 	},
@@ -203,7 +114,6 @@
 	{
 		'doctype': 'Table Mapper Detail',
 		'from_table': 'Indent',
-		'idx': 1,
 		'match_id': 0,
 		'reference_key': 'prevdoc_docname',
 		'to_table': 'Purchase Order',
@@ -215,7 +125,6 @@
 		'doctype': 'Table Mapper Detail',
 		'from_field': 'indent_details',
 		'from_table': 'Indent Detail',
-		'idx': 2,
 		'match_id': 1,
 		'reference_doctype_key': 'prevdoc_doctype',
 		'to_field': 'po_details',

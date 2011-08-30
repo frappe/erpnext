@@ -128,7 +128,7 @@ KBAnswerList = function(args) {
 			as_dict: 1,
 			no_results_message: 'No answers yet, be the first one to answer!',
 			render_row: function(body, data) {
-				new KBAnswer(body, data)
+				new KBAnswer(body, data, me)
 			},
 			get_query: function() {
 				return repl("SELECT t1.name, t1.owner, t1.answer, t1.points, t1._users_voted, t2.first_name, "
@@ -150,7 +150,7 @@ KBAnswerList = function(args) {
 // answer
 // by xxx | on xxx
 // points yyy
-KBAnswer = function(body, data) {
+KBAnswer = function(body, data, ans_list) {
 	body.className = 'qv-answer';
 	new EditableText({
 		parent: body,
@@ -169,7 +169,7 @@ KBAnswer = function(body, data) {
 		det: data,
 		with_tags: 0,
 		doctype: 'Answer'
-	}, null)
+	}, ans_list)
 	
 }
 
