@@ -131,11 +131,6 @@ def append_colnames(name, colnames, coltypes, colwidths, coloptions, col_idx):
     col_idx[str(c) + n ] = len(colnames) - 1
 
 
-
-# make default columns
-#coltypes[col_idx[based_on]] = 'Link'
-#coloptions[col_idx[based_on]]= based_on
-
 # get start date
 start_date = get_value('Fiscal Year', fiscal_year, 'year_start_date')
 if not start_date:
@@ -162,7 +157,7 @@ for r in res:
 
     ch = make_child_lst(based_on,r[0].strip())
    
-    actual = sql("select sum(ifnull(t1.debit,0))-sum(ifnull(t1.credit,0)) from `tabGL Entry` t1, `tabAccount` t2 where t2.is_pl_account = 'Yes' and t1.is_cancelled = 'No' and t1.cost_center in %s and t2.debit_or_credit = 'Debit' and t1.posting_date between '%s' and '%s' and t1.account = t2.name"%(ch, mon_list[count][data['start_date']], mon_list[count][data['end_date']]))
+    actual = sql("select sum(ifnull(t1.debit,0))-sum(ifnull(t1.credit,0)) from `tabGL Entry` t1, `tabAccount` t2 where ifnull(t2.is_pl_account, 'No') = 'Yes' and ifnull(t1.is_cancelled, 'No') = 'No' and t1.cost_center in %s and t2.debit_or_credit = 'Debit' and t1.posting_date between '%s' and '%s' and t1.account = t2.name"%(ch, mon_list[count][data['start_date']], mon_list[count][data['end_date']]))
    
     #----------------------------------------------------------
     actual = flt(actual[0][0])
