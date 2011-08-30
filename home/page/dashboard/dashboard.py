@@ -107,11 +107,12 @@ class DashboardWidget:
 		"""
 			Generate the dasboard
 		"""
+		from webnotes.utils import flt
 		tl = self.timeline()
 		self.out = []
 		
 		for i in range(len(tl)-1):
-			self.out.append([tl[i+1].strftime('%Y-%m-%d'), self.value(opts, tl[i], tl[i+1]) or 0])
+			self.out.append([tl[i+1].strftime('%Y-%m-%d'), flt(self.value(opts, tl[i], tl[i+1])) or 0])
 			
 		return self.out
 
