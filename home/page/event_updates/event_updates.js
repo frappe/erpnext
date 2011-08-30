@@ -431,8 +431,8 @@ FeedList.prototype.make_head = function() {
 	// head
 
 	$a(this.head,'h1','', {display:'inline'}, 'Home'); 
-	$a(this.head,'span','link_type', {marginLeft:'7px'}, '[?]', function() {
-		msgprint('<b>What appears here?</b> This is where you get updates of everything you are allowed to access and generates an update')
+	$a(this.head,'span','link_type', {marginLeft:'7px'}, 'help', function() {
+		msgprint('<b>What appears here?</b> This is where you get updates of everything you are permitted to follow')
 	})
 
 	// refresh
@@ -440,6 +440,11 @@ FeedList.prototype.make_head = function() {
 		{cursor:'pointer', marginLeft:'7px', fontSize:'11px'}, 'refresh',
 		function() { me.run(); }
 	);
+	
+	if(has_common(user_roles, ['System Manager','Accounts Manager'])) {
+		$btn(this.head, 'Dashboard', function() {loadpage('dashboard'); }, {marginLeft:'7px'})
+		
+	}
 }
 
 FeedList.prototype.run = function() {
@@ -589,14 +594,15 @@ HomeStatusBar = function() {
 	
 	this.render = function(r) {
 		this.wrapper.innerHTML = '';
-		this.span = $a(this.wrapper, 'span', 'home-status-link')
+		this.span = $a(this.wrapper, 'span', 'link_type', {fontWeight:'bold'});
 		this.span.onclick = function() { loadpage('My Company')	}
 		
 		if(r.unread_messages) {
-			this.span.innerHTML = '<span class="home-status-unread">' + r.unread_messages + '</span> unread message' + (cint(r.unread_messages) > 1 ? 's' : '');
+			this.span.innerHTML = '<span class="home-status-unread">' + r.unread_messages + '</span> unread';
 		} else {
-			this.span.innerHTML = 'No unread messages.';
+			this.span.innerHTML = 'Team / Messages';			
 		}
+		
 	}
 }
 
