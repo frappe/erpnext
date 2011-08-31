@@ -571,19 +571,17 @@ pscript.feature_dict = {
 	'discounts': {
 		'Delivery Note': {'delivery_note_details':['adj_rate']},
 		'Quotation': {'quotation_details':['adj_rate']},
-		'Receivable Voucher': {'rv_details':['adj_rate']},
-		'Sales Order': {'sale_order_details':['adj_rate']}
+		'Receivable Voucher': {'entries':['adj_rate']},
+		'Sales Order': {'sales_order_details':['adj_rate']}
 	},
 	'brands': {
 		'Delivery Note': {'delivery_note_details':['brand']},
-		'Enquiry': {'enquiry_details':['brand']},
 		'Indent': {'indent_details':['brand']},
 		'Item': {'fields':['brand']},
 		'Purchase Order': {'po_details':['brand']},
-		'Purchase Receipt': {'purchase_receipt_details':['brand']},
-		'Payable Voucher': {'pv_details':['brand']},
+		'Payable Voucher': {'entries':['brand']},
 		'Quotation': {'quotation_details':['brand']},
-		'Receivable Voucher': {'rv_details':['brand']},
+		'Receivable Voucher': {'entries':['brand']},
 		'Sales BOM': {'fields':['new_item_brand']},
 		'Sales Order': {'sales_order_details':['brand']},
 		'Serial No': {'fields':['brand']}
@@ -597,13 +595,13 @@ pscript.feature_dict = {
 		'Purchase Receipt': {'purchase_receipt_details':['batch_no']},
 		'QA Inspection Report': {'fields':['batch_no']},
 		'Sales and Pruchase Return Wizard': {'return_details':['batch_no']},
-		'Receivable Voucher': {'rv_details':['batch_no']},
-		'Stock Entry': {'stock_entry_details':['batch_no']},
+		'Receivable Voucher': {'entries':['batch_no']},
+		'Stock Entry': {'mtn_details':['batch_no']},
 		'Stock Ledger Entry': {'fields':['batch_no']}
 	},
 	'item_serial_nos': {
 		'Customer Issue': {'fields':['serial_no']},
-		'Delivery Note': {'delivery_note_details':['serial_no'],'delivery_note_packing_details':['serial_no']},
+		'Delivery Note': {'delivery_note_details':['serial_no'],'packing_details':['serial_no']},
 		'Installation Note': {'installed_item_details':['serial_no']},
 		'Item': {'fields':['has_serial_no']},
 		'Maintenance Schedule': {'item_maintenance_details':['serial_no'],'maintenance_schedule_details':['serial_no']},
@@ -611,8 +609,8 @@ pscript.feature_dict = {
 		'Purchase Receipt': {'purchase_receipt_details':['serial_no']},
 		'QA Inspection Report': {'fields':['item_serial_no']},
 		'Sales and Pruchase Return Wizard': {'return_details':['serial_no']},
-		'Receivable Voucher': {'rv_details':['serial_no']},
-		'Stock Entry': {'stock_entry_details':['serial_no']},
+		'Receivable Voucher': {'entries':['serial_no']},
+		'Stock Entry': {'mtn_details':['serial_no']},
 		'Stock Ledger Entry': {'fields':['serial_no']}
 	},
 	'item_groups_in_details': {
@@ -623,9 +621,9 @@ pscript.feature_dict = {
 		'Manage Account': {'fields':['default_item_group']},
 		'Purchase Order': {'po_details':['item_group']},
 		'Purchase Receipt': {'purchase_receipt_details':['item_group']},
-		'Purchase Voucher': {'pv_details':['item_group']},
+		'Purchase Voucher': {'entries':['item_group']},
 		'Quotation': {'quotation_details':['item_group']},
-		'Receivable Voucher': {'rv_details':['item_group']},
+		'Receivable Voucher': {'entries':['item_group']},
 		'Sales BOM': {'fields':['serial_no']},
 		'Sales Order': {'sales_order_details':['item_group']},
 		'Serial No': {'fields':['item_group']},
@@ -634,48 +632,67 @@ pscript.feature_dict = {
 		'Territory': {'target_details':['item_group']}
 	},
 	'page_break': {
-		'Delivery Note': {'delivery_note_details':['page_break'],'delivery_note_packing_details':['page_break']},
+		'Delivery Note': {'delivery_note_details':['page_break'],'packing_details':['page_break']},
 		'Indent': {'indent_details':['page_break']},
 		'Purchase Order': {'po_details':['page_break']},
 		'Purchase Receipt': {'purchase_receipt_details':['page_break']},
-		'Purchase Voucher': {'pv_details':['page_break']},
+		'Purchase Voucher': {'entries':['page_break']},
 		'Quotation': {'quotation_details':['page_break']},
-		'Receivable Voucher': {'rv_details':['page_break']},
+		'Receivable Voucher': {'entries':['page_break']},
 		'Sales Order': {'sales_order_details':['page_break']}
 	},
-	'multi_currency': {
-		'Delivery Note': {'fields':['currency','conversion_rate']},
-		'Payable Voucher': {'fields':['currency','conversion_rate']},
-		'POS Setting': {'fields':['currency','conversion_rate']},
-		'Purchase Order': {'fields':['currency','conversion_rate']},
-		'Purchase Receipt': {'fields':['currency','conversion_rate']},
-		'Quotation': {'fields':['currency','conversion_rate']},
-		'Receivable Voucher': {'fields':['currency','conversion_rate']},
-		'Quotation': {'fields':['currency','conversion_rate']},
-		'Item': {'ref_rate_details':['currency']},
-		'Sales BOM': {'fields':['currency']},
-		'Sales Order': {'fields':['currency','conversion_rate']},
-		'Supplier Quotation': {'fields':['currency','conversion_rate']}
-	},
 	'exports': {
-		'Delivery Note': {'fields':['currency','conversion_rate','Note','grand_total_export','in_words_export','rounded_total_export'],'delivery_note_details':['base_ref_rate','export_amount','export_rate',]},
-		'POS Setting': {'fields':['currency','conversion_rate']},
-		'Quotation': {'fields':['currency','conversion_rate']},
-		'Receivable Voucher': {'fields':['currency','conversion_rate']},
-		'Quotation': {'fields':['currency','conversion_rate']},
-		'Item': {'ref_rate_details':['currency']},
+		'Delivery Note': {'fields':['Note','conversion_rate','currency','grand_total_export','in_words_export','rounded_total_export'],'delivery_note_details':['base_ref_rate','export_amount','export_rate']},
+		'POS Setting': {'fields':['conversion_rate','currency']},
+		'Quotation': {'fields':['Note HTML','OT Notes','conversion_rate','currency','grand_total_export','in_words_export','rounded_total_export'],'quotation_details':['base_ref_rate','export_amount','export_rate']},
+		'Receivable Voucher': {'fields':['conversion_rate','currency','grand_total_export','in_words_export','rounded_total_export'],'entries':['base_ref_rate','export_amount','export_rate']},
+		'Item': {'ref_rate_details':['ref_currency']},
 		'Sales BOM': {'fields':['currency']},
-		'Sales Order': {'fields':['currency','conversion_rate']},
-		'Supplier Quotation': {'fields':['currency','conversion_rate']}
+		'Sales Order': {'fields':['Note1','OT Notes','conversion_rate','currency','grand_total_export','in_words_export','rounded_total_export'],'sales_order_details':['base_ref_rate','export_amount','export_rate']},
+		'Supplier Quotation': {'fields':['conversion_rate','currency']}
 	},
 	'imports': {
-		'Payable Voucher': {'fields':['currency','conversion_rate']},
-		'Purchase Order': {'fields':['currency','conversion_rate']},
-		'Purchase Receipt': {'fields':['currency','conversion_rate']},
-		'Receivable Voucher': {'fields':['currency','conversion_rate']},
-		'Supplier Quotation': {'fields':['currency','conversion_rate']}
+		'Payable Voucher': {'fields':['conversion_rate','currency','grand_total_import','in_words_import','net_total_import','other_charges_added_import','other_charges_deducted_import'],'entries':['import_amount','import_rate']},
+		'Purchase Order': {'fields':['Note HTML','conversion_rate','currency','grand_total_import','in_words_import','net_total_import','other_charges_added_import','other_charges_deducted_import'],'po_details':['import_amount','import_rate']},
+		'Purchase Receipt': {'fields':['conversion_rate','currency','grand_total_import','in_words_import','net_total_import','other_charges_added_import','other_charges_deducted_import'],'purchase_receipt_details':['import_amount','import_rate']}
+	},
+	'item_advanced': {
+		'Item': {'fields':['item_customer_details']}
+	},
+	'sales_extras': {
+		'Address': {'fields':['sales_partner']},
+		'Contact': {'fields':['sales_partner']},
+		'Customer': {'fields':['sales_team']},
+		'Delivery Note': {'fields':['sales_team','Packing List']},
+		'Item': {'fields':['item_customer_details']},
+		'Receivable Voucher': {'fields':['sales_team']},
+		'Sales Order': {'fields':['sales_team','Packing List']}
+	},
+	'more_info': {
+		'Customer': {'fields':['More Info']},
+		'Delivery Note': {'fields':['More Info']},
+		'Enquiry': {'fields':['More Info']},
+		'Indent': {'fields':['More Info']},
+		'Lead': {'fields':['More Info']},
+		'Payable Voucher': {'fields':['More Info']},
+		'Purchase Order': {'fields':['More Info']},
+		'Purchase Receipt': {'fields':['More Info']},
+		'Quotation': {'fields':['More Info']},
+		'Receivable Voucher': {'fields':['More Info']},
+		'Sales Order': {'fields':['More Info']},
+		'Serial No': {'fields':['More Info']},
+		'Supplier': {'fields':['More Info']}
+	},
+	'quality': {
+		'Item': {'fields':['Item Inspection Criteria','inspection_required']},
+		'Purchase Receipt': {'purchase_receipt_details':['qa_no']}
+	},
+	'manufacturing': {
+		'Item': {'fields':['Manufacturing']}
+	},
+	'pos': {
+		'Receivable Voucher': {'fields':['is_pos']}
 	}
-
 }
 
 $(document).bind('form_refresh', function() {
@@ -689,14 +706,13 @@ $(document).bind('form_refresh', function() {
 				{
 					if(fort=='fields')
 						hide_field(pscript.feature_dict[sys_feat][cur_frm.doc.doctype][fort]);
-					else
+					else if(cur_frm.fields_dict[fort])
 					{
 						for(grid_field in pscript.feature_dict[sys_feat][cur_frm.doc.doctype][fort])
-							if(cur_frm.fields_dict[fort])
-								cur_frm.fields_dict[fort].grid.set_column_disp(pscript.feature_dict[sys_feat][cur_frm.doc.doctype][fort][grid_field], false);
-							else
-								alert('Grid "'+fort+'" does not exists');
+							cur_frm.fields_dict[fort].grid.set_column_disp(pscript.feature_dict[sys_feat][cur_frm.doc.doctype][fort][grid_field], false);
 					}
+					else
+						msgprint('Grid "'+fort+'" does not exists');
 				}
 			}
 		}

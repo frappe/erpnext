@@ -5,28 +5,28 @@
 	{
 		'creation': '2011-08-25 16:53:56',
 		'docstatus': 0,
-		'modified': '2011-08-29 13:16:51',
+		'modified': '2011-08-30 14:27:18',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1314601410',
+		'_last_update': '1314692719',
 		'colour': 'White:FFF',
 		'doctype': 'DocType',
 		'issingle': 1,
 		'module': 'Setup',
 		'name': '__common__',
+		'name_case': 'Title Case',
 		'section_style': 'Simple',
 		'show_in_menu': 1,
-		'version': 6
+		'version': 9
 	},
 
 	# These values are common for all DocField
 	{
 		'doctype': 'DocField',
-		'fieldtype': 'Check',
 		'name': '__common__',
 		'parent': 'Features Setup',
 		'parentfield': 'fields',
@@ -70,6 +70,7 @@
 		'description': 'Available in \nBill Of Materials, Delivery Note, Payable Voucher, Production Order, Purchase Order, Purchase Receipt, Receivable Voucher, Sales Order, Stock Entry, Timesheet',
 		'doctype': 'DocField',
 		'fieldname': 'projects',
+		'fieldtype': 'Check',
 		'label': 'Projects'
 	},
 
@@ -79,6 +80,7 @@
 		'description': 'Available in Delivery Note and Sales Order',
 		'doctype': 'DocField',
 		'fieldname': 'packing_details',
+		'fieldtype': 'Check',
 		'label': 'Packing Detials'
 	},
 
@@ -88,6 +90,7 @@
 		'description': 'Available in Delivery Note, Quotation, Receivable Voucher, Sales Order',
 		'doctype': 'DocField',
 		'fieldname': 'discounts',
+		'fieldtype': 'Check',
 		'label': 'Discounts'
 	},
 
@@ -97,6 +100,7 @@
 		'description': 'Availble in Delivery Note, Enuiry, Indent, Item, Purchase Order, Purchase Voucher, Purchaser Receipt, Quotation, Receivable Voucher, Sales BOM, Sales Order, Serial No',
 		'doctype': 'DocField',
 		'fieldname': 'brands',
+		'fieldtype': 'Check',
 		'label': 'Brands'
 	},
 
@@ -104,20 +108,15 @@
 	{
 		'doctype': 'DocField',
 		'fieldname': 'after_sale_installations',
+		'fieldtype': 'Check',
 		'label': 'After Sale Installations'
 	},
 
 	# DocField
 	{
 		'doctype': 'DocField',
-		'fieldname': 'warehouses',
-		'label': 'Warehouses'
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
 		'fieldname': 'item_batch_nos',
+		'fieldtype': 'Check',
 		'label': 'Item Batch Nos'
 	},
 
@@ -125,6 +124,7 @@
 	{
 		'doctype': 'DocField',
 		'fieldname': 'item_searial_nos',
+		'fieldtype': 'Check',
 		'label': 'Item Serial Nos'
 	},
 
@@ -133,20 +133,85 @@
 		'colour': 'White:FFF',
 		'doctype': 'DocField',
 		'fieldname': 'page_break',
+		'fieldtype': 'Check',
 		'label': 'Page Break'
 	},
 
 	# DocField
 	{
 		'doctype': 'DocField',
+		'fieldtype': 'Column Break'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
 		'fieldname': 'item_groups_in_groups',
+		'fieldtype': 'Check',
 		'label': 'Item Groups in Details'
 	},
 
 	# DocField
 	{
 		'doctype': 'DocField',
-		'fieldname': 'ref_rates',
-		'label': 'Ref Rates'
+		'fieldname': 'more_info',
+		'fieldtype': 'Check',
+		'label': 'More Info'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'exports',
+		'fieldtype': 'Check',
+		'label': 'Exports'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'imports',
+		'fieldtype': 'Check',
+		'label': 'Imports'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'item_advanced',
+		'fieldtype': 'Check',
+		'label': 'Item Advanced'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'sales_extras',
+		'fieldtype': 'Check',
+		'label': 'Sales Extras'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'quality',
+		'fieldtype': 'Check',
+		'label': 'Quality'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'manufacturing',
+		'fieldtype': 'Check',
+		'label': 'Manufacturing'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'pos',
+		'fieldtype': 'Check',
+		'label': 'Point of Sale'
 	}
 ]
