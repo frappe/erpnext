@@ -5,8 +5,8 @@
 	{
 		'creation': '2010-08-08 17:09:19',
 		'docstatus': 0,
-		'modified': '2010-09-20 14:06:57',
-		'modified_by': 'umair@iwebnotes.com',
+		'modified': '2011-08-31 11:36:41',
+		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
 
@@ -23,7 +23,7 @@
 		'section_style': 'Tray',
 		'server_code_error': ' ',
 		'show_in_menu': 0,
-		'version': 2
+		'version': 3
 	},
 
 	# These values are common for all DocField
@@ -34,7 +34,8 @@
 		'parent': 'Ref Rate Detail',
 		'parentfield': 'fields',
 		'parenttype': 'DocType',
-		'permlevel': 0
+		'permlevel': 0,
+		'search_index': 1
 	},
 
 	# DocType, Ref Rate Detail
@@ -48,13 +49,12 @@
 		'doctype': 'DocField',
 		'fieldname': 'price_list_name',
 		'fieldtype': 'Select',
-		'idx': 1,
 		'label': 'Price List Name',
 		'oldfieldname': 'price_list_name',
 		'oldfieldtype': 'Select',
 		'options': 'link:Price List',
 		'reqd': 1,
-		'search_index': 1
+		'trigger': 'Client'
 	},
 
 	# DocField
@@ -62,12 +62,10 @@
 		'doctype': 'DocField',
 		'fieldname': 'ref_rate',
 		'fieldtype': 'Currency',
-		'idx': 2,
 		'label': 'Ref Rate',
 		'oldfieldname': 'ref_rate',
 		'oldfieldtype': 'Currency',
-		'reqd': 0,
-		'search_index': 0
+		'reqd': 0
 	},
 
 	# DocField
@@ -75,12 +73,10 @@
 		'doctype': 'DocField',
 		'fieldname': 'ref_currency',
 		'fieldtype': 'Select',
-		'idx': 3,
 		'label': 'Currency',
 		'oldfieldname': 'ref_currency',
 		'oldfieldtype': 'Select',
 		'options': 'link:Currency',
-		'reqd': 1,
-		'search_index': 1
+		'reqd': 1
 	}
 ]

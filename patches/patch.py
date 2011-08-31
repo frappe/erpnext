@@ -2,7 +2,7 @@
 # ========================
 
 
-last_patch = 351
+last_patch = 352
 
 #-------------------------------------------
 
@@ -268,7 +268,7 @@ def execute(patch_no):
 		delete_doc('Custom Script', 'Profile-Client')
 		delete_doc('Custom Script', 'Event-Client')
 		delete_doc('Custom Script', 'File-Server')
-	
+
 		# reload profile with new fields for security
 		delete_doc('DocType', 'Profile')
 		reload_doc('core', 'doctype', 'profile')
@@ -277,3 +277,7 @@ def execute(patch_no):
 		reload_doc('stock', 'doctype', 'item_customer_detail')
 	elif patch_no == 351:
 		reload_doc('home', 'page', 'dashboard')
+	elif patch_no == 352:
+		reload_doc('setup', 'doctype','feature_setup')
+		reload_doc('stock','doctype','item')
+		sql("update tabDocField set label='Produced Qty',description='Updated after finished goods are transferred to FG Warehouse through Stock Entry' where parent='Production Order' and fieldname='produced_qty'")

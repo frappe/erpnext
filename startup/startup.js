@@ -572,7 +572,7 @@ pscript.feature_dict = {
 		'Delivery Note': {'delivery_note_details':['adj_rate']},
 		'Quotation': {'quotation_details':['adj_rate']},
 		'Receivable Voucher': {'entries':['adj_rate']},
-		'Sales Order': {'sales_order_details':['adj_rate']}
+		'Sales Order': {'sales_order_details':['adj_rate','ref_rate']}
 	},
 	'brands': {
 		'Delivery Note': {'delivery_note_details':['brand']},
@@ -586,7 +586,7 @@ pscript.feature_dict = {
 		'Sales Order': {'sales_order_details':['brand']},
 		'Serial No': {'fields':['brand']}
 	},
-	'after_sale_installations': {
+	'after_sales_installations': {
 		'Delivery Note': {'fields':['installation_status','per_installed'],'delivery_note_details':['installed_qty']}
 	},
 	'item_batch_nos': {
@@ -613,7 +613,7 @@ pscript.feature_dict = {
 		'Stock Entry': {'mtn_details':['serial_no']},
 		'Stock Ledger Entry': {'fields':['serial_no']}
 	},
-	'item_groups_in_details': {
+	'item_group_in_details': {
 		'Delivery Note': {'delivery_note_details':['item_group']},
 		'Enquiry': {'enquiry_details':['item_group']},
 		'Indent': {'indent_details':['item_group']},
@@ -718,5 +718,3 @@ $(document).bind('form_refresh', function() {
 		}
 	}
 })
-
-$(document).bind('form_refresh', function() { })

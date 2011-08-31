@@ -5,14 +5,14 @@
 	{
 		'creation': '2011-08-25 16:53:56',
 		'docstatus': 0,
-		'modified': '2011-08-30 14:27:18',
+		'modified': '2011-08-31 09:31:39',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1314692719',
+		'_last_update': '1314763100',
 		'colour': 'White:FFF',
 		'doctype': 'DocType',
 		'issingle': 1,
@@ -21,7 +21,7 @@
 		'name_case': 'Title Case',
 		'section_style': 'Simple',
 		'show_in_menu': 1,
-		'version': 9
+		'version': 11
 	},
 
 	# These values are common for all DocField
@@ -107,7 +107,7 @@
 	# DocField
 	{
 		'doctype': 'DocField',
-		'fieldname': 'after_sale_installations',
+		'fieldname': 'after_sales_installations',
 		'fieldtype': 'Check',
 		'label': 'After Sale Installations'
 	},
@@ -146,7 +146,7 @@
 	# DocField
 	{
 		'doctype': 'DocField',
-		'fieldname': 'item_groups_in_groups',
+		'fieldname': 'item_group_in_details',
 		'fieldtype': 'Check',
 		'label': 'Item Groups in Details'
 	},
