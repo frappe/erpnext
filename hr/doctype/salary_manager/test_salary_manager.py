@@ -5,7 +5,7 @@ from webnotes.model.doc import Document
 from webnotes.model.code import get_obj
 sql = webnotes.conn.sql
 
-class TestSalarySlip(unittest.TestCase):
+class TestSalaryManager(unittest.TestCase):
 	def setUp(self):
 		webnotes.conn.begin()
 		for rec in [des1, dep1, branch1, grade1, comp1, emp1, emp2]:
