@@ -1,7 +1,9 @@
 # REMEMBER to update this
 # ========================
 
-last_patch = 350
+
+last_patch = 351
+
 #-------------------------------------------
 
 def execute(patch_no):
@@ -273,3 +275,5 @@ def execute(patch_no):
 	elif patch_no == 350:
 		reload_doc('stock', 'doctype', 'delivery_note_detail')
 		reload_doc('stock', 'doctype', 'item_customer_detail')
+	elif patch_no == 351:
+		reload_doc('home', 'page', 'dashboard')
