@@ -28,18 +28,11 @@ def get_status_details(arg=None):
 		
 	online = get_online_users()
 			
-	# system messages
-	msg_id = webnotes.conn.get_global('system_message_id')
-	msg = ''
-				
-	if msg_id and msg_id != webnotes.conn.get_global('system_message_id', webnotes.session['user']):
-		msg = webnotes.conn.get_global('system_message')
-			
+	# system messages			
 	ret = {
 		'user_count': len(online) or 0, 
 		'unread_messages': get_unread_messages(),
 		'online_users': online or [],
-		'system_message':msg,
 		'is_trial': webnotes.conn.get_global('is_trial'),
 		'days_to_expiry': (webnotes.conn.get_global('days_to_expiry') or '0'),
 		'setup_status': get_setup_status()
@@ -56,9 +49,20 @@ def get_setup_status():
 	percent = 20
 	ret = []
 	
-	header = webnotes.conn.get_value('Control Panel', None, 'client_name') or ''
-	if header.startswith('<div style="padding:4px; font-size:20px;">'\
-		+webnotes.conn.get_value('Control Panel', None, 'company_name')):
+	def is_header_set():
+		header = webnotes.conn.get_value('Control Panel', None, 'client_name') or ''
+
+		if header.startswith('<div style="padding:4px; font-size:20px;">'\
+			+webnotes.conn.get_value('Control Panel', None, 'company_name')):
+			return False
+			
+		elif 'Banner Comes Here' in header:
+			return False
+			
+		else:
+			return True
+	
+	if not is_header_set():
 		ret.append('<a href="#!Form/Personalize/Personalize">Upload your company banner</a>')
 	else:
 		percent += 20

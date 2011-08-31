@@ -1,7 +1,8 @@
 # REMEMBER to update this
 # ========================
 
-last_patch = 349
+last_patch = 350
+
 #-------------------------------------------
 
 def execute(patch_no):
@@ -268,4 +269,6 @@ def execute(patch_no):
 		# reload profile with new fields for security
 		delete_doc('DocType', 'Profile')
 		reload_doc('core', 'doctype', 'profile')
-		
+	elif patch_no == 350:
+		reload_doc('stock', 'doctype', 'delivery_note_detail')
+		reload_doc('stock', 'doctype', 'item_customer_detail')

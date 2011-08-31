@@ -657,7 +657,7 @@ MemberCoversationComment = function(cell, det, conv) {
 	}
 
 	var st = (!det.docstatus ? {fontWeight: 'bold'} : null);
-	this.msg = $a(this.comment, 'span', 'social', st, ': ' + det.creation);
+	this.msg = $a(this.comment, 'span', 'social', st, ': ' + det.comment);
 
 	if(det.full_name==user) {
 		$y(this.wrapper, {backgroundColor: '#D9D9F3'});

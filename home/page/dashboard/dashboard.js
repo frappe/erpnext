@@ -10,12 +10,12 @@ pscript.onload_dashboard = function() {
 
 	pscript.dashboard_settings = {
 		company: sys_defaults.company,
-		start: dateutil.obj_to_str(dateutil.add_days(new Date(), -60)),
+		start: dateutil.obj_to_str(dateutil.add_days(new Date(), -180)),
 		end: dateutil.obj_to_str(new Date()),
-		interval: 7
+		interval: 30
 	}
 	
-	var ph = new PageHeader($('.dashboard .header').get(0), 'Dashboards');
+	var ph = new PageHeader($('.dashboard .header').get(0), 'Dashboard');
 	var db = new Dashboard();
 
 	ph.add_button('Settings', db.show_settings);
@@ -46,17 +46,19 @@ Dashboard = function() {
 				// give an id!
 				var cell = $td(t,ridx,cidx);
 				var title = $a(cell, 'div', 'dashboard-title', '', data[i][0].title);
-				var parent = $a(cell, 'div', 'dashboard-graph')
+				var parent = $a(cell, 'div', 'dashboard-graph');
+				if(data[i][0].comment);
+					var comment = $a(cell, 'div', 'comment', '', data[i][0].comment)
 				
 				parent.id = '_dashboard' + ridx + '-' + cidx;
 				
 				// render graph
-				me.render_graph(parent.id, data[i][1]);
+				me.render_graph(parent.id, data[i][1], data[i][0].fillColor);
 				cidx++;
 			}
 		},
 		
-		render_graph: function(parent, values) {
+		render_graph: function(parent, values, fillColor) {
 			var vl = [];
 			$.each(values, function(i,v) { 
 				vl.push([dateutil.str_to_user(v[0]), v[1]]);
@@ -84,7 +86,8 @@ Dashboard = function() {
 						pad: 1.05,
 						tickOptions: {formatString: '%d'}
 					}
-				}
+				},
+				seriesColors: [fillColor]
 			});
 		},
 		

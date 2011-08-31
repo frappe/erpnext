@@ -35,3 +35,11 @@ def vote(arg):
 		(p, cstr(res[1]) + ',' + webnotes.user.name, args['dn']))
 	
 	return p
+
+def delete(arg):
+	"""
+		delete a question or answer (called from kb toolbar)
+	"""
+	args = load_json(arg)
+	from webnotes.model import delete_doc
+	delete_doc(args['dt'], args['dn'])
