@@ -1,7 +1,8 @@
 # REMEMBER to update this
 # ========================
 
-last_patch = 350
+
+last_patch = 351
 
 #-------------------------------------------
 
@@ -252,6 +253,8 @@ def execute(patch_no):
 	elif patch_no == 344:
 		sql("delete from `tabDocFormat` where ifnull(format, '') = '' and parent = 'Delivery Note'")
 	elif patch_no == 345:
+		# rerun 343 (merge confict)
+		reload_doc('stock','doctype','item_customer_detail')
 		sql("delete from `tabModule Def Item` where display_name = 'Salary Slip Control Panel' and parent = 'HR'")
 		reload_doc('hr','Module Def','HR')
 	elif patch_no == 346:
@@ -272,3 +275,5 @@ def execute(patch_no):
 	elif patch_no == 350:
 		reload_doc('stock', 'doctype', 'delivery_note_detail')
 		reload_doc('stock', 'doctype', 'item_customer_detail')
+	elif patch_no == 351:
+		reload_doc('home', 'page', 'dashboard')
