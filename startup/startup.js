@@ -648,13 +648,13 @@ pscript.feature_dict = {
 		'Receivable Voucher': {'fields':['conversion_rate','currency','grand_total_export','in_words_export','rounded_total_export'],'entries':['base_ref_rate','export_amount','export_rate']},
 		'Item': {'ref_rate_details':['ref_currency']},
 		'Sales BOM': {'fields':['currency']},
-		'Sales Order': {'fields':['Note1','OT Notes','conversion_rate','currency','grand_total_export','in_words_export','rounded_total_export'],'sales_order_details':['base_ref_rate','export_amount','export_rate']},
-		'Supplier Quotation': {'fields':['conversion_rate','currency']}
+		'Sales Order': {'fields':['Note1','OT Notes','conversion_rate','currency','grand_total_export','in_words_export','rounded_total_export'],'sales_order_details':['base_ref_rate','export_amount','export_rate']}
 	},
 	'imports': {
 		'Payable Voucher': {'fields':['conversion_rate','currency','grand_total_import','in_words_import','net_total_import','other_charges_added_import','other_charges_deducted_import'],'entries':['import_amount','import_rate']},
 		'Purchase Order': {'fields':['Note HTML','conversion_rate','currency','grand_total_import','in_words_import','net_total_import','other_charges_added_import','other_charges_deducted_import'],'po_details':['import_amount','import_rate']},
-		'Purchase Receipt': {'fields':['conversion_rate','currency','grand_total_import','in_words_import','net_total_import','other_charges_added_import','other_charges_deducted_import'],'purchase_receipt_details':['import_amount','import_rate']}
+		'Purchase Receipt': {'fields':['conversion_rate','currency','grand_total_import','in_words_import','net_total_import','other_charges_added_import','other_charges_deducted_import'],'purchase_receipt_details':['import_amount','import_rate']},
+		'Supplier Quotation': {'fields':['conversion_rate','currency']}
 	},
 	'item_advanced': {
 		'Item': {'fields':['item_customer_details']}
