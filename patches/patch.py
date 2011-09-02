@@ -1,7 +1,7 @@
 # REMEMBER to update this
 # ========================
 
-last_patch = 354
+last_patch = 355
 
 #-------------------------------------------
 
@@ -300,3 +300,7 @@ def execute(patch_no):
 		for d in rs:
 			m.fields[d[0]] = 1
 		m.save()
+	elif patch_no == 355:
+		reload_doc('hr', 'doctype', 'salary_slip')
+		delete_doc('DocType', 'Salary Control Panel')
+
