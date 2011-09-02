@@ -1,7 +1,7 @@
 # REMEMBER to update this
 # ========================
 
-last_patch = 353
+last_patch = 354
 
 #-------------------------------------------
 
@@ -290,3 +290,6 @@ def execute(patch_no):
 			ch.save(1)
 	elif patch_no == 353:
 		reload_doc('hr', 'doctype', 'salary_manager')
+	elif patch_no == 354:
+		reload_doc('hr', 'doctype', 'salary_slip')
+		delete_doc('DocType', 'Salary Control Panel')
