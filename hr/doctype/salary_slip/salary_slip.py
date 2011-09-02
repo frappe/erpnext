@@ -182,24 +182,24 @@ class DocType(TransactionBase):
 			earn_table = ''
 			ded_table = ''
 			if earn_ret:			
-				earn_table += "<table cellspacing= '5' cellpadding='5' >"
+				earn_table += "<table cellspacing=5px cellpadding=5px width='100%%'>"
 				
 				for e in earn_ret:
 					if not e[1]:
-						earn_table +='<tr><td>%s</td><td>0.00</td></tr>'%(cstr(e[0]))
+						earn_table +='<tr><td>%s</td><td align="right">0.00</td></tr>'%(cstr(e[0]))
 					else:
-						earn_table +='<tr><td>%s</td><td>%s</td></tr>'%(cstr(e[0]),cstr(e[1]))
+						earn_table +='<tr><td>%s</td><td align="right">%s</td></tr>'%(cstr(e[0]),cstr(e[1]))
 				earn_table += '</table>'
 			
 			if ded_ret:
 			
-				ded_table += "<table cellspacing= '5' cellpadding='5' >"
+				ded_table += "<table cellspacing=5px cellpadding=5px width='100%%'>"
 				
 				for d in ded_ret:
 					if not d[1]:
-						ded_table +='<tr><td>%s</td><td>0.00</td></tr>'%(cstr(d[0]))
+						ded_table +='<tr><td">%s</td><td align="right">0.00</td></tr>'%(cstr(d[0]))
 					else:
-						ded_table +='<tr><td>%s</td><td>%s</td></tr>'%(cstr(d[0]),cstr(d[1]))
+						ded_table +='<tr><td>%s</td><td align="right">%s</td></tr>'%(cstr(d[0]),cstr(d[1]))
 				ded_table += '</table>'
 			
 			letter_head = sql("select value from `tabSingles` where field = 'letter_head' and doctype = 'Control Panel'")
@@ -210,57 +210,58 @@ class DocType(TransactionBase):
 			msg = '''<div> %s <br>
 			<table cellspacing= "5" cellpadding="5"  width = "100%%">
 				<tr>
-					<td colspan = 4 width = "100%%"><h4>Salary Slip</h4></td>
+					<td width = "100%%" colspan = "2"><h4>Salary Slip</h4></td>
 				</tr>
 				<tr>
-					<td colspan = 2 width = "50%%"><b>Employee Code : %s</b></td>
-					<td colspan = 2 width = "50%%"><b>Employee Name : %s</b></td>
+					<td width = "50%%"><b>Employee Code : %s</b></td>
+					<td width = "50%%"><b>Employee Name : %s</b></td>
 				</tr>
 				<tr>
-					<td colspan = 2 width = "50%%">Month : %s</td>
-					<td colspan = 2 width = "50%%">Fiscal Year : %s</td>
-				</tr>
-			</table>
-			<table cellspacing= "5" cellpadding="5" >
-				<tr>
-					<td>Department : %s</td>
-					<td>Branch : %s</td>
-					<td colspan = 2>Designation : %s</td>
+					<td width = "50%%">Month : %s</td>
+					<td width = "50%%">Fiscal Year : %s</td>
 				</tr>
 				<tr>
-					<td>Grade : %s</td>
-					<td>Bank Account No. : %s</td>
-					<td colspan = 2>Bank Name : %s</td>
+					<td width = "50%%">Department : %s</td>
+					<td width = "50%%">Branch : %s</td>
+				</tr>
+				<tr>
+					<td width = "50%%">Designation : %s</td>
+					<td width = "50%%">Grade : %s</td>
+				</tr>
+				<tr>				
+					<td width = "50%%">Bank Account No. : %s</td>
+					<td  width = "50%%">Bank Name : %s</td>
 				
 				</tr>
 				<tr>
-					<td colspan = 2>Arrear Amount : <b>%s</b></td>
-					<td colspan = 2>Payment days : %s</td>
+					<td  width = "50%%">Arrear Amount : <b>%s</b></td>
+					<td  width = "50%%">Payment days : %s</td>
 				
 				</tr>
 			</table>
-			<table border="1px solid #CCC" width="100%%" cellpadding="0" cellspacing= "0" >
+			<table border="1px solid #CCC" width="100%%" cellpadding="0px" cellspacing="0px">
 				<tr>
-					<td colspan = 2 width = "50%%"><b>Earning</b></td>
-					<td colspan = 2 width = "50%%"><b>Deduction</b></td>
+					<td colspan = 2 width = "50%%" bgcolor="#CCC" align="center"><b>Earnings</b></td>
+					<td colspan = 2 width = "50%%" bgcolor="#CCC" align="center"><b>Deductions</b></td>
 				</tr>
 				<tr>
-					<td colspan = 2 width = "50%%">%s</td>
-					<td colspan = 2 width = "50%%">%s</td>
+					<td colspan = 2 width = "50%%" valign= "top">%s</td>
+					<td colspan = 2 width = "50%%" valign= "top">%s</td>
 				</tr>
 			</table>
-			<table cellspacing= "5" cellpadding="5">
+			<table cellspacing= "5" cellpadding="5" width = '100%%'>
 				<tr>
-					<td colspan = 2><b>Gross Pay :</b> %s</td>
-					<td colspan = 2><b>Total Deduction :</b> %s</td>
+					<td width = '25%%'><b>Gross Pay :</b> </td><td width = '25%%' align='right'>%s</td>
+					<td width = '25%%'><b>Total Deduction :</b></td><td width = '25%%' align='right'> %s</td>
 				</tr>
 				<tr>
-					<td><b>Net Pay : %s</b></td>
+					<tdwidth='25%%'><b>Net Pay : </b></td><td width = '25%%' align='right'><b>%s</b></td>
+					<td colspan = '2' width = '50%%'></td>
 				</tr>
 				<tr>
-					<td><b>Net Pay(in words) : %s</b></td>
+					<td width='25%%'><b>Net Pay(in words) : </td><td colspan = '3' width = '50%%'>%s</b></td>
 				</tr>
-			</table></div>'''%(cstr(letter_head[0][0]),cstr(self.doc.employee), cstr(self.doc.employee_name), cstr(self.doc.month), cstr(self.doc.fiscal_year), cstr(self.doc.department), cstr(self.doc.branch), cstr(self.doc.designation), cstr(self.doc.grade), cstr(self.doc.bank_account_no), cstr(self.doc.bank_name), cstr(self.doc.arrear_amount), cstr(self.doc.payment_days), earn_table, ded_table, cstr(self.doc.gross_pay), cstr(self.doc.total_deduction), cstr(self.doc.net_pay), cstr(self.doc.total_in_words))
+			</table></div>'''%(cstr(letter_head[0][0]),cstr(self.doc.employee), cstr(self.doc.employee_name), cstr(self.doc.month), cstr(self.doc.fiscal_year), cstr(self.doc.department), cstr(self.doc.branch), cstr(self.doc.designation), cstr(self.doc.grade), cstr(self.doc.bank_account_no), cstr(self.doc.bank_name), cstr(self.doc.arrear_amount), cstr(self.doc.payment_days), earn_table, ded_table, cstr(flt(self.doc.gross_pay)), cstr(flt(self.doc.total_deduction)), cstr(flt(self.doc.net_pay)), cstr(self.doc.total_in_words))
 			sendmail([receiver], sender='automail@erpnext.com', subject=subj, parts=[['text/plain', msg]])
 		else:
 			msgprint("Company Email ID not found.")
