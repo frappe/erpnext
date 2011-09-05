@@ -6,7 +6,6 @@
 		'creation': '2011-07-27 16:17:04',
 		'docstatus': 0,
 		'modified': '2011-07-27 16:17:04',
-		'creation': '2011-07-26 17:01:34',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
