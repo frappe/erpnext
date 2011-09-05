@@ -1,0 +1,767 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<head>
+	<meta charset="utf-8">
+	<title>ERPNext</title>
+	<meta name="author" content="">
+	<script type="text/javascript">var asset_timestamps_={"lib/js/lib/history/history.adapter.jquery.js": "1310718903", "lib/js/lib/history/history.min.js": "1315221478", "lib/js/wn/history.js": "1313759392", "lib/js/lib/superfish/superfish.min.js": "1315222973", "lib/js/legacy/jquery/jquery.jqplot.min.js": "1313994339", "lib/js/legacy/wnf.compressed.js": "1315227202", "js/app.js": "1315226253", "lib/css/layout.css": "1313603562", "lib/css/base.css": "1314774281", "lib/js/legacy/wn/modules.js": "1311752688", "lib/js/lib/history/history.html4.js": "1310718903", "lib/js/core.min.js": "1315225602", "lib/js/legacy/user.js": "1311752688", "lib/css/legacy/jquery-ui.css": "1311752687", "lib/js/legacy/wn/widgets/doc_column_view.js": "1311752688", "lib/js/legacy/widgets/report_builder/bargraph.js": "1311752688", "lib/css/legacy/user.css": "1311752687", "lib/css/legacy/default.css": "1315222973", "lib/js/legacy/jquery/jquery-ui.min.js": "1315220242", "config/_timestamps.js": "1315228305", "lib/js/legacy/form.compressed.js": "1315222973", "lib/js/legacy/widgets/form/attachments.js": "1315219428", "templates/index.html": "1315223202", "lib/js/legacy/report.compressed.js": "1315222973", "lib/css/skeleton.css": "1313603562", "lib/js/legacy/wn/widgets/filters.js": "1311752688", "index.html": "1315228304", "lib/js/legacy/widgets/print_query.js": "1311752688", "lib/js/lib/jquery.min.js": "1313062880", "lib/js/lib/history/history.js": "1310718903", "lib/js/legacy/wn/widgets/follow.js": "1311752688"}
+// provide a namespace
+wn = {}
+wn.provide = function(namespace) {
+	var nsl = namespace.split('.');
+	var l = nsl.length;
+	var parent = window;
+	for(var i=0; i<l; i++) {
+		var n = nsl[i];
+		if(!parent[n]) {
+			parent[n] = {}
+		}
+		parent = parent[n];
+	}
+}
+wn.xmlhttp = {
+	request: function() {
+		if ( window.XMLHttpRequest ) // Gecko
+			return new XMLHttpRequest() ;
+		else if ( window.ActiveXObject ) // IE
+			return new ActiveXObject("MsXml2.XmlHttp") ;		
+	},
+	
+	complete: function(req, callback, url) {
+		if (req.status==200 || req.status==304) {
+			callback(req.responseText);
+		} else {
+			alert(url +' request error: ' + req.statusText + ' (' + req.status + ')' ) ;
+		}		
+	},
+	
+	get: function(url, callback, async) {
+		// async by default
+		if(async === null) async=true;
+		var req = wn.xmlhttp.request();
+		
+		// for async type
+		req.onreadystatechange = function() {
+			if (req.readyState==4) {
+				wn.xmlhttp.complete(req, callback, url)
+			}
+		}
+		req.open('GET', url, async);
+		req.send(null);
+		
+		// for sync
+		if(!async) {
+			wn.xmlhttp.complete(req, callback, url)
+		}
+	}
+}
+
+// library to mange assets (js, css, models, html) etc in the app.
+// will try and get from localStorge if latest are available
+// or will load them via xmlhttp
+// depends on asset_timestamps_ loaded via boot
+
+wn.assets = {
+	// keep track of executed assets
+	executed_ : {},
+	
+	// check if the asset exists in
+	// localstorage and if the timestamp
+	// matches with the loaded timestamp
+	exists: function(src) {
+		if('localStorage' in window
+			&& localStorage.getItem(src)
+			&& localStorage.getItem('[ts] '+src) == asset_timestamps_[src])
+			return true
+	},
+	
+	// add the asset to
+	// localstorage
+	add: function(src, txt) {
+		if('localStorage' in window) {
+			localStorage.setItem(src, txt);
+			localStorage.setItem('[ts] ' + src, asset_timestamps_[src]);
+		}
+	},
+	
+	get: function(src) {
+		return localStorage.getItem(src);
+	},
+	
+	extn: function(src) {
+		return src.split('.').slice(-1)[0];
+	},
+
+	html_src: function(src) {
+		if(src.indexOf('/')!=-1) {
+			var t = src.split('/').slice(0,-1);
+			t.push('src');
+			t = t.join('/') +'/' + a.split('/').slice(-1)[0];
+		} else {
+			var t = 'src/' + src;
+		}
+		return t;
+	},
+	
+	// load an asset via
+	// xmlhttp
+	load: function(src) {
+		var t = wn.assets.extn(src)=='html' ? wn.assets.html_src(src) : src;
+
+		wn.xmlhttp.get(t, function(txt) {
+			// add it to localstorage
+			wn.assets.add(src, txt);			
+		}, false)
+	},
+	
+	// pass on to the handler to set
+	execute: function(src) {
+		if(!wn.assets.exists(src)) {
+			wn.assets.load(src);
+		}
+		var type = wn.assets.extn(src);
+		if(wn.assets.handler[type]) {
+			wn.assets.handler[type](wn.assets.get(src), src);
+			wn.assets.executed_[src] = 1;
+		}
+	},
+	
+	// handle types of assets
+	// and launch them in the
+	// app
+	handler: {
+		js: function(txt, src) {
+			wn.dom.eval(txt);
+		},
+		css: function(txt, src) {
+			var se = document.createElement('style');
+			se.type = "text/css";
+			if (se.styleSheet) {
+				se.styleSheet.cssText = txt;
+			} else {
+				se.appendChild(document.createTextNode(txt));
+			}
+			document.getElementsByTagName('head')[0].appendChild(se);			
+		},
+		html: function(txt, src) {
+			// make the html content page
+			var page = wn.dom.add($('.outer .inner').get(0), 'div', 'content', null, txt);
+			page.setAttribute("_src", src);
+		}
+	}
+}
+
+// require js file
+wn.require = function(items) {
+	if(typeof items === "string") {
+		items = [items];
+	}
+	var l = items.length;
+
+	for(var i=0; i< l; i++) {
+		var src = items[i];
+		if(!(src in wn.assets.executed_)) {
+			// check if available in localstorage
+			wn.assets.execute(src)
+		}
+	}
+}
+// add a new dom element
+wn.provide('wn.dom');
+
+wn.dom.by_id = function(id) {
+	return document.getElementById(id);
+}
+
+wn.dom.eval = function(txt) {
+	var el = document.createElement('script');
+	el.appendChild(document.createTextNode(txt));
+	// execute the script globally
+	document.getElementsByTagName('head')[0].appendChild(el);
+}
+
+wn.dom.add = function(parent, newtag, className, cs, innerHTML, onclick) {
+	if(parent && parent.substr)parent = wn.dom.by_id(parent);
+	var c = document.createElement(newtag);
+	if(parent)
+		parent.appendChild(c);
+		
+	// if image, 3rd parameter is source
+	if(className) {
+		if(newtag.toLowerCase()=='img')
+			c.src = className
+		else
+			c.className = className;		
+	}
+	if(cs) wn.dom.css(c,cs);
+	if(innerHTML) c.innerHTML = innerHTML;
+	if(onclick) c.onclick = onclick;
+	return c;
+}
+
+// add css to element
+wn.dom.css = function(ele, s) { 
+	if(ele && s) { 
+		for(var i in s) ele.style[i]=s[i]; 
+	}; 
+	return ele;
+}
+wn.page = {
+	set: function(src) {
+		var new_selection = $('.inner div.content[_src="'+ src +'"]');
+		if(!new_selection.length) {
+			// get from server / localstorage
+			wn.assets.execute(src);
+			new_selection = $('.inner div.content[_src="'+ src +'"]');
+		}
+
+		// hide current
+		$('.inner .current_page').removeClass('current_page');
+		
+		// show new
+		new_selection.addClass('current_page');
+		
+		// get title (the first h1, h2, h3)
+		var title = $('nav ul li a[href*="' + src + '"]').attr('title') || 'No Title'
+		
+		// replace state (to url)
+		state = History.getState();
+		if(state.hash!=src) {
+			History.replaceState(null, title, src);	
+		}
+		else {
+			document.title = title;
+		}
+	}
+}
+/*
+    http://www.JSON.org/json2.js
+    2011-02-23
+
+    Public Domain.
+
+    NO WARRANTY EXPRESSED OR IMPLIED. USE AT YOUR OWN RISK.
+
+    See http://www.JSON.org/js.html
+
+
+    This code should be minified before deployment.
+    See http://javascript.crockford.com/jsmin.html
+
+    USE YOUR OWN COPY. IT IS EXTREMELY UNWISE TO LOAD CODE FROM SERVERS YOU DO
+    NOT CONTROL.
+
+
+    This file creates a global JSON object containing two methods: stringify
+    and parse.
+
+        JSON.stringify(value, replacer, space)
+            value       any JavaScript value, usually an object or array.
+
+            replacer    an optional parameter that determines how object
+                        values are stringified for objects. It can be a
+                        function or an array of strings.
+
+            space       an optional parameter that specifies the indentation
+                        of nested structures. If it is omitted, the text will
+                        be packed without extra whitespace. If it is a number,
+                        it will specify the number of spaces to indent at each
+                        level. If it is a string (such as '\t' or '&nbsp;'),
+                        it contains the characters used to indent at each level.
+
+            This method produces a JSON text from a JavaScript value.
+
+            When an object value is found, if the object contains a toJSON
+            method, its toJSON method will be called and the result will be
+            stringified. A toJSON method does not serialize: it returns the
+            value represented by the name/value pair that should be serialized,
+            or undefined if nothing should be serialized. The toJSON method
+            will be passed the key associated with the value, and this will be
+            bound to the value
+
+            For example, this would serialize Dates as ISO strings.
+
+                Date.prototype.toJSON = function (key) {
+                    function f(n) {
+                        // Format integers to have at least two digits.
+                        return n < 10 ? '0' + n : n;
+                    }
+
+                    return this.getUTCFullYear()   + '-' +
+                         f(this.getUTCMonth() + 1) + '-' +
+                         f(this.getUTCDate())      + 'T' +
+                         f(this.getUTCHours())     + ':' +
+                         f(this.getUTCMinutes())   + ':' +
+                         f(this.getUTCSeconds())   + 'Z';
+                };
+
+            You can provide an optional replacer method. It will be passed the
+            key and value of each member, with this bound to the containing
+            object. The value that is returned from your method will be
+            serialized. If your method returns undefined, then the member will
+            be excluded from the serialization.
+
+            If the replacer parameter is an array of strings, then it will be
+            used to select the members to be serialized. It filters the results
+            such that only members with keys listed in the replacer array are
+            stringified.
+
+            Values that do not have JSON representations, such as undefined or
+            functions, will not be serialized. Such values in objects will be
+            dropped; in arrays they will be replaced with null. You can use
+            a replacer function to replace those with JSON values.
+            JSON.stringify(undefined) returns undefined.
+
+            The optional space parameter produces a stringification of the
+            value that is filled with line breaks and indentation to make it
+            easier to read.
+
+            If the space parameter is a non-empty string, then that string will
+            be used for indentation. If the space parameter is a number, then
+            the indentation will be that many spaces.
+
+            Example:
+
+            text = JSON.stringify(['e', {pluribus: 'unum'}]);
+            // text is '["e",{"pluribus":"unum"}]'
+
+
+            text = JSON.stringify(['e', {pluribus: 'unum'}], null, '\t');
+            // text is '[\n\t"e",\n\t{\n\t\t"pluribus": "unum"\n\t}\n]'
+
+            text = JSON.stringify([new Date()], function (key, value) {
+                return this[key] instanceof Date ?
+                    'Date(' + this[key] + ')' : value;
+            });
+            // text is '["Date(---current time---)"]'
+
+
+        JSON.parse(text, reviver)
+            This method parses a JSON text to produce an object or array.
+            It can throw a SyntaxError exception.
+
+            The optional reviver parameter is a function that can filter and
+            transform the results. It receives each of the keys and values,
+            and its return value is used instead of the original value.
+            If it returns what it received, then the structure is not modified.
+            If it returns undefined then the member is deleted.
+
+            Example:
+
+            // Parse the text. Values that look like ISO date strings will
+            // be converted to Date objects.
+
+            myData = JSON.parse(text, function (key, value) {
+                var a;
+                if (typeof value === 'string') {
+                    a =
+/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}(?:\.\d*)?)Z$/.exec(value);
+                    if (a) {
+                        return new Date(Date.UTC(+a[1], +a[2] - 1, +a[3], +a[4],
+                            +a[5], +a[6]));
+                    }
+                }
+                return value;
+            });
+
+            myData = JSON.parse('["Date(09/09/2001)"]', function (key, value) {
+                var d;
+                if (typeof value === 'string' &&
+                        value.slice(0, 5) === 'Date(' &&
+                        value.slice(-1) === ')') {
+                    d = new Date(value.slice(5, -1));
+                    if (d) {
+                        return d;
+                    }
+                }
+                return value;
+            });
+
+
+    This is a reference implementation. You are free to copy, modify, or
+    redistribute.
+*/
+
+/*jslint evil: true, strict: false, regexp: false */
+
+/*members "", "\b", "\t", "\n", "\f", "\r", "\"", JSON, "\\", apply,
+    call, charCodeAt, getUTCDate, getUTCFullYear, getUTCHours,
+    getUTCMinutes, getUTCMonth, getUTCSeconds, hasOwnProperty, join,
+    lastIndex, length, parse, prototype, push, replace, slice, stringify,
+    test, toJSON, toString, valueOf
+*/
+
+
+// Create a JSON object only if one does not already exist. We create the
+// methods in a closure to avoid creating global variables.
+
+var JSON;
+if (!JSON) {
+    JSON = {};
+}
+
+(function () {
+    "use strict";
+
+    function f(n) {
+        // Format integers to have at least two digits.
+        return n < 10 ? '0' + n : n;
+    }
+
+    if (typeof Date.prototype.toJSON !== 'function') {
+
+        Date.prototype.toJSON = function (key) {
+
+            return isFinite(this.valueOf()) ?
+                this.getUTCFullYear()     + '-' +
+                f(this.getUTCMonth() + 1) + '-' +
+                f(this.getUTCDate())      + 'T' +
+                f(this.getUTCHours())     + ':' +
+                f(this.getUTCMinutes())   + ':' +
+                f(this.getUTCSeconds())   + 'Z' : null;
+        };
+
+        String.prototype.toJSON      =
+            Number.prototype.toJSON  =
+            Boolean.prototype.toJSON = function (key) {
+                return this.valueOf();
+            };
+    }
+
+    var cx = /[\u0000\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,
+        escapable = /[\\\"\x00-\x1f\x7f-\x9f\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,
+        gap,
+        indent,
+        meta = {    // table of character substitutions
+            '\b': '\\b',
+            '\t': '\\t',
+            '\n': '\\n',
+            '\f': '\\f',
+            '\r': '\\r',
+            '"' : '\\"',
+            '\\': '\\\\'
+        },
+        rep;
+
+
+    function quote(string) {
+
+// If the string contains no control characters, no quote characters, and no
+// backslash characters, then we can safely slap some quotes around it.
+// Otherwise we must also replace the offending characters with safe escape
+// sequences.
+
+        escapable.lastIndex = 0;
+        return escapable.test(string) ? '"' + string.replace(escapable, function (a) {
+            var c = meta[a];
+            return typeof c === 'string' ? c :
+                '\\u' + ('0000' + a.charCodeAt(0).toString(16)).slice(-4);
+        }) + '"' : '"' + string + '"';
+    }
+
+
+    function str(key, holder) {
+
+// Produce a string from holder[key].
+
+        var i,          // The loop counter.
+            k,          // The member key.
+            v,          // The member value.
+            length,
+            mind = gap,
+            partial,
+            value = holder[key];
+
+// If the value has a toJSON method, call it to obtain a replacement value.
+
+        if (value && typeof value === 'object' &&
+                typeof value.toJSON === 'function') {
+            value = value.toJSON(key);
+        }
+
+// If we were called with a replacer function, then call the replacer to
+// obtain a replacement value.
+
+        if (typeof rep === 'function') {
+            value = rep.call(holder, key, value);
+        }
+
+// What happens next depends on the value's type.
+
+        switch (typeof value) {
+        case 'string':
+            return quote(value);
+
+        case 'number':
+
+// JSON numbers must be finite. Encode non-finite numbers as null.
+
+            return isFinite(value) ? String(value) : 'null';
+
+        case 'boolean':
+        case 'null':
+
+// If the value is a boolean or null, convert it to a string. Note:
+// typeof null does not produce 'null'. The case is included here in
+// the remote chance that this gets fixed someday.
+
+            return String(value);
+
+// If the type is 'object', we might be dealing with an object or an array or
+// null.
+
+        case 'object':
+
+// Due to a specification blunder in ECMAScript, typeof null is 'object',
+// so watch out for that case.
+
+            if (!value) {
+                return 'null';
+            }
+
+// Make an array to hold the partial results of stringifying this object value.
+
+            gap += indent;
+            partial = [];
+
+// Is the value an array?
+
+            if (Object.prototype.toString.apply(value) === '[object Array]') {
+
+// The value is an array. Stringify every element. Use null as a placeholder
+// for non-JSON values.
+
+                length = value.length;
+                for (i = 0; i < length; i += 1) {
+                    partial[i] = str(i, value) || 'null';
+                }
+
+// Join all of the elements together, separated with commas, and wrap them in
+// brackets.
+
+                v = partial.length === 0 ? '[]' : gap ?
+                    '[\n' + gap + partial.join(',\n' + gap) + '\n' + mind + ']' :
+                    '[' + partial.join(',') + ']';
+                gap = mind;
+                return v;
+            }
+
+// If the replacer is an array, use it to select the members to be stringified.
+
+            if (rep && typeof rep === 'object') {
+                length = rep.length;
+                for (i = 0; i < length; i += 1) {
+                    if (typeof rep[i] === 'string') {
+                        k = rep[i];
+                        v = str(k, value);
+                        if (v) {
+                            partial.push(quote(k) + (gap ? ': ' : ':') + v);
+                        }
+                    }
+                }
+            } else {
+
+// Otherwise, iterate through all of the keys in the object.
+
+                for (k in value) {
+                    if (Object.prototype.hasOwnProperty.call(value, k)) {
+                        v = str(k, value);
+                        if (v) {
+                            partial.push(quote(k) + (gap ? ': ' : ':') + v);
+                        }
+                    }
+                }
+            }
+
+// Join all of the member texts together, separated with commas,
+// and wrap them in braces.
+
+            v = partial.length === 0 ? '{}' : gap ?
+                '{\n' + gap + partial.join(',\n' + gap) + '\n' + mind + '}' :
+                '{' + partial.join(',') + '}';
+            gap = mind;
+            return v;
+        }
+    }
+
+// If the JSON object does not yet have a stringify method, give it one.
+
+    if (typeof JSON.stringify !== 'function') {
+        JSON.stringify = function (value, replacer, space) {
+
+// The stringify method takes a value and an optional replacer, and an optional
+// space parameter, and returns a JSON text. The replacer can be a function
+// that can replace values, or an array of strings that will select the keys.
+// A default replacer method can be provided. Use of the space parameter can
+// produce text that is more easily readable.
+
+            var i;
+            gap = '';
+            indent = '';
+
+// If the space parameter is a number, make an indent string containing that
+// many spaces.
+
+            if (typeof space === 'number') {
+                for (i = 0; i < space; i += 1) {
+                    indent += ' ';
+                }
+
+// If the space parameter is a string, it will be used as the indent string.
+
+            } else if (typeof space === 'string') {
+                indent = space;
+            }
+
+// If there is a replacer, it must be a function or an array.
+// Otherwise, throw an error.
+
+            rep = replacer;
+            if (replacer && typeof replacer !== 'function' &&
+                    (typeof replacer !== 'object' ||
+                    typeof replacer.length !== 'number')) {
+                throw new Error('JSON.stringify');
+            }
+
+// Make a fake root object containing our value under the key of ''.
+// Return the result of stringifying the value.
+
+            return str('', {'': value});
+        };
+    }
+
+
+// If the JSON object does not yet have a parse method, give it one.
+
+    if (typeof JSON.parse !== 'function') {
+        JSON.parse = function (text, reviver) {
+
+// The parse method takes a text and an optional reviver function, and returns
+// a JavaScript value if the text is a valid JSON text.
+
+            var j;
+
+            function walk(holder, key) {
+
+// The walk method is used to recursively walk the resulting structure so
+// that modifications can be made.
+
+                var k, v, value = holder[key];
+                if (value && typeof value === 'object') {
+                    for (k in value) {
+                        if (Object.prototype.hasOwnProperty.call(value, k)) {
+                            v = walk(value, k);
+                            if (v !== undefined) {
+                                value[k] = v;
+                            } else {
+                                delete value[k];
+                            }
+                        }
+                    }
+                }
+                return reviver.call(holder, key, value);
+            }
+
+
+// Parsing happens in four stages. In the first stage, we replace certain
+// Unicode characters with escape sequences. JavaScript handles many characters
+// incorrectly, either silently deleting them, or treating them as line endings.
+
+            text = String(text);
+            cx.lastIndex = 0;
+            if (cx.test(text)) {
+                text = text.replace(cx, function (a) {
+                    return '\\u' +
+                        ('0000' + a.charCodeAt(0).toString(16)).slice(-4);
+                });
+            }
+
+// In the second stage, we run the text against regular expressions that look
+// for non-JSON patterns. We are especially concerned with '()' and 'new'
+// because they can cause invocation, and '=' because it can cause mutation.
+// But just to be safe, we want to reject all unexpected forms.
+
+// We split the second stage into 4 regexp operations in order to work around
+// crippling inefficiencies in IE's and Safari's regexp engines. First we
+// replace the JSON backslash pairs with '@' (a non-JSON character). Second, we
+// replace all simple value tokens with ']' characters. Third, we delete all
+// open brackets that follow a colon or comma or that begin the text. Finally,
+// we look to see that the remaining characters are only whitespace or ']' or
+// ',' or ':' or '{' or '}'. If that is so, then the text is safe for eval.
+
+            if (/^[\],:{}\s]*$/
+                    .test(text.replace(/\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g, '@')
+                        .replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g, ']')
+                        .replace(/(?:^|:|,)(?:\s*\[)+/g, ''))) {
+
+// In the third stage we use the eval function to compile the text into a
+// JavaScript structure. The '{' operator is subject to a syntactic ambiguity
+// in JavaScript: it can begin a block or an object literal. We wrap the text
+// in parens to eliminate the ambiguity.
+
+                j = eval('(' + text + ')');
+
+// In the optional fourth stage, we recursively walk the new structure, passing
+// each name/value pair to a reviver function for possible transformation.
+
+                return typeof reviver === 'function' ?
+                    walk({'': j}, '') : j;
+            }
+
+// If the text is not JSON parseable, then a SyntaxError is thrown.
+
+            throw new SyntaxError('JSON.parse');
+        };
+    }
+}());
+
+
+// load all critical libraries
+wn.require("lib/js/lib/jquery.min.js");
+//wn.require("js/lib/history/history.min.js");
+wn.require("lib/js/lib/history/history.adapter.jquery.js");
+wn.require("lib/js/lib/history/history.js");
+wn.require("lib/js/lib/history/history.html4.js");
+wn.require("lib/js/wn/history.js");
+
+/* overload links for ajax pages */
+$(document).bind('ready', function() {
+	var base = window.location.href.split('#')[0];
+	
+	// convert hard links to softlinks
+	$.each($('a[softlink!="false"]'), function(i, v) {
+		
+		// if linking on the same site
+		if(v.href.substr(0, base.length)==base) {
+			var path = (v.href.substr(base.length));
+			
+			// if hardlink, softlink it
+			if(path.substr(0,1)!='#') {				
+				v.href = base + '#' + path;
+			}
+		}
+	});
+
+	// go to hash page if exists
+	if(window.location.hash) {
+		wn.page.set(window.location.hash.substr(1));
+	}
+
+});
+wn.require("js/app.js");
+</script>
+</head>
+<body>
+	<div id="dialog_back"></div>
+
+	<div id="startup_div" style="padding: 8px; font-size: 14px;"></div>
+
+	<!-- Main Starts -->
+	<div id="body_div"> 
+
+		<!--static (no script) content-->
+		<div class="no_script">
+			
+		</div>
+
+	</div>
+</body>
