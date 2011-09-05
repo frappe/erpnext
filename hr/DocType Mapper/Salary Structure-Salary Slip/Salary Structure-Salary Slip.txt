@@ -6,7 +6,7 @@
 		'creation': '2010-12-14 10:23:25',
 		'docstatus': 0,
 		'modified': '2011-02-12 18:31:40',
-		'modified_by': 'Administrator',
+		'modified_by': 'umair@iwebnotes.com',
 		'owner': 'harshada@webnotestech.com'
 	},
 
@@ -48,71 +48,7 @@
 	# Field Mapper Detail
 	{
 		'doctype': 'Field Mapper Detail',
-		'from_field': 'employee',
-		'idx': 1,
-		'match_id': 0,
-		'to_field': 'employee'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'employee_name',
-		'idx': 2,
-		'match_id': 0,
-		'to_field': 'employee_name'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'department',
-		'idx': 3,
-		'match_id': 0,
-		'to_field': 'department'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'designation',
-		'idx': 4,
-		'match_id': 0,
-		'to_field': 'designation'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'branch',
-		'idx': 5,
-		'match_id': 0,
-		'to_field': 'branch'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'grade',
-		'idx': 6,
-		'match_id': 0,
-		'to_field': 'grade'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'e_type',
-		'idx': 7,
-		'match_id': 1,
-		'to_field': 'e_type'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
 		'from_field': 'total_earning',
-		'idx': 7,
 		'match_id': 0,
 		'to_field': 'gross_pay'
 	},
@@ -121,7 +57,6 @@
 	{
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'modified_value',
-		'idx': 8,
 		'match_id': 1,
 		'to_field': 'e_amount'
 	},
@@ -129,35 +64,7 @@
 	# Field Mapper Detail
 	{
 		'doctype': 'Field Mapper Detail',
-		'from_field': 'total_deduction',
-		'idx': 8,
-		'match_id': 0,
-		'to_field': 'total_deduction'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'd_type',
-		'idx': 9,
-		'match_id': 2,
-		'to_field': 'd_type'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'net_pay',
-		'idx': 9,
-		'match_id': 0,
-		'to_field': 'net_pay'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
 		'from_field': 'd_modified_amt',
-		'idx': 10,
 		'match_id': 2,
 		'to_field': 'd_amount'
 	},
@@ -166,7 +73,6 @@
 	{
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'modified_value',
-		'idx': 12,
 		'match_id': 1,
 		'to_field': 'e_modified_amount'
 	},
@@ -175,7 +81,6 @@
 	{
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'depend_on_lwp',
-		'idx': 13,
 		'match_id': 1,
 		'to_field': 'e_depends_on_lwp'
 	},
@@ -184,7 +89,6 @@
 	{
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'd_modified_amt',
-		'idx': 16,
 		'match_id': 2,
 		'to_field': 'd_modified_amount'
 	},
@@ -193,7 +97,6 @@
 	{
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'depend_on_lwp',
-		'idx': 17,
 		'match_id': 2,
 		'to_field': 'd_depends_on_lwp'
 	},
@@ -202,7 +105,6 @@
 	{
 		'doctype': 'Table Mapper Detail',
 		'from_table': 'Salary Structure',
-		'idx': 1,
 		'match_id': 0,
 		'to_table': 'Salary Slip'
 	},
@@ -212,7 +114,6 @@
 		'doctype': 'Table Mapper Detail',
 		'from_field': 'earning_details',
 		'from_table': 'Earning Detail',
-		'idx': 2,
 		'match_id': 1,
 		'to_field': 'earning_details',
 		'to_table': 'SS Earning Detail'
@@ -223,7 +124,6 @@
 		'doctype': 'Table Mapper Detail',
 		'from_field': 'deduction_details',
 		'from_table': 'Deduction Detail',
-		'idx': 3,
 		'match_id': 2,
 		'to_field': 'deduction_details',
 		'to_table': 'SS Deduction Detail'

@@ -6,7 +6,7 @@
 		'creation': '2010-08-08 17:09:34',
 		'docstatus': 0,
 		'modified': '2011-05-10 16:04:40',
-		'modified_by': 'Administrator',
+		'modified_by': 'umair@iwebnotes.com',
 		'owner': 'Administrator'
 	},
 
@@ -49,35 +49,7 @@
 	# Field Mapper Detail
 	{
 		'doctype': 'Field Mapper Detail',
-		'from_field': 'item_code',
-		'idx': 1,
-		'match_id': 1,
-		'to_field': 'item_code'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'item_name',
-		'idx': 2,
-		'match_id': 1,
-		'to_field': 'item_name'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'qty',
-		'idx': 3,
-		'match_id': 1,
-		'to_field': 'qty'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
 		'from_field': 'uom',
-		'idx': 4,
 		'match_id': 1,
 		'to_field': 'stock_uom'
 	},
@@ -85,26 +57,7 @@
 	# Field Mapper Detail
 	{
 		'doctype': 'Field Mapper Detail',
-		'from_field': 'source',
-		'idx': 5,
-		'match_id': 0,
-		'to_field': 'source'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'campaign',
-		'idx': 6,
-		'match_id': 0,
-		'to_field': 'campaign'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
 		'from_field': 'name',
-		'idx': 7,
 		'match_id': 0,
 		'to_field': 'enq_no'
 	},
@@ -112,116 +65,7 @@
 	# Field Mapper Detail
 	{
 		'doctype': 'Field Mapper Detail',
-		'from_field': 'customer',
-		'idx': 8,
-		'match_id': 0,
-		'to_field': 'customer'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'customer_address',
-		'idx': 9,
-		'match_id': 0,
-		'to_field': 'customer_address'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'contact_person',
-		'idx': 10,
-		'match_id': 0,
-		'to_field': 'contact_person'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'address_display',
-		'idx': 11,
-		'match_id': 0,
-		'to_field': 'address_display'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'contact_display',
-		'idx': 12,
-		'match_id': 0,
-		'to_field': 'contact_display'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'contact_mobile',
-		'idx': 13,
-		'match_id': 0,
-		'to_field': 'contact_mobile'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'contact_email',
-		'idx': 14,
-		'match_id': 0,
-		'to_field': 'contact_email'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'territory',
-		'idx': 15,
-		'match_id': 0,
-		'to_field': 'territory'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'customer_group',
-		'idx': 16,
-		'match_id': 0,
-		'to_field': 'customer_group'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'description',
-		'idx': 17,
-		'match_id': 1,
-		'to_field': 'description'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'item_group',
-		'idx': 18,
-		'match_id': 1,
-		'to_field': 'item_group'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'brand',
-		'idx': 19,
-		'match_id': 1,
-		'to_field': 'brand'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
 		'from_field': 'parent',
-		'idx': 20,
 		'match_id': 1,
 		'to_field': 'prevdoc_docname'
 	},
@@ -230,7 +74,6 @@
 	{
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'parenttype',
-		'idx': 21,
 		'match_id': 1,
 		'to_field': 'prevdoc_doctype'
 	},
@@ -238,26 +81,7 @@
 	# Field Mapper Detail
 	{
 		'doctype': 'Field Mapper Detail',
-		'from_field': 'lead',
-		'idx': 22,
-		'match_id': 0,
-		'to_field': 'lead'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'lead_name',
-		'idx': 23,
-		'match_id': 0,
-		'to_field': 'lead_name'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
 		'from_field': 'enquiry_from',
-		'idx': 24,
 		'match_id': 0,
 		'to_field': 'quotation_to'
 	},
@@ -266,7 +90,6 @@
 	{
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'enquiry_type',
-		'idx': 25,
 		'match_id': 0,
 		'to_field': 'order_type'
 	},
@@ -275,7 +98,6 @@
 	{
 		'doctype': 'Table Mapper Detail',
 		'from_table': 'Enquiry',
-		'idx': 1,
 		'match_id': 0,
 		'to_table': 'Quotation'
 	},
@@ -285,7 +107,6 @@
 		'doctype': 'Table Mapper Detail',
 		'from_field': 'enq_details',
 		'from_table': 'Enquiry Detail',
-		'idx': 2,
 		'match_id': 1,
 		'to_field': 'quotation_details',
 		'to_table': 'Quotation Detail'

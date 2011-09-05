@@ -19,12 +19,25 @@ KBItemToolbar = function(args, kb) {
 		this.line1.innerHTML = repl('By %(name)s | %(when)s', {
 			name: wn.utils.full_name(this.det.first_name, this.det.last_name),
 			when: wn.datetime.comment_when(this.det.modified)
-		})
+		});
+		
+		// allow system manager to delete questions / answers
+		if(has_common(user_roles, ['Administrator', 'System Manager'])) {
+			this.line1.innerHTML += ' | '
+			$ln(this.line1, 'delete', me.del);
+		}
 	}
 
 	this.make_vote = function() {
 		new KBPoints(this.line2, this.det.points, this.det._users_voted, this.doctype, this.det.name, this.det.owner);
-		
+	}
+	
+	this.del = function() {
+		this.innerHTML = 'deleting...'; this.disabled = 1;
+		$c_page('knowledge_base', 'questions', 'delete', {dt:me.doctype, dn:me.det.name}, function(r,rt) {
+			// reload the list
+			kb.list.run()
+		});
 	}
 	
 	this.make_tags = function() {

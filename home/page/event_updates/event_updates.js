@@ -25,12 +25,7 @@ pscript.home_make_body = function() {
 	
 	wrapper.banner_area = $a(wrapper.head, 'div');
 
-	wrapper.setup_wizard_area = $a(wrapper.body, 'div', 'setup-wizard')
-
-	wrapper.system_message_area = $a(wrapper.body, 'div', '', 
-		{marginBottom:'16px', padding:'8px', backgroundColor:'#FFD', border:'1px dashed #AA6', display:'none'})
-	
-	
+	wrapper.setup_wizard_area = $a(wrapper.body, 'div', 'setup-wizard');	
 }
 
 // ==================================
@@ -436,8 +431,8 @@ FeedList.prototype.make_head = function() {
 	// head
 
 	$a(this.head,'h1','', {display:'inline'}, 'Home'); 
-	$a(this.head,'span','link_type', {marginLeft:'7px'}, '[?]', function() {
-		msgprint('<b>What appears here?</b> This is where you get updates of everything you are allowed to access and generates an update')
+	$a(this.head,'span','link_type', {marginLeft:'7px'}, 'help', function() {
+		msgprint('<b>What appears here?</b> This is where you get updates of everything you are permitted to follow')
 	})
 
 	// refresh
@@ -445,6 +440,11 @@ FeedList.prototype.make_head = function() {
 		{cursor:'pointer', marginLeft:'7px', fontSize:'11px'}, 'refresh',
 		function() { me.run(); }
 	);
+	
+	if(has_common(user_roles, ['System Manager','Accounts Manager'])) {
+		$btn(this.head, 'Dashboard', function() {loadpage('dashboard'); }, {marginLeft:'7px'})
+		
+	}
 }
 
 FeedList.prototype.run = function() {
@@ -594,14 +594,15 @@ HomeStatusBar = function() {
 	
 	this.render = function(r) {
 		this.wrapper.innerHTML = '';
-		this.span = $a(this.wrapper, 'span', 'home-status-link')
+		this.span = $a(this.wrapper, 'span', 'link_type', {fontWeight:'bold'});
 		this.span.onclick = function() { loadpage('My Company')	}
 		
 		if(r.unread_messages) {
-			this.span.innerHTML = '<span class="home-status-unread">' + r.unread_messages + '</span> unread message' + (cint(r.unread_messages) > 1 ? 's' : '');
+			this.span.innerHTML = '<span class="home-status-unread">' + r.unread_messages + '</span> unread';
 		} else {
-			this.span.innerHTML = 'No unread messages.';
+			this.span.innerHTML = 'Team / Messages';			
 		}
+		
 	}
 }
 
@@ -613,11 +614,7 @@ pscript.home_make_status = function() {
 	$c_page('home', 'event_updates', 'get_status_details', user,
 		function(r,rt) { 
 			home_status_bar.render(r.message);
-			
-			// system_messages
-			if(r.message.system_message)
-				pscript.show_system_message(wrapper, r.message.system_message);
-							
+										
 			// render online users
 			pscript.online_users_obj.render(r.message.online_users);
 			pscript.online_users = r.message.online_users;
@@ -628,24 +625,6 @@ pscript.home_make_status = function() {
 			}
 		}
 	);	
-}
-
-// show system message
-// -------------------
-pscript.show_system_message = function(wrapper, msg) {
-	$ds(wrapper.system_message_area);
-	var txt = $a(wrapper.system_message_area, 'div', '', {lineHeight:'1.6em'});
-	txt.innerHTML = msg;
-	
-	var span = $ln($a(wrapper.system_message_area, 'div', '', {textAlign:'right'}), 'Dismiss'.bold(), 
-		function(me) { 
-			me.set_working();
-			$c_obj('Home Control', 'dismiss_message', '', function(r,rt) { 
-				me.done_working(); 
-				$(wrapper.system_message_area).slideUp(); 
-			});
-		}, {fontSize:'11px'}
-	)
 }
 
 // complete my company registration

@@ -1,0 +1,288 @@
+# DocType, Features Setup
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2011-08-25 16:53:56',
+		'docstatus': 0,
+		'modified': '2011-08-31 15:05:53',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all DocType
+	{
+		'_last_update': '1314783102',
+		'colour': 'White:FFF',
+		'doctype': 'DocType',
+		'issingle': 1,
+		'module': 'Setup',
+		'name': '__common__',
+		'name_case': 'Title Case',
+		'section_style': 'Simple',
+		'show_in_menu': 1,
+		'version': 16
+	},
+
+	# These values are common for all DocField
+	{
+		'doctype': 'DocField',
+		'name': '__common__',
+		'parent': 'Features Setup',
+		'parentfield': 'fields',
+		'parenttype': 'DocType',
+		'permlevel': 0
+	},
+
+	# These values are common for all DocPerm
+	{
+		'create': 1,
+		'doctype': 'DocPerm',
+		'name': '__common__',
+		'parent': 'Features Setup',
+		'parentfield': 'permissions',
+		'parenttype': 'DocType',
+		'permlevel': 0,
+		'read': 1,
+		'write': 1
+	},
+
+	# DocType, Features Setup
+	{
+		'doctype': 'DocType',
+		'name': 'Features Setup'
+	},
+
+	# DocPerm
+	{
+		'doctype': 'DocPerm',
+		'role': 'System Manager'
+	},
+
+	# DocPerm
+	{
+		'doctype': 'DocPerm',
+		'role': 'Administrator'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Section Break',
+		'label': 'Materials'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'description': 'To track item in sales and purchase documents based on their serial nos. This is can also used to track warranty details of the product.',
+		'doctype': 'DocField',
+		'fieldname': 'item_searial_nos',
+		'fieldtype': 'Check',
+		'label': 'Item Serial Nos'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'description': 'To track items in sales and purchase documents with batch nos<br><b>Preferred Industry: Chemicals etc</b>',
+		'doctype': 'DocField',
+		'fieldname': 'item_batch_nos',
+		'fieldtype': 'Check',
+		'label': 'Item Batch Nos'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'description': 'To track brand name in the following documents<br>\nDelivery Note, Enuiry, Indent, Item, Purchase Order, Purchase Voucher, Purchaser Receipt, Quotation, Receivable Voucher, Sales BOM, Sales Order, Serial No',
+		'doctype': 'DocField',
+		'fieldname': 'brands',
+		'fieldtype': 'Check',
+		'label': 'Brands'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Column Break'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'description': '1. To maintain the customer wise item code and to make them searchable based on their code use this option',
+		'doctype': 'DocField',
+		'fieldname': 'item_advanced',
+		'fieldtype': 'Check',
+		'label': 'Item Advanced'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'description': 'If Sale BOM is defined, the actual BOM of the Pack is displayed as table.\nAvailable in Delivery Note and Sales Order',
+		'doctype': 'DocField',
+		'fieldname': 'packing_details',
+		'fieldtype': 'Check',
+		'label': 'Packing Detials'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'description': 'To get Item Group in details table',
+		'doctype': 'DocField',
+		'fieldname': 'item_group_in_details',
+		'fieldtype': 'Check',
+		'label': 'Item Groups in Details'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Section Break',
+		'label': 'Sales and Purchase'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'description': 'All export related fields like currency, conversion rate, export total, export grand total etc are available in <br>\nDelivery Note, POS, Quotation, Sales Invoice, Sales Order etc.',
+		'doctype': 'DocField',
+		'fieldname': 'exports',
+		'fieldtype': 'Check',
+		'label': 'Exports'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'description': 'All import related fields like currency, conversion rate, import total, import grand total etc are available in <br>\nPurchase Receipt, Supplier Quotation, Purchase Invoice, Purchase Order etc.',
+		'doctype': 'DocField',
+		'fieldname': 'imports',
+		'fieldtype': 'Check',
+		'label': 'Imports'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Column Break'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'description': 'Field available in Delivery Note, Quotation, Receivable Voucher, Sales Order',
+		'doctype': 'DocField',
+		'fieldname': 'discounts',
+		'fieldtype': 'Check',
+		'label': 'Discounts'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'description': 'To track any installation or commissioning related work after sales',
+		'doctype': 'DocField',
+		'fieldname': 'after_sales_installations',
+		'fieldtype': 'Check',
+		'label': 'After Sale Installations'
+	},
+
+	# DocField
+	{
+		'description': 'Available in \nBill Of Materials, Delivery Note, Payable Voucher, Production Order, Purchase Order, Purchase Receipt, Receivable Voucher, Sales Order, Stock Entry, Timesheet',
+		'doctype': 'DocField',
+		'fieldname': 'projects',
+		'fieldtype': 'Check',
+		'label': 'Projects'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'description': 'If you have Sales Team and Sale Partners (Channel Partners)  they can be tagged and maintain their contribution in the sales activity',
+		'doctype': 'DocField',
+		'fieldname': 'sales_extras',
+		'fieldtype': 'Check',
+		'label': 'Sales Extras'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Section Break',
+		'label': 'Production'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'description': 'If you involve in manufacturing activity<br>\nEnables item <b>Is Manufactured</b>',
+		'doctype': 'DocField',
+		'fieldname': 'manufacturing',
+		'fieldtype': 'Check',
+		'label': 'Manufacturing'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Column Break'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'description': 'If you follow Quality Inspection<br>\nEnables item QA Required and QA No in Purchase Receipt',
+		'doctype': 'DocField',
+		'fieldname': 'quality',
+		'fieldtype': 'Check',
+		'label': 'Quality'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'description': 'To enable <b>Point of Sale</b> features',
+		'doctype': 'DocField',
+		'fieldname': 'pos',
+		'fieldtype': 'Check',
+		'label': 'Point of Sale'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Section Break',
+		'label': 'Miscelleneous'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'description': 'If you have long print formats, this feature can be used to split the page to be printed on multiple pages with all headers and footers on each page',
+		'doctype': 'DocField',
+		'fieldname': 'page_break',
+		'fieldtype': 'Check',
+		'label': 'Page Break'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Column Break'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'description': 'Enables <b>More Info.</b> in all documents',
+		'doctype': 'DocField',
+		'fieldname': 'more_info',
+		'fieldtype': 'Check',
+		'label': 'More Info'
+	}
+]

@@ -3,15 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-<<<<<<< HEAD
-		'creation': '2011-07-27 16:17:04',
-		'docstatus': 0,
-		'modified': '2011-07-27 16:17:04',
-=======
 		'creation': '2011-07-27 18:48:29',
 		'docstatus': 0,
 		'modified': '2011-07-28 12:56:35',
->>>>>>> d075a6c53dc2c832a363409cd4b32ff5a6482e5a
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},

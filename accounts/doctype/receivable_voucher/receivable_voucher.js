@@ -18,10 +18,10 @@ cur_frm.cscript.onload = function(doc,dt,dn) {
 		if(!doc.voucher_date) set_multiple(dt,dn,{voucher_date:get_today()});
 		if(!doc.due_date) set_multiple(dt,dn,{due_date:get_today()});
 		if(!doc.posting_date) set_multiple(dt,dn,{posting_date:get_today()});
-		
+
 		//for previously created sales invoice, set required field related to pos
 		if(doc.is_pos ==1) cur_frm.cscript.is_pos(doc, dt, dn);
-	
+
  	    hide_field(['customer_address','contact_person','customer_name','address_display','contact_display','contact_mobile','contact_email','territory','customer_group']);
   }
 }
@@ -37,10 +37,10 @@ cur_frm.cscript.onload_post_render = function(doc, dt, dn) {
 			}
 		);
 	}
-	
+
 	if(!doc.customer && doc.__islocal) {
 		// new -- load default taxes
-		cur_frm.cscript.load_taxes(doc, cdt, cdn);		
+		cur_frm.cscript.load_taxes(doc, cdt, cdn);
 	}
 }
 
@@ -61,19 +61,19 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 
   // Show / Hide button
   cur_frm.clear_custom_buttons();
-    
-  if(doc.docstatus==1) { 
+
+  if(doc.docstatus==1) {
     cur_frm.add_custom_button('View Ledger', cur_frm.cscript['View Ledger Entry']);
     cur_frm.add_custom_button('Send SMS', cur_frm.cscript['Send SMS']);
     unhide_field('Repair Outstanding Amt');
-    
+
     if(doc.is_pos==1 && doc.update_stock!=1)
       cur_frm.add_custom_button('Make Delivery', cur_frm.cscript['Make Delivery Note']);
-  
+
     if(doc.outstanding_amount!=0)
       cur_frm.add_custom_button('Make Payment Entry', cur_frm.cscript['Make Bank Voucher']);
   }
-  else  
+  else
     hide_field('Repair Outstanding Amt');
   cur_frm.cscript.is_opening(doc, dt, dn);
   cur_frm.cscript.hide_fields(doc, cdt, cdn);
@@ -117,13 +117,13 @@ cur_frm.cscript.customer = function(doc,dt,dn) {
       var doc = locals[cur_frm.doctype][cur_frm.docname];
       get_server_fields('get_debit_to','','',doc, dt, dn, 0);
       cur_frm.refresh();
-  }   
+  }
 
-  if(doc.customer) $c_obj(make_doclist(doc.doctype, doc.name), 'get_default_customer_address', '', callback);  
+  if(doc.customer) $c_obj(make_doclist(doc.doctype, doc.name), 'get_default_customer_address', '', callback);
   if(doc.customer) unhide_field(['customer_address','contact_person','customer_name','address_display','contact_display','contact_mobile','contact_email','territory','customer_group']);
 }
 
-cur_frm.cscript.customer_address = cur_frm.cscript.contact_person = function(doc,dt,dn) {    
+cur_frm.cscript.customer_address = cur_frm.cscript.contact_person = function(doc,dt,dn) {
   if(doc.customer) get_server_fields('get_customer_address', JSON.stringify({customer: doc.customer, address: doc.customer_address, contact: doc.contact_person}),'', doc, dt, dn, 1);
 }
 
@@ -152,15 +152,15 @@ cur_frm.cscript.debit_to = function(doc,dt,dn) {
   var callback2 = function(r,rt) {
       var doc = locals[cur_frm.doctype][cur_frm.docname];
       cur_frm.refresh();
-  }   
-  
+  }
+
   var callback = function(r,rt) {
-      var doc = locals[cur_frm.doctype][cur_frm.docname];    
+      var doc = locals[cur_frm.doctype][cur_frm.docname];
       if(doc.customer) $c_obj(make_doclist(dt,dn), 'get_default_customer_address', '', callback2);
       if(doc.customer) unhide_field(['customer_address','contact_person','customer_name','address_display','contact_display','contact_mobile','contact_email','territory','customer_group']);
       cur_frm.refresh();
   }
-  
+
   if(doc.debit_to && doc.posting_date){
     get_server_fields('get_cust_and_due_date','','',doc,dt,dn,1,callback);
   }
@@ -187,13 +187,13 @@ cur_frm.cscript.project_name = function(doc,cdt,cdn){
 //Set debit and credit to zero on adding new row
 //----------------------------------------------
 cur_frm.fields_dict['entries'].grid.onrowadd = function(doc, cdt, cdn){
-  
+
   cl = getchildren('RV Detail', doc.name, cur_frm.cscript.fname, doc.doctype);
   acc = '';
   cc = '';
 
   for(var i = 0; i<cl.length; i++) {
-    
+
     if (cl[i].idx == 1){
       acc = cl[i].income_account;
       cc = cl[i].cost_center;
@@ -221,7 +221,7 @@ cur_frm.cscript.is_opening = function(doc, dt, dn) {
 
 // Get Items based on SO or DN Selected
 cur_frm.cscript['Get Items'] = function(doc, dt, dn) {
-  var callback = function(r,rt) { 
+  var callback = function(r,rt) {
 	  unhide_field(['customer_address','contact_person','customer_name','address_display','contact_display','contact_mobile','contact_email','territory','customer_group']);
 	  cur_frm.refresh();
   }
@@ -335,10 +335,10 @@ cur_frm.fields_dict.sales_order_main.get_query = function(doc) {
 // Delivery Note
 // --------------
 cur_frm.fields_dict.delivery_note_main.get_query = function(doc) {
-  if (doc.customer)	
-    return 'SELECT DISTINCT `tabDelivery Note`.`name` FROM `tabDelivery Note` WHERE `tabDelivery Note`.company = "' + doc.company + '" and `tabDelivery Note`.`docstatus` = 1 and ifnull(`tabDelivery Note`.per_billed,0) < 100 and `tabDelivery Note`.`customer` =  "' + doc.customer + '" and `tabDelivery Note`.%(key)s LIKE "%s" ORDER BY `tabDelivery Note`.`name` DESC LIMIT 50';    
+  if (doc.customer)
+    return 'SELECT DISTINCT `tabDelivery Note`.`name` FROM `tabDelivery Note` WHERE `tabDelivery Note`.company = "' + doc.company + '" and `tabDelivery Note`.`docstatus` = 1 and ifnull(`tabDelivery Note`.per_billed,0) < 100 and `tabDelivery Note`.`customer` =  "' + doc.customer + '" and `tabDelivery Note`.%(key)s LIKE "%s" ORDER BY `tabDelivery Note`.`name` DESC LIMIT 50';
   else
-    return 'SELECT DISTINCT `tabDelivery Note`.`name` FROM `tabDelivery Note` WHERE `tabDelivery Note`.company = "' + doc.company + '" and `tabDelivery Note`.`docstatus` = 1 and ifnull(`tabDelivery Note`.per_billed,0) < 100 and `tabDelivery Note`.%(key)s LIKE "%s" ORDER BY `tabDelivery Note`.`name` DESC LIMIT 50';        
+    return 'SELECT DISTINCT `tabDelivery Note`.`name` FROM `tabDelivery Note` WHERE `tabDelivery Note`.company = "' + doc.company + '" and `tabDelivery Note`.`docstatus` = 1 and ifnull(`tabDelivery Note`.per_billed,0) < 100 and `tabDelivery Note`.%(key)s LIKE "%s" ORDER BY `tabDelivery Note`.`name` DESC LIMIT 50';
 }
 
 
@@ -393,18 +393,18 @@ cur_frm.cscript.make_jv = function(doc, dt, dn) {
   jv.company = doc.company;
   jv.remark = repl('Payment received against invoice %(vn)s for %(rem)s', {vn:doc.name, rem:doc.remarks});
   jv.fiscal_year = doc.fiscal_year;
-  
+
   // debit to creditor
   var d1 = LocalDB.add_child(jv, 'Journal Voucher Detail', 'entries');
   d1.account = doc.debit_to;
   d1.credit = doc.outstanding_amount;
   d1.against_invoice = doc.name;
 
-  
+
   // credit to bank
   var d1 = LocalDB.add_child(jv, 'Journal Voucher Detail', 'entries');
   d1.debit = doc.outstanding_amount;
-  
+
   loaddoc('Journal Voucher', jv.name);
 }
 

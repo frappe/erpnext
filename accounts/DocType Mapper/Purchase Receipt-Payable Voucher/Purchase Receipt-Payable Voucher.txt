@@ -6,7 +6,7 @@
 		'creation': '2010-08-08 17:09:35',
 		'docstatus': 0,
 		'modified': '2011-05-13 12:18:34',
-		'modified_by': 'Administrator',
+		'modified_by': 'umair@iwebnotes.com',
 		'owner': 'Administrator'
 	},
 
@@ -23,6 +23,7 @@
 	{
 		'doctype': 'Field Mapper Detail',
 		'map': 'Yes',
+		'match_id': 1,
 		'name': '__common__',
 		'parent': 'Purchase Receipt-Payable Voucher',
 		'parentfield': 'field_mapper_details',
@@ -48,153 +49,7 @@
 	# Field Mapper Detail
 	{
 		'doctype': 'Field Mapper Detail',
-		'from_field': 'company',
-		'idx': 1,
-		'match_id': 0,
-		'to_field': 'company'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'fiscal_year',
-		'idx': 2,
-		'match_id': 0,
-		'to_field': 'fiscal_year'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'supplier',
-		'idx': 3,
-		'match_id': 0,
-		'to_field': 'supplier'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'supplier_name',
-		'idx': 4,
-		'match_id': 0,
-		'to_field': 'supplier_name'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'supplier_address',
-		'idx': 5,
-		'match_id': 0,
-		'to_field': 'supplier_address'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'contact_person',
-		'idx': 6,
-		'match_id': 0,
-		'to_field': 'contact_person'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'address_display',
-		'idx': 7,
-		'match_id': 0,
-		'to_field': 'address_display'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'contact_display',
-		'idx': 8,
-		'match_id': 0,
-		'to_field': 'contact_display'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'contact_mobile',
-		'idx': 9,
-		'match_id': 0,
-		'to_field': 'contact_mobile'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'contact_email',
-		'idx': 10,
-		'match_id': 0,
-		'to_field': 'contact_email'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'currency',
-		'idx': 11,
-		'match_id': 0,
-		'to_field': 'currency'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'conversion_rate',
-		'idx': 12,
-		'match_id': 0,
-		'to_field': 'conversion_rate'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'item_code',
-		'idx': 13,
-		'match_id': 1,
-		'to_field': 'item_code'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'item_name',
-		'idx': 14,
-		'match_id': 1,
-		'to_field': 'item_name'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'brand',
-		'idx': 15,
-		'match_id': 1,
-		'to_field': 'brand'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'description',
-		'idx': 16,
-		'match_id': 1,
-		'to_field': 'description'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
 		'from_field': 'eval: flt(obj.qty) - flt(obj.billed_qty)',
-		'idx': 17,
-		'match_id': 1,
 		'to_field': 'qty'
 	},
 
@@ -202,8 +57,6 @@
 	{
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'purchase_rate',
-		'idx': 18,
-		'match_id': 1,
 		'to_field': 'rate'
 	},
 
@@ -211,26 +64,13 @@
 	{
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'eval: (flt(obj.qty) - flt(obj.billed_qty)) * flt(obj.purchase_rate)',
-		'idx': 19,
-		'match_id': 1,
 		'to_field': 'amount'
 	},
 
 	# Field Mapper Detail
 	{
 		'doctype': 'Field Mapper Detail',
-		'from_field': 'import_rate',
-		'idx': 20,
-		'match_id': 1,
-		'to_field': 'import_rate'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
 		'from_field': 'eval: (flt(obj.qty) - flt(obj.billed_qty)) * flt(obj.import_rate)',
-		'idx': 21,
-		'match_id': 1,
 		'to_field': 'import_amount'
 	},
 
@@ -238,8 +78,6 @@
 	{
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'parent',
-		'idx': 22,
-		'match_id': 1,
 		'to_field': 'purchase_receipt'
 	},
 
@@ -247,8 +85,6 @@
 	{
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'prevdoc_docname',
-		'idx': 23,
-		'match_id': 1,
 		'to_field': 'purchase_order'
 	},
 
@@ -256,8 +92,6 @@
 	{
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'name',
-		'idx': 24,
-		'match_id': 1,
 		'to_field': 'pr_detail'
 	},
 
@@ -265,117 +99,7 @@
 	{
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'prevdoc_detail_docname',
-		'idx': 25,
-		'match_id': 1,
 		'to_field': 'po_detail'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'item_group',
-		'idx': 26,
-		'match_id': 1,
-		'to_field': 'item_group'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'item_tax_rate',
-		'idx': 27,
-		'match_id': 1,
-		'to_field': 'item_tax_rate'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'category',
-		'idx': 28,
-		'match_id': 2,
-		'to_field': 'category'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'add_deduct_tax',
-		'idx': 29,
-		'match_id': 2,
-		'to_field': 'add_deduct_tax'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'charge_type',
-		'idx': 30,
-		'match_id': 2,
-		'to_field': 'charge_type'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'row_id',
-		'idx': 31,
-		'match_id': 2,
-		'to_field': 'row_id'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'item_wise_tax_detail',
-		'idx': 32,
-		'match_id': 2,
-		'to_field': 'item_wise_tax_detail'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'description',
-		'idx': 33,
-		'match_id': 2,
-		'to_field': 'description'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'account_head',
-		'idx': 34,
-		'match_id': 2,
-		'to_field': 'account_head'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'cost_center',
-		'idx': 35,
-		'match_id': 2,
-		'to_field': 'cost_center'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'rate',
-		'idx': 36,
-		'match_id': 2,
-		'to_field': 'rate'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'project_name',
-		'idx': 37,
-		'match_id': 0,
-		'to_field': 'project_name'
 	},
 
 	# Table Mapper Detail
@@ -383,7 +107,6 @@
 		'doctype': 'Table Mapper Detail',
 		'from_field': 'purchase_receipt_details',
 		'from_table': 'Purchase Receipt Detail',
-		'idx': 1,
 		'match_id': 1,
 		'to_field': 'entries',
 		'to_table': 'PV Detail',
@@ -394,7 +117,6 @@
 	{
 		'doctype': 'Table Mapper Detail',
 		'from_table': 'Purchase Receipt',
-		'idx': 2,
 		'match_id': 0,
 		'to_table': 'Payable Voucher',
 		'validation_logic': 'docstatus=1'
@@ -405,7 +127,6 @@
 		'doctype': 'Table Mapper Detail',
 		'from_field': 'purchase_tax_details',
 		'from_table': 'Purchase Tax Detail',
-		'idx': 3,
 		'match_id': 2,
 		'to_field': 'purchase_tax_details',
 		'to_table': 'Purchase Tax Detail',

@@ -128,7 +128,7 @@ class DocType(TransactionBase):
 			get_obj('DocType Mapper', 'Sales Order-Receivable Voucher').dt_map('Sales Order', 'Receivable Voucher', self.doc.sales_order_main, self.doc, self.doclist, "[['Sales Order', 'Receivable Voucher'],['Sales Order Detail', 'RV Detail'],['RV Tax Detail','RV Tax Detail'], ['Sales Team', 'Sales Team']]")
 			self.get_income_account('entries')
 			
-		ret = eval(self.get_debit_to())	
+		ret = self.get_debit_to()
 		if ret.has_key('debit_to'):
 			self.doc.debit_to = ret['debit_to']
 					

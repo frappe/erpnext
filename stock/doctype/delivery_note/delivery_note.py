@@ -13,7 +13,7 @@ sql = webnotes.conn.sql
 get_value = webnotes.conn.get_value
 in_transaction = webnotes.conn.in_transaction
 convert_to_lists = webnotes.conn.convert_to_lists
-	
+
 # -----------------------------------------------------------------------------------------
 
 from utilities.transaction_base import TransactionBase
@@ -24,7 +24,7 @@ class DocType(TransactionBase):
     self.doclist = doclist
     self.tname = 'Delivery Note Detail'
     self.fname = 'delivery_note_details'
-    
+
     # Notification objects
     self.notify_obj = get_obj('Notification Control')
 
@@ -33,7 +33,7 @@ class DocType(TransactionBase):
   def autoname(self):
     self.doc.name = make_autoname(self.doc.naming_series+'.#####')
 
-    
+
 # DOCTYPE TRIGGERS FUNCTIONS
 # ==============================================================================
 #************Fiscal Year Validation*****************************
@@ -48,21 +48,21 @@ class DocType(TransactionBase):
   # *********** Get Commission rate of Sales Partner ****************
   def get_comm_rate(self, sales_partner):
     return get_obj('Sales Common').get_comm_rate(sales_partner, self)
-  
+
   # *************** Pull Sales Order Details ************************
   def pull_sales_order_details(self):
     self.validate_prev_docname()
     self.doc.clear_table(self.doclist,'other_charges')
-        
-    if self.doc.sales_order_no:        
+
+    if self.doc.sales_order_no:
       get_obj('DocType Mapper', 'Sales Order-Delivery Note').dt_map('Sales Order', 'Delivery Note', self.doc.sales_order_no, self.doc, self.doclist, "[['Sales Order', 'Delivery Note'],['Sales Order Detail', 'Delivery Note Detail'],['RV Tax Detail','RV Tax Detail'],['Sales Team','Sales Team']]")
     else:
-      msgprint("Please select Sales Order No. whose details need to be pulled")    
+      msgprint("Please select Sales Order No. whose details need to be pulled")
 
     return cstr(self.doc.sales_order_no)
 
-    
-  
+
+
   #-------------------set item details -uom and item group----------------
   def set_item_details(self):
     for d in getlist(self.doclist,'delivery_note_details'):
@@ -70,14 +70,14 @@ class DocType(TransactionBase):
       if not d.stock_uom:    d.stock_uom = res and cstr(res[0][0]) or ''
       if not d.item_group:   d.item_group = res and cstr(res[0][1]) or ''
       d.save()
-      
+
   # ::::: Validates that Sales Order is not pulled twice :::::::
   def validate_prev_docname(self):
-    for d in getlist(self.doclist, 'delivery_note_details'): 
+    for d in getlist(self.doclist, 'delivery_note_details'):
       if self.doc.sales_order_no == d.prevdoc_docname:
         msgprint(cstr(self.doc.sales_order_no) + " sales order details have already been pulled. ")
         raise Exception, "Validation Error. "
-  
+
   #Set Actual Qty based on item code and warehouse
   #------------------------------------------------------
   def set_actual_qty(self):
@@ -91,14 +91,14 @@ class DocType(TransactionBase):
   # -------------------------------------
   def get_tc_details(self):
     return get_obj('Sales Common').get_tc_details(self)
-  
+
   #pull project customer
   #-------------------------
   def pull_project_customer(self):
     res = sql("select customer from `tabProject` where name = '%s'"%self.doc.project_name)
     if res:
       get_obj('DocType Mapper', 'Project-Delivery Note').dt_map('Project', 'Delivery Note', self.doc.project_name, self.doc, self.doclist, "[['Project', 'Delivery Note']]")
-        
+
 # DELIVERY NOTE DETAILS TRIGGER FUNCTIONS
 # ================================================================================
 
@@ -119,10 +119,10 @@ class DocType(TransactionBase):
     }
     return ret
 
-    
+
 # OTHER CHARGES TRIGGER FUNCTIONS
 # ====================================================================================
-  
+
   # *********** Get Tax rate if account type is TAX ********************
   def get_rate(self,arg):
     return get_obj('Sales Common').get_rate(arg)
@@ -137,7 +137,7 @@ class DocType(TransactionBase):
   def get_other_charges(self):
     return get_obj('Sales Common').get_other_charges(self)
 
-    
+
   #check in manage account if sales order required or not.
   # ====================================================================================
   def so_required(self):
@@ -147,9 +147,9 @@ class DocType(TransactionBase):
          if not d.prevdoc_docname:
            msgprint("Sales Order No. required against item %s"%d.item_code)
            raise Exception
-       
 
-    
+
+
 # VALIDATE
 # ====================================================================================
   def validate(self):
@@ -167,13 +167,16 @@ class DocType(TransactionBase):
     sales_com_obj.make_packing_list(self,'delivery_note_details')
     get_obj('Stock Ledger').validate_serial_no(self, 'packing_details')
     sales_com_obj.validate_max_discount(self, 'delivery_note_details')             #verify whether rate is not greater than max discount
-    sales_com_obj.get_allocated_sum(self)  # this is to verify that the allocated % of sales persons is 100%    
+    sales_com_obj.get_allocated_sum(self)  # this is to verify that the allocated % of sales persons is 100%
     sales_com_obj.check_conversion_rate(self)
     # ::::::: Get total in Words ::::::::
     dcc = TransactionBase().get_company_currency(self.doc.company)
     self.doc.in_words = sales_com_obj.get_total_in_words(dcc, self.doc.rounded_total)
     self.doc.in_words_export = sales_com_obj.get_total_in_words(self.doc.currency, self.doc.rounded_total_export)
-    
+
+    # ::::::: Set Net Weight of each Packing
+    self.update_pack_nett_weight()
+    self.print_packing_slip()
     # ::::::: Set actual qty for each item in selected warehouse :::::::
     self.update_current_stock()
     # :::::: set DN status :::::::
@@ -181,8 +184,7 @@ class DocType(TransactionBase):
     self.doc.status = 'Draft'
     if not self.doc.billing_status: self.doc.billing_status = 'Not Billed'
     if not self.doc.installation_status: self.doc.installation_status = 'Not Installed'
-    
- 
+
   # ************** Validate Mandatory *************************
   def validate_mandatory(self):
     # :::::::::: Amendment Date ::::::::::::::
@@ -198,20 +200,20 @@ class DocType(TransactionBase):
       if not res:
         msgprint("Customer - %s does not belong to project - %s. \n\nIf you want to use project for multiple customers then please make customer details blank in project - %s."%(self.doc.customer,self.doc.project_name,self.doc.project_name))
         raise Exception
-            
+
   # Validate values with reference document
   #----------------------------------------
   def validate_reference_value(self):
     get_obj('DocType Mapper', 'Sales Order-Delivery Note', with_children = 1).validate_reference_value(self, self.doc.name)
-  
-	  
+
+
   # ******* Validate Previous Document Details ************
   def validate_prevdoc_details(self):
     for d in getlist(self.doclist,'delivery_note_details'):
-           
+
       prevdoc = d.prevdoc_doctype
       prevdoc_docname = d.prevdoc_docname
-      
+
       if prevdoc_docname and prevdoc:
         # ::::::::::: Validates Transaction Date of DN and previous doc (i.e. SO , PO, PR) *********
         trans_date = sql("select transaction_date from `tab%s` where name = '%s'" %(prevdoc,prevdoc_docname))[0][0]
@@ -259,7 +261,7 @@ class DocType(TransactionBase):
       ch = sql("select is_stock_item from `tabItem` where name = '%s'"%d.item_code)
       if d.prevdoc_doctype and d.prevdoc_detail_docname and ch and ch[0][0]=='Yes':
         self.validate_items_with_prevdoc(d)
-      
+
       # validates whether item is not entered twice
       e = [d.item_code, d.description, d.warehouse, d.prevdoc_docname or '', d.batch_no or '']
       f = [d.item_code, d.description, d.prevdoc_docname or '']
@@ -297,8 +299,8 @@ class DocType(TransactionBase):
     for d in getlist(self.doclist, 'packing_details'):
       bin = sql("select actual_qty, projected_qty from `tabBin` where item_code =  %s and warehouse = %s", (d.item_code, d.warehouse), as_dict = 1)
       d.actual_qty = bin and flt(bin[0]['actual_qty']) or 0
-      d.projected_qty = bin and flt(bin[0]['projected_qty']) or 0  
-      
+      d.projected_qty = bin and flt(bin[0]['projected_qty']) or 0
+
 
 # ON SUBMIT
 # =================================================================================================
@@ -322,7 +324,7 @@ class DocType(TransactionBase):
     # on submit notification
     self.notify_obj.notify_contact('Delivery Note',self.doc.doctype,self.doc.name, self.doc.email_id, self.doc.contact_person)
 
-   
+
   # *********** Checks whether actual quantity is present in warehouse *************
   def check_qty_in_stock(self):
     for d in getlist(self.doclist, 'packing_details'):
@@ -334,7 +336,7 @@ class DocType(TransactionBase):
 
 
 # ON CANCEL
-# =================================================================================================  
+# =================================================================================================
   def on_cancel(self):
     sales_com_obj = get_obj(dt = 'Sales Common')
     sales_com_obj.check_stop_sales_order(self)
@@ -345,14 +347,14 @@ class DocType(TransactionBase):
     # :::::: set DN status :::::::
     set(self.doc, 'status', 'Cancelled')
 
-  
+
   # ******************** Check Next DocStatus **************************
   def check_next_docstatus(self):
     submit_rv = sql("select t1.name from `tabReceivable Voucher` t1,`tabRV Detail` t2 where t1.name = t2.parent and t2.delivery_note = '%s' and t1.docstatus = 1" % (self.doc.name))
     if submit_rv:
       msgprint("Sales Invoice : " + cstr(submit_rv[0][0]) + " has already been submitted !")
       raise Exception , "Validation Error."
-    
+
     submit_in = sql("select t1.name from `tabInstallation Note` t1, `tabInstalled Item Details` t2 where t1.name = t2.parent and t2.prevdoc_docname = '%s' and t1.docstatus = 1" % (self.doc.name))
     if submit_in:
       msgprint("Installation Note : "+cstr(submit_in[0][0]) +" has already been submitted !")
@@ -369,11 +371,11 @@ class DocType(TransactionBase):
         if not d[0]:
           msgprint("Message: Please enter Warehouse for item %s as it is stock item."% d[1])
           raise Exception
-        # if prevdoc_doctype = "Sales Order" 
+        # if prevdoc_doctype = "Sales Order"
         if d[3] < 0 :
           # Reduce Reserved Qty from warehouse
           bin = get_obj('Warehouse', d[0]).update_bin(0, flt(update_stock) * flt(d[3]), 0, 0, 0, d[1], self.doc.transaction_date)
-          
+
         # Reduce actual qty from warehouse
         self.make_sl_entry(d, d[0], - flt(d[2]) , 0, update_stock)
     get_obj('Stock Ledger', 'Stock Ledger').update_stock(self.values)
@@ -383,7 +385,7 @@ class DocType(TransactionBase):
   def get_item_list(self, is_stopped):
    return get_obj('Sales Common').get_item_list(self, is_stopped)
 
-	
+
   # ********************** Make Stock Entry ************************************
   def make_sl_entry(self, d, wh, qty, in_value, update_stock):
     self.values.append({
@@ -394,8 +396,8 @@ class DocType(TransactionBase):
       'posting_time'        : self.doc.posting_time,
       'voucher_type'        : 'Delivery Note',
       'voucher_no'          : self.doc.name,
-      'voucher_detail_no'   : '', 
-      'actual_qty'          : qty, 
+      'voucher_detail_no'   : '',
+      'actual_qty'          : qty,
       'stock_uom'           : d[4],
       'incoming_rate'       : in_value,
       'company'             : self.doc.company,
@@ -403,9 +405,9 @@ class DocType(TransactionBase):
       'is_cancelled'        : (update_stock==1) and 'No' or 'Yes',
       'batch_no'            : d[5],
       'serial_no'           : d[6]
-    })    
+    })
 
-  
+
   # SEND SMS
   # ============================================================================================
   def send_sms(self):
@@ -436,3 +438,44 @@ class DocType(TransactionBase):
   # ===========================================
   def repair_delivery_note(self):
     get_obj('Sales Common', 'Sales Common').repair_curr_doctype_details(self)
+
+  # Packing Slip Related
+  # ==========================================
+  def update_pack_nett_weight(self):
+      for d in getlist(self.doclist, 'delivery_note_details'):
+        if d.item_name:
+          item_wt = sql("select nett_weight from `tabItem` where item_name = '%s'" % (d.item_name))
+          d.pack_nett_wt = item_wt and flt(item_wt[0][0])*flt(d.qty) or 0
+
+  # ==========================================
+  def print_packing_slip(self):
+    prev_pack='0'
+    sno=0
+    html=''
+    tot_nett_wt,tot_gross_wt=0,0
+    for d in getlist(self.doclist, 'delivery_note_details'):
+      sno=sno+1
+      if sno!=1:#Footer goes here
+        html+='</table><table width="100%"><tr><td>CASE NO</td><td>'+cstr(d.pack_no)+'</td><td>NETT WT</td><td>'+cstr(tot_nett_wt)+'</td><td>CHECKED BY</td><td></td></tr><tr><td>SIZE</td><td></td><td>GROSS WT</td><td>'+cstr(tot_gross_wt)+'</td><td>PACKED BY</td><td></td></tr></table>'
+      if prev_pack!=d.pack_no: #Prepare Header Here
+        #Header code goes here
+        html+='<div align="center">[HEADER GOES HERE]</div><div><center><h2>Packing Slip</h2></center></div> <table width="100%"><tr><td>Order No.</td><td>'+cstr(self.doc.sales_order_no)+'</td><td>Shipping Marks</td><td>'+cstr(d.pack_no)+'</td></tr></table>'
+        html+='<table class="cust_tbl" style="page-break-after:always" width="100%"><tr><td>S.NO.</td><td>QUANTITY</td><td>CS.NO.</td><td>DESCRIPTION</td><td>WEIGHT</td><tr>'
+        sno=0
+        tot_nett_wt,to_gross_wt=flt(d.pack_nett_wt),flt(d.pack_gross_wt)
+      #Body code goes here
+      html+='<tr><td>'+cstr(sno+1)+'</td><td>'+cstr(d.qty)+'</td><td></td><td>'+d.item_code+'</td><td>'+cstr(d.pack_nett_wt)+'</td></tr>'
+      prev_pack=d.pack_no
+      tot_nett_wt+=flt(d.pack_nett_wt)
+      tot_gross_wt+=flt(d.pack_gross_wt)
+    html+='</html>'
+    self.doc.print_packing_slip=html
+
+
+
+
+
+
+
+
+

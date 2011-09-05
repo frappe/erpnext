@@ -16,39 +16,19 @@ class DocType(TransactionBase):
 		self.doc = doc
 		self.doclist = doclist
 
-
-# ********************************* validate warranty / amc status ***************************************
-
-	# --------------------
-	# validate amc status
-	# --------------------
 	def validate_amc_status(self):
-		if self.doc.amc_expiry_date and getdate(self.doc.amc_expiry_date) >= datetime.date.today() and self.doc.maintenance_status == 'Out of AMC':
-			msgprint("AMC expiry date and maintenance status mismatch. Please verify")
-			raise Exception
-		elif (not self.doc.amc_expiry_date or getdate(self.doc.amc_expiry_date) < datetime.date.today()) and self.doc.maintenance_status == 'Under AMC':
-			msgprint("AMC expiry date and maintenance status mismatch. Please verify")
-			raise Exception
+		"""
+			validate amc status
+		"""
+		if (self.doc.maintenance_status == 'Out of AMC' and self.doc.amc_expiry_date and getdate(self.doc.amc_expiry_date) >= datetime.date.today()) or (self.doc.maintenance_status == 'Under AMC' and (not self.doc.amc_expiry_date or getdate(self.doc.amc_expiry_date) < datetime.date.today())):
+			msgprint("AMC expiry date and maintenance status mismatch. Please verify", raise_exception=1)
 
-
-	# -------------------------
-	# validate warranty status
-	# -------------------------
 	def validate_warranty_status(self):
-		if self.doc.warranty_expiry_date and getdate(self.doc.warranty_expiry_date) >= datetime.date.today() and self.doc.maintenance_status == 'Out of Warranty':
-			msgprint("Warranty expiry date and maintenance status mismatch. Please verify")
-			raise Exception
-		elif (not self.doc.warranty_expiry_date or getdate(self.doc.warranty_expiry_date) < datetime.date.today()) and self.doc.maintenance_status == 'Under Warranty':
-			msgprint("Warranty expiry date and maintenance status mismatch. Please verify")
-			raise Exception
-
-
-	# -------------------------------
-	# validate warranty / amc status
-	# -------------------------------
-	def validate_warranty_amc_status(self):
-		self.validate_warranty_status()
-		self.validate_amc_status()
+		"""
+			validate warranty status	
+		"""
+		if (self.doc.maintenance_status == 'Out of Warranty' and self.doc.warranty_expiry_date and getdate(self.doc.warranty_expiry_date) >= datetime.date.today()) or (self.doc.maintenance_status == 'Under Warranty' and (not self.doc.warranty_expiry_date or getdate(self.doc.warranty_expiry_date) < datetime.date.today())):
+			msgprint("Warranty expiry date and maintenance status mismatch. Please verify", raise_exception=1)
 
 
 	def validate_warehouse(self):
@@ -56,6 +36,9 @@ class DocType(TransactionBase):
 			msgprint("Warehouse is mandatory if this Serial No is <b>In Store</b>", raise_exception=1)
 
 	def validate_item(self):
+		"""
+			Validate whether serial no is required for this item
+		"""
 		item = sql("select name, has_serial_no from tabItem where name = '%s'" % self.doc.item_code)
 		if not item:
 			msgprint("Item is not exists in the system", raise_exception=1)
@@ -67,7 +50,8 @@ class DocType(TransactionBase):
 	# validate
 	# ---------
 	def validate(self):
-		self.validate_warranty_amc_status()
+		self.validate_warranty_status()
+		self.validate_amc_status()
 		self.validate_warehouse()
 		self.validate_item()
 
@@ -75,7 +59,7 @@ class DocType(TransactionBase):
 	# ------------------------
 	# make stock ledger entry
 	# ------------------------
-	def make_stock_ledger_entry(self, update_stock):
+	def make_stock_ledger_entry(self, qty):
 		from webnotes.model.code import get_obj
 		values = [{
 			'item_code'				: self.doc.item_code,
@@ -86,12 +70,12 @@ class DocType(TransactionBase):
 			'voucher_type'			: 'Serial No',
 			'voucher_no'			: self.doc.name,
 			'voucher_detail_no'	 	: '', 
-			'actual_qty'			: 1, 
+			'actual_qty'			: qty, 
 			'stock_uom'				: webnotes.conn.get_value('Item', self.doc.item_code, 'stock_uom'),
 			'incoming_rate'			: self.doc.purchase_rate,
 			'company'				: self.doc.company,
 			'fiscal_year'			: self.doc.fiscal_year,
-			'is_cancelled'			: update_stock and 'No' or 'Yes',
+			'is_cancelled'			: 'No', # is_cancelled is always 'No' because while deleted it can not find creation entry if it not created directly, voucher no != serial no.
 			'batch_no'				: '',
 			'serial_no'				: self.doc.name
 		}]
@@ -102,8 +86,8 @@ class DocType(TransactionBase):
 	# on update
 	# ----------
 	def on_update(self):
-		if self.doc.warehouse and not sql("select name from `tabStock Ledger Entry` where serial_no = '%s'" % (self.doc.name)) and self.doc.status == 'In Store':
-			self.make_stock_ledger_entry(update_stock = 1)
+		if self.doc.localname and self.doc.warehouse and self.doc.status == 'In Store' and not sql("select name from `tabStock Ledger Entry` where serial_no = '%s' and ifnull(is_cancelled, 'No') = 'No'" % (self.doc.name)):
+			self.make_stock_ledger_entry(1)
 
 
 	# ---------
@@ -114,7 +98,7 @@ class DocType(TransactionBase):
 			msgprint("Cannot trash Serial No : %s as it is already Delivered" % (self.doc.name), raise_exception = 1)
 		else:
 			webnotes.conn.set(self.doc, 'status', 'Not in Use')
-			self.make_stock_ledger_entry(update_stock = 0)
+			self.make_stock_ledger_entry(-1)
 
 
 	def on_cancel(self):
@@ -124,4 +108,4 @@ class DocType(TransactionBase):
 	# on restore
 	# -----------
 	def on_restore(self):
-		self.make_stock_ledger_entry(update_stock = 1)
+		self.make_stock_ledger_entry(1)

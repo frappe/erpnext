@@ -1,0 +1,49 @@
+# Page, dashboard
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2011-08-25 16:22:44',
+		'docstatus': 0,
+		'modified': '2011-08-25 16:22:54',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all Page
+	{
+		'category': 'Standard',
+		'doctype': 'Page',
+		'module': 'Home',
+		'name': '__common__',
+		'page_name': 'Dashboard',
+		'standard': 'Yes'
+	},
+
+	# These values are common for all Page Role
+	{
+		'doctype': 'Page Role',
+		'name': '__common__',
+		'parent': 'dashboard',
+		'parentfield': 'roles',
+		'parenttype': 'Page'
+	},
+
+	# Page, dashboard
+	{
+		'doctype': 'Page',
+		'name': 'dashboard'
+	},
+
+	# Page Role
+	{
+		'doctype': 'Page Role',
+		'role': 'System Manager'
+	},
+
+	# Page Role
+	{
+		'doctype': 'Page Role',
+		'role': 'Accounts Manager'
+	}
+]

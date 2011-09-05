@@ -1,17 +1,17 @@
 cur_frm.cscript.refresh = function(doc) {
 	// make sensitive fields(has_serial_no, is_stock_item, valuation_method)
 	// read only if any stock ledger entry exists
-	
+
 	if ((!doc.__islocal) && (doc.is_stock_item == 'Yes')) {
 		var callback = function(r, rt) {
 			if (r.message == 'exists') permlevel = 1;
 			else permlevel = 0;
-				
+
 			set_field_permlevel('has_serial_no', permlevel);
 			set_field_permlevel('is_stock_item', permlevel);
 			set_field_permlevel('valuation_method', permlevel);
 		}
-		$c_obj(make_doclist(doc.doctype, doc.name),'check_if_sle_exists','',callback); 
+		$c_obj(make_doclist(doc.doctype, doc.name),'check_if_sle_exists','',callback);
 	}
 }
 
@@ -24,25 +24,25 @@ cur_frm.fields_dict['default_bom'].get_query = function(doc) {
 
 // Expense Account
 // ---------------------------------
-cur_frm.fields_dict['purchase_account'].get_query = function(doc){ 
+cur_frm.fields_dict['purchase_account'].get_query = function(doc){
   return 'SELECT DISTINCT `tabAccount`.`name` FROM `tabAccount` WHERE `tabAccount`.`debit_or_credit`="Debit" AND `tabAccount`.`group_or_ledger`="Ledger" AND `tabAccount`.`docstatus`!=2 AND `tabAccount`.`is_pl_account` = "Yes" AND `tabAccount`.%(key)s LIKE "%s" ORDER BY `tabAccount`.`name` LIMIT 50'
 }
 
-// Income Account 
+// Income Account
 // --------------------------------
 cur_frm.fields_dict['default_income_account'].get_query = function(doc) {
   return 'SELECT DISTINCT `tabAccount`.`name` FROM `tabAccount` WHERE `tabAccount`.`debit_or_credit`="Credit" AND `tabAccount`.`group_or_ledger`="Ledger" AND `tabAccount`.`is_pl_account` = "Yes" AND `tabAccount`.`docstatus`!=2 AND `tabAccount`.`account_type` ="Income Account" AND `tabAccount`.%(key)s LIKE "%s" ORDER BY `tabAccount`.`name` LIMIT 50'
 }
 
 
-// Purchase Cost Center 
+// Purchase Cost Center
 // -----------------------------
 cur_frm.fields_dict['cost_center'].get_query = function(doc) {
   return 'SELECT `tabCost Center`.`name` FROM `tabCost Center` WHERE `tabCost Center`.%(key)s LIKE "%s" AND `tabCost Center`.`group_or_ledger` = "Ledger" AND `tabCost Center`.`docstatus`!= 2 ORDER BY  `tabCost Center`.`name` ASC LIMIT 50'
 }
 
 
-// Sales Cost Center 
+// Sales Cost Center
 // -----------------------------
 cur_frm.fields_dict['default_sales_cost_center'].get_query = function(doc) {
   return 'SELECT `tabCost Center`.`name` FROM `tabCost Center` WHERE `tabCost Center`.%(key)s LIKE "%s" AND `tabCost Center`.`group_or_ledger` = "Ledger" AND `tabCost Center`.`docstatus`!= 2 ORDER BY  `tabCost Center`.`name` ASC LIMIT 50'
@@ -66,7 +66,7 @@ cur_frm.fields_dict['item_group'].get_query = function(doc,cdt,cdn) {
 
 cur_frm.cscript.IGHelp = function(doc,dt,dn){
   var call_back = function(){
-    var sb_obj = new SalesBrowser();        
+    var sb_obj = new SalesBrowser();
     sb_obj.set_val('Item Group');
 
   }
@@ -79,21 +79,40 @@ cur_frm.cscript.IGHelp = function(doc,dt,dn){
 // in the "alternate_description" field
 cur_frm.cscript['Add Image'] = function(doc, dt, dn) {
 	if(!doc.file_list) {
-		msgprint('Please attach a file first!'); 
+		msgprint('Please attach a file first!');
 	}
-	
+
 	var f = doc.file_list.split('\n')[0];
 	var fname = f.split(',')[0];
 	var fid = f.split(',')[1];
 	if(!in_list(['jpg','jpeg','gif','png'], fname.split('.')[1].toLowerCase())) {
 		msgprint('File must be of extension jpg, jpeg, gif or png'); return;
 	}
-	
+
 	doc.description_html = repl('<table style="width: 100%; table-layout: fixed;">'+
 	'<tr><td style="width:110px"><img src="%(imgurl)s" width="100px"></td>'+
 	'<td>%(desc)s</td></tr>'+
 	'</table>', {imgurl: wn.urllib.get_file_url(fid), desc:doc.description});
-	
+
 	refresh_field('description_html');
 }
+//===================== Quotation to validation - either customer or lead mandatory ====================
+cur_frm.cscript.weight_to_validate = function(doc,cdt,cdn){
 
+  if((doc.nett_weight || doc.gross_weight) && !doc.weight_uom)
+  {
+    alert('Weight is mentioned,\nPlease mention "Weight UOM" too');
+    validated=0;
+  }
+}
+//===================validation function =================================
+
+cur_frm.cscript.validate = function(doc,cdt,cdn){
+  cur_frm.cscript.weight_to_validate(doc,cdt,cdn);
+}
+
+//===========Fill Default Currency in "Ref Rate Details====================
+cur_frm.fields_dict['ref_rate_details'].grid.onrowadd = function(doc, cdt, cdn){
+	locals[cdt][cdn].ref_currency = sys_defaults.currency;
+	refresh_field('ref_currency',cdn,'ref_rate_details');
+}

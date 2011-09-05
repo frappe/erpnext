@@ -5,14 +5,14 @@
 	{
 		'creation': '2010-12-14 16:50:05',
 		'docstatus': 0,
-		'modified': '2011-06-27 14:39:11',
+		'modified': '2011-08-11 16:56:38',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1308808105',
+		'_last_update': '1311621379',
 		'colour': 'White:FFF',
 		'doctype': 'DocType',
 		'module': 'HR',
@@ -21,7 +21,7 @@
 		'server_code_error': ' ',
 		'show_in_menu': 0,
 		'subject': 'For %(employee_name)s',
-		'version': 586
+		'version': 587
 	},
 
 	# These values are common for all DocField
@@ -39,7 +39,8 @@
 		'name': '__common__',
 		'parent': 'Salary Structure',
 		'parentfield': 'permissions',
-		'parenttype': 'DocType'
+		'parenttype': 'DocType',
+		'read': 1
 	},
 
 	# DocType, Salary Structure
@@ -54,9 +55,9 @@
 		'cancel': 0,
 		'create': 0,
 		'doctype': 'DocPerm',
-		'match': 'owner',
+		'idx': 1,
 		'permlevel': 0,
-		'read': 1,
+		'role': 'Employee',
 		'submit': 0,
 		'write': 0
 	},
@@ -66,95 +67,38 @@
 		'amend': 0,
 		'cancel': 0,
 		'create': 0,
-		'doctype': 'DocPerm',
-		'match': 'owner',
-		'permlevel': 0,
-		'read': 1,
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		'doctype': 'DocPerm',
-		'match': 'owner',
-		'permlevel': 0,
-		'read': 1,
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		'doctype': 'DocPerm',
-		'match': 'owner',
-		'permlevel': 0,
-		'read': 1,
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'doctype': 'DocPerm',
-		'permlevel': 0,
-		'role': 'Sales User'
-	},
-
-	# DocPerm
-	{
 		'doctype': 'DocPerm',
 		'idx': 2,
 		'permlevel': 1,
-		'read': 1,
 		'role': 'All',
+		'submit': 0,
 		'write': 0
 	},
 
 	# DocPerm
 	{
-		'create': 1,
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
 		'doctype': 'DocPerm',
 		'idx': 3,
 		'permlevel': 0,
-		'read': 1,
 		'role': 'HR User',
-		'write': 1
+		'submit': 0,
+		'write': 0
 	},
 
 	# DocPerm
 	{
+		'amend': 1,
+		'cancel': 1,
 		'create': 1,
 		'doctype': 'DocPerm',
 		'idx': 4,
 		'permlevel': 0,
-		'read': 1,
 		'role': 'HR Manager',
+		'submit': 1,
 		'write': 1
-	},
-
-	# DocPerm
-	{
-		'doctype': 'DocPerm',
-		'idx': 5,
-		'permlevel': 1,
-		'read': 1,
-		'role': 'HR Manager'
-	},
-
-	# DocPerm
-	{
-		'doctype': 'DocPerm',
-		'idx': 6,
-		'permlevel': 1,
-		'read': 1,
-		'role': 'HR User'
 	},
 
 	# DocField
