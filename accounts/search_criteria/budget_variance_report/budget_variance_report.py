@@ -51,7 +51,6 @@ for r in res:
   q1 = "select sum(t1.budget_allocated) from `tabBudget Detail` t1, `tab%s` t2, `tabAccount` t3 where "
   cond2 = " t3.is_pl_account = 'Yes' and t3.debit_or_credit = 'Debit' and t3.name = t1.account and t1.docstatus != 2 and "
   if ch:
-                                                                                                                                                                                                     
     qur = q1+cond2+cond1+" and t2.name = '%s'"
     ret_amt = sql(qur%(based_on,fiscal_year,based_on,r[0].strip()))
     

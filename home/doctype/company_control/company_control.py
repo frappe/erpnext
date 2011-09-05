@@ -63,10 +63,6 @@ class DocType:
 			p.fields[k] = arg[k]
 		p.save()
 
-	def update_profile_image(self, fid, fname):
-		sql("update tabProfile set file_list = '%s,%s' where name='%s'" % (fname, fid, session['user']))
-		
-
 	def get_login_url(self):
 		return session['data']['login_from']
 		

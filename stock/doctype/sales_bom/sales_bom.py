@@ -38,7 +38,7 @@ class DocType:
   def get_item_details(self, name):
     det = sql("select description, stock_uom from `tabItem` where name = '%s' " % cstr(name))
     rate = sql("select ref_rate from `tabRef Rate Detail` where price_list_name = %s and parent = %s and ref_currency = %s", (self.doc.price_list, name, self.doc.currency))
-    return cstr({'description' : det and det[0][0] or '', 'uom': det and det[0][1] or '', 'rate': rate and flt(rate[0][0]) or 0.00})
+    return {'description' : det and det[0][0] or '', 'uom': det and det[0][1] or '', 'rate': rate and flt(rate[0][0]) or 0.00}
 
 
   def get_main_item(self):

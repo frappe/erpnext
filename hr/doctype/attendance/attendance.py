@@ -34,7 +34,7 @@ class DocType:
     set(self.doc, 'employee_name', emp_nm and emp_nm[0][0] or '')
 
     ret = { 'employee_name' : emp_nm and emp_nm[0][0] or ''}
-    return str(ret)
+    return ret
   
   #validation for duplicate record
   def validate_duplicate_record(self):   

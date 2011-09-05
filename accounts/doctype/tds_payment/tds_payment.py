@@ -34,7 +34,7 @@ class DocType:
     else:
       ret = { 'registration_details': cstr(comp_det[0][0])}
    
-    return cstr(ret)
+    return ret
 
   # Get default bank and tds account
   #------------------------------------

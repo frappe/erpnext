@@ -97,7 +97,7 @@ MyProfile = function(wrapper) {
 			]);	
 
 			var w = d.widgets['wrapper'];
-			me.uploader = new Uploader(w, {thumbnail:'80px', server_obj:'Company Control', method:'update_profile_image'}, pscript.user_image_upload)
+			me.uploader = new Uploader(w, {cmd:'home.page.profile_settings.profile_settings.set_user_image'}, pscript.user_image_upload, 1)
 			me.change_dialog = d;
 		}
 		me.change_dialog.show();

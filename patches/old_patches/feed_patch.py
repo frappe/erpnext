@@ -98,6 +98,5 @@ def support_patch():
 	
 	webnotes.model.delete_doc('DocType','Support Ticket')
 	reload_doc('setup','doctype','support_email_settings')
-	reload_doc('maintenance','doctype','support_ticket')
-	reload_doc('maintenance','doctype','support_ticket_response')
-	
+	reload_doc('support','doctype','support_ticket')
+	reload_doc('support','doctype','support_ticket_response')

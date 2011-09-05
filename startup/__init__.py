@@ -9,6 +9,7 @@ h1, h2, h3, h4 {
 
 body, span, div, td, input, textarea, button, select {
 	font-family: Verdana, Arial, Sans Serif;
+	font-size: 12px
 }
 
 </style>

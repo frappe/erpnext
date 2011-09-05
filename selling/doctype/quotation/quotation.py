@@ -45,17 +45,12 @@ class DocType(TransactionBase):
 
     self.get_adj_percent()
 
-    return cstr(self.doc.quotation_to)
-    
-  # Get Customer Details
-  # --------------------
-  #def get_customer_details(self):
-  #  return cstr(get_obj('Sales Common').get_customer_details(self))
+    return self.doc.quotation_to
 
   # Get contact person details based on customer selected
   # ------------------------------------------------------
   def get_contact_details(self):
-    return cstr(get_obj('Sales Common').get_contact_details(self,0))
+    return get_obj('Sales Common').get_contact_details(self,0)
   
   # Clear Quotation Details
   # -----------------------
@@ -111,7 +106,7 @@ class DocType(TransactionBase):
       'contact_mobile' : details and details[0]['mobile_no'] or '-',
       'contact_email' : details and details[0]['email_id'] or '-'      
     }
-    return cstr(ret)
+    return ret
 
      
 # GET TERMS AND CONDITIONS
@@ -295,7 +290,7 @@ class DocType(TransactionBase):
       set(self.doc, 'status', 'Order Lost')
       set(self.doc, 'order_lost_reason', arg)
       self.update_enquiry('order lost')
-      return cstr('true')
+      return 'true'
   
   #check if value entered in item table
   #--------------------------------------
