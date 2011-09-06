@@ -580,6 +580,7 @@ class DocType(TransactionBase):
 	# Get Warehouse
 	def get_warehouse(self):
 		w = sql("select warehouse from `tabPOS Setting` where ifnull(user,'') = '%s' and company = '%s'" % (session['user'], self.doc.company))
+		w = w and w[0][0] or ''
 		if not w:
 			ps = sql("select name, warehouse from `tabPOS Setting` where ifnull(user,'') = '' and company = '%s'" % self.doc.company)
 			if not ps:
