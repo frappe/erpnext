@@ -431,13 +431,13 @@ FeedList.prototype.make_head = function() {
 	// head
 
 	$a(this.head,'h1','', {display:'inline'}, 'Home'); 
-	$a(this.head,'span','link_type', {marginLeft:'7px'}, 'help', function() {
+	$a(this.head,'span','link_type', {marginLeft:'7px', fontSize:'11px'}, 'help', function() {
 		msgprint('<b>What appears here?</b> This is where you get updates of everything you are permitted to follow')
 	})
 
 	// refresh
 	$a(this.head,'span','link_type', 
-		{cursor:'pointer', marginLeft:'7px', fontSize:'11px'}, 'refresh',
+		{marginLeft:'7px', fontSize:'11px'}, 'refresh',
 		function() { me.run(); }
 	);
 	

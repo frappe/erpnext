@@ -3,7 +3,7 @@
 	<meta charset="utf-8">
 	<title>ERPNext</title>
 	<meta name="author" content="">
-	<script type="text/javascript">var asset_timestamps_={"lib/js/lib/history/history.adapter.jquery.js": "1310718903", "lib/js/lib/history/history.min.js": "1315221478", "lib/js/wn/history.js": "1313759392", "lib/js/lib/superfish/superfish.min.js": "1315222973", "lib/js/legacy/jquery/jquery.jqplot.min.js": "1313994339", "lib/js/legacy/wnf.compressed.js": "1315293232", "js/app.js": "1315226253", "lib/css/layout.css": "1313603562", "lib/css/base.css": "1314774281", "lib/js/legacy/wn/modules.js": "1311752688", "lib/js/lib/history/history.html4.js": "1310718903", "lib/js/core.min.js": "1315225602", "lib/js/legacy/user.js": "1311752688", "lib/css/legacy/jquery-ui.css": "1311752687", "lib/js/legacy/wn/widgets/doc_column_view.js": "1311752688", "lib/js/legacy/widgets/report_builder/bargraph.js": "1311752688", "lib/css/legacy/user.css": "1311752687", "lib/css/legacy/default.css": "1315222973", "lib/js/legacy/jquery/jquery-ui.min.js": "1315220242", "config/_timestamps.js": "1315293239", "lib/js/legacy/form.compressed.js": "1315222973", "lib/js/legacy/widgets/form/attachments.js": "1315219428", "templates/index.html": "1315223202", "lib/js/legacy/report.compressed.js": "1315222973", "lib/css/skeleton.css": "1313603562", "lib/js/legacy/wn/widgets/filters.js": "1311752688", "index.html": "1315293239", "lib/js/legacy/widgets/print_query.js": "1311752688", "lib/js/lib/jquery.min.js": "1313062880", "lib/js/lib/history/history.js": "1310718903", "lib/js/legacy/wn/widgets/follow.js": "1311752688"}
+	<script type="text/javascript">var asset_timestamps_={"lib/js/lib/history/history.adapter.jquery.js": "1310718903", "lib/js/lib/history/history.min.js": "1315296053", "lib/js/wn/history.js": "1315295933", "lib/js/lib/superfish/superfish.min.js": "1315296671", "lib/js/legacy/jquery/jquery.jqplot.min.js": "1313994339", "lib/js/legacy/wnf.compressed.js": "1315303371", "js/app.js": "1315303458", "lib/css/layout.css": "1313603562", "lib/css/base.css": "1314774281", "lib/js/legacy/utils/rsh.compressed.js": "1311752688", "lib/js/legacy/wn/modules.js": "1311752688", "lib/js/lib/history/history.html4.js": "1310718903", "lib/js/core.min.js": "1315304330", "lib/js/legacy/user.js": "1311752688", "lib/css/legacy/jquery-ui.css": "1311752687", "lib/js/legacy/wn/widgets/doc_column_view.js": "1311752688", "lib/js/legacy/widgets/report_builder/bargraph.js": "1311752688", "lib/css/legacy/user.css": "1311752687", "lib/css/legacy/default.css": "1315301217", "lib/js/legacy/jquery/jquery-ui.min.js": "1315220242", "lib/js/legacy/form.compressed.js": "1315301217", "lib/js/legacy/widgets/form/attachments.js": "1315219428", "templates/index.html": "1315304305", "lib/css/ui/status_bar.css": "1315302989", "lib/css/ui/overlay.css": "1315302325", "lib/js/legacy/report.compressed.js": "1315301217", "lib/css/skeleton.css": "1313603562", "lib/js/legacy/wn/widgets/filters.js": "1311752688", "index.html": "1315304308", "lib/js/legacy/widgets/print_query.js": "1311752688", "lib/js/lib/jquery.min.js": "1313062880", "lib/js/wn/ui/status_bar.js": "1315303532", "lib/js/lib/history/history.js": "1310718903", "lib/js/legacy/wn/widgets/follow.js": "1311752688", "lib/js/wn/ui/overlay.js": "1315302025"}
 // provide a namespace
 wn = {}
 wn.provide = function(namespace) {
@@ -18,6 +18,9 @@ wn.provide = function(namespace) {
 		parent = parent[n];
 	}
 }
+
+wn.provide('wn.settings');
+wn.provide('wn.ui');
 wn.xmlhttp = {
 	request: function() {
 		if ( window.XMLHttpRequest ) // Gecko
@@ -199,12 +202,22 @@ wn.dom.add = function(parent, newtag, className, cs, innerHTML, onclick) {
 }
 
 // add css to element
-wn.dom.css = function(ele, s) { 
+wn.dom.css= function(ele, s) { 
 	if(ele && s) { 
 		for(var i in s) ele.style[i]=s[i]; 
 	}; 
 	return ele;
 }
+
+wn.dom.hide = function(ele) {
+	ele.style.display = 'none';
+}
+
+wn.dom.show = function(ele, value) {
+	if(!value) value = 'block';
+	ele.style.display = value;
+}	
+
 wn.page = {
 	set: function(src) {
 		var new_selection = $('.inner div.content[_src="'+ src +'"]');
@@ -717,7 +730,7 @@ if (!JSON) {
 
 // load all critical libraries
 wn.require("lib/js/lib/jquery.min.js");
-//wn.require("js/lib/history/history.min.js");
+//wn.require("lib/js/lib/history/history.min.js");
 wn.require("lib/js/lib/history/history.adapter.jquery.js");
 wn.require("lib/js/lib/history/history.js");
 wn.require("lib/js/lib/history/history.html4.js");
@@ -747,7 +760,7 @@ $(document).bind('ready', function() {
 	}
 
 });
-wn.require("js/app.js");
+
 </script>
 </head>
 <body>
@@ -762,6 +775,6 @@ wn.require("js/app.js");
 		<div class="no_script">
 			
 		</div>
-
 	</div>
+	<script>wn.require('js/app.js');</script>
 </body>

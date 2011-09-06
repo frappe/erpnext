@@ -1,7 +1,11 @@
-- icons - msgprint / toolbar
+x icons - msgprint / toolbar
+x history integration
+
+- loading bar
+- release
+
 - breakup - form
 - breakup - report
-- loading bar
 - new buttons
 - use wn.require to load forms, reports
 - use wn.xmlhttp
