@@ -11,8 +11,8 @@ else:
   from_date = filter_values['posting_date']
   to_date = filter_values['posting_date1']
 
-ysd, from_date_year = sql("select year_start_date, name from `tabFiscal Year` where %s between year_start_date and date_sub(date_add(year_start_date,interval 1 year), interval 1 day)",from_date)[0]
-
+from_date_year = sql("select name from `tabFiscal Year` where %s between year_start_date and date_sub(date_add(year_start_date,interval 1 year), interval 1 day)",from_date)[0][0]
+#to_date_year = sql("select name from `tabFiscal Year` where %s between year_start_date and date_sub(date_add(year_start_date,interval 1 year), interval 1 day)",to_date)[0][0]
 
 # define columns
 #---------------
@@ -49,13 +49,25 @@ total_diff = total_debit - total_credit
 
 # opening
 account = filter_values.get('account')
-if account:
-  acc_det = sql("select debit_or_credit, is_pl_account, lft, rgt, group_or_ledger from tabAccount where name = '%s'" % account)
-  closing_bal = get_obj('GL Control').get_as_on_balance(account, from_date_year, to_date, acc_det[0][0], acc_det[0][2], acc_det[0][3])[2]
-  if acc_det[0][0] == 'Credit':
-    closing_bal =  -1*closing_bal
+if not account:
+  msgprint('Select an account to proceed',raise_exception=0,small=1)
+
+
+acc_det = sql("select debit_or_credit, is_pl_account, lft, rgt, group_or_ledger from tabAccount where name = '%s'" % account)
+
+opening_bal = get_obj('GL Control').get_as_on_balance(account, from_date_year, from_date, acc_det[0][0], acc_det[0][2], acc_det[0][3])[2]
+closing_bal = get_obj('GL Control').get_as_on_balance(account, from_date_year, to_date, acc_det[0][0], acc_det[0][2], acc_det[0][3])[2]
+if acc_det[0][0] == 'Credit':
+  closing_bal = -1*closing_bal
+  opening_bal = -1*opening_bal
 
 out = []
+
+t_row = ['' for i in range(len(colnames))]
+t_row[1] = 'Opening as on '+formatdate(from_date)
+t_row[col_idx['Debit']-1] = opening_bal
+out.append(t_row)
+
 count = 0
 for r in res:
   count +=1
@@ -71,24 +83,24 @@ if total_debit != 0 or total_credit != 0:
   # Total debit/credit
   t_row = ['' for i in range(len(colnames))]
   t_row[1] = 'Total'
-  t_row[col_idx['Debit']-1] = total_debit 
-  t_row[col_idx['Credit']-1] = total_credit 
+  t_row[col_idx['Debit']-1] = total_debit
+  t_row[col_idx['Credit']-1] = total_credit
   out.append(t_row)
-  
+
 
   # diffrence (dr-cr)
   t_row = ['' for i in range(len(colnames))]
   t_row[1] = 'Total(Dr-Cr)'
-  t_row[col_idx['Debit']-1] = total_diff 
+  t_row[col_idx['Debit']-1] = total_diff
   out.append(t_row)
 
   # closing
   if account:
     t_row = ['' for i in range(len(colnames))]
-    t_row[1] = 'Closing Balance on ' + to_date
+    t_row[1] = 'Closing Balance on ' + formatdate(to_date)
     t_row[col_idx['Debit']-1] = flt(closing_bal)
     out.append(t_row)
-  
+
 # Print Format
 myheader = """<table width = '100%%'><tr><td>"""+l_head+"""</td>
 </tr>
@@ -99,5 +111,5 @@ myheader = """<table width = '100%%'><tr><td>"""+l_head+"""</td>
   """ % {'acc':account,
          'fdt':from_date,
          'tdt':to_date}
- 
+
 page_template = myheader+"<div>%(table)s</div>"

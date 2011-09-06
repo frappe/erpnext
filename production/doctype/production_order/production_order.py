@@ -13,7 +13,7 @@ sql = webnotes.conn.sql
 get_value = webnotes.conn.get_value
 in_transaction = webnotes.conn.in_transaction
 convert_to_lists = webnotes.conn.convert_to_lists
-	
+
 # -----------------------------------------------------------------------------------------
 
 
@@ -21,7 +21,7 @@ class DocType:
   def __init__(self, doc, doclist=[]):
     self.doc = doc
     self.doclist = doclist
-  
+
   # Autoname
   def autoname(self):
     p = self.doc.fiscal_year
@@ -35,7 +35,7 @@ class DocType:
             'default_bom' : item and item[0]['default_bom'] or ''
     }
     return ret
-    
+
   def validate(self):
     if not self.doc.production_item :
       msgprint("Please enter Production Item")
@@ -62,7 +62,7 @@ class DocType:
       if flt(bom_detail[0]['docstatus']) != 1:
         msgprint("BOM := '%s' is not Submitted BOM." % self.doc.bom_no)
         raise Exception
-  
+
   def update_status(self, status):
     # Set Status
     if status == 'Stopped':
@@ -78,7 +78,7 @@ class DocType:
     # Update Planned Qty of Production Item
     qty = (flt(self.doc.qty) - flt(self.doc.produced_qty)) * ((status == 'Stopped') and -1 or 1)
     get_obj('Warehouse', self.doc.fg_warehouse).update_bin(0, 0, 0, 0, flt(qty), self.doc.production_item, now())
-    
+
     # Acknowledge user
     msgprint(self.doc.doctype + ": " + self.doc.name + " has been %s and status has been updated as %s." % (cstr(status), cstr(self.doc.status)))
 
@@ -99,6 +99,6 @@ class DocType:
 
     # Set Status AS "Submitted"
     set(self.doc,'status', 'Cancelled')
-    
+
     # decrease Planned Qty of Prooduction Item by Qty
     get_obj('Warehouse', self.doc.fg_warehouse).update_bin(0, 0, 0, 0,-flt(self.doc.qty), self.doc.production_item, now())
