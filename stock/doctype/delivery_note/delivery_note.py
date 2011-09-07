@@ -443,8 +443,8 @@ class DocType(TransactionBase):
   # ==========================================
   def update_pack_nett_weight(self):
       for d in getlist(self.doclist, 'delivery_note_details'):
-        if d.item_name:
-          item_wt = sql("select nett_weight from `tabItem` where item_name = %s", (d.item_name))
+        if d.item_code:
+          item_wt = sql("select nett_weight from `tabItem` where name = %s", (d.item_code))
           d.pack_nett_wt = item_wt and flt(item_wt[0][0])*flt(d.qty) or 0
 
   # ==========================================
