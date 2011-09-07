@@ -248,4 +248,7 @@ class DocType:
 	# on rename
 	# ---------
 	def on_rename(self,newdn,olddn):		
-		sql("update `tabCompany` set company_name = '%s' where name = '%s'" %(newdn,olddn))						
+		sql("update `tabCompany` set company_name = '%s' where name = '%s'" %(newdn,olddn))	
+		sql("update `tabSingles` set value = %s where doctype='Manage Account' and field = 'default_company' and value = %s", (newdn, olddn))	
+		if get_defaults('company') == olddn:
+			set_default('company', newdn)
