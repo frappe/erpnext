@@ -172,7 +172,8 @@ SetupData = function(cnty){
     ['Property Setter',1,'Property Setter','', 'Customize properties of a Form (DocType) or Field'],
     ['Letter Head',1,'Letter Head','','Manage different letter heads for Prints'],
     ['SMS Settings',3,'SMS Settings','','Integrate your personalized SMS gateway which support http web service'],
-    ['SMS Center',3,'SMS Center','','Send mass sms to your leads, contacts and partners']
+    ['SMS Center',3,'SMS Center','','Send mass sms to your leads, contacts and partners'],
+    ['Features Setup',3,'Features Setup','','Displays fields based on features selected']
   ]};
 
   
