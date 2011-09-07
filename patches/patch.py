@@ -1,7 +1,7 @@
 # REMEMBER to update this
 # ========================
 
-last_patch = 357
+last_patch = 358
 
 #-------------------------------------------
 
@@ -310,3 +310,6 @@ def execute(patch_no):
 		sql("update `tabDocType` set default_print_format = 'Standard' where name = 'Delivery Note'")
 	elif patch_no == 357:
 		sql("delete from `tabDocField` where (fieldname in ('client_string', 'server_code_error', 'server_code_compiled', 'server_code', 'server_code_core', 'client_script', 'client_script_core', 'dt_template', 'change_log') or label = 'Template') and parent = 'DocType'")
+	elif patch_no == 358:
+		reload_doc('stock', 'doctype', 'delivery_note')
+		reload_doc('stock', 'doctype', 'delivery_note_detail')
