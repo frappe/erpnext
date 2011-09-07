@@ -1,7 +1,7 @@
 # REMEMBER to update this
 # ========================
 
-last_patch = 352
+last_patch = 353
 
 #-------------------------------------------
 
@@ -290,3 +290,6 @@ def execute(patch_no):
 			ch = addchild(dt_obj.doc, 'formats', 'DocFormat', 1)
 			ch.format = 'Delivery Note Packing List Wise'
 			ch.save(1)
+	elif patch_no == 353:
+		reload_doc('doctype', 'core', 'doctype')
+		sql("update `tabDocType` set default_print_format = 'Standard'")
