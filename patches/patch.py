@@ -309,4 +309,4 @@ def execute(patch_no):
 		reload_doc('doctype', 'core', 'doctype')
 		sql("update `tabDocType` set default_print_format = 'Standard' where name = 'Delivery Note'")
 	elif patch_no == 357:
-		sql("delete from `tabDocField` where (fieldname in ('client_string', 'server_code_error', 'server_code_compiled', 'server_code', 'server_code_core', 'client_script', 'client_script_core', 'dt_template', change_log) or label = 'Template') and parent = 'DocType'")
+		sql("delete from `tabDocField` where (fieldname in ('client_string', 'server_code_error', 'server_code_compiled', 'server_code', 'server_code_core', 'client_script', 'client_script_core', 'dt_template', 'change_log') or label = 'Template') and parent = 'DocType'")
