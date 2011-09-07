@@ -1,7 +1,7 @@
 # REMEMBER to update this
 # ========================
 
-last_patch = 353
+last_patch = 354
 
 #-------------------------------------------
 
@@ -293,3 +293,6 @@ def execute(patch_no):
 	elif patch_no == 353:
 		reload_doc('core', 'doctype', 'doctype')
 		sql("update `tabDocType` set default_print_format = 'Standard' where name = 'Delivery Note'")
+	elif patch_no == 354:
+		reload_doc('stock', 'doctype', 'delivery_note')
+		reload_doc('stock', 'doctype', 'delivery_note_detail')
