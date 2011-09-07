@@ -5,7 +5,7 @@
 	{
 		'creation': '2010-08-08 17:09:36',
 		'docstatus': 0,
-		'modified': '2011-08-08 16:56:40',
+		'modified': '2011-08-31 16:53:11',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
@@ -31,7 +31,7 @@
 
 	# These values are common for all DocType Mapper
 	{
-		'doctype': 'DocType Mapper',
+		'doctype': u'DocType Mapper',
 		'from_doctype': 'Sales Order',
 		'module': 'Accounts',
 		'name': '__common__',
@@ -41,7 +41,7 @@
 
 	# DocType Mapper, Sales Order-Receivable Voucher
 	{
-		'doctype': 'DocType Mapper',
+		'doctype': u'DocType Mapper',
 		'name': 'Sales Order-Receivable Voucher'
 	},
 
@@ -128,7 +128,7 @@
 		'match_id': 1,
 		'to_field': 'entries',
 		'to_table': 'RV Detail',
-		'validation_logic': 'amount > ifnull(billed_amt, 0) and docstatus = 1'
+		'validation_logic': 'docstatus = 1'
 	},
 
 	# Table Mapper Detail

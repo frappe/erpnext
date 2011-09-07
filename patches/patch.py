@@ -1,7 +1,7 @@
 # REMEMBER to update this
 # ========================
 
-last_patch = 355
+last_patch = 357
 
 #-------------------------------------------
 
@@ -293,7 +293,7 @@ def execute(patch_no):
 	elif patch_no == 353:
 		reload_doc('hr', 'doctype', 'salary_manager')
 	elif patch_no == 354:
-		reload_doc('setup', 'doctype','feature_setup')
+		reload_doc('setup', 'doctype','features_setup')
 		reload_doc('stock','doctype','item')
 		sql("update tabDocField set label='Produced Qty',description='Updated after finished goods are transferred to FG Warehouse through Stock Entry' where parent='Production Order' and fieldname='produced_qty'")
 		rs = sql("select fieldname from tabDocField where parent='Features Setup' and fieldname is not null")
@@ -305,4 +305,8 @@ def execute(patch_no):
 	elif patch_no == 355:
 		reload_doc('hr', 'doctype', 'salary_slip')
 		delete_doc('DocType', 'Salary Control Panel')
-
+	elif patch_no == 356:
+		reload_doc('core', 'doctype', 'doctype')
+		sql("update `tabDocType` set default_print_format = 'Standard' where name = 'Delivery Note'")
+	elif patch_no == 357:
+		sql("delete from `tabDocField` where (fieldname in ('client_string', 'server_code_error', 'server_code_compiled', 'server_code', 'server_code_core', 'client_script', 'client_script_core', 'dt_template', 'change_log') or label = 'Template') and parent = 'DocType'")
