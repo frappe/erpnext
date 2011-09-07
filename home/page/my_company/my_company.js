@@ -134,24 +134,28 @@ MemberList.prototype.make_search = function() {
 MemberList.prototype.make_list = function() {
 	var me = this;
 	this.lst_area = $a(this.list_wrapper, 'div');
-	this.lst = new Listing('Profiles',1);
-	this.lst.colwidths = ['100%'];
-	this.lst.opts.cell_style = {padding:'0px'}
-	this.lst.get_query = function() {
-		var c1 = '';
-		if(me.search_inp.value && me.search_inp.value != 'Search') {
-			var c1 = repl(' AND (first_name LIKE "%(txt)s" OR last_name LIKE "%(txt)s" OR name LIKE "%(txt)s")', {txt:'%' + me.search_inp.value + '%'});
+
+	this.lst = new wn.widgets.Listing({
+		parent: this.lst_area,
+		as_dict: 1,
+		get_query: function() {
+			var c1 = '';
+			if(me.search_inp.value && me.search_inp.value != 'Search') {
+				var c1 = repl(' AND (first_name LIKE "%(txt)s" OR last_name LIKE "%(txt)s" OR name LIKE "%(txt)s")', {txt:'%' + me.search_inp.value + '%'});
+			}
+
+			return repl("SELECT name, \
+				ifnull(concat_ws(' ', first_name, last_name),'') as full_name, \
+				gender, file_list, enabled \
+				FROM tabProfile \
+				WHERE docstatus != 2 \
+				AND name not in ('Guest','Administrator') %(cond)s \
+				ORDER BY name asc",{cond:c1});			
+		},
+		render_row: function(parent, data) {
+			me.member_items[data.name] = new MemberItem(parent, data, me);			
 		}
-		
-		this.query = repl("SELECT distinct ifnull(name,''), ifnull(concat_ws(' ', first_name, last_name),''), \
-			ifnull(messanger_status,''), ifnull(gender,''), ifnull(file_list,''), 0, enabled, last_login \
-			from tabProfile where docstatus != 2 AND name not in ('Guest','Administrator') %(cond)s \
-			ORDER BY name asc",{cond:c1});
-	}
-	this.lst.make(this.lst_area);
-	this.lst.show_cell= function(cell, ri, ci, d) {
-		me.member_items[d[ri][0]] = new MemberItem(cell, d[ri], me);
-	}
+	});	
 	this.lst.run();
 }
 
@@ -186,14 +190,14 @@ MemberItem = function(parent, det, mlist) {
 	var me = this;
 	this.det = det;
 	this.wrapper = $a(parent, 'div');
-	this.enabled = det[6];
+	this.enabled = det.enabled;
 	
 	this.tab = make_table(this.wrapper, 1,2,'100%', ['20%', '70%'], {padding:'4px', overflow:'hidden'});
 	$y(this.tab, {tableLayout:'fixed', borderCollapse:'collapse'})
 	
 	this.is_online = function() {
 		for(var i=0;i<pscript.online_users.length;i++) {
-			if(det[0]==pscript.online_users[i][0]) return true;
+			if(det.name==pscript.online_users[i][0]) return true;
 		}
 	}
 	
@@ -210,30 +214,30 @@ MemberItem = function(parent, det, mlist) {
 	this.set_image = function() {
 		// image
 		this.img = $a($td(this.tab,0,0),'img','',{width:'41px'});
-		set_user_img(this.img, det[0], null, 
-			(det[4] ? det[4].split(NEWLINE)[0].split(',')[1] : ('no_img_' + (det[3]=='Female' ? 'f' : 'm'))));		
+		set_user_img(this.img, det.name, null, 
+			(det.file_list ? det.file_list.split(NEWLINE)[0].split(',')[1] : ('no_img_' + (det.gender=='Female' ? 'f' : 'm'))));		
 	}
 	
 	// set other details like email id, name etc
 	this.set_details = function() {
 		// name
-		this.fullname = det[1] ? det[1] : det[0];
+		this.fullname = det.full_name || det.name;
 		var div = $a($td(this.tab, 0, 1), 'div', '', {fontWeight: 'bold',padding:'2px 0px'});
 		this.name_link = $a(div,'span','link_type');
 		this.name_link.innerHTML = crop(this.fullname, 15);
 		this.name_link.onclick = function() {
-			mlist.show_profile(me.det[0], me);
+			mlist.show_profile(me.det.name, me);
 		}
 
 		// "you" tag
-		if(user==det[0]) {
+		if(user==det.name) {
 			var span = $a(div,'span','',{padding:'2px' ,marginLeft:'3px'});
 			span.innerHTML = '(You)'
 		}
 
 		// email id
 		var div = $a($td(this.tab, 0, 1), 'div', '', {color: '#777', fontSize:'11px'});
-		div.innerHTML = det[0];
+		div.innerHTML = det.name;
 
 		// working img
 		var div = $a($td(this.tab, 0, 1), 'div');
@@ -256,7 +260,7 @@ MemberItem = function(parent, det, mlist) {
 	this.set_details();
 	
 	// show initial
-	if(user==det[0]) me.name_link.onclick();
+	if(user==det.name) me.name_link.onclick();
 }
 
 
@@ -305,6 +309,7 @@ MemberProfile = function(parent, uid, member_item) {
 		if(has_common(['Administrator','System Manager'],user_roles)) {
 			var roles_btn = $btn(this.toolbar_area, 'Set Roles', function() { me.show_roles() },{marginRight:'3px'});
 			var delete_btn = $btn(this.toolbar_area, 'Delete User', function() { me.delete_user(); },{marginRight:'3px'});
+			var ip_btn = $btn(this.toolbar_area, 'Securty Settings', function() { me.set_security(); },{marginRight:'3px'});
 		}
 	}
 	
@@ -313,6 +318,74 @@ MemberProfile = function(parent, uid, member_item) {
 		if(!this.role_object)
 			this.role_object = new RoleObj(this.uid);
 		this.role_object.dialog.show();
+	}
+	
+	// show securty settings
+	this.set_security = function() {
+		var d = new wn.widgets.Dialog({
+			title: 'Set User Security',
+			width: 500,
+			fields: [
+				{
+					label:'IP Address', 
+					description: 'Restrict user login by IP address, partial ips (111.111.111), \
+					multiple addresses (separated by commas) allowed', 
+					fieldname:'restrict_ip', 
+					fieldtype:'Data'
+				},
+				
+				{
+					label:'Login After',
+					description: 'User can only login after this hour (0-24)',
+					fieldtype: 'Int',
+					fieldname: 'login_after'
+				},
+
+				{
+					label:'Login Before',
+					description: 'User can only login before this hour (0-24)',
+					fieldtype: 'Int',
+					fieldname: 'login_before'
+				},
+				
+				{
+					label:'New Password',
+					description: 'Update the current user password',
+					fieldtype: 'Data',
+					fieldname: 'new_password'
+				},
+
+				{
+					label:'Update',
+					fieldtype:'Button',
+					fieldname:'update'
+				}
+			]
+		});
+		d.onshow = function() {
+			d.set_values({
+				restrict_ip: me.profile.restrict_ip || '',
+				login_before: me.profile.login_before || '',
+				login_after: me.profile.login_after || '',
+				new_password: ''
+			})
+		}
+		d.fields_dict.update.input.onclick = function() {
+			var btn = this;
+			this.set_working();
+			var args = d.get_values();
+			args.user = me.profile.name;
+			$c_page('home', 'my_company', 'update_security', JSON.stringify(args), function(r,rt) {
+				if(r.exc) {
+					msgprint(r.exc);
+					btn.done_working();
+					return;
+				}
+				$.extend(me.profile, d.get_values());
+				d.hide();
+			});
+		}
+		d.show();
 	}
 	
 	// delete user
@@ -534,6 +607,7 @@ MemberConversation = function(parent, uid, fullname) {
 		
 		this.lst = new wn.widgets.Listing({
 			parent: this.lst_area,
+			as_dict: 1,
 			no_result_message: (user==uid 
 				? 'No messages by anyone yet' 
 				: 'No messages yet. To start a conversation post a new message'),
@@ -577,18 +651,18 @@ MemberCoversationComment = function(cell, det, conv) {
 	this.wrapper = $a(cell, 'div', 'my-company-comment-wrapper');
 	this.comment = $a(this.wrapper, 'div', 'my-company-comment');
 
-	this.user = $a(this.comment, 'span', 'link_type', {fontWeight:'bold'}, pscript.get_fullname(det[1]));
+	this.user = $a(this.comment, 'span', 'link_type', {fontWeight:'bold'}, pscript.get_fullname(det.owner));
 	this.user.onclick = function() {
-		page_body.pages['My Company'].member_list.show_profile(me.det[1]);
+		page_body.pages['My Company'].member_list.show_profile(me.det.owner);
 	}
 
-	var st = (!det[4] ? {fontWeight: 'bold'} : null);
-	this.msg = $a(this.comment, 'span', 'social', st, ': ' + det[0]);
+	var st = (!det.docstatus ? {fontWeight: 'bold'} : null);
+	this.msg = $a(this.comment, 'span', 'social', st, ': ' + det.comment);
 
-	if(det[1]==user) {
+	if(det.full_name==user) {
 		$y(this.wrapper, {backgroundColor: '#D9D9F3'});
 	}
-	this.timestamp = $a(this.wrapper, 'div', 'my-company-timestamp', '', comment_when(det[3]));
+	this.timestamp = $a(this.wrapper, 'div', 'my-company-timestamp', '', comment_when(det.creation));
 }
 
 

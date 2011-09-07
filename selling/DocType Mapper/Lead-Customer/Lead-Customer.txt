@@ -14,7 +14,6 @@
 	{
 		'doctype': 'Table Mapper Detail',
 		'from_table': 'Lead',
-		'idx': 1,
 		'match_id': 0,
 		'name': '__common__',
 		'parent': 'Lead-Customer',
@@ -54,7 +53,6 @@
 	{
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'name',
-		'idx': 1,
 		'to_field': 'lead_name'
 	},
 
@@ -62,79 +60,13 @@
 	{
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'company_name',
-		'idx': 2,
 		'to_field': 'customer_name'
 	},
 
 	# Field Mapper Detail
 	{
 		'doctype': 'Field Mapper Detail',
-		'from_field': 'address_line1',
-		'idx': 3,
-		'to_field': 'address_line1'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'address_line2',
-		'idx': 4,
-		'to_field': 'address_line2'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'city',
-		'idx': 5,
-		'to_field': 'city'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'country',
-		'idx': 6,
-		'to_field': 'country'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'state',
-		'idx': 7,
-		'to_field': 'state'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'pincode',
-		'idx': 8,
-		'to_field': 'pincode'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'company',
-		'idx': 9,
-		'to_field': 'company'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'territory',
-		'idx': 10,
-		'to_field': 'territory'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
 		'from_field': 'contact_no',
-		'idx': 11,
 		'to_field': 'phone_1'
 	},
 
@@ -142,16 +74,7 @@
 	{
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'fax',
-		'idx': 12,
 		'to_field': 'fax_1'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'website',
-		'idx': 13,
-		'to_field': 'website'
 	},
 
 	# Table Mapper Detail

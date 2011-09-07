@@ -576,7 +576,7 @@ class StatusUpdater:
 		"""
 			Checks if there is overflow condering a relaxation tolerance
 		"""
-		
+	
 		# check if overflow is within tolerance
 		tolerance = self.get_tolerance_for(item['item_code'])
 		overflow_percent = ((item[args['compare_field']] - item[args['compare_ref_field']]) / item[args['compare_ref_field']] * 100)
@@ -606,12 +606,14 @@ class StatusUpdater:
 					select item_code, `%(compare_ref_field)s`, `%(compare_field)s`, parenttype, parent from `tab%(target_dt)s` 
 					where `%(compare_ref_field)s` < `%(compare_field)s` and name="%(name)s" and docstatus=1
 					""" % args, as_dict=1)
-				
 				if item:
 					item = item[0]
 					item['idx'] = d.idx
 					item['compare_ref_field'] = args['compare_ref_field']
-					if no_tolerance:
+
+					if not item[args['compare_ref_field']]:
+						msgprint("As %(compare_ref_field)s for item: %(item_code)s in %(parenttype)s: %(parent)s is zero, system will not check over-delivery or over-billed" % item)
+					elif no_tolerance:
 						item['reduce_by'] = item[args['compare_field']] - item[args['compare_ref_field']]
 						msgprint("""
 							Row #%(idx)s: Max %(compare_ref_field)s allowed for <b>Item %(item_code)s</b> against 

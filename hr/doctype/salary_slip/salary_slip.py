@@ -68,7 +68,7 @@ class DocType(TransactionBase):
 	# Get leave details
 	#=======================================================
 	def get_leave_details(self):
-		m = self.get_month_details()		
+		m = self.get_month_details()
 		lwp = self.calculate_lwp(m)
 		self.doc.total_days_in_month = m[3]
 		self.doc.leave_without_pay = lwp
@@ -129,12 +129,45 @@ class DocType(TransactionBase):
 		self.check_existing()
 		dcc = TransactionBase().get_company_currency(self.doc.company)
 		self.doc.total_in_words	= get_obj('Sales Common').get_total_in_words(dcc, self.doc.rounded_total)
+
+
+	def calculate_earning_total(self):
+		"""
+			Calculates total earnings considering lwp
+		"""
+		self.doc.gross_pay = flt(self.doc.arrear_amount) + flt(self.doc.leave_encashment_amount)
+		for d in getlist(self.doclist, 'earning_details'):
+			if cint(d.e_depends_on_lwp) == 1:
+				d.e_modified_amount = round(flt(d.e_amount)*flt(self.doc.payment_days)/cint(self.doc.total_days_in_month), 2)
+			self.doc.gross_pay += d.e_modified_amount
+	
+	def calculate_ded_total(self):
+		"""
+			Calculates total deduction considering lwp
+		"""
+		self.doc.total_deduction = 0
+		for d in getlist(self.doclist, 'deduction_details'):
+			if cint(d.d_depends_on_lwp) == 1:
+				d.d_modified_amount = round(flt(d.d_amount)*flt(self.doc.payment_days)/cint(self.doc.total_days_in_month), 2)
+			self.doc.total_deduction += d.d_modified_amount
+				
+	def calculate_net_pay(self):
+		"""
+			Calculate net payment
+		"""
+		self.calculate_earning_total()
+		self.calculate_ded_total()
+		self.doc.net_pay = flt(self.doc.gross_pay) - flt(self.doc.total_deduction)
+		self.doc.rounded_total = round(self.doc.net_pay)
 		
 	# ON SUBMIT
 	#=======================================================
 	def on_submit(self):
 		if(self.doc.email_check == 1):			
 			self.send_mail_funct()
+			
+	
+
 
 	# Send mail
 	#=======================================================
@@ -142,14 +175,13 @@ class DocType(TransactionBase):
 		emailid_ret=sql("select company_email from `tabEmployee` where name = '%s'"%self.doc.employee)
 		if emailid_ret:
 			receiver = cstr(emailid_ret[0][0]) 
-			subj = 'Salary Slip ' + cstr(self.doc.month) +' '+cstr(self.doc.year)
-			earn_ret=sql("select e_type,e_amount from `tabSS Earning Detail` where parent = '%s'"%self.doc.name)
-			ded_ret=sql("select d_type,d_amount from `tabSS Deduction Detail` where parent = '%s'"%self.doc.name)
+			subj = 'Salary Slip - ' + cstr(self.doc.month) +'/'+cstr(self.doc.fiscal_year)
+			earn_ret=sql("select e_type,e_modified_amount from `tabSS Earning Detail` where parent = '%s'"%self.doc.name)
+			ded_ret=sql("select d_type,d_modified_amount from `tabSS Deduction Detail` where parent = '%s'"%self.doc.name)
 		 
 			earn_table = ''
 			ded_table = ''
-			if earn_ret:
-			
+			if earn_ret:			
 				earn_table += "<table cellspacing= '5' cellpadding='5' >"
 				
 				for e in earn_ret:
@@ -175,62 +207,60 @@ class DocType(TransactionBase):
 			if not letter_head:
 				letter_head = ''
 			
-			msg = ''' %s <br>
+			msg = '''<div> %s <br>
+			<table cellspacing= "5" cellpadding="5"  width = "100%%">
+				<tr>
+					<td colspan = 4 width = "100%%"><h4>Salary Slip</h4></td>
+				</tr>
+				<tr>
+					<td colspan = 2 width = "50%%"><b>Employee Code : %s</b></td>
+					<td colspan = 2 width = "50%%"><b>Employee Name : %s</b></td>
+				</tr>
+				<tr>
+					<td colspan = 2 width = "50%%">Month : %s</td>
+					<td colspan = 2 width = "50%%">Fiscal Year : %s</td>
+				</tr>
+			</table>
 			<table cellspacing= "5" cellpadding="5" >
-			<tr>
-				<td colspan = 4><h4>Salary Slip</h4></td>
-			</tr>
-			<tr>
-				<td colspan = 2><b>Employee Code : %s</b></td>
-				<td colspan = 2><b>Employee Name : %s</b></td>
-			</tr>
-			<tr>
-				<td>Month : %s</td>
-				<td>Year : %s</td>
-				<td colspan = 2>Fiscal Year : %s</td>
-			</tr>
-			<tr>
-				<td>Department : %s</td>
-				<td>Branch : %s</td>
-				<td colspan = 2>Designation : %s</td>
+				<tr>
+					<td>Department : %s</td>
+					<td>Branch : %s</td>
+					<td colspan = 2>Designation : %s</td>
+				</tr>
+				<tr>
+					<td>Grade : %s</td>
+					<td>Bank Account No. : %s</td>
+					<td colspan = 2>Bank Name : %s</td>
 				
-			</tr>
-			<tr>
-				<td>Grade : %s</td>
-				<td>Bank Account No. : %s</td>
-				<td colspan = 2>Bank Name : %s</td>
+				</tr>
+				<tr>
+					<td colspan = 2>Arrear Amount : <b>%s</b></td>
+					<td colspan = 2>Payment days : %s</td>
 				
-			</tr>
-			<tr>
-				<td>PF No. : %s</td>
-				<td>ESIC No. : %s</td>
-				<td colspan = 2>Arrear Amount : <b>%s</b></td>
-			</tr>
-			<tr>
-				<td>Total days in month : %s</td>
-				<td>Leave Without Pay : %s</td>
-				<td colspan = 2>Payment days : %s</td>
-				
-			</tr>
-			<br><br>
-			<tr>
-				<td colspan = 2><b>Earning</b></td>
-				<td colspan = 2><b>Deduction</b></td>
-			</tr>
-			<tr>
-				<td colspan = 2>%s</td>
-				<td colspan = 2>%s</td>
-			</tr>
-			<br>
-			<tr>
-				<td colspan = 2><b>Gross Pay :</b> %s</td>
-				<td colspan = 2><b>Total Deduction :</b> %s</td>
-			</tr>
-			<tr>
-				<td><b>Net Pay : %s</b></td>
-				<td colspan = 3><b>Net Pay (in words) : %s</b></td>
-			</tr>
-			</table>'''%(cstr(letter_head[0][0]),cstr(self.doc.employee),self.doc.employee_name,cstr(self.doc.month),cstr(self.doc.year),cstr(self.doc.fiscal_year),self.doc.department,self.doc.branch,self.doc.designation,self.doc.grade,cstr(self.doc.bank_account_no),self.doc.bank_name,cstr(self.doc.pf_no),cstr(self.doc.esic_no),cstr(self.doc.arrear_amount),cstr(self.doc.total_days_in_month),cstr(self.doc.leave_without_pay),cstr(self.doc.payment_days),earn_table,ded_table,cstr(self.doc.gross_pay),cstr(self.doc.total_deduction),cstr(self.doc.net_pay),cstr(self.doc.net_pay_in_words))
-			sendmail([receiver], sender='automail@webnotestech.com', subject=subj, parts=[['text/plain', msg]])
+				</tr>
+			</table>
+			<table border="1px solid #CCC" width="100%%" cellpadding="0" cellspacing= "0" >
+				<tr>
+					<td colspan = 2 width = "50%%"><b>Earning</b></td>
+					<td colspan = 2 width = "50%%"><b>Deduction</b></td>
+				</tr>
+				<tr>
+					<td colspan = 2 width = "50%%">%s</td>
+					<td colspan = 2 width = "50%%">%s</td>
+				</tr>
+			</table>
+			<table cellspacing= "5" cellpadding="5">
+				<tr>
+					<td colspan = 2><b>Gross Pay :</b> %s</td>
+					<td colspan = 2><b>Total Deduction :</b> %s</td>
+				</tr>
+				<tr>
+					<td><b>Net Pay : %s</b></td>
+				</tr>
+				<tr>
+					<td><b>Net Pay(in words) : %s</b></td>
+				</tr>
+			</table></div>'''%(cstr(letter_head[0][0]),cstr(self.doc.employee), cstr(self.doc.employee_name), cstr(self.doc.month), cstr(self.doc.fiscal_year), cstr(self.doc.department), cstr(self.doc.branch), cstr(self.doc.designation), cstr(self.doc.grade), cstr(self.doc.bank_account_no), cstr(self.doc.bank_name), cstr(self.doc.arrear_amount), cstr(self.doc.payment_days), earn_table, ded_table, cstr(self.doc.gross_pay), cstr(self.doc.total_deduction), cstr(self.doc.net_pay), cstr(self.doc.total_in_words))
+			sendmail([receiver], sender='automail@erpnext.com', subject=subj, parts=[['text/plain', msg]])
 		else:
 			msgprint("Company Email ID not found.")
