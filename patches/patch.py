@@ -292,4 +292,4 @@ def execute(patch_no):
 			ch.save(1)
 	elif patch_no == 353:
 		reload_doc('doctype', 'core', 'doctype')
-		sql("update `tabDocType` set default_print_format = 'Standard'")
+		sql("update `tabDocType` set default_print_format = 'Standard' where name = 'Delivery Note'")
