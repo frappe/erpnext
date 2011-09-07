@@ -1,7 +1,7 @@
 # REMEMBER to update this
 # ========================
 
-last_patch = 356
+last_patch = 357
 
 #-------------------------------------------
 
@@ -308,3 +308,5 @@ def execute(patch_no):
 	elif patch_no == 356:
 		reload_doc('doctype', 'core', 'doctype')
 		sql("update `tabDocType` set default_print_format = 'Standard'")
+	elif patch_no == 357:
+		sql("delete from `tabDocField` where (fieldname in ('client_string', 'server_code_error', 'server_code_compiled', 'server_code', 'server_code_core', 'client_script', 'client_script_core', 'dt_template', change_log) or label = 'Template') and parent = 'DocType'")
