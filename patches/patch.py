@@ -251,6 +251,8 @@ def execute(patch_no):
 		reload_doc('stock','doctype','item_customer_detail')
 	elif patch_no == 344:
 		sql("delete from `tabDocFormat` where ifnull(format, '') = '' and parent = 'Delivery Note'")
+		reload_doc('stock', 'doctype', 'delivery_note_detail')
+		reload_doc('stock', 'doctype', 'item_customer_detail')
 	elif patch_no == 345:
 		# rerun 343 (merge confict)
 		reload_doc('stock','doctype','item_customer_detail')
@@ -291,7 +293,7 @@ def execute(patch_no):
 	elif patch_no == 353:
 		reload_doc('hr', 'doctype', 'salary_manager')
 	elif patch_no == 354:
-		reload_doc('setup', 'doctype','feature_setup')
+		reload_doc('setup', 'doctype','features_setup')
 		reload_doc('stock','doctype','item')
 		sql("update tabDocField set label='Produced Qty',description='Updated after finished goods are transferred to FG Warehouse through Stock Entry' where parent='Production Order' and fieldname='produced_qty'")
 		rs = sql("select fieldname from tabDocField where parent='Features Setup' and fieldname is not null")
