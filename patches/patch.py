@@ -251,6 +251,8 @@ def execute(patch_no):
 		reload_doc('stock','doctype','item_customer_detail')
 	elif patch_no == 344:
 		sql("delete from `tabDocFormat` where ifnull(format, '') = '' and parent = 'Delivery Note'")
+		reload_doc('stock', 'doctype', 'delivery_note_detail')
+		reload_doc('stock', 'doctype', 'item_customer_detail')
 	elif patch_no == 345:
 		# rerun 343 (merge confict)
 		reload_doc('stock','doctype','item_customer_detail')
