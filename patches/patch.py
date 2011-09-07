@@ -1,7 +1,7 @@
 # REMEMBER to update this
 # ========================
 
-last_patch = 355
+last_patch = 356
 
 #-------------------------------------------
 
@@ -305,4 +305,6 @@ def execute(patch_no):
 	elif patch_no == 355:
 		reload_doc('hr', 'doctype', 'salary_slip')
 		delete_doc('DocType', 'Salary Control Panel')
-
+	elif patch_no == 356:
+		reload_doc('doctype', 'core', 'doctype')
+		sql("update `tabDocType` set default_print_format = 'Standard'")
