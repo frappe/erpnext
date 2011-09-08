@@ -32,9 +32,9 @@ class DocType(TransactionBase):
 				amt_list.append(flt(x[0]))
 			max_amount = max(amt_list)
 			
-			app_dtl = sql("select approving_user, approving_role from `tabAuthorization Rule` where transaction = %s and (value = %s or value > %s) and docstatus != 2 and based_on = %s and company = %s %s", (doctype_name, flt(max_amount), total, based_on, company, condition))
+			app_dtl = sql("select approving_user, approving_role from `tabAuthorization Rule` where transaction = %s and (value = %s or value > %s) and docstatus != 2 and based_on = %s and company = %s %s" % ('%s', '%s', '%s', '%s', '%s', condition), (doctype_name, flt(max_amount), total, based_on, company))
 			if not app_dtl:
-				app_dtl = sql("select approving_user, approving_role from `tabAuthorization Rule` where transaction = %s and (value = %s or value > %s) and docstatus != 2 and based_on = %s and ifnull(company,'') = '' %s", (doctype_name, flt(max_amount), total, based_on, condition)) 
+				app_dtl = sql("select approving_user, approving_role from `tabAuthorization Rule` where transaction = %s and (value = %s or value > %s) and docstatus != 2 and based_on = %s and ifnull(company,'') = '' %s" % ('%s', '%s', '%s', '%s', condition), (doctype_name, flt(max_amount), total, based_on)) 
 			for d in app_dtl:
 				if(d[0]): appr_users.append(d[0])
 				if(d[1]): appr_roles.append(d[1])
@@ -61,17 +61,17 @@ class DocType(TransactionBase):
 		add_cond1,add_cond2	= '',''
 		if based_on == 'Itemwise Discount':
 			add_cond1 += " and master_name = '"+cstr(item)+"'"
-			itemwise_exists = sql("select value from `tabAuthorization Rule` where transaction = %s and value <= %s and based_on = %s and company = %s and docstatus != 2 %s %s", (doctype_name, total, based_on, company, cond, add_cond1))
+			itemwise_exists = sql("select value from `tabAuthorization Rule` where transaction = %s and value <= %s and based_on = %s and company = %s and docstatus != 2 %s %s" % ('%s', '%s', '%s', '%s', cond, add_cond1), (doctype_name, total, based_on, company))
 			if not itemwise_exists:
-				itemwise_exists = sql("select value from `tabAuthorization Rule` where transaction = %s and value <= %s and based_on = %s and ifnull(company,'') = '' and docstatus != 2 %s %s", (doctype_name, total, based_on, cond, add_cond1))
+				itemwise_exists = sql("select value from `tabAuthorization Rule` where transaction = %s and value <= %s and based_on = %s and ifnull(company,'') = '' and docstatus != 2 %s %s" % ('%s', '%s', '%s', cond, add_cond1), (doctype_name, total, based_on))
 			if itemwise_exists:
 				self.get_appr_user_role(itemwise_exists, doctype_name, total, based_on, cond+add_cond1, item,company)
 				chk = 0
 		if chk == 1:
 			if based_on == 'Itemwise Discount': add_cond2 += " and ifnull(master_name,'') = ''"
-			appr = sql("select value from `tabAuthorization Rule` where transaction = %s and value <= %s and based_on = %s and company = %s and docstatus != 2 %s %s", (doctype_name, total, based_on, company, cond, add_cond2))
+			appr = sql("select value from `tabAuthorization Rule` where transaction = %s and value <= %s and based_on = %s and company = %s and docstatus != 2 %s %s" % ('%s', '%s', '%s', '%s', cond, add_cond2), (doctype_name, total, based_on, company))
 			if not appr:
-				appr = sql("select value from `tabAuthorization Rule` where transaction = %s and value <= %s and based_on = %s and ifnull(company,'') = '' and docstatus != 2 %s %s", (doctype_name, total, based_on, cond, add_cond2))
+				appr = sql("select value from `tabAuthorization Rule` where transaction = %s and value <= %s and based_on = %s and ifnull(company,'') = '' and docstatus != 2 %s %s"% ('%s', '%s', '%s', cond, add_cond2), (doctype_name, total, based_on))
 			self.get_appr_user_role(appr, doctype_name, total, based_on, cond+add_cond2, item, company)
 			
 			
@@ -128,7 +128,7 @@ class DocType(TransactionBase):
 		# Specific Role
 		# ===============
 		# Check for authorization set on particular roles
-		based_on = [x[0] for x in sql("select based_on from `tabAuthorization Rule` where transaction = %s and system_role IN %s and based_on IN %s and (company = %s or ifnull(company,'')='') and docstatus != 2", (doctype_name, "('"+"','".join(webnotes.user.get_roles())+"')", "('"+"','".join(final_based_on)+"')",company))]
+		based_on = [x[0] for x in sql("select based_on from `tabAuthorization Rule` where transaction = %s and system_role IN (%s) and based_on IN (%s) and (company = %s or ifnull(company,'')='') and docstatus != 2", (doctype_name, "'"+"','".join(webnotes.user.get_roles())+"'", "'"+"','".join(final_based_on)+"'",company))]
 		for d in based_on:
 			self.bifurcate_based_on_type(doctype_name, total, av_dis, d, doc_obj, 2, company)
 		
