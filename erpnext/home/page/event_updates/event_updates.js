@@ -123,7 +123,7 @@ HomeWidget = function(parent, heading, item) {
 	this.footer = $a(this.wrapper,'div');
 	
 	// add button
-	this.add_btn = $btn(this.footer,'+ Add ' + item,function(){me.add()});
+	this.add_btn = $btn(this.footer,'+ Add ' + item,function(){me.add()},null,'cupid-blue');
 
 	// refresh
 	this.refresh_btn = $ln(this.footer,'Refresh',function() { me.refresh(); },{fontSize:'11px',marginLeft:'7px',color:'#888'});
@@ -431,7 +431,7 @@ FeedList.prototype.make_head = function() {
 	);
 	
 	if(has_common(user_roles, ['System Manager','Accounts Manager'])) {
-		$btn(this.head, 'Dashboard', function() {loadpage('dashboard'); }, {marginLeft:'7px'})
+		$btn(this.head, 'Dashboard', function() {loadpage('dashboard'); }, {marginLeft:'7px'}, 'cupid-blue')
 		
 	}
 }
