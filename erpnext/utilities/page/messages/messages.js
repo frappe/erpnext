@@ -529,6 +529,8 @@ MessageThread.prototype.add_autosuggest = function() {
   
   // ---- add auto suggest ---- 
   var opts = { script: '', json: true, maxresults: 10, timeout: 10000, delay:250, maxentries:500, cache:false};
+
+  wn.require('lib/js/legacy/widgets/autosuggest.js');
   
   var as = new AutoSuggest(me.msg_parts.inputs['To'], opts);
   as.custom_select = function(txt, sel) {
