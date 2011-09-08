@@ -1,7 +1,10 @@
 x icons - msgprint / toolbar
 x history integration
+x loading bar
+x blank.html issues
+x double (init) loading issue
+x redirect (sid) issue
 
-- loading bar
 - release
 
 - breakup - form

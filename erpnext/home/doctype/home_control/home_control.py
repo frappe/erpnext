@@ -33,9 +33,6 @@ class DocType:
 		ml = sql("select distinct t1.name, t1.module_icon, t1.module_label, t1.module_desc, t1.module_page from  `tabModule Def` t1, `tabModule Def Role` t2 where t2.role in ('%s') and t1.disabled !='Yes' and ifnull(t1.is_hidden, 'No') != 'Yes' and t1.name = t2.parent order by t1.module_seq asc" % "','".join(rl), as_dict=1)
 		return ml
 
-	def get_login_url(self):
-		return session['data'].get('login_from', '')
-
 	def get_module_details(self,m):
 		ret = {}
 		ret['il'] = sql('select doc_type, doc_name, display_name, icon, description, fields, click_function, idx from `tabModule Def Item` where parent=%s and ifnull(`hide`,0)=0 order by idx asc', m, as_dict=1)
@@ -50,6 +47,9 @@ class DocType:
 			AND t2.read=1 
 			AND t2.role IN ("%s") 
 			AND ifnull(standard,"No")="No"''' % (m, '", "'.join(webnotes.user.get_roles())), as_dict=1)
+
+		ret['login_url'] = session['data'].get('login_from', '')		
+
 		return ret
 
 	# ----------------------------------------------------------------------------------------------------------------
@@ -249,7 +249,12 @@ class DocType:
 		if msg_id and msg_id != webnotes.conn.get_global('system_message_id', session['user']):
 			msg = webnotes.conn.get_global('system_message')
 		
-		return {'user_count': count and cint(count[0][0]) or 0, 'unread': unread and cint(unread[0][0]) or 0, 'system_message':msg}
+		return {
+			'user_count': count and cint(count[0][0]) or 0, 
+			'unread': unread and cint(unread[0][0]) or 0, 
+			'system_message':msg,
+			'registration_complete': self.registration_complete()
+		}
 				
 	# -------------------------------------------------------------------------------------------------------
 

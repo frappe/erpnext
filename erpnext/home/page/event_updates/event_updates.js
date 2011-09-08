@@ -39,9 +39,6 @@ pscript.home_pre_process = function(wrapper) {
 		var banner = $a(wrapper.banner_area, 'div', '', {paddingBottom:'4px'})
 		banner.innerHTML = cp.client_name;
 	}
-
-	// complete registration
-	if(in_list(user_roles,'System Manager')) { pscript.complete_registration(); }	
 }
 
 // Widgets
@@ -78,16 +75,8 @@ pscript.home_make_widgets = function() {
 				}		
 			}
 		]
-	})
-	sidebar.refresh()
-
-	/*$y(cell,{padding:'0px 8px'});
-
-	new HomeCalendar(new HomeWidget(cell, 'Calendar', 'Event'));
-	
-	
-	new HomeToDo(new HomeWidget(cell, 'To Do', 'Item'));*/
-	
+	});
+		
 	new FeedList(wrapper.body);
 }
 
@@ -618,6 +607,11 @@ pscript.home_make_status = function() {
 			// render online users
 			pscript.online_users_obj.render(r.message.online_users);
 			pscript.online_users = r.message.online_users;
+	
+			// complete registration
+			if(in_list(user_roles,'System Manager')) { 
+				pscript.complete_registration(r.registration_complete); 
+			}
 			
 			// setup wizard
 			if(r.message.setup_status) {
@@ -629,54 +623,50 @@ pscript.home_make_status = function() {
 
 // complete my company registration
 // --------------------------------
-pscript.complete_registration = function()
-{
-	var reg_callback = function(r, rt){
-		if(r.message == 'No'){
-			var d = new Dialog(400, 200, "Please Complete Your Registration");
-			if(user != 'Administrator'){
-				d.no_cancel(); // Hide close image
-				$dh(page_body.wntoolbar.wrapper);
-			}
-			$($a(d.body,'div','', {margin:'8px', color:'#888'})).html('<b>Company Name : </b>'+locals['Control Panel']['Control Panel'].company_name);      
-
-			d.make_body(
-		  [
-		  	['Data','Company Abbreviation'],
-		  	['Select','Fiscal Year Start Date'],
-		  	['Select','Default Currency'],
-		  	['Button','Save'],
-			]);
-
-			//d.widgets['Save'].disabled = true;      // disable Save button
-			pscript.make_dialog_field(d);
-
-			// submit details
-			d.widgets['Save'].onclick = function()
-			{
-				d.widgets['Save'].set_working();
-				
-				flag = pscript.validate_fields(d);
-				if(flag)
-				{
-					var args = [
-						locals['Control Panel']['Control Panel'].company_name,
-						d.widgets['Company Abbreviation'].value,
-						d.widgets['Fiscal Year Start Date'].value,
-						d.widgets['Default Currency'].value
-					];
-					
-					$c_obj('Setup Control','setup_account',JSON.stringify(args),function(r, rt){
-						sys_defaults = r.message;
-						d.hide();
-						$ds(page_body.wntoolbar.wrapper);
-					});
-				}
-			}
-			d.show();
+pscript.complete_registration = function(is_complete) {
+	if(is_complete == 'No'){
+		var d = new Dialog(400, 200, "Please Complete Your Registration");
+		if(user != 'Administrator'){
+			d.no_cancel(); // Hide close image
+			$dh(page_body.wntoolbar.wrapper);
 		}
+		$($a(d.body,'div','', {margin:'8px', color:'#888'})).html('<b>Company Name : </b>'+locals['Control Panel']['Control Panel'].company_name);      
+
+		d.make_body(
+	  [
+	  	['Data','Company Abbreviation'],
+	  	['Select','Fiscal Year Start Date'],
+	  	['Select','Default Currency'],
+	  	['Button','Save'],
+		]);
+
+		//d.widgets['Save'].disabled = true;      // disable Save button
+		pscript.make_dialog_field(d);
+
+		// submit details
+		d.widgets['Save'].onclick = function()
+		{
+			d.widgets['Save'].set_working();
+			
+			flag = pscript.validate_fields(d);
+			if(flag)
+			{
+				var args = [
+					locals['Control Panel']['Control Panel'].company_name,
+					d.widgets['Company Abbreviation'].value,
+					d.widgets['Fiscal Year Start Date'].value,
+					d.widgets['Default Currency'].value
+				];
+				
+				$c_obj('Setup Control','setup_account',JSON.stringify(args),function(r, rt){
+					sys_defaults = r.message;
+					d.hide();
+					$ds(page_body.wntoolbar.wrapper);
+				});
+			}
+		}
+		d.show();
 	}
-	$c_obj('Home Control','registration_complete','',reg_callback);
 }
 
 // make dialog fields

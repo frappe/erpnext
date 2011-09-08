@@ -1,3 +1,5 @@
+wn.settings.no_history = true;
+
 wn.require('lib/js/lib/jquery.min.js');
 wn.require('lib/js/wn/ui/status_bar.js');
 
