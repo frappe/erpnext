@@ -133,8 +133,8 @@ class DocType:
 
 			# build dict
 			p = {
-				'debit': flt(entry[2])
-				,'credit':flt(entry[3])
+				'debit': entry[4]=='No' and flt(entry[2]) or 0
+				,'credit': entry[4]=='No' and flt(entry[3]) or 0
 				,'opening': entry[4]=='Yes' and diff or 0
 				
 				# end date conditino only if it is not opening

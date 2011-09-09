@@ -131,7 +131,7 @@ class DocType:
 
     r = eval(args)
     
-    if r['lft'] == 0:
+    if r['lft'] == 0 and r['action'] != 'Create':
       n = sql("select lft,rgt from `tab%s` where name = '%s'"%(r['node_title'],r['nm']))
       r['lft'] = n[0][0]
       r['rgt'] = n[0][1]
