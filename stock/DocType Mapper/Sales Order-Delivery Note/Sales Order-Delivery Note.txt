@@ -5,8 +5,8 @@
 	{
 		'creation': '2010-08-08 17:09:35',
 		'docstatus': 0,
-		'modified': '2011-05-16 11:48:19',
-		'modified_by': 'umair@iwebnotes.com',
+		'modified': '2011-09-07 12:06:54',
+		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
 
@@ -30,7 +30,7 @@
 
 	# These values are common for all DocType Mapper
 	{
-		'doctype': 'DocType Mapper',
+		'doctype': u'DocType Mapper',
 		'from_doctype': 'Sales Order',
 		'module': 'Stock',
 		'name': '__common__',
@@ -40,7 +40,7 @@
 
 	# DocType Mapper, Sales Order-Delivery Note
 	{
-		'doctype': 'DocType Mapper',
+		'doctype': u'DocType Mapper',
 		'name': 'Sales Order-Delivery Note'
 	},
 
@@ -176,15 +176,6 @@
 
 	# Field Mapper Detail
 	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'allocated_amount',
-		'map': 'Yes',
-		'match_id': 0,
-		'to_field': 'customer_mobile_no'
-	},
-
-	# Field Mapper Detail
-	{
 		'checking_operator': '=',
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'project_name',
@@ -201,6 +192,24 @@
 		'map': 'Yes',
 		'match_id': 0,
 		'to_field': 'customer'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'naming_series',
+		'map': 'No',
+		'match_id': 0,
+		'to_field': 'naming_series'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'status',
+		'map': 'No',
+		'match_id': 0,
+		'to_field': 'status'
 	},
 
 	# Table Mapper Detail

@@ -5,7 +5,7 @@
 	{
 		'creation': '2010-08-08 17:09:35',
 		'docstatus': 0,
-		'modified': '2011-08-25 18:25:02',
+		'modified': '2011-09-07 12:08:48',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
@@ -30,7 +30,7 @@
 
 	# These values are common for all DocType Mapper
 	{
-		'doctype': 'DocType Mapper',
+		'doctype': u'DocType Mapper',
 		'from_doctype': 'Quotation',
 		'module': 'Selling',
 		'name': '__common__',
@@ -40,7 +40,7 @@
 
 	# DocType Mapper, Quotation-Sales Order
 	{
-		'doctype': 'DocType Mapper',
+		'doctype': u'DocType Mapper',
 		'name': 'Quotation-Sales Order'
 	},
 
@@ -108,6 +108,15 @@
 		'map': 'No',
 		'match_id': 0,
 		'to_field': 'naming_series'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'status',
+		'map': 'No',
+		'match_id': 0,
+		'to_field': 'status'
 	},
 
 	# Table Mapper Detail

@@ -5,7 +5,7 @@
 	{
 		'creation': '2010-12-15 08:39:22',
 		'docstatus': 0,
-		'modified': '2010-12-14 20:43:41',
+		'modified': '2011-09-07 12:08:19',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
@@ -22,7 +22,6 @@
 	# These values are common for all Field Mapper Detail
 	{
 		'doctype': 'Field Mapper Detail',
-		'map': 'Yes',
 		'name': '__common__',
 		'parent': 'Receivable Voucher-Delivery Note',
 		'parentfield': 'field_mapper_details',
@@ -31,7 +30,7 @@
 
 	# These values are common for all DocType Mapper
 	{
-		'doctype': 'DocType Mapper',
+		'doctype': u'DocType Mapper',
 		'from_doctype': 'Receivable Voucher',
 		'module': 'Stock',
 		'name': '__common__',
@@ -41,7 +40,7 @@
 
 	# DocType Mapper, Receivable Voucher-Delivery Note
 	{
-		'doctype': 'DocType Mapper',
+		'doctype': u'DocType Mapper',
 		'name': 'Receivable Voucher-Delivery Note'
 	},
 
@@ -49,6 +48,7 @@
 	{
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'eval: flt(obj.qty) - flt(obj.delivered_qty)',
+		'map': 'Yes',
 		'match_id': 1,
 		'to_field': 'qty'
 	},
@@ -57,6 +57,7 @@
 	{
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'parent',
+		'map': 'Yes',
 		'match_id': 1,
 		'to_field': 'prevdoc_docname'
 	},
@@ -65,6 +66,7 @@
 	{
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'parenttype',
+		'map': 'Yes',
 		'match_id': 1,
 		'to_field': 'prevdoc_doctype'
 	},
@@ -73,6 +75,7 @@
 	{
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'name',
+		'map': 'Yes',
 		'match_id': 1,
 		'to_field': 'prevdoc_detail_docname'
 	},
@@ -81,6 +84,7 @@
 	{
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'eval: (flt(obj.qty) - flt(obj.delivered_qty)) * flt(obj.basic_rate)',
+		'map': 'Yes',
 		'match_id': 1,
 		'to_field': 'amount'
 	},
@@ -89,6 +93,7 @@
 	{
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'eval: (flt(obj.qty) - flt(obj.delivered_qty)) * flt(obj.export_rate)',
+		'map': 'Yes',
 		'match_id': 1,
 		'to_field': 'export_amount'
 	},
@@ -96,9 +101,10 @@
 	# Field Mapper Detail
 	{
 		'doctype': 'Field Mapper Detail',
-		'from_field': 'customer_address',
+		'from_field': 'naming_series',
+		'map': 'No',
 		'match_id': 0,
-		'to_field': 'delivery_address'
+		'to_field': 'naming_series'
 	},
 
 	# Table Mapper Detail
