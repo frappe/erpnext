@@ -1,7 +1,7 @@
 # REMEMBER to update this
 # ========================
 
-last_patch = 359
+last_patch = 360
 
 #-------------------------------------------
 
@@ -315,3 +315,5 @@ def execute(patch_no):
 		reload_doc('stock', 'doctype', 'delivery_note_detail')
 	elif patch_no == 359:
 		sql("update `tabDocField` set print_hide =1 where fieldname in ('pack_no', 'pack_gross_wt', 'weight_uom', 'pack_nett_wt') and parent = 'Delivery Note Detail'")
+	elif patch_no == 360:
+		sql("update `tabDocField` set print_hide =1 where fieldname = 'print_packing_slip' and parent = 'Delivery Note'")
