@@ -322,7 +322,7 @@ MemberProfile = function(parent, uid, member_item) {
 	
 	// show securty settings
 	this.set_security = function() {
-		var d = new wn.widgets.Dialog({
+		var sd = new wn.widgets.Dialog({
 			title: 'Set User Security',
 			width: 500,
 			fields: [
@@ -362,30 +362,72 @@ MemberProfile = function(parent, uid, member_item) {
 				}
 			]
 		});
-		d.onshow = function() {
-			d.set_values({
+
+		me.sec_dialog = sd
+
+		sd.onshow = function() {
+			me.sec_dialog.set_values({
 				restrict_ip: me.profile.restrict_ip || '',
 				login_before: me.profile.login_before || '',
 				login_after: me.profile.login_after || '',
 				new_password: ''
-			})
-		}
-		d.fields_dict.update.input.onclick = function() {
+			});
+		};
+		sd.fields_dict.update.input.onclick = function() {
 			var btn = this;
 			this.set_working();
-			var args = d.get_values();
+			var args = me.sec_dialog.get_values();
 			args.user = me.profile.name;
-			$c_page('home', 'my_company', 'update_security', JSON.stringify(args), function(r,rt) {
-				if(r.exc) {
-					msgprint(r.exc);
+
+			if (args.new_password) {
+				var pass_d = new wn.widgets.Dialog({
+					title: 'Your Password',
+					width: 300,
+					fields: [
+						{
+							label: 'Please Enter Your Password',
+							description: "Your password is required to update the concerned user's password",
+							fieldtype: 'Password',
+							fieldname: 'sys_admin_pwd',
+							reqd: 1		
+						},
+
+						{
+							label: 'Continue',
+							fieldtype: 'Button',
+							fieldname: 'continue'
+						}
+					]
+				});
+
+				pass_d.fields_dict.continue.input.onclick = function() {
+					btn.pwd_dialog.hide();					
+					args.sys_admin_pwd = btn.pwd_dialog.get_values().sys_admin_pwd;					
+					btn.set_working();					
+					me.update_security(args);
 					btn.done_working();
-					return;
 				}
-				$.extend(me.profile, d.get_values());
-				d.hide();
-			});
-		}
-		d.show();
+
+				pass_d.show();
+				btn.pwd_dialog = pass_d;
+				btn.done_working();
+			} else {
+				btn.done_working();
+				me.update_security(args);
+			}			
+		};
+		sd.show();		
+	}
+
+	this.update_security = function(args) {
+		$c_page('home', 'my_company', 'update_security', JSON.stringify(args), function(r,rt) {
+			if(r.exc) {
+				msgprint(r.exc);				
+				return;
+			}
+			me.sec_dialog.hide();
+			$.extend(me.profile, me.sec_dialog.get_values());
+		});
 	}
 	
 	// delete user
