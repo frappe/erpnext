@@ -312,10 +312,11 @@ cur_frm.cscript.validate = function(doc,cdt,cdn){
 //================ Last Quoted Price and Last Sold Price suggestion ======================
 cur_frm.fields_dict['quotation_details'].grid.get_field('item_code').get_query= function(doc, cdt, cdn) {
   var d = locals[cdt][cdn];
+  var cond = (doc.order_type == 'Maintenance')? " and tabItem.is_service_item = 'Yes'" : " and tabItem.is_sales_item = 'Yes'"
   if(doc.customer)
     return repl("SELECT i.name,i.item_code,concat('Last quoted at - ',cast(quote_rate as char)) as quote_rate,concat('Last sold at - ',cast(sales_rate as char)) as sales_rate FROM\
 		(\
-			select item_code,name from tabItem where tabItem.%(key)s like '%s'\
+			select item_code,name from tabItem where tabItem.%(key)s like '%s' %(cond)s\
 		)i\
 		left join\
 		(\
@@ -336,7 +337,7 @@ cur_frm.fields_dict['quotation_details'].grid.get_field('item_code').get_query= 
 			(\
 				select rd.item_code,max(voucher_date) as voucher_date from `tabRV Detail` rd, `tabReceivable Voucher` r where r.name=rd.parent and r.docstatus=1 and customer='%(cust)s' group by rd.item_code\
 			)m where r.item_code=m.item_code and r.voucher_date=m.voucher_date\
-		)s on i.item_code=s.item_code ORDER BY item_code LIMIT 50",{cust:doc.customer});
+		)s on i.item_code=s.item_code ORDER BY item_code LIMIT 50",{cust:doc.customer, cond:cond});
   else
-    return "SELECT name, item_code FROM tabItem WHERE `tabItem`.%(key)s LIKE '%s' ORDER BY tabItem.item_code DESC LIMIT 50";
+    return repl("SELECT name, item_code FROM tabItem WHERE `tabItem`.%(key)s LIKE '%s' %(cond)s ORDER BY tabItem.item_code DESC LIMIT 50", {cond:cond});
 }
