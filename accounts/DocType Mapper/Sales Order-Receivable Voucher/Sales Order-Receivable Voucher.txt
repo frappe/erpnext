@@ -5,7 +5,7 @@
 	{
 		'creation': '2010-08-08 17:09:36',
 		'docstatus': 0,
-		'modified': '2011-08-31 16:53:11',
+		'modified': '2011-09-07 12:05:03',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
@@ -22,7 +22,6 @@
 	# These values are common for all Field Mapper Detail
 	{
 		'doctype': 'Field Mapper Detail',
-		'map': 'Yes',
 		'name': '__common__',
 		'parent': 'Sales Order-Receivable Voucher',
 		'parentfield': 'field_mapper_details',
@@ -50,6 +49,7 @@
 		'checking_operator': '=',
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'customer',
+		'map': 'Yes',
 		'match_id': 0,
 		'to_field': 'customer'
 	},
@@ -58,6 +58,7 @@
 	{
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'eval: (flt(obj.amount) - flt(obj.billed_amt))/flt(obj.basic_rate)',
+		'map': 'Yes',
 		'match_id': 1,
 		'to_field': 'qty'
 	},
@@ -66,6 +67,7 @@
 	{
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'parent',
+		'map': 'Yes',
 		'match_id': 1,
 		'to_field': 'sales_order'
 	},
@@ -74,6 +76,7 @@
 	{
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'name',
+		'map': 'Yes',
 		'match_id': 1,
 		'to_field': 'so_detail'
 	},
@@ -82,6 +85,7 @@
 	{
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'eval:flt(obj.amount) - flt(obj.billed_amt)',
+		'map': 'Yes',
 		'match_id': 1,
 		'to_field': 'amount'
 	},
@@ -90,6 +94,7 @@
 	{
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'eval: (flt(obj.amount) - flt(obj.billed_amt))* flt(obj.export_rate)/flt(obj.basic_rate)',
+		'map': 'Yes',
 		'match_id': 1,
 		'to_field': 'export_amount'
 	},
@@ -99,6 +104,7 @@
 		'checking_operator': '=',
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'project_name',
+		'map': 'Yes',
 		'match_id': 0,
 		'to_field': 'project_name'
 	},
@@ -107,8 +113,18 @@
 	{
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'reserved_warehouse',
+		'map': 'Yes',
 		'match_id': 1,
 		'to_field': 'warehouse'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'naming_series',
+		'map': 'No',
+		'match_id': 0,
+		'to_field': 'naming_series'
 	},
 
 	# Table Mapper Detail
