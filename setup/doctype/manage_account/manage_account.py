@@ -29,7 +29,7 @@ class DocType:
     set_default(defkey, defvalue)
 
     if defkey == 'fiscal_year':
-      ysd = sql("select year_start_date from `tabFiscal Year` where name=%s", defvalue)
+      ysd = sql("select year_start_date from `tabFiscal Year` where name=%s", cstr(defvalue))
       ysd = ysd and ysd[0][0] or ''
       if ysd:
         set_default('year_start_date', ysd.strftime('%Y-%m-%d'))
