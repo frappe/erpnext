@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-09-25 10:50:34',
+		'creation': '2010-09-25 10:50:37',
 		'docstatus': 0,
-		'modified': '2011-07-28 12:01:10',
+		'modified': '2011-09-12 13:22:15',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
@@ -31,7 +31,7 @@
 	# These values are common for all Module Def
 	{
 		'disabled': 'No',
-		'doctype': 'Module Def',
+		'doctype': u'Module Def',
 		'doctype_list': 'GL Mapper, Journal Voucher\nGL Mapper, Payable Voucher\nGL Mapper, Receivable Voucher\nDocType Label, Receivable Voucher\nDocType Label, Payable Voucher',
 		'file_list': 'finance.gif,FileData/00210',
 		'is_hidden': 'No',
@@ -40,13 +40,13 @@
 		'module_icon': 'Accounts.gif',
 		'module_label': 'Accounts',
 		'module_name': 'Accounts',
-		'module_seq': 3,
+		'module_seq': 5,
 		'name': '__common__'
 	},
 
 	# Module Def, Accounts
 	{
-		'doctype': 'Module Def',
+		'doctype': u'Module Def',
 		'name': 'Accounts'
 	},
 
@@ -57,8 +57,7 @@
 		'display_name': 'Chart of Accounts',
 		'doc_name': 'Accounts Browser',
 		'doc_type': 'Pages',
-		'doctype': 'Module Def Item',
-		'idx': 1
+		'doctype': 'Module Def Item'
 	},
 
 	# Module Def Item
@@ -68,8 +67,7 @@
 		'display_name': 'Chart of Cost Centers',
 		'doc_name': 'Accounts Browser',
 		'doc_type': 'Pages',
-		'doctype': 'Module Def Item',
-		'idx': 2
+		'doctype': 'Module Def Item'
 	},
 
 	# Module Def Item
@@ -79,8 +77,7 @@
 		'doc_name': 'Journal Voucher',
 		'doc_type': 'Forms',
 		'doctype': 'Module Def Item',
-		'fields': 'voucher_type\nvoucher_date\nfiscal_year\ntotal_debit\ntotal_credit',
-		'idx': 3
+		'fields': 'voucher_type\nvoucher_date\nfiscal_year\ntotal_debit\ntotal_credit'
 	},
 
 	# Module Def Item
@@ -90,8 +87,7 @@
 		'doc_name': 'Receivable Voucher',
 		'doc_type': 'Forms',
 		'doctype': 'Module Def Item',
-		'fields': 'voucher_date\ndue_date\ndebit_to\ngrand_total\noutstanding_amount',
-		'idx': 4
+		'fields': 'voucher_date\ndue_date\ndebit_to\ngrand_total\noutstanding_amount'
 	},
 
 	# Module Def Item
@@ -101,8 +97,7 @@
 		'doc_name': 'Payable Voucher',
 		'doc_type': 'Forms',
 		'doctype': 'Module Def Item',
-		'fields': 'voucher_date\ncredit_to\nbill_no\ngrand_total\noutstanding_amount',
-		'idx': 5
+		'fields': 'voucher_date\ncredit_to\nbill_no\ngrand_total\noutstanding_amount'
 	},
 
 	# Module Def Item
@@ -111,8 +106,7 @@
 		'display_name': 'Lease Agreement',
 		'doc_name': 'Lease Agreement',
 		'doc_type': 'Forms',
-		'doctype': 'Module Def Item',
-		'idx': 6
+		'doctype': 'Module Def Item'
 	},
 
 	# Module Def Item
@@ -122,8 +116,7 @@
 		'doc_name': 'Financial Statements',
 		'doc_type': 'Pages',
 		'doctype': 'Module Def Item',
-		'icon': 'table.gif',
-		'idx': 7
+		'icon': 'table.gif'
 	},
 
 	# Module Def Item
@@ -132,8 +125,7 @@
 		'display_name': 'Bank Reconciliation',
 		'doc_name': 'Bank Reconciliation',
 		'doc_type': 'Single DocType',
-		'doctype': 'Module Def Item',
-		'idx': 8
+		'doctype': 'Module Def Item'
 	},
 
 	# Module Def Item
@@ -141,8 +133,7 @@
 		'display_name': 'TDS Payment',
 		'doc_name': 'TDS Payment',
 		'doc_type': 'Setup Forms',
-		'doctype': 'Module Def Item',
-		'idx': 9
+		'doctype': 'Module Def Item'
 	},
 
 	# Module Def Item
@@ -150,8 +141,7 @@
 		'display_name': 'TDS Return Acknowledgement',
 		'doc_name': 'TDS Return Acknowledgement',
 		'doc_type': 'Setup Forms',
-		'doctype': 'Module Def Item',
-		'idx': 10
+		'doctype': 'Module Def Item'
 	},
 
 	# Module Def Item
@@ -159,8 +149,7 @@
 		'display_name': 'Form 16A',
 		'doc_name': 'Form 16A',
 		'doc_type': 'Setup Forms',
-		'doctype': 'Module Def Item',
-		'idx': 11
+		'doctype': 'Module Def Item'
 	},
 
 	# Module Def Item
@@ -169,8 +158,7 @@
 		'display_name': 'Period Closing Voucher',
 		'doc_name': 'Period Closing Voucher',
 		'doc_type': 'Setup Forms',
-		'doctype': 'Module Def Item',
-		'idx': 12
+		'doctype': 'Module Def Item'
 	},
 
 	# Module Def Item
@@ -179,8 +167,7 @@
 		'display_name': 'Ledger Balance Export',
 		'doc_name': 'Ledger Balance Export',
 		'doc_type': 'Single DocType',
-		'doctype': 'Module Def Item',
-		'idx': 13
+		'doctype': 'Module Def Item'
 	},
 
 	# Module Def Item
@@ -188,8 +175,7 @@
 		'display_name': 'General Ledger',
 		'doc_name': 'GL Entry',
 		'doc_type': 'Reports',
-		'doctype': 'Module Def Item',
-		'idx': 14
+		'doctype': 'Module Def Item'
 	},
 
 	# Module Def Item
@@ -197,8 +183,7 @@
 		'display_name': 'Accounts Receivable',
 		'doc_name': 'GL Entry',
 		'doc_type': 'Reports',
-		'doctype': 'Module Def Item',
-		'idx': 15
+		'doctype': 'Module Def Item'
 	},
 
 	# Module Def Item
@@ -206,8 +191,7 @@
 		'display_name': 'Accounts Payable',
 		'doc_name': 'GL Entry',
 		'doc_type': 'Reports',
-		'doctype': 'Module Def Item',
-		'idx': 16
+		'doctype': 'Module Def Item'
 	},
 
 	# Module Def Item
@@ -215,8 +199,7 @@
 		'display_name': 'Bank Reconciliation Statement',
 		'doc_name': 'Journal Voucher Detail',
 		'doc_type': 'Reports',
-		'doctype': 'Module Def Item',
-		'idx': 17
+		'doctype': 'Module Def Item'
 	},
 
 	# Module Def Item
@@ -224,8 +207,7 @@
 		'display_name': 'Trial Balance',
 		'doc_name': 'Account',
 		'doc_type': 'Reports',
-		'doctype': 'Module Def Item',
-		'idx': 18
+		'doctype': 'Module Def Item'
 	},
 
 	# Module Def Item
@@ -233,8 +215,7 @@
 		'display_name': 'Sales Register',
 		'doc_name': 'Receivable Voucher',
 		'doc_type': 'Reports',
-		'doctype': 'Module Def Item',
-		'idx': 19
+		'doctype': 'Module Def Item'
 	},
 
 	# Module Def Item
@@ -242,8 +223,7 @@
 		'display_name': 'Purchase Register',
 		'doc_name': 'Payable Voucher',
 		'doc_type': 'Reports',
-		'doctype': 'Module Def Item',
-		'idx': 20
+		'doctype': 'Module Def Item'
 	},
 
 	# Module Def Item
@@ -251,8 +231,7 @@
 		'display_name': 'Bank Clearance report',
 		'doc_name': 'Journal Voucher Detail',
 		'doc_type': 'Reports',
-		'doctype': 'Module Def Item',
-		'idx': 21
+		'doctype': 'Module Def Item'
 	},
 
 	# Module Def Item
@@ -260,8 +239,7 @@
 		'display_name': 'Monthly Ledger Summary Report',
 		'doc_name': 'GL Entry',
 		'doc_type': 'Reports',
-		'doctype': 'Module Def Item',
-		'idx': 22
+		'doctype': 'Module Def Item'
 	},
 
 	# Module Def Item
@@ -269,8 +247,7 @@
 		'display_name': 'Collection Report',
 		'doc_name': 'Journal Voucher Detail',
 		'doc_type': 'Reports',
-		'doctype': 'Module Def Item',
-		'idx': 23
+		'doctype': 'Module Def Item'
 	},
 
 	# Module Def Item
@@ -278,8 +255,7 @@
 		'display_name': 'Total amout collection for a period - Customerwise',
 		'doc_name': 'Account',
 		'doc_type': 'Reports',
-		'doctype': 'Module Def Item',
-		'idx': 24
+		'doctype': 'Module Def Item'
 	},
 
 	# Module Def Item
@@ -287,8 +263,7 @@
 		'display_name': 'Payment Report',
 		'doc_name': 'Journal Voucher Detail',
 		'doc_type': 'Reports',
-		'doctype': 'Module Def Item',
-		'idx': 25
+		'doctype': 'Module Def Item'
 	},
 
 	# Module Def Item
@@ -296,8 +271,7 @@
 		'display_name': 'Itemwise Sales Register',
 		'doc_name': 'RV Detail',
 		'doc_type': 'Reports',
-		'doctype': 'Module Def Item',
-		'idx': 26
+		'doctype': 'Module Def Item'
 	},
 
 	# Module Def Item
@@ -305,8 +279,7 @@
 		'display_name': 'Itemwise Purchase Register',
 		'doc_name': 'PV Detail',
 		'doc_type': 'Reports',
-		'doctype': 'Module Def Item',
-		'idx': 27
+		'doctype': 'Module Def Item'
 	},
 
 	# Module Def Item
@@ -314,8 +287,7 @@
 		'display_name': 'Cost Center wise Expense',
 		'doc_name': 'GL Entry',
 		'doc_type': 'Reports',
-		'doctype': 'Module Def Item',
-		'idx': 28
+		'doctype': 'Module Def Item'
 	},
 
 	# Module Def Item
@@ -323,8 +295,7 @@
 		'display_name': 'TDS Return',
 		'doc_name': 'TDS Payment Detail',
 		'doc_type': 'Reports',
-		'doctype': 'Module Def Item',
-		'idx': 29
+		'doctype': 'Module Def Item'
 	},
 
 	# Module Def Item
@@ -332,8 +303,7 @@
 		'display_name': 'Budget Variance Report',
 		'doc_name': 'Budget Detail',
 		'doc_type': 'Reports',
-		'doctype': 'Module Def Item',
-		'idx': 30
+		'doctype': 'Module Def Item'
 	},
 
 	# Module Def Item
@@ -341,8 +311,7 @@
 		'display_name': 'Payment Receipt Report',
 		'doc_name': 'GL Entry',
 		'doc_type': 'Reports',
-		'doctype': 'Module Def Item',
-		'idx': 31
+		'doctype': 'Module Def Item'
 	},
 
 	# Module Def Item
@@ -351,8 +320,7 @@
 		'display_name': 'Business Associate Commission Report',
 		'doc_name': 'Receivable Voucher',
 		'doc_type': 'Reports',
-		'doctype': 'Module Def Item',
-		'idx': 32
+		'doctype': 'Module Def Item'
 	},
 
 	# Module Def Item
@@ -360,8 +328,7 @@
 		'display_name': 'Lease Agreement List',
 		'doc_name': 'GL Entry',
 		'doc_type': 'Reports',
-		'doctype': 'Module Def Item',
-		'idx': 33
+		'doctype': 'Module Def Item'
 	},
 
 	# Module Def Item
@@ -369,8 +336,7 @@
 		'display_name': 'Lease Monthly Future Installment Inflows',
 		'doc_name': 'GL Entry',
 		'doc_type': 'Reports',
-		'doctype': 'Module Def Item',
-		'idx': 34
+		'doctype': 'Module Def Item'
 	},
 
 	# Module Def Item
@@ -378,8 +344,7 @@
 		'display_name': 'Lease Overdue Age Wise',
 		'doc_name': 'GL Entry',
 		'doc_type': 'Reports',
-		'doctype': 'Module Def Item',
-		'idx': 35
+		'doctype': 'Module Def Item'
 	},
 
 	# Module Def Item
@@ -387,8 +352,7 @@
 		'display_name': 'Lease Overdue List',
 		'doc_name': 'GL Entry',
 		'doc_type': 'Reports',
-		'doctype': 'Module Def Item',
-		'idx': 36
+		'doctype': 'Module Def Item'
 	},
 
 	# Module Def Item
@@ -396,17 +360,7 @@
 		'display_name': 'Lease Receipts Client Wise',
 		'doc_name': 'GL Entry',
 		'doc_type': 'Reports',
-		'doctype': 'Module Def Item',
-		'idx': 37
-	},
-
-	# Module Def Item
-	{
-		'display_name': 'Lease Receipt Summary Month Wise',
-		'doc_name': 'GL Entry',
-		'doc_type': 'Reports',
-		'doctype': 'Module Def Item',
-		'idx': 38
+		'doctype': 'Module Def Item'
 	},
 
 	# Module Def Item
@@ -414,28 +368,26 @@
 		'display_name': 'Lease Yearly Future Installment Inflows',
 		'doc_name': 'GL Entry',
 		'doc_type': 'Reports',
-		'doctype': 'Module Def Item',
-		'idx': 39
+		'doctype': 'Module Def Item'
+	},
+
+	# Module Def Item
+	{
+		'display_name': 'Voucher wise tax details',
+		'doc_name': 'RV Tax Detail',
+		'doc_type': 'Reports',
+		'doctype': 'Module Def Item'
 	},
 
 	# Module Def Role
 	{
 		'doctype': 'Module Def Role',
-		'idx': 1,
 		'role': 'Accounts Manager'
 	},
 
 	# Module Def Role
 	{
 		'doctype': 'Module Def Role',
-		'idx': 2,
 		'role': 'Accounts User'
-	},
-
-	# Module Def Role
-	{
-		'doctype': 'Module Def Role',
-		'idx': 3,
-		'role': 'Administrator'
 	}
 ]
