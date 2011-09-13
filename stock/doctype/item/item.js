@@ -110,3 +110,9 @@ cur_frm.cscript.weight_to_validate = function(doc,cdt,cdn){
 cur_frm.cscript.validate = function(doc,cdt,cdn){
   cur_frm.cscript.weight_to_validate(doc,cdt,cdn);
 }
+
+//===========Fill Default Currency in "Ref Rate Details====================
+cur_frm.fields_dict['ref_rate_details'].grid.onrowadd = function(doc, cdt, cdn){
+	locals[cdt][cdn].ref_currency = sys_defaults.currency;
+	refresh_field('ref_currency',cdn,'ref_rate_details');
+}

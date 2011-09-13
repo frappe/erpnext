@@ -1,7 +1,7 @@
 # REMEMBER to update this
 # ========================
 
-last_patch = 356
+last_patch = 360
 
 #-------------------------------------------
 
@@ -269,7 +269,7 @@ def execute(patch_no):
 		delete_doc('Custom Script', 'Profile-Client')
 		delete_doc('Custom Script', 'Event-Client')
 		delete_doc('Custom Script', 'File-Server')
-	
+
 		# reload profile with new fields for security
 		delete_doc('DocType', 'Profile')
 		reload_doc('core', 'doctype', 'profile')
@@ -300,3 +300,20 @@ def execute(patch_no):
 		sql("update `tabDocField` set print_hide =1 where fieldname in ('pack_no', 'pack_gross_wt', 'weight_uom', 'pack_nett_wt') and parent = 'Delivery Note Detail'")
 	elif patch_no == 356:
 		sql("update `tabDocField` set print_hide =1 where fieldname = 'print_packing_slip' and parent = 'Delivery Note'")
+	elif patch_no == 357:
+		reload_doc('hr', 'doctype', 'salary_manager')
+	elif patch_no == 358:
+		reload_doc('setup', 'doctype','features_setup')
+		reload_doc('stock','doctype','item')
+		sql("update tabDocField set label='Produced Qty',description='Updated after finished goods are transferred to FG Warehouse through Stock Entry' where parent='Production Order' and fieldname='produced_qty'")
+		rs = sql("select fieldname from tabDocField where parent='Features Setup' and fieldname is not null")
+		from webnotes.model.doc import Document
+		m = Document('Features Setup')
+		for d in rs:
+			m.fields[d[0]] = 1
+		m.save()
+	elif patch_no == 359:
+		reload_doc('hr', 'doctype', 'salary_slip')
+		delete_doc('DocType', 'Salary Control Panel')
+	elif patch_no == 360:
+		sql("delete from `tabDocField` where (fieldname in ('client_string', 'server_code_error', 'server_code_compiled', 'server_code', 'server_code_core', 'client_script', 'client_script_core', 'dt_template', 'change_log') or label = 'Template') and parent = 'DocType'")
