@@ -1,7 +1,7 @@
 # REMEMBER to update this
 # ========================
 
-last_patch = 360
+last_patch = 362
 
 #-------------------------------------------
 
@@ -317,3 +317,7 @@ def execute(patch_no):
 		sql("update `tabDocField` set print_hide =1 where fieldname in ('pack_no', 'pack_gross_wt', 'weight_uom', 'pack_nett_wt') and parent = 'Delivery Note Detail'")
 	elif patch_no == 360:
 		sql("update `tabDocField` set print_hide =1 where fieldname = 'print_packing_slip' and parent = 'Delivery Note'")
+	elif patch_no == 361:
+		sql("update `tabModule Def Item` set doc_name = 'GL Entry' where display_name in ('Lease Agreement List', 'Lease Monthly Future Installment Inflows', 'Lease Overdue Age Wise', 'Lease Overdue List', 'Lease Receipts Client Wise', 'Lease Receipt Summary Month Wise', 'Lease Yearly Future Installment Inflows') and parent = 'Accounts'")
+	elif patch_no == 362:
+		sql("update `tabDocField` set no_copy = 1 where fieldname in ('amended_from', 'amendment_date', 'file_list', 'naming_series', 'status')")
