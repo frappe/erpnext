@@ -1,7 +1,7 @@
 # REMEMBER to update this
 # ========================
 
-last_patch = 362
+last_patch = 363
 
 #-------------------------------------------
 
@@ -321,3 +321,10 @@ def execute(patch_no):
 		sql("update `tabModule Def Item` set doc_name = 'GL Entry' where display_name in ('Lease Agreement List', 'Lease Monthly Future Installment Inflows', 'Lease Overdue Age Wise', 'Lease Overdue List', 'Lease Receipts Client Wise', 'Lease Receipt Summary Month Wise', 'Lease Yearly Future Installment Inflows') and parent = 'Accounts'")
 	elif patch_no == 362:
 		sql("update `tabDocField` set no_copy = 1 where fieldname in ('amended_from', 'amendment_date', 'file_list', 'naming_series', 'status')")
+	elif patch_no == 363:
+		reload_doc('accounts', 'search_criteria', 'voucher_wise_tax_details')
+		reload_doc('accounts', 'Module Def', 'Accounts')
+		mappers = sql("select name, module from `tabDocType Mapper`")
+		for d in mappers:
+			if d[0] and d[1]:
+				reload_doc(d[1].lower(), 'DocType Mapper', d[0])
