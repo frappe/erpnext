@@ -5,7 +5,7 @@
 	{
 		'creation': '2010-08-08 17:09:34',
 		'docstatus': 0,
-		'modified': '2011-08-09 11:14:09',
+		'modified': '2011-09-13 13:23:44',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
@@ -22,8 +22,6 @@
 	# These values are common for all Field Mapper Detail
 	{
 		'doctype': 'Field Mapper Detail',
-		'map': 'Yes',
-		'match_id': 1,
 		'name': '__common__',
 		'parent': 'Delivery Note-Receivable Voucher',
 		'parentfield': 'field_mapper_details',
@@ -32,7 +30,7 @@
 
 	# These values are common for all DocType Mapper
 	{
-		'doctype': 'DocType Mapper',
+		'doctype': u'DocType Mapper',
 		'from_doctype': 'Delivery Note',
 		'module': 'Accounts',
 		'name': '__common__',
@@ -42,7 +40,7 @@
 
 	# DocType Mapper, Delivery Note-Receivable Voucher
 	{
-		'doctype': 'DocType Mapper',
+		'doctype': u'DocType Mapper',
 		'name': 'Delivery Note-Receivable Voucher'
 	},
 
@@ -50,6 +48,8 @@
 	{
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'eval: (flt(obj.amount) - flt(obj.billed_amt)) / flt(obj.basic_rate)',
+		'map': 'Yes',
+		'match_id': 1,
 		'to_field': 'qty'
 	},
 
@@ -57,6 +57,8 @@
 	{
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'parent',
+		'map': 'Yes',
+		'match_id': 1,
 		'to_field': 'delivery_note'
 	},
 
@@ -64,6 +66,8 @@
 	{
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'name',
+		'map': 'Yes',
+		'match_id': 1,
 		'to_field': 'dn_detail'
 	},
 
@@ -71,6 +75,8 @@
 	{
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'prevdoc_docname',
+		'map': 'Yes',
+		'match_id': 1,
 		'to_field': 'sales_order'
 	},
 
@@ -78,6 +84,8 @@
 	{
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'prevdoc_detail_docname',
+		'map': 'Yes',
+		'match_id': 1,
 		'to_field': 'so_detail'
 	},
 
@@ -85,6 +93,8 @@
 	{
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'eval: flt(obj.amount) - flt(obj.billed_amt)',
+		'map': 'Yes',
+		'match_id': 1,
 		'to_field': 'amount'
 	},
 
@@ -92,7 +102,27 @@
 	{
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'eval: (flt(obj.amount) - flt(obj.billed_amt)) * flt(obj.export_rate)/flt(obj.basic_rate)',
+		'map': 'Yes',
+		'match_id': 1,
 		'to_field': 'export_amount'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'naming_series',
+		'map': 'No',
+		'match_id': 0,
+		'to_field': 'naming_series'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'incentives',
+		'map': 'No',
+		'match_id': 3,
+		'to_field': 'incentives'
 	},
 
 	# Table Mapper Detail

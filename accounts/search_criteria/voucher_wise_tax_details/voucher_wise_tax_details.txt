@@ -1,0 +1,34 @@
+# Search Criteria, voucher_wise_tax_details
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2011-09-06 15:36:58',
+		'docstatus': 0,
+		'modified': '2011-09-06 15:50:28',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all Search Criteria
+	{
+		'columns': 'RV Tax Detail\x01Type,RV Tax Detail\x01Account Head,RV Tax Detail\x01Cost Center,RV Tax Detail\x01Description,RV Tax Detail\x01Rate,RV Tax Detail\x01Amount*,RV Tax Detail\x01Total*',
+		'criteria_name': 'Voucher wise tax details',
+		'doc_type': 'RV Tax Detail',
+		'doctype': 'Search Criteria',
+		'filters': "{'Delivery Note\x01Submitted':1,'Delivery Note\x01Status':'','Delivery Note\x01Fiscal Year':''}",
+		'module': 'Accounts',
+		'name': '__common__',
+		'page_len': 50,
+		'parent_doc_type': 'Delivery Note',
+		'sort_by': '`tabRV Tax Detail`.`parent`',
+		'sort_order': 'DESC',
+		'standard': 'Yes'
+	},
+
+	# Search Criteria, voucher_wise_tax_details
+	{
+		'doctype': 'Search Criteria',
+		'name': 'voucher_wise_tax_details'
+	}
+]
