@@ -5,8 +5,8 @@
 	{
 		'creation': '2010-08-08 17:09:35',
 		'docstatus': 0,
-		'modified': '2011-05-13 12:18:34',
-		'modified_by': 'umair@iwebnotes.com',
+		'modified': '2011-09-07 12:09:55',
+		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
 
@@ -22,8 +22,6 @@
 	# These values are common for all Field Mapper Detail
 	{
 		'doctype': 'Field Mapper Detail',
-		'map': 'Yes',
-		'match_id': 1,
 		'name': '__common__',
 		'parent': 'Purchase Receipt-Payable Voucher',
 		'parentfield': 'field_mapper_details',
@@ -32,7 +30,7 @@
 
 	# These values are common for all DocType Mapper
 	{
-		'doctype': 'DocType Mapper',
+		'doctype': u'DocType Mapper',
 		'from_doctype': 'Purchase Receipt',
 		'module': 'Accounts',
 		'name': '__common__',
@@ -42,7 +40,7 @@
 
 	# DocType Mapper, Purchase Receipt-Payable Voucher
 	{
-		'doctype': 'DocType Mapper',
+		'doctype': u'DocType Mapper',
 		'name': 'Purchase Receipt-Payable Voucher'
 	},
 
@@ -50,6 +48,8 @@
 	{
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'eval: flt(obj.qty) - flt(obj.billed_qty)',
+		'map': 'Yes',
+		'match_id': 1,
 		'to_field': 'qty'
 	},
 
@@ -57,6 +57,8 @@
 	{
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'purchase_rate',
+		'map': 'Yes',
+		'match_id': 1,
 		'to_field': 'rate'
 	},
 
@@ -64,6 +66,8 @@
 	{
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'eval: (flt(obj.qty) - flt(obj.billed_qty)) * flt(obj.purchase_rate)',
+		'map': 'Yes',
+		'match_id': 1,
 		'to_field': 'amount'
 	},
 
@@ -71,6 +75,8 @@
 	{
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'eval: (flt(obj.qty) - flt(obj.billed_qty)) * flt(obj.import_rate)',
+		'map': 'Yes',
+		'match_id': 1,
 		'to_field': 'import_amount'
 	},
 
@@ -78,6 +84,8 @@
 	{
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'parent',
+		'map': 'Yes',
+		'match_id': 1,
 		'to_field': 'purchase_receipt'
 	},
 
@@ -85,6 +93,8 @@
 	{
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'prevdoc_docname',
+		'map': 'Yes',
+		'match_id': 1,
 		'to_field': 'purchase_order'
 	},
 
@@ -92,6 +102,8 @@
 	{
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'name',
+		'map': 'Yes',
+		'match_id': 1,
 		'to_field': 'pr_detail'
 	},
 
@@ -99,7 +111,18 @@
 	{
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'prevdoc_detail_docname',
+		'map': 'Yes',
+		'match_id': 1,
 		'to_field': 'po_detail'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'naming_series',
+		'map': 'No',
+		'match_id': 0,
+		'to_field': 'naming_series'
 	},
 
 	# Table Mapper Detail

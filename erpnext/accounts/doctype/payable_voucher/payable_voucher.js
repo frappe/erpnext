@@ -20,12 +20,15 @@ cur_frm.cscript.onload = function(doc,dt,dn) {
   }  
   
   if(doc.__islocal){
-    if(doc.supplier) {cur_frm.cscript.supplier(doc,dt,dn)}
-    hide_field(['supplier_address','contact_person','supplier_name','address_display','contact_display','contact_mobile','contact_email']);
+    hide_field(['supplier_address', 'contact_person', 'supplier_name', 'address_display', 'contact_display', 'contact_mobile', 'contact_email']);
   }
-  
+}
 
-  if(doc.supplier) unhide_field(['supplier_address','contact_person','supplier_name','address_display','contact_display','contact_mobile','contact_email']);  
+
+//Onload post render
+//------------------------
+cur_frm.cscript.onload_post_render = function(doc, dt, dn) {
+  if(doc.__islocal && doc.supplier) cur_frm.cscript.supplier(doc,dt,dn);
 }
 
 // Refresh

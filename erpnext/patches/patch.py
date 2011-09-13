@@ -1,7 +1,7 @@
 # REMEMBER to update this
 # ========================
 
-last_patch = 358
+last_patch = 363
 
 #-------------------------------------------
 
@@ -291,8 +291,18 @@ def execute(patch_no):
 			ch.format = 'Delivery Note Packing List Wise'
 			ch.save(1)
 	elif patch_no == 353:
-		reload_doc('hr', 'doctype', 'salary_manager')
+		reload_doc('core', 'doctype', 'doctype')
+		sql("update `tabDocType` set default_print_format = 'Standard' where name = 'Delivery Note'")
 	elif patch_no == 354:
+		reload_doc('stock', 'doctype', 'delivery_note')
+		reload_doc('stock', 'doctype', 'delivery_note_detail')
+	elif patch_no == 355:
+		sql("update `tabDocField` set print_hide =1 where fieldname in ('pack_no', 'pack_gross_wt', 'weight_uom', 'pack_nett_wt') and parent = 'Delivery Note Detail'")
+	elif patch_no == 356:
+		sql("update `tabDocField` set print_hide =1 where fieldname = 'print_packing_slip' and parent = 'Delivery Note'")
+	elif patch_no == 357:
+		reload_doc('hr', 'doctype', 'salary_manager')
+	elif patch_no == 358:
 		reload_doc('setup', 'doctype','features_setup')
 		reload_doc('stock','doctype','item')
 		sql("update tabDocField set label='Produced Qty',description='Updated after finished goods are transferred to FG Warehouse through Stock Entry' where parent='Production Order' and fieldname='produced_qty'")
@@ -302,14 +312,19 @@ def execute(patch_no):
 		for d in rs:
 			m.fields[d[0]] = 1
 		m.save()
-	elif patch_no == 355:
+	elif patch_no == 359:
 		reload_doc('hr', 'doctype', 'salary_slip')
 		delete_doc('DocType', 'Salary Control Panel')
-	elif patch_no == 356:
-		reload_doc('core', 'doctype', 'doctype')
-		sql("update `tabDocType` set default_print_format = 'Standard' where name = 'Delivery Note'")
-	elif patch_no == 357:
+	elif patch_no == 360:
 		sql("delete from `tabDocField` where (fieldname in ('client_string', 'server_code_error', 'server_code_compiled', 'server_code', 'server_code_core', 'client_script', 'client_script_core', 'dt_template', 'change_log') or label = 'Template') and parent = 'DocType'")
-	elif patch_no == 358:
-		reload_doc('stock', 'doctype', 'delivery_note')
-		reload_doc('stock', 'doctype', 'delivery_note_detail')
+	elif patch_no == 361:
+		sql("update `tabModule Def Item` set doc_name = 'GL Entry' where display_name in ('Lease Agreement List', 'Lease Monthly Future Installment Inflows', 'Lease Overdue Age Wise', 'Lease Overdue List', 'Lease Receipts Client Wise', 'Lease Receipt Summary Month Wise', 'Lease Yearly Future Installment Inflows') and parent = 'Accounts'")
+	elif patch_no == 362:
+		sql("update `tabDocField` set no_copy = 1 where fieldname in ('amended_from', 'amendment_date', 'file_list', 'naming_series', 'status')")
+	elif patch_no == 363:
+		reload_doc('accounts', 'search_criteria', 'voucher_wise_tax_details')
+		reload_doc('accounts', 'Module Def', 'Accounts')
+		mappers = sql("select name, module from `tabDocType Mapper`")
+		for d in mappers:
+			if d[0] and d[1]:
+				reload_doc(d[1].lower(), 'DocType Mapper', d[0])

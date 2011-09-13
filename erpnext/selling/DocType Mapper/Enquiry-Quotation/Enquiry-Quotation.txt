@@ -5,8 +5,8 @@
 	{
 		'creation': '2010-08-08 17:09:34',
 		'docstatus': 0,
-		'modified': '2011-05-10 16:04:40',
-		'modified_by': 'umair@iwebnotes.com',
+		'modified': '2011-09-07 12:12:30',
+		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
 
@@ -23,7 +23,6 @@
 	# These values are common for all Field Mapper Detail
 	{
 		'doctype': 'Field Mapper Detail',
-		'map': 'Yes',
 		'name': '__common__',
 		'parent': 'Enquiry-Quotation',
 		'parentfield': 'field_mapper_details',
@@ -32,7 +31,7 @@
 
 	# These values are common for all DocType Mapper
 	{
-		'doctype': 'DocType Mapper',
+		'doctype': u'DocType Mapper',
 		'from_doctype': 'Enquiry',
 		'module': 'Selling',
 		'name': '__common__',
@@ -42,7 +41,7 @@
 
 	# DocType Mapper, Enquiry-Quotation
 	{
-		'doctype': 'DocType Mapper',
+		'doctype': u'DocType Mapper',
 		'name': 'Enquiry-Quotation'
 	},
 
@@ -50,6 +49,7 @@
 	{
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'uom',
+		'map': 'Yes',
 		'match_id': 1,
 		'to_field': 'stock_uom'
 	},
@@ -58,6 +58,7 @@
 	{
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'name',
+		'map': 'Yes',
 		'match_id': 0,
 		'to_field': 'enq_no'
 	},
@@ -66,6 +67,7 @@
 	{
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'parent',
+		'map': 'Yes',
 		'match_id': 1,
 		'to_field': 'prevdoc_docname'
 	},
@@ -74,6 +76,7 @@
 	{
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'parenttype',
+		'map': 'Yes',
 		'match_id': 1,
 		'to_field': 'prevdoc_doctype'
 	},
@@ -82,6 +85,7 @@
 	{
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'enquiry_from',
+		'map': 'Yes',
 		'match_id': 0,
 		'to_field': 'quotation_to'
 	},
@@ -90,8 +94,36 @@
 	{
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'enquiry_type',
+		'map': 'Yes',
 		'match_id': 0,
 		'to_field': 'order_type'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'transaction_date',
+		'map': 'No',
+		'match_id': 0,
+		'to_field': 'transaction_date'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'status',
+		'map': 'No',
+		'match_id': 0,
+		'to_field': 'status'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'naming_series',
+		'map': 'No',
+		'match_id': 0,
+		'to_field': 'naming_series'
 	},
 
 	# Table Mapper Detail

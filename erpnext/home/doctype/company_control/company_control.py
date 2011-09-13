@@ -53,6 +53,15 @@ class DocType:
 			pr.role = r
 			pr.parentfield = 'userroles'
 			pr.save(1)
+		
+		# Update Membership Type at Gateway
+		if cint(webnotes.conn.get_value('Control Panel', None, 'sync_with_gateway')):
+			if 'System Manager' in role_list : membership_type = 'Administrator'
+			else : membership_type = 'Member'
+
+			import server_tools.gateway_utils
+			server_tools.gateway_utils.update_membership_type(cstr(arg['usr']), membership_type)
+
 		sql("delete from __SessionCache where user=%s", cstr(arg['usr']))
 
 	# Save profile

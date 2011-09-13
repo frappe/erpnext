@@ -90,9 +90,13 @@ for r in res:
 	# supplier type
 	r.append(supp_type_dict.get(r[col_idx['Account']], ''))	
 	
+	if r[col_idx['Voucher Type']] == 'Payable Voucher':
+		r += pv_dict.get(r[col_idx['Voucher No']], ['', '', ''])
+	else:
+		r += ['', '', '']
+	
 	# if entry against Payable Voucher
 	if r[col_idx['Against Voucher']] and r[col_idx['Voucher Type']] == 'Payable Voucher':
-		r += pv_dict.get(r[col_idx['Voucher No']], ['', '', ''])
 		cond = " and ifnull(against_voucher, '') = '%s'" % r[col_idx['Against Voucher']]
 
 	# if entry against JV & and not adjusted within period
