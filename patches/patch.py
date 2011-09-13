@@ -1,7 +1,7 @@
 # REMEMBER to update this
 # ========================
 
-last_patch = 360
+last_patch = 362
 
 #-------------------------------------------
 
@@ -317,3 +317,7 @@ def execute(patch_no):
 		delete_doc('DocType', 'Salary Control Panel')
 	elif patch_no == 360:
 		sql("delete from `tabDocField` where (fieldname in ('client_string', 'server_code_error', 'server_code_compiled', 'server_code', 'server_code_core', 'client_script', 'client_script_core', 'dt_template', 'change_log') or label = 'Template') and parent = 'DocType'")
+	elif patch_no == 361:
+		sql("update `tabModule Def Item` set doc_name = 'GL Entry' where display_name in ('Lease Agreement List', 'Lease Monthly Future Installment Inflows', 'Lease Overdue Age Wise', 'Lease Overdue List', 'Lease Receipts Client Wise', 'Lease Receipt Summary Month Wise', 'Lease Yearly Future Installment Inflows') and parent = 'Accounts'")
+	elif patch_no == 362:
+		sql("update `tabDocField` set no_copy = 1 where fieldname in ('amended_from', 'amendment_date', 'file_list', 'naming_series', 'status')")
