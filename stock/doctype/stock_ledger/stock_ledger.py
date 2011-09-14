@@ -134,8 +134,10 @@ class DocType:
 		else:
 			if exists and exists[0][1] == 'Delivered' and exists[0][2] != 2:
 				msgprint("Serial No: %s is already delivered, you can not cancel the document." % serial_no, raise_exception=1)
-			elif purpose in ['Material Transfer', 'Sales Return']:
-				sql("update `tabSerial No` set status = '%s', purchase_document_type = '', purchase_document_no = '', warehouse = '%s' where name = '%s'" % (purpose == 'Material Transfer' and 'In Store' or 'Delivered', d.s_warehouse, serial_no))				
+			elif purpose == 'Material Transfer':
+				sql("update `tabSerial No` set status = 'In Store', purchase_document_type = '', purchase_document_no = '', warehouse = '%s' where name = '%s'" % (d.s_warehouse, serial_no))				
+			elif purpose == 'Sales Return':
+				sql("update `tabSerial No` set status = 'Delivered', purchase_document_type = '', purchase_document_no = '' where name = '%s'" % serial_no)
 			else:
 				sql("update `tabSerial No` set docstatus = 2, status = 'Not in Use', purchase_document_type = '', purchase_document_no = '', purchase_date = '', purchase_rate = '', supplier = null, supplier_name = '', supplier_address = '', warehouse = '' where name = '%s'" % serial_no)
 
