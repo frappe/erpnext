@@ -1,7 +1,7 @@
 # REMEMBER to update this
 # ========================
 
-last_patch = 364
+last_patch = 365
 
 #-------------------------------------------
 
@@ -337,3 +337,6 @@ def execute(patch_no):
 		for d in mappers:
 			if d[0] and d[1]:
 				reload_doc(d[1].lower(), 'DocType Mapper', d[0])
+	elif patch_no == 365:
+		from patches.delivery_billing_status_patch import run_patch
+		run_patch()
