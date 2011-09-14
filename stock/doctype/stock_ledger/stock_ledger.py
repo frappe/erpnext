@@ -51,7 +51,8 @@ class DocType:
 	# -----------------------------
 	def validate_serial_no_warehouse(self, obj, fname):
 		for d in getlist(obj.doclist, fname):
-			if d.serial_no:
+			wh = d.warehouse or d.s_warehouse
+			if d.serial_no and wh:
 				serial_nos = self.get_sr_no_list(d.serial_no)
 				for s in serial_nos:
 					s = s.strip()
@@ -60,8 +61,8 @@ class DocType:
 						msgprint("Serial No %s does not exists"%s, raise_exception = 1)
 					elif not sr_war[0][0]:
 						msgprint("Warehouse not mentioned in the Serial No <b>%s</b>" % s, raise_exception = 1)
-					elif (d.warehouse and sr_war[0][0] != d.warehouse) or (d.s_warehouse and sr_war[0][0] != d.s_warehouse):
-						msgprint("Serial No : %s for Item : %s doesn't exists in Warehouse : %s" % (s, d.item_code, d.warehouse or d.s_warehouse), raise_exception = 1)
+					elif sr_war[0][0] != wh:
+						msgprint("Serial No : %s for Item : %s doesn't exists in Warehouse : %s" % (s, d.item_code, wh), raise_exception = 1)
 
 
 	# ------------------------------------
