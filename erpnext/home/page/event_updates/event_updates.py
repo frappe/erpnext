@@ -24,7 +24,7 @@ def get_unread_messages():
 # Get toolbar items
 #	
 def get_status_details(arg=None):
-	from webnotes.utils import cint, date_diff, nowdate
+	from webnotes.utils import cint, date_diff, nowdate, get_defaults
 		
 	online = get_online_users()
 			
@@ -35,7 +35,8 @@ def get_status_details(arg=None):
 		'online_users': online or [],
 		'is_trial': webnotes.conn.get_global('is_trial'),
 		'days_to_expiry': (webnotes.conn.get_global('days_to_expiry') or '0'),
-		'setup_status': get_setup_status()
+		'setup_status': get_setup_status(),
+		'registration_complete': cint(get_defaults('registration_complete')) and 'Yes' or 'No'
 	}
 	return ret
 
@@ -53,7 +54,7 @@ def get_setup_status():
 		header = webnotes.conn.get_value('Control Panel', None, 'client_name') or ''
 
 		if header.startswith('<div style="padding:4px; font-size:20px;">'\
-			+webnotes.conn.get_value('Control Panel', None, 'company_name')):
+			+(webnotes.conn.get_value('Control Panel', None, 'company_name') or '')):
 			return False
 			
 		elif 'Banner Comes Here' in header:

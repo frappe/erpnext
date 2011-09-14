@@ -52,8 +52,7 @@ class DocType:
 		self.currency = currency
 		
 		# Fiscal Year
-		master_dict = {'Fiscal Year':{'year':curr_fiscal_year,
-																	'year_start_date':fy_start_date}}
+		master_dict = {'Fiscal Year':{'year':curr_fiscal_year, 'year_start_date':fy_start_date}}
 		self.create_records(master_dict)
 		
 		# Company
@@ -85,6 +84,8 @@ class DocType:
 		# Set Registration Complete
 		set_default('registration_complete','1')
 
+		webnotes.msgprint("Great! Your company has now been created")
+		
 		import webnotes.utils
 		return webnotes.utils.get_defaults()
 

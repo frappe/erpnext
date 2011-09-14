@@ -5,7 +5,7 @@
 	{
 		'creation': '2010-08-08 17:09:34',
 		'docstatus': 0,
-		'modified': '2011-09-07 12:11:39',
+		'modified': '2011-09-14 12:36:24',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
@@ -61,6 +61,20 @@
 		'doctype': 'Field Mapper Detail',
 		'from_field': 'company_name',
 		'to_field': 'customer_name'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'contact_no',
+		'to_field': 'phone_1'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'fax',
+		'to_field': 'fax_1'
 	},
 
 	# Table Mapper Detail

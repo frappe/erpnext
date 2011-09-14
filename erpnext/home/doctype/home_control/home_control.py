@@ -121,24 +121,6 @@ class DocType:
 
 	def get_dt_help(self,dt):
 		return sql("select description from tabDocType where name=%s",dt)[0][0] or ''
-		
-	# ----------------------------------------------------------------------------------------
-	def welcome_done(self):
-		if cint(get_defaults().get('welcome_done')):
-			return 'Yes'
-		else:
-			return 'No'
-
-	def set_welcome_done(self):
-		set_default('welcome_done', '1')
-
-	# Check Complete Registration
-	# ----------------------
-	def registration_complete(self):
-		if cint(get_defaults().get('registration_complete')):
-			return 'Yes'
-		else:
-			return 'No'
 
 	# get dashboard counts
 	# --------------------
@@ -233,29 +215,6 @@ class DocType:
 	def remove_todo_item(self,nm):
 		sql("delete from `tabToDo Item` where name = %s",nm)
 
-	# -------------------------------------------------------------------------------------------------------
-
-	def get_status_details(self, arg=''):
-		# no of users online
-		count = sql("select count(distinct user) from tabSessions t2 where user not in ('Guest','Administrator') and TIMESTAMPDIFF(HOUR,t2.lastupdate,NOW()) <= 1")
-
-		# unread messages
-		unread = sql("select count(t1.name) from `tabMail` t1, `tabMail Participant Details` t2 where t2.participant_name = '%s' and t2.parent = t1.name and (t2.read_status = 'No' or t2.read_status is NULL) and (t2.delete_status = 'No' or t2.delete_status is NULL) and t1.last_updated_by != t2.participant_name" % arg)
-		
-		# system messages
-		msg_id = webnotes.conn.get_global('system_message_id')
-		msg = ''
-				
-		if msg_id and msg_id != webnotes.conn.get_global('system_message_id', session['user']):
-			msg = webnotes.conn.get_global('system_message')
-		
-		return {
-			'user_count': count and cint(count[0][0]) or 0, 
-			'unread': unread and cint(unread[0][0]) or 0, 
-			'system_message':msg,
-			'registration_complete': self.registration_complete()
-		}
-				
 	# -------------------------------------------------------------------------------------------------------
 
 	def dismiss_message(self, arg=''):

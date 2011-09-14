@@ -610,7 +610,7 @@ pscript.home_make_status = function() {
 	
 			// complete registration
 			if(in_list(user_roles,'System Manager')) { 
-				pscript.complete_registration(r.registration_complete); 
+				pscript.complete_registration(r.message.registration_complete); 
 			}
 			
 			// setup wizard
@@ -630,17 +630,24 @@ pscript.complete_registration = function(is_complete) {
 			d.no_cancel(); // Hide close image
 			$dh(page_body.wntoolbar.wrapper);
 		}
-		$($a(d.body,'div','', {margin:'8px', color:'#888'})).html('<b>Company Name : </b>'+locals['Control Panel']['Control Panel'].company_name);      
 
-		d.make_body(
-	  [
-	  	['Data','Company Abbreviation'],
-	  	['Select','Fiscal Year Start Date'],
-	  	['Select','Default Currency'],
-	  	['Button','Save'],
+		d.make_body([
+			['Data','Company Name','Example: Your Company LLC'],
+	  		['Data','Company Abbreviation', 'Example: YC (all your acconts will have this as a suffix)'],
+	  		['Select','Fiscal Year Start Date'],
+	  		['Select','Default Currency'],
+	  		['Button','Save'],
 		]);
 
-		//d.widgets['Save'].disabled = true;      // disable Save button
+		// if company name is set, set the input value
+		// and disable it
+		if(locals['Control Panel']['Control Panel'].company_name) {
+			d.widgets['Company Name'].value = locals['Control Panel']['Control Panel'].company_name;
+			d.widgets['Company Name'].disabled = 1;
+		}
+		
+
+		//d.widgets['Save'].disabled = true;	  // disable Save button
 		pscript.make_dialog_field(d);
 
 		// submit details
@@ -652,7 +659,7 @@ pscript.complete_registration = function(is_complete) {
 			if(flag)
 			{
 				var args = [
-					locals['Control Panel']['Control Panel'].company_name,
+					d.widgets['Company Name'].value,
 					d.widgets['Company Abbreviation'].value,
 					d.widgets['Fiscal Year Start Date'].value,
 					d.widgets['Default Currency'].value
