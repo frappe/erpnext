@@ -13,8 +13,8 @@ report.customize_filters = function() {
 
   this.add_filter({fieldname:'company', label:'Company', fieldtype:'Link', options:'Company', report_default:sys_defaults.company, ignore : 1, parent:'Profile'});
 
-  this.set_filter_properties('Profile','Fiscal Year',{filter_hide:0, in_first_page:1, report_default: sys_defaults.fiscal_year});
-  this.get_filter('Profile', 'Fiscal Year').set_as_single();
+  this.add_filter({fieldname:'fiscal_year', label:'Fiscal Year', fieldtype:'Link', options:'Fiscal Year', report_default:sys_defaults.fiscal_year, ignore : 1, parent:'Profile', in_first_page:1});
+
 
   // Add Filters
   this.add_filter({fieldname:'item', label:'Item', fieldtype:'Link', options:'Item', ignore : 1, parent:'Profile'});
