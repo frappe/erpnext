@@ -1,5 +1,7 @@
 # ERPNext - Open Source + SAAS ERP
 
+Version 2.0
+
 Includes Accounting, Inventory, CRM, Sales, Purchase, Projects, HRMS
 
 Built on Python / MySQL / wnframework
@@ -9,7 +11,7 @@ Built on Python / MySQL / wnframework
 
 ## Platform
 
-ERPNext is built on [wnframework](https://github.com/webnotes/wnframework)
+ERPNext is built on [wnframework](https://github.com/webnotes/wnframework) (Version 2.0)
 
 ## Download and Install
 
@@ -20,9 +22,18 @@ For download and install details, please go to [erpnext.org](http://erpnext.org)
 - [User / Functional](http://groups.google.com/group/erpnext-user-forum)
 - [Technical](http://groups.google.com/group/wnframework)
 
-## Contributing
+## Changes from wnframework version 1.7
 
-If you interested in contributing to ERPNext, you must go thorough the wnframework. The code is not easily understandable, but we are making a lot of effort to do it.
+To update from wnframework version 1.
+
+1. set your html folder to the root of erpnext (rather than wnframework)
+2. symlink wnframework as 'lib':
+
+    ln -s path/to/wnframework lib
+
+3. to setup the versions db, run:
+
+    python lib/wnf.py setup
 
 ## License
 

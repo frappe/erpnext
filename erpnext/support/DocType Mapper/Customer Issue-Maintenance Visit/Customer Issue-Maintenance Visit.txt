@@ -5,8 +5,8 @@
 	{
 		'creation': '2010-08-08 17:09:34',
 		'docstatus': 0,
-		'modified': '2011-05-18 13:37:43',
-		'modified_by': 'umair@iwebnotes.com',
+		'modified': '2011-09-15 15:04:41',
+		'modified_by': 'Administrator',
 		'owner': 'ashwini@webnotestech.com'
 	},
 
