@@ -40,7 +40,7 @@ class DocType:
 			
 		
 		# update valuation for post dated entry
-		if actual_qty:
+		if actual_qty and serial_no:
 			# check actual qty with total number of serial no
 			self.check_qty_with_serial_no()
 			
