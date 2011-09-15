@@ -5,7 +5,7 @@
 	{
 		'creation': '2010-08-08 17:09:36',
 		'docstatus': 0,
-		'modified': '2011-09-14 12:36:25',
+		'modified': '2011-09-13 17:36:31',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
@@ -57,7 +57,7 @@
 	# Field Mapper Detail
 	{
 		'doctype': 'Field Mapper Detail',
-		'from_field': 'eval: (flt(obj.amount) - flt(obj.billed_amt))/flt(obj.basic_rate)',
+		'from_field': 'eval: obj.basic_rate and (flt(obj.amount) - flt(obj.billed_amt))/flt(obj.basic_rate) or obj.qty',
 		'map': 'Yes',
 		'match_id': 1,
 		'to_field': 'qty'
@@ -136,33 +136,6 @@
 		'to_field': 'incentives'
 	},
 
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'eval: flt(obj.qty) - flt(obj.billed_qty)',
-		'map': 'Yes',
-		'match_id': 1,
-		'to_field': 'qty'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'eval: (flt(obj.qty) - flt(obj.billed_qty)) * flt(obj.basic_rate)',
-		'map': 'Yes',
-		'match_id': 1,
-		'to_field': 'amount'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'eval: (flt(obj.qty) - flt(obj.billed_qty)) * flt(obj.export_rate)',
-		'map': 'Yes',
-		'match_id': 1,
-		'to_field': 'export_amount'
-	},
-
 	# Table Mapper Detail
 	{
 		'doctype': 'Table Mapper Detail',
@@ -180,7 +153,7 @@
 		'match_id': 1,
 		'to_field': 'entries',
 		'to_table': 'RV Detail',
-		'validation_logic': 'docstatus = 1'
+		'validation_logic': '(ifnull(amount, 0) = 0 or amount > ifnull(billed_amt, 0)) and docstatus = 1'
 	},
 
 	# Table Mapper Detail

@@ -1,7 +1,7 @@
 # REMEMBER to update this
 # ========================
 
-last_patch = 363
+last_patch = 365
 
 #-------------------------------------------
 
@@ -328,3 +328,15 @@ def execute(patch_no):
 		for d in mappers:
 			if d[0] and d[1]:
 				reload_doc(d[1].lower(), 'DocType Mapper', d[0])
+	elif patch_no == 364:
+		sql("""delete from `tabField Mapper Detail` 
+			where to_field in ('qty', 'amount', 'export_amount') 
+			and parent in ('Sales Order-Receivable Voucher', 'Delivery Note-Receivable Voucher')
+		""")
+		mappers = sql("select name, module from `tabDocType Mapper`")
+		for d in mappers:
+			if d[0] and d[1]:
+				reload_doc(d[1].lower(), 'DocType Mapper', d[0])
+	elif patch_no == 365:
+		from patches.delivery_billing_status_patch import run_patch
+		run_patch()

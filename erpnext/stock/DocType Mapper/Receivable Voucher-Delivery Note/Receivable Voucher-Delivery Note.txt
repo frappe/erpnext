@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-12-14 17:56:41',
+		'creation': '2010-12-15 08:39:22',
 		'docstatus': 0,
-		'modified': '2011-09-14 12:36:24',
+		'modified': '2011-09-13 17:26:01',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
@@ -110,10 +110,10 @@
 	# Field Mapper Detail
 	{
 		'doctype': 'Field Mapper Detail',
-		'from_field': 'customer_address',
+		'from_field': 'serial_no',
 		'map': 'Yes',
-		'match_id': 0,
-		'to_field': 'delivery_address'
+		'match_id': 1,
+		'to_field': 'serial_no'
 	},
 
 	# Table Mapper Detail

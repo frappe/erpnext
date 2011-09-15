@@ -5,8 +5,8 @@
 	{
 		'creation': '2010-08-08 17:09:35',
 		'docstatus': 0,
-		'modified': '2011-05-13 12:42:57',
-		'modified_by': 'umair@iwebnotes.com',
+		'modified': '2011-09-13 17:26:55',
+		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
 
@@ -31,7 +31,7 @@
 
 	# These values are common for all DocType Mapper
 	{
-		'doctype': 'DocType Mapper',
+		'doctype': u'DocType Mapper',
 		'from_doctype': 'Purchase Order',
 		'module': 'Stock',
 		'name': '__common__',
@@ -41,7 +41,7 @@
 
 	# DocType Mapper, Purchase Order-Purchase Receipt
 	{
-		'doctype': 'DocType Mapper',
+		'doctype': u'DocType Mapper',
 		'name': 'Purchase Order-Purchase Receipt'
 	},
 

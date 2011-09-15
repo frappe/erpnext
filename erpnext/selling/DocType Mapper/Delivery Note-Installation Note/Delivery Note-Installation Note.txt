@@ -5,8 +5,8 @@
 	{
 		'creation': '2010-08-08 17:09:34',
 		'docstatus': 0,
-		'modified': '2011-05-17 11:42:57',
-		'modified_by': 'umair@iwebnotes.com',
+		'modified': '2011-09-13 17:28:37',
+		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
 
@@ -31,7 +31,7 @@
 
 	# These values are common for all DocType Mapper
 	{
-		'doctype': 'DocType Mapper',
+		'doctype': u'DocType Mapper',
 		'from_doctype': 'Delivery Note',
 		'module': 'Selling',
 		'name': '__common__',
@@ -41,7 +41,7 @@
 
 	# DocType Mapper, Delivery Note-Installation Note
 	{
-		'doctype': 'DocType Mapper',
+		'doctype': u'DocType Mapper',
 		'name': 'Delivery Note-Installation Note'
 	},
 
@@ -109,6 +109,14 @@
 		'from_field': 'posting_date',
 		'match_id': 2,
 		'to_field': 'prevdoc_date'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'serial_no',
+		'match_id': 1,
+		'to_field': 'serial_no'
 	},
 
 	# Table Mapper Detail
