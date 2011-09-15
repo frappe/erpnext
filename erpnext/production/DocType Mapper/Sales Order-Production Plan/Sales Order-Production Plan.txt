@@ -5,7 +5,7 @@
 	{
 		'creation': '2010-08-08 17:09:36',
 		'docstatus': 0,
-		'modified': '2009-12-21 13:16:59',
+		'modified': '2011-09-15 15:04:45',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},

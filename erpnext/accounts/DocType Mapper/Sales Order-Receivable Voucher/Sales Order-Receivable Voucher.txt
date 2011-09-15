@@ -5,7 +5,7 @@
 	{
 		'creation': '2010-08-08 17:09:36',
 		'docstatus': 0,
-		'modified': '2011-09-13 17:36:31',
+		'modified': '2011-09-15 15:04:45',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
@@ -143,6 +143,17 @@
 		'match_id': 0,
 		'to_table': 'Receivable Voucher',
 		'validation_logic': 'docstatus=1'
+	},
+
+	# Table Mapper Detail
+	{
+		'doctype': 'Table Mapper Detail',
+		'from_field': 'sales_order_detail',
+		'from_table': 'Sales Order Detail',
+		'match_id': 1,
+		'to_field': 'entries',
+		'to_table': 'RV Detail',
+		'validation_logic': 'docstatus = 1'
 	},
 
 	# Table Mapper Detail
