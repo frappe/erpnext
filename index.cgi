@@ -9,7 +9,6 @@ sys.path.append('lib/py')
 sys.path.append('erpnext')
 
 import webnotes
-import webnotes.defs
 
 webnotes.form = cgi.FieldStorage()
 
