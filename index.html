@@ -3,7 +3,7 @@
 	<meta charset="utf-8">
 	<title>ERPNext</title>
 	<meta name="author" content="">
-	<script type="text/javascript">window._version_number="55"
+	<script type="text/javascript">window._version_number="57"
 
 wn={}
 wn.provide=function(namespace){var nsl=namespace.split('.');var l=nsl.length;var parent=window;for(var i=0;i<l;i++){var n=nsl[i];if(!parent[n]){parent[n]={}}
@@ -67,8 +67,6 @@ if(/^[\],:{}\s]*$/.test(text.replace(/\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g,'@').
 throw new SyntaxError('JSON.parse');};}}());wn.versions.check();wn.require("lib/js/lib/jquery.min.js");wn.require("lib/js/lib/history/history.min.js");$(document).bind('ready',function(){var base=window.location.href.split('#')[0];$.each($('a[softlink!="false"]'),function(i,v){if(v.href.substr(0,base.length)==base){var path=(v.href.substr(base.length));if(path.substr(0,1)!='#'){v.href=base+'#'+path;}}});if(!wn.settings.no_history&&window.location.hash){wn.page.set(window.location.hash.substr(1));}});</script>
 </head>
 <body>
-	<div id="dialog_back"></div>
-
 	<div id="startup_div" style="padding: 8px; font-size: 14px;"></div>
 
 	<!-- Main Starts -->
@@ -80,4 +78,5 @@ throw new SyntaxError('JSON.parse');};}}());wn.versions.check();wn.require("lib/
 		</div>
 	</div>
 	<script>wn.require('js/app.js');</script>
+	<div id="dialog_back"></div>
 </body>
