@@ -35,6 +35,11 @@ To update from wnframework version 1.
 
     python lib/wnf.py setup
 
+4. copy defs.py from cgi-bin/webnotes to py/webnotes
+5. change module_path (point to erpnext/erpnext) in defs.py
+6. delete cgi-bin directory
+7. delete all old module directories from erpnext
+
 ## License
 
 ERPNext is available under the GNU/GPL license.
