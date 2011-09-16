@@ -1,7 +1,7 @@
 # REMEMBER to update this
 # ========================
 
-last_patch = 366
+last_patch = 367
 
 #-------------------------------------------
 
@@ -346,3 +346,5 @@ def execute(patch_no):
 			bobj = get_obj('Bin',b[0])
 			prev_sle = bobj.get_prev_sle(posting_date = '2011-09-15', posting_time = '01:00')
 			bobj.update_item_valuation(posting_date = '2011-09-15', posting_time = '01:00', prev_sle = prev_sle)
+	elif patch_no == 367:
+		sql("update tabDocPerm set amend = 0 where parent = 'Salary Structure'")
