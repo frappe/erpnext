@@ -411,9 +411,3 @@ class DocType:
     new_tot_income = cint(self.doc.tax_tot_income) + cint(self.doc.edu_cess) - (cint(ret_income_tax[0][0]) or 0)
     
     self.doc.tax_per_month = new_tot_income/cint(self.doc.rem_months)
-
-  # on update
-  def on_update(self):
-    obj = get_obj('Feed Control', 'Feed Control')
-   
-    obj.make_feed(self.doc)

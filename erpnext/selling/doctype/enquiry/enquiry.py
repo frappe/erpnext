@@ -115,26 +115,17 @@ class DocType(TransactionBase):
       ch = addchild(ev, 'event_individuals', 'Event User', 0)
       ch.person = d
       ch.save(1)
-    
-    #user_list = ['Sales Manager', 'Sales User']
-    #for d in user_list:
-    #  ch = addchild(ev, 'event_individuals', 'Event User', 0)
-    #  ch.person = d
-    #  ch.save()
+
 
   #--------------Validation For Last Contact Date-----------------
   # ====================================================================================================================
   def set_last_contact_date(self):
-    #if not self.doc.contact_date_ref:
-      #self.doc.contact_date_ref=self.doc.contact_date
-      #self.doc.last_contact_date=self.doc.contact_date_ref
     if self.doc.contact_date_ref and self.doc.contact_date_ref != self.doc.contact_date:
       if getdate(self.doc.contact_date_ref) < getdate(self.doc.contact_date):
         self.doc.last_contact_date=self.doc.contact_date_ref
       else:
         msgprint("Contact Date Cannot be before Last Contact Date")
         raise Exception
-      #set(self.doc, 'contact_date_ref',self.doc.contact_date)
   
   # check if item present in item table
   # ====================================================================================================================
@@ -171,8 +162,6 @@ class DocType(TransactionBase):
       raise Exception
     else:
       set(self.doc, 'status', 'Cancelled')
-
-    get_obj('Feed Control').make_feed(self.doc, 'cancelled')
     
   # declare as enquiry lost
   #---------------------------
