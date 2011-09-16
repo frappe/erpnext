@@ -115,12 +115,6 @@ class DocType(TransactionBase):
       ch = addchild(ev, 'event_individuals', 'Event User', 0)
       ch.person = d
       ch.save(1)
-    
-    #user_list = ['Sales Manager', 'Sales User']
-    #for d in user_list:
-    #  ch = addchild(ev, 'event_individuals', 'Event User', 0)
-    #  ch.person = d
-    #  ch.save()
 
   #--------------Validation For Last Contact Date-----------------
   # ====================================================================================================================
@@ -171,8 +165,6 @@ class DocType(TransactionBase):
       raise Exception
     else:
       set(self.doc, 'status', 'Cancelled')
-
-    get_obj('Feed Control').make_feed(self.doc, 'cancelled')
     
   # declare as enquiry lost
   #---------------------------

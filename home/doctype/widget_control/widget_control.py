@@ -27,11 +27,6 @@ class DocType:
       cmt.comment_date = nowdate()
       cmt.comment_time = time.strftime('%H:%M')
       cmt.save(1)
-      
-      try:
-        get_obj('Feed Control').upate_comment_in_feed(args['comment_doctype'], args['comment_docname'])
-      except:
-        pass
 	      
     else:
       raise Exception
@@ -39,7 +34,3 @@ class DocType:
   def remove_comment(self, args):
     args = json.loads(args)
     sql("delete from `tabComment Widget Record` where name=%s",args['id'])
-
-    try:
-      get_obj('Feed Control').upate_comment_in_feed(args['dt'], args['dn'])
-    except: pass
