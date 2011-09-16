@@ -46,7 +46,7 @@ class DocType:
   # check if salary structure exists
   #========================================================================================================
   def check_sal_structure(self, nm):
-    ret_sal_struct=sql("select name from `tabSalary Structure` where employee='%s' and is_active = 'Yes'"%nm)
+    ret_sal_struct=sql("select name from `tabSalary Structure` where employee='%s' and is_active = 'Yes' and docstatus!= 2"%nm)
     return ret_sal_struct and ret_sal_struct[0][0] or ''
 
   #========================================================================================================
