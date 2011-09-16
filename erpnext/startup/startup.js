@@ -112,6 +112,7 @@ pscript.select_sidebar_menu = function(t, dt, dn) {
 var body_background = '#e2e2e2';
 
 MenuPointer = function(parent, label) {
+	var me = this;
 
 	this.wrapper = $a(parent, 'div', '', {padding:'0px', cursor:'pointer', margin:'2px 0px'});
 	$br(this.wrapper, '3px');
@@ -123,15 +124,21 @@ MenuPointer = function(parent, label) {
 
 	// triangle border (?)
 	this.tab.triangle_div = $a($td(this.tab, 0, 1), 'div','', {
-		borderColor: body_background + ' ' + body_background + ' ' + body_background + ' ' + 'transparent',
+		borderColor: body_background,
 		borderWidth:'11px', borderStyle:'solid', height:'0px', width:'0px', marginRight:'-11px'});
 
 	this.label_area = $a($td(this.tab, 0, 0), 'span', '', '', label);
 
 	$(this.wrapper)
 		.hover(
-			function() { if(!this.selected)$bg(this, '#eee'); } ,
-			function() { if(!this.selected)$bg(this, body_background); }
+			function() { 
+				if(!me.selected) 
+					$y(me.label_area, {'color':'#000'}); 
+			},
+			function() { 
+				if(!me.selected) 
+					$y(me.label_area, {'color':'#444'}); 
+			}
 		)
 
 	$y($td(this.tab, 0, 0), {borderBottom:'1px solid #ddd'});
@@ -141,7 +148,8 @@ MenuPointer = function(parent, label) {
 // ====================================================================
 
 MenuPointer.prototype.select = function(grey) {
-	$y($td(this.tab, 0, 0), {color:'#fff', borderBottom:'0px solid #000'});
+	$y($td(this.tab, 0, 0), {borderBottom:'0px solid #000'});
+	$y(this.label_area, {'color':'#fff'});
 	//$gr(this.wrapper, '#F84', '#F63');
 	$gr(this.wrapper, '#888', '#666');
 	this.selected = 1;
@@ -149,14 +157,21 @@ MenuPointer.prototype.select = function(grey) {
 	if(cur_menu_pointer && cur_menu_pointer != this)
 		cur_menu_pointer.deselect();
 
+	$y(this.tab.triangle_div, {borderColor: 
+		body_background + ' ' + body_background + ' ' + body_background + ' ' + 'transparent'})
+
 	cur_menu_pointer = this;
 }
 
 // ====================================================================
 
 MenuPointer.prototype.deselect = function() {
-	$y($td(this.tab, 0, 0), {color:'#444', borderBottom:'1px solid #ddd'});
+	$y($td(this.tab, 0, 0), {borderBottom:'1px solid #ddd'});
+	$y(this.label_area, {'color':'#444'});
+
+
 	$gr(this.wrapper, body_background, body_background);
+	$y(this.tab.triangle_div, {borderColor: body_background});
 	this.selected = 0;
 }
 
