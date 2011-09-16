@@ -40,9 +40,10 @@ class DocType:
 			
 		
 		# update valuation for post dated entry
-		if actual_qty and serial_no:
+		if actual_qty:
 			# check actual qty with total number of serial no
-			self.check_qty_with_serial_no()
+			if serial_no:
+				self.check_qty_with_serial_no()
 			
 			prev_sle = self.get_prev_sle(dt, posting_time, sle_id)
 			cqty = flt(prev_sle.get('bin_aqat', 0))
