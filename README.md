@@ -27,7 +27,7 @@ For download and install details, please go to [erpnext.org](http://erpnext.org)
 To update from wnframework version 1.
 
 1. set your html folder to the root of erpnext (rather than wnframework)
-2. symlink wnframework as 'lib':
+2. create a symlink in erpnext:
 
     ln -s path/to/wnframework lib
 
