@@ -139,7 +139,6 @@ class DocType(TransactionBase):
 			Loads default accounts from items, customer when called from mapper
 		"""
 		self.get_income_account('entries')
-		self.doc.debit_to = self.get_customer_account()
 		
 	def get_income_account(self,doctype):		
 		for d in getlist(self.doclist, doctype):			

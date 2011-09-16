@@ -33,7 +33,7 @@ cur_frm.cscript.onload_post_render = function(doc, dt, dn) {
 			'load_default_accounts','',
 			function(r,rt) {
 				refresh_field('entries');
-				refresh_field('debit_to');
+				cur_frm.cscript.customer(doc,dt,dn);
 			}
 		);
 	}
