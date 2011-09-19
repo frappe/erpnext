@@ -1,7 +1,7 @@
 # REMEMBER to update this
 # ========================
 
-last_patch = 367
+last_patch = 368
 
 #-------------------------------------------
 
@@ -340,12 +340,12 @@ def execute(patch_no):
 	elif patch_no == 365:
 		from patches.delivery_billing_status_patch import run_patch
 		run_patch()
-	elif patch_no == 366:
+	elif patch_no == 367:
 		bin = sql("select name from tabBin")
 		for b in bin:
 			bobj = get_obj('Bin',b[0])
-			prev_sle = bobj.get_prev_sle(posting_date = '2011-09-15', posting_time = '01:00')
-			bobj.update_item_valuation(posting_date = '2011-09-15', posting_time = '01:00', prev_sle = prev_sle)
-	elif patch_no == 367:
+			prev_sle = bobj.get_prev_sle(posting_date = '2011-09-01', posting_time = '01:00')
+			bobj.update_item_valuation(posting_date = '2011-09-01', posting_time = '01:00', prev_sle = prev_sle)
+	elif patch_no == 368:
 		sql("update tabDocPerm set amend = 0 where parent = 'Salary Structure'")
 		sql("update tabDocPerm set cancel = 1 where parent = 'Company' and role = 'System Manager'")
