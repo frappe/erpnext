@@ -1,7 +1,7 @@
 # REMEMBER to update this
 # ========================
 
-last_patch = 367
+last_patch = 368
 
 #-------------------------------------------
 
@@ -346,3 +346,12 @@ def execute(patch_no):
 			bobj = get_obj('Bin',b[0])
 			prev_sle = bobj.get_prev_sle(posting_date = '2011-09-01', posting_time = '01:00')
 			bobj.update_item_valuation(posting_date = '2011-09-01', posting_time = '01:00', prev_sle = prev_sle)
+	elif patch_no == 368:
+		from webnotes.utils import nestedset
+		t = [
+			['Account', 'parent_account'], ['Cost Center', 'parent_cost_center'], 
+			['Item Group', 'parent_item_group'], ['Territory', 'parent_territory'],
+			['Customer Group', 'parent_customer_group'], ['Sales Person', 'parent_sales_person']
+		]
+		for d in t:
+			nestedset.rebuild_tree(d[0], d[1])
