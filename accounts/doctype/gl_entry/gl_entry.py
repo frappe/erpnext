@@ -146,8 +146,8 @@ class DocType:
 		
 		# build dict
 		p = {
-			'debit': flt(debit)
-			,'credit':flt(credit)
+			'debit': self.doc.is_opening=='No' and flt(debit) or 0
+			,'credit':self.doc.is_opening=='No' and flt(credit) or 0
 			,'opening': self.doc.is_opening=='Yes' and amt or 0
 			# end date condition only if it is not opening
 			,'end_date_condition':(self.doc.is_opening!='Yes' and ("and ab.end_date >= '"+self.doc.posting_date+"'") or '')
