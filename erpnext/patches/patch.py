@@ -1,7 +1,7 @@
 # REMEMBER to update this
 # ========================
 
-last_patch = 368
+last_patch = 371
 
 #-------------------------------------------
 
@@ -349,3 +349,29 @@ def execute(patch_no):
 	elif patch_no == 368:
 		sql("update tabDocPerm set amend = 0 where parent = 'Salary Structure'")
 		sql("update tabDocPerm set cancel = 1 where parent = 'Company' and role = 'System Manager'")
+	elif patch_no == 369:
+		from webnotes.utils import nestedset
+		t = [
+			['Account', 'parent_account'], ['Cost Center', 'parent_cost_center'], 
+			['Item Group', 'parent_item_group'], ['Territory', 'parent_territory'],
+			['Customer Group', 'parent_customer_group'], ['Sales Person', 'parent_sales_person']
+		]
+		for d in t:
+			nestedset.rebuild_tree(d[0], d[1])
+	elif patch_no == 370:
+		reload_doc('hr', 'doctype', 'appraisal')
+		reload_doc('hr', 'doctype', 'appraisal_detail')
+	elif patch_no == 371:
+		comp = sql("select name from tabCompany where docstatus!=2")
+		fy = sql("select name from `tabFiscal Year` order by year_start_date asc")
+		for c in comp:
+			prev_fy = ''
+			for f in fy:
+				fy_obj = get_obj('Fiscal Year', f[0])
+				fy_obj.doc.past_year = prev_fy
+				fy_obj.doc.company = c[0]
+				fy_obj.doc.save()
+				fy_obj.repost()
+				prev_fy = f[0]
+				sql("commit")
+				sql("start transaction")
