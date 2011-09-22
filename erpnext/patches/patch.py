@@ -1,7 +1,7 @@
 # REMEMBER to update this
 # ========================
 
-last_patch = 371
+last_patch = 372
 
 #-------------------------------------------
 
@@ -375,3 +375,8 @@ def execute(patch_no):
 				prev_fy = f[0]
 				sql("commit")
 				sql("start transaction")
+	elif patch_no == 372:
+		if sql("select count(name) from `tabDocField` where label = 'View Ledger Entry' and parent = 'Journal Voucher' and fieldtype = 'Button'")[0][0] > 1:
+			sql("delete from `tabDocField` where label = 'View Ledger Entry' and parent = 'Journal Voucher' and fieldtype = 'Button' limit 1")
+		if sql("select count(name) from `tabDocField` where label = 'Get Balance' and parent = 'Journal Voucher' and fieldtype = 'Button'")[0][0] > 1:
+			sql("delete from `tabDocField` where label = 'Get Balance' and parent = 'Journal Voucher' and fieldtype = 'Button' limit 1")
