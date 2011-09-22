@@ -1,7 +1,7 @@
 # REMEMBER to update this
 # ========================
 
-last_patch = 368
+last_patch = 369
 
 #-------------------------------------------
 
@@ -355,3 +355,6 @@ def execute(patch_no):
 		]
 		for d in t:
 			nestedset.rebuild_tree(d[0], d[1])
+	elif patch_no == 369:
+		reload_doc('hr', 'doctype', 'appraisal')
+		reload_doc('hr', 'doctype', 'appraisal_detail')

@@ -5,8 +5,8 @@
 	{
 		'creation': '2010-09-01 15:48:05',
 		'docstatus': 0,
-		'modified': '2010-09-20 14:06:57',
-		'modified_by': 'rahul@webnotestech.com',
+		'modified': '2011-09-22 10:45:37',
+		'modified_by': 'Administrator',
 		'owner': 'ashwini@webnotestech.com'
 	},
 
@@ -14,13 +14,14 @@
 	{
 		'autoname': 'APRSLD.#####',
 		'colour': 'White:FFF',
+		'default_print_format': 'Standard',
 		'doctype': 'DocType',
 		'istable': 1,
 		'module': 'HR',
 		'name': '__common__',
 		'section_style': 'Simple',
 		'server_code_error': ' ',
-		'version': 13
+		'version': 15
 	},
 
 	# These values are common for all DocField
@@ -45,7 +46,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'kra',
 		'fieldtype': 'Small Text',
-		'idx': 1,
 		'label': 'KRA',
 		'oldfieldname': 'kra',
 		'oldfieldtype': 'Small Text',
@@ -58,7 +58,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'per_weightage',
 		'fieldtype': 'Currency',
-		'idx': 2,
 		'label': 'Weightage (%)',
 		'oldfieldname': 'per_weightage',
 		'oldfieldtype': 'Currency',
@@ -72,7 +71,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'target_achieved',
 		'fieldtype': 'Small Text',
-		'idx': 3,
 		'label': 'Target Achieved',
 		'no_copy': 1,
 		'oldfieldname': 'target_achieved',
@@ -86,15 +84,15 @@
 		'colour': 'White:FFF',
 		'doctype': 'DocField',
 		'fieldname': 'score',
-		'fieldtype': 'Select',
-		'idx': 4,
+		'fieldtype': 'Currency',
 		'label': 'Score (0-5)',
 		'no_copy': 1,
 		'oldfieldname': 'score',
 		'oldfieldtype': 'Select',
 		'options': '\n0\n1\n2\n3\n4\n5',
 		'permlevel': 0,
-		'trigger': 'Client'
+		'trigger': 'Client',
+		'width': '60px'
 	},
 
 	# DocField
@@ -102,7 +100,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'score_earned',
 		'fieldtype': 'Currency',
-		'idx': 5,
 		'label': 'Score Earned',
 		'no_copy': 1,
 		'oldfieldname': 'score_earned',
