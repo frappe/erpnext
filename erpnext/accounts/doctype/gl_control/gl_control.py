@@ -191,6 +191,7 @@ class DocType:
 			else:
 				self.entries.append(le)
 
+
 	# Save GL Entries
 	# ----------------
 	def save_entries(self, cancel, adv_adj, update_outstanding):
@@ -199,7 +200,6 @@ class DocType:
 			if cancel or flt(le.debit) < 0 or flt(le.credit) < 0:
 				tmp=le.debit
 				le.debit, le.credit = abs(flt(le.credit)), abs(flt(tmp))
-
 
 			le_obj = get_obj(doc=le)
 			# validate except on_cancel
@@ -213,10 +213,12 @@ class DocType:
 			# update total debit / credit
 			self.td += flt(le.debit)
 			self.tc += flt(le.credit)
-
+			
+			
 	# Make Multiple Entries
 	# ---------------------
 	def make_gl_entries(self, doc, doclist, cancel=0, adv_adj = 0, use_mapper='', merge_entries = 1, update_outstanding='Yes'):
+		self.entries = []
 		# get entries
 		le_map_list = sql("select * from `tabGL Mapper Detail` where parent = %s", use_mapper or doc.doctype, as_dict=1)
 		self.td, self.tc = 0.0, 0.0
@@ -329,6 +331,7 @@ class DocType:
 			else:
 				msgprint("Allocation amount cannot be greater than advance amount")
 				raise Exception
+				
 
 	# Add extra row in jv detail for unadjusted amount
 	#--------------------------------------------------
@@ -351,7 +354,7 @@ class DocType:
 		add.against_account = cstr(jvd[0][3])
 		add.is_advance = 'Yes'
 		add.save(1)
-
+		
 	# check if advance entries are still valid
 	# ----------------------------------------
 	def validate_jv_entry(self, d, account_head, dr_or_cr):
@@ -359,15 +362,92 @@ class DocType:
 		# 2. check if amount is same
 		# 3. check if is_advance is 'Yes'
 		# 4. check if jv is submitted
-		ret = sql("select t2.%s from `tabJournal Voucher` t1, `tabJournal Voucher Detail` t2 where t1.name = t2.parent and (t2.against_voucher = '' or t2.against_voucher is null) and (t2.against_invoice = '' or t2.against_invoice is null) and t2.account = '%s' and t1.name = '%s' and t2.name = '%s' and t2.is_advance = 'Yes' and t1.docstatus=1 and t2.%s = %s" % ( dr_or_cr, account_head, d.journal_voucher, d.jv_detail_no, dr_or_cr, d.advance_amount))
+		ret = sql("select t2.%s from `tabJournal Voucher` t1, `tabJournal Voucher Detail` t2 where t1.name = t2.parent and ifnull(t2.against_voucher, '') = '' and ifnull(t2.against_invoice, '') = '' and t2.account = '%s' and t1.name = '%s' and t2.name = '%s' and t2.is_advance = 'Yes' and t1.docstatus=1 and t2.%s = %s" % (dr_or_cr, account_head, d.journal_voucher, d.jv_detail_no, dr_or_cr, d.advance_amount))
 		if (not ret):
 			msgprint("Please click on 'Get Advances Paid' button as the advance entries have been changed.")
 			raise Exception
 		return
 
-##############################################################################
-# Repair Outstanding Amount
-##############################################################################
+
+######################################################################################################################
+
+	#------------------------------------------
+	def reconcile_against_document(self, args):
+		"""
+			Cancel JV, Update aginst document, split if required and resubmit jv
+		"""
+		
+		for d in args:
+			self.check_if_jv_modified(d)
+
+			against_fld = {
+				'Journal Voucher' : 'against_jv',
+				'Receivable Voucher' : 'against_invoice',
+				'Payable Voucher' : 'against_voucher'
+			}
+			
+			d['against_fld'] = against_fld[d['against_voucher_type']]
+
+			# cancel JV
+			jv_obj = get_obj('Journal Voucher', d['voucher_no'], with_children=1)
+			self.make_gl_entries(jv_obj.doc, jv_obj.doclist, cancel =1, adv_adj =1)
+
+			# update ref in JV Detail
+			self.update_against_doc(d, jv_obj)
+
+			# re-submit JV
+			jv_obj = get_obj('Journal Voucher', d['voucher_no'], with_children =1)
+			self.make_gl_entries(jv_obj.doc, jv_obj.doclist, cancel = 0, adv_adj =1)
+
+	#------------------------------------------
+	def update_against_doc(self, d, jv_obj):
+		"""
+			Updates against document, if partial amount splits into rows
+		"""
+
+		sql("""
+			update `tabJournal Voucher Detail` t1, `tabJournal Voucher` t2	
+			set t1.%(dr_or_cr)s = '%(allocated_amt)s', t1.%(against_fld)s = '%(against_voucher)s', t2.modified = now() 
+			where t1.name = '%(voucher_detail_no)s' and t1.parent = t2.name""" % d)
+
+		if d['allocated_amt'] < d['unadjusted_amt']:
+			jvd = sql("select cost_center, balance, against_account, is_advance from `tabJournal Voucher Detail` where name = '%s'" % d['voucher_detail_no'])
+			# new entry with balance amount
+			ch = addchild(jv_obj.doc, 'entries', 'Journal Voucher Detail', 1)
+			ch.account = d['account']
+			ch.cost_center = cstr(jvd[0][0])
+			ch.balance = cstr(jvd[0][1])
+			ch.fields[d['dr_or_cr']] = flt(d['unadjusted_amt']) - flt(d['allocated_amt'])
+			ch.fields[d['dr_or_cr']== 'debit' and 'credit' or 'debit'] = 0
+			ch.against_account = cstr(jvd[0][2])
+			ch.is_advance = cstr(jvd[0][3])
+			ch.docstatus = 1
+			ch.save(1)
+
+	#------------------------------------------
+	def check_if_jv_modified(self, args):
+		"""
+			check if there is already a voucher reference
+			check if amount is same
+			check if jv is submitted
+		"""
+		ret = sql("""
+			select t2.%(dr_or_cr)s from `tabJournal Voucher` t1, `tabJournal Voucher Detail` t2 
+			where t1.name = t2.parent and t2.account = '%(account)s' 
+			and ifnull(t2.against_voucher, '')='' and ifnull(t2.against_invoice, '')='' and ifnull(t2.against_jv, '')=''
+			and t1.name = '%(voucher_no)s' and t2.name = '%(voucher_detail_no)s'
+			and t1.docstatus=1 and t2.%(dr_or_cr)s = %(unadjusted_amt)s
+		""" % (args))
+		
+		if not ret:
+			msgprint("Payment Entry has been modified after you pulled it. Please pull it again.", raise_exception=1)
+		
+######################################################################################################################
+		
+
+
+	# Repair Outstanding Amount
+	#---------------------------------
 	def repair_voucher_outstanding(self, voucher_obj):
 		msg = []
 
