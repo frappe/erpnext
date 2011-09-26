@@ -1,7 +1,7 @@
 # REMEMBER to update this
 # ========================
 
-last_patch = 369
+last_patch = 370
 
 #-------------------------------------------
 
@@ -358,3 +358,5 @@ def execute(patch_no):
 	elif patch_no == 369:
 		reload_doc('hr', 'doctype', 'appraisal')
 		reload_doc('hr', 'doctype', 'appraisal_detail')
+	elif patch_no == 370:
+		sql("update `tabDocField` set `hidden` = 0 where fieldname = 'group_or_ledger' and parent = 'Cost Center'")
