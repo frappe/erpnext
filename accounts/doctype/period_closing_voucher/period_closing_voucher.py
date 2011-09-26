@@ -79,8 +79,8 @@ class DocType:
   # Get account (pl) specific balance
   #===========================================================
   def get_pl_balances(self, d_or_c):
-    acc_bal = sql("select  t1.account, sum(ifnull(t1.debit,0))-sum(ifnull(t1.credit,0)) from `tabGL Entry` t1, `tabAccount` t2 where t1.account = t2.name and t2.group_or_ledger = 'Ledger' and ifnull(t2.freeze_account, 'No') = 'No' and t2.is_pl_account = 'Yes' and t2.debit_or_credit = '%s' and t2.docstatus < 2 and t2.company = '%s' and t1.posting_date between '%s' and '%s' group by t1.account " % (d_or_c, self.doc.company, self.year_start_date, self.doc.posting_date))
-    return acc_bal
+	acc_bal = sql("select  t1.account, sum(ifnull(t1.debit,0))-sum(ifnull(t1.credit,0)) from `tabGL Entry` t1, `tabAccount` t2 where t1.account = t2.name and t2.group_or_ledger = 'Ledger' and ifnull(t2.freeze_account, 'No') = 'No' and ifnull(t2.is_pl_account, 'No') = 'Yes' and ifnull(is_cancelled, 'No') = 'No' and t2.debit_or_credit = '%s' and t2.docstatus < 2 and t2.company = '%s' and t1.posting_date between '%s' and '%s' group by t1.account " % (d_or_c, self.doc.company, self.year_start_date, self.doc.posting_date))
+	return acc_bal
 
    
   # Makes GL Entries
@@ -185,7 +185,7 @@ class DocType:
   # =============================================================
   def on_cancel(self):
     # get all submit entries of current closing entry voucher
-    gl_entries = sql("select account, debit, credit from `tabGL Entry` where voucher_type = 'Period Closing Voucher' and voucher_no = '%s'" % (self.doc.name))
+    gl_entries = sql("select account, debit, credit from `tabGL Entry` where voucher_type = 'Period Closing Voucher' and voucher_no = '%s' and ifnull(is_cancelled, 'No') = 'No'" % (self.doc.name))
 
     # Swap Debit & Credit Column and make gl entry
     for gl in gl_entries:
