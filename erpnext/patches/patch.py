@@ -347,9 +347,6 @@ def execute(patch_no):
 			prev_sle = bobj.get_prev_sle(posting_date = '2011-09-01', posting_time = '01:00')
 			bobj.update_item_valuation(posting_date = '2011-09-01', posting_time = '01:00', prev_sle = prev_sle)
 	elif patch_no == 368:
-		sql("update tabDocPerm set amend = 0 where parent = 'Salary Structure'")
-		sql("update tabDocPerm set cancel = 1 where parent = 'Company' and role = 'System Manager'")
-	elif patch_no == 369:
 		from webnotes.utils import nestedset
 		t = [
 			['Account', 'parent_account'], ['Cost Center', 'parent_cost_center'], 
@@ -358,9 +355,11 @@ def execute(patch_no):
 		]
 		for d in t:
 			nestedset.rebuild_tree(d[0], d[1])
-	elif patch_no == 370:
+	elif patch_no == 369:
 		reload_doc('hr', 'doctype', 'appraisal')
 		reload_doc('hr', 'doctype', 'appraisal_detail')
+	elif patch_no == 370:
+		sql("update `tabDocField` set `hidden` = 0 where fieldname = 'group_or_ledger' and parent = 'Cost Center'")
 	elif patch_no == 371:
 		comp = sql("select name from tabCompany where docstatus!=2")
 		fy = sql("select name from `tabFiscal Year` order by year_start_date asc")
@@ -376,6 +375,9 @@ def execute(patch_no):
 				sql("commit")
 				sql("start transaction")
 	elif patch_no == 372:
+		sql("update tabDocPerm set amend = 0 where parent = 'Salary Structure'")
+		sql("update tabDocPerm set cancel = 1 where parent = 'Company' and role = 'System Manager'")
+	elif patch_no == 373:
 		if sql("select count(name) from `tabDocField` where label = 'View Ledger Entry' and parent = 'Journal Voucher' and fieldtype = 'Button'")[0][0] > 1:
 			sql("delete from `tabDocField` where label = 'View Ledger Entry' and parent = 'Journal Voucher' and fieldtype = 'Button' limit 1")
 		if sql("select count(name) from `tabDocField` where label = 'Get Balance' and parent = 'Journal Voucher' and fieldtype = 'Button'")[0][0] > 1:
