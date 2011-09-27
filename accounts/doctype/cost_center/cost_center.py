@@ -18,51 +18,57 @@ convert_to_lists = webnotes.conn.convert_to_lists
 
 
 class DocType:
-  def __init__(self,d,dl):
-    self.doc, self.doclist = d,dl
-    self.nsm_parent_field = 'parent_cost_center'
-        
-  def autoname(self):
-    #company_abbr = sql("select abbr from tabCompany where name=%s", self.doc.company)[0][0]
-    self.doc.name = self.doc.cost_center_name + ' - ' + self.doc.company_abbr    
-      
-  def get_abbr(self):
-    abbr = sql("select abbr from tabCompany where company_name='%s'"%(self.doc.company_name))[0][0] or ''
-    ret = {
-      'company_abbr'  : abbr
-    }
-    return ret
+	def __init__(self,d,dl):
+		self.doc, self.doclist = d,dl
+		self.nsm_parent_field = 'parent_cost_center'
+				
+	def autoname(self):
+		self.doc.name = self.doc.cost_center_name + ' - ' + self.doc.company_abbr		
+			
+	#-------------------------------------------------------------------------
+	def get_abbr(self):
+		abbr = sql("select abbr from tabCompany where company_name='%s'"%(self.doc.company_name))[0][0] or ''
+		ret = {
+			'company_abbr'	: abbr
+		}
+		return ret
 
-  def validate(self): 
-    # Cost Center name must be unique
-    # ---------------------------
-    if (self.doc.__islocal or (not self.doc.name)) and sql("select name from `tabCost Center` where cost_center_name = %s and company_name=%s", (self.doc.cost_center_name, self.doc.company_name)):
-      msgprint("Cost Center Name already exists, please rename")
-      raise Exception
-      
-    check_acc_list = []
-    for d in getlist(self.doclist, 'budget_details'):
-      if [d.account, d.fiscal_year] in check_acc_list:
-        msgprint("Account " + cstr(d.account) + "has been entered more than once for fiscal year " + cstr(d.fiscal_year))
-        raise Exception
-      if [d.account, d.fiscal_year] not in check_acc_list: check_acc_list.append([d.account, d.fiscal_year])
-      
-  def on_update(self):
-    # update Node Set Model
-    import webnotes
-    import webnotes.utils.nestedset
-    # update Node Set Model
-    webnotes.utils.nestedset.update_nsm(self)  
-    
-  def check_if_child_exists(self):
-    return sql("select name from `tabCost Center` where parent_cost_center = %s and docstatus != 2", self.doc.name, debug=0)
-    
-  # On Trash
-  # --------
-  def on_trash(self):
-    if self.check_if_child_exists():
-      msgprint("Child exists for this cost center. You can not trash this account.", raise_exception=1)      
-      
-    # rebuild tree
-    set(self.doc,'old_parent', '')
-    self.update_nsm_model()
+	#-------------------------------------------------------------------------
+	def validate(self): 
+		"""
+			Cost Center name must be unique
+		"""
+		if (self.doc.__islocal or not self.doc.name) and sql("select name from `tabCost Center` where cost_center_name = %s and company_name=%s", (self.doc.cost_center_name, self.doc.company_name)):
+			msgprint("Cost Center Name already exists, please rename", raise_exception=1)
+			
+		check_acc_list = []
+		for d in getlist(self.doclist, 'budget_details'):
+			if [d.account, d.fiscal_year] in check_acc_list:
+				msgprint("Account " + cstr(d.account) + "has been entered more than once for fiscal year " + cstr(d.fiscal_year), raise_exception=1)
+			else: 
+				check_acc_list.append([d.account, d.fiscal_year])
+			
+	#-------------------------------------------------------------------------
+	def update_nsm_model(self):
+		"""
+			update Nested Set Model
+		"""
+		import webnotes.utils.nestedset
+		webnotes.utils.nestedset.update_nsm(self)
+			
+	#-------------------------------------------------------------------------
+	def on_update(self):
+		self.update_nsm_model()
+		
+	def check_if_child_exists(self):
+		return sql("select name from `tabCost Center` where parent_cost_center = %s and docstatus != 2", self.doc.name)
+		
+	# On Trash
+	#-------------------------------------------------------------------------
+	def on_trash(self):
+		if self.check_if_child_exists():
+			msgprint("Child exists for this cost center. You can not trash this account.", raise_exception=1)			
+			
+		# rebuild tree
+		set(self.doc,'old_parent', '')
+		self.update_nsm_model()

@@ -360,3 +360,17 @@ def execute(patch_no):
 		reload_doc('hr', 'doctype', 'appraisal_detail')
 	elif patch_no == 370:
 		sql("update `tabDocField` set `hidden` = 0 where fieldname = 'group_or_ledger' and parent = 'Cost Center'")
+	elif patch_no == 371:
+		comp = sql("select name from tabCompany where docstatus!=2")
+		fy = sql("select name from `tabFiscal Year` order by year_start_date asc")
+		for c in comp:
+			prev_fy = ''
+			for f in fy:
+				fy_obj = get_obj('Fiscal Year', f[0])
+				fy_obj.doc.past_year = prev_fy
+				fy_obj.doc.company = c[0]
+				fy_obj.doc.save()
+				fy_obj.repost()
+				prev_fy = f[0]
+				sql("commit")
+				sql("start transaction")
