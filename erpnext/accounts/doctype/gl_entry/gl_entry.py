@@ -35,7 +35,7 @@ class DocType:
 		if not (flt(self.doc.debit) or flt(self.doc.credit)):
 			msgprint("GL Entry: Debit or Credit amount is mandatory for %s" % self.doc.account)
 			raise Exception
-
+			
 		# Debit and credit can not done at the same time
 		if flt(self.doc.credit) != 0 and flt(self.doc.debit) != 0:
 			msgprint("Sorry you cannot credit and debit under same account head.")
@@ -146,8 +146,8 @@ class DocType:
 		
 		# build dict
 		p = {
-			'debit': flt(debit)
-			,'credit':flt(credit)
+			'debit': self.doc.is_opening=='No' and flt(debit) or 0
+			,'credit':self.doc.is_opening=='No' and flt(credit) or 0
 			,'opening': self.doc.is_opening=='Yes' and amt or 0
 			# end date condition only if it is not opening
 			,'end_date_condition':(self.doc.is_opening!='Yes' and ("and ab.end_date >= '"+self.doc.posting_date+"'") or '')
@@ -185,6 +185,7 @@ class DocType:
 
 		bal = flt(sql("select sum(debit)-sum(credit) from `tabGL Entry` where against_voucher=%s and against_voucher_type=%s and ifnull(is_cancelled,'No') = 'No'", (self.doc.against_voucher, self.doc.against_voucher_type))[0][0] or 0.0)
 		tds = 0
+		
 		if self.doc.against_voucher_type=='Payable Voucher':
 			# amount to debit
 			bal = -bal
@@ -199,7 +200,7 @@ class DocType:
 			raise Exception
 			
 		# Update outstanding amt on against voucher
-		sql("update `tab%s` set outstanding_amount=%s where name='%s'" % (self.doc.against_voucher_type, bal, self.doc.against_voucher))
+		sql("update `tab%s` set outstanding_amount=%s where name='%s'"% (self.doc.against_voucher_type,bal,self.doc.against_voucher))
 		
 					
 	# Total outstanding can not be greater than credit limit for any time for any customer
