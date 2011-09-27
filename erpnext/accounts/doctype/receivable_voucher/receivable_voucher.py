@@ -225,40 +225,47 @@ class DocType(TransactionBase):
 
 
 	#-----------------------------------------------------------------
-	# ADVANCE ALLOCATION
-	#-----------------------------------------------------------------
-	def update_against_document_in_jv(self,against_document_no, against_document_doctype):
-		get_obj('GL Control').update_against_document_in_jv( self, 'advance_adjustment_details', against_document_no, against_document_doctype, self.doc.debit_to, 'credit', self.doc.doctype)
+	def update_against_document_in_jv(self):
+		"""
+			Links invoice and advance voucher:
+				1. cancel advance voucher
+				2. split into multiple rows if partially adjusted, assign against voucher
+				3. submit advance voucher
+		"""
+		
+		lst = []
+		for d in getlist(self.doclist, 'advance_adjustment_details'):
+			if flt(d.allocated_amount) > 0:
+				args = {
+					'voucher_no' : d.journal_voucher, 
+					'voucher_detail_no' : d.jv_detail_no, 
+					'against_voucher_type' : 'Receivable Voucher', 
+					'against_voucher'  : self.doc.name,
+					'account' : self.doc.debit_to, 
+					'is_advance' : 'Yes', 
+					'dr_or_cr' : 'credit', 
+					'unadjusted_amt' : flt(d.advance_amount),
+					'allocated_amt' : flt(d.allocated_amount)
+				}
+				lst.append(args)
+		
+		if lst:
+			get_obj('GL Control').reconcile_against_document(lst)
 	
-
-
-# ************************************* VALIDATE **********************************************
-	# Get Customer Name and address based on Debit To Account selected
-	# This case arises in case of direct RV where user doesn't enter customer name.
-	# Hence it should be fetched from Account Head.
-	# -----------------------------------------------------------------------------
-	#def get_customer_details(self):
-	#	get_obj('Sales Common').get_customer_details(self, inv_det_reqd = 1)
-	#	self.get_cust_and_due_date()
-
 	
-	# Validate Customer Name with SO or DN if items are fetched from SO or DN
 	# ------------------------------------------------------------------------
 	def validate_customer(self):
+		"""
+			Validate customer name with SO and DN
+		"""
 		for d in getlist(self.doclist,'entries'):
-			customer = ''
-			if d.sales_order:
-				customer = sql("select customer from `tabSales Order` where name = '%s'" % d.sales_order)[0][0]
-				doctype = 'sales order'
-				doctype_no = cstr(d.sales_order)
-			if d.delivery_note:
-				customer = sql("select customer from `tabDelivery Note` where name = '%s'" % d.delivery_note)[0][0]
-				doctype = 'delivery note'
-				doctype_no = cstr(d.delivery_note)
-			if customer and not cstr(self.doc.customer) == cstr(customer):
-				msgprint("Customer %s do not match with customer	of %s %s." %(self.doc.customer,doctype,doctype_no))
-				raise Exception , " Validation Error "
-		
+			dt = d.delivery_note and 'Delivery Note' or d.sales_order and 'Sales Order' or ''
+			if dt:
+				dt_no = d.delivery_note or d.sales_order
+				cust = sql("select customer from `tab%s` where name = %s" % (dt, '%s'), dt_no)
+				if cust and cstr(cust[0][0]) != cstr(self.doc.customer):
+					msgprint("Customer %s does not match with customer of %s: %s." %(self.doc.customer, dt, dt_no), raise_exception=1)
+			
 
 	# Validates Debit To Account and Customer Matches
 	# ------------------------------------------------
@@ -545,7 +552,7 @@ class DocType(TransactionBase):
 		self.make_gl_entries()
 
 		if not cint(self.doc.is_pos) == 1:
-			self.update_against_document_in_jv(self.doc.name, self.doc.doctype)
+			self.update_against_document_in_jv()
 		
 		# on submit notification
 		# get_obj('Notification Control').notify_contact('Sales Invoice', self.doc.doctype,self.doc.name, self.doc.email_id, self.doc.contact_person)
