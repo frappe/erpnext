@@ -5,7 +5,7 @@
 	{
 		'creation': '2010-09-25 10:50:37',
 		'docstatus': 0,
-		'modified': '2011-09-12 13:22:15',
+		'modified': '2011-09-27 12:44:04',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
@@ -124,6 +124,15 @@
 		'description': 'Update your actual clearance dates and find out if bank ledger tallies with your bank statement.',
 		'display_name': 'Bank Reconciliation',
 		'doc_name': 'Bank Reconciliation',
+		'doc_type': 'Single DocType',
+		'doctype': 'Module Def Item'
+	},
+
+	# Module Def Item
+	{
+		'description': 'Link your invoices and payment vouchers to clear/update outstanding amount',
+		'display_name': 'Internal Reconciliation',
+		'doc_name': 'Internal Reconciliation',
 		'doc_type': 'Single DocType',
 		'doctype': 'Module Def Item'
 	},
