@@ -1,7 +1,7 @@
 # REMEMBER to update this
 # ========================
 
-last_patch = 372
+last_patch = 374
 
 #-------------------------------------------
 
@@ -382,3 +382,7 @@ def execute(patch_no):
 			sql("delete from `tabDocField` where label = 'View Ledger Entry' and parent = 'Journal Voucher' and fieldtype = 'Button' limit 1")
 		if sql("select count(name) from `tabDocField` where label = 'Get Balance' and parent = 'Journal Voucher' and fieldtype = 'Button'")[0][0] > 1:
 			sql("delete from `tabDocField` where label = 'Get Balance' and parent = 'Journal Voucher' and fieldtype = 'Button' limit 1")
+	elif patch_no == 374:
+		reload_doc('accounts', 'doctype', 'internal_reconciliation')
+		reload_doc('accounts', 'doctype', 'ir_payment_detail')
+		reload_doc('accounts', 'Module Def', 'Accounts')

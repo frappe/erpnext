@@ -447,12 +447,38 @@ class DocType(TransactionBase):
 				if not submitted:
 					msgprint("Purchase Receipt : "+ cstr(d.purchase_receipt) +" is not submitted")
 					raise Exception , "Validation Error."
-
-	def update_against_document_in_jv(self, against_document_no, against_document_doctype):
-		get_obj('GL Control').update_against_document_in_jv( self,'advance_allocation_details', against_document_no, against_document_doctype, self.doc.credit_to, 'debit',self.doc.doctype)
+					
+					
+	#--------------------------------------------------------------------
+	def update_against_document_in_jv(self):
+		"""
+			Links invoice and advance voucher:
+				1. cancel advance voucher
+				2. split into multiple rows if partially adjusted, assign against voucher
+				3. submit advance voucher
+		"""
+		
+		lst = []
+		for d in getlist(self.doclist, 'advance_allocation_details'):
+			if flt(d.allocated_amount) > 0:
+				args = {
+					'voucher_no' : d.journal_voucher, 
+					'voucher_detail_no' : d.jv_detail_no, 
+					'against_voucher_type' : 'Payable Voucher', 
+					'against_voucher'  : self.doc.name,
+					'account' : self.doc.credit_to, 
+					'is_advance' : 'Yes', 
+					'dr_or_cr' : 'debit', 
+					'unadjusted_amt' : flt(d.advance_amount),
+					'allocated_amt' : flt(d.allocated_amount)
+				}
+				lst.append(args)
+		
+		if lst:
+			get_obj('GL Control').reconcile_against_document(lst)
 
 	# On Submit
-	# ----------
+	#--------------------------------------------------------------------
 	def on_submit(self):
 		self.check_prev_docstatus()
 		
@@ -462,7 +488,9 @@ class DocType(TransactionBase):
 		
 		# this sequence because outstanding may get -negative
 		get_obj(dt='GL Control').make_gl_entries(self.doc, self.doclist)
-		self.update_against_document_in_jv(self.doc.name, self.doc.doctype)
+		
+		self.update_against_document_in_jv()
+		
 		get_obj(dt = 'Purchase Common').update_prevdoc_detail(self, is_submit = 1)
 
 

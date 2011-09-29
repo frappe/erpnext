@@ -38,7 +38,7 @@ class DocType(TransactionBase):
 			for d in app_dtl:
 				if(d[0]): appr_users.append(d[0])
 				if(d[1]): appr_roles.append(d[1])
-			
+
 			if not has_common(appr_roles, webnotes.user.get_roles()) and not has_common(appr_users, session['user']):
 				msg, add_msg = '',''
 				if max_amount:
@@ -117,7 +117,7 @@ class DocType(TransactionBase):
 		# Check for authorization set for individual user
 	 
 		based_on = [x[0] for x in sql("select distinct based_on from `tabAuthorization Rule` where transaction = %s and system_user = %s and (company = %s or ifnull(company,'')='') and docstatus != 2", (doctype_name, session['user'], company))]
-				
+
 		for d in based_on:
 			self.bifurcate_based_on_type(doctype_name, total, av_dis, d, doc_obj, 1, company)
 		
@@ -128,7 +128,13 @@ class DocType(TransactionBase):
 		# Specific Role
 		# ===============
 		# Check for authorization set on particular roles
-		based_on = [x[0] for x in sql("select based_on from `tabAuthorization Rule` where transaction = %s and system_role IN (%s) and based_on IN (%s) and (company = %s or ifnull(company,'')='') and docstatus != 2", (doctype_name, "'"+"','".join(webnotes.user.get_roles())+"'", "'"+"','".join(final_based_on)+"'",company))]
+		based_on = [x[0] for x in sql("""select based_on 
+			from `tabAuthorization Rule` 
+			where transaction = %s and system_role IN (%s) and based_on IN (%s) 
+			and (company = %s or ifnull(company,'')='') 
+			and docstatus != 2
+		""" % ('%s', "'"+"','".join(webnotes.user.get_roles())+"'", "'"+"','".join(final_based_on)+"'", '%s'), (doctype_name, company))]
+		
 		for d in based_on:
 			self.bifurcate_based_on_type(doctype_name, total, av_dis, d, doc_obj, 2, company)
 		
