@@ -186,18 +186,6 @@ class TestStockEntry(unittest.TestCase):
 		return ste
 		
 	#===========================================================================
-	def check_serial_no(self, action, cnt):
-		print "Checking serial nos........"
-		if action == 'submit':
-			status, wh, docstatus = 'In Store', 'wh1', 0
-		else:
-			status, wh, docstatus = 'Not in Use', '', 2
-
-		ser = sql("select count(name) from `tabSerial No` where item_code = 'it' and warehouse = '%s' and status = '%s' and docstatus = %s" % (wh, status, docstatus))
-
-		self.assertTrue(ser[0][0] == cnt)
-
-	#===========================================================================
 	def tearDown(self):
 		webnotes.conn.rollback()
 
@@ -267,7 +255,6 @@ class TestStockEntry(unittest.TestCase):
 							'voucher_no': stock_entry.mtn[0].name,
 							'actual_qty': -5,
 							'bin_aqat': 5,
-							#'valuation_rate': 100,
 							'is_cancelled': 'Yes'
 						}, {
 							'doctype': 'Stock Ledger Entry',
@@ -286,8 +273,6 @@ class TestStockEntry(unittest.TestCase):
 							'voucher_type': 'Stock Entry',
 							'voucher_no': stock_entry.mtn[0].name,
 							'actual_qty': 5,
-							#'bin_aqat': 10,
-							#'valuation_rate': 100,
 							'is_cancelled': 'Yes'
 						}, {
 							'doctype': 'Stock Ledger Entry',
@@ -296,8 +281,6 @@ class TestStockEntry(unittest.TestCase):
 							'voucher_type': 'Stock Entry',
 							'voucher_no': stock_entry.mtn[0].name,
 							'actual_qty': -5,
-							#'bin_aqat': 0,
-							#'valuation_rate': 100,
 							'is_cancelled': 'Yes'
 						}]
 		}
