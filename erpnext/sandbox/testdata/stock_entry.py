@@ -1,5 +1,8 @@
 from webnotes.model.doc import Document
 
+# Material  Receipt
+#-----------------------
+
 mr = [
 	Document(
 		fielddata = {
@@ -31,6 +34,8 @@ mr = [
 	)
 ]
 
+# Material Transfer
+#--------------------
 
 mtn = [
 	Document(
@@ -60,6 +65,40 @@ mtn = [
 			'stock_uom': 'Nos',
 			'conversion_factor': 1,
 			'serial_no': 'srno1, srno2, srno3, srno4, srno5'	
+		}
+	)
+]
+
+# Material Issue
+#--------------------
+
+mi = [
+	Document(
+		fielddata = {
+			'doctype': 'Stock Entry',
+			'posting_date': '2011-09-01',
+			'transfer_date': '2011-09-01',
+			'posting_time': '14:00',
+			'company': 'comp',
+			'fiscal_year' : '2011-2012',
+			'purpose': 'Material Issue',
+			'name': 'mi'
+		}
+	),
+	Document(
+		fielddata  ={
+			'doctype': 'Stock Entry Detail',
+			'parenttype': 'Stock Entry',
+			'parentfield' : 'mtn_details',
+			'parent' : 'mi',
+			'item_code' : 'it',
+			's_warehouse' : 'wh1',
+			'qty' : 4,
+			'transfer_qty' : 4,
+			'incoming_rate': 100,
+			'stock_uom': 'Nos',
+			'conversion_factor': 1,
+			'serial_no': 'srno1, srno2, srno3, srno4'
 		}
 	)
 ]

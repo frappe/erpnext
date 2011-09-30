@@ -52,7 +52,7 @@ class TestStockEntry(unittest.TestCase):
 	# Purpose: Material Receipt
 	#===========================================================================
 	def test_mr_onsubmit(self):
-		print "Test Case: Stock Entry submission"
+		print "Test Case: Material Receipt submission"
 		self.save_stock_entry('Material Receipt')
 
 		mr = get_obj('Stock Entry', stock_entry.mr[0].name, with_children=1)
@@ -72,7 +72,7 @@ class TestStockEntry(unittest.TestCase):
 		
 	#===========================================================================
 	def test_mr_oncancel(self):
-		print "Test Case: Stock Entry Cancellation"
+		print "Test Case: Material Receipt Cancellation"
 		self.save_stock_entry('Material Receipt')
 		
 		mr = get_obj('Stock Entry', stock_entry.mr[0].name, with_children=1)
@@ -93,7 +93,7 @@ class TestStockEntry(unittest.TestCase):
 	# Purpose: Material Transafer
 	#===========================================================================
 	def test_mtn_onsubmit(self):
-		print "Test Case: Stock Entry submission"
+		print "Test Case: Material Transfer Note submission"
 		
 		self.save_stock_entry('Material Receipt')
 		mr = get_obj('Stock Entry', stock_entry.mr[0].name, with_children=1)
@@ -122,7 +122,7 @@ class TestStockEntry(unittest.TestCase):
 		
 	#===========================================================================
 	def test_mtn_oncancel(self):
-		print "Test Case: Stock Entry Cancellation"
+		print "Test Case: Material Transfer Note Cancellation"
 		
 		self.save_stock_entry('Material Receipt')
 		mr = get_obj('Stock Entry', stock_entry.mr[0].name, with_children=1)
@@ -145,6 +145,64 @@ class TestStockEntry(unittest.TestCase):
 		
 		# serial no
 		self.assertCount([[{'doctype': 'Serial No', 'item_code': 'it', 'warehouse': 'wh1', 'status': 'In Store', 'docstatus': 0}, 10]])
+		
+#===========================================================================
+	# Purpose: Material Issue
+	#===========================================================================
+	def test_mi_onsubmit(self):
+		print "Test Case: Material Issue submission"
+		
+		self.save_stock_entry('Material Receipt')
+		mr = get_obj('Stock Entry', stock_entry.mr[0].name, with_children=1)
+		mr = self.submit_stock_entry(mr)
+		
+		self.save_stock_entry('Material Issue')
+		mi = get_obj('Stock Entry', stock_entry.mi[0].name, with_children=1)
+		mi = self.submit_stock_entry(mi)
+		
+		# stock ledger entry
+		print "Checking stock ledger entry........."
+		self.assertDoc(self.get_expected_sle('mi_submit'))
+		
+		# bin qty
+		print "Checking Bin qty........."
+		self.assertDoc([
+			{'doctype':'Bin', 'actual_qty':6, 'item_code':'it', 'warehouse':'wh1'}
+		])
+		
+		# serial no		
+		self.assertCount([
+			[{'doctype': 'Serial No', 'item_code': 'it', 'warehouse': 'wh1', 'status': 'In Store', 'docstatus': 0}, 6]
+		])
+		
+	#===========================================================================
+	def test_mi_oncancel(self):
+		print "Test Case: Material Issue Cancellation"
+		
+		self.save_stock_entry('Material Receipt')
+		mr = get_obj('Stock Entry', stock_entry.mr[0].name, with_children=1)
+		mr = self.submit_stock_entry(mr)
+		
+		self.save_stock_entry('Material Issue')
+		mi = get_obj('Stock Entry', stock_entry.mi[0].name, with_children=1)
+		self.cancel_stock_entry(mi)
+		
+		# stock ledger entry
+		print "Checking stock ledger entry........."
+		self.assertDoc(self.get_expected_sle('mi_cancel'))
+		
+		# bin qty
+		print "Checking Bin qty........."
+		self.assertDoc([
+			{'doctype':'Bin', 'actual_qty':10, 'item_code':'it', 'warehouse':'wh1'}
+		])
+		
+		# serial no
+		self.assertCount([
+			[{'doctype': 'Serial No', 'item_code': 'it', 'warehouse': 'wh1', 'status': 'In Store', 'docstatus': 0}, 10]
+		])
+
+		
 
 	#===========================================================================
 	def save_stock_entry(self, t):
@@ -152,6 +210,8 @@ class TestStockEntry(unittest.TestCase):
 			data = stock_entry.mr
 		elif t == 'Material Transfer':
 			data = stock_entry.mtn
+		elif t == 'Material Issue':
+			data = stock_entry.mi
 			
 		for each in data:
 			each.save(1)
@@ -282,7 +342,39 @@ class TestStockEntry(unittest.TestCase):
 							'voucher_no': stock_entry.mtn[0].name,
 							'actual_qty': -5,
 							'is_cancelled': 'Yes'
+						}],
+			'mi_submit': [{'doctype': 'Stock Ledger Entry',
+							'item_code':'it',
+							'warehouse':'wh1', 
+							'voucher_type': 'Stock Entry',
+							'voucher_no': stock_entry.mi[0].name,
+							'actual_qty': -4,
+							'bin_aqat': 6,
+							'valuation_rate': 100,
+							'is_cancelled': 'No'
+						}],
+			'mi_cancel': [{
+							'doctype': 'Stock Ledger Entry', 
+							'item_code':'it',
+							'warehouse':'wh1',
+							'voucher_type': 'Stock Entry',
+							'voucher_no': stock_entry.mi[0].name,
+							'actual_qty': -4,
+							'bin_aqat': 6,
+							'valuation_rate': 100,
+							'is_cancelled': 'Yes'
+						},{
+							'doctype': 'Stock Ledger Entry', 
+							'item_code':'it',
+							'warehouse':'wh1',
+							'voucher_type': 'Stock Entry',
+							'voucher_no': stock_entry.mi[0].name,
+							'actual_qty': 4,
+							'ifnull(bin_aqat, 0)': 0,
+							'ifnull(valuation_rate, 0)': 0,
+							"ifnull(is_cancelled, 'No')": 'Yes'
 						}]
+						
 		}
 		
 		return expected_sle[action]
