@@ -8,90 +8,182 @@ webnotes.user = webnotes.profile.Profile()
 from webnotes.model.doc import Document
 from webnotes.model.code import get_obj
 from webnotes.utils import cstr, flt
+from webnotes.model.doclist import getlist
 sql = webnotes.conn.sql
 
 from sandbox.testdata.masters import *
 from sandbox.testdata import stock_entry
 #----------------------------------------------------------
 
+
 class TestStockEntry(unittest.TestCase):
+	#===========================================================================
+	def assertDoc(self, lst):
+		"""assert all values"""
+		for d in lst:
+			cl, vl = [], []
+			for k in d.keys():
+				if k!='doctype':
+					cl.append('%s=%s' % (k, '%s'))
+					vl.append(d[k])
+
+			self.assertTrue(sql("select name from `tab%s` where %s limit 1" % (d['doctype'], ' and '.join(cl)), vl))
+			
+	#===========================================================================
+	def assertCount(self, lst):
+		"""assert all values"""
+		for d in lst:
+			cl, vl = [], []
+			for k in d[0].keys():
+				if k!='doctype':
+					cl.append('%s=%s' % (k, '%s'))
+					vl.append(d[0][k])
+
+			self.assertTrue(sql("select count(name) from `tab%s` where %s limit 1" % (d[0]['doctype'], ' and '.join(cl)), vl)[0][0] == d[1])
+		
+	#===========================================================================
 	def setUp(self):
 		print "====================================="
-		webnotes.conn.begin()
-		
+		webnotes.conn.begin()		
 		create_master_records()
 		print 'Master Data Created'
 		
-		for each in stock_entry.mr:
+	#===========================================================================
+	# Purpose: Material Receipt
+	#===========================================================================
+	def test_mr_onsubmit(self):
+		print "Test Case: Stock Entry submission"
+		self.save_stock_entry('Material Receipt')
+
+		mr = get_obj('Stock Entry', stock_entry.mr[0].name, with_children=1)
+		self.submit_stock_entry(mr)
+		
+		# stock ledger entry
+		print "Checking stock ledger entry........."
+		self.assertDoc(self.get_expected_sle('mr_submit'))
+		
+		# bin qty
+		print "Checking Bin qty........."
+		self.assertDoc([{'doctype':'Bin', 'actual_qty':10, 'item_code':'it', 'warehouse':'wh1'}])
+		
+		# serial no
+		self.assertCount([[{'doctype': 'Serial No', 'item_code': 'it', 'warehouse': 'wh1', 'status': 'In Store', 'docstatus': 0}, 10]])
+
+		
+	#===========================================================================
+	def test_mr_oncancel(self):
+		print "Test Case: Stock Entry Cancellation"
+		self.save_stock_entry('Material Receipt')
+		
+		mr = get_obj('Stock Entry', stock_entry.mr[0].name, with_children=1)
+		self.cancel_stock_entry(mr)
+		
+		# stock ledger entry
+		print "Checking stock ledger entry........."
+		self.assertDoc(self.get_expected_sle('mr_cancel'))
+		
+		# bin qty
+		print "Checking Bin qty........."
+		self.assertDoc([{'doctype':'Bin', 'actual_qty':0, 'item_code':'it', 'warehouse':'wh1'}])
+		
+		# serial no
+		self.assertCount([[{'doctype': 'Serial No', 'item_code': 'it', 'warehouse': '', 'status': 'Not in Use', 'docstatus': 2}, 10]])
+		
+	#===========================================================================
+	# Purpose: Material Transafer
+	#===========================================================================
+	def test_mtn_onsubmit(self):
+		print "Test Case: Stock Entry submission"
+		
+		self.save_stock_entry('Material Receipt')
+		mr = get_obj('Stock Entry', stock_entry.mr[0].name, with_children=1)
+		mr = self.submit_stock_entry(mr)
+		
+		self.save_stock_entry('Material Transfer')
+		mtn = get_obj('Stock Entry', stock_entry.mtn[0].name, with_children=1)
+		tn = self.submit_stock_entry(mtn)
+		
+		# stock ledger entry
+		print "Checking stock ledger entry........."
+		self.assertDoc(self.get_expected_sle('mtn_submit'))
+		
+		# bin qty
+		print "Checking Bin qty........."
+		self.assertDoc([
+			{'doctype':'Bin', 'actual_qty':5, 'item_code':'it', 'warehouse':'wh1'},
+			{'doctype':'Bin', 'actual_qty':5, 'item_code':'it', 'warehouse':'wh2'}
+		])
+		
+		# serial no		
+		self.assertCount([
+			[{'doctype': 'Serial No', 'item_code': 'it', 'warehouse': 'wh1', 'status': 'In Store', 'docstatus': 0}, 5], 
+			[{'doctype': 'Serial No', 'item_code': 'it', 'warehouse': 'wh2', 'status': 'In Store', 'docstatus': 0}, 5]
+		])
+		
+	#===========================================================================
+	def test_mtn_oncancel(self):
+		print "Test Case: Stock Entry Cancellation"
+		
+		self.save_stock_entry('Material Receipt')
+		mr = get_obj('Stock Entry', stock_entry.mr[0].name, with_children=1)
+		mr = self.submit_stock_entry(mr)
+		
+		self.save_stock_entry('Material Transfer')
+		mtn = get_obj('Stock Entry', stock_entry.mtn[0].name, with_children=1)
+		self.cancel_stock_entry(mtn)
+		
+		# stock ledger entry
+		print "Checking stock ledger entry........."
+		self.assertDoc(self.get_expected_sle('mtn_cancel'))
+		
+		# bin qty
+		print "Checking Bin qty........."
+		self.assertDoc([
+			{'doctype':'Bin', 'actual_qty':10, 'item_code':'it', 'warehouse':'wh1'},
+			{'doctype':'Bin', 'actual_qty':0, 'item_code':'it', 'warehouse':'wh2'}
+		])
+		
+		# serial no
+		self.assertCount([[{'doctype': 'Serial No', 'item_code': 'it', 'warehouse': 'wh1', 'status': 'In Store', 'docstatus': 0}, 10]])
+
+	#===========================================================================
+	def save_stock_entry(self, t):
+		if t == 'Material Receipt':
+			data = stock_entry.mr
+		elif t == 'Material Transfer':
+			data = stock_entry.mtn
+			
+		for each in data:
 			each.save(1)
 
-		for t in stock_entry.mr[1:]:
-			sql("update `tabStock Entry Detail` set parent = '%s' where name = '%s'" % (stock_entry.mr[0].name, t.name))
+		for t in data[1:]:
+			sql("update `tabStock Entry Detail` set parent = '%s' where name = '%s'" % (data[0].name, t.name))
 		print "Stock Entry Created"
 		
-	
-	#===========================================================================
-	def test_stock_entry_onsubmit(self):
-		print "Test Case: Stock Entry submission"
-		self.submit_stock_entry()
-		
-		expected_sle = (('Stock Entry', stock_entry.mr[0].name, 10, 10, 100, 'No'),)
-		self.check_sle(expected_sle)
-		
-		self.check_bin_qty(10)
-		self.check_serial_no('submit', 10)
 		
 	#===========================================================================
-	def test_stock_entry_oncancel(self):
-		print "Test Case: Stock Entry Cancellation"
-		self.cancel_stock_entry()
+	def submit_stock_entry(self, ste):
+		ste.validate()
+		ste.on_submit()
 		
-		expected_sle = (
-			('Stock Entry', stock_entry.mr[0].name, 10, 10, 100, 'Yes'), 
-			('Stock Entry', stock_entry.mr[0].name, -10, None, None, 'Yes'),
-		)
-		self.check_sle(expected_sle)
-		
-		self.check_bin_qty(0)		
-		self.check_serial_no('cancel', 10)
-		
-		
-	#===========================================================================
-	def submit_stock_entry(self):
-		ste1 = get_obj('Stock Entry', stock_entry.mr[0].name, with_children=1)
-		ste1.validate()
-		ste1.on_submit()
-		
-		ste1.doc.docstatus = 1
-		ste1.doc.save()
-		
+		ste.doc.docstatus = 1
+		ste.doc.save()
+
 		print "Stock Entry Submitted"
-		
+		return ste
 			
 	#===========================================================================
-	def cancel_stock_entry(self):
-		self.submit_stock_entry()
+	def cancel_stock_entry(self, ste):
+		ste = self.submit_stock_entry(ste)
 		
-		ste1 = get_obj('Stock Entry', stock_entry.mr[0].name, with_children=1)
-		ste1.on_cancel()
+		ste.on_cancel()
 		
-		ste1.doc.cancel_reason = "testing"
-		ste1.doc.docstatus = 2
-		ste1.doc.save()
+		ste.doc.cancel_reason = "testing"
+		ste.doc.docstatus = 2
+		ste.doc.save()
 		
 		print "Stock Entry Cancelled"
-		
-	#===========================================================================
-	def check_sle(self, expected):
-		print "Checking stock ledger entry........."
-		sle = sql("select voucher_type, voucher_no, actual_qty, bin_aqat, valuation_rate, is_cancelled from `tabStock Ledger Entry` where item_code = 'it' and warehouse = 'wh1'")
-		self.assertTrue(sle == expected)
-
-	#===========================================================================
-	def check_bin_qty(self, expected_qty):
-		print "Checking Bin qty........."
-		bin_qty = sql("select actual_qty from tabBin where item_code = 'it' and warehouse = 'wh1'")
-		self.assertTrue(bin_qty[0][0] == expected_qty)
+		return ste
 		
 	#===========================================================================
 	def check_serial_no(self, action, cnt):
@@ -104,7 +196,110 @@ class TestStockEntry(unittest.TestCase):
 		ser = sql("select count(name) from `tabSerial No` where item_code = 'it' and warehouse = '%s' and status = '%s' and docstatus = %s" % (wh, status, docstatus))
 
 		self.assertTrue(ser[0][0] == cnt)
-	
+
 	#===========================================================================
 	def tearDown(self):
 		webnotes.conn.rollback()
+
+
+	# Expected Result Set
+	#===================================================================================================
+	def get_expected_sle(self, action):
+		expected_sle = {
+			'mr_submit': [{
+							'doctype': 'Stock Ledger Entry',
+							'item_code':'it',
+							'warehouse':'wh1', 
+							'voucher_type': 'Stock Entry',
+							'voucher_no': stock_entry.mr[0].name,
+							'actual_qty': 10,
+							'bin_aqat': 10,
+							'valuation_rate': 100,
+							'is_cancelled': 'No'
+						}],
+			'mr_cancel': [{
+							'doctype': 'Stock Ledger Entry', 
+							'item_code':'it',
+							'warehouse':'wh1',
+							'voucher_type': 'Stock Entry',
+							'voucher_no': stock_entry.mr[0].name,
+							'actual_qty': 10,
+							'bin_aqat': 10,
+							'valuation_rate': 100,
+							'is_cancelled': 'Yes'
+						},{
+							'doctype': 'Stock Ledger Entry', 
+							'item_code':'it',
+							'warehouse':'wh1',
+							'voucher_type': 'Stock Entry',
+							'voucher_no': stock_entry.mr[0].name,
+							'actual_qty': -10,
+							'ifnull(bin_aqat, 0)': 0,
+							'ifnull(valuation_rate, 0)': 0,
+							"ifnull(is_cancelled, 'No')": 'Yes'
+						}],
+			'mtn_submit': [{
+							'doctype': 'Stock Ledger Entry',
+							'item_code':'it',
+							'warehouse':'wh1',
+							'voucher_type': 'Stock Entry',
+							'voucher_no': stock_entry.mtn[0].name,
+							'actual_qty': -5,
+							'bin_aqat': 5,
+							'valuation_rate': 100,
+							'is_cancelled': 'No'
+						}, {
+							'doctype': 'Stock Ledger Entry',
+							'item_code':'it',
+							'warehouse':'wh2',
+							'voucher_type': 'Stock Entry',
+							'voucher_no': stock_entry.mtn[0].name,
+							'actual_qty': 5,
+							'bin_aqat': 5,
+							'valuation_rate': 100,
+							'is_cancelled': 'No'
+						}],
+			'mtn_cancel': [{
+							'doctype': 'Stock Ledger Entry',
+							'item_code':'it',
+							'warehouse':'wh1',
+							'voucher_type': 'Stock Entry',
+							'voucher_no': stock_entry.mtn[0].name,
+							'actual_qty': -5,
+							'bin_aqat': 5,
+							#'valuation_rate': 100,
+							'is_cancelled': 'Yes'
+						}, {
+							'doctype': 'Stock Ledger Entry',
+							'item_code':'it',
+							'warehouse':'wh2',
+							'voucher_type': 'Stock Entry',
+							'voucher_no': stock_entry.mtn[0].name,
+							'actual_qty': 5,
+							'bin_aqat': 5,
+							'valuation_rate': 100,
+							'is_cancelled': 'Yes'
+						}, {
+							'doctype': 'Stock Ledger Entry',
+							'item_code':'it',
+							'warehouse':'wh1',
+							'voucher_type': 'Stock Entry',
+							'voucher_no': stock_entry.mtn[0].name,
+							'actual_qty': 5,
+							#'bin_aqat': 10,
+							#'valuation_rate': 100,
+							'is_cancelled': 'Yes'
+						}, {
+							'doctype': 'Stock Ledger Entry',
+							'item_code':'it',
+							'warehouse':'wh2',
+							'voucher_type': 'Stock Entry',
+							'voucher_no': stock_entry.mtn[0].name,
+							'actual_qty': -5,
+							#'bin_aqat': 0,
+							#'valuation_rate': 100,
+							'is_cancelled': 'Yes'
+						}]
+		}
+		
+		return expected_sle[action]

@@ -185,7 +185,7 @@ class DocType:
 			self.check_serial_no_exists(serial_no, d.item_code)
 			self.set_delivery_serial_no_values(obj, serial_no)
 		else:
-			sql("update `tabSerial No` set docstatus = 0, status = 'In Store', delivery_document_type = '', delivery_document_no = '', delivery_date = '', customer = null, customer_name = '', delivery_address = '', territory = null where name = '%s'" % (serial_no))
+			sql("update `tabSerial No` set docstatus = 0, status = 'In Store', delivery_document_type = '', delivery_document_no = '', delivery_date = null, customer = null, customer_name = '', delivery_address = '', territory = null where name = '%s'" % (serial_no))
 
 
 	# ---------------------
