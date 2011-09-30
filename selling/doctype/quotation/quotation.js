@@ -314,9 +314,9 @@ cur_frm.fields_dict['quotation_details'].grid.get_field('item_code').get_query= 
   var d = locals[cdt][cdn];
   var cond = (doc.order_type == 'Maintenance')? " and tabItem.is_service_item = 'Yes'" : " and tabItem.is_sales_item = 'Yes'"
   if(doc.customer)
-    return repl("SELECT i.name,i.item_code,concat('Last quoted at - ',cast(quote_rate as char)) as quote_rate,concat('Last sold at - ',cast(sales_rate as char)) as sales_rate FROM\
+    return repl("SELECT i.name,i.item_code,concat('Last quoted at - ',cast(quote_rate as char)) as quote_rate,concat('Last sold at - ',cast(sales_rate as char)) as sales_rate, i.item_name, i.description FROM\
 		(\
-			select item_code,name from tabItem where tabItem.%(key)s like '%s' %(cond)s\
+			select item_code,name, item_name, description from tabItem where tabItem.%(key)s like '%s' %(cond)s\
 		)i\
 		left join\
 		(\
@@ -339,5 +339,5 @@ cur_frm.fields_dict['quotation_details'].grid.get_field('item_code').get_query= 
 			)m where r.item_code=m.item_code and r.voucher_date=m.voucher_date\
 		)s on i.item_code=s.item_code ORDER BY item_code LIMIT 50",{cust:doc.customer, cond:cond});
   else
-    return repl("SELECT name, item_code FROM tabItem WHERE `tabItem`.%(key)s LIKE '%s' %(cond)s ORDER BY tabItem.item_code DESC LIMIT 50", {cond:cond});
+    return repl("SELECT name, item_name, description FROM tabItem WHERE `tabItem`.%(key)s LIKE '%s' %(cond)s ORDER BY tabItem.item_code DESC LIMIT 50", {cond:cond});
 }
