@@ -552,7 +552,7 @@ Dictionary Format
 	}
 // ====================================================================*/
 pscript.feature_dict = {
-	'projects': {
+	'__projects': {
 		'Bill Of Materials': {'fields':['project_name']},
 		'Delivery Note': {'fields':['project_name']},
 		'Payable Voucher': {'fields':['project_name']},
@@ -564,17 +564,17 @@ pscript.feature_dict = {
 		'Stock Entry': {'fields':['project_name']},
 		'Timesheet': {'timesheet_details':['project_name']}
 	},
-	'packing_details': {
+	'__packing_details': {
 		'Delivery Note': {'fields':['packing_details','print_packing_slip'],'delivery_note_details':['no_of_packs','pack_gross_wt','pack_nett_wt','pack_no','pack_unit']},
 		'Sales Order': {'fields':['packing_details']}
 	},
-	'discounts': {
+	'__discounts': {
 		'Delivery Note': {'delivery_note_details':['adj_rate']},
 		'Quotation': {'quotation_details':['adj_rate']},
 		'Receivable Voucher': {'entries':['adj_rate']},
 		'Sales Order': {'sales_order_details':['adj_rate','ref_rate']}
 	},
-	'brands': {
+	'__brands': {
 		'Delivery Note': {'delivery_note_details':['brand']},
 		'Indent': {'indent_details':['brand']},
 		'Item': {'fields':['brand']},
@@ -586,10 +586,10 @@ pscript.feature_dict = {
 		'Sales Order': {'sales_order_details':['brand']},
 		'Serial No': {'fields':['brand']}
 	},
-	'after_sales_installations': {
+	'__after_sales_installations': {
 		'Delivery Note': {'fields':['installation_status','per_installed'],'delivery_note_details':['installed_qty']}
 	},
-	'item_batch_nos': {
+	'__item_batch_nos': {
 		'Delivery Note': {'delivery_note_details':['batch_no']},
 		'Item': {'fields':['has_batch_no']},
 		'Purchase Receipt': {'purchase_receipt_details':['batch_no']},
@@ -599,7 +599,7 @@ pscript.feature_dict = {
 		'Stock Entry': {'mtn_details':['batch_no']},
 		'Stock Ledger Entry': {'fields':['batch_no']}
 	},
-	'item_serial_nos': {
+	'__item_serial_nos': {
 		'Customer Issue': {'fields':['serial_no']},
 		'Delivery Note': {'delivery_note_details':['serial_no'],'packing_details':['serial_no']},
 		'Installation Note': {'installed_item_details':['serial_no']},
@@ -613,7 +613,7 @@ pscript.feature_dict = {
 		'Stock Entry': {'mtn_details':['serial_no']},
 		'Stock Ledger Entry': {'fields':['serial_no']}
 	},
-	'item_group_in_details': {
+	'__item_group_in_details': {
 		'Delivery Note': {'delivery_note_details':['item_group']},
 		'Enquiry': {'enquiry_details':['item_group']},
 		'Indent': {'indent_details':['item_group']},
@@ -631,7 +631,7 @@ pscript.feature_dict = {
 		'Sales Person': {'target_details':['item_group']},
 		'Territory': {'target_details':['item_group']}
 	},
-	'page_break': {
+	'__page_break': {
 		'Delivery Note': {'delivery_note_details':['page_break'],'packing_details':['page_break']},
 		'Indent': {'indent_details':['page_break']},
 		'Purchase Order': {'po_details':['page_break']},
@@ -641,7 +641,7 @@ pscript.feature_dict = {
 		'Receivable Voucher': {'entries':['page_break']},
 		'Sales Order': {'sales_order_details':['page_break']}
 	},
-	'exports': {
+	'__exports': {
 		'Delivery Note': {'fields':['Note','conversion_rate','currency','grand_total_export','in_words_export','rounded_total_export'],'delivery_note_details':['base_ref_rate','export_amount','export_rate']},
 		'POS Setting': {'fields':['conversion_rate','currency']},
 		'Quotation': {'fields':['Note HTML','OT Notes','conversion_rate','currency','grand_total_export','in_words_export','rounded_total_export'],'quotation_details':['base_ref_rate','export_amount','export_rate']},
@@ -650,16 +650,16 @@ pscript.feature_dict = {
 		'Sales BOM': {'fields':['currency']},
 		'Sales Order': {'fields':['Note1','OT Notes','conversion_rate','currency','grand_total_export','in_words_export','rounded_total_export'],'sales_order_details':['base_ref_rate','export_amount','export_rate']}
 	},
-	'imports': {
+	'__imports': {
 		'Payable Voucher': {'fields':['conversion_rate','currency','grand_total_import','in_words_import','net_total_import','other_charges_added_import','other_charges_deducted_import'],'entries':['import_amount','import_rate']},
 		'Purchase Order': {'fields':['Note HTML','conversion_rate','currency','grand_total_import','in_words_import','net_total_import','other_charges_added_import','other_charges_deducted_import'],'po_details':['import_amount','import_rate']},
 		'Purchase Receipt': {'fields':['conversion_rate','currency','grand_total_import','in_words_import','net_total_import','other_charges_added_import','other_charges_deducted_import'],'purchase_receipt_details':['import_amount','import_rate']},
 		'Supplier Quotation': {'fields':['conversion_rate','currency']}
 	},
-	'item_advanced': {
+	'__item_advanced': {
 		'Item': {'fields':['item_customer_details']}
 	},
-	'sales_extras': {
+	'__sales_extras': {
 		'Address': {'fields':['sales_partner']},
 		'Contact': {'fields':['sales_partner']},
 		'Customer': {'fields':['sales_team']},
@@ -668,7 +668,7 @@ pscript.feature_dict = {
 		'Receivable Voucher': {'fields':['sales_team']},
 		'Sales Order': {'fields':['sales_team','Packing List']}
 	},
-	'more_info': {
+	'__more_info': {
 		'Customer': {'fields':['More Info']},
 		'Delivery Note': {'fields':['More Info']},
 		'Enquiry': {'fields':['More Info']},
@@ -683,14 +683,14 @@ pscript.feature_dict = {
 		'Serial No': {'fields':['More Info']},
 		'Supplier': {'fields':['More Info']}
 	},
-	'quality': {
+	'__quality': {
 		'Item': {'fields':['Item Inspection Criteria','inspection_required']},
 		'Purchase Receipt': {'purchase_receipt_details':['qa_no']}
 	},
-	'manufacturing': {
+	'__manufacturing': {
 		'Item': {'fields':['Manufacturing']}
 	},
-	'pos': {
+	'__pos': {
 		'Receivable Voucher': {'fields':['is_pos']}
 	}
 }
