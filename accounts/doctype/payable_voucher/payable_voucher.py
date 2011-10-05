@@ -72,25 +72,19 @@ class DocType(TransactionBase):
 				ret['cost_center'] = cost_center and cost_center[0][0] or ''
 		return ret
 		 
-	
+		
 	# Get Items based on PO or PR
 	# ----------------------------
 	def pull_details(self):
 		if self.doc.purchase_receipt_main:
 			self.validate_duplicate_docname('purchase_receipt')
-			self.doclist = get_obj('DocType Mapper', 'Purchase Receipt-Payable Voucher').dt_map('Purchase Receipt', 'Payable Voucher', self.doc.purchase_receipt_main, self.doc, self.doclist, "[['Purchase Receipt', 'Payable Voucher'],['Purchase Receipt Detail', 'PV Detail']]")
+			self.doclist = get_obj('DocType Mapper', 'Purchase Receipt-Payable Voucher').dt_map('Purchase Receipt', 'Payable Voucher', self.doc.purchase_receipt_main, self.doc, self.doclist, "[['Purchase Receipt', 'Payable Voucher'], ['Purchase Receipt Detail', 'PV Detail'], ['Purchase Tax Detail','Purchase Tax Detail']]")
 
 		elif self.doc.purchase_order_main:
 			self.validate_duplicate_docname('purchase_order')
-			self.doclist = get_obj('DocType Mapper', 'Purchase Order-Payable Voucher').dt_map('Purchase Order', 'Payable Voucher', self.doc.purchase_order_main, self.doc, self.doclist, "[['Purchase Order', 'Payable Voucher'],['PO Detail', 'PV Detail']]")
+			self.doclist = get_obj('DocType Mapper', 'Purchase Order-Payable Voucher').dt_map('Purchase Order', 'Payable Voucher', self.doc.purchase_order_main, self.doc, self.doclist, "[['Purchase Order', 'Payable Voucher'],['PO Detail', 'PV Detail'], ['Purchase Tax Detail','Purchase Tax Detail']]")
 		
 		ret = self.get_credit_to()
-		#self.doc.supplier_name = ret['supplier_name']
-		#self.doc.supplier_address = ret['supplier_address']
-		
-		#self.doc.cst_no =ret['cst_no']
-		#self.doc.bst_no = ret['bst_no']
-		#self.doc.vat_tin_no = ret['vat_tin_no']
 
 		if ret.has_key('credit_to'):
 			self.doc.credit_to = ret['credit_to']

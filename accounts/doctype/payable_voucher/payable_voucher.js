@@ -169,12 +169,11 @@ cur_frm.cscript['Recalculate'] = function(doc, dt, dn) {
 // -----------------
 cur_frm.cscript['Get Items'] = function(doc, dt, dn) {
   var callback = function(r,rt) { 
-	  unhide_field(['supplier_address','contact_person','supplier_name','address_display','contact_display','contact_mobile','contact_email']);			  
-	  refresh_many(['credit_to','supplier','supplier_address','contact_person','supplier_name','address_display','contact_display','contact_mobile','contact_email','entries','purchase_receipt_main','purchase_order_main']);
+	  unhide_field(['supplier_address', 'contact_person', 'supplier_name', 'address_display', 'contact_display', 'contact_mobile','contact_email']);			  
+	  refresh_many(['credit_to','supplier','supplier_address','contact_person','supplier_name', 'address_display', 'contact_display','contact_mobile', 'contact_email','entries', 'purchase_receipt_main', 'purchase_order_main', 'purchase_tax_details']);
   }
-  get_server_fields('pull_details','','',doc, dt, dn,1,callback);
+  $c_obj(make_doclist(dt,dn),'pull_details','',callback);
 }
-
 
 // ========== PV Details Table ============
 
