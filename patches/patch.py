@@ -1,7 +1,7 @@
 # REMEMBER to update this
 # ========================
 
-last_patch = 372
+last_patch = 373
 
 #-------------------------------------------
 
@@ -395,6 +395,9 @@ def execute(patch_no):
 
 		get_obj('Features Setup', 'Features Setup').doc.save()
 	elif patch_no == 373:
+		sql("delete from `tabDocField` where fieldname = 'item_searial_nos' and parent = 'Features Setup'")
+		sql("delete from `tabDefaultValue` where defkey = 'item_searial_nos' and parent = 'Control Panel'")
+	elif patch_no == 374:
 		comp = sql("select name from tabCompany where docstatus!=2")
 		fy = sql("select name from `tabFiscal Year` order by year_start_date asc")
 		for c in comp:
