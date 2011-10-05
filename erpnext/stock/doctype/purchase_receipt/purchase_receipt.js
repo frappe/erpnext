@@ -82,10 +82,10 @@ cur_frm.fields_dict.contact_person.on_new = function(dn) {
 // -----------------
 cur_frm.cscript['Pull Purchase Order Details'] = function(doc, dt, dn) {
   var callback = function(r,rt) { 
-	  unhide_field(['supplier_address','contact_person','supplier_name','address_display','contact_display','contact_mobile','contact_email']);			  
-	  refresh_many(['supplier','supplier_address','contact_person','supplier_name','address_display','contact_display','contact_mobile','contact_email','purchase_receipt_details']);
+	  unhide_field(['supplier_address','contact_person','supplier_name','address_display', 'contact_display', 'contact_mobile','contact_email']);			  
+	  refresh_many(['supplier','supplier_address','contact_person', 'supplier_name', 'address_display', 'contact_display','contact_mobile', 'contact_email', 'purchase_receipt_details', 'purchase_tax_details']);
   }
-  get_server_fields('get_po_details','','',doc, dt, dn,1,callback);
+  $c_obj(make_doclist(dt,dn),'get_po_details','',callback);
 }
 
 
