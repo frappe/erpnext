@@ -8,6 +8,7 @@ class DocType:
 		"""
 		from webnotes.model import default_fields 
 		from webnotes.utils import set_default
+		
 		for key in self.doc.fields:
 			if key not in default_fields:
 				set_default(key, self.doc.fields[key])
