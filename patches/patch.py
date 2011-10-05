@@ -1,7 +1,7 @@
 # REMEMBER to update this
 # ========================
 
-last_patch = 373
+last_patch = 374
 
 #-------------------------------------------
 
@@ -397,7 +397,15 @@ def execute(patch_no):
 	elif patch_no == 373:
 		sql("delete from `tabDocField` where fieldname = 'item_searial_nos' and parent = 'Features Setup'")
 		sql("delete from `tabDefaultValue` where defkey = 'item_searial_nos' and parent = 'Control Panel'")
-	elif patch_no == 374:
+	elif patch_no == 374:	
+		rs = sql("select fieldname from tabDocField where parent='Features Setup' and fieldname is not null")
+		from webnotes.model.code import get_obj
+		m = get_obj('Features Setup')
+		for d in rs:
+			m.doc.fields[d[0]] = 1
+		m.doc.save()
+		m.validate()
+	elif patch_no == 375:
 		comp = sql("select name from tabCompany where docstatus!=2")
 		fy = sql("select name from `tabFiscal Year` order by year_start_date asc")
 		for c in comp:
