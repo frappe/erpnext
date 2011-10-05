@@ -1,7 +1,7 @@
 # REMEMBER to update this
 # ========================
 
-last_patch = 376
+last_patch = 377
 
 #-------------------------------------------
 
@@ -420,3 +420,6 @@ def execute(patch_no):
 		sql("delete from `tabDefaultValue` where defkey in (%s) and parent = 'Control Panel'" % st)
 
 		get_obj('Features Setup', 'Features Setup').doc.save()
+	elif patch_no == 377:
+		sql("delete from `tabDocField` where fieldname = 'item_searial_nos' and parent = 'Features Setup'")
+		sql("delete from `tabDefaultValue` where defkey = 'item_searial_nos' and parent = 'Control Panel'")
