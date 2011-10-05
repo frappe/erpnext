@@ -1,7 +1,7 @@
 # REMEMBER to update this
 # ========================
 
-last_patch = 371
+last_patch = 372
 
 #-------------------------------------------
 
@@ -364,12 +364,12 @@ def execute(patch_no):
 		from webnotes.modules.module_manager import reload_doc
 
 		reload_doc('setup', 'doctype','features_setup')
-		flds = ['page_break', 'projects', 'packing_details', 'discounts', 'brands', 'item_batch_nos', 'after_sales_installations', 'item_serial_nos', 'item_group_in_details', 'exports', 'imports', 'item_advanced', 'sales_extras', 'more_info', 'quality', 'manufacturing', 'pos', 'item_serial_nos']
+		flds = ['page_break', 'projects', 'packing_details', 'discounts', 'brands', 'item_batch_nos', 'after_sales_installations', 'item_searial_nos', 'item_group_in_details', 'exports', 'imports', 'item_advanced', 'sales_extras', 'more_info', 'quality', 'manufacturing', 'pos', 'item_serial_nos']
 
 		for f in flds:
 			val = sql("select value from tabSingles where field = '%s' and doctype = 'Features Setup'" % f)
 			val = val and val[0][0] or 0
-			sql("update `tabSingles` set value = %s where field = '%s' and doctype = 'Features Setup'" % (val, '__'+f))
+			sql("update `tabSingles` set `value` = %s where `field` = '%s' and doctype = 'Features Setup'" % (val, '__'+f))
 
 		st = "'"+"', '".join(flds)+"'"
 		sql("delete from `tabDocField` where fieldname in (%s) and parent = 'Features Setup'" % st)
@@ -378,6 +378,23 @@ def execute(patch_no):
 		get_obj('Features Setup', 'Features Setup').doc.save()
 		
 	elif patch_no == 372:
+		from webnotes.modules.module_manager import reload_doc
+
+		reload_doc('setup', 'doctype','features_setup')
+		flds = ['page_break', 'projects', 'packing_details', 'discounts', 'brands', 'item_batch_nos', 'after_sales_installations', 'item_searial_nos', 'item_group_in_details', 'exports', 'imports', 'item_advanced', 'sales_extras', 'more_info', 'quality', 'manufacturing', 'pos', 'item_serial_nos']
+
+		for f in flds:
+			val = sql("select value from tabSingles where field = '%s' and doctype = 'Features Setup'" % f)
+			val = val and val[0][0] or 0
+			sql("update `tabSingles` set `value` = %s where `field` = '%s' and doctype = 'Features Setup'" % (val, 'fs_'+f))
+
+		st = "'__"+"', '__".join(flds)+"'"
+		
+		sql("delete from `tabDocField` where fieldname in (%s) and parent = 'Features Setup'" % st)
+		sql("delete from `tabDefaultValue` where defkey in (%s) and parent = 'Control Panel'" % st)
+
+		get_obj('Features Setup', 'Features Setup').doc.save()
+	elif patch_no == 373:
 		comp = sql("select name from tabCompany where docstatus!=2")
 		fy = sql("select name from `tabFiscal Year` order by year_start_date asc")
 		for c in comp:
