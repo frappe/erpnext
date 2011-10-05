@@ -1,7 +1,7 @@
 # REMEMBER to update this
 # ========================
 
-last_patch = 374
+last_patch = 376
 
 #-------------------------------------------
 
@@ -386,3 +386,37 @@ def execute(patch_no):
 		reload_doc('accounts', 'doctype', 'internal_reconciliation')
 		reload_doc('accounts', 'doctype', 'ir_payment_detail')
 		reload_doc('accounts', 'Module Def', 'Accounts')
+	elif patch_no == 375:
+		from webnotes.modules.module_manager import reload_doc
+
+		reload_doc('setup', 'doctype','features_setup')
+		flds = ['page_break', 'projects', 'packing_details', 'discounts', 'brands', 'item_batch_nos', 'after_sales_installations', 'item_searial_nos', 'item_group_in_details', 'exports', 'imports', 'item_advanced', 'sales_extras', 'more_info', 'quality', 'manufacturing', 'pos', 'item_serial_nos']
+
+		for f in flds:
+			val = sql("select value from tabSingles where field = '%s' and doctype = 'Features Setup'" % f)
+			val = val and val[0][0] or 0
+			sql("update `tabSingles` set `value` = %s where `field` = '%s' and doctype = 'Features Setup'" % (val, '__'+f))
+
+		st = "'"+"', '".join(flds)+"'"
+		sql("delete from `tabDocField` where fieldname in (%s) and parent = 'Features Setup'" % st)
+		sql("delete from `tabDefaultValue` where defkey in (%s) and parent = 'Control Panel'" % st)
+
+		get_obj('Features Setup', 'Features Setup').doc.save()
+		
+	elif patch_no == 376:
+		from webnotes.modules.module_manager import reload_doc
+
+		reload_doc('setup', 'doctype','features_setup')
+		flds = ['page_break', 'projects', 'packing_details', 'discounts', 'brands', 'item_batch_nos', 'after_sales_installations', 'item_searial_nos', 'item_group_in_details', 'exports', 'imports', 'item_advanced', 'sales_extras', 'more_info', 'quality', 'manufacturing', 'pos', 'item_serial_nos']
+
+		for f in flds:
+			val = sql("select value from tabSingles where field = '%s' and doctype = 'Features Setup'" % f)
+			val = val and val[0][0] or 0
+			sql("update `tabSingles` set `value` = %s where `field` = '%s' and doctype = 'Features Setup'" % (val, 'fs_'+f))
+
+		st = "'__"+"', '__".join(flds)+"'"
+		
+		sql("delete from `tabDocField` where fieldname in (%s) and parent = 'Features Setup'" % st)
+		sql("delete from `tabDefaultValue` where defkey in (%s) and parent = 'Control Panel'" % st)
+
+		get_obj('Features Setup', 'Features Setup').doc.save()
