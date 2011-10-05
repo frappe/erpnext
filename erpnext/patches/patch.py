@@ -1,7 +1,7 @@
 # REMEMBER to update this
 # ========================
 
-last_patch = 378
+last_patch = 379
 
 #-------------------------------------------
 
@@ -431,3 +431,6 @@ def execute(patch_no):
 			m.doc.fields[d[0]] = 1
 		m.doc.save()
 		m.validate()
+	elif patch_no == 379:
+		if sql("select count(name) from `tabDocField` where label = 'Get Specification Details' and parent = 'QA Inspection Report' and fieldtype = 'Button'")[0][0] > 1:
+			sql("delete from `tabDocField` where label = 'Get Specification Details' and parent = 'QA Inspection Report' and fieldtype = 'Button' limit 1")
