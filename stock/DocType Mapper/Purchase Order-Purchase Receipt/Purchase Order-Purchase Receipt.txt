@@ -5,7 +5,7 @@
 	{
 		'creation': '2010-08-08 17:09:35',
 		'docstatus': 0,
-		'modified': '2011-09-13 17:26:55',
+		'modified': '2011-10-07 12:10:26',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
@@ -143,6 +143,14 @@
 		'from_field': 'eval:(flt(obj.qty) - flt(obj.received_qty)) * flt(obj.purchase_rate)',
 		'match_id': 1,
 		'to_field': 'amount'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'schedule_date',
+		'match_id': 1,
+		'to_field': 'schedule_date'
 	},
 
 	# Table Mapper Detail

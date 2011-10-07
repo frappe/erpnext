@@ -406,6 +406,9 @@ def execute(patch_no):
 		m.doc.save()
 		m.validate()
 	elif patch_no == 375:
+		from webnotes.session_cache import clear_cache
+		clear_cache(webnotes.session['user'])
+	elif patch_no == 376:		
 		comp = sql("select name from tabCompany where docstatus!=2")
 		fy = sql("select name from `tabFiscal Year` order by year_start_date asc")
 		for c in comp:
