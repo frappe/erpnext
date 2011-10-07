@@ -1,7 +1,7 @@
 # REMEMBER to update this
 # ========================
 
-last_patch = 379
+last_patch = 380
 
 #-------------------------------------------
 
@@ -434,3 +434,6 @@ def execute(patch_no):
 	elif patch_no == 379:
 		if sql("select count(name) from `tabDocField` where label = 'Get Specification Details' and parent = 'QA Inspection Report' and fieldtype = 'Button'")[0][0] > 1:
 			sql("delete from `tabDocField` where label = 'Get Specification Details' and parent = 'QA Inspection Report' and fieldtype = 'Button' limit 1")
+	elif patch_no == 380:
+		from webnotes.session_cache import clear_cache
+		clear_cache(webnotes.session['user'])
