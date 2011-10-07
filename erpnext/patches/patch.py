@@ -1,7 +1,7 @@
 # REMEMBER to update this
 # ========================
 
-last_patch = 380
+last_patch = 381
 
 #-------------------------------------------
 
@@ -437,3 +437,5 @@ def execute(patch_no):
 	elif patch_no == 380:
 		from webnotes.session_cache import clear_cache
 		clear_cache(webnotes.session['user'])
+	elif patch_no == 381:
+		reload_doc('stock', 'DocType Mapper', 'Purchase Order-Purchase Receipt')
