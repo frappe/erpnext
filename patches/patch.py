@@ -1,7 +1,7 @@
 # REMEMBER to update this
 # ========================
 
-last_patch = 376
+last_patch = 377
 
 #-------------------------------------------
 
@@ -410,7 +410,16 @@ def execute(patch_no):
 		clear_cache(webnotes.session['user'])
 	elif patch_no == 376:
 		reload_doc('stock', 'DocType Mapper', 'Purchase Order-Purchase Receipt')
-	elif patch_no == 377:		
+	elif patch_no == 377:
+		flds = ['page_break', 'projects', 'packing_details', 'discounts', 'brands', 'item_batch_nos', 'after_sales_installations', 'item_searial_nos', 'item_group_in_details', 'exports', 'imports', 'item_advanced', 'sales_extras', 'more_info', 'quality', 'manufacturing', 'pos', 'item_serial_nos']
+		
+		st = "'"+"', '".join(flds)+"'"
+		sql("delete from `tabDocField` where fieldname in (%s) and parent = 'Features Setup'" % st)
+		sql("delete from `tabDefaultValue` where defkey in (%s) and parent = 'Control Panel'" % st)
+		
+		from webnotes.session_cache import clear_cache
+		clear_cache(webnotes.session['user'])
+	elif patch_no == 378:
 		comp = sql("select name from tabCompany where docstatus!=2")
 		fy = sql("select name from `tabFiscal Year` order by year_start_date asc")
 		for c in comp:
