@@ -1,7 +1,7 @@
 # REMEMBER to update this
 # ========================
 
-last_patch = 383
+last_patch = 384
 
 #-------------------------------------------
 
@@ -450,3 +450,7 @@ def execute(patch_no):
 		clear_cache(webnotes.session['user'])
 	elif patch_no == 383:
 		reload_doc('accounts', 'doctype', 'cost_center')
+	elif patch_no == 384:
+		reload_doc('stock', 'Module Def', 'Stock')
+		sql("delete from `tabModule Def Item` where display_name = 'Serial No' and parent = 'Support'")
+		sql("update `tabDocType` set subject = 'Item Code: %(item_code)s, Warehouse: %(warehouse)s' where name = 'Serial No'")

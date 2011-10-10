@@ -5,17 +5,18 @@
 	{
 		'creation': '2010-08-08 17:09:23',
 		'docstatus': 0,
-		'modified': '2011-05-17 12:38:15',
+		'modified': '2011-10-10 17:08:57',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1305616095',
+		'_last_update': '1317365120',
 		'allow_trash': 1,
 		'autoname': 'field:serial_no',
 		'colour': 'White:FFF',
+		'default_print_format': 'Standard',
 		'doctype': 'DocType',
 		'document_type': 'Master',
 		'module': 'Stock',
@@ -24,9 +25,8 @@
 		'section_style': 'Tabbed',
 		'server_code_error': ' ',
 		'show_in_menu': 0,
-		'subject': '%(item_code)s',
 		'tag_fields': 'status',
-		'version': 188
+		'version': 190
 	},
 
 	# These values are common for all DocField
@@ -60,7 +60,6 @@
 		'cancel': 0,
 		'create': 0,
 		'doctype': 'DocPerm',
-		'idx': 1,
 		'permlevel': 1,
 		'role': 'Material Manager',
 		'submit': 0,
@@ -73,7 +72,6 @@
 		'cancel': 0,
 		'create': 0,
 		'doctype': 'DocPerm',
-		'idx': 2,
 		'permlevel': 0,
 		'role': 'Material Manager',
 		'submit': 0,
@@ -86,7 +84,6 @@
 		'cancel': 0,
 		'create': 0,
 		'doctype': 'DocPerm',
-		'idx': 3,
 		'permlevel': 1,
 		'role': 'Material User',
 		'submit': 0,
@@ -99,7 +96,6 @@
 		'cancel': 0,
 		'create': 0,
 		'doctype': 'DocPerm',
-		'idx': 4,
 		'permlevel': 0,
 		'role': 'Material User',
 		'submit': 0,
@@ -111,7 +107,6 @@
 		'cancel': 1,
 		'create': 1,
 		'doctype': 'DocPerm',
-		'idx': 5,
 		'permlevel': 0,
 		'role': 'System Manager',
 		'write': 1
@@ -122,7 +117,6 @@
 		'cancel': 1,
 		'create': 1,
 		'doctype': 'DocPerm',
-		'idx': 6,
 		'permlevel': 0,
 		'role': 'Material Master Manager',
 		'write': 1
@@ -131,7 +125,6 @@
 	# DocPerm
 	{
 		'doctype': 'DocPerm',
-		'idx': 7,
 		'permlevel': 1,
 		'role': 'System Manager'
 	},
@@ -139,7 +132,6 @@
 	# DocPerm
 	{
 		'doctype': 'DocPerm',
-		'idx': 8,
 		'permlevel': 1,
 		'role': 'Sales Master Manager'
 	},
@@ -148,7 +140,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Section Break',
-		'idx': 1,
 		'label': 'Details',
 		'oldfieldtype': 'Section Break',
 		'permlevel': 0
@@ -158,7 +149,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Column Break',
-		'idx': 2,
 		'permlevel': 0
 	},
 
@@ -168,7 +158,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'status',
 		'fieldtype': 'Select',
-		'idx': 3,
 		'in_filter': 1,
 		'label': 'Status',
 		'no_copy': 1,
@@ -185,7 +174,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'serial_no',
 		'fieldtype': 'Data',
-		'idx': 4,
 		'in_filter': 0,
 		'label': 'Serial No',
 		'no_copy': 1,
@@ -193,7 +181,7 @@
 		'oldfieldtype': 'Data',
 		'permlevel': 0,
 		'reqd': 1,
-		'search_index': 0
+		'search_index': 1
 	},
 
 	# DocField
@@ -202,7 +190,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'item_code',
 		'fieldtype': 'Link',
-		'idx': 5,
 		'in_filter': 1,
 		'label': 'Item Code',
 		'oldfieldname': 'item_code',
@@ -218,7 +205,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Column Break',
-		'idx': 6,
 		'permlevel': 0
 	},
 
@@ -227,7 +213,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'item_name',
 		'fieldtype': 'Data',
-		'idx': 7,
 		'label': 'Item Name',
 		'permlevel': 1
 	},
@@ -237,13 +222,11 @@
 		'doctype': 'DocField',
 		'fieldname': 'description',
 		'fieldtype': 'Text',
-		'idx': 8,
 		'in_filter': 1,
 		'label': 'Description',
 		'oldfieldname': 'description',
 		'oldfieldtype': 'Text',
 		'permlevel': 1,
-		'reqd': 1,
 		'search_index': 0,
 		'width': '300px'
 	},
@@ -253,14 +236,13 @@
 		'doctype': 'DocField',
 		'fieldname': 'item_group',
 		'fieldtype': 'Link',
-		'idx': 9,
 		'in_filter': 0,
 		'label': 'Item Group',
 		'oldfieldname': 'item_group',
 		'oldfieldtype': 'Link',
 		'options': 'Item Group',
 		'permlevel': 1,
-		'reqd': 0,
+		'reqd': 1,
 		'search_index': 0
 	},
 
@@ -269,7 +251,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'brand',
 		'fieldtype': 'Link',
-		'idx': 10,
 		'in_filter': 0,
 		'label': 'Brand',
 		'oldfieldname': 'brand',
@@ -284,7 +265,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Section Break',
-		'idx': 11,
 		'label': 'Purchase Details',
 		'permlevel': 0
 	},
@@ -293,7 +273,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Column Break',
-		'idx': 12,
 		'permlevel': 0,
 		'width': '50%'
 	},
@@ -303,7 +282,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'purchase_document_type',
 		'fieldtype': 'Select',
-		'idx': 13,
 		'label': 'Purchase Document Type',
 		'no_copy': 1,
 		'options': '\nPurchase Receipt\nStock Entry',
@@ -316,7 +294,6 @@
 		'fieldname': 'purchase_document_no',
 		'fieldtype': 'Data',
 		'hidden': 0,
-		'idx': 14,
 		'label': 'Purchase Document No',
 		'no_copy': 1,
 		'permlevel': 0
@@ -328,7 +305,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'purchase_date',
 		'fieldtype': 'Date',
-		'idx': 15,
 		'in_filter': 1,
 		'label': 'Purchase Date',
 		'no_copy': 1,
@@ -345,7 +321,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'purchase_time',
 		'fieldtype': 'Time',
-		'idx': 16,
 		'label': 'Incoming Time',
 		'no_copy': 1,
 		'permlevel': 0,
@@ -357,7 +332,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'purchase_rate',
 		'fieldtype': 'Currency',
-		'idx': 17,
 		'in_filter': 0,
 		'label': 'Incoming Rate',
 		'no_copy': 1,
@@ -372,7 +346,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Column Break',
-		'idx': 18,
 		'permlevel': 0,
 		'width': '50%'
 	},
@@ -382,7 +355,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'warehouse',
 		'fieldtype': 'Link',
-		'idx': 19,
 		'in_filter': 1,
 		'label': 'Warehouse',
 		'no_copy': 1,
@@ -399,7 +371,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'supplier',
 		'fieldtype': 'Link',
-		'idx': 20,
 		'in_filter': 1,
 		'label': 'Supplier',
 		'no_copy': 1,
@@ -412,7 +383,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'supplier_name',
 		'fieldtype': 'Data',
-		'idx': 21,
 		'in_filter': 1,
 		'label': 'Supplier Name',
 		'no_copy': 1,
@@ -424,7 +394,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'address_display',
 		'fieldtype': 'Text',
-		'idx': 22,
 		'label': 'Supplier Address',
 		'no_copy': 1,
 		'permlevel': 1
@@ -434,7 +403,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Section Break',
-		'idx': 23,
 		'label': 'Delivery Details',
 		'oldfieldtype': 'Column Break',
 		'permlevel': 0
@@ -444,7 +412,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Column Break',
-		'idx': 24,
 		'permlevel': 0,
 		'width': '50%'
 	},
@@ -454,7 +421,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'delivery_document_type',
 		'fieldtype': 'Select',
-		'idx': 25,
 		'in_filter': 1,
 		'label': 'Delivery Document Type',
 		'no_copy': 1,
@@ -467,7 +433,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'delivery_document_no',
 		'fieldtype': 'Data',
-		'idx': 26,
 		'in_filter': 1,
 		'label': 'Delivery Document No',
 		'no_copy': 1,
@@ -479,7 +444,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'customer_address',
 		'fieldtype': 'Text',
-		'idx': 27,
 		'label': 'Customer Address',
 		'oldfieldname': 'customer_address',
 		'oldfieldtype': 'Text',
@@ -491,7 +455,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'delivery_date',
 		'fieldtype': 'Date',
-		'idx': 28,
 		'label': 'Delivery Date',
 		'no_copy': 1,
 		'oldfieldname': 'delivery_date',
@@ -505,7 +468,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'delivery_time',
 		'fieldtype': 'Time',
-		'idx': 29,
 		'label': 'Delivery Time',
 		'no_copy': 1,
 		'permlevel': 1
@@ -517,7 +479,6 @@
 		'fieldname': 'is_cancelled',
 		'fieldtype': 'Select',
 		'hidden': 1,
-		'idx': 30,
 		'label': 'Is Cancelled',
 		'oldfieldname': 'is_cancelled',
 		'oldfieldtype': 'Select',
@@ -530,7 +491,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Column Break',
-		'idx': 31,
 		'permlevel': 0,
 		'width': '50%'
 	},
@@ -540,7 +500,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'customer',
 		'fieldtype': 'Link',
-		'idx': 32,
 		'in_filter': 1,
 		'label': 'Customer',
 		'no_copy': 1,
@@ -559,7 +518,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'customer_name',
 		'fieldtype': 'Data',
-		'idx': 33,
 		'in_filter': 1,
 		'label': 'Customer Name',
 		'no_copy': 1,
@@ -574,7 +532,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'delivery_address',
 		'fieldtype': 'Text',
-		'idx': 34,
 		'label': 'Delivery Address',
 		'no_copy': 1,
 		'permlevel': 1
@@ -585,7 +542,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'territory',
 		'fieldtype': 'Link',
-		'idx': 35,
 		'in_filter': 1,
 		'label': 'Territory',
 		'no_copy': 1,
@@ -601,7 +557,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Section Break',
-		'idx': 36,
 		'label': 'Warranty / AMC Details',
 		'permlevel': 0
 	},
@@ -610,7 +565,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Column Break',
-		'idx': 37,
 		'permlevel': 0,
 		'width': '50%'
 	},
@@ -620,7 +574,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'maintenance_status',
 		'fieldtype': 'Select',
-		'idx': 38,
 		'in_filter': 1,
 		'label': 'Maintenance Status',
 		'no_copy': 0,
@@ -628,7 +581,7 @@
 		'oldfieldtype': 'Select',
 		'options': '\nUnder Warranty\nOut of Warranty\nUnder AMC\nOut of AMC',
 		'permlevel': 0,
-		'search_index': 0,
+		'search_index': 1,
 		'width': '150px'
 	},
 
@@ -638,7 +591,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'warranty_period',
 		'fieldtype': 'Int',
-		'idx': 39,
 		'label': 'Warranty Period (Days)',
 		'oldfieldname': 'warranty_period',
 		'oldfieldtype': 'Int',
@@ -651,7 +603,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Column Break',
-		'idx': 40,
 		'permlevel': 0,
 		'width': '50%'
 	},
@@ -661,7 +612,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'warranty_expiry_date',
 		'fieldtype': 'Date',
-		'idx': 41,
 		'in_filter': 1,
 		'label': 'Warranty Expiry Date',
 		'oldfieldname': 'warranty_expiry_date',
@@ -675,7 +625,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'amc_expiry_date',
 		'fieldtype': 'Date',
-		'idx': 42,
 		'in_filter': 1,
 		'label': 'AMC Expiry Date',
 		'oldfieldname': 'amc_expiry_date',
@@ -689,7 +638,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Section Break',
-		'idx': 43,
 		'label': 'More Info',
 		'permlevel': 0
 	},
@@ -699,7 +647,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'serial_no_details',
 		'fieldtype': 'Text Editor',
-		'idx': 44,
 		'label': 'Serial No Details',
 		'permlevel': 0
 	},
@@ -709,13 +656,12 @@
 		'doctype': 'DocField',
 		'fieldname': 'company',
 		'fieldtype': 'Select',
-		'idx': 45,
 		'in_filter': 1,
 		'label': 'Company',
 		'options': 'link:Company',
 		'permlevel': 0,
 		'reqd': 1,
-		'search_index': 0
+		'search_index': 1
 	},
 
 	# DocField
@@ -723,13 +669,12 @@
 		'doctype': 'DocField',
 		'fieldname': 'fiscal_year',
 		'fieldtype': 'Select',
-		'idx': 46,
 		'in_filter': 1,
 		'label': 'Fiscal Year',
 		'options': 'link:Fiscal Year',
 		'permlevel': 0,
 		'reqd': 1,
-		'search_index': 0
+		'search_index': 1
 	},
 
 	# DocField
@@ -737,7 +682,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'trash_reason',
 		'fieldtype': 'Small Text',
-		'idx': 47,
 		'label': 'Trash Reason',
 		'oldfieldname': 'trash_reason',
 		'oldfieldtype': 'Small Text',
