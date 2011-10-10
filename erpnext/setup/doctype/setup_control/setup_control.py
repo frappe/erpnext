@@ -84,7 +84,7 @@ class DocType:
 		# Set Registration Complete
 		set_default('registration_complete','1')
 
-		webnotes.msgprint("Great! Your company has now been created")
+		msgprint("Great! Your company has now been created")
 		
 		import webnotes.utils
 		return webnotes.utils.get_defaults()
