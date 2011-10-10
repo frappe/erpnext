@@ -32,6 +32,35 @@ class DocType:
 			'company_abbr'	: abbr
 		}
 		return ret
+		
+	#-------------------------------------------------------------------------
+	def convert_group_to_ledger(self):
+		if self.check_if_child_exists():
+			msgprint("Cost Center: %s has existing child. You can not convert this cost center to ledger" % (self.doc.name), raise_exception=1)
+		elif self.check_gle_exists():
+			msgprint("Cost Center with existing transaction can not be converted to ledger.", raise_exception=1)
+		else:
+			self.doc.group_or_ledger = 'Ledger'
+			self.doc.save()
+			return 1
+			
+	#-------------------------------------------------------------------------
+	def convert_ledger_to_group(self):
+		if self.check_gle_exists():
+			msgprint("Cost Center with existing transaction can not be converted to group.", raise_exception=1)
+		else:
+			self.doc.group_or_ledger = 'Group'
+			self.doc.save()
+			return 1
+
+	#-------------------------------------------------------------------------
+	def check_gle_exists(self):
+		return sql("select name from `tabGL Entry` where cost_center = %s and ifnull(is_cancelled, 'No') = 'No'", (self.doc.name))
+		
+		
+	#-------------------------------------------------------------------------
+	def check_if_child_exists(self):
+		return sql("select name from `tabCost Center` where parent_cost_center = %s and docstatus != 2", self.doc.name)
 
 	#-------------------------------------------------------------------------
 	def validate(self): 

@@ -1,7 +1,7 @@
 # REMEMBER to update this
 # ========================
 
-last_patch = 382
+last_patch = 383
 
 #-------------------------------------------
 
@@ -448,3 +448,5 @@ def execute(patch_no):
 		
 		from webnotes.session_cache import clear_cache
 		clear_cache(webnotes.session['user'])
+	elif patch_no == 383:
+		reload_doc('accounts', 'doctype', 'cost_center')

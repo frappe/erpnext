@@ -5,14 +5,14 @@
 	{
 		'creation': '2010-08-08 17:08:56',
 		'docstatus': 0,
-		'modified': '2011-09-26 18:55:05',
+		'modified': '2011-10-10 12:05:07',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1316075905',
+		'_last_update': '1317365120',
 		'allow_copy': 1,
 		'allow_trash': 1,
 		'autoname': 'field:cost_center_name',
@@ -27,7 +27,7 @@
 		'section_style': 'Simple',
 		'server_code_error': ' ',
 		'show_in_menu': 0,
-		'version': 107
+		'version': 109
 	},
 
 	# These values are common for all DocField
@@ -203,6 +203,26 @@
 		'print_hide': 1,
 		'report_hide': 1,
 		'reqd': 1,
+		'trigger': 'Client'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldtype': 'Button',
+		'label': 'Convert to Group',
+		'permlevel': 0,
+		'trigger': 'Client'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldtype': 'Button',
+		'label': 'Convert to Ledger',
+		'permlevel': 0,
 		'trigger': 'Client'
 	},
 
