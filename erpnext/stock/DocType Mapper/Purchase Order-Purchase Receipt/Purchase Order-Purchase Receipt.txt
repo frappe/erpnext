@@ -1,0 +1,189 @@
+# DocType Mapper, Purchase Order-Purchase Receipt
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-08-08 17:09:35',
+		'docstatus': 0,
+		'modified': '2011-10-07 12:10:26',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all Table Mapper Detail
+	{
+		'doctype': 'Table Mapper Detail',
+		'name': '__common__',
+		'parent': 'Purchase Order-Purchase Receipt',
+		'parentfield': 'table_mapper_details',
+		'parenttype': 'DocType Mapper'
+	},
+
+	# These values are common for all Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'map': 'Yes',
+		'name': '__common__',
+		'parent': 'Purchase Order-Purchase Receipt',
+		'parentfield': 'field_mapper_details',
+		'parenttype': 'DocType Mapper'
+	},
+
+	# These values are common for all DocType Mapper
+	{
+		'doctype': u'DocType Mapper',
+		'from_doctype': 'Purchase Order',
+		'module': 'Stock',
+		'name': '__common__',
+		'ref_doc_submitted': 1,
+		'to_doctype': 'Purchase Receipt'
+	},
+
+	# DocType Mapper, Purchase Order-Purchase Receipt
+	{
+		'doctype': u'DocType Mapper',
+		'name': 'Purchase Order-Purchase Receipt'
+	},
+
+	# Field Mapper Detail
+	{
+		'checking_operator': '=',
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'supplier',
+		'match_id': 0,
+		'to_field': 'supplier'
+	},
+
+	# Field Mapper Detail
+	{
+		'checking_operator': '=',
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'company',
+		'match_id': 0,
+		'to_field': 'company'
+	},
+
+	# Field Mapper Detail
+	{
+		'checking_operator': '=',
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'currency',
+		'match_id': 0,
+		'to_field': 'currency'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'name',
+		'match_id': 1,
+		'to_field': 'prevdoc_detail_docname'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'parent',
+		'match_id': 1,
+		'to_field': 'prevdoc_docname'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'parenttype',
+		'match_id': 1,
+		'to_field': 'prevdoc_doctype'
+	},
+
+	# Field Mapper Detail
+	{
+		'checking_operator': '=',
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'item_code',
+		'match_id': 1,
+		'to_field': 'item_code'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'eval:(flt(obj.qty) - flt(obj.received_qty)) ',
+		'match_id': 1,
+		'to_field': 'received_qty'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'eval:(flt(obj.qty) - flt(obj.received_qty)) ',
+		'match_id': 1,
+		'to_field': 'qty'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'eval:(flt(obj.qty) - flt(obj.received_qty)) * flt(obj.conversion_factor)',
+		'match_id': 1,
+		'to_field': 'stock_qty'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'eval:(flt(obj.qty) - flt(obj.received_qty)) * flt(obj.import_rate)',
+		'match_id': 1,
+		'to_field': 'import_amount'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'eval:(flt(obj.qty) - flt(obj.received_qty)) * flt(obj.purchase_rate)',
+		'match_id': 1,
+		'to_field': 'amount'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'schedule_date',
+		'match_id': 1,
+		'to_field': 'schedule_date'
+	},
+
+	# Table Mapper Detail
+	{
+		'doctype': 'Table Mapper Detail',
+		'from_field': 'po_details',
+		'from_table': 'PO Detail',
+		'match_id': 1,
+		'reference_doctype_key': 'prevdoc_doctype',
+		'reference_key': 'prevdoc_detail_docname',
+		'to_field': 'purchase_receipt_details',
+		'to_table': 'Purchase Receipt Detail',
+		'validation_logic': 'docstatus=1 and qty > ifnull(received_qty,0)'
+	},
+
+	# Table Mapper Detail
+	{
+		'doctype': 'Table Mapper Detail',
+		'from_table': 'Purchase Order',
+		'match_id': 0,
+		'reference_key': 'prevdoc_docname',
+		'to_table': 'Purchase Receipt',
+		'validation_logic': 'docstatus = 1'
+	},
+
+	# Table Mapper Detail
+	{
+		'doctype': 'Table Mapper Detail',
+		'from_field': 'purchase_tax_details',
+		'from_table': 'Purchase Tax Detail',
+		'match_id': 2,
+		'to_field': 'purchase_tax_details',
+		'to_table': 'Purchase Tax Detail',
+		'validation_logic': 'docstatus = 1'
+	}
+]

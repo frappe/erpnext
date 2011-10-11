@@ -1,0 +1,131 @@
+# DocType Mapper, Salary Structure-Salary Slip
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-12-14 10:33:11',
+		'docstatus': 0,
+		'modified': '2011-09-15 15:04:44',
+		'modified_by': 'Administrator',
+		'owner': 'harshada@webnotestech.com'
+	},
+
+	# These values are common for all Table Mapper Detail
+	{
+		'doctype': 'Table Mapper Detail',
+		'name': '__common__',
+		'parent': 'Salary Structure-Salary Slip',
+		'parentfield': 'table_mapper_details',
+		'parenttype': 'DocType Mapper',
+		'validation_logic': 'name is not null'
+	},
+
+	# These values are common for all Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'map': 'Yes',
+		'name': '__common__',
+		'parent': 'Salary Structure-Salary Slip',
+		'parentfield': 'field_mapper_details',
+		'parenttype': 'DocType Mapper'
+	},
+
+	# These values are common for all DocType Mapper
+	{
+		'doctype': 'DocType Mapper',
+		'from_doctype': 'Salary Structure',
+		'module': 'HR',
+		'name': '__common__',
+		'to_doctype': 'Salary Slip'
+	},
+
+	# DocType Mapper, Salary Structure-Salary Slip
+	{
+		'doctype': 'DocType Mapper',
+		'name': 'Salary Structure-Salary Slip'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'total_earning',
+		'match_id': 0,
+		'to_field': 'gross_pay'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'modified_value',
+		'match_id': 1,
+		'to_field': 'e_amount'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'd_modified_amt',
+		'match_id': 2,
+		'to_field': 'd_amount'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'modified_value',
+		'match_id': 1,
+		'to_field': 'e_modified_amount'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'depend_on_lwp',
+		'match_id': 1,
+		'to_field': 'e_depends_on_lwp'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'd_modified_amt',
+		'match_id': 2,
+		'to_field': 'd_modified_amount'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'depend_on_lwp',
+		'match_id': 2,
+		'to_field': 'd_depends_on_lwp'
+	},
+
+	# Table Mapper Detail
+	{
+		'doctype': 'Table Mapper Detail',
+		'from_table': 'Salary Structure',
+		'match_id': 0,
+		'to_table': 'Salary Slip'
+	},
+
+	# Table Mapper Detail
+	{
+		'doctype': 'Table Mapper Detail',
+		'from_field': 'earning_details',
+		'from_table': 'Earning Detail',
+		'match_id': 1,
+		'to_field': 'earning_details',
+		'to_table': 'SS Earning Detail'
+	},
+
+	# Table Mapper Detail
+	{
+		'doctype': 'Table Mapper Detail',
+		'from_field': 'deduction_details',
+		'from_table': 'Deduction Detail',
+		'match_id': 2,
+		'to_field': 'deduction_details',
+		'to_table': 'SS Deduction Detail'
+	}
+]

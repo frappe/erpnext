@@ -1,0 +1,303 @@
+# DocType, Cost Center
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-08-08 17:08:56',
+		'docstatus': 0,
+		'modified': '2011-10-10 12:05:07',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all DocType
+	{
+		'_last_update': '1317365120',
+		'allow_copy': 1,
+		'allow_trash': 1,
+		'autoname': 'field:cost_center_name',
+		'colour': 'White:FFF',
+		'default_print_format': 'Standard',
+		'doctype': 'DocType',
+		'document_type': 'Master',
+		'in_create': 1,
+		'module': 'Accounts',
+		'name': '__common__',
+		'search_fields': 'name,parent_cost_center',
+		'section_style': 'Simple',
+		'server_code_error': ' ',
+		'show_in_menu': 0,
+		'version': 109
+	},
+
+	# These values are common for all DocField
+	{
+		'doctype': 'DocField',
+		'name': '__common__',
+		'parent': 'Cost Center',
+		'parentfield': 'fields',
+		'parenttype': 'DocType'
+	},
+
+	# These values are common for all DocPerm
+	{
+		'doctype': 'DocPerm',
+		'name': '__common__',
+		'parent': 'Cost Center',
+		'parentfield': 'permissions',
+		'parenttype': 'DocType',
+		'read': 1
+	},
+
+	# DocType, Cost Center
+	{
+		'doctype': 'DocType',
+		'name': 'Cost Center'
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
+		'doctype': 'DocPerm',
+		'permlevel': 1,
+		'role': 'Accounts Manager',
+		'submit': 0,
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 1,
+		'create': 1,
+		'doctype': 'DocPerm',
+		'permlevel': 0,
+		'role': 'Accounts Manager',
+		'submit': 0,
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
+		'doctype': 'DocPerm',
+		'permlevel': 1,
+		'role': 'Accounts User',
+		'submit': 0,
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
+		'doctype': 'DocPerm',
+		'permlevel': 0,
+		'role': 'Accounts User',
+		'submit': 0,
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'cancel': 1,
+		'create': 1,
+		'doctype': 'DocPerm',
+		'permlevel': 0,
+		'role': 'System Manager',
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'doctype': 'DocPerm',
+		'permlevel': 1,
+		'role': 'All'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'trash_reason',
+		'fieldtype': 'Small Text',
+		'label': 'Trash Reason',
+		'oldfieldname': 'trash_reason',
+		'oldfieldtype': 'Small Text',
+		'permlevel': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'cost_center_name',
+		'fieldtype': 'Data',
+		'in_filter': 0,
+		'label': 'Cost Center Name',
+		'no_copy': 1,
+		'oldfieldname': 'cost_center_name',
+		'oldfieldtype': 'Data',
+		'permlevel': 0,
+		'reqd': 1,
+		'search_index': 0
+	},
+
+	# DocField
+	{
+		'description': 'Select company name first.',
+		'doctype': 'DocField',
+		'fieldname': 'parent_cost_center',
+		'fieldtype': 'Link',
+		'label': 'Parent Cost Center',
+		'oldfieldname': 'parent_cost_center',
+		'oldfieldtype': 'Link',
+		'options': 'Cost Center',
+		'permlevel': 0,
+		'reqd': 1,
+		'trigger': 'Client'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldname': 'company_name',
+		'fieldtype': 'Link',
+		'label': 'Company',
+		'oldfieldname': 'company_name',
+		'oldfieldtype': 'Link',
+		'options': 'Company',
+		'permlevel': 0,
+		'reqd': 1,
+		'trigger': 'Client'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'company_abbr',
+		'fieldtype': 'Data',
+		'label': 'Company Abbr',
+		'oldfieldname': 'company_abbr',
+		'oldfieldtype': 'Data',
+		'permlevel': 1
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldname': 'group_or_ledger',
+		'fieldtype': 'Select',
+		'hidden': 0,
+		'label': 'Group or Ledger',
+		'no_copy': 1,
+		'oldfieldname': 'group_or_ledger',
+		'oldfieldtype': 'Select',
+		'options': '\nGroup\nLedger',
+		'permlevel': 0,
+		'print_hide': 1,
+		'report_hide': 1,
+		'reqd': 1,
+		'trigger': 'Client'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldtype': 'Button',
+		'label': 'Convert to Group',
+		'permlevel': 0,
+		'trigger': 'Client'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldtype': 'Button',
+		'label': 'Convert to Ledger',
+		'permlevel': 0,
+		'trigger': 'Client'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'distribution_id',
+		'fieldtype': 'Link',
+		'label': 'Distribution Id',
+		'oldfieldname': 'distribution_id',
+		'oldfieldtype': 'Link',
+		'options': 'Budget Distribution',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'budget_details',
+		'fieldtype': 'Table',
+		'label': 'Budget Details',
+		'oldfieldname': 'budget_details',
+		'oldfieldtype': 'Table',
+		'options': 'Budget Detail',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'lft',
+		'fieldtype': 'Int',
+		'hidden': 1,
+		'in_filter': 1,
+		'label': 'lft',
+		'no_copy': 1,
+		'oldfieldname': 'lft',
+		'oldfieldtype': 'Int',
+		'permlevel': 0,
+		'print_hide': 1,
+		'report_hide': 1,
+		'search_index': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'rgt',
+		'fieldtype': 'Int',
+		'hidden': 1,
+		'in_filter': 1,
+		'label': 'rgt',
+		'no_copy': 1,
+		'oldfieldname': 'rgt',
+		'oldfieldtype': 'Int',
+		'permlevel': 0,
+		'print_hide': 1,
+		'report_hide': 1,
+		'reqd': 0,
+		'search_index': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'old_parent',
+		'fieldtype': 'Link',
+		'hidden': 1,
+		'label': 'old_parent',
+		'no_copy': 1,
+		'oldfieldname': 'old_parent',
+		'oldfieldtype': 'Data',
+		'options': 'Cost Center',
+		'permlevel': 0,
+		'print_hide': 1,
+		'report_hide': 1
+	}
+]
