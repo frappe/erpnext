@@ -1,0 +1,102 @@
+# DocType Mapper, Production Forecast-Production Plan
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-08-08 17:09:35',
+		'docstatus': 0,
+		'modified': '2011-09-15 15:04:42',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all Table Mapper Detail
+	{
+		'doctype': 'Table Mapper Detail',
+		'name': '__common__',
+		'parent': 'Production Forecast-Production Plan',
+		'parentfield': 'table_mapper_details',
+		'parenttype': 'DocType Mapper'
+	},
+
+	# These values are common for all Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'map': 'Yes',
+		'match_id': 1,
+		'name': '__common__',
+		'parent': 'Production Forecast-Production Plan',
+		'parentfield': 'field_mapper_details',
+		'parenttype': 'DocType Mapper'
+	},
+
+	# These values are common for all DocType Mapper
+	{
+		'doctype': 'DocType Mapper',
+		'from_doctype': 'Production Forecast',
+		'module': 'Production',
+		'name': '__common__',
+		'to_doctype': 'Production Plan'
+	},
+
+	# DocType Mapper, Production Forecast-Production Plan
+	{
+		'doctype': 'DocType Mapper',
+		'name': 'Production Forecast-Production Plan'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'eval:flt(obj.qty)-flt(obj.planned_qty)',
+		'to_field': 'prevdoc_reqd_qty'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'parenttype',
+		'to_field': 'against_document'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'parent',
+		'to_field': 'document_no'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'start_date',
+		'to_field': 'document_date'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'end_date',
+		'to_field': 'confirmation_date'
+	},
+
+	# Table Mapper Detail
+	{
+		'doctype': 'Table Mapper Detail',
+		'from_table': 'Production Forecast',
+		'match_id': 0,
+		'to_table': 'Production Plan',
+		'validation_logic': 'docstatus =1'
+	},
+
+	# Table Mapper Detail
+	{
+		'doctype': 'Table Mapper Detail',
+		'from_field': 'pf_details',
+		'from_table': 'PF Detail',
+		'match_id': 1,
+		'to_field': 'pp_details',
+		'to_table': 'PP Detail',
+		'validation_logic': 'docstatus =1 and qty > planned_qty '
+	}
+]

@@ -1,0 +1,99 @@
+# DocType Mapper, Sales Order-Maintenance Visit
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-08-08 17:09:36',
+		'docstatus': 0,
+		'modified': '2011-09-15 15:04:45',
+		'modified_by': 'Administrator',
+		'owner': 'ashwini@webnotestech.com'
+	},
+
+	# These values are common for all Table Mapper Detail
+	{
+		'doctype': 'Table Mapper Detail',
+		'name': '__common__',
+		'parent': 'Sales Order-Maintenance Visit',
+		'parentfield': 'table_mapper_details',
+		'parenttype': 'DocType Mapper',
+		'validation_logic': 'docstatus=1'
+	},
+
+	# These values are common for all Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'map': 'Yes',
+		'name': '__common__',
+		'parent': 'Sales Order-Maintenance Visit',
+		'parentfield': 'field_mapper_details',
+		'parenttype': 'DocType Mapper'
+	},
+
+	# These values are common for all DocType Mapper
+	{
+		'doctype': 'DocType Mapper',
+		'from_doctype': 'Sales Order',
+		'module': 'Support',
+		'name': '__common__',
+		'ref_doc_submitted': 1,
+		'to_doctype': 'Maintenance Visit'
+	},
+
+	# DocType Mapper, Sales Order-Maintenance Visit
+	{
+		'doctype': 'DocType Mapper',
+		'name': 'Sales Order-Maintenance Visit'
+	},
+
+	# Field Mapper Detail
+	{
+		'checking_operator': '=',
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'customer',
+		'match_id': 0,
+		'to_field': 'customer'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'name',
+		'match_id': 0,
+		'to_field': 'sales_order_no'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'parent',
+		'match_id': 1,
+		'to_field': 'prevdoc_docname'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'parenttype',
+		'match_id': 1,
+		'to_field': 'prevdoc_doctype'
+	},
+
+	# Table Mapper Detail
+	{
+		'doctype': 'Table Mapper Detail',
+		'from_field': 'sales_order_details',
+		'from_table': 'Sales Order Detail',
+		'match_id': 1,
+		'to_field': 'maintenance_visit_details',
+		'to_table': 'Maintenance Visit Detail'
+	},
+
+	# Table Mapper Detail
+	{
+		'doctype': 'Table Mapper Detail',
+		'from_table': 'Sales Order',
+		'match_id': 0,
+		'to_table': 'Maintenance Visit'
+	}
+]

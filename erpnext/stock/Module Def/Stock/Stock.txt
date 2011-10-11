@@ -1,0 +1,232 @@
+# Module Def, Stock
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2011-07-01 17:40:49',
+		'docstatus': 0,
+		'modified': '2011-10-10 17:01:34',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all Module Def Role
+	{
+		'doctype': 'Module Def Role',
+		'name': '__common__',
+		'parent': 'Stock',
+		'parentfield': 'roles',
+		'parenttype': 'Module Def'
+	},
+
+	# These values are common for all Module Def Item
+	{
+		'doctype': 'Module Def Item',
+		'name': '__common__',
+		'parent': 'Stock',
+		'parentfield': 'items',
+		'parenttype': 'Module Def'
+	},
+
+	# These values are common for all Module Def
+	{
+		'disabled': 'No',
+		'doctype': u'Module Def',
+		'doctype_list': 'DocType Label, QA Inspection Report',
+		'is_hidden': 'No',
+		'module_desc': 'Material Management',
+		'module_icon': 'Stock.gif',
+		'module_label': 'Stock',
+		'module_name': 'Stock',
+		'module_seq': 7,
+		'name': '__common__'
+	},
+
+	# Module Def, Stock
+	{
+		'doctype': u'Module Def',
+		'name': 'Stock'
+	},
+
+	# Module Def Item
+	{
+		'description': 'Item master',
+		'display_name': 'Item',
+		'doc_name': 'Item',
+		'doc_type': 'Forms',
+		'doctype': 'Module Def Item',
+		'fields': 'name\nitem_group\ndescription'
+	},
+
+	# Module Def Item
+	{
+		'description': 'A unique number identifying each entity of an item',
+		'display_name': 'Serial No',
+		'doc_name': 'Serial No',
+		'doc_type': 'Forms',
+		'doctype': 'Module Def Item',
+		'fields': 'item_code\nstatus\nwarehouse\npr_no\ndelivery_note_no\ncustomer'
+	},
+
+	# Module Def Item
+	{
+		'description': 'Record of items added, removed or moved from one warehouse to another.',
+		'display_name': 'Stock Entry',
+		'doc_name': 'Stock Entry',
+		'doc_type': 'Forms',
+		'doctype': 'Module Def Item',
+		'fields': 'transfer_date\npurpose\nfrom_warehouse\nto_warehouse\nremarks'
+	},
+
+	# Module Def Item
+	{
+		'description': 'Record of items delivered to your customers along with the Printed Note',
+		'display_name': 'Delivery Note',
+		'doc_name': 'Delivery Note',
+		'doc_type': 'Forms',
+		'doctype': 'Module Def Item',
+		'fields': 'status\ntransaction_date\ncustomer\nterritory\ngrand_total\nper_billed'
+	},
+
+	# Module Def Item
+	{
+		'description': 'Record of incoming material from your suppliers',
+		'display_name': 'Purchase Receipt',
+		'doc_name': 'Purchase Receipt',
+		'doc_type': 'Forms',
+		'doctype': 'Module Def Item',
+		'fields': 'status\ntransaction_date\nsupplier\ngrand_total\nper_billed'
+	},
+
+	# Module Def Item
+	{
+		'description': 'Details of Installation done after delivery',
+		'display_name': 'Installation Note',
+		'doc_name': 'Installation Note',
+		'doc_type': 'Forms',
+		'doctype': 'Module Def Item'
+	},
+
+	# Module Def Item
+	{
+		'description': 'Create Quality Inspection Report for any item',
+		'display_name': 'Inspection Report',
+		'doc_name': 'QA Inspection Report',
+		'doc_type': 'Forms',
+		'doctype': 'Module Def Item',
+		'fields': 'inspection_type\nitem_code\nreport_date\npurchase_receipt_no\ndelivery_note_no'
+	},
+
+	# Module Def Item
+	{
+		'description': 'Reconcile your stock by uploading it form an excel file',
+		'display_name': 'Stock Reconciliation',
+		'doc_name': 'Stock Reconciliation',
+		'doc_type': 'Forms',
+		'doctype': 'Module Def Item',
+		'fields': 'reconciliation_date\nreconciliation_time\nremark'
+	},
+
+	# Module Def Item
+	{
+		'description': 'This utility tool will update Stock UOM in Item and will respectively update Actual Qty in Stock Ledger as per Conversion Factor.',
+		'display_name': 'Stock UOM Replace Utility',
+		'doc_name': 'Stock UOM Replace Utility',
+		'doc_type': 'Single DocType',
+		'doctype': 'Module Def Item'
+	},
+
+	# Module Def Item
+	{
+		'description': 'This utility will help in tracking stock for Sales Return and Purchase Return.',
+		'display_name': 'Sales and Purchase Return Wizard',
+		'doc_name': 'Sales and Purchase Return Wizard',
+		'doc_type': 'Single DocType',
+		'doctype': 'Module Def Item'
+	},
+
+	# Module Def Item
+	{
+		'description': 'You can create master template for landed cost wizard',
+		'display_name': 'Landed Cost Master',
+		'doc_name': 'Landed Cost Master',
+		'doc_type': 'Forms',
+		'doctype': 'Module Def Item',
+		'icon': 'accept.gif'
+	},
+
+	# Module Def Item
+	{
+		'description': 'Add extra expenses into Purchase Receipt which should be consider for item valuation. The cost will be added proportionately as per purchase receipt value.',
+		'display_name': 'Landed Cost Wizard',
+		'doc_name': 'Landed Cost Wizard',
+		'doc_type': 'Forms',
+		'doctype': 'Module Def Item',
+		'icon': 'accept.gif'
+	},
+
+	# Module Def Item
+	{
+		'display_name': 'Stock Ledger',
+		'doc_name': 'Stock Ledger Entry',
+		'doc_type': 'Reports',
+		'doctype': 'Module Def Item'
+	},
+
+	# Module Def Item
+	{
+		'display_name': 'Stock Level',
+		'doc_name': 'Bin',
+		'doc_type': 'Reports',
+		'doctype': 'Module Def Item'
+	},
+
+	# Module Def Item
+	{
+		'display_name': 'Shortage To Indent',
+		'doc_name': 'Item',
+		'doc_type': 'Reports',
+		'doctype': 'Module Def Item'
+	},
+
+	# Module Def Item
+	{
+		'description': 'Stock Value as per Item and Warehouse',
+		'display_name': 'Stock Report',
+		'doc_name': 'Stock Ledger Entry',
+		'doc_type': 'Reports',
+		'doctype': 'Module Def Item'
+	},
+
+	# Module Def Item
+	{
+		'display_name': 'Stock Aging Report',
+		'doc_name': 'Serial No',
+		'doc_type': 'Reports',
+		'doctype': 'Module Def Item'
+	},
+
+	# Module Def Role
+	{
+		'doctype': 'Module Def Role',
+		'role': 'Material User'
+	},
+
+	# Module Def Role
+	{
+		'doctype': 'Module Def Role',
+		'role': 'Material Master Manager'
+	},
+
+	# Module Def Role
+	{
+		'doctype': 'Module Def Role',
+		'role': 'Material Manager'
+	},
+
+	# Module Def Role
+	{
+		'doctype': 'Module Def Role',
+		'role': 'Quality Manager'
+	}
+]

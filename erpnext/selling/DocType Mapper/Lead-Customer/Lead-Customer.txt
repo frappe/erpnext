@@ -1,0 +1,84 @@
+# DocType Mapper, Lead-Customer
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-08-08 17:09:34',
+		'docstatus': 0,
+		'modified': '2011-09-14 12:36:24',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all Table Mapper Detail
+	{
+		'doctype': 'Table Mapper Detail',
+		'from_table': 'Lead',
+		'match_id': 0,
+		'name': '__common__',
+		'parent': 'Lead-Customer',
+		'parentfield': 'table_mapper_details',
+		'parenttype': 'DocType Mapper',
+		'to_table': 'Customer',
+		'validation_logic': 'name is not null'
+	},
+
+	# These values are common for all Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'map': 'Yes',
+		'match_id': 0,
+		'name': '__common__',
+		'parent': 'Lead-Customer',
+		'parentfield': 'field_mapper_details',
+		'parenttype': 'DocType Mapper'
+	},
+
+	# These values are common for all DocType Mapper
+	{
+		'doctype': u'DocType Mapper',
+		'from_doctype': 'Lead',
+		'module': 'Selling',
+		'name': '__common__',
+		'to_doctype': 'Customer'
+	},
+
+	# DocType Mapper, Lead-Customer
+	{
+		'doctype': u'DocType Mapper',
+		'name': 'Lead-Customer'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'name',
+		'to_field': 'lead_name'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'company_name',
+		'to_field': 'customer_name'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'contact_no',
+		'to_field': 'phone_1'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'fax',
+		'to_field': 'fax_1'
+	},
+
+	# Table Mapper Detail
+	{
+		'doctype': 'Table Mapper Detail'
+	}
+]

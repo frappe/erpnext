@@ -1,0 +1,165 @@
+# DocType Mapper, Quotation-Sales Order
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-08-08 17:09:35',
+		'docstatus': 0,
+		'modified': '2011-09-14 12:36:24',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all Table Mapper Detail
+	{
+		'doctype': 'Table Mapper Detail',
+		'name': '__common__',
+		'parent': 'Quotation-Sales Order',
+		'parentfield': 'table_mapper_details',
+		'parenttype': 'DocType Mapper'
+	},
+
+	# These values are common for all Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'name': '__common__',
+		'parent': 'Quotation-Sales Order',
+		'parentfield': 'field_mapper_details',
+		'parenttype': 'DocType Mapper'
+	},
+
+	# These values are common for all DocType Mapper
+	{
+		'doctype': u'DocType Mapper',
+		'from_doctype': 'Quotation',
+		'module': 'Selling',
+		'name': '__common__',
+		'ref_doc_submitted': 1,
+		'to_doctype': 'Sales Order'
+	},
+
+	# DocType Mapper, Quotation-Sales Order
+	{
+		'doctype': u'DocType Mapper',
+		'name': 'Quotation-Sales Order'
+	},
+
+	# Field Mapper Detail
+	{
+		'checking_operator': '>=',
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'transaction_date',
+		'map': 'No',
+		'match_id': 0,
+		'to_field': 'transaction_date'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'transaction_date',
+		'map': 'Yes',
+		'match_id': 0,
+		'to_field': 'quotation_date'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'name',
+		'map': 'Yes',
+		'match_id': 0,
+		'to_field': 'quotation_no'
+	},
+
+	# Field Mapper Detail
+	{
+		'checking_operator': '=',
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'company',
+		'map': 'Yes',
+		'match_id': 0,
+		'to_field': 'company'
+	},
+
+	# Field Mapper Detail
+	{
+		'checking_operator': '=',
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'fiscal_year',
+		'map': 'Yes',
+		'match_id': 0,
+		'to_field': 'fiscal_year'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'parent',
+		'map': 'Yes',
+		'match_id': 1,
+		'to_field': 'prevdoc_docname'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'naming_series',
+		'map': 'No',
+		'match_id': 0,
+		'to_field': 'naming_series'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'status',
+		'map': 'No',
+		'match_id': 0,
+		'to_field': 'status'
+	},
+
+	# Table Mapper Detail
+	{
+		'doctype': 'Table Mapper Detail',
+		'from_field': 'sales_team',
+		'from_table': 'Sales Team',
+		'match_id': 3,
+		'to_field': 'sales_team',
+		'to_table': 'Sales Team',
+		'validation_logic': 'name is not null'
+	},
+
+	# Table Mapper Detail
+	{
+		'doctype': 'Table Mapper Detail',
+		'from_field': 'other_charges',
+		'from_table': 'RV Tax Detail',
+		'match_id': 2,
+		'to_field': 'other_charges',
+		'to_table': 'RV Tax Detail',
+		'validation_logic': 'name is not null'
+	},
+
+	# Table Mapper Detail
+	{
+		'doctype': 'Table Mapper Detail',
+		'from_field': 'quotation_details',
+		'from_table': 'Quotation Detail',
+		'match_id': 1,
+		'reference_doctype_key': 'prevdoc_doctype',
+		'to_field': 'sales_order_details',
+		'to_table': 'Sales Order Detail',
+		'validation_logic': 'name is not null'
+	},
+
+	# Table Mapper Detail
+	{
+		'doctype': 'Table Mapper Detail',
+		'from_table': 'Quotation',
+		'match_id': 0,
+		'reference_key': 'prevdoc_docname',
+		'to_table': 'Sales Order',
+		'validation_logic': 'docstatus = 1'
+	}
+]

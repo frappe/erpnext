@@ -1,0 +1,340 @@
+# DocType, QA Inspection Report
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-08-08 17:09:17',
+		'docstatus': 0,
+		'modified': '2011-10-06 10:22:41',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all DocType
+	{
+		'_last_update': '1317365120',
+		'autoname': 'QAI/.######',
+		'colour': 'White:FFF',
+		'default_print_format': 'Standard',
+		'doctype': 'DocType',
+		'module': 'Buying',
+		'name': '__common__',
+		'print_outline': 'Yes',
+		'search_fields': 'item_code, report_date, purchase_receipt_no, delivery_note_no',
+		'section_style': 'Simple',
+		'server_code_error': ' ',
+		'show_in_menu': 0,
+		'version': 38
+	},
+
+	# These values are common for all DocField
+	{
+		'doctype': 'DocField',
+		'name': '__common__',
+		'parent': 'QA Inspection Report',
+		'parentfield': 'fields',
+		'parenttype': 'DocType'
+	},
+
+	# These values are common for all DocPerm
+	{
+		'doctype': 'DocPerm',
+		'name': '__common__',
+		'parent': 'QA Inspection Report',
+		'parentfield': 'permissions',
+		'parenttype': 'DocType',
+		'read': 1,
+		'role': 'Quality Manager'
+	},
+
+	# DocType, QA Inspection Report
+	{
+		'doctype': 'DocType',
+		'name': 'QA Inspection Report'
+	},
+
+	# DocPerm
+	{
+		'amend': 1,
+		'cancel': 1,
+		'create': 1,
+		'doctype': 'DocPerm',
+		'permlevel': 0,
+		'submit': 1,
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'doctype': 'DocPerm',
+		'permlevel': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Section Break',
+		'label': 'QA Inspection',
+		'no_copy': 0,
+		'oldfieldtype': 'Section Break',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Column Break',
+		'oldfieldtype': 'Column Break',
+		'permlevel': 0,
+		'width': '50%'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'naming_series',
+		'fieldtype': 'Select',
+		'label': 'Naming Series',
+		'no_copy': 1,
+		'options': '\nQAI/11-12/',
+		'permlevel': 0,
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldname': 'inspection_type',
+		'fieldtype': 'Select',
+		'in_filter': 1,
+		'label': 'Inspection Type',
+		'oldfieldname': 'inspection_type',
+		'oldfieldtype': 'Select',
+		'options': '\nIncoming\nOutgoing\nIn Process',
+		'permlevel': 0,
+		'reqd': 1,
+		'trigger': 'Client'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'report_date',
+		'fieldtype': 'Date',
+		'in_filter': 1,
+		'label': 'Report Date',
+		'oldfieldname': 'report_date',
+		'oldfieldtype': 'Date',
+		'permlevel': 0,
+		'reqd': 1,
+		'search_index': 1
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldname': 'item_code',
+		'fieldtype': 'Link',
+		'hidden': 0,
+		'in_filter': 1,
+		'label': 'Item Code',
+		'oldfieldname': 'item_code',
+		'oldfieldtype': 'Link',
+		'options': 'Item',
+		'permlevel': 0,
+		'reqd': 1,
+		'search_index': 1,
+		'trigger': 'Client'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'sample_size',
+		'fieldtype': 'Currency',
+		'in_filter': 0,
+		'label': 'Sample Size',
+		'oldfieldname': 'sample_size',
+		'oldfieldtype': 'Currency',
+		'permlevel': 0,
+		'reqd': 1,
+		'search_index': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'description',
+		'fieldtype': 'Small Text',
+		'in_filter': 1,
+		'label': 'Description',
+		'oldfieldname': 'description',
+		'oldfieldtype': 'Small Text',
+		'permlevel': 0,
+		'search_index': 0,
+		'width': '300px'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Column Break',
+		'oldfieldtype': 'Column Break',
+		'permlevel': 0,
+		'width': '50%'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'item_serial_no',
+		'fieldtype': 'Link',
+		'hidden': 0,
+		'label': 'Item Serial No',
+		'oldfieldname': 'item_serial_no',
+		'oldfieldtype': 'Link',
+		'options': 'Serial No',
+		'permlevel': 0,
+		'print_hide': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'batch_no',
+		'fieldtype': 'Link',
+		'label': 'Batch No',
+		'oldfieldname': 'batch_no',
+		'oldfieldtype': 'Link',
+		'options': 'Batch',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldname': 'purchase_receipt_no',
+		'fieldtype': 'Link',
+		'hidden': 0,
+		'in_filter': 1,
+		'label': 'Purchase Receipt No',
+		'oldfieldname': 'purchase_receipt_no',
+		'oldfieldtype': 'Link',
+		'options': 'Purchase Receipt',
+		'permlevel': 0,
+		'search_index': 1,
+		'trigger': 'Client'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldname': 'delivery_note_no',
+		'fieldtype': 'Link',
+		'hidden': 0,
+		'in_filter': 1,
+		'label': 'Delivery Note No',
+		'oldfieldname': 'delivery_note_no',
+		'oldfieldtype': 'Link',
+		'options': 'Delivery Note',
+		'permlevel': 0,
+		'print_hide': 0,
+		'search_index': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'inspected_by',
+		'fieldtype': 'Data',
+		'label': 'Inspected By',
+		'oldfieldname': 'inspected_by',
+		'oldfieldtype': 'Data',
+		'permlevel': 0,
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'remarks',
+		'fieldtype': 'Text',
+		'label': 'Remarks',
+		'no_copy': 1,
+		'oldfieldname': 'remarks',
+		'oldfieldtype': 'Text',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'verified_by',
+		'fieldtype': 'Data',
+		'label': 'Verified By',
+		'oldfieldname': 'verified_by',
+		'oldfieldtype': 'Data',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'amended_from',
+		'fieldtype': 'Data',
+		'label': 'Amended From',
+		'no_copy': 1,
+		'oldfieldname': 'amended_from',
+		'oldfieldtype': 'Data',
+		'permlevel': 1,
+		'print_hide': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'amendment_date',
+		'fieldtype': 'Date',
+		'label': 'Amendment Date',
+		'no_copy': 1,
+		'oldfieldname': 'amendment_date',
+		'oldfieldtype': 'Date',
+		'permlevel': 1,
+		'print_hide': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Section Break',
+		'label': 'Specification Details',
+		'oldfieldtype': 'Section Break',
+		'options': 'Simple',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Button',
+		'label': 'Get Specification Details',
+		'options': 'get_item_specification_details',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'qa_specification_details',
+		'fieldtype': 'Table',
+		'label': 'QA Specification Details',
+		'oldfieldname': 'qa_specification_details',
+		'oldfieldtype': 'Table',
+		'options': 'QA Specification Detail',
+		'permlevel': 0
+	}
+]
