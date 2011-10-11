@@ -562,7 +562,7 @@ pscript.feature_dict = {
 		'Timesheet': {'timesheet_details':['project_name']}
 	},
 	'fs_packing_details': {
-		'Delivery Note': {'fields':['packing_details','print_packing_slip'],'delivery_note_details':['no_of_packs','pack_gross_wt','pack_nett_wt','pack_no','pack_unit']},
+		'Delivery Note': {'fields':['packing_details','print_packing_slip','packing_checked_by','packed_by','pack_size','shipping_mark'],'delivery_note_details':['no_of_packs','pack_gross_wt','pack_nett_wt','pack_no','pack_unit']},
 		'Sales Order': {'fields':['packing_details']}
 	},
 	'fs_discounts': {

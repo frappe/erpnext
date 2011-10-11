@@ -1,7 +1,7 @@
 # REMEMBER to update this
 # ========================
 
-last_patch = 384
+last_patch = 385
 
 #-------------------------------------------
 
@@ -454,3 +454,6 @@ def execute(patch_no):
 		reload_doc('stock', 'Module Def', 'Stock')
 		sql("delete from `tabModule Def Item` where display_name = 'Serial No' and parent = 'Support'")
 		sql("update `tabDocType` set subject = 'Item Code: %(item_code)s, Warehouse: %(warehouse)s' where name = 'Serial No'")
+	elif patch_no == 385:
+		# Patch for adding packing related columns (packed by, checked by, shipping mark etc)
+		reload_doc('stock','doctype','delivery_note')
