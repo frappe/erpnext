@@ -122,16 +122,18 @@ class DocType:
 				
 	def get_raw_materials(self,pro_obj):
 		# get all items from flat bom except, child items of sub-contracted and sub assembly items and sub assembly items itself.
-		flat_bom_items = sql("select item_code, ifnull(sum(qty_consumed_per_unit), 0) * '%s', description, stock_uom	from `tabFlat BOM Detail` where parent = '%s' and parent_bom = '%s' and is_pro_applicable = 'No' and docstatus < 2 group by item_code" % ((self.doc.process == 'Backflush') and flt(self.doc.fg_completed_qty) or flt(pro_obj.doc.qty), cstr(pro_obj.doc.bom_no), cstr(pro_obj.doc.bom_no)))
-		self.make_items_dict(flat_bom_items)
+#		flat_bom_items = sql("select item_code, ifnull(sum(qty_consumed_per_unit), 0) * '%s', description, stock_uom from `tabFlat BOM Detail` where parent = '%s' and parent_bom = '%s' and is_pro_applicable = 'No' and docstatus < 2 group by item_code" % ((self.doc.process == 'Backflush') and flt(self.doc.fg_completed_qty) or flt(pro_obj.doc.qty), cstr(pro_obj.doc.bom_no), cstr(pro_obj.doc.bom_no)))
+#		self.make_items_dict(flat_bom_items)
+
 		if pro_obj.doc.consider_sa_items == 'Yes':
 			# get all Sub Assembly items only from flat bom
-			fl_bom_sa_items = sql("select item_code, ifnull(sum(qty_consumed_per_unit), 0) * '%s', description, stock_uom from `tabFlat BOM Detail` where parent = '%s' and parent_bom != '%s' and is_pro_applicable = 'Yes' and docstatus < 2 group by item_code" % ((self.doc.process == 'Backflush') and flt(self.doc.fg_completed_qty) or flt(pro_obj.doc.qty), cstr(pro_obj.doc.bom_no), cstr(pro_obj.doc.bom_no)))
+			fl_bom_sa_items = sql("select item_code, ifnull(sum(qty_consumed_per_unit), 0) * '%s', description, stock_uom from `tabFlat BOM Detail` where parent = '%s' and parent_bom = '%s' and is_pro_applicable = 'Yes' and docstatus < 2 group by item_code" % ((self.doc.process == 'Backflush') and flt(self.doc.fg_completed_qty) or flt(pro_obj.doc.qty), cstr(pro_obj.doc.bom_no), cstr(pro_obj.doc.bom_no)))
 			self.make_items_dict(fl_bom_sa_items)
 		
 		if pro_obj.doc.consider_sa_items == 'No':
 			# get all sub assembly childs only from flat bom
-			fl_bom_sa_child_item = sql("select item_code, ifnull(sum(qty_consumed_per_unit), 0) * '%s', description, stock_uom from `tabFlat BOM Detail` where parent = '%s' and parent_bom in (select distinct parent_bom from `tabFlat BOM Detail` where parent = '%s' and parent_bom != '%s' and is_pro_applicable = 'Yes' and docstatus < 2 ) and is_pro_applicable = 'No' and docstatus < 2 group by item_code" % ((self.doc.process == 'Backflush') and flt(self.doc.fg_completed_qty) or flt(pro_obj.doc.qty), cstr(pro_obj.doc.bom_no), cstr(pro_obj.doc.bom_no), cstr(pro_obj.doc.bom_no)))
+			#select item_code,ifnull(sum(qty_consumed_per_unit),0)*'%s' as qty,description,stock_uom from ( select distinct fb.name,fb.description,fb.item_code,fb.qty_consumed_per_unit,fb.stock_uom from `tabFlat BOM Detail` fb,`tabBOM Material` bm where bm.parent=fb.parent_bom and bm.docstatus<2 and fb.is_pro_applicable='Yes' and fb.docstatus<2 and fb.parent='%s' and bm.bom_no is null)a group by item_code,stock_uom
+			fl_bom_sa_child_item = sql("select item_code,ifnull(sum(qty_consumed_per_unit),0)*'%s' as qty,description,stock_uom from ( select distinct fb.name,fb.description,fb.item_code,fb.qty_consumed_per_unit,fb.stock_uom from `tabFlat BOM Detail` fb,`tabBOM Material` bm where bm.parent=fb.parent_bom and bm.docstatus<2 and fb.is_pro_applicable='Yes' and fb.docstatus<2 and fb.parent='%s' and bm.bom_no is null)a group by item_code,stock_uom" % ((self.doc.process == 'Backflush') and flt(self.doc.fg_completed_qty) or flt(pro_obj.doc.qty), cstr(pro_obj.doc.bom_no)))
 			self.make_items_dict(fl_bom_sa_child_item)
 
 	def add_to_stock_entry_detail(self, pro_obj, item_dict, fg_item = 0):
@@ -165,8 +167,9 @@ class DocType:
 		self.get_raw_materials(pro_obj)
 		
 		self.doc.clear_table(self.doclist, 'mtn_details', 1)
-		
+
 		self.add_to_stock_entry_detail(pro_obj, self.item_dict)
+		
 		if self.doc.process == 'Backflush':
 			item_dict = {cstr(pro_obj.doc.production_item) : [self.doc.fg_completed_qty, pro_obj.doc.description, pro_obj.doc.stock_uom]}
 			self.add_to_stock_entry_detail(pro_obj, item_dict, fg_item = 1)

@@ -501,7 +501,7 @@ class DocType:
     child_flat_bom_items=[]
 #    if item and (item[0]['is_sub_contracted_item'] == 'Yes' or item[0]['is_pro_applicable'] == 'Yes'):
 
-    child_flat_bom_items = sql("select item_code, description, qty_consumed_per_unit, stock_uom, moving_avg_rate, last_purchase_rate, standard_rate, '%s' as parent_bom, bom_mat_no, 'No' as is_pro_applicable from `tabFlat BOM Detail` where parent = '%s' and is_pro_applicable = 'No' and docstatus = 1" % ( d.bom_no, cstr(d.bom_no)))
+    child_flat_bom_items = sql("select fbom.item_code, fbom.description, fbom.qty_consumed_per_unit, fbom.stock_uom, fbom.moving_avg_rate, fbom.last_purchase_rate, fbom.standard_rate, '%s' as parent_bom, fbom.bom_mat_no, 'No' as is_pro_applicable from `tabFlat BOM Detail` fbom,`tabBill Of Materials` bom where fbom.parent=bom.name and fbom.parent = '%s' and fbom.is_pro_applicable = 'No' and bom.docstatus = 1" % ( d.bom_no, cstr(d.bom_no)))
     self.cur_flat_bom_items.append([d.item_code, d.description, flt(d.qty), d.stock_uom, flt(d.moving_avg_rate), flt(d.amount_as_per_mar), flt(d.last_purchase_rate), flt(d.amount_as_per_lpr), flt(d.standard_rate), flt(d.amount_as_per_sr), flt(d.qty_consumed_per_unit), (item[0]['is_sub_contracted_item'] == 'Yes') and d.parent or d.bom_no, d.name, (item[0]['is_sub_contracted_item'] == 'Yes') and 'No' or 'Yes'])
     return child_flat_bom_items
 

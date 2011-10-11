@@ -63,6 +63,9 @@ class DocType:
 			child.conversion_factor = 1
 			child.save()
 
+	# On delete 1. Delete BIN (if none of the corrosponding transactions present, it gets deleted. if present, rolled back due to exception)
+	def on_trash(self):
+		sql("delete from tabBin where item_code='%s'"%(self.doc.item_code))
 
 	# Check whether Ref Rate is not entered twice for same Price List and Currency
 	def check_ref_rate_detail(self):
@@ -124,7 +127,7 @@ class DocType:
 			self.doc.min_order_qty = 0
 		self.check_non_asset_warehouse()
 
-		if self.doc.is_pro_applicable == 'Yes' and self.doc.is_manufactured_item != 'Yes':
+		if self.doc.is_pro_applicable and self.doc.is_pro_applicable == 'Yes' and self.doc.is_manufactured_item and self.doc.is_manufactured_item != 'Yes':
 			msgprint("If making Production Order is allowed then, it should also allow to make Bill of Materials. Refer Manufacturing section.")
 			raise Exception
 
