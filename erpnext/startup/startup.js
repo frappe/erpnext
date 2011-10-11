@@ -43,18 +43,8 @@ function startup_setup() {
 	// ------------------
 	$dh(page_body.footer);
 
-	// for logout and payment
-	var callback = function(r,rt) {
-		if(r.message){
-			login_file = 'http://' + r.message;
-		}
-		else if(pscript.is_erpnext_saas) {
-			login_file = 'https://www.erpnext.com';
-		}
-		// setup toolbar
-		pscript.startup_setup_toolbar();
-	}
-	$c_obj('Home Control', 'get_login_url', '', callback);
+	// setup toolbar
+	pscript.startup_setup_toolbar();
 }
 
 // ====================================================================
@@ -299,10 +289,17 @@ SidebarItem.prototype.show_items = function() {
 
 				// add to menu-item mapper
 				menu_item_map['Page'][me.det.module_label + ' Custom Reports'] = smi.pointer;
-
 			}
-
 		}
+		
+		if(r.login_url){
+			login_file = 'http://' + r.login_url;
+		}
+		else if(pscript.is_erpnext_saas) {
+			login_file = 'https://www.erpnext.com';
+		}			
+		
+		
 		$(me.items_area).slideDown();
 
 		// high light
