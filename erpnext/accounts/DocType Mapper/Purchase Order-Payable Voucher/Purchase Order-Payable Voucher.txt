@@ -5,7 +5,7 @@
 	{
 		'creation': '2010-08-08 17:09:35',
 		'docstatus': 0,
-		'modified': '2011-09-15 15:04:43',
+		'modified': '2011-10-12 12:10:15',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
@@ -107,6 +107,15 @@
 		'to_field': 'naming_series'
 	},
 
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'total_tax',
+		'map': 'Yes',
+		'match_id': 0,
+		'to_field': 'total_tax'
+	},
+
 	# Table Mapper Detail
 	{
 		'doctype': 'Table Mapper Detail',
@@ -114,17 +123,6 @@
 		'match_id': 0,
 		'to_table': 'Payable Voucher',
 		'validation_logic': 'docstatus =1'
-	},
-
-	# Table Mapper Detail
-	{
-		'doctype': 'Table Mapper Detail',
-		'from_field': 'po_details',
-		'from_table': 'PO Detail',
-		'match_id': 1,
-		'to_field': 'entries',
-		'to_table': 'PV Detail',
-		'validation_logic': 'ifnull(billed_qty,0)  < qty'
 	},
 
 	# Table Mapper Detail

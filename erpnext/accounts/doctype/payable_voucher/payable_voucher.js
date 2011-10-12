@@ -52,7 +52,6 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 
 //Supplier
 cur_frm.cscript.supplier = function(doc,dt,dn) {
-
   var callback = function(r,rt) {
       var doc = locals[cur_frm.doctype][cur_frm.docname];    
       get_server_fields('get_credit_to','','',doc, dt, dn, 0, callback2);
@@ -144,13 +143,6 @@ cur_frm.cscript.is_opening = function(doc, dt, dn) {
 }
 
 /* ******************************** TRIGGERS **************************************** */
-/*
-// Supplier
-// ---------
-cur_frm.cscript.supplier = function(doc,cdt,cdn){
-  get_server_fields('get_credit_to','','',doc,cdt,cdn);
-}
-*/
 
 // Conversion Rate
 // ----------------
