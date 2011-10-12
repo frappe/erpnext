@@ -1,7 +1,7 @@
 # REMEMBER to update this
 # ========================
 
-last_patch = 385
+last_patch = 386
 
 #-------------------------------------------
 
@@ -457,3 +457,5 @@ def execute(patch_no):
 	elif patch_no == 385:
 		# Patch for adding packing related columns (packed by, checked by, shipping mark etc)
 		reload_doc('stock','doctype','delivery_note')
+	elif patch_no == 386:
+		sql("update `tabDocField` set allow_on_submit = 1 where fieldname = 'page_break'")
