@@ -1,7 +1,7 @@
 # REMEMBER to update this
 # ========================
 
-last_patch = 386
+last_patch = 387
 
 #-------------------------------------------
 
@@ -459,3 +459,5 @@ def execute(patch_no):
 		reload_doc('stock','doctype','delivery_note')
 	elif patch_no == 386:
 		sql("update `tabDocField` set allow_on_submit = 1 where fieldname = 'page_break'")
+	elif patch_no == 387:
+		sql("update `tabDocField` set allow_on_submit = 1 where fieldname in ('indent_details', 'po_details', 'purchase_receipt_details', 'entries', 'sales_order_details', 'delivery_note_details', 'quotation_details') and fieldtype = 'Table'")

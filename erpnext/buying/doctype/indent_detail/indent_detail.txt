@@ -5,7 +5,7 @@
 	{
 		'creation': '2010-08-08 17:09:04',
 		'docstatus': 0,
-		'modified': '2011-05-04 14:41:43',
+		'modified': '2011-10-12 13:02:13',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
@@ -14,6 +14,7 @@
 	{
 		'autoname': 'IDTD/.#####',
 		'colour': 'White:FFF',
+		'default_print_format': 'Standard',
 		'doctype': 'DocType',
 		'istable': 1,
 		'module': 'Buying',
@@ -21,7 +22,7 @@
 		'section_style': 'Tray',
 		'server_code_error': ' ',
 		'show_in_menu': 0,
-		'version': 29
+		'version': 34
 	},
 
 	# These values are common for all DocField
@@ -44,7 +45,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'schedule_date',
 		'fieldtype': 'Date',
-		'idx': 1,
 		'label': 'Required Date',
 		'no_copy': 1,
 		'oldfieldname': 'schedule_date',
@@ -60,7 +60,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'item_code',
 		'fieldtype': 'Link',
-		'idx': 2,
 		'in_filter': 1,
 		'label': 'Item Code',
 		'oldfieldname': 'item_code',
@@ -78,14 +77,13 @@
 		'doctype': 'DocField',
 		'fieldname': 'item_name',
 		'fieldtype': 'Data',
-		'idx': 3,
 		'in_filter': 1,
 		'label': 'Item Name',
 		'oldfieldname': 'item_name',
 		'oldfieldtype': 'Data',
 		'permlevel': 0,
 		'reqd': 1,
-		'search_index': 0,
+		'search_index': 1,
 		'width': '100px'
 	},
 
@@ -94,7 +92,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'description',
 		'fieldtype': 'Text',
-		'idx': 4,
 		'label': 'Description',
 		'oldfieldname': 'description',
 		'oldfieldtype': 'Text',
@@ -108,7 +105,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'warehouse',
 		'fieldtype': 'Link',
-		'idx': 5,
 		'label': 'Warehouse',
 		'oldfieldname': 'warehouse',
 		'oldfieldtype': 'Link',
@@ -125,14 +121,12 @@
 		'doctype': 'DocField',
 		'fieldname': 'brand',
 		'fieldtype': 'Link',
-		'idx': 6,
 		'label': 'Brand',
 		'oldfieldname': 'brand',
 		'oldfieldtype': 'Link',
 		'options': 'Brand',
 		'permlevel': 1,
 		'print_hide': 1,
-		'search_index': 0,
 		'width': '100px'
 	},
 
@@ -142,7 +136,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'item_group',
 		'fieldtype': 'Link',
-		'idx': 7,
 		'in_filter': 1,
 		'label': 'Item Group',
 		'no_copy': 0,
@@ -152,7 +145,7 @@
 		'permlevel': 1,
 		'print_hide': 1,
 		'reqd': 0,
-		'search_index': 0
+		'search_index': 1
 	},
 
 	# DocField
@@ -162,7 +155,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'qty',
 		'fieldtype': 'Currency',
-		'idx': 8,
 		'label': 'Quantity',
 		'no_copy': 0,
 		'oldfieldname': 'qty',
@@ -178,7 +170,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'lead_time_date',
 		'fieldtype': 'Date',
-		'idx': 9,
 		'label': 'Lead Time Date',
 		'no_copy': 1,
 		'oldfieldname': 'lead_time_date',
@@ -192,7 +183,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'uom',
 		'fieldtype': 'Link',
-		'idx': 10,
 		'label': 'Stock UOM',
 		'no_copy': 0,
 		'oldfieldname': 'uom',
@@ -200,7 +190,6 @@
 		'options': 'UOM',
 		'permlevel': 1,
 		'reqd': 1,
-		'search_index': 0,
 		'width': '50px'
 	},
 
@@ -209,7 +198,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'min_order_qty',
 		'fieldtype': 'Currency',
-		'idx': 11,
 		'label': 'Min Order Qty',
 		'no_copy': 1,
 		'oldfieldname': 'min_order_qty',
@@ -225,7 +213,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'projected_qty',
 		'fieldtype': 'Currency',
-		'idx': 12,
 		'label': 'Projected Qty',
 		'no_copy': 1,
 		'oldfieldname': 'projected_qty',
@@ -240,7 +227,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'ordered_qty',
 		'fieldtype': 'Currency',
-		'idx': 13,
 		'label': 'Ordered Qty',
 		'no_copy': 1,
 		'oldfieldname': 'ordered_qty',
@@ -253,9 +239,9 @@
 		'doctype': 'DocField',
 		'fieldname': 'sales_order_no',
 		'fieldtype': 'Link',
-		'idx': 14,
 		'label': 'Sales Order No',
 		'no_copy': 1,
+		'options': 'Sales Order',
 		'permlevel': 1,
 		'print_hide': 1
 	},
@@ -266,7 +252,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'page_break',
 		'fieldtype': 'Check',
-		'idx': 15,
 		'label': 'Page Break',
 		'no_copy': 1,
 		'oldfieldname': 'page_break',
