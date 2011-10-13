@@ -1,7 +1,7 @@
 # REMEMBER to update this
 # ========================
 
-last_patch = 391
+last_patch = 388
 
 #-------------------------------------------
 
@@ -468,7 +468,7 @@ def execute(patch_no):
 		webnotes.conn.set_global('__session_status_message', 'Patch is running. please wait...')
 	elif patch_no == 390:		
 		comp = sql("select name from tabCompany where docstatus!=2")
-		fy = [['2011-2012']]#sql("select name from `tabFiscal Year` order by year_start_date asc")
+		fy = sql("select name from `tabFiscal Year` order by year_start_date asc")
 		for c in comp:
 			prev_fy = ''
 			for f in fy:
