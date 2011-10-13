@@ -462,16 +462,4 @@ def execute(patch_no):
 	elif patch_no == 387:
 		sql("update `tabDocField` set allow_on_submit = 1 where fieldname in ('indent_details', 'po_details', 'purchase_receipt_details', 'entries', 'sales_order_details', 'delivery_note_details', 'quotation_details') and fieldtype = 'Table'")
 	elif patch_no == 388:
-		comp = sql("select name from tabCompany where docstatus!=2")
-		fy = sql("select name from `tabFiscal Year` order by year_start_date asc")
-		for c in comp:
-			prev_fy = ''
-			for f in fy:
-				fy_obj = get_obj('Fiscal Year', f[0])
-				fy_obj.doc.past_year = prev_fy
-				fy_obj.doc.company = c[0]
-				fy_obj.doc.save()
-				fy_obj.repost()
-				prev_fy = f[0]
-				sql("commit")
-				sql("start transaction")
+		pass
