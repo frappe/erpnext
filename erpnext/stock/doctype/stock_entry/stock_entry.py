@@ -93,7 +93,7 @@ class DocType:
 	def get_as_on_stock(self, item, wh, dt, tm):
 		bin = sql("select name from tabBin where item_code = %s and warehouse = %s", (item, wh))
 		bin_id = bin and bin[0][0] or ''
-		prev_sle = get_obj('Bin', bin_id).get_prev_sle(dt, tm)
+		prev_sle = bin_id and get_obj('Bin', bin_id).get_prev_sle(dt, tm) or {}		
 		qty = flt(prev_sle.get('bin_aqat', 0))
 		return qty
 
