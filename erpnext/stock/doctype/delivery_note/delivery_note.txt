@@ -5,7 +5,7 @@
 	{
 		'creation': '2011-04-18 15:58:20',
 		'docstatus': 0,
-		'modified': '2011-09-20 18:50:41',
+		'modified': '2011-10-18 13:57:23',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
@@ -21,7 +21,7 @@
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1315560377',
+		'_last_update': '1318321312',
 		'colour': 'White:FFF',
 		'default_print_format': 'Standard',
 		'doctype': 'DocType',
@@ -37,7 +37,7 @@
 		'show_in_menu': 0,
 		'subject': 'To %(customer_name)s on %(transaction_date)s | %(per_billed)s% billed',
 		'tag_fields': 'billing_status',
-		'version': 453
+		'version': 454
 	},
 
 	# These values are common for all DocFormat
@@ -110,6 +110,18 @@
 		'doctype': 'DocPerm',
 		'permlevel': 0,
 		'role': 'Material Manager',
+		'submit': 1,
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'amend': 1,
+		'cancel': 1,
+		'create': 1,
+		'doctype': 'DocPerm',
+		'permlevel': 0,
+		'role': 'Sales Manager',
 		'submit': 1,
 		'write': 1
 	},
@@ -622,6 +634,7 @@
 
 	# DocField
 	{
+		'allow_on_submit': 1,
 		'doctype': 'DocField',
 		'fieldname': 'delivery_note_details',
 		'fieldtype': 'Table',

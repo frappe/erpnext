@@ -443,33 +443,80 @@ class DocType(TransactionBase):
 	# ==========================================
 	def update_pack_nett_weight(self):
 			for d in getlist(self.doclist, 'delivery_note_details'):
-				if d.item_code:
+				if d.item_code and not d.pack_nett_wt:
 					item_wt = sql("select nett_weight from `tabItem` where name = %s", (d.item_code))
 					d.pack_nett_wt = item_wt and flt(item_wt[0][0]) or 0
 
-	# ==========================================
-	def print_packing_slip(self):
-		prev_pack='0'
-		sno=0
-		html=''
-		tot_nett_wt,tot_gross_wt=0,0
-		for d in getlist(self.doclist, 'delivery_note_details'):
-			sno=sno+1
-			if sno!=1 and prev_pack!=d.pack_no:#Footer goes here
-				html+='</table><table style="page-break-after:always" width="100%"><tr><td>CASE NO</td><td>'+cstr(d.pack_no)+'</td><td>NETT WT</td><td>'+cstr(tot_nett_wt)+'</td><td>CHECKED BY</td><td></td></tr><tr><td>SIZE</td><td></td><td>GROSS WT</td><td>'+cstr(tot_gross_wt)+'</td><td>PACKED BY</td><td></td></tr></table></div>'
-			if prev_pack!=d.pack_no: #Prepare Header Here
-				#Header code goes here
-				html+='<div align="center">[HEADER GOES HERE]</div><div><center><h2>Packing Slip</h2></center></div> <table width="100%"><tr><td width="15%">Order No.</td><td width="35%">'+cstr(self.doc.sales_order_no)+'</td><td width="15%">Shipping Marks</td><td>'+cstr(d.shipping_mark)+'</td></tr></table>'
-				html+='<table class="cust_tbl" width="100%"><tr><td>S.NO.</td><td>QUANTITY</td><td>CS.NO.</td><td>DESCRIPTION</td><td>WEIGHT</td><tr>'
-				sno=0
-				tot_nett_wt,to_gross_wt=flt(d.pack_nett_wt),flt(d.pack_gross_wt)
-			#Body code goes here
-			html+='<tr><td>'+cstr(sno+1)+'</td><td>'+cstr(d.qty)+'</td><td>'+d.item_code+'</td><td>'+d.description+'</td><td>'+cstr(d.pack_nett_wt)+'</td></tr>'
-			prev_pack=d.pack_no
-			tot_nett_wt+=flt(d.pack_nett_wt)
-			tot_gross_wt+=flt(d.pack_gross_wt)
 
-		if html!='':
-			html+='</table><table style="page-break-after:always" width="100%"><tr><td>CASE NO</td><td>'+cstr(d.pack_no)+'</td><td>NETT WT</td><td>'+cstr(tot_nett_wt)+'</td><td>CHECKED BY</td><td>'+cstr(self.doc.packing_checked_by)+'</td></tr><tr><td>SIZE</td><td>'+cstr(self.doc.pack_size)+'</td><td>GROSS WT</td><td>'+cstr(tot_gross_wt)+'</td><td>PACKED BY</td><td>'+cstr(self.doc.packed_by)+'</td></tr></table></div>'
-			html+='</html>'
+	# ==========================================
+	def get_header(self, so_no, shipping_mark):
+		header = '''
+			<div align="center">[HEADER GOES HERE]</div>
+			<div><center><h2>Packing Slip</h2></center></div>
+			<table width="100%" class="large_font">
+				<tr>
+					<td width="20%">ORDER NO.</td>
+					<td width="30%">'''+cstr(so_no)+'''</td>
+					<td width="20%">SHIPPING MARKS</td>
+					<td width="30%">'''+cstr(shipping_mark)+'''</td>
+				</tr>
+			</table>''';
+			
+		return header
+		
+	def get_footer(self, row, tot_nett, tot_gross):
+		footer = '''
+			<table style="page-break-after:always" width="100%" class="large_font">
+				<tr>
+					<td>CASE NO</td><td>'''+cstr(row.pack_no)+'''</td>
+					<td>NETT WT</td><td>'''+cstr(tot_nett)+'''</td>
+					<td>CHECKED BY</td><td>'''+cstr(row.packing_checked_by)+'''</td>
+				</tr>
+				<tr>
+					<td>SIZE</td><td>'''+cstr(row.pack_size)+'''</td>
+					<td>GROSS WT</td><td>'''+cstr(tot_gross)+'''</td>
+					<td>PACKED BY</td><td>'''+cstr(row.packed_by)+'''</td>
+				</tr>
+			</table>'''
+	
+		return footer
+	
+	def print_packing_slip(self):
+		plist = {}
+		for d in getlist(self.doclist, 'delivery_note_details'):
+			if not plist.has_key(cstr(d.pack_no)):
+				plist[cstr(d.pack_no)] = [d]
+			else:
+				plist.get(cstr(d.pack_no)).append(d)
+
+		html=''
+		
+		for d in sorted(plist.keys()):
+			tot_nett_wt,tot_gross_wt=0,0
+			
+			# header
+			html += self.get_header(self.doc.sales_order_no, self.doc.shipping_mark)
+			
+			# item table header
+			html += '''
+				<table class="cust_tbl" width="100%">
+					<tr>
+						<td><b>SR.NO.</b></td><td><b>CS.NO.</b></td><td><b>DESCRIPTION</b></td>
+						<td><b>QUANTITY</b></td><td><b>WEIGHT</b></td>
+					</tr>'''
+					
+			# item table data
+			sr_no = 1
+			for r in plist.get(d):
+				html += '<tr><td>'+cstr(sr_no)+'</td><td>'+r.item_code+'</td><td>'+r.description+'</td><td>'+cstr(r.qty)+'</td><td>'+cstr(r.pack_nett_wt)+'</td></tr>'
+				
+				tot_nett_wt += flt(r.pack_nett_wt)
+				tot_gross_wt += flt(r.pack_gross_wt)
+				
+				sr_no += 1
+				
+			html += '</table>'
+
+			# footer
+			html += self.get_footer(r, tot_nett_wt, tot_gross_wt)
 		self.doc.print_packing_slip=html
