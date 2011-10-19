@@ -5,7 +5,7 @@
 	{
 		'creation': '2010-08-08 17:09:18',
 		'docstatus': 0,
-		'modified': '2011-10-19 15:02:04',
+		'modified': '2011-10-19 16:31:54',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
@@ -34,7 +34,7 @@
 		'server_code_error': ' ',
 		'show_in_menu': 0,
 		'subject': 'To %(customer_name)s worth %(currency)s %(grand_total_export)s due on %(due_date)s | %(outstanding_amount)s outstanding',
-		'version': 361
+		'version': 363
 	},
 
 	# These values are common for all DocFormat
