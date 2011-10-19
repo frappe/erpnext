@@ -5,14 +5,23 @@
 	{
 		'creation': '2010-08-08 17:09:18',
 		'docstatus': 0,
-		'modified': '2011-10-10 12:29:26',
+		'modified': '2011-10-19 15:02:04',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
 
+	# These values are common for all DocField
+	{
+		'doctype': 'DocField',
+		'name': '__common__',
+		'parent': 'Receivable Voucher',
+		'parentfield': 'fields',
+		'parenttype': 'DocType'
+	},
+
 	# These values are common for all DocType
 	{
-		'_last_update': '1317986484',
+		'_last_update': '1319014846',
 		'change_log': '1. Change in pull_details method dt.-26-06-2009',
 		'colour': 'White:FFF',
 		'default_print_format': 'Standard',
@@ -25,15 +34,16 @@
 		'server_code_error': ' ',
 		'show_in_menu': 0,
 		'subject': 'To %(customer_name)s worth %(currency)s %(grand_total_export)s due on %(due_date)s | %(outstanding_amount)s outstanding',
-		'version': 359
+		'version': 361
 	},
 
-	# These values are common for all DocField
+	# These values are common for all DocFormat
 	{
-		'doctype': 'DocField',
+		'doctype': 'DocFormat',
+		'format': 'POS Invoice',
 		'name': '__common__',
 		'parent': 'Receivable Voucher',
-		'parentfield': 'fields',
+		'parentfield': 'formats',
 		'parenttype': 'DocType'
 	},
 
@@ -112,6 +122,11 @@
 		'role': 'Customer',
 		'submit': 0,
 		'write': 0
+	},
+
+	# DocFormat
+	{
+		'doctype': 'DocFormat'
 	},
 
 	# DocField
