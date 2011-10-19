@@ -1,5 +1,8 @@
 def execute():
+	import webnotes
 	from webnotes.modules.module_manager import reload_doc
+	from webnotes.model.doc import addchild
+	from webnotes.model.code import get_obj
 	reload_doc('stock', 'Print Format', 'Delivery Note Packing List Wise')
 	reload_doc('stock', 'Print Format', 'Purchase Receipt Format')
 	reload_doc('accounts', 'Print Format', 'Payment Receipt Voucher')
@@ -7,8 +10,7 @@ def execute():
 	reload_doc('accounts', 'Print Format', 'Form 16A Print Format')
 	reload_doc('accounts', 'Print Format', 'Cheque Printing Format')
 	
-	if not sql("select format from `tabDocFormat` where name = 'POS Invoice' and parent = 'Receivable Voucher'"):
-		from webnotes.model.doc import addchild
+	if not webnotes.conn.sql("select format from `tabDocFormat` where name = 'POS Invoice' and parent = 'Receivable Voucher'"):		
 		dt_obj = get_obj('DocType', 'Receivable Voucher', with_children = 1)
 		ch = addchild(dt_obj.doc, 'formats', 'DocFormat', 1)
 		ch.format = 'POS Invoice'
