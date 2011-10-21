@@ -101,8 +101,13 @@ report.get_query = function() {
                                   if(supp_type) add_cond += ' AND t1.supplier_type = "'+supp_type+'"';
                                   break;
       case 'Project'        :     pro = this.get_filter('Profile', 'Project').get_value();
-								  col = 'DISTINCT t1.project_name';
-                                  if(pro) add_cond += ' AND t1.project_name = "'+pro+'"';
+      							  if (inList(['Purchase Order', 'Purchase Receipt', 'Payable Voucher'], trans)) {
+									  col = 'DISTINCT t2.project_name';
+    	                              if(pro) add_cond += ' AND t2.project_name = "'+pro+'"';
+    	                          } else {
+	    	                          col = 'DISTINCT t1.project_name';
+    	                              if(pro) add_cond += ' AND t1.project_name = "'+pro+'"';
+    	                          }
                                   break;
       case 'Item Group'     :     ig = this.get_filter('Profile', 'Item Group').get_value();
                                   if(ig) sp_cond += ' AND parent.name = "'+ig+'"';

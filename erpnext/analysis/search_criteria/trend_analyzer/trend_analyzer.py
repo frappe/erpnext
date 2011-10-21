@@ -118,7 +118,10 @@ if supplier_type or based_on == 'Supplier Type':
 
 # Project
 if project or based_on == 'Project':
-	add_cond += ' AND t1.project_name = "%s"' % (based_on != 'Project' and project or '%(value)s')
+	if trans in ['Purchase Order', 'Purchase Receipt', 'Payable Voucher']:
+		add_cond += ' AND t2.project_name = "%s"' % (based_on != 'Project' and project or '%(value)s')
+	else:
+		add_cond += ' AND t1.project_name = "%s"' % (based_on != 'Project' and project or '%(value)s')
 	
 # Column to be seleted for group by condition
 # ==============================================
