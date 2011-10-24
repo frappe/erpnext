@@ -136,7 +136,7 @@ elif group_by == 'Supplier':
 	
 # ********************************************** Result Set ************************************************
 for r in res:
-	main_det = sql("SELECT %s FROM %s WHERE %s" % (query_val, add_tab, add_cond % {'value':cstr(r[col_idx[based_on]]).strip()}))
+	main_det = sql("SELECT %s FROM `%s` WHERE %s" % (query_val, add_tab, add_cond % {'value':cstr(r[col_idx[based_on]]).strip()}))
 	if group_by:
 		for col in range(cr,cr+1): # this would make all first row blank. just for look
 			r.append('')
@@ -155,12 +155,12 @@ for r in res:
 					flag = 0
 
 			if flag == 1:	
-				det = [x[0] for x in sql("SELECT DISTINCT %s FROM %s where %s" % (sel_col, add_tab, add_cond % {'value':cstr(r[col_idx[based_on]]).strip()}))]
+				det = [x[0] for x in sql("SELECT DISTINCT %s FROM `%s` where %s" % (sel_col, add_tab, add_cond % {'value':cstr(r[col_idx[based_on]]).strip()}))]
 
 				for des in range(len(det)):
 					t_row = ['' for i in range(len(colnames))]
 					t_row[col_idx[group_by]] = cstr(det[des])
-					gr_det = sql("SELECT %s FROM %s WHERE %s = '%s' and %s" % (query_val, add_tab, sel_col, cstr(det[des]), add_cond % {'value':cstr(r[col_idx[based_on]]).strip()}))
+					gr_det = sql("SELECT %s FROM `%s` WHERE %s = '%s' and %s" % (query_val, add_tab, sel_col, cstr(det[des]), add_cond % {'value':cstr(r[col_idx[based_on]]).strip()}))
 					for d in range(len(col_names)):
 						t_row[col_idx[col_names[d]]] = flt(gr_det[0][d])
 					out.append(t_row)
