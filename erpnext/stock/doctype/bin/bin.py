@@ -118,12 +118,14 @@ class DocType:
 	# validate negative stock (validate if stock is going -ve in between for back dated entries will consider only is_cancel = 'No' entries)
 	# --------------------------------------------------------------------------------------------------------------------------------------
 	def validate_negative_stock(self, cqty, s):
-		if cqty + s['actual_qty'] < 0 and s['is_cancelled'] != 'Yes':
-			msgprint(cqty)
-			msgprint(s['actual_qty'])
-			msgprint('Cannot complete this transaction because stock will become negative in future transaction for Item <b>%s</b> in Warehouse <b>%s</b> on <b>%s %s</b>' % \
-				(self.doc.item_code, self.doc.warehouse, s['posting_date'], s['posting_time']))
-			raise Exception
+		diff = cqty + s['actual_qty']
+		if  diff < 0 and (abs(diff) > 0.0001) and s['is_cancelled'] != 'Yes':
+			msgprint("""
+				Cannot complete this transaction because stock will 
+				become negative (%s) in future transaction for Item 
+				<b>%s</b> in Warehouse <b>%s</b> on <b>%s %s</b>""" % \
+				(str(diff), self.doc.item_code, self.doc.warehouse,
+					s['posting_date'], s['posting_time']), raise_exception=1)
 
 	# ------------------------------------
 	# get serialized inventory values
