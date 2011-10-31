@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-12-14 10:23:25',
+		'creation': '2010-12-14 10:33:09',
 		'docstatus': 0,
-		'modified': '2010-12-01 10:39:56',
+		'modified': '2011-10-31 15:42:36',
 		'modified_by': 'Administrator',
 		'owner': 'harshada@webnotestech.com'
 	},
@@ -13,7 +13,8 @@
 	# These values are common for all Search Criteria
 	{
 		'columns': 'Employee\x01ID',
-		'criteria_name': 'Employeewise Balance Leave Report',
+		'criteria_name': 'Employee Leave Balance Report',
+		'description': 'Employeewise Balance Leave Report',
 		'doc_type': 'Employee',
 		'doctype': 'Search Criteria',
 		'filters': "{'Employee\x01Saved':1,'Employee\x01Submitted':1,'Employee\x01Gender':'','Employee\x01Month of Birth':'','Employee\x01Status':'Active'}",
