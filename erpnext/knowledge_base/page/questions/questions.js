@@ -35,8 +35,6 @@ function KnowledgeBase(w) {
 	
 	this.make_search_bar = function() {
 		this.search = $a($a(w,'div','kb-search-wrapper'), 'textarea');
-
-		$(this.search).add_default_text('Enter keywords or a new Question');
 		
 		var div = $a(w,'div','kb-btn-wrapper');
 		$btn(div, 'Search', function() { me.run() }, {fontSize:'14px'});
