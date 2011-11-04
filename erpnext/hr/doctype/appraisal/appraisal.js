@@ -1,8 +1,8 @@
 cur_frm.add_fetch('employee', 'company', 'company');
 
 cur_frm.cscript.onload = function(doc,cdt,cdn){
-	if(doc.employee) 
-		cur_frm.cscript.employee(doc,cdt,cdn);
+	if(!doc.status) 
+		set_multiple(cdt,cdn,{status:'Draft'});
 	if(doc.amended_from && doc.__islocal) 
 		cur_frm.cscript.refresh_appraisal_details(doc, cdt, cdn);
 }
@@ -13,7 +13,6 @@ cur_frm.cscript.onload_post_render = function(doc,cdt,cdn){
 }
 
 cur_frm.cscript.refresh = function(doc,cdt,cdn){
-	if(!doc.status) set_multiple(dt,dn,{status:'Draft'});
 	if(user == doc.kra_approver && doc.status == 'Submitted') 
 		unhide_field(['Update', 'Declare Completed', 'Calculate Total Score']);
 	else hide_field(['Update', 'Declare Completed', 'Calculate Total Score']);
