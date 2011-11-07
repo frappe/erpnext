@@ -74,6 +74,9 @@ cur_frm.cscript.hide_fields = function(doc, cdt, cdn) {
 // -------
 cur_frm.cscript.refresh = function(doc, dt, dn) {
 
+	cur_frm.cscript.is_opening(doc, dt, dn);
+	cur_frm.cscript.hide_fields(doc, cdt, cdn);
+
 	// Show / Hide button
 	cur_frm.clear_custom_buttons();
 
@@ -90,8 +93,6 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 	}
 	else
 		hide_field('Repair Outstanding Amt');
-	cur_frm.cscript.is_opening(doc, dt, dn);
-	cur_frm.cscript.hide_fields(doc, cdt, cdn);
 }
 
 //fetch retail transaction related fields
