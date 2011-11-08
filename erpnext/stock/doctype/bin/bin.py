@@ -76,8 +76,29 @@ class DocType:
 		""", (self.doc.item_code, self.doc.warehouse), as_dict=1)
 		return sle and sle[0] or None
 
-	def get_prev_sle(self, posting_date = '0000-00-00', posting_time = '00:00'):
-		"""get previous stock ledger entry"""
+	def get_prev_sle(self, posting_date = '1900-01-01', posting_time = '12:00', sle_id = ''):
+		"""
+			get the last sle on or before the current time-bucket, 
+			to get actual qty before transaction, this function
+			is called from various transaction like stock entry, reco etc
+		"""
+		
+		sle = sql("""
+			select * from `tabStock Ledger Entry`
+			where item_code = %s
+			and warehouse = %s
+			and ifnull(is_cancelled, 'No') = 'No'
+			and name != %s
+			and timestamp(posting_date, posting_time) <= timestamp(%s, %s)
+			order by timestamp(posting_date, posting_time) desc, name desc
+			limit 1
+		""", (self.doc.item_code, self.doc.warehouse, sle_id, posting_date, posting_time), as_dict=1)
+
+		return sle and sle[0] or {}
+
+
+	def get_sle_prev_timebucket(self, posting_date = '1900-01-01', posting_time = '12:00'):
+		"""get previous stock ledger entry before current time-bucket"""
 		# get the last sle before the current time-bucket, so that all values
 		# are reposted from the current time-bucket onwards.
 		# this is necessary because at the time of cancellation, there may be
@@ -96,11 +117,7 @@ class DocType:
 		return sle and sle[0] or {}
 
 
-
-
-	# --------------------------------------------------------------------------------------------------------------------------------------
-	# 
-	# --------------------------------------------------------------------------------------------------------------------------------------
+	#-------------------------------------------------------------
 	def validate_negative_stock(self, cqty, s):
 		"""
 			validate negative stock for entries current datetime onwards
@@ -117,10 +134,12 @@ class DocType:
 					s['posting_date'], s['posting_time'], s['voucher_type'], s['voucher_no']), \
 					raise_exception=1)
 
-	# ------------------------------------
-	# get serialized inventory values
+
 	# ------------------------------------
 	def get_serialized_inventory_values(self, val_rate, in_rate, opening_qty, actual_qty, is_cancelled, serial_nos):
+		"""
+			get serialized inventory values
+		"""
 		if flt(in_rate) < 0: # wrong incoming rate
 			in_rate = val_rate
 		elif flt(in_rate) == 0: # In case of delivery/stock issue, get average purchase rate of serial nos of current entry
@@ -219,7 +238,7 @@ class DocType:
 		"""
 		
 		# Get prev sle
-		prev_sle = self.get_prev_sle(posting_date, posting_time)
+		prev_sle = self.get_sle_prev_timebucket(posting_date, posting_time)
 		
 		# if no prev sle, start from the first one (for repost)
 		if not prev_sle:
@@ -246,7 +265,7 @@ class DocType:
 			and timestamp(posting_date, posting_time) > timestamp(%s, %s)
 			order by timestamp(posting_date, posting_time) asc, name asc""", \
 				(self.doc.item_code, self.doc.warehouse, \
-					prev_sle.get('posting_date','0000-00-00'), prev_sle.get('posting_time', '00:00')), as_dict = 1)
+					prev_sle.get('posting_date','1900-01-01'), prev_sle.get('posting_time', '12:00')), as_dict = 1)
 
 		for sle in sll:
 			# block if stock level goes negative on any date

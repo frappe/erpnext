@@ -43,7 +43,7 @@ mtn = [
 			'doctype': 'Stock Entry',
 			'posting_date': '2011-09-01',
 			'transfer_date': '2011-09-01',
-			'posting_time': '13:00',
+			'posting_time': '12:00',
 			'company': 'comp',
 			'fiscal_year' : '2011-2012',
 			'purpose': 'Material Transfer',

@@ -344,8 +344,7 @@ def execute(patch_no):
 		bin = sql("select name from tabBin")
 		for b in bin:
 			bobj = get_obj('Bin',b[0])
-			prev_sle = bobj.get_prev_sle(posting_date = '2011-09-01', posting_time = '01:00')
-			bobj.update_entries_after(posting_date = '2011-09-01', posting_time = '01:00', prev_sle = prev_sle)
+			bobj.update_entries_after(posting_date = '2011-09-01', posting_time = '01:00')
 	elif patch_no == 368:
 		from webnotes.utils import nestedset
 		t = [

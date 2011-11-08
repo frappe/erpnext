@@ -411,8 +411,8 @@ class DocType:
     if val_method == 'FIFO':
       if warehouse:
         bin_obj = get_obj('Warehouse',warehouse).get_bin(item_code)
-        prev_sle = bin_obj.get_prev_sle('',nowdate(), (now().split(' ')[1])[:-3])
-        fcfs_stack = prev_sle and (prev_sle[0][3] and eval(prev_sle[0][3]) or []) or []
+        prev_sle = bin_obj.get_prev_sle(nowdate(), (now().split(' ')[1])[:-3])
+        fcfs_stack = prev_sle and prev_sle['fcfs_stack'] and eval(prev_sle['fcfs_stack']) or []
       else:
         prev_sle = sql("select fcfs_stack from `tabStock Ledger Entry` where item_code = '%s' and posting_date <= '%s' order by posting_date DESC, posting_time DESC, name DESC limit 1" % (item_code, nowdate()))
         fcfs_stack = prev_sle and (prev_sle[0][0] and eval(prev_sle[0][0]) or []) or []

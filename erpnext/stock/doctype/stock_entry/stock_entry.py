@@ -122,8 +122,6 @@ class DocType:
 				
 	def get_raw_materials(self,pro_obj):
 		# get all items from flat bom except, child items of sub-contracted and sub assembly items and sub assembly items itself.
-#		flat_bom_items = sql("select item_code, ifnull(sum(qty_consumed_per_unit), 0) * '%s', description, stock_uom from `tabFlat BOM Detail` where parent = '%s' and parent_bom = '%s' and is_pro_applicable = 'No' and docstatus < 2 group by item_code" % ((self.doc.process == 'Backflush') and flt(self.doc.fg_completed_qty) or flt(pro_obj.doc.qty), cstr(pro_obj.doc.bom_no), cstr(pro_obj.doc.bom_no)))
-#		self.make_items_dict(flat_bom_items)
 
 		if pro_obj.doc.consider_sa_items == 'Yes':
 			# get all Sub Assembly items only from flat bom
@@ -132,7 +130,6 @@ class DocType:
 		
 		if pro_obj.doc.consider_sa_items == 'No':
 			# get all sub assembly childs only from flat bom
-			#select item_code,ifnull(sum(qty_consumed_per_unit),0)*'%s' as qty,description,stock_uom from ( select distinct fb.name,fb.description,fb.item_code,fb.qty_consumed_per_unit,fb.stock_uom from `tabFlat BOM Detail` fb,`tabBOM Material` bm where bm.parent=fb.parent_bom and bm.docstatus<2 and fb.is_pro_applicable='Yes' and fb.docstatus<2 and fb.parent='%s' and bm.bom_no is null)a group by item_code,stock_uom
 			fl_bom_sa_child_item = sql("select item_code,ifnull(sum(qty_consumed_per_unit),0)*'%s' as qty,description,stock_uom from ( select distinct fb.name,fb.description,fb.item_code,fb.qty_consumed_per_unit,fb.stock_uom from `tabFlat BOM Detail` fb,`tabBOM Material` bm where bm.parent=fb.parent_bom and bm.docstatus<2 and fb.is_pro_applicable='Yes' and fb.docstatus<2 and fb.parent='%s' and bm.bom_no is null)a group by item_code,stock_uom" % ((self.doc.process == 'Backflush') and flt(self.doc.fg_completed_qty) or flt(pro_obj.doc.qty), cstr(pro_obj.doc.bom_no)))
 			self.make_items_dict(fl_bom_sa_child_item)
 
@@ -179,11 +176,10 @@ class DocType:
 			if flt(d.transfer_qty) <= 0:
 				msgprint("Transfer Quantity can not be less than or equal to zero at Row No " + cstr(d.idx))
 				raise Exception
-			if d.s_warehouse:
-				if flt(d.transfer_qty) > flt(d.actual_qty):
-					msgprint("Transfer Quantity is more than Available Qty at Row No " + cstr(d.idx))
-					raise Exception
-	
+			if d.s_warehouse and flt(d.transfer_qty) > flt(d.actual_qty):
+				msgprint("Transfer Quantity is more than Available Qty at Row No " + cstr(d.idx))
+				raise Exception
+
 	def calc_amount(self):
 		total_amount = 0
 		for d in getlist(self.doclist, 'mtn_details'):
