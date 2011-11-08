@@ -131,18 +131,18 @@ class DocType:
 			update item valuation in previous date and also on post date if no qty diff
 		"""
 		
-		self.update_item_valuation_pre_date(d)
+		self.update_entries_pre_date(d)
 		
 		if not flt(d[self.label['qty']]) and not flt(d[self.label['actual_qty']]):
 			# seems like a special condition when there is no actual quanitity but there is a rate, may be only for setting a rate!
 			self.make_sl_entry(1,d,1)
 			self.make_sl_entry(1,d,-1)
 		elif not qty_diff:
-			self.update_item_valuation_post_date(d)
+			self.update_entries_post_date(d)
 				
 	# update valuation rate as csv file in all sle before reconciliation date
 	# ------------------------------------------------------------------------
-	def update_item_valuation_pre_date(self, d):
+	def update_entries_pre_date(self, d):
 		mar = flt(d[self.label['mar']])		
 
 		# previous sle
@@ -168,15 +168,12 @@ class DocType:
 				
 	# Update item valuation in all sle after the reconcliation date
 	# ---------------------------------------------------------
-	def update_item_valuation_post_date(self, d):
+	def update_entries_post_date(self, d):
 		bin = sql("select name from `tabBin` where item_code = '%s' and warehouse = '%s'" % (d[self.label['item_code']], d[self.label['warehouse']]))
 		bin_obj = get_obj('Bin', bin[0][0])
 
-		# prev sle
-		prev_sle = bin_obj.get_prev_sle(self.doc.reconciliation_date,self.doc.reconciliation_time)
-
 		# update valuation in sle posted after reconciliation datetime
-		bin_obj.update_item_valuation(posting_date = self.doc.reconciliation_date, posting_time = self.doc.reconciliation_time, prev_sle = prev_sle)
+		bin_obj.update_entries_after(posting_date = self.doc.reconciliation_date, posting_time = self.doc.reconciliation_time)
 
 	# --------------
 	# make sl entry

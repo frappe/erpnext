@@ -85,7 +85,7 @@ class DocType:
       for w in wh:
         bin = sql("select name from `tabBin` where item_code = '%s' and warehouse = '%s'" % (self.doc.item_code, w[0])) 
         if bin and bin[0][0]:
-          get_obj("Bin", bin[0][0]).update_item_valuation(sle_id = '', posting_date = '', posting_time = '')
+          get_obj("Bin", bin[0][0]).update_entries_after(posting_date = '', posting_time = '')
 
     # acknowledge user
     msgprint("Item Valuation Updated Successfully.")

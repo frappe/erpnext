@@ -88,7 +88,7 @@ class DocType:
 		bin_act_qty =	flt(bin_obj.doc.actual_qty)
 		try:
 			# udpate actual qty and item valuation
-			bin_obj.update_item_valuation('', '2000-01-01', '00:00')
+			bin_obj.update_entries_after('0000-00-00', '00:00')
 			# get bin qty
 			qty_dict = self.get_bin_qty(bin_obj.doc.warehouse, bin_obj.doc.item_code)
 			

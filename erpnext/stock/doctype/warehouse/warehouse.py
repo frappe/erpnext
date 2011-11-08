@@ -68,7 +68,7 @@ class DocType:
     bl = sql("select name from tabBin where warehouse=%s", self.doc.name)
     for b in bl:
       bobj = get_obj('Bin',b[0])
-      bobj.update_item_valuation(posting_date = '2000-01-01', posting_time = '12:00')
+      bobj.update_entries_after(posting_date = '2000-01-01', posting_time = '12:00')
 
       sql("COMMIT")
       sql("START TRANSACTION")
