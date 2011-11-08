@@ -1,7 +1,7 @@
 # Please edit this list and import only required elements
 import webnotes
 
-from webnotes.utils import cint, cstr, flt
+from webnotes.utils import cint, cstr, flt, nowdate
 from webnotes.model.code import get_obj
 from webnotes import msgprint
 
