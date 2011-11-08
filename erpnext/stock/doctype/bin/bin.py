@@ -32,12 +32,12 @@ class DocType:
 		self.doc.save()
 			
 		
-		# update valuation for post dated entry
 		if actual_qty:
 			# check actual qty with total number of serial no
 			if serial_no:
 				self.check_qty_with_serial_no()
-			
+				
+			# update valuation and qty after transaction for post dated entry
 			self.update_entries_after(dt, posting_time)
 
 	def check_qty_with_serial_no(self):
@@ -46,11 +46,19 @@ class DocType:
 			Temporary validation added on: 18-07-2011
 		"""
 		if sql("select name from `tabItem` where ifnull(has_serial_no, 'No') = 'Yes' and name = '%s'" % self.doc.item_code):
-			sr_count = sql("select count(name) from `tabSerial No` where item_code = '%s' and warehouse = '%s' and status  ='In Store' and docstatus != 2" % (self.doc.item_code, self.doc.warehouse))[0][0]
+			sr_count = sql("""select count(name) from `tabSerial No` 
+							where item_code = '%s' and warehouse = '%s' 
+							and status  ='In Store' and docstatus != 2
+							""" % (self.doc.item_code, self.doc.warehouse))[0][0]
+			
 			if sr_count != self.doc.actual_qty:
-				msg = "Actual Qty(%s) in Bin is mismatched with total number(%s) of serial no in store for item: '%s' and warehouse: '%s'" % (self.doc.actual_qty, sr_count, self.doc.item_code, self.doc.warehouse)
+				msg = """Actual Qty(%s) in Bin is mismatched with total number(%s) of serial no in store 
+					for item: '%s' and warehouse: '%s'""" % \
+					(self.doc.actual_qty, sr_count, self.doc.item_code, self.doc.warehouse)
+					
 				if getattr(webnotes.defs,'admin_email_notification',1):
-					sendmail(['developers@iwebnotes.com'], sender='automail@webnotestech.com', subject='Serial No Count vs Bin Actual Qty', parts=[['text/plain', msg]])			
+					sendmail(['developers@iwebnotes.com'], sender='automail@webnotestech.com', \
+						subject='Serial No Count vs Bin Actual Qty', parts=[['text/plain', msg]])			
 				msgprint(msg, raise_exception=1)
 
 	# --------------------------------
@@ -91,17 +99,21 @@ class DocType:
 
 
 	# --------------------------------------------------------------------------------------------------------------------------------------
-	# validate negative stock (validate if stock is going -ve in between for back dated entries will consider only is_cancel = 'No' entries)
+	# 
 	# --------------------------------------------------------------------------------------------------------------------------------------
 	def validate_negative_stock(self, cqty, s):
+		"""
+			validate negative stock for entries current datetime onwards
+			will not consider cancelled entries
+		"""
 		diff = cqty + s['actual_qty']
-		if  diff < 0 and (abs(diff) > 0.0001) and s['is_cancelled'] != 'Yes':
+		if  diff < 0 and (abs(diff) > 0.0001) and s['is_cancelled'] == 'No':
 			msgprint("""
 				Negative stock error: 
 				Cannot complete this transaction because stock will 
 				become negative (%s) for Item <b>%s</b> in Warehouse 
 				<b>%s</b> on <b>%s %s</b> in Transaction %s %s""" % \
-				(str(diff), self.doc.item_code, self.doc.warehouse,
+				(str(diff), self.doc.item_code, self.doc.warehouse, \
 					s['posting_date'], s['posting_time'], s['voucher_type'], s['voucher_no']), \
 					raise_exception=1)
 
@@ -201,8 +213,10 @@ class DocType:
 		return stock_val
 
 	def update_entries_after(self, posting_date, posting_time):
-		"""update item valution from the give stock ledger entry (sle)
-		   onwards."""
+		"""
+			update valution rate and qty after transaction 
+			from the current time-bucket onwards
+		"""
 		
 		# Get prev sle
 		prev_sle = self.get_prev_sle(posting_date, posting_time)
@@ -244,7 +258,7 @@ class DocType:
 
 			# Get valuation rate
 			val_rate, stock_val = self.get_valuation_rate(val_method, serial_nos, \
-				val_rate, in_rate, stock_val, cqty, s) 
+				val_rate, in_rate, stock_val, cqty, sle) 
 			
 			# Qty upto the sle
 			cqty += sle['actual_qty'] 
