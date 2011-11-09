@@ -32,9 +32,10 @@ class DocType:
 
   #----------- Client Trigger function ----------
   def get_item_detail(self, item_code):
-    item = sql("select description from `tabItem` where (ifnull(end_of_life,'')='' or end_of_life = '0000-00-00' or end_of_life >  now()) and name = %s",item_code , as_dict =1)
+    item = sql("select description, stock_uom from `tabItem` where (ifnull(end_of_life,'')='' or end_of_life = '0000-00-00' or end_of_life >  now()) and name = %s",item_code , as_dict =1)
     ret={
-      'description'   : item and item[0]['description'] or ''
+      'description'   : item and item[0]['description'] or '',
+      'uom'			  : item and item[0]['stock_uom'] or ''
     }
     return ret
 
