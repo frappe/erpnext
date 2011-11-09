@@ -101,7 +101,7 @@ class TestStockEntry(unittest.TestCase):
 		
 		self.save_stock_entry('Material Transfer')
 		mtn = get_obj('Stock Entry', stock_entry.mtn[0].name, with_children=1)
-		tn = self.submit_stock_entry(mtn)
+		mtn = self.submit_stock_entry(mtn)
 		
 		# stock ledger entry
 		print "Checking stock ledger entry........."
@@ -202,8 +202,54 @@ class TestStockEntry(unittest.TestCase):
 			[{'doctype': 'Serial No', 'item_code': 'it', 'warehouse': 'wh1', 'status': 'In Store', 'docstatus': 0}, 10]
 		])
 
+	#===========================================================================
+	def test_entries_on_same_datetime(self):
+		print "Test Case: Multiple entries on same datetime, cancel first one"
 		
+		# submitted 1st MR
+		self.save_stock_entry('Material Receipt')
+		mr = get_obj('Stock Entry', stock_entry.mr[0].name, with_children=1)
+		mr = self.submit_stock_entry(mr)
+		
+		# submitted 2nd MR
+		for each in stock_entry.mr1:
+			each.save(1)
+		for t in stock_entry.mr1[1:]:
+			sql("update `tabStock Entry Detail` set parent = '%s' where name = '%s'" % (stock_entry.mr1[0].name, t.name))
+		
+		mr1 = get_obj('Stock Entry', stock_entry.mr1[0].name, with_children=1)
+		mr1 = self.submit_stock_entry(mr1)
 
+		
+		# submitted MTN
+		self.save_stock_entry('Material Transfer')
+		mtn = get_obj('Stock Entry', stock_entry.mtn[0].name, with_children=1)
+		mtn = self.submit_stock_entry(mtn)
+		
+		# cancel prev MR
+		mr.on_cancel()
+		mr.doc.cancel_reason = "testing"
+		mr.doc.docstatus = 2
+		mr.doc.save()
+		
+		
+		# stock ledger entry
+		print "Checking stock ledger entry........."
+		self.assertDoc(self.get_expected_sle('entries_on_same_datetime'))
+		
+		# bin qty
+		print "Checking Bin qty........."
+		self.assertDoc([
+			{'doctype':'Bin', 'actual_qty':0, 'item_code':'it', 'warehouse':'wh1'},
+			{'doctype':'Bin', 'actual_qty':5, 'item_code':'it', 'warehouse':'wh2'}
+		])
+		
+		# serial no		
+		self.assertCount([
+			[{'doctype': 'Serial No', 'item_code': 'it', 'warehouse': 'wh1', 'status': 'In Store', 'docstatus': 0}, 0], 
+			[{'doctype': 'Serial No', 'item_code': 'it', 'warehouse': 'wh2', 'status': 'In Store', 'docstatus': 0}, 5]
+		])
+		
 	#===========================================================================
 	def save_stock_entry(self, t):
 		if t == 'Material Receipt':
@@ -373,8 +419,58 @@ class TestStockEntry(unittest.TestCase):
 							'ifnull(bin_aqat, 0)': 0,
 							'ifnull(valuation_rate, 0)': 0,
 							"ifnull(is_cancelled, 'No')": 'Yes'
+						}],
+			'entries_on_same_datetime': [{
+							'doctype': 'Stock Ledger Entry', 
+							'item_code':'it',
+							'warehouse':'wh1',
+							'voucher_type': 'Stock Entry',
+							'voucher_no': stock_entry.mr[0].name,
+							'actual_qty': 10,
+							'bin_aqat': 10,
+							'valuation_rate': 100,
+							'is_cancelled': 'Yes'
+						}, {
+							'doctype': 'Stock Ledger Entry', 
+							'item_code':'it',
+							'warehouse':'wh1',
+							'voucher_type': 'Stock Entry',
+							'voucher_no': stock_entry.mr[0].name,
+							'actual_qty': -10,
+							'ifnull(bin_aqat, 0)': 0,
+							'ifnull(valuation_rate, 0)': 0,
+							"ifnull(is_cancelled, 'No')": 'Yes'
+						}, {
+							'doctype': 'Stock Ledger Entry', 
+							'item_code':'it',
+							'warehouse':'wh1',
+							'voucher_type': 'Stock Entry',
+							'voucher_no': stock_entry.mr1[0].name,
+							'actual_qty': 5,
+							'bin_aqat': 5,
+							'valuation_rate': 400,
+							'is_cancelled': 'No'
+						}, {
+							'doctype': 'Stock Ledger Entry',
+							'item_code':'it',
+							'warehouse':'wh1',
+							'voucher_type': 'Stock Entry',
+							'voucher_no': stock_entry.mtn[0].name,
+							'actual_qty': -5,
+							'bin_aqat': 0,
+							'valuation_rate': 400,
+							'is_cancelled': 'No'
+						}, {
+							'doctype': 'Stock Ledger Entry',
+							'item_code':'it',
+							'warehouse':'wh2',
+							'voucher_type': 'Stock Entry',
+							'voucher_no': stock_entry.mtn[0].name,
+							'actual_qty': 5,
+							'bin_aqat': 5,
+							'valuation_rate': 100,
+							'is_cancelled': 'No'
 						}]
-						
 		}
 		
 		return expected_sle[action]
