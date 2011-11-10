@@ -121,16 +121,46 @@ class DocType:
 				self.item_dict[i[0]] = [flt(i[1]), cstr(i[2]), cstr(i[3])]
 				
 	def get_raw_materials(self,pro_obj):
-		# get all items from flat bom except, child items of sub-contracted and sub assembly items and sub assembly items itself.
+		""" 
+			get all items from flat bom except 
+			child items of sub-contracted and sub assembly items 
+			and sub assembly items itself.
+		"""
 
 		if pro_obj.doc.consider_sa_items == 'Yes':
-			# get all Sub Assembly items only from flat bom
-			fl_bom_sa_items = sql("select item_code, ifnull(sum(qty_consumed_per_unit), 0) * '%s', description, stock_uom from `tabFlat BOM Detail` where parent = '%s' and parent_bom = '%s' and is_pro_applicable = 'Yes' and docstatus < 2 group by item_code" % ((self.doc.process == 'Backflush') and flt(self.doc.fg_completed_qty) or flt(pro_obj.doc.qty), cstr(pro_obj.doc.bom_no), cstr(pro_obj.doc.bom_no)))
+			# Get all raw materials considering SA items as raw materials, 
+			# so no childs of SA items
+			
+			fl_bom_sa_items = sql("""
+				select item_code, ifnull(sum(qty_consumed_per_unit), 0) * '%s', description, stock_uom 
+				from `tabBOM Material` 
+				where parent = '%s' and docstatus < 2 
+				group by item_code
+			""" % ((self.doc.process == 'Backflush') and flt(self.doc.fg_completed_qty) \
+					 or flt(pro_obj.doc.qty), cstr(pro_obj.doc.bom_no)))
+			
 			self.make_items_dict(fl_bom_sa_items)
 		
 		if pro_obj.doc.consider_sa_items == 'No':
-			# get all sub assembly childs only from flat bom
-			fl_bom_sa_child_item = sql("select item_code,ifnull(sum(qty_consumed_per_unit),0)*'%s' as qty,description,stock_uom from ( select distinct fb.name,fb.description,fb.item_code,fb.qty_consumed_per_unit,fb.stock_uom from `tabFlat BOM Detail` fb,`tabBOM Material` bm where bm.parent=fb.parent_bom and bm.docstatus<2 and fb.is_pro_applicable='Yes' and fb.docstatus<2 and fb.parent='%s' and bm.bom_no is null)a group by item_code,stock_uom" % ((self.doc.process == 'Backflush') and flt(self.doc.fg_completed_qty) or flt(pro_obj.doc.qty), cstr(pro_obj.doc.bom_no)))
+			# get all raw materials with sub assembly childs
+					
+			fl_bom_sa_child_item = sql("""
+				select 
+					item_code,ifnull(sum(qty_consumed_per_unit),0)*%s as qty,description,stock_uom 
+				from 
+					( 
+						select distinct fb.name, fb.description, fb.item_code, fb.qty_consumed_per_unit, fb.stock_uom 
+						from `tabFlat BOM Detail` fb,`tabItem` it 
+						where it.name = fb.item_code and ifnull(it.is_pro_applicable, 'No') = 'No'
+						and ifnull(it.is_sub_contracted_item, 'No') = 'No' 
+						and fb.docstatus<2 and fb.parent=%s
+					) a
+				group by item_code,stock_uom
+			""" , ((self.doc.process == 'Backflush') and flt(self.doc.fg_completed_qty) \
+					or flt(pro_obj.doc.qty), cstr(pro_obj.doc.bom_no)))
+			
+			
+			
 			self.make_items_dict(fl_bom_sa_child_item)
 
 	def add_to_stock_entry_detail(self, pro_obj, item_dict, fg_item = 0):
