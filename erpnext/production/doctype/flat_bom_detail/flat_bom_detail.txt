@@ -5,8 +5,8 @@
 	{
 		'creation': '2010-08-08 17:09:02',
 		'docstatus': 0,
-		'modified': '2010-09-20 14:06:57',
-		'modified_by': 'umair@iwebnotes.com',
+		'modified': '2011-11-10 14:21:40',
+		'modified_by': 'Administrator',
 		'owner': 'jai@webnotestech.com'
 	},
 
@@ -14,6 +14,7 @@
 	{
 		'autoname': 'FBD/.######',
 		'colour': 'White:FFF',
+		'default_print_format': 'Standard',
 		'doctype': 'DocType',
 		'istable': 1,
 		'module': 'Production',
@@ -22,7 +23,7 @@
 		'section_style': 'Simple',
 		'server_code_error': ' ',
 		'show_in_menu': 0,
-		'version': 15
+		'version': 18
 	},
 
 	# These values are common for all DocField
@@ -46,7 +47,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'item_code',
 		'fieldtype': 'Link',
-		'idx': 1,
 		'label': 'Item Code',
 		'oldfieldname': 'item_code',
 		'oldfieldtype': 'Link',
@@ -58,7 +58,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'description',
 		'fieldtype': 'Text',
-		'idx': 2,
 		'label': 'Description',
 		'oldfieldname': 'description',
 		'oldfieldtype': 'Text',
@@ -70,7 +69,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'moving_avg_rate',
 		'fieldtype': 'Currency',
-		'idx': 5,
 		'label': 'Valuation Rate',
 		'oldfieldname': 'moving_avg_rate',
 		'oldfieldtype': 'Currency'
@@ -81,7 +79,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'amount_as_per_mar',
 		'fieldtype': 'Currency',
-		'idx': 6,
 		'label': 'Amount As Per Valuation Rate',
 		'oldfieldname': 'amount_as_per_mar',
 		'oldfieldtype': 'Currency'
@@ -92,7 +89,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'last_purchase_rate',
 		'fieldtype': 'Currency',
-		'idx': 7,
 		'label': 'Last Purchase Rate',
 		'oldfieldname': 'last_purchase_rate',
 		'oldfieldtype': 'Currency'
@@ -103,7 +99,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'amount_as_per_lpr',
 		'fieldtype': 'Currency',
-		'idx': 8,
 		'label': 'Amount As Per LPR',
 		'oldfieldname': 'amount_as_per_lpr',
 		'oldfieldtype': 'Currency'
@@ -114,7 +109,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'qty',
 		'fieldtype': 'Currency',
-		'idx': 9,
 		'label': 'Qty',
 		'oldfieldname': 'qty',
 		'oldfieldtype': 'Currency'
@@ -125,7 +119,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'standard_rate',
 		'fieldtype': 'Currency',
-		'idx': 9,
 		'label': 'Standard Rate',
 		'oldfieldname': 'standard_rate',
 		'oldfieldtype': 'Currency'
@@ -136,7 +129,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'amount_as_per_sr',
 		'fieldtype': 'Currency',
-		'idx': 10,
 		'label': 'Amount As Per SR',
 		'oldfieldname': 'amount_as_per_sr',
 		'oldfieldtype': 'Currency'
@@ -146,11 +138,10 @@
 	{
 		'doctype': 'DocField',
 		'fieldname': 'qty_consumed_per_unit',
-		'fieldtype': 'Currency',
-		'idx': 11,
+		'fieldtype': 'Float',
 		'label': 'Qty Consumed Per Unit',
 		'oldfieldname': 'qty_consumed_per_unit',
-		'oldfieldtype': 'Currency'
+		'oldfieldtype': 'Float'
 	},
 
 	# DocField
@@ -158,12 +149,10 @@
 		'doctype': 'DocField',
 		'fieldname': 'stock_uom',
 		'fieldtype': 'Link',
-		'idx': 12,
 		'label': 'Stock UOM',
 		'oldfieldname': 'stock_uom',
 		'oldfieldtype': 'Link',
-		'options': 'UOM',
-		'search_index': 0
+		'options': 'UOM'
 	},
 
 	# DocField
@@ -172,7 +161,6 @@
 		'fieldname': 'flat_bom_no',
 		'fieldtype': 'Data',
 		'hidden': 1,
-		'idx': 12,
 		'label': 'Flat BOM No',
 		'oldfieldname': 'flat_bom_no',
 		'oldfieldtype': 'Data'
@@ -184,7 +172,6 @@
 		'fieldname': 'bom_mat_no',
 		'fieldtype': 'Data',
 		'hidden': 0,
-		'idx': 13,
 		'label': 'BOM Mat No',
 		'oldfieldname': 'bom_mat_no',
 		'oldfieldtype': 'Data'
@@ -196,7 +183,6 @@
 		'fieldname': 'parent_bom',
 		'fieldtype': 'Link',
 		'hidden': 0,
-		'idx': 14,
 		'label': 'Parent BOM',
 		'oldfieldname': 'parent_bom',
 		'oldfieldtype': 'Link'
@@ -207,7 +193,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'is_pro_applicable',
 		'fieldtype': 'Select',
-		'idx': 15,
 		'label': 'Is PRO Applicable',
 		'oldfieldname': 'is_pro_applicable',
 		'oldfieldtype': 'Select',
