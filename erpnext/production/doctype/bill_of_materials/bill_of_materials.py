@@ -32,9 +32,10 @@ class DocType:
 
   #----------- Client Trigger function ----------
   def get_item_detail(self, item_code):
-    item = sql("select description from `tabItem` where (ifnull(end_of_life,'')='' or end_of_life = '0000-00-00' or end_of_life >  now()) and name = %s",item_code , as_dict =1)
+    item = sql("select description, stock_uom from `tabItem` where (ifnull(end_of_life,'')='' or end_of_life = '0000-00-00' or end_of_life >  now()) and name = %s",item_code , as_dict =1)
     ret={
-      'description'   : item and item[0]['description'] or ''
+      'description'   : item and item[0]['description'] or '',
+      'uom'			  : item and item[0]['stock_uom'] or ''
     }
     return ret
 
@@ -411,8 +412,8 @@ class DocType:
     if val_method == 'FIFO':
       if warehouse:
         bin_obj = get_obj('Warehouse',warehouse).get_bin(item_code)
-        prev_sle = bin_obj.get_prev_sle('',nowdate(), (now().split(' ')[1])[:-3])
-        fcfs_stack = prev_sle and (prev_sle[0][3] and eval(prev_sle[0][3]) or []) or []
+        prev_sle = bin_obj.get_prev_sle(nowdate(), (now().split(' ')[1])[:-3])
+        fcfs_stack = prev_sle and prev_sle['fcfs_stack'] and eval(prev_sle['fcfs_stack']) or []
       else:
         prev_sle = sql("select fcfs_stack from `tabStock Ledger Entry` where item_code = '%s' and posting_date <= '%s' order by posting_date DESC, posting_time DESC, name DESC limit 1" % (item_code, nowdate()))
         fcfs_stack = prev_sle and (prev_sle[0][0] and eval(prev_sle[0][0]) or []) or []
@@ -499,19 +500,10 @@ class DocType:
   def get_child_flat_bom_items(self, item, d):
 
     child_flat_bom_items=[]
-#    if item and (item[0]['is_sub_contracted_item'] == 'Yes' or item[0]['is_pro_applicable'] == 'Yes'):
 
     child_flat_bom_items = sql("select fbom.item_code, fbom.description, fbom.qty_consumed_per_unit, fbom.stock_uom, fbom.moving_avg_rate, fbom.last_purchase_rate, fbom.standard_rate, '%s' as parent_bom, fbom.bom_mat_no, 'No' as is_pro_applicable from `tabFlat BOM Detail` fbom,`tabBill Of Materials` bom where fbom.parent=bom.name and fbom.parent = '%s' and fbom.is_pro_applicable = 'No' and bom.docstatus = 1" % ( d.bom_no, cstr(d.bom_no)))
     self.cur_flat_bom_items.append([d.item_code, d.description, flt(d.qty), d.stock_uom, flt(d.moving_avg_rate), flt(d.amount_as_per_mar), flt(d.last_purchase_rate), flt(d.amount_as_per_lpr), flt(d.standard_rate), flt(d.amount_as_per_sr), flt(d.qty_consumed_per_unit), (item[0]['is_sub_contracted_item'] == 'Yes') and d.parent or d.bom_no, d.name, (item[0]['is_sub_contracted_item'] == 'Yes') and 'No' or 'Yes'])
     return child_flat_bom_items
-
-#        else:
-#      child_flat_bom_items = sql("select item_code, description, qty_consumed_per_unit, stock_uom, moving_avg_rate, last_purchase_rate, standard_rate, if(parent_bom = '%s', '%s', parent_bom) as parent_bom, bom_mat_no, is_pro_applicable from `tabFlat BOM Detail` where parent = '%s' and docstatus = 1" % ( d.bom_no, d.parent, cstr(d.bom_no)))
-
-#    if not child_flat_bom_items:
-#      msgprint("Please Submit Child BOM := %s first." % cstr(d.bom_no))
-#      raise Exception
-#    else:"""
 
 
   # Get Current Flat BOM Items

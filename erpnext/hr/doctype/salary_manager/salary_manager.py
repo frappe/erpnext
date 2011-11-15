@@ -46,7 +46,7 @@ class DocType:
 		self.check_mandatory()
 		
 		cond = ''
-		for f in ['company', 'branch', 'department', 'designation', 'grade', 'employment_type']:
+		for f in ['company', 'branch', 'department', 'designation', 'grade']:
 			if self.doc.fields.get(f):
 				cond += " and t1." + f + " = '" + self.doc.fields.get(f) + "'"
 				

@@ -329,11 +329,11 @@
 	{
 		'doctype': 'DocField',
 		'fieldname': 'qty_consumed_per_unit',
-		'fieldtype': 'Currency',
+		'fieldtype': 'Float',
 		'idx': 21,
 		'label': 'Qty Consumed Per Unit',
 		'oldfieldname': 'qty_consumed_per_unit',
-		'oldfieldtype': 'Currency',
+		'oldfieldtype': 'Float',
 		'permlevel': 1
 	}
 ]

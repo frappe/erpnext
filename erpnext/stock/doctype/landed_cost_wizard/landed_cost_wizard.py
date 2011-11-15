@@ -86,9 +86,9 @@ class DocType:
 						d.save()
 					sql("update `tabStock Ledger Entry` set incoming_rate = '%s' where voucher_detail_no = '%s'"%(flt(d.valuation_rate), d.name))
 
-					bin_name = sql("select t1.name, t2.name, t2.posting_date, t2.posting_time from `tabBin` t1, `tabStock Ledger Entry` t2 where t2.voucher_detail_no = '%s' and t2.item_code = t1.item_code and t2.warehouse = t1.warehouse LIMIT 1"%(d.name))
+					bin_name = sql("select t1.name, t2.posting_date, t2.posting_time from `tabBin` t1, `tabStock Ledger Entry` t2 where t2.voucher_detail_no = '%s' and t2.item_code = t1.item_code and t2.warehouse = t1.warehouse LIMIT 1"%(d.name))
 					if bin_name and bin_name[0][0]:
-						obj = get_obj('Bin', bin_name[0][0]).update_item_valuation(bin_name[0][1], bin_name[0][2], bin_name[0][3])
+						obj = get_obj('Bin', bin_name[0][0]).update_entries_after(bin_name[0][1], bin_name[0][2])
 
 		# now distribute the taxes among the PRs
 		for lc in getlist(self.doclist, 'landed_cost_details'):
@@ -140,11 +140,11 @@ class DocType:
 						d.valuation_rate = (flt(d.purchase_rate) + (flt(d.rm_supp_cost) / flt(d.qty)) + (flt(d.item_tax_amount)/flt(d.qty))) / flt(d.conversion_factor)
 						d.save()
 					sql("update `tabStock Ledger Entry` set incoming_rate = '%s' where voucher_detail_no = '%s'"%(flt(d.valuation_rate), d.name))
-					bin_name = sql("select t1.name, t2.name, t2.posting_date, t2.posting_time from `tabBin` t1, `tabStock Ledger Entry` t2 where t2.voucher_detail_no = '%s' and t2.item_code = t1.item_code and t2.warehouse = t1.warehouse LIMIT 1"%(d.name))
+					bin_name = sql("select t1.name, t2.posting_date, t2.posting_time from `tabBin` t1, `tabStock Ledger Entry` t2 where t2.voucher_detail_no = '%s' and t2.item_code = t1.item_code and t2.warehouse = t1.warehouse LIMIT 1"%(d.name))
 
 					# update valuation of the item
 					if bin_name and bin_name[0][0]:
-						obj = get_obj('Bin', bin_name[0][0]).update_item_valuation(bin_name[0][1], bin_name[0][2], bin_name[0][3])
+						obj = get_obj('Bin', bin_name[0][0]).update_entries_after(bin_name[0][1], bin_name[0][2])
 
 	def add_deduct_taxes(self, ocd, oc, tax_amount, total_amount, total, prev_total, f=1):
 		ocd[oc].total_amount = flt(tax_amount.toFixed(2))		 

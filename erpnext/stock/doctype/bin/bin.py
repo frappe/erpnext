@@ -1,18 +1,11 @@
 # Please edit this list and import only required elements
 import webnotes
 
-from webnotes.utils import add_days, add_months, add_years, cint, cstr, date_diff, default_fields, flt, fmt_money, formatdate, generate_hash, getTraceback, get_defaults, get_first_day, get_last_day, getdate, has_common, month_name, now, nowdate, replace_newlines, sendmail, set_default, str_esc_quote, user_format, validate_email_add
-from webnotes.model import db_exists
-from webnotes.model.doc import Document, addchild, removechild, getchildren, make_autoname, SuperDocType
-from webnotes.model.doclist import getlist, copy_doclist
-from webnotes.model.code import get_obj, get_server_obj, run_server_obj, updatedb, check_syntax
-from webnotes import session, form, is_testing, msgprint, errprint
+from webnotes.utils import cint, cstr, flt, nowdate
+from webnotes.model.code import get_obj
+from webnotes import msgprint
 
-set = webnotes.conn.set
 sql = webnotes.conn.sql
-get_value = webnotes.conn.get_value
-in_transaction = webnotes.conn.in_transaction
-convert_to_lists = webnotes.conn.convert_to_lists
 
 # -----------------------------------------------------------------------------------------
 
@@ -39,19 +32,13 @@ class DocType:
 		self.doc.save()
 			
 		
-		# update valuation for post dated entry
 		if actual_qty:
 			# check actual qty with total number of serial no
 			if serial_no:
 				self.check_qty_with_serial_no()
-			
-			prev_sle = self.get_prev_sle(dt, posting_time, sle_id)
-			cqty = flt(prev_sle.get('bin_aqat', 0))
-			# Block if actual qty becomes negative
-			if (flt(cqty) + flt(actual_qty)) < 0 and flt(actual_qty) < 0 and is_cancelled == 'No':
-				msgprint('Not enough quantity (requested: %s, current: %s) for Item <b>%s</b> in Warehouse <b>%s</b> as on %s %s' % (flt(actual_qty), flt(cqty), self.doc.item_code, self.doc.warehouse, dt, posting_time), raise_exception = 1)
-
-			self.update_item_valuation(sle_id, dt, posting_time, serial_no, prev_sle)
+				
+			# update valuation and qty after transaction for post dated entry
+			self.update_entries_after(dt, posting_time)
 
 	def check_qty_with_serial_no(self):
 		"""
@@ -59,11 +46,19 @@ class DocType:
 			Temporary validation added on: 18-07-2011
 		"""
 		if sql("select name from `tabItem` where ifnull(has_serial_no, 'No') = 'Yes' and name = '%s'" % self.doc.item_code):
-			sr_count = sql("select count(name) from `tabSerial No` where item_code = '%s' and warehouse = '%s' and status  ='In Store' and docstatus != 2" % (self.doc.item_code, self.doc.warehouse))[0][0]
+			sr_count = sql("""select count(name) from `tabSerial No` 
+							where item_code = '%s' and warehouse = '%s' 
+							and status  ='In Store' and docstatus != 2
+							""" % (self.doc.item_code, self.doc.warehouse))[0][0]
+			
 			if sr_count != self.doc.actual_qty:
-				msg = "Actual Qty(%s) in Bin is mismatched with total number(%s) of serial no in store for item: '%s' and warehouse: '%s'" % (self.doc.actual_qty, sr_count, self.doc.item_code, self.doc.warehouse)
+				msg = """Actual Qty(%s) in Bin is mismatched with total number(%s) of serial no in store 
+					for item: '%s' and warehouse: '%s'""" % \
+					(self.doc.actual_qty, sr_count, self.doc.item_code, self.doc.warehouse)
+					
 				if getattr(webnotes.defs,'admin_email_notification',1):
-					sendmail(['developers@iwebnotes.com'], sender='automail@webnotestech.com', subject='Serial No Count vs Bin Actual Qty', parts=[['text/plain', msg]])			
+					sendmail(['developers@iwebnotes.com'], sender='automail@webnotestech.com', \
+						subject='Serial No Count vs Bin Actual Qty', parts=[['text/plain', msg]])			
 				msgprint(msg, raise_exception=1)
 
 	# --------------------------------
@@ -81,29 +76,19 @@ class DocType:
 		""", (self.doc.item_code, self.doc.warehouse), as_dict=1)
 		return sle and sle[0] or None
 
-	# --------------------------------
-	# get previous stock ledger entry
-	# --------------------------------
-			
-	def get_prev_sle(self, posting_date, posting_time, sle_id = ''):
-		# this function will only be called for a live entry
-		# for which the "name" will be the latest (even for the same timestamp)
-		# and even for a back-dated entry
-		# hence there cannot be any "backdated entries" with a name greater than the
-		# current one
+	def get_prev_sle(self, posting_date = '1900-01-01', posting_time = '12:00', sle_id = ''):
+		"""
+			get the last sle on or before the current time-bucket, 
+			to get actual qty before transaction, this function
+			is called from various transaction like stock entry, reco etc
+		"""
 		
-		# if there are multiple entries on this timestamp, then the last one will be with
-		# the last "name"		
-		# else, the last entry will be the highest name at the previous timestamp
-		# hence, the double sort on timestamp and name should be sufficient condition
-		# to get the last sle
-
 		sle = sql("""
 			select * from `tabStock Ledger Entry`
 			where item_code = %s
 			and warehouse = %s
-			and name != %s
 			and ifnull(is_cancelled, 'No') = 'No'
+			and name != %s
 			and timestamp(posting_date, posting_time) <= timestamp(%s, %s)
 			order by timestamp(posting_date, posting_time) desc, name desc
 			limit 1
@@ -112,25 +97,49 @@ class DocType:
 		return sle and sle[0] or {}
 
 
+	def get_sle_prev_timebucket(self, posting_date = '1900-01-01', posting_time = '12:00'):
+		"""get previous stock ledger entry before current time-bucket"""
+		# get the last sle before the current time-bucket, so that all values
+		# are reposted from the current time-bucket onwards.
+		# this is necessary because at the time of cancellation, there may be
+		# entries between the cancelled entries in the same time-bucket
+
+		sle = sql("""
+			select * from `tabStock Ledger Entry`
+			where item_code = %s
+			and warehouse = %s
+			and ifnull(is_cancelled, 'No') = 'No'
+			and timestamp(posting_date, posting_time) < timestamp(%s, %s)
+			order by timestamp(posting_date, posting_time) desc, name desc
+			limit 1
+		""", (self.doc.item_code, self.doc.warehouse, posting_date, posting_time), as_dict=1)
+
+		return sle and sle[0] or {}
 
 
-	# --------------------------------------------------------------------------------------------------------------------------------------
-	# validate negative stock (validate if stock is going -ve in between for back dated entries will consider only is_cancel = 'No' entries)
-	# --------------------------------------------------------------------------------------------------------------------------------------
+	#-------------------------------------------------------------
 	def validate_negative_stock(self, cqty, s):
+		"""
+			validate negative stock for entries current datetime onwards
+			will not consider cancelled entries
+		"""
 		diff = cqty + s['actual_qty']
-		if  diff < 0 and (abs(diff) > 0.0001) and s['is_cancelled'] != 'Yes':
+		if  diff < 0 and (abs(diff) > 0.0001) and s['is_cancelled'] == 'No':
 			msgprint("""
+				Negative stock error: 
 				Cannot complete this transaction because stock will 
-				become negative (%s) in future transaction for Item 
-				<b>%s</b> in Warehouse <b>%s</b> on <b>%s %s</b>""" % \
-				(str(diff), self.doc.item_code, self.doc.warehouse,
-					s['posting_date'], s['posting_time']), raise_exception=1)
+				become negative (%s) for Item <b>%s</b> in Warehouse 
+				<b>%s</b> on <b>%s %s</b> in Transaction %s %s""" % \
+				(str(diff), self.doc.item_code, self.doc.warehouse, \
+					s['posting_date'], s['posting_time'], s['voucher_type'], s['voucher_no']), \
+					raise_exception=1)
 
-	# ------------------------------------
-	# get serialized inventory values
+
 	# ------------------------------------
 	def get_serialized_inventory_values(self, val_rate, in_rate, opening_qty, actual_qty, is_cancelled, serial_nos):
+		"""
+			get serialized inventory values
+		"""
 		if flt(in_rate) < 0: # wrong incoming rate
 			in_rate = val_rate
 		elif flt(in_rate) == 0: # In case of delivery/stock issue, get average purchase rate of serial nos of current entry
@@ -222,11 +231,16 @@ class DocType:
 			stock_val = sum([flt(d[0])*flt(d[1]) for d in self.fcfs_bal])
 		return stock_val
 
-	# ----------------------
-	# update item valuation
-	# ----------------------
-	def update_item_valuation(self, sle_id=None, posting_date=None, posting_time=None, serial_no=None, prev_sle=None):
-		# no sle given, start from the first one (for repost)
+	def update_entries_after(self, posting_date, posting_time):
+		"""
+			update valution rate and qty after transaction 
+			from the current time-bucket onwards
+		"""
+		
+		# Get prev sle
+		prev_sle = self.get_sle_prev_timebucket(posting_date, posting_time)
+		
+		# if no prev sle, start from the first one (for repost)
 		if not prev_sle:
 			cqty, cval, val_rate, self.fcfs_bal = 0, 0, 0, []
 		
@@ -237,11 +251,11 @@ class DocType:
 			val_rate = flt(prev_sle.get('valuation_rate', 0))
 			self.fcfs_bal = eval(prev_sle.get('fcfs_stack', '[]') or '[]')
 
-		val_method = get_obj('Valuation Control').get_valuation_method(self.doc.item_code)	# get valuation method
+		# get valuation method
+		val_method = get_obj('Valuation Control').get_valuation_method(self.doc.item_code)
 
 		# recalculate the balances for all stock ledger entries
-		# after this one (so that the corrected balance will reflect
-		# correctly in all entries after this one)
+		# after the prev sle
 		sll = sql("""
 			select *
 			from `tabStock Ledger Entry` 
@@ -250,30 +264,32 @@ class DocType:
 			and ifnull(is_cancelled, 'No') = 'No'
 			and timestamp(posting_date, posting_time) > timestamp(%s, %s)
 			order by timestamp(posting_date, posting_time) asc, name asc""", \
-				(self.doc.item_code, self.doc.warehouse, posting_date, posting_time), as_dict = 1)
+				(self.doc.item_code, self.doc.warehouse, \
+					prev_sle.get('posting_date','1900-01-01'), prev_sle.get('posting_time', '12:00')), as_dict = 1)
 
-		# if in live entry - update the values of the current sle
-		if sle_id:
-			sll = sql("select * from `tabStock Ledger Entry` where name=%s and ifnull(is_cancelled, 'No') = 'No'", sle_id, as_dict=1) + sll
-		for s in sll:
+		for sle in sll:
 			# block if stock level goes negative on any date
-			self.validate_negative_stock(cqty, s)
+			self.validate_negative_stock(cqty, sle)
 
-			stock_val, in_rate = 0, s['incoming_rate'] # IN
-			serial_nos = s["serial_no"] and ("'"+"', '".join(cstr(s["serial_no"]).split('\n')) + "'") or ''
+			stock_val, in_rate = 0, sle['incoming_rate'] # IN
+			serial_nos = sle["serial_no"] and ("'"+"', '".join(cstr(sle["serial_no"]).split('\n')) \
+				+ "'") or ''
 
 			# Get valuation rate
-			val_rate, stock_val = self.get_valuation_rate(val_method, serial_nos, val_rate, in_rate, stock_val, cqty, s) 
+			val_rate, stock_val = self.get_valuation_rate(val_method, serial_nos, \
+				val_rate, in_rate, stock_val, cqty, sle) 
 			
 			# Qty upto the sle
-			cqty += s['actual_qty'] 
+			cqty += sle['actual_qty'] 
 
 			# Stock Value upto the sle
 			stock_val = self.get_stock_value(val_method, cqty, stock_val, serial_nos) 
-			# update current sle --> will it be good to update incoming rate in sle for outgoing stock entry?????
+			
+			# update current sle --> will it be good to update incoming rate in sle 
+			# for outgoing stock entry?????
 			sql("""update `tabStock Ledger Entry` 
 			set bin_aqat=%s, valuation_rate=%s, fcfs_stack=%s, stock_value=%s 
-			where name=%s""", (cqty, flt(val_rate), cstr(self.fcfs_bal), stock_val, s['name']))
+			where name=%s""", (cqty, flt(val_rate), cstr(self.fcfs_bal), stock_val, sle['name']))
 		
 		# update the bin
 		if sll:
