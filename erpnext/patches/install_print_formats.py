@@ -1,4 +1,5 @@
 import os, sys
+import webnotes
 
 path_to_file = os.sep.join(os.path.abspath(__file__).split(os.sep)[:-1] + ['print_formats'])
 
@@ -51,11 +52,34 @@ def execute():
 	"""
 		Install print formats
 	"""
+	from webnotes.modules.module_manager import reload_doc
+	reload_doc('core', 'doctype', 'print_format')
+	
+	copy_doctype_to_pfs()
 	global pf_to_install
-	print pf_to_install
 	for pf in pf_to_install:
 		install_print_format(pf)
 		print "Installed PF: " + pf['name']
+
+
+def copy_doctype_to_pfs():
+	"""
+		Copy doctype to existing print formats
+	"""
+	pf_dt_list = webnotes.conn.sql("""
+		SELECT format, parent
+		FROM `tabDocFormat`""", as_list=1)
+	
+	from webnotes.model.doc import Document
+
+	for pf, dt in pf_dt_list:
+		try:
+			d = Document('Print Format', pf)
+			d.doc_type = dt
+			d.save()
+		except Exception, e:
+			print e.args
+			pass
 
 
 def install_print_format(args):
@@ -70,11 +94,14 @@ def install_print_format(args):
 	"""
 	from webnotes.model.doc import Document
 	d = Document('Print Format')
-	d.name = args.name
-	f = open(args.file)
+	d.name = args['name']
+	f = open(args['file'])
 	d.html = f.read()
 	f.close()
-	d.module = args.module
-	d.doc_type = args.doc_type
-	d.standard = args.standard
+	d.module = args['module']
+	d.doc_type = args['doc_type']
+	d.standard = args['standard']
 	d.save(1)
+	from webnotes.model.code import get_obj
+	obj = get_obj('Print Format', args['name'])
+	obj.on_update()
