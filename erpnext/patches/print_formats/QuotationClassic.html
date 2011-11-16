@@ -98,7 +98,7 @@
 				'Quotation Detail',
 				[// Here specify the table columns to be displayed
 					'SR', 'item_code', 'item_name', 'description', 'qty', 'stock_uom',
-					'basic_rate', 'amount'
+					'export_rate', 'export_amount'
 				],
 				[// Here specify the labels of column headings
 					'Sr', 'Item Code', 'Item Name', 'Description', 'Qty',
@@ -168,7 +168,7 @@
 				<td width=60%><table width=100% cellspacing=0><tbody>
 					<tr>
 						<td width=39%><b>Name</b></td>
-						<td><script>doc.lead_name</script></td>
+						<td><script>doc.customer?doc.customer:doc.lead_name</script></td>
 					</tr>
 					<tr>
 						<td><b>Address</b></td>
@@ -224,7 +224,7 @@
 							<td>Net Total</td>
 							<td></td>
 							<td width=38%><script>
-								fmt_money(doc.net_total)
+								fmt_money(doc.net_total/doc.conversion_rate)
 							</script></td>
 						</tr>
 						<tr><td colspan=3><script>si_std.print_other_charges()</script></td></tr>
