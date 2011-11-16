@@ -235,7 +235,7 @@ class DocType(TransactionBase):
 		if self.doc.supplier and self.doc.credit_to:
 			acc_head = sql("select master_name from `tabAccount` where name = %s", self.doc.credit_to)
 			
-			if (acc_head and cstr(acc_head[0][0]) != cstr(self.doc.credit_to)) or (not acc_head and (self.doc.credit_to != cstr(self.doc.supplier) + " - " + self.get_company_abbr())):
+			if (acc_head and cstr(acc_head[0][0]) != cstr(self.doc.supplier)) or (not acc_head and (self.doc.credit_to != cstr(self.doc.supplier) + " - " + self.get_company_abbr())):
 				msgprint("Credit To: %s do not match with Supplier: %s for Company: %s.\n If both correctly entered, please select Master Type and Master Name in account master." %(self.doc.credit_to,self.doc.supplier,self.doc.company), raise_exception=1)
 				
 	# Check for Stopped PO
