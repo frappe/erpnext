@@ -136,7 +136,7 @@ class DocType(TransactionBase):
     chk_dupl_itm = []
     for d in getlist(self.doclist,'quotation_details'):
       if [cstr(d.item_code),cstr(d.description)] in chk_dupl_itm:
-        msgprint("Item %s has been entered twice. Please change atleast description to continue" % d.item_code)
+        msgprint("Item %s has been entered twice. Please change description atleast to continue" % d.item_code)
         raise Exception
       else:
         chk_dupl_itm.append([cstr(d.item_code),cstr(d.description)])
