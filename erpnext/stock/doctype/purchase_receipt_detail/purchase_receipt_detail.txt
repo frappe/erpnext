@@ -5,7 +5,7 @@
 	{
 		'creation': '2010-08-08 17:09:16',
 		'docstatus': 0,
-		'modified': '2011-10-20 18:40:15',
+		'modified': '2011-11-16 15:43:36',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
@@ -22,7 +22,7 @@
 		'section_style': 'Tray',
 		'server_code_error': ' ',
 		'show_in_menu': 0,
-		'version': 60
+		'version': 63
 	},
 
 	# These values are common for all DocField
@@ -451,6 +451,7 @@
 
 	# DocField
 	{
+		'colour': 'White:FFF',
 		'doctype': 'DocField',
 		'fieldname': 'item_tax_amount',
 		'fieldtype': 'Currency',
@@ -501,6 +502,7 @@
 
 	# DocField
 	{
+		'colour': 'White:FFF',
 		'doctype': 'DocField',
 		'fieldname': 'valuation_rate',
 		'fieldtype': 'Currency',
@@ -517,6 +519,7 @@
 
 	# DocField
 	{
+		'colour': 'White:FFF',
 		'description': 'Tax detail table fetched from item master as a string and stored in this field.\nUsed for Purchase Other Charges',
 		'doctype': 'DocField',
 		'fieldname': 'item_tax_rate',
