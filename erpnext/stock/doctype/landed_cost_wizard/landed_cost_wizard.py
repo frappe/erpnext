@@ -54,6 +54,8 @@ class DocType:
 	def get_selected_pr(self):
 		""" Get selected purchase receipt no """
 		self.selected_pr = [d.purchase_receipt for d in getlist(self.doclist, 'lc_pr_details') if d.select_pr]
+		if not self.selected_pr:
+			msgprint("Please select atleast one PR to proceed.", raise_exception=1)
 		
 	def validate_selected_pr(self):
 		"""Validate selected PR as submitted"""
@@ -180,7 +182,6 @@ class DocType:
 		if ocd[oc].category != "For Valuation":	
 			prev_total += add_ded * flt(ocd[oc].total_amount)
 			total += add_ded * flt(ocd[oc].tax_amount)
-			msgprint(add_ded * flt(ocd[oc].tax_amount))
 			ocd[oc].total = total
 		else:
 			prev_total = prev_total
