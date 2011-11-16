@@ -3,16 +3,16 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:09:07',
+		'creation': '2011-11-16 16:17:22',
 		'docstatus': 0,
-		'modified': '2011-11-16 15:59:42',
+		'modified': '2011-11-16 16:32:18',
 		'modified_by': 'Administrator',
 		'owner': 'wasim@webnotestech.com'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1321350727',
+		'_last_update': '1321441191',
 		'colour': 'White:FFF',
 		'default_print_format': 'Standard',
 		'doctype': 'DocType',
@@ -22,7 +22,7 @@
 		'section_style': 'Simple',
 		'server_code_error': ' ',
 		'show_in_menu': 1,
-		'version': 33
+		'version': 35
 	},
 
 	# These values are common for all DocField
@@ -120,8 +120,15 @@
 	# DocField
 	{
 		'doctype': 'DocField',
+		'fieldtype': 'HTML',
+		'label': 'Process',
+		'options': '<div class="field_description"><b>Process:</b><br>1. Fetch and select Purchase Receipt<br>2. Enter extra costs<br>3. Click on Update Landed Cost button<br> 4. Cost will be added into other charges table of selected PR proportionately based on net total<br>5. Item Valuation Rate will be recalculated</div>'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
 		'fieldtype': 'Section Break',
-		'label': 'Select PR',
 		'options': 'Simple'
 	},
 
@@ -174,7 +181,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Section Break',
-		'label': 'Update Landed Cost',
 		'options': 'Simple'
 	},
 
