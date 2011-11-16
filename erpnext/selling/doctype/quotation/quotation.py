@@ -139,7 +139,7 @@ class DocType(TransactionBase):
         msgprint("Item %s has been entered twice." % d.item_code)
         raise Exception
       else:
-        chk_dupl_itm.append(f)
+        chk_dupl_itm.append([cstr(d.item_code),cstr(d.description)])
 
 
   #do not allow sales item in maintenance quotation and service item in sales quotation
