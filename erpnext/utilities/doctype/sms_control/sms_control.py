@@ -66,10 +66,10 @@ class DocType:
 		sender_name = webnotes.conn.get_value('Manage Account', None, 'sms_sender_name') or 'ERPNXT'
 		if len(sender_name) > 6:
 			msgprint("""
-				As per TRAI rule, sender name must be exactly 6 characters. \n
-				Kindly change sender name in Setup --> Global Defaults \n\n
+				As per TRAI rule, sender name must be exactly 6 characters.
+				Kindly change sender name in Setup --> Global Defaults.
 				
-				Note: Hyphen, space, numeric digit , special characters are not allowed.
+				Note: Hyphen, space, numeric digit, special characters are not allowed.
 			""", raise_exception=1)
 		return sender_name
 	
