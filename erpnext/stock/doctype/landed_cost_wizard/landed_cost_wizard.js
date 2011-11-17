@@ -4,5 +4,5 @@ if(!doc.currency){doc.currency = sys_defaults.currency;}
 
 
 cur_frm.fields_dict['landed_cost_details'].grid.get_field("account_head").get_query = function(doc,cdt,cdn) {
-  return 'SELECT tabAccount.name FROM tabAccount WHERE tabAccount.group_or_ledger="Ledger" AND tabAccount.docstatus != 2 AND (tabAccount.account_type = "Tax" OR tabAccount.account_type = "Chargeable") AND  tabAccount.name LIKE "%s"'
+  return 'SELECT tabAccount.name FROM tabAccount WHERE tabAccount.group_or_ledger="Ledger" AND tabAccount.docstatus != 2 AND (tabAccount.account_type = "Tax" OR tabAccount.account_type = "Chargeable" or (tabAccount.is_pl_account = "Yes" and tabAccount.debit_or_credit = "Debit")) AND  tabAccount.name LIKE "%s"';
 }
