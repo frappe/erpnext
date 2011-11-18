@@ -125,6 +125,12 @@ cur_frm.cscript.import_rate = function(doc, cdt, cdn) {
   cur_frm.cscript.calc_amount(doc, 1);
 }
 
+//==================== Discount Rate ================================================================
+cur_frm.cscript.discount_rate = function(doc, cdt, cdn) {
+  // Calculate Amount
+  cur_frm.cscript.calc_amount(doc, 4);
+}
+
 
 //====================== Calculate Amount  ============================================================
 /*cur_frm.cscript.calc_amount = function(doc, n) {
@@ -245,16 +251,25 @@ cur_frm.cscript.calc_amount = function(doc, n) {
       set_multiple(tname, cl[i].name, {'purchase_rate': flt(doc.conversion_rate) * flt(cl[i].import_rate) }, fname);
       set_multiple(tname, cl[i].name, {'amount': flt(flt(cl[i].qty) * flt(doc.conversion_rate) * flt(cl[i].import_rate))}, fname);
       set_multiple(tname, cl[i].name, {'import_amount': flt(flt(cl[i].qty) * flt(cl[i].import_rate))}, fname);
+	  //dicount value should be changed
     }
     if(n == 2){
       set_multiple(tname, cl[i].name, {'amount': flt(flt(cl[i].qty) * flt(cl[i].purchase_rate)), 'import_rate': flt(flt(cl[i].purchase_rate) / flt(doc.conversion_rate)) }, fname);
       set_multiple(tname, cl[i].name, {'import_amount': flt(flt(cl[i].qty) *  flt(cl[i].purchase_rate) / flt(doc.conversion_rate))}, fname);
-    }
+	  //discount value should be changed    
+	}
     if(n == 3){
       set_multiple(tname, cl[i].name, {'purchase_rate': flt(flt(cl[i].amount) / flt(cl[i].qty)) }, fname);
       set_multiple(tname, cl[i].name, {'import_rate': flt(flt(cl[i].purchase_rate) / flt(doc.conversion_rate))}, fname); 
       set_multiple(tname, cl[i].name, {'import_amount': flt(flt(cl[i].qty) *  flt(cl[i].purchase_rate) / flt(doc.conversion_rate))}, fname);
     }
+	if( n==4){
+	  if(cl[i].purchase_ref_rate && !cl[i].import_ref_rate ){
+		set_multiple(tname, cl[i].name, {'
+		}
+
+	
+	
     if (n != 3){
       net_total += flt(flt(cl[i].qty) * flt(cl[i].purchase_rate));
       net_total_import += flt(flt(cl[i].qty) * flt(cl[i].import_rate));
