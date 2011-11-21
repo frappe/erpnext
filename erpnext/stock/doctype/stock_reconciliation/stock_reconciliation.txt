@@ -5,16 +5,18 @@
 	{
 		'creation': '2010-08-08 17:09:26',
 		'docstatus': 0,
-		'modified': '2011-04-25 11:46:21',
+		'modified': '2011-11-18 17:32:21',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1309508840',
+		'_last_update': '1321617633',
 		'allow_attach': 1,
+		'autoname': 'SR/.######',
 		'colour': 'White:FFF',
+		'default_print_format': 'Standard',
 		'doctype': 'DocType',
 		'max_attachments': 1,
 		'module': 'Stock',
@@ -23,7 +25,8 @@
 		'section_style': 'Tray',
 		'server_code_error': ' ',
 		'show_in_menu': 0,
-		'version': 85
+		'subject': 'Date: %(reconciliation_date)s, Time: %(reconciliation_time)s',
+		'version': 105
 	},
 
 	# These values are common for all DocField
@@ -37,6 +40,7 @@
 
 	# These values are common for all DocPerm
 	{
+		'amend': 0,
 		'doctype': 'DocPerm',
 		'name': '__common__',
 		'parent': 'Stock Reconciliation',
@@ -53,11 +57,9 @@
 
 	# DocPerm
 	{
-		'amend': 1,
 		'cancel': 1,
 		'create': 1,
 		'doctype': 'DocPerm',
-		'idx': 1,
 		'permlevel': 0,
 		'role': 'Material Manager',
 		'submit': 1,
@@ -66,11 +68,9 @@
 
 	# DocPerm
 	{
-		'amend': 0,
 		'cancel': 0,
 		'create': 0,
 		'doctype': 'DocPerm',
-		'idx': 2,
 		'permlevel': 1,
 		'role': 'Material Manager',
 		'submit': 0,
@@ -79,44 +79,21 @@
 
 	# DocPerm
 	{
-		'amend': 1,
 		'cancel': 1,
 		'create': 1,
 		'doctype': 'DocPerm',
-		'idx': 3,
 		'permlevel': 0,
 		'role': 'System Manager',
 		'submit': 1,
 		'write': 1
 	},
 
-	# DocPerm
-	{
-		'doctype': 'DocPerm',
-		'idx': 4,
-		'permlevel': 1,
-		'role': 'System Manager'
-	},
-
 	# DocField
 	{
 		'doctype': 'DocField',
-		'fieldtype': 'Button',
-		'hidden': 1,
-		'idx': 1,
-		'label': 'Validate Data',
-		'oldfieldtype': 'Button',
-		'options': 'get_reconciliation_stock_details',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldtype': 'Section Break',
-		'idx': 2,
-		'label': 'Summary',
-		'oldfieldtype': 'Section Break',
+		'fieldtype': 'HTML',
+		'label': 'Steps',
+		'options': '<div class="field_description"><b>Steps:</b><br>1. Enter Reconciliation Date and Time<br>2. Save the document<br>3. Attach csv file as per template.<br>4. Submit the document</div>',
 		'permlevel': 0
 	},
 
@@ -125,14 +102,12 @@
 		'doctype': 'DocField',
 		'fieldname': 'reconciliation_date',
 		'fieldtype': 'Date',
-		'idx': 3,
 		'in_filter': 0,
 		'label': 'Reconciliation Date',
 		'oldfieldname': 'reconciliation_date',
 		'oldfieldtype': 'Date',
 		'permlevel': 0,
-		'reqd': 1,
-		'search_index': 1
+		'reqd': 1
 	},
 
 	# DocField
@@ -140,7 +115,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'reconciliation_time',
 		'fieldtype': 'Time',
-		'idx': 4,
 		'in_filter': 0,
 		'label': 'Reconciliation Time',
 		'oldfieldname': 'reconciliation_time',
@@ -152,97 +126,20 @@
 	# DocField
 	{
 		'doctype': 'DocField',
-		'fieldname': 'next_step',
-		'fieldtype': 'Select',
-		'idx': 5,
-		'label': 'Next Steps',
-		'oldfieldname': 'next_step',
-		'oldfieldtype': 'Select',
-		'options': 'Upload File and Save Document\nValidate Data\nSubmit Document\nCompleted',
-		'permlevel': 1
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
 		'fieldname': 'remark',
 		'fieldtype': 'Text',
-		'idx': 6,
 		'label': 'Remark',
 		'oldfieldname': 'remark',
 		'oldfieldtype': 'Text',
-		'permlevel': 1
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldname': 'company',
-		'fieldtype': 'Link',
-		'idx': 7,
-		'in_filter': 1,
-		'label': 'Company',
-		'oldfieldname': 'company',
-		'oldfieldtype': 'Link',
-		'options': 'Company',
-		'permlevel': 0,
-		'search_index': 0
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldname': 'fiscal_year',
-		'fieldtype': 'Select',
-		'idx': 8,
-		'in_filter': 1,
-		'label': 'Fiscal Year',
-		'oldfieldname': 'fiscal_year',
-		'oldfieldtype': 'Select',
-		'options': 'link:Fiscal Year',
-		'permlevel': 0,
-		'search_index': 0
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldname': 'amended_from',
-		'fieldtype': 'Data',
-		'idx': 9,
-		'label': 'Amended From',
-		'permlevel': 1
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldname': 'amendment_date',
-		'fieldtype': 'Date',
-		'idx': 10,
-		'label': 'Amendment Date',
-		'permlevel': 1
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldtype': 'Section Break',
-		'idx': 11,
-		'label': 'Attachment',
-		'oldfieldtype': 'Section Break',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
 		'doctype': 'DocField',
-		'fieldtype': 'HTML',
-		'idx': 12,
-		'label': 'Attachment HTML',
-		'oldfieldtype': 'HTML',
-		'options': 'The attachment must be a CSV(Comma Seperated Value) file',
-		'permlevel': 1
+		'fieldtype': 'Button',
+		'label': 'Download Template',
+		'permlevel': 0
 	},
 
 	# DocField
@@ -251,8 +148,8 @@
 		'fieldname': 'file_list',
 		'fieldtype': 'Text',
 		'hidden': 1,
-		'idx': 13,
 		'label': 'File List',
+		'no_copy': 1,
 		'oldfieldname': 'file_list',
 		'oldfieldtype': 'Text',
 		'permlevel': 1,
