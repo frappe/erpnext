@@ -242,7 +242,7 @@ MemberItem = function(parent, det, mlist) {
 		// working img
 		var div = $a($td(this.tab, 0, 1), 'div');
 		this.working_img = $a(div,'img','',{display:'none'}); 
-		this.working_img.src = 'images/ui/button-load.gif';
+		this.working_img.src = 'lib/images/ui/button-load.gif';
 		
 		this.refresh_name_link();
 		
@@ -731,7 +731,7 @@ RoleObj = function(profile_id){
 	this.make_role_body(profile_id);
 	this.make_help_body();
 	
-	this.body.innerHTML = '<span style="color:#888">Loading...</span> <img src="images/ui/button-load.gif">'
+	this.body.innerHTML = '<span style="color:#888">Loading...</span> <img src="lib/images/ui/button-load.gif">'
 	var me=this;
 
 	d.onshow = function() {
@@ -829,7 +829,7 @@ RoleObj.prototype.make_label = function(tbl, ridx, cidx, role){
 	
 	var t = make_table($td(tbl, ridx, cidx),1,2,null,['16px', null],{marginRight:'5px'});
 	var ic = $a($td(t,0,0), 'img','',{cursor:'pointer', marginRight:'5px'});
-	ic.src= 'images/icons/help.gif';
+	ic.src= 'lib/images/icons/help.gif';
 	ic.role = role;
 		
 	ic.onclick = function(){
@@ -942,8 +942,8 @@ RoleObj.prototype.set_permissions = function(perm, role){
 		for(var i=0; i<(head_lst.length-1);i++){
 			$td(perm_tbl,0,i).innerHTML= "<b>"+head_lst[i]+"</b>";
 		}
-		var accept_img1 = 'images/icons/accept.gif';
-		var cancel_img1 =	'images/icons/cancel.gif';
+		var accept_img1 = 'lib/images/icons/accept.gif';
+		var cancel_img1 =	'lib/images/icons/cancel.gif';
 
 		for(i=1; i<perm.length+1; i++){
 			$td(perm_tbl,i,0).innerHTML= get_doctype_label(perm[i-1][0]);

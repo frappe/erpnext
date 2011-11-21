@@ -133,24 +133,13 @@ class DocType(TransactionBase):
   # Does not allow same item code to be entered twice
   # -------------------------------------------------
   def validate_for_items(self):
-    check_list=[]
     chk_dupl_itm = []
     for d in getlist(self.doclist,'quotation_details'):
-      ch = sql("select is_stock_item from `tabItem` where name = '%s'"%d.item_code)
-      if ch and ch[0][0]=='Yes':
-        if cstr(d.item_code) in check_list:
-	  msgprint("Item %s has been entered twice." % d.item_code)
-	  raise Exception
-	else:
-	  check_list.append(cstr(d.item_code))
-      
-      if ch and ch[0][0]=='No':
-        f = [cstr(d.item_code),cstr(d.description)]
-	if f in chk_dupl_itm:
-	  msgprint("Item %s has been entered twice." % d.item_code)
-	  raise Exception
-	else:
-	  chk_dupl_itm.append(f)
+      if [cstr(d.item_code),cstr(d.description)] in chk_dupl_itm:
+        msgprint("Item %s has been entered twice. Please change description atleast to continue" % d.item_code)
+        raise Exception
+      else:
+        chk_dupl_itm.append([cstr(d.item_code),cstr(d.description)])
 
 
   #do not allow sales item in maintenance quotation and service item in sales quotation

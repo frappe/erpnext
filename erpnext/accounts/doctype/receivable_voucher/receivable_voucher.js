@@ -48,9 +48,9 @@ cur_frm.cscript.onload_post_render = function(doc, dt, dn) {
 // Hide Fields
 // ------------
 cur_frm.cscript.hide_fields = function(doc, cdt, cdn) {
-	par_flds	=['project_name', 'due_date', 'posting_time', 'sales_order_main', 'delivery_note_main', 'Get Items', 'company', 'is_opening', 'currency', 'conversion_rate', 'price_list_name', 'cash_bank_account', 'source', 'cancel_reason', 'total_advance', 'gross_profit', 'gross_profit_percent', 'Get Advances Received', 'advance_adjustment_details', 'sales_partner', 'commission_rate', 'total_commission', 'Repair Outstanding Amt'];
+	par_flds	=['project_name', 'due_date', 'posting_time', 'sales_order_main', 'delivery_note_main', 'Get Items', 'is_opening', 'conversion_rate', 'source', 'cancel_reason', 'total_advance', 'gross_profit', 'gross_profit_percent', 'Get Advances Received', 'advance_adjustment_details', 'sales_partner', 'commission_rate', 'total_commission', 'Repair Outstanding Amt'];
 	
-	ch_flds = {'entries': ['income_account', 'warehouse', 'cost_center', 'sales_order', 'delivery_note']}
+	ch_flds = {'entries': ['sales_order', 'delivery_note']}
 	
 	if(cint(doc.is_pos) == 1) {
 		hide_field(par_flds);	
@@ -74,6 +74,9 @@ cur_frm.cscript.hide_fields = function(doc, cdt, cdn) {
 // -------
 cur_frm.cscript.refresh = function(doc, dt, dn) {
 
+	cur_frm.cscript.is_opening(doc, dt, dn);
+	cur_frm.cscript.hide_fields(doc, cdt, cdn);
+
 	// Show / Hide button
 	cur_frm.clear_custom_buttons();
 
@@ -90,8 +93,6 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 	}
 	else
 		hide_field('Repair Outstanding Amt');
-	cur_frm.cscript.is_opening(doc, dt, dn);
-	cur_frm.cscript.hide_fields(doc, cdt, cdn);
 }
 
 //fetch retail transaction related fields

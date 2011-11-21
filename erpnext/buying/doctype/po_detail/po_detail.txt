@@ -5,8 +5,8 @@
 	{
 		'creation': '2010-08-08 17:09:12',
 		'docstatus': 0,
-		'modified': '2010-11-12 16:53:30',
-		'modified_by': 'sneha@webnotestech.com',
+		'modified': '2011-10-20 18:39:20',
+		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
 
@@ -14,6 +14,7 @@
 	{
 		'autoname': 'POD/.#####',
 		'colour': 'White:FFF',
+		'default_print_format': 'Standard',
 		'doctype': 'DocType',
 		'istable': 1,
 		'module': 'Buying',
@@ -21,7 +22,7 @@
 		'section_style': 'Tray',
 		'server_code_error': ' ',
 		'show_in_menu': 0,
-		'version': 46
+		'version': 54
 	},
 
 	# These values are common for all DocField
@@ -45,7 +46,6 @@
 		'fieldname': 'schedule_date',
 		'fieldtype': 'Date',
 		'hidden': 0,
-		'idx': 1,
 		'in_filter': 1,
 		'label': 'Reqd By Date',
 		'no_copy': 1,
@@ -54,7 +54,7 @@
 		'permlevel': 0,
 		'print_hide': 1,
 		'reqd': 1,
-		'search_index': 0
+		'search_index': 1
 	},
 
 	# DocField
@@ -62,7 +62,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'item_code',
 		'fieldtype': 'Link',
-		'idx': 2,
 		'in_filter': 1,
 		'label': 'Item Code',
 		'oldfieldname': 'item_code',
@@ -81,7 +80,6 @@
 		'fieldname': 'item_name',
 		'fieldtype': 'Data',
 		'hidden': 0,
-		'idx': 3,
 		'in_filter': 1,
 		'label': 'Item Name',
 		'oldfieldname': 'item_name',
@@ -89,7 +87,7 @@
 		'permlevel': 0,
 		'print_hide': 1,
 		'reqd': 1,
-		'search_index': 0
+		'search_index': 1
 	},
 
 	# DocField
@@ -97,7 +95,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'description',
 		'fieldtype': 'Small Text',
-		'idx': 4,
 		'label': 'Description',
 		'oldfieldname': 'description',
 		'oldfieldtype': 'Small Text',
@@ -110,9 +107,39 @@
 	{
 		'default': '0.00',
 		'doctype': 'DocField',
+		'fieldname': 'qty',
+		'fieldtype': 'Currency',
+		'label': 'Quantity',
+		'oldfieldname': 'qty',
+		'oldfieldtype': 'Currency',
+		'permlevel': 0,
+		'reqd': 1,
+		'trigger': 'Client',
+		'width': '60px'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'uom',
+		'fieldtype': 'Link',
+		'label': 'UOM',
+		'oldfieldname': 'uom',
+		'oldfieldtype': 'Link',
+		'options': 'UOM',
+		'permlevel': 0,
+		'print_hide': 0,
+		'reqd': 1,
+		'trigger': 'Client',
+		'width': '100px'
+	},
+
+	# DocField
+	{
+		'default': '0.00',
+		'doctype': 'DocField',
 		'fieldname': 'purchase_rate',
 		'fieldtype': 'Currency',
-		'idx': 7,
 		'label': 'Rate (Default Curr.)',
 		'oldfieldname': 'purchase_rate',
 		'oldfieldtype': 'Currency',
@@ -129,7 +156,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'amount',
 		'fieldtype': 'Currency',
-		'idx': 8,
 		'label': 'Amount  (Default Curr.)',
 		'oldfieldname': 'amount',
 		'oldfieldtype': 'Currency',
@@ -140,27 +166,10 @@
 
 	# DocField
 	{
-		'default': '0.00',
-		'doctype': 'DocField',
-		'fieldname': 'qty',
-		'fieldtype': 'Currency',
-		'idx': 9,
-		'label': 'Quantity',
-		'oldfieldname': 'qty',
-		'oldfieldtype': 'Currency',
-		'permlevel': 0,
-		'reqd': 1,
-		'trigger': 'Client',
-		'width': '60px'
-	},
-
-	# DocField
-	{
 		'doctype': 'DocField',
 		'fieldname': 'import_rate',
 		'fieldtype': 'Currency',
 		'hidden': 0,
-		'idx': 9,
 		'label': 'Rate',
 		'oldfieldname': 'import_rate',
 		'oldfieldtype': 'Currency',
@@ -172,27 +181,8 @@
 	# DocField
 	{
 		'doctype': 'DocField',
-		'fieldname': 'uom',
-		'fieldtype': 'Link',
-		'idx': 10,
-		'label': 'UOM',
-		'oldfieldname': 'uom',
-		'oldfieldtype': 'Link',
-		'options': 'UOM',
-		'permlevel': 0,
-		'print_hide': 0,
-		'reqd': 1,
-		'search_index': 0,
-		'trigger': 'Client',
-		'width': '100px'
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
 		'fieldname': 'import_amount',
 		'fieldtype': 'Currency',
-		'idx': 10,
 		'label': 'Amount',
 		'oldfieldname': 'import_amount',
 		'oldfieldtype': 'Currency',
@@ -205,7 +195,6 @@
 		'fieldname': 'warehouse',
 		'fieldtype': 'Link',
 		'hidden': 0,
-		'idx': 11,
 		'label': 'Warehouse',
 		'oldfieldname': 'warehouse',
 		'oldfieldtype': 'Link',
@@ -223,7 +212,6 @@
 		'fieldname': 'conversion_factor',
 		'fieldtype': 'Currency',
 		'hidden': 0,
-		'idx': 11,
 		'label': 'Conversion Factor',
 		'oldfieldname': 'conversion_factor',
 		'oldfieldtype': 'Currency',
@@ -238,16 +226,17 @@
 	{
 		'colour': 'White:FFF',
 		'doctype': 'DocField',
-		'fieldname': 'prevdoc_doctype',
-		'fieldtype': 'Data',
-		'hidden': 1,
-		'idx': 12,
-		'label': 'Prevdoc DocType',
-		'no_copy': 0,
-		'oldfieldname': 'prevdoc_doctype',
-		'oldfieldtype': 'Data',
-		'permlevel': 1,
-		'print_hide': 1
+		'fieldname': 'stock_qty',
+		'fieldtype': 'Currency',
+		'hidden': 0,
+		'label': 'Stock Qty',
+		'no_copy': 1,
+		'oldfieldname': 'stock_qty',
+		'oldfieldtype': 'Currency',
+		'permlevel': 0,
+		'print_hide': 1,
+		'trigger': 'Client',
+		'width': '100px'
 	},
 
 	# DocField
@@ -256,7 +245,6 @@
 		'fieldname': 'stock_uom',
 		'fieldtype': 'Data',
 		'hidden': 0,
-		'idx': 12,
 		'label': 'Stock UOM',
 		'oldfieldname': 'stock_uom',
 		'oldfieldtype': 'Data',
@@ -268,12 +256,39 @@
 
 	# DocField
 	{
+		'doctype': 'DocField',
+		'fieldname': 'project_name',
+		'fieldtype': 'Link',
+		'in_filter': 1,
+		'label': 'Project Name',
+		'options': 'Project',
+		'permlevel': 0,
+		'print_hide': 1,
+		'report_hide': 0
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldname': 'prevdoc_doctype',
+		'fieldtype': 'Data',
+		'hidden': 1,
+		'label': 'Prevdoc DocType',
+		'no_copy': 0,
+		'oldfieldname': 'prevdoc_doctype',
+		'oldfieldtype': 'Data',
+		'permlevel': 1,
+		'print_hide': 1
+	},
+
+	# DocField
+	{
 		'colour': 'White:FFF',
 		'doctype': 'DocField',
 		'fieldname': 'prevdoc_docname',
 		'fieldtype': 'Link',
 		'hidden': 0,
-		'idx': 13,
 		'in_filter': 1,
 		'label': 'Indent No',
 		'no_copy': 0,
@@ -292,7 +307,6 @@
 		'fieldname': 'prevdoc_date',
 		'fieldtype': 'Date',
 		'hidden': 0,
-		'idx': 14,
 		'in_filter': 1,
 		'label': 'Indent Date',
 		'oldfieldname': 'prevdoc_date',
@@ -309,7 +323,6 @@
 		'fieldname': 'prevdoc_detail_docname',
 		'fieldtype': 'Data',
 		'hidden': 1,
-		'idx': 15,
 		'in_filter': 1,
 		'label': 'Indent Detail No',
 		'no_copy': 0,
@@ -326,14 +339,12 @@
 		'fieldname': 'brand',
 		'fieldtype': 'Link',
 		'hidden': 0,
-		'idx': 16,
 		'label': 'Brand',
 		'oldfieldname': 'brand',
 		'oldfieldtype': 'Link',
 		'options': 'Brand',
 		'permlevel': 1,
-		'print_hide': 1,
-		'search_index': 0
+		'print_hide': 1
 	},
 
 	# DocField
@@ -342,7 +353,6 @@
 		'fieldname': 'item_group',
 		'fieldtype': 'Link',
 		'hidden': 0,
-		'idx': 17,
 		'in_filter': 1,
 		'label': 'Item Group',
 		'oldfieldname': 'item_group',
@@ -350,24 +360,7 @@
 		'options': 'Item Group',
 		'permlevel': 1,
 		'print_hide': 1,
-		'search_index': 0
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldname': 'stock_qty',
-		'fieldtype': 'Currency',
-		'hidden': 0,
-		'idx': 20,
-		'label': 'Stock Qty',
-		'no_copy': 1,
-		'oldfieldname': 'stock_qty',
-		'oldfieldtype': 'Currency',
-		'permlevel': 0,
-		'print_hide': 1,
-		'trigger': 'Client',
-		'width': '100px'
+		'search_index': 1
 	},
 
 	# DocField
@@ -376,7 +369,6 @@
 		'fieldname': 'received_qty',
 		'fieldtype': 'Currency',
 		'hidden': 0,
-		'idx': 21,
 		'label': 'Received Qty',
 		'no_copy': 1,
 		'oldfieldname': 'received_qty',
@@ -392,7 +384,6 @@
 		'fieldname': 'billed_qty',
 		'fieldtype': 'Currency',
 		'hidden': 0,
-		'idx': 22,
 		'label': 'Billed Quantity',
 		'no_copy': 1,
 		'oldfieldname': 'billed_qty',
@@ -409,7 +400,6 @@
 		'fieldname': 'item_tax_rate',
 		'fieldtype': 'Small Text',
 		'hidden': 1,
-		'idx': 23,
 		'label': 'Item Tax Rate',
 		'oldfieldname': 'item_tax_rate',
 		'oldfieldtype': 'Small Text',
@@ -420,12 +410,11 @@
 
 	# DocField
 	{
-		'allow_on_submit': 1,
+		'allow_on_submit': 0,
 		'doctype': 'DocField',
 		'fieldname': 'page_break',
 		'fieldtype': 'Check',
 		'hidden': 0,
-		'idx': 24,
 		'label': 'Page Break',
 		'no_copy': 1,
 		'oldfieldname': 'page_break',

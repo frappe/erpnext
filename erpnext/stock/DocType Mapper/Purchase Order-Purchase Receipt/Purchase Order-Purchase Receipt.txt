@@ -5,7 +5,7 @@
 	{
 		'creation': '2010-08-08 17:09:35',
 		'docstatus': 0,
-		'modified': '2011-10-07 12:10:26',
+		'modified': '2011-10-12 10:49:40',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
@@ -151,6 +151,30 @@
 		'from_field': 'schedule_date',
 		'match_id': 1,
 		'to_field': 'schedule_date'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'net_total',
+		'match_id': 0,
+		'to_field': 'net_total'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'grand_total',
+		'match_id': 0,
+		'to_field': 'grand_total'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'total_tax',
+		'match_id': 0,
+		'to_field': 'total_tax'
 	},
 
 	# Table Mapper Detail

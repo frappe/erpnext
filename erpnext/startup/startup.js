@@ -43,18 +43,8 @@ function startup_setup() {
 	// ------------------
 	$dh(page_body.footer);
 
-	// for logout and payment
-	var callback = function(r,rt) {
-		if(r.message){
-			login_file = 'http://' + r.message;
-		}
-		else if(pscript.is_erpnext_saas) {
-			login_file = 'https://www.erpnext.com';
-		}
-		// setup toolbar
-		pscript.startup_setup_toolbar();
-	}
-	$c_obj('Home Control', 'get_login_url', '', callback);
+	// setup toolbar
+	pscript.startup_setup_toolbar();
 }
 
 // ====================================================================
@@ -65,6 +55,14 @@ pscript.startup_make_sidebar = function() {
 	var callback = function(r,rt) {
 		// menu
 		var ml = r.message;
+
+		// login-file
+		if(r.login_url){
+			login_file = 'http://' + r.login_url;
+		}
+		else if(pscript.is_erpnext_saas) {
+			login_file = 'https://www.erpnext.com';
+		}
 
 		// clear
 		page_body.left_sidebar.innerHTML = '';
@@ -299,10 +297,10 @@ SidebarItem.prototype.show_items = function() {
 
 				// add to menu-item mapper
 				menu_item_map['Page'][me.det.module_label + ' Custom Reports'] = smi.pointer;
-
 			}
-
 		}
+		
+		
 		$(me.items_area).slideDown();
 
 		// high light
@@ -565,7 +563,7 @@ pscript.feature_dict = {
 		'Timesheet': {'timesheet_details':['project_name']}
 	},
 	'fs_packing_details': {
-		'Delivery Note': {'fields':['packing_details','print_packing_slip'],'delivery_note_details':['no_of_packs','pack_gross_wt','pack_nett_wt','pack_no','pack_unit']},
+		'Delivery Note': {'fields':['packing_details','print_packing_slip','packing_checked_by','packed_by','pack_size','shipping_mark'],'delivery_note_details':['no_of_packs','pack_gross_wt','pack_nett_wt','pack_no','pack_unit']},
 		'Sales Order': {'fields':['packing_details']}
 	},
 	'fs_discounts': {

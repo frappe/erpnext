@@ -52,7 +52,6 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 
 //Supplier
 cur_frm.cscript.supplier = function(doc,dt,dn) {
-
   var callback = function(r,rt) {
       var doc = locals[cur_frm.doctype][cur_frm.docname];    
       get_server_fields('get_credit_to','','',doc, dt, dn, 0, callback2);
@@ -144,13 +143,6 @@ cur_frm.cscript.is_opening = function(doc, dt, dn) {
 }
 
 /* ******************************** TRIGGERS **************************************** */
-/*
-// Supplier
-// ---------
-cur_frm.cscript.supplier = function(doc,cdt,cdn){
-  get_server_fields('get_credit_to','','',doc,cdt,cdn);
-}
-*/
 
 // Conversion Rate
 // ----------------
@@ -420,7 +412,7 @@ cur_frm.cscript.make_jv = function(doc, dt, dn, det) {
 }
 
 // ***************** Get project name *****************
-cur_frm.fields_dict['project_name'].get_query = function(doc, cdt, cdn) {
+cur_frm.fields_dict['pv_details'].grid.get_field('project_name').get_query = function(doc, cdt, cdn) {
   return 'SELECT `tabProject`.name FROM `tabProject` WHERE `tabProject`.status = "Open" AND `tabProject`.name LIKE "%s" ORDER BY `tabProject`.name ASC LIMIT 50';
 }
 

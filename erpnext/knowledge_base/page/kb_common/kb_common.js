@@ -71,8 +71,8 @@ KBPoints = function(parent, points, voted, dt, dn, owner) {
 	// if user has not already voted
 	
 	if(user!='Guest' && !in_list(voted, user) && user!=owner) {
-		this.vote_up = $a(this.wrapper, 'img', 'images/ui/vote_up.gif', {margin:'0px 0px -2px 7px', cursor: 'pointer'});
-		this.vote_down = $a(this.wrapper, 'img', 'images/ui/vote_down.gif', {margin:'0px 0px -3px 0px', cursor: 'pointer'});
+		this.vote_up = $a(this.wrapper, 'img', 'lib/images/ui/vote_up.gif', {margin:'0px 0px -2px 7px', cursor: 'pointer'});
+		this.vote_down = $a(this.wrapper, 'img', 'lib/images/ui/vote_down.gif', {margin:'0px 0px -3px 0px', cursor: 'pointer'});
 		
 		this.vote_up.title = 'Vote Up'; this.vote_down.title = 'Vote Down';
 		

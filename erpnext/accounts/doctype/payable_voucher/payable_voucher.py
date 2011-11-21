@@ -232,15 +232,11 @@ class DocType(TransactionBase):
 	# Validate Acc Head of Supplier and Credit To Account entered
 	# ------------------------------------------------------------
 	def check_for_acc_head_of_supplier(self): 
-		acc_head = sql("select name from `tabAccount` where name = %s", (cstr(self.doc.supplier) + " - " + self.get_company_abbr()))
-		if self.doc.supplier:
-			if acc_head and acc_head[0][0]:
-				if not cstr(acc_head[0][0]) == cstr(self.doc.credit_to):
-					msgprint("Credit To: %s do not match with Supplier: %s for Company: %s i.e. %s" %(self.doc.credit_to,self.doc.supplier,self.doc.company,cstr(acc_head[0][0])))
-					raise Exception, "Validation Error "
-			if not acc_head:
-				msgprint("Supplier %s does not have an Account Head in %s. You must first create it from the Supplier Master" % (self.doc.supplier, self.doc.company))
-				raise Exception, "Validation Error "
+		if self.doc.supplier and self.doc.credit_to:
+			acc_head = sql("select master_name from `tabAccount` where name = %s", self.doc.credit_to)
+			
+			if (acc_head and cstr(acc_head[0][0]) != cstr(self.doc.supplier)) or (not acc_head and (self.doc.credit_to != cstr(self.doc.supplier) + " - " + self.get_company_abbr())):
+				msgprint("Credit To: %s do not match with Supplier: %s for Company: %s.\n If both correctly entered, please select Master Type and Master Name in account master." %(self.doc.credit_to,self.doc.supplier,self.doc.company), raise_exception=1)
 				
 	# Check for Stopped PO
 	# ---------------------

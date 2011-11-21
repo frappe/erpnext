@@ -5,7 +5,7 @@
 	{
 		'creation': '2010-08-08 17:09:07',
 		'docstatus': 0,
-		'modified': '2011-06-30 18:47:22',
+		'modified': '2011-11-16 16:10:00',
 		'modified_by': 'Administrator',
 		'owner': 'wasim@webnotestech.com'
 	},
@@ -13,6 +13,7 @@
 	# These values are common for all DocType
 	{
 		'colour': 'White:FFF',
+		'default_print_format': 'Standard',
 		'doctype': 'DocType',
 		'istable': 1,
 		'module': 'Stock',
@@ -20,7 +21,7 @@
 		'section_style': 'Simple',
 		'server_code_error': ' ',
 		'show_in_menu': 0,
-		'version': 2
+		'version': 5
 	},
 
 	# These values are common for all DocField
@@ -42,25 +43,23 @@
 	# DocField
 	{
 		'doctype': 'DocField',
-		'fieldname': 'purchase_receipt_no',
+		'fieldname': 'purchase_receipt',
 		'fieldtype': 'Link',
-		'idx': 1,
-		'label': 'Purchase Receipt No',
+		'label': 'Purchase Receipt',
 		'oldfieldname': 'purchase_receipt_no',
 		'oldfieldtype': 'Link',
 		'options': 'Purchase Receipt',
-		'search_index': 1
+		'width': '220px'
 	},
 
 	# DocField
 	{
 		'doctype': 'DocField',
-		'fieldname': 'include_in_landed_cost',
+		'fieldname': 'select_pr',
 		'fieldtype': 'Check',
-		'idx': 2,
-		'label': 'Include In Landed Cost',
+		'label': 'Select PR',
 		'oldfieldname': 'include_in_landed_cost',
 		'oldfieldtype': 'Check',
-		'width': '150px'
+		'width': '120px'
 	}
 ]

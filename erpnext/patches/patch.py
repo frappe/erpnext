@@ -1,7 +1,7 @@
 # REMEMBER to update this
 # ========================
 
-last_patch = 384
+last_patch = 388
 
 #-------------------------------------------
 
@@ -344,8 +344,7 @@ def execute(patch_no):
 		bin = sql("select name from tabBin")
 		for b in bin:
 			bobj = get_obj('Bin',b[0])
-			prev_sle = bobj.get_prev_sle(posting_date = '2011-09-01', posting_time = '01:00')
-			bobj.update_item_valuation(posting_date = '2011-09-01', posting_time = '01:00', prev_sle = prev_sle)
+			bobj.update_entries_after(posting_date = '2011-09-01', posting_time = '01:00')
 	elif patch_no == 368:
 		from webnotes.utils import nestedset
 		t = [
@@ -454,3 +453,12 @@ def execute(patch_no):
 		reload_doc('stock', 'Module Def', 'Stock')
 		sql("delete from `tabModule Def Item` where display_name = 'Serial No' and parent = 'Support'")
 		sql("update `tabDocType` set subject = 'Item Code: %(item_code)s, Warehouse: %(warehouse)s' where name = 'Serial No'")
+	elif patch_no == 385:
+		# Patch for adding packing related columns (packed by, checked by, shipping mark etc)
+		reload_doc('stock','doctype','delivery_note')
+	elif patch_no == 386:
+		sql("update `tabDocField` set allow_on_submit = 1 where fieldname = 'page_break'")
+	elif patch_no == 387:
+		sql("update `tabDocField` set allow_on_submit = 1 where fieldname in ('indent_details', 'po_details', 'purchase_receipt_details', 'entries', 'sales_order_details', 'delivery_note_details', 'quotation_details') and fieldtype = 'Table'")
+	elif patch_no == 388:
+		pass

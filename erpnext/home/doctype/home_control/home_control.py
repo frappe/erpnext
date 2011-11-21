@@ -31,6 +31,8 @@ class DocType:
 	def get_modules(self):
 		rl = webnotes.user.get_roles()
 		ml = sql("select distinct t1.name, t1.module_icon, t1.module_label, t1.module_desc, t1.module_page from  `tabModule Def` t1, `tabModule Def Role` t2 where t2.role in ('%s') and t1.disabled !='Yes' and ifnull(t1.is_hidden, 'No') != 'Yes' and t1.name = t2.parent order by t1.module_seq asc" % "','".join(rl), as_dict=1)
+		webnotes.response['login_url'] = session['data'].get('login_from', '')		
+		
 		return ml
 
 	def get_module_details(self,m):
@@ -47,8 +49,6 @@ class DocType:
 			AND t2.read=1 
 			AND t2.role IN ("%s") 
 			AND ifnull(standard,"No")="No"''' % (m, '", "'.join(webnotes.user.get_roles())), as_dict=1)
-
-		ret['login_url'] = session['data'].get('login_from', '')		
 
 		return ret
 

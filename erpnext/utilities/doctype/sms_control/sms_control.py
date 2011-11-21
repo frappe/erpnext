@@ -63,7 +63,15 @@ class DocType:
 
 	def get_sender_name(self):
 		"returns name as SMS sender"
-		return webnotes.conn.get_value('Manage Account', None, 'sms_sender_name') or 'ERPNext'
+		sender_name = webnotes.conn.get_value('Manage Account', None, 'sms_sender_name') or 'ERPNXT'
+		if len(sender_name) > 6:
+			msgprint("""
+				As per TRAI rule, sender name must be exactly 6 characters.
+				Kindly change sender name in Setup --> Global Defaults.
+				
+				Note: Hyphen, space, numeric digit, special characters are not allowed.
+			""", raise_exception=1)
+		return sender_name
 	
 	def get_contact_number(self, arg):
 		"returns mobile number of the contact"

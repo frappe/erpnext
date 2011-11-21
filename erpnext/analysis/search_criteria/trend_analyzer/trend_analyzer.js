@@ -5,7 +5,7 @@ report.customize_filters = function() {
 
   this.add_filter({fieldname:'period', label:'Period', fieldtype:'Select', options:'Monthly'+NEWLINE+'Quarterly'+NEWLINE+'Half Yearly'+NEWLINE+'Annual',report_default:'Quarterly',ignore : 1, parent:'Profile',in_first_page:1,single_select:1});
 
-  this.add_filter({fieldname:'based_on', label:'Based On', fieldtype:'Select', options:'Item'+NEWLINE+'Item Group'+NEWLINE+'Customer'+NEWLINE+'Customer Group'+NEWLINE+'Territory'+NEWLINE+'Supplier'+NEWLINE+'Supplier Type', ignore : 1, parent:'Profile', report_default:'Item', in_first_page : 1,single_select:1});
+  this.add_filter({fieldname:'based_on', label:'Based On', fieldtype:'Select', options:'Item'+NEWLINE+'Item Group'+NEWLINE+'Customer'+NEWLINE+'Customer Group'+NEWLINE+'Territory'+NEWLINE+'Supplier'+NEWLINE+'Supplier Type'+NEWLINE+'Project', ignore : 1, parent:'Profile', report_default:'Item', in_first_page : 1,single_select:1});
 
   this.add_filter({fieldname:'group_by', label:'Group By', fieldtype:'Select', options:NEWLINE+'Item'+NEWLINE+'Customer'+NEWLINE+'Supplier', ignore : 1, parent:'Profile',single_select:1});
 
@@ -24,6 +24,7 @@ report.customize_filters = function() {
   this.add_filter({fieldname:'territory', label:'Territory', fieldtype:'Link', options:'Territory', ignore : 1, parent:'Profile'});
   this.add_filter({fieldname:'supplier', label:'Supplier', fieldtype:'Link', options:'Supplier', ignore : 1, parent:'Profile'});
   this.add_filter({fieldname:'supplier_type', label:'Supplier Type', fieldtype:'Link', options:'Supplier Type', ignore : 1, parent:'Profile'});
+  this.add_filter({fieldname:'project', label:'Project', fieldtype:'Link', options:'Project', ignore : 1, parent:'Profile'});
 }
 
 
@@ -99,6 +100,15 @@ report.get_query = function() {
                                   add_cond += ' AND t1.supplier = t3.name';
                                   if(supp_type) add_cond += ' AND t1.supplier_type = "'+supp_type+'"';
                                   break;
+      case 'Project'        :     pro = this.get_filter('Profile', 'Project').get_value();
+      							  if (inList(['Purchase Order', 'Purchase Receipt', 'Payable Voucher'], trans)) {
+									  col = 'DISTINCT t2.project_name';
+    	                              if(pro) add_cond += ' AND t2.project_name = "'+pro+'"';
+    	                          } else {
+	    	                          col = 'DISTINCT t1.project_name';
+    	                              if(pro) add_cond += ' AND t1.project_name = "'+pro+'"';
+    	                          }
+                                  break;
       case 'Item Group'     :     ig = this.get_filter('Profile', 'Item Group').get_value();
                                   if(ig) sp_cond += ' AND parent.name = "'+ig+'"';
                                   break;
@@ -108,10 +118,11 @@ report.get_query = function() {
       case 'Territory'      :     ter = this.get_filter('Profile', 'Territory').get_value();
                                   if(ter) sp_cond += ' AND parent.name = "'+ter+'"';
                                   break;
+
     }
 
     
-    if(based_on == 'Item' || based_on == 'Customer' || based_on == 'Supplier' || based_on == 'Supplier Type')
+    if(based_on == 'Item' || based_on == 'Customer' || based_on == 'Supplier' || based_on == 'Supplier Type' || based_on == 'Project')
       var q ='SELECT '+col+' FROM `tab'+trans+'` t1, `tab'+trans_det+'` t2 '+add_tables+' WHERE t1.fiscal_year = "'+fiscal_year+'" and t1.company = "'+company+'" and t2.parent = t1.name '+add_cond;
     else
       var q = 'SELECT CONCAT(REPEAT("     ", COUNT(parent.name) - 1), node.name) AS "Name" FROM `tab'+based_on+'` node,`tab'+based_on+'` parent WHERE node.lft BETWEEN parent.lft and parent.rgt and node.docstatus !=2 '+sp_cond+' GROUP BY node.name ORDER BY node.lft';

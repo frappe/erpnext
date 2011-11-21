@@ -1,82 +1,114 @@
 # Please edit this list and import only required elements
-import webnotes
+import webnotes, unittest
 
-from webnotes.utils import add_days, add_months, add_years, cint, cstr, date_diff, default_fields, flt, fmt_money, formatdate, generate_hash, getTraceback, get_defaults, get_first_day, get_last_day, getdate, has_common, month_name, now, nowdate, replace_newlines, sendmail, set_default, str_esc_quote, user_format, validate_email_add
-from webnotes.model import db_exists
-from webnotes.model.doc import Document, addchild, removechild, getchildren, make_autoname, SuperDocType
-from webnotes.model.doclist import getlist, copy_doclist
-from webnotes.model.code import get_obj, get_server_obj, run_server_obj, updatedb, check_syntax
-from webnotes import session, form, is_testing, msgprint, errprint
+from webnotes.utils import flt
+from webnotes.model.code import get_obj
 
-set = webnotes.conn.set
-sql = webnotes.conn.sql
-get_value = webnotes.conn.get_value
-in_transaction = webnotes.conn.in_transaction
-convert_to_lists = webnotes.conn.convert_to_lists
+class TestValuationControl(unittest.TestCase):
+	def setUp(self):
+		webnotes.conn.begin()
+
+	def tearDown(self):
+		webnotes.conn.rollback()
+		
+	def test_fifo_rate(self):
+		"""test fifo rate"""
+		fcfs_stack = [[40,500.0], [12,400.0]]
+		self.assertTrue(DocType(None, None).get_fifo_rate(fcfs_stack)==((40*500.0 + 12*400.0)/52.0))
 	
-# -----------------------------------------------------------------------------------------
+	def test_serial_no_value(self):
+		"""test serial no value"""
+		from webnotes.model.doc import Document
+
+		Document(fielddata = {
+			'doctype': 'Item',
+			'docstatus': 0,
+			'name': 'it',
+			'item_name': 'it',
+			'item_code': 'it',
+			'item_group': 'Default',
+			'is_stock_item': 'Yes',
+			'has_serial_no': 'Yes',
+			'stock_uom': 'Nos',
+			'is_sales_item': 'Yes',
+			'is_purchase_item': 'Yes',
+			'is_service_item': 'No',
+			'is_sub_contracted_item': 'No',
+			'is_pro_applicable': 'Yes',
+			'is_manufactured_item': 'Yes'		
+		}).save(1)
+		
+		s1 = Document(fielddata= {
+			'doctype':'Serial No',
+			'serial_no':'s1',
+			'item_code':'it',
+			'purchase_rate': 100.0
+		})
+		s2 = Document(fielddata = s1.fields.copy())
+		s3 = Document(fielddata = s1.fields.copy())
+		s4 = Document(fielddata = s1.fields.copy())
+		s1.save(1)
+		s2.purchase_rate = 120.0
+		s2.serial_no = 's2'
+		s2.save(1)
+		s3.purchase_rate = 130.0
+		s3.serial_no = 's3'
+		s3.save(1)
+		s4.purchase_rate = 150.0
+		s4.serial_no = 's4'
+		s4.save(1)
+		
+		r = DocType(None, None).get_serializable_inventory_rate('s1,s2,s3')
+		self.assertTrue(flt(r) - (100.0+120.0+130.0)/3 < 0.0001)
 
 
 class DocType:
 	def __init__(self, d, dl):
 		self.doc, self.doclist = d, dl
 
-	# Get FIFO Rate from Stack
-	# -------------------------
-	def get_fifo_rate(self, fcfs_stack, qty):
-		fcfs_val = 0
-		withdraw = flt(qty)
-		while withdraw:
-			batch = fcfs_stack[0]				
-			if batch[0] <= withdraw:
-				# not enough or exactly same qty in current batch, clear batch
-				withdraw -= batch[0]
-				fcfs_val += (flt(batch[0]) * flt(batch[1]))
-				fcfs_stack.pop(0)
-			else:
-				# all from current batch
-				fcfs_val += (flt(withdraw) * flt(batch[1]))
-				batch[0] -= withdraw
-				withdraw = 0
-		fcfs_rate = flt(fcfs_val) / flt(qty)
-		return fcfs_rate
-
-	# --------------------------------
-	# get serializable inventory rate
-	# --------------------------------
+	def get_fifo_rate(self, fcfs_stack):
+		"""get FIFO (average) Rate from Stack"""
+		if not fcfs_stack:
+			return 0.0
+			
+		total = sum(f[0] for f in fcfs_stack)
+		if not total:
+			return 0.0
+		
+		return sum(f[0] * f[1] for f in fcfs_stack) / total
+			
 	def get_serializable_inventory_rate(self, serial_no):
+		"""get average value of serial numbers"""
+		
 		sr_nos = get_obj("Stock Ledger").get_sr_no_list(serial_no)
-		tot = 0
-		for s in sr_nos:
-			serial_no = s.strip()
-			tot += flt(get_value('Serial No', serial_no, 'purchase_rate'))
-		return tot / len(sr_nos)
+		return webnotes.conn.sql("""select avg(ifnull(purchase_rate, 0)) 
+			from `tabSerial No` where name in ("%s")""" % '", "'.join(sr_nos))[0][0] or 0.0
 
 
-	# ---------------------
-	# get valuation method
-	# ---------------------
 	def get_valuation_method(self, item_code):
+		"""get valuation method from item or default"""
 		val_method = webnotes.conn.get_value('Item', item_code, 'valuation_method')
 		if not val_method:
+			from webnotes.utils import get_defaults
 			val_method = get_defaults().get('valuation_method', 'FIFO')
 		return val_method
 		
 
-	# Get Incoming Rate based on valuation method
-	# --------------------------------------------
 	def get_incoming_rate(self, posting_date, posting_time, item, warehouse, qty = 0, serial_no = ''):
+		"""Get Incoming Rate based on valuation method"""
 		in_rate = 0
 		val_method = self.get_valuation_method(item)
 		bin_obj = get_obj('Warehouse',warehouse).get_bin(item)
 		if serial_no:
 			in_rate = self.get_serializable_inventory_rate(serial_no)
 		elif val_method == 'FIFO':
-			in_rate = 0
+			# get rate based on the last item value?
 			if qty:
 				prev_sle = bin_obj.get_prev_sle(posting_date, posting_time)
-				fcfs_stack = eval(prev_sle.get('fcfs_stack', '[]') or '[]')
-				in_rate = fcfs_stack and self.get_fifo_rate(fcfs_stack, qty) or 0
+				if not prev_sle:
+					return 0.0
+				fcfs_stack = eval(prev_sle.get('fcfs_stack', '[]'))
+				in_rate = fcfs_stack and self.get_fifo_rate(fcfs_stack) or 0
 		elif val_method == 'Moving Average':
 			prev_sle = bin_obj.get_prev_sle(posting_date, posting_time)
 			in_rate = prev_sle and prev_sle.get('valuation_rate', 0) or 0

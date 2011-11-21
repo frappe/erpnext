@@ -5,7 +5,7 @@
 	{
 		'creation': '2010-08-08 17:09:35',
 		'docstatus': 0,
-		'modified': '2011-09-15 15:04:44',
+		'modified': '2011-10-12 10:49:26',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
@@ -123,6 +123,33 @@
 		'map': 'No',
 		'match_id': 0,
 		'to_field': 'naming_series'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'net_total',
+		'map': 'Yes',
+		'match_id': 0,
+		'to_field': 'net_total'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'grand_total',
+		'map': 'Yes',
+		'match_id': 0,
+		'to_field': 'grand_total'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'total_tax',
+		'map': 'Yes',
+		'match_id': 0,
+		'to_field': 'total_tax'
 	},
 
 	# Table Mapper Detail
