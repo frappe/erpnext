@@ -258,6 +258,7 @@ cur_frm.cscript.calc_amount = function(doc, n) {
   for(var i=0;i<cl.length;i++) 
   {
     if(n == 1){ 
+      set_multiple(tname, cl[i].name, {'purchase_ref_rate':flt(cl[i].import_ref_rate)*flt(doc.conversion_rate)}, fname);
 	  set_multiple(tname, cl[i].name, {'discount_rate': flt(flt( flt( flt(cl[i].import_ref_rate) - flt(cl[i].import_rate) ) * 100 )/flt(cl[i].import_ref_rate)) }, fname);
       set_multiple(tname, cl[i].name, {'purchase_rate': flt(doc.conversion_rate) * flt(cl[i].import_rate) }, fname);
       set_multiple(tname, cl[i].name, {'amount': flt(flt(cl[i].qty) * flt(doc.conversion_rate) * flt(cl[i].import_rate))}, fname);
@@ -265,10 +266,11 @@ cur_frm.cscript.calc_amount = function(doc, n) {
      
     }
     if(n == 2){
-	  set_multiple(tname, cl[i].name, {'discount_rate': flt(flt( flt( flt(cl[i].purchase_ref_rate) - flt(cl[i].purchase_rate) ) * 100 )/flt(cl[i].purchase_ref_rate)) }, fname);
-      set_multiple(tname, cl[i].name, {'amount': flt(flt(cl[i].qty) * flt(cl[i].purchase_rate)), 'import_rate': flt(flt(cl[i].purchase_rate) / flt(doc.conversion_rate)) }, fname);
-      set_multiple(tname, cl[i].name, {'import_amount': flt(flt(cl[i].qty) *  flt(cl[i].purchase_rate) / flt(doc.conversion_rate))}, fname);
 	  set_multiple(tname, cl[i].name, {'purchase_ref_rate':flt(cl[i].import_ref_rate)*flt(doc.conversion_rate)}, fname);
+	  set_multiple(tname, cl[i].name, {'discount_rate': flt(flt( flt( flt(cl[i].purchase_ref_rate) - flt(cl[i].purchase_rate) ) * 100 )/flt(cl[i].purchase_ref_rate)) }, fname);
+      set_multiple(tname, cl[i].name, {'amount': flt(flt(cl[i].qty) * flt(cl[i].purchase_rate)),}, fname);
+	  set_multiple(tname, cl[i].name, {'import_rate': flt(flt(cl[i].purchase_rate) / flt(doc.conversion_rate)) }, fname);
+      set_multiple(tname, cl[i].name, {'import_amount': flt(flt(cl[i].qty) *  flt(cl[i].purchase_rate) / flt(doc.conversion_rate))}, fname);
 	  		  
 	}
     if(n == 3){

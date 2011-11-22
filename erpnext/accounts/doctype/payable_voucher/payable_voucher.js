@@ -333,6 +333,7 @@ cur_frm.cscript.calc_total = function(doc) {
   var el = getchildren('PV Detail',doc.name,'entries');
   for(var i in el) {
    if (flt(el[i].import_rate) > 0){
+	 set_multiple('PV Detail', el[i].name, {'purchase_ref_rate':flt(el[i].import_ref_rate)*flt(doc.conversion_rate)}, 'entries');
      set_multiple('PV Detail', el[i].name, {'rate': flt(doc.conversion_rate) * flt(el[i].import_rate) }, 'entries');
      set_multiple('PV Detail', el[i].name, {'import_amount': flt(el[i].qty) * flt(el[i].import_rate) }, 'entries');
    }
