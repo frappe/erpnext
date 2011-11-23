@@ -181,6 +181,7 @@ SetupData = function(cnty){
     ['Print Heading',1,'Print Heading','','Manage headings for printing transactions'],
     ['Term',1,'Term','','Manage template of standard Terms for order / invoices etc'],
     ['Currency',1,'Currency','','Manage list of currencies'],
+    ['Address',1,'Address','','Manage Address of customers, suplliers'],
     ['Country',1,'Country','','Country master'],
     ['State',1,'State','','State master'],
     ['Rename Tool',3,'Rename Tool','','Rename a record'],
