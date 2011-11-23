@@ -5,7 +5,7 @@
 	{
 		'creation': '2011-05-24 14:57:59',
 		'docstatus': 0,
-		'modified': '2011-11-23 13:17:20',
+		'modified': '2011-11-23 13:21:00',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
@@ -21,10 +21,10 @@
 		'in_dialog': 1,
 		'module': 'Utilities',
 		'name': '__common__',
-		'search_fields': 'customer, supplier, sales_partner',
+		'search_fields': 'customer, supplier, sales_partner, country, state',
 		'section_style': 'Simple',
 		'show_in_menu': 0,
-		'version': 42
+		'version': 43
 	},
 
 	# These values are common for all DocField
