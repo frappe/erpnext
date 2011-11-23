@@ -81,7 +81,7 @@ class DocType:
 			and ifnull(t2.against_voucher, '')='' and ifnull(t2.against_invoice, '')='' and ifnull(t2.against_jv, '')=''
 			and t2.%s > 0
 			%s
-			group by t1.name
+			group by t1.name, t2.name
 		"""% ('%s', dc, cond), self.doc.account, as_dict=1)
 
 		return gle
@@ -112,6 +112,9 @@ class DocType:
 			2. split into multiple rows if partially adjusted, assign against voucher
 			3. submit payment voucher
 		"""
+		if not self.doc.voucher_no or not sql("select name from `tab%s` where name = %s" %(self.dt[self.doc.voucher_type], '%s'),  self.doc.voucher_no):
+			msgprint("Please select valid Voucher No to proceed", raise_exception=1)
+		
 		lst = []
 		for d in getlist(self.doclist, 'ir_payment_details'):
 			if d.selected and flt(d.amt_to_be_reconciled) > 0:
@@ -129,8 +132,7 @@ class DocType:
 			
 				lst.append(args)
 		
-		if not sql("select name from `tab%s` where name = %s" %(self.dt[self.doc.voucher_type], '%s'),  self.doc.voucher_no):
-			msgprint("Please select valid Voucher No to proceed", raise_exception=1)
+
 		if lst:
 			get_obj('GL Control').reconcile_against_document(lst)
 			msgprint("Successfully reconciled.")

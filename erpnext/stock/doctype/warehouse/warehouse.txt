@@ -5,14 +5,14 @@
 	{
 		'creation': '2010-08-08 17:09:30',
 		'docstatus': 0,
-		'modified': '2011-09-28 16:19:59',
+		'modified': '2011-11-15 15:06:24',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1311621379',
+		'_last_update': '1319016431',
 		'allow_trash': 1,
 		'autoname': 'field:warehouse_name',
 		'colour': 'White:FFF',
@@ -25,7 +25,7 @@
 		'section_style': 'Tabbed',
 		'server_code_error': ' ',
 		'show_in_menu': 0,
-		'version': 56
+		'version': 58
 	},
 
 	# These values are common for all DocField
@@ -315,27 +315,6 @@
 		'oldfieldname': 'address_line_2',
 		'oldfieldtype': 'Data',
 		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'allow_on_submit': 0,
-		'doctype': 'DocField',
-		'fieldname': 'country',
-		'fieldtype': 'Link',
-		'hidden': 0,
-		'in_filter': 0,
-		'label': 'Country',
-		'no_copy': 0,
-		'oldfieldname': 'country',
-		'oldfieldtype': 'Link',
-		'options': 'Country',
-		'permlevel': 0,
-		'print_hide': 0,
-		'report_hide': 0,
-		'reqd': 0,
-		'search_index': 0,
-		'trigger': 'Client'
 	},
 
 	# DocField

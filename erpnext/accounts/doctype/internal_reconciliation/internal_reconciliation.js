@@ -2,7 +2,6 @@
 // --------------------
 
 cur_frm.fields_dict.voucher_no.get_query = function(doc) {
-
 	if (!doc.account) msgprint("Please select Account first");
 	else {
 		return repl("select voucher_no, posting_date \
