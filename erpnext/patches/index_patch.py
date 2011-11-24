@@ -293,3 +293,6 @@ def create_proper_index():
 				sql("commit")
 		except:
 			continue
+			
+def execute():
+	create_proper_index()	
