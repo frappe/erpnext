@@ -5,14 +5,14 @@
 	{
 		'creation': '2010-08-08 17:09:26',
 		'docstatus': 0,
-		'modified': '2011-11-18 17:32:21',
+		'modified': '2011-11-24 12:04:03',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1321617633',
+		'_last_update': '1321617741',
 		'allow_attach': 1,
 		'autoname': 'SR/.######',
 		'colour': 'White:FFF',
@@ -26,7 +26,7 @@
 		'server_code_error': ' ',
 		'show_in_menu': 0,
 		'subject': 'Date: %(reconciliation_date)s, Time: %(reconciliation_time)s',
-		'version': 105
+		'version': 107
 	},
 
 	# These values are common for all DocField
@@ -93,7 +93,7 @@
 		'doctype': 'DocField',
 		'fieldtype': 'HTML',
 		'label': 'Steps',
-		'options': '<div class="field_description"><b>Steps:</b><br>1. Enter Reconciliation Date and Time<br>2. Save the document<br>3. Attach csv file as per template.<br>4. Submit the document</div>',
+		'options': '<div class="field_description"><b>Steps:</b><br>1. Enter Reconciliation Date and Time<br>2. Save the document<br>3. Attach csv file as per template.<br>4. Submit the document<br>5. Enter tilde (~) sign if no difference in qty or valuation rate</div>',
 		'permlevel': 0
 	},
 
