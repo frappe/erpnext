@@ -6,3 +6,4 @@ def execute():
 	reload_doc('core', 'doctype', 'print_format')
 	reload_doc('core', 'doctype', 'doclayer')
 	reload_doc('core', 'doctype', 'doclayerfield')
+	reload_doc('accounts', 'doctype', 'gl_entry')
