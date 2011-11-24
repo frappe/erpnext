@@ -5,16 +5,19 @@
 	{
 		'creation': '2010-08-08 17:09:31',
 		'docstatus': 0,
-		'modified': '2011-01-04 13:40:42',
-		'modified_by': 'rahul@webnotestech.com',
+		'modified': '2011-11-24 14:34:41',
+		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
+		'_last_update': '1322125389',
+		'allow_email': 0,
 		'allow_trash': 1,
 		'autoname': 'field:workstation_name',
 		'colour': 'White:FFF',
+		'default_print_format': 'Standard',
 		'doctype': 'DocType',
 		'document_type': 'Master',
 		'module': 'Production',
@@ -22,7 +25,7 @@
 		'section_style': 'Simple',
 		'server_code_error': ' ',
 		'show_in_menu': 0,
-		'version': 11
+		'version': 13
 	},
 
 	# These values are common for all DocField
@@ -55,7 +58,6 @@
 		'cancel': 1,
 		'create': 1,
 		'doctype': 'DocPerm',
-		'idx': 1,
 		'permlevel': 0,
 		'role': 'System Manager',
 		'write': 1
@@ -64,7 +66,6 @@
 	# DocPerm
 	{
 		'doctype': 'DocPerm',
-		'idx': 2,
 		'permlevel': 1,
 		'role': 'System Manager'
 	},
@@ -74,7 +75,6 @@
 		'cancel': 1,
 		'create': 1,
 		'doctype': 'DocPerm',
-		'idx': 3,
 		'permlevel': 0,
 		'role': 'Production User',
 		'write': 1
@@ -85,7 +85,6 @@
 		'cancel': 1,
 		'create': 1,
 		'doctype': 'DocPerm',
-		'idx': 4,
 		'permlevel': 0,
 		'role': 'Production User',
 		'write': 1
@@ -94,7 +93,6 @@
 	# DocPerm
 	{
 		'doctype': 'DocPerm',
-		'idx': 5,
 		'permlevel': 1,
 		'role': 'Production Manager'
 	},
@@ -102,7 +100,6 @@
 	# DocPerm
 	{
 		'doctype': 'DocPerm',
-		'idx': 6,
 		'permlevel': 1,
 		'role': 'Production User'
 	},
@@ -112,7 +109,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'trash_reason',
 		'fieldtype': 'Small Text',
-		'idx': 1,
 		'label': 'Trash Reason',
 		'oldfieldname': 'trash_reason',
 		'oldfieldtype': 'Small Text',
@@ -124,7 +120,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'workstation_name',
 		'fieldtype': 'Data',
-		'idx': 2,
 		'label': 'Workstation Name',
 		'oldfieldname': 'workstation_name',
 		'oldfieldtype': 'Data',
@@ -137,7 +132,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'warehouse',
 		'fieldtype': 'Link',
-		'idx': 3,
 		'label': 'Warehouse',
 		'oldfieldname': 'warehouse',
 		'oldfieldtype': 'Link',
@@ -151,7 +145,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'description',
 		'fieldtype': 'Text',
-		'idx': 4,
 		'label': 'Description',
 		'oldfieldname': 'description',
 		'oldfieldtype': 'Text',
@@ -165,7 +158,6 @@
 		'fieldname': 'capacity',
 		'fieldtype': 'Data',
 		'hidden': 1,
-		'idx': 5,
 		'label': 'Capacity',
 		'oldfieldname': 'capacity',
 		'oldfieldtype': 'Data',
@@ -179,7 +171,6 @@
 		'fieldname': 'capacity_units',
 		'fieldtype': 'Select',
 		'hidden': 1,
-		'idx': 6,
 		'label': 'Capacity Units',
 		'oldfieldname': 'capacity_units',
 		'oldfieldtype': 'Select',
@@ -194,7 +185,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'hour_rate_labour',
 		'fieldtype': 'Currency',
-		'idx': 7,
 		'label': 'Hour Rate Labour',
 		'oldfieldname': 'hour_rate_labour',
 		'oldfieldtype': 'Currency',
@@ -206,7 +196,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Section Break',
-		'idx': 8,
 		'label': 'Over Heads',
 		'oldfieldtype': 'Section Break',
 		'permlevel': 0
@@ -217,7 +206,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'hour_rate_electricity',
 		'fieldtype': 'Currency',
-		'idx': 9,
 		'label': 'Hour Rate Electricity',
 		'oldfieldname': 'hour_rate_electricity',
 		'oldfieldtype': 'Currency',
@@ -229,7 +217,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'hour_rate_consumable',
 		'fieldtype': 'Currency',
-		'idx': 10,
 		'label': 'Hour Rate Consumable',
 		'oldfieldname': 'hour_rate_consumable',
 		'oldfieldtype': 'Currency',
@@ -241,7 +228,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'hour_rate_rent',
 		'fieldtype': 'Currency',
-		'idx': 11,
 		'label': 'Hour Rate Rent',
 		'oldfieldname': 'hour_rate_rent',
 		'oldfieldtype': 'Currency',
@@ -253,7 +239,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'overhead',
 		'fieldtype': 'Currency',
-		'idx': 12,
 		'label': 'Overhead',
 		'oldfieldname': 'overhead',
 		'oldfieldtype': 'Currency',
@@ -264,7 +249,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Section Break',
-		'idx': 13,
 		'label': 'Hour Rate',
 		'oldfieldtype': 'Section Break',
 		'permlevel': 0
@@ -275,7 +259,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'hour_rate',
 		'fieldtype': 'Currency',
-		'idx': 14,
 		'label': 'Hour Rate',
 		'oldfieldname': 'hour_rate',
 		'oldfieldtype': 'Currency',
