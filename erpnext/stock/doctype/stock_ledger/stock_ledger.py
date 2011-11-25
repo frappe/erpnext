@@ -93,27 +93,27 @@ class DocType:
 	# ---------------------
 	def set_pur_serial_no_values(self, obj, serial_no, d, s, new_rec):
 		item_details = sql("select item_group, warranty_period from `tabItem` where name = '%s' and (ifnull(end_of_life,'')='' or end_of_life = '0000-00-00' or end_of_life > now()) " %(d.item_code), as_dict=1)
-		s.purchase_document_type=	 obj.doc.doctype
-		s.purchase_document_no	=	 obj.doc.name
-		s.purchase_date		=	 obj.doc.posting_date
-		s.purchase_time		=	 obj.doc.posting_time
-		s.purchase_rate		=	 d.purchase_rate or d.incoming_rate
-		s.item_code		=	 d.item_code
-		s.brand			=	 d.brand
-		s.description		=	 d.description
-		s.item_group		=	 item_details and item_details[0]['item_group'] or ''
-		s.warranty_period	=	 item_details and item_details[0]['warranty_period'] or 0
-		s.supplier		=	 obj.doc.supplier
-		s.supplier_name		=	 obj.doc.supplier_name
-		s.supplier_address	=	 obj.doc.supplier_address
-		s.warehouse		=	 d.warehouse or d.t_warehouse
-		s.docstatus		=	 0
-		s.status		=	 'In Store'
-		s.modified		=	 nowdate()
-		s.modified_by		=	 session['user']
-		s.serial_no		=	 serial_no
-		s.fiscal_year		=	 obj.doc.fiscal_year
-		s.company		=	 obj.doc.company
+		s.purchase_document_type	=	obj.doc.doctype
+		s.purchase_document_no		=	obj.doc.name
+		s.purchase_date				=	obj.doc.posting_date
+		s.purchase_time				=	obj.doc.posting_time
+		s.purchase_rate				=	d.valuation_rate or d.incoming_rate
+		s.item_code					=	d.item_code
+		s.brand						=	d.brand
+		s.description				=	d.description
+		s.item_group				=	item_details and item_details[0]['item_group'] or ''
+		s.warranty_period			=	item_details and item_details[0]['warranty_period'] or 0
+		s.supplier					=	obj.doc.supplier
+		s.supplier_name				=	obj.doc.supplier_name
+		s.supplier_address			=	obj.doc.supplier_address
+		s.warehouse					=	d.warehouse or d.t_warehouse
+		s.docstatus					=	0
+		s.status					=	'In Store'
+		s.modified					=	nowdate()
+		s.modified_by				=	session['user']
+		s.serial_no					=	serial_no
+		s.fiscal_year				=	obj.doc.fiscal_year
+		s.company					=	obj.doc.company
 		s.save(new_rec)
 
 

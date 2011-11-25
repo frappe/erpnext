@@ -146,7 +146,7 @@ class DocType:
 			in_rate = flt(sql("select ifnull(avg(purchase_rate), 0) from `tabSerial No` where name in (%s)" % (serial_nos))[0][0])
 
 		if in_rate and val_rate == 0: # First entry
-			val_rate = in_rate		
+			val_rate = in_rate
 		# val_rate is same as previous entry if val_rate is negative
 		# Otherwise it will be calculated as per moving average
 		elif opening_qty + actual_qty > 0 and ((opening_qty * val_rate) + (actual_qty * in_rate)) > 0:
