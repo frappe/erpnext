@@ -166,7 +166,7 @@ class DocType:
 			  tax_amount = flt(rate) * (flt(ocd[row-1].total_tax_amount)+flt(ocd[row-1].total_amount)) / 100
 			elif ocd[row-1].add_deduct_tax == 'Deduct':
 			  tax_amount = flt(rate) * (flt(ocd[row-1].total_tax_amount)-flt(ocd[row-1].total_amount)) / 100
-			  
+		
 		return tax_amount  
 
 	def add_deduct_taxes(self, ocd, oc, tax_amount, total, prev_total, item_tax):
@@ -202,7 +202,8 @@ class DocType:
 			for d in getlist(pr_obj.doclist, 'purchase_receipt_details'):
 				if flt(d.qty):
 					d.valuation_rate = (flt(d.purchase_rate) + (flt(d.rm_supp_cost)/flt(d.qty)) + (flt(d.item_tax_amount)/flt(d.qty))) / flt(d.conversion_factor)
-					d.save()	
+					d.save()
+					self.update_serial_no(d.serial_no, d.valuation_rate)
 				sql("update `tabStock Ledger Entry` set incoming_rate = '%s' where voucher_detail_no = '%s'"%(flt(d.valuation_rate), d.name))
 				
 				bin = sql("select t1.name, t2.posting_date, t2.posting_time from `tabBin` t1, `tabStock Ledger Entry` t2 where t2.voucher_detail_no = '%s' and t2.item_code = t1.item_code and t2.warehouse = t1.warehouse LIMIT 1" % d.name)
@@ -210,6 +211,13 @@ class DocType:
 				# update valuation rate after pr posting date
 				if bin and bin[0][0]:
 					obj = get_obj('Bin', bin[0][0]).update_entries_after(bin[0][1], bin[0][2])
+
+	
+	def update_serial_no(self, sr_no, rate):
+		""" update valuation rate in serial no"""
+		sr_no = sr_no.split('\n')
+		for d in sr_no:
+			sql("update `tabSerial No` set purchase_rate = %s where name = %s", (rate, d))
 
 				
 	def update_landed_cost(self):
