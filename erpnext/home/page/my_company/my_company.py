@@ -140,7 +140,9 @@ def update_security(args=''):
 	if 'new_password' in args:
 		if cint(webnotes.conn.get_value('Control Panel',None,'sync_with_gateway')):
 			import server_tools.gateway_utils
-			webnotes.msgprint(server_tools.gateway_utils.change_password('', args['new_password'], args['user'], args['sys_admin_pwd'])['message'])
+			res = server_tools.gateway_utils.change_password('', args['new_password'], args['user'], args['sys_admin_pwd'])
+			if 'Traceback' not in res['message']:
+				webnotes.msgprint(res['message'])
 		else:
 			webnotes.conn.sql("update tabProfile set password=password(%s) where name=%s", (args['new_password'], args['user']))
 	else: webnotes.msgprint('Settings Updated')
