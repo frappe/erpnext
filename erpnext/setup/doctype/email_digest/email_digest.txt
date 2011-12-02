@@ -5,14 +5,14 @@
 	{
 		'creation': '2011-11-28 13:11:56',
 		'docstatus': 0,
-		'modified': '2011-12-02 10:58:22',
+		'modified': '2011-12-02 18:55:47',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1322803627',
+		'_last_update': '1322829965',
 		'autoname': 'Prompt',
 		'colour': 'White:FFF',
 		'doctype': 'DocType',
@@ -21,7 +21,7 @@
 		'name': '__common__',
 		'section_style': 'Simple',
 		'show_in_menu': 0,
-		'version': 45
+		'version': 47
 	},
 
 	# These values are common for all DocField
@@ -261,9 +261,9 @@
 	{
 		'depends_on': 'eval:doc.use_standard',
 		'doctype': 'DocField',
-		'fieldname': 'new_inquiries',
+		'fieldname': 'new_enquiries',
 		'fieldtype': 'Check',
-		'label': 'New Inquiries',
+		'label': 'New Enquiries',
 		'permlevel': 0
 	},
 
@@ -279,11 +279,20 @@
 
 	# DocField
 	{
+		'doctype': 'DocField',
+		'fieldname': 'new_sales_orders',
+		'fieldtype': 'Check',
+		'label': 'New Sales Orders',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
 		'depends_on': 'eval:doc.use_standard',
 		'doctype': 'DocField',
-		'fieldname': 'new_orders',
+		'fieldname': 'new_purchase_orders',
 		'fieldtype': 'Check',
-		'label': 'New Orders',
+		'label': 'New Purchase Orders',
 		'permlevel': 0
 	},
 

@@ -34,7 +34,7 @@ cur_frm.cscript['Add Recipients'] = function(doc, dt, dn) {
 					add_or_update = 'Update';
 				}
 				var profile = $a($td(tab, i+1, 1), 'span', '', '', v.name);
-				profile.onclick = function() { check.checked = !check.checked; }
+				//profile.onclick = function() { check.checked = !check.checked; }
 			});
 
 			// Display add recipients button

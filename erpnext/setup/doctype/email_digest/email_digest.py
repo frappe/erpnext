@@ -69,31 +69,52 @@ class DocType:
 				'type': 'bank_balance'
 			}),
 
-			'new_leads': """""",
+			'new_leads': self.generate_new_type_query({
+				'type': 'new_leads',
+				'doctype': 'Lead'
+			}),
 
-			'new_inquiries': """""",
+			'new_enquiries': self.generate_new_type_query({
+				'type': 'new_enquiries',
+				'doctype': 'Enquiry'
+			}),
 
-			'new_quotations': "",
+			'new_quotations': self.generate_new_type_query({
+				'type': 'new_quotations',
+				'doctype': 'Quotation',
+				'sum_col': 'grand_total'
+			}),
 
-			'new_orders': "",
+			'new_sales_orders': self.generate_new_type_query({
+				'type': 'new_sales_orders',
+				'doctype': 'Receivable Voucher',
+				'sum_col': 'grand_total'
+			}),
 
-			'stock_below_rl': """""",
+			'new_purchase_orders': self.generate_new_type_query({
+				'type': 'new_purchase_orders',
+				'doctype': 'Purchase Order',
+				'sum_col': 'grand_total'
+			}),
 
-			'new_transactions': """"""
+			'new_transactions': self.generate_new_type_query({
+				'type': 'new_transactions',
+				'doctype': 'Feed'
+			}),
 
+			'stock_below_rl': ""
 		}
 
 		result = {}
 
 		for query in query_dict.keys():
-			if query_dict[query]:
+			if self.doc.fields[query]:
 				webnotes.msgprint(query)
 				res = webnotes.conn.sql(query_dict[query], as_dict=1, debug=1)
 				if query == 'income':
-					res[0]['value'] = float(res[0]['credit'] - res[0]['debit'])
-				elif query == 'expenses_booked':
-					res[0]['value'] = float(res[0]['debit'] - res[0]['credit'])
-				elif query == 'bank_balance':
+					for r in res:
+						r['value'] = float(r['credit'] - r['debit'])
+				elif query in ['expenses_booked', 'bank_balance']:
 					for r in res:
 						r['value'] = float(r['debit'] - r['credit'])
 				webnotes.msgprint(query)
@@ -105,7 +126,7 @@ class DocType:
 
 	def generate_gle_query(self, args):
 		"""
-			Returns generated query string
+			Returns generated query string based 'tabGL Entry' and 'tabAccount'
 		"""
 		self.process_args(args)
 
@@ -114,7 +135,7 @@ class DocType:
 		if args['type'] in ['invoiced_amount', 'payables']:
 			query = """
 				SELECT
-					SUM(IFNULL(gle.%(field)s, 0)) AS '%(field)s',
+					IFNULL(SUM(IFNULL(gle.%(field)s, 0)), 0) AS '%(field)s',
 					%(common_select)s
 				FROM
 					%(common_from)s
@@ -128,7 +149,7 @@ class DocType:
 			args['bc_accounts_regex'] = self.get_bc_accounts_regex()
 			query = """
 				SELECT
-					SUM(IFNULL(gle.%(field)s, 0)) AS '%(field)s',
+					IFNULL(SUM(IFNULL(gle.%(field)s, 0)), 0) AS '%(field)s',
 					%(common_select)s
 				FROM
 					%(common_from)s
@@ -142,8 +163,8 @@ class DocType:
 		elif args['type'] in ['income', 'expenses_booked']:
 			query = """
 				SELECT
-					SUM(IFNULL(gle.debit, 0)) AS 'debit',
-					SUM(IFNULL(gle.credit, 0)) AS 'credit',
+					IFNULL(SUM(IFNULL(gle.debit, 0)), 0) AS 'debit',
+					IFNULL(SUM(IFNULL(gle.credit, 0)), 0) AS 'credit',
 					%(common_select)s
 				FROM
 					%(common_from)s
@@ -158,8 +179,8 @@ class DocType:
 			query = """
 				SELECT
 					ac.name AS 'name',
-					SUM(IFNULL(gle.debit, 0)) AS 'debit',
-					SUM(IFNULL(gle.credit, 0)) AS 'credit',
+					IFNULL(SUM(IFNULL(gle.debit, 0)), 0) AS 'debit',
+					IFNULL(SUM(IFNULL(gle.credit, 0)), 0) AS 'credit',
 					%(common_select)s
 				FROM
 					%(common_from)s
@@ -177,26 +198,71 @@ class DocType:
 		"""
 			Adds common conditions in dictionary "args"
 		"""
+		start_date, end_date = self.get_start_end_dates()
+
+		if 'new' in args['type']:
+			args.update({
+				'company': self.doc.company,
+				'start_date': start_date,
+				'end_date': end_date,
+				'sum_if_reqd': ''
+			})
+			if args['type'] in ['new_quotations', 'new_sales_orders', 'new_purchase_orders']:
+				args['sum_if_reqd'] = "IFNULL(SUM(IFNULL(%(sum_col)s, 0)), 0) AS '%(sum_col)s'," % args
+			
+			if args['type'] == 'new_transactions':
+				args['company_condition'] = ''
+			else:
+				args['company_condition'] = "company = '%(company)s' AND" % args
+				
+		else:
+			args.update({
+				'common_select': "COUNT(*) AS 'count'",
+
+				'common_from': "`tabGL Entry` gle, `tabAccount` ac",
+
+				'common_where': """
+					gle.company = '%s' AND
+					gle.account = ac.name AND
+					ac.docstatus < 2 AND
+					IFNULL(gle.is_cancelled, 'No') = 'No'""" % self.doc.company,
+
+				'start_date_condition': "gle.posting_date >= '%s'" % start_date,
+
+				'end_date_condition': "gle.posting_date <= '%s'" % end_date
+			})
+
+
+	def get_start_end_dates(self):
+		"""
+			Returns start and end date depending on the frequency of email digest
+		"""
 		start_date = '2011-11-01'
-		end_date = '2011-11-30'
-
-		args.update({
-			'common_select': "COUNT(*) AS 'count'",
-
-			'common_from': "`tabGL Entry` gle, `tabAccount` ac",
-
-			'common_where': """
-				gle.company = '%s' AND
-				gle.account = ac.name AND
-				ac.docstatus < 2 AND
-				IFNULL(gle.is_cancelled, 'No') = 'No'""" % self.doc.company,
-
-			'start_date_condition': "gle.posting_date >= '%s'" % start_date,
-
-			'end_date_condition': "gle.posting_date <= '%s'" % end_date
-		})
+		end_date = '2011-11-31'
+		return start_date, end_date
 
 
+	def generate_new_type_query(self, args):
+		"""
+			Returns generated query string for calculating new transactions created
+		"""
+		self.process_args(args)
+
+		query = """
+			SELECT
+				%(sum_if_reqd)s
+				COUNT(*) AS 'count'
+			FROM
+				`tab%(doctype)s`
+			WHERE
+				docstatus < 2 AND
+				%(company_condition)s
+				creation >= '%(start_date)s' AND
+				creation <= '%(end_date)s'""" % args
+
+		return query
+	
+	
 	def get_bc_accounts_regex(self):
 		"""
 			Returns a regular expression of 'Bank or Cash' type account list
