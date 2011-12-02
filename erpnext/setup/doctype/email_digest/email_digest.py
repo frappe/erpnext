@@ -32,37 +32,41 @@ class DocType:
 		query_dict = {
 
 			'invoiced_amount': self.generate_gle_query({
+				'type': 'invoiced_amount',
 				'field': 'debit',
-				'type': 'Customer',
+				'master_type': 'Customer',
 			}),
 
 			'payables': self.generate_gle_query({
+				'type': 'payables',
 				'field': 'credit',
-				'type': 'Supplier',
+				'master_type': 'Supplier',
 			}),
 
 			'collections': self.generate_gle_query({
+				'type': 'collections',
 				'field': 'credit',
-				'type': 'Customer',
-				'against': 'Bank or Cash'
+				'master_type': 'Customer',
 			}),
 
 			'payments': self.generate_gle_query({
+				'type': 'payments',
 				'field': 'debit',
-				'type': 'Supplier',
-				'against': 'Bank or Cash'
+				'master_type': 'Supplier',
 			}),
 
 			'income': self.generate_gle_query({
+				'type': 'income',
 				'debit_or_credit': 'Credit'
 			}),
 
 			'expenses_booked': self.generate_gle_query({
+				'type': 'expenses_booked',
 				'debit_or_credit': 'Debit'
 			}),
 
 			'bank_balance': self.generate_gle_query({
-				'bank_balance': None
+				'type': 'bank_balance'
 			}),
 
 			'new_leads': """""",
@@ -103,82 +107,107 @@ class DocType:
 		"""
 			Returns generated query string
 		"""
-		start_date = '2011-11-01'
-		end_date = '2011-11-30'
-		args.update({
-			'start_date': start_date,
-			'end_date': end_date,
-			'company': self.doc.company,
-			'select': None,
-			'where': None
-		})
+		self.process_args(args)
 
+		query = None
 
-		self.evaluate_query_conditions(args)
-		
-		query = """
-			SELECT
-				%(select)s,
-				COUNT(*) AS 'count'
-			FROM
-				`tabGL Entry` gle,
-				`tabAccount` ac
-			WHERE
-				gle.company = '%(company)s' AND
-				gle.account = ac.name AND
-				ac.docstatus < 2 AND
-				IFNULL(gle.is_cancelled, 'No') = 'No' AND
-				%(where)s AND
-				gle.posting_date <= '%(end_date)s'""" % args
+		if args['type'] in ['invoiced_amount', 'payables']:
+			query = """
+				SELECT
+					SUM(IFNULL(gle.%(field)s, 0)) AS '%(field)s',
+					%(common_select)s
+				FROM
+					%(common_from)s
+				WHERE
+					%(common_where)s AND
+					ac.master_type = '%(master_type)s' AND
+					%(start_date_condition)s AND
+					%(end_date_condition)s""" % args
 
-		if 'group_by' in args.keys():
-			query = query + args['group_by']
-		
+		elif args['type'] in ['collections', 'payments']:
+			args['bc_accounts_regex'] = self.get_bc_accounts_regex()
+			query = """
+				SELECT
+					SUM(IFNULL(gle.%(field)s, 0)) AS '%(field)s',
+					%(common_select)s
+				FROM
+					%(common_from)s
+				WHERE
+					%(common_where)s AND
+					ac.master_type = '%(master_type)s' AND
+					gle.against REGEXP '%(bc_accounts_regex)s' AND
+					%(start_date_condition)s AND
+					%(end_date_condition)s""" % args
+
+		elif args['type'] in ['income', 'expenses_booked']:
+			query = """
+				SELECT
+					SUM(IFNULL(gle.debit, 0)) AS 'debit',
+					SUM(IFNULL(gle.credit, 0)) AS 'credit',
+					%(common_select)s
+				FROM
+					%(common_from)s
+				WHERE
+					%(common_where)s AND
+					ac.is_pl_account = 'Yes' AND
+					ac.debit_or_credit = '%(debit_or_credit)s' AND					
+					%(start_date_condition)s AND
+					%(end_date_condition)s""" % args
+
+		elif args['type'] == 'bank_balance':
+			query = """
+				SELECT
+					ac.name AS 'name',
+					SUM(IFNULL(gle.debit, 0)) AS 'debit',
+					SUM(IFNULL(gle.credit, 0)) AS 'credit',
+					%(common_select)s
+				FROM
+					%(common_from)s
+				WHERE
+					%(common_where)s AND
+					ac.account_type = 'Bank or Cash' AND
+					%(end_date_condition)s
+				GROUP BY
+					ac.name""" % args
+
 		return query
 
 
-	def evaluate_query_conditions(self, args):
+	def process_args(self, args):
 		"""
-			Modify query according to type of information required based on args passed 
+			Adds common conditions in dictionary "args"
 		"""
-		# If collections or payments
-		if 'against' in args.keys():
-			if args['against'] == 'Bank or Cash':
-				bc_account_list = webnotes.conn.sql("""
-					SELECT name
-					FROM `tabAccount`
-					WHERE account_type = 'Bank or Cash'""", as_list=1)
-				args['reg'] = '(' + '|'.join([ac[0] for ac in bc_account_list]) + ')'
-				args['where'] = """
-					ac.master_type = '%(type)s' AND
-					gle.against REGEXP '%(reg)s' AND
-					gle.posting_date >= '%(start_date)s'""" % args
+		start_date = '2011-11-01'
+		end_date = '2011-11-30'
+
+		args.update({
+			'common_select': "COUNT(*) AS 'count'",
+
+			'common_from': "`tabGL Entry` gle, `tabAccount` ac",
+
+			'common_where': """
+				gle.company = '%s' AND
+				gle.account = ac.name AND
+				ac.docstatus < 2 AND
+				IFNULL(gle.is_cancelled, 'No') = 'No'""" % self.doc.company,
+
+			'start_date_condition': "gle.posting_date >= '%s'" % start_date,
+
+			'end_date_condition': "gle.posting_date <= '%s'" % end_date
+		})
+
+
+	def get_bc_accounts_regex(self):
+		"""
+			Returns a regular expression of 'Bank or Cash' type account list
+		"""
+		bc_account_list = webnotes.conn.sql("""
+			SELECT name
+			FROM `tabAccount`
+			WHERE account_type = 'Bank or Cash'""", as_list=1)
 		
-		# If income or expenses_booked
-		elif 'debit_or_credit' in args.keys():
-			args['select'] = """
-				SUM(IFNULL(gle.debit, 0)) AS 'debit',
-				SUM(IFNULL(gle.credit, 0)) AS 'credit'"""
-
-			args['where'] = """
-				ac.is_pl_account = 'Yes' AND
-				ac.debit_or_credit = '%(debit_or_credit)s' AND
-				gle.posting_date >= '%(start_date)s'""" % args
-
-		elif 'bank_balance' in args.keys():
-			args['select'] = "ac.name AS 'name', SUM(IFNULL(debit, 0)) AS 'debit', SUM(IFNULL(credit, 0)) AS 'credit'"
-			args['where'] = "ac.account_type = 'Bank or Cash'"
-			args['group_by'] = "GROUP BY ac.name"
-
-		# For everything else
-		else:
-			args['where'] = """
-				ac.master_type = '%(type)s' AND
-				gle.posting_date >= '%(start_date)s'""" % args
+		return '(' + '|'.join([ac[0] for ac in bc_account_list]) + ')'
 	
-		if not args['select']:
-			args['select'] = "SUM(IFNULL(gle.%(field)s, 0)) AS '%(field)s'" % args
-
 
 	def get(self):
 		"""
