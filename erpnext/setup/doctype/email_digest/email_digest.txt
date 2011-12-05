@@ -5,14 +5,14 @@
 	{
 		'creation': '2011-11-28 13:11:56',
 		'docstatus': 0,
-		'modified': '2011-12-02 18:55:47',
+		'modified': '2011-12-05 11:55:31',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1322829965',
+		'_last_update': '1323066269',
 		'autoname': 'Prompt',
 		'colour': 'White:FFF',
 		'doctype': 'DocType',
@@ -21,7 +21,7 @@
 		'name': '__common__',
 		'section_style': 'Simple',
 		'show_in_menu': 0,
-		'version': 47
+		'version': 51
 	},
 
 	# These values are common for all DocField
@@ -129,16 +129,6 @@
 		'fieldname': 'use_standard',
 		'fieldtype': 'Check',
 		'label': 'Use standard?',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldname': 'print_format',
-		'fieldtype': 'Select',
-		'label': 'Email Template',
-		'options': "link:Print Format\ndoc_type='Email Digest'",
 		'permlevel': 0
 	},
 
@@ -279,6 +269,7 @@
 
 	# DocField
 	{
+		'depends_on': 'eval:doc.use_standard',
 		'doctype': 'DocField',
 		'fieldname': 'new_sales_orders',
 		'fieldtype': 'Check',
@@ -318,10 +309,18 @@
 
 	# DocField
 	{
-		'depends_on': 'eval:!doc.use_standard',
 		'doctype': 'DocField',
 		'fieldtype': 'Section Break',
 		'label': 'Enter Custom Code',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'email_template',
+		'fieldtype': 'Code',
+		'label': 'Email Template',
 		'permlevel': 0
 	},
 

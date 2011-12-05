@@ -109,18 +109,19 @@ class DocType:
 
 		for query in query_dict.keys():
 			if self.doc.fields[query]:
-				webnotes.msgprint(query)
-				res = webnotes.conn.sql(query_dict[query], as_dict=1, debug=1)
+				#webnotes.msgprint(query)
+				res = webnotes.conn.sql(query_dict[query], as_dict=1)
 				if query == 'income':
 					for r in res:
 						r['value'] = float(r['credit'] - r['debit'])
 				elif query in ['expenses_booked', 'bank_balance']:
 					for r in res:
 						r['value'] = float(r['debit'] - r['credit'])
-				webnotes.msgprint(query)
-				webnotes.msgprint(res)
+				#webnotes.msgprint(query)
+				#webnotes.msgprint(res)
 				result[query] = (res and res[0]) and res[0] or None
 
+		#webnotes.msgprint(result)
 		return result
 
 
@@ -280,13 +281,30 @@ class DocType:
 			* Execute Query
 			* Prepare Email Body from Print Format
 		"""
-		pass
+		result = self.execute_queries()
+		webnotes.msgprint(result)
+		return result
 
 
 	def execute_queries(self):
 		"""
 			* If standard==1, execute get_standard_data
 			* If standard==0, execute python code in custom_code field
+		"""
+		result = {}
+		if self.doc.use_standard==1:
+			result = self.get_standard_data()
+		else:
+			result = self.execute_custom_code()
+
+		#webnotes.msgprint(result)
+
+		return result
+
+
+	def execute_custom_code(self):
+		"""
+			Execute custom python code
 		"""
 		pass
 

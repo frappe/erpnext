@@ -1,6 +1,6 @@
 cur_frm.cscript.refresh = function(doc, dt, dn) {
 	cur_frm.add_custom_button('Execute Now', function() {
-		$c_obj(make_doclist(dt, dn), 'get_standard_data', '', function(r, rt) {
+		$c_obj(make_doclist(dt, dn), 'get', '', function(r, rt) {
 			if(r.exc) {
 				msgprint(r.exc);
 			} else {
