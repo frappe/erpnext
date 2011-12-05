@@ -34,9 +34,9 @@ class DocType:
 	'customer_name'     :  details and details[0]['customer_name'] or ''
       }
       #get primary contact details(this is done separately coz. , if join query used & no primary contact thn it would not be able to fetch customer details)
-      contact_det = sql("select contact_name, contact_no, email_id from `tabContact` where customer_name='%s' and is_customer=1 and is_primary_contact='Yes' and docstatus!=2" %(self.doc.customer), as_dict = 1)
+      contact_det = sql("select contact_name, phone, email_id from `tabContact` where customer_name='%s' and is_customer=1 and is_primary_contact=1 and docstatus!=2" %(self.doc.customer), as_dict = 1)
       ret['contact_person'] = contact_det and contact_det[0]['contact_name'] or ''
-      ret['contact_no'] = contact_det and contact_det[0]['contact_no'] or ''
+      ret['contact_no'] = contact_det and contact_det[0]['phone'] or ''
       ret['email_id'] = contact_det and contact_det[0]['email_id'] or ''    
       return ret
     else:
