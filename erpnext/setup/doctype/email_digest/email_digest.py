@@ -378,8 +378,43 @@ class DocType:
 			webnotes.msgprint('There was a problem in sending your email. Please contact support@erpnext.com')
 			#webnotes.errprint(webnotes.getTraceback())
 
+
+	def on_update(self):
+		"""
+
+		"""
+		import webnotes
+		args = {
+			'db_name': webnotes.conn.get_value('Control Panel', '', 'account_id'),
+			'event': 'setup.doctype.email_digest.email_digest.send'
+		}
+		from webnotes.utils.scheduler import Scheduler
+		sch = Scheduler()
+		sch.connect()
+
+		if self.doc.enabled == 1:
+			# Create scheduler entry
+			res = sch.conn.sql("""
+				SELECT * FROM Event
+				WHERE
+					db_name = %(db_name)s AND
+					event = %(event)s
+			""", args)
+
+			if not (res and res[0]):
+				args['next_execution'] = self.get_next_execution()
+				
+				sch.conn.sql("""
+					INSERT INTO	Event (db_name, event, `interval`, next_execution, recurring)
+					VALUES (%(db_name)s, %(event)s, 86400, %(next_execution)s, 1)
+				""", args)
+
+		else:
+			# delete scheduler entry
+			sch.clear(args['db_name'], args['event'])
 	
-	def schedule(self):
+
+	def get_next_sending(self):
 		"""
 
 		"""
@@ -387,7 +422,65 @@ class DocType:
 		# Get System TimeZone
 		import time
 		from pytz import timezone
-		server_tz = timezone(time.tzname[0])
+		import datetime
+		import webnotes.defs
 		cp = webnotes.model.doc.Document('Control Panel','Control Panel')
 		app_tz = timezone(cp.time_zone)
+		server_tz = timezone(getattr(webnotes.defs, 'system_timezone'))
+		
+		start_date, end_date = self.get_start_end_dates()
+		
+		new_date = end_date + datetime.timedelta(days=1)
+		new_time = datetime.time(hour=6)
+
+		naive_dt = datetime.datetime.combine(new_date, new_time)
+		app_dt = app_tz.localize(naive_dt)
+		server_dt = server_tz.normalize(app_dt.astimezone(server_tz))
+
+		res = {
+			'app_dt': app_dt.replace(tzinfo=None),
+			'app_tz': app_tz,
+			'server_dt': server_dt.replace(tzinfo=None),
+			'server_tz': server_tz
+		}
+
+		from webnotes.utils import formatdate
+		str_date = formatdate(str(res['app_dt'].date()))
+		str_time = res['app_dt'].time().strftime('%I:%M')
+
+		self.doc.next_send = str_date + " at " + str_time
+
+		return res
+
+
+	def get_next_execution(self):
+		"""
+
+		"""
+		from datetime import datetime, timedelta
+		dt_args = self.get_next_sending()
+		server_dt = dt_args['server_dt']
+		now_dt = datetime.now(dt_args['server_tz'])
+		if now_dt.time() <= server_dt.time():
+			next_date = now_dt.date()
+		else:
+			next_date = now_dt.date() + timedelta(days=1)
+
+		next_time = server_dt.time()
+
+		return datetime.combine(next_date, next_time)
+
+
+	def onload(self):
+		"""
+
+		"""
+		self.get_next_sending()
+
+
+def send():
+	"""
+
+	"""
+	pass
 

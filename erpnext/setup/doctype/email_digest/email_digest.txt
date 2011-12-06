@@ -5,14 +5,14 @@
 	{
 		'creation': '2011-11-28 13:11:56',
 		'docstatus': 0,
-		'modified': '2011-12-05 18:54:27',
+		'modified': '2011-12-06 18:49:23',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1323083188',
+		'_last_update': '1323177411',
 		'autoname': 'Prompt',
 		'colour': 'White:FFF',
 		'doctype': 'DocType',
@@ -21,7 +21,7 @@
 		'name': '__common__',
 		'section_style': 'Simple',
 		'show_in_menu': 0,
-		'version': 61
+		'version': 66
 	},
 
 	# These values are common for all DocField
@@ -114,8 +114,8 @@
 	# DocField
 	{
 		'doctype': 'DocField',
-		'fieldname': 'next_send_datetime',
-		'fieldtype': 'Text',
+		'fieldname': 'next_send',
+		'fieldtype': 'Data',
 		'label': 'Next email will be sent on:',
 		'permlevel': 1
 	},
