@@ -1,12 +1,13 @@
 # Please edit this list and import only required elements
 import webnotes
 
-from webnotes.utils import add_days, add_months, add_years, cint, cstr, date_diff, default_fields, flt, fmt_money, formatdate, generate_hash, getTraceback, get_defaults, get_first_day, get_last_day, getdate, has_common, month_name, now, nowdate, replace_newlines, sendmail, set_default, str_esc_quote, user_format, validate_email_add
+from webnotes.utils import add_days, add_months, add_years, cint, cstr,date_diff, default_fields, flt, fmt_money, formatdate, generate_hash,getTraceback, get_defaults, get_first_day, get_last_day, getdate, has_common,month_name, now, nowdate, replace_newlines, sendmail, set_default,str_esc_quote, user_format, validate_email_add
 from webnotes.model import db_exists
 from webnotes.model.doc import Document, addchild, removechild, getchildren, make_autoname, SuperDocType
 from webnotes.model.doclist import getlist, copy_doclist
 from webnotes.model.code import get_obj, get_server_obj, run_server_obj, updatedb, check_syntax
 from webnotes import session, form, is_testing, msgprint, errprint
+from webnotes.utils.scheduler import set_event, cancel_event, Scheduler
 
 set = webnotes.conn.set
 sql = webnotes.conn.sql
@@ -528,7 +529,6 @@ class DocType(TransactionBase):
 	def make_gl_entries(self, is_cancel=0):
 		mapper = self.doc.is_pos and self.doc.write_off_account and 'POS with write off' or self.doc.is_pos and not self.doc.write_off_account and 'POS' or ''
 		update_outstanding = self.doc.is_pos and self.doc.write_off_account and 'No' or 'Yes'
-
 		get_obj(dt='GL Control').make_gl_entries(self.doc, self.doclist,cancel = is_cancel, use_mapper = mapper, update_outstanding = update_outstanding, merge_entries = cint(self.doc.is_pos) != 1 and 1 or 0)
 		
 
@@ -546,7 +546,8 @@ class DocType(TransactionBase):
 			get_obj("Sales Common").update_prevdoc_detail(1,self)
 
 			# Check for Approving Authority
-			get_obj('Authorization Control').validate_approving_authority(self.doc.doctype, self.doc.company, self.doc.grand_total, self)
+			if not self.doc.recurring_id:
+				get_obj('Authorization Control').validate_approving_authority(self.doc.doctype, self.doc.company, self.doc.grand_total, self)
 
 		# this sequence because outstanding may get -ve		
 		self.make_gl_entries()
@@ -618,9 +619,61 @@ class DocType(TransactionBase):
 
 		set(self.doc,'outstanding_amount',flt(self.doc.grand_total) - flt(self.doc.total_advance) - flt(self.doc.paid_amount) - flt(self.doc.write_off_amount))
 
-
 ########################################################################
 # Repair Outstanding
 #######################################################################
 	def repair_rv_outstanding(self):
 		get_obj(dt = 'GL Control').repair_voucher_outstanding(self)
+
+	def on_update_after_submit(self):
+		self.convert_into_recurring()
+		
+
+	def convert_into_recurring(self):
+		if self.doc.convert_into_recurring_invoice:
+			event = 'accounts.doctype.gl_control.gl_control.manage_recurring_invoices'
+			self.set_next_date()
+			if not self.doc.recurring_id:
+				set(self.doc, 'recurring_id', make_autoname('RECINV/.#####'))
+
+			if sql("select name from `tabReceivable Voucher` where ifnull(convert_into_recurring_invoice, 0) = 1 and next_date <= end_date"):
+				if not self.check_event_exists(event):
+					set_event(event,  interval = 60*60, recurring = 1)
+			else:
+				cancel_event(event)
+
+		elif self.doc.recurring_id:
+			sql("""update `tabReceivable Voucher` set convert_into_recurring_invoice = 0 where recurring_id = %s""", self.doc.recurring_id)
+
+
+	def check_event_exists(self, event):
+		try:
+			ev = Scheduler().get_events()
+		except:
+			msgprint("Scheduler database not exists. Please mail to support@erpnext.com", raise_exception=1)
+
+		if event in [d['event'] for d in ev]:
+			return 1
+
+
+	def set_next_date(self):
+		""" Set next date on which auto invoice will be created"""
+
+		if not self.doc.repeat_on_day_of_month:
+			msgprint("""Please enter 'Repeat on Day of Month' field value. \nThe day of the month on which auto invoice 
+						will be generated e.g. 05, 28 etc.""", raise_exception=1)
+
+		import datetime
+		m = getdate(self.doc.posting_date).month + 1
+		y = getdate(self.doc.posting_date).year
+		if m > 12:
+			m, y = 1, y+1
+		try:
+			next_date = datetime.date(y, m, cint(self.doc.repeat_on_day_of_month))
+		except:
+			import calendar
+			last_day = calendar.monthrange(y, m)[1]
+			next_date = datetime.date(y, m, last_day)
+		next_date = next_date.strftime("%Y-%m-%d")
+
+		set(self.doc, 'next_date', next_date)

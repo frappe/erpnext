@@ -4,8 +4,8 @@ import webnotes
 from webnotes.utils import add_days, add_months, add_years, cint, cstr, date_diff, default_fields, flt, fmt_money, formatdate, generate_hash, getTraceback, get_defaults, get_first_day, get_last_day, getdate, has_common, month_name, now, nowdate, replace_newlines, sendmail, set_default, str_esc_quote, user_format, validate_email_add
 from webnotes.model import db_exists
 from webnotes.model.doc import Document, addchild, removechild, getchildren, make_autoname, SuperDocType
-from webnotes.model.doclist import getlist, copy_doclist
-from webnotes.model.code import get_obj, get_server_obj, run_server_obj, updatedb, check_syntax
+from webnotes.model.doclist import getlist, copy_doclist, clone
+from webnotes.model.code import get_obj
 from webnotes import session, form, is_testing, msgprint, errprint
 
 sql = webnotes.conn.sql
@@ -24,14 +24,8 @@ class DocType:
 	# Get Company List
 	# ----------------
 	def get_companies(self,arg=''):
-		#d = get_defaults()
 		ret = sql("select name, abbr from tabCompany where docstatus != 2")
-		#pl = {}
-		#for r in ret:
-		#	inc = get_value('Account','Income - '+r[1], 'balance')
-		#	exp = get_value('Account','Expenses - '+r[1], 'balance')
-		#	pl[r[0]] = flt(flt(inc) - flt(exp))
-		return {'cl':[r[0] for r in ret]}#, 'pl':pl}
+		return {'cl':[r[0] for r in ret]}
 
 	def get_company_currency(self,arg=''):
 		dcc = TransactionBase().get_company_currency(arg)
@@ -506,3 +500,38 @@ In Account := %s User := %s has Repaired Outstanding Amount For %s : %s and foll
 			for a in set(ac_list):
 				fy_obj.repost(a)
 
+
+def manage_recurring_invoices():
+	""" 
+		Create recurring invoices on specific date by copying the original one
+		and notify the concerned people
+	"""	
+	rv = sql("""select name, recurring_id from `tabReceivable Voucher` where ifnull(convert_into_recurring_invoice, 0) = 1 
+			and next_date = %s and next_date <= end_date""", nowdate())
+	for d in rv:
+		if not sql("""select name from `tabReceivable Voucher` where posting_date = %s and recurring_id = %s""", (nowdate, d[1])):
+			prev_rv = get_obj('Receivable Voucher', d[0], with_children=1)
+			new_rv = create_new_invoice(prev_rv)
+
+			send_notification(new_rv)
+
+def create_new_invoice(prev_rv):
+	# clone rv
+	new_rv = clone(prev_rv)
+
+	# update new rv 
+	new_rv.doc.voucher_date = new_rv.doc.next_date
+	new_rv.doc.posting_date = new_rv.doc.next_date
+	new_rv.doc.aging_date = new_rv.doc.next_date
+	new_rv.doc.due_date = add_days(new_rv.doc.next_date, cint(date_diff(prev_rv.doc.due_date, prev_rv.doc.posting_date)))
+	new_rv.doc.save()
+
+	# submit and after submit
+	new_rv.submit()
+	new_rv.update_after_submit()
+
+	return new_rv
+
+def send_notification(new_rv):
+	"""Notify concerned persons about recurring invoice generation"""
+	pass
