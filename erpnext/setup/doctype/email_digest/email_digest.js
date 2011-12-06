@@ -8,6 +8,15 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 			}
 		});	
 	}, 1);
+	cur_frm.add_custom_button('Send Now', function() {
+		$c_obj(make_doclist(dt, dn), 'send', '', function(r, rt) {
+			if(r.exc) {
+				msgprint(r.exc);
+			} else {
+				console.log(arguments);
+			}
+		});	
+	}, 1);
 }
 
 cur_frm.cscript['Add Recipients'] = function(doc, dt, dn) {

@@ -5,14 +5,14 @@
 	{
 		'creation': '2011-11-28 13:11:56',
 		'docstatus': 0,
-		'modified': '2011-12-05 11:55:31',
+		'modified': '2011-12-05 18:54:27',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1323066269',
+		'_last_update': '1323083188',
 		'autoname': 'Prompt',
 		'colour': 'White:FFF',
 		'doctype': 'DocType',
@@ -21,7 +21,7 @@
 		'name': '__common__',
 		'section_style': 'Simple',
 		'show_in_menu': 0,
-		'version': 51
+		'version': 61
 	},
 
 	# These values are common for all DocField
@@ -114,12 +114,10 @@
 	# DocField
 	{
 		'doctype': 'DocField',
-		'fieldname': 'send_time',
-		'fieldtype': 'Select',
-		'label': 'At what time?',
-		'options': '\n1 AM\n2 AM\n3 AM\n4 AM\n5 AM\n6 AM\n7 AM\n8 AM\n9 AM\n10 AM\n11 AM\nNoon\n1 PM\n2 PM\n3 PM\n4 PM\n5 PM\n6 PM\n7 PM\n8 PM\n9 PM\n10 PM\n11 PM\nMidnight',
-		'permlevel': 0,
-		'reqd': 1
+		'fieldname': 'next_send_datetime',
+		'fieldtype': 'Text',
+		'label': 'Next email will be sent on:',
+		'permlevel': 1
 	},
 
 	# DocField
@@ -128,6 +126,7 @@
 		'doctype': 'DocField',
 		'fieldname': 'use_standard',
 		'fieldtype': 'Check',
+		'hidden': 1,
 		'label': 'Use standard?',
 		'permlevel': 0
 	},
@@ -309,18 +308,10 @@
 
 	# DocField
 	{
+		'depends_on': 'eval:!doc.use_standard',
 		'doctype': 'DocField',
 		'fieldtype': 'Section Break',
 		'label': 'Enter Custom Code',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldname': 'email_template',
-		'fieldtype': 'Code',
-		'label': 'Email Template',
 		'permlevel': 0
 	},
 
@@ -332,6 +323,16 @@
 		'fieldname': 'custom_code',
 		'fieldtype': 'Code',
 		'label': 'Custom Python Code',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'depends_on': 'eval:!doc.use_standard',
+		'doctype': 'DocField',
+		'fieldname': 'email_template',
+		'fieldtype': 'Code',
+		'label': 'Email Template',
 		'permlevel': 0
 	}
 ]

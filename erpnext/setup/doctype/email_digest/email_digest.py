@@ -2,7 +2,8 @@ import webnotes
 
 class DocType:
 	def __init__(self, doc, doclist=[]):
-		self.doc, self.doclist = doc, doclist	
+		self.doc, self.doclist = doc, doclist
+		self.sending = False
 
 
 	def get_profiles(self):
@@ -110,7 +111,7 @@ class DocType:
 		for query in query_dict.keys():
 			if self.doc.fields[query]:
 				#webnotes.msgprint(query)
-				res = webnotes.conn.sql(query_dict[query], as_dict=1)
+				res = webnotes.conn.sql(query_dict[query], as_dict=1, debug=1)
 				if query == 'income':
 					for r in res:
 						r['value'] = float(r['credit'] - r['debit'])
@@ -238,8 +239,41 @@ class DocType:
 		"""
 			Returns start and end date depending on the frequency of email digest
 		"""
-		start_date = '2011-11-01'
-		end_date = '2011-11-31'
+		from datetime import datetime, date, timedelta
+		today = datetime.now().date()
+		year, month, day = today.year, today.month, today.day
+		
+		if self.doc.frequency == 'Daily':
+			if self.sending:
+				start_date = end_date = today - timedelta(days=1)
+			else:
+				start_date = end_date = today
+		
+		elif self.doc.frequency == 'Weekly':
+			if self.sending:
+				start_date = today - timedelta(weeks=1)
+				end_date = today - timedelta(days=1)
+			else:
+				start_date = today - timedelta(days=today.weekday())
+				end_date = start_date + timedelta(weeks=1)
+
+		else:
+			import calendar
+			
+			if self.sending:
+				if month == 1:
+					year = year - 1
+					prev_month = 12
+				else:
+					prev_month = month - 1
+				start_date = date(year, prev_month, 1)
+				last_day = calendar.monthrange(year, prev_month)[1]
+				end_date = date(year, prev_month, last_day)
+			else:
+				start_date = date(year, month, 1)
+				last_day = calendar.monthrange(year, month)[1]
+				end_date = date(year, month, last_day)
+
 		return start_date, end_date
 
 
@@ -281,9 +315,10 @@ class DocType:
 			* Execute Query
 			* Prepare Email Body from Print Format
 		"""
-		result = self.execute_queries()
+		result, email_body = self.execute_queries()
 		webnotes.msgprint(result)
-		return result
+		webnotes.msgprint(email_body)
+		return result, email_body
 
 
 	def execute_queries(self):
@@ -294,15 +329,27 @@ class DocType:
 		result = {}
 		if self.doc.use_standard==1:
 			result = self.get_standard_data()
+			email_body = self.get_standard_body(result)
 		else:
-			result = self.execute_custom_code()
+			result, email_body = self.execute_custom_code(self.doc)
 
 		#webnotes.msgprint(result)
 
-		return result
+		return result, email_body
 
 
-	def execute_custom_code(self):
+	def get_standard_body(self, result):
+		"""
+			Generate email body depending on the result
+		"""
+		return """
+			<div>
+				Invoiced Amount: %(invoiced_amount)s<br />
+				Payables: %(payables)s<br />
+			</div>""" % result
+
+
+	def execute_custom_code(self, doc):
 		"""
 			Execute custom python code
 		"""
@@ -314,4 +361,33 @@ class DocType:
 			* Execute get method
 			* Send email to recipients
 		"""
-		pass
+		self.sending = True
+		result, email_body = self.get()
+		# TODO: before sending, check if user is disabled or not
+		from webnotes.utils.email_lib import sendmail
+		try:
+			sendmail(
+				recipients=self.doc.recipient_list.split("\n"),
+				sender='anand@erpnext.com',
+				reply_to='support@erpnext.com',
+				subject='Digest',
+				msg=email_body,
+				from_defs=1
+			)
+		except Exception, e:
+			webnotes.msgprint('There was a problem in sending your email. Please contact support@erpnext.com')
+			#webnotes.errprint(webnotes.getTraceback())
+
+	
+	def schedule(self):
+		"""
+
+		"""
+		# Get TimeZone
+		# Get System TimeZone
+		import time
+		from pytz import timezone
+		server_tz = timezone(time.tzname[0])
+		cp = webnotes.model.doc.Document('Control Panel','Control Panel')
+		app_tz = timezone(cp.time_zone)
+
