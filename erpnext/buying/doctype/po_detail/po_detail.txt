@@ -5,7 +5,7 @@
 	{
 		'creation': '2010-08-08 17:09:12',
 		'docstatus': 0,
-		'modified': '2011-12-08 14:09:24',
+		'modified': '2011-12-08 16:05:27',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
@@ -21,7 +21,7 @@
 		'section_style': 'Tray',
 		'server_code_error': ' ',
 		'show_in_menu': 0,
-		'version': 52
+		'version': 54
 	},
 
 	# These values are common for all DocField
@@ -108,7 +108,7 @@
 		'doctype': 'DocField',
 		'fieldname': 'purchase_rate',
 		'fieldtype': 'Currency',
-		'label': 'Rate (Default Curr.)',
+		'label': 'Rate (Default Curr.) *',
 		'oldfieldname': 'purchase_rate',
 		'oldfieldtype': 'Currency',
 		'permlevel': 0,
@@ -123,7 +123,7 @@
 		'doctype': 'DocField',
 		'fieldname': 'purchase_ref_rate',
 		'fieldtype': 'Currency',
-		'label': 'Ref Rate',
+		'label': 'Ref Rate *',
 		'permlevel': 0
 	},
 
@@ -172,7 +172,7 @@
 		'fieldname': 'import_rate',
 		'fieldtype': 'Currency',
 		'hidden': 0,
-		'label': 'Rate *',
+		'label': 'Rate ',
 		'oldfieldname': 'import_rate',
 		'oldfieldtype': 'Currency',
 		'permlevel': 0,
@@ -185,7 +185,7 @@
 		'doctype': 'DocField',
 		'fieldname': 'import_ref_rate',
 		'fieldtype': 'Currency',
-		'label': 'Ref Rate *',
+		'label': 'Ref Rate ',
 		'permlevel': 0
 	},
 

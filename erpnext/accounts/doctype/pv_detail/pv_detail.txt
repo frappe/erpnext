@@ -5,7 +5,7 @@
 	{
 		'creation': '2010-08-08 17:09:17',
 		'docstatus': 0,
-		'modified': '2011-10-20 18:41:17',
+		'modified': '2011-12-08 15:58:58',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
@@ -14,7 +14,6 @@
 	{
 		'autoname': 'EVD.######',
 		'colour': 'White:FFF',
-		'default_print_format': 'Standard',
 		'doctype': 'DocType',
 		'istable': 1,
 		'module': 'Accounts',
@@ -22,7 +21,7 @@
 		'section_style': 'Tray',
 		'server_code_error': ' ',
 		'show_in_menu': 0,
-		'version': 27
+		'version': 28
 	},
 
 	# These values are common for all DocField
@@ -115,7 +114,7 @@
 		'doctype': 'DocField',
 		'fieldname': 'rate',
 		'fieldtype': 'Currency',
-		'label': 'Rate (Default Curr.)',
+		'label': 'Rate *(Default Curr.)',
 		'oldfieldname': 'rate',
 		'oldfieldtype': 'Currency',
 		'permlevel': 0,
@@ -129,13 +128,22 @@
 		'doctype': 'DocField',
 		'fieldname': 'import_rate',
 		'fieldtype': 'Currency',
-		'label': 'Rate',
+		'label': 'Rate ',
 		'oldfieldname': 'import_rate',
 		'oldfieldtype': 'Currency',
 		'permlevel': 0,
 		'print_hide': 0,
 		'reqd': 1,
 		'trigger': 'Client'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'discount_rate',
+		'fieldtype': 'Currency',
+		'label': 'Discount %',
+		'permlevel': 0
 	},
 
 	# DocField
@@ -208,19 +216,6 @@
 		'print_hide': 1,
 		'trigger': 'Client',
 		'width': '120px'
-	},
-
-	# DocField
-	{
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldname': 'project_name',
-		'fieldtype': 'Link',
-		'in_filter': 1,
-		'label': 'Project Name',
-		'options': 'Project',
-		'permlevel': 0,
-		'print_hide': 1
 	},
 
 	# DocField
@@ -308,5 +303,23 @@
 		'permlevel': 0,
 		'print_hide': 1,
 		'report_hide': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'purchase_ref_rate',
+		'fieldtype': 'Currency',
+		'label': 'Ref Rate *',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'import_ref_rate',
+		'fieldtype': 'Currency',
+		'label': 'Ref Rate ',
+		'permlevel': 0
 	}
 ]
