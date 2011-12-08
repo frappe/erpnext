@@ -690,6 +690,9 @@ pscript.feature_dict = {
 	},
 	'fs_pos': {
 		'Receivable Voucher': {'fields':['is_pos']}
+	},
+	'fs_recurring_invoice': {
+		'Receivable Voucher': {'fields': ['Recurring Invoice']}
 	}
 }
 

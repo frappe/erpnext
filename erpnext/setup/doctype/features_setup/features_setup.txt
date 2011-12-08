@@ -5,14 +5,14 @@
 	{
 		'creation': '2011-09-07 11:59:05',
 		'docstatus': 0,
-		'modified': '2011-10-05 10:50:17',
+		'modified': '2011-12-06 18:48:53',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1317790484',
+		'_last_update': '1323176623',
 		'colour': 'White:FFF',
 		'default_print_format': 'Standard',
 		'doctype': 'DocType',
@@ -22,7 +22,7 @@
 		'name_case': 'Title Case',
 		'section_style': 'Simple',
 		'show_in_menu': 1,
-		'version': 21
+		'version': 24
 	},
 
 	# These values are common for all DocField
@@ -215,6 +215,39 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Section Break',
+		'label': 'Accounts'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'description': 'Check if you need automatic recurring invoices. After submitting any sales invoice, Recurring section will be visible.',
+		'doctype': 'DocField',
+		'fieldname': 'fs_recurring_invoice',
+		'fieldtype': 'Check',
+		'label': 'Recurring Invoice'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Column Break'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'description': 'To enable <b>Point of Sale</b> features',
+		'doctype': 'DocField',
+		'fieldname': 'fs_pos',
+		'fieldtype': 'Check',
+		'label': 'Point of Sale'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Section Break',
 		'label': 'Production'
 	},
 
@@ -242,16 +275,6 @@
 		'fieldname': 'fs_quality',
 		'fieldtype': 'Check',
 		'label': 'Quality'
-	},
-
-	# DocField
-	{
-		'colour': 'White:FFF',
-		'description': 'To enable <b>Point of Sale</b> features',
-		'doctype': 'DocField',
-		'fieldname': 'fs_pos',
-		'fieldtype': 'Check',
-		'label': 'Point of Sale'
 	},
 
 	# DocField
