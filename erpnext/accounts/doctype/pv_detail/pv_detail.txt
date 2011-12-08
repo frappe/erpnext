@@ -5,7 +5,7 @@
 	{
 		'creation': '2010-08-08 17:09:17',
 		'docstatus': 0,
-		'modified': '2011-12-08 15:58:58',
+		'modified': '2011-12-08 16:51:09',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
@@ -21,7 +21,7 @@
 		'section_style': 'Tray',
 		'server_code_error': ' ',
 		'show_in_menu': 0,
-		'version': 28
+		'version': 30
 	},
 
 	# These values are common for all DocField
@@ -126,6 +126,15 @@
 	# DocField
 	{
 		'doctype': 'DocField',
+		'fieldname': 'purchase_ref_rate',
+		'fieldtype': 'Currency',
+		'label': 'Ref Rate *',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
 		'fieldname': 'import_rate',
 		'fieldtype': 'Currency',
 		'label': 'Rate ',
@@ -135,6 +144,15 @@
 		'print_hide': 0,
 		'reqd': 1,
 		'trigger': 'Client'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'import_ref_rate',
+		'fieldtype': 'Currency',
+		'label': 'Ref Rate ',
+		'permlevel': 0
 	},
 
 	# DocField
@@ -303,23 +321,5 @@
 		'permlevel': 0,
 		'print_hide': 1,
 		'report_hide': 1
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldname': 'purchase_ref_rate',
-		'fieldtype': 'Currency',
-		'label': 'Ref Rate *',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldname': 'import_ref_rate',
-		'fieldtype': 'Currency',
-		'label': 'Ref Rate ',
-		'permlevel': 0
 	}
 ]
