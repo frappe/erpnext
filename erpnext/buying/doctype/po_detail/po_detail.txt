@@ -5,7 +5,7 @@
 	{
 		'creation': '2010-08-08 17:09:12',
 		'docstatus': 0,
-		'modified': '2011-12-08 16:05:27',
+		'modified': '2011-12-08 18:30:54',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
@@ -21,7 +21,7 @@
 		'section_style': 'Tray',
 		'server_code_error': ' ',
 		'show_in_menu': 0,
-		'version': 54
+		'version': 58
 	},
 
 	# These values are common for all DocField
@@ -106,6 +106,21 @@
 	{
 		'default': '0.00',
 		'doctype': 'DocField',
+		'fieldname': 'qty',
+		'fieldtype': 'Currency',
+		'label': 'Quantity',
+		'oldfieldname': 'qty',
+		'oldfieldtype': 'Currency',
+		'permlevel': 0,
+		'reqd': 1,
+		'trigger': 'Client',
+		'width': '60px'
+	},
+
+	# DocField
+	{
+		'default': '0.00',
+		'doctype': 'DocField',
 		'fieldname': 'purchase_rate',
 		'fieldtype': 'Currency',
 		'label': 'Rate (Default Curr.) *',
@@ -129,16 +144,6 @@
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'discount_rate',
-		'fieldtype': 'Currency',
-		'label': 'Discount Rate %',
-		'permlevel': 0,
-		'trigger': 'Client'
-	},
-
-	# DocField
-	{
 		'default': '0.00',
 		'doctype': 'DocField',
 		'fieldname': 'amount',
@@ -153,17 +158,12 @@
 
 	# DocField
 	{
-		'default': '0.00',
 		'doctype': 'DocField',
-		'fieldname': 'qty',
+		'fieldname': 'discount_rate',
 		'fieldtype': 'Currency',
-		'label': 'Quantity',
-		'oldfieldname': 'qty',
-		'oldfieldtype': 'Currency',
+		'label': 'Discount %',
 		'permlevel': 0,
-		'reqd': 1,
-		'trigger': 'Client',
-		'width': '60px'
+		'trigger': 'Client'
 	},
 
 	# DocField
@@ -192,6 +192,17 @@
 	# DocField
 	{
 		'doctype': 'DocField',
+		'fieldname': 'import_amount',
+		'fieldtype': 'Currency',
+		'label': 'Amount',
+		'oldfieldname': 'import_amount',
+		'oldfieldtype': 'Currency',
+		'permlevel': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
 		'fieldname': 'uom',
 		'fieldtype': 'Link',
 		'label': 'UOM',
@@ -203,17 +214,6 @@
 		'reqd': 1,
 		'trigger': 'Client',
 		'width': '100px'
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldname': 'import_amount',
-		'fieldtype': 'Currency',
-		'label': 'Amount',
-		'oldfieldname': 'import_amount',
-		'oldfieldtype': 'Currency',
-		'permlevel': 1
 	},
 
 	# DocField
