@@ -1,10 +1,18 @@
 cur_frm.cscript.refresh = function(doc, dt, dn) {
-	cur_frm.add_custom_button('Execute Now', function() {
+	cur_frm.add_custom_button('View Now', function() {
 		$c_obj(make_doclist(dt, dn), 'get', '', function(r, rt) {
 			if(r.exc) {
 				msgprint(r.exc);
 			} else {
-				console.log(arguments);
+				//console.log(arguments);
+				var d = new wn.widgets.Dialog({
+					title: 'Email Digest: ' + dn,
+					width: 800
+				});
+
+				$a(d.body, 'div', '', '', r['message'][1]);
+
+				d.show();
 			}
 		});	
 	}, 1);
@@ -13,7 +21,8 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 			if(r.exc) {
 				msgprint(r.exc);
 			} else {
-				console.log(arguments);
+				//console.log(arguments);
+				msgprint('Message Sent');
 			}
 		});	
 	}, 1);
@@ -41,6 +50,9 @@ cur_frm.cscript['Add Recipients'] = function(doc, dt, dn) {
 				if(v.checked==1) {
 					check.checked = 1;
 					add_or_update = 'Update';
+				}
+				if(v.enabled==0) {
+					v.name = "<span style='color: red'>" + v.name + " (disabled user)</span>"
 				}
 				var profile = $a($td(tab, i+1, 1), 'span', '', '', v.name);
 				//profile.onclick = function() { check.checked = !check.checked; }
@@ -72,7 +84,7 @@ cur_frm.cscript.add_to_rec_list = function(doc, tab, length) {
 		}
 	}
 	doc.recipient_list = rec_list.join('\n');
-	console.log(doc.recipient_list);
+	//console.log(doc.recipient_list);
 	cur_frm.rec_dialog.hide();
 	cur_frm.refresh_fields();
 }

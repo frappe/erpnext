@@ -5,14 +5,14 @@
 	{
 		'creation': '2011-11-28 13:11:56',
 		'docstatus': 0,
-		'modified': '2011-12-06 18:49:23',
+		'modified': '2011-12-08 19:21:26',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1323177411',
+		'_last_update': '1323352149',
 		'autoname': 'Prompt',
 		'colour': 'White:FFF',
 		'doctype': 'DocType',
@@ -21,7 +21,7 @@
 		'name': '__common__',
 		'section_style': 'Simple',
 		'show_in_menu': 0,
-		'version': 66
+		'version': 78
 	},
 
 	# These values are common for all DocField
@@ -52,6 +52,7 @@
 
 	# DocPerm
 	{
+		'cancel': 1,
 		'create': 1,
 		'doctype': 'DocPerm',
 		'permlevel': 0,
@@ -113,6 +114,7 @@
 
 	# DocField
 	{
+		'depends_on': 'eval:doc.enabled',
 		'doctype': 'DocField',
 		'fieldname': 'next_send',
 		'fieldtype': 'Data',
@@ -128,7 +130,8 @@
 		'fieldtype': 'Check',
 		'hidden': 1,
 		'label': 'Use standard?',
-		'permlevel': 0
+		'permlevel': 0,
+		'search_index': 0
 	},
 
 	# DocField
@@ -149,6 +152,7 @@
 
 	# DocField
 	{
+		'description': 'Note: Email will not be sent to disabled users',
 		'doctype': 'DocField',
 		'fieldname': 'recipient_list',
 		'fieldtype': 'Text',
@@ -163,76 +167,6 @@
 		'doctype': 'DocField',
 		'fieldtype': 'Section Break',
 		'label': 'Select Digest Content',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'depends_on': 'eval:doc.use_standard',
-		'doctype': 'DocField',
-		'fieldname': 'invoiced_amount',
-		'fieldtype': 'Check',
-		'label': 'Invoiced Amount (Receivables)',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'depends_on': 'eval:doc.use_standard',
-		'doctype': 'DocField',
-		'fieldname': 'payables',
-		'fieldtype': 'Check',
-		'label': 'Payables',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'depends_on': 'eval:doc.use_standard',
-		'doctype': 'DocField',
-		'fieldname': 'income',
-		'fieldtype': 'Check',
-		'label': 'Income',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'depends_on': 'eval:doc.use_standard',
-		'doctype': 'DocField',
-		'fieldname': 'expenses_booked',
-		'fieldtype': 'Check',
-		'label': 'Expenses Booked',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'depends_on': 'eval:doc.use_standard',
-		'doctype': 'DocField',
-		'fieldname': 'collections',
-		'fieldtype': 'Check',
-		'label': 'Collections',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'depends_on': 'eval:doc.use_standard',
-		'doctype': 'DocField',
-		'fieldname': 'payments',
-		'fieldtype': 'Check',
-		'label': 'Payments',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'depends_on': 'eval:doc.use_standard',
-		'doctype': 'DocField',
-		'fieldname': 'bank_balance',
-		'fieldtype': 'Check',
-		'label': 'Bank Balance',
 		'permlevel': 0
 	},
 
@@ -290,9 +224,9 @@
 	{
 		'depends_on': 'eval:doc.use_standard',
 		'doctype': 'DocField',
-		'fieldname': 'stock_below_rl',
+		'fieldname': 'new_transactions',
 		'fieldtype': 'Check',
-		'label': 'Stock Items below re-order level',
+		'label': 'New Transactions',
 		'permlevel': 0
 	},
 
@@ -300,9 +234,79 @@
 	{
 		'depends_on': 'eval:doc.use_standard',
 		'doctype': 'DocField',
-		'fieldname': 'new_transactions',
+		'fieldname': 'payables',
 		'fieldtype': 'Check',
-		'label': 'New Transactions',
+		'label': 'Payables',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'depends_on': 'eval:doc.use_standard',
+		'doctype': 'DocField',
+		'fieldname': 'payments',
+		'fieldtype': 'Check',
+		'label': 'Payments',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'depends_on': 'eval:doc.use_standard',
+		'doctype': 'DocField',
+		'fieldname': 'expenses_booked',
+		'fieldtype': 'Check',
+		'label': 'Expenses Booked',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'depends_on': 'eval:doc.use_standard',
+		'doctype': 'DocField',
+		'fieldname': 'invoiced_amount',
+		'fieldtype': 'Check',
+		'label': 'Invoiced Amount (Receivables)',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'depends_on': 'eval:doc.use_standard',
+		'doctype': 'DocField',
+		'fieldname': 'collections',
+		'fieldtype': 'Check',
+		'label': 'Collections',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'depends_on': 'eval:doc.use_standard',
+		'doctype': 'DocField',
+		'fieldname': 'income',
+		'fieldtype': 'Check',
+		'label': 'Income',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'depends_on': 'eval:doc.use_standard',
+		'doctype': 'DocField',
+		'fieldname': 'bank_balance',
+		'fieldtype': 'Check',
+		'label': 'Bank Balance',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'stock_below_rl',
+		'fieldtype': 'Check',
+		'hidden': 1,
+		'label': 'Stock Items below re-order level',
 		'permlevel': 0
 	},
 
@@ -317,7 +321,6 @@
 
 	# DocField
 	{
-		'default': '\n',
 		'depends_on': 'eval:!doc.use_standard',
 		'doctype': 'DocField',
 		'fieldname': 'custom_code',
