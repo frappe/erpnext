@@ -397,6 +397,14 @@ class DocType(TransactionBase):
 		if flt(self.doc.write_off_amount) and not self.doc.write_off_account:
 			msgprint("Please enter Write Off Account", raise_exception=1)
 
+
+	def validate_c_form(self):
+		""" Blank C-form no if C-form applicable marked as 'No'"""
+		if self.doc.amended_from and self.doc.c_form_applicable == 'No' and self.doc.c_form_no:
+			sql("""delete from `tabC-Form Invoice Detail` where invoice_no = %s
+					and parent = %s""", (self.doc.amended_from,	self.doc.c_form_no))
+
+			set(self.doc, 'c_form_no', '')
 	 
 	# VALIDATE
 	# ====================================================================================
@@ -432,6 +440,7 @@ class DocType(TransactionBase):
 		self.clear_advances()
 		# Set against account
 		self.set_against_income_account()
+		self.validate_c_form()
 
 		
 # *************************************************** ON SUBMIT **********************************************
@@ -554,10 +563,21 @@ class DocType(TransactionBase):
 
 		if not cint(self.doc.is_pos) == 1:
 			self.update_against_document_in_jv()
-		
+
+		self.update_c_form()
+
 		# on submit notification
 		# get_obj('Notification Control').notify_contact('Sales Invoice', self.doc.doctype,self.doc.name, self.doc.email_id, self.doc.contact_person)
-		
+
+
+	def update_c_form(self):
+		"""Update amended id in C-form"""
+		if self.doc.c_form_no and self.doc.amended_from:
+			sql("""update `tabC-Form Invoice Detail` set invoice_no = %s,
+					invoice_date = %s, territory = %s, net_total = %s,
+					grand_total = %s where invoice_no = %s and parent = %s""", (self.doc.name, self.doc.amended_from, self.doc.c_form_no))
+	
+
 			
 # *************************************************** ON CANCEL **********************************************
 	# Check Next Document's docstatus
