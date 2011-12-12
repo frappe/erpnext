@@ -187,7 +187,7 @@ cur_frm.cscript.qty  = function(doc,dt,dn) { cur_frm.cscript.calc_exp_row(doc,dt
 // ------------
 cur_frm.cscript.import_rate = function(doc,dt,dn) {
   var d = locals[dt][dn];
-  set_multiple('PV Detail', d.name, {'rate': flt(d.import_rate) * flt(doc.conversion_rate) }, 'entries');
+  set_multiple('PV Detail', d.name, {'purchase_rate': flt(d.import_rate) * flt(doc.conversion_rate) }, 'entries');
   cur_frm.cscript.calc_exp_row(doc,dt,dn)
 }
 
@@ -334,10 +334,10 @@ cur_frm.cscript.calc_total = function(doc) {
   for(var i in el) {
    if (flt(el[i].import_rate) > 0){
 	 set_multiple('PV Detail', el[i].name, {'purchase_ref_rate':flt(el[i].import_ref_rate)*flt(doc.conversion_rate)}, 'entries');
-     set_multiple('PV Detail', el[i].name, {'rate': flt(doc.conversion_rate) * flt(el[i].import_rate) }, 'entries');
+     set_multiple('PV Detail', el[i].name, {'purchase_rate': flt(doc.conversion_rate) * flt(el[i].import_rate) }, 'entries');
      set_multiple('PV Detail', el[i].name, {'import_amount': flt(el[i].qty) * flt(el[i].import_rate) }, 'entries');
    }
-   set_multiple('PV Detail', el[i].name, {'amount': flt(el[i].qty) * flt(el[i].rate) }, 'entries')
+   set_multiple('PV Detail', el[i].name, {'amount': flt(el[i].qty) * flt(el[i].purchase_rate) }, 'entries')
    t_exp += flt(el[i].amount);
   }
   doc.net_total = flt(t_exp);
@@ -369,13 +369,13 @@ var calc_total_advance = function(doc,cdt,cdn) {
 
 cur_frm.cscript.calc_exp_row = function(doc,dt,dn) {
   var d = locals[dt][dn];
-  d.amount = flt(d.qty * d.rate);
+  d.amount = flt(d.qty * d.purchase_rate);
   refresh_field('amount',dn,'entries');
   
   if (!doc.conversion_rate){ doc.conversion_rate = 1; refresh_field('conversion_rate'); }
   
-  set_multiple('PV Detail', dn, {'import_rate': flt(d.rate) / flt(doc.conversion_rate) }, 'entries');
-  set_multiple('PV Detail', dn, {'import_amount': flt(d.qty) * flt(d.rate) / flt(doc.conversion_rate) }, 'entries');
+  set_multiple('PV Detail', dn, {'import_rate': flt(d.purchase_rate) / flt(doc.conversion_rate) }, 'entries');
+  set_multiple('PV Detail', dn, {'import_amount': flt(d.qty) * flt(d.purchase_rate) / flt(doc.conversion_rate) }, 'entries');
   
   cur_frm.cscript.calc_total(doc)
 }
