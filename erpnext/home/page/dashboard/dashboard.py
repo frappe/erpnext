@@ -133,19 +133,27 @@ class DashboardWidget:
 			webnotes.msgprint('Wrongly defined account: ' + acc)
 			print acc
 			raise e
-		
-		return self.glc.get_as_on_balance(acc, self.get_fiscal_year(start), start, debit_or_credit, lft, rgt)
+
+		fiscal_year = self.get_fiscal_year(start)
+		if fiscal_year:
+			return self.glc.get_as_on_balance(acc, fiscal_year, start, debit_or_credit, lft, rgt)
+		else:
+			webnotes.msgprint('Please select the START DATE and END DATE such that\
+					they fall within the <b>same fiscal year</b> as defined in\
+					Setup > System > Fiscal Year.', raise_exception=1)
+	
 
 	def get_fiscal_year(self, dt):
 		"""
 			get fiscal year from date
 		"""
 		import webnotes
-		return webnotes.conn.sql("""
+		fiscal_year = webnotes.conn.sql("""
 			select name from `tabFiscal Year` 
 			where year_start_date <= %s and
 			DATE_ADD(year_start_date, INTERVAL 1 YEAR) >= %s
-			""", (dt, dt))[0][0]
+			""", (dt, dt))
+		return fiscal_year and (fiscal_year[0] and fiscal_year[0][0]) or None
 			
 	def get_creation_trend(self, doctype, start, end):
 		"""
