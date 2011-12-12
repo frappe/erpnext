@@ -139,7 +139,7 @@ class DashboardWidget:
 			return self.glc.get_as_on_balance(acc, fiscal_year, start, debit_or_credit, lft, rgt)
 		else:
 			webnotes.msgprint('Please select the START DATE and END DATE such that\
-					they fall within the <b>same fiscal year</b> as defined in\
+					they fall within <b>fiscal year(s)</b> as defined in\
 					Setup > System > Fiscal Year.', raise_exception=1)
 	
 
