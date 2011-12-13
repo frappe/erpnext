@@ -5,15 +5,16 @@
 	{
 		'creation': '2010-08-08 17:09:11',
 		'docstatus': 0,
-		'modified': '2011-06-21 17:01:01',
+		'modified': '2011-11-24 15:17:14',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1309508838',
+		'_last_update': '1321601347',
 		'colour': 'White:FFF',
+		'default_print_format': 'Standard',
 		'doctype': 'DocType',
 		'module': 'Accounts',
 		'name': '__common__',
@@ -23,7 +24,7 @@
 		'server_code_error': ' ',
 		'show_in_menu': 0,
 		'subject': 'From %(supplier_name)s worth %(grand_total)s due on %(due_date)s | %(outstanding_amount)s outstanding',
-		'version': 518
+		'version': 522
 	},
 
 	# These values are common for all DocField
@@ -57,7 +58,6 @@
 		'cancel': 0,
 		'create': 0,
 		'doctype': 'DocPerm',
-		'idx': 1,
 		'permlevel': 1,
 		'role': 'Accounts Manager',
 		'submit': 0,
@@ -70,7 +70,6 @@
 		'cancel': 1,
 		'create': 1,
 		'doctype': 'DocPerm',
-		'idx': 2,
 		'permlevel': 0,
 		'role': 'Accounts Manager',
 		'submit': 1,
@@ -83,7 +82,6 @@
 		'cancel': 0,
 		'create': 0,
 		'doctype': 'DocPerm',
-		'idx': 3,
 		'permlevel': 1,
 		'role': 'Accounts User',
 		'submit': 0,
@@ -93,7 +91,6 @@
 	# DocPerm
 	{
 		'doctype': 'DocPerm',
-		'idx': 4,
 		'permlevel': 1,
 		'role': 'Purchase User'
 	},
@@ -104,7 +101,6 @@
 		'cancel': 0,
 		'create': 1,
 		'doctype': 'DocPerm',
-		'idx': 5,
 		'permlevel': 0,
 		'role': 'Purchase User',
 		'submit': 0,
@@ -117,7 +113,6 @@
 		'cancel': 1,
 		'create': 1,
 		'doctype': 'DocPerm',
-		'idx': 6,
 		'permlevel': 0,
 		'role': 'Accounts User',
 		'submit': 1,
@@ -127,7 +122,6 @@
 	# DocPerm
 	{
 		'doctype': 'DocPerm',
-		'idx': 7,
 		'match': 'supplier',
 		'permlevel': 0,
 		'role': 'Supplier'
@@ -138,7 +132,6 @@
 		'allow_on_submit': 0,
 		'doctype': 'DocField',
 		'fieldtype': 'Section Break',
-		'idx': 1,
 		'label': 'Basic Info',
 		'oldfieldtype': 'Section Break',
 		'permlevel': 0
@@ -148,7 +141,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Column Break',
-		'idx': 2,
 		'oldfieldtype': 'Column Break',
 		'permlevel': 0,
 		'width': '50%'
@@ -161,7 +153,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'naming_series',
 		'fieldtype': 'Select',
-		'idx': 3,
 		'label': 'Series',
 		'no_copy': 1,
 		'oldfieldname': 'naming_series',
@@ -179,7 +170,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'credit_to',
 		'fieldtype': 'Link',
-		'idx': 4,
 		'in_filter': 1,
 		'label': 'Credit To',
 		'oldfieldname': 'credit_to',
@@ -197,7 +187,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'amended_from',
 		'fieldtype': 'Link',
-		'idx': 5,
 		'label': 'Amended From',
 		'no_copy': 1,
 		'oldfieldname': 'amended_from',
@@ -214,14 +203,12 @@
 		'fieldname': 'supplier',
 		'fieldtype': 'Link',
 		'hidden': 0,
-		'idx': 6,
 		'label': 'Supplier',
 		'oldfieldname': 'supplier',
 		'oldfieldtype': 'Link',
 		'options': 'Supplier',
 		'permlevel': 0,
 		'print_hide': 1,
-		'search_index': 1,
 		'trigger': 'Client'
 	},
 
@@ -230,11 +217,8 @@
 		'doctype': 'DocField',
 		'fieldname': 'supplier_address',
 		'fieldtype': 'Link',
-		'idx': 7,
 		'label': 'Supplier Address',
-		'options': 'Address',
-		'permlevel': 0,
-		'print_hide': 1
+		'permlevel': 0
 	},
 
 	# DocField
@@ -242,7 +226,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'contact_person',
 		'fieldtype': 'Link',
-		'idx': 8,
 		'label': 'Contact Person',
 		'options': 'Contact',
 		'permlevel': 0,
@@ -254,7 +237,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'supplier_name',
 		'fieldtype': 'Text',
-		'idx': 9,
 		'label': 'Name',
 		'oldfieldname': 'supplier_name',
 		'oldfieldtype': 'Data',
@@ -266,7 +248,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'address_display',
 		'fieldtype': 'Small Text',
-		'idx': 10,
 		'label': 'Address',
 		'permlevel': 1
 	},
@@ -276,7 +257,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'contact_display',
 		'fieldtype': 'Small Text',
-		'idx': 11,
 		'label': 'Contact',
 		'permlevel': 1
 	},
@@ -286,7 +266,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'contact_mobile',
 		'fieldtype': 'Text',
-		'idx': 12,
 		'label': 'Mobile No',
 		'permlevel': 1
 	},
@@ -296,7 +275,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'contact_email',
 		'fieldtype': 'Text',
-		'idx': 13,
 		'label': 'Contact Email',
 		'permlevel': 1,
 		'print_hide': 1
@@ -306,7 +284,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Column Break',
-		'idx': 14,
 		'oldfieldtype': 'Column Break',
 		'permlevel': 0,
 		'reqd': 0,
@@ -319,7 +296,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'voucher_date',
 		'fieldtype': 'Date',
-		'idx': 15,
 		'in_filter': 1,
 		'label': 'Voucher Date',
 		'no_copy': 0,
@@ -327,7 +303,7 @@
 		'oldfieldtype': 'Date',
 		'permlevel': 0,
 		'reqd': 1,
-		'search_index': 0
+		'search_index': 1
 	},
 
 	# DocField
@@ -335,7 +311,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'due_date',
 		'fieldtype': 'Date',
-		'idx': 16,
 		'in_filter': 1,
 		'label': 'Due Date',
 		'no_copy': 0,
@@ -343,7 +318,7 @@
 		'oldfieldtype': 'Date',
 		'permlevel': 0,
 		'print_hide': 0,
-		'search_index': 0
+		'search_index': 1
 	},
 
 	# DocField
@@ -353,7 +328,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'posting_date',
 		'fieldtype': 'Date',
-		'idx': 17,
 		'in_filter': 1,
 		'label': 'Posting Date',
 		'no_copy': 0,
@@ -371,7 +345,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'bill_no',
 		'fieldtype': 'Data',
-		'idx': 18,
 		'in_filter': 1,
 		'label': 'Bill No',
 		'oldfieldname': 'bill_no',
@@ -379,7 +352,7 @@
 		'permlevel': 0,
 		'print_hide': 1,
 		'reqd': 1,
-		'search_index': 0
+		'search_index': 1
 	},
 
 	# DocField
@@ -387,7 +360,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'bill_date',
 		'fieldtype': 'Date',
-		'idx': 19,
 		'in_filter': 1,
 		'label': 'Bill Date',
 		'oldfieldname': 'bill_date',
@@ -395,7 +367,7 @@
 		'permlevel': 0,
 		'print_hide': 1,
 		'reqd': 0,
-		'search_index': 0
+		'search_index': 1
 	},
 
 	# DocField
@@ -404,7 +376,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'amendment_date',
 		'fieldtype': 'Date',
-		'idx': 20,
 		'label': 'Amendment Date',
 		'no_copy': 1,
 		'oldfieldname': 'amendment_date',
@@ -418,7 +389,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'mode_of_payment',
 		'fieldtype': 'Select',
-		'idx': 21,
 		'label': 'Mode of Payment',
 		'oldfieldname': 'mode_of_payment',
 		'oldfieldtype': 'Select',
@@ -430,7 +400,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Section Break',
-		'idx': 22,
 		'label': 'Items',
 		'oldfieldtype': 'Section Break',
 		'permlevel': 0
@@ -443,7 +412,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'purchase_order_main',
 		'fieldtype': 'Link',
-		'idx': 23,
 		'label': 'Purchase Order',
 		'oldfieldname': 'purchase_order_main',
 		'oldfieldtype': 'Link',
@@ -460,7 +428,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'purchase_receipt_main',
 		'fieldtype': 'Link',
-		'idx': 24,
 		'label': 'Purchase Receipt',
 		'oldfieldname': 'purchase_receipt_main',
 		'oldfieldtype': 'Link',
@@ -475,7 +442,6 @@
 		'colour': 'White:FFF',
 		'doctype': 'DocField',
 		'fieldtype': 'Button',
-		'idx': 25,
 		'label': 'Get Items',
 		'oldfieldtype': 'Button',
 		'options': 'pull_details',
@@ -486,7 +452,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Column Break',
-		'idx': 26,
 		'permlevel': 0
 	},
 
@@ -495,14 +460,12 @@
 		'doctype': 'DocField',
 		'fieldname': 'currency',
 		'fieldtype': 'Select',
-		'idx': 27,
 		'label': 'Bill Currency',
 		'oldfieldname': 'currency',
 		'oldfieldtype': 'Select',
 		'options': 'link:Currency',
 		'permlevel': 0,
-		'print_hide': 1,
-		'reqd': 1
+		'print_hide': 1
 	},
 
 	# DocField
@@ -512,29 +475,26 @@
 		'doctype': 'DocField',
 		'fieldname': 'conversion_rate',
 		'fieldtype': 'Currency',
-		'idx': 28,
 		'label': 'Bill Conversion Rate',
 		'oldfieldname': 'conversion_rate',
 		'oldfieldtype': 'Currency',
 		'permlevel': 0,
-		'print_hide': 1,
-		'reqd': 1
+		'print_hide': 1
 	},
 
 	# DocField
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Section Break',
-		'idx': 29,
 		'permlevel': 0
 	},
 
 	# DocField
 	{
+		'allow_on_submit': 1,
 		'doctype': 'DocField',
 		'fieldname': 'entries',
 		'fieldtype': 'Table',
-		'idx': 30,
 		'label': 'Entries',
 		'oldfieldname': 'entries',
 		'oldfieldtype': 'Table',
@@ -546,7 +506,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Button',
-		'idx': 31,
 		'label': 'Recalculate',
 		'oldfieldtype': 'Button',
 		'permlevel': 0,
@@ -559,7 +518,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'net_total',
 		'fieldtype': 'Currency',
-		'idx': 32,
 		'label': 'Net Total',
 		'oldfieldname': 'net_total',
 		'oldfieldtype': 'Currency',
@@ -573,7 +531,6 @@
 		'description': 'Add / Edit taxes and other charges',
 		'doctype': 'DocField',
 		'fieldtype': 'Section Break',
-		'idx': 33,
 		'label': 'Taxes',
 		'oldfieldtype': 'Section Break',
 		'permlevel': 0
@@ -584,7 +541,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'purchase_other_charges',
 		'fieldtype': 'Link',
-		'idx': 34,
 		'label': 'Purchase Other Charges',
 		'oldfieldname': 'purchase_other_charges',
 		'oldfieldtype': 'Link',
@@ -597,7 +553,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Button',
-		'idx': 35,
 		'label': 'Get Tax Detail',
 		'oldfieldtype': 'Button',
 		'options': 'get_purchase_tax_details',
@@ -610,7 +565,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'purchase_tax_details',
 		'fieldtype': 'Table',
-		'idx': 36,
 		'label': 'Purchase Tax Details',
 		'oldfieldname': 'purchase_tax_details',
 		'oldfieldtype': 'Table',
@@ -622,7 +576,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Button',
-		'idx': 37,
 		'label': 'Calculate Tax',
 		'oldfieldtype': 'Button',
 		'permlevel': 0,
@@ -634,7 +587,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'HTML',
-		'idx': 38,
 		'label': 'Tax Calculation',
 		'oldfieldtype': 'HTML',
 		'permlevel': 0,
@@ -646,7 +598,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'total_tax',
 		'fieldtype': 'Currency',
-		'idx': 39,
 		'label': 'Total Tax',
 		'oldfieldname': 'total_tax',
 		'oldfieldtype': 'Currency',
@@ -658,7 +609,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Section Break',
-		'idx': 40,
 		'label': 'More Info',
 		'oldfieldtype': 'Section Break',
 		'permlevel': 0,
@@ -669,7 +619,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Column Break',
-		'idx': 41,
 		'oldfieldtype': 'Column Break',
 		'permlevel': 0,
 		'print_hide': 0,
@@ -683,7 +632,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'is_opening',
 		'fieldtype': 'Select',
-		'idx': 42,
 		'in_filter': 1,
 		'label': 'Is Opening',
 		'oldfieldname': 'is_opening',
@@ -691,25 +639,8 @@
 		'options': 'No\nYes',
 		'permlevel': 0,
 		'print_hide': 1,
-		'search_index': 0,
+		'search_index': 1,
 		'trigger': 'Client'
-	},
-
-	# DocField
-	{
-		'colour': 'White:FFF',
-		'description': 'Track this Purchase Invoice against any Project',
-		'doctype': 'DocField',
-		'fieldname': 'project_name',
-		'fieldtype': 'Link',
-		'idx': 43,
-		'in_filter': 1,
-		'label': 'Project Name',
-		'oldfieldname': 'project_name',
-		'oldfieldtype': 'Link',
-		'options': 'Project',
-		'permlevel': 0,
-		'search_index': 1
 	},
 
 	# DocField
@@ -717,7 +648,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'aging_date',
 		'fieldtype': 'Date',
-		'idx': 44,
 		'label': 'Aging Date',
 		'oldfieldname': 'aging_date',
 		'oldfieldtype': 'Date',
@@ -733,7 +663,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'select_print_heading',
 		'fieldtype': 'Link',
-		'idx': 45,
 		'label': 'Select Print Heading',
 		'no_copy': 1,
 		'oldfieldname': 'select_print_heading',
@@ -749,7 +678,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Column Break',
-		'idx': 46,
 		'oldfieldtype': 'Column Break',
 		'permlevel': 0,
 		'width': '50%'
@@ -760,7 +688,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'company',
 		'fieldtype': 'Link',
-		'idx': 47,
 		'in_filter': 1,
 		'label': 'Company',
 		'oldfieldname': 'company',
@@ -768,8 +695,7 @@
 		'options': 'Company',
 		'permlevel': 0,
 		'print_hide': 1,
-		'reqd': 1,
-		'search_index': 0
+		'search_index': 1
 	},
 
 	# DocField
@@ -777,7 +703,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'fiscal_year',
 		'fieldtype': 'Select',
-		'idx': 48,
 		'in_filter': 1,
 		'label': 'Fiscal Year',
 		'oldfieldname': 'fiscal_year',
@@ -785,8 +710,7 @@
 		'options': 'link:Fiscal Year',
 		'permlevel': 0,
 		'print_hide': 1,
-		'reqd': 1,
-		'search_index': 0
+		'search_index': 1
 	},
 
 	# DocField
@@ -796,7 +720,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'cancel_reason',
 		'fieldtype': 'Data',
-		'idx': 49,
 		'label': 'Cancel Reason',
 		'no_copy': 1,
 		'oldfieldname': 'cancel_reason',
@@ -810,7 +733,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'remarks',
 		'fieldtype': 'Small Text',
-		'idx': 50,
 		'label': 'Remarks',
 		'no_copy': 1,
 		'oldfieldname': 'remarks',
@@ -824,7 +746,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Section Break',
-		'idx': 51,
 		'label': 'Advances',
 		'oldfieldtype': 'Section Break',
 		'permlevel': 0,
@@ -835,7 +756,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Button',
-		'idx': 52,
 		'label': 'Get Advances Paid',
 		'oldfieldtype': 'Button',
 		'options': 'get_advances',
@@ -849,7 +769,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'advance_allocation_details',
 		'fieldtype': 'Table',
-		'idx': 53,
 		'label': 'Advance Allocation Details',
 		'no_copy': 1,
 		'oldfieldname': 'advance_allocation_details',
@@ -863,7 +782,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Section Break',
-		'idx': 54,
 		'label': 'TDS',
 		'oldfieldtype': 'Section Break',
 		'permlevel': 0
@@ -873,7 +791,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Column Break',
-		'idx': 55,
 		'permlevel': 0,
 		'width': '50%'
 	},
@@ -883,7 +800,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'tds_applicable',
 		'fieldtype': 'Select',
-		'idx': 56,
 		'label': 'TDS Applicable',
 		'oldfieldname': 'tds_applicable',
 		'oldfieldtype': 'Select',
@@ -897,7 +813,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'tds_category',
 		'fieldtype': 'Select',
-		'idx': 57,
 		'label': 'TDS Category',
 		'oldfieldname': 'tds_category',
 		'oldfieldtype': 'Select',
@@ -911,7 +826,6 @@
 		'colour': 'White:FFF',
 		'doctype': 'DocField',
 		'fieldtype': 'Button',
-		'idx': 58,
 		'label': 'Get TDS',
 		'oldfieldtype': 'Button',
 		'permlevel': 0,
@@ -923,7 +837,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Column Break',
-		'idx': 59,
 		'permlevel': 0,
 		'width': '50%'
 	},
@@ -933,7 +846,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'tax_code',
 		'fieldtype': 'Link',
-		'idx': 60,
 		'label': 'TDS Account Head',
 		'oldfieldname': 'tax_code',
 		'oldfieldtype': 'Link',
@@ -947,7 +859,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'rate',
 		'fieldtype': 'Currency',
-		'idx': 61,
 		'label': 'Rate',
 		'oldfieldname': 'rate',
 		'oldfieldtype': 'Currency',
@@ -960,7 +871,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'ded_amount',
 		'fieldtype': 'Currency',
-		'idx': 62,
 		'label': 'TDS Amount',
 		'oldfieldname': 'ded_amount',
 		'oldfieldtype': 'Currency',
@@ -972,7 +882,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Section Break',
-		'idx': 63,
 		'label': 'Totals',
 		'oldfieldtype': 'Section Break',
 		'permlevel': 0
@@ -982,7 +891,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Column Break',
-		'idx': 64,
 		'oldfieldtype': 'Column Break',
 		'permlevel': 0,
 		'width': '50%'
@@ -993,7 +901,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'other_charges_added',
 		'fieldtype': 'Currency',
-		'idx': 65,
 		'label': 'Other Charges Added',
 		'oldfieldname': 'other_charges_added',
 		'oldfieldtype': 'Currency',
@@ -1006,7 +913,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'other_charges_deducted',
 		'fieldtype': 'Currency',
-		'idx': 66,
 		'label': 'Other Charges Deducted',
 		'oldfieldname': 'other_charges_deducted',
 		'oldfieldtype': 'Currency',
@@ -1019,7 +925,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'total_tds_on_voucher',
 		'fieldtype': 'Currency',
-		'idx': 67,
 		'label': 'Total TDS On Voucher',
 		'no_copy': 1,
 		'oldfieldname': 'total_tds_on_voucher',
@@ -1034,7 +939,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'tds_amount_on_advance',
 		'fieldtype': 'Currency',
-		'idx': 68,
 		'label': 'TDS Amount On Advance',
 		'no_copy': 1,
 		'oldfieldname': 'tds_amount_on_advance',
@@ -1048,7 +952,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'total_advance',
 		'fieldtype': 'Currency',
-		'idx': 69,
 		'label': 'Total Advance (Incl. TDS)',
 		'no_copy': 1,
 		'oldfieldname': 'total_advance',
@@ -1063,7 +966,6 @@
 		'fieldname': 'total_amount_to_pay',
 		'fieldtype': 'Currency',
 		'hidden': 0,
-		'idx': 70,
 		'label': 'Total Amount To Pay',
 		'no_copy': 1,
 		'oldfieldname': 'total_amount_to_pay',
@@ -1077,7 +979,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'outstanding_amount',
 		'fieldtype': 'Currency',
-		'idx': 71,
 		'in_filter': 1,
 		'label': 'Outstanding Amount',
 		'no_copy': 1,
@@ -1085,14 +986,13 @@
 		'oldfieldtype': 'Currency',
 		'permlevel': 1,
 		'print_hide': 1,
-		'search_index': 0
+		'search_index': 1
 	},
 
 	# DocField
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Column Break',
-		'idx': 72,
 		'oldfieldtype': 'Column Break',
 		'permlevel': 0,
 		'print_hide': 1,
@@ -1104,7 +1004,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'grand_total',
 		'fieldtype': 'Currency',
-		'idx': 73,
 		'label': 'Grand Total',
 		'oldfieldname': 'grand_total',
 		'oldfieldtype': 'Currency',
@@ -1119,7 +1018,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'in_words',
 		'fieldtype': 'Data',
-		'idx': 74,
 		'label': 'In Words',
 		'oldfieldname': 'in_words',
 		'oldfieldtype': 'Data',
@@ -1132,7 +1030,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'net_total_import',
 		'fieldtype': 'Currency',
-		'idx': 75,
 		'label': 'Net Total (Import)',
 		'oldfieldname': 'net_total_import',
 		'oldfieldtype': 'Currency',
@@ -1145,7 +1042,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'other_charges_added_import',
 		'fieldtype': 'Currency',
-		'idx': 76,
 		'label': 'Other Charges Added (Import)',
 		'oldfieldname': 'other_charges_added_import',
 		'oldfieldtype': 'Currency',
@@ -1158,7 +1054,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'other_charges_deducted_import',
 		'fieldtype': 'Currency',
-		'idx': 77,
 		'label': 'Other Charges Deducted (Import)',
 		'oldfieldname': 'other_charges_deducted_import',
 		'oldfieldtype': 'Currency',
@@ -1171,7 +1066,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'grand_total_import',
 		'fieldtype': 'Currency',
-		'idx': 78,
 		'label': 'Grand Total (Import)',
 		'oldfieldname': 'grand_total_import',
 		'oldfieldtype': 'Currency',
@@ -1186,7 +1080,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'in_words_import',
 		'fieldtype': 'Data',
-		'idx': 79,
 		'label': 'In Words (Import)',
 		'oldfieldname': 'in_words_import',
 		'oldfieldtype': 'Data',
@@ -1200,7 +1093,6 @@
 		'depends_on': 'eval:!doc.__islocal',
 		'doctype': 'DocField',
 		'fieldtype': 'Section Break',
-		'idx': 80,
 		'label': 'Actions',
 		'oldfieldtype': 'Section Break',
 		'permlevel': 0,
@@ -1212,7 +1104,6 @@
 		'allow_on_submit': 1,
 		'doctype': 'DocField',
 		'fieldtype': 'Button',
-		'idx': 81,
 		'label': 'Repair Outstanding Amt',
 		'oldfieldtype': 'Button',
 		'options': 'repair_pv_outstanding',
@@ -1226,7 +1117,6 @@
 		'fieldname': 'against_expense_account',
 		'fieldtype': 'Small Text',
 		'hidden': 1,
-		'idx': 82,
 		'label': 'Against Expense Account',
 		'no_copy': 1,
 		'oldfieldname': 'against_expense_account',
