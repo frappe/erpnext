@@ -10,8 +10,20 @@ pscript.onload_dashboard = function() {
 
 	pscript.dashboard_settings = {
 		company: sys_defaults.company,
-		start: dateutil.obj_to_str(dateutil.add_days(new Date(), -180)),
-		end: dateutil.obj_to_str(new Date()),
+		start: (function() {
+			var start_date = dateutil.add_days(new Date(), -180);
+			var year_start_date = dateutil.str_to_obj(sys_defaults.year_start_date);
+			if (start_date < year_start_date) { start_date = year_start_date; }
+			console.log(start_date);
+			return dateutil.obj_to_str(start_date);
+		})(),
+		end: (function() {
+			var end_date = new Date();
+			var year_end_date = dateutil.str_to_obj(sys_defaults.year_end_date);
+			if (end_date > year_end_date) { end_date = year_end_date; }
+			console.log(end_date);
+			return dateutil.obj_to_str(end_date);
+		})(),
 		interval: 30
 	}
 	
