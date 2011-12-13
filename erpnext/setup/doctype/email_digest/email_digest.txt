@@ -3,24 +3,25 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2011-07-27 14:23:09',
+		'creation': '2011-11-28 13:11:56',
 		'docstatus': 0,
-		'modified': '2011-07-27 17:32:27',
+		'modified': '2011-12-08 19:21:26',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1311760331',
+		'_last_update': '1323352149',
+		'autoname': 'Prompt',
 		'colour': 'White:FFF',
 		'doctype': 'DocType',
-		'issingle': 1,
+		'document_type': 'System',
 		'module': 'Setup',
 		'name': '__common__',
 		'section_style': 'Simple',
 		'show_in_menu': 0,
-		'version': 4
+		'version': 78
 	},
 
 	# These values are common for all DocField
@@ -29,23 +30,18 @@
 		'name': '__common__',
 		'parent': 'Email Digest',
 		'parentfield': 'fields',
-		'parenttype': 'DocType',
-		'permlevel': 0
+		'parenttype': 'DocType'
 	},
 
 	# These values are common for all DocPerm
 	{
-		'create': 1,
 		'doctype': 'DocPerm',
-		'idx': 1,
 		'name': '__common__',
 		'parent': 'Email Digest',
 		'parentfield': 'permissions',
 		'parenttype': 'DocType',
-		'permlevel': 0,
 		'read': 1,
-		'role': 'Administrator',
-		'write': 1
+		'role': 'System Manager'
 	},
 
 	# DocType, Email Digest
@@ -56,34 +52,290 @@
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm'
+		'cancel': 1,
+		'create': 1,
+		'doctype': 'DocPerm',
+		'permlevel': 0,
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'doctype': 'DocPerm',
+		'permlevel': 1
 	},
 
 	# DocField
 	{
 		'doctype': 'DocField',
-		'fieldtype': 'HTML',
-		'idx': 1,
-		'label': 'Body'
+		'fieldtype': 'Section Break',
+		'label': 'Settings',
+		'permlevel': 0
 	},
 
 	# DocField
 	{
 		'doctype': 'DocField',
-		'fieldname': 'content_config',
-		'fieldtype': 'Text',
+		'fieldtype': 'Column Break',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'enabled',
+		'fieldtype': 'Check',
+		'label': 'Enabled',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'company',
+		'fieldtype': 'Select',
+		'label': 'For Company',
+		'options': 'link:Company',
+		'permlevel': 0,
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		'allow_on_submit': 0,
+		'doctype': 'DocField',
+		'fieldname': 'frequency',
+		'fieldtype': 'Select',
+		'label': 'How frequently?',
+		'options': '\nDaily\nWeekly\nMonthly',
+		'permlevel': 0,
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		'depends_on': 'eval:doc.enabled',
+		'doctype': 'DocField',
+		'fieldname': 'next_send',
+		'fieldtype': 'Data',
+		'label': 'Next email will be sent on:',
+		'permlevel': 1
+	},
+
+	# DocField
+	{
+		'default': '1',
+		'doctype': 'DocField',
+		'fieldname': 'use_standard',
+		'fieldtype': 'Check',
 		'hidden': 1,
-		'idx': 2,
-		'label': 'Content Config'
+		'label': 'Use standard?',
+		'permlevel': 0,
+		'search_index': 0
 	},
 
 	# DocField
 	{
 		'doctype': 'DocField',
-		'fieldname': 'email_config',
+		'fieldtype': 'Column Break',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Button',
+		'label': 'Add Recipients',
+		'permlevel': 0,
+		'trigger': 'Client'
+	},
+
+	# DocField
+	{
+		'description': 'Note: Email will not be sent to disabled users',
+		'doctype': 'DocField',
+		'fieldname': 'recipient_list',
 		'fieldtype': 'Text',
+		'label': 'Recipients',
+		'permlevel': 1,
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		'depends_on': 'eval:doc.use_standard',
+		'doctype': 'DocField',
+		'fieldtype': 'Section Break',
+		'label': 'Select Digest Content',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'depends_on': 'eval:doc.use_standard',
+		'doctype': 'DocField',
+		'fieldname': 'new_leads',
+		'fieldtype': 'Check',
+		'label': 'New Leads',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'depends_on': 'eval:doc.use_standard',
+		'doctype': 'DocField',
+		'fieldname': 'new_enquiries',
+		'fieldtype': 'Check',
+		'label': 'New Enquiries',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'depends_on': 'eval:doc.use_standard',
+		'doctype': 'DocField',
+		'fieldname': 'new_quotations',
+		'fieldtype': 'Check',
+		'label': 'New Quotations',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'depends_on': 'eval:doc.use_standard',
+		'doctype': 'DocField',
+		'fieldname': 'new_sales_orders',
+		'fieldtype': 'Check',
+		'label': 'New Sales Orders',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'depends_on': 'eval:doc.use_standard',
+		'doctype': 'DocField',
+		'fieldname': 'new_purchase_orders',
+		'fieldtype': 'Check',
+		'label': 'New Purchase Orders',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'depends_on': 'eval:doc.use_standard',
+		'doctype': 'DocField',
+		'fieldname': 'new_transactions',
+		'fieldtype': 'Check',
+		'label': 'New Transactions',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'depends_on': 'eval:doc.use_standard',
+		'doctype': 'DocField',
+		'fieldname': 'payables',
+		'fieldtype': 'Check',
+		'label': 'Payables',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'depends_on': 'eval:doc.use_standard',
+		'doctype': 'DocField',
+		'fieldname': 'payments',
+		'fieldtype': 'Check',
+		'label': 'Payments',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'depends_on': 'eval:doc.use_standard',
+		'doctype': 'DocField',
+		'fieldname': 'expenses_booked',
+		'fieldtype': 'Check',
+		'label': 'Expenses Booked',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'depends_on': 'eval:doc.use_standard',
+		'doctype': 'DocField',
+		'fieldname': 'invoiced_amount',
+		'fieldtype': 'Check',
+		'label': 'Invoiced Amount (Receivables)',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'depends_on': 'eval:doc.use_standard',
+		'doctype': 'DocField',
+		'fieldname': 'collections',
+		'fieldtype': 'Check',
+		'label': 'Collections',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'depends_on': 'eval:doc.use_standard',
+		'doctype': 'DocField',
+		'fieldname': 'income',
+		'fieldtype': 'Check',
+		'label': 'Income',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'depends_on': 'eval:doc.use_standard',
+		'doctype': 'DocField',
+		'fieldname': 'bank_balance',
+		'fieldtype': 'Check',
+		'label': 'Bank Balance',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'stock_below_rl',
+		'fieldtype': 'Check',
 		'hidden': 1,
-		'idx': 3,
-		'label': 'Email Config'
+		'label': 'Stock Items below re-order level',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'depends_on': 'eval:!doc.use_standard',
+		'doctype': 'DocField',
+		'fieldtype': 'Section Break',
+		'label': 'Enter Custom Code',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'depends_on': 'eval:!doc.use_standard',
+		'doctype': 'DocField',
+		'fieldname': 'custom_code',
+		'fieldtype': 'Code',
+		'label': 'Custom Python Code',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'depends_on': 'eval:!doc.use_standard',
+		'doctype': 'DocField',
+		'fieldname': 'email_template',
+		'fieldtype': 'Code',
+		'label': 'Email Template',
+		'permlevel': 0
 	}
 ]
