@@ -515,6 +515,7 @@ def manage_recurring_invoices():
 
 			send_notification(new_rv)
 
+
 def create_new_invoice(prev_rv):
 	# clone rv
 	new_rv = clone(prev_rv)
@@ -533,6 +534,61 @@ def create_new_invoice(prev_rv):
 
 	return new_rv
 
+
 def send_notification(new_rv):
 	"""Notify concerned persons about recurring invoice generation"""
-	pass
+	subject = "Invoice : " + new_rv.doc.name
+
+	com = new_rv.doc.company   # get_value('Control Panel', '', 'letter_head')
+
+	hd = '''<div><h2>%s</h2></div>
+			<div><h3>Invoice: %s</h3></div>
+			<table cellspacing= "5" cellpadding="5"  width = "100%%">
+				<tr>
+					<td width = "50%%"><b>Customer</b><br>%s<br>%s</td>
+					<td width = "50%%">Invoice Date: %s<br>Due Date: %s</td>
+				</tr>
+			</table>
+		''' % (com, new_rv.doc.name, new_rv.doc.customer, new_rv.doc.address_display, new_rv.doc.posting_date, new_rv.doc.due_date)
+	
+	
+	tbl = '''<table border="1px solid #CCC" width="100%%" cellpadding="0px" cellspacing="0px">
+				<tr>
+					<td width = "15%%" bgcolor="#CCC" align="left"><b>Item</b></td>
+					<td width = "40%%" bgcolor="#CCC" align="left"><b>Description</b></td>
+					<td width = "15%%" bgcolor="#CCC" align="center"><b>Qty</b></td>
+					<td width = "15%%" bgcolor="#CCC" align="center"><b>Rate</b></td>
+					<td width = "15%%" bgcolor="#CCC" align="center"><b>Amount</b></td>
+				</tr>
+		'''
+	for d in getlist(new_rv.doclist, 'entries'):
+		tbl += '<tr><td>' + d.item_code +'</td><td>' + d.description+'</td><td>' + cstr(d.qty) +'</td><td>' + cstr(d.basic_rate) +'</td><td>' + cstr(d.amount) +'</td></tr>'
+	tbl += '</table>'
+
+	totals =''' <table cellspacing= "5" cellpadding="5"  width = "100%%">
+					<tr>
+						<td width = "50%%"></td>
+						<td width = "50%%">
+							<table width = "100%%">
+								<tr>
+									<td width = "50%%">Net Total: </td><td>%s </td>
+								</tr><tr>
+									<td width = "50%%">Total Tax: </td><td>%s </td>
+								</tr><tr>
+									<td width = "50%%">Grand Total: </td><td>%s</td>
+								</tr><tr>
+									<td width = "50%%">In Words: </td><td>%s</td>
+								</tr>
+							</table>
+						</td>
+					</tr>
+					<tr><td>Terms:</td></tr>
+					<tr><td>%s</td></tr>
+				</table>
+			''' % (new_rv.doc.net_total, new_rv.doc.total_tax,new_rv.doc.grand_total, new_rv.doc.in_words,new_rv.doc.terms)
+
+
+	msg = hd + tbl + totals
+	from webnotes.utils.email_lib import sendmail
+	sendmail(recipients = [new_rv.doc.email_notification_address], \
+		sender=new_rv.doc.owner, subject=subject, parts=[['text/plain', msg]])
