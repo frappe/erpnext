@@ -5,7 +5,7 @@
 	{
 		'creation': '2010-08-08 17:09:16',
 		'docstatus': 0,
-		'modified': '2011-12-08 18:32:23',
+		'modified': '2011-12-13 13:03:11',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
@@ -21,7 +21,7 @@
 		'section_style': 'Tray',
 		'server_code_error': ' ',
 		'show_in_menu': 0,
-		'version': 70
+		'version': 71
 	},
 
 	# These values are common for all DocField
@@ -141,7 +141,6 @@
 	# DocField
 	{
 		'colour': 'White:FFF',
-		'default': '0.00',
 		'doctype': 'DocField',
 		'fieldname': 'purchase_rate',
 		'fieldtype': 'Currency',
@@ -157,7 +156,6 @@
 
 	# DocField
 	{
-		'default': '0.00',
 		'doctype': 'DocField',
 		'fieldname': 'amount',
 		'fieldtype': 'Currency',
@@ -199,7 +197,6 @@
 	# DocField
 	{
 		'colour': 'White:FFF',
-		'default': '0.00',
 		'doctype': 'DocField',
 		'fieldname': 'import_rate',
 		'fieldtype': 'Currency',

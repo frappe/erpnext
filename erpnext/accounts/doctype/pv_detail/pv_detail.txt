@@ -5,7 +5,7 @@
 	{
 		'creation': '2010-08-08 17:09:17',
 		'docstatus': 0,
-		'modified': '2011-12-09 18:46:35',
+		'modified': '2011-12-13 12:06:35',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
@@ -21,7 +21,7 @@
 		'section_style': 'Tray',
 		'server_code_error': ' ',
 		'show_in_menu': 0,
-		'version': 36
+		'version': 39
 	},
 
 	# These values are common for all DocField
@@ -129,13 +129,14 @@
 		'fieldname': 'purchase_ref_rate',
 		'fieldtype': 'Currency',
 		'label': 'Ref Rate *',
-		'permlevel': 0
+		'permlevel': 0,
+		'trigger': 'Client'
 	},
 
 	# DocField
 	{
 		'doctype': 'DocField',
-		'fieldname': 'purchase_rate',
+		'fieldname': 'rate',
 		'fieldtype': 'Currency',
 		'label': 'Rate *(Default Curr.)',
 		'oldfieldname': 'rate',
@@ -161,12 +162,12 @@
 
 	# DocField
 	{
-		'default': '0.00',
 		'doctype': 'DocField',
 		'fieldname': 'discount_rate',
 		'fieldtype': 'Currency',
 		'label': 'Discount %',
-		'permlevel': 0
+		'permlevel': 0,
+		'trigger': 'Client'
 	},
 
 	# DocField
@@ -175,7 +176,8 @@
 		'fieldname': 'import_ref_rate',
 		'fieldtype': 'Currency',
 		'label': 'Ref Rate ',
-		'permlevel': 0
+		'permlevel': 0,
+		'trigger': 'Client'
 	},
 
 	# DocField

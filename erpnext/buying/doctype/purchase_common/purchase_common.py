@@ -120,7 +120,8 @@ class DocType(TransactionBase):
 			'conversion_factor'	: '1',
 			'warehouse'					: wh,
 			'item_tax_rate'			: str(t),
-			'batch_no'					 : ''		
+			'batch_no'					 : '',
+			'discount_rate'			: 0		
 		}
 		
 		# get min_order_qty from item
@@ -139,6 +140,8 @@ class DocType(TransactionBase):
 		
 		#	get last purchase rate as per stock uom and default currency for following list of doctypes
 		if obj.doc.doctype in ['Supplier Quotation', 'Purchase Order', 'Purchase Receipt']:
+			ret['purchase_ref_rate'] = item and flt(item[0]['last_purchase_rate']) or 0
+			ret['import_ref_rate'] = flt(item and flt(item[0]['last_purchase_rate']) or 0) / flt(obj.doc.fields.has_key('conversion_rate') and flt(obj.doc.conversion_rate) or 1)			
 			ret['purchase_rate'] = item and flt(item[0]['last_purchase_rate']) or 0
 			ret['import_rate'] = flt(item and flt(item[0]['last_purchase_rate']) or 0) / flt(obj.doc.fields.has_key('conversion_rate') and flt(obj.doc.conversion_rate) or 1)
 		
@@ -159,8 +162,11 @@ class DocType(TransactionBase):
 		if uom:
 			ret = {
 				'conversion_factor' : flt(uom[0]['conversion_factor']),
-				'qty'				 : flt(arg['stock_qty']) / flt(uom[0]['conversion_factor']),
-				'purchase_rate'		 : (lpr and flt(lpr[0]['last_purchase_rate']) * flt(uom[0]['conversion_factor'])) or 0
+				'qty'				: flt(arg['stock_qty']) / flt(uom[0]['conversion_factor']),
+				'purchase_ref_rate'	: (lpr and flt(lpr[0]['last_purchase_rate']) * flt(uom[0]['conversion_factor'])) or 0,
+				'purchase_rate'		: (lpr and flt(lpr[0]['last_purchase_rate']) * flt(uom[0]['conversion_factor'])) or 0,
+				'import_ref_rate'	: (lpr and flt(lpr[0]['last_purchase_rate']) * flt(uom[0]['conversion_factor'])/flt(self.doc.conversion_rate)) or 0,
+				'import_rate'		: (lpr and flt(lpr[0]['last_purchase_rate']) * flt(uom[0]['conversion_factor'])/flt(self.doc.conversion_rate)) or 0
 			}
 		
 		return ret
@@ -170,8 +176,7 @@ class DocType(TransactionBase):
 		for d in getlist(obj.doclist, obj.fname):
 			if d.item_code:
 				rate = sql("select last_purchase_rate from `tabItem` where name = '%s' and (ifnull(end_of_life,'')='' or end_of_life = '0000-00-00' or end_of_life >	now())"% cstr(d.item_code), as_dict = 1 )
-				d.purchase_rate =	rate and flt(rate[0]['last_purchase_rate']) * flt(d.conversion_factor) or 0
-
+				d.purchase_rate = rate and flt(rate[0]['last_purchase_rate']) * flt(d.conversion_factor) or 0
 				if not rate[0]['last_purchase_rate']:
 					msgprint("%s has no Last Purchase Rate."% d.item_code)
 

@@ -77,13 +77,6 @@ cur_frm.cscript.supplier_address = cur_frm.cscript.contact_person = function(doc
   if(doc.supplier) get_server_fields('get_supplier_address', JSON.stringify({supplier: doc.supplier, address: doc.supplier_address, contact: doc.contact_person}),'', doc, dt, dn, 1);
 }
 
-cur_frm.fields_dict['supplier_address'].get_query = function(doc, cdt, cdn) {
-  return 'SELECT name,address_line1,city FROM tabAddress WHERE supplier = "'+ doc.supplier +'" AND docstatus != 2 AND name LIKE "%s" ORDER BY name ASC LIMIT 50';
-}
-
-cur_frm.fields_dict['contact_person'].get_query = function(doc, cdt, cdn) {
-  return 'SELECT name,CONCAT(first_name," ",ifnull(last_name,"")) As FullName,department,designation FROM tabContact WHERE supplier = "'+ doc.supplier +'" AND docstatus != 2 AND name LIKE "%s" ORDER BY name ASC LIMIT 50';
-}
 
 
 cur_frm.fields_dict.supplier_address.on_new = function(dn) {
@@ -111,12 +104,6 @@ cur_frm.cscript.credit_to = function(doc,dt,dn) {
 
 
 
-// Get Print Heading
-cur_frm.fields_dict['select_print_heading'].get_query = function(doc, cdt, cdn) {
-  return 'SELECT `tabPrint Heading`.name FROM `tabPrint Heading` WHERE `tabPrint Heading`.docstatus !=2 AND `tabPrint Heading`.name LIKE "%s" ORDER BY `tabPrint Heading`.name ASC LIMIT 50';
-}
-
-
 //Set expense_head and cost center on adding new row
 //----------------------------------------------
 cur_frm.fields_dict['entries'].grid.onrowadd = function(doc, cdt, cdn){
@@ -142,18 +129,10 @@ cur_frm.cscript.is_opening = function(doc, dt, dn) {
   if (doc.is_opening == 'Yes') unhide_field('aging_date');
 }
 
-/* ******************************** TRIGGERS **************************************** */
-
-// Conversion Rate
-// ----------------
-cur_frm.cscript.conversion_rate = function(doc,cdt,cdn) {
-  cur_frm.cscript.calc_total(doc,cdt,cdn);
-}
-
 // Recalculate Button
 // -------------------
 cur_frm.cscript['Recalculate'] = function(doc, dt, dn) {
-  cur_frm.cscript.calc_total(doc, cdt, cdn);
+  cur_frm.cscript['Calculate Tax'](doc,cdt,cdn);
   calc_total_advance(doc,cdt,cdn);
 }
 
@@ -179,31 +158,16 @@ cur_frm.cscript.item_code = function(doc,cdt,cdn){
   }
 }
 
-// Quantity
-// ---------
-cur_frm.cscript.qty  = function(doc,dt,dn) { cur_frm.cscript.calc_exp_row(doc,dt,dn); }
-
-// Import Rate
-// ------------
-cur_frm.cscript.import_rate = function(doc,dt,dn) {
-  var d = locals[dt][dn];
-  set_multiple('PV Detail', d.name, {'purchase_rate': flt(d.import_rate) * flt(doc.conversion_rate) }, 'entries');
-  cur_frm.cscript.calc_exp_row(doc,dt,dn)
-}
-
-
-// ============== TDS ===============
-
 // Rate in Deduct Taxes (TDS)
 // --------------------------
 cur_frm.cscript.rate = function(doc,dt,dn) {
   //This is done as Purchase tax detail and PV detail both contain the same fieldname 'rate'
-  if(dt != 'Purchase Tax Detail') cur_frm.cscript.calc_exp_row(doc,dt,dn); 
+  if(dt != 'Purchase Tax Detail')   cur_frm.cscript.calc_amount(doc, 2);
 }
 
 // Amount
 // -------
-cur_frm.cscript.ded_amount = function(doc,dt,dn) { cur_frm.cscript.calc_total(doc); }
+cur_frm.cscript.ded_amount = function(doc,dt,dn) {calculate_outstanding(doc);}
 
 // Get TDS Button
 // ---------------
@@ -211,7 +175,7 @@ cur_frm.cscript['Get TDS'] = function(doc, dt, dn) {
   var callback = function(r,rt) {
     cur_frm.refresh();
     refresh_field('ded_amount');
-    cur_frm.cscript.calc_total(locals[dt][dn]);
+    //cur_frm.cscript.calc_total(locals[dt][dn]);
   }
   $c_obj(make_doclist(dt,dn), 'get_tds', '', callback);
 }
@@ -243,6 +207,15 @@ cur_frm.cscript['Make Bank Voucher'] = function(doc, dt, dn) {
 
 
 /* ***************************** GET QUERY Functions *************************** */
+
+
+cur_frm.fields_dict['supplier_address'].get_query = function(doc, cdt, cdn) {
+  return 'SELECT name,address_line1,city FROM tabAddress WHERE supplier = "'+ doc.supplier +'" AND docstatus != 2 AND name LIKE "%s" ORDER BY name ASC LIMIT 50';
+}
+
+cur_frm.fields_dict['contact_person'].get_query = function(doc, cdt, cdn) {
+  return 'SELECT name,CONCAT(first_name," ",ifnull(last_name,"")) As FullName,department,designation FROM tabContact WHERE supplier = "'+ doc.supplier +'" AND docstatus != 2 AND name LIKE "%s" ORDER BY name ASC LIMIT 50';
+}
 
 // Item Code
 // ----------
@@ -276,6 +249,12 @@ cur_frm.fields_dict['purchase_receipt_main'].get_query = function(doc) {
     return 'SELECT `tabPurchase Receipt`.`name` FROM `tabPurchase Receipt` WHERE `tabPurchase Receipt`.`docstatus` = 1 AND `tabPurchase Receipt`.`status` != "Stopped" AND ifnull(`tabPurchase Receipt`.`per_billed`, 0) < 100 AND `tabPurchase Receipt`.`company` = "' + doc.company + '" AND `tabPurchase Receipt`.%(key)s LIKE "%s" ORDER BY `tabPurchase Receipt`.`name` DESC LIMIT 50'
   }
 }
+
+// Get Print Heading
+cur_frm.fields_dict['select_print_heading'].get_query = function(doc, cdt, cdn) {
+  return 'SELECT `tabPrint Heading`.name FROM `tabPrint Heading` WHERE `tabPrint Heading`.docstatus !=2 AND `tabPrint Heading`.name LIKE "%s" ORDER BY `tabPrint Heading`.name ASC LIMIT 50';
+}
+
 
 // ================== PV Details Table ===================
 // Expense Head
@@ -324,28 +303,6 @@ cur_frm.cscript.tax_code = function(doc, dt, dn) {
 
 /* ***************************** UTILITY FUNCTIONS ************************ */
 
-// Calculate
-// ---------
-cur_frm.cscript.calc_total = function(doc) {
-  
-   // expense
-  var t_exp = 0.0;
-  var el = getchildren('PV Detail',doc.name,'entries');
-  for(var i in el) {
-   if (flt(el[i].import_rate) > 0){
-	 set_multiple('PV Detail', el[i].name, {'purchase_ref_rate':flt(el[i].import_ref_rate)*flt(doc.conversion_rate)}, 'entries');
-     set_multiple('PV Detail', el[i].name, {'purchase_rate': flt(doc.conversion_rate) * flt(el[i].import_rate) }, 'entries');
-     set_multiple('PV Detail', el[i].name, {'import_amount': flt(el[i].qty) * flt(el[i].import_rate) }, 'entries');
-   }
-   set_multiple('PV Detail', el[i].name, {'amount': flt(el[i].qty) * flt(el[i].purchase_rate) }, 'entries')
-   t_exp += flt(el[i].amount);
-  }
-  doc.net_total = flt(t_exp);
-  refresh_field('net_total');
-  cur_frm.cscript.val_cal_charges(doc, cdt, cdn, cur_frm.cscript.tname, cur_frm.cscript.fname, cur_frm.cscript.other_fname);
-}
-
-
 // Calculate Advance
 // ------------------
 var calc_total_advance = function(doc,cdt,cdn) {
@@ -366,30 +323,12 @@ var calc_total_advance = function(doc,cdt,cdn) {
   refresh_many(['total_advance','outstanding_amount','tds_amount_on_advance', 'total_amount_to_pay']);
 }
 
-
-cur_frm.cscript.calc_exp_row = function(doc,dt,dn) {
-  var d = locals[dt][dn];
-  d.amount = flt(d.qty * d.purchase_rate);
-  refresh_field('amount',dn,'entries');
-  
-  if (!doc.conversion_rate){ doc.conversion_rate = 1; refresh_field('conversion_rate'); }
-  
-  set_multiple('PV Detail', dn, {'import_rate': flt(d.purchase_rate) / flt(doc.conversion_rate) }, 'entries');
-  set_multiple('PV Detail', dn, {'import_amount': flt(d.qty) * flt(d.purchase_rate) / flt(doc.conversion_rate) }, 'entries');
-  
-  cur_frm.cscript.calc_total(doc)
-}
-
-
 // Make JV
 // --------
 cur_frm.cscript.make_jv = function(doc, dt, dn, det) {
   var jv = LocalDB.create('Journal Voucher');
   jv = locals['Journal Voucher'][jv];
   jv.voucher_type = 'Bank Voucher';
-  //jv.voucher_series = det.def_bv_series;
-  //jv.voucher_date = doc.voucher_date;
-  //jv.posting_date = doc.posting_date;
   jv.remark = repl('Payment against voucher %(vn)s for %(rem)s', {vn:doc.name, rem:doc.remarks});
   jv.total_debit = doc.outstanding_amount;
   jv.total_credit = doc.outstanding_amount;
@@ -400,20 +339,17 @@ cur_frm.cscript.make_jv = function(doc, dt, dn, det) {
   var d1 = LocalDB.add_child(jv, 'Journal Voucher Detail', 'entries');
   d1.account = doc.credit_to;
   d1.debit = doc.outstanding_amount;
-  //d1.balance = det.acc_balance;
   d1.against_voucher = doc.name;
   
   // credit to bank
   var d1 = LocalDB.add_child(jv, 'Journal Voucher Detail', 'entries');
-  //d1.account = det.def_bank_account;
-  //d1.balance = det.bank_balance;
   d1.credit = doc.outstanding_amount;
   
   loaddoc('Journal Voucher', jv.name);
 }
 
 // ***************** Get project name *****************
-cur_frm.fields_dict['pv_details'].grid.get_field('project_name').get_query = function(doc, cdt, cdn) {
+cur_frm.fields_dict['entries'].grid.get_field('project_name').get_query = function(doc, cdt, cdn) {
   return 'SELECT `tabProject`.name FROM `tabProject` WHERE `tabProject`.status = "Open" AND `tabProject`.name LIKE "%s" ORDER BY `tabProject`.name ASC LIMIT 50';
 }
 
@@ -425,15 +361,6 @@ cur_frm.cscript.select_print_heading = function(doc,cdt,cdn){
   }
   else
     cur_frm.pformat.print_heading = "Purchase Invoice";
-}
-
-/* *********************** Client Side Validation **************************** */
-// Validate
-// ---------
-cur_frm.cscript.validate = function(doc, cdt, cdn) {
-  is_item_table(doc,cdt,cdn);
-  cur_frm.cscript.calc_total(doc, cdt, cdn);
-  calc_total_advance(doc, cdt, cdn);
 }
 
 /****************** Get Accounting Entry *****************/
