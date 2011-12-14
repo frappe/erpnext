@@ -5,7 +5,7 @@
 	{
 		'creation': '2010-08-08 17:09:16',
 		'docstatus': 0,
-		'modified': '2011-12-13 13:03:11',
+		'modified': '2011-12-14 10:50:00',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
@@ -14,6 +14,7 @@
 	{
 		'autoname': 'GRND/.#######',
 		'colour': 'White:FFF',
+		'default_print_format': 'Standard',
 		'doctype': 'DocType',
 		'istable': 1,
 		'module': 'Stock',
@@ -21,7 +22,7 @@
 		'section_style': 'Tray',
 		'server_code_error': ' ',
 		'show_in_menu': 0,
-		'version': 71
+		'version': 73
 	},
 
 	# These values are common for all DocField
@@ -103,6 +104,20 @@
 	{
 		'default': '0.00',
 		'doctype': 'DocField',
+		'fieldname': 'qty',
+		'fieldtype': 'Currency',
+		'label': 'Accepted Quantity',
+		'oldfieldname': 'qty',
+		'oldfieldtype': 'Currency',
+		'permlevel': 0,
+		'trigger': 'Client',
+		'width': '100px'
+	},
+
+	# DocField
+	{
+		'default': '0.00',
+		'doctype': 'DocField',
 		'fieldname': 'rejected_qty',
 		'fieldtype': 'Currency',
 		'in_filter': 0,
@@ -117,16 +132,47 @@
 
 	# DocField
 	{
+		'doctype': 'DocField',
+		'fieldname': 'import_ref_rate',
+		'fieldtype': 'Currency',
+		'label': 'Ref Rate ',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'discount_rate',
+		'fieldtype': 'Currency',
+		'label': 'Discount  %',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
 		'default': '0.00',
 		'doctype': 'DocField',
-		'fieldname': 'qty',
+		'fieldname': 'import_rate',
 		'fieldtype': 'Currency',
-		'label': 'Accepted Quantity',
-		'oldfieldname': 'qty',
+		'label': 'Rate',
+		'oldfieldname': 'import_rate',
 		'oldfieldtype': 'Currency',
 		'permlevel': 0,
+		'print_hide': 0,
 		'trigger': 'Client',
 		'width': '100px'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'import_amount',
+		'fieldtype': 'Currency',
+		'label': 'Amount',
+		'oldfieldname': 'import_amount',
+		'oldfieldtype': 'Currency',
+		'permlevel': 1
 	},
 
 	# DocField
@@ -141,6 +187,7 @@
 	# DocField
 	{
 		'colour': 'White:FFF',
+		'default': '0.00',
 		'doctype': 'DocField',
 		'fieldname': 'purchase_rate',
 		'fieldtype': 'Currency',
@@ -156,6 +203,7 @@
 
 	# DocField
 	{
+		'default': '0.00',
 		'doctype': 'DocField',
 		'fieldname': 'amount',
 		'fieldtype': 'Currency',
@@ -166,6 +214,21 @@
 		'print_hide': 1,
 		'reqd': 0,
 		'trigger': 'Client',
+		'width': '100px'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'warehouse',
+		'fieldtype': 'Link',
+		'hidden': 0,
+		'label': 'Accepted Warehouse',
+		'oldfieldname': 'warehouse',
+		'oldfieldtype': 'Link',
+		'options': 'Warehouse',
+		'permlevel': 0,
+		'print_hide': 0,
 		'width': '100px'
 	},
 
@@ -188,50 +251,6 @@
 	# DocField
 	{
 		'doctype': 'DocField',
-		'fieldname': 'discount_rate',
-		'fieldtype': 'Currency',
-		'label': 'Discount  %',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldname': 'import_rate',
-		'fieldtype': 'Currency',
-		'label': 'Rate',
-		'oldfieldname': 'import_rate',
-		'oldfieldtype': 'Currency',
-		'permlevel': 0,
-		'print_hide': 0,
-		'trigger': 'Client',
-		'width': '100px'
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldname': 'import_ref_rate',
-		'fieldtype': 'Currency',
-		'label': 'Ref Rate ',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldname': 'import_amount',
-		'fieldtype': 'Currency',
-		'label': 'Amount',
-		'oldfieldname': 'import_amount',
-		'oldfieldtype': 'Currency',
-		'permlevel': 1
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
 		'fieldname': 'conversion_factor',
 		'fieldtype': 'Currency',
 		'label': 'Conversion Factor',
@@ -241,21 +260,6 @@
 		'print_hide': 1,
 		'reqd': 1,
 		'trigger': 'Client',
-		'width': '100px'
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldname': 'warehouse',
-		'fieldtype': 'Link',
-		'hidden': 0,
-		'label': 'Accepted Warehouse',
-		'oldfieldname': 'warehouse',
-		'oldfieldtype': 'Link',
-		'options': 'Warehouse',
-		'permlevel': 0,
-		'print_hide': 0,
 		'width': '100px'
 	},
 
@@ -292,6 +296,50 @@
 
 	# DocField
 	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldname': 'schedule_date',
+		'fieldtype': 'Date',
+		'label': 'Schedule date',
+		'no_copy': 1,
+		'oldfieldname': 'schedule_date',
+		'oldfieldtype': 'Date',
+		'permlevel': 0,
+		'print_hide': 1,
+		'report_hide': 0,
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldname': 'project_name',
+		'fieldtype': 'Link',
+		'in_filter': 1,
+		'label': 'Project Name',
+		'options': 'Project',
+		'permlevel': 0,
+		'print_hide': 1
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldname': 'qa_no',
+		'fieldtype': 'Link',
+		'label': 'QA No',
+		'no_copy': 1,
+		'oldfieldname': 'qa_no',
+		'oldfieldtype': 'Link',
+		'options': 'QA Inspection Report',
+		'permlevel': 0,
+		'print_hide': 1
+	},
+
+	# DocField
+	{
 		'doctype': 'DocField',
 		'fieldname': 'brand',
 		'fieldtype': 'Link',
@@ -324,24 +372,9 @@
 	{
 		'colour': 'White:FFF',
 		'doctype': 'DocField',
-		'fieldname': 'schedule_date',
-		'fieldtype': 'Date',
-		'label': 'Schedule date',
-		'no_copy': 1,
-		'oldfieldname': 'schedule_date',
-		'oldfieldtype': 'Date',
-		'permlevel': 0,
-		'print_hide': 1,
-		'report_hide': 0,
-		'reqd': 1
-	},
-
-	# DocField
-	{
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
 		'fieldname': 'serial_no',
 		'fieldtype': 'Text',
+		'in_filter': 1,
 		'label': 'Serial No',
 		'no_copy': 1,
 		'oldfieldname': 'serial_no',
@@ -364,21 +397,6 @@
 		'permlevel': 0,
 		'print_hide': 1,
 		'trigger': 'Client'
-	},
-
-	# DocField
-	{
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldname': 'qa_no',
-		'fieldtype': 'Link',
-		'label': 'QA No',
-		'no_copy': 1,
-		'oldfieldname': 'qa_no',
-		'oldfieldtype': 'Link',
-		'options': 'QA Inspection Report',
-		'permlevel': 0,
-		'print_hide': 1
 	},
 
 	# DocField
@@ -460,6 +478,7 @@
 
 	# DocField
 	{
+		'colour': 'White:FFF',
 		'doctype': 'DocField',
 		'fieldname': 'item_tax_amount',
 		'fieldtype': 'Currency',
@@ -510,6 +529,7 @@
 
 	# DocField
 	{
+		'colour': 'White:FFF',
 		'doctype': 'DocField',
 		'fieldname': 'valuation_rate',
 		'fieldtype': 'Currency',
@@ -519,13 +539,14 @@
 		'no_copy': 1,
 		'oldfieldname': 'valuation_rate',
 		'oldfieldtype': 'Currency',
-		'permlevel': 0,
+		'permlevel': 1,
 		'print_hide': 1,
 		'width': '80px'
 	},
 
 	# DocField
 	{
+		'colour': 'White:FFF',
 		'description': 'Tax detail table fetched from item master as a string and stored in this field.\nUsed for Purchase Other Charges',
 		'doctype': 'DocField',
 		'fieldname': 'item_tax_rate',
