@@ -5,14 +5,14 @@
 	{
 		'creation': '2011-09-07 11:59:05',
 		'docstatus': 0,
-		'modified': '2011-12-06 18:48:53',
+		'modified': '2011-12-14 11:05:55',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1323176623',
+		'_last_update': '1323840127',
 		'colour': 'White:FFF',
 		'default_print_format': 'Standard',
 		'doctype': 'DocType',
@@ -22,7 +22,7 @@
 		'name_case': 'Title Case',
 		'section_style': 'Simple',
 		'show_in_menu': 1,
-		'version': 24
+		'version': 26
 	},
 
 	# These values are common for all DocField
@@ -179,7 +179,17 @@
 		'doctype': 'DocField',
 		'fieldname': 'fs_discounts',
 		'fieldtype': 'Check',
-		'label': 'Discounts'
+		'label': 'Sales Discounts'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'description': 'Discount Fields will be available in Purchase Order, Purchase Receipt, Purchase Invoice',
+		'doctype': 'DocField',
+		'fieldname': 'fs_purchase_discounts',
+		'fieldtype': 'Check',
+		'label': 'Purchase Discounts'
 	},
 
 	# DocField

@@ -5,7 +5,7 @@
 	{
 		'creation': '2010-08-08 17:09:17',
 		'docstatus': 0,
-		'modified': '2011-10-20 18:41:17',
+		'modified': '2011-12-14 10:44:21',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
@@ -22,7 +22,7 @@
 		'section_style': 'Tray',
 		'server_code_error': ' ',
 		'show_in_menu': 0,
-		'version': 27
+		'version': 42
 	},
 
 	# These values are common for all DocField
@@ -74,18 +74,6 @@
 	# DocField
 	{
 		'doctype': 'DocField',
-		'fieldname': 'brand',
-		'fieldtype': 'Data',
-		'label': 'Brand',
-		'oldfieldname': 'brand',
-		'oldfieldtype': 'Data',
-		'permlevel': 0,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
 		'fieldname': 'description',
 		'fieldtype': 'Text',
 		'label': 'Description',
@@ -93,49 +81,6 @@
 		'oldfieldtype': 'Text',
 		'permlevel': 0,
 		'width': '300px'
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldname': 'item_group',
-		'fieldtype': 'Link',
-		'in_filter': 1,
-		'label': 'Item Group',
-		'oldfieldname': 'item_group',
-		'oldfieldtype': 'Link',
-		'options': 'Item Group',
-		'permlevel': 1,
-		'print_hide': 1,
-		'search_index': 1
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldname': 'rate',
-		'fieldtype': 'Currency',
-		'label': 'Rate (Default Curr.)',
-		'oldfieldname': 'rate',
-		'oldfieldtype': 'Currency',
-		'permlevel': 0,
-		'print_hide': 1,
-		'reqd': 1,
-		'trigger': 'Client'
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldname': 'import_rate',
-		'fieldtype': 'Currency',
-		'label': 'Rate',
-		'oldfieldname': 'import_rate',
-		'oldfieldtype': 'Currency',
-		'permlevel': 0,
-		'print_hide': 0,
-		'reqd': 1,
-		'trigger': 'Client'
 	},
 
 	# DocField
@@ -155,14 +100,35 @@
 	# DocField
 	{
 		'doctype': 'DocField',
-		'fieldname': 'amount',
+		'fieldname': 'import_ref_rate',
 		'fieldtype': 'Currency',
-		'label': 'Amount (Default Curr.)',
-		'oldfieldname': 'amount',
+		'label': 'Ref Rate ',
+		'permlevel': 0,
+		'trigger': 'Client'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'discount_rate',
+		'fieldtype': 'Currency',
+		'label': 'Discount %',
+		'permlevel': 0,
+		'trigger': 'Client'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'import_rate',
+		'fieldtype': 'Currency',
+		'label': 'Rate ',
+		'oldfieldname': 'import_rate',
 		'oldfieldtype': 'Currency',
-		'permlevel': 1,
-		'print_hide': 1,
-		'reqd': 1
+		'permlevel': 0,
+		'print_hide': 0,
+		'reqd': 1,
+		'trigger': 'Client'
 	},
 
 	# DocField
@@ -174,6 +140,43 @@
 		'oldfieldname': 'import_amount',
 		'oldfieldtype': 'Currency',
 		'permlevel': 1,
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'purchase_ref_rate',
+		'fieldtype': 'Currency',
+		'label': 'Ref Rate *',
+		'permlevel': 0,
+		'trigger': 'Client'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'rate',
+		'fieldtype': 'Currency',
+		'label': 'Rate *(Default Curr.)',
+		'oldfieldname': 'rate',
+		'oldfieldtype': 'Currency',
+		'permlevel': 0,
+		'print_hide': 1,
+		'reqd': 1,
+		'trigger': 'Client'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'amount',
+		'fieldtype': 'Currency',
+		'label': 'Amount (Default Curr.)',
+		'oldfieldname': 'amount',
+		'oldfieldtype': 'Currency',
+		'permlevel': 1,
+		'print_hide': 1,
 		'reqd': 1
 	},
 
@@ -221,6 +224,33 @@
 		'options': 'Project',
 		'permlevel': 0,
 		'print_hide': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'brand',
+		'fieldtype': 'Data',
+		'label': 'Brand',
+		'oldfieldname': 'brand',
+		'oldfieldtype': 'Data',
+		'permlevel': 0,
+		'print_hide': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'item_group',
+		'fieldtype': 'Link',
+		'in_filter': 1,
+		'label': 'Item Group',
+		'oldfieldname': 'item_group',
+		'oldfieldtype': 'Link',
+		'options': 'Item Group',
+		'permlevel': 1,
+		'print_hide': 1,
+		'search_index': 1
 	},
 
 	# DocField

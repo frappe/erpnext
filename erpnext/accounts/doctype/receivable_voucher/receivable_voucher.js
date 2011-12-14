@@ -67,6 +67,12 @@ cur_frm.cscript.hide_fields = function(doc, cdt, cdn) {
 			}
 		}
 	}
+
+	// India related fields
+	var cp = locals['Control Panel']['Control Panel'];
+	if (cp.country == 'India') unhide_field(['c_form_applicable', 'c_form_no']);
+	else hide_field(['c_form_applicable', 'c_form_no']);
+
 }
 
 

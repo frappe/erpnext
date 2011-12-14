@@ -5,4 +5,5 @@ def execute():
 
 	reload_doc('accounts', 'doctype', 'receivable_voucher')
 
+	reload_doc('setup', 'doctype', 'features_setup')
 	get_obj('Features setup').validate()
