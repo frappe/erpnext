@@ -1,30 +1,43 @@
 cur_frm.cscript.refresh = function(doc, dt, dn) {
+	doc = locals[dt][dn];
+	var save_msg = "You must <b>Save</b> the form before proceeding";
+	var err_msg = "There was an error. One probable reason could be that you haven't saved the form. Please contact support@erpnext.com if the problem persists."
 	cur_frm.add_custom_button('View Now', function() {
-		$c_obj(make_doclist(dt, dn), 'get', '', function(r, rt) {
-			if(r.exc) {
-				msgprint(r.exc);
-			} else {
-				//console.log(arguments);
-				var d = new wn.widgets.Dialog({
-					title: 'Email Digest: ' + dn,
-					width: 800
-				});
+		if(doc.__unsaved != 1) {
+			$c_obj(make_doclist(dt, dn), 'get', '', function(r, rt) {
+				if(r.exc) {
+					msgprint(err_msg);
+					console.log(r.exc);
+				} else {
+					//console.log(arguments);
+					var d = new wn.widgets.Dialog({
+						title: 'Email Digest: ' + dn,
+						width: 800
+					});
 
-				$a(d.body, 'div', '', '', r['message'][1]);
+					$a(d.body, 'div', '', '', r['message'][1]);
 
-				d.show();
-			}
-		});	
+					d.show();
+				}
+			});
+		} else {
+			msgprint(save_msg);
+		}	
 	}, 1);
 	cur_frm.add_custom_button('Send Now', function() {
-		$c_obj(make_doclist(dt, dn), 'send', '', function(r, rt) {
-			if(r.exc) {
-				msgprint(r.exc);
-			} else {
-				//console.log(arguments);
-				msgprint('Message Sent');
-			}
-		});	
+		if(doc.__unsaved != 1) {
+			$c_obj(make_doclist(dt, dn), 'send', '', function(r, rt) {
+				if(r.exc) {
+					msgprint(err_msg);
+					console.log(r.exc);
+				} else {
+					//console.log(arguments);
+					msgprint('Message Sent');
+				}
+			});
+		} else {
+			msgprint(save_msg);
+		}
 	}, 1);
 }
 
