@@ -386,7 +386,7 @@ class DocType:
 			'event': 'setup.doctype.email_digest.email_digest.send'
 		}
 		from webnotes.utils.scheduler import Scheduler
-		print "before scheduler"
+		#print "before scheduler"
 		sch = Scheduler()
 		sch.connect()
 
@@ -411,7 +411,7 @@ class DocType:
 		else:
 			# delete scheduler entry
 			sch.clear(args['db_name'], args['event'])
-		print "after on update"
+		#print "after on update"
 	
 
 	def get_next_sending(self):
