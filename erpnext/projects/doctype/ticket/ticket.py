@@ -9,6 +9,7 @@ from webnotes.model.code import get_obj, get_server_obj, run_server_obj, updated
 from webnotes import session, form, is_testing, msgprint, errprint
 
 sql = webnotes.conn.sql
+set = webnotes.conn.set
 
 # -----------------------------------------------------------------------------------------
 
