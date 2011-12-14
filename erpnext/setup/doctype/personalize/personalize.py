@@ -14,7 +14,8 @@ class DocType:
 	# on update
 	#
 	def validate(self):
-		if self.doc.file_list and self.doc.set_from_attachment:
+		from webnotes.utils import cint
+		if self.doc.file_list and cint(self.doc.set_from_attachment):
 			self.set_html_from_image()
 
 		# update control panel - so it loads new letter directly
