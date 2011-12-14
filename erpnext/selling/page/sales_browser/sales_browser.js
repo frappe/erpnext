@@ -139,7 +139,7 @@ SalesBrowser.prototype.make_tree = function() {
         var has_children = true;
 
         if(cl[i].is_group=='No') {
-          var imgsrc = 'images/icons/page.gif';
+          var imgsrc = 'lib/images/icons/page.gif';
           has_children = false;
         }
         var t = me.tree.addNode(n, cl[i].name, imgsrc,me.tree.std_onclick, has_children ? me.tree.std_onexp : null);
@@ -219,7 +219,7 @@ SalesBrowser.prototype.first_level_node = function(){
       var has_children = true;
 
       if(cl[i].is_group=='No') {
-        var imgsrc = 'images/icons/page.gif';
+        var imgsrc = 'lib/images/icons/page.gif';
         has_children = false;
       }
      me.tree_area.innerHTML = ''; 

@@ -183,7 +183,7 @@
 	-->
 	<table class='header-table' cellspacing=0>
 		<thead>
-			<tr><td colspan=2><div><h1>Purchase Order</h1></div></td></tr>
+			<tr><td colspan=2><div><script>'<h1>' + (doc.select_print_heading || 'Purchase Order') + '</h1>'</script></div></td></tr>
 			<tr><td colspan=2><div style="height:15px"></div></td></tr>
 		</thead>
 		<tbody>
@@ -273,4 +273,3 @@
 		</tfoot>
 	</table>
 </div>
-

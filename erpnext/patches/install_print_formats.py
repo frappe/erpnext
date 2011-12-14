@@ -53,7 +53,7 @@ def execute():
 		Install print formats
 	"""
 	from webnotes.modules.module_manager import reload_doc
-	#reload_doc('core', 'doctype', 'print_format')
+	reload_doc('core', 'doctype', 'print_format')
 	
 	#copy_doctype_to_pfs()
 	global pf_to_install
