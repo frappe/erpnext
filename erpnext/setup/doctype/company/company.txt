@@ -5,14 +5,14 @@
 	{
 		'creation': '2010-08-08 17:08:55',
 		'docstatus': 0,
-		'modified': '2011-07-01 17:43:29',
+		'modified': '2011-12-14 15:12:28',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1309506817',
+		'_last_update': '1323855292',
 		'allow_trash': 1,
 		'autoname': 'field:company_name',
 		'colour': 'White:FFF',
@@ -23,7 +23,7 @@
 		'section_style': 'Tabbed',
 		'server_code_error': ' ',
 		'show_in_menu': 0,
-		'version': 93
+		'version': 96
 	},
 
 	# These values are common for all DocField
@@ -37,7 +37,6 @@
 
 	# These values are common for all DocPerm
 	{
-		'cancel': 0,
 		'doctype': 'DocPerm',
 		'name': '__common__',
 		'parent': 'Company',
@@ -55,9 +54,9 @@
 	# DocPerm
 	{
 		'amend': 0,
+		'cancel': 1,
 		'create': 1,
 		'doctype': 'DocPerm',
-		'idx': 1,
 		'permlevel': 0,
 		'role': 'System Manager',
 		'submit': 0,
@@ -67,9 +66,9 @@
 	# DocPerm
 	{
 		'amend': 0,
+		'cancel': 1,
 		'create': 1,
 		'doctype': 'DocPerm',
-		'idx': 2,
 		'permlevel': 0,
 		'role': 'System Manager',
 		'submit': 0,
@@ -78,8 +77,8 @@
 
 	# DocPerm
 	{
+		'cancel': 0,
 		'doctype': 'DocPerm',
-		'idx': 3,
 		'permlevel': 1,
 		'role': 'All'
 	},
@@ -89,7 +88,6 @@
 		'description': 'Please Enter Company Name and Abbr and save the document. Once saved Accounting Settings will be populated automatically',
 		'doctype': 'DocField',
 		'fieldtype': 'Section Break',
-		'idx': 1,
 		'label': 'Details',
 		'oldfieldtype': 'Section Break',
 		'permlevel': 0
@@ -101,7 +99,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'company_name',
 		'fieldtype': 'Data',
-		'idx': 2,
 		'label': 'Company',
 		'no_copy': 0,
 		'oldfieldname': 'company_name',
@@ -117,7 +114,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'abbr',
 		'fieldtype': 'Data',
-		'idx': 3,
 		'label': 'Abbr',
 		'no_copy': 0,
 		'oldfieldname': 'abbr',
@@ -128,13 +124,11 @@
 
 	# DocField
 	{
+		'depends_on': 'eval:!doc.__islocal',
 		'doctype': 'DocField',
-		'fieldname': 'address',
-		'fieldtype': 'Small Text',
-		'idx': 4,
-		'label': 'Address',
-		'oldfieldname': 'address',
-		'oldfieldtype': 'Small Text',
+		'fieldtype': 'Section Break',
+		'label': 'Default Settings',
+		'oldfieldtype': 'Section Break',
 		'permlevel': 0
 	},
 
@@ -143,7 +137,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'default_currency',
 		'fieldtype': 'Select',
-		'idx': 5,
 		'label': 'Default Currency',
 		'options': 'link:Currency',
 		'permlevel': 0,
@@ -152,110 +145,10 @@
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Column Break',
-		'idx': 6,
-		'oldfieldtype': 'Column Break',
-		'permlevel': 0,
-		'width': '50%'
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldname': 'phone_no',
-		'fieldtype': 'Data',
-		'idx': 7,
-		'label': 'Phone No',
-		'oldfieldname': 'phone_no',
-		'oldfieldtype': 'Data',
-		'options': 'Phone',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldname': 'email',
-		'fieldtype': 'Data',
-		'idx': 8,
-		'label': 'Email',
-		'oldfieldname': 'email',
-		'oldfieldtype': 'Data',
-		'options': 'Email',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldname': 'fax',
-		'fieldtype': 'Data',
-		'idx': 9,
-		'label': 'Fax',
-		'oldfieldname': 'fax',
-		'oldfieldtype': 'Data',
-		'options': 'Phone',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldname': 'website',
-		'fieldtype': 'Data',
-		'idx': 10,
-		'label': 'Website',
-		'oldfieldname': 'website',
-		'oldfieldtype': 'Data',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'colour': 'White:FFF',
-		'description': 'Company registration numbers for your reference. Example: VAT Registration Numbers etc.',
-		'doctype': 'DocField',
-		'fieldtype': 'Section Break',
-		'idx': 11,
-		'label': 'Registration Info',
-		'oldfieldtype': 'Section Break',
-		'permlevel': 0,
-		'width': '50%'
-	},
-
-	# DocField
-	{
-		'colour': 'White:FFF',
-		'description': 'Company registration numbers for your reference. Tax numbers etc.',
-		'doctype': 'DocField',
-		'fieldname': 'registration_details',
-		'fieldtype': 'Code',
-		'idx': 12,
-		'label': 'Registration Details',
-		'oldfieldname': 'registration_details',
-		'oldfieldtype': 'Code',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'depends_on': 'eval:!doc.__islocal',
-		'doctype': 'DocField',
-		'fieldtype': 'Section Break',
-		'idx': 13,
-		'label': 'Accounting Settings',
-		'oldfieldtype': 'Section Break',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
 		'depends_on': 'eval:!doc.__islocal',
 		'doctype': 'DocField',
 		'fieldname': 'default_bank_account',
 		'fieldtype': 'Link',
-		'idx': 14,
 		'label': 'Default Bank Account',
 		'no_copy': 1,
 		'oldfieldname': 'default_bank_account',
@@ -271,7 +164,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'receivables_group',
 		'fieldtype': 'Link',
-		'idx': 15,
 		'label': 'Receivables Group',
 		'no_copy': 1,
 		'oldfieldname': 'receivables_group',
@@ -287,7 +179,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'payables_group',
 		'fieldtype': 'Link',
-		'idx': 16,
 		'label': 'Payables Group',
 		'no_copy': 1,
 		'oldfieldname': 'payables_group',
@@ -301,10 +192,33 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Column Break',
-		'idx': 17,
 		'oldfieldtype': 'Column Break',
 		'permlevel': 0,
 		'width': '50%'
+	},
+
+	# DocField
+	{
+		'depends_on': 'eval:!doc.__islocal',
+		'doctype': 'DocField',
+		'fieldname': 'credit_days',
+		'fieldtype': 'Int',
+		'label': 'Credit Days',
+		'oldfieldname': 'credit_days',
+		'oldfieldtype': 'Int',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'depends_on': 'eval:!doc.__islocal',
+		'doctype': 'DocField',
+		'fieldname': 'credit_limit',
+		'fieldtype': 'Currency',
+		'label': 'Credit Limit',
+		'oldfieldname': 'credit_limit',
+		'oldfieldtype': 'Currency',
+		'permlevel': 0
 	},
 
 	# DocField
@@ -314,7 +228,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'yearly_bgt_flag',
 		'fieldtype': 'Select',
-		'idx': 18,
 		'label': 'If Yearly Budget Exceeded',
 		'oldfieldname': 'yearly_bgt_flag',
 		'oldfieldtype': 'Select',
@@ -328,7 +241,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'monthly_bgt_flag',
 		'fieldtype': 'Select',
-		'idx': 19,
 		'label': 'If Monthly Budget Exceeded',
 		'oldfieldname': 'monthly_bgt_flag',
 		'oldfieldtype': 'Select',
@@ -338,27 +250,101 @@
 
 	# DocField
 	{
-		'depends_on': 'eval:!doc.__islocal',
 		'doctype': 'DocField',
-		'fieldname': 'credit_days',
-		'fieldtype': 'Int',
-		'idx': 20,
-		'label': 'Credit Days',
-		'oldfieldname': 'credit_days',
-		'oldfieldtype': 'Int',
+		'fieldtype': 'Section Break',
+		'label': 'Company Info',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'depends_on': 'eval:!doc.__islocal',
 		'doctype': 'DocField',
-		'fieldname': 'credit_limit',
-		'fieldtype': 'Currency',
-		'idx': 21,
-		'label': 'Credit Limit',
-		'oldfieldname': 'credit_limit',
-		'oldfieldtype': 'Currency',
+		'fieldname': 'address',
+		'fieldtype': 'Small Text',
+		'label': 'Address',
+		'oldfieldname': 'address',
+		'oldfieldtype': 'Small Text',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Column Break',
+		'oldfieldtype': 'Column Break',
+		'permlevel': 0,
+		'width': '50%'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'phone_no',
+		'fieldtype': 'Data',
+		'label': 'Phone No',
+		'oldfieldname': 'phone_no',
+		'oldfieldtype': 'Data',
+		'options': 'Phone',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'fax',
+		'fieldtype': 'Data',
+		'label': 'Fax',
+		'oldfieldname': 'fax',
+		'oldfieldtype': 'Data',
+		'options': 'Phone',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'email',
+		'fieldtype': 'Data',
+		'label': 'Email',
+		'oldfieldname': 'email',
+		'oldfieldtype': 'Data',
+		'options': 'Email',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'website',
+		'fieldtype': 'Data',
+		'label': 'Website',
+		'oldfieldname': 'website',
+		'oldfieldtype': 'Data',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'description': 'Company registration numbers for your reference. Example: VAT Registration Numbers etc.',
+		'doctype': 'DocField',
+		'fieldtype': 'Section Break',
+		'label': 'Registration Info',
+		'oldfieldtype': 'Section Break',
+		'permlevel': 0,
+		'width': '50%'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'description': 'Company registration numbers for your reference. Tax numbers etc.',
+		'doctype': 'DocField',
+		'fieldname': 'registration_details',
+		'fieldtype': 'Code',
+		'label': 'Registration Details',
+		'oldfieldname': 'registration_details',
+		'oldfieldtype': 'Code',
 		'permlevel': 0
 	},
 
@@ -367,7 +353,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'trash_reason',
 		'fieldtype': 'Small Text',
-		'idx': 22,
 		'label': 'Trash Reason',
 		'no_copy': 1,
 		'oldfieldname': 'trash_reason',
