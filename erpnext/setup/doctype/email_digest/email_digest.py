@@ -110,19 +110,19 @@ class DocType:
 
 		for query in query_dict.keys():
 			if self.doc.fields[query]:
-				#webnotes.msgprint(query)
-				res = webnotes.conn.sql(query_dict[query], as_dict=1)
-				if query == 'income':
-					for r in res:
-						r['value'] = float(r['credit'] - r['debit'])
-				elif query in ['expenses_booked', 'bank_balance']:
-					for r in res:
-						r['value'] = float(r['debit'] - r['credit'])
-				#webnotes.msgprint(query)
-				#webnotes.msgprint(res)
-				result[query] = (res and len(res)==1) and res[0] or (res and res or None)
+				if query_dict[query]:
+					#webnotes.msgprint(query)
+					res = webnotes.conn.sql(query_dict[query], as_dict=1)
+					if query == 'income':
+						for r in res:
+							r['value'] = float(r['credit'] - r['debit'])
+					elif query in ['expenses_booked', 'bank_balance']:
+						for r in res:
+							r['value'] = float(r['debit'] - r['credit'])
+					#webnotes.msgprint(query)
+					#webnotes.msgprint(res)
+					result[query] = (res and len(res)==1) and res[0] or (res and res or None)
 
-		#webnotes.msgprint(result)
 		return result
 
 
@@ -149,18 +149,19 @@ class DocType:
 
 		elif args['type'] in ['collections', 'payments']:
 			args['bc_accounts_regex'] = self.get_bc_accounts_regex()
-			query = """
-				SELECT
-					IFNULL(SUM(IFNULL(gle.%(field)s, 0)), 0) AS '%(field)s',
-					%(common_select)s
-				FROM
-					%(common_from)s
-				WHERE
-					%(common_where)s AND
-					ac.master_type = '%(master_type)s' AND
-					gle.against REGEXP '%(bc_accounts_regex)s' AND
-					%(start_date_condition)s AND
-					%(end_date_condition)s""" % args
+			if args['bc_accounts_regex']:
+				query = """
+					SELECT
+						IFNULL(SUM(IFNULL(gle.%(field)s, 0)), 0) AS '%(field)s',
+						%(common_select)s
+					FROM
+						%(common_from)s
+					WHERE
+						%(common_where)s AND
+						ac.master_type = '%(master_type)s' AND
+						gle.against REGEXP '%(bc_accounts_regex)s' AND
+						%(start_date_condition)s AND
+						%(end_date_condition)s""" % args
 
 		elif args['type'] in ['income', 'expenses_booked']:
 			query = """
@@ -307,7 +308,8 @@ class DocType:
 			FROM `tabAccount`
 			WHERE account_type = 'Bank or Cash'""", as_list=1)
 		
-		return '(' + '|'.join([ac[0] for ac in bc_account_list]) + ')'
+		if bc_account_list:		
+			return '(' + '|'.join([ac[0] for ac in bc_account_list]) + ')'
 	
 
 	def get(self):
@@ -653,13 +655,17 @@ class DocType:
 		# Sort these keys depending on idx value
 		bd_keys = sorted(body_dict, key=lambda x: body_dict[x]['idx'])
 
-		
 		for k in bd_keys:
 			if self.doc.fields[k]:
-				table_list.append(body_dict[k]['table'])
+				if k in result:
+					table_list.append(body_dict[k]['table'])
+				elif k in ['collections', 'payments']:
+					table_list.append(\
+						"<div style='font-size: 16px; color: grey'>[" + \
+							k.capitalize() + \
+							"]<br />Missing: Ledger of type 'Bank or Cash'\
+						</div>")
 		
-		result = []
-
 		i = 0
 		result = []
 		op_len = len(table_list)
