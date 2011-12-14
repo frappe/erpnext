@@ -121,7 +121,7 @@ class DocType:
 				#webnotes.msgprint(query)
 				#webnotes.msgprint(res)
 				result[query] = (res and len(res)==1) and res[0] or (res and res or None)
-
+		
 		return result
 
 
