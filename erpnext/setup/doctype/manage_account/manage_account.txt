@@ -5,14 +5,14 @@
 	{
 		'creation': '2010-08-08 17:09:09',
 		'docstatus': 0,
-		'modified': '2011-05-19 11:16:11',
+		'modified': '2011-12-14 15:08:22',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1308741898',
+		'_last_update': '1323855454',
 		'allow_copy': 1,
 		'allow_email': 1,
 		'allow_print': 1,
@@ -27,7 +27,7 @@
 		'section_style': 'Tabbed',
 		'server_code_error': ' ',
 		'show_in_menu': 1,
-		'version': 514
+		'version': 516
 	},
 
 	# These values are common for all DocField
@@ -62,7 +62,6 @@
 		'cancel': 0,
 		'create': 1,
 		'doctype': 'DocPerm',
-		'idx': 1,
 		'permlevel': 0,
 		'role': 'System Manager',
 		'submit': 0,
@@ -73,7 +72,6 @@
 	{
 		'create': 1,
 		'doctype': 'DocPerm',
-		'idx': 2,
 		'permlevel': 0,
 		'role': 'System Manager',
 		'write': 1
@@ -82,7 +80,6 @@
 	# DocPerm
 	{
 		'doctype': 'DocPerm',
-		'idx': 3,
 		'permlevel': 1,
 		'role': 'System Manager',
 		'write': 1
@@ -91,7 +88,6 @@
 	# DocPerm
 	{
 		'doctype': 'DocPerm',
-		'idx': 4,
 		'permlevel': 1,
 		'role': 'All'
 	},
@@ -99,7 +95,6 @@
 	# DocPerm
 	{
 		'doctype': 'DocPerm',
-		'idx': 5,
 		'permlevel': 2,
 		'role': 'System Manager',
 		'write': 1
@@ -109,7 +104,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Section Break',
-		'idx': 1,
 		'label': 'Company'
 	},
 
@@ -118,7 +112,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'default_company',
 		'fieldtype': 'Link',
-		'idx': 2,
 		'label': 'Default Company',
 		'options': 'Company',
 		'reqd': 0
@@ -129,7 +122,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'current_fiscal_year',
 		'fieldtype': 'Link',
-		'idx': 3,
 		'label': 'Current Fiscal Year',
 		'options': 'Fiscal Year',
 		'reqd': 1
@@ -140,7 +132,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'date_format',
 		'fieldtype': 'Select',
-		'idx': 4,
 		'label': 'Date Format',
 		'options': 'yyyy-mm-dd\ndd-mm-yyyy\ndd/mm/yyyy\nmm/dd/yyyy\nmm-dd-yyyy'
 	},
@@ -149,7 +140,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Column Break',
-		'idx': 5,
 		'width': '50%'
 	},
 
@@ -159,7 +149,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'default_currency',
 		'fieldtype': 'Select',
-		'idx': 6,
 		'label': 'Default Currency',
 		'options': 'link:Currency',
 		'reqd': 1
@@ -170,7 +159,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'default_currency_format',
 		'fieldtype': 'Select',
-		'idx': 7,
 		'label': 'Default Currency Format',
 		'options': 'Lacs\nMillions'
 	},
@@ -180,7 +168,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'default_currency_fraction',
 		'fieldtype': 'Data',
-		'idx': 8,
 		'label': 'Default Currency Fraction'
 	},
 
@@ -189,7 +176,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'sms_sender_name',
 		'fieldtype': 'Data',
-		'idx': 9,
 		'label': 'SMS Sender Name'
 	},
 
@@ -197,7 +183,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Section Break',
-		'idx': 10,
 		'label': 'Stock'
 	},
 
@@ -205,7 +190,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Column Break',
-		'idx': 11,
 		'width': '50%'
 	},
 
@@ -214,7 +198,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'default_item_group',
 		'fieldtype': 'Link',
-		'idx': 12,
 		'label': 'Default Item Group',
 		'options': 'Item Group'
 	},
@@ -223,7 +206,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'HTML',
-		'idx': 13,
 		'label': 'IGHelp',
 		'options': '<a href="javascript:cur_frm.cscript.TreePage(\'Item Group\');">To manage Item Groups, click here</a>'
 	},
@@ -233,7 +215,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'default_stock_uom',
 		'fieldtype': 'Link',
-		'idx': 14,
 		'label': 'Default Stock UOM',
 		'options': 'UOM'
 	},
@@ -243,7 +224,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'default_valuation_method',
 		'fieldtype': 'Select',
-		'idx': 15,
 		'label': 'Default Valuation Method',
 		'options': 'FIFO\nMoving Average'
 	},
@@ -253,7 +233,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'default_warehouse_type',
 		'fieldtype': 'Link',
-		'idx': 16,
 		'label': 'Default Warehouse Type',
 		'options': 'Warehouse Type'
 	},
@@ -262,7 +241,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Column Break',
-		'idx': 17,
 		'width': '50%'
 	},
 
@@ -273,7 +251,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'tolerance',
 		'fieldtype': 'Currency',
-		'idx': 18,
 		'label': 'Allowance Percent'
 	},
 
@@ -284,7 +261,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'stock_frozen_upto',
 		'fieldtype': 'Date',
-		'idx': 19,
 		'label': 'Stock Frozen Upto'
 	},
 
@@ -295,7 +271,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'stock_auth_role',
 		'fieldtype': 'Link',
-		'idx': 20,
 		'label': 'Authorized Role (Frozen Entry)',
 		'options': 'Role'
 	},
@@ -304,7 +279,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Section Break',
-		'idx': 21,
 		'label': 'Accounts'
 	},
 
@@ -315,7 +289,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'acc_frozen_upto',
 		'fieldtype': 'Date',
-		'idx': 22,
 		'label': 'Accounts Frozen Upto'
 	},
 
@@ -326,7 +299,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'bde_auth_role',
 		'fieldtype': 'Link',
-		'idx': 23,
 		'label': 'Authourized Role (Frozen Entry)',
 		'options': 'Role'
 	},
@@ -336,7 +308,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'credit_controller',
 		'fieldtype': 'Link',
-		'idx': 24,
 		'label': 'Credit Controller',
 		'options': 'Role'
 	},
@@ -344,8 +315,21 @@
 	# DocField
 	{
 		'doctype': 'DocField',
+		'fieldtype': 'Column Break'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'HTML',
+		'label': 'Acccount Info',
+		'options': '<div class="help-box">For more accounting defaults, Open <a href="#!List/Company">Company</a></div>'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
 		'fieldtype': 'Section Break',
-		'idx': 25,
 		'label': 'Selling'
 	},
 
@@ -356,7 +340,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'cust_master_name',
 		'fieldtype': 'Select',
-		'idx': 26,
 		'label': 'Customer Master created by ',
 		'options': 'Customer Name\nNaming Series'
 	},
@@ -366,7 +349,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'default_customer_group',
 		'fieldtype': 'Link',
-		'idx': 27,
 		'label': 'Default Customer Group',
 		'options': 'Customer Group'
 	},
@@ -375,7 +357,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'HTML',
-		'idx': 28,
 		'label': 'CGHelp',
 		'options': '<a href="javascript:cur_frm.cscript.TreePage(\'Customer Group\');">To manage Customer Groups, click here</a>'
 	},
@@ -385,7 +366,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'default_territory',
 		'fieldtype': 'Link',
-		'idx': 29,
 		'label': 'Default Territory',
 		'options': 'Territory'
 	},
@@ -394,7 +374,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'HTML',
-		'idx': 30,
 		'label': 'TerritoryHelp',
 		'options': '<a href="javascript:cur_frm.cscript.TreePage(\'Territory\');">To manage Territory, click here</a>'
 	},
@@ -404,7 +383,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'default_price_list',
 		'fieldtype': 'Link',
-		'idx': 31,
 		'label': 'Default Price List',
 		'options': 'Price List'
 	},
@@ -413,7 +391,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Column Break',
-		'idx': 32,
 		'width': '50%'
 	},
 
@@ -424,7 +401,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'so_required',
 		'fieldtype': 'Select',
-		'idx': 33,
 		'label': 'Sales Order Required',
 		'options': 'No\nYes'
 	},
@@ -436,7 +412,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'dn_required',
 		'fieldtype': 'Select',
-		'idx': 34,
 		'label': 'Delivery Note Required',
 		'options': 'No\nYes'
 	},
@@ -445,7 +420,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Section Break',
-		'idx': 35,
 		'label': 'Buying'
 	},
 
@@ -454,7 +428,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'default_supplier_type',
 		'fieldtype': 'Link',
-		'idx': 36,
 		'label': 'Default Supplier Type',
 		'options': 'Supplier Type'
 	},
@@ -466,7 +439,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'supp_master_name',
 		'fieldtype': 'Select',
-		'idx': 37,
 		'label': 'Supplier Master created by ',
 		'options': 'Supplier Name\nNaming Series'
 	},
@@ -475,7 +447,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Column Break',
-		'idx': 38,
 		'width': '50%'
 	},
 
@@ -486,7 +457,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'po_required',
 		'fieldtype': 'Select',
-		'idx': 39,
 		'label': 'Purchase Order Required',
 		'options': 'No\nYes'
 	},
@@ -498,7 +468,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'pr_required',
 		'fieldtype': 'Select',
-		'idx': 40,
 		'label': 'Purchase Receipt Required',
 		'options': 'No\nYes'
 	},
@@ -507,7 +476,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Section Break',
-		'idx': 41,
 		'label': 'HR',
 		'options': '<div style="padding-top: 8px;" class="columnHeading">HR</div>'
 	},
@@ -519,7 +487,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'emp_created_by',
 		'fieldtype': 'Select',
-		'idx': 42,
 		'label': 'Employee Records to be created by ',
 		'options': '\nNaming Series\nEmployee Number'
 	}
