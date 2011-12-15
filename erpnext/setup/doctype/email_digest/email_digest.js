@@ -2,6 +2,7 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 	doc = locals[dt][dn];
 	var save_msg = "You must <b>Save</b> the form before proceeding";
 	var err_msg = "There was an error. One probable reason could be that you haven't saved the form. Please contact support@erpnext.com if the problem persists."
+	
 	cur_frm.add_custom_button('View Now', function() {
 		if(doc.__unsaved != 1) {
 			$c_obj(make_doclist(dt, dn), 'get', '', function(r, rt) {
@@ -41,7 +42,7 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 	}, 1);
 }
 
-cur_frm.cscript['Add Recipients'] = function(doc, dt, dn) {
+cur_frm.cscript['Add/Remove Recipients'] = function(doc, dt, dn) {
 	// Get profile list
 	$c_obj(make_doclist(dt, dn), 'get_profiles', '', function(r, rt) {
 		if(r.exc) {
@@ -50,7 +51,7 @@ cur_frm.cscript['Add Recipients'] = function(doc, dt, dn) {
 			// Open a dialog and display checkboxes against email addresses
 			doc = locals[dt][dn];
 			var d = new wn.widgets.Dialog({
-				title: 'Add Recipients',
+				title: 'Add/Remove Recipients',
 				width: 400
 			});
 			var dialog_div = $a(d.body, 'div', 'dialog-div', '', '');

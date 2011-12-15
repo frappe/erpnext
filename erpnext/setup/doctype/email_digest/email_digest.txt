@@ -3,16 +3,16 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2011-11-28 13:11:56',
+		'creation': '2011-12-12 10:41:40',
 		'docstatus': 0,
-		'modified': '2011-12-08 19:21:26',
+		'modified': '2011-12-15 13:53:08',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1323352149',
+		'_last_update': '1323353260',
 		'autoname': 'Prompt',
 		'colour': 'White:FFF',
 		'doctype': 'DocType',
@@ -21,7 +21,7 @@
 		'name': '__common__',
 		'section_style': 'Simple',
 		'show_in_menu': 0,
-		'version': 78
+		'version': 79
 	},
 
 	# These values are common for all DocField
@@ -145,7 +145,7 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Button',
-		'label': 'Add Recipients',
+		'label': 'Add/Remove Recipients',
 		'permlevel': 0,
 		'trigger': 'Client'
 	},
