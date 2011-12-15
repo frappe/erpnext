@@ -3,7 +3,7 @@ def execute():
 		remove control panel email settings if automail.webnotestech.com
 	"""
 	from webnotes.model.doc import Document
-	cp = Document('Control Panel')
+	cp = Document('Control Panel', 'Control Panel')
 	if cp:
 		if cp.outgoing_mail_server == 'mail.webnotestech.com':
 			cp.outgoing_mail_server = None;
