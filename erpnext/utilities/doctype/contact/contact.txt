@@ -5,16 +5,17 @@
 	{
 		'creation': '2010-08-08 17:08:55',
 		'docstatus': 0,
-		'modified': '2011-05-26 11:00:36',
+		'modified': '2011-12-19 14:11:08',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1306307671',
+		'_last_update': '1316075905',
 		'allow_trash': 1,
 		'colour': 'White:FFF',
+		'default_print_format': 'Standard',
 		'doctype': 'DocType',
 		'document_type': 'Master',
 		'in_create': 0,
@@ -25,7 +26,7 @@
 		'server_code_error': ' ',
 		'show_in_menu': 0,
 		'subject': '%(first_name)s %(last_name)s - Email: %(email_id)s | Contact: %(phone)s | Mobile: %(mobile_no)s',
-		'version': 242
+		'version': 243
 	},
 
 	# These values are common for all DocField
@@ -56,7 +57,6 @@
 	# DocPerm
 	{
 		'doctype': 'DocPerm',
-		'idx': 1,
 		'permlevel': 0,
 		'role': 'Sales User'
 	},
@@ -64,7 +64,6 @@
 	# DocPerm
 	{
 		'doctype': 'DocPerm',
-		'idx': 2,
 		'permlevel': 0,
 		'role': 'Purchase User'
 	},
@@ -75,7 +74,6 @@
 		'cancel': 1,
 		'create': 1,
 		'doctype': 'DocPerm',
-		'idx': 3,
 		'permlevel': 0,
 		'role': 'Sales Master Manager',
 		'submit': 0,
@@ -85,7 +83,6 @@
 	# DocPerm
 	{
 		'doctype': 'DocPerm',
-		'idx': 4,
 		'permlevel': 1,
 		'role': 'All',
 		'write': 1
@@ -94,7 +91,6 @@
 	# DocPerm
 	{
 		'doctype': 'DocPerm',
-		'idx': 5,
 		'permlevel': 2,
 		'role': 'All'
 	},
@@ -104,7 +100,6 @@
 		'cancel': 1,
 		'create': 1,
 		'doctype': 'DocPerm',
-		'idx': 6,
 		'permlevel': 0,
 		'role': 'Purchase Master Manager',
 		'write': 1
@@ -115,7 +110,6 @@
 		'cancel': 1,
 		'create': 1,
 		'doctype': 'DocPerm',
-		'idx': 7,
 		'permlevel': 0,
 		'role': 'System Manager',
 		'write': 1
@@ -126,7 +120,6 @@
 		'colour': 'White:FFF',
 		'doctype': 'DocField',
 		'fieldtype': 'Section Break',
-		'idx': 1,
 		'label': 'Contact Details',
 		'oldfieldtype': 'Section Break',
 		'permlevel': 0
@@ -136,7 +129,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Column Break',
-		'idx': 2,
 		'oldfieldtype': 'Column Break',
 		'permlevel': 0,
 		'width': '50%'
@@ -147,7 +139,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'first_name',
 		'fieldtype': 'Data',
-		'idx': 3,
 		'label': 'First Name',
 		'oldfieldname': 'first_name',
 		'oldfieldtype': 'Data',
@@ -160,7 +151,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'last_name',
 		'fieldtype': 'Data',
-		'idx': 4,
 		'label': 'Last Name',
 		'oldfieldname': 'last_name',
 		'oldfieldtype': 'Data',
@@ -174,7 +164,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'customer',
 		'fieldtype': 'Link',
-		'idx': 5,
 		'label': 'Customer',
 		'oldfieldname': 'customer',
 		'oldfieldtype': 'Link',
@@ -191,7 +180,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'customer_name',
 		'fieldtype': 'Data',
-		'idx': 6,
 		'label': 'Customer Name',
 		'permlevel': 1
 	},
@@ -203,7 +191,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'supplier',
 		'fieldtype': 'Link',
-		'idx': 7,
 		'label': 'Supplier',
 		'options': 'Supplier',
 		'permlevel': 0,
@@ -218,7 +205,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'supplier_name',
 		'fieldtype': 'Data',
-		'idx': 8,
 		'label': 'Supplier Name',
 		'permlevel': 1
 	},
@@ -230,7 +216,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'sales_partner',
 		'fieldtype': 'Link',
-		'idx': 9,
 		'label': 'Sales Partner',
 		'options': 'Sales Partner',
 		'permlevel': 0
@@ -244,7 +229,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'is_primary_contact',
 		'fieldtype': 'Check',
-		'idx': 10,
 		'label': 'Is Primary Contact',
 		'oldfieldname': 'is_primary_contact',
 		'oldfieldtype': 'Select',
@@ -255,7 +239,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Column Break',
-		'idx': 11,
 		'oldfieldtype': 'Column Break',
 		'permlevel': 0,
 		'width': '50%'
@@ -266,7 +249,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'email_id',
 		'fieldtype': 'Data',
-		'idx': 12,
 		'label': 'Email Id',
 		'oldfieldname': 'email_id',
 		'oldfieldtype': 'Data',
@@ -279,7 +261,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'phone',
 		'fieldtype': 'Data',
-		'idx': 13,
 		'label': 'Phone',
 		'oldfieldname': 'contact_no',
 		'oldfieldtype': 'Data',
@@ -292,7 +273,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'mobile_no',
 		'fieldtype': 'Data',
-		'idx': 14,
 		'label': 'Mobile No',
 		'oldfieldname': 'mobile_no',
 		'oldfieldtype': 'Data',
@@ -306,7 +286,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'department',
 		'fieldtype': 'Data',
-		'idx': 15,
 		'label': 'Department',
 		'options': 'Suggest',
 		'permlevel': 0
@@ -319,7 +298,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'designation',
 		'fieldtype': 'Data',
-		'idx': 16,
 		'label': 'Designation',
 		'options': 'Suggest',
 		'permlevel': 0
@@ -330,7 +308,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'trash_reason',
 		'fieldtype': 'Small Text',
-		'idx': 17,
 		'label': 'Trash Reason',
 		'oldfieldname': 'trash_reason',
 		'oldfieldtype': 'Small Text',
