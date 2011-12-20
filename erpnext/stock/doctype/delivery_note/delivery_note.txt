@@ -5,7 +5,7 @@
 	{
 		'creation': '2011-04-18 15:58:20',
 		'docstatus': 0,
-		'modified': '2011-10-18 13:57:23',
+		'modified': '2011-12-20 13:23:33',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
@@ -21,7 +21,7 @@
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1318321312',
+		'_last_update': '1324367019',
 		'colour': 'White:FFF',
 		'default_print_format': 'Standard',
 		'doctype': 'DocType',
@@ -37,7 +37,7 @@
 		'show_in_menu': 0,
 		'subject': 'To %(customer_name)s on %(transaction_date)s | %(per_billed)s% billed',
 		'tag_fields': 'billing_status',
-		'version': 454
+		'version': 459
 	},
 
 	# These values are common for all DocFormat
@@ -130,7 +130,8 @@
 	{
 		'doctype': 'DocPerm',
 		'permlevel': 1,
-		'role': 'All'
+		'role': 'All',
+		'write': 0
 	},
 
 	# DocPerm
@@ -542,34 +543,6 @@
 	# DocField
 	{
 		'colour': 'White:FFF',
-		'description': 'You can make a delivery note from multiple sales orders. Select sales orders one by one and click on the button below.',
-		'doctype': 'DocField',
-		'fieldname': 'sales_order_no',
-		'fieldtype': 'Link',
-		'label': 'Sales Order No',
-		'no_copy': 0,
-		'oldfieldname': 'sales_order_no',
-		'oldfieldtype': 'Link',
-		'options': 'Sales Order',
-		'permlevel': 0,
-		'print_hide': 0
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldtype': 'Button',
-		'hidden': 0,
-		'label': 'Get Items',
-		'oldfieldtype': 'Button',
-		'options': 'pull_sales_order_details',
-		'permlevel': 0,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		'colour': 'White:FFF',
 		'description': 'Select the price list as entered in "Price List" master. This will pull the reference rates of items against this price list as specified in "Item" master.',
 		'doctype': 'DocField',
 		'fieldname': 'price_list_name',
@@ -582,6 +555,31 @@
 		'print_hide': 1,
 		'reqd': 1,
 		'trigger': 'Client'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'description': 'Select the currency in which price list is maintained',
+		'doctype': 'DocField',
+		'fieldname': 'price_list_currency',
+		'fieldtype': 'Select',
+		'label': 'Price List Currency',
+		'options': 'link:Currency',
+		'permlevel': 0,
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'description': 'Rate at which Price list currency is converted to your currency',
+		'doctype': 'DocField',
+		'fieldname': 'plc_conversion_rate',
+		'fieldtype': 'Currency',
+		'label': 'Price List Currency Conversion Rate',
+		'permlevel': 0,
+		'reqd': 1
 	},
 
 	# DocField
@@ -623,6 +621,34 @@
 		'permlevel': 0,
 		'print_hide': 1,
 		'reqd': 1
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'description': 'You can make a delivery note from multiple sales orders. Select sales orders one by one and click on the button below.',
+		'doctype': 'DocField',
+		'fieldname': 'sales_order_no',
+		'fieldtype': 'Link',
+		'label': 'Sales Order No',
+		'no_copy': 0,
+		'oldfieldname': 'sales_order_no',
+		'oldfieldtype': 'Link',
+		'options': 'Sales Order',
+		'permlevel': 0,
+		'print_hide': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Button',
+		'hidden': 0,
+		'label': 'Get Items',
+		'oldfieldtype': 'Button',
+		'options': 'pull_sales_order_details',
+		'permlevel': 0,
+		'print_hide': 1
 	},
 
 	# DocField
