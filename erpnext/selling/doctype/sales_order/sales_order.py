@@ -446,7 +446,7 @@ class DocType(TransactionBase):
 				if not d[0]:
 					msgprint("Message: Please enter Reserved Warehouse for item %s as it is stock item."% d[1])
 					raise Exception
-				bin = get_obj('Warehouse', d[0]).update_bin( 0, flt(update_stock) * flt(d[2]), 0, 0, 0, d[1], self.doc.transaction_date)
+				bin = get_obj('Warehouse', d[0]).update_bin( 0, flt(update_stock) * flt(d[2]), 0, 0, 0, d[1], self.doc.transaction_date,doc_type=self.doc.doctype,doc_name=self.doc.name, is_amended = (self.doc.amended_from and 'Yes' or 'No'))
 	
 	# Gets Items from packing list
 	#=================================
