@@ -43,6 +43,7 @@ class DocType:
                 ['company',self.doc.default_company],
                 ['currency',self.doc.default_currency],
                 ['price_list_name',self.doc.default_price_list],
+				['price_list_currency', self.doc.default_price_list_currency],
                 ['item_group',self.doc.default_item_group],
                 ['customer_group',self.doc.default_customer_group],
                 ['cust_master_name',self.doc.cust_master_name], 
