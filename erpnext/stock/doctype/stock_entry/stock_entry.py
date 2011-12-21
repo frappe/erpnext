@@ -245,7 +245,7 @@ class DocType:
 				self.add_to_values(d, cstr(d.s_warehouse), -flt(d.transfer_qty), is_cancelled)
 			if cstr(d.t_warehouse):
 				self.add_to_values(d, cstr(d.t_warehouse), flt(d.transfer_qty), is_cancelled)
-		get_obj('Stock Ledger', 'Stock Ledger').update_stock(self.values)
+		get_obj('Stock Ledger', 'Stock Ledger').update_stock(self.values, self.doc.amended_from and 'Yes' or 'No')
 
 	
 	def validate_for_production_order(self, pro_obj):

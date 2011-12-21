@@ -520,7 +520,7 @@ class DocType(TransactionBase):
 			if stock_item[0]['is_stock_item'] == "Yes":
 				# Reduce actual qty from warehouse
 				self.make_sl_entry( d, d.warehouse, - flt(d.qty) , 0, update_stock)
-		get_obj('Stock Ledger', 'Stock Ledger').update_stock(self.values)
+		get_obj('Stock Ledger', 'Stock Ledger').update_stock(self.values, self.doc.amended_from and 'Yes' or 'No')
 
 
 	#-------------------POS Stock Updatation Part----------------------------------------------
