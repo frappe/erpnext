@@ -37,7 +37,6 @@ class DocType:
 		self.doc.projected_qty = flt(self.doc.actual_qty) + flt(self.doc.ordered_qty) + flt(self.doc.indented_qty) + flt(self.doc.planned_qty) - flt(self.doc.reserved_qty)
 		self.doc.save()
 		if(( flt(actual_qty)<0 or flt(reserved_qty)>0 )and is_cancelled == 'No' and is_amended=='No'):
-			msgprint('is_amended '+is_amended)
 			self.reorder_item(doc_type,doc_name)	
 		
 		if actual_qty:
@@ -319,13 +318,13 @@ class DocType:
 
 		
 	# Re order Auto Intent Generation
-	def reorder_indent(self,i,item_reorder_level,doc_type,doc_name,email_notify='1'):
+	def reorder_indent(self,i,item_reorder_level,doc_type,doc_name,email_notify=1):
 		indent = Document('Indent')
 		indent.transaction_date = nowdate()
 		indent.naming_series = 'IDT'
 		indent.company = get_defaults()['company']
 		indent.fiscal_year = get_defaults()['fiscal_year']
-		indent.remark = "This is an auto generated Indent. It was raised because the projected quantity has fallen below the minimum re-order level"
+		indent.remark = "This is an auto generated Indent. It was raised because the projected quantity has fallen below the minimum re-order level when %s %s was created"%(doc_type,doc_name)
 		indent.save(1)
 		indent_obj = get_obj('Indent',indent.name,with_children=1)
 		indent_details_child = addchild(indent_obj.doc,'indent_details','Indent Detail',0)
@@ -347,12 +346,14 @@ class DocType:
 		set(indent_obj.doc,'docstatus',1)
 		indent_obj.on_submit()
 		msgprint("Item: " + self.doc.item_code + " is to be re-ordered. Indent %s raised.Was generated from %s %s"%(indent.name,doc_type, doc_name ))
-		if(email_notify)		
-			email_list=[d for d in sql("select  from tabUserRole where role in ('Purchase Manager','Material Manager') ")]
-			#if getattr():
-			msg1='An Indent has been raised for item %s: %s on %s '%(doc_type, doc_name, nowdate())
-			sendmail(email_list, sender='automail@webnotestech.com', \
-			subject='Auto Indent Generation Notification', parts=[['text/plain',msg1]])	
+		if(email_notify):
+			send_email_notification(doc_type,doc_name)
+			
+	def send_email_notification(self,doc_type,doc_name)
+		email_list=[d for d in sql("select  from tabUserRole where role in ('Purchase Manager','Material Manager') ")]
+		msg1='An Indent has been raised for item %s: %s on %s '%(doc_type, doc_name, nowdate())
+		sendmail(email_list, sender='automail@webnotestech.com', \
+		subject='Auto Indent Generation Notification', parts=[['text/plain',msg1]])	
 	# validate
 	def validate(self):
 		self.validate_mandatory()
