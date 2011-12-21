@@ -5,14 +5,14 @@
 	{
 		'creation': '2011-01-28 17:52:35',
 		'docstatus': 0,
-		'modified': '2011-12-20 20:52:58',
+		'modified': '2011-12-21 16:32:30',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1323333040',
+		'_last_update': '1324394580',
 		'allow_trash': 1,
 		'autoname': 'TIC/.####',
 		'colour': 'White:FFF',
@@ -26,7 +26,7 @@
 		'show_in_menu': 0,
 		'subject': '%(subject)s',
 		'tag_fields': 'status',
-		'version': 246
+		'version': 247
 	},
 
 	# These values are common for all DocField
@@ -40,17 +40,13 @@
 
 	# These values are common for all DocPerm
 	{
-		'amend': 1,
-		'cancel': 1,
-		'create': 1,
 		'doctype': 'DocPerm',
 		'name': '__common__',
 		'parent': 'Ticket',
 		'parentfield': 'permissions',
 		'parenttype': 'DocType',
 		'read': 1,
-		'submit': 1,
-		'write': 1
+		'submit': 0
 	},
 
 	# DocType, Ticket
@@ -61,30 +57,46 @@
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm',
-		'permlevel': 0,
-		'role': 'All'
-	},
-
-	# DocPerm
-	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
 		'doctype': 'DocPerm',
 		'permlevel': 1,
-		'role': 'All'
+		'role': 'Projects User',
+		'write': 0
 	},
 
 	# DocPerm
 	{
+		'amend': 1,
+		'cancel': 1,
+		'create': 1,
 		'doctype': 'DocPerm',
 		'permlevel': 0,
-		'role': 'Projects User'
+		'role': 'All',
+		'write': 1
 	},
 
 	# DocPerm
 	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
 		'doctype': 'DocPerm',
 		'permlevel': 1,
-		'role': 'Projects User'
+		'role': 'All',
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'amend': 1,
+		'cancel': 1,
+		'create': 1,
+		'doctype': 'DocPerm',
+		'permlevel': 0,
+		'role': 'Projects User',
+		'write': 1
 	},
 
 	# DocField
