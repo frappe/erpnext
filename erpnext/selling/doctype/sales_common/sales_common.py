@@ -135,32 +135,31 @@ class DocType(TransactionBase):
 			'batch_no'				: ''
 		}
 		if(obj.doc.price_list_name and item):	#this is done to fetch the changed BASIC RATE and REF RATE based on PRICE LIST
-			ref_rate =	self.get_ref_rate(item_code, obj.doc.price_list_name, obj.doc.currency)
-			ret['ref_rate'] = flt(ref_rate)
-			ret['export_rate'] = flt(ref_rate)
-			ret['base_ref_rate'] = flt(ref_rate) * flt(obj.doc.conversion_rate)
-			ret['basic_rate'] = flt(ref_rate) * flt(obj.doc.conversion_rate)
-			
-		if obj.doc.doctype == 'Receivable Voucher':
-			return ret
-			
+			base_ref_rate =	self.get_ref_rate(item_code, obj.doc.price_list_name, obj.doc.price_list_currency, obj.doc.plc_conversion_rate)
+			ret['ref_rate'] = flt(base_ref_rate)/flt(obj.doc.conversion_rate)
+			ret['export_rate'] = flt(base_ref_rate)/flt(obj.doc.conversion_rate)
+			ret['base_ref_rate'] = flt(base_ref_rate)
+			ret['basic_rate'] = flt(base_ref_rate)
+
 		return ret
 	
 	# ***************** Get Ref rate as entered in Item Master ********************
-	def get_ref_rate(self, item_code, price_list_name, currency):
-		ref_rate = sql("select ref_rate from `tabRef Rate Detail` where parent = %s and price_list_name = %s and ref_currency = %s", (item_code, price_list_name, currency))
-		return ref_rate and ref_rate[0][0] or 0
+	def get_ref_rate(self, item_code, price_list_name, price_list_currency, plc_conv_rate):
+		ref_rate = sql("select ref_rate from `tabRef Rate Detail` where parent = %s and price_list_name = %s and ref_currency = %s", (item_code, price_list_name, price_list_currency))
+		base_ref_rate = ref_rate and flt(ref_rate[0][0]) * flt(plc_conv_rate) or 0
+		return base_ref_rate
 
 		
-	# ****** Re-calculates Basic Rate & amount based on Price List Selected ******
+	# ****** Re-cancellculates Basic Rate & amount based on Price List Selected ******
 	def get_adj_percent(self, obj): 
 		for d in getlist(obj.doclist, obj.fname):
-			ref_rate = self.get_ref_rate(d.item_code,obj.doc.price_list_name,obj.doc.currency)
+			base_ref_rate = self.get_ref_rate(d.item_code, obj.doc.price_list_name, obj.doc.price_list_currency, obj.doc.plc_conversion_rate)
 			d.adj_rate = 0
-			d.ref_rate = flt(ref_rate)
-			d.basic_rate = flt(ref_rate) * flt(obj.doc.conversion_rate)
-			d.base_ref_rate = flt(ref_rate) * flt(obj.doc.conversion_rate)
-			d.export_rate = flt(ref_rate)
+			d.ref_rate = flt(base_ref_rate)/flt(obj.doc.conversion_rate)
+			d.basic_rate = flt(base_ref_rate)
+			d.base_ref_rate = flt(base_ref_rate)
+			d.export_rate = flt(base_ref_rate)/flt(obj.doc.conversion_rate)
+
 
 	# Load Default Taxes
 	# ====================
@@ -268,9 +267,12 @@ class DocType(TransactionBase):
 			msgprint('Message: Please enter default currency in Company Master')
 			raise Exception		
 		if (obj.doc.currency == default_currency and flt(obj.doc.conversion_rate) != 1.00) or not obj.doc.conversion_rate or (obj.doc.currency != default_currency and flt(obj.doc.conversion_rate) == 1.00):
-			msgprint("Please Enter Appropriate Conversion Rate.")
-			raise Exception
+			msgprint("Please Enter Appropriate Conversion Rate for Customer's Currency to Base Currency (%s --> %s)" % (obj.doc.currency, default_currency), raise_exception = 1)
 	
+		if (obj.doc.price_list_currency == default_currency and flt(obj.doc.plc_conversion_rate) != 1.00) or not obj.doc.plc_conversion_rate or (obj.doc.price_list_currency != default_currency and flt(obj.doc.plc_conversion_rate) == 1.00):
+			msgprint("Please Enter Appropriate Conversion Rate for Price List Currency to Base Currency ( (%s --> %s)" % (obj.doc.price_list_currency, default_currency), raise_exception = 1)
+	
+
 
 	# Get Tax rate if account type is TAX
 	# =========================================================================

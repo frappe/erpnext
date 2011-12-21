@@ -5,13 +5,14 @@
 	{
 		'creation': '2010-08-08 17:09:09',
 		'docstatus': 0,
-		'modified': '2011-12-20 11:14:24',
+		'modified': '2011-12-21 13:22:33',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
+
 		'_last_update': '1323855502',
 		'allow_copy': 1,
 		'allow_email': 1,
@@ -325,6 +326,20 @@
 	# DocField
 	{
 		'doctype': 'DocField',
+		'fieldtype': 'Column Break'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'HTML',
+		'label': 'Account Info',
+		'options': '<div class="help-box">For more accounting defaults, Open <a href="#!List/Company">Company</a></div>'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
 		'fieldtype': 'Section Break',
 		'label': 'Selling'
 	},
@@ -377,6 +392,13 @@
 	# DocField
 	{
 		'doctype': 'DocField',
+		'fieldtype': 'Column Break',
+		'width': '50%'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
 		'fieldname': 'default_price_list',
 		'fieldtype': 'Link',
 		'label': 'Default Price List',
@@ -386,8 +408,10 @@
 	# DocField
 	{
 		'doctype': 'DocField',
-		'fieldtype': 'Column Break',
-		'width': '50%'
+		'fieldname': 'default_price_list_currency',
+		'fieldtype': 'Link',
+		'label': 'Default Price List Currency',
+		'options': 'Currency'
 	},
 
 	# DocField

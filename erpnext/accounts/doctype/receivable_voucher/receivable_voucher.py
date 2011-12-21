@@ -164,6 +164,10 @@ class DocType(TransactionBase):
 				ret['actual_qty']= actual_qty and flt(actual_qty[0][0]) or 0
 		return ret
  
+	# Fetch ref rate from item master as per selected price list
+	def get_adj_percent(self, arg=''):
+		get_obj('Sales Common').get_adj_percent(self)
+
 
 	# Get tax rate if account type is tax
 	# ------------------------------------

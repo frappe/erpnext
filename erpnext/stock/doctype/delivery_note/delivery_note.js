@@ -15,6 +15,7 @@ cur_frm.cscript.onload = function(doc, dt, dn) {
   if(!doc.transaction_date) set_multiple(dt,dn,{transaction_date:get_today()});
   if(!doc.posting_date) set_multiple(dt,dn,{posting_date:get_today()});
   if(doc.__islocal && doc.customer) cur_frm.cscript.pull_item_details_onload(doc,dt,dn);
+  if(!doc.price_list_currency) set_multiple(cdt, cdn, {price_list_currency: doc.currency, plc_conversion_rate: 1});
 
   if(!doc.posting_time) doc.posting_time = wn.datetime.get_cur_time()
     

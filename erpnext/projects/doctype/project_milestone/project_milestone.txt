@@ -5,21 +5,22 @@
 	{
 		'creation': '2010-08-08 17:09:15',
 		'docstatus': 0,
-		'modified': '2011-01-05 15:24:43',
-		'modified_by': 'sneha@webnotestech.com',
+		'modified': '2011-12-19 14:11:40',
+		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
 		'colour': 'White:FFF',
+		'default_print_format': 'Standard',
 		'doctype': 'DocType',
 		'istable': 1,
 		'module': 'Projects',
 		'name': '__common__',
 		'section_style': 'Simple',
 		'server_code_error': ' ',
-		'version': 2
+		'version': 4
 	},
 
 	# These values are common for all DocField
@@ -43,7 +44,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'milestone_date',
 		'fieldtype': 'Date',
-		'idx': 1,
 		'label': 'Milestone Date',
 		'oldfieldname': 'milestone_date',
 		'oldfieldtype': 'Date'
@@ -52,18 +52,8 @@
 	# DocField
 	{
 		'doctype': 'DocField',
-		'fieldname': 'actual_completion_date_',
-		'fieldtype': 'Date',
-		'idx': 2,
-		'label': 'Actual Completion Date '
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
 		'fieldname': 'milestone',
 		'fieldtype': 'Text',
-		'idx': 3,
 		'label': 'Milestone',
 		'oldfieldname': 'milestone',
 		'oldfieldtype': 'Text',
@@ -75,8 +65,8 @@
 		'doctype': 'DocField',
 		'fieldname': 'status',
 		'fieldtype': 'Select',
-		'idx': 4,
 		'label': 'Status',
+		'no_copy': 1,
 		'oldfieldname': 'status',
 		'oldfieldtype': 'Select',
 		'options': 'Pending\nCompleted'

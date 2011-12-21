@@ -18,7 +18,8 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
   if(!doc.transaction_date) set_multiple(cdt,cdn,{transaction_date:get_today()});
   if(!doc.conversion_rate) set_multiple(cdt,cdn,{conversion_rate:'1.00'});
   if(!doc.currency && sys_defaults.currency) set_multiple(cdt,cdn,{currency:sys_defaults.currency});
-  //if(!doc.price_list_name && sys_defaults.price_list_name) set_multiple(cdt,cdn,{price_list_name:sys_defaults.price_list_name});
+  if(!doc.price_list_currency) set_multiple(cdt, cdn, {price_list_currency: doc.currency, plc_conversion_rate: 1});
+
   if(!doc.company && sys_defaults.company) set_multiple(cdt,cdn,{company:sys_defaults.company});
   if(!doc.fiscal_year && sys_defaults.fiscal_year) set_multiple(cdt,cdn,{fiscal_year:sys_defaults.fiscal_year});
 
@@ -51,7 +52,6 @@ cur_frm.cscript.lead_cust_show = function(doc,cdt,cdn){
     hide_field(['lead','lead_name','address_display','contact_display','contact_mobile','contact_email','territory']);
     doc.lead = doc.lead_name = doc.customer = doc.customer_address = doc.contact_person = doc.address_display = doc.contact_display = doc.contact_mobile = doc.contact_email = doc.territory = doc.customer_group = "";
   }
-  //refresh_many(['lead','customer']);
 }
 
 
@@ -59,10 +59,6 @@ cur_frm.cscript.lead_cust_show = function(doc,cdt,cdn){
 //================ hide - unhide fields on basis of quotation to either lead or customer ===============================
 cur_frm.cscript.quotation_to = function(doc,cdt,cdn){
   cur_frm.cscript.lead_cust_show(doc,cdt,cdn);
-  //doc.customer_address = doc.territory = doc.contact_no = doc.email_id = "";
-  //refresh_many(['territory','customer_address','contact_no','email_id']);
-  //doc.address_display = doc.contact_display = "";
-  //refresh_many(['address_display','contact_display']);
 }
 
 
@@ -80,31 +76,8 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 
   if (!doc.docstatus) hide_field(['Update Follow up']);
   else unhide_field(['Update Follow up']);
-  //cur_frm.cscript.lead_cust_show(doc,cdt,cdn);
 }
 
-// ============== Lead and its Details ============================
-
-/*
-//================ create new contact ============================================================================
-cur_frm.cscript.new_contact = function(){
-  tn = createLocal('Contact');
-  locals['Contact'][tn].is_customer = 1;
-  if(doc.customer) locals['Contact'][tn].customer = doc.customer;
-  loaddoc('Contact', tn);
-}
-*/
-
-
-// DOCTYPE TRIGGERS
-// ====================================================================================
-
-/*
-// ***************** Get Contact Person based on customer selected *****************
-cur_frm.fields_dict['contact_person'].get_query = function(doc, cdt, cdn) {
-  return 'SELECT `tabContact`.contact_name, `tabContact`.email_id FROM `tabContact` WHERE `tabContact`.is_customer = 1 AND `tabContact`.docstatus != 2 AND `tabContact`.customer = "'+ doc.customer +'" AND `tabContact`.docstatus != 2 AND `tabContact`.contact_name LIKE "%s" ORDER BY `tabContact`.contact_name ASC LIMIT 50';
-}
-*/
 
 //customer
 cur_frm.cscript.customer = function(doc,dt,dn) {
@@ -274,14 +247,6 @@ cur_frm.cscript['Get Report'] = function(doc,cdt,cdn) {
 }
 
 
-
-
-/*
-//get query select Territory
-cur_frm.fields_dict['territory'].get_query = function(doc,cdt,cdn) {
-  return 'SELECT `tabTerritory`.`name`,`tabTerritory`.`parent_territory` FROM `tabTerritory` WHERE `tabTerritory`.`is_group` = "No" AND `tabTerritory`.`docstatus`!= 2 AND `tabTerritory`.%(key)s LIKE "%s"  ORDER BY  `tabTerritory`.`name` ASC LIMIT 50';}
-*/
-
 //===================== Quotation to validation - either customer or lead mandatory ====================
 cur_frm.cscript.quot_to_validate = function(doc,cdt,cdn){
 
@@ -293,14 +258,11 @@ cur_frm.cscript.quot_to_validate = function(doc,cdt,cdn){
     }
   }
   else if(doc.quotation_to == 'Customer'){
-
     if(!doc.customer){
       alert("Customer is mandatory.");
       validated = false;
     }
-
   }
-
 }
 
 //===================validation function =================================
