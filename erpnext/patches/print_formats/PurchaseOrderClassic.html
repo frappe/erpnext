@@ -160,7 +160,7 @@
 	-->
 	<table class='header-table' cellspacing=0>
 		<thead>
-			<tr><td><h1>Purchase Order</h1></td></tr>
+			<tr><td><script>'<h1>' + (doc.select_print_heading || 'Purchase Order') + '</h1>'</script></td></tr>
 			<tr><td><h3><script>cur_frm.docname</script></h3></td></tr>
 		</thead>
 		<tbody>
@@ -246,4 +246,3 @@
 		</tfoot>
 	</table>
 </div>
-

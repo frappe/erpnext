@@ -39,7 +39,5 @@ class DocType:
 
   def validate(self): 
 
-    r = sql("select name from `tabCustomer Group` where name = '%s' and docstatus = 2"%(self.doc.customer_group_name))
-    if r:
-      msgprint("%s record is trashed. To untrash please go to Setup & click on Trash."%(self.doc.customer_group_name))
-      raise Exception
+    if sql("select name from `tabCustomer Group` where name = %s and docstatus = 2", (self.doc.customer_group_name)):
+      msgprint("%s record is trashed. To untrash please go to Setup & click on Trash."%(self.doc.customer_group_name), raise_exception = 1)

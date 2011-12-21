@@ -572,6 +572,11 @@ pscript.feature_dict = {
 		'Receivable Voucher': {'entries':['adj_rate']},
 		'Sales Order': {'sales_order_details':['adj_rate','ref_rate']}
 	},
+	'fs_purchase_discounts': {
+		'Purchase Order': {'po_details':['purchase_ref_rate', 'discount_rate', 'import_ref_rate']},
+		'Purchase Receipt': {'purchase_receipt_details':['purchase_ref_rate', 'discount_rate', 'import_ref_rate']},
+		'Payable Voucher': {'entries':['purchase_ref_rate', 'discount_rate', 'import_ref_rate']}
+	},
 	'fs_brands': {
 		'Delivery Note': {'delivery_note_details':['brand']},
 		'Indent': {'indent_details':['brand']},

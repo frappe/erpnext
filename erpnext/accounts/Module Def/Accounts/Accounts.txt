@@ -5,7 +5,7 @@
 	{
 		'creation': '2010-09-25 10:50:37',
 		'docstatus': 0,
-		'modified': '2011-09-27 12:44:04',
+		'modified': '2011-12-07 16:18:28',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
@@ -176,6 +176,15 @@
 		'display_name': 'Ledger Balance Export',
 		'doc_name': 'Ledger Balance Export',
 		'doc_type': 'Single DocType',
+		'doctype': 'Module Def Item'
+	},
+
+	# Module Def Item
+	{
+		'description': 'Track C-Form received from customers',
+		'display_name': 'C-Form',
+		'doc_name': 'C-Form',
+		'doc_type': 'Setup Forms',
 		'doctype': 'Module Def Item'
 	},
 

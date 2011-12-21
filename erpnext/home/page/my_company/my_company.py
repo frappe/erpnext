@@ -57,14 +57,15 @@ def add_user(args):
 		from server_tools.gateway_utils import add_user_gateway
 		add_user_gateway(args['user'])
 	
-	add_profile(args['user'])
+	add_profile(args)
 	
 #
 # add profile record
 #
-def add_profile(email):
+def add_profile(args):
 	from webnotes.utils import validate_email_add
 	from webnotes.model.doc import Document
+	email = args['user']
 			
 	sql = webnotes.conn.sql
 	
@@ -83,9 +84,17 @@ def add_profile(email):
 		pr = Document('Profile')
 		pr.name = email
 		pr.email = email
-		pr.enabled=1
-		pr.user_type='System User'
-		pr.save(1)	
+		pr.first_name = args.get('first_name')
+		pr.last_name = args.get('last_name')
+		pr.enabled = 1
+		pr.user_type = 'System User'
+		pr.save(1)
+
+		if args.get('password'):
+			sql("""
+				UPDATE tabProfile 
+				SET password = PASSWORD(%s)
+				WHERE name = %s""", (args.get('password'), email))
 
 #
 # post comment

@@ -5,7 +5,7 @@
 	{
 		'creation': '2010-08-08 17:09:17',
 		'docstatus': 0,
-		'modified': '2011-12-13 12:06:35',
+		'modified': '2011-12-14 10:44:21',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
@@ -14,6 +14,7 @@
 	{
 		'autoname': 'EVD.######',
 		'colour': 'White:FFF',
+		'default_print_format': 'Standard',
 		'doctype': 'DocType',
 		'istable': 1,
 		'module': 'Accounts',
@@ -21,7 +22,7 @@
 		'section_style': 'Tray',
 		'server_code_error': ' ',
 		'show_in_menu': 0,
-		'version': 39
+		'version': 42
 	},
 
 	# These values are common for all DocField
@@ -73,18 +74,6 @@
 	# DocField
 	{
 		'doctype': 'DocField',
-		'fieldname': 'brand',
-		'fieldtype': 'Data',
-		'label': 'Brand',
-		'oldfieldname': 'brand',
-		'oldfieldtype': 'Data',
-		'permlevel': 0,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
 		'fieldname': 'description',
 		'fieldtype': 'Text',
 		'label': 'Description',
@@ -92,21 +81,6 @@
 		'oldfieldtype': 'Text',
 		'permlevel': 0,
 		'width': '300px'
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldname': 'item_group',
-		'fieldtype': 'Link',
-		'in_filter': 1,
-		'label': 'Item Group',
-		'oldfieldname': 'item_group',
-		'oldfieldtype': 'Link',
-		'options': 'Item Group',
-		'permlevel': 1,
-		'print_hide': 1,
-		'search_index': 1
 	},
 
 	# DocField
@@ -121,6 +95,52 @@
 		'print_hide': 0,
 		'reqd': 1,
 		'trigger': 'Client'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'import_ref_rate',
+		'fieldtype': 'Currency',
+		'label': 'Ref Rate ',
+		'permlevel': 0,
+		'trigger': 'Client'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'discount_rate',
+		'fieldtype': 'Currency',
+		'label': 'Discount %',
+		'permlevel': 0,
+		'trigger': 'Client'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'import_rate',
+		'fieldtype': 'Currency',
+		'label': 'Rate ',
+		'oldfieldname': 'import_rate',
+		'oldfieldtype': 'Currency',
+		'permlevel': 0,
+		'print_hide': 0,
+		'reqd': 1,
+		'trigger': 'Client'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'import_amount',
+		'fieldtype': 'Currency',
+		'label': 'Amount',
+		'oldfieldname': 'import_amount',
+		'oldfieldtype': 'Currency',
+		'permlevel': 1,
+		'reqd': 1
 	},
 
 	# DocField
@@ -162,52 +182,6 @@
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'discount_rate',
-		'fieldtype': 'Currency',
-		'label': 'Discount %',
-		'permlevel': 0,
-		'trigger': 'Client'
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldname': 'import_ref_rate',
-		'fieldtype': 'Currency',
-		'label': 'Ref Rate ',
-		'permlevel': 0,
-		'trigger': 'Client'
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldname': 'import_rate',
-		'fieldtype': 'Currency',
-		'label': 'Rate ',
-		'oldfieldname': 'import_rate',
-		'oldfieldtype': 'Currency',
-		'permlevel': 0,
-		'print_hide': 0,
-		'reqd': 1,
-		'trigger': 'Client'
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldname': 'import_amount',
-		'fieldtype': 'Currency',
-		'label': 'Amount',
-		'oldfieldname': 'import_amount',
-		'oldfieldtype': 'Currency',
-		'permlevel': 1,
-		'reqd': 1
-	},
-
-	# DocField
-	{
 		'colour': 'White:FFF',
 		'doctype': 'DocField',
 		'fieldname': 'expense_head',
@@ -237,6 +211,46 @@
 		'print_hide': 1,
 		'trigger': 'Client',
 		'width': '120px'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldname': 'project_name',
+		'fieldtype': 'Link',
+		'in_filter': 1,
+		'label': 'Project Name',
+		'options': 'Project',
+		'permlevel': 0,
+		'print_hide': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'brand',
+		'fieldtype': 'Data',
+		'label': 'Brand',
+		'oldfieldname': 'brand',
+		'oldfieldtype': 'Data',
+		'permlevel': 0,
+		'print_hide': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'item_group',
+		'fieldtype': 'Link',
+		'in_filter': 1,
+		'label': 'Item Group',
+		'oldfieldname': 'item_group',
+		'oldfieldtype': 'Link',
+		'options': 'Item Group',
+		'permlevel': 1,
+		'print_hide': 1,
+		'search_index': 1
 	},
 
 	# DocField

@@ -66,7 +66,7 @@ cur_frm.cscript.supplier = function(doc,dt,dn) {
         get_server_fields('get_default_values', args, 'entries', doc, el[i].doctype, el[i].name, 1);
       }
     }
-    cur_frm.cscript.calc_total(doc);
+    cur_frm.cscript.calc_amount(doc, 1);
   }
 
   if(doc.supplier) get_server_fields('get_default_supplier_address', JSON.stringify({supplier: doc.supplier}),'', doc, dt, dn, 1,callback);

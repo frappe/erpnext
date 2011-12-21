@@ -129,7 +129,22 @@
 				[// Here specify the column widths
 					'3%', '20%', '37%', '5%',
 					'5%', '15%', '15%'
-				]
+				],
+				null,
+				null,
+				{
+					'description' : function(data_row) {
+						if(data_row.adj_rate) {
+							var to_append = '<div style="padding-left: 15px;"><i>Discount: ' + 
+								data_row.adj_rate + '%</i></div>';
+							if(data_row.description.indexOf(to_append)==-1) {
+								return data_row.description + to_append;
+							} else { return data_row.description; }
+						} else {
+							return data_row.description;
+						}
+					}
+				}
 			);
 
 			// This code takes care of page breaks
@@ -182,7 +197,7 @@
 	-->
 	<table class='header-table' cellspacing=0>
 		<thead>
-			<tr><td colspan=2><h1>Sales Order</h1></td></tr>
+			<tr><td colspan=2><script>'<h1>' + (doc.select_print_heading || 'Sales Order') + '</h1>'</script></td></tr>
 			<tr><td colspan=2><h3><script>cur_frm.docname</script></h3></td></tr>
 		</thead>
 		<tbody>
@@ -279,5 +294,3 @@
 		</tfoot>
 	</table>
 </div>
-
-

@@ -1,0 +1,91 @@
+# DocType, C-Form Invoice Detail
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2011-12-07 16:15:39',
+		'docstatus': 0,
+		'modified': '2011-12-07 16:21:55',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all DocType
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocType',
+		'istable': 1,
+		'module': 'Accounts',
+		'name': '__common__',
+		'section_style': 'Simple',
+		'show_in_menu': 0,
+		'version': 5
+	},
+
+	# These values are common for all DocField
+	{
+		'doctype': 'DocField',
+		'name': '__common__',
+		'parent': 'C-Form Invoice Detail',
+		'parentfield': 'fields',
+		'parenttype': 'DocType'
+	},
+
+	# DocType, C-Form Invoice Detail
+	{
+		'doctype': 'DocType',
+		'name': 'C-Form Invoice Detail'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'invoice_no',
+		'fieldtype': 'Link',
+		'label': 'Invoice No',
+		'options': 'Receivable Voucher',
+		'permlevel': 0,
+		'width': '160px'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'invoice_date',
+		'fieldtype': 'Date',
+		'label': 'Invoice Date',
+		'permlevel': 1,
+		'width': '120px'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'territory',
+		'fieldtype': 'Link',
+		'label': 'Territory',
+		'options': 'Territory',
+		'permlevel': 1,
+		'width': '120px'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'net_total',
+		'fieldtype': 'Currency',
+		'label': 'Net Total',
+		'permlevel': 1,
+		'width': '120px'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'grand_total',
+		'fieldtype': 'Currency',
+		'label': 'Grand Total',
+		'permlevel': 1,
+		'width': '120px'
+	}
+]

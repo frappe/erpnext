@@ -42,13 +42,48 @@ pscript.myc_show_erpnext_message = function() {
 // Add user dialog and server call
 //
 pscript.myc_add_user = function() {
+	var fields = [{
+		fieldtype: 'Data',
+		fieldname: 'user',
+		reqd: 1,
+		label: 'Email Id of the user to add'
+	}];
+	console.log(pscript.is_erpnext_saas);
+
+	if(pscript.is_erpnext_saas==0) {
+		fields = fields.concat([
+		{
+			fieldtype: 'Data',
+			fieldname: 'first_name',
+			reqd: 1,
+			label: 'First Name'
+		},
+		{
+			fieldtype: 'Data',
+			fieldname: 'last_name',
+			reqd: 1,
+			label: 'Last Name'
+		},
+		{
+			fieldtype: 'Data',
+			fieldname: 'password',
+			reqd: 1,
+			label: 'Password'
+		}]);		
+	}
+
+	fields.push({
+		fieldtype: 'Button',
+		label: 'Add',
+		fieldname: 'add'
+	});
+
+	console.log(fields);
+	
 	var d = new wn.widgets.Dialog({
 		title: 'Add User',
 		width: 400,
-		fields: [
-			{fieldtype:'Data', fieldname:'user',reqd:1,label:'Email Id of the user to add'},
-			{fieldtype:'Button', label:'Add', fieldname:'add'}
-		]
+		fields: fields
 	});
 	d.make();
 	d.fields_dict.add.input.onclick = function() {

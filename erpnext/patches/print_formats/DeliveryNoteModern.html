@@ -135,16 +135,25 @@
 				null,
 				{
 					'description' : function(data_row) {
-						if(data_row.serial_no) {
-							return (
-								data_row.description + 
-								'<div style="padding-left: 15px;"><i>Serial No.:' + 
-								((data_row.serial_no.indexOf('\n')>-1)?'<br />':'&nbsp;') + 
-								data_row.serial_no + '</i></div>'
-							);
-						} else {
-							return data_row.description;
+						var to_append = ''
+						if(data_row.adj_rate){
+							to_append = '<div style="padding-left: 15px;"><i>Discount: ' + 
+								data_row.adj_rate + '%</i></div>';
+							if(data_row.description.indexOf(to_append)==-1) {
+								data_row.description = data_row.description + to_append;
+							}
 						}
+						
+						if(data_row.serial_no) {
+							to_append = '<div style="padding-left: 15px;"><i>Serial No.:' + 
+								((data_row.serial_no.indexOf('\n')>-1)?'<br />':'&nbsp;') + 
+								data_row.serial_no + '</i></div>';
+							if(data_row.description.indexOf(to_append)==-1) {
+								data_row.description = data_row.description + to_append;
+							}
+						}
+	
+						return data_row.description;
 					}
 				}
 			);
@@ -199,7 +208,7 @@
 	-->
 	<table class='header-table' cellspacing=0>
 		<thead>
-			<tr><td colspan=2><div><h1>Delivery Note</h1></div></td></tr>
+			<tr><td colspan=2><div><script>'<h1>' + (doc.select_print_heading || 'Delivery Note') + '</h1>'</script></div></td></tr>
 			<tr><td colspan=2><div style="height:15px"></div></td></tr>
 		</thead>
 		<tbody>
@@ -303,4 +312,3 @@
 		</tfoot>
 	</table>
 </div>
-

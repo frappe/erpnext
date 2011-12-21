@@ -130,7 +130,22 @@
 				[// Here specify the column widths
 					'3%', '20%', '37%', '5%',
 					'5%', '15%', '15%'
-				]
+				],
+				null,
+				null,
+				{
+					'description' : function(data_row) {
+						if(data_row.adj_rate) {
+							var to_append = '<div style="padding-left: 15px;"><i>Discount: ' + 
+								data_row.adj_rate + '%</i></div>';
+							if(data_row.description.indexOf(to_append)==-1) {
+								return data_row.description + to_append;
+							} else { return data_row.description; }
+						} else {
+							return data_row.description;
+						}
+					}
+				}
 			);
 
 			// This code takes care of page breaks
@@ -151,7 +166,6 @@
 
 
 		print_other_charges: function(parent) {
-			console.log(parent);
 			var oc = getchildren('RV Tax Detail', doc.name, 'other_charges');
 			var rows = '<table width=100%>\n';
 			for(var i=0; i<oc.length; i++) {
@@ -184,7 +198,7 @@
 	-->
 	<table class='header-table' cellspacing=0>
 		<thead>
-			<tr><td colspan=2><div><h1>Invoice</h1></div></td></tr>
+			<tr><td colspan=2><div><script>'<h1>' + (doc.select_print_heading || 'Invoice') + '</h1>'</script></div></td></tr>
 			<tr><td colspan=2><div style="height:15px"></div></td></tr>
 		</thead>
 		<tbody>
@@ -285,4 +299,3 @@
 		</tfoot>
 	</table>
 </div>
-
