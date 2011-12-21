@@ -69,8 +69,9 @@ class DocType:
   
   def on_update(self):
     if (self.doc.status =='Open') and (self.doc.task_email_notify==1):
-       	msg2= 'A task %s has been assigned to you by %s on %s \n%s Project:%s \t Review Date:%s\nClosing Date:%s  Details \n %s' \
-       	%(self.doc.name,self.doc.senders_name,self.doc.opening_date," ",self.doc.project, \
+       	msg2= 'A task %s has been assigned to you by %s on %s <br/> \
+       	Project:%s <br/> Review Date:%s <br /> Closing Date:%s <br /> Details  %s' \
+       	%(self.doc.name,self.doc.senders_name,self.doc.opening_date,self.doc.project, \
        	self.doc.review_date,self.doc.closing_date,self.doc.description)
     	sendmail(self.doc.allocated_to, sender='automail@webnotestech.com', \
     	subject='A task has been assigned', parts=[['text/plain',msg2]])

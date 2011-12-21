@@ -350,7 +350,7 @@ class DocType:
 			send_email_notification(doc_type,doc_name)
 			
 	def send_email_notification(self,doc_type,doc_name)
-		email_list=[d for d in sql("select  from tabUserRole where role in ('Purchase Manager','Material Manager') ")]
+		email_list=[d for d in sql("select parent from tabUserRole where role in ('Purchase Manager','Material Manager') ")]
 		msg1='An Indent has been raised for item %s: %s on %s '%(doc_type, doc_name, nowdate())
 		sendmail(email_list, sender='automail@webnotestech.com', \
 		subject='Auto Indent Generation Notification', parts=[['text/plain',msg1]])	
