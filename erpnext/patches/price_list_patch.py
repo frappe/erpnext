@@ -10,4 +10,4 @@ def execute():
 
 
 	for d in ['Receivable Voucher', 'Delivery Note', 'Sales Order', 'Quotation']:
-		sql("update `tab%s` set price_list_currency = currency, plc_conversion_rate = conversion_rate" % d)
+		webnotes.conn.sql("update `tab%s` set price_list_currency = currency, plc_conversion_rate = conversion_rate" % d)

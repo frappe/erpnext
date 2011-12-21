@@ -49,7 +49,7 @@ def update_status():
 	sql("""update `tabDelivery Note` set billing_status = if(ifnull(per_billed,0) < 0.001, 'Not Billed', 
 			if(per_billed >= 99.99, 'Fully Billed', 'Partly Billed'))""")
 			
-def run_patch():
+def execute():
 	update_delivered_billed_qty()
 	update_percent()
 	update_status()
