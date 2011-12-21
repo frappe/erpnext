@@ -36,24 +36,10 @@ def set_user_details(arg=None):
 	p.save()
 	webnotes.msgprint('Updated')
 
-def set_user_image(arg=None):
+def set_user_image(fid, fname):
 	"""
 		Set uploaded image as user image
 	"""
-	from webnotes.utils.upload_handler import UploadHandler
-	
-	uh = UploadHandler()
-	if not uh.file_name:
-		# do nothing - no file found
-		return
-	else:
-		# save the file
-		from webnotes.utils.file_manager import FileAttachments
-		
-		fa = FileAttachments('Profile', webnotes.session['user'])
-		fa.delete_all()
-		fa.add(uh.file_name, uh.content)
-		fa.save()
-		
-		uh.set_callback('window.parent.upload_callback("%s", "%s")' \
-		 	% (webnotes.form_dict['uploader_id'], fa.get_fid(0)))
+	from webnotes.utils.file_manager import add_file_list, remove_all
+	remove_all('Profile', webnotes.session['user'])
+	add_file_list('Profile', webnotes.session['user'], fname, fid)
