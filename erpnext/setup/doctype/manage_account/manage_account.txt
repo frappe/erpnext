@@ -5,7 +5,7 @@
 	{
 		'creation': '2010-08-08 17:09:09',
 		'docstatus': 0,
-		'modified': '2011-12-20 12:27:30',
+		'modified': '2011-12-21 13:22:33',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
@@ -28,7 +28,7 @@
 		'section_style': 'Tabbed',
 		'server_code_error': ' ',
 		'show_in_menu': 1,
-		'version': 515
+		'version': 516
 	},
 
 	# These values are common for all DocField
@@ -311,6 +311,20 @@
 		'fieldtype': 'Link',
 		'label': 'Credit Controller',
 		'options': 'Role'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Column Break'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'HTML',
+		'label': 'Account Info',
+		'options': '<div class="help-box">For more accounting defaults, Open <a href="#!List/Company">Company</a></div>'
 	},
 
 	# DocField
