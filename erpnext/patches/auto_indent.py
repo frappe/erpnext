@@ -4,5 +4,5 @@ def execute():
 	reload_doc('setup', 'doctype', 'manage_account')
 	reload_doc('stock', 'doctype', 'item')
 	webnotes.conn.sql("alter table `tabItem` drop column `minimum_inventory_level`")
-	webnotes.conn.sql("update `tabItem` set re_order_level = ifnull(re_order_level,min_order_qty) ")
+	webnotes.conn.sql("update `tabItem` set re_order_level = minimum_inventory_level wehre ifnull(re_order_level,0) = 0 ")
 		
