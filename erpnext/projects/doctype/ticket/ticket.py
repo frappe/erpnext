@@ -7,9 +7,9 @@ from webnotes.model.doc import Document, addchild, removechild, getchildren, mak
 from webnotes.model.doclist import getlist, copy_doclist
 from webnotes.model.code import get_obj, get_server_obj, run_server_obj, updatedb, check_syntax
 from webnotes import session, form, is_testing, msgprint, errprint
-
 sql = webnotes.conn.sql
 set = webnotes.conn.set
+get_value = webnotes.conn.get_value
 
 # -----------------------------------------------------------------------------------------
 
@@ -32,7 +32,7 @@ class DocType:
       return ret
   
   def get_allocated_to_name(self):
-    as_em = sql("select first_name, last_name from `tabProfile` where name=%s",self.doc.allocated_to)
+    as_em = sql("select first_name, last_name from `tabProfile` where name=%s",str(self.doc.allocated_to))
     ret = { 'allocated_to_name' : as_em and (as_em[0][0] + ' ' + as_em[0][1]) or ''}
     return ret
 
@@ -68,6 +68,13 @@ class DocType:
   #--------------------------------------------   
   
   def on_update(self):
+    if (self.doc.status =='Open') and (self.doc.task_email_notify==1):
+       	msg2= 'A task %s has been assigned to you by %s on %s <br/> \
+       	Project:%s <br/> Review Date:%s <br /> Closing Date:%s <br /> Details  %s' \
+       	%(self.doc.name,self.doc.senders_name,self.doc.opening_date,self.doc.project, \
+       	self.doc.review_date,self.doc.closing_date,self.doc.description)
+    	sendmail(self.doc.allocated_to, sender='automail@webnotestech.com', \
+    	subject='A task has been assigned', parts=[['text/plain',msg2]])
     pass
         
   #validate before sending for approval

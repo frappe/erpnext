@@ -12,7 +12,8 @@
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1323943888',
+
+		'_last_update': '1323855502',
 		'allow_copy': 1,
 		'allow_email': 1,
 		'allow_print': 1,
@@ -28,7 +29,7 @@
 		'section_style': 'Tabbed',
 		'server_code_error': ' ',
 		'show_in_menu': 1,
-		'version': 516
+		'version': 515
 	},
 
 	# These values are common for all DocField
@@ -240,6 +241,15 @@
 
 	# DocField
 	{
+		'doctype': 'DocField',
+		'fieldname': 'auto_indent',
+		'fieldtype': 'Check',
+		'label': 'Raise Indent when stock reaches re-order level'
+	},
+
+	# DocField
+	{
+		'default': '1',
 		'doctype': 'DocField',
 		'fieldtype': 'Column Break',
 		'width': '50%'

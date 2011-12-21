@@ -5,17 +5,18 @@
 	{
 		'creation': '2011-01-28 17:52:35',
 		'docstatus': 0,
-		'modified': '2010-12-03 10:04:58',
+		'modified': '2011-12-21 16:32:30',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1307707462',
+		'_last_update': '1324394580',
 		'allow_trash': 1,
 		'autoname': 'TIC/.####',
 		'colour': 'White:FFF',
+		'default_print_format': 'Standard',
 		'doctype': 'DocType',
 		'document_type': 'Master',
 		'module': 'Projects',
@@ -25,7 +26,7 @@
 		'show_in_menu': 0,
 		'subject': '%(subject)s',
 		'tag_fields': 'status',
-		'version': 245
+		'version': 247
 	},
 
 	# These values are common for all DocField
@@ -44,7 +45,8 @@
 		'parent': 'Ticket',
 		'parentfield': 'permissions',
 		'parenttype': 'DocType',
-		'read': 1
+		'read': 1,
+		'submit': 0
 	},
 
 	# DocType, Ticket
@@ -55,11 +57,21 @@
 
 	# DocPerm
 	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
+		'doctype': 'DocPerm',
+		'permlevel': 1,
+		'role': 'Projects User',
+		'write': 0
+	},
+
+	# DocPerm
+	{
 		'amend': 1,
 		'cancel': 1,
 		'create': 1,
 		'doctype': 'DocPerm',
-		'idx': 1,
 		'permlevel': 0,
 		'role': 'All',
 		'write': 1
@@ -67,8 +79,10 @@
 
 	# DocPerm
 	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
 		'doctype': 'DocPerm',
-		'idx': 2,
 		'permlevel': 1,
 		'role': 'All',
 		'write': 0
@@ -80,25 +94,15 @@
 		'cancel': 1,
 		'create': 1,
 		'doctype': 'DocPerm',
-		'idx': 3,
 		'permlevel': 0,
 		'role': 'Projects User',
 		'write': 1
-	},
-
-	# DocPerm
-	{
-		'doctype': 'DocPerm',
-		'idx': 4,
-		'permlevel': 1,
-		'role': 'Projects User'
 	},
 
 	# DocField
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Section Break',
-		'idx': 1,
 		'label': 'Task Details',
 		'oldfieldtype': 'Section Break',
 		'permlevel': 0,
@@ -111,7 +115,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'subject',
 		'fieldtype': 'Data',
-		'idx': 2,
 		'in_filter': 1,
 		'label': 'Subject',
 		'oldfieldname': 'subject',
@@ -125,8 +128,8 @@
 		'doctype': 'DocField',
 		'fieldname': 'status',
 		'fieldtype': 'Select',
-		'idx': 3,
 		'label': 'Status',
+		'no_copy': 1,
 		'oldfieldname': 'status',
 		'oldfieldtype': 'Select',
 		'options': 'Open\nPending Review\nClosed\nCancelled',
@@ -137,9 +140,17 @@
 	# DocField
 	{
 		'doctype': 'DocField',
+		'fieldname': 'task_email_notify',
+		'fieldtype': 'Check',
+		'label': 'Sent Mail Notification',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
 		'fieldname': 'opening_date',
 		'fieldtype': 'Date',
-		'idx': 4,
 		'label': 'Creation Date',
 		'oldfieldname': 'opening_date',
 		'oldfieldtype': 'Date',
@@ -155,7 +166,6 @@
 		'fieldname': 'review_date',
 		'fieldtype': 'Date',
 		'hidden': 1,
-		'idx': 5,
 		'label': 'Review Date',
 		'oldfieldname': 'review_date',
 		'oldfieldtype': 'Date',
@@ -170,7 +180,6 @@
 		'fieldname': 'closing_date',
 		'fieldtype': 'Date',
 		'hidden': 1,
-		'idx': 6,
 		'label': 'Closing Date',
 		'oldfieldname': 'closing_date',
 		'oldfieldtype': 'Date',
@@ -182,7 +191,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'priority',
 		'fieldtype': 'Select',
-		'idx': 7,
 		'in_filter': 1,
 		'label': 'Priority',
 		'oldfieldname': 'priority',
@@ -199,7 +207,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'project',
 		'fieldtype': 'Link',
-		'idx': 8,
 		'label': 'Project',
 		'oldfieldname': 'project',
 		'oldfieldtype': 'Link',
@@ -214,7 +221,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'customer',
 		'fieldtype': 'Link',
-		'idx': 9,
 		'label': 'Customer',
 		'oldfieldname': 'customer',
 		'oldfieldtype': 'Link',
@@ -228,7 +234,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'customer_name',
 		'fieldtype': 'Data',
-		'idx': 10,
 		'label': 'Customer Name',
 		'oldfieldname': 'customer_name',
 		'oldfieldtype': 'Data',
@@ -239,7 +244,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Column Break',
-		'idx': 11,
 		'oldfieldtype': 'Column Break',
 		'permlevel': 0,
 		'width': '50%'
@@ -251,7 +255,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'allocated_to',
 		'fieldtype': 'Link',
-		'idx': 12,
 		'label': 'Allocated To',
 		'oldfieldname': 'allocated_to',
 		'oldfieldtype': 'Link',
@@ -266,7 +269,6 @@
 		'fieldname': 'allocated_to_name',
 		'fieldtype': 'Data',
 		'hidden': 1,
-		'idx': 13,
 		'label': 'Allocated To Name',
 		'oldfieldname': 'allocated_to_name',
 		'oldfieldtype': 'Data',
@@ -278,7 +280,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'senders_name',
 		'fieldtype': 'Data',
-		'idx': 14,
 		'in_filter': 1,
 		'label': 'Raised By',
 		'oldfieldname': 'senders_name',
@@ -293,7 +294,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'senders_email',
 		'fieldtype': 'Data',
-		'idx': 15,
 		'label': 'Email',
 		'oldfieldname': 'senders_email',
 		'oldfieldtype': 'Data',
@@ -306,7 +306,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'senders_contact_no',
 		'fieldtype': 'Data',
-		'idx': 16,
 		'label': 'Senders Contact No',
 		'oldfieldname': 'senders_contact_no',
 		'oldfieldtype': 'Data',
@@ -318,7 +317,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'senders_company',
 		'fieldtype': 'Data',
-		'idx': 17,
 		'label': 'Senders Company',
 		'oldfieldname': 'senders_company',
 		'oldfieldtype': 'Data',
@@ -330,7 +328,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'category',
 		'fieldtype': 'Link',
-		'idx': 18,
 		'label': 'Category',
 		'oldfieldname': 'category',
 		'oldfieldtype': 'Link',
@@ -343,7 +340,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'external_or_internal',
 		'fieldtype': 'Select',
-		'idx': 19,
 		'label': 'External or Internal',
 		'oldfieldname': 'external_or_internal',
 		'oldfieldtype': 'Select',
@@ -357,7 +353,6 @@
 		'fieldname': 'amended_from',
 		'fieldtype': 'Data',
 		'hidden': 1,
-		'idx': 20,
 		'label': 'Amended From',
 		'no_copy': 1,
 		'oldfieldname': 'amended_from',
@@ -373,7 +368,6 @@
 		'fieldname': 'amendment_date',
 		'fieldtype': 'Date',
 		'hidden': 1,
-		'idx': 21,
 		'label': 'Amendment Date',
 		'no_copy': 1,
 		'oldfieldname': 'amendment_date',
@@ -387,7 +381,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Section Break',
-		'idx': 22,
 		'oldfieldtype': 'Section Break',
 		'options': 'Simple',
 		'permlevel': 0
@@ -398,7 +391,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'description',
 		'fieldtype': 'Text Editor',
-		'idx': 23,
 		'label': 'Details',
 		'oldfieldname': 'description',
 		'oldfieldtype': 'Text Editor',
@@ -414,7 +406,6 @@
 		'fieldname': 'first_creation_flag',
 		'fieldtype': 'Int',
 		'hidden': 1,
-		'idx': 24,
 		'in_filter': 0,
 		'label': 'First Creation Flag',
 		'no_copy': 1,
@@ -431,7 +422,6 @@
 		'fieldname': 'second_creation_flag',
 		'fieldtype': 'Int',
 		'hidden': 1,
-		'idx': 25,
 		'label': 'Second Creation Flag',
 		'no_copy': 1,
 		'oldfieldname': 'second_creation_flag',
@@ -444,7 +434,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Section Break',
-		'idx': 26,
 		'label': 'Time and Budget',
 		'oldfieldtype': 'Section Break',
 		'permlevel': 0
@@ -454,7 +443,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Column Break',
-		'idx': 27,
 		'label': 'Expected',
 		'oldfieldtype': 'Column Break',
 		'permlevel': 0,
@@ -466,7 +454,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'exp_start_date',
 		'fieldtype': 'Date',
-		'idx': 28,
 		'label': 'Expected Start Date',
 		'oldfieldname': 'exp_start_date',
 		'oldfieldtype': 'Date',
@@ -479,7 +466,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'exp_end_date',
 		'fieldtype': 'Date',
-		'idx': 29,
 		'in_filter': 1,
 		'label': 'Expected End Date',
 		'oldfieldname': 'exp_end_date',
@@ -494,7 +480,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'exp_total_hrs',
 		'fieldtype': 'Data',
-		'idx': 30,
 		'label': 'Total Hours (Expected)',
 		'oldfieldname': 'exp_total_hrs',
 		'oldfieldtype': 'Data',
@@ -507,7 +492,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'allocated_budget',
 		'fieldtype': 'Currency',
-		'idx': 31,
 		'label': 'Allocated Budget',
 		'oldfieldname': 'allocated_budget',
 		'oldfieldtype': 'Currency',
@@ -518,7 +502,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Column Break',
-		'idx': 32,
 		'label': 'Actual',
 		'oldfieldtype': 'Column Break',
 		'permlevel': 0,
@@ -530,7 +513,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'act_start_date',
 		'fieldtype': 'Date',
-		'idx': 33,
 		'label': 'Actual Start Date',
 		'oldfieldname': 'act_start_date',
 		'oldfieldtype': 'Date',
@@ -542,7 +524,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'act_end_date',
 		'fieldtype': 'Date',
-		'idx': 34,
 		'label': 'Actual End Date',
 		'oldfieldname': 'act_end_date',
 		'oldfieldtype': 'Date',
@@ -554,7 +535,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'act_total_hrs',
 		'fieldtype': 'Data',
-		'idx': 35,
 		'label': 'Total Hours (Actual)',
 		'oldfieldname': 'act_total_hrs',
 		'oldfieldtype': 'Data',
@@ -566,7 +546,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'actual_budget',
 		'fieldtype': 'Currency',
-		'idx': 36,
 		'label': 'Actual Budget',
 		'oldfieldname': 'actual_budget',
 		'oldfieldtype': 'Currency',
