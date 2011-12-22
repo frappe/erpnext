@@ -1,4 +1,5 @@
 import webnotes
+from webnotes.model.doc import Document
 
 def execute():
 	companies_list = webnotes.conn.sql("SELECT company_name FROM `tabCompany`", as_list=1)
