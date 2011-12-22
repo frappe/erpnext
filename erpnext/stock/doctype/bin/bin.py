@@ -1,11 +1,18 @@
 # Please edit this list and import only required elements
 import webnotes
 
-from webnotes.utils import cint, cstr, flt, nowdate
-from webnotes.model.code import get_obj
-from webnotes import msgprint
+from webnotes.utils import add_days, add_months, add_years, cint, cstr, date_diff, default_fields, flt, fmt_money, formatdate, generate_hash, getTraceback, get_defaults, get_first_day, get_last_day, getdate, has_common, month_name, now, nowdate, replace_newlines, sendmail, set_default, str_esc_quote, user_format, validate_email_add
+from webnotes.model import db_exists
+from webnotes.model.doc import Document, addchild, removechild, getchildren, make_autoname, SuperDocType
+from webnotes.model.doclist import getlist, copy_doclist
+from webnotes.model.code import get_obj, get_server_obj, run_server_obj, updatedb, check_syntax
+from webnotes import session, form, is_testing, msgprint, errprint
 
+set = webnotes.conn.set
 sql = webnotes.conn.sql
+get_value = webnotes.conn.get_value
+
+
 
 # -----------------------------------------------------------------------------------------
 
@@ -18,9 +25,9 @@ class DocType:
 	# -------------
 	# stock update
 	# -------------
-	def update_stock(self, actual_qty=0, reserved_qty=0, ordered_qty=0, indented_qty=0, planned_qty=0, dt=None, sle_id='', posting_time='', serial_no = '', is_cancelled = 'No'):
-
-		if not dt: dt = nowdate()
+	def update_stock(self, actual_qty=0, reserved_qty=0, ordered_qty=0, indented_qty=0, planned_qty=0, dt=None, sle_id='', posting_time='', serial_no = '', is_cancelled = 'No',doc_type='',doc_name='',is_amended='No'):
+		if not dt: 
+			dt = nowdate()
 		# update the stock values (for current quantities)
 		self.doc.actual_qty = flt(self.doc.actual_qty) + flt(actual_qty)
 		self.doc.ordered_qty = flt(self.doc.ordered_qty) + flt(ordered_qty)
@@ -28,9 +35,9 @@ class DocType:
 		self.doc.indented_qty = flt(self.doc.indented_qty) + flt(indented_qty)
 		self.doc.planned_qty = flt(self.doc.planned_qty) + flt(planned_qty)
 		self.doc.projected_qty = flt(self.doc.actual_qty) + flt(self.doc.ordered_qty) + flt(self.doc.indented_qty) + flt(self.doc.planned_qty) - flt(self.doc.reserved_qty)
-
 		self.doc.save()
-			
+		if(( flt(actual_qty)<0 or flt(reserved_qty)>0 )and is_cancelled == 'No' and is_amended=='No'):
+			self.reorder_item(doc_type,doc_name)	
 		
 		if actual_qty:
 			# check actual qty with total number of serial no
@@ -299,13 +306,54 @@ class DocType:
 
 	# item re-order
 	# -------------
-	def reorder_item(self):
-		#check if re-order is required
-		projected_qty = flt(self.doc.actual_qty) + flt(self.doc.indented_qty) + flt(self.doc.ordered_qty)
-		item_reorder_level = sql("select reorder_level from `%sItem` where name = '%s'" % (self.prefix, self.doc.item_code))[0][0] or 0
-		if flt(item_reorder_level) > flt(projected_qty):
-			msgprint("Item: " + self.doc.item_code + " is to be re-ordered. Indent raised (Not Implemented).")
-	
+	def reorder_item(self,doc_type,doc_name):
+		msgprint(get_value('Manage Account', None, 'auto_indent'))
+		if get_value('Manage Account', None, 'auto_indent'):
+			#check if re-order is required
+			indent_detail_fields = sql("select re_order_level,item_name,description,brand,item_group,lead_time_days,min_order_qty,email_notify from tabItem where item_code = %s",(self.doc.item_code),as_dict=1)
+			i =	indent_detail_fields[0] 
+			item_reorder_level = i['re_order_level'] or 0	 
+			if ((flt(item_reorder_level) > flt(self.doc.projected_qty)) and item_reorder_level) :
+				self.reorder_indent(i,item_reorder_level,doc_type,doc_name,email_notify=i['email_notify'])
+
+		
+	# Re order Auto Intent Generation
+	def reorder_indent(self,i,item_reorder_level,doc_type,doc_name,email_notify=1):
+		indent = Document('Indent')
+		indent.transaction_date = nowdate()
+		indent.naming_series = 'IDT'
+		indent.company = get_defaults()['company']
+		indent.fiscal_year = get_defaults()['fiscal_year']
+		indent.remark = "This is an auto generated Indent. It was raised because the projected quantity has fallen below the minimum re-order level when %s %s was created"%(doc_type,doc_name)
+		indent.save(1)
+		indent_obj = get_obj('Indent',indent.name,with_children=1)
+		indent_details_child = addchild(indent_obj.doc,'indent_details','Indent Detail',0)
+		indent_details_child.item_code = self.doc.item_code
+		indent_details_child.uom = self.doc.stock_uom
+		indent_details_child.warehouse = self.doc.warehouse
+		indent_details_child.schedule_date= add_days(nowdate(),i['lead_time_days'])
+		indent_details_child.item_name = i['item_name']
+		indent_details_child.description = i['description']
+		indent_details_child.item_group = i['item_group']
+		if (i['min_order_qty'] < ( flt(item_reorder_level)-flt(self.doc.projected_qty) )):
+			indent_details_child.qty =flt(flt(item_reorder_level)-flt(self.doc.projected_qty))
+		else:
+			indent_details_child.qty = i['min_order_qty']
+		indent_details_child.brand = i['brand']
+		indent_details_child.save()
+		indent_obj = get_obj('Indent',indent.name,with_children=1)
+		indent_obj.validate()
+		set(indent_obj.doc,'docstatus',1)
+		indent_obj.on_submit()
+		msgprint("Item: " + self.doc.item_code + " is to be re-ordered. Indent %s raised.Was generated from %s %s"%(indent.name,doc_type, doc_name ))
+		if(email_notify):
+			send_email_notification(doc_type,doc_name)
+			
+	def send_email_notification(self,doc_type,doc_name):
+		email_list=[d for d in sql("select parent from tabUserRole where role in ('Purchase Manager','Material Manager') ")]
+		msg1='An Indent has been raised for item %s: %s on %s '%(doc_type, doc_name, nowdate())
+		sendmail(email_list, sender='automail@webnotestech.com', \
+		subject='Auto Indent Generation Notification', parts=[['text/plain',msg1]])	
 	# validate
 	def validate(self):
 		self.validate_mandatory()

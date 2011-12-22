@@ -4,7 +4,7 @@ def execute():
 
 	reload_doc('accounts', 'doctype', 'receivable_voucher')
 	reload_doc('accounts', 'doctype', 'c_form')
-	reload_doc('accounts', 'doctype', 'c_form_invoice_details')
+	reload_doc('accounts', 'doctype', 'c_form_invoice_detail')
 	reload_doc('accounts', 'Module Def', 'Accounts')
 
 	sql = webnotes.conn.sql

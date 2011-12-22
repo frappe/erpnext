@@ -5,15 +5,16 @@
 	{
 		'creation': '2010-08-08 17:09:00',
 		'docstatus': 0,
-		'modified': '2011-05-12 18:27:46',
+		'modified': '2011-12-19 14:11:27',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1305205067',
+		'_last_update': '1316075905',
 		'colour': 'White:FFF',
+		'default_print_format': 'Standard',
 		'doctype': 'DocType',
 		'document_type': 'Transaction',
 		'module': 'Selling',
@@ -23,7 +24,7 @@
 		'server_code_error': ' ',
 		'show_in_menu': 0,
 		'subject': 'To %(customer_name)s%(lead_name)s on %(transaction_date)s',
-		'version': 586
+		'version': 587
 	},
 
 	# These values are common for all DocField
@@ -57,7 +58,6 @@
 		'cancel': 0,
 		'create': 0,
 		'doctype': 'DocPerm',
-		'idx': 1,
 		'permlevel': 1,
 		'role': 'Sales Manager',
 		'submit': 0,
@@ -70,7 +70,6 @@
 		'cancel': 1,
 		'create': 1,
 		'doctype': 'DocPerm',
-		'idx': 2,
 		'permlevel': 0,
 		'role': 'System Manager',
 		'submit': 1,
@@ -80,7 +79,6 @@
 	# DocPerm
 	{
 		'doctype': 'DocPerm',
-		'idx': 3,
 		'permlevel': 1,
 		'role': 'System Manager'
 	},
@@ -91,7 +89,6 @@
 		'cancel': 1,
 		'create': 1,
 		'doctype': 'DocPerm',
-		'idx': 4,
 		'permlevel': 0,
 		'role': 'Sales User',
 		'submit': 1,
@@ -104,7 +101,6 @@
 		'cancel': 0,
 		'create': 0,
 		'doctype': 'DocPerm',
-		'idx': 5,
 		'permlevel': 1,
 		'role': 'Sales User',
 		'submit': 0,
@@ -117,7 +113,6 @@
 		'cancel': 1,
 		'create': 1,
 		'doctype': 'DocPerm',
-		'idx': 6,
 		'permlevel': 0,
 		'role': 'Sales Manager',
 		'submit': 1,
@@ -130,7 +125,6 @@
 		'description': 'Enter customer enquiry for which you might raise a quotation in future',
 		'doctype': 'DocField',
 		'fieldtype': 'Section Break',
-		'idx': 1,
 		'label': 'Basic Info',
 		'oldfieldtype': 'Section Break',
 		'permlevel': 0
@@ -143,7 +137,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'naming_series',
 		'fieldtype': 'Select',
-		'idx': 2,
 		'label': 'Series',
 		'no_copy': 1,
 		'oldfieldname': 'naming_series',
@@ -159,7 +152,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'enquiry_from',
 		'fieldtype': 'Select',
-		'idx': 3,
 		'label': 'Enquiry From',
 		'oldfieldname': 'enquiry_from',
 		'oldfieldtype': 'Select',
@@ -178,7 +170,6 @@
 		'fieldname': 'customer',
 		'fieldtype': 'Link',
 		'hidden': 0,
-		'idx': 4,
 		'in_filter': 1,
 		'label': 'Customer',
 		'oldfieldname': 'customer',
@@ -187,7 +178,7 @@
 		'permlevel': 0,
 		'print_hide': 1,
 		'reqd': 0,
-		'search_index': 1,
+		'search_index': 0,
 		'trigger': 'Client'
 	},
 
@@ -196,7 +187,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'customer_address',
 		'fieldtype': 'Link',
-		'idx': 5,
 		'in_filter': 1,
 		'label': 'Customer Address',
 		'options': 'Address',
@@ -210,7 +200,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'contact_person',
 		'fieldtype': 'Link',
-		'idx': 6,
 		'in_filter': 1,
 		'label': 'Contact Person',
 		'options': 'Contact',
@@ -224,7 +213,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'customer_name',
 		'fieldtype': 'Data',
-		'idx': 7,
 		'label': 'Customer Name',
 		'permlevel': 1,
 		'print_hide': 0
@@ -236,7 +224,6 @@
 		'fieldname': 'lead',
 		'fieldtype': 'Link',
 		'hidden': 0,
-		'idx': 8,
 		'in_filter': 1,
 		'label': 'Lead',
 		'oldfieldname': 'lead',
@@ -244,7 +231,6 @@
 		'options': 'Lead',
 		'permlevel': 0,
 		'print_hide': 1,
-		'search_index': 1,
 		'trigger': 'Client'
 	},
 
@@ -254,7 +240,6 @@
 		'fieldname': 'lead_name',
 		'fieldtype': 'Data',
 		'hidden': 0,
-		'idx': 9,
 		'label': 'Name',
 		'oldfieldname': 'lead_name',
 		'oldfieldtype': 'Data',
@@ -267,7 +252,6 @@
 		'fieldname': 'address_display',
 		'fieldtype': 'Small Text',
 		'hidden': 0,
-		'idx': 10,
 		'label': 'Address',
 		'oldfieldname': 'address',
 		'oldfieldtype': 'Small Text',
@@ -279,7 +263,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'contact_display',
 		'fieldtype': 'Small Text',
-		'idx': 11,
 		'label': 'Contact',
 		'permlevel': 1
 	},
@@ -289,7 +272,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'contact_mobile',
 		'fieldtype': 'Text',
-		'idx': 12,
 		'label': 'Contact Mobile No',
 		'permlevel': 1
 	},
@@ -299,7 +281,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'contact_email',
 		'fieldtype': 'Text',
-		'idx': 13,
 		'label': 'Contact Email',
 		'permlevel': 1
 	},
@@ -308,7 +289,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Column Break',
-		'idx': 14,
 		'oldfieldtype': 'Column Break',
 		'permlevel': 0,
 		'width': '50%'
@@ -321,13 +301,11 @@
 		'doctype': 'DocField',
 		'fieldname': 'transaction_date',
 		'fieldtype': 'Date',
-		'idx': 15,
 		'label': 'Enquiry Date',
 		'oldfieldname': 'transaction_date',
 		'oldfieldtype': 'Date',
 		'permlevel': 0,
 		'reqd': 1,
-		'search_index': 1,
 		'width': '50px'
 	},
 
@@ -337,7 +315,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'enquiry_type',
 		'fieldtype': 'Select',
-		'idx': 16,
 		'label': 'Enquiry Type',
 		'oldfieldname': 'enquiry_type',
 		'oldfieldtype': 'Select',
@@ -353,7 +330,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'status',
 		'fieldtype': 'Select',
-		'idx': 17,
 		'label': 'Status',
 		'no_copy': 1,
 		'oldfieldname': 'status',
@@ -368,7 +344,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'amended_from',
 		'fieldtype': 'Data',
-		'idx': 18,
 		'label': 'Amended From',
 		'no_copy': 1,
 		'oldfieldname': 'amended_from',
@@ -383,7 +358,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'amendment_date',
 		'fieldtype': 'Date',
-		'idx': 19,
 		'label': 'Amendment Date',
 		'no_copy': 1,
 		'oldfieldname': 'amendment_date',
@@ -400,26 +374,25 @@
 		'doctype': 'DocField',
 		'fieldname': 'territory',
 		'fieldtype': 'Link',
-		'idx': 20,
 		'in_filter': 1,
 		'label': 'Territory',
 		'options': 'Territory',
 		'permlevel': 0,
 		'print_hide': 1,
 		'reqd': 1,
-		'search_index': 0,
+		'search_index': 1,
 		'trigger': 'Client'
 	},
 
 	# DocField
 	{
 		'colour': 'White:FFF',
+		'depends_on': 'eval:doc.enquiry_from=="Customer"',
 		'description': '<a href="javascript:cur_frm.cscript.CGHelp();">To Manage Customer Groups, click here</a>',
 		'doctype': 'DocField',
 		'fieldname': 'customer_group',
 		'fieldtype': 'Link',
 		'hidden': 0,
-		'idx': 21,
 		'in_filter': 1,
 		'label': 'Customer Group',
 		'oldfieldname': 'customer_group',
@@ -428,7 +401,7 @@
 		'permlevel': 0,
 		'print_hide': 1,
 		'reqd': 0,
-		'search_index': 0,
+		'search_index': 1,
 		'trigger': 'Client'
 	},
 
@@ -437,7 +410,6 @@
 		'colour': 'White:FFF',
 		'doctype': 'DocField',
 		'fieldtype': 'Section Break',
-		'idx': 22,
 		'label': 'Items',
 		'oldfieldtype': 'Section Break',
 		'permlevel': 0
@@ -450,7 +422,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'enquiry_details',
 		'fieldtype': 'Table',
-		'idx': 23,
 		'label': 'Enquiry Details',
 		'oldfieldname': 'enquiry_details',
 		'oldfieldtype': 'Table',
@@ -464,7 +435,6 @@
 		'description': 'Filing in Additional Information about the Enquiry will help you analyze your data better.',
 		'doctype': 'DocField',
 		'fieldtype': 'Section Break',
-		'idx': 24,
 		'label': 'More Info',
 		'oldfieldtype': 'Section Break',
 		'permlevel': 0
@@ -474,7 +444,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Column Break',
-		'idx': 25,
 		'oldfieldtype': 'Column Break',
 		'permlevel': 0,
 		'width': '50%'
@@ -485,7 +454,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'company',
 		'fieldtype': 'Link',
-		'idx': 26,
 		'in_filter': 1,
 		'label': 'Company',
 		'oldfieldname': 'company',
@@ -494,7 +462,7 @@
 		'permlevel': 0,
 		'print_hide': 1,
 		'reqd': 1,
-		'search_index': 0
+		'search_index': 1
 	},
 
 	# DocField
@@ -502,7 +470,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'fiscal_year',
 		'fieldtype': 'Select',
-		'idx': 27,
 		'in_filter': 1,
 		'label': 'Fiscal Year',
 		'oldfieldname': 'fiscal_year',
@@ -511,7 +478,7 @@
 		'permlevel': 0,
 		'print_hide': 1,
 		'reqd': 1,
-		'search_index': 0
+		'search_index': 1
 	},
 
 	# DocField
@@ -519,7 +486,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'source',
 		'fieldtype': 'Select',
-		'idx': 28,
 		'label': 'Source',
 		'oldfieldname': 'source',
 		'oldfieldtype': 'Select',
@@ -534,7 +500,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'campaign',
 		'fieldtype': 'Link',
-		'idx': 29,
 		'label': 'Campaign',
 		'oldfieldname': 'campaign',
 		'oldfieldtype': 'Link',
@@ -549,7 +514,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'order_lost_reason',
 		'fieldtype': 'Small Text',
-		'idx': 30,
 		'label': 'Order Lost Reason',
 		'no_copy': 1,
 		'oldfieldname': 'order_lost_reason',
@@ -562,7 +526,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Column Break',
-		'idx': 31,
 		'oldfieldtype': 'Column Break',
 		'permlevel': 0,
 		'width': '50%'
@@ -575,7 +538,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'contact_by',
 		'fieldtype': 'Link',
-		'idx': 32,
 		'in_filter': 1,
 		'label': 'Next Contact By',
 		'oldfieldname': 'contact_by',
@@ -592,7 +554,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'contact_date',
 		'fieldtype': 'Date',
-		'idx': 33,
 		'label': 'Next Contact Date',
 		'oldfieldname': 'contact_date',
 		'oldfieldtype': 'Date',
@@ -608,7 +569,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'last_contact_date',
 		'fieldtype': 'Date',
-		'idx': 34,
 		'label': 'Last Contact Date',
 		'no_copy': 1,
 		'oldfieldname': 'last_contact_date',
@@ -622,7 +582,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'to_discuss',
 		'fieldtype': 'Small Text',
-		'idx': 35,
 		'label': 'To Discuss',
 		'no_copy': 1,
 		'oldfieldname': 'to_discuss',
@@ -636,7 +595,6 @@
 		'description': 'Keep a track of communication related to this enquiry which will help for future reference.',
 		'doctype': 'DocField',
 		'fieldtype': 'Section Break',
-		'idx': 36,
 		'label': 'Communication History',
 		'oldfieldtype': 'Section Break',
 		'permlevel': 0
@@ -649,7 +607,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'follow_up',
 		'fieldtype': 'Table',
-		'idx': 37,
 		'label': 'Follow Up',
 		'oldfieldname': 'follow_up',
 		'oldfieldtype': 'Table',

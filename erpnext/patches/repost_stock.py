@@ -2,6 +2,7 @@ def execute():
     import webnotes
     sql = webnotes.conn.sql
     from webnotes.model.code import get_obj
+    from webnotes.utils import flt
 
     # update incoming rate in serial nos
     sr = sql("""select name, item_code, purchase_document_no from `tabSerial No`

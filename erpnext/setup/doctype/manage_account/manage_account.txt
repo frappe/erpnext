@@ -5,18 +5,20 @@
 	{
 		'creation': '2010-08-08 17:09:09',
 		'docstatus': 0,
-		'modified': '2011-12-14 15:08:22',
+		'modified': '2011-12-21 13:22:33',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1323855454',
+
+		'_last_update': '1323855502',
 		'allow_copy': 1,
 		'allow_email': 1,
 		'allow_print': 1,
 		'colour': 'White:FFF',
+		'default_print_format': 'Standard',
 		'doctype': 'DocType',
 		'hide_toolbar': 0,
 		'in_create': 1,
@@ -27,7 +29,7 @@
 		'section_style': 'Tabbed',
 		'server_code_error': ' ',
 		'show_in_menu': 1,
-		'version': 516
+		'version': 515
 	},
 
 	# These values are common for all DocField
@@ -240,6 +242,15 @@
 	# DocField
 	{
 		'doctype': 'DocField',
+		'fieldname': 'auto_indent',
+		'fieldtype': 'Check',
+		'label': 'Raise Indent when stock reaches re-order level'
+	},
+
+	# DocField
+	{
+		'default': '1',
+		'doctype': 'DocField',
 		'fieldtype': 'Column Break',
 		'width': '50%'
 	},
@@ -322,7 +333,7 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'HTML',
-		'label': 'Acccount Info',
+		'label': 'Account Info',
 		'options': '<div class="help-box">For more accounting defaults, Open <a href="#!List/Company">Company</a></div>'
 	},
 
@@ -381,6 +392,13 @@
 	# DocField
 	{
 		'doctype': 'DocField',
+		'fieldtype': 'Column Break',
+		'width': '50%'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
 		'fieldname': 'default_price_list',
 		'fieldtype': 'Link',
 		'label': 'Default Price List',
@@ -390,8 +408,10 @@
 	# DocField
 	{
 		'doctype': 'DocField',
-		'fieldtype': 'Column Break',
-		'width': '50%'
+		'fieldname': 'default_price_list_currency',
+		'fieldtype': 'Link',
+		'label': 'Default Price List Currency',
+		'options': 'Currency'
 	},
 
 	# DocField

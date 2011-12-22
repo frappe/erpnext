@@ -52,12 +52,12 @@ class DocType:
 
 	# update bin
 	# ----------
-	def update_bin(self, actual_qty, reserved_qty, ordered_qty, indented_qty, planned_qty, item_code, dt, sle_id = '',posting_time = '', serial_no = '', is_cancelled = 'No'):
+	def update_bin(self, actual_qty, reserved_qty, ordered_qty, indented_qty, planned_qty, item_code, dt, sle_id = '',posting_time = '', serial_no = '', is_cancelled = 'No',doc_type='',doc_name='',is_amended='No'):
 		self.validate_asset(item_code)
 		it_det = get_value('Item', item_code, 'is_stock_item')
 		if it_det and it_det == 'Yes':
 			bin = self.get_bin(item_code)
-			bin.update_stock(actual_qty, reserved_qty, ordered_qty, indented_qty, planned_qty, dt, sle_id, posting_time, serial_no, is_cancelled)
+			bin.update_stock(actual_qty, reserved_qty, ordered_qty, indented_qty, planned_qty, dt, sle_id, posting_time, serial_no, is_cancelled,doc_type,doc_name,is_amended)
 			return bin
 		else:
 			msgprint("[Stock Update] Ignored %s since it is not a stock item" % item_code)

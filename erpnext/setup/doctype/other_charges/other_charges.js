@@ -93,12 +93,10 @@ cur_frm.fields_dict['other_charges'].grid.get_field("account_head").get_query = 
   return 'SELECT tabAccount.name FROM tabAccount WHERE tabAccount.group_or_ledger="Ledger" AND tabAccount.docstatus != 2 AND (tabAccount.account_type = "Tax" OR tabAccount.account_type = "Chargeable") AND tabAccount.company = "'+doc.company+'" AND  tabAccount.name LIKE "%s"'
 }
 
-//--------------------filter other charges master company-wise-----------------------------------------
-/*
-cur_frm.fields_dict.charge.get_query = function(doc) {
-  return 'SELECT DISTINCT `tabOther Charges`.name FROM `tabOther Charges` WHERE `tabOther Charges`.company = "'+doc.company+'" AND `tabOther Charges`.company is not NULL AND `tabOther Charges`.name LIKE "%s" ORDER BY `tabOther Charges`.name LIMIT 50';
+cur_frm.fields_dict['other_charges'].grid.get_field("cost_center_other_charges").get_query = function(doc) {
+	return 'SELECT `tabCost Center`.`name` FROM `tabCost Center` WHERE `tabCost Center`.`company_name` = "' +doc.company+'" AND `tabCost Center`.%(key)s LIKE "%s" AND `tabCost Center`.`group_or_ledger` = "Ledger" AND `tabCost Center`.`docstatus`!= 2 ORDER BY	`tabCost Center`.`name` ASC LIMIT 50';
 }
-*/
+
 
 cur_frm.cscript.account_head = function(doc, cdt, cdn) {
   var d = locals[cdt][cdn];

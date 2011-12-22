@@ -5,15 +5,16 @@
 	{
 		'creation': '2010-09-23 10:26:03',
 		'docstatus': 0,
-		'modified': '2011-06-27 14:39:08',
+		'modified': '2011-12-19 14:11:15',
 		'modified_by': 'Administrator',
 		'owner': 'ashwini@webnotestech.com'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1308808105',
+		'_last_update': '1317365120',
 		'colour': 'White:FFF',
+		'default_print_format': 'Standard',
 		'doctype': 'DocType',
 		'document_type': 'Master',
 		'module': 'HR',
@@ -22,7 +23,7 @@
 		'section_style': 'Simple',
 		'server_code_error': ' ',
 		'show_in_menu': 0,
-		'version': 74
+		'version': 75
 	},
 
 	# These values are common for all DocField
@@ -72,7 +73,6 @@
 	{
 		'amend': 0,
 		'doctype': 'DocPerm',
-		'idx': 1,
 		'role': 'System Manager'
 	},
 
@@ -80,7 +80,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Section Break',
-		'idx': 1,
 		'label': 'Attendance Details',
 		'oldfieldtype': 'Section Break',
 		'options': 'Simple'
@@ -91,7 +90,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'naming_series',
 		'fieldtype': 'Select',
-		'idx': 2,
 		'label': 'Naming Series',
 		'no_copy': 1,
 		'oldfieldname': 'naming_series',
@@ -106,7 +104,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'employee',
 		'fieldtype': 'Link',
-		'idx': 3,
 		'in_filter': 1,
 		'label': 'Employee',
 		'oldfieldname': 'employee',
@@ -122,7 +119,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'employee_name',
 		'fieldtype': 'Data',
-		'idx': 4,
 		'label': 'Employee Name',
 		'oldfieldname': 'employee_name',
 		'oldfieldtype': 'Data'
@@ -134,27 +130,14 @@
 		'doctype': 'DocField',
 		'fieldname': 'status',
 		'fieldtype': 'Select',
-		'idx': 5,
 		'in_filter': 1,
 		'label': 'Status',
+		'no_copy': 1,
 		'oldfieldname': 'status',
 		'oldfieldtype': 'Select',
 		'options': '\nPresent\nAbsent\nHalf Day',
 		'reqd': 1,
-		'search_index': 0
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldname': 'shifts',
-		'fieldtype': 'Select',
-		'idx': 6,
-		'label': 'Shifts',
-		'oldfieldname': 'shifts',
-		'oldfieldtype': 'Select',
-		'options': '\nDay\nNight',
-		'reqd': 0
+		'search_index': 1
 	},
 
 	# DocField
@@ -164,7 +147,6 @@
 		'fieldname': 'leave_type',
 		'fieldtype': 'Link',
 		'hidden': 1,
-		'idx': 7,
 		'label': 'Leave Type',
 		'oldfieldname': 'leave_type',
 		'oldfieldtype': 'Link',
@@ -177,7 +159,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Column Break',
-		'idx': 8,
 		'oldfieldtype': 'Column Break',
 		'width': '50%'
 	},
@@ -187,13 +168,12 @@
 		'doctype': 'DocField',
 		'fieldname': 'att_date',
 		'fieldtype': 'Date',
-		'idx': 9,
 		'in_filter': 1,
 		'label': 'Attendance Date',
 		'oldfieldname': 'att_date',
 		'oldfieldtype': 'Date',
 		'reqd': 1,
-		'search_index': 1
+		'search_index': 0
 	},
 
 	# DocField
@@ -201,7 +181,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'fiscal_year',
 		'fieldtype': 'Select',
-		'idx': 10,
 		'in_filter': 1,
 		'label': 'Fiscal Year',
 		'oldfieldname': 'fiscal_year',
@@ -215,7 +194,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'company',
 		'fieldtype': 'Select',
-		'idx': 11,
 		'in_filter': 1,
 		'label': 'Company',
 		'oldfieldname': 'company',

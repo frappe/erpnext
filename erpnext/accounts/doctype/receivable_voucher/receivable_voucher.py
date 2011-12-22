@@ -164,6 +164,10 @@ class DocType(TransactionBase):
 				ret['actual_qty']= actual_qty and flt(actual_qty[0][0]) or 0
 		return ret
  
+	# Fetch ref rate from item master as per selected price list
+	def get_adj_percent(self, arg=''):
+		get_obj('Sales Common').get_adj_percent(self)
+
 
 	# Get tax rate if account type is tax
 	# ------------------------------------
@@ -516,7 +520,7 @@ class DocType(TransactionBase):
 			if stock_item[0]['is_stock_item'] == "Yes":
 				# Reduce actual qty from warehouse
 				self.make_sl_entry( d, d.warehouse, - flt(d.qty) , 0, update_stock)
-		get_obj('Stock Ledger', 'Stock Ledger').update_stock(self.values)
+		get_obj('Stock Ledger', 'Stock Ledger').update_stock(self.values, self.doc.amended_from and 'Yes' or 'No')
 
 
 	#-------------------POS Stock Updatation Part----------------------------------------------

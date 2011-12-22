@@ -19,9 +19,10 @@ cur_frm.cscript.load_taxes = function(doc, cdt, cdn) {
 // -----------------
 // Shipping Address
 // -----------------
-//cur_frm.add_fetch('ship_det_no', 'shipping_address', 'shipping_address');
-//cur_frm.add_fetch('ship_det_no', 'ship_to', 'ship_to');
+
 cur_frm.add_fetch('company', 'default_currency', 'currency');
+cur_frm.add_fetch('company', 'default_currency', 'price_list_currency');
+
 
 
 // ============== Customer and its primary contact Details ============================
@@ -59,15 +60,6 @@ cur_frm.cscript.CGHelp = function(doc,dt,dn){
 	loadpage('Sales Browser',call_back);
 }
 
-/*
-// ============= Customer's Contact Person Details =====================================
-cur_frm.cscript.contact_person = function(doc, cdt, cdn) {
-  var callback = function(){
-    refresh_many(['contact_no','email_id','customer_mobile_no','customer_address']);
-  }
-  get_server_fields('get_contact_details','','',doc, cdt, cdn, 1, callback);
-}
-*/
 
 // TRIGGERS FOR CALCULATIONS
 // =====================================================================================================
@@ -77,10 +69,17 @@ cur_frm.cscript.currency = function(doc, cdt, cdn) {
 	cur_frm.cscript.price_list_name(doc, cdt, cdn);
 }
 
+cur_frm.cscript.price_list_currency = cur_frm.cscript.currency;
+cur_frm.cscript.conversion_rate = cur_frm.cscript.currency;
+cur_frm.cscript.plc_conversion_rate = cur_frm.cscript.currency;
+
+
+
 // ******************** PRICE LIST ******************************
 cur_frm.cscript.price_list_name = function(doc, cdt, cdn) {
   var fname = cur_frm.cscript.fname;
-  if(doc.price_list_name && doc.currency) {
+  var cl = getchildren(cur_frm.cscript.tname, doc.name, cur_frm.cscript.fname);
+  if(doc.price_list_name && doc.currency && doc.price_list_currency && doc.conversion_rate && doc.plc_conversion_rate && cl.length) {
     $c_obj(make_doclist(doc.doctype, doc.name), 'get_adj_percent', '',
       function(r, rt) {
         refresh_field(fname);
@@ -92,8 +91,6 @@ cur_frm.cscript.price_list_name = function(doc, cdt, cdn) {
 }
 
 
-// ******************* CONVERSION RATE ***************************
-cur_frm.cscript.conversion_rate = function(doc, cdt, cdn) { cur_frm.cscript.recalc(doc, 3);/*cur_frm.cscript.price_list_name(doc, cdt, cdn);*/ }
 
 // ******************** ITEM CODE ******************************** 
 cur_frm.fields_dict[cur_frm.cscript.fname].grid.get_field("item_code").get_query = function(doc, cdt, cdn) {
@@ -102,7 +99,6 @@ cur_frm.fields_dict[cur_frm.cscript.fname].grid.get_field("item_code").get_query
   else 
     return 'SELECT tabItem.name,tabItem.item_name,tabItem.description FROM tabItem WHERE tabItem.is_sales_item="Yes" AND tabItem.docstatus != 2 AND (ifnull(`tabItem`.`end_of_life`,"") = "" OR `tabItem`.`end_of_life` > NOW() OR `tabItem`.`end_of_life`="0000-00-00") AND tabItem.%(key)s LIKE "%s" LIMIT 50';
 }
-
 
 
 cur_frm.cscript.item_code = function(doc, cdt, cdn) {
@@ -124,6 +120,7 @@ cur_frm.cscript.item_code = function(doc, cdt, cdn) {
   	cur_frm.cscript.custom_item_code(doc, cdt, cdn);
   }
 }
+
 
 // *********************** QUANTITY ***************************
 cur_frm.cscript.qty = function(doc, cdt, cdn) { cur_frm.cscript.recalc(doc, 1); }
@@ -154,6 +151,8 @@ cur_frm.cscript.basic_rate = function(doc, cdt, cdn) {
 // ************************ EXPORT RATE *************************
 cur_frm.cscript.export_rate = function(doc,cdt,cdn) { cur_frm.cscript.recalc(doc, 3);}
 
+
+
 // ************* GET OTHER CHARGES BASED ON COMPANY *************
 cur_frm.fields_dict.charge.get_query = function(doc) {
   return 'SELECT DISTINCT `tabOther Charges`.name FROM `tabOther Charges` WHERE `tabOther Charges`.company = "'+doc.company+'" AND `tabOther Charges`.company is not NULL AND `tabOther Charges`.docstatus != 2 AND `tabOther Charges`.%(key)s LIKE "%s" ORDER BY `tabOther Charges`.name LIMIT 50';
@@ -176,6 +175,7 @@ cur_frm.cscript.recalc = function(doc, n) {
   var other_fname  = cur_frm.cscript.other_fname;
   
   if(!flt(doc.conversion_rate)) { doc.conversion_rate = 1; refresh_field('conversion_rate'); }
+  if(!flt(doc.plc_conversion_rate)) { doc.plc_conversion_rate = 1; refresh_field('plc_conversion_rate'); }
 
   if(n > 0) cur_frm.cscript.update_fname_table(doc , tname , fname , n); // updates all values in table (i.e. amount, export amount, net total etc.)
   
@@ -367,7 +367,7 @@ cur_frm.cscript.update_fname_table = function(doc , tname , fname , n) {
       set_multiple(tname, cl[i].name, {'basic_rate': flt(flt(cl[i].export_rate) * flt(doc.conversion_rate))}, fname);
       set_multiple(tname, cl[i].name, {'amount' : flt(flt(cl[i].basic_rate) * flt(cl[i].qty)), 'export_amount': flt(flt(cl[i].export_rate) * flt(cl[i].qty))}, fname);
       if(cl[i].ref_rate > 0)
-        set_multiple(tname, cl[i].name, {'adj_rate': 100 - flt(flt(cl[i].export_rate) * 100 / flt(cl[i].ref_rate)), 'base_ref_rate': flt(flt(cl[i].ref_rate) * flt(doc.conversion_rate)) }, fname);
+		set_multiple(tname, cl[i].name, {'adj_rate': 100 - flt(flt(cl[i].export_rate) * 100 / flt(cl[i].ref_rate)), 'base_ref_rate': flt(flt(cl[i].ref_rate) * flt(doc.conversion_rate)) }, fname);
     }
     net_total += flt(flt(cl[i].qty) * flt(cl[i].basic_rate));
   }

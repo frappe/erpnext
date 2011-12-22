@@ -374,8 +374,7 @@ class DocType(TransactionBase):
 				# if prevdoc_doctype = "Sales Order"
 				if d[3] < 0 :
 					# Reduce Reserved Qty from warehouse
-					bin = get_obj('Warehouse', d[0]).update_bin(0, flt(update_stock) * flt(d[3]), 0, 0, 0, d[1], self.doc.transaction_date)
-
+					bin = get_obj('Warehouse', d[0]).update_bin(0, flt(update_stock) * flt(d[3]), 0, 0, 0, d[1], self.doc.transaction_date,doc_type=self.doc.doctype,doc_name=self.doc.name, is_amended = (self.doc.amended_from and 'Yes' or 'No'))
 				# Reduce actual qty from warehouse
 				self.make_sl_entry(d, d[0], - flt(d[2]) , 0, update_stock)
 		get_obj('Stock Ledger', 'Stock Ledger').update_stock(self.values)
