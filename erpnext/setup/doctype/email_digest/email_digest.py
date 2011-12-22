@@ -121,6 +121,8 @@ class DocType:
 				#webnotes.msgprint(query)
 				#webnotes.msgprint(res)
 				result[query] = (res and len(res)==1) and res[0] or (res and res or None)
+				if result[query] is None:
+					del result[query]
 		
 		return result
 
@@ -586,7 +588,7 @@ class DocType:
 			},
 
 			'bank_balance': {
-				'table': 'bank_balance' in result and table({
+				'table': 'bank_balance' in result and result['bank_balance'] and table({
 					'head': 'Bank Balance',
 					'body': [
 						[
@@ -662,8 +664,15 @@ class DocType:
 					table_list.append(\
 						"<div style='font-size: 16px; color: grey'>[" + \
 							k.capitalize() + \
-							"]<br />Missing: Ledger of type 'Bank or Cash'\
+							"]<br />Missing: Account of type 'Bank or Cash'\
 						</div>")
+				elif k=='bank_balance':
+					table_list.append(\
+						"<div style='font-size: 16px; color: grey'>[" + \
+							"Bank Balance" + \
+							"]<br />Alert: GL Entry not found for Account of type 'Bank or Cash'\
+						</div>")
+					
 		
 		i = 0
 		result = []
