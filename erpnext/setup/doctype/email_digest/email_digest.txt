@@ -5,14 +5,14 @@
 	{
 		'creation': '2011-12-14 12:15:09',
 		'docstatus': 0,
-		'modified': '2011-12-22 17:55:57',
+		'modified': '2011-12-22 19:01:33',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1323937389',
+		'_last_update': '1324556758',
 		'autoname': 'Prompt',
 		'colour': 'White:FFF',
 		'doctype': 'DocType',
@@ -21,7 +21,7 @@
 		'name': '__common__',
 		'section_style': 'Simple',
 		'show_in_menu': 0,
-		'version': 80
+		'version': 81
 	},
 
 	# These values are common for all DocField
@@ -132,15 +132,6 @@
 		'label': 'Use standard?',
 		'permlevel': 0,
 		'search_index': 0
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldtype': 'Button',
-		'label': 'Add Recipients',
-		'permlevel': 0,
-		'trigger': 'Client'
 	},
 
 	# DocField
