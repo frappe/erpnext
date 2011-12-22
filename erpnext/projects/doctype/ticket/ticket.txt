@@ -5,14 +5,14 @@
 	{
 		'creation': '2011-01-28 17:52:35',
 		'docstatus': 0,
-		'modified': '2011-12-21 16:32:30',
+		'modified': '2011-12-21 17:22:20',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1324394580',
+		'_last_update': '1324465350',
 		'allow_trash': 1,
 		'autoname': 'TIC/.####',
 		'colour': 'White:FFF',
@@ -26,7 +26,7 @@
 		'show_in_menu': 0,
 		'subject': '%(subject)s',
 		'tag_fields': 'status',
-		'version': 247
+		'version': 248
 	},
 
 	# These values are common for all DocField
@@ -247,6 +247,16 @@
 		'oldfieldtype': 'Column Break',
 		'permlevel': 0,
 		'width': '50%'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'allocated_to_old',
+		'fieldtype': 'Link',
+		'hidden': 1,
+		'label': 'Allocated To Old',
+		'permlevel': 0
 	},
 
 	# DocField
