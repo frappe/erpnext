@@ -2,7 +2,7 @@
 import webnotes
 
 from webnotes.utils import add_days, add_months, add_years, cint, cstr, date_diff, default_fields, flt, fmt_money, formatdate, generate_hash, getTraceback, get_defaults, get_first_day, get_last_day, getdate, has_common, month_name, now, nowdate, replace_newlines, set_default, str_esc_quote, user_format, validate_email_add
-from webnotes.util.email_lib import sendmail
+from webnotes.utils.email_lib import sendmail
 from webnotes.model import db_exists
 from webnotes.model.doc import Document, addchild, removechild, getchildren, make_autoname, SuperDocType
 from webnotes.model.doclist import getlist, copy_doclist
@@ -70,22 +70,27 @@ class DocType:
 	#--------------------------------------------	 
 	
 	def on_update(self):
-		if (self.doc.status =='Open') and (self.doc.task_email_notify==1):
-			if (self.doc.allocated_to == self.doc.allocated_to_old):
-				return			 		
-			else:
-				self.doc.allocated_to_old = self.doc.allocated_to
-				msg2="""A task %s has been assigned to you by %s on %s<br/><br/>Project: %s <br/><br/> \
-				Review Date: %s<br/><br/>Closing Date: %s <br/><br/>Details: %s""" \
-				%(self.doc.name, self.doc.senders_name, self.doc.opening_date, \
-				self.doc.project, self.doc.review_date, self.doc.closing_date, self.doc.description)
+		if self.doc.status =='Open' and self.doc.allocated_to:
+			if self.doc.task_email_notify==1:
+				if (self.doc.allocated_to == self.doc.allocated_to_old):
+					return			 		
+				else:
+					self.doc.allocated_to_old = self.doc.allocated_to
+					msg2="""This is an auto generated email.<br/>A task %s has been assigned to you by %s on %s<br/><br/>\
+					Project: %s <br/><br/>Review Date: %s<br/><br/>Closing Date: %s <br/><br/>Details: %s <br/><br/>""" \
+					%(self.doc.name, self.doc.senders_name, self.doc.opening_date, \
+					self.doc.project, self.doc.review_date, self.doc.closing_date, self.doc.description)
+					sendmail(self.doc.allocated_to, sender='automail@webnotestech.com', msg=msg2,send_now=1,\
+					subject='A task has been assigned')
+					self.doc.sent_reminder=0
+			if self.doc.exp_start_date:
+				sql("delete from tabEvent where ref_type='Task' and ref_name=%s", self.doc.name)
 				self.add_calendar_event()
-				sendmail(self.doc.allocated_to, sender='automail@webnotestech.com',subject='A task has been assigned',\
-				parts=[['text/plain',msg2]])
-				self.doc.sent_reminder=0
-		pass
-	#Function to be called from server inside scheduler ... set reminder/events			
-	#validate before sending for approval
+			else:
+				msgprint("An Expeted start date has not been set for this task.Please set a, 'Expected Start date'\
+				to add an event to allocated persons calender.You can save a task without this also.")
+			pass	
+	
 	def validate_for_pending_review(self):
 		if not self.doc.allocated_to:
 			msgprint("Please enter allocated_to.")
@@ -163,10 +168,13 @@ class DocType:
 		self.validate_for_closed()
 		self.doc.closing_date = nowdate()
 		set(self.doc, 'status', 'Closed')
+		self.remove_event_from_calender()
 		set(self.doc, 'docstatus', 1)
 		self.doc.save()
 		return cstr('true')
-	
+	def remove_event_from_calender():
+		sql("delete from tabEvent where ref_type='Task' and ref_name=%s", self.doc.name)
+		self.doc.save()
 	def cancel_task(self):
 		chk = sql("select distinct t1.name from `tabTimesheet` t1, `tabTimesheet Detail` t2 where t2.parent = t1.name and t2.task_id = %s and t1.status!='Cancelled'", self.doc.name)
 		if chk:
@@ -178,22 +186,17 @@ class DocType:
 			set(self.doc, 'docstatus', 2)
 		self.doc.save()
 		return cstr('true')
-	# def delete_event_from_calender(self): Add later
+
 	
 	def add_calendar_event(self):
 		in_calendar_of = self.doc.allocated_to
 		event = Document('Event')
 		event.owner = in_calendar_of
 		event.description ='' 
-		#'Task:%s <br/> By:%s <br/> Project:%s <br/>Details:%s' \
-		#%(self.doc.name,self.doc.senders_name,self.doc.project,self.doc.details)
-		event.event_date = self.doc.exp_start_date
-		event.event_hour = self.doc.exp_total_hrs and exp_total_hrs or ''
+		event.event_date = self.doc.exp_start_date and self.doc.exp_start_date or ''
+		event.event_hour = '10:00'
 		event.event_type = 'Private'
 		event.ref_type = 'Task'
 		event.ref_name = self.doc.name
 		event.save(1)
 
-		
-	def on_cancel(self):
-		self.cancel_task()
