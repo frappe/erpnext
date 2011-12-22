@@ -1,4 +1,5 @@
 import webnotes
+import webnotes.utils
 
 class DocType:
 	def __init__(self, doc, doclist=[]):
@@ -61,6 +62,11 @@ class DocType:
 				'debit_or_credit': 'Credit'
 			}),
 
+			'income_year_to_date': self.generate_gle_query({
+				'type': 'income_year_to_date',
+				'debit_or_credit': 'Credit'
+			}),
+
 			'expenses_booked': self.generate_gle_query({
 				'type': 'expenses_booked',
 				'debit_or_credit': 'Debit'
@@ -112,7 +118,7 @@ class DocType:
 			if self.doc.fields[query] and query_dict[query]:
 				#webnotes.msgprint(query)
 				res = webnotes.conn.sql(query_dict[query], as_dict=1)
-				if query == 'income':
+				if query in ['income', 'income_year_to_date']:
 					for r in res:
 						r['value'] = float(r['credit'] - r['debit'])
 				elif query in ['expenses_booked', 'bank_balance']:
@@ -121,6 +127,8 @@ class DocType:
 				#webnotes.msgprint(query)
 				#webnotes.msgprint(res)
 				result[query] = (res and len(res)==1) and res[0] or (res and res or None)
+				if result[query] is None:
+					del result[query]
 		
 		return result
 
@@ -177,6 +185,21 @@ class DocType:
 					%(start_date_condition)s AND
 					%(end_date_condition)s""" % args
 
+		elif args['type'] == 'income_year_to_date':
+			query = """
+				SELECT
+					IFNULL(SUM(IFNULL(gle.debit, 0)), 0) AS 'debit',
+					IFNULL(SUM(IFNULL(gle.credit, 0)), 0) AS 'credit',
+					%(common_select)s
+				FROM
+					%(common_from)s
+				WHERE
+					%(common_where)s AND
+					ac.is_pl_account = 'Yes' AND
+					ac.debit_or_credit = '%(debit_or_credit)s' AND					
+					%(fiscal_start_date_condition)s AND
+					%(end_date_condition)s""" % args
+
 		elif args['type'] == 'bank_balance':
 			query = """
 				SELECT
@@ -201,6 +224,7 @@ class DocType:
 			Adds common conditions in dictionary "args"
 		"""
 		start_date, end_date = self.get_start_end_dates()
+		fiscal_start_date = webnotes.utils.get_defaults()['year_start_date']
 
 		if 'new' in args['type']:
 			args.update({
@@ -231,7 +255,9 @@ class DocType:
 
 				'start_date_condition': "gle.posting_date >= '%s'" % start_date,
 
-				'end_date_condition': "gle.posting_date <= '%s'" % end_date
+				'end_date_condition': "gle.posting_date <= '%s'" % end_date,
+
+				'fiscal_start_date_condition': "gle.posting_date >= '%s'" % fiscal_start_date
 			})
 
 
@@ -576,6 +602,15 @@ class DocType:
 				'idx': 302
 			},
 
+			'income_year_to_date': {
+				'table': 'income_year_to_date' in result and table({
+					'head': 'Income Year To Date',
+					'body': currency_amount_str \
+						% (currency, fmt_money(result['income_year_to_date']['value']))
+				}),
+				'idx': 303
+			},
+
 			'expenses_booked': {
 				'table': 'expenses_booked' in result and table({
 					'head': 'Expenses Booked',
@@ -586,7 +621,7 @@ class DocType:
 			},
 
 			'bank_balance': {
-				'table': 'bank_balance' in result and table({
+				'table': 'bank_balance' in result and result['bank_balance'] and table({
 					'head': 'Bank Balance',
 					'body': [
 						[
@@ -662,8 +697,15 @@ class DocType:
 					table_list.append(\
 						"<div style='font-size: 16px; color: grey'>[" + \
 							k.capitalize() + \
-							"]<br />Missing: Ledger of type 'Bank or Cash'\
+							"]<br />Missing: Account of type 'Bank or Cash'\
 						</div>")
+				elif k=='bank_balance':
+					table_list.append(\
+						"<div style='font-size: 16px; color: grey'>[" + \
+							"Bank Balance" + \
+							"]<br />Alert: GL Entry not found for Account of type 'Bank or Cash'\
+						</div>")
+					
 		
 		i = 0
 		result = []
