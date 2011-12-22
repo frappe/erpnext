@@ -24,6 +24,7 @@ def enabled_default_email_digest():
 		Enables the created email digest
 	"""
 	from webnotes.model.doc import Document
+	from webnotes.model.code import get_obj
 	companies_list = webnotes.conn.sql("SELECT company_name FROM `tabCompany`", as_list=1)
 	for company in companies_list:
 		if company and company[0]:
@@ -31,6 +32,9 @@ def enabled_default_email_digest():
 			if edigest:
 				edigest.enabled = 1
 				edigest.save()
+				ed_obj = get_obj(doc=edigest)
+				ed_obj.on_update()
+
 
 
 def create_default_email_digest():
