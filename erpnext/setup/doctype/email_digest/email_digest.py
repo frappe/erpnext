@@ -660,12 +660,19 @@ class DocType:
 			if self.doc.fields[k]:
 				if k in result:
 					table_list.append(body_dict[k]['table'])
-				elif k in ['collections', 'payments', 'bank_balance']:
+				elif k in ['collections', 'payments']:
 					table_list.append(\
 						"<div style='font-size: 16px; color: grey'>[" + \
 							k.capitalize() + \
-							"]<br />Missing: Ledger of type 'Bank or Cash'\
+							"]<br />Missing: Account of type 'Bank or Cash'\
 						</div>")
+				elif k=='bank_balance':
+					table_list.append(\
+						"<div style='font-size: 16px; color: grey'>[" + \
+							"Bank Balance" + \
+							"]<br />Alert: GL Entry not found for Account of type 'Bank or Cash'\
+						</div>")
+					
 		
 		i = 0
 		result = []
