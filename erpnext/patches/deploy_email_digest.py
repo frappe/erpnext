@@ -10,10 +10,27 @@ def execute():
 	# Minor fix in print_format doctype
 	#reload_doc('core', 'doctype', 'print_format')
 	
-	reload_doc('setup', 'doctype', 'email_digest')
+	#reload_doc('setup', 'doctype', 'email_digest')
 
-	global create_default_email_digest
-	create_default_email_digest()
+	#global create_default_email_digest
+	#create_default_email_digest()
+
+	global enabled_default_email_digest
+	enabled_default_email_digest()
+
+
+def enabled_default_email_digest():
+	"""
+		Enables the created email digest
+	"""
+	from webnotes.model.doc import Document
+	companies_list = webnotes.conn.sql("SELECT company_name FROM `tabCompany`", as_list=1)
+	for company in companies_list:
+		if company and company[0]:
+			edigest = Document('Email Digest', 'Default Weekly Digest - ' + company[0])
+			if edigest:
+				edigest.enabled = 1
+				edigest.save()
 
 
 def create_default_email_digest():
