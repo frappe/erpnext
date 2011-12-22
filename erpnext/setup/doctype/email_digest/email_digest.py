@@ -121,6 +121,8 @@ class DocType:
 				#webnotes.msgprint(query)
 				#webnotes.msgprint(res)
 				result[query] = (res and len(res)==1) and res[0] or (res and res or None)
+				if result[query] is None:
+					del result[query]
 		
 		return result
 
@@ -586,7 +588,7 @@ class DocType:
 			},
 
 			'bank_balance': {
-				'table': 'bank_balance' in result and table({
+				'table': 'bank_balance' in result and result['bank_balance'] and table({
 					'head': 'Bank Balance',
 					'body': [
 						[
@@ -658,7 +660,7 @@ class DocType:
 			if self.doc.fields[k]:
 				if k in result:
 					table_list.append(body_dict[k]['table'])
-				elif k in ['collections', 'payments']:
+				elif k in ['collections', 'payments', 'bank_balance']:
 					table_list.append(\
 						"<div style='font-size: 16px; color: grey'>[" + \
 							k.capitalize() + \
