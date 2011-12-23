@@ -5,14 +5,14 @@
 	{
 		'creation': '2011-01-28 17:52:35',
 		'docstatus': 0,
-		'modified': '2011-12-23 11:13:42',
+		'modified': '2011-12-23 12:02:29',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1324544468',
+		'_last_update': '1324619022',
 		'allow_trash': 1,
 		'autoname': 'TIC/.####',
 		'colour': 'White:FFF',
@@ -26,7 +26,7 @@
 		'show_in_menu': 0,
 		'subject': '%(subject)s',
 		'tag_fields': 'status',
-		'version': 251
+		'version': 252
 	},
 
 	# These values are common for all DocField

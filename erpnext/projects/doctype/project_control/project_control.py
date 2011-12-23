@@ -116,12 +116,13 @@ class DocType:
 			return cstr('true')
 def sent_reminder_task(self):
 	task_list = sql("select subject, allocated_to, project, exp_start_date, exp_end_date, \
-	priority, status, name from tabTicket where email_notify=1 and reminder=0 and status='Open'",as_dict=1)
+	priority, status, name from tabTicket where task_email_notify=1 and sent_reminder=0 and status='Open' and \
+	exp_start_date is not null",as_dict=1)
 	for i in task_list:	
 		if (add_days(nowdate(),2) > i['exp_start_date']) and (add_days(nowdate(),3) < i['exp_start_date']):
 			msg2="""This is an auto generated email.<br/><br/>This is a reminder for the task %s has been assigned \
 			to you by %s on %s<br/><br/>Project: %s <br/><br/>Review Date: %s<br/><br/>Closing Date: %s \
-			<br/><br/>Details: %s <br/><br/>""" \
+			<br/><br/>Details: %s <br/><br/>The expected start date of this task is on %s """ \
 			%(self.doc.name, self.doc.senders_name, self.doc.opening_date, \
 			self.doc.project, self.doc.review_date, self.doc.closing_date, self.doc.description)
 			sendmail(self.doc.allocated_to, sender='automail@webnotestech.com', msg=msg2,send_now=1,\
