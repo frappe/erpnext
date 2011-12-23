@@ -1,13 +1,13 @@
 # Please edit this list and import only required elements
 import webnotes
 
-from webnotes.utils import add_days, add_months, add_years, cint, cstr, date_diff, default_fields, flt, fmt_money, formatdate, generate_hash, getTraceback, get_defaults, get_first_day, get_last_day, getdate, has_common, month_name, now, nowdate, replace_newlines, sendmail, set_default, str_esc_quote, user_format, validate_email_add
+from webnotes.utils import add_days, add_months, add_years, cint, cstr, date_diff, default_fields, flt, fmt_money, formatdate, generate_hash, getTraceback, get_defaults, get_first_day, get_last_day, getdate, has_common, month_name, now, nowdate, replace_newlines, set_default, str_esc_quote, user_format, validate_email_add, add_days
 from webnotes.model import db_exists
 from webnotes.model.doc import Document, addchild, removechild, getchildren, make_autoname, SuperDocType
 from webnotes.model.doclist import getlist, copy_doclist
 from webnotes.model.code import get_obj, get_server_obj, run_server_obj, updatedb, check_syntax
 from webnotes import session, form, is_testing, msgprint, errprint
-
+from webnotes.utils.email_lib import sendmail
 set = webnotes.conn.set
 sql = webnotes.conn.sql
 get_value = webnotes.conn.get_value
@@ -114,3 +114,17 @@ class DocType:
 		else:
 			sql("update `tabProject` set status = 'Completed' where name = %s", arg)
 			return cstr('true')
+def sent_reminder_task(self):
+	task_list = sql("select subject, allocated_to, project, exp_start_date, exp_end_date, \
+	priority, status, name from tabTicket where email_notify=1 and reminder=0 and status='Open'",as_dict=1)
+	for i in task_list:	
+		if (add_days(nowdate(),2) > i['exp_start_date']) and (add_days(nowdate(),3) < i['exp_start_date']):
+			msg2="""This is an auto generated email.<br/><br/>This is a reminder for the task %s has been assigned \
+			to you by %s on %s<br/><br/>Project: %s <br/><br/>Review Date: %s<br/><br/>Closing Date: %s \
+			<br/><br/>Details: %s <br/><br/>""" \
+			%(self.doc.name, self.doc.senders_name, self.doc.opening_date, \
+			self.doc.project, self.doc.review_date, self.doc.closing_date, self.doc.description)
+			sendmail(self.doc.allocated_to, sender='automail@webnotestech.com', msg=msg2,send_now=1,\
+			subject='A task has been assigned')
+			self.doc.sent_reminder=1	
+	

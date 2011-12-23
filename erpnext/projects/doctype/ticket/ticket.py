@@ -76,13 +76,7 @@ class DocType:
 					return			 		
 				else:
 					self.doc.allocated_to_old = self.doc.allocated_to
-					msg2="""This is an auto generated email.<br/>A task %s has been assigned to you by %s on %s<br/><br/>\
-					Project: %s <br/><br/>Review Date: %s<br/><br/>Closing Date: %s <br/><br/>Details: %s <br/><br/>""" \
-					%(self.doc.name, self.doc.senders_name, self.doc.opening_date, \
-					self.doc.project, self.doc.review_date, self.doc.closing_date, self.doc.description)
-					sendmail(self.doc.allocated_to, sender='automail@webnotestech.com', msg=msg2,send_now=1,\
-					subject='A task has been assigned')
-					self.doc.sent_reminder=0
+					self.sent_notification()
 			if self.doc.exp_start_date:
 				sql("delete from tabEvent where ref_type='Task' and ref_name=%s", self.doc.name)
 				self.add_calendar_event()
@@ -96,6 +90,15 @@ class DocType:
 			msgprint("Please enter allocated_to.")
 			raise Exception
 		self.validate_with_timesheet_dates()
+	#Sent Notification
+	def sent_notification(self):
+		msg2="""This is an auto generated email.<br/>A task %s has been assigned to you by %s on %s<br/><br/>\
+		Project: %s <br/><br/>Review Date: %s<br/><br/>Closing Date: %s <br/><br/>Details: %s <br/><br/>""" \
+		%(self.doc.name, self.doc.senders_name, self.doc.opening_date, \
+		self.doc.project, self.doc.review_date, self.doc.closing_date, self.doc.description)
+		sendmail(self.doc.allocated_to, sender='automail@webnotestech.com', msg=msg2,send_now=1,\
+		subject='A task has been assigned')
+		self.doc.sent_reminder=0
 	
 	#validate before closing task
 	def validate_for_closed(self):
