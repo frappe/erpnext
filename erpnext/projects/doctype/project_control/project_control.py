@@ -114,18 +114,23 @@ class DocType:
 		else:
 			sql("update `tabProject` set status = 'Completed' where name = %s", arg)
 			return cstr('true')
-def sent_reminder_task(self):
+			
+			
+def sent_reminder_task():
 	task_list = sql("select subject, allocated_to, project, exp_start_date, exp_end_date, \
-	priority, status, name from tabTicket where task_email_notify=1 and sent_reminder=0 and status='Open' and \
+	priority, status, name, senders_name, opening_date, review_date, description from tabTicket \
+	where task_email_notify=1 and sent_reminder=0 and status='Open' and \
 	exp_start_date is not null",as_dict=1)
+	msgprint(task_list)
 	for i in task_list:	
-		if (add_days(nowdate(),2) > i['exp_start_date']) and (add_days(nowdate(),3) < i['exp_start_date']):
+		if date_diff(i['exp_start_date'],nowdate())==2:
+			msgprint(i['exp_start_date'])
+			msgprint(add_days(nowdate(),2))
 			msg2="""This is an auto generated email.<br/><br/>This is a reminder for the task %s has been assigned \
-			to you by %s on %s<br/><br/>Project: %s <br/><br/>Review Date: %s<br/><br/>Closing Date: %s \
+			to you by %s on %s<br/><br/>Project: %s <br/><br/>Review Date: %s \
 			<br/><br/>Details: %s <br/><br/>The expected start date of this task is on %s """ \
-			%(self.doc.name, self.doc.senders_name, self.doc.opening_date, \
-			self.doc.project, self.doc.review_date, self.doc.closing_date, self.doc.description)
-			sendmail(self.doc.allocated_to, sender='automail@webnotestech.com', msg=msg2,send_now=1,\
+			%(i['name'], i['senders_name'], i['opening_date'], i['project'], i['review_date'], i['description'], i['exp_start_date'])
+			sendmail(i['allocated_to'], sender='automail@webnotestech.com', msg=msg2,send_now=1,\
 			subject='A task has been assigned')
-			self.doc.sent_reminder=1	
+			i['sent_reminder']=1	
 	

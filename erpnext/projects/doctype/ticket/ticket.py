@@ -175,7 +175,7 @@ class DocType:
 		set(self.doc, 'docstatus', 1)
 		self.doc.save()
 		return cstr('true')
-	def remove_event_from_calender():
+	def remove_event_from_calender(self):
 		sql("delete from tabEvent where ref_type='Task' and ref_name=%s", self.doc.name)
 		self.doc.save()
 	def cancel_task(self):
@@ -187,6 +187,7 @@ class DocType:
 		else:
 			set(self.doc, 'status', 'Cancelled')
 			set(self.doc, 'docstatus', 2)
+			self.remove_event_from_calender()
 		self.doc.save()
 		return cstr('true')
 
