@@ -71,25 +71,23 @@ class DocType:
 	
 	def on_update(self):
 		if self.doc.status =='Open' and self.doc.allocated_to:
-			if self.doc.task_email_notify==1:
-				if (self.doc.allocated_to == self.doc.allocated_to_old):
-					return			 		
-				else:
-					self.doc.allocated_to_old = self.doc.allocated_to
-					self.sent_notification()
+			if self.doc.task_email_notify and (self.doc.allocated_to != self.doc.allocated_to_old):
+				self.doc.allocated_to_old = self.doc.allocated_to
+				self.sent_notification()
 			if self.doc.exp_start_date:
 				sql("delete from tabEvent where ref_type='Task' and ref_name=%s", self.doc.name)
 				self.add_calendar_event()
 			else:
 				msgprint("An Expeted start date has not been set for this task.Please set a, 'Expected Start date'\
 				to add an event to allocated persons calender.You can save a task without this also.")
-			pass	
-	
+			
+			
 	def validate_for_pending_review(self):
 		if not self.doc.allocated_to:
 			msgprint("Please enter allocated_to.")
 			raise Exception
 		self.validate_with_timesheet_dates()
+		
 	#Sent Notification
 	def sent_notification(self):
 		msg2="""This is an auto generated email.<br/>A task %s has been assigned to you by %s on %s<br/><br/>\
@@ -175,9 +173,11 @@ class DocType:
 		set(self.doc, 'docstatus', 1)
 		self.doc.save()
 		return cstr('true')
+		
 	def remove_event_from_calender(self):
 		sql("delete from tabEvent where ref_type='Task' and ref_name=%s", self.doc.name)
 		self.doc.save()
+		
 	def cancel_task(self):
 		chk = sql("select distinct t1.name from `tabTimesheet` t1, `tabTimesheet Detail` t2 where t2.parent = t1.name and t2.task_id = %s and t1.status!='Cancelled'", self.doc.name)
 		if chk:
@@ -185,20 +185,19 @@ class DocType:
 			msgprint("Timesheet(s) "+','.join(chk_lst)+" created against this task. Thus can not be cancelled")
 			raise Exception
 		else:
-			set(self.doc, 'status', 'Cancelled')
-			set(self.doc, 'docstatus', 2)
+			self.doc.status = 'Cancelled'
+			self.doc.docstatus = 2
 			self.remove_event_from_calender()
 		self.doc.save()
 		return cstr('true')
 
 	
 	def add_calendar_event(self):
-		in_calendar_of = self.doc.allocated_to
 		event = Document('Event')
-		event.owner = in_calendar_of
+		event.owner = self.doc.allocated_to
 		event.description ='' 
 		event.event_date = self.doc.exp_start_date and self.doc.exp_start_date or ''
-		event.event_hour = '10:00'
+		event.event_hour =  self.doc.event_hour and self.doc.event_hour or '10:00'
 		event.event_type = 'Private'
 		event.ref_type = 'Task'
 		event.ref_name = self.doc.name
