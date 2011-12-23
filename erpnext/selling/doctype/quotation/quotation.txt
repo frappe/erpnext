@@ -5,9 +5,18 @@
 	{
 		'creation': '2010-08-08 17:09:17',
 		'docstatus': 0,
-		'modified': '2011-12-20 14:01:09',
+		'modified': '2011-12-22 19:03:04',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
+	},
+
+	# These values are common for all DocField
+	{
+		'doctype': 'DocField',
+		'name': '__common__',
+		'parent': 'Quotation',
+		'parentfield': 'fields',
+		'parenttype': 'DocType'
 	},
 
 	# These values are common for all DocType
@@ -32,15 +41,15 @@
 		'show_in_menu': 0,
 		'subject': 'To %(customer_name)s on %(transaction_date)s worth %(currency)s %(grand_total_export)s',
 		'tag_fields': 'status',
-		'version': 597
+		'version': 598
 	},
 
-	# These values are common for all DocField
+	# These values are common for all DocFormat
 	{
-		'doctype': 'DocField',
+		'doctype': 'DocFormat',
 		'name': '__common__',
 		'parent': 'Quotation',
-		'parentfield': 'fields',
+		'parentfield': 'formats',
 		'parenttype': 'DocType'
 	},
 
@@ -167,6 +176,24 @@
 		'permlevel': 1,
 		'read': 1,
 		'role': 'Maintenance User'
+	},
+
+	# DocFormat
+	{
+		'doctype': 'DocFormat',
+		'format': 'Quotation Classic'
+	},
+
+	# DocFormat
+	{
+		'doctype': 'DocFormat',
+		'format': 'Quotation Modern'
+	},
+
+	# DocFormat
+	{
+		'doctype': 'DocFormat',
+		'format': 'Quotation Spartan'
 	},
 
 	# DocField
@@ -568,6 +595,7 @@
 		'label': 'Price List Currency',
 		'options': 'link:Currency',
 		'permlevel': 0,
+		'print_hide': 1,
 		'reqd': 1
 	},
 
@@ -580,6 +608,7 @@
 		'fieldtype': 'Currency',
 		'label': 'Price List Currency Conversion Rate',
 		'permlevel': 0,
+		'print_hide': 1,
 		'reqd': 1
 	},
 

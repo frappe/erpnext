@@ -4,6 +4,7 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 	var err_msg = "There was an error. One probable reason could be that you haven't saved the form. Please contact support@erpnext.com if the problem persists."
 	
 	cur_frm.add_custom_button('View Now', function() {
+		doc = locals[dt][dn];
 		if(doc.__unsaved != 1) {
 			$c_obj(make_doclist(dt, dn), 'get', '', function(r, rt) {
 				if(r.exc) {
@@ -26,6 +27,7 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 		}	
 	}, 1);
 	cur_frm.add_custom_button('Send Now', function() {
+		doc = locals[dt][dn];
 		if(doc.__unsaved != 1) {
 			$c_obj(make_doclist(dt, dn), 'send', '', function(r, rt) {
 				if(r.exc) {

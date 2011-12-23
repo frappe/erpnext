@@ -248,7 +248,7 @@ class DocType(TransactionBase):
 					raise Exception
 			
 			# list criteria that should not repeat if item is stock item
-			e = [d.schedule_date, d.item_code, d.warehouse, d.uom, d.fields.has_key('prevdoc_docname') and d.prevdoc_docname or '', d.fields.has_key('prevdoc_detail_docname') and d.prevdoc_detail_docname or '', d.fields.has_key('batch_no') and d.batch_no or '']
+			e = [d.schedule_date, d.item_code, d.description, d.warehouse, d.uom, d.fields.has_key('prevdoc_docname') and d.prevdoc_docname or '', d.fields.has_key('prevdoc_detail_docname') and d.prevdoc_detail_docname or '', d.fields.has_key('batch_no') and d.batch_no or '']
 			
 			# if is not stock item
 			f = [d.schedule_date, d.item_code, d.description]
@@ -258,16 +258,16 @@ class DocType(TransactionBase):
 			if ch and ch[0][0] == 'Yes':			
 				# check for same items
 				if e in check_list:
-					msgprint("Item %s has been entered more than once with same schedule date, warehouse and uom." % d.item_code)
-					raise Exception
+					msgprint("""Item %s has been entered more than once with same description, schedule date, warehouse and uom.\n 
+						Please change any of the field value to enter the item twice""" % d.item_code, raise_exception = 1)
 				else:
 					check_list.append(e)
 					
 			elif ch and ch[0][0] == 'No':
 				# check for same items
 				if f in chk_dupl_itm:
-					msgprint("Item %s has been entered more than once." % d.item_code)
-					raise Exception
+					msgprint("""Item %s has been entered more than once with same description, schedule date.\n 
+						Please change any of the field value to enter the item twice.""" % d.item_code, raise_exception = 1)
 				else:
 					chk_dupl_itm.append(f)
 
