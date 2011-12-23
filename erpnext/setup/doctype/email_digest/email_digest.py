@@ -417,7 +417,6 @@ class DocType:
 		sch = Scheduler()
 		sch.connect()
 
-
 		if self.doc.enabled == 1:
 			# Create scheduler entry
 			res = sch.conn.sql("""
@@ -429,15 +428,21 @@ class DocType:
 
 			if not (res and res[0]):
 				args['next_execution'] = self.get_next_execution()
-				
+				sch.conn.begin()
 				sch.conn.sql("""
 					INSERT INTO	Event (db_name, event, `interval`, next_execution, recurring)
 					VALUES (%(db_name)s, %(event)s, 86400, %(next_execution)s, 1)
 				""", args)
+				sch.conn.commit()
 
 		else:
-			# delete scheduler entry
-			sch.clear(args['db_name'], args['event'])
+			# delete scheduler entry if no other email digest is enabled
+			res = webnotes.conn.sql("""
+				SELECT * FROM `tabEmail Digest`
+				WHERE enabled=1
+			""")
+			if not (res and res[0]):
+				sch.clear(args['db_name'], args['event'])
 		#print "after on update"
 	
 
