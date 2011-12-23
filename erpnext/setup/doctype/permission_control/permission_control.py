@@ -30,7 +30,7 @@ class DocType:
 			WHERE ifnull(docstatus,0)=0 
 			AND ifnull(istable,0)=0
 			AND ifnull(issingle,0)=0
-			AND `module` NOT IN ('System','Utilities','Setup Masters','Roles','Recycle Bin','Mapper','Application Internal','Development')
+			AND `module` NOT IN ('System','Utilities','Setup Masters','Roles','Recycle Bin','Mapper','Application Internal','Development', 'Core')
 			ORDER BY `name` ASC""")
 		
 		rl = [''] + [a[0] for a in sql("select name from tabRole where ifnull(docstatus,0)=0")]
