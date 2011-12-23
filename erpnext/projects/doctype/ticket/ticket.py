@@ -74,6 +74,7 @@ class DocType:
 			if self.doc.task_email_notify and (self.doc.allocated_to != self.doc.allocated_to_old):
 				self.doc.allocated_to_old = self.doc.allocated_to
 				self.sent_notification()
+				self.doc.sent_reminder = 0
 			if self.doc.exp_start_date:
 				sql("delete from tabEvent where ref_type='Task' and ref_name=%s", self.doc.name)
 				self.add_calendar_event()
@@ -96,7 +97,8 @@ class DocType:
 		self.doc.project, self.doc.review_date, self.doc.closing_date, self.doc.description)
 		sendmail(self.doc.allocated_to, sender='automail@webnotestech.com', msg=msg2,send_now=1,\
 		subject='A task has been assigned')
-		self.doc.sent_reminder=0
+
+
 	
 	#validate before closing task
 	def validate_for_closed(self):
