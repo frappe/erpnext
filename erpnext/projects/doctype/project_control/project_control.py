@@ -127,7 +127,7 @@ def sent_reminder_task():
 			and exp_start_date is not null""",as_dict=1)
 	for i in task_list:		
 		if date_diff(i['exp_start_date'],nowdate()) ==2:
-			msg2="""<h2>Two days to complete: %(name)s<h2>
+			msg2="""<h2>Two days to complete: %(name)s</h2>
 			<p>This is a reminder for the task %(name)s has been assigned to you 
 				by %(senders_name)s on %(opening_date)s</p>
 			<p><b>Project:</b> %(project)s</p>
