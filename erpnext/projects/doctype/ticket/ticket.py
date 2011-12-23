@@ -151,12 +151,12 @@ class DocType:
 		self.validate_for_pending_review()
 		self.get_actual_total_hrs()
 		self.doc.review_date = nowdate()
-		set(self.doc, 'status', 'Pending Review')
+		self.doc.status = 'Pending Review'
 		self.doc.save()
 		return cstr('true')
 	
 	def reopen_task(self):
-		set(self.doc, 'status', 'Open')
+		self.doc.status = 'Open'
 		self.doc.save()
 		return cstr('true')
 	
@@ -168,9 +168,9 @@ class DocType:
 			self.validate_with_timesheet_dates()
 		self.validate_for_closed()
 		self.doc.closing_date = nowdate()
-		set(self.doc, 'status', 'Closed')
+		self.doc.status = 'Closed'
 		self.remove_event_from_calender()
-		set(self.doc, 'docstatus', 1)
+		self.doc.docstatus = 1
 		self.doc.save()
 		return cstr('true')
 		
