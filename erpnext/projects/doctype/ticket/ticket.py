@@ -174,16 +174,17 @@ class DocType:
 		else:
 			self.validate_with_timesheet_dates()
 		self.validate_for_closed()
+
 		self.doc.closing_date = nowdate()
 		self.doc.status = 'Closed'
-		self.remove_event_from_calender()
 		self.doc.docstatus = 1
 		self.doc.save()
+
+		self.remove_event_from_calender()
 		return cstr('true')
 		
 	def remove_event_from_calender(self):
 		sql("delete from tabEvent where ref_type='Task' and ref_name=%s", self.doc.name)
-		self.doc.save()
 		
 	def cancel_task(self):
 		chk = sql("select distinct t1.name from `tabTimesheet` t1, `tabTimesheet Detail` t2 where t2.parent = t1.name and t2.task_id = %s and t1.status!='Cancelled'", self.doc.name)
@@ -200,6 +201,7 @@ class DocType:
 
 	
 	def add_calendar_event(self):
+		""" Add calendar event for task in calendar of Allocated person"""
 		event = Document('Event')
 		event.owner = self.doc.allocated_to
 		event.description ='' 
@@ -209,4 +211,3 @@ class DocType:
 		event.ref_type = 'Task'
 		event.ref_name = self.doc.name
 		event.save(1)
-
