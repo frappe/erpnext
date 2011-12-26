@@ -1,11 +1,7 @@
 def execute():
 	import webnotes
-	from webnotes.modules.module_manager import reload_doc
 	from webnotes.model.code import get_obj
 	
-	# reload jv gl mapper
-	reload_doc('accounts', 'GL Mapper', 'Journal Voucher')
-
 	# select jv where against_jv exists
 	jv = webnotes.conn.sql("select distinct parent from `tabJournal Voucher Detail` where docstatus = 1 and ifnull(against_jv, '') != ''")
 
