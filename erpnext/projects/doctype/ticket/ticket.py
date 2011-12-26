@@ -91,6 +91,15 @@ class DocType:
 		
 	#Sent Notification
 	def sent_notification(self):
+		i = {
+			'name' : self.doc.name,
+			'senders_name': self.doc.allocated_to,
+			'opening_date': self.doc.exp_start_date,
+			'project': self.doc.project,
+			'review_date': self.doc.review_date,
+			'description': self.doc.description
+		}
+
 		msg2="""<h2>%(name)s</h2>
 			<p>This is a Notification for the task %(name)s that has been assigned to you 
 				by %(senders_name)s on %(opening_date)s</p>
