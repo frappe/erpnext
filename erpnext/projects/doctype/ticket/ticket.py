@@ -94,7 +94,9 @@ class DocType:
 		i = {
 			'name' : self.doc.name,
 			'senders_name': self.doc.allocated_to,
-			'opening_date': self.doc.exp_start_date,
+			'opening_date': self.doc.opening_date,
+			'exp_start_date': self.doc.exp_start_date,
+			'exp_end_date' : self.doc.exp_end_date,
 			'project': self.doc.project,
 			'review_date': self.doc.review_date,
 			'description': self.doc.description
@@ -105,6 +107,8 @@ class DocType:
 				by %(senders_name)s on %(opening_date)s</p>
 			<p><b>Project:</b> %(project)s</p>
 			<p><b>Review Date:</b> %(review_date)s</p>
+			<p><b>Expected Start Date:</b> %(exp_start_date)s</p>
+			<p><b>Expected End Date:</b> %(exp_end_date)s</p>
 			<p><b>Details:</b> %(description)s</p>
 			<p>You will also recieve another reminder 2 days before the commencement of the task</p>
 			<p>Good Luck!</p>
