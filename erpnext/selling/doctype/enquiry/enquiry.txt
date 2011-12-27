@@ -5,14 +5,14 @@
 	{
 		'creation': '2010-08-08 17:09:00',
 		'docstatus': 0,
-		'modified': '2011-12-19 14:11:27',
+		'modified': '2011-12-23 18:29:48',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1316075905',
+		'_last_update': '1324626164',
 		'colour': 'White:FFF',
 		'default_print_format': 'Standard',
 		'doctype': 'DocType',
@@ -23,8 +23,9 @@
 		'section_style': 'Tabbed',
 		'server_code_error': ' ',
 		'show_in_menu': 0,
-		'subject': 'To %(customer_name)s%(lead_name)s on %(transaction_date)s',
-		'version': 587
+		'subject': 'To %(customer_name)s%(lead_name)s on %(transaction_date)s from %(enquiry_from)s',
+		'tag_fields': 'status',
+		'version': 590
 	},
 
 	# These values are common for all DocField

@@ -5,14 +5,14 @@
 	{
 		'creation': '2010-08-08 17:09:04',
 		'docstatus': 0,
-		'modified': '2011-10-12 13:09:38',
+		'modified': '2011-12-27 11:12:42',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1318404775',
+		'_last_update': '1324645806',
 		'allow_print': 0,
 		'colour': 'White:FFF',
 		'default_print_format': 'Standard',
@@ -24,8 +24,9 @@
 		'section_style': 'Tabbed',
 		'server_code_error': ' ',
 		'show_in_menu': 0,
-		'subject': '%(per_ordered)s% ordered',
-		'version': 188
+		'subject': 'eval:( ("%(per_ordered)s"?"%(per_ordered)s % Ordered":"0% Ordered") )',
+		'tag_fields': 'status',
+		'version': 203
 	},
 
 	# These values are common for all DocField
