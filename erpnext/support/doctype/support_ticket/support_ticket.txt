@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2011-05-23 09:01:10',
+		'creation': '2011-05-23 10:00:38',
 		'docstatus': 0,
-		'modified': '2011-07-25 14:45:28',
+		'modified': '2011-12-27 17:40:25',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
@@ -13,6 +13,7 @@
 	# These values are common for all DocType
 	{
 		'_last_update': '1311584009',
+		'allow_attach': 1,
 		'allow_trash': 1,
 		'autoname': 'SUP.######',
 		'colour': 'White:FFF',
@@ -25,7 +26,7 @@
 		'show_in_menu': 0,
 		'subject': '%(subject)s',
 		'tag_fields': 'status,allocated_to',
-		'version': 144
+		'version': 149
 	},
 
 	# These values are common for all DocField
@@ -39,12 +40,14 @@
 
 	# These values are common for all DocPerm
 	{
+		'amend': 0,
 		'doctype': 'DocPerm',
 		'name': '__common__',
 		'parent': 'Support Ticket',
 		'parentfield': 'permissions',
 		'parenttype': 'DocType',
-		'read': 1
+		'read': 1,
+		'submit': 0
 	},
 
 	# DocType, Support Ticket
@@ -55,23 +58,19 @@
 
 	# DocPerm
 	{
-		'amend': 0,
 		'cancel': 0,
 		'create': 1,
 		'doctype': 'DocPerm',
-		'idx': 1,
 		'permlevel': 0,
 		'role': 'Guest',
-		'submit': 0,
 		'write': 1
 	},
 
 	# DocPerm
 	{
+		'cancel': 0,
 		'create': 1,
 		'doctype': 'DocPerm',
-		'idx': 2,
-		'match': 'customer',
 		'permlevel': 0,
 		'role': 'Customer',
 		'write': 1
@@ -82,7 +81,6 @@
 		'cancel': 1,
 		'create': 1,
 		'doctype': 'DocPerm',
-		'idx': 3,
 		'permlevel': 0,
 		'role': 'Support Team',
 		'write': 1
@@ -93,8 +91,6 @@
 		'cancel': 0,
 		'create': 0,
 		'doctype': 'DocPerm',
-		'idx': 4,
-		'match': 'allocated_to',
 		'permlevel': 1,
 		'role': 'Support Team',
 		'write': 1
@@ -102,10 +98,12 @@
 
 	# DocPerm
 	{
+		'cancel': 0,
+		'create': 0,
 		'doctype': 'DocPerm',
-		'idx': 5,
 		'permlevel': 2,
-		'role': 'Support Team'
+		'role': 'Support Team',
+		'write': 0
 	},
 
 	# DocField
@@ -115,7 +113,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'status',
 		'fieldtype': 'Select',
-		'idx': 1,
 		'in_filter': 0,
 		'label': 'Status',
 		'no_copy': 1,
@@ -132,7 +129,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'subject',
 		'fieldtype': 'Text',
-		'idx': 2,
 		'in_filter': 1,
 		'label': 'Subject',
 		'permlevel': 0,
@@ -145,7 +141,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'raised_by',
 		'fieldtype': 'Data',
-		'idx': 3,
 		'in_filter': 1,
 		'label': 'Raised By (Email)',
 		'oldfieldname': 'raised_by',
@@ -160,7 +155,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'description',
 		'fieldtype': 'Text',
-		'idx': 4,
 		'label': 'Description',
 		'oldfieldname': 'problem_description',
 		'oldfieldtype': 'Text',
@@ -173,7 +167,6 @@
 		'depends_on': 'eval:!doc.__islocal',
 		'doctype': 'DocField',
 		'fieldtype': 'HTML',
-		'idx': 5,
 		'label': 'Thread HTML',
 		'permlevel': 1
 	},
@@ -184,7 +177,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'new_response',
 		'fieldtype': 'Text',
-		'idx': 6,
 		'label': 'New Response',
 		'permlevel': 0
 	},
@@ -194,8 +186,8 @@
 		'depends_on': 'eval:!doc.__islocal',
 		'doctype': 'DocField',
 		'fieldtype': 'Button',
-		'idx': 7,
 		'label': 'Send',
+		'options': 'send_response',
 		'permlevel': 0
 	},
 
@@ -204,7 +196,6 @@
 		'colour': 'White:FFF',
 		'doctype': 'DocField',
 		'fieldtype': 'Section Break',
-		'idx': 8,
 		'label': 'Additional Info',
 		'permlevel': 1
 	},
@@ -214,7 +205,6 @@
 		'depends_on': 'eval:!doc.__islocal',
 		'doctype': 'DocField',
 		'fieldtype': 'Column Break',
-		'idx': 9,
 		'oldfieldtype': 'Column Break',
 		'permlevel': 1,
 		'width': '50%'
@@ -226,7 +216,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'customer',
 		'fieldtype': 'Link',
-		'idx': 10,
 		'in_filter': 1,
 		'label': 'Customer',
 		'oldfieldname': 'customer',
@@ -244,7 +233,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'customer_name',
 		'fieldtype': 'Data',
-		'idx': 11,
 		'in_filter': 1,
 		'label': 'Customer Name',
 		'oldfieldname': 'customer_name',
@@ -259,7 +247,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'address_display',
 		'fieldtype': 'Small Text',
-		'idx': 12,
 		'label': 'Address',
 		'permlevel': 2
 	},
@@ -269,7 +256,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'contact_display',
 		'fieldtype': 'Data',
-		'idx': 13,
 		'label': 'Contact Name',
 		'permlevel': 2
 	},
@@ -279,7 +265,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'contact_mobile',
 		'fieldtype': 'Data',
-		'idx': 14,
 		'label': 'Mobile No',
 		'permlevel': 2
 	},
@@ -289,7 +274,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'contact_email',
 		'fieldtype': 'Data',
-		'idx': 15,
 		'label': 'Contact Email',
 		'oldfieldname': 'contact_no',
 		'oldfieldtype': 'Data',
@@ -302,7 +286,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'opening_date',
 		'fieldtype': 'Date',
-		'idx': 16,
 		'label': 'Opening Date',
 		'no_copy': 1,
 		'oldfieldname': 'opening_date',
@@ -315,7 +298,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'opening_time',
 		'fieldtype': 'Time',
-		'idx': 17,
 		'label': 'Opening Time',
 		'no_copy': 1,
 		'oldfieldname': 'opening_time',
@@ -328,18 +310,17 @@
 		'depends_on': 'eval:!doc.__islocal',
 		'doctype': 'DocField',
 		'fieldtype': 'Column Break',
-		'idx': 18,
 		'oldfieldtype': 'Column Break',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
+		'colour': 'White:FFF',
 		'depends_on': 'eval:!doc.__islocal',
 		'doctype': 'DocField',
 		'fieldname': 'allocated_to',
 		'fieldtype': 'Link',
-		'idx': 19,
 		'in_filter': 1,
 		'label': 'Allocated To',
 		'oldfieldname': 'allocated_to',
@@ -355,7 +336,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'resolution_details',
 		'fieldtype': 'Text',
-		'idx': 20,
 		'label': 'Resolution Details',
 		'no_copy': 1,
 		'oldfieldname': 'resolution_details',
@@ -365,11 +345,11 @@
 
 	# DocField
 	{
+		'colour': 'White:FFF',
 		'depends_on': 'eval:!doc.__islocal',
 		'doctype': 'DocField',
 		'fieldname': 'resolution_date',
 		'fieldtype': 'Date',
-		'idx': 21,
 		'in_filter': 0,
 		'label': 'Resolution Date',
 		'no_copy': 1,
@@ -385,7 +365,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'resolution_time',
 		'fieldtype': 'Time',
-		'idx': 22,
 		'label': 'Resolution Time',
 		'oldfieldname': 'resolution_time',
 		'oldfieldtype': 'Time',
@@ -399,8 +378,19 @@
 		'fieldname': 'content_type',
 		'fieldtype': 'Data',
 		'hidden': 1,
-		'idx': 23,
 		'label': 'Content Type',
 		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'file_list',
+		'fieldtype': 'Text',
+		'hidden': 1,
+		'label': 'File List',
+		'no_copy': 1,
+		'permlevel': 0,
+		'print_hide': 1
 	}
 ]
