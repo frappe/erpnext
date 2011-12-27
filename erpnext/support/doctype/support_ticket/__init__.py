@@ -33,6 +33,7 @@ class SupportMailbox(POP3Mailbox):
 			Updates message from support email as either new or reply
 		"""
 		from home import update_feed
+		from webnotes.utils.file_manager import save_file, add_file_list
 
 		content, content_type = '[Blank Email]', 'text/plain'
 		if mail.text_content:
@@ -49,6 +50,8 @@ class SupportMailbox(POP3Mailbox):
 			st.make_response_record(content, mail.mail['From'], content_type)
 			webnotes.conn.set(st.doc, 'status', 'Open')
 			update_feed(st.doc)
+			# extract attachments
+			self.save_attachments(doc=st.doc, attachment_list=mail.attachments)
 			return
 				
 		# new ticket
@@ -61,6 +64,7 @@ class SupportMailbox(POP3Mailbox):
 		d.status = 'Open'
 		try:
 			d.save(1)
+
 			# update feed
 			update_feed(d)
 
@@ -70,6 +74,31 @@ class SupportMailbox(POP3Mailbox):
 		except:
 			d.description = 'Unable to extract message'
 			d.save(1)
+
+		else:
+			# extract attachments
+			self.save_attachments(doc=d, attachment_list=mail.attachments)
+
+
+	def save_attachments(self, doc, attachment_list=[]):
+		"""
+			Saves attachments from email
+
+			attachment_list is a list of dict containing:
+			'filename', 'content', 'content-type'
+		"""
+		for attachment in attachment_list:
+			fid = save_file(
+				fname=attachment['filename'],
+				content=attachment['content'],
+				module='Support'
+			)
+			status = add_file_list('Support Ticket', doc.name, attachment['filename'], fid)
+			if not status:
+				doc.description = doc.description \
+					+ "\nCould not attach: " + str(attachment['filename'])
+				doc.save()
+
 		
 	def send_auto_reply(self, d):
 		"""
