@@ -645,29 +645,35 @@ class DocType(TransactionBase):
 
 ########################################################################
 # Repair Outstanding
-#######################################################################
+
 	def repair_rv_outstanding(self):
 		get_obj(dt = 'GL Control').repair_voucher_outstanding(self)
 
+
+	#-------------------------------------------------------------------------------------
 	def on_update_after_submit(self):
 		self.convert_into_recurring()
 		
 
 	def convert_into_recurring(self):
 		if self.doc.convert_into_recurring_invoice:
-			event = 'accounts.doctype.gl_control.gl_control.manage_recurring_invoices'
 			self.set_next_date()
 			if not self.doc.recurring_id:
 				set(self.doc, 'recurring_id', make_autoname('RECINV/.#####'))
-
-			if sql("select name from `tabReceivable Voucher` where ifnull(convert_into_recurring_invoice, 0) = 1 and next_date <= end_date"):
-				if not self.check_event_exists(event):
-					set_event(event,  interval = 60*60, recurring = 1)
-			else:
-				cancel_event(event)
-
 		elif self.doc.recurring_id:
 			sql("""update `tabReceivable Voucher` set convert_into_recurring_invoice = 0 where recurring_id = %s""", self.doc.recurring_id)
+
+		self.manage_scheduler()
+
+	def manage_scheduler(self):
+		""" set/cancel event in scheduler """
+		event = 'accounts.doctype.gl_control.gl_control.manage_recurring_invoices'
+
+		if sql("select name from `tabReceivable Voucher` where ifnull(convert_into_recurring_invoice, 0) = 1 and next_date <= end_date"):
+			if not self.check_event_exists(event):
+				set_event(event,  interval = 60*60, recurring = 1)
+		else:
+			cancel_event(event)
 
 
 	def check_event_exists(self, event):
