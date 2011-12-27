@@ -5,7 +5,7 @@
 	{
 		'creation': '2010-08-08 17:09:18',
 		'docstatus': 0,
-		'modified': '2011-12-20 18:23:36',
+		'modified': '2011-12-22 19:04:07',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
@@ -34,13 +34,12 @@
 		'server_code_error': ' ',
 		'show_in_menu': 0,
 		'subject': 'To %(customer_name)s worth %(currency)s %(grand_total_export)s due on %(due_date)s | %(outstanding_amount)s outstanding',
-		'version': 391
+		'version': 392
 	},
 
 	# These values are common for all DocFormat
 	{
 		'doctype': 'DocFormat',
-		'format': 'POS Invoice',
 		'name': '__common__',
 		'parent': 'Receivable Voucher',
 		'parentfield': 'formats',
@@ -126,7 +125,32 @@
 
 	# DocFormat
 	{
-		'doctype': 'DocFormat'
+		'doctype': 'DocFormat',
+		'format': 'POS Invoice'
+	},
+
+	# DocFormat
+	{
+		'doctype': 'DocFormat',
+		'format': 'POS Invoice'
+	},
+
+	# DocFormat
+	{
+		'doctype': 'DocFormat',
+		'format': 'Sales Invoice Classic'
+	},
+
+	# DocFormat
+	{
+		'doctype': 'DocFormat',
+		'format': 'Sales Invoice Modern'
+	},
+
+	# DocFormat
+	{
+		'doctype': 'DocFormat',
+		'format': 'Sales Invoice Spartan'
 	},
 
 	# DocField
@@ -477,6 +501,7 @@
 		'label': 'Price List Currency',
 		'options': 'link:Currency',
 		'permlevel': 0,
+		'print_hide': 1,
 		'reqd': 1
 	},
 
@@ -489,6 +514,7 @@
 		'fieldtype': 'Currency',
 		'label': 'Price List Currency Conversion Rate',
 		'permlevel': 0,
+		'print_hide': 1,
 		'reqd': 1
 	},
 

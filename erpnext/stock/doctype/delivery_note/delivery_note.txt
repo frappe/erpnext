@@ -5,7 +5,7 @@
 	{
 		'creation': '2011-04-18 15:58:20',
 		'docstatus': 0,
-		'modified': '2011-12-20 13:23:33',
+		'modified': '2011-12-22 19:03:44',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
@@ -37,13 +37,12 @@
 		'show_in_menu': 0,
 		'subject': 'To %(customer_name)s on %(transaction_date)s | %(per_billed)s% billed',
 		'tag_fields': 'billing_status',
-		'version': 459
+		'version': 460
 	},
 
 	# These values are common for all DocFormat
 	{
 		'doctype': 'DocFormat',
-		'format': 'Delivery Note Packing List Wise',
 		'name': '__common__',
 		'parent': 'Delivery Note',
 		'parentfield': 'formats',
@@ -143,7 +142,26 @@
 
 	# DocFormat
 	{
-		'doctype': 'DocFormat'
+		'doctype': 'DocFormat',
+		'format': 'Delivery Note Packing List Wise'
+	},
+
+	# DocFormat
+	{
+		'doctype': 'DocFormat',
+		'format': 'Delivery Note Classic'
+	},
+
+	# DocFormat
+	{
+		'doctype': 'DocFormat',
+		'format': 'Delivery Note Modern'
+	},
+
+	# DocFormat
+	{
+		'doctype': 'DocFormat',
+		'format': 'Delivery Note Spartan'
 	},
 
 	# DocField
@@ -567,6 +585,7 @@
 		'label': 'Price List Currency',
 		'options': 'link:Currency',
 		'permlevel': 0,
+		'print_hide': 1,
 		'reqd': 1
 	},
 
@@ -579,6 +598,7 @@
 		'fieldtype': 'Currency',
 		'label': 'Price List Currency Conversion Rate',
 		'permlevel': 0,
+		'print_hide': 1,
 		'reqd': 1
 	},
 
