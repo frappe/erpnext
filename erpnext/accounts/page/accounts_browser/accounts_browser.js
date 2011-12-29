@@ -31,7 +31,7 @@ pscript.make_chart = function(b) {
     var footer = $a($i('ab_body'),'div','',{backgroundColor: "#FFD", padding: "8px", color: "#444", fontSize: "12px", marginTop: "14px"});
     
     var help1 = $a(footer,'span');
-    help1.innerHTML = "<strong>Note:</strong> To create accounts for Customers and Suppliers, please create <a href='#Page/Selling'>Customer</a> and <a href='#Page/Buying'>Supplier</a>"
+    help1.innerHTML = "<strong>Note:</strong> To create accounts for Customers and Suppliers, please create <a href='#!List/Customer'>Customer</a> and <a href='#!List/Supplier'>Supplier</a>"
       + " Masters. This will ensure that the accounts are linked to your Selling and Buying Processes. The Account Heads for Customer and Supplier will automatically be created."
   }
 

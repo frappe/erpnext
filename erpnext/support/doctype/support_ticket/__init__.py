@@ -49,6 +49,8 @@ class SupportMailbox(POP3Mailbox):
 			st.make_response_record(content, mail.mail['From'], content_type)
 			webnotes.conn.set(st.doc, 'status', 'Open')
 			update_feed(st.doc)
+			# extract attachments
+			self.save_attachments(st.doc, mail.attachments)
 			return
 				
 		# new ticket
@@ -61,6 +63,7 @@ class SupportMailbox(POP3Mailbox):
 		d.status = 'Open'
 		try:
 			d.save(1)
+
 			# update feed
 			update_feed(d)
 
@@ -70,6 +73,30 @@ class SupportMailbox(POP3Mailbox):
 		except:
 			d.description = 'Unable to extract message'
 			d.save(1)
+
+		else:
+			# extract attachments
+			self.save_attachments(d, mail.attachments)
+
+
+	def save_attachments(self, doc, attachment_list=[]):
+		"""
+			Saves attachments from email
+
+			attachment_list is a list of dict containing:
+			'filename', 'content', 'content-type'
+		"""
+		from webnotes.utils.file_manager import save_file, add_file_list
+		for attachment in attachment_list:
+			webnotes.conn.begin()
+			fid = save_file(attachment['filename'], attachment['content'], 'Support')
+			status = add_file_list('Support Ticket', doc.name, attachment['filename'], fid)
+			if not status:
+				doc.description = doc.description \
+					+ "\nCould not attach: " + str(attachment['filename'])
+				doc.save()
+			webnotes.conn.commit()
+
 		
 	def send_auto_reply(self, d):
 		"""
