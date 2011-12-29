@@ -46,23 +46,42 @@ class DocType(TransactionBase):
     import datetime
     self.doc.clear_table(self.doclist, 'maintenance_schedule_detail')
     count = 0
+    incharge_email =[]
     for d in getlist(self.doclist, 'item_maintenance_detail'):
       self.validate_maintenance_detail()
-      s_list =[]
+      s_list =[]	
+      email_map ={}
       s_list = self.create_schedule_list(d.start_date, d.end_date, d.no_of_visits)
-      
+      if not d.incharge_name in incharge_email:
+      	e = sql("select email_id, name from `tabSales Person` where name='%s'" %(d.incharge_name),as_dict=1)[0]
+        email_map[d.incharge_name] = (e['email_id'])
       for i in range(d.no_of_visits):        
         child = addchild(self.doc,'maintenance_schedule_detail','Maintenance Schedule Detail',1,self.doclist)
         child.item_code = d.item_code
+        child.item_name = d.item_name
         child.scheduled_date = s_list[i].strftime('%Y-%m-%d')
         if d.serial_no:
           child.serial_no = d.serial_no
         child.idx = count
         count = count+1
         child.incharge_name = d.incharge_name
+        if child.scheduled_date and email_map[d.incharge_name]:
+          self.add_calender_event(child,email_map[d.incharge_name])
         child.save(1)
+        
     self.on_update()
-  
+
+  def add_calender_event(self,child,incharge_email):
+    """ Add calendar event for Maintenece Schedule in calendar of Allocated person"""
+    event = Document('Event')
+    event.owner = incharge_email
+    event.description = self.doc.name
+    event.event_date = child.scheduled_date
+    event.event_hour =  '10:00'
+    event.event_type = 'Private'
+    event.ref_type = 'Maintenance Schedule'
+    event.ref_name = self.doc.name
+    event.save(1)
   #get schedule dates
   #----------------------
   def create_schedule_list(self, start_date, end_date, no_of_visit):
@@ -287,3 +306,6 @@ class DocType(TransactionBase):
       if d.serial_no:
         self.update_amc_date(d.serial_no, '')
     set(self.doc, 'status', 'Cancelled')
+    sql("delete from `tabEvent` where ref_type='Maintenance Schedule' and ref_name='%s' " %(self.doc.name))
+  def on_trash(self):
+    sql("delete from `tabEvent` where ref_type='Maintenance Schedule' and ref_name='%s' " %(self.doc.name))
