@@ -20,16 +20,7 @@ def execute():
 	reload_doc('accounts', 'doctype', 'ir_payment_detail')
 	reload_doc('accounts', 'Module Def', 'Accounts')
 		
-		
-	reload_doc('setup', 'doctype','features_setup')
-	flds = ['page_break', 'projects', 'packing_details', 'discounts', 'brands', 'item_batch_nos', 'after_sales_installations', 'item_searial_nos', 'item_group_in_details', 'exports', 'imports', 'item_advanced', 'sales_extras', 'more_info', 'quality', 'manufacturing', 'pos', 'item_serial_nos']
-	st = "'"+"', '".join(flds)+"'"
-	sql("delete from `tabDocField` where fieldname in (%s) and parent = 'Features Setup'" % st)
-	sql("delete from `tabDefaultValue` where defkey in (%s) and parent = 'Control Panel'" % st)
 
-	fs = get_obj('Features Setup', 'Features Setup')
-	fs.doc.save()
-	fs.validate()
 		
 	if sql("select count(name) from `tabDocField` where label = 'Get Specification Details' and parent = 'QA Inspection Report' and fieldtype = 'Button'")[0][0] > 1:
 		sql("delete from `tabDocField` where label = 'Get Specification Details' and parent = 'QA Inspection Report' and fieldtype = 'Button' limit 1")
@@ -48,3 +39,20 @@ def execute():
 		
 	from webnotes.session_cache import clear_cache
 	clear_cache(webnotes.session['user'])
+
+	# FEATURES SETUP
+	#----------------
+	reload_doc('setup', 'doctype','features_setup')
+	flds = ['page_break', 'projects', 'packing_details', 'discounts', 'brands', 'item_batch_nos', 'after_sales_installations', 'item_searial_nos', 'item_group_in_details', 'exports', 'imports', 'item_advanced', 'sales_extras', 'more_info', 'quality', 'manufacturing', 'pos', 'item_serial_nos']
+	st = "'"+"', '".join(flds)+"'"
+	sql("delete from `tabSingles` where field in (%s) and doctype = 'Features Setup'" % st)
+	sql("delete from `tabDocField` where fieldname in (%s) and parent = 'Features Setup'" % st)
+	sql("delete from `tabDefaultValue` where defkey in (%s) and parent = 'Control Panel'" % st)
+
+	if not sql("select * from `tabDefaultValue` where defkey like 'fs_%' and parent = 'Control Panel'"):
+		rs = sql("select fieldname from tabDocField where parent='Features Setup' and fieldname is not null")
+		fs = get_obj('Features Setup', 'Features Setup')
+		for d in rs:
+			fs.doc.fields[d[0]] = 1
+		fs.doc.save()
+		fs.validate()
