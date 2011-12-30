@@ -53,7 +53,7 @@ cur_frm.cscript.uom = function(doc, cdt, cdn) {
     call_back = function(doc, cdt, cdn){
       cur_frm.cscript.calc_amount(doc, 2);
     }
-    str_arg = {'item_code':d.item_code, 'uom':d.uom, 'stock_qty':flt(d.stock_qty), 'qty': flt(d.qty)}
+    str_arg = {'item_code':d.item_code, 'uom':d.uom, 'stock_qty':flt(d.stock_qty), 'qty': flt(d.qty), 'conversion_rate':doc.conversion_rate}
     // Updates Conversion Factor, Qty and Purchase Rate
     get_server_fields('get_uom_details',JSON.stringify(str_arg), fname, doc,cdt,cdn,1, call_back);
     // don't make mistake of calling update_stock_qty() the get_uom_details returns stock_qty as per conversion factor properly
