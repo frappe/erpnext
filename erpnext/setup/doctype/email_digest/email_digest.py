@@ -318,8 +318,8 @@ class DocType:
 			WHERE
 				docstatus < 2 AND
 				%(company_condition)s
-				creation >= '%(start_date)s' AND
-				creation <= '%(end_date)s'""" % args
+				DATE(creation) >= '%(start_date)s' AND
+				DATE(creation) <= '%(end_date)s'""" % args
 
 		return query
 	
