@@ -45,6 +45,12 @@ def on_login_post_session(login_manager):
 		webnotes.session['data']['login_from'] = webnotes.form.getvalue('login_from')
 		webnotes.session_obj.update()
 
+	sid_list = webnotes.conn.sql("SELECT sid FROM `tabSessions` WHERE user=%s AND sid!=%s", (webnotes.session['user'], webnotes.session['sid']))
+	from webnotes.auth import LoginManager
+	login_manager = LoginManager()
+	for sid in sid_list:
+		login_manager.logout(sid=sid)
+
 	update_account_details()
 
 #
@@ -53,7 +59,7 @@ def on_login_post_session(login_manager):
 def on_logout(login_manager):
 	if cint(webnotes.conn.get_value('Control Panel', None, 'sync_with_gateway')):
 		from server_tools.gateway_utils import logout_sso
-		logout_sso()
+		logout_sso(login_manager.sid)
 
 #
 # create a profile (if logs in for the first time)

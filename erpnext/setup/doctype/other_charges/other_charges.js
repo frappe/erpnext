@@ -36,7 +36,7 @@ cur_frm.pformat.other_charges= function(doc){
     // add rows
     if(cl.length){
       for(var i=0;i<cl.length;i++){
-        if(fmt_money(convert_rate(cl[i].tax_amount))!=0)
+        if(fmt_money(convert_rate(cl[i].tax_amount))!=0 && !cl[i].included_in_print_rate)
           out += make_row(cl[i].description,fmt_money(convert_rate(cl[i].tax_amount)),0);
       }
     }

@@ -5,8 +5,8 @@
 	{
 		'creation': '2010-08-08 17:09:20',
 		'docstatus': 0,
-		'modified': '2010-09-20 14:06:57',
-		'modified_by': 'nabin@webnotestech.com',
+		'modified': '2011-12-28 17:33:30',
+		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
 
@@ -14,6 +14,7 @@
 	{
 		'autoname': 'INVTD.######',
 		'colour': 'White:FFF',
+		'default_print_format': 'Standard',
 		'doctype': 'DocType',
 		'hide_heading': 1,
 		'istable': 1,
@@ -22,7 +23,7 @@
 		'section_style': 'Tray',
 		'server_code_error': ' ',
 		'show_in_menu': 0,
-		'version': 15
+		'version': 18
 	},
 
 	# These values are common for all DocField
@@ -45,7 +46,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'charge_type',
 		'fieldtype': 'Select',
-		'idx': 1,
 		'label': 'Type',
 		'oldfieldname': 'charge_type',
 		'oldfieldtype': 'Select',
@@ -60,7 +60,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'account_head',
 		'fieldtype': 'Link',
-		'idx': 2,
 		'label': 'Account Head',
 		'oldfieldname': 'account_head',
 		'oldfieldtype': 'Link',
@@ -75,13 +74,11 @@
 		'doctype': 'DocField',
 		'fieldname': 'cost_center_other_charges',
 		'fieldtype': 'Link',
-		'idx': 3,
 		'label': 'Cost Center',
 		'oldfieldname': 'cost_center_other_charges',
 		'oldfieldtype': 'Link',
 		'options': 'Cost Center',
-		'permlevel': 0,
-		'search_index': 0
+		'permlevel': 0
 	},
 
 	# DocField
@@ -89,7 +86,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'description',
 		'fieldtype': 'Small Text',
-		'idx': 4,
 		'label': 'Description',
 		'oldfieldname': 'description',
 		'oldfieldtype': 'Small Text',
@@ -103,7 +99,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'rate',
 		'fieldtype': 'Currency',
-		'idx': 5,
 		'label': 'Rate',
 		'oldfieldname': 'rate',
 		'oldfieldtype': 'Currency',
@@ -117,7 +112,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'tax_amount',
 		'fieldtype': 'Currency',
-		'idx': 6,
 		'label': 'Amount*',
 		'oldfieldname': 'tax_amount',
 		'oldfieldtype': 'Currency',
@@ -131,7 +125,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'total',
 		'fieldtype': 'Currency',
-		'idx': 7,
 		'label': 'Total*',
 		'oldfieldname': 'total',
 		'oldfieldtype': 'Currency',
@@ -144,7 +137,6 @@
 		'fieldname': 'row_id',
 		'fieldtype': 'Data',
 		'hidden': 0,
-		'idx': 8,
 		'label': 'Enter Row',
 		'oldfieldname': 'row_id',
 		'oldfieldtype': 'Data',
@@ -157,7 +149,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'item_wise_tax_detail',
 		'fieldtype': 'Small Text',
-		'idx': 9,
 		'label': 'Item Wise Tax Detail ',
 		'oldfieldname': 'item_wise_tax_detail',
 		'oldfieldtype': 'Small Text',
@@ -170,7 +161,6 @@
 		'fieldname': 'parenttype',
 		'fieldtype': 'Data',
 		'hidden': 1,
-		'idx': 10,
 		'in_filter': 1,
 		'label': 'Parenttype',
 		'oldfieldname': 'parenttype',
@@ -188,7 +178,6 @@
 		'fieldname': 'total_tax_amount',
 		'fieldtype': 'Currency',
 		'hidden': 1,
-		'idx': 11,
 		'label': 'Total Tax Amount',
 		'no_copy': 1,
 		'oldfieldname': 'total_tax_amount',
@@ -205,11 +194,25 @@
 		'fieldname': 'total_amount',
 		'fieldtype': 'Currency',
 		'hidden': 1,
-		'idx': 12,
 		'label': 'Total Amount',
 		'no_copy': 1,
 		'oldfieldname': 'total_amount',
 		'oldfieldtype': 'Currency',
+		'permlevel': 0,
+		'print_hide': 1,
+		'report_hide': 1
+	},
+
+	# DocField
+	{
+		'allow_on_submit': 0,
+		'description': 'If checked, the tax amount will be considered as already included in the Print Rate / Print Amount',
+		'doctype': 'DocField',
+		'fieldname': 'included_in_print_rate',
+		'fieldtype': 'Check',
+		'label': 'Included in Print Rate',
+		'no_column': 0,
+		'no_copy': 1,
 		'permlevel': 0,
 		'print_hide': 1,
 		'report_hide': 1
