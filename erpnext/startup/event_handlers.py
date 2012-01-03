@@ -45,11 +45,21 @@ def on_login_post_session(login_manager):
 		webnotes.session['data']['login_from'] = webnotes.form.getvalue('login_from')
 		webnotes.session_obj.update()
 	
+	# Clear previous sessions i.e. logout previous log-in attempts
 	exception_list = ['demo@webnotestech.com']
-
 	if webnotes.session['user'] not in exception_list:
-		# Clear previous sessions i.e. logout previous log-in attempts
-		sid_list = webnotes.conn.sql("SELECT sid FROM `tabSessions` WHERE user=%s AND sid!=%s", (webnotes.session['user'], webnotes.session['sid']))
+		sid_list = webnotes.conn.sql("""
+			SELECT sid
+			FROM `tabSessions`
+			WHERE
+				user=%s AND
+				sid!=%s
+			ORDER BY lastupdate desc""", \
+			(webnotes.session['user'], webnotes.session['sid']), as_list=1)
+		if sid_list and len(sid_list)>1:
+			for i in xrange(len(sid_list)):
+				if i>0:
+					webnotes.conn.sql("DELETE FROM `tabSessions` WHERE sid=%s", sid_list[i][0])
 
 	update_account_details()
 
