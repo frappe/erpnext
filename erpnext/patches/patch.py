@@ -361,32 +361,6 @@ def execute(patch_no):
 	elif patch_no == 370:
 		sql("update `tabDocField` set `hidden` = 0 where fieldname = 'group_or_ledger' and parent = 'Cost Center'")
 	elif patch_no == 371:
-		comp = sql("select name from tabCompany where docstatus!=2")
-		fy = sql("select name from `tabFiscal Year` order by year_start_date asc")
-		for c in comp:
-			prev_fy = ''
-			for f in fy:
-				fy_obj = get_obj('Fiscal Year', f[0])
-				fy_obj.doc.past_year = prev_fy
-				fy_obj.doc.company = c[0]
-				fy_obj.doc.save()
-				fy_obj.repost()
-				prev_fy = f[0]
-				sql("commit")
-				sql("start transaction")
-	elif patch_no == 372:
-		sql("update tabDocPerm set amend = 0 where parent = 'Salary Structure'")
-		sql("update tabDocPerm set cancel = 1 where parent = 'Company' and role = 'System Manager'")
-	elif patch_no == 373:
-		if sql("select count(name) from `tabDocField` where label = 'View Ledger Entry' and parent = 'Journal Voucher' and fieldtype = 'Button'")[0][0] > 1:
-			sql("delete from `tabDocField` where label = 'View Ledger Entry' and parent = 'Journal Voucher' and fieldtype = 'Button' limit 1")
-		if sql("select count(name) from `tabDocField` where label = 'Get Balance' and parent = 'Journal Voucher' and fieldtype = 'Button'")[0][0] > 1:
-			sql("delete from `tabDocField` where label = 'Get Balance' and parent = 'Journal Voucher' and fieldtype = 'Button' limit 1")
-	elif patch_no == 374:
-		reload_doc('accounts', 'doctype', 'internal_reconciliation')
-		reload_doc('accounts', 'doctype', 'ir_payment_detail')
-		reload_doc('accounts', 'Module Def', 'Accounts')
-	elif patch_no == 375:
 		from webnotes.modules.module_manager import reload_doc
 
 		reload_doc('setup', 'doctype','features_setup')
@@ -402,8 +376,7 @@ def execute(patch_no):
 		sql("delete from `tabDefaultValue` where defkey in (%s) and parent = 'Control Panel'" % st)
 
 		get_obj('Features Setup', 'Features Setup').doc.save()
-		
-	elif patch_no == 376:
+	elif patch_no == 372:
 		from webnotes.modules.module_manager import reload_doc
 
 		reload_doc('setup', 'doctype','features_setup')
@@ -420,10 +393,10 @@ def execute(patch_no):
 		sql("delete from `tabDefaultValue` where defkey in (%s) and parent = 'Control Panel'" % st)
 
 		get_obj('Features Setup', 'Features Setup').doc.save()
-	elif patch_no == 377:
+	elif patch_no == 373:
 		sql("delete from `tabDocField` where fieldname = 'item_searial_nos' and parent = 'Features Setup'")
 		sql("delete from `tabDefaultValue` where defkey = 'item_searial_nos' and parent = 'Control Panel'")
-	elif patch_no == 378:
+	elif patch_no == 374:
 		rs = sql("select fieldname from tabDocField where parent='Features Setup' and fieldname is not null")
 		from webnotes.model.code import get_obj
 		m = get_obj('Features Setup')
@@ -431,15 +404,12 @@ def execute(patch_no):
 			m.doc.fields[d[0]] = 1
 		m.doc.save()
 		m.validate()
-	elif patch_no == 379:
-		if sql("select count(name) from `tabDocField` where label = 'Get Specification Details' and parent = 'QA Inspection Report' and fieldtype = 'Button'")[0][0] > 1:
-			sql("delete from `tabDocField` where label = 'Get Specification Details' and parent = 'QA Inspection Report' and fieldtype = 'Button' limit 1")
-	elif patch_no == 380:
+	elif patch_no == 375:
 		from webnotes.session_cache import clear_cache
 		clear_cache(webnotes.session['user'])
-	elif patch_no == 381:
+	elif patch_no == 376:
 		reload_doc('stock', 'DocType Mapper', 'Purchase Order-Purchase Receipt')
-	elif patch_no == 382:
+	elif patch_no == 377:
 		flds = ['page_break', 'projects', 'packing_details', 'discounts', 'brands', 'item_batch_nos', 'after_sales_installations', 'item_searial_nos', 'item_group_in_details', 'exports', 'imports', 'item_advanced', 'sales_extras', 'more_info', 'quality', 'manufacturing', 'pos', 'item_serial_nos']
 		
 		st = "'"+"', '".join(flds)+"'"
@@ -448,6 +418,35 @@ def execute(patch_no):
 		
 		from webnotes.session_cache import clear_cache
 		clear_cache(webnotes.session['user'])
+	elif patch_no == 378:
+		comp = sql("select name from tabCompany where docstatus!=2")
+		fy = sql("select name from `tabFiscal Year` order by year_start_date asc")
+		for c in comp:
+			prev_fy = ''
+			for f in fy:
+				fy_obj = get_obj('Fiscal Year', f[0])
+				fy_obj.doc.past_year = prev_fy
+				fy_obj.doc.company = c[0]
+				fy_obj.doc.save()
+				fy_obj.repost()
+				prev_fy = f[0]
+				sql("commit")
+				sql("start transaction")
+	elif patch_no == 379:
+		sql("update tabDocPerm set amend = 0 where parent = 'Salary Structure'")
+		sql("update tabDocPerm set cancel = 1 where parent = 'Company' and role = 'System Manager'")
+	elif patch_no == 380:
+		if sql("select count(name) from `tabDocField` where label = 'View Ledger Entry' and parent = 'Journal Voucher' and fieldtype = 'Button'")[0][0] > 1:
+			sql("delete from `tabDocField` where label = 'View Ledger Entry' and parent = 'Journal Voucher' and fieldtype = 'Button' limit 1")
+		if sql("select count(name) from `tabDocField` where label = 'Get Balance' and parent = 'Journal Voucher' and fieldtype = 'Button'")[0][0] > 1:
+			sql("delete from `tabDocField` where label = 'Get Balance' and parent = 'Journal Voucher' and fieldtype = 'Button' limit 1")
+	elif patch_no == 381:
+		reload_doc('accounts', 'doctype', 'internal_reconciliation')
+		reload_doc('accounts', 'doctype', 'ir_payment_detail')
+		reload_doc('accounts', 'Module Def', 'Accounts')
+	elif patch_no == 382:
+		if sql("select count(name) from `tabDocField` where label = 'Get Specification Details' and parent = 'QA Inspection Report' and fieldtype = 'Button'")[0][0] > 1:
+			sql("delete from `tabDocField` where label = 'Get Specification Details' and parent = 'QA Inspection Report' and fieldtype = 'Button' limit 1")
 	elif patch_no == 383:
 		reload_doc('accounts', 'doctype', 'cost_center')
 	elif patch_no == 384:

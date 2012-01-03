@@ -72,7 +72,7 @@ class DocType(TransactionBase):
 				ret['cost_center'] = cost_center and cost_center[0][0] or ''
 		return ret
 		 
-	
+		
 	# Get Items based on PO or PR
 	# ----------------------------
 	def pull_details(self):

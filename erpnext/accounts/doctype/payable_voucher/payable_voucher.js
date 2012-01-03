@@ -146,7 +146,6 @@ cur_frm.cscript['Get Items'] = function(doc, dt, dn) {
   $c_obj(make_doclist(dt,dn),'pull_details','',callback);
 }
 
-
 // ========== PV Details Table ============
 
 // Item Code

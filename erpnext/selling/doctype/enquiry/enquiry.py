@@ -116,7 +116,6 @@ class DocType(TransactionBase):
       ch.person = d
       ch.save(1)
 
-
   #--------------Validation For Last Contact Date-----------------
   # ====================================================================================================================
   def set_last_contact_date(self):
