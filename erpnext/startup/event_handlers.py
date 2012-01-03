@@ -56,10 +56,8 @@ def on_login_post_session(login_manager):
 				sid!=%s
 			ORDER BY lastupdate desc""", \
 			(webnotes.session['user'], webnotes.session['sid']), as_list=1)
-		if sid_list and len(sid_list)>1:
-			for i in xrange(len(sid_list)):
-				if i>0:
-					webnotes.conn.sql("DELETE FROM `tabSessions` WHERE sid=%s", sid_list[i][0])
+		for sid in sid_list:
+			webnotes.conn.sql("DELETE FROM `tabSessions` WHERE sid=%s", sid[0])
 
 	update_account_details()
 
