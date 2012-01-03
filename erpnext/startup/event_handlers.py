@@ -50,10 +50,6 @@ def on_login_post_session(login_manager):
 	if webnotes.session['user'] not in exception_list:
 		# Clear previous sessions i.e. logout previous log-in attempts
 		sid_list = webnotes.conn.sql("SELECT sid FROM `tabSessions` WHERE user=%s AND sid!=%s", (webnotes.session['user'], webnotes.session['sid']))
-		from webnotes.auth import LoginManager
-		login_manager = LoginManager()
-		for sid in sid_list:
-			login_manager.logout(sid=sid)
 
 	update_account_details()
 
@@ -63,7 +59,7 @@ def on_login_post_session(login_manager):
 def on_logout(login_manager):
 	if cint(webnotes.conn.get_value('Control Panel', None, 'sync_with_gateway')):
 		from server_tools.gateway_utils import logout_sso
-		logout_sso(login_manager.sid)
+		logout_sso(user=login_manager.user)
 
 #
 # create a profile (if logs in for the first time)
