@@ -89,3 +89,5 @@ class DocType:
 			else:
 				sql("insert into tabSeries (name, current) values (%s,%s)",(cstr(self.doc.prefix),cint(self.doc.starts_from)-1))
 			msgprint("Series Updated Successfully")
+		else:
+			msgprint("Please select prefix first")
