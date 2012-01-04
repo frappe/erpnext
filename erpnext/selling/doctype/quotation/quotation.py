@@ -25,9 +25,6 @@ class DocType(TransactionBase):
     self.tname = 'Quotation Detail'
     self.fname = 'quotation_details'
     
-    # Notification objects
-    self.notify_obj = get_obj('Notification Control')
-
   # Autoname
   # ---------
   def autoname(self):
@@ -306,8 +303,6 @@ class DocType(TransactionBase):
     #update enquiry status
     self.update_enquiry('submit')
     
-    # on submit notification
-    self.notify_obj.notify_contact('Quotation', self.doc.doctype, self.doc.name, self.doc.email_id, self.doc.contact_person)
     
 # ON CANCEL
 # ==========================================================================

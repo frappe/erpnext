@@ -254,10 +254,6 @@ class DocType(TransactionBase):
     # Update last purchase rate
     pc_obj.update_last_purchase_rate(self, 1)
 
-    # on submit notification
-    get_obj('Notification Control').notify_contact('Purchase Receipt', self.doc.doctype,self.doc.name, self.doc.email_id, self.doc.contact_person)
-
-
 
 
   #On Cancel
