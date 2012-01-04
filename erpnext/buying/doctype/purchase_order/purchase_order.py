@@ -207,8 +207,6 @@ class DocType(TransactionBase):
     
     self.doc.indent_no = '';
   
-    # on submit notification
-    get_obj('Notification Control').notify_contact('Purchase Order', self.doc.doctype,self.doc.name, self.doc.email_id, self.doc.contact_person)
    
   # On Cancel
   # -------------------------------------------------------------------------------------------------------

@@ -303,3 +303,12 @@ cur_frm.fields_dict['quotation_details'].grid.get_field('item_code').get_query= 
   else
     return repl("SELECT name, item_name, description FROM tabItem WHERE `tabItem`.%(key)s LIKE '%s' %(cond)s ORDER BY tabItem.item_code DESC LIMIT 50", {cond:cond});
 }
+
+$import(Notification Control)
+cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
+	var args = {
+		type: 'Quotation',
+		doctype: 'Quotation'
+	}
+	cur_frm.cscript.notify(doc, args);
+}

@@ -285,3 +285,12 @@ cur_frm.pformat.purchase_order_no = function(doc, cdt, cdn){
 
   return out;
 }
+
+$import(Notification Control)
+cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
+	var args = {
+		type: 'Purchase Receipt',
+		doctype: 'Purchase Receipt'
+	}
+	cur_frm.cscript.notify(doc, args);
+}

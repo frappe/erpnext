@@ -72,7 +72,7 @@ class DocType:
     
     set(self.doc, 'approval_status', 'Approved')    
     # on approval notification
-    get_obj('Notification Control').notify_contact('Expense Voucher Approved', self.doc.doctype, self.doc.name, self.doc.email_id, self.doc.employee_name)
+    #get_obj('Notification Control').notify_contact('Expense Voucher Approved', self.doc.doctype, self.doc.name, self.doc.email_id, self.doc.employee_name)
 
     return cstr('Approved')
   
@@ -83,7 +83,7 @@ class DocType:
     set(self.doc, 'approval_status', 'Rejected')    
 
     # on approval notification
-    get_obj('Notification Control').notify_contact('Expense Voucher Rejected', self.doc.doctype, self.doc.name, self.doc.email_id, self.doc.employee_name)
+    #get_obj('Notification Control').notify_contact('Expense Voucher Rejected', self.doc.doctype, self.doc.name, self.doc.email_id, self.doc.employee_name)
 
     return cstr('Rejected')
   
