@@ -25,9 +25,6 @@ class DocType(TransactionBase):
 		self.tname = 'Delivery Note Detail'
 		self.fname = 'delivery_note_details'
 
-		# Notification objects
-		self.notify_obj = get_obj('Notification Control')
-
 	# Autoname
 	# ---------
 	def autoname(self):
@@ -320,9 +317,6 @@ class DocType(TransactionBase):
 
 		# set DN status
 		set(self.doc, 'status', 'Submitted')
-
-		# on submit notification
-		self.notify_obj.notify_contact('Delivery Note',self.doc.doctype,self.doc.name, self.doc.email_id, self.doc.contact_person)
 
 
 	# *********** Checks whether actual quantity is present in warehouse *************

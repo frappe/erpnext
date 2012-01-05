@@ -84,6 +84,8 @@ cur_frm.cscript.sanctioned_amount = function(doc,cdt,cdn){
   cur_frm.cscript.calculate_total(doc,cdt,cdn);
 }
 
+$import(Notification Control);
+
 cur_frm.cscript['Approve'] = function(doc,cdt,cdn){
 
   if(user == doc.exp_approver){
@@ -120,6 +122,13 @@ cur_frm.cscript['Approve'] = function(doc,cdt,cdn){
             refresh_field('approval_status');
             hide_field(['Update Voucher', 'Approve', 'Reject', 'Calculate Total Amount']);
             approve_voucher_dialog.hide();
+			var args = {
+				type: 'Expense Voucher Approved',
+				doctype: 'Expense Voucher',
+				contact_name: doc.employee_name,
+				send_to: doc.email_id
+			}
+			cur_frm.cscript.notify(doc, args);
           }
           else if(r.message == 'Incomplete'){
             $i('approve_voucher_dialog_response').innerHTML = 'Incomplete Voucher';
@@ -181,6 +190,13 @@ cur_frm.cscript['Reject'] = function(doc,cdt,cdn){
             refresh_field('approval_status');
             hide_field(['Update Voucher', 'Approve', 'Reject', 'Calculate Total Amount']);
             reject_voucher_dialog.hide();
+			var args = {
+				type: 'Expense Voucher Rejected',
+				doctype: 'Expense Voucher',
+				contact_name: doc.employee_name,
+				send_to: doc.email_id
+			}
+			cur_frm.cscript.notify(doc, args);
           }
         });
       }
@@ -210,4 +226,13 @@ cur_frm.cscript['Update Voucher'] = function(doc){
     doc.__unsaved = 0;
     cur_frm.refresh_header();
   });
+}
+
+$import(Notification Control)
+cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
+	var args = {
+		type: 'Expense Voucher',
+		doctype: 'Expense Voucher'
+	}
+	cur_frm.cscript.notify(doc, args);
 }

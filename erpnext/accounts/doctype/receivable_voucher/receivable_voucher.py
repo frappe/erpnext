@@ -570,9 +570,6 @@ class DocType(TransactionBase):
 
 		self.update_c_form()
 
-		# on submit notification
-		# get_obj('Notification Control').notify_contact('Sales Invoice', self.doc.doctype,self.doc.name, self.doc.email_id, self.doc.contact_person)
-
 
 	def update_c_form(self):
 		"""Update amended id in C-form"""

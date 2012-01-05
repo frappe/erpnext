@@ -443,3 +443,12 @@ cur_frm.cscript.convert_into_recurring_invoice = function(doc) {
 		refresh_field(['repeat_on_day_of_month', 'notification_email_address']);
 	}		
 }
+
+$import(Notification Control)
+cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
+	var args = {
+		type: 'Sales Invoice',
+		doctype: 'Receivable Voucher'
+	}
+	cur_frm.cscript.notify(doc, args);
+}
