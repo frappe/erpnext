@@ -67,6 +67,9 @@ class SupportMailbox(POP3Mailbox):
 				self.save_attachments(st.doc, mail.attachments)
 				return
 				
+		opts = webnotes.conn.sql("""\
+			SELECT options FROM tabDocField
+			WHERE parent='Support Ticket' AND fieldname='naming_series'""")
 		# new ticket
 		from webnotes.model.doc import Document
 		d = Document('Support Ticket')
@@ -75,6 +78,7 @@ class SupportMailbox(POP3Mailbox):
 		d.raised_by = mail.mail['From']
 		d.content_type = content_type
 		d.status = 'Open'
+		d.naming_series = (opts and opts[0] and opts[0][0] and opts[0][0].split("\n")[0]) or 'SUP'
 		try:
 			d.save(1)
 
