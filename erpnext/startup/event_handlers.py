@@ -46,7 +46,7 @@ def on_login_post_session(login_manager):
 		webnotes.session_obj.update()
 	
 	# Clear previous sessions i.e. logout previous log-in attempts
-	exception_list = ['demo@webnotestech.com']
+	exception_list = ['demo@webnotestech.com', 'Administrator']
 	if webnotes.session['user'] not in exception_list:
 		sid_list = webnotes.conn.sql("""
 			SELECT sid
