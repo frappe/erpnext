@@ -1,4 +1,5 @@
 import webnotes
+from webnotes.model.doc import make_autoname
 
 from utilities.transaction_base import TransactionBase
 from home import update_feed
@@ -7,6 +8,9 @@ class DocType(TransactionBase):
 	def __init__(self, doc, doclist=[]):
 		self.doc = doc
 		self.doclist = doclist
+
+	def autoname(self):
+		self.doc.name = make_autoname(self.doc.naming_series+'.#####')
 
 	def send_response(self):
 		"""
