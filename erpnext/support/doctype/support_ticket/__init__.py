@@ -47,15 +47,15 @@ class SupportMailbox(POP3Mailbox):
 		if "<" in mail.mail['From']:
 			import re
 			re_result = re.findall('(?<=\<)(\S+)(?=\>)', mail.mail['From'])
-			if re_result and re_result[0]: email_id = res_result[0]
+			if re_result and re_result[0]: email_id = re_result[0]
 
 
 		for thread_id in thread_list:
 			exists = webnotes.conn.sql("""\
 				SELECT name
 				FROM `tabSupport Ticket`
-				WHERE name=%s AND raised_by REGEXP '%s'
-				""" % ('(' + email_id + ')',), thread_id)
+				WHERE name=%s AND raised_by REGEXP %s
+				""" , (thread_id, '(' + email_id + ')'))
 			if exists and exists[0] and exists[0][0]:
 				from webnotes.model.code import get_obj
 				
