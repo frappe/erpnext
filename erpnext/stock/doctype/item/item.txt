@@ -5,14 +5,14 @@
 	{
 		'creation': '2010-08-08 17:09:05',
 		'docstatus': 0,
-		'modified': '2011-12-20 11:15:42',
+		'modified': '2011-12-23 13:58:38',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1323333040',
+		'_last_update': '1324359943',
 		'allow_attach': 1,
 		'allow_trash': 1,
 		'autoname': 'field:item_code',
@@ -27,9 +27,9 @@
 		'section_style': 'Tray',
 		'server_code_error': ' ',
 		'show_in_menu': 0,
-		'subject': '%(item_name)s',
+		'subject': '%(item_name)s | Item Group: %(item_group)s | Default UOM: %(stock_uom)s | Is Asset Item: %(is_asset_item)s | Is Stock Item: %(is_stock_item)s',
 		'tag_fields': 'item_group',
-		'version': 162
+		'version': 164
 	},
 
 	# These values are common for all DocField
@@ -364,11 +364,17 @@
 
 	# DocField
 	{
+		'colour': 'White:FFF',
+		'default': '0.00',
+		'description': 'If stock level for this item has reached the minimum inventory level, system will prompt you to raise an Indent (Purchase Requisition).',
 		'doctype': 'DocField',
-		'fieldname': 'email_notify',
-		'fieldtype': 'Check',
-		'label': 'Send Email Notification when stock reaches re-order level',
-		'permlevel': 0
+		'fieldname': 'minimum_inventory_level',
+		'fieldtype': 'Currency',
+		'label': 'Minimum Inventory Level',
+		'oldfieldname': 'minimum_inventory_level',
+		'oldfieldtype': 'Currency',
+		'permlevel': 0,
+		'reqd': 0
 	},
 
 	# DocField

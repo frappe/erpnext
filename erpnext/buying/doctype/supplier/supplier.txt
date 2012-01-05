@@ -5,16 +5,17 @@
 	{
 		'creation': '2010-08-08 17:09:26',
 		'docstatus': 0,
-		'modified': '2011-07-19 16:18:58',
+		'modified': '2011-12-23 18:34:52',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1306471021',
+		'_last_update': '1324626443',
 		'allow_trash': 1,
 		'colour': 'White:FFF',
+		'default_print_format': 'Standard',
 		'doctype': 'DocType',
 		'document_type': 'Master',
 		'module': 'Buying',
@@ -23,9 +24,9 @@
 		'section_style': 'Tabbed',
 		'server_code_error': ' ',
 		'show_in_menu': 0,
-		'subject': ' ',
-		'tag_fields': 'supplier_type',
-		'version': 87
+		'subject': 'Supplier Type: %(supplier_type)s | Company: %(company)s',
+		'tag_fields': 'supplier_type,supplier_name',
+		'version': 90
 	},
 
 	# These values are common for all DocField
@@ -59,7 +60,6 @@
 		'cancel': 0,
 		'create': 0,
 		'doctype': 'DocPerm',
-		'idx': 1,
 		'permlevel': 1,
 		'role': 'Purchase Manager',
 		'submit': 0,
@@ -72,7 +72,6 @@
 		'cancel': 0,
 		'create': 0,
 		'doctype': 'DocPerm',
-		'idx': 2,
 		'permlevel': 0,
 		'role': 'Purchase Manager',
 		'submit': 0,
@@ -82,7 +81,6 @@
 	# DocPerm
 	{
 		'doctype': 'DocPerm',
-		'idx': 3,
 		'permlevel': 1,
 		'role': 'Purchase Master Manager'
 	},
@@ -93,7 +91,6 @@
 		'cancel': 1,
 		'create': 1,
 		'doctype': 'DocPerm',
-		'idx': 4,
 		'permlevel': 0,
 		'role': 'Purchase Master Manager',
 		'submit': 0,
@@ -106,7 +103,6 @@
 		'description': 'Note: You Can Manage Multiple Address or Contacts via Addresses & Contacts',
 		'doctype': 'DocField',
 		'fieldtype': 'Section Break',
-		'idx': 1,
 		'label': 'Basic Info',
 		'oldfieldtype': 'Section Break',
 		'permlevel': 0
@@ -117,7 +113,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'supplier_name',
 		'fieldtype': 'Data',
-		'idx': 2,
 		'label': 'Supplier Name',
 		'no_copy': 1,
 		'oldfieldname': 'supplier_name',
@@ -131,7 +126,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'supplier_type',
 		'fieldtype': 'Link',
-		'idx': 3,
 		'label': 'Supplier Type',
 		'oldfieldname': 'supplier_type',
 		'oldfieldtype': 'Link',
@@ -144,7 +138,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Column Break',
-		'idx': 4,
 		'permlevel': 0,
 		'width': '50%'
 	},
@@ -154,7 +147,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'naming_series',
 		'fieldtype': 'Select',
-		'idx': 5,
 		'label': 'Series',
 		'no_copy': 1,
 		'oldfieldname': 'naming_series',
@@ -167,7 +159,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Section Break',
-		'idx': 6,
 		'label': 'Address & Contacts',
 		'oldfieldtype': 'Column Break',
 		'permlevel': 0
@@ -179,7 +170,6 @@
 		'depends_on': 'eval:doc.__islocal',
 		'doctype': 'DocField',
 		'fieldtype': 'HTML',
-		'idx': 7,
 		'label': 'Address Desc',
 		'options': '<em>Addresses will appear only when you save the supplier</em>',
 		'permlevel': 0
@@ -190,7 +180,6 @@
 		'colour': 'White:FFF',
 		'doctype': 'DocField',
 		'fieldtype': 'HTML',
-		'idx': 8,
 		'label': 'Address HTML',
 		'permlevel': 1
 	},
@@ -199,7 +188,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Column Break',
-		'idx': 9,
 		'permlevel': 0,
 		'width': '50%'
 	},
@@ -210,7 +198,6 @@
 		'depends_on': 'eval:doc.__islocal',
 		'doctype': 'DocField',
 		'fieldtype': 'HTML',
-		'idx': 10,
 		'label': 'Contact Desc',
 		'options': '<em>Contact Details will appear only when you save the supplier</em>',
 		'permlevel': 0
@@ -220,7 +207,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'HTML',
-		'idx': 11,
 		'label': 'Contact HTML',
 		'permlevel': 1
 	},
@@ -229,7 +215,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Section Break',
-		'idx': 12,
 		'label': 'More Info',
 		'oldfieldtype': 'Section Break',
 		'permlevel': 0
@@ -242,7 +227,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'company',
 		'fieldtype': 'Link',
-		'idx': 13,
 		'in_filter': 1,
 		'label': 'Company',
 		'oldfieldname': 'company',
@@ -260,7 +244,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'supplier_details',
 		'fieldtype': 'Text',
-		'idx': 14,
 		'label': 'Supplier Details',
 		'oldfieldname': 'supplier_details',
 		'oldfieldtype': 'Code',
@@ -271,7 +254,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Column Break',
-		'idx': 15,
 		'permlevel': 0,
 		'width': '50%'
 	},
@@ -281,7 +263,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'credit_days',
 		'fieldtype': 'Int',
-		'idx': 16,
 		'label': 'Credit Days',
 		'permlevel': 0
 	},
@@ -291,7 +272,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'website',
 		'fieldtype': 'Data',
-		'idx': 17,
 		'label': 'Website',
 		'oldfieldname': 'website',
 		'oldfieldtype': 'Data',
@@ -304,7 +284,6 @@
 		'depends_on': 'eval:!doc.__islocal',
 		'doctype': 'DocField',
 		'fieldtype': 'Section Break',
-		'idx': 18,
 		'label': 'Transaction History',
 		'oldfieldtype': 'Section Break',
 		'permlevel': 0
@@ -316,7 +295,6 @@
 		'depends_on': 'eval:!doc.__islocal',
 		'doctype': 'DocField',
 		'fieldtype': 'HTML',
-		'idx': 19,
 		'label': 'History HTML',
 		'oldfieldtype': 'HTML',
 		'permlevel': 0
@@ -327,7 +305,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'trash_reason',
 		'fieldtype': 'Small Text',
-		'idx': 20,
 		'label': 'Trash Reason',
 		'oldfieldname': 'trash_reason',
 		'oldfieldtype': 'Small Text',
