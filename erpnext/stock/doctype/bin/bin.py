@@ -307,7 +307,6 @@ class DocType:
 	# item re-order
 	# -------------
 	def reorder_item(self,doc_type,doc_name):
-		msgprint(get_value('Manage Account', None, 'auto_indent'))
 		if get_value('Manage Account', None, 'auto_indent'):
 			#check if re-order is required
 			indent_detail_fields = sql("select re_order_level,item_name,description,brand,item_group,lead_time_days,min_order_qty,email_notify from tabItem where item_code = %s",(self.doc.item_code),as_dict=1)

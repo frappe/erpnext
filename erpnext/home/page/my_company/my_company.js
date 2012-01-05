@@ -638,17 +638,17 @@ MemberConversation = function(parent, uid, fullname) {
 		this.input_wrapper = $a(this.wrapper, 'div', 'my-company-input-wrapper');
 		var tab = make_table(this.input_wrapper, 1, 2, '100%', ['64%','36%'], {padding: '3px'})
 		this.input = $a($td(tab,0,0), 'textarea');
-		$(this.input).add_default_text( 'Send a message to ' + fullname);
 
 		// button
 		var div = $a(this.input_wrapper, 'div');
 		this.post = $btn(div, 'Post'.bold(), function() { me.post_message(); }, {margin:'0px 13px 0px 3px'})
-		this.post.set_disabled();
+		this.post.disabled = true;
+		
 		this.input.onkeyup = this.input.onchange = function() {
 			if(this.value) {
-				me.post.set_enabled();
+				me.post.disabled = false;
 			} else {
-				me.post.set_disabled();
+				me.post.disabled = true;
 			}
 		}
 
