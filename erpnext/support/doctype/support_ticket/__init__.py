@@ -54,8 +54,8 @@ class SupportMailbox(POP3Mailbox):
 			exists = webnotes.conn.sql("""\
 				SELECT name
 				FROM `tabSupport Ticket`
-				WHERE name=%s AND raised_by LIKE %s
-				""", (thread_id, "%" + email_id + "%"))
+				WHERE name=%s AND raised_by REGEXP '%s'
+				""" % ('(' + email_id + ')',), thread_id)
 			if exists and exists[0] and exists[0][0]:
 				from webnotes.model.code import get_obj
 				
