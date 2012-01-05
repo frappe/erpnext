@@ -330,7 +330,7 @@ class DocType:
 		indent_details_child.item_code = self.doc.item_code
 		indent_details_child.uom = self.doc.stock_uom
 		indent_details_child.warehouse = self.doc.warehouse
-		indent_details_child.schedule_date= add_days(nowdate(),i['lead_time_days'])
+		indent_details_child.schedule_date= add_days(nowdate(),cint(i['lead_time_days']))
 		indent_details_child.item_name = i['item_name']
 		indent_details_child.description = i['description']
 		indent_details_child.item_group = i['item_group']
