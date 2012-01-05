@@ -74,16 +74,20 @@ class DocType(TransactionBase):
     self.check_serial_no_added()
     self.validate_serial_no_warranty()
     self.validate_schedule()
+
     email_map ={}
     for d in getlist(self.doclist, 'item_maintenance_detail'):
       if d.serial_no:
         self.update_amc_date(d.serial_no, d.end_date)
-      if not d.incharge_name in email_map:
+
+      if d.incharge_name not in email_map:
       	e = sql("select email_id, name from `tabSales Person` where name='%s' " %(d.incharge_name),as_dict=1)[0]
         email_map[d.incharge_name] = (e['email_id'])
+
       scheduled_date =sql("select scheduled_date from `tabMaintenance Schedule Detail` \
-        where owner='%s' and item_code='%s' and parent='%s' " %(email_map[d.incharge_name], \
-        d.item_code,self.doc.name), as_dict=1)
+        where incharge_name='%s' and item_code='%s' and parent='%s' " %(d.incharge_name, \
+        d.item_code, self.doc.name), as_dict=1, debug=1)
+
       for key in scheduled_date:
         if email_map[d.incharge_name]:
           self.add_calender_event(key["scheduled_date"],email_map[d.incharge_name],d.item_code)     
@@ -101,6 +105,8 @@ class DocType(TransactionBase):
     event.ref_type = 'Maintenance Schedule'
     event.ref_name = self.doc.name
     event.save(1)
+
+
   #get schedule dates
   #----------------------
   def create_schedule_list(self, start_date, end_date, no_of_visit):
