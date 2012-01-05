@@ -366,10 +366,6 @@ class DocType(TransactionBase):
 		# set SO status
 		set(self.doc, 'status', 'Submitted')
 	
-		# on submit notification		
-		if self.doc.email_id:
-			get_obj('Notification Control').notify_contact('Sales Order',self.doc.doctype,self.doc.name, self.doc.email_id, self.doc.contact_person)
-				
  
 # ON CANCEL
 # ===============================================================================================

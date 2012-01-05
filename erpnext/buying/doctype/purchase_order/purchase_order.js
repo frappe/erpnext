@@ -245,3 +245,12 @@ cur_frm.pformat.indent_no = function(doc, cdt, cdn){
 
   return out;
 }
+
+$import(Notification Control)
+cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
+	var args = {
+		type: 'Purchase Order',
+		doctype: 'Purchase Order'
+	}
+	cur_frm.cscript.notify(doc, args);
+}
