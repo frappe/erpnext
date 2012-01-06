@@ -47,6 +47,7 @@ $.extend(cur_frm.cscript, {
 			set_field_permlevel('description',2);
 			set_field_permlevel('raised_by',2);
 		}
+		refresh_field('status');
 	},
 	
 	//
