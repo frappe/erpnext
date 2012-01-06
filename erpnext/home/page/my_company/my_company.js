@@ -48,9 +48,8 @@ pscript.myc_add_user = function() {
 		reqd: 1,
 		label: 'Email Id of the user to add'
 	}];
-	console.log(pscript.is_erpnext_saas);
 
-	if(pscript.is_erpnext_saas==0) {
+	if(!pscript.is_erpnext_saas) {
 		fields = fields.concat([
 		{
 			fieldtype: 'Data',
@@ -61,7 +60,6 @@ pscript.myc_add_user = function() {
 		{
 			fieldtype: 'Data',
 			fieldname: 'last_name',
-			reqd: 1,
 			label: 'Last Name'
 		},
 		{
@@ -78,8 +76,6 @@ pscript.myc_add_user = function() {
 		fieldname: 'add'
 	});
 
-	console.log(fields);
-	
 	var d = new wn.widgets.Dialog({
 		title: 'Add User',
 		width: 400,

@@ -36,7 +36,7 @@ MyProfile = function(wrapper) {
 		this.form = new wn.widgets.FieldGroup()
 		this.form.make_fields(div, [
 			{fieldname:'first_name', fieldtype:'Data',label:'First Name',reqd:1},
-			{fieldname:'last_name', fieldtype:'Data',label:'Last Name',reqd:1},
+			{fieldname:'last_name', fieldtype:'Data',label:'Last Name'},
 			{fieldname:'bio', fieldtype:'Text',label:'Bio'},
 			{fieldname:'update', fieldtype:'Button',label:'Update'}
 		]);
