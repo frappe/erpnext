@@ -85,7 +85,7 @@ $.extend(cur_frm.cscript, {
 			locals[dt][dn].new_response = '';
 			//refresh_field('new_response');
 			//cs.make_listing(doc);
-			cs.refresh(doc);
+			cur_frm.refresh();
 		});
 	},
 	
