@@ -432,16 +432,17 @@ pscript.startup_set_module_order = function() {
 
 pscript.startup_setup_toolbar = function() {
   var menu_tab = page_body.wntoolbar.menu_table_right;
-	// Profile
-  // ---------
-  $td(menu_tab,0,0).innerHTML = '<a style="font-weight: bold; color: #FFF" href="javascript:'+"loadpage('profile-settings')"+'">'+user_fullname+'</a>';
-
+	// help
+	// ----
+	$td(menu_tab,0,0).innerHTML = '<a style="font-weight: bold; color: #FFF" href="http://erpnext.blogspot.com/2011/03/erpnext-help.html" target="_blank">Help</a>';
+	
+	$td(menu_tab,0,1).innerHTML = '<a style="font-weight: bold; color: #FFF" href="http://groups.google.com/group/erpnext-user-forum" target="_blank">Forum</a>';
+	
 	if(pscript.is_erpnext_saas){
-		// Help
-  	// --------------
-		//var help_url = login_file + '#!helpdesk'
-		$td(menu_tab,0,1).innerHTML = '<a style="font-weight: bold; color: #FFF" href="http://groups.google.com/group/erpnext-user-forum" target="_blank">Forum</a>';
-
+		// Live Chat Help
+		// --------------
+		$td(menu_tab,0,2).innerHTML = '<a style="font-weight: bold; color: #FFF" href="http://www.providesupport.com?messenger=iwebnotes" target="_blank">Chat</a>';
+		
 		// Manage account
 		// --------------
 		if(is_system_manager) {
@@ -449,18 +450,10 @@ pscript.startup_setup_toolbar = function() {
 		}
 	}
 	else{
-		$dh($td(menu_tab,0,1));
+		$dh($td(menu_tab,0,2));
 		$dh($td(menu_tab,0,3));
 	}
 
-	// Live Chat Help
-	// --------------
-	$td(menu_tab,0,2).innerHTML = '<a style="font-weight: bold; color: #FFF" href="http://www.providesupport.com?messenger=iwebnotes" target="_blank">Chat</a>';
-
-	// help
-	// ----
-	var cell = menu_tab.rows[0].insertCell(3);
-	cell.innerHTML = '<a style="font-weight: bold; color: #FFF" href="http://erpnext.blogspot.com/2011/03/erpnext-help.html" target="_blank">Help</a>';
 	$y(cell, page_body.wntoolbar.right_table_style);
 
 }
