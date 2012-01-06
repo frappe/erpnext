@@ -137,7 +137,8 @@
 					'description' : function(data_row) {
 						if(data_row.adj_rate) {
 							var to_append = '<div style="padding-left: 15px;"><i>Discount: ' + 
-								data_row.adj_rate + '%</i></div>';
+								data_row.adj_rate + '% on ' + doc.currency + ' ' +
+								fmt_money(data_row.ref_rate) + '</i></div>';
 							if(data_row.description.indexOf(to_append)==-1) {
 								return data_row.description + to_append;
 							} else { return data_row.description; }
@@ -169,12 +170,14 @@
 			var oc = getchildren('RV Tax Detail', doc.name, 'other_charges');
 			var rows = '<table width=100%>\n';
 			for(var i=0; i<oc.length; i++) {
-				rows +=
-					'<tr>\n' +
-						'\t<td>' + oc[i].description + '</td>\n' +
-						'\t<td></td>\n' +
-						'\t<td width=38%>' + fmt_money(oc[i].tax_amount) + '</td>\n' +
-					'</tr>\n';
+				if(!oc[i].included_in_print_rate) {
+					rows +=
+						'<tr>\n' +
+							'\t<td>' + oc[i].description + '</td>\n' +
+							'\t<td></td>\n' +
+							'\t<td width=38%>' + fmt_money(oc[i].tax_amount) + '</td>\n' +
+						'</tr>\n';
+				}
 			}
 			return rows + '</table>\n';
 		}
