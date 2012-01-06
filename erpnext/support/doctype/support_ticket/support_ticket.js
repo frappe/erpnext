@@ -83,8 +83,9 @@ $.extend(cur_frm.cscript, {
 	Send: function(doc, dt, dn) {
 		$c_obj([doc], 'send_response', '', function(r,rt) {
 			locals[dt][dn].new_response = '';
-			refresh_field('new_response');
-			cs.make_listing(doc);
+			//refresh_field('new_response');
+			//cs.make_listing(doc);
+			cs.refresh(doc);
 		});
 	},
 	
