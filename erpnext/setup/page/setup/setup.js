@@ -168,7 +168,7 @@ SetupData = function(cnty){
     ['Manage Trash',2,'Trash','','Restore trashed items'],
     ['Import Data',2,'Import Data','','Import data from CSV files'],
     ['Manage Users',2,'My Company','','Add / remove users and manage their roles'],
-    ['Web Forms',2,'Webforms','', 'Code to embed forms in yor website'],
+    //['Web Forms',2,'Webforms','', 'Code to embed forms in yor website'],
     ['Permissions Manager',2,'Permission Engine','', 'Manage all permissions from one tool'],
     //['Property Setter',1,'Property Setter','', 'Customize properties of a Form (DocType) or Field'],
     ['Customize Form View',3,'DocLayer','', 'Customize properties of a Form (DocType) or Field'],
