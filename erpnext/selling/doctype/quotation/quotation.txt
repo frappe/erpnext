@@ -5,7 +5,7 @@
 	{
 		'creation': '2010-08-08 17:09:17',
 		'docstatus': 0,
-		'modified': '2011-12-22 19:03:04',
+		'modified': '2012-01-09 16:52:51',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
@@ -21,7 +21,7 @@
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1322549700',
+		'_last_update': '1325570646',
 		'allow_attach': 1,
 		'allow_email': 0,
 		'allow_trash': 1,
@@ -41,7 +41,7 @@
 		'show_in_menu': 0,
 		'subject': 'To %(customer_name)s on %(transaction_date)s worth %(currency)s %(grand_total_export)s',
 		'tag_fields': 'status',
-		'version': 598
+		'version': 599
 	},
 
 	# These values are common for all DocFormat
@@ -703,7 +703,7 @@
 		'oldfieldname': 'net_total',
 		'oldfieldtype': 'Currency',
 		'permlevel': 1,
-		'print_hide': 1,
+		'print_hide': 0,
 		'reqd': 0,
 		'width': '100px'
 	},
@@ -902,7 +902,7 @@
 		'oldfieldname': 'grand_total_export',
 		'oldfieldtype': 'Currency',
 		'permlevel': 1,
-		'print_hide': 1,
+		'print_hide': 0,
 		'reqd': 0,
 		'width': '200px'
 	},
@@ -917,7 +917,7 @@
 		'oldfieldname': 'rounded_total_export',
 		'oldfieldtype': 'Currency',
 		'permlevel': 1,
-		'print_hide': 1,
+		'print_hide': 0,
 		'reqd': 0,
 		'width': '200px'
 	},
