@@ -165,8 +165,8 @@ class DocType(TransactionBase):
 				'qty'				: flt(arg['stock_qty']) / flt(uom[0]['conversion_factor']),
 				'purchase_ref_rate'	: (lpr and flt(lpr[0]['last_purchase_rate']) * flt(uom[0]['conversion_factor'])) or 0,
 				'purchase_rate'		: (lpr and flt(lpr[0]['last_purchase_rate']) * flt(uom[0]['conversion_factor'])) or 0,
-				'import_ref_rate'	: (lpr and flt(lpr[0]['last_purchase_rate']) * flt(uom[0]['conversion_factor'])/flt(self.doc.conversion_rate)) or 0,
-				'import_rate'		: (lpr and flt(lpr[0]['last_purchase_rate']) * flt(uom[0]['conversion_factor'])/flt(self.doc.conversion_rate)) or 0
+				'import_ref_rate'	: (lpr and flt(lpr[0]['last_purchase_rate']) * flt(uom[0]['conversion_factor'])/flt(arg['conversion_rate'])) or 0,
+				'import_rate'		: (lpr and flt(lpr[0]['last_purchase_rate']) * flt(uom[0]['conversion_factor'])/flt(arg['conversion_rate'])) or 0
 			}
 		
 		return ret

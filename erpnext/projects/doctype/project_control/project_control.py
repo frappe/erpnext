@@ -130,6 +130,7 @@ def sent_reminder_task():
 			msg2="""<h2>Two days to complete: %(name)s</h2>
 			<p>This is a reminder for the task %(name)s has been assigned to you 
 				by %(senders_name)s on %(opening_date)s</p>
+			<p><b>Subject:</b> %(subject)s </p>
 			<p><b>Project:</b> %(project)s</p>
 			<p><b>Expected Start Date:</b> %(exp_start_date)s</p>
 			<p><b>Expected End Date:</b> %(exp_end_date)s</p>

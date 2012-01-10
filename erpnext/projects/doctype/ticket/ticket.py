@@ -97,6 +97,7 @@ class DocType:
 			'opening_date': self.doc.opening_date,
 			'exp_start_date': self.doc.exp_start_date,
 			'exp_end_date' : self.doc.exp_end_date,
+			'subject' : self.doc.subject,
 			'project': self.doc.project,
 			'review_date': self.doc.review_date,
 			'description': self.doc.description
@@ -105,6 +106,7 @@ class DocType:
 		msg2="""<h2>%(name)s</h2>
 			<p>This is a Notification for the task %(name)s that has been assigned to you 
 				by %(senders_name)s on %(opening_date)s</p>
+			<p><b>Subject:</b> %(subject)s </p>
 			<p><b>Project:</b> %(project)s</p>
 			<p><b>Review Date:</b> %(review_date)s</p>
 			<p><b>Expected Start Date:</b> %(exp_start_date)s</p>
