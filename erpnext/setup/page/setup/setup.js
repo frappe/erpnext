@@ -168,7 +168,7 @@ SetupData = function(cnty){
     ['Manage Trash',2,'Trash','','Restore trashed items'],
     ['Import Data',2,'Import Data','','Import data from CSV files'],
     ['Manage Users',2,'My Company','','Add / remove users and manage their roles'],
-    ['Web Forms',2,'Webforms','', 'Code to embed forms in yor website'],
+    //['Web Forms',2,'Webforms','', 'Code to embed forms in yor website'],
     ['Permissions Manager',2,'Permission Engine','', 'Manage all permissions from one tool'],
     //['Property Setter',1,'Property Setter','', 'Customize properties of a Form (DocType) or Field'],
     ['Customize Form View',3,'DocLayer','', 'Customize properties of a Form (DocType) or Field'],
@@ -235,8 +235,7 @@ SetupData = function(cnty){
   this.buying = {'Buying':[['Supplier Type',1,'Supplier Type','','Manage supplier classifications'],
     ['Supplier',1,'Supplier','id'+NEWLINE+'supplier_type'+NEWLINE+'supplier_status'+NEWLINE+'company','Supplier master']]};
   
-  this.maintenance = {'Maintenance':[['Serial No',1,'Serial No','item_code'+NEWLINE+'status'+NEWLINE+'pr_no'+NEWLINE+'delivery_note_no'+NEWLINE+'customer_name','Manage unique serial numbers for items'],
-    ['Purpose of Service',1,'Purpose of Service','','Purpose of service master']]};
+  this.maintenance = {'Maintenance':[['Serial No',1,'Serial No','item_code'+NEWLINE+'status'+NEWLINE+'pr_no'+NEWLINE+'delivery_note_no'+NEWLINE+'customer_name','Manage unique serial numbers for items']]};
   
   this.production = {'Production':[['Bill of Materials',1,'Bill Of Materials','id'+NEWLINE+'item'+NEWLINE+'description'+NEWLINE+'operating_cost'+NEWLINE+'maintained_by','Muti-level bill of materials and operations'],
     ['Workstation',1,'Workstation','id'+NEWLINE+'workstation_name'+NEWLINE+'warehouse'+NEWLINE+'description','Workstation master']]};

@@ -15,14 +15,14 @@ cur_frm.cscript.onload = function(doc, dt, dn) {
   if(!doc.transaction_date) set_multiple(dt,dn,{transaction_date:get_today()});
   if(!doc.posting_date) set_multiple(dt,dn,{posting_date:get_today()});
   if(doc.__islocal && doc.customer) cur_frm.cscript.pull_item_details_onload(doc,dt,dn);
-  if(!doc.price_list_currency) set_multiple(cdt, cdn, {price_list_currency: doc.currency, plc_conversion_rate: 1});
-
+  if(!doc.price_list_currency) {
+	set_multiple(dt, dn, {price_list_currency: doc.currency, plc_conversion_rate:1});
+}
   if(!doc.posting_time) doc.posting_time = wn.datetime.get_cur_time()
     
   if(doc.__islocal){
     hide_field(['customer_address','contact_person','customer_name','address_display','contact_display','contact_mobile','contact_email','territory','customer_group']);
   }   
-
 }
 
 cur_frm.cscript.onload_post_render = function(doc, dt, dn) {
@@ -34,7 +34,6 @@ cur_frm.cscript.onload_post_render = function(doc, dt, dn) {
 // REFRESH
 // ================================================================================================
 cur_frm.cscript.refresh = function(doc, cdt, cdn) { 
-
   cur_frm.clear_custom_buttons();
  
   if(doc.per_billed < 100 && doc.docstatus==1) cur_frm.add_custom_button('Make Invoice', cur_frm.cscript['Make Sales Invoice']);

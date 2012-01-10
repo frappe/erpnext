@@ -307,7 +307,6 @@ class DocType:
 	# item re-order
 	# -------------
 	def reorder_item(self,doc_type,doc_name):
-		msgprint(get_value('Manage Account', None, 'auto_indent'))
 		if get_value('Manage Account', None, 'auto_indent'):
 			#check if re-order is required
 			indent_detail_fields = sql("select re_order_level,item_name,description,brand,item_group,lead_time_days,min_order_qty,email_notify from tabItem where item_code = %s",(self.doc.item_code),as_dict=1)
@@ -331,7 +330,7 @@ class DocType:
 		indent_details_child.item_code = self.doc.item_code
 		indent_details_child.uom = self.doc.stock_uom
 		indent_details_child.warehouse = self.doc.warehouse
-		indent_details_child.schedule_date= add_days(nowdate(),i['lead_time_days'])
+		indent_details_child.schedule_date= add_days(nowdate(),cint(i['lead_time_days']))
 		indent_details_child.item_name = i['item_name']
 		indent_details_child.description = i['description']
 		indent_details_child.item_group = i['item_group']

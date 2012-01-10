@@ -82,9 +82,12 @@ class DocType:
 
 	#-----------------------------------------------------------------------------------------------------------------------------------
 	def update_series_start(self):
-		ser_det = sql("select name from `tabSeries` where name = %s", self.doc.prefix)
-		if ser_det:
-			sql("update `tabSeries` set current = '%s' where name = '%s'" % (self.doc.starts_from-1,self.doc.prefix))
+		if self.doc.prefix:
+			ser_det = sql("select name from `tabSeries` where name = %s", self.doc.prefix)
+			if ser_det:
+				sql("update `tabSeries` set current = '%s' where name = '%s'" % (self.doc.starts_from-1,self.doc.prefix))
+			else:
+				sql("insert into tabSeries (name, current) values (%s,%s)",(cstr(self.doc.prefix),cint(self.doc.starts_from)-1))
+			msgprint("Series Updated Successfully")
 		else:
-			sql("insert into tabSeries (name, current) values (%s,%s)",(cstr(self.doc.prefix),cint(self.doc.starts_from)-1))
-		msgprint("Series Updated Successfully")
+			msgprint("Please select prefix first")

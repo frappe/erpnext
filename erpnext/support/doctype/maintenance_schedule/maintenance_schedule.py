@@ -46,14 +46,15 @@ class DocType(TransactionBase):
     import datetime
     self.doc.clear_table(self.doclist, 'maintenance_schedule_detail')
     count = 0
+    sql("delete from `tabMaintenance Schedule Detail` where parent='%s'" %(self.doc.name))
     for d in getlist(self.doclist, 'item_maintenance_detail'):
       self.validate_maintenance_detail()
-      s_list =[]
+      s_list =[]	
       s_list = self.create_schedule_list(d.start_date, d.end_date, d.no_of_visits)
-      
       for i in range(d.no_of_visits):        
         child = addchild(self.doc,'maintenance_schedule_detail','Maintenance Schedule Detail',1,self.doclist)
         child.item_code = d.item_code
+        child.item_name = d.item_name
         child.scheduled_date = s_list[i].strftime('%Y-%m-%d')
         if d.serial_no:
           child.serial_no = d.serial_no
@@ -61,8 +62,51 @@ class DocType(TransactionBase):
         count = count+1
         child.incharge_name = d.incharge_name
         child.save(1)
+        
     self.on_update()
-  
+
+
+
+  def on_submit(self):
+    if not getlist(self.doclist, 'maintenance_schedule_detail'):
+      msgprint("Please click on 'Generate Schedule' to get schedule")
+      raise Exception
+    self.check_serial_no_added()
+    self.validate_serial_no_warranty()
+    self.validate_schedule()
+
+    email_map ={}
+    for d in getlist(self.doclist, 'item_maintenance_detail'):
+      if d.serial_no:
+        self.update_amc_date(d.serial_no, d.end_date)
+
+      if d.incharge_name not in email_map:
+      	e = sql("select email_id, name from `tabSales Person` where name='%s' " %(d.incharge_name),as_dict=1)[0]
+        email_map[d.incharge_name] = (e['email_id'])
+
+      scheduled_date =sql("select scheduled_date from `tabMaintenance Schedule Detail` \
+        where incharge_name='%s' and item_code='%s' and parent='%s' " %(d.incharge_name, \
+        d.item_code, self.doc.name), as_dict=1, debug=1)
+
+      for key in scheduled_date:
+        if email_map[d.incharge_name]:
+          self.add_calender_event(key["scheduled_date"],email_map[d.incharge_name],d.item_code)     
+    set(self.doc, 'status', 'Submitted')    
+    
+
+  def add_calender_event(self,scheduled_date,incharge_email,item_code):
+    """ Add calendar event for Maintenece Schedule in calendar of Allocated person"""
+    event = Document('Event')
+    event.owner = incharge_email
+    event.description = "Item Code:%s and Reference:%s" %(item_code,self.doc.name)
+    event.event_date = scheduled_date
+    event.event_hour =  '10:00'
+    event.event_type = 'Private'
+    event.ref_type = 'Maintenance Schedule'
+    event.ref_name = self.doc.name
+    event.save(1)
+
+
   #get schedule dates
   #----------------------
   def create_schedule_list(self, start_date, end_date, no_of_visit):
@@ -97,6 +141,8 @@ class DocType(TransactionBase):
       msgprint("Weekly periodicity can be set for period of atleast 1 week or more")
       raise Exception
   
+
+
   #get count on the basis of periodicity selected
   #----------------------------------------------------
   def get_no_of_visits(self, arg):
@@ -121,6 +167,8 @@ class DocType(TransactionBase):
     ret = {'no_of_visits':count}
     return ret
   
+
+
   def validate_maintenance_detail(self):
     if not getlist(self.doclist, 'item_maintenance_detail'):
       msgprint("Please enter Maintaince Details first")
@@ -269,21 +317,15 @@ class DocType(TransactionBase):
           msgprint("Please click on 'Generate Schedule' to fetch serial no added for item "+m.item_code)
           raise Exception
   
-  def on_submit(self):
-    if not getlist(self.doclist, 'maintenance_schedule_detail'):
-      msgprint("Please click on 'Generate Schedule' to get schedule")
-      raise Exception
-    self.check_serial_no_added()
-    self.validate_serial_no_warranty()
-    self.validate_schedule()
-    for d in getlist(self.doclist, 'item_maintenance_detail'):
-      if d.serial_no:
-        self.update_amc_date(d.serial_no, d.end_date)
-    set(self.doc, 'status', 'Submitted')    
-
+  
   
   def on_cancel(self):
     for d in getlist(self.doclist, 'item_maintenance_detail'):
       if d.serial_no:
         self.update_amc_date(d.serial_no, '')
     set(self.doc, 'status', 'Cancelled')
+    sql("delete from `tabEvent` where ref_type='Maintenance Schedule' and ref_name='%s' " %(self.doc.name))
+  def on_trash(self):
+    sql("delete from `tabEvent` where ref_type='Maintenance Schedule' and ref_name='%s' " %(self.doc.name))
+    
+

@@ -18,8 +18,8 @@ cur_frm.cscript.onload = function(doc,dt,dn) {
 		if(!doc.voucher_date) set_multiple(dt,dn,{voucher_date:get_today()});
 		if(!doc.due_date) set_multiple(dt,dn,{due_date:get_today()});
 		if(!doc.posting_date) set_multiple(dt,dn,{posting_date:get_today()});
-		if(!doc.currency && sys_defaults.currency) set_multiple(cdt,cdn,{currency:sys_defaults.currency});
-		if(!doc.price_list_currency) set_multiple(cdt, cdn, {price_list_currency: doc.currency, plc_conversion_rate: 1});
+		if(!doc.currency && sys_defaults.currency) set_multiple(dt,dn,{currency:sys_defaults.currency});
+		if(!doc.price_list_currency) set_multiple(dt, dn, {price_list_currency: doc.currency, plc_conversion_rate: 1});
 
 		//for previously created sales invoice, set required field related to pos
 		if(doc.is_pos ==1) cur_frm.cscript.is_pos(doc, dt, dn);
