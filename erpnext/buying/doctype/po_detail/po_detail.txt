@@ -5,7 +5,7 @@
 	{
 		'creation': '2010-08-08 17:09:12',
 		'docstatus': 0,
-		'modified': '2011-12-14 10:49:46',
+		'modified': '2012-01-10 16:38:21',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
@@ -22,7 +22,7 @@
 		'section_style': 'Tray',
 		'server_code_error': ' ',
 		'show_in_menu': 0,
-		'version': 60
+		'version': 61
 	},
 
 	# These values are common for all DocField
@@ -301,7 +301,7 @@
 		'fieldtype': 'Link',
 		'hidden': 0,
 		'in_filter': 1,
-		'label': 'Indent No',
+		'label': 'Purchase Requisition No',
 		'no_copy': 0,
 		'oldfieldname': 'prevdoc_docname',
 		'oldfieldtype': 'Link',
@@ -319,7 +319,7 @@
 		'fieldtype': 'Date',
 		'hidden': 0,
 		'in_filter': 1,
-		'label': 'Indent Date',
+		'label': 'Purchase Requisition Date',
 		'oldfieldname': 'prevdoc_date',
 		'oldfieldtype': 'Date',
 		'permlevel': 1,
@@ -335,7 +335,7 @@
 		'fieldtype': 'Data',
 		'hidden': 1,
 		'in_filter': 1,
-		'label': 'Indent Detail No',
+		'label': 'Purchase Requisition Detail No',
 		'no_copy': 0,
 		'oldfieldname': 'prevdoc_detail_docname',
 		'oldfieldtype': 'Data',

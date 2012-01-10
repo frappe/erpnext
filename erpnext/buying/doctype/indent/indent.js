@@ -3,9 +3,10 @@ cur_frm.cscript.fname = "indent_details";
 
 $import(Purchase Common)
 $import(SMS Control)
+cur_frm.cscript.indent_doctype_label =  get_doctype_label('Indent');
+  
 //========================== On Load =================================================
 cur_frm.cscript.onload = function(doc, cdt, cdn) {
-  
   if (!doc.transaction_date) doc.transaction_date = dateutil.obj_to_str(new Date())
   if (!doc.status) doc.status = 'Draft';
   
@@ -42,18 +43,18 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
     }
     if(!is_closed) {
   	  cur_frm.add_custom_button('Make Purchase Order', cur_frm.cscript['Make Purchase Order'])
-  	  cur_frm.add_custom_button('Stop Indent', cur_frm.cscript['Stop Indent'])
+  	  cur_frm.add_custom_button('Stop ' + cur_frm.cscript.indent_doctype_label, cur_frm.cscript['Stop Purchase Requisition'])
     }
     cur_frm.add_custom_button('Send SMS', cur_frm.cscript['Send SMS']);
   }
  
   if(doc.docstatus == 1 && doc.status == 'Stopped')
-    cur_frm.add_custom_button('Unstop Indent', cur_frm.cscript['Unstop Indent'])
+    cur_frm.add_custom_button('Unstop ' + cur_frm.cscript.indent_doctype_label, cur_frm.cscript['Unstop Purchase Requisition'])
     
   if(doc.docstatus == 1)
-    unhide_field(['Repair Indent']);
+    unhide_field(['Repair Purchase Requisition']);
   else
-    hide_field(['Repair Indent']);
+    hide_field(['Repair Purchase Requisition']);
 }
 
 //======================= validation ===================================
@@ -71,7 +72,7 @@ cur_frm.cscript.transaction_date = function(doc,cdt,cdn){
 cur_frm.cscript.qty = function(doc, cdt, cdn) {
   var d = locals[cdt][cdn];
   if (flt(d.qty) < flt(d.min_order_qty))
-    alert("Warning: Indent Qty is less than Minimum Order Qty");
+    alert("Warning: " + cur_frm.cscript.indent_doctype_label + " Qty is less than Minimum Order Qty");
 }
 
 // On Button Click Functions
@@ -95,9 +96,9 @@ cur_frm.cscript['Make Purchase Order'] = function() {
 
 // Stop INDENT
 // ==================================================================================================
-cur_frm.cscript['Stop Indent'] = function() {
+cur_frm.cscript['Stop Purchase Requisition'] = function() {
   var doc = cur_frm.doc;
-  var check = confirm("Do you really want to STOP this Indent?");
+  var check = confirm("Do you really want to STOP this " + cur_frm.cscript.indent_doctype_label + "?");
 
   if (check) {
     $c('runserverobj', args={'method':'update_status', 'arg': 'Stopped', 'docs': compress_doclist(make_doclist(doc.doctype, doc.name))}, function(r,rt) {
@@ -108,9 +109,9 @@ cur_frm.cscript['Stop Indent'] = function() {
 
 // Un Stop INDENT
 //====================================================================================================
-cur_frm.cscript['Unstop Indent'] = function(){
+cur_frm.cscript['Unstop Purchase Requisition'] = function(){
   var doc = cur_frm.doc
-  var check = confirm("Do you really want to UNSTOP this Indent?");
+  var check = confirm("Do you really want to UNSTOP this " + cur_frm.cscript.indent_doctype_label + "?");
   
   if (check) {
     $c('runserverobj', args={'method':'update_status', 'arg': 'Submitted','docs': compress_doclist(make_doclist(doc.doctype, doc.name))}, function(r,rt) {

@@ -8,5 +8,10 @@ patch_list = [
 		'patch_module': 'patches.jan_mar_2012',
 		'patch_file': 'print_hide_totals',
 		'description': 'Uncheck print_hide for RV, SO, DN and Quotation'
+	},
+	{
+		'patch_module': 'patches.jan_mar_2012',
+		'patch_file': 'rename_doctype_indent',
+		'description': 'Add DocType Label: Indent to Purchase Requisition'
 	}
 ]

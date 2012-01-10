@@ -5,14 +5,14 @@
 	{
 		'creation': '2010-08-08 17:09:04',
 		'docstatus': 0,
-		'modified': '2011-10-12 13:09:38',
+		'modified': '2012-01-10 15:39:17',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1318404775',
+		'_last_update': '1326190064',
 		'allow_print': 0,
 		'colour': 'White:FFF',
 		'default_print_format': 'Standard',
@@ -25,7 +25,7 @@
 		'server_code_error': ' ',
 		'show_in_menu': 0,
 		'subject': '%(per_ordered)s% ordered',
-		'version': 188
+		'version': 197
 	},
 
 	# These values are common for all DocField
@@ -235,7 +235,7 @@
 		'fieldname': 'transaction_date',
 		'fieldtype': 'Date',
 		'in_filter': 1,
-		'label': 'Indent Date',
+		'label': 'Transaction Date',
 		'no_copy': 1,
 		'oldfieldname': 'transaction_date',
 		'oldfieldtype': 'Date',
@@ -249,7 +249,7 @@
 	# DocField
 	{
 		'colour': 'White:FFF',
-		'description': '% of materials ordered against this Indent',
+		'description': '% of materials ordered against this Purchase Requisition',
 		'doctype': 'DocField',
 		'fieldname': 'per_ordered',
 		'fieldtype': 'Currency',
@@ -273,7 +273,7 @@
 	# DocField
 	{
 		'colour': 'White:FFF',
-		'description': 'One or multiple Sales Order no which generated this Indent',
+		'description': 'One or multiple Sales Order no which generated this Purchase Requisition',
 		'doctype': 'DocField',
 		'fieldname': 'sales_order_no',
 		'fieldtype': 'Link',
@@ -302,7 +302,7 @@
 		'doctype': 'DocField',
 		'fieldname': 'indent_details',
 		'fieldtype': 'Table',
-		'label': 'Indent Details',
+		'label': 'Purchase Requisition Details',
 		'no_copy': 0,
 		'oldfieldname': 'indent_details',
 		'oldfieldtype': 'Table',
@@ -314,7 +314,7 @@
 	{
 		'colour': 'White:FFF',
 		'default': 'Give additional details about the indent.',
-		'description': 'Filing in Additional Information about the Indent will help you analyze your data better.',
+		'description': 'Filing in Additional Information about the Purchase Requisition will help you analyze your data better.',
 		'doctype': 'DocField',
 		'fieldtype': 'Section Break',
 		'label': 'More Info',
@@ -362,7 +362,7 @@
 	# DocField
 	{
 		'colour': 'White:FFF',
-		'description': 'Name of the entity who has requested for the indent',
+		'description': 'Name of the entity who has requested for the Purchase Requisition',
 		'doctype': 'DocField',
 		'fieldname': 'requested_by',
 		'fieldtype': 'Data',
@@ -400,7 +400,7 @@
 	# DocField
 	{
 		'colour': 'White:FFF',
-		'description': 'After cancelling the indent, a dialog box will ask you reason for cancellation which will be reflected in this field',
+		'description': 'After cancelling the Purchase Requisition, a dialog box will ask you reason for cancellation which will be reflected in this field',
 		'doctype': 'DocField',
 		'fieldname': 'cancel_reason',
 		'fieldtype': 'Data',
@@ -443,7 +443,7 @@
 
 	# DocField
 	{
-		'description': 'Add Terms and Conditions for the Indent. You can also prepare a master Term Sheet and use the Template',
+		'description': 'Add Terms and Conditions for the Purchase Requisition. You can also prepare a master Term Sheet and use the Template',
 		'doctype': 'DocField',
 		'fieldtype': 'Section Break',
 		'label': 'Terms',
@@ -505,7 +505,7 @@
 		'doctype': 'DocField',
 		'fieldname': 'terms',
 		'fieldtype': 'Text Editor',
-		'label': 'Terms1',
+		'label': 'Terms Content',
 		'oldfieldname': 'terms',
 		'oldfieldtype': 'Text Editor',
 		'permlevel': 0
@@ -526,7 +526,7 @@
 		'colour': 'White:FFF',
 		'doctype': 'DocField',
 		'fieldtype': 'Button',
-		'label': 'Repair Indent',
+		'label': 'Repair Purchase Requisition',
 		'oldfieldtype': 'Button',
 		'options': 'repair_indent',
 		'permlevel': 0,
