@@ -247,9 +247,9 @@ cur_frm.cscript.calc_doc_values = function(doc, cdt, cdn, tname, fname, other_fn
 		net_total_incl += flt(d[j].amount);
 	}
   }
-  console.log("Net Total: " + net_total);
-  console.log("Net Total Incl: " + net_total_incl);
-  console.log("Other Charges: " + other_charges_total);
+  //console.log("Net Total: " + net_total);
+  //console.log("Net Total Incl: " + net_total_incl);
+  //console.log("Other Charges: " + other_charges_total);
   doc.net_total = net_total_incl > net_total ? flt(net_total_incl) : flt(net_total);
   doc.other_charges_total = flt(other_charges_total);
   doc.grand_total = flt(flt(net_total) + flt(other_charges_total));
@@ -384,11 +384,11 @@ cur_frm.cscript.consider_incl_rate = function(doc, other_fname) {
 	var tax_list = getchildren('RV Tax Detail', doc.name, other_fname, doc.doctype);
 	for(var i=0; i<tax_list.length; i++) {
 		if(tax_list[i].included_in_print_rate) {
-			console.log('consider incl rate');
+			//console.log('consider incl rate');
 			return true;
 		}
 	}
-	console.log('do not consider incl rate');
+	//console.log('do not consider incl rate');
 	return false;
 }
 
@@ -430,9 +430,9 @@ cur_frm.cscript.back_calc_basic_rate = function(doc, tname, fname, child, other_
 		};
 	}
 	var basic_rate = flt((child.export_rate * flt(doc.conversion_rate)) / total);
-	console.log(temp_tax_list);
-	console.log('in basic rate back calc');
-	console.log(basic_rate);
+	//console.log(temp_tax_list);
+	//console.log('in basic rate back calc');
+	//console.log(basic_rate);
 	return basic_rate;
 }
 
@@ -500,7 +500,7 @@ cur_frm.cscript.update_fname_table = function(doc , tname , fname , n, other_fna
 				var export_rate = flt(cl[i].ref_rate) * flt(1 - flt(cl[i].adj_rate / 100));
 				set_multiple(tname, cl[i].name, { 'export_rate': flt(export_rate) }, fname);
 			}
-			console.log("export_rate: " + cl[i].export_rate);
+			//console.log("export_rate: " + cl[i].export_rate);
 
 			var basic_rate = cur_frm.cscript.back_calc_basic_rate(doc, tname, fname, cl[i], other_fname);
 			var base_ref_rate = basic_rate + flt(basic_rate * flt(cl[i].adj_rate) / 100);
