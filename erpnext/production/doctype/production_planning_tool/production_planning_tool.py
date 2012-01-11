@@ -59,11 +59,11 @@ class DocType:
 			select 
 				distinct t1.name, t1.transaction_date, t1.customer, t1.grand_total 
 			from 
-				`tabSales Order` t1, `tabDelivery Note Packing Detail` t2, tabItem t3
+				`tabSales Order` t1, `tabSales Order Detail` t2, `tabDelivery Note Packing Detail` t3, tabItem t4
 			where 
-				t1.name = t2.parent and t2.parenttype = 'Sales Order' and t1.docstatus = 1 and t3.name = t2.item_code
-				and ifnull(t1.per_delivered, 0) < 100 and t1.status != 'Stopped' and company = '%s' %s
-				and (ifnull(t3.is_pro_applicable, 'No') = 'Yes' or ifnull(t3.is_sub_contracted_item, 'No') = 'Yes')
+				t1.name = t2.parent and t1.name = t3.parent and t3.parenttype = 'Sales Order' and t1.docstatus = 1 and t2.item_code = t3.parent_item 
+				and t4.name = t3.item_code and  t1.status != 'Stopped' and t1.company = '%s' and ifnull(t2.qty, 0) > ifnull(t2.delivered_qty, 0) 
+				and (ifnull(t4.is_pro_applicable, 'No') = 'Yes' or ifnull(t4.is_sub_contracted_item, 'No') = 'Yes') %s
 			order by t1.name desc
 		"""% (self.doc.company, cond), as_dict = 1)
 
@@ -88,7 +88,7 @@ class DocType:
 		if self.doc.customer:
 			cond += ' and t1.customer = "' + self.doc.customer + '"'
 		if self.doc.fg_item:
-			cond += ' and t2.item_code = "' + self.doc.fg_item + '"'
+			cond += ' and t3.item_code = "' + self.doc.fg_item + '"'
 
 		return cond
 
@@ -120,7 +120,7 @@ class DocType:
 
 
 	def get_included_so(self):
-		so = "'" + "','".join([d.sales_order for d in getlist(self.doclist, 'pp_so_details') if d.include_in_plan]) + "'"
+		so = "'" + "','".join([cstr(d.sales_order) for d in getlist(self.doclist, 'pp_so_details') if d.include_in_plan]) + "'"
 		return so
 
 
