@@ -59,10 +59,11 @@ class DocType:
 			select 
 				distinct t1.name, t1.transaction_date, t1.customer, t1.grand_total 
 			from 
-				`tabSales Order` t1, `tabDelivery Note Packing Detail` t2
+				`tabSales Order` t1, `tabDelivery Note Packing Detail` t2, tabItem t3
 			where 
-				t1.name = t2.parent and t2.parenttype = 'Sales Order' and t1.docstatus = 1
+				t1.name = t2.parent and t2.parenttype = 'Sales Order' and t1.docstatus = 1 and t3.name = t2.item_code
 				and ifnull(t1.per_delivered, 0) < 100 and t1.status != 'Stopped' and company = '%s' %s
+				and (ifnull(t3.is_pro_applicable, 'No') = 'Yes' or ifnull(t3.is_sub_contracted_item, 'No') = 'Yes')
 			order by t1.name desc
 		"""% (self.doc.company, cond), as_dict = 1)
 
