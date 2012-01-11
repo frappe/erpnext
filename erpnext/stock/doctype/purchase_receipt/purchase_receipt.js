@@ -78,6 +78,7 @@ cur_frm.fields_dict.contact_person.on_new = function(dn) {
   locals['Contact'][dn].supplier_name = locals[cur_frm.doctype][cur_frm.docname].supplier_name;
 }
 
+
 // Get Purchase Order Button
 // -----------------
 cur_frm.cscript['Pull Purchase Order Details'] = function(doc, dt, dn) {
@@ -87,6 +88,7 @@ cur_frm.cscript['Pull Purchase Order Details'] = function(doc, dt, dn) {
   }
   $c_obj(make_doclist(dt,dn),'get_po_details','',callback);
 }
+
 
 
 //================ create new contact ============================================================================

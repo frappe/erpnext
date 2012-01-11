@@ -44,6 +44,20 @@ def on_login_post_session(login_manager):
 	if webnotes.form_dict.get('login_from'):
 		webnotes.session['data']['login_from'] = webnotes.form.getvalue('login_from')
 		webnotes.session_obj.update()
+	
+	# Clear previous sessions i.e. logout previous log-in attempts
+	exception_list = ['demo@webnotestech.com', 'Administrator']
+	if webnotes.session['user'] not in exception_list:
+		sid_list = webnotes.conn.sql("""
+			SELECT sid
+			FROM `tabSessions`
+			WHERE
+				user=%s AND
+				sid!=%s
+			ORDER BY lastupdate desc""", \
+			(webnotes.session['user'], webnotes.session['sid']), as_list=1)
+		for sid in sid_list:
+			webnotes.conn.sql("DELETE FROM `tabSessions` WHERE sid=%s", sid[0])
 
 	update_account_details()
 
@@ -53,7 +67,7 @@ def on_login_post_session(login_manager):
 def on_logout(login_manager):
 	if cint(webnotes.conn.get_value('Control Panel', None, 'sync_with_gateway')):
 		from server_tools.gateway_utils import logout_sso
-		logout_sso()
+		logout_sso(user=login_manager.user)
 
 #
 # create a profile (if logs in for the first time)

@@ -8,50 +8,80 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 }*/
 
 // For customizing print
+cur_frm.pformat.net_total = function(doc) {
+	return '';
+}
+
+cur_frm.pformat.grand_total_export = function(doc) {
+	return '';
+}
+
+cur_frm.pformat.round_total_export = function(doc) {
+	return '';
+}
 
 cur_frm.pformat.other_charges= function(doc){
   //function to make row of table
-  var make_row = function(title,val,bold){
-    var bstart = '<b>'; var bend = '</b>';
-    return '<tr><td style="width:50%;">'+(bold?bstart:'')+title+(bold?bend:'')+'</td>'
-     +'<td style="width:25%;text-align:right;">'+doc.currency+'</td>'
-     +'<td style="width:25%;text-align:right;">'+val+'</td>'
-     +'</tr>'
-  }
+	var make_row = function(title,val,bold){
+		var bstart = '<b>'; var bend = '</b>';
+		return '<tr><td style="width:50%;">'+(bold?bstart:'')+title+(bold?bend:'')+'</td>'
+		 +'<td style="width:25%;text-align:right;">'+doc.currency+'</td>'
+		 +'<td style="width:25%;text-align:right;">'+val+'</td>'
+		 +'</tr>'
+	}
 
-  function convert_rate(val){
-    var new_val = flt(val)/flt(doc.conversion_rate);
-    return new_val;
-  }
-  out ='';
-  if (!doc.print_without_amount) {
-    var cl = getchildren('RV Tax Detail',doc.name,'other_charges');
+	function convert_rate(val){
+		var new_val = flt(val)/flt(doc.conversion_rate);
+		return new_val;
+	}
+	out ='';
+	if (!doc.print_without_amount) {
+		print_hide_dict = {};
+		for(var i in locals['DocField']) {
+			var doc_field = locals['DocField'][i];
+			if(doc_field.fieldname) {
+				print_hide_dict[doc_field.fieldname] = doc_field.print_hide;
+			}
+		}
 
-    // outer table  
-    var out='<div><table class="noborder" style="width:100%"><tr><td style="width: 60%"></td><td>';
-    
-    // main table
-    out +='<table class="noborder" style="width:100%">'+make_row('Net Total',fmt_money(convert_rate(doc.net_total)),1);
+		var cl = getchildren('RV Tax Detail',doc.name,'other_charges');
 
-    // add rows
-    if(cl.length){
-      for(var i=0;i<cl.length;i++){
-        if(fmt_money(convert_rate(cl[i].tax_amount))!=0)
-          out += make_row(cl[i].description,fmt_money(convert_rate(cl[i].tax_amount)),0);
-      }
-    }
-  
-    // grand total
-    out +=make_row('Grand Total',fmt_money(doc.grand_total_export),1) +make_row('Rounded Total',fmt_money(doc.rounded_total_export),1)
-    if(doc.in_words_export){
-      out +='</table></td></tr>';
-      out += '<tr><td colspan = "2">';
-      out += '<table><tr><td style="width:25%;"><b>In Words</b></td>'
-      out+= '<td style="width:50%;">'+doc.in_words_export+'</td></tr>'
-    }
-    out +='</table></td></tr></table></div>';   
-  }
-  return out;
+		// outer table  
+		var out='<div><table class="noborder" style="width:100%"><tr><td style="width: 60%"></td><td>';
+
+		// main table
+
+		out +='<table class="noborder" style="width:100%">';
+		if(!print_hide_dict['net_total']) {
+			out +=make_row('Net Total',fmt_money(convert_rate(doc.net_total)),1);
+		}
+
+		// add rows
+		if(cl.length){
+			for(var i=0;i<cl.length;i++){
+				if(fmt_money(convert_rate(cl[i].tax_amount))!=0 && !cl[i].included_in_print_rate)
+				  out += make_row(cl[i].description,fmt_money(convert_rate(cl[i].tax_amount)),0);
+			}
+		}
+
+		// grand total
+		if(!print_hide_dict['grand_total_export']) {
+			out += make_row('Grand Total',fmt_money(doc.grand_total_export),1);
+		}
+		
+		if(!print_hide_dict['rounded_total_export']) {
+			out += make_row('Rounded Total',fmt_money(doc.rounded_total_export),1);
+		}
+
+		if(doc.in_words_export){
+			out +='</table></td></tr>';
+			out += '<tr><td colspan = "2">';
+			out += '<table><tr><td style="width:25%;"><b>In Words</b></td>'
+			out+= '<td style="width:50%;">'+doc.in_words_export+'</td></tr>'
+		}
+		out +='</table></td></tr></table></div>';   
+	}
+	return out;
 }
 
 cur_frm.cscript.charge_type = function(doc, cdt, cdn) {

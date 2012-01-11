@@ -130,26 +130,47 @@ cur_frm.cscript.adj_rate = function(doc, cdt, cdn) { cur_frm.cscript.recalc(doc,
 
 // ************************ REF RATE ****************************
 cur_frm.cscript.ref_rate = function(doc, cdt, cdn){
-  var d = locals[cdt][cdn];
-  set_multiple(cur_frm.cscript.tname, d.name, {'export_rate': flt(d.ref_rate) * (100 - flt(d.adj_rate)) / 100}, cur_frm.cscript.fname);
-  cur_frm.cscript.recalc(doc, 3);
+	var d = locals[cdt][cdn];
+	var consider_incl_rate = cur_frm.cscript.consider_incl_rate(doc, cur_frm.cscript.other_fname);
+	if(!consider_incl_rate) {
+		set_multiple(cur_frm.cscript.tname, d.name, {'export_rate': flt(d.ref_rate) * (100 - flt(d.adj_rate)) / 100}, cur_frm.cscript.fname);
+	}
+	cur_frm.cscript.recalc(doc, 1);
 }
 
 // *********************** BASIC RATE **************************
 cur_frm.cscript.basic_rate = function(doc, cdt, cdn) { 
-  var fname = cur_frm.cscript.fname;
-  var d = locals[cdt][cdn];;
-  if(!d.qty)
-  {
-    d.qty = 1;
-    refresh_field('qty', d.name, fname);
-
-  }
-  cur_frm.cscript.recalc(doc, 2); 
+	var fname = cur_frm.cscript.fname;
+	var d = locals[cdt][cdn];
+	if(!d.qty) {
+		d.qty = 1;
+		refresh_field('qty', d.name, fname);
+	}
+	var consider_incl_rate = cur_frm.cscript.consider_incl_rate(doc, cur_frm.cscript.other_fname);
+	if(!consider_incl_rate) {
+		cur_frm.cscript.recalc(doc, 2);
+	} else {
+		var basic_rate = cur_frm.cscript.back_calc_basic_rate(
+			doc, cur_frm.cscript.tname, fname, d, cur_frm.cscript.other_fname
+		);
+		if (d.basic_rate != basic_rate.toFixed(2)) { 
+			d.basic_rate = basic_rate;
+			refresh_field('basic_rate', d.name, fname); 
+			msgprint("You cannot change Basic Rate* (Base Currency) when \
+				considering rates inclusive of taxes.<br /> \
+				Please either <br /> \
+				* Specify Basic Rate (i.e. Rate which will be displayed in print) <br /> \
+				-- or -- <br />\
+				* Uncheck 'Included in Print Rate' in the tax entries of Taxes section.");
+		}
+	}
 }
 
 // ************************ EXPORT RATE *************************
-cur_frm.cscript.export_rate = function(doc,cdt,cdn) { cur_frm.cscript.recalc(doc, 3);}
+cur_frm.cscript.export_rate = function(doc,cdt,cdn) {
+	doc = locals[doc.doctype][doc.name];
+	cur_frm.cscript.recalc(doc, 1);
+}
 
 
 
@@ -177,7 +198,7 @@ cur_frm.cscript.recalc = function(doc, n) {
   if(!flt(doc.conversion_rate)) { doc.conversion_rate = 1; refresh_field('conversion_rate'); }
   if(!flt(doc.plc_conversion_rate)) { doc.plc_conversion_rate = 1; refresh_field('plc_conversion_rate'); }
 
-  if(n > 0) cur_frm.cscript.update_fname_table(doc , tname , fname , n); // updates all values in table (i.e. amount, export amount, net total etc.)
+  if(n > 0) cur_frm.cscript.update_fname_table(doc , tname , fname , n, other_fname); // updates all values in table (i.e. amount, export amount, net total etc.)
   
   if(flt(doc.net_total) > 0) {
     var cl = getchildren('RV Tax Detail', doc.name, other_fname,doc.doctype);
@@ -218,11 +239,18 @@ cur_frm.cscript.calc_doc_values = function(doc, cdt, cdn, tname, fname, other_fn
   for(var i = 0; i<cl.length; i++){
     net_total += flt(cl[i].amount);
   }
+  net_total_incl = net_total
   var d = getchildren('RV Tax Detail', doc.name, other_fname,doc.doctype);
   for(var j = 0; j<d.length; j++){
     other_charges_total += flt(d[j].amount);
+	if(d[j].included_in_print_rate) {
+		net_total_incl += flt(d[j].amount);
+	}
   }
-  doc.net_total = flt(net_total);
+  //console.log("Net Total: " + net_total);
+  //console.log("Net Total Incl: " + net_total_incl);
+  //console.log("Other Charges: " + other_charges_total);
+  doc.net_total = net_total_incl > net_total ? flt(net_total_incl) : flt(net_total);
   doc.other_charges_total = flt(other_charges_total);
   doc.grand_total = flt(flt(net_total) + flt(other_charges_total));
   doc.rounded_total = Math.round(doc.grand_total);
@@ -278,9 +306,12 @@ cur_frm.cscript.calc_other_charges = function(doc , tname , fname , other_fname)
       
       // this is calculation part for all types
       if(tax[t].charge_type != "Actual") tax[t].item_wise_tax_detail += item_wise_tax_detail;
-      tax[t].total_amount = flt(tax_amount.toFixed(2));     //stores actual tax amount in virtual field
-      tax[t].total_tax_amount = flt(prev_total.toFixed(2));      //stores total amount in virtual field
-      tax[t].tax_amount += flt(tax_amount.toFixed(2));       
+      //tax[t].total_amount = flt(tax_amount.toFixed(2));     //stores actual tax amount in virtual field
+      //tax[t].total_tax_amount = flt(prev_total.toFixed(2));      //stores total amount in virtual field
+      //tax[t].tax_amount += flt(tax_amount.toFixed(2));       
+      tax[t].total_amount = flt(tax_amount);     //stores actual tax amount in virtual field
+      tax[t].total_tax_amount = flt(prev_total);      //stores total amount in virtual field
+      tax[t].tax_amount += flt(tax_amount);       
       var total_amount = flt(tax[t].tax_amount);
       total_tax_amount = flt(tax[t].total_tax_amount) + flt(total_amount);
       set_multiple('RV Tax Detail', tax[t].name, { 'item_wise_tax_detail':tax[t].item_wise_tax_detail, 'amount':total_amount, 'total':flt(total)+flt(tax[t].tax_amount)/*_tax_amount)*/}, other_fname);
@@ -311,7 +342,8 @@ cur_frm.cscript.check_charge_type_and_get_tax_amount = function( doc, tax, t, cl
       refresh_field('total_excise_rate');
       return
     }
-    return tax_amount = (flt(rate) * flt(cl.amount) / 100);
+    
+	return tax_amount = (flt(rate) * flt(cl.amount) / 100);
   }
   else if(tax[t].charge_type == 'On Previous Row Amount'){
     if(flt(print_amt) == 1) {
@@ -347,28 +379,158 @@ cur_frm.cscript.check_charge_type_and_get_tax_amount = function( doc, tax, t, cl
   }
 }
 
+// ********************** Functions for inclusive value calc ******************************
+cur_frm.cscript.consider_incl_rate = function(doc, other_fname) {
+	var tax_list = getchildren('RV Tax Detail', doc.name, other_fname, doc.doctype);
+	for(var i=0; i<tax_list.length; i++) {
+		if(tax_list[i].included_in_print_rate) {
+			//console.log('consider incl rate');
+			return true;
+		}
+	}
+	//console.log('do not consider incl rate');
+	return false;
+}
+
+cur_frm.cscript.back_calc_basic_rate = function(doc, tname, fname, child, other_fname) {
+	
+	var get_item_tax_rate = function(item, tax) {
+		if(item.item_tax_rate) {
+			// Should to replace eval with JSON.parse when item_tax_rate is converted to json string notation
+			var item_tax = eval('var a='+item.item_tax_rate+';a');
+			if(item_tax[tax.account_head]!=null) {
+				return flt(item_tax[tax.account_head]);
+			}
+		}
+	};
+
+	var tax_list = getchildren('RV Tax Detail', doc.name, other_fname, doc.doctype);
+	var total = 1;
+	var temp_tax_list = [];
+	var amt = 0;
+	var item_tax_rate = 0;
+	var rate = 0;
+	for(var i=0; i<tax_list.length; i++) {
+		amt = 0;
+		item_tax_rate = get_item_tax_rate(child, tax_list[i]);
+		rate = item_tax_rate ? item_tax_rate : flt(tax_list[i].rate);
+		if(tax_list[i].included_in_print_rate) {
+			if(tax_list[i].charge_type=='On Net Total') {
+				amt = flt(rate / 100);
+			} else if(tax_list[i].charge_type=='On Previous Row Total') {
+				amt = flt((rate * temp_tax_list[tax_list[i].row_id-1]['total']) / 100);
+			} else if(tax_list[i].charge_type=='On Previous Row Amount') {
+				amt = flt((rate * temp_tax_list[tax_list[i].row_id-1]['amt']) / 100);
+			}
+		}
+		total += flt(amt);
+		temp_tax_list[i] = {
+			amt: amt,
+			total: total
+		};
+	}
+	var basic_rate = flt((child.export_rate * flt(doc.conversion_rate)) / total);
+	//console.log(temp_tax_list);
+	//console.log('in basic rate back calc');
+	//console.log(basic_rate);
+	return basic_rate;
+}
+
+cur_frm.cscript.included_in_print_rate = function(doc, cdt, cdn) {
+	var tax = locals[cdt][cdn];
+	if(tax.included_in_print_rate==1) { 
+		if(!inList(['On Net Total', 'On Previous Row Total', 'On Previous Row Amount'], tax.charge_type)) {
+			msgprint("Included in Print Rate (i.e. Inclusive Price) is only valid for charges of type: <br /> \
+				* On Net Total <br /> \
+				* On Previous Row Amount <br /> \
+				* On Previous Row Total");
+			tax.included_in_print_rate = 0;
+			refresh_field('included_in_print_rate', tax.name, cur_frm.cscript.other_fname);
+		} else if(inList(['On Previous Row Total', 'On Previous Row Amount'], tax.charge_type)){
+			if(tax.row_id) {
+				var tax_list = getchildren('RV Tax Detail', doc.name, cur_frm.cscript.other_fname, doc.doctype);
+				if(tax_list[tax.row_id-1].charge_type=='Actual') {
+					msgprint("Row of type 'Actual' cannot be depended on for type '" + tax.charge_type + "'\
+						when using tax inclusive prices.<br />\
+						This will lead to incorrect values.<br /><br /> \
+						<b>Please specify correct value in 'Enter Row' column of <span style='color:red'>Row: "	
+						+ tax.idx + "</span> in Taxes table</b>");
+					validated = false;
+					tax.included_in_print_rate = 0;
+					refresh_field('included_in_print_rate', tax.name, cur_frm.cscript.other_fname);
+				}
+			}
+		}
+	}
+}
+
 // ********************** Update values in table ******************************
-cur_frm.cscript.update_fname_table = function(doc , tname , fname , n) {
+cur_frm.cscript.update_fname_table = function(doc , tname , fname , n, other_fname) {
   doc = locals[doc.doctype][doc.name] 
   var net_total = 0
   var cl = getchildren(tname, doc.name, fname);
+  var consider_incl_rate = cur_frm.cscript.consider_incl_rate(doc, other_fname);
   for(var i=0;i<cl.length;i++) {
     if(n == 1){
-      if(flt(cl[i].ref_rate) > 0)
-        set_multiple(tname, cl[i].name, {'export_rate': flt(flt(cl[i].ref_rate) * (100 - flt(cl[i].adj_rate)) / 100)}, fname);
-      set_multiple(tname, cl[i].name, {'export_amount': flt(flt(cl[i].qty) * flt(cl[i].export_rate)), 'basic_rate': flt(flt(cl[i].export_rate) * flt(doc.conversion_rate)), 'amount': flt((flt(cl[i].export_rate) * flt(doc.conversion_rate)) * flt(cl[i].qty)) }, fname);
+		if(!consider_incl_rate) {
+			if(flt(cl[i].ref_rate) > 0) {
+				set_multiple(tname, cl[i].name, {
+					'export_rate': flt(flt(cl[i].ref_rate) * (100 - flt(cl[i].adj_rate)) / 100)
+				}, fname); 
+				
+			} else if(flt(cl[i].export_rate) > 0) {
+				var ref_rate = flt(cl[i].adj_rate)!=flt(100) ?
+					flt((100 * flt(cl[i].export_rate))/flt(100 - flt(cl[i].adj_rate))) :
+					flt(0)
+				set_multiple(tname, cl[i].name, { 'ref_rate': ref_rate }, fname);
+			}
+
+			set_multiple(tname, cl[i].name, {
+				'export_amount': flt(flt(cl[i].qty) * flt(cl[i].export_rate)),
+				'basic_rate': flt(flt(cl[i].export_rate) * flt(doc.conversion_rate)),
+				'amount': flt((flt(cl[i].export_rate) * flt(doc.conversion_rate)) * flt(cl[i].qty))
+			}, fname);
+
+			var base_ref_rate = flt(cl[i].basic_rate) + flt(flt(cl[i].basic_rate) * flt(cl[i].adj_rate) / 100);
+			set_multiple(tname, cl[i].name, {
+				'base_ref_rate': flt(base_ref_rate)
+			}, fname);
+
+		} else if(consider_incl_rate) {
+			if(flt(cl[i].export_rate) > 0) {
+				// calculate basic rate based on taxes
+				// then calculate and set basic_rate, base_ref_rate, ref_rate, amount, export_amount
+				var ref_rate = flt(cl[i].adj_rate)!=flt(100) ?
+					flt((100 * flt(cl[i].export_rate))/flt(100 - flt(cl[i].adj_rate))) :
+					flt(0)
+				set_multiple(tname, cl[i].name, { 'ref_rate': ref_rate }, fname);
+			} else if((flt(cl[i].ref_rate) > 0) && (flt(cl[i].adj_rate) > 0)) {
+				var export_rate = flt(cl[i].ref_rate) * flt(1 - flt(cl[i].adj_rate / 100));
+				set_multiple(tname, cl[i].name, { 'export_rate': flt(export_rate) }, fname);
+			}
+			//console.log("export_rate: " + cl[i].export_rate);
+
+			var basic_rate = cur_frm.cscript.back_calc_basic_rate(doc, tname, fname, cl[i], other_fname);
+			var base_ref_rate = basic_rate + flt(basic_rate * flt(cl[i].adj_rate) / 100);
+			set_multiple(tname, cl[i].name, {
+				'basic_rate': flt(basic_rate),
+				'amount': flt(basic_rate * flt(cl[i].qty)),
+				'export_amount': flt(flt(cl[i].qty) * flt(cl[i].export_rate)),
+				'base_ref_rate': flt(base_ref_rate)
+			}, fname);
+		}
     }
     else if(n == 2){
       if(flt(cl[i].ref_rate) > 0)
         set_multiple(tname, cl[i].name, {'adj_rate': 100 - flt(flt(cl[i].basic_rate)  * 100 / (flt(cl[i].ref_rate) * flt(doc.conversion_rate)))}, fname);
       set_multiple(tname, cl[i].name, {'amount': flt(flt(cl[i].qty) * flt(cl[i].basic_rate)), 'export_rate': flt(flt(cl[i].basic_rate) / flt(doc.conversion_rate)), 'export_amount': flt((flt(cl[i].basic_rate) / flt(doc.conversion_rate)) * flt(cl[i].qty)) }, fname);
     }
-    else if(n == 3){
+    /*else if(n == 3){
       set_multiple(tname, cl[i].name, {'basic_rate': flt(flt(cl[i].export_rate) * flt(doc.conversion_rate))}, fname);
       set_multiple(tname, cl[i].name, {'amount' : flt(flt(cl[i].basic_rate) * flt(cl[i].qty)), 'export_amount': flt(flt(cl[i].export_rate) * flt(cl[i].qty))}, fname);
       if(cl[i].ref_rate > 0)
 		set_multiple(tname, cl[i].name, {'adj_rate': 100 - flt(flt(cl[i].export_rate) * 100 / flt(cl[i].ref_rate)), 'base_ref_rate': flt(flt(cl[i].ref_rate) * flt(doc.conversion_rate)) }, fname);
-    }
+    }*/
     net_total += flt(flt(cl[i].qty) * flt(cl[i].basic_rate));
   }
   doc.net_total = net_total;
@@ -389,20 +551,31 @@ cur_frm.cscript['Re-Calculate Values'] = function(doc, cdt, cdn) {
 }
 
 cur_frm.cscript['Calculate Charges'] = function(doc, cdt, cdn) {
-  var other_fname  = cur_frm.cscript.other_fname;
+	var other_fname  = cur_frm.cscript.other_fname;
 
-  var cl = getchildren('RV Tax Detail', doc.name, other_fname, doc.doctype);
-  for(var i = 0; i<cl.length; i++){
-    cl[i].total_tax_amount = 0;
-    cl[i].total_amount = 0;
-    cl[i].tax_amount = 0;                    // this is done to calculate other charges
-    cl[i].total = 0;
-    if(in_list(['On Previous Row Amount','On Previous Row Total'],cl[i].charge_type) && !cl[i].row_id){
-      alert("Please Enter Row on which amount needs to be calculated for row : "+cl[i].idx);
-      validated = false;
-    }
-  }
-  cur_frm.cscript.recalc(doc, 1);
+	var cl = getchildren('RV Tax Detail', doc.name, other_fname, doc.doctype);
+	for(var i = 0; i<cl.length; i++){
+		cl[i].total_tax_amount = 0;
+		cl[i].total_amount = 0;
+		cl[i].tax_amount = 0;                    // this is done to calculate other charges
+		cl[i].total = 0;
+		if(in_list(['On Previous Row Amount','On Previous Row Total'], cl[i].charge_type)) { 
+			if(!cl[i].row_id){
+				alert("Please Enter Row on which amount needs to be calculated for row : "+cl[i].idx);
+				validated = false;
+			} else if(cl[i].included_in_print_rate && cl[cl[i].row_id-1].charge_type=='Actual') {
+				msgprint("Row of type 'Actual' cannot be depended on for type '" + cl[i].charge_type + "'\
+					when using tax inclusive prices.<br />\
+					This will lead to incorrect values.<br /><br /> \
+					<b>Please specify correct value in 'Enter Row' column of <span style='color:red'>Row: "	
+					+ cl[i].idx + "</span> in Taxes table</b>");
+				validated = false;
+				cl[i].included_in_print_rate = 0;
+				refresh_field('included_in_print_rate', cl[i].name, other_fname);
+			}
+		}
+	}
+	cur_frm.cscript.recalc(doc, 1);
 }
 
 // Get Sales Partner Commission

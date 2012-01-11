@@ -47,6 +47,7 @@ $.extend(cur_frm.cscript, {
 			set_field_permlevel('description',2);
 			set_field_permlevel('raised_by',2);
 		}
+		refresh_field('status');
 	},
 	
 	//
@@ -83,8 +84,7 @@ $.extend(cur_frm.cscript, {
 	Send: function(doc, dt, dn) {
 		$c_obj([doc], 'send_response', '', function(r,rt) {
 			locals[dt][dn].new_response = '';
-			refresh_field('new_response');
-			cs.make_listing(doc);
+			cur_frm.refresh();
 		});
 	},
 	

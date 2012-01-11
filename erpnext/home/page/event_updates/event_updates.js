@@ -583,7 +583,11 @@ HomeStatusBar = function() {
 	
 	this.render = function(r) {
 		this.wrapper.innerHTML = '';
-		this.span = $a(this.wrapper, 'span', 'link_type', {fontWeight:'bold'});
+		this.profile_settings = $a($a(this.wrapper, 'p'), 'span', 'link_type', {fontWeight:'bold'});
+		this.profile_settings.innerHTML = user_fullname + ' (Profile Settings)';
+		this.profile_settings.onclick = function() { loadpage('profile-settings'); }
+
+		this.span = $a($a(this.wrapper, 'p'), 'span', 'link_type', {fontWeight:'bold'});
 		this.span.onclick = function() { loadpage('My Company')	}
 		
 		if(r.unread_messages) {

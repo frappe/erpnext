@@ -3,7 +3,7 @@
 	<meta charset="utf-8">
 	<title>ERPNext</title>
 	<meta name="author" content="">
-	<script type="text/javascript">window._version_number="348"
+	<script type="text/javascript">window._version_number="29"
 
 wn={}
 wn.provide=function(namespace){var nsl=namespace.split('.');var l=nsl.length;var parent=window;for(var i=0;i<l;i++){var n=nsl[i];if(!parent[n]){parent[n]={}}
@@ -12,11 +12,8 @@ wn.provide('wn.settings');wn.provide('wn.ui');wn.xmlhttp={request:function(){if(
 return new XMLHttpRequest();else if(window.ActiveXObject)
 return new ActiveXObject("MsXml2.XmlHttp");},complete:function(req,callback,url){if(req.status==200||req.status==304){callback(req.responseText);}else{alert(url+' request error: '+req.statusText+' ('+req.status+')');}},get:function(url,callback,args,async){if(async===null)async=true;var req=wn.xmlhttp.request();req.onreadystatechange=function(){if(req.readyState==4){wn.xmlhttp.complete(req,callback,url)}}
 var sep=((args&&args.indexOf('?'))==-1)?'?':'&';var u=args?(url+sep+args):url;req.open('GET',u,async);req.send(null);if(!async){wn.xmlhttp.complete(req,callback,url)}}}
-wn.versions={is_latest:function(){if(window._version_number==(localStorage?localStorage['_version_number']:null)){return true;}
-return false;},get_diff:function(){if(!localStorage)return;wn.xmlhttp.get('index.cgi',function(txt){r=JSON.parse(txt);if(r.exc){alert(r.exc);}
-wn.versions.set(r.message);},'cmd=get_diff&version_number='+localStorage['_version_number'],false);},set:function(diff){for(var i=0;i<diff.length;i++){localStorage.removeItem(diff[i]);}
-localStorage['_version_number']=_version_number;},check:function(){if(localStorage&&!localStorage['_version_number']){localStorage['_version_number']=_version_number;return;}
-if(!wn.versions.is_latest())wn.versions.get_diff();}}
+wn.versions={check:function(){if(localStorage){if(window._version_number==-1||parseInt(localStorage._version_number)!=parseInt(window._version_number)){localStorage.clear();}
+localStorage.setItem('_version_number',window._version_number);}}}
 wn.assets={executed_:{},exists:function(src){if('localStorage'in window&&localStorage.getItem(src))
 return true},add:function(src,txt){if('localStorage'in window){localStorage.setItem(src,txt);}},get:function(src){return localStorage.getItem(src);},extn:function(src){if(src.indexOf('?')!=-1){src=src.split('?').slice(-1)[0];}
 return src.split('.').slice(-1)[0];},html_src:function(src){if(src.indexOf('/')!=-1){var t=src.split('/').slice(0,-1);t.push('src');t=t.join('/')+'/'+a.split('/').slice(-1)[0];}else{var t='src/'+src;}
@@ -74,7 +71,7 @@ throw new SyntaxError('JSON.parse');};}}());wn.versions.check();wn.require("lib/
 
 		<!--static (no script) content-->
 		<div class="no_script">
-			
+			No content
 		</div>
 	</div>
 	<script>wn.require('js/app.js');</script>

@@ -40,19 +40,36 @@ class SupportMailbox(POP3Mailbox):
 		else:
 			content, content_type = mail.html_content, 'text/html'
 			
-		thread_id = mail.get_thread_id()
+		thread_list = mail.get_thread_id()
 
-		if webnotes.conn.exists('Support Ticket', thread_id):
-			from webnotes.model.code import get_obj
-			
-			st = get_obj('Support Ticket', thread_id)
-			st.make_response_record(content, mail.mail['From'], content_type)
-			webnotes.conn.set(st.doc, 'status', 'Open')
-			update_feed(st.doc)
-			# extract attachments
-			self.save_attachments(st.doc, mail.attachments)
-			return
+
+		email_id = mail.mail['From']
+		if "<" in mail.mail['From']:
+			import re
+			re_result = re.findall('(?<=\<)(\S+)(?=\>)', mail.mail['From'])
+			if re_result and re_result[0]: email_id = re_result[0]
+
+
+		for thread_id in thread_list:
+			exists = webnotes.conn.sql("""\
+				SELECT name
+				FROM `tabSupport Ticket`
+				WHERE name=%s AND raised_by REGEXP %s
+				""" , (thread_id, '(' + email_id + ')'))
+			if exists and exists[0] and exists[0][0]:
+				from webnotes.model.code import get_obj
 				
+				st = get_obj('Support Ticket', thread_id)
+				st.make_response_record(content, mail.mail['From'], content_type)
+				webnotes.conn.set(st.doc, 'status', 'Open')
+				update_feed(st.doc)
+				# extract attachments
+				self.save_attachments(st.doc, mail.attachments)
+				return
+				
+		opts = webnotes.conn.sql("""\
+			SELECT options FROM tabDocField
+			WHERE parent='Support Ticket' AND fieldname='naming_series'""")
 		# new ticket
 		from webnotes.model.doc import Document
 		d = Document('Support Ticket')
@@ -61,6 +78,7 @@ class SupportMailbox(POP3Mailbox):
 		d.raised_by = mail.mail['From']
 		d.content_type = content_type
 		d.status = 'Open'
+		d.naming_series = (opts and opts[0] and opts[0][0] and opts[0][0].split("\n")[0]) or 'SUP'
 		try:
 			d.save(1)
 

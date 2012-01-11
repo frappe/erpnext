@@ -63,7 +63,7 @@ class DocType:
 		return sql("select name from `tabCost Center` where parent_cost_center = %s and docstatus != 2", self.doc.name)
 
 	#-------------------------------------------------------------------------
-	def validate(self): 
+	def validate(self):
 		"""
 			Cost Center name must be unique
 		"""
@@ -88,9 +88,6 @@ class DocType:
 	#-------------------------------------------------------------------------
 	def on_update(self):
 		self.update_nsm_model()
-		
-	def check_if_child_exists(self):
-		return sql("select name from `tabCost Center` where parent_cost_center = %s and docstatus != 2", self.doc.name)
 		
 	# On Trash
 	#-------------------------------------------------------------------------

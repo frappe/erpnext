@@ -5,7 +5,7 @@
 	{
 		'creation': '2011-04-18 15:58:20',
 		'docstatus': 0,
-		'modified': '2011-12-22 19:03:44',
+		'modified': '2012-01-09 16:52:43',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
@@ -21,7 +21,7 @@
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1324367019',
+		'_last_update': '1326105502',
 		'colour': 'White:FFF',
 		'default_print_format': 'Standard',
 		'doctype': 'DocType',
@@ -37,7 +37,7 @@
 		'show_in_menu': 0,
 		'subject': 'To %(customer_name)s on %(transaction_date)s | %(per_billed)s% billed',
 		'tag_fields': 'billing_status',
-		'version': 460
+		'version': 463
 	},
 
 	# These values are common for all DocFormat
@@ -703,7 +703,7 @@
 		'oldfieldname': 'net_total',
 		'oldfieldtype': 'Currency',
 		'permlevel': 1,
-		'print_hide': 1,
+		'print_hide': 0,
 		'reqd': 0,
 		'width': '150px'
 	},
@@ -885,7 +885,7 @@
 		'oldfieldname': 'grand_total_export',
 		'oldfieldtype': 'Currency',
 		'permlevel': 1,
-		'print_hide': 1,
+		'print_hide': 0,
 		'reqd': 0,
 		'width': '150px'
 	},
@@ -900,7 +900,7 @@
 		'oldfieldname': 'rounded_total_export',
 		'oldfieldtype': 'Currency',
 		'permlevel': 1,
-		'print_hide': 1,
+		'print_hide': 0,
 		'width': '150px'
 	},
 

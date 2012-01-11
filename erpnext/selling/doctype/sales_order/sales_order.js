@@ -52,7 +52,7 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 
       // indent
       if(doc.order_type != 'Maintenance')
-        cur_frm.add_custom_button('Make Indent', cur_frm.cscript['Make Indent']);
+        cur_frm.add_custom_button('Make ' + get_doctype_label('Indent'), cur_frm.cscript['Make Purchase Requisition']);
   	  
       // sales invoice
   	  if(doc.per_billed < 100)
@@ -242,7 +242,7 @@ cur_frm.cscript['Make Maintenance Visit'] = function() {
 
 // make indent
 // ================================================================================================
-cur_frm.cscript['Make Indent'] = function() {
+cur_frm.cscript['Make Purchase Requisition'] = function() {
   var doc = cur_frm.doc;
   if (doc.docstatus == 1) { 
   n = createLocal("Indent");
