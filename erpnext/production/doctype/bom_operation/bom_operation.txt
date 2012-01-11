@@ -5,14 +5,15 @@
 	{
 		'creation': '2010-08-08 17:08:53',
 		'docstatus': 0,
-		'modified': '2010-09-20 14:06:57',
-		'modified_by': 'umair@iwebnotes.com',
+		'modified': '2011-12-28 12:28:02',
+		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
 		'colour': 'White:FFF',
+		'default_print_format': 'Standard',
 		'doctype': 'DocType',
 		'istable': 1,
 		'module': 'Production',
@@ -20,7 +21,7 @@
 		'section_style': 'Simple',
 		'server_code_error': ' ',
 		'show_in_menu': 0,
-		'version': 6
+		'version': 8
 	},
 
 	# These values are common for all DocField
@@ -29,7 +30,8 @@
 		'name': '__common__',
 		'parent': 'BOM Operation',
 		'parentfield': 'fields',
-		'parenttype': 'DocType'
+		'parenttype': 'DocType',
+		'permlevel': 0
 	},
 
 	# These values are common for all DocPerm
@@ -52,7 +54,6 @@
 	# DocPerm
 	{
 		'doctype': 'DocPerm',
-		'idx': 1,
 		'permlevel': 0,
 		'write': 1
 	},
@@ -60,7 +61,6 @@
 	# DocPerm
 	{
 		'doctype': 'DocPerm',
-		'idx': 2,
 		'permlevel': 1
 	},
 
@@ -69,11 +69,9 @@
 		'doctype': 'DocField',
 		'fieldname': 'operation_no',
 		'fieldtype': 'Data',
-		'idx': 1,
 		'label': 'Operation No',
 		'oldfieldname': 'operation_no',
 		'oldfieldtype': 'Data',
-		'permlevel': 0,
 		'reqd': 1
 	},
 
@@ -82,24 +80,10 @@
 		'doctype': 'DocField',
 		'fieldname': 'opn_description',
 		'fieldtype': 'Text',
-		'idx': 2,
 		'label': 'Opn Description',
 		'oldfieldname': 'opn_description',
 		'oldfieldtype': 'Text',
-		'permlevel': 0,
 		'reqd': 1
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldname': 'details',
-		'fieldtype': 'Data',
-		'idx': 3,
-		'label': 'Details',
-		'oldfieldname': 'details',
-		'oldfieldtype': 'Data',
-		'permlevel': 0
 	},
 
 	# DocField
@@ -107,14 +91,11 @@
 		'doctype': 'DocField',
 		'fieldname': 'workstation',
 		'fieldtype': 'Link',
-		'idx': 4,
 		'label': 'Workstation',
 		'oldfieldname': 'workstation',
 		'oldfieldtype': 'Link',
 		'options': 'Workstation',
-		'permlevel': 0,
-		'reqd': 1,
-		'search_index': 0,
+		'reqd': 0,
 		'trigger': 'Client'
 	},
 
@@ -123,25 +104,10 @@
 		'doctype': 'DocField',
 		'fieldname': 'hour_rate',
 		'fieldtype': 'Currency',
-		'idx': 5,
 		'label': 'Hour Rate',
 		'oldfieldname': 'hour_rate',
 		'oldfieldtype': 'Currency',
-		'permlevel': 1,
 		'reqd': 0
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldname': 'workstation_capacity',
-		'fieldtype': 'Currency',
-		'hidden': 1,
-		'idx': 6,
-		'label': 'Workstation Capacity',
-		'oldfieldname': 'workstation_capacity',
-		'oldfieldtype': 'Currency',
-		'permlevel': 0
 	},
 
 	# DocField
@@ -149,11 +115,9 @@
 		'doctype': 'DocField',
 		'fieldname': 'time_in_mins',
 		'fieldtype': 'Currency',
-		'idx': 7,
 		'label': 'Operation Time (mins)',
 		'oldfieldname': 'time_in_mins',
 		'oldfieldtype': 'Currency',
-		'permlevel': 0,
 		'reqd': 0
 	},
 
@@ -163,11 +127,9 @@
 		'doctype': 'DocField',
 		'fieldname': 'operating_cost',
 		'fieldtype': 'Currency',
-		'idx': 8,
 		'label': 'Operating Cost',
 		'oldfieldname': 'operating_cost',
 		'oldfieldtype': 'Currency',
-		'permlevel': 1,
 		'reqd': 0
 	}
 ]

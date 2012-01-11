@@ -5,15 +5,16 @@
 	{
 		'creation': '2010-08-08 17:09:14',
 		'docstatus': 0,
-		'modified': '2011-08-31 10:03:21',
+		'modified': '2012-01-06 13:33:25',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1313485457',
+		'_last_update': '1325668998',
 		'colour': 'White:FFF',
+		'default_print_format': 'Standard',
 		'doctype': 'DocType',
 		'in_create': 0,
 		'module': 'Production',
@@ -21,7 +22,7 @@
 		'section_style': 'Tabbed',
 		'server_code_error': ' ',
 		'show_in_menu': 0,
-		'version': 180
+		'version': 189
 	},
 
 	# These values are common for all DocField
@@ -95,38 +96,9 @@
 	# DocField
 	{
 		'doctype': 'DocField',
-		'fieldtype': 'Section Break',
-		'label': 'Production Order',
-		'oldfieldtype': 'Section Break',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'colour': 'White:FFF',
-		'description': 'The date on which current entry is made in system.',
-		'doctype': 'DocField',
-		'fieldname': 'transaction_date',
-		'fieldtype': 'Date',
-		'label': 'Transaction Date',
-		'oldfieldname': 'transaction_date',
-		'oldfieldtype': 'Date',
+		'fieldtype': 'Column Break',
 		'permlevel': 0,
-		'reqd': 1
-	},
-
-	# DocField
-	{
-		'colour': 'White:FFF',
-		'description': 'The date on which current entry will get or has actually executed.',
-		'doctype': 'DocField',
-		'fieldname': 'posting_date',
-		'fieldtype': 'Date',
-		'label': 'Posting Date',
-		'oldfieldname': 'posting_date',
-		'oldfieldtype': 'Date',
-		'permlevel': 0,
-		'reqd': 1
+		'width': '50%'
 	},
 
 	# DocField
@@ -160,6 +132,17 @@
 
 	# DocField
 	{
+		'doctype': 'DocField',
+		'fieldname': 'stock_uom',
+		'fieldtype': 'Data',
+		'label': 'Stock UOM',
+		'oldfieldname': 'stock_uom',
+		'oldfieldtype': 'Data',
+		'permlevel': 1
+	},
+
+	# DocField
+	{
 		'colour': 'White:FFF',
 		'description': 'Bill of Material which was considered for manufacturing the production item.',
 		'doctype': 'DocField',
@@ -176,21 +159,6 @@
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'origin',
-		'fieldtype': 'Select',
-		'in_filter': 1,
-		'label': 'Origin',
-		'no_copy': 1,
-		'oldfieldname': 'origin',
-		'oldfieldtype': 'Select',
-		'options': 'Manual\nMRP',
-		'permlevel': 1,
-		'reqd': 1
-	},
-
-	# DocField
-	{
 		'colour': 'White:FFF',
 		'description': 'Quantity of item for which Production Order is raised.',
 		'doctype': 'DocField',
@@ -201,78 +169,6 @@
 		'oldfieldtype': 'Currency',
 		'permlevel': 0,
 		'reqd': 1
-	},
-
-	# DocField
-	{
-		'description': 'Select name of the project if Production Order need to be created against any project',
-		'doctype': 'DocField',
-		'fieldname': 'project_name',
-		'fieldtype': 'Link',
-		'in_filter': 1,
-		'label': 'Project Name',
-		'oldfieldname': 'project_name',
-		'oldfieldtype': 'Link',
-		'options': 'Project',
-		'permlevel': 0,
-		'trigger': 'Client'
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldname': 'amended_from',
-		'fieldtype': 'Data',
-		'label': 'Amended From',
-		'oldfieldname': 'amended_from',
-		'oldfieldtype': 'Data',
-		'permlevel': 1
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldname': 'amendment_date',
-		'fieldtype': 'Date',
-		'label': 'Amendment Date',
-		'oldfieldname': 'amendment_date',
-		'oldfieldtype': 'Date',
-		'permlevel': 1
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldtype': 'Column Break',
-		'oldfieldtype': 'Column Break',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldname': 'stock_uom',
-		'fieldtype': 'Data',
-		'label': 'Stock UOM',
-		'oldfieldname': 'stock_uom',
-		'oldfieldtype': 'Data',
-		'permlevel': 1
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldname': 'status',
-		'fieldtype': 'Select',
-		'in_filter': 1,
-		'label': 'Status',
-		'no_copy': 1,
-		'oldfieldname': 'status',
-		'oldfieldtype': 'Select',
-		'options': '\nDraft\nSubmitted\nStopped\nIn Process\nCompleted\nCancelled',
-		'permlevel': 1,
-		'reqd': 1,
-		'search_index': 1
 	},
 
 	# DocField
@@ -309,18 +205,111 @@
 
 	# DocField
 	{
+		'doctype': 'DocField',
+		'fieldname': 'amended_from',
+		'fieldtype': 'Data',
+		'label': 'Amended From',
+		'no_copy': 1,
+		'oldfieldname': 'amended_from',
+		'oldfieldtype': 'Data',
+		'permlevel': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'amendment_date',
+		'fieldtype': 'Date',
+		'label': 'Amendment Date',
+		'no_copy': 1,
+		'oldfieldname': 'amendment_date',
+		'oldfieldtype': 'Date',
+		'permlevel': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Column Break',
+		'oldfieldtype': 'Column Break',
+		'permlevel': 0,
+		'width': '50%'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'description': 'The date on which current entry will get or has actually executed.',
+		'doctype': 'DocField',
+		'fieldname': 'posting_date',
+		'fieldtype': 'Date',
+		'label': 'Posting Date',
+		'oldfieldname': 'posting_date',
+		'oldfieldtype': 'Date',
+		'permlevel': 0,
+		'reqd': 1
+	},
+
+	# DocField
+	{
 		'colour': 'White:FFF',
 		'description': 'Select "Yes" if stock is maintained and tracked for sub - assembly items.',
 		'doctype': 'DocField',
 		'fieldname': 'consider_sa_items',
 		'fieldtype': 'Select',
 		'in_filter': 1,
-		'label': 'Consider SA Items',
+		'label': 'Consider SA Items as raw material',
 		'oldfieldname': 'consider_sa_items',
 		'oldfieldtype': 'Select',
 		'options': '\nYes\nNo',
 		'permlevel': 1,
 		'reqd': 1
+	},
+
+	# DocField
+	{
+		'description': 'Select name of the project if Production Order need to be created against any project',
+		'doctype': 'DocField',
+		'fieldname': 'project_name',
+		'fieldtype': 'Link',
+		'in_filter': 1,
+		'label': 'Project Name',
+		'oldfieldname': 'project_name',
+		'oldfieldtype': 'Link',
+		'options': 'Project',
+		'permlevel': 0,
+		'trigger': 'Client'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'origin',
+		'fieldtype': 'Select',
+		'in_filter': 1,
+		'label': 'Origin',
+		'no_copy': 1,
+		'oldfieldname': 'origin',
+		'oldfieldtype': 'Select',
+		'options': 'Manual\nMRP',
+		'permlevel': 1,
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'status',
+		'fieldtype': 'Select',
+		'in_filter': 1,
+		'label': 'Status',
+		'no_copy': 1,
+		'oldfieldname': 'status',
+		'oldfieldtype': 'Select',
+		'options': '\nDraft\nSubmitted\nStopped\nIn Process\nCompleted\nCancelled',
+		'permlevel': 1,
+		'reqd': 1,
+		'search_index': 1
 	},
 
 	# DocField
@@ -361,78 +350,5 @@
 		'options': 'link:Fiscal Year',
 		'permlevel': 0,
 		'reqd': 1
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldtype': 'Section Break',
-		'label': 'Next Steps',
-		'oldfieldtype': 'Section Break',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'allow_on_submit': 1,
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldtype': 'Button',
-		'label': 'Material Transfer',
-		'oldfieldtype': 'Button',
-		'permlevel': 0,
-		'trigger': 'Client'
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldtype': 'Column Break',
-		'oldfieldtype': 'Column Break',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'allow_on_submit': 1,
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldtype': 'Button',
-		'label': 'Backflush',
-		'oldfieldtype': 'Button',
-		'permlevel': 0,
-		'trigger': 'Client'
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldtype': 'Column Break',
-		'oldfieldtype': 'Column Break',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'allow_on_submit': 1,
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldtype': 'Button',
-		'label': 'Stop Production Order',
-		'oldfieldtype': 'Button',
-		'permlevel': 0,
-		'trigger': 'Client'
-	},
-
-	# DocField
-	{
-		'allow_on_submit': 1,
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldtype': 'Button',
-		'label': 'Unstop Production Order',
-		'oldfieldtype': 'Button',
-		'permlevel': 0,
-		'trigger': 'Client'
 	}
 ]

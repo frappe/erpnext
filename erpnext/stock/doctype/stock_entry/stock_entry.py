@@ -73,6 +73,7 @@ class DocType:
 		return ret
 
 		
+
 	# get stock and incoming rate on posting date
 	# ---------------------------------------------
 	def get_stock_and_rate(self, bom_no = ''):
@@ -87,7 +88,8 @@ class DocType:
 			# get incoming rate
 			if not flt(d.incoming_rate):
 				d.incoming_rate = self.get_incoming_rate(d.item_code, d.s_warehouse, self.doc.posting_date, self.doc.posting_time, d.transfer_qty, d.serial_no, d.fg_item, bom_no)
-			
+
+
 	# Get stock qty on any date
 	# ---------------------------
 	def get_as_on_stock(self, item, wh, dt, tm):
@@ -97,29 +99,47 @@ class DocType:
 		qty = flt(prev_sle.get('bin_aqat', 0))
 		return qty
 
+
 	# Get incoming rate
 	# -------------------
-	def get_incoming_rate(self, item, wh, dt, tm, qty = 0, serial_no = '', fg_item = 'No', bom_no = ''):
+	def get_incoming_rate(self, item, wh, dt, tm, qty = 0, serial_no = '', fg_item = 0, bom_no = ''):
 		in_rate = 0
-		if fg_item == 'Yes':
+		if fg_item:
 			# re-calculate cost for production item from bom
 			get_obj('BOM Control').calculate_cost(bom_no)
-			in_rate = get_value('Bill Of Materials', bom_no, 'cost_as_per_mar')
+			in_rate = flt(get_value('Bill Of Materials', bom_no, 'total_cost'))
 		elif wh:
 			in_rate = get_obj('Valuation Control').get_incoming_rate(dt, tm, item, wh, qty, serial_no)
 		
 		return in_rate
 
-	# makes dict of unique items with it's qty
-	#-----------------------------------------
+
+
 	def make_items_dict(self, items_list):
-		# items_list = [[item_name, qty]]
+		"""makes dict of unique items with it's qty"""
 		for i in items_list:
 			if self.item_dict.has_key(i[0]):
 				self.item_dict[i[0]][0] = flt(self.item_dict[i[0]][0]) + flt(i[1])
 			else:
 				self.item_dict[i[0]] = [flt(i[1]), cstr(i[2]), cstr(i[3])]
 				
+
+
+	def update_only_remaining_qty(self):
+		""" Only pending raw material to be issued to shop floor """
+		already_issued_item = {}
+		for t in sql("""select t1.item_code, sum(t1.qty) from `tabStock Entry Detail` t1, `tabStock Entry` t2
+				where t1.parent = t2.name and t2.production_order = %s and t2.process = 'Material Transfer' 
+				and t2.docstatus = 1 group by t1.item_code""", self.doc.production_order):
+			already_issued_item[t[0]] = flt(t[1])
+
+		for d in self.item_dict.keys():
+			self.item_dict[d][0] -= already_issued_item.get(d, 0)
+			if self.item_dict[d][0] <= 0:
+				del self.item_dict[d]
+
+
+
 	def get_raw_materials(self,pro_obj):
 		""" 
 			get all items from flat bom except 
@@ -130,7 +150,6 @@ class DocType:
 		if pro_obj.doc.consider_sa_items == 'Yes':
 			# Get all raw materials considering SA items as raw materials, 
 			# so no childs of SA items
-			
 			fl_bom_sa_items = sql("""
 				select item_code, ifnull(sum(qty_consumed_per_unit), 0) * '%s', description, stock_uom 
 				from `tabBOM Material` 
@@ -138,12 +157,10 @@ class DocType:
 				group by item_code
 			""" % ((self.doc.process == 'Backflush') and flt(self.doc.fg_completed_qty) \
 					 or flt(pro_obj.doc.qty), cstr(pro_obj.doc.bom_no)))
-			
 			self.make_items_dict(fl_bom_sa_items)
-		
-		if pro_obj.doc.consider_sa_items == 'No':
-			# get all raw materials with sub assembly childs
-					
+
+		else:
+			# get all raw materials with sub assembly childs					
 			fl_bom_sa_child_item = sql("""
 				select 
 					item_code,ifnull(sum(qty_consumed_per_unit),0)*%s as qty,description,stock_uom 
@@ -152,16 +169,19 @@ class DocType:
 						select distinct fb.name, fb.description, fb.item_code, fb.qty_consumed_per_unit, fb.stock_uom 
 						from `tabFlat BOM Detail` fb,`tabItem` it 
 						where it.name = fb.item_code and ifnull(it.is_pro_applicable, 'No') = 'No'
-						and ifnull(it.is_sub_contracted_item, 'No') = 'No' 
-						and fb.docstatus<2 and fb.parent=%s
+						and ifnull(it.is_sub_contracted_item, 'No') = 'No' and fb.docstatus<2 and fb.parent=%s
 					) a
 				group by item_code,stock_uom
 			""" , ((self.doc.process == 'Backflush') and flt(self.doc.fg_completed_qty) \
 					or flt(pro_obj.doc.qty), cstr(pro_obj.doc.bom_no)))
 			
-			
-			
 			self.make_items_dict(fl_bom_sa_child_item)
+
+		# Update only qty remaining to be issued for production
+		if self.doc.process == 'Material Transfer':
+			self.update_only_remaining_qty()
+
+
 
 	def add_to_stock_entry_detail(self, pro_obj, item_dict, fg_item = 0):
 		sw, tw = '', ''
@@ -174,7 +194,7 @@ class DocType:
 			se_child = addchild(self.doc, 'mtn_details', 'Stock Entry Detail', 0, self.doclist)
 			se_child.s_warehouse = sw
 			se_child.t_warehouse = tw
-			se_child.fg_item	= fg_item
+			se_child.fg_item = fg_item
 			se_child.item_code = cstr(d)
 			se_child.description = item_dict[d][1]
 			se_child.uom = item_dict[d][2]
@@ -184,7 +204,8 @@ class DocType:
 			se_child.transfer_qty = flt(item_dict[d][0])
 			se_child.conversion_factor = 1.00
 
-	
+
+
 	# get items 
 	#------------------
 	def get_items(self):
@@ -201,6 +222,7 @@ class DocType:
 			item_dict = {cstr(pro_obj.doc.production_item) : [self.doc.fg_completed_qty, pro_obj.doc.description, pro_obj.doc.stock_uom]}
 			self.add_to_stock_entry_detail(pro_obj, item_dict, fg_item = 1)
 
+
 	def validate_transfer_qty(self):
 		for d in getlist(self.doclist, 'mtn_details'):
 			if flt(d.transfer_qty) <= 0:
@@ -210,12 +232,14 @@ class DocType:
 				msgprint("Transfer Quantity is more than Available Qty at Row No " + cstr(d.idx))
 				raise Exception
 
+
 	def calc_amount(self):
 		total_amount = 0
 		for d in getlist(self.doclist, 'mtn_details'):
 			d.amount = flt(d.transfer_qty) * flt(d.incoming_rate)
 			total_amount += flt(d.amount)
 		self.doc.total_amount = flt(total_amount)
+
 
 	def add_to_values(self, d, wh, qty, is_cancelled):
 		self.values.append({
@@ -269,8 +293,7 @@ class DocType:
 				msgprint("error:Already Produced Qty for %s is %s and maximum allowed Qty is %s" % (pro_obj.doc.production_item, cstr(pro_obj.doc.produced_qty) or 0.00 , cstr(pro_obj.doc.qty)))
 				raise Exception
 	
-	# Validate
-	# ------------------
+
 	def validate(self):
 		sl_obj = get_obj("Stock Ledger", "Stock Ledger")
 		sl_obj.scrub_serial_nos(self)
@@ -280,17 +303,19 @@ class DocType:
 			pro_obj = get_obj('Production Order', self.doc.production_order)
 		self.validate_for_production_order(pro_obj)
 		self.get_stock_and_rate(pro_obj and pro_obj.doc.bom_no or '')
-		self.validate_incoming_rate()
 		self.validate_warehouse(pro_obj)
+		self.validate_incoming_rate()
 		self.calc_amount()
 		get_obj('Sales Common').validate_fiscal_year(self.doc.fiscal_year,self.doc.posting_date,'Posting Date')
-				
+		
+	
 	# If target warehouse exists, incoming rate is mandatory
 	# --------------------------------------------------------
 	def validate_incoming_rate(self):
 		for d in getlist(self.doclist, 'mtn_details'):
 			if not flt(d.incoming_rate) and d.t_warehouse:
 				msgprint("Rate is mandatory for Item: %s at row %s" % (d.item_code, d.idx), raise_exception=1)
+
 
 	# Validate warehouse
 	# -----------------------------------
@@ -336,7 +361,7 @@ class DocType:
 					msgprint(" Target Warehouse should be same as WIP Warehouse %s in Production Order %s at Row No %s" % (cstr(pro_obj.doc.wip_warehouse), cstr(pro_obj.doc.name), cstr(d.idx)) )
 					raise Exception
 				if not cstr(d.s_warehouse):
-					msgprint("Please Enter Source Warehouse at Row No %s is mandatory." % (cstr(d.idx)))
+					msgprint("Please Enter Source Warehouse at Row No %s." % (cstr(d.idx)))
 					raise Exception
 			if self.doc.process == 'Backflush':
 				if flt(d.fg_item):
@@ -362,24 +387,26 @@ class DocType:
 			msgprint("The Total of FG Qty %s in Stock Entry Detail do not match with FG Completed Qty %s" % (flt(fg_qty), flt(self.doc.fg_completed_qty)))
 			raise Exception
 
+
 	def update_production_order(self, is_submit):
 		if self.doc.production_order:
 			pro_obj = get_obj("Production Order", self.doc.production_order)
 			if flt(pro_obj.doc.docstatus) != 1:
-				msgprint("One cannot do any transaction against Production Order : %s, as it's not submitted" % (pro_obj.doc.name))
+				msgprint("You cannot do any transaction against Production Order : %s, as it's not submitted" % (pro_obj.doc.name))
 				raise Exception
 			if pro_obj.doc.status == 'Stopped':
-				msgprint("One cannot do any transaction against Production Order : %s, as it's status is 'Stopped'" % (pro_obj.doc.name))
+				msgprint("You cannot do any transaction against Production Order : %s, as it's status is 'Stopped'" % (pro_obj.doc.name))
 				raise Exception
 			if getdate(pro_obj.doc.posting_date) > getdate(self.doc.posting_date):
 				msgprint("Posting Date of Stock Entry cannot be before Posting Date of Production Order "+ cstr(self.doc.production_order))
 				raise Exception
 			if self.doc.process == 'Backflush':
 				pro_obj.doc.produced_qty = flt(pro_obj.doc.produced_qty) + (is_submit and 1 or -1 ) * flt(self.doc.fg_completed_qty)
-				get_obj('Warehouse',	pro_obj.doc.fg_warehouse).update_bin(0, 0, 0, 0, (is_submit and 1 or -1 ) *	flt(self.doc.fg_completed_qty), pro_obj.doc.production_item, now())
-			pro_obj.doc.status = (flt(pro_obj.doc.qty) == flt(pro_obj.doc.produced_qty)) and	'Completed' or 'In Process'
+				get_obj('Warehouse', pro_obj.doc.fg_warehouse).update_bin(0, 0, 0, 0, (is_submit and 1 or -1 ) * flt(self.doc.fg_completed_qty), pro_obj.doc.production_item, now())
+			pro_obj.doc.status = (flt(pro_obj.doc.qty) == flt(pro_obj.doc.produced_qty)) and 'Completed' or 'In Process'
 			pro_obj.doc.save()
 	
+
 	# Create / Update Serial No
 	# ----------------------------------
 	def update_serial_no(self, is_submit):
@@ -400,8 +427,7 @@ class DocType:
 					if self.doc.purpose == 'Purchase Return':
 						delete_doc("Serial No", serial_no)
 
-	# On Submit
-	# ------------------
+
 	def on_submit(self):
 		self.validate_transfer_qty()
 		# Check for Approving Authority
@@ -411,14 +437,14 @@ class DocType:
 		# update Production Order
 		self.update_production_order(1)
 
-	# On Cancel
-	# -------------------
+
 	def on_cancel(self):
 		self.update_serial_no(0)
 		self.update_stock_ledger(1)
 		# update Production Order
 		self.update_production_order(0)
 		
+
 	def get_cust_values(self):
 		tbl = self.doc.delivery_note_no and 'Delivery Note' or 'Receivable Voucher'
 		record_name = self.doc.delivery_note_no or self.doc.sales_invoice_no

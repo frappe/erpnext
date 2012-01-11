@@ -5,7 +5,7 @@
 	{
 		'creation': '2010-08-08 17:09:02',
 		'docstatus': 0,
-		'modified': '2011-11-10 14:21:40',
+		'modified': '2012-01-11 14:32:31',
 		'modified_by': 'Administrator',
 		'owner': 'jai@webnotestech.com'
 	},
@@ -23,7 +23,7 @@
 		'section_style': 'Simple',
 		'server_code_error': ' ',
 		'show_in_menu': 0,
-		'version': 18
+		'version': 24
 	},
 
 	# These values are common for all DocField
@@ -67,48 +67,8 @@
 	# DocField
 	{
 		'doctype': 'DocField',
-		'fieldname': 'moving_avg_rate',
-		'fieldtype': 'Currency',
-		'label': 'Valuation Rate',
-		'oldfieldname': 'moving_avg_rate',
-		'oldfieldtype': 'Currency'
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldname': 'amount_as_per_mar',
-		'fieldtype': 'Currency',
-		'label': 'Amount As Per Valuation Rate',
-		'oldfieldname': 'amount_as_per_mar',
-		'oldfieldtype': 'Currency'
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldname': 'last_purchase_rate',
-		'fieldtype': 'Currency',
-		'label': 'Last Purchase Rate',
-		'oldfieldname': 'last_purchase_rate',
-		'oldfieldtype': 'Currency'
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldname': 'amount_as_per_lpr',
-		'fieldtype': 'Currency',
-		'label': 'Amount As Per LPR',
-		'oldfieldname': 'amount_as_per_lpr',
-		'oldfieldtype': 'Currency'
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
 		'fieldname': 'qty',
-		'fieldtype': 'Currency',
+		'fieldtype': 'Float',
 		'label': 'Qty',
 		'oldfieldname': 'qty',
 		'oldfieldtype': 'Currency'
@@ -117,9 +77,9 @@
 	# DocField
 	{
 		'doctype': 'DocField',
-		'fieldname': 'standard_rate',
-		'fieldtype': 'Currency',
-		'label': 'Standard Rate',
+		'fieldname': 'rate',
+		'fieldtype': 'Float',
+		'label': 'Rate',
 		'oldfieldname': 'standard_rate',
 		'oldfieldtype': 'Currency'
 	},
@@ -127,21 +87,11 @@
 	# DocField
 	{
 		'doctype': 'DocField',
-		'fieldname': 'amount_as_per_sr',
-		'fieldtype': 'Currency',
-		'label': 'Amount As Per SR',
+		'fieldname': 'amount',
+		'fieldtype': 'Float',
+		'label': 'Amount',
 		'oldfieldname': 'amount_as_per_sr',
 		'oldfieldtype': 'Currency'
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldname': 'qty_consumed_per_unit',
-		'fieldtype': 'Float',
-		'label': 'Qty Consumed Per Unit',
-		'oldfieldname': 'qty_consumed_per_unit',
-		'oldfieldtype': 'Float'
 	},
 
 	# DocField
@@ -158,45 +108,31 @@
 	# DocField
 	{
 		'doctype': 'DocField',
-		'fieldname': 'flat_bom_no',
-		'fieldtype': 'Data',
-		'hidden': 1,
-		'label': 'Flat BOM No',
-		'oldfieldname': 'flat_bom_no',
-		'oldfieldtype': 'Data'
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldname': 'bom_mat_no',
-		'fieldtype': 'Data',
-		'hidden': 0,
-		'label': 'BOM Mat No',
-		'oldfieldname': 'bom_mat_no',
-		'oldfieldtype': 'Data'
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
 		'fieldname': 'parent_bom',
 		'fieldtype': 'Link',
 		'hidden': 0,
 		'label': 'Parent BOM',
 		'oldfieldname': 'parent_bom',
-		'oldfieldtype': 'Link'
+		'oldfieldtype': 'Link',
+		'width': '250px'
 	},
 
 	# DocField
 	{
 		'doctype': 'DocField',
-		'fieldname': 'is_pro_applicable',
-		'fieldtype': 'Select',
-		'label': 'Is PRO Applicable',
-		'oldfieldname': 'is_pro_applicable',
-		'oldfieldtype': 'Select',
-		'options': '\nYes\nNo',
-		'reqd': 0
+		'fieldname': 'mat_detail_no',
+		'fieldtype': 'Data',
+		'hidden': 1,
+		'label': 'Mat Detail No'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'qty_consumed_per_unit',
+		'fieldtype': 'Float',
+		'hidden': 0,
+		'label': 'Qty Consumed Per Unit',
+		'no_copy': 0
 	}
 ]

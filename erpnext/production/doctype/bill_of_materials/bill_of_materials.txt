@@ -5,14 +5,14 @@
 	{
 		'creation': '2010-08-08 17:08:52',
 		'docstatus': 0,
-		'modified': '2011-11-09 12:47:50',
+		'modified': '2012-01-11 14:33:04',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1319016431',
+		'_last_update': '1326272478',
 		'allow_attach': 0,
 		'allow_copy': 0,
 		'allow_email': 0,
@@ -32,11 +32,11 @@
 		'name': '__common__',
 		'read_only': 0,
 		'search_fields': 'item',
-		'section_style': 'Tabbed',
+		'section_style': 'Simple',
 		'server_code_error': ' ',
 		'show_in_menu': 0,
 		'subject': '%(item)s',
-		'version': 171
+		'version': 194
 	},
 
 	# These values are common for all DocField
@@ -134,86 +134,10 @@
 	# DocField
 	{
 		'doctype': 'DocField',
-		'fieldname': 'trash_reason',
-		'fieldtype': 'Small Text',
-		'label': 'Trash Reason',
-		'oldfieldname': 'trash_reason',
-		'oldfieldtype': 'Small Text',
-		'permlevel': 1
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldtype': 'HTML',
-		'label': 'TreeView1',
-		'oldfieldtype': 'HTML',
-		'options': '<div style=\'border: 1px solid #CCF; padding: 8px;margin-bottom: 8px;\'><div class=\'link_type\' onclick=\'loadpage("Bill of Materials"); \'>Go To BOM Tree View</div></div>',
-		'permlevel': 1
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldtype': 'Section Break',
-		'oldfieldtype': 'Section Break',
-		'options': 'Simple',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'allow_on_submit': 1,
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldtype': 'Button',
-		'label': 'Set as Default BOM',
-		'oldfieldtype': 'Button',
-		'permlevel': 0,
-		'trigger': 'Client'
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
 		'fieldtype': 'Column Break',
 		'oldfieldtype': 'Column Break',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'allow_on_submit': 1,
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldtype': 'Button',
-		'hidden': 1,
-		'label': 'Activate BOM',
-		'oldfieldtype': 'Button',
 		'permlevel': 0,
-		'trigger': 'Client'
-	},
-
-	# DocField
-	{
-		'allow_on_submit': 1,
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldtype': 'Button',
-		'hidden': 1,
-		'label': 'Inactivate BOM',
-		'oldfieldtype': 'Button',
-		'permlevel': 0,
-		'trigger': 'Client'
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldtype': 'Section Break',
-		'label': 'Details',
-		'oldfieldtype': 'Section Break',
-		'permlevel': 0
+		'width': '50%'
 	},
 
 	# DocField
@@ -232,18 +156,6 @@
 		'reqd': 1,
 		'search_index': 1,
 		'trigger': 'Client'
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldname': 'description',
-		'fieldtype': 'Text',
-		'label': 'Description',
-		'oldfieldname': 'description',
-		'oldfieldtype': 'Text',
-		'permlevel': 0,
-		'width': '300px'
 	},
 
 	# DocField
@@ -272,30 +184,22 @@
 
 	# DocField
 	{
-		'colour': 'White:FFF',
 		'doctype': 'DocField',
-		'fieldname': 'is_active',
-		'fieldtype': 'Select',
-		'label': 'Is Active',
-		'no_copy': 1,
-		'oldfieldname': 'is_active',
-		'oldfieldtype': 'Select',
-		'options': '\nYes\nNo',
+		'fieldname': 'description',
+		'fieldtype': 'Text',
+		'label': 'Description',
+		'oldfieldname': 'description',
+		'oldfieldtype': 'Text',
 		'permlevel': 0,
-		'reqd': 1
+		'width': '300px'
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
 		'doctype': 'DocField',
-		'fieldname': 'is_default',
-		'fieldtype': 'Check',
-		'label': 'Is Default',
-		'no_copy': 1,
-		'oldfieldname': 'is_default',
-		'oldfieldtype': 'Check',
-		'permlevel': 1
+		'fieldtype': 'Column Break',
+		'permlevel': 0,
+		'width': '50%'
 	},
 
 	# DocField
@@ -315,6 +219,61 @@
 
 	# DocField
 	{
+		'allow_on_submit': 1,
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldname': 'is_active',
+		'fieldtype': 'Select',
+		'hidden': 0,
+		'label': 'Is Active',
+		'no_copy': 1,
+		'oldfieldname': 'is_active',
+		'oldfieldtype': 'Select',
+		'options': '\nYes\nNo',
+		'permlevel': 0,
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		'allow_on_submit': 1,
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldname': 'is_default',
+		'fieldtype': 'Check',
+		'label': 'Is Default',
+		'no_copy': 1,
+		'oldfieldname': 'is_default',
+		'oldfieldtype': 'Check',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'maintained_by',
+		'fieldtype': 'Data',
+		'label': 'Maintained By',
+		'oldfieldname': 'maintained_by',
+		'oldfieldtype': 'Data',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldname': 'remarks',
+		'fieldtype': 'Text',
+		'label': 'Remarks',
+		'no_copy': 1,
+		'oldfieldname': 'remarks',
+		'oldfieldtype': 'Text',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
 		'doctype': 'DocField',
 		'fieldtype': 'Section Break',
 		'label': 'Operations',
@@ -325,7 +284,7 @@
 	# DocField
 	{
 		'colour': 'White:FFF',
-		'description': 'Specify the operations performed and give a unique Operation no to your operations. Select the workstation which is nothing but machinery where this operation would be performed on raw materials. Hour rate will be fetched from the Workstation master. Operation time will be entered manually. Operating cost will be calculated once the Bill of Material is saved.',
+		'description': 'Specify the operations, operating cost and give a unique Operation no to your operations.',
 		'doctype': 'DocField',
 		'fieldname': 'bom_operations',
 		'fieldtype': 'Table',
@@ -370,92 +329,55 @@
 
 	# DocField
 	{
-		'colour': 'White:FFF',
 		'doctype': 'DocField',
-		'fieldname': 'remarks',
-		'fieldtype': 'Text',
-		'label': 'Remarks',
-		'no_copy': 1,
-		'oldfieldname': 'remarks',
-		'oldfieldtype': 'Text',
+		'fieldtype': 'Column Break',
+		'permlevel': 0,
+		'width': '50%'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'rm_cost_as_per',
+		'fieldtype': 'Select',
+		'label': 'Consider Raw Material Cost As Per',
+		'options': 'Valuation Rate\nLast Purchase Rate\nStandard Rate',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
 		'doctype': 'DocField',
-		'fieldname': 'cost_as_per_mar',
-		'fieldtype': 'Currency',
-		'label': 'Cost As Per Valuation Rate',
-		'oldfieldname': 'cost_as_per_mar',
-		'oldfieldtype': 'Currency',
+		'fieldname': 'costing_date',
+		'fieldtype': 'Date',
+		'label': 'Costing Date',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
+		'allow_on_submit': 1,
 		'doctype': 'DocField',
-		'fieldname': 'cost_as_per_lpr',
-		'fieldtype': 'Currency',
-		'label': 'Cost As Per LPR',
-		'oldfieldname': 'cost_as_per_lpr',
-		'oldfieldtype': 'Currency',
-		'permlevel': 1
+		'fieldtype': 'Button',
+		'label': 'Update Cost as on today',
+		'options': 'calculate_cost',
+		'permlevel': 0
 	},
 
 	# DocField
 	{
 		'doctype': 'DocField',
-		'fieldname': 'cost_as_per_sr',
-		'fieldtype': 'Currency',
-		'label': 'Cost As Per SR',
-		'oldfieldname': 'cost_as_per_sr',
-		'oldfieldtype': 'Currency',
-		'permlevel': 1
-	},
-
-	# DocField
-	{
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldname': 'cost_as_on',
-		'fieldtype': 'Data',
-		'label': 'Cost as on',
-		'oldfieldname': 'cost_as_on',
-		'oldfieldtype': 'Data',
-		'permlevel': 1
+		'fieldtype': 'Column Break',
+		'permlevel': 0,
+		'width': '50%'
 	},
 
 	# DocField
 	{
 		'doctype': 'DocField',
-		'fieldname': 'dir_mat_as_per_mar',
-		'fieldtype': 'Currency',
-		'label': 'Direct Material As Per Valuation',
-		'oldfieldname': 'dir_mat_as_per_mar',
-		'oldfieldtype': 'Currency',
-		'permlevel': 1
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldname': 'dir_mat_as_per_lpr',
-		'fieldtype': 'Currency',
-		'label': 'Direct Material As Per LPR',
-		'oldfieldname': 'dir_mat_as_per_lpr',
-		'oldfieldtype': 'Currency',
-		'permlevel': 1
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldname': 'dir_mat_as_per_sr',
-		'fieldtype': 'Currency',
-		'label': 'Direct Material As Per SR',
-		'oldfieldname': 'dir_mat_as_per_sr',
-		'oldfieldtype': 'Currency',
+		'fieldname': 'raw_material_cost',
+		'fieldtype': 'Float',
+		'label': 'Raw Material Cost',
 		'permlevel': 1
 	},
 
@@ -463,22 +385,18 @@
 	{
 		'doctype': 'DocField',
 		'fieldname': 'operating_cost',
-		'fieldtype': 'Currency',
+		'fieldtype': 'Float',
 		'label': 'Operating Cost',
-		'oldfieldname': 'operating_cost',
-		'oldfieldtype': 'Currency',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
 		'doctype': 'DocField',
-		'fieldname': 'maintained_by',
-		'fieldtype': 'Data',
-		'label': 'Maintained By',
-		'oldfieldname': 'maintained_by',
-		'oldfieldtype': 'Data',
-		'permlevel': 0
+		'fieldname': 'total_cost',
+		'fieldtype': 'Float',
+		'label': 'Total Cost',
+		'permlevel': 1
 	},
 
 	# DocField
@@ -486,19 +404,9 @@
 		'doctype': 'DocField',
 		'fieldtype': 'Section Break',
 		'hidden': 1,
-		'label': 'BOM Report',
-		'oldfieldtype': 'Section Break',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldtype': 'Section Break',
-		'hidden': 0,
-		'label': 'Flat BOM',
-		'oldfieldtype': 'Section Break',
-		'permlevel': 0
+		'options': 'Simple',
+		'permlevel': 0,
+		'print_hide': 0
 	},
 
 	# DocField
@@ -508,12 +416,25 @@
 		'doctype': 'DocField',
 		'fieldname': 'flat_bom_details',
 		'fieldtype': 'Table',
-		'hidden': 0,
+		'hidden': 1,
 		'label': 'Flat BOM Detail',
 		'no_copy': 1,
 		'oldfieldname': 'flat_bom_details',
 		'oldfieldtype': 'Table',
 		'options': 'Flat BOM Detail',
-		'permlevel': 0
+		'permlevel': 0,
+		'print_hide': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'trash_reason',
+		'fieldtype': 'Small Text',
+		'hidden': 1,
+		'label': 'Trash Reason',
+		'oldfieldname': 'trash_reason',
+		'oldfieldtype': 'Small Text',
+		'permlevel': 1
 	}
 ]

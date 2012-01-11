@@ -5,8 +5,8 @@
 	{
 		'creation': '2010-08-08 17:09:12',
 		'docstatus': 0,
-		'modified': '2010-09-20 14:06:57',
-		'modified_by': 'umair@iwebnotes.com',
+		'modified': '2012-01-09 16:25:13',
+		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
 
@@ -14,6 +14,7 @@
 	{
 		'autoname': 'PPID/.#####',
 		'colour': 'White:FFF',
+		'default_print_format': 'Standard',
 		'doctype': 'DocType',
 		'istable': 1,
 		'module': 'Production',
@@ -21,7 +22,7 @@
 		'section_style': 'Simple',
 		'server_code_error': ' ',
 		'show_in_menu': 0,
-		'version': 21
+		'version': 27
 	},
 
 	# These values are common for all DocField
@@ -42,50 +43,11 @@
 	# DocField
 	{
 		'doctype': 'DocField',
-		'fieldname': 'source_doctype',
+		'fieldname': 'sales_order',
 		'fieldtype': 'Data',
-		'idx': 1,
-		'label': 'Against Document ',
-		'oldfieldname': 'source_doctype',
-		'oldfieldtype': 'Data',
-		'permlevel': 1
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldname': 'source_docname',
-		'fieldtype': 'Data',
-		'idx': 2,
-		'label': 'Document No',
+		'label': 'Sales Order',
 		'oldfieldname': 'source_docname',
 		'oldfieldtype': 'Data',
-		'permlevel': 1
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldname': 'source_detail_docname',
-		'fieldtype': 'Data',
-		'hidden': 1,
-		'idx': 3,
-		'label': 'Document Detail No',
-		'oldfieldname': 'source_detail_docname',
-		'oldfieldtype': 'Data',
-		'permlevel': 1
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldname': 'parent_item',
-		'fieldtype': 'Link',
-		'idx': 4,
-		'label': 'Parent Item',
-		'oldfieldname': 'parent_item',
-		'oldfieldtype': 'Link',
-		'options': 'Item',
 		'permlevel': 1
 	},
 
@@ -95,44 +57,14 @@
 		'doctype': 'DocField',
 		'fieldname': 'item_code',
 		'fieldtype': 'Link',
-		'idx': 5,
 		'label': 'Item Code',
 		'oldfieldname': 'item_code',
 		'oldfieldtype': 'Link',
 		'options': 'Item',
 		'permlevel': 0,
-		'trigger': 'Client'
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldname': 'document_date',
-		'fieldtype': 'Date',
-		'idx': 6,
-		'in_filter': 1,
-		'label': 'Document Date',
-		'oldfieldname': 'document_date',
-		'oldfieldtype': 'Date',
-		'permlevel': 0,
-		'search_index': 1,
-		'width': '150px'
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldname': 'confirmation_date',
-		'fieldtype': 'Date',
-		'idx': 7,
-		'in_filter': 1,
-		'label': 'Confirmed Delivery Date',
-		'oldfieldname': 'confirmation_date',
-		'oldfieldtype': 'Date',
-		'permlevel': 0,
 		'reqd': 1,
-		'search_index': 0,
-		'width': '100px'
+		'trigger': 'Client',
+		'width': '150px'
 	},
 
 	# DocField
@@ -140,37 +72,22 @@
 		'doctype': 'DocField',
 		'fieldname': 'bom_no',
 		'fieldtype': 'Link',
-		'idx': 8,
 		'label': 'BOM No',
 		'oldfieldname': 'bom_no',
 		'oldfieldtype': 'Link',
 		'options': 'Bill Of Materials',
 		'permlevel': 0,
-		'search_index': 0,
+		'reqd': 1,
 		'width': '100px'
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldname': 'description',
-		'fieldtype': 'Text',
-		'idx': 9,
-		'label': 'Description',
-		'oldfieldname': 'description',
-		'oldfieldtype': 'Text',
-		'permlevel': 1,
-		'width': '300px'
 	},
 
 	# DocField
 	{
 		'default': '0.00',
 		'doctype': 'DocField',
-		'fieldname': 'prevdoc_reqd_qty',
+		'fieldname': 'so_pending_qty',
 		'fieldtype': 'Currency',
-		'idx': 11,
-		'label': 'Total Reqd Qty',
+		'label': 'SO Pending Qty',
 		'oldfieldname': 'prevdoc_reqd_qty',
 		'oldfieldtype': 'Currency',
 		'permlevel': 1,
@@ -180,70 +97,63 @@
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'stock_uom',
-		'fieldtype': 'Data',
-		'idx': 12,
-		'label': 'Stock UOM',
-		'oldfieldname': 'stock_uom',
-		'oldfieldtype': 'Data',
-		'permlevel': 1,
-		'reqd': 1
-	},
-
-	# DocField
-	{
 		'default': '0.00',
 		'doctype': 'DocField',
 		'fieldname': 'planned_qty',
 		'fieldtype': 'Currency',
-		'idx': 12,
-		'label': 'Planned Quantity',
+		'label': 'Planned Qty',
 		'oldfieldname': 'planned_qty',
 		'oldfieldtype': 'Currency',
 		'permlevel': 0,
 		'reqd': 1,
-		'width': '180px'
+		'width': '100px'
 	},
 
 	# DocField
 	{
-		'default': '0.00',
 		'doctype': 'DocField',
-		'fieldname': 'produced_qty',
-		'fieldtype': 'Currency',
-		'hidden': 1,
-		'idx': 13,
-		'label': 'Produced Qty',
-		'oldfieldname': 'produced_qty',
-		'oldfieldtype': 'Currency',
+		'fieldname': 'stock_uom',
+		'fieldtype': 'Data',
+		'label': 'UOM',
+		'oldfieldname': 'stock_uom',
+		'oldfieldtype': 'Data',
 		'permlevel': 1,
-		'width': '130px'
+		'reqd': 1,
+		'width': '80px'
 	},
 
 	# DocField
 	{
 		'doctype': 'DocField',
-		'fieldname': 'pro_created',
-		'fieldtype': 'Check',
-		'idx': 14,
-		'label': 'PRO Created',
-		'oldfieldname': 'pro_created',
-		'oldfieldtype': 'Check',
+		'fieldname': 'description',
+		'fieldtype': 'Text',
+		'label': 'Description',
+		'oldfieldname': 'description',
+		'oldfieldtype': 'Text',
+		'permlevel': 1,
+		'width': '200px'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'parent_packing_item',
+		'fieldtype': 'Link',
+		'label': 'Parent Packing Item',
+		'oldfieldname': 'parent_item',
+		'oldfieldtype': 'Link',
+		'options': 'Item',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
 		'doctype': 'DocField',
-		'fieldname': 'mrp',
+		'fieldname': 'is_pro_created',
 		'fieldtype': 'Check',
-		'hidden': 1,
-		'idx': 15,
-		'label': 'Already MRP Considered',
-		'oldfieldname': 'mrp',
+		'label': 'Is PRO Created',
+		'oldfieldname': 'pro_created',
 		'oldfieldtype': 'Check',
-		'permlevel': 1,
-		'width': '140px'
+		'permlevel': 1
 	}
 ]
