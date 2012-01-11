@@ -1,0 +1,26 @@
+# DocType Label, Indent
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2012-01-10 15:33:53',
+		'docstatus': 0,
+		'modified': '2012-01-10 15:33:53',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all DocType Label
+	{
+		'doctype': 'DocType Label',
+		'dt': 'Indent',
+		'dt_label': 'Purchase Requisition',
+		'name': '__common__'
+	},
+
+	# DocType Label, Indent
+	{
+		'doctype': 'DocType Label',
+		'name': 'Indent'
+	}
+]
