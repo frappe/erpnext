@@ -16,7 +16,7 @@ cur_frm.pformat.grand_total_export = function(doc) {
 	return '';
 }
 
-cur_frm.pformat.round_total_export = function(doc) {
+cur_frm.pformat.rounded_total_export = function(doc) {
 	return '';
 }
 

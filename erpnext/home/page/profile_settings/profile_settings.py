@@ -32,7 +32,10 @@ def set_user_details(arg=None):
 	from webnotes.model.doc import Document
 	
 	p = Document('Profile', webnotes.user.name)
-	p.fields.update(load_json(arg))
+	arg_dict = load_json(arg)
+	if not 'bio' in arg_dict: arg_dict['bio'] = None
+	if not 'last_name' in arg_dict: arg_dict['last_name'] = None
+	p.fields.update(arg_dict)
 	p.save()
 	webnotes.msgprint('Updated')
 
