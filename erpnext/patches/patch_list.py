@@ -13,5 +13,10 @@ patch_list = [
 		'patch_module': 'patches.jan_mar_2012',
 		'patch_file': 'rename_doctype_indent',
 		'description': 'Add DocType Label: Indent to Purchase Requisition'
+	},
+	{
+		'patch_module': 'patches.jan_mar_2012',
+		'patch_file': 'production_cleanup',
+		'description': 'Major changes in production module, almost rewrited the entire code'
 	}
 ]
