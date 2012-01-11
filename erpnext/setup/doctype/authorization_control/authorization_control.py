@@ -88,7 +88,7 @@ class DocType(TransactionBase):
 			if doc_obj:
 				if doc_obj.doc.doctype == 'Receivable Voucher': customer = doc_obj.doc.customer
 				else: customer = doc_obj.doc.customer_name
-				add_cond = " and master_name = '"+cstr(customer)+"'"
+				add_cond = " and master_name = '"+make_esc("'")(cstr(customer))+"'"
 		if based_on == 'Itemwise Discount':
 			if doc_obj:
 				for t in getlist(doc_obj.doclist, doc_obj.fname):
