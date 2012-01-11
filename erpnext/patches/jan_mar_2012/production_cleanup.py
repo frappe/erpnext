@@ -39,7 +39,7 @@ def execute():
 
 	sql("update `tabBOM Material` set rate = moving_avg_rate, amount = amount_as_per_mar")
 
-	sql("update `tabFlat Bom Detail` set rate = moving_avg_rate, amount = amount_as_per_mar")
+	sql("update `tabFlat BOM Detail` set rate = moving_avg_rate, amount = amount_as_per_mar")
 
 
 
