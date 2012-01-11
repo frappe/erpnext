@@ -48,6 +48,8 @@ class DocType:
 		ret = sql("select name from `tabBill Of Materials` where item = '%s' " % (item_code))
 		return '~~~'.join([r[0] for r in ret])
 
+
+
 	def get_operations(self,bom_no):
 		ret = sql("select operation_no,opn_description,workstation,hour_rate,time_in_mins from `tabBOM Operation` where parent = %s", bom_no, as_dict = 1)
 		cost = sql("select dir_mat_as_per_mar , operating_cost , cost_as_per_mar from `tabBill Of Materials` where name = %s", bom_no, as_dict = 1)
@@ -87,7 +89,6 @@ class DocType:
 	def calculate_cost( self, bom_no):
 		main_bom_list = get_obj(dt = 'Production Control').traverse_bom_tree( bom_no = bom_no, qty = 1, calculate_cost = 1)
 		main_bom_list.reverse()
-		msgprint(main_bom_list)
 		for bom in main_bom_list:
 			bom_obj = get_obj('Bill Of Materials', bom, with_children = 1)
 			bom_obj.calculate_cost()
