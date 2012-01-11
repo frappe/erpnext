@@ -563,7 +563,7 @@ cur_frm.cscript['Calculate Charges'] = function(doc, cdt, cdn) {
 			if(!cl[i].row_id){
 				alert("Please Enter Row on which amount needs to be calculated for row : "+cl[i].idx);
 				validated = false;
-			} else if(cl[cl[i].row_id-1].charge_type=='Actual') {
+			} else if(cl[i].included_in_print_rate && cl[cl[i].row_id-1].charge_type=='Actual') {
 				msgprint("Row of type 'Actual' cannot be depended on for type '" + cl[i].charge_type + "'\
 					when using tax inclusive prices.<br />\
 					This will lead to incorrect values.<br /><br /> \
