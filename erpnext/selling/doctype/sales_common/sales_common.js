@@ -472,11 +472,19 @@ cur_frm.cscript.update_fname_table = function(doc , tname , fname , n, other_fna
   var consider_incl_rate = cur_frm.cscript.consider_incl_rate(doc, other_fname);
   for(var i=0;i<cl.length;i++) {
     if(n == 1){
-		if(!consider_incl_rate && (flt(cl[i].ref_rate) > 0)) {
-			set_multiple(tname, cl[i].name, {
-				'export_rate': flt(flt(cl[i].ref_rate) * (100 - flt(cl[i].adj_rate)) / 100)
-			}, fname); 
-			
+		if(!consider_incl_rate) {
+			if(flt(cl[i].ref_rate) > 0) {
+				set_multiple(tname, cl[i].name, {
+					'export_rate': flt(flt(cl[i].ref_rate) * (100 - flt(cl[i].adj_rate)) / 100)
+				}, fname); 
+				
+			} else if(flt(cl[i].export_rate) > 0) {
+				var ref_rate = flt(cl[i].adj_rate)!=flt(100) ?
+					flt((100 * flt(cl[i].export_rate))/flt(100 - flt(cl[i].adj_rate))) :
+					flt(0)
+				set_multiple(tname, cl[i].name, { 'ref_rate': ref_rate }, fname);
+			}
+
 			set_multiple(tname, cl[i].name, {
 				'export_amount': flt(flt(cl[i].qty) * flt(cl[i].export_rate)),
 				'basic_rate': flt(flt(cl[i].export_rate) * flt(doc.conversion_rate)),
@@ -487,7 +495,7 @@ cur_frm.cscript.update_fname_table = function(doc , tname , fname , n, other_fna
 			set_multiple(tname, cl[i].name, {
 				'base_ref_rate': flt(base_ref_rate)
 			}, fname);
-			
+
 		} else if(consider_incl_rate) {
 			if(flt(cl[i].export_rate) > 0) {
 				// calculate basic rate based on taxes
