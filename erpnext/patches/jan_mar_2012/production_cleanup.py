@@ -6,9 +6,10 @@ def execute():
 	
 	# Production Planning Tool
 	#---------------------------------------------------------------
-	delete_doc('DocType', 'PP Detail')
-	delete_doc('DocType', 'PP SO Detail')
-	delete_doc('DocType', 'Production Planning Tool')
+	#delete_doc('DocType', 'PP Detail')
+	#delete_doc('DocType', 'PP SO Detail')
+	#delete_doc('DocType', 'Production Planning Tool')
+	sql("delete from `tabDocField` where parent in ('Production Planning Tool', 'PP Detail', 'PP SO Detail')")
 	
 	reload_doc('production', 'doctype', 'production_planning_tool')
 	reload_doc('production', 'doctype', 'pp_detail')
@@ -28,9 +29,9 @@ def execute():
 	# Bill Of Materials
 	#---------------------------------------------------------------
 	reload_doc('production', 'doctype', 'bill_of_materials')
-	relaod_doc('production', 'doctype', 'bom_material')
-	relaod_doc('production', 'doctype', 'bom_operation')
-	relaod_doc('production', 'doctype', 'flat_bom_detail')
+	reload_doc('production', 'doctype', 'bom_material')
+	reload_doc('production', 'doctype', 'bom_operation')
+	reload_doc('production', 'doctype', 'flat_bom_detail')
 
 	#copy values
 	sql("""update `tabBill Of Materials` set rm_cost_as_per = 'Valuation Rate', 
@@ -38,7 +39,7 @@ def execute():
 
 	sql("update `tabBOM Material` set rate = moving_avg_rate, amount = amount_as_per_mar")
 
-	sql("update `tabFlat Bom Detail` set rate = moving_average_rate, amount = amount_as_per_mar")
+	sql("update `tabFlat Bom Detail` set rate = moving_avg_rate, amount = amount_as_per_mar")
 
 
 
