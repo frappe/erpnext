@@ -5,14 +5,14 @@
 	{
 		'creation': '2010-08-08 17:09:14',
 		'docstatus': 0,
-		'modified': '2012-01-06 13:33:25',
+		'modified': '2012-01-11 17:36:23',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1325668998',
+		'_last_update': '1325837006',
 		'colour': 'White:FFF',
 		'default_print_format': 'Standard',
 		'doctype': 'DocType',
@@ -22,7 +22,7 @@
 		'section_style': 'Tabbed',
 		'server_code_error': ' ',
 		'show_in_menu': 0,
-		'version': 189
+		'version': 190
 	},
 
 	# These values are common for all DocField
@@ -253,7 +253,7 @@
 	# DocField
 	{
 		'colour': 'White:FFF',
-		'description': 'Select "Yes" if stock is maintained and tracked for sub - assembly items.',
+		'description': 'Select "Yes" if stock is maintained and tracked for sub-assembly items. Select "No" if you want child items of sub-assembly for material transfer.',
 		'doctype': 'DocField',
 		'fieldname': 'consider_sa_items',
 		'fieldtype': 'Select',
