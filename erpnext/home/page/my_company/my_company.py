@@ -119,17 +119,26 @@ def post_comment(arg):
 		else:
 			fn = webnotes.user.name
 
-		from webnotes.utils.email_lib import sendmail
-		from setup.doctype.notification_control.notification_control import get_formatted_message
-		
 		message = '''A new comment has been posted on your page by %s:
 		
 		<b>Comment:</b> %s
 		
 		To answer, please login to your erpnext account!
+
+		<a href='https://signin.erpnext.com'>https://signin.erpnext.com</a>
 		''' % (fn, arg['comment'])
 		
-		sendmail([arg['uid']], webnotes.user.name, get_formatted_message('New Comment', message), fn + ' has posted a new comment')
+		from webnotes.model.code import get_obj
+		note = get_obj('Notification Control')
+		email_msg = note.prepare_message({
+			'type': 'New Comment',
+			'message': message
+		})
+
+		sender = webnotes.user.name!='Administrator' and webnotes.user.name or 'support+admin_post@erpnext.com'
+		
+		from webnotes.utils.email_lib import sendmail
+		sendmail([arg['uid']], sender, email_msg, fn + ' has posted a new comment')
 	
 #
 # update read messages
