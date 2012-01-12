@@ -18,5 +18,10 @@ patch_list = [
 		'patch_module': 'patches.jan_mar_2012',
 		'patch_file': 'production_cleanup',
 		'description': 'Major changes in production module, almost rewrited the entire code'
+	},
+	{
+		'patch_module': 'patches.jan_mar_2012',
+		'patch_file': 'jan_production_patches',
+		'description': 'Fixes after Major changes in production module'
 	}
 ]
