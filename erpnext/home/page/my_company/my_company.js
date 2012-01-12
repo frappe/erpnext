@@ -416,7 +416,7 @@ MemberProfile = function(parent, uid, member_item) {
 					width: 300,
 					fields: [
 						{
-							label: 'Please Enter Your Password',
+							label: 'Please Enter <b style="color: black">Your Password</b>',
 							description: "Your password is required to update the concerned user's password",
 							fieldtype: 'Password',
 							fieldname: 'sys_admin_pwd',
