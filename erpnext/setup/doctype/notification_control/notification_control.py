@@ -55,9 +55,9 @@ class DocType:
 		"""
 			Prepares message body
 		"""
-		if args.get('type') and args.get('doctype'):
+		if args.get('type'):
 			msg_dict = {}
-			msg_dict['message'] = self.get_message(args.get('type'))
+			msg_dict['message'] = args.get('message') or self.get_message(args.get('type'))
 			msg_dict['company'] = Document('Control Panel', 'Control Panel').company_name
 			msg_dict['salutation'] = "Hi" + (args.get('contact_name') and (" " + args.get('contact_name')) or "")
 			msg_dict['send_from'] = webnotes.conn.sql("""\
