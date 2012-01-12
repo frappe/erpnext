@@ -86,8 +86,8 @@ class DocType:
 
 
 	#------------- Wrapper Code --------------
-	def calculate_cost( self, bom_no):
-		main_bom_list = get_obj(dt = 'Production Control').traverse_bom_tree( bom_no = bom_no, qty = 1, calculate_cost = 1)
+	def calculate_cost(self, bom_no):
+		main_bom_list = get_obj('Production Control').traverse_bom_tree( bom_no = bom_no, qty = 1, calculate_cost = 1)
 		main_bom_list.reverse()
 		for bom in main_bom_list:
 			bom_obj = get_obj('Bill Of Materials', bom, with_children = 1)

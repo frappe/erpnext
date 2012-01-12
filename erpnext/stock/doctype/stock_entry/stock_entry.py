@@ -87,7 +87,7 @@ class DocType:
 
 			# get incoming rate
 			if not flt(d.incoming_rate):
-				d.incoming_rate = self.get_incoming_rate(d.item_code, d.s_warehouse, self.doc.posting_date, self.doc.posting_time, d.transfer_qty, d.serial_no, d.fg_item, bom_no)
+				d.incoming_rate = self.get_incoming_rate(d.item_code, d.s_warehouse, self.doc.posting_date, self.doc.posting_time, d.transfer_qty, d.serial_no, d.fg_item, d.bom_no or bom_no)
 
 
 	# Get stock qty on any date
@@ -104,7 +104,7 @@ class DocType:
 	# -------------------
 	def get_incoming_rate(self, item, wh, dt, tm, qty = 0, serial_no = '', fg_item = 0, bom_no = ''):
 		in_rate = 0
-		if fg_item:
+		if fg_item and bom_no:
 			# re-calculate cost for production item from bom
 			get_obj('BOM Control').calculate_cost(bom_no)
 			in_rate = flt(get_value('Bill Of Materials', bom_no, 'total_cost'))
@@ -203,7 +203,7 @@ class DocType:
 			se_child.qty = flt(item_dict[d][0])
 			se_child.transfer_qty = flt(item_dict[d][0])
 			se_child.conversion_factor = 1.00
-
+			if fg_item: se_child.bom_no = pro_obj.doc.bom_no
 
 
 	# get items 
@@ -305,6 +305,7 @@ class DocType:
 		self.get_stock_and_rate(pro_obj and pro_obj.doc.bom_no or '')
 		self.validate_warehouse(pro_obj)
 		self.validate_incoming_rate()
+		self.validate_bom_belongs_to_item()
 		self.calc_amount()
 		get_obj('Sales Common').validate_fiscal_year(self.doc.fiscal_year,self.doc.posting_date,'Posting Date')
 		
@@ -315,6 +316,15 @@ class DocType:
 		for d in getlist(self.doclist, 'mtn_details'):
 			if not flt(d.incoming_rate) and d.t_warehouse:
 				msgprint("Rate is mandatory for Item: %s at row %s" % (d.item_code, d.idx), raise_exception=1)
+	
+	
+	def validate_bom_belongs_to_item(self):
+		for d in getlist(self.doclist, 'mtn_details'):
+			if d.bom_no and not webnotes.conn.sql("""\
+					SELECT name FROM `tabBill Of Materials`
+					WHERE item = %s and name = %s
+				""", (d.item_code, d.bom_no)):
+				msgprint("BOM %s does not belong to Item: %s at row %s" % (d.bom_no, d.item_code, d.idx), raise_exception=1)
 
 
 	# Validate warehouse

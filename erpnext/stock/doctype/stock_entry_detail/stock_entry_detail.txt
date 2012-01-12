@@ -5,7 +5,7 @@
 	{
 		'creation': '2010-08-08 17:09:25',
 		'docstatus': 0,
-		'modified': '2011-04-26 11:47:18',
+		'modified': '2012-01-12 11:51:57',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
@@ -14,6 +14,7 @@
 	{
 		'autoname': 'MTND/.######',
 		'colour': 'White:FFF',
+		'default_print_format': 'Standard',
 		'doctype': 'DocType',
 		'istable': 1,
 		'module': 'Stock',
@@ -21,7 +22,7 @@
 		'section_style': 'Tray',
 		'server_code_error': ' ',
 		'show_in_menu': 0,
-		'version': 24
+		'version': 26
 	},
 
 	# These values are common for all DocField
@@ -44,13 +45,12 @@
 		'doctype': 'DocField',
 		'fieldname': 's_warehouse',
 		'fieldtype': 'Link',
-		'idx': 1,
 		'in_filter': 1,
 		'label': 'Source Warehouse',
 		'oldfieldname': 's_warehouse',
 		'oldfieldtype': 'Link',
 		'options': 'Warehouse',
-		'permlevel': 2
+		'permlevel': 0
 	},
 
 	# DocField
@@ -58,13 +58,12 @@
 		'doctype': 'DocField',
 		'fieldname': 't_warehouse',
 		'fieldtype': 'Link',
-		'idx': 2,
 		'in_filter': 1,
 		'label': 'Target Warehouse',
 		'oldfieldname': 't_warehouse',
 		'oldfieldtype': 'Link',
 		'options': 'Warehouse',
-		'permlevel': 2
+		'permlevel': 0
 	},
 
 	# DocField
@@ -72,12 +71,11 @@
 		'doctype': 'DocField',
 		'fieldname': 'fg_item',
 		'fieldtype': 'Check',
-		'idx': 3,
 		'in_filter': 1,
 		'label': 'FG Item',
 		'oldfieldname': 'fg_item',
 		'oldfieldtype': 'Check',
-		'permlevel': 2,
+		'permlevel': 0,
 		'print_hide': 1
 	},
 
@@ -86,7 +84,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'item_code',
 		'fieldtype': 'Link',
-		'idx': 4,
 		'in_filter': 1,
 		'label': 'Item Code',
 		'oldfieldname': 'item_code',
@@ -101,21 +98,8 @@
 	# DocField
 	{
 		'doctype': 'DocField',
-		'fieldname': 'item_name',
-		'fieldtype': 'Data',
-		'idx': 5,
-		'in_filter': 1,
-		'label': 'Item Name',
-		'permlevel': 0,
-		'search_index': 1
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
 		'fieldname': 'description',
 		'fieldtype': 'Text',
-		'idx': 6,
 		'label': 'Description',
 		'oldfieldname': 'description',
 		'oldfieldtype': 'Text',
@@ -128,14 +112,12 @@
 		'doctype': 'DocField',
 		'fieldname': 'batch_no',
 		'fieldtype': 'Link',
-		'idx': 7,
 		'label': 'Batch No',
 		'oldfieldname': 'batch_no',
 		'oldfieldtype': 'Link',
 		'options': 'Batch',
 		'permlevel': 0,
 		'print_hide': 1,
-		'search_index': 0,
 		'trigger': 'Client'
 	},
 
@@ -144,7 +126,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'actual_qty',
 		'fieldtype': 'Read Only',
-		'idx': 8,
 		'in_filter': 1,
 		'label': 'Actual Qty (at source)',
 		'no_copy': 1,
@@ -153,7 +134,7 @@
 		'permlevel': 1,
 		'print_hide': 1,
 		'reqd': 0,
-		'search_index': 0
+		'search_index': 1
 	},
 
 	# DocField
@@ -161,7 +142,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'qty',
 		'fieldtype': 'Currency',
-		'idx': 9,
 		'label': 'Qty',
 		'oldfieldname': 'qty',
 		'oldfieldtype': 'Currency',
@@ -175,7 +155,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'reqd_qty',
 		'fieldtype': 'Currency',
-		'idx': 10,
 		'in_filter': 0,
 		'label': 'Reqd Qty',
 		'oldfieldname': 'reqd_qty',
@@ -190,14 +169,12 @@
 		'doctype': 'DocField',
 		'fieldname': 'uom',
 		'fieldtype': 'Link',
-		'idx': 11,
 		'label': 'UOM',
 		'oldfieldname': 'uom',
 		'oldfieldtype': 'Link',
 		'options': 'UOM',
 		'permlevel': 0,
 		'reqd': 1,
-		'search_index': 0,
 		'trigger': 'Client'
 	},
 
@@ -206,7 +183,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'conversion_factor',
 		'fieldtype': 'Currency',
-		'idx': 12,
 		'label': 'Conversion Factor',
 		'oldfieldname': 'conversion_factor',
 		'oldfieldtype': 'Currency',
@@ -219,7 +195,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'stock_uom',
 		'fieldtype': 'Link',
-		'idx': 13,
 		'in_filter': 0,
 		'label': 'Stock UOM',
 		'oldfieldname': 'stock_uom',
@@ -235,7 +210,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'transfer_qty',
 		'fieldtype': 'Currency',
-		'idx': 14,
 		'label': 'Stock Qty',
 		'oldfieldname': 'transfer_qty',
 		'oldfieldtype': 'Currency',
@@ -248,7 +222,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'serial_no',
 		'fieldtype': 'Text',
-		'idx': 15,
 		'label': 'Serial No',
 		'no_copy': 1,
 		'oldfieldname': 'serial_no',
@@ -262,7 +235,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'incoming_rate',
 		'fieldtype': 'Currency',
-		'idx': 16,
 		'label': 'Incoming Rate',
 		'oldfieldname': 'incoming_rate',
 		'oldfieldtype': 'Currency',
@@ -275,10 +247,20 @@
 		'doctype': 'DocField',
 		'fieldname': 'amount',
 		'fieldtype': 'Currency',
-		'idx': 17,
 		'label': 'Amount',
 		'oldfieldname': 'amount',
 		'oldfieldtype': 'Currency',
 		'permlevel': 1
+	},
+
+	# DocField
+	{
+		'description': 'BOM No. for a Finished Good Item',
+		'doctype': 'DocField',
+		'fieldname': 'bom_no',
+		'fieldtype': 'Link',
+		'label': 'BOM No.',
+		'options': 'Bill Of Materials',
+		'permlevel': 0
 	}
 ]
