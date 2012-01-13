@@ -378,7 +378,7 @@ class DocType(TransactionBase):
 		if not self.doc.cash_bank_account:
 			msgprint("Cash/Bank Account is mandatory for POS entry")
 			raise Exception
-		if (flt(self.doc.paid_amount) + flt(self.doc.write_off_amount) - flt(self.doc.grand_total))>0.001:
+		if (flt(self.doc.paid_amount) + flt(self.doc.write_off_amount) - round(flt(self.doc.grand_total), 2))>0.001:
 			msgprint("(Paid amount + Write Off Amount) can not be greater than Grand Total")
 			raise Exception
 
