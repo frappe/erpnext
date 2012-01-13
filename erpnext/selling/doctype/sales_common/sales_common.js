@@ -478,12 +478,14 @@ cur_frm.cscript.update_fname_table = function(doc , tname , fname , n, other_fna
 					'export_rate': flt(flt(cl[i].ref_rate) * (100 - flt(cl[i].adj_rate)) / 100)
 				}, fname); 
 				
-			} else if(flt(cl[i].export_rate) > 0) {
+			} 
+			// Commenting this part because ref_rate backcalculation injects floating point issues
+			/*else if(flt(cl[i].export_rate) > 0) {
 				var ref_rate = flt(cl[i].adj_rate)!=flt(100) ?
 					flt((100 * flt(cl[i].export_rate))/flt(100 - flt(cl[i].adj_rate))) :
 					flt(0)
-				set_multiple(tname, cl[i].name, { 'ref_rate': ref_rate }, fname);
-			}
+				set_multiple(tname, cl[i].name, { 'ref_rate': flt(ref_rate) }, fname);
+			} */
 
 			set_multiple(tname, cl[i].name, {
 				'export_amount': flt(flt(cl[i].qty) * flt(cl[i].export_rate)),
