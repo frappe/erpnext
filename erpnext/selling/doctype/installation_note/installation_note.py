@@ -98,7 +98,7 @@ class DocType(TransactionBase):
   #get list of serial no from previous_doc
   #----------------------------------------------
   def get_prevdoc_serial_no(self, prevdoc_detail_docname, prevdoc_docname):
-    from material_management.doctype.stock_ledger.stock_ledger import get_sr_no_list
+    from stock.doctype.stock_ledger.stock_ledger import get_sr_no_list
 	
     res = sql("select serial_no from `tabDelivery Note Detail` where name = '%s' and parent ='%s'" % (prevdoc_detail_docname, prevdoc_docname))
     return get_sr_no_list(res[0][0])
