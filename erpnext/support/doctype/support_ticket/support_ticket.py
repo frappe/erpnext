@@ -23,6 +23,9 @@ class DocType(TransactionBase):
 		
 		response = self.doc.new_response + '\n\n[Please do not change the subject while responding.]'
 
+		# add last response to new response
+		response += self.last_response()
+
 		signature = webnotes.conn.get_value('Email Settings',None,'support_signature')
 		if signature:
 			response += '\n\n' + signature
@@ -39,6 +42,14 @@ class DocType(TransactionBase):
 		webnotes.conn.set(self.doc,'status','Waiting for Customer')
 		self.make_response_record(response)
 	
+	def last_response(self):
+		"""return last response"""
+		tmp = webnotes.conn.sql("""select mail from `tabSupport Ticket Response`
+			where parent = %s order by creation desc limit 1
+			""", self.doc.name)
+			
+		return '\n\n=== In response to ===\n\n' + tmp[0][0] 
+		
 	def make_response_record(self, response, from_email = None, content_type='text/plain'):
 		"""
 			Creates a new Support Ticket Response record
