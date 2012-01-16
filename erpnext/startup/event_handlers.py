@@ -1,4 +1,5 @@
 import webnotes
+import webnotes.defs
 from webnotes.utils import cint
 
 #
@@ -17,7 +18,11 @@ def on_login(login_manager):
 			# alisaing here... so check if the user is disabled
 			if not webnotes.conn.sql("select ifnull(enabled,0) from tabProfile where name=%s", user)[0][0]:
 				# throw execption
-				raise Exception, "Authentication Failed"
+				webnotes.msgprint("Authentication Failed", raise_exception=1)
+
+			if hasattr(webnotes.defs, 'validate_ip'):
+				msg = getattr(webnotes.defs, 'validate_ip')()
+				if msg: webnotes.msgprint(msg, raise_exception=1)
 			
 			login_manager.user = user
 
