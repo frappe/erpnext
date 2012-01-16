@@ -245,7 +245,7 @@ cur_frm.cscript.calc_doc_values = function(doc, cdt, cdn, tname, fname, other_fn
 	var inclusive_rate = 0
 	var d = getchildren('RV Tax Detail', doc.name, other_fname,doc.doctype);
 	for(var j = 0; j<d.length; j++){
-		other_charges_total += flt(d[j].amount);
+		other_charges_total += flt(d[j].tax_amount);
 		if(d[j].included_in_print_rate) {
 			inclusive_rate = 1;
 		}
@@ -325,12 +325,15 @@ cur_frm.cscript.calc_other_charges = function(doc , tname , fname , other_fname)
 
 			tax[t].total_amount = flt(tax_amount.toFixed(2));     //stores actual tax amount in virtual field
 			tax[t].total_tax_amount = flt(prev_total);      //stores total amount in virtual field
-			tax[t].tax_amount += flt(tax_amount.toFixed(2));       
+			tax[t].tax_amount += flt(tax_amount);       
 
-			var total_amount = flt(tax_amount);
-			total_tax_amount = flt(tax[t].total_tax_amount) + flt(total_amount);
-			set_multiple('RV Tax Detail', tax[t].name, { 'item_wise_tax_detail':tax[t].item_wise_tax_detail, 'amount':total_amount, 'total':flt((flt(total)+flt(tax[t].tax_amount)).toFixed(2))/*_tax_amount)*/}, other_fname);
+			//var total_amount = flt(tax_amount.toFixed(2));
+			//total_tax_amount = flt(tax[t].total_tax_amount) + flt(total_amount);
+			
+			set_multiple('RV Tax Detail', tax[t].name, { 'item_wise_tax_detail':tax[t].item_wise_tax_detail, 'amount':flt(tax[t].total_amount), 'total':flt((flt(total)+flt(tax[t].tax_amount)).toFixed(2))/*_tax_amount)*/}, other_fname);
+			
 			//console.log("Total: " + (flt(total)+flt(tax[t].tax_amount)));
+			
 			prev_total += flt(tax[t].total_amount);   // for previous row total
 			total += flt(tax_amount);     // for adding total to previous amount
 
