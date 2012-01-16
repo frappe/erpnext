@@ -48,7 +48,13 @@ class DocType(TransactionBase):
 			where parent = %s order by creation desc limit 1
 			""", self.doc.name)
 			
-		return '\n\n=== In response to ===\n\n' + tmp[0][0] 
+		if not tmp:
+			tmp = webnotes.conn.sql("""
+				SELECT description from `tabSupport Ticket`
+				where name = %s
+			""", self.doc.name)
+
+		return '\n\n=== In response to ===\n\n' + tmp[0][0]
 		
 	def make_response_record(self, response, from_email = None, content_type='text/plain'):
 		"""
