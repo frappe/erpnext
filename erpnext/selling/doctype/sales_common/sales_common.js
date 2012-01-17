@@ -233,99 +233,119 @@ cur_frm.cscript.recalc = function(doc, n) {
 
 // ******* Calculation of total amounts of document (item amount + other charges)****************
 cur_frm.cscript.calc_doc_values = function(doc, cdt, cdn, tname, fname, other_fname) {
-  doc = locals[doc.doctype][doc.name];
-  var net_total = 0; var other_charges_total = 0;
-  var cl = getchildren(tname, doc.name, fname);
-  for(var i = 0; i<cl.length; i++){
-    net_total += flt(cl[i].amount);
-  }
-  net_total_incl = net_total
-  var d = getchildren('RV Tax Detail', doc.name, other_fname,doc.doctype);
-  for(var j = 0; j<d.length; j++){
-    other_charges_total += flt(d[j].amount);
-	if(d[j].included_in_print_rate) {
-		net_total_incl += flt(d[j].amount);
+	doc = locals[doc.doctype][doc.name];
+	var net_total = 0; var other_charges_total = 0;
+	var net_total_incl = 0
+	var cl = getchildren(tname, doc.name, fname);
+	for(var i = 0; i<cl.length; i++){
+		net_total += flt(cl[i].amount);
+		net_total_incl += flt(cl[i].export_amount);
 	}
-  }
-  //console.log("Net Total: " + net_total);
-  //console.log("Net Total Incl: " + net_total_incl);
-  //console.log("Other Charges: " + other_charges_total);
-  doc.net_total = net_total_incl > net_total ? flt(net_total_incl) : flt(net_total);
-  doc.other_charges_total = flt(other_charges_total);
-  doc.grand_total = flt(flt(net_total) + flt(other_charges_total));
-  doc.rounded_total = Math.round(doc.grand_total);
-  doc.grand_total_export = flt(flt(doc.grand_total) / flt(doc.conversion_rate));
-  doc.rounded_total_export = Math.round(doc.grand_total_export);
-  doc.total_commission = flt(flt(net_total) * flt(doc.commission_rate) / 100);
+
+	var inclusive_rate = 0
+	var d = getchildren('RV Tax Detail', doc.name, other_fname,doc.doctype);
+	for(var j = 0; j<d.length; j++){
+		other_charges_total += flt(d[j].tax_amount);
+		if(d[j].included_in_print_rate) {
+			inclusive_rate = 1;
+		}
+	}
+
+	//console.log("Net Total: " + net_total);
+	//console.log("Net Total Incl: " + net_total_incl);
+	//console.log("Other Charges: " + other_charges_total);
+	doc.net_total = inclusive_rate ? flt(net_total_incl) : flt(net_total);
+	doc.other_charges_total = flt(other_charges_total);
+	//console.log('In calc doc values');
+	//console.log(net_total);
+	//console.log(other_charges_total);
+	doc.grand_total = flt(flt(net_total) + flt(other_charges_total));
+	doc.rounded_total = Math.round(doc.grand_total);
+	doc.grand_total_export = flt(flt(doc.grand_total) / flt(doc.conversion_rate));
+	doc.rounded_total_export = Math.round(doc.grand_total_export);
+	doc.total_commission = flt(flt(net_total) * flt(doc.commission_rate) / 100);
 }
 
 // ******************************* OTHER CHARGES *************************************
 cur_frm.cscript.calc_other_charges = function(doc , tname , fname , other_fname) {
-  doc = locals[doc.doctype][doc.name];
-  // make display area
-  // ------------------
+	doc = locals[doc.doctype][doc.name];
 
-  cur_frm.fields_dict['Other Charges Calculation'].disp_area.innerHTML = '<b style="padding: 8px 0px;">Calculation Details for Other Charges:</b>';
-  var cl = getchildren(tname, doc.name, fname);
-  var tax = getchildren('RV Tax Detail', doc.name, other_fname,doc.doctype);
-  // make display table
-  // ------------------
-  var otc = make_table(cur_frm.fields_dict['Other Charges Calculation'].disp_area, cl.length + 1, tax.length + 1, '90%',[],{border:'1px solid #AAA',padding:'2px'});
-  $y(otc,{marginTop:'8px'});
+	// Make Display Area
+	cur_frm.fields_dict['Other Charges Calculation'].disp_area.innerHTML =
+		'<b style="padding: 8px 0px;">Calculation Details for Other Charges:</b>';
+
+	var cl = getchildren(tname, doc.name, fname);
+	var tax = getchildren('RV Tax Detail', doc.name, other_fname,doc.doctype);
   
-  var tax_desc = {}; var tax_desc_rates = []; var net_total = 0;
+	// Make display table
+	var otc = make_table(cur_frm.fields_dict['Other Charges Calculation'].disp_area,
+		cl.length + 1, tax.length + 1, '90%', [], { border:'1px solid #AAA', padding:'2px' });
+	$y(otc,{marginTop:'8px'});
+  
+	var tax_desc = {}; var tax_desc_rates = []; var net_total = 0;
   
   
-  for(var i=0;i<cl.length;i++) {
-    net_total += flt(flt(cl[i].qty) * flt(cl[i].basic_rate));
-    var prev_total = flt(cl[i].amount);
-    if(cl[i].item_tax_rate)
-      var check_tax = eval('var a='+cl[i].item_tax_rate+';a');        //to get in dictionary
+	for(var i=0;i<cl.length;i++) {
+		net_total += flt(flt(cl[i].qty) * flt(cl[i].basic_rate));
+		var prev_total = flt(cl[i].amount);
+		if(cl[i].item_tax_rate)
+			var check_tax = eval('var a='+cl[i].item_tax_rate+';a');        //to get in dictionary
     
-    // Add Item Code in new Row 
-    //--------------------------
-    $td(otc,i+1,0).innerHTML = cl[i].item_code ? cl[i].item_code : cl[i].description;
+		// Add Item Code in new Row
+		$td(otc,i+1,0).innerHTML = cl[i].item_code ? cl[i].item_code : cl[i].description;
     
-    var tax = getchildren('RV Tax Detail', doc.name, other_fname,doc.doctype);
-    var total = net_total;
+		var tax = getchildren('RV Tax Detail', doc.name, other_fname,doc.doctype);
+		var total = net_total;
     
-    for(var t=0;t<tax.length;t++){
-     
-      var account = tax[t].account_head;
-      $td(otc,0,t+1).innerHTML = account?account:'';
-      //Check For Rate
-      if(cl[i].item_tax_rate && check_tax[account]!=null)  {rate = flt(check_tax[account]);}
-      else               // if particular item doesn't have particular rate it will take other charges rate
-        rate = flt(tax[t].rate);
-      //Check For Rate and get tax amount
-      var tax_amount = cur_frm.cscript.check_charge_type_and_get_tax_amount(doc,tax,t, cl[i], rate);
+		for(var t=0;t<tax.length;t++){
+			var account = tax[t].account_head;
+			$td(otc,0,t+1).innerHTML = account?account:'';
       
-      //enter item_wise_tax_detail i.e. tax rate on each item
+			//Check For Rate
+			if(cl[i].item_tax_rate && check_tax[account]!=null) {
+				var rate = flt(check_tax[account]);
+			} else {
+				// if particular item doesn't have particular rate it will take other charges rate
+				var rate = flt(tax[t].rate);
+			}
+
+			//Check For Rate and get tax amount
+			var tax_amount = cur_frm.cscript.check_charge_type_and_get_tax_amount(doc,tax,t, cl[i], rate);
       
-      item_wise_tax_detail = cur_frm.cscript.get_item_wise_tax_detail( doc, rate, cl, i, tax, t);
+			//enter item_wise_tax_detail i.e. tax rate on each item
+			var item_wise_tax_detail = cur_frm.cscript.get_item_wise_tax_detail(doc, rate, cl, i, tax, t);
       
-      // this is calculation part for all types
-      if(tax[t].charge_type != "Actual") tax[t].item_wise_tax_detail += item_wise_tax_detail;
-      //tax[t].total_amount = flt(tax_amount.toFixed(2));     //stores actual tax amount in virtual field
-      //tax[t].total_tax_amount = flt(prev_total.toFixed(2));      //stores total amount in virtual field
-      //tax[t].tax_amount += flt(tax_amount.toFixed(2));       
-      tax[t].total_amount = flt(tax_amount);     //stores actual tax amount in virtual field
-      tax[t].total_tax_amount = flt(prev_total);      //stores total amount in virtual field
-      tax[t].tax_amount += flt(tax_amount);       
-      var total_amount = flt(tax[t].tax_amount);
-      total_tax_amount = flt(tax[t].total_tax_amount) + flt(total_amount);
-      set_multiple('RV Tax Detail', tax[t].name, { 'item_wise_tax_detail':tax[t].item_wise_tax_detail, 'amount':total_amount, 'total':flt(total)+flt(tax[t].tax_amount)/*_tax_amount)*/}, other_fname);
-      prev_total += flt(tax[t].total_amount);   // for previous row total
-      total += flt(tax[t].tax_amount);     // for adding total to previous amount
+			// this is calculation part for all types
+			if(tax[t].charge_type != "Actual") {
+				tax[t].item_wise_tax_detail += item_wise_tax_detail;
+			}
+			//console.log(tax[t]);
+			//console.log(tax_amount);
+			//console.log(total);
+
+			tax[t].total_amount = flt(tax_amount.toFixed(2));     //stores actual tax amount in virtual field
+			tax[t].total_tax_amount = flt(prev_total);      //stores total amount in virtual field
+			tax[t].tax_amount += flt(tax_amount);       
+
+			//var total_amount = flt(tax_amount.toFixed(2));
+			//total_tax_amount = flt(tax[t].total_tax_amount) + flt(total_amount);
+			
+			set_multiple('RV Tax Detail', tax[t].name, { 'item_wise_tax_detail':tax[t].item_wise_tax_detail, 'amount':flt(tax[t].total_amount), 'total':flt((flt(total)+flt(tax[t].tax_amount)).toFixed(2))/*_tax_amount)*/}, other_fname);
+			
+			//console.log("Total: " + (flt(total)+flt(tax[t].tax_amount)));
+			
+			prev_total += flt(tax[t].total_amount);   // for previous row total
+			total += flt(tax_amount);     // for adding total to previous amount
+
+			if(tax[t].charge_type == 'Actual')
+				$td(otc,i+1,t+1).innerHTML = fmt_money(tax[t].total_amount);
+			else
+				$td(otc,i+1,t+1).innerHTML = '('+fmt_money(rate) + '%) ' +fmt_money(tax[t].total_amount);
       
-      if(tax[t].charge_type == 'Actual')
-        $td(otc,i+1,t+1).innerHTML = fmt_money(tax[t].total_amount);
-      else
-        $td(otc,i+1,t+1).innerHTML = '('+fmt_money(rate) + '%) ' +fmt_money(tax[t].total_amount);
-      
-    }
-  }
+		}
+	}
 }
+
 cur_frm.cscript.check_charge_type_and_get_tax_amount = function( doc, tax, t, cl, rate, print_amt) {
   doc = locals[doc.doctype][doc.name];
   if (! print_amt) print_amt = 0;
@@ -392,8 +412,7 @@ cur_frm.cscript.consider_incl_rate = function(doc, other_fname) {
 	return false;
 }
 
-cur_frm.cscript.back_calc_basic_rate = function(doc, tname, fname, child, other_fname) {
-	
+cur_frm.cscript.back_calc_basic_rate = function(doc, tname, fname, child, other_fname) {	
 	var get_item_tax_rate = function(item, tax) {
 		if(item.item_tax_rate) {
 			// Should to replace eval with JSON.parse when item_tax_rate is converted to json string notation
@@ -429,7 +448,7 @@ cur_frm.cscript.back_calc_basic_rate = function(doc, tname, fname, child, other_
 			total: total
 		};
 	}
-	var basic_rate = flt((child.export_rate * flt(doc.conversion_rate)) / total);
+	var basic_rate = (child.export_rate * flt(doc.conversion_rate)) / total;
 	//console.log(temp_tax_list);
 	//console.log('in basic rate back calc');
 	//console.log(basic_rate);
