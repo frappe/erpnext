@@ -91,8 +91,8 @@ class TransactionBase:
 		details = sql("select name, first_name, last_name, email_id, phone, mobile_no, department, designation from `tabContact` where %s and docstatus != 2 order by is_primary_contact desc limit 1" % cond, as_dict = 1)
 
 		extract = lambda x: details and details[0] and details[0].get(x,'') or ''
-		contact_fields = [('','first_name'),('\n','lastname')]
-		contact_display = ''.join([a[0]+extract(a[1]) for a in contact_fields if extract(a[1])])
+		contact_fields = [('','first_name'),(' ','last_name')]
+		contact_display = ''.join([a[0]+cstr(extract(a[1])) for a in contact_fields if extract(a[1])])
 		if contact_display.startswith('\n'): contact_display = contact_display[1:]
 		
 		contact_name = details and details[0]['name'] or ''
