@@ -5,14 +5,14 @@
 	{
 		'creation': '2010-08-08 17:09:05',
 		'docstatus': 0,
-		'modified': '2011-12-20 11:15:42',
+		'modified': '2012-01-17 18:39:39',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1323333040',
+		'_last_update': '1325570647',
 		'allow_attach': 1,
 		'allow_trash': 1,
 		'autoname': 'field:item_code',
@@ -29,7 +29,7 @@
 		'show_in_menu': 0,
 		'subject': '%(item_name)s',
 		'tag_fields': 'item_group',
-		'version': 162
+		'version': 164
 	},
 
 	# These values are common for all DocField
@@ -618,6 +618,34 @@
 		'oldfieldname': 'uom_conversion_details',
 		'oldfieldtype': 'Table',
 		'options': 'UOM Conversion Detail',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'manufacturer',
+		'fieldtype': 'Data',
+		'label': 'Manufacturer',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'manufacturer_part_no',
+		'fieldtype': 'Data',
+		'label': 'Manufacturer Part Number',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'item_supplier_details',
+		'fieldtype': 'Table',
+		'label': 'Item Supplier Details',
+		'options': 'Item Supplier',
 		'permlevel': 0
 	},
 
