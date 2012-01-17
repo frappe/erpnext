@@ -2,6 +2,7 @@
 *.comp.js
 .DS_Store
 server_tools
+user_files
 patch.log
 lib
 versions-local.db

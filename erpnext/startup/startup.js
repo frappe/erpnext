@@ -13,7 +13,6 @@ if(inList(user_roles,'System Manager')) is_system_manager = 1;
 function startup_setup() {
 	pscript.is_erpnext_saas = cint(locals['Control Panel']['Control Panel'].sync_with_gateway)
 
-
 	if(get_url_arg('embed')) {
 		// hide header, footer
 		$dh(page_body.banner_area);
@@ -21,18 +20,18 @@ function startup_setup() {
 		$dh(page_body.footer);
 		return;
 	}
-
-	if(user=='Guest' && !get_url_arg('akey')) {
-		if(pscript.is_erpnext_saas) {
-			window.location.href = 'https://www.erpnext.com';
-			return;
-		}
-	}
-
 	// page structure
 	// --------------
-	$td(page_body.wntoolbar.body_tab,0,0).innerHTML = '<i><b>erp</b>next</i>';
-	$y($td(page_body.wntoolbar.body_tab,0,0), {width:'140px', color:'#FFF', paddingLeft:'8px', paddingRight:'8px', fontSize:'14px'})
+	if(page_body.wntoolbar) {
+		$td(page_body.wntoolbar.body_tab,0,0).innerHTML = '<i><b>erp</b>next</i>';
+		$y($td(page_body.wntoolbar.body_tab,0,0), {
+			width:'140px', 
+			color:'#FFF', 
+			paddingLeft:'8px', 
+			paddingRight:'8px', 
+			fontSize:'14px'
+		});		
+	}
 	$dh(page_body.banner_area);
 
 	// sidebar
@@ -41,7 +40,7 @@ function startup_setup() {
 
 	// border to the body
 	// ------------------
-	$dh(page_body.footer);
+	page_body.footer.innerHTML = '<div class="erpnext-footer">Powered by <a href="https://erpnext.com">ERPNext</a></div>';
 
 	// setup toolbar
 	pscript.startup_setup_toolbar();
