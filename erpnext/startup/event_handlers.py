@@ -7,8 +7,9 @@ def on_login(login_manager):
 		called from login manager, before login
 	"""
 	try:
-		import server_tools.gateway_utils
-		server_tools.gateway_utils.check_login()
+		if login_manager.user not in ('Guest', None, ''):
+			import server_tools.gateway_utils
+			server_tools.gateway_utils.check_login(login_manager.user)
 	except ImportError:
 		pass
 
