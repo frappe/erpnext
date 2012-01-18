@@ -43,14 +43,11 @@ pscript.myc_show_erpnext_message = function() {
 //
 pscript.myc_add_user = function() {
 	var fields = [{
-		fieldtype: 'Data',
-		fieldname: 'user',
-		reqd: 1,
-		label: 'Email Id of the user to add'
-	}];
-
-	if(!pscript.is_erpnext_saas) {
-		fields = fields.concat([
+			fieldtype: 'Data',
+			fieldname: 'user',
+			reqd: 1,
+			label: 'Email Id of the user to add'
+		},
 		{
 			fieldtype: 'Data',
 			fieldname: 'first_name',
@@ -67,14 +64,15 @@ pscript.myc_add_user = function() {
 			fieldname: 'password',
 			reqd: 1,
 			label: 'Password'
-		}]);		
+		},
+		{
+			fieldtype: 'Button',
+			label: 'Add',
+			fieldname: 'add'
+		}];		
 	}
 
-	fields.push({
-		fieldtype: 'Button',
-		label: 'Add',
-		fieldname: 'add'
-	});
+	fields.push();
 
 	var d = new wn.widgets.Dialog({
 		title: 'Add User',

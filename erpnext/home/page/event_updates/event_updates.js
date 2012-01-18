@@ -6,7 +6,7 @@ pscript['onload_Event Updates'] = function() {
 			
 	pscript.home_make_body();
 	pscript.home_make_status();
-	pscript.home_pre_process();
+	pscript.home_set_banner();
 	pscript.home_make_widgets();
 }
 
@@ -30,7 +30,7 @@ pscript.home_make_body = function() {
 
 // ==================================
 
-pscript.home_pre_process = function(wrapper) {
+pscript.home_set_banner = function(wrapper) {
 	var wrapper = page_body.pages['Event Updates'];
 	var cp = locals['Control Panel']['Control Panel'];
 

@@ -12,22 +12,14 @@ body {
 	background-color: #e2e2e2;
 }
 
-.layout_wrapper {
-	padding: 13px;
-	margin: 7px;
-	-moz-box-shadow: 1px 1px 6px #AAA;
-	-webkit-box-shadow: 1px 1px 6px #AAA;
-	box-shadow: 1px 1px 6px #AAA;
-	background-color: #FFF;
+.erpnext-footer {
+	margin: 3px auto;
+	color: #888;
+	text-align: center;
 }
 
-#birthday_area {
-	display: none;
-	padding: 4px;
-	margin-bottom: 8px;
-	background-color: #FDD;
-	padding: 4px;
-	color: #644;
+.erpnext-footer a, .erpnext-footer a:hover, .erpnext-footer a:visited {
+	color: #666;
 }
 
 .module-icons {
