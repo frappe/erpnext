@@ -8,7 +8,7 @@ def on_login(login_manager):
 	"""
 	try:
 		import server_tools.gateway_utils
-		server_tools.gateway_utils.check_login()
+		server_tools.gateway_utils.check_login(login_manager.user)
 	except ImportError:
 		pass
 
