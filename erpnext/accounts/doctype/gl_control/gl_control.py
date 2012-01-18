@@ -506,10 +506,10 @@ def manage_recurring_invoices():
 		Create recurring invoices on specific date by copying the original one
 		and notify the concerned people
 	"""	
-	rv = sql("""select name, recurring_id from `tabReceivable Voucher` where ifnull(convert_into_recurring_invoice, 0) = 1 
+	rv = webnotes.conn.sql("""select name, recurring_id from `tabReceivable Voucher` where ifnull(convert_into_recurring_invoice, 0) = 1 
 			and next_date = %s and next_date <= end_date order by next_date	desc""", nowdate())
 	for d in rv:
-		if not sql("""select name from `tabReceivable Voucher` where posting_date = %s and recurring_id = %s""", (nowdate(), d[1])):
+		if not webnotes.conn.sql("""select name from `tabReceivable Voucher` where posting_date = %s and recurring_id = %s""", (nowdate(), d[1])):
 			prev_rv = get_obj('Receivable Voucher', d[0], with_children=1)
 			new_rv = create_new_invoice(prev_rv)
 
