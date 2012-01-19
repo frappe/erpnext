@@ -2,6 +2,7 @@
 *.comp.js
 .DS_Store
 server_tools
+services
 user_files
 patch.log
 lib
