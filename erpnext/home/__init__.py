@@ -16,6 +16,7 @@ feed_dict = {
 
 	# Stock
 	'Delivery Note':	['[%(status)s] To %(customer_name)s', '#4169E1'],
+	'Purchase Receipt': ['[%(status)s] From %(supplier)s', '#4169E1'],
 
 	# Accounts
 	'Journal Voucher':      ['[%(voucher_type)s] %(name)s', '#4169E1'],
@@ -33,38 +34,6 @@ feed_dict = {
 	'Support Ticket':       ['[%(status)s] %(subject)s', '#000080']	
 }
 
-feed_dict_color = {
-	# Project
-	'Project': '#000080',
-	
-	# Sales
-	'Lead':	'#000080',
-	'Quotation': '#4169E1',
-	'Sales Order': '#4169E1',
-
-	# Purchase
-	'Supplier': '#6495ED',
-	'Purchase Order': '#4169E1',
-
-	# Stock
-	'Delivery Note': '#4169E1',
-
-	# Accounts
-	'Journal Voucher': '#4169E1',
-	'Payable Voucher': '#4169E1',
-	'Receivable Voucher': '#4169E1',
-
-	# HR
-	'Expense Voucher': '#4169E1',
-	'Salary Slip': '#4169E1',
-	'Leave Transaction': '#4169E1',
-
-	# Support
-	'Customer Issue': '#000080',
-	'Maintenance Visit': '#4169E1',
-	'Support Ticket': '#000080'
-}
-
 def make_feed(doc, subject, color):
 	"makes a new Feed record"
 	#msgprint(subject)
@@ -77,20 +46,6 @@ def make_feed(doc, subject, color):
 	f.color = color
 	f.save(1)
 
-def update_feed1(doc):   
-	"adds a new feed"
-	prop_rec = webnotes.conn.sql("select value from `tabProperty Setter` where doc_type = %s and property = 'subject'", (doc.doctype))
-	if prop_rec:		
-		subject = prop_rec[0][0]
-	else:	
-		rec = webnotes.conn.sql("select subject from tabDocType where name=%s", (doc.doctype))
-		subject = rec[0][0]
-	
-	subject, color = [subject, feed_dict_color.get(doc.doctype)]
-	if subject:
-		subject = subject % doc.fields
-		make_feed(doc, subject, color)
-		
 def update_feed(doc, method=None):   
 	"adds a new feed"
 	if method=='validate':
