@@ -10,5 +10,11 @@ def execute():
 		WHERE fieldname='allocated_to'
 	""")
 
+	webnotes.conn.sql("""
+		DELETE from `tabDocField`
+		WHERE parent='Customer Issue'
+		AND label='Make Maintenance Visit'
+	""")
+
 	from webnotes.modules.module_manager import reload_doc
 	reload_doc('support', 'doctype', 'customer_issue')
