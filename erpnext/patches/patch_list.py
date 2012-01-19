@@ -23,5 +23,16 @@ patch_list = [
 		'patch_module': 'patches.jan_mar_2012',
 		'patch_file': 'jan_production_patches',
 		'description': 'Fixes after Major changes in production module'
-	}
+	},
+	{
+		'patch_module': 'patches.jan_mar_2012',
+		'patch_file': 'allocated_to_profile',
+		'description': """Change Options to "Profile" for fieldname "allocated_to"
+			as this is giving improper values in Permission Engine"""
+	},
+	{
+		'patch_module': 'patches.jan_mar_2012',
+		'patch_file': 'remove_get_tds_button',
+		'description': "Remove One Get TDS button, which is appearing twice in JV"
+	},
 ]
