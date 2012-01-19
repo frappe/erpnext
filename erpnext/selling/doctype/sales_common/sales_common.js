@@ -251,17 +251,13 @@ cur_frm.cscript.calc_doc_values = function(doc, cdt, cdn, tname, fname, other_fn
 		}
 	}
 
-	//console.log("Net Total: " + net_total);
-	//console.log("Net Total Incl: " + net_total_incl);
-	//console.log("Other Charges: " + other_charges_total);
 	doc.net_total = inclusive_rate ? flt(net_total_incl) : flt(net_total);
 	doc.other_charges_total = flt(other_charges_total);
-	//console.log('In calc doc values');
-	//console.log(net_total);
-	//console.log(other_charges_total);
-	doc.grand_total = flt(flt(net_total) + flt(other_charges_total));
+	//doc.grand_total = flt(flt(net_total) + flt(other_charges_total));
+	doc.grand_total = flt((flt(net_total) + flt(other_charges_total)).toFixed(2));
 	doc.rounded_total = Math.round(doc.grand_total);
-	doc.grand_total_export = flt(flt(doc.grand_total) / flt(doc.conversion_rate));
+	//doc.grand_total_export = flt(flt(doc.grand_total) / flt(doc.conversion_rate));
+	doc.grand_total_export = flt((flt(doc.grand_total) / flt(doc.conversion_rate)).toFixed(2));
 	doc.rounded_total_export = Math.round(doc.grand_total_export);
 	doc.total_commission = flt(flt(net_total) * flt(doc.commission_rate) / 100);
 }
