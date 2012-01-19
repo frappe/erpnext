@@ -20,7 +20,7 @@ def on_login_post_session(login_manager):
 		update login_from and delete parallel sessions
 	"""
 	# Clear previous sessions i.e. logout previous log-in attempts
-	exception_list = ['demo@webnotestech.com', 'Administrator']
+	exception_list = ['demo@webnotestech.com', 'Administrator', 'Guest']
 	if webnotes.session['user'] not in exception_list:
 		sid_list = webnotes.conn.sql("""
 			DELETE FROM `tabSessions`

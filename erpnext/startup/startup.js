@@ -55,14 +55,6 @@ pscript.startup_make_sidebar = function() {
 		// menu
 		var ml = r.message;
 
-		// login-file
-		if(r.login_url){
-			login_file = 'http://' + r.login_url;
-		}
-		else if(pscript.is_erpnext_saas) {
-			login_file = 'https://www.erpnext.com';
-		}
-
 		// clear
 		page_body.left_sidebar.innerHTML = '';
 

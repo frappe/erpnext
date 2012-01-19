@@ -69,8 +69,7 @@ pscript.myc_add_user = function() {
 			fieldtype: 'Button',
 			label: 'Add',
 			fieldname: 'add'
-		}];		
-	}
+		}];
 
 	fields.push();
 
