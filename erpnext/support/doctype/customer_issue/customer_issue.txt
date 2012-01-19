@@ -5,15 +5,16 @@
 	{
 		'creation': '2010-08-08 17:08:57',
 		'docstatus': 0,
-		'modified': '2011-05-27 18:30:14',
+		'modified': '2012-01-19 12:29:40',
 		'modified_by': 'Administrator',
 		'owner': 'harshada@webnotestech.com'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1308741898',
+		'_last_update': '1325570647',
 		'colour': 'White:FFF',
+		'default_print_format': 'Standard',
 		'doctype': 'DocType',
 		'module': 'Support',
 		'name': '__common__',
@@ -23,7 +24,7 @@
 		'show_in_menu': 0,
 		'subject': '%(complaint)s By %(complaint_raised_by)s on %(issue_date)s',
 		'tag_fields': 'status',
-		'version': 96
+		'version': 97
 	},
 
 	# These values are common for all DocField
@@ -55,7 +56,6 @@
 	{
 		'create': 1,
 		'doctype': 'DocPerm',
-		'idx': 1,
 		'permlevel': 0,
 		'role': 'Guest',
 		'write': 1
@@ -67,7 +67,6 @@
 		'cancel': 1,
 		'create': 1,
 		'doctype': 'DocPerm',
-		'idx': 2,
 		'permlevel': 0,
 		'role': 'System Manager',
 		'submit': 1,
@@ -77,7 +76,6 @@
 	# DocPerm
 	{
 		'doctype': 'DocPerm',
-		'idx': 3,
 		'permlevel': 1,
 		'role': 'System Manager'
 	},
@@ -88,7 +86,6 @@
 		'cancel': 1,
 		'create': 1,
 		'doctype': 'DocPerm',
-		'idx': 4,
 		'permlevel': 0,
 		'role': 'Maintenance Manager',
 		'submit': 1,
@@ -98,7 +95,6 @@
 	# DocPerm
 	{
 		'doctype': 'DocPerm',
-		'idx': 5,
 		'permlevel': 1,
 		'role': 'Maintenance Manager'
 	},
@@ -109,7 +105,6 @@
 		'cancel': 1,
 		'create': 1,
 		'doctype': 'DocPerm',
-		'idx': 6,
 		'permlevel': 0,
 		'role': 'Maintenance User',
 		'submit': 1,
@@ -119,7 +114,6 @@
 	# DocPerm
 	{
 		'doctype': 'DocPerm',
-		'idx': 7,
 		'permlevel': 1,
 		'role': 'Maintenance User'
 	},
@@ -128,7 +122,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Section Break',
-		'idx': 1,
 		'label': 'Customer Issue',
 		'oldfieldtype': 'Section Break',
 		'permlevel': 0
@@ -139,7 +132,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'naming_series',
 		'fieldtype': 'Select',
-		'idx': 2,
 		'in_filter': 0,
 		'label': 'Series',
 		'no_copy': 1,
@@ -158,7 +150,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'status',
 		'fieldtype': 'Select',
-		'idx': 3,
 		'in_filter': 1,
 		'label': 'Status',
 		'no_copy': 1,
@@ -167,7 +158,7 @@
 		'options': '\nOpen\nClosed\nWork In Progress\nCancelled',
 		'permlevel': 0,
 		'reqd': 1,
-		'search_index': 0
+		'search_index': 1
 	},
 
 	# DocField
@@ -176,7 +167,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'complaint_date',
 		'fieldtype': 'Date',
-		'idx': 4,
 		'in_filter': 1,
 		'label': 'Issue Date',
 		'oldfieldname': 'complaint_date',
@@ -191,7 +181,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'complaint_raised_by',
 		'fieldtype': 'Data',
-		'idx': 5,
 		'label': 'Raised By',
 		'oldfieldname': 'complaint_raised_by',
 		'oldfieldtype': 'Data',
@@ -203,7 +192,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'from_company',
 		'fieldtype': 'Data',
-		'idx': 6,
 		'label': 'From Company',
 		'oldfieldname': 'from_company',
 		'oldfieldtype': 'Data',
@@ -215,7 +203,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'service_address',
 		'fieldtype': 'Small Text',
-		'idx': 7,
 		'label': 'Service Address',
 		'oldfieldname': 'service_address',
 		'oldfieldtype': 'Small Text',
@@ -226,7 +213,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Column Break',
-		'idx': 8,
 		'oldfieldtype': 'Column Break',
 		'permlevel': 0,
 		'width': '50%'
@@ -238,7 +224,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'customer',
 		'fieldtype': 'Link',
-		'idx': 9,
 		'in_filter': 1,
 		'label': 'Customer',
 		'oldfieldname': 'customer',
@@ -256,7 +241,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'customer_address',
 		'fieldtype': 'Link',
-		'idx': 10,
 		'label': 'Customer Address',
 		'options': 'Address',
 		'permlevel': 0,
@@ -268,7 +252,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'contact_person',
 		'fieldtype': 'Link',
-		'idx': 11,
 		'label': 'Contact Person',
 		'options': 'Contact',
 		'permlevel': 0,
@@ -280,7 +263,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'customer_name',
 		'fieldtype': 'Data',
-		'idx': 12,
 		'label': 'Name',
 		'permlevel': 1
 	},
@@ -290,7 +272,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'address_display',
 		'fieldtype': 'Small Text',
-		'idx': 13,
 		'label': 'Address',
 		'permlevel': 1
 	},
@@ -300,7 +281,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'contact_display',
 		'fieldtype': 'Small Text',
-		'idx': 14,
 		'label': 'Contact',
 		'permlevel': 1
 	},
@@ -310,7 +290,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'contact_mobile',
 		'fieldtype': 'Data',
-		'idx': 15,
 		'label': 'Mobile No',
 		'permlevel': 1
 	},
@@ -320,7 +299,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'contact_email',
 		'fieldtype': 'Data',
-		'idx': 16,
 		'label': 'Contact Email',
 		'permlevel': 1
 	},
@@ -331,7 +309,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'territory',
 		'fieldtype': 'Link',
-		'idx': 17,
 		'in_filter': 1,
 		'label': 'Territory',
 		'oldfieldname': 'territory',
@@ -340,7 +317,7 @@
 		'permlevel': 0,
 		'print_hide': 1,
 		'reqd': 0,
-		'search_index': 0
+		'search_index': 1
 	},
 
 	# DocField
@@ -348,7 +325,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'customer_group',
 		'fieldtype': 'Link',
-		'idx': 18,
 		'label': 'Customer Group',
 		'options': 'Customer Group',
 		'permlevel': 0,
@@ -362,7 +338,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'company',
 		'fieldtype': 'Link',
-		'idx': 19,
 		'in_filter': 1,
 		'label': 'Company',
 		'oldfieldname': 'company',
@@ -371,7 +346,7 @@
 		'permlevel': 0,
 		'print_hide': 1,
 		'reqd': 1,
-		'search_index': 0,
+		'search_index': 1,
 		'trigger': 'Client'
 	},
 
@@ -380,7 +355,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'fiscal_year',
 		'fieldtype': 'Select',
-		'idx': 20,
 		'in_filter': 1,
 		'label': 'Fiscal Year',
 		'oldfieldname': 'fiscal_year',
@@ -389,7 +363,7 @@
 		'permlevel': 0,
 		'print_hide': 1,
 		'reqd': 1,
-		'search_index': 0
+		'search_index': 1
 	},
 
 	# DocField
@@ -398,7 +372,6 @@
 		'fieldname': 'amended_from',
 		'fieldtype': 'Data',
 		'hidden': 1,
-		'idx': 21,
 		'label': 'Amended From',
 		'no_copy': 1,
 		'oldfieldname': 'amended_from',
@@ -414,7 +387,6 @@
 		'fieldname': 'amendment_date',
 		'fieldtype': 'Date',
 		'hidden': 1,
-		'idx': 22,
 		'label': 'Amendment Date',
 		'no_copy': 1,
 		'oldfieldname': 'amendment_date',
@@ -428,7 +400,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Section Break',
-		'idx': 23,
 		'label': 'Issue Details',
 		'oldfieldtype': 'Section Break',
 		'options': 'Simple',
@@ -440,7 +411,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'serial_no',
 		'fieldtype': 'Link',
-		'idx': 24,
 		'label': 'Serial No',
 		'options': 'Serial No',
 		'permlevel': 0,
@@ -453,7 +423,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'item_code',
 		'fieldtype': 'Link',
-		'idx': 25,
 		'in_filter': 1,
 		'label': 'Item Code',
 		'oldfieldname': 'item_code',
@@ -472,7 +441,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'item_name',
 		'fieldtype': 'Data',
-		'idx': 26,
 		'label': 'Item Name',
 		'oldfieldname': 'item_name',
 		'oldfieldtype': 'Data',
@@ -486,7 +454,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'description',
 		'fieldtype': 'Small Text',
-		'idx': 27,
 		'label': 'Description',
 		'oldfieldname': 'description',
 		'oldfieldtype': 'Small Text',
@@ -499,7 +466,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'complaint',
 		'fieldtype': 'Small Text',
-		'idx': 28,
 		'label': 'Issue',
 		'no_copy': 1,
 		'oldfieldname': 'complaint',
@@ -512,7 +478,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Column Break',
-		'idx': 29,
 		'oldfieldtype': 'Column Break',
 		'permlevel': 0,
 		'width': '50%'
@@ -525,7 +490,6 @@
 		'fieldname': 'warranty_amc_status',
 		'fieldtype': 'Select',
 		'hidden': 0,
-		'idx': 30,
 		'in_filter': 1,
 		'label': 'Warranty / AMC Status',
 		'options': '\nUnder Warranty\nOut of Warranty\nUnder AMC\nOut of AMC',
@@ -537,7 +501,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'warranty_expiry_date',
 		'fieldtype': 'Date',
-		'idx': 31,
 		'label': 'Warranty Expiry Date',
 		'permlevel': 0
 	},
@@ -547,7 +510,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'amc_expiry_date',
 		'fieldtype': 'Date',
-		'idx': 32,
 		'label': 'AMC Expiry Date',
 		'permlevel': 0
 	},
@@ -557,13 +519,12 @@
 		'doctype': 'DocField',
 		'fieldname': 'allocated_on',
 		'fieldtype': 'Date',
-		'idx': 33,
 		'in_filter': 1,
 		'label': 'Allocated On',
 		'oldfieldname': 'allocated_on',
 		'oldfieldtype': 'Date',
 		'permlevel': 0,
-		'search_index': 0
+		'search_index': 1
 	},
 
 	# DocField
@@ -571,21 +532,19 @@
 		'doctype': 'DocField',
 		'fieldname': 'allocated_to',
 		'fieldtype': 'Link',
-		'idx': 34,
 		'in_filter': 1,
 		'label': 'Allocated To',
 		'oldfieldname': 'allocated_to',
 		'oldfieldtype': 'Link',
-		'options': 'Sales Person',
+		'options': 'Profile',
 		'permlevel': 0,
-		'search_index': 0
+		'search_index': 1
 	},
 
 	# DocField
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Section Break',
-		'idx': 35,
 		'label': 'Resolution Detail',
 		'oldfieldtype': 'Section Break',
 		'options': 'Simple',
@@ -597,7 +556,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'resolution_details',
 		'fieldtype': 'Text',
-		'idx': 36,
 		'label': 'Resolution Details',
 		'no_copy': 1,
 		'oldfieldname': 'resolution_details',
@@ -609,7 +567,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Column Break',
-		'idx': 37,
 		'oldfieldtype': 'Column Break',
 		'permlevel': 0,
 		'width': '50%'
@@ -620,14 +577,13 @@
 		'doctype': 'DocField',
 		'fieldname': 'resolution_date',
 		'fieldtype': 'Date',
-		'idx': 38,
 		'in_filter': 1,
 		'label': 'Resolution Date',
 		'no_copy': 1,
 		'oldfieldname': 'resolution_date',
 		'oldfieldtype': 'Date',
 		'permlevel': 0,
-		'search_index': 0
+		'search_index': 1
 	},
 
 	# DocField
@@ -635,7 +591,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'resolved_by',
 		'fieldtype': 'Link',
-		'idx': 39,
 		'in_filter': 1,
 		'label': 'Resolved By',
 		'no_copy': 1,
@@ -643,7 +598,7 @@
 		'oldfieldtype': 'Link',
 		'options': 'Sales Person',
 		'permlevel': 0,
-		'search_index': 0
+		'search_index': 1
 	},
 
 	# DocField
@@ -653,7 +608,6 @@
 		'depends_on': 'eval:!doc.__islocal',
 		'doctype': 'DocField',
 		'fieldtype': 'Section Break',
-		'idx': 40,
 		'label': 'Next Steps',
 		'oldfieldtype': 'Section Break',
 		'permlevel': 0
@@ -665,7 +619,6 @@
 		'colour': 'White:FFF',
 		'doctype': 'DocField',
 		'fieldtype': 'Button',
-		'idx': 41,
 		'label': 'Make Maintenance Visit',
 		'oldfieldtype': 'Button',
 		'permlevel': 0,
