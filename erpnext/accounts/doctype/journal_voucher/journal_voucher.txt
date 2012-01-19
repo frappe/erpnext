@@ -5,15 +5,25 @@
 	{
 		'creation': '2010-08-08 17:09:06',
 		'docstatus': 0,
-		'modified': '2011-07-28 15:28:12',
+		'modified': '2012-01-19 14:15:53',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
+	},
+
+	# These values are common for all DocField
+	{
+		'doctype': 'DocField',
+		'name': '__common__',
+		'parent': 'Journal Voucher',
+		'parentfield': 'fields',
+		'parenttype': 'DocType'
 	},
 
 	# These values are common for all DocType
 	{
 		'_last_update': '1311251040',
 		'colour': 'White:FFF',
+		'default_print_format': 'Standard',
 		'doctype': 'DocType',
 		'module': 'Accounts',
 		'name': '__common__',
@@ -23,15 +33,15 @@
 		'show_in_menu': 0,
 		'subject': ' ',
 		'tag_fields': 'voucher_type',
-		'version': 309
+		'version': 311
 	},
 
-	# These values are common for all DocField
+	# These values are common for all DocFormat
 	{
-		'doctype': 'DocField',
+		'doctype': 'DocFormat',
 		'name': '__common__',
 		'parent': 'Journal Voucher',
-		'parentfield': 'fields',
+		'parentfield': 'formats',
 		'parenttype': 'DocType'
 	},
 
@@ -57,7 +67,6 @@
 		'cancel': 0,
 		'create': 0,
 		'doctype': 'DocPerm',
-		'idx': 1,
 		'permlevel': 1,
 		'role': 'Accounts Manager',
 		'submit': 0,
@@ -70,7 +79,6 @@
 		'cancel': 1,
 		'create': 1,
 		'doctype': 'DocPerm',
-		'idx': 2,
 		'permlevel': 0,
 		'role': 'Accounts Manager',
 		'submit': 1,
@@ -83,7 +91,6 @@
 		'cancel': 1,
 		'create': 1,
 		'doctype': 'DocPerm',
-		'idx': 3,
 		'permlevel': 0,
 		'role': 'Accounts User',
 		'submit': 1,
@@ -96,18 +103,28 @@
 		'cancel': 0,
 		'create': 0,
 		'doctype': 'DocPerm',
-		'idx': 4,
 		'permlevel': 1,
 		'role': 'Accounts User',
 		'submit': 0,
 		'write': 0
 	},
 
+	# DocFormat
+	{
+		'doctype': 'DocFormat',
+		'format': 'Payment Receipt Voucher'
+	},
+
+	# DocFormat
+	{
+		'doctype': 'DocFormat',
+		'format': 'Cheque Printing Format'
+	},
+
 	# DocField
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Section Break',
-		'idx': 1,
 		'label': 'Basic Info',
 		'oldfieldtype': 'Section Break',
 		'permlevel': 0
@@ -117,7 +134,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Section Break',
-		'idx': 2,
 		'label': '1. Select Series and Dates',
 		'oldfieldtype': 'Section Break',
 		'options': 'Simple',
@@ -128,7 +144,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Column Break',
-		'idx': 3,
 		'oldfieldtype': 'Column Break',
 		'permlevel': 0,
 		'width': '50%'
@@ -139,12 +154,11 @@
 		'doctype': 'DocField',
 		'fieldname': 'voucher_type',
 		'fieldtype': 'Select',
-		'idx': 4,
 		'in_filter': 1,
 		'label': 'Voucher Type',
 		'oldfieldname': 'voucher_type',
 		'oldfieldtype': 'Select',
-		'options': '\nJournal Entry\nBank Voucher\nCash Voucher\nCredit Card Voucher\nDebit Note\nCredit Note\nContra Voucher\nExcise Voucher\nWrite Off Voucher\nLoan Receipt',
+		'options': '\nJournal Entry\nBank Voucher\nCash Voucher\nCredit Card Voucher\nDebit Note\nCredit Note\nContra Voucher\nExcise Voucher\nWrite Off Voucher',
 		'permlevel': 0,
 		'print_hide': 0,
 		'search_index': 1
@@ -157,7 +171,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'write_off_amount',
 		'fieldtype': 'Currency',
-		'idx': 5,
 		'label': 'Write Off Amount <=',
 		'permlevel': 0,
 		'print_hide': 1,
@@ -172,7 +185,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'write_off_based_on',
 		'fieldtype': 'Select',
-		'idx': 6,
 		'label': 'Write Off Based On',
 		'options': 'Accounts Receivable\nAccounts Payable',
 		'permlevel': 0,
@@ -187,7 +199,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'naming_series',
 		'fieldtype': 'Select',
-		'idx': 7,
 		'label': 'Series',
 		'no_copy': 1,
 		'oldfieldname': 'naming_series',
@@ -205,7 +216,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'voucher_date',
 		'fieldtype': 'Date',
-		'idx': 8,
 		'in_filter': 1,
 		'label': 'Voucher Date',
 		'no_copy': 1,
@@ -223,7 +233,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'posting_date',
 		'fieldtype': 'Date',
-		'idx': 9,
 		'in_filter': 1,
 		'label': 'Posting Date',
 		'no_copy': 1,
@@ -239,7 +248,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'due_date',
 		'fieldtype': 'Date',
-		'idx': 10,
 		'label': 'Due Date',
 		'oldfieldname': 'due_date',
 		'oldfieldtype': 'Date',
@@ -253,7 +261,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'amendment_date',
 		'fieldtype': 'Date',
-		'idx': 11,
 		'label': 'Amendment Date',
 		'no_copy': 1,
 		'oldfieldname': 'amendment_date',
@@ -267,7 +274,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'amended_from',
 		'fieldtype': 'Link',
-		'idx': 12,
 		'label': 'Amended From',
 		'no_copy': 1,
 		'oldfieldname': 'amended_from',
@@ -283,7 +289,6 @@
 		'depends_on': "eval:doc.voucher_type == 'Write Off Voucher'",
 		'doctype': 'DocField',
 		'fieldtype': 'Button',
-		'idx': 13,
 		'label': 'Get Outstanding Invoices',
 		'options': 'get_outstanding_invoices',
 		'permlevel': 0,
@@ -295,7 +300,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Column Break',
-		'idx': 14,
 		'oldfieldtype': 'Column Break',
 		'permlevel': 0,
 		'width': '50%'
@@ -306,7 +310,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'cheque_no',
 		'fieldtype': 'Data',
-		'idx': 15,
 		'in_filter': 1,
 		'label': 'Cheque No',
 		'no_copy': 1,
@@ -321,7 +324,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'cheque_date',
 		'fieldtype': 'Date',
-		'idx': 16,
 		'label': 'Cheque Date',
 		'no_copy': 1,
 		'oldfieldname': 'cheque_date',
@@ -334,7 +336,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'clearance_date',
 		'fieldtype': 'Date',
-		'idx': 17,
 		'in_filter': 1,
 		'label': 'Clearance Date',
 		'no_copy': 1,
@@ -350,7 +351,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'user_remark',
 		'fieldtype': 'Small Text',
-		'idx': 18,
 		'in_filter': 1,
 		'label': 'User Remark',
 		'no_copy': 1,
@@ -365,7 +365,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'remark',
 		'fieldtype': 'Small Text',
-		'idx': 19,
 		'label': 'Remark',
 		'no_copy': 1,
 		'oldfieldname': 'remark',
@@ -378,7 +377,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Section Break',
-		'idx': 20,
 		'label': '2. Add / Edit GL Entries',
 		'oldfieldtype': 'Section Break',
 		'options': 'Simple',
@@ -387,10 +385,10 @@
 
 	# DocField
 	{
+		'allow_on_submit': 1,
 		'doctype': 'DocField',
 		'fieldname': 'entries',
 		'fieldtype': 'Table',
-		'idx': 21,
 		'label': 'Entries',
 		'oldfieldname': 'entries',
 		'oldfieldtype': 'Table',
@@ -403,7 +401,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Button',
-		'idx': 22,
 		'label': 'Get Balance',
 		'oldfieldtype': 'Button',
 		'permlevel': 0,
@@ -415,7 +412,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'total_debit',
 		'fieldtype': 'Currency',
-		'idx': 23,
 		'in_filter': 1,
 		'label': 'Total Debit',
 		'no_copy': 1,
@@ -429,7 +425,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'total_credit',
 		'fieldtype': 'Currency',
-		'idx': 24,
 		'in_filter': 1,
 		'label': 'Total Credit',
 		'no_copy': 1,
@@ -443,7 +438,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'difference',
 		'fieldtype': 'Currency',
-		'idx': 25,
 		'label': 'Difference',
 		'no_copy': 1,
 		'oldfieldname': 'difference',
@@ -456,7 +450,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Section Break',
-		'idx': 26,
 		'label': 'Addtional Info',
 		'oldfieldtype': 'Section Break',
 		'permlevel': 0
@@ -466,7 +459,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Column Break',
-		'idx': 27,
 		'oldfieldtype': 'Column Break',
 		'permlevel': 0,
 		'width': '50%'
@@ -477,7 +469,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'bill_no',
 		'fieldtype': 'Data',
-		'idx': 28,
 		'label': 'Bill No',
 		'oldfieldname': 'bill_no',
 		'oldfieldtype': 'Data',
@@ -490,7 +481,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'bill_date',
 		'fieldtype': 'Date',
-		'idx': 29,
 		'label': 'Bill Date',
 		'oldfieldname': 'bill_date',
 		'oldfieldtype': 'Date',
@@ -505,7 +495,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'is_opening',
 		'fieldtype': 'Select',
-		'idx': 30,
 		'in_filter': 1,
 		'label': 'Is Opening',
 		'oldfieldname': 'is_opening',
@@ -522,7 +511,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'aging_date',
 		'fieldtype': 'Date',
-		'idx': 31,
 		'label': 'Aging Date',
 		'no_copy': 0,
 		'oldfieldname': 'aging_date',
@@ -536,7 +524,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'cancel_reason',
 		'fieldtype': 'Data',
-		'idx': 32,
 		'label': 'Cancel Reason',
 		'no_copy': 1,
 		'oldfieldname': 'cancel_reason',
@@ -551,7 +538,6 @@
 		'fieldname': 'pay_to_recd_from',
 		'fieldtype': 'Data',
 		'hidden': 0,
-		'idx': 33,
 		'label': 'Pay To / Recd From',
 		'no_copy': 1,
 		'permlevel': 0,
@@ -565,7 +551,6 @@
 		'fieldname': 'total_amount',
 		'fieldtype': 'Data',
 		'hidden': 0,
-		'idx': 34,
 		'label': 'Total Amount',
 		'no_copy': 1,
 		'permlevel': 1,
@@ -579,7 +564,6 @@
 		'fieldname': 'total_amount_in_words',
 		'fieldtype': 'Data',
 		'hidden': 0,
-		'idx': 35,
 		'label': 'Total Amount in Words',
 		'no_copy': 1,
 		'permlevel': 1,
@@ -591,7 +575,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Column Break',
-		'idx': 36,
 		'oldfieldtype': 'Column Break',
 		'permlevel': 0,
 		'width': '50%'
@@ -602,7 +585,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'fiscal_year',
 		'fieldtype': 'Select',
-		'idx': 37,
 		'in_filter': 1,
 		'label': 'Fiscal Year',
 		'oldfieldname': 'fiscal_year',
@@ -619,7 +601,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'company',
 		'fieldtype': 'Link',
-		'idx': 38,
 		'in_filter': 1,
 		'label': 'Company',
 		'oldfieldname': 'company',
@@ -638,7 +619,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'select_print_heading',
 		'fieldtype': 'Link',
-		'idx': 39,
 		'label': 'Select Print Heading',
 		'no_copy': 1,
 		'oldfieldname': 'select_print_heading',
@@ -654,7 +634,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Section Break',
-		'idx': 40,
 		'oldfieldtype': 'Section Break',
 		'options': 'Simple',
 		'permlevel': 0
@@ -665,7 +644,6 @@
 		'allow_on_submit': 1,
 		'doctype': 'DocField',
 		'fieldtype': 'Button',
-		'idx': 41,
 		'label': 'View Ledger Entry',
 		'oldfieldtype': 'Button',
 		'permlevel': 0,
@@ -677,7 +655,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Section Break',
-		'idx': 42,
 		'label': 'TDS',
 		'oldfieldtype': 'Section Break',
 		'permlevel': 0,
@@ -690,7 +667,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'tds_applicable',
 		'fieldtype': 'Select',
-		'idx': 43,
 		'in_filter': 1,
 		'label': 'TDS Applicable',
 		'no_copy': 1,
@@ -709,7 +685,6 @@
 		'fieldname': 'tds_category',
 		'fieldtype': 'Select',
 		'hidden': 0,
-		'idx': 44,
 		'in_filter': 1,
 		'label': 'TDS Category',
 		'no_copy': 1,
@@ -729,7 +704,6 @@
 		'fieldname': 'supplier_account',
 		'fieldtype': 'Link',
 		'hidden': 0,
-		'idx': 45,
 		'label': 'Supplier Account',
 		'no_copy': 1,
 		'oldfieldname': 'supplier_account',
@@ -745,7 +719,6 @@
 		'colour': 'White:FFF',
 		'doctype': 'DocField',
 		'fieldtype': 'Button',
-		'idx': 46,
 		'label': 'Get TDS',
 		'no_copy': 0,
 		'oldfieldtype': 'Button',
@@ -760,7 +733,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'tax_code',
 		'fieldtype': 'Link',
-		'idx': 47,
 		'label': 'TDS Account Head',
 		'no_copy': 1,
 		'oldfieldname': 'tax_code',
@@ -775,7 +747,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'rate',
 		'fieldtype': 'Currency',
-		'idx': 48,
 		'label': 'Rate',
 		'no_copy': 1,
 		'oldfieldname': 'rate',
@@ -790,7 +761,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'ded_amount',
 		'fieldtype': 'Currency',
-		'idx': 49,
 		'label': 'Amount',
 		'no_copy': 1,
 		'oldfieldname': 'ded_amount',
