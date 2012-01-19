@@ -24,7 +24,7 @@ class DocType(TransactionBase):
 		response = self.doc.new_response + '\n\n[Please do not change the subject while responding.]'
 
 		# add last response to new response
-		response += self.last_response()
+		response += unicode(self.last_response(), 'utf-8')
 
 		signature = webnotes.conn.get_value('Email Settings',None,'support_signature')
 		if signature:
