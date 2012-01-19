@@ -36,7 +36,7 @@ class DocType(TransactionBase):
 			recipients = [self.doc.raised_by], \
 			sender=webnotes.conn.get_value('Email Settings',None,'support_email'), \
 			subject=subject, \
-			msg=response)
+			msg=response.encode('utf-8'))
 
 		self.doc.new_response = None
 		webnotes.conn.set(self.doc,'status','Waiting for Customer')
