@@ -3,24 +3,130 @@
 	<meta charset="utf-8">
 	<title>ERPNext</title>
 	<meta name="author" content="">
-	<script type="text/javascript">window._version_number="86"
+	<script type="text/javascript">window._version_number="102";
+
+/*
+*	lib/js/wn/class.js
+*/
+/*
+
+Inheritence "Class"
+-------------------
+see: http://ejohn.org/blog/simple-javascript-inheritance/
+To subclass, use:
+
+	var MyClass = Class.extend({
+		init: function
+	})
+
+*/
+
+/* Simple JavaScript Inheritance
+ * By John Resig http://ejohn.org/
+ * MIT Licensed.
+ */
+// Inspired by base2 and Prototype
+
+(function(){
+	var initializing = false, fnTest = /xyz/.test(function(){xyz;}) ? /\b_super\b/ : /.*/;
+	// The base Class implementation (does nothing)
+	this.Class = function(){};
+	
+	// Create a new Class that inherits from this class
+	Class.extend = function(prop) {
+		var _super = this.prototype;
+		
+		// Instantiate a base class (but only create the instance,
+		// don't run the init constructor)
+		initializing = true;
+		var prototype = new this();
+		initializing = false;
+		
+		// Copy the properties over onto the new prototype
+		for (var name in prop) {
+			// Check if we're overwriting an existing function
+			prototype[name] = typeof prop[name] == "function" && 
+				typeof _super[name] == "function" && fnTest.test(prop[name]) ?
+				(function(name, fn){
+					return function() {
+						var tmp = this._super;
+						
+						// Add a new ._super() method that is the same method
+						// but on the super-class
+						this._super = _super[name];
+						
+						// The method only need to be bound temporarily, so we
+						// remove it when we're done executing
+						var ret = fn.apply(this, arguments);				
+						this._super = tmp;
+						
+						return ret;
+					};
+				})(name, prop[name]) :
+				prop[name];
+		}
+		
+		// The dummy class constructor
+		function Class() {
+			// All construction is actually done in the init method
+			if ( !initializing && this.init )
+				this.init.apply(this, arguments);
+		}
+		
+		// Populate our constructed prototype object
+		Class.prototype = prototype;
+		
+		// Enforce the constructor to be what we expect
+		Class.prototype.constructor = Class;
+
+		// And make this class extendable
+		Class.extend = arguments.callee;
+		
+		return Class;
+	};
+})();
+
+/*
+*	lib/js/wn/provide.js
+*/
 
 wn={}
 wn.provide=function(namespace){var nsl=namespace.split('.');var l=nsl.length;var parent=window;for(var i=0;i<l;i++){var n=nsl[i];if(!parent[n]){parent[n]={}}
 parent=parent[n];}}
-wn.provide('wn.settings');wn.provide('wn.ui');wn.xmlhttp={request:function(){if(window.XMLHttpRequest)
+wn.provide('wn.settings');wn.provide('wn.ui');
+/*
+*	lib/js/wn/xmlhttp.js
+*/
+
+wn.xmlhttp={request:function(){if(window.XMLHttpRequest)
 return new XMLHttpRequest();else if(window.ActiveXObject)
 return new ActiveXObject("MsXml2.XmlHttp");},complete:function(req,callback,url){if(req.status==200||req.status==304){callback(req.responseText);}else{alert(url+' request error: '+req.statusText+' ('+req.status+')');}},get:function(url,callback,args,async){if(async===null)async=true;var req=wn.xmlhttp.request();req.onreadystatechange=function(){if(req.readyState==4){wn.xmlhttp.complete(req,callback,url)}}
 var sep=((args&&args.indexOf('?'))==-1)?'?':'&';var u=args?(url+sep+args):url;req.open('GET',u,async);req.send(null);if(!async){wn.xmlhttp.complete(req,callback,url)}}}
+/*
+*	lib/js/wn/versions.js
+*/
+
 wn.versions={check:function(){if(localStorage){if(window._version_number==-1||parseInt(localStorage._version_number)!=parseInt(window._version_number)){localStorage.clear();}
 localStorage.setItem('_version_number',window._version_number);}}}
+/*
+*	lib/js/wn/assets.js
+*/
+
 wn.assets={executed_:{},exists:function(src){if('localStorage'in window&&localStorage.getItem(src))
 return true},add:function(src,txt){if('localStorage'in window){localStorage.setItem(src,txt);}},get:function(src){return localStorage.getItem(src);},extn:function(src){if(src.indexOf('?')!=-1){src=src.split('?').slice(-1)[0];}
 return src.split('.').slice(-1)[0];},load:function(src){var t=src;wn.xmlhttp.get(t,function(txt){wn.assets.add(src,txt);},'q='+Math.floor(Math.random()*1000),false)},execute:function(src){if(!wn.assets.exists(src)){wn.assets.load(src);}
 var type=wn.assets.extn(src);if(wn.assets.handler[type]){wn.assets.handler[type](wn.assets.get(src),src);wn.assets.executed_[src]=1;}},handler:{js:function(txt,src){wn.dom.eval(txt);},css:function(txt,src){var se=document.createElement('style');se.type="text/css";if(se.styleSheet){se.styleSheet.cssText=txt;}else{se.appendChild(document.createTextNode(txt));}
 document.getElementsByTagName('head')[0].appendChild(se);},cgi:function(txt,src){wn.dom.eval(txt)}}}
+/*
+*	lib/js/wn/require.js
+*/
+
 wn.require=function(items){if(typeof items==="string"){items=[items];}
 var l=items.length;for(var i=0;i<l;i++){var src=items[i];if(!(src in wn.assets.executed_)){wn.assets.execute(src);}}}
+/*
+*	lib/js/wn/dom.js
+*/
+
 wn.provide('wn.dom');wn.dom.by_id=function(id){return document.getElementById(id);}
 wn.dom.eval=function(txt){var el=document.createElement('script');el.appendChild(document.createTextNode(txt));document.getElementsByTagName('head')[0].appendChild(el);}
 wn.dom.add=function(parent,newtag,className,cs,innerHTML,onclick){if(parent&&parent.substr)parent=wn.dom.by_id(parent);var c=document.createElement(newtag);if(parent)
@@ -32,10 +138,18 @@ if(cs)wn.dom.css(c,cs);if(innerHTML)c.innerHTML=innerHTML;if(onclick)c.onclick=o
 wn.dom.css=function(ele,s){if(ele&&s){for(var i in s)ele.style[i]=s[i];};return ele;}
 wn.dom.hide=function(ele){ele.style.display='none';}
 wn.dom.show=function(ele,value){if(!value)value='block';ele.style.display=value;}
+/*
+*	lib/js/wn/page.js
+*/
+
 wn.page={set:function(src){var new_selection=$('.inner div.content[_src="'+src+'"]');if(!new_selection.length){wn.assets.execute(src);new_selection=$('.inner div.content[_src="'+src+'"]');}
 $('.inner .current_page').removeClass('current_page');new_selection.addClass('current_page');var title=$('nav ul li a[href*="'+src+'"]').attr('title')||'No Title'
 state=window.location.hash;if(state!=src){window.location.hash=state;}
 else{document.title=title;}}}
+/*
+*	lib/js/lib/json2.js
+*/
+
 var JSON;if(!JSON){JSON={};}
 (function(){"use strict";function f(n){return n<10?'0'+n:n;}
 if(typeof Date.prototype.toJSON!=='function'){Date.prototype.toJSON=function(key){return isFinite(this.valueOf())?this.getUTCFullYear()+'-'+
@@ -60,7 +174,12 @@ return reviver.call(holder,key,value);}
 text=String(text);cx.lastIndex=0;if(cx.test(text)){text=text.replace(cx,function(a){return'\\u'+
 ('0000'+a.charCodeAt(0).toString(16)).slice(-4);});}
 if(/^[\],:{}\s]*$/.test(text.replace(/\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g,'@').replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g,']').replace(/(?:^|:|,)(?:\s*\[)+/g,''))){j=eval('('+text+')');return typeof reviver==='function'?walk({'':j},''):j;}
-throw new SyntaxError('JSON.parse');};}}());wn.versions.check();wn.require("lib/js/lib/jquery.min.js");wn.require("lib/js/lib/history/history.min.js");$(document).bind('ready',function(){var base=window.location.href.split('#')[0];$.each($('a[softlink!="false"]'),function(i,v){if(v.href.substr(0,base.length)==base){var path=(v.href.substr(base.length));if(path.substr(0,1)!='#'){v.href=base+'#'+path;}}});if(!wn.settings.no_history&&window.location.hash){wn.page.set(window.location.hash.substr(1));}});</script>
+throw new SyntaxError('JSON.parse');};}}());
+/*
+*	lib/js/core.js
+*/
+
+wn.versions.check();wn.require("lib/js/lib/jquery.min.js");wn.require("lib/js/lib/history/history.min.js");$(document).bind('ready',function(){var base=window.location.href.split('#')[0];$.each($('a[softlink!="false"]'),function(i,v){if(v.href.substr(0,base.length)==base){var path=(v.href.substr(base.length));if(path.substr(0,1)!='#'){v.href=base+'#'+path;}}});if(!wn.settings.no_history&&window.location.hash){wn.page.set(window.location.hash.substr(1));}});</script>
 </head>
 <body>
 	<header></header>

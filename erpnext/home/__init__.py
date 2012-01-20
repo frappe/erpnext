@@ -52,4 +52,5 @@ def update_feed(doc, method=None):
 		subject, color = feed_dict.get(doc.doctype, [None, None])
 		if subject:
 			subject = subject % doc.fields
+			
 			make_feed(doc, subject, color)
