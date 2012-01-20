@@ -311,7 +311,7 @@ cur_frm.cscript.calc_other_charges = function(doc , tname , fname , other_fname)
 			//enter item_wise_tax_detail i.e. tax rate on each item
 			var item_wise_tax_detail = cur_frm.cscript.get_item_wise_tax_detail(doc, rate, cl, i, tax, t);
 			if(tax[t].charge_type != "Actual") tax[t].item_wise_tax_detail += item_wise_tax_detail;
-			tax[t].total_amount = flt(tax_amount);     //stores actual tax amount in virtual field
+			tax[t].total_amount = roundNumber(flt(tax_amount), 2);     //stores actual tax amount in virtual field
 			tax[t].total_tax_amount = flt(prev_total);      //stores total amount in virtual field
 			tax[t].tax_amount += flt(tax_amount);       
 			var total_amount = flt(tax[t].tax_amount);
@@ -328,6 +328,8 @@ cur_frm.cscript.calc_other_charges = function(doc , tname , fname , other_fname)
 		}
 	}
 }
+
+function roundNumber(num, dec) {	var result = Math.round(num*Math.pow(10,dec))/Math.pow(10,dec);	return result;}
 
 cur_frm.cscript.check_charge_type_and_get_tax_amount = function( doc, tax, t, cl, rate, print_amt) {
   doc = locals[doc.doctype][doc.name];
