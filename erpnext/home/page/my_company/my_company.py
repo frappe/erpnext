@@ -1,6 +1,7 @@
 import webnotes
 
 from webnotes.utils import cint, load_json, cstr
+from webnotes.model.doc import Document
 
 try: import json
 except: import simplejson as json
@@ -65,8 +66,7 @@ def add_user(args):
 # add profile record
 #
 def add_profile(args):
-	from webnotes.utils import validate_email_add
-	from webnotes.model.doc import Document
+	from webnotes.utils import validate_email_add, now
 	email = args['user']
 			
 	sql = webnotes.conn.sql
@@ -80,7 +80,7 @@ def add_profile(args):
 	if sql("select name from tabProfile where name = %s", email):
 		# exists, enable it
 		sql("update tabProfile set enabled = 1, docstatus=0 where name = %s", email)
-		webnotes.msgprint('Profile exists, enabled it')
+		webnotes.msgprint('Profile exists, enabled it with new password')
 	else:
 		# does not exist, create it!
 		pr = Document('Profile')
@@ -92,11 +92,25 @@ def add_profile(args):
 		pr.user_type = 'System User'
 		pr.save(1)
 
-		if args.get('password'):
-			sql("""
-				UPDATE tabProfile 
-				SET password = PASSWORD(%s)
-				WHERE name = %s""", (args.get('password'), email))
+	if args.get('password'):
+		sql("""
+			UPDATE tabProfile 
+			SET password = PASSWORD(%s), modified = %s
+			WHERE name = %s""", (args.get('password'), now, email))
+
+	send_welcome_mail(email, args.get('password'))
+
+def send_welcome_mail(email, password):
+	"""send welcome mail to user with password and login url"""
+	pr = Document('Profile', email)
+	from webnotes.utils.email_lib import sendmail_md
+	args = {
+		'company': webnotes.conn.get_default('company'),
+		'name': email,
+		'password': password,
+		'account_url': webnotes.conn.get_default('account_url')
+	}
+	sendmail_md(pr.email, subject="Welcome to ERPNext", msg=welcome_txt % args)
 
 #
 # post comment
@@ -166,3 +180,18 @@ def update_security(args=''):
 		else:
 			webnotes.conn.sql("update tabProfile set password=password(%s) where name=%s", (args['new_password'], args['user']))
 	else: webnotes.msgprint('Settings Updated')
+
+welcome_txt = """
+## %(company)s
+
+#### Welcome!
+
+A new account has been created for you, here are your details:
+
+login-id: %(name)s
+password: %(password)s
+
+To login to your new ERPNext account, please go to:
+
+%(account_url)s
+"""

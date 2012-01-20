@@ -2,8 +2,10 @@ import webnotes
 from webnotes.model.doc import Document
 
 def execute():
+	from webnotes.modules import reload_doc
 	add_default_home_page()
 	cleanup()
+	reload_doc('setup','doctype','manage_account')
 	
 def cleanup():
 	from webnotes.model import delete_doc

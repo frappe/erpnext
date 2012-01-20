@@ -1,66 +1,60 @@
-# Please edit this list and import only required elements
+"""Global Defaults"""
 import webnotes
 
-from webnotes.utils import cint, cstr, get_defaults, set_default, fmt_money, get_last_day, get_first_day
-from webnotes import session, form, is_testing, msgprint, errprint
-
-sql = webnotes.conn.sql
-
-	
-# -----------------------------------------------------------------------------------------
-
+keydict = {
+	"fiscal_year": "current_fiscal_year",
+    'company': 'default_company',
+    'currency': 'default_currency',
+    'price_list_name': 'default_price_list',
+	'price_list_currency': 'default_price_list_currency',
+    'item_group': 'default_item_group',
+    'customer_group': 'default_customer_group',
+    'cust_master_name': 'cust_master_name', 
+    'supplier_type': 'default_supplier_type',
+    'supp_master_name': 'supp_master_name', 
+    'territory': 'default_territory',
+    'stock_uom': 'default_stock_uom',
+    'fraction_currency': 'default_currency_fraction',
+    'valuation_method': 'default_valuation_method',
+	'date_format': 'date_format',
+	'currency_format':'default_currency_format',
+	'account_url':'account_url'
+}
 
 class DocType:
-  def __init__(self, d, dl):
-    self.doc, self.doclist = d, dl
+	def __init__(self, d, dl):
+		self.doc, self.doclist = d, dl
 
-#---------------------------------------------------------------------------------------------------------------------------------------------  
-  def get_bal(self,arg):
-    bal = sql("select `tabAccount Balance`.balance,`tabAccount`.debit_or_credit from `tabAccount`,`tabAccount Balance` where `tabAccount Balance`.account=%s and `tabAccount Balance`.period=%s and `tabAccount Balance`.account=`tabAccount`.name ",(arg,self.doc.current_fiscal_year))
-    if bal:
-      return fmt_money(flt(bal[0][0])) + ' ' + bal[0][1]
-
-
-# =========================================================================================================================================
-
-  # Update Default
-  # ---------------
-  def set_system_default(self, defkey, defvalue):
-    set_default(defkey, defvalue)
-
-    if defkey == 'fiscal_year':
-      ysd = sql("select year_start_date from `tabFiscal Year` where name=%s", cstr(defvalue))
-      ysd = ysd and ysd[0][0] or ''
-      if ysd:
-        set_default('year_start_date', ysd.strftime('%Y-%m-%d'))
-        set_default('year_end_date', get_last_day(get_first_day(ysd,0,11)).strftime('%Y-%m-%d'))
-
-
-  # Update
-  # --------
-  def update_cp(self):
-    def_list = [['fiscal_year',self.doc.current_fiscal_year],
-                ['company',self.doc.default_company],
-                ['currency',self.doc.default_currency],
-                ['price_list_name',self.doc.default_price_list or ''],
-				['price_list_currency', self.doc.default_price_list_currency or ''],
-                ['item_group',self.doc.default_item_group or ''],
-                ['customer_group',self.doc.default_customer_group or ''],
-                ['cust_master_name',self.doc.cust_master_name or ''], 
-                ['supplier_type',self.doc.default_supplier_type or ''],
-                ['supp_master_name',self.doc.supp_master_name], 
-                ['territory',self.doc.default_territory or ''],
-                ['stock_uom',self.doc.default_stock_uom or ''],
-                ['fraction_currency',self.doc.default_currency_fraction or ''],
-                ['valuation_method',self.doc.default_valuation_method]]
-
-    for d in def_list:
-      self.set_system_default(d[0],d[1])
-    # Update Currency Format
+	def get_bal(self,arg):
+		"""get account balance (??)"""
+		from webnotes.utils import fmt_money, flt
+		bal = webnotes.conn.sql("select `tabAccount Balance`.balance,`tabAccount`.debit_or_credit from `tabAccount`,`tabAccount Balance` where `tabAccount Balance`.account=%s and `tabAccount Balance`.period=%s and `tabAccount Balance`.account=`tabAccount`.name ",(arg,self.doc.current_fiscal_year))
+		if bal:
+			return fmt_money(flt(bal[0][0])) + ' ' + bal[0][1]
 	
-    sql("update `tabSingles` set value = '%s' where field = 'currency_format' and doctype = 'Control Panel'" % self.doc.default_currency_format)
-    sql("update `tabSingles` set value = '%s' where field = 'date_format' and doctype = 'Control Panel'" %self.doc.date_format)
-
-
-    return get_defaults()
-
+	def validate(self):
+		"""validate"""
+		if not (self.doc.account_url and (self.doc.account_url.startswith('http://') \
+			or self.doc.account_url.startswith('https://'))):
+			webnotes.msgprint("Account URL must start with 'http://' or 'https://'", raise_exception=1)
+	
+	def on_update(self):
+		"""update defaults"""
+		self.validate()
+		
+		for key in keydict:
+			webnotes.conn.set_default(key, self.doc.fields.get(keydict[key], ''))
+			
+		# update year start date and year end date from fiscal_year
+		ysd = webnotes.conn.sql("""select year_start_date from `tabFiscal Year` 
+			where name=%s""", self.doc.fiscal_year)
+			
+		ysd = ysd and ysd[0][0] or ''
+		from webnotes.utils import get_first_day, get_last_day
+		if ysd:
+			webnotes.conn.set_default('year_start_date', ysd.strftime('%Y-%m-%d'))
+			webnotes.conn.set_default('year_end_date', \
+				get_last_day(get_first_day(ysd,0,11)).strftime('%Y-%m-%d'))
+		
+	def get_defaults(self):
+		return webnotes.conn.get_defaults()
