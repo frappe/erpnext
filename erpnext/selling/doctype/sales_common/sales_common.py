@@ -593,7 +593,9 @@ class StatusUpdater:
 				
 				If you want to increase your overflow tolerance, please increase tolerance %% in Global Defaults or Item master. 
 				
-				Or, you must reduce the %(compare_ref_field)s by %(reduce_by)s""" % item, raise_exception=1)
+				Or, you must reduce the %(compare_ref_field)s by %(reduce_by)s
+				
+				Also, please check if the order item has already been billed in the Sales Order""" % item, raise_exception=1)
 
 	def validate_qty(self, args, no_tolerance=None):
 		"""

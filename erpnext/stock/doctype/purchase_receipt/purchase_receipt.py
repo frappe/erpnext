@@ -92,6 +92,17 @@ class DocType(TransactionBase):
         raise Exception
 
 
+  def validate_challan_no(self):
+    "Validate if same challan no exists for same supplier in a purchase receipt"
+    if self.doc.challan_no:
+      exists = webnotes.conn.sql("""
+	    SELECT name FROM `tabPurchase Receipt`
+	    WHERE name!=%s AND supplier=%s AND challan_no=%s""", (self.doc.name, self.doc.supplier, self.doc.challan_no))
+      if exists:
+	    webnotes.msgprint("Another Purchase Receipt using the same Challan No. already exists.\
+		  Please enter a valid Challan No.", raise_exception=1)
+
+
   # update valuation rate
   def update_valuation_rate(self):
     total_b_cost = flt(self.doc.buying_cost_transport) + flt(self.doc.buying_cost_taxes) + flt(self.doc.buying_cost_other)
@@ -127,6 +138,7 @@ class DocType(TransactionBase):
     self.validate_accepted_rejected_qty()
     self.validate_inspection()             # Validate Inspection
     get_obj('Stock Ledger').validate_serial_no(self, 'purchase_receipt_details')
+    self.validate_challan_no()
 
     pc_obj = get_obj(dt='Purchase Common')
     pc_obj.validate_for_items(self)
