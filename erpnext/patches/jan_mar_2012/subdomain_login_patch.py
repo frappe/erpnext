@@ -4,7 +4,7 @@ from webnotes.model.doc import Document
 def execute():
 	add_default_home_page()
 	cleanup()
-	
+		
 def cleanup():
 	from webnotes.model import delete_doc
 	delete_doc("DocType", "SSO Control")
