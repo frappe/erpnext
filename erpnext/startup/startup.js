@@ -10,28 +10,18 @@ var user_full_nm = {};
 // check if session user is system manager
 if(inList(user_roles,'System Manager')) is_system_manager = 1;
 
+wn.require('erpnext/startup/toolbar.js');
+
 function startup_setup() {
 	pscript.is_erpnext_saas = cint(locals['Control Panel']['Control Panel'].sync_with_gateway)
 
 	if(get_url_arg('embed')) {
 		// hide header, footer
-		$dh(page_body.banner_area);
-		$dh(page_body.wntoolbar);
+		$('.topbar').css('display', 'none');
 		$dh(page_body.footer);
 		return;
 	}
-	// page structure
-	// --------------
-	if(page_body.wntoolbar) {
-		$td(page_body.wntoolbar.body_tab,0,0).innerHTML = '<i><b>erp</b>next</i>';
-		$y($td(page_body.wntoolbar.body_tab,0,0), {
-			width:'140px', 
-			color:'#FFF', 
-			paddingLeft:'8px', 
-			paddingRight:'8px', 
-			fontSize:'14px'
-		});		
-	}
+	
 	$dh(page_body.banner_area);
 
 	// sidebar
@@ -43,7 +33,7 @@ function startup_setup() {
 	page_body.footer.innerHTML = '<div class="erpnext-footer">Powered by <a href="https://erpnext.com">ERPNext</a></div>';
 
 	// setup toolbar
-	pscript.startup_setup_toolbar();
+	erpnext.toolbar.setup();
 }
 
 // ====================================================================
@@ -418,37 +408,6 @@ pscript.startup_set_module_order = function() {
 	$c_obj('Home Control', 'get_module_order', '', callback)
 
 }
-
-// ====================================================================
-
-pscript.startup_setup_toolbar = function() {
-  var menu_tab = page_body.wntoolbar.menu_table_right;
-	// help
-	// ----
-	$td(menu_tab,0,0).innerHTML = '<a style="font-weight: bold; color: #FFF" href="http://erpnext.blogspot.com/2011/03/erpnext-help.html" target="_blank">Help</a>';
-	
-	$td(menu_tab,0,1).innerHTML = '<a style="font-weight: bold; color: #FFF" href="http://groups.google.com/group/erpnext-user-forum" target="_blank">Forum</a>';
-	
-	if(pscript.is_erpnext_saas){
-		// Live Chat Help
-		// --------------
-		$td(menu_tab,0,2).innerHTML = '<a style="font-weight: bold; color: #FFF" href="http://www.providesupport.com?messenger=iwebnotes" target="_blank">Chat</a>';
-		
-		// Manage account
-		// --------------
-		if(is_system_manager) {
-			$td(menu_tab,0,3).innerHTML = '<a style="font-weight: bold; color: #FFF;" href="#!billing">Billing</a>';
-		}
-	}
-	else{
-		$dh($td(menu_tab,0,2));
-		$dh($td(menu_tab,0,3));
-	}
-
-	$y(cell, page_body.wntoolbar.right_table_style);
-
-}
-
 // chart of accounts
 // ====================================================================
 show_chart_browser = function(nm, chart_type){

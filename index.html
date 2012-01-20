@@ -3,7 +3,7 @@
 	<meta charset="utf-8">
 	<title>ERPNext</title>
 	<meta name="author" content="">
-	<script type="text/javascript">window._version_number="52"
+	<script type="text/javascript">window._version_number="82"
 
 wn={}
 wn.provide=function(namespace){var nsl=namespace.split('.');var l=nsl.length;var parent=window;for(var i=0;i<l;i++){var n=nsl[i];if(!parent[n]){parent[n]={}}
@@ -16,10 +16,9 @@ wn.versions={check:function(){if(localStorage){if(window._version_number==-1||pa
 localStorage.setItem('_version_number',window._version_number);}}}
 wn.assets={executed_:{},exists:function(src){if('localStorage'in window&&localStorage.getItem(src))
 return true},add:function(src,txt){if('localStorage'in window){localStorage.setItem(src,txt);}},get:function(src){return localStorage.getItem(src);},extn:function(src){if(src.indexOf('?')!=-1){src=src.split('?').slice(-1)[0];}
-return src.split('.').slice(-1)[0];},html_src:function(src){if(src.indexOf('/')!=-1){var t=src.split('/').slice(0,-1);t.push('src');t=t.join('/')+'/'+a.split('/').slice(-1)[0];}else{var t='src/'+src;}
-return t;},load:function(src){var t=wn.assets.extn(src)=='html'?wn.assets.html_src(src):src;wn.xmlhttp.get(t,function(txt){wn.assets.add(src,txt);},'q='&Math.floor(Math.random()*1000),false)},execute:function(src){if(!wn.assets.exists(src)){wn.assets.load(src);}
+return src.split('.').slice(-1)[0];},load:function(src){var t=src;wn.xmlhttp.get(t,function(txt){wn.assets.add(src,txt);},'q='+Math.floor(Math.random()*1000),false)},execute:function(src){if(!wn.assets.exists(src)){wn.assets.load(src);}
 var type=wn.assets.extn(src);if(wn.assets.handler[type]){wn.assets.handler[type](wn.assets.get(src),src);wn.assets.executed_[src]=1;}},handler:{js:function(txt,src){wn.dom.eval(txt);},css:function(txt,src){var se=document.createElement('style');se.type="text/css";if(se.styleSheet){se.styleSheet.cssText=txt;}else{se.appendChild(document.createTextNode(txt));}
-document.getElementsByTagName('head')[0].appendChild(se);},html:function(txt,src){var page=wn.dom.add($('.outer .inner').get(0),'div','content',null,txt);page.setAttribute("_src",src);},cgi:function(txt,src){wn.dom.eval(txt)}}}
+document.getElementsByTagName('head')[0].appendChild(se);},cgi:function(txt,src){wn.dom.eval(txt)}}}
 wn.require=function(items){if(typeof items==="string"){items=[items];}
 var l=items.length;for(var i=0;i<l;i++){var src=items[i];if(!(src in wn.assets.executed_)){wn.assets.execute(src);}}}
 wn.provide('wn.dom');wn.dom.by_id=function(id){return document.getElementById(id);}
@@ -64,13 +63,12 @@ if(/^[\],:{}\s]*$/.test(text.replace(/\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g,'@').
 throw new SyntaxError('JSON.parse');};}}());wn.versions.check();wn.require("lib/js/lib/jquery.min.js");wn.require("lib/js/lib/history/history.min.js");$(document).bind('ready',function(){var base=window.location.href.split('#')[0];$.each($('a[softlink!="false"]'),function(i,v){if(v.href.substr(0,base.length)==base){var path=(v.href.substr(base.length));if(path.substr(0,1)!='#'){v.href=base+'#'+path;}}});if(!wn.settings.no_history&&window.location.hash){wn.page.set(window.location.hash.substr(1));}});</script>
 </head>
 <body>
+	<header></header>
 	<div id="startup_div" style="padding: 8px; font-size: 14px;"></div>
-
 	<!-- Main Starts -->
 	<div id="body_div"> 
-
 		<!--static (no script) content-->
-		<div class="no_script" style='font-family: verdana, sans'>
+		<div class="no_script" style='font-family: Lucida Grande, Verdana, Sans; font-size: 12px'>
 			Loading...
 		</div>
 	</div>
