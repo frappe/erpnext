@@ -252,7 +252,7 @@ cur_frm.cscript.calc_doc_values = function(doc, cdt, cdn, tname, fname, other_fn
 	}
 
 	doc.net_total = inclusive_rate ? flt(net_total_incl) : flt(net_total);
-	doc.other_charges_total = flt(other_charges_total).toFixed(2);
+	doc.other_charges_total = flt(flt(other_charges_total).toFixed(2));
 	//doc.grand_total = flt(flt(net_total) + flt(other_charges_total));
 	doc.grand_total = flt((flt(net_total) + flt(other_charges_total)).toFixed(2));
 	doc.rounded_total = Math.round(doc.grand_total);
