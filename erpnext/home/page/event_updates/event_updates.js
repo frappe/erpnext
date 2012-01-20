@@ -632,7 +632,7 @@ pscript.complete_registration = function(is_complete) {
 		var d = new Dialog(400, 200, "Please Complete Your Registration");
 		if(user != 'Administrator'){
 			d.no_cancel(); // Hide close image
-			$dh(page_body.wntoolbar.wrapper);
+			$('header').toggle(false);
 		}
 
 		d.make_body([
@@ -672,7 +672,7 @@ pscript.complete_registration = function(is_complete) {
 				$c_obj('Setup Control','setup_account',JSON.stringify(args),function(r, rt){
 					sys_defaults = r.message;
 					d.hide();
-					$ds(page_body.wntoolbar.wrapper);
+					$('header').toggle(true);
 				});
 			}
 		}
