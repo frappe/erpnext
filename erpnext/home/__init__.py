@@ -48,9 +48,8 @@ def make_feed(doc, subject, color):
 
 def update_feed(doc, method=None):   
 	"adds a new feed"
-	if method=='validate':
-		return
-	subject, color = feed_dict.get(doc.doctype, [None, None])
-	if subject:
-		subject = subject % doc.fields
-		make_feed(doc, subject, color)
+	if method=='on_update':
+		subject, color = feed_dict.get(doc.doctype, [None, None])
+		if subject:
+			subject = subject % doc.fields
+			make_feed(doc, subject, color)

@@ -98,18 +98,17 @@ def add_profile(args):
 			SET password = PASSWORD(%s), modified = %s
 			WHERE name = %s""", (args.get('password'), now, email))
 
-	send_welcome_mail(email, args.get('password'))
+	send_welcome_mail(email, args)
 
-def send_welcome_mail(email, password):
+def send_welcome_mail(email, args):
 	"""send welcome mail to user with password and login url"""
 	pr = Document('Profile', email)
 	from webnotes.utils.email_lib import sendmail_md
-	args = {
+	args.update({
 		'company': webnotes.conn.get_default('company'),
-		'name': email,
 		'password': password,
 		'account_url': webnotes.conn.get_default('account_url')
-	}
+	})
 	sendmail_md(pr.email, subject="Welcome to ERPNext", msg=welcome_txt % args)
 
 #
@@ -184,7 +183,9 @@ def update_security(args=''):
 welcome_txt = """
 ## %(company)s
 
-#### Welcome!
+Dear %(first_name)s %(last_name)s
+
+Welcome!
 
 A new account has been created for you, here are your details:
 

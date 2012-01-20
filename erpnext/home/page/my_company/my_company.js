@@ -243,7 +243,8 @@ MemberItem = function(parent, det, mlist) {
 		// image
 		this.img = $a($td(this.tab,0,0),'img','',{width:'41px'});
 		set_user_img(this.img, det.name, null, 
-			(det.file_list ? det.file_list.split(NEWLINE)[0].split(',')[1] : ('no_img_' + (det.gender=='Female' ? 'f' : 'm'))));		
+			(det.file_list ? det.file_list.split(NEWLINE)[0].split(',')[1] : 
+				('no_img_' + (det.gender=='Female' ? 'f' : 'm'))));
 	}
 	
 	// set other details like email id, name etc

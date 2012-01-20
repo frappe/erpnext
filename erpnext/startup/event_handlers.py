@@ -28,3 +28,8 @@ def on_login_post_session(login_manager):
 				user=%s AND
 				sid!=%s""", \
 			(webnotes.session['user'], webnotes.session['sid']), as_list=1)
+
+def doclist_all(doc, method):
+	"""doclist trigger called from webnotes.model.doclist on any event"""
+	import home
+	home.update_feed(doc, method)

@@ -6,11 +6,14 @@ def execute():
 	add_default_home_page()
 	cleanup()
 	reload_doc('setup','doctype','manage_account')
+	webnotes.conn.commit()
+	webnotes.conn.sql("drop table tabDocTrigger")
 	
 def cleanup():
 	from webnotes.model import delete_doc
 	delete_doc("DocType", "SSO Control")
 	delete_doc("DocType", "WN ERP Cient Control")
+	delete_doc("DocType", "DocTrigger")
 	
 def add_default_home_page():
 	if not webnotes.conn.sql("""select name from `tabDefault Home Page`
