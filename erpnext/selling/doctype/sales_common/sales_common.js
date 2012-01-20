@@ -310,34 +310,21 @@ cur_frm.cscript.calc_other_charges = function(doc , tname , fname , other_fname)
       
 			//enter item_wise_tax_detail i.e. tax rate on each item
 			var item_wise_tax_detail = cur_frm.cscript.get_item_wise_tax_detail(doc, rate, cl, i, tax, t);
-      
-			// this is calculation part for all types
-			if(tax[t].charge_type != "Actual") {
-				tax[t].item_wise_tax_detail += item_wise_tax_detail;
-			}
-			//console.log(tax[t]);
-			//console.log(tax_amount);
-			//console.log(total);
-
-			tax[t].total_amount = flt(tax_amount.toFixed(2));     //stores actual tax amount in virtual field
+			if(tax[t].charge_type != "Actual") tax[t].item_wise_tax_detail += item_wise_tax_detail;
+			tax[t].total_amount = flt(tax_amount);     //stores actual tax amount in virtual field
 			tax[t].total_tax_amount = flt(prev_total);      //stores total amount in virtual field
 			tax[t].tax_amount += flt(tax_amount);       
-
-			//var total_amount = flt(tax_amount.toFixed(2));
-			//total_tax_amount = flt(tax[t].total_tax_amount) + flt(total_amount);
-			
-			set_multiple('RV Tax Detail', tax[t].name, { 'item_wise_tax_detail':tax[t].item_wise_tax_detail, 'amount':flt(tax[t].total_amount), 'total':flt((flt(total)+flt(tax[t].tax_amount)).toFixed(2))/*_tax_amount)*/}, other_fname);
-			
-			//console.log("Total: " + (flt(total)+flt(tax[t].tax_amount)));
-			
+			var total_amount = flt(tax[t].tax_amount);
+			total_tax_amount = flt(tax[t].total_tax_amount) + flt(total_amount);
+			set_multiple('RV Tax Detail', tax[t].name, { 'item_wise_tax_detail':tax[t].item_wise_tax_detail, 'amount':flt(total_amount.toFixed(2)), 'total':(flt(total)+flt(tax[t].tax_amount)).toFixed(2)/*_tax_amount)*/}, other_fname);
 			prev_total += flt(tax[t].total_amount);   // for previous row total
-			total += flt(tax_amount);     // for adding total to previous amount
+			total += flt(tax[t].tax_amount);     // for adding total to previous amount
 
 			if(tax[t].charge_type == 'Actual')
 				$td(otc,i+1,t+1).innerHTML = fmt_money(tax[t].total_amount);
 			else
 				$td(otc,i+1,t+1).innerHTML = '('+fmt_money(rate) + '%) ' +fmt_money(tax[t].total_amount);
-      
+
 		}
 	}
 }
