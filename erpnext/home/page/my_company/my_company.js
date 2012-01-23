@@ -579,7 +579,7 @@ MemberProfile = function(parent, uid, member_item) {
 		$ds(this.member_item.working_img);
 		$dh(this.wrapper);
 		this.loading = 1;
-		$c('webnotes.widgets.form.getdoc', {'name':this.uid, 'doctype':'Profile', 'user':user}, callback);	// onload		
+		$c('webnotes.widgets.form.load.getdoc', {'name':this.uid, 'doctype':'Profile', 'user':user}, callback);	// onload		
 	}
 	
 	// show / hide

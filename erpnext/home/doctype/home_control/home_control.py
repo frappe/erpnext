@@ -197,7 +197,10 @@ class DocType:
 		return count
 		
 	def get_todo_list(self):
-		return convert_to_lists(sql("select name, description, date, priority,checked from `tabToDo Item` where owner=%s order by field(priority,'High','Medium','Low') asc, date asc", session['user']))
+		return sql("""select name, description, date, 
+			priority, checked, reference_type, reference_name from `tabToDo Item` 
+			where owner=%s order by field(priority,'High','Medium','Low') asc, date asc""", \
+				session['user'], as_dict=1)
 		
 	def add_todo_item(self,args):
 		args = json.loads(args)
