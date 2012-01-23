@@ -5,14 +5,14 @@
 	{
 		'creation': '2010-08-08 17:08:55',
 		'docstatus': 0,
-		'modified': '2011-12-19 14:11:08',
+		'modified': '2012-01-23 16:07:56',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1316075905',
+		'_last_update': '1327314958',
 		'allow_trash': 1,
 		'colour': 'White:FFF',
 		'default_print_format': 'Standard',
@@ -26,7 +26,7 @@
 		'server_code_error': ' ',
 		'show_in_menu': 0,
 		'subject': '%(first_name)s %(last_name)s - Email: %(email_id)s | Contact: %(phone)s | Mobile: %(mobile_no)s',
-		'version': 243
+		'version': 245
 	},
 
 	# These values are common for all DocField
@@ -225,7 +225,7 @@
 	{
 		'colour': 'White:FFF',
 		'default': '0',
-		'depends_on': 'eval:(cint(doc.is_customer) || cint(doc.is_supplier) || cint(doc.is_sales_partner))',
+		'depends_on': 'eval:(doc.customer || doc.supplier || doc.sales_partner)',
 		'doctype': 'DocField',
 		'fieldname': 'is_primary_contact',
 		'fieldtype': 'Check',
