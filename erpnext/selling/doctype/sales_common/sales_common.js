@@ -5,6 +5,10 @@
 // cur_frm.cscript.other_fname - Other Charges fieldname
 // cur_frm.cscript.sales_team_fname - Sales Team fieldname
 
+function roundNumber(num, dec) {
+	var result = Math.round(num*Math.pow(10,dec))/Math.pow(10,dec);
+	return result;
+}
 
 // ============== Load Default Taxes ===================
 cur_frm.cscript.load_taxes = function(doc, cdt, cdn) {
@@ -153,7 +157,8 @@ cur_frm.cscript.basic_rate = function(doc, cdt, cdn) {
 		var basic_rate = cur_frm.cscript.back_calc_basic_rate(
 			doc, cur_frm.cscript.tname, fname, d, cur_frm.cscript.other_fname
 		);
-		if (d.basic_rate != basic_rate.toFixed(2)) { 
+		// TODO: remove roundNumber for basic_rate comparison
+		if (d.basic_rate != roundNumber(basic_rate, 2)) { 
 			d.basic_rate = basic_rate;
 			refresh_field('basic_rate', d.name, fname); 
 			msgprint("You cannot change Basic Rate* (Base Currency) when \
@@ -238,7 +243,7 @@ cur_frm.cscript.calc_doc_values = function(doc, cdt, cdn, tname, fname, other_fn
 	var net_total_incl = 0
 	var cl = getchildren(tname, doc.name, fname);
 	for(var i = 0; i<cl.length; i++){
-		net_total += flt(cl[i].amount);
+		net_total += flt(cl[i].basic_rate) * flt(cl[i].qty);
 		net_total_incl += flt(cl[i].export_amount);
 	}
 
@@ -251,13 +256,15 @@ cur_frm.cscript.calc_doc_values = function(doc, cdt, cdn, tname, fname, other_fn
 		}
 	}
 
+	if(flt(doc.conversion_rate)>1) {
+		net_total_incl *= flt(doc.conversion_rate);
+	}
+
 	doc.net_total = inclusive_rate ? flt(net_total_incl) : flt(net_total);
-	doc.other_charges_total = flt(flt(other_charges_total).toFixed(2));
-	//doc.grand_total = flt(flt(net_total) + flt(other_charges_total));
-	doc.grand_total = flt((flt(net_total) + flt(other_charges_total)).toFixed(2));
+	doc.other_charges_total = roundNumber(flt(other_charges_total), 2);
+	doc.grand_total = roundNumber((flt(net_total) + flt(other_charges_total)), 2);
 	doc.rounded_total = Math.round(doc.grand_total);
-	//doc.grand_total_export = flt(flt(doc.grand_total) / flt(doc.conversion_rate));
-	doc.grand_total_export = flt((flt(doc.grand_total) / flt(doc.conversion_rate)).toFixed(2));
+	doc.grand_total_export = roundNumber((flt(doc.grand_total) / flt(doc.conversion_rate)), 2);
 	doc.rounded_total_export = Math.round(doc.grand_total_export);
 	doc.total_commission = flt(flt(net_total) * flt(doc.commission_rate) / 100);
 }
@@ -277,9 +284,8 @@ cur_frm.cscript.calc_other_charges = function(doc , tname , fname , other_fname)
 	var otc = make_table(cur_frm.fields_dict['Other Charges Calculation'].disp_area,
 		cl.length + 1, tax.length + 1, '90%', [], { border:'1px solid #AAA', padding:'2px' });
 	$y(otc,{marginTop:'8px'});
-  
+
 	var tax_desc = {}; var tax_desc_rates = []; var net_total = 0;
-  
   
 	for(var i=0;i<cl.length;i++) {
 		net_total += flt(flt(cl[i].qty) * flt(cl[i].basic_rate));
@@ -290,13 +296,13 @@ cur_frm.cscript.calc_other_charges = function(doc , tname , fname , other_fname)
 		// Add Item Code in new Row
 		$td(otc,i+1,0).innerHTML = cl[i].item_code ? cl[i].item_code : cl[i].description;
     
-		var tax = getchildren('RV Tax Detail', doc.name, other_fname,doc.doctype);
+		//var tax = getchildren('RV Tax Detail', doc.name, other_fname,doc.doctype);
 		var total = net_total;
+    
     
 		for(var t=0;t<tax.length;t++){
 			var account = tax[t].account_head;
 			$td(otc,0,t+1).innerHTML = account?account:'';
-      
 			//Check For Rate
 			if(cl[i].item_tax_rate && check_tax[account]!=null) {
 				var rate = flt(check_tax[account]);
@@ -307,16 +313,16 @@ cur_frm.cscript.calc_other_charges = function(doc , tname , fname , other_fname)
 
 			//Check For Rate and get tax amount
 			var tax_amount = cur_frm.cscript.check_charge_type_and_get_tax_amount(doc,tax,t, cl[i], rate);
-      
+			
 			//enter item_wise_tax_detail i.e. tax rate on each item
 			var item_wise_tax_detail = cur_frm.cscript.get_item_wise_tax_detail(doc, rate, cl, i, tax, t);
 			if(tax[t].charge_type != "Actual") tax[t].item_wise_tax_detail += item_wise_tax_detail;
 			tax[t].total_amount = flt(tax_amount);     //stores actual tax amount in virtual field
 			tax[t].total_tax_amount = flt(prev_total);      //stores total amount in virtual field
-			tax[t].tax_amount += roundNumber(flt(tax_amount), 2);       
+			tax[t].tax_amount += flt(tax_amount);       
 			var total_amount = flt(tax[t].tax_amount);
 			total_tax_amount = flt(tax[t].total_tax_amount) + flt(total_amount);
-			set_multiple('RV Tax Detail', tax[t].name, { 'item_wise_tax_detail':tax[t].item_wise_tax_detail, 'amount':flt(total_amount.toFixed(2)), 'total':(flt(total)+flt(tax[t].tax_amount)).toFixed(2)/*_tax_amount)*/}, other_fname);
+			set_multiple('RV Tax Detail', tax[t].name, { 'item_wise_tax_detail':tax[t].item_wise_tax_detail, 'amount':roundNumber(flt(total_amount), 2), 'total':roundNumber(flt(total)+flt(tax[t].tax_amount), 2)}, other_fname);
 			prev_total += flt(tax[t].total_amount);   // for previous row total
 			total += flt(tax[t].tax_amount);     // for adding total to previous amount
 
@@ -327,10 +333,11 @@ cur_frm.cscript.calc_other_charges = function(doc , tname , fname , other_fname)
 
 		}
 	}
+	
+	for(var t=0;t<tax.length;t++){
+		tax[t].tax_amount = roundNumber(tax[t].tax_amount, 2);
+	}
 }
-
-function roundNumber(num, dec) {	var result = Math.round(num*Math.pow(10,dec))/Math.pow(10,dec);	return result;}
-
 cur_frm.cscript.check_charge_type_and_get_tax_amount = function( doc, tax, t, cl, rate, print_amt) {
   doc = locals[doc.doctype][doc.name];
   if (! print_amt) print_amt = 0;
@@ -347,7 +354,6 @@ cur_frm.cscript.check_charge_type_and_get_tax_amount = function( doc, tax, t, cl
       refresh_field('total_excise_rate');
       return
     }
-    
 	return tax_amount = (flt(rate) * flt(cl.amount) / 100);
   }
   else if(tax[t].charge_type == 'On Previous Row Amount'){
@@ -470,37 +476,27 @@ cur_frm.cscript.included_in_print_rate = function(doc, cdt, cdn) {
 
 // ********************** Update values in table ******************************
 cur_frm.cscript.update_fname_table = function(doc , tname , fname , n, other_fname) {
-  doc = locals[doc.doctype][doc.name] 
-  var net_total = 0
-  var cl = getchildren(tname, doc.name, fname);
-  var consider_incl_rate = cur_frm.cscript.consider_incl_rate(doc, other_fname);
-  for(var i=0;i<cl.length;i++) {
-    if(n == 1){
-		if(!consider_incl_rate) {
-			if(flt(cl[i].ref_rate) > 0) {
+	doc = locals[doc.doctype][doc.name] 
+	var net_total = 0
+	var cl = getchildren(tname, doc.name, fname);
+	var consider_incl_rate = cur_frm.cscript.consider_incl_rate(doc, other_fname);
+	for(var i=0;i<cl.length;i++) {
+		if(n == 1){
+			if(!consider_incl_rate) {
+				if(flt(cl[i].ref_rate) > 0) {
+					set_multiple(tname, cl[i].name, {
+						'export_rate': flt(flt(cl[i].ref_rate) * (100 - flt(cl[i].adj_rate)) / 100)
+					}, fname);
+				}
 				set_multiple(tname, cl[i].name, {
-					'export_rate': flt(flt(cl[i].ref_rate) * (100 - flt(cl[i].adj_rate)) / 100)
-				}, fname); 
-				
-			} 
-			// Commenting this part because ref_rate backcalculation injects floating point issues
-			/*else if(flt(cl[i].export_rate) > 0) {
-				var ref_rate = flt(cl[i].adj_rate)!=flt(100) ?
-					flt((100 * flt(cl[i].export_rate))/flt(100 - flt(cl[i].adj_rate))) :
-					flt(0)
-				set_multiple(tname, cl[i].name, { 'ref_rate': flt(ref_rate) }, fname);
-			} */
-
-			set_multiple(tname, cl[i].name, {
-				'export_amount': flt(flt(cl[i].qty) * flt(cl[i].export_rate)),
-				'basic_rate': flt(flt(cl[i].export_rate) * flt(doc.conversion_rate)),
-				'amount': flt((flt(cl[i].export_rate) * flt(doc.conversion_rate)) * flt(cl[i].qty))
-			}, fname);
-
-			var base_ref_rate = flt(cl[i].basic_rate) + flt(flt(cl[i].basic_rate) * flt(cl[i].adj_rate) / 100);
-			set_multiple(tname, cl[i].name, {
-				'base_ref_rate': flt(base_ref_rate)
-			}, fname);
+					'export_amount': flt(flt(cl[i].qty) * flt(cl[i].export_rate)),
+					'basic_rate': flt(flt(cl[i].export_rate) * flt(doc.conversion_rate)),
+					'amount': roundNumber(flt((flt(cl[i].export_rate) * flt(doc.conversion_rate)) * flt(cl[i].qty)), 2)
+				}, fname);
+				var base_ref_rate = flt(cl[i].basic_rate) + flt(flt(cl[i].basic_rate) * flt(cl[i].adj_rate) / 100);
+				set_multiple(tname, cl[i].name, {
+					'base_ref_rate': flt(base_ref_rate)
+				}, fname);
 
 		} else if(consider_incl_rate) {
 			if(flt(cl[i].export_rate) > 0) {
@@ -520,7 +516,7 @@ cur_frm.cscript.update_fname_table = function(doc , tname , fname , n, other_fna
 			var base_ref_rate = basic_rate + flt(basic_rate * flt(cl[i].adj_rate) / 100);
 			set_multiple(tname, cl[i].name, {
 				'basic_rate': flt(basic_rate),
-				'amount': flt(basic_rate * flt(cl[i].qty)),
+				'amount': roundNumber(flt(basic_rate * flt(cl[i].qty)), 2),
 				'export_amount': flt(flt(cl[i].qty) * flt(cl[i].export_rate)),
 				'base_ref_rate': flt(base_ref_rate)
 			}, fname);
@@ -655,4 +651,3 @@ cur_frm.cscript.validate_items = function(doc) {
     validated = false;
   }
 }
-
