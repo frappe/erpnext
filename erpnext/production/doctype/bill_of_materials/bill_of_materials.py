@@ -135,7 +135,7 @@ class DocType:
 		""" Uncheck others if current one is selected as default, update default bom in item master"""
 
 		if self.doc.is_default and self.doc.is_active == 'Yes':
-			sql("update `tabBill Of Materials` set is_default = 0 where name != %s", self.doc.name)
+			sql("update `tabBill Of Materials` set is_default = 0 where name != %s and item=%s", (self.doc.name, self.doc.item))
 
 			# update default bom in Item Master
 			sql("update `tabItem` set default_bom = %s where name = %s", (self.doc.name, self.doc.item))

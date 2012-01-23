@@ -1,0 +1,36 @@
+# Search Criteria, customer_address_contact
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2012-01-23 18:28:40',
+		'docstatus': 0,
+		'modified': '2012-01-23 18:28:40',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all Search Criteria
+	{
+		'add_col': "`tabAddress`.address_line1 AS 'Address Line 1'\n`tabAddress`.address_line2 AS 'Address Line 2'\n`tabAddress`.city AS 'City'\n`tabAddress`.state AS 'State'\n`tabAddress`.pincode AS 'Pincode'\n`tabAddress`.country AS 'Country'\n`tabContact`.first_name AS 'Contact First Name'\n`tabContact`.last_name AS 'Contact Last Name'\n`tabContact`.phone AS 'Contact Phone'\n`tabContact`.mobile_no AS 'Contact Mobile'\n`tabContact`.email_id AS 'Contact Email'",
+		'add_cond': '`tabAddress`.customer=`tabCustomer`.name\nifnull(`tabAddress`.is_primary_address, 0)=1\n`tabContact`.customer=`tabCustomer`.name\nifnull(`tabContact`.is_primary_contact, 0)=1',
+		'add_tab': '`tabAddress`\n`tabContact`',
+		'columns': 'Customer\x01ID,Customer\x01Customer Name',
+		'criteria_name': 'Customer Address Contact',
+		'doc_type': 'Customer',
+		'doctype': 'Search Criteria',
+		'filters': "{'Customer\x01Saved':1,'Customer\x01Submitted':1}",
+		'module': 'Selling',
+		'name': '__common__',
+		'page_len': 50,
+		'sort_by': '`tabCustomer`.`customer_name`',
+		'sort_order': 'ASC',
+		'standard': 'Yes'
+	},
+
+	# Search Criteria, customer_address_contact
+	{
+		'doctype': 'Search Criteria',
+		'name': 'customer_address_contact'
+	}
+]
