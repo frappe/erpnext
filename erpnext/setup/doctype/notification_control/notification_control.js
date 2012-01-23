@@ -32,7 +32,7 @@ cur_frm.cscript.notify = function(doc, args) {
 						args['send_to'] || doc.contact_email,
 						send_from,
 						send_from,
-						doc.company + " - " + print_heading,
+						doc.company + " - " + print_heading + " - " + doc.name,
 						res.message,
 						res.print_format
 					);
