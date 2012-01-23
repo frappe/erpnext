@@ -346,21 +346,32 @@ HomeToDo.prototype.render_item = function(item, det) {
 	$y(tab, {tableLayout:'fixed'});
 
 	var span = $a($td(tab, 0, 0), 'span', '', {padding:'2px',color:'#FFF',fontSize:'10px'
-		,backgroundColor:(det[3]=='Low' ? '#888' : (det[3]=='High' ? '#EDA857' : '#687FD3'))});
+		, backgroundColor:(det.priority=='Low' ? '#888' : 
+			(det.priority=='High' ? '#EDA857' : '#687FD3'))});
 		
 	$(span).css('-moz-border-radius','3px').css('-webkit-border-radius','3px');
-	span.innerHTML = det[3];
+	span.innerHTML = det.priority;
 
 	// text
-	var span = $a($td(tab, 0, 1), 'span', 'social', {lineHeight:'1.5em'}, replace_newlines(det[1]));
-	if(det[4]) $y(span,{textDecoration:'line-through'});
+	var span = $a($td(tab, 0, 1), 'div', 'social', {lineHeight:'1.5em'}, 
+		replace_newlines(det.description));
+	if(det.checked) $y(span,{textDecoration:'line-through'});
+	
+	// reference link
+	if(det.reference_name) {
+		$a($td(tab, 0, 1), 'div', 'social', '', 
+			repl('<a href="#!Form/%(reference_type)s/%(reference_name)s">%(reference_name)s</a>',
+				det))
+	}
 	
 	// if expired & open, then in red
-	if(!det[4] && dateutil.str_to_obj(det[2]) < new Date()) {
+	if(!det.checked && dateutil.str_to_obj(det.date) < new Date()) {
 		$y(span,{color:'RED'}); 
-		$a($td(tab, 0, 1), 'div', '', {fontSize:'10px', color:'#666'}, dateutil.str_to_user(det[2]) + ' (Overdue)');
+		$a($td(tab, 0, 1), 'div', '', {fontSize:'10px', color:'#666'},
+		 	dateutil.str_to_user(det.date) + ' (Overdue)');
 	} else {
-		$a($td(tab, 0, 1), 'div', '', {fontSize:'10px', color:'#666'}, dateutil.str_to_user(det[2]));		
+		$a($td(tab, 0, 1), 'div', '', {fontSize:'10px', color:'#666'}, 
+			dateutil.str_to_user(det.date));		
 	}
 }
 
@@ -371,10 +382,10 @@ HomeToDo.prototype.clear_dialog = function() {
 HomeToDo.prototype.set_dialog_values = function(det) {
 	var d = this.widget.dialog;
 	d.set_values({
-		date: det[2],
-		priority: det[3],
-		description: det[1],
-		checked: det[4]
+		date: det.date,
+		priority: det.priority,
+		description: det.description,
+		checked: det.checked
 	});
 	d.det = det;
 }
@@ -389,8 +400,6 @@ HomeToDo.prototype.save = function(btn) {
 	 	return;	
 	}
 
-	det.name = d.det ? d.det[0] : '';
-	
 	var callback = function(r,rt) {
 		btn.done_working();
 		me.widget.dialog.hide();
@@ -420,9 +429,6 @@ FeedList.prototype.make_head = function() {
 	// head
 
 	$a(this.head,'h1','', {display:'inline'}, 'Home'); 
-	$a(this.head,'span','link_type', {marginLeft:'7px', fontSize:'11px'}, 'help', function() {
-		msgprint('<b>What appears here?</b> This is where you get updates of everything you are permitted to follow')
-	})
 
 	// refresh
 	$a(this.head,'span','link_type', 
@@ -583,10 +589,6 @@ HomeStatusBar = function() {
 	
 	this.render = function(r) {
 		this.wrapper.innerHTML = '';
-		this.profile_settings = $a($a(this.wrapper, 'p'), 'span', 'link_type', {fontWeight:'bold'});
-		this.profile_settings.innerHTML = user_fullname + ' (Profile Settings)';
-		this.profile_settings.onclick = function() { loadpage('profile-settings'); }
-
 		this.span = $a($a(this.wrapper, 'p'), 'span', 'link_type', {fontWeight:'bold'});
 		this.span.onclick = function() { loadpage('My Company')	}
 		

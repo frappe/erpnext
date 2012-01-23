@@ -90,8 +90,6 @@ cur_frm.cscript['Declare Completed'] = function(doc,cdt,cdn){
 		
 		declare_completed_dialog.refresh_dt = function(){
 			cur_frm.cscript.refresh(this.doc, this.cdt, this.cdn);
-			msgprint("refersh done");
-			$c('webnotes.widgets.form.form_header.refresh_labels',this.doc,function(r,rt){});
 		}
 		
 		declare_completed_dialog.add = function() {
