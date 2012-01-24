@@ -15,7 +15,7 @@ cur_frm.cscript.account_type = function(doc, cdt, cdn) {
 cur_frm.cscript.onload = function(doc, cdt, cdn) {
   cur_frm.cscript.account_type(doc, cdt, cdn);
   // hide India specific fields
-  var cp = locals['Control Panel']['Control Panel'];
+  var cp = wn.control_panel;
   if(cp.country == 'India')
     unhide_field(['pan_number', 'tds_applicable', 'tds_details', 'TDS']);
   else

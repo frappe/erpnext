@@ -1,0 +1,99 @@
+# DocType, Top Bar Settings
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2012-01-24 10:21:41',
+		'docstatus': 0,
+		'modified': '2012-01-24 10:45:02',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all DocType
+	{
+		'_last_update': '1327380941',
+		'allow_attach': 1,
+		'colour': 'White:FFF',
+		'doctype': 'DocType',
+		'document_type': 'Other',
+		'issingle': 1,
+		'max_attachments': 1,
+		'module': 'Website',
+		'name': '__common__',
+		'section_style': 'Simple',
+		'show_in_menu': 0,
+		'version': 3
+	},
+
+	# These values are common for all DocField
+	{
+		'doctype': 'DocField',
+		'name': '__common__',
+		'parent': 'Top Bar Settings',
+		'parentfield': 'fields',
+		'parenttype': 'DocType',
+		'permlevel': 0
+	},
+
+	# These values are common for all DocPerm
+	{
+		'create': 1,
+		'doctype': 'DocPerm',
+		'name': '__common__',
+		'parent': 'Top Bar Settings',
+		'parentfield': 'permissions',
+		'parenttype': 'DocType',
+		'permlevel': 0,
+		'read': 1,
+		'write': 1
+	},
+
+	# DocType, Top Bar Settings
+	{
+		'doctype': 'DocType',
+		'name': 'Top Bar Settings'
+	},
+
+	# DocPerm
+	{
+		'doctype': 'DocPerm',
+		'role': 'System Manager'
+	},
+
+	# DocPerm
+	{
+		'doctype': 'DocPerm',
+		'role': 'Website Manager'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'description': 'Brand is what appears on the top-right of the toolbar. If it is an image, make sure it\nhas a transparent background and use the &lt;img /&gt; tag',
+		'doctype': 'DocField',
+		'fieldname': 'brand_html',
+		'fieldtype': 'Text',
+		'label': 'Brand HTML'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'top_bar_items',
+		'fieldtype': 'Table',
+		'label': 'Top Bar Items',
+		'options': 'Top Bar Item'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'file_list',
+		'fieldtype': 'Text',
+		'hidden': 1,
+		'label': 'File List',
+		'no_copy': 1,
+		'print_hide': 1
+	}
+]

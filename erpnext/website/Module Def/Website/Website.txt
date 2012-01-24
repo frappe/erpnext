@@ -1,0 +1,66 @@
+# Module Def, Website
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2012-01-23 17:05:32',
+		'docstatus': 0,
+		'modified': '2012-01-24 10:29:53',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all Module Def Role
+	{
+		'doctype': 'Module Def Role',
+		'name': '__common__',
+		'parent': 'Website',
+		'parentfield': 'roles',
+		'parenttype': 'Module Def'
+	},
+
+	# These values are common for all Module Def Item
+	{
+		'display_name': 'Top Bar Settings',
+		'doc_name': 'Top Bar Settings',
+		'doc_type': 'Single DocType',
+		'doctype': 'Module Def Item',
+		'name': '__common__',
+		'parent': 'Website',
+		'parentfield': 'items',
+		'parenttype': 'Module Def'
+	},
+
+	# These values are common for all Module Def
+	{
+		'disabled': 'No',
+		'doctype': u'Module Def',
+		'is_hidden': 'No',
+		'module_label': 'Website',
+		'module_name': 'Website',
+		'name': '__common__'
+	},
+
+	# Module Def, Website
+	{
+		'doctype': u'Module Def',
+		'name': 'Website'
+	},
+
+	# Module Def Item
+	{
+		'doctype': 'Module Def Item'
+	},
+
+	# Module Def Role
+	{
+		'doctype': 'Module Def Role',
+		'role': 'System Manager'
+	},
+
+	# Module Def Role
+	{
+		'doctype': 'Module Def Role',
+		'role': 'Website Manager'
+	}
+]

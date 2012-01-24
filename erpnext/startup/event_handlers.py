@@ -33,3 +33,21 @@ def doclist_all(doc, method):
 	"""doclist trigger called from webnotes.model.doclist on any event"""
 	import home
 	home.update_feed(doc, method)
+	
+def boot_session(bootinfo):
+	"""boot session - send website info if guest"""
+	import webnotes
+	import webnotes.model.doc
+	
+	if webnotes.session['user']=='Guest':
+		bootinfo['topbar'] = webnotes.model.doc.getsingle('Top Bar Settings')
+		bootinfo['topbaritems'] = webnotes.conn.sql("""select label, std_page, custom_page, parent_label
+			from `tabTop Bar Item`""", as_dict=1)
+	else:	
+		bootinfo['letter_heads'] = get_letter_heads()
+
+def get_letter_heads():
+	"""load letter heads with startup"""
+	import webnotes
+	ret = webnotes.conn.sql("select name, content from `tabLetter Head` where ifnull(disabled,0)=0")
+	dict(ret)

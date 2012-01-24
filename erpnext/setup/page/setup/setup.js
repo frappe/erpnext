@@ -1,9 +1,8 @@
 pscript.onload_Setup = function() {
   var parent = $i('setup_div');
-  add_space_holder(parent);
 
   var callback = function(r,rt){
-
+    $('#setup_div').empty();
     // header
     parent.page_head = new PageHeader(parent,'Setup');
     
@@ -11,7 +10,6 @@ pscript.onload_Setup = function() {
     var setup_data = new SetupData(r.message);
     pscript.setup_make_sections(setup_data);
     
-    remove_space_holder();
   }
   $c_obj('Setup Wizard Control','get_country','',callback);  
 }

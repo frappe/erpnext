@@ -462,7 +462,7 @@ MemberProfile = function(parent, uid, member_item) {
 	// delete user
 	// create a confirm dialog and call server method
 	this.delete_user = function() {
-		var cp = locals['Control Panel']['Control Panel'];
+		var cp = wn.control_panel;
 
 		var d = new Dialog(400,200,'Delete User');
 		d.make_body([

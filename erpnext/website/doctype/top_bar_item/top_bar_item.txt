@@ -1,0 +1,74 @@
+# DocType, Top Bar Item
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2012-01-24 10:24:19',
+		'docstatus': 0,
+		'modified': '2012-01-24 10:24:19',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all DocType
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocType',
+		'istable': 1,
+		'module': 'Website',
+		'name': '__common__',
+		'section_style': 'Simple',
+		'show_in_menu': 0,
+		'version': 1
+	},
+
+	# These values are common for all DocField
+	{
+		'doctype': 'DocField',
+		'name': '__common__',
+		'parent': 'Top Bar Item',
+		'parentfield': 'fields',
+		'parenttype': 'DocType',
+		'permlevel': 0
+	},
+
+	# DocType, Top Bar Item
+	{
+		'doctype': 'DocType',
+		'name': 'Top Bar Item'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'label',
+		'fieldtype': 'Data',
+		'label': 'Label'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'std_page',
+		'fieldtype': 'Select',
+		'label': 'Std Page',
+		'options': 'Home\nAbout\nContact\nProduct\nCustomer\nBlog\nPartner\nCareer\nCustom'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'custom_page',
+		'fieldtype': 'Link',
+		'label': 'Custom Page',
+		'options': 'Web Page'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'parent_label',
+		'fieldtype': 'Select',
+		'label': 'Parent Label'
+	}
+]
