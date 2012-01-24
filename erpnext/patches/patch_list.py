@@ -37,7 +37,7 @@ patch_list = [
 	},
 	{
 		'patch_module': 'patches.jan_mar_2012',
-		'patch_file': 'customer_address_contact',
+		'patch_file': 'customer_address_contact_patch',
 		'description': "Install Customer Address Contact report and run patches regarding primary address and contact"
 	},
 ]
