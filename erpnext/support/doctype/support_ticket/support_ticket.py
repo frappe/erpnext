@@ -19,7 +19,7 @@ class DocType(TransactionBase):
 		if not self.doc.new_response:
 			webnotes.msgprint("Please write something as a response", raise_exception=1)
 		
-		subject = '[' + self.doc.name + '] ' + self.doc.subject
+		subject = '[' + self.doc.name + '] ' + (self.doc.subject or 'No Subject Specified')
 		
 		response = self.doc.new_response + '\n\n[Please do not change the subject while responding.]'
 
