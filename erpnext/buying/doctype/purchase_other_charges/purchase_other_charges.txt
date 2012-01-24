@@ -5,16 +5,18 @@
 	{
 		'creation': '2010-08-08 17:09:15',
 		'docstatus': 0,
-		'modified': '2010-09-20 17:30:25',
+		'modified': '2012-01-24 12:42:18',
 		'modified_by': 'Administrator',
 		'owner': 'wasim@webnotestech.com'
 	},
 
 	# These values are common for all DocType
 	{
+		'_last_update': '1325570646',
 		'allow_trash': 1,
 		'autoname': 'field:title',
 		'colour': 'White:FFF',
+		'default_print_format': 'Standard',
 		'doctype': 'DocType',
 		'document_type': 'Master',
 		'module': 'Buying',
@@ -22,7 +24,7 @@
 		'section_style': 'Simple',
 		'server_code_error': ' ',
 		'show_in_menu': 0,
-		'version': 16
+		'version': 18
 	},
 
 	# These values are common for all DocField
@@ -54,7 +56,6 @@
 	# DocPerm
 	{
 		'doctype': 'DocPerm',
-		'idx': 1,
 		'permlevel': 1,
 		'role': 'All'
 	},
@@ -65,7 +66,6 @@
 		'cancel': 0,
 		'create': 0,
 		'doctype': 'DocPerm',
-		'idx': 2,
 		'permlevel': 0,
 		'role': 'Purchase Manager',
 		'submit': 0,
@@ -77,7 +77,6 @@
 		'cancel': 1,
 		'create': 1,
 		'doctype': 'DocPerm',
-		'idx': 3,
 		'permlevel': 0,
 		'role': 'System Manager',
 		'write': 1
@@ -88,7 +87,6 @@
 		'cancel': 1,
 		'create': 1,
 		'doctype': 'DocPerm',
-		'idx': 4,
 		'permlevel': 0,
 		'role': 'Purchase Master Manager',
 		'submit': 0,
@@ -100,7 +98,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'title',
 		'fieldtype': 'Data',
-		'idx': 1,
 		'in_filter': 1,
 		'label': 'Title',
 		'oldfieldname': 'title',
@@ -112,9 +109,19 @@
 	# DocField
 	{
 		'doctype': 'DocField',
+		'fieldname': 'company',
+		'fieldtype': 'Link',
+		'in_filter': 1,
+		'label': 'Company',
+		'options': 'Company',
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
 		'fieldname': 'purchase_tax_details',
 		'fieldtype': 'Table',
-		'idx': 2,
 		'label': 'Purchase Tax Details',
 		'oldfieldname': 'purchase_tax_details',
 		'oldfieldtype': 'Table',
