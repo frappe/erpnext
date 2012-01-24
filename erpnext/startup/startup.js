@@ -15,6 +15,7 @@ erpnext.startup.start = function() {
 	
 	if(user == 'Guest'){
 		$dh(page_body.left_sidebar);
+		wn.require('erpnext/website/css/website.css');
 		wn.require('erpnext/website/js/topbar.js');
 	} else {
 		// modules
