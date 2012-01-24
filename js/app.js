@@ -7,6 +7,7 @@ wn.app = {
 	version: '2.' + window._version_number
 }
 
+wn.modules_path = 'erpnext';
 wn.settings.no_history = true;
 
 wn.require('lib/js/lib/jquery.min.js');

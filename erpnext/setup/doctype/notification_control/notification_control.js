@@ -22,8 +22,7 @@ cur_frm.cscript.notify = function(doc, args) {
 					if(user!='Administrator') {
 						return user;
 					} else {
-						var cp = locals['Control Panel']['Control Panel'];
-						return (cp.auto_email_id || 'automail@erpnext.com');
+						return (wn.control_panel.auto_email_id || 'automail@erpnext.com');
 					}
 				})();
 				if(res.send) {
