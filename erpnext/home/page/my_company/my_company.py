@@ -35,8 +35,7 @@ def disable_profile(arg=''):
 		return 'Cannot disable Administrator'
 
 	webnotes.conn.sql("update tabProfile set enabled=0 where name=%s", arg)
-	login_manager = LoginManager()
-	login_manager.logout(user=arg)
+	webnotes.login_manager.logout(user=arg)
 	return 0
 
 #

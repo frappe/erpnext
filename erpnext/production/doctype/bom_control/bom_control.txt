@@ -5,8 +5,8 @@
 	{
 		'creation': '2010-08-08 17:08:53',
 		'docstatus': 0,
-		'modified': '2010-12-23 11:22:14',
-		'modified_by': 'umair@iwebnotes.com',
+		'modified': '2012-01-24 20:56:54',
+		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
 
@@ -20,7 +20,7 @@
 		'section_style': 'Simple',
 		'server_code_error': ' ',
 		'show_in_menu': 0,
-		'version': 107
+		'version': 108
 	},
 
 	# DocType, BOM Control

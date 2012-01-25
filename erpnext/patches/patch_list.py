@@ -40,4 +40,9 @@ patch_list = [
 		'patch_file': 'customer_address_contact_patch',
 		'description': "Install Customer Address Contact report and run patches regarding primary address and contact"
 	},
+	{
+		'patch_module': 'patches.jan_mar_2012',
+		'patch_file': 'doclabel_in_doclayer',
+		'description': "Show DocType Labels instead of DocType names in Customize Form View"
+	},
 ]

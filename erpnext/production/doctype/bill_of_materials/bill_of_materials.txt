@@ -5,14 +5,14 @@
 	{
 		'creation': '2010-08-08 17:08:52',
 		'docstatus': 0,
-		'modified': '2012-01-11 14:33:04',
+		'modified': '2012-01-24 19:49:00',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1326272478',
+		'_last_update': '1326963484',
 		'allow_attach': 0,
 		'allow_copy': 0,
 		'allow_email': 0,
@@ -36,7 +36,7 @@
 		'server_code_error': ' ',
 		'show_in_menu': 0,
 		'subject': '%(item)s',
-		'version': 194
+		'version': 196
 	},
 
 	# These values are common for all DocField
