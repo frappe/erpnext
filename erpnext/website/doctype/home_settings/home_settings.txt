@@ -1,0 +1,75 @@
+# DocType, Home Settings
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2012-01-24 15:56:06',
+		'docstatus': 0,
+		'modified': '2012-01-24 15:56:06',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all DocType
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocType',
+		'issingle': 1,
+		'module': 'Website',
+		'name': '__common__',
+		'section_style': 'Simple',
+		'show_in_menu': 0,
+		'version': 1
+	},
+
+	# These values are common for all DocField
+	{
+		'colour': 'White:FFF',
+		'description': 'HTML that will appear on the top part of the home page. Usually should contain a headline and image.',
+		'doctype': 'DocField',
+		'fieldname': 'banner_html',
+		'fieldtype': 'Code',
+		'label': 'Banner HTML',
+		'name': '__common__',
+		'parent': 'Home Settings',
+		'parentfield': 'fields',
+		'parenttype': 'DocType',
+		'permlevel': 0
+	},
+
+	# These values are common for all DocPerm
+	{
+		'create': 1,
+		'doctype': 'DocPerm',
+		'name': '__common__',
+		'parent': 'Home Settings',
+		'parentfield': 'permissions',
+		'parenttype': 'DocType',
+		'permlevel': 0,
+		'read': 1,
+		'write': 1
+	},
+
+	# DocType, Home Settings
+	{
+		'doctype': 'DocType',
+		'name': 'Home Settings'
+	},
+
+	# DocPerm
+	{
+		'doctype': 'DocPerm',
+		'role': 'System Manager'
+	},
+
+	# DocPerm
+	{
+		'doctype': 'DocPerm',
+		'role': 'Website Manager'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField'
+	}
+]

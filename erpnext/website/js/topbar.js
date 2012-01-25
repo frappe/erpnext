@@ -36,8 +36,9 @@ erpnext.topbar.TopBar = Class.extend({
 		for(var i=0;i<items.length;i++) {
 			var item = items[i];
 			if(!item.parent_label) {
-				$('header .nav:first').append(repl('<li><a href="#" data-label="%(label)s">\
-					%(label)s</a></li>', item))
+				item.route = item.std_page.toLowerCase();
+				$('header .nav:first').append(repl('<li><a href="#!%(route)s" \
+					data-label="%(label)s">%(label)s</a></li>', item))
 			}
 		}
 	}

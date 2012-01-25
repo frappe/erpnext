@@ -1,0 +1,17 @@
+#!python
+
+from webnotes.model.doc import getsingle
+
+home_settings = getsingle('Home Settings')
+
+html= """
+<div class="layout_wrapper">
+	<div id="content-home">
+		%(banner_html)s
+	</div>
+</div>
+""" % home_settings
+
+out = {
+	"content": html
+}
