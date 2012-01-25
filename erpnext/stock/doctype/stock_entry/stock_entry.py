@@ -107,7 +107,8 @@ class DocType:
 		if fg_item and bom_no:
 			# re-calculate cost for production item from bom
 			get_obj('BOM Control').calculate_cost(bom_no)
-			in_rate = flt(get_value('Bill Of Materials', bom_no, 'total_cost'))
+			bom_obj = get_obj('Bill Of Materials', bom_no)
+			in_rate = flt(bom_obj.doc.total_cost) / (flt(bom_obj.doc.quantity) or 1)
 		elif wh:
 			in_rate = get_obj('Valuation Control').get_incoming_rate(dt, tm, item, wh, qty, serial_no)
 		
@@ -146,7 +147,6 @@ class DocType:
 			child items of sub-contracted and sub assembly items 
 			and sub assembly items itself.
 		"""
-
 		if pro_obj.doc.consider_sa_items == 'Yes':
 			# Get all raw materials considering SA items as raw materials, 
 			# so no childs of SA items
@@ -157,6 +157,7 @@ class DocType:
 				group by item_code
 			""" % ((self.doc.process == 'Backflush') and flt(self.doc.fg_completed_qty) \
 					 or flt(pro_obj.doc.qty), cstr(pro_obj.doc.bom_no)))
+			
 			self.make_items_dict(fl_bom_sa_items)
 
 		else:
@@ -174,7 +175,6 @@ class DocType:
 				group by item_code,stock_uom
 			""" , ((self.doc.process == 'Backflush') and flt(self.doc.fg_completed_qty) \
 					or flt(pro_obj.doc.qty), cstr(pro_obj.doc.bom_no)))
-			
 			self.make_items_dict(fl_bom_sa_child_item)
 
 		# Update only qty remaining to be issued for production
