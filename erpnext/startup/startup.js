@@ -11,6 +11,8 @@ erpnext.startup.set_globals = function() {
 }
 
 erpnext.startup.start = function() {
+	$('#startup_div').html('Starting up...').toggle(true);
+	
 	erpnext.startup.set_globals();
 	
 	if(user == 'Guest'){
@@ -33,6 +35,7 @@ erpnext.startup.start = function() {
 	$('footer').html('<div class="erpnext-footer">\
 		Powered by <a href="https://erpnext.com">ERPNext</a></div>');
 
+	$('#startup_div').toggle(false);
 }
 
 // chart of accounts

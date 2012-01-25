@@ -1,17 +1,17 @@
 #!python
 
 from webnotes.model.doc import getsingle
+from jinja2 import Template
 
-home_settings = getsingle('Home Settings')
 
-html= """
+temp = Template("""
 <div class="layout_wrapper">
 	<div id="content-home">
-		%(banner_html)s
+		{{ home_settings.banner_html }}
 	</div>
 </div>
-""" % home_settings
+""")
 
 out = {
-	"content": html
+	"content": temp.render(home_settings = getsingle('Home Settings'))
 }
