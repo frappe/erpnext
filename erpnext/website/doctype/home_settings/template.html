@@ -1,0 +1,17 @@
+<div class="layout_wrapper">
+	<div id="content-home">
+		{% if doc.headline %}
+			<h1>{{ doc.headline }}</h1>
+		{% endif %}
+		{% if doc.banner %}
+			<img src="files/{{ doc.banner }}" style="width: 870px; margin-bottom: 20px" />
+		{% endif %}
+		<div class="web-main-section">
+			{{ doc.main_section_html }}
+		</div>
+		<div class="web-side-section">
+			{{ doc.side_section_html }}
+		</div>
+		<div style="clear: both"></div>
+	</div>
+</div>

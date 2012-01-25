@@ -5,31 +5,29 @@
 	{
 		'creation': '2012-01-24 15:56:06',
 		'docstatus': 0,
-		'modified': '2012-01-24 15:56:06',
+		'modified': '2012-01-25 13:31:56',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
+		'_last_update': '1327476129',
+		'allow_attach': 1,
 		'colour': 'White:FFF',
 		'doctype': 'DocType',
 		'issingle': 1,
+		'max_attachments': 5,
 		'module': 'Website',
 		'name': '__common__',
 		'section_style': 'Simple',
 		'show_in_menu': 0,
-		'version': 1
+		'version': 4
 	},
 
 	# These values are common for all DocField
 	{
-		'colour': 'White:FFF',
-		'description': 'HTML that will appear on the top part of the home page. Usually should contain a headline and image.',
 		'doctype': 'DocField',
-		'fieldname': 'banner_html',
-		'fieldtype': 'Code',
-		'label': 'Banner HTML',
 		'name': '__common__',
 		'parent': 'Home Settings',
 		'parentfield': 'fields',
@@ -70,6 +68,51 @@
 
 	# DocField
 	{
-		'doctype': 'DocField'
+		'colour': 'White:FFF',
+		'description': 'HTML that will appear on the top part of the home page. For no headline, leave blank',
+		'doctype': 'DocField',
+		'fieldname': 'headline',
+		'fieldtype': 'Text',
+		'label': 'Headline'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'banner',
+		'fieldtype': 'Select',
+		'label': 'Banner',
+		'options': 'attach_files:'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'description': 'For formatting, use \n<a href="http://warpedvisions.org/projects/markdown-cheat-sheet/" \ntarget = "_blank">markdown</a>',
+		'doctype': 'DocField',
+		'fieldname': 'main_section',
+		'fieldtype': 'Code',
+		'label': 'Main Section'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'description': 'For formatting, use \n<a href="http://warpedvisions.org/projects/markdown-cheat-sheet/" \ntarget = "_blank">markdown</a>',
+		'doctype': 'DocField',
+		'fieldname': 'side_section',
+		'fieldtype': 'Code',
+		'label': 'Side Section'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'file_list',
+		'fieldtype': 'Text',
+		'hidden': 1,
+		'label': 'File List',
+		'no_copy': 1,
+		'print_hide': 1
 	}
 ]
