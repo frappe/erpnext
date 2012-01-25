@@ -1,0 +1,24 @@
+<div class="layout_wrapper">
+	<div class="web-content" id="content-contact-us">
+		{% if doc.headline %}
+			<h1>{{ doc.headline }}</h1>
+		{% endif %}
+		<div class="web-main-section">
+			<label>Your Name*</label>
+			<div><input name="contact-name" type="text"/></div>
+			<br>
+			<label>Email*</label>
+			<div><input name="contact-email" type="text"/></div>
+			<br>
+			<label>Message*</label>
+			<div><textarea name="contact-message" style="height: 200px"></textarea></div>
+			<br>
+			<div><button class="btn primary">Send</button></div>
+			{{ doc.main_section_html }}
+		</div>
+		<div class="web-side-section">
+			{{ doc.side_section_html }}
+		</div>
+		<div style="clear: both"></div>
+	</div>
+</div>
