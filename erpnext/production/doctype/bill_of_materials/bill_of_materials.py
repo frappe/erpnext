@@ -175,7 +175,6 @@ class DocType:
 
 		self.update_flat_bom_engine(is_submit = self.doc.docstatus)
 
-
 	
 
 	def calculate_op_cost(self):
@@ -369,7 +368,6 @@ class DocType:
 			})
 			if d.bom_no:
 				self.get_child_flat_bom_items(d.bom_no, d.qty)
-
 
 
 	def update_flat_bom_engine(self, is_submit = 0):
