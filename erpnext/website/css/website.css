@@ -1,0 +1,21 @@
+#body_div {
+	width: 900px;
+	margin: auto;
+}
+
+header .topbar .container {
+	width: 900px;
+	margin: auto;
+}
+
+.web-main-section {
+	width: 65%;
+	float: left;
+	margin-bottom: 20px;
+}
+
+.web-side-section {
+	width: 30%;
+	float: right;
+	margin-bottom: 20px;
+}

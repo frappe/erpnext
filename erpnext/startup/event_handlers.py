@@ -50,4 +50,4 @@ def get_letter_heads():
 	"""load letter heads with startup"""
 	import webnotes
 	ret = webnotes.conn.sql("select name, content from `tabLetter Head` where ifnull(disabled,0)=0")
-	dict(ret)
+	return dict(ret)

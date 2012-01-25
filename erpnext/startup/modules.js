@@ -215,7 +215,8 @@ SidebarItem.prototype.show_items = function() {
 					}
 				}
 				if(me.il[i].doc_type=='Reports') has_reports = 1;
-				if(in_list(['Single DocType', 'Pages', 'Setup Forms'], me.il[i].doc_type)) has_tools = 1;
+				if(in_list(['Single DocType', 'Pages', 'Setup Forms'], me.il[i].doc_type)) 
+					has_tools = 1;
 			}
 			// reports
 			if(has_reports) {

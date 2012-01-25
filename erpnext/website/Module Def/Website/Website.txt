@@ -5,7 +5,7 @@
 	{
 		'creation': '2012-01-23 17:05:32',
 		'docstatus': 0,
-		'modified': '2012-01-24 10:29:53',
+		'modified': '2012-01-24 15:57:51',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
@@ -21,9 +21,6 @@
 
 	# These values are common for all Module Def Item
 	{
-		'display_name': 'Top Bar Settings',
-		'doc_name': 'Top Bar Settings',
-		'doc_type': 'Single DocType',
 		'doctype': 'Module Def Item',
 		'name': '__common__',
 		'parent': 'Website',
@@ -49,6 +46,17 @@
 
 	# Module Def Item
 	{
+		'display_name': 'Top Bar Settings',
+		'doc_name': 'Top Bar Settings',
+		'doc_type': 'Single DocType',
+		'doctype': 'Module Def Item'
+	},
+
+	# Module Def Item
+	{
+		'display_name': 'Home Settings',
+		'doc_name': 'Home Settings',
+		'doc_type': 'Forms',
 		'doctype': 'Module Def Item'
 	},
 

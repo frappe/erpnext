@@ -15,8 +15,15 @@ def cleanup():
 	delete_doc("DocType", "SSO Control")
 	delete_doc("DocType", "WN ERP Client Control")
 	delete_doc("DocType", "DocTrigger")
+
+	# cleanup control panel
 	delete_doc("DocType", "Control Panel")
 	reload_doc("core", "doctype", "control_panel")
+
+	# cleanup page
+	delete_doc("DocType", "Control Panel")
+	reload_doc("core", "doctype", "control_panel")
+	
 	webnotes.conn.sql("""delete from tabSingles
 		where field like 'startup_%' and doctype='Control Panel'""")
 	
