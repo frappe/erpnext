@@ -14,7 +14,8 @@ sql = webnotes.conn.sql
 get_value = webnotes.conn.get_value
 in_transaction = webnotes.conn.in_transaction
 convert_to_lists = webnotes.conn.convert_to_lists
-	
+session = webnotes.session
+
 # -----------------------------------------------------------------------------------------
 
 from utilities.transaction_base import TransactionBase
@@ -153,7 +154,9 @@ class DocType(TransactionBase):
 	def get_item_details(self, item_code):
 		ret = get_obj('Sales Common').get_item_details(item_code, self)
 		if item_code and cint(self.doc.is_pos) == 1:
-			dtl = sql("select income_account, warehouse, cost_center from `tabPOS Setting` where user = '%s' and company = '%s'" % (session['user'], self.doc.company), as_dict=1)				 
+			dtl = sql("""select income_account, warehouse, cost_center from 
+				`tabPOS Setting` where user = '%s' and company = '%s'""" % (session['user'], 
+				self.doc.company), as_dict=1)				 
 			if not dtl:
 				dtl = sql("select income_account, warehouse, cost_center from `tabPOS Setting` where ifnull(user,'') = '' and company = '%s'" % (self.doc.company), as_dict=1)
 			if dtl and dtl[0]['income_account']: ret['income_account'] = dtl and dtl[0]['income_account']

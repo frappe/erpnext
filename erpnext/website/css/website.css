@@ -22,4 +22,7 @@ header .topbar .container {
 	width: 30%;
 	float: right;
 	margin-bottom: 20px;
+	margin-right: 15px;
+	color: #606060;
+	overflow-x: hidden;
 }

@@ -212,7 +212,8 @@ HomeWidgetItem.prototype.delete_item = function() {
 	var callback = function(r,rt) {
 		$(me.wrapper).slideUp();
 	}
-	$c_obj('Home Control',this.widget.delete_method, this.widget.get_item_id(this.det) ,callback);
+	$c_obj('Home Control',this.widget.delete_method, 
+		this.widget.get_item_id(this.det) ,callback);
 		
 }
 
@@ -324,7 +325,7 @@ HomeToDo = function(widget) {
 	this.widget.get_list_method = 'get_todo_list';
 	this.widget.delete_method = 'remove_todo_item';
 	this.widget.no_items_message = 'Nothing to do?';
-	this.widget.get_item_id = function(det) { return det[0]; }
+	this.widget.get_item_id = function(det) { return det.name; }
 
 	this.widget.decorator = this;
 
