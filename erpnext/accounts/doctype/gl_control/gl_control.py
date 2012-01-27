@@ -589,5 +589,5 @@ def send_notification(new_rv):
 
 	msg = hd + tbl + totals
 	from webnotes.utils.email_lib import sendmail
-	sendmail(recipients = [new_rv.doc.email_notification_address], \
+	sendmail(recipients = new_rv.doc.notification_email_address.split(", "), \
 		sender=new_rv.doc.owner, subject=subject, parts=[['text/plain', msg]])
