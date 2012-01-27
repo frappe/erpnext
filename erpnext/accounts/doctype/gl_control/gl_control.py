@@ -505,9 +505,9 @@ def manage_recurring_invoices():
 		and notify the concerned people
 	"""	
 	rv = webnotes.conn.sql("""select name, recurring_id from `tabReceivable Voucher` where ifnull(convert_into_recurring_invoice, 0) = 1 
-			and next_date = %s and next_date <= end_date order by next_date	desc""", nowdate())
+			and next_date = %s and next_date <= end_date and docstatus=1 order by next_date	desc""", nowdate())
 	for d in rv:
-		if not webnotes.conn.sql("""select name from `tabReceivable Voucher` where posting_date = %s and recurring_id = %s""", (nowdate(), d[1])):
+		if not webnotes.conn.sql("""select name from `tabReceivable Voucher` where posting_date = %s and recurring_id = %s and docstatus=1""", (nowdate(), d[1])):
 			prev_rv = get_obj('Receivable Voucher', d[0], with_children=1)
 			new_rv = create_new_invoice(prev_rv)
 
@@ -524,6 +524,7 @@ def create_new_invoice(prev_rv):
 	new_rv.doc.posting_date = new_rv.doc.next_date
 	new_rv.doc.aging_date = new_rv.doc.next_date
 	new_rv.doc.due_date = add_days(new_rv.doc.next_date, cint(date_diff(prev_rv.doc.due_date, prev_rv.doc.posting_date)))
+	new_rv.doc.owner = prev_rv.doc.owner
 	new_rv.doc.save()
 
 	# submit and after submit
