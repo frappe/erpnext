@@ -42,7 +42,7 @@ def boot_session(bootinfo):
 	if webnotes.session['user']=='Guest':
 		bootinfo['topbar'] = webnotes.model.doc.getsingle('Top Bar Settings')
 		bootinfo['topbaritems'] = webnotes.conn.sql("""select label, std_page, custom_page, parent_label
-			from `tabTop Bar Item`""", as_dict=1)
+			from `tabTop Bar Item` where parent='Top Bar Settings' order by idx asc""", as_dict=1)
 	else:	
 		bootinfo['letter_heads'] = get_letter_heads()
 

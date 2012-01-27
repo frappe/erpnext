@@ -20,7 +20,7 @@ erpnext.topbar.TopBar = Class.extend({
 		$('header').append('<div class="topbar">\
 			<div class="topbar-inner">\
 			<div class="container">\
-				<a class="brand">[brand]</a>\
+				<a class="brand" href="#!home">[brand]</a>\
 				<ul class="nav">\
 				</ul>\
 				<img src="lib/images/ui/spinner.gif" id="spinner"/>\
