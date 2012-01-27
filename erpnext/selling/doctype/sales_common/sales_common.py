@@ -8,7 +8,6 @@ from webnotes.model.doclist import getlist, copy_doclist
 from webnotes.model.code import get_obj, get_server_obj, run_server_obj, updatedb, check_syntax
 from webnotes import session, form, is_testing, msgprint, errprint
 
-sql = webnotes.conn.sql
 get_value = webnotes.conn.get_value
 in_transaction = webnotes.conn.in_transaction
 convert_to_lists = webnotes.conn.convert_to_lists
@@ -44,7 +43,7 @@ class DocType(TransactionBase):
 		if obj.doc.doctype != 'Quotation':
 			obj.doc.clear_table(obj.doclist,'sales_team')
 			idx = 0
-			for d in sql("select sales_person, allocated_percentage, allocated_amount, incentives from `tabSales Team` where parent = '%s'" % obj.doc.customer):
+			for d in webnotes.conn.sql("select sales_person, allocated_percentage, allocated_amount, incentives from `tabSales Team` where parent = '%s'" % obj.doc.customer):
 				ch = addchild(obj.doc, 'sales_team', 'Sales Team', 1, obj.doclist)
 				ch.sales_person = d and cstr(d[0]) or ''
 				ch.allocated_percentage = d and flt(d[1]) or 0
@@ -59,7 +58,7 @@ class DocType(TransactionBase):
 	def get_contact_details(self, obj = '', primary = 0):
 		cond = " and contact_name = '"+cstr(obj.doc.contact_person)+"'"
 		if primary: cond = " and is_primary_contact = 'Yes'"
-		contact = sql("select contact_name, contact_no, email_id, contact_address from `tabContact` where customer = '%s' and docstatus != 2 %s" %(obj.doc.customer, cond), as_dict = 1)
+		contact = webnotes.conn.sql("select contact_name, contact_no, email_id, contact_address from `tabContact` where customer = '%s' and docstatus != 2 %s" %(obj.doc.customer, cond), as_dict = 1)
 		if not contact:
 			return
 		c = contact[0]
@@ -74,7 +73,7 @@ class DocType(TransactionBase):
 	# Get customer's primary shipping details
 	# ==============================================================
 	def get_shipping_details(self, obj = ''):
-		det = sql("select name, ship_to, shipping_address from `tabShipping Address` where customer = '%s' and docstatus != 2 and ifnull(is_primary_address, 'Yes') = 'Yes'" %(obj.doc.customer), as_dict = 1)
+		det = webnotes.conn.sql("select name, ship_to, shipping_address from `tabShipping Address` where customer = '%s' and docstatus != 2 and ifnull(is_primary_address, 'Yes') = 'Yes'" %(obj.doc.customer), as_dict = 1)
 		obj.doc.ship_det_no = det and det[0]['name'] or ''
 		obj.doc.ship_to = det and det[0]['ship_to'] or ''
 		obj.doc.shipping_address = det and det[0]['shipping_address'] or ''
@@ -84,14 +83,14 @@ class DocType(TransactionBase):
 	# ====================
 	def get_invoice_details(self, obj = ''):
 		if obj.doc.company:
-			acc_head = sql("select name from `tabAccount` where name = '%s' and docstatus != 2" % (cstr(obj.doc.customer) + " - " + get_value('Company', obj.doc.company, 'abbr')))
+			acc_head = webnotes.conn.sql("select name from `tabAccount` where name = '%s' and docstatus != 2" % (cstr(obj.doc.customer) + " - " + get_value('Company', obj.doc.company, 'abbr')))
 			obj.doc.debit_to = acc_head and acc_head[0][0] or ''
 
 
 	# Get Customer Details along with its primary contact details
 	# ==============================================================
 	def get_customer_details(self, obj = '', inv_det_reqd = 1):
-		details = sql("select customer_name,address, territory, customer_group, default_sales_partner, default_commission_rate from `tabCustomer` where name = '%s' and docstatus != 2" %(obj.doc.customer), as_dict = 1)
+		details = webnotes.conn.sql("select customer_name,address, territory, customer_group, default_sales_partner, default_commission_rate from `tabCustomer` where name = '%s' and docstatus != 2" %(obj.doc.customer), as_dict = 1)
 		obj.doc.customer_name = details and details[0]['customer_name'] or ''
 		obj.doc.customer_address =	details and details[0]['address'] or ''
 		obj.doc.territory = details and details[0]['territory'] or ''
@@ -113,8 +112,8 @@ class DocType(TransactionBase):
 		if not obj.doc.price_list_name:
 			msgprint("Please Select Price List before selecting Items")
 			raise Exception
-		item = sql("select description, item_name, brand, item_group, stock_uom, default_warehouse, default_income_account, default_sales_cost_center, description_html from `tabItem` where name = '%s' and (ifnull(end_of_life,'')='' or end_of_life >	now() or end_of_life = '0000-00-00') and (is_sales_item = 'Yes' or is_service_item = 'Yes')" %(item_code), as_dict=1)
-		tax = sql("select tax_type, tax_rate from `tabItem Tax` where parent = %s" , item_code)
+		item = webnotes.conn.sql("select description, item_name, brand, item_group, stock_uom, default_warehouse, default_income_account, default_sales_cost_center, description_html from `tabItem` where name = '%s' and (ifnull(end_of_life,'')='' or end_of_life >	now() or end_of_life = '0000-00-00') and (is_sales_item = 'Yes' or is_service_item = 'Yes')" %(item_code), as_dict=1)
+		tax = webnotes.conn.sql("select tax_type, tax_rate from `tabItem Tax` where parent = %s" , item_code)
 		t = {}
 		for x in tax: t[x[0]] = flt(x[1])
 		ret = {
@@ -145,7 +144,7 @@ class DocType(TransactionBase):
 	
 	# ***************** Get Ref rate as entered in Item Master ********************
 	def get_ref_rate(self, item_code, price_list_name, price_list_currency, plc_conv_rate):
-		ref_rate = sql("select ref_rate from `tabRef Rate Detail` where parent = %s and price_list_name = %s and ref_currency = %s", (item_code, price_list_name, price_list_currency))
+		ref_rate = webnotes.conn.sql("select ref_rate from `tabRef Rate Detail` where parent = %s and price_list_name = %s and ref_currency = %s", (item_code, price_list_name, price_list_currency))
 		base_ref_rate = ref_rate and flt(ref_rate[0][0]) * flt(plc_conv_rate) or 0
 		return base_ref_rate
 
@@ -175,7 +174,7 @@ class DocType(TransactionBase):
 			if default: add_cond = 'ifnull(t2.is_default,0) = 1'
 			else: add_cond = 't1.parent = "'+cstr(obj.doc.charge)+'"'
 			idx = 0
-			other_charge = sql("select t1.charge_type,t1.row_id,t1.description,t1.account_head,t1.rate,t1.tax_amount,t1.included_in_print_rate from `tabRV Tax Detail` t1, `tabOther Charges` t2 where t1.parent = t2.name and t2.company = '%s' and %s order by t1.idx" % (obj.doc.company, add_cond), as_dict = 1)
+			other_charge = webnotes.conn.sql("select t1.charge_type,t1.row_id,t1.description,t1.account_head,t1.rate,t1.tax_amount,t1.included_in_print_rate from `tabRV Tax Detail` t1, `tabOther Charges` t2 where t1.parent = t2.name and t2.company = '%s' and %s order by t1.idx" % (obj.doc.company, add_cond), as_dict = 1)
 			for other in other_charge:
 				d =	addchild(obj.doc, 'other_charges', 'RV Tax Detail', 1, obj.doclist)
 				d.charge_type = other['charge_type']
@@ -192,12 +191,12 @@ class DocType(TransactionBase):
 	# Get TERMS AND CONDITIONS
 	# =======================================================================================
 	def get_tc_details(self,obj):
-		r = sql("select terms from `tabTerm` where name = %s", obj.doc.tc_name)
+		r = webnotes.conn.sql("select terms from `tabTerm` where name = %s", obj.doc.tc_name)
 		if r: obj.doc.terms = r[0][0]
 
 #---------------------------------------- Get Tax Details -------------------------------#
 	def get_tax_details(self, item_code, obj):
-		tax = sql("select tax_type, tax_rate from `tabItem Tax` where parent = %s" , item_code)
+		tax = webnotes.conn.sql("select tax_type, tax_rate from `tabItem Tax` where parent = %s" , item_code)
 		t = {}
 		for x in tax: t[x[0]] = flt(x[1])
 		ret = {
@@ -208,8 +207,8 @@ class DocType(TransactionBase):
 	# Get Serial No Details
 	# ==========================================================================
 	def get_serial_details(self, serial_no, obj):
-		item = sql("select item_code, make, label,brand, description from `tabSerial No` where name = '%s' and docstatus != 2" %(serial_no), as_dict=1)
-		tax = sql("select tax_type, tax_rate from `tabItem Tax` where parent = %s" , item[0]['item_code'])
+		item = webnotes.conn.sql("select item_code, make, label,brand, description from `tabSerial No` where name = '%s' and docstatus != 2" %(serial_no), as_dict=1)
+		tax = webnotes.conn.sql("select tax_type, tax_rate from `tabItem Tax` where parent = %s" , item[0]['item_code'])
 		t = {}
 		for x in tax: t[x[0]] = flt(x[1])
 		ret = {
@@ -226,7 +225,7 @@ class DocType(TransactionBase):
 	# =======================================================================
 	def get_comm_rate(self, sales_partner, obj):
 
-		comm_rate = sql("select commission_rate from `tabSales Partner` where name = '%s' and docstatus != 2" %(sales_partner), as_dict=1)
+		comm_rate = webnotes.conn.sql("select commission_rate from `tabSales Partner` where name = '%s' and docstatus != 2" %(sales_partner), as_dict=1)
 		if comm_rate:
 			total_comm = flt(comm_rate[0]['commission_rate']) * flt(obj.doc.net_total) / 100
 			ret = {
@@ -243,7 +242,7 @@ class DocType(TransactionBase):
 	# =======================================================================================
 	def validate_max_discount(self,obj, detail_table):
 		for d in getlist(obj.doclist, detail_table):
-			discount = sql("select max_discount from tabItem where name = '%s'" %(d.item_code),as_dict = 1)
+			discount = webnotes.conn.sql("select max_discount from tabItem where name = '%s'" %(d.item_code),as_dict = 1)
 			if discount and discount[0]['max_discount'] and (flt(d.adj_rate)>flt(discount[0]['max_discount'])):
 				msgprint("You cannot give more than " + cstr(discount[0]['max_discount']) + " % discount on Item Code : "+cstr(d.item_code))
 				raise Exception
@@ -279,7 +278,7 @@ class DocType(TransactionBase):
 	# =========================================================================
 	def get_rate(self, arg):
 		arg = eval(arg)
-		rate = sql("select account_type, tax_rate from `tabAccount` where name = '%s' and docstatus != 2" %(arg['account_head']), as_dict=1)
+		rate = webnotes.conn.sql("select account_type, tax_rate from `tabAccount` where name = '%s' and docstatus != 2" %(arg['account_head']), as_dict=1)
 		ret = {'rate' : 0}
 		if arg['charge_type'] == 'Actual' and rate[0]['account_type'] == 'Tax':
 			msgprint("You cannot select ACCOUNT HEAD of type TAX as your CHARGE TYPE is 'ACTUAL'")
@@ -296,10 +295,10 @@ class DocType(TransactionBase):
 	# Make Packing List from Sales BOM
 	# =======================================================================
 	def has_sales_bom(self, item_code):
-		return sql("select name from `tabSales BOM` where name=%s and docstatus != 2", item_code)
+		return webnotes.conn.sql("select name from `tabSales BOM` where name=%s and docstatus != 2", item_code)
 	
 	def get_sales_bom_items(self, item_code):
-		return sql("select item_code, qty, uom from `tabSales BOM Detail` where parent=%s", item_code)
+		return webnotes.conn.sql("select item_code, qty, uom from `tabSales BOM Detail` where parent=%s", item_code)
 
 
 	# --------------
@@ -339,14 +338,14 @@ class DocType(TransactionBase):
 	def get_curr_and_ref_doc_details(self, curr_doctype, ref_tab_fname, ref_tab_dn, ref_doc_tname, curr_parent_name, curr_parent_doctype):
 		# Get total qty, amt of current doctype (eg RV) except for qty, amt of this transaction
 		if curr_parent_doctype == 'Installation Note':
-			curr_det = sql("select sum(qty) from `tab%s` where %s = '%s' and docstatus = 1 and parent != '%s'"% (curr_doctype, ref_tab_fname, ref_tab_dn, curr_parent_name))
+			curr_det = webnotes.conn.sql("select sum(qty) from `tab%s` where %s = '%s' and docstatus = 1 and parent != '%s'"% (curr_doctype, ref_tab_fname, ref_tab_dn, curr_parent_name))
 			qty, amt = curr_det and flt(curr_det[0][0]) or 0, 0
 		else:
-			curr_det = sql("select sum(qty), sum(amount) from `tab%s` where %s = '%s' and docstatus = 1 and parent != '%s'"% (curr_doctype, ref_tab_fname, ref_tab_dn, curr_parent_name))
+			curr_det = webnotes.conn.sql("select sum(qty), sum(amount) from `tab%s` where %s = '%s' and docstatus = 1 and parent != '%s'"% (curr_doctype, ref_tab_fname, ref_tab_dn, curr_parent_name))
 			qty, amt = curr_det and flt(curr_det[0][0]) or 0, curr_det and flt(curr_det[0][1]) or 0
 
 		# get total qty of ref doctype
-		ref_det = sql("select qty, amount from `tab%s` where name = '%s' and docstatus = 1"% (ref_doc_tname, ref_tab_dn))
+		ref_det = webnotes.conn.sql("select qty, amount from `tab%s` where name = '%s' and docstatus = 1"% (ref_doc_tname, ref_tab_dn))
 		max_qty, max_amt = ref_det and flt(ref_det[0][0]) or 0, ref_det and flt(ref_det[0][1]) or 0
 
 		return qty, max_qty, amt, max_amt
@@ -359,10 +358,10 @@ class DocType(TransactionBase):
 	# add packing list items
 	# -----------------------
 	def get_packing_item_details(self, item):
-		return sql("select item_name, description, stock_uom from `tabItem` where name = %s", item, as_dict = 1)[0]
+		return webnotes.conn.sql("select item_name, description, stock_uom from `tabItem` where name = %s", item, as_dict = 1)[0]
 
 	def get_bin_qty(self, item, warehouse):
-		det = sql("select actual_qty, projected_qty from `tabBin` where item_code = '%s' and warehouse = '%s'" % (item, warehouse), as_dict = 1)
+		det = webnotes.conn.sql("select actual_qty, projected_qty from `tabBin` where item_code = '%s' and warehouse = '%s'" % (item, warehouse), as_dict = 1)
 		return det and det[0] or ''
 
 	def add_packing_list_item(self,obj, item_code, qty, warehouse, line):
@@ -424,7 +423,7 @@ class DocType(TransactionBase):
 			elif d.fields.has_key('sales_order') and d.sales_order and not d.delivery_note:
 				ref_doc_name = d.sales_order
 			if ref_doc_name:
-				so_status = sql("select status from `tabSales Order` where name = %s",ref_doc_name)
+				so_status = webnotes.conn.sql("select status from `tabSales Order` where name = %s",ref_doc_name)
 				so_status = so_status and so_status[0][0] or ''
 				if so_status == 'Stopped':
 					msgprint("You cannot do any transaction against Sales Order : '%s' as it is Stopped." %(ref_doc_name))
@@ -435,7 +434,7 @@ class DocType(TransactionBase):
 	def check_active_sales_items(self,obj):
 		for d in getlist(obj.doclist, obj.fname):
 			if d.item_code:		# extra condn coz item_code is not mandatory in RV
-				valid_item = sql("select docstatus,is_sales_item, is_service_item from tabItem where name = %s",d.item_code)
+				valid_item = webnotes.conn.sql("select docstatus,is_sales_item, is_service_item from tabItem where name = %s",d.item_code)
 				if valid_item and valid_item[0][0] == 2:
 					msgprint("Item : '%s' does not exist in system." %(d.item_code))
 					raise Exception
@@ -449,10 +448,10 @@ class DocType(TransactionBase):
 # **************************************************************************************************************************************************
 
 	def check_credit(self,obj,grand_total):
-		acc_head = sql("select name from `tabAccount` where company = '%s' and master_name = '%s'"%(obj.doc.company, obj.doc.customer))
+		acc_head = webnotes.conn.sql("select name from `tabAccount` where company = '%s' and master_name = '%s'"%(obj.doc.company, obj.doc.customer))
 		if acc_head:
 			tot_outstanding = 0
-			dbcr = sql("select sum(debit), sum(credit) from `tabGL Entry` where account = '%s' and ifnull(is_cancelled, 'No')='No'" % acc_head[0][0])
+			dbcr = webnotes.conn.sql("select sum(debit), sum(credit) from `tabGL Entry` where account = '%s' and ifnull(is_cancelled, 'No')='No'" % acc_head[0][0])
 			if dbcr:
 				tot_outstanding = flt(dbcr[0][0])-flt(dbcr[0][1])
 
@@ -460,7 +459,7 @@ class DocType(TransactionBase):
 			get_obj('Account',acc_head[0][0]).check_credit_limit(acc_head[0][0], obj.doc.company, exact_outstanding)
 
 	def validate_fiscal_year(self,fiscal_year,transaction_date,dn):
-		fy=sql("select year_start_date from `tabFiscal Year` where name='%s'"%fiscal_year)
+		fy=webnotes.conn.sql("select year_start_date from `tabFiscal Year` where name='%s'"%fiscal_year)
 		ysd=fy and fy[0][0] or ""
 		yed=add_days(str(ysd),365)
 		if str(transaction_date) < str(ysd) or str(transaction_date) > str(yed):
@@ -475,9 +474,9 @@ class DocType(TransactionBase):
 		for d in getlist(obj.doclist, obj.fname):
 			if d.prevdoc_doctype and d.prevdoc_docname:
 				if d.prevdoc_doctype == 'Receivable Voucher':
-					dt = sql("select posting_date from `tab%s` where name = '%s'" % (d.prevdoc_doctype, d.prevdoc_docname))
+					dt = webnotes.conn.sql("select posting_date from `tab%s` where name = '%s'" % (d.prevdoc_doctype, d.prevdoc_docname))
 				else:
-					dt = sql("select transaction_date from `tab%s` where name = '%s'" % (d.prevdoc_doctype, d.prevdoc_docname))
+					dt = webnotes.conn.sql("select transaction_date from `tab%s` where name = '%s'" % (d.prevdoc_doctype, d.prevdoc_docname))
 				d.prevdoc_date = dt and dt[0][0].strftime('%Y-%m-%d') or ''
 
 	def update_prevdoc_detail(self, is_submit, obj):
@@ -607,7 +606,7 @@ class StatusUpdater:
 				args['name'] = d.fields[args['join_field']]
 
 				# get all qty where qty > compare_field
-				item = sql("""
+				item = webnotes.conn.sql("""
 					select item_code, `%(compare_ref_field)s`, `%(compare_field)s`, parenttype, parent from `tab%(target_dt)s` 
 					where `%(compare_ref_field)s` < `%(compare_field)s` and name="%(name)s" and docstatus=1
 					""" % args, as_dict=1)
@@ -712,7 +711,7 @@ class StatusUpdater:
 				args['detail_id'] = d.fields.get(args['join_field'])
 			
 				if args['detail_id']:
-					sql("""
+					webnotes.conn.sql("""
 						update 
 							`tab%(target_dt)s` 
 						set 
@@ -727,7 +726,7 @@ class StatusUpdater:
 				args['name'] = name
 				
 				# update percent complete in the parent table
-				sql("""
+				webnotes.conn.sql("""
 					update 
 						`tab%(target_parent_dt)s` 
 					set 
@@ -740,7 +739,7 @@ class StatusUpdater:
 
 				# update field
 				if args['status_field']:
-					sql("""
+					webnotes.conn.sql("""
 						update
 							`tab%(target_parent_dt)s` 
 						set
