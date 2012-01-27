@@ -1,0 +1,100 @@
+# DocType, Contact Us Settings
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2012-01-25 16:01:33',
+		'docstatus': 0,
+		'modified': '2012-01-25 16:01:33',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all DocType
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocType',
+		'document_type': 'Other',
+		'issingle': 1,
+		'module': 'Website',
+		'name': '__common__',
+		'section_style': 'Simple',
+		'show_in_menu': 0,
+		'version': 1
+	},
+
+	# These values are common for all DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'name': '__common__',
+		'parent': 'Contact Us Settings',
+		'parentfield': 'fields',
+		'parenttype': 'DocType',
+		'permlevel': 0
+	},
+
+	# These values are common for all DocPerm
+	{
+		'create': 1,
+		'doctype': 'DocPerm',
+		'name': '__common__',
+		'parent': 'Contact Us Settings',
+		'parentfield': 'permissions',
+		'parenttype': 'DocType',
+		'permlevel': 0,
+		'read': 1,
+		'write': 1
+	},
+
+	# DocType, Contact Us Settings
+	{
+		'doctype': 'DocType',
+		'name': 'Contact Us Settings'
+	},
+
+	# DocPerm
+	{
+		'doctype': 'DocPerm',
+		'role': 'Website Manager'
+	},
+
+	# DocPerm
+	{
+		'doctype': 'DocPerm',
+		'role': 'System Manager'
+	},
+
+	# DocField
+	{
+		'default': 'Contact Us',
+		'doctype': 'DocField',
+		'fieldname': 'headline',
+		'fieldtype': 'Data',
+		'label': 'Headline'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'send_email_notification',
+		'fieldtype': 'Check',
+		'label': 'Send Email Notification'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'main_section',
+		'fieldtype': 'Code',
+		'label': 'Main Section'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'side_section',
+		'fieldtype': 'Code',
+		'label': 'Side Section'
+	}
+]

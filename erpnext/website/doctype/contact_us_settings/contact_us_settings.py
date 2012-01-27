@@ -13,5 +13,4 @@ class DocType:
 		import os
 		path = os.path.join(os.path.dirname(__file__), 'template.html')
 		
-		webnotes.conn.set_value('Page', 'home', 'content', make_template(self.doc, path))
-		
+		webnotes.conn.set_value('Page', 'contact', 'content', make_template(self.doc, path))

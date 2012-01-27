@@ -8,6 +8,10 @@ header .topbar .container {
 	margin: auto;
 }
 
+.web-content input[type="text"], .web-content input[type="password"], .web-content select {
+	min-width: 180px;
+}
+
 .web-main-section {
 	width: 65%;
 	float: left;
@@ -18,4 +22,7 @@ header .topbar .container {
 	width: 30%;
 	float: right;
 	margin-bottom: 20px;
+	margin-right: 15px;
+	color: #606060;
+	overflow-x: hidden;
 }

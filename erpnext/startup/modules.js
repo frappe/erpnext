@@ -145,8 +145,10 @@ SidebarItem.prototype.onclick = function() {
 		// page type
 		this.pointer.select();
 
-		$item_set_working(me.pointer.label_area);
-		loadpage(this.det.module_page, function() { $item_done_working(me.pointer.label_area); });
+		$(me.pointer.label_area).set_working();
+		loadpage(this.det.module_page, function() { 
+			$(me.pointer.label_area).done_working(); 
+		});
 
 	} else {
 		// show sub items
@@ -190,7 +192,7 @@ SidebarItem.prototype.show_items = function() {
 	this.loading = 1;
 	var me = this;
 
-	$item_set_working(this.pointer.label_area);
+	$(this.pointer.label_area).set_working();
 	var callback = function(r,rt){
 		me.loaded = 1;
 		me.loading = 0;
@@ -199,7 +201,7 @@ SidebarItem.prototype.show_items = function() {
 		var has_tools = 0;
 
 		// widget code
-		$item_done_working(me.pointer.label_area);
+		$(me.pointer.label_area).done_working();
 
 		if(r.message.il) {
 			me.il = r.message.il;

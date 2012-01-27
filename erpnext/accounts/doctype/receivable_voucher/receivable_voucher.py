@@ -11,7 +11,8 @@ from webnotes.utils.scheduler import set_event, cancel_event, Scheduler
 
 in_transaction = webnotes.conn.in_transaction
 convert_to_lists = webnotes.conn.convert_to_lists
-	
+session = webnotes.session
+
 # -----------------------------------------------------------------------------------------
 
 from utilities.transaction_base import TransactionBase
