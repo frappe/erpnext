@@ -9,9 +9,6 @@ from webnotes.model.code import get_obj, get_server_obj, run_server_obj, updated
 from webnotes import session, form, is_testing, msgprint, errprint
 from webnotes.utils.scheduler import set_event, cancel_event, Scheduler
 
-set = webnotes.conn.set
-sql = webnotes.conn.sql
-get_value = webnotes.conn.get_value
 in_transaction = webnotes.conn.in_transaction
 convert_to_lists = webnotes.conn.convert_to_lists
 	
@@ -39,25 +36,25 @@ class DocType(TransactionBase):
 	#Set retail related fields from pos settings
 	#-------------------------------------------------------------------------
 	def set_pos_fields(self):
-		pos = sql("select * from `tabPOS Setting` where ifnull(user,'') = '%s' and company = '%s'" % (session['user'], self.doc.company), as_dict=1)
+		pos = webnotes.conn.sql("select * from `tabPOS Setting` where ifnull(user,'') = '%s' and company = '%s'" % (session['user'], self.doc.company), as_dict=1)
 		if not pos:
-			pos = sql("select * from `tabPOS Setting` where ifnull(user,'') = '' and company = '%s'" % (self.doc.company), as_dict=1)
+			pos = webnotes.conn.sql("select * from `tabPOS Setting` where ifnull(user,'') = '' and company = '%s'" % (self.doc.company), as_dict=1)
 		if pos:
-			val = sql("select name from `tabAccount` where name = %s and docstatus != 2", (cstr(self.doc.customer) + " - " + self.get_company_abbr()))
+			val = webnotes.conn.sql("select name from `tabAccount` where name = %s and docstatus != 2", (cstr(self.doc.customer) + " - " + self.get_company_abbr()))
 			val = val and val[0][0] or ''
 			if not val: val = pos and pos[0]['customer_account'] or ''
 			if not self.doc.debit_to:
-				set(self.doc,'debit_to',val)
+				webnotes.conn.set(self.doc,'debit_to',val)
 			
 			lst = ['territory','naming_series','currency','charge','letter_head','tc_name','price_list_name','company','select_print_heading','cash_bank_account']
 				
 			for i in lst:
 				val = pos and pos[0][i] or ''
-				set(self.doc,i,val)
+				webnotes.conn.set(self.doc,i,val)
 			self.set_pos_item_values()
 			
 			val = pos and flt(pos[0]['conversion_rate']) or 0	
-			set(self.doc,'conversion_rate',val)
+			webnotes.conn.set(self.doc,'conversion_rate',val)
 
 			#fetch terms	
 			if self.doc.tc_name:	 self.get_tc_details()
@@ -70,9 +67,9 @@ class DocType(TransactionBase):
 	# -------------------------------------------------------------------------- 
 	def set_pos_item_values(self):
 		if cint(self.doc.is_pos) ==1:
-			dtl = sql("select income_account, warehouse, cost_center from `tabPOS Setting` where ifnull(user,'') = '%s' and company = '%s'" % (session['user'], self.doc.company), as_dict=1)
+			dtl = webnotes.conn.sql("select income_account, warehouse, cost_center from `tabPOS Setting` where ifnull(user,'') = '%s' and company = '%s'" % (session['user'], self.doc.company), as_dict=1)
 			if not dtl:
-				dtl = sql("select income_account, warehouse, cost_center from `tabPOS Setting` where ifnull(user,'') = '' and company = '%s'" % (self.doc.company), as_dict=1)
+				dtl = webnotes.conn.sql("select income_account, warehouse, cost_center from `tabPOS Setting` where ifnull(user,'') = '' and company = '%s'" % (self.doc.company), as_dict=1)
 			for d in getlist(self.doclist,'entries'):
 				if dtl and dtl[0]['income_account']: d.income_account = dtl[0]['income_account']
 				if dtl and dtl[0]['cost_center']: d.cost_center = dtl[0]['cost_center']
@@ -82,7 +79,7 @@ class DocType(TransactionBase):
 	# Get Account Head to which amount needs to be Debited based on Customer
 	# ----------------------------------------------------------------------
 	def get_customer_account(self):
-		acc_head = sql("select name from `tabAccount` where (name = %s or (master_name = %s and master_type = 'customer')) and docstatus != 2", (cstr(self.doc.customer) + " - " + self.get_company_abbr(),self.doc.customer))
+		acc_head = webnotes.conn.sql("select name from `tabAccount` where (name = %s or (master_name = %s and master_type = 'customer')) and docstatus != 2", (cstr(self.doc.customer) + " - " + self.get_company_abbr(),self.doc.customer))
 		if acc_head and acc_head[0][0]:
 			return acc_head[0][0]
 		else:
@@ -99,17 +96,17 @@ class DocType(TransactionBase):
 	def get_cust_and_due_date(self):
 		credit_days = 0
 		if self.doc.debit_to:
-			credit_days = sql("select credit_days from `tabAccount` where name='%s' and docstatus != 2" % self.doc.debit_to)
+			credit_days = webnotes.conn.sql("select credit_days from `tabAccount` where name='%s' and docstatus != 2" % self.doc.debit_to)
 			credit_days = credit_days and cint(credit_days[0][0]) or 0
 		if self.doc.company and not credit_days:
-			credit_days = sql("select credit_days from `tabCompany` where name='%s'" % self.doc.company)
+			credit_days = webnotes.conn.sql("select credit_days from `tabCompany` where name='%s'" % self.doc.company)
 			credit_days = credit_days and cint(credit_days[0][0]) or 0
 		# Customer has higher priority than company
 		# i.e.if not entered in customer will take credit days from company
 		self.doc.due_date = add_days(cstr(self.doc.posting_date), credit_days)
 		
 		if self.doc.debit_to:
-			self.doc.customer = get_value('Account',self.doc.debit_to,'master_name')
+			self.doc.customer = webnotes.conn.get_value('Account',self.doc.debit_to,'master_name')
 		#	get_obj('Sales Common').get_customer_details(self, inv_det_reqd = 0)
 
 
@@ -144,7 +141,7 @@ class DocType(TransactionBase):
 	def get_income_account(self,doctype):		
 		for d in getlist(self.doclist, doctype):			
 			if d.item_code:
-				item = sql("select default_income_account, default_sales_cost_center from tabItem where name = '%s'" %(d.item_code), as_dict=1)
+				item = webnotes.conn.sql("select default_income_account, default_sales_cost_center from tabItem where name = '%s'" %(d.item_code), as_dict=1)
 				d.income_account = item and item[0]['default_income_account'] or ''
 				d.cost_center = item and item[0]['default_sales_cost_center'] or ''				
 
@@ -153,14 +150,14 @@ class DocType(TransactionBase):
 	def get_item_details(self, item_code):
 		ret = get_obj('Sales Common').get_item_details(item_code, self)
 		if item_code and cint(self.doc.is_pos) == 1:
-			dtl = sql("select income_account, warehouse, cost_center from `tabPOS Setting` where user = '%s' and company = '%s'" % (session['user'], self.doc.company), as_dict=1)				 
+			dtl = webnotes.conn.sql("select income_account, warehouse, cost_center from `tabPOS Setting` where user = '%s' and company = '%s'" % (session['user'], self.doc.company), as_dict=1)				 
 			if not dtl:
-				dtl = sql("select income_account, warehouse, cost_center from `tabPOS Setting` where ifnull(user,'') = '' and company = '%s'" % (self.doc.company), as_dict=1)
+				dtl = webnotes.conn.sql("select income_account, warehouse, cost_center from `tabPOS Setting` where ifnull(user,'') = '' and company = '%s'" % (self.doc.company), as_dict=1)
 			if dtl and dtl[0]['income_account']: ret['income_account'] = dtl and dtl[0]['income_account']
 			if dtl and dtl[0]['cost_center']: ret['cost_center'] = dtl and dtl[0]['cost_center']
 			if dtl and dtl[0]['warehouse']: ret['warehouse'] = dtl and dtl[0]['warehouse']
 			if ret['warehouse']:
-				actual_qty = sql("select actual_qty from `tabBin` where item_code = '%s' and warehouse = '%s'" % (item_code, ret['warehouse']))		
+				actual_qty = webnotes.conn.sql("select actual_qty from `tabBin` where item_code = '%s' and warehouse = '%s'" % (item_code, ret['warehouse']))		
 				ret['actual_qty']= actual_qty and flt(actual_qty[0][0]) or 0
 		return ret
  
@@ -205,7 +202,7 @@ class DocType(TransactionBase):
 	#pull project customer
 	#-------------------------
 	def pull_project_customer(self):
-		res = sql("select customer from `tabProject` where name = '%s'"%self.doc.project_name)
+		res = webnotes.conn.sql("select customer from `tabProject` where name = '%s'"%self.doc.project_name)
 		if res:
 			get_obj('DocType Mapper', 'Project-Receivable Voucher').dt_map('Project', 'Receivable Voucher', self.doc.project_name, self.doc, self.doclist, "[['Project', 'Receivable Voucher']]")
 
@@ -214,7 +211,7 @@ class DocType(TransactionBase):
 	# Get Company Abbr.
 	# ------------------
 	def get_company_abbr(self):
-		return sql("select abbr from tabCompany where name=%s", self.doc.company)[0][0]
+		return webnotes.conn.sql("select abbr from tabCompany where name=%s", self.doc.company)[0][0]
 		
 	
 	# Check whether sales order / delivery note items already pulled
@@ -267,7 +264,7 @@ class DocType(TransactionBase):
 			dt = d.delivery_note and 'Delivery Note' or d.sales_order and 'Sales Order' or ''
 			if dt:
 				dt_no = d.delivery_note or d.sales_order
-				cust = sql("select customer from `tab%s` where name = %s" % (dt, '%s'), dt_no)
+				cust = webnotes.conn.sql("select customer from `tab%s` where name = %s" % (dt, '%s'), dt_no)
 				if cust and cstr(cust[0][0]) != cstr(self.doc.customer):
 					msgprint("Customer %s does not match with customer of %s: %s." %(self.doc.customer, dt, dt_no), raise_exception=1)
 			
@@ -276,7 +273,7 @@ class DocType(TransactionBase):
 	# ------------------------------------------------
 	def validate_debit_to_acc(self):
 		if self.doc.customer and not cint(self.doc.is_pos):
-			acc_head = sql("select name from `tabAccount` where name = %s and docstatus != 2", (cstr(self.doc.customer) + " - " + self.get_company_abbr()))
+			acc_head = webnotes.conn.sql("select name from `tabAccount` where name = %s and docstatus != 2", (cstr(self.doc.customer) + " - " + self.get_company_abbr()))
 			if acc_head and acc_head[0][0]:
 				if not cstr(acc_head[0][0]) == cstr(self.doc.debit_to):
 					msgprint("Debit To %s do not match with Customer %s for Company %s i.e. %s" %(self.doc.debit_to,self.doc.customer,self.doc.company,cstr(acc_head[0][0])))
@@ -292,7 +289,7 @@ class DocType(TransactionBase):
 	# 3. Is a PL Account
 	# ---------------------------
 	def validate_debit_acc(self):
-		acc = sql("select debit_or_credit, is_pl_account from tabAccount where name = '%s' and docstatus != 2" % self.doc.debit_to)
+		acc = webnotes.conn.sql("select debit_or_credit, is_pl_account from tabAccount where name = '%s' and docstatus != 2" % self.doc.debit_to)
 		if not acc:
 			msgprint("Account: "+ self.doc.debit_to + " does not exist")
 			raise Exception
@@ -308,8 +305,8 @@ class DocType(TransactionBase):
 	# -----------------------------------------------------------------------
 	def validate_fixed_asset_account(self):
 		for d in getlist(self.doclist,'entries'):
-			item = sql("select name,is_asset_item,is_sales_item from `tabItem` where name = '%s' and (ifnull(end_of_life,'')='' or end_of_life = '0000-00-00' or end_of_life >	now())"% d.item_code)
-			acc =	sql("select account_type from `tabAccount` where name = '%s' and docstatus != 2" % d.income_account)
+			item = webnotes.conn.sql("select name,is_asset_item,is_sales_item from `tabItem` where name = '%s' and (ifnull(end_of_life,'')='' or end_of_life = '0000-00-00' or end_of_life >	now())"% d.item_code)
+			acc =	webnotes.conn.sql("select account_type from `tabAccount` where name = '%s' and docstatus != 2" % d.income_account)
 			if not acc:
 				msgprint("Account: "+d.income_account+" does not exist in the system")
 				raise Exception
@@ -358,7 +355,7 @@ class DocType(TransactionBase):
 	def so_dn_required(self):
 		dict = {'Sales Order':'so_required','Delivery Note':'dn_required'}
 		for i in dict:	
-			res = sql("select value from `tabSingles` where doctype = 'Manage Account' and field = '%s'"%dict[i])
+			res = webnotes.conn.sql("select value from `tabSingles` where doctype = 'Manage Account' and field = '%s'"%dict[i])
 			if res and res[0][0] == 'Yes':
 				for d in getlist(self.doclist,'entries'):
 					if not d.fields[i.lower().replace(' ','_')]:
@@ -369,7 +366,7 @@ class DocType(TransactionBase):
 	#-------------------------------------------------------------------------------------------------
 	def validate_proj_cust(self):
 		if self.doc.project_name and self.doc.customer:
-			res = sql("select name from `tabProject` where name = '%s' and (customer = '%s' or ifnull(customer,'')='')"%(self.doc.project_name, self.doc.customer))
+			res = webnotes.conn.sql("select name from `tabProject` where name = '%s' and (customer = '%s' or ifnull(customer,'')='')"%(self.doc.project_name, self.doc.customer))
 			if not res:
 				msgprint("Customer - %s does not belong to project - %s. \n\nIf you want to use project for multiple customers then please make customer details blank in that project."%(self.doc.customer,self.doc.project_name))
 				raise Exception
@@ -386,7 +383,7 @@ class DocType(TransactionBase):
 	# ********* UPDATE CURRENT STOCK *****************************
 	def update_current_stock(self):
 		for d in getlist(self.doclist, 'entries'):
-			bin = sql("select actual_qty from `tabBin` where item_code = %s and warehouse = %s", (d.item_code, d.warehouse), as_dict = 1)
+			bin = webnotes.conn.sql("select actual_qty from `tabBin` where item_code = %s and warehouse = %s", (d.item_code, d.warehouse), as_dict = 1)
 			d.actual_qty = bin and flt(bin[0]['actual_qty']) or 0
 
 	def validate_item_code(self):
@@ -405,10 +402,10 @@ class DocType(TransactionBase):
 	def validate_c_form(self):
 		""" Blank C-form no if C-form applicable marked as 'No'"""
 		if self.doc.amended_from and self.doc.c_form_applicable == 'No' and self.doc.c_form_no:
-			sql("""delete from `tabC-Form Invoice Detail` where invoice_no = %s
+			webnotes.conn.sql("""delete from `tabC-Form Invoice Detail` where invoice_no = %s
 					and parent = %s""", (self.doc.amended_from,	self.doc.c_form_no))
 
-			set(self.doc, 'c_form_no', '')
+			webnotes.conn.set(self.doc, 'c_form_no', '')
 	 
 	# VALIDATE
 	# ====================================================================================
@@ -453,13 +450,13 @@ class DocType(TransactionBase):
 	def check_prev_docstatus(self):
 		for d in getlist(self.doclist,'entries'):
 			if d.sales_order:
-				submitted = sql("select name from `tabSales Order` where docstatus = 1 and name = '%s'" % d.sales_order)
+				submitted = webnotes.conn.sql("select name from `tabSales Order` where docstatus = 1 and name = '%s'" % d.sales_order)
 				if not submitted:
 					msgprint("Sales Order : "+ cstr(d.sales_order) +" is not submitted")
 					raise Exception , "Validation Error."
 
 			if d.delivery_note:
-				submitted = sql("select name from `tabDelivery Note` where docstatus = 1 and name = '%s'" % d.delivery_note)
+				submitted = webnotes.conn.sql("select name from `tabDelivery Note` where docstatus = 1 and name = '%s'" % d.delivery_note)
 				if not submitted:
 					msgprint("Delivery Note : "+ cstr(d.delivery_note) +" is not submitted")
 					raise Exception , "Validation Error."
@@ -469,17 +466,17 @@ class DocType(TransactionBase):
 	def set_actual_qty(self):
 		for d in getlist(self.doclist, 'delivery_note_details'):
 			if d.item_code and d.warehouse:
-				actual_qty = sql("select actual_qty from `tabBin` where item_code = '%s' and warehouse = '%s'" % (d.item_code, d.warehouse))
+				actual_qty = webnotes.conn.sql("select actual_qty from `tabBin` where item_code = '%s' and warehouse = '%s'" % (d.item_code, d.warehouse))
 				d.actual_qty = actual_qty and flt(actual_qty[0][0]) or 0					
 
 	# Check qty in stock depends on item code and warehouse
 	#-------------------------------------------------------
 	def check_qty_in_stock(self):
 		for d in getlist(self.doclist, 'entries'):
-			is_stock_item = sql("select is_stock_item from `tabItem` where name = '%s'" % d.item_code)[0][0]
+			is_stock_item = webnotes.conn.sql("select is_stock_item from `tabItem` where name = '%s'" % d.item_code)[0][0]
 			actual_qty = 0
 			if d.item_code and d.warehouse:
-				actual_qty = sql("select actual_qty from `tabBin` where item_code = '%s' and warehouse = '%s'" % (d.item_code, d.warehouse))
+				actual_qty = webnotes.conn.sql("select actual_qty from `tabBin` where item_code = '%s' and warehouse = '%s'" % (d.item_code, d.warehouse))
 				actual_qty = actual_qty and flt(actual_qty[0][0]) or 0
 
 			if is_stock_item == 'Yes' and flt(d.qty) > flt(actual_qty):
@@ -490,7 +487,7 @@ class DocType(TransactionBase):
 
 	# ********************** Make Stock Entry ************************************
 	def make_sl_entry(self, d, wh, qty, in_value, update_stock):
-		st_uom = sql("select stock_uom from `tabItem` where name = '%s'"%d.item_code)
+		st_uom = webnotes.conn.sql("select stock_uom from `tabItem` where name = '%s'"%d.item_code)
 		self.values.append({
 			'item_code'					 : d.item_code,
 			'warehouse'					 : wh,
@@ -516,7 +513,7 @@ class DocType(TransactionBase):
 	def update_stock_ledger(self, update_stock, clear = 0):
 		self.values = []
 		for d in getlist(self.doclist, 'entries'):
-			stock_item = sql("SELECT is_stock_item, is_sample_item FROM tabItem where name = '%s'"%(d.item_code), as_dict = 1) # stock ledger will be updated only if it is a stock item
+			stock_item = webnotes.conn.sql("SELECT is_stock_item, is_sample_item FROM tabItem where name = '%s'"%(d.item_code), as_dict = 1) # stock ledger will be updated only if it is a stock item
 			if stock_item[0]['is_stock_item'] == "Yes":
 				# Reduce actual qty from warehouse
 				self.make_sl_entry( d, d.warehouse, - flt(d.qty) , 0, update_stock)
@@ -531,7 +528,7 @@ class DocType(TransactionBase):
 	# ********** Get Actual Qty of item in warehouse selected *************
 	def get_actual_qty(self,args):
 		args = eval(args)
-		actual_qty = sql("select actual_qty from `tabBin` where item_code = '%s' and warehouse = '%s'" % (args['item_code'], args['warehouse']), as_dict=1)
+		actual_qty = webnotes.conn.sql("select actual_qty from `tabBin` where item_code = '%s' and warehouse = '%s'" % (args['item_code'], args['warehouse']), as_dict=1)
 		ret = {
 			 'actual_qty' : actual_qty and flt(actual_qty[0]['actual_qty']) or 0
 		}
@@ -574,7 +571,7 @@ class DocType(TransactionBase):
 	def update_c_form(self):
 		"""Update amended id in C-form"""
 		if self.doc.c_form_no and self.doc.amended_from:
-			sql("""update `tabC-Form Invoice Detail` set invoice_no = %s,
+			webnotes.conn.sql("""update `tabC-Form Invoice Detail` set invoice_no = %s,
 					invoice_date = %s, territory = %s, net_total = %s,
 					grand_total = %s where invoice_no = %s and parent = %s""", (self.doc.name, self.doc.amended_from, self.doc.c_form_no))
 	
@@ -584,7 +581,7 @@ class DocType(TransactionBase):
 	# Check Next Document's docstatus
 	# --------------------------------
 	def check_next_docstatus(self):
-		submit_jv = sql("select t1.name from `tabJournal Voucher` t1,`tabJournal Voucher Detail` t2 where t1.name = t2.parent and t2.against_invoice = '%s' and t1.docstatus = 1" % (self.doc.name))
+		submit_jv = webnotes.conn.sql("select t1.name from `tabJournal Voucher` t1,`tabJournal Voucher Detail` t2 where t1.name = t2.parent and t2.against_invoice = '%s' and t1.docstatus = 1" % (self.doc.name))
 		if submit_jv:
 			msgprint("Journal Voucher : " + cstr(submit_jv[0][0]) + " has been created against " + cstr(self.doc.doctype) + ". So " + cstr(self.doc.doctype) + " cannot be Cancelled.")
 			raise Exception, "Validation Error."
@@ -607,10 +604,10 @@ class DocType(TransactionBase):
 
 	# Get Warehouse
 	def get_warehouse(self):
-		w = sql("select warehouse from `tabPOS Setting` where ifnull(user,'') = '%s' and company = '%s'" % (session['user'], self.doc.company))
+		w = webnotes.conn.sql("select warehouse from `tabPOS Setting` where ifnull(user,'') = '%s' and company = '%s'" % (session['user'], self.doc.company))
 		w = w and w[0][0] or ''
 		if not w:
-			ps = sql("select name, warehouse from `tabPOS Setting` where ifnull(user,'') = '' and company = '%s'" % self.doc.company)
+			ps = webnotes.conn.sql("select name, warehouse from `tabPOS Setting` where ifnull(user,'') = '' and company = '%s'" % self.doc.company)
 			if not ps:
 				msgprint("To make POS entry, please create POS Setting from Setup --> Accounts --> POS Setting and refresh the system.")
 				raise Exception
@@ -633,12 +630,12 @@ class DocType(TransactionBase):
 						d.warehouse = cstr(w)
 
 			if flt(self.doc.paid_amount) == 0: 
-				set(self.doc,'paid_amount',(flt(self.doc.grand_total) - flt(self.doc.write_off_amount)))
+				webnotes.conn.set(self.doc,'paid_amount',(flt(self.doc.grand_total) - flt(self.doc.write_off_amount)))
 
 		else:
-			set(self.doc,'paid_amount',0)
+			webnotes.conn.set(self.doc,'paid_amount',0)
 
-		set(self.doc,'outstanding_amount',flt(self.doc.grand_total) - flt(self.doc.total_advance) - flt(self.doc.paid_amount) - flt(self.doc.write_off_amount))
+		webnotes.conn.set(self.doc,'outstanding_amount',flt(self.doc.grand_total) - flt(self.doc.total_advance) - flt(self.doc.paid_amount) - flt(self.doc.write_off_amount))
 
 ########################################################################
 # Repair Outstanding
@@ -656,9 +653,9 @@ class DocType(TransactionBase):
 		if self.doc.convert_into_recurring_invoice:
 			self.set_next_date()
 			if not self.doc.recurring_id:
-				set(self.doc, 'recurring_id', make_autoname('RECINV/.#####'))
+				webnotes.conn.set(self.doc, 'recurring_id', make_autoname('RECINV/.#####'))
 		elif self.doc.recurring_id:
-			sql("""update `tabReceivable Voucher` set convert_into_recurring_invoice = 0 where recurring_id = %s""", self.doc.recurring_id)
+			webnotes.conn.sql("""update `tabReceivable Voucher` set convert_into_recurring_invoice = 0 where recurring_id = %s""", self.doc.recurring_id)
 
 		self.manage_scheduler()
 
@@ -666,7 +663,7 @@ class DocType(TransactionBase):
 		""" set/cancel event in scheduler """
 		event = 'accounts.doctype.gl_control.gl_control.manage_recurring_invoices'
 
-		if sql("select name from `tabReceivable Voucher` where ifnull(convert_into_recurring_invoice, 0) = 1 and next_date <= end_date"):
+		if webnotes.conn.sql("select name from `tabReceivable Voucher` where ifnull(convert_into_recurring_invoice, 0) = 1 and next_date <= end_date"):
 			if not self.check_event_exists(event):
 				set_event(event,  interval = 60*60, recurring = 1)
 		else:
@@ -703,4 +700,4 @@ class DocType(TransactionBase):
 			next_date = datetime.date(y, m, last_day)
 		next_date = next_date.strftime("%Y-%m-%d")
 
-		set(self.doc, 'next_date', next_date)
+		webnotes.conn.set(self.doc, 'next_date', next_date)

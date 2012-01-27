@@ -4,8 +4,6 @@ from webnotes.model.doc import Document, addchild, removechild, getchildren
 from webnotes.model.doclist import getlist, copy_doclist
 from webnotes import msgprint
 
-sql = webnotes.conn.sql
-
 class TransactionBase:
 
 	# Get Customer Default Primary Address - first load
@@ -66,9 +64,9 @@ class TransactionBase:
 			cond = 'name="%s"' % address_name	
 
 		if is_shipping_address:
-			details = sql("select name, address_line1, address_line2, city, country, pincode, state, phone from `tabAddress` where %s and docstatus != 2 order by is_shipping_address desc limit 1" % cond, as_dict = 1)
+			details = webnotes.conn.sql("select name, address_line1, address_line2, city, country, pincode, state, phone from `tabAddress` where %s and docstatus != 2 order by is_shipping_address desc limit 1" % cond, as_dict = 1)
 		else:
-			details = sql("select name, address_line1, address_line2, city, country, pincode, state, phone from `tabAddress` where %s and docstatus != 2 order by is_primary_address desc limit 1" % cond, as_dict = 1)
+			details = webnotes.conn.sql("select name, address_line1, address_line2, city, country, pincode, state, phone from `tabAddress` where %s and docstatus != 2 order by is_primary_address desc limit 1" % cond, as_dict = 1)
 		
 		extract = lambda x: details and details[0] and details[0].get(x,'') or ''
 		address_fields = [('','address_line1'),('\n','address_line2'),('\n','city'),(' ','pincode'),('\n','state'),('\n','country'),('\nPhone: ','phone')]
@@ -88,7 +86,7 @@ class TransactionBase:
 		else:
 			cond = 'name="%s"' % contact_name			
 			
-		details = sql("select name, first_name, last_name, email_id, phone, mobile_no, department, designation from `tabContact` where %s and docstatus != 2 order by is_primary_contact desc limit 1" % cond, as_dict = 1)
+		details = webnotes.conn.sql("select name, first_name, last_name, email_id, phone, mobile_no, department, designation from `tabContact` where %s and docstatus != 2 order by is_primary_contact desc limit 1" % cond, as_dict = 1)
 
 		extract = lambda x: details and details[0] and details[0].get(x,'') or ''
 		contact_fields = [('','first_name'),(' ','last_name')]
@@ -103,7 +101,7 @@ class TransactionBase:
 	# Get Customer Details
 	# -----------------------
 	def get_customer_details(self, name):		
-		customer_details = sql("select customer_name, customer_group, territory, default_sales_partner, default_commission_rate from tabCustomer where name = '%s' and docstatus != 2" %(name), as_dict = 1)
+		customer_details = webnotes.conn.sql("select customer_name, customer_group, territory, default_sales_partner, default_commission_rate from tabCustomer where name = '%s' and docstatus != 2" %(name), as_dict = 1)
 		if customer_details:
 			self.doc.customer_name = customer_details[0]['customer_name'] or ''
 			self.doc.customer_group = customer_details[0]['customer_group'] or ''
@@ -114,7 +112,7 @@ class TransactionBase:
 	# Get Customer Shipping Address
 	# -----------------------
 	def get_shipping_address(self, name):
-		details = sql("select name, address_line1, address_line2, city, country, pincode, state, phone from `tabAddress` where customer = '%s' and docstatus != 2 order by is_shipping_address desc limit 1" %(name), as_dict = 1)
+		details = webnotes.conn.sql("select name, address_line1, address_line2, city, country, pincode, state, phone from `tabAddress` where customer = '%s' and docstatus != 2 order by is_shipping_address desc limit 1" %(name), as_dict = 1)
 		
 		extract = lambda x: details and details[0] and details[0].get(x,'') or ''
 		address_fields = [('','address_line1'),('\n','address_line2'),('\n','city'),(' ','pincode'),('\n','state'),('\n','country'),('\nPhone: ','phone')]
@@ -130,7 +128,7 @@ class TransactionBase:
 	# Get Lead Details
 	# -----------------------
 	def get_lead_details(self, name):		
-		details = sql("select name, lead_name, address_line1, address_line2, city, country, state, pincode, territory, contact_no, mobile_no, email_id from `tabLead` where name = '%s'" %(name), as_dict = 1)		
+		details = webnotes.conn.sql("select name, lead_name, address_line1, address_line2, city, country, state, pincode, territory, contact_no, mobile_no, email_id from `tabLead` where name = '%s'" %(name), as_dict = 1)		
 		
 		extract = lambda x: details and details[0] and details[0].get(x,'') or ''
 		address_fields = [('','address_line1'),('\n','address_line2'),('\n','city'),(' ','pincode'),('\n','state'),('\n','country'),('\nPhone: ','contact_no')]
@@ -183,7 +181,7 @@ class TransactionBase:
 	# Get Supplier Details
 	# -----------------------
 	def get_supplier_details(self, name):		
-		supplier_details = sql("select supplier_name from tabSupplier where name = '%s' and docstatus != 2" %(name), as_dict = 1)
+		supplier_details = webnotes.conn.sql("select supplier_name from tabSupplier where name = '%s' and docstatus != 2" %(name), as_dict = 1)
 		ret = {
 			'supplier_name' : supplier_details and supplier_details[0]['supplier_name'] or ''
 		}
@@ -194,7 +192,7 @@ class TransactionBase:
 	def get_sales_person(self, name):			
 		self.doc.clear_table(self.doclist,'sales_team')
 		idx = 0
-		for d in sql("select sales_person, allocated_percentage, allocated_amount, incentives from `tabSales Team` where parent = '%s'" % name):
+		for d in webnotes.conn.sql("select sales_person, allocated_percentage, allocated_amount, incentives from `tabSales Team` where parent = '%s'" % name):
 			ch = addchild(self.doc, 'sales_team', 'Sales Team', 1, self.doclist)
 			ch.sales_person = d and cstr(d[0]) or ''
 			ch.allocated_percentage = d and flt(d[1]) or 0
@@ -206,6 +204,6 @@ class TransactionBase:
 	# Get Company Specific Default Currency
 	# -------------------------------------
 	def get_company_currency(self, name):
-		ret = sql("select default_currency from tabCompany where name = '%s'" %(name))
+		ret = webnotes.conn.sql("select default_currency from tabCompany where name = '%s'" %(name))
 		dcc = ret and ret[0][0] or get_defaults()['currency']						
 		return dcc	
