@@ -21,8 +21,8 @@ def cleanup():
 	reload_doc("core", "doctype", "control_panel")
 
 	# cleanup page
-	delete_doc("DocType", "Control Panel")
-	reload_doc("core", "doctype", "control_panel")
+	delete_doc("DocType", "Page")
+	reload_doc("core", "doctype", "page")
 	
 	webnotes.conn.sql("""delete from tabSingles
 		where field like 'startup_%' and doctype='Control Panel'""")

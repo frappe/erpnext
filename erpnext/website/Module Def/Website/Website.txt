@@ -5,13 +5,14 @@
 	{
 		'creation': '2012-01-23 17:05:32',
 		'docstatus': 0,
-		'modified': '2012-01-27 10:14:58',
+		'modified': '2012-01-27 14:30:06',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
 
 	# These values are common for all Module Def Role
 	{
+		'__islocal': 1,
 		'doctype': 'Module Def Role',
 		'name': '__common__',
 		'parent': 'Website',
@@ -21,7 +22,7 @@
 
 	# These values are common for all Module Def Item
 	{
-		'doc_type': 'Single DocType',
+		'__islocal': 1,
 		'doctype': 'Module Def Item',
 		'name': '__common__',
 		'parent': 'Website',
@@ -49,6 +50,15 @@
 	{
 		'display_name': 'Top Bar Settings',
 		'doc_name': 'Top Bar Settings',
+		'doc_type': 'Single DocType',
+		'doctype': 'Module Def Item'
+	},
+
+	# Module Def Item
+	{
+		'display_name': 'Blog',
+		'doc_name': 'Blog',
+		'doc_type': 'Forms',
 		'doctype': 'Module Def Item'
 	},
 
@@ -56,6 +66,15 @@
 	{
 		'display_name': 'Home Settings',
 		'doc_name': 'Home Settings',
+		'doc_type': 'Single DocType',
+		'doctype': 'Module Def Item'
+	},
+
+	# Module Def Item
+	{
+		'display_name': 'Top Bar Settings',
+		'doc_name': 'Top Bar Settings',
+		'doc_type': 'Single DocType',
 		'doctype': 'Module Def Item'
 	},
 
@@ -63,6 +82,15 @@
 	{
 		'display_name': 'Contact Us Settings',
 		'doc_name': 'Contact Us Settings',
+		'doc_type': 'Single DocType',
+		'doctype': 'Module Def Item'
+	},
+
+	# Module Def Item
+	{
+		'display_name': 'Home Settings',
+		'doc_name': 'Home Settings',
+		'doc_type': 'Single DocType',
 		'doctype': 'Module Def Item'
 	},
 
@@ -70,6 +98,23 @@
 	{
 		'display_name': 'About Us Settings',
 		'doc_name': 'About Us Settings',
+		'doc_type': 'Single DocType',
+		'doctype': 'Module Def Item'
+	},
+
+	# Module Def Item
+	{
+		'display_name': 'Contact Us Settings',
+		'doc_name': 'Contact Us Settings',
+		'doc_type': 'Single DocType',
+		'doctype': 'Module Def Item'
+	},
+
+	# Module Def Item
+	{
+		'display_name': 'About Us Settings',
+		'doc_name': 'About Us Settings',
+		'doc_type': 'Single DocType',
 		'doctype': 'Module Def Item'
 	},
 
@@ -77,6 +122,18 @@
 	{
 		'doctype': 'Module Def Role',
 		'role': 'System Manager'
+	},
+
+	# Module Def Role
+	{
+		'doctype': 'Module Def Role',
+		'role': 'System Manager'
+	},
+
+	# Module Def Role
+	{
+		'doctype': 'Module Def Role',
+		'role': 'Website Manager'
 	},
 
 	# Module Def Role

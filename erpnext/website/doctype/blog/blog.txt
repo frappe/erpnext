@@ -1,0 +1,88 @@
+# DocType, Blog
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2012-01-27 12:24:03',
+		'docstatus': 0,
+		'modified': '2012-01-27 12:24:03',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all DocType
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocType',
+		'module': 'Website',
+		'name': '__common__',
+		'section_style': 'Simple',
+		'show_in_menu': 0,
+		'version': 1
+	},
+
+	# These values are common for all DocField
+	{
+		'doctype': 'DocField',
+		'name': '__common__',
+		'parent': 'Blog',
+		'parentfield': 'fields',
+		'parenttype': 'DocType',
+		'permlevel': 0
+	},
+
+	# These values are common for all DocPerm
+	{
+		'create': 1,
+		'doctype': 'DocPerm',
+		'name': '__common__',
+		'parent': 'Blog',
+		'parentfield': 'permissions',
+		'parenttype': 'DocType',
+		'permlevel': 0,
+		'read': 1,
+		'write': 1
+	},
+
+	# DocType, Blog
+	{
+		'doctype': 'DocType',
+		'name': 'Blog'
+	},
+
+	# DocPerm
+	{
+		'doctype': 'DocPerm',
+		'role': 'Website Manager'
+	},
+
+	# DocPerm
+	{
+		'doctype': 'DocPerm',
+		'role': 'Blogger'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'title',
+		'fieldtype': 'Data',
+		'label': 'Title'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'published',
+		'fieldtype': 'Check',
+		'label': 'Published'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'content',
+		'fieldtype': 'Code',
+		'label': 'Content'
+	}
+]

@@ -1,11 +1,11 @@
-# Page, about
+# Page, blog
 [
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-01-27 11:37:57',
+		'creation': '2012-01-27 15:47:52',
 		'docstatus': 0,
-		'modified': '2012-01-27 13:26:42',
+		'modified': '2012-01-27 15:47:52',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
@@ -15,25 +15,26 @@
 		'doctype': 'Page',
 		'module': 'Website',
 		'name': '__common__',
-		'page_name': 'about',
+		'page_name': 'blog',
 		'standard': 'Yes',
-		'title': 'About Us'
+		'title': 'Blog'
 	},
 
 	# These values are common for all Page Role
 	{
+		'__islocal': 1,
 		'doctype': 'Page Role',
 		'name': '__common__',
-		'parent': 'about',
+		'parent': 'blog',
 		'parentfield': 'roles',
 		'parenttype': 'Page',
 		'role': 'Guest'
 	},
 
-	# Page, about
+	# Page, blog
 	{
 		'doctype': 'Page',
-		'name': 'about'
+		'name': 'blog'
 	},
 
 	# Page Role
