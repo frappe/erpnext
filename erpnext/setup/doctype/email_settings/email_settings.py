@@ -71,7 +71,7 @@ class DocType:
 		"""
 			Checks support ticket email settings
 		"""
-		if self.doc.support_host:
+		if self.doc.sync_support_mails and self.doc.support_host:
 			from webnotes.utils.email_lib.receive import POP3Mailbox
 			from webnotes.model.doc import Document
 			import _socket, poplib
