@@ -243,7 +243,8 @@ cur_frm.cscript.calc_doc_values = function(doc, cdt, cdn, tname, fname, other_fn
 	var net_total_incl = 0
 	var cl = getchildren(tname, doc.name, fname);
 	for(var i = 0; i<cl.length; i++){
-		net_total += flt(cl[i].basic_rate) * flt(cl[i].qty);
+		//net_total += flt(cl[i].basic_rate) * flt(cl[i].qty);
+		net_total += flt(cl[i].amount);
 		net_total_incl += flt(cl[i].export_amount);
 	}
 
