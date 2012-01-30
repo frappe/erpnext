@@ -189,7 +189,7 @@ Welcome!
 
 A new account has been created for you, here are your details:
 
-login-id: %(name)s
+login-id: %(user)s
 password: %(password)s
 
 To login to your new ERPNext account, please go to:
