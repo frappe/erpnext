@@ -158,8 +158,7 @@ class DocType:
 			('Payable Voucher', 'supplier'),
 			('Purchase Order', 'supplier'),
 			('Purchase Receipt', 'supplier'),
-			('Serial No', 'supplier'),
-			('Supplier Quotation', 'supplier')]
+			('Serial No', 'supplier')]
 			for rec in update_fields:
 				sql("update `tab%s` set supplier_name = '%s' where %s = '%s'" %(rec[0],newdn,rec[1],olddn))
 				

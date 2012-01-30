@@ -5,18 +5,19 @@
 	{
 		'creation': '2010-08-08 17:08:59',
 		'docstatus': 0,
-		'modified': '2011-07-25 15:03:51',
+		'modified': '2012-01-25 18:44:45',
 		'modified_by': 'Administrator',
 		'owner': 'harshada@webnotestech.com'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1311586371',
+		'_last_update': '1325570647',
 		'allow_copy': 1,
 		'allow_email': 1,
 		'allow_print': 1,
 		'colour': 'White:FFF',
+		'default_print_format': 'Standard',
 		'doctype': 'DocType',
 		'in_create': 1,
 		'issingle': 1,
@@ -24,7 +25,7 @@
 		'name': '__common__',
 		'section_style': 'Simple',
 		'server_code_error': ' ',
-		'version': 34
+		'version': 35
 	},
 
 	# These values are common for all DocField
@@ -59,21 +60,18 @@
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm',
-		'idx': 1
+		'doctype': 'DocPerm'
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm',
-		'idx': 2
+		'doctype': 'DocPerm'
 	},
 
 	# DocField
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Section Break',
-		'idx': 1,
 		'label': 'Outgoing Mails'
 	},
 
@@ -81,7 +79,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'HTML',
-		'idx': 2,
 		'label': '1',
 		'options': '<div class="help_box">Set your outgoing mail settings here. All system generated notifications, emails will go from this mail server</div>'
 	},
@@ -91,7 +88,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'outgoing_mail_server',
 		'fieldtype': 'Data',
-		'idx': 3,
 		'label': 'Outgoing Mail Server'
 	},
 
@@ -99,8 +95,7 @@
 	{
 		'doctype': 'DocField',
 		'fieldname': 'mail_port',
-		'fieldtype': 'Data',
-		'idx': 4,
+		'fieldtype': 'Int',
 		'label': 'Mail Port'
 	},
 
@@ -109,7 +104,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'use_ssl',
 		'fieldtype': 'Check',
-		'idx': 5,
 		'label': 'Use SSL'
 	},
 
@@ -118,7 +112,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'mail_login',
 		'fieldtype': 'Data',
-		'idx': 6,
 		'label': 'Login Id'
 	},
 
@@ -127,7 +120,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'mail_password',
 		'fieldtype': 'Password',
-		'idx': 7,
 		'label': 'Mail Password'
 	},
 
@@ -136,7 +128,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'auto_email_id',
 		'fieldtype': 'Data',
-		'idx': 8,
 		'label': 'Auto Email Id'
 	},
 
@@ -145,7 +136,6 @@
 		'description': 'Set the POP3 email settings to pull emails directly from a mailbox and create Support Tickets',
 		'doctype': 'DocField',
 		'fieldtype': 'Section Break',
-		'idx': 9,
 		'label': 'Support Ticket Mail Settings'
 	},
 
@@ -153,7 +143,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'HTML',
-		'idx': 10,
 		'label': '2',
 		'options': '<div class="help_box">To automatically create Support Tickets from your incoming mail, set your pop3 settings here.</div>'
 	},
@@ -162,7 +151,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Section Break',
-		'idx': 11,
 		'options': 'Simple'
 	},
 
@@ -173,7 +161,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'sync_support_mails',
 		'fieldtype': 'Check',
-		'idx': 12,
 		'label': 'Sync Support Mails'
 	},
 
@@ -184,7 +171,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'support_email',
 		'fieldtype': 'Data',
-		'idx': 13,
 		'label': 'Support Email'
 	},
 
@@ -195,7 +181,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'support_host',
 		'fieldtype': 'Data',
-		'idx': 14,
 		'label': 'POP3 Mail Server'
 	},
 
@@ -204,7 +189,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'support_use_ssl',
 		'fieldtype': 'Check',
-		'idx': 15,
 		'label': 'Use SSL'
 	},
 
@@ -213,7 +197,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'support_username',
 		'fieldtype': 'Data',
-		'idx': 16,
 		'label': 'User Name'
 	},
 
@@ -222,15 +205,13 @@
 		'doctype': 'DocField',
 		'fieldname': 'support_password',
 		'fieldtype': 'Password',
-		'idx': 17,
 		'label': 'Support Password'
 	},
 
 	# DocField
 	{
 		'doctype': 'DocField',
-		'fieldtype': 'Column Break',
-		'idx': 18
+		'fieldtype': 'Column Break'
 	},
 
 	# DocField
@@ -240,7 +221,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'support_signature',
 		'fieldtype': 'Text',
-		'idx': 19,
 		'label': 'Signature'
 	},
 
@@ -251,7 +231,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'support_autoreply',
 		'fieldtype': 'Text',
-		'idx': 20,
 		'label': 'Autoreply'
 	}
 ]

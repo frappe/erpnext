@@ -45,4 +45,9 @@ patch_list = [
 		'patch_file': 'doclabel_in_doclayer',
 		'description': "Show DocType Labels instead of DocType names in Customize Form View"
 	},
+	{
+		'patch_module': 'patches.jan_mar_2012',
+		'patch_file': 'email_settings_reload',
+		'description': "Change type of mail_port field to Int and reload email_settings doctype"
+	},
 ]
