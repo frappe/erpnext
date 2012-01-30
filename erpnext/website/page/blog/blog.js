@@ -1,4 +1,3 @@
-wn.require('lib/js/lib/prettydate.js')
 
 pscript.onload_blog = function(wrapper) {
 	wrapper.blog_list = new wn.widgets.Listing({

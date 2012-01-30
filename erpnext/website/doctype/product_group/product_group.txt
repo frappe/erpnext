@@ -1,0 +1,57 @@
+# DocType, Product Group
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2012-01-30 12:17:12',
+		'docstatus': 0,
+		'modified': '2012-01-30 12:17:12',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all DocType
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocType',
+		'istable': 1,
+		'module': 'Website',
+		'name': '__common__',
+		'section_style': 'Simple',
+		'show_in_menu': 0,
+		'version': 1
+	},
+
+	# These values are common for all DocField
+	{
+		'doctype': 'DocField',
+		'name': '__common__',
+		'parent': 'Product Group',
+		'parentfield': 'fields',
+		'parenttype': 'DocType',
+		'permlevel': 0
+	},
+
+	# DocType, Product Group
+	{
+		'doctype': 'DocType',
+		'name': 'Product Group'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'item_group',
+		'fieldtype': 'Link',
+		'label': 'Item Group',
+		'options': 'Item Group'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'label',
+		'fieldtype': 'Data',
+		'label': 'Label'
+	}
+]

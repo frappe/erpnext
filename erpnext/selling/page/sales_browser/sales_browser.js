@@ -1,4 +1,5 @@
 pscript['onload_Sales Browser'] = function(){
+  wn.require('lib/js/legacy/widgets/tree.js');
   var parent = $i('tr_body');
   parent.innerHTML = 'Please select your chart: '
   var sel = $a(parent,'select');

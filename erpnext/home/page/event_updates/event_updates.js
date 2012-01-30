@@ -449,51 +449,40 @@ FeedList.prototype.run = function() {
 }
 
 FeedList.prototype.make_list = function() {
-	this.list_area = $a(this.wrapper,'div')
-	this.no_result = $a(this.wrapper, 'div','help_box',{display:'none'},'Nothing to show yet. Your feed will be updated as you start your activities')
-	
-	var l = new Listing('Feed List',1);
 	var me = this;
-
-	// style
-	l.colwidths = ['100%']; l.page_len = 20;	
-	l.opts.cell_style = {padding:'0px'};
-	l.opts.hide_rec_label = 1;
+	this.list_area = $a(this.wrapper,'div')
 	
-	// build query
-	l.get_query = function(){
-		this.query = repl('select \
+	this.list = new wn.widgets.Listing({
+		parent: this.list_area,
+		query: repl('select \
 			distinct t1.name, t1.doc_type, t1.doc_name, t1.subject, t1.modified_by, \
-			concat(ifnull(t2.first_name,""), " ", ifnull(t2.last_name,"")), t1.modified, t1.color \
+			concat(ifnull(t2.first_name,""), " ", ifnull(t2.last_name,"")) as full_name, \
+			t1.modified, t1.color \
 			from tabFeed t1, tabProfile t2, tabUserRole t3, tabDocPerm t4 \
 			where t1.doc_type = t4.parent \
 			and t2.name = t1.owner \
 			and t3.parent = "%(user)s" \
 			and t4.role = t3.role \
 			and ifnull(t4.`read`,0) = 1 \
-			order by t1.modified desc', {user:user})
-		this.query_max = ''
-	}
-	
-	// render list ui
-	l.show_cell = function(cell,ri,ci,d){ me.render_feed(cell,ri,ci,d); }
-	
-	// onrun
-	l.onrun = function(){ $(me.wrapper).fadeIn(); if(me.after_run) me.after_run(); }
-	
-	// make
-	l.make(this.list_area);
-	$dh(l.btn_area);
-
-	this.list = l;
+			order by t1.modified desc', {user:user}),
+		no_result_message: 'Nothing to show yet. Your feed will be updated as you start your activities',
+		render_row: function(parent, data) {
+			me.render_feed(parent, data)
+		},
+		onrun: function() {
+			$(me.wrapper).fadeIn(); 
+			if(me.after_run) me.after_run();
+		},
+		hide_refresh: true
+	});
 }
 
 FeedList.prototype.after_run = function() {
 	this.list.has_data() ? $dh(this.no_result) : $ds(this.no_result)
 }
 
-FeedList.prototype.render_feed = function(cell,ri,ci,d) {
-	new FeedItem(cell, d[ri], this);
+FeedList.prototype.render_feed = function(parent, data) {
+	new FeedItem(parent, data, this);
 }
 
 // Item
@@ -527,12 +516,12 @@ FeedItem = function(cell, det, feedlist) {
 
 FeedItem.prototype.add_day_sep = function(det) {
 	var me = this;
-	var prev_date = det[6].split(' ')[0];
+	var prev_date = det.modified.split(' ')[0];
 	
 	var make_div = function() {
 		var div = $a(me.head, 'div', '', 
 			{borderBottom:'1px solid #888', margin:'8px 0px', padding:'2px 0px', color:'#888', fontSize:'11px'});
-		div.innerHTML = comment_when(det[6], 1);
+		div.innerHTML = comment_when(det.modified, 1);
 		
 		// today?
 		if(prev_date==get_today()) {
@@ -554,32 +543,31 @@ FeedItem.prototype.render_tag = function(det) {
 	tag = $a($td(this.tab,0,0), 'div', '', 
 		{color:'#FFF', padding:'3px', textAlign:'right', fontSize:'11px', whiteSpace:'nowrap', overflow:'hidden', cursor:'pointer'});
 	$br(tag,'3px');
-	$y(tag, {backgroundColor:(det[7] ? det[7] : '#273')});
-	tag.innerHTML = get_doctype_label(det[1]);
-	tag.dt = det[1]
+	$y(tag, {backgroundColor:(det.color || '#273')});
+	tag.innerHTML = get_doctype_label(det.doc_type);
+	tag.dt = det.doc_type;
 	tag.onclick = function() { loaddocbrowser(this.dt); }
 }
 
 FeedItem.prototype.render_references = function(div, det) {
 	// name
-	div.tab = make_table(div, 1, 2, '100%', [null, '15%'])
-	//div.innerHTML = '<b>' + (strip(det[11]) ? det[11] : det[2]) + ' (' + cint(det[12]) + '): </b> has ' + det[7] + ' ';
-	
-	var dt = det[1]; var dn = det[2]
+	div.tab = make_table(div, 1, 2, '100%', [null, '15%'])	
+	var dt = det.doc_type; var dn = det.doc_name
 	
 	// link
 	var allow = in_list(profile.can_read, dt);
-	var span = $a($td(div.tab,0,0), 'span', (allow ? 'link_type': ''), null, det[2]);
+	var span = $a($td(div.tab,0,0), 'span', (allow ? 'link_type': ''), null, det.doc_name);
 	span.dt = dt; span.dn = dn;
 	if(allow) span.onclick = function() { loaddoc(this.dt, this.dn); }
 	
 	// subject
-	if(det[3]) {
-		$a($td(div.tab,0,0), 'span', '', {marginLeft:'7px', color:'#444'}, det[3]);
+	if(det.subject) {
+		$a($td(div.tab,0,0), 'span', '', {marginLeft:'7px', color:'#444'}, det.subject);
 	}
 	
 	// by
-	$y($td(div.tab,0,1), {fontSize:'11px'}).innerHTML = (strip(det[5]) ? det[5] : det[4]);
+	$y($td(div.tab,0,1), {fontSize:'11px'}).innerHTML = 
+		(strip(det.full_name) ? det.full_name : det.modified_by);
 }
 
 HomeStatusBar = function() {

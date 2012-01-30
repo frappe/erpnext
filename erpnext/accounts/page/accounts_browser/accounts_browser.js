@@ -1,4 +1,5 @@
 pscript['onload_Accounts Browser'] = function(){
+	wn.require('lib/js/legacy/widgets/tree.js');
   // if the user directly loads the page, ask to select the chart
   var parent = $i('ab_body');
   parent.innerHTML = 'Please select your chart: '

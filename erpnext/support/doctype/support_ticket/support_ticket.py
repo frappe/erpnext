@@ -65,6 +65,8 @@ class DocType(TransactionBase):
 		d = Document('Support Ticket Response')
 		d.from_email = from_email or webnotes.user.name
 		d.parent = self.doc.name
+		d.parenttype = "Support Ticket"
+		d.parentfield = "responses"
 		d.mail = response
 		d.content_type = content_type
 		d.save(1)

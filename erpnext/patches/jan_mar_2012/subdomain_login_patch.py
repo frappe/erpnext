@@ -14,6 +14,7 @@ def cleanup():
 	from webnotes.model import delete_doc
 	delete_doc("DocType", "SSO Control")
 	delete_doc("DocType", "WN ERP Client Control")
+	delete_doc("DocType", "Production Tips Common")
 	delete_doc("DocType", "DocTrigger")
 
 	# cleanup control panel
