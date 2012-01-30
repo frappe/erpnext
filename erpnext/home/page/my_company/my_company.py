@@ -105,7 +105,7 @@ def send_welcome_mail(email, args):
 	from webnotes.utils.email_lib import sendmail_md
 	args.update({
 		'company': webnotes.conn.get_default('company'),
-		'password': password,
+		'password': args.get('password'),
 		'account_url': webnotes.conn.get_default('account_url')
 	})
 	sendmail_md(pr.email, subject="Welcome to ERPNext", msg=welcome_txt % args)
