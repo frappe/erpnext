@@ -28,13 +28,13 @@ erpnext.startup.start = function() {
 		wn.require('erpnext/startup/toolbar.js');
 		erpnext.toolbar.setup();
 		wn.require('erpnext/startup/feature_setup.js');
+
+		// border to the body
+		// ------------------
+		$('footer').html('<div class="erpnext-footer">\
+			Powered by <a href="https://erpnext.com">ERPNext</a></div>');
 	}
 	
-	// border to the body
-	// ------------------
-	$('footer').html('<div class="erpnext-footer">\
-		Powered by <a href="https://erpnext.com">ERPNext</a></div>');
-
 	$('#startup_div').toggle(false);
 }
 

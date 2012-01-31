@@ -1,0 +1,110 @@
+# DocType, Web Page
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2012-01-31 15:18:49',
+		'docstatus': 0,
+		'modified': '2012-01-31 15:48:50',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all DocType
+	{
+		'_last_update': '1328003330',
+		'allow_attach': 1,
+		'colour': 'White:FFF',
+		'description': 'A custom page is a simple page with the layout - headline, main section, side section\n\nEditing:\n\n- Editing is in [markdown format](http://daringfireball.net/projects/markdown/syntax)\n- You can also add images and embed html code\n\nAccessing the page:\n\n- The page can be accessed as #![page-name] after the main url\n\nIdeal for pages like FAQ, Terms, Help etc.\n\n',
+		'doctype': 'DocType',
+		'max_attachments': 5,
+		'module': 'Website',
+		'name': '__common__',
+		'section_style': 'Simple',
+		'show_in_menu': 0,
+		'version': 3
+	},
+
+	# These values are common for all DocField
+	{
+		'doctype': 'DocField',
+		'name': '__common__',
+		'parent': 'Web Page',
+		'parentfield': 'fields',
+		'parenttype': 'DocType',
+		'permlevel': 0
+	},
+
+	# These values are common for all DocPerm
+	{
+		'doctype': 'DocPerm',
+		'name': '__common__',
+		'parent': 'Web Page',
+		'parentfield': 'permissions',
+		'parenttype': 'DocType',
+		'read': 1,
+		'role': 'Website Manager'
+	},
+
+	# DocType, Web Page
+	{
+		'doctype': 'DocType',
+		'name': 'Web Page'
+	},
+
+	# DocPerm
+	{
+		'create': 1,
+		'doctype': 'DocPerm',
+		'permlevel': 0,
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'doctype': 'DocPerm',
+		'permlevel': 1
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'description': 'Title / headline of your page',
+		'doctype': 'DocField',
+		'fieldname': 'title',
+		'fieldtype': 'Data',
+		'label': 'Title',
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'description': 'Content in markdown format that appears on the main side of your page',
+		'doctype': 'DocField',
+		'fieldname': 'main_section',
+		'fieldtype': 'Code',
+		'label': 'Main Section'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'description': 'Content in markdown format that appears on the right side',
+		'doctype': 'DocField',
+		'fieldname': 'side_section',
+		'fieldtype': 'Code',
+		'label': 'Side Section'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'file_list',
+		'fieldtype': 'Text',
+		'hidden': 1,
+		'label': 'File List',
+		'no_copy': 1,
+		'print_hide': 1
+	}
+]

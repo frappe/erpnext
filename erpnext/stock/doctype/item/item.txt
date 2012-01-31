@@ -5,14 +5,14 @@
 	{
 		'creation': '2010-08-08 17:09:05',
 		'docstatus': 0,
-		'modified': '2012-01-30 12:10:37',
+		'modified': '2012-01-30 16:46:37',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1327904359',
+		'_last_update': '1327905637',
 		'allow_attach': 1,
 		'allow_trash': 1,
 		'autoname': 'field:item_code',
@@ -29,7 +29,7 @@
 		'show_in_menu': 0,
 		'subject': '%(item_name)s',
 		'tag_fields': 'item_group',
-		'version': 164
+		'version': 165
 	},
 
 	# These values are common for all DocField
@@ -490,98 +490,6 @@
 		'fieldtype': 'Link',
 		'label': 'Weight UOM',
 		'options': 'UOM',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldtype': 'Section Break',
-		'label': 'Website Details',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'colour': 'White:FFF',
-		'description': 'Check here to show this item on your website under "Products"',
-		'doctype': 'DocField',
-		'fieldname': 'show_in_website',
-		'fieldtype': 'Check',
-		'label': 'Show in website',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'colour': 'White:FFF',
-		'description': 'Small image shown in listings (100px width) (Attach first)',
-		'doctype': 'DocField',
-		'fieldname': 'thumbnail_image',
-		'fieldtype': 'Select',
-		'label': 'Thumbnail Image',
-		'options': 'attach_files:',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'colour': 'White:FFF',
-		'description': 'Small image shown product page (300px width) (Attach first)',
-		'doctype': 'DocField',
-		'fieldname': 'full_image',
-		'fieldtype': 'Select',
-		'label': 'Full Image',
-		'options': 'attach_files:',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldtype': 'Column Break',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'colour': 'White:FFF',
-		'description': 'Price list for your website (leave blank if you do not want to show the price)',
-		'doctype': 'DocField',
-		'fieldname': 'website_price_list',
-		'fieldtype': 'Link',
-		'label': 'Website Price List',
-		'options': 'Price List',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'colour': 'White:FFF',
-		'description': 'Enter your shipping warehouse if you want "In Stock" or "Out of Stock" to appear on your website',
-		'doctype': 'DocField',
-		'fieldname': 'website_warehouse',
-		'fieldtype': 'Link',
-		'label': 'Website Warehouse',
-		'options': 'Warehouse',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldtype': 'Section Break',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'colour': 'White:FFF',
-		'description': 'Detailed description of your product for your website. Formatted in html/markdown format.',
-		'doctype': 'DocField',
-		'fieldname': 'website_description',
-		'fieldtype': 'Code',
-		'label': 'Website Description',
 		'permlevel': 0
 	},
 

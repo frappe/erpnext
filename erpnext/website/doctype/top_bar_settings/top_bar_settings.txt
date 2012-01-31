@@ -5,14 +5,14 @@
 	{
 		'creation': '2012-01-24 10:21:41',
 		'docstatus': 0,
-		'modified': '2012-01-24 10:45:02',
+		'modified': '2012-01-31 15:55:34',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1327380941',
+		'_last_update': '1327382102',
 		'allow_attach': 1,
 		'colour': 'White:FFF',
 		'doctype': 'DocType',
@@ -23,7 +23,7 @@
 		'name': '__common__',
 		'section_style': 'Simple',
 		'show_in_menu': 0,
-		'version': 3
+		'version': 4
 	},
 
 	# These values are common for all DocField
@@ -69,6 +69,13 @@
 
 	# DocField
 	{
+		'doctype': 'DocField',
+		'fieldtype': 'Section Break',
+		'label': 'Top Bar'
+	},
+
+	# DocField
+	{
 		'colour': 'White:FFF',
 		'description': 'Brand is what appears on the top-right of the toolbar. If it is an image, make sure it\nhas a transparent background and use the &lt;img /&gt; tag',
 		'doctype': 'DocField',
@@ -83,6 +90,38 @@
 		'fieldname': 'top_bar_items',
 		'fieldtype': 'Table',
 		'label': 'Top Bar Items',
+		'options': 'Top Bar Item'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Section Break',
+		'label': 'Footer'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'address',
+		'fieldtype': 'Text',
+		'label': 'Address'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'copyright',
+		'fieldtype': 'Data',
+		'label': 'Copyright'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'footer_items',
+		'fieldtype': 'Table',
+		'label': 'Footer Items',
 		'options': 'Top Bar Item'
 	},
 

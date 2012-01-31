@@ -266,11 +266,14 @@ SidebarItem.prototype.show_items = function() {
 SidebarItem.prototype.show_section = function(sec_type) {
 	var me = this;
 	var label = this.det.module_label + ' ' + sec_type;
-	var type_map = {'Reports':'Reports', 'Custom Reports':'Custom Reports', 'Pages':'Tools', 'Single DocType':'Tools', 'Setup Forms':'Tools'}
+	var type_map = {'Reports':'Reports', 'Custom Reports':'Custom Reports', 
+		'Pages':'Tools', 'Single DocType':'Tools', 'Setup Forms':'Tools'}
+
 
 	if(page_body.pages[label]) {
 		loadpage(label, null, 1);
 	} else {
+		
 		// make the reports page
 		var page = page_body.add_page(label);
 		this.wrapper = $a(page,'div','layout_wrapper');
@@ -373,3 +376,6 @@ pscript.startup_set_module_order = function() {
 	$c_obj('Home Control', 'get_module_order', '', callback)
 
 }
+
+
+

@@ -35,8 +35,8 @@ erpnext.topbar.TopBar = Class.extend({
 		var items = wn.boot.topbaritems
 		for(var i=0;i<items.length;i++) {
 			var item = items[i];
-			if(!item.parent_label) {
-				item.route = item.std_page.toLowerCase();
+			if(!item.parent_label && item.parentfield=='top_bar_items') {
+				item.route = item.std_page ? item.std_page.toLowerCase() : item.custom_page;
 				$('header .nav:first').append(repl('<li><a href="#!%(route)s" \
 					data-label="%(label)s">%(label)s</a></li>', item))
 			}
@@ -45,3 +45,30 @@ erpnext.topbar.TopBar = Class.extend({
 });
 
 erpnext.topbar.topbar = new erpnext.topbar.TopBar();
+
+// footer
+erpnext.Footer = Class.extend({
+	init: function() {
+		$('footer').html(repl('<div class="web-footer">\
+			<div class="web-footer-menu"><ul></ul></div>\
+			<div class="web-footer-address">%(address)s</div>\
+			<div class="web-footer-copyright">&copy; %(copyright)s</div>\
+			<div class="web-footer-powered">Powered by \
+				<a href="https://erpnext.com">erpnext.com</a></div>\
+		</div>', wn.boot.topbar));
+		this.make_items();
+	},
+	make_items: function() {
+		var items = wn.boot.topbaritems
+		for(var i=0;i<items.length;i++) {
+			var item = items[i];
+			if(!item.parent_label && item.parentfield=='footer_items') {
+				item.route = item.std_page ? item.std_page.toLowerCase() : item.custom_page;
+				$('.web-footer-menu ul').append(repl('<li><a href="#!%(route)s" \
+					data-label="%(label)s">%(label)s</a></li>', item))
+			}
+		}
+	}
+});
+
+erpnext.footer = new erpnext.Footer();

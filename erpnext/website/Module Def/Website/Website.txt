@@ -5,7 +5,7 @@
 	{
 		'creation': '2012-01-23 17:05:32',
 		'docstatus': 0,
-		'modified': '2012-01-30 12:19:11',
+		'modified': '2012-01-31 15:19:28',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
@@ -49,6 +49,22 @@
 		'display_name': 'Top Bar Settings',
 		'doc_name': 'Top Bar Settings',
 		'doc_type': 'Single DocType',
+		'doctype': 'Module Def Item'
+	},
+
+	# Module Def Item
+	{
+		'display_name': 'Web Page',
+		'doc_name': 'Web Page',
+		'doc_type': 'Forms',
+		'doctype': 'Module Def Item'
+	},
+
+	# Module Def Item
+	{
+		'display_name': 'Product',
+		'doc_name': 'Product',
+		'doc_type': 'Forms',
 		'doctype': 'Module Def Item'
 	},
 

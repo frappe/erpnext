@@ -3,6 +3,10 @@
 	margin: auto;
 }
 
+footer {
+	width: 900px;
+	margin: auto;
+}
 header .topbar .container {
 	width: 900px;
 	margin: auto;
@@ -25,4 +29,42 @@ header .topbar .container {
 	margin-right: 15px;
 	color: #606060;
 	overflow-x: hidden;
+}
+
+.web-footer {
+	text-align: center;
+	color: #777;
+	margin: 10px;
+	line-height: 1.7;
+}
+
+.web-footer div, .web-footer a {
+	font-size: 11px;
+}
+
+.web-footer-menu {
+	margin-bottom: 7px;
+}
+.web-footer a, .web-footer a:visited {
+	color: #777;
+}
+
+.web-footer a:hover {
+	background-color: #777;
+	color: #fff;
+}
+
+.web-footer-menu ul {
+	list-style: none;
+	margin: 0px;
+}
+
+.web-footer-menu ul li {
+	display: inline;
+	padding: 2px 15px;
+	border-right: 1px solid #999;
+}
+
+.web-footer-menu ul li:last-child {
+	border-right: 0px solid #777;
 }

@@ -5,7 +5,7 @@
 	{
 		'creation': '2012-01-24 10:24:19',
 		'docstatus': 0,
-		'modified': '2012-01-24 10:24:19',
+		'modified': '2012-01-30 14:14:48',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
@@ -19,7 +19,7 @@
 		'name': '__common__',
 		'section_style': 'Simple',
 		'show_in_menu': 0,
-		'version': 1
+		'version': 2
 	},
 
 	# These values are common for all DocField
@@ -52,7 +52,7 @@
 		'fieldname': 'std_page',
 		'fieldtype': 'Select',
 		'label': 'Std Page',
-		'options': 'Home\nAbout\nContact\nProduct\nCustomer\nBlog\nPartner\nCareer\nCustom'
+		'options': 'Home\nAbout\nContact\nProducts\nBlog\nCustom'
 	},
 
 	# DocField

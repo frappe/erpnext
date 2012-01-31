@@ -477,10 +477,6 @@ FeedList.prototype.make_list = function() {
 	});
 }
 
-FeedList.prototype.after_run = function() {
-	this.list.has_data() ? $dh(this.no_result) : $ds(this.no_result)
-}
-
 FeedList.prototype.render_feed = function(parent, data) {
 	new FeedItem(parent, data, this);
 }
