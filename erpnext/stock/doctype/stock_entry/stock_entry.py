@@ -435,7 +435,10 @@ class DocType:
 						sl_obj.update_serial_purchase_details(self, d, serial_no, is_submit, self.doc.purpose)
 					
 					if self.doc.purpose == 'Purchase Return':
-						delete_doc("Serial No", serial_no)
+						#delete_doc("Serial No", serial_no)
+						serial_doc = Document("Serial No", serial_no)
+						serial_doc.status = 'Purchase Returned'
+						serial_doc.save()
 
 
 	def on_submit(self):

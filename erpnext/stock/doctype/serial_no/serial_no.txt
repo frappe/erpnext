@@ -5,14 +5,14 @@
 	{
 		'creation': '2010-08-08 17:09:23',
 		'docstatus': 0,
-		'modified': '2011-10-10 17:08:57',
+		'modified': '2012-01-31 15:53:38',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1317365120',
+		'_last_update': '1325570647',
 		'allow_trash': 1,
 		'autoname': 'field:serial_no',
 		'colour': 'White:FFF',
@@ -25,8 +25,9 @@
 		'section_style': 'Tabbed',
 		'server_code_error': ' ',
 		'show_in_menu': 0,
+		'subject': 'Item Code: %(item_code)s, Warehouse: %(warehouse)s',
 		'tag_fields': 'status',
-		'version': 190
+		'version': 191
 	},
 
 	# These values are common for all DocField
@@ -163,7 +164,7 @@
 		'no_copy': 1,
 		'oldfieldname': 'status',
 		'oldfieldtype': 'Select',
-		'options': '\nIn Store\nDelivered\nNot in Use',
+		'options': '\nIn Store\nDelivered\nNot in Use\nPurchase Returned',
 		'permlevel': 1,
 		'reqd': 1,
 		'search_index': 1
