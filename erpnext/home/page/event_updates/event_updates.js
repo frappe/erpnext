@@ -401,6 +401,7 @@ HomeToDo.prototype.save = function(btn) {
 	 	return;	
 	}
 
+	det.name = d.det.name;
 	var callback = function(r,rt) {
 		btn.done_working();
 		me.widget.dialog.hide();
