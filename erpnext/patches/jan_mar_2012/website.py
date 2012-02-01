@@ -16,14 +16,18 @@ def execute():
 	reload_doc('website', 'doctype', 'top_bar_item')
 	reload_doc('website', 'doctype', 'contact_us_settings')
 	reload_doc('website', 'doctype', 'about_us_settings')
+	reload_doc('website', 'doctype', 'products_settings')
 	reload_doc('website', 'doctype', 'blog')
 	reload_doc('website', 'doctype', 'blog_subscriber')
+	reload_doc('website', 'doctype', 'product')
+	reload_doc('website', 'doctype', 'web_page')
 
 	reload_doc('website', 'page', 'home')
 	reload_doc('website', 'page', 'contact')
 	reload_doc('website', 'page', 'about')
 	reload_doc('website', 'page', 'blog')
 	reload_doc('website', 'page', 'unsubscribe')
+	reload_doc('website', 'page', 'products')
 		
 def add_website_manager():
 	"""add website manager to system manager"""
