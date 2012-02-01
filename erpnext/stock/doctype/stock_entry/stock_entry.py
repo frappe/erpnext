@@ -438,6 +438,7 @@ class DocType:
 						#delete_doc("Serial No", serial_no)
 						serial_doc = Document("Serial No", serial_no)
 						serial_doc.status = 'Purchase Returned'
+						serial_doc.docstatus = 2
 						serial_doc.save()
 
 
