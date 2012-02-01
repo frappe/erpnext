@@ -55,4 +55,9 @@ patch_list = [
 		'patch_file': 'serial_no_add_opt',
 		'description': "Add option 'Purchase Returned' to Serial No status field"
 	},
+	{
+		'patch_module': 'patches.jan_mar_2012',
+		'patch_file': 'cancel_purchase_returned',
+		'description': "Set docstatus = 2 where status = 'Purchase Returned' for serial no"
+	},
 ]
