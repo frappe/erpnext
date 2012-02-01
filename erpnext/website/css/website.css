@@ -3,6 +3,10 @@
 	margin: auto;
 }
 
+.layout_wrapper {
+	padding: 20px;
+}
+
 footer {
 	width: 900px;
 	margin: auto;
@@ -10,6 +14,11 @@ footer {
 header .topbar .container {
 	width: 900px;
 	margin: auto;
+}
+
+.web-home-banner {
+	width: 860px; 
+	margin-bottom: 20px
 }
 
 .web-content input[type="text"], .web-content input[type="password"], .web-content select {

@@ -1,0 +1,49 @@
+# DocType, Related Page
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2012-02-01 16:16:47',
+		'docstatus': 0,
+		'modified': '2012-02-01 16:16:48',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all DocType
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocType',
+		'istable': 1,
+		'module': 'Website',
+		'name': '__common__',
+		'section_style': 'Simple',
+		'show_in_menu': 0,
+		'version': 1
+	},
+
+	# These values are common for all DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'page',
+		'fieldtype': 'Link',
+		'label': 'Page',
+		'name': '__common__',
+		'options': 'Page',
+		'parent': 'Related Page',
+		'parentfield': 'fields',
+		'parenttype': 'DocType',
+		'permlevel': 0
+	},
+
+	# DocType, Related Page
+	{
+		'doctype': 'DocType',
+		'name': 'Related Page'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField'
+	}
+]

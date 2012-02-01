@@ -5,14 +5,14 @@
 	{
 		'creation': '2012-01-31 15:18:49',
 		'docstatus': 0,
-		'modified': '2012-01-31 15:48:50',
+		'modified': '2012-02-01 16:19:39',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1328003330',
+		'_last_update': '1328093309',
 		'allow_attach': 1,
 		'colour': 'White:FFF',
 		'description': 'A custom page is a simple page with the layout - headline, main section, side section\n\nEditing:\n\n- Editing is in [markdown format](http://daringfireball.net/projects/markdown/syntax)\n- You can also add images and embed html code\n\nAccessing the page:\n\n- The page can be accessed as #![page-name] after the main url\n\nIdeal for pages like FAQ, Terms, Help etc.\n\n',
@@ -22,7 +22,7 @@
 		'name': '__common__',
 		'section_style': 'Simple',
 		'show_in_menu': 0,
-		'version': 3
+		'version': 5
 	},
 
 	# These values are common for all DocField
@@ -95,6 +95,28 @@
 		'fieldname': 'side_section',
 		'fieldtype': 'Code',
 		'label': 'Side Section'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'description': 'Link for next page appears at the bottom of the page',
+		'doctype': 'DocField',
+		'fieldname': 'next_page',
+		'fieldtype': 'Link',
+		'label': 'Next Page',
+		'options': 'Page'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'description': 'Related pages appear on the right side of the link and are linked both ways.',
+		'doctype': 'DocField',
+		'fieldname': 'related_pages',
+		'fieldtype': 'Table',
+		'label': 'Related Pages',
+		'options': 'Related Page'
 	},
 
 	# DocField

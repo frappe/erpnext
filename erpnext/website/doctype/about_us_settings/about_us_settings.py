@@ -20,4 +20,5 @@ class DocType:
 		for t in self.doc.about_team:
 			t['bio'] = markdown2.markdown(t['bio'])
 		
+		webnotes.conn.set_value('Page', 'about', 'title', self.doc.headline)
 		webnotes.conn.set_value('Page', 'about', 'content', make_template(self.doc, path))
