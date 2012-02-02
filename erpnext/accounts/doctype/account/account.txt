@@ -5,27 +5,28 @@
 	{
 		'creation': '2010-08-08 17:08:51',
 		'docstatus': 0,
-		'modified': '2011-06-23 17:11:38',
+		'modified': '2012-02-02 15:34:41',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1309508836',
+		'_last_update': '1325570645',
 		'allow_copy': 1,
 		'allow_trash': 1,
 		'colour': 'White:FFF',
+		'default_print_format': 'Standard',
 		'doctype': 'DocType',
 		'document_type': 'Master',
 		'in_create': 1,
 		'module': 'Accounts',
 		'name': '__common__',
-		'search_fields': 'debit_or_credit, group_or_ledger',
+		'search_fields': 'account_type, debit_or_credit, group_or_ledger',
 		'section_style': 'Tray',
 		'server_code_error': ' ',
 		'show_in_menu': 0,
-		'version': 133
+		'version': 138
 	},
 
 	# These values are common for all DocField
@@ -56,7 +57,6 @@
 	# DocPerm
 	{
 		'doctype': 'DocPerm',
-		'idx': 1,
 		'permlevel': 0,
 		'role': 'Sales User'
 	},
@@ -64,7 +64,6 @@
 	# DocPerm
 	{
 		'doctype': 'DocPerm',
-		'idx': 2,
 		'permlevel': 0,
 		'role': 'Purchase User'
 	},
@@ -75,7 +74,6 @@
 		'cancel': 1,
 		'create': 1,
 		'doctype': 'DocPerm',
-		'idx': 3,
 		'permlevel': 0,
 		'role': 'Accounts User',
 		'submit': 0,
@@ -88,7 +86,6 @@
 		'cancel': 1,
 		'create': 1,
 		'doctype': 'DocPerm',
-		'idx': 4,
 		'permlevel': 0,
 		'role': 'Accounts Manager',
 		'submit': 0,
@@ -101,7 +98,6 @@
 		'cancel': 0,
 		'create': 0,
 		'doctype': 'DocPerm',
-		'idx': 5,
 		'permlevel': 1,
 		'role': 'Accounts User',
 		'submit': 0,
@@ -114,7 +110,6 @@
 		'cancel': 0,
 		'create': 0,
 		'doctype': 'DocPerm',
-		'idx': 6,
 		'permlevel': 1,
 		'role': 'Accounts Manager',
 		'submit': 0,
@@ -127,7 +122,6 @@
 		'cancel': 0,
 		'create': 0,
 		'doctype': 'DocPerm',
-		'idx': 7,
 		'permlevel': 2,
 		'role': 'Accounts Manager',
 		'submit': 0,
@@ -140,7 +134,6 @@
 		'cancel': 0,
 		'create': 0,
 		'doctype': 'DocPerm',
-		'idx': 8,
 		'permlevel': 2,
 		'role': 'Accounts User',
 		'submit': 0,
@@ -151,7 +144,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Section Break',
-		'idx': 1,
 		'label': 'Properties',
 		'oldfieldtype': 'Section Break',
 		'permlevel': 0
@@ -161,7 +153,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Column Break',
-		'idx': 2,
 		'permlevel': 0,
 		'width': '50%'
 	},
@@ -171,7 +162,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'account_name',
 		'fieldtype': 'Data',
-		'idx': 3,
 		'in_filter': 1,
 		'label': 'Account Name',
 		'no_copy': 1,
@@ -179,7 +169,7 @@
 		'oldfieldtype': 'Data',
 		'permlevel': 1,
 		'reqd': 1,
-		'search_index': 0
+		'search_index': 1
 	},
 
 	# DocField
@@ -187,7 +177,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'parent_account',
 		'fieldtype': 'Link',
-		'idx': 4,
 		'label': 'Parent Account',
 		'oldfieldname': 'parent_account',
 		'oldfieldtype': 'Link',
@@ -203,7 +192,6 @@
 		'fieldname': 'level',
 		'fieldtype': 'Int',
 		'hidden': 1,
-		'idx': 5,
 		'label': 'Level',
 		'oldfieldname': 'level',
 		'oldfieldtype': 'Int',
@@ -217,7 +205,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'group_or_ledger',
 		'fieldtype': 'Select',
-		'idx': 6,
 		'in_filter': 1,
 		'label': 'Group or Ledger',
 		'oldfieldname': 'group_or_ledger',
@@ -225,14 +212,13 @@
 		'options': '\nLedger\nGroup',
 		'permlevel': 1,
 		'reqd': 1,
-		'search_index': 0
+		'search_index': 1
 	},
 
 	# DocField
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Button',
-		'idx': 7,
 		'label': 'Convert to Group',
 		'permlevel': 0,
 		'trigger': 'Client'
@@ -242,7 +228,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Button',
-		'idx': 8,
 		'label': 'Convert to Ledger',
 		'permlevel': 0,
 		'trigger': 'Client'
@@ -253,13 +238,12 @@
 		'doctype': 'DocField',
 		'fieldname': 'debit_or_credit',
 		'fieldtype': 'Data',
-		'idx': 9,
 		'in_filter': 1,
 		'label': 'Debit or Credit',
 		'oldfieldname': 'debit_or_credit',
 		'oldfieldtype': 'Data',
 		'permlevel': 1,
-		'search_index': 0
+		'search_index': 1
 	},
 
 	# DocField
@@ -267,14 +251,13 @@
 		'doctype': 'DocField',
 		'fieldname': 'is_pl_account',
 		'fieldtype': 'Select',
-		'idx': 10,
 		'in_filter': 1,
 		'label': 'Is PL Account',
 		'oldfieldname': 'is_pl_account',
 		'oldfieldtype': 'Select',
 		'options': 'Yes\nNo',
 		'permlevel': 1,
-		'search_index': 0
+		'search_index': 1
 	},
 
 	# DocField
@@ -282,7 +265,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'account_type',
 		'fieldtype': 'Select',
-		'idx': 11,
 		'in_filter': 1,
 		'label': 'Account Type',
 		'oldfieldname': 'account_type',
@@ -301,7 +283,6 @@
 		'fieldname': 'tax_rate',
 		'fieldtype': 'Currency',
 		'hidden': 0,
-		'idx': 12,
 		'label': 'Rate',
 		'oldfieldname': 'tax_rate',
 		'oldfieldtype': 'Currency',
@@ -313,7 +294,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Column Break',
-		'idx': 13,
 		'permlevel': 0,
 		'width': '50%'
 	},
@@ -323,7 +303,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'freeze_account',
 		'fieldtype': 'Select',
-		'idx': 14,
 		'label': 'Freeze Account',
 		'oldfieldname': 'freeze_account',
 		'oldfieldtype': 'Select',
@@ -336,7 +315,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'company',
 		'fieldtype': 'Link',
-		'idx': 15,
 		'in_filter': 1,
 		'label': 'Company',
 		'oldfieldname': 'company',
@@ -344,7 +322,7 @@
 		'options': 'Company',
 		'permlevel': 1,
 		'reqd': 1,
-		'search_index': 0
+		'search_index': 1
 	},
 
 	# DocField
@@ -352,8 +330,7 @@
 		'doctype': 'DocField',
 		'fieldname': 'credit_days',
 		'fieldtype': 'Int',
-		'hidden': 0,
-		'idx': 16,
+		'hidden': 1,
 		'label': 'Credit Days',
 		'oldfieldname': 'credit_days',
 		'oldfieldtype': 'Int',
@@ -366,8 +343,7 @@
 		'doctype': 'DocField',
 		'fieldname': 'credit_limit',
 		'fieldtype': 'Currency',
-		'hidden': 0,
-		'idx': 17,
+		'hidden': 1,
 		'label': 'Credit Limit',
 		'oldfieldname': 'credit_limit',
 		'oldfieldtype': 'Currency',
@@ -380,7 +356,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'master_type',
 		'fieldtype': 'Select',
-		'idx': 18,
 		'label': 'Master Type',
 		'oldfieldname': 'master_type',
 		'oldfieldtype': 'Select',
@@ -393,7 +368,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'master_name',
 		'fieldtype': 'Link',
-		'idx': 19,
 		'label': 'Master Name',
 		'oldfieldname': 'master_name',
 		'oldfieldtype': 'Link',
@@ -405,7 +379,6 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Section Break',
-		'idx': 20,
 		'label': 'TDS',
 		'oldfieldtype': 'Section Break',
 		'permlevel': 0
@@ -416,7 +389,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'pan_number',
 		'fieldtype': 'Data',
-		'idx': 21,
 		'label': 'PAN Number',
 		'oldfieldname': 'pan_number',
 		'oldfieldtype': 'Data',
@@ -429,7 +401,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'tds_applicable',
 		'fieldtype': 'Select',
-		'idx': 22,
 		'label': 'TDS Applicable',
 		'oldfieldname': 'tds_applicable',
 		'oldfieldtype': 'Select',
@@ -442,7 +413,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'tds_details',
 		'fieldtype': 'Table',
-		'idx': 23,
 		'label': 'TDS Details',
 		'oldfieldname': 'tds_details',
 		'oldfieldtype': 'Table',
@@ -456,13 +426,12 @@
 		'doctype': 'DocField',
 		'fieldname': 'old_parent',
 		'fieldtype': 'Link',
-		'options': 'Account', 
 		'hidden': 1,
-		'idx': 24,
 		'label': 'Old Parent',
 		'no_copy': 1,
 		'oldfieldname': 'old_parent',
 		'oldfieldtype': 'Data',
+		'options': 'Account',
 		'permlevel': 0,
 		'report_hide': 1
 	},
@@ -475,7 +444,6 @@
 		'fieldname': 'lft',
 		'fieldtype': 'Int',
 		'hidden': 1,
-		'idx': 25,
 		'in_filter': 1,
 		'label': 'Lft',
 		'no_copy': 1,
@@ -495,7 +463,6 @@
 		'fieldname': 'rgt',
 		'fieldtype': 'Int',
 		'hidden': 1,
-		'idx': 26,
 		'in_filter': 1,
 		'label': 'Rgt',
 		'no_copy': 1,
@@ -512,7 +479,6 @@
 		'doctype': 'DocField',
 		'fieldname': 'trash_reason',
 		'fieldtype': 'Small Text',
-		'idx': 27,
 		'label': 'Trash Reason',
 		'oldfieldname': 'trash_reason',
 		'oldfieldtype': 'Small Text',
