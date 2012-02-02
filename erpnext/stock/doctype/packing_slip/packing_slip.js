@@ -1,0 +1,123 @@
+cur_frm.fields_dict['delivery_note'].get_query = function(doc, cdt, cdn) {
+	return 'SELECT name FROM `tabDelivery Note` WHERE docstatus=1 AND %(key)s LIKE "%s"';
+}
+
+
+cur_frm.fields_dict['item_details'].grid.get_field('item_code').get_query = function(doc, cdt, cdn) {
+	return 'SELECT name, description FROM `tabItem` WHERE name IN ( \
+		SELECT item_code FROM `tabDelivery Note Detail` \
+		WHERE parent="'	+ doc.delivery_note + '") AND %(key)s LIKE "%s" LIMIT 50';
+}
+
+
+// Fetch item details
+cur_frm.cscript.item_code = function(doc, cdt, cdn) {
+	if(locals[cdt][cdn].item_code) {
+		$c_obj(make_doclist(cdt, cdn), 'get_item_details', doc.delivery_note, function(r, rt) {
+			if(r.exc) {
+				msgprint(r.exc);
+			} else {
+				refresh_field('item_details');
+			}
+		});
+	}
+}
+
+
+cur_frm.cscript.onload = function(doc, cdt, cdn) {
+	if(doc.delivery_note) {
+		var ps_detail = getchildren('Packing Slip Detail', doc.name, 'item_details');
+		if(!(flt(ps_detail[0].net_weight) && cstr(ps_detail[0].weight_uom))) {
+			cur_frm.cscript.update_item_details(doc);
+			refresh_field('naming_series');
+		}
+	}
+}
+
+
+cur_frm.cscript.update_item_details = function(doc) {
+	$c_obj(make_doclist(doc.doctype, doc.name), 'update_item_details', '', function(r, rt) {
+		if(r.exc) {
+			msgprint(r.exc);
+		} else {
+			refresh_field('item_details');
+		}
+	});
+}
+
+
+cur_frm.cscript.validate = function(doc, cdt, cdn) {
+	cur_frm.cscript.validate_case_nos(doc);
+	cur_frm.cscript.validate_calculate_item_details(doc);
+}
+
+
+// To Case No. cannot be less than From Case No.
+cur_frm.cscript.validate_case_nos = function(doc) {
+	doc = locals[doc.doctype][doc.name];
+	if(cint(doc.from_case_no)==0) {
+		msgprint("Case No. cannot be 0")
+		validated = false;
+	} else if(!cint(doc.to_case_no)) {
+		doc.to_case_no = doc.from_case_no;
+		refresh_field('to_case_no');
+	} else if(cint(doc.to_case_no) < cint(doc.from_case_no)) {
+		msgprint("'To Case No.' cannot be less than 'From Case No.'");
+		validated = false;
+	}	
+}
+
+
+cur_frm.cscript.validate_calculate_item_details = function(doc) {
+	doc = locals[doc.doctype][doc.name];
+	var ps_detail = getchildren('Packing Slip Detail', doc.name, 'item_details');
+
+	cur_frm.cscript.validate_duplicate_items(doc, ps_detail);
+	cur_frm.cscript.calc_net_total_pkg(doc, ps_detail);
+}
+
+
+// Do not allow duplicate items i.e. items with same item_code
+// Also check for 0 qty
+cur_frm.cscript.validate_duplicate_items = function(doc, ps_detail) {
+	for(var i=0; i<ps_detail.length; i++) {
+		for(var j=0; j<ps_detail.length; j++) {
+			if(i!=j && ps_detail[i].item_code==ps_detail[j].item_code) {
+				msgprint("You have entered duplicate items. Please rectify and try again.");
+				validated = false;
+				return;
+			}
+		}
+		if(flt(ps_detail[i].qty)<=0) {
+			msgprint("Invalid quantity specified for item " + ps_detail[i].item_code +
+				". Quantity should be greater than 0.");
+			validated = false;
+		}
+	}
+}
+
+
+// Calculate Net Weight of Package
+cur_frm.cscript.calc_net_total_pkg = function(doc, ps_detail) {
+	var net_weight_pkg = 0;
+	doc.net_weight_uom = ps_detail?ps_detail[0].weight_uom:'';
+	doc.gross_weight_uom = doc.net_weight_uom;
+
+	for(var i=0; i<ps_detail.length; i++) {
+		var item = ps_detail[i];
+		if(item.weight_uom != doc.net_weight_uom) {
+			msgprint("Different UOM for items will lead to incorrect \
+			(Total) Net Weight value. Make sure that Net Weight of each item is \
+			in the same UOM.")
+			validated = false;
+		}
+		net_weight_pkg += flt(item.net_weight) * flt(item.qty);
+	}
+
+	doc.net_weight_pkg = roundNumber(net_weight_pkg, 2);
+	if(!flt(doc.gross_weight_pkg)) {
+		doc.gross_weight_pkg = doc.net_weight_pkg
+	}
+	refresh_many(['net_weight_pkg', 'net_weight_uom', 'gross_weight_uom', 'gross_weight_pkg']);
+}
+

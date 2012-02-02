@@ -26,7 +26,7 @@ for r in res:
   lft_rgt = sql("select lft, rgt from `tab%s` where name = '%s'" % (opt,r[col_idx[opt]].strip()))
   
   
-  det = sql("select COUNT(CASE WHEN t1.amc_expiry_date < '%s' THEN t1.name ELSE NULL END), COUNT(CASE WHEN t1.amc_expiry_date >= '%s' THEN t1.name ELSE NULL END), COUNT(CASE WHEN t1.warranty_expiry_date < '%s' THEN t1.name ELSE NULL END), COUNT(CASE WHEN t1.warranty_expiry_date >= '%s' THEN t1.name ELSE NULL END) from `tabSerial No` t1, `tab%s` t2 where t1.%s = t2.name and t2.lft>= '%s' and t2. rgt <= '%s' and t1.status not in ('In Store', 'Scrapped','Not in Use') and ifnull(item_group,'')!='' and ifnull(territory,'')!=''" %(nowdate,nowdate,nowdate,nowdate,opt, opt_dict[opt], lft_rgt[0][0], lft_rgt[0][1]))
+  det = sql("select COUNT(CASE WHEN t1.amc_expiry_date < '%s' THEN t1.name ELSE NULL END), COUNT(CASE WHEN t1.amc_expiry_date >= '%s' THEN t1.name ELSE NULL END), COUNT(CASE WHEN t1.warranty_expiry_date < '%s' THEN t1.name ELSE NULL END), COUNT(CASE WHEN t1.warranty_expiry_date >= '%s' THEN t1.name ELSE NULL END) from `tabSerial No` t1, `tab%s` t2 where t1.%s = t2.name and t2.lft>= '%s' and t2. rgt <= '%s' and t1.status = 'Delivered' and ifnull(item_group,'')!='' and ifnull(territory,'')!=''" %(nowdate,nowdate,nowdate,nowdate,opt, opt_dict[opt], lft_rgt[0][0], lft_rgt[0][1]))
   
   r.append(cint(det[0][0]))
   r.append(cint(det[0][1]))
