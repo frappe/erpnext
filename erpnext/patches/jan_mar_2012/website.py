@@ -5,7 +5,6 @@ from webnotes.model.doc import Document
 
 def execute():	
 	add_website_manager()
-	return
 	cleanup_file_data()
 	update_patch_log()
 	from webnotes.modules import reload_doc
