@@ -19,6 +19,12 @@ erpnext.startup.start = function() {
 		$dh(page_body.left_sidebar);
 		wn.require('erpnext/website/css/website.css');
 		wn.require('erpnext/website/js/topbar.js');
+		if(wn.boot.custom_css) {
+			set_style(wn.boot.custom_css);
+		}
+		if(wn.boot.website_settings.title_prefix) {
+			wn.title_prefix = wn.boot.website_settings.title_prefix;
+		}
 	} else {
 		// modules
 		wn.require('erpnext/startup/modules.js');

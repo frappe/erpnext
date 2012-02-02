@@ -1,18 +1,18 @@
-# DocType, Top Bar Settings
+# DocType, Website Settings
 [
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-01-24 10:21:41',
+		'creation': '2012-02-02 13:19:50',
 		'docstatus': 0,
-		'modified': '2012-01-31 15:55:34',
+		'modified': '2012-02-02 13:31:24',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1327382102',
+		'_last_update': '1328169455',
 		'allow_attach': 1,
 		'colour': 'White:FFF',
 		'doctype': 'DocType',
@@ -23,14 +23,14 @@
 		'name': '__common__',
 		'section_style': 'Simple',
 		'show_in_menu': 0,
-		'version': 4
+		'version': 3
 	},
 
 	# These values are common for all DocField
 	{
 		'doctype': 'DocField',
 		'name': '__common__',
-		'parent': 'Top Bar Settings',
+		'parent': 'Website Settings',
 		'parentfield': 'fields',
 		'parenttype': 'DocType',
 		'permlevel': 0
@@ -41,7 +41,7 @@
 		'create': 1,
 		'doctype': 'DocPerm',
 		'name': '__common__',
-		'parent': 'Top Bar Settings',
+		'parent': 'Website Settings',
 		'parentfield': 'permissions',
 		'parenttype': 'DocType',
 		'permlevel': 0,
@@ -49,10 +49,10 @@
 		'write': 1
 	},
 
-	# DocType, Top Bar Settings
+	# DocType, Website Settings
 	{
 		'doctype': 'DocType',
-		'name': 'Top Bar Settings'
+		'name': 'Website Settings'
 	},
 
 	# DocPerm
@@ -72,6 +72,28 @@
 		'doctype': 'DocField',
 		'fieldtype': 'Section Break',
 		'label': 'Top Bar'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'description': 'The name of your company / website as you want to appear on browser title bar. All pages will have this as the prefix to the title.',
+		'doctype': 'DocField',
+		'fieldname': 'title_prefix',
+		'fieldtype': 'Data',
+		'label': 'Title Prefix'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'description': 'The "Web Page" that is the website home page',
+		'doctype': 'DocField',
+		'fieldname': 'home_page',
+		'fieldtype': 'Link',
+		'label': 'Home Page',
+		'options': 'Web Page',
+		'reqd': 1
 	},
 
 	# DocField

@@ -13,14 +13,14 @@ wn.require('lib/js/bootstrap/bootstrap-dropdown.js');
 erpnext.topbar.TopBar = Class.extend({
 	init: function() {
 		this.make();
-		$('.brand').html(wn.boot.topbar.brand_html);
+		$('.brand').html(wn.boot.website_settings.brand_html);
 		this.make_items();
 	},
 	make: function() {
 		$('header').append('<div class="topbar">\
 			<div class="topbar-inner">\
 			<div class="container">\
-				<a class="brand" href="#!home">[brand]</a>\
+				<a class="brand">[brand]</a>\
 				<ul class="nav">\
 				</ul>\
 				<img src="lib/images/ui/spinner.gif" id="spinner"/>\
@@ -30,9 +30,10 @@ erpnext.topbar.TopBar = Class.extend({
 			</div>\
 			</div>\
 			</div>');
+		$('.brand').attr('href', '#!' + (wn.boot.website_settings.home_page || 'Login Page'))
 	},
 	make_items: function() {
-		var items = wn.boot.topbaritems
+		var items = wn.boot.website_menus
 		for(var i=0;i<items.length;i++) {
 			var item = items[i];
 			if(!item.parent_label && item.parentfield=='top_bar_items') {
@@ -55,11 +56,11 @@ erpnext.Footer = Class.extend({
 			<div class="web-footer-copyright">&copy; %(copyright)s</div>\
 			<div class="web-footer-powered">Powered by \
 				<a href="https://erpnext.com">erpnext.com</a></div>\
-		</div>', wn.boot.topbar));
+		</div>', wn.boot.website_settings));
 		this.make_items();
 	},
 	make_items: function() {
-		var items = wn.boot.topbaritems
+		var items = wn.boot.website_menus
 		for(var i=0;i<items.length;i++) {
 			var item = items[i];
 			if(!item.parent_label && item.parentfield=='footer_items') {

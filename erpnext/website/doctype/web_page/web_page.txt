@@ -5,14 +5,14 @@
 	{
 		'creation': '2012-01-31 15:18:49',
 		'docstatus': 0,
-		'modified': '2012-02-01 16:19:39',
+		'modified': '2012-02-02 13:15:36',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1328093309',
+		'_last_update': '1328093379',
 		'allow_attach': 1,
 		'colour': 'White:FFF',
 		'description': 'A custom page is a simple page with the layout - headline, main section, side section\n\nEditing:\n\n- Editing is in [markdown format](http://daringfireball.net/projects/markdown/syntax)\n- You can also add images and embed html code\n\nAccessing the page:\n\n- The page can be accessed as #![page-name] after the main url\n\nIdeal for pages like FAQ, Terms, Help etc.\n\n',
@@ -22,7 +22,7 @@
 		'name': '__common__',
 		'section_style': 'Simple',
 		'show_in_menu': 0,
-		'version': 5
+		'version': 6
 	},
 
 	# These values are common for all DocField
@@ -75,6 +75,16 @@
 		'fieldtype': 'Data',
 		'label': 'Title',
 		'reqd': 1
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'description': 'Section that will span 2 columns, formatted as markdown. If no head, leave blank. If you are displaying a banner, it must be 860px',
+		'doctype': 'DocField',
+		'fieldname': 'head_section',
+		'fieldtype': 'Text',
+		'label': 'Head Section'
 	},
 
 	# DocField

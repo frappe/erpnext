@@ -16,7 +16,7 @@ class DocType:
 		from jinja2 import Template
 		import os
 	
-		website.utils.markdown(self.doc, ['main_section', 'side_section'])
+		website.utils.markdown(self.doc, ['head_section','main_section', 'side_section'])
 		
 		self.add_page_links()
 		
@@ -44,7 +44,8 @@ class DocType:
 		
 	def cleanup_temp(self):
 		"""cleanup temp fields"""
-		fl = ['main_section_html', 'side_section_html', 'see_also', 'next_page_html']
+		fl = ['main_section_html', 'side_section_html', 'see_also', \
+			'next_page_html', 'head_section_html']
 		for f in fl:
 			if f in self.doc.fields:
 				del self.doc.fields[f]

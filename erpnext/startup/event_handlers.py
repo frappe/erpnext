@@ -40,10 +40,11 @@ def boot_session(bootinfo):
 	import webnotes.model.doc
 	
 	if webnotes.session['user']=='Guest':
-		bootinfo['topbar'] = webnotes.model.doc.getsingle('Top Bar Settings')
-		bootinfo['topbaritems'] = webnotes.conn.sql("""select label, std_page, custom_page, 
+		bootinfo['website_settings'] = webnotes.model.doc.getsingle('Website Settings')
+		bootinfo['website_menus'] = webnotes.conn.sql("""select label, std_page, custom_page, 
 			parent_label, parentfield
-			from `tabTop Bar Item` where parent='Top Bar Settings' order by idx asc""", as_dict=1)
+			from `tabTop Bar Item` where parent='Website Settings' order by idx asc""", as_dict=1)
+		bootinfo['custom_css'] = webnotes.conn.get_value('Style Settings', None, 'custom_css') or ''
 	else:	
 		bootinfo['letter_heads'] = get_letter_heads()
 

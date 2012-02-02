@@ -55,7 +55,7 @@ pscript.select_sidebar_menu = function(t, dt, dn) {
 var body_background = '#e2e2e2';
 
 MenuPointer = function(parent, label) {
-
+	var me = this;
 	this.wrapper = $a(parent, 'div', '', {padding:'0px', cursor:'pointer', margin:'2px 0px'});
 	$br(this.wrapper, '3px');
 
@@ -73,8 +73,10 @@ MenuPointer = function(parent, label) {
 
 	$(this.wrapper)
 		.hover(
-			function() { if(!this.selected)$bg(this, '#eee'); } ,
-			function() { if(!this.selected)$bg(this, body_background); }
+			function() { if(!me.selected)
+				$bg(this, '#eee'); } ,
+			function() { if(!me.selected)
+				$bg(this, body_background); }
 		)
 
 	$y($td(this.tab, 0, 0), {borderBottom:'1px solid #ddd'});
@@ -84,9 +86,10 @@ MenuPointer = function(parent, label) {
 // ====================================================================
 
 MenuPointer.prototype.select = function(grey) {
-	$y($td(this.tab, 0, 0), {color:'#fff', borderBottom:'0px solid #000'});
-	//$gr(this.wrapper, '#F84', '#F63');
-	$gr(this.wrapper, '#888', '#666');
+	$y($td(this.tab, 0, 0), {
+		color:'#fff', borderBottom:'0px solid #000'
+	});
+	$(this.wrapper).css('background-color', '#999');
 	this.selected = 1;
 
 	if(cur_menu_pointer && cur_menu_pointer != this)
@@ -99,7 +102,7 @@ MenuPointer.prototype.select = function(grey) {
 
 MenuPointer.prototype.deselect = function() {
 	$y($td(this.tab, 0, 0), {color:'#444', borderBottom:'1px solid #ddd'});
-	$gr(this.wrapper, body_background, body_background);
+	$(this.wrapper).css('background-color', body_background);
 	this.selected = 0;
 }
 

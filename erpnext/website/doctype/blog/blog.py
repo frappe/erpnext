@@ -30,7 +30,7 @@ class DocType():
 		
 		with open(os.path.join(os.path.dirname(__file__), 'blog_page.js'), 'r') as f:
 			p.script = Template(f.read()).render(doc=self.doc)
-		
+				
 		p.save()
 		
 		website.utils.add_guest_access_to_page(p.name)

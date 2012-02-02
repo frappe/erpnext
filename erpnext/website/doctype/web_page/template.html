@@ -1,7 +1,10 @@
 <div class="layout_wrapper">
 	<div class="web-content" id="content-{{ doc.name }}">
-		<h1>{{ doc.title }}</h1>
-		<br>
+		{% if doc.head_section %}
+		<div class="web-head-section">
+			{{ doc.head_section_html }}
+		</div>
+		{% endif %}
 		<div class="web-main-section">
 			{{ doc.main_section_html }}
 			{% if doc.next_page_html %}

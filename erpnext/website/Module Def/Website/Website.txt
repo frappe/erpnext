@@ -5,7 +5,7 @@
 	{
 		'creation': '2012-01-23 17:05:32',
 		'docstatus': 0,
-		'modified': '2012-01-31 15:19:28',
+		'modified': '2012-02-02 13:23:41',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
@@ -46,14 +46,6 @@
 
 	# Module Def Item
 	{
-		'display_name': 'Top Bar Settings',
-		'doc_name': 'Top Bar Settings',
-		'doc_type': 'Single DocType',
-		'doctype': 'Module Def Item'
-	},
-
-	# Module Def Item
-	{
 		'display_name': 'Web Page',
 		'doc_name': 'Web Page',
 		'doc_type': 'Forms',
@@ -78,6 +70,22 @@
 
 	# Module Def Item
 	{
+		'display_name': 'Style Settings',
+		'doc_name': 'Style Settings',
+		'doc_type': 'Single DocType',
+		'doctype': 'Module Def Item'
+	},
+
+	# Module Def Item
+	{
+		'display_name': 'Website Settings',
+		'doc_name': 'Website Settings',
+		'doc_type': 'Single DocType',
+		'doctype': 'Module Def Item'
+	},
+
+	# Module Def Item
+	{
 		'display_name': 'Home Settings',
 		'doc_name': 'Home Settings',
 		'doc_type': 'Single DocType',
@@ -96,14 +104,6 @@
 	{
 		'display_name': 'Contact Us Settings',
 		'doc_name': 'Contact Us Settings',
-		'doc_type': 'Single DocType',
-		'doctype': 'Module Def Item'
-	},
-
-	# Module Def Item
-	{
-		'display_name': 'About Us Settings',
-		'doc_name': 'About Us Settings',
 		'doc_type': 'Single DocType',
 		'doctype': 'Module Def Item'
 	},
