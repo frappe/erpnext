@@ -168,6 +168,13 @@ cur_frm.cscript.basic_rate = function(doc, cdt, cdn) {
 
 // ************************ EXPORT RATE *************************
 cur_frm.cscript.export_rate = function(doc,cdt,cdn) {
+	var cur_rec = locals[cdt][cdn];
+	var fname = cur_frm.cscript.fname;
+	var tname = cur_frm.cscript.tname;
+	if(flt(cur_rec.ref_rate)>0 && flt(cur_rec.export_rate)>0 && !flt(cur_rec.adj_rate)) {
+		var adj_rate = 100 * (1 - (flt(cur_rec.export_rate) / flt(cur_rec.ref_rate)));
+		set_multiple(tname, cur_rec.name, { 'adj_rate': adj_rate }, fname);
+	}
 	doc = locals[doc.doctype][doc.name];
 	cur_frm.cscript.recalc(doc, 1);
 }
