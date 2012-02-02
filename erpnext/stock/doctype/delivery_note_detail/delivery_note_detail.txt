@@ -5,7 +5,7 @@
 	{
 		'creation': '2010-08-08 17:08:58',
 		'docstatus': 0,
-		'modified': '2011-10-18 16:32:44',
+		'modified': '2012-02-01 16:08:06',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
@@ -23,7 +23,7 @@
 		'section_style': 'Tray',
 		'server_code_error': ' ',
 		'show_in_menu': 0,
-		'version': 43
+		'version': 51
 	},
 
 	# These values are common for all DocField
@@ -292,104 +292,6 @@
 	# DocField
 	{
 		'doctype': 'DocField',
-		'fieldname': 'pack_no',
-		'fieldtype': 'Data',
-		'label': 'Pack No',
-		'permlevel': 0,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldname': 'pack_gross_wt',
-		'fieldtype': 'Float',
-		'label': 'Pack Gross Wt',
-		'permlevel': 0,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldname': 'weight_uom',
-		'fieldtype': 'Link',
-		'label': 'Weight UOM',
-		'options': 'UOM',
-		'permlevel': 0,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldname': 'pack_nett_wt',
-		'fieldtype': 'Float',
-		'label': 'Pack Nett Wt',
-		'permlevel': 0,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldname': 'no_of_packs',
-		'fieldtype': 'Int',
-		'label': 'No of Packs',
-		'oldfieldname': 'no_of_packs',
-		'oldfieldtype': 'Int',
-		'permlevel': 0,
-		'print_hide': 1,
-		'width': '100px'
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldname': 'pack_unit',
-		'fieldtype': 'Data',
-		'label': 'Pack Unit',
-		'oldfieldname': 'pack_unit',
-		'oldfieldtype': 'Data',
-		'permlevel': 0,
-		'print_hide': 1,
-		'width': '100px'
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldname': 'pack_size',
-		'fieldtype': 'Data',
-		'label': 'Pack Size',
-		'no_copy': 0,
-		'permlevel': 0,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldname': 'packed_by',
-		'fieldtype': 'Data',
-		'label': 'Packed By',
-		'permlevel': 0,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldname': 'packing_checked_by',
-		'fieldtype': 'Data',
-		'label': 'Packing Checked By',
-		'permlevel': 0,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
 		'fieldname': 'installed_qty',
 		'fieldtype': 'Currency',
 		'label': 'Installed Qty',
@@ -500,6 +402,20 @@
 		'label': 'Item Tax Rate',
 		'oldfieldname': 'item_tax_rate',
 		'oldfieldtype': 'Small Text',
+		'permlevel': 1,
+		'print_hide': 1
+	},
+
+	# DocField
+	{
+		'allow_on_submit': 1,
+		'colour': 'White:FFF',
+		'default': '0',
+		'doctype': 'DocField',
+		'fieldname': 'packed_qty',
+		'fieldtype': 'Currency',
+		'label': 'Packed Quantity',
+		'no_copy': 1,
 		'permlevel': 1,
 		'print_hide': 1
 	},

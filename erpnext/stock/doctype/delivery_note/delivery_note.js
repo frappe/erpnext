@@ -46,6 +46,10 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
     cur_frm.add_custom_button('Send SMS', cur_frm.cscript['Send SMS']);
     unhide_field(['SMS','Send SMS', 'message', 'customer_mobile_no', 'Repair Delivery Note']);
   }
+
+  if(doc.docstatus==1) {
+    cur_frm.add_custom_button('Make Packing Slip', cur_frm.cscript['Make Packing Slip']);
+  }
   
   set_print_hide(doc, cdt, cdn);
 }
@@ -279,6 +283,23 @@ cur_frm.cscript['Make Installation Note'] = function() {
   else if(doc.per_installed >= 100)
     msgprint("Item installation is already completed")
 }
+
+//-----------------------------------Make Sales Invoice----------------------------------------------
+cur_frm.cscript['Make Packing Slip'] = function() {
+  var doc = cur_frm.doc
+  n = createLocal('Packing Slip');
+  $c('dt_map', args={
+    'docs':compress_doclist([locals['Packing Slip'][n]]),
+    'from_doctype':doc.doctype,
+    'to_doctype':'Packing Slip',
+    'from_docname':doc.name,
+    'from_to_list':"[['Delivery Note','Packing Slip'],['Delivery Note Detail','Packing Slip Detail']]"
+    }, function(r,rt) {
+       loaddoc('Packing Slip', n);
+    }
+  );
+}
+
 
 //get query select Territory
 //=======================================================================================================================

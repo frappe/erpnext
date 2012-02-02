@@ -5,14 +5,14 @@
 	{
 		'creation': '2010-08-08 17:09:05',
 		'docstatus': 0,
-		'modified': '2012-01-30 16:46:37',
+		'modified': '2012-01-30 17:34:23',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1327905637',
+		'_last_update': '1326963484',
 		'allow_attach': 1,
 		'allow_trash': 1,
 		'autoname': 'field:item_code',
@@ -467,19 +467,11 @@
 
 	# DocField
 	{
+		'description': 'Net Weight of each Item',
 		'doctype': 'DocField',
-		'fieldname': 'nett_weight',
+		'fieldname': 'net_weight',
 		'fieldtype': 'Float',
-		'label': 'Nett Weight',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldname': 'gross_weight',
-		'fieldtype': 'Float',
-		'label': 'Gross Weight',
+		'label': 'Net Weight',
 		'permlevel': 0
 	},
 

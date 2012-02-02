@@ -5,11 +5,6 @@
 // cur_frm.cscript.other_fname - Other Charges fieldname
 // cur_frm.cscript.sales_team_fname - Sales Team fieldname
 
-function roundNumber(num, dec) {
-	var result = Math.round(num*Math.pow(10,dec))/Math.pow(10,dec);
-	return result;
-}
-
 // ============== Load Default Taxes ===================
 cur_frm.cscript.load_taxes = function(doc, cdt, cdn) {
   // run if this is not executed from dt_map...
@@ -243,7 +238,8 @@ cur_frm.cscript.calc_doc_values = function(doc, cdt, cdn, tname, fname, other_fn
 	var net_total_incl = 0
 	var cl = getchildren(tname, doc.name, fname);
 	for(var i = 0; i<cl.length; i++){
-		net_total += flt(cl[i].basic_rate) * flt(cl[i].qty);
+		//net_total += flt(cl[i].basic_rate) * flt(cl[i].qty);
+		net_total += flt(cl[i].amount);
 		net_total_incl += flt(cl[i].export_amount);
 	}
 

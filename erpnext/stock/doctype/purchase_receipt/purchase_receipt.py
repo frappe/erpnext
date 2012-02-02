@@ -93,11 +93,12 @@ class DocType(TransactionBase):
 
 
   def validate_challan_no(self):
-    "Validate if same challan no exists for same supplier in a purchase receipt"
+    "Validate if same challan no exists for same supplier in a submitted purchase receipt"
     if self.doc.challan_no:
       exists = webnotes.conn.sql("""
 	    SELECT name FROM `tabPurchase Receipt`
-	    WHERE name!=%s AND supplier=%s AND challan_no=%s""", (self.doc.name, self.doc.supplier, self.doc.challan_no))
+	    WHERE name!=%s AND supplier=%s AND challan_no=%s
+		AND docstatus=1""", (self.doc.name, self.doc.supplier, self.doc.challan_no))
       if exists:
 	    webnotes.msgprint("Another Purchase Receipt using the same Challan No. already exists.\
 		  Please enter a valid Challan No.", raise_exception=1)

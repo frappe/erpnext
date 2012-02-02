@@ -1,0 +1,93 @@
+# DocType Mapper, Delivery Note-Packing Slip
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2012-02-02 11:35:53',
+		'docstatus': 0,
+		'modified': '2012-02-02 11:35:53',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all Table Mapper Detail
+	{
+		'doctype': 'Table Mapper Detail',
+		'name': '__common__',
+		'parent': 'Delivery Note-Packing Slip',
+		'parentfield': 'table_mapper_details',
+		'parenttype': 'DocType Mapper'
+	},
+
+	# These values are common for all Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'name': '__common__',
+		'parent': 'Delivery Note-Packing Slip',
+		'parentfield': 'field_mapper_details',
+		'parenttype': 'DocType Mapper'
+	},
+
+	# These values are common for all DocType Mapper
+	{
+		'doctype': u'DocType Mapper',
+		'from_doctype': 'Delivery Note',
+		'module': 'Stock',
+		'name': '__common__',
+		'ref_doc_submitted': 1,
+		'to_doctype': 'Packing Slip'
+	},
+
+	# DocType Mapper, Delivery Note-Packing Slip
+	{
+		'doctype': u'DocType Mapper',
+		'name': 'Delivery Note-Packing Slip'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'name',
+		'map': 'Yes',
+		'match_id': 0,
+		'to_field': 'delivery_note'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'qty',
+		'map': 'No',
+		'match_id': 1,
+		'to_field': 'qty'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'naming_series',
+		'map': 'No',
+		'match_id': 0,
+		'to_field': 'naming_series'
+	},
+
+	# Table Mapper Detail
+	{
+		'doctype': 'Table Mapper Detail',
+		'from_table': 'Delivery Note',
+		'match_id': 0,
+		'to_table': 'Packing Slip',
+		'validation_logic': 'docstatus=1'
+	},
+
+	# Table Mapper Detail
+	{
+		'doctype': 'Table Mapper Detail',
+		'from_field': 'delivery_note_details',
+		'from_table': 'Delivery Note Detail',
+		'match_id': 1,
+		'to_field': 'item_details',
+		'to_table': 'Packing Slip Detail',
+		'validation_logic': 'IFNULL(packed_qty, 0) < IFNULL(qty, 0)'
+	}
+]
