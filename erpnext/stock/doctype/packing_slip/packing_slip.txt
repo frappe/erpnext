@@ -1,0 +1,314 @@
+# DocType, Packing Slip
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2012-01-30 12:13:10',
+		'docstatus': 0,
+		'modified': '2012-02-02 10:37:15',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all DocType
+	{
+		'_last_update': '1328091392',
+		'autoname': 'PS.#######',
+		'colour': 'White:FFF',
+		'doctype': 'DocType',
+		'document_type': 'Transaction',
+		'is_transaction_doc': 1,
+		'module': 'Stock',
+		'name': '__common__',
+		'read_only_onload': 1,
+		'search_fields': 'delivery_note',
+		'section_style': 'Simple',
+		'show_in_menu': 0,
+		'subject': '[%(delivery_note)s] Case Nos: %(from_case_no)s - %(to_case_no)s  |  Net Weight: %(net_weight_pkg)s %(net_weight_uom)s  |  Gross Weight: %(gross_weight_pkg)s %(gross_weight_uom)s',
+		'version': 40
+	},
+
+	# These values are common for all DocField
+	{
+		'doctype': 'DocField',
+		'name': '__common__',
+		'parent': 'Packing Slip',
+		'parentfield': 'fields',
+		'parenttype': 'DocType'
+	},
+
+	# These values are common for all DocPerm
+	{
+		'doctype': 'DocPerm',
+		'name': '__common__',
+		'parent': 'Packing Slip',
+		'parentfield': 'permissions',
+		'parenttype': 'DocType',
+		'read': 1
+	},
+
+	# DocType, Packing Slip
+	{
+		'doctype': 'DocType',
+		'name': 'Packing Slip'
+	},
+
+	# DocPerm
+	{
+		'amend': 1,
+		'cancel': 1,
+		'create': 1,
+		'doctype': 'DocPerm',
+		'permlevel': 0,
+		'role': 'Material User',
+		'submit': 1,
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'amend': 1,
+		'cancel': 1,
+		'create': 1,
+		'doctype': 'DocPerm',
+		'permlevel': 0,
+		'role': 'Sales User',
+		'submit': 1,
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'amend': 1,
+		'cancel': 1,
+		'create': 1,
+		'doctype': 'DocPerm',
+		'permlevel': 0,
+		'role': 'Material Master Manager',
+		'submit': 1,
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'amend': 1,
+		'cancel': 1,
+		'create': 1,
+		'doctype': 'DocPerm',
+		'permlevel': 0,
+		'role': 'Material Manager',
+		'submit': 1,
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'amend': 1,
+		'cancel': 1,
+		'create': 1,
+		'doctype': 'DocPerm',
+		'permlevel': 0,
+		'role': 'Sales Manager',
+		'submit': 1,
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'doctype': 'DocPerm',
+		'permlevel': 1,
+		'role': 'All'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Section Break',
+		'label': 'Packing Slip Details',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Column Break',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'delivery_note',
+		'fieldtype': 'Link',
+		'label': 'Delivery Note',
+		'options': 'Delivery Note',
+		'permlevel': 0,
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Column Break',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'naming_series',
+		'fieldtype': 'Select',
+		'label': 'Series',
+		'no_copy': 0,
+		'options': 'PS',
+		'permlevel': 0,
+		'print_hide': 1,
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldtype': 'Section Break',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Column Break',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldname': 'from_case_no',
+		'fieldtype': 'Data',
+		'label': 'From Case No.',
+		'no_copy': 1,
+		'permlevel': 0,
+		'reqd': 1,
+		'width': '50px'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Column Break',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldname': 'to_case_no',
+		'fieldtype': 'Data',
+		'label': 'To Case No.',
+		'no_copy': 1,
+		'permlevel': 0,
+		'width': '50px'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Section Break',
+		'label': 'Package Item Details',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'item_details',
+		'fieldtype': 'Table',
+		'label': 'Items',
+		'options': 'Packing Slip Detail',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Section Break',
+		'label': 'Package Weight Details',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldname': 'net_weight_pkg',
+		'fieldtype': 'Currency',
+		'label': 'Net Weight',
+		'no_copy': 1,
+		'permlevel': 1
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldname': 'net_weight_uom',
+		'fieldtype': 'Data',
+		'label': 'Net Weight UOM',
+		'no_copy': 1,
+		'permlevel': 1
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Column Break',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldname': 'gross_weight_pkg',
+		'fieldtype': 'Currency',
+		'label': 'Gross Weight',
+		'no_copy': 1,
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocField',
+		'fieldname': 'gross_weight_uom',
+		'fieldtype': 'Link',
+		'label': 'Gross Weight UOM',
+		'no_copy': 1,
+		'options': 'UOM',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'depends_on': 'eval:doc.amended_from',
+		'doctype': 'DocField',
+		'fieldtype': 'Section Break',
+		'label': 'Misc Details',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'amended_from',
+		'fieldtype': 'Link',
+		'label': 'Amended From',
+		'no_copy': 1,
+		'options': 'Packing Slip',
+		'permlevel': 1,
+		'print_hide': 1
+	}
+]

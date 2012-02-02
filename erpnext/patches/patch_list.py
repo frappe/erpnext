@@ -60,4 +60,9 @@ patch_list = [
 		'patch_file': 'cancel_purchase_returned',
 		'description': "Set docstatus = 2 where status = 'Purchase Returned' for serial no"
 	},
+	{
+		'patch_module': 'patches.jan_mar_2012',
+		'patch_file': 'deploy_packing_slip',
+		'description': "Delete old packing slip fields & print format & deploy new doctypes related to Packing Slip"
+	},
 ]

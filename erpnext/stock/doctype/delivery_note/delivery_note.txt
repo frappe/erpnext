@@ -5,7 +5,7 @@
 	{
 		'creation': '2011-04-18 15:58:20',
 		'docstatus': 0,
-		'modified': '2012-01-09 16:52:43',
+		'modified': '2012-01-30 16:52:12',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
@@ -21,7 +21,7 @@
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1326105502',
+		'_last_update': '1326273792',
 		'colour': 'White:FFF',
 		'default_print_format': 'Standard',
 		'doctype': 'DocType',
@@ -37,7 +37,7 @@
 		'show_in_menu': 0,
 		'subject': 'To %(customer_name)s on %(transaction_date)s | %(per_billed)s% billed',
 		'tag_fields': 'billing_status',
-		'version': 463
+		'version': 464
 	},
 
 	# These values are common for all DocFormat
@@ -1433,53 +1433,5 @@
 		'options': 'repair_delivery_note',
 		'permlevel': 0,
 		'print_hide': 1
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldname': 'print_packing_slip',
-		'fieldtype': 'Text',
-		'hidden': 1,
-		'in_filter': 0,
-		'label': 'Print Packing Slip',
-		'permlevel': 0,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldname': 'shipping_mark',
-		'fieldtype': 'Text',
-		'label': 'Shipping Mark',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldname': 'packed_by',
-		'fieldtype': 'Text',
-		'label': 'Packed By',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldname': 'packing_checked_by',
-		'fieldtype': 'Text',
-		'label': 'Packing Checked By',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldname': 'pack_size',
-		'fieldtype': 'Text',
-		'label': 'Pack Size',
-		'permlevel': 0
 	}
 ]

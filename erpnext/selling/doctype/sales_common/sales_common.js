@@ -5,11 +5,6 @@
 // cur_frm.cscript.other_fname - Other Charges fieldname
 // cur_frm.cscript.sales_team_fname - Sales Team fieldname
 
-function roundNumber(num, dec) {
-	var result = Math.round(num*Math.pow(10,dec))/Math.pow(10,dec);
-	return result;
-}
-
 // ============== Load Default Taxes ===================
 cur_frm.cscript.load_taxes = function(doc, cdt, cdn) {
   // run if this is not executed from dt_map...
