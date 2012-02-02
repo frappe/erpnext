@@ -54,9 +54,9 @@ class DocType(TransactionBase):
 				where name = %s
 			""", self.doc.name)
 
-		response_title = "\n\n=== In response to ===\n\n"
+		response_title = "=== In response to ==="
 
-		return response_title + tmp[0][0].split(response_title)[0]
+		return "\n\n" + response_title + "\n\n" + tmp[0][0].split(response_title)[0]
 		
 	def make_response_record(self, response, from_email = None, content_type='text/plain'):
 		"""
