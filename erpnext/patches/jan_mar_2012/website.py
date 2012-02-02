@@ -14,7 +14,7 @@ def execute():
 	reload_doc('website', 'Module Def', 'Website')
 	reload_doc('website', 'Role', 'Website Manager')
 
-	webnotes.conn.sql("""delete from `tabModule Def Role` where parent='Website'"""):
+	webnotes.conn.sql("""delete from `tabModule Def Role` where parent='Website'""")
 	d = Document('Module Def Role')
 	d.parent = 'Website'
 	d.role = 'Website Manager'
@@ -53,7 +53,10 @@ def add_website_manager():
 
 def cleanup_file_data():
 	webnotes.conn.commit()
-	webnotes.conn.sql("""alter table `tabFile Data` drop column blob_content""")
+	try:
+		webnotes.conn.sql("""alter table `tabFile Data` drop column blob_content""")
+	except:
+		pass
 	webnotes.conn.begin()
 
 def update_patch_log():
