@@ -152,3 +152,19 @@ cur_frm.cscript['View Ledger Entry'] = function(doc,cdt,cdn){
   }
   loadreport('GL Entry','General Ledger', callback);
 }
+
+
+cur_frm.cscript.voucher_type = function(doc, cdt, cdn) {
+	if(doc.voucher_type == 'Bank Voucher' && cstr(doc.company)) {
+		var children = getchildren('Journal Voucher Detail', doc.name, 'entries');
+		if(!children || children.length==0) {
+			$c('accounts.get_default_bank_account', {company: doc.company }, function(r, rt) {
+				if(!r.exc) {
+					var jvd = LocalDB.add_child(doc, 'Journal Voucher Detail', 'entries');
+					jvd.account = cstr(r.message);
+					refresh_field('entries');
+				}
+			});
+		}
+	}
+}
