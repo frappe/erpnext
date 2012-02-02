@@ -200,8 +200,12 @@ cur_frm.cscript.allocated_amount = function(doc,cdt,cdn){
 
 // Make Journal Voucher
 // --------------------
-cur_frm.cscript['Make Bank Voucher'] = function(doc, dt, dn) {
-  cur_frm.cscript.make_jv(cur_frm.doc);
+cur_frm.cscript['Make Bank Voucher'] = function() {
+  $c('accounts.get_default_bank_account', { company: cur_frm.doc.company }, function(r, rt) {
+    if(!r.exc) {
+      cur_frm.cscript.make_jv(cur_frm.doc, null, null, r.message);
+	}
+  });
 }
 
 
@@ -324,7 +328,7 @@ var calc_total_advance = function(doc,cdt,cdn) {
 
 // Make JV
 // --------
-cur_frm.cscript.make_jv = function(doc, dt, dn, det) {
+cur_frm.cscript.make_jv = function(doc, dt, dn, bank_account) {
   var jv = LocalDB.create('Journal Voucher');
   jv = locals['Journal Voucher'][jv];
   jv.voucher_type = 'Bank Voucher';
@@ -342,6 +346,7 @@ cur_frm.cscript.make_jv = function(doc, dt, dn, det) {
   
   // credit to bank
   var d1 = LocalDB.add_child(jv, 'Journal Voucher Detail', 'entries');
+  d1.account = bank_account;
   d1.credit = doc.outstanding_amount;
   
   loaddoc('Journal Voucher', jv.name);
