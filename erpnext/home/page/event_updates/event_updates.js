@@ -456,7 +456,7 @@ FeedList.prototype.make_list = function() {
 	this.list = new wn.widgets.Listing({
 		parent: this.list_area,
 		query: repl('select \
-			distinct t1.name, t1.doc_type, t1.doc_name, t1.subject, t1.modified_by, \
+			distinct t1.name, t1.feed_type, t1.doc_type, t1.doc_name, t1.subject, t1.modified_by, \
 			concat(ifnull(t2.first_name,""), " ", ifnull(t2.last_name,"")) as full_name, \
 			t1.modified, t1.color \
 			from tabFeed t1, tabProfile t2, tabUserRole t3, tabDocPerm t4 \
@@ -495,13 +495,11 @@ FeedItem = function(cell, det, feedlist) {
 	this.tab = make_table(this.wrapper, 1, 2, '100%', [(100/7)+'%', (600/7)+'%']);
 	$y(this.tab,{tableLayout:'fixed'})
 
-	// image
 	$y($td(this.tab,0,0),{textAlign:'right',paddingRight:'4px'});
 	
 	// text
 	this.text_area = $a($td(this.tab,0,1), 'div');
-	this.render_references(this.text_area, det);
-	
+	this.render_references(this.text_area, det);	
 	this.render_tag(det);
 	
 	// add day separator
@@ -537,13 +535,21 @@ FeedItem.prototype.add_day_sep = function(det) {
 // -------------------------------------------------
 
 FeedItem.prototype.render_tag = function(det) {
+	// type is the name
 	tag = $a($td(this.tab,0,0), 'div', '', 
-		{color:'#FFF', padding:'3px', textAlign:'right', fontSize:'11px', whiteSpace:'nowrap', overflow:'hidden', cursor:'pointer'});
+		{color:'#FFF', padding:'3px', textAlign:'right', fontSize:'11px', 
+			whiteSpace:'nowrap', overflow:'hidden', cursor:'pointer'});
 	$br(tag,'3px');
 	$y(tag, {backgroundColor:(det.color || '#273')});
-	tag.innerHTML = get_doctype_label(det.doc_type);
-	tag.dt = det.doc_type;
-	tag.onclick = function() { loaddocbrowser(this.dt); }
+	
+	// tag label
+	tag.innerHTML = det.feed_type || get_doctype_label(det.doc_type);
+	
+	// not comment / label
+	if(!det.feed_type) {
+		tag.dt = det.doc_type;
+		tag.onclick = function() { loaddocbrowser(this.dt); }		
+	}
 }
 
 FeedItem.prototype.render_references = function(div, det) {
@@ -552,10 +558,15 @@ FeedItem.prototype.render_references = function(div, det) {
 	var dt = det.doc_type; var dn = det.doc_name
 	
 	// link
-	var allow = in_list(profile.can_read, dt);
-	var span = $a($td(div.tab,0,0), 'span', (allow ? 'link_type': ''), null, det.doc_name);
-	span.dt = dt; span.dn = dn;
-	if(allow) span.onclick = function() { loaddoc(this.dt, this.dn); }
+	if(det.feed_type=='Login') {
+		// nothing - no link		
+	} else {
+		var allow = in_list(profile.can_read, dt);
+		var span = $a($td(div.tab,0,0), 'span', (allow ? 'link_type': ''), null, 
+			det.doc_name);
+		span.dt = dt; span.dn = dn;
+		if(allow) span.onclick = function() { loaddoc(this.dt, this.dn); }		
+	}
 	
 	// subject
 	if(det.subject) {
