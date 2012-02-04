@@ -5,8 +5,6 @@ from webnotes.model.doc import Document
 
 def execute():	
 	add_website_manager()
-	cleanup_file_data()
-	update_patch_log()
 	from webnotes.modules import reload_doc
 	from webnotes.model import delete_doc
 	
@@ -50,16 +48,3 @@ def add_website_manager():
 			d.parent = i[0]
 			d.role = 'Website Manager'
 			d.save(1)
-
-def cleanup_file_data():
-	webnotes.conn.commit()
-	try:
-		webnotes.conn.sql("""alter table `tabFile Data` drop column blob_content""")
-	except:
-		pass
-	webnotes.conn.begin()
-
-def update_patch_log():
-	webnotes.conn.commit()
-	webnotes.conn.sql("""alter table __PatchLog engine=InnoDB""")
-	webnotes.conn.begin()
