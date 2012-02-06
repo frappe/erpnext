@@ -2,6 +2,7 @@ import webnotes
 
 def execute():
 	from webnotes.model import delete_doc
+	from webnotes.modules import reload_doc
 	delete_doc("DocType", "SSO Control")
 	delete_doc("DocType", "WN ERP Client Control")
 	delete_doc("DocType", "Production Tips Common")
@@ -18,7 +19,8 @@ def execute():
 	
 	webnotes.conn.sql("""delete from tabSingles
 		where field like 'startup_%' and doctype='Control Panel'""")
-		
+	webnotes.conn.sql("""delete from __SessionCache""")
+
 	webnotes.conn.commit()
 
 	# DDLs
