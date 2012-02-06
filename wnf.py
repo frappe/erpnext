@@ -68,6 +68,10 @@ def run():
 	from webnotes.db import Database
 	import webnotes.modules.patch_handler
 
+	# connect
+	if options.db_name is not None:
+		webnotes.connect(options.db_name)
+
 	# build
 	if options.build:
 		import build.project
@@ -99,19 +103,11 @@ def run():
 		os.system('git commit -a -m "%s"' % options.push[2])
 		os.system('git push %s %s' % (options.push[0], options.push[1]))
 	
-	
-	
 	# patch
 	elif options.patch_list:
 		# clear log
 		webnotes.modules.patch_handler.log_list = []
 		
-		# connect to db
-		if options.db_name is not None:
-			webnotes.connect(options.db_name)
-		else:
-			webnotes.connect()
-	
 		# run individual patches
 		for patch in options.patch_list:
 			webnotes.modules.patch_handler.run_single(\
@@ -129,6 +125,10 @@ def run():
 	elif options.run_latest:
 		webnotes.modules.patch_handler.run_all()
 		print '\n'.join(webnotes.modules.patch_handler.log_list)
-		
+	
+	# print messages
+	if webnotes.message_log:
+		print '\n'.join(webnotes.message_log)
+
 if __name__=='__main__':
 	run()
