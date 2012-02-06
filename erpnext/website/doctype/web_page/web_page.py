@@ -37,10 +37,13 @@ class DocType:
 						"title": webnotes.conn.get_value("Page", self.doc.next_page, "title")}
 
 		self.doc.see_also = ''
-		for l in webnotes.conn.sql("""select distinct t1.page, t2.title from
-			`tabRelated Page` t1, tabPage t2 where
-			t1.page = t2.name order by t2.title""", as_dict=1):
-			self.doc.see_also += """<p><a href="#!%(page)s">%(title)s</a></p>""" % l
+		for d in self.doclist:
+			if d.doctype=='Related Page':
+				tmp = {"page":d.page, "title":webnotes.conn.get_value('Page', d.page, 'title')}
+				self.doc.see_also += """<li><a href="#!%(page)s">%(title)s</a></li>""" % tmp
+		
+		if self.doc.see_also:
+			self.doc.see_also = '<ul>%s</ul>' % self.doc.see_also
 		
 	def cleanup_temp(self):
 		"""cleanup temp fields"""

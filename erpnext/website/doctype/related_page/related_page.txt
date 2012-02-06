@@ -5,45 +5,45 @@
 	{
 		'creation': '2012-02-01 16:16:47',
 		'docstatus': 0,
-		'modified': '2012-02-01 16:16:48',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-02-06 12:24:29',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'colour': 'White:FFF',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
 		'istable': 1,
-		'module': 'Website',
+		'module': u'Website',
 		'name': '__common__',
-		'section_style': 'Simple',
+		'section_style': u'Simple',
 		'show_in_menu': 0,
-		'version': 1
+		'version': 3
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'page',
-		'fieldtype': 'Link',
-		'label': 'Page',
+		'doctype': u'DocField',
+		'fieldname': u'page',
+		'fieldtype': u'Link',
+		'label': u'Page',
 		'name': '__common__',
-		'options': 'Page',
-		'parent': 'Related Page',
-		'parentfield': 'fields',
-		'parenttype': 'DocType',
+		'options': u'Page',
+		'parent': u'Related Page',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
 		'permlevel': 0
 	},
 
 	# DocType, Related Page
 	{
 		'doctype': 'DocType',
-		'name': 'Related Page'
+		'name': u'Related Page'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField'
+		'doctype': u'DocField'
 	}
 ]
