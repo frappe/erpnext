@@ -7,7 +7,8 @@ def execute():
 	add_website_manager()
 	from webnotes.modules import reload_doc
 	from webnotes.model import delete_doc
-	
+
+	reload_doc('setup', 'doctype', 'item_group')
 	delete_doc('Website', 'Module Def', 'Website')
 	reload_doc('website', 'Module Def', 'Website')
 	reload_doc('website', 'Role', 'Website Manager')
@@ -42,16 +43,17 @@ def execute():
 
 def create_home_page():
 	"""create a dummy home page"""
-	if not webnotes.conn.sql("""select name from `tabWeb Page` where name='home'""")
-	d = Document('Web Page')
-	d.title = 'Home'
-	d.head_section = "<h1>Your Headline</h1>"
-	d.main_section = "<p>Some introduction about your company</p>"
-	d.side_section = "<p>Links to other pages</p>"
-	d.save()
-	obj = get_obj(doc = d)
-	obj.validate()
-	obj.doc.save()
+	from webnotes.model.code import get_obj
+	if not webnotes.conn.sql("""select name from `tabWeb Page` where name='home'"""):
+		d = Document('Web Page')
+		d.title = 'Home'
+		d.head_section = "<h1>Your Headline</h1>"
+		d.main_section = "<p>Some introduction about your company</p>"
+		d.side_section = "<p>Links to other pages</p>"
+		d.save()
+		obj = get_obj(doc = d)
+		obj.validate()
+		obj.doc.save()
 
 def add_website_manager():
 	"""add website manager to system manager"""
