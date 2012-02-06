@@ -46,11 +46,7 @@ class DocType:
 
   #=======================================================================================================
   def get_page_lst(self,nm):
-    
-    r1 = cstr(webnotes.user.get_roles()).replace('[','').replace(']','')
-
-    ret = sql("select parent from `tabPage Role` where role in (%s) and parent = '%s'"%(r1,nm))
-
+    ret = sql("select parent from `tabPage Role` where role in ('%s') and parent = '%s'" % ("','".join(webnotes.user.get_roles()),nm))
     return ret and True or False
     
   #=======================================================================================================
