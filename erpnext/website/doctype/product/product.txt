@@ -5,245 +5,245 @@
 	{
 		'creation': '2012-01-30 16:21:29',
 		'docstatus': 0,
-		'modified': '2012-01-31 13:46:23',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-02-06 16:15:29',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1327995660',
+		'_last_update': u'1327997783',
 		'allow_attach': 1,
-		'autoname': 'field:item',
-		'colour': 'White:FFF',
-		'description': 'A Product is shown on the website and is linked to an item.',
+		'autoname': u'field:item',
+		'colour': u'White:FFF',
+		'description': u'A Product is shown on the website and is linked to an item.',
 		'doctype': 'DocType',
 		'max_attachments': 5,
-		'module': 'Website',
+		'module': u'Website',
 		'name': '__common__',
-		'section_style': 'Simple',
+		'section_style': u'Simple',
 		'show_in_menu': 0,
-		'version': 10
+		'version': 11
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Product',
-		'parentfield': 'fields',
-		'parenttype': 'DocType'
+		'parent': u'Product',
+		'parentfield': u'fields',
+		'parenttype': u'DocType'
 	},
 
 	# These values are common for all DocPerm
 	{
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'name': '__common__',
-		'parent': 'Product',
-		'parentfield': 'permissions',
-		'parenttype': 'DocType',
+		'parent': u'Product',
+		'parentfield': u'permissions',
+		'parenttype': u'DocType',
 		'read': 1,
-		'role': 'Website Manager'
+		'role': u'Website Manager'
 	},
 
 	# DocType, Product
 	{
 		'doctype': 'DocType',
-		'name': 'Product'
+		'name': u'Product'
 	},
 
 	# DocPerm
 	{
 		'create': 1,
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'permlevel': 0,
 		'write': 1
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldname': 'item',
-		'fieldtype': 'Link',
-		'label': 'Item',
-		'options': 'Item',
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'item',
+		'fieldtype': u'Link',
+		'label': u'Item',
+		'options': u'Item',
 		'permlevel': 0,
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'title',
-		'fieldtype': 'Link',
-		'label': 'Title',
+		'doctype': u'DocField',
+		'fieldname': u'title',
+		'fieldtype': u'Data',
+		'label': u'Title',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'published',
-		'fieldtype': 'Check',
-		'label': 'Published',
+		'doctype': u'DocField',
+		'fieldname': u'published',
+		'fieldtype': u'Check',
+		'label': u'Published',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'description': 'Select Price List for the web. Leave blank to hide price.',
-		'doctype': 'DocField',
-		'fieldname': 'price_list',
-		'fieldtype': 'Link',
-		'label': 'Price List',
-		'options': 'Price List',
+		'colour': u'White:FFF',
+		'description': u'Select Price List for the web. Leave blank to hide price.',
+		'doctype': u'DocField',
+		'fieldname': u'price_list',
+		'fieldtype': u'Link',
+		'label': u'Price List',
+		'options': u'Price List',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'description': 'Select shipping warehouse to show "In Stock" or "Out of Stock". To hide, leave blank',
-		'doctype': 'DocField',
-		'fieldname': 'warehouse',
-		'fieldtype': 'Link',
-		'label': 'Warehouse',
-		'options': 'Warehouse',
+		'colour': u'White:FFF',
+		'description': u'Select shipping warehouse to show "In Stock" or "Out of Stock". To hide, leave blank',
+		'doctype': u'DocField',
+		'fieldname': u'warehouse',
+		'fieldtype': u'Link',
+		'label': u'Warehouse',
+		'options': u'Warehouse',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Column Break',
+		'doctype': u'DocField',
+		'fieldtype': u'Column Break',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'description': 'Image for listing (Width: 100px) (Attach First)',
-		'doctype': 'DocField',
-		'fieldname': 'thumbnail_image',
-		'fieldtype': 'Select',
-		'label': 'Thumbnail Image',
-		'options': 'attach_files:',
+		'colour': u'White:FFF',
+		'description': u'Image for listing (Width: 100px) (Attach First)',
+		'doctype': u'DocField',
+		'fieldname': u'thumbnail_image',
+		'fieldtype': u'Select',
+		'label': u'Thumbnail Image',
+		'options': u'attach_files:',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'description': 'Image for listing (Width: 300px) (Attach First)',
-		'doctype': 'DocField',
-		'fieldname': 'full_image',
-		'fieldtype': 'Select',
-		'label': 'Full Image',
-		'options': 'attach_files:',
+		'colour': u'White:FFF',
+		'description': u'Image for listing (Width: 300px) (Attach First)',
+		'doctype': u'DocField',
+		'fieldname': u'full_image',
+		'fieldtype': u'Select',
+		'label': u'Full Image',
+		'options': u'attach_files:',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldname': 'short_description',
-		'fieldtype': 'Text',
-		'label': 'Short Description',
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'short_description',
+		'fieldtype': u'Text',
+		'label': u'Short Description',
 		'permlevel': 0,
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Section Break',
+		'doctype': u'DocField',
+		'fieldtype': u'Section Break',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'description': 'Full description (formatted as markdown)',
-		'doctype': 'DocField',
-		'fieldname': 'long_description',
-		'fieldtype': 'Code',
-		'label': 'Long Description',
+		'colour': u'White:FFF',
+		'description': u'Full description (formatted as markdown)',
+		'doctype': u'DocField',
+		'fieldname': u'long_description',
+		'fieldtype': u'Code',
+		'label': u'Long Description',
 		'permlevel': 0,
 		'reqd': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Section Break',
+		'doctype': u'DocField',
+		'fieldtype': u'Section Break',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'page_name',
-		'fieldtype': 'Data',
-		'label': 'Page Name',
+		'doctype': u'DocField',
+		'fieldname': u'page_name',
+		'fieldtype': u'Data',
+		'label': u'Page Name',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldname': 'price',
-		'fieldtype': 'Currency',
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'price',
+		'fieldtype': u'Currency',
 		'hidden': 0,
-		'label': 'Price',
+		'label': u'Price',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldname': 'sales',
-		'fieldtype': 'Currency',
-		'label': 'Sales',
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'sales',
+		'fieldtype': u'Currency',
+		'label': u'Sales',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'stock',
-		'fieldtype': 'Currency',
-		'label': 'Stock',
+		'doctype': u'DocField',
+		'fieldname': u'stock',
+		'fieldtype': u'Currency',
+		'label': u'Stock',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'currency',
-		'fieldtype': 'Link',
-		'label': 'Currency',
-		'options': 'Currency',
+		'doctype': u'DocField',
+		'fieldname': u'currency',
+		'fieldtype': u'Link',
+		'label': u'Currency',
+		'options': u'Currency',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'file_list',
-		'fieldtype': 'Text',
+		'doctype': u'DocField',
+		'fieldname': u'file_list',
+		'fieldtype': u'Text',
 		'hidden': 1,
-		'label': 'File List',
+		'label': u'File List',
 		'no_copy': 1,
 		'permlevel': 0,
 		'print_hide': 1

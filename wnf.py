@@ -50,13 +50,13 @@ def setup_options():
 	parser.add_option("-d", "--db",
 						dest="db_name",
 						help="Apply the patches on given db")
-	parser.add_option('-r', '--reload_doc', nargs=3, metavar = "module doctype docname",
+	parser.add_option('--reload_doc', nargs=3, metavar = "module doctype docname",
 						help="reload doc")
 	
 	return parser.parse_args()
 	
 def run():
-	sys.path.append('.')
+	sys.path.append('lib')
 	sys.path.append('lib/py')
 	import webnotes
 	import webnotes.defs
@@ -122,7 +122,7 @@ def run():
 		# reload
 	elif options.reload_doc:
 		webnotes.modules.patch_handler.reload_doc(\
-			{"module":args[0], "dt":args[1], "dn":args[2]})		
+			{"module":options.reload_doc[0], "dt":options.reload_doc[1], "dn":options.reload_doc[2]})		
 		print '\n'.join(webnotes.modules.patch_handler.log_list)
 
 	# run all pending
