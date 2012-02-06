@@ -38,6 +38,21 @@ def execute():
 	reload_doc('website', 'page', 'products')
 	reload_doc('website', 'page', 'unsubscribe')
 		
+	create_home_page()
+
+def create_home_page():
+	"""create a dummy home page"""
+	if not webnotes.conn.sql("""select name from `tabWeb Page` where name='home'""")
+	d = Document('Web Page')
+	d.title = 'Home'
+	d.head_section = "<h1>Your Headline</h1>"
+	d.main_section = "<p>Some introduction about your company</p>"
+	d.side_section = "<p>Links to other pages</p>"
+	d.save()
+	obj = get_obj(doc = d)
+	obj.validate()
+	obj.doc.save()
+
 def add_website_manager():
 	"""add website manager to system manager"""
 	for i in webnotes.conn.sql("""select distinct parent from tabUserRole 
