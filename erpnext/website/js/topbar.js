@@ -37,7 +37,7 @@ erpnext.topbar.TopBar = Class.extend({
 		for(var i=0;i<items.length;i++) {
 			var item = items[i];
 			if(!item.parent_label && item.parentfield=='top_bar_items') {
-				item.route = item.std_page ? item.std_page.toLowerCase() : item.custom_page;
+				item.route = item.custom_page ? item.custom_page : item.std_page.toLowerCase();
 				$('header .nav:first').append(repl('<li><a href="#!%(route)s" \
 					data-label="%(label)s">%(label)s</a></li>', item))
 			}
@@ -64,7 +64,7 @@ erpnext.Footer = Class.extend({
 		for(var i=0;i<items.length;i++) {
 			var item = items[i];
 			if(!item.parent_label && item.parentfield=='footer_items') {
-				item.route = item.std_page ? item.std_page.toLowerCase() : item.custom_page;
+				item.route = item.custom_page ? item.custom_page : item.std_page.toLowerCase();
 				$('.web-footer-menu ul').append(repl('<li><a href="#!%(route)s" \
 					data-label="%(label)s">%(label)s</a></li>', item))
 			}
