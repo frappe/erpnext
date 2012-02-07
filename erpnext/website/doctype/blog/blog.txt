@@ -5,21 +5,23 @@
 	{
 		'creation': '2012-01-27 12:24:03',
 		'docstatus': 0,
-		'modified': '2012-02-07 12:59:01',
+		'modified': '2012-02-07 13:55:17',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': u'1327647244',
+		'_last_update': u'1328599743',
+		'allow_attach': 1,
 		'colour': u'White:FFF',
 		'doctype': 'DocType',
+		'max_attachments': 5,
 		'module': u'Website',
 		'name': '__common__',
 		'section_style': u'Simple',
 		'show_in_menu': 0,
-		'version': 2
+		'version': 3
 	},
 
 	# These values are common for all DocField
@@ -106,5 +108,17 @@
 		'fieldtype': u'Text',
 		'label': u'Preview',
 		'permlevel': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'file_list',
+		'fieldtype': u'Text',
+		'hidden': 1,
+		'label': u'File List',
+		'no_copy': 1,
+		'permlevel': 0,
+		'print_hide': 1
 	}
 ]

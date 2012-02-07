@@ -1,0 +1,26 @@
+# Role, Blogger
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2012-01-27 12:22:24',
+		'docstatus': 0,
+		'modified': '2012-01-27 12:22:24',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
+	},
+
+	# These values are common for all Role
+	{
+		'doctype': 'Role',
+		'module': u'Website',
+		'name': '__common__',
+		'role_name': u'Blogger'
+	},
+
+	# Role, Blogger
+	{
+		'doctype': 'Role',
+		'name': u'Blogger'
+	}
+]

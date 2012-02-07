@@ -52,6 +52,8 @@ def setup_options():
 						help="Apply the patches on given db")
 	parser.add_option('--reload_doc', nargs=3, metavar = "module doctype docname",
 						help="reload doc")
+	parser.add_option('--export_doc', nargs=2, metavar = "doctype docname",
+						help="export doc")
 	
 	return parser.parse_args()
 	
@@ -120,6 +122,10 @@ def run():
 		webnotes.modules.patch_handler.reload_doc(\
 			{"module":options.reload_doc[0], "dt":options.reload_doc[1], "dn":options.reload_doc[2]})		
 		print '\n'.join(webnotes.modules.patch_handler.log_list)
+
+	elif options.export_doc:
+		from webnotes.modules import export_doc
+		export_doc(options.export_doc[0], options.export_doc[1])
 
 	# run all pending
 	elif options.run_latest:
