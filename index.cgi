@@ -32,11 +32,11 @@ def respond():
 	if 'cmd' in webnotes.form_dict:
 		webnotes.handler.handle()
 	else:
-		import webnotes.index
+		import webnotes.cms.index
 		print "Content-Type: text/html"
 		webnotes.handler.print_cookies()
 		print
-		print webnotes.index.get()
+		print webnotes.cms.index.get()
 
 if __name__=="__main__":
 	init()
