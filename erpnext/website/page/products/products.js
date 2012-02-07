@@ -54,6 +54,7 @@ erpnext.products.make_product_list = function(wrapper) {
 				t1.page_name, t1.short_description \
 				from tabProduct t1, tabItem t2 \
 				where t1.item = t2.name \
+				and ifnull(t1.published,0)=1 \
 				and t2.item_group="%(cat)s" \
 				and t1.short_description like "%%(searchstr)s%"', args)
 		},
@@ -63,7 +64,7 @@ erpnext.products.make_product_list = function(wrapper) {
 				<div style="float:left; width: 400px">\
 					<b><a href="#!%(page_name)s">%(title)s</a></b>\
 					<p>%(short_description)s</p></div>\
-				<div style="clear: both; margin-bottom: 7px;"></div>', data);
+				<div style="clear: both; margin-bottom: 15px; border-bottom: 1px solid #AAA"></div>', data);
 		}
 	});
 	
