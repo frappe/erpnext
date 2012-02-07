@@ -148,8 +148,22 @@ class DocType(TransactionBase):
 
 	# Item Details
 	# -------------
-	def get_item_details(self, item_code):
-		ret = get_obj('Sales Common').get_item_details(item_code, self)
+	def get_item_details(self, item_code=None):
+		if item_code:
+			ret = get_obj('Sales Common').get_item_details(item_code, self)
+			return self.get_pos_details(item_code, ret)
+		else:
+			obj = get_obj('Sales Common')
+			for doc in self.doclist:
+				if doc.fields.get('item_code'):
+					ret = obj.get_item_details(doc.item_code, self)
+					ret = self.get_pos_details(item_code, ret)
+					for r in ret:
+						if not doc.fields.get(r):
+							doc.fields[r] = ret[r]					
+
+
+	def get_pos_details(self, item_code, ret):
 		if item_code and cint(self.doc.is_pos) == 1:
 			dtl = webnotes.conn.sql("select income_account, warehouse, cost_center from `tabPOS Setting` where user = '%s' and company = '%s'" % (session['user'], self.doc.company), as_dict=1)				 
 			if not dtl:
@@ -161,7 +175,8 @@ class DocType(TransactionBase):
 				actual_qty = webnotes.conn.sql("select actual_qty from `tabBin` where item_code = '%s' and warehouse = '%s'" % (item_code, ret['warehouse']))		
 				ret['actual_qty']= actual_qty and flt(actual_qty[0][0]) or 0
 		return ret
- 
+
+
 	# Fetch ref rate from item master as per selected price list
 	def get_adj_percent(self, arg=''):
 		get_obj('Sales Common').get_adj_percent(self)

@@ -107,7 +107,7 @@ class DocType:
 				prev_sle = bin_obj.get_prev_sle(posting_date, posting_time)
 				if not prev_sle:
 					return 0.0
-				fcfs_stack = eval(prev_sle.get('fcfs_stack', '[]'))
+				fcfs_stack = eval(str(prev_sle.get('fcfs_stack', '[]')))
 				in_rate = fcfs_stack and self.get_fifo_rate(fcfs_stack) or 0
 		elif val_method == 'Moving Average':
 			prev_sle = bin_obj.get_prev_sle(posting_date, posting_time)

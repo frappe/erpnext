@@ -109,10 +109,11 @@ class DocType(TransactionBase):
 	# Get Item Details
 	# ===============================================================
 	def get_item_details(self, item_code, obj):
+		import json
 		if not obj.doc.price_list_name:
 			msgprint("Please Select Price List before selecting Items")
 			raise Exception
-		item = webnotes.conn.sql("select description, item_name, brand, item_group, stock_uom, default_warehouse, default_income_account, default_sales_cost_center, description_html from `tabItem` where name = '%s' and (ifnull(end_of_life,'')='' or end_of_life >	now() or end_of_life = '0000-00-00') and (is_sales_item = 'Yes' or is_service_item = 'Yes')" %(item_code), as_dict=1)
+		item = webnotes.conn.sql("select description, item_name, brand, item_group, stock_uom, default_warehouse, default_income_account, default_sales_cost_center, description_html from `tabItem` where name = '%s' and (ifnull(end_of_life,'')='' or end_of_life >	now() or end_of_life = '0000-00-00') and (is_sales_item = 'Yes' or is_service_item = 'Yes')" % (item_code), as_dict=1)
 		tax = webnotes.conn.sql("select tax_type, tax_rate from `tabItem Tax` where parent = %s" , item_code)
 		t = {}
 		for x in tax: t[x[0]] = flt(x[1])
@@ -130,7 +131,7 @@ class DocType(TransactionBase):
 			'adj_rate'				: 0,
 			'amount'				: 0,
 			'export_amount'			: 0,
-			'item_tax_rate'			: str(t),
+			'item_tax_rate'			: json.dumps(t),
 			'batch_no'				: ''
 		}
 		if(obj.doc.price_list_name and item):	#this is done to fetch the changed BASIC RATE and REF RATE based on PRICE LIST

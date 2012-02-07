@@ -520,7 +520,8 @@ class DocType:
 		currency = company.default_currency
 
 		def table(args):
-			if type(args['body']) == type(''):
+			table_body = ""
+			if isinstance(args['body'], basestring):
 				table_body = """\
 					<tbody><tr>
 						<td style='padding: 5px; font-size: 24px; \
@@ -530,7 +531,7 @@ class DocType:
 						</td>
 					</tr></tbody>"""
 
-			elif type(args['body'] == type([])):
+			elif isinstance(args['body'], list):
 				body_rows = []
 				for rows in args['body']:
 					for r in rows:
@@ -762,7 +763,7 @@ def send():
 	"""
 	edigest_list = webnotes.conn.sql("""
 		SELECT name FROM `tabEmail Digest`
-		WHERE enabled=1
+		WHERE enabled=1 and docstatus<2
 	""", as_list=1)
 
 	from webnotes.model.code import get_obj
