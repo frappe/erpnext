@@ -30,7 +30,7 @@ class DocType:
 			supp = supp and supp[0][0] or ''
 			if supp:
 				msgprint("You already have a Supplier with same name")
-				raise Exception
+				raise Exception("You already have a Supplier with same name")
 			else:
 				self.doc.name = cust
 		else:
