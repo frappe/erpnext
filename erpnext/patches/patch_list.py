@@ -65,4 +65,9 @@ patch_list = [
 		'patch_file': 'deploy_packing_slip',
 		'description': "Delete old packing slip fields & print format & deploy new doctypes related to Packing Slip"
 	},
+	{
+		'patch_module': 'patches.jan_mar_2012',
+		'patch_file': 'map_conversion_rate',
+		'description': "Maps conversion rate in doctype mappers PO-PR and PO-PV"
+	},
 ]
