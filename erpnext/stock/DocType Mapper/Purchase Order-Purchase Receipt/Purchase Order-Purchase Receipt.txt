@@ -5,233 +5,217 @@
 	{
 		'creation': '2010-08-08 17:09:35',
 		'docstatus': 0,
-		'modified': '2012-01-05 11:21:23',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-02-07 13:28:20',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all Table Mapper Detail
 	{
-		'doctype': 'Table Mapper Detail',
+		'doctype': u'Table Mapper Detail',
 		'name': '__common__',
-		'parent': 'Purchase Order-Purchase Receipt',
-		'parentfield': 'table_mapper_details',
-		'parenttype': 'DocType Mapper'
+		'parent': u'Purchase Order-Purchase Receipt',
+		'parentfield': u'table_mapper_details',
+		'parenttype': u'DocType Mapper'
 	},
 
 	# These values are common for all Field Mapper Detail
 	{
-		'doctype': 'Field Mapper Detail',
+		'doctype': u'Field Mapper Detail',
+		'map': u'Yes',
 		'name': '__common__',
-		'parent': 'Purchase Order-Purchase Receipt',
-		'parentfield': 'field_mapper_details',
-		'parenttype': 'DocType Mapper'
+		'parent': u'Purchase Order-Purchase Receipt',
+		'parentfield': u'field_mapper_details',
+		'parenttype': u'DocType Mapper'
 	},
 
 	# These values are common for all DocType Mapper
 	{
 		'doctype': u'DocType Mapper',
-		'from_doctype': 'Purchase Order',
-		'module': 'Stock',
+		'from_doctype': u'Purchase Order',
+		'module': u'Stock',
 		'name': '__common__',
 		'ref_doc_submitted': 1,
-		'to_doctype': 'Purchase Receipt'
+		'to_doctype': u'Purchase Receipt'
 	},
 
 	# DocType Mapper, Purchase Order-Purchase Receipt
 	{
 		'doctype': u'DocType Mapper',
-		'name': 'Purchase Order-Purchase Receipt'
+		'name': u'Purchase Order-Purchase Receipt'
 	},
 
 	# Field Mapper Detail
 	{
-		'checking_operator': '=',
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'supplier',
-		'map': 'Yes',
+		'checking_operator': u'=',
+		'doctype': u'Field Mapper Detail',
+		'from_field': u'supplier',
 		'match_id': 0,
-		'to_field': 'supplier'
+		'to_field': u'supplier'
 	},
 
 	# Field Mapper Detail
 	{
-		'checking_operator': '=',
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'company',
-		'map': 'Yes',
+		'checking_operator': u'=',
+		'doctype': u'Field Mapper Detail',
+		'from_field': u'company',
 		'match_id': 0,
-		'to_field': 'company'
+		'to_field': u'company'
 	},
 
 	# Field Mapper Detail
 	{
-		'checking_operator': '=',
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'currency',
-		'map': 'Yes',
+		'checking_operator': u'=',
+		'doctype': u'Field Mapper Detail',
+		'from_field': u'currency',
 		'match_id': 0,
-		'to_field': 'currency'
+		'to_field': u'currency'
 	},
 
 	# Field Mapper Detail
 	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'name',
-		'map': 'Yes',
+		'doctype': u'Field Mapper Detail',
+		'from_field': u'name',
 		'match_id': 1,
-		'to_field': 'prevdoc_detail_docname'
+		'to_field': u'prevdoc_detail_docname'
 	},
 
 	# Field Mapper Detail
 	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'parent',
-		'map': 'Yes',
+		'doctype': u'Field Mapper Detail',
+		'from_field': u'parent',
 		'match_id': 1,
-		'to_field': 'prevdoc_docname'
+		'to_field': u'prevdoc_docname'
 	},
 
 	# Field Mapper Detail
 	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'parenttype',
-		'map': 'Yes',
+		'doctype': u'Field Mapper Detail',
+		'from_field': u'parenttype',
 		'match_id': 1,
-		'to_field': 'prevdoc_doctype'
+		'to_field': u'prevdoc_doctype'
 	},
 
 	# Field Mapper Detail
 	{
-		'checking_operator': '=',
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'item_code',
-		'map': 'Yes',
+		'checking_operator': u'=',
+		'doctype': u'Field Mapper Detail',
+		'from_field': u'item_code',
 		'match_id': 1,
-		'to_field': 'item_code'
+		'to_field': u'item_code'
 	},
 
 	# Field Mapper Detail
 	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'eval:(flt(obj.qty) - flt(obj.received_qty)) ',
-		'map': 'Yes',
+		'doctype': u'Field Mapper Detail',
+		'from_field': u'eval:(flt(obj.qty) - flt(obj.received_qty)) ',
 		'match_id': 1,
-		'to_field': 'received_qty'
+		'to_field': u'received_qty'
 	},
 
 	# Field Mapper Detail
 	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'eval:(flt(obj.qty) - flt(obj.received_qty)) ',
-		'map': 'Yes',
+		'doctype': u'Field Mapper Detail',
+		'from_field': u'eval:(flt(obj.qty) - flt(obj.received_qty)) ',
 		'match_id': 1,
-		'to_field': 'qty'
+		'to_field': u'qty'
 	},
 
 	# Field Mapper Detail
 	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'eval:(flt(obj.qty) - flt(obj.received_qty)) * flt(obj.conversion_factor)',
-		'map': 'Yes',
+		'doctype': u'Field Mapper Detail',
+		'from_field': u'eval:(flt(obj.qty) - flt(obj.received_qty)) * flt(obj.conversion_factor)',
 		'match_id': 1,
-		'to_field': 'stock_qty'
+		'to_field': u'stock_qty'
 	},
 
 	# Field Mapper Detail
 	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'eval:(flt(obj.qty) - flt(obj.received_qty)) * flt(obj.import_rate)',
-		'map': 'Yes',
+		'doctype': u'Field Mapper Detail',
+		'from_field': u'eval:(flt(obj.qty) - flt(obj.received_qty)) * flt(obj.import_rate)',
 		'match_id': 1,
-		'to_field': 'import_amount'
+		'to_field': u'import_amount'
 	},
 
 	# Field Mapper Detail
 	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'eval:(flt(obj.qty) - flt(obj.received_qty)) * flt(obj.purchase_rate)',
-		'map': 'Yes',
+		'doctype': u'Field Mapper Detail',
+		'from_field': u'eval:(flt(obj.qty) - flt(obj.received_qty)) * flt(obj.purchase_rate)',
 		'match_id': 1,
-		'to_field': 'amount'
+		'to_field': u'amount'
 	},
 
 	# Field Mapper Detail
 	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'schedule_date',
-		'map': 'Yes',
+		'doctype': u'Field Mapper Detail',
+		'from_field': u'schedule_date',
 		'match_id': 1,
-		'to_field': 'schedule_date'
+		'to_field': u'schedule_date'
 	},
 
 	# Field Mapper Detail
 	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'net_total',
-		'map': 'Yes',
+		'doctype': u'Field Mapper Detail',
+		'from_field': u'net_total',
 		'match_id': 0,
-		'to_field': 'net_total'
+		'to_field': u'net_total'
 	},
 
 	# Field Mapper Detail
 	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'grand_total',
-		'map': 'Yes',
+		'doctype': u'Field Mapper Detail',
+		'from_field': u'grand_total',
 		'match_id': 0,
-		'to_field': 'grand_total'
+		'to_field': u'grand_total'
 	},
 
 	# Field Mapper Detail
 	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'total_tax',
-		'map': 'Yes',
+		'doctype': u'Field Mapper Detail',
+		'from_field': u'total_tax',
 		'match_id': 0,
-		'to_field': 'total_tax'
+		'to_field': u'total_tax'
 	},
 
 	# Field Mapper Detail
 	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'transaction_date',
-		'map': 'No',
+		'doctype': u'Field Mapper Detail',
+		'from_field': u'conversion_rate',
 		'match_id': 0,
-		'to_field': 'transaction_date'
+		'to_field': u'conversion_rate'
 	},
 
 	# Table Mapper Detail
 	{
-		'doctype': 'Table Mapper Detail',
-		'from_field': 'po_details',
-		'from_table': 'PO Detail',
+		'doctype': u'Table Mapper Detail',
+		'from_field': u'po_details',
+		'from_table': u'PO Detail',
 		'match_id': 1,
-		'reference_doctype_key': 'prevdoc_doctype',
-		'reference_key': 'prevdoc_detail_docname',
-		'to_field': 'purchase_receipt_details',
-		'to_table': 'Purchase Receipt Detail',
-		'validation_logic': 'docstatus=1 and qty > ifnull(received_qty,0)'
+		'reference_doctype_key': u'prevdoc_doctype',
+		'reference_key': u'prevdoc_detail_docname',
+		'to_field': u'purchase_receipt_details',
+		'to_table': u'Purchase Receipt Detail',
+		'validation_logic': u'docstatus=1 and qty > ifnull(received_qty,0)'
 	},
 
 	# Table Mapper Detail
 	{
-		'doctype': 'Table Mapper Detail',
-		'from_table': 'Purchase Order',
+		'doctype': u'Table Mapper Detail',
+		'from_table': u'Purchase Order',
 		'match_id': 0,
-		'reference_key': 'prevdoc_docname',
-		'to_table': 'Purchase Receipt',
-		'validation_logic': 'docstatus = 1'
+		'reference_key': u'prevdoc_docname',
+		'to_table': u'Purchase Receipt',
+		'validation_logic': u'docstatus = 1'
 	},
 
 	# Table Mapper Detail
 	{
-		'doctype': 'Table Mapper Detail',
-		'from_field': 'purchase_tax_details',
-		'from_table': 'Purchase Tax Detail',
+		'doctype': u'Table Mapper Detail',
+		'from_field': u'purchase_tax_details',
+		'from_table': u'Purchase Tax Detail',
 		'match_id': 2,
-		'to_field': 'purchase_tax_details',
-		'to_table': 'Purchase Tax Detail',
-		'validation_logic': 'docstatus = 1'
+		'to_field': u'purchase_tax_details',
+		'to_table': u'Purchase Tax Detail',
+		'validation_logic': u'docstatus = 1'
 	}
 ]

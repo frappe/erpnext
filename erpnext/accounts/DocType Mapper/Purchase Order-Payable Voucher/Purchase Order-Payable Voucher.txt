@@ -5,7 +5,7 @@
 	{
 		'creation': '2010-08-08 17:09:35',
 		'docstatus': 0,
-		'modified': '2012-02-06 15:25:06',
+		'modified': '2012-02-07 13:28:31',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -114,6 +114,15 @@
 		'map': u'Yes',
 		'match_id': 0,
 		'to_field': u'total_tax'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': u'Field Mapper Detail',
+		'from_field': u'conversion_rate',
+		'map': u'Yes',
+		'match_id': 0,
+		'to_field': u'conversion_rate'
 	},
 
 	# Table Mapper Detail
