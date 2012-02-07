@@ -858,7 +858,7 @@ RoleObj.prototype.make_label = function(tbl, ridx, cidx, role){
 	
 	var t = make_table($td(tbl, ridx, cidx),1,2,null,['16px', null],{marginRight:'5px'});
 	var ic = $a($td(t,0,0), 'img','',{cursor:'pointer', marginRight:'5px'});
-	ic.src= 'lib/images/icons/help.gif';
+	ic.src= 'lib/images/icons/help.png';
 	ic.role = role;
 		
 	ic.onclick = function(){

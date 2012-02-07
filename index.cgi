@@ -19,7 +19,13 @@ def init():
 		webnotes.form_dict[key] = webnotes.form.getvalue(key)
 
 	# init request
-	webnotes.http_request = webnotes.auth.HTTPRequest()
+	try:
+		webnotes.http_request = webnotes.auth.HTTPRequest()
+	except Exception, e:
+		if webnotes.response['message']=='Authentication Failed':
+			pass
+		else:
+			raise e
 
 def respond():
 	import webnotes

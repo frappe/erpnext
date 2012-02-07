@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2011-04-08 10:50:41',
+		'creation': '2011-04-06 18:11:38',
 		'docstatus': 0,
-		'modified': '2011-04-05 09:16:57',
+		'modified': '2012-02-03 11:28:16',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
@@ -14,18 +14,18 @@
 	{
 		'autoname': '_FEED.#####',
 		'colour': 'White:FFF',
+		'default_print_format': 'Standard',
 		'doctype': 'DocType',
 		'module': 'Home',
 		'name': '__common__',
 		'section_style': 'Simple',
 		'show_in_menu': 0,
-		'version': 1
+		'version': 2
 	},
 
 	# These values are common for all DocField
 	{
 		'doctype': 'DocField',
-		'fieldtype': 'Data',
 		'name': '__common__',
 		'parent': 'Feed',
 		'parentfield': 'fields',
@@ -42,8 +42,16 @@
 	# DocField
 	{
 		'doctype': 'DocField',
+		'fieldname': 'feed_type',
+		'fieldtype': 'Select',
+		'label': 'Feed Type'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
 		'fieldname': 'doc_type',
-		'idx': 1,
+		'fieldtype': 'Data',
 		'label': 'Doc Type'
 	},
 
@@ -51,7 +59,7 @@
 	{
 		'doctype': 'DocField',
 		'fieldname': 'doc_name',
-		'idx': 2,
+		'fieldtype': 'Data',
 		'label': 'Doc Name'
 	},
 
@@ -59,7 +67,7 @@
 	{
 		'doctype': 'DocField',
 		'fieldname': 'subject',
-		'idx': 3,
+		'fieldtype': 'Data',
 		'label': 'Subject'
 	},
 
@@ -67,7 +75,7 @@
 	{
 		'doctype': 'DocField',
 		'fieldname': 'color',
-		'idx': 4,
+		'fieldtype': 'Data',
 		'label': 'Color'
 	}
 ]

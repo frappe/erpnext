@@ -34,23 +34,33 @@ feed_dict = {
 	'Support Ticket':       ['[%(status)s] %(subject)s', '#000080']	
 }
 
-def make_feed(doc, subject, color):
+def make_feed(feedtype, doctype, name, owner, subject, color):
 	"makes a new Feed record"
 	#msgprint(subject)
 	from webnotes.model.doc import Document
-	webnotes.conn.sql("delete from tabFeed where doc_type=%s and doc_name=%s", (doc.doctype, doc.name))
+
+	if feedtype in ('Login', 'Comment'):
+		# delete old login, comment feed
+		webnotes.conn.sql("""delete from tabFeed where 
+			datediff(curdate(), creation) > 7 and doc_type in ('Comment', 'Login')""")
+	else:
+		# one feed per item
+		webnotes.conn.sql("""delete from tabFeed
+			where doc_type=%s and doc_name=%s 
+			and ifnull(feed_type,'') != 'Comment'""", (doctype, name))
+
 	f = Document('Feed')
-	f.doc_type = doc.doctype
-	f.doc_name = doc.name
+	f.owner = owner
+	f.feed_type = feedtype
+	f.doc_type = doctype
+	f.doc_name = name
 	f.subject = subject
 	f.color = color
-	f.save(1)
+	f.save()
 
 def update_feed(doc, method=None):   
 	"adds a new feed"
 	if method=='on_update':
 		subject, color = feed_dict.get(doc.doctype, [None, None])
-		if subject:
-			subject = subject % doc.fields
-			
-			make_feed(doc, subject, color)
+		if subject:			
+			make_feed('', doc.doctype, doc.name, doc.owner, subject % doc.fields, color)

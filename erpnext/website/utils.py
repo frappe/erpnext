@@ -25,7 +25,8 @@ def markdown(doc, fields):
 def page_name(title):
 	"""make page name from title, and check that there is no duplicate"""
 	import re
-	name = re.sub('[~!@#$%^&*()<>,."\']', '', title.lower())
+	name = title.lower()
+	name = re.sub('[~!@#$%^&*()<>,."\']', '', name)
 	return '-'.join(name.split()[:4])
 	
 def add_page(title):

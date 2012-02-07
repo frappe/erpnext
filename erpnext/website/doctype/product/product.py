@@ -1,3 +1,5 @@
+import webnotes
+
 class DocType:
 	def __init__(self, d, dl):
 		self.doc, self.doclist = d, dl
@@ -25,3 +27,13 @@ class DocType:
 		website.utils.add_guest_access_to_page(p.name)
 		self.doc.page_name = p.name
 		del self.doc.fields['long_description_html']
+		self.make_item_group_active()
+
+
+	def make_item_group_active(self):
+		"""show item group in website"""
+		if self.doc.published:
+			from webnotes.model.doc import Document
+			ig = Document('Item Group', webnotes.conn.get_value('Item', self.doc.item, 'item_group'))
+			ig.show_in_website = 1
+			ig.save()

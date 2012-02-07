@@ -5,70 +5,69 @@
 	{
 		'creation': '2012-01-24 10:24:19',
 		'docstatus': 0,
-		'modified': '2012-01-30 14:14:48',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-02-07 10:35:19',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'colour': 'White:FFF',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
 		'istable': 1,
-		'module': 'Website',
+		'module': u'Website',
 		'name': '__common__',
-		'section_style': 'Simple',
+		'section_style': u'Simple',
 		'show_in_menu': 0,
-		'version': 2
+		'version': 4
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Top Bar Item',
-		'parentfield': 'fields',
-		'parenttype': 'DocType',
+		'parent': u'Top Bar Item',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
 		'permlevel': 0
 	},
 
 	# DocType, Top Bar Item
 	{
 		'doctype': 'DocType',
-		'name': 'Top Bar Item'
+		'name': u'Top Bar Item'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'label',
-		'fieldtype': 'Data',
-		'label': 'Label'
+		'doctype': u'DocField',
+		'fieldname': u'label',
+		'fieldtype': u'Data',
+		'label': u'Label'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'std_page',
-		'fieldtype': 'Select',
-		'label': 'Std Page',
-		'options': 'Home\nAbout\nContact\nProducts\nBlog\nCustom'
+		'doctype': u'DocField',
+		'fieldname': u'custom_page',
+		'fieldtype': u'Link',
+		'label': u'Page',
+		'options': u'Page'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'custom_page',
-		'fieldtype': 'Link',
-		'label': 'Custom Page',
-		'options': 'Web Page'
+		'doctype': u'DocField',
+		'fieldname': u'url',
+		'fieldtype': u'Data',
+		'label': u'URL'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'parent_label',
-		'fieldtype': 'Select',
-		'label': 'Parent Label'
+		'doctype': u'DocField',
+		'fieldname': u'parent_label',
+		'fieldtype': u'Select',
+		'label': u'Parent Label'
 	}
 ]

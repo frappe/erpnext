@@ -14,11 +14,11 @@ class DocType:
 		path = os.path.join(os.path.dirname(__file__), 'template.html')
 		
 		self.doc.about_team = webnotes.conn.sql("""select * from `tabAbout Us Team` 
-			where parent='About Us Settings'""", as_dict=1)
+			where parent='About Us Settings' order by idx""", as_dict=1)
 		
 		import markdown2
 		for t in self.doc.about_team:
-			t['bio'] = markdown2.markdown(t['bio'])
+			t['bio'] = markdown2.markdown(t.get('bio') or '')
 		
 		webnotes.conn.set_value('Page', 'about', 'title', self.doc.headline)
 		webnotes.conn.set_value('Page', 'about', 'content', make_template(self.doc, path))
