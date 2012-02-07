@@ -34,8 +34,8 @@ feed_dict = {
 	'Support Ticket':       ['[%(status)s] %(subject)s', '#000080'],
 	
 	# Website
-	'Web Page': ['%(title)s', '#00080'],
-	'Blog': ['%(title)s', '#00080']
+	'Web Page': ['%(title)s', '#000080'],
+	'Blog': ['%(title)s', '#000080']
 }
 
 def make_feed(feedtype, doctype, name, owner, subject, color):

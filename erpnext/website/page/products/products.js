@@ -70,7 +70,6 @@ erpnext.products.make_product_list = function(wrapper) {
 				<div style="clear: both; margin-bottom: 15px; border-bottom: 1px solid #AAA"></div>', data);
 		}
 	});
-	
 }
 
 erpnext.products.set_group = function() {

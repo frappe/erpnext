@@ -18,6 +18,7 @@ class DocType():
 	def validate(self):
 		"""write/update 'Page' with the blog"""		
 		p = website.utils.add_page(self.doc.title)
+		self.doc.name = p.name
 		
 		from jinja2 import Template
 		import markdown2

@@ -12,6 +12,7 @@ def execute():
 	delete_doc('Website', 'Module Def', 'Website')
 	reload_doc('website', 'Module Def', 'Website')
 	reload_doc('website', 'Role', 'Website Manager')
+	reload_doc('website', 'Role', 'Blogger')
 
 	webnotes.conn.sql("""delete from `tabModule Def Role` where parent='Website'""")
 	d = Document('Module Def Role')
