@@ -100,8 +100,18 @@ class DocType(TransactionBase):
 # ================================================================================
 
 	# ***************** Get Item Details ******************************
-	def get_item_details(self, item_code):
-		return get_obj('Sales Common').get_item_details(item_code, self)
+	def get_item_details(self, item_code=None):
+		if item_code:
+			return get_obj('Sales Common').get_item_details(item_code, self)
+		else:
+			obj = get_obj('Sales Common')
+			for doc in self.doclist:
+				if doc.fields.get('item_code'):
+					ret = obj.get_item_details(doc.item_code, self)
+					for r in ret:
+						if not doc.fields.get(r):
+							doc.fields[r] = ret[r]					
+
 
 	# *** Re-calculates Basic Rate & amount based on Price List Selected ***
 	def get_adj_percent(self, arg=''):

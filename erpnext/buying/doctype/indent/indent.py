@@ -90,7 +90,21 @@ class DocType:
 	# get item details
 	# ---------------------------------
 	def get_item_details(self, arg =''):
-		return get_obj(dt='Purchase Common').get_item_details(self,arg)
+		if arg:
+			return get_obj(dt='Purchase Common').get_item_details(self,arg)
+		else:
+			obj = get_obj('Purchase Common')
+			for doc in self.doclist:
+				if doc.fields.get('item_code'):
+					temp = {
+						'item_code': doc.fields.get('item_code'),
+						'warehouse': doc.fields.get('warehouse')
+					}
+					ret = obj.get_item_details(self, json.dumps(temp))
+					for r in ret:
+						if not doc.fields.get(r):
+							doc.fields[r] = ret[r]
+
 
 	# Get UOM Details
 	# ---------------------------------

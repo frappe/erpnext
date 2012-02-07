@@ -92,7 +92,19 @@ class DocType(TransactionBase):
 
 	# Get Item Details
 	# -----------------		
-	def get_item_details(self,arg):
+	def get_item_details(self, arg=None):
+		if arg:
+			return self.get_pv_details(arg)
+		else:
+			for doc in self.doclist:
+				if doc.fields.get('item_code'):
+					ret = self.get_pv_details(doc.item_code)
+					for r in ret:
+						if not doc.fields.get(r):
+							doc.fields[r] = ret[r]
+
+
+	def get_pv_details(self, arg):
 		item_det = sql("select item_name, brand, description, item_group,purchase_account,cost_center from tabItem where name=%s",arg,as_dict=1)
 		tax = sql("select tax_type, tax_rate from `tabItem Tax` where parent = %s" , arg)
 		t = {}
@@ -110,6 +122,8 @@ class DocType(TransactionBase):
 			'item_tax_rate'			: str(t)
 		}
 		return ret
+
+
 		
 	# Advance Allocation
 	# -------------------

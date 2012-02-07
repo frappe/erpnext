@@ -1,4 +1,5 @@
 import webnotes
+from webnotes.utils import cstr
 
 from webnotes.utils.email_lib.receive import POP3Mailbox
 
@@ -111,7 +112,7 @@ class SupportMailbox(POP3Mailbox):
 			status = add_file_list('Support Ticket', doc.name, attachment['filename'], fid)
 			if not status:
 				doc.description = doc.description \
-					+ "\nCould not attach: " + str(attachment['filename'])
+					+ "\nCould not attach: " + cstr(attachment['filename'])
 				doc.save()
 			webnotes.conn.commit()
 
@@ -137,7 +138,7 @@ We will get back to you as soon as possible
 		sendmail(\
 			recipients = [d.raised_by], \
 			sender = self.email_settings.support_email, \
-			subject = '['+d.name+'] ' + str(d.subject or ''), \
+			subject = '['+d.name+'] ' + cstr(d.subject), \
 			msg = response)
 		
 	def auto_close_tickets(self):

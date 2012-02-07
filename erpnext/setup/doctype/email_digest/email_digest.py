@@ -763,7 +763,7 @@ def send():
 	"""
 	edigest_list = webnotes.conn.sql("""
 		SELECT name FROM `tabEmail Digest`
-		WHERE enabled=1
+		WHERE enabled=1 and docstatus<2
 	""", as_list=1)
 
 	from webnotes.model.code import get_obj

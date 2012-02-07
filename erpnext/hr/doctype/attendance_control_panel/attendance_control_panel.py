@@ -94,8 +94,9 @@ class DocType:
       
     from webnotes.utils import file_manager
     fn, content = file_manager.get_file(filename[1])
-    
-    if not type(content) == str:
+ 
+	# NOTE: Don't know why this condition exists
+    if not isinstance(content, basestring) and hasattr(content, 'tostring'):
       content = content.tostring()
 
     import webnotes.model.import_docs
