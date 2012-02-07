@@ -25,6 +25,9 @@ cur_frm.cscript.onload = function(doc,dt,dn) {
 		if(doc.is_pos ==1) cur_frm.cscript.is_pos(doc, dt, dn);
 
  			hide_field(['customer_address', 'contact_person', 'customer_name', 'address_display', 'contact_display', 'contact_mobile', 'contact_email', 'territory', 'customer_group']);
+
+		// defined in sales_common.js
+		cur_frm.cscript.update_item_details(doc, cdt, cdn);		
 	}
 }
 

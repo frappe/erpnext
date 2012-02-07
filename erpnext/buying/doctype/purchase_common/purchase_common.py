@@ -96,9 +96,9 @@ class DocType(TransactionBase):
 		if r: obj.doc.terms = r[0][0]
 
 	# Get Item Details
-	def get_item_details( self, obj, arg =''):
-
-		arg = eval(arg)
+	def get_item_details(self, obj, arg =''):
+		import json
+		arg = json.loads(arg)
 		item = sql("select item_name,item_group, brand, description, min_order_qty, stock_uom, default_warehouse,lead_time_days, last_purchase_rate from `tabItem` where name = %s and (ifnull(end_of_life,'')='' or end_of_life = '0000-00-00' or end_of_life >	now())", (arg['item_code']), as_dict = 1)
 		tax = sql("select tax_type, tax_rate from `tabItem Tax` where parent = %s" , arg['item_code'])
 		t = {}
@@ -119,7 +119,7 @@ class DocType(TransactionBase):
 			'stock_uom'					: item and item[0]['stock_uom'] or '',
 			'conversion_factor'	: '1',
 			'warehouse'					: wh,
-			'item_tax_rate'			: str(t),
+			'item_tax_rate'			: json.dumps(t),
 			'batch_no'					 : '',
 			'discount_rate'			: 0		
 		}
