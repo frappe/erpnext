@@ -12,7 +12,17 @@ cur_frm.cscript.onload = function(doc,dt,dn){
 	}
 	// make address, contact, shipping, history list body
 	cur_frm.cscript.make_hl_body();
-  	//cur_frm.cscript.make_sl_body();  	
+  	//cur_frm.cscript.make_sl_body();
+
+	cur_frm.cscript.load_defaults(doc, dt, dn);
+}
+
+cur_frm.cscript.load_defaults = function(doc, dt, dn) {
+	doc = locals[doc.doctype][doc.name];
+	if(!(doc.__islocal && doc.lead_name)) { return; }
+
+	var fields_to_refresh = LocalDB.set_default_values(doc);
+	if(fields_to_refresh) { refresh_many(fields_to_refresh); }
 }
 
 cur_frm.add_fetch('lead_name', 'company_name', 'customer_name');
