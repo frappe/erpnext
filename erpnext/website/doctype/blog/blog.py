@@ -15,7 +15,7 @@ class DocType():
 		"""save file by its name"""
 		self.doc.name = website.utils.page_name(self.doc.title)
 	
-	def on_update(self):
+	def validate(self):
 		"""write/update 'Page' with the blog"""		
 		p = website.utils.add_page(self.doc.title)
 		
