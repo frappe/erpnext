@@ -46,8 +46,11 @@ erpnext.products.make_product_list = function(wrapper) {
 		run_btn: $(wrapper).find('.products-search .btn').get(0),
 		hide_refresh: true,
 		get_query: function() {
+			var srch = $('input[name="products-search"]').val()
+			var search_cond = 'and (t1.short_description like "%%(srch)s%"\
+				or t1.title like "%%(srch)s%")';
 			args = {
-				searchstr: $('input[name="products-search"]').val() || '',
+				search_cond: srch ? repl(search_cond, {srch:srch}) : '',
 				cat: erpnext.products.cur_group
 			};
 			return repl('select t1.name, t1.title, t1.thumbnail_image, \
@@ -55,7 +58,7 @@ erpnext.products.make_product_list = function(wrapper) {
 				from tabProduct t1, tabItem t2 \
 				where t1.item = t2.name \
 				and t2.item_group="%(cat)s" \
-				and t1.short_description like "%%(searchstr)s%"', args)
+				%(search_cond)s', args)
 		},
 		render_row: function(parent, data) {
 			parent.innerHTML = repl('<div style="float:left; width: 115px;">\
