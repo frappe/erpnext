@@ -34,7 +34,7 @@ cur_frm.cscript.load_defaults = function(doc, dt, dn) {
 
 // Update existing item details
 cur_frm.cscript.update_item_details = function(doc, dt, dn) {
-	if(!cur_frm.doc.__islocal) return;
+	if(!cur_frm.doc.__islocal) { return; }
 	var children = getchildren(cur_frm.cscript.tname, doc.name, cur_frm.cscript.fname);
 	if(children) {
 		$c_obj(make_doclist(doc.doctype, doc.name), 'get_item_details', '',
