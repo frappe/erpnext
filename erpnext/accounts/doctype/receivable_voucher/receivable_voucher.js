@@ -21,13 +21,14 @@ cur_frm.cscript.onload = function(doc,dt,dn) {
 		if(!doc.currency && sys_defaults.currency) set_multiple(dt,dn,{currency:sys_defaults.currency});
 		if(!doc.price_list_currency) set_multiple(dt, dn, {price_list_currency: doc.currency, plc_conversion_rate: 1});
 
-		//for previously created sales invoice, set required field related to pos
-		if(doc.is_pos ==1) cur_frm.cscript.is_pos(doc, dt, dn);
-
- 			hide_field(['customer_address', 'contact_person', 'customer_name', 'address_display', 'contact_display', 'contact_mobile', 'contact_email', 'territory', 'customer_group']);
+ 		hide_field(['customer_address', 'contact_person', 'customer_name', 'address_display', 'contact_display', 'contact_mobile', 'contact_email', 'territory', 'customer_group']);
 
 		// defined in sales_common.js
 		cur_frm.cscript.update_item_details(doc, cdt, cdn);		
+		
+		//for previously created sales invoice, set required field related to pos
+		if(doc.is_pos ==1) cur_frm.cscript.is_pos(doc, dt, dn);
+
 	}
 }
 
