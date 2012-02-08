@@ -42,11 +42,12 @@ def make_feed(feedtype, doctype, name, owner, subject, color):
 	"makes a new Feed record"
 	#msgprint(subject)
 	from webnotes.model.doc import Document
+	from webnotes.utils import get_full_name
 
-	if feedtype in ('Login', 'Comment'):
+	if feedtype in ('Login', 'Comment', 'Assignment'):
 		# delete old login, comment feed
 		webnotes.conn.sql("""delete from tabFeed where 
-			datediff(curdate(), creation) > 7 and doc_type in ('Comment', 'Login')""")
+			datediff(curdate(), creation) > 7 and doc_type in ('Comment', 'Login', 'Assignment')""")
 	else:
 		# one feed per item
 		webnotes.conn.sql("""delete from tabFeed
@@ -60,6 +61,7 @@ def make_feed(feedtype, doctype, name, owner, subject, color):
 	f.doc_name = name
 	f.subject = subject
 	f.color = color
+	f.full_name = get_full_name(owner)
 	f.save()
 
 def update_feed(doc, method=None):   

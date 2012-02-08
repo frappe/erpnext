@@ -25,14 +25,14 @@ pscript['onload_{{ doc.name }}'] = function(wrapper) {
 
 	wrapper.comment_list = new wn.widgets.Listing({
 		parent: $(wrapper).find('.web-main-section').get(0),
-		query: 'select comment, comment_by_fullname, comment_date\
+		query: 'select comment, comment_by_fullname, modified\
 			from `tabComment Widget Record` where comment_doctype="Page"\
 			and comment_docname="{{ doc.name }}"',
 		no_result_message: 'Be the first one to comment',
 		render_row: function(parent, data) {
-			data.comment_date = dateutil.str_to_user(data.comment_date);
+			data.comment_date = prettyDate(data.modified);
 			$(parent).html(repl("<div style='color:#777'>\
-				On %(comment_date)s %(comment_by_fullname)s said:\
+				%(comment_by_fullname)s | %(comment_date)s:\
 				</div>\
 				<p style='margin-left: 20px;'>%(comment)s</p><br>", data))
 		},

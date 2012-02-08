@@ -14,8 +14,10 @@ class DocType:
 		p = website.utils.add_page(self.doc.title)
 		
 		from jinja2 import Template
+		from webnotes.utils import global_date_format
 		import os
 	
+		self.doc.updated = global_date_format(self.doc.modified)
 		website.utils.markdown(self.doc, ['head_section','main_section', 'side_section'])
 		
 		self.add_page_links()
@@ -31,24 +33,21 @@ class DocType:
 	def add_page_links(self):
 		"""add links for next_page and see_also"""
 		if self.doc.next_page:
-			self.doc.next_page_html = """<div class="info-box round">
-			<p style="text-align: right"><b>Next:</b>
-				<a href="#!%(name)s">%(title)s</a></p></div>""" % {"name":self.doc.next_page, \
+			self.doc.next_page_html = """<div class="info-box round" style="text-align: right">
+				<b>Next:</b>
+				<a href="#!%(name)s">%(title)s</a></div>""" % {"name":self.doc.next_page, \
 						"title": webnotes.conn.get_value("Page", self.doc.next_page, "title")}
 
 		self.doc.see_also = ''
 		for d in self.doclist:
 			if d.doctype=='Related Page':
 				tmp = {"page":d.page, "title":webnotes.conn.get_value('Page', d.page, 'title')}
-				self.doc.see_also += """<li><a href="#!%(page)s">%(title)s</a></li>""" % tmp
-		
-		if self.doc.see_also:
-			self.doc.see_also = '<ul>%s</ul>' % self.doc.see_also
-		
+				self.doc.see_also += """<div><a href="#!%(page)s">%(title)s</a></div>""" % tmp
+				
 	def cleanup_temp(self):
 		"""cleanup temp fields"""
 		fl = ['main_section_html', 'side_section_html', 'see_also', \
-			'next_page_html', 'head_section_html']
+			'next_page_html', 'head_section_html', 'updated']
 		for f in fl:
 			if f in self.doc.fields:
 				del self.doc.fields[f]

@@ -10,9 +10,9 @@ pscript.onload_blog = function(wrapper) {
 		render_row: function(parent, data) {
 			if(data.content.length==300) data.content += '...';
 			data.date = prettyDate(data.modified);
-			parent.innerHTML = repl('<h4><a href="#!%(name)s">%(title)s</a></h4>\
-				<div class="help">By %(first_name)s %(last_name)s on %(date)s</div>\
-				<p><div class="comment">%(content)s</div></p><br>', data);
+			parent.innerHTML = repl('<h3><a href="#!%(name)s">%(title)s</a></h3>\
+				<p><div class="help">By %(first_name)s %(last_name)s on %(date)s</div></p>\
+				<div class="comment">%(content)s</div><br>', data);
 		},
 		page_length: 10
 	});

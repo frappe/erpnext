@@ -15,10 +15,6 @@ pscript.startup_make_sidebar = function() {
 				new SidebarItem(ml[m]);
 			}
 		}
-		if(in_list(user_roles, 'System Manager')) {
-			var div = $a(page_body.left_sidebar, 'div', 'link_type', {padding:'8px', fontSize:'11px'});
-			$(div).html('[edit]').click(pscript.startup_set_module_order)
-		}
 		nav_obj.observers.push({notify:function(t,dt,dn) { pscript.select_sidebar_menu(t, dt, dn); }});
 
 		// select current
@@ -352,33 +348,3 @@ SidebarModuleItem = function(si, det) {
 			si.show_section(me.det.doc_type);
 	}
 }
-
-
-// ====================================================================
-// Drag & Drop order selection
-// ====================================================================
-
-pscript.startup_set_module_order = function() {
-	var update_order= function(ml) {
-		mdict = {};
-		for(var i=0; i<ml.length; i++) {
-			mdict[ml[i][3][3]] = {'module_seq':ml[i][1], 'is_hidden':(ml[i][2] ? 'No' : 'Yes')}
-		}
-		$c_obj('Home Control', 'set_module_order', JSON.stringify(mdict), function(r,rt) { pscript.startup_make_sidebar(); } )
-	}
-
-	var callback = function(r, rt) {
-		var ml = [];
-		for(var i=0; i<r.message.length; i++) {
-			var det = r.message[i];
-			ml.push([det[1], det[2], (det[3]!='No' ? 0 : 1), det[0]]);
-		}
-		new ListSelector('Set Module Sequence', 'Select items and set the order you want them to appear'+
-			'<br><b>Note:</b> <i>These changes will apply to all users!</i>', ml, update_order, 1);
-	}
-	$c_obj('Home Control', 'get_module_order', '', callback)
-
-}
-
-
-
