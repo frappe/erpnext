@@ -45,6 +45,13 @@ header .topbar .container {
 	margin-bottom: 20px;
 }
 
+.web-main-section p,
+.web-main-section h4,
+.web-main-section h5,
+.web-main-section pre  {
+	margin-left: 9px;
+}
+
 .web-side-section {
 	width: 30%;
 	float: right;
