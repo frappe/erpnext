@@ -61,12 +61,16 @@ cur_frm.cscript.supplier = function(doc,dt,dn) {
 	}
 	
 	var callback2 = function(r,rt){
-		var doc = locals[cur_frm.doctype][cur_frm.docname];		
+		var doc = locals[cur_frm.doctype][cur_frm.docname];
 		var el = getchildren('PV Detail',doc.name,'entries');
 		for(var i in el){
 			if(el[i].item_code && (!el[i].expense_head || !el[i].cost_center)){
-				args = "{'item_code':'" + el[i].item_code + "','expense_head':'" + el[i].expense_head + "','cost_center':'" + el[i].cost_center + "'}";
-				get_server_fields('get_default_values', args, 'entries', doc, el[i].doctype, el[i].name, 1);
+				args = {
+					item_code: el[i].item_code,
+					expense_head: el[i].expense_head,
+					cost_center: el[i].cost_center
+				};
+				get_server_fields('get_default_values', JSON.stringify(args), 'entries', doc, el[i].doctype, el[i].name, 1);
 			}
 		}
 		cur_frm.cscript.calc_amount(doc, 1);
