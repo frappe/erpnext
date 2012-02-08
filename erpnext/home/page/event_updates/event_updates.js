@@ -457,11 +457,10 @@ FeedList.prototype.make_list = function() {
 		parent: this.list_area,
 		query: repl('select \
 			distinct t1.name, t1.feed_type, t1.doc_type, t1.doc_name, t1.subject, t1.modified_by, \
-			concat(ifnull(t2.first_name,""), " ", ifnull(t2.last_name,"")) as full_name, \
+			if(ifnull(t1.full_name,"")="", t1.owner, t1.full_name) as full_name, \
 			t1.modified, t1.color \
-			from tabFeed t1, tabProfile t2, tabUserRole t3, tabDocPerm t4 \
+			from tabFeed t1, tabUserRole t3, tabDocPerm t4 \
 			where t1.doc_type = t4.parent \
-			and t2.name = t1.owner \
 			and t3.parent = "%(user)s" \
 			and t4.role = t3.role \
 			and ifnull(t4.`read`,0) = 1 \

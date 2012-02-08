@@ -38,7 +38,6 @@ def on_login_post_session(login_manager):
 
 def comment_added(doc):
 	"""add comment to feed"""
-	import json
 	home.make_feed('Comment', doc.comment_doctype, doc.comment_docname, doc.comment_by,
 		'<i>"' + doc.comment + '"</i>', '#6B24B3')
 

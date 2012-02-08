@@ -5,77 +5,85 @@
 	{
 		'creation': '2011-04-06 18:11:38',
 		'docstatus': 0,
-		'modified': '2012-02-03 11:28:16',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-02-08 11:35:40',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'autoname': '_FEED.#####',
-		'colour': 'White:FFF',
-		'default_print_format': 'Standard',
+		'autoname': u'_FEED.#####',
+		'colour': u'White:FFF',
+		'default_print_format': u'Standard',
 		'doctype': 'DocType',
-		'module': 'Home',
+		'module': u'Home',
 		'name': '__common__',
-		'section_style': 'Simple',
+		'section_style': u'Simple',
 		'show_in_menu': 0,
-		'version': 2
+		'version': 3
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Feed',
-		'parentfield': 'fields',
-		'parenttype': 'DocType',
+		'parent': u'Feed',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
 		'permlevel': 0
 	},
 
 	# DocType, Feed
 	{
 		'doctype': 'DocType',
-		'name': 'Feed'
+		'name': u'Feed'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'feed_type',
-		'fieldtype': 'Select',
-		'label': 'Feed Type'
+		'doctype': u'DocField',
+		'fieldname': u'feed_type',
+		'fieldtype': u'Select',
+		'label': u'Feed Type'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'doc_type',
-		'fieldtype': 'Data',
-		'label': 'Doc Type'
+		'doctype': u'DocField',
+		'fieldname': u'doc_type',
+		'fieldtype': u'Data',
+		'label': u'Doc Type'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'doc_name',
-		'fieldtype': 'Data',
-		'label': 'Doc Name'
+		'doctype': u'DocField',
+		'fieldname': u'doc_name',
+		'fieldtype': u'Data',
+		'label': u'Doc Name'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'subject',
-		'fieldtype': 'Data',
-		'label': 'Subject'
+		'doctype': u'DocField',
+		'fieldname': u'subject',
+		'fieldtype': u'Data',
+		'label': u'Subject'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'color',
-		'fieldtype': 'Data',
-		'label': 'Color'
+		'doctype': u'DocField',
+		'fieldname': u'color',
+		'fieldtype': u'Data',
+		'label': u'Color'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'full_name',
+		'fieldtype': u'Data',
+		'label': u'Full Name'
 	}
 ]

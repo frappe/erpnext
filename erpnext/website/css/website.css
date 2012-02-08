@@ -61,6 +61,26 @@ header .topbar .container {
 	overflow-x: hidden;
 }
 
+.web-page-status {
+	padding: 7px;
+	color: #777;
+	clear: both;
+	text-align: right;
+}
+
+.web-page-status a,
+.web-page-status a:hover,
+.web-page-status a:visited {
+	padding: 2px;
+	background-color: #777;
+	color: #FFF;
+	text-decoration: none;
+}
+
+.web-page-status a:hover {
+	background-color: #444;
+}
+
 footer {
 	color: #777;	
 }

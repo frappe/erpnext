@@ -2,7 +2,8 @@
 	<div class="web-content" id="blog-{{ doc.name }}">
 		<h1>Blog</h1>
 		<div class="web-main-section">
-			<h2>{{ doc.title }}</h2>
+			<h3>{{ doc.title }}</h3>
+			<div class="help">By {{ doc.full_name }} on {{ doc.updated }}</div>
 			<br>
 			{{ doc.content_html }}
 		</div>
