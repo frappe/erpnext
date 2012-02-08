@@ -11,6 +11,17 @@ h1 {
 	margin-bottom: 15px;
 }
 
+pre {
+    background-color: #F8F8F8;
+    border: 1px solid #CCCCCC;
+    border-radius: 3px 3px 3px 3px;
+    font-size: 13px;
+    line-height: 19px;
+    overflow: auto;
+    padding: 6px 10px;
+	margin-bottom: 9px;
+}
+
 footer {
 	width: 900px;
 	margin: auto;
