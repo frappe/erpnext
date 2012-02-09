@@ -61,7 +61,8 @@ class DocType(TransactionBase):
 	# Get Default Cost Center and Expense Head from Item Master
 	# ----------------------------------------------------------
 	def get_default_values(self,args):
-		args = eval(args)
+		import json
+		args = json.loads(args)
 		ret = {}
 		if sql("select name from `tabItem` where name = '%s'" % args['item_code']):
 			if not args['expense_head'] or args['expense_head'] == 'undefined':
@@ -105,6 +106,7 @@ class DocType(TransactionBase):
 
 
 	def get_pv_details(self, arg):
+		import json
 		item_det = sql("select item_name, brand, description, item_group,purchase_account,cost_center from tabItem where name=%s",arg,as_dict=1)
 		tax = sql("select tax_type, tax_rate from `tabItem Tax` where parent = %s" , arg)
 		t = {}
@@ -119,7 +121,7 @@ class DocType(TransactionBase):
 			'amount' : 0.00,
 			'expense_head' : item_det and item_det[0]['purchase_account'] or '',
 			'cost_center' : item_det and item_det[0]['cost_center'] or '',
-			'item_tax_rate'			: str(t)
+			'item_tax_rate'			: json.dumps(t)
 		}
 		return ret
 
