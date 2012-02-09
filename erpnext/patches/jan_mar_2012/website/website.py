@@ -8,6 +8,10 @@ def execute():
 	from webnotes.modules import reload_doc
 	from webnotes.model import delete_doc
 
+	# cleanup page
+	delete_doc("DocType", "Page")
+	reload_doc("core", "doctype", "page")
+
 	reload_doc('setup', 'doctype', 'item_group')
 	delete_doc('Website', 'Module Def', 'Website')
 	reload_doc('website', 'Module Def', 'Website')
@@ -23,7 +27,6 @@ def execute():
 	reload_doc('website', 'doctype', 'about_us_settings')
 	reload_doc('website', 'doctype', 'about_us_team')
 	reload_doc('website', 'doctype', 'blog')
-	reload_doc('website', 'doctype', 'blog_subscriber')
 	reload_doc('website', 'doctype', 'contact_us_settings')
 	reload_doc('website', 'doctype', 'product')
 	reload_doc('website', 'doctype', 'product_group')
