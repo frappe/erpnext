@@ -54,6 +54,8 @@ def setup_options():
 						help="reload doc")
 	parser.add_option('--export_doc', nargs=2, metavar = "doctype docname",
 						help="export doc")
+	parser.add_option('--install', nargs=3, metavar = "rootpassword dbname source",
+						help="install fresh db")
 	
 	return parser.parse_args()
 	
@@ -131,6 +133,12 @@ def run():
 	elif options.run_latest:
 		webnotes.modules.patch_handler.run_all()
 		print '\n'.join(webnotes.modules.patch_handler.log_list)
+	
+	elif options.install:
+		from webnotes.install_lib.install import Installer
+		inst = Installer('root', options.install[0])
+		inst.import_from_db(options.install[1], source_path=options.install[2], \
+			password='admin', verbose = 1)		
 	
 	# print messages
 	if webnotes.message_log:
