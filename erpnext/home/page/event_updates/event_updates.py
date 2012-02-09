@@ -36,7 +36,10 @@ def get_status_details(arg=None):
 		'is_trial': webnotes.conn.get_global('is_trial'),
 		'days_to_expiry': (webnotes.conn.get_global('days_to_expiry') or '0'),
 		'setup_status': get_setup_status(),
-		'registration_complete': cint(get_defaults('registration_complete')) and 'Yes' or 'No'
+		'registration_complete': cint(get_defaults('registration_complete')) and 'Yes' or 'No',
+		'profile': webnotes.conn.sql("""\
+			SELECT first_name, last_name FROM `tabProfile`
+			WHERE name=%s AND docstatus<2""", webnotes.user.name, as_dict=1)
 	}
 	return ret
 

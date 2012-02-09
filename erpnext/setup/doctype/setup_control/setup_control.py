@@ -47,9 +47,17 @@ class DocType:
 	# Account Setup
 	# ---------------
 	def setup_account(self, args):
-		company_name, comp_abbr, fy_start, currency = eval(args)
+		import webnotes
+		company_name, comp_abbr, fy_start, currency, first_name, last_name = eval(args)
 		curr_fiscal_year,fy_start_date = self.get_fy_details(fy_start)
 		self.currency = currency
+
+		# Update Profile
+		if last_name=='None': last_name = None
+		webnotes.conn.sql("""\
+			UPDATE `tabProfile` SET first_name=%s, last_name=%s
+			WHERE name=%s AND docstatus<2""", (first_name, last_name, webnotes.user.name))
+			
 		
 		# Fiscal Year
 		master_dict = {'Fiscal Year':{'year':curr_fiscal_year, 'year_start_date':fy_start_date}}
@@ -66,6 +74,7 @@ class DocType:
 								'default_currency': currency,
 								'default_company':company_name,
 								'default_valuation_method':'FIFO',
+								'default_stock_uom':'Nos',
 								'date_format':'dd-mm-yyyy',
 								'default_currency_format':'Lacs',
 								'so_required':'No',
@@ -87,7 +96,8 @@ class DocType:
 		msgprint("Great! Your company has now been created")
 		
 		import webnotes.utils
-		return webnotes.utils.get_defaults()
+		user_fullname = (first_name or '') + (last_name and (" " + last_name) or '')
+		return {'sys_defaults': webnotes.utils.get_defaults(), 'user_fullname': user_fullname}
 
 		
 	# Get Fiscal year Details

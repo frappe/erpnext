@@ -585,6 +585,7 @@ HomeStatusBar = function() {
 		this.wrapper.innerHTML = '';
 		this.profile_settings = $a($a(this.wrapper, 'p'), 'span', 'link_type', {fontWeight:'bold'});
 		this.profile_settings.innerHTML = user_fullname + ' (Profile Settings)';
+		this.profile_settings.id = "user_fullname";
 		this.profile_settings.onclick = function() { loadpage('profile-settings'); }
 
 		this.span = $a($a(this.wrapper, 'p'), 'span', 'link_type', {fontWeight:'bold'});
@@ -614,7 +615,7 @@ pscript.home_make_status = function() {
 	
 			// complete registration
 			if(in_list(user_roles,'System Manager')) { 
-				pscript.complete_registration(r.message.registration_complete); 
+				pscript.complete_registration(r.message.registration_complete, r.message.profile); 
 			}
 			
 			// setup wizard
@@ -627,15 +628,19 @@ pscript.home_make_status = function() {
 
 // complete my company registration
 // --------------------------------
-pscript.complete_registration = function(is_complete) {
+pscript.complete_registration = function(is_complete, profile) {
 	if(is_complete == 'No'){
-		var d = new Dialog(400, 200, "Please Complete Your Registration");
+		var d = new Dialog(400, 200, "Setup your Account");
 		if(user != 'Administrator'){
 			d.no_cancel(); // Hide close image
 			$dh(page_body.wntoolbar.wrapper);
 		}
 
 		d.make_body([
+			['HTML', 'Your Profile Details', '<h4>Your Profile Details</h4>'],
+			['Data', 'First Name'],
+			['Data', 'Last Name'],
+			['HTML', 'Company Details', '<h4>Create your first company</h4>'],
 			['Data','Company Name','Example: Your Company LLC'],
 	  		['Data','Company Abbreviation', 'Example: YC (all your acconts will have this as a suffix)'],
 	  		['Select','Fiscal Year Start Date'],
@@ -649,7 +654,16 @@ pscript.complete_registration = function(is_complete) {
 			d.widgets['Company Name'].value = locals['Control Panel']['Control Panel'].company_name;
 			d.widgets['Company Name'].disabled = 1;
 		}
-		
+
+		if(profile && profile.length>0) {
+			if(profile[0].first_name && profile[0].first_name!='None') {
+				d.widgets['First Name'].value = profile[0].first_name;
+			}
+
+			if(profile[0].last_name && profile[0].last_name!='None') {
+				d.widgets['Last Name'].value = profile[0].last_name;
+			}
+		}		
 
 		//d.widgets['Save'].disabled = true;	  // disable Save button
 		pscript.make_dialog_field(d);
@@ -666,14 +680,20 @@ pscript.complete_registration = function(is_complete) {
 					d.widgets['Company Name'].value,
 					d.widgets['Company Abbreviation'].value,
 					d.widgets['Fiscal Year Start Date'].value,
-					d.widgets['Default Currency'].value
+					d.widgets['Default Currency'].value,
+					d.widgets['First Name'].value,
+					d.widgets['Last Name'].value
 				];
 				
 				$c_obj('Setup Control','setup_account',JSON.stringify(args),function(r, rt){
-					sys_defaults = r.message;
+					sys_defaults = r.message.sys_defaults;
+					user_fullname = r.message.user_fullname;
 					d.hide();
 					$ds(page_body.wntoolbar.wrapper);
+					$('#user_fullname').html(user_fullname + " (Profile Settings)");
 				});
+			} else {
+				d.widgets['Save'].done_working();
 			}
 		}
 		d.show();
@@ -699,12 +719,12 @@ pscript.make_dialog_field = function(d)
 // ---------------
 pscript.validate_fields = function(d)
 {
-	var lst = ['Company Abbreviation', 'Fiscal Year Start Date', 'Default Currency'];
-	var msg = 'Please enter the following fields';
+	var lst = ['First Name', 'Company Name', 'Company Abbreviation', 'Fiscal Year Start Date', 'Default Currency'];
+	var msg = 'Please enter the following fields\n';
 	var flag = 1;
 	for(var i=0; i<lst.length; i++)
 	{
-		if(!d.widgets[lst[i]].value){
+		if(!d.widgets[lst[i]].value || d.widgets[lst[i]].value=='None'){
 			flag = 0;
 			msg = msg + NEWLINE + lst[i];
 		}
