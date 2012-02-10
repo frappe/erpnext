@@ -84,7 +84,7 @@ $.extend(cur_frm.cscript, {
 	Send: function(doc, dt, dn) {
 		$c_obj([doc], 'send_response', '', function(r,rt) {
 			locals[dt][dn].new_response = '';
-			if(!r.exc) {
+			if(!(r.exc || r.server_messages)) {
 				cur_frm.refresh();
 			}
 		});
