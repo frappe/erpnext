@@ -84,14 +84,18 @@ $.extend(cur_frm.cscript, {
 	Send: function(doc, dt, dn) {
 		$c_obj([doc], 'send_response', '', function(r,rt) {
 			locals[dt][dn].new_response = '';
-			cur_frm.refresh();
+			if(!r.exc) {
+				cur_frm.refresh();
+			}
 		});
 	},
 	
 	customer: function(doc, dt, dn) {
 		var callback = function(r,rt) {
 			var doc = locals[cur_frm.doctype][cur_frm.docname];
-			cur_frm.refresh();
+			if(!r.exc) {
+				cur_frm.refresh();
+			}
 		}
 		if(doc.customer) $c_obj(make_doclist(doc.doctype, doc.name), 'get_default_customer_address', '', callback);
 		if(doc.customer) unhide_field(['customer_name','address_display','contact_display','contact_mobile','contact_email']);
@@ -104,7 +108,9 @@ $.extend(cur_frm.cscript, {
 		if(answer) {
 			if(doc.name) 
 				$c_obj([doc],'close_ticket','',function(r,rt) {
-					cur_frm.refresh();
+					if(!r.exc) {
+						cur_frm.refresh();
+					}
 				});
 		}
 	},
@@ -116,7 +122,9 @@ $.extend(cur_frm.cscript, {
 		if(answer) {
 			if(doc.name) 
 				$c_obj([doc],'reopen_ticket','',function(r,rt) {
-					cur_frm.refresh();
+					if(!r.exc) {
+						cur_frm.refresh();
+					}
 				});
 		}
 	}
