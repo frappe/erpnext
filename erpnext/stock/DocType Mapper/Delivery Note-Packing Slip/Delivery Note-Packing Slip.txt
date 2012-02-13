@@ -3,91 +3,91 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-02-02 11:35:53',
+		'creation': '2012-02-13 11:28:48',
 		'docstatus': 0,
-		'modified': '2012-02-02 11:35:53',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-02-13 11:28:48',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all Table Mapper Detail
 	{
-		'doctype': 'Table Mapper Detail',
+		'doctype': u'Table Mapper Detail',
 		'name': '__common__',
-		'parent': 'Delivery Note-Packing Slip',
-		'parentfield': 'table_mapper_details',
-		'parenttype': 'DocType Mapper'
+		'parent': u'Delivery Note-Packing Slip',
+		'parentfield': u'table_mapper_details',
+		'parenttype': u'DocType Mapper'
 	},
 
 	# These values are common for all Field Mapper Detail
 	{
-		'doctype': 'Field Mapper Detail',
+		'doctype': u'Field Mapper Detail',
 		'name': '__common__',
-		'parent': 'Delivery Note-Packing Slip',
-		'parentfield': 'field_mapper_details',
-		'parenttype': 'DocType Mapper'
+		'parent': u'Delivery Note-Packing Slip',
+		'parentfield': u'field_mapper_details',
+		'parenttype': u'DocType Mapper'
 	},
 
 	# These values are common for all DocType Mapper
 	{
 		'doctype': u'DocType Mapper',
-		'from_doctype': 'Delivery Note',
-		'module': 'Stock',
+		'from_doctype': u'Delivery Note',
+		'module': u'Stock',
 		'name': '__common__',
 		'ref_doc_submitted': 1,
-		'to_doctype': 'Packing Slip'
+		'to_doctype': u'Packing Slip'
 	},
 
 	# DocType Mapper, Delivery Note-Packing Slip
 	{
 		'doctype': u'DocType Mapper',
-		'name': 'Delivery Note-Packing Slip'
+		'name': u'Delivery Note-Packing Slip'
 	},
 
 	# Field Mapper Detail
 	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'name',
-		'map': 'Yes',
+		'doctype': u'Field Mapper Detail',
+		'from_field': u'name',
+		'map': u'Yes',
 		'match_id': 0,
-		'to_field': 'delivery_note'
+		'to_field': u'delivery_note'
 	},
 
 	# Field Mapper Detail
 	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'qty',
-		'map': 'No',
+		'doctype': u'Field Mapper Detail',
+		'from_field': u'qty',
+		'map': u'No',
 		'match_id': 1,
-		'to_field': 'qty'
+		'to_field': u'qty'
 	},
 
 	# Field Mapper Detail
 	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'naming_series',
-		'map': 'No',
+		'doctype': u'Field Mapper Detail',
+		'from_field': u'naming_series',
+		'map': u'No',
 		'match_id': 0,
-		'to_field': 'naming_series'
+		'to_field': u'naming_series'
 	},
 
 	# Table Mapper Detail
 	{
-		'doctype': 'Table Mapper Detail',
-		'from_table': 'Delivery Note',
+		'doctype': u'Table Mapper Detail',
+		'from_table': u'Delivery Note',
 		'match_id': 0,
-		'to_table': 'Packing Slip',
-		'validation_logic': 'docstatus=1'
+		'to_table': u'Packing Slip',
+		'validation_logic': u'docstatus=1'
 	},
 
 	# Table Mapper Detail
 	{
-		'doctype': 'Table Mapper Detail',
-		'from_field': 'delivery_note_details',
-		'from_table': 'Delivery Note Detail',
+		'doctype': u'Table Mapper Detail',
+		'from_field': u'delivery_note_details',
+		'from_table': u'Delivery Note Detail',
 		'match_id': 1,
-		'to_field': 'item_details',
-		'to_table': 'Packing Slip Detail',
-		'validation_logic': 'IFNULL(packed_qty, 0) < IFNULL(qty, 0)'
+		'to_field': u'item_details',
+		'to_table': u'Packing Slip Detail',
+		'validation_logic': u'IFNULL(packed_qty, 0) < IFNULL(qty, 0)'
 	}
 ]

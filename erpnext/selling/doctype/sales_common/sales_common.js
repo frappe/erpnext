@@ -6,18 +6,23 @@
 // cur_frm.cscript.sales_team_fname - Sales Team fieldname
 
 // ============== Load Default Taxes ===================
-cur_frm.cscript.load_taxes = function(doc, cdt, cdn) {
+cur_frm.cscript.load_taxes = function(doc, cdt, cdn, callback) {
 	// run if this is not executed from dt_map...
-	if(doc.customer) return;
+	doc = locals[doc.doctype][doc.name];
+	if(doc.customer || getchildren('RV Tax Detail', doc.name, 'other_charges', doc.doctype).length) {
+		if(callback) callback(doc, cdt, cdn);
+		return;
+	}
 	$c_obj([doc],'load_default_taxes','',function(r,rt){
-		 refresh_field('other_charges');
+		refresh_field('other_charges');
+		if(callback) callback(doc, cdt, cdn);
 	});
 }
 
 
 // Gets called after existing item details are update to fill in
 // remaining default values
-cur_frm.cscript.load_defaults = function(doc, dt, dn) {
+cur_frm.cscript.load_defaults = function(doc, dt, dn, callback) {
 	if(!cur_frm.doc.__islocal) { return; }
 
 	doc = locals[doc.doctype][doc.name];
@@ -31,11 +36,13 @@ cur_frm.cscript.load_defaults = function(doc, dt, dn) {
 		LocalDB.set_default_values(children[i]);
 	}
 	refresh_field(cur_frm.cscript.fname);
+	cur_frm.cscript.load_taxes(doc, dt, dn, callback);
 }
 
 
 // Update existing item details
-cur_frm.cscript.update_item_details = function(doc, dt, dn) {
+cur_frm.cscript.update_item_details = function(doc, dt, dn, callback) {
+	doc = locals[doc.doctype][doc.name];
 	if(!cur_frm.doc.__islocal) return;
 	var children = getchildren(cur_frm.cscript.tname, doc.name, cur_frm.cscript.fname);
 	if(children) {
@@ -44,7 +51,7 @@ cur_frm.cscript.update_item_details = function(doc, dt, dn) {
 			if(!r.exc) {
 				refresh_field(cur_frm.cscript.fname);
 				doc = locals[doc.doctype][doc.name];
-				cur_frm.cscript.load_defaults(doc, dt, dn);
+				cur_frm.cscript.load_defaults(doc, dt, dn, callback);
 			}
 		});
 	}
