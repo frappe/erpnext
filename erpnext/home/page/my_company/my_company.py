@@ -104,6 +104,7 @@ def send_welcome_mail(email, args):
 #
 # post comment
 #
+@webnotes.whitelist()
 def post_comment(arg):
 	arg = load_json(arg)
 	
@@ -146,6 +147,7 @@ def post_comment(arg):
 #
 # update read messages
 #
+@webnotes.whitelist()
 def set_read_all_messages(arg=''):
 	webnotes.conn.sql("""UPDATE `tabComment Widget Record`
 	SET docstatus = 1
@@ -153,6 +155,7 @@ def set_read_all_messages(arg=''):
 	AND comment_docname = %s
 	""", webnotes.user.name)
 
+@webnotes.whitelist()
 def update_security(args=''):
 	import json
 	args = json.loads(args)
