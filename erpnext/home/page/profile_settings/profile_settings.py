@@ -2,6 +2,7 @@ import webnotes
 
 from webnotes.utils import load_json, cint, nowdate
 
+@webnotes.whitelist()
 def change_password(arg):
 	"""
 		Change password
@@ -15,12 +16,14 @@ def change_password(arg):
 	webnotes.conn.sql("update tabProfile set password=password(%s), modified=%s where name=%s",(arg['new_password'], nowdate(), webnotes.session['user']))
 	webnotes.msgprint('Password Updated');
 
+@webnotes.whitelist()
 def get_user_details(arg=None):
 	"""
 		Returns user first name, last name and bio
 	"""
 	return webnotes.conn.sql("select first_name, last_name, bio from tabProfile where name=%s", webnotes.user.name, as_dict=1)[0]
 	
+@webnotes.whitelist()
 def set_user_details(arg=None):
 	"""
 		updates user details given in argument
@@ -35,6 +38,7 @@ def set_user_details(arg=None):
 	p.save()
 	webnotes.msgprint('Updated')
 
+@webnotes.whitelist()
 def set_user_image(fid, fname):
 	"""
 		Set uploaded image as user image

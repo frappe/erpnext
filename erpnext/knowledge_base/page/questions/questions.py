@@ -3,6 +3,7 @@ import webnotes
 from webnotes.utils import load_json, cint, cstr
 
 # add a new question
+@webnotes.whitelist()
 def add_question(arg):
 	args = load_json(arg)
 	
@@ -22,7 +23,7 @@ def add_question(arg):
 					'notify': 1
 				})
 	
-	
+@webnotes.whitelist()
 def vote(arg):
 	args = load_json(arg)
 	
@@ -36,6 +37,7 @@ def vote(arg):
 	
 	return p
 
+@webnotes.whitelist()
 def delete(arg):
 	"""
 		delete a question or answer (called from kb toolbar)

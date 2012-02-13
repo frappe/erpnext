@@ -54,11 +54,12 @@ dashboards = [
 	}
 ]
 
+import webnotes
+
 class DashboardWidget:
 	def __init__(self, company, start, end, interval):
 		from webnotes.utils import getdate
 		from webnotes.model.code import get_obj
-		import webnotes
 		
 		self.company = company
 		self.abbr = webnotes.conn.get_value('Company', company, 'abbr')
@@ -233,7 +234,7 @@ class DashboardWidget:
 		elif opts['type']=='creation':
 			return self.get_creation_trend(opts['doctype'], start, end)
 
-
+@webnotes.whitelist()
 def load_dashboard(args):
 	"""
 		Get dashboard based on

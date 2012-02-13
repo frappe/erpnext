@@ -1,5 +1,6 @@
 import json, webnotes
 
+@webnotes.whitelist()
 def send(args):
 	"""create support ticket"""
 	args = json.loads(args)

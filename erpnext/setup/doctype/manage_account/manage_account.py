@@ -30,17 +30,10 @@ class DocType:
 		from webnotes.utils import fmt_money, flt
 		bal = webnotes.conn.sql("select `tabAccount Balance`.balance,`tabAccount`.debit_or_credit from `tabAccount`,`tabAccount Balance` where `tabAccount Balance`.account=%s and `tabAccount Balance`.period=%s and `tabAccount Balance`.account=`tabAccount`.name ",(arg,self.doc.current_fiscal_year))
 		if bal:
-			return fmt_money(flt(bal[0][0])) + ' ' + bal[0][1]
-	
-	def validate(self):
-		"""validate"""
-		if not (self.doc.account_url and (self.doc.account_url.startswith('http://') \
-			or self.doc.account_url.startswith('https://'))):
-			webnotes.msgprint("Account URL must start with 'http://' or 'https://'", raise_exception=1)
+			return fmt_money(flt(bal[0][0])) + ' ' + bal[0][1]	
 	
 	def on_update(self):
 		"""update defaults"""
-		self.validate()
 		
 		for key in keydict:
 			webnotes.conn.set_default(key, self.doc.fields.get(keydict[key], ''))

@@ -1,19 +1,22 @@
 import webnotes
 from webnotes.utils import load_json, cstr, now
 
-# update the editable text item
+@webnotes.whitelist()
 def update_item(args):
 	args = load_json(args)
 	
 	webnotes.conn.sql("update `tab%s` set `%s`=%s, modified=%s where name=%s" \
 		% (args['dt'], args['fn'], '%s', '%s', '%s'), (args['text'], now(), args['dn']))
-		
+
+@webnotes.whitelist()
 def has_answered(arg):
 	return webnotes.conn.sql("select name from tabAnswer where owner=%s and question=%s", (webnotes.user.name, arg)) and 'Yes' or 'No'
 
+@webnotes.whitelist()
 def get_question(arg):
 	return cstr(webnotes.conn.sql("select question from tabQuestion where name=%s", arg)[0][0])
 
+@webnotes.whitelist()
 def add_answer(args):
 	args = load_json(args)
 	

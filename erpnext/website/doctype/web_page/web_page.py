@@ -10,8 +10,11 @@ class DocType:
 		self.doc.name = website.utils.page_name(self.doc.title)
 
 	def validate(self):
-		"""make page for this product"""					
-		p = website.utils.add_page(self.doc.title)
+		"""make page for this product"""
+		if not self.doc.name:				
+			self.doc.name = website.utils.page_name(self.doc.title)
+
+		p = website.utils.add_page(self.doc.name)
 		
 		from jinja2 import Template
 		from webnotes.utils import global_date_format
