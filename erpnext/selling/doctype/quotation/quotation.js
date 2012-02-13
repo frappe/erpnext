@@ -32,15 +32,11 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 		}
 	}
 
-	// defined in sales_common.js
-	cur_frm.cscript.update_item_details(doc, cdt, cdn);
-
 }
 
 cur_frm.cscript.onload_post_render = function(doc, dt, dn) {
-	// load default charges
-	if(doc.__islocal && !getchildren('RV Tax Detail', doc.name, 'other_charges', doc.doctype).length)
-		cur_frm.cscript.load_taxes(doc, cdt, cdn);
+	// defined in sales_common.js
+	cur_frm.cscript.update_item_details(doc, cdt, cdn);
 }
 
 // hide - unhide fields based on lead or customer..

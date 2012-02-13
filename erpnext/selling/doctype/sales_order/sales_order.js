@@ -23,15 +23,12 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 		hide_field(['customer_address','contact_person','customer_name','address_display','contact_display','contact_mobile','contact_email','territory','customer_group','shipping_address']);
 	}
 
-	// defined in sales_common.js
-	cur_frm.cscript.update_item_details(doc, cdt, cdn);
 }
 
 cur_frm.cscript.onload_post_render = function(doc, cdt, cdn) {
 	if(doc.__islocal) {
-		if(doc.quotation) cur_frm.cscript['Pull Quotation Details'](doc,cdt,cdn);
-	} else {
-	cur_frm.cscript.load_taxes(doc, cdt, cdn);
+		// defined in sales_common.js
+		cur_frm.cscript.update_item_details(doc, cdt, cdn, callback);
 	}
 }
 
