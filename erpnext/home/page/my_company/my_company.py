@@ -47,6 +47,9 @@ def delete_user(args):
 	if cint(webnotes.conn.get_value('Control Panel', None, 'sync_with_gateway')):
 		from server_tools.gateway_utils import remove_user_gateway
 		remove_user_gateway(args['user'])
+	
+	webnotes.login_manager.logout(user=args['user'])
+
 
 #
 # add user
