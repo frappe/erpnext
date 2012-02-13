@@ -197,17 +197,19 @@ class DocType(TransactionBase):
 
 #---------------------------------------- Get Tax Details -------------------------------#
 	def get_tax_details(self, item_code, obj):
+		import json
 		tax = webnotes.conn.sql("select tax_type, tax_rate from `tabItem Tax` where parent = %s" , item_code)
 		t = {}
 		for x in tax: t[x[0]] = flt(x[1])
 		ret = {
-			'item_tax_rate'		:	tax and str(t) or ''
+			'item_tax_rate'		:	tax and json.dumps(t) or ''
 		}
 		return ret
 
 	# Get Serial No Details
 	# ==========================================================================
 	def get_serial_details(self, serial_no, obj):
+		import json
 		item = webnotes.conn.sql("select item_code, make, label,brand, description from `tabSerial No` where name = '%s' and docstatus != 2" %(serial_no), as_dict=1)
 		tax = webnotes.conn.sql("select tax_type, tax_rate from `tabItem Tax` where parent = %s" , item[0]['item_code'])
 		t = {}
@@ -218,7 +220,7 @@ class DocType(TransactionBase):
 			'label'						: item and item[0]['label'] or '',
 			'brand'						: item and item[0]['brand'] or '',
 			'description'			: item and item[0]['description'] or '',
-			'item_tax_rate'		: str(t)
+			'item_tax_rate'		: json.dumps(t)
 		}
 		return ret
 		

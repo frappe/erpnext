@@ -241,7 +241,7 @@ cur_frm.cscript['Make Purchase Invoice'] = function() {
 		'from_docname': cur_frm.doc.name,
 		'from_to_list':"[['Purchase Receipt','Payable Voucher'],['Purchase Receipt Detail','PV Detail'],['Purchase Tax Detail','Purchase Tax Detail']]"
 		}, function(r,rt) {
-			 loaddoc('Payable Voucher', n);
+			loaddoc('Payable Voucher', n);
 		}
 	);
 }

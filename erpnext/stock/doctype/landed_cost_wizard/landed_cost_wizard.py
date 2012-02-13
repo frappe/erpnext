@@ -112,6 +112,7 @@ class DocType:
 		
 	def cal_charges_and_item_tax_amt(self):
 		""" Re-calculates other charges values and itemwise tax amount for getting valuation rate"""
+		import json
 		for pr in self.selected_pr:
 			obj = get_obj('Purchase Receipt', pr, with_children = 1)
 			total = 0
@@ -121,7 +122,11 @@ class DocType:
 				prev_total, item_tax = flt(prd.amount), 0
 				total += flt(prd.qty) * flt(prd.purchase_rate)
 			
-				item_tax_rate = prd.item_tax_rate and eval(prd.item_tax_rate) or {}
+				try:
+					item_tax_rate = prd.item_tax_rate and json.loads(prd.item_tax_rate) or {}
+				except ValueError:
+					item_tax_rate = prd.item_tax_rate and eval(prd.item_tax_rate) or {}
+
 				
 				ocd = getlist(obj.doclist, 'purchase_tax_details')
 				# calculate tax for other charges
