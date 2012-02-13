@@ -35,13 +35,24 @@ class DocType:
 	# set account details
 	#-----------------------
 	def set_account_details(self, args):
-		args = eval(args)
+		"""
+			Called from gateway after allocation
+		"""
+		import json
+		args = json.loads(args)
 
 		self.set_cp_defaults(args['company'], args['industry'], args['time_zone'], args['country'], args['account_name'])
 		self.create_profile(args['user'], args['first_name'], args['last_name'])	
 	
-		from server_tools.gateway_utils import update_client_control
-		update_client_control(args['total_users'])
+		# Domain related updates
+		try:
+			from server_tools.gateway_utils import add_domain_map
+			add_domain_map(args)
+		except ImportError, e:
+			pass
+
+		# add record in domain_list of Website Settings
+		webnotes.conn.set_value('Website Settings', 'Website Settings', 'subdomain', args['url_name'] + ".erpnext.com")
 		
 	
 	# Account Setup
