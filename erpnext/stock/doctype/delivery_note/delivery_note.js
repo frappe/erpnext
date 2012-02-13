@@ -24,12 +24,13 @@ cur_frm.cscript.onload = function(doc, dt, dn) {
 		hide_field(['customer_address','contact_person','customer_name','address_display','contact_display','contact_mobile','contact_email','territory','customer_group']);
 	}
 
-	// defined in sales_common.js
-	//cur_frm.cscript.update_item_details(doc, cdt, cdn);
 	
 }
 
 cur_frm.cscript.onload_post_render = function(doc, dt, dn) {
+	// defined in sales_common.js
+	//cur_frm.cscript.update_item_details(doc, cdt, cdn);
+	
 	// load default charges
 	if(doc.__islocal && !getchildren('RV Tax Detail', doc.name, 'other_charges', doc.doctype).length) 
 		cur_frm.cscript.load_taxes(doc, cdt, cdn);	
