@@ -6,13 +6,12 @@ from webnotes.model.doc import Document
 try: import json
 except: import simplejson as json
 
+@webnotes.whitelist()
 def get_account_settings_url(arg=''):
 	import server_tools.gateway_utils
 	return server_tools.gateway_utils.get_account_settings_url()
 
-#
-# set max users
-#
+@webnotes.whitelist()
 def get_max_users(arg=''):
 	from server_tools.gateway_utils import get_max_users_gateway
 	return {
@@ -20,16 +19,12 @@ def get_max_users(arg=''):
 		'enabled': cint(webnotes.conn.sql("select count(*) from tabProfile where ifnull(enabled,0)=1 and name not in ('Administrator', 'Guest')")[0][0])
 	}
 
-#
-# enable profile in local
-#
+@webnotes.whitelist()
 def enable_profile(arg=''):
 	webnotes.conn.sql("update tabProfile set enabled=1 where name=%s", arg)
 	return 1
 		
-#
-# disable profile in local
-#
+@webnotes.whitelist()
 def disable_profile(arg=''):
 	if arg=='Administrator':
 		return 'Cannot disable Administrator'
@@ -38,9 +33,7 @@ def disable_profile(arg=''):
 	webnotes.login_manager.logout(user=arg)
 	return 0
 
-#
-# delete user
-#
+@webnotes.whitelist()
 def delete_user(args):
 	args = json.loads(args)
 	webnotes.conn.sql("update tabProfile set enabled=0, docstatus=2 where name=%s", args['user'])
@@ -49,9 +42,7 @@ def delete_user(args):
 		from server_tools.gateway_utils import remove_user_gateway
 		remove_user_gateway(args['user'])
 
-#
-# add user
-#
+@webnotes.whitelist()
 def add_user(args):
 	args = json.loads(args)
 	# erpnext-saas
@@ -61,9 +52,7 @@ def add_user(args):
 	
 	add_profile(args)
 	
-#
-# add profile record
-#
+@webnotes.whitelist()
 def add_profile(args):
 	from webnotes.utils import validate_email_add, now
 	email = args['user']
@@ -99,6 +88,7 @@ def add_profile(args):
 
 	send_welcome_mail(email, args)
 
+@webnotes.whitelist()
 def send_welcome_mail(email, args):
 	"""send welcome mail to user with password and login url"""
 	pr = Document('Profile', email)

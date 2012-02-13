@@ -1,4 +1,6 @@
 import webnotes
+
+@webnotes.whitelist()
 def subscribe(arg):
 	"""subscribe to blog (blog_subscriber)"""
 	if webnotes.conn.sql("""select name from `tabBlog Subscriber` where name=%s""", arg):

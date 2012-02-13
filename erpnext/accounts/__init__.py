@@ -2,6 +2,7 @@ import webnotes
 from webnotes.utils import flt
 from webnotes.model.code import get_obj
 
+@webnotes.whitelist()
 def get_default_bank_account():
 	"""
 		Get default bank account for a company
@@ -14,7 +15,7 @@ def get_default_bank_account():
 	
 	if res: return res[0][0]
 
-
+@webnotes.whitelist()
 def get_new_jv_details():
 	"""
 		Get details which will help create new jv on sales/purchase return

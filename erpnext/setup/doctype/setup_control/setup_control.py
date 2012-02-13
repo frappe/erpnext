@@ -140,7 +140,7 @@ class DocType:
 		for d in def_args.keys():
 			ma_obj.doc.fields[d] = def_args[d]
 		ma_obj.doc.save()
-		ma_obj.update_cp()
+		ma_obj.on_update()
 
 
 	# Set Control Panel Defaults
