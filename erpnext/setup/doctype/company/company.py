@@ -95,11 +95,11 @@ class DocType:
 						]
 		
 		acc_list_india = [
-							['CENVAT Capital Goods','Tax Assets','Ledger','No','','Debit',self.doc.name,''],
+							['CENVAT Capital Goods','Tax Assets','Ledger','No','Chargeable','Debit',self.doc.name,''],
 							['CENVAT','Tax Assets','Ledger','No','Chargeable','Debit',self.doc.name,''],
-							['CENVAT Service Tax','Tax Assets','Ledger','No','','Debit',self.doc.name,''],
-							['CENVAT Service Tax Cess 1','Tax Assets','Ledger','No','','Debit',self.doc.name,''],
-							['CENVAT Service Tax Cess 2','Tax Assets','Ledger','No','','Debit',self.doc.name,''],
+							['CENVAT Service Tax','Tax Assets','Ledger','No','Chargeable','Debit',self.doc.name,''],
+							['CENVAT Service Tax Cess 1','Tax Assets','Ledger','No','Chargeable','Debit',self.doc.name,''],
+							['CENVAT Service Tax Cess 2','Tax Assets','Ledger','No','Chargeable','Debit',self.doc.name,''],
 							['CENVAT Edu Cess','Tax Assets','Ledger','No','Chargeable','Debit',self.doc.name,''],
 							['CENVAT SHE Cess','Tax Assets','Ledger','No','Chargeable','Debit',self.doc.name,''],
 							['Excise Duty 4','Tax Assets','Ledger','No','Tax','Debit',self.doc.name,'4.00'],
@@ -108,8 +108,8 @@ class DocType:
 							['Excise Duty 14','Tax Assets','Ledger','No','Tax','Debit',self.doc.name,'14.00'],
 							['Excise Duty Edu Cess 2','Tax Assets','Ledger','No','Tax','Debit',self.doc.name,'2.00'],
 							['Excise Duty SHE Cess 1','Tax Assets','Ledger','No','Tax','Debit',self.doc.name,'1.00'],
-							['P L A','Tax Assets','Ledger','No','','Debit',self.doc.name,''],
-							['P L A - Cess Portion','Tax Assets','Ledger','No','','Debit',self.doc.name,''],
+							['P L A','Tax Assets','Ledger','No','Tax','Debit',self.doc.name,''],
+							['P L A - Cess Portion','Tax Assets','Ledger','No','Tax','Debit',self.doc.name,''],
 							['Edu. Cess on Excise','Duties and Taxes','Ledger','No','Tax','Credit',self.doc.name,'2.00'],
 							['Edu. Cess on Service Tax','Duties and Taxes','Ledger','No','Tax','Credit',self.doc.name,'2.00'],
 							['Edu. Cess on TDS','Duties and Taxes','Ledger','No','Tax','Credit',self.doc.name,'2.00'],
@@ -122,13 +122,13 @@ class DocType:
 							['SHE Cess on Service Tax','Duties and Taxes','Ledger','No','Tax','Credit',self.doc.name,'1.00'],
 							['SHE Cess on TDS','Duties and Taxes','Ledger','No','Tax','Credit',self.doc.name,'1.00'],
 							['Professional Tax','Duties and Taxes','Ledger','No','','Credit',self.doc.name,''],
-							['VAT','Duties and Taxes','Ledger','No','','Credit',self.doc.name,''],
-							['TDS (Advertisement)','Duties and Taxes','Ledger','No','','Credit',self.doc.name,''],
-							['TDS (Commission)','Duties and Taxes','Ledger','No','','Credit',self.doc.name,''],
-							['TDS (Contractor)','Duties and Taxes','Ledger','No','','Credit',self.doc.name,''],
-							['TDS (Interest)','Duties and Taxes','Ledger','No','','Credit',self.doc.name,''],
-							['TDS (Rent)','Duties and Taxes','Ledger','No','','Credit',self.doc.name,''],
-							['TDS (Salary)','Duties and Taxes','Ledger','No','','Credit',self.doc.name,'']
+							['VAT','Duties and Taxes','Ledger','No','Tax','Credit',self.doc.name,''],
+							['TDS (Advertisement)','Duties and Taxes','Ledger','No','Tax','Credit',self.doc.name,''],
+							['TDS (Commission)','Duties and Taxes','Ledger','No','Tax','Credit',self.doc.name,''],
+							['TDS (Contractor)','Duties and Taxes','Ledger','No','Tax','Credit',self.doc.name,''],
+							['TDS (Interest)','Duties and Taxes','Ledger','No','Tax','Credit',self.doc.name,''],
+							['TDS (Rent)','Duties and Taxes','Ledger','No','Tax','Credit',self.doc.name,''],
+							['TDS (Salary)','Duties and Taxes','Ledger','No','Tax','Credit',self.doc.name,'']
 						 ]
 		# load common account heads
 		for d in acc_list_common:
