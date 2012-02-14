@@ -112,6 +112,7 @@
 		"js/all-app.js": [
 			"lib/js/lib/jquery.min.js:concat",
 			"lib/js/lib/history/history.min.js:concat",
+			"lib/js/legacy/jquery/jquery-ui.min.js:concat",
 			"lib/js/core.min.js:concat",
 			"lib/js/legacy/globals.js",
 			"lib/js/legacy/utils/datatype.js",
