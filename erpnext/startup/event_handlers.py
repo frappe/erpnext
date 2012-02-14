@@ -56,6 +56,10 @@ def boot_session(bootinfo):
 			parent_label, parentfield
 			from `tabTop Bar Item` where parent='Website Settings' order by idx asc""", as_dict=1)
 		bootinfo['custom_css'] = webnotes.conn.get_value('Style Settings', None, 'custom_css') or ''
+		bootinfo['analytics_code'] = \
+			webnotes.conn.get_value('Website Settings', None, 'analytics_code')
+		bootinfo['analytics_call'] = \
+			webnotes.conn.get_value('Website Settings', None, 'analytics_call')
 	else:	
 		bootinfo['letter_heads'] = get_letter_heads()
 
