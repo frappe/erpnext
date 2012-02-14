@@ -44,6 +44,7 @@ def execute():
 	reload_doc('website', 'page', 'unsubscribe')
 		
 	create_home_page()
+	add_website_manager()
 
 def create_home_page():
 	"""create a dummy home page"""
