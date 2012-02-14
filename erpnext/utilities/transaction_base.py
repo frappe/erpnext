@@ -19,7 +19,8 @@ class TransactionBase:
 		self.doc.contact_mobile = contact_mobile or ''
 	
 		self.get_customer_details(self.doc.customer)
-		self.get_sales_person(self.doc.customer)				
+		if args != 'onload':
+			self.get_sales_person(self.doc.customer)
 		
 	# Get Customer Default Shipping Address - first load
 	# -----------------------
@@ -34,8 +35,8 @@ class TransactionBase:
 		self.doc.contact_mobile = contact_mobile or ''
 		
 		self.get_customer_details(self.doc.customer)
-		if self.doc.doctype != 'Quotation':
-			self.get_sales_person(self.doc.customer)						
+		if self.doc.doctype != 'Quotation' and args != 'onload':
+			self.get_sales_person(self.doc.customer)			
 
 	# Get Customer Address
 	# -----------------------

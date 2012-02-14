@@ -61,12 +61,13 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 
 
 //customer
-cur_frm.cscript.customer = function(doc,dt,dn) {	
+cur_frm.cscript.customer = function(doc,dt,dn,onload) {	
 	var callback = function(r,rt) {
 			var doc = locals[cur_frm.doctype][cur_frm.docname];
 			cur_frm.refresh();
 	} 
-	if(doc.customer) $c_obj(make_doclist(doc.doctype, doc.name), 'get_default_customer_shipping_address', '', callback);
+	var args = onload ? 'onload':''
+	if(doc.customer) $c_obj(make_doclist(doc.doctype, doc.name), 'get_default_customer_shipping_address', args, callback);
 	if(doc.customer) unhide_field(['customer_address','contact_person','customer_name','address_display','contact_display','contact_mobile','contact_email','territory','customer_group','shipping_address']);
 }
 
@@ -112,7 +113,7 @@ cur_frm.cscript['Get Items'] = function(doc,dt,dn) {
 cur_frm.cscript.pull_item_details_onload = function(doc,dt,dn){
 	var callback = function(r,rt){
 		refresh_field('delivery_note_details');
-		cur_frm.cscript.customer(doc,dt,dn);
+		cur_frm.cscript.customer(doc,dt,dn,onload=true);
 	} 
 	$c_obj(make_doclist(dt,dn),'set_item_details','',callback);
 }
