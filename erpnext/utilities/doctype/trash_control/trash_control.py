@@ -26,7 +26,7 @@ class DocType:
   # -----------
   def get_masters(self):
     mlist = []
-    res = sql("select distinct t1.name from tabDocType t1, tabDocPerm t2 where ifnull(t1.allow_trash, 0) = 1 and (ifnull(t2.write, 0) = 1 or ifnull(t2.create, 0) = 1) and t2.role in %s and t2.parent = t1.name and t1.module not in ('DocType','Application Internal','Recycle Bin','Development','Testing','Testing System','Test') ORDER BY t1.name" % cstr(tuple(webnotes.user.get_roles())))
+    res = sql("select distinct t1.name from tabDocType t1, tabDocPerm t2 where ifnull(t1.allow_trash, 0) = 1 and (ifnull(t2.write, 0) = 1 or ifnull(t2.create, 0) = 1) and t2.role in (%s) and t2.parent = t1.name and t1.module not in ('DocType','Application Internal','Recycle Bin','Development','Testing','Testing System','Test') ORDER BY t1.name" % ("'"+"', '".join(webnotes.user.get_roles())+"'"))
     for r in res:
       mlist.append(r[0])
     return mlist
