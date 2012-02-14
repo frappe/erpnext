@@ -3,35 +3,35 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2011-03-30 11:03:20',
+		'creation': '2011-03-29 14:57:52',
 		'docstatus': 0,
-		'modified': '2011-03-29 14:26:16',
-		'modified_by': 'Administrator',
-		'owner': 'dhanalekshmi@webnotestech.com'
+		'modified': '2012-02-14 11:04:22',
+		'modified_by': u'Administrator',
+		'owner': u'dhanalekshmi@webnotestech.com'
 	},
 
 	# These values are common for all Search Criteria
 	{
-		'add_col': '`tabPO Detail`.qty - ifnull(`tabPO Detail`.received_qty, 0) AS "Pending Quantity To Receive"\n(`tabPO Detail`.qty - ifnull(`tabPO Detail`.received_qty, 0)) * `tabPO Detail`.purchase_rate AS "Pending Amount To Receive"',
-		'add_cond': '`tabPO Detail`.qty - ifnull(`tabPO Detail`.received_qty, 0) > 0 \n`tabPurchase Order`.status != "Stopped"',
-		'columns': 'Purchase Order\x01ID,Purchase Order\x01Supplier,Purchase Order\x01Supplier Name,Purchase Order\x01Status,Purchase Order\x01PO Date,Purchase Order\x01Fiscal Year,PO Detail\x01Indent No,PO Detail\x01Item Code,PO Detail\x01Item Name,PO Detail\x01Description,PO Detail\x01Quantity,PO Detail\x01UOM,PO Detail\x01Received Qty',
-		'criteria_name': 'Pending PO Items To Receive',
-		'description': 'Pending PO Items To Receive',
-		'doc_type': 'PO Detail',
+		'add_col': u'`tabPO Detail`.qty - ifnull(`tabPO Detail`.received_qty, 0) AS "Pending Quantity To Receive"\n(`tabPO Detail`.qty - ifnull(`tabPO Detail`.received_qty, 0)) * `tabPO Detail`.purchase_rate AS "Pending Amount To Receive"',
+		'add_cond': u'`tabPO Detail`.qty - ifnull(`tabPO Detail`.received_qty, 0) > 0 \n`tabPurchase Order`.status != "Stopped"',
+		'columns': u'Purchase Order\x01ID,Purchase Order\x01Supplier,Purchase Order\x01Supplier Name,Purchase Order\x01Status,Purchase Order\x01PO Date,Purchase Order\x01Fiscal Year,PO Detail\x01Indent No,PO Detail\x01Item Code,PO Detail\x01Item Name,PO Detail\x01Description,PO Detail\x01Quantity,PO Detail\x01UOM,PO Detail\x01Received Qty',
+		'criteria_name': u'Pending PO Items To Receive',
+		'description': u'Pending PO Items To Receive',
+		'doc_type': u'PO Detail',
 		'doctype': 'Search Criteria',
-		'filters': "{'Purchase Order\x01Saved':1,'Purchase Order\x01Submitted':1,'Purchase Order\x01Status':'','Purchase Order\x01Fiscal Year':''}",
-		'module': 'Buying',
+		'filters': u"{'Purchase Order\x01Saved':1,'Purchase Order\x01Submitted':1,'Purchase Order\x01Status':'','Purchase Order\x01Fiscal Year':''}",
+		'module': u'Buying',
 		'name': '__common__',
 		'page_len': 50,
-		'parent_doc_type': 'Purchase Order',
-		'sort_by': '`tabPurchase Order`.`name`',
-		'sort_order': 'DESC',
-		'standard': 'Yes'
+		'parent_doc_type': u'Purchase Order',
+		'sort_by': u'`tabPurchase Order`.`name`',
+		'sort_order': u'DESC',
+		'standard': u'Yes'
 	},
 
 	# Search Criteria, pending_po_items_to_receive
 	{
 		'doctype': 'Search Criteria',
-		'name': 'pending_po_items_to_receive'
+		'name': u'pending_po_items_to_receive'
 	}
 ]
