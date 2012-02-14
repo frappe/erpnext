@@ -5,130 +5,138 @@
 	{
 		'creation': '2010-08-08 17:09:34',
 		'docstatus': 0,
-		'modified': '2011-09-15 15:04:42',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-02-14 15:21:20',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all Table Mapper Detail
 	{
-		'doctype': 'Table Mapper Detail',
+		'doctype': u'Table Mapper Detail',
 		'name': '__common__',
-		'parent': 'Indent-Purchase Order',
-		'parentfield': 'table_mapper_details',
-		'parenttype': 'DocType Mapper'
+		'parent': u'Indent-Purchase Order',
+		'parentfield': u'table_mapper_details',
+		'parenttype': u'DocType Mapper'
 	},
 
 	# These values are common for all Field Mapper Detail
 	{
-		'doctype': 'Field Mapper Detail',
-		'map': 'Yes',
+		'doctype': u'Field Mapper Detail',
+		'map': u'Yes',
 		'name': '__common__',
-		'parent': 'Indent-Purchase Order',
-		'parentfield': 'field_mapper_details',
-		'parenttype': 'DocType Mapper'
+		'parent': u'Indent-Purchase Order',
+		'parentfield': u'field_mapper_details',
+		'parenttype': u'DocType Mapper'
 	},
 
 	# These values are common for all DocType Mapper
 	{
-		'doctype': 'DocType Mapper',
-		'from_doctype': 'Indent',
-		'module': 'Buying',
+		'doctype': u'DocType Mapper',
+		'from_doctype': u'Indent',
+		'module': u'Buying',
 		'name': '__common__',
 		'ref_doc_submitted': 1,
-		'to_doctype': 'Purchase Order'
+		'to_doctype': u'Purchase Order'
 	},
 
 	# DocType Mapper, Indent-Purchase Order
 	{
-		'doctype': 'DocType Mapper',
-		'name': 'Indent-Purchase Order'
+		'doctype': u'DocType Mapper',
+		'name': u'Indent-Purchase Order'
 	},
 
 	# Field Mapper Detail
 	{
-		'checking_operator': '=',
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'company',
+		'checking_operator': u'=',
+		'doctype': u'Field Mapper Detail',
+		'from_field': u'company',
 		'match_id': 0,
-		'to_field': 'company'
+		'to_field': u'company'
 	},
 
 	# Field Mapper Detail
 	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'parenttype',
+		'doctype': u'Field Mapper Detail',
+		'from_field': u'parenttype',
 		'match_id': 1,
-		'to_field': 'prevdoc_doctype'
+		'to_field': u'prevdoc_doctype'
 	},
 
 	# Field Mapper Detail
 	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'parent',
+		'doctype': u'Field Mapper Detail',
+		'from_field': u'parent',
 		'match_id': 1,
-		'to_field': 'prevdoc_docname'
+		'to_field': u'prevdoc_docname'
 	},
 
 	# Field Mapper Detail
 	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'name',
+		'doctype': u'Field Mapper Detail',
+		'from_field': u'name',
 		'match_id': 1,
-		'to_field': 'prevdoc_detail_docname'
+		'to_field': u'prevdoc_detail_docname'
 	},
 
 	# Field Mapper Detail
 	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'uom',
+		'doctype': u'Field Mapper Detail',
+		'from_field': u'uom',
 		'match_id': 1,
-		'to_field': 'stock_uom'
+		'to_field': u'stock_uom'
 	},
 
 	# Field Mapper Detail
 	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'eval:flt(1)',
+		'doctype': u'Field Mapper Detail',
+		'from_field': u'eval:flt(1)',
 		'match_id': 1,
-		'to_field': 'conversion_factor'
+		'to_field': u'conversion_factor'
 	},
 
 	# Field Mapper Detail
 	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'eval:flt(obj.qty) - flt(obj.ordered_qty)',
+		'doctype': u'Field Mapper Detail',
+		'from_field': u'eval:flt(obj.qty) - flt(obj.ordered_qty)',
 		'match_id': 1,
-		'to_field': 'stock_qty'
+		'to_field': u'stock_qty'
 	},
 
 	# Field Mapper Detail
 	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'eval:flt(obj.qty) - flt(obj.ordered_qty)',
+		'doctype': u'Field Mapper Detail',
+		'from_field': u'eval:flt(obj.qty) - flt(obj.ordered_qty)',
 		'match_id': 1,
-		'to_field': 'qty'
+		'to_field': u'qty'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': u'Field Mapper Detail',
+		'from_field': u'schedule_date',
+		'match_id': 1,
+		'to_field': u'schedule_date'
 	},
 
 	# Table Mapper Detail
 	{
-		'doctype': 'Table Mapper Detail',
-		'from_table': 'Indent',
+		'doctype': u'Table Mapper Detail',
+		'from_table': u'Indent',
 		'match_id': 0,
-		'reference_key': 'prevdoc_docname',
-		'to_table': 'Purchase Order',
-		'validation_logic': 'docstatus = 1'
+		'reference_key': u'prevdoc_docname',
+		'to_table': u'Purchase Order',
+		'validation_logic': u'docstatus = 1'
 	},
 
 	# Table Mapper Detail
 	{
-		'doctype': 'Table Mapper Detail',
-		'from_field': 'indent_details',
-		'from_table': 'Indent Detail',
+		'doctype': u'Table Mapper Detail',
+		'from_field': u'indent_details',
+		'from_table': u'Indent Detail',
 		'match_id': 1,
-		'reference_doctype_key': 'prevdoc_doctype',
-		'to_field': 'po_details',
-		'to_table': 'PO Detail',
-		'validation_logic': 'qty > ifnull(ordered_qty,0) and docstatus =1'
+		'reference_doctype_key': u'prevdoc_doctype',
+		'to_field': u'po_details',
+		'to_table': u'PO Detail',
+		'validation_logic': u'qty > ifnull(ordered_qty,0) and docstatus =1'
 	}
 ]

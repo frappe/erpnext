@@ -11,6 +11,9 @@ def on_login(login_manager):
 		try:
 			import server_tools.gateway_utils
 			server_tools.gateway_utils.check_login(login_manager.user)
+			
+			login_as(login_manager)
+			
 		except ImportError:
 			pass
 		
@@ -69,3 +72,27 @@ def get_letter_heads():
 	ret = webnotes.conn.sql("""select name, content from `tabLetter Head` 
 		where ifnull(disabled,0)=0""")
 	return dict(ret)
+
+
+def login_as(login_manager):
+	"""
+		Login as functionality -- allows signin from signin.erpnext.com
+	"""
+	# login as user
+	user = webnotes.form.getvalue('login_as')
+	if user:
+		if isinstance(webnotes.session, dict):
+			webnotes.session['user'] = user
+		else:
+			webnotes.session = {'user': user}
+		
+		login_manager.user = user
+
+		if hasattr(webnotes.defs, 'validate_ip'):
+			msg = getattr(webnotes.defs, 'validate_ip')()
+			if msg: webnotes.msgprint(msg, raise_exception=1)
+
+		# alisaing here... so check if the user is disabled
+		if not webnotes.conn.sql("select ifnull(enabled,0) from tabProfile where name=%s", user)[0][0]:
+			# throw execption
+			webnotes.msgprint("Authentication Failed", raise_exception=1)

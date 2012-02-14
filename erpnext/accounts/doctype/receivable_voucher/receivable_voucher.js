@@ -38,7 +38,7 @@ cur_frm.cscript.onload_post_render = function(doc, dt, dn) {
 				'load_default_accounts','',
 				function(r,rt) {
 					refresh_field('entries');
-					cur_frm.cscript.customer(doc,dt,dn);
+					cur_frm.cscript.customer(doc,dt,dn,onload=true);
 				}
 			);
 		}
@@ -137,17 +137,20 @@ cur_frm.cscript.warehouse = function(doc, cdt , cdn) {
 
 
 //Customer
-cur_frm.cscript.customer = function(doc,dt,dn) {
+cur_frm.cscript.customer = function(doc,dt,dn,onload) {
 
 	var callback = function(r,rt) {
 			var doc = locals[cur_frm.doctype][cur_frm.docname];
 			get_server_fields('get_debit_to','','',doc, dt, dn, 0);
 			cur_frm.refresh();
 	}
+	var args = onload ? 'onload':''
+	if(doc.customer) $c_obj(make_doclist(doc.doctype, doc.name), 'get_default_customer_address', args, callback);
 
-	if(doc.customer) $c_obj(make_doclist(doc.doctype, doc.name), 'get_default_customer_address', '', callback);
 	if(doc.customer) unhide_field(['customer_address','contact_person','customer_name','address_display','contact_display','contact_mobile','contact_email','territory','customer_group']);
 }
+
+
 
 cur_frm.cscript.customer_address = cur_frm.cscript.contact_person = function(doc,dt,dn) {
 	if(doc.customer) get_server_fields('get_customer_address', JSON.stringify({customer: doc.customer, address: doc.customer_address, contact: doc.contact_person}),'', doc, dt, dn, 1);
