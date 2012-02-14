@@ -21,11 +21,8 @@ def init():
 	# init request
 	try:
 		webnotes.http_request = webnotes.auth.HTTPRequest()
-	except Exception, e:
-		if webnotes.response['message']=='Authentication Failed':
-			pass
-		else:
-			raise e
+	except webnotes.AuthenticationError, e:
+		pass
 
 def respond():
 	import webnotes

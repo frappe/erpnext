@@ -1,6 +1,4 @@
 wn.provide('erpnext.topbar');
-wn.require('lib/css/bootstrap/bootstrap-topbar.css');
-wn.require('lib/js/bootstrap/bootstrap-dropdown.js');
 
 /*
 <li class="dropdown">\
@@ -45,7 +43,6 @@ erpnext.topbar.TopBar = Class.extend({
 	}
 });
 
-erpnext.topbar.topbar = new erpnext.topbar.TopBar();
 
 // footer
 erpnext.Footer = Class.extend({
@@ -72,4 +69,7 @@ erpnext.Footer = Class.extend({
 	}
 });
 
-erpnext.footer = new erpnext.Footer();
+$(document).bind('startup', function() {
+	erpnext.footer = new erpnext.Footer();
+	erpnext.topbar.topbar = new erpnext.topbar.TopBar();	
+})

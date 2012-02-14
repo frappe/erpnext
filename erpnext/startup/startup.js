@@ -17,8 +17,6 @@ erpnext.startup.start = function() {
 	
 	if(user == 'Guest'){
 		$dh(page_body.left_sidebar);
-		wn.require('erpnext/website/css/website.css');
-		wn.require('erpnext/website/js/topbar.js');
 		if(wn.boot.custom_css) {
 			set_style(wn.boot.custom_css);
 		}
@@ -27,13 +25,10 @@ erpnext.startup.start = function() {
 		}
 	} else {
 		// modules
-		wn.require('erpnext/startup/modules.js');
 		pscript.startup_make_sidebar();
 
 		// setup toolbar
-		wn.require('erpnext/startup/toolbar.js');
 		erpnext.toolbar.setup();
-		wn.require('erpnext/startup/feature_setup.js');
 
 		// border to the body
 		// ------------------
@@ -83,4 +78,6 @@ ModulePage = function(parent, module_name, module_label, help_page, callback) {
 }
 
 // start
-erpnext.startup.start();
+$(document).bind('startup', function() {
+	erpnext.startup.start();	
+});
