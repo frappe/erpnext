@@ -70,4 +70,9 @@ patch_list = [
 		'patch_file': 'map_conversion_rate',
 		'description': "Maps conversion rate in doctype mappers PO-PR and PO-PV"
 	},
+	{
+		'patch_module': 'patches.jan_mar_2012',
+		'patch_file': 'account_type_patch',
+		'description': 'mentioed account type for some tax accounts'
+	}
 ]
