@@ -74,5 +74,10 @@ patch_list = [
 		'patch_module': 'patches.jan_mar_2012',
 		'patch_file': 'account_type_patch',
 		'description': 'mentioed account type for some tax accounts'
+	},
+	{
+		'patch_module': 'patches.jan_mar_2012',
+		'patch_file': 'subcon_default_val',
+		'description': 'Default value of is_subcontracted in PO, PR is No'
 	}
 ]
