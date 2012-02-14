@@ -1,0 +1,74 @@
+# DocType, About Us Team
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2012-01-27 10:14:18',
+		'docstatus': 0,
+		'modified': '2012-01-27 11:54:18',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all DocType
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocType',
+		'istable': 1,
+		'module': 'Website',
+		'name': '__common__',
+		'section_style': 'Simple',
+		'show_in_menu': 0,
+		'version': 5
+	},
+
+	# These values are common for all DocField
+	{
+		'doctype': 'DocField',
+		'name': '__common__',
+		'parent': 'About Us Team',
+		'parentfield': 'fields',
+		'parenttype': 'DocType',
+		'permlevel': 0
+	},
+
+	# DocType, About Us Team
+	{
+		'doctype': 'DocType',
+		'name': 'About Us Team'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'person_name',
+		'fieldtype': 'Data',
+		'label': 'Person Name'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'designation',
+		'fieldtype': 'Data',
+		'label': 'Designation'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'image',
+		'fieldtype': 'Select',
+		'label': 'Image',
+		'options': 'attach_files:'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'bio',
+		'fieldtype': 'Text',
+		'label': 'Bio (markdown)',
+		'width': '300px'
+	}
+]

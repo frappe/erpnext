@@ -1,7 +1,8 @@
 import webnotes
 from webnotes.utils import cint
 
-def get_online_users():
+@webnotes.whitelist()
+def get_online_users(arg=None):
 	# get users
 	return webnotes.conn.sql("""SELECT DISTINCT t1.user, t2.first_name, t2.last_name 
 		from tabSessions t1, tabProfile t2
@@ -9,10 +10,7 @@ def get_online_users():
 		and t1.user not in ('Guest','Administrator')
 		and TIMESTAMPDIFF(HOUR,t1.lastupdate,NOW()) <= 1""", as_list=1) or []
 
-#
-# get unread messages
-#
-def get_unread_messages():
+def get_unread_messages(arg=None):
 	"returns unread (docstatus-0 messages for a user)"
 	return cint(webnotes.conn.sql("""SELECT COUNT(*) FROM `tabComment Widget Record`
 	WHERE comment_doctype='My Company'
@@ -20,10 +18,9 @@ def get_unread_messages():
 	AND ifnull(docstatus,0)=0
 	""", webnotes.user.name)[0][0])
 
-#
-# Get toolbar items
-#	
+@webnotes.whitelist()
 def get_status_details(arg=None):
+	"""get toolbar items"""
 	from webnotes.utils import cint, date_diff, nowdate, get_defaults
 		
 	online = get_online_users()
@@ -43,7 +40,7 @@ def get_status_details(arg=None):
 	}
 	return ret
 
-def get_setup_status():
+def get_setup_status(arg=None):
 	"""
 		Returns the setup status of the current account
 	"""

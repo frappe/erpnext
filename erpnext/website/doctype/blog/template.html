@@ -1,0 +1,20 @@
+<div class="layout_wrapper">
+	<div class="web-content" id="blog-{{ doc.name }}">
+		<h1>Blog</h1>
+		<div class="web-main-section">
+			<h3>{{ doc.title }}</h3>
+			<div class="help">By {{ doc.full_name }} on {{ doc.updated }}</div>
+			<br>
+			{{ doc.content_html }}
+		</div>
+		<div class="web-side-section">
+			<p><a href="#!blog">All Blogs</a></p>
+			<h4>Subscribe</h4>
+			<p>
+				<img src="images/feed.png" style="margin-right: 4px; margin-bottom: -4px">
+				<a href="rss.xml" target="_blank">RSS Feed</a>
+			</p>
+		</div>
+		<div style="clear: both"></div>
+	</div>
+</div>

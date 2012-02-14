@@ -1,4 +1,5 @@
 pscript['onload_Bill of Materials'] = function() {
+	wn.require('lib/js/legacy/widgets/tree.js');
 	
 	// header and toolbar
 	var h = new PageHeader('bom_header','Bill of Materials','BOM gives the breakdown of cost for product');
@@ -113,12 +114,11 @@ pscript.bom_calculate_cost = function() {
   $c('runserverobj', args={'doctype':'BOM Control', 'docname':'BOM Control', 'method':'calculate_cost', 'arg':pscript.bom_no}, function(r,rt) {
       var calculated = r.message;
       if (calculated == 'calculated') {pscript.show_bom();}
-      else  {$i('bom_tree').innerHTML = "Sorry it's taking too long try next time....";}
+      else  {$i('bom_tree').innerHTML = "Not available";}
   });	
 }
 
 pscript.collapse_all = function(){
-  alert("In");
   pscript.bom_tree.collapseall()
 }
 

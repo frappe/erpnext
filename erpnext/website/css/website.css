@@ -1,0 +1,125 @@
+#body_div {
+	width: 900px;
+	margin: auto;
+}
+
+.layout_wrapper {
+	padding: 20px;
+}
+
+h1 {
+	margin-bottom: 15px;
+}
+
+pre {
+    background-color: #F8F8F8;
+    border: 1px solid #CCCCCC;
+    border-radius: 3px 3px 3px 3px;
+    font-size: 13px;
+    line-height: 19px;
+    overflow: auto;
+    padding: 6px 10px;
+	margin-bottom: 9px;
+}
+
+footer {
+	width: 900px;
+	margin: auto;
+}
+header .topbar .container {
+	width: 900px;
+	margin: auto;
+}
+
+.web-head-section {
+	margin-bottom: 20px
+}
+
+.web-content input[type="text"], .web-content input[type="password"], .web-content select {
+	min-width: 180px;
+}
+
+.web-main-section {
+	width: 65%;
+	float: left;
+	margin-bottom: 20px;
+}
+
+.web-main-section p,
+.web-main-section h4,
+.web-main-section h5,
+.web-main-section pre  {
+	margin-left: 9px;
+}
+
+.web-side-section {
+	width: 30%;
+	float: right;
+	margin-bottom: 20px;
+	margin-right: 15px;
+	color: #606060;
+	overflow-x: hidden;
+}
+
+.web-page-status {
+	padding: 7px;
+	color: #777;
+	clear: both;
+	text-align: right;
+}
+
+.web-page-status a,
+.web-page-status a:hover,
+.web-page-status a:visited {
+	padding: 2px;
+	background-color: #777;
+	color: #FFF;
+	text-decoration: none;
+}
+
+.web-page-status a:hover {
+	background-color: #444;
+}
+
+footer {
+	color: #777;	
+}
+
+.web-footer {
+	color: inherit;
+	text-align: center;
+	margin: 10px;
+	line-height: 1.7;
+}
+
+.web-footer div, .web-footer a {
+	font-size: 11px;
+}
+
+.web-footer-menu {
+	margin-bottom: 7px;
+}
+footer a, footer a:visited {
+	color: #777;
+}
+
+footer a:hover {
+	background-color: #777;
+	color: #fff;
+}
+
+.web-footer-menu ul {
+	list-style: none;
+	margin: 0px;
+	padding: 0px;
+}
+
+.web-footer-menu ul li {
+	display: inline;
+	padding: 2px 15px;
+	border-right: 1px solid #999;
+}
+
+.web-footer-menu ul li:last-child {
+	border-right: 0px solid #777 !important;
+}

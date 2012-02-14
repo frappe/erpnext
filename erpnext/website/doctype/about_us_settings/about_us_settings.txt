@@ -1,0 +1,106 @@
+# DocType, About Us Settings
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2012-01-27 10:13:16',
+		'docstatus': 0,
+		'modified': '2012-01-27 11:36:44',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all DocType
+	{
+		'_last_update': '1327641155',
+		'allow_attach': 1,
+		'colour': 'White:FFF',
+		'doctype': 'DocType',
+		'issingle': 1,
+		'max_attachments': 10,
+		'module': 'Website',
+		'name': '__common__',
+		'section_style': 'Simple',
+		'show_in_menu': 0,
+		'version': 4
+	},
+
+	# These values are common for all DocField
+	{
+		'doctype': 'DocField',
+		'name': '__common__',
+		'parent': 'About Us Settings',
+		'parentfield': 'fields',
+		'parenttype': 'DocType',
+		'permlevel': 0
+	},
+
+	# These values are common for all DocPerm
+	{
+		'create': 1,
+		'doctype': 'DocPerm',
+		'name': '__common__',
+		'parent': 'About Us Settings',
+		'parentfield': 'permissions',
+		'parenttype': 'DocType',
+		'permlevel': 0,
+		'read': 1,
+		'role': 'Website Manager',
+		'write': 1
+	},
+
+	# DocType, About Us Settings
+	{
+		'doctype': 'DocType',
+		'name': 'About Us Settings'
+	},
+
+	# DocPerm
+	{
+		'doctype': 'DocPerm'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'headline',
+		'fieldtype': 'Data',
+		'label': 'Headline'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'main_section',
+		'fieldtype': 'Code',
+		'label': 'Main Section'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'team',
+		'fieldtype': 'Table',
+		'label': 'Team',
+		'options': 'About Us Team'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'side_section',
+		'fieldtype': 'Code',
+		'label': 'Side Section'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'file_list',
+		'fieldtype': 'Text',
+		'hidden': 1,
+		'label': 'File List',
+		'no_copy': 1,
+		'print_hide': 1
+	}
+]

@@ -1,0 +1,29 @@
+# Module Def, Setup Masters
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-08-08 17:35:42',
+		'docstatus': 0,
+		'modified': '2012-01-23 17:04:53',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all Module Def
+	{
+		'disabled': 'No',
+		'doctype': u'Module Def',
+		'is_hidden': 'No',
+		'last_updated_date': '2010-11-29 12:02:02',
+		'module_label': 'Setup Masters',
+		'module_name': 'Setup Masters',
+		'name': '__common__'
+	},
+
+	# Module Def, Setup Masters
+	{
+		'doctype': u'Module Def',
+		'name': 'Setup Masters'
+	}
+]

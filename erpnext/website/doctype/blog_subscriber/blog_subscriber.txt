@@ -1,0 +1,29 @@
+# DocType, Blog Subscriber
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2012-01-27 17:18:33',
+		'docstatus': 0,
+		'modified': '2012-01-27 17:18:33',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all DocType
+	{
+		'colour': 'White:FFF',
+		'doctype': 'DocType',
+		'module': 'Website',
+		'name': '__common__',
+		'section_style': 'Simple',
+		'show_in_menu': 0,
+		'version': 1
+	},
+
+	# DocType, Blog Subscriber
+	{
+		'doctype': 'DocType',
+		'name': 'Blog Subscriber'
+	}
+]

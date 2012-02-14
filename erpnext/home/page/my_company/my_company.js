@@ -43,14 +43,11 @@ pscript.myc_show_erpnext_message = function() {
 //
 pscript.myc_add_user = function() {
 	var fields = [{
-		fieldtype: 'Data',
-		fieldname: 'user',
-		reqd: 1,
-		label: 'Email Id of the user to add'
-	}];
-
-	if(!pscript.is_erpnext_saas) {
-		fields = fields.concat([
+			fieldtype: 'Data',
+			fieldname: 'user',
+			reqd: 1,
+			label: 'Email Id of the user to add'
+		},
 		{
 			fieldtype: 'Data',
 			fieldname: 'first_name',
@@ -67,14 +64,14 @@ pscript.myc_add_user = function() {
 			fieldname: 'password',
 			reqd: 1,
 			label: 'Password'
-		}]);		
-	}
+		},
+		{
+			fieldtype: 'Button',
+			label: 'Add',
+			fieldname: 'add'
+		}];
 
-	fields.push({
-		fieldtype: 'Button',
-		label: 'Add',
-		fieldname: 'add'
-	});
+	fields.push();
 
 	var d = new wn.widgets.Dialog({
 		title: 'Add User',
@@ -246,7 +243,8 @@ MemberItem = function(parent, det, mlist) {
 		// image
 		this.img = $a($td(this.tab,0,0),'img','',{width:'41px'});
 		set_user_img(this.img, det.name, null, 
-			(det.file_list ? det.file_list.split(NEWLINE)[0].split(',')[1] : ('no_img_' + (det.gender=='Female' ? 'f' : 'm'))));		
+			(det.file_list ? det.file_list.split(NEWLINE)[0].split(',')[1] : 
+				('no_img_' + (det.gender=='Female' ? 'f' : 'm'))));
 	}
 	
 	// set other details like email id, name etc
@@ -464,7 +462,7 @@ MemberProfile = function(parent, uid, member_item) {
 	// delete user
 	// create a confirm dialog and call server method
 	this.delete_user = function() {
-		var cp = locals['Control Panel']['Control Panel'];
+		var cp = wn.control_panel;
 
 		var d = new Dialog(400,200,'Delete User');
 		d.make_body([
@@ -581,7 +579,7 @@ MemberProfile = function(parent, uid, member_item) {
 		$ds(this.member_item.working_img);
 		$dh(this.wrapper);
 		this.loading = 1;
-		$c('webnotes.widgets.form.getdoc', {'name':this.uid, 'doctype':'Profile', 'user':user}, callback);	// onload		
+		$c('webnotes.widgets.form.load.getdoc', {'name':this.uid, 'doctype':'Profile', 'user':user}, callback);	// onload		
 	}
 	
 	// show / hide
@@ -860,7 +858,7 @@ RoleObj.prototype.make_label = function(tbl, ridx, cidx, role){
 	
 	var t = make_table($td(tbl, ridx, cidx),1,2,null,['16px', null],{marginRight:'5px'});
 	var ic = $a($td(t,0,0), 'img','',{cursor:'pointer', marginRight:'5px'});
-	ic.src= 'lib/images/icons/help.gif';
+	ic.src= 'lib/images/icons/help.png';
 	ic.role = role;
 		
 	ic.onclick = function(){

@@ -1,6 +1,6 @@
 pscript.onload_dashboard = function() {
 	// load jqplot
-	$.scriptPath = 'js/'
+	wn.require('lib/css/jqpot.css');
 	wn.require('lib/js/legacy/jquery/jquery.jqplot.min.js');
 	wn.require('lib/js/legacy/jquery/jqplot-plugins/jqplot.barRenderer.js'); 
 	wn.require('lib/js/legacy/jquery/jqplot-plugins/jqplot.canvasAxisTickRenderer.min.js');

@@ -1,0 +1,36 @@
+<div class="layout_wrapper">
+	<div class="web-content" id="content-about-us">
+		{% if doc.headline %}
+			<h1>{{ doc.headline }}</h1>
+		{% endif %}
+		<div class="web-main-section">
+			{{ doc.main_section_html }}
+			
+			{% if doc.about_team %}
+				<h2>Team</h2>
+				<table style="width: 90%">
+					<tbody>
+						{% for p in doc.about_team %}
+							<tr>
+								<td style="width: 110px">
+									<img src="files/{{ p.image }}" 
+										style="width: 100px; margin-right: 10px; 
+											margin-bottom: 15px;" />
+								</td>
+								<td>
+									<h4>{{ p.person_name }}</h4>
+									<p class="field_description">{{ p.designation }}</p>
+									<div style="margin-bottom: 15px">{{ p.bio }}</div>
+								</td>
+							</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+			{% endif %}
+		</div>
+		<div class="web-side-section">
+			{{ doc.side_section_html }}
+		</div>
+		<div style="clear: both"></div>
+	</div>
+</div>

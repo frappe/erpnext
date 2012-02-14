@@ -5,11 +5,10 @@ pscript['onload_Sales Dashboard'] = function() {
   $dh(pscript.mnt_div);
   $dh(pscript.mnt_div1);
   //pscript.dx_axis = [];
-  
-  if($.jqplot) pscript.all_onchnge();
-  else
-    // import the library
-    $c_js('jquery/jquery.jqplot.min.js', pscript.all_onchnge);
+
+	wn.require('lib/css/jqpot.css');
+	wn.require('lib/js/legacy/jquery/jquery.jqplot.min.js');
+	pscript.all_onchnge();
 }
 //=======================================================================
 pscript.make_filters = function(){

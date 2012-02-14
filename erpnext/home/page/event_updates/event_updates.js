@@ -6,7 +6,7 @@ pscript['onload_Event Updates'] = function() {
 			
 	pscript.home_make_body();
 	pscript.home_make_status();
-	pscript.home_pre_process();
+	pscript.home_set_banner();
 	pscript.home_make_widgets();
 }
 
@@ -30,9 +30,9 @@ pscript.home_make_body = function() {
 
 // ==================================
 
-pscript.home_pre_process = function(wrapper) {
+pscript.home_set_banner = function(wrapper) {
 	var wrapper = page_body.pages['Event Updates'];
-	var cp = locals['Control Panel']['Control Panel'];
+	var cp = wn.control_panel;
 
 	// banner
 	if(cp.client_name) {
@@ -212,7 +212,8 @@ HomeWidgetItem.prototype.delete_item = function() {
 	var callback = function(r,rt) {
 		$(me.wrapper).slideUp();
 	}
-	$c_obj('Home Control',this.widget.delete_method, this.widget.get_item_id(this.det) ,callback);
+	$c_obj('Home Control',this.widget.delete_method, 
+		this.widget.get_item_id(this.det) ,callback);
 		
 }
 
@@ -324,7 +325,7 @@ HomeToDo = function(widget) {
 	this.widget.get_list_method = 'get_todo_list';
 	this.widget.delete_method = 'remove_todo_item';
 	this.widget.no_items_message = 'Nothing to do?';
-	this.widget.get_item_id = function(det) { return det[0]; }
+	this.widget.get_item_id = function(det) { return det.name; }
 
 	this.widget.decorator = this;
 
@@ -346,21 +347,32 @@ HomeToDo.prototype.render_item = function(item, det) {
 	$y(tab, {tableLayout:'fixed'});
 
 	var span = $a($td(tab, 0, 0), 'span', '', {padding:'2px',color:'#FFF',fontSize:'10px'
-		,backgroundColor:(det[3]=='Low' ? '#888' : (det[3]=='High' ? '#EDA857' : '#687FD3'))});
+		, backgroundColor:(det.priority=='Low' ? '#888' : 
+			(det.priority=='High' ? '#EDA857' : '#687FD3'))});
 		
 	$(span).css('-moz-border-radius','3px').css('-webkit-border-radius','3px');
-	span.innerHTML = det[3];
+	span.innerHTML = det.priority;
 
 	// text
-	var span = $a($td(tab, 0, 1), 'span', 'social', {lineHeight:'1.5em'}, replace_newlines(det[1]));
-	if(det[4]) $y(span,{textDecoration:'line-through'});
+	var span = $a($td(tab, 0, 1), 'div', 'social', {lineHeight:'1.5em'}, 
+		replace_newlines(det.description));
+	if(det.checked) $y(span,{textDecoration:'line-through'});
+	
+	// reference link
+	if(det.reference_name) {
+		$a($td(tab, 0, 1), 'div', 'social', '', 
+			repl('<a href="#!Form/%(reference_type)s/%(reference_name)s">%(reference_name)s</a>',
+				det))
+	}
 	
 	// if expired & open, then in red
-	if(!det[4] && dateutil.str_to_obj(det[2]) < new Date()) {
+	if(!det.checked && dateutil.str_to_obj(det.date) < new Date()) {
 		$y(span,{color:'RED'}); 
-		$a($td(tab, 0, 1), 'div', '', {fontSize:'10px', color:'#666'}, dateutil.str_to_user(det[2]) + ' (Overdue)');
+		$a($td(tab, 0, 1), 'div', '', {fontSize:'10px', color:'#666'},
+		 	dateutil.str_to_user(det.date) + ' (Overdue)');
 	} else {
-		$a($td(tab, 0, 1), 'div', '', {fontSize:'10px', color:'#666'}, dateutil.str_to_user(det[2]));		
+		$a($td(tab, 0, 1), 'div', '', {fontSize:'10px', color:'#666'}, 
+			dateutil.str_to_user(det.date));		
 	}
 }
 
@@ -371,10 +383,10 @@ HomeToDo.prototype.clear_dialog = function() {
 HomeToDo.prototype.set_dialog_values = function(det) {
 	var d = this.widget.dialog;
 	d.set_values({
-		date: det[2],
-		priority: det[3],
-		description: det[1],
-		checked: det[4]
+		date: det.date,
+		priority: det.priority,
+		description: det.description,
+		checked: det.checked
 	});
 	d.det = det;
 }
@@ -389,8 +401,7 @@ HomeToDo.prototype.save = function(btn) {
 	 	return;	
 	}
 
-	det.name = d.det ? d.det[0] : '';
-	
+	det.name = d.det.name;
 	var callback = function(r,rt) {
 		btn.done_working();
 		me.widget.dialog.hide();
@@ -420,9 +431,6 @@ FeedList.prototype.make_head = function() {
 	// head
 
 	$a(this.head,'h1','', {display:'inline'}, 'Home'); 
-	$a(this.head,'span','link_type', {marginLeft:'7px', fontSize:'11px'}, 'help', function() {
-		msgprint('<b>What appears here?</b> This is where you get updates of everything you are permitted to follow')
-	})
 
 	// refresh
 	$a(this.head,'span','link_type', 
@@ -442,51 +450,35 @@ FeedList.prototype.run = function() {
 }
 
 FeedList.prototype.make_list = function() {
-	this.list_area = $a(this.wrapper,'div')
-	this.no_result = $a(this.wrapper, 'div','help_box',{display:'none'},'Nothing to show yet. Your feed will be updated as you start your activities')
-	
-	var l = new Listing('Feed List',1);
 	var me = this;
-
-	// style
-	l.colwidths = ['100%']; l.page_len = 20;	
-	l.opts.cell_style = {padding:'0px'};
-	l.opts.hide_rec_label = 1;
+	this.list_area = $a(this.wrapper,'div')
 	
-	// build query
-	l.get_query = function(){
-		this.query = repl('select \
-			distinct t1.name, t1.doc_type, t1.doc_name, t1.subject, t1.modified_by, \
-			concat(ifnull(t2.first_name,""), " ", ifnull(t2.last_name,"")), t1.modified, t1.color \
-			from tabFeed t1, tabProfile t2, tabUserRole t3, tabDocPerm t4 \
+	this.list = new wn.widgets.Listing({
+		parent: this.list_area,
+		query: repl('select \
+			distinct t1.name, t1.feed_type, t1.doc_type, t1.doc_name, t1.subject, t1.modified_by, \
+			if(ifnull(t1.full_name,"")="", t1.owner, t1.full_name) as full_name, \
+			t1.modified, t1.color \
+			from tabFeed t1, tabUserRole t3, tabDocPerm t4 \
 			where t1.doc_type = t4.parent \
-			and t2.name = t1.owner \
 			and t3.parent = "%(user)s" \
 			and t4.role = t3.role \
 			and ifnull(t4.`read`,0) = 1 \
-			order by t1.modified desc', {user:user})
-		this.query_max = ''
-	}
-	
-	// render list ui
-	l.show_cell = function(cell,ri,ci,d){ me.render_feed(cell,ri,ci,d); }
-	
-	// onrun
-	l.onrun = function(){ $(me.wrapper).fadeIn(); if(me.after_run) me.after_run(); }
-	
-	// make
-	l.make(this.list_area);
-	$dh(l.btn_area);
-
-	this.list = l;
+			order by t1.modified desc', {user:user}),
+		no_result_message: 'Nothing to show yet. Your feed will be updated as you start your activities',
+		render_row: function(parent, data) {
+			me.render_feed(parent, data)
+		},
+		onrun: function() {
+			$(me.wrapper).fadeIn(); 
+			if(me.after_run) me.after_run();
+		},
+		hide_refresh: true
+	});
 }
 
-FeedList.prototype.after_run = function() {
-	this.list.has_data() ? $dh(this.no_result) : $ds(this.no_result)
-}
-
-FeedList.prototype.render_feed = function(cell,ri,ci,d) {
-	new FeedItem(cell, d[ri], this);
+FeedList.prototype.render_feed = function(parent, data) {
+	new FeedItem(parent, data, this);
 }
 
 // Item
@@ -502,13 +494,11 @@ FeedItem = function(cell, det, feedlist) {
 	this.tab = make_table(this.wrapper, 1, 2, '100%', [(100/7)+'%', (600/7)+'%']);
 	$y(this.tab,{tableLayout:'fixed'})
 
-	// image
 	$y($td(this.tab,0,0),{textAlign:'right',paddingRight:'4px'});
 	
 	// text
 	this.text_area = $a($td(this.tab,0,1), 'div');
-	this.render_references(this.text_area, det);
-	
+	this.render_references(this.text_area, det);	
 	this.render_tag(det);
 	
 	// add day separator
@@ -520,12 +510,12 @@ FeedItem = function(cell, det, feedlist) {
 
 FeedItem.prototype.add_day_sep = function(det) {
 	var me = this;
-	var prev_date = det[6].split(' ')[0];
+	var prev_date = det.modified.split(' ')[0];
 	
 	var make_div = function() {
 		var div = $a(me.head, 'div', '', 
 			{borderBottom:'1px solid #888', margin:'8px 0px', padding:'2px 0px', color:'#888', fontSize:'11px'});
-		div.innerHTML = comment_when(det[6], 1);
+		div.innerHTML = comment_when(det.modified, 1);
 		
 		// today?
 		if(prev_date==get_today()) {
@@ -544,35 +534,47 @@ FeedItem.prototype.add_day_sep = function(det) {
 // -------------------------------------------------
 
 FeedItem.prototype.render_tag = function(det) {
+	// type is the name
 	tag = $a($td(this.tab,0,0), 'div', '', 
-		{color:'#FFF', padding:'3px', textAlign:'right', fontSize:'11px', whiteSpace:'nowrap', overflow:'hidden', cursor:'pointer'});
+		{color:'#FFF', padding:'3px', textAlign:'right', fontSize:'11px', 
+			whiteSpace:'nowrap', overflow:'hidden', cursor:'pointer'});
 	$br(tag,'3px');
-	$y(tag, {backgroundColor:(det[7] ? det[7] : '#273')});
-	tag.innerHTML = get_doctype_label(det[1]);
-	tag.dt = det[1]
-	tag.onclick = function() { loaddocbrowser(this.dt); }
+	$y(tag, {backgroundColor:(det.color || '#273')});
+	
+	// tag label
+	tag.innerHTML = det.feed_type || get_doctype_label(det.doc_type);
+	
+	// not comment / label
+	if(!det.feed_type) {
+		tag.dt = det.doc_type;
+		tag.onclick = function() { loaddocbrowser(this.dt); }		
+	}
 }
 
 FeedItem.prototype.render_references = function(div, det) {
 	// name
-	div.tab = make_table(div, 1, 2, '100%', [null, '15%'])
-	//div.innerHTML = '<b>' + (strip(det[11]) ? det[11] : det[2]) + ' (' + cint(det[12]) + '): </b> has ' + det[7] + ' ';
-	
-	var dt = det[1]; var dn = det[2]
+	div.tab = make_table(div, 1, 2, '100%', [null, '15%'])	
+	var dt = det.doc_type; var dn = det.doc_name
 	
 	// link
-	var allow = in_list(profile.can_read, dt);
-	var span = $a($td(div.tab,0,0), 'span', (allow ? 'link_type': ''), null, det[2]);
-	span.dt = dt; span.dn = dn;
-	if(allow) span.onclick = function() { loaddoc(this.dt, this.dn); }
+	if(det.feed_type=='Login') {
+		// nothing - no link		
+	} else {
+		var allow = in_list(profile.can_read, dt);
+		var span = $a($td(div.tab,0,0), 'span', (allow ? 'link_type': ''), null, 
+			det.doc_name);
+		span.dt = dt; span.dn = dn;
+		if(allow) span.onclick = function() { loaddoc(this.dt, this.dn); }		
+	}
 	
 	// subject
-	if(det[3]) {
-		$a($td(div.tab,0,0), 'span', '', {marginLeft:'7px', color:'#444'}, det[3]);
+	if(det.subject) {
+		$a($td(div.tab,0,0), 'span', '', {marginLeft:'7px', color:'#444'}, det.subject);
 	}
 	
 	// by
-	$y($td(div.tab,0,1), {fontSize:'11px'}).innerHTML = (strip(det[5]) ? det[5] : det[4]);
+	$y($td(div.tab,0,1), {fontSize:'11px'}).innerHTML = 
+		(strip(det.full_name) ? det.full_name : det.modified_by);
 }
 
 HomeStatusBar = function() {
@@ -583,11 +585,6 @@ HomeStatusBar = function() {
 	
 	this.render = function(r) {
 		this.wrapper.innerHTML = '';
-		this.profile_settings = $a($a(this.wrapper, 'p'), 'span', 'link_type', {fontWeight:'bold'});
-		this.profile_settings.innerHTML = user_fullname + ' (Profile Settings)';
-		this.profile_settings.id = "user_fullname";
-		this.profile_settings.onclick = function() { loadpage('profile-settings'); }
-
 		this.span = $a($a(this.wrapper, 'p'), 'span', 'link_type', {fontWeight:'bold'});
 		this.span.onclick = function() { loadpage('My Company')	}
 		
@@ -615,6 +612,7 @@ pscript.home_make_status = function() {
 	
 			// complete registration
 			if(in_list(user_roles,'System Manager')) { 
+				wn.require("erpnext/home/page/event_updates/complete_registration.js");
 				pscript.complete_registration(r.message.registration_complete, r.message.profile); 
 			}
 			
@@ -624,114 +622,6 @@ pscript.home_make_status = function() {
 			}
 		}
 	);	
-}
-
-// complete my company registration
-// --------------------------------
-pscript.complete_registration = function(is_complete, profile) {
-	if(is_complete == 'No'){
-		var d = new Dialog(400, 200, "Setup your Account");
-		if(user != 'Administrator'){
-			d.no_cancel(); // Hide close image
-			$dh(page_body.wntoolbar.wrapper);
-		}
-
-		d.make_body([
-			['HTML', 'Your Profile Details', '<h4>Your Profile Details</h4>'],
-			['Data', 'First Name'],
-			['Data', 'Last Name'],
-			['HTML', 'Company Details', '<h4>Create your first company</h4>'],
-			['Data','Company Name','Example: Your Company LLC'],
-	  		['Data','Company Abbreviation', 'Example: YC (all your acconts will have this as a suffix)'],
-	  		['Select','Fiscal Year Start Date'],
-	  		['Select','Default Currency'],
-	  		['Button','Save'],
-		]);
-
-		// if company name is set, set the input value
-		// and disable it
-		if(locals['Control Panel']['Control Panel'].company_name) {
-			d.widgets['Company Name'].value = locals['Control Panel']['Control Panel'].company_name;
-			d.widgets['Company Name'].disabled = 1;
-		}
-
-		if(profile && profile.length>0) {
-			if(profile[0].first_name && profile[0].first_name!='None') {
-				d.widgets['First Name'].value = profile[0].first_name;
-			}
-
-			if(profile[0].last_name && profile[0].last_name!='None') {
-				d.widgets['Last Name'].value = profile[0].last_name;
-			}
-		}		
-
-		//d.widgets['Save'].disabled = true;	  // disable Save button
-		pscript.make_dialog_field(d);
-
-		// submit details
-		d.widgets['Save'].onclick = function()
-		{
-			d.widgets['Save'].set_working();
-			
-			flag = pscript.validate_fields(d);
-			if(flag)
-			{
-				var args = [
-					d.widgets['Company Name'].value,
-					d.widgets['Company Abbreviation'].value,
-					d.widgets['Fiscal Year Start Date'].value,
-					d.widgets['Default Currency'].value,
-					d.widgets['First Name'].value,
-					d.widgets['Last Name'].value
-				];
-				
-				$c_obj('Setup Control','setup_account',JSON.stringify(args),function(r, rt){
-					sys_defaults = r.message.sys_defaults;
-					user_fullname = r.message.user_fullname;
-					d.hide();
-					$ds(page_body.wntoolbar.wrapper);
-					$('#user_fullname').html(user_fullname + " (Profile Settings)");
-				});
-			} else {
-				d.widgets['Save'].done_working();
-			}
-		}
-		d.show();
-	}
-}
-
-// make dialog fields
-// ------------------
-pscript.make_dialog_field = function(d)
-{
-	// fiscal year format 
-	fisc_format = d.widgets['Fiscal Year Start Date'];
-	add_sel_options(fisc_format, ['', '1st Jan', '1st Apr', '1st Jul', '1st Oct']);
-  
-	// default currency
-	currency_list = ['', 'AED', 'AFN', 'ALL', 'AMD', 'ANG', 'AOA', 'ARS', 'AUD', 'AZN', 'BAM', 'BBD', 'BDT', 'BGN', 'BHD', 'BIF', 'BMD', 'BND', 'BOB', 'BRL', 'BSD', 'BTN', 'BYR', 'BZD', 'CAD', 'CDF', 'CFA', 'CFP', 'CHF', 'CLP', 'CNY', 'COP', 'CRC', 'CUC', 'CZK', 'DJF', 'DKK', 'DOP', 'DZD', 'EEK', 'EGP', 'ERN', 'ETB', 'EUR', 'EURO', 'FJD', 'FKP', 'FMG', 'GBP', 'GEL', 'GHS', 'GIP', 'GMD', 'GNF', 'GQE', 'GTQ', 'GYD', 'HKD', 'HNL', 'HRK', 'HTG', 'HUF', 'IDR', 'ILS', 'INR', 'IQD', 'IRR', 'ISK', 'JMD', 'JOD', 'JPY', 'KES', 'KGS', 'KHR', 'KMF', 'KPW', 'KRW', 'KWD', 'KYD', 'KZT', 'LAK', 'LBP', 'LKR', 'LRD', 'LSL', 'LTL', 'LVL', 'LYD', 'MAD', 'MDL', 'MGA', 'MKD', 'MMK', 'MNT', 'MOP', 'MRO', 'MUR', 'MVR', 'MWK', 'MXN', 'MYR', 'MZM', 'NAD', 'NGN', 'NIO', 'NOK', 'NPR', 'NRs', 'NZD', 'OMR', 'PAB', 'PEN', 'PGK', 'PHP', 'PKR', 'PLN', 'PYG', 'QAR', 'RMB', 'RON', 'RSD', 'RUB', 'RWF', 'SAR', 'SCR', 'SDG', 'SDR', 'SEK', 'SGD', 'SHP', 'SOS', 'SRD', 'STD', 'SYP', 'SZL', 'THB', 'TJS', 'TMT', 'TND', 'TRY', 'TTD', 'TWD', 'TZS', 'UAE', 'UAH', 'UGX', 'USD', 'USh', 'UYU', 'UZS', 'VEB', 'VND', 'VUV', 'WST', 'XAF', 'XCD', 'XDR', 'XOF', 'XPF', 'YEN', 'YER', 'YTL', 'ZAR', 'ZMK', 'ZWR'];
-	currency = d.widgets['Default Currency'];
-	add_sel_options(currency, currency_list);
-}
-
-
-// validate fields
-// ---------------
-pscript.validate_fields = function(d)
-{
-	var lst = ['First Name', 'Company Name', 'Company Abbreviation', 'Fiscal Year Start Date', 'Default Currency'];
-	var msg = 'Please enter the following fields\n';
-	var flag = 1;
-	for(var i=0; i<lst.length; i++)
-	{
-		if(!d.widgets[lst[i]].value || d.widgets[lst[i]].value=='None'){
-			flag = 0;
-			msg = msg + NEWLINE + lst[i];
-		}
-	}
-
-	if(!flag)  alert(msg);
-	return flag;
 }
 
 SetupWizard = function(status) { 

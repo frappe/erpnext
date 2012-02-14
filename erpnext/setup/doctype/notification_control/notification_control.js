@@ -6,7 +6,7 @@ cur_frm.cscript.select_transaction = function(doc, dt, dn) {
       refresh_field('custom_message');
     }
     $c_obj('Notification Control','get_message',doc.select_transaction, callback)
-  }
+}
 }
 
 cur_frm.cscript.notify = function(doc, args) {

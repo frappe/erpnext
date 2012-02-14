@@ -616,34 +616,6 @@
 	# DocField
 	{
 		'doctype': 'DocField',
-		'fieldname': 'manufacturer',
-		'fieldtype': 'Data',
-		'label': 'Manufacturer',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldname': 'manufacturer_part_no',
-		'fieldtype': 'Data',
-		'label': 'Manufacturer Part Number',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldname': 'item_supplier_details',
-		'fieldtype': 'Table',
-		'label': 'Item Supplier Details',
-		'options': 'Item Supplier',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
 		'fieldtype': 'Section Break',
 		'label': 'Sales Details',
 		'oldfieldtype': 'Section Break',

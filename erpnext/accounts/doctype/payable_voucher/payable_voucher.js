@@ -7,10 +7,10 @@ $import(Purchase Common)
 // On Load
 // --------
 cur_frm.cscript.onload = function(doc,dt,dn) {
-	var cp = locals['Control Panel']['Control Panel'];
-	
+	var cp = wn.control_panel;
+
 	if(!doc.voucher_date) set_multiple(dt,dn,{voucher_date:get_today()});
-	if(!doc.posting_date) set_multiple(dt,dn,{posting_date:get_today()});	
+	if(!doc.posting_date) set_multiple(dt,dn,{posting_date:get_today()});  
 
 	if(cp.country == 'India') {
 		unhide_field(['TDS','tds_applicable','tds_category','Get TDS','tax_code','rate','ded_amount','total_tds_on_voucher','tds_amount_on_advance']);

@@ -1,0 +1,28 @@
+<div class="layout_wrapper">
+	<div class="web-content" id="content-{{ doc.name }}">
+		{% if doc.head_section %}
+		<div class="web-head-section">
+			{{ doc.head_section_html }}
+		</div>
+		{% endif %}
+		<div class="web-main-section">
+			{{ doc.main_section_html }}
+			{% if doc.next_page_html %}
+				{{ doc.next_page_html }}
+			{% endif %}
+		</div>
+		<div class="web-side-section">
+			{{ doc.side_section_html }}
+			{% if doc.see_also %}
+			<div class="info-box">
+				<h4>See Also</h4>
+				{{ doc.see_also }}
+			</div>
+			{% endif %}
+		</div>
+		<div style="clear: both"></div>
+	</div>
+</div>
+<div class="web-page-status">
+	Last Modified: {{ doc.updated }} <a href="#contact">Feedback</a>
+</div>

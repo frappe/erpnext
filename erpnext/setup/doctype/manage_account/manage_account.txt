@@ -5,14 +5,13 @@
 	{
 		'creation': '2010-08-08 17:09:09',
 		'docstatus': 0,
-		'modified': '2011-12-21 13:22:33',
+		'modified': '2012-01-20 11:25:18',
 		'modified_by': 'Administrator',
 		'owner': 'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-
 		'_last_update': '1323855502',
 		'allow_copy': 1,
 		'allow_email': 1,
@@ -29,7 +28,7 @@
 		'section_style': 'Tabbed',
 		'server_code_error': ' ',
 		'show_in_menu': 1,
-		'version': 515
+		'version': 517
 	},
 
 	# These values are common for all DocField
@@ -106,6 +105,37 @@
 	{
 		'doctype': 'DocField',
 		'fieldtype': 'Section Break',
+		'label': 'System'
+	},
+
+	# DocField
+	{
+		'colour': 'White:FFF',
+		'description': 'Example: http://frappe.erpnext.com',
+		'doctype': 'DocField',
+		'fieldname': 'account_url',
+		'fieldtype': 'Data',
+		'label': 'Account URL'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Column Break'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldname': 'sms_sender_name',
+		'fieldtype': 'Data',
+		'label': 'SMS Sender Name'
+	},
+
+	# DocField
+	{
+		'doctype': 'DocField',
+		'fieldtype': 'Section Break',
 		'label': 'Company'
 	},
 
@@ -171,14 +201,6 @@
 		'fieldname': 'default_currency_fraction',
 		'fieldtype': 'Data',
 		'label': 'Default Currency Fraction'
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldname': 'sms_sender_name',
-		'fieldtype': 'Data',
-		'label': 'SMS Sender Name'
 	},
 
 	# DocField

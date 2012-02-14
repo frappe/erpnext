@@ -1,6 +1,6 @@
 cur_frm.cscript.onload = function(doc, cdt, cdn) {
-	var cp = locals['Control Panel']['Control Panel'];
-	
+	var cp = wn.control_panel;
+
 	if (!doc.voucher_date) doc.voucher_date = dateutil.obj_to_str(new Date());
 
 	if(cp.country == 'India') {
@@ -11,7 +11,6 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 	}
 
 	cur_frm.cscript.load_defaults(doc, cdt, cdn);
-
 }
 
 

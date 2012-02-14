@@ -1,17 +1,17 @@
 import webnotes
 
 from webnotes.utils import cint, load_json, cstr
+from webnotes.model.doc import Document
 
 try: import json
 except: import simplejson as json
 
+@webnotes.whitelist()
 def get_account_settings_url(arg=''):
 	import server_tools.gateway_utils
 	return server_tools.gateway_utils.get_account_settings_url()
 
-#
-# set max users
-#
+@webnotes.whitelist()
 def get_max_users(arg=''):
 	from server_tools.gateway_utils import get_max_users_gateway
 	return {
@@ -19,16 +19,12 @@ def get_max_users(arg=''):
 		'enabled': cint(webnotes.conn.sql("select count(*) from tabProfile where ifnull(enabled,0)=1 and name not in ('Administrator', 'Guest')")[0][0])
 	}
 
-#
-# enable profile in local
-#
+@webnotes.whitelist()
 def enable_profile(arg=''):
 	webnotes.conn.sql("update tabProfile set enabled=1 where name=%s", arg)
 	return 1
 		
-#
-# disable profile in local
-#
+@webnotes.whitelist()
 def disable_profile(arg=''):
 	if arg=='Administrator':
 		return 'Cannot disable Administrator'
@@ -37,9 +33,7 @@ def disable_profile(arg=''):
 	webnotes.login_manager.logout(user=arg)
 	return 0
 
-#
-# delete user
-#
+@webnotes.whitelist()
 def delete_user(args):
 	args = json.loads(args)
 	webnotes.conn.sql("update tabProfile set enabled=0, docstatus=2 where name=%s", args['user'])
@@ -51,9 +45,7 @@ def delete_user(args):
 	webnotes.login_manager.logout(user=args['user'])
 
 
-#
-# add user
-#
+@webnotes.whitelist()
 def add_user(args):
 	args = json.loads(args)
 	# erpnext-saas
@@ -63,12 +55,9 @@ def add_user(args):
 	
 	add_profile(args)
 	
-#
-# add profile record
-#
+@webnotes.whitelist()
 def add_profile(args):
-	from webnotes.utils import validate_email_add
-	from webnotes.model.doc import Document
+	from webnotes.utils import validate_email_add, now
 	email = args['user']
 			
 	sql = webnotes.conn.sql
@@ -82,7 +71,7 @@ def add_profile(args):
 	if sql("select name from tabProfile where name = %s", email):
 		# exists, enable it
 		sql("update tabProfile set enabled = 1, docstatus=0 where name = %s", email)
-		webnotes.msgprint('Profile exists, enabled it')
+		webnotes.msgprint('Profile exists, enabled it with new password')
 	else:
 		# does not exist, create it!
 		pr = Document('Profile')
@@ -94,15 +83,31 @@ def add_profile(args):
 		pr.user_type = 'System User'
 		pr.save(1)
 
-		if args.get('password'):
-			sql("""
-				UPDATE tabProfile 
-				SET password = PASSWORD(%s)
-				WHERE name = %s""", (args.get('password'), email))
+	if args.get('password'):
+		sql("""
+			UPDATE tabProfile 
+			SET password = PASSWORD(%s), modified = %s
+			WHERE name = %s""", (args.get('password'), now, email))
+
+	send_welcome_mail(email, args)
+
+@webnotes.whitelist()
+def send_welcome_mail(email, args):
+	"""send welcome mail to user with password and login url"""
+	pr = Document('Profile', email)
+	from webnotes.utils.email_lib import sendmail_md
+	args.update({
+		'company': webnotes.conn.get_default('company'),
+		'password': args.get('password'),
+		'account_url': webnotes.conn.get_default('account_url')
+	})
+	if not args.get('last_name'): args['last_name'] = ''
+	sendmail_md(pr.email, subject="Welcome to ERPNext", msg=welcome_txt % args)
 
 #
 # post comment
 #
+@webnotes.whitelist()
 def post_comment(arg):
 	arg = load_json(arg)
 	
@@ -145,6 +150,7 @@ def post_comment(arg):
 #
 # update read messages
 #
+@webnotes.whitelist()
 def set_read_all_messages(arg=''):
 	webnotes.conn.sql("""UPDATE `tabComment Widget Record`
 	SET docstatus = 1
@@ -152,6 +158,7 @@ def set_read_all_messages(arg=''):
 	AND comment_docname = %s
 	""", webnotes.user.name)
 
+@webnotes.whitelist()
 def update_security(args=''):
 	import json
 	args = json.loads(args)
@@ -168,3 +175,20 @@ def update_security(args=''):
 		else:
 			webnotes.conn.sql("update tabProfile set password=password(%s) where name=%s", (args['new_password'], args['user']))
 	else: webnotes.msgprint('Settings Updated')
+
+welcome_txt = """
+## %(company)s
+
+Dear %(first_name)s %(last_name)s
+
+Welcome!
+
+A new account has been created for you, here are your details:
+
+login-id: %(user)s
+password: %(password)s
+
+To login to your new ERPNext account, please go to:
+
+%(account_url)s
+"""

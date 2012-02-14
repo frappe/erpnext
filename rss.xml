@@ -1,0 +1,18 @@
+#!/usr/bin/python
+
+import cgi, cgitb, os, sys
+cgitb.enable()
+
+# import libs
+sys.path.append('lib/py')
+
+import webnotes
+import webnotes.auth
+
+if __name__=='__main__':
+	webnotes.http_request = webnotes.auth.HTTPRequest()
+	from webnotes.cms import feed
+	xml = feed.generate()
+	print 'Content-Type: text/xml'
+	print
+	print xml

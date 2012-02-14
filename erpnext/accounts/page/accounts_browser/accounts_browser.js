@@ -1,4 +1,5 @@
 pscript['onload_Accounts Browser'] = function(){
+	wn.require('lib/js/legacy/widgets/tree.js');
   // if the user directly loads the page, ask to select the chart
   var parent = $i('ab_body');
   parent.innerHTML = 'Please select your chart: '
@@ -124,7 +125,7 @@ pscript.make_ac_tree = function() {
           var imgsrc=null;
           var has_children = true;
           if(cl[i].group_or_ledger=='Ledger') {
-            var imgsrc = 'lib/images/icons/page.gif';
+            var imgsrc = 'lib/images/icons/page.png';
             has_children = false;
           }
           var t = tree.addNode(n, cl[i].account_name, imgsrc,tree.std_onclick, has_children ? tree.std_onexp : null);
@@ -137,7 +138,7 @@ pscript.make_ac_tree = function() {
           var imgsrc=null;
           var has_children = true;
           if(cl[i].group_or_ledger=='Ledger') {
-            var imgsrc = 'lib/images/icons/page.gif';
+            var imgsrc = 'lib/images/icons/page.png';
             has_children = false;
           }
           var t = tree.addNode(n, cl[i].cost_center_name, imgsrc,tree.std_onclick, has_children ? tree.std_onexp : null);
