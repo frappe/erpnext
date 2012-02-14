@@ -38,6 +38,7 @@ class DocType:
 			from webnotes.utils import cint
 			import _socket
 			from webnotes.utils.email_lib.send import EMail
+			import smtplib
 			out_email = EMail()
 			out_email.server = self.doc.outgoing_mail_server.encode('utf-8')
 			out_email.port = cint(self.doc.mail_port)
