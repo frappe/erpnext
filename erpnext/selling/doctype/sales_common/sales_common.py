@@ -140,7 +140,6 @@ class DocType(TransactionBase):
 			ret['export_rate'] = flt(base_ref_rate)/flt(obj.doc.conversion_rate)
 			ret['base_ref_rate'] = flt(base_ref_rate)
 			ret['basic_rate'] = flt(base_ref_rate)
-
 		return ret
 	
 	# ***************** Get Ref rate as entered in Item Master ********************

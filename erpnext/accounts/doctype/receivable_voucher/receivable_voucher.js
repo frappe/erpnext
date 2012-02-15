@@ -21,19 +21,15 @@ cur_frm.cscript.onload = function(doc,dt,dn) {
 		if(!doc.currency && sys_defaults.currency) set_multiple(dt,dn,{currency:sys_defaults.currency});
 		if(!doc.price_list_currency) set_multiple(dt, dn, {price_list_currency: doc.currency, plc_conversion_rate: 1});
 
- 		hide_field(['customer_address', 'contact_person', 'customer_name', 'address_display', 'contact_display', 'contact_mobile', 'contact_email', 'territory', 'customer_group']);
-
-		//for previously created sales invoice, set required field related to pos
-		if(doc.is_pos ==1) cur_frm.cscript.is_pos(doc, dt, dn);
-
+ 		hide_field(['customer_address', 'contact_person','customer_name','address_display', 'contact_display', 'contact_mobile', 'contact_email', 'territory', 'customer_group']);
 	}
 }
 
 cur_frm.cscript.onload_post_render = function(doc, dt, dn) {
-	var callback = null;
+	var callback2 = null;
 	if(doc.customer && doc.__islocal) {
 		// called from mapper, update the account names for items and customer
-		callback = function(doc, dt, dn) {
+		callback2 = function(doc, dt, dn) {
 			$c_obj(make_doclist(doc.doctype,doc.name),
 				'load_default_accounts','',
 				function(r,rt) {
@@ -44,15 +40,20 @@ cur_frm.cscript.onload_post_render = function(doc, dt, dn) {
 		}
 	}
 	// defined in sales_common.js
-	cur_frm.cscript.update_item_details(doc, cdt, cdn, callback);		
+	var callback1 = function(doc, dt, dn) {
+		//for previously created sales invoice, set required field related to pos	
+		cur_frm.cscript.update_item_details(doc, dt, dn, callback2);
+	}
 		
+	if(doc.is_pos ==1) cur_frm.cscript.is_pos(doc, dt, dn,callback1);
+	else cur_frm.cscript.update_item_details(doc, dt, dn, callback2);
 }
 
 
 // Hide Fields
 // ------------
 cur_frm.cscript.hide_fields = function(doc, cdt, cdn) {
-	par_flds	=['project_name', 'due_date', 'posting_time', 'sales_order_main', 'delivery_note_main', 'Get Items', 'is_opening', 'conversion_rate', 'source', 'cancel_reason', 'total_advance', 'gross_profit', 'gross_profit_percent', 'Get Advances Received', 'advance_adjustment_details', 'sales_partner', 'commission_rate', 'total_commission', 'Repair Outstanding Amt'];
+	par_flds = ['project_name', 'due_date', 'posting_time', 'sales_order_main', 'delivery_note_main', 'Get Items', 'is_opening', 'conversion_rate', 'source', 'cancel_reason', 'total_advance', 'gross_profit', 'gross_profit_percent', 'Get Advances Received', 'advance_adjustment_details', 'sales_partner', 'commission_rate', 'total_commission', 'Repair Outstanding Amt'];
 	
 	ch_flds = {'entries': ['sales_order', 'delivery_note']}
 	
@@ -107,7 +108,7 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 
 //fetch retail transaction related fields
 //--------------------------------------------
-cur_frm.cscript.is_pos = function(doc,dt,dn){
+cur_frm.cscript.is_pos = function(doc,dt,dn,callback){
 	cur_frm.cscript.hide_fields(doc, cdt, cdn);
 	if(doc.is_pos == 1){
 		if (!doc.company) {
@@ -116,10 +117,11 @@ cur_frm.cscript.is_pos = function(doc,dt,dn){
 			refresh_field('is_pos');
 		}
 		else {
-			var callback = function(r,rt){
+			var callback1 = function(r,rt){
+				if(callback) callback(doc, dt, dn);
 				cur_frm.refresh();
 			}
-			$c_obj(make_doclist(dt,dn),'set_pos_fields','',callback);
+			$c_obj(make_doclist(dt,dn),'set_pos_fields','',callback1);
 		}
 	}
 }

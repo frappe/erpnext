@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-02-02 13:51:29',
+		'creation': '2012-02-02 13:19:50',
 		'docstatus': 0,
-		'modified': '2012-02-13 12:23:36',
+		'modified': '2012-02-14 16:13:59',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -23,7 +23,7 @@
 		'name': '__common__',
 		'section_style': u'Simple',
 		'show_in_menu': 0,
-		'version': 8
+		'version': 9
 	},
 
 	# These values are common for all DocField
@@ -205,5 +205,35 @@
 		'label': u'Domain List',
 		'permlevel': 0,
 		'reqd': 0
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldtype': u'Section Break',
+		'label': u'Analytics',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'colour': u'White:FFF',
+		'description': u'Code pasted in the head tag to start an Analytics engine like Google Analytics',
+		'doctype': u'DocField',
+		'fieldname': u'analytics_code',
+		'fieldtype': u'Text',
+		'label': u'Analytics Code',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'colour': u'White:FFF',
+		'description': u"Function to be called when page is changed. (_gaq.push['_trackPageview'] for Google Code)",
+		'doctype': u'DocField',
+		'fieldname': u'analytics_call',
+		'fieldtype': u'Text',
+		'label': u'Analytics Call',
+		'permlevel': 0
 	}
 ]
