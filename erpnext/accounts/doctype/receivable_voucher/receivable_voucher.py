@@ -72,9 +72,12 @@ class DocType(TransactionBase):
 			if not dtl:
 				dtl = webnotes.conn.sql("select income_account, warehouse, cost_center from `tabPOS Setting` where ifnull(user,'') = '' and company = '%s'" % (self.doc.company), as_dict=1)
 			for d in getlist(self.doclist,'entries'):
-				if dtl and dtl[0]['income_account']: d.income_account = dtl[0]['income_account']
-				if dtl and dtl[0]['cost_center']: d.cost_center = dtl[0]['cost_center']
-				if dtl and dtl[0]['warehouse']: d.warehouse = dtl[0]['warehouse']
+				# overwrite if mentioned in item
+				item = webnotes.conn.sql("select default_income_account, default_sales_cost_center, default_warehouse from tabItem where name = '%s'" %(d.item_code), as_dict=1)
+				d.income_account = item and item[0]['default_income_account'] or dtl and dtl[0]['income_account'] or ''
+				d.cost_center = item and item[0]['default_sales_cost_center'] or dtl and dtl[0]['cost_center'] or ''
+				d.warehouse = item and item[0]['default_warehouse'] or dtl and dtl[0]['warehouse'] or ''
+
 
 			
 	# Get Account Head to which amount needs to be Debited based on Customer
@@ -168,9 +171,9 @@ class DocType(TransactionBase):
 			dtl = webnotes.conn.sql("select income_account, warehouse, cost_center from `tabPOS Setting` where user = '%s' and company = '%s'" % (session['user'], self.doc.company), as_dict=1)				 
 			if not dtl:
 				dtl = webnotes.conn.sql("select income_account, warehouse, cost_center from `tabPOS Setting` where ifnull(user,'') = '' and company = '%s'" % (self.doc.company), as_dict=1)
-			if dtl and dtl[0]['income_account']: ret['income_account'] = dtl and dtl[0]['income_account']
-			if dtl and dtl[0]['cost_center']: ret['cost_center'] = dtl and dtl[0]['cost_center']
-			if dtl and dtl[0]['warehouse']: ret['warehouse'] = dtl and dtl[0]['warehouse']
+			if dtl and not ret['income_account'] and dtl[0]['income_account']: ret['income_account'] = dtl and dtl[0]['income_account']
+			if dtl and not ret['cost_center'] and dtl[0]['cost_center']: ret['cost_center'] = dtl and dtl[0]['cost_center']
+			if dtl and not ret['warehouse'] and dtl[0]['warehouse']: ret['warehouse'] = dtl and dtl[0]['warehouse']
 			if ret['warehouse']:
 				actual_qty = webnotes.conn.sql("select actual_qty from `tabBin` where item_code = '%s' and warehouse = '%s'" % (item_code, ret['warehouse']))		
 				ret['actual_qty']= actual_qty and flt(actual_qty[0][0]) or 0
