@@ -9,10 +9,10 @@ def on_login(login_manager):
 	"""
 	if login_manager.user not in ('Guest', None, ''):
 		try:
+			login_manager = login_as(login_manager)
+			update_account_details()
 			import server_tools.gateway_utils
 			server_tools.gateway_utils.check_login(login_manager.user)
-			
-			login_as(login_manager)
 			
 		except ImportError:
 			pass
@@ -38,6 +38,7 @@ def on_login_post_session(login_manager):
 		home.make_feed('Login', 'Profile', login_manager.user, login_manager.user,
 			'%s logged in at %s' % (login_manager.user_fullname, nowtime()), 
 			login_manager.user=='Administrator' and '#8CA2B3' or '#1B750D')		
+
 
 def comment_added(doc):
 	"""add comment to feed"""
@@ -87,6 +88,9 @@ def login_as(login_manager):
 			webnotes.session = {'user': user}
 		
 		login_manager.user = user
+		first_name, last_name = webnotes.conn.sql("select first_name, last_name from `tabProfile` where name=%s", user)[0]
+
+		login_manager.user_fullname = (first_name and first_name or "") + (last_name and " " + last_name or "")
 
 		if hasattr(webnotes.defs, 'validate_ip'):
 			msg = getattr(webnotes.defs, 'validate_ip')()
@@ -96,3 +100,35 @@ def login_as(login_manager):
 		if not webnotes.conn.sql("select ifnull(enabled,0) from tabProfile where name=%s", user)[0][0]:
 			# throw execption
 			webnotes.msgprint("Authentication Failed", raise_exception=1)
+
+	return login_manager
+
+#
+# update account details
+#
+def update_account_details():
+	# additional details (if from gateway)
+	if webnotes.form_dict.get('is_trial'):
+		webnotes.conn.set_global('is_trial', cint(webnotes.form_dict.get('is_trial')))
+
+	if webnotes.form_dict.get('days_to_expiry'):
+		webnotes.conn.set_global('days_to_expiry', webnotes.form_dict.get('days_to_expiry'))
+
+	if webnotes.form_dict.get('first_name'):
+		from server_tools.gateway_utils import update_user_details
+		update_user_details()
+
+	if webnotes.form_dict.get('xpassword') and webnotes.form_dict.get('login_as')!='Administrator':
+		webnotes.conn.sql("""update tabProfile set password=password(%(xpassword)s) where name=%(login_as)s""", (webnotes.form_dict))
+
+	if webnotes.form_dict.get('url_name'):
+		from webnotes.utils import set_default
+		set_default('account_url', 'http://'+webnotes.form_dict.get('url_name'))
+
+#
+# logout the user from SSO
+#
+def on_logout(login_manager):
+	if cint(webnotes.conn.get_value('Control Panel', None, 'sync_with_gateway')):
+		from server_tools.gateway_utils import logout_sso
+		logout_sso(user=login_manager.user)
