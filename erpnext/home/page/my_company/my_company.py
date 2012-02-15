@@ -172,8 +172,7 @@ def update_security(args=''):
 			res = server_tools.gateway_utils.change_password('', args['new_password'], args['user'], args['sys_admin_pwd'])
 			if 'Traceback' not in res['message']:
 				webnotes.msgprint(res['message'])
-		else:
-			webnotes.conn.sql("update tabProfile set password=password(%s) where name=%s", (args['new_password'], args['user']))
+		webnotes.conn.sql("update tabProfile set password=password(%s) where name=%s", (args['new_password'], args['user']))
 	else: webnotes.msgprint('Settings Updated')
 
 welcome_txt = """
