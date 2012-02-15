@@ -22,16 +22,18 @@ cur_frm.cscript.onload = function(doc,dt,dn) {
 	if(doc.__islocal){
 		hide_field(['supplier_address', 'contact_person', 'supplier_name', 'address_display', 'contact_display', 'contact_mobile', 'contact_email']);
 	}
-	
-	// defined in purchase_common.js
-	cur_frm.cscript.update_item_details(doc, cdt, cdn);
 }
 
 
 //Onload post render
 //------------------------
 cur_frm.cscript.onload_post_render = function(doc, dt, dn) {
-	if(doc.__islocal && doc.supplier) cur_frm.cscript.supplier(doc,dt,dn);
+	var callback = function(doc, dt, dn) {
+		if(doc.__islocal && doc.supplier) cur_frm.cscript.supplier(doc,dt,dn);
+	}
+		
+	// defined in purchase_common.js
+	cur_frm.cscript.update_item_details(doc, cdt, cdn, callback);
 }
 
 // Refresh

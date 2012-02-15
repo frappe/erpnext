@@ -33,7 +33,7 @@ cur_frm.cscript.load_defaults = function(doc, dt, dn) {
 }
 
 // Update existing item details
-cur_frm.cscript.update_item_details = function(doc, dt, dn) {
+cur_frm.cscript.update_item_details = function(doc, dt, dn, callback) {
 	if(!cur_frm.doc.__islocal) { return; }
 	var children = getchildren(cur_frm.cscript.tname, doc.name, cur_frm.cscript.fname);
 	if(children) {
@@ -43,6 +43,7 @@ cur_frm.cscript.update_item_details = function(doc, dt, dn) {
 				refresh_field(cur_frm.cscript.fname);
 				doc = locals[doc.doctype][doc.name];
 				cur_frm.cscript.load_defaults(doc, dt, dn);
+				if(callback) callback(doc, dt, dn);
 			}
 		});
 	}
