@@ -10,3 +10,4 @@ def execute():
 	patches.jan_mar_2012.website.website.execute()
 	patches.jan_mar_2012.website.cleanups.execute()
 	patches.jan_mar_2012.website.domain_list.execute()
+	patches.jan_mar_2012.website.file_data_rename.execute()
