@@ -65,7 +65,7 @@ erpnext.products.make_product_list = function(wrapper) {
 			parent.innerHTML = repl('<div style="float:left; width: 115px;">\
 				<img src="files/%(thumbnail_image)s" style="width:100px;"></div>\
 				<div style="float:left; width: 400px">\
-					<b><a href="#!%(page_name)s">%(title)s</a></b>\
+					<p><b><a href="#!%(page_name)s">%(title)s</a></b></p>\
 					<p>%(short_description)s</p></div>\
 				<div style="clear: both; margin-bottom: 15px; border-bottom: 1px solid #AAA"></div>', data);
 		}

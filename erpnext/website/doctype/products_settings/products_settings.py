@@ -13,3 +13,6 @@ class DocType:
 				break
 				
 		webnotes.conn.set_default("default_product_category", tmp)
+		
+		from webnotes.session_cache import clear_cache
+		clear_cache('Guest')

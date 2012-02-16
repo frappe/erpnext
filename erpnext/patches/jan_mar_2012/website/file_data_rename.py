@@ -12,7 +12,6 @@ def execute():
 	change_file_data_in_tabseries()
 	replace_file_list_column_entries()
 
-
 def replace_name_in_file_data():
 	"""
 		Change / to - in tabFile Data name column entries
