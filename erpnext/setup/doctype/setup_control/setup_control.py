@@ -42,7 +42,7 @@ class DocType:
 		args = json.loads(args)
 
 		self.set_cp_defaults(args['company'], args['industry'], args['time_zone'], args['country'], args['account_name'])
-		self.create_profile(args['user'], args['first_name'], args['last_name'])	
+		self.create_profile(args['user'], args['first_name'], args['last_name'], args.get('pwd'))	
 	
 		# Domain related updates
 		try:
@@ -168,13 +168,14 @@ class DocType:
 			
 	# Create Profile
 	# --------------
-	def create_profile(self, user_email, user_fname, user_lname):
+	def create_profile(self, user_email, user_fname, user_lname, pwd=None):
 		pr = Document('Profile')
 		pr.first_name = user_fname
 		pr.last_name = user_lname
 		pr.name = pr.email = user_email
 		pr.enabled = 1
 		pr.save(1)
+		if pwd: webnotes.conn.sql("UPDATE `tabProfile` SET password=PASSWORD(%s) WHERE name=%s", (pwd, user_email))
 		self.add_roles(pr)
 	
 	def add_roles(self, pr):
