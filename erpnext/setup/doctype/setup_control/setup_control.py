@@ -179,7 +179,7 @@ class DocType:
 		self.add_roles(pr)
 	
 	def add_roles(self, pr):
-		roles_list = ['System Manager','Sales Manager','Sales User','Purchase Manager','Purchase User','Material Manager','Material User','Accounts Manager','Accounts User','HR Manager','HR User','Production Manager','Production User','Sales Master Manager','Purchase Master Manager','Material Master Manager','Quality Manager','Maintenance User','Maintenance Manager']
+		roles_list = ['System Manager','Sales Manager','Sales User','Purchase Manager','Purchase User','Material Manager','Material User','Accounts Manager','Accounts User','HR Manager','HR User','Production Manager','Production User','Sales Master Manager','Purchase Master Manager','Material Master Manager','Quality Manager','Maintenance User','Maintenance Manager','Website Manager']
 		for r in roles_list:
 			d = addchild(pr, 'userroles', 'UserRole', 1)
 			d.role = r
