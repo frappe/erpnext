@@ -29,7 +29,6 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 		var ps_detail = getchildren('Packing Slip Detail', doc.name, 'item_details');
 		if(!(flt(ps_detail[0].net_weight) && cstr(ps_detail[0].weight_uom))) {
 			cur_frm.cscript.update_item_details(doc);
-			refresh_field('naming_series');
 		}
 	}
 }
@@ -41,6 +40,7 @@ cur_frm.cscript.update_item_details = function(doc) {
 			msgprint(r.exc);
 		} else {
 			refresh_field('item_details');
+			refresh_field('naming_series');
 		}
 	});
 }
