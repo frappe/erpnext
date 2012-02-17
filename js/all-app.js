@@ -554,7 +554,10 @@ $dh(this.input_area);$ds(this.disp_area);}else{if(this.hide)this.hide();else $dh
 this.set_status=this.disp_status;}}
 Field.prototype.refresh=function(){this.disp_status=this.get_status();if(this.in_grid&&this.table_refresh&&this.disp_status=='Write')
 {this.table_refresh();return;}
-this.set_label();this.refresh_display();if(this.onrefresh)this.onrefresh();if(this.input&&this.input.refresh)this.input.refresh(this.df);if(!this.not_in_form)
+this.set_label();this.refresh_display();if(this.onrefresh)
+this.onrefresh();if(this.input){if(this.input.refresh)this.input.refresh(this.df);}
+if(this.wrapper){this.wrapper.fieldobj=this;$(this.wrapper).trigger('refresh');}
+if(!this.not_in_form)
 this.set_input(_f.get_value(this.doctype,this.docname,this.df.fieldname));this.refresh_mandatory();this.set_max_width();}
 Field.prototype.refresh_label_icon=function(){if(this.df.reqd){if(this.get_value&&is_null(this.get_value())){if(this.label_icon)$ds(this.label_icon);$(this.txt?this.txt:this.input).addClass('field-to-update')}else{if(this.label_icon)$dh(this.label_icon);$(this.txt?this.txt:this.input).removeClass('field-to-update')}}}
 Field.prototype.set=function(val){if(this.not_in_form)
@@ -1486,7 +1489,10 @@ $dh(this.input_area);$ds(this.disp_area);}else{if(this.hide)this.hide();else $dh
 this.set_status=this.disp_status;}}
 Field.prototype.refresh=function(){this.disp_status=this.get_status();if(this.in_grid&&this.table_refresh&&this.disp_status=='Write')
 {this.table_refresh();return;}
-this.set_label();this.refresh_display();if(this.onrefresh)this.onrefresh();if(this.input&&this.input.refresh)this.input.refresh(this.df);if(!this.not_in_form)
+this.set_label();this.refresh_display();if(this.onrefresh)
+this.onrefresh();if(this.input){if(this.input.refresh)this.input.refresh(this.df);}
+if(this.wrapper){this.wrapper.fieldobj=this;$(this.wrapper).trigger('refresh');}
+if(!this.not_in_form)
 this.set_input(_f.get_value(this.doctype,this.docname,this.df.fieldname));this.refresh_mandatory();this.set_max_width();}
 Field.prototype.refresh_label_icon=function(){if(this.df.reqd){if(this.get_value&&is_null(this.get_value())){if(this.label_icon)$ds(this.label_icon);$(this.txt?this.txt:this.input).addClass('field-to-update')}else{if(this.label_icon)$dh(this.label_icon);$(this.txt?this.txt:this.input).removeClass('field-to-update')}}}
 Field.prototype.set=function(val){if(this.not_in_form)

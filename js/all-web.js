@@ -463,7 +463,10 @@ $dh(this.input_area);$ds(this.disp_area);}else{if(this.hide)this.hide();else $dh
 this.set_status=this.disp_status;}}
 Field.prototype.refresh=function(){this.disp_status=this.get_status();if(this.in_grid&&this.table_refresh&&this.disp_status=='Write')
 {this.table_refresh();return;}
-this.set_label();this.refresh_display();if(this.onrefresh)this.onrefresh();if(this.input&&this.input.refresh)this.input.refresh(this.df);if(!this.not_in_form)
+this.set_label();this.refresh_display();if(this.onrefresh)
+this.onrefresh();if(this.input){if(this.input.refresh)this.input.refresh(this.df);}
+if(this.wrapper){this.wrapper.fieldobj=this;$(this.wrapper).trigger('refresh');}
+if(!this.not_in_form)
 this.set_input(_f.get_value(this.doctype,this.docname,this.df.fieldname));this.refresh_mandatory();this.set_max_width();}
 Field.prototype.refresh_label_icon=function(){if(this.df.reqd){if(this.get_value&&is_null(this.get_value())){if(this.label_icon)$ds(this.label_icon);$(this.txt?this.txt:this.input).addClass('field-to-update')}else{if(this.label_icon)$dh(this.label_icon);$(this.txt?this.txt:this.input).removeClass('field-to-update')}}}
 Field.prototype.set=function(val){if(this.not_in_form)
@@ -1134,7 +1137,7 @@ $(document).bind('startup',function(){erpnext.startup.start();});
 /*
  *	erpnext/website/js/topbar.js
  */
-wn.provide('erpnext.topbar');erpnext.topbar.TopBar=Class.extend({init:function(){this.make();$('.brand').html(wn.boot.website_settings.brand_html);this.make_items();},make:function(){$('header').append('<div class="topbar">\
+wn.provide('erpnext.topbar');erpnext.topbar.TopBar=Class.extend({init:function(){this.make();$('.brand').html(wn.boot.website_settings.brand_html);this.make_items();$('.topbar').dropdown();},make:function(){$('header').append('<div class="topbar">\
    <div class="topbar-inner">\
    <div class="container">\
     <a class="brand">[brand]</a>\
@@ -1146,9 +1149,11 @@ wn.provide('erpnext.topbar');erpnext.topbar.TopBar=Class.extend({init:function()
     </ul>\
    </div>\
    </div>\
-   </div>');$('.brand').attr('href','#!'+(wn.boot.website_settings.home_page||'Login Page'))},make_items:function(){var items=wn.boot.website_menus
-for(var i=0;i<items.length;i++){var item=items[i];if(!item.parent_label&&item.parentfield=='top_bar_items'){item.route=item.url||item.custom_page;$('header .nav:first').append(repl('<li><a href="#!%(route)s" \
-     data-label="%(label)s">%(label)s</a></li>',item))}}}});erpnext.Footer=Class.extend({init:function(){$('footer').html(repl('<div class="web-footer">\
+   </div>');$('.brand').attr('href','#!'+(wn.boot.website_settings.home_page||'Login Page'))},make_items:function(){var items=wn.boot.website_menus;for(var i=0;i<items.length;i++){var item=items[i];if(!item.parent_label&&item.parentfield=='top_bar_items'){item.route=item.url||item.custom_page;$('header .nav:first').append(repl('<li data-label="%(label)s">\
+     <a href="#!%(route)s">%(label)s</a></li>',item))}}
+for(var i=0;i<items.length;i++){var item=items[i];if(item.parent_label&&item.parentfield=='top_bar_items'){$parent_li=$(repl('header li[data-label="%(parent_label)s"]',item));if(!$parent_li.hasClass('dropdown')){$parent_li.addClass('dropdown');$parent_li.find('a:first').addClass('dropdown-toggle');$parent_li.append('<ul class="dropdown-menu"></ul>');}
+item.route=item.url||item.custom_page;$parent_li.find('.dropdown-menu').append(repl('<li data-label="%(label)s">\
+     <a href="#!%(route)s">%(label)s</a></li>',item))}}}});erpnext.Footer=Class.extend({init:function(){$('footer').html(repl('<div class="web-footer">\
    <div class="web-footer-menu"><ul></ul></div>\
    <div class="web-footer-address">%(address)s</div>\
    <div class="web-footer-copyright">&copy; %(copyright)s</div>\
