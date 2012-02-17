@@ -32,6 +32,7 @@ class DocType:
 		
 		website.utils.add_guest_access_to_page(p.name)
 		self.cleanup_temp()
+		self.if_home_clear_cache()
 			
 	def add_page_links(self):
 		"""add links for next_page and see_also"""
@@ -54,4 +55,10 @@ class DocType:
 		for f in fl:
 			if f in self.doc.fields:
 				del self.doc.fields[f]
+				
+	def if_home_clear_cache(self):
+		"""if home page, clear cache"""
+		if webnotes.conn.get_value("Website Settings", None, "home_page")==self.doc.name:
+			from webnotes.session_cache import clear_cache
+			clear_cache('Guest')			
 	

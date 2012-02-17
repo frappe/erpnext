@@ -11,6 +11,14 @@ h1 {
 	margin-bottom: 15px;
 }
 
+h2 {
+	margin-bottom: 11px;
+}
+
+h3 {
+	margin-bottom: 7px;
+}
+
 pre {
     background-color: #F8F8F8;
     border: 1px solid #CCCCCC;
@@ -43,13 +51,6 @@ header .topbar .container {
 	width: 65%;
 	float: left;
 	margin-bottom: 20px;
-}
-
-.web-main-section p,
-.web-main-section h4,
-.web-main-section h5,
-.web-main-section pre  {
-	margin-left: 9px;
 }
 
 .web-side-section {

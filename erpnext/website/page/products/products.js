@@ -67,7 +67,7 @@ erpnext.products.make_product_list = function(wrapper) {
 				<div style="float:left; width: 400px">\
 					<p><b><a href="#!%(page_name)s">%(title)s</a></b></p>\
 					<p>%(short_description)s</p></div>\
-				<div style="clear: both; margin-bottom: 15px; border-bottom: 1px solid #AAA"></div>', data);
+				<div style="clear: both;"></div><hr />', data);
 		}
 	});
 }

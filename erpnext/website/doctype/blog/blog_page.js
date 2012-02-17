@@ -21,7 +21,7 @@ pscript['onload_{{ doc.name }}'] = function(wrapper) {
 	
 	
 	// comments
-	$(wrapper).find('.web-main-section').append('<h3>Comments</h3>');
+	$(wrapper).find('.web-main-section').append('<hr><h3>Comments</h3>');
 
 	wrapper.comment_list = new wn.widgets.Listing({
 		parent: $(wrapper).find('.web-main-section').get(0),
