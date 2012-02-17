@@ -26,7 +26,7 @@ cur_frm.fields_dict.purchase_receipt_no.get_query = function(doc) {
 // Hide/unhide based on return type
 //----------------------------------
 cur_frm.cscript.return_type = function(doc, cdt, cdn) {
-	var cp = locals['Control Panel']['Control Panel'];
+	var cp = wn.control_panel;
 	hide_field(['purchase_receipt_no', 'delivery_note_no', 'sales_invoice_no',
 		'return_details', 'Get Items', 'Make Excise Invoice', 'Make Stock Entry',
 		'Make Debit Note', 'Make Credit Note']);
