@@ -353,7 +353,7 @@ return"";else
 return decodeURIComponent(results[1]);},get_dict:function(){var d={}
 var t=window.location.href.split('?')[1];if(!t)return d;if(t.indexOf('#')!=-1)t=t.split('#')[0];if(!t)return d;t=t.split('&');for(var i=0;i<t.length;i++){var a=t[i].split('=');d[decodeURIComponent(a[0])]=decodeURIComponent(a[1]);}
 return d;},get_base_url:function(){var url=window.location.href.split('#')[0].split('?')[0].split('index.html')[0];if(url.substr(url.length-1,1)=='/')url=url.substr(0,url.length-1)
-return url},get_file_url:function(file_id){return repl('files/%(fn)s',{fn:file_id,ac:ac_id})}}
+return url},get_file_url:function(file_id){return repl('files/%(fn)s',{fn:file_id})}}
 get_url_arg=wn.urllib.get_arg;get_url_dict=wn.urllib.get_dict;var user_img={}
 var user_img_queue={};var user_img_loading=[];set_user_img=function(img,username,get_latest,img_id){function set_it(i){if(user_img[username]=='no_img_m')
 i.src='lib/images/ui/no_img_m.gif';else if(user_img[username]=='no_img_f')

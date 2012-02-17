@@ -427,7 +427,7 @@ return"";else
 return decodeURIComponent(results[1]);},get_dict:function(){var d={}
 var t=window.location.href.split('?')[1];if(!t)return d;if(t.indexOf('#')!=-1)t=t.split('#')[0];if(!t)return d;t=t.split('&');for(var i=0;i<t.length;i++){var a=t[i].split('=');d[decodeURIComponent(a[0])]=decodeURIComponent(a[1]);}
 return d;},get_base_url:function(){var url=window.location.href.split('#')[0].split('?')[0].split('index.html')[0];if(url.substr(url.length-1,1)=='/')url=url.substr(0,url.length-1)
-return url},get_file_url:function(file_id){return repl('files/%(fn)s',{fn:file_id,ac:ac_id})}}
+return url},get_file_url:function(file_id){return repl('files/%(fn)s',{fn:file_id})}}
 get_url_arg=wn.urllib.get_arg;get_url_dict=wn.urllib.get_dict;var user_img={}
 var user_img_queue={};var user_img_loading=[];set_user_img=function(img,username,get_latest,img_id){function set_it(i){if(user_img[username]=='no_img_m')
 i.src='lib/images/ui/no_img_m.gif';else if(user_img[username]=='no_img_f')
@@ -2200,7 +2200,8 @@ this.make();}
 wn.widgets.form.sidebar.Attachment=function(parent,filedet,frm){filedet=filedet.split(',')
 this.filename=filedet[0];this.fileid=filedet[1];this.frm=frm;var me=this;this.wrapper=$a(parent,'div','sidebar-comment-message');this.remove_fileid=function(){var doc=locals[me.frm.doctype][me.frm.docname];var fl=doc.file_list.split('\n');new_fl=[];for(var i=0;i<fl.length;i++){if(fl[i].split(',')[1]!=me.fileid)new_fl.push(fl[i]);}
 doc.file_list=new_fl.join('\n');}
-this.ln=$a(this.wrapper,'a','link_type',{fontSize:'11px'},this.fileid);this.ln.href='files/'+this.fileid;this.ln.target='_blank';this.del=$a(this.wrapper,'span','close','','&#215;');this.del.onclick=function(){var yn=confirm("Are you sure you want to delete the attachment?")
+var display_name=this.fileid;if(this.fileid.substr(0,8)=='FileData')
+display_name=this.filename;this.ln=$a(this.wrapper,'a','link_type',{fontSize:'11px'},display_name);this.ln.href='files/'+this.fileid;this.ln.target='_blank';this.del=$a(this.wrapper,'span','close','','&#215;');this.del.onclick=function(){var yn=confirm("Are you sure you want to delete the attachment?")
 if(yn){var callback=function(r,rt){locals[me.frm.doctype][me.frm.docname].modified=r.message;$dh(me.wrapper);me.remove_fileid();frm.refresh();}
 $c('webnotes.widgets.form.utils.remove_attach',args={'fid':me.fileid,dt:me.frm.doctype,dn:me.frm.docname},callback);}}}
 wn.widgets.form.file_upload_done=function(doctype,docname,fileid,filename,at_id,new_timestamp){var at_id=cint(at_id);var doc=locals[doctype][docname];if(doc.file_list){var fl=doc.file_list.split('\n')
