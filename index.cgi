@@ -11,6 +11,7 @@ sys.path.append('erpnext')
 import webnotes
 import webnotes.handler
 import webnotes.auth
+import webnotes.defs
 
 def init():
 	# make the form_dict
@@ -23,6 +24,8 @@ def init():
 		webnotes.http_request = webnotes.auth.HTTPRequest()
 	except webnotes.AuthenticationError, e:
 		pass
+	except webnotes.defs.IllegalDomainException, e:
+		print "Location: " + (webnotes.defs.redirect_404)
 
 def respond():
 	import webnotes
