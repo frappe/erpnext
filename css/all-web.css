@@ -1079,12 +1079,12 @@ header .topbar .container {
 	margin: auto;
 }
 
-.web-head-section {
-	margin-bottom: 20px
-}
-
 .web-content input[type="text"], .web-content input[type="password"], .web-content select {
 	min-width: 180px;
+}
+
+.web-head-section {
+	margin-bottom: 20px
 }
 
 .web-main-section {
