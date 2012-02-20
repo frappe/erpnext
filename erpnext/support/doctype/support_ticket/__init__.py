@@ -63,7 +63,7 @@ class SupportMailbox(POP3Mailbox):
 				st = get_obj('Support Ticket', thread_id)
 				st.make_response_record(content, mail.mail['From'], content_type)
 				webnotes.conn.set(st.doc, 'status', 'Open')
-				update_feed(st.doc)
+				update_feed(st.doc, 'on_update')
 				# extract attachments
 				self.save_attachments(st.doc, mail.attachments)
 				return
@@ -84,7 +84,7 @@ class SupportMailbox(POP3Mailbox):
 			d.save(1)
 
 			# update feed
-			update_feed(d)
+			update_feed(d, 'on_update')
 
 			# send auto reply
 			self.send_auto_reply(d)
