@@ -24,7 +24,7 @@ def init():
 		webnotes.http_request = webnotes.auth.HTTPRequest()
 	except webnotes.AuthenticationError, e:
 		pass
-	except webnotes.defs.IllegalDomainException, e:
+	except webnotes.UnknownDomainError, e:
 		print "Location: " + (webnotes.defs.redirect_404)
 
 def respond():

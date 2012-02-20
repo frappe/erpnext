@@ -10,7 +10,7 @@
 <h3 style="background-color: #EEF; padding: 2px;">Step 1. Download Template</h3>
 <select id="import_template" style="margin: 10px;"> <option>Select Master...</option> </select>
 
-<div style="margin: 10px; margin-top: 0px;"><input name="overwrite" type="checkbox"/> Over-write records with same name?</div>
+<div style="margin: 10px; margin-top: 0px;"><input name="overwrite" type="checkbox"/> Do you want to over-write records? <br><span style='color:orange'>Warning: Over-writing the data of child tables, will delete all old data. For more info see below</span></div>
 <div id="child_tab_lst"></div>
 <h3 style="background-color: #EEF; padding: 2px;">Step 2. Upload and Import</h3>
 <table style="width: 480px;" border="0" cellspacing="10px">
@@ -33,19 +33,27 @@
 </table>
 </form>
 <div style="background-color: #FFE; padding: 13px; margin: 17px;">
-<h3>Data Import Guide</h3>
-<ol>
-<li>Get the template of the DocType for which you want to import in CSV (Comma seperated values) format.</li>
-<li>Fill in the data in the template. You can remove columns that are not relevant</li>
-<li>Save the template in CSV format</li>
-<li>Select the saved CSV file, identify the date format if any</li>
-<li>Click on "Import"</li>
-</ol></div>
+	<h3>Data Import Guide</h3>
+	<ol>
+		<li>Get the template of the DocType for which you want to import in CSV (Comma seperated values) format.</li>
+		<li>Fill in the data in the template. You can remove columns that are not relevant</li>
+		<li>Save the template in CSV format</li>
+		<li>Select the saved CSV file, identify the date format if any</li>
+		<li>Click on "Import"</li>
+	</ol>
+	<h4>Over-writing Guide</h4>
+	<ol>
+		<li>To over-write data, click on "Do you want to over-write records?" and then download template</li>
+		<li>To over-write parent table data, mention existing ID in "Name" column</li>
+		<li>Over-writing of child table data will delete all previous data of child table and re-import. so before over-writing child tables, export all data from system, modify them and then re-import</li>
+		<li>Over-write checkbox will be checked while importing</li>
+	</ol>
+</div>
 </td>
 <td style="border: 1px solid #AAA; padding: 4px;">
 <h3>Import Log:</h3>
 <div id="import_result_area">
-<iframe name="ImportIFrame" style="border: 0px; height: 500px; width: 100%"></iframe>
+<iframe name="ImportIFrame" style="border: 0px; height: 620px; width: 100%"></iframe>
 </div>
 </td>
 </tr>
