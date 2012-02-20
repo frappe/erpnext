@@ -481,8 +481,9 @@ var t=make_table(msg_dialog.rows['Msg'],1,2,'100%',['20px','250px'],{padding:'2p
 if(!msg_dialog.display)msg_dialog.show();var has_msg=msg_dialog.msg_area.innerHTML?1:0;var m=$a(msg_dialog.msg_area,'div','');if(has_msg)$y(m,{marginTop:'4px'});$dh(msg_dialog.msg_icon);if(msg.substr(0,6).toLowerCase()=='error:'){msg_dialog.msg_icon.src='lib/images/icons/error.gif';$di(msg_dialog.msg_icon);msg=msg.substr(6);}else if(msg.substr(0,8).toLowerCase()=='message:'){msg_dialog.msg_icon.src='lib/images/icons/application.gif';$di(msg_dialog.msg_icon);msg=msg.substr(8);}else if(msg.substr(0,3).toLowerCase()=='ok:'){msg_dialog.msg_icon.src='lib/images/icons/accept.gif';$di(msg_dialog.msg_icon);msg=msg.substr(3);}
 m.innerHTML=replace_newlines(msg);if(m.offsetHeight>200){$y(m,{height:'200px',width:'400px',overflow:'auto'})}
 msg_dialog.custom_onhide=callback;}
-var growl_area;function show_alert(txt){if(!growl_area){growl_area=$a(popup_cont,'div','',{position:'fixed',bottom:'8px',right:'8px',width:'320px',zIndex:10});}
-var wrapper=$a(growl_area,'div','',{position:'relative'});var body=$a(wrapper,'div','notice');var c=$a(body,'div','wn-icon ic-round_delete',{cssFloat:'right'});$(c).click(function(){$dh(this.wrapper)});c.wrapper=wrapper;var t=$a(body,'div','',{color:'#FFF'});$(t).html(txt);$(wrapper).hide().fadeIn(1000);}
+var growl_area;function show_alert(txt,id){if(!growl_area){growl_area=$a(popup_cont,'div','',{position:'fixed',bottom:'8px',right:'8px',width:'320px',zIndex:10});}
+var wrapper=$a(growl_area,'div','',{position:'relative'});var body=$a(wrapper,'div','notice');var c=$a(body,'div','wn-icon ic-round_delete',{cssFloat:'right'});$(c).click(function(){$dh(this.wrapper)});c.wrapper=wrapper;var t=$a(body,'div','',{color:'#FFF'});$(t).html(txt);if(id){$(t).attr('id',id);}
+$(wrapper).hide().fadeIn(1000);}
 /*
  *	lib/js/legacy/utils/shortcut.js
  */
@@ -1379,7 +1380,7 @@ if(rd[1]){var dt=rd[0];var dn=rd[1];this.add(dt,dn,0);}}}});
 /*
  *	lib/js/wn/ui/toolbar/toolbar.js
  */
-wn.ui.toolbar.Toolbar=Class.extend({init:function(){this.make();this.make_home();this.make_new();this.make_search();this.make_report();wn.ui.toolbar.recent=new wn.ui.toolbar.RecentDocs();if(in_list(user_roles,'Administrator'))
+wn.ui.toolbar.Toolbar=Class.extend({init:function(){this.make();this.make_home();this.make_document();wn.ui.toolbar.recent=new wn.ui.toolbar.RecentDocs();if(in_list(user_roles,'Administrator'))
 this.make_options();this.make_tools();this.set_user_name();this.make_logout();$('.topbar').dropdown();$(document).trigger('toolbar_setup');},make:function(){$('header').append('<div class="topbar">\
    <div class="topbar-inner">\
    <div class="container">\
@@ -1396,10 +1397,14 @@ this.make_options();this.make_tools();this.set_user_name();this.make_logout();$(
     </ul>\
    </div>\
    </div>\
-   </div>');},make_home:function(){$('.topbar .nav:first').append('<li><a href="#'+home_page+'">Home</a></li>')},make_new:function(){wn.ui.toolbar.new_dialog=new wn.ui.toolbar.NewDialog();$('.topbar .nav:first').append('<li><a href="#" \
-   onclick="return wn.ui.toolbar.new_dialog.show();">New</a></li>');},make_search:function(){wn.ui.toolbar.search=new wn.ui.toolbar.Search();$('.topbar .nav:first').append('<li><a href="#" \
-   onclick="return wn.ui.toolbar.search.show();">Search</a></li>');},make_report:function(){wn.ui.toolbar.report=new wn.ui.toolbar.Report();$('.topbar .nav:first').append('<li><a href="#" \
-   onclick="return wn.ui.toolbar.report.show();">Report</a></li>');},make_tools:function(){$('.topbar .nav:first').append('<li class="dropdown">\
+   </div>');},make_home:function(){$('.topbar .nav:first').append('<li><a href="#'+home_page+'">Home</a></li>')},make_document:function(){wn.ui.toolbar.new_dialog=new wn.ui.toolbar.NewDialog();wn.ui.toolbar.search=new wn.ui.toolbar.Search();wn.ui.toolbar.report=new wn.ui.toolbar.Report();$('.topbar .nav:first').append('<li class="dropdown">\
+   <a class="dropdown-toggle" href="#" onclick="return false;">Document</a>\
+   <ul class="dropdown-menu" id="toolbar-document">\
+    <li><a href="#" onclick="return wn.ui.toolbar.new_dialog.show();">New</a></li>\
+    <li><a href="#" onclick="return wn.ui.toolbar.search.show();">Search</a></li>\
+    <li><a href="#" onclick="return wn.ui.toolbar.report.show();">Report</a></li>\
+   </ul>\
+  </li>');},make_tools:function(){$('.topbar .nav:first').append('<li class="dropdown">\
    <a class="dropdown-toggle" href="#" onclick="return false;">Tools</a>\
    <ul class="dropdown-menu" id="toolbar-tools">\
     <li><a href="#" onclick="return err_console.show();">Error Console</a></li>\
@@ -2209,7 +2214,7 @@ wn.widgets.form.sidebar.AssignTo=Class.extend({init:function(parent,sidebar,doct
 this.refresh();},refresh:function(){var me=this;$c('webnotes.widgets.form.assign_to.get',{doctype:me.doctype,name:me.name},function(r,rt){me.render(r.message)})},render:function(d){var me=this;$(this.body).empty();if(this.dialog){this.dialog.hide();}
 for(var i=0;i<d.length;i++){$(this.body).append(repl('<div>%(owner)s \
     <a class="close" href="#" data-owner="%(owner)s">&#215</a></div>',d[i]))}
-$(this.body).find('a.close').click(function(){$c('webnotes.widgets.form.assign_to.remove',{doctype:me.doctype,name:me.name,assign_to:$(this).attr('data-owner')},function(r,rt){me.render(r.message);});return false;});},add:function(){var me=this;if(!me.dialog){me.dialog=new wn.widgets.Dialog({title:'Add to To Do',width:350,fields:[{fieldtype:'Link',fieldname:'assign_to',options:'Profile',label:'Assign To',description:'Add to To Do List of',reqd:true},{fieldtype:'Data',fieldname:'description',label:'Comment','default':'Assigned by '+user},{fieldtype:'Date',fieldname:'date',label:'Complete By'},{fieldtype:'Select',fieldname:'priority',label:'Priority',options:'Low\nMedium\nHigh','default':'Medium'},{fieldtype:'Button',label:'Add',fieldname:'add_btn'}]});me.dialog.fields_dict.add_btn.input.onclick=function(){var assign_to=me.dialog.fields_dict.assign_to.get_value();if(assign_to){$c('webnotes.widgets.form.assign_to.add',{doctype:me.doctype,name:me.name,assign_to:assign_to,description:me.dialog.fields_dict.description.get_value(),priority:me.dialog.fields_dict.priority.get_value(),date:me.dialog.fields_dict.date.get_value()},function(r,rt){me.render(r.message);});}}}
+$(this.body).find('a.close').click(function(){$c('webnotes.widgets.form.assign_to.remove',{doctype:me.doctype,name:me.name,assign_to:$(this).attr('data-owner')},function(r,rt){me.render(r.message);});return false;});},add:function(){var me=this;if(!me.dialog){me.dialog=new wn.widgets.Dialog({title:'Add to To Do',width:350,fields:[{fieldtype:'Link',fieldname:'assign_to',options:'Profile',label:'Assign To',description:'Add to To Do List of',reqd:true},{fieldtype:'Data',fieldname:'description',label:'Comment','default':'Assigned by '+user},{fieldtype:'Date',fieldname:'date',label:'Complete By'},{fieldtype:'Select',fieldname:'priority',label:'Priority',options:'Low\nMedium\nHigh','default':'Medium'},{fieldtype:'Check',fieldname:'notify',label:'Notify By Email'},{fieldtype:'Button',label:'Add',fieldname:'add_btn'}]});me.dialog.fields_dict.add_btn.input.onclick=function(){var assign_to=me.dialog.fields_dict.assign_to.get_value();if(assign_to){$c('webnotes.widgets.form.assign_to.add',{doctype:me.doctype,name:me.name,assign_to:assign_to,description:me.dialog.fields_dict.description.get_value(),priority:me.dialog.fields_dict.priority.get_value(),date:me.dialog.fields_dict.date.get_value(),notify:me.dialog.fields_dict.notify.get_value()},function(r,rt){me.render(r.message);});}}}
 me.dialog.clear();me.dialog.show();}});
 /*
  *	lib/js/legacy/app.js
@@ -2258,7 +2263,7 @@ wn.modules_path='erpnext';wn.settings.no_history=true;$(document).bind('ready',f
 var current_module;var is_system_manager=0;var module_content_dict={};var user_full_nm={};wn.provide('erpnext.startup');erpnext.startup.set_globals=function(){pscript.is_erpnext_saas=cint(wn.control_panel.sync_with_gateway)
 if(inList(user_roles,'System Manager'))is_system_manager=1;}
 erpnext.startup.start=function(){$('#startup_div').html('Starting up...').toggle(true);erpnext.startup.set_globals();if(user=='Guest'){$dh(page_body.left_sidebar);if(wn.boot.custom_css){set_style(wn.boot.custom_css);}
-if(wn.boot.website_settings.title_prefix){wn.title_prefix=wn.boot.website_settings.title_prefix;}}else{pscript.startup_make_sidebar();erpnext.toolbar.setup();$('footer').html('<div class="erpnext-footer">\
+if(wn.boot.website_settings.title_prefix){wn.title_prefix=wn.boot.website_settings.title_prefix;}}else{pscript.startup_make_sidebar();erpnext.toolbar.setup();erpnext.startup.set_periodic_updates();$('footer').html('<div class="erpnext-footer">\
    Powered by <a href="https://erpnext.com">ERPNext</a></div>');}
 $('#startup_div').toggle(false);}
 show_chart_browser=function(nm,chart_type){var call_back=function(){if(nm=='Sales Browser'){var sb_obj=new SalesBrowser();sb_obj.set_val(chart_type);}
@@ -2268,6 +2273,10 @@ loadpage(nm,call_back);}
 ModulePage=function(parent,module_name,module_label,help_page,callback){this.parent=parent;page_body.cur_page.module_page=this;this.wrapper=$a(parent,'div');this.module_name=module_name;this.transactions=[];this.page_head=new PageHeader(this.wrapper,module_label);if(help_page){var btn=this.page_head.add_button('Help',function(){loadpage(this.help_page)},1,'ui-icon-help')
 btn.help_page=help_page;}
 if(callback)this.callback=function(){callback();}}
+var update_messages=function(){if(inList(['Guest','Administrator'],user)){return;}
+$c_page('home','event_updates','get_unread_messages',null,function(r,rt){if(!r.exc){page_body.wntoolbar.set_new_comments(r.message);}});}
+erpnext.startup.set_periodic_updates=function(){wn.updates={};if(wn.updates.id){clearInterval(wn.updates.id);}
+wn.updates.id=setInterval(update_messages,180000);}
 $(document).bind('startup',function(){erpnext.startup.start();});
 /*
  *	erpnext/startup/modules.js
@@ -2314,8 +2323,8 @@ si.show_section(me.det.doc_type);}}
 /*
  *	erpnext/startup/toolbar.js
  */
-wn.provide('erpnext.toolbar');erpnext.toolbar.setup=function(){$('#toolbar-user').append('<li><a href="#profile-settings">Profile Settings</a></li>')
-$('.topbar .secondary-nav').append('<li class="dropdown">\
+wn.provide('erpnext.toolbar');erpnext.toolbar.setup=function(){$('#toolbar-user').append('<li><a href="#profile-settings">Profile Settings</a></li>');$('#toolbar-user').append('<li><a href="#My Company">Team / Messages</a></li>');$('.topbar .secondary-nav').prepend('\
+  <li><a href="#" id="toolbar-new-comments"></a></li>');$('.topbar .secondary-nav').append('<li class="dropdown">\
   <a class="dropdown-toggle" href="#" onclick="return false;">Help</a>\
   <ul class="dropdown-menu" id="toolbar-help">\
   </ul></li>')
@@ -2325,7 +2334,8 @@ $('#toolbar-help').append('<li><a href="http://groups.google.com/group/erpnext-u
   Forum</a></li>')
 $('#toolbar-help').append('<li><a href="http://www.providesupport.com?messenger=iwebnotes" target="_blank">\
   Live Chat (Office Hours)</a></li>')
-if(pscript.is_erpnext_saas&&is_system_manager){$('#toolbar-user').append('<li><a href="#billing">Billing</a></li>')}}
+if(pscript.is_erpnext_saas&&is_system_manager){$('#toolbar-user').append('<li><a href="#billing">Billing</a></li>')}
+$.extend(page_body.wntoolbar,{set_new_comments:function(new_comments){var topbar_nc=$('#toolbar-new-comments');if(new_comments&&new_comments.length>0){topbar_nc.html('<span class="topbar-new-comments">'+new_comments.length+'</span>');topbar_nc.click(function(){loadpage('My Company');});$.each(new_comments,function(i,v){var msg='New Message: '+(v[1].length<=100?v[1]:(v[1].substr(0,100)+"..."));var id=v[0].replace('/','-');if(!$('#'+id)[0]){show_alert(msg,id);}})}else{topbar_nc.html('');topbar_nc.click(function(){return false;});}}});page_body.wntoolbar.set_new_comments();}
 /*
  *	erpnext/startup/feature_setup.js
  */

@@ -29,13 +29,16 @@ erpnext.startup.start = function() {
 
 		// setup toolbar
 		erpnext.toolbar.setup();
+		
+		// set interval for updates
+		erpnext.startup.set_periodic_updates();
 
 		// border to the body
 		// ------------------
 		$('footer').html('<div class="erpnext-footer">\
 			Powered by <a href="https://erpnext.com">ERPNext</a></div>');
 	}
-	
+
 	$('#startup_div').toggle(false);
 }
 
@@ -76,6 +79,35 @@ ModulePage = function(parent, module_name, module_label, help_page, callback) {
 
 	if(callback) this.callback = function(){ callback(); }
 }
+
+// ========== Update Messages ============
+var update_messages = function() {
+	// Updates Team Messages
+	
+	if(inList(['Guest', 'Administrator'], user)) { return; }
+	
+	$c_page('home', 'event_updates', 'get_unread_messages', null,
+		function(r,rt) {
+			if(!r.exc) {
+				// This function is defined in toolbar.js
+				page_body.wntoolbar.set_new_comments(r.message);
+			}
+		}
+	);
+}
+
+erpnext.startup.set_periodic_updates = function() {
+	// Set interval for periodic updates of team messages
+	wn.updates = {};
+
+	if(wn.updates.id) {
+		clearInterval(wn.updates.id);
+	}
+
+	wn.updates.id = setInterval(update_messages, 180000);
+}
+
+// =======================================
 
 // start
 $(document).bind('startup', function() {

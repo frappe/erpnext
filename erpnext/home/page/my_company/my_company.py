@@ -119,7 +119,7 @@ def post_comment(arg):
 	d.comment = arg['comment']
 	d.save(1)
 	
-	if cint(arg['notify']):
+	if cint(arg.get('notify')):
 		fn = webnotes.conn.sql('select first_name, last_name from tabProfile where name=%s', webnotes.user.name)[0]
 		if fn[0] or f[1]:
 			fn = cstr(fn[0]) + (fn[0] and ' ' or '') + cstr(fn[1])
