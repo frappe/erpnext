@@ -202,7 +202,6 @@ class DocType:
 		self.update_nsm_model()		
 		# Add curret year balance
 		self.set_year_balance()
-		
 
 	# Check user role for approval process
 	# ==================================================================
@@ -232,7 +231,7 @@ class DocType:
 	# ==================================================================
 	def check_balance_before_trash(self):
 		if self.check_gle_exists():
-			msgprint("Account with existing transaction can not be trashed", raise_exception=1)
+			msgprint("Account with existing transaction (Sales Invoice / Purchase Invoice / Journal Voucher) can not be trashed", raise_exception=1)
 		if self.check_if_child_exists():
 			msgprint("Child account exists for this account. You can not trash this account.", raise_exception=1)
 
@@ -247,10 +246,14 @@ class DocType:
 	# ==================================================================
 	def on_trash(self): 
 		# Check balance before trash
-		self.check_balance_before_trash()		
+		self.check_balance_before_trash()
+		
 		# rebuild tree
 		set(self.doc,'old_parent', '')
 		self.update_nsm_model()
+
+		# delete all cancelled gl entry of this account
+		sql("delete from `tabGL Entry` where account = %s and ifnull(is_cancelled, 'No') = 'Yes'", self.doc.name)
 
 		#delete Account Balance
 		sql("delete from `tabAccount Balance` where account = %s", self.doc.name)
@@ -260,6 +263,8 @@ class DocType:
 	def on_restore(self):
 		# rebuild tree
 		self.update_nsm_model()
+		# intiate balances
+		self.set_year_balance()
 	
 	# on rename
 	# ---------
