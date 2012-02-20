@@ -16,12 +16,14 @@ pscript.home_make_body = function() {
 	var wrapper = page_body.pages['Event Updates'];
 	
 	// body
-	wrapper.main_tab = make_table(wrapper,1,2,'100%',['70%','30%']);
-	$y(wrapper.main_tab, {tableLayout:'fixed'});
-
-	wrapper.body = $a($td(wrapper.main_tab, 0, 0), 'div', 'layout_wrapper');
-
+	$(wrapper).addClass('layout-wrapper')
+		.css('background-color', wn.sidebar_background).css('padding', '0px');
+	wrapper.style.backgroud
+	
+	wrapper.body = $a(wrapper, 'div', 'layout-main-section');
 	wrapper.head = $a(wrapper.body, 'div');
+	wrapper.side_section =$a(wrapper, 'div', 'layout-side-section');
+	$a(wrapper, 'div', '', {clear:'both'});
 	
 	wrapper.banner_area = $a(wrapper.head, 'div');
 
@@ -46,7 +48,7 @@ pscript.home_set_banner = function(wrapper) {
 
 pscript.home_make_widgets = function() {
 	var wrapper = page_body.pages['Event Updates'];
-	var cell = $td(wrapper.main_tab, 0, 1);
+	var cell = wrapper.side_section;
 
 	// sidebar
 	sidebar = new wn.widgets.PageSidebar(cell, {
@@ -580,7 +582,7 @@ FeedItem.prototype.render_references = function(div, det) {
 HomeStatusBar = function() {
 	var me = this;
 	var parent = page_body.pages['Event Updates'];
-	this.wrapper = $a($td(parent.main_tab, 0, 1), 'div', 'home-status', {}, 'Loading...');
+	this.wrapper = $a(parent.sidebar_section, 'div', 'home-status', {}, 'Loading...');
 	$br(this.wrapper, '3px');
 	
 	this.render = function(r) {

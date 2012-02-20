@@ -39,7 +39,7 @@
 			"lib/css/legacy/menus.css",
 			"lib/css/legacy/messages.css",
 			"lib/css/legacy/dialog.css",
-			"lib/css/legacy/bootstrap-buttons.css",
+			"lib/css/bootstrap/bootstrap-buttons.css",
 			"lib/css/bootstrap/bootstrap-topbar.css",
 			"erpnext/startup/startup.css",
 			"erpnext/website/css/website.css"	
@@ -61,7 +61,7 @@
 			"lib/css/legacy/tabs.css",
 			"lib/css/legacy/bw-icons.css",
 			"lib/css/legacy/sidebar.css",
-			"lib/css/legacy/bootstrap-buttons.css",
+			"lib/css/bootstrap/bootstrap-buttons.css",
 			"lib/css/bootstrap/bootstrap-topbar.css",
 			"erpnext/startup/startup.css"							
 		]
