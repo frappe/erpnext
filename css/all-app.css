@@ -234,10 +234,15 @@ div.std-footer-item {
 	padding: 15px;
 }
 
+.layout-wrapper-background {
+	background-color: #f2f2f2 !important;
+	padding: 0px;
+}
+
 .layout-main-section {
 	width: 68%;
 	float: left;
-	padding: 13px;
+	padding: 15px;
 	background-color: #FFF;
 	min-height: 450px;
 }
@@ -245,10 +250,9 @@ div.std-footer-item {
 .layout-side-section {
 	width: 24%;
 	float: right;
-	margin-right: 15px;
 	color: #606060;
 	overflow-x: hidden;
-	padding: 13px;
+	padding: 15px;
 	min-height: 450px;
 }
 
@@ -1619,45 +1623,38 @@ ul.box_tabs li.box_tab_selected a {
 
 /*
  *	lib/css/legacy/sidebar.css
- */div.psidebar-wrapper {
-	margin: 0px 8px;
+ */div.psidebar {
 }
 
-div.psidebar-head {
+div.psidebar div.head {
 	font-size: 14px;
 	font-weight: bold;
 	color: #555;
 	margin-bottom: 12px;
 }
 
-div.psidebar-section {
+div.psidebar div.section {
 	margin-bottom: 11px;
 	overflow: hidden;
 }
 
-div.psidebar-section-head {
+div.psidebar div.section-head {
 	font-size: 12px;
 	padding: 5px 11px;
 	border-bottom: 2px solid #444;
 }
 
-div.psidebar-section-body {
+div.psidebar div.section-body {
 	margin: 7px 11px 11px 11px;
 }
 
-div.psidebar-section-item {
+div.psidebar div.section-item {
 	margin-bottom: 7px;
 }
 
-.psidebar-section-link {
+div.psidebar .section-link {
 	font-size: 11px;
 	color: #666;
-}
-
-div.follower-list {
-	color: #666;
-	margin-top: 7px;
-	font-size: 11px;
 }
 /*
  *	lib/css/bootstrap/bootstrap-buttons.css

@@ -234,10 +234,15 @@ div.std-footer-item {
 	padding: 15px;
 }
 
+.layout-wrapper-background {
+	background-color: #f2f2f2 !important;
+	padding: 0px;
+}
+
 .layout-main-section {
 	width: 68%;
 	float: left;
-	padding: 13px;
+	padding: 15px;
 	background-color: #FFF;
 	min-height: 450px;
 }
@@ -245,10 +250,9 @@ div.std-footer-item {
 .layout-side-section {
 	width: 24%;
 	float: right;
-	margin-right: 15px;
 	color: #606060;
 	overflow-x: hidden;
-	padding: 13px;
+	padding: 15px;
 	min-height: 450px;
 }
 

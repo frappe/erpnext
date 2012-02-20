@@ -16,9 +16,7 @@ pscript.home_make_body = function() {
 	var wrapper = page_body.pages['Event Updates'];
 	
 	// body
-	$(wrapper).addClass('layout-wrapper')
-		.css('background-color', wn.sidebar_background).css('padding', '0px');
-	wrapper.style.backgroud
+	$(wrapper).addClass('layout-wrapper').addClass('layout-wrapper-background')
 	
 	wrapper.body = $a(wrapper, 'div', 'layout-main-section');
 	wrapper.head = $a(wrapper.body, 'div');
