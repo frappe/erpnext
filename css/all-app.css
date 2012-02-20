@@ -2253,3 +2253,15 @@ body {
 .module-icons-setup{ background-position: 0 -594px;  } 
 .module-icons-stock{ background-position: 0 -660px;  } 
 .module-icons-support{ background-position: 0 -726px;  } 
+
+.topbar-new-comments {
+	margin: -3px 0px;
+	padding: 2px;
+	font-size: 14px;
+	color: #fff;
+	background-color: #B00D07;
+	min-width: 20px;
+	text-align: center;
+	display: inline-block;
+	border-radius: 2px;
+}

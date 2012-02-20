@@ -95,6 +95,7 @@ OnlineUsers = function(wrapper) {
 		
 		if(online_users.length) {
 			var max = online_users.length; max = (max > 10 ? 10 : max)
+			me.wrapper.innerHTML = "";
 			for(var i=0; i<max; i++) {
 				new OneOnlineUser(me.wrapper, online_users[i]);
 			}
@@ -577,34 +578,13 @@ FeedItem.prototype.render_references = function(div, det) {
 		(strip(det.full_name) ? det.full_name : det.modified_by);
 }
 
-HomeStatusBar = function() {
-	var me = this;
-	var parent = page_body.pages['Event Updates'];
-	this.wrapper = $a($td(parent.main_tab, 0, 1), 'div', 'home-status', {}, 'Loading...');
-	$br(this.wrapper, '3px');
-	
-	this.render = function(r) {
-		this.wrapper.innerHTML = '';
-		this.span = $a($a(this.wrapper, 'p'), 'span', 'link_type', {fontWeight:'bold'});
-		this.span.onclick = function() { loadpage('My Company')	}
-		
-		if(r.unread_messages) {
-			this.span.innerHTML = '<span class="home-status-unread">' + r.unread_messages + '</span> unread';
-		} else {
-			this.span.innerHTML = 'Team / Messages';			
-		}
-		
-	}
-}
-
 pscript.home_make_status = function() {
-	var home_status_bar = new HomeStatusBar()
 	var wrapper = page_body.pages['Event Updates'];
 
 	// get values
 	$c_page('home', 'event_updates', 'get_status_details', user,
 		function(r,rt) { 
-			home_status_bar.render(r.message);
+			page_body.wntoolbar.set_new_comments(r.message.unread_messages);
 										
 			// render online users
 			pscript.online_users_obj.render(r.message.online_users);

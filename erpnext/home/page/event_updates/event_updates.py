@@ -10,13 +10,16 @@ def get_online_users(arg=None):
 		and t1.user not in ('Guest','Administrator')
 		and TIMESTAMPDIFF(HOUR,t1.lastupdate,NOW()) <= 1""", as_list=1) or []
 
+@webnotes.whitelist()
 def get_unread_messages(arg=None):
 	"returns unread (docstatus-0 messages for a user)"
-	return cint(webnotes.conn.sql("""SELECT COUNT(*) FROM `tabComment Widget Record`
-	WHERE comment_doctype='My Company'
-	AND comment_docname = %s
-	AND ifnull(docstatus,0)=0
-	""", webnotes.user.name)[0][0])
+	return webnotes.conn.sql("""\
+		SELECT name, comment
+		FROM `tabComment Widget Record`
+		WHERE comment_doctype='My Company'
+		AND comment_docname = %s
+		AND ifnull(docstatus,0)=0
+		""", webnotes.user.name, as_list=1)
 
 @webnotes.whitelist()
 def get_status_details(arg=None):
@@ -30,8 +33,6 @@ def get_status_details(arg=None):
 		'user_count': len(online) or 0, 
 		'unread_messages': get_unread_messages(),
 		'online_users': online or [],
-		'is_trial': webnotes.conn.get_global('is_trial'),
-		'days_to_expiry': (webnotes.conn.get_global('days_to_expiry') or '0'),
 		'setup_status': get_setup_status(),
 		'registration_complete': cint(get_defaults('registration_complete')) and 'Yes' or 'No',
 		'profile': webnotes.conn.sql("""\
