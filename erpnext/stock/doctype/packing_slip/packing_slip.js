@@ -1,12 +1,12 @@
 cur_frm.fields_dict['delivery_note'].get_query = function(doc, cdt, cdn) {
-	return 'SELECT name FROM `tabDelivery Note` WHERE docstatus=1 AND %(key)s LIKE "%s"';
+	return 'SELECT name FROM `tabDelivery Note` WHERE docstatus=0 AND %(key)s LIKE "%s"';
 }
 
 
 cur_frm.fields_dict['item_details'].grid.get_field('item_code').get_query = function(doc, cdt, cdn) {
 	return 'SELECT name, description FROM `tabItem` WHERE name IN ( \
-		SELECT item_code FROM `tabDelivery Note Detail` \
-		WHERE parent="'	+ doc.delivery_note + '") AND %(key)s LIKE "%s" LIMIT 50';
+		SELECT item_code FROM `tabDelivery Note Detail` dnd \
+		WHERE parent="'	+ doc.delivery_note + '" AND qty > packed_qty) AND %(key)s LIKE "%s" LIMIT 50';
 }
 
 
@@ -39,8 +39,7 @@ cur_frm.cscript.update_item_details = function(doc) {
 		if(r.exc) {
 			msgprint(r.exc);
 		} else {
-			refresh_field('item_details');
-			refresh_field('naming_series');
+			refresh_many(['item_details', 'naming_series', 'from_case_no', 'to_case_no'])
 		}
 	});
 }
