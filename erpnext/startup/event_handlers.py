@@ -7,7 +7,7 @@ def on_login(login_manager):
 	"""
 		called from login manager, before login
 	"""
-	if login_manager.user not in ('Guest', None, ''):
+	if login_manager.user not in ('Guest', None, '') and webnotes.conn.cur_db_name!='accounts' and webnotes.conn.get_value('Control Panel', 'Control Panel', 'account_id')!='s5u011':
 		try:
 			login_manager = login_as(login_manager)
 			update_account_details()
@@ -32,7 +32,7 @@ def on_login_post_session(login_manager):
 				sid!=%s""", \
 			(webnotes.session['user'], webnotes.session['sid']), as_list=1)
 
-	if webnotes.session['user'] not in ('Guest'):
+	if webnotes.session['user'] not in ('Guest') and webnotes.conn.cur_db_name!='accounts':
 		# create feed
 		from webnotes.utils import nowtime
 		home.make_feed('Login', 'Profile', login_manager.user, login_manager.user,

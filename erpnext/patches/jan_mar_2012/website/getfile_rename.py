@@ -23,17 +23,23 @@ def execute():
 			txt = get_file_id(txt)
 			
 			webnotes.conn.sql("""update `tab%s` set %s=%s where name=%s""" % \
-				(table[0], table[1], '%s', '%s'), (txt, item[0]), debug=1)
+				(table[0], table[1], '%s', '%s'), (txt, item[0]))
 	
 	# control panel, client name
 	txt = webnotes.conn.get_value('Control Panel',None,'client_name')
-	txt = get_file_id(txt)
-	webnotes.conn.set_value('Control Panel', None, 'client_name', txt.replace('index.cgi?cmd=get_file&fname=', 'files/'))
-		
+	if txt:
+		txt = get_file_id(txt)
+		webnotes.conn.set_value('Control Panel', None, 'client_name', txt.replace('index.cgi?cmd=get_file&fname=', 'files/'))
+	
 def get_file_id(txt):
 	"""old file links may be from fileid or filename"""
 	import re
 	match = re.search('files/([^"\']*)', txt)
+
+	if not match:
+		print txt
+		return txt
+
 	fname = match.groups()[0]
 	if not fname.startswith('FileData'):
 		fid = webnotes.conn.sql("""select name from `tabFile Data` 

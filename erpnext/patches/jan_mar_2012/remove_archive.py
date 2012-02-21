@@ -8,7 +8,7 @@ def execute():
 	from webnotes.utils import archive
 	arc_tables = webnotes.conn.sql('show tables like "arc%"')
 	try:
-		webnotes.conn.auto_commit_on_excess = 1
+		webnotes.conn.auto_commit_on_many_writes = 1
 		for tab in arc_tables:
 			tab = tab[0]
 			dt = tab[3:]
