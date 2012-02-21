@@ -15,7 +15,7 @@ def execute():
 			res = webnotes.conn.sql("SELECT name FROM `%s`" % tab)
 			for dn in res:
 				archive.archive_doc(dt, dn[0], restore=1)
-				count++
+				count += 1
 				if not count%100:
 					webnotes.conn.commit()
 					webnotes.conn.begin()
