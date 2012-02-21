@@ -1,4 +1,4 @@
-wn.provide('erpnext.topbar');
+wn.provide('erpnext.navbar');
 
 /*
 <li class="dropdown">\
@@ -8,16 +8,16 @@ wn.provide('erpnext.topbar');
 </li>\
 */
 
-erpnext.topbar.TopBar = Class.extend({
+erpnext.navbar.navbar = Class.extend({
 	init: function() {
 		this.make();
 		$('.brand').html(wn.boot.website_settings.brand_html);
 		this.make_items();
-		$('.topbar').dropdown();
+		$('.navbar').dropdown();
 	},
 	make: function() {
-		$('header').append('<div class="topbar">\
-			<div class="topbar-inner">\
+		$('header').append('<div class="navbar navbar-fixed-top">\
+			<div class="navbar-inner">\
 			<div class="container">\
 				<a class="brand">[brand]</a>\
 				<ul class="nav">\
@@ -52,7 +52,9 @@ erpnext.topbar.TopBar = Class.extend({
 				$parent_li = $(repl('header li[data-label="%(parent_label)s"]', item));
 				if(!$parent_li.hasClass('dropdown')) {
 					$parent_li.addClass('dropdown');
-					$parent_li.find('a:first').addClass('dropdown-toggle');
+					$parent_li.find('a:first').addClass('dropdown-toggle')
+						.attr('data-toggle', 'dropdown')
+						.append('<b class="caret"></b>');
 					$parent_li.append('<ul class="dropdown-menu"></ul>');
 				}
 				item.route = item.url || item.custom_page;
@@ -91,5 +93,5 @@ erpnext.Footer = Class.extend({
 
 $(document).bind('startup', function() {
 	erpnext.footer = new erpnext.Footer();
-	erpnext.topbar.topbar = new erpnext.topbar.TopBar();	
+	erpnext.navbar.navbar = new erpnext.navbar.navbar();	
 })
