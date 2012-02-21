@@ -181,7 +181,7 @@ class DocType(TransactionBase):
 	# ------------------
 	def validate_po_date(self):
 		# validate p.o date v/s delivery date
-		if self.doc.po_date and self.doc.delivery_date and getdate(self.doc.po_date) >= getdate(self.doc.delivery_date):
+		if self.doc.po_date and self.doc.delivery_date and getdate(self.doc.po_date) > getdate(self.doc.delivery_date):
 			msgprint("Expected Delivery Date cannot be before Purchase Order Date")
 			raise Exception	
 		# amendment date is necessary if document is amended
