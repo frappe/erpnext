@@ -1,7 +1,7 @@
-pscript['onload_Accounts Browser'] = function(){
+pscript['onshow_Accounts Browser'] = function(){
 	wn.require('lib/js/legacy/widgets/tree.js');
 
-	var route = location.hash;
+	var route = decodeURIComponent(location.hash);
 	if(route.indexOf('/')!=-1) {
 		var chart_type = route.split('/')[1];
 		pscript.make_chart(chart_type);
