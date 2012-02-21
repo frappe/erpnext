@@ -1077,7 +1077,8 @@ $dh(dialog_message);if(!fcount)return;fcount--;if(!fcount){$dh(dialog_back);froz
 /*
  *	lib/js/legacy/webpage/error_console.js
  */
-var err_console;var err_list=[];function errprint(t){err_list[err_list.length]=('<pre style="font-family: Courier, Fixed; font-size: 11px; border-bottom: 1px solid #AAA; overflow: auto; width: 90%;">'+t+'</pre>');}
+var err_console;var err_list=[];function errprint(t){if(!err_list)err_list=[];err_list.push('<pre style="font-family: Courier, Fixed; font-size: 11px; \
+  border-bottom: 1px solid #AAA; overflow: auto; width: 90%;">'+t+'</pre>');}
 function setup_err_console(){err_console=new Dialog(640,480,'Error Console')
 err_console.make_body([['HTML','Error List'],['Button','Clear'],['HTML','Error Report']]);var span=$a(err_console.widgets['Error Report'],'span','link_type');span.innerHTML='Send Error Report';span.onclick=function(){msg=prompt('How / where did you get the error [optional]')
 var call_back=function(r,rt){err_console.hide();msgprint("Error Report Sent")}
@@ -1334,7 +1335,7 @@ this.make_options();this.make_tools();this.set_user_name();this.make_logout();$(
     </ul>\
    </div>\
    </div>\
-   </div>');},make_home:function(){$('.navbar .nav:first').append('<li><a href="#'+home_page+'">Home</a></li>')},make_document:function(){wn.ui.toolbar.new_dialog=new wn.ui.toolbar.NewDialog();wn.ui.toolbar.search=new wn.ui.toolbar.Search();wn.ui.toolbar.report=new wn.ui.toolbar.Report();$('.navbar .nav:first').append('<li class="dropdown">\
+   </div>');},make_home:function(){$('.navbar .nav:first').append('<li data-name="navbar-home"><a href="#'+home_page+'">Home</a></li>')},make_document:function(){wn.ui.toolbar.new_dialog=new wn.ui.toolbar.NewDialog();wn.ui.toolbar.search=new wn.ui.toolbar.Search();wn.ui.toolbar.report=new wn.ui.toolbar.Report();$('.navbar .nav:first').append('<li class="dropdown">\
    <a class="dropdown-toggle" href="#"  data-toggle="dropdown"\
     onclick="return false;">Document<b class="caret"></b></a>\
    <ul class="dropdown-menu" id="toolbar-document">\
@@ -1375,7 +1376,8 @@ this.setup_sidebar_menu=function(){if(this.left_sidebar&&this.cp.show_sidebar_me
 this.run_startup_code=function(){$(document).trigger('startup');try{if(this.cp.custom_startup_code)
 eval(this.cp.custom_startup_code);}catch(e){errprint(e);}}
 this.setup=function(){this.cp=wn.control_panel;this.wrapper=$a($i('body_div'),'div');this.body=$a(this.wrapper,'div');this.setup_page_areas();if(user=='Guest')user_defaults.hide_webnotes_toolbar=1;if(!cint(user_defaults.hide_webnotes_toolbar)||user=='Administrator'){this.wntoolbar=new wn.ui.toolbar.Toolbar();}
-if(this.cp.page_width)$y(this.wrapper,{width:cint(this.cp.page_width)+'px'});}
+if(this.cp.page_width)
+$y(this.wrapper,{width:cint(this.cp.page_width)+'px'});}
 this.pages={};this.cur_page=null;this.add_page=function(label,onshow,onhide){var c=$a(this.center.body,'div');if(onshow)
 c.onshow=onshow;if(onhide)
 c.onhide=onhide;this.pages[label]=c;$dh(c);return c;}
@@ -1799,7 +1801,7 @@ cur_frm.comments.list.dt=cur_frm.doctype;cur_frm.comments.list.dn=cur_frm.docnam
  */
 _f.ColumnBreak=function(){this.set_input=function(){};}
 _f.ColumnBreak.prototype.make_body=function(){if((!this.perm[this.df.permlevel])||(!this.perm[this.df.permlevel][READ])||this.df.hidden){return;}
-this.cell=this.frm.layout.addcell(this.df.width);$y(this.cell.wrapper,{padding:'8px'});_f.cur_col_break_width=this.df.width;var fn=this.df.fieldname?this.df.fieldname:this.df.label;if(this.df&&this.df.label){this.label=$a(this.cell.wrapper,'h3','','',this.df.label);}}
+this.cell=this.frm.layout.addcell(this.df.width);$y(this.cell.wrapper,{padding:'8px'});_f.cur_col_break_width=this.df.width;var fn=this.df.fieldname?this.df.fieldname:this.df.label;if(this.df&&this.df.label){this.label=$a(this.cell.wrapper,'div','','',this.df.label);}}
 _f.ColumnBreak.prototype.refresh=function(layout){if(!this.cell)return;var fn=this.df.fieldname?this.df.fieldname:this.df.label;if(fn){this.df=get_field(this.doctype,fn,this.docname);if(this.set_hidden!=this.df.hidden){if(this.df.hidden)
 this.cell.hide();else
 this.cell.show();this.set_hidden=this.df.hidden;}}}
@@ -2163,7 +2165,6 @@ if(r.dt_labels){for(key in r.dt_labels)session.rev_dt_labels[r.dt_labels[key]]=k
 wn.control_panel=r.control_panel;}
 var setup_history=function(r){rename_observers.push(nav_obj);}
 var callback=function(r,rt){if(r.exc)console.log(r.exc);setup_globals(r);setup_history();var a=new Body();page_body.run_startup_code();page_body.setup_sidebar_menu();for(var i=0;i<startup_list.length;i++){startup_list[i]();}
-if(get_url_arg('embed')){newdoc(get_url_arg('embed'));return;}
 var t=to_open();if(t){historyChange(t);}else if(home_page){loadpage(home_page);}
 page_body.ready();}
 if(wn.boot){LocalDB.sync(wn.boot.docs);callback(wn.boot,'');if(wn.boot.error_messages)
@@ -2220,6 +2221,11 @@ $(document).bind('startup',function(){erpnext.startup.start();});
 /*
  *	erpnext/startup/modules.js
  */
+wn.provide('erpnext.module_page');erpnext.module_page.setup_page=function(module,wrapper){erpnext.module_page.hide_links(wrapper);erpnext.module_page.make_list(module,wrapper);$(wrapper).find("a").tooltip({delay:{show:500,hide:100}});}
+erpnext.module_page.hide_links=function(wrapper){$(wrapper).find('[href*="List/"]').each(function(){var href=$(this).attr('href');var dt=href.split('/')[1];if(wn.boot.profile.can_read.indexOf(get_label_doctype(dt))==-1){var txt=$(this).text();$(this).parent().css('color','#999').html(txt);}});$(wrapper).find('[data-doctype]').each(function(){var dt=$(this).attr('data-doctype');if(wn.boot.profile.can_read.indexOf(dt)==-1){var txt=$(this).text();$(this).parent().css('color','#999').html(txt);}});$(wrapper).find('[href*="Form/"]').each(function(){var href=$(this).attr('href');var dt=href.split('/')[1];if(wn.boot.profile.can_read.indexOf(get_label_doctype(dt))==-1){var txt=$(this).text();$(this).parent().css('color','#999').html(txt);}});}
+erpnext.module_page.make_list=function(module,wrapper){wrapper.list=new wn.widgets.Listing({parent:$(wrapper).find('.reports-list').get(0),method:'utilities.get_report_list',render_row:function(row,data){if(!data.parent_doc_type)data.parent_doc_type=data.doc_type;$(row).html(repl('<a href="#!Report/%(doc_type)s/%(criteria_name)s" \
+    data-doctype="%(parent_doc_type)s">\
+    %(criteria_name)s</a>',data))},args:{module:module},no_refresh:true});wrapper.list.run();}
 pscript.startup_make_sidebar=function(){$y(page_body.left_sidebar,{width:(100/6)+'%',paddingTop:'8px'});var callback=function(r,rt){var ml=r.message;page_body.left_sidebar.innerHTML='';for(var m=0;m<ml.length;m++){if(ml[m]){new SidebarItem(ml[m]);}}
 nav_obj.observers.push({notify:function(t,dt,dn){pscript.select_sidebar_menu(t,dt,dn);}});var no=nav_obj.ol[nav_obj.ol.length-1];if(no&&menu_item_map[decodeURIComponent(no[0])][decodeURIComponent(no[1])])
 pscript.select_sidebar_menu(decodeURIComponent(no[0]),decodeURIComponent(no[1]));}
@@ -2262,7 +2268,7 @@ si.show_section(me.det.doc_type);}}
 /*
  *	erpnext/startup/toolbar.js
  */
-wn.provide('erpnext.toolbar');erpnext.toolbar.setup=function(){$('#toolbar-user').append('<li><a href="#profile-settings">Profile Settings</a></li>');$('#toolbar-user').append('<li><a href="#My Company">Team / Messages</a></li>');$('.navbar .pull-right').prepend('\
+wn.provide('erpnext.toolbar');erpnext.toolbar.setup=function(){erpnext.toolbar.add_modules();$('#toolbar-user').append('<li><a href="#profile-settings">Profile Settings</a></li>');$('#toolbar-user').append('<li><a href="#My Company">Team / Messages</a></li>');$('.navbar .pull-right').prepend('\
   <li><a href="#" id="toolbar-new-comments"></a></li>');$('.navbar .pull-right').append('<li class="dropdown">\
   <a class="dropdown-toggle" data-toggle="dropdown" href="#" \
    onclick="return false;">Help<b class="caret"></b></a>\
@@ -2276,6 +2282,23 @@ $('#toolbar-help').append('<li><a href="http://www.providesupport.com?messenger=
   Live Chat (Office Hours)</a></li>')
 if(pscript.is_erpnext_saas&&is_system_manager){$('#toolbar-user').append('<li><a href="#billing">Billing</a></li>')}
 $.extend(page_body.wntoolbar,{set_new_comments:function(new_comments){var navbar_nc=$('#toolbar-new-comments');if(new_comments&&new_comments.length>0){navbar_nc.html('<span class="navbar-new-comments">'+new_comments.length+'</span>');navbar_nc.click(function(){loadpage('My Company');});$.each(new_comments,function(i,v){var msg='New Message: '+(v[1].length<=100?v[1]:(v[1].substr(0,100)+"..."));var id=v[0].replace('/','-');if(!$('#'+id)[0]){show_alert(msg,id);}})}else{navbar_nc.html('');navbar_nc.click(function(){return false;});}}});page_body.wntoolbar.set_new_comments();}
+erpnext.toolbar.add_modules=function(){$('<li class="dropdown">\
+  <a class="dropdown-toggle" data-toggle="dropdown" href="#"\
+   onclick="return false;">Modules<b class="caret"></b></a>\
+  <ul class="dropdown-menu">\
+   <li><a href="#!accounts-home" data-module="Accounts">Accounts</a></li>\
+   <li><a href="#!selling-home" data-module="Selling">Selling</a></li>\
+   <li><a href="#!stock-home" data-module="Stock">Stock</a></li>\
+   <li><a href="#!buying-home" data-module="Buying">Buying</a></li>\
+   <li><a href="#!support-home" data-module="Support">Support</a></li>\
+   <li><a href="#!hr-home" data-module="HR">Human Resources</a></li>\
+   <li><a href="#!projects-home" data-module="Projects">Projects</a></li>\
+   <li><a href="#!production-home" data-module="Production">Production</a></li>\
+   <li><a href="#!website-home" data-module="Website">Website</a></li>\
+   <li class="divider"></li>\
+   <li><a href="#!Setup" data-module="Setup">Setup</a></li>\
+  </ul>\
+  </li>').insertAfter('li[data-name="navbar-home"]');$('.navbar .nav:first')}
 /*
  *	erpnext/startup/feature_setup.js
  */

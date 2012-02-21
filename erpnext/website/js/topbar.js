@@ -14,7 +14,7 @@ erpnext.navbar.navbar = Class.extend({
 		$('.brand').html(wn.boot.website_settings.brand_html);
 		this.make_items();
 		$('.dropdown-toggle').dropdown();
-pull-right	},
+	},
 	make: function() {
 		$('header').append('<div class="navbar navbar-fixed-top">\
 			<div class="navbar-inner">\
@@ -54,7 +54,11 @@ pull-right	},
 					$parent_li.addClass('dropdown');
 					$parent_li.find('a:first').addClass('dropdown-toggle')
 						.attr('data-toggle', 'dropdown')
-						.append('<b class="caret"></b>');
+						.attr('href', '')
+						.append('<b class="caret"></b>')
+						.click(function() {
+							return false;
+						});
 					$parent_li.append('<ul class="dropdown-menu"></ul>');
 				}
 				item.route = item.url || item.custom_page;
@@ -79,6 +83,7 @@ erpnext.Footer = Class.extend({
 		this.make_items();
 	},
 	make_items: function() {
+		alert(16);
 		var items = wn.boot.website_menus
 		for(var i=0;i<items.length;i++) {
 			var item = items[i];

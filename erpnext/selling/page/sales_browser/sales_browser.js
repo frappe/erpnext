@@ -1,5 +1,13 @@
 pscript['onload_Sales Browser'] = function(){
   wn.require('lib/js/legacy/widgets/tree.js');
+
+	var route = location.hash;
+	if(route.indexOf('/')!=-1) {
+		var chart_type = route.split('/')[1];
+		new SalesBrowser().set_val(chart_type)
+		return;
+	}
+
   var parent = $i('tr_body');
   parent.innerHTML = 'Please select your chart: '
   var sel = $a(parent,'select');

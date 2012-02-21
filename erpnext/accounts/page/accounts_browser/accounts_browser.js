@@ -1,11 +1,19 @@
 pscript['onload_Accounts Browser'] = function(){
 	wn.require('lib/js/legacy/widgets/tree.js');
-  // if the user directly loads the page, ask to select the chart
-  var parent = $i('ab_body');
-  parent.innerHTML = 'Please select your chart: '
-  var sel = $a(parent,'select');
-  add_sel_options(sel, ['Account', 'Cost Center'], 'Account');
-  var btn = $btn(parent, 'Go', function() { pscript.make_chart(sel_val(sel)); }, {marginTop:'8px'});
+
+	var route = location.hash;
+	if(route.indexOf('/')!=-1) {
+		var chart_type = route.split('/')[1];
+		pscript.make_chart(chart_type);
+		return;
+	}
+	
+	// if the user directly loads the page, ask to select the chart
+	var parent = $i('ab_body');
+	parent.innerHTML = 'Please select your chart: '
+	var sel = $a(parent,'select');
+	add_sel_options(sel, ['Account', 'Cost Center'], 'Account');
+	var btn = $btn(parent, 'Go', function() { pscript.make_chart(sel_val(sel)); }, {marginTop:'8px'});
 }
 
 pscript.make_chart = function(b) {

@@ -111,5 +111,5 @@ erpnext.startup.set_periodic_updates = function() {
 
 // start
 $(document).bind('startup', function() {
-	erpnext.startup.start();	
+	erpnext.startup.start();
 });

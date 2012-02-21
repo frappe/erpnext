@@ -1,0 +1,28 @@
+# Page, website-home
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2012-02-21 13:23:51',
+		'docstatus': 0,
+		'modified': '2012-02-21 13:23:51',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
+	},
+
+	# These values are common for all Page
+	{
+		'doctype': 'Page',
+		'module': u'Website',
+		'name': '__common__',
+		'page_name': u'website-home',
+		'standard': u'Yes',
+		'title': u'Website Home'
+	},
+
+	# Page, website-home
+	{
+		'doctype': 'Page',
+		'name': u'website-home'
+	}
+]

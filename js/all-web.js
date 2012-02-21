@@ -800,7 +800,8 @@ $dh(dialog_message);if(!fcount)return;fcount--;if(!fcount){$dh(dialog_back);froz
 /*
  *	lib/js/legacy/webpage/error_console.js
  */
-var err_console;var err_list=[];function errprint(t){err_list[err_list.length]=('<pre style="font-family: Courier, Fixed; font-size: 11px; border-bottom: 1px solid #AAA; overflow: auto; width: 90%;">'+t+'</pre>');}
+var err_console;var err_list=[];function errprint(t){if(!err_list)err_list=[];err_list.push('<pre style="font-family: Courier, Fixed; font-size: 11px; \
+  border-bottom: 1px solid #AAA; overflow: auto; width: 90%;">'+t+'</pre>');}
 function setup_err_console(){err_console=new Dialog(640,480,'Error Console')
 err_console.make_body([['HTML','Error List'],['Button','Clear'],['HTML','Error Report']]);var span=$a(err_console.widgets['Error Report'],'span','link_type');span.innerHTML='Send Error Report';span.onclick=function(){msg=prompt('How / where did you get the error [optional]')
 var call_back=function(r,rt){err_console.hide();msgprint("Error Report Sent")}
@@ -988,7 +989,8 @@ this.setup_sidebar_menu=function(){if(this.left_sidebar&&this.cp.show_sidebar_me
 this.run_startup_code=function(){$(document).trigger('startup');try{if(this.cp.custom_startup_code)
 eval(this.cp.custom_startup_code);}catch(e){errprint(e);}}
 this.setup=function(){this.cp=wn.control_panel;this.wrapper=$a($i('body_div'),'div');this.body=$a(this.wrapper,'div');this.setup_page_areas();if(user=='Guest')user_defaults.hide_webnotes_toolbar=1;if(!cint(user_defaults.hide_webnotes_toolbar)||user=='Administrator'){this.wntoolbar=new wn.ui.toolbar.Toolbar();}
-if(this.cp.page_width)$y(this.wrapper,{width:cint(this.cp.page_width)+'px'});}
+if(this.cp.page_width)
+$y(this.wrapper,{width:cint(this.cp.page_width)+'px'});}
 this.pages={};this.cur_page=null;this.add_page=function(label,onshow,onhide){var c=$a(this.center.body,'div');if(onshow)
 c.onshow=onshow;if(onhide)
 c.onhide=onhide;this.pages[label]=c;$dh(c);return c;}
@@ -1008,7 +1010,6 @@ if(r.dt_labels){for(key in r.dt_labels)session.rev_dt_labels[r.dt_labels[key]]=k
 wn.control_panel=r.control_panel;}
 var setup_history=function(r){rename_observers.push(nav_obj);}
 var callback=function(r,rt){if(r.exc)console.log(r.exc);setup_globals(r);setup_history();var a=new Body();page_body.run_startup_code();page_body.setup_sidebar_menu();for(var i=0;i<startup_list.length;i++){startup_list[i]();}
-if(get_url_arg('embed')){newdoc(get_url_arg('embed'));return;}
 var t=to_open();if(t){historyChange(t);}else if(home_page){loadpage(home_page);}
 page_body.ready();}
 if(wn.boot){LocalDB.sync(wn.boot.docs);callback(wn.boot,'');if(wn.boot.error_messages)
@@ -1065,7 +1066,7 @@ $(document).bind('startup',function(){erpnext.startup.start();});
 /*
  *	erpnext/website/js/topbar.js
  */
-wn.provide('erpnext.navbar');erpnext.navbar.navbar=Class.extend({init:function(){this.make();$('.brand').html(wn.boot.website_settings.brand_html);this.make_items();$('.dropdown-toggle').dropdown();pull-right},make:function(){$('header').append('<div class="navbar navbar-fixed-top">\
+wn.provide('erpnext.navbar');erpnext.navbar.navbar=Class.extend({init:function(){this.make();$('.brand').html(wn.boot.website_settings.brand_html);this.make_items();$('.dropdown-toggle').dropdown();},make:function(){$('header').append('<div class="navbar navbar-fixed-top">\
    <div class="navbar-inner">\
    <div class="container">\
     <a class="brand">[brand]</a>\
@@ -1079,14 +1080,8 @@ wn.provide('erpnext.navbar');erpnext.navbar.navbar=Class.extend({init:function()
    </div>\
    </div>');$('.brand').attr('href','#!'+(wn.boot.website_settings.home_page||'Login Page'))},make_items:function(){var items=wn.boot.website_menus;for(var i=0;i<items.length;i++){var item=items[i];if(!item.parent_label&&item.parentfield=='top_bar_items'){item.route=item.url||item.custom_page;$('header .nav:first').append(repl('<li data-label="%(label)s">\
      <a href="#!%(route)s">%(label)s</a></li>',item))}}
-for(var i=0;i<items.length;i++){var item=items[i];if(item.parent_label&&item.parentfield=='top_bar_items'){$parent_li=$(repl('header li[data-label="%(parent_label)s"]',item));if(!$parent_li.hasClass('dropdown')){$parent_li.addClass('dropdown');$parent_li.find('a:first').addClass('dropdown-toggle').attr('data-toggle','dropdown').append('<b class="caret"></b>');$parent_li.append('<ul class="dropdown-menu"></ul>');}
+for(var i=0;i<items.length;i++){var item=items[i];if(item.parent_label&&item.parentfield=='top_bar_items'){$parent_li=$(repl('header li[data-label="%(parent_label)s"]',item));if(!$parent_li.hasClass('dropdown')){$parent_li.addClass('dropdown');$parent_li.find('a:first').addClass('dropdown-toggle').attr('data-toggle','dropdown').attr('href','').append('<b class="caret"></b>').click(function(){return false;});$parent_li.append('<ul class="dropdown-menu"></ul>');}
 item.route=item.url||item.custom_page;$parent_li.find('.dropdown-menu').append(repl('<li data-label="%(label)s">\
-     <a href="#!%(route)s">%(label)s</a></li>',item))}}}});erpnext.Footer=Class.extend({init:function(){$('footer').html(repl('<div class="web-footer">\
-   <div class="web-footer-menu"><ul></ul></div>\
-   <div class="web-footer-address">%(address)s</div>\
-   <div class="web-footer-copyright">&copy; %(copyright)s</div>\
-   <div class="web-footer-powered">Powered by \
-    <a href="https://erpnext.com">erpnext.com</a></div>\
-  </div>',wn.boot.website_settings));this.make_items();},make_items:function(){var items=wn.boot.website_menus
+     <a href="#!%(route)s">%(label)s</a></li>',item))}}}});erpnext.Footer=Class.extend({init:function(){alert(15);this.make_items();},make_items:function(){alert(16);var items=wn.boot.website_menus
 for(var i=0;i<items.length;i++){var item=items[i];if(!item.parent_label&&item.parentfield=='footer_items'){item.route=item.url||item.custom_page;$('.web-footer-menu ul').append(repl('<li><a href="#!%(route)s" \
      data-label="%(label)s">%(label)s</a></li>',item))}}}});$(document).bind('startup',function(){erpnext.footer=new erpnext.Footer();erpnext.navbar.navbar=new erpnext.navbar.navbar();})
