@@ -5,56 +5,56 @@
 	{
 		'creation': '2010-08-08 17:09:05',
 		'docstatus': 0,
-		'modified': '2012-01-30 17:34:23',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-02-21 12:40:01',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1326963484',
+		'_last_update': u'1329808172',
 		'allow_attach': 1,
 		'allow_trash': 1,
-		'autoname': 'field:item_code',
-		'colour': 'White:FFF',
-		'default_print_format': 'Standard',
+		'autoname': u'field:item_code',
+		'colour': u'White:FFF',
+		'default_print_format': u'Standard',
 		'doctype': 'DocType',
-		'document_type': 'Master',
+		'document_type': u'Master',
 		'max_attachments': 1,
-		'module': 'Stock',
+		'module': u'Stock',
 		'name': '__common__',
-		'search_fields': 'item_name,description,item_group,customer_code',
-		'section_style': 'Tray',
-		'server_code_error': ' ',
+		'search_fields': u'item_name,description,item_group,customer_code',
+		'section_style': u'Tray',
+		'server_code_error': u' ',
 		'show_in_menu': 0,
-		'subject': '%(item_name)s',
-		'tag_fields': 'item_group',
-		'version': 165
+		'subject': u'%(item_name)s',
+		'tag_fields': u'item_group',
+		'version': 171
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Item',
-		'parentfield': 'fields',
-		'parenttype': 'DocType'
+		'parent': u'Item',
+		'parentfield': u'fields',
+		'parenttype': u'DocType'
 	},
 
 	# These values are common for all DocPerm
 	{
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'name': '__common__',
-		'parent': 'Item',
-		'parentfield': 'permissions',
-		'parenttype': 'DocType',
+		'parent': u'Item',
+		'parentfield': u'permissions',
+		'parenttype': u'DocType',
 		'read': 1
 	},
 
 	# DocType, Item
 	{
 		'doctype': 'DocType',
-		'name': 'Item'
+		'name': u'Item'
 	},
 
 	# DocPerm
@@ -62,9 +62,9 @@
 		'amend': 0,
 		'cancel': 0,
 		'create': 0,
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'permlevel': 1,
-		'role': 'Material Manager',
+		'role': u'Material Manager',
 		'submit': 0,
 		'write': 0
 	},
@@ -74,9 +74,9 @@
 		'amend': 0,
 		'cancel': 0,
 		'create': 0,
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'role': 'Material Manager',
+		'role': u'Material Manager',
 		'submit': 0,
 		'write': 0
 	},
@@ -86,9 +86,9 @@
 		'amend': 0,
 		'cancel': 0,
 		'create': 0,
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'permlevel': 1,
-		'role': 'Material User',
+		'role': u'Material User',
 		'submit': 0,
 		'write': 0
 	},
@@ -98,9 +98,9 @@
 		'amend': 0,
 		'cancel': 0,
 		'create': 0,
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'role': 'Material User',
+		'role': u'Material User',
 		'submit': 0,
 		'write': 0
 	},
@@ -109,18 +109,18 @@
 	{
 		'cancel': 1,
 		'create': 1,
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'role': 'Material Master Manager',
+		'role': u'Material Master Manager',
 		'write': 1
 	},
 
 	# DocPerm
 	{
 		'create': 0,
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'permlevel': 1,
-		'role': 'Material Master Manager',
+		'role': u'Material Master Manager',
 		'write': 0
 	},
 
@@ -128,51 +128,51 @@
 	{
 		'cancel': 1,
 		'create': 1,
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'role': 'System Manager',
+		'role': u'System Manager',
 		'write': 1
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'permlevel': 1,
-		'role': 'System Manager'
+		'role': u'System Manager'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Section Break',
-		'label': 'Item',
+		'doctype': u'DocField',
+		'fieldtype': u'Section Break',
+		'label': u'Item',
 		'no_copy': 0,
-		'oldfieldtype': 'Section Break',
+		'oldfieldtype': u'Section Break',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'trash_reason',
-		'fieldtype': 'Small Text',
-		'label': 'Trash Reason',
-		'oldfieldname': 'trash_reason',
-		'oldfieldtype': 'Small Text',
+		'doctype': u'DocField',
+		'fieldname': u'trash_reason',
+		'fieldtype': u'Small Text',
+		'label': u'Trash Reason',
+		'oldfieldname': u'trash_reason',
+		'oldfieldtype': u'Small Text',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'description': 'Item will be saved by this name in the data base.',
-		'doctype': 'DocField',
-		'fieldname': 'item_code',
-		'fieldtype': 'Data',
+		'colour': u'White:FFF',
+		'description': u'Item will be saved by this name in the data base.',
+		'doctype': u'DocField',
+		'fieldname': u'item_code',
+		'fieldtype': u'Data',
 		'in_filter': 0,
-		'label': 'Item Code',
-		'oldfieldname': 'item_code',
-		'oldfieldtype': 'Data',
+		'label': u'Item Code',
+		'oldfieldname': u'item_code',
+		'oldfieldtype': u'Data',
 		'permlevel': 0,
 		'reqd': 1,
 		'search_index': 0
@@ -180,13 +180,13 @@
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'item_name',
-		'fieldtype': 'Data',
+		'doctype': u'DocField',
+		'fieldname': u'item_name',
+		'fieldtype': u'Data',
 		'in_filter': 1,
-		'label': 'Item Name',
-		'oldfieldname': 'item_name',
-		'oldfieldtype': 'Data',
+		'label': u'Item Name',
+		'oldfieldname': u'item_name',
+		'oldfieldtype': u'Data',
 		'permlevel': 0,
 		'reqd': 1,
 		'search_index': 1
@@ -194,40 +194,40 @@
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'description': 'Classify your item in any one item group by clicking on the magnifying glass',
-		'doctype': 'DocField',
-		'fieldname': 'item_group',
-		'fieldtype': 'Link',
+		'colour': u'White:FFF',
+		'description': u'Classify your item in any one item group by clicking on the magnifying glass',
+		'doctype': u'DocField',
+		'fieldname': u'item_group',
+		'fieldtype': u'Link',
 		'in_filter': 1,
-		'label': 'Item Group',
-		'oldfieldname': 'item_group',
-		'oldfieldtype': 'Link',
-		'options': 'Item Group',
+		'label': u'Item Group',
+		'oldfieldname': u'item_group',
+		'oldfieldtype': u'Link',
+		'options': u'Item Group',
 		'permlevel': 0,
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'HTML',
-		'label': 'IGHelp',
-		'oldfieldtype': 'HTML',
-		'options': '<a href="javascript:cur_frm.cscript.IGHelp();">To manage Item Group, click here</a>',
+		'doctype': u'DocField',
+		'fieldtype': u'HTML',
+		'label': u'IGHelp',
+		'oldfieldtype': u'HTML',
+		'options': u'<a href="javascript:cur_frm.cscript.IGHelp();">To manage Item Group, click here</a>',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'brand',
-		'fieldtype': 'Link',
+		'doctype': u'DocField',
+		'fieldname': u'brand',
+		'fieldtype': u'Link',
 		'hidden': 0,
-		'label': 'Brand',
-		'oldfieldname': 'brand',
-		'oldfieldtype': 'Link',
-		'options': 'Brand',
+		'label': u'Brand',
+		'oldfieldname': u'brand',
+		'oldfieldtype': u'Link',
+		'options': u'Brand',
 		'permlevel': 0,
 		'print_hide': 1,
 		'reqd': 0
@@ -235,655 +235,696 @@
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Column Break',
+		'doctype': u'DocField',
+		'fieldtype': u'Column Break',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'description',
-		'fieldtype': 'Text',
+		'doctype': u'DocField',
+		'fieldname': u'description',
+		'fieldtype': u'Text',
 		'in_filter': 0,
-		'label': 'Description',
-		'oldfieldname': 'description',
-		'oldfieldtype': 'Text',
+		'label': u'Description',
+		'oldfieldname': u'description',
+		'oldfieldtype': u'Text',
 		'permlevel': 0,
 		'reqd': 1,
 		'search_index': 0,
-		'width': '300px'
+		'width': u'300px'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'description_html',
-		'fieldtype': 'Text',
-		'label': 'Description HTML',
+		'doctype': u'DocField',
+		'fieldname': u'description_html',
+		'fieldtype': u'Text',
+		'label': u'Description HTML',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'description': 'Generates HTML to include image (1st attachment) in the description',
-		'doctype': 'DocField',
-		'fieldtype': 'Button',
-		'label': 'Add Image',
+		'colour': u'White:FFF',
+		'description': u'Generates HTML to include image (1st attachment) in the description',
+		'doctype': u'DocField',
+		'fieldtype': u'Button',
+		'label': u'Add Image',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Section Break',
-		'label': 'Inventory',
-		'oldfieldtype': 'Section Break',
+		'doctype': u'DocField',
+		'fieldtype': u'Section Break',
+		'label': u'Inventory',
+		'oldfieldtype': u'Section Break',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'description': 'Enter unit of measurement in which stock of this item is maintained in your warehouse.',
-		'doctype': 'DocField',
-		'fieldname': 'stock_uom',
-		'fieldtype': 'Link',
-		'label': 'Default UoM',
-		'oldfieldname': 'stock_uom',
-		'oldfieldtype': 'Link',
-		'options': 'UOM',
+		'colour': u'White:FFF',
+		'description': u'Enter unit of measurement in which stock of this item is maintained in your warehouse.',
+		'doctype': u'DocField',
+		'fieldname': u'stock_uom',
+		'fieldtype': u'Link',
+		'label': u'Default UoM',
+		'oldfieldname': u'stock_uom',
+		'oldfieldtype': u'Link',
+		'options': u'UOM',
 		'permlevel': 0,
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'default': 'Yes',
-		'description': 'Select "Yes" if you are maintaining stock of this item in your Inventory.',
-		'doctype': 'DocField',
-		'fieldname': 'is_stock_item',
-		'fieldtype': 'Select',
-		'label': 'Is Stock Item',
-		'oldfieldname': 'is_stock_item',
-		'oldfieldtype': 'Select',
-		'options': '\nYes\nNo',
+		'colour': u'White:FFF',
+		'default': u'Yes',
+		'description': u'Select "Yes" if you are maintaining stock of this item in your Inventory.',
+		'doctype': u'DocField',
+		'fieldname': u'is_stock_item',
+		'fieldtype': u'Select',
+		'label': u'Is Stock Item',
+		'oldfieldname': u'is_stock_item',
+		'oldfieldtype': u'Select',
+		'options': u'\nYes\nNo',
 		'permlevel': 0,
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'valuation_method',
-		'fieldtype': 'Select',
-		'label': 'Valuation Method',
-		'oldfieldname': 'valuation_method',
-		'oldfieldtype': 'Select',
-		'options': '\nFIFO\nMoving Average',
+		'doctype': u'DocField',
+		'fieldname': u'valuation_method',
+		'fieldtype': u'Select',
+		'label': u'Valuation Method',
+		'oldfieldname': u'valuation_method',
+		'oldfieldtype': u'Select',
+		'options': u'\nFIFO\nMoving Average',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'default_warehouse',
-		'fieldtype': 'Link',
-		'label': 'Default Warehouse',
-		'oldfieldname': 'default_warehouse',
-		'oldfieldtype': 'Link',
-		'options': 'Warehouse',
+		'doctype': u'DocField',
+		'fieldname': u'default_warehouse',
+		'fieldtype': u'Link',
+		'label': u'Default Warehouse',
+		'oldfieldname': u'default_warehouse',
+		'oldfieldtype': u'Link',
+		'options': u'Warehouse',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'description': 'Percentage variation in quantity to be allowed while receiving or delivering this item.',
-		'doctype': 'DocField',
-		'fieldname': 'tolerance',
-		'fieldtype': 'Currency',
-		'label': 'Allowance Percent',
-		'oldfieldname': 'tolerance',
-		'oldfieldtype': 'Currency',
+		'colour': u'White:FFF',
+		'description': u'Percentage variation in quantity to be allowed while receiving or delivering this item.',
+		'doctype': u'DocField',
+		'fieldname': u'tolerance',
+		'fieldtype': u'Currency',
+		'label': u'Allowance Percent',
+		'oldfieldname': u'tolerance',
+		'oldfieldtype': u'Currency',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 're_order_level',
-		'fieldtype': 'Currency',
-		'label': 'Re-Order Level',
-		'oldfieldname': 're_order_level',
-		'oldfieldtype': 'Currency',
+		'colour': u'White:FFF',
+		'description': u'The system will generate auto indent when stock reaches re-order level.',
+		'doctype': u'DocField',
+		'fieldname': u're_order_level',
+		'fieldtype': u'Currency',
+		'label': u'Re-Order Level',
+		'oldfieldname': u're_order_level',
+		'oldfieldtype': u'Currency',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'email_notify',
-		'fieldtype': 'Check',
-		'label': 'Send Email Notification when stock reaches re-order level',
+		'colour': u'White:FFF',
+		'description': u'The system will create auto indent of re-order quantity when stock reaches re-order level',
+		'doctype': u'DocField',
+		'fieldname': u're_order_qty',
+		'fieldtype': u'Currency',
+		'label': u'Re-Order Qty',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'default': '0.00',
-		'description': 'You can enter the minimum quantity of this item to be ordered.',
-		'doctype': 'DocField',
-		'fieldname': 'min_order_qty',
-		'fieldtype': 'Currency',
+		'doctype': u'DocField',
+		'fieldname': u'email_notify',
+		'fieldtype': u'Check',
+		'label': u'Send Email Notification when stock reaches re-order level',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'colour': u'White:FFF',
+		'default': u'0.00',
+		'description': u'You can enter the minimum quantity of this item to be ordered.',
+		'doctype': u'DocField',
+		'fieldname': u'min_order_qty',
+		'fieldtype': u'Currency',
 		'hidden': 0,
-		'label': 'Minimum Order Qty',
-		'oldfieldname': 'min_order_qty',
-		'oldfieldtype': 'Currency',
+		'label': u'Minimum Order Qty',
+		'oldfieldname': u'min_order_qty',
+		'oldfieldtype': u'Currency',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Column Break',
-		'oldfieldtype': 'Column Break',
+		'doctype': u'DocField',
+		'fieldtype': u'Column Break',
+		'oldfieldtype': u'Column Break',
 		'permlevel': 0,
-		'width': '50%'
+		'width': u'50%'
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'default': 'No',
-		'description': 'Select "Yes" if this item is used for some internal purpose in your company.',
-		'doctype': 'DocField',
-		'fieldname': 'is_asset_item',
-		'fieldtype': 'Select',
-		'label': 'Is Asset Item',
-		'oldfieldname': 'is_asset_item',
-		'oldfieldtype': 'Select',
-		'options': '\nYes\nNo',
-		'permlevel': 0,
-		'reqd': 1
-	},
-
-	# DocField
-	{
-		'colour': 'White:FFF',
-		'default': 'No',
-		'doctype': 'DocField',
-		'fieldname': 'has_batch_no',
-		'fieldtype': 'Select',
-		'label': 'Has Batch No',
-		'oldfieldname': 'has_batch_no',
-		'oldfieldtype': 'Select',
-		'options': '\nYes\nNo',
+		'colour': u'White:FFF',
+		'default': u'No',
+		'description': u'Select "Yes" if this item is used for some internal purpose in your company.',
+		'doctype': u'DocField',
+		'fieldname': u'is_asset_item',
+		'fieldtype': u'Select',
+		'label': u'Is Asset Item',
+		'oldfieldname': u'is_asset_item',
+		'oldfieldtype': u'Select',
+		'options': u'\nYes\nNo',
 		'permlevel': 0,
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'default': 'No',
-		'description': 'Selecting "Yes" will give a unique identity to each entity of this item which can be viewed in the Serial No master.',
-		'doctype': 'DocField',
-		'fieldname': 'has_serial_no',
-		'fieldtype': 'Select',
+		'colour': u'White:FFF',
+		'default': u'No',
+		'doctype': u'DocField',
+		'fieldname': u'has_batch_no',
+		'fieldtype': u'Select',
+		'label': u'Has Batch No',
+		'oldfieldname': u'has_batch_no',
+		'oldfieldtype': u'Select',
+		'options': u'\nYes\nNo',
+		'permlevel': 0,
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		'colour': u'White:FFF',
+		'default': u'No',
+		'description': u'Selecting "Yes" will give a unique identity to each entity of this item which can be viewed in the Serial No master.',
+		'doctype': u'DocField',
+		'fieldname': u'has_serial_no',
+		'fieldtype': u'Select',
 		'in_filter': 1,
-		'label': 'Has Serial No',
-		'oldfieldname': 'has_serial_no',
-		'oldfieldtype': 'Select',
-		'options': '\nYes\nNo',
+		'label': u'Has Serial No',
+		'oldfieldname': u'has_serial_no',
+		'oldfieldtype': u'Select',
+		'options': u'\nYes\nNo',
 		'permlevel': 0,
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'warranty_period',
-		'fieldtype': 'Data',
-		'label': 'Warranty Period (in days)',
-		'oldfieldname': 'warranty_period',
-		'oldfieldtype': 'Data',
+		'doctype': u'DocField',
+		'fieldname': u'warranty_period',
+		'fieldtype': u'Data',
+		'label': u'Warranty Period (in days)',
+		'oldfieldname': u'warranty_period',
+		'oldfieldtype': u'Data',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'end_of_life',
-		'fieldtype': 'Date',
-		'label': 'End of Life',
-		'oldfieldname': 'end_of_life',
-		'oldfieldtype': 'Date',
+		'doctype': u'DocField',
+		'fieldname': u'end_of_life',
+		'fieldtype': u'Date',
+		'label': u'End of Life',
+		'oldfieldname': u'end_of_life',
+		'oldfieldtype': u'Date',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'description': 'Net Weight of each Item',
-		'doctype': 'DocField',
-		'fieldname': 'net_weight',
-		'fieldtype': 'Float',
-		'label': 'Net Weight',
+		'description': u'Net Weight of each Item',
+		'doctype': u'DocField',
+		'fieldname': u'net_weight',
+		'fieldtype': u'Float',
+		'label': u'Net Weight',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'weight_uom',
-		'fieldtype': 'Link',
-		'label': 'Weight UOM',
-		'options': 'UOM',
+		'doctype': u'DocField',
+		'fieldname': u'weight_uom',
+		'fieldtype': u'Link',
+		'label': u'Weight UOM',
+		'options': u'UOM',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldtype': 'Section Break',
-		'label': 'Purchase Details',
-		'oldfieldtype': 'Section Break',
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldtype': u'Section Break',
+		'label': u'Purchase Details',
+		'oldfieldtype': u'Section Break',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'default': 'Yes',
-		'description': 'Selecting "Yes" will allow this item to appear in Purchase Order , Purchase Receipt.',
-		'doctype': 'DocField',
-		'fieldname': 'is_purchase_item',
-		'fieldtype': 'Select',
-		'label': 'Is Purchase Item',
-		'oldfieldname': 'is_purchase_item',
-		'oldfieldtype': 'Select',
-		'options': '\nYes\nNo',
+		'colour': u'White:FFF',
+		'default': u'Yes',
+		'description': u'Selecting "Yes" will allow this item to appear in Purchase Order , Purchase Receipt.',
+		'doctype': u'DocField',
+		'fieldname': u'is_purchase_item',
+		'fieldtype': u'Select',
+		'label': u'Is Purchase Item',
+		'oldfieldname': u'is_purchase_item',
+		'oldfieldtype': u'Select',
+		'options': u'\nYes\nNo',
 		'permlevel': 0,
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'description': 'Lead Time days is number of days by which this item is expected in your warehouse. This days is fetched in Indent when you select this item.',
-		'doctype': 'DocField',
-		'fieldname': 'lead_time_days',
-		'fieldtype': 'Int',
-		'label': 'Lead Time Days',
+		'colour': u'White:FFF',
+		'description': u'Lead Time days is number of days by which this item is expected in your warehouse. This days is fetched in Indent when you select this item.',
+		'doctype': u'DocField',
+		'fieldname': u'lead_time_days',
+		'fieldtype': u'Int',
+		'label': u'Lead Time Days',
 		'no_copy': 1,
-		'oldfieldname': 'lead_time_days',
-		'oldfieldtype': 'Int',
+		'oldfieldname': u'lead_time_days',
+		'oldfieldtype': u'Int',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'description': 'Default Purchase Account in which cost of the item will be debited.',
-		'doctype': 'DocField',
-		'fieldname': 'purchase_account',
-		'fieldtype': 'Link',
-		'label': 'Default Expense Account',
-		'oldfieldname': 'purchase_account',
-		'oldfieldtype': 'Link',
-		'options': 'Account',
+		'colour': u'White:FFF',
+		'description': u'Default Purchase Account in which cost of the item will be debited.',
+		'doctype': u'DocField',
+		'fieldname': u'purchase_account',
+		'fieldtype': u'Link',
+		'label': u'Default Expense Account',
+		'oldfieldname': u'purchase_account',
+		'oldfieldtype': u'Link',
+		'options': u'Account',
 		'permlevel': 0,
-		'trigger': 'Client'
+		'trigger': u'Client'
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'description': 'Default Cost Center for tracking expense for this item.',
-		'doctype': 'DocField',
-		'fieldname': 'cost_center',
-		'fieldtype': 'Link',
-		'label': 'Default Cost Center',
-		'oldfieldname': 'cost_center',
-		'oldfieldtype': 'Link',
-		'options': 'Cost Center',
+		'colour': u'White:FFF',
+		'description': u'Default Cost Center for tracking expense for this item.',
+		'doctype': u'DocField',
+		'fieldname': u'cost_center',
+		'fieldtype': u'Link',
+		'label': u'Default Cost Center',
+		'oldfieldname': u'cost_center',
+		'oldfieldtype': u'Link',
+		'options': u'Cost Center',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'description': 'Buying Cost will be updated from Purchase Orders and Purchase Receipts. <br>The buying cost will calculated by moving average method.',
-		'doctype': 'DocField',
-		'fieldname': 'buying_cost',
-		'fieldtype': 'Currency',
-		'label': 'Buying Cost',
+		'colour': u'White:FFF',
+		'description': u'Buying Cost will be updated from Purchase Orders and Purchase Receipts. <br>The buying cost will calculated by moving average method.',
+		'doctype': u'DocField',
+		'fieldname': u'buying_cost',
+		'fieldtype': u'Currency',
+		'label': u'Buying Cost',
 		'no_copy': 1,
-		'oldfieldname': 'buying_cost',
-		'oldfieldtype': 'Currency',
+		'oldfieldname': u'buying_cost',
+		'oldfieldtype': u'Currency',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldname': 'last_purchase_rate',
-		'fieldtype': 'Currency',
-		'label': 'Last Purchase Rate',
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'last_purchase_rate',
+		'fieldtype': u'Currency',
+		'label': u'Last Purchase Rate',
 		'no_copy': 1,
-		'oldfieldname': 'last_purchase_rate',
-		'oldfieldtype': 'Currency',
+		'oldfieldname': u'last_purchase_rate',
+		'oldfieldtype': u'Currency',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'standard_rate',
-		'fieldtype': 'Currency',
-		'label': 'Standard Rate',
-		'oldfieldname': 'standard_rate',
-		'oldfieldtype': 'Currency',
+		'doctype': u'DocField',
+		'fieldname': u'standard_rate',
+		'fieldtype': u'Currency',
+		'label': u'Standard Rate',
+		'oldfieldname': u'standard_rate',
+		'oldfieldtype': u'Currency',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Column Break',
-		'oldfieldtype': 'Column Break',
+		'doctype': u'DocField',
+		'fieldtype': u'Column Break',
+		'oldfieldtype': u'Column Break',
 		'permlevel': 0,
-		'width': '50%'
+		'width': u'50%'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'uom_conversion_details',
-		'fieldtype': 'Table',
-		'label': 'UOM Conversion Details',
-		'oldfieldname': 'uom_conversion_details',
-		'oldfieldtype': 'Table',
-		'options': 'UOM Conversion Detail',
+		'doctype': u'DocField',
+		'fieldname': u'uom_conversion_details',
+		'fieldtype': u'Table',
+		'label': u'UOM Conversion Details',
+		'oldfieldname': u'uom_conversion_details',
+		'oldfieldtype': u'Table',
+		'options': u'UOM Conversion Detail',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Section Break',
-		'label': 'Sales Details',
-		'oldfieldtype': 'Section Break',
+		'doctype': u'DocField',
+		'fieldname': u'manufacturer',
+		'fieldtype': u'Data',
+		'label': u'Manufacturer',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'default': 'Yes',
-		'description': 'Selecting "Yes" will allow this item to figure in Sales Order, Delivery Note',
-		'doctype': 'DocField',
-		'fieldname': 'is_sales_item',
-		'fieldtype': 'Select',
+		'doctype': u'DocField',
+		'fieldname': u'manufacturer_part_no',
+		'fieldtype': u'Data',
+		'label': u'Manufacturer Part Number',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'item_supplier_details',
+		'fieldtype': u'Table',
+		'label': u'Item Supplier Details',
+		'options': u'Item Supplier',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldtype': u'Section Break',
+		'label': u'Sales Details',
+		'oldfieldtype': u'Section Break',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'colour': u'White:FFF',
+		'default': u'Yes',
+		'description': u'Selecting "Yes" will allow this item to figure in Sales Order, Delivery Note',
+		'doctype': u'DocField',
+		'fieldname': u'is_sales_item',
+		'fieldtype': u'Select',
 		'in_filter': 1,
-		'label': 'Is Sales Item',
-		'oldfieldname': 'is_sales_item',
-		'oldfieldtype': 'Select',
-		'options': '\nYes\nNo',
+		'label': u'Is Sales Item',
+		'oldfieldname': u'is_sales_item',
+		'oldfieldtype': u'Select',
+		'options': u'\nYes\nNo',
 		'permlevel': 0,
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'default': 'No',
-		'description': 'Select "Yes" if this item represents some work like training, designing, consulting etc.',
-		'doctype': 'DocField',
-		'fieldname': 'is_service_item',
-		'fieldtype': 'Select',
+		'colour': u'White:FFF',
+		'default': u'No',
+		'description': u'Select "Yes" if this item represents some work like training, designing, consulting etc.',
+		'doctype': u'DocField',
+		'fieldname': u'is_service_item',
+		'fieldtype': u'Select',
 		'in_filter': 1,
-		'label': 'Is Service Item',
-		'oldfieldname': 'is_service_item',
-		'oldfieldtype': 'Select',
-		'options': '\nYes\nNo',
+		'label': u'Is Service Item',
+		'oldfieldname': u'is_service_item',
+		'oldfieldtype': u'Select',
+		'options': u'\nYes\nNo',
 		'permlevel': 0,
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'default': 'No',
-		'description': 'Select "Yes" if this item is to be sent to a customer or received from a supplier as a sample. Delivery notes and Purchase Receipts will update stock levels but there will be no invoice against this item.',
-		'doctype': 'DocField',
-		'fieldname': 'is_sample_item',
-		'fieldtype': 'Select',
-		'label': 'Allow Samples',
-		'oldfieldname': 'is_sample_item',
-		'oldfieldtype': 'Select',
-		'options': '\nYes\nNo',
+		'colour': u'White:FFF',
+		'default': u'No',
+		'description': u'Select "Yes" if this item is to be sent to a customer or received from a supplier as a sample. Delivery notes and Purchase Receipts will update stock levels but there will be no invoice against this item.',
+		'doctype': u'DocField',
+		'fieldname': u'is_sample_item',
+		'fieldtype': u'Select',
+		'label': u'Allow Samples',
+		'oldfieldname': u'is_sample_item',
+		'oldfieldtype': u'Select',
+		'options': u'\nYes\nNo',
 		'permlevel': 0,
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'max_discount',
-		'fieldtype': 'Currency',
-		'label': 'Max Discount (%)',
-		'oldfieldname': 'max_discount',
-		'oldfieldtype': 'Currency',
+		'doctype': u'DocField',
+		'fieldname': u'max_discount',
+		'fieldtype': u'Currency',
+		'label': u'Max Discount (%)',
+		'oldfieldname': u'max_discount',
+		'oldfieldtype': u'Currency',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'default_income_account',
-		'fieldtype': 'Link',
-		'label': 'Default Income Account',
-		'options': 'Account',
+		'doctype': u'DocField',
+		'fieldname': u'default_income_account',
+		'fieldtype': u'Link',
+		'label': u'Default Income Account',
+		'options': u'Account',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'default_sales_cost_center',
-		'fieldtype': 'Link',
-		'label': 'Cost Center',
-		'options': 'Cost Center',
+		'doctype': u'DocField',
+		'fieldname': u'default_sales_cost_center',
+		'fieldtype': u'Link',
+		'label': u'Cost Center',
+		'options': u'Cost Center',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'sales_rate',
-		'fieldtype': 'Currency',
+		'doctype': u'DocField',
+		'fieldname': u'sales_rate',
+		'fieldtype': u'Currency',
 		'hidden': 1,
-		'label': 'Sales Rate',
-		'oldfieldname': 'sales_rate',
-		'oldfieldtype': 'Currency',
+		'label': u'Sales Rate',
+		'oldfieldname': u'sales_rate',
+		'oldfieldtype': u'Currency',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Column Break',
-		'oldfieldtype': 'Column Break',
+		'doctype': u'DocField',
+		'fieldtype': u'Column Break',
+		'oldfieldtype': u'Column Break',
 		'permlevel': 0,
-		'width': '50%'
+		'width': u'50%'
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'description': 'Create a price list from Price List master and enter standard ref rates against each of them. On selection of a price list in Quotation, Sales Order or Delivery Note, corresponding ref rate will be fetched for this item.',
-		'doctype': 'DocField',
-		'fieldname': 'ref_rate_details',
-		'fieldtype': 'Table',
-		'label': 'Ref Rate Details',
-		'oldfieldname': 'ref_rate_details',
-		'oldfieldtype': 'Table',
-		'options': 'Ref Rate Detail',
+		'colour': u'White:FFF',
+		'description': u'Create a price list from Price List master and enter standard ref rates against each of them. On selection of a price list in Quotation, Sales Order or Delivery Note, corresponding ref rate will be fetched for this item.',
+		'doctype': u'DocField',
+		'fieldname': u'ref_rate_details',
+		'fieldtype': u'Table',
+		'label': u'Ref Rate Details',
+		'oldfieldname': u'ref_rate_details',
+		'oldfieldtype': u'Table',
+		'options': u'Ref Rate Detail',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'description': 'For the convenience of customers, these codes can be used in print formats like Invoices and Delivery Notes',
-		'doctype': 'DocField',
-		'fieldname': 'item_customer_details',
-		'fieldtype': 'Table',
-		'label': 'Customer Codes',
-		'options': 'Item Customer Detail',
+		'description': u'For the convenience of customers, these codes can be used in print formats like Invoices and Delivery Notes',
+		'doctype': u'DocField',
+		'fieldname': u'item_customer_details',
+		'fieldtype': u'Table',
+		'label': u'Customer Codes',
+		'options': u'Item Customer Detail',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Section Break',
-		'label': 'Item Tax',
-		'oldfieldtype': 'Section Break',
+		'doctype': u'DocField',
+		'fieldtype': u'Section Break',
+		'label': u'Item Tax',
+		'oldfieldtype': u'Section Break',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'item_tax',
-		'fieldtype': 'Table',
-		'label': 'Item Tax1',
-		'oldfieldname': 'item_tax',
-		'oldfieldtype': 'Table',
-		'options': 'Item Tax',
+		'doctype': u'DocField',
+		'fieldname': u'item_tax',
+		'fieldtype': u'Table',
+		'label': u'Item Tax1',
+		'oldfieldname': u'item_tax',
+		'oldfieldtype': u'Table',
+		'options': u'Item Tax',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Section Break',
-		'label': 'Inspection Criteria',
-		'oldfieldtype': 'Section Break',
+		'doctype': u'DocField',
+		'fieldtype': u'Section Break',
+		'label': u'Inspection Criteria',
+		'oldfieldtype': u'Section Break',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'default': 'No',
-		'doctype': 'DocField',
-		'fieldname': 'inspection_required',
-		'fieldtype': 'Select',
-		'label': 'Inspection Required',
+		'default': u'No',
+		'doctype': u'DocField',
+		'fieldname': u'inspection_required',
+		'fieldtype': u'Select',
+		'label': u'Inspection Required',
 		'no_copy': 0,
-		'oldfieldname': 'inspection_required',
-		'oldfieldtype': 'Select',
-		'options': '\nYes\nNo',
+		'oldfieldname': u'inspection_required',
+		'oldfieldtype': u'Select',
+		'options': u'\nYes\nNo',
 		'permlevel': 0,
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'item_specification_details',
-		'fieldtype': 'Table',
-		'label': 'Item Specification Detail',
-		'oldfieldname': 'item_specification_details',
-		'oldfieldtype': 'Table',
-		'options': 'Item Specification Detail',
+		'doctype': u'DocField',
+		'fieldname': u'item_specification_details',
+		'fieldtype': u'Table',
+		'label': u'Item Specification Detail',
+		'oldfieldname': u'item_specification_details',
+		'oldfieldtype': u'Table',
+		'options': u'Item Specification Detail',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Section Break',
-		'label': 'Manufacturing',
-		'oldfieldtype': 'Section Break',
+		'doctype': u'DocField',
+		'fieldtype': u'Section Break',
+		'label': u'Manufacturing',
+		'oldfieldtype': u'Section Break',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'default': 'No',
-		'description': 'Selecting "Yes" will allow you to create Bill of Material showing raw material and operational costs incurred to manufacture this item.',
-		'doctype': 'DocField',
-		'fieldname': 'is_manufactured_item',
-		'fieldtype': 'Select',
-		'label': 'Allow Bill of Materials',
-		'oldfieldname': 'is_manufactured_item',
-		'oldfieldtype': 'Select',
-		'options': '\nYes\nNo',
+		'colour': u'White:FFF',
+		'default': u'No',
+		'description': u'Selecting "Yes" will allow you to create Bill of Material showing raw material and operational costs incurred to manufacture this item.',
+		'doctype': u'DocField',
+		'fieldname': u'is_manufactured_item',
+		'fieldtype': u'Select',
+		'label': u'Allow Bill of Materials',
+		'oldfieldname': u'is_manufactured_item',
+		'oldfieldtype': u'Select',
+		'options': u'\nYes\nNo',
 		'permlevel': 0,
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldname': 'default_bom',
-		'fieldtype': 'Link',
-		'label': 'Default BOM',
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'default_bom',
+		'fieldtype': u'Link',
+		'label': u'Default BOM',
 		'no_copy': 1,
-		'oldfieldname': 'default_bom',
-		'oldfieldtype': 'Link',
-		'options': 'Bill Of Materials',
+		'oldfieldname': u'default_bom',
+		'oldfieldtype': u'Link',
+		'options': u'Bill Of Materials',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'default': 'No',
-		'description': 'Selecting "Yes" will allow you to make a Production Order for this item.',
-		'doctype': 'DocField',
-		'fieldname': 'is_pro_applicable',
-		'fieldtype': 'Select',
-		'label': 'Allow Production Order',
-		'oldfieldname': 'is_pro_applicable',
-		'oldfieldtype': 'Select',
-		'options': '\nYes\nNo',
+		'colour': u'White:FFF',
+		'default': u'No',
+		'description': u'Selecting "Yes" will allow you to make a Production Order for this item.',
+		'doctype': u'DocField',
+		'fieldname': u'is_pro_applicable',
+		'fieldtype': u'Select',
+		'label': u'Allow Production Order',
+		'oldfieldname': u'is_pro_applicable',
+		'oldfieldtype': u'Select',
+		'options': u'\nYes\nNo',
 		'permlevel': 0,
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'default': 'No',
-		'description': 'Select "Yes" if you supply raw materials to your supplier to manufacture this item.',
-		'doctype': 'DocField',
-		'fieldname': 'is_sub_contracted_item',
-		'fieldtype': 'Select',
-		'label': 'Is Sub Contracted Item',
-		'oldfieldname': 'is_sub_contracted_item',
-		'oldfieldtype': 'Select',
-		'options': '\nYes\nNo',
+		'colour': u'White:FFF',
+		'default': u'No',
+		'description': u'Select "Yes" if you supply raw materials to your supplier to manufacture this item.',
+		'doctype': u'DocField',
+		'fieldname': u'is_sub_contracted_item',
+		'fieldtype': u'Select',
+		'label': u'Is Sub Contracted Item',
+		'oldfieldname': u'is_sub_contracted_item',
+		'oldfieldtype': u'Select',
+		'options': u'\nYes\nNo',
 		'permlevel': 0,
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'file_list',
-		'fieldtype': 'Text',
+		'doctype': u'DocField',
+		'fieldname': u'file_list',
+		'fieldtype': u'Text',
 		'hidden': 1,
-		'label': 'File List',
+		'label': u'File List',
 		'no_copy': 1,
 		'permlevel': 0,
 		'print_hide': 1
@@ -891,12 +932,12 @@
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'customer_code',
-		'fieldtype': 'Data',
+		'doctype': u'DocField',
+		'fieldname': u'customer_code',
+		'fieldtype': u'Data',
 		'hidden': 1,
 		'in_filter': 1,
-		'label': 'Customer Code',
+		'label': u'Customer Code',
 		'no_copy': 1,
 		'permlevel': 0,
 		'print_hide': 1

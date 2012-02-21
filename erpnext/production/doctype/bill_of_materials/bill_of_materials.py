@@ -318,7 +318,6 @@ class DocType:
 				ch.fields[i] = d[i]
 			ch.docstatus = is_submit
 			ch.save(1)
-
 		self.doc.save()
 
 
@@ -351,10 +350,6 @@ class DocType:
 		""" Get all raw materials including items from child bom"""
 		self.cur_flat_bom_items = []
 		for d in getlist(self.doclist, 'bom_materials'):
-			item = {}
-			if d.bom_no:
-				item = sql("select is_sub_contracted_item from `tabItem` where name = '%s'" % d.item_code)
-
 			self.cur_flat_bom_items.append({
 				'item_code'				: d.item_code, 
 				'description'			: d.description, 
