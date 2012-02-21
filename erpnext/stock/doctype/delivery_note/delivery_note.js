@@ -52,7 +52,7 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 		unhide_field(['SMS','Send SMS', 'message', 'customer_mobile_no', 'Repair Delivery Note']);
 	}
 
-	if(doc.docstatus==1) {
+	if(doc.docstatus==0 && !doc.__islocal) {
 		cur_frm.add_custom_button('Make Packing Slip', cur_frm.cscript['Make Packing Slip']);
 	}
 	
