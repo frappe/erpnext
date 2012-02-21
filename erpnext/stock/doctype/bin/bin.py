@@ -36,8 +36,8 @@ class DocType:
 		self.doc.planned_qty = flt(self.doc.planned_qty) + flt(planned_qty)
 		self.doc.projected_qty = flt(self.doc.actual_qty) + flt(self.doc.ordered_qty) + flt(self.doc.indented_qty) + flt(self.doc.planned_qty) - flt(self.doc.reserved_qty)
 		self.doc.save()
-		if(( flt(actual_qty)<0 or flt(reserved_qty)>0 )and is_cancelled == 'No' and is_amended=='No'):
-			self.reorder_item(doc_type,doc_name)	
+		if(( flt(actual_qty)<0 or flt(reserved_qty)>0 ) and is_cancelled == 'No' and is_amended=='No'):
+			self.reorder_item(doc_type,doc_name)
 		
 		if actual_qty:
 			# check actual qty with total number of serial no
@@ -304,26 +304,37 @@ class DocType:
 				(flt(val_rate), cqty, flt(stock_val), self.doc.name))
 
 
-	# item re-order
-	# -------------
+
 	def reorder_item(self,doc_type,doc_name):
+		""" Reorder item if stock reaches reorder level"""
+
 		if get_value('Manage Account', None, 'auto_indent'):
 			#check if re-order is required
-			indent_detail_fields = sql("select re_order_level,item_name,description,brand,item_group,lead_time_days,min_order_qty,email_notify from tabItem where item_code = %s",(self.doc.item_code),as_dict=1)
-			i =	indent_detail_fields[0] 
-			item_reorder_level = i['re_order_level'] or 0	 
-			if ((flt(item_reorder_level) > flt(self.doc.projected_qty)) and item_reorder_level) :
-				self.reorder_indent(i,item_reorder_level,doc_type,doc_name,email_notify=i['email_notify'])
+			ret = sql("select re_order_level, item_name, description, brand, item_group, lead_time_days, min_order_qty, email_notify, re_order_qty from tabItem where item_code = %s", (self.doc.item_code), as_dict=1)
+			
+			current_qty = sql("""
+				select sum(t1.actual_qty) + sum(t1.indented_qty) + sum(t1.ordered_qty) -sum(t1.reserved_qty)
+				from tabBin t1, tabWarehouse t2
+				where t1.item_code = %s 
+				and t1.warehouse = t2.name
+				and t2.warehouse_type in ('Stores', 'Reserved', 'Default Warehouse Type')
+				and t1.docstatus != 2
+			""", self.doc.item_code)
 
-		
-	# Re order Auto Intent Generation
-	def reorder_indent(self,i,item_reorder_level,doc_type,doc_name,email_notify=1):
+			if ((flt(ret[0]['re_order_level']) > flt(current_qty)) and ret[0]['re_order_level']):
+				self.create_auto_indent(ret[0], doc_type, doc_name)
+
+	
+
+	def create_auto_indent(self, i , doc_type, doc_name):
+		"""	Create indent on reaching reorder level	"""
+
 		indent = Document('Indent')
 		indent.transaction_date = nowdate()
 		indent.naming_series = 'IDT'
 		indent.company = get_defaults()['company']
 		indent.fiscal_year = get_defaults()['fiscal_year']
-		indent.remark = "This is an auto generated Indent. It was raised because the projected quantity has fallen below the minimum re-order level when %s %s was created"%(doc_type,doc_name)
+		indent.remark = "This is an auto generated Indent. It was raised because the (actual + ordered + indented - reserved) quantity reaches re-order level when %s %s was created"%(doc_type,doc_name)
 		indent.save(1)
 		indent_obj = get_obj('Indent',indent.name,with_children=1)
 		indent_details_child = addchild(indent_obj.doc,'indent_details','Indent Detail',0)
@@ -334,26 +345,29 @@ class DocType:
 		indent_details_child.item_name = i['item_name']
 		indent_details_child.description = i['description']
 		indent_details_child.item_group = i['item_group']
-		if (i['min_order_qty'] < ( flt(item_reorder_level)-flt(self.doc.projected_qty) )):
-			indent_details_child.qty =flt(flt(item_reorder_level)-flt(self.doc.projected_qty))
-		else:
-			indent_details_child.qty = i['min_order_qty']
+		indent_details_child.qty = i['re_order_qty']
 		indent_details_child.brand = i['brand']
 		indent_details_child.save()
 		indent_obj = get_obj('Indent',indent.name,with_children=1)
 		indent_obj.validate()
 		set(indent_obj.doc,'docstatus',1)
 		indent_obj.on_submit()
-		msgprint("Item: " + self.doc.item_code + " is to be re-ordered. Indent %s raised.Was generated from %s %s"%(indent.name,doc_type, doc_name ))
-		if(email_notify):
+		msgprint("Item: " + self.doc.item_code + " is to be re-ordered. Indent %s raised. It was generated from %s %s"%(indent.name,doc_type, doc_name ))
+		if(i['email_notify']):
 			send_email_notification(doc_type,doc_name)
 			
+
+
 	def send_email_notification(self,doc_type,doc_name):
+		""" Notify user about auto creation of indent"""
+
 		email_list=[d for d in sql("select parent from tabUserRole where role in ('Purchase Manager','Material Manager') ")]
 		msg1='An Indent has been raised for item %s: %s on %s '%(doc_type, doc_name, nowdate())
 		sendmail(email_list, sender='automail@webnotestech.com', \
 		subject='Auto Indent Generation Notification', parts=[['text/plain',msg1]])	
-	# validate
+
+
+
 	def validate(self):
 		self.validate_mandatory()
 
