@@ -28,9 +28,10 @@ class DocType:
 			WHERE name=%(delivery_note)s
 			""", self.doc.fields)
 
-		if not(res and res[0][0]==1):
+		if not(res and res[0][0]==0):
 			webnotes.msgprint("""Invalid Delivery Note. Delivery Note should exist 
-				and should be submitted. Please rectify and try again.""", raise_exception=1)
+				and should be in draft state. Please rectify and try again.""", 
+				raise_exception=1)
 
 
 	def validate_case_nos(self):
@@ -46,12 +47,8 @@ class DocType:
 			""", self.doc.fields)
 
 		if res:
-			recommended_case_no = webnotes.conn.sql("""\
-				SELECT MAX(to_case_no) FROM `tabPacking Slip`
-				WHERE delivery_note = %(delivery_note)s AND docstatus=1""", self.doc.fields)
-			
 			webnotes.msgprint("""Case No(s). already in use. Please rectify and try again.
-				Recommended <b>From Case No. = %s</b>""" % (cint(recommended_case_no[0][0]) + 1),
+				Recommended <b>From Case No. = %s</b>""" % self.get_recommended_case_no(),
 				raise_exception=1)
 
 
@@ -75,13 +72,18 @@ class DocType:
 			* Item Quantity dict of current packing slip doc
 			* No. of Cases of this packing slip
 		"""
-		item_codes = ", ".join([('"' + d.item_code + '"') for d in self.doclist])
+		item_codes = ", ".join([('"' + d.item_code + '"') for d in
+			self.doclist])
+		
+		if not item_codes: webnotes.msgprint("No Items to Pack",
+				raise_exception=1)
 
 		res = webnotes.conn.sql("""\
 			SELECT item_code, IFNULL(SUM(qty), 0) as qty, IFNULL(packed_qty, 0) as packed_qty, stock_uom
 			FROM `tabDelivery Note Detail`
 			WHERE parent = "%s" AND item_code IN (%s)
-			GROUP BY item_code""" % (self.doc.delivery_note, item_codes), as_dict=1)
+			GROUP BY item_code""" % (self.doc.delivery_note, item_codes),
+			as_dict=1)
 
 		ps_item_qty = dict([[d.item_code, d.qty] for d in self.doclist])
 
@@ -150,7 +152,23 @@ class DocType:
 		"""
 			Fill empty columns in Packing Slip Detail
 		"""
+		self.doc.from_case_no = self.get_recommended_case_no()
+
 		from webnotes.model.code import get_obj
 		for d in self.doclist:
 			psd_obj = get_obj(doc=d)
 			psd_obj.get_item_details(self.doc.delivery_note)
+
+
+	def get_recommended_case_no(self):
+		"""
+			Returns the next case no. for a new packing slip for a delivery
+			note
+		"""
+		recommended_case_no = webnotes.conn.sql("""\
+			SELECT MAX(to_case_no) FROM `tabPacking Slip`
+			WHERE delivery_note = %(delivery_note)s AND docstatus=1""", self.doc.fields)
+
+		return cint(recommended_case_no[0][0]) + 1
+		
+

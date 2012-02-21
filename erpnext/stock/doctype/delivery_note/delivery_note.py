@@ -309,6 +309,7 @@ class DocType(TransactionBase):
 # ON SUBMIT
 # =================================================================================================
 	def on_submit(self):
+		self.validate_packed_qty()
 		set(self.doc, 'message', 'Items against your Order #%s have been delivered. Delivery #%s: ' % (self.doc.po_no, self.doc.name))
 		self.check_qty_in_stock()
 		# Check for Approving Authority
@@ -324,6 +325,28 @@ class DocType(TransactionBase):
 
 		# set DN status
 		set(self.doc, 'status', 'Submitted')
+
+
+	def validate_packed_qty(self):
+		"""
+			Validate that if packed qty exists, it should be equal to qty
+		"""
+		if not any([d.fields.get('packed_qty') for d in self.doclist]):
+			return
+		packing_error_list = []
+		for d in self.doclist:
+			if d.doctype != 'Delivery Note Detail': continue
+			if d.fields.get('qty') != d.fields.get('packed_qty'):
+				packing_error_list.append([
+					d.fields.get('item_code', ''),
+					d.fields.get('qty', ''),
+					d.fields.get('packed_qty', '')
+				])
+		if packing_error_list:
+			from webnotes.utils import cstr
+			err_msg = "\n".join([("Item: " + d[0] + ", Qty: " + cstr(d[1]) \
+				+ ", Packed: " + cstr(d[2])) for d in packing_error_list])
+			webnotes.msgprint("Packing Error:\n" + err_msg, raise_exception=1)
 
 
 	# *********** Checks whether actual quantity is present in warehouse *************

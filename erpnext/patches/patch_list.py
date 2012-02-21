@@ -79,5 +79,30 @@ patch_list = [
 		'patch_module': 'patches.jan_mar_2012',
 		'patch_file': 'subcon_default_val',
 		'description': 'Default value of is_subcontracted in PO, PR is No'
-	}
+	},
+	{
+		'patch_module': 'patches.jan_mar_2012.website',
+		'patch_file': 'all',
+		'description': 'Run all website related patches'
+	},
+	{
+		'patch_module': 'patches.jan_mar_2012',
+		'patch_file': 'remove_archive',
+		'description': 'unarchive all records and drop archive tables'
+	},
+	{
+		'patch_module': 'patches.jan_mar_2012',
+		'patch_file': 'no_copy_patch',
+		'description': 'insert after fld in custom fld should be no_copy'
+	},
+	{
+		'patch_module': 'patches.jan_mar_2012',
+		'patch_file': 'reload_item',
+		'description': 'reload item'
+	},
+	{
+		'patch_module': 'patches.jan_mar_2012',
+		'patch_file': 'fix_packing_slip',
+		'description': 'Update Mapper Delivery Note-Packing Slip'
+	},
 ]

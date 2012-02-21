@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-02-13 11:28:48',
+		'creation': '2012-02-02 11:50:33',
 		'docstatus': 0,
-		'modified': '2012-02-13 11:28:48',
+		'modified': '2012-02-21 16:11:29',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -34,7 +34,7 @@
 		'from_doctype': u'Delivery Note',
 		'module': u'Stock',
 		'name': '__common__',
-		'ref_doc_submitted': 1,
+		'ref_doc_submitted': 0,
 		'to_doctype': u'Packing Slip'
 	},
 
@@ -77,7 +77,7 @@
 		'from_table': u'Delivery Note',
 		'match_id': 0,
 		'to_table': u'Packing Slip',
-		'validation_logic': u'docstatus=1'
+		'validation_logic': u'docstatus=0'
 	},
 
 	# Table Mapper Detail
