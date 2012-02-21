@@ -197,10 +197,11 @@ class DocType:
 		return count
 		
 	def get_todo_list(self):
-		return sql("""select name, description, date, 
+		res = sql("""select name, description, `date`, 
 			priority, checked, reference_type, reference_name from `tabToDo Item` 
 			where owner=%s order by field(priority,'High','Medium','Low') asc, date asc""", \
 				session['user'], as_dict=1)
+		return res
 		
 	def add_todo_item(self,args):
 		args = json.loads(args)
@@ -213,10 +214,26 @@ class DocType:
 		d.owner = session['user']
 		d.save(not args.get('name') and 1 or 0)
 
+		if args.get('name') and d.checked:
+			self.notify_assignment(d)
+	
 		return d.name
 
 	def remove_todo_item(self,nm):
+		d = Document('ToDo Item', nm or None)
+		if d and d.name:
+			self.notify_assignment(d)
 		sql("delete from `tabToDo Item` where name = %s",nm)
+
+	def notify_assignment(self, d):
+		doc_type = d.fields.get('reference_type')
+		doc_name = d.fields.get('reference_name')
+		assigned_by = d.fields.get('assigned_by')
+		if doc_type and doc_name and assigned_by:
+			from webnotes.widgets.form import assign_to
+			assign_to.notify_assignment(assigned_by, d.owner, doc_type, doc_name)
+
+
 
 	# -------------------------------------------------------------------------------------------------------
 

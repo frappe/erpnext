@@ -13,8 +13,8 @@ erpnext.navbar.navbar = Class.extend({
 		this.make();
 		$('.brand').html(wn.boot.website_settings.brand_html);
 		this.make_items();
-		$('.navbar').dropdown();
-	},
+		$('.dropdown-toggle').dropdown();
+pull-right	},
 	make: function() {
 		$('header').append('<div class="navbar navbar-fixed-top">\
 			<div class="navbar-inner">\
@@ -23,7 +23,7 @@ erpnext.navbar.navbar = Class.extend({
 				<ul class="nav">\
 				</ul>\
 				<img src="lib/images/ui/spinner.gif" id="spinner"/>\
-				<ul class="nav secondary-nav">\
+				<ul class="nav pull-right">\
 					<li><a href="#!Login Page">Login</a></li>\
 				</ul>\
 			</div>\

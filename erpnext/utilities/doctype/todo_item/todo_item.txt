@@ -3,140 +3,211 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2009-05-12 11:19:11',
+		'creation': '2009-05-12 16:43:58',
 		'docstatus': 0,
-		'modified': '2010-09-20 14:06:57',
-		'modified_by': 'yogesh@webnotestech.com',
-		'owner': 'Administrator'
+		'modified': '2012-02-17 15:48:54',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'autoname': 'TDI.########',
-		'colour': 'White:FFF',
+		'allow_attach': 0,
+		'allow_copy': 0,
+		'allow_email': 0,
+		'allow_print': 0,
+		'allow_rename': 0,
+		'allow_trash': 0,
+		'autoname': u'TDI.########',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
+		'hide_heading': 0,
+		'hide_toolbar': 0,
 		'in_create': 1,
-		'module': 'Utilities',
+		'in_dialog': 0,
+		'is_transaction_doc': 0,
+		'issingle': 0,
+		'max_attachments': 0,
+		'module': u'Utilities',
 		'name': '__common__',
 		'read_only': 1,
-		'section_style': 'Simple',
-		'server_code_error': ' ',
-		'show_in_menu': 0
+		'read_only_onload': 0,
+		'section_style': u'Simple',
+		'server_code_error': u' ',
+		'show_in_menu': 0,
+		'use_template': 0,
+		'version': 5
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'ToDo Item',
-		'parentfield': 'fields',
-		'parenttype': 'DocType',
+		'parent': u'ToDo Item',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
 		'permlevel': 0
 	},
 
 	# These values are common for all DocPerm
 	{
 		'create': 1,
-		'doctype': 'DocPerm',
-		'idx': 1,
+		'doctype': u'DocPerm',
 		'name': '__common__',
-		'parent': 'ToDo Item',
-		'parentfield': 'permissions',
-		'parenttype': 'DocType',
+		'parent': u'ToDo Item',
+		'parentfield': u'permissions',
+		'parenttype': u'DocType',
 		'permlevel': 0,
 		'read': 1,
-		'role': 'All'
+		'role': u'All',
+		'write': 1
 	},
 
 	# DocType, ToDo Item
 	{
 		'doctype': 'DocType',
-		'name': 'ToDo Item'
+		'name': u'ToDo Item'
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm'
+		'doctype': u'DocPerm'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'description',
-		'fieldtype': 'Text',
-		'idx': 1,
-		'label': 'Description',
-		'oldfieldname': 'description',
-		'oldfieldtype': 'Text',
-		'width': '300px'
+		'allow_on_submit': 0,
+		'doctype': u'DocField',
+		'fieldname': u'description',
+		'fieldtype': u'Text',
+		'hidden': 0,
+		'in_filter': 0,
+		'label': u'Description',
+		'no_copy': 0,
+		'oldfieldname': u'description',
+		'oldfieldtype': u'Text',
+		'print_hide': 0,
+		'report_hide': 0,
+		'reqd': 0,
+		'search_index': 0,
+		'width': u'300px'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'date',
-		'fieldtype': 'Date',
-		'idx': 2,
-		'label': 'Date',
-		'oldfieldname': 'date',
-		'oldfieldtype': 'Date',
-		'reqd': 1
+		'allow_on_submit': 0,
+		'doctype': u'DocField',
+		'fieldname': u'date',
+		'fieldtype': u'Date',
+		'hidden': 0,
+		'in_filter': 0,
+		'label': u'Date',
+		'no_copy': 0,
+		'oldfieldname': u'date',
+		'oldfieldtype': u'Date',
+		'print_hide': 0,
+		'report_hide': 0,
+		'reqd': 0,
+		'search_index': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'priority',
-		'fieldtype': 'Data',
-		'idx': 3,
-		'label': 'Priority',
-		'oldfieldname': 'priority',
-		'oldfieldtype': 'Data',
-		'reqd': 1
+		'allow_on_submit': 0,
+		'doctype': u'DocField',
+		'fieldname': u'priority',
+		'fieldtype': u'Data',
+		'hidden': 0,
+		'in_filter': 0,
+		'label': u'Priority',
+		'no_copy': 0,
+		'oldfieldname': u'priority',
+		'oldfieldtype': u'Data',
+		'print_hide': 0,
+		'report_hide': 0,
+		'reqd': 0,
+		'search_index': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'reference_type',
-		'fieldtype': 'Data',
-		'idx': 4,
-		'label': 'Reference Type',
-		'oldfieldname': 'reference_type',
-		'oldfieldtype': 'Data'
+		'allow_on_submit': 0,
+		'doctype': u'DocField',
+		'fieldname': u'reference_type',
+		'fieldtype': u'Data',
+		'hidden': 0,
+		'in_filter': 0,
+		'label': u'Reference Type',
+		'no_copy': 0,
+		'oldfieldname': u'reference_type',
+		'oldfieldtype': u'Data',
+		'print_hide': 0,
+		'report_hide': 0,
+		'reqd': 0,
+		'search_index': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'reference_name',
-		'fieldtype': 'Data',
-		'idx': 5,
-		'label': 'Reference Name',
-		'oldfieldname': 'reference_name',
-		'oldfieldtype': 'Data'
+		'allow_on_submit': 0,
+		'doctype': u'DocField',
+		'fieldname': u'reference_name',
+		'fieldtype': u'Data',
+		'hidden': 0,
+		'in_filter': 0,
+		'label': u'Reference Name',
+		'no_copy': 0,
+		'oldfieldname': u'reference_name',
+		'oldfieldtype': u'Data',
+		'print_hide': 0,
+		'report_hide': 0,
+		'reqd': 0,
+		'search_index': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'checked',
-		'fieldtype': 'Check',
-		'idx': 6,
-		'label': 'Checked',
-		'oldfieldname': 'checked',
-		'oldfieldtype': 'Check'
+		'allow_on_submit': 0,
+		'doctype': u'DocField',
+		'fieldname': u'checked',
+		'fieldtype': u'Check',
+		'hidden': 0,
+		'in_filter': 0,
+		'label': u'Checked',
+		'no_copy': 0,
+		'oldfieldname': u'checked',
+		'oldfieldtype': u'Check',
+		'print_hide': 0,
+		'report_hide': 0,
+		'reqd': 0,
+		'search_index': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'role',
-		'fieldtype': 'Link',
-		'idx': 7,
-		'label': 'Role',
-		'oldfieldname': 'role',
-		'oldfieldtype': 'Link',
-		'options': 'Role'
+		'allow_on_submit': 0,
+		'doctype': u'DocField',
+		'fieldname': u'role',
+		'fieldtype': u'Link',
+		'hidden': 0,
+		'in_filter': 0,
+		'label': u'Role',
+		'no_copy': 0,
+		'oldfieldname': u'role',
+		'oldfieldtype': u'Link',
+		'options': u'Role',
+		'print_hide': 0,
+		'report_hide': 0,
+		'reqd': 0,
+		'search_index': 0
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'assigned_by',
+		'fieldtype': u'Link',
+		'label': u'Assigned By',
+		'options': u'Profile'
 	}
 ]

@@ -377,8 +377,11 @@ class DocType:
 			* Execute get method
 			* Send email to recipients
 		"""
+		if not self.doc.recipient_list: return
+
 		self.sending = True
 		result, email_body = self.get()
+		
 		recipient_list = self.doc.recipient_list.split("\n")
 
 		# before sending, check if user is disabled or not
@@ -633,7 +636,7 @@ class DocType:
 						[
 							"<span style='font-size: 16px; font-weight: normal'>%s</span>" % bank['name'],
 							currency_amount_str % (currency, fmt_money(bank['value']))
-						] for bank in result['bank_balance']
+						] for bank in result.get('bank_balance', [])
 					]
 				}),
 				'idx': 400
