@@ -14,19 +14,16 @@ erpnext.startup.start = function() {
 	$('#startup_div').html('Starting up...').toggle(true);
 	
 	erpnext.startup.set_globals();
-	
+
+	if(wn.boot.custom_css) {
+		set_style(wn.boot.custom_css);
+	}
+		
 	if(user == 'Guest'){
-		$dh(page_body.left_sidebar);
-		if(wn.boot.custom_css) {
-			set_style(wn.boot.custom_css);
-		}
 		if(wn.boot.website_settings.title_prefix) {
 			wn.title_prefix = wn.boot.website_settings.title_prefix;
 		}
 	} else {
-		// modules
-		pscript.startup_make_sidebar();
-
 		// setup toolbar
 		erpnext.toolbar.setup();
 		

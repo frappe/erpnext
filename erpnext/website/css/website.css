@@ -1,8 +1,3 @@
-#body_div {
-	width: 900px;
-	margin: auto;
-}
-
 .layout_wrapper {
 	padding: 20px;
 }
@@ -28,15 +23,6 @@ pre {
     overflow: auto;
     padding: 6px 10px;
 	margin-bottom: 9px;
-}
-
-footer {
-	width: 900px;
-	margin: auto;
-}
-header .topbar .container {
-	width: 900px;
-	margin: auto;
 }
 
 .web-content input[type="text"], .web-content input[type="password"], .web-content select {

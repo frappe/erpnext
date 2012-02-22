@@ -83,7 +83,6 @@ erpnext.Footer = Class.extend({
 		this.make_items();
 	},
 	make_items: function() {
-		alert(16);
 		var items = wn.boot.website_menus
 		for(var i=0;i<items.length;i++) {
 			var item = items[i];

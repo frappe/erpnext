@@ -103,8 +103,19 @@ div.comment { color: #444; }
 div#body_div {
 	position: relative;
 	display: none;
-	margin-top: 56px;
 	padding-right: 7px;
+	width: 900px;
+	margin: auto;
+	margin-top: 56px;
+}
+
+footer {
+	width: 900px;
+	margin: auto;
+}
+header .container {
+	width: 900px;
+	margin: auto;
 }
 
 div.no_script {
@@ -123,11 +134,6 @@ div.loading_div {
 	font-size: 12px;
 	border: 1px solid #FF4;
 }
-
-
-div#head_div { background-color: #FFF; }
-
-#head_banner { background-color: #FFF; }
 
 div.std-footer {
 	margin: 13px 0px;
@@ -161,18 +167,6 @@ div.std-footer-item {
 	background: linear-gradient(top, #ededed 0%,#d1d1d1 47%,#b7b7b7 100%); /* W3C */	
 }
 
-.header-gradient {
-	background: #84827c; /* Old browsers */
-	background: -moz-linear-gradient(top, #84827c 0%, #27211c 100%); /* FF3.6+ */
-	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#84827c), color-stop(100%,#27211c)); /* Chrome,Safari4+ */
-	background: -webkit-linear-gradient(top, #84827c 0%,#27211c 100%); /* Chrome10+,Safari5.1+ */
-	background: -o-linear-gradient(top, #84827c 0%,#27211c 100%); /* Opera11.10+ */
-	background: -ms-linear-gradient(top, #84827c 0%,#27211c 100%); /* IE10+ */
-	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#84827c', endColorstr='#27211c',GradientType=0 ); /* IE6-9 */
-	background: linear-gradient(top, #84827c 0%,#27211c 100%); /* W3C */
-	color: #FFF;
-}
-
 .layout_wrapper, .layout-wrapper {
 	-moz-box-shadow: 1px 1px 6px #AAA;
 	-webkit-box-shadow: 1px 1px 6px #AAA;
@@ -187,7 +181,7 @@ div.std-footer-item {
 }
 
 .layout-main-section {
-	width: 68%;
+	width: 70%;
 	float: left;
 	padding: 15px;
 	background-color: #FFF;
@@ -195,7 +189,7 @@ div.std-footer-item {
 }
 
 .layout-side-section {
-	width: 24%;
+	width: 22%;
 	float: right;
 	color: #606060;
 	overflow-x: hidden;
@@ -1290,16 +1284,15 @@ ul.box_tabs li {
 	cursor: pointer;
 }
 
-ul.box_tabs a {
+ul.box_tabs li a {
 	display:block;
 	padding:3px 15px 3px 6px;
-	text-decoration:none;
+	text-decoration: none;
 }
 
 ul.box_tabs li.box_tab_mouseover {
 	background-color: #BBB;
 }
-
 
 ul.box_tabs li.box_tab_selected {	
 	background-color: #777;
@@ -1312,9 +1305,8 @@ ul.box_tabs li.box_tab_selected {
 	
 }
 ul.box_tabs li.box_tab_selected a {
-
+	color: #fff;
 }
-
 /*
  *	lib/css/legacy/bw-icons.css
  */
