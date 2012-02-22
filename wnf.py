@@ -58,8 +58,10 @@ def setup_options():
 						help="install fresh db")
 	parser.add_option('--sync_with_gateway', nargs=1, metavar = "1/0", \
 						help="Set or Unset Sync with Gateway")
-	parser.add_option('--docdiff', nargs=0, \
-						help="Get diff between .txt files and database records")
+	parser.add_option('--diff_ref_file', nargs=0, \
+						help="Get missing database records and mismatch properties, with file as reference")
+	parser.add_option('--diff_ref_db', nargs=0, \
+						help="Get missing .txt files and mismatch properties, with database as reference")
 
 	return parser.parse_args()
 	
@@ -155,9 +157,13 @@ def run():
 		else:
 			webnotes.message_log.append("ERROR: sync_with_gateway can be either 0 or 1")
 	
-	elif options.docdiff is not None:
+	elif options.diff_ref_file is not None:
 		import webnotes.modules.diff
-		webnotes.modules.diff.diff()
+		webnotes.modules.diff.diff_ref_file()
+
+	elif options.diff_ref_db is not None:
+		import webnotes.modules.diff
+		webnotes.modules.diff.diff_ref_db()
 	
 	# print messages
 	if webnotes.message_log:
