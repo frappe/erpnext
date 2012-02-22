@@ -18,7 +18,6 @@
 		'module': 'Home',
 		'name': '__common__',
 		'section_style': 'Simple',
-		'server_code': '\n\n\t# Update roles of given user\n\tdef update_roles(self,arg):\n\t\targ = eval(arg)\n\t\tsql("delete from `tabUserRole` where parenttype=\'Profile\' and parent =\'%s\'" % (cstr(arg[\'usr\'])))\n\t\trole_list = arg[\'role_list\'].split(\',\')\n\t\tmsgprint(sql("select role from tabUserRole where parent = \'%s\'" % cstr(arg[\'usr\'])))\n\t\tmsgprint(role_list)\n\t\tfor r in role_list:\n\t\t\tpr=Document(\'UserRole\')\n\t\t\tpr.parent = arg[\'usr\']\n\t\t\tpr.parenttype = \'Profile\'\n\t\t\tpr.role = r\n\t\t\tpr.parentfield = \'userroles\'\n\t\t\tpr.save(1)\n\t\tmsgprint(sql("select role from tabUserRole where parent = \'%s\'" % cstr(arg[\'usr\'])))\n\n\n  # Create New Profile\n  # ====================\n\tdef create_new_profile(self, arg):\n\t\tp = Document(\'Profile\')\n\t\tp.first_name = arg.get(\'first_name\') or arg.get(\'email_id\')\n\t\tp.last_name = arg.get(\'last_name\')\n\t\tp.email = arg.get(\'email_id\')\n\t\tp.name = arg.get(\'email_id\')\n\t\tp.user_type = arg.get(\'user_type\') or \'System User\'\n\t\tp.enabled = 0\t\n\t\tp.save(new=1)\n\t\tp_obj = get_obj(\'Profile\', p.name)\n\t\tp_obj.on_update()',
 		'server_code_error': ' ',
 		'version': 13
 	},
