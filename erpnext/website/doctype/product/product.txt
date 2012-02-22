@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-01-30 16:21:29',
+		'creation': '2012-02-17 15:53:22',
 		'docstatus': 0,
-		'modified': '2012-02-06 16:15:29',
+		'modified': '2012-02-22 18:32:46',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -18,12 +18,13 @@
 		'colour': u'White:FFF',
 		'description': u'A Product is shown on the website and is linked to an item.',
 		'doctype': 'DocType',
+		'document_type': u'Master',
 		'max_attachments': 5,
 		'module': u'Website',
 		'name': '__common__',
 		'section_style': u'Simple',
 		'show_in_menu': 0,
-		'version': 11
+		'version': 12
 	},
 
 	# These values are common for all DocField
