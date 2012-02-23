@@ -23,13 +23,18 @@ def replace_code(start, txt1, txt2, extn):
 def setup_options():
 	from optparse import OptionParser
 	parser = OptionParser()
+
+	parser.add_option("-d", "--db",
+						dest="db_name",
+						help="Apply the patches on given db")
+
+	# build
 	parser.add_option("-b", "--build", default=False, action="store_true",
 						help="minify + concat js files")
 	parser.add_option("-c", "--clear", default=False, action="store_true",
 						help="increment version")
-	parser.add_option("--replace", nargs=3, default=False, 
-						metavar = "search replace_by extension",
-						help="file search-replace")
+
+	# git
 	parser.add_option("--status", default=False, action="store_true",
 						help="git status")
 	parser.add_option("--pull", nargs=2, default=False,
@@ -41,27 +46,42 @@ def setup_options():
 	parser.add_option("-l", "--latest",
 						action="store_true", dest="run_latest", default=False,
 						help="Apply the latest patches")
+
+	# patch
 	parser.add_option("-p", "--patch", nargs=1, dest="patch_list", metavar='patch_module',
 						action="append",
 						help="Apply patch")
 	parser.add_option("-f", "--force",
 						action="store_true", dest="force", default=False,
 						help="Force Apply all patches specified using option -p or --patch")
-	parser.add_option("-d", "--db",
-						dest="db_name",
-						help="Apply the patches on given db")
 	parser.add_option('--reload_doc', nargs=3, metavar = "module doctype docname",
 						help="reload doc")
 	parser.add_option('--export_doc', nargs=2, metavar = "doctype docname",
 						help="export doc")
+
+	# install
 	parser.add_option('--install', nargs=3, metavar = "rootpassword dbname source",
 						help="install fresh db")
 	parser.add_option('--sync_with_gateway', nargs=1, metavar = "1/0", \
 						help="Set or Unset Sync with Gateway")
+
+	# diff
 	parser.add_option('--diff_ref_file', nargs=0, \
 						help="Get missing database records and mismatch properties, with file as reference")
 	parser.add_option('--diff_ref_db', nargs=0, \
 						help="Get missing .txt files and mismatch properties, with database as reference")
+
+	# scheduler
+	parser.add_option('--run_scheduler', default=False, action="store_true",
+						help="Trigger scheduler")
+	parser.add_option('--run_scheduler_event', nargs=1, metavar="[all|daily|weekly|monthly]",
+						help="Run scheduler event")
+
+	# misc
+	parser.add_option("--replace", nargs=3, default=False, 
+						metavar = "search replace_by extension",
+						help="file search-replace")
+	
 
 	return parser.parse_args()
 	
@@ -164,6 +184,14 @@ def run():
 	elif options.diff_ref_db is not None:
 		import webnotes.modules.diff
 		webnotes.modules.diff.diff_ref_db()
+	
+	elif options.run_scheduler:
+		import webnotes.utils.scheduler
+		print webnotes.utils.scheduler.execute()
+	
+	elif options.run_scheduler_event is not None:
+		import webnotes.utils.scheduler
+		print webnotes.utils.scheduler.trigger('execute_' + options.run_scheduler_event)
 	
 	# print messages
 	if webnotes.message_log:

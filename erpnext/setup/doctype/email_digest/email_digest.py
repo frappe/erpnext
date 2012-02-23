@@ -783,7 +783,7 @@ def send():
 			send_date = dt_dict['server_dt'].date()
 			send_time = dt_dict['server_dt'].time()
 
-			if (now_date == send_date) and (send_time <= now_time):
+			if (now_date == send_date):
 				#webnotes.msgprint('sending ' + ed_obj.doc.name)
 				ed_obj.send()
 			#else:
