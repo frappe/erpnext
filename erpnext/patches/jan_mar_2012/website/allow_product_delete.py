@@ -4,4 +4,5 @@ def execute():
 	"""
 	import webnotes
 	webnotes.conn.sql("""UPDATE `tabDocPerm` SET cancel=1
-		WHERE parent='Product' AND role='Website Manager'""")
+		WHERE parent='Product' AND role='Website Manager'
+		AND permlevel=0""")
