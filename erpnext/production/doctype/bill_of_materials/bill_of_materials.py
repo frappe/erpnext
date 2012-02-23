@@ -268,7 +268,7 @@ class DocType:
 
 	def check_if_item_repeated(self, item, op, check_list):
 		if [cstr(item), cstr(op)] in check_list:
-			msgprint("Item %s has been entered twice against same operation" % d.item_code, raise_exception = 1)
+			msgprint("Item %s has been entered twice against same operation" % item, raise_exception = 1)
 		else:
 			check_list.append([cstr(item), cstr(op)])
 
