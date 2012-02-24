@@ -27,6 +27,7 @@ def execute():
 	reload_doc('production', 'page', 'production_home')
 	reload_doc('projects', 'page', 'projects_home')
 	reload_doc('website', 'page', 'website_home')
+	reload_doc('home', 'page', 'desktop')
 	
 	webnotes.conn.commit()
 	webnotes.conn.sql("""create table __SchedulerLog (
