@@ -97,13 +97,22 @@ ModulePage = function(parent, module_name, module_label, help_page, callback) {
 var update_messages = function() {
 	// Updates Team Messages
 	
-	if(inList(['Guest', 'Administrator'], user)) { return; }
+	if(inList(['Guest'], user)) { return; }
 	
 	$c_page('home', 'event_updates', 'get_unread_messages', null,
 		function(r,rt) {
 			if(!r.exc) {
 				// This function is defined in toolbar.js
 				page_body.wntoolbar.set_new_comments(r.message);
+				var circle = $('#msg_count')
+				if(circle) {
+					if(r.message.length) {
+						circle.find('span:first').text(r.message.length);
+						circle.toggle(true);
+					} else {
+						circle.toggle(false);
+					}
+				}
 			}
 		}
 	);
@@ -117,7 +126,7 @@ erpnext.startup.set_periodic_updates = function() {
 		clearInterval(wn.updates.id);
 	}
 
-	wn.updates.id = setInterval(update_messages, 180000);
+	wn.updates.id = setInterval(update_messages, 60000);
 }
 
 // =======================================

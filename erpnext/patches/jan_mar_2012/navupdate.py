@@ -15,6 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import webnotes
+import _mysql_exceptions
 
 def execute():
 	from webnotes.modules import reload_doc
@@ -28,10 +29,16 @@ def execute():
 	reload_doc('projects', 'page', 'projects_home')
 	reload_doc('website', 'page', 'website_home')
 	reload_doc('home', 'page', 'desktop')
+	reload_doc('utilities', 'page', 'todo')
+	reload_doc('utilities', 'page', 'calendar')
 	
 	webnotes.conn.commit()
-	webnotes.conn.sql("""create table __SchedulerLog (
-		`timestamp` timestamp,
-		method varchar(200),
-		error text
-	) engine=MyISAM""")
+
+	try:
+		webnotes.conn.sql("""create table __SchedulerLog (
+			`timestamp` timestamp,
+			method varchar(200),
+			error text
+		) engine=MyISAM""")
+	except _mysql_exceptions.OperationalError, e:
+		pass

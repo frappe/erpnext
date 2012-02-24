@@ -44,7 +44,7 @@ body {
 .module-icons-stock{ background-position: 0 -660px;  } 
 .module-icons-support{ background-position: 0 -726px;  } 
 
-.topbar-new-comments {
+.navbar-new-comments {
 	margin: -3px 0px;
 	padding: 2px;
 	font-size: 14px;

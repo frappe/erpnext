@@ -57,21 +57,25 @@
 
 .case-label {
 	color: white;
-	font-size: 14px;
+	/*font-size: 12px;*/
 	padding-top: 10px;
 	text-align: center;
 	text-shadow: 1px 1px 5px #000, 3px 3px 5px #000;
 }
 
 /* Hover and click effects */
-.case-border:hover {
-	animation: hover-effect 0.5s;
-	-moz-animation: hover-effect 0.5s; /* Firefox */
-	-webkit-animation: hover-effect 0.5s; /* Safari and Chrome */
+.case-border:hover, .circle:hover {
+	animation: hover-effect 0.1s;
+	-moz-animation: hover-effect 0.1s; /* Firefox */
+	-webkit-animation: hover-effect 0.05s; /* Safari and Chrome */
+	
+	animation-timing-function:linear;
+	-moz-animation-timing-function:linear; /* Firefox */
+	-webkit-animation-timing-function:linear; /* Safari and Chrome */
 	box-shadow: 0 0 2px 0 black, 0 0 10px 1px white;
 }
 
-.case-border:active, .case-border:focus {
+.case-border:active, .case-border:focus, .circle:active, .circle:focus {
 	box-shadow: 0 0 5px 2px black;
 }
 
@@ -91,5 +95,29 @@
 {
 	from {box-shadow: 0 0 10px 1px black}
 	to {box-shadow: 0 0 2px 0 black, 0 0 10px 1px white;}
+}
+
+.circle {
+	border-radius: 100%;
+	height: 15px;
+	min-width: 15px;
+	background: #B00D07;
+	padding: 3px;
+	z-index: 2;
+	float: right;
+	margin-top: -10px;
+	margin-right: 10px;
+	border: 2px solid white;
+	box-shadow: 0 0 10px 1px black;
+}
+
+.circle-text {
+	color: white;
+	font-size: 12px;
+	vertical-align: middle;
+	text-align: center;
+	display: inline-block;
+	margin-top: -2px;
+	text-shadow: 1px 1px 5px #000;
 }
 
