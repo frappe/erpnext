@@ -1,5 +1,7 @@
 .todoitem {
-	margin-bottom: 11px;
+	padding-bottom: 11px;
+	border-bottom: 1px solid #DEB85F;
+	margin-bottom: 5px;
 	height: 14px;
 }
 

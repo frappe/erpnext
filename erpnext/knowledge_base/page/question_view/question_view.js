@@ -14,17 +14,12 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-pscript['onload_question-view'] = function() {
-//
-	var w = page_body.pages['question-view'];
-	w.className = 'layout_wrapper';
-	new PageHeader(w, 'Knowledge Base');
-	w.link = $ln($a(w, 'div'), '< Back to all questions', function() { loadpage('questions'); })
-	w.body = $a(w, 'div', 'qv-body');
-
+pscript['onload_question-view'] = function(wrapper) {
+	wrapper.add_answer_area = $('.add-answer-area').get(0);
 }
 
 pscript['refresh_question-view'] = function() {
+	$('.add-answer-area').empty();
 	// href
 	var qid = window.location.hash.split('/')[1];
 	if(qid) {
@@ -39,16 +34,11 @@ pscript.question_view = function(qid, qtext) {
 
 KBQuestionView = function(w, qid, qtext) {
 	var me = this;
-	
-	w.body.innerHTML = '';
-	w.question_area = $a(w.body, 'div', 'social qv-question-wrapper');
-	w.answer_area = $a(w.body, 'div', 'social qv-answer-wrapper');
-	w.add_answer_link = $a(w.body, 'div', '', {margin:'3px 0px'});
-	w.add_answer_area = $a(w.body, 'div', 'qv-add-answer');
-	
+		
 	this.make_question = function() {
+		$(w).find('.qv-question-wrapper').empty();
 		new EditableText({
-			parent: w.question_area,
+			parent: $(w).find('.qv-question-wrapper').get(0),
 			dt: 'Question',
 			dn: qid,
 			fieldname: 'question',
@@ -62,8 +52,9 @@ KBQuestionView = function(w, qid, qtext) {
 	
 	// answer list
 	this.make_answer_list = function() {
+		$(w).find('.qv-answer-wrapper').empty();
 		this.ans_list = new KBAnswerList({
-			parent: w.answer_area,
+			parent: $(w).find('.qv-answer-wrapper').get(0),
 			qid: qid
 		})
 	}
@@ -80,11 +71,12 @@ KBQuestionView = function(w, qid, qtext) {
 	
 	// add a link to open add answer
 	this.make_answer_box_link = function() {
-		$a(w.add_answer_link, 'span', 'link_type', null, '+ Add your answer', 
-			function() { 
-				$dh(w.add_answer_link);
-				me.make_answer_box();
-			});
+		$('.add-answer-link').html('<button class="btn btn-small">\
+			<i class="icon-plus"></i> Add you answer</button>').find('button').click(
+				function() {
+					$(this).toggle(false);
+					me.make_answer_box();
+				});
 	}
 	
 	// answer box
@@ -142,7 +134,7 @@ KBAnswerList = function(args) {
 		this.list = new wn.widgets.Listing({
 			parent: me.parent,
 			as_dict: 1,
-			no_results_message: 'No answers yet, be the first one to answer!',
+			no_result_message: 'No answers yet, be the first one to answer!',
 			render_row: function(body, data) {
 				new KBAnswer(body, data, me)
 			},
@@ -151,7 +143,8 @@ KBAnswerList = function(args) {
 					+"t2.last_name, t1.modified from tabAnswer t1, tabProfile t2 "
 					+"where question='%(qid)s' and t1.owner = t2.name "
 					+"order by t1.points desc, t1.modified desc", {qid: me.qid})
-			}
+			},
+			title: 'Answers'
 		});
 		
 		this.list.run();
@@ -168,7 +161,7 @@ KBAnswerList = function(args) {
 // points yyy
 KBAnswer = function(body, data, ans_list) {
 	body.className = 'qv-answer';
-	new EditableText({
+	var edtxt = new EditableText({
 		parent: body,
 		dt: 'Answer',
 		dn: data.name,
@@ -178,6 +171,8 @@ KBAnswer = function(body, data, ans_list) {
 		disp_class: 'qv-ans-text',
 		rich_text: 1
 	});	
+	
+	$(edtxt.wrapper).addClass('well');
 	
 	var div = $a(body, 'div', '', {})
 	new KBItemToolbar({

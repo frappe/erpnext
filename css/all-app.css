@@ -168,9 +168,9 @@ div.std-footer-item {
 }
 
 .layout_wrapper, .layout-wrapper {
-	-moz-box-shadow: 1px 1px 6px #AAA;
-	-webkit-box-shadow: 1px 1px 6px #AAA;
-	box-shadow: 1px 1px 6px #AAA;
+	-moz-box-shadow: 1px 1px 8px #555;
+	-webkit-box-shadow: 1px 1px 8px #555;
+	box-shadow: 1px 1px 8px #555;
 	background-color: #fff;
 	padding: 15px;
 }
@@ -210,6 +210,21 @@ div.std-footer-item {
 }
 .container:after {
   clear: both;
+}
+
+.well {
+  min-height: 20px;
+  padding: 19px;
+  margin-bottom: 20px;
+  background-color: #f5f5f5;
+  border: 1px solid #eee;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  border-radius: 4px;
+  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
+  -moz-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
 }
 
 /*
@@ -903,180 +918,6 @@ table.builder_tab td {
 	width: 33%;
 	padding: 2px;
 }
-/*
- *	lib/css/legacy/calendar.css
- *//**** CALENDAR ****/
-
-.caldiv {
-	position:absolute;
-	visibility:hidden;
-	background-color:white;
-	width: 144px;
-	z-index: 301; /* always on top(?) */
-}
-
-
-	
-div.cal_wrapper { }
-div.cal_body {
-	margin: 16px;
-	background-color: #DDD;
-	position: relative;
-	border-radius: 5px;
-	-moz-border-radius: 5px;
-	-webkit-border-radius: 5px;	
-}
-
-div.cal_head {
-	margin: 16px;
-	margin-bottom: 0px;
-}
-div.cal_head div {
-	font-size: 18px;
-	color: #666;
-	padding-top: 8px;
-}
-
-div.cal_view_body {
-	margin: 16px;
-}
-
-div.cal_view_body_plain {
-	margin: 16px;
-}
-
-div.cal_month_head {
-}
-
-div.cal_month_body {
-	border-top: 1px solid #888;
-}
-
-.cal_month_headtable {
-	/*table-layout:fixed;*/
-	width: 100%;
-}
-
-.cal_month_name {
-	width: 100%;
-	color: #888;
-	font-size: 14px;
-	font-weight: bold;
-	text-align: center;
-	padding: 4px;
-}
-
-.cal_month_headtable tr td{
-	font-size: 12px;
-	font-weight: bold;
-	text-align: center;
-	padding: 4px;
-}
-
-table.cal_month_table {
-	border-collapse: collapse;
-	/*table-layout:fixed;*/
-	height: 100%;
-	width: 100%;
-}
-
-table.cal_month_table td {
-	width: 14.29%;
-	height: 20%;
-	/*overflow:hidden;*/
-	padding:0px;
-}
-
-div.cal_month_date {
-	width:100%;
-	height:25%;
-	font-size: 10px;
-	overflow:hidden;
-	/*background-color: #EEF;*/
-}
-
-div.cal_month_date_holiday {
-	/*background-color: #FFF;*/
-}
-
-div.cal_month_unit {
-	width:100%;
-	height:75%;
-	overflow:hidden;
-	cursor:pointer;
-	/*background-color:#FFF;*/
-}
-	
-div.cal_vu_disabled {
-	background-color:#FFF;
-	cursor:default;
-}
-
-table.cal_day_table {
-	border-collapse: collapse;
-	width: 100%;
-}
-
-table.cal_day_table td {
-}
-
-div.cal_day_body {
-	width: 100%;
-	height: 80%;
-	overflow-y: auto;
-	overflow-x: hidden;
-	border-top: 1px solid #AAA;
-}
-
-div.cal_day_unit{
-	width:100%;
-	cursor:pointer;
-}
-
-table.cal_week_table {
-	border-collapse: collapse;
-	width: 100%;
-}
-
-table.cal_week_table td {
-	width: 12.5%;
-}
-
-div.cal_week_body {
-	width: 100%;
-	height: 80%;
-	overflow-y: auto;
-	overflow-x: hidden;
-	border-top: 1px solid #888;
-}
-
-div.cal_week_unit{
-	width: 100%;
-	cursor:pointer;
-}
-
-div.cal_event {
-	width: 100%;
-	height: 12px;
-	overflow: hidden;
-	font-size: 11px;
-	color: #00B;
-	margin-bottom: 2px;
-	text-decoration: underline;
-}
-
-div.cal_event_Public {
-	color: GREEN;
-}
-
-div.cal_event_Private {
-	color: BLUE;
-}
-
-div.cal_event_hover {
-	text-decoration: underline;
-}
-
 /*
  *	lib/css/legacy/autosuggest.css
  *//* 

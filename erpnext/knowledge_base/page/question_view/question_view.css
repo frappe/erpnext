@@ -24,9 +24,6 @@
 }
 
 .qv-question-wrapper {
-	margin: 7px 0px 13px 0px;
-	padding-bottom: 7px;
-	border-bottom: 1px solid #CCC;
 }
 
 .qv-add-answer {
@@ -43,7 +40,5 @@
 }
 
 .qv-answer {
-	margin: 7px 0px 7px 0px;
-	padding-bottom: 7px;
-	border-bottom: 1px solid #CCC;	
+
 }
