@@ -1,0 +1,28 @@
+# Page, calendar
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2012-02-24 11:24:12',
+		'docstatus': 0,
+		'modified': '2012-02-24 11:24:12',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
+	},
+
+	# These values are common for all Page
+	{
+		'doctype': 'Page',
+		'module': u'Utilities',
+		'name': '__common__',
+		'page_name': u'calendar',
+		'standard': u'Yes',
+		'title': u'Calendar'
+	},
+
+	# Page, calendar
+	{
+		'doctype': 'Page',
+		'name': u'calendar'
+	}
+]

@@ -47,7 +47,7 @@ def patch_primary_contact():
 			GROUP BY sales_partner HAVING SUM(IFNULL(is_primary_contact, 0))=0
 		)
 	""", as_list=1)
-	names = ", ".join(['"' + str(r[0]) + '"' for r in res if r])
+	names = ", ".join(['"' + unicode(r[0]) + '"' for r in res if r])
 	if names: webnotes.conn.sql("UPDATE `tabContact` SET is_primary_contact=1 WHERE name IN (%s)" % names)
 
 def patch_primary_address():
@@ -70,5 +70,5 @@ def patch_primary_address():
 			AND SUM(IFNULL(is_shipping_address, 0))=0
 		)
 	""", as_list=1)
-	names = ", ".join(['"' + str(r[0]) + '"' for r in res if r])
+	names = ", ".join(['"' + unicode(r[0]) + '"' for r in res if r])
 	if names: webnotes.conn.sql("UPDATE `tabAddress` SET is_primary_address=1 WHERE name IN (%s)" % names)

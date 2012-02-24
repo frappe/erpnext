@@ -1,0 +1,29 @@
+.todoitem {
+	margin-bottom: 11px;
+	height: 14px;
+}
+
+.todoitem .label {
+	width: 50px;
+	display: inline-block;
+	text-align: center;
+	margin-right: 7px;
+}
+
+.todoitem .close {
+	margin-left: 14px;
+	font-size: 14px;
+	float: left;
+}
+
+.todoitem .ref_link {
+	float: left;
+	margin-left: 14px;
+	display: inline-block;
+	line-height: 18px;
+}
+
+.todoitem .description {
+	cursor: pointer;
+	float: left;
+}

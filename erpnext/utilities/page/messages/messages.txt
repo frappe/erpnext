@@ -1,0 +1,28 @@
+# Page, messages
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2012-02-24 11:21:57',
+		'docstatus': 0,
+		'modified': '2012-02-24 11:21:57',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
+	},
+
+	# These values are common for all Page
+	{
+		'doctype': 'Page',
+		'module': u'Utilities',
+		'name': '__common__',
+		'page_name': u'messages',
+		'standard': u'Yes',
+		'title': u'Messages'
+	},
+
+	# Page, messages
+	{
+		'doctype': 'Page',
+		'name': u'messages'
+	}
+]

@@ -446,7 +446,7 @@ function $c_obj(doclist,method,arg,call_back,no_spinner,freeze_msg,btn){var args
 if(typeof doclist=='string')args.doctype=doclist;else args.docs=compress_doclist(doclist)
 $c('runserverobj',args,call_back,null,no_spinner,freeze_msg,btn);}
 function $c_page(module,page,method,arg,call_back,no_spinner,freeze_msg,btn){if(arg&&!arg.substr)arg=JSON.stringify(arg);$c(module+'.page.'+page+'.'+page+'.'+method,{'arg':arg},call_back,null,no_spinner,freeze_msg,btn);}
-wn.call=function(args){if(args.module&&args.page){$c_page(args.module,args.page,args.method,args.args,args.callback,args.no_spinner,false,args.btn);}else if(args.docs){$c_obj(args.doc,args.method,args.args,args.callback,args.no_spinner,false,args.btn);}else{$c(args.method,args.args,args.callback,false,args.no_spinner,false,args.btn);}}
+wn.call=function(args){if(!args.args)args.args={};if(args.module&&args.page){$c_page(args.module,args.page,args.method,args.args,args.callback,args.no_spinner,false,args.btn);}else if(args.docs){$c_obj(args.doc,args.method,args.args,args.callback,args.no_spinner,false,args.btn);}else{$c(args.method,args.args,args.callback,false,args.no_spinner,false,args.btn);}}
 function $c_obj_csv(doclist,method,arg){var args={}
 args.cmd='runserverobj';args.as_csv=1;args.method=method;args.arg=arg;if(doclist.substr)
 args.doctype=doclist;else
@@ -1317,8 +1317,7 @@ if(rd[1]){var dt=rd[0];var dn=rd[1];this.add(dt,dn,0);}}}});
 /*
  *	lib/js/wn/ui/toolbar/toolbar.js
  */
-wn.ui.toolbar.Toolbar=Class.extend({init:function(){this.make();this.make_home();this.make_document();wn.ui.toolbar.recent=new wn.ui.toolbar.RecentDocs();if(in_list(user_roles,'Administrator'))
-this.make_options();this.make_tools();this.set_user_name();this.make_logout();$('.dropdown-toggle').dropdown();$(document).trigger('toolbar_setup');},make:function(){$('header').append('<div class="navbar navbar-fixed-top">\
+wn.ui.toolbar.Toolbar=Class.extend({init:function(){this.make();this.make_home();this.make_document();this.make_apps();wn.ui.toolbar.recent=new wn.ui.toolbar.RecentDocs();this.make_tools();this.set_user_name();this.make_logout();$('.dropdown-toggle').dropdown();$(document).trigger('toolbar_setup');},make:function(){$('header').append('<div class="navbar navbar-fixed-top">\
    <div class="navbar-inner">\
    <div class="container">\
     <a class="brand"></a>\
@@ -1335,13 +1334,17 @@ this.make_options();this.make_tools();this.set_user_name();this.make_logout();$(
     </ul>\
    </div>\
    </div>\
-   </div>');},make_home:function(){$('.navbar .nav:first').append('<li data-name="navbar-home"><a href="#'+home_page+'">Home</a></li>')},make_document:function(){wn.ui.toolbar.new_dialog=new wn.ui.toolbar.NewDialog();wn.ui.toolbar.search=new wn.ui.toolbar.Search();wn.ui.toolbar.report=new wn.ui.toolbar.Report();$('.navbar .nav:first').append('<li class="dropdown">\
+   </div>');},make_home:function(){$('.navbar .nav:first').append('<li data-name="navbar-home">\
+   <a href="#!'+home_page+'">Home</a></li>');$('.navbar .brand').attr('href',"#!"+home_page);},make_document:function(){wn.ui.toolbar.new_dialog=new wn.ui.toolbar.NewDialog();wn.ui.toolbar.search=new wn.ui.toolbar.Search();wn.ui.toolbar.report=new wn.ui.toolbar.Report();$('.navbar .nav:first').append('<li class="dropdown">\
    <a class="dropdown-toggle" href="#"  data-toggle="dropdown"\
     onclick="return false;">Document<b class="caret"></b></a>\
    <ul class="dropdown-menu" id="toolbar-document">\
-    <li><a href="#" onclick="return wn.ui.toolbar.new_dialog.show();">New</a></li>\
-    <li><a href="#" onclick="return wn.ui.toolbar.search.show();">Search</a></li>\
-    <li><a href="#" onclick="return wn.ui.toolbar.report.show();">Report</a></li>\
+    <li><a href="#" onclick="return wn.ui.toolbar.new_dialog.show();">\
+     <i class="icon-plus"></i> New</a></li>\
+    <li><a href="#" onclick="return wn.ui.toolbar.search.show();">\
+     <i class="icon-search"></i> Search</a></li>\
+    <li><a href="#" onclick="return wn.ui.toolbar.report.show();">\
+     <i class="icon-list"></i> Report</a></li>\
    </ul>\
   </li>');},make_tools:function(){$('.navbar .nav:first').append('<li class="dropdown">\
    <a class="dropdown-toggle" data-toggle="dropdown" href="#" \
@@ -1353,13 +1356,16 @@ this.make_options();this.make_tools();this.set_user_name();this.make_logout();$(
    </ul>\
   </li>');if(has_common(user_roles,['Administrator','System Manager'])){$('#toolbar-tools').append('<li><a href="#" \
     onclick="return wn.ui.toolbar.download_backup();">\
-    Download Backup</a></li>');}},make_options:function(){$('.navbar .nav:first').append('<li class="dropdown">\
+    Download Backup</a></li>');}},make_apps:function(){$('.navbar .nav:first').append('<li class="dropdown">\
    <a class="dropdown-toggle" data-toggle="dropdown" \
-    href="#" onclick="return false;">Options<b class="caret"></b></a>\
-   <ul class="dropdown-menu" id="toolbar-options">\
+    href="#" onclick="return false;">Apps<b class="caret"></b></a>\
+   <ul class="dropdown-menu">\
+    <li><a href="#!messages">Messages</a></li>\
+    <li><a href="#!todo">To Do</a></li>\
+    <li><a href="#!calendar">Calendar</a></li>\
+    <li><a href="#!questions">Knowledge Base</a></li>\
    </ul>\
-  </li>');profile.start_items.sort(function(a,b){return(a[4]-b[4])});for(var i=0;i<profile.start_items.length;i++){var d=profile.start_items[i];var ispage=d[0]=='Page';$('#toolbar-options').append(repl('<li><a href="#%(type)s%(dt)s%(dn)s">\
-    %(dn)s</a></li>',{type:(ispage?'':'Form/'),dt:(ispage?'':(d[0]+'/')),dn:d[5]||d[1]}));}},set_user_name:function(){var fn=user_fullname;if(fn.length>15)fn=fn.substr(0,12)+'...';$('#toolbar-user-link').html(fn+'<b class="caret"></b>');},make_logout:function(){$('#toolbar-user').append('<li><a href="#" onclick="return logout();">Logout</a></li>');}});wn.ui.toolbar.clear_cache=function(){localStorage&&localStorage.clear();$c('webnotes.session_cache.clear',{},function(r,rt){show_alert(r.message);});return false;}
+  </li>');},set_user_name:function(){var fn=user_fullname;if(fn.length>15)fn=fn.substr(0,12)+'...';$('#toolbar-user-link').html(fn+'<b class="caret"></b>');},make_logout:function(){$('#toolbar-user').append('<li><a href="#" onclick="return logout();">Logout</a></li>');}});wn.ui.toolbar.clear_cache=function(){localStorage&&localStorage.clear();$c('webnotes.session_cache.clear',{},function(r,rt){show_alert(r.message);});return false;}
 wn.ui.toolbar.download_backup=function(){$c('webnotes.utils.backups.get_backup',{},function(r,rt){});return false;}
 wn.ui.toolbar.show_about=function(){try{wn.require('lib/js/wn/misc/about.js');wn.ui.misc.about();}catch(e){console.log(e);}
 return false;}
@@ -2155,7 +2161,7 @@ me.dialog.clear();me.dialog.show();}});
 /*
  *	lib/js/legacy/app.js
  */
-var popup_cont;var session={};var start_sid=null;if(!wn)var wn={};function startup(){start_sid=get_cookie('sid');popup_cont=$a(document.getElementsByTagName('body')[0],'div');var setup_globals=function(r){wn.boot=r;profile=r.profile;user=r.profile.name;user_fullname=profile.first_name+(r.profile.last_name?(' '+r.profile.last_name):'');user_defaults=profile.defaults;user_roles=profile.roles;user_email=profile.email;profile.start_items=r.start_items;home_page=r.home_page;_p.letter_heads=r.letter_heads;sys_defaults=r.sysdefaults;session.rt=profile.can_read;if(r.ipinfo)session.ipinfo=r.ipinfo;session.dt_labels=r.dt_labels;session.rev_dt_labels={}
+var popup_cont;var session={};var start_sid=null;if(!wn)var wn={};function startup(){start_sid=get_cookie('sid');popup_cont=$a(document.getElementsByTagName('body')[0],'div');var setup_globals=function(r){wn.boot=r;profile=r.profile;user=r.profile.name;user_fullname=profile.first_name+(r.profile.last_name?(' '+r.profile.last_name):'');user_defaults=profile.defaults;user_roles=profile.roles;user_email=profile.email;home_page=r.home_page;_p.letter_heads=r.letter_heads;sys_defaults=r.sysdefaults;session.rt=profile.can_read;if(r.ipinfo)session.ipinfo=r.ipinfo;session.dt_labels=r.dt_labels;session.rev_dt_labels={}
 if(r.dt_labels){for(key in r.dt_labels)session.rev_dt_labels[r.dt_labels[key]]=key;}
 wn.control_panel=r.control_panel;}
 var setup_history=function(r){rename_observers.push(nav_obj);}

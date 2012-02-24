@@ -69,6 +69,8 @@
 			"lib/css/bootstrap/navbar.css",
 			"lib/css/bootstrap/dropdown.css",
 			"lib/css/bootstrap/tooltip.css",
+			"lib/css/bootstrap/label.css",
+			"lib/css/bootstrap/icons.css",
 			"erpnext/startup/startup.css"							
 		]
 	},
