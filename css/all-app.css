@@ -2816,12 +2816,7 @@ body {
 
 .erpnext-footer {
 	margin: 3px auto;
-	color: #888;
 	text-align: center;
-}
-
-.erpnext-footer a, .erpnext-footer a:hover, .erpnext-footer a:visited {
-	color: #666;
 }
 
 .module-icons {

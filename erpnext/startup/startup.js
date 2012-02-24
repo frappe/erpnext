@@ -48,7 +48,7 @@ erpnext.startup.start = function() {
 
 		// border to the body
 		// ------------------
-		$('footer').html('<div class="erpnext-footer">\
+		$('footer').html('<div class="web-footer erpnext-footer">\
 			Powered by <a href="https://erpnext.com">ERPNext</a></div>');
 	}
 
