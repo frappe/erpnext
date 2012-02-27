@@ -78,7 +78,7 @@ erpnext.desktop.render = function() {
 }
 
 erpnext.desktop.show_pending_notifications = function() {
-	$('#messages a:first').prepend('<div id="msg_count" class="circle">\
+	$('#messages a:first').prepend('<div id="msg_count" class="circle" title="Unread Messages">\
 		<span class="circle-text"></span></div>');
 	$('#msg_count').toggle(false);
 	update_messages();

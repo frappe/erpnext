@@ -31,5 +31,5 @@ $(document).bind('ready', function() {
 });
 
 $(document).bind('toolbar_setup', function() {
-	$('.brand').html('<b>erp</b>next');	
+	$('.brand').html('<b>erp</b>next&nbsp;<i class="icon-home icon-white navbar-icon-home" ></i>');	
 })

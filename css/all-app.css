@@ -1186,7 +1186,6 @@ div.psidebar div.section-item, div.psidebar .section-link {
 	font-size: 11px;
 	color: #666;
 }
-
 /*
  *	lib/css/bootstrap/headings.css
  *//* heading from bootstrap */
@@ -2089,12 +2088,6 @@ button.btn.small, input[type="submit"].btn.small {
   right: 13px;
 }
 
-/*extra size menus for recent*/
-.dropdown-menu#toolbar-recent, .dropdown-menu#toolbar-options, .dropdown-menu#toolbar-help{
-	width: 260px !important;
-	max-width: 260px !important;
-}
-
 /* ajax spinner */
 .navbar #spinner {
 	display: block;
@@ -2108,6 +2101,7 @@ button.btn.small, input[type="submit"].btn.small {
 .navbar-inner {
 	padding: 0px 20px;
 }
+
 /*
  *	lib/css/bootstrap/dropdown.css
  */.dropdown {
@@ -2844,11 +2838,41 @@ body {
 .navbar-new-comments {
 	margin: -3px 0px;
 	padding: 2px;
-	font-size: 14px;
-	color: #fff;
-	background-color: #B00D07;
 	min-width: 20px;
 	text-align: center;
 	display: inline-block;
 	border-radius: 2px;
+	color: #999999;
+	background-color: #333131;
+}
+
+.navbar-new-comments:hover,
+.navbar-new-comments:active,
+.navbar-new-comments:focus {
+	color: #fff;
+}
+
+
+.navbar-new-comments-true {
+	color: #fff;
+	background-color: #B00D07;
+}
+
+.navbar-icon-home {
+	vertical-align: middle;
+	opacity:0.4;
+	Filter:alpha(opacity=40); /* For IE8 and earlier */
+}
+
+.navbar-icon-home:hover,
+.navbar-icon-home:focus,
+.navbar-icon-home:active {
+	opacity:1;
+	Filter:alpha(opacity=100); /* For IE8 and earlier */
+}
+
+/*extra size menus for recent*/
+.dropdown-menu#toolbar-recent, .dropdown-menu#toolbar-options, .dropdown-menu#toolbar-help{
+	min-width: 160px !important;
+	max-width: 260px !important;
 }

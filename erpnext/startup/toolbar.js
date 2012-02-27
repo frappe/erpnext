@@ -27,11 +27,11 @@ erpnext.toolbar.setup = function() {
 	$('#toolbar-user').append('<li><a href="#My Company">Team / Messages</a></li>');
 
 
-	$('.navbar .pull-right').prepend('\
-		<li><a href="#" id="toolbar-new-comments"></a></li>');
+	$('.navbar .pull-right').append('\
+		<li><a href="#!My%20Company" title="Unread Messages"><span class="navbar-new-comments"></span></a></li>');
 
 	// help
-	$('.navbar .pull-right').append('<li class="dropdown">\
+	$('.navbar .pull-right').prepend('<li class="dropdown">\
 		<a class="dropdown-toggle" data-toggle="dropdown" href="#" \
 			onclick="return false;">Help<b class="caret"></b></a>\
 		<ul class="dropdown-menu" id="toolbar-help">\
@@ -53,18 +53,18 @@ erpnext.toolbar.setup = function() {
 
 	$.extend(page_body.wntoolbar, {
 		set_new_comments: function(new_comments) {
-			var navbar_nc = $('#toolbar-new-comments');
+			var navbar_nc = $('.navbar-new-comments');
 			if(new_comments && new_comments.length>0) {
-				navbar_nc.html('<span class="navbar-new-comments">' + new_comments.length + '</span>');
-				navbar_nc.click(function() { loadpage('My Company'); });
+				navbar_nc.text(new_comments.length);
+				navbar_nc.addClass('navbar-new-comments-true')
 				$.each(new_comments, function(i, v) {
 					var msg = 'New Message: ' + (v[1].length<=100 ? v[1] : (v[1].substr(0, 100) + "..."));
 					var id = v[0].replace('/', '-');
 					if(!$('#' + id)[0]) { show_alert(msg, id); }
 				})
 			} else {
-				navbar_nc.html('');
-				navbar_nc.click(function() { return false; });
+				navbar_nc.removeClass('navbar-new-comments-true');
+				navbar_nc.text(0);
 			}
 		}
 	});
@@ -89,7 +89,7 @@ erpnext.toolbar.add_modules = function() {
 			<li class="divider"></li>\
 			<li><a href="#!Setup" data-module="Setup">Setup</a></li>\
 		</ul>\
-		</li>').insertAfter('li[data-name="navbar-home"]');
+		</li>').prependTo('.navbar .nav:first');
 	$('.navbar .nav:first')	
 }
 
