@@ -108,13 +108,13 @@ class DocType(TransactionBase):
 	
 	# Get Item Details
 	# ===============================================================
-	def get_item_details(self, item_code, obj):
+	def get_item_details(self, args, obj):
 		import json
 		if not obj.doc.price_list_name:
 			msgprint("Please Select Price List before selecting Items")
 			raise Exception
-		item = webnotes.conn.sql("select description, item_name, brand, item_group, stock_uom, default_warehouse, default_income_account, default_sales_cost_center, description_html from `tabItem` where name = '%s' and (ifnull(end_of_life,'')='' or end_of_life >	now() or end_of_life = '0000-00-00') and (is_sales_item = 'Yes' or is_service_item = 'Yes')" % (item_code), as_dict=1)
-		tax = webnotes.conn.sql("select tax_type, tax_rate from `tabItem Tax` where parent = %s" , item_code)
+		item = webnotes.conn.sql("select description, item_name, brand, item_group, stock_uom, default_warehouse, default_income_account, default_sales_cost_center, description_html from `tabItem` where name = '%s' and (ifnull(end_of_life,'')='' or end_of_life >	now() or end_of_life = '0000-00-00') and (is_sales_item = 'Yes' or is_service_item = 'Yes')" % (args['item_code']), as_dict=1)
+		tax = webnotes.conn.sql("select tax_type, tax_rate from `tabItem Tax` where parent = %s" , args['item_code'])
 		t = {}
 		for x in tax: t[x[0]] = flt(x[1])
 		ret = {
@@ -124,9 +124,9 @@ class DocType(TransactionBase):
 			'brand'					: item and item[0]['brand'] or '',
 			'stock_uom'				: item and item[0]['stock_uom'] or '',
 			'reserved_warehouse'	: item and item[0]['default_warehouse'] or '',
-			'warehouse'				: item and item[0]['default_warehouse'] or '',
-			'income_account'		: item and item[0]['default_income_account'] or '',
-			'cost_center'			: item and item[0]['default_sales_cost_center'] or '',
+			'warehouse'				: item and item[0]['default_warehouse'] or args.get('warehouse'),
+			'income_account'		: item and item[0]['default_income_account'] or args.get('income_account'),
+			'cost_center'			: item and item[0]['default_sales_cost_center'] or args.get('cost_center'),
 			'qty'					: 1.00,	 # this is done coz if item once fetched is fetched again thn its qty shld be reset to 1
 			'adj_rate'				: 0,
 			'amount'				: 0,
@@ -135,7 +135,7 @@ class DocType(TransactionBase):
 			'batch_no'				: ''
 		}
 		if(obj.doc.price_list_name and item):	#this is done to fetch the changed BASIC RATE and REF RATE based on PRICE LIST
-			base_ref_rate =	self.get_ref_rate(item_code, obj.doc.price_list_name, obj.doc.price_list_currency, obj.doc.plc_conversion_rate)
+			base_ref_rate =	self.get_ref_rate(args['item_code'], obj.doc.price_list_name, obj.doc.price_list_currency, obj.doc.plc_conversion_rate)
 			ret['ref_rate'] = flt(base_ref_rate)/flt(obj.doc.conversion_rate)
 			ret['export_rate'] = flt(base_ref_rate)/flt(obj.doc.conversion_rate)
 			ret['base_ref_rate'] = flt(base_ref_rate)
@@ -158,7 +158,21 @@ class DocType(TransactionBase):
 			d.basic_rate = flt(base_ref_rate)
 			d.base_ref_rate = flt(base_ref_rate)
 			d.export_rate = flt(base_ref_rate)/flt(obj.doc.conversion_rate)
+			d.amount = flt(d.qty)*flt(base_ref_rate)
+			d.export_amount = flt(d.qty)*flt(base_ref_rate)/flt(obj.doc.conversion_rate)
 
+
+	def get_comp_base_currency(self, comp):
+		""" get default currency of company"""
+		return webnotes.conn.sql("select default_currency from `tabCompany` where name = %s", comp)[0][0]
+
+	def get_price_list_currency(self, price_list, comp):
+		""" Get all currency in which price list is maintained"""
+		plc = webnotes.conn.sql("select distinct ref_currency from `tabRef Rate Detail` where price_list_name = %s", price_list)
+		plc = [d[0] for d in plc]
+		base_currency = self.get_comp_base_currency(comp)
+		return plc, base_currency
+	
 
 	# Load Default Taxes
 	# ====================

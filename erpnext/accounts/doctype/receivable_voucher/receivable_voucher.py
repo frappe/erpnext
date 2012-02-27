@@ -74,9 +74,9 @@ class DocType(TransactionBase):
 			for d in getlist(self.doclist,'entries'):
 				# overwrite if mentioned in item
 				item = webnotes.conn.sql("select default_income_account, default_sales_cost_center, default_warehouse from tabItem where name = '%s'" %(d.item_code), as_dict=1)
-				d.income_account = item and item[0]['default_income_account'] or dtl and dtl[0]['income_account'] or ''
-				d.cost_center = item and item[0]['default_sales_cost_center'] or dtl and dtl[0]['cost_center'] or ''
-				d.warehouse = item and item[0]['default_warehouse'] or dtl and dtl[0]['warehouse'] or ''
+				d.income_account = item and item[0]['default_income_account'] or dtl and dtl[0]['income_account'] or d.income_account
+				d.cost_center = item and item[0]['default_sales_cost_center'] or dtl and dtl[0]['cost_center'] or d.cost_center
+				d.warehouse = item and item[0]['default_warehouse'] or dtl and dtl[0]['warehouse'] or d.warehouse
 
 
 			
@@ -151,31 +151,36 @@ class DocType(TransactionBase):
 
 	# Item Details
 	# -------------
-	def get_item_details(self, item_code=None):
-		if item_code:
-			ret = get_obj('Sales Common').get_item_details(item_code, self)
-			return self.get_pos_details(item_code, ret)
+	def get_item_details(self, args=None):
+		args = eval(args)
+		if args['item_code']:
+			ret = get_obj('Sales Common').get_item_details(args, self)
+			return self.get_pos_details(args, ret)
 		else:
 			obj = get_obj('Sales Common')
 			for doc in self.doclist:
 				if doc.fields.get('item_code'):
 					ret = obj.get_item_details(doc.item_code, self)
-					ret = self.get_pos_details(item_code, ret)
+					ret = self.get_pos_details(doc.item_code, ret)
 					for r in ret:
 						if not doc.fields.get(r):
-							doc.fields[r] = ret[r]					
+							doc.fields[r] = ret[r]		
 
 
-	def get_pos_details(self, item_code, ret):
-		if item_code and cint(self.doc.is_pos) == 1:
+	def get_pos_details(self, args, ret):
+		if args['item_code'] and cint(self.doc.is_pos) == 1:
 			dtl = webnotes.conn.sql("select income_account, warehouse, cost_center from `tabPOS Setting` where user = '%s' and company = '%s'" % (session['user'], self.doc.company), as_dict=1)				 
 			if not dtl:
 				dtl = webnotes.conn.sql("select income_account, warehouse, cost_center from `tabPOS Setting` where ifnull(user,'') = '' and company = '%s'" % (self.doc.company), as_dict=1)
-			if dtl and not ret['income_account'] and dtl[0]['income_account']: ret['income_account'] = dtl and dtl[0]['income_account']
-			if dtl and not ret['cost_center'] and dtl[0]['cost_center']: ret['cost_center'] = dtl and dtl[0]['cost_center']
-			if dtl and not ret['warehouse'] and dtl[0]['warehouse']: ret['warehouse'] = dtl and dtl[0]['warehouse']
+
+			item = webnotes.conn.sql("select default_income_account, default_sales_cost_center, default_warehouse from tabItem where name = '%s'" %(args['item_code']), as_dict=1)
+
+			ret['income_account'] = item and item[0]['default_income_account'] or dtl and dtl[0]['income_account'] or args['income_account']
+			ret['cost_center'] = item and item[0]['default_sales_cost_center'] or dtl and dtl[0]['cost_center'] or args['cost_center']
+			ret['warehouse'] = item and item[0]['default_warehouse'] or dtl and dtl[0]['warehouse'] or args['warehouse']
+
 			if ret['warehouse']:
-				actual_qty = webnotes.conn.sql("select actual_qty from `tabBin` where item_code = '%s' and warehouse = '%s'" % (item_code, ret['warehouse']))		
+				actual_qty = webnotes.conn.sql("select actual_qty from `tabBin` where item_code = '%s' and warehouse = '%s'" % (args['item_code'], ret['warehouse']))
 				ret['actual_qty']= actual_qty and flt(actual_qty[0][0]) or 0
 		return ret
 
@@ -183,6 +188,14 @@ class DocType(TransactionBase):
 	# Fetch ref rate from item master as per selected price list
 	def get_adj_percent(self, arg=''):
 		get_obj('Sales Common').get_adj_percent(self)
+
+
+	def get_comp_base_currency(self):
+		return get_obj('Sales Common').get_comp_base_currency(self.doc.company)
+
+	def get_price_list_currency(self):
+		return get_obj('Sales Common').get_price_list_currency(self.doc.price_list_name, self.doc.company)
+
 
 
 	# Get tax rate if account type is tax
