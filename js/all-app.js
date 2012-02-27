@@ -1320,7 +1320,7 @@ if(rd[1]){var dt=rd[0];var dn=rd[1];this.add(dt,dn,0);}}}});
 /*
  *	lib/js/wn/ui/toolbar/toolbar.js
  */
-wn.ui.toolbar.Toolbar=Class.extend({init:function(){this.make();this.make_home();this.make_document();this.make_apps();wn.ui.toolbar.recent=new wn.ui.toolbar.RecentDocs();this.make_tools();this.set_user_name();this.make_logout();$('.dropdown-toggle').dropdown();$(document).trigger('toolbar_setup');},make:function(){$('header').append('<div class="navbar navbar-fixed-top">\
+wn.ui.toolbar.Toolbar=Class.extend({init:function(){this.make();this.make_home();this.make_document();wn.ui.toolbar.recent=new wn.ui.toolbar.RecentDocs();this.make_tools();this.set_user_name();this.make_logout();$('.dropdown-toggle').dropdown();$(document).trigger('toolbar_setup');},make:function(){$('header').append('<div class="navbar navbar-fixed-top">\
    <div class="navbar-inner">\
    <div class="container">\
     <a class="brand"></a>\
@@ -1337,8 +1337,7 @@ wn.ui.toolbar.Toolbar=Class.extend({init:function(){this.make();this.make_home()
     </ul>\
    </div>\
    </div>\
-   </div>');},make_home:function(){$('.navbar .nav:first').append('<li data-name="navbar-home">\
-   <a href="#!'+home_page+'">Home</a></li>');$('.navbar .brand').attr('href',"#!"+home_page);},make_document:function(){wn.ui.toolbar.new_dialog=new wn.ui.toolbar.NewDialog();wn.ui.toolbar.search=new wn.ui.toolbar.Search();wn.ui.toolbar.report=new wn.ui.toolbar.Report();$('.navbar .nav:first').append('<li class="dropdown">\
+   </div>');},make_home:function(){$('.navbar .brand').attr('href',"#!"+home_page);},make_document:function(){wn.ui.toolbar.new_dialog=new wn.ui.toolbar.NewDialog();wn.ui.toolbar.search=new wn.ui.toolbar.Search();wn.ui.toolbar.report=new wn.ui.toolbar.Report();$('.navbar .nav:first').append('<li class="dropdown">\
    <a class="dropdown-toggle" href="#"  data-toggle="dropdown"\
     onclick="return false;">Document<b class="caret"></b></a>\
    <ul class="dropdown-menu" id="toolbar-document">\
@@ -1359,16 +1358,7 @@ wn.ui.toolbar.Toolbar=Class.extend({init:function(){this.make();this.make_home()
    </ul>\
   </li>');if(has_common(user_roles,['Administrator','System Manager'])){$('#toolbar-tools').append('<li><a href="#" \
     onclick="return wn.ui.toolbar.download_backup();">\
-    Download Backup</a></li>');}},make_apps:function(){$('.navbar .nav:first').append('<li class="dropdown">\
-   <a class="dropdown-toggle" data-toggle="dropdown" \
-    href="#" onclick="return false;">Apps<b class="caret"></b></a>\
-   <ul class="dropdown-menu">\
-    <li><a href="#!messages">Messages</a></li>\
-    <li><a href="#!todo">To Do</a></li>\
-    <li><a href="#!calendar">Calendar</a></li>\
-    <li><a href="#!questions">Knowledge Base</a></li>\
-   </ul>\
-  </li>');},set_user_name:function(){var fn=user_fullname;if(fn.length>15)fn=fn.substr(0,12)+'...';$('#toolbar-user-link').html(fn+'<b class="caret"></b>');},make_logout:function(){$('#toolbar-user').append('<li><a href="#" onclick="return logout();">Logout</a></li>');}});wn.ui.toolbar.clear_cache=function(){localStorage&&localStorage.clear();$c('webnotes.session_cache.clear',{},function(r,rt){show_alert(r.message);});return false;}
+    Download Backup</a></li>');}},set_user_name:function(){var fn=user_fullname;if(fn.length>15)fn=fn.substr(0,12)+'...';$('#toolbar-user-link').html(fn+'<b class="caret"></b>');},make_logout:function(){$('#toolbar-user').append('<li><a href="#" onclick="return logout();">Logout</a></li>');}});wn.ui.toolbar.clear_cache=function(){localStorage&&localStorage.clear();$c('webnotes.session_cache.clear',{},function(r,rt){show_alert(r.message);});return false;}
 wn.ui.toolbar.download_backup=function(){$c('webnotes.utils.backups.get_backup',{},function(r,rt){});return false;}
 wn.ui.toolbar.show_about=function(){try{wn.require('lib/js/wn/misc/about.js');wn.ui.misc.about();}catch(e){console.log(e);}
 return false;}
@@ -2203,7 +2193,7 @@ get_window_height=function(){var ht=window.innerHeight?window.innerHeight:docume
  *	js/app.js
  */
 wn.app={name:'ERPNext',license:'GNU/GPL - Usage Condition: All "erpnext" branding must be kept as it is',source:'https://github.com/webnotes/erpnext',publisher:'Web Notes Technologies Pvt Ltd, Mumbai',copyright:'&copy; Web Notes Technologies Pvt Ltd',version:'2.'+window._version_number}
-wn.modules_path='erpnext';wn.settings.no_history=true;$(document).bind('ready',function(){startup();});$(document).bind('toolbar_setup',function(){$('.brand').html('<b>erp</b>next');})
+wn.modules_path='erpnext';wn.settings.no_history=true;$(document).bind('ready',function(){startup();});$(document).bind('toolbar_setup',function(){$('.brand').html('<b>erp</b>next&nbsp;<i class="icon-home icon-white navbar-icon-home" ></i>');})
 /*
  *	erpnext/startup/startup.js
  */
@@ -2237,8 +2227,8 @@ erpnext.module_page.make_list=function(module,wrapper){wrapper.list=new wn.widge
 /*
  *	erpnext/startup/toolbar.js
  */
-wn.provide('erpnext.toolbar');erpnext.toolbar.setup=function(){erpnext.toolbar.add_modules();$('#toolbar-user').append('<li><a href="#profile-settings">Profile Settings</a></li>');$('#toolbar-user').append('<li><a href="#My Company">Team / Messages</a></li>');$('.navbar .pull-right').prepend('\
-  <li><a href="#" id="toolbar-new-comments"></a></li>');$('.navbar .pull-right').append('<li class="dropdown">\
+wn.provide('erpnext.toolbar');erpnext.toolbar.setup=function(){erpnext.toolbar.add_modules();$('#toolbar-user').append('<li><a href="#profile-settings">Profile Settings</a></li>');$('#toolbar-user').append('<li><a href="#My Company">Team / Messages</a></li>');$('.navbar .pull-right').append('\
+  <li><a href="#!My%20Company" title="Unread Messages"><span class="navbar-new-comments"></span></a></li>');$('.navbar .pull-right').prepend('<li class="dropdown">\
   <a class="dropdown-toggle" data-toggle="dropdown" href="#" \
    onclick="return false;">Help<b class="caret"></b></a>\
   <ul class="dropdown-menu" id="toolbar-help">\
@@ -2250,7 +2240,8 @@ $('#toolbar-help').append('<li><a href="http://groups.google.com/group/erpnext-u
 $('#toolbar-help').append('<li><a href="http://www.providesupport.com?messenger=iwebnotes" target="_blank">\
   Live Chat (Office Hours)</a></li>')
 if(pscript.is_erpnext_saas&&is_system_manager){$('#toolbar-user').append('<li><a href="#billing">Billing</a></li>')}
-$.extend(page_body.wntoolbar,{set_new_comments:function(new_comments){var navbar_nc=$('#toolbar-new-comments');if(new_comments&&new_comments.length>0){navbar_nc.html('<span class="navbar-new-comments">'+new_comments.length+'</span>');navbar_nc.click(function(){loadpage('My Company');});$.each(new_comments,function(i,v){var msg='New Message: '+(v[1].length<=100?v[1]:(v[1].substr(0,100)+"..."));var id=v[0].replace('/','-');if(!$('#'+id)[0]){show_alert(msg,id);}})}else{navbar_nc.html('');navbar_nc.click(function(){return false;});}}});page_body.wntoolbar.set_new_comments();}
+$.extend(page_body.wntoolbar,{set_new_comments:function(new_comments){var navbar_nc=$('.navbar-new-comments');if(new_comments&&new_comments.length>0){navbar_nc.text(new_comments.length);navbar_nc.addClass('navbar-new-comments-true')
+$.each(new_comments,function(i,v){var msg='New Message: '+(v[1].length<=100?v[1]:(v[1].substr(0,100)+"..."));var id=v[0].replace('/','-');if(!$('#'+id)[0]){show_alert(msg,id);}})}else{navbar_nc.removeClass('navbar-new-comments-true');navbar_nc.text(0);}}});page_body.wntoolbar.set_new_comments();}
 erpnext.toolbar.add_modules=function(){$('<li class="dropdown">\
   <a class="dropdown-toggle" data-toggle="dropdown" href="#"\
    onclick="return false;">Modules<b class="caret"></b></a>\
@@ -2267,7 +2258,7 @@ erpnext.toolbar.add_modules=function(){$('<li class="dropdown">\
    <li class="divider"></li>\
    <li><a href="#!Setup" data-module="Setup">Setup</a></li>\
   </ul>\
-  </li>').insertAfter('li[data-name="navbar-home"]');$('.navbar .nav:first')}
+  </li>').prependTo('.navbar .nav:first');$('.navbar .nav:first')}
 /*
  *	erpnext/startup/feature_setup.js
  */
