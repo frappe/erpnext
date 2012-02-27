@@ -111,6 +111,8 @@ var update_messages = function() {
 						circle.toggle(false);
 					}
 				}
+			} else {
+				clearInterval(wn.updates.id);
 			}
 		}
 	);
