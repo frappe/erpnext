@@ -159,13 +159,11 @@ EmailMessage = function(parent, args, list, idx) {
 			this.from_email = this.from_email.replace('<', '&lt;').replace('>', '&gt;');
 		
 		// main wrapper
-		w = $a(parent, 'div', '', 
-			{margin:'7px 0px', padding:'0px', border:'1px solid #c8c8c8', backgroundColor:'#f9f9f9'}
-		);
-		$br(w, '7px');
+		w = $a(parent, 'div', 'support-ticket-wrapper well');
+		//$(w).addClass('support-ticket-wrapper');
 
 		// sender and timestamp
-		$a($a(w, 'div', '', {marginBottom:'7px', padding: '7px', backgroundColor:'#d2d2f2'}), 
+		$a($a(w, 'div', 'support-ticket-title'), 
 			'span', 'link_type', {}, repl('By %(from_email)s on %(creation)s:', this), 
 			function() {
 				// toggle message display on timestamp
