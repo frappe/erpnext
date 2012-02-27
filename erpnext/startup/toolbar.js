@@ -22,13 +22,10 @@ erpnext.toolbar.setup = function() {
 	erpnext.toolbar.add_modules();
 	
 	// profile
-	$('#toolbar-user').append('<li><a href="#profile-settings">Profile Settings</a></li>');
-	
-	$('#toolbar-user').append('<li><a href="#My Company">Team / Messages</a></li>');
-
+	$('#toolbar-user').append('<li><a href="#!profile-settings">Profile Settings</a></li>');
 
 	$('.navbar .pull-right').append('\
-		<li><a href="#!My%20Company" title="Unread Messages"><span class="navbar-new-comments"></span></a></li>');
+		<li><a href="#!messages" title="Unread Messages"><span class="navbar-new-comments"></span></a></li>');
 
 	// help
 	$('.navbar .pull-right').prepend('<li class="dropdown">\

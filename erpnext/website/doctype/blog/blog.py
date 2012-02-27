@@ -39,10 +39,10 @@ class DocType():
 		from jinja2 import Template
 		import markdown2
 		import os
-		from webnotes.utils import global_date_format, get_full_name
+		from webnotes.utils import global_date_format, get_fullname
 		
 		self.doc.content_html = markdown2.markdown(self.doc.content or '')
-		self.doc.full_name = get_full_name(self.doc.owner)
+		self.doc.full_name = get_fullname(self.doc.owner)
 		self.doc.updated = global_date_format(self.doc.modified)
 		
 		with open(os.path.join(os.path.dirname(__file__), 'template.html'), 'r') as f:

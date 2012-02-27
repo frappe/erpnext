@@ -95,7 +95,6 @@ def get_letter_heads():
 		where ifnull(disabled,0)=0""")
 	return dict(ret)
 
-
 def login_as(login_manager):
 	"""
 		Login as functionality -- allows signin from signin.erpnext.com

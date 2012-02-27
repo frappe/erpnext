@@ -28,7 +28,7 @@ pscript['refresh_question-view'] = function() {
 }
 
 pscript.question_view = function(qid, qtext) {
-	var w = page_body.pages['question-view'];
+	var w = wn.pages['question-view'];
 	new KBQuestionView(w, qid, qtext);
 }
 

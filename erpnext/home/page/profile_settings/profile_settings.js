@@ -15,7 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 pscript['onload_profile-settings'] = function() {
-	var wrapper = page_body.pages['profile-settings'];
+	var wrapper = wn.pages['profile-settings'];
 	wrapper.className = 'layout_wrapper';
 	pscript.myprofile = new MyProfile(wrapper)
 }

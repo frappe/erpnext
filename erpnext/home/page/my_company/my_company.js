@@ -15,7 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 pscript['onload_My Company'] = function() {
-	var wrapper = page_body.pages['My Company'];
+	var wrapper = wn.pages['My Company'];
 	
 	// body
 	wrapper.className = 'layout_wrapper';
@@ -112,7 +112,7 @@ pscript.myc_add_user = function() {
 }
 
 pscript.myc_refresh = function() {
-	page_body.pages['My Company'].member_list.lst.run();	
+	wn.pages['My Company'].member_list.lst.run();	
 }
 
 pscript.myc_make_list= function(wrapper) {
@@ -121,7 +121,7 @@ pscript.myc_make_list= function(wrapper) {
 
 pscript.get_fullname=function(uid) {
 	if(uid=='Administrator') return uid;
-	return page_body.pages['My Company'].member_list.member_items[uid].fullname;		
+	return wn.pages['My Company'].member_list.member_items[uid].fullname;		
 }
 
 
@@ -740,7 +740,7 @@ MemberCoversationComment = function(cell, det, conv) {
 
 	this.user = $a(this.comment, 'span', 'link_type', {fontWeight:'bold'}, pscript.get_fullname(det.owner));
 	this.user.onclick = function() {
-		page_body.pages['My Company'].member_list.show_profile(me.det.owner);
+		wn.pages['My Company'].member_list.show_profile(me.det.owner);
 	}
 
 	var st = (!det.docstatus ? {fontWeight: 'bold'} : null);
