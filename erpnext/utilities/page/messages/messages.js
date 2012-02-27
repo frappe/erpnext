@@ -86,13 +86,27 @@ erpnext.messages = {
 				if(data.owner==user) {
 					data.cls = 'message-self';
 					data.comment_by_fullname = 'You';	
+					data.delete_html = repl('<a class="close" onclick="erpnext.messages.delete(this)"\
+						data-name="%(name)s">&times;</a>', data);
 				} else {
-					data.cls = 'message-other'
+					data.cls = 'message-other';
+					data.delete_html = '';
 				}
 
-				wrapper.innerHTML = repl('<div class="message %(cls)s"><b>%(comment)s</b>\
-					<div class="help">by %(comment_by_fullname)s, %(creation)s</div></div>\
+				wrapper.innerHTML = repl('<div class="message %(cls)s">%(delete_html)s\
+						<b>%(comment)s</b>\
+						<div class="help">by %(comment_by_fullname)s, %(creation)s</div></div>\
 					<div style="clear: both;"></div>', data);
+			}
+		});
+	},
+	delete: function(ele) {
+		$(ele).parent().css('opacity', 0.6);
+		wn.call({
+			method:'utilities.page.messages.messages.delete',
+			args: {name : $(ele).attr('data-name')},
+			callback: function() {
+				$(ele).parent().toggle(false);
 			}
 		});
 	},

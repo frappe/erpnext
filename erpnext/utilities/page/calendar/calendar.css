@@ -28,6 +28,7 @@ div.cal_head div {
 }
 
 div.cal_toolbar {
+	width: 80%;
 }
 
 div.cal_toolbar .btn {
@@ -153,14 +154,6 @@ div.cal_week_body {
 div.cal_week_unit{
 	width: 100%;
 	cursor:pointer;
-}
-
-div.cal_event {
-	overflow-x: hidden;
-	font-size: 11px;
-	color: #00B;
-	margin-bottom: 2px;
-	text-decoration: underline;
 }
 
 div.cal_event_Public {

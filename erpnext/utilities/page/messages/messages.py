@@ -48,3 +48,8 @@ def post(arg=None):
 	d.comment_doctype = 'Message'
 	d.save()
 	
+@webnotes.whitelist()
+def delete(arg=None):
+	webnotes.conn.sql("""delete from `tabComment Widget Record` where name=%s""", 
+		webnotes.form_dict['name']);
+	
