@@ -2187,7 +2187,8 @@ get_window_height=function(){var ht=window.innerHeight?window.innerHeight:docume
  *	js/app.js
  */
 wn.app={name:'ERPNext',license:'GNU/GPL - Usage Condition: All "erpnext" branding must be kept as it is',source:'https://github.com/webnotes/erpnext',publisher:'Web Notes Technologies Pvt Ltd, Mumbai',copyright:'&copy; Web Notes Technologies Pvt Ltd',version:'2.'+window._version_number}
-wn.modules_path='erpnext';wn.settings.no_history=true;$(document).bind('ready',function(){startup();});$(document).bind('toolbar_setup',function(){$('.brand').html('<b>erp</b>next&nbsp;<i class="icon-home icon-white navbar-icon-home" ></i>');})
+wn.modules_path='erpnext';wn.settings.no_history=true;$(document).bind('ready',function(){startup();});$(document).bind('toolbar_setup',function(){$('.brand').html('<b>erp</b>next\
+  <i class="icon-home icon-white navbar-icon-home" ></i>').hover(function(){$(this).find('.icon-home').addClass('navbar-icon-home-hover');},function(){$(this).find('.icon-home').removeClass('navbar-icon-home-hover');});})
 /*
  *	erpnext/startup/startup.js
  */
@@ -2206,7 +2207,7 @@ btn.help_page=help_page;}
 if(callback)this.callback=function(){callback();}}
 var update_messages=function(){if(inList(['Guest'],user)){return;}
 $c_page('home','event_updates','get_unread_messages',null,function(r,rt){if(!r.exc){page_body.wntoolbar.set_new_comments(r.message);var circle=$('#msg_count')
-if(circle){if(r.message.length){circle.find('span:first').text(r.message.length);circle.toggle(true);}else{circle.toggle(false);}}}});}
+if(circle){if(r.message.length){circle.find('span:first').text(r.message.length);circle.toggle(true);}else{circle.toggle(false);}}}else{clearInterval(wn.updates.id);}});}
 erpnext.startup.set_periodic_updates=function(){wn.updates={};if(wn.updates.id){clearInterval(wn.updates.id);}
 wn.updates.id=setInterval(update_messages,60000);}
 $(document).bind('startup',function(){erpnext.startup.start();});

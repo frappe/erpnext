@@ -121,7 +121,7 @@ if customer_group or based_on == 'Customer Group':
 # Territory
 if territory or based_on == 'Territory':
 	add_tab += ' ,`tabTerritory` t11 '
-	add_cond += ' AND t1.territory = t11.name AND t1.territory = t11.name and (t11.name = "%s" or t11.name IN (SELECT t12.name FROM `tabTerritory` t12,`tabTerritory` t13 WHERE t12.lft BETWEEN t13.lft and t13.rgt and t12.docstatus !=2 and ifnull(t12.is_group,"No") = "No" and t13.name = "%s"))' % (based_on != 'Territory' and territory or '%(value)s', based_on != 'Territory' and territory or '%(value)s')
+	add_cond += ' AND t1.territory = t11.name and (t11.name = "%s" or t11.name IN (SELECT t12.name FROM `tabTerritory` t12,`tabTerritory` t13 WHERE t12.lft BETWEEN t13.lft and t13.rgt and t12.docstatus !=2 and ifnull(t12.is_group,"No") = "No" and t13.name = "%s"))' % (based_on != 'Territory' and territory or '%(value)s', based_on != 'Territory' and territory or '%(value)s')
 
 # Supplier
 if supplier or based_on == 'Supplier':

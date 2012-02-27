@@ -32,7 +32,7 @@ def get_unread_messages(arg=None):
 	return webnotes.conn.sql("""\
 		SELECT name, comment
 		FROM `tabComment Widget Record`
-		WHERE comment_doctype='My Company'
+		WHERE comment_doctype IN ('My Company', 'Message')
 		AND comment_docname = %s
 		AND ifnull(docstatus,0)=0
 		""", webnotes.user.name, as_list=1)

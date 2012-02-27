@@ -70,7 +70,8 @@ body {
 
 .navbar-icon-home:hover,
 .navbar-icon-home:focus,
-.navbar-icon-home:active {
+.navbar-icon-home:active,
+.navbar-icon-home-hover{
 	opacity:1;
 	Filter:alpha(opacity=100); /* For IE8 and earlier */
 }

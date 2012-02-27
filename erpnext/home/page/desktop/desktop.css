@@ -65,36 +65,15 @@
 
 /* Hover and click effects */
 .case-border:hover, .circle:hover {
-	animation: hover-effect 0.1s;
-	-moz-animation: hover-effect 0.1s; /* Firefox */
-	-webkit-animation: hover-effect 0.05s; /* Safari and Chrome */
-	
-	animation-timing-function:linear;
-	-moz-animation-timing-function:linear; /* Firefox */
-	-webkit-animation-timing-function:linear; /* Safari and Chrome */
-	box-shadow: 0 0 2px 0 black, 0 0 10px 1px white;
+	box-shadow: 0 0 2px 0px black, 0 0 10px 1px white;
 }
 
 .case-border:active, .case-border:focus, .circle:active, .circle:focus {
-	box-shadow: 0 0 2px 0 black, 0 0 15px 2px white;
-}
-
-@keyframes hover-effect
-{
-	from {box-shadow: 0 0 10px 1px black}
-	to {box-shadow: 0 0 2px 0 black, 0 0 10px 1px white;}
-}
-
-@-moz-keyframes hover-effect /* Firefox */
-{
-	from {box-shadow: 0 0 10px 1px black}
-	to {box-shadow: 0 0 2px 0 black, 0 0 10px 1px white;}
-}
-
-@-webkit-keyframes hover-effect /* Safari and Chrome */
-{
-	from {box-shadow: 0 0 10px 1px black}
-	to {box-shadow: 0 0 2px 0 black, 0 0 10px 1px white;}
+	transform: scale(0.98, 0.98);
+	-ms-transform: scale(0.98, 0.98); /* IE 9 */
+	-webkit-transform: scale(0.98, 0.98); /* Safari and Chrome */
+	-o-transform: scale(0.98, 0.98); /* Opera */
+	-moz-transform: scale(0.98, 0.98); /* Firefox */
 }
 
 .circle {
