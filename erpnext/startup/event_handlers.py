@@ -81,8 +81,12 @@ def boot_session(bootinfo):
 			webnotes.conn.get_value('Website Settings', None, 'analytics_code')
 		bootinfo['analytics_call'] = \
 			webnotes.conn.get_value('Website Settings', None, 'analytics_call')
+		
 	else:	
 		bootinfo['letter_heads'] = get_letter_heads()
+
+		import webnotes.model.doctype
+		bootinfo['docs'] += webnotes.model.doctype.get('Event')
 
 def get_letter_heads():
 	"""load letter heads with startup"""
