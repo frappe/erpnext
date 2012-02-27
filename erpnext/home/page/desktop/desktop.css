@@ -76,7 +76,7 @@
 }
 
 .case-border:active, .case-border:focus, .circle:active, .circle:focus {
-	box-shadow: 0 0 5px 2px black;
+	box-shadow: 0 0 2px 0 black, 0 0 15px 2px white;
 }
 
 @keyframes hover-effect
@@ -113,11 +113,10 @@
 
 .circle-text {
 	color: white;
-	font-size: 12px;
 	vertical-align: middle;
 	text-align: center;
 	display: inline-block;
-	margin-top: -2px;
+	margin-top: -3px;
 	text-shadow: 1px 1px 5px #000;
 }
 
