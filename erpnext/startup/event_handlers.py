@@ -84,6 +84,7 @@ def boot_session(bootinfo):
 		
 	else:	
 		bootinfo['letter_heads'] = get_letter_heads()
+		bootinfo['user_fullnames'] = get_fullnames()
 
 		import webnotes.model.doctype
 		bootinfo['docs'] += webnotes.model.doctype.get('Event')
@@ -95,6 +96,17 @@ def get_letter_heads():
 		where ifnull(disabled,0)=0""")
 	return dict(ret)
 
+def get_fullnames():
+	"""map of user fullnames"""
+	ret = dict(webnotes.conn.sql("""select name, 
+		concat(ifnull(first_name, ''), 
+			if(ifnull(first_name, '')!='', ' ', ''), ifnull(last_name, ''))
+		from tabProfile where ifnull(enabled, 0)=1"""))
+	for key in ret:
+		if not ret[key]:
+			ret[key] = key
+	
+	return ret
 
 def login_as(login_manager):
 	"""

@@ -29,7 +29,7 @@ pscript['onload_Event Updates'] = function() {
 // ==================================
 
 pscript.home_make_body = function() {
-	var wrapper = page_body.pages['Event Updates'];
+	var wrapper = wn.pages['Event Updates'];
 	
 	// body
 	$(wrapper).addClass('layout-wrapper').addClass('layout-wrapper-background')
@@ -47,7 +47,7 @@ pscript.home_make_body = function() {
 // ==================================
 
 pscript.home_set_banner = function(wrapper) {
-	var wrapper = page_body.pages['Event Updates'];
+	var wrapper = wn.pages['Event Updates'];
 	var cp = wn.control_panel;
 
 	// banner
@@ -61,7 +61,7 @@ pscript.home_set_banner = function(wrapper) {
 // ==================================
 
 pscript.home_make_widgets = function() {
-	var wrapper = page_body.pages['Event Updates'];
+	var wrapper = wn.pages['Event Updates'];
 	var cell = wrapper.side_section;
 
 	// sidebar
@@ -595,7 +595,7 @@ FeedItem.prototype.render_references = function(div, det) {
 }
 
 pscript.home_make_status = function() {
-	var wrapper = page_body.pages['Event Updates'];
+	var wrapper = wn.pages['Event Updates'];
 
 	// get values
 	$c_page('home', 'event_updates', 'get_status_details', user,
@@ -625,7 +625,7 @@ SetupWizard = function(status) {
 	$.extend(this, {
 		make: function(status) {
 			me.status = status;
-			me.wrapper = page_body.pages['Event Updates'].setup_wizard_area;
+			me.wrapper = wn.pages['Event Updates'].setup_wizard_area;
 			$ds(me.wrapper);
 			me.make_percent(status.percent);
 			me.make_suggestion(status.ret);

@@ -16,8 +16,6 @@
 
 var current_module;
 var is_system_manager = 0;
-var module_content_dict = {};
-var user_full_nm = {};
 
 wn.provide('erpnext.startup');
 

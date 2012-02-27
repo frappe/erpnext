@@ -58,7 +58,7 @@ def make_feed(feedtype, doctype, name, owner, subject, color):
 	"makes a new Feed record"
 	#msgprint(subject)
 	from webnotes.model.doc import Document
-	from webnotes.utils import get_full_name
+	from webnotes.utils import get_fullname
 
 	if feedtype in ('Login', 'Comment', 'Assignment'):
 		# delete old login, comment feed
@@ -77,7 +77,7 @@ def make_feed(feedtype, doctype, name, owner, subject, color):
 	f.doc_name = name
 	f.subject = subject
 	f.color = color
-	f.full_name = get_full_name(owner)
+	f.full_name = get_fullname(owner)
 	f.save()
 
 def update_feed(doc, method=None):   

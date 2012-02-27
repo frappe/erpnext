@@ -186,6 +186,9 @@ div.std-footer-item {
 	padding: 15px;
 	background-color: #FFF;
 	min-height: 450px;
+	-moz-box-shadow:    7px 0px 6px -2px #ddd;
+	-webkit-box-shadow: 7px 0px 6px -2px #ddd;
+	box-shadow:         7px 0px 6px -2px #ddd;
 }
 
 .layout-side-section {

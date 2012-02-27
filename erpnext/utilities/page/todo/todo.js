@@ -126,7 +126,7 @@ erpnext.todo.save = function(btn) {
 	});
 }
 
-pscript.onload_todo = function() {
+wn.pages.todo.onload = function() {
 	// load todos
 	erpnext.todo.refresh();
 }
