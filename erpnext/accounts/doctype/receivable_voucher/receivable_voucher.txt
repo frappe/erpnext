@@ -5,7 +5,7 @@
 	{
 		'creation': '2010-08-08 17:09:18',
 		'docstatus': 0,
-		'modified': '2012-02-24 14:32:22',
+		'modified': '2012-02-27 17:34:46',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -21,7 +21,7 @@
 
 	# These values are common for all DocType
 	{
-		'_last_update': u'1330074081',
+		'_last_update': u'1330344021',
 		'change_log': u'1. Change in pull_details method dt.-26-06-2009',
 		'colour': u'White:FFF',
 		'default_print_format': u'Standard',
@@ -34,7 +34,7 @@
 		'server_code_error': u' ',
 		'show_in_menu': 0,
 		'subject': u'To %(customer_name)s worth %(currency)s %(grand_total_export)s due on %(due_date)s | %(outstanding_amount)s outstanding',
-		'version': 408
+		'version': 414
 	},
 
 	# These values are common for all DocFormat
@@ -278,6 +278,54 @@
 
 	# DocField
 	{
+		'doctype': u'DocField',
+		'fieldname': u'customer_name',
+		'fieldtype': u'Data',
+		'label': u'Name',
+		'oldfieldname': u'customer_name',
+		'oldfieldtype': u'Data',
+		'permlevel': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'address_display',
+		'fieldtype': u'Small Text',
+		'label': u'Address',
+		'permlevel': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'contact_display',
+		'fieldtype': u'Small Text',
+		'label': u'Contact',
+		'permlevel': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'contact_mobile',
+		'fieldtype': u'Text',
+		'label': u'Mobile No',
+		'permlevel': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'contact_email',
+		'fieldtype': u'Text',
+		'label': u'Contact Email',
+		'permlevel': 1,
+		'print_hide': 1
+	},
+
+	# DocField
+	{
 		'colour': u'White:FFF',
 		'doctype': u'DocField',
 		'fieldtype': u'Column Break',
@@ -299,7 +347,7 @@
 		'oldfieldname': u'posting_date',
 		'oldfieldtype': u'Date',
 		'permlevel': 0,
-		'print_hide': 1,
+		'print_hide': 0,
 		'reqd': 1,
 		'search_index': 1
 	},
@@ -373,6 +421,33 @@
 		'oldfieldtype': u'Select',
 		'options': u'link:Mode of Payment',
 		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'territory',
+		'fieldtype': u'Link',
+		'in_filter': 1,
+		'label': u'Territory',
+		'options': u'Territory',
+		'permlevel': 0,
+		'print_hide': 1,
+		'reqd': 1,
+		'search_index': 0
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'customer_group',
+		'fieldtype': u'Link',
+		'in_filter': 1,
+		'label': u'Customer Group',
+		'options': u'Customer Group',
+		'permlevel': 0,
+		'print_hide': 1,
+		'search_index': 0
 	},
 
 	# DocField
@@ -1234,107 +1309,6 @@
 		'options': u'Advance Adjustment Detail',
 		'permlevel': 0,
 		'print_hide': 1
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'depends_on': u'eval:doc.customer',
-		'doctype': u'DocField',
-		'fieldtype': u'Section Break',
-		'label': u'Customer Details',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldtype': u'Column Break',
-		'permlevel': 0,
-		'width': u'50%'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'customer_name',
-		'fieldtype': u'Data',
-		'label': u'Name',
-		'oldfieldname': u'customer_name',
-		'oldfieldtype': u'Data',
-		'permlevel': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'address_display',
-		'fieldtype': u'Small Text',
-		'label': u'Address',
-		'permlevel': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'customer_group',
-		'fieldtype': u'Link',
-		'in_filter': 1,
-		'label': u'Customer Group',
-		'options': u'Customer Group',
-		'permlevel': 0,
-		'print_hide': 1,
-		'search_index': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldtype': u'Column Break',
-		'permlevel': 0,
-		'width': u'50%'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'contact_display',
-		'fieldtype': u'Small Text',
-		'label': u'Contact',
-		'permlevel': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'contact_mobile',
-		'fieldtype': u'Text',
-		'label': u'Mobile No',
-		'permlevel': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'contact_email',
-		'fieldtype': u'Text',
-		'label': u'Contact Email',
-		'permlevel': 1,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'territory',
-		'fieldtype': u'Link',
-		'in_filter': 1,
-		'label': u'Territory',
-		'options': u'Territory',
-		'permlevel': 0,
-		'print_hide': 1,
-		'reqd': 1,
-		'search_index': 0
 	},
 
 	# DocField

@@ -96,19 +96,25 @@ var set_dynamic_label_par = function(doc, cdt, cdn, base_curr) {
 
 
 var set_dynamic_label_child = function(doc, cdt, cdn, base_curr) {
-		// item table flds
-		item_cols_base = {'basic_rate': 'Basic Rate', 'base_ref_rate': 'Price List Rate', 'amount': 'Amount'};
-		item_cols_export = {'export_rate': 'Basic Rate', 'ref_rate': 'Price List Rate', 'export_amount': 'Amount'};
+	// item table flds
+	item_cols_base = {'basic_rate': 'Basic Rate', 'base_ref_rate': 'Price List Rate', 'amount': 'Amount'};
+	item_cols_export = {'export_rate': 'Basic Rate', 'ref_rate': 'Price List Rate', 'export_amount': 'Amount'};
 		
-		for (d in item_cols_base) $('[data-grid-fieldname="'+cur_frm.cscript.tname+'-'+d+'"]').html(item_cols_base[d]+' ('+base_curr+')');
-		for (d in item_cols_export) $('[data-grid-fieldname="'+cur_frm.cscript.tname+'-'+d+'"]').html(item_cols_export[d]+' ('+doc.currency+')');	
+	for (d in item_cols_base) $('[data-grid-fieldname="'+cur_frm.cscript.tname+'-'+d+'"]').html(item_cols_base[d]+' ('+base_curr+')');
+	for (d in item_cols_export) $('[data-grid-fieldname="'+cur_frm.cscript.tname+'-'+d+'"]').html(item_cols_export[d]+' ('+doc.currency+')');	
 
-		var hide = (doc.currency == sys_defaults['currency']) ? false : true;
-		for (f in item_cols_base) cur_frm.fields_dict[cur_frm.cscript.fname].grid.set_column_disp(f, hide);
+	var hide = (doc.currency == sys_defaults['currency']) ? false : true;
+	for (f in item_cols_base) cur_frm.fields_dict[cur_frm.cscript.fname].grid.set_column_disp(f, hide);
 
-		//tax table flds
-		tax_cols = {'tax_amount': 'Amount', 'total': 'Total'};
-		for (d in tax_cols) $('[data-grid-fieldname="RV Tax Detail-'+d+'"]').html(tax_cols[d]+' ('+base_curr+')');	
+	//tax table flds
+	tax_cols = {'tax_amount': 'Amount', 'total': 'Total'};
+	for (d in tax_cols) $('[data-grid-fieldname="RV Tax Detail-'+d+'"]').html(tax_cols[d]+' ('+base_curr+')');
+		
+	if (doc.doctype == 'Receivable Voucher') {
+		// advance table flds
+		adv_cols = {'advance_amount': 'Advance Amount', 'allocated_amount': 'Allocated Amount'}
+		for (d in adv_cols) $('[data-grid-fieldname="Advance Adjustment Detail-'+d+'"]').html(adv_cols[d]+' ('+base_curr+')');	
+	}
 }
 
 // Change label dynamically based on currency

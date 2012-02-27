@@ -5,67 +5,67 @@
 	{
 		'creation': '2010-08-08 17:09:16',
 		'docstatus': 0,
-		'modified': '2011-12-14 10:50:00',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-02-27 18:43:39',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'autoname': 'GRND/.#######',
-		'colour': 'White:FFF',
-		'default_print_format': 'Standard',
+		'autoname': u'GRND/.#######',
+		'colour': u'White:FFF',
+		'default_print_format': u'Standard',
 		'doctype': 'DocType',
 		'istable': 1,
-		'module': 'Stock',
+		'module': u'Stock',
 		'name': '__common__',
-		'section_style': 'Tray',
-		'server_code_error': ' ',
+		'section_style': u'Tray',
+		'server_code_error': u' ',
 		'show_in_menu': 0,
-		'version': 73
+		'version': 74
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Purchase Receipt Detail',
-		'parentfield': 'fields',
-		'parenttype': 'DocType'
+		'parent': u'Purchase Receipt Detail',
+		'parentfield': u'fields',
+		'parenttype': u'DocType'
 	},
 
 	# DocType, Purchase Receipt Detail
 	{
 		'doctype': 'DocType',
-		'name': 'Purchase Receipt Detail'
+		'name': u'Purchase Receipt Detail'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'item_code',
-		'fieldtype': 'Link',
+		'doctype': u'DocField',
+		'fieldname': u'item_code',
+		'fieldtype': u'Link',
 		'in_filter': 1,
-		'label': 'Item Code',
-		'oldfieldname': 'item_code',
-		'oldfieldtype': 'Link',
-		'options': 'Item',
+		'label': u'Item Code',
+		'oldfieldname': u'item_code',
+		'oldfieldtype': u'Link',
+		'options': u'Item',
 		'permlevel': 0,
 		'reqd': 1,
 		'search_index': 1,
-		'trigger': 'Client',
-		'width': '100px'
+		'trigger': u'Client',
+		'width': u'100px'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'item_name',
-		'fieldtype': 'Data',
+		'doctype': u'DocField',
+		'fieldname': u'item_name',
+		'fieldtype': u'Data',
 		'in_filter': 0,
-		'label': 'Item Name',
-		'oldfieldname': 'item_name',
-		'oldfieldtype': 'Data',
+		'label': u'Item Name',
+		'oldfieldname': u'item_name',
+		'oldfieldtype': u'Data',
 		'permlevel': 0,
 		'print_hide': 1,
 		'reqd': 1,
@@ -74,236 +74,267 @@
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'description',
-		'fieldtype': 'Text',
-		'label': 'Description',
-		'oldfieldname': 'description',
-		'oldfieldtype': 'Text',
+		'doctype': u'DocField',
+		'fieldname': u'description',
+		'fieldtype': u'Text',
+		'label': u'Description',
+		'oldfieldname': u'description',
+		'oldfieldtype': u'Text',
 		'permlevel': 0,
 		'reqd': 1,
-		'width': '300px'
+		'width': u'300px'
 	},
 
 	# DocField
 	{
-		'default': '0.00',
-		'doctype': 'DocField',
-		'fieldname': 'received_qty',
-		'fieldtype': 'Currency',
-		'label': 'Recd Quantity',
-		'oldfieldname': 'received_qty',
-		'oldfieldtype': 'Currency',
+		'default': u'0.00',
+		'doctype': u'DocField',
+		'fieldname': u'received_qty',
+		'fieldtype': u'Currency',
+		'label': u'Recd Quantity',
+		'oldfieldname': u'received_qty',
+		'oldfieldtype': u'Currency',
 		'permlevel': 0,
 		'reqd': 1,
-		'trigger': 'Client',
-		'width': '100px'
+		'trigger': u'Client',
+		'width': u'100px'
 	},
 
 	# DocField
 	{
-		'default': '0.00',
-		'doctype': 'DocField',
-		'fieldname': 'qty',
-		'fieldtype': 'Currency',
-		'label': 'Accepted Quantity',
-		'oldfieldname': 'qty',
-		'oldfieldtype': 'Currency',
+		'default': u'0.00',
+		'doctype': u'DocField',
+		'fieldname': u'qty',
+		'fieldtype': u'Currency',
+		'label': u'Accepted Quantity',
+		'oldfieldname': u'qty',
+		'oldfieldtype': u'Currency',
 		'permlevel': 0,
-		'trigger': 'Client',
-		'width': '100px'
+		'trigger': u'Client',
+		'width': u'100px'
 	},
 
 	# DocField
 	{
-		'default': '0.00',
-		'doctype': 'DocField',
-		'fieldname': 'rejected_qty',
-		'fieldtype': 'Currency',
+		'default': u'0.00',
+		'doctype': u'DocField',
+		'fieldname': u'rejected_qty',
+		'fieldtype': u'Currency',
 		'in_filter': 0,
-		'label': 'Rejected Quantity',
-		'oldfieldname': 'rejected_qty',
-		'oldfieldtype': 'Currency',
+		'label': u'Rejected Quantity',
+		'oldfieldname': u'rejected_qty',
+		'oldfieldtype': u'Currency',
 		'permlevel': 0,
 		'search_index': 0,
-		'trigger': 'Client',
-		'width': '100px'
+		'trigger': u'Client',
+		'width': u'100px'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'import_ref_rate',
-		'fieldtype': 'Currency',
-		'label': 'Ref Rate ',
+		'doctype': u'DocField',
+		'fieldname': u'import_ref_rate',
+		'fieldtype': u'Currency',
+		'label': u'Ref Rate ',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'discount_rate',
-		'fieldtype': 'Currency',
-		'label': 'Discount  %',
+		'doctype': u'DocField',
+		'fieldname': u'discount_rate',
+		'fieldtype': u'Currency',
+		'label': u'Discount  %',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'default': '0.00',
-		'doctype': 'DocField',
-		'fieldname': 'import_rate',
-		'fieldtype': 'Currency',
-		'label': 'Rate',
-		'oldfieldname': 'import_rate',
-		'oldfieldtype': 'Currency',
+		'colour': u'White:FFF',
+		'default': u'0.00',
+		'doctype': u'DocField',
+		'fieldname': u'import_rate',
+		'fieldtype': u'Currency',
+		'label': u'Rate',
+		'oldfieldname': u'import_rate',
+		'oldfieldtype': u'Currency',
 		'permlevel': 0,
 		'print_hide': 0,
-		'trigger': 'Client',
-		'width': '100px'
+		'trigger': u'Client',
+		'width': u'100px'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'import_amount',
-		'fieldtype': 'Currency',
-		'label': 'Amount',
-		'oldfieldname': 'import_amount',
-		'oldfieldtype': 'Currency',
+		'doctype': u'DocField',
+		'fieldname': u'import_amount',
+		'fieldtype': u'Currency',
+		'label': u'Amount',
+		'oldfieldname': u'import_amount',
+		'oldfieldtype': u'Currency',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'purchase_ref_rate',
-		'fieldtype': 'Currency',
-		'label': 'Ref Rate *',
+		'doctype': u'DocField',
+		'fieldname': u'purchase_ref_rate',
+		'fieldtype': u'Currency',
+		'label': u'Ref Rate *',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'default': '0.00',
-		'doctype': 'DocField',
-		'fieldname': 'purchase_rate',
-		'fieldtype': 'Currency',
-		'label': 'Rate *(Default Curr.)',
-		'oldfieldname': 'purchase_rate',
-		'oldfieldtype': 'Currency',
+		'colour': u'White:FFF',
+		'default': u'0.00',
+		'doctype': u'DocField',
+		'fieldname': u'purchase_rate',
+		'fieldtype': u'Currency',
+		'label': u'Rate *(Default Curr.)',
+		'oldfieldname': u'purchase_rate',
+		'oldfieldtype': u'Currency',
 		'permlevel': 0,
 		'print_hide': 1,
 		'reqd': 1,
-		'trigger': 'Client',
-		'width': '100px'
+		'trigger': u'Client',
+		'width': u'100px'
 	},
 
 	# DocField
 	{
-		'default': '0.00',
-		'doctype': 'DocField',
-		'fieldname': 'amount',
-		'fieldtype': 'Currency',
-		'label': 'Amount (Default Curr.)',
-		'oldfieldname': 'amount',
-		'oldfieldtype': 'Currency',
+		'default': u'0.00',
+		'doctype': u'DocField',
+		'fieldname': u'amount',
+		'fieldtype': u'Currency',
+		'label': u'Amount (Default Curr.)',
+		'oldfieldname': u'amount',
+		'oldfieldtype': u'Currency',
 		'permlevel': 0,
 		'print_hide': 1,
 		'reqd': 0,
-		'trigger': 'Client',
-		'width': '100px'
+		'trigger': u'Client',
+		'width': u'100px'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'warehouse',
-		'fieldtype': 'Link',
+		'doctype': u'DocField',
+		'fieldname': u'warehouse',
+		'fieldtype': u'Link',
 		'hidden': 0,
-		'label': 'Accepted Warehouse',
-		'oldfieldname': 'warehouse',
-		'oldfieldtype': 'Link',
-		'options': 'Warehouse',
+		'label': u'Accepted Warehouse',
+		'oldfieldname': u'warehouse',
+		'oldfieldtype': u'Link',
+		'options': u'Warehouse',
 		'permlevel': 0,
 		'print_hide': 0,
-		'width': '100px'
+		'width': u'100px'
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldname': 'uom',
-		'fieldtype': 'Link',
-		'label': 'UOM',
-		'oldfieldname': 'uom',
-		'oldfieldtype': 'Link',
-		'options': 'UOM',
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'uom',
+		'fieldtype': u'Link',
+		'label': u'UOM',
+		'oldfieldname': u'uom',
+		'oldfieldtype': u'Link',
+		'options': u'UOM',
 		'permlevel': 0,
 		'reqd': 1,
-		'trigger': 'Client',
-		'width': '100px'
+		'trigger': u'Client',
+		'width': u'100px'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'conversion_factor',
-		'fieldtype': 'Currency',
-		'label': 'Conversion Factor',
-		'oldfieldname': 'conversion_factor',
-		'oldfieldtype': 'Currency',
+		'doctype': u'DocField',
+		'fieldname': u'conversion_factor',
+		'fieldtype': u'Currency',
+		'label': u'Conversion Factor',
+		'oldfieldname': u'conversion_factor',
+		'oldfieldtype': u'Currency',
 		'permlevel': 0,
 		'print_hide': 1,
 		'reqd': 1,
-		'trigger': 'Client',
-		'width': '100px'
+		'trigger': u'Client',
+		'width': u'100px'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'stock_uom',
-		'fieldtype': 'Data',
-		'label': 'Stock UOM',
-		'oldfieldname': 'stock_uom',
-		'oldfieldtype': 'Data',
+		'doctype': u'DocField',
+		'fieldname': u'stock_uom',
+		'fieldtype': u'Data',
+		'label': u'Stock UOM',
+		'oldfieldname': u'stock_uom',
+		'oldfieldtype': u'Data',
 		'permlevel': 1,
 		'print_hide': 1,
 		'reqd': 1,
-		'width': '100px'
+		'width': u'100px'
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldname': 'rejected_warehouse',
-		'fieldtype': 'Link',
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'serial_no',
+		'fieldtype': u'Text',
+		'in_filter': 1,
+		'label': u'Serial No',
+		'no_copy': 1,
+		'oldfieldname': u'serial_no',
+		'oldfieldtype': u'Text',
+		'permlevel': 0,
+		'print_hide': 1,
+		'report_hide': 0
+	},
+
+	# DocField
+	{
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'batch_no',
+		'fieldtype': u'Link',
+		'label': u'Batch No',
+		'oldfieldname': u'batch_no',
+		'oldfieldtype': u'Link',
+		'options': u'Batch',
+		'permlevel': 0,
+		'print_hide': 1,
+		'trigger': u'Client'
+	},
+
+	# DocField
+	{
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'rejected_warehouse',
+		'fieldtype': u'Link',
 		'hidden': 1,
-		'label': 'Rejected Warehouse',
+		'label': u'Rejected Warehouse',
 		'no_copy': 1,
-		'oldfieldname': 'rejected_warehouse',
-		'oldfieldtype': 'Link',
-		'options': 'Warehouse',
+		'oldfieldname': u'rejected_warehouse',
+		'oldfieldtype': u'Link',
+		'options': u'Warehouse',
 		'permlevel': 1,
 		'print_hide': 1,
-		'width': '100px'
+		'width': u'100px'
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldname': 'schedule_date',
-		'fieldtype': 'Date',
-		'label': 'Schedule date',
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'schedule_date',
+		'fieldtype': u'Date',
+		'label': u'Schedule date',
 		'no_copy': 1,
-		'oldfieldname': 'schedule_date',
-		'oldfieldtype': 'Date',
+		'oldfieldname': u'schedule_date',
+		'oldfieldtype': u'Date',
 		'permlevel': 0,
 		'print_hide': 1,
 		'report_hide': 0,
@@ -312,57 +343,57 @@
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldname': 'project_name',
-		'fieldtype': 'Link',
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'project_name',
+		'fieldtype': u'Link',
 		'in_filter': 1,
-		'label': 'Project Name',
-		'options': 'Project',
+		'label': u'Project Name',
+		'options': u'Project',
 		'permlevel': 0,
 		'print_hide': 1
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldname': 'qa_no',
-		'fieldtype': 'Link',
-		'label': 'QA No',
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'qa_no',
+		'fieldtype': u'Link',
+		'label': u'QA No',
 		'no_copy': 1,
-		'oldfieldname': 'qa_no',
-		'oldfieldtype': 'Link',
-		'options': 'QA Inspection Report',
+		'oldfieldname': u'qa_no',
+		'oldfieldtype': u'Link',
+		'options': u'QA Inspection Report',
 		'permlevel': 0,
 		'print_hide': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'brand',
-		'fieldtype': 'Link',
+		'doctype': u'DocField',
+		'fieldname': u'brand',
+		'fieldtype': u'Link',
 		'hidden': 1,
-		'label': 'Brand',
-		'oldfieldname': 'brand',
-		'oldfieldtype': 'Link',
-		'options': 'Brand',
+		'label': u'Brand',
+		'oldfieldname': u'brand',
+		'oldfieldtype': u'Link',
+		'options': u'Brand',
 		'permlevel': 1,
 		'print_hide': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'item_group',
-		'fieldtype': 'Link',
+		'doctype': u'DocField',
+		'fieldname': u'item_group',
+		'fieldtype': u'Link',
 		'hidden': 1,
 		'in_filter': 1,
-		'label': 'Item Group',
-		'oldfieldname': 'item_group',
-		'oldfieldtype': 'Link',
-		'options': 'Item Group',
+		'label': u'Item Group',
+		'oldfieldname': u'item_group',
+		'oldfieldtype': u'Link',
+		'options': u'Item Group',
 		'permlevel': 1,
 		'print_hide': 1,
 		'search_index': 1
@@ -370,192 +401,161 @@
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldname': 'serial_no',
-		'fieldtype': 'Text',
-		'in_filter': 1,
-		'label': 'Serial No',
-		'no_copy': 1,
-		'oldfieldname': 'serial_no',
-		'oldfieldtype': 'Text',
+		'doctype': u'DocField',
+		'fieldname': u'stock_qty',
+		'fieldtype': u'Currency',
+		'label': u'Stock Qty',
+		'oldfieldname': u'stock_qty',
+		'oldfieldtype': u'Currency',
 		'permlevel': 0,
 		'print_hide': 1,
-		'report_hide': 0
+		'trigger': u'Client',
+		'width': u'100px'
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldname': 'batch_no',
-		'fieldtype': 'Link',
-		'label': 'Batch No',
-		'oldfieldname': 'batch_no',
-		'oldfieldtype': 'Link',
-		'options': 'Batch',
-		'permlevel': 0,
-		'print_hide': 1,
-		'trigger': 'Client'
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldname': 'stock_qty',
-		'fieldtype': 'Currency',
-		'label': 'Stock Qty',
-		'oldfieldname': 'stock_qty',
-		'oldfieldtype': 'Currency',
-		'permlevel': 0,
-		'print_hide': 1,
-		'trigger': 'Client',
-		'width': '100px'
-	},
-
-	# DocField
-	{
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldname': 'prevdoc_doctype',
-		'fieldtype': 'Data',
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'prevdoc_doctype',
+		'fieldtype': u'Data',
 		'hidden': 1,
-		'label': 'Prevdoc Doctype',
-		'oldfieldname': 'prevdoc_doctype',
-		'oldfieldtype': 'Data',
+		'label': u'Prevdoc Doctype',
+		'oldfieldname': u'prevdoc_doctype',
+		'oldfieldtype': u'Data',
 		'permlevel': 0,
 		'print_hide': 1
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldname': 'prevdoc_docname',
-		'fieldtype': 'Link',
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'prevdoc_docname',
+		'fieldtype': u'Link',
 		'hidden': 0,
 		'in_filter': 1,
-		'label': 'PO No',
+		'label': u'PO No',
 		'no_copy': 0,
-		'oldfieldname': 'prevdoc_docname',
-		'oldfieldtype': 'Link',
-		'options': 'Purchase Order',
+		'oldfieldname': u'prevdoc_docname',
+		'oldfieldtype': u'Link',
+		'options': u'Purchase Order',
 		'permlevel': 1,
 		'print_hide': 0,
 		'reqd': 0,
 		'search_index': 1,
-		'width': '150px'
+		'width': u'150px'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'prevdoc_date',
-		'fieldtype': 'Date',
+		'doctype': u'DocField',
+		'fieldname': u'prevdoc_date',
+		'fieldtype': u'Date',
 		'hidden': 1,
 		'in_filter': 1,
-		'label': 'PO Date',
-		'oldfieldname': 'prevdoc_date',
-		'oldfieldtype': 'Date',
+		'label': u'PO Date',
+		'oldfieldname': u'prevdoc_date',
+		'oldfieldtype': u'Date',
 		'permlevel': 1,
 		'print_hide': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'rm_supp_cost',
-		'fieldtype': 'Currency',
+		'doctype': u'DocField',
+		'fieldname': u'rm_supp_cost',
+		'fieldtype': u'Currency',
 		'hidden': 1,
 		'in_filter': 0,
-		'label': 'Raw Materials Supplied Cost',
-		'oldfieldname': 'rm_supp_cost',
-		'oldfieldtype': 'Currency',
+		'label': u'Raw Materials Supplied Cost',
+		'oldfieldname': u'rm_supp_cost',
+		'oldfieldtype': u'Currency',
 		'permlevel': 2,
 		'print_hide': 1,
-		'width': '150px'
+		'width': u'150px'
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldname': 'item_tax_amount',
-		'fieldtype': 'Currency',
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'item_tax_amount',
+		'fieldtype': u'Currency',
 		'hidden': 1,
-		'label': 'Item Tax Amount',
+		'label': u'Item Tax Amount',
 		'no_copy': 1,
-		'oldfieldname': 'item_tax_amount',
-		'oldfieldtype': 'Currency',
+		'oldfieldname': u'item_tax_amount',
+		'oldfieldtype': u'Currency',
 		'permlevel': 1,
 		'print_hide': 1,
 		'reqd': 0,
 		'search_index': 1,
-		'width': '150px'
+		'width': u'150px'
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldname': 'prevdoc_detail_docname',
-		'fieldtype': 'Data',
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'prevdoc_detail_docname',
+		'fieldtype': u'Data',
 		'hidden': 1,
 		'in_filter': 1,
-		'label': 'PO Detail No',
+		'label': u'PO Detail No',
 		'no_copy': 0,
-		'oldfieldname': 'prevdoc_detail_docname',
-		'oldfieldtype': 'Data',
+		'oldfieldname': u'prevdoc_detail_docname',
+		'oldfieldtype': u'Data',
 		'permlevel': 1,
 		'print_hide': 1,
 		'search_index': 1,
-		'width': '150px'
+		'width': u'150px'
 	},
 
 	# DocField
 	{
-		'default': '0.00',
-		'doctype': 'DocField',
-		'fieldname': 'billed_qty',
-		'fieldtype': 'Currency',
-		'label': 'Billed Quantity',
+		'default': u'0.00',
+		'doctype': u'DocField',
+		'fieldname': u'billed_qty',
+		'fieldtype': u'Currency',
+		'label': u'Billed Quantity',
 		'no_copy': 1,
-		'oldfieldname': 'billed_qty',
-		'oldfieldtype': 'Currency',
+		'oldfieldname': u'billed_qty',
+		'oldfieldtype': u'Currency',
 		'permlevel': 1,
 		'print_hide': 1,
-		'width': '100px'
+		'width': u'100px'
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldname': 'valuation_rate',
-		'fieldtype': 'Currency',
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'valuation_rate',
+		'fieldtype': u'Currency',
 		'hidden': 1,
 		'in_filter': 0,
-		'label': 'Valuation Rate',
+		'label': u'Valuation Rate',
 		'no_copy': 1,
-		'oldfieldname': 'valuation_rate',
-		'oldfieldtype': 'Currency',
+		'oldfieldname': u'valuation_rate',
+		'oldfieldtype': u'Currency',
 		'permlevel': 1,
 		'print_hide': 1,
-		'width': '80px'
+		'width': u'80px'
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'description': 'Tax detail table fetched from item master as a string and stored in this field.\nUsed for Purchase Other Charges',
-		'doctype': 'DocField',
-		'fieldname': 'item_tax_rate',
-		'fieldtype': 'Small Text',
+		'colour': u'White:FFF',
+		'description': u'Tax detail table fetched from item master as a string and stored in this field.\nUsed for Purchase Other Charges',
+		'doctype': u'DocField',
+		'fieldname': u'item_tax_rate',
+		'fieldtype': u'Small Text',
 		'hidden': 1,
 		'in_filter': 0,
-		'label': 'Item Tax Rate',
-		'oldfieldname': 'item_tax_rate',
-		'oldfieldtype': 'Small Text',
+		'label': u'Item Tax Rate',
+		'oldfieldname': u'item_tax_rate',
+		'oldfieldtype': u'Small Text',
 		'permlevel': 1,
 		'print_hide': 1,
 		'report_hide': 1
@@ -564,12 +564,12 @@
 	# DocField
 	{
 		'allow_on_submit': 1,
-		'doctype': 'DocField',
-		'fieldname': 'page_break',
-		'fieldtype': 'Check',
-		'label': 'Page Break',
-		'oldfieldname': 'page_break',
-		'oldfieldtype': 'Check',
+		'doctype': u'DocField',
+		'fieldname': u'page_break',
+		'fieldtype': u'Check',
+		'label': u'Page Break',
+		'oldfieldname': u'page_break',
+		'oldfieldtype': u'Check',
 		'permlevel': 0,
 		'print_hide': 1
 	}

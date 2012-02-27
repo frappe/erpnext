@@ -150,6 +150,10 @@ class DocType(TransactionBase):
 		rate = sql("select tax_rate from `tabAccount` where name='%s'"%(acc))
 		ret={'add_tax_rate' :rate and flt(rate[0][0]) or 0 }
 		return ret
+
+
+	def get_comp_base_currency(self):
+		return get_obj('Purchase Common').get_comp_base_currency(self.doc.company)
 	
 
 # *************************** Server Utility Functions *****************************

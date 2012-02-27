@@ -5,7 +5,7 @@
 	{
 		'creation': '2010-08-08 17:09:21',
 		'docstatus': 0,
-		'modified': '2012-02-24 16:51:54',
+		'modified': '2012-02-27 17:07:40',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -21,7 +21,7 @@
 
 	# These values are common for all DocType
 	{
-		'_last_update': u'1330082356',
+		'_last_update': u'1330082514',
 		'allow_attach': 0,
 		'colour': u'White:FFF',
 		'default_print_format': u'Standard',
@@ -38,7 +38,7 @@
 		'show_in_menu': 0,
 		'subject': u'From %(customer_name)s on %(transaction_date)s worth %(currency)s %(grand_total_export)s | %(per_delivered)s% delivered | %(per_billed)s% billed',
 		'tag_fields': u'delivery_status,billing_status',
-		'version': 628
+		'version': 629
 	},
 
 	# These values are common for all DocFormat
@@ -278,19 +278,48 @@
 
 	# DocField
 	{
-		'colour': u'White:FFF',
-		'description': u'Track this Sales Order against any Project',
 		'doctype': u'DocField',
-		'fieldname': u'project_name',
-		'fieldtype': u'Link',
-		'in_filter': 1,
-		'label': u'Project Name',
-		'oldfieldname': u'project_name',
-		'oldfieldtype': u'Link',
-		'options': u'Project',
-		'permlevel': 0,
-		'search_index': 1,
-		'trigger': u'Client'
+		'fieldname': u'customer_name',
+		'fieldtype': u'Data',
+		'label': u'Name',
+		'permlevel': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'address_display',
+		'fieldtype': u'Small Text',
+		'label': u'Address',
+		'permlevel': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'contact_display',
+		'fieldtype': u'Small Text',
+		'label': u'Contact',
+		'permlevel': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'contact_mobile',
+		'fieldtype': u'Text',
+		'label': u'Mobile No',
+		'permlevel': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'contact_email',
+		'fieldtype': u'Text',
+		'label': u'Contact Email',
+		'permlevel': 1,
+		'print_hide': 1
 	},
 
 	# DocField
@@ -338,6 +367,25 @@
 
 	# DocField
 	{
+		'colour': u'White:FFF',
+		'depends_on': u"eval:doc.order_type == 'Sales'",
+		'doctype': u'DocField',
+		'fieldname': u'delivery_date',
+		'fieldtype': u'Date',
+		'hidden': 0,
+		'in_filter': 1,
+		'label': u'Expected Delivery Date',
+		'oldfieldname': u'delivery_date',
+		'oldfieldtype': u'Date',
+		'permlevel': 0,
+		'print_hide': 1,
+		'reqd': 0,
+		'search_index': 1,
+		'width': u'160px'
+	},
+
+	# DocField
+	{
 		'default': u'Draft',
 		'doctype': u'DocField',
 		'fieldname': u'status',
@@ -358,20 +406,18 @@
 	# DocField
 	{
 		'colour': u'White:FFF',
-		'depends_on': u"eval:doc.order_type == 'Sales'",
+		'description': u'Track this Sales Order against any Project',
 		'doctype': u'DocField',
-		'fieldname': u'delivery_date',
-		'fieldtype': u'Date',
-		'hidden': 0,
+		'fieldname': u'project_name',
+		'fieldtype': u'Link',
 		'in_filter': 1,
-		'label': u'Expected Delivery Date',
-		'oldfieldname': u'delivery_date',
-		'oldfieldtype': u'Date',
+		'label': u'Project Name',
+		'oldfieldname': u'project_name',
+		'oldfieldtype': u'Link',
+		'options': u'Project',
 		'permlevel': 0,
-		'print_hide': 1,
-		'reqd': 0,
 		'search_index': 1,
-		'width': u'160px'
+		'trigger': u'Client'
 	},
 
 	# DocField
@@ -440,6 +486,60 @@
 		'permlevel': 0,
 		'print_hide': 1,
 		'width': u'100px'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'territory',
+		'fieldtype': u'Link',
+		'in_filter': 1,
+		'label': u'Territory',
+		'options': u'Territory',
+		'permlevel': 0,
+		'print_hide': 1,
+		'reqd': 1,
+		'search_index': 1
+	},
+
+	# DocField
+	{
+		'colour': u'White:FFF',
+		'description': u'Category of customer as entered in Customer master',
+		'doctype': u'DocField',
+		'fieldname': u'customer_group',
+		'fieldtype': u'Link',
+		'in_filter': 1,
+		'label': u'Customer Group',
+		'options': u'Customer Group',
+		'permlevel': 0,
+		'print_hide': 1,
+		'reqd': 1,
+		'search_index': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'shipping_address',
+		'fieldtype': u'Small Text',
+		'in_filter': 0,
+		'label': u'Shipping Address',
+		'permlevel': 1,
+		'print_hide': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'shipping_address_name',
+		'fieldtype': u'Data',
+		'hidden': 1,
+		'in_filter': 1,
+		'label': u'Shipping Address Name',
+		'options': u'Address',
+		'permlevel': 1,
+		'print_hide': 1
 	},
 
 	# DocField
@@ -1094,132 +1194,6 @@
 		'no_copy': 1,
 		'oldfieldname': u'cancel_reason',
 		'oldfieldtype': u'Data',
-		'permlevel': 1,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'depends_on': u'eval:doc.customer',
-		'doctype': u'DocField',
-		'fieldtype': u'Section Break',
-		'label': u'Customer Details',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldtype': u'Column Break',
-		'permlevel': 0,
-		'width': u'50%'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'customer_name',
-		'fieldtype': u'Data',
-		'label': u'Name',
-		'permlevel': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'address_display',
-		'fieldtype': u'Small Text',
-		'label': u'Address',
-		'permlevel': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'territory',
-		'fieldtype': u'Link',
-		'in_filter': 1,
-		'label': u'Territory',
-		'options': u'Territory',
-		'permlevel': 0,
-		'print_hide': 1,
-		'reqd': 1,
-		'search_index': 1
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'description': u'Category of customer as entered in Customer master',
-		'doctype': u'DocField',
-		'fieldname': u'customer_group',
-		'fieldtype': u'Link',
-		'in_filter': 1,
-		'label': u'Customer Group',
-		'options': u'Customer Group',
-		'permlevel': 0,
-		'print_hide': 1,
-		'reqd': 1,
-		'search_index': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldtype': u'Column Break',
-		'permlevel': 0,
-		'width': u'50%'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'contact_display',
-		'fieldtype': u'Small Text',
-		'label': u'Contact',
-		'permlevel': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'contact_mobile',
-		'fieldtype': u'Text',
-		'label': u'Mobile No',
-		'permlevel': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'contact_email',
-		'fieldtype': u'Text',
-		'label': u'Contact Email',
-		'permlevel': 1,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'shipping_address',
-		'fieldtype': u'Small Text',
-		'in_filter': 0,
-		'label': u'Shipping Address',
-		'permlevel': 1,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'shipping_address_name',
-		'fieldtype': u'Data',
-		'hidden': 1,
-		'in_filter': 1,
-		'label': u'Shipping Address Name',
-		'options': u'Address',
 		'permlevel': 1,
 		'print_hide': 1
 	},
