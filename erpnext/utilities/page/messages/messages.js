@@ -38,6 +38,7 @@ wn.pages.messages.onload = function(wrapper) {
 wn.pages.messages.onshow = function(wrapper) {
 	erpnext.messages.show();
 	setTimeout(erpnext.messages.refresh, 5000);
+	$('#message-post-text').focus();
 }
 
 erpnext.messages = {
@@ -83,19 +84,26 @@ erpnext.messages = {
 				data.creation = dateutil.comment_when(data.creation);
 				data.comment_by_fullname = wn.boot.user_fullnames[data.owner];
 
+				data.reply_html = '';
 				if(data.owner==user) {
 					data.cls = 'message-self';
 					data.comment_by_fullname = 'You';	
-					data.delete_html = repl('<a class="close" onclick="erpnext.messages.delete(this)"\
+					data.delete_html = repl('<a class="close" \
+						onclick="erpnext.messages.delete(this)"\
 						data-name="%(name)s">&times;</a>', data);
 				} else {
 					data.cls = 'message-other';
 					data.delete_html = '';
+					if(erpnext.messages.contact==user) {
+						data.reply_html = repl('<a href="#!messages/%(owner)s">\
+							<i class="icon-share-alt"></i> Reply</a>', data)
+					}
 				}
 
 				wrapper.innerHTML = repl('<div class="message %(cls)s">%(delete_html)s\
 						<b>%(comment)s</b>\
-						<div class="help">by %(comment_by_fullname)s, %(creation)s</div></div>\
+						<div class="help">by %(comment_by_fullname)s, %(creation)s</div>\
+						%(reply_html)s</div>\
 					<div style="clear: both;"></div>', data);
 			}
 		});
