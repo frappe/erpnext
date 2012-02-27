@@ -940,7 +940,7 @@ var df=get_field(dt,key);if(df&&((!from_amend&&cint(df.no_copy)==1)||in_list(Loc
 return locals[dt][newdoc];}
 function make_doclist(dt,dn,deleted){var dl=[];dl[0]=locals[dt][dn];for(var ndt in locals){if(locals[ndt]){for(var ndn in locals[ndt]){var doc=locals[ndt][ndn];if(doc&&doc.parenttype==dt&&(doc.parent==dn||(deleted&&doc.__oldparent==dn))){dl[dl.length]=doc;}}}}
 return dl;}
-var rename_observers=[];function notify_rename_observers(dt,old_name,new_name){try{var old=locals[dt][old_name];old.parent=null;old.__deleted=1;}catch(e){alert("[rename_from_local] No Document for: "+old_name);}
+var rename_observers=[];function notify_rename_observers(dt,old_name,new_name){try{delete locals[dt][old_name];}catch(e){alert("[rename_from_local] No Document for: "+old_name);}
 for(var i=0;i<rename_observers.length;i++){if(rename_observers[i])
 rename_observers[i].rename_notify(dt,old_name,new_name);}}
 var Meta={};var local_dt={};Meta.make_local_dt=function(dt,dn){var dl=make_doclist('DocType',dt);if(!local_dt[dt])local_dt[dt]={};if(!local_dt[dt][dn])local_dt[dt][dn]={};for(var i=0;i<dl.length;i++){var d=dl[i];if(d.doctype=='DocField'){var key=d.fieldname?d.fieldname:d.label;local_dt[dt][dn][key]=copy_dict(d);}}}
