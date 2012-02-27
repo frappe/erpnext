@@ -99,5 +99,10 @@ patch_list = [
 		'patch_module': 'patches.jan_mar_2012',
 		'patch_file': 'reload_item',
 		'description': 'reload item'
-	}
+	},
+	{
+		'patch_module': 'patches.jan_mar_2012',
+		'patch_file': 'fix_packing_slip',
+		'description': 'Update Mapper Delivery Note-Packing Slip'
+	},
 ]
