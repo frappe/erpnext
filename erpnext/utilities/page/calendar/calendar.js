@@ -33,7 +33,6 @@ pscript.onload_calendar = function(wrapper) {
 Calendar=function() {
 	this.views=[];
 	this.events = {};
-	this.has_event = {};
 	this.events_by_name = {};
 	this.weekdays = new Array("Sun","Mon","Tue","Wed","Thu","Fri","Sat");
 }
@@ -57,15 +56,18 @@ Calendar.prototype.init=function (parent) {
 	this.views['Day'] = new Calendar.DayView(this);
 
 	// Month view as initial
-	this.cur_view = this.views['Day'];
-	this.views['Day'].show();
+	this.cur_view = this.views['Month'];
+	this.views['Month'].show();
 	
 }
 
 Calendar.prototype.rename_notify = function(dt, old_name, new_name) {
 	// calendar
-	if(dt = 'Event' && this.has_event[old_name])
-		this.has_event[old_name] = false;	
+	if(dt = 'Event'){		
+		if(this.events_by_name[old_name]) {
+			delete this.events_by_name[old_name];
+		}
+	}
 }
 
 //------------------------------------------------------
@@ -119,19 +121,15 @@ Calendar.prototype.show_event = function(ev, cal_ev) {
 			
 			// save values
 			d.ev.description = d.widgets['Description'].value;
-			if(d.widgets['Cancel Event'].checked) d.ev.event_type='Cancel';
-			else if(d.widgets['Public Event'].checked) d.ev.event_type='Public';
+			if(d.widgets['Cancel Event'].checked) 
+				d.ev.event_type='Cancel';
+			else if(d.widgets['Public Event'].checked) 
+				d.ev.event_type='Public';
 			
 			me.event_dialog.hide();
 			
 			// if new event
-			if(d.cal_ev)
-				var cal_ev = d.cal_ev;
-			else 
-				var cal_ev = me.set_event(d.ev);
-
-			cal_ev.save();
-			if(me.cur_view)me.cur_view.refresh();			
+			me.save_event(d.ev);
 		}
 		this.event_dialog = d;
 	}
@@ -139,6 +137,20 @@ Calendar.prototype.show_event = function(ev, cal_ev) {
 	this.event_dialog.cal_ev = cal_ev ? cal_ev : null;
 	this.event_dialog.show();
 	
+}
+
+Calendar.prototype.save_event = function(doc) {
+	var me = this;
+	save_doclist('Event', doc.name, 'Save', function(r) { 
+		var doc = locals['Event'][r.docname];
+		var cal = erpnext.calendar;
+		cal.cur_view.refresh();
+
+		// if cancelled, hide
+		if(doc.event_type=='Cancel') {
+			$(cal.events_by_name[doc.name].body).toggle(false);
+		}
+	});
 }
 
 //------------------------------------------------------
@@ -193,7 +205,7 @@ Calendar.prototype.get_daily_event_list=function(day) {
 Calendar.prototype.set_event = function(ev) {
 	// don't duplicate
 	if(this.events_by_name[ev.name]) {
-		return;
+		return this.events_by_name[ev.name];
 	}
 		
 	var dt = dateutil.str_to_obj(ev.event_date);
@@ -204,16 +216,16 @@ Calendar.prototype.set_event = function(ev) {
 	if(!this.events[y]) this.events[y] = [];
 	if(!this.events[y][m]) this.events[y][m] = [];
 	if(!this.events[y][m][d]) this.events[y][m][d] = [];
-	if(!this.events[y][m][d][cint(cint(ev.event_hour))]) 
+	if(!this.events[y][m][d][cint(ev.event_hour)]) 
 		this.events[y][m][d][cint(ev.event_hour)] = [];
 
 	var cal_ev = new Calendar.CalEvent(ev, this);
 	this.events[y][m][d][cint(ev.event_hour)].push(cal_ev);	
 	this.events_by_name[ev.name] = cal_ev;
-	this.has_event[ev.name] = true;
 	
 	return cal_ev;
 }
+
 //------------------------------------------------------
 
 Calendar.prototype.refresh = function(viewtype){//Sets the viewtype of the Calendar and Calls the View class based on the viewtype
@@ -235,14 +247,11 @@ Calendar.prototype.refresh = function(viewtype){//Sets the viewtype of the Calen
 
 Calendar.CalEvent= function(doc, cal) {
 	this.body = document.createElement('div');
-	var v = locals['Event'][doc.name].description;
-	if(v==null)v='';
-	this.body.innerHTML = v;
-
+	this.link = $a(this.body, 'a', '', {}, locals['Event'][doc.name].description || '');
 	this.doc = doc;
 	var me = this;
 
-	this.body.onclick = function() {
+	this.link.onclick = function() {
 		if(me.doc.name) {
 			cal.show_event(me.doc, me);
 		}
@@ -252,26 +261,18 @@ Calendar.CalEvent= function(doc, cal) {
 Calendar.CalEvent.prototype.show = function(vu) {
 
 	var t = this.doc.event_type;
-	this.my_class = 'cal_event cal_event_'+ t;
+	this.my_class = 'cal_event_'+ t;
 	
 	if(this.body.parentNode)
 		this.body.parentNode.removeChild(this.body);
 	vu.body.appendChild(this.body);
 	
 	// refresh
-	var v = this.doc.description;
-	if(v==null)v='';
-	this.body.innerHTML = v;
+	this.link.innerHTML = this.doc.description || '';
 	this.body.className = this.my_class;
 }
 
-Calendar.CalEvent.prototype.save = function() {
-	var me = this;
-	save_doclist('Event', me.doc.name, 'Save', function(r) { 
-		me.doc = locals['Event'][r.docname];
-		erpnext.calendar.has_event[r.docname] = true;
-	} );
-}
+
 // ----------
 
 Calendar.View =function() { this.daystep = 0; this.monthstep = 0; }

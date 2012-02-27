@@ -156,9 +156,7 @@ div.cal_week_unit{
 }
 
 div.cal_event {
-	width: 100%;
-	height: 12px;
-	overflow: hidden;
+	overflow-x: hidden;
 	font-size: 11px;
 	color: #00B;
 	margin-bottom: 2px;
