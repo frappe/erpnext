@@ -73,20 +73,35 @@ erpnext.toolbar.add_modules = function() {
 	$('<li class="dropdown">\
 		<a class="dropdown-toggle" data-toggle="dropdown" href="#"\
 			onclick="return false;">Modules<b class="caret"></b></a>\
-		<ul class="dropdown-menu">\
-			<li><a href="#!accounts-home" data-module="Accounts">Accounts</a></li>\
-			<li><a href="#!selling-home" data-module="Selling">Selling</a></li>\
-			<li><a href="#!stock-home" data-module="Stock">Stock</a></li>\
-			<li><a href="#!buying-home" data-module="Buying">Buying</a></li>\
-			<li><a href="#!support-home" data-module="Support">Support</a></li>\
-			<li><a href="#!hr-home" data-module="HR">Human Resources</a></li>\
-			<li><a href="#!projects-home" data-module="Projects">Projects</a></li>\
-			<li><a href="#!production-home" data-module="Production">Production</a></li>\
-			<li><a href="#!website-home" data-module="Website">Website</a></li>\
-			<li class="divider"></li>\
-			<li><a href="#!Setup" data-module="Setup">Setup</a></li>\
+		<ul class="dropdown-menu modules">\
 		</ul>\
 		</li>').prependTo('.navbar .nav:first');
-	$('.navbar .nav:first')	
+	
+	// if no modules list then show all
+	if(wn.boot.modules_list)
+		wn.boot.modules_list = JSON.parse(wn.boot.modules_list);
+	else
+		wn.boot.modules_list = ['Accounts', 'Selling', 'Buying', 'Stock', 
+			'Production', 'Projects', 'Support', 'HR', 'Website'];
+
+	// add to dropdown
+	for(var i in wn.boot.modules_list) {
+		var m = wn.boot.modules_list[i]
+		args = {
+			module: m,
+			module_page: m.toLowerCase(),
+			module_label: m=='HR' ? 'Human Resources' : m
+		}
+			
+		$('.navbar .modules').append(repl('<li><a href="#!%(module_page)s-home" \
+			data-module="%(module)s">%(module_label)s</a></li>', args));			
+	}
+	
+	// setup for system manager
+	if(user_roles.indexOf("System Manager")!=-1) {
+		$('.navbar .modules').append('<li class="divider"></li>\
+		<li><a href="#!Setup" data-module="Setup">Setup</a></li>');
+	}
+	
 }
 
