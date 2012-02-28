@@ -1,5 +1,21 @@
 #!/usr/bin/env python
 
+# ERPNext - web based ERP (http://erpnext.com)
+# Copyright (C) 2012 Web Notes Technologies Pvt Ltd
+# 
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 import os, sys
 
 def replace_code(start, txt1, txt2, extn):
@@ -23,13 +39,18 @@ def replace_code(start, txt1, txt2, extn):
 def setup_options():
 	from optparse import OptionParser
 	parser = OptionParser()
+
+	parser.add_option("-d", "--db",
+						dest="db_name",
+						help="Apply the patches on given db")
+
+	# build
 	parser.add_option("-b", "--build", default=False, action="store_true",
 						help="minify + concat js files")
 	parser.add_option("-c", "--clear", default=False, action="store_true",
 						help="increment version")
-	parser.add_option("--replace", nargs=3, default=False, 
-						metavar = "search replace_by extension",
-						help="file search-replace")
+
+	# git
 	parser.add_option("--status", default=False, action="store_true",
 						help="git status")
 	parser.add_option("--pull", nargs=2, default=False,
@@ -41,22 +62,42 @@ def setup_options():
 	parser.add_option("-l", "--latest",
 						action="store_true", dest="run_latest", default=False,
 						help="Apply the latest patches")
+
+	# patch
 	parser.add_option("-p", "--patch", nargs=1, dest="patch_list", metavar='patch_module',
 						action="append",
 						help="Apply patch")
 	parser.add_option("-f", "--force",
 						action="store_true", dest="force", default=False,
 						help="Force Apply all patches specified using option -p or --patch")
-	parser.add_option("-d", "--db",
-						dest="db_name",
-						help="Apply the patches on given db")
 	parser.add_option('--reload_doc', nargs=3, metavar = "module doctype docname",
 						help="reload doc")
 	parser.add_option('--export_doc', nargs=2, metavar = "doctype docname",
 						help="export doc")
+
+	# install
 	parser.add_option('--install', nargs=3, metavar = "rootpassword dbname source",
 						help="install fresh db")
-	parser.add_option('--sync_with_gateway', nargs=1, metavar = "1/0", help="Set or Unset Sync with Gateway")
+	parser.add_option('--sync_with_gateway', nargs=1, metavar = "1/0", \
+						help="Set or Unset Sync with Gateway")
+
+	# diff
+	parser.add_option('--diff_ref_file', nargs=0, \
+						help="Get missing database records and mismatch properties, with file as reference")
+	parser.add_option('--diff_ref_db', nargs=0, \
+						help="Get missing .txt files and mismatch properties, with database as reference")
+
+	# scheduler
+	parser.add_option('--run_scheduler', default=False, action="store_true",
+						help="Trigger scheduler")
+	parser.add_option('--run_scheduler_event', nargs=1, metavar="[all|daily|weekly|monthly]",
+						help="Run scheduler event")
+
+	# misc
+	parser.add_option("--replace", nargs=3, default=False, 
+						metavar = "search replace_by extension",
+						help="file search-replace")
+	
 
 	return parser.parse_args()
 	
@@ -151,6 +192,22 @@ def run():
 			webnotes.message_log.append("sync_with_gateway set to %s" % options.sync_with_gateway[0])
 		else:
 			webnotes.message_log.append("ERROR: sync_with_gateway can be either 0 or 1")
+	
+	elif options.diff_ref_file is not None:
+		import webnotes.modules.diff
+		webnotes.modules.diff.diff_ref_file()
+
+	elif options.diff_ref_db is not None:
+		import webnotes.modules.diff
+		webnotes.modules.diff.diff_ref_db()
+	
+	elif options.run_scheduler:
+		import webnotes.utils.scheduler
+		print webnotes.utils.scheduler.execute()
+	
+	elif options.run_scheduler_event is not None:
+		import webnotes.utils.scheduler
+		print webnotes.utils.scheduler.trigger('execute_' + options.run_scheduler_event)
 	
 	# print messages
 	if webnotes.message_log:

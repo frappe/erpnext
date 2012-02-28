@@ -1,4 +1,20 @@
-wn.provide('erpnext.topbar');
+// ERPNext - web based ERP (http://erpnext.com)
+// Copyright (C) 2012 Web Notes Technologies Pvt Ltd
+// 
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// 
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+wn.provide('erpnext.navbar');
 
 /*
 <li class="dropdown">\
@@ -8,22 +24,22 @@ wn.provide('erpnext.topbar');
 </li>\
 */
 
-erpnext.topbar.TopBar = Class.extend({
+erpnext.navbar.navbar = Class.extend({
 	init: function() {
 		this.make();
 		$('.brand').html(wn.boot.website_settings.brand_html);
 		this.make_items();
-		$('.topbar').dropdown();
+		$('.dropdown-toggle').dropdown();
 	},
 	make: function() {
-		$('header').append('<div class="topbar">\
-			<div class="topbar-inner">\
+		$('header').append('<div class="navbar navbar-fixed-top">\
+			<div class="navbar-inner">\
 			<div class="container">\
 				<a class="brand">[brand]</a>\
 				<ul class="nav">\
 				</ul>\
 				<img src="lib/images/ui/spinner.gif" id="spinner"/>\
-				<ul class="nav secondary-nav">\
+				<ul class="nav pull-right">\
 					<li><a href="#!Login Page">Login</a></li>\
 				</ul>\
 			</div>\
@@ -52,7 +68,13 @@ erpnext.topbar.TopBar = Class.extend({
 				$parent_li = $(repl('header li[data-label="%(parent_label)s"]', item));
 				if(!$parent_li.hasClass('dropdown')) {
 					$parent_li.addClass('dropdown');
-					$parent_li.find('a:first').addClass('dropdown-toggle');
+					$parent_li.find('a:first').addClass('dropdown-toggle')
+						.attr('data-toggle', 'dropdown')
+						.attr('href', '')
+						.append('<b class="caret"></b>')
+						.click(function() {
+							return false;
+						});
 					$parent_li.append('<ul class="dropdown-menu"></ul>');
 				}
 				item.route = item.url || item.custom_page;
@@ -91,5 +113,5 @@ erpnext.Footer = Class.extend({
 
 $(document).bind('startup', function() {
 	erpnext.footer = new erpnext.Footer();
-	erpnext.topbar.topbar = new erpnext.topbar.TopBar();	
+	erpnext.navbar.navbar = new erpnext.navbar.navbar();	
 })

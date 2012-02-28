@@ -1,0 +1,35 @@
+#message-post-text {
+	height: 3em;
+}
+
+#message-list {
+	margin: 0px 40px;
+}
+
+.message {
+	border-radius: 5px;
+	max-width: 60%;
+	min-width: 40%;
+	padding: 7px;
+	margin-bottom: 7px;
+}
+
+.message .help {
+	margin-bottom: 0px;
+	padding-bottom: 0px;
+	color: #888;
+	font-size: 11px;
+}
+
+.message-other {
+	background-color: #EBFF9C;
+	border: 1px solid #C3CF78;
+	float: right;
+	text-align: right;
+}
+
+.message-self {
+	background-color: #eee;
+	border: 1px solid #ccc;
+	float: left;	
+}

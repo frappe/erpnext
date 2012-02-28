@@ -1,3 +1,19 @@
+// ERPNext - web based ERP (http://erpnext.com)
+// Copyright (C) 2012 Web Notes Technologies Pvt Ltd
+// 
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// 
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 // threading structure
 // -------- orginal message --------
 // xoxoxoxo
@@ -143,13 +159,11 @@ EmailMessage = function(parent, args, list, idx) {
 			this.from_email = this.from_email.replace('<', '&lt;').replace('>', '&gt;');
 		
 		// main wrapper
-		w = $a(parent, 'div', '', 
-			{margin:'7px 0px', padding:'0px', border:'1px solid #c8c8c8', backgroundColor:'#f9f9f9'}
-		);
-		$br(w, '7px');
+		w = $a(parent, 'div', 'support-ticket-wrapper well');
+		//$(w).addClass('support-ticket-wrapper');
 
 		// sender and timestamp
-		$a($a(w, 'div', '', {marginBottom:'7px', padding: '7px', backgroundColor:'#d2d2f2'}), 
+		$a($a(w, 'div', 'support-ticket-title'), 
 			'span', 'link_type', {}, repl('By %(from_email)s on %(creation)s:', this), 
 			function() {
 				// toggle message display on timestamp

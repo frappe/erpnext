@@ -1,3 +1,19 @@
+# ERPNext - web based ERP (http://erpnext.com)
+# Copyright (C) 2012 Web Notes Technologies Pvt Ltd
+# 
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 import webnotes
 import webnotes.defs
 from webnotes.utils import cint
@@ -54,18 +70,23 @@ def boot_session(bootinfo):
 	import webnotes
 	import webnotes.model.doc
 	
+	bootinfo['custom_css'] = webnotes.conn.get_value('Style Settings', None, 'custom_css') or ''
+
 	if webnotes.session['user']=='Guest':
 		bootinfo['website_settings'] = webnotes.model.doc.getsingle('Website Settings')
 		bootinfo['website_menus'] = webnotes.conn.sql("""select label, url, custom_page, 
 			parent_label, parentfield
 			from `tabTop Bar Item` where parent='Website Settings' order by idx asc""", as_dict=1)
-		bootinfo['custom_css'] = webnotes.conn.get_value('Style Settings', None, 'custom_css') or ''
 		bootinfo['analytics_code'] = \
 			webnotes.conn.get_value('Website Settings', None, 'analytics_code')
 		bootinfo['analytics_call'] = \
 			webnotes.conn.get_value('Website Settings', None, 'analytics_call')
+		
 	else:	
 		bootinfo['letter_heads'] = get_letter_heads()
+
+		import webnotes.model.doctype
+		bootinfo['docs'] += webnotes.model.doctype.get('Event')
 
 def get_letter_heads():
 	"""load letter heads with startup"""
@@ -73,7 +94,6 @@ def get_letter_heads():
 	ret = webnotes.conn.sql("""select name, content from `tabLetter Head` 
 		where ifnull(disabled,0)=0""")
 	return dict(ret)
-
 
 def login_as(login_manager):
 	"""

@@ -1,3 +1,19 @@
+// ERPNext - web based ERP (http://erpnext.com)
+// Copyright (C) 2012 Web Notes Technologies Pvt Ltd
+// 
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// 
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 pscript['onload_Event Updates'] = function() {
 	if(user=='Guest') {
 		loadpage('Login Page');
@@ -13,15 +29,15 @@ pscript['onload_Event Updates'] = function() {
 // ==================================
 
 pscript.home_make_body = function() {
-	var wrapper = page_body.pages['Event Updates'];
+	var wrapper = wn.pages['Event Updates'];
 	
 	// body
-	wrapper.main_tab = make_table(wrapper,1,2,'100%',['70%','30%']);
-	$y(wrapper.main_tab, {tableLayout:'fixed'});
-
-	wrapper.body = $a($td(wrapper.main_tab, 0, 0), 'div', 'layout_wrapper');
-
+	$(wrapper).addClass('layout-wrapper').addClass('layout-wrapper-background')
+	
+	wrapper.body = $a(wrapper, 'div', 'layout-main-section');
 	wrapper.head = $a(wrapper.body, 'div');
+	wrapper.side_section =$a(wrapper, 'div', 'layout-side-section');
+	$a(wrapper, 'div', '', {clear:'both'});
 	
 	wrapper.banner_area = $a(wrapper.head, 'div');
 
@@ -31,7 +47,7 @@ pscript.home_make_body = function() {
 // ==================================
 
 pscript.home_set_banner = function(wrapper) {
-	var wrapper = page_body.pages['Event Updates'];
+	var wrapper = wn.pages['Event Updates'];
 	var cp = wn.control_panel;
 
 	// banner
@@ -45,8 +61,8 @@ pscript.home_set_banner = function(wrapper) {
 // ==================================
 
 pscript.home_make_widgets = function() {
-	var wrapper = page_body.pages['Event Updates'];
-	var cell = $td(wrapper.main_tab, 0, 1);
+	var wrapper = wn.pages['Event Updates'];
+	var cell = wrapper.side_section;
 
 	// sidebar
 	sidebar = new wn.widgets.PageSidebar(cell, {
@@ -579,7 +595,7 @@ FeedItem.prototype.render_references = function(div, det) {
 }
 
 pscript.home_make_status = function() {
-	var wrapper = page_body.pages['Event Updates'];
+	var wrapper = wn.pages['Event Updates'];
 
 	// get values
 	$c_page('home', 'event_updates', 'get_status_details', user,
@@ -609,7 +625,7 @@ SetupWizard = function(status) {
 	$.extend(this, {
 		make: function(status) {
 			me.status = status;
-			me.wrapper = page_body.pages['Event Updates'].setup_wizard_area;
+			me.wrapper = wn.pages['Event Updates'].setup_wizard_area;
 			$ds(me.wrapper);
 			me.make_percent(status.percent);
 			me.make_suggestion(status.ret);

@@ -1,5 +1,21 @@
+// ERPNext - web based ERP (http://erpnext.com)
+// Copyright (C) 2012 Web Notes Technologies Pvt Ltd
+// 
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// 
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 pscript['onload_My Company'] = function() {
-	var wrapper = page_body.pages['My Company'];
+	var wrapper = wn.pages['My Company'];
 	
 	// body
 	wrapper.className = 'layout_wrapper';
@@ -96,7 +112,7 @@ pscript.myc_add_user = function() {
 }
 
 pscript.myc_refresh = function() {
-	page_body.pages['My Company'].member_list.lst.run();	
+	wn.pages['My Company'].member_list.lst.run();	
 }
 
 pscript.myc_make_list= function(wrapper) {
@@ -105,7 +121,7 @@ pscript.myc_make_list= function(wrapper) {
 
 pscript.get_fullname=function(uid) {
 	if(uid=='Administrator') return uid;
-	return page_body.pages['My Company'].member_list.member_items[uid].fullname;		
+	return wn.pages['My Company'].member_list.member_items[uid].fullname;		
 }
 
 
@@ -724,7 +740,7 @@ MemberCoversationComment = function(cell, det, conv) {
 
 	this.user = $a(this.comment, 'span', 'link_type', {fontWeight:'bold'}, pscript.get_fullname(det.owner));
 	this.user.onclick = function() {
-		page_body.pages['My Company'].member_list.show_profile(me.det.owner);
+		wn.pages['My Company'].member_list.show_profile(me.det.owner);
 	}
 
 	var st = (!det.docstatus ? {fontWeight: 'bold'} : null);

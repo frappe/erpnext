@@ -1,22 +1,33 @@
-pscript.onload_questions = function() {
-	var w = page_body.pages['questions'];
+// ERPNext - web based ERP (http://erpnext.com)
+// Copyright (C) 2012 Web Notes Technologies Pvt Ltd
+// 
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// 
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+pscript.onload_questions = function(wrapper) {	
+	body = $(wrapper).find('.layout-main-section').get(0);
 	
-	var tab = make_table(w, 1, 2, '100%', ['75%', '25%'], {});
-	var body = $a($td(tab,0,0),'div','layout_wrapper');
-
-	new PageHeader(body, 'Knowledge Base');
-
 	// kb
 	var kb = new KnowledgeBase(body);
 	
 	// sidebar
-	$y($td(tab, 0, 1), {paddingTop:'53px'});
-	this.sidebar = new wn.widgets.PageSidebar($td(tab, 0, 1), {
+	this.sidebar = new wn.widgets.PageSidebar($(wrapper).find('.layout-side-section').get(0), {
 		sections: [
 			{
 				title: 'Top Tags',
 				render: function(body) {
-					new wn.widgets.TagCloud(body, 'Question', function(tag) { kb.set_tag_filter(tag) });
+					new wn.widgets.TagCloud(body, 'Question', function(tag) 
+						{ kb.set_tag_filter(tag) });
 				}				
 			}
 		]
@@ -34,11 +45,14 @@ function KnowledgeBase(w) {
 	this.tag_filter_dict = {};
 	
 	this.make_search_bar = function() {
-		this.search = $a($a(w,'div','kb-search-wrapper'), 'textarea');
+		this.search = $(w).find('.kb-search-wrapper textarea').get(0);
 		
-		var div = $a(w,'div','kb-btn-wrapper');
-		$btn(div, 'Search', function() { me.run() }, {fontSize:'14px'});
-		$btn(div, 'Ask', function() { me.ask() }, {fontSize:'14px'});
+		$(w).find('.btn.search').click(function() {
+			me.run();
+		})
+		$(w).find('.btn.ask').click(function() {
+			me.ask();
+		})
 	}
 	
 	// ask a new question

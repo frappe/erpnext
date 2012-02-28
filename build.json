@@ -39,8 +39,11 @@
 			"lib/css/legacy/menus.css",
 			"lib/css/legacy/messages.css",
 			"lib/css/legacy/dialog.css",
-			"lib/css/legacy/bootstrap-buttons.css",
-			"lib/css/bootstrap/bootstrap-topbar.css",
+			"lib/css/bootstrap/headings.css",
+			"lib/css/bootstrap/buttons.css",
+			"lib/css/bootstrap/navbar.css",
+			"lib/css/bootstrap/dropdown.css",
+			"lib/css/bootstrap/tooltip.css",
 			"erpnext/startup/startup.css",
 			"erpnext/website/css/website.css"	
 		]
@@ -55,14 +58,17 @@
 			"lib/css/legacy/grid.css",
 			"lib/css/legacy/listing.css",
 			"lib/css/legacy/report.css",
-			"lib/css/legacy/calendar.css",
 			"lib/css/legacy/autosuggest.css",
 			"lib/css/legacy/dialog.css",
 			"lib/css/legacy/tabs.css",
-			"lib/css/legacy/bw-icons.css",
 			"lib/css/legacy/sidebar.css",
-			"lib/css/legacy/bootstrap-buttons.css",
-			"lib/css/bootstrap/bootstrap-topbar.css",
+			"lib/css/bootstrap/headings.css",
+			"lib/css/bootstrap/buttons.css",
+			"lib/css/bootstrap/navbar.css",
+			"lib/css/bootstrap/dropdown.css",
+			"lib/css/bootstrap/tooltip.css",
+			"lib/css/bootstrap/label.css",
+			"lib/css/bootstrap/icons.css",
 			"erpnext/startup/startup.css"							
 		]
 	},
@@ -71,6 +77,7 @@
 		"js/all-web.js": [
 			"lib/js/lib/jquery.min.js:concat",
 			"lib/js/lib/history/history.min.js:concat",
+			"lib/js/lib/bootstrap.min.js:concat",
 			"lib/js/core.min.js:concat",
 			"lib/js/legacy/globals.js",
 			"lib/js/legacy/utils/datatype.js",
@@ -102,7 +109,6 @@
 			"lib/js/legacy/webpage/body.js",
 			"lib/js/legacy/app.js",
 			"js/app.js",
-			"lib/js/bootstrap/bootstrap-dropdown.js:concat",
 			"erpnext/startup/startup.js",
 			"erpnext/website/js/topbar.js"
 		]
@@ -114,6 +120,7 @@
 			"lib/js/lib/history/history.min.js:concat",
 			"lib/js/legacy/jquery/jquery-ui.min.js:concat",
 			"lib/js/legacy/tiny_mce_33/jquery.tinymce.js:concat",
+			"lib/js/lib/bootstrap.min.js:concat",
 			"lib/js/core.min.js:concat",
 			"lib/js/legacy/globals.js",
 			"lib/js/legacy/utils/datatype.js",
@@ -148,7 +155,6 @@
 			"lib/js/legacy/wn/widgets/footer.js",
 			"lib/js/legacy/model/local_data.js",
 			"lib/js/legacy/model/doclist.js",
-			"lib/js/bootstrap/bootstrap-dropdown.js:concat",
 			"lib/js/wn/ui/toolbar.min.js:concat",
 			"lib/js/legacy/webpage/body.js",
 			"lib/js/legacy/widgets/form/fields.js",

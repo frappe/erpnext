@@ -1,0 +1,101 @@
+/* Sprite CSS */
+.sprite-account{ background-position: 0 0; width: 32px; height: 40px; } 
+.sprite-buying{ background-position: 0 -90px; width: 40px; height: 40px; } 
+.sprite-calendar{ background-position: 0 -180px; width: 35px; height: 40px; } 
+.sprite-dashboard{ background-position: 0 -270px; width: 40px; height: 29px; } 
+.sprite-feed{ background-position: 0 -349px; width: 32px; height: 40px; } 
+.sprite-hr{ background-position: 0 -439px; width: 40px; height: 32px; } 
+.sprite-kb{ background-position: 0 -521px; width: 24px; height: 39px; } 
+.sprite-messages{ background-position: 0 -610px; width: 40px; height: 26px; } 
+.sprite-production{ background-position: 0 -686px; width: 40px; height: 33px; } 
+.sprite-project{ background-position: 0 -769px; width: 40px; height: 22px; } 
+.sprite-report{ background-position: 0 -841px; width: 29px; height: 40px; } 
+.sprite-selling{ background-position: 0 -931px; width: 34px; height: 40px; } 
+.sprite-setting{ background-position: 0 -1021px; width: 37px; height: 40px; } 
+.sprite-stock{ background-position: 0 -1111px; width: 34px; height: 39px; } 
+.sprite-support{ background-position: 0 -1200px; width: 40px; height: 40px; } 
+.sprite-todo{ background-position: 0 -1290px; width: 40px; height: 34px; } 
+.sprite-website{ background-position: 0 -1374px; width: 40px; height: 40px; } 
+
+.sprite-image { background-image: url("images/sprite-desktop.png"); }
+
+
+.sprite-account{ margin-top: 8px; margin-left: 12px; } 
+.sprite-selling{ margin-top: 8px; margin-left: 12px; } 
+.sprite-stock{ margin-top: 8px; margin-left: 8px; } 
+.sprite-buying{ margin-top: 8px; margin-left: 8px; } 
+.sprite-support{ margin-top: 8px; margin-left: 8px; } 
+.sprite-hr{ margin-top: 12px; margin-left: 8px; } 
+.sprite-project{ margin-top: 16px; margin-left: 8px; } 
+.sprite-production{ margin-top: 10px; margin-left: 8px; } 
+.sprite-website{ margin-top: 8px; margin-left: 8px; } 
+.sprite-setting{ margin-top: 8px; margin-left: 8px; } 
+.sprite-dashboard{ margin-top: 14px; margin-left: 8px; } 
+.sprite-report{ margin-top: 8px; margin-left: 14px; } 
+
+.sprite-messages{ margin-top: 14px; margin-left: 8px; } 
+.sprite-todo{ margin-top: 10px; margin-left: 10px; } 
+.sprite-calendar{ margin-top: 8px; margin-left: 10px; } 
+.sprite-kb{ margin-top: 8px; margin-left: 16px; } 
+.sprite-feed{ margin-top: 8px; margin-left: 14px; } 
+
+.case-border {
+	border-radius: 10px;
+	width: 56px;
+	height: 56px;
+	border: 4px solid white;
+	box-shadow: 0 0 10px 1px black;
+	margin: auto;
+}
+
+.case-wrapper {
+	margin: 24px;
+	float: left;
+	width: 100px;
+	height: 100px;
+}
+
+.case-label {
+	color: white;
+	/*font-size: 12px;*/
+	padding-top: 10px;
+	text-align: center;
+	text-shadow: 1px 1px 5px #000, 3px 3px 5px #000;
+}
+
+/* Hover and click effects */
+.case-border:hover, .circle:hover {
+	box-shadow: 0 0 2px 0px black, 0 0 10px 1px white;
+}
+
+.case-border:active, .case-border:focus, .circle:active, .circle:focus {
+	transform: scale(0.98, 0.98);
+	-ms-transform: scale(0.98, 0.98); /* IE 9 */
+	-webkit-transform: scale(0.98, 0.98); /* Safari and Chrome */
+	-o-transform: scale(0.98, 0.98); /* Opera */
+	-moz-transform: scale(0.98, 0.98); /* Firefox */
+}
+
+.circle {
+	border-radius: 100%;
+	height: 15px;
+	min-width: 15px;
+	background: #B00D07;
+	padding: 3px;
+	z-index: 2;
+	float: right;
+	margin-top: -10px;
+	margin-right: 10px;
+	border: 2px solid white;
+	box-shadow: 0 0 10px 1px black;
+}
+
+.circle-text {
+	color: white;
+	vertical-align: middle;
+	text-align: center;
+	display: inline-block;
+	margin-top: -3px;
+	text-shadow: 1px 1px 5px #000;
+}
+

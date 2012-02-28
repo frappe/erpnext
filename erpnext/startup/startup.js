@@ -1,7 +1,21 @@
+// ERPNext - web based ERP (http://erpnext.com)
+// Copyright (C) 2012 Web Notes Technologies Pvt Ltd
+// 
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// 
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 var current_module;
 var is_system_manager = 0;
-var module_content_dict = {};
-var user_full_nm = {};
 
 wn.provide('erpnext.startup');
 
@@ -14,19 +28,16 @@ erpnext.startup.start = function() {
 	$('#startup_div').html('Starting up...').toggle(true);
 	
 	erpnext.startup.set_globals();
-	
+
+	if(wn.boot.custom_css) {
+		set_style(wn.boot.custom_css);
+	}
+		
 	if(user == 'Guest'){
-		$dh(page_body.left_sidebar);
-		if(wn.boot.custom_css) {
-			set_style(wn.boot.custom_css);
-		}
 		if(wn.boot.website_settings.title_prefix) {
 			wn.title_prefix = wn.boot.website_settings.title_prefix;
 		}
 	} else {
-		// modules
-		pscript.startup_make_sidebar();
-
 		// setup toolbar
 		erpnext.toolbar.setup();
 		
@@ -35,7 +46,7 @@ erpnext.startup.start = function() {
 
 		// border to the body
 		// ------------------
-		$('footer').html('<div class="erpnext-footer">\
+		$('footer').html('<div class="web-footer erpnext-footer">\
 			Powered by <a href="https://erpnext.com">ERPNext</a></div>');
 	}
 
@@ -84,13 +95,24 @@ ModulePage = function(parent, module_name, module_label, help_page, callback) {
 var update_messages = function() {
 	// Updates Team Messages
 	
-	if(inList(['Guest', 'Administrator'], user)) { return; }
+	if(inList(['Guest'], user)) { return; }
 	
 	$c_page('home', 'event_updates', 'get_unread_messages', null,
 		function(r,rt) {
 			if(!r.exc) {
 				// This function is defined in toolbar.js
 				page_body.wntoolbar.set_new_comments(r.message);
+				var circle = $('#msg_count')
+				if(circle) {
+					if(r.message.length) {
+						circle.find('span:first').text(r.message.length);
+						circle.toggle(true);
+					} else {
+						circle.toggle(false);
+					}
+				}
+			} else {
+				clearInterval(wn.updates.id);
 			}
 		}
 	);
@@ -104,12 +126,12 @@ erpnext.startup.set_periodic_updates = function() {
 		clearInterval(wn.updates.id);
 	}
 
-	wn.updates.id = setInterval(update_messages, 180000);
+	wn.updates.id = setInterval(update_messages, 60000);
 }
 
 // =======================================
 
 // start
 $(document).bind('startup', function() {
-	erpnext.startup.start();	
+	erpnext.startup.start();
 });

@@ -1,18 +1,36 @@
+// ERPNext - web based ERP (http://erpnext.com)
+// Copyright (C) 2012 Web Notes Technologies Pvt Ltd
+// 
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// 
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 /* toolbar settings */
 wn.provide('erpnext.toolbar');
 
 erpnext.toolbar.setup = function() {
-	// profile
-	$('#toolbar-user').append('<li><a href="#profile-settings">Profile Settings</a></li>');
+	// modules 
+	erpnext.toolbar.add_modules();
 	
-	$('#toolbar-user').append('<li><a href="#My Company">Team / Messages</a></li>');
+	// profile
+	$('#toolbar-user').append('<li><a href="#!profile-settings">Profile Settings</a></li>');
 
-	$('.topbar .secondary-nav').prepend('\
-		<li><a href="#" id="toolbar-new-comments"></a></li>');
+	$('.navbar .pull-right').append('\
+		<li><a href="#!messages" title="Unread Messages"><span class="navbar-new-comments"></span></a></li>');
 
 	// help
-	$('.topbar .secondary-nav').append('<li class="dropdown">\
-		<a class="dropdown-toggle" href="#" onclick="return false;">Help</a>\
+	$('.navbar .pull-right').prepend('<li class="dropdown">\
+		<a class="dropdown-toggle" data-toggle="dropdown" href="#" \
+			onclick="return false;">Help<b class="caret"></b></a>\
 		<ul class="dropdown-menu" id="toolbar-help">\
 		</ul></li>')
 
@@ -32,22 +50,43 @@ erpnext.toolbar.setup = function() {
 
 	$.extend(page_body.wntoolbar, {
 		set_new_comments: function(new_comments) {
-			var topbar_nc = $('#toolbar-new-comments');
+			var navbar_nc = $('.navbar-new-comments');
 			if(new_comments && new_comments.length>0) {
-				topbar_nc.html('<span class="topbar-new-comments">' + new_comments.length + '</span>');
-				topbar_nc.click(function() { loadpage('My Company'); });
+				navbar_nc.text(new_comments.length);
+				navbar_nc.addClass('navbar-new-comments-true')
 				$.each(new_comments, function(i, v) {
 					var msg = 'New Message: ' + (v[1].length<=100 ? v[1] : (v[1].substr(0, 100) + "..."));
 					var id = v[0].replace('/', '-');
 					if(!$('#' + id)[0]) { show_alert(msg, id); }
 				})
 			} else {
-				topbar_nc.html('');
-				topbar_nc.click(function() { return false; });
+				navbar_nc.removeClass('navbar-new-comments-true');
+				navbar_nc.text(0);
 			}
 		}
 	});
 
 	page_body.wntoolbar.set_new_comments();
+}
+
+erpnext.toolbar.add_modules = function() {
+	$('<li class="dropdown">\
+		<a class="dropdown-toggle" data-toggle="dropdown" href="#"\
+			onclick="return false;">Modules<b class="caret"></b></a>\
+		<ul class="dropdown-menu">\
+			<li><a href="#!accounts-home" data-module="Accounts">Accounts</a></li>\
+			<li><a href="#!selling-home" data-module="Selling">Selling</a></li>\
+			<li><a href="#!stock-home" data-module="Stock">Stock</a></li>\
+			<li><a href="#!buying-home" data-module="Buying">Buying</a></li>\
+			<li><a href="#!support-home" data-module="Support">Support</a></li>\
+			<li><a href="#!hr-home" data-module="HR">Human Resources</a></li>\
+			<li><a href="#!projects-home" data-module="Projects">Projects</a></li>\
+			<li><a href="#!production-home" data-module="Production">Production</a></li>\
+			<li><a href="#!website-home" data-module="Website">Website</a></li>\
+			<li class="divider"></li>\
+			<li><a href="#!Setup" data-module="Setup">Setup</a></li>\
+		</ul>\
+		</li>').prependTo('.navbar .nav:first');
+	$('.navbar .nav:first')	
 }
 

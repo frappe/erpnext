@@ -1,3 +1,19 @@
+# ERPNext - web based ERP (http://erpnext.com)
+# Copyright (C) 2012 Web Notes Technologies Pvt Ltd
+# 
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 # Please edit this list and import only required elements
 import webnotes
 
@@ -7,7 +23,6 @@ from webnotes.model.doc import Document, addchild, removechild, getchildren, mak
 from webnotes.model.doclist import getlist, copy_doclist
 from webnotes.model.code import get_obj, get_server_obj, run_server_obj, updatedb, check_syntax
 from webnotes import session, form, is_testing, msgprint, errprint
-from webnotes.utils.scheduler import set_event, cancel_event, Scheduler
 
 in_transaction = webnotes.conn.in_transaction
 convert_to_lists = webnotes.conn.convert_to_lists
@@ -688,29 +703,6 @@ class DocType(TransactionBase):
 				webnotes.conn.set(self.doc, 'recurring_id', make_autoname('RECINV/.#####'))
 		elif self.doc.recurring_id:
 			webnotes.conn.sql("""update `tabReceivable Voucher` set convert_into_recurring_invoice = 0 where recurring_id = %s""", self.doc.recurring_id)
-
-		self.manage_scheduler()
-
-	def manage_scheduler(self):
-		""" set/cancel event in scheduler """
-		event = 'accounts.doctype.gl_control.gl_control.manage_recurring_invoices'
-
-		if webnotes.conn.sql("select name from `tabReceivable Voucher` where ifnull(convert_into_recurring_invoice, 0) = 1 and next_date <= end_date"):
-			if not self.check_event_exists(event):
-				set_event(event,  interval = 60*60, recurring = 1)
-		else:
-			cancel_event(event)
-
-
-	def check_event_exists(self, event):
-		try:
-			ev = Scheduler().get_events()
-		except:
-			msgprint("Scheduler database not exists. Please mail to support@erpnext.com", raise_exception=1)
-
-		if event in [d['event'] for d in ev]:
-			return 1
-
 
 	def set_next_date(self):
 		""" Set next date on which auto invoice will be created"""

@@ -1,3 +1,19 @@
+# ERPNext - web based ERP (http://erpnext.com)
+# Copyright (C) 2012 Web Notes Technologies Pvt Ltd
+# 
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 import webnotes
 import webnotes.utils
 
@@ -406,49 +422,6 @@ class DocType:
 			#webnotes.errprint(webnotes.getTraceback())
 
 
-	def on_update(self):
-		"""
-
-		"""
-		import webnotes
-		args = {
-			'db_name': webnotes.conn.get_value('Control Panel', '', 'account_id'),
-			'event': 'setup.doctype.email_digest.email_digest.send'
-		}
-		from webnotes.utils.scheduler import Scheduler
-		#print "before scheduler"
-		sch = Scheduler()
-		sch.connect()
-
-		if self.doc.enabled == 1:
-			# Create scheduler entry
-			res = sch.conn.sql("""
-				SELECT * FROM Event
-				WHERE
-					db_name = %(db_name)s AND
-					event = %(event)s
-			""", args)
-
-			if not (res and res[0]):
-				args['next_execution'] = self.get_next_execution()
-				sch.conn.begin()
-				sch.conn.sql("""
-					INSERT INTO	Event (db_name, event, `interval`, next_execution, recurring)
-					VALUES (%(db_name)s, %(event)s, 86400, %(next_execution)s, 1)
-				""", args)
-				sch.conn.commit()
-
-		else:
-			# delete scheduler entry if no other email digest is enabled
-			res = webnotes.conn.sql("""
-				SELECT * FROM `tabEmail Digest`
-				WHERE enabled=1
-			""")
-			if not (res and res[0]):
-				sch.clear(args['db_name'], args['event'])
-		#print "after on update"
-	
-
 	def get_next_sending(self):
 		"""
 
@@ -783,7 +756,7 @@ def send():
 			send_date = dt_dict['server_dt'].date()
 			send_time = dt_dict['server_dt'].time()
 
-			if (now_date == send_date) and (send_time <= now_time):
+			if (now_date == send_date):
 				#webnotes.msgprint('sending ' + ed_obj.doc.name)
 				ed_obj.send()
 			#else:
