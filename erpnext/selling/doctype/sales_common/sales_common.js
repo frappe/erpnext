@@ -61,7 +61,7 @@ cur_frm.cscript.update_item_details = function(doc, dt, dn, callback) {
 	doc = locals[doc.doctype][doc.name];
 	if(!cur_frm.doc.__islocal) return;
 	var children = getchildren(cur_frm.cscript.tname, doc.name, cur_frm.cscript.fname);
-	if(children) {
+	if(children.length) {
 		$c_obj(make_doclist(doc.doctype, doc.name), 'get_item_details', '',
 		function(r, rt) {
 			if(!r.exc) {
@@ -73,13 +73,6 @@ cur_frm.cscript.update_item_details = function(doc, dt, dn, callback) {
 	}
 }
 
-
-// -----------------
-// Shipping Address
-// -----------------
-
-cur_frm.add_fetch('company', 'default_currency', 'currency');
-cur_frm.add_fetch('company', 'default_currency', 'price_list_currency');
 
 
 
@@ -98,6 +91,94 @@ cur_frm.cscript.customer = function(doc, cdt, cdn) {
 		}
 	}
 }
+
+
+var set_dynamic_label_par = function(doc, cdt, cdn, base_curr) {
+	//parent flds
+	par_cols_base = {'net_total': 'Net Total', 'other_charges_total': 'Other Charges Total', 
+		'grand_total':	'Grand Total', 'rounded_total': 'Rounded Total', 'in_words': 'In Words'}
+	par_cols_export = {'grand_total_export': 'Grand Total', 'rounded_total_export':	'Rounded Total', 'in_words_export':	'In Words'};
+
+	for (d in par_cols_base) cur_frm.fields_dict[d].label_area.innerHTML = par_cols_base[d]+' (' + base_curr + ')';
+	for (d in par_cols_export) cur_frm.fields_dict[d].label_area.innerHTML = par_cols_export[d]+' (' + doc.currency + ')';
+	cur_frm.fields_dict['conversion_rate'].label_area.innerHTML = "Conversion Rate (" + doc.currency +' -> '+ base_curr + ')';
+	cur_frm.fields_dict['plc_conversion_rate'].label_area.innerHTML = 'Price List Currency Conversion Rate (' + doc.price_list_currency +' -> '+ base_curr + ')';
+
+	if (doc.doctype == 'Receivable Voucher') {
+		cur_frm.fields_dict['total_advance'].label_area.innerHTML = 'Total Advance (' + base_curr + ')';
+		cur_frm.fields_dict['outstanding_amount'].label_area.innerHTML = 'Outstanding Amount (' + base_curr + ')';
+	}
+}
+
+
+var set_dynamic_label_child = function(doc, cdt, cdn, base_curr) {
+	// item table flds
+	item_cols_base = {'basic_rate': 'Basic Rate', 'base_ref_rate': 'Price List Rate', 'amount': 'Amount'};
+	item_cols_export = {'export_rate': 'Basic Rate', 'ref_rate': 'Price List Rate', 'export_amount': 'Amount'};
+		
+	for (d in item_cols_base) $('[data-grid-fieldname="'+cur_frm.cscript.tname+'-'+d+'"]').html(item_cols_base[d]+' ('+base_curr+')');
+	for (d in item_cols_export) $('[data-grid-fieldname="'+cur_frm.cscript.tname+'-'+d+'"]').html(item_cols_export[d]+' ('+doc.currency+')');	
+
+	var hide = (doc.currency == sys_defaults['currency']) ? false : true;
+	for (f in item_cols_base) cur_frm.fields_dict[cur_frm.cscript.fname].grid.set_column_disp(f, hide);
+
+	//tax table flds
+	tax_cols = {'tax_amount': 'Amount', 'total': 'Total'};
+	for (d in tax_cols) $('[data-grid-fieldname="RV Tax Detail-'+d+'"]').html(tax_cols[d]+' ('+base_curr+')');
+		
+	if (doc.doctype == 'Receivable Voucher') {
+		// advance table flds
+		adv_cols = {'advance_amount': 'Advance Amount', 'allocated_amount': 'Allocated Amount'}
+		for (d in adv_cols) $('[data-grid-fieldname="Advance Adjustment Detail-'+d+'"]').html(adv_cols[d]+' ('+base_curr+')');	
+	}
+}
+
+// Change label dynamically based on currency
+//------------------------------------------------------------------
+
+cur_frm.cscript.dynamic_label = function(doc, cdt, cdn) {
+	var callback = function(r, rt) {
+		if (r.message) base_curr = r.message;
+		else base_curr = sys_defaults['currency'];
+
+		set_dynamic_label_par(doc, cdt, cdn, base_curr);
+		set_dynamic_label_child(doc, cdt, cdn, base_curr);
+	}
+
+	if (doc.company == sys_defaults['company']) callback('', '');
+	else $c_obj(make_doclist(doc.doctype, doc.name), 'get_comp_base_currency', '', callback);
+}
+
+
+// hide / unhide price list currency based on availability of price list in customer's currency
+//---------------------------------------------------------------------------------------------------
+
+cur_frm.cscript.hide_price_list_currency = function(doc, cdt, cdn, callback1) {
+	if (doc.price_list_name && doc.currency) {
+		var callback = function(r, rt) {
+			pl_currency = r.message[0]?r.message[0]:[];
+			if (pl_currency.length==1) {
+				if (pl_currency[0] == doc.currency) set_multiple(cdt, cdn, {price_list_currency:doc.currency, plc_conversion_rate:doc.conversion_rate});
+				else if (pl_currency[0] = r.message[1]) set_multiple(cdt, cdn, {price_list_currency:pl_currency[0], plc_conversion_rate:1})
+				hide_field(['price_list_currency', 'plc_conversion_rate']);
+			} else unhide_field(['price_list_currency', 'plc_conversion_rate']);
+
+			if (r.message[1] == doc.currency) {
+				set_multiple(cdt, cdn, {conversion_rate:1});
+				hide_field(['conversion_rate', 'grand_total_export', 'in_words_export', 'rounded_total_export']);
+			} else unhide_field(['conversion_rate', 'grand_total_export', 'in_words_export', 'rounded_total_export']);
+
+			if (r.message[1] == doc.price_list_currency) {
+				set_multiple(cdt, cdn, {plc_conversion_rate:1});
+				hide_field('plc_conversion_rate');
+			} else unhide_field('plc_conversion_rate');
+
+			callback1()
+		}
+		$c_obj(make_doclist(doc.doctype, doc.name), 'get_price_list_currency', '', callback);
+	}
+}
+
 
 //====================opens territory tree page ==================
 cur_frm.cscript.TerritoryHelp = function(doc,dt,dn){
@@ -123,29 +204,42 @@ cur_frm.cscript.CGHelp = function(doc,dt,dn){
 // =====================================================================================================
 
 // ********************* CURRENCY ******************************
-cur_frm.cscript.currency = function(doc, cdt, cdn) {		 
-	cur_frm.cscript.price_list_name(doc, cdt, cdn);
+cur_frm.cscript.currency = function(doc, cdt, cdn) {
+	cur_frm.cscript.price_list_name(doc, cdt, cdn); 
 }
 
 cur_frm.cscript.price_list_currency = cur_frm.cscript.currency;
 cur_frm.cscript.conversion_rate = cur_frm.cscript.currency;
 cur_frm.cscript.plc_conversion_rate = cur_frm.cscript.currency;
 
+cur_frm.cscript.company = function(doc, dt, dn) {
+	var callback = function(r, rt) {
+		var doc = locals[dt][dn];
+		set_multiple(doc.doctype, doc.name, {currency:r.message,price_list_currency:r.message});
+		cur_frm.cscript.currency(doc, cdt, cdn);
+	}
+	$c_obj(make_doclist(doc.doctype, doc.name), 'get_comp_base_currency', '', callback);
+}
+
 
 
 // ******************** PRICE LIST ******************************
 cur_frm.cscript.price_list_name = function(doc, cdt, cdn) {
-	var fname = cur_frm.cscript.fname;
-	var cl = getchildren(cur_frm.cscript.tname, doc.name, cur_frm.cscript.fname);
-	if(doc.price_list_name && doc.currency && doc.price_list_currency && doc.conversion_rate && doc.plc_conversion_rate && cl.length) {
-		$c_obj(make_doclist(doc.doctype, doc.name), 'get_adj_percent', '',
-			function(r, rt) {
-				refresh_field(fname);
-				var doc = locals[cdt][cdn];
-				cur_frm.cscript.recalc(doc,3);		//this is to re-calculate BASIC RATE and AMOUNT on basis of changed REF RATE
-			}
-		);
+	var callback = function() {
+		var fname = cur_frm.cscript.fname;
+		var cl = getchildren(cur_frm.cscript.tname, doc.name, cur_frm.cscript.fname);
+		if(doc.price_list_name && doc.currency && doc.price_list_currency && doc.conversion_rate && doc.plc_conversion_rate) {
+			$c_obj(make_doclist(doc.doctype, doc.name), 'get_adj_percent', '',
+				function(r, rt) {
+					refresh_field(fname);
+					var doc = locals[cdt][cdn];
+					cur_frm.cscript.recalc(doc,3);		//this is to re-calculate BASIC RATE and AMOUNT on basis of changed REF RATE
+					cur_frm.cscript.dynamic_label(doc, cdt, cdn);	
+				}
+			);
+		}
 	}
+	cur_frm.cscript.hide_price_list_currency(doc, cdt, cdn, callback);
 }
 
 
@@ -171,7 +265,8 @@ cur_frm.cscript.item_code = function(doc, cdt, cdn) {
 			var callback = function(r, rt){
 				cur_frm.cscript.recalc(doc, 1);
 			}
-			get_server_fields('get_item_details',d.item_code, fname,doc,cdt,cdn,1,callback);
+			var args = {'item_code':d.item_code, 'income_account':d.income_account, 'cost_center': d.cost_center, 'warehouse': d.warehouse};
+			get_server_fields('get_item_details',JSON.stringify(args), fname,doc,cdt,cdn,1,callback);
 		}
 	}
 	if(cur_frm.cscript.custom_item_code){

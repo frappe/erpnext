@@ -196,6 +196,13 @@ class DocType(TransactionBase):
 				if not rate[0]['last_purchase_rate']:
 					msgprint("%s has no Last Purchase Rate."% d.item_code)
 
+
+	def get_comp_base_currency(self, comp):
+		""" get default currency of company"""
+		return webnotes.conn.sql("select default_currency from `tabCompany` where name = %s", comp)[0][0]
+
+
+
 	# validation
 	# -------------------------------------------------------------------------------------------------------
 	

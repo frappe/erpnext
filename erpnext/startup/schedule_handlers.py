@@ -17,13 +17,40 @@
 """will be called by scheduler"""
 
 import webnotes
+from webnotes.utils import scheduler
 	
 def execute_all():
-	"""get support email"""
-	from support.doctype.support_ticket import get_support_mails
-	get_support_mails()
+	"""
+		* get support email
+		* recurring invoice
+	"""
+	try:
+		from support.doctype.support_ticket import get_support_mails
+		get_support_mails()
+	except Exception, e:
+		scheduler.log('get_support_mails')
+
+	try:
+		from accounts.doctype.gl_control.gl_control import manage_recurring_invoices
+		manage_recurring_invoices()
+	except Exception, e:
+		scheduler.log('manage_recurring_invoices')
+
+	
 	
 def execute_daily():
 	"""email digest"""
-	from setup.doctype.email_digest.email_digest import send
-	send()
+	try:
+		from setup.doctype.email_digest.email_digest import send
+		send()
+	except Exception, e:
+		scheduler.log('email_digest.send')
+
+def execute_weekly():
+	pass
+
+def execute_monthly():
+	pass
+
+def execute_hourly():
+	pass

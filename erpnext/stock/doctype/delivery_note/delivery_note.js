@@ -38,24 +38,23 @@ cur_frm.cscript.onload = function(doc, dt, dn) {
 		
 	if(doc.__islocal){
 		hide_field(['customer_address','contact_person','customer_name','address_display','contact_display','contact_mobile','contact_email','territory','customer_group']);
-	}
-
-	
+	}	
 }
 
 cur_frm.cscript.onload_post_render = function(doc, dt, dn) {
 	// defined in sales_common.js
-	//cur_frm.cscript.update_item_details(doc, cdt, cdn);
-	
-	// load default charges
-	if(doc.__islocal && !getchildren('RV Tax Detail', doc.name, 'other_charges', doc.doctype).length) 
-		cur_frm.cscript.load_taxes(doc, cdt, cdn);	
+	if(doc.__islocal) cur_frm.cscript.update_item_details(doc, dt, dn);
 } 
 
 // REFRESH
 // ================================================================================================
 cur_frm.cscript.refresh = function(doc, cdt, cdn) { 
 	cur_frm.clear_custom_buttons();
+	var callback = function() {
+		cur_frm.cscript.dynamic_label(doc, cdt, cdn);
+	}
+	cur_frm.cscript.hide_price_list_currency(doc, cdt, cdn, callback); 
+
  
 	if(doc.per_billed < 100 && doc.docstatus==1) cur_frm.add_custom_button('Make Invoice', cur_frm.cscript['Make Sales Invoice']);
 	
@@ -160,61 +159,6 @@ cur_frm.fields_dict['project_name'].get_query = function(doc, cdt, cdn) {
 	return repl('SELECT `tabProject`.name FROM `tabProject` WHERE `tabProject`.status = "Open" AND %(cond)s `tabProject`.name LIKE "%s" ORDER BY `tabProject`.name ASC LIMIT 50', {cond:cond});
 }
 
-/*
-//---- get customer details ----------------------------
-cur_frm.cscript.project_name = function(doc,cdt,cdn){
-	$c_obj(make_doclist(doc.doctype, doc.name),'pull_project_customer','', function(r,rt){
-		refresh_many(['customer','customer_name', 'customer_address', 'contact_person', 'territory', 'contact_no', 'email_id', 'customer_group']);
-	});
-}
-*/
-
-
-
-// UTILITY FUNCTIONS
-// ================================================================================================
-/*
-var cfn_set_fields = function(doc, cdt, cdn) { 
- var supplier_field_list = ['Supplier','supplier','supplier_address'];
-	var customer_field_list = ['Customer','customer','customer_name','customer_address','territory','customer_group','Business Associate','sales_partner','commission_rate','total_commission','sales_order_no','Get Items'];
-	if (doc.delivery_type == 'Rejected' && doc.purchase_receipt_no) {
-		unhide_field('purchase_receipt_no');
-		unhide_field(supplier_field_list);
-		hide_field(customer_field_list);
-		get_field(doc.doctype, 'delivery_type' , doc.name).permlevel = 1;
-	}
-	else if (doc.delivery_type == 'Subcontract' && doc.purchase_order_no) {
-		unhide_field('purchase_order_no');
-		unhide_field(supplier_field_list);
-		hide_field(cutomer_field_list);
-		get_field(doc.doctype, 'delivery_type' , doc.name).permlevel = 1;
-	}
-	else if (doc.delivery_type == 'Sample') unhide_field('to_warehouse');
-	else get_field(doc.doctype, 'delivery_type' , doc.name).permlevel = 0;	 
-		
-	
-}
-
-*/
-
-// DOCTYPE TRIGGERS
-// ================================================================================================
-
-/*
-// ***************** Get Contact Person based on customer selected *****************
-cur_frm.fields_dict['contact_person'].get_query = function(doc, cdt, cdn) {
-	return 'SELECT `tabContact`.contact_name FROM `tabContact` WHERE ((`tabContact`.is_customer = 1 AND `tabContact`.customer = "'+ doc.customer+'") or (`tabContact`.is_sales_partner = 1 AND `tabContact`.sales_partner = "'+ doc.sales_partner+'")) AND `tabContact`.docstatus != 2 AND `tabContact`.contact_name LIKE "%s" ORDER BY `tabContact`.contact_name ASC LIMIT 50';
-}
-*/
-
-/*
-// ***************** get shipping address based on customer selected *****************
-cur_frm.fields_dict['ship_det_no'].get_query = function(doc, cdt, cdn) {
-	return 'SELECT `tabShipping Address`.`name`, `tabShipping Address`.`ship_to`, `tabShipping Address`.`shipping_address` FROM `tabShipping Address` WHERE `tabShipping Address`.customer = "'+ doc.customer+'" AND `tabShipping Address`.`docstatus` != 2 AND `tabShipping Address`.`name` LIKE "%s" ORDER BY `tabShipping Address`.name ASC LIMIT 50';
-}
-*/
-
-
 
 // *************** Customized link query for SALES ORDER based on customer and currency***************************** 
 cur_frm.fields_dict['sales_order_no'].get_query = function(doc) {
@@ -248,13 +192,6 @@ cur_frm.cscript.serial_no = function(doc, cdt , cdn) {
 	}
 }
 
-/* 
-// this won't work in case of Sales Bom item where item.is_stock_item = 'No'
-cur_frm.fields_dict['delivery_note_details'].grid.get_field('warehouse').get_query= function(doc, cdt, cdn) {
-	var d = locals[cdt][cdn];
-	return "SELECT `tabBin`.`warehouse`, `tabBin`.`actual_qty` FROM `tabBin` WHERE `tabBin`.`item_code` = '"+ d.item_code +"' AND ifnull(`tabBin`.`actual_qty`,0) > 0 AND `tabBin`.`warehouse` like '%s' ORDER BY `tabBin`.`warehouse` DESC LIMIT 50";
-}
-*/
 
 cur_frm.cscript.warehouse = function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];

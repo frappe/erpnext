@@ -43,10 +43,10 @@ class DocType:
 			
 		if not in_transaction:
 			sql("start transaction")
-				
+		
 		self.clear_account_balances()
 		self.create_account_balances()
-		self.update_opening()
+		self.update_opening(self.doc.company)
 		self.post_entries()
 		sql("commit")
 		
@@ -97,17 +97,17 @@ class DocType:
 		return periods
 
 	# ====================================================================================
-	def update_opening(self):
+	def update_opening(self, company):
 		"""
 			set opening from last year closing
 		
 		"""
 		
-		abl = sql("select t1.account, t1.balance from `tabAccount Balance` t1, tabAccount t2 where t1.period= '%s' and t2.company= '%s' and ifnull(t2.is_pl_account, 'No') = 'No' and t1.account = t2.name for update" % (self.doc.past_year, self.doc.company))
+		abl = sql("select t1.account, t1.balance from `tabAccount Balance` t1, tabAccount t2 where t1.period= '%s' and t2.company= '%s' and ifnull(t2.is_pl_account, 'No') = 'No' and t1.account = t2.name for update" % (self.doc.past_year, company))
 		
 		cnt = 0
 		for ab in abl:
-			if cnt % 100 == 0: 
+			if cnt % 100 == 0:
 				sql("commit")
 				sql("start transaction")
 		
@@ -200,10 +200,19 @@ class DocType:
 	def create_periods(self):
 		get_obj('Period Control').generate_periods(self.doc.name)
 
+	def validate(self):
+		if sql("select name from `tabFiscal Year` where year_start_date < %s", self.doc.year_start_date) and not self.doc.past_year:
+			msgprint("Please enter Past Year", raise_exception=1)
+
+		if not self.doc.is_fiscal_year_closed:
+			self.doc.is_fiscal_year_closed = 'No'
+
+
 	# on update
 	def on_update(self):
-		if not self.doc.is_fiscal_year_closed:
-			self.is_fiscal_year_closed = 'No'
-			self.doc.save()
 		self.create_periods()
 		self.create_account_balances()
+
+		if self.doc.fields.get('localname', '')[:15] == 'New Fiscal Year':
+			for d in sql("select name from tabCompany"):
+				self.update_opening(d[0])

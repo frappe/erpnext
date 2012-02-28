@@ -47,7 +47,6 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 			hide_field(['customer','customer_address','contact_person', 'customer_name','contact_display', 'customer_group']);
 		}
 	}
-
 }
 
 cur_frm.cscript.onload_post_render = function(doc, dt, dn) {
@@ -83,6 +82,12 @@ cur_frm.cscript.quotation_to = function(doc,cdt,cdn){
 cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 
 	cur_frm.clear_custom_buttons();
+
+	var callback = function() {
+		cur_frm.cscript.dynamic_label(doc, cdt, cdn);
+	}
+	cur_frm.cscript.hide_price_list_currency(doc, cdt, cdn, callback); 
+
 
 	if(doc.docstatus == 1 && doc.status!='Order Lost') {
 		cur_frm.add_custom_button('Make Sales Order', cur_frm.cscript['Make Sales Order']);

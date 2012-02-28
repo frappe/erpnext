@@ -54,6 +54,9 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	// Unhide Fields in Next Steps
 	// ---------------------------------
 	cur_frm.clear_custom_buttons();
+
+	cur_frm.cscript.dynamic_label(doc, cdt, cdn);
+
 	if(doc.docstatus == 1){
 		var ch = getchildren('Purchase Receipt Detail',doc.name,'purchase_receipt_details');
 		allow_billing = 0;

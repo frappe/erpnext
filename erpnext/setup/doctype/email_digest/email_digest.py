@@ -422,49 +422,6 @@ class DocType:
 			#webnotes.errprint(webnotes.getTraceback())
 
 
-	def on_update(self):
-		"""
-
-		"""
-		import webnotes
-		args = {
-			'db_name': webnotes.conn.get_value('Control Panel', '', 'account_id'),
-			'event': 'setup.doctype.email_digest.email_digest.send'
-		}
-		from webnotes.utils.scheduler import Scheduler
-		#print "before scheduler"
-		sch = Scheduler()
-		sch.connect()
-
-		if self.doc.enabled == 1:
-			# Create scheduler entry
-			res = sch.conn.sql("""
-				SELECT * FROM Event
-				WHERE
-					db_name = %(db_name)s AND
-					event = %(event)s
-			""", args)
-
-			if not (res and res[0]):
-				args['next_execution'] = self.get_next_execution()
-				sch.conn.begin()
-				sch.conn.sql("""
-					INSERT INTO	Event (db_name, event, `interval`, next_execution, recurring)
-					VALUES (%(db_name)s, %(event)s, 86400, %(next_execution)s, 1)
-				""", args)
-				sch.conn.commit()
-
-		else:
-			# delete scheduler entry if no other email digest is enabled
-			res = webnotes.conn.sql("""
-				SELECT * FROM `tabEmail Digest`
-				WHERE enabled=1
-			""")
-			if not (res and res[0]):
-				sch.clear(args['db_name'], args['event'])
-		#print "after on update"
-	
-
 	def get_next_sending(self):
 		"""
 

@@ -151,12 +151,9 @@ class DocType:
 		# amount to debit
 		amt = flt(self.doc.debit) - flt(self.doc.credit)
 		if det[0][2] == 'Credit': amt = -amt
-		if cancel:
-			debit = -1 * flt(self.doc.credit)
-			credit = -1 * flt(self.doc.debit)
-		else:
-			debit = flt(self.doc.debit)
-			credit = flt(self.doc.credit)
+
+		debit = cancel and -1 * flt(self.doc.credit) or flt(self.doc.debit)
+		credit = cancel and -1 * flt(self.doc.debit) or flt(self.doc.credit)
 		
 		self.create_new_balances(det)
 		
@@ -174,6 +171,7 @@ class DocType:
 			,'fiscal_year': self.doc.fiscal_year
 		}
 
+		# Update account balance for current year
 		sql("""update `tabAccount Balance` ab, `tabAccount` a 
 				set 
 					ab.debit = ifnull(ab.debit,0) + %(debit)s
@@ -186,6 +184,34 @@ class DocType:
 					and ab.account = a.name
 					%(end_date_condition)s
 					and ab.fiscal_year = '%(fiscal_year)s' """ % p)
+
+		# Future year balances
+		# Update opening only where period_type is Year
+		sql("""update `tabAccount Balance` ab, `tabAccount` a, `tabFiscal Year` fy
+				set 
+					ab.opening = ifnull(ab.opening,0) + %(diff)s
+				where
+					a.lft <= %(lft)s
+					and a.rgt >= %(rgt)s
+					and ab.account = a.name
+					and ifnull(a.is_pl_account, 'No') = 'No'
+					and ab.period = ab.fiscal_year
+					and fy.name = ab.fiscal_year
+					and fy.year_start_date > %(posting_date)s""" % p)
+
+		# Update balance for all period for future years
+		sql("""update `tabAccount Balance` ab, `tabAccount` a, `tabFiscal Year` fy 
+				set 
+					ab.balance = ifnull(ab.balance,0) + %(diff)s
+				where
+					a.lft <= %(lft)s
+					and a.rgt >= %(rgt)s
+					and ab.account = a.name
+					and ifnull(a.is_pl_account, 'No') = 'No'
+					and fy.name = ab.fiscal_year
+					and fy.year_start_date > %(posting_date)s""" % p)
+
+
 
 			
 	# Get periods(month and year)

@@ -48,10 +48,12 @@ cur_frm.cscript.onload_post_render = function(doc, cdt, cdn) {
 
 // ================================== Refresh ==========================================
 cur_frm.cscript.refresh = function(doc, cdt, cdn) { 
-
 	// Show buttons
 	// ---------------------------------
 	cur_frm.clear_custom_buttons();
+
+	cur_frm.cscript.dynamic_label(doc, cdt, cdn);
+
 	if(doc.docstatus == 1 && doc.status != 'Stopped'){
 		var ch = getchildren('PO Detail',doc.name,'po_details');
 		var allow_billing = 0; var allow_receipt = 0;

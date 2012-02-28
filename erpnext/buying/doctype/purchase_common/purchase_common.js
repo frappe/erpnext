@@ -66,6 +66,89 @@ cur_frm.cscript.update_item_details = function(doc, dt, dn, callback) {
 }
 
 
+
+
+var set_dynamic_label_par = function(doc, cdt, cdn, base_curr) {
+	//parent flds
+	par_cols_base = {'net_total': 'Net Total', 'total_tax': 'Total Tax', 'grand_total':	'Grand Total', /*'rounded_total': 'Rounded Total',*/
+		'in_words': 'In Words', 'other_charges_added': 'Other Charges Added', 'other_charges_deducted': 'Other Charges Deducted'}
+	par_cols_import = {'net_total_import': 'Net Total', 'grand_total_import': 'Grand Total', 'in_words_import':	'In Words', 
+		'other_charges_added_import': 'Other Charges Added', 'other_charges_deducted_import': 'Other Charges Deducted'};
+
+	for (d in par_cols_base) cur_frm.fields_dict[d].label_area.innerHTML = par_cols_base[d]+' (' + base_curr + ')';
+	for (d in par_cols_import) cur_frm.fields_dict[d].label_area.innerHTML = par_cols_import[d]+' (' + doc.currency + ')';
+	cur_frm.fields_dict['conversion_rate'].label_area.innerHTML = "Conversion Rate (" + doc.currency +' -> '+ base_curr + ')';
+
+	if (doc.doctype == 'Payable Voucher') {
+		cur_frm.fields_dict['total_tds_on_voucher'].label_area.innerHTML = 'Total TDS On Voucher (' + base_curr + ')';
+		cur_frm.fields_dict['outstanding_amount'].label_area.innerHTML = 'Outstanding Amount (' + base_curr + ')';
+		cur_frm.fields_dict['tds_amount_on_advance'].label_area.innerHTML = 'TDS Amount On Advance (' + base_curr + ')';
+		cur_frm.fields_dict['total_advance'].label_area.innerHTML = 'Total Advance (Incl. TDS) (' + base_curr + ')';
+		cur_frm.fields_dict['total_amount_to_pay'].label_area.innerHTML = 'Total Amount To Pay (' + base_curr + ')';
+		cur_frm.fields_dict['ded_amount'].label_area.innerHTML = 'TDS Amount (' + base_curr + ')';
+	} else cur_frm.fields_dict['rounded_total'].label_area.innerHTML = 'Rounded Total (' + base_curr + ')';
+
+}
+
+
+var set_dynamic_label_child = function(doc, cdt, cdn, base_curr) {
+		// item table flds
+		item_cols_base = {'purchase_ref_rate': 'Ref Rate', 'amount': 'Amount'};
+		item_cols_import = {'import_rate': 'Rate', 'import_ref_rate': 'Ref Rate', 'import_amount': 'Amount'};
+		
+		for (d in item_cols_base) $('[data-grid-fieldname="'+cur_frm.cscript.tname+'-'+d+'"]').html(item_cols_base[d]+' ('+base_curr+')');
+		for (d in item_cols_import) $('[data-grid-fieldname="'+cur_frm.cscript.tname+'-'+d+'"]').html(item_cols_import[d]+' ('+doc.currency+')');
+		
+		var hide = (doc.currency == sys_defaults['currency']) ? false : true;
+		for (f in item_cols_base) cur_frm.fields_dict[cur_frm.cscript.fname].grid.set_column_disp(f, hide);
+
+		if (doc.doctype == 'Payable Voucher') {
+			$('[data-grid-fieldname="'+cur_frm.cscript.tname+'-rate"]').html('Rate ('+base_curr+')');
+			cur_frm.fields_dict[cur_frm.cscript.fname].grid.set_column_disp('rate', hide);
+			// advance table flds
+			adv_cols = {'advance_amount': 'Advance Amount', 'allocated_amount': 'Allocated Amount', 'tds_amount': 'TDS Amount', 'tds_allocated': 'TDS Allocated'}
+			for (d in adv_cols) $('[data-grid-fieldname="Advance Allocation Detail-'+d+'"]').html(adv_cols[d]+' ('+base_curr+')');	
+		}
+		else {
+			$('[data-grid-fieldname="'+cur_frm.cscript.tname+'-purchase_rate"]').html('Rate ('+base_curr+')');
+			cur_frm.fields_dict[cur_frm.cscript.fname].grid.set_column_disp('purchase_rate', hide);
+		}
+
+		//tax table flds
+		tax_cols = {'tax_amount': 'Amount', 'total': 'Aggregate Total'};
+		for (d in tax_cols) $('[data-grid-fieldname="Purchase Tax Detail-'+d+'"]').html(tax_cols[d]+' ('+base_curr+')');	
+
+
+}
+
+// Change label dynamically based on currency
+//------------------------------------------------------------------
+
+cur_frm.cscript.dynamic_label = function(doc, cdt, cdn) {
+	var callback = function(r, rt) {
+		if (r.message) base_curr = r.message;
+		else base_curr = sys_defaults['currency'];
+		
+		if (base_curr == doc.currency) {
+			set_multiple(cdt, cdn, {conversion_rate:1});
+			hide_field(['conversion_rate', 'net_total_import','grand_total_import', 'in_words_import', 'other_charges_added_import', 'other_charges_deducted_import']);
+		} else unhide_field(['conversion_rate', 'net_total_import','grand_total_import', 'in_words_import', 'other_charges_added_import', 'other_charges_deducted_import']);
+
+		set_dynamic_label_par(doc, cdt, cdn, base_curr);
+		set_dynamic_label_child(doc, cdt, cdn, base_curr);
+	}
+
+	if (doc.company == sys_defaults['company']) callback('', '');
+	else $c_obj(make_doclist(doc.doctype, doc.name), 'get_comp_base_currency', '', callback);
+}
+
+cur_frm.cscript.currency = function(doc, cdt, cdn) {
+	cur_frm.cscript.dynamic_label(doc, cdt, cdn);
+}
+
+cur_frm.cscript.company = cur_frm.cscript.currency;
+
+
 // ======================== Conversion Rate ==========================================
 cur_frm.cscript.conversion_rate = function(doc,cdt,cdn) {
 	cur_frm.cscript.calc_amount( doc, 1);

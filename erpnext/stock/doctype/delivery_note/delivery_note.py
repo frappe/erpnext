@@ -116,9 +116,10 @@ class DocType(TransactionBase):
 # ================================================================================
 
 	# ***************** Get Item Details ******************************
-	def get_item_details(self, item_code=None):
-		if item_code:
-			return get_obj('Sales Common').get_item_details(item_code, self)
+	def get_item_details(self, args=None):
+		args = eval(args)
+		if args['item_code']:
+			return get_obj('Sales Common').get_item_details(args, self)
 		else:
 			obj = get_obj('Sales Common')
 			for doc in self.doclist:
@@ -132,6 +133,14 @@ class DocType(TransactionBase):
 	# *** Re-calculates Basic Rate & amount based on Price List Selected ***
 	def get_adj_percent(self, arg=''):
 		get_obj('Sales Common').get_adj_percent(self)
+
+
+	def get_comp_base_currency(self):
+		return get_obj('Sales Common').get_comp_base_currency(self.doc.company)
+
+	def get_price_list_currency(self):
+		return get_obj('Sales Common').get_price_list_currency(self.doc.price_list_name, self.doc.company)
+
 
 	# ********** Get Actual Qty of item in warehouse selected *************
 	def get_actual_qty(self,args):

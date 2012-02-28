@@ -69,24 +69,19 @@ cur_frm.cscript.onload_post_render = function(doc, dt, dn) {
 // Hide Fields
 // ------------
 cur_frm.cscript.hide_fields = function(doc, cdt, cdn) {
-	par_flds = ['project_name', 'due_date', 'posting_time', 'sales_order_main', 'delivery_note_main', 'Get Items', 'is_opening', 'conversion_rate', 'source', 'cancel_reason', 'total_advance', 'gross_profit', 'gross_profit_percent', 'Get Advances Received', 'advance_adjustment_details', 'sales_partner', 'commission_rate', 'total_commission', 'Repair Outstanding Amt'];
+	par_flds = ['project_name', 'due_date', 'sales_order_main', 'delivery_note_main', 'Get Items', 'is_opening', 'conversion_rate', 'source', 'cancel_reason', 'total_advance', 'gross_profit', 'gross_profit_percent', 'Get Advances Received', 'advance_adjustment_details', 'sales_partner', 'commission_rate', 'total_commission', 'Repair Outstanding Amt'];
 	
-	ch_flds = {'entries': ['sales_order', 'delivery_note']}
+	item_flds_normal = ['sales_order', 'delivery_note']
+	item_flds_pos = ['warehouse', 'serial_no', 'batch_no', 'actual_qty', 'delivered_qty']
 	
 	if(cint(doc.is_pos) == 1) {
-		hide_field(par_flds);	
-		for(t in ch_flds) {
-			for(f in ch_flds[t]) {
-				cur_frm.fields_dict[t].grid.set_column_disp(ch_flds[t][f], false);
-			}
-		}
+		hide_field(par_flds);
+		for(f in item_flds_normal) cur_frm.fields_dict['entries'].grid.set_column_disp(item_flds_normal[f], false);
+		for(f in item_flds_pos) cur_frm.fields_dict['entries'].grid.set_column_disp(item_flds_pos[f], (doc.update_stock==1?true:false));
 	} else {
 		unhide_field(par_flds);
-		for (t in ch_flds) {
-			for (f in ch_flds[t]) {
-				cur_frm.fields_dict[t].grid.set_column_disp(ch_flds[t][f], true);
-			}
-		}
+		for(f in item_flds_normal) cur_frm.fields_dict['entries'].grid.set_column_disp(item_flds_normal[f], true);
+		for(f in item_flds_pos) cur_frm.fields_dict['entries'].grid.set_column_disp(item_flds_pos[f], false);
 	}
 
 	// India related fields
@@ -100,9 +95,14 @@ cur_frm.cscript.hide_fields = function(doc, cdt, cdn) {
 // Refresh
 // -------
 cur_frm.cscript.refresh = function(doc, dt, dn) {
-
 	cur_frm.cscript.is_opening(doc, dt, dn);
-	cur_frm.cscript.hide_fields(doc, cdt, cdn);
+	cur_frm.cscript.hide_fields(doc, dt, dn);
+
+	var callback = function() {
+		cur_frm.cscript.dynamic_label(doc, dt, dn);
+	}
+	cur_frm.cscript.hide_price_list_currency(doc, dt, dn, callback); 
+
 
 	// Show / Hide button
 	cur_frm.clear_custom_buttons();
@@ -125,7 +125,7 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 //fetch retail transaction related fields
 //--------------------------------------------
 cur_frm.cscript.is_pos = function(doc,dt,dn,callback){
-	cur_frm.cscript.hide_fields(doc, cdt, cdn);
+	cur_frm.cscript.hide_fields(doc, dt, dn);
 	if(doc.is_pos == 1){
 		if (!doc.company) {
 			msgprint("Please select company to proceed");
@@ -140,6 +140,11 @@ cur_frm.cscript.is_pos = function(doc,dt,dn,callback){
 			$c_obj(make_doclist(dt,dn),'set_pos_fields','',callback1);
 		}
 	}
+}
+
+
+cur_frm.cscript.update_stock = function(doc, dt, dn) {
+	cur_frm.cscript.hide_fields(doc, dt, dn);
 }
 
 

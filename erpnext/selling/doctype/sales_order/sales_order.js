@@ -38,21 +38,26 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 	if(doc.__islocal){
 		hide_field(['customer_address','contact_person','customer_name','address_display','contact_display','contact_mobile','contact_email','territory','customer_group','shipping_address']);
 	}
-
 }
 
 cur_frm.cscript.onload_post_render = function(doc, cdt, cdn) {
 	if(doc.__islocal) {
 		// defined in sales_common.js
-		cur_frm.cscript.update_item_details(doc, cdt, cdn, callback);
+		cur_frm.cscript.update_item_details(doc, cdt, cdn);
 	}
 }
+
 
 // Refresh
 //==================
 cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	cur_frm.clear_custom_buttons();
-	
+	var callback = function() {
+		cur_frm.cscript.dynamic_label(doc, cdt, cdn);
+	}
+	cur_frm.cscript.hide_price_list_currency(doc, cdt, cdn, callback); 
+
+
 	if(doc.docstatus==1) {
 		if(doc.status != 'Stopped') {
 			cur_frm.add_custom_button('Send SMS', cur_frm.cscript['Send SMS']);
@@ -98,7 +103,7 @@ cur_frm.cscript.customer = function(doc,dt,dn) {
 	}	 
 
 	if(doc.customer) $c_obj(make_doclist(doc.doctype, doc.name), 'get_default_customer_address', '', callback);
-	if(doc.customer) unhide_field(['customer_address','contact_person','customer_name','address_display','contact_display','contact_mobile','contact_email','territory','customer_group','shipping_address']);
+	if(doc.customer) unhide_field(['customer_address', 'contact_person', 'customer_name', 'address_display', 'contact_display', 'contact_mobile', 'contact_email', 'territory','customer_group','shipping_address']);
 }
 
 cur_frm.cscript.customer_address = cur_frm.cscript.contact_person = function(doc,dt,dn) {		
@@ -150,13 +155,6 @@ cur_frm.cscript.new_contact = function(){
 
 // DOCTYPE TRIGGERS
 // ================================================================================================
-
-/*
-// ***************** get shipping address based on customer selected *****************
-cur_frm.fields_dict['ship_det_no'].get_query = function(doc, cdt, cdn) {
-	return 'SELECT `tabShipping Address`.`name`, `tabShipping Address`.`ship_to`, `tabShipping Address`.`shipping_address` FROM `tabShipping Address` WHERE `tabShipping Address`.customer = "'+ doc.customer+'" AND `tabShipping Address`.`docstatus` != 2 AND `tabShipping Address`.`name` LIKE "%s" ORDER BY `tabShipping Address`.name ASC LIMIT 50';
-}
-*/
 
 
 // ***************** Get project name *****************

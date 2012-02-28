@@ -58,6 +58,9 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 	
 	cur_frm.clear_custom_buttons();
 
+	cur_frm.cscript.dynamic_label(doc, cdt, cdn);
+
+
 	// Show / Hide button
 	if(doc.docstatus==1 && doc.outstanding_amount > 0)
 		cur_frm.add_custom_button('Make Payment Entry', cur_frm.cscript['Make Bank Voucher']);

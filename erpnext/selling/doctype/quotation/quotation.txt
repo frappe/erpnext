@@ -5,87 +5,68 @@
 	{
 		'creation': '2010-08-08 17:09:17',
 		'docstatus': 0,
-		'modified': '2012-01-09 16:52:51',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-02-27 17:14:54',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Quotation',
-		'parentfield': 'fields',
-		'parenttype': 'DocType'
+		'parent': u'Quotation',
+		'parentfield': u'fields',
+		'parenttype': u'DocType'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1325570646',
+		'_last_update': u'1330069750',
 		'allow_attach': 1,
 		'allow_email': 0,
 		'allow_trash': 1,
-		'colour': 'White:FFF',
-		'default_print_format': 'Standard',
+		'colour': u'White:FFF',
+		'default_print_format': u'Standard',
 		'doctype': 'DocType',
-		'document_type': 'Transaction',
+		'document_type': u'Transaction',
 		'hide_toolbar': 0,
 		'is_transaction_doc': 1,
 		'max_attachments': 1,
-		'module': 'Selling',
+		'module': u'Selling',
 		'name': '__common__',
 		'read_only_onload': 1,
-		'search_fields': 'status,transaction_date,customer,lead,order_type',
-		'section_style': 'Tabbed',
-		'server_code_error': ' ',
+		'search_fields': u'status,transaction_date,customer,lead,order_type',
+		'section_style': u'Tabbed',
+		'server_code_error': u' ',
 		'show_in_menu': 0,
-		'subject': 'To %(customer_name)s on %(transaction_date)s worth %(currency)s %(grand_total_export)s',
-		'tag_fields': 'status',
-		'version': 599
+		'subject': u'To %(customer_name)s on %(transaction_date)s worth %(currency)s %(grand_total_export)s',
+		'tag_fields': u'status',
+		'version': 617
 	},
 
 	# These values are common for all DocFormat
 	{
-		'doctype': 'DocFormat',
+		'doctype': u'DocFormat',
 		'name': '__common__',
-		'parent': 'Quotation',
-		'parentfield': 'formats',
-		'parenttype': 'DocType'
+		'parent': u'Quotation',
+		'parentfield': u'formats',
+		'parenttype': u'DocType'
 	},
 
 	# These values are common for all DocPerm
 	{
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'name': '__common__',
-		'parent': 'Quotation',
-		'parentfield': 'permissions',
-		'parenttype': 'DocType'
+		'parent': u'Quotation',
+		'parentfield': u'permissions',
+		'parenttype': u'DocType',
+		'read': 1
 	},
 
 	# DocType, Quotation
 	{
 		'doctype': 'DocType',
-		'name': 'Quotation'
-	},
-
-	# DocPerm
-	{
-		'doctype': 'DocPerm',
-		'permlevel': 0,
-		'role': 'user print'
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		'doctype': 'DocPerm',
-		'permlevel': 1,
-		'read': 1,
-		'role': 'Sales Manager',
-		'submit': 0,
-		'write': 0
+		'name': u'Quotation'
 	},
 
 	# DocPerm
@@ -93,10 +74,9 @@
 		'amend': 1,
 		'cancel': 1,
 		'create': 1,
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'read': 1,
-		'role': 'Sales Manager',
+		'role': u'Sales Manager',
 		'submit': 1,
 		'write': 1
 	},
@@ -106,34 +86,19 @@
 		'amend': 1,
 		'cancel': 1,
 		'create': 1,
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'read': 1,
-		'role': 'Sales User',
+		'role': u'Sales User',
 		'submit': 1,
 		'write': 1
 	},
 
 	# DocPerm
 	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		'doctype': 'DocPerm',
-		'permlevel': 1,
-		'read': 1,
-		'role': 'Sales User',
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'doctype': 'DocPerm',
-		'match': 'customer_name',
+		'doctype': u'DocPerm',
+		'match': u'customer_name',
 		'permlevel': 0,
-		'read': 1,
-		'role': 'Customer'
+		'role': u'Customer'
 	},
 
 	# DocPerm
@@ -141,20 +106,11 @@
 		'amend': 1,
 		'cancel': 1,
 		'create': 1,
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'read': 1,
-		'role': 'Maintenance Manager',
+		'role': u'Maintenance Manager',
 		'submit': 1,
 		'write': 1
-	},
-
-	# DocPerm
-	{
-		'doctype': 'DocPerm',
-		'permlevel': 1,
-		'read': 1,
-		'role': 'Maintenance Manager'
 	},
 
 	# DocPerm
@@ -162,71 +118,69 @@
 		'amend': 1,
 		'cancel': 1,
 		'create': 1,
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'read': 1,
-		'role': 'Maintenance User',
+		'role': u'Maintenance User',
 		'submit': 1,
 		'write': 1
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'permlevel': 1,
-		'read': 1,
-		'role': 'Maintenance User'
+		'role': u'All'
 	},
 
 	# DocFormat
 	{
-		'doctype': 'DocFormat',
-		'format': 'Quotation Classic'
+		'doctype': u'DocFormat',
+		'format': u'Quotation Classic'
 	},
 
 	# DocFormat
 	{
-		'doctype': 'DocFormat',
-		'format': 'Quotation Modern'
+		'doctype': u'DocFormat',
+		'format': u'Quotation Modern'
 	},
 
 	# DocFormat
 	{
-		'doctype': 'DocFormat',
-		'format': 'Quotation Spartan'
+		'doctype': u'DocFormat',
+		'format': u'Quotation Spartan'
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldtype': 'Section Break',
-		'label': 'Basic Info',
-		'oldfieldtype': 'Section Break',
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldtype': u'Section Break',
+		'label': u'Basic Info',
+		'oldfieldtype': u'Section Break',
 		'permlevel': 0,
 		'print_hide': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Column Break',
+		'doctype': u'DocField',
+		'fieldtype': u'Column Break',
 		'permlevel': 0,
-		'width': '50%'
+		'width': u'50%'
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'description': 'To manage multiple series please go to Setup > Manage Series',
-		'doctype': 'DocField',
-		'fieldname': 'naming_series',
-		'fieldtype': 'Select',
-		'label': 'Series',
+		'colour': u'White:FFF',
+		'description': u'To manage multiple series please go to Setup > Manage Series',
+		'doctype': u'DocField',
+		'fieldname': u'naming_series',
+		'fieldtype': u'Select',
+		'label': u'Series',
 		'no_copy': 1,
-		'oldfieldname': 'naming_series',
-		'oldfieldtype': 'Select',
-		'options': 'QTN',
+		'oldfieldname': u'naming_series',
+		'oldfieldtype': u'Select',
+		'options': u'QTN',
 		'permlevel': 0,
 		'print_hide': 1,
 		'reqd': 1
@@ -234,120 +188,121 @@
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldname': 'quotation_to',
-		'fieldtype': 'Select',
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'quotation_to',
+		'fieldtype': u'Select',
 		'in_filter': 1,
-		'label': 'Quotation To',
-		'oldfieldname': 'quotation_to',
-		'oldfieldtype': 'Select',
-		'options': '\nLead\nCustomer',
+		'label': u'Quotation To',
+		'oldfieldname': u'quotation_to',
+		'oldfieldtype': u'Select',
+		'options': u'\nLead\nCustomer',
 		'permlevel': 0,
 		'print_hide': 1,
 		'report_hide': 0,
 		'reqd': 1,
-		'trigger': 'Client'
+		'trigger': u'Client'
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldname': 'customer',
-		'fieldtype': 'Link',
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'customer',
+		'fieldtype': u'Link',
 		'hidden': 0,
 		'in_filter': 1,
-		'label': 'Customer',
-		'oldfieldname': 'customer',
-		'oldfieldtype': 'Link',
-		'options': 'Customer',
+		'label': u'Customer',
+		'oldfieldname': u'customer',
+		'oldfieldtype': u'Link',
+		'options': u'Customer',
 		'permlevel': 0,
 		'print_hide': 1,
 		'search_index': 1,
-		'trigger': 'Client'
+		'trigger': u'Client'
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldname': 'customer_address',
-		'fieldtype': 'Link',
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'customer_address',
+		'fieldtype': u'Link',
 		'hidden': 0,
 		'in_filter': 1,
-		'label': 'Customer Address',
-		'options': 'Address',
+		'label': u'Customer Address',
+		'options': u'Address',
 		'permlevel': 0,
 		'print_hide': 1,
-		'trigger': 'Client'
+		'trigger': u'Client'
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldname': 'contact_person',
-		'fieldtype': 'Link',
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'contact_person',
+		'fieldtype': u'Link',
 		'hidden': 0,
 		'in_filter': 1,
-		'label': 'Contact Person',
-		'oldfieldname': 'contact_person',
-		'oldfieldtype': 'Link',
-		'options': 'Contact',
+		'label': u'Contact Person',
+		'oldfieldname': u'contact_person',
+		'oldfieldtype': u'Link',
+		'options': u'Contact',
 		'permlevel': 0,
 		'print_hide': 1,
 		'reqd': 0,
-		'trigger': 'Client'
+		'trigger': u'Client'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'customer_name',
-		'fieldtype': 'Data',
-		'label': 'Name',
-		'permlevel': 1
-	},
-
-	# DocField
-	{
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldname': 'lead',
-		'fieldtype': 'Link',
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'lead',
+		'fieldtype': u'Link',
 		'hidden': 0,
 		'in_filter': 1,
-		'label': 'Lead',
-		'oldfieldname': 'lead',
-		'oldfieldtype': 'Link',
-		'options': 'Lead',
+		'label': u'Lead',
+		'oldfieldname': u'lead',
+		'oldfieldtype': u'Link',
+		'options': u'Lead',
 		'permlevel': 0,
 		'print_hide': 1,
-		'trigger': 'Client'
+		'trigger': u'Client'
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldname': 'lead_name',
-		'fieldtype': 'Text',
-		'label': 'Name',
+		'colour': u'White:FFF',
+		'depends_on': u'eval:doc.lead',
+		'doctype': u'DocField',
+		'fieldname': u'lead_name',
+		'fieldtype': u'Text',
+		'label': u'Name',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldname': 'address_display',
-		'fieldtype': 'Small Text',
+		'doctype': u'DocField',
+		'fieldname': u'customer_name',
+		'fieldtype': u'Data',
+		'label': u'Name',
+		'permlevel': 1
+	},
+
+	# DocField
+	{
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'address_display',
+		'fieldtype': u'Small Text',
 		'hidden': 0,
 		'in_filter': 0,
-		'label': 'Address',
-		'oldfieldname': 'customer_address',
-		'oldfieldtype': 'Small Text',
+		'label': u'Address',
+		'oldfieldname': u'customer_address',
+		'oldfieldtype': u'Small Text',
 		'permlevel': 1,
 		'print_hide': 0,
 		'reqd': 0,
@@ -356,78 +311,79 @@
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldname': 'contact_display',
-		'fieldtype': 'Small Text',
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'contact_display',
+		'fieldtype': u'Small Text',
 		'in_filter': 0,
-		'label': 'Contact',
+		'label': u'Contact',
 		'permlevel': 1,
 		'print_hide': 0
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldname': 'contact_mobile',
-		'fieldtype': 'Text',
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'contact_mobile',
+		'fieldtype': u'Text',
 		'hidden': 0,
-		'label': 'Mobile No',
+		'label': u'Mobile No',
 		'permlevel': 1,
 		'print_hide': 0
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldname': 'contact_email',
-		'fieldtype': 'Text',
-		'label': 'Contact Email',
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'contact_email',
+		'fieldtype': u'Text',
+		'label': u'Contact Email',
 		'permlevel': 1,
 		'print_hide': 1
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldtype': 'Column Break',
-		'oldfieldtype': 'Column Break',
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldtype': u'Column Break',
+		'oldfieldtype': u'Column Break',
 		'permlevel': 0,
-		'width': '50%'
+		'width': u'50%'
 	},
 
 	# DocField
 	{
-		'default': 'Today',
-		'description': 'The date at which current entry is made in system.',
-		'doctype': 'DocField',
-		'fieldname': 'transaction_date',
-		'fieldtype': 'Date',
+		'default': u'Today',
+		'description': u'The date at which current entry is made in system.',
+		'doctype': u'DocField',
+		'fieldname': u'transaction_date',
+		'fieldtype': u'Date',
 		'in_filter': 1,
-		'label': 'Quotation Date',
+		'label': u'Quotation Date',
 		'no_copy': 1,
-		'oldfieldname': 'transaction_date',
-		'oldfieldtype': 'Date',
+		'oldfieldname': u'transaction_date',
+		'oldfieldtype': u'Date',
 		'permlevel': 0,
 		'reqd': 1,
 		'search_index': 1,
-		'width': '100px'
+		'width': u'100px'
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldname': 'order_type',
-		'fieldtype': 'Select',
+		'colour': u'White:FFF',
+		'default': u'Sales',
+		'doctype': u'DocField',
+		'fieldname': u'order_type',
+		'fieldtype': u'Select',
 		'in_filter': 1,
-		'label': 'Order Type',
-		'oldfieldname': 'order_type',
-		'oldfieldtype': 'Select',
-		'options': '\nSales\nMaintenance',
+		'label': u'Order Type',
+		'oldfieldname': u'order_type',
+		'oldfieldtype': u'Select',
+		'options': u'\nSales\nMaintenance',
 		'permlevel': 0,
 		'print_hide': 0,
 		'reqd': 1,
@@ -437,17 +393,17 @@
 	# DocField
 	{
 		'allow_on_submit': 0,
-		'colour': 'White:FFF',
-		'default': 'Draft',
-		'doctype': 'DocField',
-		'fieldname': 'status',
-		'fieldtype': 'Select',
+		'colour': u'White:FFF',
+		'default': u'Draft',
+		'doctype': u'DocField',
+		'fieldname': u'status',
+		'fieldtype': u'Select',
 		'in_filter': 1,
-		'label': 'Status',
+		'label': u'Status',
 		'no_copy': 1,
-		'oldfieldname': 'status',
-		'oldfieldtype': 'Select',
-		'options': '\nDraft\nSubmitted\nOrder Confirmed\nOrder Lost\nCancelled',
+		'oldfieldname': u'status',
+		'oldfieldtype': u'Select',
+		'options': u'\nDraft\nSubmitted\nOrder Confirmed\nOrder Lost\nCancelled',
 		'permlevel': 1,
 		'print_hide': 1,
 		'reqd': 1,
@@ -456,110 +412,76 @@
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'amended_from',
-		'fieldtype': 'Data',
-		'label': 'Amended From',
+		'doctype': u'DocField',
+		'fieldname': u'amended_from',
+		'fieldtype': u'Data',
+		'label': u'Amended From',
 		'no_copy': 1,
-		'oldfieldname': 'amended_from',
-		'oldfieldtype': 'Data',
+		'oldfieldname': u'amended_from',
+		'oldfieldtype': u'Data',
 		'permlevel': 1,
 		'print_hide': 1,
-		'width': '150px'
+		'width': u'150px'
 	},
 
 	# DocField
 	{
-		'description': 'The date at which current entry is corrected in the system.',
-		'doctype': 'DocField',
-		'fieldname': 'amendment_date',
-		'fieldtype': 'Date',
-		'label': 'Amendment Date',
+		'description': u'The date at which current entry is corrected in the system.',
+		'doctype': u'DocField',
+		'fieldname': u'amendment_date',
+		'fieldtype': u'Date',
+		'label': u'Amendment Date',
 		'no_copy': 1,
-		'oldfieldname': 'amendment_date',
-		'oldfieldtype': 'Date',
+		'oldfieldname': u'amendment_date',
+		'oldfieldtype': u'Date',
 		'permlevel': 0,
 		'print_hide': 1,
-		'width': '100px'
+		'width': u'100px'
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'description': "To create Quotation against Enquiry, Select Enquiry No. and click on 'Pull Enquiry Details' ",
-		'doctype': 'DocField',
-		'fieldname': 'enq_no',
-		'fieldtype': 'Link',
+		'colour': u'White:FFF',
+		'description': u'Will be fetched from Customer',
+		'doctype': u'DocField',
+		'fieldname': u'territory',
+		'fieldtype': u'Link',
 		'hidden': 0,
 		'in_filter': 1,
-		'label': 'Enquiry No',
-		'no_copy': 0,
-		'oldfieldname': 'enq_no',
-		'oldfieldtype': 'Link',
-		'options': 'Enquiry',
-		'permlevel': 0,
-		'print_hide': 0,
-		'report_hide': 0,
-		'search_index': 0
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldtype': 'Button',
-		'hidden': 0,
-		'label': 'Pull Enquiry Detail',
-		'no_copy': 0,
-		'oldfieldtype': 'Button',
-		'permlevel': 0,
-		'print_hide': 0,
-		'report_hide': 0,
-		'trigger': 'Client'
-	},
-
-	# DocField
-	{
-		'colour': 'White:FFF',
-		'description': 'Will be fetched from Customer',
-		'doctype': 'DocField',
-		'fieldname': 'territory',
-		'fieldtype': 'Link',
-		'hidden': 0,
-		'in_filter': 1,
-		'label': 'Territory',
-		'options': 'Territory',
+		'label': u'Territory',
+		'options': u'Territory',
 		'permlevel': 0,
 		'print_hide': 1,
 		'reqd': 1,
 		'search_index': 0,
-		'trigger': 'Client'
+		'trigger': u'Client'
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldname': 'customer_group',
-		'fieldtype': 'Link',
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'customer_group',
+		'fieldtype': u'Link',
 		'in_filter': 1,
-		'label': 'Customer Group',
-		'oldfieldname': 'customer_group',
-		'oldfieldtype': 'Link',
-		'options': 'Customer Group',
+		'label': u'Customer Group',
+		'oldfieldname': u'customer_group',
+		'oldfieldtype': u'Link',
+		'options': u'Customer Group',
 		'permlevel': 0,
 		'print_hide': 1,
 		'reqd': 0,
 		'search_index': 0,
-		'trigger': 'Client'
+		'trigger': u'Client'
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldtype': 'Section Break',
-		'label': 'Items',
-		'oldfieldtype': 'Section Break',
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldtype': u'Section Break',
+		'label': u'Items',
+		'oldfieldtype': u'Section Break',
 		'permlevel': 0,
 		'print_hide': 0,
 		'search_index': 0
@@ -567,33 +489,33 @@
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'description': 'Select the price list as entered in "Price List" master. This will pull the reference rates of items against this price list as specified in "Item" master.',
-		'doctype': 'DocField',
-		'fieldname': 'price_list_name',
-		'fieldtype': 'Select',
+		'colour': u'White:FFF',
+		'description': u'Select the price list as entered in "Price List" master. This will pull the reference rates of items against this price list as specified in "Item" master.',
+		'doctype': u'DocField',
+		'fieldname': u'price_list_name',
+		'fieldtype': u'Select',
 		'in_filter': 1,
-		'label': 'Price List',
-		'oldfieldname': 'price_list_name',
-		'oldfieldtype': 'Select',
-		'options': 'link:Price List',
+		'label': u'Price List',
+		'oldfieldname': u'price_list_name',
+		'oldfieldtype': u'Select',
+		'options': u'link:Price List',
 		'permlevel': 0,
 		'print_hide': 1,
 		'reqd': 1,
 		'search_index': 0,
-		'trigger': 'Client',
-		'width': '100px'
+		'trigger': u'Client',
+		'width': u'100px'
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'description': 'Select the currency in which price list is maintained',
-		'doctype': 'DocField',
-		'fieldname': 'price_list_currency',
-		'fieldtype': 'Select',
-		'label': 'Price List Currency',
-		'options': 'link:Currency',
+		'colour': u'White:FFF',
+		'description': u'Select the currency in which price list is maintained',
+		'doctype': u'DocField',
+		'fieldname': u'price_list_currency',
+		'fieldtype': u'Select',
+		'label': u'Price List Currency',
+		'options': u'link:Currency',
 		'permlevel': 0,
 		'print_hide': 1,
 		'reqd': 1
@@ -601,12 +523,12 @@
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'description': 'Rate at which Price list currency is converted to your currency',
-		'doctype': 'DocField',
-		'fieldname': 'plc_conversion_rate',
-		'fieldtype': 'Currency',
-		'label': 'Price List Currency Conversion Rate',
+		'colour': u'White:FFF',
+		'description': u"Rate at which Price list currency is converted to company's base currency",
+		'doctype': u'DocField',
+		'fieldname': u'plc_conversion_rate',
+		'fieldtype': u'Currency',
+		'label': u'Price List Currency Conversion Rate',
 		'permlevel': 0,
 		'print_hide': 1,
 		'reqd': 1
@@ -614,365 +536,373 @@
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Column Break',
+		'doctype': u'DocField',
+		'fieldtype': u'Column Break',
 		'permlevel': 0,
-		'width': '50%'
+		'width': u'50%'
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'description': "Customer's currency - If you want to select a currency that is not the default currency, then you must also specify the Currency Conversion Rate.",
-		'doctype': 'DocField',
-		'fieldname': 'currency',
-		'fieldtype': 'Select',
+		'colour': u'White:FFF',
+		'description': u"Customer's currency - If you want to select a currency that is not the default currency, then you must also specify the Currency Conversion Rate.",
+		'doctype': u'DocField',
+		'fieldname': u'currency',
+		'fieldtype': u'Select',
 		'in_filter': 1,
-		'label': 'Currency',
-		'oldfieldname': 'currency',
-		'oldfieldtype': 'Select',
-		'options': 'link:Currency',
+		'label': u'Currency',
+		'oldfieldname': u'currency',
+		'oldfieldtype': u'Select',
+		'options': u'link:Currency',
 		'permlevel': 0,
 		'print_hide': 1,
 		'reqd': 1,
 		'search_index': 0,
-		'trigger': 'Client',
-		'width': '100px'
+		'trigger': u'Client',
+		'width': u'100px'
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'default': '1.00',
-		'description': "Rate at which customer's currency is converted to your currency",
-		'doctype': 'DocField',
-		'fieldname': 'conversion_rate',
-		'fieldtype': 'Currency',
-		'label': 'Currency Conversion Rate',
-		'oldfieldname': 'conversion_rate',
-		'oldfieldtype': 'Currency',
+		'colour': u'White:FFF',
+		'default': u'1.00',
+		'description': u"Rate at which customer's currency is converted to company's base currency",
+		'doctype': u'DocField',
+		'fieldname': u'conversion_rate',
+		'fieldtype': u'Currency',
+		'label': u'Conversion Rate',
+		'oldfieldname': u'conversion_rate',
+		'oldfieldtype': u'Currency',
 		'permlevel': 0,
 		'print_hide': 1,
 		'reqd': 1,
-		'trigger': 'Client',
-		'width': '100px'
+		'trigger': u'Client',
+		'width': u'100px'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Button',
-		'label': 'Clear Table',
-		'oldfieldtype': 'Button',
-		'options': 'clear_quotation_details',
+		'colour': u'White:FFF',
+		'description': u"To create Quotation against Enquiry, Select Enquiry No. and click on 'Pull Enquiry Details' ",
+		'doctype': u'DocField',
+		'fieldname': u'enq_no',
+		'fieldtype': u'Link',
+		'hidden': 0,
+		'in_filter': 1,
+		'label': u'Enquiry No',
+		'no_copy': 0,
+		'oldfieldname': u'enq_no',
+		'oldfieldtype': u'Link',
+		'options': u'Enquiry',
 		'permlevel': 0,
-		'print_hide': 1
+		'print_hide': 0,
+		'report_hide': 0,
+		'search_index': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Section Break',
-		'options': 'Simple',
+		'doctype': u'DocField',
+		'fieldtype': u'Button',
+		'hidden': 0,
+		'label': u'Pull Enquiry Detail',
+		'no_copy': 0,
+		'oldfieldtype': u'Button',
+		'permlevel': 0,
+		'print_hide': 0,
+		'report_hide': 0,
+		'trigger': u'Client'
+	},
+
+	# DocField
+	{
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldtype': u'Section Break',
+		'options': u'Simple',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
 		'allow_on_submit': 1,
-		'colour': 'White:FFF',
-		'description': 'Field Descriptions for Quotation Details\n\n<b>Ref Rate: </b>Rate in your selected Price List. Price Lists help you track discounts.\n\n<b>Page Break:</b> If you want to break the page on this item in the Print Format',
-		'doctype': 'DocField',
-		'fieldname': 'quotation_details',
-		'fieldtype': 'Table',
-		'label': 'Quotation Details',
-		'oldfieldname': 'quotation_details',
-		'oldfieldtype': 'Table',
-		'options': 'Quotation Detail',
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'quotation_details',
+		'fieldtype': u'Table',
+		'label': u'Quotation Details',
+		'oldfieldname': u'quotation_details',
+		'oldfieldtype': u'Table',
+		'options': u'Quotation Detail',
 		'permlevel': 0,
-		'width': '40px'
+		'width': u'40px'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'net_total',
-		'fieldtype': 'Currency',
-		'label': 'Net Total*',
-		'no_copy': 0,
-		'oldfieldname': 'net_total',
-		'oldfieldtype': 'Currency',
-		'permlevel': 1,
-		'print_hide': 0,
-		'reqd': 0,
-		'width': '100px'
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldtype': 'Button',
-		'label': 'Re-Calculate Values',
-		'oldfieldtype': 'Button',
-		'permlevel': 0,
-		'print_hide': 1,
-		'trigger': 'Client'
-	},
-
-	# DocField
-	{
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldtype': 'HTML',
-		'label': 'Note HTML',
-		'oldfieldtype': 'HTML',
-		'options': '<div style="margin-top:16px"><b>Note :</b> * In Base Currency\n</div>',
+		'doctype': u'DocField',
+		'fieldtype': u'Button',
+		'label': u'Clear Table',
+		'oldfieldtype': u'Button',
+		'options': u'clear_quotation_details',
 		'permlevel': 0,
 		'print_hide': 1
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldtype': 'Section Break',
-		'label': 'Taxes',
-		'oldfieldtype': 'Section Break',
+		'doctype': u'DocField',
+		'fieldtype': u'Button',
+		'label': u'Re-Calculate Values',
+		'oldfieldtype': u'Button',
+		'permlevel': 0,
+		'print_hide': 1,
+		'trigger': u'Client'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'net_total',
+		'fieldtype': u'Currency',
+		'label': u'Net Total*',
+		'no_copy': 0,
+		'oldfieldname': u'net_total',
+		'oldfieldtype': u'Currency',
+		'permlevel': 1,
+		'print_hide': 0,
+		'reqd': 0,
+		'width': u'100px'
+	},
+
+	# DocField
+	{
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldtype': u'HTML',
+		'label': u'Note HTML',
+		'oldfieldtype': u'HTML',
+		'options': u'<div style="margin-top:16px"><b>Note :</b> * In Base Currency\n</div>',
+		'permlevel': 0,
+		'print_hide': 1
+	},
+
+	# DocField
+	{
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldtype': u'Section Break',
+		'label': u'Taxes',
+		'oldfieldtype': u'Section Break',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'charge',
-		'fieldtype': 'Link',
+		'doctype': u'DocField',
+		'fieldname': u'charge',
+		'fieldtype': u'Link',
 		'hidden': 0,
-		'label': 'Select Charges Master',
-		'oldfieldname': 'charge',
-		'oldfieldtype': 'Link',
-		'options': 'Other Charges',
+		'label': u'Select Charges Master',
+		'oldfieldname': u'charge',
+		'oldfieldtype': u'Link',
+		'options': u'Other Charges',
 		'permlevel': 0,
 		'print_hide': 1,
-		'trigger': 'Client'
+		'trigger': u'Client'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Button',
+		'doctype': u'DocField',
+		'fieldtype': u'Button',
 		'hidden': 0,
-		'label': 'Get Charges',
-		'oldfieldtype': 'Button',
+		'label': u'Get Charges',
+		'oldfieldtype': u'Button',
 		'permlevel': 0,
 		'print_hide': 1,
-		'trigger': 'Client'
+		'trigger': u'Client'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'other_charges',
-		'fieldtype': 'Table',
-		'label': 'Other Charges',
-		'oldfieldname': 'other_charges',
-		'oldfieldtype': 'Table',
-		'options': 'RV Tax Detail',
+		'doctype': u'DocField',
+		'fieldname': u'other_charges',
+		'fieldtype': u'Table',
+		'label': u'Other Charges',
+		'oldfieldname': u'other_charges',
+		'oldfieldtype': u'Table',
+		'options': u'RV Tax Detail',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldtype': 'Button',
-		'label': 'Calculate Charges',
-		'oldfieldtype': 'Button',
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldtype': u'Button',
+		'label': u'Calculate Charges',
+		'oldfieldtype': u'Button',
 		'permlevel': 0,
 		'print_hide': 1,
-		'trigger': 'Client'
+		'trigger': u'Client'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'other_charges_total',
-		'fieldtype': 'Currency',
-		'label': 'Charges Total*',
-		'oldfieldname': 'other_charges_total',
-		'oldfieldtype': 'Currency',
+		'doctype': u'DocField',
+		'fieldname': u'other_charges_total',
+		'fieldtype': u'Currency',
+		'label': u'Charges Total*',
+		'oldfieldname': u'other_charges_total',
+		'oldfieldtype': u'Currency',
 		'permlevel': 1,
 		'print_hide': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'grand_total',
-		'fieldtype': 'Currency',
-		'label': 'Grand Total*',
+		'doctype': u'DocField',
+		'fieldtype': u'HTML',
+		'label': u'Other Charges Calculation',
+		'oldfieldtype': u'HTML',
+		'permlevel': 0,
+		'print_hide': 1
+	},
+
+	# DocField
+	{
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldtype': u'Section Break',
+		'label': u'Totals',
+		'oldfieldtype': u'Section Break',
+		'permlevel': 0,
+		'print_hide': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'grand_total',
+		'fieldtype': u'Currency',
+		'label': u'Grand Total*',
 		'no_copy': 0,
-		'oldfieldname': 'grand_total',
-		'oldfieldtype': 'Currency',
+		'oldfieldname': u'grand_total',
+		'oldfieldtype': u'Currency',
 		'permlevel': 1,
 		'print_hide': 1,
 		'reqd': 0,
-		'width': '200px'
+		'width': u'200px'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'HTML',
-		'label': 'Other Charges Calculation',
-		'oldfieldtype': 'HTML',
-		'permlevel': 0,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldtype': 'HTML',
-		'label': 'OT Notes',
-		'oldfieldtype': 'HTML',
-		'options': '<div style="margin-top:16px"><b>Note :</b> * In Base Currency\n</div>',
-		'permlevel': 0,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldtype': 'Section Break',
-		'label': 'Totals',
-		'oldfieldtype': 'Section Break',
-		'permlevel': 0,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldname': 'rounded_total',
-		'fieldtype': 'Currency',
-		'label': 'Rounded Total',
+		'doctype': u'DocField',
+		'fieldname': u'rounded_total',
+		'fieldtype': u'Currency',
+		'label': u'Rounded Total',
 		'no_copy': 0,
-		'oldfieldname': 'rounded_total',
-		'oldfieldtype': 'Currency',
+		'oldfieldname': u'rounded_total',
+		'oldfieldtype': u'Currency',
 		'permlevel': 1,
 		'print_hide': 1,
-		'trigger': 'Client',
-		'width': '200px'
+		'trigger': u'Client',
+		'width': u'200px'
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'description': 'In Words will be visible once you save the Quotation.',
-		'doctype': 'DocField',
-		'fieldname': 'in_words',
-		'fieldtype': 'Data',
-		'label': 'In Words',
+		'colour': u'White:FFF',
+		'description': u'In Words will be visible once you save the Quotation.',
+		'doctype': u'DocField',
+		'fieldname': u'in_words',
+		'fieldtype': u'Data',
+		'label': u'In Words',
 		'no_copy': 0,
-		'oldfieldname': 'in_words',
-		'oldfieldtype': 'Data',
+		'oldfieldname': u'in_words',
+		'oldfieldtype': u'Data',
 		'permlevel': 1,
 		'print_hide': 1,
-		'width': '200px'
+		'width': u'200px'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Column Break',
-		'oldfieldtype': 'Column Break',
+		'doctype': u'DocField',
+		'fieldtype': u'Column Break',
+		'oldfieldtype': u'Column Break',
 		'permlevel': 0,
 		'print_hide': 1,
-		'width': '50%'
+		'width': u'50%'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'grand_total_export',
-		'fieldtype': 'Currency',
-		'label': 'Grand Total (Export)',
+		'doctype': u'DocField',
+		'fieldname': u'grand_total_export',
+		'fieldtype': u'Currency',
+		'label': u'Grand Total',
 		'no_copy': 0,
-		'oldfieldname': 'grand_total_export',
-		'oldfieldtype': 'Currency',
+		'oldfieldname': u'grand_total_export',
+		'oldfieldtype': u'Currency',
 		'permlevel': 1,
 		'print_hide': 0,
 		'reqd': 0,
-		'width': '200px'
+		'width': u'200px'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'rounded_total_export',
-		'fieldtype': 'Currency',
-		'label': 'Rounded Total (Export)',
+		'doctype': u'DocField',
+		'fieldname': u'rounded_total_export',
+		'fieldtype': u'Currency',
+		'label': u'Rounded Total',
 		'no_copy': 0,
-		'oldfieldname': 'rounded_total_export',
-		'oldfieldtype': 'Currency',
+		'oldfieldname': u'rounded_total_export',
+		'oldfieldtype': u'Currency',
 		'permlevel': 1,
 		'print_hide': 0,
 		'reqd': 0,
-		'width': '200px'
+		'width': u'200px'
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'description': 'In Words (Export) will be visible once you save the Quotation.',
-		'doctype': 'DocField',
-		'fieldname': 'in_words_export',
-		'fieldtype': 'Data',
-		'label': 'In Words (Export)',
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'in_words_export',
+		'fieldtype': u'Data',
+		'label': u'In Words',
 		'no_copy': 0,
-		'oldfieldname': 'in_words_export',
-		'oldfieldtype': 'Data',
+		'oldfieldname': u'in_words_export',
+		'oldfieldtype': u'Data',
 		'permlevel': 1,
 		'print_hide': 1,
-		'width': '200px'
+		'width': u'200px'
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'description': 'Add Terms and Conditions for the Quotation like Payment Terms, Validity of Offer etc. You can also prepare a master Term Sheet and use the Template',
-		'doctype': 'DocField',
-		'fieldtype': 'Section Break',
-		'label': 'Terms',
-		'oldfieldtype': 'Section Break',
+		'colour': u'White:FFF',
+		'description': u'Add Terms and Conditions for the Quotation like Payment Terms, Validity of Offer etc. You can also prepare a master Term Sheet and use the Template',
+		'doctype': u'DocField',
+		'fieldtype': u'Section Break',
+		'label': u'Terms',
+		'oldfieldtype': u'Section Break',
 		'permlevel': 0,
 		'print_hide': 0
 	},
 
 	# DocField
 	{
-		'allow_on_submit': 1,
-		'doctype': 'DocField',
-		'fieldname': 'letter_head',
-		'fieldtype': 'Select',
-		'label': 'Letter Head',
-		'oldfieldname': 'letter_head',
-		'oldfieldtype': 'Select',
-		'options': 'link:Letter Head',
-		'permlevel': 0,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldname': 'tc_name',
-		'fieldtype': 'Link',
-		'label': 'Select Terms',
-		'oldfieldname': 'tc_name',
-		'oldfieldtype': 'Link',
-		'options': 'Term',
+		'doctype': u'DocField',
+		'fieldname': u'tc_name',
+		'fieldtype': u'Link',
+		'label': u'Select Terms',
+		'oldfieldname': u'tc_name',
+		'oldfieldtype': u'Link',
+		'options': u'Term',
 		'permlevel': 0,
 		'print_hide': 1,
 		'report_hide': 1
@@ -980,79 +910,93 @@
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Button',
-		'label': 'Get Terms',
-		'oldfieldtype': 'Button',
-		'options': 'get_tc_details',
+		'doctype': u'DocField',
+		'fieldtype': u'Button',
+		'label': u'Get Terms',
+		'oldfieldtype': u'Button',
+		'options': u'get_tc_details',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'HTML',
-		'label': 'Terms HTML',
-		'oldfieldtype': 'HTML',
-		'options': 'You can add Terms and Notes that will be printed in the Transaction',
+		'doctype': u'DocField',
+		'fieldtype': u'HTML',
+		'label': u'Terms HTML',
+		'oldfieldtype': u'HTML',
+		'options': u'You can add Terms and Notes that will be printed in the Transaction',
 		'permlevel': 0,
 		'print_hide': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'terms',
-		'fieldtype': 'Text Editor',
-		'label': 'Term Details',
-		'oldfieldname': 'terms',
-		'oldfieldtype': 'Text Editor',
+		'doctype': u'DocField',
+		'fieldname': u'terms',
+		'fieldtype': u'Text Editor',
+		'label': u'Term Details',
+		'oldfieldname': u'terms',
+		'oldfieldtype': u'Text Editor',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'description': 'Filling in additional information about the Quotation will help you analyze your data better.',
-		'doctype': 'DocField',
-		'fieldtype': 'Section Break',
-		'label': 'More Info',
-		'oldfieldtype': 'Section Break',
+		'colour': u'White:FFF',
+		'description': u'Filling in additional information about the Quotation will help you analyze your data better.',
+		'doctype': u'DocField',
+		'fieldtype': u'Section Break',
+		'label': u'More Info',
+		'oldfieldtype': u'Section Break',
 		'permlevel': 0,
 		'print_hide': 1
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'description': 'Select the relevant company name if you have multiple companies.',
-		'doctype': 'DocField',
-		'fieldname': 'company',
-		'fieldtype': 'Link',
+		'allow_on_submit': 1,
+		'doctype': u'DocField',
+		'fieldname': u'letter_head',
+		'fieldtype': u'Select',
+		'label': u'Letter Head',
+		'oldfieldname': u'letter_head',
+		'oldfieldtype': u'Select',
+		'options': u'link:Letter Head',
+		'permlevel': 0,
+		'print_hide': 1
+	},
+
+	# DocField
+	{
+		'colour': u'White:FFF',
+		'description': u'Select the relevant company name if you have multiple companies.',
+		'doctype': u'DocField',
+		'fieldname': u'company',
+		'fieldtype': u'Link',
 		'in_filter': 1,
-		'label': 'Company',
-		'oldfieldname': 'company',
-		'oldfieldtype': 'Link',
-		'options': 'Company',
+		'label': u'Company',
+		'oldfieldname': u'company',
+		'oldfieldtype': u'Link',
+		'options': u'Company',
 		'permlevel': 0,
 		'print_hide': 1,
 		'reqd': 1,
 		'search_index': 0,
-		'trigger': 'Client',
-		'width': '150px'
+		'trigger': u'Client',
+		'width': u'150px'
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldname': 'fiscal_year',
-		'fieldtype': 'Select',
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'fiscal_year',
+		'fieldtype': u'Select',
 		'in_filter': 1,
-		'label': 'Fiscal Year',
-		'oldfieldname': 'fiscal_year',
-		'oldfieldtype': 'Select',
-		'options': 'link:Fiscal Year',
+		'label': u'Fiscal Year',
+		'oldfieldname': u'fiscal_year',
+		'oldfieldtype': u'Select',
+		'options': u'link:Fiscal Year',
 		'permlevel': 0,
 		'print_hide': 1,
 		'reqd': 1,
@@ -1061,15 +1005,15 @@
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldname': 'enq_det',
-		'fieldtype': 'Text',
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'enq_det',
+		'fieldtype': u'Text',
 		'hidden': 1,
-		'label': 'Enquiry Detail',
+		'label': u'Enquiry Detail',
 		'no_copy': 0,
-		'oldfieldname': 'enq_det',
-		'oldfieldtype': 'Text',
+		'oldfieldname': u'enq_det',
+		'oldfieldtype': u'Text',
 		'permlevel': 1,
 		'print_hide': 1,
 		'report_hide': 0
@@ -1077,16 +1021,16 @@
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldname': 'source',
-		'fieldtype': 'Select',
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'source',
+		'fieldtype': u'Select',
 		'hidden': 0,
-		'label': 'Source',
+		'label': u'Source',
 		'no_copy': 0,
-		'oldfieldname': 'source',
-		'oldfieldtype': 'Select',
-		'options': "\nExisting Customer\nReference\nAdvertisement\nCold Calling\nExhibition\nSupplier Reference\nMass Mailing\nCustomer's Vendor\nCampaign",
+		'oldfieldname': u'source',
+		'oldfieldtype': u'Select',
+		'options': u"\nExisting Customer\nReference\nAdvertisement\nCold Calling\nExhibition\nSupplier Reference\nMass Mailing\nCustomer's Vendor\nCampaign",
 		'permlevel': 0,
 		'print_hide': 1,
 		'report_hide': 0
@@ -1094,32 +1038,71 @@
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldname': 'campaign',
-		'fieldtype': 'Link',
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'campaign',
+		'fieldtype': u'Link',
 		'hidden': 0,
-		'label': 'Campaign',
+		'label': u'Campaign',
 		'no_copy': 0,
-		'oldfieldname': 'campaign',
-		'oldfieldtype': 'Link',
-		'options': 'Campaign',
+		'oldfieldname': u'campaign',
+		'oldfieldtype': u'Link',
+		'options': u'Campaign',
 		'permlevel': 0,
 		'print_hide': 1,
 		'report_hide': 0
+	},
+
+	# DocField
+	{
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'cancel_reason',
+		'fieldtype': u'Data',
+		'label': u'Cancel Reason',
+		'no_copy': 1,
+		'oldfieldname': u'cancel_reason',
+		'oldfieldtype': u'Data',
+		'permlevel': 1,
+		'print_hide': 1,
+		'report_hide': 0
+	},
+
+	# DocField
+	{
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'order_lost_reason',
+		'fieldtype': u'Small Text',
+		'label': u'Order Lost Reason',
+		'no_copy': 1,
+		'oldfieldname': u'order_lost_reason',
+		'oldfieldtype': u'Small Text',
+		'permlevel': 1,
+		'print_hide': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldtype': u'Column Break',
+		'oldfieldtype': u'Column Break',
+		'permlevel': 0,
+		'print_hide': 1,
+		'width': u'50%'
 	},
 
 	# DocField
 	{
 		'allow_on_submit': 1,
-		'doctype': 'DocField',
-		'fieldname': 'select_print_heading',
-		'fieldtype': 'Link',
-		'label': 'Select Print Heading',
+		'doctype': u'DocField',
+		'fieldname': u'select_print_heading',
+		'fieldtype': u'Link',
+		'label': u'Select Print Heading',
 		'no_copy': 1,
-		'oldfieldname': 'select_print_heading',
-		'oldfieldtype': 'Link',
-		'options': 'Print Heading',
+		'oldfieldname': u'select_print_heading',
+		'oldfieldtype': u'Link',
+		'options': u'Print Heading',
 		'permlevel': 0,
 		'print_hide': 1,
 		'report_hide': 1
@@ -1127,105 +1110,66 @@
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldname': 'cancel_reason',
-		'fieldtype': 'Data',
-		'label': 'Cancel Reason',
-		'no_copy': 1,
-		'oldfieldname': 'cancel_reason',
-		'oldfieldtype': 'Data',
-		'permlevel': 1,
-		'print_hide': 1,
-		'report_hide': 0
-	},
-
-	# DocField
-	{
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldname': 'order_lost_reason',
-		'fieldtype': 'Small Text',
-		'label': 'Order Lost Reason',
-		'no_copy': 1,
-		'oldfieldname': 'order_lost_reason',
-		'oldfieldtype': 'Small Text',
-		'permlevel': 1,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldtype': 'Column Break',
-		'oldfieldtype': 'Column Break',
-		'permlevel': 0,
-		'print_hide': 1,
-		'width': '50%'
-	},
-
-	# DocField
-	{
-		'description': 'Your sales person who will contact the customer/lead in future',
-		'doctype': 'DocField',
-		'fieldname': 'contact_by',
-		'fieldtype': 'Link',
-		'label': 'Next Contact By',
-		'oldfieldname': 'contact_by',
-		'oldfieldtype': 'Link',
-		'options': 'Profile',
+		'description': u'Your sales person who will contact the customer/lead in future',
+		'doctype': u'DocField',
+		'fieldname': u'contact_by',
+		'fieldtype': u'Link',
+		'label': u'Next Contact By',
+		'oldfieldname': u'contact_by',
+		'oldfieldtype': u'Link',
+		'options': u'Profile',
 		'permlevel': 0,
 		'print_hide': 1
 	},
 
 	# DocField
 	{
-		'description': 'Your sales person will get a reminder on this date to contact the customer/lead',
-		'doctype': 'DocField',
-		'fieldname': 'contact_date',
-		'fieldtype': 'Date',
-		'label': 'Next Contact Date',
-		'oldfieldname': 'contact_date',
-		'oldfieldtype': 'Date',
+		'description': u'Your sales person will get a reminder on this date to contact the customer/lead',
+		'doctype': u'DocField',
+		'fieldname': u'contact_date',
+		'fieldtype': u'Date',
+		'label': u'Next Contact Date',
+		'oldfieldname': u'contact_date',
+		'oldfieldtype': u'Date',
 		'permlevel': 0,
 		'print_hide': 1
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'description': 'Date on which the lead/customer was last contacted',
-		'doctype': 'DocField',
-		'fieldname': 'last_contact_date',
-		'fieldtype': 'Date',
-		'label': 'Last Contact Date',
+		'colour': u'White:FFF',
+		'description': u'Date on which the lead/customer was last contacted',
+		'doctype': u'DocField',
+		'fieldname': u'last_contact_date',
+		'fieldtype': u'Date',
+		'label': u'Last Contact Date',
 		'no_copy': 1,
-		'oldfieldname': 'last_contact_date',
-		'oldfieldtype': 'Date',
+		'oldfieldname': u'last_contact_date',
+		'oldfieldtype': u'Date',
 		'permlevel': 1,
 		'print_hide': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'to_discuss',
-		'fieldtype': 'Small Text',
-		'label': 'To Discuss',
-		'oldfieldname': 'to_discuss',
-		'oldfieldtype': 'Small Text',
+		'doctype': u'DocField',
+		'fieldname': u'to_discuss',
+		'fieldtype': u'Small Text',
+		'label': u'To Discuss',
+		'oldfieldname': u'to_discuss',
+		'oldfieldtype': u'Small Text',
 		'permlevel': 0,
 		'print_hide': 1
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'description': 'Keep a track on communications regarding this Quotation. This will help you remember earlier communications in case the Customer comes back again',
-		'doctype': 'DocField',
-		'fieldtype': 'Section Break',
-		'label': 'Communication History',
-		'oldfieldtype': 'Section Break',
+		'colour': u'White:FFF',
+		'description': u'Keep a track on communications regarding this Quotation. This will help you remember earlier communications in case the Customer comes back again',
+		'doctype': u'DocField',
+		'fieldtype': u'Section Break',
+		'label': u'Communication History',
+		'oldfieldtype': u'Section Break',
 		'permlevel': 0,
 		'print_hide': 1
 	},
@@ -1233,27 +1177,27 @@
 	# DocField
 	{
 		'allow_on_submit': 1,
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldname': 'follow_up',
-		'fieldtype': 'Table',
-		'label': 'Follow up',
-		'oldfieldname': 'follow_up',
-		'oldfieldtype': 'Table',
-		'options': 'Follow up',
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'follow_up',
+		'fieldtype': u'Table',
+		'label': u'Follow up',
+		'oldfieldname': u'follow_up',
+		'oldfieldtype': u'Table',
+		'options': u'Follow up',
 		'permlevel': 0,
 		'print_hide': 1,
-		'width': '40px'
+		'width': u'40px'
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldname': 'file_list',
-		'fieldtype': 'Small Text',
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'file_list',
+		'fieldtype': u'Small Text',
 		'hidden': 1,
-		'label': 'File List',
+		'label': u'File List',
 		'no_copy': 1,
 		'permlevel': 0,
 		'print_hide': 1
