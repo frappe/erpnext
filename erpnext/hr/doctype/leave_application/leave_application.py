@@ -30,7 +30,7 @@ class DocType:
 	def get_leave_balance(self):
 		leave_all = sql("select total_leaves_allocated from `tabLeave Allocation` where employee = '%s' and leave_type = '%s' and fiscal_year = '%s' and docstatus = 1" % (self.doc.employee, self.doc.leave_type, self.doc.fiscal_year))
 		leave_all = leave_all and flt(leave_all[0][0]) or 0
-		leave_app = sql("select total_leave_days from `tabLeave Application` where employee = '%s' and leave_type = '%s' and fiscal_year = '%s' and docstatus = 1" % (self.doc.employee, self.doc.leave_type, self.doc.fiscal_year))
+		leave_app = sql("select SUM(total_leave_days) from `tabLeave Application` where employee = '%s' and leave_type = '%s' and fiscal_year = '%s' and docstatus = 1" % (self.doc.employee, self.doc.leave_type, self.doc.fiscal_year))
 		leave_app = leave_app and flt(leave_app[0][0]) or 0
 		ret = {'leave_balance':leave_all - leave_app}
 		return ret
