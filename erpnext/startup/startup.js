@@ -30,7 +30,7 @@ erpnext.modules = {
 	'Website': 'website-home',
 	'HR': 'hr-home',
 	'Setup': 'Setup',
-	'Activity': 'Event Updates',
+	'Activity': 'activity',
 	'To Do': 'todo',
 	'Calendar': 'calendar',
 	'Messages': 'messages',
@@ -58,7 +58,7 @@ erpnext.startup.start = function() {
 	} else {
 		// setup toolbar
 		erpnext.toolbar.setup();
-		
+				
 		// set interval for updates
 		erpnext.startup.set_periodic_updates();
 
@@ -66,6 +66,13 @@ erpnext.startup.start = function() {
 		// ------------------
 		$('footer').html('<div class="web-footer erpnext-footer">\
 			Powered by <a href="https://erpnext.com">ERPNext</a></div>');
+
+		// complete registration
+		if(in_list(user_roles,'System Manager') && (wn.boot.setup_complete=='No')) { 
+			wn.require("erpnext/startup/js/complete_setup.js");
+			erpnext.complete_setup(); 
+		}
+
 	}
 
 	$('#startup_div').toggle(false);
@@ -86,28 +93,6 @@ show_chart_browser = function(nm, chart_type){
   loadpage(nm,call_back);
 }
 
-
-// Module Page
-// ====================================================================
-
-ModulePage = function(parent, module_name, module_label, help_page, callback) {
-	this.parent = parent;
-
-	// add to current page
-	page_body.cur_page.module_page = this;
-
-	this.wrapper = $a(parent,'div');
-	this.module_name = module_name;
-	this.transactions = [];
-	this.page_head = new PageHeader(this.wrapper, module_label);
-
-	if(help_page) {
-		var btn = this.page_head.add_button('Help', function() { loadpage(this.help_page) }, 1, 'ui-icon-help')
-		btn.help_page = help_page;
-	}
-
-	if(callback) this.callback = function(){ callback(); }
-}
 
 // ========== Update Messages ============
 var update_messages = function() {

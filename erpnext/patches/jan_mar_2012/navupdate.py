@@ -32,6 +32,9 @@ def execute():
 	reload_doc('utilities', 'page', 'todo')
 	reload_doc('utilities', 'page', 'calendar')
 	reload_doc('utilities', 'page', 'messages')
+	reload_doc('utilities', 'page', 'modules_setup')
+	reload_doc('utilities', 'page', 'users')
+	reload_doc('utilities', 'page', 'activity')
 	
 	webnotes.conn.set_value('Control Panel', 'Control Panel', 'home_page',
 			'desktop')

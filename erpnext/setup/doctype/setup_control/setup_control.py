@@ -14,24 +14,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# Please edit this list and import only required elements
 import webnotes
 
-from webnotes.utils import add_days, add_months, add_years, cint, cstr, date_diff, default_fields, flt, fmt_money, formatdate, generate_hash, getTraceback, get_defaults, get_first_day, get_last_day, getdate, has_common, month_name, now, nowdate, replace_newlines, sendmail, set_default, str_esc_quote, user_format, validate_email_add
-from webnotes.model import db_exists
-from webnotes.model.doc import Document, addchild, removechild, getchildren, make_autoname, SuperDocType
-from webnotes.model.doclist import getlist, copy_doclist
-from webnotes.model.code import get_obj, get_server_obj, run_server_obj, updatedb, check_syntax
-from webnotes import session, form, is_testing, msgprint, errprint
+from webnotes.utils import cint, cstr, flt, getdate, now, nowdate
+from webnotes.model.doc import Document, addchild
+from webnotes.model.code import get_obj
+from webnotes import session, form, msgprint
 
-set = webnotes.conn.set
 sql = webnotes.conn.sql
-get_value = webnotes.conn.get_value
-in_transaction = webnotes.conn.in_transaction
-convert_to_lists = webnotes.conn.convert_to_lists
-	
-# -----------------------------------------------------------------------------------------
-
 
 class DocType:
 	def __init__(self, d, dl):
@@ -74,9 +64,10 @@ class DocType:
 	# Account Setup
 	# ---------------
 	def setup_account(self, args):
-		import webnotes
-		company_name, comp_abbr, fy_start, currency, first_name, last_name = eval(args)
-		curr_fiscal_year,fy_start_date = self.get_fy_details(fy_start)
+		import webnotes, json
+		locals().update(args)
+
+		curr_fiscal_year, fy_start_date = self.get_fy_details(fy_start)
 		self.currency = currency
 
 		# Update Profile
@@ -92,7 +83,7 @@ class DocType:
 		
 		# Company
 		master_dict = {'Company':{'company_name':company_name,
-								  'abbr':comp_abbr,
+								  'abbr':company_abbr,
 								  'default_currency':currency
 															}}
 		self.create_records(master_dict)
@@ -117,14 +108,38 @@ class DocType:
 		# Set 
 		self.set_defaults(def_args)
 
-		# Set Registration Complete
-		set_default('registration_complete','1')
+		self.create_feed_and_todo()
 
-		msgprint("Great! Your company has now been created")
+		webnotes.clear_cache()
+		msgprint("Company setup is complete")
 		
 		import webnotes.utils
 		user_fullname = (first_name or '') + (last_name and (" " + last_name) or '')
 		return {'sys_defaults': webnotes.utils.get_defaults(), 'user_fullname': user_fullname}
+
+	def create_feed_and_todo(self):
+		"""update activty feed and create todo for creation of item, customer, vendor"""
+		import home
+		home.make_feed('Comment', '', '', webnotes.session['user'],
+			'<i>"' + doc.comment + '"</i>', '#6B24B3')
+
+		d = Document('ToDo Item')
+		d.description = 'Create your first <a href="#!List/Customer">Customer</a>'
+		d.priority = 'High'
+		d.date = nowdate()
+		d.save(1)
+
+		d = Document('ToDo Item')
+		d.description = 'Create your first <a href="#!List/Item">Item</a>'
+		d.priority = 'High'
+		d.date = nowdate()
+		d.save(1)
+
+		d = Document('ToDo Item')
+		d.description = 'Create your first <a href="#!List/Supplier">Supplier</a>'
+		d.priority = 'High'
+		d.date = nowdate()
+		d.save(1)
 
 		
 	# Get Fiscal year Details
@@ -207,14 +222,6 @@ class DocType:
 			d = addchild(pr,'userroles', 'UserRole', 1)
 			d.role = r
 			d.save(1)
-			
-
-	# Sync DB
-	# -------
-	def sync_db(arg=''):
-		import webnotes.model.db_schema
-		sql("delete from `tabDocType Update Register`")
-		webnotes.model.db_schema.sync_all()
 		
 	
 	def is_setup_okay(self, args):
@@ -224,21 +231,14 @@ class DocType:
 
 		from server_tools.gateway_utils import get_total_users
 		
-		args = eval(args)
-		#webnotes.logger.error("args in set_account_details of setup_control: " + str(args))
-		
+		args = eval(args)		
 		cp_defaults = webnotes.conn.get_value('Control Panel', None, 'account_id')
-		
 		user_profile = webnotes.conn.get_value('Profile', args['user'], 'name')
 		
 		from webnotes.utils import cint
 		
 		total_users = get_total_users()
-		
-		#webnotes.logger.error("setup_control.is_setup_okay: " + cp_defaults + " " + user_profile + " " + str(total_users))
-		
-		#webnotes.logger.error("setup_control.is_setup_okay: Passed Values:" + args['account_name'] + " " + args['user'] + " " + str(args['total_users']))
-		
+						
 		if (cp_defaults==args['account_name']) and user_profile and \
 		   (total_users==cint(args['total_users'])):
 		   return 'True'

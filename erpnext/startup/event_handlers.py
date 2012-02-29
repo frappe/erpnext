@@ -89,6 +89,10 @@ def boot_session(bootinfo):
 		bootinfo['docs'] += webnotes.model.doctype.get('Event')
 		
 		bootinfo['modules_list'] = webnotes.conn.get_global('modules_list')
+		
+		# if no company, show a dialog box to create a new company
+		bootinfo['setup_complete'] = webnotes.conn.sql("""select name from 
+			tabCompany limit 1""") and 'Yes' or 'No'
 
 def get_letter_heads():
 	"""load letter heads with startup"""

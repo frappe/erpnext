@@ -1,0 +1,23 @@
+#activity-list .label {
+	display: inline-block;
+	width: 100px;
+	margin-right: 7px;
+}
+
+#activity-list .label-info {
+	cursor: pointer;
+}
+
+#activity-list .user-info {
+	float: right;
+	color: #777;
+	font-size: 10px;
+}
+
+#activity-list .date-sep {
+	margin-bottom: 11px;
+	padding: 5px 0px;
+	border-bottom: 1px solid #aaa;
+	color: #555;
+	font-size: 10px;
+}
