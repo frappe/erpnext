@@ -91,7 +91,7 @@ if item or based_on == 'Item':
 # Item Group
 if item_group or based_on == 'Item Group':
 	add_tab += ' ,`tabItem` t3, `tabItem Group` t4 '
-	add_cond += ' AND t3.name = t2.item_code AND t3.item_group = t4.name and (t4.name = "%s" or t4.name IN (SELECT t5.name FROM `tabItem Group` t5,`tabItem Group` t6 WHERE t5.lft BETWEEN t6.lft and t6.rgt and t5.docstatus !=2 and ifnull(t5.is_group,"No") = "No" and t6.name = "%s"))' % (based_on != 'Item Group' and item_group or '%(value)s', based_on != 'Item Group' and item_group or '%(value)s')
+	add_cond += ' AND t3.name = t2.item_code AND t3.item_group = t4.name and (t4.name = "%s" or t4.name IN (SELECT t5.name FROM `tabItem Group` t5,`tabItem Group` t6 WHERE t5.lft BETWEEN t6.lft and t6.rgt and t5.docstatus !=2 and t6.name = "%s"))' % (based_on != 'Item Group' and item_group or '%(value)s', based_on != 'Item Group' and item_group or '%(value)s')
 
 # Customer
 if customer or based_on == 'Customer':
