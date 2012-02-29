@@ -81,20 +81,22 @@ erpnext.toolbar.add_modules = function() {
 	if(wn.boot.modules_list)
 		wn.boot.modules_list = JSON.parse(wn.boot.modules_list);
 	else
-		wn.boot.modules_list = ['Accounts', 'Selling', 'Buying', 'Stock', 
-			'Production', 'Projects', 'Support', 'HR', 'Website'];
+		wn.boot.modules_list = keys(erpnext.modules).sort();
 
 	// add to dropdown
 	for(var i in wn.boot.modules_list) {
 		var m = wn.boot.modules_list[i]
-		args = {
-			module: m,
-			module_page: m.toLowerCase(),
-			module_label: m=='HR' ? 'Human Resources' : m
+		
+		if(m!='Setup') {
+			args = {
+				module: m,
+				module_page: erpnext.modules[m],
+				module_label: m=='HR' ? 'Human Resources' : m
+			}
+
+			$('.navbar .modules').append(repl('<li><a href="#!%(module_page)s" \
+				data-module="%(module)s">%(module_label)s</a></li>', args));			
 		}
-			
-		$('.navbar .modules').append(repl('<li><a href="#!%(module_page)s-home" \
-			data-module="%(module)s">%(module_label)s</a></li>', args));			
 	}
 	
 	// setup for system manager
