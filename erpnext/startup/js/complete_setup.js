@@ -35,7 +35,7 @@ erpnext.complete_setup = function() {
 	var d = new wn.widgets.Dialog({
 		title: "Setup",
 		fields: [
-			{fieldname:'first_name', label:'Your First Name', fieldtype:'Data'},
+			{fieldname:'first_name', label:'Your First Name', fieldtype:'Data', reqd: 1},
 			{fieldname:'last_name', label:'Your Last Name', fieldtype:'Data'},
 			{fieldname:'company_name', label:'Company Name', fieldtype:'Data', reqd:1,
 				description: 'e.g. "My Company LLC"'},
@@ -43,9 +43,9 @@ erpnext.complete_setup = function() {
 				description:'e.g. "MC"',reqd:1},
 			{fieldname:'fy_start', label:'Financial Year Start Date', fieldtype:'Select',
 				description:'Your financial year begins on"', reqd:1,
-				options=['', '1st Jan', '1st Apr', '1st Jul', '1st Oct'].join('\n')},
-			{fieldname:'currency': label: 'Default Currency', reqd:1,
-				options=currency_list.join('\n')},
+				options: ['', '1st Jan', '1st Apr', '1st Jul', '1st Oct'].join('\n')},
+			{fieldname:'currency', label: 'Default Currency', reqd:1,
+				options: currency_list.join('\n'), fieldtype: 'Select'},
 			{fieldname:'update', label:'Setup',fieldtype:'Button'}
 		]
 	})
@@ -65,7 +65,7 @@ erpnext.complete_setup = function() {
 	
 	// set first name, last name
 	if(user_fullname) {
-		u = user_fullname.spilt(' ');
+		u = user_fullname.split(' ');
 		if(u[0]) {
 			d.fields_dict.first_name.input.value = u[0];
 		}

@@ -55,13 +55,13 @@ return output.join('');};str_format.cache={};str_format.parse=function(fmt){var 
 else if((match=/^\x25{2}/.exec(_fmt))!==null){parse_tree.push('%');}
 else if((match=/^\x25(?:([1-9]\d*)\$|\(([^\)]+)\))?(\+)?(0|'[^$])?(-)?(\d+)?(?:\.(\d+))?([b-fosuxX])/.exec(_fmt))!==null){if(match[2]){arg_names|=1;var field_list=[],replacement_field=match[2],field_match=[];if((field_match=/^([a-z_][a-z_\d]*)/i.exec(replacement_field))!==null){field_list.push(field_match[1]);while((replacement_field=replacement_field.substring(field_match[0].length))!==''){if((field_match=/^\.([a-z_][a-z_\d]*)/i.exec(replacement_field))!==null){field_list.push(field_match[1]);}
 else if((field_match=/^\[(\d+)\]/.exec(replacement_field))!==null){field_list.push(field_match[1]);}
-else{}}}
-else{}
+else{throw('[sprintf] huh?');}}}
+else{throw('[sprintf] huh?');}
 match[2]=field_list;}
 else{arg_names|=2;}
 if(arg_names===3){throw('[sprintf] mixing positional and named placeholders is not (yet) supported');}
 parse_tree.push(match);}
-else{}
+else{throw('[sprintf] huh?');}
 _fmt=_fmt.substring(match[0].length);}
 return parse_tree;};return str_format;})();var vsprintf=function(fmt,argv){argv.unshift(fmt);return sprintf.apply(null,argv);};
 /*
