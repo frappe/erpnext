@@ -66,7 +66,7 @@ $.extend(wn.pages.users, {
 	},
 	render: function(data) {
 		if(data.file_list) {
-			data.imgsrc = 'files/' + data.files_list.split('\n')[0].split(',')[1];
+			data.imgsrc = 'files/' + data.file_list.split('\n')[0].split(',')[1];
 		} else {
 			data.imgsrc = 'lib/images/ui/no_img_' + (data.gender=='Female' ? 'f' : 'm');
 		}

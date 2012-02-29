@@ -33,6 +33,10 @@ erpnext.ActivityFeed = Class.extend({
 			data.add_class = "label-important";
 		}
 		
+		if(date.feed_type=='Assignment') {
+			data.add_class = "label-warning";
+		}
+		
 		// link
 		if(data.doc_name && data.feed_type!='Login') {
 			data.link = repl('<a href="#!Form/%(doc_type)s/%(doc_name)s">%(doc_name)s</a>', data)
