@@ -33,7 +33,7 @@ erpnext.ActivityFeed = Class.extend({
 			data.add_class = "label-important";
 		}
 		
-		if(date.feed_type=='Assignment') {
+		if(data.feed_type=='Assignment') {
 			data.add_class = "label-warning";
 		}
 		
