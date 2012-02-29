@@ -19,7 +19,7 @@ erpnext.ActivityFeed = Class.extend({
 			%(link)s %(subject)s <span class="user-info">%(by)s</span>', data));
 	},
 	scrub_data: function(data) {
-		data.by = wn.boot.user_fullnames[data.owner];
+		data.by = wn.user_info(data.owner).fullname;
 		
 		// feedtype
 		if(!data.feed_type) {

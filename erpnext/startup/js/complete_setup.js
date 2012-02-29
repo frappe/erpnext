@@ -82,7 +82,7 @@ erpnext.complete_setup = function() {
 		$c_obj('Setup Control','setup_account',data,function(r, rt){
 			sys_defaults = r.message;
 			user_fullname = r.message.user_fullname;
-			wn.boot.user_fullnames[user] = user_fullname;
+			wn.boot.user_info[user].fullname = user_fullname;
 			d.hide();
 			$('header').toggle(true);
 			page_body.wntoolbar.set_user_name();
