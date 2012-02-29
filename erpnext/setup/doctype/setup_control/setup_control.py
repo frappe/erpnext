@@ -48,8 +48,8 @@ class DocType:
 		args = json.loads(args)
 
 		self.set_cp_defaults(args['company'], args['industry'], args['time_zone'], args['country'], args['account_name'])
-		self.create_profile(args['user'], args['first_name'], args['last_name'], args.get('pwd'))	
-	
+		self.create_profile(args['user'], args['first_name'], args['last_name'], args.get('pwd'))
+
 		# Domain related updates
 		try:
 			from server_tools.gateway_utils import add_domain_map
@@ -58,7 +58,9 @@ class DocType:
 			pass
 
 		# add record in domain_list of Website Settings
-		webnotes.conn.set_value('Website Settings', 'Website Settings', 'subdomain', args['url_name'] + ".erpnext.com")
+		account_url = args['url_name'] + '.erpnext.com'
+		webnotes.conn.set_value('Website Settings', 'Website Settings',
+				'subdomain', account_url)
 		
 	
 	# Account Setup
@@ -125,7 +127,8 @@ class DocType:
 		"""update activty feed and create todo for creation of item, customer, vendor"""
 		import home
 		home.make_feed('Comment', 'ToDo Item', '', webnotes.session['user'],
-			'<i>"' + 'Setup Complete. Please check your To Do List' + '"</i>', '#6B24B3')
+			'<i>"' + 'Setup Complete. Please check your <a href="#!todo">\
+			To Do List</a>' + '"</i>', '#6B24B3')
 
 		d = Document('ToDo Item')
 		d.description = 'Create your first Customer'
