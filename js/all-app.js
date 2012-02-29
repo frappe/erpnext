@@ -901,7 +901,7 @@ this.clear=function(){this.results_area.innerHTML='';this.table=null;$ds(this.re
 this.make_results=function(r,rt){if(this.start==0)this.clear();$dh(this.more_button_area);if(this.loading_img)$dh(this.loading_img)
 if(r.message)r.values=r.message;if(r.values&&r.values.length){this.values=r.values;var m=Math.min(r.values.length,this.page_length);for(var i=0;i<m;i++){var row=this.add_row();this.opts.render_row(row,r.values[i],this,i);}
 this.start+=m;if(r.values.length>=this.page_length)$ds(this.more_button_area);}else{if(this.start==0){$dh(this.results_area);$ds(this.no_results_area);}}
-if(this.onrun)this.onrun();if(this.opts.onrun)this.opts.onrun();}
+if(this.onrun)this.onrun();if(this.opts.onrun)this.opts.onrun();if(this.opts.callback)this.opts.callback(r);}
 this.add_row=function(){return $a(this.results_area,'div','',(opts.cell_style?opts.cell_style:{padding:'3px 0px'}));}
 this.run=function(callback,append){if(callback)
 this.onrun=callback;if(!append)
@@ -2255,7 +2255,7 @@ wn.provide('erpnext.module_page');erpnext.module_page.setup_page=function(module
 erpnext.module_page.hide_links=function(wrapper){$(wrapper).find('[href*="List/"]').each(function(){var href=$(this).attr('href');var dt=href.split('/')[1];if(wn.boot.profile.can_read.indexOf(get_label_doctype(dt))==-1){var txt=$(this).text();$(this).parent().css('color','#999').html(txt);}});$(wrapper).find('[data-doctype]').each(function(){var dt=$(this).attr('data-doctype');if(wn.boot.profile.can_read.indexOf(dt)==-1){var txt=$(this).text();$(this).parent().css('color','#999').html(txt);}});$(wrapper).find('[href*="Form/"]').each(function(){var href=$(this).attr('href');var dt=href.split('/')[1];if(wn.boot.profile.can_read.indexOf(get_label_doctype(dt))==-1){var txt=$(this).text();$(this).parent().css('color','#999').html(txt);}});}
 erpnext.module_page.make_list=function(module,wrapper){wrapper.list=new wn.widgets.Listing({parent:$(wrapper).find('.reports-list').get(0),method:'utilities.get_report_list',render_row:function(row,data){if(!data.parent_doc_type)data.parent_doc_type=data.doc_type;$(row).html(repl('<a href="#!Report/%(doc_type)s/%(criteria_name)s" \
     data-doctype="%(parent_doc_type)s">\
-    %(criteria_name)s</a>',data))},args:{module:module},no_refresh:true});wrapper.list.run();}
+    %(criteria_name)s</a>',data))},args:{module:module},no_refresh:true,callback:function(r){erpnext.module_page.hide_links(wrapper)}});wrapper.list.run();}
 /*
  *	erpnext/startup/js/toolbar.js
  */

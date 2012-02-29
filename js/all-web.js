@@ -716,7 +716,7 @@ this.clear=function(){this.results_area.innerHTML='';this.table=null;$ds(this.re
 this.make_results=function(r,rt){if(this.start==0)this.clear();$dh(this.more_button_area);if(this.loading_img)$dh(this.loading_img)
 if(r.message)r.values=r.message;if(r.values&&r.values.length){this.values=r.values;var m=Math.min(r.values.length,this.page_length);for(var i=0;i<m;i++){var row=this.add_row();this.opts.render_row(row,r.values[i],this,i);}
 this.start+=m;if(r.values.length>=this.page_length)$ds(this.more_button_area);}else{if(this.start==0){$dh(this.results_area);$ds(this.no_results_area);}}
-if(this.onrun)this.onrun();if(this.opts.onrun)this.opts.onrun();}
+if(this.onrun)this.onrun();if(this.opts.onrun)this.opts.onrun();if(this.opts.callback)this.opts.callback(r);}
 this.add_row=function(){return $a(this.results_area,'div','',(opts.cell_style?opts.cell_style:{padding:'3px 0px'}));}
 this.run=function(callback,append){if(callback)
 this.onrun=callback;if(!append)
