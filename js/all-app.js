@@ -129,13 +129,13 @@ return output.join('');};str_format.cache={};str_format.parse=function(fmt){var 
 else if((match=/^\x25{2}/.exec(_fmt))!==null){parse_tree.push('%');}
 else if((match=/^\x25(?:([1-9]\d*)\$|\(([^\)]+)\))?(\+)?(0|'[^$])?(-)?(\d+)?(?:\.(\d+))?([b-fosuxX])/.exec(_fmt))!==null){if(match[2]){arg_names|=1;var field_list=[],replacement_field=match[2],field_match=[];if((field_match=/^([a-z_][a-z_\d]*)/i.exec(replacement_field))!==null){field_list.push(field_match[1]);while((replacement_field=replacement_field.substring(field_match[0].length))!==''){if((field_match=/^\.([a-z_][a-z_\d]*)/i.exec(replacement_field))!==null){field_list.push(field_match[1]);}
 else if((field_match=/^\[(\d+)\]/.exec(replacement_field))!==null){field_list.push(field_match[1]);}
-else{}}}
-else{}
+else{throw('[sprintf] huh?');}}}
+else{throw('[sprintf] huh?');}
 match[2]=field_list;}
 else{arg_names|=2;}
 if(arg_names===3){throw('[sprintf] mixing positional and named placeholders is not (yet) supported');}
 parse_tree.push(match);}
-else{}
+else{throw('[sprintf] huh?');}
 _fmt=_fmt.substring(match[0].length);}
 return parse_tree;};return str_format;})();var vsprintf=function(fmt,argv){argv.unshift(fmt);return sprintf.apply(null,argv);};
 /*
@@ -280,7 +280,9 @@ var lstrip=function(s,chars){if(!chars)chars=['\n','\t',' '];var first_char=s.su
 return s;}
 var rstrip=function(s,chars){if(!chars)chars=['\n','\t',' '];var last_char=s.substr(s.length-1);while(in_list(chars,last_char)){var s=s.substr(0,this.length-1);last_char=s.substr(this.length-1);}
 return s;}
-function repl(s,dict){return sprintf(s,dict);}
+function repl_all(s,s1,s2){var idx=s.indexOf(s1);while(idx!=-1){s=s.replace(s1,s2);idx=s.indexOf(s1);}
+return s;}
+function repl(s,dict){if(s==null)return'';for(key in dict)s=repl_all(s,'%('+key+')s',dict[key]);return s;}
 function keys(obj){var mykeys=[];for(key in obj)mykeys[mykeys.length]=key;return mykeys;}
 function values(obj){var myvalues=[];for(key in obj)myvalues[myvalues.length]=obj[key];return myvalues;}
 function in_list(list,item){for(var i=0;i<list.length;i++)
@@ -1677,7 +1679,7 @@ _f.Frm.prototype.setup=function(){var me=this;this.fields=[];this.fields_dict={}
 _f.Frm.prototype.setup_print_layout=function(){this.print_wrapper=$a(this.wrapper,'div');this.print_head=$a(this.print_wrapper,'div');this.print_body=$a(this.print_wrapper,'div','layout_wrapper',{padding:'23px'});var t=make_table(this.print_head,1,2,'100%',[],{padding:'6px'});this.view_btn_wrapper=$a($td(t,0,0),'span','green_buttons');this.view_btn=$btn(this.view_btn_wrapper,'View Details',function(){cur_frm.edit_doc()},{marginRight:'4px'},'green');this.print_btn=$btn($td(t,0,0),'Print',function(){cur_frm.print_doc()});$y($td(t,0,1),{textAlign:'right'});this.print_close_btn=$btn($td(t,0,1),'Close',function(){nav_obj.show_last_open();});}
 _f.Frm.prototype.onhide=function(){if(_f.cur_grid_cell)_f.cur_grid_cell.grid.cell_deselect();}
 _f.Frm.prototype.setup_std_layout=function(){this.page_layout=new wn.PageLayout({parent:this.wrapper,main_width:this.in_dialog?'100%':'75%',sidebar_width:this.in_dialog?'0%':'25%'})
-this.meta.section_style='Simple';this.layout=new Layout(this.page_layout.body,'100%');if(!this.in_dialog){this.setup_sidebar();}
+this.meta.section_style='Simple';this.layout=new Layout(this.page_layout.body,'100%');if(this.in_dialog){$(this.page_layout.wrapper).removeClass('layout-wrapper-background');$(this.page_layout.main).removeClass('layout-main-section');$(this.page_layout.sidebar_area).toggle(false);}else{this.setup_sidebar();}
 this.setup_footer();if(!(this.meta.istable||user=='Guest'))this.frm_head=new _f.FrmHeader(this.page_layout.head,this);if(this.frm_head&&this.meta.in_dialog)$dh(this.frm_head.page_head.close_btn);if(this.meta.colour)
 this.layout.wrapper.style.backgroundColor='#'+this.meta.colour.split(':')[1];this.setup_fields_std();if(this.meta.description)
 this.add_description();}
@@ -2222,6 +2224,7 @@ var current_module;var is_system_manager=0;wn.provide('erpnext.startup');erpnext
 erpnext.startup.set_globals=function(){pscript.is_erpnext_saas=cint(wn.control_panel.sync_with_gateway)
 if(inList(user_roles,'System Manager'))is_system_manager=1;}
 erpnext.startup.start=function(){$('#startup_div').html('Starting up...').toggle(true);erpnext.startup.set_globals();if(wn.boot.custom_css){set_style(wn.boot.custom_css);}
+if(wn.boot.user_background){erpnext.set_user_background(wn.boot.user_background);}
 if(user=='Guest'){if(wn.boot.website_settings.title_prefix){wn.title_prefix=wn.boot.website_settings.title_prefix;}}else{erpnext.toolbar.setup();erpnext.startup.set_periodic_updates();$('footer').html('<div class="web-footer erpnext-footer">\
    Powered by <a href="https://erpnext.com">ERPNext</a></div>');if(in_list(user_roles,'System Manager')&&(wn.boot.setup_complete=='No')){wn.require("erpnext/startup/js/complete_setup.js");erpnext.complete_setup();}}
 $('#startup_div').toggle(false);}
@@ -2234,6 +2237,7 @@ $c_page('home','event_updates','get_unread_messages',null,function(r,rt){if(!r.e
 if(circle){if(r.message.length){circle.find('span:first').text(r.message.length);circle.toggle(true);}else{circle.toggle(false);}}}else{clearInterval(wn.updates.id);}});}
 erpnext.startup.set_periodic_updates=function(){wn.updates={};if(wn.updates.id){clearInterval(wn.updates.id);}
 wn.updates.id=setInterval(update_messages,60000);}
+erpnext.set_user_background=function(src){set_style(repl('body { background: url("files/%(src)s") repeat !important;}',{src:src}))}
 $(document).bind('startup',function(){erpnext.startup.start();});
 /*
  *	erpnext/startup/js/modules.js

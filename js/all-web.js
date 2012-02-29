@@ -55,13 +55,13 @@ return output.join('');};str_format.cache={};str_format.parse=function(fmt){var 
 else if((match=/^\x25{2}/.exec(_fmt))!==null){parse_tree.push('%');}
 else if((match=/^\x25(?:([1-9]\d*)\$|\(([^\)]+)\))?(\+)?(0|'[^$])?(-)?(\d+)?(?:\.(\d+))?([b-fosuxX])/.exec(_fmt))!==null){if(match[2]){arg_names|=1;var field_list=[],replacement_field=match[2],field_match=[];if((field_match=/^([a-z_][a-z_\d]*)/i.exec(replacement_field))!==null){field_list.push(field_match[1]);while((replacement_field=replacement_field.substring(field_match[0].length))!==''){if((field_match=/^\.([a-z_][a-z_\d]*)/i.exec(replacement_field))!==null){field_list.push(field_match[1]);}
 else if((field_match=/^\[(\d+)\]/.exec(replacement_field))!==null){field_list.push(field_match[1]);}
-else{}}}
-else{}
+else{throw('[sprintf] huh?');}}}
+else{throw('[sprintf] huh?');}
 match[2]=field_list;}
 else{arg_names|=2;}
 if(arg_names===3){throw('[sprintf] mixing positional and named placeholders is not (yet) supported');}
 parse_tree.push(match);}
-else{}
+else{throw('[sprintf] huh?');}
 _fmt=_fmt.substring(match[0].length);}
 return parse_tree;};return str_format;})();var vsprintf=function(fmt,argv){argv.unshift(fmt);return sprintf.apply(null,argv);};
 /*
@@ -206,7 +206,9 @@ var lstrip=function(s,chars){if(!chars)chars=['\n','\t',' '];var first_char=s.su
 return s;}
 var rstrip=function(s,chars){if(!chars)chars=['\n','\t',' '];var last_char=s.substr(s.length-1);while(in_list(chars,last_char)){var s=s.substr(0,this.length-1);last_char=s.substr(this.length-1);}
 return s;}
-function repl(s,dict){return sprintf(s,dict);}
+function repl_all(s,s1,s2){var idx=s.indexOf(s1);while(idx!=-1){s=s.replace(s1,s2);idx=s.indexOf(s1);}
+return s;}
+function repl(s,dict){if(s==null)return'';for(key in dict)s=repl_all(s,'%('+key+')s',dict[key]);return s;}
 function keys(obj){var mykeys=[];for(key in obj)mykeys[mykeys.length]=key;return mykeys;}
 function values(obj){var myvalues=[];for(key in obj)myvalues[myvalues.length]=obj[key];return myvalues;}
 function in_list(list,item){for(var i=0;i<list.length;i++)
@@ -1070,6 +1072,7 @@ var current_module;var is_system_manager=0;wn.provide('erpnext.startup');erpnext
 erpnext.startup.set_globals=function(){pscript.is_erpnext_saas=cint(wn.control_panel.sync_with_gateway)
 if(inList(user_roles,'System Manager'))is_system_manager=1;}
 erpnext.startup.start=function(){$('#startup_div').html('Starting up...').toggle(true);erpnext.startup.set_globals();if(wn.boot.custom_css){set_style(wn.boot.custom_css);}
+if(wn.boot.user_background){erpnext.set_user_background(wn.boot.user_background);}
 if(user=='Guest'){if(wn.boot.website_settings.title_prefix){wn.title_prefix=wn.boot.website_settings.title_prefix;}}else{erpnext.toolbar.setup();erpnext.startup.set_periodic_updates();$('footer').html('<div class="web-footer erpnext-footer">\
    Powered by <a href="https://erpnext.com">ERPNext</a></div>');if(in_list(user_roles,'System Manager')&&(wn.boot.setup_complete=='No')){wn.require("erpnext/startup/js/complete_setup.js");erpnext.complete_setup();}}
 $('#startup_div').toggle(false);}
@@ -1082,6 +1085,7 @@ $c_page('home','event_updates','get_unread_messages',null,function(r,rt){if(!r.e
 if(circle){if(r.message.length){circle.find('span:first').text(r.message.length);circle.toggle(true);}else{circle.toggle(false);}}}else{clearInterval(wn.updates.id);}});}
 erpnext.startup.set_periodic_updates=function(){wn.updates={};if(wn.updates.id){clearInterval(wn.updates.id);}
 wn.updates.id=setInterval(update_messages,60000);}
+erpnext.set_user_background=function(src){set_style(repl('body { background: url("files/%(src)s") repeat !important;}',{src:src}))}
 $(document).bind('startup',function(){erpnext.startup.start();});
 /*
  *	erpnext/website/js/topbar.js

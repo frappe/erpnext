@@ -14,7 +14,7 @@ erpnext.ActivityFeed = Class.extend({
 	init: function(row, data) {
 		this.scrub_data(data);
 		this.add_date_separator(row, data);
-		$(row).append(repl('<span %(onclick)s\
+		$(row).append(sprintf('<span %(onclick)s\
 			class="label %(add_class)s">%(feed_type)s</span>\
 			%(link)s %(subject)s <span class="user-info">%(by)s</span>', data));
 	},

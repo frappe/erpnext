@@ -50,6 +50,9 @@ erpnext.startup.start = function() {
 	if(wn.boot.custom_css) {
 		set_style(wn.boot.custom_css);
 	}
+	if(wn.boot.user_background) {
+		erpnext.set_user_background(wn.boot.user_background);
+	}
 		
 	if(user == 'Guest'){
 		if(wn.boot.website_settings.title_prefix) {
@@ -130,6 +133,10 @@ erpnext.startup.set_periodic_updates = function() {
 	}
 
 	wn.updates.id = setInterval(update_messages, 60000);
+}
+
+erpnext.set_user_background = function(src) {
+	set_style(repl('body { background: url("files/%(src)s") repeat !important;}', {src:src}))
 }
 
 // =======================================
