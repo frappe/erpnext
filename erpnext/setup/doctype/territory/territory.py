@@ -75,3 +75,10 @@ class DocType:
       if not flt(d.target_qty) and not flt(d.target_amount):
         msgprint("Either target qty or target amount is mandatory.")
         raise Exception
+
+
+	def on_trash(self):
+		terr = sql("select name from `tabCustomer` where ifnull(territory, '') = %s", self.doc.name)
+		if terr:
+			msgprint("""Territory: %s can not be trashed/deleted because it is used in territory: %s. 
+				To trash/delete this, remove/change territory in customer master""" % (self.doc.name, terr[0][0] or ''), raise_exception=1)

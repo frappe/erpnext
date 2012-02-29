@@ -61,3 +61,9 @@ class DocType:
     if r:
       msgprint("'%s' record is trashed. To untrash please go to Setup & click on Trash."%(self.doc.item_group_name))
       raise Exception
+	
+	def on_trash(self):
+		ig = sql("select name from `tabItem` where ifnull(item_group, '') = %s", self.doc.name)
+		if ig:
+			msgprint("""Item Group: %s can not be trashed/deleted because it is used in item: %s. 
+				To trash/delete this, remove/change item group in item master""" % (self.doc.name, ig[0][0] or ''), raise_exception=1)
