@@ -87,6 +87,8 @@ def boot_session(bootinfo):
 
 		import webnotes.model.doctype
 		bootinfo['docs'] += webnotes.model.doctype.get('Event')
+		
+		bootinfo['modules_list'] = webnotes.conn.get_global('modules_list')
 
 def get_letter_heads():
 	"""load letter heads with startup"""
