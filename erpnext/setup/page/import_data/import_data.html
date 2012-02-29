@@ -41,12 +41,37 @@
 		<li>Select the saved CSV file, identify the date format if any</li>
 		<li>Click on "Import"</li>
 	</ol>
+	<br />
 	<h4>Over-writing Guide</h4>
 	<ol>
 		<li>To over-write data, click on "Do you want to over-write records?" and then download template</li>
 		<li>To over-write parent table data, mention existing ID in "Name" column</li>
 		<li>Over-writing of child table data will delete all previous data of child table and re-import. so before over-writing child tables, export all data from system, modify them and then re-import</li>
 		<li>Over-write checkbox will be checked while importing</li>
+	</ol>
+	<br />
+	<h4>Do you have Non-English data?</h4>
+	You may need to save the file with UTF-8 encoding for data to be imported correctly.
+	<br /><br />
+	Microsoft Excel Users:<br />
+	There is no obvious way of saving a CSV file with UTF-8 encoding.<br />
+	You will need to follow these steps:
+	<ol>
+		<li>In Excel, save the file in CSV (Comma Delimited) format</li>
+		<li>Open this saved file in Notepad</li>
+		<li>Click on File -&gt; Save As</li>
+		<li>File Name: &lt;your filename&gt;.csv<br />
+			Save as type: Text Documents (*.txt)<br />
+			Encoding: UTF-8
+		</li>
+		<li>Click on Save</li>
+	</ol>
+	<br />
+	OpenOffice or LibreOffice Users:<br />
+	<ol>
+		<li>While saving as CSV, check "Edit Filter Settings".</li>
+		<li>You will be prompted for Encoding.</li>
+		<li>Make sure it is "UTF-8" and click on OK.</li>
 	</ol>
 </div>
 </td>
