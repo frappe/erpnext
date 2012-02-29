@@ -40,7 +40,7 @@ def init():
 		webnotes.http_request = webnotes.auth.HTTPRequest()
 		return True
 	except webnotes.AuthenticationError, e:
-		pass
+		return True
 	except webnotes.UnknownDomainError, e:
 		print "Location: " + (webnotes.defs.redirect_404)
 	except webnotes.SessionStopped, e:
