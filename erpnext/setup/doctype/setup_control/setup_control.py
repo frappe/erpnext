@@ -65,16 +65,18 @@ class DocType:
 	# ---------------
 	def setup_account(self, args):
 		import webnotes, json
-		locals().update(args)
+		args = json.loads(args)
 
-		curr_fiscal_year, fy_start_date = self.get_fy_details(fy_start)
-		self.currency = currency
+		curr_fiscal_year, fy_start_date = self.get_fy_details(args.get('fy_start'))
+
+		args['name'] = webnotes.session.get('user')
 
 		# Update Profile
-		if last_name=='None': last_name = None
+		if not args.get('last_name') or args.get('last_name')=='None': args['last_name'] = None
 		webnotes.conn.sql("""\
-			UPDATE `tabProfile` SET first_name=%s, last_name=%s
-			WHERE name=%s AND docstatus<2""", (first_name, last_name, webnotes.user.name))
+			UPDATE `tabProfile` SET first_name=%(first_name)s,
+			last_name=%(last_name)s
+			WHERE name=%(name)s AND docstatus<2""", args)
 			
 		
 		# Fiscal Year
@@ -82,15 +84,15 @@ class DocType:
 		self.create_records(master_dict)
 		
 		# Company
-		master_dict = {'Company':{'company_name':company_name,
-								  'abbr':company_abbr,
-								  'default_currency':currency
-															}}
+		master_dict = {'Company':{'company_name':args.get('company_name'),
+								  'abbr':args.get('company_abbr'),
+								  'default_currency':args.get('currency')
+								}}
 		self.create_records(master_dict)
 		
 		def_args = {'current_fiscal_year':curr_fiscal_year,
-								'default_currency': currency,
-								'default_company':company_name,
+								'default_currency': args.get('currency'),
+								'default_company':args.get('company_name'),
 								'default_valuation_method':'FIFO',
 								'default_stock_uom':'Nos',
 								'date_format':'dd-mm-yyyy',
@@ -102,7 +104,8 @@ class DocType:
 								'emp_created_by':'Naming Series',
 								'cust_master_name':'Customer Name', 
 								'supp_master_name':'Supplier Name',
-								'default_currency_format': (currency=='INR') and 'Lacs' or 'Millions'
+								'default_currency_format': \
+										(args.get('currency')=='INR') and 'Lacs' or 'Millions'
 					}
 
 		# Set 
@@ -114,31 +117,35 @@ class DocType:
 		msgprint("Company setup is complete")
 		
 		import webnotes.utils
-		user_fullname = (first_name or '') + (last_name and (" " + last_name) or '')
+		user_fullname = (args.get('first_name') or '') + (args.get('last_name')
+				and (" " + args.get('last_name')) or '')
 		return {'sys_defaults': webnotes.utils.get_defaults(), 'user_fullname': user_fullname}
 
 	def create_feed_and_todo(self):
 		"""update activty feed and create todo for creation of item, customer, vendor"""
 		import home
-		home.make_feed('Comment', '', '', webnotes.session['user'],
-			'<i>"' + doc.comment + '"</i>', '#6B24B3')
+		home.make_feed('Comment', 'ToDo Item', '', webnotes.session['user'],
+			'<i>"' + 'Setup Complete. Please check your To Do List' + '"</i>', '#6B24B3')
 
 		d = Document('ToDo Item')
-		d.description = 'Create your first <a href="#!List/Customer">Customer</a>'
+		d.description = 'Create your first Customer'
 		d.priority = 'High'
 		d.date = nowdate()
+		d.reference_type = 'Customer'
 		d.save(1)
 
 		d = Document('ToDo Item')
-		d.description = 'Create your first <a href="#!List/Item">Item</a>'
+		d.description = 'Create your first Item'
 		d.priority = 'High'
 		d.date = nowdate()
+		d.reference_type = 'Item'
 		d.save(1)
 
 		d = Document('ToDo Item')
-		d.description = 'Create your first <a href="#!List/Supplier">Supplier</a>'
+		d.description = 'Create your first Supplier'
 		d.priority = 'High'
 		d.date = nowdate()
+		d.reference_type = 'Supplier'
 		d.save(1)
 
 		

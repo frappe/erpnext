@@ -5,7 +5,7 @@
 	{
 		'creation': '2010-08-08 17:09:35',
 		'docstatus': 0,
-		'modified': '2012-02-07 13:28:20',
+		'modified': '2012-02-29 17:55:13',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -22,7 +22,6 @@
 	# These values are common for all Field Mapper Detail
 	{
 		'doctype': u'Field Mapper Detail',
-		'map': u'Yes',
 		'name': '__common__',
 		'parent': u'Purchase Order-Purchase Receipt',
 		'parentfield': u'field_mapper_details',
@@ -50,6 +49,7 @@
 		'checking_operator': u'=',
 		'doctype': u'Field Mapper Detail',
 		'from_field': u'supplier',
+		'map': u'Yes',
 		'match_id': 0,
 		'to_field': u'supplier'
 	},
@@ -59,6 +59,7 @@
 		'checking_operator': u'=',
 		'doctype': u'Field Mapper Detail',
 		'from_field': u'company',
+		'map': u'Yes',
 		'match_id': 0,
 		'to_field': u'company'
 	},
@@ -68,6 +69,7 @@
 		'checking_operator': u'=',
 		'doctype': u'Field Mapper Detail',
 		'from_field': u'currency',
+		'map': u'Yes',
 		'match_id': 0,
 		'to_field': u'currency'
 	},
@@ -76,6 +78,7 @@
 	{
 		'doctype': u'Field Mapper Detail',
 		'from_field': u'name',
+		'map': u'Yes',
 		'match_id': 1,
 		'to_field': u'prevdoc_detail_docname'
 	},
@@ -84,6 +87,7 @@
 	{
 		'doctype': u'Field Mapper Detail',
 		'from_field': u'parent',
+		'map': u'Yes',
 		'match_id': 1,
 		'to_field': u'prevdoc_docname'
 	},
@@ -92,6 +96,7 @@
 	{
 		'doctype': u'Field Mapper Detail',
 		'from_field': u'parenttype',
+		'map': u'Yes',
 		'match_id': 1,
 		'to_field': u'prevdoc_doctype'
 	},
@@ -101,6 +106,7 @@
 		'checking_operator': u'=',
 		'doctype': u'Field Mapper Detail',
 		'from_field': u'item_code',
+		'map': u'Yes',
 		'match_id': 1,
 		'to_field': u'item_code'
 	},
@@ -109,6 +115,7 @@
 	{
 		'doctype': u'Field Mapper Detail',
 		'from_field': u'eval:(flt(obj.qty) - flt(obj.received_qty)) ',
+		'map': u'Yes',
 		'match_id': 1,
 		'to_field': u'received_qty'
 	},
@@ -117,6 +124,7 @@
 	{
 		'doctype': u'Field Mapper Detail',
 		'from_field': u'eval:(flt(obj.qty) - flt(obj.received_qty)) ',
+		'map': u'Yes',
 		'match_id': 1,
 		'to_field': u'qty'
 	},
@@ -125,6 +133,7 @@
 	{
 		'doctype': u'Field Mapper Detail',
 		'from_field': u'eval:(flt(obj.qty) - flt(obj.received_qty)) * flt(obj.conversion_factor)',
+		'map': u'Yes',
 		'match_id': 1,
 		'to_field': u'stock_qty'
 	},
@@ -133,6 +142,7 @@
 	{
 		'doctype': u'Field Mapper Detail',
 		'from_field': u'eval:(flt(obj.qty) - flt(obj.received_qty)) * flt(obj.import_rate)',
+		'map': u'Yes',
 		'match_id': 1,
 		'to_field': u'import_amount'
 	},
@@ -141,6 +151,7 @@
 	{
 		'doctype': u'Field Mapper Detail',
 		'from_field': u'eval:(flt(obj.qty) - flt(obj.received_qty)) * flt(obj.purchase_rate)',
+		'map': u'Yes',
 		'match_id': 1,
 		'to_field': u'amount'
 	},
@@ -149,6 +160,7 @@
 	{
 		'doctype': u'Field Mapper Detail',
 		'from_field': u'schedule_date',
+		'map': u'Yes',
 		'match_id': 1,
 		'to_field': u'schedule_date'
 	},
@@ -157,6 +169,7 @@
 	{
 		'doctype': u'Field Mapper Detail',
 		'from_field': u'net_total',
+		'map': u'Yes',
 		'match_id': 0,
 		'to_field': u'net_total'
 	},
@@ -165,6 +178,7 @@
 	{
 		'doctype': u'Field Mapper Detail',
 		'from_field': u'grand_total',
+		'map': u'Yes',
 		'match_id': 0,
 		'to_field': u'grand_total'
 	},
@@ -173,6 +187,7 @@
 	{
 		'doctype': u'Field Mapper Detail',
 		'from_field': u'total_tax',
+		'map': u'Yes',
 		'match_id': 0,
 		'to_field': u'total_tax'
 	},
@@ -180,7 +195,17 @@
 	# Field Mapper Detail
 	{
 		'doctype': u'Field Mapper Detail',
+		'from_field': u'transaction_date',
+		'map': u'No',
+		'match_id': 0,
+		'to_field': u'transaction_date'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': u'Field Mapper Detail',
 		'from_field': u'conversion_rate',
+		'map': u'Yes',
 		'match_id': 0,
 		'to_field': u'conversion_rate'
 	},

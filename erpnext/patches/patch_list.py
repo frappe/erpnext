@@ -121,4 +121,40 @@ patch_list = [
 		'patch_file': 'fix_packing_slip',
 		'description': 'Update Mapper Delivery Note-Packing Slip'
 	},
+	{
+		'patch_module': 'patches.jan_mar_2012.apps',
+		'patch_file': 'todo_item',
+		'description': 'Reloads todo item'
+	},
+	{
+		'patch_module': 'patches.jan_mar_2012',
+		'patch_file': 'convert_tables_to_utf8',
+		'description': 'Convert tables to UTF-8'
+	},
+	{
+		'patch_module': 'patches.jan_mar_2012',
+		'patch_file': 'pending_patches',
+	},
+	{
+		'patch_module': 'patches.jan_mar_2012',
+		'patch_file': 'pos_setting_patch',
+	},
+	{
+		'patch_module': 'patches.jan_mar_2012',
+		'patch_file': 'reload_doctype',
+	},
+	{
+		'patch_module': 'patches.jan_mar_2012',
+		'patch_file': 'reload_po_pr_mapper',
+	},
+	{
+		'patch_module': 'patches.jan_mar_2012',
+		'patch_file': 'delete_pur_of_service',
+		'description': 'Deletes purpose of service'
+	},
+	{
+		'patch_module': 'patches.jan_mar_2012',
+		'patch_file': 'navupdate',
+		'description': 'New Navigation Pages'
+	},
 ]
