@@ -154,8 +154,8 @@ def send_welcome_mail(email, args):
 	args.update({
 		'company': webnotes.conn.get_default('company'),
 		'password': args.get('password'),
-		'account_url': webnotes.conn.get_value('Website Settings', 'Website
-			Settings', 'subdomain') or ""
+		'account_url': webnotes.conn.get_value('Website Settings',
+			'Website Settings', 'subdomain') or ""
 	})
 	if not args.get('last_name'): args['last_name'] = ''
 	sendmail_md(pr.email, subject="Welcome to ERPNext", msg=welcome_txt % args, from_defs=1)
