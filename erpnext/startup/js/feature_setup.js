@@ -149,7 +149,6 @@ pscript.feature_dict = {
 		'Sales Order': {'fields':['sales_team','Packing List']}
 	},
 	'fs_more_info': {
-		'Customer': {'fields':['More Info']},
 		'Delivery Note': {'fields':['More Info']},
 		'Enquiry': {'fields':['More Info']},
 		'Indent': {'fields':['More Info']},
@@ -160,8 +159,6 @@ pscript.feature_dict = {
 		'Quotation': {'fields':['More Info']},
 		'Receivable Voucher': {'fields':['More Info']},
 		'Sales Order': {'fields':['More Info']},
-		'Serial No': {'fields':['More Info']},
-		'Supplier': {'fields':['More Info']}
 	},
 	'fs_quality': {
 		'Item': {'fields':['Item Inspection Criteria','inspection_required']},
