@@ -33,10 +33,10 @@ def execute():
 	}
 
 	for d in del_flds:
-		webnotes.conn.sql("delete from `tabDocField` where fieldname in (%s) and parent = %s", (del_flds[d], d))
+		webnotes.conn.sql("delete from `tabDocField` where fieldname in (%s) and parent = '%s'"% (del_flds[d], d))
 
 	for d in del_labels:
-		webnotes.conn.sql("delete from `tabDocField` where label in (%s) and parent = %s", (del_labels[d], d))
+		webnotes.conn.sql("delete from `tabDocField` where label in (%s) and parent = '%s'"% (del_labels[d], d))
 
 	delete_doc('DocType', 'Update Delivery Date Detail')
 
