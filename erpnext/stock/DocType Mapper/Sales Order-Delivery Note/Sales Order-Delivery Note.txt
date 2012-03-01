@@ -5,273 +5,263 @@
 	{
 		'creation': '2010-08-08 17:09:35',
 		'docstatus': 0,
-		'modified': '2011-09-14 12:36:25',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-01 17:58:16',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all Table Mapper Detail
 	{
-		'doctype': 'Table Mapper Detail',
+		'doctype': u'Table Mapper Detail',
 		'name': '__common__',
-		'parent': 'Sales Order-Delivery Note',
-		'parentfield': 'table_mapper_details',
-		'parenttype': 'DocType Mapper'
+		'parent': u'Sales Order-Delivery Note',
+		'parentfield': u'table_mapper_details',
+		'parenttype': u'DocType Mapper'
 	},
 
 	# These values are common for all Field Mapper Detail
 	{
-		'doctype': 'Field Mapper Detail',
+		'doctype': u'Field Mapper Detail',
 		'name': '__common__',
-		'parent': 'Sales Order-Delivery Note',
-		'parentfield': 'field_mapper_details',
-		'parenttype': 'DocType Mapper'
+		'parent': u'Sales Order-Delivery Note',
+		'parentfield': u'field_mapper_details',
+		'parenttype': u'DocType Mapper'
 	},
 
 	# These values are common for all DocType Mapper
 	{
 		'doctype': u'DocType Mapper',
-		'from_doctype': 'Sales Order',
-		'module': 'Stock',
+		'from_doctype': u'Sales Order',
+		'module': u'Stock',
 		'name': '__common__',
 		'ref_doc_submitted': 1,
-		'to_doctype': 'Delivery Note'
+		'to_doctype': u'Delivery Note'
 	},
 
 	# DocType Mapper, Sales Order-Delivery Note
 	{
 		'doctype': u'DocType Mapper',
-		'name': 'Sales Order-Delivery Note'
+		'name': u'Sales Order-Delivery Note'
 	},
 
 	# Field Mapper Detail
 	{
-		'checking_operator': '>=',
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'transaction_date',
-		'map': 'No',
+		'doctype': u'Field Mapper Detail',
+		'from_field': u'name',
+		'map': u'Yes',
 		'match_id': 0,
-		'to_field': 'transaction_date'
+		'to_field': u'sales_order_no'
 	},
 
 	# Field Mapper Detail
 	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'name',
-		'map': 'Yes',
+		'checking_operator': u'=',
+		'doctype': u'Field Mapper Detail',
+		'from_field': u'company',
+		'map': u'Yes',
 		'match_id': 0,
-		'to_field': 'sales_order_no'
+		'to_field': u'company'
 	},
 
 	# Field Mapper Detail
 	{
-		'checking_operator': '=',
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'company',
-		'map': 'Yes',
+		'checking_operator': u'=',
+		'doctype': u'Field Mapper Detail',
+		'from_field': u'currency',
+		'map': u'Yes',
 		'match_id': 0,
-		'to_field': 'company'
+		'to_field': u'currency'
 	},
 
 	# Field Mapper Detail
 	{
-		'checking_operator': '=',
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'currency',
-		'map': 'Yes',
+		'doctype': u'Field Mapper Detail',
+		'from_field': u'shipping_address_name',
+		'map': u'Yes',
 		'match_id': 0,
-		'to_field': 'currency'
+		'to_field': u'customer_address'
 	},
 
 	# Field Mapper Detail
 	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'shipping_address_name',
-		'map': 'Yes',
+		'doctype': u'Field Mapper Detail',
+		'from_field': u'shipping_address',
+		'map': u'Yes',
 		'match_id': 0,
-		'to_field': 'customer_address'
+		'to_field': u'address_display'
 	},
 
 	# Field Mapper Detail
 	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'shipping_address',
-		'map': 'Yes',
-		'match_id': 0,
-		'to_field': 'address_display'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'parent',
-		'map': 'Yes',
+		'doctype': u'Field Mapper Detail',
+		'from_field': u'parent',
+		'map': u'Yes',
 		'match_id': 1,
-		'to_field': 'prevdoc_docname'
+		'to_field': u'prevdoc_docname'
 	},
 
 	# Field Mapper Detail
 	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'parenttype',
-		'map': 'Yes',
+		'doctype': u'Field Mapper Detail',
+		'from_field': u'parenttype',
+		'map': u'Yes',
 		'match_id': 1,
-		'to_field': 'prevdoc_doctype'
+		'to_field': u'prevdoc_doctype'
 	},
 
 	# Field Mapper Detail
 	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'name',
-		'map': 'Yes',
+		'doctype': u'Field Mapper Detail',
+		'from_field': u'name',
+		'map': u'Yes',
 		'match_id': 1,
-		'to_field': 'prevdoc_detail_docname'
+		'to_field': u'prevdoc_detail_docname'
 	},
 
 	# Field Mapper Detail
 	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'eval: (flt(obj.qty) - flt(obj.delivered_qty)) * flt(obj.export_rate)',
-		'map': 'Yes',
+		'doctype': u'Field Mapper Detail',
+		'from_field': u'eval: (flt(obj.qty) - flt(obj.delivered_qty)) * flt(obj.export_rate)',
+		'map': u'Yes',
 		'match_id': 1,
-		'to_field': 'export_amount'
+		'to_field': u'export_amount'
 	},
 
 	# Field Mapper Detail
 	{
-		'checking_operator': '=',
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'basic_rate',
-		'map': 'Yes',
+		'checking_operator': u'=',
+		'doctype': u'Field Mapper Detail',
+		'from_field': u'basic_rate',
+		'map': u'Yes',
 		'match_id': 1,
-		'to_field': 'basic_rate'
+		'to_field': u'basic_rate'
 	},
 
 	# Field Mapper Detail
 	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'eval: flt(obj.qty) - flt(obj.delivered_qty)',
-		'map': 'Yes',
+		'doctype': u'Field Mapper Detail',
+		'from_field': u'eval: flt(obj.qty) - flt(obj.delivered_qty)',
+		'map': u'Yes',
 		'match_id': 1,
-		'to_field': 'qty'
+		'to_field': u'qty'
 	},
 
 	# Field Mapper Detail
 	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'eval: (flt(obj.qty) - flt(obj.delivered_qty)) * flt(obj.basic_rate)',
-		'map': 'Yes',
+		'doctype': u'Field Mapper Detail',
+		'from_field': u'eval: (flt(obj.qty) - flt(obj.delivered_qty)) * flt(obj.basic_rate)',
+		'map': u'Yes',
 		'match_id': 1,
-		'to_field': 'amount'
+		'to_field': u'amount'
 	},
 
 	# Field Mapper Detail
 	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'reserved_warehouse',
-		'map': 'Yes',
+		'doctype': u'Field Mapper Detail',
+		'from_field': u'reserved_warehouse',
+		'map': u'Yes',
 		'match_id': 1,
-		'to_field': 'warehouse'
+		'to_field': u'warehouse'
 	},
 
 	# Field Mapper Detail
 	{
-		'checking_operator': '=',
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'project_name',
-		'map': 'Yes',
+		'checking_operator': u'=',
+		'doctype': u'Field Mapper Detail',
+		'from_field': u'project_name',
+		'map': u'Yes',
 		'match_id': 0,
-		'to_field': 'project_name'
+		'to_field': u'project_name'
 	},
 
 	# Field Mapper Detail
 	{
-		'checking_operator': '=',
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'customer',
-		'map': 'Yes',
+		'checking_operator': u'=',
+		'doctype': u'Field Mapper Detail',
+		'from_field': u'customer',
+		'map': u'Yes',
 		'match_id': 0,
-		'to_field': 'customer'
+		'to_field': u'customer'
 	},
 
 	# Field Mapper Detail
 	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'naming_series',
-		'map': 'No',
+		'doctype': u'Field Mapper Detail',
+		'from_field': u'naming_series',
+		'map': u'No',
 		'match_id': 0,
-		'to_field': 'naming_series'
+		'to_field': u'naming_series'
 	},
 
 	# Field Mapper Detail
 	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'status',
-		'map': 'No',
+		'doctype': u'Field Mapper Detail',
+		'from_field': u'status',
+		'map': u'No',
 		'match_id': 0,
-		'to_field': 'status'
+		'to_field': u'status'
 	},
 
 	# Field Mapper Detail
 	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'incentives',
-		'map': 'No',
+		'doctype': u'Field Mapper Detail',
+		'from_field': u'incentives',
+		'map': u'No',
 		'match_id': 3,
-		'to_field': 'incentives'
+		'to_field': u'incentives'
 	},
 
 	# Field Mapper Detail
 	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'allocated_amount',
-		'map': 'Yes',
+		'doctype': u'Field Mapper Detail',
+		'from_field': u'allocated_amount',
+		'map': u'Yes',
 		'match_id': 0,
-		'to_field': 'customer_mobile_no'
+		'to_field': u'customer_mobile_no'
 	},
 
 	# Table Mapper Detail
 	{
-		'doctype': 'Table Mapper Detail',
-		'from_field': 'sales_team',
-		'from_table': 'Sales Team',
+		'doctype': u'Table Mapper Detail',
+		'from_field': u'sales_team',
+		'from_table': u'Sales Team',
 		'match_id': 3,
-		'to_field': 'sales_team',
-		'to_table': 'Sales Team',
-		'validation_logic': 'name is not null'
+		'to_field': u'sales_team',
+		'to_table': u'Sales Team',
+		'validation_logic': u'name is not null'
 	},
 
 	# Table Mapper Detail
 	{
-		'doctype': 'Table Mapper Detail',
-		'from_field': 'other_charges',
-		'from_table': 'RV Tax Detail',
+		'doctype': u'Table Mapper Detail',
+		'from_field': u'other_charges',
+		'from_table': u'RV Tax Detail',
 		'match_id': 2,
-		'to_field': 'other_charges',
-		'to_table': 'RV Tax Detail',
-		'validation_logic': 'name is not null'
+		'to_field': u'other_charges',
+		'to_table': u'RV Tax Detail',
+		'validation_logic': u'name is not null'
 	},
 
 	# Table Mapper Detail
 	{
-		'doctype': 'Table Mapper Detail',
-		'from_field': 'sales_order_details',
-		'from_table': 'Sales Order Detail',
+		'doctype': u'Table Mapper Detail',
+		'from_field': u'sales_order_details',
+		'from_table': u'Sales Order Detail',
 		'match_id': 1,
-		'reference_doctype_key': 'prevdoc_doctype',
-		'reference_key': 'prevdoc_detail_docname',
-		'to_field': 'delivery_note_details',
-		'to_table': 'Delivery Note Detail',
-		'validation_logic': 'qty > ifnull(delivered_qty,0) and docstatus = 1'
+		'reference_doctype_key': u'prevdoc_doctype',
+		'reference_key': u'prevdoc_detail_docname',
+		'to_field': u'delivery_note_details',
+		'to_table': u'Delivery Note Detail',
+		'validation_logic': u'qty > ifnull(delivered_qty,0) and docstatus = 1'
 	},
 
 	# Table Mapper Detail
 	{
-		'doctype': 'Table Mapper Detail',
-		'from_table': 'Sales Order',
+		'doctype': u'Table Mapper Detail',
+		'from_table': u'Sales Order',
 		'match_id': 0,
-		'reference_key': 'prevdoc_docname',
-		'to_table': 'Delivery Note',
-		'validation_logic': 'docstatus = 1'
+		'reference_key': u'prevdoc_docname',
+		'to_table': u'Delivery Note',
+		'validation_logic': u'docstatus = 1'
 	}
 ]
