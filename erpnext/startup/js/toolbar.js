@@ -87,7 +87,7 @@ erpnext.toolbar.add_modules = function() {
 	for(var i in wn.boot.modules_list) {
 		var m = wn.boot.modules_list[i]
 		
-		if(m!='Setup') {
+		if(m!='Setup' && wn.boot.profile.allow_modules.indexOf(m)!=-1) {
 			args = {
 				module: m,
 				module_page: erpnext.modules[m],
@@ -97,6 +97,12 @@ erpnext.toolbar.add_modules = function() {
 			$('.navbar .modules').append(repl('<li><a href="#!%(module_page)s" \
 				data-module="%(module)s">%(module_label)s</a></li>', args));			
 		}
+	}
+
+	// dasboard for accounts system manager
+	if(user_roles.indexOf("Accounts Manager")!=-1) {
+		$('.navbar .modules').append('<li><a href="#!dashboard" \
+			data-module="Dashboard">Dashboard</a></li>');
 	}
 	
 	// setup for system manager

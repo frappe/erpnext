@@ -34,7 +34,8 @@ erpnext.modules = {
 	'To Do': 'todo',
 	'Calendar': 'calendar',
 	'Messages': 'messages',
-	'Knowledge Base': 'questions'
+	'Knowledge Base': 'questions',
+	'Dashboard': 'dashboard'
 }
 
 erpnext.startup.set_globals = function() {
@@ -59,6 +60,10 @@ erpnext.startup.start = function() {
 			wn.title_prefix = wn.boot.website_settings.title_prefix;
 		}
 	} else {
+		// always allow apps
+		wn.boot.profile.allow_modules = wn.boot.profile.allow_modules.concat(
+			['To Do', 'Knowledge Base', 'Calendar', 'Activity'])
+		
 		// setup toolbar
 		erpnext.toolbar.setup();
 				

@@ -79,9 +79,12 @@ erpnext.desktop.render = function() {
 
 	for(var i in wn.boot.modules_list) {
 		var m = wn.boot.modules_list[i];
-		if(m!='Setup')
+		if(m!='Setup' && wn.boot.profile.allow_modules.indexOf(m)!=-1)
 			add_icon(m);
 	}
+
+	if(user_roles.indexOf('Accounts Manager')!=-1)
+		add_icon('Dashboard')
 
 	if(user_roles.indexOf('System Manager')!=-1)
 		add_icon('Setup')
