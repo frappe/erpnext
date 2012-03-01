@@ -178,7 +178,8 @@ EmailMessage = function(parent, args, list, idx) {
 		// email text
 		this.message = $a(w, 'div', '', 
 			// style
-			{lineHeight:'1.7em', display:'none', padding: '7px'}, 
+			{lineHeight:'1.7em', display:'none', padding: '7px', width: '575px',
+				wordWrap: 'break-word', textWrap: 'normal', overflowX: 'auto'}, 
 			
 			// newlines for text email
 			(this.content_type=='text/plain' ? this.mail

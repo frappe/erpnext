@@ -41,9 +41,12 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 }
 
 cur_frm.cscript.onload_post_render = function(doc, cdt, cdn) {
-	if(doc.__islocal){ 
-		cur_frm.cscript.get_default_schedule_date(doc);
-	}	
+	var callback = function(doc, cdt, cdn) {
+		if(doc.__islocal){ 
+			cur_frm.cscript.get_default_schedule_date(doc);
+		}	
+	}
+	cur_frm.cscript.dynamic_label(doc, cdt, cdn, callback);
 }
 
 // ================================== Refresh ==========================================
@@ -52,7 +55,7 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	// ---------------------------------
 	cur_frm.clear_custom_buttons();
 
-	cur_frm.cscript.dynamic_label(doc, cdt, cdn);
+	if (!cur_frm.cscript.is_onload) cur_frm.cscript.dynamic_label(doc, cdt, cdn);
 
 	if(doc.docstatus == 1 && doc.status != 'Stopped'){
 		var ch = getchildren('PO Detail',doc.name,'po_details');

@@ -92,39 +92,36 @@ var set_dynamic_label_par = function(doc, cdt, cdn, base_curr) {
 
 
 var set_dynamic_label_child = function(doc, cdt, cdn, base_curr) {
-		// item table flds
-		item_cols_base = {'purchase_ref_rate': 'Ref Rate', 'amount': 'Amount'};
-		item_cols_import = {'import_rate': 'Rate', 'import_ref_rate': 'Ref Rate', 'import_amount': 'Amount'};
+	// item table flds
+	item_cols_base = {'purchase_ref_rate': 'Ref Rate', 'amount': 'Amount'};
+	item_cols_import = {'import_rate': 'Rate', 'import_ref_rate': 'Ref Rate', 'import_amount': 'Amount'};
 		
-		for (d in item_cols_base) $('[data-grid-fieldname="'+cur_frm.cscript.tname+'-'+d+'"]').html(item_cols_base[d]+' ('+base_curr+')');
-		for (d in item_cols_import) $('[data-grid-fieldname="'+cur_frm.cscript.tname+'-'+d+'"]').html(item_cols_import[d]+' ('+doc.currency+')');
+	for (d in item_cols_base) $('[data-grid-fieldname="'+cur_frm.cscript.tname+'-'+d+'"]').html(item_cols_base[d]+' ('+base_curr+')');
+	for (d in item_cols_import) $('[data-grid-fieldname="'+cur_frm.cscript.tname+'-'+d+'"]').html(item_cols_import[d]+' ('+doc.currency+')');
 		
-		var hide = (doc.currency == sys_defaults['currency']) ? false : true;
-		for (f in item_cols_base) cur_frm.fields_dict[cur_frm.cscript.fname].grid.set_column_disp(f, hide);
+	var hide = (doc.currency == sys_defaults['currency']) ? false : true;
+	for (f in item_cols_base) cur_frm.fields_dict[cur_frm.cscript.fname].grid.set_column_disp(f, hide);
+	if (doc.doctype == 'Payable Voucher') {
+		$('[data-grid-fieldname="'+cur_frm.cscript.tname+'-rate"]').html('Rate ('+base_curr+')');
+		cur_frm.fields_dict[cur_frm.cscript.fname].grid.set_column_disp('rate', hide);
+		// advance table flds
+		adv_cols = {'advance_amount': 'Advance Amount', 'allocated_amount': 'Allocated Amount', 'tds_amount': 'TDS Amount', 'tds_allocated': 'TDS Allocated'}
+		for (d in adv_cols) $('[data-grid-fieldname="Advance Allocation Detail-'+d+'"]').html(adv_cols[d]+' ('+base_curr+')');	
+	}
+	else {
+		$('[data-grid-fieldname="'+cur_frm.cscript.tname+'-purchase_rate"]').html('Rate ('+base_curr+')');
+		cur_frm.fields_dict[cur_frm.cscript.fname].grid.set_column_disp('purchase_rate', hide);
+	}
 
-		if (doc.doctype == 'Payable Voucher') {
-			$('[data-grid-fieldname="'+cur_frm.cscript.tname+'-rate"]').html('Rate ('+base_curr+')');
-			cur_frm.fields_dict[cur_frm.cscript.fname].grid.set_column_disp('rate', hide);
-			// advance table flds
-			adv_cols = {'advance_amount': 'Advance Amount', 'allocated_amount': 'Allocated Amount', 'tds_amount': 'TDS Amount', 'tds_allocated': 'TDS Allocated'}
-			for (d in adv_cols) $('[data-grid-fieldname="Advance Allocation Detail-'+d+'"]').html(adv_cols[d]+' ('+base_curr+')');	
-		}
-		else {
-			$('[data-grid-fieldname="'+cur_frm.cscript.tname+'-purchase_rate"]').html('Rate ('+base_curr+')');
-			cur_frm.fields_dict[cur_frm.cscript.fname].grid.set_column_disp('purchase_rate', hide);
-		}
-
-		//tax table flds
-		tax_cols = {'tax_amount': 'Amount', 'total': 'Aggregate Total'};
-		for (d in tax_cols) $('[data-grid-fieldname="Purchase Tax Detail-'+d+'"]').html(tax_cols[d]+' ('+base_curr+')');	
-
-
+	//tax table flds
+	tax_cols = {'tax_amount': 'Amount', 'total': 'Aggregate Total'};
+	for (d in tax_cols) $('[data-grid-fieldname="Purchase Tax Detail-'+d+'"]').html(tax_cols[d]+' ('+base_curr+')');	
 }
 
 // Change label dynamically based on currency
 //------------------------------------------------------------------
 
-cur_frm.cscript.dynamic_label = function(doc, cdt, cdn) {
+cur_frm.cscript.dynamic_label = function(doc, cdt, cdn, callback1) {
 	var callback = function(r, rt) {
 		if (r.message) base_curr = r.message;
 		else base_curr = sys_defaults['currency'];
@@ -136,10 +133,16 @@ cur_frm.cscript.dynamic_label = function(doc, cdt, cdn) {
 
 		set_dynamic_label_par(doc, cdt, cdn, base_curr);
 		set_dynamic_label_child(doc, cdt, cdn, base_curr);
+
+		if(callback1) callback1(doc, cdt, cdn);
 	}
 
 	if (doc.company == sys_defaults['company']) callback('', '');
-	else $c_obj(make_doclist(doc.doctype, doc.name), 'get_comp_base_currency', '', callback);
+	else wn.call({
+		method: 'selling.doctype.sales_common.sales_common.get_comp_base_currency',
+		args: {company: doc.company},
+		callback: callback
+	});
 }
 
 cur_frm.cscript.currency = function(doc, cdt, cdn) {

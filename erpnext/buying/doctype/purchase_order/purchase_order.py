@@ -100,10 +100,6 @@ class DocType(TransactionBase):
 		return get_obj('Purchase Common').get_tc_details(self)
 
 
-	def get_comp_base_currency(self):
-		return get_obj('Purchase Common').get_comp_base_currency(self.doc.company)
-
-
 
 	# validate if indent has been pulled twice
 	def validate_prev_docname(self):
