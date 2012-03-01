@@ -66,11 +66,11 @@ class DocType(TransactionBase):
 				
 			for i in lst:
 				val = pos and pos[0][i] or ''
-				webnotes.conn.set(self.doc,i,val)
+				self.doc.fields[i] = val
 			self.set_pos_item_values()
 			
 			val = pos and flt(pos[0]['conversion_rate']) or 0	
-			webnotes.conn.set(self.doc,'conversion_rate',val)
+			self.doc.conversion_rate = val
 
 			#fetch terms	
 			if self.doc.tc_name:	 self.get_tc_details()
