@@ -119,7 +119,9 @@ var set_dynamic_label_child = function(doc, cdt, cdn, base_curr) {
 	for (d in item_cols_export) $('[data-grid-fieldname="'+cur_frm.cscript.tname+'-'+d+'"]').html(item_cols_export[d]+' ('+doc.currency+')');	
 
 	var hide = (doc.currency == sys_defaults['currency']) ? false : true;
-	for (f in item_cols_base) cur_frm.fields_dict[cur_frm.cscript.fname].grid.set_column_disp(f, hide);
+	for (f in item_cols_export) {
+		cur_frm.fields_dict[cur_frm.cscript.fname].grid.set_column_disp(f, hide);
+	}
 
 	//tax table flds
 	tax_cols = {'tax_amount': 'Amount', 'total': 'Total'};
@@ -555,11 +557,9 @@ cur_frm.cscript.consider_incl_rate = function(doc, other_fname) {
 	var tax_list = getchildren('RV Tax Detail', doc.name, other_fname, doc.doctype);
 	for(var i=0; i<tax_list.length; i++) {
 		if(tax_list[i].included_in_print_rate) {
-			//console.log('consider incl rate');
 			return true;
 		}
 	}
-	//console.log('do not consider incl rate');
 	return false;
 }
 

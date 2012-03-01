@@ -100,17 +100,19 @@ var set_dynamic_label_child = function(doc, cdt, cdn, base_curr) {
 	for (d in item_cols_import) $('[data-grid-fieldname="'+cur_frm.cscript.tname+'-'+d+'"]').html(item_cols_import[d]+' ('+doc.currency+')');
 		
 	var hide = (doc.currency == sys_defaults['currency']) ? false : true;
-	for (f in item_cols_base) cur_frm.fields_dict[cur_frm.cscript.fname].grid.set_column_disp(f, hide);
+	for (f in item_cols_import) {
+		cur_frm.fields_dict[cur_frm.cscript.fname].grid.set_column_disp(f, hide);
+	}
 	if (doc.doctype == 'Payable Voucher') {
 		$('[data-grid-fieldname="'+cur_frm.cscript.tname+'-rate"]').html('Rate ('+base_curr+')');
-		cur_frm.fields_dict[cur_frm.cscript.fname].grid.set_column_disp('rate', hide);
+		//cur_frm.fields_dict[cur_frm.cscript.fname].grid.set_column_disp('rate', hide);
 		// advance table flds
 		adv_cols = {'advance_amount': 'Advance Amount', 'allocated_amount': 'Allocated Amount', 'tds_amount': 'TDS Amount', 'tds_allocated': 'TDS Allocated'}
 		for (d in adv_cols) $('[data-grid-fieldname="Advance Allocation Detail-'+d+'"]').html(adv_cols[d]+' ('+base_curr+')');	
 	}
 	else {
 		$('[data-grid-fieldname="'+cur_frm.cscript.tname+'-purchase_rate"]').html('Rate ('+base_curr+')');
-		cur_frm.fields_dict[cur_frm.cscript.fname].grid.set_column_disp('purchase_rate', hide);
+		//cur_frm.fields_dict[cur_frm.cscript.fname].grid.set_column_disp('purchase_rate', hide);
 	}
 
 	//tax table flds
