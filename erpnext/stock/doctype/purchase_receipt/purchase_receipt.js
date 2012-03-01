@@ -40,12 +40,15 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 
 cur_frm.cscript.onload_post_render = function(doc, dt, dn) {
 	var callback = function(doc, dt, dn) {
-		if(doc.__islocal){ 
-			cur_frm.cscript.get_default_schedule_date(doc);
+		var callback1 = function(doc, dt, dn) {
+			if(doc.__islocal){ 
+				cur_frm.cscript.get_default_schedule_date(doc);
+			}
 		}
+		// defined in purchase_common.js
+		cur_frm.cscript.update_item_details(doc, dt, dn, callback1);	
 	}
-	// defined in purchase_common.js
-	cur_frm.cscript.update_item_details(doc, cdt, cdn, callback);	
+	cur_frm.cscript.dynamic_label(doc, dt, dn, callback);
 }
 
 //========================== Refresh ===============================================================
@@ -55,7 +58,8 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	// ---------------------------------
 	cur_frm.clear_custom_buttons();
 
-	cur_frm.cscript.dynamic_label(doc, cdt, cdn);
+	if (!cur_frm.cscript.is_onload) cur_frm.cscript.dynamic_label(doc, cdt, cdn);
+
 
 	if(doc.docstatus == 1){
 		var ch = getchildren('Purchase Receipt Detail',doc.name,'purchase_receipt_details');

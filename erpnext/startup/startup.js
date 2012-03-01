@@ -62,7 +62,7 @@ erpnext.startup.start = function() {
 	} else {
 		// always allow apps
 		wn.boot.profile.allow_modules = wn.boot.profile.allow_modules.concat(
-			['To Do', 'Knowledge Base', 'Calendar', 'Activity'])
+			['To Do', 'Knowledge Base', 'Calendar', 'Activity', 'Messages'])
 		
 		// setup toolbar
 		erpnext.toolbar.setup();
@@ -73,7 +73,7 @@ erpnext.startup.start = function() {
 		// border to the body
 		// ------------------
 		$('footer').html('<div class="web-footer erpnext-footer">\
-			Powered by <a href="https://erpnext.com">ERPNext</a></div>');
+			<a href="#!attributions">ERPNext | Attributions and License</a></div>');
 
 		// complete registration
 		if(in_list(user_roles,'System Manager') && (wn.boot.setup_complete=='No')) { 

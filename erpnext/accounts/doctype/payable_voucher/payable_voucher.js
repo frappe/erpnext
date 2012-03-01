@@ -45,11 +45,14 @@ cur_frm.cscript.onload = function(doc,dt,dn) {
 //------------------------
 cur_frm.cscript.onload_post_render = function(doc, dt, dn) {
 	var callback = function(doc, dt, dn) {
-		if(doc.__islocal && doc.supplier) cur_frm.cscript.supplier(doc,dt,dn);
+		var callback1 = function(doc, dt, dn) {
+			if(doc.__islocal && doc.supplier) cur_frm.cscript.supplier(doc,dt,dn);
+		}
+	
+		// defined in purchase_common.js
+		cur_frm.cscript.update_item_details(doc, dt, dn, callback1);
 	}
-		
-	// defined in purchase_common.js
-	cur_frm.cscript.update_item_details(doc, cdt, cdn, callback);
+	cur_frm.cscript.dynamic_label(doc, dt, dn, callback);
 }
 
 // Refresh
@@ -58,7 +61,7 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 	
 	cur_frm.clear_custom_buttons();
 
-	cur_frm.cscript.dynamic_label(doc, cdt, cdn);
+	if (!cur_frm.cscript.is_onload) cur_frm.cscript.dynamic_label(doc, dt, dn);
 
 
 	// Show / Hide button

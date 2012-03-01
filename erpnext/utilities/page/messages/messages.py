@@ -48,7 +48,8 @@ def get_list(arg=None):
 @webnotes.whitelist()
 def get_active_users(arg=None):
 	return webnotes.conn.sql("""select name from tabProfile 
-		where enabled=1 and
+		where ifnull(enabled,0)=1 and
+		docstatus < 2 and 
 		name not in ('Administrator', 'Guest') 
 		order by first_name""", as_dict=1)
 
