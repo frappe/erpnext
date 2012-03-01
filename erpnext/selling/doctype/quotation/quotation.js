@@ -50,8 +50,11 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 }
 
 cur_frm.cscript.onload_post_render = function(doc, dt, dn) {
-	// defined in sales_common.js
-	cur_frm.cscript.update_item_details(doc, cdt, cdn);
+	var callback = function(doc, dt, dn) {
+		// defined in sales_common.js
+		cur_frm.cscript.update_item_details(doc, dt, dn);
+	}
+	cur_frm.cscript.hide_price_list_currency(doc, dt, dn, callback); 
 }
 
 // hide - unhide fields based on lead or customer..
@@ -83,10 +86,7 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 
 	cur_frm.clear_custom_buttons();
 
-	var callback = function() {
-		cur_frm.cscript.dynamic_label(doc, cdt, cdn);
-	}
-	cur_frm.cscript.hide_price_list_currency(doc, cdt, cdn, callback); 
+	if (!cur_frm.cscript.is_onload) cur_frm.cscript.hide_price_list_currency(doc, cdt, cdn); 
 
 
 	if(doc.docstatus == 1 && doc.status!='Order Lost') {
