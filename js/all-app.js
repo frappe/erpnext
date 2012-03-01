@@ -2242,9 +2242,9 @@ show_chart_browser=function(nm,chart_type){var call_back=function(){if(nm=='Sale
 else if(nm=='Accounts Browser')
 pscript.make_chart(chart_type);}
 loadpage(nm,call_back);}
-var update_messages=function(){if(inList(['Guest'],user)){return;}
-$c_page('home','event_updates','get_unread_messages',null,function(r,rt){if(!r.exc){page_body.wntoolbar.set_new_comments(r.message);var circle=$('#msg_count')
-if(circle){if(r.message.length){circle.find('span:first').text(r.message.length);circle.toggle(true);}else{circle.toggle(false);}}}else{clearInterval(wn.updates.id);}});}
+var update_messages=function(reset){if(inList(['Guest'],user)){return;}
+if(!reset){$c_page('home','event_updates','get_unread_messages',null,function(r,rt){if(!r.exc){page_body.wntoolbar.set_new_comments(r.message);var circle=$('#msg_count')
+if(circle){if(r.message.length){circle.find('span:first').text(r.message.length);circle.toggle(true);}else{circle.toggle(false);}}}else{clearInterval(wn.updates.id);}});}else{page_body.wntoolbar.set_new_comments(0);$('#msg_count').toggle(false);}}
 erpnext.startup.set_periodic_updates=function(){wn.updates={};if(wn.updates.id){clearInterval(wn.updates.id);}
 wn.updates.id=setInterval(update_messages,60000);}
 erpnext.set_user_background=function(src){set_style(repl('body { background: url("files/%(src)s") repeat !important;}',{src:src}))}

@@ -85,10 +85,11 @@
 }
 
 .circle {
-	border-radius: 100%;
-	-moz-border-radius: 100%;
-	-webkit-border-radius: 100%;
+	border-radius: 30px;
+	-moz-border-radius: 30px;
+	-webkit-border-radius: 30px;
 	height: 15px;
+	line-height: 12px;
 	min-width: 15px;
 	background: #B00D07;
 	padding: 3px;

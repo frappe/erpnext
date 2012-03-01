@@ -103,30 +103,35 @@ show_chart_browser = function(nm, chart_type){
 
 
 // ========== Update Messages ============
-var update_messages = function() {
+var update_messages = function(reset) {
 	// Updates Team Messages
 	
 	if(inList(['Guest'], user)) { return; }
-	
-	$c_page('home', 'event_updates', 'get_unread_messages', null,
-		function(r,rt) {
-			if(!r.exc) {
-				// This function is defined in toolbar.js
-				page_body.wntoolbar.set_new_comments(r.message);
-				var circle = $('#msg_count')
-				if(circle) {
-					if(r.message.length) {
-						circle.find('span:first').text(r.message.length);
-						circle.toggle(true);
-					} else {
-						circle.toggle(false);
+
+	if(!reset) {
+		$c_page('home', 'event_updates', 'get_unread_messages', null,
+			function(r,rt) {
+				if(!r.exc) {
+					// This function is defined in toolbar.js
+					page_body.wntoolbar.set_new_comments(r.message);
+					var circle = $('#msg_count')
+					if(circle) {
+						if(r.message.length) {
+							circle.find('span:first').text(r.message.length);
+							circle.toggle(true);
+						} else {
+							circle.toggle(false);
+						}
 					}
+				} else {
+					clearInterval(wn.updates.id);
 				}
-			} else {
-				clearInterval(wn.updates.id);
 			}
-		}
-	);
+		);
+	} else {
+		page_body.wntoolbar.set_new_comments(0);
+		$('#msg_count').toggle(false);
+	}
 }
 
 erpnext.startup.set_periodic_updates = function() {
