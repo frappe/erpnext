@@ -157,4 +157,14 @@ patch_list = [
 		'patch_file': 'navupdate',
 		'description': 'New Navigation Pages'
 	},
+	{
+		'patch_module': 'patches.jan_mar_2012',
+		'patch_file': 'label_cleanup',
+		'description': 'Remove extra fields and new dynamic labels'
+	},
+	{
+		'patch_module': 'patches.jan_mar_2012',
+		'patch_file': 'add_roles_to_admin',
+		'description': 'Add Roles to Administrator'
+	},
 ]
