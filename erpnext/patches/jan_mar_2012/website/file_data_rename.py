@@ -69,3 +69,12 @@ def replace_file_list_column_entries():
 			if file_list and "/" in file_list:
 				webnotes.conn.sql("UPDATE `%s` SET file_list='%s' WHERE name='%s'" \
 					% (tab, file_list.replace('/', '-'), name))
+
+	singles = webnotes.conn.sql("""SELECT doctype, value FROM `tabSingles`
+		WHERE field='file_list'""")
+	for doctype, file_list in singles:
+		if file_list and "/" in file_list:
+			webnotes.conn.sql("""UPDATE `tabSingles` SET value='%s'
+				WHERE doctype='%s' AND field='file_list'"""
+				% (file_list.replace('/', '-'), doctype))
+
