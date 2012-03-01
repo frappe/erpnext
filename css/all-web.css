@@ -1574,6 +1574,7 @@ span, div, td, input, textarea, button, select {
 }
 
 body {
+	background: url(../erpnext/images/stripedbg.png) repeat;
 }
 
 .erpnext-footer {

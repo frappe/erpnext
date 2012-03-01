@@ -46,6 +46,10 @@ erpnext.startup.set_globals = function() {
 erpnext.startup.start = function() {
 	$('#startup_div').html('Starting up...').toggle(true);
 	
+	if(!erpnext.check_browser_support())
+		return;
+	
+	
 	erpnext.startup.set_globals();
 
 	if(wn.boot.custom_css) {
@@ -84,6 +88,29 @@ erpnext.startup.start = function() {
 	}
 
 	$('#startup_div').toggle(false);
+}
+
+erpnext.check_browser_support = function() {
+	var is_supported = function() {
+		if($.browser.mozilla && flt($.browser.version)<4) return false;
+		if($.browser.msie && flt($.browser.version)<9) return false;
+		if($.browser.webkit && flt($.browser.version)<534) return false;
+		return true;
+	}
+	var s = is_supported();
+	if(!s) {
+		$('body').html('<div style="width: 900px; margin: 20px auto; padding: 20px;\
+			background-color: #fff; border: 2px solid #aaa; font-family: Arial">\
+			<h3>Unsupported Browser</h3> \
+			<p><i>ERPNext requires a modern web browser to function correctly</i></p> \
+			<p>Supported browsers are: \
+			<ul><li><a href="http://mozilla.com/firefox">Mozilla Firfox 4+</a>, \
+			<li><a href="http://google.com/chrome">Google Chorme 14+</a>, \
+			<li><a href="http://apple.com/safari">Apple Safari 5+</a>, \
+			<li><a href="http://ie.microsoft.com">Microsoft Internet Explorer 9+</a>, \
+			<li><a href="http://www.opera.com/">Opera</a></p></ul>')
+	}
+	return s;
 }
 
 // chart of accounts
