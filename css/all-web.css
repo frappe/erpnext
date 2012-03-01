@@ -362,7 +362,7 @@ div.dialog_head {
 }
 
 div.dialog_body {
-	padding: 8px 4px 16px 4px;
+	padding: 8px 8px 16px;
 	border-radius: 5px;
 	-moz-border-radius: 5px;
 	-webkit-border-radius: 5px;	
@@ -1620,7 +1620,7 @@ body {
 }
 
 .erpnext-footer {
-	margin: 3px auto;
+	margin: 11px auto;
 	text-align: center;
 }
 
