@@ -239,14 +239,6 @@ else comma=''
 return bestguess+comma+' '+in_words(remainder);}else{return bestguess;}}
 function roundNumber(num,dec){var result=Math.round(num*Math.pow(10,dec))/Math.pow(10,dec);return result;}
 /*
- *	lib/js/legacy/utils/browser_detect.js
- */
-var appVer=navigator.appVersion.toLowerCase();var is_minor=parseFloat(appVer);var is_major=parseInt(is_minor);var iePos=appVer.indexOf('msie');if(iePos!=-1){is_minor=parseFloat(appVer.substring(iePos+5,appVer.indexOf(';',iePos)))
-is_major=parseInt(is_minor);}
-var isIE=(iePos!=-1);var isIE6=(isIE&&is_major<=6);var isIE7=(isIE&&is_major>=7);if(/Firefox[\/\s](\d+\.\d+)/.test(navigator.userAgent)){var isFF=1;var ffversion=new Number(RegExp.$1)
-if(ffversion>=3)var isFF3=1;else if(ffversion>=2)var isFF2=1;else if(ffversion>=1)var isFF1=1;}
-var isSafari=navigator.userAgent.indexOf('Safari')!=-1?1:0;var isChrome=navigator.userAgent.indexOf('Chrome')!=-1?1:0;
-/*
  *	lib/js/legacy/utils/datetime.js
  */
 function same_day(d1,d2){if(d1.getFullYear()==d2.getFullYear()&&d1.getMonth()==d2.getMonth()&&d1.getDate()==d2.getDate())return true;else return false;}
@@ -390,7 +382,7 @@ set_it(img);},null,1);user_img_loading.push(username);}}
 var outUrl="index.cgi";var NULL_CHAR='^\5*';function checkResponse(r,on_timeout,no_spinner,freeze_msg){try{if(r.readyState==4&&r.status==200)return true;else return false;}catch(e){msgprint("error:Request timed out, try again");if(on_timeout)
 on_timeout();hide_loading();if(freeze_msg)
 unfreeze();return false;}}
-var pending_req=0;function newHttpReq(){if(!isIE)
+var pending_req=0;function newHttpReq(){if(!$.browser.msie)
 var r=new XMLHttpRequest();else if(window.ActiveXObject)
 var r=new ActiveXObject("Microsoft.XMLHTTP");return r;}
 function $c(command,args,fn,on_timeout,no_spinner,freeze_msg,btn){var req=newHttpReq();ret_fn=function(){if(checkResponse(req,on_timeout,no_spinner,freeze_msg)){if(btn)$(btn).done_working();if(!no_spinner)
@@ -835,7 +827,7 @@ function hide_loading(){pending_req--;if(!pending_req){$('body').css('cursor','d
 /*
  *	lib/js/legacy/webpage/freeze_page.js
  */
-var fcount=0;var frozen=0;var dialog_message;var dialog_back;function freeze(msg,do_freeze){if(!dialog_back){dialog_back=$a($i('body_div'),'div','dialog_back');if(isIE)dialog_back.style['filter']='alpha(opacity=60)';}
+var fcount=0;var frozen=0;var dialog_message;var dialog_back;function freeze(msg,do_freeze){if(!dialog_back){dialog_back=$a($i('body_div'),'div','dialog_back');$(dialog_back).css('opacity',0.6);}
 $ds(dialog_back);fcount++;frozen=1;}
 function unfreeze(){if(dialog_message)
 $dh(dialog_message);if(!fcount)return;fcount--;if(!fcount){$dh(dialog_back);frozen=0;}}
@@ -1080,12 +1072,25 @@ wn.modules_path='erpnext';wn.settings.no_history=true;$(document).bind('ready',f
 var current_module;var is_system_manager=0;wn.provide('erpnext.startup');erpnext.modules={'Selling':'selling-home','Accounts':'accounts-home','Stock':'stock-home','Buying':'buying-home','Support':'support-home','Projects':'projects-home','Production':'production-home','Website':'website-home','HR':'hr-home','Setup':'Setup','Activity':'activity','To Do':'todo','Calendar':'calendar','Messages':'messages','Knowledge Base':'questions','Dashboard':'dashboard'}
 erpnext.startup.set_globals=function(){pscript.is_erpnext_saas=cint(wn.control_panel.sync_with_gateway)
 if(inList(user_roles,'System Manager'))is_system_manager=1;}
-erpnext.startup.start=function(){$('#startup_div').html('Starting up...').toggle(true);erpnext.startup.set_globals();if(wn.boot.custom_css){set_style(wn.boot.custom_css);}
+erpnext.startup.start=function(){$('#startup_div').html('Starting up...').toggle(true);if(!erpnext.check_browser_support())
+return;erpnext.startup.set_globals();if(wn.boot.custom_css){set_style(wn.boot.custom_css);}
 if(wn.boot.user_background){erpnext.set_user_background(wn.boot.user_background);}
 if(user=='Guest'){if(wn.boot.website_settings.title_prefix){wn.title_prefix=wn.boot.website_settings.title_prefix;}}else{wn.boot.profile.allow_modules=wn.boot.profile.allow_modules.concat(['To Do','Knowledge Base','Calendar','Activity','Messages'])
 erpnext.toolbar.setup();erpnext.startup.set_periodic_updates();$('footer').html('<div class="web-footer erpnext-footer">\
    <a href="#!attributions">ERPNext | Attributions and License</a></div>');if(in_list(user_roles,'System Manager')&&(wn.boot.setup_complete=='No')){wn.require("erpnext/startup/js/complete_setup.js");erpnext.complete_setup();}}
 $('#startup_div').toggle(false);}
+erpnext.check_browser_support=function(){var is_supported=function(){if($.browser.mozilla&&flt($.browser.version)<4)return false;if($.browser.msie&&flt($.browser.version)<9)return false;if($.browser.webkit&&flt($.browser.version)<534)return false;return true;}
+var s=is_supported();if(!s){$('body').html('<div style="width: 900px; margin: 20px auto; padding: 20px;\
+   background-color: #fff; border: 2px solid #aaa; font-family: Arial">\
+   <h3>Unsupported Browser</h3> \
+   <p><i>ERPNext requires a modern web browser to function correctly</i></p> \
+   <p>Supported browsers are: \
+   <ul><li><a href="http://mozilla.com/firefox">Mozilla Firfox 4+</a>, \
+   <li><a href="http://google.com/chrome">Google Chorme 14+</a>, \
+   <li><a href="http://apple.com/safari">Apple Safari 5+</a>, \
+   <li><a href="http://ie.microsoft.com">Microsoft Internet Explorer 9+</a>, \
+   <li><a href="http://www.opera.com/">Opera</a></p></ul>')}
+return s;}
 show_chart_browser=function(nm,chart_type){var call_back=function(){if(nm=='Sales Browser'){var sb_obj=new SalesBrowser();sb_obj.set_val(chart_type);}
 else if(nm=='Accounts Browser')
 pscript.make_chart(chart_type);}
