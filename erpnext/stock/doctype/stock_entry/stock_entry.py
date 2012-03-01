@@ -437,8 +437,8 @@ class DocType:
 					if self.doc.purpose == 'Purchase Return':
 						#delete_doc("Serial No", serial_no)
 						serial_doc = Document("Serial No", serial_no)
-						serial_doc.status = 'Purchase Returned'
-						serial_doc.docstatus = 2
+						serial_doc.status = is_submit and 'Purchase Returned' or 'In Store'
+						serial_doc.docstatus = is_submit and 2 or 0
 						serial_doc.save()
 
 
