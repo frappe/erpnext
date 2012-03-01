@@ -40,3 +40,8 @@ def execute():
 
 	delete_doc('DocType', 'Update Delivery Date Detail')
 
+	# Reload print formats
+	reload_doc('accounts', 'Print Format', 'Sales Invoice Classic')
+	reload_doc('accounts', 'Print Format', 'Sales Invoice Modern')
+	reload_doc('accounts', 'Print Format', 'Sales Invoice Spartan')
+

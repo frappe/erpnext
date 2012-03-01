@@ -230,59 +230,16 @@ div.std-footer-item {
   box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
 }
 
-/*
- *	lib/css/legacy/menus.css
- */
-/******** Menus - menu.js ************/
-
-ul.menu_toolbar {
-	z-index: 30;
-	padding: 0px;
-	margin: 0px;
-	margin-top: 1px;
+.avatar-small {
+	display: inline-block; 
+	min-width: 29px;
+}
+.avatar-small img {
+	height: 24px; 
+	margin-bottom: -7px;
+	max-width: 24px;
 }
 
-ul.menu_toolbar li {
-	list-style: none;
-	margin: 0px;
-	float: left;
-}
-
-.top_menu {
-	margin: 0px;
-	padding: 4px;
-	cursor: pointer;
-	color: #FFF;
-	margin-right: 8px;
-}
-
-.top_menu_mo {
-	background-color: #000;
-
-	-moz-border-radius: 5px;
-	-webkit-border-radius: 5px;
-}
-
-div.menu_toolbar_dropdown {
-	position: absolute;
-	margin-top: 4px;
-	margin-left: 8px;
-	width: 140px;
-	background-color: #FFF;
-	color: #000;
-	display: none;
-	border: 2px solid #333;
-	z-index: 31;
-	overflow-y: auto;
-	overflow-x: hidden;
-}
-
-div.dd_item {
-	cursor: pointer;
-	padding: 4px;
-	background-color: #FFF;
-}
-div.dd_item_mo { background-color: #FE8; }
 /*
  *	lib/css/legacy/messages.css
  */
@@ -2812,7 +2769,7 @@ body {
 }
 
 .erpnext-footer {
-	margin: 3px auto;
+	margin: 11px auto;
 	text-align: center;
 }
 
