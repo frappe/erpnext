@@ -46,6 +46,7 @@ erpnext.startup.set_globals = function() {
 erpnext.startup.start = function() {
 	$('#startup_div').html('Starting up...').toggle(true);
 	
+	
 	erpnext.startup.set_globals();
 
 	if(wn.boot.custom_css) {
@@ -148,8 +149,6 @@ erpnext.startup.set_periodic_updates = function() {
 erpnext.set_user_background = function(src) {
 	set_style(repl('body { background: url("files/%(src)s") repeat !important;}', {src:src}))
 }
-
-// =======================================
 
 // start
 $(document).bind('startup', function() {
