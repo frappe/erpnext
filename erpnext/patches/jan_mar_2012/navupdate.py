@@ -37,6 +37,12 @@ def execute():
 	reload_doc('home', 'page', 'activity')
 	reload_doc('core', 'doctype', 'profile')
 	
+	# update user_image in profile
+	for p in webnotes.conn.sql("""select name, file_list from tabProfile 
+		where ifnull(file_list,'')!=''"""):
+		fid = p[1].split('\n')[0].split(',')[1]
+		webnotes.conn.set_value('Profile', p[0], 'user_image', fid)
+	
 	webnotes.conn.set_value('Control Panel', 'Control Panel', 'home_page',
 			'desktop')
 
