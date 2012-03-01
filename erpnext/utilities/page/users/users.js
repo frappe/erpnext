@@ -151,22 +151,22 @@ $.extend(wn.pages.users, {
 
 		this.settings_dialog.fields_dict.update.input.onclick = function() {
 			var btn = this;
-			this.set_working();
 			var args = me.settings_dialog.get_values();
 			args.user = me.uid;
 
 			if (args.new_password) {
 				me.get_password(btn, args);
 			} else {
-				btn.set_working();					
-				me.update_security(args);
+				me.update_security(btn, args);
 			}
 		};
 		
 	},
-	update_security: function(args) {
+	update_security: function(btn, args) {
 		var me = wn.pages.users;
+		$(btn).set_working();
 		$c_page('utilities', 'users', 'update_security', JSON.stringify(args), function(r,rt) {
+			$(btn).done_working();
 			if(r.exc) {
 				msgprint(r.exc);				
 				return;
