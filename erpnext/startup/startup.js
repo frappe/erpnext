@@ -62,7 +62,7 @@ erpnext.startup.start = function() {
 	} else {
 		// always allow apps
 		wn.boot.profile.allow_modules = wn.boot.profile.allow_modules.concat(
-			['To Do', 'Knowledge Base', 'Calendar', 'Activity'])
+			['To Do', 'Knowledge Base', 'Calendar', 'Activity', 'Messages'])
 		
 		// setup toolbar
 		erpnext.toolbar.setup();
