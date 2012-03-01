@@ -152,11 +152,15 @@ class DocType:
 		amt = flt(self.doc.debit) - flt(self.doc.credit)
 		if det[0][2] == 'Credit': amt = -amt
 
-		debit = cancel and -1 * flt(self.doc.credit) or flt(self.doc.debit)
-		credit = cancel and -1 * flt(self.doc.debit) or flt(self.doc.credit)
-		
+		if cancel:
+			debit = -1 * flt(self.doc.credit)
+			credit = -1 * flt(self.doc.debit)
+		else:
+			debit = flt(self.doc.debit)
+			credit = flt(self.doc.credit)
+
 		self.create_new_balances(det)
-		
+
 		# build dict
 		p = {
 			'debit': self.doc.is_opening=='No' and flt(debit) or 0
@@ -197,7 +201,7 @@ class DocType:
 					and ifnull(a.is_pl_account, 'No') = 'No'
 					and ab.period = ab.fiscal_year
 					and fy.name = ab.fiscal_year
-					and fy.year_start_date > %(posting_date)s""" % p)
+					and fy.year_start_date > '%(posting_date)s'""" % p)
 
 		# Update balance for all period for future years
 		sql("""update `tabAccount Balance` ab, `tabAccount` a, `tabFiscal Year` fy 
@@ -209,7 +213,7 @@ class DocType:
 					and ab.account = a.name
 					and ifnull(a.is_pl_account, 'No') = 'No'
 					and fy.name = ab.fiscal_year
-					and fy.year_start_date > %(posting_date)s""" % p)
+					and fy.year_start_date > '%(posting_date)s'""" % p)
 
 
 
