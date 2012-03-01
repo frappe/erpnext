@@ -52,10 +52,12 @@ class DocType:
 			msgprint("GL Entry: Debit or Credit amount is mandatory for %s" % self.doc.account)
 			raise Exception
 			
+			
+		# COMMMENTED below to allow zero amount (+ and -) entry in tax table
 		# Debit and credit can not done at the same time
-		if flt(self.doc.credit) != 0 and flt(self.doc.debit) != 0:
-			msgprint("Sorry you cannot credit and debit under same account head.")
-			raise Exception, "Validation Error."
+		#if flt(self.doc.credit) != 0 and flt(self.doc.debit) != 0:
+		#	msgprint("Sorry you cannot credit and debit under same account head.")
+		#	raise Exception, "Validation Error."
 		
 	# Cost center is required only if transaction made against pl account
 	#--------------------------------------------------------------------
