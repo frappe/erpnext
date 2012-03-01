@@ -150,31 +150,6 @@ erpnext.set_user_background = function(src) {
 	set_style(repl('body { background: url("files/%(src)s") repeat !important;}', {src:src}))
 }
 
-// =======================================
-
-$(document).bind('ready', function() {
-	(function() {
-		var is_supported = function() {
-			if($.browser.mozilla && flt($.browser.version)<4) return false;
-			if($.browser.msie && flt($.browser.version)<9) return false;
-			if($.browser.webkit && flt($.browser.version)<534) return false;
-			return true;
-		}
-		if(!is_supported()) {
-			$('body').html('<div style="width: 900px; margin: 20px auto; padding: 20px;\
-				background-color: #fff; border: 2px solid #aaa; font-family: Arial">\
-				<h3>Unsupported Browser</h3> \
-				<p><i>ERPNext requires a modern web browser to function correctly</i></p> \
-				<p>Supported browsers are: \
-				<ul><li><a href="http://mozilla.com/firefox">Mozilla Firfox 4+</a>, \
-				<li><a href="http://google.com/chrome">Google Chorme 14+</a>, \
-				<li><a href="http://apple.com/safari">Apple Safari 5+</a>, \
-				<li><a href="http://ie.microsoft.com">Microsoft Internet Explorer 9+</a>, \
-				<li><a href="http://www.opera.com/">Opera</a></p></ul>');
-		}
-	})();	
-})
-
 // start
 $(document).bind('startup', function() {
 	erpnext.startup.start();

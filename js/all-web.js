@@ -168,6 +168,17 @@ throw new SyntaxError('JSON.parse');};}}());
  *	lib/js/core.js
  */
 if(!console){var console={log:function(txt){errprint(txt);}}}
+wn.check_browser_support=function(){var is_supported=function(){if($.browser.mozilla&&flt($.browser.version)<4)return false;if($.browser.msie&&flt($.browser.version)<9)return false;if($.browser.webkit&&flt($.browser.version)<534)return false;return true;}
+if(!is_supported()){$('body').html('<div style="width: 900px; margin: 20px auto; padding: 20px;\
+   background-color: #fff; border: 2px solid #aaa; font-family: Arial">\
+   <h3>Unsupported Browser</h3> \
+   <p><i>ERPNext requires a modern web browser to function correctly</i></p> \
+   <p>Supported browsers are: \
+   <ul><li><a href="http://mozilla.com/firefox">Mozilla Firfox 4+</a>, \
+   <li><a href="http://google.com/chrome">Google Chorme 14+</a>, \
+   <li><a href="http://apple.com/safari">Apple Safari 5+</a>, \
+   <li><a href="http://ie.microsoft.com">Microsoft Internet Explorer 9+</a>, \
+   <li><a href="http://www.opera.com/">Opera</a></p></ul>');}}
 wn.versions.check();$(document).bind('ready',function(){var base=window.location.href.split('#')[0];$.each($('a[softlink!="false"]'),function(i,v){if(v.href.substr(0,base.length)==base){var path=(v.href.substr(base.length));if(path.substr(0,1)!='#'){v.href=base+'#'+path;}}});if(!wn.settings.no_history&&window.location.hash){wn.page.set(window.location.hash.substr(1));}});
 /*
  *	lib/js/legacy/globals.js
@@ -1088,17 +1099,6 @@ if(circle){if(r.message.length){circle.find('span:first').text(r.message.length)
 erpnext.startup.set_periodic_updates=function(){wn.updates={};if(wn.updates.id){clearInterval(wn.updates.id);}
 wn.updates.id=setInterval(update_messages,60000);}
 erpnext.set_user_background=function(src){set_style(repl('body { background: url("files/%(src)s") repeat !important;}',{src:src}))}
-$(document).bind('ready',function(){(function(){var is_supported=function(){if($.browser.mozilla&&flt($.browser.version)<4)return false;if($.browser.msie&&flt($.browser.version)<9)return false;if($.browser.webkit&&flt($.browser.version)<534)return false;return true;}
-if(!is_supported()){$('body').html('<div style="width: 900px; margin: 20px auto; padding: 20px;\
-    background-color: #fff; border: 2px solid #aaa; font-family: Arial">\
-    <h3>Unsupported Browser</h3> \
-    <p><i>ERPNext requires a modern web browser to function correctly</i></p> \
-    <p>Supported browsers are: \
-    <ul><li><a href="http://mozilla.com/firefox">Mozilla Firfox 4+</a>, \
-    <li><a href="http://google.com/chrome">Google Chorme 14+</a>, \
-    <li><a href="http://apple.com/safari">Apple Safari 5+</a>, \
-    <li><a href="http://ie.microsoft.com">Microsoft Internet Explorer 9+</a>, \
-    <li><a href="http://www.opera.com/">Opera</a></p></ul>');}})();})
 $(document).bind('startup',function(){erpnext.startup.start();});
 /*
  *	erpnext/website/js/topbar.js
