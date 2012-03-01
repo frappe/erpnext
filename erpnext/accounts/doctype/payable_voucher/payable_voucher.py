@@ -168,9 +168,6 @@ class DocType(TransactionBase):
 		return ret
 
 
-	def get_comp_base_currency(self):
-		return get_obj('Purchase Common').get_comp_base_currency(self.doc.company)
-	
 
 # *************************** Server Utility Functions *****************************
 	# Get Company abbr

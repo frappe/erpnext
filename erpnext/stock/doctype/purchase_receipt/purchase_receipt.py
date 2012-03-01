@@ -88,10 +88,6 @@ class DocType(TransactionBase):
 	def get_tc_details(self):
 		return get_obj('Purchase Common').get_tc_details(self)
 
-	def get_comp_base_currency(self):
-		return get_obj('Purchase Common').get_comp_base_currency(self.doc.company)
-
-
 
 	# get available qty at warehouse
 	def get_bin_details(self, arg = ''):
