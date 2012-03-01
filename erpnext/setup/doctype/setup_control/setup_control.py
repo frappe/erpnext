@@ -69,7 +69,7 @@ class DocType:
 		import webnotes, json
 		args = json.loads(args)
 
-		curr_fiscal_year, fy_start_date = self.get_fy_details(args.get('fy_start'))
+		curr_fiscal_year, fy_start_date, fy_abbr = self.get_fy_details(args.get('fy_start'))
 
 		args['name'] = webnotes.session.get('user')
 
@@ -82,7 +82,12 @@ class DocType:
 			
 		
 		# Fiscal Year
-		master_dict = {'Fiscal Year':{'year':curr_fiscal_year, 'year_start_date':fy_start_date}}
+		master_dict = {'Fiscal Year':{
+			'year': curr_fiscal_year,
+			'year_start_date': fy_start_date,
+			'abbreviation': fy_abbr,
+			'company': args.get('company_name'),
+			'is_fiscal_year_closed': 'No'}}
 		self.create_records(master_dict)
 		
 		# Company
@@ -163,9 +168,11 @@ class DocType:
 		#eddt = sql("select DATE_FORMAT(DATE_SUB(DATE_ADD('%s', INTERVAL 1 YEAR), INTERVAL 1 DAY),'%%d-%%m-%%Y')" % (stdt.split('-')[2]+ '-' + stdt.split('-')[1] + '-' + stdt.split('-')[0]))
 		if(fy_start == '1st Jan'):
 			fy = cstr(getdate(nowdate()).year)
+			abbr = cstr(fy)[-2:]
 		else:
 			fy = cstr(curr_year) + '-' + cstr(curr_year+1)
-		return fy,stdt
+			abbr = cstr(curr_year)[-2:] + '-' + cstr(curr_year+1)[-2:]
+		return fy, stdt, abbr
 
 
 	# Create Company and Fiscal Year
