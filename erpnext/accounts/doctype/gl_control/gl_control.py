@@ -536,7 +536,6 @@ def create_new_invoice(prev_rv):
 
 	# update new rv 
 
-	new_rv.doc.voucher_date = new_rv.doc.next_date
 	new_rv.doc.posting_date = new_rv.doc.next_date
 	new_rv.doc.aging_date = new_rv.doc.next_date
 	new_rv.doc.due_date = add_days(new_rv.doc.next_date, cint(date_diff(prev_rv.doc.due_date, prev_rv.doc.posting_date)))

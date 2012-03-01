@@ -60,7 +60,7 @@ elif based_on == 'Sales Partner':
 
 if under == 'Receivable Voucher':
   under_detail = 'RV'
-  dt = 'voucher_date'
+  dt = 'posting_date'
 else:
   under_detail = under
   dt = "transaction_date"
