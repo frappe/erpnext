@@ -65,7 +65,7 @@ erpnext.messages = {
 		$(wn.pages.messages).find('.well').toggle(contact==user ? false : true);
 
 		$(wn.pages.messages).find('h1:first').html('Messages: ' 
-			+ (user==contact ? 'From everyone' : wn.boot.user_fullnames[contact]))
+			+ (user==contact ? 'From everyone' : wn.user_info(contact).fullname));
 
 		erpnext.messages.contact = contact;
 		erpnext.messages.list.opts.args.contact = contact;
@@ -98,7 +98,7 @@ erpnext.messages = {
 			},
 			render_row: function(wrapper, data) {
 				data.creation = dateutil.comment_when(data.creation);
-				data.comment_by_fullname = wn.boot.user_fullnames[data.owner];
+				data.comment_by_fullname = wn.user_info(data.owner).fullname;
 
 				data.reply_html = '';
 				if(data.owner==user) {
@@ -143,7 +143,7 @@ erpnext.messages = {
 				var $body = $(wn.pages.messages).find('.section-body');
 				for(var i in r.message) {
 					var p = r.message[i];
-					p.fullname = wn.boot.user_fullnames[p.name];
+					p.fullname = wn.user_info(p.name).fullname;
 					p.name = p.name.replace('@', '__at__');
 					$body.append(repl('<div class="section-item">\
 						<a href="#!messages/%(name)s">%(fullname)s</a></div>', p))

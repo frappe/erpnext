@@ -66,11 +66,11 @@ $.extend(wn.pages.users, {
 	},
 	render: function(data) {
 		if(data.file_list) {
-			data.imgsrc = 'files/' + data.files_list.split('\n')[0].split(',')[1];
+			data.imgsrc = 'files/' + data.file_list.split('\n')[0].split(',')[1];
 		} else {
-			data.imgsrc = 'lib/images/ui/no_img_' + (data.gender=='Female' ? 'f' : 'm');
+			data.imgsrc = 'lib/images/ui/no_img_' + (data.gender=='Female' ? 'f' : 'm') + '.gif';
 		}
-		data.fullname = wn.boot.user_fullnames[data.name];
+		data.fullname = wn.user_info(data.name).fullname;
 		data.delete_html = '';
 		if(!data.enabled) 
 			data.delete_html = '<a class="close" title="delete">&times;</a>';
@@ -232,6 +232,7 @@ $.extend(wn.pages.users, {
 				$c_page('utilities', 'users', 'add_user', v, function(r,rt) {
 					if(r.exc) { msgprint(r.exc); return; }
 					else {
+						wn.boot.user_info[v.user] = {fullname:v.first_name + ' ' + v.last_name};
 						d.hide();
 						me.refresh();
 					}

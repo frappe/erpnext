@@ -3,12 +3,12 @@ wn.provide('erpnext.desktop');
 erpnext.desktop.gradient = "<style>\
 	.case-%(name)s {\
 		background: %(start)s; /* Old browsers */\
-		background: -moz-radial-gradient(center, ellipse cover,  %(start)s 0%, %(middle)s 44%, %(end)s 100%); /* FF3.6+ */\
-		background: -webkit-gradient(radial, center center, 0px, center center, 100%, color-stop(0%,%(start)s), color-stop(44%,%(middle)s), color-stop(100%,%(end)s)); /* Chrome,Safari4+ */\
-		background: -webkit-radial-gradient(center, ellipse cover,  %(start)s 0%,%(middle)s 44%,%(end)s 100%); /* Chrome10+,Safari5.1+ */\
-		background: -o-radial-gradient(center, ellipse cover,  %(start)s 0%,%(middle)s 44%,%(end)s 100%); /* Opera 12+ */\
-		background: -ms-radial-gradient(center, ellipse cover,  %(start)s 0%,%(middle)s 44%,%(end)s 100%); /* IE10+ */\
-		background: radial-gradient(center, ellipse cover,  %(start)s 0%,%(middle)s 44%,%(end)s 100%); /* W3C */\
+		background: -moz-radial-gradient(center, ellipse cover,  %(start)s 0%%, %(middle)s 44%%, %(end)s 100%%); /* FF3.6+ */\
+		background: -webkit-gradient(radial, center center, 0px, center center, 100%%, color-stop(0%%,%(start)s), color-stop(44%%,%(middle)s), color-stop(100%%,%(end)s)); /* Chrome,Safari4+ */\
+		background: -webkit-radial-gradient(center, ellipse cover,  %(start)s 0%%,%(middle)s 44%%,%(end)s 100%%); /* Chrome10+,Safari5.1+ */\
+		background: -o-radial-gradient(center, ellipse cover,  %(start)s 0%%,%(middle)s 44%%,%(end)s 100%%); /* Opera 12+ */\
+		background: -ms-radial-gradient(center, ellipse cover,  %(start)s 0%%,%(middle)s 44%%,%(end)s 100%%); /* IE10+ */\
+		background: radial-gradient(center, ellipse cover,  %(start)s 0%%,%(middle)s 44%%,%(end)s 100%%); /* W3C */\
 	}\
 	</style>"
 
@@ -79,7 +79,7 @@ erpnext.desktop.render = function() {
 
 	for(var i in wn.boot.modules_list) {
 		var m = wn.boot.modules_list[i];
-		if(m!='Setup');
+		if(m!='Setup')
 			add_icon(m);
 	}
 

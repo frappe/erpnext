@@ -63,6 +63,31 @@ def set_user_image(fid, fname):
 	"""
 		Set uploaded image as user image
 	"""
-	from webnotes.utils.file_manager import add_file_list, remove_all
-	remove_all('Profile', webnotes.session['user'])
-	add_file_list('Profile', webnotes.session['user'], fname, fid)
+	from webnotes.utils.file_manager import add_file_list, remove_file
+	user = webnotes.session['user']
+	
+	# remove old file
+	old_image = webnotes.conn.get_value('Profile', user, 'user_image')
+	if old_image:
+		remove_file('Profile', user, old_image)
+		
+	# add new file
+	add_file_list('Profile', user, fname, fid)
+	webnotes.conn.set_value('Profile', user, 'user_image', fid)
+
+@webnotes.whitelist()	
+def set_user_background(fid, fname):
+	"""
+		Set uploaded image as user image
+	"""
+	from webnotes.utils.file_manager import add_file_list, remove_file
+	user = webnotes.session['user']
+	
+	# remove old file
+	old_image = webnotes.conn.get_value('Profile', user, 'background_image')
+	if old_image:
+		remove_file('Profile', user, old_image)
+		
+	# add new file
+	add_file_list('Profile', user, fname, fid)
+	webnotes.conn.set_value('Profile', user, 'background_image', fid)

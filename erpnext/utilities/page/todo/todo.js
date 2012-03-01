@@ -46,14 +46,22 @@ erpnext.todo.ToDoItem = Class.extend({
 		}
 		todo.labelclass = label_map[todo.priority];
 		todo.userdate = dateutil.str_to_user(todo.date);
+		if(todo.reference_name && todo.reference_type) {
+			todo.link = repl('<a href="#!Form/%(reference_type)s/%(reference_name)s">\
+						%(reference_name)s</a>', todo);
+		} else if(todo.reference_type) {
+			todo.link = repl('<a href="#!List/%(reference_type)s">\
+						%(reference_type)s</a>', todo);
+		} else {
+			todo.link = '';
+		}
 		$('#todo-list').append(repl('<div class="todoitem">\
 				<span class="description">\
 					<span class="label %(labelclass)s">%(priority)s</span>\
 					<span class="help" style="margin-right: 7px">%(userdate)s</span>\
 					%(description)s</span>\
 					<span class="ref_link">&rarr;\
-					<a href="#!Form/%(reference_type)s/%(reference_name)s">\
-						[%(reference_name)s]</a></span>\
+					%(link)s</span>\
 					<a href="#" class="close">&times;</a>\
 		</div>', todo));
 		$todo = $('div.todoitem:last');
@@ -62,7 +70,7 @@ erpnext.todo.ToDoItem = Class.extend({
 			$todo.find('.description').css('text-decoration', 'line-through');
 		}
 		
-		if(!todo.reference_name)
+		if(!todo.reference_type)
 			$todo.find('.ref_link').toggle(false);
 		
 		$todo.find('.description')

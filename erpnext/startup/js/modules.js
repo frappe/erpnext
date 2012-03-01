@@ -73,7 +73,10 @@ erpnext.module_page.make_list = function(module, wrapper) {
 		args: {
 			module: module
 		},
-		no_refresh: true
+		no_refresh: true,
+		callback: function(r) {
+			erpnext.module_page.hide_links(wrapper)
+		}
 	});
 	wrapper.list.run();	
 }
