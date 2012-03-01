@@ -74,7 +74,6 @@
 
 	{
 		"js/all-web.js": [
-			"lib/js/lib/jquery.min.js:concat",
 			"lib/js/lib/history/history.min.js:concat",
 			"lib/js/lib/bootstrap.min.js:concat",
 			"lib/js/lib/sprintf.js",
@@ -115,7 +114,6 @@
 	
 	{
 		"js/all-app.js": [
-			"lib/js/lib/jquery.min.js:concat",
 			"lib/js/lib/history/history.min.js:concat",
 			"lib/js/legacy/jquery/jquery-ui.min.js:concat",
 			"lib/js/legacy/tiny_mce_33/jquery.tinymce.js:concat",
