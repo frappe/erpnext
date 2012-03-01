@@ -167,4 +167,10 @@ patch_list = [
 		'patch_file': 'add_roles_to_admin',
 		'description': 'Add Roles to Administrator'
 	},
+	{
+		'patch_module': 'patches.jan_mar_2012',
+		'patch_file': 'dt_map_fix',
+		'description': 'removed transaction date from dt_mapper'
+	},
+
 ]
