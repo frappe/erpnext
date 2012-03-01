@@ -533,7 +533,7 @@ class DocType(TransactionBase):
 		self.values.append({
 			'item_code'					 : d.item_code,
 			'warehouse'					 : wh,
-			'transaction_date'		: self.doc.voucher_date,
+			'transaction_date'			: getdate(self.doc.modified).strftime('%Y-%m-%d'),
 			'posting_date'				: self.doc.posting_date,
 			'posting_time'				: self.doc.posting_time,
 			'voucher_type'				: 'Receivable Voucher',
