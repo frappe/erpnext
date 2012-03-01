@@ -240,9 +240,9 @@ class DocType(TransactionBase):
 
 			if prevdoc_docname and prevdoc:
 				# ::::::::::: Validates Transaction Date of DN and previous doc (i.e. SO , PO, PR) *********
-				trans_date = sql("select transaction_date from `tab%s` where name = '%s'" %(prevdoc,prevdoc_docname))[0][0]
-				if trans_date and getdate(self.doc.transaction_date) < (trans_date):
-					msgprint("Your Voucher Date cannot be before "+cstr(prevdoc)+" Date.")
+				trans_date = sql("select posting_date from `tab%s` where name = '%s'" %(prevdoc,prevdoc_docname))[0][0]
+				if trans_date and getdate(self.doc.posting_date) < (trans_date):
+					msgprint("Your Posting Date cannot be before "+cstr(prevdoc)+" Date.")
 					raise Exception
 				# ::::::::: Validates DN and previous doc details ::::::::::::::::::
 				get_name = sql("select name from `tab%s` where name = '%s'" % (prevdoc, prevdoc_docname))
@@ -452,7 +452,7 @@ class DocType(TransactionBase):
 		self.values.append({
 			'item_code'					 : d[1],
 			'warehouse'					 : wh,
-			'transaction_date'		: self.doc.transaction_date,
+			'transaction_date'		: getdate(self.doc.modified).strftime('%Y-%m-%d'),
 			'posting_date'				: self.doc.posting_date,
 			'posting_time'				: self.doc.posting_time,
 			'voucher_type'				: 'Delivery Note',
