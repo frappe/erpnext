@@ -37,7 +37,6 @@
 	{
 		"css/all-web.css": [
 			"lib/css/legacy/body.css",
-			"lib/css/legacy/menus.css",
 			"lib/css/legacy/messages.css",
 			"lib/css/legacy/dialog.css",
 			"lib/css/bootstrap/headings.css",
@@ -53,7 +52,6 @@
 	{
 		"css/all-app.css": [
 			"lib/css/legacy/body.css",
-			"lib/css/legacy/menus.css",
 			"lib/css/legacy/messages.css",
 			"lib/css/legacy/forms.css",
 			"lib/css/legacy/grid.css",
