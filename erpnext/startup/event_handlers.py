@@ -48,7 +48,7 @@ def on_login_post_session(login_manager):
 				sid!=%s""", \
 			(webnotes.session['user'], webnotes.session['sid']), as_list=1)
 
-	if webnotes.session['user'] not in ('Guest') and webnotes.conn.cur_db_name!='accounts':
+	if webnotes.session['user'] not in ('Guest', 'demo@webnotestech.com') and webnotes.conn.cur_db_name!='accounts':
 		# create feed
 		from webnotes.utils import nowtime
 		home.make_feed('Login', 'Profile', login_manager.user, login_manager.user,
