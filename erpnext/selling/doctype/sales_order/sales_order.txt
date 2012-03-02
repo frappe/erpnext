@@ -5,7 +5,7 @@
 	{
 		'creation': '2010-08-08 17:09:21',
 		'docstatus': 0,
-		'modified': '2012-03-02 12:19:01',
+		'modified': '2012-03-02 14:34:02',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -21,7 +21,7 @@
 
 	# These values are common for all DocType
 	{
-		'_last_update': u'1330593645',
+		'_last_update': u'1330670942',
 		'allow_attach': 0,
 		'colour': u'White:FFF',
 		'default_print_format': u'Standard',
@@ -38,7 +38,7 @@
 		'show_in_menu': 0,
 		'subject': u'From %(customer_name)s on %(transaction_date)s worth %(currency)s %(grand_total_export)s | %(per_delivered)s% delivered | %(per_billed)s% billed',
 		'tag_fields': u'delivery_status,billing_status',
-		'version': 630
+		'version': 631
 	},
 
 	# These values are common for all DocFormat
@@ -392,6 +392,7 @@
 		'oldfieldtype': u'Select',
 		'options': u'\nSales\nMaintenance',
 		'permlevel': 0,
+		'print_hide': 1,
 		'reqd': 1
 	},
 
