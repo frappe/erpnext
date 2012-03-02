@@ -61,7 +61,6 @@ class DocType:
     
     # ---- get companies ---------
     res = sql("select name from `tabCompany`")
-    comp.append('All')
     for r in res:
       comp.append(r[0])
     #comp.append(r[0] for r in res)
