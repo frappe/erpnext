@@ -1081,7 +1081,7 @@ if(!reset){$c_page('home','event_updates','get_unread_messages',null,function(r,
 if(circle){if(r.message.length){circle.find('span:first').text(r.message.length);circle.toggle(true);}else{circle.toggle(false);}}}else{clearInterval(wn.updates.id);}});}else{page_body.wntoolbar.set_new_comments(0);$('#msg_count').toggle(false);}}
 erpnext.startup.set_periodic_updates=function(){wn.updates={};if(wn.updates.id){clearInterval(wn.updates.id);}
 wn.updates.id=setInterval(update_messages,60000);}
-erpnext.set_user_background=function(src){set_style(repl('body { background: url("files/%(src)s") repeat !important;}',{src:src}))}
+erpnext.set_user_background=function(src){set_style(repl('body { background: url("files/%(src)s") repeat;}',{src:src}))}
 $(document).bind('startup',function(){erpnext.startup.start();});
 /*
  *	erpnext/website/js/topbar.js
