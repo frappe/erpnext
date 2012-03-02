@@ -3,7 +3,6 @@
 		"lib/js/core.min.js": [
 			"lib/js/wn/class.js",
 			"lib/js/wn/provide.js",
-			"lib/js/wn/xmlhttp.js",
 			"lib/js/wn/versions.js",
 			"lib/js/wn/assets.js",
 			"lib/js/wn/require.js",
@@ -11,6 +10,7 @@
 			"lib/js/wn/page.js",
 			"lib/js/wn/misc/user.js",
 			"lib/js/lib/json2.js",
+			"lib/js/wn/request.js",
 			"lib/js/core.js"
 		]
 	},
@@ -95,7 +95,6 @@
 			"lib/js/legacy/webpage/history.js",
 			"lib/js/legacy/webpage/search.js",
 			"lib/js/legacy/webpage/spinner.js",
-			"lib/js/legacy/webpage/freeze_page.js",
 			"lib/js/legacy/webpage/error_console.js",
 			"lib/js/legacy/webpage/loaders.js",
 			"lib/js/legacy/webpage/uploader.js",
@@ -142,7 +141,6 @@
 			"lib/js/legacy/webpage/history.js",
 			"lib/js/legacy/webpage/search.js",
 			"lib/js/legacy/webpage/spinner.js",
-			"lib/js/legacy/webpage/freeze_page.js",
 			"lib/js/legacy/webpage/error_console.js",
 			"lib/js/legacy/webpage/loaders.js",
 			"lib/js/legacy/webpage/uploader.js",

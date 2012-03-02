@@ -55,7 +55,7 @@ cur_frm.cscript.onload = function(doc, dt, dn) {
       if (ci==0){ 
         var d1 = $a(cell,'div');
         var img = $a(cell,'img','',{width:'40px'});
-        set_user_img(img,d[ri][0])
+        img.src = wn.user_info(d[ri][0]).image;
         var d2 = $a(cell,'div');
         d2.innerHTML =  d[ri][0] + ' on: ' + date.str_to_user(d[ri][1]);
       }
