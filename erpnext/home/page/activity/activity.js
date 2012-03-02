@@ -48,12 +48,13 @@ erpnext.ActivityFeed = Class.extend({
 		var date = dateutil.str_to_obj(data.modified);
 		var last = erpnext.last_feed_date;
 		
-		if((last && dateutil.get_diff(last, date)>1) || (!last)) {
-			var pdate = dateutil.comment_when(date);
-			var diff = dateutil.get_diff(new Date(), date);
+		if((last && dateutil.obj_to_str(last) != dateutil.obj_to_str(date)) || (!last)) {
+			var diff = dateutil.get_day_diff(new Date(), date);
 			if(diff < 1) {
 				pdate = 'Today';
-			} else if(diff > 6) {
+			} else if(diff < 2) {
+				pdate = 'Yesterday';
+			} else {
 				pdate = dateutil.global_date_format(date);
 			}
 			$(row).html(repl('<div class="date-sep">%(date)s</div>', {date: pdate}));

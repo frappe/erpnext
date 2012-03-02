@@ -128,7 +128,7 @@ pscript.feature_dict = {
 		'Receivable Voucher': {'fields':['conversion_rate','currency','grand_total_export','in_words_export','rounded_total_export'],'entries':['ref_rate','export_amount','export_rate']},
 		'Item': {'ref_rate_details':['ref_currency']},
 		'Sales BOM': {'fields':['currency']},
-		'Sales Order': {'fields':['Note1','OT Notes','conversion_rate','currency','grand_total_export','in_words_export','rounded_total_export'],'sales_order_details':['base_ref_rate','export_amount','export_rate']}
+		'Sales Order': {'fields':['Note1','OT Notes','conversion_rate','currency','grand_total_export','in_words_export','rounded_total_export'],'sales_order_details':['ref_rate','export_amount','export_rate']}
 	},
 	'fs_imports': {
 		'Payable Voucher': {'fields':['conversion_rate','currency','grand_total_import','in_words_import','net_total_import','other_charges_added_import','other_charges_deducted_import'],'entries':['import_amount','import_rate']},
