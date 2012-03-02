@@ -420,7 +420,7 @@ get_url_arg=wn.urllib.get_arg;get_url_dict=wn.urllib.get_dict;
  *	lib/js/legacy/utils/handler.js
  */
 function $c(command,args,callback,error,no_spinner,freeze_msg,btn){wn.request.call({args:$.extend(args,{cmd:command}),success:callback,error:error,btn:btn,freeze:freeze_msg,show_spinner:!no_spinner})}
-function $c_obj(doclist,method,arg,callback,no_spinner,freeze_msg,btn){if(typeof arg=='string')arg=JSON.stringify(arg);args:{cmd:'runserverobj',arg:arg,method:method,},if(typeof doclist=='string')
+function $c_obj(doclist,method,arg,callback,no_spinner,freeze_msg,btn){if(typeof arg=='string')arg=JSON.stringify(arg);args={cmd:'runserverobj',arg:arg,method:method};if(typeof doclist=='string')
 args.doctype=doclist;else
 args.docs=compress_doclist(doclist)
 wn.request.call({args:args
