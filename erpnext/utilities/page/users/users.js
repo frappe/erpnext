@@ -197,7 +197,7 @@ $.extend(wn.pages.users, {
 			btn.pwd_dialog.hide();					
 			args.sys_admin_pwd = btn.pwd_dialog.get_values().sys_admin_pwd;					
 			btn.set_working();					
-			me.update_security(args);
+			me.update_security(btn, args);
 			btn.done_working();
 		}
 

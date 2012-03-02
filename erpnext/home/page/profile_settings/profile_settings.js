@@ -31,8 +31,8 @@ MyProfile = function(wrapper) {
 		
 		this.tab = make_table($a(this.wrapper, 'div', '', {marginTop:'19px'}), 
 			1, 2, '90%', ['50%', '50%'], {padding:'11px'})
-		this.img = $a($td(this.tab, 0, 0), 'img');
-		set_user_img(this.img, user);
+		this.img = $a($td(this.tab, 0, 0), 'img', '', {width: '120px', maxHeight:'200px'});
+		this.img.src = wn.user_info(user).image;
 
 		$btn($a($td(this.tab, 0, 0), 'div', '', {marginTop:'11px'}), 'Change Image', this.change_image);
 
@@ -135,14 +135,18 @@ MyProfile = function(wrapper) {
 }
 
 pscript.background_change = function(fid) {
-	//erpnext.set_background_image(fid);
-	pscript.open_dialog.hide();
+	msgprint('File Uploaded');
+	if(fid) {
+		erpnext.set_user_background(fid);		
+		pscript.open_dialog.hide();
+	}
 }
 
 pscript.user_image_upload = function(fid) {
 	msgprint('File Uploaded');
 	if(fid) {
 		pscript.open_dialog.hide();
-		set_user_img(pscript.myprofile.img, user, null, fid);
+		wn.boot.user_info[user].image = 'files/' + fid;
+		pscript.myprofile.img.src = 'files/' + fid;
 	}
 }

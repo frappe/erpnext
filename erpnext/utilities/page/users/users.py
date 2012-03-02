@@ -82,7 +82,7 @@ def update_security(args=''):
 	webnotes.conn.set_value('Profile', args['user'], 'login_before', args.get('login_before'))
 	webnotes.conn.set_value('Profile', args['user'], 'enabled', int(args.get('enabled',0)) or 0)
 
-	if 'new_password' in args:
+	if args.get('new_password') and args.get('sys_admin_pwd'):
 		if cint(webnotes.conn.get_value('Control Panel',None,'sync_with_gateway')):
 			import server_tools.gateway_utils
 			res = server_tools.gateway_utils.change_password('', args['new_password'], 
