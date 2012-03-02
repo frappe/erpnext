@@ -369,8 +369,7 @@ function $c(command,args,callback,error,no_spinner,freeze_msg,btn){wn.request.ca
 function $c_obj(doclist,method,arg,callback,no_spinner,freeze_msg,btn){if(typeof arg=='string')arg=JSON.stringify(arg);args={cmd:'runserverobj',arg:arg,method:method};if(typeof doclist=='string')
 args.doctype=doclist;else
 args.docs=compress_doclist(doclist)
-wn.request.call({args:args
-success:callback,btn:btn,freeze:freeze_msg,show_spinner:!no_spinner});}
+wn.request.call({args:args,success:callback,btn:btn,freeze:freeze_msg,show_spinner:!no_spinner});}
 function $c_page(module,page,method,arg,callback,no_spinner,freeze_msg,btn){if(typeof arg=='string')arg=JSON.stringify(arg);wn.request.call({args:{cmd:module+'.page.'+page+'.'+page+'.'+method,arg:arg,method:method},success:callback,error:error,btn:btn,freeze:freeze_msg,show_spinner:!no_spinner});}
 function $c_obj_csv(doclist,method,arg){var args={}
 args.cmd='runserverobj';args.as_csv=1;args.method=method;args.arg=arg;if(doclist.substr)
