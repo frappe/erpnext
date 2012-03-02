@@ -5,7 +5,7 @@
 	{
 		'creation': '2010-08-08 17:09:17',
 		'docstatus': 0,
-		'modified': '2012-02-27 18:42:06',
+		'modified': '2012-03-02 14:39:34',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -22,7 +22,7 @@
 		'section_style': u'Tray',
 		'server_code_error': u' ',
 		'show_in_menu': 0,
-		'version': 43
+		'version': 44
 	},
 
 	# These values are common for all DocField
@@ -104,6 +104,7 @@
 		'fieldtype': u'Currency',
 		'label': u'Ref Rate ',
 		'permlevel': 0,
+		'print_hide': 1,
 		'trigger': u'Client'
 	},
 
@@ -114,6 +115,7 @@
 		'fieldtype': u'Currency',
 		'label': u'Discount %',
 		'permlevel': 0,
+		'print_hide': 1,
 		'trigger': u'Client'
 	},
 
@@ -150,6 +152,7 @@
 		'fieldtype': u'Currency',
 		'label': u'Ref Rate *',
 		'permlevel': 0,
+		'print_hide': 1,
 		'trigger': u'Client'
 	},
 
