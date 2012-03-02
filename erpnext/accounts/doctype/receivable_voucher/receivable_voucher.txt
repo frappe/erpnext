@@ -5,7 +5,7 @@
 	{
 		'creation': '2010-08-08 17:09:18',
 		'docstatus': 0,
-		'modified': '2012-02-27 17:34:46',
+		'modified': '2012-03-02 12:22:21',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -21,7 +21,7 @@
 
 	# These values are common for all DocType
 	{
-		'_last_update': u'1330344021',
+		'_last_update': u'1330593645',
 		'change_log': u'1. Change in pull_details method dt.-26-06-2009',
 		'colour': u'White:FFF',
 		'default_print_format': u'Standard',
@@ -34,7 +34,7 @@
 		'server_code_error': u' ',
 		'show_in_menu': 0,
 		'subject': u'To %(customer_name)s worth %(currency)s %(grand_total_export)s due on %(due_date)s | %(outstanding_amount)s outstanding',
-		'version': 414
+		'version': 415
 	},
 
 	# These values are common for all DocFormat
@@ -176,6 +176,7 @@
 	# DocField
 	{
 		'colour': u'White:FFF',
+		'default': u'INV',
 		'depends_on': u'eval:doc.retail_transaction!="Yes"',
 		'description': u'To manage multiple series please go to Setup > Manage Series',
 		'doctype': u'DocField',
@@ -185,7 +186,7 @@
 		'no_copy': 1,
 		'oldfieldname': u'naming_series',
 		'oldfieldtype': u'Select',
-		'options': u'\nINV\nINV/10-11/',
+		'options': u'INV\nINV/10-11/',
 		'permlevel': 0,
 		'print_hide': 1,
 		'reqd': 1
@@ -645,17 +646,6 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
-		'fieldtype': u'HTML',
-		'label': u'Rates HTML',
-		'oldfieldtype': u'HTML',
-		'options': u'* Rates in standard currency',
-		'permlevel': 0,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
 		'colour': u'White:FFF',
 		'depends_on': u'eval:doc.is_pos==1',
 		'doctype': u'DocField',
@@ -1074,24 +1064,6 @@
 
 	# DocField
 	{
-		'colour': u'White:FFF',
-		'default': u'Today',
-		'description': u"This is the date on which this voucher is made in the system. Today's date comes by default.",
-		'doctype': u'DocField',
-		'fieldname': u'voucher_date',
-		'fieldtype': u'Date',
-		'in_filter': 1,
-		'label': u'Voucher Date',
-		'no_copy': 1,
-		'oldfieldname': u'voucher_date',
-		'oldfieldtype': u'Date',
-		'permlevel': 0,
-		'reqd': 1,
-		'search_index': 0
-	},
-
-	# DocField
-	{
 		'doctype': u'DocField',
 		'fieldname': u'aging_date',
 		'fieldtype': u'Date',
@@ -1180,7 +1152,8 @@
 		'doctype': u'DocField',
 		'fieldtype': u'Column Break',
 		'oldfieldtype': u'Column Break',
-		'permlevel': 0
+		'permlevel': 0,
+		'print_hide': 1
 	},
 
 	# DocField
@@ -1390,7 +1363,8 @@
 		'doctype': u'DocField',
 		'fieldtype': u'Section Break',
 		'options': u'Simple',
-		'permlevel': 0
+		'permlevel': 0,
+		'print_hide': 1
 	},
 
 	# DocField
@@ -1412,7 +1386,8 @@
 		'doctype': u'DocField',
 		'fieldtype': u'Section Break',
 		'label': u'Recurring Invoice',
-		'permlevel': 0
+		'permlevel': 0,
+		'print_hide': 1
 	},
 
 	# DocField
@@ -1420,6 +1395,7 @@
 		'doctype': u'DocField',
 		'fieldtype': u'Column Break',
 		'permlevel': 0,
+		'print_hide': 1,
 		'width': u'50%'
 	},
 
@@ -1473,6 +1449,7 @@
 		'fieldtype': u'Column Break',
 		'no_copy': 0,
 		'permlevel': 0,
+		'print_hide': 1,
 		'width': u'50%'
 	},
 

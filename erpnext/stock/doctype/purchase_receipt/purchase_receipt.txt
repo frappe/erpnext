@@ -5,14 +5,14 @@
 	{
 		'creation': '2010-08-08 17:09:15',
 		'docstatus': 0,
-		'modified': '2012-02-27 17:54:59',
+		'modified': '2012-03-02 12:26:39',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': u'1330345245',
+		'_last_update': u'1330593645',
 		'colour': u'White:FFF',
 		'default_print_format': u'Standard',
 		'doctype': 'DocType',
@@ -26,7 +26,7 @@
 		'server_code_error': u' ',
 		'show_in_menu': 0,
 		'subject': u'From %(supplier_name)s against %(purchase_order)s on %(transaction_date)s',
-		'version': 324
+		'version': 325
 	},
 
 	# These values are common for all DocField
@@ -300,25 +300,6 @@
 		'oldfieldtype': u'Column Break',
 		'permlevel': 0,
 		'width': u'50%'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'description': u'The date at which current entry is made in system.',
-		'doctype': u'DocField',
-		'fieldname': u'transaction_date',
-		'fieldtype': u'Date',
-		'in_filter': 1,
-		'label': u'Transaction Date',
-		'no_copy': 1,
-		'oldfieldname': u'transaction_date',
-		'oldfieldtype': u'Date',
-		'permlevel': 0,
-		'reqd': 1,
-		'search_index': 1,
-		'trigger': u'Client',
-		'width': u'100px'
 	},
 
 	# DocField
@@ -948,6 +929,7 @@
 		'fieldtype': u'Column Break',
 		'oldfieldtype': u'Column Break',
 		'permlevel': 0,
+		'print_hide': 1,
 		'width': u'50%'
 	},
 
@@ -1120,7 +1102,8 @@
 		'fieldtype': u'Section Break',
 		'label': u'Raw Material Details',
 		'oldfieldtype': u'Section Break',
-		'permlevel': 1
+		'permlevel': 1,
+		'print_hide': 1
 	},
 
 	# DocField
@@ -1130,7 +1113,8 @@
 		'label': u'Get Current Stock',
 		'oldfieldtype': u'Button',
 		'options': u'get_current_stock',
-		'permlevel': 0
+		'permlevel': 0,
+		'print_hide': 1
 	},
 
 	# DocField

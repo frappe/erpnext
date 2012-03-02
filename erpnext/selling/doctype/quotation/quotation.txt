@@ -5,7 +5,7 @@
 	{
 		'creation': '2010-08-08 17:09:17',
 		'docstatus': 0,
-		'modified': '2012-02-27 17:14:54',
+		'modified': '2012-03-02 12:20:40',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -41,7 +41,7 @@
 		'show_in_menu': 0,
 		'subject': u'To %(customer_name)s on %(transaction_date)s worth %(currency)s %(grand_total_export)s',
 		'tag_fields': u'status',
-		'version': 617
+		'version': 618
 	},
 
 	# These values are common for all DocFormat
@@ -673,18 +673,6 @@
 		'print_hide': 0,
 		'reqd': 0,
 		'width': u'100px'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'doctype': u'DocField',
-		'fieldtype': u'HTML',
-		'label': u'Note HTML',
-		'oldfieldtype': u'HTML',
-		'options': u'<div style="margin-top:16px"><b>Note :</b> * In Base Currency\n</div>',
-		'permlevel': 0,
-		'print_hide': 1
 	},
 
 	# DocField
