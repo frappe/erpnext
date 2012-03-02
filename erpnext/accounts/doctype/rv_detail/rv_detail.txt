@@ -5,7 +5,7 @@
 	{
 		'creation': '2010-08-08 17:09:20',
 		'docstatus': 0,
-		'modified': '2012-03-01 18:43:30',
+		'modified': '2012-03-02 14:37:42',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -22,7 +22,7 @@
 		'section_style': u'Tray',
 		'server_code_error': u' ',
 		'show_in_menu': 0,
-		'version': 26
+		'version': 27
 	},
 
 	# These values are common for all DocField
@@ -88,15 +88,6 @@
 	# DocField
 	{
 		'doctype': u'DocField',
-		'fieldname': u'stock_uom',
-		'fieldtype': u'Data',
-		'label': u'UOM',
-		'permlevel': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
 		'fieldname': u'qty',
 		'fieldtype': u'Currency',
 		'label': u'Qty',
@@ -105,6 +96,15 @@
 		'permlevel': 0,
 		'reqd': 0,
 		'trigger': u'Client'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'stock_uom',
+		'fieldtype': u'Data',
+		'label': u'UOM',
+		'permlevel': 1
 	},
 
 	# DocField
