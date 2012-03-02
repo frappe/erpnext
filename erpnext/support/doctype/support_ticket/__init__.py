@@ -29,6 +29,7 @@ class SupportMailbox(POP3Mailbox):
 
 		# extract email settings
 		self.email_settings = Document('Email Settings','Email Settings')
+		if not self.email_settings.fields.get('sync_support_mails'): return
 		
 		s = Document('Support Email Settings')
 		s.use_ssl = self.email_settings.support_use_ssl
