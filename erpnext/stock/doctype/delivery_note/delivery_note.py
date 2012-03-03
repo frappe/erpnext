@@ -74,16 +74,6 @@ class DocType(TransactionBase):
 
 		return cstr(self.doc.sales_order_no)
 
-
-
-	#-------------------set item details -uom and item group----------------
-	def set_item_details(self):
-		for d in getlist(self.doclist,'delivery_note_details'):
-			res = sql("select stock_uom, item_group from `tabItem` where name ='%s'"%d.item_code)
-			if not d.stock_uom:		d.stock_uom = res and cstr(res[0][0]) or ''
-			if not d.item_group:	 d.item_group = res and cstr(res[0][1]) or ''
-			d.save()
-
 	# ::::: Validates that Sales Order is not pulled twice :::::::
 	def validate_prev_docname(self):
 		for d in getlist(self.doclist, 'delivery_note_details'):
