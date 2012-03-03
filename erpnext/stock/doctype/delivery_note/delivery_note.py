@@ -351,16 +351,17 @@ class DocType(TransactionBase):
 		"""
 			Validate that if packed qty exists, it should be equal to qty
 		"""
-		if not any([d.fields.get('packed_qty') for d in self.doclist]):
+		if not any([flt(d.fields.get('packed_qty')) for d in self.doclist if
+				d.doctype=='Delivery Note Detail']):
 			return
 		packing_error_list = []
 		for d in self.doclist:
 			if d.doctype != 'Delivery Note Detail': continue
-			if d.fields.get('qty') != d.fields.get('packed_qty'):
+			if flt(d.fields.get('qty')) != flt(d.fields.get('packed_qty')):
 				packing_error_list.append([
 					d.fields.get('item_code', ''),
-					d.fields.get('qty', ''),
-					d.fields.get('packed_qty', '')
+					d.fields.get('qty', 0),
+					d.fields.get('packed_qty', 0)
 				])
 		if packing_error_list:
 			from webnotes.utils import cstr
