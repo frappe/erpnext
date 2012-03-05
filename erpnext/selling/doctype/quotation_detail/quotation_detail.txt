@@ -5,7 +5,7 @@
 	{
 		'creation': '2010-08-08 17:09:18',
 		'docstatus': 0,
-		'modified': '2012-03-02 14:40:25',
+		'modified': '2012-03-05 15:00:10',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -23,7 +23,7 @@
 		'section_style': u'Tray',
 		'server_code_error': u' ',
 		'show_in_menu': 0,
-		'version': 31
+		'version': 33
 	},
 
 	# These values are common for all DocField
@@ -207,21 +207,6 @@
 
 	# DocField
 	{
-		'colour': u'White:FFF',
-		'doctype': u'DocField',
-		'fieldname': u'stock_uom',
-		'fieldtype': u'Data',
-		'label': u'UOM',
-		'oldfieldname': u'stock_uom',
-		'oldfieldtype': u'Data',
-		'permlevel': 1,
-		'print_hide': 0,
-		'reqd': 0,
-		'width': u'100px'
-	},
-
-	# DocField
-	{
 		'default': u'0.00',
 		'doctype': u'DocField',
 		'fieldname': u'amount',
@@ -235,6 +220,21 @@
 		'reqd': 0,
 		'search_index': 0,
 		'trigger': u'Client',
+		'width': u'100px'
+	},
+
+	# DocField
+	{
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'stock_uom',
+		'fieldtype': u'Data',
+		'label': u'UOM',
+		'oldfieldname': u'stock_uom',
+		'oldfieldtype': u'Data',
+		'permlevel': 1,
+		'print_hide': 0,
+		'reqd': 0,
 		'width': u'100px'
 	},
 

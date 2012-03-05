@@ -26,13 +26,15 @@ cur_frm.cscript.load_taxes = function(doc, cdt, cdn, callback) {
 	// run if this is not executed from dt_map...
 	doc = locals[doc.doctype][doc.name];
 	if(doc.customer || getchildren('RV Tax Detail', doc.name, 'other_charges', doc.doctype).length) {
-		if(callback) callback(doc, cdt, cdn);
-		return;
+		if(callback) {
+			callback(doc, cdt, cdn);
+		}
+	} else {
+		$c_obj([doc],'load_default_taxes','',function(r,rt){
+			refresh_field('other_charges');
+			if(callback) callback(doc, cdt, cdn);
+		});
 	}
-	$c_obj([doc],'load_default_taxes','',function(r,rt){
-		refresh_field('other_charges');
-		if(callback) callback(doc, cdt, cdn);
-	});
 }
 
 
@@ -119,7 +121,7 @@ var set_dynamic_label_child = function(doc, cdt, cdn, base_curr) {
 	for (d in item_cols_export) $('[data-grid-fieldname="'+cur_frm.cscript.tname+'-'+d+'"]').html(item_cols_export[d]+' ('+doc.currency+')');	
 
 	var hide = (doc.currency == sys_defaults['currency']) ? false : true;
-	for (f in item_cols_export) {
+	for (f in item_cols_base) {
 		cur_frm.fields_dict[cur_frm.cscript.fname].grid.set_column_disp(f, hide);
 	}
 
@@ -656,10 +658,10 @@ cur_frm.cscript.update_fname_table = function(doc , tname , fname , n, other_fna
 					'basic_rate': flt(flt(cl[i].export_rate) * flt(doc.conversion_rate)),
 					'amount': roundNumber(flt((flt(cl[i].export_rate) * flt(doc.conversion_rate)) * flt(cl[i].qty)), 2)
 				}, fname);
-				var base_ref_rate = flt(cl[i].basic_rate) + flt(flt(cl[i].basic_rate) * flt(cl[i].adj_rate) / 100);
-				set_multiple(tname, cl[i].name, {
-					'base_ref_rate': flt(base_ref_rate)
-				}, fname);
+				//var base_ref_rate = flt(cl[i].basic_rate) + flt(flt(cl[i].basic_rate) * flt(cl[i].adj_rate) / 100);
+				//set_multiple(tname, cl[i].name, {
+				//	'base_ref_rate': flt(base_ref_rate)
+				//}, fname);
 
 		} else if(consider_incl_rate) {
 			if(flt(cl[i].export_rate) > 0) {
