@@ -26,13 +26,15 @@ cur_frm.cscript.load_taxes = function(doc, cdt, cdn, callback) {
 	// run if this is not executed from dt_map...
 	doc = locals[doc.doctype][doc.name];
 	if(doc.customer || getchildren('RV Tax Detail', doc.name, 'other_charges', doc.doctype).length) {
-		if(callback) callback(doc, cdt, cdn);
-		return;
+		if(callback) {
+			callback(doc, cdt, cdn);
+		}
+	} else {
+		$c_obj([doc],'load_default_taxes','',function(r,rt){
+			refresh_field('other_charges');
+			if(callback) callback(doc, cdt, cdn);
+		});
 	}
-	$c_obj([doc],'load_default_taxes','',function(r,rt){
-		refresh_field('other_charges');
-		if(callback) callback(doc, cdt, cdn);
-	});
 }
 
 

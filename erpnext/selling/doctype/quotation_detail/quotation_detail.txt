@@ -5,7 +5,7 @@
 	{
 		'creation': '2010-08-08 17:09:18',
 		'docstatus': 0,
-		'modified': '2012-03-02 14:40:25',
+		'modified': '2012-03-05 10:48:27',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -23,7 +23,7 @@
 		'section_style': u'Tray',
 		'server_code_error': u' ',
 		'show_in_menu': 0,
-		'version': 31
+		'version': 32
 	},
 
 	# These values are common for all DocField
@@ -110,17 +110,14 @@
 
 	# DocField
 	{
-		'default': u'0.00',
 		'doctype': u'DocField',
-		'fieldname': u'ref_rate',
+		'fieldname': u'base_ref_rate',
 		'fieldtype': u'Currency',
-		'label': u'Price List Rate',
-		'oldfieldname': u'ref_rate',
+		'label': u'Price List Rate*',
+		'oldfieldname': u'base_ref_rate',
 		'oldfieldtype': u'Currency',
-		'permlevel': 0,
+		'permlevel': 1,
 		'print_hide': 1,
-		'reqd': 0,
-		'trigger': u'Client',
 		'width': u'100px'
 	},
 
@@ -135,6 +132,58 @@
 		'oldfieldtype': u'Float',
 		'permlevel': 0,
 		'print_hide': 1,
+		'trigger': u'Client',
+		'width': u'100px'
+	},
+
+	# DocField
+	{
+		'default': u'0.00',
+		'doctype': u'DocField',
+		'fieldname': u'basic_rate',
+		'fieldtype': u'Currency',
+		'in_filter': 0,
+		'label': u'Basic Rate*',
+		'oldfieldname': u'basic_rate',
+		'oldfieldtype': u'Currency',
+		'permlevel': 0,
+		'print_hide': 1,
+		'reqd': 0,
+		'search_index': 0,
+		'trigger': u'Client',
+		'width': u'100px'
+	},
+
+	# DocField
+	{
+		'default': u'0.00',
+		'doctype': u'DocField',
+		'fieldname': u'amount',
+		'fieldtype': u'Currency',
+		'in_filter': 0,
+		'label': u'Amount*',
+		'oldfieldname': u'amount',
+		'oldfieldtype': u'Currency',
+		'permlevel': 1,
+		'print_hide': 1,
+		'reqd': 0,
+		'search_index': 0,
+		'trigger': u'Client',
+		'width': u'100px'
+	},
+
+	# DocField
+	{
+		'default': u'0.00',
+		'doctype': u'DocField',
+		'fieldname': u'ref_rate',
+		'fieldtype': u'Currency',
+		'label': u'Price List Rate',
+		'oldfieldname': u'ref_rate',
+		'oldfieldtype': u'Currency',
+		'permlevel': 0,
+		'print_hide': 1,
+		'reqd': 0,
 		'trigger': u'Client',
 		'width': u'100px'
 	},
@@ -176,37 +225,6 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
-		'fieldname': u'base_ref_rate',
-		'fieldtype': u'Currency',
-		'label': u'Price List Rate*',
-		'oldfieldname': u'base_ref_rate',
-		'oldfieldtype': u'Currency',
-		'permlevel': 1,
-		'print_hide': 1,
-		'width': u'100px'
-	},
-
-	# DocField
-	{
-		'default': u'0.00',
-		'doctype': u'DocField',
-		'fieldname': u'basic_rate',
-		'fieldtype': u'Currency',
-		'in_filter': 0,
-		'label': u'Basic Rate*',
-		'oldfieldname': u'basic_rate',
-		'oldfieldtype': u'Currency',
-		'permlevel': 0,
-		'print_hide': 1,
-		'reqd': 0,
-		'search_index': 0,
-		'trigger': u'Client',
-		'width': u'100px'
-	},
-
-	# DocField
-	{
 		'colour': u'White:FFF',
 		'doctype': u'DocField',
 		'fieldname': u'stock_uom',
@@ -217,24 +235,6 @@
 		'permlevel': 1,
 		'print_hide': 0,
 		'reqd': 0,
-		'width': u'100px'
-	},
-
-	# DocField
-	{
-		'default': u'0.00',
-		'doctype': u'DocField',
-		'fieldname': u'amount',
-		'fieldtype': u'Currency',
-		'in_filter': 0,
-		'label': u'Amount*',
-		'oldfieldname': u'amount',
-		'oldfieldtype': u'Currency',
-		'permlevel': 1,
-		'print_hide': 1,
-		'reqd': 0,
-		'search_index': 0,
-		'trigger': u'Client',
 		'width': u'100px'
 	},
 

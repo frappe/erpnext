@@ -30,7 +30,7 @@ cur_frm.cscript.onload = function(doc, dt, dn) {
 	if(!doc.status) set_multiple(dt,dn,{status:'Draft'});
 	if(!doc.transaction_date) set_multiple(dt,dn,{transaction_date:get_today()});
 	if(!doc.posting_date) set_multiple(dt,dn,{posting_date:get_today()});
-	if(doc.__islocal && doc.customer) cur_frm.cscript.pull_item_details_onload(doc,dt,dn);
+	if(doc.__islocal && doc.customer) cur_frm.cscript.customer(doc,dt,dn,onload=true);
 	if(!doc.price_list_currency) {
 		set_multiple(dt, dn, {price_list_currency: doc.currency, plc_conversion_rate:1});
 	}
@@ -124,16 +124,6 @@ cur_frm.cscript['Get Items'] = function(doc,dt,dn) {
  $c_obj(make_doclist(doc.doctype, doc.name),'pull_sales_order_details','',callback); 
 }
 
-
-//RV-DN : Pull Item details - UOM, Item Group as it was not in Sales Invoice
-//---------------------------------------------------------------------
-cur_frm.cscript.pull_item_details_onload = function(doc,dt,dn){
-	var callback = function(r,rt){
-		refresh_field('delivery_note_details');
-		cur_frm.cscript.customer(doc,dt,dn,onload=true);
-	} 
-	$c_obj(make_doclist(dt,dn),'set_item_details','',callback);
-}
 
 //================ create new contact ============================================================================
 cur_frm.cscript.new_contact = function(){
