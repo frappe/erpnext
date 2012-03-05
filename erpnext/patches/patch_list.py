@@ -172,5 +172,10 @@ patch_list = [
 		'patch_file': 'dt_map_fix',
 		'description': 'removed transaction date from dt_mapper'
 	},
+	{
+		'patch_module': 'patches.jan_mar_2012',
+		'patch_file': 'reload_table',
+		'description': 'Relaod all item table: fld order changes' 
+	},
 
 ]
