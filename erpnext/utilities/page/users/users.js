@@ -269,8 +269,8 @@ erpnext.RoleEditor = Class.extend({
 			</div>', {role: this.roles[i]}));
 		}
 		$(this.dialog.body).append('<div style="clear: both">\
-			<button class="btn btn-small btn-primary">Save</button></div>');
-		$(this.dialog.body).find('button.btn-primary').click(function() {
+			<button class="btn btn-small btn-info">Save</button></div>');
+		$(this.dialog.body).find('button.btn-info').click(function() {
 			me.save();
 		});
 		$(this.dialog.body).find('.user-role a').click(function() {
@@ -314,7 +314,7 @@ erpnext.RoleEditor = Class.extend({
 				unset_roles: JSON.stringify(unset_roles),
 				uid: this.uid
 			},
-			btn: $(this.dialog.body).find('.btn-primary').get(0),
+			btn: $(this.dialog.body).find('.btn-info').get(0),
 			callback: function() {
 				
 			}
