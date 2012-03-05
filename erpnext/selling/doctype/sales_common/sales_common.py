@@ -36,7 +36,9 @@ from utilities.transaction_base import TransactionBase
 @webnotes.whitelist()
 def get_comp_base_currency(arg=None):
 	""" get default currency of company"""
-	return webnotes.conn.sql("select default_currency from `tabCompany` where name = %s", webnotes.form_dict['company'])[0][0]
+	res = webnotes.conn.sql("""select default_currency from `tabCompany`
+			where name = %s""", webnotes.form_dict.get('company'))
+	return res and res[0][0] or None
 
 @webnotes.whitelist()
 def get_price_list_currency(arg=None):
