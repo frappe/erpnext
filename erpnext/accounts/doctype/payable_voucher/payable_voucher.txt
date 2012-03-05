@@ -5,7 +5,7 @@
 	{
 		'creation': '2010-08-08 17:09:11',
 		'docstatus': 0,
-		'modified': '2012-02-27 18:25:38',
+		'modified': '2012-03-02 12:28:23',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -24,7 +24,7 @@
 		'server_code_error': u' ',
 		'show_in_menu': 0,
 		'subject': u'From %(supplier_name)s worth %(grand_total)s due on %(due_date)s | %(outstanding_amount)s outstanding',
-		'version': 520
+		'version': 521
 	},
 
 	# These values are common for all DocField
@@ -304,22 +304,6 @@
 		'oldfieldtype': u'Date',
 		'permlevel': 0,
 		'print_hide': 1,
-		'reqd': 1,
-		'search_index': 1
-	},
-
-	# DocField
-	{
-		'default': u'Today',
-		'doctype': u'DocField',
-		'fieldname': u'voucher_date',
-		'fieldtype': u'Date',
-		'in_filter': 1,
-		'label': u'Voucher Date',
-		'no_copy': 0,
-		'oldfieldname': u'voucher_date',
-		'oldfieldtype': u'Date',
-		'permlevel': 0,
 		'reqd': 1,
 		'search_index': 1
 	},
@@ -613,7 +597,7 @@
 		'label': u'More Info',
 		'oldfieldtype': u'Section Break',
 		'permlevel': 0,
-		'print_hide': 0
+		'print_hide': 1
 	},
 
 	# DocField
@@ -622,7 +606,7 @@
 		'fieldtype': u'Column Break',
 		'oldfieldtype': u'Column Break',
 		'permlevel': 0,
-		'print_hide': 0,
+		'print_hide': 1,
 		'width': u'50%'
 	},
 
@@ -681,6 +665,7 @@
 		'fieldtype': u'Column Break',
 		'oldfieldtype': u'Column Break',
 		'permlevel': 0,
+		'print_hide': 1,
 		'width': u'50%'
 	},
 
@@ -750,7 +735,7 @@
 		'label': u'Advances',
 		'oldfieldtype': u'Section Break',
 		'permlevel': 0,
-		'print_hide': 0
+		'print_hide': 1
 	},
 
 	# DocField
@@ -785,7 +770,8 @@
 		'fieldtype': u'Section Break',
 		'label': u'TDS',
 		'oldfieldtype': u'Section Break',
-		'permlevel': 0
+		'permlevel': 0,
+		'print_hide': 1
 	},
 
 	# DocField
@@ -793,6 +779,7 @@
 		'doctype': u'DocField',
 		'fieldtype': u'Column Break',
 		'permlevel': 0,
+		'print_hide': 1,
 		'width': u'50%'
 	},
 
@@ -839,6 +826,7 @@
 		'doctype': u'DocField',
 		'fieldtype': u'Column Break',
 		'permlevel': 0,
+		'print_hide': 1,
 		'width': u'50%'
 	},
 
@@ -894,6 +882,7 @@
 		'fieldtype': u'Column Break',
 		'oldfieldtype': u'Column Break',
 		'permlevel': 0,
+		'print_hide': 1,
 		'width': u'50%'
 	},
 

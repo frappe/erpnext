@@ -14,24 +14,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# Please edit this list and import only required elements
 import webnotes
 
-from webnotes.utils import add_days, add_months, add_years, cint, cstr, date_diff, default_fields, flt, fmt_money, formatdate, generate_hash, getTraceback, get_defaults, get_first_day, get_last_day, getdate, has_common, month_name, now, nowdate, replace_newlines, sendmail, set_default, str_esc_quote, user_format, validate_email_add
-from webnotes.model import db_exists
-from webnotes.model.doc import Document, addchild, removechild, getchildren, make_autoname, SuperDocType
-from webnotes.model.doclist import getlist, copy_doclist
-from webnotes.model.code import get_obj, get_server_obj, run_server_obj, updatedb, check_syntax
-from webnotes import session, form, is_testing, msgprint, errprint
+from webnotes.utils import cint, cstr, flt, getdate, now, nowdate
+from webnotes.model.doc import Document, addchild
+from webnotes.model.code import get_obj
+from webnotes import session, form, msgprint
 
-set = webnotes.conn.set
 sql = webnotes.conn.sql
-get_value = webnotes.conn.get_value
-in_transaction = webnotes.conn.in_transaction
-convert_to_lists = webnotes.conn.convert_to_lists
-	
-# -----------------------------------------------------------------------------------------
-
 
 class DocType:
 	def __init__(self, d, dl):
@@ -58,8 +48,8 @@ class DocType:
 		args = json.loads(args)
 
 		self.set_cp_defaults(args['company'], args['industry'], args['time_zone'], args['country'], args['account_name'])
-		self.create_profile(args['user'], args['first_name'], args['last_name'], args.get('pwd'))	
-	
+		self.create_profile(args['user'], args['first_name'], args['last_name'], args.get('pwd'))
+
 		# Domain related updates
 		try:
 			from server_tools.gateway_utils import add_domain_map
@@ -68,38 +58,48 @@ class DocType:
 			pass
 
 		# add record in domain_list of Website Settings
-		webnotes.conn.set_value('Website Settings', 'Website Settings', 'subdomain', args['url_name'] + ".erpnext.com")
+		account_url = args['url_name'] + '.erpnext.com'
+		webnotes.conn.set_value('Website Settings', 'Website Settings',
+				'subdomain', account_url)
 		
 	
 	# Account Setup
 	# ---------------
 	def setup_account(self, args):
-		import webnotes
-		company_name, comp_abbr, fy_start, currency, first_name, last_name = eval(args)
-		curr_fiscal_year,fy_start_date = self.get_fy_details(fy_start)
-		self.currency = currency
+		import webnotes, json
+		args = json.loads(args)
+
+		curr_fiscal_year, fy_start_date, fy_abbr = self.get_fy_details(args.get('fy_start'))
+
+		args['name'] = webnotes.session.get('user')
 
 		# Update Profile
-		if last_name=='None': last_name = None
+		if not args.get('last_name') or args.get('last_name')=='None': args['last_name'] = None
 		webnotes.conn.sql("""\
-			UPDATE `tabProfile` SET first_name=%s, last_name=%s
-			WHERE name=%s AND docstatus<2""", (first_name, last_name, webnotes.user.name))
+			UPDATE `tabProfile` SET first_name=%(first_name)s,
+			last_name=%(last_name)s
+			WHERE name=%(name)s AND docstatus<2""", args)
 			
 		
 		# Fiscal Year
-		master_dict = {'Fiscal Year':{'year':curr_fiscal_year, 'year_start_date':fy_start_date}}
+		master_dict = {'Fiscal Year':{
+			'year': curr_fiscal_year,
+			'year_start_date': fy_start_date,
+			'abbreviation': fy_abbr,
+			'company': args.get('company_name'),
+			'is_fiscal_year_closed': 'No'}}
 		self.create_records(master_dict)
 		
 		# Company
-		master_dict = {'Company':{'company_name':company_name,
-								  'abbr':comp_abbr,
-								  'default_currency':currency
-															}}
+		master_dict = {'Company':{'company_name':args.get('company_name'),
+								  'abbr':args.get('company_abbr'),
+								  'default_currency':args.get('currency')
+								}}
 		self.create_records(master_dict)
 		
 		def_args = {'current_fiscal_year':curr_fiscal_year,
-								'default_currency': currency,
-								'default_company':company_name,
+								'default_currency': args.get('currency'),
+								'default_company':args.get('company_name'),
 								'default_valuation_method':'FIFO',
 								'default_stock_uom':'Nos',
 								'date_format':'dd-mm-yyyy',
@@ -111,20 +111,50 @@ class DocType:
 								'emp_created_by':'Naming Series',
 								'cust_master_name':'Customer Name', 
 								'supp_master_name':'Supplier Name',
-								'default_currency_format': (currency=='INR') and 'Lacs' or 'Millions'
+								'default_currency_format': \
+										(args.get('currency')=='INR') and 'Lacs' or 'Millions'
 					}
 
 		# Set 
 		self.set_defaults(def_args)
 
-		# Set Registration Complete
-		set_default('registration_complete','1')
+		self.create_feed_and_todo()
 
-		msgprint("Great! Your company has now been created")
+		webnotes.clear_cache()
+		msgprint("Company setup is complete")
 		
 		import webnotes.utils
-		user_fullname = (first_name or '') + (last_name and (" " + last_name) or '')
+		user_fullname = (args.get('first_name') or '') + (args.get('last_name')
+				and (" " + args.get('last_name')) or '')
 		return {'sys_defaults': webnotes.utils.get_defaults(), 'user_fullname': user_fullname}
+
+	def create_feed_and_todo(self):
+		"""update activty feed and create todo for creation of item, customer, vendor"""
+		import home
+		home.make_feed('Comment', 'ToDo Item', '', webnotes.session['user'],
+			'<i>"' + 'Setup Complete. Please check your <a href="#!todo">\
+			To Do List</a>' + '"</i>', '#6B24B3')
+
+		d = Document('ToDo Item')
+		d.description = 'Create your first Customer'
+		d.priority = 'High'
+		d.date = nowdate()
+		d.reference_type = 'Customer'
+		d.save(1)
+
+		d = Document('ToDo Item')
+		d.description = 'Create your first Item'
+		d.priority = 'High'
+		d.date = nowdate()
+		d.reference_type = 'Item'
+		d.save(1)
+
+		d = Document('ToDo Item')
+		d.description = 'Create your first Supplier'
+		d.priority = 'High'
+		d.date = nowdate()
+		d.reference_type = 'Supplier'
+		d.save(1)
 
 		
 	# Get Fiscal year Details
@@ -138,9 +168,11 @@ class DocType:
 		#eddt = sql("select DATE_FORMAT(DATE_SUB(DATE_ADD('%s', INTERVAL 1 YEAR), INTERVAL 1 DAY),'%%d-%%m-%%Y')" % (stdt.split('-')[2]+ '-' + stdt.split('-')[1] + '-' + stdt.split('-')[0]))
 		if(fy_start == '1st Jan'):
 			fy = cstr(getdate(nowdate()).year)
+			abbr = cstr(fy)[-2:]
 		else:
 			fy = cstr(curr_year) + '-' + cstr(curr_year+1)
-		return fy,stdt
+			abbr = cstr(curr_year)[-2:] + '-' + cstr(curr_year+1)[-2:]
+		return fy, stdt, abbr
 
 
 	# Create Company and Fiscal Year
@@ -207,14 +239,6 @@ class DocType:
 			d = addchild(pr,'userroles', 'UserRole', 1)
 			d.role = r
 			d.save(1)
-			
-
-	# Sync DB
-	# -------
-	def sync_db(arg=''):
-		import webnotes.model.db_schema
-		sql("delete from `tabDocType Update Register`")
-		webnotes.model.db_schema.sync_all()
 		
 	
 	def is_setup_okay(self, args):
@@ -224,21 +248,14 @@ class DocType:
 
 		from server_tools.gateway_utils import get_total_users
 		
-		args = eval(args)
-		#webnotes.logger.error("args in set_account_details of setup_control: " + str(args))
-		
+		args = eval(args)		
 		cp_defaults = webnotes.conn.get_value('Control Panel', None, 'account_id')
-		
 		user_profile = webnotes.conn.get_value('Profile', args['user'], 'name')
 		
 		from webnotes.utils import cint
 		
 		total_users = get_total_users()
-		
-		#webnotes.logger.error("setup_control.is_setup_okay: " + cp_defaults + " " + user_profile + " " + str(total_users))
-		
-		#webnotes.logger.error("setup_control.is_setup_okay: Passed Values:" + args['account_name'] + " " + args['user'] + " " + str(args['total_users']))
-		
+						
 		if (cp_defaults==args['account_name']) and user_profile and \
 		   (total_users==cint(args['total_users'])):
 		   return 'True'

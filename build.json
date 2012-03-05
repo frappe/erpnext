@@ -9,6 +9,7 @@
 			"lib/js/wn/require.js",
 			"lib/js/wn/dom.js",
 			"lib/js/wn/page.js",
+			"lib/js/wn/misc/user.js",
 			"lib/js/lib/json2.js",
 			"lib/js/core.js"
 		]
@@ -36,7 +37,6 @@
 	{
 		"css/all-web.css": [
 			"lib/css/legacy/body.css",
-			"lib/css/legacy/menus.css",
 			"lib/css/legacy/messages.css",
 			"lib/css/legacy/dialog.css",
 			"lib/css/bootstrap/headings.css",
@@ -52,7 +52,6 @@
 	{
 		"css/all-app.css": [
 			"lib/css/legacy/body.css",
-			"lib/css/legacy/menus.css",
 			"lib/css/legacy/messages.css",
 			"lib/css/legacy/forms.css",
 			"lib/css/legacy/grid.css",
@@ -75,13 +74,12 @@
 
 	{
 		"js/all-web.js": [
-			"lib/js/lib/jquery.min.js:concat",
 			"lib/js/lib/history/history.min.js:concat",
 			"lib/js/lib/bootstrap.min.js:concat",
+			"lib/js/lib/sprintf.js",
 			"lib/js/core.min.js:concat",
 			"lib/js/legacy/globals.js",
 			"lib/js/legacy/utils/datatype.js",
-			"lib/js/legacy/utils/browser_detect.js",
 			"lib/js/legacy/utils/datetime.js",
 			"lib/js/legacy/utils/dom.js",
 			"lib/js/legacy/utils/handler.js",
@@ -116,15 +114,14 @@
 	
 	{
 		"js/all-app.js": [
-			"lib/js/lib/jquery.min.js:concat",
 			"lib/js/lib/history/history.min.js:concat",
 			"lib/js/legacy/jquery/jquery-ui.min.js:concat",
 			"lib/js/legacy/tiny_mce_33/jquery.tinymce.js:concat",
 			"lib/js/lib/bootstrap.min.js:concat",
+			"lib/js/lib/sprintf.js",
 			"lib/js/core.min.js:concat",
 			"lib/js/legacy/globals.js",
 			"lib/js/legacy/utils/datatype.js",
-			"lib/js/legacy/utils/browser_detect.js",
 			"lib/js/legacy/utils/datetime.js",
 			"lib/js/legacy/utils/dom.js",
 			"lib/js/legacy/utils/handler.js",
@@ -175,9 +172,9 @@
 			"lib/js/legacy/app.js",
 			"js/app.js",
 			"erpnext/startup/startup.js",
-			"erpnext/startup/modules.js",
-			"erpnext/startup/toolbar.js",
-			"erpnext/startup/feature_setup.js"
+			"erpnext/startup/js/modules.js",
+			"erpnext/startup/js/toolbar.js",
+			"erpnext/startup/js/feature_setup.js"
 		]
 	}
 	

@@ -13,10 +13,11 @@ span, div, td, input, textarea, button, select {
 }
 
 body {
+	background: url(../images/stripedbg.png) repeat;
 }
 
 .erpnext-footer {
-	margin: 3px auto;
+	margin: 11px auto;
 	text-align: center;
 }
 

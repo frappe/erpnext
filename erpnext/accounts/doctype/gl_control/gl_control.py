@@ -177,7 +177,7 @@ class DocType:
 	#----------------------------------------------------------------------------
 	def make_single_entry(self,parent,d,le_map,cancel, merge_entries):
 		if self.get_val(le_map['account'], d, parent) and (self.get_val(le_map['debit'], d, parent) or self.get_val(le_map['credit'], d, parent)):
-			flist = ['account','cost_center','against','debit','credit','remarks','voucher_type','voucher_no','transaction_date','posting_date','fiscal_year','against_voucher','against_voucher_type','company','is_opening', 'aging_date']
+			flist = ['account','cost_center','against','debit','credit','remarks','voucher_type','voucher_no','posting_date','fiscal_year','against_voucher','against_voucher_type','company','is_opening', 'aging_date']
 
 			# Check budget before gl entry
 			#check budget only if account is expense account
@@ -536,7 +536,6 @@ def create_new_invoice(prev_rv):
 
 	# update new rv 
 
-	new_rv.doc.voucher_date = new_rv.doc.next_date
 	new_rv.doc.posting_date = new_rv.doc.next_date
 	new_rv.doc.aging_date = new_rv.doc.next_date
 	new_rv.doc.due_date = add_days(new_rv.doc.next_date, cint(date_diff(prev_rv.doc.due_date, prev_rv.doc.posting_date)))

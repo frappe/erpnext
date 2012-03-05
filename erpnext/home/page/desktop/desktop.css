@@ -41,10 +41,15 @@
 
 .case-border {
 	border-radius: 10px;
+	-moz-border-radius: 10px;
+	-webkit-border-radius: 10px;
 	width: 56px;
 	height: 56px;
 	border: 4px solid white;
 	box-shadow: 0 0 10px 1px black;
+	-moz-box-shadow: 0 0 10px 1px black;
+	-webkit-box-shadow: 0 0 10px 1px black;
+	-o-box-shadow: 0 0 10px 1px black;
 	margin: auto;
 }
 
@@ -66,6 +71,9 @@
 /* Hover and click effects */
 .case-border:hover, .circle:hover {
 	box-shadow: 0 0 2px 0px black, 0 0 10px 1px white;
+	-moz-box-shadow: 0 0 2px 0px black, 0 0 10px 1px white;
+	-webkit-box-shadow: 0 0 2px 0px black, 0 0 10px 1px white;
+	-o-box-shadow: 0 0 2px 0px black, 0 0 10px 1px white;
 }
 
 .case-border:active, .case-border:focus, .circle:active, .circle:focus {
@@ -77,8 +85,11 @@
 }
 
 .circle {
-	border-radius: 100%;
+	border-radius: 30px;
+	-moz-border-radius: 30px;
+	-webkit-border-radius: 30px;
 	height: 15px;
+	line-height: 12px;
 	min-width: 15px;
 	background: #B00D07;
 	padding: 3px;
@@ -88,6 +99,9 @@
 	margin-right: 10px;
 	border: 2px solid white;
 	box-shadow: 0 0 10px 1px black;
+	-moz-box-shadow: 0 0 10px 1px black;
+	-webkit-box-shadow: 0 0 10px 1px black;
+	-o-box-shadow: 0 0 10px 1px black;
 }
 
 .circle-text {

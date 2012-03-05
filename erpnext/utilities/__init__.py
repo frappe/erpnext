@@ -23,6 +23,7 @@ def get_report_list(arg=None):
 		distinct criteria_name, doc_type, parent_doc_type
 		from `tabSearch Criteria` 
 		where module='%(module)s' 
-		and docstatus in (0, NULL) 
+		and docstatus in (0, NULL)
+		and ifnull(disabled, 0) = 0 
 		order by criteria_name 
 		limit %(limit_start)s, %(limit_page_length)s""" % webnotes.form_dict, as_dict=True)

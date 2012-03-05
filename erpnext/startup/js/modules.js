@@ -32,7 +32,7 @@ erpnext.module_page.hide_links = function(wrapper) {
 	$(wrapper).find('[href*="List/"]').each(function() {
 		var href = $(this).attr('href');
 		var dt = href.split('/')[1];
-		if(wn.boot.profile.can_read.indexOf(get_label_doctype(dt))==-1) {
+		if(wn.boot.profile.all_read.indexOf(get_label_doctype(dt))==-1) {
 			var txt = $(this).text();
 			$(this).parent().css('color', '#999').html(txt);
 		}
@@ -41,7 +41,7 @@ erpnext.module_page.hide_links = function(wrapper) {
 	// reports
 	$(wrapper).find('[data-doctype]').each(function() {
 		var dt = $(this).attr('data-doctype');
-		if(wn.boot.profile.can_read.indexOf(dt)==-1) {
+		if(wn.boot.profile.all_read.indexOf(dt)==-1) {
 			var txt = $(this).text();
 			$(this).parent().css('color', '#999').html(txt);
 		}
@@ -51,7 +51,7 @@ erpnext.module_page.hide_links = function(wrapper) {
 	$(wrapper).find('[href*="Form/"]').each(function() {
 		var href = $(this).attr('href');
 		var dt = href.split('/')[1];
-		if(wn.boot.profile.can_read.indexOf(get_label_doctype(dt))==-1) {
+		if(wn.boot.profile.all_read.indexOf(get_label_doctype(dt))==-1) {
 			var txt = $(this).text();
 			$(this).parent().css('color', '#999').html(txt);
 		}
@@ -73,7 +73,10 @@ erpnext.module_page.make_list = function(module, wrapper) {
 		args: {
 			module: module
 		},
-		no_refresh: true
+		no_refresh: true,
+		callback: function(r) {
+			erpnext.module_page.hide_links(wrapper)
+		}
 	});
 	wrapper.list.run();	
 }

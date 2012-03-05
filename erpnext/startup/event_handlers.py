@@ -48,7 +48,7 @@ def on_login_post_session(login_manager):
 				sid!=%s""", \
 			(webnotes.session['user'], webnotes.session['sid']), as_list=1)
 
-	if webnotes.session['user'] not in ('Guest') and webnotes.conn.cur_db_name!='accounts':
+	if webnotes.session['user'] not in ('Guest', 'demo@webnotestech.com') and webnotes.conn.cur_db_name!='accounts':
 		# create feed
 		from webnotes.utils import nowtime
 		home.make_feed('Login', 'Profile', login_manager.user, login_manager.user,
@@ -87,6 +87,14 @@ def boot_session(bootinfo):
 
 		import webnotes.model.doctype
 		bootinfo['docs'] += webnotes.model.doctype.get('Event')
+		
+		bootinfo['modules_list'] = webnotes.conn.get_global('modules_list')
+		
+		# if no company, show a dialog box to create a new company
+		bootinfo['setup_complete'] = webnotes.conn.sql("""select name from 
+			tabCompany limit 1""") and 'Yes' or 'No'
+			
+		bootinfo['user_background'] = webnotes.conn.get_value("Profile", webnotes.session['user'], 'background_image') or ''
 
 def get_letter_heads():
 	"""load letter heads with startup"""

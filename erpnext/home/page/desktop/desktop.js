@@ -43,36 +43,53 @@ erpnext.desktop.add_classes = function() {
 }
 
 erpnext.desktop.render = function() {
-	var icons = [
-		{ gradient: 'brown', sprite: 'feed', label: 'Activity', link: '#!Event Updates' },
-		{ gradient: 'blue', sprite: 'account', label: 'Accounts', link: '#!accounts-home' },
-		{ gradient: 'green', sprite: 'selling', label: 'Selling', link: '#!selling-home' },
-		{ gradient: 'yellow', sprite: 'stock', label: 'Stock', link: '#!stock-home' },
-		{ gradient: 'red', sprite: 'buying', label: 'Buying', link: '#!buying-home' },
-		{ gradient: 'purple', sprite: 'support', label: 'Support', link: '#!support-home' },
-		{ gradient: 'ocean', sprite: 'hr', label: 'Human<br />Resources', link: '#!hr-home' },
-		{ gradient: 'violet', sprite: 'project', label: 'Projects', link: '#!projects-home' },
-		{ gradient: 'dark-red', sprite: 'production', label: 'Production', link: '#!production-home' },
-		{ gradient: 'leaf-green', sprite: 'website', label: 'Website', link: '#!website-home' },
-		{ gradient: 'grey', sprite: 'setting', label: 'Settings', link: '#!Setup' },
-		{ gradient: 'bright-green', sprite: 'dashboard', label: 'Dashboard', link: '#!dashboard' },
-		//{ gradient: 'dark-blue', sprite: 'report', label: 'Report' },
-		{ gradient: 'pink', sprite: 'messages', label: 'Messages', link: '#!messages' },
-		{ gradient: 'bright-yellow', sprite: 'todo', label: 'To Do', link: '#!todo' },
-		{ gradient: 'peacock', sprite: 'calendar', label: 'Calendar', link: '#!calendar' },
-		{ gradient: 'ultra-dark-green', sprite: 'kb', label: 'Knowledge<br />Base', link: '#!questions' },
-	]
+	var icons = {
+		'Accounts': { gradient: 'blue', sprite: 'account', label: 'Accounts'},
+		'Selling': { gradient: 'green', sprite: 'selling', label: 'Selling'},
+		'Stock': { gradient: 'yellow', sprite: 'stock', label: 'Stock'},
+		'Buying': { gradient: 'red', sprite: 'buying', label: 'Buying'},
+		'Support': { gradient: 'purple', sprite: 'support', label: 'Support'},
+		'HR': { gradient: 'ocean', sprite: 'hr', label: 'Human<br />Resources'},
+		'Projects':	{ gradient: 'violet', sprite: 'project', label: 'Projects'},
+		'Production': { gradient: 'dark-red', sprite: 'production', label: 'Production'},
+		'Website': { gradient: 'leaf-green', sprite: 'website', label: 'Website'},
+		'Activity': { gradient: 'brown', sprite: 'feed', label: 'Activity'},
+		'Setup': { gradient: 'grey', sprite: 'setting', label: 'Setup'},
+		'Dashboard': { gradient: 'bright-green', sprite: 'dashboard', label: 'Dashboard'},
+		'To Do': { gradient: 'bright-yellow', sprite: 'todo', label: 'To Do'},
+		'Messages': { gradient: 'pink', sprite: 'messages', label: 'Messages'},
+		'Calendar': { gradient: 'peacock', sprite: 'calendar', label: 'Calendar'},
+		'Knowledge Base': { gradient: 'ultra-dark-green', sprite: 'kb', label: 'Knowledge<br />Base'}
+	}
+	
 
-	$.each(icons, function(i, v) {
-		var icon_case = $('#icon-grid').append(repl('\
-			<div id="%(sprite)s" class="case-wrapper"><a href="%(link)s">\
+	var add_icon = function(m) {
+		var icon = icons[m];
+		icon.link = erpnext.modules[m];
+		$('#icon-grid').append(repl('\
+			<div id="%(sprite)s" class="case-wrapper"><a href="#!%(link)s">\
 				<div class="case-border case-%(gradient)s">\
 					<div class="sprite-image sprite-%(sprite)s"></div>\
 				</div></a>\
 				<div class="case-label">%(label)s</div>\
-			</div>', v));
-	});
+			</div>', icon));		
+	}
+	
+	// setup
 
+	for(var i in wn.boot.modules_list) {
+		var m = wn.boot.modules_list[i];
+		if(m!='Setup' && wn.boot.profile.allow_modules.indexOf(m)!=-1)
+			add_icon(m);
+	}
+
+	if(user_roles.indexOf('Accounts Manager')!=-1)
+		add_icon('Dashboard')
+
+	if(user_roles.indexOf('System Manager')!=-1)
+		add_icon('Setup')
+
+	// apps
 	erpnext.desktop.show_pending_notifications();
 
 }

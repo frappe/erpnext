@@ -38,10 +38,25 @@ def init():
 	# init request
 	try:
 		webnotes.http_request = webnotes.auth.HTTPRequest()
+		return True
 	except webnotes.AuthenticationError, e:
-		pass
+		return True
 	except webnotes.UnknownDomainError, e:
 		print "Location: " + (webnotes.defs.redirect_404)
+	except webnotes.SessionStopped, e:
+		if 'cmd' in webnotes.form_dict:
+			webnotes.handler.print_json()
+		else:
+			print "Content-Type: text/html"
+			print
+			print """<html>
+				<body style="background-color: #EEE;">
+					<h3 style="width: 900px; background-color: #FFF; border: 2px solid #AAA; padding: 20px; font-family: Arial; margin: 20px auto">
+						Updating.
+						We will be back in a few moments...
+					</h3>
+				</body>
+				</html>"""
 
 def respond():
 	import webnotes
@@ -55,5 +70,5 @@ def respond():
 		print webnotes.cms.index.get()
 
 if __name__=="__main__":
-	init()
-	respond()
+	if init():
+		respond()

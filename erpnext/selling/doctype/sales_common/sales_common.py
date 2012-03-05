@@ -32,6 +32,23 @@ convert_to_lists = webnotes.conn.convert_to_lists
 
 from utilities.transaction_base import TransactionBase
 
+
+@webnotes.whitelist()
+def get_comp_base_currency(arg=None):
+	""" get default currency of company"""
+	res = webnotes.conn.sql("""select default_currency from `tabCompany`
+			where name = %s""", webnotes.form_dict.get('company'))
+	return res and res[0][0] or None
+
+@webnotes.whitelist()
+def get_price_list_currency(arg=None):
+	""" Get all currency in which price list is maintained"""
+	plc = webnotes.conn.sql("select distinct ref_currency from `tabRef Rate Detail` where price_list_name = %s", webnotes.form_dict['price_list'])
+	plc = [d[0] for d in plc]
+	base_currency = get_comp_base_currency(webnotes.form_dict['company'])
+	return plc, base_currency
+
+
 class DocType(TransactionBase):
 	def __init__(self,d,dl):
 		self.doc, self.doclist = d,dl
@@ -177,18 +194,6 @@ class DocType(TransactionBase):
 			d.amount = flt(d.qty)*flt(base_ref_rate)
 			d.export_amount = flt(d.qty)*flt(base_ref_rate)/flt(obj.doc.conversion_rate)
 
-
-	def get_comp_base_currency(self, comp):
-		""" get default currency of company"""
-		return webnotes.conn.sql("select default_currency from `tabCompany` where name = %s", comp)[0][0]
-
-	def get_price_list_currency(self, price_list, comp):
-		""" Get all currency in which price list is maintained"""
-		plc = webnotes.conn.sql("select distinct ref_currency from `tabRef Rate Detail` where price_list_name = %s", price_list)
-		plc = [d[0] for d in plc]
-		base_currency = self.get_comp_base_currency(comp)
-		return plc, base_currency
-	
 
 	# Load Default Taxes
 	# ====================
@@ -781,3 +786,4 @@ class StatusUpdater:
 						where
 							name="%(name)s"
 					""" % args)
+

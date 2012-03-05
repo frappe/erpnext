@@ -66,11 +66,11 @@ class DocType(TransactionBase):
 				
 			for i in lst:
 				val = pos and pos[0][i] or ''
-				webnotes.conn.set(self.doc,i,val)
+				self.doc.fields[i] = val
 			self.set_pos_item_values()
 			
 			val = pos and flt(pos[0]['conversion_rate']) or 0	
-			webnotes.conn.set(self.doc,'conversion_rate',val)
+			self.doc.conversion_rate = val
 
 			#fetch terms	
 			if self.doc.tc_name:	 self.get_tc_details()
@@ -167,16 +167,19 @@ class DocType(TransactionBase):
 	# Item Details
 	# -------------
 	def get_item_details(self, args=None):
-		args = eval(args)
-		if args['item_code']:
+		args = args and eval(args) or {}
+		if args.get('item_code'):
 			ret = get_obj('Sales Common').get_item_details(args, self)
 			return self.get_pos_details(args, ret)
 		else:
 			obj = get_obj('Sales Common')
 			for doc in self.doclist:
 				if doc.fields.get('item_code'):
-					ret = obj.get_item_details(doc.item_code, self)
-					ret = self.get_pos_details(doc.item_code, ret)
+					arg = {'item_code':doc.fields.get('item_code'), 'income_account':doc.fields.get('income_account'), 
+						'cost_center': doc.fields.get('cost_center'), 'warehouse': doc.fields.get('warehouse')};
+
+					ret = obj.get_item_details(arg, self)
+					ret = self.get_pos_details(arg, ret)
 					for r in ret:
 						if not doc.fields.get(r):
 							doc.fields[r] = ret[r]		
@@ -203,14 +206,6 @@ class DocType(TransactionBase):
 	# Fetch ref rate from item master as per selected price list
 	def get_adj_percent(self, arg=''):
 		get_obj('Sales Common').get_adj_percent(self)
-
-
-	def get_comp_base_currency(self):
-		return get_obj('Sales Common').get_comp_base_currency(self.doc.company)
-
-	def get_price_list_currency(self):
-		return get_obj('Sales Common').get_price_list_currency(self.doc.price_list_name, self.doc.company)
-
 
 
 	# Get tax rate if account type is tax
@@ -538,7 +533,7 @@ class DocType(TransactionBase):
 		self.values.append({
 			'item_code'					 : d.item_code,
 			'warehouse'					 : wh,
-			'transaction_date'		: self.doc.voucher_date,
+			'transaction_date'			: getdate(self.doc.modified).strftime('%Y-%m-%d'),
 			'posting_date'				: self.doc.posting_date,
 			'posting_time'				: self.doc.posting_time,
 			'voucher_type'				: 'Receivable Voucher',

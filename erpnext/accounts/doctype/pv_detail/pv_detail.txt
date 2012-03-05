@@ -5,7 +5,7 @@
 	{
 		'creation': '2010-08-08 17:09:17',
 		'docstatus': 0,
-		'modified': '2012-02-27 18:42:06',
+		'modified': '2012-03-05 10:54:12',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -22,7 +22,7 @@
 		'section_style': u'Tray',
 		'server_code_error': u' ',
 		'show_in_menu': 0,
-		'version': 43
+		'version': 45
 	},
 
 	# These values are common for all DocField
@@ -100,10 +100,11 @@
 	# DocField
 	{
 		'doctype': u'DocField',
-		'fieldname': u'import_ref_rate',
+		'fieldname': u'purchase_ref_rate',
 		'fieldtype': u'Currency',
-		'label': u'Ref Rate ',
+		'label': u'Ref Rate *',
 		'permlevel': 0,
+		'print_hide': 1,
 		'trigger': u'Client'
 	},
 
@@ -114,42 +115,7 @@
 		'fieldtype': u'Currency',
 		'label': u'Discount %',
 		'permlevel': 0,
-		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'import_rate',
-		'fieldtype': u'Currency',
-		'label': u'Rate ',
-		'oldfieldname': u'import_rate',
-		'oldfieldtype': u'Currency',
-		'permlevel': 0,
-		'print_hide': 0,
-		'reqd': 1,
-		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'import_amount',
-		'fieldtype': u'Currency',
-		'label': u'Amount',
-		'oldfieldname': u'import_amount',
-		'oldfieldtype': u'Currency',
-		'permlevel': 1,
-		'reqd': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'purchase_ref_rate',
-		'fieldtype': u'Currency',
-		'label': u'Ref Rate *',
-		'permlevel': 0,
+		'print_hide': 1,
 		'trigger': u'Client'
 	},
 
@@ -177,6 +143,43 @@
 		'oldfieldtype': u'Currency',
 		'permlevel': 1,
 		'print_hide': 1,
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'import_ref_rate',
+		'fieldtype': u'Currency',
+		'label': u'Ref Rate ',
+		'permlevel': 0,
+		'print_hide': 1,
+		'trigger': u'Client'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'import_rate',
+		'fieldtype': u'Currency',
+		'label': u'Rate ',
+		'oldfieldname': u'import_rate',
+		'oldfieldtype': u'Currency',
+		'permlevel': 0,
+		'print_hide': 0,
+		'reqd': 1,
+		'trigger': u'Client'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'import_amount',
+		'fieldtype': u'Currency',
+		'label': u'Amount',
+		'oldfieldname': u'import_amount',
+		'oldfieldtype': u'Currency',
+		'permlevel': 1,
 		'reqd': 1
 	},
 

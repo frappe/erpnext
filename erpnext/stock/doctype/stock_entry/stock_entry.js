@@ -51,7 +51,7 @@ var cfn_set_fields = function(doc, cdt, cdn) {
     hide_field(lst);
     unhide_field(['supplier','supplier_name','supplier_address','purchase_receipt_no']);
   }
-  if(doc.purpose == 'Sales Return'){
+  else if(doc.purpose == 'Sales Return'){
     doc.supplier=doc.supplier_name = doc.supplier_address=doc.purchase_receipt_no='';
     hide_field(lst);
     unhide_field(['customer','customer_name','customer_address','delivery_note_no', 'sales_invoice_no']);

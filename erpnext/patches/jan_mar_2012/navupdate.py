@@ -32,6 +32,17 @@ def execute():
 	reload_doc('utilities', 'page', 'todo')
 	reload_doc('utilities', 'page', 'calendar')
 	reload_doc('utilities', 'page', 'messages')
+	reload_doc('setup', 'page', 'modules_setup')
+	reload_doc('utilities', 'page', 'users')
+	reload_doc('home', 'page', 'activity')
+	reload_doc('home', 'page', 'attributions')
+	reload_doc('core', 'doctype', 'profile')
+	
+	# update user_image in profile
+	for p in webnotes.conn.sql("""select name, file_list from tabProfile 
+		where ifnull(file_list,'')!=''"""):
+		fid = p[1].split('\n')[0].split(',')[1]
+		webnotes.conn.set_value('Profile', p[0], 'user_image', fid)
 	
 	webnotes.conn.set_value('Control Panel', 'Control Panel', 'home_page',
 			'desktop')

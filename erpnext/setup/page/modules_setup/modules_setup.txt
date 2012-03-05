@@ -1,0 +1,28 @@
+# Page, modules_setup
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2012-02-28 17:48:39',
+		'docstatus': 0,
+		'modified': '2012-02-28 17:48:39',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
+	},
+
+	# These values are common for all Page
+	{
+		'doctype': 'Page',
+		'module': u'Setup',
+		'name': '__common__',
+		'page_name': u'modules_setup',
+		'standard': u'Yes',
+		'title': u'Modules Setup'
+	},
+
+	# Page, modules_setup
+	{
+		'doctype': 'Page',
+		'name': u'modules_setup'
+	}
+]

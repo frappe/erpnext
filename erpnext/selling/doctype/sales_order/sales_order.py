@@ -102,14 +102,16 @@ class DocType(TransactionBase):
 	# Get Item Details
 	# ----------------
 	def get_item_details(self, args=None):
-		args = eval(args)
-		if args['item_code']:
+		args = args and eval(args) or {}
+		if args.get('item_code'):
 			return get_obj('Sales Common').get_item_details(args, self)
 		else:
 			obj = get_obj('Sales Common')
 			for doc in self.doclist:
 				if doc.fields.get('item_code'):
-					ret = obj.get_item_details(doc.item_code, self)
+					arg = {'item_code':doc.fields.get('item_code'), 'income_account':doc.fields.get('income_account'), 
+						'cost_center': doc.fields.get('cost_center'), 'warehouse': doc.fields.get('warehouse')};
+					ret = obj.get_item_details(arg, self)
 					for r in ret:
 						if not doc.fields.get(r):
 							doc.fields[r] = ret[r]					
@@ -119,13 +121,6 @@ class DocType(TransactionBase):
 	# --------------------------------------------------------------
 	def get_adj_percent(self, arg=''):
 		get_obj('Sales Common').get_adj_percent(self)
-
-	def get_comp_base_currency(self):
-		return get_obj('Sales Common').get_comp_base_currency(self.doc.company)
-
-	def get_price_list_currency(self):
-		return get_obj('Sales Common').get_price_list_currency(self.doc.price_list_name, self.doc.company)
-
 
 
 

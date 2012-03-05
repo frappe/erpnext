@@ -42,27 +42,31 @@ cur_frm.cscript.onload = function(doc,dt,dn) {
 }
 
 cur_frm.cscript.onload_post_render = function(doc, dt, dn) {
-	var callback2 = null;
-	if(doc.customer && doc.__islocal) {
+	var callback = function(doc, dt, dn) {
 		// called from mapper, update the account names for items and customer
-		callback2 = function(doc, dt, dn) {
-			$c_obj(make_doclist(doc.doctype,doc.name),
-				'load_default_accounts','',
-				function(r,rt) {
-					refresh_field('entries');
-					cur_frm.cscript.customer(doc,dt,dn,onload=true);
-				}
-			);
+		var callback2 = function(doc, dt, dn) {
+			if(doc.customer && doc.__islocal) {
+				$c_obj(make_doclist(doc.doctype,doc.name),
+					'load_default_accounts','',
+					function(r,rt) {
+						refresh_field('entries');
+						cur_frm.cscript.customer(doc,dt,dn,onload=true);
+					}
+				);
+			}
 		}
-	}
-	// defined in sales_common.js
-	var callback1 = function(doc, dt, dn) {
-		//for previously created sales invoice, set required field related to pos	
-		cur_frm.cscript.update_item_details(doc, dt, dn, callback2);
-	}
+		// defined in sales_common.js
+		var callback1 = function(doc, dt, dn) {
+			//for previously created sales invoice, set required field related to pos	
+			cur_frm.cscript.update_item_details(doc, dt, dn, callback2);
+		}
 		
-	if(doc.is_pos ==1) cur_frm.cscript.is_pos(doc, dt, dn,callback1);
-	else cur_frm.cscript.update_item_details(doc, dt, dn, callback2);
+		if(doc.is_pos ==1) cur_frm.cscript.is_pos(doc, dt, dn,callback1);
+		else cur_frm.cscript.update_item_details(doc, dt, dn, callback2);
+	}
+
+	cur_frm.cscript.hide_price_list_currency(doc, dt, dn, callback); 
+
 }
 
 
@@ -97,15 +101,10 @@ cur_frm.cscript.hide_fields = function(doc, cdt, cdn) {
 cur_frm.cscript.refresh = function(doc, dt, dn) {
 	cur_frm.cscript.is_opening(doc, dt, dn);
 	cur_frm.cscript.hide_fields(doc, dt, dn);
-
-	var callback = function() {
-		cur_frm.cscript.dynamic_label(doc, dt, dn);
-	}
-	cur_frm.cscript.hide_price_list_currency(doc, dt, dn, callback); 
-
-
 	// Show / Hide button
 	cur_frm.clear_custom_buttons();
+
+	if (!cur_frm.cscript.is_onload)	cur_frm.cscript.hide_price_list_currency(doc, dt, dn); 
 
 	if(doc.docstatus==1) {
 		cur_frm.add_custom_button('View Ledger', cur_frm.cscript['View Ledger Entry']);

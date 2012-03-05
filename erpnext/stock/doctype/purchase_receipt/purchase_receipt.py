@@ -57,7 +57,7 @@ class DocType(TransactionBase):
 
 #-----------------Validation For Fiscal Year------------------------
 	def validate_fiscal_year(self):
-		get_obj(dt = 'Purchase Common').validate_fiscal_year(self.doc.fiscal_year,self.doc.transaction_date,'Transaction Date')
+		get_obj(dt = 'Purchase Common').validate_fiscal_year(self.doc.fiscal_year,self.doc.posting_date,'Transaction Date')
 
 
 	# Get Item Details
@@ -87,10 +87,6 @@ class DocType(TransactionBase):
 	# =====================================================================================
 	def get_tc_details(self):
 		return get_obj('Purchase Common').get_tc_details(self)
-
-	def get_comp_base_currency(self):
-		return get_obj('Purchase Common').get_comp_base_currency(self.doc.company)
-
 
 
 	# get available qty at warehouse
@@ -230,7 +226,7 @@ class DocType(TransactionBase):
 
 					ord_qty = -flt(curr_qty)
 					# update order qty in bin
-					bin = get_obj('Warehouse', d.warehouse).update_bin(0, 0, (is_submit and 1 or -1) * flt(ord_qty), 0, 0, d.item_code, self.doc.transaction_date)
+					bin = get_obj('Warehouse', d.warehouse).update_bin(0, 0, (is_submit and 1 or -1) * flt(ord_qty), 0, 0, d.item_code, self.doc.posting_date)
 
 				# UPDATE actual qty to warehouse by pr_qty
 				self.make_sl_entry(d, d.warehouse, flt(pr_qty), d.valuation_rate, is_submit)
@@ -249,7 +245,7 @@ class DocType(TransactionBase):
 		self.values.append({
 			'item_code'					 : d.fields.has_key('item_code') and d.item_code or d.rm_item_code,
 			'warehouse'					 : wh,
-			'transaction_date'		: self.doc.transaction_date,
+			'transaction_date'			: getdate(self.doc.modified).strftime('%Y-%m-%d'),
 			'posting_date'				: self.doc.posting_date,
 			'posting_time'				: self.doc.posting_time,
 			'voucher_type'				: 'Purchase Receipt',

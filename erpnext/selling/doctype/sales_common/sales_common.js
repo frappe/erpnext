@@ -26,13 +26,15 @@ cur_frm.cscript.load_taxes = function(doc, cdt, cdn, callback) {
 	// run if this is not executed from dt_map...
 	doc = locals[doc.doctype][doc.name];
 	if(doc.customer || getchildren('RV Tax Detail', doc.name, 'other_charges', doc.doctype).length) {
-		if(callback) callback(doc, cdt, cdn);
-		return;
+		if(callback) {
+			callback(doc, cdt, cdn);
+		}
+	} else {
+		$c_obj([doc],'load_default_taxes','',function(r,rt){
+			refresh_field('other_charges');
+			if(callback) callback(doc, cdt, cdn);
+		});
 	}
-	$c_obj([doc],'load_default_taxes','',function(r,rt){
-		refresh_field('other_charges');
-		if(callback) callback(doc, cdt, cdn);
-	});
 }
 
 
@@ -72,7 +74,6 @@ cur_frm.cscript.update_item_details = function(doc, dt, dn, callback) {
 		});
 	}
 }
-
 
 
 
@@ -120,7 +121,9 @@ var set_dynamic_label_child = function(doc, cdt, cdn, base_curr) {
 	for (d in item_cols_export) $('[data-grid-fieldname="'+cur_frm.cscript.tname+'-'+d+'"]').html(item_cols_export[d]+' ('+doc.currency+')');	
 
 	var hide = (doc.currency == sys_defaults['currency']) ? false : true;
-	for (f in item_cols_base) cur_frm.fields_dict[cur_frm.cscript.fname].grid.set_column_disp(f, hide);
+	for (f in item_cols_export) {
+		cur_frm.fields_dict[cur_frm.cscript.fname].grid.set_column_disp(f, hide);
+	}
 
 	//tax table flds
 	tax_cols = {'tax_amount': 'Amount', 'total': 'Total'};
@@ -136,17 +139,11 @@ var set_dynamic_label_child = function(doc, cdt, cdn, base_curr) {
 // Change label dynamically based on currency
 //------------------------------------------------------------------
 
-cur_frm.cscript.dynamic_label = function(doc, cdt, cdn) {
-	var callback = function(r, rt) {
-		if (r.message) base_curr = r.message;
-		else base_curr = sys_defaults['currency'];
+cur_frm.cscript.dynamic_label = function(doc, cdt, cdn, base_curr, callback) {
+	set_dynamic_label_par(doc, cdt, cdn, base_curr);
+	set_dynamic_label_child(doc, cdt, cdn, base_curr);
 
-		set_dynamic_label_par(doc, cdt, cdn, base_curr);
-		set_dynamic_label_child(doc, cdt, cdn, base_curr);
-	}
-
-	if (doc.company == sys_defaults['company']) callback('', '');
-	else $c_obj(make_doclist(doc.doctype, doc.name), 'get_comp_base_currency', '', callback);
+	if (callback) callback(doc, cdt, cdn);
 }
 
 
@@ -155,27 +152,30 @@ cur_frm.cscript.dynamic_label = function(doc, cdt, cdn) {
 
 cur_frm.cscript.hide_price_list_currency = function(doc, cdt, cdn, callback1) {
 	if (doc.price_list_name && doc.currency) {
-		var callback = function(r, rt) {
-			pl_currency = r.message[0]?r.message[0]:[];
-			if (pl_currency.length==1) {
-				if (pl_currency[0] == doc.currency) set_multiple(cdt, cdn, {price_list_currency:doc.currency, plc_conversion_rate:doc.conversion_rate});
-				else if (pl_currency[0] = r.message[1]) set_multiple(cdt, cdn, {price_list_currency:pl_currency[0], plc_conversion_rate:1})
-				hide_field(['price_list_currency', 'plc_conversion_rate']);
-			} else unhide_field(['price_list_currency', 'plc_conversion_rate']);
+		wn.call({
+			method: 'selling.doctype.sales_common.sales_common.get_price_list_currency',
+			args: {'price_list':doc.price_list_name, 'company': doc.company},
+			callback: function(r, rt) {
+				pl_currency = r.message[0]?r.message[0]:[];
+				if (pl_currency.length==1) {
+					if (pl_currency[0] == doc.currency) set_multiple(cdt, cdn, {price_list_currency:doc.currency, plc_conversion_rate:doc.conversion_rate});
+					else if (pl_currency[0] = r.message[1]) set_multiple(cdt, cdn, {price_list_currency:pl_currency[0], plc_conversion_rate:1})
+					hide_field(['price_list_currency', 'plc_conversion_rate']);
+				} else unhide_field(['price_list_currency', 'plc_conversion_rate']);
 
-			if (r.message[1] == doc.currency) {
-				set_multiple(cdt, cdn, {conversion_rate:1});
-				hide_field(['conversion_rate', 'grand_total_export', 'in_words_export', 'rounded_total_export']);
-			} else unhide_field(['conversion_rate', 'grand_total_export', 'in_words_export', 'rounded_total_export']);
+				if (r.message[1] == doc.currency) {
+					set_multiple(cdt, cdn, {conversion_rate:1});
+					hide_field(['conversion_rate', 'grand_total_export', 'in_words_export', 'rounded_total_export']);
+				} else unhide_field(['conversion_rate', 'grand_total_export', 'in_words_export', 'rounded_total_export']);
 
-			if (r.message[1] == doc.price_list_currency) {
-				set_multiple(cdt, cdn, {plc_conversion_rate:1});
-				hide_field('plc_conversion_rate');
-			} else unhide_field('plc_conversion_rate');
-
-			callback1()
-		}
-		$c_obj(make_doclist(doc.doctype, doc.name), 'get_price_list_currency', '', callback);
+				if (r.message[1] == doc.price_list_currency) {
+					set_multiple(cdt, cdn, {plc_conversion_rate:1});
+					hide_field('plc_conversion_rate');
+				} else unhide_field('plc_conversion_rate');
+				
+				cur_frm.cscript.dynamic_label(doc, cdt, cdn, r.message[1], callback1);	
+			}
+		})
 	}
 }
 
@@ -213,12 +213,15 @@ cur_frm.cscript.conversion_rate = cur_frm.cscript.currency;
 cur_frm.cscript.plc_conversion_rate = cur_frm.cscript.currency;
 
 cur_frm.cscript.company = function(doc, dt, dn) {
-	var callback = function(r, rt) {
-		var doc = locals[dt][dn];
-		set_multiple(doc.doctype, doc.name, {currency:r.message,price_list_currency:r.message});
-		cur_frm.cscript.currency(doc, cdt, cdn);
-	}
-	$c_obj(make_doclist(doc.doctype, doc.name), 'get_comp_base_currency', '', callback);
+	wn.call({
+		method: 'selling.doctype.sales_common.sales_common.get_comp_base_currency',
+		args: {company:doc.company},
+		callback: function(r, rt) {
+			var doc = locals[dt][dn];
+			set_multiple(doc.doctype, doc.name, {currency:r.message, price_list_currency:r.message});
+			cur_frm.cscript.currency(doc, cdt, cdn);
+		}
+	});
 }
 
 
@@ -234,7 +237,6 @@ cur_frm.cscript.price_list_name = function(doc, cdt, cdn) {
 					refresh_field(fname);
 					var doc = locals[cdt][cdn];
 					cur_frm.cscript.recalc(doc,3);		//this is to re-calculate BASIC RATE and AMOUNT on basis of changed REF RATE
-					cur_frm.cscript.dynamic_label(doc, cdt, cdn);	
 				}
 			);
 		}
@@ -557,11 +559,9 @@ cur_frm.cscript.consider_incl_rate = function(doc, other_fname) {
 	var tax_list = getchildren('RV Tax Detail', doc.name, other_fname, doc.doctype);
 	for(var i=0; i<tax_list.length; i++) {
 		if(tax_list[i].included_in_print_rate) {
-			//console.log('consider incl rate');
 			return true;
 		}
 	}
-	//console.log('do not consider incl rate');
 	return false;
 }
 

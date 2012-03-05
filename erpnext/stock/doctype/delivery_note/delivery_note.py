@@ -74,16 +74,6 @@ class DocType(TransactionBase):
 
 		return cstr(self.doc.sales_order_no)
 
-
-
-	#-------------------set item details -uom and item group----------------
-	def set_item_details(self):
-		for d in getlist(self.doclist,'delivery_note_details'):
-			res = sql("select stock_uom, item_group from `tabItem` where name ='%s'"%d.item_code)
-			if not d.stock_uom:		d.stock_uom = res and cstr(res[0][0]) or ''
-			if not d.item_group:	 d.item_group = res and cstr(res[0][1]) or ''
-			d.save()
-
 	# ::::: Validates that Sales Order is not pulled twice :::::::
 	def validate_prev_docname(self):
 		for d in getlist(self.doclist, 'delivery_note_details'):
@@ -117,14 +107,16 @@ class DocType(TransactionBase):
 
 	# ***************** Get Item Details ******************************
 	def get_item_details(self, args=None):
-		args = eval(args)
-		if args['item_code']:
+		args = args and eval(args) or {}
+		if args.get('item_code'):
 			return get_obj('Sales Common').get_item_details(args, self)
 		else:
 			obj = get_obj('Sales Common')
 			for doc in self.doclist:
 				if doc.fields.get('item_code'):
-					ret = obj.get_item_details(doc.item_code, self)
+					arg = {'item_code':doc.fields.get('item_code'), 'income_account':doc.fields.get('income_account'), 
+						'cost_center': doc.fields.get('cost_center'), 'warehouse': doc.fields.get('warehouse')};
+					ret = obj.get_item_details(arg, self)
 					for r in ret:
 						if not doc.fields.get(r):
 							doc.fields[r] = ret[r]					
@@ -133,13 +125,6 @@ class DocType(TransactionBase):
 	# *** Re-calculates Basic Rate & amount based on Price List Selected ***
 	def get_adj_percent(self, arg=''):
 		get_obj('Sales Common').get_adj_percent(self)
-
-
-	def get_comp_base_currency(self):
-		return get_obj('Sales Common').get_comp_base_currency(self.doc.company)
-
-	def get_price_list_currency(self):
-		return get_obj('Sales Common').get_price_list_currency(self.doc.price_list_name, self.doc.company)
 
 
 	# ********** Get Actual Qty of item in warehouse selected *************
@@ -245,9 +230,9 @@ class DocType(TransactionBase):
 
 			if prevdoc_docname and prevdoc:
 				# ::::::::::: Validates Transaction Date of DN and previous doc (i.e. SO , PO, PR) *********
-				trans_date = sql("select transaction_date from `tab%s` where name = '%s'" %(prevdoc,prevdoc_docname))[0][0]
-				if trans_date and getdate(self.doc.transaction_date) < (trans_date):
-					msgprint("Your Voucher Date cannot be before "+cstr(prevdoc)+" Date.")
+				trans_date = sql("select posting_date from `tab%s` where name = '%s'" %(prevdoc,prevdoc_docname))[0][0]
+				if trans_date and getdate(self.doc.posting_date) < (trans_date):
+					msgprint("Your Posting Date cannot be before "+cstr(prevdoc)+" Date.")
 					raise Exception
 				# ::::::::: Validates DN and previous doc details ::::::::::::::::::
 				get_name = sql("select name from `tab%s` where name = '%s'" % (prevdoc, prevdoc_docname))
@@ -356,16 +341,17 @@ class DocType(TransactionBase):
 		"""
 			Validate that if packed qty exists, it should be equal to qty
 		"""
-		if not any([d.fields.get('packed_qty') for d in self.doclist]):
+		if not any([flt(d.fields.get('packed_qty')) for d in self.doclist if
+				d.doctype=='Delivery Note Detail']):
 			return
 		packing_error_list = []
 		for d in self.doclist:
 			if d.doctype != 'Delivery Note Detail': continue
-			if d.fields.get('qty') != d.fields.get('packed_qty'):
+			if flt(d.fields.get('qty')) != flt(d.fields.get('packed_qty')):
 				packing_error_list.append([
 					d.fields.get('item_code', ''),
-					d.fields.get('qty', ''),
-					d.fields.get('packed_qty', '')
+					d.fields.get('qty', 0),
+					d.fields.get('packed_qty', 0)
 				])
 		if packing_error_list:
 			from webnotes.utils import cstr
@@ -457,7 +443,7 @@ class DocType(TransactionBase):
 		self.values.append({
 			'item_code'					 : d[1],
 			'warehouse'					 : wh,
-			'transaction_date'		: self.doc.transaction_date,
+			'transaction_date'		: getdate(self.doc.modified).strftime('%Y-%m-%d'),
 			'posting_date'				: self.doc.posting_date,
 			'posting_time'				: self.doc.posting_time,
 			'voucher_type'				: 'Delivery Note',

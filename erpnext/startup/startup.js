@@ -19,6 +19,25 @@ var is_system_manager = 0;
 
 wn.provide('erpnext.startup');
 
+erpnext.modules = {
+	'Selling': 'selling-home',
+	'Accounts': 'accounts-home',
+	'Stock': 'stock-home',
+	'Buying': 'buying-home',
+	'Support': 'support-home',
+	'Projects': 'projects-home',
+	'Production': 'production-home',
+	'Website': 'website-home',
+	'HR': 'hr-home',
+	'Setup': 'Setup',
+	'Activity': 'activity',
+	'To Do': 'todo',
+	'Calendar': 'calendar',
+	'Messages': 'messages',
+	'Knowledge Base': 'questions',
+	'Dashboard': 'dashboard'
+}
+
 erpnext.startup.set_globals = function() {
 	pscript.is_erpnext_saas = cint(wn.control_panel.sync_with_gateway)
 	if(inList(user_roles,'System Manager')) is_system_manager = 1;
@@ -27,10 +46,14 @@ erpnext.startup.set_globals = function() {
 erpnext.startup.start = function() {
 	$('#startup_div').html('Starting up...').toggle(true);
 	
+	
 	erpnext.startup.set_globals();
 
 	if(wn.boot.custom_css) {
 		set_style(wn.boot.custom_css);
+	}
+	if(wn.boot.user_background) {
+		erpnext.set_user_background(wn.boot.user_background);
 	}
 		
 	if(user == 'Guest'){
@@ -38,16 +61,27 @@ erpnext.startup.start = function() {
 			wn.title_prefix = wn.boot.website_settings.title_prefix;
 		}
 	} else {
+		// always allow apps
+		wn.boot.profile.allow_modules = wn.boot.profile.allow_modules.concat(
+			['To Do', 'Knowledge Base', 'Calendar', 'Activity', 'Messages'])
+		
 		// setup toolbar
 		erpnext.toolbar.setup();
-		
+				
 		// set interval for updates
 		erpnext.startup.set_periodic_updates();
 
 		// border to the body
 		// ------------------
 		$('footer').html('<div class="web-footer erpnext-footer">\
-			Powered by <a href="https://erpnext.com">ERPNext</a></div>');
+			<a href="#!attributions">ERPNext | Attributions and License</a></div>');
+
+		// complete registration
+		if(in_list(user_roles,'System Manager') && (wn.boot.setup_complete=='No')) { 
+			wn.require("erpnext/startup/js/complete_setup.js");
+			erpnext.complete_setup(); 
+		}
+
 	}
 
 	$('#startup_div').toggle(false);
@@ -69,53 +103,36 @@ show_chart_browser = function(nm, chart_type){
 }
 
 
-// Module Page
-// ====================================================================
-
-ModulePage = function(parent, module_name, module_label, help_page, callback) {
-	this.parent = parent;
-
-	// add to current page
-	page_body.cur_page.module_page = this;
-
-	this.wrapper = $a(parent,'div');
-	this.module_name = module_name;
-	this.transactions = [];
-	this.page_head = new PageHeader(this.wrapper, module_label);
-
-	if(help_page) {
-		var btn = this.page_head.add_button('Help', function() { loadpage(this.help_page) }, 1, 'ui-icon-help')
-		btn.help_page = help_page;
-	}
-
-	if(callback) this.callback = function(){ callback(); }
-}
-
 // ========== Update Messages ============
-var update_messages = function() {
+var update_messages = function(reset) {
 	// Updates Team Messages
 	
 	if(inList(['Guest'], user)) { return; }
-	
-	$c_page('home', 'event_updates', 'get_unread_messages', null,
-		function(r,rt) {
-			if(!r.exc) {
-				// This function is defined in toolbar.js
-				page_body.wntoolbar.set_new_comments(r.message);
-				var circle = $('#msg_count')
-				if(circle) {
-					if(r.message.length) {
-						circle.find('span:first').text(r.message.length);
-						circle.toggle(true);
-					} else {
-						circle.toggle(false);
+
+	if(!reset) {
+		$c_page('home', 'event_updates', 'get_unread_messages', null,
+			function(r,rt) {
+				if(!r.exc) {
+					// This function is defined in toolbar.js
+					page_body.wntoolbar.set_new_comments(r.message);
+					var circle = $('#msg_count')
+					if(circle) {
+						if(r.message.length) {
+							circle.find('span:first').text(r.message.length);
+							circle.toggle(true);
+						} else {
+							circle.toggle(false);
+						}
 					}
+				} else {
+					clearInterval(wn.updates.id);
 				}
-			} else {
-				clearInterval(wn.updates.id);
 			}
-		}
-	);
+		);
+	} else {
+		page_body.wntoolbar.set_new_comments(0);
+		$('#msg_count').toggle(false);
+	}
 }
 
 erpnext.startup.set_periodic_updates = function() {
@@ -129,7 +146,9 @@ erpnext.startup.set_periodic_updates = function() {
 	wn.updates.id = setInterval(update_messages, 60000);
 }
 
-// =======================================
+erpnext.set_user_background = function(src) {
+	set_style(repl('body { background: url("files/%(src)s") repeat;}', {src:src}))
+}
 
 // start
 $(document).bind('startup', function() {
