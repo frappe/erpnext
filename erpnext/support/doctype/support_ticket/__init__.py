@@ -140,6 +140,7 @@ class SupportMailbox(POP3Mailbox):
 		"""
 			Send auto reply to emails
 		"""
+		from webnotes.utils import cstr
 		signature = self.email_settings.fields.get('support_signature') or ''
 
 		response = self.email_settings.fields.get('support_autoreply') or ("""
@@ -150,15 +151,15 @@ We will get back to you as soon as possible
 
 [This is an automatic response]
 
-		""" + signature)
+		""" + cstr(signature))
 
 		from webnotes.utils.email_lib import sendmail
 		
 		sendmail(\
-			recipients = [d.raised_by], \
-			sender = self.email_settings.support_email, \
-			subject = '['+d.name+'] ' + cstr(d.subject), \
-			msg = response)
+			recipients = [cstr(d.raised_by)], \
+			sender = cstr(self.email_settings.fields.get('support_email')), \
+			subject = '['+cstr(d.name)+'] ' + cstr(d.subject), \
+			msg = cstr(response))
 		
 	def auto_close_tickets(self):
 		"""
