@@ -140,9 +140,9 @@ class SupportMailbox(POP3Mailbox):
 		"""
 			Send auto reply to emails
 		"""
-		signature = self.email_settings.support_signature or ''
+		signature = self.email_settings.fields.get('support_signature') or ''
 
-		response = self.email_settings.support_autoreply or ("""
+		response = self.email_settings.fields.get('support_autoreply') or ("""
 A new Ticket has been raised for your query. If you have any additional information, please
 reply back to this mail.
 		
