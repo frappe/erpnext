@@ -67,7 +67,7 @@ def add_user(args):
 	# erpnext-saas
 	if cint(webnotes.conn.get_value('Control Panel', None, 'sync_with_gateway')):
 		from server_tools.gateway_utils import add_user_gateway
-		add_user_gateway(args['user'])
+		add_user_gateway(args)
 	
 	add_profile(args)
 	
