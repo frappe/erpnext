@@ -177,5 +177,10 @@ patch_list = [
 		'patch_file': 'reload_table',
 		'description': 'Relaod all item table: fld order changes' 
 	},
+	{
+		'patch_module': 'patches.jan_mar_2012',
+		'patch_file': 'remove_series_defval',
+		'description': 'Remove rv series default value' 
+	},
 
 ]
