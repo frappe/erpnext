@@ -5,7 +5,7 @@
 	{
 		'creation': '2010-08-08 17:09:18',
 		'docstatus': 0,
-		'modified': '2012-03-02 12:22:21',
+		'modified': '2012-03-06 11:05:53',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -21,7 +21,7 @@
 
 	# These values are common for all DocType
 	{
-		'_last_update': u'1330593645',
+		'_last_update': u'1330671142',
 		'change_log': u'1. Change in pull_details method dt.-26-06-2009',
 		'colour': u'White:FFF',
 		'default_print_format': u'Standard',
@@ -34,7 +34,7 @@
 		'server_code_error': u' ',
 		'show_in_menu': 0,
 		'subject': u'To %(customer_name)s worth %(currency)s %(grand_total_export)s due on %(due_date)s | %(outstanding_amount)s outstanding',
-		'version': 415
+		'version': 416
 	},
 
 	# These values are common for all DocFormat
@@ -176,7 +176,6 @@
 	# DocField
 	{
 		'colour': u'White:FFF',
-		'default': u'INV',
 		'depends_on': u'eval:doc.retail_transaction!="Yes"',
 		'description': u'To manage multiple series please go to Setup > Manage Series',
 		'doctype': u'DocField',
