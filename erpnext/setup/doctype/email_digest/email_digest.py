@@ -282,7 +282,8 @@ class DocType:
 			Returns start and end date depending on the frequency of email digest
 		"""
 		from datetime import datetime, date, timedelta
-		today = datetime.now().date()
+		from webnotes.utils import now_datetime
+		today = now_datetime().date()
 		year, month, day = today.year, today.month, today.day
 		
 		if self.doc.frequency == 'Daily':
@@ -409,6 +410,7 @@ class DocType:
 
 		from webnotes.utils.email_lib import sendmail
 		try:
+			#webnotes.msgprint('in send')
 			sendmail(
 				recipients=recipient_list,
 				sender='notifications+email_digest@erpnext.com',
@@ -419,64 +421,22 @@ class DocType:
 			)
 		except Exception, e:
 			webnotes.msgprint('There was a problem in sending your email. Please contact support@erpnext.com')
-			#webnotes.errprint(webnotes.getTraceback())
+			webnotes.errprint(webnotes.getTraceback())
 
 
 	def get_next_sending(self):
-		"""
-
-		"""
-		# Get TimeZone
-		# Get System TimeZone
-		import time
-		from pytz import timezone
 		import datetime
-		import webnotes.defs
-		cp = webnotes.model.doc.Document('Control Panel','Control Panel')
-		app_tz = timezone(cp.time_zone)
-		server_tz = timezone(getattr(webnotes.defs, 'system_timezone'))
 		
 		start_date, end_date = self.get_start_end_dates()
 		
-		new_date = end_date + datetime.timedelta(days=1)
-		new_time = datetime.time(hour=6)
-
-		naive_dt = datetime.datetime.combine(new_date, new_time)
-		app_dt = app_tz.localize(naive_dt)
-		server_dt = server_tz.normalize(app_dt.astimezone(server_tz))
-
-		res = {
-			'app_dt': app_dt.replace(tzinfo=None),
-			'app_tz': app_tz,
-			'server_dt': server_dt.replace(tzinfo=None),
-			'server_tz': server_tz
-		}
-
+		send_date = end_date + datetime.timedelta(days=1)
+		
 		from webnotes.utils import formatdate
-		str_date = formatdate(str(res['app_dt'].date()))
-		str_time = res['app_dt'].time().strftime('%I:%M')
+		str_date = formatdate(str(send_date))
 
-		self.doc.next_send = str_date + " at about " + str_time
+		self.doc.next_send = str_date + " at midnight"
 
-		return res
-
-
-	def get_next_execution(self):
-		"""
-
-		"""
-		from datetime import datetime, timedelta
-		dt_args = self.get_next_sending()
-		server_dt = dt_args['server_dt']
-		now_dt = datetime.now(dt_args['server_tz'])
-		if now_dt.time() <= server_dt.time():
-			next_date = now_dt.date()
-		else:
-			next_date = now_dt.date() + timedelta(days=1)
-
-		next_time = server_dt.time()
-
-		return datetime.combine(next_date, next_time)
+		return send_date
 
 
 	def onload(self):
@@ -743,21 +703,16 @@ def send():
 	""", as_list=1)
 
 	from webnotes.model.code import get_obj
-	from datetime import datetime, timedelta
-	now = datetime.now()
-	now_date = now.date()
-	now_time = (now + timedelta(hours=2)).time()
+	from webnotes.utils import now_datetime
 
+	now_date = now_datetime().date()
+	
 	for ed in edigest_list:
 		if ed[0]:
 			ed_obj = get_obj('Email Digest', ed[0])
 			ed_obj.sending = True
-			dt_dict = ed_obj.get_next_sending()
-			send_date = dt_dict['server_dt'].date()
-			send_time = dt_dict['server_dt'].time()
+			send_date = ed_obj.get_next_sending()
+			#webnotes.msgprint([ed[0], now_date, send_date])
 
 			if (now_date == send_date):
-				#webnotes.msgprint('sending ' + ed_obj.doc.name)
 				ed_obj.send()
-			#else:
-			#	webnotes.msgprint('not sending ' + ed_obj.doc.name)
