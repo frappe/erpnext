@@ -18,7 +18,7 @@
 // ------
 // cur_frm.cscript.tname - Details table name
 // cur_frm.cscript.fname - Details fieldname
-// cur_frm.cscript.other_fname - Other Charges fieldname
+// cur_frm.cscript.other_fname - wn.require('erpnext/setup/doctype/other_charges/other_charges.js'); fieldname
 // cur_frm.cscript.sales_team_fname - Sales Team fieldname
 
 // ============== Load Default Taxes ===================
@@ -96,7 +96,7 @@ cur_frm.cscript.customer = function(doc, cdt, cdn) {
 
 var set_dynamic_label_par = function(doc, cdt, cdn, base_curr) {
 	//parent flds
-	par_cols_base = {'net_total': 'Net Total', 'other_charges_total': 'Other Charges Total', 
+	par_cols_base = {'net_total': 'Net Total', 'other_charges_total': 'wn.require('erpnext/setup/doctype/other_charges/other_charges.js'); Total', 
 		'grand_total':	'Grand Total', 'rounded_total': 'Rounded Total', 'in_words': 'In Words'}
 	par_cols_export = {'grand_total_export': 'Grand Total', 'rounded_total_export':	'Rounded Total', 'in_words_export':	'In Words'};
 
@@ -339,7 +339,7 @@ cur_frm.cscript.export_rate = function(doc,cdt,cdn) {
 
 // ************* GET OTHER CHARGES BASED ON COMPANY *************
 cur_frm.fields_dict.charge.get_query = function(doc) {
-	return 'SELECT DISTINCT `tabOther Charges`.name FROM `tabOther Charges` WHERE `tabOther Charges`.company = "'+doc.company+'" AND `tabOther Charges`.company is not NULL AND `tabOther Charges`.docstatus != 2 AND `tabOther Charges`.%(key)s LIKE "%s" ORDER BY `tabOther Charges`.name LIMIT 50';
+	return 'SELECT DISTINCT `tabwn.require('erpnext/setup/doctype/other_charges/other_charges.js');`.name FROM `tabwn.require('erpnext/setup/doctype/other_charges/other_charges.js');` WHERE `tabwn.require('erpnext/setup/doctype/other_charges/other_charges.js');`.company = "'+doc.company+'" AND `tabwn.require('erpnext/setup/doctype/other_charges/other_charges.js');`.company is not NULL AND `tabwn.require('erpnext/setup/doctype/other_charges/other_charges.js');`.docstatus != 2 AND `tabwn.require('erpnext/setup/doctype/other_charges/other_charges.js');`.%(key)s LIKE "%s" ORDER BY `tabwn.require('erpnext/setup/doctype/other_charges/other_charges.js');`.name LIMIT 50';
 }
 
 // ********************* Get Charges ****************************
@@ -433,14 +433,14 @@ cur_frm.cscript.calc_other_charges = function(doc , tname , fname , other_fname)
 	doc = locals[doc.doctype][doc.name];
 
 	// Make Display Area
-	cur_frm.fields_dict['Other Charges Calculation'].disp_area.innerHTML =
-		'<b style="padding: 8px 0px;">Calculation Details for Other Charges:</b>';
+	cur_frm.fields_dict['wn.require('erpnext/setup/doctype/other_charges/other_charges.js'); Calculation'].disp_area.innerHTML =
+		'<b style="padding: 8px 0px;">Calculation Details for wn.require('erpnext/setup/doctype/other_charges/other_charges.js');:</b>';
 
 	var cl = getchildren(tname, doc.name, fname);
 	var tax = getchildren('RV Tax Detail', doc.name, other_fname,doc.doctype);
 	
 	// Make display table
-	var otc = make_table(cur_frm.fields_dict['Other Charges Calculation'].disp_area,
+	var otc = make_table(cur_frm.fields_dict['wn.require('erpnext/setup/doctype/other_charges/other_charges.js'); Calculation'].disp_area,
 		cl.length + 1, tax.length + 1, '90%', [], { border:'1px solid #AAA', padding:'2px' });
 	$y(otc,{marginTop:'8px'});
 
@@ -795,10 +795,10 @@ cur_frm.cscript.allocated_percentage = function(doc, cdt, cdn) {
 // =================================================================================
 cur_frm.cscript.validate = function(doc, cdt, cdn) {
 	cur_frm.cscript.validate_items(doc);
-	var cl = getchildren('Other Charges', doc.name, 'other_charges');
+	var cl = getchildren('wn.require('erpnext/setup/doctype/other_charges/other_charges.js');', doc.name, 'other_charges');
 	for(var i =0;i<cl.length;i++) {
 		if(!cl[i].amount) {
-			alert("Please Enter Amount in Row no. "+cl[i].idx+" in Other Charges table");
+			alert("Please Enter Amount in Row no. "+cl[i].idx+" in wn.require('erpnext/setup/doctype/other_charges/other_charges.js'); table");
 			validated = false;
 		}
 	}

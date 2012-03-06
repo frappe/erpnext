@@ -185,4 +185,4 @@ KBAnswer = function(body, data, ans_list) {
 }
 
 
-$import(knowledge_base/page/kb_common/kb_common.js);
+wn.require('erpnext/knowledge_base/page/kb_common/kb_common.js');

@@ -16,7 +16,7 @@
 
 // Module CRM
 
-$import(SMS Control)
+wn.require('erpnext/utilities/doctype/sms_control/sms_control.js');
 
 cur_frm.cscript.onload = function(doc, cdt, cdn) {
   if(user =='Guest'){

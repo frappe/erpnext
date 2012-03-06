@@ -215,4 +215,4 @@ KBQuestion = function(parent, det, kb) {
 	this.make()
 }
 
-$import(knowledge_base/page/kb_common/kb_common.js);
+wn.require('erpnext/knowledge_base/page/kb_common/kb_common.js');

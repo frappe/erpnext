@@ -100,7 +100,7 @@ cur_frm.cscript.sanctioned_amount = function(doc,cdt,cdn){
   cur_frm.cscript.calculate_total(doc,cdt,cdn);
 }
 
-$import(Notification Control);
+wn.require('erpnext/setup/doctype/notification_control/notification_control.js');
 
 cur_frm.cscript['Approve'] = function(doc,cdt,cdn){
 
@@ -244,7 +244,6 @@ cur_frm.cscript['Update Voucher'] = function(doc){
   });
 }
 
-$import(Notification Control)
 cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
 	var args = {
 		type: 'Expense Voucher',
