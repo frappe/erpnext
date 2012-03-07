@@ -47,7 +47,7 @@ feed_dict = {
 	# Support
 	'Customer Issue':       ['[%(status)s] %(description)s by %(customer_name)s', '#000080'],
 	'Maintenance Visit':['To %(customer_name)s', '#4169E1'],
-	'Support Ticket':       ['[%(status)s] %(subject)s', '#000080'],
+	'Support Ticket':       ["[%(status)s] %(subject)s", '#000080'],
 	
 	# Website
 	'Web Page': ['%(title)s', '#000080'],
