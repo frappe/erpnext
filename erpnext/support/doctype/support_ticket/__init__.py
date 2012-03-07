@@ -81,6 +81,7 @@ class SupportMailbox(POP3Mailbox):
 				st.make_response_record(content, mail.mail['From'], content_type)
 				webnotes.conn.set(st.doc, 'status', 'Open')
 				update_feed(st.doc, 'on_update')
+				webnotes.conn.commit()
 				# extract attachments
 				self.save_attachments(st.doc, mail.attachments)
 				return
@@ -99,21 +100,22 @@ class SupportMailbox(POP3Mailbox):
 		d.naming_series = (opts and opts[0] and opts[0][0] and opts[0][0].split("\n")[0]) or 'SUP'
 		try:
 			d.save(1)
+		except:
+			d.description = 'Unable to extract message'
+			d.save(1)
 
+		else:
 			# update feed
 			update_feed(d, 'on_update')
 
 			# send auto reply
 			self.send_auto_reply(d)
 
-		except:
-			d.description = 'Unable to extract message'
-			d.save(1)
-
-		else:
+			webnotes.conn.commit()
+			
 			# extract attachments
 			self.save_attachments(d, mail.attachments)
-
+			
 
 	def save_attachments(self, doc, attachment_list=[]):
 		"""
@@ -138,9 +140,10 @@ class SupportMailbox(POP3Mailbox):
 		"""
 			Send auto reply to emails
 		"""
-		signature = self.email_settings.support_signature
+		from webnotes.utils import cstr
+		signature = self.email_settings.fields.get('support_signature') or ''
 
-		response = self.email_settings.support_autoreply or ("""
+		response = self.email_settings.fields.get('support_autoreply') or ("""
 A new Ticket has been raised for your query. If you have any additional information, please
 reply back to this mail.
 		
@@ -148,15 +151,15 @@ We will get back to you as soon as possible
 
 [This is an automatic response]
 
-		""" + (signature or ''))
+		""" + cstr(signature))
 
 		from webnotes.utils.email_lib import sendmail
 		
 		sendmail(\
-			recipients = [d.raised_by], \
-			sender = self.email_settings.support_email, \
-			subject = '['+d.name+'] ' + cstr(d.subject), \
-			msg = response)
+			recipients = [cstr(d.raised_by)], \
+			sender = cstr(self.email_settings.fields.get('support_email')), \
+			subject = '['+cstr(d.name)+'] ' + cstr(d.subject), \
+			msg = cstr(response))
 		
 	def auto_close_tickets(self):
 		"""
