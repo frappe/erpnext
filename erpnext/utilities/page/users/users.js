@@ -232,7 +232,7 @@ $.extend(wn.pages.users, {
 				$c_page('utilities', 'users', 'add_user', v, function(r,rt) {
 					if(r.exc) { msgprint(r.exc); return; }
 					else {
-						wn.boot.user_info[v.user] = {fullname:v.first_name + ' ' + v.last_name};
+						wn.boot.user_info[v.user] = {fullname:v.first_name + ' ' + (v.last_name || '')};
 						d.hide();
 						me.refresh();
 					}
