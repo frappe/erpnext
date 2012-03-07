@@ -833,33 +833,6 @@ $di(this.more_btn);}}
 Listing.prototype.make_headings=function(t,nr,nc){for(var ci=0;ci<nc;ci++){var tmp=make_table($td(t,0,ci),1,2,'100%',['','0px'],this.opts.head_style);$y(tmp,{tableLayout:'fixed',borderCollapse:'collapse'});$y($td(t,0,ci),this.opts.head_main_style);$td(t,0,ci).sort_cell=$td(tmp,0,1);$td(t,0,ci).label_cell=$td(tmp,0,0);$td(tmp,0,1).style.padding='0px';$td(tmp,0,0).innerHTML=this.colnames[ci]?this.colnames[ci]:'&nbsp;';if(this.sort_list[ci])this.set_sort($td(t,0,ci),ci,this.sort_list[ci]);var div=$a($td(t,0,ci),'div');$td(t,0,ci).style.borderBottom='1px solid #CCC';if(this.coltypes&&this.coltypes[ci]&&in_list(['Currency','Float','Int'],this.coltypes[ci]))$y($td(t,0,ci).label_cell,{textAlign:'right'})}}
 Listing.prototype.std_cell=function(cell,ri,ci,d){var has_headrow=this.colnames?1:0;cell.div=$a(cell,'div');$s(cell.div,d[ri][ci],this.coltypes?this.coltypes[ci+(this.no_index?0:1)]:null,this.coloptions?this.coloptions[ci+(this.no_index?0:1)]:null);}
 /*
- *	lib/js/wn/ui/listing.js
- */
-wn.widgets.Listing=function(opts){this.opts=opts;this.page_length=20;this.btns={};this.start=0;var me=this;this.make=function(opts){if(this.opts.parent.jquery)
-this.opts.parent=this.opts.parent.get(0);this.wrapper=$a(this.opts.parent,'div');this.filters_area=$a(this.wrapper,'div','listing-filters');this.toolbar_area=$a(this.wrapper,'div','listing-toolbar');this.results_area=$a(this.wrapper,'div','listing-results');this.more_button_area=$a(this.wrapper,'div','listing-more');this.no_results_area=$a(this.wrapper,'div','help_box',{display:'none'},(this.opts.no_result_message?this.opts.no_result_message:'No results'));if(opts)this.opts=opts;this.page_length=this.opts.page_length?this.opts.page_length:this.page_length;this.make_toolbar();this.make_filters();this.make_more_button();}
-this.make_filters=function(){if(this.opts.filters){$ds(this.filters_area);this.filters=new wn.widgets.FieldGroup(this.filters_area,this.opts.fields);}}
-this.make_toolbar=function(){if(!(this.opts.hide_refresh||this.opts.no_refresh)){if(this.opts.title){$a(this.toolbar_area,'h3','',{display:'inline-block',marginRight:'15px'},this.opts.title);}
-this.ref_img=$a(this.toolbar_area,'span','link_type',{color:'#888'},'[refresh]');this.ref_img.onclick=function(){me.run();}
-this.loading_img=$a(this.toolbar_area,'img','lib/images/ui/button-load.gif',{display:'none',marginLeft:'3px',marginBottom:'-2px'});}
-if(this.opts.new_doctype){this.new_btn=$btn(this.toolbar_area,'New '+get_doctype_label(this.opts.new_doctype),function(){newdoc(me.opts.new_doctype,me.opts.new_doc_onload,me.opts.new_doc_indialog,me.opts.new_doc_onsave);},{marginLeft:'7px'});}}
-this.make_more_button=function(){this.more_btn=$btn(this.more_button_area,'More...',function(){me.more_btn.set_working();me.run(function(){me.more_btn.done_working();},1);},'',0,1);$y(this.more_btn.loading_img,{marginBottom:'0px'});}
-this.clear=function(){this.results_area.innerHTML='';this.table=null;$ds(this.results_area);$dh(this.no_results_area);}
-this.make_results=function(r,rt){if(this.start==0)this.clear();$dh(this.more_button_area);if(this.loading_img)$dh(this.loading_img)
-if(r.message)r.values=r.message;if(r.values&&r.values.length){this.values=r.values;var m=Math.min(r.values.length,this.page_length);for(var i=0;i<m;i++){var row=this.add_row();this.opts.render_row(row,r.values[i],this,i);}
-this.start+=m;if(r.values.length>=this.page_length)$ds(this.more_button_area);}else{if(this.start==0){$dh(this.results_area);$ds(this.no_results_area);}}
-if(this.onrun)this.onrun();if(this.opts.onrun)this.opts.onrun();if(this.opts.callback)this.opts.callback(r);}
-this.add_row=function(){return $a(this.results_area,'div','',(opts.cell_style?opts.cell_style:{padding:'3px 0px'}));}
-this.run=function(callback,append){if(callback)
-this.onrun=callback;if(!append)
-this.start=0;if(!this.opts.method){this.query=this.opts.get_query?this.opts.get_query():this.opts.query;this.add_limits();var args={query_max:this.query_max||this.opts.query_max||'',as_dict:1}
-args.simple_query=this.query;}else{var args={limit_start:this.start,limit_page_length:this.page_length}}
-if(this.opts.args)
-$.extend(args,this.opts.args)
-if(this.opts.get_args){$.extend(args,this.opts.get_args());}
-if(this.loading_img)$di(this.loading_img);wn.call({method:this.opts.method||'webnotes.widgets.query_builder.runquery',args:args,callback:function(r,rt){me.make_results(r,rt)},no_spinner:this.opts.no_loading,btn:this.opts.run_btn});}
-this.refresh=this.run;this.add_limits=function(){this.query+=' LIMIT '+this.start+','+(this.page_length+1);}
-if(opts)this.make();}
-/*
  *	lib/js/legacy/widgets/layout.js
  */
 function Layout(parent,width){if(parent&&parent.substr){parent=$i(parent);}
@@ -2191,7 +2164,7 @@ $(document).bind('startup',function(){erpnext.startup.start();});
  */
 wn.provide('erpnext.module_page');erpnext.module_page.setup_page=function(module,wrapper){erpnext.module_page.hide_links(wrapper);erpnext.module_page.make_list(module,wrapper);$(wrapper).find("a[title]").tooltip({delay:{show:500,hide:100}});}
 erpnext.module_page.hide_links=function(wrapper){$(wrapper).find('[href*="List/"]').each(function(){var href=$(this).attr('href');var dt=href.split('/')[1];if(wn.boot.profile.all_read.indexOf(get_label_doctype(dt))==-1){var txt=$(this).text();$(this).parent().css('color','#999').html(txt);}});$(wrapper).find('[data-doctype]').each(function(){var dt=$(this).attr('data-doctype');if(wn.boot.profile.all_read.indexOf(dt)==-1){var txt=$(this).text();$(this).parent().css('color','#999').html(txt);}});$(wrapper).find('[href*="Form/"]').each(function(){var href=$(this).attr('href');var dt=href.split('/')[1];if(wn.boot.profile.all_read.indexOf(get_label_doctype(dt))==-1){var txt=$(this).text();$(this).parent().css('color','#999').html(txt);}});}
-erpnext.module_page.make_list=function(module,wrapper){wrapper.list=new wn.widgets.Listing({parent:$(wrapper).find('.reports-list').get(0),method:'utilities.get_report_list',render_row:function(row,data){if(!data.parent_doc_type)data.parent_doc_type=data.doc_type;$(row).html(repl('<a href="#!Report/%(doc_type)s/%(criteria_name)s" \
+erpnext.module_page.make_list=function(module,wrapper){wrapper.list=new wn.ui.Listing({parent:$(wrapper).find('.reports-list').get(0),method:'utilities.get_report_list',render_row:function(row,data){if(!data.parent_doc_type)data.parent_doc_type=data.doc_type;$(row).html(repl('<a href="#!Report/%(doc_type)s/%(criteria_name)s" \
     data-doctype="%(parent_doc_type)s">\
     %(criteria_name)s</a>',data))},args:{module:module},no_refresh:true,callback:function(r){erpnext.module_page.hide_links(wrapper)}});wrapper.list.run();}
 /*

@@ -54,7 +54,7 @@ cur_frm.cscript.refresh = function(doc,dt,dn) {
 
 cur_frm.cscript.make_address = function() {
 	if(!cur_frm.address_list) {
-		cur_frm.address_list = new wn.widgets.Listing({
+		cur_frm.address_list = new wn.ui.Listing({
 			parent: cur_frm.fields_dict['Address HTML'].wrapper,
 			page_length: 2,
 			new_doctype: "Address",
@@ -96,7 +96,7 @@ cur_frm.cscript.make_address = function() {
 
 cur_frm.cscript.make_contact = function() {
 	if(!cur_frm.contact_list) {
-		cur_frm.contact_list = new wn.widgets.Listing({
+		cur_frm.contact_list = new wn.ui.Listing({
 			parent: cur_frm.fields_dict['Contact HTML'].wrapper,
 			page_length: 2,
 			new_doctype: "Contact",

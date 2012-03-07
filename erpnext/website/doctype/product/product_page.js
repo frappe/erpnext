@@ -30,7 +30,7 @@ pscript["onload_{{ doc.page_name }}"] = function(wrapper) {
 	});
 	
 	// similar products
-	wrapper.similar = new wn.widgets.Listing({
+	wrapper.similar = new wn.ui.Listing({
 		parent: $(wrapper).find('.similar-products').get(0),
 		hide_refresh: true,
 		page_length: 5,

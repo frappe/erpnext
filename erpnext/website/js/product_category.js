@@ -18,7 +18,7 @@
 erpnext.product_item_group = {}
 
 erpnext.make_product_categories = function(wrapper) {
-	wrapper.category_list = new wn.widgets.Listing({
+	wrapper.category_list = new wn.ui.Listing({
 		parent: $(wrapper).find('.more-categories').get(0),
 		query: 'select label, count(t2.name) as items, t1.item_group \
 			from `tabProduct Group` t1, `tabProduct` t2, tabItem t3\

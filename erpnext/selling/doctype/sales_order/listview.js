@@ -1,10 +1,19 @@
 // render
 wn.doclistviews['Sales Order'] = {
-	fields: ["name", "owner", "modified", "customer_name", 
-		"ifnull(per_delivered,0) as per_delivered", 
-		"ifnull(per_billed,0) as per_billed", "currency", 
-		"ifnull(grand_total_export,0) as grand_total_export", 
-		"docstatus"],
+	fields: [
+		{ field: "name", name: "ID"},
+		{ field: "owner", name: "Created By"},
+		{ field: "modified", name: "Last Updated"},
+		{ field: "customer_name", name: "Customer", width:300},
+		{ field: "per_delivered", name: "% Delivered", 
+			query: "ifnull(per_delivered,0) as per_delivered"}, 
+		{ field: "per_billed", name: "% Billed", 
+			query: "ifnull(per_billed,0) as per_billed"}, 
+		{ field: "currency", name: "Currency"},
+		{ field: "grand_total_export", name: "Grand Total", 
+			query:"ifnull(grand_total_export,0) as grand_total_export"},
+		{ field: "docstatus", name: "Status"}
+	],
 	render: function(row, data, listobj) {
 		data.modified_date = dateutil.str_to_user(data.modified).split(' ')[0];
 		
