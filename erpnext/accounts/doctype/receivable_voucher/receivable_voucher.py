@@ -106,8 +106,8 @@ class DocType(TransactionBase):
 
 	def get_debit_to(self):
 		acc_head = self.get_customer_account()
-		if acc_head:
-			return { 'debit_to' : acc_head }
+		return acc_head and {'debit_to' : acc_head} or {}
+
 
 
 	# Set Due Date = Posting Date + Credit Days
@@ -146,8 +146,7 @@ class DocType(TransactionBase):
 			self.get_income_account('entries')
 			
 		ret = self.get_debit_to()
-		if ret.has_key('debit_to'):
-			self.doc.debit_to = ret['debit_to']
+		self.doc.debit_to = ret.get('debit_to')
 					
 	# onload pull income account
 	# --------------------------
