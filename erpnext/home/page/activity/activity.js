@@ -1,5 +1,5 @@
 wn.pages['activity'].onload = function(wrapper) {
-	var list = new wn.widgets.Listing({
+	var list = new wn.ui.Listing({
 		method: 'home.page.activity.activity.get_feed',
 		parent: $('#activity-list'),
 		render_row: function(row, data) {

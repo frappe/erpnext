@@ -91,7 +91,7 @@ erpnext.messages = {
 		return user;	
 	},
 	make_list: function() {
-		erpnext.messages.list = new wn.widgets.Listing({
+		erpnext.messages.list = new wn.ui.Listing({
 			parent: $('#message-list').get(0),
 			method: 'utilities.page.messages.messages.get_list',
 			args: {

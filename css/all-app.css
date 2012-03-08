@@ -239,7 +239,6 @@ div.std-footer-item {
 	margin-bottom: -7px;
 	max-width: 24px;
 }
-
 /*
  *	lib/css/legacy/messages.css
  */
@@ -1143,6 +1142,80 @@ div.psidebar div.section-item, div.psidebar .section-link {
 	font-size: 11px;
 	color: #666;
 }
+/*
+ *	lib/css/ui/list.css
+ */.hide {
+	display: none;
+}
+
+.list-filters {
+	margin: 7px 0px;
+}
+
+.wnlist .img-load {
+	display: none;
+	float: left;
+	margin-left: 11px;
+	margin-top: 8px;
+}
+
+div.list-row {
+	border-bottom: 1px solid #eee;
+	padding: 3px 0px;
+}
+div.list-row:hover {
+	background-color: #eef
+}
+
+div.show_filters {
+	display: none;
+}
+
+div.filter_list {
+	padding: 13px;
+}
+
+div.show_filters.well {
+	margin-top: 11px;
+	margin-bottom: 11px;
+}
+
+div.filter_list .run_btn {
+	text-align: right;
+}
+
+div.filter_list .add_filter {
+	margin: 3px 0px;
+}
+
+div.list_filter {
+	margin: 7px 0px;
+}
+
+div.list_filter input, div.list_filter select {
+	width: 130px;
+	margin-right: 7px;
+}
+
+span.bar-outer {
+	display: inline-block;
+	margin: 0px 7px;
+	margin-top: 3px;
+	background-color: #fff;
+	border: 1px solid #aaa;
+	height: 10px;
+}
+
+span.bar-inner {
+	display: inline-block;
+	background-color: #bdf;
+	height: 100%;
+	margin-bottom: 2px;
+}
+span.bar-complete {
+	background-color: green;
+}
+
 /*
  *	lib/css/bootstrap/headings.css
  *//* heading from bootstrap */

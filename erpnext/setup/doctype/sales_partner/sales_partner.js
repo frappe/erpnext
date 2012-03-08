@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-$import(Contact Control)
+wn.require('erpnext/setup/doctype/contact_control/contact_control.js');
 
 cur_frm.cscript.onload = function(doc,dt,dn){
 	// history doctypes and scripts
@@ -48,7 +48,7 @@ cur_frm.cscript.refresh = function(doc,dt,dn){
 
 cur_frm.cscript.make_address = function() {
 	if(!cur_frm.address_list) {
-		cur_frm.address_list = new wn.widgets.Listing({
+		cur_frm.address_list = new wn.ui.Listing({
 			parent: cur_frm.fields_dict['Address HTML'].wrapper,
 			page_length: 2,
 			new_doctype: "Address",
@@ -80,7 +80,7 @@ cur_frm.cscript.make_address = function() {
 
 cur_frm.cscript.make_contact = function() {
 	if(!cur_frm.contact_list) {
-		cur_frm.contact_list = new wn.widgets.Listing({
+		cur_frm.contact_list = new wn.ui.Listing({
 			parent: cur_frm.fields_dict['Contact HTML'].wrapper,
 			page_length: 2,
 			new_doctype: "Contact",

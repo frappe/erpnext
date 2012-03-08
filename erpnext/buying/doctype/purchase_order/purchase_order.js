@@ -17,9 +17,11 @@
 cur_frm.cscript.tname = "PO Detail";
 cur_frm.cscript.fname = "po_details";
 cur_frm.cscript.other_fname = "purchase_tax_details";
-$import(Purchase Common)
-$import(Purchase Other Charges)
-$import(SMS Control)
+
+wn.require('erpnext/buying/doctype/purchase_other_charges/purchase_other_charges.js');
+wn.require('erpnext/buying/doctype/purchase_common/purchase_common.js');
+wn.require('erpnext/utilities/doctype/sms_control/sms_control.js');
+wn.require('erpnext/setup/doctype/notification_control/notification_control.js');
 
 //========================== On Load =================================================
 cur_frm.cscript.onload = function(doc, cdt, cdn) {
@@ -270,7 +272,6 @@ cur_frm.pformat.indent_no = function(doc, cdt, cdn){
 	return out;
 }
 
-$import(Notification Control)
 cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
 	var args = {
 		type: 'Purchase Order',

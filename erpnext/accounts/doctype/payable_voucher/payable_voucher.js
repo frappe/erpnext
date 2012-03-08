@@ -17,8 +17,8 @@
 cur_frm.cscript.tname = "PV Detail";
 cur_frm.cscript.fname = "entries";
 cur_frm.cscript.other_fname = "purchase_tax_details";
-$import(Purchase Other Charges)
-$import(Purchase Common)
+wn.require('erpnext/buying/doctype/purchase_other_charges/purchase_other_charges.js');
+wn.require('erpnext/buying/doctype/purchase_common/purchase_common.js');
 
 // On Load
 // --------

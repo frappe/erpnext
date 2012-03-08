@@ -17,8 +17,8 @@
 cur_frm.cscript.tname = "Indent Detail";
 cur_frm.cscript.fname = "indent_details";
 
-$import(Purchase Common)
-$import(SMS Control)
+wn.require('erpnext/buying/doctype/purchase_common/purchase_common.js');
+wn.require('erpnext/utilities/doctype/sms_control/sms_control.js');
 cur_frm.cscript.indent_doctype_label =	get_doctype_label('Indent');
 	
 //========================== On Load =================================================

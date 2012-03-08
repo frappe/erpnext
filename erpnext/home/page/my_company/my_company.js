@@ -179,7 +179,7 @@ MemberList.prototype.make_list = function() {
 	var me = this;
 	this.lst_area = $a(this.list_wrapper, 'div');
 
-	this.lst = new wn.widgets.Listing({
+	this.lst = new wn.ui.Listing({
 		parent: this.lst_area,
 		as_dict: 1,
 		get_query: function() {
@@ -692,7 +692,7 @@ MemberConversation = function(parent, uid, fullname) {
 			this.my_messages_box = $a(this.lst_area, 'div', 'my-company-conversation-head', {marginBottom:'7px'}, 'Messages by everyone to me<br>To send a message, click on the user on the left')
 		}
 		
-		this.lst = new wn.widgets.Listing({
+		this.lst = new wn.ui.Listing({
 			parent: this.lst_area,
 			as_dict: 1,
 			no_result_message: (user==uid 

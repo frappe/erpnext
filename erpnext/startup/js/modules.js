@@ -61,7 +61,7 @@ erpnext.module_page.hide_links = function(wrapper) {
 
 erpnext.module_page.make_list = function(module, wrapper) {
 	// make project listing
-	wrapper.list = new wn.widgets.Listing({
+	wrapper.list = new wn.ui.Listing({
 		parent: $(wrapper).find('.reports-list').get(0),
 		method: 'utilities.get_report_list',
 		render_row: function(row, data) {

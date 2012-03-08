@@ -81,7 +81,7 @@ $.extend(cur_frm.cscript, {
 		}, null, -1)
 		
 		// render thread		
-		cs.thread_list = new wn.widgets.Listing({
+		cs.thread_list = new wn.ui.Listing({
 			parent: cur_frm.fields_dict['Thread HTML'].wrapper,
 			no_result_message: 'No responses yet',
 			get_query: function() {

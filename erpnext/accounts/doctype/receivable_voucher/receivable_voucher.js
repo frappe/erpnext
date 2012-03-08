@@ -22,9 +22,10 @@ cur_frm.cscript.sales_team_fname = "sales_team";
 // print heading
 cur_frm.pformat.print_heading = 'Invoice';
 
-$import(Sales Common)
-$import(Other Charges)
-$import(SMS Control)
+wn.require('erpnext/selling/doctype/sales_common/sales_common.js');
+wn.require('erpnext/setup/doctype/other_charges/other_charges.js');
+wn.require('erpnext/utilities/doctype/sms_control/sms_control.js');
+wn.require('erpnext/setup/doctype/notification_control/notification_control.js');
 
 // On Load
 // -------
@@ -476,7 +477,6 @@ cur_frm.cscript.convert_into_recurring_invoice = function(doc) {
 	}		
 }
 
-$import(Notification Control)
 cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
 	var args = {
 		type: 'Sales Invoice',
