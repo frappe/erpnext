@@ -188,7 +188,7 @@ EmailMessage = function(parent, args, list, idx) {
 		);
 		
 		// show only first and last message
-		if(idx==-1 || list && list.values.length-1==idx) {
+		if(idx==-1 || list && list.data.length-1==idx) {
 			$ds(this.message)
 		}
 		
