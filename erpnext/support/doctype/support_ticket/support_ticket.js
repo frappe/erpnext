@@ -73,7 +73,7 @@ $.extend(cur_frm.cscript, {
 		cur_frm.fields_dict['Thread HTML'].wrapper.innerHTML = '';
 		
 		// render first message
-		new EmailMessage(cur_frm.fields_dict['Thread HTML'].wrapper, {
+		new EmailMessage($a(cur_frm.fields_dict['Thread HTML'].wrapper, 'div'), {
 			from_email: doc.raised_by,
 			creation: doc.creation,
 			mail: doc.description,
@@ -82,7 +82,7 @@ $.extend(cur_frm.cscript, {
 		
 		// render thread		
 		cs.thread_list = new wn.ui.Listing({
-			parent: cur_frm.fields_dict['Thread HTML'].wrapper,
+			parent: $a(cur_frm.fields_dict['Thread HTML'].wrapper, 'div'),
 			no_result_message: 'No responses yet',
 			get_query: function() {
 				return 'select mail, from_email, creation, content_type '+
