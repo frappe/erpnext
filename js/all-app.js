@@ -587,13 +587,13 @@ if(this.input.focus){try{this.input.focus();}catch(e){}}}
 if(this.txt){try{this.txt.focus();}catch(e){}
 this.txt.field_object=this;}}
 function DataField(){}DataField.prototype=new Field();DataField.prototype.make_input=function(){var me=this;this.input=$a_input(this.input_area,this.df.fieldtype=='Password'?'password':'text');this.get_value=function(){var v=this.input.value;if(this.validate)v=this.validate(v);return v;}
-this.input.name=this.df.fieldname;this.set_value=function(val){if(!me.last_value)me.last_value='';if(me.validate){val=me.validate(val);me.input.value=val;}
+this.input.name=this.df.fieldname;$(this.input).change(function(){me.set_value($(this).val());});this.set_value=function(val){if(!me.last_value)me.last_value='';if(me.validate){val=me.validate(val);me.input.value=val;}
 me.set(val);if(me.format_input)
 me.format_input();if(in_list(['Currency','Float','Int'],me.df.fieldtype)){if(flt(me.last_value)==flt(val)){me.last_value=val;return;}}
 me.last_value=val;me.run_trigger();}
 this.input.set_input=function(val){if(val==null)val='';me.input.value=val;if(me.format_input)me.format_input();}
 if(this.df.options=='Suggest'){if(this.suggest_icon)$di(this.suggest_icon);$(me.input).autocomplete({source:function(request,response){wn.call({method:'webnotes.widgets.search.search_link',args:{'txt':request.term,'dt':me.df.options,'query':repl('SELECT DISTINCT `%(fieldname)s` FROM \
-       `tab%(dt)s` WHERE `%(fieldname)s` LIKE "%s" LIMIT 50',{fieldname:me.df.fieldname,dt:me.df.parent})},callback:function(r){response(r.results);}});},select:function(event,ui){me.set_value(ui.item.value);return false;}});}}
+       `tab%(dt)s` WHERE `%(fieldname)s` LIKE "%s" LIMIT 50',{fieldname:me.df.fieldname,dt:me.df.parent})},callback:function(r){response(r.results);}});},select:function(event,ui){me.set_input_value(ui.item.value);return false;}});}}
 DataField.prototype.validate=function(v){if(this.df.options=='Phone'){if(v+''=='')return'';v1=''
 v=v.replace(/ /g,'').replace(/-/g,'').replace(/\(/g,'').replace(/\)/g,'');if(v&&v.substr(0,1)=='+'){v1='+';v=v.substr(1);}
 if(v&&v.substr(0,2)=='00'){v1+='00';v=v.substr(2);}
@@ -636,7 +636,6 @@ var fetch='';if(cur_frm.fetch_dict[me.df.fieldname])
 fetch=cur_frm.fetch_dict[me.df.fieldname].columns.join(', ');$c('webnotes.widgets.form.utils.validate_link',{'value':val,'options':me.df.options,'fetch':fetch},function(r,rt){if(selector&&selector.display)return;if(r.message=='Ok'){if(r.fetch_values)
 me.set_fetch_values(r.fetch_values);me.run_trigger();}else{var astr='';if(in_list(profile.can_create,me.df.options))astr=repl('<br><br><span class="link_type" onclick="newdoc(\'%(dt)s\')">Click here</span> to create a new %(dtl)s',{dt:me.df.options,dtl:get_doctype_label(me.df.options)})
 msgprint(repl('error:<b>%(val)s</b> is not a valid %(dt)s.<br><br>You must first create a new %(dt)s <b>%(val)s</b> and then select its value. To find an existing %(dt)s, click on the magnifying glass next to the field.%(add)s',{val:me.txt.value,dt:get_doctype_label(me.df.options),add:astr}));me.txt.value='';me.set('');}});}
-LinkField.prototype.set_onchange=function(){var me=this;$(me.txt).change(function(event){});}
 LinkField.prototype.set_fetch_values=function(fetch_values){var fl=cur_frm.fetch_dict[this.df.fieldname].fields;var changed_fields=[];for(var i=0;i<fl.length;i++){if(locals[this.doctype][this.docname][fl[i]]!=fetch_values[i]){locals[this.doctype][this.docname][fl[i]]=fetch_values[i];if(!this.grid){refresh_field(fl[i]);changed_fields.push(fl[i]);}}}
 for(i=0;i<changed_fields.length;i++){if(cur_frm.fields_dict[changed_fields[i]])
 cur_frm.fields_dict[changed_fields[i]].run_trigger();}
@@ -1028,7 +1027,7 @@ var docname=history_get_name(t);if(t[0]=='Form'){_history_current=newLocation;if
 /*
  *	lib/js/legacy/webpage/search.js
  */
-search_fields={};function setlinkvalue(name){selector.input.set_input(name);selector.hide();}
+search_fields={};function setlinkvalue(name){selector.input.set_input_value(name);selector.hide();}
 function makeselector(){var d=new Dialog(540,440,'Search');d.make_body([['Data','Beginning With','Tip: You can use wildcard "%"'],['Select','Search By'],['Button','Search'],['HTML','Help'],['HTML','Result']]);var inp=d.widgets['Beginning With'];var field_sel=d.widgets['Search By'];var btn=d.widgets['Search'];d.sel_type='';d.values_len=0;d.set=function(input,type,label){d.sel_type=type;d.input=input;if(d.style!='Link'){d.rows['Result'].innerHTML='';d.values_len=0;}
 d.style='Link';d.set_query_description()
 if(!d.sel_type)d.sel_type='Value';d.set_title('Select a "'+d.sel_type+'" for field "'+label+'"');}
@@ -1042,8 +1041,7 @@ inp.value='';if(d.input&&d.input.txt.value){inp.value=d.input.txt.value;}
 try{inp.focus();}catch(e){}
 if(d.input)d.input.set_get_query();var get_sf_list=function(dt){var l=[];var lf=search_fields[dt];for(var i=0;i<lf.length;i++)l.push(lf[i][1]);return l;}
 $ds(d.rows['Search By']);if(search_fields[d.sel_type]){empty_select(field_sel);add_sel_options(field_sel,get_sf_list(d.sel_type),'ID');}else{empty_select(field_sel);add_sel_options(field_sel,['ID'],'ID');$c('webnotes.widgets.search.getsearchfields',{'doctype':d.sel_type},function(r,rt){search_fields[d.sel_type]=r.searchfields;empty_select(field_sel);add_sel_options(field_sel,get_sf_list(d.sel_type));field_sel.selectedIndex=0;});}}
-d.onhide=function(){if(d.input&&d.input.txt)
-d.input.txt.onchange()}
+d.onhide=function(){}
 btn.onclick=function(){if(this.disabled)return;this.args.is_ajax=true;this.set_working();d.set_doctype=d.sel_type;var q='';args={};if(d.input&&d.input.get_query){var doc={};args.is_simple=1;if(cur_frm)doc=locals[cur_frm.doctype][cur_frm.docname];var q=d.input.get_query(doc,d.input.doctype,d.input.docname);if(!q){return'';}}
 var get_sf_fieldname=function(v){var lf=search_fields[d.sel_type];if(!lf)
 return'name'
@@ -1435,13 +1433,13 @@ if(this.input.focus){try{this.input.focus();}catch(e){}}}
 if(this.txt){try{this.txt.focus();}catch(e){}
 this.txt.field_object=this;}}
 function DataField(){}DataField.prototype=new Field();DataField.prototype.make_input=function(){var me=this;this.input=$a_input(this.input_area,this.df.fieldtype=='Password'?'password':'text');this.get_value=function(){var v=this.input.value;if(this.validate)v=this.validate(v);return v;}
-this.input.name=this.df.fieldname;this.set_value=function(val){if(!me.last_value)me.last_value='';if(me.validate){val=me.validate(val);me.input.value=val;}
+this.input.name=this.df.fieldname;$(this.input).change(function(){me.set_value($(this).val());});this.set_value=function(val){if(!me.last_value)me.last_value='';if(me.validate){val=me.validate(val);me.input.value=val;}
 me.set(val);if(me.format_input)
 me.format_input();if(in_list(['Currency','Float','Int'],me.df.fieldtype)){if(flt(me.last_value)==flt(val)){me.last_value=val;return;}}
 me.last_value=val;me.run_trigger();}
 this.input.set_input=function(val){if(val==null)val='';me.input.value=val;if(me.format_input)me.format_input();}
 if(this.df.options=='Suggest'){if(this.suggest_icon)$di(this.suggest_icon);$(me.input).autocomplete({source:function(request,response){wn.call({method:'webnotes.widgets.search.search_link',args:{'txt':request.term,'dt':me.df.options,'query':repl('SELECT DISTINCT `%(fieldname)s` FROM \
-       `tab%(dt)s` WHERE `%(fieldname)s` LIKE "%s" LIMIT 50',{fieldname:me.df.fieldname,dt:me.df.parent})},callback:function(r){response(r.results);}});},select:function(event,ui){me.set_value(ui.item.value);return false;}});}}
+       `tab%(dt)s` WHERE `%(fieldname)s` LIKE "%s" LIMIT 50',{fieldname:me.df.fieldname,dt:me.df.parent})},callback:function(r){response(r.results);}});},select:function(event,ui){me.set_input_value(ui.item.value);return false;}});}}
 DataField.prototype.validate=function(v){if(this.df.options=='Phone'){if(v+''=='')return'';v1=''
 v=v.replace(/ /g,'').replace(/-/g,'').replace(/\(/g,'').replace(/\)/g,'');if(v&&v.substr(0,1)=='+'){v1='+';v=v.substr(1);}
 if(v&&v.substr(0,2)=='00'){v1+='00';v=v.substr(2);}
@@ -1484,7 +1482,6 @@ var fetch='';if(cur_frm.fetch_dict[me.df.fieldname])
 fetch=cur_frm.fetch_dict[me.df.fieldname].columns.join(', ');$c('webnotes.widgets.form.utils.validate_link',{'value':val,'options':me.df.options,'fetch':fetch},function(r,rt){if(selector&&selector.display)return;if(r.message=='Ok'){if(r.fetch_values)
 me.set_fetch_values(r.fetch_values);me.run_trigger();}else{var astr='';if(in_list(profile.can_create,me.df.options))astr=repl('<br><br><span class="link_type" onclick="newdoc(\'%(dt)s\')">Click here</span> to create a new %(dtl)s',{dt:me.df.options,dtl:get_doctype_label(me.df.options)})
 msgprint(repl('error:<b>%(val)s</b> is not a valid %(dt)s.<br><br>You must first create a new %(dt)s <b>%(val)s</b> and then select its value. To find an existing %(dt)s, click on the magnifying glass next to the field.%(add)s',{val:me.txt.value,dt:get_doctype_label(me.df.options),add:astr}));me.txt.value='';me.set('');}});}
-LinkField.prototype.set_onchange=function(){var me=this;$(me.txt).change(function(event){});}
 LinkField.prototype.set_fetch_values=function(fetch_values){var fl=cur_frm.fetch_dict[this.df.fieldname].fields;var changed_fields=[];for(var i=0;i<fl.length;i++){if(locals[this.doctype][this.docname][fl[i]]!=fetch_values[i]){locals[this.doctype][this.docname][fl[i]]=fetch_values[i];if(!this.grid){refresh_field(fl[i]);changed_fields.push(fl[i]);}}}
 for(i=0;i<changed_fields.length;i++){if(cur_frm.fields_dict[changed_fields[i]])
 cur_frm.fields_dict[changed_fields[i]].run_trigger();}
