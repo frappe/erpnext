@@ -1,7 +1,8 @@
 
 /*
  *	lib/css/legacy/body.css
- */html { 
+ */
+html { 
 	margin: 0px;
 	padding: 0px;
 }
@@ -239,9 +240,11 @@ div.std-footer-item {
 	margin-bottom: -7px;
 	max-width: 24px;
 }
+
 /*
  *	lib/css/legacy/messages.css
  */
+
 /* FLOATING MESSAGE */
 
 .btn-img { cursor: pointer; }
@@ -290,9 +293,11 @@ div.notice {
 	text-align: center;
 	font-size: 14px;
 }
+
 /*
  *	lib/css/legacy/dialog.css
- *//***** Dialogs *******/
+ */
+/***** Dialogs *******/
 
 div.dialog_wrapper {
 	position: absolute;
@@ -370,9 +375,11 @@ div.dialog_row table td textarea {
 	font-size: 12px;
 }
 
+
 /*
  *	lib/css/bootstrap/headings.css
- *//* heading from bootstrap */
+ */
+/* heading from bootstrap */
 
 h1,
 h2,
@@ -433,9 +440,11 @@ h6 {
   color: #999999;
   text-transform: uppercase;
 }
+
 /*
  *	lib/css/bootstrap/buttons.css
- */.close {
+ */
+.close {
   float: right;
   font-size: 20px;
   font-weight: bold;
@@ -818,9 +827,11 @@ button.btn.small, input[type="submit"].btn.small {
 .btn-small .caret {
   margin-top: 4px;
 }
+
 /*
  *	lib/css/bootstrap/navbar.css
- */.nav {
+ */
+.nav {
   margin-left: 0;
   margin-bottom: 18px;
   list-style: none;
@@ -1286,9 +1297,11 @@ button.btn.small, input[type="submit"].btn.small {
 	padding: 0px 20px;
 }
 
+
 /*
  *	lib/css/bootstrap/dropdown.css
- */.dropdown {
+ */
+.dropdown {
   position: relative;
 }
 .dropdown-toggle {
@@ -1388,9 +1401,11 @@ button.btn.small, input[type="submit"].btn.small {
 .dropdown.open .dropdown-menu {
   display: block;
 }
+
 /*
  *	lib/css/bootstrap/tooltip.css
- */.tooltip {
+ */
+.tooltip {
   position: absolute;
   z-index: 1020;
   display: block;
@@ -1556,9 +1571,11 @@ button.btn.small, input[type="submit"].btn.small {
 .popover-content p, .popover-content ul, .popover-content ol {
   margin-bottom: 0;
 }
+
 /*
  *	erpnext/startup/startup.css
- */h1, h2, h3, h4, h5 {
+ */
+h1, h2, h3, h4, h5 {
 	font-family: Tahoma, Arial, Verdana, sans-serif;
 	font-weight: bold;
 }
@@ -1643,9 +1660,11 @@ body {
 	max-width: 260px !important;
 }
 
+
 /*
  *	erpnext/website/css/website.css
- */.layout_wrapper {
+ */
+.layout_wrapper {
 	padding: 20px;
 }
 
