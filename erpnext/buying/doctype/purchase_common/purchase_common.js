@@ -162,7 +162,7 @@ cur_frm.cscript.conversion_rate = function(doc,cdt,cdn) {
 //==================== Item Code Get Query =======================================================
 // Only Is Purchase Item = 'Yes' and Items not moved to trash are allowed.
 cur_frm.fields_dict[fname].grid.get_field("item_code").get_query = function(doc, cdt, cdn) {
-	return 'SELECT tabItem.name, tabItem.description FROM tabItem WHERE tabItem.is_purchase_item="Yes" AND (IFNULL(`tabItem`.`end_of_life`,"") = "" OR `tabItem`.`end_of_life` ="0000-00-00" OR `tabItem`.`end_of_life` > NOW()) AND tabItem.%(key)s LIKE "%s" LIMIT 50'
+	return 'SELECT tabItem.name, tabItem.description FROM tabItem WHERE (ifnull(tabItem.is_purchase_item, "No")="Yes" or ifnull(tabItem.is_sub_contracted_item, "No")="Yes") AND (IFNULL(`tabItem`.`end_of_life`,"") = "" OR `tabItem`.`end_of_life` ="0000-00-00" OR `tabItem`.`end_of_life` > NOW()) AND tabItem.%(key)s LIKE "%s" LIMIT 50'
 }
 
 //==================== Get Item Code Details =====================================================
@@ -358,17 +358,17 @@ cur_frm.cscript.calc_amount = function(doc, n) {
 			set_multiple(tname, cl[i].name, {'import_rate': flt(flt(cl[i][rate_fld]) / flt(doc.conversion_rate))}, fname); 
 			set_multiple(tname, cl[i].name, {'import_amount': flt(flt(cl[i].qty) *	flt(cl[i][rate_fld]) / flt(doc.conversion_rate))}, fname);
 
-		}else if( n==4){		
+		}else if( n==4){
 
 		set_multiple(tname, cl[i].name, {'import_ref_rate': flt(flt(cl[i].purchase_ref_rate) / flt(doc.conversion_rate))}, fname);
 
 			tmp[rate_fld] = flt( flt(cl[i].purchase_ref_rate) - flt(flt(cl[i].purchase_ref_rate)*flt(cl[i].discount_rate)/100) )
 		set_multiple(tname, cl[i].name, tmp, fname);
-
+		msgprint(cl[i][rate_fld])
 		set_multiple(tname, cl[i].name, {'import_rate': flt(flt(cl[i][rate_fld]) / flt(doc.conversion_rate))}, fname); 
 		set_multiple(tname, cl[i].name, {'amount':flt(flt(cl[i].qty) * flt(cl[i][rate_fld]))}, fname);
 		set_multiple(tname, cl[i].name, {'import_amount': flt(flt(cl[i].qty) *	flt(cl[i][rate_fld]) / flt(doc.conversion_rate))}, fname); 
-
+		msgprint(cl[i]['amount'])
 	}else if( n==5){	
 		tmp[rate_fld] = flt( flt(cl[i].import_ref_rate) - flt(flt(cl[i].import_ref_rate)*flt(cl[i].discount_rate)/100) ) * flt(doc.conversion_rate);
 		set_multiple(tname, cl[i].name, {'purchase_ref_rate': flt(flt(cl[i].import_ref_rate) * flt(doc.conversion_rate))}, fname);
