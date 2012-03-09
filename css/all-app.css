@@ -1577,6 +1577,11 @@ div.list-row:hover {
 	background-color: #eef
 }
 
+div.paging-button {
+	text-align: center;
+	padding: 11px 0px;
+}
+
 div.show_filters {
 	display: none;
 }

@@ -108,12 +108,19 @@ cur_frm.cscript.customer = function(doc,dt,dn) {
 			cur_frm.refresh();
 	}
 
-	if(doc.customer) $c_obj(make_doclist(doc.doctype, doc.name), 'get_default_customer_address', '', callback);
-	if(doc.customer) unhide_field(['customer_address','contact_person','customer_name','address_display','contact_display','contact_mobile','contact_email','territory','customer_group']);
+	if(doc.customer) $c_obj(make_doclist(doc.doctype, doc.name), 
+		'get_default_customer_address', '', callback);
+	if(doc.customer) unhide_field(['customer_address','contact_person','customer_name',
+		'address_display','contact_display','contact_mobile','contact_email','territory',
+		'customer_group']);
 }
 
 cur_frm.cscript.customer_address = cur_frm.cscript.contact_person = function(doc,dt,dn) {
-	if(doc.customer) get_server_fields('get_customer_address', JSON.stringify({customer: doc.customer, address: doc.customer_address, contact: doc.contact_person}),'', doc, dt, dn, 1);
+	if(doc.customer) get_server_fields('get_customer_address', JSON.stringify({
+		customer: doc.customer, 
+		address: doc.customer_address, 
+		contact: doc.contact_person
+	}),'', doc, dt, dn, 1);
 }
 
 cur_frm.fields_dict.customer_address.on_new = function(dn) {
