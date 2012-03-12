@@ -5,14 +5,14 @@
 	{
 		'creation': '2010-08-08 17:09:14',
 		'docstatus': 0,
-		'modified': '2012-03-12 14:25:08',
+		'modified': '2012-03-12 16:07:48',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': u'1331542439',
+		'_last_update': u'1331542508',
 		'allow_attach': 1,
 		'allow_trash': 1,
 		'autoname': u'field:project_name',
@@ -29,7 +29,7 @@
 		'show_in_menu': 0,
 		'subject': u' ',
 		'tag_fields': u'status',
-		'version': 37
+		'version': 38
 	},
 
 	# These values are common for all DocField
@@ -461,11 +461,14 @@
 
 	# DocField
 	{
+		'colour': u'White:FFF',
 		'doctype': u'DocField',
 		'fieldname': u'file_list',
 		'fieldtype': u'Small Text',
+		'hidden': 1,
 		'label': u'File List',
 		'no_copy': 1,
-		'permlevel': 0
+		'permlevel': 0,
+		'print_hide': 1
 	}
 ]
