@@ -21,7 +21,7 @@ def execute():
 		* Reload email_digest doctype
 		* Create default email digest
 	"""
-	from webnotes.modules.module_manager import reload_doc
+	from webnotes.modules import reload_doc
 	
 	# Minor fix in print_format doctype
 	#reload_doc('core', 'doctype', 'print_format')

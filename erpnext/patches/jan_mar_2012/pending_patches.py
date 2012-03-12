@@ -17,7 +17,7 @@
 def execute():
 	import webnotes
 	from webnotes.model.code import get_obj
-	from webnotes.modules.module_manager import reload_doc
+	from webnotes.modules import reload_doc
 	sql = webnotes.conn.sql
 
 	reload_doc('hr', 'doctype', 'appraisal')

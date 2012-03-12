@@ -24,7 +24,7 @@ last_patch = 388
 def execute(patch_no):
 	return
 	import webnotes
-	from webnotes.modules.module_manager import reload_doc
+	from webnotes.modules import reload_doc
 
 	from webnotes.model.code import get_obj
 	sql = webnotes.conn.sql
@@ -377,7 +377,7 @@ def execute(patch_no):
 	elif patch_no == 370:
 		sql("update `tabDocField` set `hidden` = 0 where fieldname = 'group_or_ledger' and parent = 'Cost Center'")
 	elif patch_no == 371:
-		from webnotes.modules.module_manager import reload_doc
+		from webnotes.modules import reload_doc
 
 		reload_doc('setup', 'doctype','features_setup')
 		flds = ['page_break', 'projects', 'packing_details', 'discounts', 'brands', 'item_batch_nos', 'after_sales_installations', 'item_searial_nos', 'item_group_in_details', 'exports', 'imports', 'item_advanced', 'sales_extras', 'more_info', 'quality', 'manufacturing', 'pos', 'item_serial_nos']
@@ -393,7 +393,7 @@ def execute(patch_no):
 
 		get_obj('Features Setup', 'Features Setup').doc.save()
 	elif patch_no == 372:
-		from webnotes.modules.module_manager import reload_doc
+		from webnotes.modules import reload_doc
 
 		reload_doc('setup', 'doctype','features_setup')
 		flds = ['page_break', 'projects', 'packing_details', 'discounts', 'brands', 'item_batch_nos', 'after_sales_installations', 'item_searial_nos', 'item_group_in_details', 'exports', 'imports', 'item_advanced', 'sales_extras', 'more_info', 'quality', 'manufacturing', 'pos', 'item_serial_nos']

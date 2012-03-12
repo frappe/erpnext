@@ -16,7 +16,7 @@
 
 def execute():
 	import webnotes
-	from webnotes.modules.module_manager import reload_doc
+	from webnotes.modules import reload_doc
 	reload_doc('stock', 'doctype', 'delivery_note_detail')
 	reload_doc('stock', 'Print Format', 'Delivery Note Packing List Wise')
 	
