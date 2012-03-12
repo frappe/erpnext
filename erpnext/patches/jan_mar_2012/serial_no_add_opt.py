@@ -30,5 +30,5 @@ def execute():
 			webnotes.conn.commit()
 			webnotes.conn.begin()
 
-	from webnotes.modules.module_manager import reload_doc
+	from webnotes.modules import reload_doc
 	reload_doc('stock', 'doctype', 'serial_no')

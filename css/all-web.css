@@ -26,12 +26,15 @@ label {
 }
 
 select, input, textarea { 
-	border: 1px solid #AAA; 
+	border: 1px solid #ccc; 
 	-moz-border-radius: 4px;
 	-webkit-border-radius: 4px;
 	font-size: 13px;
 	padding: 4px;
-	color: #222;
+	color: #444;
+	-webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+	-moz-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+	box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
 }
 
 textarea { 

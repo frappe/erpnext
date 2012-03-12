@@ -15,7 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import webnotes
-from webnotes.modules.module_manager import reload_doc
+from webnotes.modules import reload_doc
 	
 def execute():
 	"""

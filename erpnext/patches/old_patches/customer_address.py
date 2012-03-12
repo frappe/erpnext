@@ -21,7 +21,7 @@ from webnotes.utils import load_json, cint, cstr
 from webnotes import msgprint, errprint
 
 def make_address():
-	from webnotes.modules.module_manager import reload_doc
+	from webnotes.modules import reload_doc
 	reload_doc('utilities','doctype','address')
 	
 	from webnotes.model.db_schema import updatedb
@@ -128,7 +128,7 @@ def delete_unwanted_fields():
 #		export_to_files(record_list=[['DocType',dt]])
 
 def reload_doc_files():
-	from webnotes.modules.module_manager import reload_doc	
+	from webnotes.modules import reload_doc	
 	reload_doc('utilities', 'doctype', 'contact')
 	reload_doc('selling', 'doctype', 'customer')
 	reload_doc('support', 'doctype', 'customer_issue')
@@ -149,7 +149,7 @@ def reload_doc_files():
 	reload_doc('buying', 'doctype', 'supplier')
 	
 def reload_mapper_files():
-	from webnotes.modules.module_manager import reload_doc	
+	from webnotes.modules import reload_doc	
 	reload_doc('Mapper', 'DocType Mapper', 'Customer Issue-Maintenance Visit')
 	reload_doc('Mapper', 'DocType Mapper', 'Delivery Note-Installation Note')
 	reload_doc('Mapper', 'DocType Mapper', 'Delivery Note-Receivable Voucher')

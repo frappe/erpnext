@@ -110,7 +110,7 @@ def set_subjects_and_tagfields():
 def support_patch():
 	# relaod support and other doctypes
 	
-	from webnotes.modules.module_manager import reload_doc
+	from webnotes.modules import reload_doc
 	
 	webnotes.model.delete_doc('DocType','Support Ticket')
 	reload_doc('setup','doctype','support_email_settings')

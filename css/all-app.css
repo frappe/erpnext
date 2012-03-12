@@ -26,12 +26,15 @@ label {
 }
 
 select, input, textarea { 
-	border: 1px solid #AAA; 
+	border: 1px solid #ccc; 
 	-moz-border-radius: 4px;
 	-webkit-border-radius: 4px;
 	font-size: 13px;
 	padding: 4px;
-	color: #222;
+	color: #444;
+	-webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+	-moz-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+	box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
 }
 
 textarea { 
@@ -299,6 +302,18 @@ div.notice {
  */
 /* FORMS */
 
+div.form-section-break {
+	margin: 15px 0px 3px 0px;
+}
+
+div.form-section-break h3 {
+	line-height: 20px;
+}
+
+div.form-section-break hr {
+	margin: 9px 0px;
+}
+
 
 div.frm_print_wrapper {
 	background-color:#FFF;
@@ -442,9 +457,9 @@ div.time_field select{
 
 
 .field_description, .help {
-	margin: 3px 0px 11px 0px;
+	margin: 3px 0px;
+	font-size: 11px;
 	color: #888;
-	font-style: italic;
 }
 
 .field_description_top {

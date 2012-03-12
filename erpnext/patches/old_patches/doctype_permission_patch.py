@@ -21,7 +21,7 @@ def set_doctype_permissions():
 	# remove descriptions
 	webnotes.conn.sql("update tabDocType set description=null")
 		
-	from webnotes.modules.module_manager import reload_doc
+	from webnotes.modules import reload_doc
 	reload_doc('core','doctype','custom_script')
 	reload_doc('core','doctype','custom_field')
 	reload_doc('core','doctype','property_setter')

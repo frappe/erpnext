@@ -47,7 +47,7 @@ def reload_related_doctype():
 		* purchase_order
 		* po_detail
 	"""
-	from webnotes.modules.module_manager import reload_doc
+	from webnotes.modules import reload_doc
 	reload_doc('buying', 'doctype', 'indent')
 	reload_doc('buying', 'doctype', 'purchase_order')
 	reload_doc('buying', 'doctype', 'po_detail')

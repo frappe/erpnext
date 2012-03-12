@@ -100,14 +100,14 @@ var set_dynamic_label_par = function(doc, cdt, cdn, base_curr) {
 		'grand_total':	'Grand Total', 'rounded_total': 'Rounded Total', 'in_words': 'In Words'}
 	par_cols_export = {'grand_total_export': 'Grand Total', 'rounded_total_export':	'Rounded Total', 'in_words_export':	'In Words'};
 
-	for (d in par_cols_base) cur_frm.fields_dict[d].label_area.innerHTML = par_cols_base[d]+' (' + base_curr + ')';
-	for (d in par_cols_export) cur_frm.fields_dict[d].label_area.innerHTML = par_cols_export[d]+' (' + doc.currency + ')';
-	cur_frm.fields_dict['conversion_rate'].label_area.innerHTML = "Conversion Rate (" + doc.currency +' -> '+ base_curr + ')';
-	cur_frm.fields_dict['plc_conversion_rate'].label_area.innerHTML = 'Price List Currency Conversion Rate (' + doc.price_list_currency +' -> '+ base_curr + ')';
+	for (d in par_cols_base) cur_frm.fields_dict[d].label_span.innerHTML = par_cols_base[d]+' (' + base_curr + ')';
+	for (d in par_cols_export) cur_frm.fields_dict[d].label_span.innerHTML = par_cols_export[d]+' (' + doc.currency + ')';
+	cur_frm.fields_dict['conversion_rate'].label_span.innerHTML = "Conversion Rate (" + doc.currency +' -> '+ base_curr + ')';
+	cur_frm.fields_dict['plc_conversion_rate'].label_span.innerHTML = 'Price List Currency Conversion Rate (' + doc.price_list_currency +' -> '+ base_curr + ')';
 
 	if (doc.doctype == 'Receivable Voucher') {
-		cur_frm.fields_dict['total_advance'].label_area.innerHTML = 'Total Advance (' + base_curr + ')';
-		cur_frm.fields_dict['outstanding_amount'].label_area.innerHTML = 'Outstanding Amount (' + base_curr + ')';
+		cur_frm.fields_dict['total_advance'].label_span.innerHTML = 'Total Advance (' + base_curr + ')';
+		cur_frm.fields_dict['outstanding_amount'].label_span.innerHTML = 'Outstanding Amount (' + base_curr + ')';
 	}
 }
 

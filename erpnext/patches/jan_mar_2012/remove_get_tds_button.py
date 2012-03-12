@@ -26,5 +26,5 @@ def execute():
 		AND fieldtype='Button'
 	""")
 
-	from webnotes.modules.module_manager import reload_doc
+	from webnotes.modules import reload_doc
 	reload_doc('accounts', 'doctype', 'journal_voucher')

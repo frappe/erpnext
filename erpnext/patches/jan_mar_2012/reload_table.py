@@ -1,6 +1,6 @@
 def execute():
 	import webnotes
-	from webnotes.modules.module_manager import reload_doc
+	from webnotes.modules import reload_doc
 	reload_doc('selling', 'doctype', 'quotation_detail')
 	reload_doc('selling', 'doctype', 'sales_order_detail')
 	reload_doc('stock', 'doctype', 'delivery_note_detail')
