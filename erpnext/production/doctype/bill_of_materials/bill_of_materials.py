@@ -91,14 +91,12 @@ class DocType:
 
 		arg = eval(arg)
 		item = self.get_item_det(arg['item_code'])
-
 		self.validate_rm_item(item)
 		
 		arg['bom_no'] = arg['bom_no'] or item and cstr(item[0]['default_bom']) or ''
 		arg.update(item[0])
 
 		rate = self.get_rm_rate(arg)
-
 		ret_item = {
 					 'description'  : item and arg['description'] or '',
 					 'stock_uom'	: item and arg['stock_uom'] or '',
@@ -209,11 +207,11 @@ class DocType:
 		"""Fetch RM rate as per today's valuation rate and calculate totals"""
 		total_rm_cost = 0
 		for d in getlist(self.doclist, 'bom_materials'):
-			if self.doc.rm_cost_as_per == 'Valuation Rate':
-				arg = {'item_code': d.item_code, 'qty': d.qty, 'bom_no': d.bom_no}
-				ret = self.get_bom_material_detail(cstr(arg))
-				for k in ret:
-					d.fields[k] = ret[k]
+			#if self.doc.rm_cost_as_per == 'Valuation Rate':
+			arg = {'item_code': d.item_code, 'qty': d.qty, 'bom_no': d.bom_no}
+			ret = self.get_bom_material_detail(cstr(arg))
+			for k in ret:
+				d.fields[k] = ret[k]
 
 			d.amount = flt(d.rate) * flt(d.qty)
 			total_rm_cost += d.amount
