@@ -303,7 +303,13 @@ div.notice {
 /* FORMS */
 
 div.form-section-head {
-	margin: 15px 0px 3px 0px;
+	margin: 11px 0px 3px 0px;
+	border-top: 1px solid #ccc;
+	padding-top: 11px;
+}
+
+div.form-layout-row:first-child .form-section-head {
+	border-top: 0px solid #ccc !important;	
 }
 
 div.form-section-head h3 {
