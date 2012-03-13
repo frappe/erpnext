@@ -302,15 +302,15 @@ div.notice {
  */
 /* FORMS */
 
-div.form-section-break {
+div.form-section-head {
 	margin: 15px 0px 3px 0px;
 }
 
-div.form-section-break h3 {
+div.form-section-head h3 {
 	line-height: 20px;
 }
 
-div.form-section-break hr {
+div.form-section-head hr {
 	margin: 9px 0px;
 }
 
@@ -460,6 +460,10 @@ div.time_field select{
 	margin: 3px 0px;
 	font-size: 11px;
 	color: #888;
+}
+
+.help ol {
+	padding-left: 19px;
 }
 
 .field_description_top {

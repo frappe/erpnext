@@ -439,7 +439,7 @@ Field.prototype.set_description=function(){if(this.df.description){var p=in_list
 if(in_list(['Text Editor','Code'],this.df.fieldtype))
 $(this.desc_area).addClass('field_description_top');}}
 Field.prototype.get_status=function(){if(this.in_filter)this.not_in_form=this.in_filter;if(this.not_in_form){return'Write';}
-var fn=this.df.fieldname?this.df.fieldname:this.df.label;this.df=get_field(this.doctype,fn,this.docname);if(!this.df.permlevel)this.df.permlevel=0;var p=this.perm[this.df.permlevel];var ret;if(cur_frm.editable&&p&&p[WRITE])ret='Write';else if(p&&p[READ])ret='Read';else ret='None';if(this.df.fieldtype=='Binary')
+if(!this.df.permlevel)this.df.permlevel=0;var p=this.perm[this.df.permlevel];var ret;if(cur_frm.editable&&p&&p[WRITE])ret='Write';else if(p&&p[READ])ret='Read';else ret='None';if(this.df.fieldtype=='Binary')
 ret='None';if(cint(this.df.hidden))
 ret='None';if(ret=='Write'&&cint(cur_frm.doc.docstatus)>0)ret='Read';var a_o_s=cint(this.df.allow_on_submit);if(a_o_s&&(this.in_grid||(this.frm&&this.frm.not_in_container))){a_o_s=null;if(this.in_grid)a_o_s=this.grid.field.df.allow_on_submit;if(this.frm&&this.frm.not_in_container){a_o_s=cur_grid.field.df.allow_on_submit;}}
 if(cur_frm.editable&&a_o_s&&cint(cur_frm.doc.docstatus)>0&&!this.df.hidden){tmp_perm=get_perm(cur_frm.doctype,cur_frm.docname,1);if(tmp_perm[this.df.permlevel]&&tmp_perm[this.df.permlevel][WRITE])ret='Write';}
@@ -726,11 +726,11 @@ $.extend(this,this.opts);this.prepare_opts();$(this.parent).html(repl('\
     </div>\
    </div>\
   ',this.opts));this.$w=$(this.parent).find('.wnlist');this.set_events();this.make_filters();},show_view:function($btn,$div,$btn_unsel,$div_unsel){$btn_unsel.removeClass('btn-info');$btn_unsel.find('i').removeClass('icon-white');$div_unsel.toggle(false);$btn.addClass('btn-info');$btn.find('i').addClass('icon-white');$div.toggle(true);},set_events:function(){var me=this;this.$w.find('.btn-refresh').click(function(){me.run();});this.$w.find('.btn-more').click(function(){me.run({append:true});});this.$w.find('.btn-list').click(function(){me.show_view($(this),me.$w.find('.result-list'),me.$w.find('.btn-grid'),me.$w.find('.result-grid'))});this.$w.find('.btn-grid').click(function(){me.show_view($(this),me.$w.find('.result-grid'),me.$w.find('.btn-list'),me.$w.find('.result-list'))});if(this.title){this.$w.find('h3').html(this.title).toggle(true);}
-if(this.new_doctype){this.$w.find('.btn-new').toggle(true).click(function(){newdoc(me.new_doctype);})}else{this.$w.find('.btn-new').toggle(false).attr('hidden','hidden');}
-if(!me.show_filters){this.$w.find('.btn-filter').toggle(false).attr('hidden','hidden');}
-if(this.hide_refresh||this.no_refresh){this.$w.find('.btn-refresh').toggle(false).attr('hidden','hidden');}
+if(this.new_doctype){this.$w.find('.btn-new').toggle(true).click(function(){newdoc(me.new_doctype,me.new_doc_onload,true,me.new_doc_onsave);})}else{this.$w.find('.btn-new').remove();}
+if(!me.show_filters){this.$w.find('.btn-filter').remove();}
+if(this.hide_refresh||this.no_refresh){this.$w.find('.btn-refresh').remove();}
 if(this.show_grid){this.$w.find('.select-view').toggle(true);}
-if(this.$w.find('.list-toolbar a[hidden!="hidden"]').length>1){this.$w.find('.list-toolbar').addClass('btn-group')}
+if(this.$w.find('.list-toolbar a').length>1){this.$w.find('.list-toolbar').addClass('btn-group')}
 if(this.$w.find('.list-toolbar a[hidden!="hidden"]').length==0){this.$w.find('.list-toolbar-wrapper').toggle(false);}},make_filters:function(){this.filter_list=new wn.ui.FilterList({listobj:this,$parent:this.$w.find('.list-filters').toggle(true),doctype:this.doctype,filter_fields:this.filter_fields});},clear:function(){this.data=[];this.$w.find('.result-list').empty();this.$w.find('.result').toggle(true);this.$w.find('.no-result').toggle(false);this.start=0;},run:function(){var me=this;var a0=arguments[0];var a1=arguments[1];if(a0&&typeof a0=='function')
 this.onrun=a0;if(a0&&a0.callback)
 this.onrun=a0.callback;if(!a1&&!(a0&&a0.append))
@@ -784,7 +784,7 @@ Layout.prototype.setcolour=function(col){$bg(cc,col);}
 Layout.prototype.show=function(){$ds(this.wrapper);}
 Layout.prototype.hide=function(){$dh(this.wrapper);}
 Layout.prototype.close_borders=function(){if(this.with_border){this.myrows[this.myrows.length-1].wrapper.style.borderBottom='1px solid #000';}}
-function LayoutRow(layout,parent){this.layout=layout;this.wrapper=$a(parent,'div');this.main_head=$a(this.wrapper,'div');this.main_body=$a(this.wrapper,'div');if(layout.with_border){this.wrapper.style.border='1px solid #000';this.wrapper.style.borderBottom='0px';}
+function LayoutRow(layout,parent){this.layout=layout;this.wrapper=$a(parent,'div','form-layout-row');this.main_head=$a(this.wrapper,'div');this.main_body=$a(this.wrapper,'div');if(layout.with_border){this.wrapper.style.border='1px solid #000';this.wrapper.style.borderBottom='0px';}
 this.header=$a(this.main_body,'div','',{padding:(layout.with_border?'0px 8px':'0px')});this.body=$a(this.main_body,'div');this.table=$a(this.body,'table','',{width:'100%',borderCollapse:'collapse'});this.row=this.table.insertRow(0);this.mycells=[];}
 LayoutRow.prototype.hide=function(){$dh(this.wrapper);}
 LayoutRow.prototype.show=function(){$ds(this.wrapper);}
@@ -920,8 +920,6 @@ if(get_local('Page',page_name)||wn.pages[page_name])
 fn();else{args=get_url_dict();args.name=page_name;$c('webnotes.widgets.page.getpage',args,fn);}}
 pscript.update_page_history=function(page_name,no_history){var arg=null;var t=null;if(window.location.hash){var t=nav_obj.get_page(window.location.hash)}else if(get_url_arg('page')){var t=nav_obj.get_page(get_url_arg('page'))}
 if(t&&t[1]==page_name)arg=t[2];nav_obj.open_notify('Page',page_name,arg,no_history);}
-function loadscript(src,call_back){set_loading();var script=$a('head','script');script.type='text/javascript';script.src=src;script.onload=function(){if(call_back)call_back();hide_loading();}
-script.onreadystatechange=function(){if(this.readyState=='complete'||this.readyState=='loaded'){hide_loading();call_back();}}}
 var doc_browser_page;function loaddocbrowser(dt,label,fields){wn.require('lib/js/legacy/webpage/docbrowser.js');dt=get_label_doctype(dt);if(!doc_browser_page)
 doc_browser_page=new ItemBrowserPage();doc_browser_page.show(dt,label,fields);nav_obj.open_notify('List',dt,'');}
 function loaddocbrowser2(dt,label,fields){wn.pages.doclistview.show(dt);return;}

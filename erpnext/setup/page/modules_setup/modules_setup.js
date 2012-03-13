@@ -1,4 +1,4 @@
-wn.require('lib/js/lib/jquery-ui-sortable.min.js');
+wn.require('lib/js/lib/jquery/jquery.ui.sortable.js');
 
 $.extend(wn.pages.modules_setup, {
 	modules: ['Activity', 'Accounts', 'Selling', 'Buying', 'Stock', 'Production', 'Projects', 
