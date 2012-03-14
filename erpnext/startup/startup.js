@@ -110,20 +110,29 @@ var update_messages = function(reset) {
 	if(inList(['Guest'], user)) { return; }
 
 	if(!reset) {
-		$c_page('home', 'event_updates', 'get_unread_messages', null,
+		$c_page('home', 'event_updates', 'get_global_status_messages', null,
 			function(r,rt) {
 				if(!r.exc) {
 					// This function is defined in toolbar.js
-					page_body.wntoolbar.set_new_comments(r.message);
-					var circle = $('#msg_count')
-					if(circle) {
-						if(r.message.length) {
-							circle.find('span:first').text(r.message.length);
-							circle.toggle(true);
-						} else {
-							circle.toggle(false);
+					page_body.wntoolbar.set_new_comments(r.message.unread_messages);
+					
+					var show_in_circle = function(parent_id, msg) {
+						var parent = $('#'+parent_id);
+						if(parent) {
+							if(msg) {
+								parent.find('span:first').text(msg);
+								parent.toggle(true);
+							} else {
+								parent.toggle(false);
+							}
 						}
 					}
+
+					show_in_circle('unread_messages', r.message.unread_messages.length);
+					show_in_circle('open_support_tickets', r.message.open_support_tickets);
+					show_in_circle('things_todo', r.message.things_todo);
+					show_in_circle('todays_events', r.message.todays_events);
+
 				} else {
 					clearInterval(wn.updates.id);
 				}
@@ -131,7 +140,7 @@ var update_messages = function(reset) {
 		);
 	} else {
 		page_body.wntoolbar.set_new_comments(0);
-		$('#msg_count').toggle(false);
+		$('#unread_messages').toggle(false);
 	}
 }
 
