@@ -97,6 +97,9 @@ def setup_options():
 	parser.add_option("--replace", nargs=3, default=False, 
 						metavar = "search replace_by extension",
 						help="file search-replace")
+
+	parser.add_option("--cci", nargs=1, metavar="CacheItem Key",
+		help="Clear Cache Item")
 	
 
 	return parser.parse_args()
@@ -209,6 +212,13 @@ def run():
 		import webnotes.utils.scheduler
 		print webnotes.utils.scheduler.trigger('execute_' + options.run_scheduler_event)
 	
+	elif options.cci is not None:
+		if options.cci=='all':
+			webnotes.conn.sql("DELETE FROM __CacheItem")
+		else:
+			from webnotes.utils.cache import CacheItem
+			CacheItem(options.cci).clear()
+
 	# print messages
 	if webnotes.message_log:
 		print '\n'.join(webnotes.message_log)
