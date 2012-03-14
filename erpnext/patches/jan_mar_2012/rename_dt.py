@@ -17,10 +17,14 @@ def execute():
 	for d in del_dt:
 		delete_doc('DocType', d)
 
-
+	
 	# Rename dt	
 	#-------------
 	rendt = {
+		'KRA Sheet'					:	'Appraisal Template Goal'
+	}
+
+	new = {
 		'Receivable Voucher'		:	'Sales Invoice',
 		'RV Detail'					:	'Sales Invoice Item',
 		'RV Tax Detail'				:	'Sales Taxes and Charges',
