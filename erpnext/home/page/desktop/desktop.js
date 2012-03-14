@@ -95,9 +95,37 @@ erpnext.desktop.render = function() {
 }
 
 erpnext.desktop.show_pending_notifications = function() {
-	$('#messages a:first').prepend('<div id="msg_count" class="circle" title="Unread Messages">\
-		<span class="circle-text"></span></div>');
-	$('#msg_count').toggle(false);
+	var add_circle = function(str_module, id, title) {
+		var module = $('#'+str_module);
+		module.find('a:first').append(
+			repl('<div id="%(id)s" class="circle" title="%(title)s" style="display: None">\
+					<span class="circle-text"></span>\
+				 </div>', {id: id, title: title}));
+		
+		var case_border = module.find('.case-border');
+		var circle = module.find('.circle');
+
+		var add_hover_and_click = function(primary, secondary, hover_class, click_class) {
+			primary
+			.hover(
+				function() { secondary.addClass(hover_class); },
+				function() { secondary.removeClass(hover_class); })
+			.mousedown(function() { secondary.addClass(click_class); })
+			.mouseup(function() { secondary.removeClass(click_class); })
+			.focusin(function() { $(this).mousedown(); })
+			.focusout(function() { $(this).mouseup(); })
+		}
+		
+		add_hover_and_click(case_border, circle, 'hover-effect', 'circle-click');
+		add_hover_and_click(circle, case_border, 'hover-effect', 'case-border-click');
+
+	}
+
+	add_circle('messages', 'unread_messages', 'Unread Messages');
+	add_circle('support', 'open_support_tickets', 'Open Support Tickets');
+	add_circle('todo', 'things_todo', 'Things To Do');
+	add_circle('calendar', 'todays_events', 'Todays Events');
+
 	update_messages();
 
 }
