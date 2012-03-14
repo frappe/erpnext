@@ -600,7 +600,7 @@ pscript.home_make_status = function() {
 	// get values
 	$c_page('home', 'event_updates', 'get_status_details', user,
 		function(r,rt) { 
-			page_body.wntoolbar.set_new_comments(r.message.unread_messages);
+			//page_body.wntoolbar.set_new_comments(r.message.unread_messages);
 										
 			// render online users
 			pscript.online_users_obj.render(r.message.online_users);
