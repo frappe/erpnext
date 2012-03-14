@@ -49,11 +49,11 @@ def search_replace_with_prompt(fpath, txt1, txt2):
 			a = raw_input('Do you want to Change [y/n]?')
 			if a=='y':
 				c = c.replace(txt1, txt2)
-			tmp.append(c)
+		tmp.append(c)
 
 	with open(fpath, 'w') as f:
 		f.write(''.join(tmp))
-	print colored('Updated in %s'  % fpath, 'green')
+	print colored('Updated', 'green')
 	
 
 def setup_options():

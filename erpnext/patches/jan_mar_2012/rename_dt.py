@@ -8,9 +8,13 @@ def execute():
 
 	# delete dt
 	#-------------
-	deldt = ['Widget Control', 'Update Delivery Date Detail', 'Update Delivery Date', 'Tag Detail', 'Supplier rating', 'Stylesheet', 'Question Tag', 'PRO PP Detail', 'PRO Detail', 'PPW Detail', 'PF Detail', 'Personalize', 'Patch Util', 'Page Template', 'Module Def Role', 'Module Def Item', 'File Group', 'File Browser Control', 'File', 'Educational Qualifications', 'Earn Deduction Detail', 'DocType Property Setter', 'DocFormat', 'Contact Detail', 'BOM Report Detail', 'BOM Replace Utility Detail', 'BOM Replace Utility', 'Absent Days Detail', 'Activity Dashboard Control', 'Raw Materials Supplied', 'Setup Wizard Control', 'Company Group']
+	del_mapper = ['Production Forecast-Production Planning Tool', 'Production Forecast-Production Plan']
+	for d in del_mapper:
+		delete_doc('DocType Mapper', d)
 
-	for d in deldt:
+	del_dt = ['Widget Control', 'Update Delivery Date Detail', 'Update Delivery Date', 'Tag Detail', 'Supplier rating', 'Stylesheet', 'Question Tag', 'PRO PP Detail', 'PRO Detail', 'PPW Detail', 'PF Detail', 'Personalize', 'Patch Util', 'Page Template', 'Module Def Role', 'Module Def Item', 'File Group', 'File Browser Control', 'File', 'Educational Qualifications', 'Earn Deduction Detail', 'DocType Property Setter', 'Contact Detail', 'BOM Report Detail', 'BOM Replace Utility Detail', 'BOM Replace Utility', 'Absent Days Detail', 'Activity Dashboard Control', 'Raw Materials Supplied', 'Setup Wizard Control', 'Company Group'] # docformat
+
+	for d in del_dt:
 		delete_doc('DocType', d)
 
 
@@ -82,7 +86,7 @@ def execute():
 		'Bill Of Materials'			:	'BOM',
 		'Appraisal Detail'			:	'Appraisal Goal',
 		'Advance Allocation Detail' :	'Purchase Invoice Advance',
-		'Advance Adjustment Detail' :	'Sales Invoice Advance'
+		'Advance Adjustment Detail' :	'Sales Invoice Advance',
 		'Ledger Detail'				:	'Multi Ledger Report Detail',
 		'TA Control'				:	'Trend Analyzer Control',
 		'Sales and Purchase Return Wizard'	: 'Sales and Purchase Return Tool',
@@ -94,6 +98,8 @@ def execute():
 	}
 
 	for d in rendt:
+		print d + ' --------> '+ rendt[d]
+
 		#rename
 		rename('DocType', d, rendt[d], 1)
 
@@ -104,6 +110,7 @@ def execute():
 
 		# RUN ONLY IN LOCAL
 		######################
+
 
 		# replace dt in js/py file
 		for extn in ['js', 'py', 'txt']:
