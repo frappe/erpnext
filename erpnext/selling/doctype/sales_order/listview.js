@@ -1,21 +1,16 @@
 // render
-wn.doclistviews['Sales Order'] = {
-	fields: [
-		{ field: "name", name: "ID"},
-		{ field: "owner", name: "Created By"},
-		{ field: "modified", name: "Last Updated"},
-		{ field: "customer_name", name: "Customer", width:300},
-		{ field: "per_delivered", name: "% Delivered", 
-			query: "ifnull(per_delivered,0) as per_delivered"}, 
-		{ field: "per_billed", name: "% Billed", 
-			query: "ifnull(per_billed,0) as per_billed"}, 
-		{ field: "currency", name: "Currency"},
-		{ field: "grand_total_export", name: "Grand Total", 
-			query:"ifnull(grand_total_export,0) as grand_total_export"},
-		{ field: "docstatus", name: "Status"}
-	],
+wn.doclistviews['Sales Order'] = wn.pages.ListView.extend({
+	init: function(doctype) {
+		this._super(doctype)
+		this.fields = this.fields.concat([
+			"`tabSales Order`.customer_name", 
+			"ifnull(`tabSales Order`.per_delivered,0) as per_delivered", 
+			"ifnull(`tabSales Order`.per_billed,0) as per_billed",
+			"`tabSales Order`.currency", 
+			"ifnull(`tabSales Order`.grand_total_export,0) as grand_total_export"
+		]);
+	},
 	render: function(row, data, listobj) {
-		data.modified_date = dateutil.str_to_user(data.modified).split(' ')[0];
 		
 		// bar color for billed
 		data.bar_class_delivered = ''; data.bar_class_billed = '';
@@ -24,27 +19,30 @@ wn.doclistviews['Sales Order'] = {
 		
 		// lock for docstatus
 		data.icon = '';
-		if(data.docstatus==1) {
+		data.item_color = 'grey';
+		if(data.docstatus==0) {
+			data.customer_name = '[Draft] ' + data.customer_name;
+		} else if(data.docstatus==1) {
 			data.icon = ' <i class="icon-lock" title="Submitted"></i>';
+			data.item_color = 'blue';
+		} else if(data.docstatus==2) {
+			data.icon = ' <i class="icon-remove" title="Cancelled"></i>';
+			data.item_color = 'red';
 		}
 		
-		$(row).html(repl('<span class="avatar-small"><img src="%(avatar)s" /></span>\
-			<a href="#!Form/%(doctype)s/%(name)s">%(name)s</a>\
-			%(icon)s\
-			<span style="color:#444">%(customer_name)s</span>\
-			<span class="bar-outer" style="width: 30px; float: right" \
-				title="%(per_delivered)s% Delivered">\
-				<span class="bar-inner %(bar_class_delivered)s" \
-					style="width: %(per_delivered)s%;"></span>\
-			</span>\
-			<span class="bar-outer" style="width: 30px; float: right" \
-				title="%(per_billed)s% Billed">\
-				<span class="bar-inner %(bar_class_billed)s" \
-					style="width: %(per_billed)s%;"></span>\
-			</span>\
-			<span style="float:right; font-size: 11px; color: #888;\
-				margin-left: 7px;">%(modified_date)s</span>\
-			<span style="color:#444; float: right;">%(currency)s %(grand_total_export)s</span>\
-			', data)).addClass('list-row');
+		this._super(row, data);
+		this.$main.html(repl('<span style="color:%(item_color)s">%(customer_name)s</span>\
+		<span class="bar-outer" style="width: 30px; float: right" \
+			title="%(per_delivered)s% Delivered">\
+			<span class="bar-inner %(bar_class_delivered)s" \
+				style="width: %(per_delivered)s%;"></span>\
+		</span>\
+		<span class="bar-outer" style="width: 30px; float: right" \
+			title="%(per_billed)s% Billed">\
+			<span class="bar-inner %(bar_class_billed)s" \
+				style="width: %(per_billed)s%;"></span>\
+		</span>\
+		<span style="color:#444; float: right;">%(currency)s %(grand_total_export)s</span>\
+		', data))
 	}
-}
+});

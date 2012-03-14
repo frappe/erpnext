@@ -3,6 +3,7 @@
 	border-bottom: 1px solid #DEB85F;
 	margin-bottom: 5px;
 	height: 14px;
+	clear: both;
 }
 
 .todoitem .label {
