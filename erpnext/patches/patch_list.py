@@ -182,5 +182,10 @@ patch_list = [
 		'patch_file': 'remove_series_defval',
 		'description': 'Remove rv series default value' 
 	},
+	{
+		'patch_module': 'patches.jan_mar_2012',
+		'patch_file': 'update_stockreco_perm',
+		'description': 'Update stock reco permission' 
+	},
 
 ]
