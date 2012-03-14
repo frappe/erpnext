@@ -2229,8 +2229,10 @@ else if(nm=='Accounts Browser')
 pscript.make_chart(chart_type);}
 loadpage(nm,call_back);}
 var update_messages=function(reset){if(inList(['Guest'],user)){return;}
-if(!reset){$c_page('home','event_updates','get_unread_messages',null,function(r,rt){if(!r.exc){page_body.wntoolbar.set_new_comments(r.message);var circle=$('#msg_count')
-if(circle){if(r.message.length){circle.find('span:first').text(r.message.length);circle.toggle(true);}else{circle.toggle(false);}}}else{clearInterval(wn.updates.id);}});}else{page_body.wntoolbar.set_new_comments(0);$('#msg_count').toggle(false);}}
+if(!reset){$c_page('home','event_updates','get_global_status_messages',null,function(r,rt){if(!r.exc){page_body.wntoolbar.set_new_comments(r.message.unread_messages);var messages_circle=$('#unread_msg_count')
+if(messages_circle){if(r.message.unread_messages.length){messages_circle.find('span:first').text(r.message.unread_messages.length);messages_circle.toggle(true);}else{messages_circle.toggle(false);}}
+var support_circle=$('#open_support_ticket_count')
+if(support_circle){if(r.message.open_support_tickets){support_circle.find('span:first').text(r.message.open_support_tickets);support_circle.toggle(true);}else{support_circle.toggle(false);}}}else{clearInterval(wn.updates.id);}});}else{page_body.wntoolbar.set_new_comments(0);$('#msg_count').toggle(false);}}
 erpnext.startup.set_periodic_updates=function(){wn.updates={};if(wn.updates.id){clearInterval(wn.updates.id);}
 wn.updates.id=setInterval(update_messages,60000);}
 erpnext.set_user_background=function(src){set_style(repl('body { background: url("files/%(src)s") repeat;}',{src:src}))}
