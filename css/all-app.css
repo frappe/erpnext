@@ -728,6 +728,43 @@ div.srs_filter_area td {
 }
 
 
+/* stats */
+
+div.stat-grid {
+	border: 2px solid #bbb;
+	background-color: white;
+	margin-bottom: 19px;
+	border-radius: 5px;
+	-moz-border-radius: 5px;
+	-webkit-border-radius: 5px;
+	overflow: hidden;
+}
+
+div.stat-label {
+	position: relative;
+	padding: 3px;
+	text-align: center;
+}
+div.stat-label, div.stat-label a {
+	z-index: 5;
+}
+
+div.stat-item {
+	position: relative;
+	border-bottom: 1px solid #ddd;
+}
+div.stat-item:last-child {
+	border-bottom: 0px solid #ddd;	
+}
+
+div.stat-bar {
+	position: absolute;
+	left: 0px;
+	background-color: #def;
+	height: 100%;
+	z-index: 0;
+}
+
 
 
 
