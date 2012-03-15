@@ -26,9 +26,11 @@ def on_login(login_manager):
 	if login_manager.user not in ('Guest', None, '') and webnotes.conn.cur_db_name!='accounts' and webnotes.conn.get_value('Control Panel', 'Control Panel', 'account_id')!='s5u011':
 		try:
 			login_manager = login_as(login_manager)
-			update_account_details()
-			import server_tools.gateway_utils
-			server_tools.gateway_utils.check_login(login_manager.user)
+			if hasattr(webnotes.defs, 'sync_with_gateway') and \
+					cint(webnotes.defs.sync_with_gateway) or 0:
+				update_account_details()
+				import server_tools.gateway_utils
+				server_tools.gateway_utils.check_login(login_manager.user)
 			
 		except ImportError:
 			pass
@@ -157,6 +159,8 @@ def update_account_details():
 # logout the user from SSO
 #
 def on_logout(login_manager):
-	if cint(webnotes.conn.get_value('Control Panel', None, 'sync_with_gateway')):
+	import webnotes.defs
+	if hasattr(webnotes.defs, 'sync_with_gateway') and \
+			cint(webnotes.defs.sync_with_gateway) or 0:
 		from server_tools.gateway_utils import logout_sso
 		logout_sso(user=login_manager.user)

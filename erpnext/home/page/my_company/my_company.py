@@ -54,7 +54,10 @@ def delete_user(args):
 	args = json.loads(args)
 	webnotes.conn.sql("update tabProfile set enabled=0, docstatus=2 where name=%s", args['user'])
 	# erpnext-saas
-	if cint(webnotes.conn.get_value('Control Panel', None, 'sync_with_gateway')):
+	import webnotes.defs
+	from webnotes.utils import cint
+	if hasattr(webnotes.defs, 'sync_with_gateway') and \
+			cint(webnotes.defs.sync_with_gateway) or 0:	
 		from server_tools.gateway_utils import remove_user_gateway
 		remove_user_gateway(args['user'])
 	
@@ -65,7 +68,10 @@ def delete_user(args):
 def add_user(args):
 	args = json.loads(args)
 	# erpnext-saas
-	if cint(webnotes.conn.get_value('Control Panel', None, 'sync_with_gateway')):
+	import webnotes.defs
+	from webnotes.utils import cint
+	if hasattr(webnotes.defs, 'sync_with_gateway') and \
+			cint(webnotes.defs.sync_with_gateway) or 0:
 		from server_tools.gateway_utils import add_user_gateway
 		add_user_gateway(args)
 	
@@ -183,7 +189,10 @@ def update_security(args=''):
 	webnotes.conn.set_value('Profile', args['user'], 'login_before', args.get('login_before'))
 
 	if 'new_password' in args:
-		if cint(webnotes.conn.get_value('Control Panel',None,'sync_with_gateway')):
+		import webnotes.defs
+		from webnotes.utils import cint
+		if hasattr(webnotes.defs, 'sync_with_gateway') and \
+				cint(webnotes.defs.sync_with_gateway) or 0:			
 			import server_tools.gateway_utils
 			res = server_tools.gateway_utils.change_password('', args['new_password'], args['user'], args['sys_admin_pwd'])
 			if 'Traceback' not in res['message']:
