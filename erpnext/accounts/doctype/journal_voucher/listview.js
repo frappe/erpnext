@@ -1,6 +1,6 @@
 wn.doclistviews['Journal Voucher'] = wn.pages.ListView.extend({
-	init: function(doctype) {
-		this._super(doctype);
+	init: function(d) {
+		this._super(d);
 		this.fields = this.fields.concat([
 			'`tabJournal Voucher`.voucher_type'
 		]);

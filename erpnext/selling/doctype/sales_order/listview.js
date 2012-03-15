@@ -1,7 +1,7 @@
 // render
 wn.doclistviews['Sales Order'] = wn.pages.ListView.extend({
-	init: function(doctype) {
-		this._super(doctype)
+	init: function(d) {
+		this._super(d)
 		this.fields = this.fields.concat([
 			"`tabSales Order`.customer_name", 
 			"ifnull(`tabSales Order`.per_delivered,0) as per_delivered", 
@@ -9,6 +9,7 @@ wn.doclistviews['Sales Order'] = wn.pages.ListView.extend({
 			"`tabSales Order`.currency", 
 			"ifnull(`tabSales Order`.grand_total_export,0) as grand_total_export"
 		]);
+		this.stats = this.stats.concat(['status']);
 	},
 	render: function(row, data, listobj) {
 		

@@ -122,6 +122,18 @@ header .container {
 	margin: auto;
 }
 
+@media (max-width: 1200px) {
+	div#body_div, header .container, footer {
+		width: 900px;
+	}
+}
+
+@media (min-width: 1200px) {
+	div#body_div, header .container, footer {
+		width: 1200px;
+	}
+}
+
 div.no_script {
 	display: none;
 }
@@ -236,12 +248,14 @@ div.std-footer-item {
 
 .avatar-small {
 	display: inline-block; 
-	min-width: 29px;
+	width: 24px;
+	height: 20px;
+	vertical-align: middle;
+	overflow: hidden;
+	margin: 0px 3px;
 }
 .avatar-small img {
-	height: 24px; 
-	margin-bottom: -7px;
-	max-width: 24px;
+	width: 24px; 
 }
 
 /*
@@ -673,17 +687,7 @@ div.sidebar-comment-info {
 /*
  *	lib/css/legacy/listing.css
  */
-/* listing 2.0 */
 
-div.listing-more {
-	margin: 7px 0px 17px 0px;
-	text-align: center;
-	display: none;
-}
-
-div.listing-toolbar {
-	margin: 7px 0px;
-}
 
 /* SRS */
 
@@ -726,47 +730,6 @@ div.srs_filter_area {
 div.srs_filter_area td {
 	vertical-align: middle;
 }
-
-
-/* stats */
-
-div.stat-grid {
-	border: 2px solid #bbb;
-	background-color: white;
-	margin-bottom: 19px;
-	border-radius: 5px;
-	-moz-border-radius: 5px;
-	-webkit-border-radius: 5px;
-	overflow: hidden;
-}
-
-div.stat-label {
-	position: relative;
-	padding: 3px;
-	text-align: center;
-}
-div.stat-label, div.stat-label a {
-	z-index: 5;
-}
-
-div.stat-item {
-	position: relative;
-	border-bottom: 1px solid #ddd;
-}
-div.stat-item:last-child {
-	border-bottom: 0px solid #ddd;	
-}
-
-div.stat-bar {
-	position: absolute;
-	left: 0px;
-	background-color: #def;
-	height: 100%;
-	z-index: 0;
-}
-
-
-
 
 /*
  *	lib/css/legacy/report.css
@@ -1631,12 +1594,20 @@ div.psidebar div.section-item, div.psidebar .section-link {
 	margin-top: 8px;
 }
 
+/* list-row */
 div.list-row {
 	border-bottom: 1px solid #eee;
-	padding: 3px 0px;
+	padding: 5px 0px;
 }
 div.list-row:hover {
 	background-color: #eef
+}
+div.list-row .label {
+	margin-left: 3px;
+}
+div.list-row .main {
+	margin-left: 4px;
+	color: #444;
 }
 
 div.paging-button {
@@ -1674,6 +1645,8 @@ div.list_filter input, div.list_filter select {
 	margin-right: 7px;
 }
 
+/* bar */
+
 span.bar-outer {
 	display: inline-block;
 	margin: 0px 7px;
@@ -1692,6 +1665,50 @@ span.bar-inner {
 span.bar-complete {
 	background-color: green;
 }
+
+
+/* stats */
+
+div.stat-wrapper {
+	margin-bottom: 19px;	
+}
+
+div.stat-grid {
+	border: 2px solid #bbb;
+	background-color: white;
+	border-radius: 5px;
+	-moz-border-radius: 5px;
+	-webkit-border-radius: 5px;
+	overflow: hidden;
+}
+
+div.stat-label {
+	position: relative;
+	padding: 3px;
+	text-align: center;
+}
+div.stat-label, div.stat-label a {
+	z-index: 5;
+}
+
+div.stat-item {
+	position: relative;
+	border-bottom: 1px solid #ddd;
+}
+div.stat-item:last-child {
+	border-bottom: 0px solid #ddd;	
+}
+
+div.stat-bar {
+	position: absolute;
+	left: 0px;
+	background-color: #def;
+	height: 100%;
+	z-index: 0;
+}
+
+
+
 
 
 /*

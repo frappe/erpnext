@@ -122,6 +122,18 @@ header .container {
 	margin: auto;
 }
 
+@media (max-width: 1200px) {
+	div#body_div, header .container, footer {
+		width: 900px;
+	}
+}
+
+@media (min-width: 1200px) {
+	div#body_div, header .container, footer {
+		width: 1200px;
+	}
+}
+
 div.no_script {
 	display: none;
 }
@@ -236,12 +248,14 @@ div.std-footer-item {
 
 .avatar-small {
 	display: inline-block; 
-	min-width: 29px;
+	width: 24px;
+	height: 20px;
+	vertical-align: middle;
+	overflow: hidden;
+	margin: 0px 3px;
 }
 .avatar-small img {
-	height: 24px; 
-	margin-bottom: -7px;
-	max-width: 24px;
+	width: 24px; 
 }
 
 /*
