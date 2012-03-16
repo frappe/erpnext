@@ -25,11 +25,12 @@ def replace_code(start, txt1, txt2, extn):
 		for fn in wt[2]:
 			if fn.split('.')[-1]==extn:
 				fpath = os.path.join(wt[0], fn)
-				with open(fpath, 'r') as f:
-					content = f.read()
+				if fpath != '/var/www/erpnext/erpnext/patches/jan_mar_2012/rename_dt.py': # temporary
+					with open(fpath, 'r') as f:
+						content = f.read()
 				
-				if re.search(txt1, content):
-					search_replace_with_prompt(fpath, txt1, txt2)
+					if re.search(txt1, content):
+						search_replace_with_prompt(fpath, txt1, txt2)
 
 
 
@@ -45,9 +46,10 @@ def search_replace_with_prompt(fpath, txt1, txt2):
 		if c.find(txt1) != -1:
 			print '\n', fpath
 			print  colored(txt1, 'red').join(c[:-1].split(txt1))
-
-			a = raw_input('Do you want to Change [y/n]?')
-			if a=='y':
+			a = ''
+			while a not in ['y', 'n', 'Y', 'N']:
+				a = raw_input('Do you want to Change [y/n]?')
+			if a.lower() == 'y':
 				c = c.replace(txt1, txt2)
 		tmp.append(c)
 
