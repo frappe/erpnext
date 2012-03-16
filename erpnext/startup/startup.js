@@ -114,7 +114,7 @@ var update_messages = function(reset) {
 			function(r,rt) {
 				if(!r.exc) {
 					// This function is defined in toolbar.js
-					page_body.wntoolbar.set_new_comments(r.message.unread_messages);
+					wn.container.wntoolbar.set_new_comments(r.message.unread_messages);
 					
 					var show_in_circle = function(parent_id, msg) {
 						var parent = $('#'+parent_id);
@@ -139,7 +139,7 @@ var update_messages = function(reset) {
 			}
 		);
 	} else {
-		page_body.wntoolbar.set_new_comments(0);
+		wn.container.wntoolbar.set_new_comments(0);
 		$('#unread_messages').toggle(false);
 	}
 }

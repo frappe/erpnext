@@ -1,5 +1,5 @@
 // render
-wn.doclistviews['Sales Order'] = wn.pages.ListView.extend({
+wn.doclistviews['Sales Order'] = wn.views.ListView.extend({
 	init: function(d) {
 		this._super(d)
 		this.fields = this.fields.concat([

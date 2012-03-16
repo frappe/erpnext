@@ -1,4 +1,4 @@
-wn.doclistviews['Journal Voucher'] = wn.pages.ListView.extend({
+wn.doclistviews['Journal Voucher'] = wn.views.ListView.extend({
 	init: function(d) {
 		this._super(d);
 		this.fields = this.fields.concat([

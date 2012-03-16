@@ -48,7 +48,7 @@ erpnext.toolbar.setup = function() {
 		$('#toolbar-user').append('<li><a href="#billing">Billing</a></li>')
 	}
 
-	$.extend(page_body.wntoolbar, {
+	$.extend(wn.container.wntoolbar, {
 		set_new_comments: function(new_comments) {
 			var navbar_nc = $('.navbar-new-comments');
 			if(new_comments && new_comments.length>0) {
@@ -66,7 +66,7 @@ erpnext.toolbar.setup = function() {
 		}
 	});
 
-	page_body.wntoolbar.set_new_comments();
+	wn.container.wntoolbar.set_new_comments();
 }
 
 erpnext.toolbar.add_modules = function() {

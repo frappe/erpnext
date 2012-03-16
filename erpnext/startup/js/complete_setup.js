@@ -85,7 +85,7 @@ erpnext.complete_setup = function() {
 			wn.boot.user_info[user].fullname = user_fullname;
 			d.hide();
 			$('header').toggle(true);
-			page_body.wntoolbar.set_user_name();
+			wn.container.wntoolbar.set_user_name();
 		});
 	}
 	
