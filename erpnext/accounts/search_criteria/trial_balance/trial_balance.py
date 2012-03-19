@@ -114,8 +114,8 @@ for r in res:
 	r.append(flt(opening<0 and -opening or 0))
 	r.append(flt(debit))
 	r.append(flt(credit))
-	r.append(flt(closing>0 and closing or 0))
-	r.append(flt(closing<0 and -closing or 0))
+	r.append(flt(closing>0.01 and closing or 0))
+	r.append(flt(closing<-0.01 and -closing or 0))
 
 
 out =[]
