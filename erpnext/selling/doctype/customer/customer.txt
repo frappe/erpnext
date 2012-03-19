@@ -203,7 +203,7 @@
 	# DocField
 	{
 		'colour': u'White:FFF',
-		'description': u'<a href="javascript:cur_frm.cscript.CGHelp();">To manage Customer Groups, click here</a>',
+		'description': u'<a href="#!Sales Browser/Customer Group">To manage Customer Groups, click here</a>',
 		'doctype': u'DocField',
 		'fieldname': u'customer_group',
 		'fieldtype': u'Link',
@@ -223,7 +223,7 @@
 	# DocField
 	{
 		'colour': u'White:FFF',
-		'description': u'<a href="javascript:cur_frm.cscript.TerritoryHelp();">To manage Territory, click here</a>',
+		'description': u'<a href="#!Sales Browser/Territory">To manage Territory, click here</a>',
 		'doctype': u'DocField',
 		'fieldname': u'territory',
 		'fieldtype': u'Link',
