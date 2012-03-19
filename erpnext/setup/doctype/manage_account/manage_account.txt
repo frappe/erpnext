@@ -391,7 +391,7 @@
 		'doctype': 'DocField',
 		'fieldtype': 'HTML',
 		'label': 'CGHelp',
-		'options': '<a href="javascript:cur_frm.cscript.TreePage(\'Customer Group\');">To manage Customer Groups, click here</a>'
+		'options': '<a href="#!Sales Browser/Customer Group">To manage Customer Groups, click here</a>'
 	},
 
 	# DocField
@@ -408,7 +408,7 @@
 		'doctype': 'DocField',
 		'fieldtype': 'HTML',
 		'label': 'TerritoryHelp',
-		'options': '<a href="javascript:cur_frm.cscript.TreePage(\'Territory\');">To manage Territory, click here</a>'
+		'options': '<a href="#!Sales Browser/Territory">To manage Territory, click here</a>'
 	},
 
 	# DocField
