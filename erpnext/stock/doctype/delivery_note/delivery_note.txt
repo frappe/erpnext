@@ -31,11 +31,11 @@
 		'module': u'Stock',
 		'name': '__common__',
 		'read_only_onload': 1,
-		'search_fields': u'status,transaction_date,customer,customer_name, territory,grand_total',
+		'search_fields': u'status,customer,customer_name, territory,grand_total',
 		'section_style': u'Tabbed',
 		'server_code_error': u' ',
 		'show_in_menu': 0,
-		'subject': u'To %(customer_name)s on %(transaction_date)s | %(per_billed)s% billed',
+		'subject': u'To %(customer_name)s on %(posting_date)s | %(per_billed)s% billed',
 		'tag_fields': u'billing_status',
 		'version': 475
 	},
