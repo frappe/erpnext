@@ -107,7 +107,7 @@ show_chart_browser = function(nm, chart_type){
 var update_messages = function(reset) {
 	// Updates Team Messages
 	
-	if(inList(['Guest'], user)) { return; }
+	if(inList(['Guest'], user) || !wn.session_alive) { return; }
 
 	if(!reset) {
 		$c_page('home', 'event_updates', 'get_global_status_messages', null,

@@ -1223,7 +1223,7 @@ show_chart_browser=function(nm,chart_type){var call_back=function(){if(nm=='Sale
 else if(nm=='Accounts Browser')
 pscript.make_chart(chart_type);}
 loadpage(nm,call_back);}
-var update_messages=function(reset){if(inList(['Guest'],user)){return;}
+var update_messages=function(reset){if(inList(['Guest'],user)||!wn.session_alive){return;}
 if(!reset){$c_page('home','event_updates','get_global_status_messages',null,function(r,rt){if(!r.exc){wn.container.wntoolbar.set_new_comments(r.message.unread_messages);var show_in_circle=function(parent_id,msg){var parent=$('#'+parent_id);if(parent){if(msg){parent.find('span:first').text(msg);parent.toggle(true);}else{parent.toggle(false);}}}
 show_in_circle('unread_messages',r.message.unread_messages.length);show_in_circle('open_support_tickets',r.message.open_support_tickets);show_in_circle('things_todo',r.message.things_todo);show_in_circle('todays_events',r.message.todays_events);}else{clearInterval(wn.updates.id);}});}else{wn.container.wntoolbar.set_new_comments(0);$('#unread_messages').toggle(false);}}
 erpnext.startup.set_periodic_updates=function(){wn.updates={};if(wn.updates.id){clearInterval(wn.updates.id);}
