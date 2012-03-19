@@ -46,7 +46,6 @@
 			"lib/css/legacy/body.css",
 			"lib/css/legacy/messages.css",
 			"lib/css/legacy/dialog.css",
-			"lib/css/ui/container.css",
 			"lib/css/bootstrap/headings.css",
 			"lib/css/bootstrap/buttons.css",
 			"lib/css/bootstrap/navbar.css",
@@ -70,7 +69,6 @@
 			"lib/css/legacy/sidebar.css",
 			"lib/css/Aristo/aristo.selected.css",
 			"lib/css/ui/list.css",
-			"lib/css/ui/container.css",
 			"lib/css/bootstrap/headings.css",
 			"lib/css/bootstrap/buttons.css",
 			"lib/css/bootstrap/navbar.css",
@@ -78,7 +76,8 @@
 			"lib/css/bootstrap/tooltip.css",
 			"lib/css/bootstrap/label.css",
 			"lib/css/bootstrap/icons.css",
-			"erpnext/startup/startup.css"							
+			"lib/css/bootstrap/popover.css",
+			"erpnext/startup/startup.css"
 		]
 	},
 

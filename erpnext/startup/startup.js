@@ -73,8 +73,8 @@ erpnext.startup.start = function() {
 
 		// border to the body
 		// ------------------
-		$('footer').html('<div class="web-footer erpnext-footer">\
-			<a href="#!attributions">ERPNext | Attributions and License</a></div>');
+		//$('footer').html('<div class="web-footer erpnext-footer">\
+		//	<a href="#!attributions">ERPNext | Attributions and License</a></div>');
 
 		// complete registration
 		if(in_list(user_roles,'System Manager') && (wn.boot.setup_complete=='No')) { 
