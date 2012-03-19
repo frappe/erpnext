@@ -231,7 +231,7 @@
 		'doctype': 'DocField',
 		'fieldtype': 'HTML',
 		'label': 'IGHelp',
-		'options': '<a href="javascript:cur_frm.cscript.TreePage(\'Item Group\');">To manage Item Groups, click here</a>'
+		'options': '<a href="#!Sales Browser/Item Group">To manage Item Groups, click here</a>'
 	},
 
 	# DocField
