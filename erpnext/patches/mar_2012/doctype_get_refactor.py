@@ -8,11 +8,36 @@ def execute():
 		* Remove 'no_column' from DocField
 		* Drop table DocFormat
 	"""
+	change_property_setter_fieldnames()
 	handle_custom_fields()
 	create_file_list()
 
 	# do at last - needs commit due to DDL statements
 	change_to_decimal()
+
+def change_property_setter_fieldnames():
+	docfield_list = webnotes.conn.sql("""\
+		SELECT name, fieldname FROM `tabDocField`""", as_list=1)
+	custom_field_list = webnotes.conn.sql("""\
+		SELECT name, fieldname FROM `tabCustom Field`""", as_list=1)
+	field_list = docfield_list + custom_field_list
+	property_setter_list = webnotes.conn.sql("""\
+		SELECT name, doc_name, value, property
+		FROM `tabProperty Setter`
+		WHERE doctype_or_field='DocField'""")
+	field_dict = dict(field_list)
+	for name, doc_name, value, prop in property_setter_list:
+		if doc_name in field_dict:
+			webnotes.conn.sql("""\
+				UPDATE `tabProperty Setter`
+				SET field_name = %s
+				WHERE name = %s""", (field_dict.get(doc_name), name))
+		if value in field_dict and prop=='previous_field':
+			webnotes.conn.sql("""\
+				UPDATE `tabProperty Setter`
+				SET value = %s
+				WHERE name = %s""", (field_dict.get(value), name))
+
 
 def handle_custom_fields():
 	"""
@@ -64,12 +89,13 @@ def create_prev_field_prop_setter(cf):
 		webnotes.conn.sql("""\
 			DELETE FROM `tabProperty Setter`
 			WHERE doc_type = %s
-			AND doc_name = %s
-			AND property = 'previous_field'""", (f.get('dt'), f.get('name')))
+			AND field_name = %s
+			AND property = 'previous_field'""", (f.get('dt'), f.get('fieldname')))
+
 		ps = Document('Property Setter', fielddata = {
 			'doctype_or_field': 'DocField',
 			'doc_type': f.get('dt'),
-			'doc_name': f.get('name'),
+			'field_name': f.get('fieldname'),
 			'property': 'previous_field',
 			'value': prev_field,
 			'property_type': 'Data',
@@ -85,19 +111,6 @@ def remove_custom_from_docfield(cf):
 			f.get('fieldname')))
 
 def create_file_list():
-	tables = webnotes.conn.sql("SHOW TABLES")
-	exists = []
-	for tab in tables:
-		if not tab: continue
-		desc = webnotes.conn.sql("DESC `%s`" % tab[0], as_dict=1)
-
-		for d in desc:
-			if d.get('Field')=='file_list':
-				exists.append(tab[0])
-				break
-	
-	print exists
-	
 	should_exist = ['Website Settings', 'Web Page', 'Timesheet', 'Ticket',
 		'Support Ticket', 'Supplier', 'Style Settings', 'Stock Reconciliation',
 		'Stock Entry', 'Serial No', 'Sales Order', 'Receivable Voucher',
@@ -113,13 +126,11 @@ def create_file_list():
 	from webnotes.model.code import get_obj
 
 	for dt in should_exist:
-		if dt in exists: continue
 		obj = get_obj('DocType', dt, with_children=1)
 		obj.doc.allow_attach = 1
 		obj.doc.save()
 		obj.make_file_list()
 		obj.on_update()
-
 
 def change_to_decimal():
 	webnotes.conn.commit()
