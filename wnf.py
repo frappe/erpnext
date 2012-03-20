@@ -78,9 +78,7 @@ def setup_options():
 	# install
 	parser.add_option('--install', nargs=3, metavar = "rootpassword dbname source",
 						help="install fresh db")
-	parser.add_option('--sync_with_gateway', nargs=1, metavar = "1/0", \
-						help="Set or Unset Sync with Gateway")
-
+	
 	# diff
 	parser.add_option('--diff_ref_file', nargs=0, \
 						help="Get missing database records and mismatch properties, with file as reference")
@@ -184,17 +182,6 @@ def run():
 		inst = Installer('root', options.install[0])
 		inst.import_from_db(options.install[1], source_path=options.install[2], \
 			password='admin', verbose = 1)
-	
-	elif options.sync_with_gateway:
-		if int(options.sync_with_gateway[0]) in [0, 1]:
-			webnotes.conn.begin()
-			webnotes.conn.sql("""\
-				UPDATE `tabSingles` SET value=%s
-				WHERE field='sync_with_gateway' AND doctype='Control Panel'""", int(options.sync_with_gateway[0]))
-			webnotes.conn.commit()
-			webnotes.message_log.append("sync_with_gateway set to %s" % options.sync_with_gateway[0])
-		else:
-			webnotes.message_log.append("ERROR: sync_with_gateway can be either 0 or 1")
 	
 	elif options.diff_ref_file is not None:
 		import webnotes.modules.diff
