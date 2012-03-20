@@ -130,7 +130,10 @@ def create_file_list():
 		obj.doc.allow_attach = 1
 		obj.doc.save()
 		obj.make_file_list()
-		obj.on_update()
+		from webnotes.model.db_schema import updatedb
+		updatedb(obj.doc.name)
+		from webnotes.utils.cache import CacheItem
+		CacheItem(obj.doc.name).clear()
 
 def change_to_decimal():
 	webnotes.conn.commit()
