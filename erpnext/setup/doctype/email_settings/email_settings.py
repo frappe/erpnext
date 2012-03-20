@@ -23,21 +23,6 @@ class DocType:
 	def __init__(self,doc,doclist):
 		self.doc,self.doclist = doc,doclist
 
-	def set_vals(self):
-		res = sql("select field, value from `tabSingles` where doctype = 'Control Panel' and field IN ('outgoing_mail_server','mail_login','mail_password','auto_email_id','mail_port','use_ssl')")
-		ret = {}
-		for r in res:
-			ret[cstr(r[0])]=r[1] and cstr(r[1]) or ''
-				
-		return ret
-
-	def set_cp_value(self, key):
-		"""
-			Update value in control panel
-		"""
-		webnotes.conn.set_value('Control Panel', None, key,
-				self.doc.fields.get(key))
-
 	def validate(self):
 		"""
 			Checks connectivity to email servers before saving
@@ -113,11 +98,3 @@ class DocType:
 			except poplib.error_proto, e:
 				webnotes.msgprint('Invalid User Name or Support Password. Please rectify and try again.')
 				webnotes.msgprint(e)
-
-		
-	def on_update(self):
-		"""
-			update control panel
-		"""
-		for f in ('outgoing_mail_server', 'mail_login', 'mail_password', 'auto_email_id', 'mail_port', 'use_ssl'):
-			self.set_cp_value(f)
