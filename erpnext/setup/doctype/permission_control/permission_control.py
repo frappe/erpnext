@@ -180,6 +180,11 @@ class DocType:
 							sql("delete from tabDocPerm where parent = %s and role = %s and ifnull(permlevel,0) = %s",(parent, role, cint(permlevel)))
 						
 						sql("update tabDocType set modified = %s where name = %s",(now(), parent))
+
+
+		from webnotes.utils.cache import CacheItem
+		CacheItem(parent).clear()		
+
 		msgprint("Permissions Updated")
 				
 	# Get Fields based on DocType and Permlevel
