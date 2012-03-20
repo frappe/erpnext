@@ -1515,7 +1515,6 @@ div.psidebar div.section-item, div.psidebar .section-link {
 	margin: -1px;
 	background: #5f83b9;
 	color: #FFFFFF;
-	text-shadow: 0px 1px 1px #234386;
 	border-color: #466086;
 		-moz-border-radius: 0; 
 		-webkit-border-radius: 0;
@@ -1630,12 +1629,23 @@ div.list-row {
 div.list-row:hover {
 	background-color: #eef
 }
+
 div.list-row .label {
-	margin-left: 3px;
+	margin-right: 4px;
 }
-div.list-row .main {
-	margin-left: 4px;
-	color: #444;
+
+div.list-row table {
+	table-layout: fixed;
+	border-collapse: collapse;
+	width: 100%;
+}
+
+div.list-row table td {
+	overflow: hidden;
+	padding-right: 3px;
+	vertical-align: middle;
+	height: 24px;
+	max-height: 24px;
 }
 
 div.paging-button {
@@ -1689,9 +1699,13 @@ span.bar-inner {
 	background-color: #bdf;
 	height: 100%;
 	margin-bottom: 2px;
+	float: left;
 }
 span.bar-complete {
-	background-color: green;
+	background-color: #009900;
+}
+span.bar-empty {
+	background-color: #990000;
 }
 
 

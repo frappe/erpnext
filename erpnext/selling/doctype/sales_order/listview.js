@@ -11,6 +11,7 @@ wn.doclistviews['Sales Order'] = wn.views.ListView.extend({
 		]);
 		this.stats = this.stats.concat(['status']);
 	},
+
 	render: function(row, data, listobj) {
 		
 		// bar color for billed
