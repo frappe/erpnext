@@ -217,6 +217,7 @@ div.std-footer-item {
 	box-shadow: 0px 0px 6px rgba(0,0,0,0.3);
 	background-color: #fff;
 	padding: 15px;
+	margin-bottom: 30px;
 }
 
 .layout-wrapper-background {
@@ -229,7 +230,7 @@ div.std-footer-item {
 	float: left;
 	padding: 15px;
 	background-color: #FFF;
-	min-height: 450px;
+	min-height: 600px;
 	-moz-box-shadow:    7px 0px 6px -2px #ddd;
 	-webkit-box-shadow: 7px 0px 6px -2px #ddd;
 	box-shadow:         7px 0px 6px -2px #ddd;
@@ -241,7 +242,7 @@ div.std-footer-item {
 	color: #606060; 
 	overflow-x: hidden;
 	padding: 15px;
-	min-height: 450px;
+	min-height: 600px;
 }
 
 /* from bootstrap */
@@ -1101,9 +1102,8 @@ div.psidebar div.section {
 }
 
 div.psidebar div.section-head {
-	font-size: 12px;
 	padding: 5px 11px;
-	border-bottom: 2px solid #444;
+	border-bottom: 2px solid #777;
 }
 
 div.psidebar div.section-body {
@@ -1740,6 +1740,23 @@ div.stat-bar {
 
 
 /*
+ *	lib/css/ui/fonts.css
+ */
+@font-face {
+  font-family: 'Pontano Sans';
+  font-style: normal;
+  font-weight: 400;
+  src: url('../lib/css/fonts/pontanosans.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Droid Sans';
+  font-style: normal;
+  font-weight: normal;
+  src: local('Droid Sans'), local('DroidSans'), url('../lib/css/fonts/droidsans.woff') format('woff');
+}
+
+/*
  *	lib/css/bootstrap/headings.css
  */
 /* heading from bootstrap */
@@ -1808,6 +1825,7 @@ h6 {
  *	lib/css/bootstrap/buttons.css
  */
 .close {
+  font-family: Helvetica, Sans;
   float: right;
   font-size: 20px;
   font-weight: bold;

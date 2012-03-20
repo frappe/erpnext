@@ -5,150 +5,150 @@
 	{
 		'creation': '2012-02-02 09:57:25',
 		'docstatus': 0,
-		'modified': '2012-02-02 10:47:38',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-20 11:25:05',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1328159294',
+		'_last_update': u'1330594969',
 		'allow_attach': 1,
-		'colour': 'White:FFF',
-		'description': 'Set your background color, font and image (tiled)',
+		'colour': u'White:FFF',
+		'description': u'Set your background color, font and image (tiled)',
 		'doctype': 'DocType',
 		'issingle': 1,
 		'max_attachments': 1,
-		'module': 'Website',
+		'module': u'Website',
 		'name': '__common__',
-		'section_style': 'Simple',
+		'section_style': u'Simple',
 		'show_in_menu': 0,
-		'version': 9
+		'version': 14
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Style Settings',
-		'parentfield': 'fields',
-		'parenttype': 'DocType'
+		'parent': u'Style Settings',
+		'parentfield': u'fields',
+		'parenttype': u'DocType'
 	},
 
 	# These values are common for all DocPerm
 	{
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'name': '__common__',
-		'parent': 'Style Settings',
-		'parentfield': 'permissions',
-		'parenttype': 'DocType',
+		'parent': u'Style Settings',
+		'parentfield': u'permissions',
+		'parenttype': u'DocType',
 		'read': 1,
-		'role': 'Website Manager'
+		'role': u'Website Manager'
 	},
 
 	# DocType, Style Settings
 	{
 		'doctype': 'DocType',
-		'name': 'Style Settings'
+		'name': u'Style Settings'
 	},
 
 	# DocPerm
 	{
 		'create': 1,
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'permlevel': 0,
 		'write': 1
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'description': 'Solid background color (default light gray)',
-		'doctype': 'DocField',
-		'fieldname': 'background_color',
-		'fieldtype': 'Data',
-		'label': 'Background Color',
+		'colour': u'White:FFF',
+		'description': u'Solid background color (default light gray)',
+		'doctype': u'DocField',
+		'fieldname': u'background_color',
+		'fieldtype': u'Data',
+		'label': u'Background Color',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'description': 'If image is selected, color will be ignored (attach first)',
-		'doctype': 'DocField',
-		'fieldname': 'background_image',
-		'fieldtype': 'Select',
-		'label': 'Background Image',
-		'options': 'attach_files:',
+		'colour': u'White:FFF',
+		'description': u'If image is selected, color will be ignored (attach first)',
+		'doctype': u'DocField',
+		'fieldname': u'background_image',
+		'fieldtype': u'Select',
+		'label': u'Background Image',
+		'options': u'attach_files:',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'font',
-		'fieldtype': 'Select',
-		'label': 'Font',
-		'options': '\nLucida Grande\nVerdana\nArial\nGeorgia\nTahoma',
+		'doctype': u'DocField',
+		'fieldname': u'font',
+		'fieldtype': u'Select',
+		'label': u'Font',
+		'options': u'\nLucida Grande\nVerdana\nArial\nGeorgia\nTahoma\nPontano Sans\nDroid Sans\nGill Sans',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'font_size',
-		'fieldtype': 'Select',
-		'label': 'Font Size',
-		'options': '\n12px\n13px\n14px',
+		'doctype': u'DocField',
+		'fieldname': u'font_size',
+		'fieldtype': u'Select',
+		'label': u'Font Size',
+		'options': u'\n12px\n13px\n14px',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'heading_font',
-		'fieldtype': 'Select',
-		'label': 'Heaing Font',
-		'options': '\nLucida Grande\nVerdana\nArial\nGeorgia\nTahoma',
+		'doctype': u'DocField',
+		'fieldname': u'heading_font',
+		'fieldtype': u'Select',
+		'label': u'Heading Font',
+		'options': u'\nLucida Grande\nVerdana\nArial\nGeorgia\nTahoma\nPontano Sans\nDroid Sans\nGill Sans',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'description': 'Select a white footer foreground color if you have a dark background',
-		'doctype': 'DocField',
-		'fieldname': 'footer_font_color',
-		'fieldtype': 'Select',
-		'label': 'Footer Font Color',
-		'options': '\nwhite',
+		'colour': u'White:FFF',
+		'description': u'Select a white footer foreground color if you have a dark background',
+		'doctype': u'DocField',
+		'fieldname': u'footer_font_color',
+		'fieldtype': u'Select',
+		'label': u'Footer Font Color',
+		'options': u'\nwhite',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'description': 'Auto generated',
-		'doctype': 'DocField',
-		'fieldname': 'custom_css',
-		'fieldtype': 'Code',
-		'label': 'Custom CSS',
+		'colour': u'White:FFF',
+		'description': u'Auto generated',
+		'doctype': u'DocField',
+		'fieldname': u'custom_css',
+		'fieldtype': u'Code',
+		'label': u'Custom CSS',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'file_list',
-		'fieldtype': 'Text',
+		'doctype': u'DocField',
+		'fieldname': u'file_list',
+		'fieldtype': u'Text',
 		'hidden': 1,
-		'label': 'File List',
+		'label': u'File List',
 		'no_copy': 1,
 		'permlevel': 0,
 		'print_hide': 1
