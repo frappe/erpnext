@@ -192,5 +192,10 @@ patch_list = [
 		'patch_file': 'stock_entry_others_patch',
 		'description': 'new purpose others in stock entry' 
 	},
+	{
+		'patch_module': 'patches.jan_mar_2012',
+		'patch_file': 'reload_quote',
+		'description': 'reload quote: organization fld added' 
+	},
 
 ]
