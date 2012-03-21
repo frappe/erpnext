@@ -5,48 +5,51 @@
 	{
 		'creation': '2010-08-08 17:09:27',
 		'docstatus': 0,
-		'modified': '2010-09-20 14:06:57',
-		'modified_by': 'yogesh@webnotestech.com',
-		'owner': 'Administrator'
+		'modified': '2012-03-21 14:54:12',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
+		'_last_update': u'1322549700',
 		'allow_trash': 1,
-		'autoname': 'field:title',
-		'colour': 'White:FFF',
+		'autoname': u'field:title',
+		'colour': u'White:FFF',
+		'default_print_format': u'Standard',
 		'doctype': 'DocType',
-		'document_type': 'Master',
-		'module': 'Setup',
+		'document_type': u'Master',
+		'module': u'Setup',
 		'name': '__common__',
-		'section_style': 'Simple',
-		'server_code_error': ' ',
-		'version': 10
+		'section_style': u'Simple',
+		'server_code_error': u' ',
+		'show_in_menu': 0,
+		'version': 11
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Term',
-		'parentfield': 'fields',
-		'parenttype': 'DocType'
+		'parent': u'Term',
+		'parentfield': u'fields',
+		'parenttype': u'DocType'
 	},
 
 	# These values are common for all DocPerm
 	{
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'name': '__common__',
-		'parent': 'Term',
-		'parentfield': 'permissions',
-		'parenttype': 'DocType',
+		'parent': u'Term',
+		'parentfield': u'permissions',
+		'parenttype': u'DocType',
 		'read': 1
 	},
 
 	# DocType, Term
 	{
 		'doctype': 'DocType',
-		'name': 'Term'
+		'name': u'Term'
 	},
 
 	# DocPerm
@@ -54,10 +57,9 @@
 		'amend': 0,
 		'cancel': 0,
 		'create': 0,
-		'doctype': 'DocPerm',
-		'idx': 1,
+		'doctype': u'DocPerm',
 		'permlevel': 1,
-		'role': 'Sales Master Manager',
+		'role': u'Sales Master Manager',
 		'submit': 0,
 		'write': 0
 	},
@@ -67,10 +69,9 @@
 		'amend': 0,
 		'cancel': 1,
 		'create': 1,
-		'doctype': 'DocPerm',
-		'idx': 2,
+		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'role': 'Sales Master Manager',
+		'role': u'Sales Master Manager',
 		'submit': 0,
 		'write': 1
 	},
@@ -80,10 +81,9 @@
 		'amend': 0,
 		'cancel': 0,
 		'create': 0,
-		'doctype': 'DocPerm',
-		'idx': 3,
+		'doctype': u'DocPerm',
 		'permlevel': 1,
-		'role': 'Sales User',
+		'role': u'Sales User',
 		'submit': 0,
 		'write': 0
 	},
@@ -93,30 +93,27 @@
 		'amend': 0,
 		'cancel': 0,
 		'create': 0,
-		'doctype': 'DocPerm',
-		'idx': 4,
+		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'role': 'Sales User',
+		'role': u'Sales User',
 		'submit': 0,
 		'write': 0
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm',
-		'idx': 5,
+		'doctype': u'DocPerm',
 		'permlevel': 1,
-		'role': 'All'
+		'role': u'All'
 	},
 
 	# DocPerm
 	{
 		'cancel': 1,
 		'create': 1,
-		'doctype': 'DocPerm',
-		'idx': 6,
+		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'role': 'System Manager',
+		'role': u'System Manager',
 		'write': 1
 	},
 
@@ -124,35 +121,32 @@
 	{
 		'cancel': 1,
 		'create': 1,
-		'doctype': 'DocPerm',
-		'idx': 7,
+		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'role': 'Accounts User',
+		'role': u'Accounts User',
 		'write': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'trash_reason',
-		'fieldtype': 'Small Text',
-		'idx': 1,
-		'label': 'Trash Reason',
-		'oldfieldname': 'trash_reason',
-		'oldfieldtype': 'Small Text',
+		'doctype': u'DocField',
+		'fieldname': u'trash_reason',
+		'fieldtype': u'Small Text',
+		'label': u'Trash Reason',
+		'oldfieldname': u'trash_reason',
+		'oldfieldtype': u'Small Text',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'title',
-		'fieldtype': 'Data',
-		'idx': 2,
+		'doctype': u'DocField',
+		'fieldname': u'title',
+		'fieldtype': u'Data',
 		'in_filter': 1,
-		'label': 'Title',
-		'oldfieldname': 'title',
-		'oldfieldtype': 'Data',
+		'label': u'Title',
+		'oldfieldname': u'title',
+		'oldfieldtype': u'Data',
 		'permlevel': 0,
 		'reqd': 1,
 		'search_index': 0
@@ -160,13 +154,12 @@
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'terms',
-		'fieldtype': 'Text Editor',
-		'idx': 3,
-		'label': 'Terms',
-		'oldfieldname': 'terms',
-		'oldfieldtype': 'Text Editor',
+		'doctype': u'DocField',
+		'fieldname': u'terms',
+		'fieldtype': u'Text Editor',
+		'label': u'Terms',
+		'oldfieldname': u'terms',
+		'oldfieldtype': u'Text Editor',
 		'permlevel': 0
 	}
 ]

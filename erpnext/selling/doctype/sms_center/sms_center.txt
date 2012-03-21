@@ -5,66 +5,66 @@
 	{
 		'creation': '2011-01-11 17:52:26',
 		'docstatus': 0,
-		'modified': '2011-02-15 17:06:33',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-21 13:06:26',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1300788634',
+		'_last_update': u'1322549700',
 		'allow_attach': 0,
 		'allow_copy': 1,
 		'allow_email': 1,
 		'allow_print': 1,
-		'colour': 'White:FFF',
+		'colour': u'White:FFF',
+		'default_print_format': u'Standard',
 		'doctype': 'DocType',
 		'hide_heading': 0,
 		'hide_toolbar': 0,
 		'in_create': 0,
 		'issingle': 1,
 		'menu_index': 4,
-		'module': 'Selling',
+		'module': u'Selling',
 		'name': '__common__',
 		'read_only': 1,
-		'section_style': 'Simple',
-		'server_code_error': ' ',
+		'section_style': u'Simple',
+		'server_code_error': u' ',
 		'show_in_menu': 1,
-		'version': 39
+		'version': 41
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'SMS Center',
-		'parentfield': 'fields',
-		'parenttype': 'DocType',
+		'parent': u'SMS Center',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
 		'permlevel': 0
 	},
 
 	# These values are common for all DocPerm
 	{
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'name': '__common__',
-		'parent': 'SMS Center',
-		'parentfield': 'permissions',
-		'parenttype': 'DocType',
+		'parent': u'SMS Center',
+		'parentfield': u'permissions',
+		'parenttype': u'DocType',
 		'read': 1,
-		'role': 'System Manager'
+		'role': u'System Manager'
 	},
 
 	# DocType, SMS Center
 	{
 		'doctype': 'DocType',
-		'name': 'SMS Center'
+		'name': u'SMS Center'
 	},
 
 	# DocPerm
 	{
 		'create': 1,
-		'doctype': 'DocPerm',
-		'idx': 1,
+		'doctype': u'DocPerm',
 		'permlevel': 0,
 		'write': 1
 	},
@@ -72,124 +72,112 @@
 	# DocPerm
 	{
 		'create': 0,
-		'doctype': 'DocPerm',
-		'idx': 2,
+		'doctype': u'DocPerm',
 		'permlevel': 1,
 		'write': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'column_break1',
-		'fieldtype': 'Column Break',
-		'idx': 1,
-		'width': '50%'
+		'doctype': u'DocField',
+		'fieldname': u'column_break1',
+		'fieldtype': u'Column Break',
+		'width': u'50%'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'send_to',
-		'fieldtype': 'Select',
-		'idx': 2,
-		'label': 'Send To',
-		'options': '\nAll Contact\nAll Customer Contact\nAll Supplier Contact\nAll Sales Partner Contact\nAll Lead (Open)\nAll Employee (Active)\nAll Sales Person',
-		'trigger': 'Client'
+		'doctype': u'DocField',
+		'fieldname': u'send_to',
+		'fieldtype': u'Select',
+		'label': u'Send To',
+		'options': u'\nAll Contact\nAll Customer Contact\nAll Supplier Contact\nAll Sales Partner Contact\nAll Lead (Open)\nAll Employee (Active)\nAll Sales Person',
+		'trigger': u'Client'
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'depends_on': "eval:doc.send_to=='All Customer Contact'",
-		'doctype': 'DocField',
-		'fieldname': 'customer',
-		'fieldtype': 'Link',
-		'idx': 3,
-		'label': 'Customer',
-		'options': 'Customer'
+		'colour': u'White:FFF',
+		'depends_on': u"eval:doc.send_to=='All Customer Contact'",
+		'doctype': u'DocField',
+		'fieldname': u'customer',
+		'fieldtype': u'Link',
+		'label': u'Customer',
+		'options': u'Customer'
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'depends_on': "eval:doc.send_to=='All Supplier Contact'",
-		'doctype': 'DocField',
-		'fieldname': 'supplier',
-		'fieldtype': 'Link',
-		'idx': 4,
-		'label': 'Supplier',
-		'options': 'Supplier'
+		'colour': u'White:FFF',
+		'depends_on': u"eval:doc.send_to=='All Supplier Contact'",
+		'doctype': u'DocField',
+		'fieldname': u'supplier',
+		'fieldtype': u'Link',
+		'label': u'Supplier',
+		'options': u'Supplier'
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'depends_on': "eval:doc.send_to=='All Employee (Active)'",
-		'doctype': 'DocField',
-		'fieldname': 'department',
-		'fieldtype': 'Select',
-		'idx': 5,
-		'label': 'Department',
-		'options': 'link:Department'
+		'colour': u'White:FFF',
+		'depends_on': u"eval:doc.send_to=='All Employee (Active)'",
+		'doctype': u'DocField',
+		'fieldname': u'department',
+		'fieldtype': u'Select',
+		'label': u'Department',
+		'options': u'link:Department'
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'depends_on': "eval:doc.send_to=='All Employee (Active)'",
-		'doctype': 'DocField',
-		'fieldname': 'branch',
-		'fieldtype': 'Select',
-		'idx': 6,
-		'label': 'Branch',
-		'options': 'link:Branch'
+		'colour': u'White:FFF',
+		'depends_on': u"eval:doc.send_to=='All Employee (Active)'",
+		'doctype': u'DocField',
+		'fieldname': u'branch',
+		'fieldtype': u'Select',
+		'label': u'Branch',
+		'options': u'link:Branch'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Button',
-		'idx': 7,
-		'label': 'Create Receiver List',
-		'options': 'create_receiver_list'
+		'doctype': u'DocField',
+		'fieldtype': u'Button',
+		'label': u'Create Receiver List',
+		'options': u'create_receiver_list'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'receiver_list',
-		'fieldtype': 'Code',
-		'idx': 8,
-		'label': 'Receiver List'
+		'doctype': u'DocField',
+		'fieldname': u'receiver_list',
+		'fieldtype': u'Code',
+		'label': u'Receiver List'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'column_break9',
-		'fieldtype': 'Column Break',
-		'idx': 9,
-		'width': '50%'
+		'doctype': u'DocField',
+		'fieldname': u'column_break9',
+		'fieldtype': u'Column Break',
+		'width': u'50%'
 	},
 
 	# DocField
 	{
-		'description': 'Message greater than 160 character will be splitted into multiple mesage',
-		'doctype': 'DocField',
-		'fieldname': 'message',
-		'fieldtype': 'Text',
-		'idx': 10,
-		'label': 'Message',
+		'description': u'Message greater than 160 character will be splitted into multiple mesage',
+		'doctype': u'DocField',
+		'fieldname': u'message',
+		'fieldtype': u'Text',
+		'label': u'Message',
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Button',
-		'idx': 11,
-		'label': 'Send SMS',
-		'options': 'send_sms'
+		'doctype': u'DocField',
+		'fieldtype': u'Button',
+		'label': u'Send SMS',
+		'options': u'send_sms'
 	}
 ]

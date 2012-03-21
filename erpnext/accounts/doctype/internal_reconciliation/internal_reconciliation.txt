@@ -5,7 +5,7 @@
 	{
 		'creation': '2011-08-30 11:45:50',
 		'docstatus': 0,
-		'modified': '2012-03-21 12:25:18',
+		'modified': '2012-03-21 12:55:31',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -22,7 +22,7 @@
 		'name': '__common__',
 		'section_style': u'Simple',
 		'show_in_menu': 1,
-		'version': 36
+		'version': 37
 	},
 
 	# These values are common for all DocField
