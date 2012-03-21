@@ -560,10 +560,12 @@ def send_notification(new_rv):
 			<table cellspacing= "5" cellpadding="5"  width = "100%%">
 				<tr>
 					<td width = "50%%"><b>Customer</b><br>%s<br>%s</td>
-					<td width = "50%%">Invoice Date: %s<br>Period: %s to %s <br>Due Date: %s</td>
+					<td width = "50%%">Invoice Date	   : %s<br>Invoice Period : %s to %s <br>Due Date	   : %s</td>
 				</tr>
 			</table>
-		''' % (com, new_rv.doc.name, new_rv.doc.customer, new_rv.doc.address_display, new_rv.doc.posting_date, add_days(add_months(new_rv.doc.posting_date, -1), 1), new_rv.doc.posting_date, new_rv.doc.due_date)
+		''' % (com, new_rv.doc.name, new_rv.doc.customer, new_rv.doc.address_display, getdate(new_rv.doc.posting_date).strftime("%d-%m-%Y"), \
+		getdate(add_days(add_months(new_rv.doc.posting_date, -1), 1)).strftime("%d-%m-%Y"), getdate(new_rv.doc.posting_date).strftime("%d-%m-%Y"),\
+		getdate(new_rv.doc.due_date).strftime("%d-%m-%Y"))
 	
 	
 	tbl = '''<table border="1px solid #CCC" width="100%%" cellpadding="0px" cellspacing="0px">
@@ -596,14 +598,13 @@ def send_notification(new_rv):
 							</table>
 						</td>
 					</tr>
-					<tr><td>Terms:</td></tr>
+					<tr><td>Terms and Conditions:</td></tr>
 					<tr><td>%s</td></tr>
 				</table>
-			''' % (new_rv.doc.net_total, new_rv.doc.total_tax,new_rv.doc.grand_total, new_rv.doc.in_words,new_rv.doc.terms)
+			''' % (new_rv.doc.net_total, new_rv.doc.other_charges_total,new_rv.doc.grand_total, new_rv.doc.in_words,new_rv.doc.terms)
 
 
 	msg = hd + tbl + totals
-	msgprint(msg)
 	from webnotes.utils.email_lib import sendmail
-	#sendmail(recipients = new_rv.doc.notification_email_address.split(", "), \
-	#	sender=new_rv.doc.owner, subject=subject, parts=[['text/plain', msg]])
+	sendmail(recipients = new_rv.doc.notification_email_address.split(", "), \
+		sender=new_rv.doc.owner, subject=subject, parts=[['text/plain', msg]])
