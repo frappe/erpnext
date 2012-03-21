@@ -162,7 +162,7 @@ cur_frm.cscript.is_opening = function(doc, dt, dn) {
 
 // Recalculate Button
 // -------------------
-cur_frm.cscript['Recalculate'] = function(doc, dt, dn) {
+cur_frm.cscript['Recalculate'] = function(doc, cdt, cdn) {
 	cur_frm.cscript['Calculate Tax'](doc,cdt,cdn);
 	calc_total_advance(doc,cdt,cdn);
 }

@@ -81,12 +81,12 @@ class TransactionBase:
 			cond = 'name="%s"' % address_name	
 
 		if is_shipping_address:
-			details = webnotes.conn.sql("select name, address_line1, address_line2, city, country, pincode, state, phone from `tabAddress` where %s and docstatus != 2 order by is_shipping_address desc limit 1" % cond, as_dict = 1)
+			details = webnotes.conn.sql("select name, address_line1, address_line2, city, country, pincode, state, phone, fax from `tabAddress` where %s and docstatus != 2 order by is_shipping_address desc limit 1" % cond, as_dict = 1)
 		else:
-			details = webnotes.conn.sql("select name, address_line1, address_line2, city, country, pincode, state, phone from `tabAddress` where %s and docstatus != 2 order by is_primary_address desc limit 1" % cond, as_dict = 1)
+			details = webnotes.conn.sql("select name, address_line1, address_line2, city, country, pincode, state, phone, fax from `tabAddress` where %s and docstatus != 2 order by is_primary_address desc limit 1" % cond, as_dict = 1)
 		
 		extract = lambda x: details and details[0] and details[0].get(x,'') or ''
-		address_fields = [('','address_line1'),('\n','address_line2'),('\n','city'),(' ','pincode'),('\n','state'),('\n','country'),('\nPhone: ','phone')]
+		address_fields = [('','address_line1'),('\n','address_line2'),('\n','city'),(' ','pincode'),('\n','state'),('\n','country'),('\nPhone: ','phone'),('\nFax: ', 'fax')]
 		address_display = ''.join([a[0]+extract(a[1]) for a in address_fields if extract(a[1])])
 		if address_display.startswith('\n'): address_display = address_display[1:]		
 
