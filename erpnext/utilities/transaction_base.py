@@ -145,7 +145,7 @@ class TransactionBase:
 	# Get Lead Details
 	# -----------------------
 	def get_lead_details(self, name):		
-		details = webnotes.conn.sql("select name, lead_name, address_line1, address_line2, city, country, state, pincode, territory, contact_no, mobile_no, email_id from `tabLead` where name = '%s'" %(name), as_dict = 1)		
+		details = webnotes.conn.sql("select name, lead_name, address_line1, address_line2, city, country, state, pincode, territory, contact_no, mobile_no, email_id, company_name from `tabLead` where name = '%s'" %(name), as_dict = 1)		
 		
 		extract = lambda x: details and details[0] and details[0].get(x,'') or ''
 		address_fields = [('','address_line1'),('\n','address_line2'),('\n','city'),(' ','pincode'),('\n','state'),('\n','country'),('\nPhone: ','contact_no')]
@@ -157,7 +157,8 @@ class TransactionBase:
 			'address_display' : address_display,
 			'territory' : extract('territory'),
 			'contact_mobile' : extract('mobile_no'),
-			'contact_email' : extract('email_id')
+			'contact_email' : extract('email_id'),
+			'organization' : extract('company_name')
 		}
 		return ret
 		
