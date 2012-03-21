@@ -451,19 +451,19 @@
 
 	# DocField
 	{
-		'depends_on': u"eval:doc.purpose == 'Others'",
+		'depends_on': u"eval:doc.purpose == 'Other'",
 		'doctype': u'DocField',
 		'fieldname': u'bom_no',
 		'fieldtype': u'Link',
 		'label': u'BOM No',
-		'options': u'Bill of Materials',
+		'options': u'Bill Of Materials',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
 		'colour': u'White:FFF',
-		'depends_on': u"eval:doc.purpose == 'Others'",
+		'depends_on': u"eval:doc.purpose == 'Other'",
 		'description': u'Select "Yes" if stock is maintained and tracked for sub-assembly items. Select "No" if you want child items of sub-assembly for material transfer.',
 		'doctype': u'DocField',
 		'fieldname': u'consider_sa_items_as_raw_materials',
