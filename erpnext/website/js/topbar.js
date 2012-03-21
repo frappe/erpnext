@@ -24,7 +24,7 @@ wn.provide('erpnext.navbar');
 </li>\
 */
 
-erpnext.navbar.navbar = Class.extend({
+erpnext.navbar.Navbar = Class.extend({
 	init: function() {
 		this.make();
 		$('.brand').html(wn.boot.website_settings.brand_html);
@@ -113,5 +113,5 @@ erpnext.Footer = Class.extend({
 
 $(document).bind('startup', function() {
 //	erpnext.footer = new erpnext.Footer();
-//	erpnext.navbar.navbar = new erpnext.navbar.navbar();	
+	erpnext.navbar.navbar = new erpnext.navbar.Navbar();	
 })
