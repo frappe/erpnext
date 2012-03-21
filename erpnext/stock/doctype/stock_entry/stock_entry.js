@@ -25,14 +25,14 @@ var cfn_set_fields = function(doc, cdt, cdn) {
   lst = ['supplier','supplier_name','supplier_address','customer','customer_name','customer_address'];
   hide_field(lst);  
 
-  if (doc.purpose == 'Production Order' || doc.purpose == 'Others'){
+  if (doc.purpose == 'Production Order' || doc.purpose == 'Other'){
     unhide_field('Get Items');
     hide_field(['from_warehouse', 'to_warehouse','purchase_receipt_no','delivery_note_no', 'sales_invoice_no','Warehouse HTML', 'transporter', 'is_excisable_goods', 'excisable_goods']);
 	if (doc.purpose=='Production Order') unhide_field(['production_order', 'process']);
     
 	doc.from_warehouse = '';
     doc.to_warehosue = '';
-    if (doc.process == 'Backflush' || doc.purpose == 'Others'){
+    if (doc.process == 'Backflush' || doc.purpose == 'Other'){
       unhide_field('fg_completed_qty');
     }
     else{
