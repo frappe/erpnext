@@ -197,5 +197,10 @@ patch_list = [
 		'patch_file': 'reload_quote',
 		'description': 'reload quote: organization fld added' 
 	},
+	{
+		'patch_module': 'patches.jan_mar_2012',
+		'patch_file': 'update_purpose_se',
+		'description': 'Purpose SE: Others to Other' 
+	},
 
 ]
