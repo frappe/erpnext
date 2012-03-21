@@ -123,7 +123,10 @@ class DocType(TransactionBase):
 
 	def get_pv_details(self, arg):
 		import json
-		item_det = sql("select item_name, brand, description, item_group,purchase_account,cost_center from tabItem where name=%s",arg,as_dict=1)
+		item_det = sql("select item_name, brand, description, item_group,purchase_account,cost_center, last_purchase_rate from tabItem where name=%s",arg,as_dict=1)
+		lpr = item_det and flt(item_det[0]['last_purchase_rate']) or 0
+		import_lpr = lpr / flt(self.doc.conversion_rate) or 1
+
 		tax = sql("select tax_type, tax_rate from `tabItem Tax` where parent = %s" , arg)
 		t = {}
 		for x in tax: t[x[0]] = flt(x[1])
@@ -132,13 +135,17 @@ class DocType(TransactionBase):
 			'brand' : item_det and item_det[0]['brand'] or '',
 			'description' : item_det and item_det[0]['description'] or '',
 			'item_group'	: item_det and item_det[0]['item_group'] or '',
-			'rate' : 0.00,
+			'rate' : lpr,
+			'purchase_ref_rate' : lpr,
+			'import_ref_rate' : import_lpr,
+			'import_rate' : import_lpr,
 			'qty' : 0.00,
 			'amount' : 0.00,
 			'expense_head' : item_det and item_det[0]['purchase_account'] or '',
 			'cost_center' : item_det and item_det[0]['cost_center'] or '',
 			'item_tax_rate'			: json.dumps(t)
 		}
+
 		return ret
 
 
