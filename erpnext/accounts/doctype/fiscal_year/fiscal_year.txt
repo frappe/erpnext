@@ -5,205 +5,193 @@
 	{
 		'creation': '2010-08-08 17:09:02',
 		'docstatus': 0,
-		'modified': '2011-01-03 17:52:39',
-		'modified_by': 'umair@iwebnotes.com',
-		'owner': 'Administrator'
+		'modified': '2012-03-21 12:31:26',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1307707462',
+		'_last_update': u'1322549700',
 		'allow_trash': 1,
-		'autoname': 'field:year',
-		'colour': 'White:FFF',
+		'autoname': u'field:year',
+		'colour': u'White:FFF',
+		'default_print_format': u'Standard',
 		'doctype': 'DocType',
-		'document_type': 'Master',
-		'module': 'Accounts',
+		'document_type': u'Master',
+		'module': u'Accounts',
 		'name': '__common__',
-		'section_style': 'Tabbed',
-		'server_code_error': ' ',
+		'section_style': u'Tabbed',
+		'server_code_error': u' ',
 		'show_in_menu': 0,
-		'version': 54
+		'version': 56
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Fiscal Year',
-		'parentfield': 'fields',
-		'parenttype': 'DocType'
+		'parent': u'Fiscal Year',
+		'parentfield': u'fields',
+		'parenttype': u'DocType'
 	},
 
 	# These values are common for all DocPerm
 	{
 		'cancel': 1,
 		'create': 1,
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'name': '__common__',
-		'parent': 'Fiscal Year',
-		'parentfield': 'permissions',
-		'parenttype': 'DocType',
+		'parent': u'Fiscal Year',
+		'parentfield': u'permissions',
+		'parenttype': u'DocType',
 		'permlevel': 0,
 		'read': 1,
-		'role': 'System Manager',
+		'role': u'System Manager',
 		'write': 1
 	},
 
 	# DocType, Fiscal Year
 	{
 		'doctype': 'DocType',
-		'name': 'Fiscal Year'
+		'name': u'Fiscal Year'
 	},
 
 	# DocPerm
 	{
 		'amend': 0,
-		'doctype': 'DocPerm',
-		'idx': 1,
+		'doctype': u'DocPerm',
 		'submit': 0
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm',
-		'idx': 2
+		'doctype': u'DocPerm'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Section Break',
-		'idx': 1,
-		'label': 'Year Details',
-		'oldfieldtype': 'Section Break',
+		'doctype': u'DocField',
+		'fieldtype': u'Section Break',
+		'label': u'Year Details',
+		'oldfieldtype': u'Section Break',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'trash_reason',
-		'fieldtype': 'Small Text',
-		'idx': 2,
-		'label': 'Trash Reason',
-		'oldfieldname': 'trash_reason',
-		'oldfieldtype': 'Small Text',
+		'doctype': u'DocField',
+		'fieldname': u'trash_reason',
+		'fieldtype': u'Small Text',
+		'label': u'Trash Reason',
+		'oldfieldname': u'trash_reason',
+		'oldfieldtype': u'Small Text',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'year',
-		'fieldtype': 'Data',
-		'idx': 3,
-		'label': 'Year Name',
-		'oldfieldname': 'year',
-		'oldfieldtype': 'Data',
+		'doctype': u'DocField',
+		'fieldname': u'year',
+		'fieldtype': u'Data',
+		'label': u'Year Name',
+		'oldfieldname': u'year',
+		'oldfieldtype': u'Data',
 		'permlevel': 0,
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'abbreviation',
-		'fieldtype': 'Data',
-		'idx': 4,
-		'label': 'Abbreviation',
-		'oldfieldname': 'abbreviation',
-		'oldfieldtype': 'Data',
+		'doctype': u'DocField',
+		'fieldname': u'abbreviation',
+		'fieldtype': u'Data',
+		'label': u'Abbreviation',
+		'oldfieldname': u'abbreviation',
+		'oldfieldtype': u'Data',
 		'permlevel': 0,
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'year_start_date',
-		'fieldtype': 'Date',
-		'idx': 5,
-		'label': 'Year Start Date',
-		'oldfieldname': 'year_start_date',
-		'oldfieldtype': 'Date',
+		'doctype': u'DocField',
+		'fieldname': u'year_start_date',
+		'fieldtype': u'Date',
+		'label': u'Year Start Date',
+		'oldfieldname': u'year_start_date',
+		'oldfieldtype': u'Date',
 		'permlevel': 0,
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'is_fiscal_year_closed',
-		'fieldtype': 'Select',
-		'idx': 6,
-		'label': 'Year Closed',
-		'oldfieldname': 'is_fiscal_year_closed',
-		'oldfieldtype': 'Select',
-		'options': '\nNo\nYes',
+		'doctype': u'DocField',
+		'fieldname': u'is_fiscal_year_closed',
+		'fieldtype': u'Select',
+		'label': u'Year Closed',
+		'oldfieldname': u'is_fiscal_year_closed',
+		'oldfieldtype': u'Select',
+		'options': u'\nNo\nYes',
 		'permlevel': 0,
 		'reqd': 0
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'description': "Click on the button below to reset balances from your previous year's closing and repost your balances. You can use this if your previous year balance sheet has been changed and you wish to update your current accounts.",
-		'doctype': 'DocField',
-		'fieldtype': 'Section Break',
-		'idx': 7,
-		'label': 'Repost Accounts',
-		'oldfieldtype': 'Section Break',
+		'colour': u'White:FFF',
+		'description': u"Click on the button below to reset balances from your previous year's closing and repost your balances. You can use this if your previous year balance sheet has been changed and you wish to update your current accounts.",
+		'doctype': u'DocField',
+		'fieldtype': u'Section Break',
+		'label': u'Repost Accounts',
+		'oldfieldtype': u'Section Break',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'past_year',
-		'fieldtype': 'Select',
-		'idx': 8,
-		'label': 'Past Year',
-		'oldfieldname': 'past_year',
-		'oldfieldtype': 'Select',
-		'options': 'link:Fiscal Year',
+		'doctype': u'DocField',
+		'fieldname': u'past_year',
+		'fieldtype': u'Select',
+		'label': u'Past Year',
+		'oldfieldname': u'past_year',
+		'oldfieldtype': u'Select',
+		'options': u'link:Fiscal Year',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'company',
-		'fieldtype': 'Link',
-		'idx': 9,
-		'in_filter': 1,
-		'label': 'Company',
-		'oldfieldname': 'company',
-		'oldfieldtype': 'Link',
-		'options': 'Company',
+		'doctype': u'DocField',
+		'fieldname': u'company',
+		'fieldtype': u'Link',
+		'in_filter': 0,
+		'label': u'Company',
+		'oldfieldname': u'company',
+		'oldfieldtype': u'Link',
+		'options': u'Company',
 		'permlevel': 0,
 		'search_index': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Button',
-		'idx': 10,
-		'label': 'Repost Account Balances',
-		'oldfieldtype': 'Button',
-		'options': 'repost',
+		'doctype': u'DocField',
+		'fieldtype': u'Button',
+		'label': u'Repost Account Balances',
+		'oldfieldtype': u'Button',
+		'options': u'repost',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Button',
-		'idx': 11,
-		'label': 'Repost Voucher Outstanding',
-		'oldfieldtype': 'Button',
-		'options': 'update_voucher_outstanding',
+		'doctype': u'DocField',
+		'fieldtype': u'Button',
+		'label': u'Repost Voucher Outstanding',
+		'oldfieldtype': u'Button',
+		'options': u'update_voucher_outstanding',
 		'permlevel': 0
 	}
 ]

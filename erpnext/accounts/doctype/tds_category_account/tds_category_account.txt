@@ -5,33 +5,34 @@
 	{
 		'creation': '2010-08-08 17:09:27',
 		'docstatus': 0,
-		'modified': '2010-09-20 14:06:57',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-21 12:29:18',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'colour': 'White:FFF',
+		'colour': u'White:FFF',
+		'default_print_format': u'Standard',
 		'doctype': 'DocType',
 		'istable': 1,
-		'module': 'Accounts',
+		'module': u'Accounts',
 		'name': '__common__',
-		'section_style': 'Tray',
-		'server_code_error': ' ',
+		'section_style': u'Tray',
+		'server_code_error': u' ',
 		'show_in_menu': 0,
-		'version': 1
+		'version': 2
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Link',
+		'doctype': u'DocField',
+		'fieldtype': u'Link',
 		'name': '__common__',
-		'oldfieldtype': 'Link',
-		'parent': 'TDS Category Account',
-		'parentfield': 'fields',
-		'parenttype': 'DocType',
+		'oldfieldtype': u'Link',
+		'parent': u'TDS Category Account',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
 		'permlevel': 0,
 		'reqd': 1
 	},
@@ -39,28 +40,26 @@
 	# DocType, TDS Category Account
 	{
 		'doctype': 'DocType',
-		'name': 'TDS Category Account'
+		'name': u'TDS Category Account'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'company',
-		'idx': 2,
+		'doctype': u'DocField',
+		'fieldname': u'company',
 		'in_filter': 1,
-		'label': 'Company',
-		'oldfieldname': 'company',
-		'options': 'Company',
+		'label': u'Company',
+		'oldfieldname': u'company',
+		'options': u'Company',
 		'search_index': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'account_head',
-		'idx': 3,
-		'label': 'Account Head',
-		'oldfieldname': 'account_head',
-		'options': 'Account'
+		'doctype': u'DocField',
+		'fieldname': u'account_head',
+		'label': u'Account Head',
+		'oldfieldname': u'account_head',
+		'options': u'Account'
 	}
 ]
