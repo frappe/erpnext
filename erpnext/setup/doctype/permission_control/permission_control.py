@@ -57,22 +57,31 @@ class DocType:
 	# Get Perm Level, Perm type of Doctypes of Module and Role Selected
 	# -------------------------------------------------------------------
 	def get_permissions(self,doctype):
-		ret = []
-			
-		# Get permtype for the role selected
-		ptype = sql("select `role`,`permlevel`,`read`,`write`,`create`,`submit`,`cancel`,`amend` from tabDocPerm where `parent` = %s order by `permlevel` ASC",doctype,as_dict = 1)
+		import webnotes.model.doctype
+		doclist = webnotes.model.doctype.get(doctype, form=0)
+		
+		ptype = [{
+				'role': perm.role,
+				'permlevel': cint(perm.permlevel),
+				'read': cint(perm.read),
+				'write': cint(perm.write),
+				'create': cint(perm.create),
+				'cancel': cint(perm.cancel),
+				'submit': cint(perm.submit),
+				'amend': cint(perm.amend)
+				} for perm in sorted(doclist,
+					key=lambda d: [d.fields.get('permlevel'),
+						d.fields.get('role')]) if perm.doctype=='DocPerm']
 
-		# to convert 0L in 0 in values of dictionary
-		for p in ptype:
-			for key in p:
-				if key!='role':
-					p[key] = cint(p[key])
-			ret.append(p)
-						
-		# fields list
-		fl = ['', 'owner'] + [l[0] for l in sql("select fieldname from tabDocField where parent=%s and fieldtype='Link' and ifnull(options,'')!=''", doctype)]
-						
-		return {'perms':ret, 'fields':fl}
+		fl = ['', 'owner'] + [d.fieldname for d in doclist \
+				if d.doctype=='DocField' and d.fieldtype=='Link' \
+				and cstr(d.options)!='']
+
+		return {
+			'perms':ptype,
+			'fields':fl,
+			'is_submittable': doclist[0].fields.get('is_submittable')
+		}
 		
 	# get default values
 	# ------------------

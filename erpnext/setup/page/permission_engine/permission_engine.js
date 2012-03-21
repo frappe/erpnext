@@ -148,9 +148,13 @@ pscript.PermEngine.prototype.get_permissions = function() {
 		 // Get permissions
 		if(r.message.perms.length) {
 			me.get_results(r.message);
+			pscript.is_submittable = cint(r.message.is_submittable);
 		}
-		else me.body.innerHTML = '<div style = "color : red; margin:8px 0px;">No Records Found</div>'
-		pscript.show_submittable();
+		else {
+			me.body.innerHTML = '<div style = "color : red; margin:8px 0px;">No Records Found</div>'
+			pscript.is_submittable = 0;
+		}
+		pscript.hide_submit_amend()
 	});
 }
 
@@ -171,6 +175,7 @@ pscript.PermEngine.prototype.get_results = function(r){
 	
 	var head = $a(this.body, 'h3'); head.innerHTML = 'Rules for ' + doctype;				
 	var permt = make_table(me.body, perms.length+1,9,'80%',[],{border:'1px solid #AAA', padding:'3px', verticalAlign:'middle', height:'30px'});
+	$(permt).attr('id', 'perm_table');
 		
 	// Create Grid for particular DocType
 	// ------------------------------------
@@ -203,9 +208,7 @@ pscript.PermEngine.prototype.get_results = function(r){
 			var val = perms[l][$td(permt,0,m+2).fieldname];
 			if(val == 1) chk.checked = 1;
 			else chk.checked = 0;
-
-			if(m==3) { chk.onclick = pscript.show_submittable }
-
+			//if(m==3) { chk.onclick = pscript.show_submittable }
 			chk.doctype = doctype;
 			chk.permlevel = perms[l].permlevel; chk.perm_type = col_labels[m+2].toLowerCase(); chk.role = perms[l].role;
 			pscript.all_checkboxes.push(chk);
@@ -214,21 +217,18 @@ pscript.PermEngine.prototype.get_results = function(r){
 	
 	// add selects for match
 	me.add_match_select(r, perms, permt, doctype);
+
 }
 
-// Show submittable warning
-pscript.show_submittable = function() {
-	var submittable = 0;
-	for(i in pscript.all_checkboxes) {
-		c = pscript.all_checkboxes[i];
-		if(c.perm_type=='submit' && c.checked) {
-			submittable = 1;
-			break;
-		}
-	}
-	if(submittable) {
+pscript.hide_submit_amend = function() {
+	var perm_table = $('#perm_table');
+	if (pscript.is_submittable) {
+		perm_table.find('td:nth-child(6)').each(function() { $(this).toggle(true); });
+		perm_table.find('td:nth-child(8)').each(function() { $(this).toggle(true); });
 		$('#submittable_warning').toggle(true);
 	} else {
+		perm_table.find('td:nth-child(6)').each(function() { $(this).toggle(false); });
+		perm_table.find('td:nth-child(8)').each(function() { $(this).toggle(false); });
 		$('#submittable_warning').toggle(false);
 	}
 }
@@ -537,6 +537,22 @@ pscript.PermEngine.prototype.update_permissions = function() {
 		var s = pscript.all_matches[i];
 		if(sel_val(s))
 			add_to_out(s.details.parent, s.details.permlevel, s.details.role, 'match', sel_val(s));
+	}
+
+	if(pscript.is_submittable) {
+		var doctype = sel_val(me.type_select);
+		var validated = false;
+		for(var role in out[doctype][0]) {
+			if(out[doctype][0][role]['submit']) {
+				validated = true;
+				break;
+			};
+		}
+		if(!validated) {
+			msgprint("Atleast one Role at Level 0 needs to have submit permission. \
+					 Please rectify and try again.")
+			return;
+		}
 	}
 	
 	var args = "{'perm_dict': "+JSON.stringify(out)+"}"
