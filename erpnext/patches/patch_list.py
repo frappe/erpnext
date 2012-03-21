@@ -202,5 +202,10 @@ patch_list = [
 		'patch_file': 'update_purpose_se',
 		'description': 'Purpose SE: Others to Other' 
 	},
+	{
+		'patch_module': 'patches.jan_mar_2012',
+		'patch_file': 'update_se_fld_options',
+		'description': 'Purpose SE: Others to Other' 
+	},
 
 ]
