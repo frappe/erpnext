@@ -231,7 +231,7 @@ class DocType:
 			bom_no = pro_obj.doc.bom_no
 			fg_qty = (self.doc.process == 'Backflush') and flt(self.doc.fg_completed_qty) or flt(pro_obj.doc.qty)
 			consider_sa_items_as_rm = pro_obj.doc.consider_sa_items
-		elif self.doc.purpose == 'Others':
+		elif self.doc.purpose == 'Other':
 			self.validate_bom_no()
 			bom_no = self.doc.bom_no
 			fg_qty = self.doc.fg_completed_qty
@@ -249,7 +249,7 @@ class DocType:
 			sw = ''
 			tw = cstr(pro_obj.doc.fg_warehouse)	
 			fg_item_dict = {cstr(pro_obj.doc.production_item) : [self.doc.fg_completed_qty, pro_obj.doc.description, pro_obj.doc.stock_uom]}
-		elif self.doc.purpose == 'Others' and self.doc.bom_no:
+		elif self.doc.purpose == 'Other' and self.doc.bom_no:
 			sw, tw = '', ''
 			item = sql("select item, description, uom from `tabBill Of Materials` where name = %s", self.doc.bom_no, as_dict=1)
 			fg_item_dict = {item[0]['item'] : [self.doc.fg_completed_qty, item[0]['description'], item[0]['uom']]}
@@ -427,7 +427,7 @@ class DocType:
 					if cstr(d.s_warehouse) != cstr(pro_obj.doc.wip_warehouse):
 						msgprint("As Item %s is Raw Material. Source Warehouse should be same as WIP Warehouse %s in Production Order %s, at Row No %s. " % ( cstr(d.item_code), cstr(pro_obj.doc.wip_warehouse), cstr(pro_obj.doc.name), cstr(d.idx)))
 						raise Exception
-			if d.fg_item and (self.doc.purpose == 'Others' or self.doc.process == 'Backflush'):
+			if d.fg_item and (self.doc.purpose == 'Other' or self.doc.process == 'Backflush'):
 				fg_qty = flt(fg_qty) + flt(d.transfer_qty)
 
 			d.save()
