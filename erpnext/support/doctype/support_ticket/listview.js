@@ -23,6 +23,7 @@ wn.doclistviews['Support Ticket'] = wn.views.ListView.extend({
 		}
 		else if(data.status=='Waiting for Customer') {
 			data.label_type = 'info'
+			data.status = 'Waiting'
 		}
 		data.status_html = repl('<span class="label label-%(label_type)s">%(status)s</span>', data);
 		
@@ -35,9 +36,9 @@ wn.doclistviews['Support Ticket'] = wn.views.ListView.extend({
 	columns: [
 		{width: '5%', content:'avatar'},
 		{width: '3%', content:'docstatus'},
-		{width: '12%', content:'name'},
+		{width: '15%', content:'name'},
 		{width: '8%', content:'status_html'},		
-		{width: '62%', content:'tags+subject+description', css: {color:'#aaa'}},
+		{width: '60%', content:'tags+subject+description', css: {color:'#aaa'}},
 		{width: '10%', content:'modified', css: {'text-align': 'right', 'color':'#777'}}
 	]
 
