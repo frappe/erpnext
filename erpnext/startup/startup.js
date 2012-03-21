@@ -49,14 +49,14 @@ erpnext.startup.start = function() {
 	
 	erpnext.startup.set_globals();
 
-	if(wn.boot.custom_css) {
-		set_style(wn.boot.custom_css);
-	}
 	if(wn.boot.user_background) {
 		erpnext.set_user_background(wn.boot.user_background);
 	}
 		
 	if(user == 'Guest'){
+		if(wn.boot.custom_css) {
+			set_style(wn.boot.custom_css);
+		}
 		if(wn.boot.website_settings.title_prefix) {
 			wn.title_prefix = wn.boot.website_settings.title_prefix;
 		}
