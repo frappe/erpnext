@@ -5,14 +5,14 @@
 	{
 		'creation': '2010-08-08 17:09:25',
 		'docstatus': 0,
-		'modified': '2012-03-20 14:28:17',
+		'modified': '2012-03-21 11:00:48',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': u'1332225743',
+		'_last_update': u'1332233897',
 		'allow_attach': 0,
 		'allow_copy': 0,
 		'allow_email': 0,
@@ -41,7 +41,7 @@
 		'subject': u'%(remarks)s',
 		'tag_fields': u'purpose',
 		'use_template': 0,
-		'version': 258
+		'version': 259
 	},
 
 	# These values are common for all DocField
@@ -234,7 +234,7 @@
 		'no_copy': 0,
 		'oldfieldname': u'purpose',
 		'oldfieldtype': u'Select',
-		'options': u'Material Issue\nMaterial Receipt\nMaterial Transfer\nSales Return\nPurchase Return\nSubcontracting\nProduction Order\nOthers',
+		'options': u'Material Issue\nMaterial Receipt\nMaterial Transfer\nSales Return\nPurchase Return\nSubcontracting\nProduction Order\nOther',
 		'permlevel': 0,
 		'report_hide': 0,
 		'reqd': 1,
