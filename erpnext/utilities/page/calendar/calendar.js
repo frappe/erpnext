@@ -24,7 +24,11 @@ pscript.onload_calendar = function(wrapper) {
 	if(!erpnext.calendar) {
 		erpnext.calendar = new Calendar();
 		erpnext.calendar.init(wrapper);
-		rename_observers.push(erpnext.calendar);
+
+		var me = this;
+		$(document).bind('rename', function(event, dt, old_name, new_name) {
+			erpnext.calendar.rename_notify(dt, old_name, new_name)
+		});
 	}
 }
 
@@ -63,7 +67,7 @@ Calendar.prototype.init=function (parent) {
 
 Calendar.prototype.rename_notify = function(dt, old_name, new_name) {
 	// calendar
-	if(dt = 'Event'){		
+	if(dt = 'Event'){
 		if(this.events_by_name[old_name]) {
 			delete this.events_by_name[old_name];
 		}

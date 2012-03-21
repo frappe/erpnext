@@ -72,15 +72,6 @@ cur_frm.cscript.make_address = function() {
 			parent: cur_frm.fields_dict['Address HTML'].wrapper,
 			page_length: 2,
 			new_doctype: "Address",
-			new_doc_onload: function(dn) {
-				ndoc = locals["Address"][dn];
-				ndoc.customer = cur_frm.doc.name;
-				ndoc.customer_name = cur_frm.doc.customer_name;
-				ndoc.address_type = 'Office';				
-			},
-			new_doc_onsave: function(dn) {				
-				cur_frm.address_list.run()				
-			},
 			get_query: function() {
 				return "select name, address_type, address_line1, address_line2, city, state, country, pincode, fax, email_id, phone, is_primary_address, is_shipping_address from tabAddress where customer='"+cur_frm.docname+"' and docstatus != 2 order by is_primary_address desc"
 			},
@@ -114,17 +105,6 @@ cur_frm.cscript.make_contact = function() {
 			parent: cur_frm.fields_dict['Contact HTML'].wrapper,
 			page_length: 2,
 			new_doctype: "Contact",
-			new_doc_onload: function(dn) {
-				ndoc = locals["Contact"][dn];
-				ndoc.customer = cur_frm.doc.name;
-				ndoc.customer_name = cur_frm.doc.customer_name;
-				if(cur_frm.doc.customer_type == 'Individual') {
-					ndoc.first_name = cur_frm.doc.customer_name;
-				}
-			},
-			new_doc_onsave: function(dn) {				
-				cur_frm.contact_list.run()
-			},
 			get_query: function() {
 				return "select name, first_name, last_name, email_id, phone, mobile_no, department, designation, is_primary_contact from tabContact where customer='"+cur_frm.docname+"' and docstatus != 2 order by is_primary_contact desc"
 			},
@@ -174,6 +154,7 @@ cur_frm.fields_dict['lead_name'].get_query = function(doc,dt,dn){
 // make quotation list
 // --------------------
 cur_frm.cscript.make_qtn_list = function(parent,doc){
+	wn.require('lib/js/legacy/widgets/listing.js');
 
 	var lst = new Listing();
 	lst.colwidths = ['5%','20%','20%','20%','20%','15%'];
@@ -191,6 +172,8 @@ cur_frm.cscript.make_qtn_list = function(parent,doc){
 // make so list
 // -------------
 cur_frm.cscript.make_so_list = function(parent,doc){
+	wn.require('lib/js/legacy/widgets/listing.js');
+
 	var lst = new Listing();
 	lst.colwidths = ['5%','20%','20%','30%','25%'];
 	lst.colnames = ['Sr.','Id','Status','Sales Order Date','Grand Total'];
@@ -207,6 +190,8 @@ cur_frm.cscript.make_so_list = function(parent,doc){
 // make dn list
 // -------------
 cur_frm.cscript.make_dn_list = function(parent,doc){
+	wn.require('lib/js/legacy/widgets/listing.js');
+
 	var lst = new Listing();
 	lst.colwidths = ['5%','20%','20%','20%','20%','15%'];
 	lst.colnames = ['Sr.','Id','Status','Delivery Note Date','Territory','Grand Total'];
@@ -223,6 +208,8 @@ cur_frm.cscript.make_dn_list = function(parent,doc){
 // make si list
 // -------------
 cur_frm.cscript.make_si_list = function(parent,doc){
+	wn.require('lib/js/legacy/widgets/listing.js');
+	
 	var lst = new Listing();
 	lst.colwidths = ['5%','20%','20%','20%','20%','15%'];
 	lst.colnames = ['Sr.','Id','Posting Date','Due Date','Debit To','Grand Total'];

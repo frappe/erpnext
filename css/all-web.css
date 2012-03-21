@@ -29,7 +29,7 @@ select, input, textarea {
 	border: 1px solid #ccc; 
 	-moz-border-radius: 4px;
 	-webkit-border-radius: 4px;
-	font-size: 13px;
+	font-size: inherit;
 	padding: 4px;
 	color: #444;
 	-webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
@@ -41,7 +41,7 @@ textarea {
 	font-family: inherit; 
 	height: 120px; 
 	width: 90%; 
-	font-size: 12px; 
+	font-size: inherit; 
 	white-space: normal;
 }
 
@@ -104,6 +104,15 @@ div.fix_ff_cursor { overflow: auto; }
 
 div.comment { color: #444; }
 
+.small {
+	font-size: 11px;
+}
+
+.help {
+	margin: 3px 0px;
+	color: #888;
+}
+
 div#body_div {
 	position: relative;
 	display: none;
@@ -113,13 +122,63 @@ div#body_div {
 	margin-top: 56px;
 }
 
-footer {
+.content {
 	width: 900px;
-	margin: auto;
+	margin-bottom: 30px;
+	position: absolute;
+	-webkit-transition:all 0.5s ease-in-out;
+	-moz-transition:all 0.5s ease-in-out;
+	-o-transition:all 0.5s ease-in-out;
+	-ms-transition:all 0.5s ease-in-out;	
+	transition:all 0.5s ease-in-out;
+}
+
+.background-fade-in {
+	-webkit-transition: background 1s ease-in; /* property duration timing-function delay */
+    -moz-transition: background 1s ease-in;
+    -o-transition: background 1s ease-in;
+    transition: background 1s ease-in;
+}
+
+/* selector for open pages */
+#opened-page-selector {
+	width: 900px;
+	height: 900px;
+	position: absolute;
+	z-index: 100;
+	opacity: 0;
+	background-color: #bdf;
+}
+
+#opened-page-selector.active {
+	opacity: 0.6;
+	cursor: pointer;
+}
+
+.popover-container {
+	height: 400px;
+}
+
+footer {
+	position: absolute;
+	bottom: 0px;
+	width: 100%;
 }
 header .container {
 	width: 900px;
 	margin: auto;
+}
+
+@media (max-width: 1200px) {
+	div#body_div, header .container, .content, #opened-page-selector, footer {
+		width: 900px;
+	}
+}
+
+@media (min-width: 1200px) {
+	div#body_div, header .container, .content, #opened-page-selector, footer {
+		width: 1100px;
+	}
 }
 
 div.no_script {
@@ -135,7 +194,6 @@ div.loading_div {
 	display: none;
 	text-align: center;
 	padding: 2px;
-	font-size: 12px;
 	border: 1px solid #FF4;
 }
 
@@ -160,27 +218,18 @@ div.std-footer-item {
 	-moz-border-radius: 5px;
 	border-radius: 5px;	
 }
-.gradient {
-	background: #ededed; /* Old browsers */
-	background: -moz-linear-gradient(top, #ededed 0%, #d1d1d1 47%, #b7b7b7 100%); /* FF3.6+ */
-	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#ededed), color-stop(47%,#d1d1d1), color-stop(100%,#b7b7b7)); /* Chrome,Safari4+ */
-	background: -webkit-linear-gradient(top, #ededed 0%,#d1d1d1 47%,#b7b7b7 100%); /* Chrome10+,Safari5.1+ */
-	background: -o-linear-gradient(top, #ededed 0%,#d1d1d1 47%,#b7b7b7 100%); /* Opera11.10+ */
-	background: -ms-linear-gradient(top, #ededed 0%,#d1d1d1 47%,#b7b7b7 100%); /* IE10+ */
-	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ededed', endColorstr='#b7b7b7',GradientType=0 ); /* IE6-9 */
-	background: linear-gradient(top, #ededed 0%,#d1d1d1 47%,#b7b7b7 100%); /* W3C */	
-}
 
 .layout_wrapper, .layout-wrapper {
-	-moz-box-shadow: 1px 1px 8px #555;
-	-webkit-box-shadow: 1px 1px 8px #555;
-	box-shadow: 1px 1px 8px #555;
+	-moz-box-shadow: 0px 0px 6px rgba(0,0,0,0.3);
+	-webkit-box-shadow: 0px 0px 6px rgba(0,0,0,0.3);
+	box-shadow: 0px 0px 6px rgba(0,0,0,0.3);
 	background-color: #fff;
 	padding: 15px;
+	margin-bottom: 30px;
 }
 
 .layout-wrapper-background {
-	background-color: #f2f2f2 !important;
+	background-color: #fafafa !important;
 	padding: 0px;
 }
 
@@ -189,7 +238,7 @@ div.std-footer-item {
 	float: left;
 	padding: 15px;
 	background-color: #FFF;
-	min-height: 450px;
+	min-height: 600px;
 	-moz-box-shadow:    7px 0px 6px -2px #ddd;
 	-webkit-box-shadow: 7px 0px 6px -2px #ddd;
 	box-shadow:         7px 0px 6px -2px #ddd;
@@ -198,10 +247,10 @@ div.std-footer-item {
 .layout-side-section {
 	width: 22%;
 	/*float: right;*/
-	color: #606060;
+	color: #606060; 
 	overflow-x: hidden;
 	padding: 15px;
-	min-height: 450px;
+	min-height: 600px;
 }
 
 /* from bootstrap */
@@ -236,12 +285,14 @@ div.std-footer-item {
 
 .avatar-small {
 	display: inline-block; 
-	min-width: 29px;
+	width: 24px;
+	height: 20px;
+	vertical-align: middle;
+	overflow: hidden;
+	margin: 0px 3px;
 }
 .avatar-small img {
-	height: 24px; 
-	margin-bottom: -7px;
-	max-width: 24px;
+	width: 24px; 
 }
 
 /*
@@ -448,6 +499,7 @@ h6 {
  *	lib/css/bootstrap/buttons.css
  */
 .close {
+  font-family: Helvetica, Sans;
   float: right;
   font-size: 20px;
   font-weight: bold;

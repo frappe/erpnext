@@ -76,7 +76,7 @@ erpnext.messages = {
 	// check for updates every 5 seconds if page is active
 	refresh: function() {
 		setTimeout(erpnext.messages.refresh, 10000);
-		if(page_body.cur_page_label != 'messages') return;
+		if(wn.container.page.label != 'messages') return;
 		erpnext.messages.show();
 	},
 	get_contact: function() {

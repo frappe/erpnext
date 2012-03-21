@@ -73,8 +73,8 @@ erpnext.startup.start = function() {
 
 		// border to the body
 		// ------------------
-		$('footer').html('<div class="web-footer erpnext-footer">\
-			<a href="#!attributions">ERPNext | Attributions and License</a></div>');
+		//$('footer').html('<div class="web-footer erpnext-footer">\
+		//	<a href="#!attributions">ERPNext | Attributions and License</a></div>');
 
 		// complete registration
 		if(in_list(user_roles,'System Manager') && (wn.boot.setup_complete=='No')) { 
@@ -107,14 +107,14 @@ show_chart_browser = function(nm, chart_type){
 var update_messages = function(reset) {
 	// Updates Team Messages
 	
-	if(inList(['Guest'], user)) { return; }
+	if(inList(['Guest'], user) || !wn.session_alive) { return; }
 
 	if(!reset) {
 		$c_page('home', 'event_updates', 'get_global_status_messages', null,
 			function(r,rt) {
 				if(!r.exc) {
 					// This function is defined in toolbar.js
-					page_body.wntoolbar.set_new_comments(r.message.unread_messages);
+					wn.container.wntoolbar.set_new_comments(r.message.unread_messages);
 					
 					var show_in_circle = function(parent_id, msg) {
 						var parent = $('#'+parent_id);
@@ -139,7 +139,7 @@ var update_messages = function(reset) {
 			}
 		);
 	} else {
-		page_body.wntoolbar.set_new_comments(0);
+		wn.container.wntoolbar.set_new_comments(0);
 		$('#unread_messages').toggle(false);
 	}
 }
