@@ -5,7 +5,7 @@
 	{
 		'creation': '2012-02-02 09:57:25',
 		'docstatus': 0,
-		'modified': '2012-03-20 11:25:05',
+		'modified': '2012-03-21 10:53:38',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -23,7 +23,7 @@
 		'name': '__common__',
 		'section_style': u'Simple',
 		'show_in_menu': 0,
-		'version': 14
+		'version': 15
 	},
 
 	# These values are common for all DocField
@@ -105,7 +105,7 @@
 		'fieldname': u'font_size',
 		'fieldtype': u'Select',
 		'label': u'Font Size',
-		'options': u'\n12px\n13px\n14px',
+		'options': u'\n12px\n13px\n14px\n15px\n16px',
 		'permlevel': 0
 	},
 

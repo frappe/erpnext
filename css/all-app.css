@@ -29,7 +29,7 @@ select, input, textarea {
 	border: 1px solid #ccc; 
 	-moz-border-radius: 4px;
 	-webkit-border-radius: 4px;
-	font-size: 13px;
+	font-size: inherit;
 	padding: 4px;
 	color: #444;
 	-webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
@@ -41,7 +41,7 @@ textarea {
 	font-family: inherit; 
 	height: 120px; 
 	width: 90%; 
-	font-size: 12px; 
+	font-size: inherit; 
 	white-space: normal;
 }
 
@@ -103,6 +103,15 @@ div.fix_ff_cursor { overflow: auto; }
 /* --- Layout --- */
 
 div.comment { color: #444; }
+
+.small {
+	font-size: 11px;
+}
+
+.help {
+	margin: 3px 0px;
+	color: #888;
+}
 
 div#body_div {
 	position: relative;
@@ -185,7 +194,6 @@ div.loading_div {
 	display: none;
 	text-align: center;
 	padding: 2px;
-	font-size: 12px;
 	border: 1px solid #FF4;
 }
 
@@ -391,24 +399,6 @@ div.grid_tbarlinks {
 }
 
 
-div.frm_tip_box {
-	margin: 0px;
-	padding: 8px;
-	background-color: #FFC;
-	display: none;
-	font-size: 11px;
-	border: 1px solid #FFB;
-}
-
-div.frm_tip_box table {
-	border-collapse: collapse;
-	vertical-align: top;
-}
-
-td.frm_tray_area {
-	width: 122px;
-}
-
 div.dialog_frm {
 	position: relative;
 	margin: 10px;
@@ -505,12 +495,6 @@ div.time_field select{
 .datainputcell { padding: 2px 0px; }
 
 
-.field_description, .help {
-	margin: 3px 0px;
-	font-size: 11px;
-	color: #888;
-}
-
 .help ol {
 	padding-left: 19px;
 }
@@ -519,9 +503,6 @@ div.time_field select{
 	margin-bottom: 3px;
 }
 
-.field_label {
-	font-size:11px;
-}
 .input_area input, select, textarea { 
 	font-size: 14px;
 	padding: 2px;
@@ -572,7 +553,6 @@ div.sidebar-comment-wrapper input {
 }
 div.sidebar-comment-message {
 	margin-top: 8px;
-	font-size: 11px;
 	color: #777;
 }
 
@@ -583,7 +563,6 @@ div.sidebar-comment-text {
 	color: #444;
 }
 div.sidebar-comment-info {
-	font-size: 10px;
 	color: #777;
 }
 
@@ -1103,7 +1082,7 @@ div.psidebar div.section {
 
 div.psidebar div.section-head {
 	padding: 5px 11px;
-	border-bottom: 2px solid #777;
+	border-bottom: 1px solid #aaa;
 }
 
 div.psidebar div.section-body {
@@ -1115,7 +1094,6 @@ div.psidebar div.section-item {
 }
 
 div.psidebar div.section-item, div.psidebar .section-link {
-	font-size: 11px;
 	color: #666;
 }
 
@@ -1759,7 +1737,7 @@ div.stat-bar {
 @font-face {
   font-family: 'Pontano Sans';
   font-style: normal;
-  font-weight: 400;
+  font-weight: 800;
   src: url('../lib/css/fonts/pontanosans.woff') format('woff');
 }
 

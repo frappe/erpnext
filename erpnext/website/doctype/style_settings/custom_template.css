@@ -12,6 +12,12 @@ body {
 {% endif %}
 }
 
+{% if doc.font_size %}
+.small {
+	font-size: {{ doc.small_font_size }} !important;
+}
+{% endif %}
+
 {% if doc.footer_font_color %}
 footer {
 	color: {{ doc.footer_font_color }};

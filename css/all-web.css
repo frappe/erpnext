@@ -29,7 +29,7 @@ select, input, textarea {
 	border: 1px solid #ccc; 
 	-moz-border-radius: 4px;
 	-webkit-border-radius: 4px;
-	font-size: 13px;
+	font-size: inherit;
 	padding: 4px;
 	color: #444;
 	-webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
@@ -41,7 +41,7 @@ textarea {
 	font-family: inherit; 
 	height: 120px; 
 	width: 90%; 
-	font-size: 12px; 
+	font-size: inherit; 
 	white-space: normal;
 }
 
@@ -103,6 +103,15 @@ div.fix_ff_cursor { overflow: auto; }
 /* --- Layout --- */
 
 div.comment { color: #444; }
+
+.small {
+	font-size: 11px;
+}
+
+.help {
+	margin: 3px 0px;
+	color: #888;
+}
 
 div#body_div {
 	position: relative;
@@ -185,7 +194,6 @@ div.loading_div {
 	display: none;
 	text-align: center;
 	padding: 2px;
-	font-size: 12px;
 	border: 1px solid #FF4;
 }
 

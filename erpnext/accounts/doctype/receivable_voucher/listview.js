@@ -9,36 +9,24 @@ wn.doclistviews['Receivable Voucher'] = wn.views.ListView.extend({
 			"`tabReceivable Voucher`.currency", 
 			"ifnull(`tabReceivable Voucher`.grand_total_export,0) as grand_total_export"
 		]);
-		this.stats = this.stats.concat(['status']);
 	},
-	render: function(row, data, listobj) {
-		
-		// bar color for billed
-		data.per_paid = flt((data.grand_total - data.outstanding_amount) / data.grand_total * 100, 2)
-
-		data.bar_outer_class = ''; data.bar_inner_class = '';
-		if(data.outstanding_amount == 0) data.bar_inner_class = 'bar-complete';
-		if(data.per_paid < 1) data.bar_outer_class = 'bar-empty';
-		
-		// lock for docstatus
-		data.icon = '';
-		data.item_color = 'grey';
-		if(data.docstatus==0) {
-			data.customer = '[Draft] ' + data.customer;
-		} else if(data.docstatus==1) {
-			data.item_color = 'blue';
-		} else if(data.docstatus==2) {
-			data.item_color = 'red';
-		}
-		
-		this._super(row, data);
-		this.$main.html(repl('<span style="color:%(item_color)s">%(customer)s</span>\
-		<span class="bar-outer %(bar_outer_class)s" style="width: 30px; float: right" \
-			title="%(per_paid)s% Paid">\
-			<span class="bar-inner %(bar_inner_class)s" \
-				style="width: %(per_paid)s%;"></span>\
-		</span>\
-		<span style="color:#444; float: right;">%(currency)s %(grand_total_export)s</span>\
-		', data))
-	}
+	prepare_data: function(data) {
+		this._super(data);
+		data.paid = flt((data.grand_total - data.outstanding_amount) / data.grand_total * 100, 2);
+	},
+	columns: [
+		{width: '5%', content:'avatar'},
+		{width: '3%', content:'docstatus'},
+		{width: '15%', content:'name'},
+		{width: '37%', content:'tags+customer', css: {color:'#aaa'}},
+		{
+			width: '18%', 
+			content: function(parent, data) { 
+				$(parent).html(data.currency + ' ' + fmt_money(data.grand_total_export)) 
+			},
+			css: {'text-align':'right'}
+		},
+		{width: '10%', content: 'paid', type:'bar-graph', label:'Paid'},
+		{width: '12%', content:'modified', css: {'text-align': 'right', 'color':'#777'}}
+	]
 });
