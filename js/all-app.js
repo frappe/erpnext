@@ -1332,7 +1332,7 @@ wn.ui.toolbar.NewDialog=wn.ui.toolbar.SelectorDialog.extend({init:function(){thi
 /*
  *	lib/js/wn/ui/toolbar/search.js
  */
-wn.ui.toolbar.Search=wn.ui.toolbar.SelectorDialog.extend({init:function(){this._super({title:"Search",execute:function(val){selector.set_search(val);selector.show();},});this.set_values(profile.can_read.join(',').split(','));makeselector();}});
+wn.ui.toolbar.Search=wn.ui.toolbar.SelectorDialog.extend({init:function(){this._super({title:"Search",execute:function(val){selector.set_search(val);selector.show();},});this.set_values(profile.can_search.join(',').split(','));makeselector();}});
 /*
  *	lib/js/wn/ui/toolbar/report.js
  */
