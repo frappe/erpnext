@@ -45,10 +45,15 @@ erpnext.todo.ToDoItem = Class.extend({
 			'Low':''
 		}
 		todo.labelclass = label_map[todo.priority];
-		todo.userdate = dateutil.str_to_user(todo.date);
+		todo.userdate = dateutil.str_to_user(todo.date) || '';
+		if(todo.assigned_by) {
+			todo.fullname = repl("[By %(fullname)s] ", {
+				fullname: wn.boot.user_info[todo.assigned_by].fullname
+			})
+		}
 		if(todo.reference_name && todo.reference_type) {
 			todo.link = repl('<a href="#!Form/%(reference_type)s/%(reference_name)s">\
-						%(reference_name)s</a>', todo);
+						%(reference_type)s: %(reference_name)s</a>', todo);
 		} else if(todo.reference_type) {
 			todo.link = repl('<a href="#!List/%(reference_type)s">\
 						%(reference_type)s</a>', todo);
@@ -59,8 +64,8 @@ erpnext.todo.ToDoItem = Class.extend({
 				<span class="description">\
 					<span class="label %(labelclass)s">%(priority)s</span>\
 					<span class="help" style="margin-right: 7px">%(userdate)s</span>\
-					%(description)s</span>\
-					<span class="ref_link">&rarr;\
+					%(fullname)s%(description)s</span>\
+					<span class="ref_link">&rarr; &nbsp;\
 					%(link)s</span>\
 					<a href="#" class="close">&times;</a>\
 		</div>', todo));
