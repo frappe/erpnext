@@ -37,8 +37,8 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 }
 
 cur_frm.cscript.hide_dialog = function() {
-	var route = wn.get_route();
-	cur_frm.address_list.run();
+	if(cur_frm.address_list)
+		cur_frm.address_list.run();
 }
 
 

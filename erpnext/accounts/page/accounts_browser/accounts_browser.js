@@ -46,7 +46,7 @@ pscript.make_chart = function(b) {
   //================== table body======================================  
   var ac_main_grid = make_table($i('ab_body'),1,2,'100%',['60%','40%'],{border:"0px", padding:"4px",tableLayout: "fixed", borderCollapse: "collapse"});
   $y($td(ac_main_grid,0,0),{border: "1px solid #dddddd", padding: "8px"});
-  pscript.account_tree = $a($td(ac_main_grid,0,0),'div');
+  pscript.account_tree = $a($td(ac_main_grid,0,0),'div', '',{minHeight:'400px'});
   $y($td(ac_main_grid,0,1),{border: "1px solid #DDD"});
   pscript.la = $a($td(ac_main_grid,0,1),'div');
   pscript.acc_period_bal = $a($td(ac_main_grid,0,1),'div');
