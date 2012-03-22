@@ -1658,7 +1658,7 @@ var doc=locals[f.doctype][f.docname];var sl=this.get_status_tags(doc,f);this.set
  */
 wn.provide('_f');_f.frms={};_f.Frm=function(doctype,parent){this.docname='';this.doctype=doctype;this.display=0;var me=this;this.is_editable={};this.opendocs={};this.sections=[];this.grids=[];this.cscript={};this.pformat={};this.fetch_dict={};this.parent=parent;this.tinymce_id_list=[];this.setup_meta(doctype);var me=this;$(document).bind('rename',function(event,dt,old_name,new_name){if(dt==me.doctype)
 me.rename_notify(dt,old_name,new_name)});}
-_f.Frm.prototype.check_doctype_conflict=function(docname){var me=this;if(this.doctype=='DocType'){if(wn.views.formview[docname]){msgprint("Cannot open DocType when its instance is open")
+_f.Frm.prototype.check_doctype_conflict=function(docname){var me=this;if(this.doctype=='DocType'&&docname=='DocType'){msgprint('Allowing DocType, DocType. Be careful!')}else if(this.doctype=='DocType'){if(wn.views.formview[docname]){msgprint("Cannot open DocType when its instance is open")
 throw'doctype open conflict'}}else{if(wn.views.formview.DocType&&wn.views.formview.DocType.frm.opendocs[this.doctype]){msgprint("Cannot open instance when its DocType is open")
 throw'doctype open conflict'}}}
 _f.Frm.prototype.setup=function(){var me=this;this.fields=[];this.fields_dict={};this.wrapper=this.parent;this.setup_print_layout();this.saved_wrapper=$a(this.wrapper,'div');this.setup_std_layout();this.setup_client_script();this.setup_done=true;}
@@ -1857,7 +1857,8 @@ _f.Grid.prototype.hide=function(){$dh(this.wrapper);$dh(this.tbar_div);}
 _f.Grid.prototype.insert_column=function(doctype,fieldname,fieldtype,label,width,options,perm,reqd){var idx=this.head_row.cells.length;if(!width)width='100px';if((width+'').slice(-2)!='px'){width=width+'px';}
 var col=this.head_row.insertCell(idx);col.doctype=doctype;col.fieldname=fieldname;col.fieldtype=fieldtype;col.innerHTML='<div data-grid-fieldname = "'+doctype+'-'+fieldname+'">'+label+'</div>';col.label=label;if(reqd)
 col.childNodes[0].style.color="#D22";col.style.width=width;col.options=options;col.perm=perm;this.col_idx_by_name[fieldname]=idx;}
-_f.Grid.prototype.reset_table_width=function(){var w=0;for(var i=0,len=this.head_row.cells.length;i<len;i++){w+=cint(this.head_row.cells[i].style.width);}
+_f.Grid.prototype.reset_table_width=function(){var w=0;$.each(this.head_row.cells,function(i,cell){if((cell.style.display||'').toLowerCase()!='none')
+w+=cint(cell.style.width);})
 this.head_tab.style.width=w+'px';this.tab.style.width=w+'px';}
 _f.Grid.prototype.set_column_disp=function(fieldname,show){var cidx=this.col_idx_by_name[fieldname];if(!cidx){msgprint('Trying to hide unknown column: '+fieldname);return;}
 var disp=show?'table-cell':'none';this.head_row.cells[cidx].style.display=disp;for(var i=0,len=this.tab.rows.length;i<len;i++){var cell=this.tab.rows[i].cells[cidx];cell.style.display=disp;}
