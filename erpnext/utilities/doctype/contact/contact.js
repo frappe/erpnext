@@ -38,8 +38,8 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 }
 
 cur_frm.cscript.hide_dialog = function() {
-	var route = wn.get_route();
-	cur_frm.contact_list.run();
+	if(cur_frm.contact_list)
+		cur_frm.contact_list.run();
 }
 
 
