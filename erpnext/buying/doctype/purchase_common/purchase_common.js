@@ -393,12 +393,12 @@ cur_frm.cscript.calc_amount = function(doc, n) {
 	refresh_field('net_total');
 	refresh_field('net_total_import');
 	
-	cur_frm.cscript.val_cal_charges(doc, cdt, cdn, tname, fname, other_fname);
+	cur_frm.cscript.val_cal_charges(doc, tname, fname, other_fname);
 }
 
 
 //======== Function was broken away from cur_frm.cscript.calc_amount as PV has fieldname 'rate' instead of 'purchase_rate'===========
-cur_frm.cscript.val_cal_charges = function(doc, cdt, cdn, tname, fname, other_fname){
+cur_frm.cscript.val_cal_charges = function(doc, tname, fname, other_fname){
 
 	doc = locals[doc.doctype][doc.name]
 	if(flt(doc.net_total) > 0) {
@@ -416,7 +416,7 @@ cur_frm.cscript.val_cal_charges = function(doc, cdt, cdn, tname, fname, other_fn
 		}
 		cur_frm.cscript.calc_other_charges(doc , tname , fname , other_fname); // calculate other charges
 	}
-	cur_frm.cscript.calc_doc_values(doc, cdt, cdn, tname, fname, other_fname); // calculates total amounts
+	cur_frm.cscript.calc_doc_values(doc, tname, fname, other_fname); // calculates total amounts
 
 	refresh_many(['net_total', 'grand_total', 'rounded_total', 'grand_total_import', 'rounded_total_import', 'in_words', 'in_words_import', 'purchase_tax_details', 'total_tax', 'other_charges_added', 'other_charges_deducted', 'net_total_import', 'other_charges_added_import', 'other_charges_deducted_import']);
 
@@ -545,9 +545,10 @@ cur_frm.cscript.calc_other_charges = function(doc , tname , fname , other_fname)
 
 
 // ******* Calculation of total amounts of document (item amount + other charges)****************
-cur_frm.cscript.calc_doc_values = function(doc, cdt, cdn, tname, fname, other_fname) {
+cur_frm.cscript.calc_doc_values = function(doc, tname, fname, other_fname) {
 	doc = locals[doc.doctype][doc.name];
-	var net_total = 0; var total_tax = 0; var other_charges_added = 0; var other_charges_deducted = 0;
+	var net_total = 0; var total_tax = 0; var other_charges_added = 0; 
+	var other_charges_deducted = 0;
 	var cl = getchildren(tname, doc.name, fname);
 	for(var i = 0; i<cl.length; i++){
 		net_total += flt(cl[i].amount);

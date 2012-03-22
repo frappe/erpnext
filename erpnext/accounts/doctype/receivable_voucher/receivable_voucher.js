@@ -163,14 +163,24 @@ cur_frm.cscript.warehouse = function(doc, cdt , cdn) {
 cur_frm.cscript.customer = function(doc,dt,dn,onload) {
 
 	var callback = function(r,rt) {
+			var callback2 = function(doc, dt, dn) {
+				doc = locals[dt][dn];
+				if(doc.debit_to && doc.posting_date){
+					get_server_fields('get_cust_and_due_date','','',doc,dt,dn,1,
+					function(doc, dt, dn) {
+						cur_frm.refresh();
+					});
+					
+				}
+			}
 			var doc = locals[cur_frm.doctype][cur_frm.docname];
-			get_server_fields('get_debit_to','','',doc, dt, dn, 0);
-			cur_frm.refresh();
+			get_server_fields('get_debit_to','','',doc, dt, dn, 0, callback2);
 	}
 	var args = onload ? 'onload':''
 	if(doc.customer) $c_obj(make_doclist(doc.doctype, doc.name), 'get_default_customer_address', args, callback);
 
 	if(doc.customer) unhide_field(['customer_address','contact_person','customer_name','address_display','contact_display','contact_mobile','contact_email','territory','customer_group']);
+	
 }
 
 

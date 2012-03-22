@@ -49,7 +49,7 @@ SalesBrowser = function(){
     var tr_main_grid = make_table(div_body,1,2,'100%',['60%','40%'],{width: "100%", tableLayout: "fixed", borderCollapse: "collapse", border:"0px", padding:"4px 4px 4px 4px"});
     
     $y($td(tr_main_grid,0,0),{border: "1px solid #dddddd", padding: "8px", width: "60%"});   
-    this.tree_area = $a($td(tr_main_grid,0,0),'div');
+    this.tree_area = $a($td(tr_main_grid,0,0),'div','',{minHeight:'400px'});
 
     $y($td(tr_main_grid,0,1),{border: "1px solid #DDD"});   
     this.detail_area = $a($td(tr_main_grid,0,1),'div');

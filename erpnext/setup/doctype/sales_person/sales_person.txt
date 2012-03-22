@@ -183,7 +183,7 @@
 		'idx': 5,
 		'label': 'SPHelp',
 		'oldfieldtype': 'HTML',
-		'options': '<a href="javascript:cur_frm.cscript.TreePage(\'Sales Person\');">To manage Sales Person, click here</a>',
+		'options': '<a href="#!Sales Browser/Sales Person">To manage Sales Person, click here</a>',
 		'permlevel': 0
 	},
 
