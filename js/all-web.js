@@ -168,11 +168,11 @@ this.prepare_opts();$.extend(this,this.opts);$(this.parent).html(repl('\
     \
     <div class="list-filters hide">\
      <div class="show_filters well">\
+      <div class="filter_area"></div>\
       <div>\
        <button class="btn btn-small add-filter-btn">\
         <i class="icon-plus"></i> Add Filter</button>\
       </div>\
-      <div class="filter_area"></div>\
      </div>\
     </div>\
     \
@@ -892,11 +892,11 @@ this.prepare_opts();$.extend(this,this.opts);$(this.parent).html(repl('\
     \
     <div class="list-filters hide">\
      <div class="show_filters well">\
+      <div class="filter_area"></div>\
       <div>\
        <button class="btn btn-small add-filter-btn">\
         <i class="icon-plus"></i> Add Filter</button>\
       </div>\
-      <div class="filter_area"></div>\
      </div>\
     </div>\
     \
