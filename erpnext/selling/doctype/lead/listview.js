@@ -4,9 +4,10 @@ wn.doclistviews['Lead'] = wn.views.ListView.extend({
 		this.fields = this.fields.concat([
 			'tabLead.lead_name',
 			'tabLead.status',
-			'tabLead.source'
+			'tabLead.source',
+			'tabLead.rating'
 		]);
-		this.stats = this.stats.concat(['status', 'source']);
+		this.stats = this.stats.concat(['status', 'source', 'rating']);
 	},
 
 	prepare_data: function(data) {
@@ -17,14 +18,15 @@ wn.doclistviews['Lead'] = wn.views.ListView.extend({
 		else if(['Open', 'Attempted to Contact', 'Contacted', 'Contact in Future'].indexOf(data.status)!=-1) {
 			data.label_type = 'info'
 		}
-		data.status_html = repl('<span class="label label-%(label_type)s">%(status)s</span>', data);		
+		data.status_html = repl('<span class="label label-%(label_type)s">%(status)s</span>', data);
+		
+		data.lead_name = (data.rating ? ('['+data.rating+'] ') : '') + '['+data.source+'] ' + data.lead_name;
 	},
 
 	columns: [
 		{width: '20%', content:'name'},
-		{width: '10%', content:'status_html'},		
-		{width: '15%', content:'source'},		
-		{width: '40%', content:'tags+lead_name', css: {color:'#aaa'}},
-		{width: '10%', content:'modified', css: {'text-align': 'right', 'color':'#777'}}
+		{width: '12%', content:'status_html'},
+		{width: '55%', content:'tags+lead_name', css: {color:'#aaa'}},
+		{width: '13%', content:'modified', css: {'text-align': 'right', 'color':'#777'}}
 	]
 })
