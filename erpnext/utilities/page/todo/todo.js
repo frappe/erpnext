@@ -50,7 +50,7 @@ erpnext.todo.ToDoItem = Class.extend({
 			todo.fullname = repl("[By %(fullname)s] ", {
 				fullname: wn.boot.user_info[todo.assigned_by].fullname
 			})
-		}
+		} else { todo.fullname = ''; }
 		if(todo.reference_name && todo.reference_type) {
 			todo.link = repl('<a href="#!Form/%(reference_type)s/%(reference_name)s">\
 						%(reference_type)s: %(reference_name)s</a>', todo);
