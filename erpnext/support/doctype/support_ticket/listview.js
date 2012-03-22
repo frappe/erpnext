@@ -31,14 +31,13 @@ wn.doclistviews['Support Ticket'] = wn.views.ListView.extend({
 		
 		// description
 		if(data.description && data.description.length > 50) {
-			data.description = '<span title="'+data.description+'">' + data.description.substr(0,30) + '...</span>';
+			data.description = '<span title="'+data.description+'">' + data.description.substr(0,50) + '...</span>';
 		}
 	},
 	
 	columns: [
-		{width: '3%', content:'docstatus'},
-		{width: '15%', content:'name'},
-		{width: '8%', content:'status_html'},		
+		{width: '20%', content:'name'},
+		{width: '10%', content:'status_html'},		
 		{width: '60%', content:'tags+description', css: {color:'#aaa'}},
 		{width: '10%', content:'modified', css: {'text-align': 'right', 'color':'#777'}}
 	]
