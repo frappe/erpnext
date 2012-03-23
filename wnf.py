@@ -29,12 +29,32 @@ def replace_code(start, txt1, txt2, extn):
 					content = f.read()
 				
 				if re.search(txt1, content):
-					a = raw_input('Change in %s [y/n]?' % fpath)
-					if a=='y':
-						with open(fpath, 'w') as f:
-							f.write(re.sub(txt1, txt2, content))
-				
-						print 'updated in %s' % fpath
+					search_replace_with_prompt(fpath, txt1, txt2)
+
+
+
+def search_replace_with_prompt(fpath, txt1, txt2):
+	""" Search and replace all txt1 by txt2 in the file with confirmation"""
+
+	from termcolor import colored
+	with open(fpath, 'r') as f:
+		content = f.readlines()
+
+	tmp = []
+	for c in content:
+		if c.find(txt1) != -1:
+			print '\n', fpath
+			print  colored(txt1, 'red').join(c[:-1].split(txt1))
+
+			a = raw_input('Do you want to Change [y/n]?')
+			if a=='y':
+				c = c.replace(txt1, txt2)
+			tmp.append(c)
+
+	with open(fpath, 'w') as f:
+		f.write(''.join(tmp))
+	print colored('Updated in %s'  % fpath, 'green')
+	
 
 def setup_options():
 	from optparse import OptionParser

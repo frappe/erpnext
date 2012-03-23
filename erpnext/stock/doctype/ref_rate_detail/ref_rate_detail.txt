@@ -5,35 +5,36 @@
 	{
 		'creation': '2010-08-08 17:09:19',
 		'docstatus': 0,
-		'modified': '2011-08-31 11:36:41',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-21 14:57:41',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'autoname': 'RFD/.#####',
-		'colour': 'White:FFF',
+		'autoname': u'RFD/.#####',
+		'colour': u'White:FFF',
+		'default_print_format': u'Standard',
 		'doctype': 'DocType',
 		'in_create': 1,
 		'istable': 1,
-		'module': 'Stock',
+		'module': u'Stock',
 		'name': '__common__',
 		'read_only': 0,
-		'section_style': 'Tray',
-		'server_code_error': ' ',
+		'section_style': u'Tray',
+		'server_code_error': u' ',
 		'show_in_menu': 0,
 		'version': 3
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'in_filter': 1,
 		'name': '__common__',
-		'parent': 'Ref Rate Detail',
-		'parentfield': 'fields',
-		'parenttype': 'DocType',
+		'parent': u'Ref Rate Detail',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
 		'permlevel': 0,
 		'search_index': 1
 	},
@@ -41,42 +42,41 @@
 	# DocType, Ref Rate Detail
 	{
 		'doctype': 'DocType',
-		'name': 'Ref Rate Detail'
+		'name': u'Ref Rate Detail'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'price_list_name',
-		'fieldtype': 'Select',
-		'label': 'Price List Name',
-		'oldfieldname': 'price_list_name',
-		'oldfieldtype': 'Select',
-		'options': 'link:Price List',
-		'reqd': 1,
-		'trigger': 'Client'
+		'doctype': u'DocField',
+		'fieldname': u'price_list_name',
+		'fieldtype': u'Select',
+		'label': u'Price List Name',
+		'oldfieldname': u'price_list_name',
+		'oldfieldtype': u'Select',
+		'options': u'link:Price List',
+		'reqd': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'ref_rate',
-		'fieldtype': 'Currency',
-		'label': 'Ref Rate',
-		'oldfieldname': 'ref_rate',
-		'oldfieldtype': 'Currency',
+		'doctype': u'DocField',
+		'fieldname': u'ref_rate',
+		'fieldtype': u'Currency',
+		'label': u'Ref Rate',
+		'oldfieldname': u'ref_rate',
+		'oldfieldtype': u'Currency',
 		'reqd': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'ref_currency',
-		'fieldtype': 'Select',
-		'label': 'Currency',
-		'oldfieldname': 'ref_currency',
-		'oldfieldtype': 'Select',
-		'options': 'link:Currency',
+		'doctype': u'DocField',
+		'fieldname': u'ref_currency',
+		'fieldtype': u'Select',
+		'label': u'Currency',
+		'oldfieldname': u'ref_currency',
+		'oldfieldtype': u'Select',
+		'options': u'link:Currency',
 		'reqd': 1
 	}
 ]

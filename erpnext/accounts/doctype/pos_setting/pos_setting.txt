@@ -5,40 +5,43 @@
 	{
 		'creation': '2010-12-15 08:39:23',
 		'docstatus': 0,
-		'modified': '2010-12-10 11:29:51',
-		'modified_by': 'rahul@webnotestech.com',
-		'owner': 'Administrator'
+		'modified': '2012-03-21 12:39:49',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'autoname': 'POS/.####',
-		'colour': 'White:FFF',
+		'_last_update': u'1322549700',
+		'autoname': u'POS/.####',
+		'colour': u'White:FFF',
+		'default_print_format': u'Standard',
 		'doctype': 'DocType',
-		'module': 'Accounts',
+		'module': u'Accounts',
 		'name': '__common__',
-		'section_style': 'Simple',
-		'server_code_error': ' ',
-		'version': 27
+		'section_style': u'Simple',
+		'server_code_error': u' ',
+		'show_in_menu': 0,
+		'version': 33
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'POS Setting',
-		'parentfield': 'fields',
-		'parenttype': 'DocType',
+		'parent': u'POS Setting',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
 		'permlevel': 0
 	},
 
 	# These values are common for all DocPerm
 	{
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'name': '__common__',
-		'parent': 'POS Setting',
-		'parentfield': 'permissions',
-		'parenttype': 'DocType',
+		'parent': u'POS Setting',
+		'parentfield': u'permissions',
+		'parenttype': u'DocType',
 		'permlevel': 0,
 		'read': 1
 	},
@@ -46,15 +49,14 @@
 	# DocType, POS Setting
 	{
 		'doctype': 'DocType',
-		'name': 'POS Setting'
+		'name': u'POS Setting'
 	},
 
 	# DocPerm
 	{
 		'create': 1,
-		'doctype': 'DocPerm',
-		'idx': 1,
-		'role': 'System Manager',
+		'doctype': u'DocPerm',
+		'role': u'System Manager',
 		'submit': 0,
 		'write': 1
 	},
@@ -62,247 +64,219 @@
 	# DocPerm
 	{
 		'create': 1,
-		'doctype': 'DocPerm',
-		'idx': 2,
-		'role': 'System Manager',
+		'doctype': u'DocPerm',
+		'role': u'System Manager',
 		'write': 1
 	},
 
 	# DocPerm
 	{
 		'create': 1,
-		'doctype': 'DocPerm',
-		'idx': 3,
-		'role': 'Accounts Manager',
+		'doctype': u'DocPerm',
+		'role': u'Accounts Manager',
 		'write': 1
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm',
-		'idx': 4,
-		'role': 'Accounts User'
+		'doctype': u'DocPerm',
+		'role': u'Accounts User'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'user',
-		'fieldtype': 'Link',
-		'idx': 1,
-		'label': 'User',
-		'oldfieldname': 'user',
-		'oldfieldtype': 'Link',
-		'options': 'Profile'
+		'doctype': u'DocField',
+		'fieldname': u'user',
+		'fieldtype': u'Link',
+		'label': u'User',
+		'oldfieldname': u'user',
+		'oldfieldtype': u'Link',
+		'options': u'Profile'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'territory',
-		'fieldtype': 'Link',
-		'idx': 2,
-		'label': 'Territory',
-		'oldfieldname': 'territory',
-		'oldfieldtype': 'Link',
-		'options': 'Territory',
+		'doctype': u'DocField',
+		'fieldname': u'territory',
+		'fieldtype': u'Link',
+		'label': u'Territory',
+		'oldfieldname': u'territory',
+		'oldfieldtype': u'Link',
+		'options': u'Territory',
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'naming_series',
-		'fieldtype': 'Select',
-		'idx': 3,
-		'label': 'Series',
+		'doctype': u'DocField',
+		'fieldname': u'naming_series',
+		'fieldtype': u'Select',
+		'label': u'Series',
 		'no_copy': 1,
-		'oldfieldname': 'naming_series',
-		'oldfieldtype': 'Select',
+		'oldfieldname': u'naming_series',
+		'oldfieldtype': u'Select',
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'currency',
-		'fieldtype': 'Select',
-		'idx': 4,
-		'label': 'Currency',
-		'oldfieldname': 'currency',
-		'oldfieldtype': 'Select',
-		'options': 'link:Currency',
+		'doctype': u'DocField',
+		'fieldname': u'currency',
+		'fieldtype': u'Select',
+		'label': u'Currency',
+		'oldfieldname': u'currency',
+		'oldfieldtype': u'Select',
+		'options': u'link:Currency',
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'default': '1.00',
-		'doctype': 'DocField',
-		'fieldname': 'conversion_rate',
-		'fieldtype': 'Currency',
-		'idx': 5,
-		'label': 'Conversion Rate',
-		'oldfieldname': 'conversion_rate',
-		'oldfieldtype': 'Currency',
+		'colour': u'White:FFF',
+		'default': u'1',
+		'doctype': u'DocField',
+		'fieldname': u'conversion_rate',
+		'fieldtype': u'Currency',
+		'label': u'Conversion Rate',
+		'oldfieldname': u'conversion_rate',
+		'oldfieldtype': u'Currency',
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'price_list_name',
-		'fieldtype': 'Select',
-		'idx': 6,
-		'label': 'Price List',
-		'oldfieldname': 'price_list_name',
-		'oldfieldtype': 'Select',
-		'options': 'link:Price List',
+		'doctype': u'DocField',
+		'fieldname': u'price_list_name',
+		'fieldtype': u'Select',
+		'label': u'Price List',
+		'oldfieldname': u'price_list_name',
+		'oldfieldtype': u'Select',
+		'options': u'link:Price List',
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'company',
-		'fieldtype': 'Link',
-		'idx': 7,
-		'label': 'Company',
-		'oldfieldname': 'company',
-		'oldfieldtype': 'Link',
-		'options': 'Company',
-		'reqd': 1,
-		'search_index': 0
+		'doctype': u'DocField',
+		'fieldname': u'company',
+		'fieldtype': u'Link',
+		'label': u'Company',
+		'oldfieldname': u'company',
+		'oldfieldtype': u'Link',
+		'options': u'Company',
+		'reqd': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Column Break',
-		'idx': 8,
-		'oldfieldtype': 'Column Break'
+		'doctype': u'DocField',
+		'fieldtype': u'Column Break',
+		'oldfieldtype': u'Column Break'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'customer_account',
-		'fieldtype': 'Link',
-		'idx': 9,
-		'label': 'Customer Account',
-		'oldfieldname': 'customer_account',
-		'oldfieldtype': 'Link',
-		'options': 'Account',
-		'reqd': 0,
-		'search_index': 0
+		'doctype': u'DocField',
+		'fieldname': u'customer_account',
+		'fieldtype': u'Link',
+		'label': u'Customer Account',
+		'oldfieldname': u'customer_account',
+		'oldfieldtype': u'Link',
+		'options': u'Account',
+		'reqd': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'cash_bank_account',
-		'fieldtype': 'Link',
-		'idx': 10,
-		'label': 'Cash/Bank Account',
-		'oldfieldname': 'cash_bank_account',
-		'oldfieldtype': 'Link',
-		'options': 'Account',
-		'reqd': 1,
-		'search_index': 0
+		'doctype': u'DocField',
+		'fieldname': u'cash_bank_account',
+		'fieldtype': u'Link',
+		'label': u'Cash/Bank Account',
+		'oldfieldname': u'cash_bank_account',
+		'oldfieldtype': u'Link',
+		'options': u'Account',
+		'reqd': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'income_account',
-		'fieldtype': 'Link',
-		'idx': 11,
-		'label': 'Income Account',
-		'oldfieldname': 'income_account',
-		'oldfieldtype': 'Link',
-		'options': 'Account',
-		'reqd': 1,
-		'search_index': 0
+		'doctype': u'DocField',
+		'fieldname': u'income_account',
+		'fieldtype': u'Link',
+		'label': u'Income Account',
+		'oldfieldname': u'income_account',
+		'oldfieldtype': u'Link',
+		'options': u'Account',
+		'reqd': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'warehouse',
-		'fieldtype': 'Link',
-		'idx': 12,
-		'label': 'Warehouse',
-		'oldfieldname': 'warehouse',
-		'oldfieldtype': 'Link',
-		'options': 'Warehouse',
-		'reqd': 1,
-		'search_index': 0
+		'doctype': u'DocField',
+		'fieldname': u'warehouse',
+		'fieldtype': u'Link',
+		'label': u'Warehouse',
+		'oldfieldname': u'warehouse',
+		'oldfieldtype': u'Link',
+		'options': u'Warehouse',
+		'reqd': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'cost_center',
-		'fieldtype': 'Link',
-		'idx': 13,
-		'label': 'Cost Center',
-		'oldfieldname': 'cost_center',
-		'oldfieldtype': 'Link',
-		'options': 'Cost Center',
-		'reqd': 1,
-		'search_index': 0
+		'doctype': u'DocField',
+		'fieldname': u'cost_center',
+		'fieldtype': u'Link',
+		'label': u'Cost Center',
+		'oldfieldname': u'cost_center',
+		'oldfieldtype': u'Link',
+		'options': u'Cost Center',
+		'reqd': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'charge',
-		'fieldtype': 'Link',
-		'idx': 14,
-		'label': 'Charge',
-		'oldfieldname': 'charge',
-		'oldfieldtype': 'Link',
-		'options': 'Other Charges',
-		'search_index': 0
+		'doctype': u'DocField',
+		'fieldname': u'charge',
+		'fieldtype': u'Link',
+		'label': u'Charge',
+		'oldfieldname': u'charge',
+		'oldfieldtype': u'Link',
+		'options': u'Other Charges'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'letter_head',
-		'fieldtype': 'Select',
-		'idx': 15,
-		'label': 'Letter Head',
-		'oldfieldname': 'letter_head',
-		'oldfieldtype': 'Select',
-		'options': 'link:Letter Head',
+		'doctype': u'DocField',
+		'fieldname': u'letter_head',
+		'fieldtype': u'Select',
+		'label': u'Letter Head',
+		'oldfieldname': u'letter_head',
+		'oldfieldtype': u'Select',
+		'options': u'link:Letter Head',
 		'print_hide': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'tc_name',
-		'fieldtype': 'Link',
-		'idx': 16,
-		'label': 'Terms',
-		'oldfieldname': 'tc_name',
-		'oldfieldtype': 'Link',
-		'options': 'Term',
-		'search_index': 0
+		'doctype': u'DocField',
+		'fieldname': u'tc_name',
+		'fieldtype': u'Link',
+		'label': u'Terms',
+		'oldfieldname': u'tc_name',
+		'oldfieldtype': u'Link',
+		'options': u'Term'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'select_print_heading',
-		'fieldtype': 'Select',
-		'idx': 17,
+		'doctype': u'DocField',
+		'fieldname': u'select_print_heading',
+		'fieldtype': u'Select',
 		'in_filter': 0,
-		'label': 'Select Print Heading',
-		'oldfieldname': 'select_print_heading',
-		'oldfieldtype': 'Select',
-		'options': 'link:Print Heading'
+		'label': u'Select Print Heading',
+		'oldfieldname': u'select_print_heading',
+		'oldfieldtype': u'Select',
+		'options': u'link:Print Heading'
 	}
 ]

@@ -5,154 +5,148 @@
 	{
 		'creation': '2010-08-08 17:09:05',
 		'docstatus': 0,
-		'modified': '2010-09-20 14:06:57',
-		'modified_by': 'abhishek@webnotestech.com',
-		'owner': 'Administrator'
+		'modified': '2012-03-21 14:52:10',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'autoname': 'IID/.#####',
-		'colour': 'White:FFF',
+		'autoname': u'IID/.#####',
+		'colour': u'White:FFF',
+		'default_print_format': u'Standard',
 		'doctype': 'DocType',
 		'istable': 1,
-		'module': 'Selling',
+		'module': u'Selling',
 		'name': '__common__',
-		'section_style': 'Simple',
-		'server_code_error': ' ',
-		'version': 24
+		'section_style': u'Simple',
+		'server_code_error': u' ',
+		'show_in_menu': 0,
+		'version': 25
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Installed Item Details',
-		'parentfield': 'fields',
-		'parenttype': 'DocType'
+		'parent': u'Installed Item Details',
+		'parentfield': u'fields',
+		'parenttype': u'DocType'
 	},
 
 	# DocType, Installed Item Details
 	{
 		'doctype': 'DocType',
-		'name': 'Installed Item Details'
+		'name': u'Installed Item Details'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'item_code',
-		'fieldtype': 'Link',
-		'idx': 1,
-		'label': 'Item Code',
-		'oldfieldname': 'item_code',
-		'oldfieldtype': 'Link',
-		'options': 'Item',
+		'doctype': u'DocField',
+		'fieldname': u'item_code',
+		'fieldtype': u'Link',
+		'label': u'Item Code',
+		'oldfieldname': u'item_code',
+		'oldfieldtype': u'Link',
+		'options': u'Item',
 		'permlevel': 0,
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'description',
-		'fieldtype': 'Data',
-		'idx': 2,
-		'label': 'Description',
-		'oldfieldname': 'description',
-		'oldfieldtype': 'Data',
+		'doctype': u'DocField',
+		'fieldname': u'description',
+		'fieldtype': u'Data',
+		'label': u'Description',
+		'oldfieldname': u'description',
+		'oldfieldtype': u'Data',
 		'permlevel': 1,
-		'width': '300px'
+		'width': u'300px'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'prevdoc_date',
-		'fieldtype': 'Date',
+		'doctype': u'DocField',
+		'fieldname': u'prevdoc_date',
+		'fieldtype': u'Date',
 		'hidden': 0,
-		'idx': 3,
-		'label': 'Delivery Date',
-		'oldfieldname': 'prevdoc_date',
-		'oldfieldtype': 'Date',
+		'label': u'Delivery Date',
+		'oldfieldname': u'prevdoc_date',
+		'oldfieldtype': u'Date',
 		'permlevel': 1,
 		'print_hide': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'serial_no',
-		'fieldtype': 'Small Text',
-		'idx': 5,
-		'label': 'Serial No',
-		'oldfieldname': 'serial_no',
-		'oldfieldtype': 'Small Text',
+		'doctype': u'DocField',
+		'fieldname': u'serial_no',
+		'fieldtype': u'Small Text',
+		'label': u'Serial No',
+		'oldfieldname': u'serial_no',
+		'oldfieldtype': u'Small Text',
 		'permlevel': 0,
-		'width': '180px'
+		'width': u'180px'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'prevdoc_detail_docname',
-		'fieldtype': 'Data',
+		'doctype': u'DocField',
+		'fieldname': u'prevdoc_detail_docname',
+		'fieldtype': u'Data',
 		'hidden': 1,
-		'idx': 6,
-		'label': 'Against Document Detail No',
+		'label': u'Against Document Detail No',
 		'no_copy': 1,
-		'oldfieldname': 'prevdoc_detail_docname',
-		'oldfieldtype': 'Data',
+		'oldfieldname': u'prevdoc_detail_docname',
+		'oldfieldtype': u'Data',
 		'permlevel': 1,
 		'print_hide': 1,
-		'width': '150px'
+		'width': u'150px'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'prevdoc_docname',
-		'fieldtype': 'Data',
+		'doctype': u'DocField',
+		'fieldname': u'prevdoc_docname',
+		'fieldtype': u'Data',
 		'hidden': 1,
-		'idx': 7,
 		'in_filter': 1,
-		'label': 'Against Document No',
+		'label': u'Against Document No',
 		'no_copy': 1,
-		'oldfieldname': 'prevdoc_docname',
-		'oldfieldtype': 'Data',
+		'oldfieldname': u'prevdoc_docname',
+		'oldfieldtype': u'Data',
 		'permlevel': 1,
 		'print_hide': 1,
 		'search_index': 1,
-		'width': '150px'
+		'width': u'150px'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'prevdoc_doctype',
-		'fieldtype': 'Data',
+		'doctype': u'DocField',
+		'fieldname': u'prevdoc_doctype',
+		'fieldtype': u'Data',
 		'hidden': 1,
-		'idx': 8,
 		'in_filter': 1,
-		'label': 'Document Type',
+		'label': u'Document Type',
 		'no_copy': 1,
-		'oldfieldname': 'prevdoc_doctype',
-		'oldfieldtype': 'Data',
+		'oldfieldname': u'prevdoc_doctype',
+		'oldfieldtype': u'Data',
 		'permlevel': 1,
 		'print_hide': 1,
-		'search_index': 0,
-		'width': '150px'
+		'search_index': 1,
+		'width': u'150px'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'qty',
-		'fieldtype': 'Currency',
-		'idx': 9,
-		'label': 'Installed Qty',
-		'oldfieldname': 'qty',
-		'oldfieldtype': 'Currency',
+		'doctype': u'DocField',
+		'fieldname': u'qty',
+		'fieldtype': u'Currency',
+		'label': u'Installed Qty',
+		'oldfieldname': u'qty',
+		'oldfieldtype': u'Currency',
 		'permlevel': 0,
 		'reqd': 1
 	}

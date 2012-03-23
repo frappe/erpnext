@@ -3,308 +3,291 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2011-07-22 17:47:57',
+		'creation': '2011-07-27 13:14:28',
 		'docstatus': 0,
-		'modified': '2011-07-27 15:33:55',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-21 12:43:53',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1311555967',
-		'colour': 'White:FFF',
+		'_last_update': u'1311555967',
+		'colour': u'White:FFF',
+		'default_print_format': u'Standard',
 		'doctype': 'DocType',
-		'module': 'Accounts',
+		'module': u'Accounts',
 		'name': '__common__',
-		'section_style': 'Simple',
+		'section_style': u'Simple',
 		'show_in_menu': 0,
-		'version': 21
+		'version': 24
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Lease Agreement',
-		'parentfield': 'fields',
-		'parenttype': 'DocType'
+		'parent': u'Lease Agreement',
+		'parentfield': u'fields',
+		'parenttype': u'DocType'
 	},
 
 	# These values are common for all DocPerm
 	{
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'name': '__common__',
-		'parent': 'Lease Agreement',
-		'parentfield': 'permissions',
-		'parenttype': 'DocType',
+		'parent': u'Lease Agreement',
+		'parentfield': u'permissions',
+		'parenttype': u'DocType',
 		'read': 1
 	},
 
 	# DocType, Lease Agreement
 	{
 		'doctype': 'DocType',
-		'name': 'Lease Agreement'
+		'name': u'Lease Agreement'
 	},
 
 	# DocPerm
 	{
 		'cancel': 1,
 		'create': 1,
-		'doctype': 'DocPerm',
-		'idx': 1,
+		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'role': 'Accounts User',
+		'role': u'Accounts User',
 		'submit': 1,
 		'write': 1
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm',
-		'idx': 2,
+		'doctype': u'DocPerm',
 		'permlevel': 1,
-		'role': 'Accounts User'
+		'role': u'Accounts User'
 	},
 
 	# DocPerm
 	{
+		'amend': 1,
 		'cancel': 1,
-		'create': 1,
-		'doctype': 'DocPerm',
-		'idx': 3,
+		'create': 0,
+		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'role': 'Accounts Manager',
+		'role': u'Accounts Manager',
 		'submit': 1,
 		'write': 1
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm',
-		'idx': 4,
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
 		'permlevel': 1,
-		'role': 'Accounts Manager'
+		'role': u'Accounts Manager',
+		'submit': 0,
+		'write': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'naming_series',
-		'fieldtype': 'Select',
-		'idx': 1,
-		'label': 'Naming Series',
-		'options': '\nLA',
+		'doctype': u'DocField',
+		'fieldname': u'naming_series',
+		'fieldtype': u'Select',
+		'label': u'Naming Series',
+		'no_copy': 1,
+		'options': u'\nLA',
 		'permlevel': 0,
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Section Break',
-		'idx': 2,
-		'label': 'Lessee Info.',
+		'doctype': u'DocField',
+		'fieldtype': u'Section Break',
+		'label': u'Lessee Info.',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'account',
-		'fieldtype': 'Link',
-		'idx': 3,
-		'label': 'Lessee Account',
-		'options': 'Account',
+		'doctype': u'DocField',
+		'fieldname': u'account',
+		'fieldtype': u'Link',
+		'label': u'Account',
+		'options': u'Account',
 		'permlevel': 0,
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'lessee_father',
-		'fieldtype': 'Data',
-		'idx': 4,
-		'label': 'Lessee Father',
+		'doctype': u'DocField',
+		'fieldname': u'lessee_father',
+		'fieldtype': u'Data',
+		'label': u'Lessee Father',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'lessee_nic',
-		'fieldtype': 'Data',
-		'idx': 5,
-		'label': 'Lessee NIC',
+		'doctype': u'DocField',
+		'fieldname': u'lessee_nic',
+		'fieldtype': u'Data',
+		'label': u'Lessee NIC',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'lessee_contact',
-		'fieldtype': 'Data',
-		'idx': 6,
-		'label': 'Lessee Contact',
+		'doctype': u'DocField',
+		'fieldname': u'lessee_contact',
+		'fieldtype': u'Data',
+		'label': u'Lessee Contact',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'lessee_address',
-		'fieldtype': 'Text',
-		'idx': 7,
-		'label': 'Lessee Address',
+		'doctype': u'DocField',
+		'fieldname': u'lessee_address',
+		'fieldtype': u'Text',
+		'label': u'Lessee Address',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Section Break',
-		'idx': 8,
-		'label': 'Vehicle Info.',
+		'doctype': u'DocField',
+		'fieldtype': u'Section Break',
+		'label': u'Vehicle Info.',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'model_no',
-		'fieldtype': 'Data',
-		'idx': 9,
-		'label': 'Model No',
+		'doctype': u'DocField',
+		'fieldname': u'model_no',
+		'fieldtype': u'Data',
+		'label': u'Model No',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'engine_no',
-		'fieldtype': 'Data',
-		'idx': 10,
-		'label': 'Engine No',
+		'doctype': u'DocField',
+		'fieldname': u'engine_no',
+		'fieldtype': u'Data',
+		'label': u'Engine No',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'chassis_no',
-		'fieldtype': 'Data',
-		'idx': 11,
-		'label': 'Chassis No',
+		'doctype': u'DocField',
+		'fieldname': u'chassis_no',
+		'fieldtype': u'Data',
+		'label': u'Chassis No',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Section Break',
-		'idx': 12,
-		'label': 'Invoice and Payment Info.',
+		'doctype': u'DocField',
+		'fieldtype': u'Section Break',
+		'label': u'Invoice and Payment Info.',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldname': 'invoice',
-		'fieldtype': 'Link',
-		'idx': 13,
-		'label': 'Invoice',
-		'options': 'Receivable Voucher',
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'invoice',
+		'fieldtype': u'Link',
+		'label': u'Invoice',
+		'options': u'Receivable Voucher',
 		'permlevel': 0,
 		'reqd': 1,
-		'trigger': 'Client'
+		'trigger': u'Client'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'invoice_amount',
-		'fieldtype': 'Currency',
-		'idx': 14,
-		'label': 'Invoice Amount',
+		'doctype': u'DocField',
+		'fieldname': u'invoice_amount',
+		'fieldtype': u'Currency',
+		'label': u'Invoice Amount',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'down_payment',
-		'fieldtype': 'Currency',
-		'idx': 15,
-		'label': 'Down Payment',
+		'doctype': u'DocField',
+		'fieldname': u'down_payment',
+		'fieldtype': u'Currency',
+		'label': u'Down Payment',
 		'permlevel': 0,
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'start_date',
-		'fieldtype': 'Date',
-		'idx': 16,
-		'label': 'Start Date',
+		'doctype': u'DocField',
+		'fieldname': u'start_date',
+		'fieldtype': u'Date',
+		'label': u'Start Date',
 		'permlevel': 0,
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'no_of_installments',
-		'fieldtype': 'Int',
-		'idx': 17,
-		'label': 'No of Installments',
+		'doctype': u'DocField',
+		'fieldname': u'no_of_installments',
+		'fieldtype': u'Int',
+		'label': u'No of Installments',
 		'permlevel': 0,
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'installment_amount',
-		'fieldtype': 'Currency',
-		'idx': 18,
-		'label': 'Installment Amount',
+		'doctype': u'DocField',
+		'fieldname': u'installment_amount',
+		'fieldtype': u'Currency',
+		'label': u'Installment Amount',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldtype': 'Button',
-		'idx': 19,
-		'label': 'Generate',
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldtype': u'Button',
+		'label': u'Generate',
 		'permlevel': 0,
-		'trigger': 'Client'
+		'trigger': u'Client'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'installments',
-		'fieldtype': 'Table',
-		'idx': 20,
-		'label': 'Installments',
-		'options': 'Lease Installment',
+		'doctype': u'DocField',
+		'fieldname': u'installments',
+		'fieldtype': u'Table',
+		'label': u'Installments',
+		'options': u'Lease Installment',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
 		'allow_on_submit': 1,
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldtype': 'Button',
-		'idx': 21,
-		'label': 'Installment Reciept',
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldtype': u'Button',
+		'label': u'Installment Reciept',
 		'permlevel': 0
 	}
 ]

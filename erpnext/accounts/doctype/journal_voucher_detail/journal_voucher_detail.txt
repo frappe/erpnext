@@ -5,187 +5,179 @@
 	{
 		'creation': '2010-08-08 17:09:06',
 		'docstatus': 0,
-		'modified': '2010-10-01 16:24:51',
-		'modified_by': 'umair@iwebnotes.com',
-		'owner': 'Administrator'
+		'modified': '2012-03-21 12:26:17',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'autoname': 'JVD.######',
-		'colour': 'White:FFF',
+		'autoname': u'JVD.######',
+		'colour': u'White:FFF',
+		'default_print_format': u'Standard',
 		'doctype': 'DocType',
 		'istable': 1,
-		'module': 'Accounts',
+		'module': u'Accounts',
 		'name': '__common__',
-		'section_style': 'Tray',
-		'server_code_error': ' ',
+		'section_style': u'Tray',
+		'server_code_error': u' ',
 		'show_in_menu': 0,
-		'version': 2
+		'version': 3
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Journal Voucher Detail',
-		'parentfield': 'fields',
-		'parenttype': 'DocType'
+		'parent': u'Journal Voucher Detail',
+		'parentfield': u'fields',
+		'parenttype': u'DocType'
 	},
 
 	# DocType, Journal Voucher Detail
 	{
 		'doctype': 'DocType',
-		'name': 'Journal Voucher Detail'
+		'name': u'Journal Voucher Detail'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'account',
-		'fieldtype': 'Link',
-		'idx': 1,
+		'doctype': u'DocField',
+		'fieldname': u'account',
+		'fieldtype': u'Link',
 		'in_filter': 1,
-		'label': 'Account',
-		'oldfieldname': 'account',
-		'oldfieldtype': 'Link',
-		'options': 'Account',
+		'label': u'Account',
+		'oldfieldname': u'account',
+		'oldfieldtype': u'Link',
+		'options': u'Account',
 		'permlevel': 0,
 		'reqd': 1,
 		'search_index': 1,
-		'trigger': 'Client',
-		'width': '180px'
+		'trigger': u'Client',
+		'width': u'180px'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'cost_center',
-		'fieldtype': 'Link',
-		'idx': 2,
+		'doctype': u'DocField',
+		'fieldname': u'cost_center',
+		'fieldtype': u'Link',
 		'in_filter': 1,
-		'label': 'Cost Center',
-		'oldfieldname': 'cost_center',
-		'oldfieldtype': 'Link',
-		'options': 'Cost Center',
+		'label': u'Cost Center',
+		'oldfieldname': u'cost_center',
+		'oldfieldtype': u'Link',
+		'options': u'Cost Center',
 		'permlevel': 0,
 		'search_index': 0,
-		'width': '180px'
+		'width': u'180px'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'balance',
-		'fieldtype': 'Data',
-		'idx': 3,
-		'label': 'Balance',
+		'doctype': u'DocField',
+		'fieldname': u'balance',
+		'fieldtype': u'Data',
+		'label': u'Balance',
 		'no_copy': 1,
-		'oldfieldname': 'balance',
-		'oldfieldtype': 'Data',
+		'oldfieldname': u'balance',
+		'oldfieldtype': u'Data',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'debit',
-		'fieldtype': 'Currency',
-		'idx': 4,
-		'label': 'Debit',
-		'oldfieldname': 'debit',
-		'oldfieldtype': 'Currency',
+		'doctype': u'DocField',
+		'fieldname': u'debit',
+		'fieldtype': u'Currency',
+		'label': u'Debit',
+		'oldfieldname': u'debit',
+		'oldfieldtype': u'Currency',
 		'permlevel': 0,
-		'trigger': 'Client'
+		'trigger': u'Client'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'credit',
-		'fieldtype': 'Currency',
-		'idx': 5,
-		'label': 'Credit',
-		'oldfieldname': 'credit',
-		'oldfieldtype': 'Currency',
+		'doctype': u'DocField',
+		'fieldname': u'credit',
+		'fieldtype': u'Currency',
+		'label': u'Credit',
+		'oldfieldname': u'credit',
+		'oldfieldtype': u'Currency',
 		'permlevel': 0,
-		'trigger': 'Client'
+		'trigger': u'Client'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'against_voucher',
-		'fieldtype': 'Link',
-		'idx': 6,
+		'doctype': u'DocField',
+		'fieldname': u'against_voucher',
+		'fieldtype': u'Link',
 		'in_filter': 1,
-		'label': 'Against Payable',
+		'label': u'Against Payable',
 		'no_copy': 1,
-		'oldfieldname': 'against_voucher',
-		'oldfieldtype': 'Link',
-		'options': 'Payable Voucher',
+		'oldfieldname': u'against_voucher',
+		'oldfieldtype': u'Link',
+		'options': u'Payable Voucher',
 		'permlevel': 0,
 		'search_index': 1,
-		'trigger': 'Client'
+		'trigger': u'Client'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'against_invoice',
-		'fieldtype': 'Link',
-		'idx': 7,
+		'doctype': u'DocField',
+		'fieldname': u'against_invoice',
+		'fieldtype': u'Link',
 		'in_filter': 1,
-		'label': 'Against Receivable',
+		'label': u'Against Receivable',
 		'no_copy': 1,
-		'oldfieldname': 'against_invoice',
-		'oldfieldtype': 'Link',
-		'options': 'Receivable Voucher',
+		'oldfieldname': u'against_invoice',
+		'oldfieldtype': u'Link',
+		'options': u'Receivable Voucher',
 		'permlevel': 0,
 		'search_index': 1,
-		'trigger': 'Client'
+		'trigger': u'Client'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'against_jv',
-		'fieldtype': 'Link',
-		'idx': 8,
+		'doctype': u'DocField',
+		'fieldname': u'against_jv',
+		'fieldtype': u'Link',
 		'in_filter': 1,
-		'label': 'Against JV',
+		'label': u'Against JV',
 		'no_copy': 1,
-		'oldfieldname': 'against_jv',
-		'oldfieldtype': 'Link',
-		'options': 'Journal Voucher',
+		'oldfieldname': u'against_jv',
+		'oldfieldtype': u'Link',
+		'options': u'Journal Voucher',
+		'permlevel': 0,
+		'search_index': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'is_advance',
+		'fieldtype': u'Select',
+		'label': u'Is Advance',
+		'no_copy': 1,
+		'oldfieldname': u'is_advance',
+		'oldfieldtype': u'Select',
+		'options': u'No\nYes',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'is_advance',
-		'fieldtype': 'Select',
-		'idx': 9,
-		'label': 'Is Advance',
-		'no_copy': 1,
-		'oldfieldname': 'is_advance',
-		'oldfieldtype': 'Select',
-		'options': 'No\nYes',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldname': 'against_account',
-		'fieldtype': 'Text',
+		'doctype': u'DocField',
+		'fieldname': u'against_account',
+		'fieldtype': u'Text',
 		'hidden': 1,
-		'idx': 10,
-		'label': 'Against Account',
+		'label': u'Against Account',
 		'no_copy': 1,
-		'oldfieldname': 'against_account',
-		'oldfieldtype': 'Text',
+		'oldfieldname': u'against_account',
+		'oldfieldtype': u'Text',
 		'permlevel': 0
 	}
 ]
