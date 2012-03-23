@@ -18,6 +18,11 @@ import webnotes
 from webnotes.utils import flt
 from webnotes.model.code import get_obj
 
+install_docs = [
+	{"doctype":"Role", "name":"Accounts Manager"},
+	{"doctype":"Role", "name":"Accounts User"}
+]
+
 @webnotes.whitelist()
 def get_default_bank_account():
 	"""

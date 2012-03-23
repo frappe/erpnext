@@ -16,7 +16,7 @@
 
 def execute():
 	import webnotes
-	from webnotes.modules.module_manager import reload_doc
+	from webnotes.modules import reload_doc
 	reload_doc('website', 'doctype', 'website_settings')
 
 	res = webnotes.conn.sql("""\

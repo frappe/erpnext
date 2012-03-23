@@ -20,9 +20,10 @@ cur_frm.cscript.fname = "delivery_note_details";
 cur_frm.cscript.other_fname = "other_charges";
 cur_frm.cscript.sales_team_fname = "sales_team";
 
-$import(Sales Common)
-$import(Other Charges)
-$import(SMS Control)
+wn.require('erpnext/selling/doctype/sales_common/sales_common.js');
+wn.require('erpnext/setup/doctype/other_charges/other_charges.js');
+wn.require('erpnext/utilities/doctype/sms_control/sms_control.js');
+wn.require('erpnext/setup/doctype/notification_control/notification_control.js');
 
 // ONLOAD
 // ================================================================================================
@@ -81,11 +82,11 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 cur_frm.cscript.customer = function(doc,dt,dn,onload) {	
 	var callback = function(r,rt) {
 			var doc = locals[cur_frm.doctype][cur_frm.docname];
+			if(doc.customer) unhide_field(['customer_address','contact_person','customer_name','address_display','contact_display','contact_mobile','contact_email','territory','customer_group','shipping_address']);
 			cur_frm.refresh();
 	} 
 	var args = onload ? 'onload':''
 	if(doc.customer) $c_obj(make_doclist(doc.doctype, doc.name), 'get_default_customer_shipping_address', args, callback);
-	if(doc.customer) unhide_field(['customer_address','contact_person','customer_name','address_display','contact_display','contact_mobile','contact_email','territory','customer_group','shipping_address']);
 }
 
 cur_frm.cscript.customer_address = cur_frm.cscript.contact_person = function(doc,dt,dn) {		
@@ -322,7 +323,6 @@ cur_frm.pformat.sales_order_no= function(doc, cdt, cdn){
 	return out;
 }
 
-$import(Notification Control)
 cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
 	var args = {
 		type: 'Delivery Note',

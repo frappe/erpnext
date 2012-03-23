@@ -21,11 +21,11 @@
 		'module': u'Stock',
 		'name': '__common__',
 		'read_only_onload': 1,
-		'search_fields': u'status, transaction_date, supplier',
+		'search_fields': u'status, posting_date, supplier',
 		'section_style': u'Tabbed',
 		'server_code_error': u' ',
 		'show_in_menu': 0,
-		'subject': u'From %(supplier_name)s against %(purchase_order)s on %(transaction_date)s',
+		'subject': u'From %(supplier_name)s against %(purchase_order)s on %(posting_date)s',
 		'version': 325
 	},
 

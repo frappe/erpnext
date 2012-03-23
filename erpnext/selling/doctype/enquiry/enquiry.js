@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-$import(SMS Control)
+wn.require('erpnext/utilities/doctype/sms_control/sms_control.js');
 
 cur_frm.cscript.refresh = function(doc, cdt, cdn){
 

@@ -107,7 +107,7 @@ function KnowledgeBase(w) {
 		this.list_area = $a(w, 'div', '', {marginRight:'13px'})
 		this.no_result = $a(w, 'div','help_box',{display:'none'},'No questions asked yet! Be the first one to ask')
 
-		this.list = new wn.widgets.Listing({
+		this.list = new wn.ui.Listing({
 			parent: this.list_area,
 			no_results_message: 'No questions found. Ask a new question!',
 			as_dict: 1,
@@ -215,4 +215,4 @@ KBQuestion = function(parent, det, kb) {
 	this.make()
 }
 
-$import(knowledge_base/page/kb_common/kb_common.js);
+wn.require('erpnext/knowledge_base/page/kb_common/kb_common.js');

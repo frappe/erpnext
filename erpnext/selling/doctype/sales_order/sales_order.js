@@ -22,9 +22,10 @@ cur_frm.cscript.other_fname = "other_charges";
 cur_frm.cscript.sales_team_fname = "sales_team";
 
 
-$import(Sales Common)
-$import(Other Charges)
-$import(SMS Control)
+wn.require('erpnext/selling/doctype/sales_common/sales_common.js');
+wn.require('erpnext/setup/doctype/other_charges/other_charges.js');
+wn.require('erpnext/utilities/doctype/sms_control/sms_control.js');
+wn.require('erpnext/setup/doctype/notification_control/notification_control.js');
 
 
 // ONLOAD
@@ -35,7 +36,7 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 	if(!doc.price_list_currency) set_multiple(cdt, cdn, {price_list_currency: doc.currency, plc_conversion_rate: 1});
 	// load default charges
 	
-	if(doc.__islocal){
+	if(doc.__islocal && !doc.customer){
 		hide_field(['customer_address','contact_person','customer_name','address_display','contact_display','contact_mobile','contact_email','territory','customer_group','shipping_address']);
 	}
 }
@@ -100,13 +101,16 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 //customer
 cur_frm.cscript.customer = function(doc,dt,dn) {
 	var callback = function(r,rt) {
-			var doc = locals[cur_frm.doctype][cur_frm.docname];
-			get_server_fields('get_shipping_address',doc.customer,'',doc, dt, dn, 0);
+		var callback2  = function(r, rt) {
+			if(doc.customer) unhide_field(['customer_address', 'contact_person', 'customer_name', 'address_display', 'contact_display', 'contact_mobile', 'contact_email', 'territory','customer_group','shipping_address']);
 			cur_frm.refresh();
+		}
+		var doc = locals[cur_frm.doctype][cur_frm.docname];
+		get_server_fields('get_shipping_address',doc.customer,'',doc, dt, dn, 0, callback2);
+			
 	}	 
 
 	if(doc.customer) $c_obj(make_doclist(doc.doctype, doc.name), 'get_default_customer_address', '', callback);
-	if(doc.customer) unhide_field(['customer_address', 'contact_person', 'customer_name', 'address_display', 'contact_display', 'contact_mobile', 'contact_email', 'territory','customer_group','shipping_address']);
 }
 
 cur_frm.cscript.customer_address = cur_frm.cscript.contact_person = function(doc,dt,dn) {		
@@ -352,7 +356,6 @@ cur_frm.fields_dict['territory'].get_query = function(doc,cdt,cdn) {
 	return 'SELECT `tabTerritory`.`name`,`tabTerritory`.`parent_territory` FROM `tabTerritory` WHERE `tabTerritory`.`is_group` = "No" AND `tabTerritory`.`docstatus`!= 2 AND `tabTerritory`.%(key)s LIKE "%s"	ORDER BY	`tabTerritory`.`name` ASC LIMIT 50';
 }
 
-$import(Notification Control)
 cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
 	var args = {
 		type: 'Sales Order',

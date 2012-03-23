@@ -43,20 +43,24 @@ wn.pages.messages.onload = function(wrapper) {
 	});
 	
 	// enable, disable button
-	$('#message-post-text').keyup(function() {
+	$('#message-post-text').keyup(function(e) {
 		if($(this).val()) {
 			$('#message-post').attr('disabled', false);
 		} else {
 			$('#message-post').attr('disabled', true);
 		}
+		
+		if(e.which==13) {
+			$('#message-post').click();
+		}
 	})
 }
 
-wn.pages.messages.onshow = function(wrapper) {
+$(wn.pages.messages).bind('show', function() {
 	erpnext.messages.show();
-	setTimeout(erpnext.messages.refresh, 5000);
+	setTimeout(erpnext.messages.refresh, 7000);
 	$('#message-post-text').focus();
-}
+})
 
 erpnext.messages = {
 	show: function() {
@@ -75,8 +79,8 @@ erpnext.messages = {
 	},
 	// check for updates every 5 seconds if page is active
 	refresh: function() {
-		setTimeout(erpnext.messages.refresh, 10000);
-		if(page_body.cur_page_label != 'messages') return;
+		setTimeout(erpnext.messages.refresh, 7000);
+		if(wn.container.page.label != 'Messages') return;
 		erpnext.messages.show();
 	},
 	get_contact: function() {
@@ -91,13 +95,15 @@ erpnext.messages = {
 		return user;	
 	},
 	make_list: function() {
-		erpnext.messages.list = new wn.widgets.Listing({
+		erpnext.messages.list = new wn.ui.Listing({
 			parent: $('#message-list').get(0),
 			method: 'utilities.page.messages.messages.get_list',
 			args: {
 				contact: null
 			},
 			render_row: function(wrapper, data) {
+				$(wrapper).removeClass('list-row');
+				
 				data.creation = dateutil.comment_when(data.creation);
 				data.comment_by_fullname = wn.user_info(data.owner).fullname;
 

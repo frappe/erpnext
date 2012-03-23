@@ -73,7 +73,7 @@ $.extend(cur_frm.cscript, {
 		cur_frm.fields_dict['Thread HTML'].wrapper.innerHTML = '';
 		
 		// render first message
-		new EmailMessage(cur_frm.fields_dict['Thread HTML'].wrapper, {
+		new EmailMessage($a(cur_frm.fields_dict['Thread HTML'].wrapper, 'div'), {
 			from_email: doc.raised_by,
 			creation: doc.creation,
 			mail: doc.description,
@@ -81,8 +81,8 @@ $.extend(cur_frm.cscript, {
 		}, null, -1)
 		
 		// render thread		
-		cs.thread_list = new wn.widgets.Listing({
-			parent: cur_frm.fields_dict['Thread HTML'].wrapper,
+		cs.thread_list = new wn.ui.Listing({
+			parent: $a(cur_frm.fields_dict['Thread HTML'].wrapper, 'div'),
 			no_result_message: 'No responses yet',
 			get_query: function() {
 				return 'select mail, from_email, creation, content_type '+
@@ -188,7 +188,7 @@ EmailMessage = function(parent, args, list, idx) {
 		);
 		
 		// show only first and last message
-		if(idx==-1 || list && list.values.length-1==idx) {
+		if(idx==-1 || list && list.data.length-1==idx) {
 			$ds(this.message)
 		}
 		

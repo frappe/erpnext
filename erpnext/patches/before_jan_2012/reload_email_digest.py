@@ -15,5 +15,5 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 def execute():
-	from webnotes.modules.module_manager import reload_doc
+	from webnotes.modules import reload_doc
 	reload_doc('Setup', 'DocType', 'Email Digest')

@@ -21,7 +21,7 @@ pscript['onload_{{ doc.name }}'] = function(wrapper) {
 	var side = $(wrapper).find('.web-side-section')
 		.append('<h4>Recent Posts</h4>').get(0);
 		
-	wrapper.recent_list = new wn.widgets.Listing({
+	wrapper.recent_list = new wn.ui.Listing({
 		parent: side,
 		query: 'select name, title, left(content, 100) as content from tabBlog\
 			where ifnull(published,1)=1',
@@ -39,7 +39,7 @@ pscript['onload_{{ doc.name }}'] = function(wrapper) {
 	// comments
 	$(wrapper).find('.web-main-section').append('<hr><h3>Comments</h3>');
 
-	wrapper.comment_list = new wn.widgets.Listing({
+	wrapper.comment_list = new wn.ui.Listing({
 		parent: $(wrapper).find('.web-main-section').get(0),
 		query: 'select comment, comment_by_fullname, modified\
 			from `tabComment Widget Record` where comment_doctype="Page"\

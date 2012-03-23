@@ -56,8 +56,12 @@ def get_active_users(arg=None):
 @webnotes.whitelist()
 def post(arg=None):
 	"""post message"""
-	import json
-	arg = json.loads(arg)
+	if arg:
+		import json
+		arg = json.loads(arg)
+	else:
+		arg = {}
+		arg.update(webnotes.form_dict)
 	from webnotes.model.doc import Document
 	d = Document('Comment Widget Record')
 	d.comment = arg['txt']

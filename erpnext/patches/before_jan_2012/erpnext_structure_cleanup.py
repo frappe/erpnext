@@ -19,7 +19,7 @@
 
 import webnotes
 from webnotes.model import delete_doc
-from webnotes.modules.module_manager import reload_doc
+from webnotes.modules import reload_doc
 from webnotes.modules.export_module import export_to_files
 sql = webnotes.conn.sql
 

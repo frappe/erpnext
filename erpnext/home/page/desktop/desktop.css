@@ -46,10 +46,10 @@
 	width: 56px;
 	height: 56px;
 	border: 4px solid white;
-	box-shadow: 0 0 10px 1px black;
-	-moz-box-shadow: 0 0 10px 1px black;
-	-webkit-box-shadow: 0 0 10px 1px black;
-	-o-box-shadow: 0 0 10px 1px black;
+	box-shadow: 0 0 4px 1px black;
+	-moz-box-shadow: 0 0 4px 1px black;
+	-webkit-box-shadow: 0 0 4px 1px black;
+	-o-box-shadow: 0 0 4px 1px black;
 	margin: auto;
 }
 
@@ -62,17 +62,16 @@
 
 .case-label {
 	color: white;
-	/*font-size: 12px;*/
 	padding-top: 10px;
 	text-align: center;
-	text-shadow: 1px 1px 5px #000, 3px 3px 5px #000;
+	text-shadow: 1px 1px 2px #000, 1px 1px 2px #000, 1px 1px 2px #000, 0px 0px 2px #000;
 }
 
 /* Hover and click effects */
 .case-border:hover, .circle:hover, .hover-effect {
-	box-shadow: 0 0 2px 0px black, 0 0 10px 1px white !important;
-	-moz-box-shadow: 0 0 2px 0px black, 0 0 10px 1px white !important;
-	-webkit-box-shadow: 0 0 2px 0px black, 0 0 10px 1px white !important;
+	box-shadow: 0 0 2px 0px black, 0 0 4px 1px white !important;
+	-moz-box-shadow: 0 0 2px 0px black, 0 0 4px 1px white !important;
+	-webkit-box-shadow: 0 0 2px 0px black, 0 0 4px 1px white !important;
 	-o-box-shadow: 0 0 2px 0px black, 0 0 10px 1px white !important;
 }
 
@@ -105,10 +104,10 @@
 	margin-top: -74px;
 	margin-right: 10px;
 	border: 2px solid white;
-	box-shadow: 0 0 10px 1px black;
-	-moz-box-shadow: 0 0 10px 1px black;
-	-webkit-box-shadow: 0 0 10px 1px black;
-	-o-box-shadow: 0 0 10px 1px black;
+	box-shadow: 0 0 4px 1px black;
+	-moz-box-shadow: 0 0 4px 1px black;
+	-webkit-box-shadow: 0 0 4px 1px black;
+	-o-box-shadow: 0 0 4px 1px black;
 }
 
 .circle-text {

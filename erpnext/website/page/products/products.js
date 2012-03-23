@@ -57,7 +57,7 @@ erpnext.products.get_group = function() {
 }
 
 erpnext.products.make_product_list = function(wrapper) {
-	wrapper.mainlist = new wn.widgets.Listing({
+	wrapper.mainlist = new wn.ui.Listing({
 		parent: $(wrapper).find('.web-main-section').get(0),
 		run_btn: $(wrapper).find('.products-search .btn').get(0),
 		hide_refresh: true,

@@ -24,5 +24,5 @@ def execute():
 		UPDATE `tabDocField` SET options=NULL
 		WHERE parent='DocLayer' AND fieldname='doc_type'
 	""")
-	from webnotes.modules.module_manager import reload_doc
+	from webnotes.modules import reload_doc
 	reload_doc('core', 'doctype', 'doclayer')

@@ -16,12 +16,12 @@
 
 pscript.onload_dashboard = function() {
 	// load jqplot
-	wn.require('lib/css/jqplot.css');
-	wn.require('lib/js/legacy/jquery/jquery.jqplot.min.js');
-	wn.require('lib/js/legacy/jquery/jqplot-plugins/jqplot.barRenderer.js'); 
-	wn.require('lib/js/legacy/jquery/jqplot-plugins/jqplot.canvasAxisTickRenderer.min.js');
-	wn.require('lib/js/legacy/jquery/jqplot-plugins/jqplot.canvasTextRenderer.min.js');
-	wn.require('lib/js/legacy/jquery/jqplot-plugins/jqplot.categoryAxisRenderer.min.js');
+	wn.require('lib/css/lib/jqplot.css');
+	wn.require('lib/js/lib/jqplot/jquery.jqplot.min.js');
+	wn.require('lib/js/lib/jqplot/jqplot-plugins/jqplot.barRenderer.js'); 
+	wn.require('lib/js/lib/jqplot/jqplot-plugins/jqplot.canvasAxisTickRenderer.min.js');
+	wn.require('lib/js/lib/jqplot/jqplot-plugins/jqplot.canvasTextRenderer.min.js');
+	wn.require('lib/js/lib/jqplot/jqplot-plugins/jqplot.categoryAxisRenderer.min.js');
 
 
 	pscript.dashboard_settings = {

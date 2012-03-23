@@ -5,12 +5,18 @@ body {
 	background-color: #{{ doc.background_color }};
 {% endif %}	
 {% if doc.font %}
-	font-family: {{ doc.font }} !important;
+	font-family: '{{ doc.font }}', Verdana, Sans !important;
 {% endif %}
 {% if doc.font_size %}
 	font-size: {{ doc.font_size }} !important;
 {% endif %}
 }
+
+{% if doc.font_size %}
+.small {
+	font-size: {{ doc.small_font_size }} !important;
+}
+{% endif %}
 
 {% if doc.footer_font_color %}
 footer {
@@ -26,6 +32,6 @@ footer a, footer a:visited, footer a:hover {
 
 {% if doc.heading_font %}
 h1, h2, h3, h4, h5 {
-	font-family: {{ doc.heading_font}} !important;
+	font-family: '{{ doc.heading_font}}', Arial, 'Helvetica Neue' !important;
 }	
 {% endif %}

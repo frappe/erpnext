@@ -17,8 +17,8 @@
 cur_frm.cscript.tname = "PV Detail";
 cur_frm.cscript.fname = "entries";
 cur_frm.cscript.other_fname = "purchase_tax_details";
-$import(Purchase Other Charges)
-$import(Purchase Common)
+wn.require('erpnext/buying/doctype/purchase_other_charges/purchase_other_charges.js');
+wn.require('erpnext/buying/doctype/purchase_common/purchase_common.js');
 
 // On Load
 // --------
@@ -162,7 +162,7 @@ cur_frm.cscript.is_opening = function(doc, dt, dn) {
 
 // Recalculate Button
 // -------------------
-cur_frm.cscript['Recalculate'] = function(doc, dt, dn) {
+cur_frm.cscript['Recalculate'] = function(doc, cdt, cdn) {
 	cur_frm.cscript['Calculate Tax'](doc,cdt,cdn);
 	calc_total_advance(doc,cdt,cdn);
 }

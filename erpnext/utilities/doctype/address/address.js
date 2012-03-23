@@ -17,5 +17,28 @@
 cur_frm.cscript.onload = function(doc, cdt, cdn) {
 	if(doc.customer) cur_frm.add_fetch('customer', 'customer_name', 'customer_name');
 	if(doc.supplier) cur_frm.add_fetch('supplier', 'supplier_name', 'supplier_name');
+	
+	var route = wn.get_route();
+	if(route[1]=='Supplier') {
+		var supplier = locals.Supplier[route[2]]
+		doc.supplier = supplier.name;
+		doc.supplier_name = supplier.supplier_name;
+		doc.address_type = 'Office';
+	} else if(route[1]=='Customer') {
+		var customer = locals.Customer[route[2]]
+		doc.supplier = customer.name;
+		doc.customer_name = customer.customer_name;
+		doc.address_type = 'Office';
+	} else if(route[1]=='Sales Partner') {
+		var sp = locals['Sales Partner'][route[2]];
+		doc.sales_partner = sp.name;
+		ndoc.address_type = 'Office';				
+	}
 }
+
+cur_frm.cscript.hide_dialog = function() {
+	if(cur_frm.address_list)
+		cur_frm.address_list.run();
+}
+
 

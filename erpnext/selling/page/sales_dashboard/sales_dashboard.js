@@ -22,8 +22,8 @@ pscript['onload_Sales Dashboard'] = function() {
   $dh(pscript.mnt_div1);
   //pscript.dx_axis = [];
 
-	wn.require('lib/css/jqpot.css');
-	wn.require('lib/js/legacy/jquery/jquery.jqplot.min.js');
+	wn.require('lib/css/lib/jqplot.css');
+	wn.require('lib/js/lib/jqplot/jquery.jqplot.min.js');
 	pscript.all_onchnge();
 }
 //=======================================================================

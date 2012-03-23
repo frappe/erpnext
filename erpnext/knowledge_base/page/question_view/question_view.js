@@ -131,7 +131,7 @@ KBAnswerList = function(args) {
 	
 	this.make_list = function() {
 	
-		this.list = new wn.widgets.Listing({
+		this.list = new wn.ui.Listing({
 			parent: me.parent,
 			as_dict: 1,
 			no_result_message: 'No answers yet, be the first one to answer!',
@@ -185,4 +185,4 @@ KBAnswer = function(body, data, ans_list) {
 }
 
 
-$import(knowledge_base/page/kb_common/kb_common.js);
+wn.require('erpnext/knowledge_base/page/kb_common/kb_common.js');

@@ -470,7 +470,7 @@ FeedList.prototype.make_list = function() {
 	var me = this;
 	this.list_area = $a(this.wrapper,'div')
 	
-	this.list = new wn.widgets.Listing({
+	this.list = new wn.ui.Listing({
 		parent: this.list_area,
 		query: repl('select \
 			distinct t1.name, t1.feed_type, t1.doc_type, t1.doc_name, t1.subject, t1.modified_by, \
@@ -600,7 +600,7 @@ pscript.home_make_status = function() {
 	// get values
 	$c_page('home', 'event_updates', 'get_status_details', user,
 		function(r,rt) { 
-			//page_body.wntoolbar.set_new_comments(r.message.unread_messages);
+			//wn.container.wntoolbar.set_new_comments(r.message.unread_messages);
 										
 			// render online users
 			pscript.online_users_obj.render(r.message.online_users);

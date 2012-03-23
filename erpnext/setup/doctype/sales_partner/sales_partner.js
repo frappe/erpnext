@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-$import(Contact Control)
+wn.require('erpnext/setup/doctype/contact_control/contact_control.js');
 
 cur_frm.cscript.onload = function(doc,dt,dn){
 	// history doctypes and scripts
@@ -48,18 +48,10 @@ cur_frm.cscript.refresh = function(doc,dt,dn){
 
 cur_frm.cscript.make_address = function() {
 	if(!cur_frm.address_list) {
-		cur_frm.address_list = new wn.widgets.Listing({
+		cur_frm.address_list = new wn.ui.Listing({
 			parent: cur_frm.fields_dict['Address HTML'].wrapper,
 			page_length: 2,
-			new_doctype: "Address",
-			new_doc_onload: function(dn) {
-				ndoc = locals["Address"][dn];
-				ndoc.sales_partner = cur_frm.doc.name;
-				ndoc.address_type = 'Office';				
-			},
-			new_doc_onsave: function(dn) {				
-				cur_frm.address_list.run()
-			},			
+			new_doctype: "Address",			
 			get_query: function() {
 				return "select name, address_type, address_line1, address_line2, city, state, country, pincode, fax, email_id, phone, is_primary_address, is_shipping_address from tabAddress where sales_partner='"+cur_frm.docname+"' and docstatus != 2 order by is_primary_address desc"
 			},
@@ -80,17 +72,10 @@ cur_frm.cscript.make_address = function() {
 
 cur_frm.cscript.make_contact = function() {
 	if(!cur_frm.contact_list) {
-		cur_frm.contact_list = new wn.widgets.Listing({
+		cur_frm.contact_list = new wn.ui.Listing({
 			parent: cur_frm.fields_dict['Contact HTML'].wrapper,
 			page_length: 2,
 			new_doctype: "Contact",
-			new_doc_onload: function(dn) {
-				ndoc = locals["Contact"][dn];
-				ndoc.sales_partner = cur_frm.doc.name;				
-			},
-			new_doc_onsave: function(dn) {				
-				cur_frm.contact_list.run()
-			},
 			get_query: function() {
 				return "select name, first_name, last_name, email_id, phone, mobile_no, department, designation, is_primary_contact from tabContact where sales_partner='"+cur_frm.docname+"' and docstatus != 2 order by is_primary_contact desc"
 			},

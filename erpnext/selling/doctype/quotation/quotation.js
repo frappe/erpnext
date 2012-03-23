@@ -21,9 +21,10 @@ cur_frm.cscript.other_fname = "other_charges";
 cur_frm.cscript.sales_team_fname = "sales_team";
 
 // =====================================================================================
-$import(Sales Common)
-$import(Other Charges)
-$import(SMS Control)
+wn.require('erpnext/selling/doctype/sales_common/sales_common.js');
+wn.require('erpnext/setup/doctype/other_charges/other_charges.js');
+wn.require('erpnext/utilities/doctype/sms_control/sms_control.js');
+wn.require('erpnext/setup/doctype/notification_control/notification_control.js');
 
 // ONLOAD
 // ===================================================================================
@@ -41,7 +42,7 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 
 	if(doc.quotation_to) {
 		if(doc.quotation_to == 'Customer') {
-			hide_field(['lead', 'lead_name']);
+			hide_field(['lead', 'lead_name', 'organization']);
 		}
 		else if (doc.quotation_to == 'Lead') {
 			hide_field(['customer','customer_address','contact_person', 'customer_name','contact_display', 'customer_group']);
@@ -60,16 +61,11 @@ cur_frm.cscript.onload_post_render = function(doc, dt, dn) {
 // hide - unhide fields based on lead or customer..
 // =======================================================================================================================
 cur_frm.cscript.lead_cust_show = function(doc,cdt,cdn){
-	if(doc.quotation_to == 'Lead'){
-		unhide_field(['lead']);
-		hide_field(['lead_name','customer','customer_address','contact_person','customer_name','address_display','contact_display','contact_mobile','contact_email','territory','customer_group']);
-		doc.lead = doc.lead_name = doc.customer = doc.customer_address = doc.contact_person = doc.address_display = doc.contact_display = doc.contact_mobile = doc.contact_email = doc.territory = doc.customer_group = "";
-	}
-	else if(doc.quotation_to == 'Customer'){
-		unhide_field(['customer']);
-		hide_field(['lead','lead_name','address_display','contact_display','contact_mobile','contact_email','territory']);
-		doc.lead = doc.lead_name = doc.customer = doc.customer_address = doc.contact_person = doc.address_display = doc.contact_display = doc.contact_mobile = doc.contact_email = doc.territory = doc.customer_group = "";
-	}
+	hide_field(['lead', 'lead_name','customer','customer_address','contact_person','customer_name','address_display','contact_display','contact_mobile','contact_email','territory','customer_group', 'organization']);
+	if(doc.quotation_to == 'Lead') unhide_field(['lead']);
+	else if(doc.quotation_to == 'Customer') unhide_field(['customer']);
+	
+	doc.lead = doc.lead_name = doc.customer = doc.customer_address = doc.contact_person = doc.address_display = doc.contact_display = doc.contact_mobile = doc.contact_email = doc.territory = doc.customer_group = doc.organization = "";
 }
 
 
@@ -107,12 +103,19 @@ cur_frm.cscript.customer = function(doc,dt,dn) {
 			cur_frm.refresh();
 	}
 
-	if(doc.customer) $c_obj(make_doclist(doc.doctype, doc.name), 'get_default_customer_address', '', callback);
-	if(doc.customer) unhide_field(['customer_address','contact_person','customer_name','address_display','contact_display','contact_mobile','contact_email','territory','customer_group']);
+	if(doc.customer) $c_obj(make_doclist(doc.doctype, doc.name), 
+		'get_default_customer_address', '', callback);
+	if(doc.customer) unhide_field(['customer_address','contact_person','customer_name',
+		'address_display','contact_display','contact_mobile','contact_email','territory',
+		'customer_group']);
 }
 
 cur_frm.cscript.customer_address = cur_frm.cscript.contact_person = function(doc,dt,dn) {
-	if(doc.customer) get_server_fields('get_customer_address', JSON.stringify({customer: doc.customer, address: doc.customer_address, contact: doc.contact_person}),'', doc, dt, dn, 1);
+	if(doc.customer) get_server_fields('get_customer_address', JSON.stringify({
+		customer: doc.customer, 
+		address: doc.customer_address, 
+		contact: doc.contact_person
+	}),'', doc, dt, dn, 1);
 }
 
 cur_frm.fields_dict.customer_address.on_new = function(dn) {
@@ -140,7 +143,7 @@ cur_frm.fields_dict['lead'].get_query = function(doc,cdt,cdn){
 
 cur_frm.cscript.lead = function(doc, cdt, cdn) {
 	if(doc.lead) get_server_fields('get_lead_details', doc.lead,'', doc, cdt, cdn, 1);
-	if(doc.lead) unhide_field(['lead_name','address_display','contact_mobile','contact_email','territory']);
+	if(doc.lead) unhide_field(['lead_name','address_display','contact_mobile','contact_email','territory', 'organization']);
 }
 
 
@@ -326,7 +329,6 @@ cur_frm.fields_dict['quotation_details'].grid.get_field('item_code').get_query= 
 		return repl("SELECT name, item_name, description FROM tabItem WHERE `tabItem`.%(key)s LIKE '%s' %(cond)s ORDER BY tabItem.item_code DESC LIMIT 50", {cond:cond});
 }
 
-$import(Notification Control)
 cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
 	var args = {
 		type: 'Quotation',

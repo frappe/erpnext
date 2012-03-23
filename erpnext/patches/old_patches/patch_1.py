@@ -781,12 +781,12 @@ elif patch_no == 184:
 	except: pass
 
 	# import
-	from webnotes.modules.module_manager import reload_doc
+	from webnotes.modules import reload_doc
 	reload_doc('event_updates','doctype','feed')
 elif patch_no==185:
 	sql("delete from tabDocTrigger where method = 'webnotes.widgets.follow.on_docsave'")
 elif patch_no==186:
-	from webnotes.modules.module_manager import reload_doc
+	from webnotes.modules import reload_doc
 	reload_doc('event_updates','doctype','feed')
 elif patch_no == 187:
 	sql("update tabDocType set autoname = '' where name = 'QA Inspection Report'")
@@ -807,7 +807,7 @@ elif patch_no == 194:
 	sql("delete from `tabModule Def Item` where parent = 'SRM' and doc_name = 'Landed Cost Wizard' and display_name = 'Landed Cost Wizard'")
 	import_from_files(record_list = [['stock', 'Module Def', 'Material Management']])
 elif patch_no == 195:
-	from webnotes.modules.module_manager import reload_doc
+	from webnotes.modules import reload_doc
 	reload_doc('setup','doctype','manage_account')
 elif patch_no == 196:
 	sql("update `tabModule Def` set module_page = null where name = 'Material Management'")

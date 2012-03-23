@@ -3,6 +3,7 @@
 	border-bottom: 1px solid #DEB85F;
 	margin-bottom: 5px;
 	height: 14px;
+	clear: both;
 }
 
 .todoitem .label {
@@ -20,7 +21,7 @@
 
 .todoitem .ref_link {
 	float: left;
-	margin-left: 14px;
+	margin-left: 10px;
 	display: inline-block;
 	line-height: 18px;
 }

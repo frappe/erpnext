@@ -18,7 +18,7 @@
 // ------
 // cur_frm.cscript.tname - Details table name
 // cur_frm.cscript.fname - Details fieldname
-// cur_frm.cscript.other_fname - Other Charges fieldname
+// cur_frm.cscript.other_fname - wn.require('erpnext/setup/doctype/other_charges/other_charges.js'); fieldname
 // cur_frm.cscript.sales_team_fname - Sales Team fieldname
 
 // ============== Load Default Taxes ===================
@@ -100,14 +100,14 @@ var set_dynamic_label_par = function(doc, cdt, cdn, base_curr) {
 		'grand_total':	'Grand Total', 'rounded_total': 'Rounded Total', 'in_words': 'In Words'}
 	par_cols_export = {'grand_total_export': 'Grand Total', 'rounded_total_export':	'Rounded Total', 'in_words_export':	'In Words'};
 
-	for (d in par_cols_base) cur_frm.fields_dict[d].label_area.innerHTML = par_cols_base[d]+' (' + base_curr + ')';
-	for (d in par_cols_export) cur_frm.fields_dict[d].label_area.innerHTML = par_cols_export[d]+' (' + doc.currency + ')';
-	cur_frm.fields_dict['conversion_rate'].label_area.innerHTML = "Conversion Rate (" + doc.currency +' -> '+ base_curr + ')';
-	cur_frm.fields_dict['plc_conversion_rate'].label_area.innerHTML = 'Price List Currency Conversion Rate (' + doc.price_list_currency +' -> '+ base_curr + ')';
+	for (d in par_cols_base) cur_frm.fields_dict[d].label_span.innerHTML = par_cols_base[d]+' (' + base_curr + ')';
+	for (d in par_cols_export) cur_frm.fields_dict[d].label_span.innerHTML = par_cols_export[d]+' (' + doc.currency + ')';
+	cur_frm.fields_dict['conversion_rate'].label_span.innerHTML = "Conversion Rate (" + doc.currency +' -> '+ base_curr + ')';
+	cur_frm.fields_dict['plc_conversion_rate'].label_span.innerHTML = 'Price List Currency Conversion Rate (' + doc.price_list_currency +' -> '+ base_curr + ')';
 
 	if (doc.doctype == 'Receivable Voucher') {
-		cur_frm.fields_dict['total_advance'].label_area.innerHTML = 'Total Advance (' + base_curr + ')';
-		cur_frm.fields_dict['outstanding_amount'].label_area.innerHTML = 'Outstanding Amount (' + base_curr + ')';
+		cur_frm.fields_dict['total_advance'].label_span.innerHTML = 'Total Advance (' + base_curr + ')';
+		cur_frm.fields_dict['outstanding_amount'].label_span.innerHTML = 'Outstanding Amount (' + base_curr + ')';
 	}
 }
 
@@ -212,13 +212,16 @@ cur_frm.cscript.price_list_currency = cur_frm.cscript.currency;
 cur_frm.cscript.conversion_rate = cur_frm.cscript.currency;
 cur_frm.cscript.plc_conversion_rate = cur_frm.cscript.currency;
 
-cur_frm.cscript.company = function(doc, dt, dn) {
+cur_frm.cscript.company = function(doc, cdt, cdn) {
 	wn.call({
 		method: 'selling.doctype.sales_common.sales_common.get_comp_base_currency',
 		args: {company:doc.company},
 		callback: function(r, rt) {
-			var doc = locals[dt][dn];
-			set_multiple(doc.doctype, doc.name, {currency:r.message, price_list_currency:r.message});
+			var doc = locals[cdt][cdn];
+			set_multiple(doc.doctype, doc.name, {
+				currency:r.message, 
+				price_list_currency:r.message
+			});
 			cur_frm.cscript.currency(doc, cdt, cdn);
 		}
 	});
@@ -249,9 +252,20 @@ cur_frm.cscript.price_list_name = function(doc, cdt, cdn) {
 // ******************** ITEM CODE ******************************** 
 cur_frm.fields_dict[cur_frm.cscript.fname].grid.get_field("item_code").get_query = function(doc, cdt, cdn) {
 	if (doc.order_type == 'Maintenance')
-		return 'SELECT tabItem.name,tabItem.item_name,tabItem.description FROM tabItem WHERE tabItem.is_service_item="Yes" AND tabItem.docstatus != 2 AND (ifnull(`tabItem`.`end_of_life`,"") = "" OR `tabItem`.`end_of_life` > NOW() OR `tabItem`.`end_of_life`="0000-00-00") AND tabItem.%(key)s LIKE "%s" LIMIT 50';
+		return 'SELECT tabItem.name,tabItem.item_name,tabItem.description \
+			FROM tabItem WHERE tabItem.is_service_item="Yes" \
+			AND tabItem.docstatus != 2 \
+			AND (ifnull(`tabItem`.`end_of_life`,"") = "" \
+				OR `tabItem`.`end_of_life` > NOW() \
+				OR `tabItem`.`end_of_life`="0000-00-00") \
+			AND tabItem.%(key)s LIKE "%s" LIMIT 50';
 	else 
-		return 'SELECT tabItem.name,tabItem.item_name,tabItem.description FROM tabItem WHERE tabItem.is_sales_item="Yes" AND tabItem.docstatus != 2 AND (ifnull(`tabItem`.`end_of_life`,"") = "" OR `tabItem`.`end_of_life` > NOW() OR `tabItem`.`end_of_life`="0000-00-00") AND tabItem.%(key)s LIKE "%s" LIMIT 50';
+		return 'SELECT tabItem.name,tabItem.item_name,tabItem.description FROM tabItem \
+			WHERE tabItem.is_sales_item="Yes" AND tabItem.docstatus != 2 \
+			AND (ifnull(`tabItem`.`end_of_life`,"") = "" \
+				OR `tabItem`.`end_of_life` > NOW() \
+				OR `tabItem`.`end_of_life`="0000-00-00") \
+			AND tabItem.%(key)s LIKE "%s" LIMIT 50';
 }
 
 
@@ -267,8 +281,14 @@ cur_frm.cscript.item_code = function(doc, cdt, cdn) {
 			var callback = function(r, rt){
 				cur_frm.cscript.recalc(doc, 1);
 			}
-			var args = {'item_code':d.item_code, 'income_account':d.income_account, 'cost_center': d.cost_center, 'warehouse': d.warehouse};
-			get_server_fields('get_item_details',JSON.stringify(args), fname,doc,cdt,cdn,1,callback);
+			var args = {
+				'item_code':d.item_code, 
+				'income_account':d.income_account, 
+				'cost_center': d.cost_center, 
+				'warehouse': d.warehouse
+			};
+			get_server_fields('get_item_details',JSON.stringify(args), 
+				fname,doc,cdt,cdn,1,callback);
 		}
 	}
 	if(cur_frm.cscript.custom_item_code){
@@ -358,8 +378,14 @@ cur_frm.cscript.recalc = function(doc, n) {
 	var sales_team = cur_frm.cscript.sales_team_fname;
 	var other_fname	= cur_frm.cscript.other_fname;
 	
-	if(!flt(doc.conversion_rate)) { doc.conversion_rate = 1; refresh_field('conversion_rate'); }
-	if(!flt(doc.plc_conversion_rate)) { doc.plc_conversion_rate = 1; refresh_field('plc_conversion_rate'); }
+	if(!flt(doc.conversion_rate)) { 
+		doc.conversion_rate = 1; 
+		refresh_field('conversion_rate'); 
+	}
+	if(!flt(doc.plc_conversion_rate)) { 
+		doc.plc_conversion_rate = 1; 
+		refresh_field('plc_conversion_rate'); 
+	}
 
 	if(n > 0) cur_frm.cscript.update_fname_table(doc , tname , fname , n, other_fname); // updates all values in table (i.e. amount, export amount, net total etc.)
 	
@@ -378,7 +404,7 @@ cur_frm.cscript.recalc = function(doc, n) {
 		}
 		cur_frm.cscript.calc_other_charges(doc , tname , fname , other_fname); // calculate other charges
 	}
-	cur_frm.cscript.calc_doc_values(doc, cdt, cdn, tname, fname, other_fname); // calculates total amounts
+	cur_frm.cscript.calc_doc_values(doc, null, null, tname, fname, other_fname); // calculates total amounts
 
 	// ******************* calculate allocated amount of sales person ************************
 	cl = getchildren('Sales Team', doc.name, sales_team);

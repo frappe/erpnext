@@ -25,5 +25,5 @@ def execute():
 		WHERE parent = 'Email Settings' AND fieldname = 'mail_port'
 	""")
 
-	from webnotes.modules.module_manager import reload_doc
+	from webnotes.modules import reload_doc
 	reload_doc('setup', 'doctype', 'email_settings')

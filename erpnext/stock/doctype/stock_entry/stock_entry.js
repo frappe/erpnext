@@ -22,13 +22,17 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 
 
 var cfn_set_fields = function(doc, cdt, cdn) {
-  lst = ['supplier','supplier_name','supplier_address','customer','customer_name','customer_address']; 
-  if (doc.purpose == 'Production Order'){
-    unhide_field(['production_order', 'process', 'Get Items']);
-    hide_field(['from_warehouse', 'to_warehouse','purchase_receipt_no','delivery_note_no', 'sales_invoice_no','Warehouse HTML']);
-    doc.from_warehouse = '';
+  lst = ['supplier','supplier_name','supplier_address','customer','customer_name','customer_address'];
+  hide_field(lst);  
+
+  if (doc.purpose == 'Production Order' || doc.purpose == 'Other'){
+    unhide_field('Get Items');
+    hide_field(['from_warehouse', 'to_warehouse','purchase_receipt_no','delivery_note_no', 'sales_invoice_no','Warehouse HTML', 'transporter', 'is_excisable_goods', 'excisable_goods']);
+	if (doc.purpose=='Production Order') unhide_field(['production_order', 'process']);
+    
+	doc.from_warehouse = '';
     doc.to_warehosue = '';
-    if (doc.process == 'Backflush'){
+    if (doc.process == 'Backflush' || doc.purpose == 'Other'){
       unhide_field('fg_completed_qty');
     }
     else{
@@ -39,7 +43,6 @@ var cfn_set_fields = function(doc, cdt, cdn) {
   else{
     unhide_field(['from_warehouse', 'to_warehouse']);
     hide_field(['production_order', 'process', 'Get Items', 'fg_completed_qty','purchase_receipt_no','delivery_note_no', 'sales_invoice_no']);
-    hide_field(lst);
     doc.production_order = '';
     doc.process = '';
     doc.fg_completed_qty = 0;
@@ -48,12 +51,10 @@ var cfn_set_fields = function(doc, cdt, cdn) {
  
   if(doc.purpose == 'Purchase Return'){
     doc.customer=doc.customer_name = doc.customer_address=doc.delivery_note_no=doc.sales_invoice_no='';
-    hide_field(lst);
     unhide_field(['supplier','supplier_name','supplier_address','purchase_receipt_no']);
   }
   else if(doc.purpose == 'Sales Return'){
     doc.supplier=doc.supplier_name = doc.supplier_address=doc.purchase_receipt_no='';
-    hide_field(lst);
     unhide_field(['customer','customer_name','customer_address','delivery_note_no', 'sales_invoice_no']);
   } else{
     doc.customer=doc.customer_name=doc.customer_address=doc.delivery_note_no=doc.sales_invoice_no=doc.supplier=doc.supplier_name = doc.supplier_address=doc.purchase_receipt_no='';
@@ -110,6 +111,7 @@ fld.get_query = function(doc, cdt, cdn) {
 		+'AND ifnull(`tabBin`.`actual_qty`,0) > 0 '
 		+'AND tabBin.warehouse="'+ d.s_warehouse +'" '
 		+'AND tabItem.docstatus < 2 '
+		+'AND (ifnull(`tabItem`.`end_of_life`,"") = "" OR `tabItem`.`end_of_life` > NOW() OR `tabItem`.`end_of_life`="0000-00-00") '
 		+'AND tabItem.%(key)s LIKE "%s" '
 		+'ORDER BY tabItem.name ASC '
 		+'LIMIT 50'
@@ -117,6 +119,7 @@ fld.get_query = function(doc, cdt, cdn) {
 		return 'SELECT tabItem.name, tabItem.description '
 		+'FROM tabItem '
 		+'WHERE tabItem.docstatus < 2 '
+		+'AND (ifnull(`tabItem`.`end_of_life`,"") = "" OR `tabItem`.`end_of_life` > NOW() OR `tabItem`.`end_of_life`="0000-00-00") '
 		+'AND tabItem.%(key)s LIKE "%s" '
 		+'ORDER BY tabItem.name ASC '
 		+'LIMIT 50'

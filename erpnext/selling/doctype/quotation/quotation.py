@@ -116,26 +116,8 @@ class DocType(TransactionBase):
 	# Pull details from other charges master (Get Other Charges)
 	# ----------------------------------------------------------
 	def get_other_charges(self):
-		return get_obj('Sales Common').get_other_charges(self)
+		return get_obj('Sales Common').get_other_charges(self)	
 	
-	# Get Lead Details along with its details
-	# ==============================================================
-	def get_lead_details1(self, name):		
-		details = sql("select name, lead_name, address_line1, address_line2, city, country, state, pincode, territory, contact_no, mobile_no, email_id from `tabLead` where name = '%s'" %(name), as_dict = 1)	 
-		ret = {
-			'lead_name' : details and details[0]['lead_name'] or '',
-			'address_display' : (details and details[0]['address_line1']
-						 + (details[0]['address_line2'] and '\n' + details[0]['address_line2'] or '') + '\n' 
-						 + details[0]['city'] 
-						 + (details[0]['pincode'] and ', ' + details[0]['pincode'] or '') + '\n' 
-						 + (details[0]['state'] and details[0]['state']+', ' or '') 
-						 + details[0]['country'] + '\nTel: ' + details[0]['contact_no'] + '\n' or '-'),
-			'territory' : details and details[0]['territory'] or '',
-			'contact_mobile' : details and details[0]['mobile_no'] or '-',
-			'contact_email' : details and details[0]['email_id'] or '-'			
-		}
-		return ret
-
 		 
 # GET TERMS AND CONDITIONS
 # ====================================================================================

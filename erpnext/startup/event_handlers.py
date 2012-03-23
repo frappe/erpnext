@@ -89,6 +89,7 @@ def boot_session(bootinfo):
 
 		import webnotes.model.doctype
 		bootinfo['docs'] += webnotes.model.doctype.get('Event')
+		bootinfo['docs'] += webnotes.model.doctype.get('Search Criteria')
 		
 		bootinfo['modules_list'] = webnotes.conn.get_global('modules_list')
 		

@@ -26,7 +26,7 @@ def execute():
 	patch_primary_address()
 
 def reload_sc():
-	from webnotes.modules.module_manager import reload_doc
+	from webnotes.modules import reload_doc
 	reload_doc('selling', 'search_criteria', 'customer_address_contact')
 	reload_doc('selling', 'Module Def', 'Selling')
 

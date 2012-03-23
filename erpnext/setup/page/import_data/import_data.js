@@ -47,7 +47,7 @@ pscript['onload_Import Data'] = function() {
 								
 								dt.onclick = function(){ 
 									var ovr = $('input[name="overwrite"]:checked').length;
-										window.location = outUrl + '?cmd=get_template&dt=' + this.nm + (ovr ? '&overwrite=1' : '');
+										window.location = wn.request.url + '?cmd=get_template&dt=' + this.nm + (ovr ? '&overwrite=1' : '');
 								}
 							}
 						}	

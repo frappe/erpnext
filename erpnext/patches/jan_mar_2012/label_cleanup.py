@@ -1,7 +1,7 @@
 def execute():
 	import webnotes
 	from webnotes.model import delete_doc
-	from webnotes.modules.module_manager import reload_doc
+	from webnotes.modules import reload_doc
 
 	dt = {
 		'selling':	['quotation', 'sales_order', 'quotation_detail', 'sales_order_detail'], 
