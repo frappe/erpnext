@@ -52,6 +52,8 @@
 			"lib/css/bootstrap/navbar.css",
 			"lib/css/bootstrap/dropdown.css",
 			"lib/css/bootstrap/tooltip.css",
+			"lib/css/ui/fonts.css",
+			"lib/css/ui/list.css",
 			"erpnext/startup/startup.css",
 			"erpnext/website/css/website.css"	
 		]
@@ -159,6 +161,7 @@
 			"lib/js/legacy/model/local_data.js",
 			"lib/js/legacy/model/doclist.js",
 			"lib/js/wn/ui/toolbar.min.js:concat",
+			"lib/js/wn/views/breadcrumbs.js",
 			"lib/js/legacy/widgets/form/fields.js",
 			"lib/js/legacy/widgets/form/form_dialog.js",
 			"lib/js/legacy/widgets/form/form_header.js",
