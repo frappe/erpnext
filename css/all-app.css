@@ -123,7 +123,6 @@ div#body_div {
 
 .content {
 	width: 900px;
-	margin-bottom: 30px;
 }
 
 .background-fade-in {
@@ -134,9 +133,8 @@ div#body_div {
 }
 
 footer {
-	position: absolute;
-	bottom: 0px;
-	width: 100%;
+	width: 900px;
+	margin: auto;
 }
 header .container {
 	width: 900px;
@@ -160,7 +158,6 @@ div.no_script {
 }
 
 div.loading_div {
-	position: absolute;
 	background-color: #FFFFCC;
 	z-index: 1999;
 	right: 5px;
@@ -3464,12 +3461,12 @@ button.btn.small, input[type="submit"].btn.small {
  *	erpnext/startup/startup.css
  */
 h1, h2, h3, h4, h5 {
-	font-family: "Lato", Helvetica, "Helvetica Neue", sans-serif;
+	font-family: "Open Sans", Helvetica, "Helvetica Neue", sans-serif;
 	font-weight: bold;
 }
 
 body {
-	font-family: "Lato", Helvetica, "Helvetica Neue", sans-serif;
+	font-family: "Open Sans", Helvetica, "Helvetica Neue", sans-serif;
 	font-size: 13px;
 }
 
