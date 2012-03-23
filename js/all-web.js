@@ -207,8 +207,7 @@ this.prepare_opts();$.extend(this,this.opts);$(this.parent).html(repl('\
 if(this.new_doctype){this.$w.find('.btn-new').toggle(true).click(function(){newdoc(me.new_doctype);})}else{this.$w.find('.btn-new').remove();}
 if(!me.show_filters){this.$w.find('.btn-filter').remove();}
 if(this.hide_refresh||this.no_refresh){this.$w.find('.btn-refresh').remove();}
-this.btn_groupify();},btn_groupify:function(){var nbtns=this.$w.find('.list-toolbar a').length;if(nbtns>1){var w=0;this.$w.find('.list-toolbar a').each(function(i,e){w+=$(e).outerWidth();});}
-if(nbtns==0){this.$w.find('.list-toolbar-wrapper').toggle(false);}},make_filters:function(){this.filter_list=new wn.ui.FilterList({listobj:this,$parent:this.$w.find('.list-filters').toggle(true),doctype:this.doctype,filter_fields:this.filter_fields});},clear:function(){this.data=[];this.$w.find('.result-list').empty();this.$w.find('.result').toggle(true);this.$w.find('.no-result').toggle(false);this.start=0;},run:function(){var me=this;var a0=arguments[0];var a1=arguments[1];if(a0&&typeof a0=='function')
+this.btn_groupify();},btn_groupify:function(){var nbtns=this.$w.find('.list-toolbar a').length;if(nbtns==0){this.$w.find('.list-toolbar-wrapper').toggle(false);}},make_filters:function(){this.filter_list=new wn.ui.FilterList({listobj:this,$parent:this.$w.find('.list-filters').toggle(true),doctype:this.doctype,filter_fields:this.filter_fields});},clear:function(){this.data=[];this.$w.find('.result-list').empty();this.$w.find('.result').toggle(true);this.$w.find('.no-result').toggle(false);this.start=0;},run:function(){var me=this;var a0=arguments[0];var a1=arguments[1];if(a0&&typeof a0=='function')
 this.onrun=a0;if(a0&&a0.callback)
 this.onrun=a0.callback;if(!a1&&!(a0&&a0.append))
 this.start=0;me.set_working(true);wn.call({method:this.opts.method||'webnotes.widgets.query_builder.runquery',args:this.get_call_args(),callback:function(r){me.set_working(false);me.render_results(r)},no_spinner:this.opts.no_loading});},set_working:function(flag){this.$w.find('.img-load').toggle(flag);},get_call_args:function(){if(!this.method){this.query=this.get_query?this.get_query():this.query;this.add_limits();var args={query_max:this.query_max,as_dict:1}
@@ -250,7 +249,7 @@ df.fieldtype=df.original_type;else
 df.original_type=df.fieldtype;df.description='';df.reqd=0;if(fieldtype){df.fieldtype=fieldtype;return;}
 if(df.fieldtype=='Check'){df.fieldtype='Select';df.options='No\nYes';}else if(['Text','Text Editor','Code','Link'].indexOf(df.fieldtype)!=-1){df.fieldtype='Data';}},set_default_condition:function(df,fieldtype){if(!fieldtype){if(df.fieldtype=='Data'){this.$w.find('.condition').val('like');}else{this.$w.find('.condition').val('=');}}},get_value:function(){var me=this;var val=me.field.get_value();var cond=me.$w.find('.condition').val();if(me.field.df.original_type=='Check'){val=(val=='Yes'?1:0);}
 if(cond=='like'){val=val+'%';}
-return[me.$w.find('.fieldname_select option:selected').attr('table'),me.field.df.fieldname,me.$w.find('.condition').val(),val];}});
+return[me.$w.find('.fieldname_select option:selected').attr('table'),me.field.df.fieldname,me.$w.find('.condition').val(),cstr(val)];}});
 /*
  *	lib/js/wn/views/container.js
  */
@@ -931,8 +930,7 @@ this.prepare_opts();$.extend(this,this.opts);$(this.parent).html(repl('\
 if(this.new_doctype){this.$w.find('.btn-new').toggle(true).click(function(){newdoc(me.new_doctype);})}else{this.$w.find('.btn-new').remove();}
 if(!me.show_filters){this.$w.find('.btn-filter').remove();}
 if(this.hide_refresh||this.no_refresh){this.$w.find('.btn-refresh').remove();}
-this.btn_groupify();},btn_groupify:function(){var nbtns=this.$w.find('.list-toolbar a').length;if(nbtns>1){var w=0;this.$w.find('.list-toolbar a').each(function(i,e){w+=$(e).outerWidth();});}
-if(nbtns==0){this.$w.find('.list-toolbar-wrapper').toggle(false);}},make_filters:function(){this.filter_list=new wn.ui.FilterList({listobj:this,$parent:this.$w.find('.list-filters').toggle(true),doctype:this.doctype,filter_fields:this.filter_fields});},clear:function(){this.data=[];this.$w.find('.result-list').empty();this.$w.find('.result').toggle(true);this.$w.find('.no-result').toggle(false);this.start=0;},run:function(){var me=this;var a0=arguments[0];var a1=arguments[1];if(a0&&typeof a0=='function')
+this.btn_groupify();},btn_groupify:function(){var nbtns=this.$w.find('.list-toolbar a').length;if(nbtns==0){this.$w.find('.list-toolbar-wrapper').toggle(false);}},make_filters:function(){this.filter_list=new wn.ui.FilterList({listobj:this,$parent:this.$w.find('.list-filters').toggle(true),doctype:this.doctype,filter_fields:this.filter_fields});},clear:function(){this.data=[];this.$w.find('.result-list').empty();this.$w.find('.result').toggle(true);this.$w.find('.no-result').toggle(false);this.start=0;},run:function(){var me=this;var a0=arguments[0];var a1=arguments[1];if(a0&&typeof a0=='function')
 this.onrun=a0;if(a0&&a0.callback)
 this.onrun=a0.callback;if(!a1&&!(a0&&a0.append))
 this.start=0;me.set_working(true);wn.call({method:this.opts.method||'webnotes.widgets.query_builder.runquery',args:this.get_call_args(),callback:function(r){me.set_working(false);me.render_results(r)},no_spinner:this.opts.no_loading});},set_working:function(flag){this.$w.find('.img-load').toggle(flag);},get_call_args:function(){if(!this.method){this.query=this.get_query?this.get_query():this.query;this.add_limits();var args={query_max:this.query_max,as_dict:1}
@@ -974,7 +972,7 @@ df.fieldtype=df.original_type;else
 df.original_type=df.fieldtype;df.description='';df.reqd=0;if(fieldtype){df.fieldtype=fieldtype;return;}
 if(df.fieldtype=='Check'){df.fieldtype='Select';df.options='No\nYes';}else if(['Text','Text Editor','Code','Link'].indexOf(df.fieldtype)!=-1){df.fieldtype='Data';}},set_default_condition:function(df,fieldtype){if(!fieldtype){if(df.fieldtype=='Data'){this.$w.find('.condition').val('like');}else{this.$w.find('.condition').val('=');}}},get_value:function(){var me=this;var val=me.field.get_value();var cond=me.$w.find('.condition').val();if(me.field.df.original_type=='Check'){val=(val=='Yes'?1:0);}
 if(cond=='like'){val=val+'%';}
-return[me.$w.find('.fieldname_select option:selected').attr('table'),me.field.df.fieldname,me.$w.find('.condition').val(),val];}});
+return[me.$w.find('.fieldname_select option:selected').attr('table'),me.field.df.fieldname,me.$w.find('.condition').val(),cstr(val)];}});
 /*
  *	lib/js/legacy/widgets/layout.js
  */
