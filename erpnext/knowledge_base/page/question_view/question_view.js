@@ -19,9 +19,9 @@ pscript['onload_question-view'] = function(wrapper) {
 }
 
 pscript['refresh_question-view'] = function() {
-	$('.add-answer-area').empty();
 	// href
 	var qid = window.location.hash.split('/')[1];
+	console.log(qid)
 	if(qid) {
 		pscript.question_view(qid);
 	}
