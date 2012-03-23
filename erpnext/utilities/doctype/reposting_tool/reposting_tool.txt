@@ -5,92 +5,88 @@
 	{
 		'creation': '2010-08-08 17:09:19',
 		'docstatus': 0,
-		'modified': '2011-04-19 11:50:09',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-21 14:56:21',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1308741898',
 		'allow_copy': 1,
 		'allow_email': 1,
 		'allow_print': 1,
-		'colour': 'Light Blue:DEF',
+		'colour': u'Light Blue:DEF',
+		'default_print_format': u'Standard',
 		'doctype': 'DocType',
 		'hide_toolbar': 1,
 		'in_create': 0,
 		'issingle': 1,
-		'module': 'Utilities',
+		'module': u'Utilities',
 		'name': '__common__',
 		'read_only': 1,
-		'section_style': 'Simple',
-		'server_code_error': ' ',
+		'section_style': u'Simple',
+		'server_code_error': u' ',
 		'show_in_menu': 1,
-		'version': 174
+		'version': 173
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Reposting Tool',
-		'parentfield': 'fields',
-		'parenttype': 'DocType',
+		'parent': u'Reposting Tool',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
 		'permlevel': 0
 	},
 
 	# These values are common for all DocPerm
 	{
 		'create': 1,
-		'doctype': 'DocPerm',
-		'idx': 1,
+		'doctype': u'DocPerm',
 		'name': '__common__',
-		'parent': 'Reposting Tool',
-		'parentfield': 'permissions',
-		'parenttype': 'DocType',
+		'parent': u'Reposting Tool',
+		'parentfield': u'permissions',
+		'parenttype': u'DocType',
 		'permlevel': 0,
 		'read': 1,
-		'role': 'System Manager',
+		'role': u'System Manager',
 		'write': 1
 	},
 
 	# DocType, Reposting Tool
 	{
 		'doctype': 'DocType',
-		'name': 'Reposting Tool'
+		'name': u'Reposting Tool'
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm'
+		'doctype': u'DocPerm'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'recalculate_mar_&_actual_qty',
-		'fieldtype': 'Data',
-		'idx': 1,
-		'label': 'Recalculate MAR & Actual Qty'
+		'doctype': u'DocField',
+		'fieldname': u'recalculate_mar_&_actual_qty',
+		'fieldtype': u'Data',
+		'label': u'Recalculate MAR & Actual Qty'
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldtype': 'Button',
-		'idx': 2,
-		'label': 'Repost Bin',
-		'trigger': 'Client'
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldtype': u'Button',
+		'label': u'Repost Bin',
+		'trigger': u'Client'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Button',
-		'idx': 3,
-		'label': 'Repost Account Balances',
-		'trigger': 'Client'
+		'doctype': u'DocField',
+		'fieldtype': u'Button',
+		'label': u'Repost Account Balances',
+		'trigger': u'Client'
 	}
 ]

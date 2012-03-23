@@ -5,61 +5,57 @@
 	{
 		'creation': '2010-08-08 17:09:03',
 		'docstatus': 0,
-		'modified': '2011-02-11 14:23:09',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-21 14:36:29',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'colour': 'White:FFF',
+		'colour': u'White:FFF',
+		'default_print_format': u'Standard',
 		'doctype': 'DocType',
 		'istable': 1,
-		'module': 'HR',
+		'module': u'HR',
 		'name': '__common__',
-		'section_style': 'Simple',
-		'server_code_error': ' ',
+		'section_style': u'Simple',
+		'server_code_error': u' ',
 		'show_in_menu': 0,
-		'version': 4
+		'version': 2
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Holiday List Detail',
-		'parentfield': 'fields',
-		'parenttype': 'DocType',
+		'parent': u'Holiday List Detail',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
 		'permlevel': 0
 	},
 
 	# DocType, Holiday List Detail
 	{
 		'doctype': 'DocType',
-		'name': 'Holiday List Detail'
+		'name': u'Holiday List Detail'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'description',
-		'fieldtype': 'Small Text',
-		'idx': 1,
-		'label': 'Description',
-		'oldfieldname': 'holiday_name',
-		'oldfieldtype': 'Data',
-		'width': '300px'
+		'doctype': u'DocField',
+		'fieldname': u'description',
+		'fieldtype': u'Small Text',
+		'label': u'Description',
+		'width': u'300px'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'holiday_date',
-		'fieldtype': 'Date',
-		'idx': 2,
-		'label': 'Date',
-		'oldfieldname': 'holiday_date',
-		'oldfieldtype': 'Date',
-		'width': '100px'
+		'doctype': u'DocField',
+		'fieldname': u'holiday_date',
+		'fieldtype': u'Date',
+		'label': u'Date',
+		'oldfieldname': u'holiday_date',
+		'oldfieldtype': u'Date'
 	}
 ]

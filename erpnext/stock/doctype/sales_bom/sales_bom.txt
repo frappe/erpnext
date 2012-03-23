@@ -5,48 +5,50 @@
 	{
 		'creation': '2010-08-08 17:09:21',
 		'docstatus': 0,
-		'modified': '2010-12-23 11:43:34',
-		'modified_by': 'umair@iwebnotes.com',
-		'owner': 'Administrator'
+		'modified': '2012-03-21 14:55:47',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
+		'_last_update': u'1322549701',
 		'allow_trash': 1,
-		'colour': 'White:FFF',
+		'colour': u'White:FFF',
+		'default_print_format': u'Standard',
 		'doctype': 'DocType',
-		'document_type': 'Master',
-		'module': 'Stock',
+		'document_type': u'Master',
+		'module': u'Stock',
 		'name': '__common__',
-		'section_style': 'Simple',
-		'server_code_error': ' ',
+		'section_style': u'Simple',
+		'server_code_error': u' ',
 		'show_in_menu': 0,
-		'version': 37
+		'version': 40
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Sales BOM',
-		'parentfield': 'fields',
-		'parenttype': 'DocType'
+		'parent': u'Sales BOM',
+		'parentfield': u'fields',
+		'parenttype': u'DocType'
 	},
 
 	# These values are common for all DocPerm
 	{
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'name': '__common__',
-		'parent': 'Sales BOM',
-		'parentfield': 'permissions',
-		'parenttype': 'DocType',
+		'parent': u'Sales BOM',
+		'parentfield': u'permissions',
+		'parenttype': u'DocType',
 		'read': 1
 	},
 
 	# DocType, Sales BOM
 	{
 		'doctype': 'DocType',
-		'name': 'Sales BOM'
+		'name': u'Sales BOM'
 	},
 
 	# DocPerm
@@ -54,10 +56,9 @@
 		'amend': 0,
 		'cancel': 0,
 		'create': 0,
-		'doctype': 'DocPerm',
-		'idx': 1,
+		'doctype': u'DocPerm',
 		'permlevel': 1,
-		'role': 'Material Manager',
+		'role': u'Material Manager',
 		'submit': 0,
 		'write': 0
 	},
@@ -67,10 +68,9 @@
 		'amend': 1,
 		'cancel': 1,
 		'create': 1,
-		'doctype': 'DocPerm',
-		'idx': 2,
+		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'role': 'Material Manager',
+		'role': u'Material Manager',
 		'submit': 1,
 		'write': 1
 	},
@@ -80,10 +80,9 @@
 		'amend': 0,
 		'cancel': 0,
 		'create': 0,
-		'doctype': 'DocPerm',
-		'idx': 3,
+		'doctype': u'DocPerm',
 		'permlevel': 1,
-		'role': 'Material User',
+		'role': u'Material User',
 		'submit': 0,
 		'write': 0
 	},
@@ -93,10 +92,9 @@
 		'amend': 0,
 		'cancel': 0,
 		'create': 0,
-		'doctype': 'DocPerm',
-		'idx': 4,
+		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'role': 'Material User',
+		'role': u'Material User',
 		'submit': 0,
 		'write': 0
 	},
@@ -106,10 +104,9 @@
 		'amend': 0,
 		'cancel': 1,
 		'create': 1,
-		'doctype': 'DocPerm',
-		'idx': 5,
+		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'role': 'Sales User',
+		'role': u'Sales User',
 		'submit': 0,
 		'write': 1
 	},
@@ -119,156 +116,143 @@
 		'amend': 0,
 		'cancel': 0,
 		'create': 0,
-		'doctype': 'DocPerm',
-		'idx': 6,
+		'doctype': u'DocPerm',
 		'permlevel': 1,
-		'role': 'Sales User',
+		'role': u'Sales User',
 		'submit': 0,
 		'write': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'trash_reason',
-		'fieldtype': 'Small Text',
-		'idx': 1,
-		'label': 'Trash Reason',
-		'oldfieldname': 'trash_reason',
-		'oldfieldtype': 'Small Text',
+		'doctype': u'DocField',
+		'fieldname': u'trash_reason',
+		'fieldtype': u'Small Text',
+		'label': u'Trash Reason',
+		'oldfieldname': u'trash_reason',
+		'oldfieldtype': u'Small Text',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'new_item_code',
-		'fieldtype': 'Data',
-		'idx': 2,
-		'label': 'New Item Code',
+		'doctype': u'DocField',
+		'fieldname': u'new_item_code',
+		'fieldtype': u'Data',
+		'label': u'New Item Code',
 		'no_copy': 1,
-		'oldfieldname': 'new_item_code',
-		'oldfieldtype': 'Data',
+		'oldfieldname': u'new_item_code',
+		'oldfieldtype': u'Data',
 		'permlevel': 1,
 		'reqd': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'new_item_name',
-		'fieldtype': 'Data',
-		'idx': 3,
-		'label': 'New Item Name',
-		'oldfieldname': 'new_item_name',
-		'oldfieldtype': 'Data',
+		'doctype': u'DocField',
+		'fieldname': u'new_item_name',
+		'fieldtype': u'Data',
+		'label': u'New Item Name',
+		'oldfieldname': u'new_item_name',
+		'oldfieldtype': u'Data',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'new_item_brand',
+		'fieldtype': u'Data',
+		'label': u'New Item Brand',
+		'oldfieldname': u'new_item_brand',
+		'oldfieldtype': u'Data',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'new_item_brand',
-		'fieldtype': 'Data',
-		'idx': 4,
-		'label': 'New Item Brand',
-		'oldfieldname': 'new_item_brand',
-		'oldfieldtype': 'Data',
-		'permlevel': 1
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldname': 'description',
-		'fieldtype': 'Text',
-		'idx': 5,
-		'label': 'New Description',
-		'oldfieldname': 'description',
-		'oldfieldtype': 'Text',
+		'doctype': u'DocField',
+		'fieldname': u'description',
+		'fieldtype': u'Text',
+		'label': u'New Description',
+		'oldfieldname': u'description',
+		'oldfieldtype': u'Text',
 		'permlevel': 1,
-		'width': '300px'
+		'width': u'300px'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'item_group',
-		'fieldtype': 'Link',
-		'idx': 7,
-		'label': 'Item Group',
-		'oldfieldname': 'item_group',
-		'oldfieldtype': 'Link',
-		'options': 'Item Group',
+		'doctype': u'DocField',
+		'fieldname': u'item_group',
+		'fieldtype': u'Link',
+		'label': u'Item Group',
+		'oldfieldname': u'item_group',
+		'oldfieldtype': u'Link',
+		'options': u'Item Group',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldname': 'price_list',
-		'fieldtype': 'Select',
-		'idx': 8,
-		'label': 'Price List',
-		'oldfieldname': 'price_list',
-		'oldfieldtype': 'Select',
-		'options': 'link:Price List',
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'price_list',
+		'fieldtype': u'Select',
+		'label': u'Price List',
+		'oldfieldname': u'price_list',
+		'oldfieldtype': u'Select',
+		'options': u'link:Price List',
 		'permlevel': 0,
-		'trigger': 'Client'
+		'trigger': u'Client'
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldname': 'currency',
-		'fieldtype': 'Select',
-		'idx': 9,
-		'label': 'Currency',
-		'oldfieldname': 'currency',
-		'oldfieldtype': 'Select',
-		'options': 'link:Currency',
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'currency',
+		'fieldtype': u'Select',
+		'label': u'Currency',
+		'oldfieldname': u'currency',
+		'oldfieldtype': u'Select',
+		'options': u'link:Currency',
 		'permlevel': 0,
-		'trigger': 'Client'
+		'trigger': u'Client'
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldtype': 'Button',
-		'idx': 10,
-		'label': 'Find Sales BOM',
-		'oldfieldtype': 'Button',
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldtype': u'Button',
+		'label': u'Find Sales BOM',
+		'oldfieldtype': u'Button',
 		'permlevel': 0,
-		'trigger': 'Client'
+		'trigger': u'Client'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'sales_bom_items',
-		'fieldtype': 'Table',
-		'idx': 11,
-		'label': 'Sales BOM Items',
-		'oldfieldname': 'sales_bom_items',
-		'oldfieldtype': 'Table',
-		'options': 'Sales BOM Detail',
+		'doctype': u'DocField',
+		'fieldname': u'sales_bom_items',
+		'fieldtype': u'Table',
+		'label': u'Sales BOM Items',
+		'oldfieldname': u'sales_bom_items',
+		'oldfieldtype': u'Table',
+		'options': u'Sales BOM Detail',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'stock_uom',
-		'fieldtype': 'Link',
-		'idx': 12,
-		'label': 'Stock UOM',
-		'oldfieldname': 'stock_uom',
-		'oldfieldtype': 'Link',
-		'options': 'UOM',
-		'permlevel': 0,
-		'search_index': 0
+		'doctype': u'DocField',
+		'fieldname': u'stock_uom',
+		'fieldtype': u'Link',
+		'label': u'Stock UOM',
+		'oldfieldname': u'stock_uom',
+		'oldfieldtype': u'Link',
+		'options': u'UOM',
+		'permlevel': 0
 	}
 ]

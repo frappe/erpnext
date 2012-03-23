@@ -15,13 +15,13 @@
 		'doctype': 'Page',
 		'module': 'Knowledge Base',
 		'name': '__common__',
-		'page_name': 'questions',
+		'page_name': 'Questions',
 		'standard': 'Yes'
 	},
 
 	# Page, questions
 	{
 		'doctype': 'Page',
-		'name': 'questions'
+		'name': 'Questions'
 	}
 ]

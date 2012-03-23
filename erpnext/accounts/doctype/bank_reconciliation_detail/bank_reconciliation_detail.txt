@@ -5,109 +5,128 @@
 	{
 		'creation': '2010-08-08 17:08:52',
 		'docstatus': 0,
-		'modified': '2010-09-23 13:57:17',
-		'modified_by': 'umair@iwebnotes.com',
-		'owner': 'Administrator'
+		'modified': '2012-03-22 14:53:24',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'colour': 'White:FFF',
+		'colour': u'White:FFF',
+		'default_print_format': u'Standard',
 		'doctype': 'DocType',
 		'istable': 1,
-		'module': 'Accounts',
+		'module': u'Accounts',
 		'name': '__common__',
-		'section_style': 'Tray',
+		'section_style': u'Tray',
 		'show_in_menu': 0,
-		'version': 4
+		'version': 5
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Bank Reconciliation Detail',
-		'parentfield': 'fields',
-		'parenttype': 'DocType'
+		'no_copy': 0,
+		'parent': u'Bank Reconciliation Detail',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
+		'search_index': 0
 	},
 
 	# DocType, Bank Reconciliation Detail
 	{
 		'doctype': 'DocType',
-		'name': 'Bank Reconciliation Detail'
+		'name': u'Bank Reconciliation Detail'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'voucher_id',
-		'fieldtype': 'Link',
-		'idx': 1,
-		'label': 'Voucher ID',
-		'oldfieldname': 'voucher_id',
-		'oldfieldtype': 'Link',
-		'options': 'Journal Voucher',
+		'doctype': u'DocField',
+		'fieldname': u'voucher_id',
+		'fieldtype': u'Link',
+		'label': u'Voucher ID',
+		'oldfieldname': u'voucher_id',
+		'oldfieldtype': u'Link',
+		'options': u'Journal Voucher',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'against_account',
-		'fieldtype': 'Data',
-		'idx': 2,
-		'label': 'Against Account',
-		'oldfieldname': 'against_account',
-		'oldfieldtype': 'Data',
+		'doctype': u'DocField',
+		'fieldname': u'against_account',
+		'fieldtype': u'Data',
+		'label': u'Against Account',
+		'oldfieldname': u'against_account',
+		'oldfieldtype': u'Data',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'description': 'The date at which current entry will get or has actually executed.',
-		'doctype': 'DocField',
-		'fieldname': 'posting_date',
-		'fieldtype': 'Date',
-		'idx': 3,
-		'label': 'Posting Date',
-		'oldfieldname': 'posting_date',
-		'oldfieldtype': 'Date',
+		'description': u'The date at which current entry will get or has actually executed.',
+		'doctype': u'DocField',
+		'fieldname': u'posting_date',
+		'fieldtype': u'Date',
+		'label': u'Posting Date',
+		'oldfieldname': u'posting_date',
+		'oldfieldtype': u'Date',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'cheque_number',
-		'fieldtype': 'Data',
-		'idx': 4,
-		'label': 'Cheque Number',
-		'oldfieldname': 'cheque_number',
-		'oldfieldtype': 'Data',
+		'doctype': u'DocField',
+		'fieldname': u'cheque_number',
+		'fieldtype': u'Data',
+		'label': u'Cheque Number',
+		'oldfieldname': u'cheque_number',
+		'oldfieldtype': u'Data',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'cheque_date',
-		'fieldtype': 'Date',
-		'idx': 5,
-		'label': 'Cheque Date',
-		'oldfieldname': 'cheque_date',
-		'oldfieldtype': 'Date',
+		'doctype': u'DocField',
+		'fieldname': u'cheque_date',
+		'fieldtype': u'Date',
+		'label': u'Cheque Date',
+		'oldfieldname': u'cheque_date',
+		'oldfieldtype': u'Date',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'clearance_date',
-		'fieldtype': 'Date',
-		'idx': 8,
-		'label': 'Clearance Date',
-		'oldfieldname': 'clearance_date',
-		'oldfieldtype': 'Date',
+		'doctype': u'DocField',
+		'fieldname': u'debit',
+		'fieldtype': u'Currency',
+		'label': u'Debit',
+		'oldfieldname': u'debit',
+		'oldfieldtype': u'Currency',
+		'permlevel': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'credit',
+		'fieldtype': u'Currency',
+		'label': u'Credit',
+		'oldfieldname': u'credit',
+		'oldfieldtype': u'Currency',
+		'permlevel': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'clearance_date',
+		'fieldtype': u'Date',
+		'label': u'Clearance Date',
+		'oldfieldname': u'clearance_date',
+		'oldfieldtype': u'Date',
 		'permlevel': 0
 	}
 ]
