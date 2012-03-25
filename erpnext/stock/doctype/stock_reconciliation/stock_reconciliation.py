@@ -60,7 +60,7 @@ class DocType:
 				self.validate_warehouse(s[1], count)
 			
 				# encode as ascii
-				self.data.append([d.encode("ascii") for d in s])
+				self.data.append([d.decode("utf-8") for d in s])
 				count += 1
 			
 		if not self.validated:
@@ -186,7 +186,7 @@ class DocType:
 		# write to file
 		fname = self.doc.file_list.split(',')
 		from webnotes.utils import file_manager
-		file_manager.write_file(fname[1], out)
+		file_manager.write_file(fname[1], out.encode('utf-8'))
 		
 			
 
