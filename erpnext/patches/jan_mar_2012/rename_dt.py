@@ -57,8 +57,6 @@ def execute():
 		reload_doc('accounts', 'GL Mapper', d[0])
 		
 	#gl entry, stock ledger entry, 
-	webnotes.conn.sql("update `tabDocField` set options =replace(options, %s, %s) where fieldtype = 'Select' and ")
-	select parent, fieldname from tabDocField where options like '%Receivable Voucher%' and fieldtype = 'Select'
 
 
 
@@ -93,8 +91,9 @@ def update_dt_in_records(rendt):
 	for d in rendt:
 		# Feed, property setter, search criteria, gl mapper, form 16A, naming series options, doclayer - dodtype is not mentioed in options
 		dt_list = webnotes.conn.sql("select parent, fieldname from tabDocField where fieldname in ('dt', 'doctype', 'doc_type', 'dt_type') and ifnull(options, '') = ''")
-		for dt in record_dt:
-			webnotes.conn.sql("update `tab%s` set %s = replace(%s, '%s', '%s') where %s = '%s'" % (dt[0], dt[1], dt[1], d, rendt[d], dt[1], d))
+		print dt_list
+		for dt in dt_list:
+			webnotes.conn.sql("update `tab%s` set %s = replace(%s, '%s', '%s') where %s = '%s'" % (dt[0], dt[1], dt[1], d, rendt[d], dt[1], d), debug=1)
 
 		# gl mapper, gl entry
 		webnotes.conn.sql("update `tabGL Mapper Detail` set against_voucher_type = replace(against_voucher_type, %s, %s) where against_voucher_type like '%%%s%%'" % (d, rendt[d], d))
@@ -102,6 +101,7 @@ def update_dt_in_records(rendt):
 		webnotes.conn.sql("update `tabGL Entry` set voucher_type = replace(voucher_type, %s, %s) where voucher_type = '%s'" % (d, rendt[d], d))
 
 		# Stock ledger entry
+		webnotes.conn.sql("update `tabStock ledger Entry` set voucher_type = replace(voucher_type, %s, %s) where voucher_type = '%s'" % (d, rendt[d], d))
 
 		# Custom fld: options
 		webnotes.conn.sql("update `tabCustom Field` set options = replace(options, %s, %s) where fieldtype in ('Link', 'Select')", (d, rendt[d]))
@@ -143,14 +143,14 @@ def update_dt_in_records(rendt):
 
 
 def get_dt_to_be_renamed():
-	rendt = {
+	"""rendt = {
 		'Receivable Voucher'		:	'Sales Invoice',
 		'RV Detail'					:	'Sales Invoice Item',
 		'RV Tax Detail'				:	'Sales Taxes and Charges',
 		'Advance Adjustment Detail' :	'Sales Invoice Advance',
-}
+}"""
 
-	new = {
+	rendt = {
 		'Receivable Voucher'		:	'Sales Invoice',
 		'RV Detail'					:	'Sales Invoice Item',
 		'RV Tax Detail'				:	'Sales Taxes and Charges',
@@ -230,11 +230,11 @@ def get_dt_to_be_renamed():
 
 
 def get_mapper_to_be_renamed():
-	ren_mapper = {	
+	"""ren_mapper = {	
 		'Sales Order-Receivable Voucher'	:	'Sales Order-Sales Invoice',
 		'Receivable Voucher-Delivery Note' 	: 	'Sales Invoice-Delivery Note',
 		'Delivery Note-Receivable Voucher'	: 	'Delivery Note-Sales Invoice'
-	}
+	}"""
 
 	ren_map = {
 		'Sales Order-Receivable Voucher'	:	'Sales Order-Sales Invoice',
