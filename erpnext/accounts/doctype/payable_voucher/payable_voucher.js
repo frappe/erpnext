@@ -254,7 +254,7 @@ cur_frm.fields_dict['contact_person'].get_query = function(doc, cdt, cdn) {
 // Item Code
 // ----------
 cur_frm.fields_dict['entries'].grid.get_field("item_code").get_query = function(doc, cdt, cdn) {
-	return 'SELECT tabItem.name, tabItem.description FROM tabItem WHERE tabItem.is_purchase_item="Yes" AND (IFNULL(`tabItem`.`end_of_life`,"") = "" OR `tabItem`.`end_of_life` ="0000-00-00" OR `tabItem`.`end_of_life` > NOW()) AND tabItem.%(key)s LIKE "%s" LIMIT 50'
+	return 'SELECT tabItem.name, tabItem.description FROM tabItem WHERE tabItem.is_purchase_item="Yes" AND (IFNULL(`tabItem`.`end_of_life`,"") = "" OR `tabItem`.`end_of_life` ="0000-00-00" OR `tabItem`.`end_of_life` > NOW()) AND tabItem.docstatus != 2 AND tabItem.%(key)s LIKE "%s" LIMIT 50'
 }
 
 // Credit To
