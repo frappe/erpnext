@@ -26,13 +26,13 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 		doc.address_type = 'Office';
 	} else if(route[1]=='Customer') {
 		var customer = locals.Customer[route[2]]
-		doc.supplier = customer.name;
+		doc.customer = customer.name;
 		doc.customer_name = customer.customer_name;
 		doc.address_type = 'Office';
 	} else if(route[1]=='Sales Partner') {
 		var sp = locals['Sales Partner'][route[2]];
 		doc.sales_partner = sp.name;
-		ndoc.address_type = 'Office';				
+		doc.address_type = 'Office';				
 	}
 }
 
