@@ -59,8 +59,7 @@ class DocType:
 				self.validate_item(s[0], count)
 				self.validate_warehouse(s[1], count)
 			
-				# encode as ascii
-				self.data.append([d.encode("ascii") for d in s])
+				self.data.append(s)
 				count += 1
 			
 		if not self.validated:
