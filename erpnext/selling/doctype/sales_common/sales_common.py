@@ -515,7 +515,7 @@ class DocType(TransactionBase):
 					dt = webnotes.conn.sql("select posting_date from `tab%s` where name = '%s'" % (d.prevdoc_doctype, d.prevdoc_docname))
 				else:
 					dt = webnotes.conn.sql("select transaction_date from `tab%s` where name = '%s'" % (d.prevdoc_doctype, d.prevdoc_docname))
-				d.prevdoc_date = dt and dt[0][0].strftime('%Y-%m-%d') or ''
+				d.prevdoc_date = (dt and dt[0][0]) and dt[0][0].strftime('%Y-%m-%d') or ''
 
 	def update_prevdoc_detail(self, is_submit, obj):
 		StatusUpdater(obj, is_submit).update()
