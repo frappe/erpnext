@@ -3,59 +3,57 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:09:07',
+		'creation': '2012-03-27 14:36:34',
 		'docstatus': 0,
-		'modified': '2010-09-20 14:06:57',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-27 14:36:34',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'colour': 'White:FFF',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
 		'istable': 1,
-		'module': 'Stock',
+		'module': u'Stock',
 		'name': '__common__',
-		'section_style': 'Simple',
-		'server_code_error': ' ',
+		'section_style': u'Simple',
+		'server_code_error': u' ',
 		'version': 2
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Data',
+		'doctype': u'DocField',
+		'fieldtype': u'Data',
 		'name': '__common__',
-		'oldfieldtype': 'Data',
-		'parent': 'Landed Cost Master Detail',
-		'parentfield': 'fields',
-		'parenttype': 'DocType',
+		'oldfieldtype': u'Data',
+		'parent': u'Landed Cost Master Detail',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
 		'permlevel': 0
 	},
 
 	# DocType, Landed Cost Master Detail
 	{
 		'doctype': 'DocType',
-		'name': 'Landed Cost Master Detail'
+		'name': u'Landed Cost Master Detail'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'account_head',
-		'idx': 1,
-		'label': 'Account Head',
-		'oldfieldname': 'account_head'
+		'doctype': u'DocField',
+		'fieldname': u'account_head',
+		'label': u'Account Head',
+		'oldfieldname': u'account_head'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'description',
-		'idx': 2,
-		'label': 'Description',
-		'oldfieldname': 'description',
-		'width': '300px'
+		'doctype': u'DocField',
+		'fieldname': u'description',
+		'label': u'Description',
+		'oldfieldname': u'description',
+		'width': u'300px'
 	}
 ]

@@ -3,136 +3,136 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:09:02',
+		'creation': '2012-03-27 14:36:03',
 		'docstatus': 0,
-		'modified': '2012-01-11 14:32:31',
-		'modified_by': 'Administrator',
-		'owner': 'jai@webnotestech.com'
+		'modified': '2012-03-27 14:36:03',
+		'modified_by': u'Administrator',
+		'owner': u'jai@webnotestech.com'
 	},
 
 	# These values are common for all DocType
 	{
-		'autoname': 'FBD/.######',
-		'colour': 'White:FFF',
-		'default_print_format': 'Standard',
+		'autoname': u'FBD/.######',
+		'colour': u'White:FFF',
+		'default_print_format': u'Standard',
 		'doctype': 'DocType',
 		'istable': 1,
-		'module': 'Production',
+		'module': u'Production',
 		'name': '__common__',
 		'read_only': 0,
-		'section_style': 'Simple',
-		'server_code_error': ' ',
+		'section_style': u'Simple',
+		'server_code_error': u' ',
 		'show_in_menu': 0,
 		'version': 24
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Flat BOM Detail',
-		'parentfield': 'fields',
-		'parenttype': 'DocType',
+		'parent': u'Flat BOM Detail',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
 		'permlevel': 0
 	},
 
 	# DocType, Flat BOM Detail
 	{
 		'doctype': 'DocType',
-		'name': 'Flat BOM Detail'
+		'name': u'Flat BOM Detail'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'item_code',
-		'fieldtype': 'Link',
-		'label': 'Item Code',
-		'oldfieldname': 'item_code',
-		'oldfieldtype': 'Link',
-		'options': 'Item'
+		'doctype': u'DocField',
+		'fieldname': u'item_code',
+		'fieldtype': u'Link',
+		'label': u'Item Code',
+		'oldfieldname': u'item_code',
+		'oldfieldtype': u'Link',
+		'options': u'Item'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'description',
-		'fieldtype': 'Text',
-		'label': 'Description',
-		'oldfieldname': 'description',
-		'oldfieldtype': 'Text',
-		'width': '300px'
+		'doctype': u'DocField',
+		'fieldname': u'description',
+		'fieldtype': u'Text',
+		'label': u'Description',
+		'oldfieldname': u'description',
+		'oldfieldtype': u'Text',
+		'width': u'300px'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'qty',
-		'fieldtype': 'Float',
-		'label': 'Qty',
-		'oldfieldname': 'qty',
-		'oldfieldtype': 'Currency'
+		'doctype': u'DocField',
+		'fieldname': u'qty',
+		'fieldtype': u'Float',
+		'label': u'Qty',
+		'oldfieldname': u'qty',
+		'oldfieldtype': u'Currency'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'rate',
-		'fieldtype': 'Float',
-		'label': 'Rate',
-		'oldfieldname': 'standard_rate',
-		'oldfieldtype': 'Currency'
+		'doctype': u'DocField',
+		'fieldname': u'rate',
+		'fieldtype': u'Float',
+		'label': u'Rate',
+		'oldfieldname': u'standard_rate',
+		'oldfieldtype': u'Currency'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'amount',
-		'fieldtype': 'Float',
-		'label': 'Amount',
-		'oldfieldname': 'amount_as_per_sr',
-		'oldfieldtype': 'Currency'
+		'doctype': u'DocField',
+		'fieldname': u'amount',
+		'fieldtype': u'Float',
+		'label': u'Amount',
+		'oldfieldname': u'amount_as_per_sr',
+		'oldfieldtype': u'Currency'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'stock_uom',
-		'fieldtype': 'Link',
-		'label': 'Stock UOM',
-		'oldfieldname': 'stock_uom',
-		'oldfieldtype': 'Link',
-		'options': 'UOM'
+		'doctype': u'DocField',
+		'fieldname': u'stock_uom',
+		'fieldtype': u'Link',
+		'label': u'Stock UOM',
+		'oldfieldname': u'stock_uom',
+		'oldfieldtype': u'Link',
+		'options': u'UOM'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'parent_bom',
-		'fieldtype': 'Link',
+		'doctype': u'DocField',
+		'fieldname': u'parent_bom',
+		'fieldtype': u'Link',
 		'hidden': 0,
-		'label': 'Parent BOM',
-		'oldfieldname': 'parent_bom',
-		'oldfieldtype': 'Link',
-		'width': '250px'
+		'label': u'Parent BOM',
+		'oldfieldname': u'parent_bom',
+		'oldfieldtype': u'Link',
+		'width': u'250px'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'mat_detail_no',
-		'fieldtype': 'Data',
+		'doctype': u'DocField',
+		'fieldname': u'mat_detail_no',
+		'fieldtype': u'Data',
 		'hidden': 1,
-		'label': 'Mat Detail No'
+		'label': u'Mat Detail No'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'qty_consumed_per_unit',
-		'fieldtype': 'Float',
+		'doctype': u'DocField',
+		'fieldname': u'qty_consumed_per_unit',
+		'fieldtype': u'Float',
 		'hidden': 0,
-		'label': 'Qty Consumed Per Unit',
+		'label': u'Qty Consumed Per Unit',
 		'no_copy': 0
 	}
 ]

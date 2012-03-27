@@ -3,32 +3,32 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:09:27',
+		'creation': '2012-03-27 14:35:49',
 		'docstatus': 0,
-		'modified': '2010-09-20 14:06:57',
-		'modified_by': 'Administrator',
-		'owner': 'nabin@webnotestech.com'
+		'modified': '2012-03-27 14:35:49',
+		'modified_by': u'Administrator',
+		'owner': u'nabin@webnotestech.com'
 	},
 
 	# These values are common for all DocType
 	{
-		'autoname': 'TDSR/.####',
-		'colour': 'White:FFF',
+		'autoname': u'TDSR/.####',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
-		'module': 'Accounts',
+		'module': u'Accounts',
 		'name': '__common__',
-		'section_style': 'Simple',
-		'server_code_error': ' ',
+		'section_style': u'Simple',
+		'server_code_error': u' ',
 		'version': 13
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'TDS Return Acknowledgement',
-		'parentfield': 'fields',
-		'parenttype': 'DocType',
+		'parent': u'TDS Return Acknowledgement',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
 		'permlevel': 0,
 		'reqd': 1
 	},
@@ -36,11 +36,11 @@
 	# These values are common for all DocPerm
 	{
 		'create': 1,
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'name': '__common__',
-		'parent': 'TDS Return Acknowledgement',
-		'parentfield': 'permissions',
-		'parenttype': 'DocType',
+		'parent': u'TDS Return Acknowledgement',
+		'parentfield': u'permissions',
+		'parenttype': u'DocType',
 		'permlevel': 0,
 		'read': 1,
 		'write': 1
@@ -49,80 +49,73 @@
 	# DocType, TDS Return Acknowledgement
 	{
 		'doctype': 'DocType',
-		'name': 'TDS Return Acknowledgement'
+		'name': u'TDS Return Acknowledgement'
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm',
-		'idx': 1,
-		'role': 'Accounts User'
+		'doctype': u'DocPerm',
+		'role': u'Accounts User'
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm',
-		'idx': 2,
-		'role': 'Accounts Manager'
+		'doctype': u'DocPerm',
+		'role': u'Accounts Manager'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'fiscal_year',
-		'fieldtype': 'Select',
-		'idx': 1,
-		'label': 'Fiscal Year',
-		'oldfieldname': 'fiscal_year',
-		'oldfieldtype': 'Select',
-		'options': 'link:Fiscal Year'
+		'doctype': u'DocField',
+		'fieldname': u'fiscal_year',
+		'fieldtype': u'Select',
+		'label': u'Fiscal Year',
+		'oldfieldname': u'fiscal_year',
+		'oldfieldtype': u'Select',
+		'options': u'link:Fiscal Year'
 	},
 
 	# DocField
 	{
 		'allow_on_submit': 0,
-		'doctype': 'DocField',
-		'fieldname': 'quarter',
-		'fieldtype': 'Select',
-		'idx': 2,
-		'label': 'Quarter',
-		'oldfieldname': 'quarter',
-		'oldfieldtype': 'Select',
-		'options': '\nApr-Jun\nJul-Sept\nOct-Dec\nJan-Mar',
-		'trigger': 'Client'
+		'doctype': u'DocField',
+		'fieldname': u'quarter',
+		'fieldtype': u'Select',
+		'label': u'Quarter',
+		'oldfieldname': u'quarter',
+		'oldfieldtype': u'Select',
+		'options': u'\nApr-Jun\nJul-Sept\nOct-Dec\nJan-Mar',
+		'trigger': u'Client'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'tds_category',
-		'fieldtype': 'Select',
-		'idx': 3,
-		'label': 'TDS Category',
-		'oldfieldname': 'tds_category',
-		'oldfieldtype': 'Select',
-		'options': 'link:TDS Category'
+		'doctype': u'DocField',
+		'fieldname': u'tds_category',
+		'fieldtype': u'Select',
+		'label': u'TDS Category',
+		'oldfieldname': u'tds_category',
+		'oldfieldtype': u'Select',
+		'options': u'link:TDS Category'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'acknowledgement_no',
-		'fieldtype': 'Data',
-		'idx': 4,
-		'label': 'Acknowledgement No',
-		'oldfieldname': 'acknowledgement_no',
-		'oldfieldtype': 'Data'
+		'doctype': u'DocField',
+		'fieldname': u'acknowledgement_no',
+		'fieldtype': u'Data',
+		'label': u'Acknowledgement No',
+		'oldfieldname': u'acknowledgement_no',
+		'oldfieldtype': u'Data'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'date_of_receipt',
-		'fieldtype': 'Date',
-		'idx': 5,
-		'label': 'Date of Receipt',
-		'oldfieldname': 'date_of_receipt',
-		'oldfieldtype': 'Date'
+		'doctype': u'DocField',
+		'fieldname': u'date_of_receipt',
+		'fieldtype': u'Date',
+		'label': u'Date of Receipt',
+		'oldfieldname': u'date_of_receipt',
+		'oldfieldtype': u'Date'
 	}
 ]

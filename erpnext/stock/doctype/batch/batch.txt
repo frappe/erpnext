@@ -3,155 +3,146 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:08:52',
+		'creation': '2012-03-27 14:36:26',
 		'docstatus': 0,
-		'modified': '2010-09-20 14:06:57',
-		'modified_by': 'Administrator',
-		'owner': 'harshada@webnotestech.com'
+		'modified': '2012-03-27 14:36:26',
+		'modified_by': u'Administrator',
+		'owner': u'harshada@webnotestech.com'
 	},
 
 	# These values are common for all DocType
 	{
 		'allow_trash': 1,
-		'autoname': 'field:batch_id',
-		'colour': 'White:FFF',
+		'autoname': u'field:batch_id',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
-		'document_type': 'Master',
-		'module': 'Stock',
+		'document_type': u'Master',
+		'module': u'Stock',
 		'name': '__common__',
-		'section_style': 'Simple',
-		'server_code_error': ' ',
+		'section_style': u'Simple',
+		'server_code_error': u' ',
 		'version': 12
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Batch',
-		'parentfield': 'fields',
-		'parenttype': 'DocType'
+		'parent': u'Batch',
+		'parentfield': u'fields',
+		'parenttype': u'DocType'
 	},
 
 	# These values are common for all DocPerm
 	{
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'name': '__common__',
-		'parent': 'Batch',
-		'parentfield': 'permissions',
-		'parenttype': 'DocType',
+		'parent': u'Batch',
+		'parentfield': u'permissions',
+		'parenttype': u'DocType',
 		'read': 1,
-		'role': 'Material Master Manager'
+		'role': u'Material Master Manager'
 	},
 
 	# DocType, Batch
 	{
 		'doctype': 'DocType',
-		'name': 'Batch'
+		'name': u'Batch'
 	},
 
 	# DocPerm
 	{
 		'cancel': 1,
 		'create': 1,
-		'doctype': 'DocPerm',
-		'idx': 1,
+		'doctype': u'DocPerm',
 		'permlevel': 0,
 		'write': 1
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm',
-		'idx': 2,
+		'doctype': u'DocPerm',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'trash_reason',
-		'fieldtype': 'Small Text',
-		'idx': 1,
-		'label': 'Trash Reason',
-		'oldfieldname': 'trash_reason',
-		'oldfieldtype': 'Small Text',
+		'doctype': u'DocField',
+		'fieldname': u'trash_reason',
+		'fieldtype': u'Small Text',
+		'label': u'Trash Reason',
+		'oldfieldname': u'trash_reason',
+		'oldfieldtype': u'Small Text',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'batch_id',
-		'fieldtype': 'Data',
-		'idx': 2,
-		'label': 'Batch ID',
+		'doctype': u'DocField',
+		'fieldname': u'batch_id',
+		'fieldtype': u'Data',
+		'label': u'Batch ID',
 		'no_copy': 1,
-		'oldfieldname': 'batch_id',
-		'oldfieldtype': 'Data',
+		'oldfieldname': u'batch_id',
+		'oldfieldtype': u'Data',
 		'permlevel': 0,
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'description',
-		'fieldtype': 'Small Text',
-		'idx': 3,
-		'label': 'Description',
-		'oldfieldname': 'description',
-		'oldfieldtype': 'Small Text',
+		'doctype': u'DocField',
+		'fieldname': u'description',
+		'fieldtype': u'Small Text',
+		'label': u'Description',
+		'oldfieldname': u'description',
+		'oldfieldtype': u'Small Text',
 		'permlevel': 0,
-		'width': '300px'
+		'width': u'300px'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'start_date',
-		'fieldtype': 'Date',
-		'idx': 4,
-		'label': 'Batch Started Date',
-		'oldfieldname': 'start_date',
-		'oldfieldtype': 'Date',
+		'doctype': u'DocField',
+		'fieldname': u'start_date',
+		'fieldtype': u'Date',
+		'label': u'Batch Started Date',
+		'oldfieldname': u'start_date',
+		'oldfieldtype': u'Date',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'finished_date',
-		'fieldtype': 'Date',
-		'idx': 5,
-		'label': 'Batch Finished Date',
-		'oldfieldname': 'finished_date',
-		'oldfieldtype': 'Date',
+		'doctype': u'DocField',
+		'fieldname': u'finished_date',
+		'fieldtype': u'Date',
+		'label': u'Batch Finished Date',
+		'oldfieldname': u'finished_date',
+		'oldfieldtype': u'Date',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'expiry_date',
-		'fieldtype': 'Date',
-		'idx': 6,
-		'label': 'Expiry Date',
-		'oldfieldname': 'expiry_date',
-		'oldfieldtype': 'Date',
+		'doctype': u'DocField',
+		'fieldname': u'expiry_date',
+		'fieldtype': u'Date',
+		'label': u'Expiry Date',
+		'oldfieldname': u'expiry_date',
+		'oldfieldtype': u'Date',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'item',
-		'fieldtype': 'Link',
-		'idx': 7,
-		'label': 'Item',
-		'oldfieldname': 'item',
-		'oldfieldtype': 'Link',
-		'options': 'Item',
+		'doctype': u'DocField',
+		'fieldname': u'item',
+		'fieldtype': u'Link',
+		'label': u'Item',
+		'oldfieldname': u'item',
+		'oldfieldtype': u'Link',
+		'options': u'Item',
 		'permlevel': 0,
 		'reqd': 1
 	}

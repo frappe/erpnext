@@ -3,98 +3,93 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:09:14',
+		'creation': '2012-03-27 14:35:59',
 		'docstatus': 0,
-		'modified': '2010-09-20 14:06:57',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-27 14:35:59',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'colour': 'White:FFF',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
 		'istable': 1,
-		'module': 'HR',
+		'module': u'HR',
 		'name': '__common__',
-		'section_style': 'Simple',
-		'server_code_error': ' ',
+		'section_style': u'Simple',
+		'server_code_error': u' ',
 		'show_in_menu': 0,
 		'version': 5
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Professional Training Details',
-		'parentfield': 'fields',
-		'parenttype': 'DocType',
+		'parent': u'Professional Training Details',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
 		'permlevel': 0
 	},
 
 	# DocType, Professional Training Details
 	{
 		'doctype': 'DocType',
-		'name': 'Professional Training Details'
+		'name': u'Professional Training Details'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'institute',
-		'fieldtype': 'Small Text',
-		'idx': 1,
-		'label': 'Institute / Conducted By',
-		'oldfieldname': 'institute',
-		'oldfieldtype': 'Small Text',
+		'doctype': u'DocField',
+		'fieldname': u'institute',
+		'fieldtype': u'Small Text',
+		'label': u'Institute / Conducted By',
+		'oldfieldname': u'institute',
+		'oldfieldtype': u'Small Text',
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'nature_of_training',
-		'fieldtype': 'Small Text',
-		'idx': 2,
-		'label': 'Program / Seminar Title',
-		'oldfieldname': 'nature_of_training',
-		'oldfieldtype': 'Small Text',
+		'doctype': u'DocField',
+		'fieldname': u'nature_of_training',
+		'fieldtype': u'Small Text',
+		'label': u'Program / Seminar Title',
+		'oldfieldname': u'nature_of_training',
+		'oldfieldtype': u'Small Text',
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'duration',
-		'fieldtype': 'Data',
-		'idx': 3,
-		'label': 'Duration',
-		'oldfieldname': 'duration',
-		'oldfieldtype': 'Data',
+		'doctype': u'DocField',
+		'fieldname': u'duration',
+		'fieldtype': u'Data',
+		'label': u'Duration',
+		'oldfieldname': u'duration',
+		'oldfieldtype': u'Data',
 		'reqd': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'loc',
-		'fieldtype': 'Data',
-		'idx': 4,
-		'label': 'Location',
-		'oldfieldname': 'loc',
-		'oldfieldtype': 'Data',
+		'doctype': u'DocField',
+		'fieldname': u'loc',
+		'fieldtype': u'Data',
+		'label': u'Location',
+		'oldfieldname': u'loc',
+		'oldfieldtype': u'Data',
 		'reqd': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'certificate',
-		'fieldtype': 'Small Text',
-		'idx': 5,
-		'label': 'Certificate',
-		'oldfieldname': 'certificate',
-		'oldfieldtype': 'Small Text'
+		'doctype': u'DocField',
+		'fieldname': u'certificate',
+		'fieldtype': u'Small Text',
+		'label': u'Certificate',
+		'oldfieldname': u'certificate',
+		'oldfieldtype': u'Small Text'
 	}
 ]

@@ -3,117 +3,111 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:09:21',
+		'creation': '2012-03-27 14:36:37',
 		'docstatus': 0,
-		'modified': '2010-09-20 14:06:57',
-		'modified_by': 'umair@iwebnotes.com',
-		'owner': 'Administrator'
+		'modified': '2012-03-27 14:36:37',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'colour': 'White:FFF',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
 		'istable': 1,
-		'module': 'Stock',
+		'module': u'Stock',
 		'name': '__common__',
-		'section_style': 'Tray',
-		'server_code_error': ' ',
+		'section_style': u'Tray',
+		'server_code_error': u' ',
 		'show_in_menu': 0,
 		'version': 3
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Sales BOM Detail',
-		'parentfield': 'fields',
-		'parenttype': 'DocType'
+		'parent': u'Sales BOM Detail',
+		'parentfield': u'fields',
+		'parenttype': u'DocType'
 	},
 
 	# DocType, Sales BOM Detail
 	{
 		'doctype': 'DocType',
-		'name': 'Sales BOM Detail'
+		'name': u'Sales BOM Detail'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'is_main_item',
-		'fieldtype': 'Select',
-		'idx': 1,
-		'label': 'Is Main Item',
-		'oldfieldname': 'is_main_item',
-		'oldfieldtype': 'Select',
-		'options': '\nYes\nNo',
+		'doctype': u'DocField',
+		'fieldname': u'is_main_item',
+		'fieldtype': u'Select',
+		'label': u'Is Main Item',
+		'oldfieldname': u'is_main_item',
+		'oldfieldtype': u'Select',
+		'options': u'\nYes\nNo',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'item_code',
-		'fieldtype': 'Link',
-		'idx': 2,
-		'label': 'Item',
-		'oldfieldname': 'item_code',
-		'oldfieldtype': 'Link',
-		'options': 'Item',
+		'doctype': u'DocField',
+		'fieldname': u'item_code',
+		'fieldtype': u'Link',
+		'label': u'Item',
+		'oldfieldname': u'item_code',
+		'oldfieldtype': u'Link',
+		'options': u'Item',
 		'permlevel': 0,
 		'reqd': 1,
-		'trigger': 'Client'
+		'trigger': u'Client'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'description',
-		'fieldtype': 'Text',
-		'idx': 3,
-		'label': 'Description',
-		'oldfieldname': 'description',
-		'oldfieldtype': 'Text',
+		'doctype': u'DocField',
+		'fieldname': u'description',
+		'fieldtype': u'Text',
+		'label': u'Description',
+		'oldfieldname': u'description',
+		'oldfieldtype': u'Text',
 		'permlevel': 0,
-		'width': '300px'
+		'width': u'300px'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'rate',
-		'fieldtype': 'Currency',
-		'idx': 6,
-		'label': 'Rate',
-		'oldfieldname': 'rate',
-		'oldfieldtype': 'Currency',
+		'doctype': u'DocField',
+		'fieldname': u'rate',
+		'fieldtype': u'Currency',
+		'label': u'Rate',
+		'oldfieldname': u'rate',
+		'oldfieldtype': u'Currency',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'qty',
-		'fieldtype': 'Currency',
-		'idx': 9,
-		'label': 'Qty',
-		'oldfieldname': 'qty',
-		'oldfieldtype': 'Currency',
+		'doctype': u'DocField',
+		'fieldname': u'qty',
+		'fieldtype': u'Currency',
+		'label': u'Qty',
+		'oldfieldname': u'qty',
+		'oldfieldtype': u'Currency',
 		'permlevel': 0,
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'uom',
-		'fieldtype': 'Link',
-		'idx': 10,
-		'label': 'UOM',
-		'oldfieldname': 'uom',
-		'oldfieldtype': 'Link',
-		'options': 'UOM',
+		'doctype': u'DocField',
+		'fieldname': u'uom',
+		'fieldtype': u'Link',
+		'label': u'UOM',
+		'oldfieldname': u'uom',
+		'oldfieldtype': u'Link',
+		'options': u'UOM',
 		'permlevel': 1,
 		'search_index': 0
 	}

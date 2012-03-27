@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-02-17 15:53:22',
+		'creation': '2012-03-27 14:36:47',
 		'docstatus': 0,
-		'modified': '2012-02-22 18:32:46',
+		'modified': '2012-03-27 14:36:47',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -38,13 +38,17 @@
 
 	# These values are common for all DocPerm
 	{
+		'amend': 0,
+		'create': 1,
 		'doctype': u'DocPerm',
 		'name': '__common__',
 		'parent': u'Product',
 		'parentfield': u'permissions',
 		'parenttype': u'DocType',
+		'permlevel': 0,
 		'read': 1,
-		'role': u'Website Manager'
+		'submit': 0,
+		'write': 1
 	},
 
 	# DocType, Product
@@ -55,16 +59,23 @@
 
 	# DocPerm
 	{
-		'create': 1,
+		'cancel': 0,
 		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'write': 1
+		'role': u'Sales Manager'
 	},
 
 	# DocPerm
 	{
+		'cancel': 0,
 		'doctype': u'DocPerm',
-		'permlevel': 1
+		'role': u'Sales User'
+	},
+
+	# DocPerm
+	{
+		'cancel': 1,
+		'doctype': u'DocPerm',
+		'role': u'Website Manager'
 	},
 
 	# DocField
@@ -124,6 +135,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'column_break0',
 		'fieldtype': u'Column Break',
 		'permlevel': 0
 	},
@@ -166,6 +178,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'section_break0',
 		'fieldtype': u'Section Break',
 		'permlevel': 0
 	},
@@ -185,6 +198,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'section_break1',
 		'fieldtype': u'Section Break',
 		'permlevel': 0
 	},

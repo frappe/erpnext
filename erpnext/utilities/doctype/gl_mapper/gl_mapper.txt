@@ -3,44 +3,44 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:09:03',
+		'creation': '2012-03-27 14:36:46',
 		'docstatus': 0,
-		'modified': '2011-05-10 11:16:01',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-27 14:36:46',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1305006361',
-		'autoname': 'field:doc_type',
-		'colour': 'White:FFF',
+		'_last_update': u'1305006361',
+		'autoname': u'field:doc_type',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
-		'module': 'Utilities',
+		'module': u'Utilities',
 		'name': '__common__',
-		'section_style': 'Simple',
-		'server_code_error': ' ',
+		'section_style': u'Simple',
+		'server_code_error': u' ',
 		'show_in_menu': 0,
 		'version': 3
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'GL Mapper',
-		'parentfield': 'fields',
-		'parenttype': 'DocType',
+		'parent': u'GL Mapper',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
 		'permlevel': 0
 	},
 
 	# These values are common for all DocPerm
 	{
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'name': '__common__',
-		'parent': 'GL Mapper',
-		'parentfield': 'permissions',
-		'parenttype': 'DocType',
+		'parent': u'GL Mapper',
+		'parentfield': u'permissions',
+		'parenttype': u'DocType',
 		'permlevel': 0,
 		'read': 1
 	},
@@ -48,7 +48,7 @@
 	# DocType, GL Mapper
 	{
 		'doctype': 'DocType',
-		'name': 'GL Mapper'
+		'name': u'GL Mapper'
 	},
 
 	# DocPerm
@@ -56,43 +56,38 @@
 		'amend': 0,
 		'cancel': 0,
 		'create': 0,
-		'doctype': 'DocPerm',
-		'idx': 1,
-		'role': 'Accounts User',
+		'doctype': u'DocPerm',
+		'role': u'Accounts User',
 		'submit': 0,
 		'write': 0
 	},
 
 	# DocPerm
 	{
-		'create': 1,
-		'doctype': 'DocPerm',
-		'idx': 2,
-		'role': 'System Manager',
+		'doctype': u'DocPerm',
+		'role': u'System Manager',
 		'write': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'doc_type',
-		'fieldtype': 'Data',
-		'idx': 1,
-		'label': 'Doc Type',
-		'oldfieldname': 'doc_type',
-		'oldfieldtype': 'Link',
+		'doctype': u'DocField',
+		'fieldname': u'doc_type',
+		'fieldtype': u'Data',
+		'label': u'Doc Type',
+		'oldfieldname': u'doc_type',
+		'oldfieldtype': u'Link',
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'fields',
-		'fieldtype': 'Table',
-		'idx': 2,
-		'label': 'Fields',
-		'oldfieldname': 'fields',
-		'oldfieldtype': 'Table',
-		'options': 'GL Mapper Detail'
+		'doctype': u'DocField',
+		'fieldname': u'fields',
+		'fieldtype': u'Table',
+		'label': u'Fields',
+		'oldfieldname': u'fields',
+		'oldfieldtype': u'Table',
+		'options': u'GL Mapper Detail'
 	}
 ]

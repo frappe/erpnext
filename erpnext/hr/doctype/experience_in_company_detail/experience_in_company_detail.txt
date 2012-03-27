@@ -3,108 +3,102 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:09:01',
+		'creation': '2012-03-27 14:35:57',
 		'docstatus': 0,
-		'modified': '2010-09-20 14:06:57',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-27 14:35:57',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'colour': 'White:FFF',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
 		'istable': 1,
-		'module': 'HR',
+		'module': u'HR',
 		'name': '__common__',
-		'section_style': 'Simple',
+		'section_style': u'Simple',
 		'show_in_menu': 0,
 		'version': 6
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Experience In Company Detail',
-		'parentfield': 'fields',
-		'parenttype': 'DocType',
+		'parent': u'Experience In Company Detail',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
 		'permlevel': 0
 	},
 
 	# DocType, Experience In Company Detail
 	{
 		'doctype': 'DocType',
-		'name': 'Experience In Company Detail'
+		'name': u'Experience In Company Detail'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'branch',
-		'fieldtype': 'Select',
-		'idx': 1,
-		'label': 'Branch',
-		'oldfieldname': 'branch',
-		'oldfieldtype': 'Select',
-		'options': 'link:Branch'
+		'doctype': u'DocField',
+		'fieldname': u'branch',
+		'fieldtype': u'Select',
+		'label': u'Branch',
+		'oldfieldname': u'branch',
+		'oldfieldtype': u'Select',
+		'options': u'link:Branch'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'department',
-		'fieldtype': 'Select',
-		'idx': 2,
-		'label': 'Department',
-		'oldfieldname': 'department',
-		'oldfieldtype': 'Select',
-		'options': 'link:Department'
+		'doctype': u'DocField',
+		'fieldname': u'department',
+		'fieldtype': u'Select',
+		'label': u'Department',
+		'oldfieldname': u'department',
+		'oldfieldtype': u'Select',
+		'options': u'link:Department'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'designation',
-		'fieldtype': 'Select',
-		'idx': 3,
-		'label': 'Designation',
-		'oldfieldname': 'designation',
-		'oldfieldtype': 'Select',
-		'options': 'link:Designation'
+		'doctype': u'DocField',
+		'fieldname': u'designation',
+		'fieldtype': u'Select',
+		'label': u'Designation',
+		'oldfieldname': u'designation',
+		'oldfieldtype': u'Select',
+		'options': u'link:Designation'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'grade',
-		'fieldtype': 'Select',
-		'idx': 4,
-		'label': 'Grade',
-		'oldfieldname': 'grade',
-		'oldfieldtype': 'Select',
-		'options': 'link:Grade'
+		'doctype': u'DocField',
+		'fieldname': u'grade',
+		'fieldtype': u'Select',
+		'label': u'Grade',
+		'oldfieldname': u'grade',
+		'oldfieldtype': u'Select',
+		'options': u'link:Grade'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'from_date',
-		'fieldtype': 'Date',
-		'idx': 5,
-		'label': 'From Date',
-		'oldfieldname': 'from_date',
-		'oldfieldtype': 'Date'
+		'doctype': u'DocField',
+		'fieldname': u'from_date',
+		'fieldtype': u'Date',
+		'label': u'From Date',
+		'oldfieldname': u'from_date',
+		'oldfieldtype': u'Date'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'to_date',
-		'fieldtype': 'Date',
-		'idx': 6,
-		'label': 'To Date',
-		'oldfieldname': 'to_date',
-		'oldfieldtype': 'Date'
+		'doctype': u'DocField',
+		'fieldname': u'to_date',
+		'fieldtype': u'Date',
+		'label': u'To Date',
+		'oldfieldname': u'to_date',
+		'oldfieldtype': u'Date'
 	}
 ]

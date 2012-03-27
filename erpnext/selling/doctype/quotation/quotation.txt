@@ -3,20 +3,11 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:09:17',
+		'creation': '2012-03-27 14:36:12',
 		'docstatus': 0,
-		'modified': '2012-03-20 14:56:28',
+		'modified': '2012-03-27 18:48:29',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
-	},
-
-	# These values are common for all DocField
-	{
-		'doctype': u'DocField',
-		'name': '__common__',
-		'parent': u'Quotation',
-		'parentfield': u'fields',
-		'parenttype': u'DocType'
 	},
 
 	# These values are common for all DocType
@@ -30,6 +21,7 @@
 		'doctype': 'DocType',
 		'document_type': u'Transaction',
 		'hide_toolbar': 0,
+		'is_submittable': 1,
 		'is_transaction_doc': 1,
 		'max_attachments': 1,
 		'module': u'Selling',
@@ -41,15 +33,15 @@
 		'show_in_menu': 0,
 		'subject': u'To %(customer_name)s on %(transaction_date)s worth %(currency)s %(grand_total_export)s',
 		'tag_fields': u'status',
-		'version': 621
+		'version': 622
 	},
 
-	# These values are common for all DocFormat
+	# These values are common for all DocField
 	{
-		'doctype': u'DocFormat',
+		'doctype': u'DocField',
 		'name': '__common__',
 		'parent': u'Quotation',
-		'parentfield': u'formats',
+		'parentfield': u'fields',
 		'parenttype': u'DocType'
 	},
 
@@ -76,21 +68,21 @@
 		'create': 1,
 		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'role': u'Sales Manager',
+		'role': u'Sales User',
 		'submit': 1,
 		'write': 1
 	},
 
 	# DocPerm
 	{
-		'amend': 1,
-		'cancel': 1,
-		'create': 1,
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
 		'doctype': u'DocPerm',
-		'permlevel': 0,
+		'permlevel': 1,
 		'role': u'Sales User',
-		'submit': 1,
-		'write': 1
+		'submit': 0,
+		'write': 0
 	},
 
 	# DocPerm
@@ -103,6 +95,30 @@
 
 	# DocPerm
 	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Sales Manager',
+		'submit': 0,
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'amend': 1,
+		'cancel': 1,
+		'create': 1,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Sales Manager',
+		'submit': 1,
+		'write': 1
+	},
+
+	# DocPerm
+	{
 		'amend': 1,
 		'cancel': 1,
 		'create': 1,
@@ -111,6 +127,13 @@
 		'role': u'Maintenance Manager',
 		'submit': 1,
 		'write': 1
+	},
+
+	# DocPerm
+	{
+		'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Maintenance Manager'
 	},
 
 	# DocPerm
@@ -129,31 +152,14 @@
 	{
 		'doctype': u'DocPerm',
 		'permlevel': 1,
-		'role': u'All'
-	},
-
-	# DocFormat
-	{
-		'doctype': u'DocFormat',
-		'format': u'Quotation Classic'
-	},
-
-	# DocFormat
-	{
-		'doctype': u'DocFormat',
-		'format': u'Quotation Modern'
-	},
-
-	# DocFormat
-	{
-		'doctype': u'DocFormat',
-		'format': u'Quotation Spartan'
+		'role': u'Maintenance User'
 	},
 
 	# DocField
 	{
 		'colour': u'White:FFF',
 		'doctype': u'DocField',
+		'fieldname': u'basic_info',
 		'fieldtype': u'Section Break',
 		'label': u'Basic Info',
 		'oldfieldtype': u'Section Break',
@@ -164,6 +170,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'column_break0',
 		'fieldtype': u'Column Break',
 		'permlevel': 0,
 		'width': u'50%'
@@ -357,6 +364,7 @@
 	{
 		'colour': u'White:FFF',
 		'doctype': u'DocField',
+		'fieldname': u'column_break1',
 		'fieldtype': u'Column Break',
 		'oldfieldtype': u'Column Break',
 		'permlevel': 0,
@@ -488,6 +496,7 @@
 	{
 		'colour': u'White:FFF',
 		'doctype': u'DocField',
+		'fieldname': u'items',
 		'fieldtype': u'Section Break',
 		'label': u'Items',
 		'oldfieldtype': u'Section Break',
@@ -546,6 +555,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'column_break2',
 		'fieldtype': u'Column Break',
 		'permlevel': 0,
 		'width': u'50%'
@@ -612,6 +622,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'pull_enquiry_detail',
 		'fieldtype': u'Button',
 		'hidden': 0,
 		'label': u'Pull Enquiry Detail',
@@ -627,6 +638,7 @@
 	{
 		'colour': u'White:FFF',
 		'doctype': u'DocField',
+		'fieldname': u'section_break0',
 		'fieldtype': u'Section Break',
 		'options': u'Simple',
 		'permlevel': 0
@@ -650,6 +662,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'clear_table',
 		'fieldtype': u'Button',
 		'label': u'Clear Table',
 		'oldfieldtype': u'Button',
@@ -661,6 +674,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'recalculate_values',
 		'fieldtype': u'Button',
 		'label': u'Re-Calculate Values',
 		'oldfieldtype': u'Button',
@@ -688,6 +702,7 @@
 	{
 		'colour': u'White:FFF',
 		'doctype': u'DocField',
+		'fieldname': u'taxes',
 		'fieldtype': u'Section Break',
 		'label': u'Taxes',
 		'oldfieldtype': u'Section Break',
@@ -712,6 +727,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'get_charges',
 		'fieldtype': u'Button',
 		'hidden': 0,
 		'label': u'Get Charges',
@@ -737,6 +753,7 @@
 	{
 		'colour': u'White:FFF',
 		'doctype': u'DocField',
+		'fieldname': u'calculate_charges',
 		'fieldtype': u'Button',
 		'label': u'Calculate Charges',
 		'oldfieldtype': u'Button',
@@ -760,6 +777,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'other_charges_calculation',
 		'fieldtype': u'HTML',
 		'label': u'Other Charges Calculation',
 		'oldfieldtype': u'HTML',
@@ -771,6 +789,7 @@
 	{
 		'colour': u'White:FFF',
 		'doctype': u'DocField',
+		'fieldname': u'totals',
 		'fieldtype': u'Section Break',
 		'label': u'Totals',
 		'oldfieldtype': u'Section Break',
@@ -827,6 +846,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'column_break3',
 		'fieldtype': u'Column Break',
 		'oldfieldtype': u'Column Break',
 		'permlevel': 0,
@@ -884,6 +904,7 @@
 		'colour': u'White:FFF',
 		'description': u'Add Terms and Conditions for the Quotation like Payment Terms, Validity of Offer etc. You can also prepare a master Term Sheet and use the Template',
 		'doctype': u'DocField',
+		'fieldname': u'terms_section_break',
 		'fieldtype': u'Section Break',
 		'label': u'Terms',
 		'oldfieldtype': u'Section Break',
@@ -908,6 +929,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'get_terms',
 		'fieldtype': u'Button',
 		'label': u'Get Terms',
 		'oldfieldtype': u'Button',
@@ -918,6 +940,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'terms_html',
 		'fieldtype': u'HTML',
 		'label': u'Terms HTML',
 		'oldfieldtype': u'HTML',
@@ -942,6 +965,7 @@
 		'colour': u'White:FFF',
 		'description': u'Filling in additional information about the Quotation will help you analyze your data better.',
 		'doctype': u'DocField',
+		'fieldname': u'more_info',
 		'fieldtype': u'Section Break',
 		'label': u'More Info',
 		'oldfieldtype': u'Section Break',
@@ -1082,6 +1106,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'column_break4',
 		'fieldtype': u'Column Break',
 		'oldfieldtype': u'Column Break',
 		'permlevel': 0,
@@ -1164,6 +1189,7 @@
 		'colour': u'White:FFF',
 		'description': u'Keep a track on communications regarding this Quotation. This will help you remember earlier communications in case the Customer comes back again',
 		'doctype': u'DocField',
+		'fieldname': u'communication_history',
 		'fieldtype': u'Section Break',
 		'label': u'Communication History',
 		'oldfieldtype': u'Section Break',

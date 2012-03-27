@@ -3,61 +3,59 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2011-07-08 13:20:10',
+		'creation': '2012-03-27 14:36:25',
 		'docstatus': 0,
-		'modified': '2011-07-08 13:20:34',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-27 14:36:25',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'colour': 'White:FFF',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
 		'istable': 1,
-		'module': 'Setup',
+		'module': u'Setup',
 		'name': '__common__',
-		'section_style': 'Tray',
+		'section_style': u'Tray',
 		'show_in_menu': 0,
 		'version': 3
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Series Detail',
-		'parentfield': 'fields',
-		'parenttype': 'DocType',
+		'parent': u'Series Detail',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
 		'permlevel': 0
 	},
 
 	# DocType, Series Detail
 	{
 		'doctype': 'DocType',
-		'name': 'Series Detail'
+		'name': u'Series Detail'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'series',
-		'fieldtype': 'Read Only',
-		'idx': 1,
-		'label': 'Series',
-		'oldfieldname': 'series',
-		'oldfieldtype': 'Read Only'
+		'doctype': u'DocField',
+		'fieldname': u'series',
+		'fieldtype': u'Read Only',
+		'label': u'Series',
+		'oldfieldname': u'series',
+		'oldfieldtype': u'Read Only'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'remove',
-		'fieldtype': 'Check',
-		'idx': 2,
-		'label': 'Remove',
-		'oldfieldname': 'remove',
-		'oldfieldtype': 'Check',
-		'trigger': 'Client'
+		'doctype': u'DocField',
+		'fieldname': u'remove',
+		'fieldtype': u'Check',
+		'label': u'Remove',
+		'oldfieldname': u'remove',
+		'oldfieldtype': u'Check',
+		'trigger': u'Client'
 	}
 ]

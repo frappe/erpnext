@@ -3,270 +3,253 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:08:58',
+		'creation': '2012-03-27 14:36:30',
 		'docstatus': 0,
-		'modified': '2011-03-14 14:50:55',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-27 14:36:30',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'colour': 'White:FFF',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
 		'istable': 1,
-		'module': 'Stock',
+		'module': u'Stock',
 		'name': '__common__',
-		'section_style': 'Tray',
-		'server_code_error': ' ',
+		'section_style': u'Tray',
+		'server_code_error': u' ',
 		'show_in_menu': 0,
 		'version': 17
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Delivery Note Packing Detail',
-		'parentfield': 'fields',
-		'parenttype': 'DocType'
+		'parent': u'Delivery Note Packing Detail',
+		'parentfield': u'fields',
+		'parenttype': u'DocType'
 	},
 
 	# DocType, Delivery Note Packing Detail
 	{
 		'doctype': 'DocType',
-		'name': 'Delivery Note Packing Detail'
+		'name': u'Delivery Note Packing Detail'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'parent_item',
-		'fieldtype': 'Link',
-		'idx': 1,
-		'label': 'Parent Item',
-		'oldfieldname': 'parent_item',
-		'oldfieldtype': 'Link',
-		'options': 'Item',
+		'doctype': u'DocField',
+		'fieldname': u'parent_item',
+		'fieldtype': u'Link',
+		'label': u'Parent Item',
+		'oldfieldname': u'parent_item',
+		'oldfieldtype': u'Link',
+		'options': u'Item',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldname': 'item_code',
-		'fieldtype': 'Link',
-		'idx': 2,
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'item_code',
+		'fieldtype': u'Link',
 		'in_filter': 1,
-		'label': 'Item Code',
-		'oldfieldname': 'item_code',
-		'oldfieldtype': 'Link',
-		'options': 'Item',
+		'label': u'Item Code',
+		'oldfieldname': u'item_code',
+		'oldfieldtype': u'Link',
+		'options': u'Item',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'item_name',
-		'fieldtype': 'Data',
-		'idx': 3,
+		'doctype': u'DocField',
+		'fieldname': u'item_name',
+		'fieldtype': u'Data',
 		'in_filter': 1,
-		'label': 'Item Name',
-		'oldfieldname': 'item_name',
-		'oldfieldtype': 'Data',
+		'label': u'Item Name',
+		'oldfieldname': u'item_name',
+		'oldfieldtype': u'Data',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'parent_detail_docname',
-		'fieldtype': 'Data',
+		'doctype': u'DocField',
+		'fieldname': u'parent_detail_docname',
+		'fieldtype': u'Data',
 		'hidden': 1,
-		'idx': 4,
-		'label': 'Parent Detail docname',
+		'label': u'Parent Detail docname',
 		'no_copy': 1,
-		'oldfieldname': 'parent_detail_docname',
-		'oldfieldtype': 'Data',
+		'oldfieldname': u'parent_detail_docname',
+		'oldfieldtype': u'Data',
 		'permlevel': 1,
 		'print_hide': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'description',
-		'fieldtype': 'Text',
-		'idx': 5,
-		'label': 'Description',
-		'oldfieldname': 'description',
-		'oldfieldtype': 'Text',
+		'doctype': u'DocField',
+		'fieldname': u'description',
+		'fieldtype': u'Text',
+		'label': u'Description',
+		'oldfieldname': u'description',
+		'oldfieldtype': u'Text',
 		'permlevel': 1,
-		'width': '300px'
+		'width': u'300px'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'warehouse',
-		'fieldtype': 'Link',
-		'idx': 6,
-		'label': 'Warehouse',
-		'oldfieldname': 'warehouse',
-		'oldfieldtype': 'Link',
-		'options': 'Warehouse',
+		'doctype': u'DocField',
+		'fieldname': u'warehouse',
+		'fieldtype': u'Link',
+		'label': u'Warehouse',
+		'oldfieldname': u'warehouse',
+		'oldfieldtype': u'Link',
+		'options': u'Warehouse',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'qty',
-		'fieldtype': 'Currency',
-		'idx': 7,
-		'label': 'Qty',
-		'oldfieldname': 'qty',
-		'oldfieldtype': 'Currency',
+		'doctype': u'DocField',
+		'fieldname': u'qty',
+		'fieldtype': u'Currency',
+		'label': u'Qty',
+		'oldfieldname': u'qty',
+		'oldfieldtype': u'Currency',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'serial_no',
-		'fieldtype': 'Text',
-		'idx': 8,
-		'label': 'Serial No',
+		'doctype': u'DocField',
+		'fieldname': u'serial_no',
+		'fieldtype': u'Text',
+		'label': u'Serial No',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'actual_qty',
-		'fieldtype': 'Currency',
-		'idx': 9,
-		'label': 'Actual Qty',
+		'doctype': u'DocField',
+		'fieldname': u'actual_qty',
+		'fieldtype': u'Currency',
+		'label': u'Actual Qty',
 		'no_copy': 1,
-		'oldfieldname': 'actual_qty',
-		'oldfieldtype': 'Currency',
+		'oldfieldname': u'actual_qty',
+		'oldfieldtype': u'Currency',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'projected_qty',
-		'fieldtype': 'Currency',
-		'idx': 10,
-		'label': 'Projected Qty',
+		'doctype': u'DocField',
+		'fieldname': u'projected_qty',
+		'fieldtype': u'Currency',
+		'label': u'Projected Qty',
 		'no_copy': 1,
-		'oldfieldname': 'projected_qty',
-		'oldfieldtype': 'Currency',
+		'oldfieldname': u'projected_qty',
+		'oldfieldtype': u'Currency',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'uom',
-		'fieldtype': 'Link',
-		'idx': 11,
-		'label': 'UOM',
-		'oldfieldname': 'uom',
-		'oldfieldtype': 'Link',
-		'options': 'UOM',
+		'doctype': u'DocField',
+		'fieldname': u'uom',
+		'fieldtype': u'Link',
+		'label': u'UOM',
+		'oldfieldname': u'uom',
+		'oldfieldtype': u'Link',
+		'options': u'UOM',
 		'permlevel': 1,
 		'search_index': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'planned_qty',
-		'fieldtype': 'Currency',
+		'doctype': u'DocField',
+		'fieldname': u'planned_qty',
+		'fieldtype': u'Currency',
 		'hidden': 1,
-		'idx': 12,
-		'label': 'Planned Qty ',
+		'label': u'Planned Qty ',
 		'no_copy': 1,
-		'oldfieldname': 'planned_qty',
-		'oldfieldtype': 'Currency',
+		'oldfieldname': u'planned_qty',
+		'oldfieldtype': u'Currency',
 		'permlevel': 1,
 		'print_hide': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'produced_qty',
-		'fieldtype': 'Currency',
+		'doctype': u'DocField',
+		'fieldname': u'produced_qty',
+		'fieldtype': u'Currency',
 		'hidden': 1,
-		'idx': 13,
-		'label': 'Produced Qty',
+		'label': u'Produced Qty',
 		'no_copy': 1,
-		'oldfieldname': 'produced_qty',
-		'oldfieldtype': 'Currency',
+		'oldfieldname': u'produced_qty',
+		'oldfieldtype': u'Currency',
 		'permlevel': 1,
 		'print_hide': 1
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldname': 'prevdoc_doctype',
-		'fieldtype': 'Data',
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'prevdoc_doctype',
+		'fieldtype': u'Data',
 		'hidden': 1,
-		'idx': 14,
-		'label': 'Prevdoc DocType',
-		'oldfieldname': 'prevdoc_doctype',
-		'oldfieldtype': 'Data',
+		'label': u'Prevdoc DocType',
+		'oldfieldname': u'prevdoc_doctype',
+		'oldfieldtype': u'Data',
 		'permlevel': 1,
 		'print_hide': 1
 	},
 
 	# DocField
 	{
-		'description': 'The date at which current entry is made in system.',
-		'doctype': 'DocField',
-		'fieldname': 'transaction_date',
-		'fieldtype': 'Date',
+		'description': u'The date at which current entry is made in system.',
+		'doctype': u'DocField',
+		'fieldname': u'transaction_date',
+		'fieldtype': u'Date',
 		'hidden': 0,
-		'idx': 15,
-		'label': 'Sales Order Date',
-		'oldfieldname': 'transaction_date',
-		'oldfieldtype': 'Date',
+		'label': u'Sales Order Date',
+		'oldfieldname': u'transaction_date',
+		'oldfieldtype': u'Date',
 		'permlevel': 1,
 		'print_hide': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'delivery_date',
-		'fieldtype': 'Date',
+		'doctype': u'DocField',
+		'fieldname': u'delivery_date',
+		'fieldtype': u'Date',
 		'hidden': 0,
-		'idx': 16,
-		'label': 'Expected Delivery Date',
-		'oldfieldname': 'delivery_date',
-		'oldfieldtype': 'Date',
+		'label': u'Expected Delivery Date',
+		'oldfieldname': u'delivery_date',
+		'oldfieldtype': u'Date',
 		'permlevel': 1,
 		'print_hide': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'confirmation_date',
-		'fieldtype': 'Date',
+		'doctype': u'DocField',
+		'fieldname': u'confirmation_date',
+		'fieldtype': u'Date',
 		'hidden': 1,
-		'idx': 17,
-		'label': 'Confirmed delivery date',
+		'label': u'Confirmed delivery date',
 		'no_copy': 1,
-		'oldfieldname': 'confirmation_date',
-		'oldfieldtype': 'Date',
+		'oldfieldname': u'confirmation_date',
+		'oldfieldtype': u'Date',
 		'permlevel': 1,
 		'print_hide': 1
 	},
@@ -274,13 +257,12 @@
 	# DocField
 	{
 		'allow_on_submit': 1,
-		'doctype': 'DocField',
-		'fieldname': 'page_break',
-		'fieldtype': 'Check',
-		'idx': 18,
-		'label': 'Page Break',
-		'oldfieldname': 'page_break',
-		'oldfieldtype': 'Check',
+		'doctype': u'DocField',
+		'fieldname': u'page_break',
+		'fieldtype': u'Check',
+		'label': u'Page Break',
+		'oldfieldname': u'page_break',
+		'oldfieldtype': u'Check',
 		'permlevel': 1
 	}
 ]

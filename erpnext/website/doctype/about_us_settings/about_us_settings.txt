@@ -3,103 +3,103 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-01-27 10:13:16',
+		'creation': '2012-03-27 14:36:47',
 		'docstatus': 0,
-		'modified': '2012-01-27 11:36:44',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-27 14:36:47',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1327641155',
+		'_last_update': u'1327641155',
 		'allow_attach': 1,
-		'colour': 'White:FFF',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
 		'issingle': 1,
 		'max_attachments': 10,
-		'module': 'Website',
+		'module': u'Website',
 		'name': '__common__',
-		'section_style': 'Simple',
+		'section_style': u'Simple',
 		'show_in_menu': 0,
 		'version': 4
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'About Us Settings',
-		'parentfield': 'fields',
-		'parenttype': 'DocType',
+		'parent': u'About Us Settings',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
 		'permlevel': 0
 	},
 
 	# These values are common for all DocPerm
 	{
 		'create': 1,
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'name': '__common__',
-		'parent': 'About Us Settings',
-		'parentfield': 'permissions',
-		'parenttype': 'DocType',
+		'parent': u'About Us Settings',
+		'parentfield': u'permissions',
+		'parenttype': u'DocType',
 		'permlevel': 0,
 		'read': 1,
-		'role': 'Website Manager',
+		'role': u'Website Manager',
 		'write': 1
 	},
 
 	# DocType, About Us Settings
 	{
 		'doctype': 'DocType',
-		'name': 'About Us Settings'
+		'name': u'About Us Settings'
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm'
+		'doctype': u'DocPerm'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'headline',
-		'fieldtype': 'Data',
-		'label': 'Headline'
+		'doctype': u'DocField',
+		'fieldname': u'headline',
+		'fieldtype': u'Data',
+		'label': u'Headline'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'main_section',
-		'fieldtype': 'Code',
-		'label': 'Main Section'
+		'doctype': u'DocField',
+		'fieldname': u'main_section',
+		'fieldtype': u'Code',
+		'label': u'Main Section'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'team',
-		'fieldtype': 'Table',
-		'label': 'Team',
-		'options': 'About Us Team'
+		'doctype': u'DocField',
+		'fieldname': u'team',
+		'fieldtype': u'Table',
+		'label': u'Team',
+		'options': u'About Us Team'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'side_section',
-		'fieldtype': 'Code',
-		'label': 'Side Section'
+		'doctype': u'DocField',
+		'fieldname': u'side_section',
+		'fieldtype': u'Code',
+		'label': u'Side Section'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'file_list',
-		'fieldtype': 'Text',
+		'doctype': u'DocField',
+		'fieldname': u'file_list',
+		'fieldtype': u'Text',
 		'hidden': 1,
-		'label': 'File List',
+		'label': u'File List',
 		'no_copy': 1,
 		'print_hide': 1
 	}

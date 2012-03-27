@@ -3,46 +3,46 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:09:27',
+		'creation': '2012-03-27 14:35:48',
 		'docstatus': 0,
-		'modified': '2010-09-20 14:06:57',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-27 14:35:48',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1302586171',
-		'autoname': 'field:category_name',
-		'colour': 'White:FFF',
+		'_last_update': u'1302586171',
+		'autoname': u'field:category_name',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
-		'document_type': 'Master',
+		'document_type': u'Master',
 		'in_create': 0,
-		'module': 'Accounts',
+		'module': u'Accounts',
 		'name': '__common__',
-		'section_style': 'Simple',
-		'server_code_error': ' ',
+		'section_style': u'Simple',
+		'server_code_error': u' ',
 		'show_in_menu': 0,
 		'version': 8
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'TDS Category',
-		'parentfield': 'fields',
-		'parenttype': 'DocType',
+		'parent': u'TDS Category',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
 		'permlevel': 0
 	},
 
 	# These values are common for all DocPerm
 	{
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'name': '__common__',
-		'parent': 'TDS Category',
-		'parentfield': 'permissions',
-		'parenttype': 'DocType',
+		'parent': u'TDS Category',
+		'parentfield': u'permissions',
+		'parenttype': u'DocType',
 		'permlevel': 0,
 		'read': 1
 	},
@@ -50,7 +50,26 @@
 	# DocType, TDS Category
 	{
 		'doctype': 'DocType',
-		'name': 'TDS Category'
+		'name': u'TDS Category'
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 1,
+		'doctype': u'DocPerm',
+		'role': u'Accounts Manager',
+		'submit': 0,
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'create': 1,
+		'doctype': u'DocPerm',
+		'role': u'System Manager',
+		'write': 1
 	},
 
 	# DocPerm
@@ -58,47 +77,24 @@
 		'amend': 0,
 		'cancel': 0,
 		'create': 0,
-		'doctype': 'DocPerm',
-		'idx': 1,
-		'role': 'Accounts User',
+		'doctype': u'DocPerm',
+		'role': u'Accounts User',
 		'submit': 0,
 		'write': 0
 	},
 
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 1,
-		'doctype': 'DocPerm',
-		'idx': 2,
-		'role': 'Accounts Manager',
-		'submit': 0,
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'create': 1,
-		'doctype': 'DocPerm',
-		'idx': 3,
-		'role': 'System Manager',
-		'write': 1
-	},
-
 	# DocField
 	{
-		'default': 'Accounts',
-		'doctype': 'DocField',
-		'fieldname': 'module',
-		'fieldtype': 'Link',
+		'default': u'Accounts',
+		'doctype': u'DocField',
+		'fieldname': u'module',
+		'fieldtype': u'Link',
 		'hidden': 0,
-		'idx': 1,
 		'in_filter': 0,
-		'label': 'Module',
-		'oldfieldname': 'module',
-		'oldfieldtype': 'Link',
-		'options': 'Module Def',
+		'label': u'Module',
+		'oldfieldname': u'module',
+		'oldfieldtype': u'Link',
+		'options': u'Module Def',
 		'print_hide': 0,
 		'report_hide': 0,
 		'search_index': 0
@@ -106,36 +102,34 @@
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'HTML',
-		'idx': 2,
-		'label': 'Note HTML',
-		'oldfieldtype': 'HTML',
-		'options': '<b>Note:</b> You must first create the Accounts from the Chart of Accounts and then link it to this Category.'
+		'doctype': u'DocField',
+		'fieldname': u'note_html',
+		'fieldtype': u'HTML',
+		'label': u'Note HTML',
+		'oldfieldtype': u'HTML',
+		'options': u'<b>Note:</b> You must first create the Accounts from the Chart of Accounts and then link it to this Category.'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'category_name',
-		'fieldtype': 'Data',
-		'idx': 3,
-		'label': 'Category Name',
-		'oldfieldname': 'category_name',
-		'oldfieldtype': 'Data',
+		'doctype': u'DocField',
+		'fieldname': u'category_name',
+		'fieldtype': u'Data',
+		'label': u'Category Name',
+		'oldfieldname': u'category_name',
+		'oldfieldtype': u'Data',
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'tds_sh_edu_cess_account',
-		'fieldtype': 'Table',
-		'idx': 4,
-		'label': 'TDS Account Detail',
-		'oldfieldname': 'tds_sh_edu_cess_account',
-		'oldfieldtype': 'Table',
-		'options': 'TDS Category Account',
+		'doctype': u'DocField',
+		'fieldname': u'tds_sh_edu_cess_account',
+		'fieldtype': u'Table',
+		'label': u'TDS Account Detail',
+		'oldfieldname': u'tds_sh_edu_cess_account',
+		'oldfieldtype': u'Table',
+		'options': u'TDS Category Account',
 		'reqd': 0
 	}
 ]

@@ -3,48 +3,47 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:09:24',
+		'creation': '2012-03-27 14:36:25',
 		'docstatus': 0,
-		'modified': '2011-07-04 17:10:23',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-27 14:36:25',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'colour': 'White:FFF',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
 		'issingle': 1,
-		'module': 'Setup',
+		'module': u'Setup',
 		'name': '__common__',
-		'section_style': 'Simple',
-		'server_code_error': ' ',
+		'section_style': u'Simple',
+		'server_code_error': u' ',
 		'show_in_menu': 0,
 		'version': 110
 	},
 
 	# These values are common for all DocPerm
 	{
-		'doctype': 'DocPerm',
-		'idx': 1,
+		'doctype': u'DocPerm',
 		'name': '__common__',
-		'parent': 'Setup Wizard Control',
-		'parentfield': 'permissions',
-		'parenttype': 'DocType',
+		'parent': u'Setup Wizard Control',
+		'parentfield': u'permissions',
+		'parenttype': u'DocType',
 		'permlevel': 0,
 		'read': 1,
-		'role': 'All',
+		'role': u'All',
 		'write': 1
 	},
 
 	# DocType, Setup Wizard Control
 	{
 		'doctype': 'DocType',
-		'name': 'Setup Wizard Control'
+		'name': u'Setup Wizard Control'
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm'
+		'doctype': u'DocPerm'
 	}
 ]

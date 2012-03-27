@@ -3,93 +3,89 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:09:26',
+		'creation': '2012-03-27 14:36:25',
 		'docstatus': 0,
-		'modified': '2010-09-20 14:06:57',
-		'modified_by': 'abhishek@webnotestech.com',
-		'owner': 'Administrator'
+		'modified': '2012-03-27 14:36:25',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'colour': 'White:FFF',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
 		'istable': 1,
-		'module': 'Setup',
+		'module': u'Setup',
 		'name': '__common__',
-		'section_style': 'Tray',
-		'server_code_error': ' ',
+		'section_style': u'Tray',
+		'server_code_error': u' ',
 		'show_in_menu': 0,
 		'version': 15
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Target Detail',
-		'parentfield': 'fields',
-		'parenttype': 'DocType',
+		'parent': u'Target Detail',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
 		'permlevel': 0
 	},
 
 	# DocType, Target Detail
 	{
 		'doctype': 'DocType',
-		'name': 'Target Detail'
+		'name': u'Target Detail'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'item_group',
-		'fieldtype': 'Link',
-		'idx': 1,
+		'doctype': u'DocField',
+		'fieldname': u'item_group',
+		'fieldtype': u'Link',
 		'in_filter': 1,
-		'label': 'Item Group',
-		'oldfieldname': 'item_group',
-		'oldfieldtype': 'Link',
-		'options': 'Item Group',
+		'label': u'Item Group',
+		'oldfieldname': u'item_group',
+		'oldfieldtype': u'Link',
+		'options': u'Item Group',
 		'reqd': 0,
 		'search_index': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'fiscal_year',
-		'fieldtype': 'Select',
-		'idx': 2,
+		'doctype': u'DocField',
+		'fieldname': u'fiscal_year',
+		'fieldtype': u'Select',
 		'in_filter': 1,
-		'label': 'Fiscal Year',
-		'oldfieldname': 'fiscal_year',
-		'oldfieldtype': 'Select',
-		'options': 'link:Fiscal Year',
+		'label': u'Fiscal Year',
+		'oldfieldname': u'fiscal_year',
+		'oldfieldtype': u'Select',
+		'options': u'link:Fiscal Year',
 		'reqd': 1,
 		'search_index': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'target_qty',
-		'fieldtype': 'Currency',
-		'idx': 3,
-		'label': 'Target Qty',
-		'oldfieldname': 'target_qty',
-		'oldfieldtype': 'Currency'
+		'doctype': u'DocField',
+		'fieldname': u'target_qty',
+		'fieldtype': u'Currency',
+		'label': u'Target Qty',
+		'oldfieldname': u'target_qty',
+		'oldfieldtype': u'Currency'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'target_amount',
-		'fieldtype': 'Currency',
-		'idx': 4,
+		'doctype': u'DocField',
+		'fieldname': u'target_amount',
+		'fieldtype': u'Currency',
 		'in_filter': 1,
-		'label': 'Target  Amount',
-		'oldfieldname': 'target_amount',
-		'oldfieldtype': 'Currency',
+		'label': u'Target  Amount',
+		'oldfieldname': u'target_amount',
+		'oldfieldtype': u'Currency',
 		'reqd': 0,
 		'search_index': 1
 	}

@@ -3,49 +3,49 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2011-05-24 14:41:08',
+		'creation': '2012-03-27 14:35:44',
 		'docstatus': 0,
-		'modified': '2011-05-24 15:22:43',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-27 14:35:44',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1306229235',
+		'_last_update': u'1306229235',
 		'allow_copy': 1,
 		'allow_email': 1,
 		'allow_print': 1,
-		'colour': 'White:FFF',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
-		'document_type': 'Other',
+		'document_type': u'Other',
 		'hide_heading': 0,
 		'issingle': 1,
-		'module': 'Accounts',
+		'module': u'Accounts',
 		'name': '__common__',
-		'section_style': 'Simple',
+		'section_style': u'Simple',
 		'show_in_menu': 0,
 		'version': 9
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Ledger Balance Export',
-		'parentfield': 'fields',
-		'parenttype': 'DocType',
+		'parent': u'Ledger Balance Export',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
 		'permlevel': 0
 	},
 
 	# These values are common for all DocPerm
 	{
 		'create': 1,
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'name': '__common__',
-		'parent': 'Ledger Balance Export',
-		'parentfield': 'permissions',
-		'parenttype': 'DocType',
+		'parent': u'Ledger Balance Export',
+		'parentfield': u'permissions',
+		'parenttype': u'DocType',
 		'permlevel': 0,
 		'read': 1,
 		'write': 1
@@ -54,76 +54,71 @@
 	# DocType, Ledger Balance Export
 	{
 		'doctype': 'DocType',
-		'name': 'Ledger Balance Export'
+		'name': u'Ledger Balance Export'
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm',
-		'idx': 1,
-		'role': 'Accounts Manager'
+		'doctype': u'DocPerm',
+		'role': u'Accounts Manager'
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm',
-		'idx': 2,
-		'role': 'Accounts User'
+		'doctype': u'DocPerm',
+		'role': u'Accounts User'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Column Break',
-		'idx': 1,
-		'label': 'Select Date Range'
+		'doctype': u'DocField',
+		'fieldname': u'select_date_range',
+		'fieldtype': u'Column Break',
+		'label': u'Select Date Range'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'from_date',
-		'fieldtype': 'Date',
-		'idx': 2,
-		'label': 'From Date',
+		'doctype': u'DocField',
+		'fieldname': u'from_date',
+		'fieldtype': u'Date',
+		'label': u'From Date',
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'to_date',
-		'fieldtype': 'Date',
-		'idx': 3,
-		'label': 'To Date',
+		'doctype': u'DocField',
+		'fieldname': u'to_date',
+		'fieldtype': u'Date',
+		'label': u'To Date',
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Column Break',
-		'idx': 4,
-		'label': 'Select ledgers'
+		'doctype': u'DocField',
+		'fieldname': u'select_ledgers',
+		'fieldtype': u'Column Break',
+		'label': u'Select ledgers'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'ledger_details',
-		'fieldtype': 'Table',
-		'idx': 5,
-		'label': 'Ledger Details',
-		'options': 'Ledger Detail'
+		'doctype': u'DocField',
+		'fieldname': u'ledger_details',
+		'fieldtype': u'Table',
+		'label': u'Ledger Details',
+		'options': u'Ledger Detail'
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldtype': 'Button',
-		'idx': 6,
-		'label': 'Export Report',
-		'trigger': 'Client'
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'export_report',
+		'fieldtype': u'Button',
+		'label': u'Export Report',
+		'trigger': u'Client'
 	}
 ]

@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:09:04',
+		'creation': '2012-03-27 14:36:09',
 		'docstatus': 0,
-		'modified': '2012-03-21 14:08:59',
+		'modified': '2012-03-27 18:48:02',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -17,13 +17,14 @@
 		'colour': u'White:FFF',
 		'default_print_format': u'Standard',
 		'doctype': 'DocType',
+		'is_submittable': 1,
 		'module': u'Selling',
 		'name': '__common__',
 		'section_style': u'Simple',
 		'server_code_error': u' ',
 		'show_in_menu': 0,
 		'subject': u'At %(customer_name)s on %(inst_date)s',
-		'version': 97
+		'version': 98
 	},
 
 	# These values are common for all DocField
@@ -84,13 +85,6 @@
 
 	# DocPerm
 	{
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Sales User'
-	},
-
-	# DocPerm
-	{
 		'amend': 1,
 		'cancel': 1,
 		'create': 1,
@@ -105,12 +99,20 @@
 	{
 		'doctype': u'DocPerm',
 		'permlevel': 1,
+		'role': u'Sales User'
+	},
+
+	# DocPerm
+	{
+		'doctype': u'DocPerm',
+		'permlevel': 1,
 		'role': u'Sales Manager'
 	},
 
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'installation_note',
 		'fieldtype': u'Section Break',
 		'label': u'Installation Note',
 		'oldfieldtype': u'Section Break',
@@ -120,6 +122,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'column_break0',
 		'fieldtype': u'Column Break',
 		'oldfieldtype': u'Column Break',
 		'permlevel': 0,
@@ -257,6 +260,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'column_break1',
 		'fieldtype': u'Column Break',
 		'oldfieldtype': u'Column Break',
 		'permlevel': 0,
@@ -396,6 +400,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'item_details',
 		'fieldtype': u'Section Break',
 		'label': u'Item Details',
 		'oldfieldtype': u'Section Break',
@@ -424,18 +429,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
-		'fieldtype': u'Button',
-		'hidden': 0,
-		'label': u'Get Items',
-		'oldfieldtype': u'Button',
-		'options': u'pull_delivery_note_details',
-		'permlevel': 0,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
+		'fieldname': u'get_items',
 		'fieldtype': u'Button',
 		'hidden': 0,
 		'label': u'Get Items',

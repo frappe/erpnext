@@ -3,33 +3,33 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-09-01 15:48:06',
+		'creation': '2012-03-27 14:35:58',
 		'docstatus': 0,
-		'modified': '2010-09-20 14:06:57',
-		'modified_by': 'Administrator',
-		'owner': 'ashwini@webnotestech.com'
+		'modified': '2012-03-27 14:35:58',
+		'modified_by': u'Administrator',
+		'owner': u'ashwini@webnotestech.com'
 	},
 
 	# These values are common for all DocType
 	{
-		'autoname': 'KSHEET.#####',
-		'colour': 'White:FFF',
+		'autoname': u'KSHEET.#####',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
 		'istable': 1,
-		'module': 'HR',
+		'module': u'HR',
 		'name': '__common__',
-		'section_style': 'Simple',
-		'server_code_error': ' ',
+		'section_style': u'Simple',
+		'server_code_error': u' ',
 		'version': 6
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'KRA Sheet',
-		'parentfield': 'fields',
-		'parenttype': 'DocType',
+		'parent': u'KRA Sheet',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
 		'permlevel': 0,
 		'reqd': 1
 	},
@@ -37,32 +37,30 @@
 	# DocType, KRA Sheet
 	{
 		'doctype': 'DocType',
-		'name': 'KRA Sheet'
+		'name': u'KRA Sheet'
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'description': 'Key Performance Area',
-		'doctype': 'DocField',
-		'fieldname': 'kra',
-		'fieldtype': 'Small Text',
-		'idx': 1,
-		'label': 'KRA',
-		'oldfieldname': 'kra',
-		'oldfieldtype': 'Small Text',
-		'width': '200px'
+		'colour': u'White:FFF',
+		'description': u'Key Performance Area',
+		'doctype': u'DocField',
+		'fieldname': u'kra',
+		'fieldtype': u'Small Text',
+		'label': u'KRA',
+		'oldfieldname': u'kra',
+		'oldfieldtype': u'Small Text',
+		'width': u'200px'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'per_weightage',
-		'fieldtype': 'Currency',
-		'idx': 2,
-		'label': 'Weightage (%)',
-		'oldfieldname': 'per_weightage',
-		'oldfieldtype': 'Currency',
-		'width': '100px'
+		'doctype': u'DocField',
+		'fieldname': u'per_weightage',
+		'fieldtype': u'Currency',
+		'label': u'Weightage (%)',
+		'oldfieldname': u'per_weightage',
+		'oldfieldtype': u'Currency',
+		'width': u'100px'
 	}
 ]

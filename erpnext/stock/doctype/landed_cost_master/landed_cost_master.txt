@@ -3,166 +3,155 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:09:07',
+		'creation': '2012-03-27 14:36:34',
 		'docstatus': 0,
-		'modified': '2010-09-20 14:06:57',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-27 14:36:34',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1309508838',
-		'autoname': 'field:title',
-		'colour': 'White:FFF',
+		'_last_update': u'1309508838',
+		'autoname': u'field:title',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
-		'document_type': 'Master',
-		'module': 'Stock',
+		'document_type': u'Master',
+		'module': u'Stock',
 		'name': '__common__',
-		'section_style': 'Simple',
-		'server_code_error': ' ',
+		'section_style': u'Simple',
+		'server_code_error': u' ',
 		'version': 2
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Landed Cost Master',
-		'parentfield': 'fields',
-		'parenttype': 'DocType'
+		'parent': u'Landed Cost Master',
+		'parentfield': u'fields',
+		'parenttype': u'DocType'
 	},
 
 	# These values are common for all DocPerm
 	{
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'name': '__common__',
-		'parent': 'Landed Cost Master',
-		'parentfield': 'permissions',
-		'parenttype': 'DocType',
+		'parent': u'Landed Cost Master',
+		'parentfield': u'permissions',
+		'parenttype': u'DocType',
 		'read': 1
 	},
 
 	# DocType, Landed Cost Master
 	{
 		'doctype': 'DocType',
-		'name': 'Landed Cost Master'
+		'name': u'Landed Cost Master'
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm',
-		'idx': 1,
+		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'role': 'All'
+		'role': u'All'
 	},
 
 	# DocPerm
 	{
 		'create': 1,
-		'doctype': 'DocPerm',
-		'idx': 2,
+		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'role': 'Purchase Manager',
+		'role': u'Purchase Manager',
 		'write': 1
 	},
 
 	# DocPerm
 	{
 		'create': 1,
-		'doctype': 'DocPerm',
-		'idx': 3,
+		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'role': 'System Manager',
+		'role': u'System Manager',
 		'write': 1
 	},
 
 	# DocPerm
 	{
 		'create': 1,
-		'doctype': 'DocPerm',
-		'idx': 4,
+		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'role': 'Purchase User',
+		'role': u'Purchase User',
 		'write': 1
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm',
-		'idx': 5,
+		'doctype': u'DocPerm',
 		'permlevel': 1,
-		'role': 'All'
+		'role': u'All'
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm',
-		'idx': 6,
+		'doctype': u'DocPerm',
 		'permlevel': 1,
-		'role': 'System Manager'
+		'role': u'System Manager'
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm',
-		'idx': 7,
+		'doctype': u'DocPerm',
 		'permlevel': 1,
-		'role': 'Purchase User'
+		'role': u'Purchase User'
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm',
-		'idx': 8,
+		'doctype': u'DocPerm',
 		'permlevel': 1,
-		'role': 'Purchase Manager'
+		'role': u'Purchase Manager'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'trash_reason',
-		'fieldtype': 'Small Text',
-		'idx': 1,
-		'label': 'Trash Reason',
-		'oldfieldname': 'trash_reason',
-		'oldfieldtype': 'Small Text',
+		'doctype': u'DocField',
+		'fieldname': u'trash_reason',
+		'fieldtype': u'Small Text',
+		'label': u'Trash Reason',
+		'oldfieldname': u'trash_reason',
+		'oldfieldtype': u'Small Text',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'title',
-		'fieldtype': 'Data',
-		'idx': 2,
-		'label': 'Title',
-		'oldfieldname': 'title',
-		'oldfieldtype': 'Data',
+		'doctype': u'DocField',
+		'fieldname': u'title',
+		'fieldtype': u'Data',
+		'label': u'Title',
+		'oldfieldname': u'title',
+		'oldfieldtype': u'Data',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Section Break',
-		'idx': 3,
-		'label': 'Landed Cost Details',
-		'oldfieldtype': 'Section Break',
+		'doctype': u'DocField',
+		'fieldname': u'landed_cost_details',
+		'fieldtype': u'Section Break',
+		'label': u'Landed Cost Details',
+		'oldfieldtype': u'Section Break',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'landed_cost',
-		'fieldtype': 'Table',
-		'idx': 4,
-		'label': 'Landed Cost',
-		'oldfieldname': 'landed_cost',
-		'oldfieldtype': 'Table',
-		'options': 'Landed Cost Master Detail',
+		'doctype': u'DocField',
+		'fieldname': u'landed_cost',
+		'fieldtype': u'Table',
+		'label': u'Landed Cost',
+		'oldfieldname': u'landed_cost',
+		'oldfieldtype': u'Table',
+		'options': u'Landed Cost Master Detail',
 		'permlevel': 0
 	}
 ]

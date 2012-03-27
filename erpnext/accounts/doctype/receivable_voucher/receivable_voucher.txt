@@ -3,20 +3,11 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:09:18',
+		'creation': '2012-03-27 14:35:47',
 		'docstatus': 0,
-		'modified': '2012-03-06 11:05:53',
+		'modified': '2012-03-27 18:44:28',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
-	},
-
-	# These values are common for all DocField
-	{
-		'doctype': u'DocField',
-		'name': '__common__',
-		'parent': u'Receivable Voucher',
-		'parentfield': u'fields',
-		'parenttype': u'DocType'
 	},
 
 	# These values are common for all DocType
@@ -26,6 +17,7 @@
 		'colour': u'White:FFF',
 		'default_print_format': u'Standard',
 		'doctype': 'DocType',
+		'is_submittable': 1,
 		'module': u'Accounts',
 		'name': '__common__',
 		'read_only_onload': 1,
@@ -34,15 +26,15 @@
 		'server_code_error': u' ',
 		'show_in_menu': 0,
 		'subject': u'To %(customer_name)s worth %(currency)s %(grand_total_export)s due on %(due_date)s | %(outstanding_amount)s outstanding',
-		'version': 416
+		'version': 417
 	},
 
-	# These values are common for all DocFormat
+	# These values are common for all DocField
 	{
-		'doctype': u'DocFormat',
+		'doctype': u'DocField',
 		'name': '__common__',
 		'parent': u'Receivable Voucher',
-		'parentfield': u'formats',
+		'parentfield': u'fields',
 		'parenttype': u'DocType'
 	},
 
@@ -64,30 +56,6 @@
 
 	# DocPerm
 	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Accounts Manager',
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'amend': 1,
-		'cancel': 1,
-		'create': 1,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Accounts Manager',
-		'submit': 1,
-		'write': 1
-	},
-
-	# DocPerm
-	{
 		'amend': 1,
 		'cancel': 1,
 		'create': 1,
@@ -116,46 +84,40 @@
 		'cancel': 0,
 		'create': 0,
 		'doctype': u'DocPerm',
-		'match': u'customer',
 		'permlevel': 0,
 		'role': u'Customer',
 		'submit': 0,
 		'write': 0
 	},
 
-	# DocFormat
+	# DocPerm
 	{
-		'doctype': u'DocFormat',
-		'format': u'POS Invoice'
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Accounts Manager',
+		'submit': 0,
+		'write': 0
 	},
 
-	# DocFormat
+	# DocPerm
 	{
-		'doctype': u'DocFormat',
-		'format': u'POS Invoice'
-	},
-
-	# DocFormat
-	{
-		'doctype': u'DocFormat',
-		'format': u'Sales Invoice Classic'
-	},
-
-	# DocFormat
-	{
-		'doctype': u'DocFormat',
-		'format': u'Sales Invoice Modern'
-	},
-
-	# DocFormat
-	{
-		'doctype': u'DocFormat',
-		'format': u'Sales Invoice Spartan'
+		'amend': 1,
+		'cancel': 1,
+		'create': 1,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Accounts Manager',
+		'submit': 1,
+		'write': 1
 	},
 
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'basic_info',
 		'fieldtype': u'Section Break',
 		'label': u'Basic Info',
 		'oldfieldtype': u'Section Break',
@@ -166,6 +128,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'column_break0',
 		'fieldtype': u'Column Break',
 		'oldfieldtype': u'Column Break',
 		'permlevel': 0,
@@ -328,6 +291,7 @@
 	{
 		'colour': u'White:FFF',
 		'doctype': u'DocField',
+		'fieldname': u'column_break1',
 		'fieldtype': u'Column Break',
 		'oldfieldtype': u'Column Break',
 		'permlevel': 0
@@ -454,6 +418,7 @@
 	{
 		'colour': u'White:FFF',
 		'doctype': u'DocField',
+		'fieldname': u'items',
 		'fieldtype': u'Section Break',
 		'label': u'Items',
 		'oldfieldtype': u'Section Break',
@@ -504,6 +469,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'column_break2',
 		'fieldtype': u'Column Break',
 		'permlevel': 0,
 		'width': u'50%'
@@ -572,6 +538,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'get_items',
 		'fieldtype': u'Button',
 		'label': u'Get Items',
 		'oldfieldtype': u'Button',
@@ -583,6 +550,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'section_break0',
 		'fieldtype': u'Section Break',
 		'options': u'Simple',
 		'permlevel': 0
@@ -606,6 +574,7 @@
 	{
 		'colour': u'White:FFF',
 		'doctype': u'DocField',
+		'fieldname': u'recalculate_values',
 		'fieldtype': u'Button',
 		'label': u'Re-Calculate Values',
 		'oldfieldtype': u'Button',
@@ -617,6 +586,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'section_break1',
 		'fieldtype': u'Section Break',
 		'permlevel': 0
 	},
@@ -624,6 +594,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'column_break3',
 		'fieldtype': u'Column Break',
 		'permlevel': 0,
 		'width': u'50%'
@@ -676,6 +647,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'column_break4',
 		'fieldtype': u'Column Break',
 		'permlevel': 0,
 		'width': u'50%'
@@ -722,6 +694,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'taxes',
 		'fieldtype': u'Section Break',
 		'label': u'Taxes',
 		'oldfieldtype': u'Section Break',
@@ -744,6 +717,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'get_charges',
 		'fieldtype': u'Button',
 		'label': u'Get Charges',
 		'oldfieldtype': u'Button',
@@ -769,6 +743,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'calculate_charges',
 		'fieldtype': u'Button',
 		'label': u'Calculate Charges',
 		'oldfieldtype': u'Button',
@@ -792,6 +767,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'other_charges_calculation',
 		'fieldtype': u'HTML',
 		'label': u'Other Charges Calculation',
 		'oldfieldtype': u'HTML',
@@ -803,6 +779,7 @@
 	{
 		'colour': u'White:FFF',
 		'doctype': u'DocField',
+		'fieldname': u'totals',
 		'fieldtype': u'Section Break',
 		'label': u'Totals',
 		'oldfieldtype': u'Section Break',
@@ -814,6 +791,7 @@
 	{
 		'colour': u'White:FFF',
 		'doctype': u'DocField',
+		'fieldname': u'column_break5',
 		'fieldtype': u'Column Break',
 		'oldfieldtype': u'Column Break',
 		'permlevel': 0,
@@ -893,6 +871,7 @@
 	{
 		'colour': u'White:FFF',
 		'doctype': u'DocField',
+		'fieldname': u'column_break6',
 		'fieldtype': u'Column Break',
 		'oldfieldtype': u'Column Break',
 		'permlevel': 0,
@@ -966,6 +945,7 @@
 	{
 		'colour': u'White:FFF',
 		'doctype': u'DocField',
+		'fieldname': u'terms_section_break',
 		'fieldtype': u'Section Break',
 		'label': u'Terms',
 		'oldfieldtype': u'Section Break',
@@ -989,6 +969,7 @@
 	{
 		'colour': u'White:FFF',
 		'doctype': u'DocField',
+		'fieldname': u'get_terms',
 		'fieldtype': u'Button',
 		'label': u'Get Terms',
 		'oldfieldtype': u'Button',
@@ -1002,6 +983,7 @@
 	{
 		'colour': u'White:FFF',
 		'doctype': u'DocField',
+		'fieldname': u'terms_html',
 		'fieldtype': u'HTML',
 		'label': u'Terms HTML',
 		'oldfieldtype': u'HTML',
@@ -1025,6 +1007,7 @@
 	{
 		'colour': u'White:FFF',
 		'doctype': u'DocField',
+		'fieldname': u'more_info',
 		'fieldtype': u'Section Break',
 		'label': u'More Info',
 		'oldfieldtype': u'Section Break',
@@ -1036,6 +1019,7 @@
 	{
 		'colour': u'White:FFF',
 		'doctype': u'DocField',
+		'fieldname': u'column_break7',
 		'fieldtype': u'Column Break',
 		'oldfieldtype': u'Column Break',
 		'permlevel': 0,
@@ -1149,6 +1133,7 @@
 	{
 		'colour': u'White:FFF',
 		'doctype': u'DocField',
+		'fieldname': u'column_break8',
 		'fieldtype': u'Column Break',
 		'oldfieldtype': u'Column Break',
 		'permlevel': 0,
@@ -1252,6 +1237,7 @@
 		'colour': u'White:FFF',
 		'depends_on': u'eval:!doc.is_pos',
 		'doctype': u'DocField',
+		'fieldname': u'advances',
 		'fieldtype': u'Section Break',
 		'label': u'Advances',
 		'oldfieldtype': u'Section Break',
@@ -1262,6 +1248,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'get_advances_received',
 		'fieldtype': u'Button',
 		'label': u'Get Advances Received',
 		'oldfieldtype': u'Button',
@@ -1286,6 +1273,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'sales_team_section_break',
 		'fieldtype': u'Section Break',
 		'label': u'Sales Team',
 		'oldfieldtype': u'Section Break',
@@ -1297,6 +1285,7 @@
 	{
 		'colour': u'White:FFF',
 		'doctype': u'DocField',
+		'fieldname': u'column_break9',
 		'fieldtype': u'Column Break',
 		'oldfieldtype': u'Column Break',
 		'permlevel': 0,
@@ -1323,6 +1312,7 @@
 	{
 		'colour': u'White:FFF',
 		'doctype': u'DocField',
+		'fieldname': u'column_break10',
 		'fieldtype': u'Column Break',
 		'oldfieldtype': u'Column Break',
 		'permlevel': 0,
@@ -1360,6 +1350,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'section_break2',
 		'fieldtype': u'Section Break',
 		'options': u'Simple',
 		'permlevel': 0,
@@ -1383,6 +1374,7 @@
 	{
 		'depends_on': u'eval:doc.docstatus==1',
 		'doctype': u'DocField',
+		'fieldname': u'recurring_invoice',
 		'fieldtype': u'Section Break',
 		'label': u'Recurring Invoice',
 		'permlevel': 0,
@@ -1392,6 +1384,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'column_break11',
 		'fieldtype': u'Column Break',
 		'permlevel': 0,
 		'print_hide': 1,
@@ -1445,6 +1438,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'column_break12',
 		'fieldtype': u'Column Break',
 		'no_copy': 0,
 		'permlevel': 0,
@@ -1511,6 +1505,7 @@
 	{
 		'allow_on_submit': 1,
 		'doctype': u'DocField',
+		'fieldname': u'repair_outstanding_amt',
 		'fieldtype': u'Button',
 		'label': u'Repair Outstanding Amt',
 		'oldfieldtype': u'Button',

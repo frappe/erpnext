@@ -3,133 +3,126 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:09:23',
+		'creation': '2012-03-27 14:36:17',
 		'docstatus': 0,
-		'modified': '2010-11-24 09:09:57',
-		'modified_by': 'nabin@webnotestech.com',
-		'owner': 'Administrator'
+		'modified': '2012-03-27 14:36:17',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'colour': 'White:FFF',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
 		'istable': 1,
-		'module': 'Selling',
+		'module': u'Selling',
 		'name': '__common__',
-		'section_style': 'Tray',
-		'server_code_error': ' ',
+		'section_style': u'Tray',
+		'server_code_error': u' ',
 		'show_in_menu': 0,
 		'version': 5
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Sales Team',
-		'parentfield': 'fields',
-		'parenttype': 'DocType',
+		'parent': u'Sales Team',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
 		'permlevel': 0
 	},
 
 	# DocType, Sales Team
 	{
 		'doctype': 'DocType',
-		'name': 'Sales Team'
+		'name': u'Sales Team'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'sales_person',
-		'fieldtype': 'Link',
-		'idx': 1,
+		'doctype': u'DocField',
+		'fieldname': u'sales_person',
+		'fieldtype': u'Link',
 		'in_filter': 1,
-		'label': 'Sales Person',
-		'oldfieldname': 'sales_person',
-		'oldfieldtype': 'Link',
-		'options': 'Sales Person',
+		'label': u'Sales Person',
+		'oldfieldname': u'sales_person',
+		'oldfieldtype': u'Link',
+		'options': u'Sales Person',
 		'reqd': 1,
 		'search_index': 1,
-		'width': '200px'
+		'width': u'200px'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'sales_designation',
-		'fieldtype': 'Data',
-		'idx': 2,
-		'label': 'Designation',
-		'oldfieldname': 'sales_designation',
-		'oldfieldtype': 'Data',
-		'width': '100px'
+		'doctype': u'DocField',
+		'fieldname': u'sales_designation',
+		'fieldtype': u'Data',
+		'label': u'Designation',
+		'oldfieldname': u'sales_designation',
+		'oldfieldtype': u'Data',
+		'width': u'100px'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'contact_no',
-		'fieldtype': 'Data',
+		'doctype': u'DocField',
+		'fieldname': u'contact_no',
+		'fieldtype': u'Data',
 		'hidden': 1,
-		'idx': 3,
-		'label': 'Contact No.',
-		'oldfieldname': 'contact_no',
-		'oldfieldtype': 'Data',
-		'width': '100px'
+		'label': u'Contact No.',
+		'oldfieldname': u'contact_no',
+		'oldfieldtype': u'Data',
+		'width': u'100px'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'allocated_percentage',
-		'fieldtype': 'Currency',
-		'idx': 4,
-		'label': 'Allocated (%)',
-		'oldfieldname': 'allocated_percentage',
-		'oldfieldtype': 'Currency',
+		'doctype': u'DocField',
+		'fieldname': u'allocated_percentage',
+		'fieldtype': u'Currency',
+		'label': u'Allocated (%)',
+		'oldfieldname': u'allocated_percentage',
+		'oldfieldtype': u'Currency',
 		'reqd': 0,
-		'trigger': 'Client',
-		'width': '100px'
+		'trigger': u'Client',
+		'width': u'100px'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'allocated_amount',
-		'fieldtype': 'Currency',
-		'idx': 5,
-		'label': 'Allocated Amount',
-		'oldfieldname': 'allocated_amount',
-		'oldfieldtype': 'Currency',
+		'doctype': u'DocField',
+		'fieldname': u'allocated_amount',
+		'fieldtype': u'Currency',
+		'label': u'Allocated Amount',
+		'oldfieldname': u'allocated_amount',
+		'oldfieldtype': u'Currency',
 		'reqd': 0,
-		'width': '120px'
+		'width': u'120px'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'parenttype',
-		'fieldtype': 'Data',
+		'doctype': u'DocField',
+		'fieldname': u'parenttype',
+		'fieldtype': u'Data',
 		'hidden': 1,
-		'idx': 6,
 		'in_filter': 1,
-		'label': 'Parenttype',
-		'oldfieldname': 'parenttype',
-		'oldfieldtype': 'Data',
+		'label': u'Parenttype',
+		'oldfieldname': u'parenttype',
+		'oldfieldtype': u'Data',
 		'print_hide': 1,
 		'search_index': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'incentives',
-		'fieldtype': 'Currency',
-		'idx': 7,
-		'label': 'Incentives',
-		'oldfieldname': 'incentives',
-		'oldfieldtype': 'Currency'
+		'doctype': u'DocField',
+		'fieldname': u'incentives',
+		'fieldtype': u'Currency',
+		'label': u'Incentives',
+		'oldfieldname': u'incentives',
+		'oldfieldtype': u'Currency'
 	}
 ]

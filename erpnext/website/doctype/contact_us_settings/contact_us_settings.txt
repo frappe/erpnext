@@ -3,45 +3,45 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-01-25 16:01:33',
+		'creation': '2012-03-27 14:36:47',
 		'docstatus': 0,
-		'modified': '2012-01-25 16:01:33',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-27 14:36:47',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'colour': 'White:FFF',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
-		'document_type': 'Other',
+		'document_type': u'Other',
 		'issingle': 1,
-		'module': 'Website',
+		'module': u'Website',
 		'name': '__common__',
-		'section_style': 'Simple',
+		'section_style': u'Simple',
 		'show_in_menu': 0,
 		'version': 1
 	},
 
 	# These values are common for all DocField
 	{
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Contact Us Settings',
-		'parentfield': 'fields',
-		'parenttype': 'DocType',
+		'parent': u'Contact Us Settings',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
 		'permlevel': 0
 	},
 
 	# These values are common for all DocPerm
 	{
 		'create': 1,
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'name': '__common__',
-		'parent': 'Contact Us Settings',
-		'parentfield': 'permissions',
-		'parenttype': 'DocType',
+		'parent': u'Contact Us Settings',
+		'parentfield': u'permissions',
+		'parenttype': u'DocType',
 		'permlevel': 0,
 		'read': 1,
 		'write': 1
@@ -50,51 +50,51 @@
 	# DocType, Contact Us Settings
 	{
 		'doctype': 'DocType',
-		'name': 'Contact Us Settings'
+		'name': u'Contact Us Settings'
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm',
-		'role': 'Website Manager'
+		'doctype': u'DocPerm',
+		'role': u'Website Manager'
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm',
-		'role': 'System Manager'
+		'doctype': u'DocPerm',
+		'role': u'System Manager'
 	},
 
 	# DocField
 	{
-		'default': 'Contact Us',
-		'doctype': 'DocField',
-		'fieldname': 'headline',
-		'fieldtype': 'Data',
-		'label': 'Headline'
+		'default': u'Contact Us',
+		'doctype': u'DocField',
+		'fieldname': u'headline',
+		'fieldtype': u'Data',
+		'label': u'Headline'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'send_email_notification',
-		'fieldtype': 'Check',
-		'label': 'Send Email Notification'
+		'doctype': u'DocField',
+		'fieldname': u'send_email_notification',
+		'fieldtype': u'Check',
+		'label': u'Send Email Notification'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'main_section',
-		'fieldtype': 'Code',
-		'label': 'Main Section'
+		'doctype': u'DocField',
+		'fieldname': u'main_section',
+		'fieldtype': u'Code',
+		'label': u'Main Section'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'side_section',
-		'fieldtype': 'Code',
-		'label': 'Side Section'
+		'doctype': u'DocField',
+		'fieldname': u'side_section',
+		'fieldtype': u'Code',
+		'label': u'Side Section'
 	}
 ]

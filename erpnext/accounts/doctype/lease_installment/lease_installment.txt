@@ -3,89 +3,84 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2011-07-22 17:49:33',
+		'creation': '2012-03-27 14:35:44',
 		'docstatus': 0,
-		'modified': '2011-07-22 17:49:33',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-27 14:35:44',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'colour': 'White:FFF',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
 		'istable': 1,
-		'module': 'Accounts',
+		'module': u'Accounts',
 		'name': '__common__',
-		'section_style': 'Simple',
+		'section_style': u'Simple',
 		'show_in_menu': 0,
 		'version': 5
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Lease Installment',
-		'parentfield': 'fields',
-		'parenttype': 'DocType'
+		'parent': u'Lease Installment',
+		'parentfield': u'fields',
+		'parenttype': u'DocType'
 	},
 
 	# DocType, Lease Installment
 	{
 		'doctype': 'DocType',
-		'name': 'Lease Installment'
+		'name': u'Lease Installment'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'amount',
-		'fieldtype': 'Currency',
-		'idx': 1,
-		'label': 'Amount',
+		'doctype': u'DocField',
+		'fieldname': u'amount',
+		'fieldtype': u'Currency',
+		'label': u'Amount',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'due_date',
-		'fieldtype': 'Date',
-		'idx': 2,
-		'label': 'Due Date',
+		'doctype': u'DocField',
+		'fieldname': u'due_date',
+		'fieldtype': u'Date',
+		'label': u'Due Date',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'cheque_number',
-		'fieldtype': 'Data',
-		'idx': 3,
-		'label': 'Cheque Number',
+		'doctype': u'DocField',
+		'fieldname': u'cheque_number',
+		'fieldtype': u'Data',
+		'label': u'Cheque Number',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'cheque_date',
-		'fieldtype': 'Date',
-		'idx': 4,
-		'label': 'Cheque Date',
+		'doctype': u'DocField',
+		'fieldname': u'cheque_date',
+		'fieldtype': u'Date',
+		'label': u'Cheque Date',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'jv_number',
-		'fieldtype': 'Link',
+		'doctype': u'DocField',
+		'fieldname': u'jv_number',
+		'fieldtype': u'Link',
 		'hidden': 0,
-		'idx': 5,
-		'label': 'JV Number',
-		'options': 'Journal Voucher',
+		'label': u'JV Number',
+		'options': u'Journal Voucher',
 		'permlevel': 1
 	}
 ]

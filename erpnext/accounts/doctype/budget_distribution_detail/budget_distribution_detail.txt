@@ -3,76 +3,73 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:08:54',
+		'creation': '2012-03-27 14:35:41',
 		'docstatus': 0,
-		'modified': '2010-09-20 14:06:57',
-		'modified_by': 'umair@iwebnotes.com',
-		'owner': 'Administrator'
+		'modified': '2012-03-27 14:35:41',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'autoname': 'BDD/.#####',
-		'colour': 'White:FFF',
+		'autoname': u'BDD/.#####',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
 		'istable': 1,
-		'module': 'Accounts',
+		'module': u'Accounts',
 		'name': '__common__',
-		'section_style': 'Tray',
-		'server_code_error': ' ',
+		'section_style': u'Tray',
+		'server_code_error': u' ',
 		'show_in_menu': 0,
 		'version': 6
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Budget Distribution Detail',
-		'parentfield': 'fields',
-		'parenttype': 'DocType'
+		'parent': u'Budget Distribution Detail',
+		'parentfield': u'fields',
+		'parenttype': u'DocType'
 	},
 
 	# DocType, Budget Distribution Detail
 	{
 		'doctype': 'DocType',
-		'name': 'Budget Distribution Detail'
+		'name': u'Budget Distribution Detail'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'month',
-		'fieldtype': 'Data',
-		'idx': 1,
-		'label': 'Month',
-		'oldfieldname': 'month',
-		'oldfieldtype': 'Data',
+		'doctype': u'DocField',
+		'fieldname': u'month',
+		'fieldtype': u'Data',
+		'label': u'Month',
+		'oldfieldname': u'month',
+		'oldfieldtype': u'Data',
 		'permlevel': 2,
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'percentage_allocation',
-		'fieldtype': 'Currency',
-		'idx': 2,
-		'label': 'Percentage Allocation',
-		'oldfieldname': 'percentage_allocation',
-		'oldfieldtype': 'Currency',
+		'doctype': u'DocField',
+		'fieldname': u'percentage_allocation',
+		'fieldtype': u'Currency',
+		'label': u'Percentage Allocation',
+		'oldfieldname': u'percentage_allocation',
+		'oldfieldtype': u'Currency',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'aggregate_percentage',
-		'fieldtype': 'Currency',
-		'idx': 3,
-		'label': 'Aggregate Percentage',
-		'oldfieldname': 'aggregate_percentage',
-		'oldfieldtype': 'Currency',
+		'doctype': u'DocField',
+		'fieldname': u'aggregate_percentage',
+		'fieldtype': u'Currency',
+		'label': u'Aggregate Percentage',
+		'oldfieldname': u'aggregate_percentage',
+		'oldfieldtype': u'Currency',
 		'permlevel': 2
 	}
 ]

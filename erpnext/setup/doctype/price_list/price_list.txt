@@ -3,47 +3,47 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:09:13',
+		'creation': '2012-03-27 14:36:22',
 		'docstatus': 0,
-		'modified': '2011-04-18 10:01:48',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-27 14:36:22',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1303100817',
+		'_last_update': u'1303100817',
 		'allow_attach': 1,
 		'allow_trash': 1,
-		'autoname': 'field:price_list_name',
-		'colour': 'White:FFF',
+		'autoname': u'field:price_list_name',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
-		'document_type': 'Master',
-		'module': 'Setup',
+		'document_type': u'Master',
+		'module': u'Setup',
 		'name': '__common__',
-		'section_style': 'Simple',
-		'server_code_error': ' ',
+		'section_style': u'Simple',
+		'server_code_error': u' ',
 		'show_in_menu': 0,
 		'version': 6
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Price List',
-		'parentfield': 'fields',
-		'parenttype': 'DocType'
+		'parent': u'Price List',
+		'parentfield': u'fields',
+		'parenttype': u'DocType'
 	},
 
 	# These values are common for all DocPerm
 	{
 		'amend': 0,
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'name': '__common__',
-		'parent': 'Price List',
-		'parentfield': 'permissions',
-		'parenttype': 'DocType',
+		'parent': u'Price List',
+		'parentfield': u'permissions',
+		'parenttype': u'DocType',
 		'read': 1,
 		'submit': 0
 	},
@@ -51,135 +51,127 @@
 	# DocType, Price List
 	{
 		'doctype': 'DocType',
-		'name': 'Price List'
-	},
-
-	# DocPerm
-	{
-		'cancel': 0,
-		'create': 0,
-		'doctype': 'DocPerm',
-		'idx': 1,
-		'permlevel': 1,
-		'role': 'Sales Manager',
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'cancel': 0,
-		'create': 0,
-		'doctype': 'DocPerm',
-		'idx': 2,
-		'permlevel': 0,
-		'role': 'Sales Manager',
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'cancel': 0,
-		'create': 0,
-		'doctype': 'DocPerm',
-		'idx': 3,
-		'permlevel': 1,
-		'role': 'Sales User',
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'cancel': 0,
-		'create': 0,
-		'doctype': 'DocPerm',
-		'idx': 4,
-		'permlevel': 0,
-		'role': 'Sales User',
-		'write': 0
+		'name': u'Price List'
 	},
 
 	# DocPerm
 	{
 		'cancel': 1,
 		'create': 1,
-		'doctype': 'DocPerm',
-		'idx': 5,
+		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'role': 'Sales Master Manager',
+		'role': u'Sales Master Manager',
 		'write': 1
+	},
+
+	# DocPerm
+	{
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Sales Manager',
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Sales Manager',
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Sales User',
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Sales User',
+		'write': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'trash_reason',
-		'fieldtype': 'Small Text',
-		'idx': 1,
-		'label': 'Trash Reason',
-		'oldfieldname': 'trash_reason',
-		'oldfieldtype': 'Small Text',
+		'doctype': u'DocField',
+		'fieldname': u'trash_reason',
+		'fieldtype': u'Small Text',
+		'label': u'Trash Reason',
+		'oldfieldname': u'trash_reason',
+		'oldfieldtype': u'Small Text',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'price_list_name',
-		'fieldtype': 'Data',
-		'idx': 2,
-		'label': 'Price List Name',
-		'oldfieldname': 'price_list_name',
-		'oldfieldtype': 'Data',
+		'doctype': u'DocField',
+		'fieldname': u'price_list_name',
+		'fieldtype': u'Data',
+		'label': u'Price List Name',
+		'oldfieldname': u'price_list_name',
+		'oldfieldtype': u'Data',
 		'permlevel': 0,
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'depends_on': 'eval:!doc.__islocal',
-		'doctype': 'DocField',
-		'fieldtype': 'HTML',
-		'idx': 3,
-		'label': 'Price Help',
+		'colour': u'White:FFF',
+		'depends_on': u'eval:!doc.__islocal',
+		'doctype': u'DocField',
+		'fieldname': u'price_help',
+		'fieldtype': u'HTML',
+		'label': u'Price Help',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'depends_on': 'eval:!doc.__islocal',
-		'description': 'Click on this button to clear prices for this list in all items',
-		'doctype': 'DocField',
-		'fieldtype': 'Button',
-		'idx': 4,
-		'label': 'Clear Prices',
+		'colour': u'White:FFF',
+		'depends_on': u'eval:!doc.__islocal',
+		'description': u'Click on this button to clear prices for this list in all items',
+		'doctype': u'DocField',
+		'fieldname': u'clear_prices',
+		'fieldtype': u'Button',
+		'label': u'Clear Prices',
 		'permlevel': 0,
-		'trigger': 'Client'
+		'trigger': u'Client'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'file_list',
-		'fieldtype': 'Text',
+		'doctype': u'DocField',
+		'fieldname': u'file_list',
+		'fieldtype': u'Text',
 		'hidden': 1,
-		'idx': 5,
-		'label': 'File List',
+		'label': u'File List',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'depends_on': 'eval:!doc.__islocal',
-		'description': 'Update prices from the attachment',
-		'doctype': 'DocField',
-		'fieldtype': 'Button',
-		'idx': 6,
-		'label': 'Update Prices',
-		'options': 'update_prices',
+		'colour': u'White:FFF',
+		'depends_on': u'eval:!doc.__islocal',
+		'description': u'Update prices from the attachment',
+		'doctype': u'DocField',
+		'fieldname': u'update_prices',
+		'fieldtype': u'Button',
+		'label': u'Update Prices',
+		'options': u'update_prices',
 		'permlevel': 0,
-		'trigger': 'Server'
+		'trigger': u'Server'
 	}
 ]

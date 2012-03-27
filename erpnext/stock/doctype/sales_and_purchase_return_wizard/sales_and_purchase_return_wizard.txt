@@ -3,65 +3,61 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:09:21',
+		'creation': '2012-03-27 14:36:36',
 		'docstatus': 0,
-		'modified': '2011-02-23 19:09:18',
-		'modified_by': 'Administrator',
-		'owner': 'wasim@webnotestech.com'
+		'modified': '2012-03-27 14:36:36',
+		'modified_by': u'Administrator',
+		'owner': u'wasim@webnotestech.com'
 	},
 
 	# These values are common for all DocType
 	{
-		'colour': 'White:FFF',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
 		'is_transaction_doc': 0,
 		'issingle': 1,
 		'istable': 0,
 		'menu_index': 1,
-		'module': 'Stock',
+		'module': u'Stock',
 		'name': '__common__',
-		'parent_node': 'Materials',
-		'section_style': 'Simple',
-		'server_code_error': ' ',
+		'parent_node': u'Materials',
+		'section_style': u'Simple',
+		'server_code_error': u' ',
 		'show_in_menu': 1,
 		'version': 46
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Sales and Purchase Return Wizard',
-		'parentfield': 'fields',
-		'parenttype': 'DocType'
+		'parent': u'Sales and Purchase Return Wizard',
+		'parentfield': u'fields',
+		'parenttype': u'DocType'
 	},
 
 	# These values are common for all DocPerm
 	{
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'name': '__common__',
-		'parent': 'Sales and Purchase Return Wizard',
-		'parentfield': 'permissions',
-		'parenttype': 'DocType',
+		'parent': u'Sales and Purchase Return Wizard',
+		'parentfield': u'permissions',
+		'parenttype': u'DocType',
 		'read': 1
 	},
 
 	# DocType, Sales and Purchase Return Wizard
 	{
 		'doctype': 'DocType',
-		'name': 'Sales and Purchase Return Wizard'
+		'name': u'Sales and Purchase Return Wizard'
 	},
 
 	# DocPerm
 	{
-		'amend': 0,
-		'cancel': 0,
 		'create': 1,
-		'doctype': 'DocPerm',
-		'idx': 1,
+		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'role': 'Material User',
-		'submit': 0,
+		'role': u'All',
 		'write': 1
 	},
 
@@ -69,11 +65,137 @@
 	{
 		'amend': 0,
 		'cancel': 0,
-		'create': 0,
-		'doctype': 'DocPerm',
-		'idx': 2,
+		'create': 1,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'System Manager',
+		'submit': 0,
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'doctype': u'DocPerm',
 		'permlevel': 1,
-		'role': 'Material User',
+		'role': u'All'
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'System Manager',
+		'submit': 0,
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Accounts Manager'
+	},
+
+	# DocPerm
+	{
+		'create': 1,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Purchase Manager',
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'create': 1,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Purchase User',
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'create': 1,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Sales Manager',
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'create': 1,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Sales User',
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'create': 1,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Accounts User',
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'create': 1,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Accounts Manager',
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Accounts User'
+	},
+
+	# DocPerm
+	{
+		'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Sales User'
+	},
+
+	# DocPerm
+	{
+		'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Sales Manager'
+	},
+
+	# DocPerm
+	{
+		'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Purchase User'
+	},
+
+	# DocPerm
+	{
+		'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Purchase Manager'
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Material Manager',
 		'submit': 0,
 		'write': 0
 	},
@@ -83,10 +205,9 @@
 		'amend': 0,
 		'cancel': 0,
 		'create': 1,
-		'doctype': 'DocPerm',
-		'idx': 3,
+		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'role': 'Material Manager',
+		'role': u'Material Manager',
 		'submit': 0,
 		'write': 1
 	},
@@ -96,22 +217,11 @@
 		'amend': 0,
 		'cancel': 0,
 		'create': 0,
-		'doctype': 'DocPerm',
-		'idx': 4,
+		'doctype': u'DocPerm',
 		'permlevel': 1,
-		'role': 'Material Manager',
+		'role': u'Material User',
 		'submit': 0,
 		'write': 0
-	},
-
-	# DocPerm
-	{
-		'create': 1,
-		'doctype': 'DocPerm',
-		'idx': 5,
-		'permlevel': 0,
-		'role': 'All',
-		'write': 1
 	},
 
 	# DocPerm
@@ -119,325 +229,186 @@
 		'amend': 0,
 		'cancel': 0,
 		'create': 1,
-		'doctype': 'DocPerm',
-		'idx': 6,
+		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'role': 'System Manager',
+		'role': u'Material User',
 		'submit': 0,
 		'write': 1
-	},
-
-	# DocPerm
-	{
-		'create': 1,
-		'doctype': 'DocPerm',
-		'idx': 7,
-		'permlevel': 0,
-		'role': 'Accounts Manager',
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'create': 1,
-		'doctype': 'DocPerm',
-		'idx': 8,
-		'permlevel': 0,
-		'role': 'Accounts User',
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'create': 1,
-		'doctype': 'DocPerm',
-		'idx': 9,
-		'permlevel': 0,
-		'role': 'Sales User',
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'create': 1,
-		'doctype': 'DocPerm',
-		'idx': 10,
-		'permlevel': 0,
-		'role': 'Sales Manager',
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'create': 1,
-		'doctype': 'DocPerm',
-		'idx': 11,
-		'permlevel': 0,
-		'role': 'Purchase User',
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'create': 1,
-		'doctype': 'DocPerm',
-		'idx': 12,
-		'permlevel': 0,
-		'role': 'Purchase Manager',
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'doctype': 'DocPerm',
-		'idx': 13,
-		'permlevel': 1,
-		'role': 'All'
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		'doctype': 'DocPerm',
-		'idx': 14,
-		'permlevel': 1,
-		'role': 'System Manager',
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'doctype': 'DocPerm',
-		'idx': 15,
-		'permlevel': 1,
-		'role': 'Accounts Manager'
-	},
-
-	# DocPerm
-	{
-		'doctype': 'DocPerm',
-		'idx': 16,
-		'permlevel': 1,
-		'role': 'Accounts User'
-	},
-
-	# DocPerm
-	{
-		'doctype': 'DocPerm',
-		'idx': 17,
-		'permlevel': 1,
-		'role': 'Sales User'
-	},
-
-	# DocPerm
-	{
-		'doctype': 'DocPerm',
-		'idx': 18,
-		'permlevel': 1,
-		'role': 'Sales Manager'
-	},
-
-	# DocPerm
-	{
-		'doctype': 'DocPerm',
-		'idx': 19,
-		'permlevel': 1,
-		'role': 'Purchase User'
-	},
-
-	# DocPerm
-	{
-		'doctype': 'DocPerm',
-		'idx': 20,
-		'permlevel': 1,
-		'role': 'Purchase Manager'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'return_date',
-		'fieldtype': 'Date',
-		'idx': 1,
-		'label': 'Return Date',
+		'doctype': u'DocField',
+		'fieldname': u'return_date',
+		'fieldtype': u'Date',
+		'label': u'Return Date',
 		'no_copy': 1,
-		'oldfieldname': 'return_date',
-		'oldfieldtype': 'Date',
+		'oldfieldname': u'return_date',
+		'oldfieldtype': u'Date',
 		'permlevel': 0,
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'return_type',
-		'fieldtype': 'Select',
-		'idx': 2,
-		'label': 'Return Type',
+		'doctype': u'DocField',
+		'fieldname': u'return_type',
+		'fieldtype': u'Select',
+		'label': u'Return Type',
 		'no_copy': 1,
-		'oldfieldname': 'return_type',
-		'oldfieldtype': 'Select',
-		'options': '\nSales Return\nPurchase Return',
+		'oldfieldname': u'return_type',
+		'oldfieldtype': u'Select',
+		'options': u'\nSales Return\nPurchase Return',
 		'permlevel': 0,
 		'reqd': 1,
-		'trigger': 'Client'
+		'trigger': u'Client'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'delivery_note_no',
-		'fieldtype': 'Link',
+		'doctype': u'DocField',
+		'fieldname': u'delivery_note_no',
+		'fieldtype': u'Link',
 		'hidden': 1,
-		'idx': 3,
-		'label': 'Delivery Note No',
+		'label': u'Delivery Note No',
 		'no_copy': 1,
-		'oldfieldname': 'delivery_note_no',
-		'oldfieldtype': 'Link',
-		'options': 'Delivery Note',
+		'oldfieldname': u'delivery_note_no',
+		'oldfieldtype': u'Link',
+		'options': u'Delivery Note',
 		'permlevel': 0,
 		'reqd': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'sales_invoice_no',
-		'fieldtype': 'Link',
+		'doctype': u'DocField',
+		'fieldname': u'sales_invoice_no',
+		'fieldtype': u'Link',
 		'hidden': 1,
-		'idx': 4,
-		'label': 'Sales Invoice No',
-		'options': 'Receivable Voucher',
+		'label': u'Sales Invoice No',
+		'options': u'Receivable Voucher',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'purchase_receipt_no',
-		'fieldtype': 'Link',
+		'doctype': u'DocField',
+		'fieldname': u'purchase_receipt_no',
+		'fieldtype': u'Link',
 		'hidden': 1,
-		'idx': 5,
-		'label': 'Purchase Receipt No',
+		'label': u'Purchase Receipt No',
 		'no_copy': 1,
-		'oldfieldname': 'purchase_receipt_no',
-		'oldfieldtype': 'Link',
-		'options': 'Purchase Receipt',
+		'oldfieldname': u'purchase_receipt_no',
+		'oldfieldtype': u'Link',
+		'options': u'Purchase Receipt',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'cust_supp',
-		'fieldtype': 'Data',
+		'doctype': u'DocField',
+		'fieldname': u'cust_supp',
+		'fieldtype': u'Data',
 		'hidden': 1,
-		'idx': 6,
-		'label': 'Customer/Supplier',
+		'label': u'Customer/Supplier',
 		'permlevel': 1,
 		'print_hide': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'cust_supp_name',
-		'fieldtype': 'Data',
+		'doctype': u'DocField',
+		'fieldname': u'cust_supp_name',
+		'fieldtype': u'Data',
 		'hidden': 1,
-		'idx': 7,
-		'label': 'Cust/Supp Name',
+		'label': u'Cust/Supp Name',
 		'permlevel': 1,
 		'print_hide': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'cust_supp_address',
-		'fieldtype': 'Small Text',
+		'doctype': u'DocField',
+		'fieldname': u'cust_supp_address',
+		'fieldtype': u'Small Text',
 		'hidden': 1,
-		'idx': 8,
-		'label': 'Cust/Supp Address',
+		'label': u'Cust/Supp Address',
 		'permlevel': 1,
 		'print_hide': 1
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldtype': 'Button',
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'get_items',
+		'fieldtype': u'Button',
 		'hidden': 1,
-		'idx': 9,
-		'label': 'Get Items',
-		'oldfieldtype': 'Button',
+		'label': u'Get Items',
+		'oldfieldtype': u'Button',
 		'permlevel': 0,
-		'trigger': 'Client'
+		'trigger': u'Client'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'return_details',
-		'fieldtype': 'Table',
+		'doctype': u'DocField',
+		'fieldname': u'return_details',
+		'fieldtype': u'Table',
 		'hidden': 1,
-		'idx': 10,
-		'label': 'Return Details',
+		'label': u'Return Details',
 		'no_copy': 1,
-		'oldfieldname': 'return_details',
-		'oldfieldtype': 'Table',
-		'options': 'Return Detail',
+		'oldfieldname': u'return_details',
+		'oldfieldtype': u'Table',
+		'options': u'Return Detail',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Button',
+		'doctype': u'DocField',
+		'fieldname': u'make_stock_entry',
+		'fieldtype': u'Button',
 		'hidden': 1,
-		'idx': 11,
-		'label': 'Make Stock Entry',
-		'oldfieldtype': 'Button',
+		'label': u'Make Stock Entry',
+		'oldfieldtype': u'Button',
 		'permlevel': 0,
-		'trigger': 'Client'
+		'trigger': u'Client'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Button',
+		'doctype': u'DocField',
+		'fieldname': u'make_excise_invoice',
+		'fieldtype': u'Button',
 		'hidden': 1,
-		'idx': 12,
-		'label': 'Make Excise Invoice',
-		'oldfieldtype': 'Button',
+		'label': u'Make Excise Invoice',
+		'oldfieldtype': u'Button',
 		'permlevel': 0,
-		'trigger': 'Client'
+		'trigger': u'Client'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Button',
+		'doctype': u'DocField',
+		'fieldname': u'make_credit_note',
+		'fieldtype': u'Button',
 		'hidden': 1,
-		'idx': 13,
-		'label': 'Make Credit Note',
-		'oldfieldtype': 'Button',
+		'label': u'Make Credit Note',
+		'oldfieldtype': u'Button',
 		'permlevel': 0,
-		'trigger': 'Client'
+		'trigger': u'Client'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Button',
+		'doctype': u'DocField',
+		'fieldname': u'make_debit_note',
+		'fieldtype': u'Button',
 		'hidden': 1,
-		'idx': 14,
-		'label': 'Make Debit Note',
-		'oldfieldtype': 'Button',
+		'label': u'Make Debit Note',
+		'oldfieldtype': u'Button',
 		'permlevel': 0,
-		'trigger': 'Client'
+		'trigger': u'Client'
 	}
 ]

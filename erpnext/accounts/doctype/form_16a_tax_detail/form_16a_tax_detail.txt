@@ -3,148 +3,138 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:09:02',
+		'creation': '2012-03-27 14:35:42',
 		'docstatus': 0,
-		'modified': '2010-09-27 16:53:54',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-27 14:35:42',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'colour': 'White:FFF',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
 		'istable': 1,
-		'module': 'Accounts',
+		'module': u'Accounts',
 		'name': '__common__',
-		'section_style': 'Tray',
+		'section_style': u'Tray',
 		'show_in_menu': 0,
 		'version': 1
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Form 16A Tax Detail',
-		'parentfield': 'fields',
-		'parenttype': 'DocType',
+		'parent': u'Form 16A Tax Detail',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
 		'permlevel': 0
 	},
 
 	# DocType, Form 16A Tax Detail
 	{
 		'doctype': 'DocType',
-		'name': 'Form 16A Tax Detail'
+		'name': u'Form 16A Tax Detail'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'amount_paid',
-		'fieldtype': 'Currency',
-		'idx': 1,
-		'label': 'Amount paid / credited',
-		'oldfieldname': 'amount_paid',
-		'oldfieldtype': 'Currency'
+		'doctype': u'DocField',
+		'fieldname': u'amount_paid',
+		'fieldtype': u'Currency',
+		'label': u'Amount paid / credited',
+		'oldfieldname': u'amount_paid',
+		'oldfieldtype': u'Currency'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'date_of_payment',
-		'fieldtype': 'Date',
-		'idx': 2,
-		'label': 'Date of payment / credit',
-		'oldfieldname': 'date_of_payment',
-		'oldfieldtype': 'Date'
+		'doctype': u'DocField',
+		'fieldname': u'date_of_payment',
+		'fieldtype': u'Date',
+		'label': u'Date of payment / credit',
+		'oldfieldname': u'date_of_payment',
+		'oldfieldtype': u'Date'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'tds_main',
-		'fieldtype': 'Currency',
-		'idx': 3,
-		'label': 'TDS(Main)',
-		'oldfieldname': 'tds_main',
-		'oldfieldtype': 'Currency'
+		'doctype': u'DocField',
+		'fieldname': u'tds_main',
+		'fieldtype': u'Currency',
+		'label': u'TDS(Main)',
+		'oldfieldname': u'tds_main',
+		'oldfieldtype': u'Currency'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'surcharge',
-		'fieldtype': 'Currency',
-		'idx': 4,
-		'label': 'Surcharge',
-		'oldfieldname': 'surcharge',
-		'oldfieldtype': 'Currency'
+		'doctype': u'DocField',
+		'fieldname': u'surcharge',
+		'fieldtype': u'Currency',
+		'label': u'Surcharge',
+		'oldfieldname': u'surcharge',
+		'oldfieldtype': u'Currency'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'cess_on_tds',
-		'fieldtype': 'Currency',
-		'idx': 5,
-		'label': 'Cess on TDS',
-		'oldfieldname': 'cess_on_tds',
-		'oldfieldtype': 'Currency'
+		'doctype': u'DocField',
+		'fieldname': u'cess_on_tds',
+		'fieldtype': u'Currency',
+		'label': u'Cess on TDS',
+		'oldfieldname': u'cess_on_tds',
+		'oldfieldtype': u'Currency'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'total_tax_deposited',
-		'fieldtype': 'Currency',
-		'idx': 8,
-		'label': 'Total Tax Deposited',
-		'oldfieldname': 'total_tax_deposited',
-		'oldfieldtype': 'Currency'
+		'doctype': u'DocField',
+		'fieldname': u'total_tax_deposited',
+		'fieldtype': u'Currency',
+		'label': u'Total Tax Deposited',
+		'oldfieldname': u'total_tax_deposited',
+		'oldfieldtype': u'Currency'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'cheque_no',
-		'fieldtype': 'Data',
-		'idx': 9,
-		'label': 'Cheque / DD No.',
-		'oldfieldname': 'cheque_no',
-		'oldfieldtype': 'Data'
+		'doctype': u'DocField',
+		'fieldname': u'cheque_no',
+		'fieldtype': u'Data',
+		'label': u'Cheque / DD No.',
+		'oldfieldname': u'cheque_no',
+		'oldfieldtype': u'Data'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'bsr_code',
-		'fieldtype': 'Data',
-		'idx': 10,
-		'label': 'BSR Code',
-		'oldfieldname': 'bsr_code',
-		'oldfieldtype': 'Data'
+		'doctype': u'DocField',
+		'fieldname': u'bsr_code',
+		'fieldtype': u'Data',
+		'label': u'BSR Code',
+		'oldfieldname': u'bsr_code',
+		'oldfieldtype': u'Data'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'tax_deposited_date',
-		'fieldtype': 'Date',
-		'idx': 11,
-		'label': 'Tax Deposited Date',
-		'oldfieldname': 'tax_deposited_date',
-		'oldfieldtype': 'Date'
+		'doctype': u'DocField',
+		'fieldname': u'tax_deposited_date',
+		'fieldtype': u'Date',
+		'label': u'Tax Deposited Date',
+		'oldfieldname': u'tax_deposited_date',
+		'oldfieldtype': u'Date'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'challan_no',
-		'fieldtype': 'Data',
-		'idx': 12,
-		'label': 'Challan No.',
-		'oldfieldname': 'challan_no',
-		'oldfieldtype': 'Data'
+		'doctype': u'DocField',
+		'fieldname': u'challan_no',
+		'fieldtype': u'Data',
+		'label': u'Challan No.',
+		'oldfieldname': u'challan_no',
+		'oldfieldtype': u'Data'
 	}
 ]

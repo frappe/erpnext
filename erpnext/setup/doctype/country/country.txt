@@ -3,42 +3,41 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:08:56',
+		'creation': '2012-03-27 14:36:19',
 		'docstatus': 0,
-		'modified': '2010-09-20 14:06:57',
-		'modified_by': 'yogesh@webnotestech.com',
-		'owner': 'Administrator'
+		'modified': '2012-03-27 14:36:19',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'autoname': 'field:country_name',
-		'colour': 'White:FFF',
+		'autoname': u'field:country_name',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
-		'document_type': 'Master',
+		'document_type': u'Master',
 		'in_create': 0,
-		'module': 'Setup',
+		'module': u'Setup',
 		'name': '__common__',
 		'read_only': 0,
-		'section_style': 'Simple',
-		'server_code_error': ' ',
+		'section_style': u'Simple',
+		'server_code_error': u' ',
 		'show_in_menu': 0,
 		'version': 11
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'country_name',
-		'fieldtype': 'Data',
-		'idx': 1,
-		'label': 'Country Name',
+		'doctype': u'DocField',
+		'fieldname': u'country_name',
+		'fieldtype': u'Data',
+		'label': u'Country Name',
 		'name': '__common__',
-		'oldfieldname': 'country_name',
-		'oldfieldtype': 'Data',
-		'parent': 'Country',
-		'parentfield': 'fields',
-		'parenttype': 'DocType',
+		'oldfieldname': u'country_name',
+		'oldfieldtype': u'Data',
+		'parent': u'Country',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
 		'permlevel': 0,
 		'reqd': 1
 	},
@@ -46,11 +45,11 @@
 	# These values are common for all DocPerm
 	{
 		'create': 1,
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'name': '__common__',
-		'parent': 'Country',
-		'parentfield': 'permissions',
-		'parenttype': 'DocType',
+		'parent': u'Country',
+		'parentfield': u'permissions',
+		'parenttype': u'DocType',
 		'permlevel': 0,
 		'read': 1,
 		'write': 1
@@ -59,42 +58,38 @@
 	# DocType, Country
 	{
 		'doctype': 'DocType',
-		'name': 'Country'
+		'name': u'Country'
 	},
 
 	# DocPerm
 	{
 		'amend': 0,
 		'cancel': 0,
-		'doctype': 'DocPerm',
-		'idx': 1,
-		'role': 'Sales Master Manager',
+		'doctype': u'DocPerm',
+		'role': u'Sales Master Manager',
 		'submit': 0
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm',
-		'idx': 2,
-		'role': 'Purchase Master Manager'
+		'doctype': u'DocPerm',
+		'role': u'Purchase Master Manager'
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm',
-		'idx': 3,
-		'role': 'HR User'
+		'doctype': u'DocPerm',
+		'role': u'HR User'
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm',
-		'idx': 4,
-		'role': 'HR Manager'
+		'doctype': u'DocPerm',
+		'role': u'HR Manager'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField'
+		'doctype': u'DocField'
 	}
 ]

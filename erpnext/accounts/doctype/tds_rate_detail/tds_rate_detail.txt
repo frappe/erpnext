@@ -3,86 +3,82 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:09:27',
+		'creation': '2012-03-27 14:35:49',
 		'docstatus': 0,
-		'modified': '2010-09-20 14:06:57',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-27 14:35:49',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'colour': 'White:FFF',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
 		'istable': 1,
-		'module': 'Accounts',
+		'module': u'Accounts',
 		'name': '__common__',
-		'section_style': 'Tray',
-		'server_code_error': ' ',
+		'section_style': u'Tray',
+		'server_code_error': u' ',
 		'show_in_menu': 0,
 		'version': 7
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'TDS Rate Detail',
-		'parentfield': 'fields',
-		'parenttype': 'DocType',
+		'parent': u'TDS Rate Detail',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
 		'permlevel': 0
 	},
 
 	# DocType, TDS Rate Detail
 	{
 		'doctype': 'DocType',
-		'name': 'TDS Rate Detail'
+		'name': u'TDS Rate Detail'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'category',
-		'fieldtype': 'Link',
-		'idx': 1,
-		'label': 'Category',
-		'oldfieldname': 'category',
-		'oldfieldtype': 'Link',
-		'options': 'TDS Category',
-		'width': '200px'
+		'doctype': u'DocField',
+		'fieldname': u'category',
+		'fieldtype': u'Link',
+		'label': u'Category',
+		'oldfieldname': u'category',
+		'oldfieldtype': u'Link',
+		'options': u'TDS Category',
+		'width': u'200px'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'slab_from',
-		'fieldtype': 'Currency',
-		'idx': 2,
-		'label': 'Slab From',
-		'oldfieldname': 'slab_from',
-		'oldfieldtype': 'Currency'
+		'doctype': u'DocField',
+		'fieldname': u'slab_from',
+		'fieldtype': u'Currency',
+		'label': u'Slab From',
+		'oldfieldname': u'slab_from',
+		'oldfieldtype': u'Currency'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'rate',
-		'fieldtype': 'Currency',
-		'idx': 3,
-		'label': 'Rate',
-		'oldfieldname': 'rate',
-		'oldfieldtype': 'Currency',
-		'width': '50px'
+		'doctype': u'DocField',
+		'fieldname': u'rate',
+		'fieldtype': u'Currency',
+		'label': u'Rate',
+		'oldfieldname': u'rate',
+		'oldfieldtype': u'Currency',
+		'width': u'50px'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'rate_without_pan',
-		'fieldtype': 'Currency',
-		'idx': 4,
-		'label': 'Rate without PAN',
-		'oldfieldname': 'rate_without_pan',
-		'oldfieldtype': 'Currency'
+		'doctype': u'DocField',
+		'fieldname': u'rate_without_pan',
+		'fieldtype': u'Currency',
+		'label': u'Rate without PAN',
+		'oldfieldname': u'rate_without_pan',
+		'oldfieldtype': u'Currency'
 	}
 ]

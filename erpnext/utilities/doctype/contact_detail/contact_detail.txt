@@ -3,96 +3,91 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:08:56',
+		'creation': '2012-03-27 14:36:46',
 		'docstatus': 0,
-		'modified': '2010-09-20 14:06:57',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-27 14:36:46',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'autoname': 'CD/.#####',
-		'colour': 'White:FFF',
+		'autoname': u'CD/.#####',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
 		'istable': 1,
-		'module': 'Utilities',
+		'module': u'Utilities',
 		'name': '__common__',
-		'section_style': 'Tray',
+		'section_style': u'Tray',
 		'show_in_menu': 0,
 		'version': 5
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Contact Detail',
-		'parentfield': 'fields',
-		'parenttype': 'DocType',
+		'parent': u'Contact Detail',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
 		'permlevel': 0
 	},
 
 	# DocType, Contact Detail
 	{
 		'doctype': 'DocType',
-		'name': 'Contact Detail'
+		'name': u'Contact Detail'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'contact_person',
-		'fieldtype': 'Data',
-		'idx': 1,
-		'label': 'Contact Person',
-		'oldfieldname': 'contact_person',
-		'oldfieldtype': 'Data',
+		'doctype': u'DocField',
+		'fieldname': u'contact_person',
+		'fieldtype': u'Data',
+		'label': u'Contact Person',
+		'oldfieldname': u'contact_person',
+		'oldfieldtype': u'Data',
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'contact_no',
-		'fieldtype': 'Data',
-		'idx': 2,
-		'label': 'Contact No',
-		'oldfieldname': 'contact_no',
-		'oldfieldtype': 'Data',
+		'doctype': u'DocField',
+		'fieldname': u'contact_no',
+		'fieldtype': u'Data',
+		'label': u'Contact No',
+		'oldfieldname': u'contact_no',
+		'oldfieldtype': u'Data',
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'department',
-		'fieldtype': 'Data',
-		'idx': 3,
-		'label': 'Department',
-		'oldfieldname': 'department',
-		'oldfieldtype': 'Data'
+		'doctype': u'DocField',
+		'fieldname': u'department',
+		'fieldtype': u'Data',
+		'label': u'Department',
+		'oldfieldname': u'department',
+		'oldfieldtype': u'Data'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'designation',
-		'fieldtype': 'Data',
-		'idx': 4,
-		'label': 'Designation',
-		'oldfieldname': 'designation',
-		'oldfieldtype': 'Data'
+		'doctype': u'DocField',
+		'fieldname': u'designation',
+		'fieldtype': u'Data',
+		'label': u'Designation',
+		'oldfieldname': u'designation',
+		'oldfieldtype': u'Data'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'email_id',
-		'fieldtype': 'Small Text',
-		'idx': 5,
-		'label': 'Email Id',
-		'oldfieldname': 'email_id',
-		'oldfieldtype': 'Small Text'
+		'doctype': u'DocField',
+		'fieldname': u'email_id',
+		'fieldtype': u'Small Text',
+		'label': u'Email Id',
+		'oldfieldname': u'email_id',
+		'oldfieldtype': u'Small Text'
 	}
 ]

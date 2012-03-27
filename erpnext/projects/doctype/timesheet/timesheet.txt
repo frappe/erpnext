@@ -3,50 +3,52 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-12-14 10:23:29',
+		'creation': '2012-03-27 14:36:07',
 		'docstatus': 0,
-		'modified': '2011-02-23 11:22:29',
-		'modified_by': 'Administrator',
-		'owner': 'ashwini@webnotestech.com'
+		'modified': '2012-03-27 18:47:10',
+		'modified_by': u'Administrator',
+		'owner': u'ashwini@webnotestech.com'
 	},
 
 	# These values are common for all DocType
 	{
-		'autoname': 'TimeSheet.#####',
-		'colour': 'White:FFF',
+		'autoname': u'TimeSheet.#####',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
-		'module': 'Projects',
+		'is_submittable': 1,
+		'module': u'Projects',
 		'name': '__common__',
-		'search_fields': 'status, owner, timesheet_date',
-		'section_style': 'Simple',
-		'server_code_error': ' ',
-		'subject': '%(owner)s',
-		'version': 68
+		'search_fields': u'status, owner, timesheet_date',
+		'section_style': u'Simple',
+		'server_code_error': u' ',
+		'show_in_menu': 0,
+		'subject': u'%(owner)s',
+		'version': 69
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Timesheet',
-		'parentfield': 'fields',
-		'parenttype': 'DocType'
+		'parent': u'Timesheet',
+		'parentfield': u'fields',
+		'parenttype': u'DocType'
 	},
 
 	# These values are common for all DocPerm
 	{
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'name': '__common__',
-		'parent': 'Timesheet',
-		'parentfield': 'permissions',
-		'parenttype': 'DocType',
+		'parent': u'Timesheet',
+		'parentfield': u'permissions',
+		'parenttype': u'DocType',
 		'read': 1
 	},
 
 	# DocType, Timesheet
 	{
 		'doctype': 'DocType',
-		'name': 'Timesheet'
+		'name': u'Timesheet'
 	},
 
 	# DocPerm
@@ -54,18 +56,18 @@
 		'amend': 1,
 		'cancel': 1,
 		'create': 1,
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'role': 'Projects User',
+		'role': u'Projects User',
 		'submit': 1,
 		'write': 1
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'permlevel': 1,
-		'role': 'Projects User'
+		'role': u'Projects User'
 	},
 
 	# DocPerm
@@ -73,44 +75,41 @@
 		'amend': 1,
 		'cancel': 1,
 		'create': 1,
-		'doctype': 'DocPerm',
-		'idx': 1,
+		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'role': 'System Manager',
+		'role': u'System Manager',
 		'submit': 1,
 		'write': 1
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm',
-		'idx': 2,
+		'doctype': u'DocPerm',
 		'permlevel': 1,
-		'role': 'System Manager'
+		'role': u'System Manager'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Section Break',
-		'idx': 1,
-		'label': 'Timesheet Details',
+		'doctype': u'DocField',
+		'fieldname': u'timesheet_details_section_break',
+		'fieldtype': u'Section Break',
+		'label': u'Timesheet Details',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'default': 'Draft',
-		'doctype': 'DocField',
-		'fieldname': 'status',
-		'fieldtype': 'Select',
-		'idx': 2,
+		'colour': u'White:FFF',
+		'default': u'Draft',
+		'doctype': u'DocField',
+		'fieldname': u'status',
+		'fieldtype': u'Select',
 		'in_filter': 0,
-		'label': 'Status',
-		'oldfieldname': 'status',
-		'oldfieldtype': 'Select',
-		'options': '\nDraft\nSubmitted\nCancelled',
+		'label': u'Status',
+		'oldfieldname': u'status',
+		'oldfieldtype': u'Select',
+		'options': u'\nDraft\nSubmitted\nCancelled',
 		'permlevel': 1,
 		'reqd': 1,
 		'search_index': 1
@@ -118,16 +117,15 @@
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'default': 'Today',
-		'doctype': 'DocField',
-		'fieldname': 'timesheet_date',
-		'fieldtype': 'Date',
-		'idx': 3,
+		'colour': u'White:FFF',
+		'default': u'Today',
+		'doctype': u'DocField',
+		'fieldname': u'timesheet_date',
+		'fieldtype': u'Date',
 		'in_filter': 1,
-		'label': 'Timesheet Date',
-		'oldfieldname': 'timesheet_date',
-		'oldfieldtype': 'Date',
+		'label': u'Timesheet Date',
+		'oldfieldname': u'timesheet_date',
+		'oldfieldtype': u'Date',
 		'permlevel': 0,
 		'reqd': 1,
 		'search_index': 1
@@ -135,15 +133,14 @@
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'owner',
-		'fieldtype': 'Link',
-		'idx': 4,
+		'doctype': u'DocField',
+		'fieldname': u'owner',
+		'fieldtype': u'Link',
 		'in_filter': 1,
-		'label': 'Timesheet By',
-		'oldfieldname': 'owner',
-		'oldfieldtype': 'Link',
-		'options': 'Profile',
+		'label': u'Timesheet By',
+		'oldfieldname': u'owner',
+		'oldfieldtype': u'Link',
+		'options': u'Profile',
 		'permlevel': 0,
 		'reqd': 1,
 		'search_index': 0
@@ -151,69 +148,65 @@
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'amended_from',
-		'fieldtype': 'Data',
+		'doctype': u'DocField',
+		'fieldname': u'amended_from',
+		'fieldtype': u'Data',
 		'hidden': 1,
-		'idx': 5,
-		'label': 'Amended From',
-		'oldfieldname': 'amended_from',
-		'oldfieldtype': 'Data',
+		'label': u'Amended From',
+		'oldfieldname': u'amended_from',
+		'oldfieldtype': u'Data',
 		'permlevel': 1,
 		'print_hide': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'amendment_date',
-		'fieldtype': 'Date',
+		'doctype': u'DocField',
+		'fieldname': u'amendment_date',
+		'fieldtype': u'Date',
 		'hidden': 1,
-		'idx': 6,
-		'label': 'Amendment Date',
-		'oldfieldname': 'amendment_date',
-		'oldfieldtype': 'Date',
+		'label': u'Amendment Date',
+		'oldfieldname': u'amendment_date',
+		'oldfieldtype': u'Date',
 		'permlevel': 1,
 		'print_hide': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Column Break',
-		'idx': 7,
+		'doctype': u'DocField',
+		'fieldname': u'column_break0',
+		'fieldtype': u'Column Break',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'notes',
-		'fieldtype': 'Text',
-		'idx': 8,
-		'label': 'Notes',
+		'doctype': u'DocField',
+		'fieldname': u'notes',
+		'fieldtype': u'Text',
+		'label': u'Notes',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Section Break',
-		'idx': 9,
-		'options': 'Simple',
+		'doctype': u'DocField',
+		'fieldname': u'section_break0',
+		'fieldtype': u'Section Break',
+		'options': u'Simple',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'timesheet_details',
-		'fieldtype': 'Table',
-		'idx': 10,
-		'label': 'Timesheet Details',
-		'oldfieldname': 'timesheet_details',
-		'oldfieldtype': 'Table',
-		'options': 'Timesheet Detail',
+		'doctype': u'DocField',
+		'fieldname': u'timesheet_details',
+		'fieldtype': u'Table',
+		'label': u'Timesheet Details',
+		'oldfieldname': u'timesheet_details',
+		'oldfieldtype': u'Table',
+		'options': u'Timesheet Detail',
 		'permlevel': 0
 	}
 ]

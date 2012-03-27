@@ -3,191 +3,179 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2011-03-23 10:39:45',
+		'creation': '2012-03-27 14:36:17',
 		'docstatus': 0,
-		'modified': '2011-03-24 10:39:09',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-27 14:36:17',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
 		'allow_trash': 1,
-		'autoname': 'SA.#####',
-		'colour': 'White:FFF',
+		'autoname': u'SA.#####',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
-		'document_type': 'Master',
-		'module': 'Selling',
+		'document_type': u'Master',
+		'module': u'Selling',
 		'name': '__common__',
-		'search_fields': 'customer, ship_to, shipping_address',
-		'section_style': 'Simple',
+		'search_fields': u'customer, ship_to, shipping_address',
+		'section_style': u'Simple',
 		'show_in_menu': 0,
 		'version': 8
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Shipping Address',
-		'parentfield': 'fields',
-		'parenttype': 'DocType'
+		'parent': u'Shipping Address',
+		'parentfield': u'fields',
+		'parenttype': u'DocType'
 	},
 
 	# These values are common for all DocPerm
 	{
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'name': '__common__',
-		'parent': 'Shipping Address',
-		'parentfield': 'permissions',
-		'parenttype': 'DocType',
+		'parent': u'Shipping Address',
+		'parentfield': u'permissions',
+		'parenttype': u'DocType',
 		'read': 1
 	},
 
 	# DocType, Shipping Address
 	{
 		'doctype': 'DocType',
-		'name': 'Shipping Address'
+		'name': u'Shipping Address'
 	},
 
 	# DocPerm
 	{
 		'cancel': 1,
 		'create': 1,
-		'doctype': 'DocPerm',
-		'idx': 1,
+		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'role': 'Sales Master Manager',
+		'role': u'Sales Master Manager',
 		'write': 1
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm',
-		'idx': 2,
+		'doctype': u'DocPerm',
 		'permlevel': 1,
-		'role': 'Sales Master Manager'
+		'role': u'Sales Master Manager'
 	},
 
 	# DocPerm
 	{
 		'cancel': 1,
 		'create': 1,
-		'doctype': 'DocPerm',
-		'idx': 3,
+		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'role': 'Sales Manager',
+		'role': u'Sales Manager',
 		'write': 1
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm',
-		'idx': 4,
+		'doctype': u'DocPerm',
 		'permlevel': 1,
-		'role': 'Sales Manager'
+		'role': u'Sales Manager'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Column Break',
-		'idx': 1,
+		'doctype': u'DocField',
+		'fieldname': u'column_break0',
+		'fieldtype': u'Column Break',
 		'permlevel': 0,
-		'width': '50%'
+		'width': u'50%'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'customer',
-		'fieldtype': 'Link',
-		'idx': 2,
-		'label': 'Customer',
-		'options': 'Customer',
+		'doctype': u'DocField',
+		'fieldname': u'customer',
+		'fieldtype': u'Link',
+		'label': u'Customer',
+		'options': u'Customer',
 		'permlevel': 0,
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'customer_name',
-		'fieldtype': 'Data',
-		'idx': 3,
-		'label': 'Customer Name',
+		'doctype': u'DocField',
+		'fieldname': u'customer_name',
+		'fieldtype': u'Data',
+		'label': u'Customer Name',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'customer_address',
-		'fieldtype': 'Text',
-		'idx': 4,
-		'label': 'Customer Address',
+		'doctype': u'DocField',
+		'fieldname': u'customer_address',
+		'fieldtype': u'Text',
+		'label': u'Customer Address',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'ship_to',
-		'fieldtype': 'Data',
-		'idx': 5,
-		'label': 'Ship To',
+		'doctype': u'DocField',
+		'fieldname': u'ship_to',
+		'fieldtype': u'Data',
+		'label': u'Ship To',
 		'permlevel': 0,
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'shipping_address',
-		'fieldtype': 'Text',
-		'idx': 6,
-		'label': 'Shipping Address',
+		'doctype': u'DocField',
+		'fieldname': u'shipping_address',
+		'fieldtype': u'Text',
+		'label': u'Shipping Address',
 		'permlevel': 0,
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Column Break',
-		'idx': 7,
+		'doctype': u'DocField',
+		'fieldname': u'column_break1',
+		'fieldtype': u'Column Break',
 		'permlevel': 0,
-		'width': '50%'
+		'width': u'50%'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'is_primary_address',
-		'fieldtype': 'Select',
-		'idx': 8,
-		'label': 'Is Primary Address',
-		'options': 'Yes\nNo',
+		'doctype': u'DocField',
+		'fieldname': u'is_primary_address',
+		'fieldtype': u'Select',
+		'label': u'Is Primary Address',
+		'options': u'Yes\nNo',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'shipping_details',
-		'fieldtype': 'Text Editor',
-		'idx': 9,
-		'label': 'Shipping Details',
+		'doctype': u'DocField',
+		'fieldname': u'shipping_details',
+		'fieldtype': u'Text Editor',
+		'label': u'Shipping Details',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'trash_reason',
-		'fieldtype': 'Small Text',
-		'idx': 10,
-		'label': 'Trash Reason',
+		'doctype': u'DocField',
+		'fieldname': u'trash_reason',
+		'fieldtype': u'Small Text',
+		'label': u'Trash Reason',
 		'permlevel': 1
 	}
 ]

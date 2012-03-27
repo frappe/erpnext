@@ -3,100 +3,96 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2011-06-27 10:52:02',
+		'creation': '2012-03-27 14:36:47',
 		'docstatus': 0,
-		'modified': '2011-07-26 00:59:27',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-27 14:36:47',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1308739509',
+		'_last_update': u'1308739509',
 		'allow_email': 1,
 		'allow_print': 1,
-		'colour': 'White:FFF',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
 		'hide_heading': 0,
 		'hide_toolbar': 0,
 		'issingle': 1,
-		'module': 'Utilities',
+		'module': u'Utilities',
 		'name': '__common__',
-		'section_style': 'Simple',
+		'section_style': u'Simple',
 		'show_in_menu': 0,
 		'version': 7
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Rename Tool',
-		'parentfield': 'fields',
-		'parenttype': 'DocType',
+		'parent': u'Rename Tool',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
 		'permlevel': 0
 	},
 
 	# These values are common for all DocPerm
 	{
 		'create': 1,
-		'doctype': 'DocPerm',
-		'idx': 1,
+		'doctype': u'DocPerm',
 		'name': '__common__',
-		'parent': 'Rename Tool',
-		'parentfield': 'permissions',
-		'parenttype': 'DocType',
+		'parent': u'Rename Tool',
+		'parentfield': u'permissions',
+		'parenttype': u'DocType',
 		'permlevel': 0,
 		'read': 1,
-		'role': 'System Manager',
+		'role': u'System Manager',
 		'write': 1
 	},
 
 	# DocType, Rename Tool
 	{
 		'doctype': 'DocType',
-		'name': 'Rename Tool'
+		'name': u'Rename Tool'
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm'
+		'doctype': u'DocPerm'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'select_doctype',
-		'fieldtype': 'Select',
-		'idx': 1,
-		'label': 'Select DocType',
-		'options': '\nAccount\nCompany\nCustomer\nSupplier\nEmployee\nWarehouse\nItem'
+		'doctype': u'DocField',
+		'fieldname': u'select_doctype',
+		'fieldtype': u'Select',
+		'label': u'Select DocType',
+		'options': u'\nAccount\nCompany\nCustomer\nSupplier\nEmployee\nWarehouse\nItem'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'document_to_rename',
-		'fieldtype': 'Link',
-		'idx': 2,
-		'label': 'Document to rename'
+		'doctype': u'DocField',
+		'fieldname': u'document_to_rename',
+		'fieldtype': u'Link',
+		'label': u'Document to rename'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'new_name',
-		'fieldtype': 'Data',
-		'idx': 3,
-		'label': 'New Name'
+		'doctype': u'DocField',
+		'fieldname': u'new_name',
+		'fieldtype': u'Data',
+		'label': u'New Name'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Button',
-		'idx': 4,
-		'label': 'Rename',
-		'options': 'rename'
+		'doctype': u'DocField',
+		'fieldname': u'rename',
+		'fieldtype': u'Button',
+		'label': u'Rename',
+		'options': u'rename'
 	}
 ]

@@ -3,50 +3,49 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:09:13',
+		'creation': '2012-03-27 14:36:04',
 		'docstatus': 0,
-		'modified': '2010-09-20 14:06:57',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-27 14:36:04',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'autoname': 'PPWD/.#######',
-		'colour': 'White:FFF',
+		'autoname': u'PPWD/.#######',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
-		'module': 'Production',
+		'module': u'Production',
 		'name': '__common__',
-		'section_style': 'Simple',
+		'section_style': u'Simple',
 		'show_in_menu': 0,
 		'version': 1
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'warehouse',
-		'fieldtype': 'Link',
-		'idx': 1,
-		'label': 'Warehouse',
+		'doctype': u'DocField',
+		'fieldname': u'warehouse',
+		'fieldtype': u'Link',
+		'label': u'Warehouse',
 		'name': '__common__',
-		'oldfieldname': 'warehouse',
-		'oldfieldtype': 'Link',
-		'options': 'Warehouse',
-		'parent': 'PPW Detail',
-		'parentfield': 'fields',
-		'parenttype': 'DocType',
+		'oldfieldname': u'warehouse',
+		'oldfieldtype': u'Link',
+		'options': u'Warehouse',
+		'parent': u'PPW Detail',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
 		'permlevel': 0
 	},
 
 	# DocType, PPW Detail
 	{
 		'doctype': 'DocType',
-		'name': 'PPW Detail'
+		'name': u'PPW Detail'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField'
+		'doctype': u'DocField'
 	}
 ]

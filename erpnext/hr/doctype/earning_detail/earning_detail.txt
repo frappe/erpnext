@@ -3,78 +3,75 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:08:59',
+		'creation': '2012-03-27 14:35:54',
 		'docstatus': 0,
-		'modified': '2011-02-09 13:02:55',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-27 14:35:54',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'colour': 'White:FFF',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
 		'hide_heading': 0,
 		'hide_toolbar': 0,
 		'istable': 1,
-		'module': 'HR',
+		'module': u'HR',
 		'name': '__common__',
-		'section_style': 'Simple',
-		'server_code_error': ' ',
+		'section_style': u'Simple',
+		'server_code_error': u' ',
 		'show_in_menu': 0,
 		'version': 26
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Earning Detail',
-		'parentfield': 'fields',
-		'parenttype': 'DocType',
+		'parent': u'Earning Detail',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
 		'permlevel': 0
 	},
 
 	# DocType, Earning Detail
 	{
 		'doctype': 'DocType',
-		'name': 'Earning Detail'
+		'name': u'Earning Detail'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'e_type',
-		'fieldtype': 'Link',
-		'idx': 1,
-		'label': 'Type',
-		'oldfieldname': 'e_type',
-		'oldfieldtype': 'Data',
-		'options': 'Earning Type',
+		'doctype': u'DocField',
+		'fieldname': u'e_type',
+		'fieldtype': u'Link',
+		'label': u'Type',
+		'oldfieldname': u'e_type',
+		'oldfieldtype': u'Data',
+		'options': u'Earning Type',
 		'reqd': 1,
-		'width': '200px'
+		'width': u'200px'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'modified_value',
-		'fieldtype': 'Currency',
-		'idx': 2,
-		'label': 'Amount',
-		'oldfieldname': 'modified_value',
-		'oldfieldtype': 'Currency',
-		'trigger': 'Client'
+		'doctype': u'DocField',
+		'fieldname': u'modified_value',
+		'fieldtype': u'Currency',
+		'label': u'Amount',
+		'oldfieldname': u'modified_value',
+		'oldfieldtype': u'Currency',
+		'trigger': u'Client'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'depend_on_lwp',
-		'fieldtype': 'Check',
-		'idx': 3,
-		'label': 'Depend on LWP',
-		'oldfieldname': 'depend_on_lwp',
-		'oldfieldtype': 'Check'
+		'doctype': u'DocField',
+		'fieldname': u'depend_on_lwp',
+		'fieldtype': u'Check',
+		'label': u'Depend on LWP',
+		'oldfieldname': u'depend_on_lwp',
+		'oldfieldtype': u'Check'
 	}
 ]

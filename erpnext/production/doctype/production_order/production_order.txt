@@ -3,51 +3,52 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:09:14',
+		'creation': '2012-03-27 14:36:05',
 		'docstatus': 0,
-		'modified': '2012-01-11 17:36:23',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-27 14:45:50',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1325837006',
-		'colour': 'White:FFF',
-		'default_print_format': 'Standard',
+		'_last_update': u'1325837006',
+		'colour': u'White:FFF',
+		'default_print_format': u'Standard',
 		'doctype': 'DocType',
 		'in_create': 0,
-		'module': 'Production',
+		'is_submittable': 1,
+		'module': u'Production',
 		'name': '__common__',
-		'section_style': 'Tabbed',
-		'server_code_error': ' ',
+		'section_style': u'Tabbed',
+		'server_code_error': u' ',
 		'show_in_menu': 0,
 		'version': 190
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Production Order',
-		'parentfield': 'fields',
-		'parenttype': 'DocType'
+		'parent': u'Production Order',
+		'parentfield': u'fields',
+		'parenttype': u'DocType'
 	},
 
 	# These values are common for all DocPerm
 	{
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'name': '__common__',
-		'parent': 'Production Order',
-		'parentfield': 'permissions',
-		'parenttype': 'DocType',
+		'parent': u'Production Order',
+		'parentfield': u'permissions',
+		'parenttype': u'DocType',
 		'read': 1
 	},
 
 	# DocType, Production Order
 	{
 		'doctype': 'DocType',
-		'name': 'Production Order'
+		'name': u'Production Order'
 	},
 
 	# DocPerm
@@ -55,18 +56,18 @@
 		'amend': 1,
 		'cancel': 1,
 		'create': 1,
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'role': 'System Manager',
+		'role': u'System Manager',
 		'submit': 1,
 		'write': 1
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'permlevel': 1,
-		'role': 'All'
+		'role': u'All'
 	},
 
 	# DocPerm
@@ -74,9 +75,9 @@
 		'amend': 1,
 		'cancel': 1,
 		'create': 1,
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'role': 'Production Manager',
+		'role': u'Production Manager',
 		'submit': 1,
 		'write': 1
 	},
@@ -86,227 +87,229 @@
 		'amend': 1,
 		'cancel': 1,
 		'create': 1,
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'role': 'Production User',
+		'role': u'Production User',
 		'submit': 1,
 		'write': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Column Break',
+		'doctype': u'DocField',
+		'fieldname': u'column_break0',
+		'fieldtype': u'Column Break',
 		'permlevel': 0,
-		'width': '50%'
+		'width': u'50%'
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'description': 'Item for which this Production Order is raised.',
-		'doctype': 'DocField',
-		'fieldname': 'production_item',
-		'fieldtype': 'Link',
+		'colour': u'White:FFF',
+		'description': u'Item for which this Production Order is raised.',
+		'doctype': u'DocField',
+		'fieldname': u'production_item',
+		'fieldtype': u'Link',
 		'in_filter': 1,
-		'label': 'Production Item',
-		'oldfieldname': 'production_item',
-		'oldfieldtype': 'Link',
-		'options': 'Item',
+		'label': u'Production Item',
+		'oldfieldname': u'production_item',
+		'oldfieldtype': u'Link',
+		'options': u'Item',
 		'permlevel': 1,
 		'reqd': 1,
-		'trigger': 'Client'
+		'trigger': u'Client'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'description',
-		'fieldtype': 'Text',
-		'label': 'Description',
-		'oldfieldname': 'description',
-		'oldfieldtype': 'Text',
+		'doctype': u'DocField',
+		'fieldname': u'description',
+		'fieldtype': u'Text',
+		'label': u'Description',
+		'oldfieldname': u'description',
+		'oldfieldtype': u'Text',
 		'permlevel': 0,
-		'width': '300px'
+		'width': u'300px'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'stock_uom',
-		'fieldtype': 'Data',
-		'label': 'Stock UOM',
-		'oldfieldname': 'stock_uom',
-		'oldfieldtype': 'Data',
+		'doctype': u'DocField',
+		'fieldname': u'stock_uom',
+		'fieldtype': u'Data',
+		'label': u'Stock UOM',
+		'oldfieldname': u'stock_uom',
+		'oldfieldtype': u'Data',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'description': 'Bill of Material which was considered for manufacturing the production item.',
-		'doctype': 'DocField',
-		'fieldname': 'bom_no',
-		'fieldtype': 'Link',
-		'label': 'BOM No',
-		'oldfieldname': 'bom_no',
-		'oldfieldtype': 'Link',
-		'options': 'Bill Of Materials',
+		'colour': u'White:FFF',
+		'description': u'Bill of Material which was considered for manufacturing the production item.',
+		'doctype': u'DocField',
+		'fieldname': u'bom_no',
+		'fieldtype': u'Link',
+		'label': u'BOM No',
+		'oldfieldname': u'bom_no',
+		'oldfieldtype': u'Link',
+		'options': u'Bill Of Materials',
 		'permlevel': 1,
 		'reqd': 1,
-		'trigger': 'Client'
+		'trigger': u'Client'
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'description': 'Quantity of item for which Production Order is raised.',
-		'doctype': 'DocField',
-		'fieldname': 'qty',
-		'fieldtype': 'Currency',
-		'label': 'Qty',
-		'oldfieldname': 'qty',
-		'oldfieldtype': 'Currency',
+		'colour': u'White:FFF',
+		'description': u'Quantity of item for which Production Order is raised.',
+		'doctype': u'DocField',
+		'fieldname': u'qty',
+		'fieldtype': u'Currency',
+		'label': u'Qty',
+		'oldfieldname': u'qty',
+		'oldfieldtype': u'Currency',
 		'permlevel': 0,
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'description': 'The warehouse for finished goods where stock of produced items will be updated.',
-		'doctype': 'DocField',
-		'fieldname': 'fg_warehouse',
-		'fieldtype': 'Link',
+		'colour': u'White:FFF',
+		'description': u'The warehouse for finished goods where stock of produced items will be updated.',
+		'doctype': u'DocField',
+		'fieldname': u'fg_warehouse',
+		'fieldtype': u'Link',
 		'in_filter': 1,
-		'label': 'FG Warehouse',
-		'oldfieldname': 'fg_warehouse',
-		'oldfieldtype': 'Link',
-		'options': 'Warehouse',
+		'label': u'FG Warehouse',
+		'oldfieldname': u'fg_warehouse',
+		'oldfieldtype': u'Link',
+		'options': u'Warehouse',
 		'permlevel': 0,
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'description': 'The work in progress warehouse where raw materials will be operated upon to create finished goods.',
-		'doctype': 'DocField',
-		'fieldname': 'wip_warehouse',
-		'fieldtype': 'Link',
+		'colour': u'White:FFF',
+		'description': u'The work in progress warehouse where raw materials will be operated upon to create finished goods.',
+		'doctype': u'DocField',
+		'fieldname': u'wip_warehouse',
+		'fieldtype': u'Link',
 		'in_filter': 1,
-		'label': 'WIP Warehouse',
-		'oldfieldname': 'wip_warehouse',
-		'oldfieldtype': 'Link',
-		'options': 'Warehouse',
+		'label': u'WIP Warehouse',
+		'oldfieldname': u'wip_warehouse',
+		'oldfieldtype': u'Link',
+		'options': u'Warehouse',
 		'permlevel': 0,
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'amended_from',
-		'fieldtype': 'Data',
-		'label': 'Amended From',
+		'doctype': u'DocField',
+		'fieldname': u'amended_from',
+		'fieldtype': u'Data',
+		'label': u'Amended From',
 		'no_copy': 1,
-		'oldfieldname': 'amended_from',
-		'oldfieldtype': 'Data',
+		'oldfieldname': u'amended_from',
+		'oldfieldtype': u'Data',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'amendment_date',
-		'fieldtype': 'Date',
-		'label': 'Amendment Date',
+		'doctype': u'DocField',
+		'fieldname': u'amendment_date',
+		'fieldtype': u'Date',
+		'label': u'Amendment Date',
 		'no_copy': 1,
-		'oldfieldname': 'amendment_date',
-		'oldfieldtype': 'Date',
+		'oldfieldname': u'amendment_date',
+		'oldfieldtype': u'Date',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Column Break',
-		'oldfieldtype': 'Column Break',
+		'doctype': u'DocField',
+		'fieldname': u'column_break1',
+		'fieldtype': u'Column Break',
+		'oldfieldtype': u'Column Break',
 		'permlevel': 0,
-		'width': '50%'
+		'width': u'50%'
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'description': 'The date on which current entry will get or has actually executed.',
-		'doctype': 'DocField',
-		'fieldname': 'posting_date',
-		'fieldtype': 'Date',
-		'label': 'Posting Date',
-		'oldfieldname': 'posting_date',
-		'oldfieldtype': 'Date',
+		'colour': u'White:FFF',
+		'description': u'The date on which current entry will get or has actually executed.',
+		'doctype': u'DocField',
+		'fieldname': u'posting_date',
+		'fieldtype': u'Date',
+		'label': u'Posting Date',
+		'oldfieldname': u'posting_date',
+		'oldfieldtype': u'Date',
 		'permlevel': 0,
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'description': 'Select "Yes" if stock is maintained and tracked for sub-assembly items. Select "No" if you want child items of sub-assembly for material transfer.',
-		'doctype': 'DocField',
-		'fieldname': 'consider_sa_items',
-		'fieldtype': 'Select',
+		'colour': u'White:FFF',
+		'description': u'Select "Yes" if stock is maintained and tracked for sub-assembly items. Select "No" if you want child items of sub-assembly for material transfer.',
+		'doctype': u'DocField',
+		'fieldname': u'consider_sa_items',
+		'fieldtype': u'Select',
 		'in_filter': 1,
-		'label': 'Consider SA Items as raw material',
-		'oldfieldname': 'consider_sa_items',
-		'oldfieldtype': 'Select',
-		'options': '\nYes\nNo',
+		'label': u'Consider SA Items as raw material',
+		'oldfieldname': u'consider_sa_items',
+		'oldfieldtype': u'Select',
+		'options': u'\nYes\nNo',
 		'permlevel': 1,
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'description': 'Select name of the project if Production Order need to be created against any project',
-		'doctype': 'DocField',
-		'fieldname': 'project_name',
-		'fieldtype': 'Link',
+		'description': u'Select name of the project if Production Order need to be created against any project',
+		'doctype': u'DocField',
+		'fieldname': u'project_name',
+		'fieldtype': u'Link',
 		'in_filter': 1,
-		'label': 'Project Name',
-		'oldfieldname': 'project_name',
-		'oldfieldtype': 'Link',
-		'options': 'Project',
+		'label': u'Project Name',
+		'oldfieldname': u'project_name',
+		'oldfieldtype': u'Link',
+		'options': u'Project',
 		'permlevel': 0,
-		'trigger': 'Client'
+		'trigger': u'Client'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'origin',
-		'fieldtype': 'Select',
+		'doctype': u'DocField',
+		'fieldname': u'origin',
+		'fieldtype': u'Select',
 		'in_filter': 1,
-		'label': 'Origin',
+		'label': u'Origin',
 		'no_copy': 1,
-		'oldfieldname': 'origin',
-		'oldfieldtype': 'Select',
-		'options': 'Manual\nMRP',
+		'oldfieldname': u'origin',
+		'oldfieldtype': u'Select',
+		'options': u'Manual\nMRP',
 		'permlevel': 1,
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'status',
-		'fieldtype': 'Select',
+		'doctype': u'DocField',
+		'fieldname': u'status',
+		'fieldtype': u'Select',
 		'in_filter': 1,
-		'label': 'Status',
+		'label': u'Status',
 		'no_copy': 1,
-		'oldfieldname': 'status',
-		'oldfieldtype': 'Select',
-		'options': '\nDraft\nSubmitted\nStopped\nIn Process\nCompleted\nCancelled',
+		'oldfieldname': u'status',
+		'oldfieldtype': u'Select',
+		'options': u'\nDraft\nSubmitted\nStopped\nIn Process\nCompleted\nCancelled',
 		'permlevel': 1,
 		'reqd': 1,
 		'search_index': 1
@@ -314,40 +317,40 @@
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'description': 'Updated after finished goods are transferred to FG Warehouse through Stock Entry',
-		'doctype': 'DocField',
-		'fieldname': 'produced_qty',
-		'fieldtype': 'Currency',
-		'label': 'Produced Qty',
-		'oldfieldname': 'produced_qty',
-		'oldfieldtype': 'Currency',
+		'colour': u'White:FFF',
+		'description': u'Updated after finished goods are transferred to FG Warehouse through Stock Entry',
+		'doctype': u'DocField',
+		'fieldname': u'produced_qty',
+		'fieldtype': u'Currency',
+		'label': u'Produced Qty',
+		'oldfieldname': u'produced_qty',
+		'oldfieldtype': u'Currency',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'company',
-		'fieldtype': 'Link',
-		'label': 'Company',
-		'oldfieldname': 'company',
-		'oldfieldtype': 'Link',
-		'options': 'Company',
+		'doctype': u'DocField',
+		'fieldname': u'company',
+		'fieldtype': u'Link',
+		'label': u'Company',
+		'oldfieldname': u'company',
+		'oldfieldtype': u'Link',
+		'options': u'Company',
 		'permlevel': 0,
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'fiscal_year',
-		'fieldtype': 'Select',
+		'doctype': u'DocField',
+		'fieldname': u'fiscal_year',
+		'fieldtype': u'Select',
 		'in_filter': 1,
-		'label': 'Fiscal Year',
-		'oldfieldname': 'fiscal_year',
-		'oldfieldtype': 'Select',
-		'options': 'link:Fiscal Year',
+		'label': u'Fiscal Year',
+		'oldfieldname': u'fiscal_year',
+		'oldfieldtype': u'Select',
+		'options': u'link:Fiscal Year',
 		'permlevel': 0,
 		'reqd': 1
 	}

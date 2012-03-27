@@ -3,80 +3,80 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:09:31',
+		'creation': '2012-03-27 14:36:05',
 		'docstatus': 0,
-		'modified': '2011-11-24 14:34:41',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-27 18:46:49',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1322125389',
+		'_last_update': u'1322125389',
 		'allow_email': 0,
 		'allow_trash': 1,
-		'autoname': 'field:workstation_name',
-		'colour': 'White:FFF',
-		'default_print_format': 'Standard',
+		'autoname': u'field:workstation_name',
+		'colour': u'White:FFF',
+		'default_print_format': u'Standard',
 		'doctype': 'DocType',
-		'document_type': 'Master',
-		'module': 'Production',
+		'document_type': u'Master',
+		'module': u'Production',
 		'name': '__common__',
-		'section_style': 'Simple',
-		'server_code_error': ' ',
+		'section_style': u'Simple',
+		'server_code_error': u' ',
 		'show_in_menu': 0,
-		'version': 13
+		'version': 14
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Workstation',
-		'parentfield': 'fields',
-		'parenttype': 'DocType'
+		'parent': u'Workstation',
+		'parentfield': u'fields',
+		'parenttype': u'DocType'
 	},
 
 	# These values are common for all DocPerm
 	{
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'name': '__common__',
-		'parent': 'Workstation',
-		'parentfield': 'permissions',
-		'parenttype': 'DocType',
+		'parent': u'Workstation',
+		'parentfield': u'permissions',
+		'parenttype': u'DocType',
 		'read': 1
 	},
 
 	# DocType, Workstation
 	{
 		'doctype': 'DocType',
-		'name': 'Workstation'
+		'name': u'Workstation'
 	},
 
 	# DocPerm
 	{
 		'cancel': 1,
 		'create': 1,
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'role': 'System Manager',
+		'role': u'System Manager',
 		'write': 1
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'permlevel': 1,
-		'role': 'System Manager'
+		'role': u'System Manager'
 	},
 
 	# DocPerm
 	{
 		'cancel': 1,
 		'create': 1,
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'role': 'Production User',
+		'role': u'Production User',
 		'write': 1
 	},
 
@@ -84,184 +84,186 @@
 	{
 		'cancel': 1,
 		'create': 1,
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'role': 'Production User',
+		'role': u'Production User',
 		'write': 1
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'permlevel': 1,
-		'role': 'Production Manager'
+		'role': u'Production Manager'
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'permlevel': 1,
-		'role': 'Production User'
+		'role': u'Production User'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'trash_reason',
-		'fieldtype': 'Small Text',
-		'label': 'Trash Reason',
-		'oldfieldname': 'trash_reason',
-		'oldfieldtype': 'Small Text',
+		'doctype': u'DocField',
+		'fieldname': u'trash_reason',
+		'fieldtype': u'Small Text',
+		'label': u'Trash Reason',
+		'oldfieldname': u'trash_reason',
+		'oldfieldtype': u'Small Text',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'workstation_name',
-		'fieldtype': 'Data',
-		'label': 'Workstation Name',
-		'oldfieldname': 'workstation_name',
-		'oldfieldtype': 'Data',
+		'doctype': u'DocField',
+		'fieldname': u'workstation_name',
+		'fieldtype': u'Data',
+		'label': u'Workstation Name',
+		'oldfieldname': u'workstation_name',
+		'oldfieldtype': u'Data',
 		'permlevel': 0,
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'warehouse',
-		'fieldtype': 'Link',
-		'label': 'Warehouse',
-		'oldfieldname': 'warehouse',
-		'oldfieldtype': 'Link',
-		'options': 'Warehouse',
+		'doctype': u'DocField',
+		'fieldname': u'warehouse',
+		'fieldtype': u'Link',
+		'label': u'Warehouse',
+		'oldfieldname': u'warehouse',
+		'oldfieldtype': u'Link',
+		'options': u'Warehouse',
 		'permlevel': 0,
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'description',
-		'fieldtype': 'Text',
-		'label': 'Description',
-		'oldfieldname': 'description',
-		'oldfieldtype': 'Text',
+		'doctype': u'DocField',
+		'fieldname': u'description',
+		'fieldtype': u'Text',
+		'label': u'Description',
+		'oldfieldname': u'description',
+		'oldfieldtype': u'Text',
 		'permlevel': 0,
-		'width': '300px'
+		'width': u'300px'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'capacity',
-		'fieldtype': 'Data',
+		'doctype': u'DocField',
+		'fieldname': u'capacity',
+		'fieldtype': u'Data',
 		'hidden': 1,
-		'label': 'Capacity',
-		'oldfieldname': 'capacity',
-		'oldfieldtype': 'Data',
+		'label': u'Capacity',
+		'oldfieldname': u'capacity',
+		'oldfieldtype': u'Data',
 		'permlevel': 0,
 		'reqd': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'capacity_units',
-		'fieldtype': 'Select',
+		'doctype': u'DocField',
+		'fieldname': u'capacity_units',
+		'fieldtype': u'Select',
 		'hidden': 1,
-		'label': 'Capacity Units',
-		'oldfieldname': 'capacity_units',
-		'oldfieldtype': 'Select',
-		'options': '\nUnits/Shifts\nUnits/Hour',
+		'label': u'Capacity Units',
+		'oldfieldname': u'capacity_units',
+		'oldfieldtype': u'Select',
+		'options': u'\nUnits/Shifts\nUnits/Hour',
 		'permlevel': 0,
 		'reqd': 0
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldname': 'hour_rate_labour',
-		'fieldtype': 'Currency',
-		'label': 'Hour Rate Labour',
-		'oldfieldname': 'hour_rate_labour',
-		'oldfieldtype': 'Currency',
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'hour_rate_labour',
+		'fieldtype': u'Currency',
+		'label': u'Hour Rate Labour',
+		'oldfieldname': u'hour_rate_labour',
+		'oldfieldtype': u'Currency',
 		'permlevel': 0,
 		'reqd': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Section Break',
-		'label': 'Over Heads',
-		'oldfieldtype': 'Section Break',
+		'doctype': u'DocField',
+		'fieldname': u'over_heads',
+		'fieldtype': u'Section Break',
+		'label': u'Over Heads',
+		'oldfieldtype': u'Section Break',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'hour_rate_electricity',
-		'fieldtype': 'Currency',
-		'label': 'Hour Rate Electricity',
-		'oldfieldname': 'hour_rate_electricity',
-		'oldfieldtype': 'Currency',
+		'doctype': u'DocField',
+		'fieldname': u'hour_rate_electricity',
+		'fieldtype': u'Currency',
+		'label': u'Hour Rate Electricity',
+		'oldfieldname': u'hour_rate_electricity',
+		'oldfieldtype': u'Currency',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'hour_rate_consumable',
-		'fieldtype': 'Currency',
-		'label': 'Hour Rate Consumable',
-		'oldfieldname': 'hour_rate_consumable',
-		'oldfieldtype': 'Currency',
+		'doctype': u'DocField',
+		'fieldname': u'hour_rate_consumable',
+		'fieldtype': u'Currency',
+		'label': u'Hour Rate Consumable',
+		'oldfieldname': u'hour_rate_consumable',
+		'oldfieldtype': u'Currency',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'hour_rate_rent',
-		'fieldtype': 'Currency',
-		'label': 'Hour Rate Rent',
-		'oldfieldname': 'hour_rate_rent',
-		'oldfieldtype': 'Currency',
+		'doctype': u'DocField',
+		'fieldname': u'hour_rate_rent',
+		'fieldtype': u'Currency',
+		'label': u'Hour Rate Rent',
+		'oldfieldname': u'hour_rate_rent',
+		'oldfieldtype': u'Currency',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'overhead',
-		'fieldtype': 'Currency',
-		'label': 'Overhead',
-		'oldfieldname': 'overhead',
-		'oldfieldtype': 'Currency',
+		'doctype': u'DocField',
+		'fieldname': u'overhead',
+		'fieldtype': u'Currency',
+		'label': u'Overhead',
+		'oldfieldname': u'overhead',
+		'oldfieldtype': u'Currency',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Section Break',
-		'label': 'Hour Rate',
-		'oldfieldtype': 'Section Break',
+		'doctype': u'DocField',
+		'fieldname': u'hour_rate_section_break',
+		'fieldtype': u'Section Break',
+		'label': u'Hour Rate',
+		'oldfieldtype': u'Section Break',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'hour_rate',
-		'fieldtype': 'Currency',
-		'label': 'Hour Rate',
-		'oldfieldname': 'hour_rate',
-		'oldfieldtype': 'Currency',
+		'doctype': u'DocField',
+		'fieldname': u'hour_rate',
+		'fieldtype': u'Currency',
+		'label': u'Hour Rate',
+		'oldfieldname': u'hour_rate',
+		'oldfieldtype': u'Currency',
 		'permlevel': 1
 	}
 ]

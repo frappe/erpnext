@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2011-08-30 11:45:50',
+		'creation': '2012-03-27 14:35:42',
 		'docstatus': 0,
-		'modified': '2012-03-21 12:55:31',
+		'modified': '2012-03-27 14:35:42',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -88,6 +88,7 @@
 	{
 		'colour': u'White:FFF',
 		'doctype': u'DocField',
+		'fieldname': u'column_break0',
 		'fieldtype': u'Column Break',
 		'permlevel': 0,
 		'width': u'50%'
@@ -127,6 +128,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'column_break1',
 		'fieldtype': u'Column Break',
 		'permlevel': 0,
 		'width': u'50%'
@@ -154,6 +156,7 @@
 	{
 		'colour': u'White:FFF',
 		'doctype': u'DocField',
+		'fieldname': u'payment_entries',
 		'fieldtype': u'Section Break',
 		'label': u'Payment Entries',
 		'permlevel': 0
@@ -163,6 +166,7 @@
 	{
 		'colour': u'White:FFF',
 		'doctype': u'DocField',
+		'fieldname': u'column_break2',
 		'fieldtype': u'Column Break',
 		'label': u"<div class = 'field_description'>Filter payment entries based on date:</div>",
 		'permlevel': 0,
@@ -191,6 +195,7 @@
 	{
 		'colour': u'White:FFF',
 		'doctype': u'DocField',
+		'fieldname': u'column_break3',
 		'fieldtype': u'Column Break',
 		'label': u"<div class = 'field_description'>Filter payment entries based on amount:</div>",
 		'permlevel': 0,
@@ -219,6 +224,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'section_break0',
 		'fieldtype': u'Section Break',
 		'options': u'Simple',
 		'permlevel': 0
@@ -227,6 +233,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'pull_payment_entries',
 		'fieldtype': u'Button',
 		'label': u'Pull Payment Entries',
 		'options': u'get_payment_entries',
@@ -247,6 +254,7 @@
 	{
 		'colour': u'White:FFF',
 		'doctype': u'DocField',
+		'fieldname': u'reconcile_html',
 		'fieldtype': u'HTML',
 		'label': u'Reconcile HTML',
 		'options': u"<div class='field_description'>Select Payment Voucher and Amount to Reconcile in the above table and then click Reconcile button</div>",
@@ -257,6 +265,7 @@
 	{
 		'colour': u'White:FFF',
 		'doctype': u'DocField',
+		'fieldname': u'reconcile',
 		'fieldtype': u'Button',
 		'label': u'Reconcile',
 		'options': u'reconcile',

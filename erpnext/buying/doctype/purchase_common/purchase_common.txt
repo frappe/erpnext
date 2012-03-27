@@ -3,22 +3,22 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:09:15',
+		'creation': '2012-03-27 14:35:51',
 		'docstatus': 0,
-		'modified': '2010-12-23 10:45:17',
-		'modified_by': 'sneha@webnotestech.com',
-		'owner': 'Administrator'
+		'modified': '2012-03-27 14:35:51',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'colour': 'White:FFF',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
 		'issingle': 1,
-		'module': 'Buying',
+		'module': u'Buying',
 		'name': '__common__',
-		'section_style': 'Simple',
-		'server_code_error': ' ',
+		'section_style': u'Simple',
+		'server_code_error': u' ',
 		'show_in_menu': 0,
 		'version': 187
 	},
@@ -26,6 +26,6 @@
 	# DocType, Purchase Common
 	{
 		'doctype': 'DocType',
-		'name': 'Purchase Common'
+		'name': u'Purchase Common'
 	}
 ]

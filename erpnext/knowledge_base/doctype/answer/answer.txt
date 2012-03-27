@@ -3,107 +3,100 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2011-05-04 11:09:49',
+		'creation': '2012-03-27 14:36:01',
 		'docstatus': 0,
-		'modified': '2011-05-30 15:52:52',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-27 14:36:01',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
 		'allow_attach': 0,
 		'allow_trash': 1,
-		'autoname': '_ANS.#######',
-		'colour': 'White:FFF',
+		'autoname': u'_ANS.#######',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
 		'in_create': 1,
-		'module': 'Knowledge Base',
+		'module': u'Knowledge Base',
 		'name': '__common__',
 		'read_only': 1,
-		'section_style': 'Simple',
-		'server_code_error': ' ',
+		'section_style': u'Simple',
+		'server_code_error': u' ',
 		'show_in_menu': 0,
 		'version': 3
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Answer',
-		'parentfield': 'fields',
-		'parenttype': 'DocType',
+		'parent': u'Answer',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
 		'permlevel': 0
 	},
 
 	# These values are common for all DocPerm
 	{
-		'amend': 0,
 		'cancel': 1,
 		'create': 1,
-		'doctype': 'DocPerm',
-		'idx': 1,
+		'doctype': u'DocPerm',
 		'name': '__common__',
-		'parent': 'Answer',
-		'parentfield': 'permissions',
-		'parenttype': 'DocType',
+		'parent': u'Answer',
+		'parentfield': u'permissions',
+		'parenttype': u'DocType',
 		'permlevel': 0,
 		'read': 1,
-		'role': 'All',
-		'submit': 0,
+		'role': u'All',
 		'write': 1
 	},
 
 	# DocType, Answer
 	{
 		'doctype': 'DocType',
-		'name': 'Answer'
+		'name': u'Answer'
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm'
+		'doctype': u'DocPerm'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'question',
-		'fieldtype': 'Link',
-		'idx': 1,
-		'label': 'Question',
-		'options': 'Question'
+		'doctype': u'DocField',
+		'fieldname': u'question',
+		'fieldtype': u'Link',
+		'label': u'Question',
+		'options': u'Question'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'answer',
-		'fieldtype': 'Text',
-		'idx': 2,
-		'label': 'Answer',
-		'oldfieldname': 'question',
-		'oldfieldtype': 'Text'
+		'doctype': u'DocField',
+		'fieldname': u'answer',
+		'fieldtype': u'Text',
+		'label': u'Answer',
+		'oldfieldname': u'question',
+		'oldfieldtype': u'Text'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'points',
-		'fieldtype': 'Int',
-		'idx': 3,
-		'label': 'Points'
+		'doctype': u'DocField',
+		'fieldname': u'points',
+		'fieldtype': u'Int',
+		'label': u'Points'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': '_users_voted',
-		'fieldtype': 'Text',
+		'doctype': u'DocField',
+		'fieldname': u'_users_voted',
+		'fieldtype': u'Text',
 		'hidden': 1,
-		'idx': 4,
-		'label': 'Users Voted',
+		'label': u'Users Voted',
 		'print_hide': 1
 	}
 ]

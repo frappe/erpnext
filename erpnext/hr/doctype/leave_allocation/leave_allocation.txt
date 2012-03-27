@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2011-02-14 10:18:47',
+		'creation': '2012-03-27 14:35:58',
 		'docstatus': 0,
-		'modified': '2012-03-21 12:49:25',
+		'modified': '2012-03-27 14:45:49',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -17,6 +17,7 @@
 		'colour': u'White:FFF',
 		'default_print_format': u'Standard',
 		'doctype': 'DocType',
+		'is_submittable': 1,
 		'module': u'HR',
 		'name': '__common__',
 		'search_fields': u'employee,employee_name,leave_type,total_leaves_allocated,fiscal_year',
@@ -83,110 +84,6 @@
 		'cancel': 1,
 		'create': 1,
 		'doctype': u'DocPerm',
-		'match': u'owner',
-		'permlevel': 0,
-		'role': u'HR User',
-		'submit': 1,
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'match': u'owner',
-		'permlevel': 0,
-		'role': u'HR User',
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'amend': 1,
-		'cancel': 1,
-		'create': 1,
-		'doctype': u'DocPerm',
-		'match': u'owner',
-		'permlevel': 0,
-		'role': u'HR User',
-		'submit': 1,
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'match': u'owner',
-		'permlevel': 0,
-		'role': u'HR User',
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'amend': 1,
-		'cancel': 1,
-		'create': 1,
-		'doctype': u'DocPerm',
-		'match': u'owner',
-		'permlevel': 0,
-		'role': u'HR User',
-		'submit': 1,
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'match': u'owner',
-		'permlevel': 0,
-		'role': u'HR User',
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'amend': 1,
-		'cancel': 1,
-		'create': 1,
-		'doctype': u'DocPerm',
-		'match': u'owner',
-		'permlevel': 0,
-		'role': u'HR User',
-		'submit': 1,
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'match': u'owner',
-		'permlevel': 0,
-		'role': u'HR User',
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'amend': 1,
-		'cancel': 1,
-		'create': 1,
-		'doctype': u'DocPerm',
 		'permlevel': 0,
 		'role': u'HR Manager',
 		'submit': 1,
@@ -203,6 +100,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'column_break0',
 		'fieldtype': u'Column Break',
 		'permlevel': 0,
 		'width': u'50%'
@@ -304,6 +202,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'column_break1',
 		'fieldtype': u'Column Break',
 		'permlevel': 0,
 		'width': u'50%'

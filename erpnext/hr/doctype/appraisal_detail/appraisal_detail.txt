@@ -3,64 +3,64 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-09-01 15:48:05',
+		'creation': '2012-03-27 14:35:53',
 		'docstatus': 0,
-		'modified': '2011-09-22 10:45:37',
-		'modified_by': 'Administrator',
-		'owner': 'ashwini@webnotestech.com'
+		'modified': '2012-03-27 14:35:53',
+		'modified_by': u'Administrator',
+		'owner': u'ashwini@webnotestech.com'
 	},
 
 	# These values are common for all DocType
 	{
-		'autoname': 'APRSLD.#####',
-		'colour': 'White:FFF',
-		'default_print_format': 'Standard',
+		'autoname': u'APRSLD.#####',
+		'colour': u'White:FFF',
+		'default_print_format': u'Standard',
 		'doctype': 'DocType',
 		'istable': 1,
-		'module': 'HR',
+		'module': u'HR',
 		'name': '__common__',
-		'section_style': 'Simple',
-		'server_code_error': ' ',
+		'section_style': u'Simple',
+		'server_code_error': u' ',
 		'version': 15
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Appraisal Detail',
-		'parentfield': 'fields',
-		'parenttype': 'DocType'
+		'parent': u'Appraisal Detail',
+		'parentfield': u'fields',
+		'parenttype': u'DocType'
 	},
 
 	# DocType, Appraisal Detail
 	{
 		'doctype': 'DocType',
-		'name': 'Appraisal Detail'
+		'name': u'Appraisal Detail'
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'description': 'Key Responsibility Area',
-		'doctype': 'DocField',
-		'fieldname': 'kra',
-		'fieldtype': 'Small Text',
-		'label': 'KRA',
-		'oldfieldname': 'kra',
-		'oldfieldtype': 'Small Text',
+		'colour': u'White:FFF',
+		'description': u'Key Responsibility Area',
+		'doctype': u'DocField',
+		'fieldname': u'kra',
+		'fieldtype': u'Small Text',
+		'label': u'KRA',
+		'oldfieldname': u'kra',
+		'oldfieldtype': u'Small Text',
 		'permlevel': 0,
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'per_weightage',
-		'fieldtype': 'Currency',
-		'label': 'Weightage (%)',
-		'oldfieldname': 'per_weightage',
-		'oldfieldtype': 'Currency',
+		'doctype': u'DocField',
+		'fieldname': u'per_weightage',
+		'fieldtype': u'Currency',
+		'label': u'Weightage (%)',
+		'oldfieldname': u'per_weightage',
+		'oldfieldtype': u'Currency',
 		'permlevel': 0,
 		'reqd': 1
 	},
@@ -68,42 +68,42 @@
 	# DocField
 	{
 		'allow_on_submit': 1,
-		'doctype': 'DocField',
-		'fieldname': 'target_achieved',
-		'fieldtype': 'Small Text',
-		'label': 'Target Achieved',
+		'doctype': u'DocField',
+		'fieldname': u'target_achieved',
+		'fieldtype': u'Small Text',
+		'label': u'Target Achieved',
 		'no_copy': 1,
-		'oldfieldname': 'target_achieved',
-		'oldfieldtype': 'Small Text',
+		'oldfieldname': u'target_achieved',
+		'oldfieldtype': u'Small Text',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
 		'allow_on_submit': 1,
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldname': 'score',
-		'fieldtype': 'Currency',
-		'label': 'Score (0-5)',
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'score',
+		'fieldtype': u'Currency',
+		'label': u'Score (0-5)',
 		'no_copy': 1,
-		'oldfieldname': 'score',
-		'oldfieldtype': 'Select',
-		'options': '\n0\n1\n2\n3\n4\n5',
+		'oldfieldname': u'score',
+		'oldfieldtype': u'Select',
+		'options': u'\n0\n1\n2\n3\n4\n5',
 		'permlevel': 0,
-		'trigger': 'Client',
-		'width': '60px'
+		'trigger': u'Client',
+		'width': u'60px'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'score_earned',
-		'fieldtype': 'Currency',
-		'label': 'Score Earned',
+		'doctype': u'DocField',
+		'fieldname': u'score_earned',
+		'fieldtype': u'Currency',
+		'label': u'Score Earned',
 		'no_copy': 1,
-		'oldfieldname': 'score_earned',
-		'oldfieldtype': 'Currency',
+		'oldfieldname': u'score_earned',
+		'oldfieldtype': u'Currency',
 		'permlevel': 1
 	}
 ]

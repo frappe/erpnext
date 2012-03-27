@@ -3,108 +3,103 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:08:51',
+		'creation': '2012-03-27 14:35:40',
 		'docstatus': 0,
-		'modified': '2010-09-20 14:06:57',
-		'modified_by': 'umair@iwebnotes.com',
-		'owner': 'Administrator'
+		'modified': '2012-03-27 14:35:40',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'colour': 'White:FFF',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
 		'istable': 1,
-		'module': 'Accounts',
+		'module': u'Accounts',
 		'name': '__common__',
-		'section_style': 'Tray',
-		'server_code_error': ' ',
+		'section_style': u'Tray',
+		'server_code_error': u' ',
 		'show_in_menu': 0,
 		'version': 24
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
 		'no_copy': 1,
-		'parent': 'Advance Adjustment Detail',
-		'parentfield': 'fields',
-		'parenttype': 'DocType'
+		'parent': u'Advance Adjustment Detail',
+		'parentfield': u'fields',
+		'parenttype': u'DocType'
 	},
 
 	# DocType, Advance Adjustment Detail
 	{
 		'doctype': 'DocType',
-		'name': 'Advance Adjustment Detail'
+		'name': u'Advance Adjustment Detail'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'journal_voucher',
-		'fieldtype': 'Link',
-		'idx': 1,
-		'label': 'Journal Voucher',
-		'oldfieldname': 'journal_voucher',
-		'oldfieldtype': 'Link',
-		'options': 'Journal Voucher',
+		'doctype': u'DocField',
+		'fieldname': u'journal_voucher',
+		'fieldtype': u'Link',
+		'label': u'Journal Voucher',
+		'oldfieldname': u'journal_voucher',
+		'oldfieldtype': u'Link',
+		'options': u'Journal Voucher',
 		'permlevel': 1,
-		'width': '250px'
+		'width': u'250px'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'jv_detail_no',
-		'fieldtype': 'Data',
+		'doctype': u'DocField',
+		'fieldname': u'jv_detail_no',
+		'fieldtype': u'Data',
 		'hidden': 1,
-		'idx': 2,
-		'label': 'Journal Voucher Detail No',
-		'oldfieldname': 'jv_detail_no',
-		'oldfieldtype': 'Data',
+		'label': u'Journal Voucher Detail No',
+		'oldfieldname': u'jv_detail_no',
+		'oldfieldtype': u'Data',
 		'permlevel': 1,
 		'print_hide': 1,
-		'width': '120px'
+		'width': u'120px'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'advance_amount',
-		'fieldtype': 'Currency',
-		'idx': 3,
-		'label': 'Advance amount',
-		'oldfieldname': 'advance_amount',
-		'oldfieldtype': 'Currency',
+		'doctype': u'DocField',
+		'fieldname': u'advance_amount',
+		'fieldtype': u'Currency',
+		'label': u'Advance amount',
+		'oldfieldname': u'advance_amount',
+		'oldfieldtype': u'Currency',
 		'permlevel': 1,
-		'width': '120px'
+		'width': u'120px'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'allocated_amount',
-		'fieldtype': 'Currency',
-		'idx': 4,
-		'label': 'Allocated amount',
-		'oldfieldname': 'allocated_amount',
-		'oldfieldtype': 'Currency',
+		'doctype': u'DocField',
+		'fieldname': u'allocated_amount',
+		'fieldtype': u'Currency',
+		'label': u'Allocated amount',
+		'oldfieldname': u'allocated_amount',
+		'oldfieldtype': u'Currency',
 		'permlevel': 0,
-		'trigger': 'Client',
-		'width': '120px'
+		'trigger': u'Client',
+		'width': u'120px'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'remarks',
-		'fieldtype': 'Small Text',
-		'idx': 5,
-		'label': 'Remarks',
-		'oldfieldname': 'remarks',
-		'oldfieldtype': 'Small Text',
+		'doctype': u'DocField',
+		'fieldname': u'remarks',
+		'fieldtype': u'Small Text',
+		'label': u'Remarks',
+		'oldfieldname': u'remarks',
+		'oldfieldtype': u'Small Text',
 		'permlevel': 1,
-		'width': '150px'
+		'width': u'150px'
 	}
 ]

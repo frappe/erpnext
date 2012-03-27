@@ -3,133 +3,133 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:08:53',
+		'creation': '2012-03-27 14:36:02',
 		'docstatus': 0,
-		'modified': '2011-12-28 12:28:02',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-27 14:36:02',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'colour': 'White:FFF',
-		'default_print_format': 'Standard',
+		'colour': u'White:FFF',
+		'default_print_format': u'Standard',
 		'doctype': 'DocType',
 		'istable': 1,
-		'module': 'Production',
+		'module': u'Production',
 		'name': '__common__',
-		'section_style': 'Simple',
-		'server_code_error': ' ',
+		'section_style': u'Simple',
+		'server_code_error': u' ',
 		'show_in_menu': 0,
 		'version': 8
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'BOM Operation',
-		'parentfield': 'fields',
-		'parenttype': 'DocType',
+		'parent': u'BOM Operation',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
 		'permlevel': 0
 	},
 
 	# These values are common for all DocPerm
 	{
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'name': '__common__',
-		'parent': 'BOM Operation',
-		'parentfield': 'permissions',
-		'parenttype': 'DocType',
+		'parent': u'BOM Operation',
+		'parentfield': u'permissions',
+		'parenttype': u'DocType',
 		'read': 1,
-		'role': 'System Manager'
+		'role': u'System Manager'
 	},
 
 	# DocType, BOM Operation
 	{
 		'doctype': 'DocType',
-		'name': 'BOM Operation'
+		'name': u'BOM Operation'
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'permlevel': 0,
 		'write': 1
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'operation_no',
-		'fieldtype': 'Data',
-		'label': 'Operation No',
-		'oldfieldname': 'operation_no',
-		'oldfieldtype': 'Data',
+		'doctype': u'DocField',
+		'fieldname': u'operation_no',
+		'fieldtype': u'Data',
+		'label': u'Operation No',
+		'oldfieldname': u'operation_no',
+		'oldfieldtype': u'Data',
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'opn_description',
-		'fieldtype': 'Text',
-		'label': 'Opn Description',
-		'oldfieldname': 'opn_description',
-		'oldfieldtype': 'Text',
+		'doctype': u'DocField',
+		'fieldname': u'opn_description',
+		'fieldtype': u'Text',
+		'label': u'Opn Description',
+		'oldfieldname': u'opn_description',
+		'oldfieldtype': u'Text',
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'workstation',
-		'fieldtype': 'Link',
-		'label': 'Workstation',
-		'oldfieldname': 'workstation',
-		'oldfieldtype': 'Link',
-		'options': 'Workstation',
+		'doctype': u'DocField',
+		'fieldname': u'workstation',
+		'fieldtype': u'Link',
+		'label': u'Workstation',
+		'oldfieldname': u'workstation',
+		'oldfieldtype': u'Link',
+		'options': u'Workstation',
 		'reqd': 0,
-		'trigger': 'Client'
+		'trigger': u'Client'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'hour_rate',
-		'fieldtype': 'Currency',
-		'label': 'Hour Rate',
-		'oldfieldname': 'hour_rate',
-		'oldfieldtype': 'Currency',
+		'doctype': u'DocField',
+		'fieldname': u'hour_rate',
+		'fieldtype': u'Currency',
+		'label': u'Hour Rate',
+		'oldfieldname': u'hour_rate',
+		'oldfieldtype': u'Currency',
 		'reqd': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'time_in_mins',
-		'fieldtype': 'Currency',
-		'label': 'Operation Time (mins)',
-		'oldfieldname': 'time_in_mins',
-		'oldfieldtype': 'Currency',
+		'doctype': u'DocField',
+		'fieldname': u'time_in_mins',
+		'fieldtype': u'Currency',
+		'label': u'Operation Time (mins)',
+		'oldfieldname': u'time_in_mins',
+		'oldfieldtype': u'Currency',
 		'reqd': 0
 	},
 
 	# DocField
 	{
 		'allow_on_submit': 0,
-		'doctype': 'DocField',
-		'fieldname': 'operating_cost',
-		'fieldtype': 'Currency',
-		'label': 'Operating Cost',
-		'oldfieldname': 'operating_cost',
-		'oldfieldtype': 'Currency',
+		'doctype': u'DocField',
+		'fieldname': u'operating_cost',
+		'fieldtype': u'Currency',
+		'label': u'Operating Cost',
+		'oldfieldname': u'operating_cost',
+		'oldfieldtype': u'Currency',
 		'reqd': 0
 	}
 ]

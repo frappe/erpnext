@@ -3,64 +3,62 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:09:06',
+		'creation': '2012-03-27 14:36:33',
 		'docstatus': 0,
-		'modified': '2010-09-20 14:06:57',
-		'modified_by': 'umair@iwebnotes.com',
-		'owner': 'Administrator'
+		'modified': '2012-03-27 14:36:33',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'autoname': 'IISD/.#####',
-		'colour': 'White:FFF',
+		'autoname': u'IISD/.#####',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
 		'istable': 1,
-		'module': 'Stock',
+		'module': u'Stock',
 		'name': '__common__',
-		'section_style': 'Simple',
-		'server_code_error': ' ',
+		'section_style': u'Simple',
+		'server_code_error': u' ',
 		'show_in_menu': 0,
 		'version': 1
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Data',
+		'doctype': u'DocField',
+		'fieldtype': u'Data',
 		'name': '__common__',
-		'oldfieldtype': 'Data',
-		'parent': 'Item Specification Detail',
-		'parentfield': 'fields',
-		'parenttype': 'DocType',
+		'oldfieldtype': u'Data',
+		'parent': u'Item Specification Detail',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
 		'permlevel': 0
 	},
 
 	# DocType, Item Specification Detail
 	{
 		'doctype': 'DocType',
-		'name': 'Item Specification Detail'
+		'name': u'Item Specification Detail'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'specification',
-		'idx': 1,
+		'doctype': u'DocField',
+		'fieldname': u'specification',
 		'in_filter': 0,
-		'label': 'Parameter',
-		'oldfieldname': 'specification',
+		'label': u'Parameter',
+		'oldfieldname': u'specification',
 		'reqd': 1,
 		'search_index': 0,
-		'width': '200px'
+		'width': u'200px'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'value',
-		'idx': 2,
-		'label': 'Acceptance Criteria',
-		'oldfieldname': 'value'
+		'doctype': u'DocField',
+		'fieldname': u'value',
+		'label': u'Acceptance Criteria',
+		'oldfieldname': u'value'
 	}
 ]

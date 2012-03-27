@@ -3,146 +3,138 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:09:18',
+		'creation': '2012-03-27 14:35:52',
 		'docstatus': 0,
-		'modified': '2010-09-20 14:06:57',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-27 14:35:52',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'autoname': 'RMS/.######',
-		'colour': 'White:FFF',
+		'autoname': u'RMS/.######',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
 		'istable': 1,
-		'module': 'Buying',
+		'module': u'Buying',
 		'name': '__common__',
-		'section_style': 'Tray',
+		'section_style': u'Tray',
 		'show_in_menu': 0,
 		'version': 8
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Raw Materials Supplied',
-		'parentfield': 'fields',
-		'parenttype': 'DocType'
+		'parent': u'Raw Materials Supplied',
+		'parentfield': u'fields',
+		'parenttype': u'DocType'
 	},
 
 	# DocType, Raw Materials Supplied
 	{
 		'doctype': 'DocType',
-		'name': 'Raw Materials Supplied'
+		'name': u'Raw Materials Supplied'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'po_item',
-		'fieldtype': 'Select',
-		'idx': 1,
-		'label': 'PO Item',
-		'oldfieldname': 'po_item',
-		'oldfieldtype': 'Select',
+		'doctype': u'DocField',
+		'fieldname': u'po_item',
+		'fieldtype': u'Select',
+		'label': u'PO Item',
+		'oldfieldname': u'po_item',
+		'oldfieldtype': u'Select',
 		'permlevel': 0,
 		'reqd': 1,
-		'trigger': 'Client'
+		'trigger': u'Client'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'raw_material',
-		'fieldtype': 'Link',
-		'idx': 2,
-		'label': 'Raw Material',
-		'oldfieldname': 'raw_material',
-		'oldfieldtype': 'Link',
-		'options': 'Item',
+		'doctype': u'DocField',
+		'fieldname': u'raw_material',
+		'fieldtype': u'Link',
+		'label': u'Raw Material',
+		'oldfieldname': u'raw_material',
+		'oldfieldtype': u'Link',
+		'options': u'Item',
 		'permlevel': 0,
 		'reqd': 1,
-		'trigger': 'Client'
+		'trigger': u'Client'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'description',
-		'fieldtype': 'Small Text',
-		'idx': 3,
-		'label': 'Description',
-		'oldfieldname': 'description',
-		'oldfieldtype': 'Small Text',
+		'doctype': u'DocField',
+		'fieldname': u'description',
+		'fieldtype': u'Small Text',
+		'label': u'Description',
+		'oldfieldname': u'description',
+		'oldfieldtype': u'Small Text',
 		'permlevel': 0,
-		'width': '300px'
+		'width': u'300px'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'source_warehouse',
-		'fieldtype': 'Select',
-		'idx': 5,
-		'label': 'Source Warehouse',
-		'oldfieldname': 'source_warehouse',
-		'oldfieldtype': 'Select',
-		'options': 'link:Warehouse',
+		'doctype': u'DocField',
+		'fieldname': u'source_warehouse',
+		'fieldtype': u'Select',
+		'label': u'Source Warehouse',
+		'oldfieldname': u'source_warehouse',
+		'oldfieldtype': u'Select',
+		'options': u'link:Warehouse',
 		'permlevel': 0,
 		'reqd': 1,
-		'trigger': 'Client'
+		'trigger': u'Client'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'ma_valuation_rate',
-		'fieldtype': 'Currency',
-		'idx': 7,
-		'label': 'Valuation  Rate (MA)',
+		'doctype': u'DocField',
+		'fieldname': u'ma_valuation_rate',
+		'fieldtype': u'Currency',
+		'label': u'Valuation  Rate (MA)',
 		'no_copy': 1,
-		'oldfieldname': 'ma_valuation_rate',
-		'oldfieldtype': 'Currency',
+		'oldfieldname': u'ma_valuation_rate',
+		'oldfieldtype': u'Currency',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'fifo_valuation_rate',
-		'fieldtype': 'Currency',
-		'idx': 8,
-		'label': 'Valuation Rate (FIFO)',
-		'oldfieldname': 'fifo_valuation_rate',
-		'oldfieldtype': 'Currency',
+		'doctype': u'DocField',
+		'fieldname': u'fifo_valuation_rate',
+		'fieldtype': u'Currency',
+		'label': u'Valuation Rate (FIFO)',
+		'oldfieldname': u'fifo_valuation_rate',
+		'oldfieldtype': u'Currency',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'qty',
-		'fieldtype': 'Currency',
-		'idx': 9,
-		'label': 'Qty',
-		'oldfieldname': 'qty',
-		'oldfieldtype': 'Currency',
+		'doctype': u'DocField',
+		'fieldname': u'qty',
+		'fieldtype': u'Currency',
+		'label': u'Qty',
+		'oldfieldname': u'qty',
+		'oldfieldtype': u'Currency',
 		'permlevel': 0,
 		'reqd': 1,
-		'trigger': 'Client'
+		'trigger': u'Client'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'stock_uom',
-		'fieldtype': 'Data',
-		'idx': 12,
-		'label': 'Stock UOM',
-		'oldfieldname': 'stock_uom',
-		'oldfieldtype': 'Data',
+		'doctype': u'DocField',
+		'fieldname': u'stock_uom',
+		'fieldtype': u'Data',
+		'label': u'Stock UOM',
+		'oldfieldname': u'stock_uom',
+		'oldfieldtype': u'Data',
 		'permlevel': 1
 	}
 ]

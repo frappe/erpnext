@@ -3,23 +3,23 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:09:30',
+		'creation': '2012-03-27 14:35:53',
 		'docstatus': 0,
-		'modified': '2010-09-20 14:06:57',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-27 14:35:53',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'colour': 'White:FFF',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
 		'issingle': 1,
 		'istable': 0,
-		'module': 'Home',
+		'module': u'Home',
 		'name': '__common__',
-		'section_style': 'Simple',
-		'server_code_error': ' ',
+		'section_style': u'Simple',
+		'server_code_error': u' ',
 		'show_in_menu': 0,
 		'version': 27
 	},
@@ -27,6 +27,6 @@
 	# DocType, Widget Control
 	{
 		'doctype': 'DocType',
-		'name': 'Widget Control'
+		'name': u'Widget Control'
 	}
 ]

@@ -3,30 +3,30 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-11-09 09:35:22',
+		'creation': '2012-03-27 14:35:49',
 		'docstatus': 0,
-		'modified': '2010-12-02 18:00:30',
-		'modified_by': 'Administrator',
-		'owner': 'saumil@webnotestech.com'
+		'modified': '2012-03-27 14:35:49',
+		'modified_by': u'Administrator',
+		'owner': u'saumil@webnotestech.com'
 	},
 
 	# These values are common for all DocType
 	{
-		'colour': 'White:FFF',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
 		'in_create': 1,
 		'issingle': 1,
-		'module': 'Analysis',
+		'module': u'Analysis',
 		'name': '__common__',
 		'read_only': 1,
-		'section_style': 'Simple',
-		'server_code_error': ' ',
+		'section_style': u'Simple',
+		'server_code_error': u' ',
 		'version': 11
 	},
 
 	# DocType, TA Control
 	{
 		'doctype': 'DocType',
-		'name': 'TA Control'
+		'name': u'TA Control'
 	}
 ]

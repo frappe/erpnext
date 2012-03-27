@@ -3,61 +3,59 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:09:30',
+		'creation': '2012-03-27 14:36:26',
 		'docstatus': 0,
-		'modified': '2010-09-20 14:06:57',
-		'modified_by': 'Administrator',
-		'owner': 'swarnalata@webnotestech.com'
+		'modified': '2012-03-27 14:36:26',
+		'modified_by': u'Administrator',
+		'owner': u'swarnalata@webnotestech.com'
 	},
 
 	# These values are common for all DocType
 	{
-		'colour': 'White:FFF',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
 		'istable': 1,
-		'module': 'Setup',
+		'module': u'Setup',
 		'name': '__common__',
-		'section_style': 'Simple',
+		'section_style': u'Simple',
 		'show_in_menu': 0,
 		'version': 5
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Workflow Action Detail',
-		'parentfield': 'fields',
-		'parenttype': 'DocType',
+		'parent': u'Workflow Action Detail',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
 		'permlevel': 0,
-		'width': '200px'
+		'width': u'200px'
 	},
 
 	# DocType, Workflow Action Detail
 	{
 		'doctype': 'DocType',
-		'name': 'Workflow Action Detail'
+		'name': u'Workflow Action Detail'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'action_field',
-		'fieldtype': 'Select',
-		'idx': 1,
-		'label': 'Field',
-		'oldfieldname': 'action_field',
-		'oldfieldtype': 'Select'
+		'doctype': u'DocField',
+		'fieldname': u'action_field',
+		'fieldtype': u'Select',
+		'label': u'Field',
+		'oldfieldname': u'action_field',
+		'oldfieldtype': u'Select'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'action_value',
-		'fieldtype': 'Data',
-		'idx': 2,
-		'label': 'Value',
-		'oldfieldname': 'action_value',
-		'oldfieldtype': 'Data'
+		'doctype': u'DocField',
+		'fieldname': u'action_value',
+		'fieldtype': u'Data',
+		'label': u'Value',
+		'oldfieldname': u'action_value',
+		'oldfieldtype': u'Data'
 	}
 ]

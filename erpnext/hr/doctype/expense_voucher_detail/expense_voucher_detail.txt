@@ -3,106 +3,101 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-09-03 16:45:08',
+		'creation': '2012-03-27 14:35:56',
 		'docstatus': 0,
-		'modified': '2010-09-20 14:06:57',
-		'modified_by': 'Administrator',
-		'owner': 'harshada@webnotestech.com'
+		'modified': '2012-03-27 14:35:56',
+		'modified_by': u'Administrator',
+		'owner': u'harshada@webnotestech.com'
 	},
 
 	# These values are common for all DocType
 	{
-		'colour': 'White:FFF',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
 		'istable': 1,
-		'module': 'HR',
+		'module': u'HR',
 		'name': '__common__',
-		'section_style': 'Simple',
-		'server_code_error': ' ',
+		'section_style': u'Simple',
+		'server_code_error': u' ',
 		'version': 5
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Expense Voucher Detail',
-		'parentfield': 'fields',
-		'parenttype': 'DocType',
+		'parent': u'Expense Voucher Detail',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
 		'permlevel': 0
 	},
 
 	# DocType, Expense Voucher Detail
 	{
 		'doctype': 'DocType',
-		'name': 'Expense Voucher Detail'
+		'name': u'Expense Voucher Detail'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'expense_date',
-		'fieldtype': 'Date',
-		'idx': 1,
-		'label': 'Expense Date',
-		'oldfieldname': 'expense_date',
-		'oldfieldtype': 'Date',
+		'doctype': u'DocField',
+		'fieldname': u'expense_date',
+		'fieldtype': u'Date',
+		'label': u'Expense Date',
+		'oldfieldname': u'expense_date',
+		'oldfieldtype': u'Date',
 		'reqd': 0,
-		'width': '150px'
+		'width': u'150px'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'expense_type',
-		'fieldtype': 'Link',
-		'idx': 2,
-		'label': 'Expense Type',
-		'oldfieldname': 'expense_type',
-		'oldfieldtype': 'Link',
-		'options': 'Expense Type',
+		'doctype': u'DocField',
+		'fieldname': u'expense_type',
+		'fieldtype': u'Link',
+		'label': u'Expense Type',
+		'oldfieldname': u'expense_type',
+		'oldfieldtype': u'Link',
+		'options': u'Expense Type',
 		'reqd': 1,
-		'width': '150px'
+		'width': u'150px'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'description',
-		'fieldtype': 'Small Text',
-		'idx': 3,
-		'label': 'Description',
-		'oldfieldname': 'description',
-		'oldfieldtype': 'Small Text',
-		'width': '300px'
+		'doctype': u'DocField',
+		'fieldname': u'description',
+		'fieldtype': u'Small Text',
+		'label': u'Description',
+		'oldfieldname': u'description',
+		'oldfieldtype': u'Small Text',
+		'width': u'300px'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'claim_amount',
-		'fieldtype': 'Currency',
-		'idx': 4,
-		'label': 'Claim Amount',
-		'oldfieldname': 'claim_amount',
-		'oldfieldtype': 'Currency',
+		'doctype': u'DocField',
+		'fieldname': u'claim_amount',
+		'fieldtype': u'Currency',
+		'label': u'Claim Amount',
+		'oldfieldname': u'claim_amount',
+		'oldfieldtype': u'Currency',
 		'reqd': 1,
-		'trigger': 'Client',
-		'width': '150px'
+		'trigger': u'Client',
+		'width': u'150px'
 	},
 
 	# DocField
 	{
 		'allow_on_submit': 1,
-		'doctype': 'DocField',
-		'fieldname': 'sanctioned_amount',
-		'fieldtype': 'Currency',
-		'idx': 5,
-		'label': 'Sanctioned Amount',
+		'doctype': u'DocField',
+		'fieldname': u'sanctioned_amount',
+		'fieldtype': u'Currency',
+		'label': u'Sanctioned Amount',
 		'no_copy': 1,
-		'oldfieldname': 'sanctioned_amount',
-		'oldfieldtype': 'Currency',
-		'trigger': 'Client',
-		'width': '150px'
+		'oldfieldname': u'sanctioned_amount',
+		'oldfieldtype': u'Currency',
+		'trigger': u'Client',
+		'width': u'150px'
 	}
 ]

@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-09-03 16:45:08',
+		'creation': '2012-03-27 14:35:56',
 		'docstatus': 0,
-		'modified': '2012-03-21 14:37:04',
+		'modified': '2012-03-27 14:45:48',
 		'modified_by': u'Administrator',
 		'owner': u'harshada@webnotestech.com'
 	},
@@ -17,6 +17,7 @@
 		'colour': u'White:FFF',
 		'default_print_format': u'Standard',
 		'doctype': 'DocType',
+		'is_submittable': 1,
 		'module': u'HR',
 		'name': '__common__',
 		'search_fields': u'approval_status,employee,employee_name',
@@ -55,13 +56,19 @@
 
 	# DocPerm
 	{
+		'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'All'
+	},
+
+	# DocPerm
+	{
 		'amend': 1,
 		'cancel': 1,
 		'create': 1,
 		'doctype': u'DocPerm',
 		'match': u'owner',
 		'permlevel': 0,
-		'role': u'Employee',
 		'submit': 1,
 		'write': 1
 	},
@@ -90,16 +97,10 @@
 		'write': 1
 	},
 
-	# DocPerm
-	{
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'All'
-	},
-
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'details',
 		'fieldtype': u'Section Break',
 		'label': u'Details',
 		'oldfieldtype': u'Section Break',
@@ -185,6 +186,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'column_break0',
 		'fieldtype': u'Column Break',
 		'oldfieldtype': u'Column Break',
 		'permlevel': 0,
@@ -266,6 +268,7 @@
 	{
 		'allow_on_submit': 1,
 		'doctype': u'DocField',
+		'fieldname': u'approve',
 		'fieldtype': u'Button',
 		'hidden': 1,
 		'label': u'Approve',
@@ -279,6 +282,7 @@
 	{
 		'allow_on_submit': 1,
 		'doctype': u'DocField',
+		'fieldname': u'reject',
 		'fieldtype': u'Button',
 		'hidden': 1,
 		'label': u'Reject',
@@ -291,6 +295,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'expense_details',
 		'fieldtype': u'Section Break',
 		'label': u'Expense Details',
 		'oldfieldtype': u'Section Break',
@@ -302,6 +307,7 @@
 		'allow_on_submit': 1,
 		'colour': u'White:FFF',
 		'doctype': u'DocField',
+		'fieldname': u'calculate_total_amount',
 		'fieldtype': u'Button',
 		'label': u'Calculate Total Amount',
 		'oldfieldtype': u'Button',
@@ -346,6 +352,7 @@
 	{
 		'allow_on_submit': 1,
 		'doctype': u'DocField',
+		'fieldname': u'update_voucher',
 		'fieldtype': u'Button',
 		'hidden': 1,
 		'label': u'Update Voucher',

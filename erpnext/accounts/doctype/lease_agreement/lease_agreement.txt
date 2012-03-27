@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2011-07-27 13:14:28',
+		'creation': '2012-03-27 14:35:44',
 		'docstatus': 0,
-		'modified': '2012-03-21 12:43:53',
+		'modified': '2012-03-27 14:35:44',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -34,12 +34,14 @@
 
 	# These values are common for all DocPerm
 	{
+		'create': 1,
 		'doctype': u'DocPerm',
 		'name': '__common__',
 		'parent': u'Lease Agreement',
 		'parentfield': u'permissions',
 		'parenttype': u'DocType',
-		'read': 1
+		'read': 1,
+		'role': u'Accounts Manager'
 	},
 
 	# DocType, Lease Agreement
@@ -50,30 +52,9 @@
 
 	# DocPerm
 	{
-		'cancel': 1,
-		'create': 1,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Accounts User',
-		'submit': 1,
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Accounts User'
-	},
-
-	# DocPerm
-	{
 		'amend': 1,
 		'cancel': 1,
-		'create': 0,
 		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Accounts Manager',
 		'submit': 1,
 		'write': 1
 	},
@@ -82,10 +63,7 @@
 	{
 		'amend': 0,
 		'cancel': 0,
-		'create': 0,
 		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Accounts Manager',
 		'submit': 0,
 		'write': 0
 	},
@@ -105,6 +83,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'lessee_info',
 		'fieldtype': u'Section Break',
 		'label': u'Lessee Info.',
 		'permlevel': 0
@@ -160,6 +139,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'vehicle_info',
 		'fieldtype': u'Section Break',
 		'label': u'Vehicle Info.',
 		'permlevel': 0
@@ -195,6 +175,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'invoice_and_payment_info',
 		'fieldtype': u'Section Break',
 		'label': u'Invoice and Payment Info.',
 		'permlevel': 0
@@ -265,6 +246,7 @@
 	{
 		'colour': u'White:FFF',
 		'doctype': u'DocField',
+		'fieldname': u'generate',
 		'fieldtype': u'Button',
 		'label': u'Generate',
 		'permlevel': 0,
@@ -286,6 +268,7 @@
 		'allow_on_submit': 1,
 		'colour': u'White:FFF',
 		'doctype': u'DocField',
+		'fieldname': u'installment_reciept',
 		'fieldtype': u'Button',
 		'label': u'Installment Reciept',
 		'permlevel': 0

@@ -3,59 +3,59 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2011-11-16 16:17:22',
+		'creation': '2012-03-27 14:36:34',
 		'docstatus': 0,
-		'modified': '2011-11-16 16:32:18',
-		'modified_by': 'Administrator',
-		'owner': 'wasim@webnotestech.com'
+		'modified': '2012-03-27 14:36:34',
+		'modified_by': u'Administrator',
+		'owner': u'wasim@webnotestech.com'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1321441191',
-		'colour': 'White:FFF',
-		'default_print_format': 'Standard',
+		'_last_update': u'1321441191',
+		'colour': u'White:FFF',
+		'default_print_format': u'Standard',
 		'doctype': 'DocType',
 		'issingle': 1,
-		'module': 'Stock',
+		'module': u'Stock',
 		'name': '__common__',
-		'section_style': 'Simple',
-		'server_code_error': ' ',
+		'section_style': u'Simple',
+		'server_code_error': u' ',
 		'show_in_menu': 1,
 		'version': 35
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Landed Cost Wizard',
-		'parentfield': 'fields',
-		'parenttype': 'DocType',
+		'parent': u'Landed Cost Wizard',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
 		'permlevel': 0
 	},
 
 	# These values are common for all DocPerm
 	{
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'name': '__common__',
-		'parent': 'Landed Cost Wizard',
-		'parentfield': 'permissions',
-		'parenttype': 'DocType',
+		'parent': u'Landed Cost Wizard',
+		'parentfield': u'permissions',
+		'parenttype': u'DocType',
 		'read': 1
 	},
 
 	# DocType, Landed Cost Wizard
 	{
 		'doctype': 'DocType',
-		'name': 'Landed Cost Wizard'
+		'name': u'Landed Cost Wizard'
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'role': 'All',
+		'role': u'All',
 		'write': 0
 	},
 
@@ -64,9 +64,9 @@
 		'amend': 0,
 		'cancel': 0,
 		'create': 1,
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'role': 'Purchase Manager',
+		'role': u'Purchase Manager',
 		'submit': 0,
 		'write': 1
 	},
@@ -74,148 +74,154 @@
 	# DocPerm
 	{
 		'create': 1,
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'role': 'System Manager',
+		'role': u'System Manager',
 		'write': 1
 	},
 
 	# DocPerm
 	{
 		'create': 1,
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'role': 'Purchase User',
+		'role': u'Purchase User',
 		'write': 1
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'permlevel': 1,
-		'role': 'All'
+		'role': u'All'
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'permlevel': 1,
-		'role': 'System Manager'
+		'role': u'System Manager'
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'permlevel': 1,
-		'role': 'Purchase User'
+		'role': u'Purchase User'
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'permlevel': 1,
-		'role': 'Purchase Manager'
+		'role': u'Purchase Manager'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'HTML',
-		'label': 'Process',
-		'options': '<div class="field_description"><b>Process:</b><br>1. Fetch and select Purchase Receipt<br>2. Enter extra costs<br>3. Click on Update Landed Cost button<br> 4. Cost will be added into other charges table of selected PR proportionately based on net total<br>5. Item Valuation Rate will be recalculated</div>'
+		'doctype': u'DocField',
+		'fieldname': u'process',
+		'fieldtype': u'HTML',
+		'label': u'Process',
+		'options': u'<div class="field_description"><b>Process:</b><br>1. Fetch and select Purchase Receipt<br>2. Enter extra costs<br>3. Click on Update Landed Cost button<br> 4. Cost will be added into other charges table of selected PR proportionately based on net total<br>5. Item Valuation Rate will be recalculated</div>'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Section Break',
-		'options': 'Simple'
+		'doctype': u'DocField',
+		'fieldname': u'section_break0',
+		'fieldtype': u'Section Break',
+		'options': u'Simple'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'from_pr_date',
-		'fieldtype': 'Date',
-		'label': 'From PR Date',
+		'doctype': u'DocField',
+		'fieldname': u'from_pr_date',
+		'fieldtype': u'Date',
+		'label': u'From PR Date',
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'to_pr_date',
-		'fieldtype': 'Date',
-		'label': 'To PR Date',
+		'doctype': u'DocField',
+		'fieldname': u'to_pr_date',
+		'fieldtype': u'Date',
+		'label': u'To PR Date',
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'currency',
-		'fieldtype': 'Select',
-		'label': 'Currency',
-		'options': 'link:Currency',
+		'doctype': u'DocField',
+		'fieldname': u'currency',
+		'fieldtype': u'Select',
+		'label': u'Currency',
+		'options': u'link:Currency',
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Button',
-		'label': 'Get Purchase Receipt',
-		'options': 'get_purchase_receipts'
+		'doctype': u'DocField',
+		'fieldname': u'get_purchase_receipt',
+		'fieldtype': u'Button',
+		'label': u'Get Purchase Receipt',
+		'options': u'get_purchase_receipts'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'lc_pr_details',
-		'fieldtype': 'Table',
-		'label': 'LC PR Details',
-		'options': 'LC PR Detail'
+		'doctype': u'DocField',
+		'fieldname': u'lc_pr_details',
+		'fieldtype': u'Table',
+		'label': u'LC PR Details',
+		'options': u'LC PR Detail'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Section Break',
-		'options': 'Simple'
+		'doctype': u'DocField',
+		'fieldname': u'section_break1',
+		'fieldtype': u'Section Break',
+		'options': u'Simple'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'landed_cost',
-		'fieldtype': 'Link',
-		'label': 'Select Landed Cost Details Master',
-		'options': 'Landed Cost Master'
+		'doctype': u'DocField',
+		'fieldname': u'landed_cost',
+		'fieldtype': u'Link',
+		'label': u'Select Landed Cost Details Master',
+		'options': u'Landed Cost Master'
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldtype': 'Button',
-		'label': 'Get Details',
-		'options': 'get_landed_cost_master_details'
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'get_details',
+		'fieldtype': u'Button',
+		'label': u'Get Details',
+		'options': u'get_landed_cost_master_details'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'landed_cost_details',
-		'fieldtype': 'Table',
-		'label': 'Landed Cost Details',
-		'options': 'Landed Cost Detail'
+		'doctype': u'DocField',
+		'fieldname': u'landed_cost_details',
+		'fieldtype': u'Table',
+		'label': u'Landed Cost Details',
+		'options': u'Landed Cost Detail'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Button',
-		'label': 'Update PR',
-		'options': 'update_landed_cost'
+		'doctype': u'DocField',
+		'fieldname': u'update_pr',
+		'fieldtype': u'Button',
+		'label': u'Update PR',
+		'options': u'update_landed_cost'
 	}
 ]

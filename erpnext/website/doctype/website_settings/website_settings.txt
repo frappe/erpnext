@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-02-02 13:19:50',
+		'creation': '2012-03-27 14:36:48',
 		'docstatus': 0,
-		'modified': '2012-02-14 16:13:59',
+		'modified': '2012-03-27 14:36:48',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -79,6 +79,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'top_bar',
 		'fieldtype': u'Section Break',
 		'label': u'Top Bar',
 		'permlevel': 0
@@ -132,6 +133,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'footer',
 		'fieldtype': u'Section Break',
 		'label': u'Footer',
 		'permlevel': 0
@@ -180,6 +182,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'domains',
 		'fieldtype': u'Section Break',
 		'label': u'Domains',
 		'permlevel': 0
@@ -210,6 +213,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'analytics',
 		'fieldtype': u'Section Break',
 		'label': u'Analytics',
 		'permlevel': 0

@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:09:07',
+		'creation': '2012-03-27 14:36:10',
 		'docstatus': 0,
-		'modified': '2012-03-21 14:35:34',
+		'modified': '2012-03-27 14:36:10',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -56,26 +56,21 @@
 
 	# DocPerm
 	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
 		'doctype': u'DocPerm',
 		'permlevel': 1,
-		'role': u'Sales User',
-		'submit': 0,
-		'write': 0
+		'role': u'All'
 	},
 
 	# DocPerm
 	{
 		'amend': 0,
 		'cancel': 0,
-		'create': 0,
+		'create': 1,
 		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Sales Manager',
+		'permlevel': 0,
+		'role': u'Sales User',
 		'submit': 0,
-		'write': 0
+		'write': 1
 	},
 
 	# DocPerm
@@ -96,28 +91,44 @@
 		'cancel': 0,
 		'create': 1,
 		'doctype': u'DocPerm',
+		'match': u'owner',
 		'permlevel': 0,
-		'role': u'Sales User',
+		'role': u'System Manager',
 		'submit': 0,
 		'write': 1
 	},
 
 	# DocPerm
 	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
 		'doctype': u'DocPerm',
 		'permlevel': 1,
-		'role': u'All'
+		'role': u'Sales Manager',
+		'submit': 0,
+		'write': 0
 	},
 
 	# DocPerm
 	{
 		'amend': 0,
 		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Sales User',
+		'submit': 0,
+		'write': 0
+	},
+
+	# DocPerm
+	{
 		'create': 1,
 		'doctype': u'DocPerm',
+		'match': u'territory',
 		'permlevel': 0,
 		'role': u'System Manager',
-		'submit': 0,
 		'write': 1
 	},
 
@@ -134,6 +145,7 @@
 	{
 		'colour': u'White:FFF',
 		'doctype': u'DocField',
+		'fieldname': u'basic_info',
 		'fieldtype': u'Section Break',
 		'label': u'Basic Info',
 		'oldfieldtype': u'Section Break',
@@ -143,6 +155,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'column_break0',
 		'fieldtype': u'Column Break',
 		'oldfieldtype': u'Column Break',
 		'permlevel': 0,
@@ -285,6 +298,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'column_break1',
 		'fieldtype': u'Column Break',
 		'permlevel': 0,
 		'width': u'50%'
@@ -376,6 +390,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'contact_info',
 		'fieldtype': u'Section Break',
 		'label': u'Contact Info',
 		'oldfieldtype': u'Column Break',
@@ -458,6 +473,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'column_break2',
 		'fieldtype': u'Column Break',
 		'permlevel': 0
 	},
@@ -545,6 +561,7 @@
 	{
 		'colour': u'White:FFF',
 		'doctype': u'DocField',
+		'fieldname': u'more_info',
 		'fieldtype': u'Section Break',
 		'label': u'More Info',
 		'oldfieldtype': u'Section Break',
@@ -637,6 +654,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'column_break3',
 		'fieldtype': u'Column Break',
 		'oldfieldtype': u'Column Break',
 		'permlevel': 0,
@@ -715,6 +733,7 @@
 		'colour': u'White:FFF',
 		'description': u'Keep a track of communication with this lead which will help for future reference.',
 		'doctype': u'DocField',
+		'fieldname': u'communication_history',
 		'fieldtype': u'Section Break',
 		'label': u'Communication History',
 		'oldfieldtype': u'Section Break',

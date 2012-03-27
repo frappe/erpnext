@@ -3,45 +3,45 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:09:27',
+		'creation': '2012-03-27 14:35:49',
 		'docstatus': 0,
-		'modified': '2010-09-20 14:06:57',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-27 14:35:49',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'autoname': 'Prompt',
-		'colour': 'White:FFF',
+		'autoname': u'Prompt',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
 		'in_create': 1,
-		'module': 'Accounts',
+		'module': u'Accounts',
 		'name': '__common__',
 		'read_only': 0,
-		'section_style': 'Simple',
-		'server_code_error': ' ',
+		'section_style': u'Simple',
+		'server_code_error': u' ',
 		'show_in_menu': 0,
 		'version': 11
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'TDS Rate Chart',
-		'parentfield': 'fields',
-		'parenttype': 'DocType',
+		'parent': u'TDS Rate Chart',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
 		'permlevel': 0
 	},
 
 	# These values are common for all DocPerm
 	{
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'name': '__common__',
-		'parent': 'TDS Rate Chart',
-		'parentfield': 'permissions',
-		'parenttype': 'DocType',
+		'parent': u'TDS Rate Chart',
+		'parentfield': u'permissions',
+		'parenttype': u'DocType',
 		'permlevel': 0,
 		'read': 1
 	},
@@ -49,7 +49,7 @@
 	# DocType, TDS Rate Chart
 	{
 		'doctype': 'DocType',
-		'name': 'TDS Rate Chart'
+		'name': u'TDS Rate Chart'
 	},
 
 	# DocPerm
@@ -57,21 +57,8 @@
 		'amend': 0,
 		'cancel': 0,
 		'create': 0,
-		'doctype': 'DocPerm',
-		'idx': 1,
-		'role': 'Accounts User',
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		'doctype': 'DocPerm',
-		'idx': 2,
-		'role': 'Accounts Manager',
+		'doctype': u'DocPerm',
+		'role': u'Accounts Manager',
 		'submit': 0,
 		'write': 0
 	},
@@ -79,49 +66,56 @@
 	# DocPerm
 	{
 		'create': 1,
-		'doctype': 'DocPerm',
-		'idx': 3,
-		'role': 'System Manager',
+		'doctype': u'DocPerm',
+		'role': u'System Manager',
 		'write': 1
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'role': u'Accounts User',
+		'submit': 0,
+		'write': 0
 	},
 
 	# DocField
 	{
-		'default': 'Accounts',
-		'doctype': 'DocField',
-		'fieldname': 'module',
-		'fieldtype': 'Link',
+		'default': u'Accounts',
+		'doctype': u'DocField',
+		'fieldname': u'module',
+		'fieldtype': u'Link',
 		'hidden': 1,
-		'idx': 1,
-		'label': 'Module',
-		'oldfieldname': 'module',
-		'oldfieldtype': 'Link',
-		'options': 'Module Def',
+		'label': u'Module',
+		'oldfieldname': u'module',
+		'oldfieldtype': u'Link',
+		'options': u'Module Def',
 		'print_hide': 1,
 		'report_hide': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'applicable_from',
-		'fieldtype': 'Date',
-		'idx': 2,
-		'label': 'Applicable From',
-		'oldfieldname': 'applicable_from',
-		'oldfieldtype': 'Date',
+		'doctype': u'DocField',
+		'fieldname': u'applicable_from',
+		'fieldtype': u'Date',
+		'label': u'Applicable From',
+		'oldfieldname': u'applicable_from',
+		'oldfieldtype': u'Date',
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'rate_chart_detail',
-		'fieldtype': 'Table',
-		'idx': 3,
-		'label': 'Rate Chart Detail',
-		'oldfieldname': 'rate_chart_detail',
-		'oldfieldtype': 'Table',
-		'options': 'TDS Rate Detail'
+		'doctype': u'DocField',
+		'fieldname': u'rate_chart_detail',
+		'fieldtype': u'Table',
+		'label': u'Rate Chart Detail',
+		'oldfieldname': u'rate_chart_detail',
+		'oldfieldtype': u'Table',
+		'options': u'TDS Rate Detail'
 	}
 ]

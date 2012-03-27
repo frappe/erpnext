@@ -3,127 +3,127 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2011-08-30 11:57:48',
+		'creation': '2012-03-27 14:35:43',
 		'docstatus': 0,
-		'modified': '2011-09-20 15:18:02',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-27 14:35:43',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'colour': 'White:FFF',
-		'default_print_format': 'Standard',
+		'colour': u'White:FFF',
+		'default_print_format': u'Standard',
 		'doctype': 'DocType',
 		'istable': 1,
-		'module': 'Accounts',
+		'module': u'Accounts',
 		'name': '__common__',
-		'section_style': 'Simple',
+		'section_style': u'Simple',
 		'show_in_menu': 0,
 		'version': 14
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'IR Payment Detail',
-		'parentfield': 'fields',
-		'parenttype': 'DocType'
+		'parent': u'IR Payment Detail',
+		'parentfield': u'fields',
+		'parenttype': u'DocType'
 	},
 
 	# DocType, IR Payment Detail
 	{
 		'doctype': 'DocType',
-		'name': 'IR Payment Detail'
+		'name': u'IR Payment Detail'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'selected',
-		'fieldtype': 'Check',
-		'label': 'Select',
+		'doctype': u'DocField',
+		'fieldname': u'selected',
+		'fieldtype': u'Check',
+		'label': u'Select',
 		'permlevel': 0,
 		'reqd': 1,
-		'width': '60px'
+		'width': u'60px'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'voucher_no',
-		'fieldtype': 'Link',
-		'label': 'Voucher No',
-		'options': 'Journal Voucher',
+		'doctype': u'DocField',
+		'fieldname': u'voucher_no',
+		'fieldtype': u'Link',
+		'label': u'Voucher No',
+		'options': u'Journal Voucher',
 		'permlevel': 1,
 		'reqd': 0,
-		'width': '140px'
+		'width': u'140px'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'amt_due',
-		'fieldtype': 'Currency',
-		'label': 'Amt Due',
+		'doctype': u'DocField',
+		'fieldname': u'amt_due',
+		'fieldtype': u'Currency',
+		'label': u'Amt Due',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'amt_to_be_reconciled',
-		'fieldtype': 'Currency',
-		'label': 'Amt to be reconciled',
+		'doctype': u'DocField',
+		'fieldname': u'amt_to_be_reconciled',
+		'fieldtype': u'Currency',
+		'label': u'Amt to be reconciled',
 		'permlevel': 0,
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'posting_date',
-		'fieldtype': 'Date',
-		'label': 'Posting Date',
+		'doctype': u'DocField',
+		'fieldname': u'posting_date',
+		'fieldtype': u'Date',
+		'label': u'Posting Date',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'total_amt',
-		'fieldtype': 'Currency',
-		'label': 'Total Amt',
+		'doctype': u'DocField',
+		'fieldname': u'total_amt',
+		'fieldtype': u'Currency',
+		'label': u'Total Amt',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'against_account',
-		'fieldtype': 'Data',
-		'label': 'Against Account',
+		'doctype': u'DocField',
+		'fieldname': u'against_account',
+		'fieldtype': u'Data',
+		'label': u'Against Account',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'remarks',
-		'fieldtype': 'Small Text',
-		'label': 'Remarks',
+		'doctype': u'DocField',
+		'fieldname': u'remarks',
+		'fieldtype': u'Small Text',
+		'label': u'Remarks',
 		'permlevel': 1,
-		'width': '200px'
+		'width': u'200px'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'voucher_detail_no',
-		'fieldtype': 'Data',
+		'doctype': u'DocField',
+		'fieldname': u'voucher_detail_no',
+		'fieldtype': u'Data',
 		'hidden': 1,
-		'label': 'Voucher Detail No',
+		'label': u'Voucher Detail No',
 		'no_column': 0,
 		'permlevel': 1,
 		'print_hide': 1,

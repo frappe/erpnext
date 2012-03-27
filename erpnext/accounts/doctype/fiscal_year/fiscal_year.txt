@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:09:02',
+		'creation': '2012-03-27 14:35:41',
 		'docstatus': 0,
-		'modified': '2012-03-21 12:54:40',
+		'modified': '2012-03-27 14:35:41',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -59,19 +59,20 @@
 
 	# DocPerm
 	{
+		'doctype': u'DocPerm'
+	},
+
+	# DocPerm
+	{
 		'amend': 0,
 		'doctype': u'DocPerm',
 		'submit': 0
 	},
 
-	# DocPerm
-	{
-		'doctype': u'DocPerm'
-	},
-
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'year_details',
 		'fieldtype': u'Section Break',
 		'label': u'Year Details',
 		'oldfieldtype': u'Section Break',
@@ -143,6 +144,7 @@
 		'colour': u'White:FFF',
 		'description': u"Click on the button below to reset balances from your previous year's closing and repost your balances. You can use this if your previous year balance sheet has been changed and you wish to update your current accounts.",
 		'doctype': u'DocField',
+		'fieldname': u'repost_accounts',
 		'fieldtype': u'Section Break',
 		'label': u'Repost Accounts',
 		'oldfieldtype': u'Section Break',
@@ -178,6 +180,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'repost_account_balances',
 		'fieldtype': u'Button',
 		'label': u'Repost Account Balances',
 		'oldfieldtype': u'Button',
@@ -188,6 +191,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'repost_voucher_outstanding',
 		'fieldtype': u'Button',
 		'label': u'Repost Voucher Outstanding',
 		'oldfieldtype': u'Button',

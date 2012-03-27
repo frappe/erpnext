@@ -3,131 +3,123 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:09:27',
+		'creation': '2012-03-27 14:35:48',
 		'docstatus': 0,
-		'modified': '2010-09-20 14:06:57',
-		'modified_by': 'Administrator',
-		'owner': 'wasim@webnotestech.com'
+		'modified': '2012-03-27 14:35:48',
+		'modified_by': u'Administrator',
+		'owner': u'wasim@webnotestech.com'
 	},
 
 	# These values are common for all DocType
 	{
-		'colour': 'White:FFF',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
 		'istable': 1,
-		'module': 'Accounts',
+		'module': u'Accounts',
 		'name': '__common__',
-		'section_style': 'Simple',
-		'server_code_error': ' ',
+		'section_style': u'Simple',
+		'server_code_error': u' ',
 		'show_in_menu': 0,
 		'version': 2
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'TDS Detail',
-		'parentfield': 'fields',
-		'parenttype': 'DocType',
+		'parent': u'TDS Detail',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
 		'permlevel': 0,
-		'width': '150px'
+		'width': u'150px'
 	},
 
 	# These values are common for all DocPerm
 	{
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'name': '__common__',
-		'parent': 'TDS Detail',
-		'parentfield': 'permissions',
-		'parenttype': 'DocType',
+		'parent': u'TDS Detail',
+		'parentfield': u'permissions',
+		'parenttype': u'DocType',
 		'read': 1
 	},
 
 	# DocType, TDS Detail
 	{
 		'doctype': 'DocType',
-		'name': 'TDS Detail'
+		'name': u'TDS Detail'
 	},
 
 	# DocPerm
 	{
 		'create': 0,
-		'doctype': 'DocPerm',
-		'idx': 1,
+		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'role': 'All',
+		'role': u'All',
 		'write': 1
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm',
-		'idx': 2,
+		'doctype': u'DocPerm',
 		'permlevel': 1,
-		'role': 'All'
+		'role': u'All'
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm',
-		'idx': 3,
+		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'role': 'System Manager',
+		'role': u'System Manager',
 		'write': 1
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm',
-		'idx': 4,
+		'doctype': u'DocPerm',
 		'permlevel': 1,
-		'role': 'System Manager'
+		'role': u'System Manager'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'tds_category',
-		'fieldtype': 'Select',
-		'idx': 1,
-		'label': 'TDS Category',
-		'oldfieldname': 'tds_category',
-		'oldfieldtype': 'Select',
-		'options': 'link:TDS Category'
+		'doctype': u'DocField',
+		'fieldname': u'tds_category',
+		'fieldtype': u'Select',
+		'label': u'TDS Category',
+		'oldfieldname': u'tds_category',
+		'oldfieldtype': u'Select',
+		'options': u'link:TDS Category'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'special_tds_rate_applicable',
-		'fieldtype': 'Select',
-		'idx': 2,
-		'label': 'Special TDS Rate Applicable',
-		'oldfieldname': 'special_tds_rate_applicable',
-		'oldfieldtype': 'Select',
-		'options': '\nYes\nNo'
+		'doctype': u'DocField',
+		'fieldname': u'special_tds_rate_applicable',
+		'fieldtype': u'Select',
+		'label': u'Special TDS Rate Applicable',
+		'oldfieldname': u'special_tds_rate_applicable',
+		'oldfieldtype': u'Select',
+		'options': u'\nYes\nNo'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'special_tds_rate',
-		'fieldtype': 'Currency',
-		'idx': 3,
-		'label': 'Special TDS Rate(Section-197)\t',
-		'oldfieldname': 'special_tds_rate',
-		'oldfieldtype': 'Currency'
+		'doctype': u'DocField',
+		'fieldname': u'special_tds_rate',
+		'fieldtype': u'Currency',
+		'label': u'Special TDS Rate(Section-197)\t',
+		'oldfieldname': u'special_tds_rate',
+		'oldfieldtype': u'Currency'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'special_tds_limit',
-		'fieldtype': 'Currency',
-		'idx': 4,
-		'label': 'Special TDS Limit',
-		'oldfieldname': 'special_tds_limit',
-		'oldfieldtype': 'Currency'
+		'doctype': u'DocField',
+		'fieldname': u'special_tds_limit',
+		'fieldtype': u'Currency',
+		'label': u'Special TDS Limit',
+		'oldfieldname': u'special_tds_limit',
+		'oldfieldtype': u'Currency'
 	}
 ]

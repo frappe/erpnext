@@ -3,28 +3,28 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:08:55',
+		'creation': '2012-03-27 14:35:52',
 		'docstatus': 0,
-		'modified': '2011-01-13 12:14:36',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-27 14:35:52',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'colour': 'White:FFF',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
 		'issingle': 1,
-		'module': 'Home',
+		'module': u'Home',
 		'name': '__common__',
-		'section_style': 'Simple',
-		'server_code_error': ' ',
+		'section_style': u'Simple',
+		'server_code_error': u' ',
 		'version': 13
 	},
 
 	# DocType, Company Control
 	{
 		'doctype': 'DocType',
-		'name': 'Company Control'
+		'name': u'Company Control'
 	}
 ]

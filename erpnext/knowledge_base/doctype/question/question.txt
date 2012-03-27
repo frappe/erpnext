@@ -3,37 +3,37 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:09:17',
+		'creation': '2012-03-27 14:36:01',
 		'docstatus': 0,
-		'modified': '2011-04-20 18:22:44',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-27 14:36:01',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
 		'allow_attach': 0,
 		'allow_trash': 1,
-		'autoname': 'QUES.#######',
-		'colour': 'White:FFF',
+		'autoname': u'QUES.#######',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
 		'in_create': 1,
-		'module': 'Knowledge Base',
+		'module': u'Knowledge Base',
 		'name': '__common__',
 		'read_only': 1,
-		'section_style': 'Simple',
-		'server_code_error': ' ',
+		'section_style': u'Simple',
+		'server_code_error': u' ',
 		'show_in_menu': 0,
 		'version': 7
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Question',
-		'parentfield': 'fields',
-		'parenttype': 'DocType',
+		'parent': u'Question',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
 		'permlevel': 0
 	},
 
@@ -41,128 +41,118 @@
 	{
 		'cancel': 1,
 		'create': 1,
-		'doctype': 'DocPerm',
-		'idx': 1,
+		'doctype': u'DocPerm',
 		'name': '__common__',
-		'parent': 'Question',
-		'parentfield': 'permissions',
-		'parenttype': 'DocType',
+		'parent': u'Question',
+		'parentfield': u'permissions',
+		'parenttype': u'DocType',
 		'permlevel': 0,
 		'read': 1,
-		'role': 'All',
+		'role': u'All',
 		'write': 1
 	},
 
 	# DocType, Question
 	{
 		'doctype': 'DocType',
-		'name': 'Question'
+		'name': u'Question'
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm'
+		'doctype': u'DocPerm'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'question',
-		'fieldtype': 'Text',
-		'idx': 1,
-		'label': 'Question',
-		'oldfieldname': 'question',
-		'oldfieldtype': 'Text'
+		'doctype': u'DocField',
+		'fieldname': u'question',
+		'fieldtype': u'Text',
+		'label': u'Question',
+		'oldfieldname': u'question',
+		'oldfieldtype': u'Text'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'points',
-		'fieldtype': 'Int',
+		'doctype': u'DocField',
+		'fieldname': u'points',
+		'fieldtype': u'Int',
 		'hidden': 1,
-		'idx': 2,
-		'label': 'Points'
+		'label': u'Points'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'answer',
-		'fieldtype': 'Text Editor',
-		'idx': 3,
-		'label': 'Answer',
-		'oldfieldname': 'answer',
-		'oldfieldtype': 'Text Editor'
+		'doctype': u'DocField',
+		'fieldname': u'answer',
+		'fieldtype': u'Text Editor',
+		'label': u'Answer',
+		'oldfieldname': u'answer',
+		'oldfieldtype': u'Text Editor'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': '_user_tags',
-		'fieldtype': 'Data',
+		'doctype': u'DocField',
+		'fieldname': u'_user_tags',
+		'fieldtype': u'Data',
 		'hidden': 1,
-		'idx': 4,
-		'label': 'User Tags'
+		'label': u'User Tags'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'tag_1',
-		'fieldtype': 'Link',
-		'idx': 5,
-		'label': 'Tag 1',
-		'oldfieldname': 'tag_1',
-		'oldfieldtype': 'Link',
-		'options': 'Question Tag',
+		'doctype': u'DocField',
+		'fieldname': u'tag_1',
+		'fieldtype': u'Link',
+		'label': u'Tag 1',
+		'oldfieldname': u'tag_1',
+		'oldfieldtype': u'Link',
+		'options': u'Question Tag',
 		'search_index': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': '_users_voted',
-		'fieldtype': 'Text',
-		'idx': 6,
-		'label': 'Users Voted'
+		'doctype': u'DocField',
+		'fieldname': u'_users_voted',
+		'fieldtype': u'Text',
+		'label': u'Users Voted'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'tag_2',
-		'fieldtype': 'Link',
-		'idx': 7,
-		'label': 'Tag 2',
-		'oldfieldname': 'tag_2',
-		'oldfieldtype': 'Link',
-		'options': 'Question Tag',
+		'doctype': u'DocField',
+		'fieldname': u'tag_2',
+		'fieldtype': u'Link',
+		'label': u'Tag 2',
+		'oldfieldname': u'tag_2',
+		'oldfieldtype': u'Link',
+		'options': u'Question Tag',
 		'search_index': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'tag_3',
-		'fieldtype': 'Link',
-		'idx': 8,
-		'label': 'Tag 3',
-		'oldfieldname': 'tag_3',
-		'oldfieldtype': 'Link',
-		'options': 'Question Tag',
+		'doctype': u'DocField',
+		'fieldname': u'tag_3',
+		'fieldtype': u'Link',
+		'label': u'Tag 3',
+		'oldfieldname': u'tag_3',
+		'oldfieldtype': u'Link',
+		'options': u'Question Tag',
 		'search_index': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'file_list',
-		'fieldtype': 'Text',
+		'doctype': u'DocField',
+		'fieldname': u'file_list',
+		'fieldtype': u'Text',
 		'hidden': 1,
-		'idx': 9,
-		'label': 'File List',
-		'oldfieldname': 'file_list',
-		'oldfieldtype': 'Text'
+		'label': u'File List',
+		'oldfieldname': u'file_list',
+		'oldfieldtype': u'Text'
 	}
 ]

@@ -3,101 +3,97 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:09:13',
+		'creation': '2012-03-27 14:36:22',
 		'docstatus': 0,
-		'modified': '2010-09-20 14:06:57',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-27 14:36:22',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1294312215',
+		'_last_update': u'1294312215',
 		'allow_trash': 1,
-		'autoname': 'field:print_heading',
-		'colour': 'White:FFF',
+		'autoname': u'field:print_heading',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
-		'document_type': 'Master',
-		'module': 'Setup',
+		'document_type': u'Master',
+		'module': u'Setup',
 		'name': '__common__',
-		'search_fields': 'print_heading',
-		'section_style': 'Simple',
-		'server_code_error': ' ',
+		'search_fields': u'print_heading',
+		'section_style': u'Simple',
+		'server_code_error': u' ',
 		'version': 27
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Print Heading',
-		'parentfield': 'fields',
-		'parenttype': 'DocType'
+		'parent': u'Print Heading',
+		'parentfield': u'fields',
+		'parenttype': u'DocType'
 	},
 
 	# These values are common for all DocPerm
 	{
 		'cancel': 1,
 		'create': 1,
-		'doctype': 'DocPerm',
-		'idx': 1,
+		'doctype': u'DocPerm',
 		'name': '__common__',
-		'parent': 'Print Heading',
-		'parentfield': 'permissions',
-		'parenttype': 'DocType',
+		'parent': u'Print Heading',
+		'parentfield': u'permissions',
+		'parenttype': u'DocType',
 		'permlevel': 0,
 		'read': 1,
-		'role': 'All',
+		'role': u'All',
 		'write': 1
 	},
 
 	# DocType, Print Heading
 	{
 		'doctype': 'DocType',
-		'name': 'Print Heading'
+		'name': u'Print Heading'
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm'
+		'doctype': u'DocPerm'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'trash_reason',
-		'fieldtype': 'Small Text',
-		'idx': 1,
-		'label': 'Trash Reason',
-		'oldfieldname': 'trash_reason',
-		'oldfieldtype': 'Small Text',
+		'doctype': u'DocField',
+		'fieldname': u'trash_reason',
+		'fieldtype': u'Small Text',
+		'label': u'Trash Reason',
+		'oldfieldname': u'trash_reason',
+		'oldfieldtype': u'Small Text',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'print_heading',
-		'fieldtype': 'Data',
-		'idx': 2,
+		'doctype': u'DocField',
+		'fieldname': u'print_heading',
+		'fieldtype': u'Data',
 		'in_filter': 1,
-		'label': 'Print Heading',
-		'oldfieldname': 'print_heading',
-		'oldfieldtype': 'Data',
+		'label': u'Print Heading',
+		'oldfieldname': u'print_heading',
+		'oldfieldtype': u'Data',
 		'permlevel': 0,
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'description',
-		'fieldtype': 'Small Text',
-		'idx': 3,
-		'label': 'Description',
-		'oldfieldname': 'description',
-		'oldfieldtype': 'Small Text',
+		'doctype': u'DocField',
+		'fieldname': u'description',
+		'fieldtype': u'Small Text',
+		'label': u'Description',
+		'oldfieldname': u'description',
+		'oldfieldtype': u'Small Text',
 		'permlevel': 0,
-		'width': '300px'
+		'width': u'300px'
 	}
 ]

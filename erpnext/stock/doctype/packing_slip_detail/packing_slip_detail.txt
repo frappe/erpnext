@@ -3,111 +3,111 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-01-30 17:40:50',
+		'creation': '2012-03-27 14:36:34',
 		'docstatus': 0,
-		'modified': '2012-01-31 13:15:40',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-27 14:36:34',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'autoname': 'PSD/.#######',
-		'colour': 'White:FFF',
+		'autoname': u'PSD/.#######',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
 		'istable': 1,
-		'module': 'Stock',
+		'module': u'Stock',
 		'name': '__common__',
-		'section_style': 'Simple',
+		'section_style': u'Simple',
 		'show_in_menu': 0,
 		'version': 9
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Packing Slip Detail',
-		'parentfield': 'fields',
-		'parenttype': 'DocType'
+		'parent': u'Packing Slip Detail',
+		'parentfield': u'fields',
+		'parenttype': u'DocType'
 	},
 
 	# DocType, Packing Slip Detail
 	{
 		'doctype': 'DocType',
-		'name': 'Packing Slip Detail'
+		'name': u'Packing Slip Detail'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'item_code',
-		'fieldtype': 'Link',
-		'label': 'Item Code',
-		'options': 'Item',
+		'doctype': u'DocField',
+		'fieldname': u'item_code',
+		'fieldtype': u'Link',
+		'label': u'Item Code',
+		'options': u'Item',
 		'permlevel': 0,
 		'reqd': 1,
-		'width': '100px'
+		'width': u'100px'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'item_name',
-		'fieldtype': 'Data',
-		'label': 'Item Name',
+		'doctype': u'DocField',
+		'fieldname': u'item_name',
+		'fieldtype': u'Data',
+		'label': u'Item Name',
 		'permlevel': 1,
-		'width': '200px'
+		'width': u'200px'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'qty',
-		'fieldtype': 'Currency',
-		'label': 'Quantity',
+		'doctype': u'DocField',
+		'fieldname': u'qty',
+		'fieldtype': u'Currency',
+		'label': u'Quantity',
 		'permlevel': 0,
 		'reqd': 1,
-		'width': '100px'
+		'width': u'100px'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'stock_uom',
-		'fieldtype': 'Data',
-		'label': 'UOM',
+		'doctype': u'DocField',
+		'fieldname': u'stock_uom',
+		'fieldtype': u'Data',
+		'label': u'UOM',
 		'permlevel': 1,
-		'width': '100px'
+		'width': u'100px'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'net_weight',
-		'fieldtype': 'Float',
-		'label': 'Net Weight',
+		'doctype': u'DocField',
+		'fieldname': u'net_weight',
+		'fieldtype': u'Float',
+		'label': u'Net Weight',
 		'permlevel': 1,
-		'width': '100px'
+		'width': u'100px'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'weight_uom',
-		'fieldtype': 'Link',
-		'label': 'Weight UOM',
-		'options': 'UOM',
+		'doctype': u'DocField',
+		'fieldname': u'weight_uom',
+		'fieldtype': u'Link',
+		'label': u'Weight UOM',
+		'options': u'UOM',
 		'permlevel': 1,
-		'width': '100px'
+		'width': u'100px'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'page_break',
-		'fieldtype': 'Check',
-		'label': 'Page Break',
+		'doctype': u'DocField',
+		'fieldname': u'page_break',
+		'fieldtype': u'Check',
+		'label': u'Page Break',
 		'permlevel': 0
 	}
 ]

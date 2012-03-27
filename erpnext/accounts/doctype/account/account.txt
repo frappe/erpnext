@@ -3,170 +3,168 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:08:51',
+		'creation': '2012-03-27 14:35:39',
 		'docstatus': 0,
-		'modified': '2012-02-02 15:34:41',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-27 14:35:39',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1325570645',
+		'_last_update': u'1325570645',
 		'allow_copy': 1,
 		'allow_trash': 1,
-		'colour': 'White:FFF',
-		'default_print_format': 'Standard',
+		'colour': u'White:FFF',
+		'default_print_format': u'Standard',
 		'doctype': 'DocType',
-		'document_type': 'Master',
+		'document_type': u'Master',
 		'in_create': 1,
-		'module': 'Accounts',
+		'module': u'Accounts',
 		'name': '__common__',
-		'search_fields': 'debit_or_credit, group_or_ledger',
-		'section_style': 'Tray',
-		'server_code_error': ' ',
+		'search_fields': u'debit_or_credit, group_or_ledger',
+		'section_style': u'Tray',
+		'server_code_error': u' ',
 		'show_in_menu': 0,
 		'version': 138
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Account',
-		'parentfield': 'fields',
-		'parenttype': 'DocType'
+		'parent': u'Account',
+		'parentfield': u'fields',
+		'parenttype': u'DocType'
 	},
 
 	# These values are common for all DocPerm
 	{
-		'doctype': 'DocPerm',
+		'amend': 0,
+		'doctype': u'DocPerm',
 		'name': '__common__',
-		'parent': 'Account',
-		'parentfield': 'permissions',
-		'parenttype': 'DocType',
-		'read': 1
+		'parent': u'Account',
+		'parentfield': u'permissions',
+		'parenttype': u'DocType',
+		'read': 1,
+		'submit': 0
 	},
 
 	# DocType, Account
 	{
 		'doctype': 'DocType',
-		'name': 'Account'
+		'name': u'Account'
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm',
-		'permlevel': 0,
-		'role': 'Sales User'
-	},
-
-	# DocPerm
-	{
-		'doctype': 'DocPerm',
-		'permlevel': 0,
-		'role': 'Purchase User'
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
 		'cancel': 1,
 		'create': 1,
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'role': 'Accounts User',
-		'submit': 0,
+		'role': u'Accounts User',
 		'write': 1
 	},
 
 	# DocPerm
 	{
-		'amend': 0,
-		'cancel': 1,
-		'create': 1,
-		'doctype': 'DocPerm',
-		'permlevel': 0,
-		'role': 'Accounts Manager',
-		'submit': 0,
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
 		'cancel': 0,
 		'create': 0,
-		'doctype': 'DocPerm',
-		'permlevel': 1,
-		'role': 'Accounts User',
-		'submit': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Sales User',
 		'write': 0
 	},
 
 	# DocPerm
 	{
-		'amend': 0,
 		'cancel': 0,
 		'create': 0,
-		'doctype': 'DocPerm',
-		'permlevel': 1,
-		'role': 'Accounts Manager',
-		'submit': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Purchase User',
 		'write': 0
 	},
 
 	# DocPerm
 	{
-		'amend': 0,
 		'cancel': 0,
 		'create': 0,
-		'doctype': 'DocPerm',
-		'permlevel': 2,
-		'role': 'Accounts Manager',
-		'submit': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Accounts User',
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Accounts Manager',
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'cancel': 1,
+		'create': 1,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Accounts Manager',
 		'write': 1
 	},
 
 	# DocPerm
 	{
-		'amend': 0,
 		'cancel': 0,
 		'create': 0,
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'permlevel': 2,
-		'role': 'Accounts User',
-		'submit': 0,
+		'role': u'Accounts Manager',
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 2,
+		'role': u'Accounts User',
 		'write': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Section Break',
-		'label': 'Properties',
-		'oldfieldtype': 'Section Break',
+		'doctype': u'DocField',
+		'fieldname': u'properties',
+		'fieldtype': u'Section Break',
+		'label': u'Properties',
+		'oldfieldtype': u'Section Break',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Column Break',
+		'doctype': u'DocField',
+		'fieldname': u'column_break0',
+		'fieldtype': u'Column Break',
 		'permlevel': 0,
-		'width': '50%'
+		'width': u'50%'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'account_name',
-		'fieldtype': 'Data',
+		'doctype': u'DocField',
+		'fieldname': u'account_name',
+		'fieldtype': u'Data',
 		'in_filter': 1,
-		'label': 'Account Name',
+		'label': u'Account Name',
 		'no_copy': 1,
-		'oldfieldname': 'account_name',
-		'oldfieldtype': 'Data',
+		'oldfieldname': u'account_name',
+		'oldfieldtype': u'Data',
 		'permlevel': 1,
 		'reqd': 1,
 		'search_index': 1
@@ -174,42 +172,42 @@
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'parent_account',
-		'fieldtype': 'Link',
-		'label': 'Parent Account',
-		'oldfieldname': 'parent_account',
-		'oldfieldtype': 'Link',
-		'options': 'Account',
+		'doctype': u'DocField',
+		'fieldname': u'parent_account',
+		'fieldtype': u'Link',
+		'label': u'Parent Account',
+		'oldfieldname': u'parent_account',
+		'oldfieldtype': u'Link',
+		'options': u'Account',
 		'permlevel': 0,
 		'search_index': 1,
-		'trigger': 'Client'
+		'trigger': u'Client'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'level',
-		'fieldtype': 'Int',
+		'doctype': u'DocField',
+		'fieldname': u'level',
+		'fieldtype': u'Int',
 		'hidden': 1,
-		'label': 'Level',
-		'oldfieldname': 'level',
-		'oldfieldtype': 'Int',
+		'label': u'Level',
+		'oldfieldname': u'level',
+		'oldfieldtype': u'Int',
 		'permlevel': 1,
 		'print_hide': 1
 	},
 
 	# DocField
 	{
-		'default': 'Ledger',
-		'doctype': 'DocField',
-		'fieldname': 'group_or_ledger',
-		'fieldtype': 'Select',
+		'default': u'Ledger',
+		'doctype': u'DocField',
+		'fieldname': u'group_or_ledger',
+		'fieldtype': u'Select',
 		'in_filter': 1,
-		'label': 'Group or Ledger',
-		'oldfieldname': 'group_or_ledger',
-		'oldfieldtype': 'Select',
-		'options': '\nLedger\nGroup',
+		'label': u'Group or Ledger',
+		'oldfieldname': u'group_or_ledger',
+		'oldfieldtype': u'Select',
+		'options': u'\nLedger\nGroup',
 		'permlevel': 1,
 		'reqd': 1,
 		'search_index': 1
@@ -217,109 +215,112 @@
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Button',
-		'label': 'Convert to Group',
+		'doctype': u'DocField',
+		'fieldname': u'convert_to_group',
+		'fieldtype': u'Button',
+		'label': u'Convert to Group',
 		'permlevel': 0,
-		'trigger': 'Client'
+		'trigger': u'Client'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Button',
-		'label': 'Convert to Ledger',
+		'doctype': u'DocField',
+		'fieldname': u'convert_to_ledger',
+		'fieldtype': u'Button',
+		'label': u'Convert to Ledger',
 		'permlevel': 0,
-		'trigger': 'Client'
+		'trigger': u'Client'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'debit_or_credit',
-		'fieldtype': 'Data',
+		'doctype': u'DocField',
+		'fieldname': u'debit_or_credit',
+		'fieldtype': u'Data',
 		'in_filter': 1,
-		'label': 'Debit or Credit',
-		'oldfieldname': 'debit_or_credit',
-		'oldfieldtype': 'Data',
+		'label': u'Debit or Credit',
+		'oldfieldname': u'debit_or_credit',
+		'oldfieldtype': u'Data',
 		'permlevel': 1,
 		'search_index': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'is_pl_account',
-		'fieldtype': 'Select',
+		'doctype': u'DocField',
+		'fieldname': u'is_pl_account',
+		'fieldtype': u'Select',
 		'in_filter': 1,
-		'label': 'Is PL Account',
-		'oldfieldname': 'is_pl_account',
-		'oldfieldtype': 'Select',
-		'options': 'Yes\nNo',
+		'label': u'Is PL Account',
+		'oldfieldname': u'is_pl_account',
+		'oldfieldtype': u'Select',
+		'options': u'Yes\nNo',
 		'permlevel': 1,
 		'search_index': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'account_type',
-		'fieldtype': 'Select',
+		'doctype': u'DocField',
+		'fieldname': u'account_type',
+		'fieldtype': u'Select',
 		'in_filter': 1,
-		'label': 'Account Type',
-		'oldfieldname': 'account_type',
-		'oldfieldtype': 'Select',
-		'options': '\nFixed Asset Account\nBank or Cash\nExpense Account\nTax\nIncome Account\nChargeable',
+		'label': u'Account Type',
+		'oldfieldname': u'account_type',
+		'oldfieldtype': u'Select',
+		'options': u'\nFixed Asset Account\nBank or Cash\nExpense Account\nTax\nIncome Account\nChargeable',
 		'permlevel': 0,
 		'search_index': 0,
-		'trigger': 'Client'
+		'trigger': u'Client'
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'description': 'If Account Type is "Tax" then the default rate is required.',
-		'doctype': 'DocField',
-		'fieldname': 'tax_rate',
-		'fieldtype': 'Currency',
+		'colour': u'White:FFF',
+		'description': u'If Account Type is "Tax" then the default rate is required.',
+		'doctype': u'DocField',
+		'fieldname': u'tax_rate',
+		'fieldtype': u'Currency',
 		'hidden': 0,
-		'label': 'Rate',
-		'oldfieldname': 'tax_rate',
-		'oldfieldtype': 'Currency',
+		'label': u'Rate',
+		'oldfieldname': u'tax_rate',
+		'oldfieldtype': u'Currency',
 		'permlevel': 0,
 		'reqd': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Column Break',
+		'doctype': u'DocField',
+		'fieldname': u'column_break1',
+		'fieldtype': u'Column Break',
 		'permlevel': 0,
-		'width': '50%'
+		'width': u'50%'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'freeze_account',
-		'fieldtype': 'Select',
-		'label': 'Freeze Account',
-		'oldfieldname': 'freeze_account',
-		'oldfieldtype': 'Select',
-		'options': 'No\nYes',
+		'doctype': u'DocField',
+		'fieldname': u'freeze_account',
+		'fieldtype': u'Select',
+		'label': u'Freeze Account',
+		'oldfieldname': u'freeze_account',
+		'oldfieldtype': u'Select',
+		'options': u'No\nYes',
 		'permlevel': 2
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'company',
-		'fieldtype': 'Link',
+		'doctype': u'DocField',
+		'fieldname': u'company',
+		'fieldtype': u'Link',
 		'in_filter': 1,
-		'label': 'Company',
-		'oldfieldname': 'company',
-		'oldfieldtype': 'Link',
-		'options': 'Company',
+		'label': u'Company',
+		'oldfieldname': u'company',
+		'oldfieldtype': u'Link',
+		'options': u'Company',
 		'permlevel': 1,
 		'reqd': 1,
 		'search_index': 1
@@ -327,128 +328,129 @@
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'credit_days',
-		'fieldtype': 'Int',
+		'doctype': u'DocField',
+		'fieldname': u'credit_days',
+		'fieldtype': u'Int',
 		'hidden': 1,
-		'label': 'Credit Days',
-		'oldfieldname': 'credit_days',
-		'oldfieldtype': 'Int',
+		'label': u'Credit Days',
+		'oldfieldname': u'credit_days',
+		'oldfieldtype': u'Int',
 		'permlevel': 0,
 		'print_hide': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'credit_limit',
-		'fieldtype': 'Currency',
+		'doctype': u'DocField',
+		'fieldname': u'credit_limit',
+		'fieldtype': u'Currency',
 		'hidden': 1,
-		'label': 'Credit Limit',
-		'oldfieldname': 'credit_limit',
-		'oldfieldtype': 'Currency',
+		'label': u'Credit Limit',
+		'oldfieldname': u'credit_limit',
+		'oldfieldtype': u'Currency',
 		'permlevel': 0,
 		'print_hide': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'master_type',
-		'fieldtype': 'Select',
-		'label': 'Master Type',
-		'oldfieldname': 'master_type',
-		'oldfieldtype': 'Select',
-		'options': '\nNA\nSupplier\nCustomer\nEmployee',
+		'doctype': u'DocField',
+		'fieldname': u'master_type',
+		'fieldtype': u'Select',
+		'label': u'Master Type',
+		'oldfieldname': u'master_type',
+		'oldfieldtype': u'Select',
+		'options': u'\nNA\nSupplier\nCustomer\nEmployee',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'master_name',
-		'fieldtype': 'Link',
-		'label': 'Master Name',
-		'oldfieldname': 'master_name',
-		'oldfieldtype': 'Link',
+		'doctype': u'DocField',
+		'fieldname': u'master_name',
+		'fieldtype': u'Link',
+		'label': u'Master Name',
+		'oldfieldname': u'master_name',
+		'oldfieldtype': u'Link',
 		'permlevel': 0,
-		'trigger': 'Client'
+		'trigger': u'Client'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Section Break',
-		'label': 'TDS',
-		'oldfieldtype': 'Section Break',
+		'doctype': u'DocField',
+		'fieldname': u'tds',
+		'fieldtype': u'Section Break',
+		'label': u'TDS',
+		'oldfieldtype': u'Section Break',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'pan_number',
-		'fieldtype': 'Data',
-		'label': 'PAN Number',
-		'oldfieldname': 'pan_number',
-		'oldfieldtype': 'Data',
+		'doctype': u'DocField',
+		'fieldname': u'pan_number',
+		'fieldtype': u'Data',
+		'label': u'PAN Number',
+		'oldfieldname': u'pan_number',
+		'oldfieldtype': u'Data',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'default': 'No',
-		'doctype': 'DocField',
-		'fieldname': 'tds_applicable',
-		'fieldtype': 'Select',
-		'label': 'TDS Applicable',
-		'oldfieldname': 'tds_applicable',
-		'oldfieldtype': 'Select',
-		'options': '\nYes\nNo',
+		'default': u'No',
+		'doctype': u'DocField',
+		'fieldname': u'tds_applicable',
+		'fieldtype': u'Select',
+		'label': u'TDS Applicable',
+		'oldfieldname': u'tds_applicable',
+		'oldfieldtype': u'Select',
+		'options': u'\nYes\nNo',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'tds_details',
-		'fieldtype': 'Table',
-		'label': 'TDS Details',
-		'oldfieldname': 'tds_details',
-		'oldfieldtype': 'Table',
-		'options': 'TDS Detail',
+		'doctype': u'DocField',
+		'fieldname': u'tds_details',
+		'fieldtype': u'Table',
+		'label': u'TDS Details',
+		'oldfieldname': u'tds_details',
+		'oldfieldtype': u'Table',
+		'options': u'TDS Detail',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'description': "Don't delete this field at any cost",
-		'doctype': 'DocField',
-		'fieldname': 'old_parent',
-		'fieldtype': 'Link',
+		'description': u"Don't delete this field at any cost",
+		'doctype': u'DocField',
+		'fieldname': u'old_parent',
+		'fieldtype': u'Link',
 		'hidden': 1,
-		'label': 'Old Parent',
+		'label': u'Old Parent',
 		'no_copy': 1,
-		'oldfieldname': 'old_parent',
-		'oldfieldtype': 'Data',
-		'options': 'Account',
+		'oldfieldname': u'old_parent',
+		'oldfieldtype': u'Data',
+		'options': u'Account',
 		'permlevel': 0,
 		'report_hide': 1
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'description': "Don't delete this field at any cost",
-		'doctype': 'DocField',
-		'fieldname': 'lft',
-		'fieldtype': 'Int',
+		'colour': u'White:FFF',
+		'description': u"Don't delete this field at any cost",
+		'doctype': u'DocField',
+		'fieldname': u'lft',
+		'fieldtype': u'Int',
 		'hidden': 1,
 		'in_filter': 1,
-		'label': 'Lft',
+		'label': u'Lft',
 		'no_copy': 1,
-		'oldfieldname': 'lft',
-		'oldfieldtype': 'Int',
+		'oldfieldname': u'lft',
+		'oldfieldtype': u'Int',
 		'permlevel': 3,
 		'print_hide': 1,
 		'report_hide': 1,
@@ -457,17 +459,17 @@
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'description': "Don't delete this field at any cost",
-		'doctype': 'DocField',
-		'fieldname': 'rgt',
-		'fieldtype': 'Int',
+		'colour': u'White:FFF',
+		'description': u"Don't delete this field at any cost",
+		'doctype': u'DocField',
+		'fieldname': u'rgt',
+		'fieldtype': u'Int',
 		'hidden': 1,
 		'in_filter': 1,
-		'label': 'Rgt',
+		'label': u'Rgt',
 		'no_copy': 1,
-		'oldfieldname': 'rgt',
-		'oldfieldtype': 'Int',
+		'oldfieldname': u'rgt',
+		'oldfieldtype': u'Int',
 		'permlevel': 3,
 		'print_hide': 1,
 		'report_hide': 1,
@@ -476,12 +478,12 @@
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'trash_reason',
-		'fieldtype': 'Small Text',
-		'label': 'Trash Reason',
-		'oldfieldname': 'trash_reason',
-		'oldfieldtype': 'Small Text',
+		'doctype': u'DocField',
+		'fieldname': u'trash_reason',
+		'fieldtype': u'Small Text',
+		'label': u'Trash Reason',
+		'oldfieldname': u'trash_reason',
+		'oldfieldtype': u'Small Text',
 		'permlevel': 1
 	}
 ]

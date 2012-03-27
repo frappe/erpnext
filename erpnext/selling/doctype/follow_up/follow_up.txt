@@ -3,22 +3,22 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:09:02',
+		'creation': '2012-03-27 14:36:09',
 		'docstatus': 0,
-		'modified': '2010-10-13 12:06:26',
-		'modified_by': 'yogesh@webnotestech.com',
-		'owner': 'Administrator'
+		'modified': '2012-03-27 14:36:09',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'colour': 'White:FFF',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
 		'istable': 1,
-		'module': 'Selling',
+		'module': u'Selling',
 		'name': '__common__',
-		'section_style': 'Tray',
-		'server_code_error': ' ',
+		'section_style': u'Tray',
+		'server_code_error': u' ',
 		'show_in_menu': 0,
 		'version': 10
 	},
@@ -26,69 +26,65 @@
 	# These values are common for all DocField
 	{
 		'allow_on_submit': 1,
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Follow up',
-		'parentfield': 'fields',
-		'parenttype': 'DocType',
+		'parent': u'Follow up',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
 		'permlevel': 0
 	},
 
 	# DocType, Follow up
 	{
 		'doctype': 'DocType',
-		'name': 'Follow up'
+		'name': u'Follow up'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'date',
-		'fieldtype': 'Date',
-		'idx': 1,
+		'doctype': u'DocField',
+		'fieldname': u'date',
+		'fieldtype': u'Date',
 		'in_filter': 1,
-		'label': 'Date',
-		'oldfieldname': 'date',
-		'oldfieldtype': 'Date'
+		'label': u'Date',
+		'oldfieldname': u'date',
+		'oldfieldtype': u'Date'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'notes',
-		'fieldtype': 'Small Text',
-		'idx': 2,
+		'doctype': u'DocField',
+		'fieldname': u'notes',
+		'fieldtype': u'Small Text',
 		'in_filter': 0,
-		'label': 'Notes',
-		'oldfieldname': 'notes',
-		'oldfieldtype': 'Small Text',
-		'width': '300px'
+		'label': u'Notes',
+		'oldfieldname': u'notes',
+		'oldfieldtype': u'Small Text',
+		'width': u'300px'
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldname': 'follow_up_type',
-		'fieldtype': 'Select',
-		'idx': 3,
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'follow_up_type',
+		'fieldtype': u'Select',
 		'in_filter': 1,
-		'label': 'Follow up type',
-		'oldfieldname': 'follow_up_type',
-		'oldfieldtype': 'Select',
-		'options': '\nPhone\nEmail\nSMS\nVisit\nOther'
+		'label': u'Follow up type',
+		'oldfieldname': u'follow_up_type',
+		'oldfieldtype': u'Select',
+		'options': u'\nPhone\nEmail\nSMS\nVisit\nOther'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'follow_up_by',
-		'fieldtype': 'Link',
-		'idx': 4,
+		'doctype': u'DocField',
+		'fieldname': u'follow_up_by',
+		'fieldtype': u'Link',
 		'in_filter': 1,
-		'label': 'Follow up by',
-		'oldfieldname': 'follow_up_by',
-		'oldfieldtype': 'Link',
-		'options': 'Sales Person'
+		'label': u'Follow up by',
+		'oldfieldname': u'follow_up_by',
+		'oldfieldtype': u'Link',
+		'options': u'Sales Person'
 	}
 ]

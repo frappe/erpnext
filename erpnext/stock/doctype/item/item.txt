@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:09:05',
+		'creation': '2012-03-27 14:36:31',
 		'docstatus': 0,
-		'modified': '2012-02-21 12:40:01',
+		'modified': '2012-03-27 18:51:27',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -29,7 +29,7 @@
 		'show_in_menu': 0,
 		'subject': u'%(item_name)s',
 		'tag_fields': u'item_group',
-		'version': 171
+		'version': 172
 	},
 
 	# These values are common for all DocField
@@ -59,73 +59,6 @@
 
 	# DocPerm
 	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Material Manager',
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Material Manager',
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Material User',
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Material User',
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'cancel': 1,
-		'create': 1,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Material Master Manager',
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'create': 0,
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Material Master Manager',
-		'write': 0
-	},
-
-	# DocPerm
-	{
 		'cancel': 1,
 		'create': 1,
 		'doctype': u'DocPerm',
@@ -136,14 +69,82 @@
 
 	# DocPerm
 	{
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Material Master Manager',
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'cancel': 1,
+		'create': 1,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Material Master Manager',
+		'write': 1
+	},
+
+	# DocPerm
+	{
 		'doctype': u'DocPerm',
 		'permlevel': 1,
 		'role': u'System Manager'
 	},
 
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Material Manager',
+		'submit': 0,
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Material Manager',
+		'submit': 0,
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Material User',
+		'submit': 0,
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Material User',
+		'submit': 0,
+		'write': 0
+	},
+
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'item',
 		'fieldtype': u'Section Break',
 		'label': u'Item',
 		'no_copy': 0,
@@ -211,6 +212,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'ighelp',
 		'fieldtype': u'HTML',
 		'label': u'IGHelp',
 		'oldfieldtype': u'HTML',
@@ -236,6 +238,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'column_break0',
 		'fieldtype': u'Column Break',
 		'permlevel': 0
 	},
@@ -269,6 +272,7 @@
 		'colour': u'White:FFF',
 		'description': u'Generates HTML to include image (1st attachment) in the description',
 		'doctype': u'DocField',
+		'fieldname': u'add_image',
 		'fieldtype': u'Button',
 		'label': u'Add Image',
 		'permlevel': 0
@@ -277,6 +281,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'inventory',
 		'fieldtype': u'Section Break',
 		'label': u'Inventory',
 		'oldfieldtype': u'Section Break',
@@ -402,6 +407,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'column_break1',
 		'fieldtype': u'Column Break',
 		'oldfieldtype': u'Column Break',
 		'permlevel': 0,
@@ -502,6 +508,7 @@
 	{
 		'colour': u'White:FFF',
 		'doctype': u'DocField',
+		'fieldname': u'purchase_details',
 		'fieldtype': u'Section Break',
 		'label': u'Purchase Details',
 		'oldfieldtype': u'Section Break',
@@ -608,6 +615,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'column_break2',
 		'fieldtype': u'Column Break',
 		'oldfieldtype': u'Column Break',
 		'permlevel': 0,
@@ -657,6 +665,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'sales_details',
 		'fieldtype': u'Section Break',
 		'label': u'Sales Details',
 		'oldfieldtype': u'Section Break',
@@ -759,6 +768,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'column_break3',
 		'fieldtype': u'Column Break',
 		'oldfieldtype': u'Column Break',
 		'permlevel': 0,
@@ -793,6 +803,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'item_tax_section_break',
 		'fieldtype': u'Section Break',
 		'label': u'Item Tax',
 		'oldfieldtype': u'Section Break',
@@ -814,6 +825,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'inspection_criteria',
 		'fieldtype': u'Section Break',
 		'label': u'Inspection Criteria',
 		'oldfieldtype': u'Section Break',
@@ -850,6 +862,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'manufacturing',
 		'fieldtype': u'Section Break',
 		'label': u'Manufacturing',
 		'oldfieldtype': u'Section Break',

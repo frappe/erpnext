@@ -3,44 +3,43 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:08:51',
+		'creation': '2012-03-27 14:35:53',
 		'docstatus': 0,
-		'modified': '2010-09-20 14:06:57',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-27 14:35:53',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'colour': 'White:FFF',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
 		'istable': 1,
-		'module': 'HR',
+		'module': u'HR',
 		'name': '__common__',
-		'section_style': 'Simple',
+		'section_style': u'Simple',
 		'show_in_menu': 0,
 		'version': 5
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Absent Days Detail',
-		'parentfield': 'fields',
-		'parenttype': 'DocType',
+		'parent': u'Absent Days Detail',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
 		'permlevel': 0
 	},
 
 	# These values are common for all DocPerm
 	{
 		'create': 1,
-		'doctype': 'DocPerm',
-		'idx': 1,
+		'doctype': u'DocPerm',
 		'name': '__common__',
-		'parent': 'Absent Days Detail',
-		'parentfield': 'permissions',
-		'parenttype': 'DocType',
+		'parent': u'Absent Days Detail',
+		'parentfield': u'permissions',
+		'parenttype': u'DocType',
 		'permlevel': 0,
 		'read': 1,
 		'write': 1
@@ -49,89 +48,82 @@
 	# DocType, Absent Days Detail
 	{
 		'doctype': 'DocType',
-		'name': 'Absent Days Detail'
+		'name': u'Absent Days Detail'
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm'
+		'doctype': u'DocPerm'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'leave_type',
-		'fieldtype': 'Select',
-		'idx': 1,
-		'label': 'Leave Type',
-		'oldfieldname': 'leave_type',
-		'oldfieldtype': 'Select',
-		'options': 'link:Leave Type'
+		'doctype': u'DocField',
+		'fieldname': u'leave_type',
+		'fieldtype': u'Select',
+		'label': u'Leave Type',
+		'oldfieldname': u'leave_type',
+		'oldfieldtype': u'Select',
+		'options': u'link:Leave Type'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'no_of_leave_days',
-		'fieldtype': 'Data',
-		'idx': 2,
-		'label': 'No of leave days',
-		'oldfieldname': 'no_of_leave_days',
-		'oldfieldtype': 'Data'
+		'doctype': u'DocField',
+		'fieldname': u'no_of_leave_days',
+		'fieldtype': u'Data',
+		'label': u'No of leave days',
+		'oldfieldname': u'no_of_leave_days',
+		'oldfieldtype': u'Data'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'from_date',
-		'fieldtype': 'Date',
-		'idx': 3,
-		'label': 'From Date',
-		'oldfieldname': 'from_date',
-		'oldfieldtype': 'Date'
+		'doctype': u'DocField',
+		'fieldname': u'from_date',
+		'fieldtype': u'Date',
+		'label': u'From Date',
+		'oldfieldname': u'from_date',
+		'oldfieldtype': u'Date'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'to_date',
-		'fieldtype': 'Date',
-		'idx': 4,
-		'label': 'To Date',
-		'oldfieldname': 'to_date',
-		'oldfieldtype': 'Date'
+		'doctype': u'DocField',
+		'fieldname': u'to_date',
+		'fieldtype': u'Date',
+		'label': u'To Date',
+		'oldfieldname': u'to_date',
+		'oldfieldtype': u'Date'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'previous_balance',
-		'fieldtype': 'Data',
-		'idx': 5,
-		'label': 'Previous Balance',
-		'oldfieldname': 'previous_balance',
-		'oldfieldtype': 'Data'
+		'doctype': u'DocField',
+		'fieldname': u'previous_balance',
+		'fieldtype': u'Data',
+		'label': u'Previous Balance',
+		'oldfieldname': u'previous_balance',
+		'oldfieldtype': u'Data'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'current_balance',
-		'fieldtype': 'Data',
-		'idx': 6,
-		'label': 'Current Balance',
-		'oldfieldname': 'current_balance',
-		'oldfieldtype': 'Data'
+		'doctype': u'DocField',
+		'fieldname': u'current_balance',
+		'fieldtype': u'Data',
+		'label': u'Current Balance',
+		'oldfieldname': u'current_balance',
+		'oldfieldtype': u'Data'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'max_allowed',
-		'fieldtype': 'Data',
-		'idx': 7,
-		'label': 'Max. Allowed',
-		'oldfieldname': 'max_allowed',
-		'oldfieldtype': 'Data'
+		'doctype': u'DocField',
+		'fieldname': u'max_allowed',
+		'fieldtype': u'Data',
+		'label': u'Max. Allowed',
+		'oldfieldname': u'max_allowed',
+		'oldfieldtype': u'Data'
 	}
 ]

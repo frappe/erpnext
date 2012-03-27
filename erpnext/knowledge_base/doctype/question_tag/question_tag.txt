@@ -3,37 +3,36 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:09:17',
+		'creation': '2012-03-27 14:36:02',
 		'docstatus': 0,
-		'modified': '2010-09-20 14:06:57',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-27 14:36:02',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'autoname': 'field:tag_name',
-		'colour': 'White:FFF',
+		'autoname': u'field:tag_name',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
-		'module': 'Knowledge Base',
+		'module': u'Knowledge Base',
 		'name': '__common__',
-		'section_style': 'Simple',
+		'section_style': u'Simple',
 		'version': 1
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'tag_name',
-		'fieldtype': 'Data',
-		'idx': 1,
-		'label': 'Tag Name',
+		'doctype': u'DocField',
+		'fieldname': u'tag_name',
+		'fieldtype': u'Data',
+		'label': u'Tag Name',
 		'name': '__common__',
-		'oldfieldname': 'tag_name',
-		'oldfieldtype': 'Data',
-		'parent': 'Question Tag',
-		'parentfield': 'fields',
-		'parenttype': 'DocType',
+		'oldfieldname': u'tag_name',
+		'oldfieldtype': u'Data',
+		'parent': u'Question Tag',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
 		'permlevel': 0,
 		'reqd': 1
 	},
@@ -41,31 +40,30 @@
 	# These values are common for all DocPerm
 	{
 		'create': 1,
-		'doctype': 'DocPerm',
-		'idx': 1,
+		'doctype': u'DocPerm',
 		'name': '__common__',
-		'parent': 'Question Tag',
-		'parentfield': 'permissions',
-		'parenttype': 'DocType',
+		'parent': u'Question Tag',
+		'parentfield': u'permissions',
+		'parenttype': u'DocType',
 		'permlevel': 0,
 		'read': 1,
-		'role': 'All',
+		'role': u'All',
 		'write': 1
 	},
 
 	# DocType, Question Tag
 	{
 		'doctype': 'DocType',
-		'name': 'Question Tag'
+		'name': u'Question Tag'
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm'
+		'doctype': u'DocPerm'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField'
+		'doctype': u'DocField'
 	}
 ]

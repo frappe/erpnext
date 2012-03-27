@@ -3,303 +3,301 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:09:03',
+		'creation': '2012-03-27 14:35:42',
 		'docstatus': 0,
-		'modified': '2011-11-24 15:03:45',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-27 14:35:42',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1319016431',
-		'autoname': 'GL.#######',
-		'colour': 'White:FFF',
-		'default_print_format': 'Standard',
+		'_last_update': u'1319016431',
+		'autoname': u'GL.#######',
+		'colour': u'White:FFF',
+		'default_print_format': u'Standard',
 		'doctype': 'DocType',
 		'in_create': 1,
-		'module': 'Accounts',
+		'module': u'Accounts',
 		'name': '__common__',
-		'search_fields': 'voucher_no,account,posting_date,against_voucher',
-		'section_style': 'Simple',
-		'server_code_error': ' ',
+		'search_fields': u'voucher_no,account,posting_date,against_voucher',
+		'section_style': u'Simple',
+		'server_code_error': u' ',
 		'show_in_menu': 0,
 		'version': 103
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'GL Entry',
-		'parentfield': 'fields',
-		'parenttype': 'DocType',
+		'parent': u'GL Entry',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
 		'permlevel': 0
 	},
 
 	# These values are common for all DocPerm
 	{
-		'doctype': 'DocPerm',
+		'create': 0,
+		'doctype': u'DocPerm',
 		'name': '__common__',
-		'parent': 'GL Entry',
-		'parentfield': 'permissions',
-		'parenttype': 'DocType',
-		'read': 1
+		'parent': u'GL Entry',
+		'parentfield': u'permissions',
+		'parenttype': u'DocType',
+		'read': 1,
+		'write': 0
 	},
 
 	# DocType, GL Entry
 	{
 		'doctype': 'DocType',
-		'name': 'GL Entry'
+		'name': u'GL Entry'
 	},
 
 	# DocPerm
 	{
 		'amend': 0,
 		'cancel': 0,
-		'create': 0,
-		'doctype': 'DocPerm',
-		'role': 'Accounts User',
-		'submit': 0,
-		'write': 0
+		'doctype': u'DocPerm',
+		'role': u'Accounts User',
+		'submit': 0
 	},
 
 	# DocPerm
 	{
 		'amend': 0,
 		'cancel': 0,
-		'create': 0,
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'role': 'Accounts Manager',
-		'submit': 0,
-		'write': 0
+		'role': u'Accounts Manager',
+		'submit': 0
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'role': 'System Manager'
+		'role': u'System Manager'
 	},
 
 	# DocField
 	{
-		'description': 'The date at which current entry will get or has actually executed.',
-		'doctype': 'DocField',
-		'fieldname': 'posting_date',
-		'fieldtype': 'Date',
+		'description': u'The date at which current entry will get or has actually executed.',
+		'doctype': u'DocField',
+		'fieldname': u'posting_date',
+		'fieldtype': u'Date',
 		'in_filter': 1,
-		'label': 'Posting Date',
-		'oldfieldname': 'posting_date',
-		'oldfieldtype': 'Date',
+		'label': u'Posting Date',
+		'oldfieldname': u'posting_date',
+		'oldfieldtype': u'Date',
 		'search_index': 1
 	},
 
 	# DocField
 	{
-		'description': 'The date at which current entry is made in system.',
-		'doctype': 'DocField',
-		'fieldname': 'transaction_date',
-		'fieldtype': 'Date',
-		'label': 'Transaction Date',
-		'oldfieldname': 'transaction_date',
-		'oldfieldtype': 'Date'
+		'description': u'The date at which current entry is made in system.',
+		'doctype': u'DocField',
+		'fieldname': u'transaction_date',
+		'fieldtype': u'Date',
+		'label': u'Transaction Date',
+		'oldfieldname': u'transaction_date',
+		'oldfieldtype': u'Date'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'aging_date',
-		'fieldtype': 'Date',
+		'doctype': u'DocField',
+		'fieldname': u'aging_date',
+		'fieldtype': u'Date',
 		'in_filter': 1,
-		'label': 'Aging Date',
-		'oldfieldname': 'aging_date',
-		'oldfieldtype': 'Date',
+		'label': u'Aging Date',
+		'oldfieldname': u'aging_date',
+		'oldfieldtype': u'Date',
 		'search_index': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'account',
-		'fieldtype': 'Link',
+		'doctype': u'DocField',
+		'fieldname': u'account',
+		'fieldtype': u'Link',
 		'in_filter': 1,
-		'label': 'Account',
-		'oldfieldname': 'account',
-		'oldfieldtype': 'Link',
-		'options': 'Account',
+		'label': u'Account',
+		'oldfieldname': u'account',
+		'oldfieldtype': u'Link',
+		'options': u'Account',
 		'search_index': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'cost_center',
-		'fieldtype': 'Link',
+		'doctype': u'DocField',
+		'fieldname': u'cost_center',
+		'fieldtype': u'Link',
 		'in_filter': 1,
-		'label': 'Cost Center',
-		'oldfieldname': 'cost_center',
-		'oldfieldtype': 'Link',
-		'options': 'Cost Center',
+		'label': u'Cost Center',
+		'oldfieldname': u'cost_center',
+		'oldfieldtype': u'Link',
+		'options': u'Cost Center',
 		'search_index': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'debit',
-		'fieldtype': 'Currency',
-		'label': 'Debit Amt',
-		'oldfieldname': 'debit',
-		'oldfieldtype': 'Currency'
+		'doctype': u'DocField',
+		'fieldname': u'debit',
+		'fieldtype': u'Currency',
+		'label': u'Debit Amt',
+		'oldfieldname': u'debit',
+		'oldfieldtype': u'Currency'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'credit',
-		'fieldtype': 'Currency',
-		'label': 'Credit Amt',
-		'oldfieldname': 'credit',
-		'oldfieldtype': 'Currency'
+		'doctype': u'DocField',
+		'fieldname': u'credit',
+		'fieldtype': u'Currency',
+		'label': u'Credit Amt',
+		'oldfieldname': u'credit',
+		'oldfieldtype': u'Currency'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'against',
-		'fieldtype': 'Text',
+		'doctype': u'DocField',
+		'fieldname': u'against',
+		'fieldtype': u'Text',
 		'in_filter': 1,
-		'label': 'Against',
-		'oldfieldname': 'against',
-		'oldfieldtype': 'Text'
+		'label': u'Against',
+		'oldfieldname': u'against',
+		'oldfieldtype': u'Text'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'against_voucher',
-		'fieldtype': 'Data',
+		'doctype': u'DocField',
+		'fieldname': u'against_voucher',
+		'fieldtype': u'Data',
 		'in_filter': 1,
-		'label': 'Against Voucher',
-		'oldfieldname': 'against_voucher',
-		'oldfieldtype': 'Data',
+		'label': u'Against Voucher',
+		'oldfieldname': u'against_voucher',
+		'oldfieldtype': u'Data',
 		'search_index': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'against_voucher_type',
-		'fieldtype': 'Data',
+		'doctype': u'DocField',
+		'fieldname': u'against_voucher_type',
+		'fieldtype': u'Data',
 		'in_filter': 0,
-		'label': 'Against Voucher Type',
-		'oldfieldname': 'against_voucher_type',
-		'oldfieldtype': 'Data',
+		'label': u'Against Voucher Type',
+		'oldfieldname': u'against_voucher_type',
+		'oldfieldtype': u'Data',
 		'search_index': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'voucher_type',
-		'fieldtype': 'Select',
+		'doctype': u'DocField',
+		'fieldname': u'voucher_type',
+		'fieldtype': u'Select',
 		'in_filter': 1,
-		'label': 'Voucher Type',
-		'oldfieldname': 'voucher_type',
-		'oldfieldtype': 'Select',
-		'options': 'Journal Voucher\nReceivable Voucher\nPayable Voucher',
+		'label': u'Voucher Type',
+		'oldfieldname': u'voucher_type',
+		'oldfieldtype': u'Select',
+		'options': u'Journal Voucher\nReceivable Voucher\nPayable Voucher',
 		'search_index': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'voucher_no',
-		'fieldtype': 'Data',
+		'doctype': u'DocField',
+		'fieldname': u'voucher_no',
+		'fieldtype': u'Data',
 		'in_filter': 1,
-		'label': 'Voucher No',
-		'oldfieldname': 'voucher_no',
-		'oldfieldtype': 'Data',
+		'label': u'Voucher No',
+		'oldfieldname': u'voucher_no',
+		'oldfieldtype': u'Data',
 		'search_index': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'remarks',
-		'fieldtype': 'Text',
+		'doctype': u'DocField',
+		'fieldname': u'remarks',
+		'fieldtype': u'Text',
 		'in_filter': 1,
-		'label': 'Remarks',
+		'label': u'Remarks',
 		'no_copy': 1,
-		'oldfieldname': 'remarks',
-		'oldfieldtype': 'Text',
+		'oldfieldname': u'remarks',
+		'oldfieldtype': u'Text',
 		'search_index': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'is_cancelled',
-		'fieldtype': 'Select',
+		'doctype': u'DocField',
+		'fieldname': u'is_cancelled',
+		'fieldtype': u'Select',
 		'in_filter': 1,
-		'label': 'Is Cancelled',
-		'oldfieldname': 'is_cancelled',
-		'oldfieldtype': 'Select',
-		'options': 'No\nYes',
+		'label': u'Is Cancelled',
+		'oldfieldname': u'is_cancelled',
+		'oldfieldtype': u'Select',
+		'options': u'No\nYes',
 		'search_index': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'is_opening',
-		'fieldtype': 'Select',
+		'doctype': u'DocField',
+		'fieldname': u'is_opening',
+		'fieldtype': u'Select',
 		'in_filter': 1,
-		'label': 'Is Opening',
-		'oldfieldname': 'is_opening',
-		'oldfieldtype': 'Select',
-		'options': 'No\nYes',
+		'label': u'Is Opening',
+		'oldfieldname': u'is_opening',
+		'oldfieldtype': u'Select',
+		'options': u'No\nYes',
 		'search_index': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'is_advance',
-		'fieldtype': 'Select',
+		'doctype': u'DocField',
+		'fieldname': u'is_advance',
+		'fieldtype': u'Select',
 		'in_filter': 0,
-		'label': 'Is Advance',
-		'oldfieldname': 'is_advance',
-		'oldfieldtype': 'Select',
-		'options': 'No\nYes',
+		'label': u'Is Advance',
+		'oldfieldname': u'is_advance',
+		'oldfieldtype': u'Select',
+		'options': u'No\nYes',
 		'search_index': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'fiscal_year',
-		'fieldtype': 'Select',
+		'doctype': u'DocField',
+		'fieldname': u'fiscal_year',
+		'fieldtype': u'Select',
 		'in_filter': 1,
-		'label': 'Fiscal Year',
-		'oldfieldname': 'fiscal_year',
-		'oldfieldtype': 'Select',
-		'options': 'link:Fiscal Year',
+		'label': u'Fiscal Year',
+		'oldfieldname': u'fiscal_year',
+		'oldfieldtype': u'Select',
+		'options': u'link:Fiscal Year',
 		'search_index': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'company',
-		'fieldtype': 'Link',
+		'doctype': u'DocField',
+		'fieldname': u'company',
+		'fieldtype': u'Link',
 		'in_filter': 1,
-		'label': 'Company',
-		'oldfieldname': 'company',
-		'oldfieldtype': 'Link',
-		'options': 'Company',
+		'label': u'Company',
+		'oldfieldname': u'company',
+		'oldfieldtype': u'Link',
+		'options': u'Company',
 		'search_index': 0
 	}
 ]

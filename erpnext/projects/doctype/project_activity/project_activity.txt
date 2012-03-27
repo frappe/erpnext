@@ -3,173 +3,165 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:09:14',
+		'creation': '2012-03-27 14:36:06',
 		'docstatus': 0,
-		'modified': '2010-09-20 14:06:57',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-27 14:36:06',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'autoname': 'Activity.######',
-		'colour': 'White:FFF',
+		'autoname': u'Activity.######',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
-		'module': 'Projects',
+		'module': u'Projects',
 		'name': '__common__',
-		'section_style': 'Simple',
-		'server_code_error': ' ',
+		'section_style': u'Simple',
+		'server_code_error': u' ',
 		'version': 15
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Project Activity',
-		'parentfield': 'fields',
-		'parenttype': 'DocType',
+		'parent': u'Project Activity',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
 		'permlevel': 0
 	},
 
 	# These values are common for all DocPerm
 	{
 		'create': 1,
-		'doctype': 'DocPerm',
-		'idx': 1,
+		'doctype': u'DocPerm',
 		'name': '__common__',
-		'parent': 'Project Activity',
-		'parentfield': 'permissions',
-		'parenttype': 'DocType',
+		'parent': u'Project Activity',
+		'parentfield': u'permissions',
+		'parenttype': u'DocType',
 		'permlevel': 0,
 		'read': 1,
-		'role': 'All',
+		'role': u'All',
 		'write': 1
 	},
 
 	# DocType, Project Activity
 	{
 		'doctype': 'DocType',
-		'name': 'Project Activity'
+		'name': u'Project Activity'
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm'
+		'doctype': u'DocPerm'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'project',
-		'fieldtype': 'Link',
-		'idx': 1,
-		'label': 'Project',
-		'oldfieldname': 'project',
-		'oldfieldtype': 'Link',
-		'options': 'Project'
+		'doctype': u'DocField',
+		'fieldname': u'project',
+		'fieldtype': u'Link',
+		'label': u'Project',
+		'oldfieldname': u'project',
+		'oldfieldtype': u'Link',
+		'options': u'Project'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'activity_name',
-		'fieldtype': 'Data',
-		'idx': 2,
-		'label': 'Activity Name',
-		'oldfieldname': 'activity_name',
-		'oldfieldtype': 'Data',
+		'doctype': u'DocField',
+		'fieldname': u'activity_name',
+		'fieldtype': u'Data',
+		'label': u'Activity Name',
+		'oldfieldname': u'activity_name',
+		'oldfieldtype': u'Data',
 		'print_hide': 1,
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'percent_complete',
-		'fieldtype': 'Select',
-		'idx': 3,
-		'label': 'Percent Complete',
-		'oldfieldname': 'percent_complete',
-		'oldfieldtype': 'Select',
-		'options': '0\n5\n10\n15\n20\n25\n30\n35\n40\n45\n50\n55\n60\n65\n70\n75\n80\n85\n90\n95\n100',
+		'doctype': u'DocField',
+		'fieldname': u'percent_complete',
+		'fieldtype': u'Select',
+		'label': u'Percent Complete',
+		'oldfieldname': u'percent_complete',
+		'oldfieldtype': u'Select',
+		'options': u'0\n5\n10\n15\n20\n25\n30\n35\n40\n45\n50\n55\n60\n65\n70\n75\n80\n85\n90\n95\n100',
 		'reqd': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'last_update',
-		'fieldtype': 'Date',
+		'doctype': u'DocField',
+		'fieldname': u'last_update',
+		'fieldtype': u'Date',
 		'hidden': 1,
-		'idx': 4,
-		'label': 'Last Update',
-		'oldfieldname': 'last_update',
-		'oldfieldtype': 'Date',
+		'label': u'Last Update',
+		'oldfieldname': u'last_update',
+		'oldfieldtype': u'Date',
 		'print_hide': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'last_update_by',
-		'fieldtype': 'Data',
+		'doctype': u'DocField',
+		'fieldname': u'last_update_by',
+		'fieldtype': u'Data',
 		'hidden': 1,
-		'idx': 5,
-		'label': 'Last Update By',
-		'oldfieldname': 'last_update_by',
-		'oldfieldtype': 'Data',
+		'label': u'Last Update By',
+		'oldfieldname': u'last_update_by',
+		'oldfieldtype': u'Data',
 		'print_hide': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Section Break',
-		'idx': 6,
-		'label': 'Updates',
-		'oldfieldtype': 'Section Break'
+		'doctype': u'DocField',
+		'fieldname': u'updates',
+		'fieldtype': u'Section Break',
+		'label': u'Updates',
+		'oldfieldtype': u'Section Break'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'HTML',
-		'idx': 7,
-		'label': 'Updates HTML',
-		'oldfieldtype': 'HTML'
+		'doctype': u'DocField',
+		'fieldname': u'updates_html',
+		'fieldtype': u'HTML',
+		'label': u'Updates HTML',
+		'oldfieldtype': u'HTML'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'new_update',
-		'fieldtype': 'Text',
-		'idx': 8,
-		'label': 'New Update',
-		'oldfieldname': 'new_update',
-		'oldfieldtype': 'Text'
+		'doctype': u'DocField',
+		'fieldname': u'new_update',
+		'fieldtype': u'Text',
+		'label': u'New Update',
+		'oldfieldname': u'new_update',
+		'oldfieldtype': u'Text'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'hours',
-		'fieldtype': 'Float',
-		'idx': 9,
-		'label': 'Hours',
-		'oldfieldname': 'hours',
-		'oldfieldtype': 'Float'
+		'doctype': u'DocField',
+		'fieldname': u'hours',
+		'fieldtype': u'Float',
+		'label': u'Hours',
+		'oldfieldname': u'hours',
+		'oldfieldtype': u'Float'
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldtype': 'Button',
-		'idx': 10,
-		'label': 'Add',
-		'oldfieldtype': 'Button',
-		'trigger': 'Client'
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'add',
+		'fieldtype': u'Button',
+		'label': u'Add',
+		'oldfieldtype': u'Button',
+		'trigger': u'Client'
 	}
 ]

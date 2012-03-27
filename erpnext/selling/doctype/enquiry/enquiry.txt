@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:09:00',
+		'creation': '2012-03-27 14:36:08',
 		'docstatus': 0,
-		'modified': '2012-03-07 13:10:00',
+		'modified': '2012-03-27 14:45:47',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -17,6 +17,7 @@
 		'default_print_format': u'Standard',
 		'doctype': 'DocType',
 		'document_type': u'Transaction',
+		'is_submittable': 1,
 		'module': u'Selling',
 		'name': '__common__',
 		'search_fields': u'status,transaction_date,customer,lead,enquiry_type,territory,company',
@@ -50,18 +51,6 @@
 	{
 		'doctype': 'DocType',
 		'name': u'Enquiry'
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Sales Manager',
-		'submit': 0,
-		'write': 0
 	},
 
 	# DocPerm
@@ -119,11 +108,24 @@
 		'write': 1
 	},
 
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Sales Manager',
+		'submit': 0,
+		'write': 0
+	},
+
 	# DocField
 	{
 		'colour': u'White:FFF',
 		'description': u'Enter customer enquiry for which you might raise a quotation in future',
 		'doctype': u'DocField',
+		'fieldname': u'basic_info',
 		'fieldtype': u'Section Break',
 		'label': u'Basic Info',
 		'oldfieldtype': u'Section Break',
@@ -288,6 +290,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'column_break0',
 		'fieldtype': u'Column Break',
 		'oldfieldtype': u'Column Break',
 		'permlevel': 0,
@@ -409,6 +412,7 @@
 	{
 		'colour': u'White:FFF',
 		'doctype': u'DocField',
+		'fieldname': u'items',
 		'fieldtype': u'Section Break',
 		'label': u'Items',
 		'oldfieldtype': u'Section Break',
@@ -434,6 +438,7 @@
 		'colour': u'White:FFF',
 		'description': u'Filing in Additional Information about the Enquiry will help you analyze your data better.',
 		'doctype': u'DocField',
+		'fieldname': u'more_info',
 		'fieldtype': u'Section Break',
 		'label': u'More Info',
 		'oldfieldtype': u'Section Break',
@@ -443,6 +448,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'column_break1',
 		'fieldtype': u'Column Break',
 		'oldfieldtype': u'Column Break',
 		'permlevel': 0,
@@ -525,6 +531,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'column_break2',
 		'fieldtype': u'Column Break',
 		'oldfieldtype': u'Column Break',
 		'permlevel': 0,
@@ -594,6 +601,7 @@
 		'colour': u'White:FFF',
 		'description': u'Keep a track of communication related to this enquiry which will help for future reference.',
 		'doctype': u'DocField',
+		'fieldname': u'communication_history',
 		'fieldtype': u'Section Break',
 		'label': u'Communication History',
 		'oldfieldtype': u'Section Break',

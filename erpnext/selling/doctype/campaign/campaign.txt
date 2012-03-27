@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:08:54',
+		'creation': '2012-03-27 14:36:07',
 		'docstatus': 0,
-		'modified': '2012-02-20 18:06:32',
+		'modified': '2012-03-27 14:36:07',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -36,10 +36,82 @@
 		'parenttype': u'DocType'
 	},
 
+	# These values are common for all DocPerm
+	{
+		'amend': 0,
+		'doctype': u'DocPerm',
+		'name': '__common__',
+		'parent': u'Campaign',
+		'parentfield': u'permissions',
+		'parenttype': u'DocType',
+		'read': 1,
+		'submit': 0
+	},
+
 	# DocType, Campaign
 	{
 		'doctype': 'DocType',
 		'name': u'Campaign'
+	},
+
+	# DocPerm
+	{
+		'cancel': 1,
+		'create': 1,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Sales Master Manager',
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Sales Manager',
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Sales Manager',
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Sales Master Manager',
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Sales User',
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Sales User',
+		'write': 0
 	},
 
 	# DocField
@@ -56,6 +128,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'campaign',
 		'fieldtype': u'Section Break',
 		'label': u'Campaign',
 		'oldfieldtype': u'Section Break',

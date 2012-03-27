@@ -3,102 +3,98 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:08:53',
+		'creation': '2012-03-27 14:36:02',
 		'docstatus': 0,
-		'modified': '2010-09-20 14:06:57',
-		'modified_by': 'Administrator',
-		'owner': 'jai@webnotestech.com'
+		'modified': '2012-03-27 14:36:02',
+		'modified_by': u'Administrator',
+		'owner': u'jai@webnotestech.com'
 	},
 
 	# These values are common for all DocType
 	{
-		'autoname': 'BRUD/.#####',
-		'colour': 'White:FFF',
+		'autoname': u'BRUD/.#####',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
 		'hide_toolbar': 1,
 		'in_create': 1,
 		'istable': 1,
-		'module': 'Production',
+		'module': u'Production',
 		'name': '__common__',
 		'read_only': 1,
-		'section_style': 'Simple',
-		'server_code_error': ' ',
+		'section_style': u'Simple',
+		'server_code_error': u' ',
 		'show_in_menu': 0,
 		'version': 8
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'BOM Replace Utility Detail',
-		'parentfield': 'fields',
-		'parenttype': 'DocType'
+		'parent': u'BOM Replace Utility Detail',
+		'parentfield': u'fields',
+		'parenttype': u'DocType'
 	},
 
 	# These values are common for all DocPerm
 	{
 		'create': 0,
-		'doctype': 'DocPerm',
-		'idx': 1,
+		'doctype': u'DocPerm',
 		'name': '__common__',
-		'parent': 'BOM Replace Utility Detail',
-		'parentfield': 'permissions',
-		'parenttype': 'DocType',
+		'parent': u'BOM Replace Utility Detail',
+		'parentfield': u'permissions',
+		'parenttype': u'DocType',
 		'permlevel': 0,
 		'read': 1,
-		'role': 'System Manager',
+		'role': u'System Manager',
 		'write': 1
 	},
 
 	# DocType, BOM Replace Utility Detail
 	{
 		'doctype': 'DocType',
-		'name': 'BOM Replace Utility Detail'
+		'name': u'BOM Replace Utility Detail'
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm'
+		'doctype': u'DocPerm'
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldname': 'parent_bom',
-		'fieldtype': 'Link',
-		'idx': 1,
-		'label': 'Parent BOM',
-		'oldfieldname': 'parent_bom',
-		'oldfieldtype': 'Link',
-		'options': 'Bill Of Materials',
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'parent_bom',
+		'fieldtype': u'Link',
+		'label': u'Parent BOM',
+		'oldfieldname': u'parent_bom',
+		'oldfieldtype': u'Link',
+		'options': u'Bill Of Materials',
 		'permlevel': 1,
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'replace',
-		'fieldtype': 'Check',
-		'idx': 2,
-		'label': 'Replace',
-		'oldfieldname': 'replace',
-		'oldfieldtype': 'Check',
+		'doctype': u'DocField',
+		'fieldname': u'replace',
+		'fieldtype': u'Check',
+		'label': u'Replace',
+		'oldfieldname': u'replace',
+		'oldfieldtype': u'Check',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'bom_created',
-		'fieldtype': 'Link',
-		'idx': 3,
-		'label': 'BOM Created',
-		'oldfieldname': 'bom_created',
-		'oldfieldtype': 'Link',
-		'options': 'Bill Of Materials',
+		'doctype': u'DocField',
+		'fieldname': u'bom_created',
+		'fieldtype': u'Link',
+		'label': u'BOM Created',
+		'oldfieldname': u'bom_created',
+		'oldfieldtype': u'Link',
+		'options': u'Bill Of Materials',
 		'permlevel': 1,
 		'search_index': 0
 	}

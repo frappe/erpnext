@@ -3,159 +3,149 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:09:26',
+		'creation': '2012-03-27 14:36:40',
 		'docstatus': 0,
-		'modified': '2010-12-23 14:40:02',
-		'modified_by': 'umair@iwebnotes.com',
-		'owner': 'Administrator'
+		'modified': '2012-03-27 14:36:40',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'colour': 'White:FFF',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
 		'in_create': 0,
 		'issingle': 1,
-		'module': 'Stock',
+		'module': u'Stock',
 		'name': '__common__',
 		'read_only': 0,
-		'section_style': 'Simple',
-		'server_code_error': ' ',
+		'section_style': u'Simple',
+		'server_code_error': u' ',
 		'version': 25
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Stock UOM Replace Utility',
-		'parentfield': 'fields',
-		'parenttype': 'DocType'
+		'parent': u'Stock UOM Replace Utility',
+		'parentfield': u'fields',
+		'parenttype': u'DocType'
 	},
 
 	# These values are common for all DocPerm
 	{
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'name': '__common__',
-		'parent': 'Stock UOM Replace Utility',
-		'parentfield': 'permissions',
-		'parenttype': 'DocType',
+		'parent': u'Stock UOM Replace Utility',
+		'parentfield': u'permissions',
+		'parenttype': u'DocType',
 		'read': 1
 	},
 
 	# DocType, Stock UOM Replace Utility
 	{
 		'doctype': 'DocType',
-		'name': 'Stock UOM Replace Utility'
+		'name': u'Stock UOM Replace Utility'
 	},
 
 	# DocPerm
 	{
 		'create': 1,
-		'doctype': 'DocPerm',
-		'idx': 1,
+		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'role': 'System Manager',
+		'role': u'System Manager',
 		'write': 1
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm',
-		'idx': 2,
+		'doctype': u'DocPerm',
 		'permlevel': 1,
-		'role': 'System Manager',
+		'role': u'System Manager',
 		'write': 0
 	},
 
 	# DocPerm
 	{
 		'create': 1,
-		'doctype': 'DocPerm',
-		'idx': 3,
+		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'role': 'Material Master Manager',
+		'role': u'Material Master Manager',
 		'write': 1
 	},
 
 	# DocPerm
 	{
 		'create': 1,
-		'doctype': 'DocPerm',
-		'idx': 4,
+		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'role': 'Material Manager',
+		'role': u'Material Manager',
 		'write': 1
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm',
-		'idx': 5,
+		'doctype': u'DocPerm',
 		'permlevel': 1,
-		'role': 'Material Master Manager'
+		'role': u'Material Master Manager'
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm',
-		'idx': 6,
+		'doctype': u'DocPerm',
 		'permlevel': 1,
-		'role': 'Material Manager'
+		'role': u'Material Manager'
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldname': 'item_code',
-		'fieldtype': 'Link',
-		'idx': 1,
-		'label': 'Item',
-		'options': 'Item',
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'item_code',
+		'fieldtype': u'Link',
+		'label': u'Item',
+		'options': u'Item',
 		'permlevel': 0,
-		'trigger': 'Client'
+		'trigger': u'Client'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'current_stock_uom',
-		'fieldtype': 'Link',
-		'idx': 2,
-		'label': 'Current Stock UOM',
-		'options': 'UOM',
+		'doctype': u'DocField',
+		'fieldname': u'current_stock_uom',
+		'fieldtype': u'Link',
+		'label': u'Current Stock UOM',
+		'options': u'UOM',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'new_stock_uom',
-		'fieldtype': 'Link',
-		'idx': 3,
-		'label': 'New Stock UOM',
-		'options': 'UOM',
+		'doctype': u'DocField',
+		'fieldname': u'new_stock_uom',
+		'fieldtype': u'Link',
+		'label': u'New Stock UOM',
+		'options': u'UOM',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Button',
-		'idx': 5,
-		'label': 'Update',
-		'options': 'update_stock_uom',
+		'doctype': u'DocField',
+		'fieldname': u'update',
+		'fieldtype': u'Button',
+		'label': u'Update',
+		'options': u'update_stock_uom',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'conversion_factor',
-		'fieldtype': 'Currency',
-		'idx': 11,
-		'label': 'Conversion Factor',
+		'doctype': u'DocField',
+		'fieldname': u'conversion_factor',
+		'fieldtype': u'Currency',
+		'label': u'Conversion Factor',
 		'permlevel': 0
 	}
 ]

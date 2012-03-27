@@ -3,139 +3,139 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-01-31 15:18:49',
+		'creation': '2012-03-27 14:36:48',
 		'docstatus': 0,
-		'modified': '2012-02-02 13:15:36',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-27 14:36:48',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1328093379',
+		'_last_update': u'1328093379',
 		'allow_attach': 1,
-		'colour': 'White:FFF',
-		'description': 'A custom page is a simple page with the layout - headline, main section, side section\n\nEditing:\n\n- Editing is in [markdown format](http://daringfireball.net/projects/markdown/syntax)\n- You can also add images and embed html code\n\nAccessing the page:\n\n- The page can be accessed as #![page-name] after the main url\n\nIdeal for pages like FAQ, Terms, Help etc.\n\n',
+		'colour': u'White:FFF',
+		'description': u'A custom page is a simple page with the layout - headline, main section, side section\n\nEditing:\n\n- Editing is in [markdown format](http://daringfireball.net/projects/markdown/syntax)\n- You can also add images and embed html code\n\nAccessing the page:\n\n- The page can be accessed as #![page-name] after the main url\n\nIdeal for pages like FAQ, Terms, Help etc.\n\n',
 		'doctype': 'DocType',
 		'max_attachments': 5,
-		'module': 'Website',
+		'module': u'Website',
 		'name': '__common__',
-		'section_style': 'Simple',
+		'section_style': u'Simple',
 		'show_in_menu': 0,
 		'version': 6
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Web Page',
-		'parentfield': 'fields',
-		'parenttype': 'DocType',
+		'parent': u'Web Page',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
 		'permlevel': 0
 	},
 
 	# These values are common for all DocPerm
 	{
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'name': '__common__',
-		'parent': 'Web Page',
-		'parentfield': 'permissions',
-		'parenttype': 'DocType',
+		'parent': u'Web Page',
+		'parentfield': u'permissions',
+		'parenttype': u'DocType',
 		'read': 1,
-		'role': 'Website Manager'
+		'role': u'Website Manager'
 	},
 
 	# DocType, Web Page
 	{
 		'doctype': 'DocType',
-		'name': 'Web Page'
+		'name': u'Web Page'
 	},
 
 	# DocPerm
 	{
 		'create': 1,
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'permlevel': 0,
 		'write': 1
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'description': 'Title / headline of your page',
-		'doctype': 'DocField',
-		'fieldname': 'title',
-		'fieldtype': 'Data',
-		'label': 'Title',
+		'colour': u'White:FFF',
+		'description': u'Title / headline of your page',
+		'doctype': u'DocField',
+		'fieldname': u'title',
+		'fieldtype': u'Data',
+		'label': u'Title',
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'description': 'Section that will span 2 columns, formatted as markdown. If no head, leave blank. If you are displaying a banner, it must be 860px',
-		'doctype': 'DocField',
-		'fieldname': 'head_section',
-		'fieldtype': 'Text',
-		'label': 'Head Section'
+		'colour': u'White:FFF',
+		'description': u'Section that will span 2 columns, formatted as markdown. If no head, leave blank. If you are displaying a banner, it must be 860px',
+		'doctype': u'DocField',
+		'fieldname': u'head_section',
+		'fieldtype': u'Text',
+		'label': u'Head Section'
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'description': 'Content in markdown format that appears on the main side of your page',
-		'doctype': 'DocField',
-		'fieldname': 'main_section',
-		'fieldtype': 'Code',
-		'label': 'Main Section'
+		'colour': u'White:FFF',
+		'description': u'Content in markdown format that appears on the main side of your page',
+		'doctype': u'DocField',
+		'fieldname': u'main_section',
+		'fieldtype': u'Code',
+		'label': u'Main Section'
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'description': 'Content in markdown format that appears on the right side',
-		'doctype': 'DocField',
-		'fieldname': 'side_section',
-		'fieldtype': 'Code',
-		'label': 'Side Section'
+		'colour': u'White:FFF',
+		'description': u'Content in markdown format that appears on the right side',
+		'doctype': u'DocField',
+		'fieldname': u'side_section',
+		'fieldtype': u'Code',
+		'label': u'Side Section'
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'description': 'Link for next page appears at the bottom of the page',
-		'doctype': 'DocField',
-		'fieldname': 'next_page',
-		'fieldtype': 'Link',
-		'label': 'Next Page',
-		'options': 'Page'
+		'colour': u'White:FFF',
+		'description': u'Link for next page appears at the bottom of the page',
+		'doctype': u'DocField',
+		'fieldname': u'next_page',
+		'fieldtype': u'Link',
+		'label': u'Next Page',
+		'options': u'Page'
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'description': 'Related pages appear on the right side of the link and are linked both ways.',
-		'doctype': 'DocField',
-		'fieldname': 'related_pages',
-		'fieldtype': 'Table',
-		'label': 'Related Pages',
-		'options': 'Related Page'
+		'colour': u'White:FFF',
+		'description': u'Related pages appear on the right side of the link and are linked both ways.',
+		'doctype': u'DocField',
+		'fieldname': u'related_pages',
+		'fieldtype': u'Table',
+		'label': u'Related Pages',
+		'options': u'Related Page'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'file_list',
-		'fieldtype': 'Text',
+		'doctype': u'DocField',
+		'fieldname': u'file_list',
+		'fieldtype': u'Text',
 		'hidden': 1,
-		'label': 'File List',
+		'label': u'File List',
 		'no_copy': 1,
 		'print_hide': 1
 	}

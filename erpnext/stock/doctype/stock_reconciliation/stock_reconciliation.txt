@@ -3,76 +3,78 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:09:26',
+		'creation': '2012-03-27 14:36:40',
 		'docstatus': 0,
-		'modified': '2011-11-24 12:04:03',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-27 14:45:52',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1321617741',
+		'_last_update': u'1321617741',
 		'allow_attach': 1,
-		'autoname': 'SR/.######',
-		'colour': 'White:FFF',
-		'default_print_format': 'Standard',
+		'autoname': u'SR/.######',
+		'colour': u'White:FFF',
+		'default_print_format': u'Standard',
 		'doctype': 'DocType',
+		'is_submittable': 1,
 		'max_attachments': 1,
-		'module': 'Stock',
+		'module': u'Stock',
 		'name': '__common__',
-		'search_fields': 'reconciliation_date',
-		'section_style': 'Tray',
-		'server_code_error': ' ',
+		'search_fields': u'reconciliation_date',
+		'section_style': u'Tray',
+		'server_code_error': u' ',
 		'show_in_menu': 0,
-		'subject': 'Date: %(reconciliation_date)s, Time: %(reconciliation_time)s',
+		'subject': u'Date: %(reconciliation_date)s, Time: %(reconciliation_time)s',
 		'version': 107
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Stock Reconciliation',
-		'parentfield': 'fields',
-		'parenttype': 'DocType'
+		'parent': u'Stock Reconciliation',
+		'parentfield': u'fields',
+		'parenttype': u'DocType'
 	},
 
 	# These values are common for all DocPerm
 	{
-		'amend': 0,
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'name': '__common__',
-		'parent': 'Stock Reconciliation',
-		'parentfield': 'permissions',
-		'parenttype': 'DocType',
+		'parent': u'Stock Reconciliation',
+		'parentfield': u'permissions',
+		'parenttype': u'DocType',
 		'read': 1
 	},
 
 	# DocType, Stock Reconciliation
 	{
 		'doctype': 'DocType',
-		'name': 'Stock Reconciliation'
+		'name': u'Stock Reconciliation'
 	},
 
 	# DocPerm
 	{
+		'amend': 0,
 		'cancel': 1,
 		'create': 1,
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'role': 'Material Manager',
+		'role': u'Material Manager',
 		'submit': 1,
 		'write': 1
 	},
 
 	# DocPerm
 	{
+		'amend': 0,
 		'cancel': 0,
 		'create': 0,
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'permlevel': 1,
-		'role': 'Material Manager',
+		'role': u'Material Manager',
 		'submit': 0,
 		'write': 0
 	},
@@ -81,77 +83,104 @@
 	{
 		'cancel': 1,
 		'create': 1,
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'role': 'System Manager',
+		'role': u'System Manager',
 		'submit': 1,
 		'write': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'HTML',
-		'label': 'Steps',
-		'options': '<div class="field_description"><b>Steps:</b><br>1. Enter Reconciliation Date and Time<br>2. Save the document<br>3. Attach csv file as per template.<br>4. Submit the document<br>5. Enter tilde (~) sign if no difference in qty or valuation rate</div>',
+		'doctype': u'DocField',
+		'fieldname': u'steps',
+		'fieldtype': u'HTML',
+		'label': u'Steps',
+		'options': u'<div class="field_description"><b>Steps:</b><br>1. Enter Reconciliation Date and Time<br>2. Save the document<br>3. Attach csv file as per template.<br>4. Submit the document<br>5. Enter tilde (~) sign if no difference in qty or valuation rate</div>',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'reconciliation_date',
-		'fieldtype': 'Date',
+		'doctype': u'DocField',
+		'fieldname': u'reconciliation_date',
+		'fieldtype': u'Date',
 		'in_filter': 0,
-		'label': 'Reconciliation Date',
-		'oldfieldname': 'reconciliation_date',
-		'oldfieldtype': 'Date',
+		'label': u'Reconciliation Date',
+		'oldfieldname': u'reconciliation_date',
+		'oldfieldtype': u'Date',
 		'permlevel': 0,
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'reconciliation_time',
-		'fieldtype': 'Time',
+		'doctype': u'DocField',
+		'fieldname': u'reconciliation_time',
+		'fieldtype': u'Time',
 		'in_filter': 0,
-		'label': 'Reconciliation Time',
-		'oldfieldname': 'reconciliation_time',
-		'oldfieldtype': 'Time',
+		'label': u'Reconciliation Time',
+		'oldfieldname': u'reconciliation_time',
+		'oldfieldtype': u'Time',
 		'permlevel': 0,
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'remark',
-		'fieldtype': 'Text',
-		'label': 'Remark',
-		'oldfieldname': 'remark',
-		'oldfieldtype': 'Text',
+		'doctype': u'DocField',
+		'fieldname': u'remark',
+		'fieldtype': u'Text',
+		'label': u'Remark',
+		'oldfieldname': u'remark',
+		'oldfieldtype': u'Text',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Button',
-		'label': 'Download Template',
+		'doctype': u'DocField',
+		'fieldname': u'download_template',
+		'fieldtype': u'Button',
+		'label': u'Download Template',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'file_list',
-		'fieldtype': 'Text',
+		'doctype': u'DocField',
+		'fieldname': u'file_list',
+		'fieldtype': u'Text',
 		'hidden': 1,
-		'label': 'File List',
+		'label': u'File List',
 		'no_copy': 1,
-		'oldfieldname': 'file_list',
-		'oldfieldtype': 'Text',
+		'oldfieldname': u'file_list',
+		'oldfieldtype': u'Text',
+		'permlevel': 1,
+		'print_hide': 1
+	},
+
+	# DocField
+	{
+		'depends_on': u'eval:doc.amended_from',
+		'description': u'The date at which current entry is corrected in the system.',
+		'doctype': u'DocField',
+		'fieldname': u'amendment_date',
+		'fieldtype': u'Date',
+		'label': u'Amendment Date',
+		'no_copy': 1,
+		'permlevel': 0,
+		'print_hide': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'amended_from',
+		'fieldtype': u'Link',
+		'label': u'Amended From',
+		'no_copy': 1,
+		'options': u'Receivable Voucher',
 		'permlevel': 1,
 		'print_hide': 1
 	}

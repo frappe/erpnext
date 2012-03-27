@@ -3,46 +3,46 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:08:58',
+		'creation': '2012-03-27 14:35:54',
 		'docstatus': 0,
-		'modified': '2010-09-20 14:06:57',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-27 14:35:54',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
 		'allow_trash': 1,
-		'autoname': 'field:department_name',
-		'colour': 'White:FFF',
+		'autoname': u'field:department_name',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
-		'document_type': 'Master',
-		'module': 'HR',
+		'document_type': u'Master',
+		'module': u'HR',
 		'name': '__common__',
-		'section_style': 'Simple',
-		'server_code_error': ' ',
+		'section_style': u'Simple',
+		'server_code_error': u' ',
 		'show_in_menu': 0,
 		'version': 7
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Department',
-		'parentfield': 'fields',
-		'parenttype': 'DocType'
+		'parent': u'Department',
+		'parentfield': u'fields',
+		'parenttype': u'DocType'
 	},
 
 	# These values are common for all DocPerm
 	{
 		'cancel': 1,
 		'create': 1,
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'name': '__common__',
-		'parent': 'Department',
-		'parentfield': 'permissions',
-		'parenttype': 'DocType',
+		'parent': u'Department',
+		'parentfield': u'permissions',
+		'parenttype': u'DocType',
 		'permlevel': 0,
 		'read': 1,
 		'write': 1
@@ -51,51 +51,46 @@
 	# DocType, Department
 	{
 		'doctype': 'DocType',
-		'name': 'Department'
+		'name': u'Department'
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm',
-		'idx': 1,
-		'role': 'System Manager'
+		'doctype': u'DocPerm',
+		'role': u'System Manager'
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm',
-		'idx': 2,
-		'role': 'HR User'
+		'doctype': u'DocPerm',
+		'role': u'HR User'
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm',
-		'idx': 3,
-		'role': 'HR Manager'
+		'doctype': u'DocPerm',
+		'role': u'HR Manager'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'trash_reason',
-		'fieldtype': 'Small Text',
-		'idx': 1,
-		'label': 'Trash Reason',
-		'oldfieldname': 'trash_reason',
-		'oldfieldtype': 'Small Text',
+		'doctype': u'DocField',
+		'fieldname': u'trash_reason',
+		'fieldtype': u'Small Text',
+		'label': u'Trash Reason',
+		'oldfieldname': u'trash_reason',
+		'oldfieldtype': u'Small Text',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'department_name',
-		'fieldtype': 'Data',
-		'idx': 2,
-		'label': 'Department',
-		'oldfieldname': 'department_name',
-		'oldfieldtype': 'Data',
+		'doctype': u'DocField',
+		'fieldname': u'department_name',
+		'fieldtype': u'Data',
+		'label': u'Department',
+		'oldfieldname': u'department_name',
+		'oldfieldtype': u'Data',
 		'permlevel': 0,
 		'reqd': 1
 	}

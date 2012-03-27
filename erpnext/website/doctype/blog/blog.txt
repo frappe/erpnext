@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-01-27 12:24:03',
+		'creation': '2012-03-27 14:36:47',
 		'docstatus': 0,
-		'modified': '2012-02-07 13:55:17',
+		'modified': '2012-03-27 14:36:47',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -35,12 +35,15 @@
 
 	# These values are common for all DocPerm
 	{
+		'create': 1,
 		'doctype': u'DocPerm',
 		'name': '__common__',
 		'parent': u'Blog',
 		'parentfield': u'permissions',
 		'parenttype': u'DocType',
-		'read': 1
+		'permlevel': 0,
+		'read': 1,
+		'write': 1
 	},
 
 	# DocType, Blog
@@ -51,27 +54,14 @@
 
 	# DocPerm
 	{
-		'create': 1,
 		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Website Manager',
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'create': 1,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Blogger',
-		'write': 1
+		'role': u'Website Manager'
 	},
 
 	# DocPerm
 	{
 		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'All'
+		'role': u'Blogger'
 	},
 
 	# DocField

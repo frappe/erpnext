@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:09:27',
+		'creation': '2012-03-27 14:35:48',
 		'docstatus': 0,
-		'modified': '2012-03-21 12:29:51',
+		'modified': '2012-03-27 14:45:52',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -16,6 +16,7 @@
 		'default_print_format': u'Standard',
 		'doctype': 'DocType',
 		'in_create': 0,
+		'is_submittable': 1,
 		'module': u'Accounts',
 		'name': '__common__',
 		'section_style': u'Simple',
@@ -51,18 +52,6 @@
 
 	# DocPerm
 	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Accounts User',
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
 		'amend': 1,
 		'cancel': 1,
 		'create': 1,
@@ -71,6 +60,13 @@
 		'role': u'System Manager',
 		'submit': 1,
 		'write': 1
+	},
+
+	# DocPerm
+	{
+		'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'All'
 	},
 
 	# DocPerm
@@ -99,14 +95,20 @@
 
 	# DocPerm
 	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
 		'doctype': u'DocPerm',
 		'permlevel': 1,
-		'role': u'All'
+		'role': u'Accounts User',
+		'submit': 0,
+		'write': 0
 	},
 
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'column_break0',
 		'fieldtype': u'Column Break',
 		'oldfieldtype': u'Column Break',
 		'permlevel': 0,
@@ -163,6 +165,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'column_break1',
 		'fieldtype': u'Column Break',
 		'oldfieldtype': u'Column Break',
 		'permlevel': 0,
@@ -229,6 +232,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'section_break0',
 		'fieldtype': u'Section Break',
 		'oldfieldtype': u'Section Break',
 		'permlevel': 0
@@ -237,6 +241,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'column_break2',
 		'fieldtype': u'Column Break',
 		'oldfieldtype': u'Column Break',
 		'permlevel': 0,
@@ -285,6 +290,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'column_break3',
 		'fieldtype': u'Column Break',
 		'oldfieldtype': u'Column Break',
 		'permlevel': 0,
@@ -294,6 +300,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'html0',
 		'fieldtype': u'HTML',
 		'oldfieldtype': u'HTML',
 		'options': u'<b>Please Update Cheque No., BSR Code, Challan ID no. after actual payment. Unless you do not get it in Form 16A.</b>',
@@ -352,6 +359,7 @@
 	{
 		'allow_on_submit': 1,
 		'doctype': u'DocField',
+		'fieldname': u'update',
 		'fieldtype': u'Button',
 		'label': u'Update',
 		'oldfieldtype': u'Button',
@@ -363,6 +371,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'section_break1',
 		'fieldtype': u'Section Break',
 		'oldfieldtype': u'Section Break',
 		'permlevel': 0
@@ -371,6 +380,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'get_tds_list',
 		'fieldtype': u'Button',
 		'label': u'Get TDS List',
 		'oldfieldtype': u'Button',
@@ -393,6 +403,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'section_break2',
 		'fieldtype': u'Section Break',
 		'oldfieldtype': u'Section Break',
 		'permlevel': 0
@@ -413,6 +424,7 @@
 	{
 		'allow_on_submit': 1,
 		'doctype': u'DocField',
+		'fieldname': u'make_bank_voucher',
 		'fieldtype': u'Button',
 		'label': u'Make Bank Voucher',
 		'oldfieldtype': u'Button',

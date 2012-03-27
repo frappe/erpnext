@@ -3,28 +3,28 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:08:51',
+		'creation': '2012-03-27 14:36:45',
 		'docstatus': 0,
-		'modified': '2010-09-20 14:06:57',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-27 14:36:45',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'colour': 'White:FFF',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
 		'issingle': 1,
-		'module': 'Utilities',
+		'module': u'Utilities',
 		'name': '__common__',
-		'section_style': 'Simple',
-		'server_code_error': ' ',
+		'section_style': u'Simple',
+		'server_code_error': u' ',
 		'version': 42
 	},
 
 	# DocType, Activity Dashboard Control
 	{
 		'doctype': 'DocType',
-		'name': 'Activity Dashboard Control'
+		'name': u'Activity Dashboard Control'
 	}
 ]

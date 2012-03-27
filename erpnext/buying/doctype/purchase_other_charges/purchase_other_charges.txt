@@ -3,61 +3,61 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:09:15',
+		'creation': '2012-03-27 14:35:51',
 		'docstatus': 0,
-		'modified': '2012-01-24 12:42:18',
-		'modified_by': 'Administrator',
-		'owner': 'wasim@webnotestech.com'
+		'modified': '2012-03-27 14:35:51',
+		'modified_by': u'Administrator',
+		'owner': u'wasim@webnotestech.com'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1325570646',
+		'_last_update': u'1325570646',
 		'allow_trash': 1,
-		'autoname': 'field:title',
-		'colour': 'White:FFF',
-		'default_print_format': 'Standard',
+		'autoname': u'field:title',
+		'colour': u'White:FFF',
+		'default_print_format': u'Standard',
 		'doctype': 'DocType',
-		'document_type': 'Master',
-		'module': 'Buying',
+		'document_type': u'Master',
+		'module': u'Buying',
 		'name': '__common__',
-		'section_style': 'Simple',
-		'server_code_error': ' ',
+		'section_style': u'Simple',
+		'server_code_error': u' ',
 		'show_in_menu': 0,
 		'version': 18
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Purchase Other Charges',
-		'parentfield': 'fields',
-		'parenttype': 'DocType',
+		'parent': u'Purchase Other Charges',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
 		'permlevel': 0
 	},
 
 	# These values are common for all DocPerm
 	{
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'name': '__common__',
-		'parent': 'Purchase Other Charges',
-		'parentfield': 'permissions',
-		'parenttype': 'DocType',
+		'parent': u'Purchase Other Charges',
+		'parentfield': u'permissions',
+		'parenttype': u'DocType',
 		'read': 1
 	},
 
 	# DocType, Purchase Other Charges
 	{
 		'doctype': 'DocType',
-		'name': 'Purchase Other Charges'
+		'name': u'Purchase Other Charges'
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'permlevel': 1,
-		'role': 'All'
+		'role': u'All'
 	},
 
 	# DocPerm
@@ -65,9 +65,9 @@
 		'amend': 0,
 		'cancel': 0,
 		'create': 0,
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'role': 'Purchase Manager',
+		'role': u'Purchase Manager',
 		'submit': 0,
 		'write': 0
 	},
@@ -76,9 +76,9 @@
 	{
 		'cancel': 1,
 		'create': 1,
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'role': 'System Manager',
+		'role': u'System Manager',
 		'write': 1
 	},
 
@@ -86,45 +86,45 @@
 	{
 		'cancel': 1,
 		'create': 1,
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'role': 'Purchase Master Manager',
+		'role': u'Purchase Master Manager',
 		'submit': 0,
 		'write': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'title',
-		'fieldtype': 'Data',
+		'doctype': u'DocField',
+		'fieldname': u'title',
+		'fieldtype': u'Data',
 		'in_filter': 1,
-		'label': 'Title',
-		'oldfieldname': 'title',
-		'oldfieldtype': 'Data',
+		'label': u'Title',
+		'oldfieldname': u'title',
+		'oldfieldtype': u'Data',
 		'reqd': 1,
 		'search_index': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'company',
-		'fieldtype': 'Link',
+		'doctype': u'DocField',
+		'fieldname': u'company',
+		'fieldtype': u'Link',
 		'in_filter': 1,
-		'label': 'Company',
-		'options': 'Company',
+		'label': u'Company',
+		'options': u'Company',
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'purchase_tax_details',
-		'fieldtype': 'Table',
-		'label': 'Purchase Tax Details',
-		'oldfieldname': 'purchase_tax_details',
-		'oldfieldtype': 'Table',
-		'options': 'Purchase Tax Detail'
+		'doctype': u'DocField',
+		'fieldname': u'purchase_tax_details',
+		'fieldtype': u'Table',
+		'label': u'Purchase Tax Details',
+		'oldfieldname': u'purchase_tax_details',
+		'oldfieldtype': u'Table',
+		'options': u'Purchase Tax Detail'
 	}
 ]

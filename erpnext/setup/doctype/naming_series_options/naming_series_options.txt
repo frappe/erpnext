@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-12-14 10:23:17',
+		'creation': '2012-03-27 14:36:21',
 		'docstatus': 0,
-		'modified': '2012-03-21 14:53:21',
+		'modified': '2012-03-27 14:36:21',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},

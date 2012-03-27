@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:09:19',
+		'creation': '2012-03-27 14:36:47',
 		'docstatus': 0,
-		'modified': '2012-03-21 14:56:21',
+		'modified': '2012-03-27 14:36:47',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -77,6 +77,7 @@
 	{
 		'colour': u'White:FFF',
 		'doctype': u'DocField',
+		'fieldname': u'repost_bin',
 		'fieldtype': u'Button',
 		'label': u'Repost Bin',
 		'trigger': u'Client'
@@ -85,6 +86,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'repost_account_balances',
 		'fieldtype': u'Button',
 		'label': u'Repost Account Balances',
 		'trigger': u'Client'

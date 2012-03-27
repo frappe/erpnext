@@ -3,151 +3,142 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:09:12',
+		'creation': '2012-03-27 14:35:50',
 		'docstatus': 0,
-		'modified': '2010-09-20 14:06:57',
-		'modified_by': 'sneha@webnotestech.com',
-		'owner': 'dhanalekshmi@webnotestech.com'
+		'modified': '2012-03-27 14:35:50',
+		'modified_by': u'Administrator',
+		'owner': u'dhanalekshmi@webnotestech.com'
 	},
 
 	# These values are common for all DocType
 	{
-		'colour': 'White:FFF',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
 		'hide_toolbar': 1,
 		'istable': 1,
-		'module': 'Buying',
+		'module': u'Buying',
 		'name': '__common__',
-		'section_style': 'Simple',
-		'server_code_error': ' ',
+		'section_style': u'Simple',
+		'server_code_error': u' ',
 		'show_in_menu': 0,
 		'version': 1
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'PO Raw Material Detail',
-		'parentfield': 'fields',
-		'parenttype': 'DocType'
+		'parent': u'PO Raw Material Detail',
+		'parentfield': u'fields',
+		'parenttype': u'DocType'
 	},
 
 	# DocType, PO Raw Material Detail
 	{
 		'doctype': 'DocType',
-		'name': 'PO Raw Material Detail'
+		'name': u'PO Raw Material Detail'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'reference_name',
-		'fieldtype': 'Data',
+		'doctype': u'DocField',
+		'fieldname': u'reference_name',
+		'fieldtype': u'Data',
 		'hidden': 0,
-		'idx': 1,
 		'in_filter': 0,
-		'label': 'Reference Name',
-		'oldfieldname': 'reference_name',
-		'oldfieldtype': 'Data',
+		'label': u'Reference Name',
+		'oldfieldname': u'reference_name',
+		'oldfieldtype': u'Data',
 		'permlevel': 1,
 		'search_index': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'bom_detail_no',
-		'fieldtype': 'Data',
-		'idx': 2,
-		'label': 'BOM Detail No',
-		'oldfieldname': 'bom_detail_no',
-		'oldfieldtype': 'Data',
+		'doctype': u'DocField',
+		'fieldname': u'bom_detail_no',
+		'fieldtype': u'Data',
+		'label': u'BOM Detail No',
+		'oldfieldname': u'bom_detail_no',
+		'oldfieldtype': u'Data',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'main_item_code',
-		'fieldtype': 'Data',
-		'idx': 3,
-		'label': 'Item Code',
-		'oldfieldname': 'main_item_code',
-		'oldfieldtype': 'Data',
+		'doctype': u'DocField',
+		'fieldname': u'main_item_code',
+		'fieldtype': u'Data',
+		'label': u'Item Code',
+		'oldfieldname': u'main_item_code',
+		'oldfieldtype': u'Data',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'rm_item_code',
-		'fieldtype': 'Data',
-		'idx': 4,
-		'label': 'Raw Material Item Code',
-		'oldfieldname': 'rm_item_code',
-		'oldfieldtype': 'Data',
+		'doctype': u'DocField',
+		'fieldname': u'rm_item_code',
+		'fieldtype': u'Data',
+		'label': u'Raw Material Item Code',
+		'oldfieldname': u'rm_item_code',
+		'oldfieldtype': u'Data',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'required_qty',
-		'fieldtype': 'Currency',
-		'idx': 6,
-		'label': 'Required Qty',
-		'oldfieldname': 'required_qty',
-		'oldfieldtype': 'Currency',
+		'doctype': u'DocField',
+		'fieldname': u'required_qty',
+		'fieldtype': u'Currency',
+		'label': u'Required Qty',
+		'oldfieldname': u'required_qty',
+		'oldfieldtype': u'Currency',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'rate',
-		'fieldtype': 'Currency',
-		'idx': 8,
-		'label': 'Rate',
-		'oldfieldname': 'rate',
-		'oldfieldtype': 'Currency',
+		'doctype': u'DocField',
+		'fieldname': u'rate',
+		'fieldtype': u'Currency',
+		'label': u'Rate',
+		'oldfieldname': u'rate',
+		'oldfieldtype': u'Currency',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'amount',
-		'fieldtype': 'Currency',
-		'idx': 9,
-		'label': 'Amount',
-		'oldfieldname': 'amount',
-		'oldfieldtype': 'Currency',
+		'doctype': u'DocField',
+		'fieldname': u'amount',
+		'fieldtype': u'Currency',
+		'label': u'Amount',
+		'oldfieldname': u'amount',
+		'oldfieldtype': u'Currency',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'conversion_factor',
-		'fieldtype': 'Currency',
+		'doctype': u'DocField',
+		'fieldname': u'conversion_factor',
+		'fieldtype': u'Currency',
 		'hidden': 1,
-		'idx': 11,
-		'label': 'Conversion Factor',
-		'oldfieldname': 'conversion_factor',
-		'oldfieldtype': 'Currency',
+		'label': u'Conversion Factor',
+		'oldfieldname': u'conversion_factor',
+		'oldfieldtype': u'Currency',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'stock_uom',
-		'fieldtype': 'Data',
-		'idx': 12,
-		'label': 'Stock Uom',
-		'oldfieldname': 'stock_uom',
-		'oldfieldtype': 'Data',
+		'doctype': u'DocField',
+		'fieldname': u'stock_uom',
+		'fieldtype': u'Data',
+		'label': u'Stock Uom',
+		'oldfieldname': u'stock_uom',
+		'oldfieldtype': u'Data',
 		'permlevel': 1
 	}
 ]

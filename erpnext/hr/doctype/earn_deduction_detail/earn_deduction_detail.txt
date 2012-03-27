@@ -3,114 +3,108 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:08:59',
+		'creation': '2012-03-27 14:35:54',
 		'docstatus': 0,
-		'modified': '2010-09-20 14:06:57',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-27 14:35:54',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'colour': 'White:FFF',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
 		'istable': 1,
-		'module': 'HR',
+		'module': u'HR',
 		'name': '__common__',
-		'section_style': 'Simple',
+		'section_style': u'Simple',
 		'show_in_menu': 0,
 		'version': 4
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Earn Deduction Detail',
-		'parentfield': 'fields',
-		'parenttype': 'DocType',
+		'parent': u'Earn Deduction Detail',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
 		'permlevel': 0
 	},
 
 	# These values are common for all DocPerm
 	{
 		'create': 1,
-		'doctype': 'DocPerm',
-		'idx': 1,
+		'doctype': u'DocPerm',
 		'name': '__common__',
-		'parent': 'Earn Deduction Detail',
-		'parentfield': 'permissions',
-		'parenttype': 'DocType',
+		'parent': u'Earn Deduction Detail',
+		'parentfield': u'permissions',
+		'parenttype': u'DocType',
 		'permlevel': 0,
 		'read': 1,
-		'role': 'All',
+		'role': u'All',
 		'write': 1
 	},
 
 	# DocType, Earn Deduction Detail
 	{
 		'doctype': 'DocType',
-		'name': 'Earn Deduction Detail'
+		'name': u'Earn Deduction Detail'
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm'
+		'doctype': u'DocPerm'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'earn_deduction_name',
-		'fieldtype': 'Data',
-		'idx': 1,
-		'label': 'Earn/Deduction Name',
-		'oldfieldname': 'earn_deduction_name',
-		'oldfieldtype': 'Data'
+		'doctype': u'DocField',
+		'fieldname': u'earn_deduction_name',
+		'fieldtype': u'Data',
+		'label': u'Earn/Deduction Name',
+		'oldfieldname': u'earn_deduction_name',
+		'oldfieldtype': u'Data'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'mode',
-		'fieldtype': 'Select',
-		'idx': 2,
-		'label': 'Mode',
-		'oldfieldname': 'mode',
-		'oldfieldtype': 'Select',
-		'options': '\n%\nRs'
+		'doctype': u'DocField',
+		'fieldname': u'mode',
+		'fieldtype': u'Select',
+		'label': u'Mode',
+		'oldfieldname': u'mode',
+		'oldfieldtype': u'Select',
+		'options': u'\n%\nRs'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'per',
-		'fieldtype': 'Data',
-		'idx': 3,
-		'label': 'Per.(%)',
-		'oldfieldname': 'per',
-		'oldfieldtype': 'Data'
+		'doctype': u'DocField',
+		'fieldname': u'per',
+		'fieldtype': u'Data',
+		'label': u'Per.(%)',
+		'oldfieldname': u'per',
+		'oldfieldtype': u'Data'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'amount',
-		'fieldtype': 'Data',
-		'idx': 4,
-		'label': 'Amount',
-		'oldfieldname': 'amount',
-		'oldfieldtype': 'Data'
+		'doctype': u'DocField',
+		'fieldname': u'amount',
+		'fieldtype': u'Data',
+		'label': u'Amount',
+		'oldfieldname': u'amount',
+		'oldfieldtype': u'Data'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'type',
-		'fieldtype': 'Data',
-		'idx': 5,
-		'label': 'Type',
-		'oldfieldname': 'type',
-		'oldfieldtype': 'Data'
+		'doctype': u'DocField',
+		'fieldname': u'type',
+		'fieldtype': u'Data',
+		'label': u'Type',
+		'oldfieldname': u'type',
+		'oldfieldtype': u'Data'
 	}
 ]

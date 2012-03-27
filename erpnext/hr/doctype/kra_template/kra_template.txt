@@ -3,44 +3,44 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-09-01 15:48:06',
+		'creation': '2012-03-27 14:35:58',
 		'docstatus': 0,
-		'modified': '2010-09-20 14:06:57',
-		'modified_by': 'Administrator',
-		'owner': 'ashwini@webnotestech.com'
+		'modified': '2012-03-27 14:35:58',
+		'modified_by': u'Administrator',
+		'owner': u'ashwini@webnotestech.com'
 	},
 
 	# These values are common for all DocType
 	{
-		'autoname': 'field:kra_title',
-		'colour': 'White:FFF',
+		'autoname': u'field:kra_title',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
-		'document_type': 'Master',
-		'module': 'HR',
+		'document_type': u'Master',
+		'module': u'HR',
 		'name': '__common__',
-		'section_style': 'Simple',
-		'server_code_error': ' ',
+		'section_style': u'Simple',
+		'server_code_error': u' ',
 		'version': 3
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'KRA Template',
-		'parentfield': 'fields',
-		'parenttype': 'DocType',
+		'parent': u'KRA Template',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
 		'permlevel': 0
 	},
 
 	# These values are common for all DocPerm
 	{
 		'create': 1,
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'name': '__common__',
-		'parent': 'KRA Template',
-		'parentfield': 'permissions',
-		'parenttype': 'DocType',
+		'parent': u'KRA Template',
+		'parentfield': u'permissions',
+		'parenttype': u'DocType',
 		'permlevel': 0,
 		'read': 1,
 		'write': 1
@@ -49,67 +49,63 @@
 	# DocType, KRA Template
 	{
 		'doctype': 'DocType',
-		'name': 'KRA Template'
+		'name': u'KRA Template'
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm',
-		'role': 'HR Manager'
+		'doctype': u'DocPerm',
+		'role': u'System Manager'
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm',
-		'role': 'HR User'
+		'doctype': u'DocPerm',
+		'role': u'HR Manager'
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm',
-		'role': 'System Manager'
+		'doctype': u'DocPerm',
+		'role': u'HR User'
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm',
-		'idx': 1,
-		'role': 'System Manager'
+		'doctype': u'DocPerm',
+		'role': u'System Manager'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'kra_title',
-		'fieldtype': 'Data',
-		'idx': 1,
-		'label': 'KRA Title',
-		'oldfieldname': 'kra_title',
-		'oldfieldtype': 'Data',
+		'doctype': u'DocField',
+		'fieldname': u'kra_title',
+		'fieldtype': u'Data',
+		'label': u'KRA Title',
+		'oldfieldname': u'kra_title',
+		'oldfieldtype': u'Data',
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'description',
-		'fieldtype': 'Small Text',
-		'idx': 2,
-		'label': 'Description',
-		'oldfieldname': 'description',
-		'oldfieldtype': 'Small Text',
-		'width': '300px'
+		'doctype': u'DocField',
+		'fieldname': u'description',
+		'fieldtype': u'Small Text',
+		'label': u'Description',
+		'oldfieldname': u'description',
+		'oldfieldtype': u'Small Text',
+		'width': u'300px'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'kra_sheet',
-		'fieldtype': 'Table',
-		'idx': 3,
-		'label': 'KRA Sheet',
-		'oldfieldname': 'kra_sheet',
-		'oldfieldtype': 'Table',
-		'options': 'KRA Sheet'
+		'doctype': u'DocField',
+		'fieldname': u'kra_sheet',
+		'fieldtype': u'Table',
+		'label': u'KRA Sheet',
+		'oldfieldname': u'kra_sheet',
+		'oldfieldtype': u'Table',
+		'options': u'KRA Sheet'
 	}
 ]

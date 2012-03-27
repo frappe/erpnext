@@ -3,139 +3,132 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:08:51',
+		'creation': '2012-03-27 14:35:40',
 		'docstatus': 0,
-		'modified': '2010-09-20 14:06:57',
-		'modified_by': 'umair@iwebnotes.com',
-		'owner': 'Administrator'
+		'modified': '2012-03-27 14:35:40',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'colour': 'White:FFF',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
 		'istable': 1,
-		'module': 'Accounts',
+		'module': u'Accounts',
 		'name': '__common__',
-		'section_style': 'Tray',
-		'server_code_error': ' ',
+		'section_style': u'Tray',
+		'server_code_error': u' ',
 		'show_in_menu': 0,
 		'version': 20
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Advance Allocation Detail',
-		'parentfield': 'fields',
-		'parenttype': 'DocType'
+		'parent': u'Advance Allocation Detail',
+		'parentfield': u'fields',
+		'parenttype': u'DocType'
 	},
 
 	# DocType, Advance Allocation Detail
 	{
 		'doctype': 'DocType',
-		'name': 'Advance Allocation Detail'
+		'name': u'Advance Allocation Detail'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'journal_voucher',
-		'fieldtype': 'Link',
-		'idx': 1,
-		'label': 'Journal Voucher',
+		'doctype': u'DocField',
+		'fieldname': u'journal_voucher',
+		'fieldtype': u'Link',
+		'label': u'Journal Voucher',
 		'no_copy': 1,
-		'oldfieldname': 'journal_voucher',
-		'oldfieldtype': 'Link',
-		'options': 'Journal Voucher',
+		'oldfieldname': u'journal_voucher',
+		'oldfieldtype': u'Link',
+		'options': u'Journal Voucher',
 		'permlevel': 1,
-		'width': '180px'
+		'width': u'180px'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'jv_detail_no',
-		'fieldtype': 'Date',
+		'doctype': u'DocField',
+		'fieldname': u'jv_detail_no',
+		'fieldtype': u'Date',
 		'hidden': 1,
-		'idx': 2,
-		'label': 'Journal Voucher Detail No',
+		'label': u'Journal Voucher Detail No',
 		'no_copy': 1,
-		'oldfieldname': 'jv_detail_no',
-		'oldfieldtype': 'Date',
+		'oldfieldname': u'jv_detail_no',
+		'oldfieldtype': u'Date',
 		'permlevel': 1,
 		'print_hide': 1,
-		'width': '80px'
+		'width': u'80px'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'advance_amount',
-		'fieldtype': 'Currency',
-		'idx': 3,
-		'label': 'Advance Amount',
+		'doctype': u'DocField',
+		'fieldname': u'advance_amount',
+		'fieldtype': u'Currency',
+		'label': u'Advance Amount',
 		'no_copy': 1,
-		'oldfieldname': 'advance_amount',
-		'oldfieldtype': 'Currency',
+		'oldfieldname': u'advance_amount',
+		'oldfieldtype': u'Currency',
 		'permlevel': 1,
-		'width': '100px'
+		'width': u'100px'
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldname': 'allocated_amount',
-		'fieldtype': 'Currency',
-		'idx': 4,
-		'label': 'Allocated Amount',
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'allocated_amount',
+		'fieldtype': u'Currency',
+		'label': u'Allocated Amount',
 		'no_copy': 1,
-		'oldfieldname': 'allocated_amount',
-		'oldfieldtype': 'Currency',
+		'oldfieldname': u'allocated_amount',
+		'oldfieldtype': u'Currency',
 		'permlevel': 0,
-		'trigger': 'Client',
-		'width': '100px'
+		'trigger': u'Client',
+		'width': u'100px'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'tds_amount',
-		'fieldtype': 'Currency',
-		'idx': 5,
-		'label': 'TDS Amount',
-		'oldfieldname': 'tds_amount',
-		'oldfieldtype': 'Currency',
+		'doctype': u'DocField',
+		'fieldname': u'tds_amount',
+		'fieldtype': u'Currency',
+		'label': u'TDS Amount',
+		'oldfieldname': u'tds_amount',
+		'oldfieldtype': u'Currency',
 		'permlevel': 1,
-		'width': '80px'
+		'width': u'80px'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'tds_allocated',
-		'fieldtype': 'Currency',
-		'idx': 6,
-		'label': 'TDS Allocated',
-		'oldfieldname': 'tds_allocated',
-		'oldfieldtype': 'Currency',
+		'doctype': u'DocField',
+		'fieldname': u'tds_allocated',
+		'fieldtype': u'Currency',
+		'label': u'TDS Allocated',
+		'oldfieldname': u'tds_allocated',
+		'oldfieldtype': u'Currency',
 		'permlevel': 1,
-		'width': '80px'
+		'width': u'80px'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'remarks',
-		'fieldtype': 'Small Text',
-		'idx': 7,
-		'label': 'Remarks',
+		'doctype': u'DocField',
+		'fieldname': u'remarks',
+		'fieldtype': u'Small Text',
+		'label': u'Remarks',
 		'no_copy': 1,
-		'oldfieldname': 'remarks',
-		'oldfieldtype': 'Small Text',
+		'oldfieldname': u'remarks',
+		'oldfieldtype': u'Small Text',
 		'permlevel': 1,
-		'width': '150px'
+		'width': u'150px'
 	}
 ]

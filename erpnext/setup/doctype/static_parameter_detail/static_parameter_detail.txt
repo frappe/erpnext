@@ -3,57 +3,55 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2011-05-24 18:22:22',
+		'creation': '2012-03-27 14:36:25',
 		'docstatus': 0,
-		'modified': '2011-05-24 18:42:30',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-27 14:36:25',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'colour': 'White:FFF',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
 		'istable': 1,
-		'module': 'Setup',
+		'module': u'Setup',
 		'name': '__common__',
-		'section_style': 'Simple',
+		'section_style': u'Simple',
 		'show_in_menu': 0,
 		'version': 4
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Data',
+		'doctype': u'DocField',
+		'fieldtype': u'Data',
 		'name': '__common__',
-		'parent': 'Static Parameter Detail',
-		'parentfield': 'fields',
-		'parenttype': 'DocType',
+		'parent': u'Static Parameter Detail',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
 		'permlevel': 0,
 		'reqd': 1,
-		'width': '150px'
+		'width': u'150px'
 	},
 
 	# DocType, Static Parameter Detail
 	{
 		'doctype': 'DocType',
-		'name': 'Static Parameter Detail'
+		'name': u'Static Parameter Detail'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'parameter',
-		'idx': 1,
-		'label': 'Parameter'
+		'doctype': u'DocField',
+		'fieldname': u'parameter',
+		'label': u'Parameter'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'value',
-		'idx': 2,
-		'label': 'Value'
+		'doctype': u'DocField',
+		'fieldname': u'value',
+		'label': u'Value'
 	}
 ]

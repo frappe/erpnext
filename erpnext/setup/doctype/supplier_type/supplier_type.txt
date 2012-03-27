@@ -3,45 +3,45 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:09:26',
+		'creation': '2012-03-27 14:36:25',
 		'docstatus': 0,
-		'modified': '2010-09-20 14:06:57',
-		'modified_by': 'yogesh@webnotestech.com',
-		'owner': 'Administrator'
+		'modified': '2012-03-27 14:36:25',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
 		'allow_trash': 1,
-		'autoname': 'field:supplier_type',
-		'colour': 'White:FFF',
+		'autoname': u'field:supplier_type',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
-		'document_type': 'Master',
-		'module': 'Setup',
+		'document_type': u'Master',
+		'module': u'Setup',
 		'name': '__common__',
-		'section_style': 'Simple',
-		'server_code_error': ' ',
+		'section_style': u'Simple',
+		'server_code_error': u' ',
 		'show_in_menu': 0,
 		'version': 3
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Supplier Type',
-		'parentfield': 'fields',
-		'parenttype': 'DocType'
+		'parent': u'Supplier Type',
+		'parentfield': u'fields',
+		'parenttype': u'DocType'
 	},
 
 	# These values are common for all DocPerm
 	{
 		'amend': 0,
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'name': '__common__',
-		'parent': 'Supplier Type',
-		'parentfield': 'permissions',
-		'parenttype': 'DocType',
+		'parent': u'Supplier Type',
+		'parentfield': u'permissions',
+		'parenttype': u'DocType',
 		'read': 1,
 		'submit': 0
 	},
@@ -49,85 +49,78 @@
 	# DocType, Supplier Type
 	{
 		'doctype': 'DocType',
-		'name': 'Supplier Type'
-	},
-
-	# DocPerm
-	{
-		'cancel': 0,
-		'create': 0,
-		'doctype': 'DocPerm',
-		'idx': 1,
-		'permlevel': 1,
-		'role': 'Purchase Manager',
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'cancel': 0,
-		'create': 0,
-		'doctype': 'DocPerm',
-		'idx': 2,
-		'permlevel': 0,
-		'role': 'Purchase Manager',
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'cancel': 0,
-		'create': 0,
-		'doctype': 'DocPerm',
-		'idx': 3,
-		'permlevel': 1,
-		'role': 'Purchase User',
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'cancel': 0,
-		'create': 0,
-		'doctype': 'DocPerm',
-		'idx': 4,
-		'permlevel': 0,
-		'role': 'Purchase User',
-		'write': 0
+		'name': u'Supplier Type'
 	},
 
 	# DocPerm
 	{
 		'cancel': 1,
 		'create': 1,
-		'doctype': 'DocPerm',
-		'idx': 5,
+		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'role': 'Purchase Master Manager',
+		'role': u'Purchase Master Manager',
 		'write': 1
+	},
+
+	# DocPerm
+	{
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Purchase Manager',
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Purchase Manager',
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Purchase User',
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Purchase User',
+		'write': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'trash_reason',
-		'fieldtype': 'Small Text',
-		'idx': 1,
-		'label': 'Trash Reason',
-		'oldfieldname': 'trash_reason',
-		'oldfieldtype': 'Small Text',
+		'doctype': u'DocField',
+		'fieldname': u'trash_reason',
+		'fieldtype': u'Small Text',
+		'label': u'Trash Reason',
+		'oldfieldname': u'trash_reason',
+		'oldfieldtype': u'Small Text',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'supplier_type',
-		'fieldtype': 'Data',
-		'idx': 2,
-		'label': 'Supplier Type',
-		'oldfieldname': 'supplier_type',
-		'oldfieldtype': 'Data',
+		'doctype': u'DocField',
+		'fieldname': u'supplier_type',
+		'fieldtype': u'Data',
+		'label': u'Supplier Type',
+		'oldfieldname': u'supplier_type',
+		'oldfieldtype': u'Data',
 		'permlevel': 0,
 		'reqd': 1
 	}

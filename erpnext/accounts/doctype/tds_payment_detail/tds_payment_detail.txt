@@ -3,116 +3,109 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:09:27',
+		'creation': '2012-03-27 14:35:49',
 		'docstatus': 0,
-		'modified': '2010-09-20 14:06:57',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-27 14:35:49',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'colour': 'White:FFF',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
 		'istable': 1,
-		'module': 'Accounts',
+		'module': u'Accounts',
 		'name': '__common__',
-		'section_style': 'Tray',
-		'server_code_error': ' ',
+		'section_style': u'Tray',
+		'server_code_error': u' ',
 		'show_in_menu': 0,
 		'version': 11
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'TDS Payment Detail',
-		'parentfield': 'fields',
-		'parenttype': 'DocType',
+		'parent': u'TDS Payment Detail',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
 		'permlevel': 0
 	},
 
 	# DocType, TDS Payment Detail
 	{
 		'doctype': 'DocType',
-		'name': 'TDS Payment Detail'
+		'name': u'TDS Payment Detail'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'voucher_no',
-		'fieldtype': 'Data',
-		'idx': 1,
-		'label': 'Voucher No',
-		'oldfieldname': 'voucher_no',
-		'oldfieldtype': 'Data'
+		'doctype': u'DocField',
+		'fieldname': u'voucher_no',
+		'fieldtype': u'Data',
+		'label': u'Voucher No',
+		'oldfieldname': u'voucher_no',
+		'oldfieldtype': u'Data'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'party_name',
-		'fieldtype': 'Data',
-		'idx': 2,
-		'label': 'Party Name',
-		'oldfieldname': 'party_name',
-		'oldfieldtype': 'Data'
+		'doctype': u'DocField',
+		'fieldname': u'party_name',
+		'fieldtype': u'Data',
+		'label': u'Party Name',
+		'oldfieldname': u'party_name',
+		'oldfieldtype': u'Data'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'amount_paid',
-		'fieldtype': 'Currency',
-		'idx': 3,
-		'label': 'Amount paid / credited',
-		'oldfieldname': 'amount_paid',
-		'oldfieldtype': 'Currency'
+		'doctype': u'DocField',
+		'fieldname': u'amount_paid',
+		'fieldtype': u'Currency',
+		'label': u'Amount paid / credited',
+		'oldfieldname': u'amount_paid',
+		'oldfieldtype': u'Currency'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'date_of_payment',
-		'fieldtype': 'Date',
-		'idx': 4,
-		'label': 'Date of payment / credit',
-		'oldfieldname': 'date_of_payment',
-		'oldfieldtype': 'Date'
+		'doctype': u'DocField',
+		'fieldname': u'date_of_payment',
+		'fieldtype': u'Date',
+		'label': u'Date of payment / credit',
+		'oldfieldname': u'date_of_payment',
+		'oldfieldtype': u'Date'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'tds_amount',
-		'fieldtype': 'Currency',
-		'idx': 5,
-		'label': 'TDS',
-		'oldfieldname': 'tds_amount',
-		'oldfieldtype': 'Currency'
+		'doctype': u'DocField',
+		'fieldname': u'tds_amount',
+		'fieldtype': u'Currency',
+		'label': u'TDS',
+		'oldfieldname': u'tds_amount',
+		'oldfieldtype': u'Currency'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'cess_on_tds',
-		'fieldtype': 'Currency',
-		'idx': 6,
-		'label': 'Cess on TDS',
-		'oldfieldname': 'cess_on_tds',
-		'oldfieldtype': 'Currency'
+		'doctype': u'DocField',
+		'fieldname': u'cess_on_tds',
+		'fieldtype': u'Currency',
+		'label': u'Cess on TDS',
+		'oldfieldname': u'cess_on_tds',
+		'oldfieldtype': u'Currency'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'total_tax_amount',
-		'fieldtype': 'Currency',
-		'idx': 7,
-		'label': 'Total Tax Amount',
-		'oldfieldname': 'total_tax_amount',
-		'oldfieldtype': 'Currency'
+		'doctype': u'DocField',
+		'fieldname': u'total_tax_amount',
+		'fieldtype': u'Currency',
+		'label': u'Total Tax Amount',
+		'oldfieldname': u'total_tax_amount',
+		'oldfieldtype': u'Currency'
 	}
 ]

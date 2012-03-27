@@ -3,127 +3,119 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:09:13',
+		'creation': '2012-03-27 14:36:04',
 		'docstatus': 0,
-		'modified': '2010-09-20 14:06:57',
-		'modified_by': 'Administrator',
-		'owner': 'jai@webnotestech.com'
+		'modified': '2012-03-27 14:36:04',
+		'modified_by': u'Administrator',
+		'owner': u'jai@webnotestech.com'
 	},
 
 	# These values are common for all DocType
 	{
-		'colour': 'White:FFF',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
 		'istable': 1,
-		'module': 'Production',
+		'module': u'Production',
 		'name': '__common__',
-		'section_style': 'Simple',
+		'section_style': u'Simple',
 		'show_in_menu': 0,
 		'version': 5
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'PRO PP Detail',
-		'parentfield': 'fields',
-		'parenttype': 'DocType',
+		'parent': u'PRO PP Detail',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
 		'permlevel': 0
 	},
 
 	# DocType, PRO PP Detail
 	{
 		'doctype': 'DocType',
-		'name': 'PRO PP Detail'
+		'name': u'PRO PP Detail'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'source_doctype',
-		'fieldtype': 'Data',
-		'idx': 1,
-		'label': 'Source Doctype',
-		'oldfieldname': 'source_doctype',
-		'oldfieldtype': 'Data'
+		'doctype': u'DocField',
+		'fieldname': u'source_doctype',
+		'fieldtype': u'Data',
+		'label': u'Source Doctype',
+		'oldfieldname': u'source_doctype',
+		'oldfieldtype': u'Data'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'source_docname',
-		'fieldtype': 'Data',
-		'idx': 2,
-		'label': 'Source Docname',
-		'oldfieldname': 'source_docname',
-		'oldfieldtype': 'Data'
+		'doctype': u'DocField',
+		'fieldname': u'source_docname',
+		'fieldtype': u'Data',
+		'label': u'Source Docname',
+		'oldfieldname': u'source_docname',
+		'oldfieldtype': u'Data'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'source_detail_docname',
-		'fieldtype': 'Data',
-		'idx': 3,
-		'label': 'Source Detail Docname ',
-		'oldfieldname': 'source_detail_docname',
-		'oldfieldtype': 'Data'
+		'doctype': u'DocField',
+		'fieldname': u'source_detail_docname',
+		'fieldtype': u'Data',
+		'label': u'Source Detail Docname ',
+		'oldfieldname': u'source_detail_docname',
+		'oldfieldtype': u'Data'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'prevdoc_detail_docname',
-		'fieldtype': 'Data',
-		'idx': 4,
-		'label': 'Prevdoc Detail Docname',
-		'oldfieldname': 'prevdoc_detail_docname',
-		'oldfieldtype': 'Data'
+		'doctype': u'DocField',
+		'fieldname': u'prevdoc_detail_docname',
+		'fieldtype': u'Data',
+		'label': u'Prevdoc Detail Docname',
+		'oldfieldname': u'prevdoc_detail_docname',
+		'oldfieldtype': u'Data'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'confirm_date',
-		'fieldtype': 'Date',
-		'idx': 5,
-		'label': 'Confirm Date',
-		'oldfieldname': 'confirm_date',
-		'oldfieldtype': 'Date'
+		'doctype': u'DocField',
+		'fieldname': u'confirm_date',
+		'fieldtype': u'Date',
+		'label': u'Confirm Date',
+		'oldfieldname': u'confirm_date',
+		'oldfieldtype': u'Date'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'qty_reqd',
-		'fieldtype': 'Currency',
-		'idx': 6,
-		'label': 'Qty Reqd',
-		'oldfieldname': 'qty_reqd',
-		'oldfieldtype': 'Currency'
+		'doctype': u'DocField',
+		'fieldname': u'qty_reqd',
+		'fieldtype': u'Currency',
+		'label': u'Qty Reqd',
+		'oldfieldname': u'qty_reqd',
+		'oldfieldtype': u'Currency'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'produced_qty',
-		'fieldtype': 'Currency',
-		'idx': 7,
-		'label': 'Produced Qty',
-		'oldfieldname': 'produced_qty',
-		'oldfieldtype': 'Currency'
+		'doctype': u'DocField',
+		'fieldname': u'produced_qty',
+		'fieldtype': u'Currency',
+		'label': u'Produced Qty',
+		'oldfieldname': u'produced_qty',
+		'oldfieldtype': u'Currency'
 	},
 
 	# DocField
 	{
 		'allow_on_submit': 1,
-		'doctype': 'DocField',
-		'fieldname': 'update',
-		'fieldtype': 'Check',
-		'idx': 8,
-		'label': 'Update',
-		'oldfieldname': 'update',
-		'oldfieldtype': 'Check'
+		'doctype': u'DocField',
+		'fieldname': u'update',
+		'fieldtype': u'Check',
+		'label': u'Update',
+		'oldfieldname': u'update',
+		'oldfieldtype': u'Check'
 	}
 ]

@@ -3,52 +3,52 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:08:55',
+		'creation': '2012-03-27 14:36:19',
 		'docstatus': 0,
-		'modified': '2011-12-14 15:12:28',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-27 14:36:19',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1323855292',
+		'_last_update': u'1323855292',
 		'allow_trash': 1,
-		'autoname': 'field:company_name',
-		'colour': 'White:FFF',
+		'autoname': u'field:company_name',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
-		'document_type': 'Master',
-		'module': 'Setup',
+		'document_type': u'Master',
+		'module': u'Setup',
 		'name': '__common__',
-		'section_style': 'Tabbed',
-		'server_code_error': ' ',
+		'section_style': u'Tabbed',
+		'server_code_error': u' ',
 		'show_in_menu': 0,
 		'version': 96
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Company',
-		'parentfield': 'fields',
-		'parenttype': 'DocType'
+		'parent': u'Company',
+		'parentfield': u'fields',
+		'parenttype': u'DocType'
 	},
 
 	# These values are common for all DocPerm
 	{
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'name': '__common__',
-		'parent': 'Company',
-		'parentfield': 'permissions',
-		'parenttype': 'DocType',
+		'parent': u'Company',
+		'parentfield': u'permissions',
+		'parenttype': u'DocType',
 		'read': 1
 	},
 
 	# DocType, Company
 	{
 		'doctype': 'DocType',
-		'name': 'Company'
+		'name': u'Company'
 	},
 
 	# DocPerm
@@ -56,9 +56,9 @@
 		'amend': 0,
 		'cancel': 1,
 		'create': 1,
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'role': 'System Manager',
+		'role': u'System Manager',
 		'submit': 0,
 		'write': 1
 	},
@@ -68,9 +68,9 @@
 		'amend': 0,
 		'cancel': 1,
 		'create': 1,
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'role': 'System Manager',
+		'role': u'System Manager',
 		'submit': 0,
 		'write': 1
 	},
@@ -78,285 +78,291 @@
 	# DocPerm
 	{
 		'cancel': 0,
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'permlevel': 1,
-		'role': 'All'
+		'role': u'All'
 	},
 
 	# DocField
 	{
-		'description': 'Please Enter Company Name and Abbr and save the document. Once saved Accounting Settings will be populated automatically',
-		'doctype': 'DocField',
-		'fieldtype': 'Section Break',
-		'label': 'Details',
-		'oldfieldtype': 'Section Break',
+		'description': u'Please Enter Company Name and Abbr and save the document. Once saved Accounting Settings will be populated automatically',
+		'doctype': u'DocField',
+		'fieldname': u'details',
+		'fieldtype': u'Section Break',
+		'label': u'Details',
+		'oldfieldtype': u'Section Break',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldname': 'company_name',
-		'fieldtype': 'Data',
-		'label': 'Company',
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'company_name',
+		'fieldtype': u'Data',
+		'label': u'Company',
 		'no_copy': 0,
-		'oldfieldname': 'company_name',
-		'oldfieldtype': 'Data',
+		'oldfieldname': u'company_name',
+		'oldfieldtype': u'Data',
 		'permlevel': 0,
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'description': 'Please Enter Abbreviation or Short Name properly as it will be added as Suffix to all Account Heads.',
-		'doctype': 'DocField',
-		'fieldname': 'abbr',
-		'fieldtype': 'Data',
-		'label': 'Abbr',
+		'colour': u'White:FFF',
+		'description': u'Please Enter Abbreviation or Short Name properly as it will be added as Suffix to all Account Heads.',
+		'doctype': u'DocField',
+		'fieldname': u'abbr',
+		'fieldtype': u'Data',
+		'label': u'Abbr',
 		'no_copy': 0,
-		'oldfieldname': 'abbr',
-		'oldfieldtype': 'Data',
+		'oldfieldname': u'abbr',
+		'oldfieldtype': u'Data',
 		'permlevel': 0,
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'depends_on': 'eval:!doc.__islocal',
-		'doctype': 'DocField',
-		'fieldtype': 'Section Break',
-		'label': 'Default Settings',
-		'oldfieldtype': 'Section Break',
+		'depends_on': u'eval:!doc.__islocal',
+		'doctype': u'DocField',
+		'fieldname': u'default_settings',
+		'fieldtype': u'Section Break',
+		'label': u'Default Settings',
+		'oldfieldtype': u'Section Break',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'default_currency',
-		'fieldtype': 'Select',
-		'label': 'Default Currency',
-		'options': 'link:Currency',
+		'doctype': u'DocField',
+		'fieldname': u'default_currency',
+		'fieldtype': u'Select',
+		'label': u'Default Currency',
+		'options': u'link:Currency',
 		'permlevel': 0,
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'depends_on': 'eval:!doc.__islocal',
-		'doctype': 'DocField',
-		'fieldname': 'default_bank_account',
-		'fieldtype': 'Link',
-		'label': 'Default Bank Account',
+		'depends_on': u'eval:!doc.__islocal',
+		'doctype': u'DocField',
+		'fieldname': u'default_bank_account',
+		'fieldtype': u'Link',
+		'label': u'Default Bank Account',
 		'no_copy': 1,
-		'oldfieldname': 'default_bank_account',
-		'oldfieldtype': 'Link',
-		'options': 'Account',
+		'oldfieldname': u'default_bank_account',
+		'oldfieldtype': u'Link',
+		'options': u'Account',
 		'permlevel': 0,
-		'trigger': 'Client'
+		'trigger': u'Client'
 	},
 
 	# DocField
 	{
-		'depends_on': 'eval:!doc.__islocal',
-		'doctype': 'DocField',
-		'fieldname': 'receivables_group',
-		'fieldtype': 'Link',
-		'label': 'Receivables Group',
+		'depends_on': u'eval:!doc.__islocal',
+		'doctype': u'DocField',
+		'fieldname': u'receivables_group',
+		'fieldtype': u'Link',
+		'label': u'Receivables Group',
 		'no_copy': 1,
-		'oldfieldname': 'receivables_group',
-		'oldfieldtype': 'Link',
-		'options': 'Account',
+		'oldfieldname': u'receivables_group',
+		'oldfieldtype': u'Link',
+		'options': u'Account',
 		'permlevel': 0,
-		'trigger': 'Client'
+		'trigger': u'Client'
 	},
 
 	# DocField
 	{
-		'depends_on': 'eval:!doc.__islocal',
-		'doctype': 'DocField',
-		'fieldname': 'payables_group',
-		'fieldtype': 'Link',
-		'label': 'Payables Group',
+		'depends_on': u'eval:!doc.__islocal',
+		'doctype': u'DocField',
+		'fieldname': u'payables_group',
+		'fieldtype': u'Link',
+		'label': u'Payables Group',
 		'no_copy': 1,
-		'oldfieldname': 'payables_group',
-		'oldfieldtype': 'Link',
-		'options': 'Account',
+		'oldfieldname': u'payables_group',
+		'oldfieldtype': u'Link',
+		'options': u'Account',
 		'permlevel': 0,
-		'trigger': 'Client'
+		'trigger': u'Client'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Column Break',
-		'oldfieldtype': 'Column Break',
+		'doctype': u'DocField',
+		'fieldname': u'column_break0',
+		'fieldtype': u'Column Break',
+		'oldfieldtype': u'Column Break',
 		'permlevel': 0,
-		'width': '50%'
+		'width': u'50%'
 	},
 
 	# DocField
 	{
-		'depends_on': 'eval:!doc.__islocal',
-		'doctype': 'DocField',
-		'fieldname': 'credit_days',
-		'fieldtype': 'Int',
-		'label': 'Credit Days',
-		'oldfieldname': 'credit_days',
-		'oldfieldtype': 'Int',
+		'depends_on': u'eval:!doc.__islocal',
+		'doctype': u'DocField',
+		'fieldname': u'credit_days',
+		'fieldtype': u'Int',
+		'label': u'Credit Days',
+		'oldfieldname': u'credit_days',
+		'oldfieldtype': u'Int',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'depends_on': 'eval:!doc.__islocal',
-		'doctype': 'DocField',
-		'fieldname': 'credit_limit',
-		'fieldtype': 'Currency',
-		'label': 'Credit Limit',
-		'oldfieldname': 'credit_limit',
-		'oldfieldtype': 'Currency',
+		'depends_on': u'eval:!doc.__islocal',
+		'doctype': u'DocField',
+		'fieldname': u'credit_limit',
+		'fieldtype': u'Currency',
+		'label': u'Credit Limit',
+		'oldfieldname': u'credit_limit',
+		'oldfieldtype': u'Currency',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'depends_on': 'eval:!doc.__islocal',
-		'doctype': 'DocField',
-		'fieldname': 'yearly_bgt_flag',
-		'fieldtype': 'Select',
-		'label': 'If Yearly Budget Exceeded',
-		'oldfieldname': 'yearly_bgt_flag',
-		'oldfieldtype': 'Select',
-		'options': '\nWarn\nIgnore\nStop',
+		'colour': u'White:FFF',
+		'depends_on': u'eval:!doc.__islocal',
+		'doctype': u'DocField',
+		'fieldname': u'yearly_bgt_flag',
+		'fieldtype': u'Select',
+		'label': u'If Yearly Budget Exceeded',
+		'oldfieldname': u'yearly_bgt_flag',
+		'oldfieldtype': u'Select',
+		'options': u'\nWarn\nIgnore\nStop',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'depends_on': 'eval:!doc.__islocal',
-		'doctype': 'DocField',
-		'fieldname': 'monthly_bgt_flag',
-		'fieldtype': 'Select',
-		'label': 'If Monthly Budget Exceeded',
-		'oldfieldname': 'monthly_bgt_flag',
-		'oldfieldtype': 'Select',
-		'options': '\nWarn\nIgnore\nStop',
+		'depends_on': u'eval:!doc.__islocal',
+		'doctype': u'DocField',
+		'fieldname': u'monthly_bgt_flag',
+		'fieldtype': u'Select',
+		'label': u'If Monthly Budget Exceeded',
+		'oldfieldname': u'monthly_bgt_flag',
+		'oldfieldtype': u'Select',
+		'options': u'\nWarn\nIgnore\nStop',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Section Break',
-		'label': 'Company Info',
+		'doctype': u'DocField',
+		'fieldname': u'company_info',
+		'fieldtype': u'Section Break',
+		'label': u'Company Info',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'address',
-		'fieldtype': 'Small Text',
-		'label': 'Address',
-		'oldfieldname': 'address',
-		'oldfieldtype': 'Small Text',
+		'doctype': u'DocField',
+		'fieldname': u'address',
+		'fieldtype': u'Small Text',
+		'label': u'Address',
+		'oldfieldname': u'address',
+		'oldfieldtype': u'Small Text',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Column Break',
-		'oldfieldtype': 'Column Break',
+		'doctype': u'DocField',
+		'fieldname': u'column_break1',
+		'fieldtype': u'Column Break',
+		'oldfieldtype': u'Column Break',
 		'permlevel': 0,
-		'width': '50%'
+		'width': u'50%'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'phone_no',
-		'fieldtype': 'Data',
-		'label': 'Phone No',
-		'oldfieldname': 'phone_no',
-		'oldfieldtype': 'Data',
-		'options': 'Phone',
+		'doctype': u'DocField',
+		'fieldname': u'phone_no',
+		'fieldtype': u'Data',
+		'label': u'Phone No',
+		'oldfieldname': u'phone_no',
+		'oldfieldtype': u'Data',
+		'options': u'Phone',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'fax',
-		'fieldtype': 'Data',
-		'label': 'Fax',
-		'oldfieldname': 'fax',
-		'oldfieldtype': 'Data',
-		'options': 'Phone',
+		'doctype': u'DocField',
+		'fieldname': u'fax',
+		'fieldtype': u'Data',
+		'label': u'Fax',
+		'oldfieldname': u'fax',
+		'oldfieldtype': u'Data',
+		'options': u'Phone',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'email',
-		'fieldtype': 'Data',
-		'label': 'Email',
-		'oldfieldname': 'email',
-		'oldfieldtype': 'Data',
-		'options': 'Email',
+		'doctype': u'DocField',
+		'fieldname': u'email',
+		'fieldtype': u'Data',
+		'label': u'Email',
+		'oldfieldname': u'email',
+		'oldfieldtype': u'Data',
+		'options': u'Email',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'website',
-		'fieldtype': 'Data',
-		'label': 'Website',
-		'oldfieldname': 'website',
-		'oldfieldtype': 'Data',
+		'doctype': u'DocField',
+		'fieldname': u'website',
+		'fieldtype': u'Data',
+		'label': u'Website',
+		'oldfieldname': u'website',
+		'oldfieldtype': u'Data',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'description': 'Company registration numbers for your reference. Example: VAT Registration Numbers etc.',
-		'doctype': 'DocField',
-		'fieldtype': 'Section Break',
-		'label': 'Registration Info',
-		'oldfieldtype': 'Section Break',
+		'colour': u'White:FFF',
+		'description': u'Company registration numbers for your reference. Example: VAT Registration Numbers etc.',
+		'doctype': u'DocField',
+		'fieldname': u'registration_info',
+		'fieldtype': u'Section Break',
+		'label': u'Registration Info',
+		'oldfieldtype': u'Section Break',
 		'permlevel': 0,
-		'width': '50%'
+		'width': u'50%'
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'description': 'Company registration numbers for your reference. Tax numbers etc.',
-		'doctype': 'DocField',
-		'fieldname': 'registration_details',
-		'fieldtype': 'Code',
-		'label': 'Registration Details',
-		'oldfieldname': 'registration_details',
-		'oldfieldtype': 'Code',
+		'colour': u'White:FFF',
+		'description': u'Company registration numbers for your reference. Tax numbers etc.',
+		'doctype': u'DocField',
+		'fieldname': u'registration_details',
+		'fieldtype': u'Code',
+		'label': u'Registration Details',
+		'oldfieldname': u'registration_details',
+		'oldfieldtype': u'Code',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'trash_reason',
-		'fieldtype': 'Small Text',
-		'label': 'Trash Reason',
+		'doctype': u'DocField',
+		'fieldname': u'trash_reason',
+		'fieldtype': u'Small Text',
+		'label': u'Trash Reason',
 		'no_copy': 1,
-		'oldfieldname': 'trash_reason',
-		'oldfieldtype': 'Small Text',
+		'oldfieldname': u'trash_reason',
+		'oldfieldtype': u'Small Text',
 		'permlevel': 1
 	}
 ]

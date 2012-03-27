@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:08:56',
+		'creation': '2012-03-27 14:36:07',
 		'docstatus': 0,
-		'modified': '2012-02-29 13:24:31',
+		'modified': '2012-03-27 18:47:38',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -27,7 +27,7 @@
 		'show_in_menu': 0,
 		'subject': u'eval:"%(customer_name)s"=="%(name)s" ? "" : "%(customer_name)s"',
 		'tag_fields': u'customer_group,customer_type',
-		'version': 434
+		'version': 435
 	},
 
 	# These values are common for all DocField
@@ -59,46 +59,6 @@
 
 	# DocPerm
 	{
-		'cancel': 0,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Sales Manager',
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'cancel': 0,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Sales Manager',
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'cancel': 0,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Sales User',
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'cancel': 0,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Sales User',
-		'write': 0
-	},
-
-	# DocPerm
-	{
 		'cancel': 1,
 		'create': 1,
 		'doctype': u'DocPerm',
@@ -117,11 +77,52 @@
 		'write': 0
 	},
 
+	# DocPerm
+	{
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Sales Manager',
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Sales Manager',
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Sales User',
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Sales User',
+		'write': 0
+	},
+
 	# DocField
 	{
 		'colour': u'White:FFF',
 		'description': u'Note: You Can Manage Multiple Address or Contacts via Addresses & Contacts',
 		'doctype': u'DocField',
+		'fieldname': u'basic_info',
 		'fieldtype': u'Section Break',
 		'label': u'Basic Info',
 		'oldfieldtype': u'Section Break',
@@ -195,6 +196,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'column_break0',
 		'fieldtype': u'Column Break',
 		'permlevel': 0,
 		'width': u'50%'
@@ -241,6 +243,7 @@
 	{
 		'colour': u'White:FFF',
 		'doctype': u'DocField',
+		'fieldname': u'address_contacts',
 		'fieldtype': u'Section Break',
 		'label': u'Address & Contacts',
 		'permlevel': 0
@@ -251,6 +254,7 @@
 		'colour': u'White:FFF',
 		'depends_on': u'eval:doc.__islocal',
 		'doctype': u'DocField',
+		'fieldname': u'address_desc',
 		'fieldtype': u'HTML',
 		'label': u'Address Desc',
 		'options': u'<em>Addresses will appear only when you save the customer</em>',
@@ -261,6 +265,7 @@
 	{
 		'colour': u'White:FFF',
 		'doctype': u'DocField',
+		'fieldname': u'address_html',
 		'fieldtype': u'HTML',
 		'label': u'Address HTML',
 		'permlevel': 1
@@ -269,6 +274,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'column_break1',
 		'fieldtype': u'Column Break',
 		'permlevel': 0,
 		'width': u'50%'
@@ -279,6 +285,7 @@
 		'colour': u'White:FFF',
 		'depends_on': u'eval:doc.__islocal',
 		'doctype': u'DocField',
+		'fieldname': u'contact_desc',
 		'fieldtype': u'HTML',
 		'label': u'Contact Desc',
 		'options': u'<em>Contact Details will appear only when you save the customer</em>',
@@ -289,6 +296,7 @@
 	{
 		'colour': u'White:FFF',
 		'doctype': u'DocField',
+		'fieldname': u'contact_html',
 		'fieldtype': u'HTML',
 		'label': u'Contact HTML',
 		'oldfieldtype': u'HTML',
@@ -299,6 +307,7 @@
 	{
 		'colour': u'White:FFF',
 		'doctype': u'DocField',
+		'fieldname': u'more_info',
 		'fieldtype': u'Section Break',
 		'label': u'More Info',
 		'oldfieldtype': u'Section Break',
@@ -308,6 +317,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'column_break2',
 		'fieldtype': u'Column Break',
 		'permlevel': 0,
 		'width': u'50%'
@@ -346,6 +356,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'column_break3',
 		'fieldtype': u'Column Break',
 		'permlevel': 0,
 		'width': u'50%'
@@ -385,6 +396,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'sales_team_section_break',
 		'fieldtype': u'Section Break',
 		'label': u'Sales Team',
 		'oldfieldtype': u'Section Break',
@@ -431,6 +443,7 @@
 		'colour': u'White:FFF',
 		'depends_on': u'eval:!doc.__islocal',
 		'doctype': u'DocField',
+		'fieldname': u'transaction_history',
 		'fieldtype': u'Section Break',
 		'label': u'Transaction History',
 		'permlevel': 0
@@ -441,6 +454,7 @@
 		'colour': u'White:FFF',
 		'depends_on': u'eval:!doc.__islocal',
 		'doctype': u'DocField',
+		'fieldname': u'history_html',
 		'fieldtype': u'HTML',
 		'label': u'History HTML',
 		'permlevel': 0

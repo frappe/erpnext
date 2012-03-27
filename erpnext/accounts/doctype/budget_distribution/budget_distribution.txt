@@ -3,79 +3,76 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:08:54',
+		'creation': '2012-03-27 14:35:41',
 		'docstatus': 0,
-		'modified': '2010-12-29 18:20:37',
-		'modified_by': 'umair@iwebnotes.com',
-		'owner': 'Administrator'
+		'modified': '2012-03-27 14:35:41',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
 		'allow_trash': 1,
-		'autoname': 'field:distribution_id',
-		'colour': 'White:FFF',
+		'autoname': u'field:distribution_id',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
-		'module': 'Accounts',
+		'module': u'Accounts',
 		'name': '__common__',
-		'name_case': 'Title Case',
-		'section_style': 'Simple',
-		'server_code_error': ' ',
+		'name_case': u'Title Case',
+		'section_style': u'Simple',
+		'server_code_error': u' ',
 		'show_in_menu': 0,
 		'version': 24
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Budget Distribution',
-		'parentfield': 'fields',
-		'parenttype': 'DocType'
+		'parent': u'Budget Distribution',
+		'parentfield': u'fields',
+		'parenttype': u'DocType'
 	},
 
 	# These values are common for all DocPerm
 	{
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'name': '__common__',
-		'parent': 'Budget Distribution',
-		'parentfield': 'permissions',
-		'parenttype': 'DocType',
+		'parent': u'Budget Distribution',
+		'parentfield': u'permissions',
+		'parenttype': u'DocType',
 		'read': 1
 	},
 
 	# DocType, Budget Distribution
 	{
 		'doctype': 'DocType',
-		'name': 'Budget Distribution'
+		'name': u'Budget Distribution'
 	},
 
 	# DocPerm
 	{
 		'cancel': 1,
 		'create': 1,
-		'doctype': 'DocPerm',
-		'idx': 1,
+		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'role': 'System Manager',
+		'role': u'System Manager',
 		'write': 1
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm',
-		'idx': 2,
+		'doctype': u'DocPerm',
 		'permlevel': 1,
-		'role': 'System Manager',
+		'role': u'System Manager',
 		'write': 1
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm',
-		'idx': 3,
+		'doctype': u'DocPerm',
 		'permlevel': 2,
-		'role': 'System Manager'
+		'role': u'System Manager'
 	},
 
 	# DocPerm
@@ -83,10 +80,9 @@
 		'amend': 0,
 		'cancel': 1,
 		'create': 1,
-		'doctype': 'DocPerm',
-		'idx': 4,
+		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'role': 'Accounts Manager',
+		'role': u'Accounts Manager',
 		'submit': 0,
 		'write': 1
 	},
@@ -96,71 +92,65 @@
 		'amend': 0,
 		'cancel': 0,
 		'create': 0,
-		'doctype': 'DocPerm',
-		'idx': 5,
+		'doctype': u'DocPerm',
 		'permlevel': 1,
-		'role': 'Accounts Manager',
+		'role': u'Accounts Manager',
 		'submit': 0,
 		'write': 1
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm',
-		'idx': 6,
+		'doctype': u'DocPerm',
 		'permlevel': 2,
-		'role': 'Accounts Manager'
+		'role': u'Accounts Manager'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'distribution_id',
-		'fieldtype': 'Data',
-		'idx': 1,
-		'label': 'Distribution ID',
-		'oldfieldname': 'distribution_id',
-		'oldfieldtype': 'Data',
+		'doctype': u'DocField',
+		'fieldname': u'distribution_id',
+		'fieldtype': u'Data',
+		'label': u'Distribution ID',
+		'oldfieldname': u'distribution_id',
+		'oldfieldtype': u'Data',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'fiscal_year',
-		'fieldtype': 'Select',
-		'idx': 2,
+		'doctype': u'DocField',
+		'fieldname': u'fiscal_year',
+		'fieldtype': u'Select',
 		'in_filter': 1,
-		'label': 'Fiscal Year',
-		'oldfieldname': 'fiscal_year',
-		'oldfieldtype': 'Select',
-		'options': 'link:Fiscal Year',
+		'label': u'Fiscal Year',
+		'oldfieldname': u'fiscal_year',
+		'oldfieldtype': u'Select',
+		'options': u'link:Fiscal Year',
 		'permlevel': 0,
 		'search_index': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'budget_distribution_details',
-		'fieldtype': 'Table',
-		'idx': 3,
-		'label': 'Budget Distribution Details',
-		'oldfieldname': 'budget_distribution_details',
-		'oldfieldtype': 'Table',
-		'options': 'Budget Distribution Detail',
+		'doctype': u'DocField',
+		'fieldname': u'budget_distribution_details',
+		'fieldtype': u'Table',
+		'label': u'Budget Distribution Details',
+		'oldfieldname': u'budget_distribution_details',
+		'oldfieldtype': u'Table',
+		'options': u'Budget Distribution Detail',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'trash_reason',
-		'fieldtype': 'Small Text',
-		'idx': 4,
-		'label': 'Trash Reason',
-		'oldfieldname': 'trash_reason',
-		'oldfieldtype': 'Small Text',
+		'doctype': u'DocField',
+		'fieldname': u'trash_reason',
+		'fieldtype': u'Small Text',
+		'label': u'Trash Reason',
+		'oldfieldname': u'trash_reason',
+		'oldfieldtype': u'Small Text',
 		'permlevel': 1
 	}
 ]

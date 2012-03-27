@@ -3,141 +3,133 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:09:05',
+		'creation': '2012-03-27 14:35:57',
 		'docstatus': 0,
-		'modified': '2010-09-20 14:06:57',
-		'modified_by': 'umair@iwebnotes.com',
-		'owner': 'Administrator'
+		'modified': '2012-03-27 14:35:57',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'colour': 'White:FFF',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
 		'istable': 1,
-		'module': 'HR',
+		'module': u'HR',
 		'name': '__common__',
-		'section_style': 'Simple',
-		'server_code_error': ' ',
+		'section_style': u'Simple',
+		'server_code_error': u' ',
 		'show_in_menu': 0,
 		'version': 10
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Invest 80 Declaration Detail',
-		'parentfield': 'fields',
-		'parenttype': 'DocType'
+		'parent': u'Invest 80 Declaration Detail',
+		'parentfield': u'fields',
+		'parenttype': u'DocType'
 	},
 
 	# These values are common for all DocPerm
 	{
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'name': '__common__',
-		'parent': 'Invest 80 Declaration Detail',
-		'parentfield': 'permissions',
-		'parenttype': 'DocType',
+		'parent': u'Invest 80 Declaration Detail',
+		'parentfield': u'permissions',
+		'parenttype': u'DocType',
 		'read': 1,
-		'role': 'System Manager'
+		'role': u'System Manager'
 	},
 
 	# DocType, Invest 80 Declaration Detail
 	{
 		'doctype': 'DocType',
-		'name': 'Invest 80 Declaration Detail'
+		'name': u'Invest 80 Declaration Detail'
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm',
-		'idx': 1,
+		'doctype': u'DocPerm',
 		'permlevel': 0,
 		'write': 1
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm',
-		'idx': 2,
+		'doctype': u'DocPerm',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'particulars4',
-		'fieldtype': 'Small Text',
-		'idx': 1,
-		'label': 'Particulars',
-		'oldfieldname': 'particulars4',
-		'oldfieldtype': 'Small Text',
+		'doctype': u'DocField',
+		'fieldname': u'particulars4',
+		'fieldtype': u'Small Text',
+		'label': u'Particulars',
+		'oldfieldname': u'particulars4',
+		'oldfieldtype': u'Small Text',
 		'permlevel': 1,
 		'reqd': 1,
-		'width': '300px'
+		'width': u'300px'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'under_section4',
-		'fieldtype': 'Data',
-		'idx': 2,
-		'label': 'Under Section',
-		'oldfieldname': 'under_section4',
-		'oldfieldtype': 'Data',
+		'doctype': u'DocField',
+		'fieldname': u'under_section4',
+		'fieldtype': u'Data',
+		'label': u'Under Section',
+		'oldfieldname': u'under_section4',
+		'oldfieldtype': u'Data',
 		'permlevel': 1,
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'max_limit4',
-		'fieldtype': 'Currency',
-		'idx': 3,
-		'label': 'Max. Limit',
-		'oldfieldname': 'max_limit4',
-		'oldfieldtype': 'Currency',
+		'doctype': u'DocField',
+		'fieldname': u'max_limit4',
+		'fieldtype': u'Currency',
+		'label': u'Max. Limit',
+		'oldfieldname': u'max_limit4',
+		'oldfieldtype': u'Currency',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldname': 'actual_amount4',
-		'fieldtype': 'Currency',
-		'idx': 4,
-		'label': 'Actual Amount',
-		'oldfieldname': 'actual_amount4',
-		'oldfieldtype': 'Currency',
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'actual_amount4',
+		'fieldtype': u'Currency',
+		'label': u'Actual Amount',
+		'oldfieldname': u'actual_amount4',
+		'oldfieldtype': u'Currency',
 		'permlevel': 0,
-		'trigger': 'Client'
+		'trigger': u'Client'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'eligible_amount4',
-		'fieldtype': 'Currency',
-		'idx': 5,
-		'label': 'Eligible Amount',
-		'oldfieldname': 'eligible_amount4',
-		'oldfieldtype': 'Currency',
+		'doctype': u'DocField',
+		'fieldname': u'eligible_amount4',
+		'fieldtype': u'Currency',
+		'label': u'Eligible Amount',
+		'oldfieldname': u'eligible_amount4',
+		'oldfieldtype': u'Currency',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'modified_amount4',
-		'fieldtype': 'Currency',
-		'idx': 6,
-		'label': 'Modified Amount',
-		'oldfieldname': 'modified_amount4',
-		'oldfieldtype': 'Currency',
+		'doctype': u'DocField',
+		'fieldname': u'modified_amount4',
+		'fieldtype': u'Currency',
+		'label': u'Modified Amount',
+		'oldfieldname': u'modified_amount4',
+		'oldfieldtype': u'Currency',
 		'permlevel': 0
 	}
 ]

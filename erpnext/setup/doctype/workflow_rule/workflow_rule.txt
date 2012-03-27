@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:09:31',
+		'creation': '2012-03-27 14:36:26',
 		'docstatus': 0,
-		'modified': '2012-03-21 14:58:16',
+		'modified': '2012-03-27 14:36:26',
 		'modified_by': u'Administrator',
 		'owner': u'swarnalata@webnotestech.com'
 	},
@@ -64,6 +64,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'rule_definition',
 		'fieldtype': u'Section Break',
 		'label': u'Rule Definition',
 		'oldfieldtype': u'Section Break'
@@ -72,6 +73,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'intro_html',
 		'fieldtype': u'HTML',
 		'label': u'Intro HTML',
 		'oldfieldtype': u'HTML',
@@ -135,6 +137,7 @@
 	{
 		'colour': u'White:FFF',
 		'doctype': u'DocField',
+		'fieldname': u'define_rule',
 		'fieldtype': u'Section Break',
 		'label': u'Define Rule',
 		'oldfieldtype': u'Section Break',
@@ -170,6 +173,7 @@
 	{
 		'colour': u'White:FFF',
 		'doctype': u'DocField',
+		'fieldname': u'action_detail',
 		'fieldtype': u'Section Break',
 		'label': u'Action Detail',
 		'oldfieldtype': u'Section Break'
@@ -178,6 +182,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'action_html',
 		'fieldtype': u'HTML',
 		'label': u'Action html',
 		'oldfieldtype': u'HTML',
@@ -199,6 +204,7 @@
 	{
 		'colour': u'White:FFF',
 		'doctype': u'DocField',
+		'fieldname': u'reject_html',
 		'fieldtype': u'HTML',
 		'hidden': 1,
 		'label': u'Reject HTML',

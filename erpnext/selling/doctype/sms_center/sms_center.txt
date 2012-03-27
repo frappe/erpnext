@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2011-01-11 17:52:26',
+		'creation': '2012-03-27 14:36:17',
 		'docstatus': 0,
-		'modified': '2012-03-21 13:06:26',
+		'modified': '2012-03-27 14:36:17',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -142,6 +142,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'create_receiver_list',
 		'fieldtype': u'Button',
 		'label': u'Create Receiver List',
 		'options': u'create_receiver_list'
@@ -176,6 +177,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'send_sms',
 		'fieldtype': u'Button',
 		'label': u'Send SMS',
 		'options': u'send_sms'

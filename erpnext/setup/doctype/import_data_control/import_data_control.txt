@@ -3,28 +3,28 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-10-04 16:30:30',
+		'creation': '2012-03-27 14:36:21',
 		'docstatus': 0,
-		'modified': '2010-12-24 11:43:03',
-		'modified_by': 'abhishek@webnotestech.com',
-		'owner': 'harshada@webnotestech.com'
+		'modified': '2012-03-27 14:36:21',
+		'modified_by': u'Administrator',
+		'owner': u'harshada@webnotestech.com'
 	},
 
 	# These values are common for all DocType
 	{
-		'colour': 'White:FFF',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
 		'issingle': 1,
-		'module': 'Setup',
+		'module': u'Setup',
 		'name': '__common__',
-		'section_style': 'Simple',
-		'server_code_error': ' ',
+		'section_style': u'Simple',
+		'server_code_error': u' ',
 		'version': 12
 	},
 
 	# DocType, Import Data Control
 	{
 		'doctype': 'DocType',
-		'name': 'Import Data Control'
+		'name': u'Import Data Control'
 	}
 ]

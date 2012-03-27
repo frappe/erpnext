@@ -3,50 +3,49 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:09:04',
+		'creation': '2012-03-27 14:36:09',
 		'docstatus': 0,
-		'modified': '2010-09-20 14:06:57',
-		'modified_by': 'Administrator',
-		'owner': 'harshada@webnotestech.com'
+		'modified': '2012-03-27 14:36:09',
+		'modified_by': u'Administrator',
+		'owner': u'harshada@webnotestech.com'
 	},
 
 	# These values are common for all DocType
 	{
-		'autoname': 'field:industry',
-		'colour': 'White:FFF',
+		'autoname': u'field:industry',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
-		'document_type': 'Master',
-		'module': 'Selling',
+		'document_type': u'Master',
+		'module': u'Selling',
 		'name': '__common__',
-		'section_style': 'Simple',
-		'server_code_error': ' ',
+		'section_style': u'Simple',
+		'server_code_error': u' ',
 		'version': 4
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'industry',
-		'fieldtype': 'Data',
-		'idx': 1,
-		'label': 'Industry',
+		'doctype': u'DocField',
+		'fieldname': u'industry',
+		'fieldtype': u'Data',
+		'label': u'Industry',
 		'name': '__common__',
-		'oldfieldname': 'industry',
-		'oldfieldtype': 'Data',
-		'parent': 'Industry Type',
-		'parentfield': 'fields',
-		'parenttype': 'DocType',
+		'oldfieldname': u'industry',
+		'oldfieldtype': u'Data',
+		'parent': u'Industry Type',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
 		'permlevel': 0,
 		'reqd': 1
 	},
 
 	# These values are common for all DocPerm
 	{
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'name': '__common__',
-		'parent': 'Industry Type',
-		'parentfield': 'permissions',
-		'parenttype': 'DocType',
+		'parent': u'Industry Type',
+		'parentfield': u'permissions',
+		'parenttype': u'DocType',
 		'permlevel': 0,
 		'read': 1
 	},
@@ -54,36 +53,33 @@
 	# DocType, Industry Type
 	{
 		'doctype': 'DocType',
-		'name': 'Industry Type'
+		'name': u'Industry Type'
 	},
 
 	# DocPerm
 	{
 		'create': 1,
-		'doctype': 'DocPerm',
-		'idx': 1,
-		'role': 'Sales Manager',
+		'doctype': u'DocPerm',
+		'role': u'Sales Manager',
 		'write': 1
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm',
-		'idx': 2,
-		'role': 'Sales User'
+		'doctype': u'DocPerm',
+		'role': u'Sales User'
 	},
 
 	# DocPerm
 	{
 		'create': 1,
-		'doctype': 'DocPerm',
-		'idx': 3,
-		'role': 'Sales Master Manager',
+		'doctype': u'DocPerm',
+		'role': u'Sales Master Manager',
 		'write': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField'
+		'doctype': u'DocField'
 	}
 ]

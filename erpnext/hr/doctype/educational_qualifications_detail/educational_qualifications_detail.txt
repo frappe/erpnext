@@ -3,107 +3,101 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:08:59',
+		'creation': '2012-03-27 14:35:54',
 		'docstatus': 0,
-		'modified': '2010-09-20 14:06:57',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-27 14:35:54',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'colour': 'White:FFF',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
 		'istable': 1,
-		'module': 'HR',
+		'module': u'HR',
 		'name': '__common__',
-		'section_style': 'Simple',
-		'server_code_error': ' ',
+		'section_style': u'Simple',
+		'server_code_error': u' ',
 		'show_in_menu': 0,
 		'version': 5
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Educational Qualifications Detail',
-		'parentfield': 'fields',
-		'parenttype': 'DocType',
+		'parent': u'Educational Qualifications Detail',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
 		'permlevel': 0
 	},
 
 	# DocType, Educational Qualifications Detail
 	{
 		'doctype': 'DocType',
-		'name': 'Educational Qualifications Detail'
+		'name': u'Educational Qualifications Detail'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'school_univ',
-		'fieldtype': 'Small Text',
-		'idx': 1,
-		'label': 'School/University',
-		'oldfieldname': 'school_univ',
-		'oldfieldtype': 'Small Text'
+		'doctype': u'DocField',
+		'fieldname': u'school_univ',
+		'fieldtype': u'Small Text',
+		'label': u'School/University',
+		'oldfieldname': u'school_univ',
+		'oldfieldtype': u'Small Text'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'qualification',
-		'fieldtype': 'Data',
-		'idx': 2,
-		'label': 'Qualification',
-		'oldfieldname': 'qualification',
-		'oldfieldtype': 'Data',
-		'width': '100px'
+		'doctype': u'DocField',
+		'fieldname': u'qualification',
+		'fieldtype': u'Data',
+		'label': u'Qualification',
+		'oldfieldname': u'qualification',
+		'oldfieldtype': u'Data',
+		'width': u'100px'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'level',
-		'fieldtype': 'Select',
-		'idx': 3,
-		'label': 'Level',
-		'oldfieldname': 'level',
-		'oldfieldtype': 'Select',
-		'options': 'Graduate\nPost Graduate\nUnder Graduate'
+		'doctype': u'DocField',
+		'fieldname': u'level',
+		'fieldtype': u'Select',
+		'label': u'Level',
+		'oldfieldname': u'level',
+		'oldfieldtype': u'Select',
+		'options': u'Graduate\nPost Graduate\nUnder Graduate'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'year_of_passing',
-		'fieldtype': 'Int',
-		'idx': 4,
-		'label': 'Year of Passing',
-		'oldfieldname': 'year_of_passing',
-		'oldfieldtype': 'Int'
+		'doctype': u'DocField',
+		'fieldname': u'year_of_passing',
+		'fieldtype': u'Int',
+		'label': u'Year of Passing',
+		'oldfieldname': u'year_of_passing',
+		'oldfieldtype': u'Int'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'class_per',
-		'fieldtype': 'Data',
-		'idx': 5,
-		'label': 'Class / Percentage',
-		'oldfieldname': 'class_per',
-		'oldfieldtype': 'Data'
+		'doctype': u'DocField',
+		'fieldname': u'class_per',
+		'fieldtype': u'Data',
+		'label': u'Class / Percentage',
+		'oldfieldname': u'class_per',
+		'oldfieldtype': u'Data'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'maj_opt_subj',
-		'fieldtype': 'Text',
-		'idx': 6,
-		'label': 'Major/Optional Subjects',
-		'oldfieldname': 'maj_opt_subj',
-		'oldfieldtype': 'Text'
+		'doctype': u'DocField',
+		'fieldname': u'maj_opt_subj',
+		'fieldtype': u'Text',
+		'label': u'Major/Optional Subjects',
+		'oldfieldname': u'maj_opt_subj',
+		'oldfieldtype': u'Text'
 	}
 ]

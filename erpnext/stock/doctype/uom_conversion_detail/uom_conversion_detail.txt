@@ -3,63 +3,61 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:09:29',
+		'creation': '2012-03-27 14:36:40',
 		'docstatus': 0,
-		'modified': '2010-09-20 14:06:57',
-		'modified_by': 'umair@iwebnotes.com',
-		'owner': 'Administrator'
+		'modified': '2012-03-27 14:36:40',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'autoname': 'UCDD/.#####',
-		'colour': 'White:FFF',
+		'autoname': u'UCDD/.#####',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
 		'istable': 1,
-		'module': 'Stock',
+		'module': u'Stock',
 		'name': '__common__',
-		'section_style': 'Tray',
-		'server_code_error': ' ',
+		'section_style': u'Tray',
+		'server_code_error': u' ',
 		'show_in_menu': 0,
 		'version': 1
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'UOM Conversion Detail',
-		'parentfield': 'fields',
-		'parenttype': 'DocType',
+		'parent': u'UOM Conversion Detail',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
 		'permlevel': 0
 	},
 
 	# DocType, UOM Conversion Detail
 	{
 		'doctype': 'DocType',
-		'name': 'UOM Conversion Detail'
+		'name': u'UOM Conversion Detail'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'uom',
-		'fieldtype': 'Link',
-		'idx': 10,
-		'label': 'UOM',
-		'oldfieldname': 'uom',
-		'oldfieldtype': 'Link',
-		'options': 'UOM'
+		'doctype': u'DocField',
+		'fieldname': u'uom',
+		'fieldtype': u'Link',
+		'label': u'UOM',
+		'oldfieldname': u'uom',
+		'oldfieldtype': u'Link',
+		'options': u'UOM'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'conversion_factor',
-		'fieldtype': 'Float',
-		'idx': 11,
-		'label': 'Conversion Factor',
-		'oldfieldname': 'conversion_factor',
-		'oldfieldtype': 'Float'
+		'doctype': u'DocField',
+		'fieldname': u'conversion_factor',
+		'fieldtype': u'Float',
+		'label': u'Conversion Factor',
+		'oldfieldname': u'conversion_factor',
+		'oldfieldtype': u'Float'
 	}
 ]

@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:09:08',
+		'creation': '2012-03-27 14:35:59',
 		'docstatus': 0,
-		'modified': '2012-03-21 14:42:27',
+		'modified': '2012-03-27 14:35:59',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -108,6 +108,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'column_break0',
 		'fieldtype': u'Column Break',
 		'width': u'50%'
 	},
@@ -170,6 +171,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'column_break1',
 		'fieldtype': u'Column Break',
 		'width': u'50%'
 	},
@@ -218,6 +220,7 @@
 	{
 		'colour': u'White:FFF',
 		'doctype': u'DocField',
+		'fieldname': u'allocate',
 		'fieldtype': u'Button',
 		'label': u'Allocate',
 		'options': u'allocate_leave',

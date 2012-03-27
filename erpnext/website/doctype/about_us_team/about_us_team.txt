@@ -3,72 +3,72 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-01-27 10:14:18',
+		'creation': '2012-03-27 14:36:47',
 		'docstatus': 0,
-		'modified': '2012-01-27 11:54:18',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-27 14:36:47',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'colour': 'White:FFF',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
 		'istable': 1,
-		'module': 'Website',
+		'module': u'Website',
 		'name': '__common__',
-		'section_style': 'Simple',
+		'section_style': u'Simple',
 		'show_in_menu': 0,
 		'version': 5
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'About Us Team',
-		'parentfield': 'fields',
-		'parenttype': 'DocType',
+		'parent': u'About Us Team',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
 		'permlevel': 0
 	},
 
 	# DocType, About Us Team
 	{
 		'doctype': 'DocType',
-		'name': 'About Us Team'
+		'name': u'About Us Team'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'person_name',
-		'fieldtype': 'Data',
-		'label': 'Person Name'
+		'doctype': u'DocField',
+		'fieldname': u'person_name',
+		'fieldtype': u'Data',
+		'label': u'Person Name'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'designation',
-		'fieldtype': 'Data',
-		'label': 'Designation'
+		'doctype': u'DocField',
+		'fieldname': u'designation',
+		'fieldtype': u'Data',
+		'label': u'Designation'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'image',
-		'fieldtype': 'Select',
-		'label': 'Image',
-		'options': 'attach_files:'
+		'doctype': u'DocField',
+		'fieldname': u'image',
+		'fieldtype': u'Select',
+		'label': u'Image',
+		'options': u'attach_files:'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'bio',
-		'fieldtype': 'Text',
-		'label': 'Bio (markdown)',
-		'width': '300px'
+		'doctype': u'DocField',
+		'fieldname': u'bio',
+		'fieldtype': u'Text',
+		'label': u'Bio (markdown)',
+		'width': u'300px'
 	}
 ]

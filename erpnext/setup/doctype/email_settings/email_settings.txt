@@ -3,234 +3,240 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:08:59',
+		'creation': '2012-03-27 14:36:20',
 		'docstatus': 0,
-		'modified': '2012-01-25 18:44:45',
-		'modified_by': 'Administrator',
-		'owner': 'harshada@webnotestech.com'
+		'modified': '2012-03-27 14:36:20',
+		'modified_by': u'Administrator',
+		'owner': u'harshada@webnotestech.com'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1325570647',
+		'_last_update': u'1325570647',
 		'allow_copy': 1,
 		'allow_email': 1,
 		'allow_print': 1,
-		'colour': 'White:FFF',
-		'default_print_format': 'Standard',
+		'colour': u'White:FFF',
+		'default_print_format': u'Standard',
 		'doctype': 'DocType',
 		'in_create': 1,
 		'issingle': 1,
-		'module': 'Setup',
+		'module': u'Setup',
 		'name': '__common__',
-		'section_style': 'Simple',
-		'server_code_error': ' ',
+		'section_style': u'Simple',
+		'server_code_error': u' ',
 		'version': 35
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Email Settings',
-		'parentfield': 'fields',
-		'parenttype': 'DocType',
+		'parent': u'Email Settings',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
 		'permlevel': 0
 	},
 
 	# These values are common for all DocPerm
 	{
 		'create': 1,
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'name': '__common__',
-		'parent': 'Email Settings',
-		'parentfield': 'permissions',
-		'parenttype': 'DocType',
+		'parent': u'Email Settings',
+		'parentfield': u'permissions',
+		'parenttype': u'DocType',
 		'permlevel': 0,
 		'read': 1,
-		'role': 'System Manager',
+		'role': u'System Manager',
 		'write': 1
 	},
 
 	# DocType, Email Settings
 	{
 		'doctype': 'DocType',
-		'name': 'Email Settings'
+		'name': u'Email Settings'
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm'
+		'doctype': u'DocPerm'
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm'
+		'doctype': u'DocPerm'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Section Break',
-		'label': 'Outgoing Mails'
+		'doctype': u'DocField',
+		'fieldname': u'outgoing_mails',
+		'fieldtype': u'Section Break',
+		'label': u'Outgoing Mails'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'HTML',
-		'label': '1',
-		'options': '<div class="help_box">Set your outgoing mail settings here. All system generated notifications, emails will go from this mail server</div>'
+		'doctype': u'DocField',
+		'fieldname': u'html1',
+		'fieldtype': u'HTML',
+		'label': u'1',
+		'options': u'<div class="help_box">Set your outgoing mail settings here. All system generated notifications, emails will go from this mail server</div>'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'outgoing_mail_server',
-		'fieldtype': 'Data',
-		'label': 'Outgoing Mail Server'
+		'doctype': u'DocField',
+		'fieldname': u'outgoing_mail_server',
+		'fieldtype': u'Data',
+		'label': u'Outgoing Mail Server'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'mail_port',
-		'fieldtype': 'Int',
-		'label': 'Mail Port'
+		'doctype': u'DocField',
+		'fieldname': u'mail_port',
+		'fieldtype': u'Int',
+		'label': u'Mail Port'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'use_ssl',
-		'fieldtype': 'Check',
-		'label': 'Use SSL'
+		'doctype': u'DocField',
+		'fieldname': u'use_ssl',
+		'fieldtype': u'Check',
+		'label': u'Use SSL'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'mail_login',
-		'fieldtype': 'Data',
-		'label': 'Login Id'
+		'doctype': u'DocField',
+		'fieldname': u'mail_login',
+		'fieldtype': u'Data',
+		'label': u'Login Id'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'mail_password',
-		'fieldtype': 'Password',
-		'label': 'Mail Password'
+		'doctype': u'DocField',
+		'fieldname': u'mail_password',
+		'fieldtype': u'Password',
+		'label': u'Mail Password'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'auto_email_id',
-		'fieldtype': 'Data',
-		'label': 'Auto Email Id'
+		'doctype': u'DocField',
+		'fieldname': u'auto_email_id',
+		'fieldtype': u'Data',
+		'label': u'Auto Email Id'
 	},
 
 	# DocField
 	{
-		'description': 'Set the POP3 email settings to pull emails directly from a mailbox and create Support Tickets',
-		'doctype': 'DocField',
-		'fieldtype': 'Section Break',
-		'label': 'Support Ticket Mail Settings'
+		'description': u'Set the POP3 email settings to pull emails directly from a mailbox and create Support Tickets',
+		'doctype': u'DocField',
+		'fieldname': u'support_ticket_mail_settings',
+		'fieldtype': u'Section Break',
+		'label': u'Support Ticket Mail Settings'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'HTML',
-		'label': '2',
-		'options': '<div class="help_box">To automatically create Support Tickets from your incoming mail, set your pop3 settings here.</div>'
+		'doctype': u'DocField',
+		'fieldname': u'html2',
+		'fieldtype': u'HTML',
+		'label': u'2',
+		'options': u'<div class="help_box">To automatically create Support Tickets from your incoming mail, set your pop3 settings here.</div>'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Section Break',
-		'options': 'Simple'
+		'doctype': u'DocField',
+		'fieldname': u'section_break0',
+		'fieldtype': u'Section Break',
+		'options': u'Simple'
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'description': 'Check this to pull emails from your mailbox',
-		'doctype': 'DocField',
-		'fieldname': 'sync_support_mails',
-		'fieldtype': 'Check',
-		'label': 'Sync Support Mails'
+		'colour': u'White:FFF',
+		'description': u'Check this to pull emails from your mailbox',
+		'doctype': u'DocField',
+		'fieldname': u'sync_support_mails',
+		'fieldtype': u'Check',
+		'label': u'Sync Support Mails'
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'description': 'Your support email id - must be a valid email - this is where your emails will come!',
-		'doctype': 'DocField',
-		'fieldname': 'support_email',
-		'fieldtype': 'Data',
-		'label': 'Support Email'
+		'colour': u'White:FFF',
+		'description': u'Your support email id - must be a valid email - this is where your emails will come!',
+		'doctype': u'DocField',
+		'fieldname': u'support_email',
+		'fieldtype': u'Data',
+		'label': u'Support Email'
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'description': 'POP3 mail server (e.g. pop.gmail.com)',
-		'doctype': 'DocField',
-		'fieldname': 'support_host',
-		'fieldtype': 'Data',
-		'label': 'POP3 Mail Server'
+		'colour': u'White:FFF',
+		'description': u'POP3 mail server (e.g. pop.gmail.com)',
+		'doctype': u'DocField',
+		'fieldname': u'support_host',
+		'fieldtype': u'Data',
+		'label': u'POP3 Mail Server'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'support_use_ssl',
-		'fieldtype': 'Check',
-		'label': 'Use SSL'
+		'doctype': u'DocField',
+		'fieldname': u'support_use_ssl',
+		'fieldtype': u'Check',
+		'label': u'Use SSL'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'support_username',
-		'fieldtype': 'Data',
-		'label': 'User Name'
+		'doctype': u'DocField',
+		'fieldname': u'support_username',
+		'fieldtype': u'Data',
+		'label': u'User Name'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'support_password',
-		'fieldtype': 'Password',
-		'label': 'Support Password'
+		'doctype': u'DocField',
+		'fieldname': u'support_password',
+		'fieldtype': u'Password',
+		'label': u'Support Password'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Column Break'
+		'doctype': u'DocField',
+		'fieldname': u'column_break0',
+		'fieldtype': u'Column Break'
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'description': 'Signature to be appended at the end of every email',
-		'doctype': 'DocField',
-		'fieldname': 'support_signature',
-		'fieldtype': 'Text',
-		'label': 'Signature'
+		'colour': u'White:FFF',
+		'description': u'Signature to be appended at the end of every email',
+		'doctype': u'DocField',
+		'fieldname': u'support_signature',
+		'fieldtype': u'Text',
+		'label': u'Signature'
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'description': 'Autoreply when a new mail is received',
-		'doctype': 'DocField',
-		'fieldname': 'support_autoreply',
-		'fieldtype': 'Text',
-		'label': 'Autoreply'
+		'colour': u'White:FFF',
+		'description': u'Autoreply when a new mail is received',
+		'doctype': u'DocField',
+		'fieldname': u'support_autoreply',
+		'fieldtype': u'Text',
+		'label': u'Autoreply'
 	}
 ]

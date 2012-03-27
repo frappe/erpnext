@@ -3,120 +3,113 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:09:12',
+		'creation': '2012-03-27 14:36:22',
 		'docstatus': 0,
-		'modified': '2010-09-20 14:06:57',
-		'modified_by': 'umair@iwebnotes.com',
-		'owner': 'nabin@webnotestech.com'
+		'modified': '2012-03-27 14:36:22',
+		'modified_by': u'Administrator',
+		'owner': u'nabin@webnotestech.com'
 	},
 
 	# These values are common for all DocType
 	{
-		'autoname': 'field:period_name',
-		'colour': 'White:FFF',
+		'autoname': u'field:period_name',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
-		'document_type': 'Master',
+		'document_type': u'Master',
 		'in_create': 1,
-		'module': 'Setup',
+		'module': u'Setup',
 		'name': '__common__',
-		'section_style': 'Simple',
-		'server_code_error': ' ',
+		'section_style': u'Simple',
+		'server_code_error': u' ',
 		'version': 5
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Period',
-		'parentfield': 'fields',
-		'parenttype': 'DocType',
+		'parent': u'Period',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
 		'permlevel': 0
 	},
 
 	# These values are common for all DocPerm
 	{
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'name': '__common__',
-		'parent': 'Period',
-		'parentfield': 'permissions',
-		'parenttype': 'DocType',
+		'parent': u'Period',
+		'parentfield': u'permissions',
+		'parenttype': u'DocType',
 		'permlevel': 0,
 		'read': 1,
-		'role': 'System Manager',
+		'role': u'System Manager',
 		'write': 0
 	},
 
 	# DocType, Period
 	{
 		'doctype': 'DocType',
-		'name': 'Period'
+		'name': u'Period'
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm',
-		'idx': 1
+		'doctype': u'DocPerm'
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm',
-		'idx': 2
+		'doctype': u'DocPerm'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'period_name',
-		'fieldtype': 'Data',
-		'idx': 1,
-		'label': 'Period Name',
-		'oldfieldname': 'period_name',
-		'oldfieldtype': 'Data'
+		'doctype': u'DocField',
+		'fieldname': u'period_name',
+		'fieldtype': u'Data',
+		'label': u'Period Name',
+		'oldfieldname': u'period_name',
+		'oldfieldtype': u'Data'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'start_date',
-		'fieldtype': 'Date',
-		'idx': 2,
-		'label': 'Start Date',
-		'oldfieldname': 'start_date',
-		'oldfieldtype': 'Date'
+		'doctype': u'DocField',
+		'fieldname': u'start_date',
+		'fieldtype': u'Date',
+		'label': u'Start Date',
+		'oldfieldname': u'start_date',
+		'oldfieldtype': u'Date'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'end_date',
-		'fieldtype': 'Date',
-		'idx': 3,
-		'label': 'End Date',
-		'oldfieldname': 'end_date',
-		'oldfieldtype': 'Date'
+		'doctype': u'DocField',
+		'fieldname': u'end_date',
+		'fieldtype': u'Date',
+		'label': u'End Date',
+		'oldfieldname': u'end_date',
+		'oldfieldtype': u'Date'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'period_type',
-		'fieldtype': 'Data',
-		'idx': 4,
-		'label': 'Period Type',
-		'oldfieldname': 'period_type',
-		'oldfieldtype': 'Data'
+		'doctype': u'DocField',
+		'fieldname': u'period_type',
+		'fieldtype': u'Data',
+		'label': u'Period Type',
+		'oldfieldname': u'period_type',
+		'oldfieldtype': u'Data'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'fiscal_year',
-		'fieldtype': 'Data',
-		'idx': 5,
-		'label': 'Fiscal Year',
-		'oldfieldname': 'fiscal_year',
-		'oldfieldtype': 'Data'
+		'doctype': u'DocField',
+		'fieldname': u'fiscal_year',
+		'fieldtype': u'Data',
+		'label': u'Fiscal Year',
+		'oldfieldname': u'fiscal_year',
+		'oldfieldtype': u'Data'
 	}
 ]

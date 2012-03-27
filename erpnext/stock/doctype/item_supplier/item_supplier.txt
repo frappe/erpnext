@@ -3,56 +3,56 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-01-17 18:36:35',
+		'creation': '2012-03-27 14:36:33',
 		'docstatus': 0,
-		'modified': '2012-01-17 18:40:37',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-27 14:36:33',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'colour': 'White:FFF',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
 		'istable': 1,
-		'module': 'Stock',
+		'module': u'Stock',
 		'name': '__common__',
-		'section_style': 'Simple',
+		'section_style': u'Simple',
 		'show_in_menu': 0,
 		'version': 3
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Item Supplier',
-		'parentfield': 'fields',
-		'parenttype': 'DocType',
+		'parent': u'Item Supplier',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
 		'permlevel': 0
 	},
 
 	# DocType, Item Supplier
 	{
 		'doctype': 'DocType',
-		'name': 'Item Supplier'
+		'name': u'Item Supplier'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'supplier',
-		'fieldtype': 'Link',
-		'label': 'Supplier',
-		'options': 'Supplier'
+		'doctype': u'DocField',
+		'fieldname': u'supplier',
+		'fieldtype': u'Link',
+		'label': u'Supplier',
+		'options': u'Supplier'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'supplier_part_no',
-		'fieldtype': 'Data',
-		'label': 'Supplier Part Number',
-		'width': '200px'
+		'doctype': u'DocField',
+		'fieldname': u'supplier_part_no',
+		'fieldtype': u'Data',
+		'label': u'Supplier Part Number',
+		'width': u'200px'
 	}
 ]

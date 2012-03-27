@@ -3,46 +3,46 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:09:29',
+		'creation': '2012-03-27 14:36:26',
 		'docstatus': 0,
-		'modified': '2010-12-24 15:14:23',
-		'modified_by': 'abhishek@webnotestech.com',
-		'owner': 'Administrator'
+		'modified': '2012-03-27 14:36:26',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1307707462',
+		'_last_update': u'1307707462',
 		'allow_trash': 1,
-		'autoname': 'field:uom_name',
-		'colour': 'White:FFF',
+		'autoname': u'field:uom_name',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
-		'document_type': 'Master',
-		'module': 'Setup',
+		'document_type': u'Master',
+		'module': u'Setup',
 		'name': '__common__',
-		'section_style': 'Tabbed',
-		'server_code_error': ' ',
+		'section_style': u'Tabbed',
+		'server_code_error': u' ',
 		'show_in_menu': 0,
 		'version': 5
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'UOM',
-		'parentfield': 'fields',
-		'parenttype': 'DocType'
+		'parent': u'UOM',
+		'parentfield': u'fields',
+		'parenttype': u'DocType'
 	},
 
 	# These values are common for all DocPerm
 	{
 		'amend': 0,
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'name': '__common__',
-		'parent': 'UOM',
-		'parentfield': 'permissions',
-		'parenttype': 'DocType',
+		'parent': u'UOM',
+		'parentfield': u'permissions',
+		'parenttype': u'DocType',
 		'read': 1,
 		'submit': 0
 	},
@@ -50,95 +50,88 @@
 	# DocType, UOM
 	{
 		'doctype': 'DocType',
-		'name': 'UOM'
-	},
-
-	# DocPerm
-	{
-		'cancel': 0,
-		'create': 0,
-		'doctype': 'DocPerm',
-		'idx': 1,
-		'permlevel': 1,
-		'role': 'Material Manager',
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'cancel': 0,
-		'create': 0,
-		'doctype': 'DocPerm',
-		'idx': 2,
-		'permlevel': 0,
-		'role': 'Material Manager',
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'cancel': 0,
-		'create': 0,
-		'doctype': 'DocPerm',
-		'idx': 3,
-		'permlevel': 1,
-		'role': 'Material User',
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'cancel': 0,
-		'create': 0,
-		'doctype': 'DocPerm',
-		'idx': 4,
-		'permlevel': 0,
-		'role': 'Material User',
-		'write': 0
+		'name': u'UOM'
 	},
 
 	# DocPerm
 	{
 		'cancel': 1,
 		'create': 1,
-		'doctype': 'DocPerm',
-		'idx': 5,
+		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'role': 'Material Master Manager',
+		'role': u'Material Master Manager',
 		'write': 1
+	},
+
+	# DocPerm
+	{
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Material Manager',
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Material Manager',
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Material User',
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Material User',
+		'write': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'trash_reason',
-		'fieldtype': 'Small Text',
-		'idx': 1,
-		'label': 'Trash Reason',
-		'oldfieldname': 'trash_reason',
-		'oldfieldtype': 'Small Text',
+		'doctype': u'DocField',
+		'fieldname': u'trash_reason',
+		'fieldtype': u'Small Text',
+		'label': u'Trash Reason',
+		'oldfieldname': u'trash_reason',
+		'oldfieldtype': u'Small Text',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Section Break',
-		'idx': 2,
-		'label': 'UOM Details',
-		'oldfieldtype': 'Section Break',
+		'doctype': u'DocField',
+		'fieldname': u'uom_details',
+		'fieldtype': u'Section Break',
+		'label': u'UOM Details',
+		'oldfieldtype': u'Section Break',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'uom_name',
-		'fieldtype': 'Data',
-		'idx': 3,
-		'label': 'UOM Name',
-		'oldfieldname': 'uom_name',
-		'oldfieldtype': 'Data',
+		'doctype': u'DocField',
+		'fieldname': u'uom_name',
+		'fieldtype': u'Data',
+		'label': u'UOM Name',
+		'oldfieldname': u'uom_name',
+		'oldfieldtype': u'Data',
 		'permlevel': 0,
 		'reqd': 1
 	}

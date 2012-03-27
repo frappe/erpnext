@@ -3,149 +3,140 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:09:19',
+		'creation': '2012-03-27 14:36:14',
 		'docstatus': 0,
-		'modified': '2011-02-23 19:09:05',
-		'modified_by': 'Administrator',
-		'owner': 'wasim@webnotestech.com'
+		'modified': '2012-03-27 14:36:14',
+		'modified_by': u'Administrator',
+		'owner': u'wasim@webnotestech.com'
 	},
 
 	# These values are common for all DocType
 	{
-		'colour': 'White:FFF',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
 		'istable': 1,
-		'module': 'Selling',
+		'module': u'Selling',
 		'name': '__common__',
-		'section_style': 'Simple',
-		'server_code_error': ' ',
+		'section_style': u'Simple',
+		'server_code_error': u' ',
 		'show_in_menu': 0,
 		'version': 8
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Return Detail',
-		'parentfield': 'fields',
-		'parenttype': 'DocType'
+		'parent': u'Return Detail',
+		'parentfield': u'fields',
+		'parenttype': u'DocType'
 	},
 
 	# DocType, Return Detail
 	{
 		'doctype': 'DocType',
-		'name': 'Return Detail'
+		'name': u'Return Detail'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'item_code',
-		'fieldtype': 'Link',
-		'idx': 1,
-		'label': 'Item Code',
-		'oldfieldname': 'item_code',
-		'oldfieldtype': 'Link',
-		'options': 'Item',
+		'doctype': u'DocField',
+		'fieldname': u'item_code',
+		'fieldtype': u'Link',
+		'label': u'Item Code',
+		'oldfieldname': u'item_code',
+		'oldfieldtype': u'Link',
+		'options': u'Item',
 		'permlevel': 1,
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'description',
-		'fieldtype': 'Data',
-		'idx': 2,
-		'label': 'Description',
-		'oldfieldname': 'description',
-		'oldfieldtype': 'Data',
+		'doctype': u'DocField',
+		'fieldname': u'description',
+		'fieldtype': u'Data',
+		'label': u'Description',
+		'oldfieldname': u'description',
+		'oldfieldtype': u'Data',
 		'permlevel': 1,
-		'width': '300px'
+		'width': u'300px'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'uom',
-		'fieldtype': 'Link',
-		'idx': 3,
-		'label': 'UOM',
-		'oldfieldname': 'uom',
-		'oldfieldtype': 'Link',
-		'options': 'UOM',
+		'doctype': u'DocField',
+		'fieldname': u'uom',
+		'fieldtype': u'Link',
+		'label': u'UOM',
+		'oldfieldname': u'uom',
+		'oldfieldtype': u'Link',
+		'options': u'UOM',
 		'permlevel': 1,
 		'search_index': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'rate',
-		'fieldtype': 'Currency',
-		'idx': 4,
-		'label': 'Rate',
-		'oldfieldname': 'rate',
-		'oldfieldtype': 'Currency',
+		'doctype': u'DocField',
+		'fieldname': u'rate',
+		'fieldtype': u'Currency',
+		'label': u'Rate',
+		'oldfieldname': u'rate',
+		'oldfieldtype': u'Currency',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'qty',
-		'fieldtype': 'Data',
-		'idx': 5,
-		'label': 'Qty',
-		'oldfieldname': 'qty',
-		'oldfieldtype': 'Data',
+		'doctype': u'DocField',
+		'fieldname': u'qty',
+		'fieldtype': u'Data',
+		'label': u'Qty',
+		'oldfieldname': u'qty',
+		'oldfieldtype': u'Data',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'returned_qty',
-		'fieldtype': 'Data',
-		'idx': 6,
-		'label': 'Returned Qty',
-		'oldfieldname': 'returned_qty',
-		'oldfieldtype': 'Data',
+		'doctype': u'DocField',
+		'fieldname': u'returned_qty',
+		'fieldtype': u'Data',
+		'label': u'Returned Qty',
+		'oldfieldname': u'returned_qty',
+		'oldfieldtype': u'Data',
 		'permlevel': 0,
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'serial_no',
-		'fieldtype': 'Small Text',
-		'idx': 7,
-		'label': 'Serial No',
+		'doctype': u'DocField',
+		'fieldname': u'serial_no',
+		'fieldtype': u'Small Text',
+		'label': u'Serial No',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'batch_no',
-		'fieldtype': 'Data',
-		'idx': 8,
-		'label': 'Batch No',
+		'doctype': u'DocField',
+		'fieldname': u'batch_no',
+		'fieldtype': u'Data',
+		'label': u'Batch No',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'detail_name',
-		'fieldtype': 'Data',
+		'doctype': u'DocField',
+		'fieldname': u'detail_name',
+		'fieldtype': u'Data',
 		'hidden': 1,
-		'idx': 9,
-		'label': 'Detail Name',
-		'oldfieldname': 'detail_name',
-		'oldfieldtype': 'Data',
+		'label': u'Detail Name',
+		'oldfieldname': u'detail_name',
+		'oldfieldtype': u'Data',
 		'permlevel': 1
 	}
 ]

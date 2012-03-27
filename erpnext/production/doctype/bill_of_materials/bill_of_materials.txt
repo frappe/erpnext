@@ -3,233 +3,223 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:08:52',
+		'creation': '2012-03-27 14:36:02',
 		'docstatus': 0,
-		'modified': '2012-01-24 19:49:00',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-27 14:45:46',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1326963484',
+		'_last_update': u'1326963484',
 		'allow_attach': 0,
 		'allow_copy': 0,
 		'allow_email': 0,
 		'allow_print': 0,
 		'allow_rename': 0,
 		'allow_trash': 1,
-		'colour': 'White:FFF',
-		'default_print_format': 'Standard',
+		'colour': u'White:FFF',
+		'default_print_format': u'Standard',
 		'doctype': 'DocType',
-		'document_type': 'Master',
+		'document_type': u'Master',
 		'hide_heading': 0,
 		'hide_toolbar': 0,
 		'in_create': 0,
+		'is_submittable': 1,
 		'issingle': 0,
 		'istable': 0,
-		'module': 'Production',
+		'module': u'Production',
 		'name': '__common__',
 		'read_only': 0,
-		'search_fields': 'item',
-		'section_style': 'Simple',
-		'server_code_error': ' ',
+		'search_fields': u'item',
+		'section_style': u'Simple',
+		'server_code_error': u' ',
 		'show_in_menu': 0,
-		'subject': '%(item)s',
+		'subject': u'%(item)s',
 		'version': 196
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Bill Of Materials',
-		'parentfield': 'fields',
-		'parenttype': 'DocType'
+		'parent': u'Bill Of Materials',
+		'parentfield': u'fields',
+		'parenttype': u'DocType'
 	},
 
 	# These values are common for all DocPerm
 	{
-		'amend': 0,
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'name': '__common__',
-		'parent': 'Bill Of Materials',
-		'parentfield': 'permissions',
-		'parenttype': 'DocType',
+		'parent': u'Bill Of Materials',
+		'parentfield': u'permissions',
+		'parenttype': u'DocType',
 		'read': 1
 	},
 
 	# DocType, Bill Of Materials
 	{
 		'doctype': 'DocType',
-		'name': 'Bill Of Materials'
+		'name': u'Bill Of Materials'
 	},
 
 	# DocPerm
 	{
 		'cancel': 1,
 		'create': 1,
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'role': 'System Manager',
+		'role': u'System Manager',
 		'submit': 1,
 		'write': 1
 	},
 
 	# DocPerm
 	{
-		'cancel': 0,
-		'create': 0,
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'permlevel': 1,
-		'role': 'System Manager',
-		'submit': 0,
-		'write': 0
+		'role': u'System Manager'
 	},
 
 	# DocPerm
 	{
 		'cancel': 1,
 		'create': 1,
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'role': 'Production Manager',
+		'role': u'Production Manager',
 		'submit': 1,
 		'write': 1
 	},
 
 	# DocPerm
 	{
-		'cancel': 0,
-		'create': 0,
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'permlevel': 1,
-		'role': 'Production Manager',
-		'submit': 0,
-		'write': 0
+		'role': u'Production Manager'
 	},
 
 	# DocPerm
 	{
 		'cancel': 1,
 		'create': 1,
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'role': 'Production User',
+		'role': u'Production User',
 		'submit': 1,
 		'write': 1
 	},
 
 	# DocPerm
 	{
-		'cancel': 0,
-		'create': 0,
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'permlevel': 1,
-		'role': 'Production User',
-		'submit': 0,
-		'write': 0
+		'role': u'Production User'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Column Break',
-		'oldfieldtype': 'Column Break',
+		'doctype': u'DocField',
+		'fieldname': u'column_break0',
+		'fieldtype': u'Column Break',
+		'oldfieldtype': u'Column Break',
 		'permlevel': 0,
-		'width': '50%'
+		'width': u'50%'
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'description': 'Select the item code for which Bill of Material is being created',
-		'doctype': 'DocField',
-		'fieldname': 'item',
-		'fieldtype': 'Link',
+		'colour': u'White:FFF',
+		'description': u'Select the item code for which Bill of Material is being created',
+		'doctype': u'DocField',
+		'fieldname': u'item',
+		'fieldtype': u'Link',
 		'in_filter': 1,
-		'label': 'Item',
-		'oldfieldname': 'item',
-		'oldfieldtype': 'Link',
-		'options': 'Item',
+		'label': u'Item',
+		'oldfieldname': u'item',
+		'oldfieldtype': u'Link',
+		'options': u'Item',
 		'permlevel': 0,
 		'reqd': 1,
 		'search_index': 1,
-		'trigger': 'Client'
+		'trigger': u'Client'
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'description': 'Total quantity of items for which raw materials required and operations done will be defined',
-		'doctype': 'DocField',
-		'fieldname': 'quantity',
-		'fieldtype': 'Currency',
-		'label': 'Quantity',
-		'oldfieldname': 'quantity',
-		'oldfieldtype': 'Currency',
+		'colour': u'White:FFF',
+		'description': u'Total quantity of items for which raw materials required and operations done will be defined',
+		'doctype': u'DocField',
+		'fieldname': u'quantity',
+		'fieldtype': u'Currency',
+		'label': u'Quantity',
+		'oldfieldname': u'quantity',
+		'oldfieldtype': u'Currency',
 		'permlevel': 0,
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'uom',
-		'fieldtype': 'Select',
-		'label': 'UOM',
-		'options': 'link:UOM',
+		'doctype': u'DocField',
+		'fieldname': u'uom',
+		'fieldtype': u'Select',
+		'label': u'UOM',
+		'options': u'link:UOM',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'description',
-		'fieldtype': 'Text',
-		'label': 'Description',
-		'oldfieldname': 'description',
-		'oldfieldtype': 'Text',
+		'doctype': u'DocField',
+		'fieldname': u'description',
+		'fieldtype': u'Text',
+		'label': u'Description',
+		'oldfieldname': u'description',
+		'oldfieldtype': u'Text',
 		'permlevel': 0,
-		'width': '300px'
+		'width': u'300px'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Column Break',
+		'doctype': u'DocField',
+		'fieldname': u'column_break1',
+		'fieldtype': u'Column Break',
 		'permlevel': 0,
-		'width': '50%'
+		'width': u'50%'
 	},
 
 	# DocField
 	{
-		'description': 'Select name of the project if Bill Of Materials need to be created against any project',
-		'doctype': 'DocField',
-		'fieldname': 'project_name',
-		'fieldtype': 'Link',
+		'description': u'Select name of the project if Bill Of Materials need to be created against any project',
+		'doctype': u'DocField',
+		'fieldname': u'project_name',
+		'fieldtype': u'Link',
 		'in_filter': 1,
-		'label': 'Project Name',
-		'oldfieldname': 'project_name',
-		'oldfieldtype': 'Link',
-		'options': 'Project',
+		'label': u'Project Name',
+		'oldfieldname': u'project_name',
+		'oldfieldtype': u'Link',
+		'options': u'Project',
 		'permlevel': 0,
-		'trigger': 'Client'
+		'trigger': u'Client'
 	},
 
 	# DocField
 	{
 		'allow_on_submit': 1,
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldname': 'is_active',
-		'fieldtype': 'Select',
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'is_active',
+		'fieldtype': u'Select',
 		'hidden': 0,
-		'label': 'Is Active',
+		'label': u'Is Active',
 		'no_copy': 1,
-		'oldfieldname': 'is_active',
-		'oldfieldtype': 'Select',
-		'options': '\nYes\nNo',
+		'oldfieldname': u'is_active',
+		'oldfieldtype': u'Select',
+		'options': u'\nYes\nNo',
 		'permlevel': 0,
 		'reqd': 1
 	},
@@ -237,204 +227,236 @@
 	# DocField
 	{
 		'allow_on_submit': 1,
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldname': 'is_default',
-		'fieldtype': 'Check',
-		'label': 'Is Default',
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'is_default',
+		'fieldtype': u'Check',
+		'label': u'Is Default',
 		'no_copy': 1,
-		'oldfieldname': 'is_default',
-		'oldfieldtype': 'Check',
+		'oldfieldname': u'is_default',
+		'oldfieldtype': u'Check',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'maintained_by',
-		'fieldtype': 'Data',
-		'label': 'Maintained By',
-		'oldfieldname': 'maintained_by',
-		'oldfieldtype': 'Data',
+		'doctype': u'DocField',
+		'fieldname': u'maintained_by',
+		'fieldtype': u'Data',
+		'label': u'Maintained By',
+		'oldfieldname': u'maintained_by',
+		'oldfieldtype': u'Data',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldname': 'remarks',
-		'fieldtype': 'Text',
-		'label': 'Remarks',
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'remarks',
+		'fieldtype': u'Text',
+		'label': u'Remarks',
 		'no_copy': 1,
-		'oldfieldname': 'remarks',
-		'oldfieldtype': 'Text',
+		'oldfieldname': u'remarks',
+		'oldfieldtype': u'Text',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Section Break',
-		'label': 'Operations',
-		'oldfieldtype': 'Section Break',
+		'doctype': u'DocField',
+		'fieldname': u'operations',
+		'fieldtype': u'Section Break',
+		'label': u'Operations',
+		'oldfieldtype': u'Section Break',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'description': 'Specify the operations, operating cost and give a unique Operation no to your operations.',
-		'doctype': 'DocField',
-		'fieldname': 'bom_operations',
-		'fieldtype': 'Table',
-		'label': 'BOM Operations',
-		'oldfieldname': 'bom_operations',
-		'oldfieldtype': 'Table',
-		'options': 'BOM Operation',
+		'colour': u'White:FFF',
+		'description': u'Specify the operations, operating cost and give a unique Operation no to your operations.',
+		'doctype': u'DocField',
+		'fieldname': u'bom_operations',
+		'fieldtype': u'Table',
+		'label': u'BOM Operations',
+		'oldfieldname': u'bom_operations',
+		'oldfieldtype': u'Table',
+		'options': u'BOM Operation',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Section Break',
-		'label': 'Materials',
-		'oldfieldtype': 'Section Break',
+		'doctype': u'DocField',
+		'fieldname': u'materials',
+		'fieldtype': u'Section Break',
+		'label': u'Materials',
+		'oldfieldtype': u'Section Break',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'description': 'Enter the raw materials required to manufacture the BOM item. Specify the operation no as entered in the previous tab which will be performed on the raw materials entered.',
-		'doctype': 'DocField',
-		'fieldname': 'bom_materials',
-		'fieldtype': 'Table',
-		'label': 'BOM Material',
-		'oldfieldname': 'bom_materials',
-		'oldfieldtype': 'Table',
-		'options': 'BOM Material',
+		'colour': u'White:FFF',
+		'description': u'Enter the raw materials required to manufacture the BOM item. Specify the operation no as entered in the previous tab which will be performed on the raw materials entered.',
+		'doctype': u'DocField',
+		'fieldname': u'bom_materials',
+		'fieldtype': u'Table',
+		'label': u'BOM Material',
+		'oldfieldname': u'bom_materials',
+		'oldfieldtype': u'Table',
+		'options': u'BOM Material',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Section Break',
-		'label': 'Costing',
-		'oldfieldtype': 'Section Break',
+		'doctype': u'DocField',
+		'fieldname': u'costing',
+		'fieldtype': u'Section Break',
+		'label': u'Costing',
+		'oldfieldtype': u'Section Break',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Column Break',
+		'doctype': u'DocField',
+		'fieldname': u'column_break2',
+		'fieldtype': u'Column Break',
 		'permlevel': 0,
-		'width': '50%'
+		'width': u'50%'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'rm_cost_as_per',
-		'fieldtype': 'Select',
-		'label': 'Consider Raw Material Cost As Per',
-		'options': 'Valuation Rate\nLast Purchase Rate\nStandard Rate',
+		'doctype': u'DocField',
+		'fieldname': u'rm_cost_as_per',
+		'fieldtype': u'Select',
+		'label': u'Consider Raw Material Cost As Per',
+		'options': u'Valuation Rate\nLast Purchase Rate\nStandard Rate',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'costing_date',
-		'fieldtype': 'Date',
-		'label': 'Costing Date',
+		'doctype': u'DocField',
+		'fieldname': u'costing_date',
+		'fieldtype': u'Date',
+		'label': u'Costing Date',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
 		'allow_on_submit': 1,
-		'doctype': 'DocField',
-		'fieldtype': 'Button',
-		'label': 'Update Cost as on today',
-		'options': 'calculate_cost',
+		'doctype': u'DocField',
+		'fieldname': u'update_cost_as_on_today',
+		'fieldtype': u'Button',
+		'label': u'Update Cost as on today',
+		'options': u'calculate_cost',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Column Break',
+		'doctype': u'DocField',
+		'fieldname': u'column_break3',
+		'fieldtype': u'Column Break',
 		'permlevel': 0,
-		'width': '50%'
+		'width': u'50%'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'raw_material_cost',
-		'fieldtype': 'Float',
-		'label': 'Raw Material Cost',
+		'doctype': u'DocField',
+		'fieldname': u'raw_material_cost',
+		'fieldtype': u'Float',
+		'label': u'Raw Material Cost',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'operating_cost',
-		'fieldtype': 'Float',
-		'label': 'Operating Cost',
+		'doctype': u'DocField',
+		'fieldname': u'operating_cost',
+		'fieldtype': u'Float',
+		'label': u'Operating Cost',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'total_cost',
-		'fieldtype': 'Float',
-		'label': 'Total Cost',
+		'doctype': u'DocField',
+		'fieldname': u'total_cost',
+		'fieldtype': u'Float',
+		'label': u'Total Cost',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Section Break',
+		'doctype': u'DocField',
+		'fieldname': u'section_break0',
+		'fieldtype': u'Section Break',
 		'hidden': 1,
-		'options': 'Simple',
+		'options': u'Simple',
 		'permlevel': 0,
 		'print_hide': 0
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'default': 'No Toolbar',
-		'doctype': 'DocField',
-		'fieldname': 'flat_bom_details',
-		'fieldtype': 'Table',
+		'colour': u'White:FFF',
+		'default': u'No Toolbar',
+		'doctype': u'DocField',
+		'fieldname': u'flat_bom_details',
+		'fieldtype': u'Table',
 		'hidden': 1,
-		'label': 'Flat BOM Detail',
+		'label': u'Flat BOM Detail',
 		'no_copy': 1,
-		'oldfieldname': 'flat_bom_details',
-		'oldfieldtype': 'Table',
-		'options': 'Flat BOM Detail',
+		'oldfieldname': u'flat_bom_details',
+		'oldfieldtype': u'Table',
+		'options': u'Flat BOM Detail',
 		'permlevel': 0,
 		'print_hide': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'trash_reason',
-		'fieldtype': 'Small Text',
+		'doctype': u'DocField',
+		'fieldname': u'trash_reason',
+		'fieldtype': u'Small Text',
 		'hidden': 1,
-		'label': 'Trash Reason',
-		'oldfieldname': 'trash_reason',
-		'oldfieldtype': 'Small Text',
+		'label': u'Trash Reason',
+		'oldfieldname': u'trash_reason',
+		'oldfieldtype': u'Small Text',
 		'permlevel': 1
+	},
+
+	# DocField
+	{
+		'depends_on': u'eval:doc.amended_from',
+		'description': u'The date at which current entry is corrected in the system.',
+		'doctype': u'DocField',
+		'fieldname': u'amendment_date',
+		'fieldtype': u'Date',
+		'label': u'Amendment Date',
+		'no_copy': 1,
+		'permlevel': 0,
+		'print_hide': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'amended_from',
+		'fieldtype': u'Link',
+		'label': u'Amended From',
+		'no_copy': 1,
+		'options': u'Receivable Voucher',
+		'permlevel': 1,
+		'print_hide': 1
 	}
 ]

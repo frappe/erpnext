@@ -3,22 +3,22 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:09:21',
+		'creation': '2012-03-27 14:36:14',
 		'docstatus': 0,
-		'modified': '2011-01-03 11:21:04',
-		'modified_by': 'nabin@webnotestech.com',
-		'owner': 'Administrator'
+		'modified': '2012-03-27 14:36:14',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'colour': 'White:FFF',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
 		'issingle': 1,
-		'module': 'Selling',
+		'module': u'Selling',
 		'name': '__common__',
-		'section_style': 'Simple',
-		'server_code_error': ' ',
+		'section_style': u'Simple',
+		'server_code_error': u' ',
 		'show_in_menu': 0,
 		'version': 290
 	},
@@ -26,6 +26,6 @@
 	# DocType, Sales Common
 	{
 		'doctype': 'DocType',
-		'name': 'Sales Common'
+		'name': u'Sales Common'
 	}
 ]

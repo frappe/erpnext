@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:09:14',
+		'creation': '2012-03-27 14:36:05',
 		'docstatus': 0,
-		'modified': '2012-03-22 14:39:13',
+		'modified': '2012-03-27 14:36:05',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -43,16 +43,12 @@
 
 	# These values are common for all DocPerm
 	{
-		'cancel': 1,
-		'create': 1,
 		'doctype': u'DocPerm',
 		'name': '__common__',
 		'parent': u'Project',
 		'parentfield': u'permissions',
 		'parenttype': u'DocType',
-		'permlevel': 0,
-		'read': 1,
-		'write': 1
+		'read': 1
 	},
 
 	# DocType, Project
@@ -63,14 +59,33 @@
 
 	# DocPerm
 	{
+		'amend': 0,
+		'cancel': 1,
+		'create': 1,
 		'doctype': u'DocPerm',
-		'role': u'All'
+		'permlevel': 0,
+		'role': u'All',
+		'submit': 0,
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 1,
+		'create': 1,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Projects User',
+		'submit': 0,
+		'write': 1
 	},
 
 	# DocPerm
 	{
 		'doctype': u'DocPerm',
-		'role': u'Projects User'
+		'permlevel': 1,
+		'role': u'All'
 	},
 
 	# DocField
@@ -78,6 +93,7 @@
 		'colour': u'White:FFF',
 		'description': u'Helps you keep track of your projects and links to Tasks. You can tag a task to a project to track its progress',
 		'doctype': u'DocField',
+		'fieldname': u'basic_info',
 		'fieldtype': u'Section Break',
 		'label': u'Basic Info',
 		'oldfieldtype': u'Section Break',
@@ -286,6 +302,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'project_details',
 		'fieldtype': u'Section Break',
 		'label': u'Project Details',
 		'oldfieldtype': u'Section Break',
@@ -296,6 +313,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'column_break0',
 		'fieldtype': u'Column Break',
 		'oldfieldtype': u'Column Break',
 		'permlevel': 0,
@@ -305,6 +323,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'section_break0',
 		'fieldtype': u'Section Break',
 		'oldfieldtype': u'Section Break',
 		'options': u'Simple',
@@ -327,6 +346,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'customer_details',
 		'fieldtype': u'Section Break',
 		'label': u'Customer Details',
 		'oldfieldtype': u'Section Break',
@@ -459,6 +479,7 @@
 		'colour': u'White:FFF',
 		'description': u'Important dates and commitments in your project life cycle',
 		'doctype': u'DocField',
+		'fieldname': u'milestones',
 		'fieldtype': u'Section Break',
 		'label': u'Milestones',
 		'oldfieldtype': u'Section Break',

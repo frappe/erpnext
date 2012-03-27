@@ -3,46 +3,46 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:09:10',
+		'creation': '2012-03-27 14:36:22',
 		'docstatus': 0,
-		'modified': '2010-09-20 14:06:57',
-		'modified_by': 'yogesh@webnotestech.com',
-		'owner': 'Administrator'
+		'modified': '2012-03-27 14:36:22',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
 		'allow_trash': 1,
-		'autoname': 'field:order_lost_reason',
-		'colour': 'White:FFF',
+		'autoname': u'field:order_lost_reason',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
-		'document_type': 'Master',
-		'module': 'Setup',
+		'document_type': u'Master',
+		'module': u'Setup',
 		'name': '__common__',
-		'section_style': 'Simple',
-		'server_code_error': ' ',
+		'section_style': u'Simple',
+		'server_code_error': u' ',
 		'show_in_menu': 0,
 		'version': 4
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Order Lost Reason',
-		'parentfield': 'fields',
-		'parenttype': 'DocType'
+		'parent': u'Order Lost Reason',
+		'parentfield': u'fields',
+		'parenttype': u'DocType'
 	},
 
 	# These values are common for all DocPerm
 	{
 		'cancel': 1,
 		'create': 1,
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'name': '__common__',
-		'parent': 'Order Lost Reason',
-		'parentfield': 'permissions',
-		'parenttype': 'DocType',
+		'parent': u'Order Lost Reason',
+		'parentfield': u'permissions',
+		'parenttype': u'DocType',
 		'permlevel': 0,
 		'read': 1,
 		'write': 1
@@ -51,46 +51,42 @@
 	# DocType, Order Lost Reason
 	{
 		'doctype': 'DocType',
-		'name': 'Order Lost Reason'
+		'name': u'Order Lost Reason'
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm',
-		'idx': 1,
-		'role': 'System Manager'
+		'doctype': u'DocPerm',
+		'role': u'System Manager'
 	},
 
 	# DocPerm
 	{
 		'amend': 0,
-		'doctype': 'DocPerm',
-		'idx': 2,
-		'role': 'Sales Master Manager',
+		'doctype': u'DocPerm',
+		'role': u'Sales Master Manager',
 		'submit': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'trash_reason',
-		'fieldtype': 'Small Text',
-		'idx': 1,
-		'label': 'Trash Reason',
-		'oldfieldname': 'trash_reason',
-		'oldfieldtype': 'Small Text',
+		'doctype': u'DocField',
+		'fieldname': u'trash_reason',
+		'fieldtype': u'Small Text',
+		'label': u'Trash Reason',
+		'oldfieldname': u'trash_reason',
+		'oldfieldtype': u'Small Text',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'order_lost_reason',
-		'fieldtype': 'Data',
-		'idx': 2,
-		'label': 'Order Lost Reason',
-		'oldfieldname': 'order_lost_reason',
-		'oldfieldtype': 'Data',
+		'doctype': u'DocField',
+		'fieldname': u'order_lost_reason',
+		'fieldtype': u'Data',
+		'label': u'Order Lost Reason',
+		'oldfieldname': u'order_lost_reason',
+		'oldfieldtype': u'Data',
 		'permlevel': 0,
 		'reqd': 1
 	}

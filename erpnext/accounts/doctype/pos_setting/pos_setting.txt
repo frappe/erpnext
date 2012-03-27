@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-12-15 08:39:23',
+		'creation': '2012-03-27 14:35:46',
 		'docstatus': 0,
-		'modified': '2012-03-21 12:39:49',
+		'modified': '2012-03-27 14:35:46',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -170,6 +170,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'column_break0',
 		'fieldtype': u'Column Break',
 		'oldfieldtype': u'Column Break'
 	},

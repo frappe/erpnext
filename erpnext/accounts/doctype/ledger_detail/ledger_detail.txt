@@ -3,50 +3,49 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2011-05-24 14:50:42',
+		'creation': '2012-03-27 14:35:44',
 		'docstatus': 0,
-		'modified': '2011-05-24 15:24:03',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-27 14:35:44',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'colour': 'White:FFF',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
 		'istable': 1,
-		'module': 'Accounts',
+		'module': u'Accounts',
 		'name': '__common__',
-		'section_style': 'Simple',
+		'section_style': u'Simple',
 		'show_in_menu': 0,
 		'version': 3
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'account',
-		'fieldtype': 'Link',
-		'idx': 1,
-		'label': 'Account',
+		'doctype': u'DocField',
+		'fieldname': u'account',
+		'fieldtype': u'Link',
+		'label': u'Account',
 		'name': '__common__',
-		'options': 'Account',
-		'parent': 'Ledger Detail',
-		'parentfield': 'fields',
-		'parenttype': 'DocType',
+		'options': u'Account',
+		'parent': u'Ledger Detail',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
 		'permlevel': 0,
 		'reqd': 1,
-		'width': '300px'
+		'width': u'300px'
 	},
 
 	# DocType, Ledger Detail
 	{
 		'doctype': 'DocType',
-		'name': 'Ledger Detail'
+		'name': u'Ledger Detail'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField'
+		'doctype': u'DocField'
 	}
 ]

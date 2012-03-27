@@ -3,98 +3,122 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:09:13',
+		'creation': '2012-03-27 14:36:04',
 		'docstatus': 0,
-		'modified': '2012-01-09 17:41:37',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-27 14:36:04',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'autoname': 'PP/.SO/.#####',
-		'colour': 'White:FFF',
-		'default_print_format': 'Standard',
+		'autoname': u'PP/.SO/.#####',
+		'colour': u'White:FFF',
+		'default_print_format': u'Standard',
 		'doctype': 'DocType',
 		'istable': 1,
-		'module': 'Production',
+		'module': u'Production',
 		'name': '__common__',
-		'section_style': 'Simple',
-		'server_code_error': ' ',
+		'section_style': u'Simple',
+		'server_code_error': u' ',
 		'show_in_menu': 0,
 		'version': 5
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'PP SO Detail',
-		'parentfield': 'fields',
-		'parenttype': 'DocType'
+		'parent': u'PP SO Detail',
+		'parentfield': u'fields',
+		'parenttype': u'DocType'
+	},
+
+	# These values are common for all DocPerm
+	{
+		'doctype': u'DocPerm',
+		'name': '__common__',
+		'parent': u'PP SO Detail',
+		'parentfield': u'permissions',
+		'parenttype': u'DocType',
+		'read': 1,
+		'role': u'System Manager'
 	},
 
 	# DocType, PP SO Detail
 	{
 		'doctype': 'DocType',
-		'name': 'PP SO Detail'
+		'name': u'PP SO Detail'
 	},
 
-	# DocField
+	# DocPerm
 	{
-		'doctype': 'DocField',
-		'fieldname': 'sales_order',
-		'fieldtype': 'Link',
-		'label': 'Sales Order',
-		'oldfieldname': 'prevdoc_docname',
-		'oldfieldtype': 'Data',
-		'options': 'Sales Order',
+		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'width': '150px'
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'doctype': u'DocPerm',
+		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'sales_order_date',
-		'fieldtype': 'Date',
-		'label': 'Sales Order Date',
-		'oldfieldname': 'document_date',
-		'oldfieldtype': 'Date',
-		'permlevel': 1,
-		'width': '100px'
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldname': 'customer',
-		'fieldtype': 'Link',
-		'label': 'Customer',
-		'options': 'Customer',
-		'permlevel': 1,
-		'width': '150px'
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldname': 'grand_total',
-		'fieldtype': 'Currency',
-		'label': 'Grand Total',
-		'permlevel': 1,
-		'width': '100px'
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldname': 'include_in_plan',
-		'fieldtype': 'Check',
-		'label': 'Include In Plan',
-		'oldfieldname': 'include_in_plan',
-		'oldfieldtype': 'Check',
+		'doctype': u'DocField',
+		'fieldname': u'sales_order',
+		'fieldtype': u'Link',
+		'label': u'Sales Order',
+		'oldfieldname': u'prevdoc_docname',
+		'oldfieldtype': u'Data',
+		'options': u'Sales Order',
 		'permlevel': 0,
-		'width': '100px'
+		'width': u'150px'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'sales_order_date',
+		'fieldtype': u'Date',
+		'label': u'Sales Order Date',
+		'oldfieldname': u'document_date',
+		'oldfieldtype': u'Date',
+		'permlevel': 1,
+		'width': u'100px'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'customer',
+		'fieldtype': u'Link',
+		'label': u'Customer',
+		'options': u'Customer',
+		'permlevel': 1,
+		'width': u'150px'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'grand_total',
+		'fieldtype': u'Currency',
+		'label': u'Grand Total',
+		'permlevel': 1,
+		'width': u'100px'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'include_in_plan',
+		'fieldtype': u'Check',
+		'label': u'Include In Plan',
+		'oldfieldname': u'include_in_plan',
+		'oldfieldtype': u'Check',
+		'permlevel': 0,
+		'width': u'100px'
 	}
 ]

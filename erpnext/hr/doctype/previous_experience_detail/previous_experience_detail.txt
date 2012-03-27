@@ -3,125 +3,118 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:09:13',
+		'creation': '2012-03-27 14:35:59',
 		'docstatus': 0,
-		'modified': '2010-09-20 14:06:57',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-27 14:35:59',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'colour': 'White:FFF',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
 		'istable': 1,
-		'module': 'HR',
+		'module': u'HR',
 		'name': '__common__',
-		'section_style': 'Simple',
-		'server_code_error': ' ',
+		'section_style': u'Simple',
+		'server_code_error': u' ',
 		'show_in_menu': 0,
 		'version': 3
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Previous Experience Detail',
-		'parentfield': 'fields',
-		'parenttype': 'DocType',
+		'parent': u'Previous Experience Detail',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
 		'permlevel': 0
 	},
 
 	# These values are common for all DocPerm
 	{
 		'create': 1,
-		'doctype': 'DocPerm',
-		'idx': 1,
+		'doctype': u'DocPerm',
 		'name': '__common__',
-		'parent': 'Previous Experience Detail',
-		'parentfield': 'permissions',
-		'parenttype': 'DocType',
+		'parent': u'Previous Experience Detail',
+		'parentfield': u'permissions',
+		'parenttype': u'DocType',
 		'permlevel': 0,
 		'read': 1,
-		'role': 'All',
+		'role': u'All',
 		'write': 1
 	},
 
 	# DocType, Previous Experience Detail
 	{
 		'doctype': 'DocType',
-		'name': 'Previous Experience Detail'
+		'name': u'Previous Experience Detail'
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm'
+		'doctype': u'DocPerm'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'company_name',
-		'fieldtype': 'Data',
-		'idx': 1,
-		'label': 'Company',
-		'oldfieldname': 'company_name',
-		'oldfieldtype': 'Data'
+		'doctype': u'DocField',
+		'fieldname': u'company_name',
+		'fieldtype': u'Data',
+		'label': u'Company',
+		'oldfieldname': u'company_name',
+		'oldfieldtype': u'Data'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'designation',
-		'fieldtype': 'Data',
-		'idx': 2,
-		'label': 'Designation',
-		'oldfieldname': 'designation',
-		'oldfieldtype': 'Data'
+		'doctype': u'DocField',
+		'fieldname': u'designation',
+		'fieldtype': u'Data',
+		'label': u'Designation',
+		'oldfieldname': u'designation',
+		'oldfieldtype': u'Data'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'salary',
-		'fieldtype': 'Currency',
-		'idx': 3,
-		'label': 'Salary',
-		'oldfieldname': 'salary',
-		'oldfieldtype': 'Currency'
+		'doctype': u'DocField',
+		'fieldname': u'salary',
+		'fieldtype': u'Currency',
+		'label': u'Salary',
+		'oldfieldname': u'salary',
+		'oldfieldtype': u'Currency'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'address',
-		'fieldtype': 'Small Text',
-		'idx': 4,
-		'label': 'Address',
-		'oldfieldname': 'address',
-		'oldfieldtype': 'Small Text'
+		'doctype': u'DocField',
+		'fieldname': u'address',
+		'fieldtype': u'Small Text',
+		'label': u'Address',
+		'oldfieldname': u'address',
+		'oldfieldtype': u'Small Text'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'contact',
-		'fieldtype': 'Data',
-		'idx': 5,
-		'label': 'Contact',
-		'oldfieldname': 'contact',
-		'oldfieldtype': 'Data'
+		'doctype': u'DocField',
+		'fieldname': u'contact',
+		'fieldtype': u'Data',
+		'label': u'Contact',
+		'oldfieldname': u'contact',
+		'oldfieldtype': u'Data'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'total_experience',
-		'fieldtype': 'Data',
-		'idx': 6,
-		'label': 'Total Experience',
-		'oldfieldname': 'total_experience',
-		'oldfieldtype': 'Data'
+		'doctype': u'DocField',
+		'fieldname': u'total_experience',
+		'fieldtype': u'Data',
+		'label': u'Total Experience',
+		'oldfieldname': u'total_experience',
+		'oldfieldtype': u'Data'
 	}
 ]

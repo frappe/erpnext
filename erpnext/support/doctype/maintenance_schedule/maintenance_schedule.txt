@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:09:09',
+		'creation': '2012-03-27 14:36:41',
 		'docstatus': 0,
-		'modified': '2012-03-21 14:09:46',
+		'modified': '2012-03-27 14:45:49',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -17,6 +17,7 @@
 		'colour': u'White:FFF',
 		'default_print_format': u'Standard',
 		'doctype': 'DocType',
+		'is_submittable': 1,
 		'module': u'Support',
 		'name': '__common__',
 		'search_fields': u'status,customer,customer_name, sales_order_no',
@@ -92,6 +93,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'customer_details',
 		'fieldtype': u'Section Break',
 		'label': u'Customer Details',
 		'oldfieldtype': u'Section Break',
@@ -102,6 +104,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'column_break0',
 		'fieldtype': u'Column Break',
 		'oldfieldtype': u'Column Break',
 		'permlevel': 0
@@ -201,6 +204,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'column_break1',
 		'fieldtype': u'Column Break',
 		'oldfieldtype': u'Column Break',
 		'permlevel': 0
@@ -310,6 +314,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'items',
 		'fieldtype': u'Section Break',
 		'label': u'Items',
 		'oldfieldtype': u'Section Break',
@@ -336,6 +341,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'get_items',
 		'fieldtype': u'Button',
 		'label': u'Get Items',
 		'oldfieldtype': u'Button',
@@ -359,6 +365,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'schedule',
 		'fieldtype': u'Section Break',
 		'label': u'Schedule',
 		'oldfieldtype': u'Section Break',
@@ -370,6 +377,7 @@
 	{
 		'colour': u'White:FFF',
 		'doctype': u'DocField',
+		'fieldname': u'generate_schedule',
 		'fieldtype': u'Button',
 		'label': u'Generate Schedule',
 		'oldfieldtype': u'Button',

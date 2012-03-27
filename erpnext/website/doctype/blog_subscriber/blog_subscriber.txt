@@ -3,20 +3,20 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-01-27 17:18:33',
+		'creation': '2012-03-27 14:36:47',
 		'docstatus': 0,
-		'modified': '2012-01-27 17:18:33',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-27 14:36:47',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'colour': 'White:FFF',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
-		'module': 'Website',
+		'module': u'Website',
 		'name': '__common__',
-		'section_style': 'Simple',
+		'section_style': u'Simple',
 		'show_in_menu': 0,
 		'version': 1
 	},
@@ -24,6 +24,6 @@
 	# DocType, Blog Subscriber
 	{
 		'doctype': 'DocType',
-		'name': 'Blog Subscriber'
+		'name': u'Blog Subscriber'
 	}
 ]

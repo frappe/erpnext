@@ -3,94 +3,90 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:08:54',
+		'creation': '2012-03-27 14:35:41',
 		'docstatus': 0,
-		'modified': '2010-09-20 14:06:57',
-		'modified_by': 'umair@iwebnotes.com',
-		'owner': 'Administrator'
+		'modified': '2012-03-27 14:35:41',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'autoname': 'CBD/.######',
-		'colour': 'White:FFF',
+		'autoname': u'CBD/.######',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
 		'istable': 1,
-		'module': 'Accounts',
+		'module': u'Accounts',
 		'name': '__common__',
-		'section_style': 'Tray',
+		'section_style': u'Tray',
 		'show_in_menu': 0,
 		'version': 6
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Budget Detail',
-		'parentfield': 'fields',
-		'parenttype': 'DocType'
+		'parent': u'Budget Detail',
+		'parentfield': u'fields',
+		'parenttype': u'DocType'
 	},
 
 	# DocType, Budget Detail
 	{
 		'doctype': 'DocType',
-		'name': 'Budget Detail'
+		'name': u'Budget Detail'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'account',
-		'fieldtype': 'Link',
-		'idx': 1,
+		'doctype': u'DocField',
+		'fieldname': u'account',
+		'fieldtype': u'Link',
 		'in_filter': 1,
-		'label': 'Account',
-		'oldfieldname': 'account',
-		'oldfieldtype': 'Link',
-		'options': 'Account',
+		'label': u'Account',
+		'oldfieldname': u'account',
+		'oldfieldtype': u'Link',
+		'options': u'Account',
 		'permlevel': 0,
 		'reqd': 1,
 		'search_index': 1,
-		'trigger': 'Client'
+		'trigger': u'Client'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'budget_allocated',
-		'fieldtype': 'Currency',
-		'idx': 2,
-		'label': 'Budget Allocated',
-		'oldfieldname': 'budget_allocated',
-		'oldfieldtype': 'Currency',
+		'doctype': u'DocField',
+		'fieldname': u'budget_allocated',
+		'fieldtype': u'Currency',
+		'label': u'Budget Allocated',
+		'oldfieldname': u'budget_allocated',
+		'oldfieldtype': u'Currency',
 		'permlevel': 0,
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'actual',
-		'fieldtype': 'Currency',
-		'idx': 3,
-		'label': 'Actual',
-		'oldfieldname': 'actual',
-		'oldfieldtype': 'Currency',
+		'doctype': u'DocField',
+		'fieldname': u'actual',
+		'fieldtype': u'Currency',
+		'label': u'Actual',
+		'oldfieldname': u'actual',
+		'oldfieldtype': u'Currency',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'fiscal_year',
-		'fieldtype': 'Select',
-		'idx': 4,
+		'doctype': u'DocField',
+		'fieldname': u'fiscal_year',
+		'fieldtype': u'Select',
 		'in_filter': 1,
-		'label': 'Fiscal Year',
-		'oldfieldname': 'fiscal_year',
-		'oldfieldtype': 'Select',
-		'options': 'link:Fiscal Year',
+		'label': u'Fiscal Year',
+		'oldfieldname': u'fiscal_year',
+		'oldfieldtype': u'Select',
+		'options': u'link:Fiscal Year',
 		'permlevel': 0,
 		'reqd': 1,
 		'search_index': 1

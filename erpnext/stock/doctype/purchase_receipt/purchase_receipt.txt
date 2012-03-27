@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:09:15',
+		'creation': '2012-03-27 14:36:34',
 		'docstatus': 0,
-		'modified': '2012-03-02 12:26:39',
+		'modified': '2012-03-27 18:51:48',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -17,6 +17,7 @@
 		'default_print_format': u'Standard',
 		'doctype': 'DocType',
 		'document_type': u'Transaction',
+		'is_submittable': 1,
 		'is_transaction_doc': 1,
 		'module': u'Stock',
 		'name': '__common__',
@@ -26,7 +27,7 @@
 		'server_code_error': u' ',
 		'show_in_menu': 0,
 		'subject': u'From %(supplier_name)s against %(purchase_order)s on %(posting_date)s',
-		'version': 325
+		'version': 326
 	},
 
 	# These values are common for all DocField
@@ -52,54 +53,6 @@
 	{
 		'doctype': 'DocType',
 		'name': u'Purchase Receipt'
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Material Manager',
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'amend': 1,
-		'cancel': 1,
-		'create': 1,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Material Manager',
-		'submit': 1,
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Material User',
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'amend': 1,
-		'cancel': 1,
-		'create': 1,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Material User',
-		'submit': 1,
-		'write': 1
 	},
 
 	# DocPerm
@@ -137,11 +90,60 @@
 		'write': 1
 	},
 
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Material Manager',
+		'submit': 0,
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'amend': 1,
+		'cancel': 1,
+		'create': 1,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Material Manager',
+		'submit': 1,
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Material User',
+		'submit': 0,
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'amend': 1,
+		'cancel': 1,
+		'create': 1,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Material User',
+		'submit': 1,
+		'write': 1
+	},
+
 	# DocField
 	{
 		'colour': u'White:FFF',
 		'description': u'Enter Basic Information about the Purchase Receipt',
 		'doctype': u'DocField',
+		'fieldname': u'basic_info',
 		'fieldtype': u'Section Break',
 		'label': u'Basic Info',
 		'oldfieldtype': u'Section Break',
@@ -151,6 +153,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'column_break0',
 		'fieldtype': u'Column Break',
 		'oldfieldtype': u'Column Break',
 		'permlevel': 0,
@@ -296,6 +299,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'column_break1',
 		'fieldtype': u'Column Break',
 		'oldfieldtype': u'Column Break',
 		'permlevel': 0,
@@ -435,6 +439,7 @@
 	{
 		'colour': u'White:FFF',
 		'doctype': u'DocField',
+		'fieldname': u'items',
 		'fieldtype': u'Section Break',
 		'label': u'Items',
 		'oldfieldtype': u'Section Break',
@@ -511,6 +516,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'column_break2',
 		'fieldtype': u'Column Break',
 		'oldfieldtype': u'Column Break',
 		'permlevel': 0
@@ -536,6 +542,7 @@
 	{
 		'colour': u'White:FFF',
 		'doctype': u'DocField',
+		'fieldname': u'pull_purchase_order_details',
 		'fieldtype': u'Button',
 		'label': u'Pull Purchase Order Details',
 		'oldfieldtype': u'Button',
@@ -548,6 +555,7 @@
 	{
 		'colour': u'White:FFF',
 		'doctype': u'DocField',
+		'fieldname': u'section_break0',
 		'fieldtype': u'Section Break',
 		'oldfieldtype': u'Section Break',
 		'options': u'Simple',
@@ -586,6 +594,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'recalculate_values',
 		'fieldtype': u'Button',
 		'label': u'Re-Calculate Values',
 		'oldfieldtype': u'Button',
@@ -598,6 +607,7 @@
 		'colour': u'White:FFF',
 		'description': u'Add / Edit taxes and other charges',
 		'doctype': u'DocField',
+		'fieldname': u'taxes',
 		'fieldtype': u'Section Break',
 		'label': u'Taxes',
 		'oldfieldtype': u'Section Break',
@@ -622,6 +632,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'get_tax_detail',
 		'fieldtype': u'Button',
 		'label': u'Get Tax Detail',
 		'oldfieldtype': u'Button',
@@ -645,6 +656,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'calculate_tax',
 		'fieldtype': u'Button',
 		'label': u'Calculate Tax',
 		'oldfieldtype': u'Button',
@@ -668,6 +680,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'tax_calculation',
 		'fieldtype': u'HTML',
 		'label': u'Tax Calculation',
 		'oldfieldtype': u'HTML',
@@ -680,6 +693,7 @@
 		'colour': u'White:FFF',
 		'description': u'Detailed Breakup of the totals',
 		'doctype': u'DocField',
+		'fieldname': u'totals',
 		'fieldtype': u'Section Break',
 		'label': u'Totals',
 		'oldfieldtype': u'Section Break',
@@ -752,6 +766,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'column_break3',
 		'fieldtype': u'Column Break',
 		'permlevel': 0,
 		'width': u'50%'
@@ -823,6 +838,7 @@
 		'colour': u'White:FFF',
 		'description': u'Add Terms and Conditions for the Purchase Receipt. You can also prepare a master Term Sheet and use the Template.',
 		'doctype': u'DocField',
+		'fieldname': u'terms_section_break',
 		'fieldtype': u'Section Break',
 		'label': u'Terms',
 		'oldfieldtype': u'Section Break',
@@ -845,6 +861,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'get_terms',
 		'fieldtype': u'Button',
 		'label': u'Get Terms',
 		'oldfieldtype': u'Button',
@@ -855,6 +872,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'terms_html',
 		'fieldtype': u'HTML',
 		'label': u'Terms HTML',
 		'oldfieldtype': u'HTML',
@@ -879,6 +897,7 @@
 		'colour': u'White:FFF',
 		'description': u'Filing in Additional Information about the Purchase Receipt will help you analyze your data better.',
 		'doctype': u'DocField',
+		'fieldname': u'more_info',
 		'fieldtype': u'Section Break',
 		'label': u'More Info',
 		'oldfieldtype': u'Section Break',
@@ -926,6 +945,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'column_break4',
 		'fieldtype': u'Column Break',
 		'oldfieldtype': u'Column Break',
 		'permlevel': 0,
@@ -937,6 +957,7 @@
 	{
 		'colour': u'White:FFF',
 		'doctype': u'DocField',
+		'fieldname': u'other_details',
 		'fieldtype': u'HTML',
 		'hidden': 1,
 		'label': u'Other Details',
@@ -1006,6 +1027,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'transporter_info',
 		'fieldtype': u'Section Break',
 		'label': u'Transporter Info',
 		'permlevel': 0
@@ -1057,6 +1079,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'column_break5',
 		'fieldtype': u'Column Break',
 		'permlevel': 0,
 		'width': u'50%'
@@ -1099,6 +1122,7 @@
 		'colour': u'White:FFF',
 		'description': u'Following table will show values if items are sub - contracted. These values will be fetched from the master of "Bill of Materials" of sub - contracted items.',
 		'doctype': u'DocField',
+		'fieldname': u'raw_material_details',
 		'fieldtype': u'Section Break',
 		'label': u'Raw Material Details',
 		'oldfieldtype': u'Section Break',
@@ -1109,6 +1133,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'get_current_stock',
 		'fieldtype': u'Button',
 		'label': u'Get Current Stock',
 		'oldfieldtype': u'Button',
@@ -1136,6 +1161,7 @@
 		'allow_on_submit': 1,
 		'colour': u'White:FFF',
 		'doctype': u'DocField',
+		'fieldname': u'repair_purchase_receipt',
 		'fieldtype': u'Button',
 		'label': u'Repair Purchase Receipt',
 		'oldfieldtype': u'Button',

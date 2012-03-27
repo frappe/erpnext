@@ -3,50 +3,49 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2011-05-23 12:37:01',
+		'creation': '2012-03-27 14:36:43',
 		'docstatus': 0,
-		'modified': '2012-01-05 16:29:45',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-27 14:36:43',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1311584009',
+		'_last_update': u'1311584009',
 		'allow_attach': 1,
 		'allow_trash': 1,
-		'colour': 'White:FFF',
-		'default_print_format': 'Standard',
+		'colour': u'White:FFF',
+		'default_print_format': u'Standard',
 		'doctype': 'DocType',
-		'module': 'Support',
+		'module': u'Support',
 		'name': '__common__',
-		'search_fields': 'status,customer,allocated_to,subject,raised_by',
-		'section_style': 'Tray',
-		'server_code_error': ' ',
+		'search_fields': u'status,customer,allocated_to,subject,raised_by',
+		'section_style': u'Tray',
+		'server_code_error': u' ',
 		'show_in_menu': 0,
-		'subject': '%(subject)s',
-		'tag_fields': 'status,allocated_to',
+		'subject': u'%(subject)s',
+		'tag_fields': u'status,allocated_to',
 		'version': 153
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Support Ticket',
-		'parentfield': 'fields',
-		'parenttype': 'DocType'
+		'parent': u'Support Ticket',
+		'parentfield': u'fields',
+		'parenttype': u'DocType'
 	},
 
 	# These values are common for all DocPerm
 	{
 		'amend': 0,
-		'cancel': 0,
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'name': '__common__',
-		'parent': 'Support Ticket',
-		'parentfield': 'permissions',
-		'parenttype': 'DocType',
+		'parent': u'Support Ticket',
+		'parentfield': u'permissions',
+		'parenttype': u'DocType',
 		'read': 1,
 		'submit': 0
 	},
@@ -54,67 +53,72 @@
 	# DocType, Support Ticket
 	{
 		'doctype': 'DocType',
-		'name': 'Support Ticket'
+		'name': u'Support Ticket'
 	},
 
 	# DocPerm
 	{
+		'cancel': 0,
 		'create': 1,
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'role': 'Guest',
+		'role': u'Guest',
 		'write': 1
 	},
 
 	# DocPerm
 	{
+		'cancel': 0,
 		'create': 1,
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'role': 'Customer',
+		'role': u'Customer',
 		'write': 1
 	},
 
 	# DocPerm
 	{
+		'cancel': 1,
 		'create': 1,
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'role': 'Support Team',
+		'role': u'Support Team',
 		'write': 1
 	},
 
 	# DocPerm
 	{
+		'cancel': 0,
 		'create': 0,
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'permlevel': 1,
-		'role': 'Support Team',
+		'role': u'Support Team',
 		'write': 1
 	},
 
 	# DocPerm
 	{
+		'cancel': 0,
 		'create': 0,
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'permlevel': 2,
-		'role': 'Support Team',
+		'role': u'Support Team',
 		'write': 0
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'default': 'Open',
-		'doctype': 'DocField',
-		'fieldname': 'status',
-		'fieldtype': 'Select',
+		'colour': u'White:FFF',
+		'default': u'Open',
+		'doctype': u'DocField',
+		'fieldname': u'status',
+		'fieldtype': u'Select',
 		'in_filter': 0,
-		'label': 'Status',
+		'label': u'Status',
 		'no_copy': 1,
-		'oldfieldname': 'status',
-		'oldfieldtype': 'Select',
-		'options': '\nOpen\nTo Reply\nWaiting for Customer\nHold\nClosed',
+		'oldfieldname': u'status',
+		'oldfieldtype': u'Select',
+		'options': u'\nOpen\nTo Reply\nWaiting for Customer\nHold\nClosed',
 		'permlevel': 1,
 		'reqd': 0,
 		'search_index': 1
@@ -122,116 +126,120 @@
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'subject',
-		'fieldtype': 'Text',
+		'doctype': u'DocField',
+		'fieldname': u'subject',
+		'fieldtype': u'Text',
 		'in_filter': 1,
-		'label': 'Subject',
+		'label': u'Subject',
 		'permlevel': 0,
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'depends_on': 'eval:doc.__islocal',
-		'doctype': 'DocField',
-		'fieldname': 'raised_by',
-		'fieldtype': 'Data',
+		'depends_on': u'eval:doc.__islocal',
+		'doctype': u'DocField',
+		'fieldname': u'raised_by',
+		'fieldtype': u'Data',
 		'in_filter': 1,
-		'label': 'Raised By (Email)',
-		'oldfieldname': 'raised_by',
-		'oldfieldtype': 'Data',
+		'label': u'Raised By (Email)',
+		'oldfieldname': u'raised_by',
+		'oldfieldtype': u'Data',
 		'permlevel': 0,
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'depends_on': 'eval:doc.__islocal',
-		'doctype': 'DocField',
-		'fieldname': 'description',
-		'fieldtype': 'Text',
-		'label': 'Description',
-		'oldfieldname': 'problem_description',
-		'oldfieldtype': 'Text',
+		'depends_on': u'eval:doc.__islocal',
+		'doctype': u'DocField',
+		'fieldname': u'description',
+		'fieldtype': u'Text',
+		'label': u'Description',
+		'oldfieldname': u'problem_description',
+		'oldfieldtype': u'Text',
 		'permlevel': 0,
 		'reqd': 0
 	},
 
 	# DocField
 	{
-		'depends_on': 'eval:!doc.__islocal',
-		'doctype': 'DocField',
-		'fieldtype': 'HTML',
-		'label': 'Thread HTML',
+		'depends_on': u'eval:!doc.__islocal',
+		'doctype': u'DocField',
+		'fieldname': u'thread_html',
+		'fieldtype': u'HTML',
+		'label': u'Thread HTML',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'depends_on': 'eval:!doc.__islocal',
-		'doctype': 'DocField',
-		'fieldname': 'new_response',
-		'fieldtype': 'Text',
-		'label': 'New Response',
+		'depends_on': u'eval:!doc.__islocal',
+		'doctype': u'DocField',
+		'fieldname': u'new_response',
+		'fieldtype': u'Text',
+		'label': u'New Response',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'depends_on': 'eval:!doc.__islocal',
-		'doctype': 'DocField',
-		'fieldtype': 'Button',
-		'label': 'Send',
+		'depends_on': u'eval:!doc.__islocal',
+		'doctype': u'DocField',
+		'fieldname': u'send',
+		'fieldtype': u'Button',
+		'label': u'Send',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldtype': 'Section Break',
-		'label': 'Additional Info',
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'additional_info',
+		'fieldtype': u'Section Break',
+		'label': u'Additional Info',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'depends_on': 'eval:!doc.__islocal',
-		'doctype': 'DocField',
-		'fieldtype': 'Column Break',
-		'oldfieldtype': 'Column Break',
+		'depends_on': u'eval:!doc.__islocal',
+		'doctype': u'DocField',
+		'fieldname': u'column_break0',
+		'fieldtype': u'Column Break',
+		'oldfieldtype': u'Column Break',
 		'permlevel': 1,
-		'width': '50%'
+		'width': u'50%'
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldname': 'customer',
-		'fieldtype': 'Link',
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'customer',
+		'fieldtype': u'Link',
 		'in_filter': 1,
-		'label': 'Customer',
-		'oldfieldname': 'customer',
-		'oldfieldtype': 'Link',
-		'options': 'Customer',
+		'label': u'Customer',
+		'oldfieldname': u'customer',
+		'oldfieldtype': u'Link',
+		'options': u'Customer',
 		'permlevel': 1,
 		'print_hide': 1,
 		'reqd': 0,
 		'search_index': 1,
-		'trigger': 'Client'
+		'trigger': u'Client'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'customer_name',
-		'fieldtype': 'Data',
+		'doctype': u'DocField',
+		'fieldname': u'customer_name',
+		'fieldtype': u'Data',
 		'in_filter': 1,
-		'label': 'Customer Name',
-		'oldfieldname': 'customer_name',
-		'oldfieldtype': 'Data',
+		'label': u'Customer Name',
+		'oldfieldname': u'customer_name',
+		'oldfieldtype': u'Data',
 		'permlevel': 2,
 		'reqd': 0,
 		'search_index': 0
@@ -239,151 +247,152 @@
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'address_display',
-		'fieldtype': 'Small Text',
-		'label': 'Address',
+		'doctype': u'DocField',
+		'fieldname': u'address_display',
+		'fieldtype': u'Small Text',
+		'label': u'Address',
 		'permlevel': 2
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'contact_display',
-		'fieldtype': 'Data',
-		'label': 'Contact Name',
+		'doctype': u'DocField',
+		'fieldname': u'contact_display',
+		'fieldtype': u'Data',
+		'label': u'Contact Name',
 		'permlevel': 2
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'contact_mobile',
-		'fieldtype': 'Data',
-		'label': 'Mobile No',
+		'doctype': u'DocField',
+		'fieldname': u'contact_mobile',
+		'fieldtype': u'Data',
+		'label': u'Mobile No',
 		'permlevel': 2
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'contact_email',
-		'fieldtype': 'Data',
-		'label': 'Contact Email',
-		'oldfieldname': 'contact_no',
-		'oldfieldtype': 'Data',
+		'doctype': u'DocField',
+		'fieldname': u'contact_email',
+		'fieldtype': u'Data',
+		'label': u'Contact Email',
+		'oldfieldname': u'contact_no',
+		'oldfieldtype': u'Data',
 		'permlevel': 2
 	},
 
 	# DocField
 	{
-		'default': 'Today',
-		'doctype': 'DocField',
-		'fieldname': 'opening_date',
-		'fieldtype': 'Date',
-		'label': 'Opening Date',
+		'default': u'Today',
+		'doctype': u'DocField',
+		'fieldname': u'opening_date',
+		'fieldtype': u'Date',
+		'label': u'Opening Date',
 		'no_copy': 1,
-		'oldfieldname': 'opening_date',
-		'oldfieldtype': 'Date',
+		'oldfieldname': u'opening_date',
+		'oldfieldtype': u'Date',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'opening_time',
-		'fieldtype': 'Time',
-		'label': 'Opening Time',
+		'doctype': u'DocField',
+		'fieldname': u'opening_time',
+		'fieldtype': u'Time',
+		'label': u'Opening Time',
 		'no_copy': 1,
-		'oldfieldname': 'opening_time',
-		'oldfieldtype': 'Time',
+		'oldfieldname': u'opening_time',
+		'oldfieldtype': u'Time',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'depends_on': 'eval:!doc.__islocal',
-		'doctype': 'DocField',
-		'fieldtype': 'Column Break',
-		'oldfieldtype': 'Column Break',
+		'depends_on': u'eval:!doc.__islocal',
+		'doctype': u'DocField',
+		'fieldname': u'column_break1',
+		'fieldtype': u'Column Break',
+		'oldfieldtype': u'Column Break',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'depends_on': 'eval:!doc.__islocal',
-		'doctype': 'DocField',
-		'fieldname': 'allocated_to',
-		'fieldtype': 'Link',
+		'colour': u'White:FFF',
+		'depends_on': u'eval:!doc.__islocal',
+		'doctype': u'DocField',
+		'fieldname': u'allocated_to',
+		'fieldtype': u'Link',
 		'in_filter': 1,
-		'label': 'Allocated To',
-		'oldfieldname': 'allocated_to',
-		'oldfieldtype': 'Link',
-		'options': 'Profile',
+		'label': u'Allocated To',
+		'oldfieldname': u'allocated_to',
+		'oldfieldtype': u'Link',
+		'options': u'Profile',
 		'permlevel': 1,
 		'search_index': 1
 	},
 
 	# DocField
 	{
-		'depends_on': 'eval:!doc.__islocal',
-		'doctype': 'DocField',
-		'fieldname': 'resolution_details',
-		'fieldtype': 'Text',
-		'label': 'Resolution Details',
+		'depends_on': u'eval:!doc.__islocal',
+		'doctype': u'DocField',
+		'fieldname': u'resolution_details',
+		'fieldtype': u'Text',
+		'label': u'Resolution Details',
 		'no_copy': 1,
-		'oldfieldname': 'resolution_details',
-		'oldfieldtype': 'Text',
+		'oldfieldname': u'resolution_details',
+		'oldfieldtype': u'Text',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'depends_on': 'eval:!doc.__islocal',
-		'doctype': 'DocField',
-		'fieldname': 'resolution_date',
-		'fieldtype': 'Date',
+		'colour': u'White:FFF',
+		'depends_on': u'eval:!doc.__islocal',
+		'doctype': u'DocField',
+		'fieldname': u'resolution_date',
+		'fieldtype': u'Date',
 		'in_filter': 0,
-		'label': 'Resolution Date',
+		'label': u'Resolution Date',
 		'no_copy': 1,
-		'oldfieldname': 'resolution_date',
-		'oldfieldtype': 'Date',
+		'oldfieldname': u'resolution_date',
+		'oldfieldtype': u'Date',
 		'permlevel': 1,
 		'search_index': 0
 	},
 
 	# DocField
 	{
-		'depends_on': 'eval:!doc.__islocal',
-		'doctype': 'DocField',
-		'fieldname': 'resolution_time',
-		'fieldtype': 'Time',
-		'label': 'Resolution Time',
-		'oldfieldname': 'resolution_time',
-		'oldfieldtype': 'Time',
+		'depends_on': u'eval:!doc.__islocal',
+		'doctype': u'DocField',
+		'fieldname': u'resolution_time',
+		'fieldtype': u'Time',
+		'label': u'Resolution Time',
+		'oldfieldname': u'resolution_time',
+		'oldfieldtype': u'Time',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldname': 'content_type',
-		'fieldtype': 'Data',
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'content_type',
+		'fieldtype': u'Data',
 		'hidden': 1,
-		'label': 'Content Type',
+		'label': u'Content Type',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'file_list',
-		'fieldtype': 'Text',
+		'doctype': u'DocField',
+		'fieldname': u'file_list',
+		'fieldtype': u'Text',
 		'hidden': 1,
-		'label': 'File List',
+		'label': u'File List',
 		'no_copy': 1,
 		'permlevel': 0,
 		'print_hide': 1
@@ -391,13 +400,13 @@
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'naming_series',
-		'fieldtype': 'Select',
+		'doctype': u'DocField',
+		'fieldname': u'naming_series',
+		'fieldtype': u'Select',
 		'hidden': 1,
-		'label': 'Series',
+		'label': u'Series',
 		'no_copy': 1,
-		'options': 'SUP',
+		'options': u'SUP',
 		'permlevel': 0,
 		'print_hide': 1,
 		'reqd': 0,

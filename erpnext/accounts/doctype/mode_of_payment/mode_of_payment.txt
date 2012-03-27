@@ -3,39 +3,38 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:09:10',
+		'creation': '2012-03-27 14:35:44',
 		'docstatus': 0,
-		'modified': '2010-09-20 14:06:57',
-		'modified_by': 'Administrator',
-		'owner': 'harshada@webnotestech.com'
+		'modified': '2012-03-27 14:35:44',
+		'modified_by': u'Administrator',
+		'owner': u'harshada@webnotestech.com'
 	},
 
 	# These values are common for all DocType
 	{
-		'autoname': 'field:mode_of_payment',
-		'colour': 'White:FFF',
+		'autoname': u'field:mode_of_payment',
+		'colour': u'White:FFF',
 		'doctype': 'DocType',
-		'document_type': 'Master',
-		'module': 'Accounts',
+		'document_type': u'Master',
+		'module': u'Accounts',
 		'name': '__common__',
-		'section_style': 'Simple',
-		'server_code_error': ' ',
+		'section_style': u'Simple',
+		'server_code_error': u' ',
 		'version': 3
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'mode_of_payment',
-		'fieldtype': 'Data',
-		'idx': 1,
-		'label': 'Mode of Payment',
+		'doctype': u'DocField',
+		'fieldname': u'mode_of_payment',
+		'fieldtype': u'Data',
+		'label': u'Mode of Payment',
 		'name': '__common__',
-		'oldfieldname': 'mode_of_payment',
-		'oldfieldtype': 'Data',
-		'parent': 'Mode of Payment',
-		'parentfield': 'fields',
-		'parenttype': 'DocType',
+		'oldfieldname': u'mode_of_payment',
+		'oldfieldtype': u'Data',
+		'parent': u'Mode of Payment',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
 		'permlevel': 0,
 		'reqd': 1
 	},
@@ -43,31 +42,30 @@
 	# These values are common for all DocPerm
 	{
 		'create': 1,
-		'doctype': 'DocPerm',
-		'idx': 1,
+		'doctype': u'DocPerm',
 		'name': '__common__',
-		'parent': 'Mode of Payment',
-		'parentfield': 'permissions',
-		'parenttype': 'DocType',
+		'parent': u'Mode of Payment',
+		'parentfield': u'permissions',
+		'parenttype': u'DocType',
 		'permlevel': 0,
 		'read': 1,
-		'role': 'Accounts Manager',
+		'role': u'Accounts Manager',
 		'write': 1
 	},
 
 	# DocType, Mode of Payment
 	{
 		'doctype': 'DocType',
-		'name': 'Mode of Payment'
+		'name': u'Mode of Payment'
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm'
+		'doctype': u'DocPerm'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField'
+		'doctype': u'DocField'
 	}
 ]
