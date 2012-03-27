@@ -207,5 +207,25 @@ patch_list = [
 		'patch_file': 'update_se_fld_options',
 		'description': 'Purpose SE: Others to Other' 
 	},
+	{
+		'patch_module': 'patches.mar_2012',
+		'patch_file': 'pos_invoice_fix',
+		'description': 'Reload POS Invoice' 
+	},
+	{
+		'patch_module': 'patches.mar_2012',
+		'patch_file': 'cleanup_control_panel',
+		'description': 'Remove email related fields from Control Panel' 
+	},
+	{
+		'patch_module': 'patches.mar_2012',
+		'patch_file': 'doctype_get_refactor',
+		'description': 'Patch related to doctype get refactoring' 
+	},
+	{
+		'patch_module': 'patches.mar_2012',
+		'patch_file': 'clean_property_setter',
+		'description': 'Cleanup Property Setter Entries' 
+	},
 
 ]

@@ -10,7 +10,7 @@ def execute():
 	"""
 	change_property_setter_fieldnames()
 	handle_custom_fields()
-	create_file_list()
+	#create_file_list()
 
 	# do at last - needs commit due to DDL statements
 	change_to_decimal()

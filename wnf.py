@@ -116,9 +116,14 @@ def setup_options():
 						metavar = "search replace_by extension",
 						help="file search-replace")
 
-	parser.add_option("--cci", nargs=1, metavar="CacheItem Key",
+	parser.add_option("--cci", nargs=1, metavar="CacheItem Key or all",
 		help="Clear Cache Item")
 	
+	parser.add_option("--sync_all", help="Synchronize all DocTypes using txt files",
+			nargs=0)
+	
+	parser.add_option("--sync", help="Synchronize given DocType using txt file",
+			nargs=2, metavar="module doctype (use their folder names)")
 
 	return parser.parse_args()
 	
@@ -225,6 +230,14 @@ def run():
 		else:
 			from webnotes.utils.cache import CacheItem
 			CacheItem(options.cci).clear()
+	
+	elif options.sync_all is not None:
+		import webnotes.model.sync
+		webnotes.model.sync.sync_all()
+
+	elif options.sync is not None:
+		import webnotes.model.sync
+		webnotes.model.sync.sync(options.sync[0], options.sync[1])
 
 	# print messages
 	if webnotes.message_log:
