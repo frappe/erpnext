@@ -39,7 +39,8 @@ class DocType:
 		self.doclist = doclist
 		
 	def get_bin(self, item_code):
-		bin = sql("select name from tabBin where item_code = '%s' and warehouse = '%s'" % (item_code, self.doc.name))
+		bin = sql("select name from tabBin where item_code = %s and \
+				warehouse = %s", (item_code, self.doc.name))
 		bin = bin and bin[0][0] or ''
 		if not bin:
 			if not self.doc.warehouse_type :
