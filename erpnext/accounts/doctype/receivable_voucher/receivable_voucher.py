@@ -166,7 +166,8 @@ class DocType(TransactionBase):
 	# Item Details
 	# -------------
 	def get_item_details(self, args=None):
-		args = args and eval(args) or {}
+		import json
+		args = args and json.loads(args) or {}
 		if args.get('item_code'):
 			ret = get_obj('Sales Common').get_item_details(args, self)
 			return self.get_pos_details(args, ret)

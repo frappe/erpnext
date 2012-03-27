@@ -23,7 +23,7 @@
 		'name': '__common__',
 		'section_style': u'Simple',
 		'show_in_menu': 0,
-		'version': 15
+		'version': 18
 	},
 
 	# These values are common for all DocField
@@ -69,17 +69,6 @@
 	# DocField
 	{
 		'colour': u'White:FFF',
-		'description': u'Solid background color (default light gray)',
-		'doctype': u'DocField',
-		'fieldname': u'background_color',
-		'fieldtype': u'Data',
-		'label': u'Background Color',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
 		'description': u'If image is selected, color will be ignored (attach first)',
 		'doctype': u'DocField',
 		'fieldname': u'background_image',
@@ -91,11 +80,22 @@
 
 	# DocField
 	{
+		'colour': u'White:FFF',
+		'description': u'Solid background color (default light gray)',
+		'doctype': u'DocField',
+		'fieldname': u'background_color',
+		'fieldtype': u'Data',
+		'label': u'Background Color',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
 		'doctype': u'DocField',
 		'fieldname': u'font',
 		'fieldtype': u'Select',
 		'label': u'Font',
-		'options': u'\nLucida Grande\nVerdana\nArial\nGeorgia\nTahoma\nPontano Sans\nDroid Sans\nGill Sans',
+		'options': u'\nLucida Grande\nVerdana\nArial\nGeorgia\nTahoma\nLato\nOpen Sans',
 		'permlevel': 0
 	},
 
@@ -115,7 +115,7 @@
 		'fieldname': u'heading_font',
 		'fieldtype': u'Select',
 		'label': u'Heading Font',
-		'options': u'\nLucida Grande\nVerdana\nArial\nGeorgia\nTahoma\nPontano Sans\nDroid Sans\nGill Sans',
+		'options': u'\nLucida Grande\nVerdana\nArial\nGeorgia\nTahoma\nLato\nOpen Sans',
 		'permlevel': 0
 	},
 

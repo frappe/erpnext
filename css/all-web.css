@@ -123,7 +123,6 @@ div#body_div {
 
 .content {
 	width: 900px;
-	margin-bottom: 30px;
 }
 
 .background-fade-in {
@@ -134,9 +133,8 @@ div#body_div {
 }
 
 footer {
-	position: absolute;
-	bottom: 0px;
-	width: 100%;
+	width: 900px;
+	margin: auto;
 }
 header .container {
 	width: 900px;
@@ -160,7 +158,6 @@ div.no_script {
 }
 
 div.loading_div {
-	position: absolute;
 	background-color: #FFFFCC;
 	z-index: 1999;
 	right: 5px;
@@ -199,7 +196,6 @@ div.std-footer-item {
 	box-shadow: 0px 0px 6px rgba(0,0,0,0.3);
 	background-color: #fff;
 	padding: 15px;
-	margin-bottom: 30px;
 }
 
 .layout-wrapper-background {
@@ -1602,15 +1598,203 @@ button.btn.small, input[type="submit"].btn.small {
 }
 
 /*
+ *	lib/css/ui/fonts.css
+ */
+@font-face {
+  font-family: 'Pontano Sans';
+  font-style: normal;
+  font-weight: 800;
+  src: url('../lib/css/fonts/pontanosans.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Droid Sans';
+  font-style: normal;
+  font-weight: normal;
+  src: local('Droid Sans'), local('DroidSans'), url('../lib/css/fonts/droidsans.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'PT Sans';
+  font-style: normal;
+  font-weight: normal;
+  src: local('PT Sans'), local('PTSans-Regular'), url('../lib/css/fonts/ptsans.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Open Sans'), local('OpenSans'), url('../lib/css/fonts/opensans.woff') format('woff');
+}
+@font-face {
+  font-family: 'Lato';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Lato Regular'), local('Lato-Regular'), url('../lib/css/fonts/lato.woff') format('woff');
+}
+
+
+
+/*
+ *	lib/css/ui/list.css
+ */
+.hide {
+	display: none;
+}
+
+.list-filters {
+	margin: 7px 0px;
+}
+
+.wnlist .img-load {
+	display: none;
+	float: left;
+	margin-bottom: 8px;
+}
+
+/* list-row */
+div.list-row {
+	border-bottom: 1px solid #eee;
+	padding: 5px 0px;
+}
+div.list-row:hover {
+	background-color: #eef
+}
+
+div.list-row .label {
+	margin-right: 4px;
+}
+
+div.list-row table {
+	table-layout: fixed;
+	border-collapse: collapse;
+	width: 100%;
+}
+
+div.list-row table td {
+	overflow: hidden;
+	padding-right: 3px;
+	vertical-align: middle;
+	height: 24px;
+	max-height: 24px;
+}
+
+div.paging-button {
+	text-align: center;
+	padding: 11px 0px;
+}
+
+div.show_filters {
+	display: none;
+}
+
+div.filter_list {
+	padding: 13px;
+}
+
+div.show_filters.well {
+	margin-top: 11px;
+	margin-bottom: 11px;
+}
+
+div.filter_list .run_btn {
+	text-align: right;
+}
+
+div.filter_list .add_filter {
+	margin: 3px 0px;
+}
+
+div.list_filter {
+	margin: 7px 0px;
+}
+
+div.list_filter input, div.list_filter select {
+	width: 130px;
+	margin-right: 7px;
+}
+
+/* bar */
+
+span.bar-outer {
+	display: inline-block;
+	margin: 0px 7px;
+	margin-top: 3px;
+	background-color: #fff;
+	border: 1px solid #aaa;
+	height: 10px;
+}
+
+span.bar-inner {
+	display: inline-block;
+	background-color: #bdf;
+	height: 100%;
+	margin-bottom: 2px;
+	float: left;
+}
+span.bar-complete {
+	background-color: #009900;
+}
+span.bar-empty {
+	background-color: #990000;
+}
+
+
+/* stats */
+
+div.stat-wrapper {
+	margin-bottom: 19px;	
+}
+
+div.stat-grid {
+	border: 2px solid #bbb;
+	background-color: white;
+	border-radius: 5px;
+	-moz-border-radius: 5px;
+	-webkit-border-radius: 5px;
+	overflow: hidden;
+}
+
+div.stat-label {
+	position: relative;
+	padding: 3px;
+	text-align: center;
+}
+div.stat-label, div.stat-label a {
+	z-index: 5;
+}
+
+div.stat-item {
+	position: relative;
+	border-bottom: 1px solid #ddd;
+}
+div.stat-item:last-child {
+	border-bottom: 0px solid #ddd;	
+}
+
+div.stat-bar {
+	position: absolute;
+	left: 0px;
+	background-color: #def;
+	height: 100%;
+	z-index: 0;
+}
+
+
+
+
+
+/*
  *	erpnext/startup/startup.css
  */
 h1, h2, h3, h4, h5 {
-	font-family: "Lato", Helvetica, "Helvetica Neue", sans-serif;
+	font-family: "Open Sans", Helvetica, "Helvetica Neue", sans-serif;
 	font-weight: bold;
 }
 
 body {
-	font-family: "Lato", Helvetica, "Helvetica Neue", sans-serif;
+	font-family: "Open Sans", Helvetica, "Helvetica Neue", sans-serif;
 	font-size: 13px;
 }
 
@@ -1711,6 +1895,10 @@ h2 {
 
 h3 {
 	margin-bottom: 7px;
+}
+
+p, li {
+	line-height: 1.6em;
 }
 
 pre {

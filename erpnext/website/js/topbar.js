@@ -112,6 +112,6 @@ erpnext.Footer = Class.extend({
 });
 
 $(document).bind('startup', function() {
-//	erpnext.footer = new erpnext.Footer();
+	erpnext.footer = new erpnext.Footer();
 	erpnext.navbar.navbar = new erpnext.navbar.Navbar();	
 })
