@@ -217,5 +217,10 @@ patch_list = [
 		'patch_file': 'mapper_fix',
 		'description': 'DN-RV duplicate table entry'
 	},
+	{
+		'patch_module': 'patches.mar_2012',
+		'patch_file': 'so_rv_mapper_fix',
+		'description': 'SO-RV duplicate mapper entry removal'
+	},
 
 ]
