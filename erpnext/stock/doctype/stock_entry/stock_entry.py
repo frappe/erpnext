@@ -157,13 +157,13 @@ class DocType:
 
 
 
-	def get_raw_materials(self,pro_obj):
+	def get_raw_materials(self, bom_no, fg_qty, consider_sa_items_as_rm):
 		""" 
 			get all items from flat bom except 
 			child items of sub-contracted and sub assembly items 
 			and sub assembly items itself.
 		"""
-		if pro_obj.doc.consider_sa_items == 'Yes':
+		if consider_sa_items_as_rm == 'Yes':
 			# Get all raw materials considering SA items as raw materials, 
 			# so no childs of SA items
 			fl_bom_sa_items = sql("""
@@ -171,8 +171,7 @@ class DocType:
 				from `tabBOM Material` 
 				where parent = '%s' and docstatus < 2 
 				group by item_code
-			""" % ((self.doc.process == 'Backflush') and flt(self.doc.fg_completed_qty) \
-					 or flt(pro_obj.doc.qty), cstr(pro_obj.doc.bom_no)))
+			""" % (fg_qty, bom_no))
 			
 			self.make_items_dict(fl_bom_sa_items)
 
@@ -189,8 +188,7 @@ class DocType:
 						and ifnull(it.is_sub_contracted_item, 'No') = 'No' and fb.docstatus<2 and fb.parent=%s
 					) a
 				group by item_code,stock_uom
-			""" , ((self.doc.process == 'Backflush') and flt(self.doc.fg_completed_qty) \
-					or flt(pro_obj.doc.qty), cstr(pro_obj.doc.bom_no)))
+			""" , (fg_qty, bom_no))
 			self.make_items_dict(fl_bom_sa_child_item)
 
 		# Update only qty remaining to be issued for production
@@ -199,17 +197,11 @@ class DocType:
 
 
 
-	def add_to_stock_entry_detail(self, pro_obj, item_dict, fg_item = 0):
-		sw, tw = '', ''
-		if self.doc.process == 'Material Transfer':
-			tw = cstr(pro_obj.doc.wip_warehouse)
-		if self.doc.process == 'Backflush':
-			tw = fg_item and cstr(pro_obj.doc.fg_warehouse) or ''
-			if not fg_item: sw = cstr(pro_obj.doc.wip_warehouse)
+	def add_to_stock_entry_detail(self, source_wh, target_wh, item_dict, fg_item = 0, bom_no = ''):
 		for d in item_dict:
 			se_child = addchild(self.doc, 'mtn_details', 'Stock Entry Detail', 0, self.doclist)
-			se_child.s_warehouse = sw
-			se_child.t_warehouse = tw
+			se_child.s_warehouse = source_wh
+			se_child.t_warehouse = target_wh
 			se_child.fg_item = fg_item
 			se_child.item_code = cstr(d)
 			se_child.description = item_dict[d][1]
@@ -219,24 +211,52 @@ class DocType:
 			se_child.qty = flt(item_dict[d][0])
 			se_child.transfer_qty = flt(item_dict[d][0])
 			se_child.conversion_factor = 1.00
-			if fg_item: se_child.bom_no = pro_obj.doc.bom_no
+			if fg_item: se_child.bom_no = bom_no
+
+	def validate_bom_no(self):
+		if self.doc.bom_no:
+			if not self.doc.fg_completed_qty:
+				msgprint("Please enter FG Completed Qty", raise_exception=1)
+			if not self.doc.consider_sa_items_as_raw_materials:
+				msgprint("Please confirm whether you want to consider sub assembly item as raw materials", raise_exception=1)	
 
 
 	# get items 
 	#------------------
 	def get_items(self):
-		pro_obj = self.doc.production_order and get_obj('Production Order', self.doc.production_order) or ''
-		
-		self.validate_for_production_order(pro_obj)
-		self.get_raw_materials(pro_obj)
-		
+		if self.doc.purpose == 'Production Order':
+			pro_obj = self.doc.production_order and get_obj('Production Order', self.doc.production_order) or ''	
+			self.validate_for_production_order(pro_obj)
+
+			bom_no = pro_obj.doc.bom_no
+			fg_qty = (self.doc.process == 'Backflush') and flt(self.doc.fg_completed_qty) or flt(pro_obj.doc.qty)
+			consider_sa_items_as_rm = pro_obj.doc.consider_sa_items
+		elif self.doc.purpose == 'Other':
+			self.validate_bom_no()
+			bom_no = self.doc.bom_no
+			fg_qty = self.doc.fg_completed_qty
+			consider_sa_items_as_rm = self.doc.consider_sa_items_as_raw_materials
+			
+		self.get_raw_materials(bom_no, fg_qty, consider_sa_items_as_rm)
 		self.doc.clear_table(self.doclist, 'mtn_details', 1)
 
-		self.add_to_stock_entry_detail(pro_obj, self.item_dict)
-		
+		sw = (self.doc.process == 'Backflush') and cstr(pro_obj.doc.wip_warehouse) or ''
+		tw = (self.doc.process == 'Material Transfer') and cstr(pro_obj.doc.wip_warehouse) or ''
+		self.add_to_stock_entry_detail(sw, tw, self.item_dict)
+
+		fg_item_dict = {}
 		if self.doc.process == 'Backflush':
-			item_dict = {cstr(pro_obj.doc.production_item) : [self.doc.fg_completed_qty, pro_obj.doc.description, pro_obj.doc.stock_uom]}
-			self.add_to_stock_entry_detail(pro_obj, item_dict, fg_item = 1)
+			sw = ''
+			tw = cstr(pro_obj.doc.fg_warehouse)	
+			fg_item_dict = {cstr(pro_obj.doc.production_item) : [self.doc.fg_completed_qty, pro_obj.doc.description, pro_obj.doc.stock_uom]}
+		elif self.doc.purpose == 'Other' and self.doc.bom_no:
+			sw, tw = '', ''
+			item = sql("select item, description, uom from `tabBill Of Materials` where name = %s", self.doc.bom_no, as_dict=1)
+			fg_item_dict = {item[0]['item'] : [self.doc.fg_completed_qty, item[0]['description'], item[0]['uom']]}
+
+		if fg_item_dict:
+			self.add_to_stock_entry_detail(sw, tw, fg_item_dict, fg_item = 1, bom_no = bom_no)
+			
 
 
 	def validate_transfer_qty(self):
@@ -289,7 +309,7 @@ class DocType:
 
 	
 	def validate_for_production_order(self, pro_obj):
-		if self.doc.purpose == 'Production Order' or self.doc.process or self.doc.production_order or flt(self.doc.fg_completed_qty):
+		if self.doc.purpose == 'Production Order' or self.doc.process or self.doc.production_order:
 			if self.doc.purpose != 'Production Order':
 				msgprint("Purpose should be 'Production Order'.")
 				raise Exception
@@ -394,7 +414,6 @@ class DocType:
 					if cstr(pro_obj.doc.production_item) != cstr(d.item_code):
 						msgprint("Item %s in Stock Entry Detail as Row No %s do not match with Item %s in Production Order %s" % (cstr(d.item_code), cstr(d.idx), cstr(pro_obj.doc.production_item), cstr(pro_obj.doc.name)))
 						raise Exception
-					fg_qty = flt(fg_qty) + flt(d.transfer_qty)
 					if cstr(d.t_warehouse) != cstr(pro_obj.doc.fg_warehouse):
 						msgprint("As Item %s is FG Item. Target Warehouse should be same as FG Warehouse %s in Production Order %s, at Row No %s. " % ( cstr(d.item_code), cstr(pro_obj.doc.fg_warehouse), cstr(pro_obj.doc.name), cstr(d.idx)))
 						raise Exception
@@ -408,6 +427,9 @@ class DocType:
 					if cstr(d.s_warehouse) != cstr(pro_obj.doc.wip_warehouse):
 						msgprint("As Item %s is Raw Material. Source Warehouse should be same as WIP Warehouse %s in Production Order %s, at Row No %s. " % ( cstr(d.item_code), cstr(pro_obj.doc.wip_warehouse), cstr(pro_obj.doc.name), cstr(d.idx)))
 						raise Exception
+			if d.fg_item and (self.doc.purpose == 'Other' or self.doc.process == 'Backflush'):
+				fg_qty = flt(fg_qty) + flt(d.transfer_qty)
+
 			d.save()
 		if self.doc.fg_completed_qty and flt(self.doc.fg_completed_qty) != flt(fg_qty):
 			msgprint("The Total of FG Qty %s in Stock Entry Detail do not match with FG Completed Qty %s" % (flt(fg_qty), flt(self.doc.fg_completed_qty)))

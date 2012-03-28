@@ -209,13 +209,14 @@ class DocType(TransactionBase):
 			if default: add_cond = 'ifnull(t2.is_default,0) = 1'
 			else: add_cond = 't1.parent = "'+cstr(obj.doc.charge)+'"'
 			idx = 0
-			other_charge = webnotes.conn.sql("select t1.charge_type,t1.row_id,t1.description,t1.account_head,t1.rate,t1.tax_amount,t1.included_in_print_rate from `tabRV Tax Detail` t1, `tabOther Charges` t2 where t1.parent = t2.name and t2.company = '%s' and %s order by t1.idx" % (obj.doc.company, add_cond), as_dict = 1)
+			other_charge = webnotes.conn.sql("select t1.charge_type,t1.row_id,t1.description,t1.account_head,t1.rate,t1.tax_amount,t1.included_in_print_rate, t1.cost_center_other_charges from `tabRV Tax Detail` t1, `tabOther Charges` t2 where t1.parent = t2.name and t2.company = '%s' and %s order by t1.idx" % (obj.doc.company, add_cond), as_dict = 1)
 			for other in other_charge:
 				d =	addchild(obj.doc, 'other_charges', 'RV Tax Detail', 1, obj.doclist)
 				d.charge_type = other['charge_type']
 				d.row_id = other['row_id']
 				d.description = other['description']
 				d.account_head = other['account_head']
+				d.cost_center_other_charges = other['cost_center_other_charges']
 				d.rate = flt(other['rate'])
 				d.tax_amount = flt(other['tax_amount'])
 				d.included_in_print_rate = cint(other['included_in_print_rate'])
@@ -514,7 +515,7 @@ class DocType(TransactionBase):
 					dt = webnotes.conn.sql("select posting_date from `tab%s` where name = '%s'" % (d.prevdoc_doctype, d.prevdoc_docname))
 				else:
 					dt = webnotes.conn.sql("select transaction_date from `tab%s` where name = '%s'" % (d.prevdoc_doctype, d.prevdoc_docname))
-				d.prevdoc_date = dt and dt[0][0].strftime('%Y-%m-%d') or ''
+				d.prevdoc_date = (dt and dt[0][0]) and dt[0][0].strftime('%Y-%m-%d') or ''
 
 	def update_prevdoc_detail(self, is_submit, obj):
 		StatusUpdater(obj, is_submit).update()

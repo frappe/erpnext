@@ -187,5 +187,35 @@ patch_list = [
 		'patch_file': 'update_stockreco_perm',
 		'description': 'Update stock reco permission' 
 	},
+	{
+		'patch_module': 'patches.jan_mar_2012',
+		'patch_file': 'stock_entry_others_patch',
+		'description': 'new purpose others in stock entry' 
+	},
+	{
+		'patch_module': 'patches.jan_mar_2012',
+		'patch_file': 'reload_quote',
+		'description': 'reload quote: organization fld added' 
+	},
+	{
+		'patch_module': 'patches.jan_mar_2012',
+		'patch_file': 'update_purpose_se',
+		'description': 'Purpose SE: Others to Other' 
+	},
+	{
+		'patch_module': 'patches.jan_mar_2012',
+		'patch_file': 'update_se_fld_options',
+		'description': 'Purpose SE: Others to Other' 
+	},
+	{
+		'patch_module': 'patches.jan_mar_2012',
+		'patch_file': 'reload_mapper',
+		'description': 'SO-DN, SO-Rv, DN-RV'
+	},
+	{
+		'patch_module': 'patches.jan_mar_2012',
+		'patch_file': 'mapper_fix',
+		'description': 'DN-RV duplicate table entry'
+	},
 
 ]

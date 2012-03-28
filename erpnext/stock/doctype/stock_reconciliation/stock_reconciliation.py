@@ -59,8 +59,7 @@ class DocType:
 				self.validate_item(s[0], count)
 				self.validate_warehouse(s[1], count)
 			
-				# encode as ascii
-				self.data.append([d.encode("ascii") for d in s])
+				self.data.append(s)
 				count += 1
 			
 		if not self.validated:
@@ -76,7 +75,8 @@ class DocType:
 
 	def validate_item(self, item, count):
 		""" Validate item exists and non-serialized"""
-		det = sql("select item_code, has_serial_no from `tabItem` where name = '%s'"% cstr(item), as_dict = 1)
+		det = sql("select item_code, has_serial_no from `tabItem` \
+				where name = %s", cstr(item), as_dict = 1)
 		if not det:
 			msgprint("Item: " + cstr(item) + " mentioned at Row No. " + cstr(count) + "does not exist in the system")
 			self.validated = 0
@@ -89,7 +89,7 @@ class DocType:
 
 	def validate_warehouse(self, wh, count,):
 		"""Validate warehouse exists"""
-		if not sql("select name from `tabWarehouse` where name = '%s'" % cstr(wh)):
+		if not sql("select name from `tabWarehouse` where name = %s", cstr(wh)):
 			msgprint("Warehouse: " + cstr(wh) + " mentioned at Row No. " + cstr(count) + " does not exist in the system")
 			self.validated = 0
 
