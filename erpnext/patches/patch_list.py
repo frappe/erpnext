@@ -212,5 +212,10 @@ patch_list = [
 		'patch_file': 'reload_mapper',
 		'description': 'SO-DN, SO-Rv, DN-RV'
 	},
+	{
+		'patch_module': 'patches.jan_mar_2012',
+		'patch_file': 'mapper_fix',
+		'description': 'DN-RV duplicate table entry'
+	},
 
 ]

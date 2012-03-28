@@ -161,17 +161,6 @@
 		'match_id': 1,
 		'to_field': 'entries',
 		'to_table': 'RV Detail',
-		'validation_logic': 'amount > ifnull(billed_amt, 0) and docstatus = 1'
-	},
-
-	# Table Mapper Detail
-	{
-		'doctype': 'Table Mapper Detail',
-		'from_field': 'delivery_note_details',
-		'from_table': 'Delivery Note Detail',
-		'match_id': 1,
-		'to_field': 'entries',
-		'to_table': 'RV Detail',
 		'validation_logic': '(ifnull(amount, 0) = 0 or amount > ifnull(billed_amt, 0)) and docstatus = 1'
 	},
 
