@@ -134,6 +134,16 @@
 		'to_field': 'serial_no'
 	},
 
+	# Field Mapper Detail
+	{
+		'checking_operator': u'=',
+		'doctype': u'Field Mapper Detail',
+		'from_field': u'export_rate',
+		'map': u'Yes',
+		'match_id': 1,
+		'to_field': u'export_rate'
+	},
+
 	# Table Mapper Detail
 	{
 		'doctype': 'Table Mapper Detail',
