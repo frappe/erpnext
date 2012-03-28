@@ -3,12 +3,14 @@ wn.doclistviews['Receivable Voucher'] = wn.views.ListView.extend({
 	init: function(d) {
 		this._super(d)
 		this.fields = this.fields.concat([
-			"`tabReceivable Voucher`.customer", 
+			"`tabReceivable Voucher`.customer_name", 
 			"ifnull(`tabReceivable Voucher`.outstanding_amount,0) as outstanding_amount", 
 			"ifnull(`tabReceivable Voucher`.grand_total,0) as grand_total", 
 			"`tabReceivable Voucher`.currency", 
 			"ifnull(`tabReceivable Voucher`.grand_total_export,0) as grand_total_export"
 		]);
+
+		this.stats = this.stats.concat(['company']);		
 	},
 	prepare_data: function(data) {
 		this._super(data);
@@ -18,7 +20,7 @@ wn.doclistviews['Receivable Voucher'] = wn.views.ListView.extend({
 		{width: '5%', content:'avatar'},
 		{width: '3%', content:'docstatus'},
 		{width: '15%', content:'name'},
-		{width: '37%', content:'tags+customer', css: {color:'#aaa'}},
+		{width: '37%', content:'tags+customer_name', css: {color:'#aaa'}},
 		{
 			width: '18%', 
 			content: function(parent, data) { 

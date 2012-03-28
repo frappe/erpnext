@@ -9,14 +9,14 @@ wn.doclistviews['Sales Order'] = wn.views.ListView.extend({
 			"`tabSales Order`.currency", 
 			"ifnull(`tabSales Order`.grand_total_export,0) as grand_total_export"
 		]);
-		this.stats = this.stats.concat(['status']);
+		this.stats = this.stats.concat(['status', 'company']);
 	},
 	
 	columns: [
 		{width: '5%', content:'avatar'},
 		{width: '3%', content:'docstatus'},
 		{width: '15%', content:'name'},
-		{width: '37%', content:'tags+customer_name', css: {color:'#aaa'}},
+		{width: '35%', content:'tags+customer_name', css: {color:'#aaa'}},
 		{
 			width: '18%', 
 			content: function(parent, data) { 
@@ -26,7 +26,7 @@ wn.doclistviews['Sales Order'] = wn.views.ListView.extend({
 		},
 		{width: '8%', content: 'per_delivered', type:'bar-graph', label:'Delivered'},
 		{width: '8%', content: 'per_billed', type:'bar-graph', label:'Billed'},
-		{width: '10%', content:'modified', css: {'text-align': 'right', 'color':'#777'}}
+		{width: '12%', content:'modified', css: {'text-align': 'right', 'color':'#777'}}
 	]
 
 });
