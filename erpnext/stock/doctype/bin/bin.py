@@ -337,12 +337,12 @@ class DocType:
 				and t1.docstatus != 2
 			""", self.doc.item_code)
 
-			if ((flt(ret[0]['re_order_level']) > flt(current_qty)) and ret[0]['re_order_level']):
-				self.create_auto_indent(ret[0], doc_type, doc_name)
+			if ((flt(ret[0]['re_order_level']) > flt(current_qty[0][0])) and ret[0]['re_order_level']):
+				self.create_auto_indent(ret[0], doc_type, doc_name, current_qty[0][0])
 
 	
 
-	def create_auto_indent(self, i , doc_type, doc_name):
+	def create_auto_indent(self, i , doc_type, doc_name, cur_qty):
 		"""	Create indent on reaching reorder level	"""
 
 		indent = Document('Indent')
@@ -361,7 +361,7 @@ class DocType:
 		indent_details_child.item_name = i['item_name']
 		indent_details_child.description = i['description']
 		indent_details_child.item_group = i['item_group']
-		indent_details_child.qty = i['re_order_qty']
+		indent_details_child.qty = i['re_order_qty'] or (flt(i['re_order_level']) - flt(cur_qty))
 		indent_details_child.brand = i['brand']
 		indent_details_child.save()
 		indent_obj = get_obj('Indent',indent.name,with_children=1)
