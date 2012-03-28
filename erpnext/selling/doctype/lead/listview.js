@@ -7,7 +7,7 @@ wn.doclistviews['Lead'] = wn.views.ListView.extend({
 			'tabLead.source',
 			'tabLead.rating'
 		]);
-		this.stats = this.stats.concat(['status', 'source', 'rating']);
+		this.stats = this.stats.concat(['status', 'source', 'rating', 'company']);
 	},
 
 	prepare_data: function(data) {
