@@ -3,59 +3,58 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2011-07-08 11:14:15',
+		'creation': '2011-07-07 17:47:52',
 		'docstatus': 0,
-		'modified': '2011-07-26 00:59:27',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-21 14:56:46',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1311622167',
+		'_last_update': u'1322549701',
 		'allow_attach': 1,
-		'autoname': 'field:rename_doctype',
-		'colour': 'White:FFF',
+		'autoname': u'field:rename_doctype',
+		'colour': u'White:FFF',
+		'default_print_format': u'Standard',
 		'doctype': 'DocType',
-		'module': 'Utilities',
+		'module': u'Utilities',
 		'name': '__common__',
-		'section_style': 'Simple',
+		'section_style': u'Simple',
 		'show_in_menu': 0,
-		'version': 7
+		'version': 8
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Bulk Rename Tool',
-		'parentfield': 'fields',
-		'parenttype': 'DocType',
-		'permlevel': 0
+		'parent': u'Bulk Rename Tool',
+		'parentfield': u'fields',
+		'parenttype': u'DocType'
 	},
 
 	# These values are common for all DocPerm
 	{
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'name': '__common__',
-		'parent': 'Bulk Rename Tool',
-		'parentfield': 'permissions',
-		'parenttype': 'DocType',
+		'parent': u'Bulk Rename Tool',
+		'parentfield': u'permissions',
+		'parenttype': u'DocType',
 		'read': 1,
-		'role': 'System Manager'
+		'role': u'System Manager'
 	},
 
 	# DocType, Bulk Rename Tool
 	{
 		'doctype': 'DocType',
-		'name': 'Bulk Rename Tool'
+		'name': u'Bulk Rename Tool'
 	},
 
 	# DocPerm
 	{
 		'create': 1,
-		'doctype': 'DocPerm',
-		'idx': 1,
+		'doctype': u'DocPerm',
 		'permlevel': 0,
 		'submit': 1,
 		'write': 1
@@ -63,37 +62,38 @@
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm',
-		'idx': 2,
+		'doctype': u'DocPerm',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'rename_doctype',
-		'fieldtype': 'Data',
-		'idx': 1,
-		'label': 'Rename DocType',
-		'options': 'Suggest',
+		'doctype': u'DocField',
+		'fieldname': u'rename_doctype',
+		'fieldtype': u'Data',
+		'label': u'Rename DocType',
+		'options': u'Suggest',
+		'permlevel': 0,
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'file_list',
-		'fieldtype': 'Text',
-		'idx': 2,
-		'label': 'File List'
+		'doctype': u'DocField',
+		'fieldname': u'file_list',
+		'fieldtype': u'Text',
+		'hidden': 1,
+		'label': u'File List',
+		'no_copy': 1,
+		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Button',
-		'idx': 3,
-		'label': 'Rename',
-		'options': 'do_rename'
+		'doctype': u'DocField',
+		'fieldtype': u'Button',
+		'label': u'Rename',
+		'options': u'do_rename',
+		'permlevel': 0
 	}
 ]

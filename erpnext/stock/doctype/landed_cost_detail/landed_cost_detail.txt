@@ -5,31 +5,32 @@
 	{
 		'creation': '2010-08-08 17:09:06',
 		'docstatus': 0,
-		'modified': '2011-06-30 18:47:46',
-		'modified_by': 'Administrator',
-		'owner': 'wasim@webnotestech.com'
+		'modified': '2012-03-21 14:58:34',
+		'modified_by': u'Administrator',
+		'owner': u'wasim@webnotestech.com'
 	},
 
 	# These values are common for all DocType
 	{
-		'colour': 'White:FFF',
+		'colour': u'White:FFF',
+		'default_print_format': u'Standard',
 		'doctype': 'DocType',
 		'istable': 1,
-		'module': 'Stock',
+		'module': u'Stock',
 		'name': '__common__',
-		'section_style': 'Simple',
-		'server_code_error': ' ',
+		'section_style': u'Simple',
+		'server_code_error': u' ',
 		'show_in_menu': 0,
 		'version': 2
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Landed Cost Detail',
-		'parentfield': 'fields',
-		'parenttype': 'DocType',
+		'parent': u'Landed Cost Detail',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
 		'permlevel': 0,
 		'reqd': 1
 	},
@@ -37,42 +38,39 @@
 	# DocType, Landed Cost Detail
 	{
 		'doctype': 'DocType',
-		'name': 'Landed Cost Detail'
+		'name': u'Landed Cost Detail'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'account_head',
-		'fieldtype': 'Link',
-		'idx': 1,
-		'label': 'Account Head',
-		'oldfieldname': 'account_head',
-		'oldfieldtype': 'Link',
-		'options': 'Account',
+		'doctype': u'DocField',
+		'fieldname': u'account_head',
+		'fieldtype': u'Link',
+		'label': u'Account Head',
+		'oldfieldname': u'account_head',
+		'oldfieldtype': u'Link',
+		'options': u'Account',
 		'search_index': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'description',
-		'fieldtype': 'Data',
-		'idx': 2,
-		'label': 'Description',
-		'oldfieldname': 'description',
-		'oldfieldtype': 'Data',
-		'width': '300px'
+		'doctype': u'DocField',
+		'fieldname': u'description',
+		'fieldtype': u'Data',
+		'label': u'Description',
+		'oldfieldname': u'description',
+		'oldfieldtype': u'Data',
+		'width': u'300px'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'amount',
-		'fieldtype': 'Currency',
-		'idx': 3,
-		'label': 'Amount',
-		'oldfieldname': 'amount',
-		'oldfieldtype': 'Currency'
+		'doctype': u'DocField',
+		'fieldname': u'amount',
+		'fieldtype': u'Currency',
+		'label': u'Amount',
+		'oldfieldname': u'amount',
+		'oldfieldtype': u'Currency'
 	}
 ]

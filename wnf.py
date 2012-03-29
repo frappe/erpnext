@@ -25,16 +25,38 @@ def replace_code(start, txt1, txt2, extn):
 		for fn in wt[2]:
 			if fn.split('.')[-1]==extn:
 				fpath = os.path.join(wt[0], fn)
-				with open(fpath, 'r') as f:
-					content = f.read()
+				if fpath != '/var/www/erpnext/erpnext/patches/jan_mar_2012/rename_dt.py': # temporary
+					with open(fpath, 'r') as f:
+						content = f.read()
 				
-				if re.search(txt1, content):
-					a = raw_input('Change in %s [y/n]?' % fpath)
-					if a=='y':
-						with open(fpath, 'w') as f:
-							f.write(re.sub(txt1, txt2, content))
-				
-						print 'updated in %s' % fpath
+					if re.search(txt1, content):
+						search_replace_with_prompt(fpath, txt1, txt2)
+
+
+
+def search_replace_with_prompt(fpath, txt1, txt2):
+	""" Search and replace all txt1 by txt2 in the file with confirmation"""
+
+	from termcolor import colored
+	with open(fpath, 'r') as f:
+		content = f.readlines()
+
+	tmp = []
+	for c in content:
+		if c.find(txt1) != -1:
+			print '\n', fpath
+			print  colored(txt1, 'red').join(c[:-1].split(txt1))
+			a = ''
+			while a not in ['y', 'n', 'Y', 'N']:
+				a = raw_input('Do you want to Change [y/n]?')
+			if a.lower() == 'y':
+				c = c.replace(txt1, txt2)
+		tmp.append(c)
+
+	with open(fpath, 'w') as f:
+		f.write(''.join(tmp))
+	print colored('Updated', 'green')
+	
 
 def setup_options():
 	from optparse import OptionParser

@@ -3,51 +3,52 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2011-02-10 17:24:59',
+		'creation': '2011-02-14 10:18:47',
 		'docstatus': 0,
-		'modified': '2011-02-17 13:47:13',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-21 12:49:25',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1299063937',
-		'autoname': 'LAL/.#####',
-		'colour': 'White:FFF',
+		'_last_update': u'1317365120',
+		'autoname': u'LAL/.#####',
+		'colour': u'White:FFF',
+		'default_print_format': u'Standard',
 		'doctype': 'DocType',
-		'module': 'HR',
+		'module': u'HR',
 		'name': '__common__',
-		'search_fields': 'employee,employee_name,leave_type,total_leaves_allocated,fiscal_year',
-		'section_style': 'Simple',
-		'server_code_error': ' ',
+		'search_fields': u'employee,employee_name,leave_type,total_leaves_allocated,fiscal_year',
+		'section_style': u'Simple',
+		'server_code_error': u' ',
 		'show_in_menu': 0,
-		'version': 1565
+		'version': 1560
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Leave Allocation',
-		'parentfield': 'fields',
-		'parenttype': 'DocType'
+		'parent': u'Leave Allocation',
+		'parentfield': u'fields',
+		'parenttype': u'DocType'
 	},
 
 	# These values are common for all DocPerm
 	{
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'name': '__common__',
-		'parent': 'Leave Allocation',
-		'parentfield': 'permissions',
-		'parenttype': 'DocType',
+		'parent': u'Leave Allocation',
+		'parentfield': u'permissions',
+		'parenttype': u'DocType',
 		'read': 1
 	},
 
 	# DocType, Leave Allocation
 	{
 		'doctype': 'DocType',
-		'name': 'Leave Allocation'
+		'name': u'Leave Allocation'
 	},
 
 	# DocPerm
@@ -55,11 +56,10 @@
 		'amend': 1,
 		'cancel': 1,
 		'create': 1,
-		'doctype': 'DocPerm',
-		'idx': 1,
-		'match': 'owner',
+		'doctype': u'DocPerm',
+		'match': u'owner',
 		'permlevel': 0,
-		'role': 'HR User',
+		'role': u'HR User',
 		'submit': 1,
 		'write': 1
 	},
@@ -69,11 +69,10 @@
 		'amend': 0,
 		'cancel': 0,
 		'create': 0,
-		'doctype': 'DocPerm',
-		'idx': 2,
-		'match': 'owner',
+		'doctype': u'DocPerm',
+		'match': u'owner',
 		'permlevel': 0,
-		'role': 'HR User',
+		'role': u'HR User',
 		'submit': 0,
 		'write': 0
 	},
@@ -83,93 +82,189 @@
 		'amend': 1,
 		'cancel': 1,
 		'create': 1,
-		'doctype': 'DocPerm',
-		'idx': 3,
+		'doctype': u'DocPerm',
+		'match': u'owner',
 		'permlevel': 0,
-		'role': 'HR Manager',
+		'role': u'HR User',
 		'submit': 1,
 		'write': 1
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm',
-		'idx': 4,
-		'permlevel': 1,
-		'role': 'HR Manager'
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldname': 'column_break1',
-		'fieldtype': 'Column Break',
-		'idx': 1,
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'match': u'owner',
 		'permlevel': 0,
-		'width': '50%'
+		'role': u'HR User',
+		'submit': 0,
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'amend': 1,
+		'cancel': 1,
+		'create': 1,
+		'doctype': u'DocPerm',
+		'match': u'owner',
+		'permlevel': 0,
+		'role': u'HR User',
+		'submit': 1,
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'match': u'owner',
+		'permlevel': 0,
+		'role': u'HR User',
+		'submit': 0,
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'amend': 1,
+		'cancel': 1,
+		'create': 1,
+		'doctype': u'DocPerm',
+		'match': u'owner',
+		'permlevel': 0,
+		'role': u'HR User',
+		'submit': 1,
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'match': u'owner',
+		'permlevel': 0,
+		'role': u'HR User',
+		'submit': 0,
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'amend': 1,
+		'cancel': 1,
+		'create': 1,
+		'doctype': u'DocPerm',
+		'match': u'owner',
+		'permlevel': 0,
+		'role': u'HR User',
+		'submit': 1,
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'match': u'owner',
+		'permlevel': 0,
+		'role': u'HR User',
+		'submit': 0,
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'amend': 1,
+		'cancel': 1,
+		'create': 1,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'HR Manager',
+		'submit': 1,
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'HR Manager'
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldname': 'employee',
-		'fieldtype': 'Link',
-		'idx': 2,
+		'doctype': u'DocField',
+		'fieldtype': u'Column Break',
+		'permlevel': 0,
+		'width': u'50%'
+	},
+
+	# DocField
+	{
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'employee',
+		'fieldtype': u'Link',
 		'in_filter': 1,
-		'label': 'Employee',
-		'oldfieldname': 'employee',
-		'oldfieldtype': 'Link',
-		'options': 'Employee',
+		'label': u'Employee',
+		'oldfieldname': u'employee',
+		'oldfieldtype': u'Link',
+		'options': u'Employee',
 		'permlevel': 0,
 		'reqd': 1,
 		'search_index': 1,
-		'trigger': 'Client'
+		'trigger': u'Client'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'employee_name',
-		'fieldtype': 'Data',
-		'idx': 3,
+		'doctype': u'DocField',
+		'fieldname': u'employee_name',
+		'fieldtype': u'Data',
 		'in_filter': 1,
-		'label': 'Employee Name',
+		'label': u'Employee Name',
 		'permlevel': 1,
-		'search_index': 0
+		'search_index': 1
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldname': 'leave_type',
-		'fieldtype': 'Select',
-		'idx': 4,
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'leave_type',
+		'fieldtype': u'Select',
 		'in_filter': 1,
-		'label': 'Leave Type',
-		'oldfieldname': 'leave_type',
-		'oldfieldtype': 'Link',
-		'options': '\nCasual Leave\nCompensatory Off\nLeave Without Pay\nPaternity Leave\nPrivilege Leave\nSick Leave',
+		'label': u'Leave Type',
+		'oldfieldname': u'leave_type',
+		'oldfieldtype': u'Link',
+		'options': u'link:Leave Type',
 		'permlevel': 0,
 		'reqd': 1,
 		'search_index': 1,
-		'trigger': 'Client'
+		'trigger': u'Client'
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'default': 'Today',
-		'doctype': 'DocField',
-		'fieldname': 'posting_date',
-		'fieldtype': 'Date',
+		'colour': u'White:FFF',
+		'default': u'Today',
+		'doctype': u'DocField',
+		'fieldname': u'posting_date',
+		'fieldtype': u'Date',
 		'hidden': 0,
-		'idx': 5,
-		'label': 'Posting Date',
+		'label': u'Posting Date',
 		'no_copy': 1,
-		'oldfieldname': 'date',
-		'oldfieldtype': 'Date',
+		'oldfieldname': u'date',
+		'oldfieldtype': u'Date',
 		'permlevel': 1,
 		'reqd': 1,
 		'search_index': 0
@@ -177,116 +272,108 @@
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldname': 'fiscal_year',
-		'fieldtype': 'Select',
-		'idx': 6,
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'fiscal_year',
+		'fieldtype': u'Select',
 		'in_filter': 1,
-		'label': 'Fiscal Year',
-		'oldfieldname': 'fiscal_year',
-		'oldfieldtype': 'Data',
-		'options': '\n2010-2011\n2011-2012\n2012-2013',
+		'label': u'Fiscal Year',
+		'oldfieldname': u'fiscal_year',
+		'oldfieldtype': u'Data',
+		'options': u'link:Fiscal Year',
 		'permlevel': 0,
 		'reqd': 1,
 		'search_index': 1,
-		'trigger': 'Client'
+		'trigger': u'Client'
 	},
 
 	# DocField
 	{
-		'colour': 'White:FFF',
-		'doctype': 'DocField',
-		'fieldname': 'description',
-		'fieldtype': 'Small Text',
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'description',
+		'fieldtype': u'Small Text',
 		'hidden': 0,
-		'idx': 7,
-		'label': 'Description',
-		'oldfieldname': 'reason',
-		'oldfieldtype': 'Small Text',
+		'label': u'Description',
+		'oldfieldname': u'reason',
+		'oldfieldtype': u'Small Text',
 		'permlevel': 0,
-		'width': '300px'
+		'width': u'300px'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'column_break8',
-		'fieldtype': 'Column Break',
-		'idx': 8,
+		'doctype': u'DocField',
+		'fieldtype': u'Column Break',
 		'permlevel': 0,
-		'width': '50%'
+		'width': u'50%'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'carry_forward',
-		'fieldtype': 'Check',
-		'idx': 9,
-		'label': 'Carry Forward',
+		'doctype': u'DocField',
+		'fieldname': u'carry_forward',
+		'fieldtype': u'Check',
+		'label': u'Carry Forward',
 		'permlevel': 0,
-		'trigger': 'Client'
+		'trigger': u'Client'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'carry_forwarded_leaves',
-		'fieldtype': 'Currency',
-		'idx': 10,
-		'label': 'Carry Forwarded Leaves',
+		'doctype': u'DocField',
+		'fieldname': u'carry_forwarded_leaves',
+		'fieldtype': u'Currency',
+		'label': u'Carry Forwarded Leaves',
 		'permlevel': 0,
-		'trigger': 'Client'
+		'trigger': u'Client'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'new_leaves_allocated',
-		'fieldtype': 'Currency',
-		'idx': 11,
-		'label': 'New Leaves Allocated',
+		'doctype': u'DocField',
+		'fieldname': u'new_leaves_allocated',
+		'fieldtype': u'Currency',
+		'label': u'New Leaves Allocated',
 		'permlevel': 0,
-		'trigger': 'Client'
+		'trigger': u'Client'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'total_leaves_allocated',
-		'fieldtype': 'Currency',
-		'idx': 12,
-		'label': 'Total Leaves Allocated',
+		'doctype': u'DocField',
+		'fieldname': u'total_leaves_allocated',
+		'fieldtype': u'Currency',
+		'label': u'Total Leaves Allocated',
 		'permlevel': 1,
 		'reqd': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'amended_from',
-		'fieldtype': 'Data',
+		'doctype': u'DocField',
+		'fieldname': u'amended_from',
+		'fieldtype': u'Data',
 		'hidden': 0,
-		'idx': 13,
-		'label': 'Amended From',
-		'oldfieldname': 'amended_from',
-		'oldfieldtype': 'Data',
+		'label': u'Amended From',
+		'no_copy': 1,
+		'oldfieldname': u'amended_from',
+		'oldfieldtype': u'Data',
 		'permlevel': 1,
 		'print_hide': 1
 	},
 
 	# DocField
 	{
-		'description': 'The date at which current entry is corrected in the system.',
-		'doctype': 'DocField',
-		'fieldname': 'amendment_date',
-		'fieldtype': 'Date',
+		'description': u'The date at which current entry is corrected in the system.',
+		'doctype': u'DocField',
+		'fieldname': u'amendment_date',
+		'fieldtype': u'Date',
 		'hidden': 0,
-		'idx': 14,
-		'label': 'Amendment Date',
-		'oldfieldname': 'amendment_date',
-		'oldfieldtype': 'Date',
+		'label': u'Amendment Date',
+		'no_copy': 1,
+		'oldfieldname': u'amendment_date',
+		'oldfieldtype': u'Date',
 		'permlevel': 1,
 		'print_hide': 1
 	}

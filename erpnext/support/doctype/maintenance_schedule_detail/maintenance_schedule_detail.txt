@@ -5,50 +5,51 @@
 	{
 		'creation': '2010-08-08 17:09:09',
 		'docstatus': 0,
-		'modified': '2010-09-20 14:06:57',
-		'modified_by': 'umair@iwebnotes.com',
-		'owner': 'Administrator'
+		'modified': '2012-03-21 14:10:17',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'autoname': 'MSD.#####',
-		'colour': 'White:FFF',
+		'autoname': u'MSD.#####',
+		'colour': u'White:FFF',
+		'default_print_format': u'Standard',
 		'doctype': 'DocType',
 		'istable': 1,
-		'module': 'Support',
+		'module': u'Support',
 		'name': '__common__',
-		'section_style': 'Simple',
-		'server_code_error': ' ',
-		'version': 12
+		'section_style': u'Simple',
+		'server_code_error': u' ',
+		'show_in_menu': 0,
+		'version': 13
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Maintenance Schedule Detail',
-		'parentfield': 'fields',
-		'parenttype': 'DocType'
+		'parent': u'Maintenance Schedule Detail',
+		'parentfield': u'fields',
+		'parenttype': u'DocType'
 	},
 
 	# DocType, Maintenance Schedule Detail
 	{
 		'doctype': 'DocType',
-		'name': 'Maintenance Schedule Detail'
+		'name': u'Maintenance Schedule Detail'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'item_code',
-		'fieldtype': 'Link',
-		'idx': 1,
+		'doctype': u'DocField',
+		'fieldname': u'item_code',
+		'fieldtype': u'Link',
 		'in_filter': 1,
-		'label': 'Item Code',
-		'oldfieldname': 'item_code',
-		'oldfieldtype': 'Link',
-		'options': 'Item',
+		'label': u'Item Code',
+		'oldfieldname': u'item_code',
+		'oldfieldtype': u'Link',
+		'options': u'Item',
 		'permlevel': 1,
 		'reqd': 0,
 		'search_index': 1
@@ -56,28 +57,26 @@
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'item_name',
-		'fieldtype': 'Data',
-		'idx': 2,
+		'doctype': u'DocField',
+		'fieldname': u'item_name',
+		'fieldtype': u'Data',
 		'in_filter': 0,
-		'label': 'Item Name',
-		'oldfieldname': 'item_name',
-		'oldfieldtype': 'Data',
+		'label': u'Item Name',
+		'oldfieldname': u'item_name',
+		'oldfieldtype': u'Data',
 		'permlevel': 1,
 		'search_index': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'scheduled_date',
-		'fieldtype': 'Date',
-		'idx': 3,
+		'doctype': u'DocField',
+		'fieldname': u'scheduled_date',
+		'fieldtype': u'Date',
 		'in_filter': 1,
-		'label': 'Scheduled Date',
-		'oldfieldname': 'scheduled_date',
-		'oldfieldtype': 'Date',
+		'label': u'Scheduled Date',
+		'oldfieldname': u'scheduled_date',
+		'oldfieldtype': u'Date',
 		'permlevel': 0,
 		'reqd': 1,
 		'search_index': 1
@@ -85,15 +84,14 @@
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'actual_date',
-		'fieldtype': 'Date',
+		'doctype': u'DocField',
+		'fieldname': u'actual_date',
+		'fieldtype': u'Date',
 		'hidden': 1,
-		'idx': 4,
-		'label': 'Actual Date',
+		'label': u'Actual Date',
 		'no_copy': 1,
-		'oldfieldname': 'actual_date',
-		'oldfieldtype': 'Date',
+		'oldfieldname': u'actual_date',
+		'oldfieldtype': u'Date',
 		'permlevel': 1,
 		'print_hide': 1,
 		'report_hide': 1
@@ -101,15 +99,14 @@
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'incharge_name',
-		'fieldtype': 'Link',
-		'idx': 5,
+		'doctype': u'DocField',
+		'fieldname': u'incharge_name',
+		'fieldtype': u'Link',
 		'in_filter': 1,
-		'label': 'Incharge Name',
-		'oldfieldname': 'incharge_name',
-		'oldfieldtype': 'Link',
-		'options': 'Sales Person',
+		'label': u'Incharge Name',
+		'oldfieldname': u'incharge_name',
+		'oldfieldtype': u'Link',
+		'options': u'Sales Person',
 		'permlevel': 0,
 		'reqd': 1,
 		'search_index': 0
@@ -117,17 +114,16 @@
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'serial_no',
-		'fieldtype': 'Small Text',
-		'idx': 6,
+		'doctype': u'DocField',
+		'fieldname': u'serial_no',
+		'fieldtype': u'Small Text',
 		'in_filter': 1,
-		'label': 'Serial No',
+		'label': u'Serial No',
 		'no_copy': 0,
-		'oldfieldname': 'serial_no',
-		'oldfieldtype': 'Small Text',
+		'oldfieldname': u'serial_no',
+		'oldfieldtype': u'Small Text',
 		'permlevel': 1,
-		'search_index': 1,
-		'width': '160px'
+		'search_index': 0,
+		'width': u'160px'
 	}
 ]
