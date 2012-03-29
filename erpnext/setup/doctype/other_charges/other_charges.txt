@@ -5,49 +5,51 @@
 	{
 		'creation': '2010-08-08 17:09:11',
 		'docstatus': 0,
-		'modified': '2011-01-07 11:04:07',
-		'modified_by': 'rakesh@iwebnotes.com',
-		'owner': 'Administrator'
+		'modified': '2012-03-21 14:51:06',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
+		'_last_update': u'1322549700',
 		'allow_trash': 1,
-		'autoname': 'field:title',
-		'colour': 'White:FFF',
+		'autoname': u'field:title',
+		'colour': u'White:FFF',
+		'default_print_format': u'Standard',
 		'doctype': 'DocType',
-		'document_type': 'Master',
-		'module': 'Setup',
+		'document_type': u'Master',
+		'module': u'Setup',
 		'name': '__common__',
-		'section_style': 'Tabbed',
-		'server_code_error': ' ',
+		'section_style': u'Tabbed',
+		'server_code_error': u' ',
 		'show_in_menu': 0,
-		'version': 56
+		'version': 57
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Other Charges',
-		'parentfield': 'fields',
-		'parenttype': 'DocType'
+		'parent': u'Other Charges',
+		'parentfield': u'fields',
+		'parenttype': u'DocType'
 	},
 
 	# These values are common for all DocPerm
 	{
-		'doctype': 'DocPerm',
+		'doctype': u'DocPerm',
 		'name': '__common__',
-		'parent': 'Other Charges',
-		'parentfield': 'permissions',
-		'parenttype': 'DocType',
+		'parent': u'Other Charges',
+		'parentfield': u'permissions',
+		'parenttype': u'DocType',
 		'read': 1
 	},
 
 	# DocType, Other Charges
 	{
 		'doctype': 'DocType',
-		'name': 'Other Charges'
+		'name': u'Other Charges'
 	},
 
 	# DocPerm
@@ -55,10 +57,9 @@
 		'amend': 0,
 		'cancel': 0,
 		'create': 0,
-		'doctype': 'DocPerm',
-		'idx': 1,
+		'doctype': u'DocPerm',
 		'permlevel': 1,
-		'role': 'Sales Master Manager',
+		'role': u'Sales Master Manager',
 		'submit': 0,
 		'write': 0
 	},
@@ -68,10 +69,9 @@
 		'amend': 0,
 		'cancel': 0,
 		'create': 0,
-		'doctype': 'DocPerm',
-		'idx': 2,
+		'doctype': u'DocPerm',
 		'permlevel': 1,
-		'role': 'Sales User',
+		'role': u'Sales User',
 		'submit': 0,
 		'write': 0
 	},
@@ -81,10 +81,9 @@
 		'amend': 0,
 		'cancel': 0,
 		'create': 0,
-		'doctype': 'DocPerm',
-		'idx': 3,
+		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'role': 'Sales User',
+		'role': u'Sales User',
 		'submit': 0,
 		'write': 0
 	},
@@ -94,10 +93,9 @@
 		'amend': 0,
 		'cancel': 1,
 		'create': 1,
-		'doctype': 'DocPerm',
-		'idx': 4,
+		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'role': 'Accounts Manager',
+		'role': u'Accounts Manager',
 		'submit': 0,
 		'write': 1
 	},
@@ -106,10 +104,9 @@
 	{
 		'cancel': 1,
 		'create': 1,
-		'doctype': 'DocPerm',
-		'idx': 5,
+		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'role': 'System Manager',
+		'role': u'System Manager',
 		'write': 1
 	},
 
@@ -118,46 +115,42 @@
 		'amend': 0,
 		'cancel': 1,
 		'create': 1,
-		'doctype': 'DocPerm',
-		'idx': 6,
+		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'role': 'Sales Master Manager',
+		'role': u'Sales Master Manager',
 		'submit': 0,
 		'write': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'trash_reason',
-		'fieldtype': 'Small Text',
-		'idx': 1,
-		'label': 'Trash Reason',
-		'oldfieldname': 'trash_reason',
-		'oldfieldtype': 'Small Text',
+		'doctype': u'DocField',
+		'fieldname': u'trash_reason',
+		'fieldtype': u'Small Text',
+		'label': u'Trash Reason',
+		'oldfieldname': u'trash_reason',
+		'oldfieldtype': u'Small Text',
 		'permlevel': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldtype': 'Section Break',
-		'idx': 2,
-		'label': 'Other Charges Details',
-		'oldfieldtype': 'Section Break',
+		'doctype': u'DocField',
+		'fieldtype': u'Section Break',
+		'label': u'Other Charges Details',
+		'oldfieldtype': u'Section Break',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'title',
-		'fieldtype': 'Data',
-		'idx': 3,
+		'doctype': u'DocField',
+		'fieldname': u'title',
+		'fieldtype': u'Data',
 		'in_filter': 1,
-		'label': 'Title',
-		'oldfieldname': 'title',
-		'oldfieldtype': 'Data',
+		'label': u'Title',
+		'oldfieldname': u'title',
+		'oldfieldtype': u'Data',
 		'permlevel': 0,
 		'reqd': 1,
 		'search_index': 0
@@ -165,25 +158,23 @@
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'is_default',
-		'fieldtype': 'Check',
-		'idx': 4,
-		'label': 'Default',
+		'doctype': u'DocField',
+		'fieldname': u'is_default',
+		'fieldtype': u'Check',
+		'label': u'Default',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'company',
-		'fieldtype': 'Link',
-		'idx': 5,
+		'doctype': u'DocField',
+		'fieldname': u'company',
+		'fieldtype': u'Link',
 		'in_filter': 1,
-		'label': 'Company',
-		'oldfieldname': 'company',
-		'oldfieldtype': 'Link',
-		'options': 'Company',
+		'label': u'Company',
+		'oldfieldname': u'company',
+		'oldfieldtype': u'Link',
+		'options': u'Company',
 		'permlevel': 0,
 		'reqd': 1,
 		'search_index': 0
@@ -191,14 +182,13 @@
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'other_charges',
-		'fieldtype': 'Table',
-		'idx': 6,
-		'label': 'Other Charges',
-		'oldfieldname': 'other_charges',
-		'oldfieldtype': 'Table',
-		'options': 'RV Tax Detail',
+		'doctype': u'DocField',
+		'fieldname': u'other_charges',
+		'fieldtype': u'Table',
+		'label': u'Other Charges',
+		'oldfieldname': u'other_charges',
+		'oldfieldtype': u'Table',
+		'options': u'RV Tax Detail',
 		'permlevel': 0
 	}
 ]

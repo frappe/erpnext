@@ -5,79 +5,78 @@
 	{
 		'creation': '2010-12-14 10:23:17',
 		'docstatus': 0,
-		'modified': '2010-09-20 14:06:57',
-		'modified_by': 'yogesh@webnotestech.com',
-		'owner': 'Administrator'
+		'modified': '2012-03-21 14:53:21',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'autoname': '__NSO.#####',
-		'colour': 'White:FFF',
+		'autoname': u'__NSO.#####',
+		'colour': u'White:FFF',
+		'default_print_format': u'Standard',
 		'doctype': 'DocType',
 		'in_create': 1,
-		'module': 'Setup',
+		'module': u'Setup',
 		'name': '__common__',
 		'read_only': 0,
-		'section_style': 'Simple',
-		'server_code_error': ' ',
-		'version': 4
+		'section_style': u'Simple',
+		'server_code_error': u' ',
+		'show_in_menu': 0,
+		'version': 5
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Naming Series Options',
-		'parentfield': 'fields',
-		'parenttype': 'DocType',
+		'parent': u'Naming Series Options',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
 		'permlevel': 0
 	},
 
 	# These values are common for all DocPerm
 	{
-		'doctype': 'DocPerm',
-		'idx': 1,
+		'doctype': u'DocPerm',
 		'name': '__common__',
-		'parent': 'Naming Series Options',
-		'parentfield': 'permissions',
-		'parenttype': 'DocType',
+		'parent': u'Naming Series Options',
+		'parentfield': u'permissions',
+		'parenttype': u'DocType',
 		'permlevel': 0,
 		'read': 1,
-		'role': 'System Manager'
+		'role': u'System Manager'
 	},
 
 	# DocType, Naming Series Options
 	{
 		'doctype': 'DocType',
-		'name': 'Naming Series Options'
+		'name': u'Naming Series Options'
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm'
+		'doctype': u'DocPerm'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'doc_type',
-		'fieldtype': 'Data',
-		'idx': 1,
-		'label': 'Doc Type',
-		'oldfieldname': 'doc_type',
-		'oldfieldtype': 'Data',
+		'doctype': u'DocField',
+		'fieldname': u'doc_type',
+		'fieldtype': u'Data',
+		'label': u'Doc Type',
+		'oldfieldname': u'doc_type',
+		'oldfieldtype': u'Data',
 		'search_index': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'series_options',
-		'fieldtype': 'Text',
-		'idx': 2,
-		'label': 'Series Options',
-		'oldfieldname': 'series_options',
-		'oldfieldtype': 'Text'
+		'doctype': u'DocField',
+		'fieldname': u'series_options',
+		'fieldtype': u'Text',
+		'label': u'Series Options',
+		'oldfieldname': u'series_options',
+		'oldfieldtype': u'Text'
 	}
 ]

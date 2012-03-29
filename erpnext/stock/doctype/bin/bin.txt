@@ -5,244 +5,224 @@
 	{
 		'creation': '2010-08-08 17:08:52',
 		'docstatus': 0,
-		'modified': '2010-12-16 23:57:05',
-		'modified_by': 'nabin@webnotestech.com',
-		'owner': 'Administrator'
+		'modified': '2012-03-21 14:07:49',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': '1308741898',
-		'autoname': 'BIN/.#######',
-		'colour': 'White:FFF',
+		'_last_update': u'1322549701',
+		'autoname': u'BIN/.#######',
+		'colour': u'White:FFF',
+		'default_print_format': u'Standard',
 		'doctype': 'DocType',
 		'hide_toolbar': 1,
 		'in_create': 1,
-		'module': 'Stock',
+		'module': u'Stock',
 		'name': '__common__',
 		'read_only': 0,
-		'search_fields': 'item_code,warehouse',
-		'section_style': 'Simple',
-		'server_code_error': ' ',
+		'search_fields': u'item_code,warehouse',
+		'section_style': u'Simple',
+		'server_code_error': u' ',
 		'show_in_menu': 0,
-		'version': 114
+		'version': 115
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': 'DocField',
+		'doctype': u'DocField',
 		'name': '__common__',
-		'parent': 'Bin',
-		'parentfield': 'fields',
-		'parenttype': 'DocType',
+		'parent': u'Bin',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
 		'permlevel': 1
 	},
 
 	# These values are common for all DocPerm
 	{
-		'doctype': 'DocPerm',
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
 		'name': '__common__',
-		'parent': 'Bin',
-		'parentfield': 'permissions',
-		'parenttype': 'DocType',
-		'read': 1
+		'parent': u'Bin',
+		'parentfield': u'permissions',
+		'parenttype': u'DocType',
+		'read': 1,
+		'submit': 0,
+		'write': 0
 	},
 
 	# DocType, Bin
 	{
 		'doctype': 'DocType',
-		'name': 'Bin'
+		'name': u'Bin'
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm',
-		'idx': 1,
+		'doctype': u'DocPerm',
 		'permlevel': 1,
-		'role': 'Sales Manager'
+		'role': u'Sales Manager'
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm',
-		'idx': 2,
+		'doctype': u'DocPerm',
 		'permlevel': 1,
-		'role': 'Sales User'
+		'role': u'Sales User'
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm',
-		'idx': 3,
+		'doctype': u'DocPerm',
 		'permlevel': 1,
-		'role': 'Purchase Manager'
+		'role': u'Purchase Manager'
 	},
 
 	# DocPerm
 	{
-		'doctype': 'DocPerm',
-		'idx': 4,
+		'doctype': u'DocPerm',
 		'permlevel': 1,
-		'role': 'Purchase User'
+		'role': u'Purchase User'
 	},
 
 	# DocPerm
 	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		'doctype': 'DocPerm',
-		'idx': 5,
+		'doctype': u'DocPerm',
 		'permlevel': 1,
-		'role': 'Material User',
-		'submit': 0,
-		'write': 0
+		'role': u'Material User'
 	},
 
 	# DocPerm
 	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		'doctype': 'DocPerm',
-		'idx': 6,
+		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'role': 'Material Manager',
-		'submit': 0,
-		'write': 0
+		'role': u'Material Manager'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'warehouse',
-		'fieldtype': 'Link',
-		'idx': 1,
+		'doctype': u'DocField',
+		'fieldname': u'warehouse',
+		'fieldtype': u'Link',
 		'in_filter': 1,
-		'label': 'Warehouse',
-		'oldfieldname': 'warehouse',
-		'oldfieldtype': 'Link',
-		'options': 'Warehouse',
+		'label': u'Warehouse',
+		'oldfieldname': u'warehouse',
+		'oldfieldtype': u'Link',
+		'options': u'Warehouse',
 		'search_index': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'warehouse_type',
-		'fieldtype': 'Data',
-		'idx': 2,
-		'label': 'Warehouse Type',
-		'oldfieldname': 'warehouse_type',
-		'oldfieldtype': 'Data'
+		'doctype': u'DocField',
+		'fieldname': u'warehouse_type',
+		'fieldtype': u'Data',
+		'label': u'Warehouse Type',
+		'oldfieldname': u'warehouse_type',
+		'oldfieldtype': u'Data'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'item_code',
-		'fieldtype': 'Link',
-		'idx': 3,
+		'doctype': u'DocField',
+		'fieldname': u'item_code',
+		'fieldtype': u'Link',
 		'in_filter': 1,
-		'label': 'Item Code',
-		'oldfieldname': 'item_code',
-		'oldfieldtype': 'Link',
-		'options': 'Item',
+		'label': u'Item Code',
+		'oldfieldname': u'item_code',
+		'oldfieldtype': u'Link',
+		'options': u'Item',
 		'search_index': 1
 	},
 
 	# DocField
 	{
-		'default': '0.00',
-		'doctype': 'DocField',
-		'fieldname': 'reserved_qty',
-		'fieldtype': 'Currency',
-		'idx': 5,
-		'in_filter': 1,
-		'label': 'Reserved Quantity',
-		'oldfieldname': 'reserved_qty',
-		'oldfieldtype': 'Currency',
-		'search_index': 0
-	},
-
-	# DocField
-	{
-		'default': '0.00',
-		'doctype': 'DocField',
-		'fieldname': 'actual_qty',
-		'fieldtype': 'Currency',
-		'idx': 6,
-		'in_filter': 1,
-		'label': 'Actual Quantity',
-		'oldfieldname': 'actual_qty',
-		'oldfieldtype': 'Currency',
-		'search_index': 0
-	},
-
-	# DocField
-	{
-		'default': '0.00',
-		'doctype': 'DocField',
-		'fieldname': 'ordered_qty',
-		'fieldtype': 'Currency',
-		'idx': 7,
-		'in_filter': 1,
-		'label': 'Ordered Quantity',
-		'oldfieldname': 'ordered_qty',
-		'oldfieldtype': 'Currency',
-		'search_index': 0
-	},
-
-	# DocField
-	{
-		'default': '0.00',
-		'doctype': 'DocField',
-		'fieldname': 'indented_qty',
-		'fieldtype': 'Currency',
-		'idx': 8,
-		'in_filter': 1,
-		'label': 'Indented Quantity',
-		'oldfieldname': 'indented_qty',
-		'oldfieldtype': 'Currency',
-		'search_index': 0
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldname': 'planned_qty',
-		'fieldtype': 'Currency',
-		'idx': 9,
-		'in_filter': 1,
-		'label': 'Planned Qty',
-		'oldfieldname': 'planned_qty',
-		'oldfieldtype': 'Currency',
-		'search_index': 0
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldname': 'projected_qty',
-		'fieldtype': 'Currency',
-		'idx': 10,
-		'in_filter': 1,
-		'label': 'Projected Qty',
-		'oldfieldname': 'projected_qty',
-		'oldfieldtype': 'Currency'
-	},
-
-	# DocField
-	{
-		'doctype': 'DocField',
-		'fieldname': 'ma_rate',
-		'fieldtype': 'Currency',
-		'hidden': 1,
-		'idx': 11,
+		'default': u'0.00',
+		'doctype': u'DocField',
+		'fieldname': u'reserved_qty',
+		'fieldtype': u'Currency',
 		'in_filter': 0,
-		'label': 'Moving Average Rate',
-		'oldfieldname': 'ma_rate',
-		'oldfieldtype': 'Currency',
+		'label': u'Reserved Quantity',
+		'oldfieldname': u'reserved_qty',
+		'oldfieldtype': u'Currency',
+		'search_index': 0
+	},
+
+	# DocField
+	{
+		'default': u'0.00',
+		'doctype': u'DocField',
+		'fieldname': u'actual_qty',
+		'fieldtype': u'Currency',
+		'in_filter': 0,
+		'label': u'Actual Quantity',
+		'oldfieldname': u'actual_qty',
+		'oldfieldtype': u'Currency',
+		'search_index': 0
+	},
+
+	# DocField
+	{
+		'default': u'0.00',
+		'doctype': u'DocField',
+		'fieldname': u'ordered_qty',
+		'fieldtype': u'Currency',
+		'in_filter': 0,
+		'label': u'Ordered Quantity',
+		'oldfieldname': u'ordered_qty',
+		'oldfieldtype': u'Currency',
+		'search_index': 0
+	},
+
+	# DocField
+	{
+		'default': u'0.00',
+		'doctype': u'DocField',
+		'fieldname': u'indented_qty',
+		'fieldtype': u'Currency',
+		'in_filter': 0,
+		'label': u'Indented Quantity',
+		'oldfieldname': u'indented_qty',
+		'oldfieldtype': u'Currency',
+		'search_index': 0
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'planned_qty',
+		'fieldtype': u'Currency',
+		'in_filter': 0,
+		'label': u'Planned Qty',
+		'oldfieldname': u'planned_qty',
+		'oldfieldtype': u'Currency',
+		'search_index': 0
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'projected_qty',
+		'fieldtype': u'Currency',
+		'in_filter': 0,
+		'label': u'Projected Qty',
+		'oldfieldname': u'projected_qty',
+		'oldfieldtype': u'Currency'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'ma_rate',
+		'fieldtype': u'Currency',
+		'hidden': 1,
+		'in_filter': 0,
+		'label': u'Moving Average Rate',
+		'oldfieldname': u'ma_rate',
+		'oldfieldtype': u'Currency',
 		'print_hide': 1,
 		'report_hide': 1,
 		'search_index': 0
@@ -250,50 +230,46 @@
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'stock_uom',
-		'fieldtype': 'Data',
-		'idx': 12,
+		'doctype': u'DocField',
+		'fieldname': u'stock_uom',
+		'fieldtype': u'Data',
 		'in_filter': 1,
-		'label': 'UOM',
-		'oldfieldname': 'stock_uom',
-		'oldfieldtype': 'Data',
+		'label': u'UOM',
+		'oldfieldname': u'stock_uom',
+		'oldfieldtype': u'Data',
 		'search_index': 0
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'fcfs_rate',
-		'fieldtype': 'Currency',
+		'doctype': u'DocField',
+		'fieldname': u'fcfs_rate',
+		'fieldtype': u'Currency',
 		'hidden': 1,
-		'idx': 12,
-		'label': 'FCFS Rate',
-		'oldfieldname': 'fcfs_rate',
-		'oldfieldtype': 'Currency',
+		'label': u'FCFS Rate',
+		'oldfieldname': u'fcfs_rate',
+		'oldfieldtype': u'Currency',
 		'print_hide': 1,
 		'report_hide': 1
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'valuation_rate',
-		'fieldtype': 'Currency',
-		'idx': 13,
-		'label': 'Valuation Rate',
-		'oldfieldname': 'valuation_rate',
-		'oldfieldtype': 'Currency'
+		'doctype': u'DocField',
+		'fieldname': u'valuation_rate',
+		'fieldtype': u'Currency',
+		'label': u'Valuation Rate',
+		'oldfieldname': u'valuation_rate',
+		'oldfieldtype': u'Currency'
 	},
 
 	# DocField
 	{
-		'doctype': 'DocField',
-		'fieldname': 'stock_value',
-		'fieldtype': 'Currency',
-		'idx': 14,
-		'label': 'Stock Value',
-		'oldfieldname': 'stock_value',
-		'oldfieldtype': 'Currency'
+		'doctype': u'DocField',
+		'fieldname': u'stock_value',
+		'fieldtype': u'Currency',
+		'label': u'Stock Value',
+		'oldfieldname': u'stock_value',
+		'oldfieldtype': u'Currency'
 	}
 ]
