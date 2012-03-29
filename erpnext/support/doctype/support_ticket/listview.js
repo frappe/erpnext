@@ -1,5 +1,7 @@
 // render
 wn.doclistviews['Support Ticket'] = wn.views.ListView.extend({
+	me: this,
+
 	init: function(d) {
 		this._super(d)
 		this.fields = this.fields.concat([
@@ -26,8 +28,13 @@ wn.doclistviews['Support Ticket'] = wn.views.ListView.extend({
 			data.status = 'Waiting'
 		}
 		data.status_html = repl('<span class="label label-%(label_type)s">%(status)s</span>', data);
+		var a = $(data.status_html).click(function() {
+			me.set_filter('status', $(this).text());
+		});
 		
-		data.description = data.description + ' | ' + data.subject;
+		// replace double quote with blank string
+		data.description = cstr(data.subject).replace(/"/gi, '')
+			+ " | " + cstr(data.description).replace(/"/gi, '');
 		
 		// description
 		if(data.description && data.description.length > 50) {

@@ -1589,10 +1589,12 @@ div.list-row table {
 
 div.list-row table td {
 	overflow: hidden;
-	padding-right: 3px;
+	/*padding-right: 3px;*/
+	padding: 0px 3px;
 	vertical-align: middle;
 	height: 24px;
 	max-height: 24px;
+	word-wrap: break-word;
 }
 
 div.paging-button {
