@@ -36,6 +36,10 @@ cur_frm.pformat.rounded_total_export = function(doc) {
 	return '';
 }
 
+cur_frm.pformat.in_words_export = function(doc) {
+	return '';
+}
+
 cur_frm.pformat.other_charges= function(doc){
   //function to make row of table
 	var make_row = function(title,val,bold){
@@ -89,7 +93,7 @@ cur_frm.pformat.other_charges= function(doc){
 			out += make_row('Rounded Total',fmt_money(doc.rounded_total_export),1);
 		}
 
-		if(doc.in_words_export){
+		if(doc.in_words_export && !print_hide_dict['in_words_export']){
 			out +='</table></td></tr>';
 			out += '<tr><td colspan = "2">';
 			out += '<table><tr><td style="width:25%;"><b>In Words</b></td>'

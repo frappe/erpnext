@@ -888,7 +888,7 @@
 		'oldfieldname': u'in_words_export',
 		'oldfieldtype': u'Data',
 		'permlevel': 1,
-		'print_hide': 1,
+		'print_hide': 0,
 		'width': u'150px'
 	},
 
