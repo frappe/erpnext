@@ -131,10 +131,10 @@
 	{
 		'checking_operator': u'=',
 		'doctype': u'Field Mapper Detail',
-		'from_field': u'basic_rate',
+		'from_field': u'export_rate',
 		'map': u'Yes',
 		'match_id': 1,
-		'to_field': u'basic_rate'
+		'to_field': u'export_rate'
 	},
 
 	# Field Mapper Detail

@@ -134,6 +134,16 @@
 		'to_field': 'serial_no'
 	},
 
+	# Field Mapper Detail
+	{
+		'checking_operator': u'=',
+		'doctype': u'Field Mapper Detail',
+		'from_field': u'export_rate',
+		'map': u'Yes',
+		'match_id': 1,
+		'to_field': u'export_rate'
+	},
+
 	# Table Mapper Detail
 	{
 		'doctype': 'Table Mapper Detail',
@@ -141,17 +151,6 @@
 		'match_id': 0,
 		'to_table': 'Receivable Voucher',
 		'validation_logic': 'docstatus=1'
-	},
-
-	# Table Mapper Detail
-	{
-		'doctype': 'Table Mapper Detail',
-		'from_field': 'delivery_note_details',
-		'from_table': 'Delivery Note Detail',
-		'match_id': 1,
-		'to_field': 'entries',
-		'to_table': 'RV Detail',
-		'validation_logic': 'amount > ifnull(billed_amt, 0) and docstatus = 1'
 	},
 
 	# Table Mapper Detail
