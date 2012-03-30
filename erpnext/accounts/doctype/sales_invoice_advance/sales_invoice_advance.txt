@@ -1,0 +1,105 @@
+# DocType, Sales Invoice Advance
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2012-03-27 14:35:40',
+		'docstatus': 0,
+		'modified': '2012-03-27 14:35:40',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
+	},
+
+	# These values are common for all DocType
+	{
+		'colour': u'White:FFF',
+		'doctype': 'DocType',
+		'istable': 1,
+		'module': u'Accounts',
+		'name': '__common__',
+		'section_style': u'Tray',
+		'server_code_error': u' ',
+		'show_in_menu': 0,
+		'version': 24
+	},
+
+	# These values are common for all DocField
+	{
+		'doctype': u'DocField',
+		'name': '__common__',
+		'no_copy': 1,
+		'parent': u'Sales Invoice Advance',
+		'parentfield': u'fields',
+		'parenttype': u'DocType'
+	},
+
+	# DocType, Sales Invoice Advance
+	{
+		'doctype': 'DocType',
+		'name': u'Sales Invoice Advance'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'journal_voucher',
+		'fieldtype': u'Link',
+		'label': u'Journal Voucher',
+		'oldfieldname': u'journal_voucher',
+		'oldfieldtype': u'Link',
+		'options': u'Journal Voucher',
+		'permlevel': 1,
+		'width': u'250px'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'jv_detail_no',
+		'fieldtype': u'Data',
+		'hidden': 1,
+		'label': u'Journal Voucher Detail No',
+		'oldfieldname': u'jv_detail_no',
+		'oldfieldtype': u'Data',
+		'permlevel': 1,
+		'print_hide': 1,
+		'width': u'120px'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'advance_amount',
+		'fieldtype': u'Currency',
+		'label': u'Advance amount',
+		'oldfieldname': u'advance_amount',
+		'oldfieldtype': u'Currency',
+		'permlevel': 1,
+		'width': u'120px'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'allocated_amount',
+		'fieldtype': u'Currency',
+		'label': u'Allocated amount',
+		'oldfieldname': u'allocated_amount',
+		'oldfieldtype': u'Currency',
+		'permlevel': 0,
+		'trigger': u'Client',
+		'width': u'120px'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'remarks',
+		'fieldtype': u'Small Text',
+		'label': u'Remarks',
+		'oldfieldname': u'remarks',
+		'oldfieldtype': u'Small Text',
+		'permlevel': 1,
+		'width': u'150px'
+	}
+]

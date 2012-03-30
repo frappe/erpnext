@@ -1,0 +1,163 @@
+# DocType, Maintenance Visit Purpose
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2012-03-27 14:36:43',
+		'docstatus': 0,
+		'modified': '2012-03-27 14:36:43',
+		'modified_by': u'Administrator',
+		'owner': u'ashwini@webnotestech.com'
+	},
+
+	# These values are common for all DocType
+	{
+		'autoname': u'MVD.#####',
+		'colour': u'White:FFF',
+		'doctype': 'DocType',
+		'istable': 1,
+		'module': u'Support',
+		'name': '__common__',
+		'section_style': u'Simple',
+		'server_code_error': u' ',
+		'version': 13
+	},
+
+	# These values are common for all DocField
+	{
+		'doctype': u'DocField',
+		'name': '__common__',
+		'parent': u'Maintenance Visit Purpose',
+		'parentfield': u'fields',
+		'parenttype': u'DocType'
+	},
+
+	# DocType, Maintenance Visit Purpose
+	{
+		'doctype': 'DocType',
+		'name': u'Maintenance Visit Purpose'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'description',
+		'fieldtype': u'Small Text',
+		'label': u'Description',
+		'oldfieldname': u'description',
+		'oldfieldtype': u'Small Text',
+		'permlevel': 0,
+		'reqd': 1,
+		'width': u'300px'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'service_person',
+		'fieldtype': u'Link',
+		'label': u'Service Person',
+		'oldfieldname': u'service_person',
+		'oldfieldtype': u'Link',
+		'options': u'Sales Person',
+		'permlevel': 0,
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'work_done',
+		'fieldtype': u'Small Text',
+		'label': u'Work Done',
+		'oldfieldname': u'work_done',
+		'oldfieldtype': u'Small Text',
+		'permlevel': 0,
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'item_code',
+		'fieldtype': u'Link',
+		'label': u'Item Code',
+		'oldfieldname': u'item_code',
+		'oldfieldtype': u'Link',
+		'options': u'Item',
+		'permlevel': 0,
+		'trigger': u'Client'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'item_name',
+		'fieldtype': u'Data',
+		'label': u'Item Name',
+		'oldfieldname': u'item_name',
+		'oldfieldtype': u'Data',
+		'permlevel': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'serial_no',
+		'fieldtype': u'Small Text',
+		'label': u'Serial No',
+		'oldfieldname': u'serial_no',
+		'oldfieldtype': u'Small Text',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'prevdoc_docname',
+		'fieldtype': u'Data',
+		'hidden': 0,
+		'label': u'Against Document No',
+		'no_copy': 1,
+		'oldfieldname': u'prevdoc_docname',
+		'oldfieldtype': u'Data',
+		'permlevel': 1,
+		'print_hide': 1,
+		'report_hide': 1,
+		'width': u'160px'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'prevdoc_detail_docname',
+		'fieldtype': u'Data',
+		'hidden': 1,
+		'label': u'Against Document Detail No',
+		'no_copy': 1,
+		'oldfieldname': u'prevdoc_detail_docname',
+		'oldfieldtype': u'Data',
+		'permlevel': 1,
+		'print_hide': 1,
+		'report_hide': 1,
+		'width': u'160px'
+	},
+
+	# DocField
+	{
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'prevdoc_doctype',
+		'fieldtype': u'Data',
+		'hidden': 0,
+		'label': u'Document Type',
+		'no_copy': 1,
+		'oldfieldname': u'prevdoc_doctype',
+		'oldfieldtype': u'Data',
+		'permlevel': 1,
+		'print_hide': 1,
+		'report_hide': 1,
+		'width': u'150px'
+	}
+]

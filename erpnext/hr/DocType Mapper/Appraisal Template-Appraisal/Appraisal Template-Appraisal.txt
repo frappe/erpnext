@@ -1,0 +1,47 @@
+# DocType Mapper, Appraisal Template-Appraisal
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-09-01 15:47:59',
+		'docstatus': 0,
+		'modified': '2011-09-15 15:04:42',
+		'modified_by': 'Administrator',
+		'owner': 'ashwini@webnotestech.com'
+	},
+
+	# These values are common for all Table Mapper Detail
+	{
+		'doctype': 'Table Mapper Detail',
+		'from_field': 'kra_sheet',
+		'from_table': 'Appraisal Template Goal',
+		'match_id': 0,
+		'name': '__common__',
+		'parent': 'Appraisal Template-Appraisal',
+		'parentfield': 'table_mapper_details',
+		'parenttype': 'DocType Mapper',
+		'to_field': 'appraisal_details',
+		'to_table': 'Appraisal Goal',
+		'validation_logic': 'name is not Null'
+	},
+
+	# These values are common for all DocType Mapper
+	{
+		'doctype': 'DocType Mapper',
+		'from_doctype': 'Appraisal Template',
+		'module': 'HR',
+		'name': '__common__',
+		'to_doctype': 'Appraisal'
+	},
+
+	# DocType Mapper, Appraisal Template-Appraisal
+	{
+		'doctype': 'DocType Mapper',
+		'name': 'Appraisal Template-Appraisal'
+	},
+
+	# Table Mapper Detail
+	{
+		'doctype': 'Table Mapper Detail'
+	}
+]

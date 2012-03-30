@@ -15,7 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 // Module Material Management
-cur_frm.cscript.tname = "Delivery Note Detail";
+cur_frm.cscript.tname = "Delivery Note Item";
 cur_frm.cscript.fname = "delivery_note_details";
 cur_frm.cscript.other_fname = "other_charges";
 cur_frm.cscript.sales_team_fname = "sales_team";
@@ -203,15 +203,15 @@ cur_frm.fields_dict['transporter_name'].get_query = function(doc) {
 //-----------------------------------Make Sales Invoice----------------------------------------------
 cur_frm.cscript['Make Sales Invoice'] = function() {
 	var doc = cur_frm.doc
-	n = createLocal('Receivable Voucher');
+	n = createLocal('Sales Invoice');
 	$c('dt_map', args={
-		'docs':compress_doclist([locals['Receivable Voucher'][n]]),
+		'docs':compress_doclist([locals['Sales Invoice'][n]]),
 		'from_doctype':doc.doctype,
-		'to_doctype':'Receivable Voucher',
+		'to_doctype':'Sales Invoice',
 		'from_docname':doc.name,
-		'from_to_list':"[['Delivery Note','Receivable Voucher'],['Delivery Note Detail','RV Detail'],['RV Tax Detail','RV Tax Detail'],['Sales Team','Sales Team']]"
+		'from_to_list':"[['Delivery Note','Sales Invoice'],['Delivery Note Item','Sales Invoice Item'],['Sales Taxes and Charges','Sales Taxes and Charges'],['Sales Team','Sales Team']]"
 		}, function(r,rt) {
-			 loaddoc('Receivable Voucher', n);
+			 loaddoc('Sales Invoice', n);
 		}
 	);
 }
@@ -226,7 +226,7 @@ cur_frm.cscript['Make Installation Note'] = function() {
 			'from_doctype':doc.doctype,
 			'to_doctype':'Installation Note',
 			'from_docname':doc.name,
-			'from_to_list':"[['Delivery Note','Installation Note'],['Delivery Note Detail','Installed Item Details']]"
+			'from_to_list':"[['Delivery Note','Installation Note'],['Delivery Note Item','Installation Note Item']]"
 			}, function(r,rt) {
 				 loaddoc('Installation Note', n);
 			}
@@ -245,7 +245,7 @@ cur_frm.cscript['Make Packing Slip'] = function() {
 		'from_doctype':doc.doctype,
 		'to_doctype':'Packing Slip',
 		'from_docname':doc.name,
-		'from_to_list':"[['Delivery Note','Packing Slip'],['Delivery Note Detail','Packing Slip Detail']]"
+		'from_to_list':"[['Delivery Note','Packing Slip'],['Delivery Note Item','Packing Slip Item']]"
 		}, function(r,rt) {
 			 loaddoc('Packing Slip', n);
 		}
@@ -264,16 +264,16 @@ cur_frm.fields_dict['territory'].get_query = function(doc,cdt,cdn) {
 var set_print_hide= function(doc, cdt, cdn){
 	if (doc.print_without_amount) {
 		fields['Delivery Note']['currency'].print_hide = 1;
-		fields['Delivery Note Detail']['export_rate'].print_hide = 1;
-		fields['Delivery Note Detail']['adj_rate'].print_hide = 1;
-		fields['Delivery Note Detail']['ref_rate'].print_hide = 1;
-		fields['Delivery Note Detail']['export_amount'].print_hide = 1;
+		fields['Delivery Note Item']['export_rate'].print_hide = 1;
+		fields['Delivery Note Item']['adj_rate'].print_hide = 1;
+		fields['Delivery Note Item']['ref_rate'].print_hide = 1;
+		fields['Delivery Note Item']['export_amount'].print_hide = 1;
 	} else {
 		fields['Delivery Note']['currency'].print_hide = 0;
-		fields['Delivery Note Detail']['export_rate'].print_hide = 0;
-		fields['Delivery Note Detail']['adj_rate'].print_hide = 0;
-		fields['Delivery Note Detail']['ref_rate'].print_hide = 0;
-		fields['Delivery Note Detail']['export_amount'].print_hide = 0;
+		fields['Delivery Note Item']['export_rate'].print_hide = 0;
+		fields['Delivery Note Item']['adj_rate'].print_hide = 0;
+		fields['Delivery Note Item']['ref_rate'].print_hide = 0;
+		fields['Delivery Note Item']['export_amount'].print_hide = 0;
 	}
 }
 
@@ -296,7 +296,7 @@ cur_frm.pformat.sales_order_no= function(doc, cdt, cdn){
 
 	out ='';
 	
-	var cl = getchildren('Delivery Note Detail',doc.name,'delivery_note_details');
+	var cl = getchildren('Delivery Note Item',doc.name,'delivery_note_details');
 
 	// outer table	
 	var out='<div><table class="noborder" style="width:100%"><tr><td style="width: 50%"></td><td>';

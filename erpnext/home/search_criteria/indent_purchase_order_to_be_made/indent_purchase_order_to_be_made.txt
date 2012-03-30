@@ -12,16 +12,16 @@
 
 	# These values are common for all Search Criteria
 	{
-		'add_cond': "`tabIndent`.status='Submitted'\nifnull(`tabIndent`.per_ordered,0)<100",
-		'columns': 'Indent\x01ID,Indent\x01Indent Date,Indent\x01Requested By,Indent\x01Owner,Indent\x01% Ordered',
-		'criteria_name': 'Indent-Purchase Order to be made',
-		'doc_type': 'Indent',
+		'add_cond': "`tabPurchase Request`.status='Submitted'\nifnull(`tabPurchase Request`.per_ordered,0)<100",
+		'columns': 'Purchase Request\x01ID,Purchase Request\x01Purchase Request Date,Purchase Request\x01Requested By,Purchase Request\x01Owner,Purchase Request\x01% Ordered',
+		'criteria_name': 'Purchase Request-Purchase Order to be made',
+		'doc_type': 'Purchase Request',
 		'doctype': 'Search Criteria',
-		'filters': "{'Indent\x01Submitted':1,'Indent\x01Status':'Submitted','Indent\x01Fiscal Year':''}",
+		'filters': "{'Purchase Request\x01Submitted':1,'Purchase Request\x01Status':'Submitted','Purchase Request\x01Fiscal Year':''}",
 		'module': 'Home',
 		'name': '__common__',
 		'page_len': 50,
-		'sort_by': '`tabIndent`.`name`',
+		'sort_by': '`tabPurchase Request`.`name`',
 		'sort_order': 'DESC',
 		'standard': 'Yes'
 	},

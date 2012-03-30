@@ -30,7 +30,7 @@ class DocType:
 	#Default Naming Series
 	#---------------------------------------------------
 	def naming_series(self):
-		ns = [['TDS Payment', 'TDSP'], ['Payable Voucher', 'BILL'], ['Journal Voucher', 'JV'], ['Receivable Voucher', 'INV'], ['Lead', 'Lead'], ['Indent', 'IDT'], ['Enquiry', 'Enquiry'], ['Purchase Order', 'PO'], ['Quotation', 'QTN'], ['Purchase Receipt', 'GRN'], ['Stock Entry', 'STE'], ['Sales Order', 'SO'], ['Delivery Note', 'DN'], ['Employee', 'EMP/']]
+		ns = [['TDS Payment', 'TDSP'], ['Purchase Invoice', 'BILL'], ['Journal Voucher', 'JV'], ['Sales Invoice', 'INV'], ['Lead', 'Lead'], ['Purchase Request', 'IDT'], ['Opportunity', 'Opportunity'], ['Purchase Order', 'PO'], ['Quotation', 'QTN'], ['Purchase Receipt', 'GRN'], ['Stock Entry', 'STE'], ['Sales Order', 'SO'], ['Delivery Note', 'DN'], ['Employee', 'EMP/']]
 		for r in ns: 
 			rec = Document('Naming Series')
 			rec.select_doc_for_series = r[0]
@@ -131,25 +131,25 @@ class DocType:
 	def create_feed_and_todo(self):
 		"""update activty feed and create todo for creation of item, customer, vendor"""
 		import home
-		home.make_feed('Comment', 'ToDo Item', '', webnotes.session['user'],
+		home.make_feed('Comment', 'ToDo', '', webnotes.session['user'],
 			'<i>"' + 'Setup Complete. Please check your <a href="#!todo">\
 			To Do List</a>' + '"</i>', '#6B24B3')
 
-		d = Document('ToDo Item')
+		d = Document('ToDo')
 		d.description = 'Create your first Customer'
 		d.priority = 'High'
 		d.date = nowdate()
 		d.reference_type = 'Customer'
 		d.save(1)
 
-		d = Document('ToDo Item')
+		d = Document('ToDo')
 		d.description = 'Create your first Item'
 		d.priority = 'High'
 		d.date = nowdate()
 		d.reference_type = 'Item'
 		d.save(1)
 
-		d = Document('ToDo Item')
+		d = Document('ToDo')
 		d.description = 'Create your first Supplier'
 		d.priority = 'High'
 		d.date = nowdate()
@@ -195,7 +195,7 @@ class DocType:
 	# Set System Defaults
 	# --------------------
 	def set_defaults(self, def_args):
-		ma_obj = get_obj('Manage Account','Manage Account')
+		ma_obj = get_obj('Global Defaults','Global Defaults')
 		for d in def_args.keys():
 			ma_obj.doc.fields[d] = def_args[d]
 		ma_obj.doc.save()

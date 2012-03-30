@@ -12,19 +12,19 @@
 
 	# These values are common for all Search Criteria
 	{
-		'columns': 'Sales Order Detail\x01Item Code,Sales Order Detail\x01Quantity,Sales Order Detail\x01Delivered Qty,Sales Order Detail\x01Billed Qty',
+		'columns': 'Sales Order Item\x01Item Code,Sales Order Item\x01Quantity,Sales Order Item\x01Delivered Qty,Sales Order Item\x01Billed Qty',
 		'criteria_name': 'Periodic Sales Summary',
 		'dis_filters': 'fiscal_year',
 		'disabled': 1,
-		'doc_type': 'Sales Order Detail',
+		'doc_type': 'Sales Order Item',
 		'doctype': 'Search Criteria',
 		'filters': "{'Sales Order\x01Submitted':1,'Sales Order\x01Company Name':'','Sales Order\x01Fiscal Year':''}",
-		'group_by': '`tabSales Order Detail`.`item_code`',
+		'group_by': '`tabSales Order Item`.`item_code`',
 		'module': 'Selling',
 		'name': '__common__',
 		'page_len': 50,
 		'parent_doc_type': 'Sales Order',
-		'sort_by': '`tabSales Order Detail`.`item_code`',
+		'sort_by': '`tabSales Order Item`.`item_code`',
 		'sort_order': 'DESC',
 		'standard': 'Yes'
 	},

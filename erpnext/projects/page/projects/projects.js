@@ -217,7 +217,7 @@ GanttTask = function(grid, data, idx) {
 
 	// label
 	this.label = $a(grid.y_labels, 'div', '', {'top':(idx*40) + 'px', overflow:'hidden', position:'absolute', 'width':'100%', height: '40px'});
-	var l1 = $a($a(this.label, 'div'), 'span', 'link_type'); l1.innerHTML = data[0]; l1.dn = data[7]; l1.onclick = function() { loaddoc('Ticket', this.dn) };
+	var l1 = $a($a(this.label, 'div'), 'span', 'link_type'); l1.innerHTML = data[0]; l1.dn = data[7]; l1.onclick = function() { loaddoc('Task', this.dn) };
 	var l2 = $a(this.label, 'div', '', {fontSize:'10px'}); l2.innerHTML = data[1];
 
 	// bar

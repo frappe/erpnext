@@ -1,0 +1,175 @@
+# DocType, Quality Inspection Reading
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2012-03-27 14:35:52',
+		'docstatus': 0,
+		'modified': '2012-03-27 14:35:52',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
+	},
+
+	# These values are common for all DocType
+	{
+		'autoname': u'QASD/.#####',
+		'colour': u'White:FFF',
+		'doctype': 'DocType',
+		'istable': 1,
+		'module': u'Buying',
+		'name': '__common__',
+		'section_style': u'Tray',
+		'server_code_error': u' ',
+		'show_in_menu': 0,
+		'version': 2
+	},
+
+	# These values are common for all DocField
+	{
+		'doctype': u'DocField',
+		'name': '__common__',
+		'parent': u'Quality Inspection Reading',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
+		'permlevel': 0
+	},
+
+	# DocType, Quality Inspection Reading
+	{
+		'doctype': 'DocType',
+		'name': u'Quality Inspection Reading'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'specification',
+		'fieldtype': u'Data',
+		'label': u'Parameter',
+		'oldfieldname': u'specification',
+		'oldfieldtype': u'Data',
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'value',
+		'fieldtype': u'Data',
+		'label': u'Acceptance Criteria',
+		'oldfieldname': u'value',
+		'oldfieldtype': u'Data'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'reading_1',
+		'fieldtype': u'Data',
+		'label': u'Reading 1',
+		'oldfieldname': u'reading_1',
+		'oldfieldtype': u'Data'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'reading_2',
+		'fieldtype': u'Data',
+		'label': u'Reading 2',
+		'oldfieldname': u'reading_2',
+		'oldfieldtype': u'Data'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'reading_3',
+		'fieldtype': u'Data',
+		'label': u'Reading 3',
+		'oldfieldname': u'reading_3',
+		'oldfieldtype': u'Data'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'reading_4',
+		'fieldtype': u'Data',
+		'label': u'Reading 4',
+		'oldfieldname': u'reading_4',
+		'oldfieldtype': u'Data'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'reading_5',
+		'fieldtype': u'Data',
+		'label': u'Reading 5',
+		'oldfieldname': u'reading_5',
+		'oldfieldtype': u'Data'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'reading_6',
+		'fieldtype': u'Data',
+		'label': u'Reading 6',
+		'oldfieldname': u'reading_6',
+		'oldfieldtype': u'Data'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'reading_7',
+		'fieldtype': u'Data',
+		'label': u'Reading 7',
+		'oldfieldname': u'reading_7',
+		'oldfieldtype': u'Data'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'reading_8',
+		'fieldtype': u'Data',
+		'label': u'Reading 8',
+		'oldfieldname': u'reading_8',
+		'oldfieldtype': u'Data'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'reading_9',
+		'fieldtype': u'Data',
+		'label': u'Reading 9',
+		'oldfieldname': u'reading_9',
+		'oldfieldtype': u'Data'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'reading_10',
+		'fieldtype': u'Data',
+		'label': u'Reading 10',
+		'oldfieldname': u'reading_10',
+		'oldfieldtype': u'Data'
+	},
+
+	# DocField
+	{
+		'default': u'Accepted',
+		'doctype': u'DocField',
+		'fieldname': u'status',
+		'fieldtype': u'Select',
+		'label': u'Status',
+		'oldfieldname': u'status',
+		'oldfieldtype': u'Select',
+		'options': u'Accepted\nRejected'
+	}
+]

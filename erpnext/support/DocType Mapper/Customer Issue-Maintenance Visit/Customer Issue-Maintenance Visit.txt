@@ -96,7 +96,7 @@
 		'match_id': 1,
 		'reference_doctype_key': 'prevdoc_doctype',
 		'to_field': 'maintenance_visit_details',
-		'to_table': 'Maintenance Visit Detail'
+		'to_table': 'Maintenance Visit Purpose'
 	},
 
 	# Table Mapper Detail

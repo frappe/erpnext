@@ -16,7 +16,7 @@
 
 // Module CRM
 
-cur_frm.cscript.tname = "Sales Order Detail";
+cur_frm.cscript.tname = "Sales Order Item";
 cur_frm.cscript.fname = "sales_order_details";
 cur_frm.cscript.other_fname = "other_charges";
 cur_frm.cscript.sales_team_fname = "sales_team";
@@ -77,7 +77,7 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 
 			// indent
 			if(doc.order_type != 'Maintenance')
-				cur_frm.add_custom_button('Make ' + get_doctype_label('Indent'), cur_frm.cscript['Make Purchase Requisition']);
+				cur_frm.add_custom_button('Make ' + get_doctype_label('Purchase Request'), cur_frm.cscript['Make Purchase Requisition']);
 			
 			// sales invoice
 			if(doc.per_billed < 100)
@@ -135,7 +135,7 @@ cur_frm.fields_dict['contact_person'].get_query = function(doc, cdt, cdn) {
 	return 'SELECT name,CONCAT(first_name," ",ifnull(last_name,"")) As FullName,department,designation FROM tabContact WHERE customer = "'+ doc.customer +'" AND docstatus != 2 AND name LIKE "%s" ORDER BY name ASC LIMIT 50';
 }
 
-cur_frm.cscript['Pull Quotation Details'] = function(doc,dt,dn) {
+cur_frm.cscript['Pull Quotation Items'] = function(doc,dt,dn) {
 	var callback = function(r,rt){
 		var doc = locals[cur_frm.doctype][cur_frm.docname];					
 		if(r.message){							
@@ -217,7 +217,7 @@ cur_frm.cscript['Make Maintenance Schedule'] = function() {
 									'from_doctype':'Sales Order',
 									'to_doctype':'Maintenance Schedule',
 									'from_docname':doc.name,
-						'from_to_list':"[['Sales Order', 'Maintenance Schedule'], ['Sales Order Detail', 'Item Maintenance Detail']]"
+						'from_to_list':"[['Sales Order', 'Maintenance Schedule'], ['Sales Order Item', 'Maintenance Schedule Item']]"
 					}
 					, function(r,rt) {
 						loaddoc("Maintenance Schedule", n);
@@ -246,7 +246,7 @@ cur_frm.cscript['Make Maintenance Visit'] = function() {
 									'from_doctype':'Sales Order',
 									'to_doctype':'Maintenance Visit',
 									'from_docname':doc.name,
-						'from_to_list':"[['Sales Order', 'Maintenance Visit'], ['Sales Order Detail', 'Maintenance Visit Detail']]"
+						'from_to_list':"[['Sales Order', 'Maintenance Visit'], ['Sales Order Item', 'Maintenance Visit Purpose']]"
 					}
 					, function(r,rt) {
 						loaddoc("Maintenance Visit", n);
@@ -266,16 +266,16 @@ cur_frm.cscript['Make Maintenance Visit'] = function() {
 cur_frm.cscript['Make Purchase Requisition'] = function() {
 	var doc = cur_frm.doc;
 	if (doc.docstatus == 1) { 
-	n = createLocal("Indent");
+	n = createLocal("Purchase Request");
 	$c('dt_map', args={
-					'docs':compress_doclist([locals["Indent"][n]]),
+					'docs':compress_doclist([locals["Purchase Request"][n]]),
 					'from_doctype':'Sales Order',
-					'to_doctype':'Indent',
+					'to_doctype':'Purchase Request',
 					'from_docname':doc.name,
-		'from_to_list':"[['Sales Order', 'Indent'], ['Sales Order Detail', 'Indent Detail']]"
+		'from_to_list':"[['Sales Order', 'Purchase Request'], ['Sales Order Item', 'Purchase Request Item']]"
 	}
 	, function(r,rt) {
-		loaddoc("Indent", n);
+		loaddoc("Purchase Request", n);
 		}
 		);
 	}
@@ -293,7 +293,7 @@ cur_frm.cscript['Make Delivery Note'] = function() {
 					'from_doctype':'Sales Order',
 					'to_doctype':'Delivery Note',
 					'from_docname':doc.name,
-		'from_to_list':"[['Sales Order', 'Delivery Note'], ['Sales Order Detail', 'Delivery Note Detail'],['RV Tax Detail','RV Tax Detail'],['Sales Team','Sales Team']]"
+		'from_to_list':"[['Sales Order', 'Delivery Note'], ['Sales Order Item', 'Delivery Note Item'],['Sales Taxes and Charges','Sales Taxes and Charges'],['Sales Team','Sales Team']]"
 	}
 	, function(r,rt) {
 		loaddoc("Delivery Note", n);
@@ -308,15 +308,15 @@ cur_frm.cscript['Make Delivery Note'] = function() {
 cur_frm.cscript['Make Sales Invoice'] = function() {
 	var doc = cur_frm.doc;
 
-	n = createLocal('Receivable Voucher');
+	n = createLocal('Sales Invoice');
 	$c('dt_map', args={
-		'docs':compress_doclist([locals['Receivable Voucher'][n]]),
+		'docs':compress_doclist([locals['Sales Invoice'][n]]),
 		'from_doctype':doc.doctype,
-		'to_doctype':'Receivable Voucher',
+		'to_doctype':'Sales Invoice',
 		'from_docname':doc.name,
-		'from_to_list':"[['Sales Order','Receivable Voucher'],['Sales Order Detail','RV Detail'],['RV Tax Detail','RV Tax Detail'],['Sales Team','Sales Team']]"
+		'from_to_list':"[['Sales Order','Sales Invoice'],['Sales Order Item','Sales Invoice Item'],['Sales Taxes and Charges','Sales Taxes and Charges'],['Sales Team','Sales Team']]"
 		}, function(r,rt) {
-			 loaddoc('Receivable Voucher', n);
+			 loaddoc('Sales Invoice', n);
 		}
 	);
 }

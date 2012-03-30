@@ -82,28 +82,28 @@ cur_frm.cscript['Send SMS'] = function(doc,dt,dn) {
 	var sms_man = new SMSManager();
 	var default_msg = {
 		'Lead'				: '',
-		'Enquiry'			: 'Your enquiry has been logged into the system. Ref No: ' + doc.name,
+		'Opportunity'			: 'Your enquiry has been logged into the system. Ref No: ' + doc.name,
 		'Quotation'			: 'Quotation ' + doc.name + ' has been sent via email. Thanks!',
 		'Sales Order'		: 'Sales Order ' + doc.name + ' has been created against ' 
 					+ (doc.quotation_no ? ('Quote No:' + doc.quotation_no) : '')
 					+ (doc.po_no ? (' for your PO: ' + doc.po_no) : ''),
 		'Delivery Note'		: 'Items has been delivered against delivery note: ' + doc.name
 					+ (doc.po_no ? (' for your PO: ' + doc.po_no) : ''),		
-		'Receivable Voucher': 'Invoice ' + doc.name + ' has been sent via email '
+		'Sales Invoice': 'Invoice ' + doc.name + ' has been sent via email '
 					+ (doc.po_no ? (' for your PO: ' + doc.po_no) : ''),
-		'Indent'			: 'Indent ' + doc.name + ' has been raised in the system',
+		'Purchase Request'			: 'Purchase Request ' + doc.name + ' has been raised in the system',
 		'Purchase Order'	: 'Purchase Order ' + doc.name + ' has been sent via email',
 		'Purchase Receipt'	: 'Items has been received against purchase receipt: ' + doc.name
 	}
 
-	if (in_list(['Quotation', 'Sales Order', 'Delivery Note', 'Receivable Voucher'], doc.doctype))
+	if (in_list(['Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice'], doc.doctype))
 		sms_man.show(doc.contact_person, 'customer', doc.customer, '', default_msg[doc.doctype]);
 	else if (in_list(['Purchase Order', 'Purchase Receipt'], doc.doctype))
 		sms_man.show(doc.contact_person, 'supplier', doc.supplier, '', default_msg[doc.doctype]);
 	else if (doc.doctype == 'Lead')
 		sms_man.show('', '', '', doc.mobile_no, default_msg[doc.doctype]);
-	else if (doc.doctype == 'Enquiry')
+	else if (doc.doctype == 'Opportunity')
 		sms_man.show('', '', '', doc.contact_no, default_msg[doc.doctype]);
-	else if (doc.doctype == 'Indent')
+	else if (doc.doctype == 'Purchase Request')
 		sms_man.show('', '', '', '', default_msg[doc.doctype]);
 }

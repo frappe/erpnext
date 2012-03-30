@@ -1,0 +1,103 @@
+# DocType, Employee Education
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2012-03-27 14:35:54',
+		'docstatus': 0,
+		'modified': '2012-03-27 14:35:54',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
+	},
+
+	# These values are common for all DocType
+	{
+		'colour': u'White:FFF',
+		'doctype': 'DocType',
+		'istable': 1,
+		'module': u'HR',
+		'name': '__common__',
+		'section_style': u'Simple',
+		'server_code_error': u' ',
+		'show_in_menu': 0,
+		'version': 5
+	},
+
+	# These values are common for all DocField
+	{
+		'doctype': u'DocField',
+		'name': '__common__',
+		'parent': u'Employee Education',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
+		'permlevel': 0
+	},
+
+	# DocType, Employee Education
+	{
+		'doctype': 'DocType',
+		'name': u'Employee Education'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'school_univ',
+		'fieldtype': u'Small Text',
+		'label': u'School/University',
+		'oldfieldname': u'school_univ',
+		'oldfieldtype': u'Small Text'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'qualification',
+		'fieldtype': u'Data',
+		'label': u'Qualification',
+		'oldfieldname': u'qualification',
+		'oldfieldtype': u'Data',
+		'width': u'100px'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'level',
+		'fieldtype': u'Select',
+		'label': u'Level',
+		'oldfieldname': u'level',
+		'oldfieldtype': u'Select',
+		'options': u'Graduate\nPost Graduate\nUnder Graduate'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'year_of_passing',
+		'fieldtype': u'Int',
+		'label': u'Year of Passing',
+		'oldfieldname': u'year_of_passing',
+		'oldfieldtype': u'Int'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'class_per',
+		'fieldtype': u'Data',
+		'label': u'Class / Percentage',
+		'oldfieldname': u'class_per',
+		'oldfieldtype': u'Data'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'maj_opt_subj',
+		'fieldtype': u'Text',
+		'label': u'Major/Optional Subjects',
+		'oldfieldname': u'maj_opt_subj',
+		'oldfieldtype': u'Text'
+	}
+]

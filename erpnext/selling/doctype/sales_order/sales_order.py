@@ -38,7 +38,7 @@ class DocType(TransactionBase):
 	def __init__(self, doc, doclist=[]):
 		self.doc = doc
 		self.doclist = doclist
-		self.tname = 'Sales Order Detail'
+		self.tname = 'Sales Order Item'
 		self.fname = 'sales_order_details'
 		self.person_tname = 'Target Detail'
 		self.partner_tname = 'Partner Target Detail'
@@ -52,7 +52,7 @@ class DocType(TransactionBase):
 		
 # DOCTYPE TRIGGER FUNCTIONS
 # =============================
-	# Pull Quotation Details
+	# Pull Quotation Items
 	# -----------------------
 	def pull_quotation_details(self):
 		self.doc.clear_table(self.doclist, 'other_charges')
@@ -60,7 +60,7 @@ class DocType(TransactionBase):
 		self.doc.clear_table(self.doclist, 'sales_team')
 		self.doc.clear_table(self.doclist, 'tc_details')
 		if self.doc.quotation_no:				
-			get_obj('DocType Mapper', 'Quotation-Sales Order').dt_map('Quotation', 'Sales Order', self.doc.quotation_no, self.doc, self.doclist, "[['Quotation', 'Sales Order'],['Quotation Detail', 'Sales Order Detail'],['RV Tax Detail','RV Tax Detail'],['Sales Team','Sales Team'],['TC Detail','TC Detail']]")			
+			get_obj('DocType Mapper', 'Quotation-Sales Order').dt_map('Quotation', 'Sales Order', self.doc.quotation_no, self.doc, self.doclist, "[['Quotation', 'Sales Order'],['Quotation Item', 'Sales Order Item'],['Sales Taxes and Charges','Sales Taxes and Charges'],['Sales Team','Sales Team'],['TC Detail','TC Detail']]")			
 		else:
 			msgprint("Please select Quotation whose details need to pull")		
 
@@ -91,7 +91,7 @@ class DocType(TransactionBase):
 	def get_comm_rate(self, sales_partner):
 		return get_obj('Sales Common').get_comm_rate(sales_partner, self)
 
-	# Clear Sales Order Details Table
+	# Clear Sales Order Items Table
 	# --------------------------------
 	def clear_sales_order_details(self):
 		self.doc.clear_table(self.doclist, 'sales_order_details')
@@ -163,7 +163,7 @@ class DocType(TransactionBase):
 #check if maintenance schedule already generated
 #============================================
 	def check_maintenance_schedule(self):
-		nm = sql("select t1.name from `tabMaintenance Schedule` t1, `tabItem Maintenance Detail` t2 where t2.parent=t1.name and t2.prevdoc_docname=%s and t1.docstatus=1", self.doc.name)
+		nm = sql("select t1.name from `tabMaintenance Schedule` t1, `tabMaintenance Schedule Item` t2 where t2.parent=t1.name and t2.prevdoc_docname=%s and t1.docstatus=1", self.doc.name)
 		nm = nm and nm[0][0] or ''
 		
 		if not nm:
@@ -172,7 +172,7 @@ class DocType(TransactionBase):
 #check if maintenance visit already generated
 #============================================
 	def check_maintenance_visit(self):
-		nm = sql("select t1.name from `tabMaintenance Visit` t1, `tabMaintenance Visit Detail` t2 where t2.parent=t1.name and t2.prevdoc_docname=%s and t1.docstatus=1 and t1.completion_status='Fully Completed'", self.doc.name)
+		nm = sql("select t1.name from `tabMaintenance Visit` t1, `tabMaintenance Visit Purpose` t2 where t2.parent=t1.name and t2.prevdoc_docname=%s and t1.docstatus=1 and t1.completion_status='Fully Completed'", self.doc.name)
 		nm = nm and nm[0][0] or ''
 		
 		if not nm:
@@ -216,7 +216,7 @@ class DocType(TransactionBase):
 	def validate_for_items(self):
 		check_list,flag = [],0
 		chk_dupl_itm = []
-		# Sales Order Details Validations
+		# Sales Order Items Validations
 		for d in getlist(self.doclist, 'sales_order_details'):
 			if cstr(self.doc.quotation_no) == cstr(d.prevdoc_docname):
 				flag = 1
@@ -358,9 +358,9 @@ class DocType(TransactionBase):
 				raise Exception , "Validation Error. "
 	
 	def update_enquiry_status(self, prevdoc, flag):
-		enq = sql("select t2.prevdoc_docname from `tabQuotation` t1, `tabQuotation Detail` t2 where t2.parent = t1.name and t1.name=%s", prevdoc)
+		enq = sql("select t2.prevdoc_docname from `tabQuotation` t1, `tabQuotation Item` t2 where t2.parent = t1.name and t1.name=%s", prevdoc)
 		if enq:
-			sql("update `tabEnquiry` set status = %s where name=%s",(flag,enq[0][0]))
+			sql("update `tabOpportunity` set status = %s where name=%s",(flag,enq[0][0]))
 
 	#update status of quotation, enquiry
 	#----------------------------------------
@@ -373,7 +373,7 @@ class DocType(TransactionBase):
 					#update enquiry
 					self.update_enquiry_status(d.prevdoc_docname, 'Order Confirmed')
 				elif flag == 'cancel':
-					chk = sql("select t1.name from `tabSales Order` t1, `tabSales Order Detail` t2 where t2.parent = t1.name and t2.prevdoc_docname=%s and t1.name!=%s and t1.docstatus=1", (d.prevdoc_docname,self.doc.name))
+					chk = sql("select t1.name from `tabSales Order` t1, `tabSales Order Item` t2 where t2.parent = t1.name and t2.prevdoc_docname=%s and t1.name!=%s and t1.docstatus=1", (d.prevdoc_docname,self.doc.name))
 					if not chk:
 						sql("update `tabQuotation` set status = 'Submitted' where name=%s",d.prevdoc_docname)
 						
@@ -421,18 +421,18 @@ class DocType(TransactionBase):
 	# ----------------------------------------------------------------------------
 	def check_nextdoc_docstatus(self):
 		# Checks Delivery Note
-		submit_dn = sql("select t1.name from `tabDelivery Note` t1,`tabDelivery Note Detail` t2 where t1.name = t2.parent and t2.prevdoc_docname = '%s' and t1.docstatus = 1" % (self.doc.name))
+		submit_dn = sql("select t1.name from `tabDelivery Note` t1,`tabDelivery Note Item` t2 where t1.name = t2.parent and t2.prevdoc_docname = '%s' and t1.docstatus = 1" % (self.doc.name))
 		if submit_dn:
 			msgprint("Delivery Note : " + cstr(submit_dn[0][0]) + " has been submitted against " + cstr(self.doc.doctype) + ". Please cancel Delivery Note : " + cstr(submit_dn[0][0]) + " first and then cancel "+ cstr(self.doc.doctype), raise_exception = 1)
-		# Checks Receivable Voucher
-		submit_rv = sql("select t1.name from `tabReceivable Voucher` t1,`tabRV Detail` t2 where t1.name = t2.parent and t2.sales_order = '%s' and t1.docstatus = 1" % (self.doc.name))
+		# Checks Sales Invoice
+		submit_rv = sql("select t1.name from `tabSales Invoice` t1,`tabSales Invoice Item` t2 where t1.name = t2.parent and t2.sales_order = '%s' and t1.docstatus = 1" % (self.doc.name))
 		if submit_rv:
 			msgprint("Sales Invoice : " + cstr(submit_rv[0][0]) + " has already been submitted against " +cstr(self.doc.doctype)+ ". Please cancel Sales Invoice : "+ cstr(submit_rv[0][0]) + " first and then cancel "+ cstr(self.doc.doctype), raise_exception = 1)
 		#check maintenance schedule
-		submit_ms = sql("select t1.name from `tabMaintenance Schedule` t1, `tabItem Maintenance Detail` t2 where t2.parent=t1.name and t2.prevdoc_docname = %s and t1.docstatus = 1",self.doc.name)
+		submit_ms = sql("select t1.name from `tabMaintenance Schedule` t1, `tabMaintenance Schedule Item` t2 where t2.parent=t1.name and t2.prevdoc_docname = %s and t1.docstatus = 1",self.doc.name)
 		if submit_ms:
 			msgprint("Maintenance Schedule : " + cstr(submit_ms[0][0]) + " has already been submitted against " +cstr(self.doc.doctype)+ ". Please cancel Maintenance Schedule : "+ cstr(submit_ms[0][0]) + " first and then cancel "+ cstr(self.doc.doctype), raise_exception = 1)
-		submit_mv = sql("select t1.name from `tabMaintenance Visit` t1, `tabMaintenance Visit Detail` t2 where t2.parent=t1.name and t2.prevdoc_docname = %s and t1.docstatus = 1",self.doc.name)
+		submit_mv = sql("select t1.name from `tabMaintenance Visit` t1, `tabMaintenance Visit Purpose` t2 where t2.parent=t1.name and t2.prevdoc_docname = %s and t1.docstatus = 1",self.doc.name)
 		if submit_mv:
 			msgprint("Maintenance Visit : " + cstr(submit_mv[0][0]) + " has already been submitted against " +cstr(self.doc.doctype)+ ". Please cancel Maintenance Visit : " + cstr(submit_mv[0][0]) + " first and then cancel "+ cstr(self.doc.doctype), raise_exception = 1)
 

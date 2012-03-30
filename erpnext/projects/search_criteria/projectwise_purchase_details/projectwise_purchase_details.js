@@ -88,7 +88,7 @@ report.get_query = function() {
     if(fy !='') cond += ' t1.fiscal_year = "'+fy+'" AND '; 
  
   
-    var q = 'SELECT DISTINCT t1.name, t1.status, t1.project_name, t1.supplier, t1.supplier_name,t1.grand_total FROM `tabPurchase Receipt` t1,  `tabPurchase Receipt Detail` t2 WHERE '+cond +'IFNULL(t1.project_name,"") !="" AND t1.docstatus != 2 AND t1.name = t2.parent';
+    var q = 'SELECT DISTINCT t1.name, t1.status, t1.project_name, t1.supplier, t1.supplier_name,t1.grand_total FROM `tabPurchase Receipt` t1,  `tabPurchase Receipt Item` t2 WHERE '+cond +'IFNULL(t1.project_name,"") !="" AND t1.docstatus != 2 AND t1.name = t2.parent';
   
     return q;  
   }
@@ -101,7 +101,7 @@ report.get_query = function() {
     if(company) cond += ' t1.company = "'+company+'" AND ';
     if(fy !='') cond += ' t1.fiscal_year = "'+fy+'" AND ';     
     
-    var q = 'SELECT DISTINCT t1.name , t1.credit_to , t1.project_name, t1.supplier, t1.supplier_name , t1.grand_total FROM `tabPayable Voucher` t1,  `tabPV Detail` t2 WHERE '+cond +'IFNULL(t1.project_name,"") !="" AND t1.docstatus != 2 AND t1.name = t2.parent';
+    var q = 'SELECT DISTINCT t1.name , t1.credit_to , t1.project_name, t1.supplier, t1.supplier_name , t1.grand_total FROM `tabPurchase Invoice` t1,  `tabPurchase Invoice Item` t2 WHERE '+cond +'IFNULL(t1.project_name,"") !="" AND t1.docstatus != 2 AND t1.name = t2.parent';
   
     return q;  
   }  

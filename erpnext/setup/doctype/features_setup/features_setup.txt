@@ -97,7 +97,7 @@
 	# DocField
 	{
 		'colour': u'White:FFF',
-		'description': u'To track brand name in the following documents<br>\nDelivery Note, Enuiry, Indent, Item, Purchase Order, Purchase Voucher, Purchaser Receipt, Quotation, Receivable Voucher, Sales BOM, Sales Order, Serial No',
+		'description': u'To track brand name in the following documents<br>\nDelivery Note, Enuiry, Purchase Request, Item, Purchase Order, Purchase Voucher, Purchaser Receipt, Quotation, Sales Invoice, Sales BOM, Sales Order, Serial No',
 		'doctype': u'DocField',
 		'fieldname': u'fs_brands',
 		'fieldtype': u'Check',
@@ -179,7 +179,7 @@
 	# DocField
 	{
 		'colour': u'White:FFF',
-		'description': u'Field available in Delivery Note, Quotation, Receivable Voucher, Sales Order',
+		'description': u'Field available in Delivery Note, Quotation, Sales Invoice, Sales Order',
 		'doctype': u'DocField',
 		'fieldname': u'fs_discounts',
 		'fieldtype': u'Check',
@@ -208,7 +208,7 @@
 
 	# DocField
 	{
-		'description': u'Available in \nBill Of Materials, Delivery Note, Payable Voucher, Production Order, Purchase Order, Purchase Receipt, Receivable Voucher, Sales Order, Stock Entry, Timesheet',
+		'description': u'Available in \nBOM, Delivery Note, Purchase Invoice, Production Order, Purchase Order, Purchase Receipt, Sales Invoice, Sales Order, Stock Entry, Timesheet',
 		'doctype': u'DocField',
 		'fieldname': u'fs_projects',
 		'fieldtype': u'Check',

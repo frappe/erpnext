@@ -146,10 +146,10 @@ cur_frm.cscript.make_pi_list = function(parent,doc){
 	lst.colwidths = ['5%','20%','20%','20%','15%','20%'];
 	lst.colnames = ['Sr.','Id','Posting Date','Credit To','Bill Date','Grand Total'];
 	lst.coltypes = ['Data','Link','Data','Data','Currency','Currency'];
-	lst.coloptions = ['','Payable Voucher','','','',''];
+	lst.coloptions = ['','Purchase Invoice','','','',''];
 
-	var q = repl("select name, posting_date, credit_to, bill_date, grand_total from `tabPayable Voucher` where supplier='%(sup)s' order by posting_date desc", {'sup':doc.name});
-	var q_max = repl("select count(name) from `tabPayable Voucher` where supplier='%(sup)s'", {'sup':doc.name});
+	var q = repl("select name, posting_date, credit_to, bill_date, grand_total from `tabPurchase Invoice` where supplier='%(sup)s' order by posting_date desc", {'sup':doc.name});
+	var q_max = repl("select count(name) from `tabPurchase Invoice` where supplier='%(sup)s'", {'sup':doc.name});
 	
-	cur_frm.cscript.run_list(lst,parent,q,q_max,doc,'Purchase Invoice','Payable Voucher');	
+	cur_frm.cscript.run_list(lst,parent,q,q_max,doc,'Purchase Invoice','Purchase Invoice');	
 }

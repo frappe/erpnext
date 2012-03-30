@@ -28,13 +28,13 @@ def execute():
 
 	webnotes.conn.sql("""
 		UPDATE tabDocField SET fieldtype='Float'
-		WHERE parent='Bill Of Materials'
+		WHERE parent='BOM'
 		AND fieldname IN ('operating_cost', 'raw_material_cost', 'total_cost')
 	""")
 
 	webnotes.conn.sql("""
 		UPDATE tabDocField SET fieldtype='Float'
-		WHERE parent='BOM Material'
+		WHERE parent='BOM Item'
 		AND fieldname IN ('qty', 'rate', 'amount', 'qty_consumed_per_unit')
 	""")
 	

@@ -45,7 +45,7 @@ class DocType:
       return (ret)
   
   def get_task_details(self, task_sub):
-    tsk = sql("select name, project, customer, customer_name from `tabTicket` where subject = %s", task_sub)
+    tsk = sql("select name, project, customer, customer_name from `tabTask` where subject = %s", task_sub)
     if tsk:
       ret = {'task_id': tsk and tsk[0][0] or '', 'project_name': tsk and tsk[0][1] or '', 'customer_name': tsk and tsk[0][3] or ''}
       return ret

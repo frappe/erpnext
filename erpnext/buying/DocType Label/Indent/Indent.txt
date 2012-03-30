@@ -1,4 +1,4 @@
-# DocType Label, Indent
+# DocType Label, Purchase Request
 [
 
 	# These values are common in all dictionaries
@@ -13,14 +13,14 @@
 	# These values are common for all DocType Label
 	{
 		'doctype': 'DocType Label',
-		'dt': 'Indent',
+		'dt': 'Purchase Request',
 		'dt_label': 'Purchase Requisition',
 		'name': '__common__'
 	},
 
-	# DocType Label, Indent
+	# DocType Label, Purchase Request
 	{
 		'doctype': 'DocType Label',
-		'name': 'Indent'
+		'name': 'Purchase Request'
 	}
 ]

@@ -138,7 +138,7 @@
 		'doctype': u'DocField',
 		'fieldname': u'landed_cost_details',
 		'fieldtype': u'Section Break',
-		'label': u'Landed Cost Details',
+		'label': u'Landed Cost Items',
 		'oldfieldtype': u'Section Break',
 		'permlevel': 0
 	},

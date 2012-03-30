@@ -88,10 +88,10 @@ class DocType:
   #---------------------------------------------------------   
   def make_earn_ded_table(self):           
     #Earning List
-    self.make_table('Earning Type','earning_details','Earning Detail')
+    self.make_table('Earning Type','earning_details','Salary Structure Earning')
     
     #Deduction List
-    self.make_table('Deduction Type','deduction_details', 'Deduction Detail')
+    self.make_table('Deduction Type','deduction_details', 'Salary Structure Deduction')
     
 
   # Check if another active ss exists

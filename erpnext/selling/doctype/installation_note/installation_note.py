@@ -38,7 +38,7 @@ class DocType(TransactionBase):
   def __init__(self, doc, doclist=[]):
     self.doc = doc
     self.doclist = doclist
-    self.tname = 'Installed Item Details'
+    self.tname = 'Installation Note Item'
     self.fname = 'installed_item_details'
 
   # Autoname
@@ -51,7 +51,7 @@ class DocType(TransactionBase):
   #====================================
   def pull_delivery_note_details(self):
     self.validate_prev_docname()
-    self.doclist = get_obj('DocType Mapper', 'Delivery Note-Installation Note').dt_map('Delivery Note', 'Installation Note', self.doc.delivery_note_no, self.doc, self.doclist, "[['Delivery Note', 'Installation Note'],['Delivery Note Detail', 'Installed Item Details']]")
+    self.doclist = get_obj('DocType Mapper', 'Delivery Note-Installation Note').dt_map('Delivery Note', 'Installation Note', self.doc.delivery_note_no, self.doc, self.doclist, "[['Delivery Note', 'Installation Note'],['Delivery Note Item', 'Installation Note Item']]")
   
   # Validates that Delivery Note is not pulled twice 
   #============================================
@@ -116,7 +116,7 @@ class DocType(TransactionBase):
   def get_prevdoc_serial_no(self, prevdoc_detail_docname, prevdoc_docname):
     from stock.doctype.stock_ledger.stock_ledger import get_sr_no_list
 	
-    res = sql("select serial_no from `tabDelivery Note Detail` where name = '%s' and parent ='%s'" % (prevdoc_detail_docname, prevdoc_docname))
+    res = sql("select serial_no from `tabDelivery Note Item` where name = '%s' and parent ='%s'" % (prevdoc_detail_docname, prevdoc_docname))
     return get_sr_no_list(res[0][0])
     
   #check if all serial nos from current record exist in resp delivery note

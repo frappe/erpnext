@@ -38,7 +38,7 @@ class DocType(TransactionBase):
 	def __init__(self, doc, doclist=[]):
 		self.doc = doc
 		self.doclist = doclist
-		self.tname = 'Delivery Note Detail'
+		self.tname = 'Delivery Note Item'
 		self.fname = 'delivery_note_details'
 
 	# Autoname
@@ -62,13 +62,13 @@ class DocType(TransactionBase):
 	def get_comm_rate(self, sales_partner):
 		return get_obj('Sales Common').get_comm_rate(sales_partner, self)
 
-	# *************** Pull Sales Order Details ************************
+	# *************** Pull Sales Order Items ************************
 	def pull_sales_order_details(self):
 		self.validate_prev_docname()
 		self.doc.clear_table(self.doclist,'other_charges')
 
 		if self.doc.sales_order_no:
-			get_obj('DocType Mapper', 'Sales Order-Delivery Note').dt_map('Sales Order', 'Delivery Note', self.doc.sales_order_no, self.doc, self.doclist, "[['Sales Order', 'Delivery Note'],['Sales Order Detail', 'Delivery Note Detail'],['RV Tax Detail','RV Tax Detail'],['Sales Team','Sales Team']]")
+			get_obj('DocType Mapper', 'Sales Order-Delivery Note').dt_map('Sales Order', 'Delivery Note', self.doc.sales_order_no, self.doc, self.doclist, "[['Sales Order', 'Delivery Note'],['Sales Order Item', 'Delivery Note Item'],['Sales Taxes and Charges','Sales Taxes and Charges'],['Sales Team','Sales Team']]")
 		else:
 			msgprint("Please select Sales Order No. whose details need to be pulled")
 
@@ -159,7 +159,7 @@ class DocType(TransactionBase):
 	#check in manage account if sales order required or not.
 	# ====================================================================================
 	def so_required(self):
-		res = sql("select value from `tabSingles` where doctype = 'Manage Account' and field = 'so_required'")
+		res = sql("select value from `tabSingles` where doctype = 'Global Defaults' and field = 'so_required'")
 		if res and res[0][0] == 'Yes':
 			 for d in getlist(self.doclist,'delivery_note_details'):
 				 if not d.prevdoc_docname:
@@ -297,9 +297,9 @@ class DocType(TransactionBase):
 	# ------------------------------------------------------------------
 	def validate_items_with_prevdoc(self, d):
 		if d.prevdoc_doctype == 'Sales Order':
-			data = sql("select item_code, reserved_warehouse from `tabSales Order Detail` where parent = '%s' and name = '%s'" % (d.prevdoc_docname, d.prevdoc_detail_docname))
+			data = sql("select item_code, reserved_warehouse from `tabSales Order Item` where parent = '%s' and name = '%s'" % (d.prevdoc_docname, d.prevdoc_detail_docname))
 		if d.prevdoc_doctype == 'Purchase Receipt':
-			data = sql("select item_code, rejected_warehouse from `tabPurchase Receipt Detail` where parent = '%s' and name = '%s'" % (d.prevdoc_docname, d.prevdoc_detail_docname))
+			data = sql("select item_code, rejected_warehouse from `tabPurchase Receipt Item` where parent = '%s' and name = '%s'" % (d.prevdoc_docname, d.prevdoc_detail_docname))
 		if not data or data[0][0] != d.item_code or data[0][1] != d.warehouse:
 			msgprint("Item: %s / Warehouse: %s is not matching with Sales Order: %s. Sales Order might be modified after fetching data from it. Please delete items and fetch again." % (d.item_code, d.warehouse, d.prevdoc_docname))
 			raise Exception
@@ -343,11 +343,11 @@ class DocType(TransactionBase):
 			Validate that if packed qty exists, it should be equal to qty
 		"""
 		if not any([flt(d.fields.get('packed_qty')) for d in self.doclist if
-				d.doctype=='Delivery Note Detail']):
+				d.doctype=='Delivery Note Item']):
 			return
 		packing_error_list = []
 		for d in self.doclist:
-			if d.doctype != 'Delivery Note Detail': continue
+			if d.doctype != 'Delivery Note Item': continue
 			if flt(d.fields.get('qty')) != flt(d.fields.get('packed_qty')):
 				packing_error_list.append([
 					d.fields.get('item_code', ''),
@@ -387,12 +387,12 @@ class DocType(TransactionBase):
 
 	# ******************** Check Next DocStatus **************************
 	def check_next_docstatus(self):
-		submit_rv = sql("select t1.name from `tabReceivable Voucher` t1,`tabRV Detail` t2 where t1.name = t2.parent and t2.delivery_note = '%s' and t1.docstatus = 1" % (self.doc.name))
+		submit_rv = sql("select t1.name from `tabSales Invoice` t1,`tabSales Invoice Item` t2 where t1.name = t2.parent and t2.delivery_note = '%s' and t1.docstatus = 1" % (self.doc.name))
 		if submit_rv:
 			msgprint("Sales Invoice : " + cstr(submit_rv[0][0]) + " has already been submitted !")
 			raise Exception , "Validation Error."
 
-		submit_in = sql("select t1.name from `tabInstallation Note` t1, `tabInstalled Item Details` t2 where t1.name = t2.parent and t2.prevdoc_docname = '%s' and t1.docstatus = 1" % (self.doc.name))
+		submit_in = sql("select t1.name from `tabInstallation Note` t1, `tabInstallation Note Item` t2 where t1.name = t2.parent and t2.prevdoc_docname = '%s' and t1.docstatus = 1" % (self.doc.name))
 		if submit_in:
 			msgprint("Installation Note : "+cstr(submit_in[0][0]) +" has already been submitted !")
 			raise Exception , "Validation Error."

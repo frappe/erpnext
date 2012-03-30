@@ -38,7 +38,7 @@ class DocType(TransactionBase):
 	def __init__(self, doc, doclist=[]):
 		self.doc = doc
 		self.doclist = doclist
-		self.tname = 'Quotation Detail'
+		self.tname = 'Quotation Item'
 		self.fname = 'quotation_details'
 		
 	# Autoname
@@ -50,11 +50,11 @@ class DocType(TransactionBase):
 # DOCTYPE TRIGGER FUNCTIONS
 # ==============================================================================		
  
-	# Pull Enquiry Details
+	# Pull Opportunity Details
 	# --------------------
 	def pull_enq_details(self):
 		self.doc.clear_table(self.doclist, 'quotation_details')
-		get_obj('DocType Mapper', 'Enquiry-Quotation').dt_map('Enquiry', 'Quotation', self.doc.enq_no, self.doc, self.doclist, "[['Enquiry', 'Quotation'],['Enquiry Detail', 'Quotation Detail']]")
+		get_obj('DocType Mapper', 'Enquiry-Quotation').dt_map('Enquiry', 'Quotation', self.doc.enq_no, self.doc, self.doclist, "[['Enquiry', 'Quotation'],['Opportunity Item', 'Quotation Item']]")
 
 		self.get_adj_percent()
 
@@ -65,7 +65,7 @@ class DocType(TransactionBase):
 	def get_contact_details(self):
 		return get_obj('Sales Common').get_contact_details(self,0)
 	
-	# Clear Quotation Details
+	# Clear Quotation Items
 	# -----------------------
 	def clear_quotation_details(self):
 		self.doc.clear_table(self.doclist, 'quotation_details')	
@@ -245,7 +245,7 @@ class DocType(TransactionBase):
 		ev.event_date = self.doc.contact_date
 		ev.event_hour = '10:00'
 		ev.event_type = 'Private'
-		ev.ref_type = 'Enquiry'
+		ev.ref_type = 'Opportunity'
 		ev.ref_name = self.doc.name
 		ev.save(1)
 		
@@ -270,18 +270,18 @@ class DocType(TransactionBase):
 		
 		if prevdoc:
 			if flag == 'submit': #on submit
-				sql("update `tabEnquiry` set status = 'Quotation Sent' where name = %s", prevdoc)
+				sql("update `tabOpportunity` set status = 'Quotation Sent' where name = %s", prevdoc)
 			elif flag == 'cancel': #on cancel
-				sql("update `tabEnquiry` set status = 'Open' where name = %s", prevdoc)
+				sql("update `tabOpportunity` set status = 'Open' where name = %s", prevdoc)
 			elif flag == 'order lost': #order lost
-				sql("update `tabEnquiry` set status = 'Enquiry Lost' where name=%s", prevdoc)
+				sql("update `tabOpportunity` set status = 'Opportunity Lost' where name=%s", prevdoc)
 			elif flag == 'order confirm': #order confirm
-				sql("update `tabEnquiry` set status='Order Confirmed' where name=%s", prevdoc)
+				sql("update `tabOpportunity` set status='Order Confirmed' where name=%s", prevdoc)
 	
 	# declare as order lost
 	#-------------------------
 	def declare_order_lost(self,arg):
-		chk = sql("select t1.name from `tabSales Order` t1, `tabSales Order Detail` t2 where t2.parent = t1.name and t1.docstatus=1 and t2.prevdoc_docname = %s",self.doc.name)
+		chk = sql("select t1.name from `tabSales Order` t1, `tabSales Order Item` t2 where t2.parent = t1.name and t1.docstatus=1 and t2.prevdoc_docname = %s",self.doc.name)
 		if chk:
 			msgprint("Sales Order No. "+cstr(chk[0][0])+" is submitted against this Quotation. Thus 'Order Lost' can not be declared against it.")
 			raise Exception
@@ -350,6 +350,6 @@ class DocType(TransactionBase):
 		return print_lst
 	
 	def update_followup_details(self):
-		sql("delete from `tabFollow up` where parent = '%s'"%self.doc.name)
+		sql("delete from `tabCommunication Log` where parent = '%s'"%self.doc.name)
 		for d in getlist(self.doclist, 'follow_up'):
 			d.save()

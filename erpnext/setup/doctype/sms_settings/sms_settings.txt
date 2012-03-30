@@ -127,7 +127,7 @@
 		'doctype': u'DocField',
 		'fieldname': u'static_parameter_details',
 		'fieldtype': u'Table',
-		'label': u'Static Parameter Details',
-		'options': u'Static Parameter Detail'
+		'label': u'SMS Parameters',
+		'options': u'SMS Parameter'
 	}
 ]

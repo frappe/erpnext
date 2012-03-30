@@ -58,7 +58,7 @@ elif based_on == 'Sales Partner':
   based = 'sales_partner'
 
 
-if under == 'Receivable Voucher':
+if under == 'Sales Invoice':
   under_detail = 'RV'
   dt = 'posting_date'
 else:

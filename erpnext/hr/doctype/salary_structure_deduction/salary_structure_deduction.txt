@@ -1,0 +1,74 @@
+# DocType, Salary Structure Deduction
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2012-03-27 14:35:54',
+		'docstatus': 0,
+		'modified': '2012-03-27 14:35:54',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
+	},
+
+	# These values are common for all DocType
+	{
+		'colour': u'White:FFF',
+		'doctype': 'DocType',
+		'istable': 1,
+		'module': u'HR',
+		'name': '__common__',
+		'section_style': u'Simple',
+		'server_code_error': u' ',
+		'show_in_menu': 0,
+		'version': 14
+	},
+
+	# These values are common for all DocField
+	{
+		'doctype': u'DocField',
+		'name': '__common__',
+		'parent': u'Salary Structure Deduction',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
+		'permlevel': 0
+	},
+
+	# DocType, Salary Structure Deduction
+	{
+		'doctype': 'DocType',
+		'name': u'Salary Structure Deduction'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'd_type',
+		'fieldtype': u'Link',
+		'label': u'Type',
+		'oldfieldname': u'd_type',
+		'oldfieldtype': u'Select',
+		'options': u'Deduction Type',
+		'reqd': 1,
+		'width': u'200px'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'd_modified_amt',
+		'fieldtype': u'Currency',
+		'label': u'Amount',
+		'oldfieldname': u'd_modified_amt',
+		'oldfieldtype': u'Currency'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'depend_on_lwp',
+		'fieldtype': u'Check',
+		'label': u'Depend on LWP',
+		'oldfieldname': u'depend_on_lwp',
+		'oldfieldtype': u'Check'
+	}
+]

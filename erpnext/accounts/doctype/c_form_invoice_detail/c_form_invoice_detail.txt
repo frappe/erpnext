@@ -43,7 +43,7 @@
 		'fieldname': u'invoice_no',
 		'fieldtype': u'Link',
 		'label': u'Invoice No',
-		'options': u'Receivable Voucher',
+		'options': u'Sales Invoice',
 		'permlevel': 0,
 		'width': u'160px'
 	},

@@ -21,7 +21,7 @@ cur_frm.fields_dict['delivery_note'].get_query = function(doc, cdt, cdn) {
 
 cur_frm.fields_dict['item_details'].grid.get_field('item_code').get_query = function(doc, cdt, cdn) {
 	return 'SELECT name, description FROM `tabItem` WHERE name IN ( \
-		SELECT item_code FROM `tabDelivery Note Detail` dnd \
+		SELECT item_code FROM `tabDelivery Note Item` dnd \
 		WHERE parent="'	+ doc.delivery_note + '" AND qty > packed_qty) AND %(key)s LIKE "%s" LIMIT 50';
 }
 
@@ -42,7 +42,7 @@ cur_frm.cscript.item_code = function(doc, cdt, cdn) {
 
 cur_frm.cscript.onload = function(doc, cdt, cdn) {
 	if(doc.delivery_note) {
-		var ps_detail = getchildren('Packing Slip Detail', doc.name, 'item_details');
+		var ps_detail = getchildren('Packing Slip Item', doc.name, 'item_details');
 		if(!(flt(ps_detail[0].net_weight) && cstr(ps_detail[0].weight_uom))) {
 			cur_frm.cscript.update_item_details(doc);
 		}
@@ -85,7 +85,7 @@ cur_frm.cscript.validate_case_nos = function(doc) {
 
 cur_frm.cscript.validate_calculate_item_details = function(doc) {
 	doc = locals[doc.doctype][doc.name];
-	var ps_detail = getchildren('Packing Slip Detail', doc.name, 'item_details');
+	var ps_detail = getchildren('Packing Slip Item', doc.name, 'item_details');
 
 	cur_frm.cscript.validate_duplicate_items(doc, ps_detail);
 	cur_frm.cscript.calc_net_total_pkg(doc, ps_detail);

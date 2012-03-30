@@ -1,0 +1,69 @@
+# DocType, SMS Receiver
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2012-03-27 14:36:47',
+		'docstatus': 0,
+		'modified': '2012-03-27 14:36:47',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
+	},
+
+	# These values are common for all DocType
+	{
+		'colour': u'White:FFF',
+		'doctype': 'DocType',
+		'istable': 1,
+		'module': u'Utilities',
+		'name': '__common__',
+		'section_style': u'Tray',
+		'server_code_error': u' ',
+		'version': 2
+	},
+
+	# These values are common for all DocField
+	{
+		'doctype': u'DocField',
+		'fieldtype': u'Data',
+		'name': '__common__',
+		'oldfieldtype': u'Data',
+		'parent': u'SMS Receiver',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
+		'permlevel': 0
+	},
+
+	# DocType, SMS Receiver
+	{
+		'doctype': 'DocType',
+		'name': u'SMS Receiver'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'customer_name',
+		'label': u'Customer Name',
+		'oldfieldname': u'customer_name'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'receiver_name',
+		'label': u'Receiver Name',
+		'oldfieldname': u'receiver_name',
+		'width': u'350px'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'mobile_no',
+		'label': u'Mobile No',
+		'oldfieldname': u'mobile_no',
+		'reqd': 1,
+		'width': u'200px'
+	}
+]

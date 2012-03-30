@@ -66,7 +66,7 @@ for r in row_list:
 
 for r in res:
   if r[col_idx['Against Payable']]:
-    dt=sql("select date(modified), aging_date from `tabPayable Voucher` where name='%s'"%r[col_idx['Against Payable']])
+    dt=sql("select date(modified), aging_date from `tabPurchase Invoice` where name='%s'"%r[col_idx['Against Payable']])
     r.append('')
     r.append(dt and cstr(dt[0][0]) or '')
     r.append(dt and cstr(dt[0][1]) or '')

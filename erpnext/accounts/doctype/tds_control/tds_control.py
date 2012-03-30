@@ -44,14 +44,14 @@ class DocType:
   # voucher in which tds was applicable for 1st time
         
   def validate_first_entry(self,obj):
-    if obj.doc.doctype == 'Payable Voucher':
+    if obj.doc.doctype == 'Purchase Invoice':
       supp_acc = obj.doc.credit_to
     elif obj.doc.doctype == 'Journal Voucher':
       supp_acc = obj.doc.supplier_account
 
     if obj.doc.ded_amount:
       # first pv
-      first_pv = sql("select posting_date from `tabPayable Voucher` where credit_to = '%s' and docstatus = 1 and tds_category = '%s' and fiscal_year = '%s' and tds_applicable = 'Yes' and (ded_amount != 0 or ded_amount is not null) order by posting_date asc limit 1"%(supp_acc, obj.doc.tds_category, obj.doc.fiscal_year))
+      first_pv = sql("select posting_date from `tabPurchase Invoice` where credit_to = '%s' and docstatus = 1 and tds_category = '%s' and fiscal_year = '%s' and tds_applicable = 'Yes' and (ded_amount != 0 or ded_amount is not null) order by posting_date asc limit 1"%(supp_acc, obj.doc.tds_category, obj.doc.fiscal_year))
       first_pv_date = first_pv and first_pv[0][0] or ''
       # first jv
       first_jv = sql("select posting_date from `tabJournal Voucher` where supplier_account = '%s'and docstatus = 1 and tds_category = '%s' and fiscal_year = '%s' and tds_applicable = 'Yes' and (ded_amount != 0 or ded_amount is not null) order by posting_date asc limit 1"%(supp_acc, obj.doc.tds_category, obj.doc.fiscal_year))
@@ -77,7 +77,7 @@ class DocType:
     self.validate_first_entry(obj)
 
     # get current amount and supplier head
-    if obj.doc.doctype == 'Payable Voucher':
+    if obj.doc.doctype == 'Purchase Invoice':
       supplier_account = obj.doc.credit_to
       total_amount=flt(obj.doc.grand_total)
       for d in getlist(obj.doclist,'advance_allocation_details'):
@@ -90,7 +90,7 @@ class DocType:
     if obj.doc.tds_category:      
       # get total billed
       total_billed = 0
-      pv = sql("select sum(ifnull(grand_total,0)), sum(ifnull(ded_amount,0)) from `tabPayable Voucher` where tds_category = %s and credit_to = %s and fiscal_year = %s and docstatus = 1 and name != %s and is_opening != 'Yes'", (obj.doc.tds_category, supplier_account, obj.doc.fiscal_year, obj.doc.name))
+      pv = sql("select sum(ifnull(grand_total,0)), sum(ifnull(ded_amount,0)) from `tabPurchase Invoice` where tds_category = %s and credit_to = %s and fiscal_year = %s and docstatus = 1 and name != %s and is_opening != 'Yes'", (obj.doc.tds_category, supplier_account, obj.doc.fiscal_year, obj.doc.name))
       jv = sql("select sum(ifnull(total_debit,0)), sum(ifnull(ded_amount,0)) from `tabJournal Voucher` where tds_category = %s and supplier_account = %s and fiscal_year = %s and docstatus = 1 and name != %s and is_opening != 'Yes'", (obj.doc.tds_category, supplier_account, obj.doc.fiscal_year, obj.doc.name))
       tds_in_pv = pv and pv[0][1] or 0
       tds_in_jv = jv and jv[0][1] or 0

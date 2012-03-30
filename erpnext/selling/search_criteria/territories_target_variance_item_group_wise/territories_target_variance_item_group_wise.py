@@ -25,7 +25,7 @@ for f in flt_dict:
 fiscal_year = filter_values.get('fiscal_year')
 period = filter_values.get('period')
 under = filter_values.get('under')
-if under == 'Sales Invoice': under = 'Receivable Voucher'
+if under == 'Sales Invoice': under = 'Sales Invoice'
 territory = filter_values.get('territory')
 target_on = filter_values.get('target_on')
 
@@ -124,13 +124,13 @@ for r in res:
     #----------------------------------------------------------    
     if target_on == "Quantity":
 
-      actual = sql("select sum(ifnull(t2.qty,0)) from `tab%s` t1, `tab%s Detail` t2 where t2.parenttype = '%s' and t2.parent = t1.name and t1.%s = '%s' and t1.docstatus = 1 and t2.item_group = '%s' and t1.%s between '%s' and '%s'" % (under, (under == 'Receivable Voucher') and 'RV' or under, under, based_on_fn, territory, r[0],date_fn, mon_list[count][data['start_date']], mon_list[count][data['end_date']]))
+      actual = sql("select sum(ifnull(t2.qty,0)) from `tab%s` t1, `tab%s Detail` t2 where t2.parenttype = '%s' and t2.parent = t1.name and t1.%s = '%s' and t1.docstatus = 1 and t2.item_group = '%s' and t1.%s between '%s' and '%s'" % (under, (under == 'Sales Invoice') and 'RV' or under, under, based_on_fn, territory, r[0],date_fn, mon_list[count][data['start_date']], mon_list[count][data['end_date']]))
       
     
     #----------------------------------------------------------  
     if target_on == "Amount":
 
-      actual = sql("select sum(ifnull(t2.amount,0)) from `tab%s` t1, `tab%s Detail` t2 where t2.parenttype = '%s' and t2.parent = t1.name and t1.%s = '%s' and t1.docstatus = 1 and t2.item_group = '%s' and t1.%s between '%s' and '%s'" % (under, (under == 'Receivable Voucher') and 'RV' or under, under, based_on_fn, territory, r[0],date_fn, mon_list[count][data['start_date']], mon_list[count][data['end_date']]))
+      actual = sql("select sum(ifnull(t2.amount,0)) from `tab%s` t1, `tab%s Detail` t2 where t2.parenttype = '%s' and t2.parent = t1.name and t1.%s = '%s' and t1.docstatus = 1 and t2.item_group = '%s' and t1.%s between '%s' and '%s'" % (under, (under == 'Sales Invoice') and 'RV' or under, under, based_on_fn, territory, r[0],date_fn, mon_list[count][data['start_date']], mon_list[count][data['end_date']]))
 
     #----------------------------------------------------------
 

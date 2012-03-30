@@ -12,16 +12,16 @@
 
 	# These values are common for all Search Criteria
 	{
-		'columns': 'RV Tax Detail\x01Type,RV Tax Detail\x01Account Head,RV Tax Detail\x01Cost Center,RV Tax Detail\x01Description,RV Tax Detail\x01Rate,RV Tax Detail\x01Amount*,RV Tax Detail\x01Total*',
+		'columns': 'Sales Taxes and Charges\x01Type,Sales Taxes and Charges\x01Account Head,Sales Taxes and Charges\x01Cost Center,Sales Taxes and Charges\x01Description,Sales Taxes and Charges\x01Rate,Sales Taxes and Charges\x01Amount*,Sales Taxes and Charges\x01Total*',
 		'criteria_name': 'Voucher wise tax details',
-		'doc_type': 'RV Tax Detail',
+		'doc_type': 'Sales Taxes and Charges',
 		'doctype': 'Search Criteria',
 		'filters': "{'Delivery Note\x01Submitted':1,'Delivery Note\x01Status':'','Delivery Note\x01Fiscal Year':''}",
 		'module': 'Accounts',
 		'name': '__common__',
 		'page_len': 50,
 		'parent_doc_type': 'Delivery Note',
-		'sort_by': '`tabRV Tax Detail`.`parent`',
+		'sort_by': '`tabSales Taxes and Charges`.`parent`',
 		'sort_order': 'DESC',
 		'standard': 'Yes'
 	},

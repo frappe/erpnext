@@ -89,7 +89,7 @@ report.get_query = function() {
     if(company) cond += ' t1.company = "'+company+'" AND ';
     if(fy) cond += ' t1.fiscal_year = "'+fy+'" AND '; 
     
-    var q = 'SELECT DISTINCT t1.name, t1.status, t1.project_name, t1.customer, t1.customer_name, t1.per_billed, t1.per_installed, t1.grand_total FROM `tabDelivery Note` t1, `tabDelivery Note Detail` t2  WHERE '+cond+' IFNULL(t1.project_name,"") !="" AND t1.docstatus != 2';
+    var q = 'SELECT DISTINCT t1.name, t1.status, t1.project_name, t1.customer, t1.customer_name, t1.per_billed, t1.per_installed, t1.grand_total FROM `tabDelivery Note` t1, `tabDelivery Note Item` t2  WHERE '+cond+' IFNULL(t1.project_name,"") !="" AND t1.docstatus != 2';
 
     return q;
   }
@@ -104,7 +104,7 @@ report.get_query = function() {
     if(fy) cond += ' t1.fiscal_year = "'+fy+'" AND '; 
 
        
-    var q = 'SELECT DISTINCT t1.name , t1.debit_to , t1.project_name , t1.customer , t1.customer_name , t1.grand_total  FROM `tabReceivable Voucher` t1,  `tabRV Detail` t2 WHERE '+cond +'IFNULL(t1.project_name,"") !="" AND t1.docstatus != 2 AND t1.name = t2.parent';
+    var q = 'SELECT DISTINCT t1.name , t1.debit_to , t1.project_name , t1.customer , t1.customer_name , t1.grand_total  FROM `tabSales Invoice` t1,  `tabSales Invoice Item` t2 WHERE '+cond +'IFNULL(t1.project_name,"") !="" AND t1.docstatus != 2 AND t1.name = t2.parent';
 
     return q;  
   }

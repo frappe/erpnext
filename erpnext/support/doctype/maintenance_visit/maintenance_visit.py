@@ -59,10 +59,10 @@ class DocType(TransactionBase):
     self.doc.clear_table(self.doclist, 'maintenance_visit_details')
     
     if self.doc.sales_order_no:
-      self.doclist = get_obj('DocType Mapper', 'Sales Order-Maintenance Visit').dt_map('Sales Order', 'Maintenance Visit', self.doc.sales_order_no, self.doc, self.doclist, "[['Sales Order', 'Maintenance Visit'],['Sales Order Detail', 'Maintenance Visit Detail']]")
+      self.doclist = get_obj('DocType Mapper', 'Sales Order-Maintenance Visit').dt_map('Sales Order', 'Maintenance Visit', self.doc.sales_order_no, self.doc, self.doclist, "[['Sales Order', 'Maintenance Visit'],['Sales Order Item', 'Maintenance Visit Purpose']]")
     
     elif self.doc.customer_issue_no:      
-      self.doclist = get_obj('DocType Mapper', 'Customer Issue-Maintenance Visit').dt_map('Customer Issue', 'Maintenance Visit', self.doc.customer_issue_no, self.doc, self.doclist, "[['Customer Issue', 'Maintenance Visit'],['Customer Issue', 'Maintenance Visit Detail']]")
+      self.doclist = get_obj('DocType Mapper', 'Customer Issue-Maintenance Visit').dt_map('Customer Issue', 'Maintenance Visit', self.doc.customer_issue_no, self.doc, self.doclist, "[['Customer Issue', 'Maintenance Visit'],['Customer Issue', 'Maintenance Visit Purpose']]")
   
   #validate reference value using doctype mapper
   #-----------------------------------------------------
@@ -117,7 +117,7 @@ class DocType(TransactionBase):
           elif self.doc.completion_status == 'Partially Completed':
             status = 'Work In Progress'
         else:
-          nm = sql("select t1.name, t1.mntc_date, t2.service_person, t2.work_done from `tabMaintenance Visit` t1, `tabMaintenance Visit Detail` t2 where t2.parent = t1.name and t1.completion_status = 'Partially Completed' and t2.prevdoc_docname = %s and t1.name!=%s and t1.docstatus = 1 order by t1.name desc limit 1", (d.prevdoc_docname, self.doc.name))
+          nm = sql("select t1.name, t1.mntc_date, t2.service_person, t2.work_done from `tabMaintenance Visit` t1, `tabMaintenance Visit Purpose` t2 where t2.parent = t1.name and t1.completion_status = 'Partially Completed' and t2.prevdoc_docname = %s and t1.name!=%s and t1.docstatus = 1 order by t1.name desc limit 1", (d.prevdoc_docname, self.doc.name))
           
           if nm:
             status = 'Work In Progress'
@@ -141,7 +141,7 @@ class DocType(TransactionBase):
         check_for_doctype = d.prevdoc_doctype
     
     if check_for_docname:
-      check = sql("select t1.name from `tabMaintenance Visit` t1, `tabMaintenance Visit Detail` t2 where t2.parent = t1.name and t1.name!=%s and t2.prevdoc_docname=%s and t1.docstatus = 1 and (t1.mntc_date > %s or (t1.mntc_date = %s and t1.mntc_time > %s))", (self.doc.name, check_for_docname, self.doc.mntc_date, self.doc.mntc_date, self.doc.mntc_time))
+      check = sql("select t1.name from `tabMaintenance Visit` t1, `tabMaintenance Visit Purpose` t2 where t2.parent = t1.name and t1.name!=%s and t2.prevdoc_docname=%s and t1.docstatus = 1 and (t1.mntc_date > %s or (t1.mntc_date = %s and t1.mntc_time > %s))", (self.doc.name, check_for_docname, self.doc.mntc_date, self.doc.mntc_date, self.doc.mntc_time))
       
       if check:
         check_lst = [x[0] for x in check]

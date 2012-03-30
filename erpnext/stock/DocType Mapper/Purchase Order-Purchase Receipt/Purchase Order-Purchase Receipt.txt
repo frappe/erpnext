@@ -189,12 +189,12 @@
 	{
 		'doctype': u'Table Mapper Detail',
 		'from_field': u'po_details',
-		'from_table': u'PO Detail',
+		'from_table': u'Purchase Order Item',
 		'match_id': 1,
 		'reference_doctype_key': u'prevdoc_doctype',
 		'reference_key': u'prevdoc_detail_docname',
 		'to_field': u'purchase_receipt_details',
-		'to_table': u'Purchase Receipt Detail',
+		'to_table': u'Purchase Receipt Item',
 		'validation_logic': u'docstatus=1 and qty > ifnull(received_qty,0)'
 	},
 
@@ -212,10 +212,10 @@
 	{
 		'doctype': u'Table Mapper Detail',
 		'from_field': u'purchase_tax_details',
-		'from_table': u'Purchase Tax Detail',
+		'from_table': u'Purchase Taxes and Charges',
 		'match_id': 2,
 		'to_field': u'purchase_tax_details',
-		'to_table': u'Purchase Tax Detail',
+		'to_table': u'Purchase Taxes and Charges',
 		'validation_logic': u'docstatus = 1'
 	}
 ]

@@ -201,8 +201,8 @@
 		'doctype': u'DocField',
 		'fieldname': u'pp_so_details',
 		'fieldtype': u'Table',
-		'label': u'PP SO Details',
-		'options': u'PP SO Detail'
+		'label': u'Production Plan Sales Orders',
+		'options': u'Production Plan Sales Order'
 	},
 
 	# DocField
@@ -256,8 +256,8 @@
 		'doctype': u'DocField',
 		'fieldname': u'pp_details',
 		'fieldtype': u'Table',
-		'label': u'PP Details',
-		'options': u'PP Detail'
+		'label': u'Production Plan Items',
+		'options': u'Production Plan Item'
 	},
 
 	# DocField

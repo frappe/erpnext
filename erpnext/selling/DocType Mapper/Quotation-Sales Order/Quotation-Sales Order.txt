@@ -134,10 +134,10 @@
 	{
 		'doctype': 'Table Mapper Detail',
 		'from_field': 'other_charges',
-		'from_table': 'RV Tax Detail',
+		'from_table': 'Sales Taxes and Charges',
 		'match_id': 2,
 		'to_field': 'other_charges',
-		'to_table': 'RV Tax Detail',
+		'to_table': 'Sales Taxes and Charges',
 		'validation_logic': 'name is not null'
 	},
 
@@ -145,11 +145,11 @@
 	{
 		'doctype': 'Table Mapper Detail',
 		'from_field': 'quotation_details',
-		'from_table': 'Quotation Detail',
+		'from_table': 'Quotation Item',
 		'match_id': 1,
 		'reference_doctype_key': 'prevdoc_doctype',
 		'to_field': 'sales_order_details',
-		'to_table': 'Sales Order Detail',
+		'to_table': 'Sales Order Item',
 		'validation_logic': 'name is not null'
 	},
 

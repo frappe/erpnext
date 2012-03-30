@@ -7,9 +7,27 @@ from webnotes.modules.module_manager import reload_doc
 from webnotes.utils import make_esc
 import os
 
+def execute3():
+	# Dt Mapper renaming
+	ren_mapper = get_mapper_to_be_renamed()
+	# Rename mapper in db
+	rename_in_db(ren_mapper, 'DocType Mapper', 0)
 
+	#---------------------------------------------------
+	# GL Mapper renaming
+	gl_mapper = {'Receivable Voucher': 'Sales Invoice', 'Payable Voucher': 'Purchase Invoice'}
+	rename_in_db(gl_mapper, 'GL Mapper', 0)
+
+
+	#---------------------------------------------------
+	# remove dt label
+	webnotes.conn.sql("""delete from `tabDocType Label` where name in ('Ticket', 'Receivable Voucher', 
+		'QA Inspection Report', 'Payable Voucher', 'Manage Account', 'Indent', 'DocLayer')""")
 
 def execute():
+	update_local_file_system()
+
+def execute2():
 	# delete dt, mapper
 	delete_dt_and_mapper()
 	
@@ -235,7 +253,7 @@ def get_mapper_to_be_renamed():
 		'Enquiry-Quotation'					: 	'Opportunity-Quotation',
 		'Delivery Note-Receivable Voucher'	: 	'Delivery Note-Sales Invoice'
 	}
-	return ren_mapper
+	return ren_map
 
 
 
@@ -250,9 +268,9 @@ def update_local_file_system():
 	rendt = get_dt_to_be_renamed()
 
 	# replace dt in js/py file
-	update_file_content(rendt)
+	#update_file_content(rendt)
 	# git mv
-	rename_dt_files(rendt)
+	#rename_dt_files(rendt)
 
 
 	# Mapper renaming
@@ -268,6 +286,7 @@ def update_local_file_system():
 
 def update_file_content(rendt):
 	for d in rendt:
+		print colored('Renaming... ' + d + ' --> '+ rendt[d], 'yellow')
 		for extn in ['js', 'py', 'txt']:
 			replace_code('/var/www/erpnext/', d, rendt[d], extn)
 		
@@ -293,13 +312,14 @@ def rename_dt_files(rendt):
 def rename_mapper_files(ren_mapper):
 	for d in ren_mapper:
 		# module
-		mod = '_'.join(webnotes.conn.sql("select module from `tabDocType Mapper` where name = %s", ren_mapper[d])[0][0].lower().split())
+		mod = '_'.join(webnotes.conn.sql("select module from `tabDocType Mapper` where name = %s", ren_mapper[d], debug=1)[0][0].lower().split())
 		path = 'erpnext/' + mod + '/DocType Mapper/'
 
 		# rename old dir
 		esc = make_esc('$ ')
 		os.system('git mv ' + esc(path + d) + ' ' + esc(path + ren_mapper[d]))
 		print 'git mv ' + esc(path + d) + ' ' + esc(path + ren_mapper[d])
-		os.system('git mv ' + esc(path + ren_mapper[d] + '/'+ d + '.' +extn) + ' ' + esc(path + ren_mapper[d] + '/' + ren_mapper[d] + '.' +extn))
+		os.system('git mv ' + esc(path + ren_mapper[d] + '/'+ d + '.txt')
+				+ ' ' + esc(path + ren_mapper[d] + '/' + ren_mapper[d] + '.txt'))
 		print 'git mv ' + esc(path + ren_mapper[d] + '/'+ d + '.txt') + ' ' + esc(path + ren_mapper[d] + '/' + ren_mapper[d] + '.txt')
 		

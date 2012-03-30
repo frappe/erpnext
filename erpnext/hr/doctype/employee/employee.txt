@@ -857,7 +857,7 @@
 		'fieldname': u'educational_qualification_details',
 		'fieldtype': u'Table',
 		'label': u'Educational Qualification Details',
-		'options': u'Educational Qualifications Detail',
+		'options': u'Employee Education',
 		'permlevel': 0
 	},
 
@@ -885,8 +885,8 @@
 		'doctype': u'DocField',
 		'fieldname': u'previous_experience_details',
 		'fieldtype': u'Table',
-		'label': u'Previous Experience Details',
-		'options': u'Previous Experience Detail',
+		'label': u'Employee External Work Historys',
+		'options': u'Employee External Work History',
 		'permlevel': 0
 	},
 
@@ -905,8 +905,8 @@
 		'doctype': u'DocField',
 		'fieldname': u'experience_in_company_details',
 		'fieldtype': u'Table',
-		'label': u'Experience In Company Details',
-		'options': u'Experience In Company Detail',
+		'label': u'Employee Internal Work Historys',
+		'options': u'Employee Internal Work History',
 		'permlevel': 0
 	},
 

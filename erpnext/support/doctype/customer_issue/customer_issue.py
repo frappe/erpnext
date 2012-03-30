@@ -48,7 +48,7 @@ class DocType(TransactionBase):
 #check if maintenance schedule already generated
 #============================================
   def check_maintenance_visit(self):
-    nm = sql("select t1.name from `tabMaintenance Visit` t1, `tabMaintenance Visit Detail` t2 where t2.parent=t1.name and t2.prevdoc_docname=%s and t1.docstatus=1 and t1.completion_status='Fully Completed'", self.doc.name)
+    nm = sql("select t1.name from `tabMaintenance Visit` t1, `tabMaintenance Visit Purpose` t2 where t2.parent=t1.name and t2.prevdoc_docname=%s and t1.docstatus=1 and t1.completion_status='Fully Completed'", self.doc.name)
     nm = nm and nm[0][0] or ''
     
     if not nm:
@@ -72,7 +72,7 @@ class DocType(TransactionBase):
     #  raise Exception
   
   def on_cancel(self):
-    lst = sql("select t1.name from `tabMaintenance Visit` t1, `tabMaintenance Visit Detail` t2 where t2.parent = t1.name and t2.prevdoc_docname = '%s' and  t1.docstatus!=2"%(self.doc.name))
+    lst = sql("select t1.name from `tabMaintenance Visit` t1, `tabMaintenance Visit Purpose` t2 where t2.parent = t1.name and t2.prevdoc_docname = '%s' and  t1.docstatus!=2"%(self.doc.name))
     if lst:
       lst1 = ','.join([x[0] for x in lst])
       msgprint("Maintenance Visit No. "+lst1+" already created against this customer issue. So can not be Cancelled")

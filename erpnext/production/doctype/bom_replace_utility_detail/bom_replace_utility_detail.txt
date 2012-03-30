@@ -70,7 +70,7 @@
 		'label': u'Parent BOM',
 		'oldfieldname': u'parent_bom',
 		'oldfieldtype': u'Link',
-		'options': u'Bill Of Materials',
+		'options': u'BOM',
 		'permlevel': 1,
 		'reqd': 1
 	},
@@ -94,7 +94,7 @@
 		'label': u'BOM Created',
 		'oldfieldname': u'bom_created',
 		'oldfieldtype': u'Link',
-		'options': u'Bill Of Materials',
+		'options': u'BOM',
 		'permlevel': 1,
 		'search_index': 0
 	}

@@ -89,11 +89,11 @@ for each in sql("select t2.name, t1.supplier_type from tabSupplier t1, tabAccoun
 
 # get due_date, bill_no, bill_date from PV
 pv_dict = {}
-for t in sql("select name, due_date, bill_no, bill_date from `tabPayable Voucher` group by name"):
+for t in sql("select name, due_date, bill_no, bill_date from `tabPurchase Invoice` group by name"):
 	pv_dict[t[0]] = [cstr(t[1]), t[2], cstr(t[3])]
 
 # pv outside this period
-pv_outside_period = [d[0] for d in sql("select distinct name from `tabPayable Voucher` where (posting_date < '%s' or posting_date > '%s') and docstatus = 1" % (from_date, to_date))]
+pv_outside_period = [d[0] for d in sql("select distinct name from `tabPurchase Invoice` where (posting_date < '%s' or posting_date > '%s') and docstatus = 1" % (from_date, to_date))]
 
 
 out = []
@@ -106,17 +106,17 @@ for r in res:
 	# supplier type
 	r.append(supp_type_dict.get(r[col_idx['Account']], ''))	
 	
-	if r[col_idx['Voucher Type']] == 'Payable Voucher':
+	if r[col_idx['Voucher Type']] == 'Purchase Invoice':
 		r += pv_dict.get(r[col_idx['Voucher No']], ['', '', ''])
 	else:
 		r += ['', '', '']
 	
-	# if entry against Payable Voucher
-	if r[col_idx['Against Voucher']] and r[col_idx['Voucher Type']] == 'Payable Voucher':
+	# if entry against Purchase Invoice
+	if r[col_idx['Against Voucher']] and r[col_idx['Voucher Type']] == 'Purchase Invoice':
 		cond = " and ifnull(against_voucher, '') = '%s'" % r[col_idx['Against Voucher']]
 
 	# if entry against JV & and not adjusted within period
-	elif r[col_idx['Against Voucher Type']] == 'Payable Voucher' and r[col_idx['Against Voucher']] in pv_outside_period:
+	elif r[col_idx['Against Voucher Type']] == 'Purchase Invoice' and r[col_idx['Against Voucher']] in pv_outside_period:
 		booking_amt = 0
 		cond = " and voucher_no = '%s' and ifnull(against_voucher, '') = '%s'" % (r[col_idx['Voucher No']], r[col_idx['Against Voucher']])
 	
@@ -132,7 +132,7 @@ for r in res:
 		total_outstanding_amt += flt(outstanding_amt)
 
 		# add to total booking amount
-		if outstanding_amt and r[col_idx['Voucher Type']] == 'Payable Voucher' and r[col_idx['Against Voucher']]:
+		if outstanding_amt and r[col_idx['Voucher Type']] == 'Purchase Invoice' and r[col_idx['Against Voucher']]:
 			total_booking_amt += flt(booking_amt)
 
 	r += [booking_amt, outstanding_amt]

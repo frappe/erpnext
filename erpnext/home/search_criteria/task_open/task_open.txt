@@ -12,16 +12,16 @@
 
 	# These values are common for all Search Criteria
 	{
-		'add_cond': "`tabTicket`.status='Open'",
-		'columns': 'Ticket\x01ID,Ticket\x01Subject,Ticket\x01Priority,Ticket\x01Raised By,Ticket\x01Allocated To',
+		'add_cond': "`tabTask`.status='Open'",
+		'columns': 'Task\x01ID,Task\x01Subject,Task\x01Priority,Task\x01Raised By,Task\x01Allocated To',
 		'criteria_name': 'Task-Open',
-		'doc_type': 'Ticket',
+		'doc_type': 'Task',
 		'doctype': 'Search Criteria',
-		'filters': "{'Ticket\x01Priority':''}",
+		'filters': "{'Task\x01Priority':''}",
 		'module': 'Home',
 		'name': '__common__',
 		'page_len': 50,
-		'sort_by': '`tabTicket`.`name`',
+		'sort_by': '`tabTask`.`name`',
 		'sort_order': 'DESC',
 		'standard': 'Yes'
 	},

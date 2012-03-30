@@ -13,7 +13,7 @@
 	# These values are common for all Search Criteria
 	{
 		'columns': 'Item\x01ID,Item\x01Item Name,Item\x01Description,Item\x01Lead Time Days',
-		'criteria_name': 'Shortage To Indent',
+		'criteria_name': 'Shortage To Purchase Request',
 		'doc_type': 'Item',
 		'doctype': 'Search Criteria',
 		'filters': "{'Item\x01Saved':1}",

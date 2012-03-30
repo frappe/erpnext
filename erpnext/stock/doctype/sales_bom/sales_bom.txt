@@ -242,7 +242,7 @@
 		'label': u'Sales BOM Items',
 		'oldfieldname': u'sales_bom_items',
 		'oldfieldtype': u'Table',
-		'options': u'Sales BOM Detail',
+		'options': u'Sales BOM Item',
 		'permlevel': 0
 	},
 
@@ -278,7 +278,7 @@
 		'fieldtype': u'Link',
 		'label': u'Amended From',
 		'no_copy': 1,
-		'options': u'Receivable Voucher',
+		'options': u'Sales Invoice',
 		'permlevel': 1,
 		'print_hide': 1
 	}

@@ -260,7 +260,7 @@
 		'fieldname': u'bom_no',
 		'fieldtype': u'Link',
 		'label': u'BOM No.',
-		'options': u'Bill Of Materials',
+		'options': u'BOM',
 		'permlevel': 0
 	}
 ]

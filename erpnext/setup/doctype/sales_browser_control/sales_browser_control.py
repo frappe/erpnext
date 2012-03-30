@@ -82,7 +82,7 @@ class DocType:
     #validation for trash of default record
     if not type == 'Sales Person':
       field = 'default_'+type.lower().replace(' ','_')
-      chk = sql("select value from `tabSingles` where doctype = 'Manage Account' and field = '%s' and value = '%s'"%(field,name))
+      chk = sql("select value from `tabSingles` where doctype = 'Global Defaults' and field = '%s' and value = '%s'"%(field,name))
       if chk:
         msgprint("'%s' record is set as a default %s in Global Defaults. Please change default %s then try to trash '%s' record."%(name,type.lower(), type.lower(), name))
         raise Exception

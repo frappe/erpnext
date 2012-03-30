@@ -39,7 +39,7 @@ class DocType:
   # Autoname
   #========================================================================================================
   def autoname(self):
-    ret = sql("select value from `tabSingles` where doctype = 'Manage Account' and field = 'emp_created_by'")
+    ret = sql("select value from `tabSingles` where doctype = 'Global Defaults' and field = 'emp_created_by'")
     if not ret:
       msgprint("To Save Employee, please go to Setup -->Global Defaults. Click on HR and select 'Employee Records to be created by'.")
       raise Exception 
@@ -113,7 +113,7 @@ class DocType:
   # Validate name
   #========================================================================================================
   def validate_name(self):  
-    ret = sql("select value from `tabSingles` where doctype = 'Manage Account' and field = 'emp_created_by'")
+    ret = sql("select value from `tabSingles` where doctype = 'Global Defaults' and field = 'emp_created_by'")
 
     if not ret:
       msgprint("To Save Employee, please go to Setup -->Global Defaults. Click on HR and select 'Employee Records to be created by'.")

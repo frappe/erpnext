@@ -39,12 +39,12 @@ class DocType:
     self.doclist = doclist
     
   def search_parent_bom_of_bom(self):
-    pbom = sql("select parent from `tabBOM Material` where bom_no = '%s' and docstatus = 1 " % self.doc.s_bom )
+    pbom = sql("select parent from `tabBOM Item` where bom_no = '%s' and docstatus = 1 " % self.doc.s_bom )
     self.doc.clear_table(self.doclist,'replace_bom_details', 1)
     self.add_to_replace_bom_utility_detail(pbom, 'replace_bom_details')
   
   def search_parent_bom_of_item(self):
-    pbom = sql("select parent from `tabBOM Material` where item_code = '%s' and (bom_no is NULL or bom_no = '') and docstatus =1" % self.doc.s_item )
+    pbom = sql("select parent from `tabBOM Item` where item_code = '%s' and (bom_no is NULL or bom_no = '') and docstatus =1" % self.doc.s_item )
     self.doc.clear_table(self.doclist,'replace_item_details', 1)
     self.add_to_replace_bom_utility_detail(pbom, 'replace_item_details')
     
@@ -57,7 +57,7 @@ class DocType:
     
   def replace_bom(self):
     # validate r_bom
-    bom = sql("select name, is_active, docstatus from `tabBill Of Materials` where name = %s",self.doc.r_bom, as_dict =1)
+    bom = sql("select name, is_active, docstatus from `tabBOM` where name = %s",self.doc.r_bom, as_dict =1)
     if not bom:
       msgprint("Please Enter Valid BOM to replace with.")
       raise Exception
@@ -69,7 +69,7 @@ class DocType:
       raise Exception
     
     # get item code of r_bom
-    item_code = cstr(sql("select item from `tabBill Of Materials` where name = '%s' " % self.doc.r_bom)[0][0])
+    item_code = cstr(sql("select item from `tabBOM` where name = '%s' " % self.doc.r_bom)[0][0])
     # call replace bom engine
     self.replace_bom_engine('replace_bom_details', 'bom_no', self.doc.s_bom, self.doc.r_bom, item_code)
   
@@ -107,12 +107,12 @@ class DocType:
         # make copy
         if self.doc.create_new_bom:
           import webnotes.model.doc
-          new_bom_dl = copy_doclist(webnotes.model.doc.get('Bill Of Materials', d.parent_bom), no_copy = ['is_active', 'is_default', 'is_sub_assembly', 'remarks', 'flat_bom_details'])
+          new_bom_dl = copy_doclist(webnotes.model.doc.get('BOM', d.parent_bom), no_copy = ['is_active', 'is_default', 'is_sub_assembly', 'remarks', 'flat_bom_details'])
         
           new_bom_dl[0].docstatus = 0
           new_bom_dl[0].save()
         else:
-          new_bom_dl = get_obj('Bill Of Materials', d.parent_bom, with_children = 1).doclist
+          new_bom_dl = get_obj('BOM', d.parent_bom, with_children = 1).doclist
 
         # replace s_data with r_data in Bom Material Detail Table
         self.replace_data_in_bom_materials(new_bom_dl, fname, s_data, r_data, item_code)
@@ -121,7 +121,7 @@ class DocType:
         d.save()
 
   def update_docstatus(self):
-    sql("update `tabBill Of Materials` set docstatus = 0 where  name = '%s' limit 1" % self.doc.bom)
+    sql("update `tabBOM` set docstatus = 0 where  name = '%s' limit 1" % self.doc.bom)
     msgprint("Updated")
 
   def update_bom(self):
@@ -132,7 +132,7 @@ class DocType:
     #msgprint(main_bom_list)
     for bom in main_bom_list:
       if bom and bom not in self.check_bom_list:
-        bom_obj = get_obj('Bill Of Materials', bom, with_children = 1)
+        bom_obj = get_obj('BOM', bom, with_children = 1)
         #print(bom_obj.doc.fields)
         bom_obj.validate()
         bom_obj.doc.docstatus = 1

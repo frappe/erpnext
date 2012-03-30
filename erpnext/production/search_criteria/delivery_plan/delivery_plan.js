@@ -25,8 +25,8 @@ report.customize_filters = function() {
   // to unhide required filters
   this.filter_fields_dict['Sales Order'+FILTER_SEP +'Customer'].df.filter_hide = 0;
   this.filter_fields_dict['Sales Order'+FILTER_SEP +'Customer Name'].df.filter_hide = 0;
-  this.filter_fields_dict['Sales Order Detail'+FILTER_SEP +'From Confirmed Delivery Date'].df.filter_hide = 0;
-  this.filter_fields_dict['Sales Order Detail'+FILTER_SEP +'To Confirmed Delivery Date'].df.filter_hide = 0;
+  this.filter_fields_dict['Sales Order Item'+FILTER_SEP +'From Confirmed Delivery Date'].df.filter_hide = 0;
+  this.filter_fields_dict['Sales Order Item'+FILTER_SEP +'To Confirmed Delivery Date'].df.filter_hide = 0;
 
 
   this.filter_fields_dict['Sales Order'+FILTER_SEP +'Company'].df['report_default'] = sys_defaults.company;

@@ -96,10 +96,10 @@ class DocType:
     ret = {}
     st,group = [],[]
     if module == 'Sales':
-      st = ['Quotation','Sales Order','Delivery Note','Receivable Voucher']
+      st = ['Quotation','Sales Order','Delivery Note','Sales Invoice']
       group = ['Item','Item Group','Customer','Customer Group','Cost Center']
     elif module == 'Purchase':
-      st = ['Purchase Order','Purchase Receipt','Payable Voucher']
+      st = ['Purchase Order','Purchase Receipt','Purchase Invoice']
       group = ['Item','Item Group','Supplier','Supplier Type']
     
     ret['stmt_type'] = st

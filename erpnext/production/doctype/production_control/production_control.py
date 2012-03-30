@@ -46,7 +46,7 @@ class DocType:
 		count, bom_list, qty_list = 0, [bom_no], [qty]
 		while (count < len(bom_list)):
 			# get child items from BOM MAterial Table.
-			child_items = sql("select item_code, bom_no, qty, qty_consumed_per_unit from `tabBOM Material` where parent = %s", bom_list[count], as_dict = 1)
+			child_items = sql("select item_code, bom_no, qty, qty_consumed_per_unit from `tabBOM Item` where parent = %s", bom_list[count], as_dict = 1)
 			child_items = child_items and child_items or []
 			for item in child_items:
 				# Calculate qty required for FG's qty.
@@ -106,7 +106,7 @@ class DocType:
 		# run calculate cost and get
 		for bom in main_bom_list:
 			if bom and bom not in self.check_bom_list:
-				bom_obj = get_obj('Bill Of Materials', bom, with_children = 1)
+				bom_obj = get_obj('BOM', bom, with_children = 1)
 				bom_obj.doc.save()
 				bom_obj.check_recursion()
 				bom_obj.update_flat_bom_engine()

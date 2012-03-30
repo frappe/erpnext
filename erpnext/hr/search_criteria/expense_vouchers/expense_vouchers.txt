@@ -12,15 +12,15 @@
 
 	# These values are common for all Search Criteria
 	{
-		'columns': 'Expense Voucher\x01ID,Expense Voucher\x01Approval Status,Expense Voucher\x01From Employee,Expense Voucher\x01Employee Name,Expense Voucher\x01Approver,Expense Voucher\x01Posting Date,Expense Voucher\x01Total Claimed Amount,Expense Voucher\x01Total Sanctioned Amount',
-		'criteria_name': 'Expense Vouchers',
-		'doc_type': 'Expense Voucher',
+		'columns': 'Expense Claim\x01ID,Expense Claim\x01Approval Status,Expense Claim\x01From Employee,Expense Claim\x01Employee Name,Expense Claim\x01Approver,Expense Claim\x01Posting Date,Expense Claim\x01Total Claimed Amount,Expense Claim\x01Total Sanctioned Amount',
+		'criteria_name': 'Expense Claims',
+		'doc_type': 'Expense Claim',
 		'doctype': 'Search Criteria',
-		'filters': "{'Expense Voucher\x01Saved':1,'Expense Voucher\x01Submitted':1,'Expense Voucher\x01Approval Status':'','Expense Voucher\x01Fiscal Year':''}",
+		'filters': "{'Expense Claim\x01Saved':1,'Expense Claim\x01Submitted':1,'Expense Claim\x01Approval Status':'','Expense Claim\x01Fiscal Year':''}",
 		'module': 'HR',
 		'name': '__common__',
 		'page_len': 50,
-		'sort_by': '`tabExpense Voucher`.`name`',
+		'sort_by': '`tabExpense Claim`.`name`',
 		'sort_order': 'DESC',
 		'standard': 'Yes'
 	},

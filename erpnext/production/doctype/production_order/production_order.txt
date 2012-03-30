@@ -153,7 +153,7 @@
 		'label': u'BOM No',
 		'oldfieldname': u'bom_no',
 		'oldfieldtype': u'Link',
-		'options': u'Bill Of Materials',
+		'options': u'BOM',
 		'permlevel': 1,
 		'reqd': 1,
 		'trigger': u'Client'

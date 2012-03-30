@@ -25,7 +25,7 @@ for f in flt_dict:
 fiscal_year = filter_values.get('fiscal_year')
 period = filter_values.get('period')
 under = filter_values.get('under')
-if under == 'Sales Invoice': under = 'Receivable Voucher'
+if under == 'Sales Invoice': under = 'Sales Invoice'
 based_on = filter_values.get('based_on')
 target_on = filter_values.get('target_on')
 
@@ -201,10 +201,10 @@ for r in res:
     #----------------------------------------------------------    
     if target_on == "Quantity":
       if based_on == "Territory":
-        actual = sql("select sum(ifnull(t2.qty,0)) from `tab%s` t1, `tab%s Detail` t2 where t2.parenttype = '%s' and t2.parent = t1.name and t1.%s in %s and t1.docstatus = 1 and t1.%s between '%s' and '%s'" % (under, (under == 'Receivable Voucher') and 'RV' or under, under, based_on_fn, ch, date_fn, mon_list[count][data['start_date']], mon_list[count][data['end_date']]))
+        actual = sql("select sum(ifnull(t2.qty,0)) from `tab%s` t1, `tab%s Detail` t2 where t2.parenttype = '%s' and t2.parent = t1.name and t1.%s in %s and t1.docstatus = 1 and t1.%s between '%s' and '%s'" % (under, (under == 'Sales Invoice') and 'RV' or under, under, based_on_fn, ch, date_fn, mon_list[count][data['start_date']], mon_list[count][data['end_date']]))
       
       elif based_on == 'Sales Person':
-        actual = sql("select sum(ifnull(t2.qty,0) * ifnull(t3.allocated_percentage,0) / 100) from `tab%s` t1, `tab%s Detail` t2, `tabSales Team` t3 where t2.parent = t1.name and t3.parent = t1.name and t3.%s in %s and t1.docstatus != 2 and t1.docstatus = 1 and t1.%s between '%s' and '%s' "%(under, (under == 'Receivable Voucher') and 'RV' or under, based_on_fn, ch, date_fn, mon_list[count][data['start_date']], mon_list[count][data['end_date']]))
+        actual = sql("select sum(ifnull(t2.qty,0) * ifnull(t3.allocated_percentage,0) / 100) from `tab%s` t1, `tab%s Detail` t2, `tabSales Team` t3 where t2.parent = t1.name and t3.parent = t1.name and t3.%s in %s and t1.docstatus != 2 and t1.docstatus = 1 and t1.%s between '%s' and '%s' "%(under, (under == 'Sales Invoice') and 'RV' or under, based_on_fn, ch, date_fn, mon_list[count][data['start_date']], mon_list[count][data['end_date']]))
     
     #----------------------------------------------------------  
     if target_on == "Amount":

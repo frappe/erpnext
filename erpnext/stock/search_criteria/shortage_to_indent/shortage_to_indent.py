@@ -73,7 +73,7 @@ col = [['Total Daily Consumption','Currency','150px','']
       ,['Actual Quantity','Currency','150px','']
       ,['Indented Quantity','Currency','150px','']
       ,['Ordered Quantity','Currency','150px','']
-      ,['Shortage To Indent','Currency','150px','']
+      ,['Shortage To Purchase Request','Currency','150px','']
       ,['MAR','Currency','100px','']
       ,['LPR','Currency','100px','']]
 

@@ -12,11 +12,11 @@
 
 	# These values are common for all Search Criteria
 	{
-		'add_col': "SUM(`tabSales Order Detail`.`qty` - `tabSales Order Detail`.`delivered_qty`) AS 'Pending Qty'\nSUM((`tabSales Order Detail`.`qty` - `tabSales Order Detail`.`delivered_qty`)* `tabSales Order Detail`.basic_rate) AS 'Pending Amount'",
-		'add_cond': '`tabSales Order Detail`.`qty` > `tabSales Order Detail`.`delivered_qty`\nIFNULL(`tabSales Order`.`project_name`,"")!=""\n`tabSales Order`.order_type = \'Sales\'',
-		'columns': 'Sales Order\x01ID,Sales Order\x01Project Name,Sales Order\x01Customer,Sales Order\x01Customer Name,Sales Order Detail\x01Item Code,Sales Order Detail\x01Item Name,Sales Order\x01%  Delivered,Sales Order\x01% Billed,Sales Order\x01Sales Order Date,Sales Order\x01Expected Delivery Date',
+		'add_col': "SUM(`tabSales Order Item`.`qty` - `tabSales Order Item`.`delivered_qty`) AS 'Pending Qty'\nSUM((`tabSales Order Item`.`qty` - `tabSales Order Item`.`delivered_qty`)* `tabSales Order Item`.basic_rate) AS 'Pending Amount'",
+		'add_cond': '`tabSales Order Item`.`qty` > `tabSales Order Item`.`delivered_qty`\nIFNULL(`tabSales Order`.`project_name`,"")!=""\n`tabSales Order`.order_type = \'Sales\'',
+		'columns': 'Sales Order\x01ID,Sales Order\x01Project Name,Sales Order\x01Customer,Sales Order\x01Customer Name,Sales Order Item\x01Item Code,Sales Order Item\x01Item Name,Sales Order\x01%  Delivered,Sales Order\x01% Billed,Sales Order\x01Sales Order Date,Sales Order\x01Expected Delivery Date',
 		'criteria_name': 'Projectwise Pending Qty and Costs',
-		'doc_type': 'Sales Order Detail',
+		'doc_type': 'Sales Order Item',
 		'doctype': 'Search Criteria',
 		'filters': "{'Sales Order\x01Submitted':1,'Sales Order\x01Status':'Submitted','Sales Order\x01Fiscal Year':''}",
 		'module': 'Projects',

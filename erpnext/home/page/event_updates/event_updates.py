@@ -30,7 +30,7 @@ def get_unread_messages():
 	"returns unread (docstatus-0 messages for a user)"
 	return webnotes.conn.sql("""\
 		SELECT name, comment
-		FROM `tabComment Widget Record`
+		FROM `tabComment`
 		WHERE comment_doctype IN ('My Company', 'Message')
 		AND comment_docname = %s
 		AND ifnull(docstatus,0)=0
@@ -52,7 +52,7 @@ def get_things_todo():
 	"""
 	from webnotes.utils import cint
 	incomplete_todos = webnotes.conn.sql("""\
-		SELECT COUNT(*) FROM `tabToDo Item`
+		SELECT COUNT(*) FROM `tabToDo`
 		WHERE IFNULL(checked, 0) = 0
 		AND owner = %s""", webnotes.session.get('user'))
 	return incomplete_todos and cint(incomplete_todos[0][0]) or 0

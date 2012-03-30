@@ -223,7 +223,7 @@ class DocType:
 	# ==================================================================
 	def get_authorized_user(self):
 		# Check logged-in user is authorized
-		if get_value('Manage Account', None, 'credit_controller') in webnotes.user.get_roles():
+		if get_value('Global Defaults', None, 'credit_controller') in webnotes.user.get_roles():
 			return 1
 			
 	# Check Credit limit for customer

@@ -99,7 +99,7 @@ class DocType:
 		"""
 			Get default print format from doclayer
 		"""
-		doclayer = get_obj('DocLayer', 'DocLayer')
+		doclayer = get_obj('Customize Form', 'Customize Form')
 		doclayer.doc.doc_type = args.get('doctype')
 		doclayer.get()
 		if doclayer.doc.default_print_format:

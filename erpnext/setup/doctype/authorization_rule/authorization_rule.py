@@ -69,7 +69,7 @@ class DocType:
   # Validate Rule
   # --------------
   def validate_rule(self):
-    if not self.doc.transaction == 'Expense Voucher' and not self.doc.transaction == 'Appraisal':
+    if not self.doc.transaction == 'Expense Claim' and not self.doc.transaction == 'Appraisal':
       if not self.doc.approving_role and not self.doc.approving_user:
         msgprint("Please enter Approving Role or Approving User")
         raise Exception
@@ -95,8 +95,8 @@ class DocType:
       if self.doc.transaction == 'Appraisal' and self.doc.based_on != 'Not Applicable':
         msgprint("Based on is 'Not Applicable' while setting authorization rule for 'Appraisal'")
         raise Exception
-      if self.doc.transaction == 'Expense Voucher' and self.doc.based_on != 'Total Claimed Amount':
-        msgprint("Authorization rule should be based on 'Total Calimed Amount' while setting authorization rule for 'Expense Voucher'")
+      if self.doc.transaction == 'Expense Claim' and self.doc.based_on != 'Total Claimed Amount':
+        msgprint("Authorization rule should be based on 'Total Calimed Amount' while setting authorization rule for 'Expense Claim'")
         raise Exception
 
 

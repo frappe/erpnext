@@ -534,7 +534,7 @@
 	# DocField
 	{
 		'colour': u'White:FFF',
-		'description': u'Lead Time days is number of days by which this item is expected in your warehouse. This days is fetched in Indent when you select this item.',
+		'description': u'Lead Time days is number of days by which this item is expected in your warehouse. This days is fetched in Purchase Request when you select this item.',
 		'doctype': u'DocField',
 		'fieldname': u'lead_time_days',
 		'fieldtype': u'Int',
@@ -782,10 +782,10 @@
 		'doctype': u'DocField',
 		'fieldname': u'ref_rate_details',
 		'fieldtype': u'Table',
-		'label': u'Ref Rate Details',
+		'label': u'Item Prices',
 		'oldfieldname': u'ref_rate_details',
 		'oldfieldtype': u'Table',
-		'options': u'Ref Rate Detail',
+		'options': u'Item Price',
 		'permlevel': 0
 	},
 
@@ -852,10 +852,10 @@
 		'doctype': u'DocField',
 		'fieldname': u'item_specification_details',
 		'fieldtype': u'Table',
-		'label': u'Item Specification Detail',
+		'label': u'Item Quality Inspection Parameter',
 		'oldfieldname': u'item_specification_details',
 		'oldfieldtype': u'Table',
-		'options': u'Item Specification Detail',
+		'options': u'Item Quality Inspection Parameter',
 		'permlevel': 0
 	},
 
@@ -895,7 +895,7 @@
 		'no_copy': 1,
 		'oldfieldname': u'default_bom',
 		'oldfieldtype': u'Link',
-		'options': u'Bill Of Materials',
+		'options': u'BOM',
 		'permlevel': 1
 	},
 

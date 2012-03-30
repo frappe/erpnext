@@ -122,7 +122,7 @@
 		'fieldname': u's_bom',
 		'fieldtype': u'Link',
 		'label': u'Select BOM',
-		'options': u'Bill Of Materials',
+		'options': u'BOM',
 		'trigger': u'Client'
 	},
 
@@ -169,7 +169,7 @@
 		'fieldname': u'r_bom',
 		'fieldtype': u'Link',
 		'label': u'Replace Bom with',
-		'options': u'Bill Of Materials',
+		'options': u'BOM',
 		'trigger': u'Client'
 	},
 
@@ -341,7 +341,7 @@
 		'fieldname': u'fg_bom_no',
 		'fieldtype': u'Link',
 		'label': u'FG BOM No',
-		'options': u'Bill Of Materials'
+		'options': u'BOM'
 	},
 
 	# DocField
@@ -368,7 +368,7 @@
 		'fieldname': u'bom',
 		'fieldtype': u'Link',
 		'label': u'BOM',
-		'options': u'Bill Of Materials'
+		'options': u'BOM'
 	},
 
 	# DocField

@@ -12,4 +12,4 @@ def execute():
 		for r in del_rec[d]:
 			delete_doc(d, r)
 
-	sql("delete from tabDocField where label='Repair Indent' and parent = 'Indent'")
+	sql("delete from tabDocField where label='Repair Purchase Request' and parent = 'Purchase Request'")

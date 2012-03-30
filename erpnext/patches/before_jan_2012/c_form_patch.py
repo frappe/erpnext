@@ -24,5 +24,5 @@ def execute():
 	reload_doc('accounts', 'Module Def', 'Accounts')
 
 	sql = webnotes.conn.sql
-	sql("update `tabReceivable Voucher` set c_form_applicable = 'Yes' where c_form_applicable = 'Y'")
-	sql("update `tabReceivable Voucher` set c_form_applicable = 'No' where c_form_applicable = 'N'")
+	sql("update `tabSales Invoice` set c_form_applicable = 'Yes' where c_form_applicable = 'Y'")
+	sql("update `tabSales Invoice` set c_form_applicable = 'No' where c_form_applicable = 'N'")

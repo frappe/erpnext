@@ -113,19 +113,19 @@
 	{
 		'doctype': 'Table Mapper Detail',
 		'from_field': 'earning_details',
-		'from_table': 'Earning Detail',
+		'from_table': 'Salary Structure Earning',
 		'match_id': 1,
 		'to_field': 'earning_details',
-		'to_table': 'SS Earning Detail'
+		'to_table': 'Salary Slip Earning'
 	},
 
 	# Table Mapper Detail
 	{
 		'doctype': 'Table Mapper Detail',
 		'from_field': 'deduction_details',
-		'from_table': 'Deduction Detail',
+		'from_table': 'Salary Structure Deduction',
 		'match_id': 2,
 		'to_field': 'deduction_details',
-		'to_table': 'SS Deduction Detail'
+		'to_table': 'Salary Slip Deduction'
 	}
 ]

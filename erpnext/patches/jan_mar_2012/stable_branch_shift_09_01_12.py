@@ -19,10 +19,10 @@ from webnotes.modules import reload_doc
 	
 def execute():
 	"""
-		* Reload RV Tax Detail
+		* Reload Sales Taxes and Charges
 		* Reload Support Ticket
 		* Run Install Print Format Patch
-		* Reload DocLayer
+		* Reload Customize Form
 	"""
 	reload_doc('accounts', 'doctype', 'rv_tax_detail')
 	reload_doc('support', 'doctype', 'support_ticket')

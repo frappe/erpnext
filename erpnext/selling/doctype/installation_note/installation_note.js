@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-cur_frm.cscript.tname = "Installed Item Details";
+cur_frm.cscript.tname = "Installation Note Item";
 cur_frm.cscript.fname = "installed_item_details";
 
 cur_frm.cscript.onload = function(doc, dt, dn) {
@@ -34,7 +34,7 @@ cur_frm.fields_dict['delivery_note_no'].get_query = function(doc) {
   if(doc.customer) {
     cond = '`tabDelivery Note`.customer = "'+doc.customer+'" AND';
   }
-  return repl('SELECT DISTINCT `tabDelivery Note`.name, `tabDelivery Note`.customer_name  FROM `tabDelivery Note`, `tabDelivery Note Detail` WHERE `tabDelivery Note`.company = "%(company)s" AND `tabDelivery Note`.docstatus = 1 AND ifnull(`tabDelivery Note`.per_installed,0) < 100 AND %(cond)s `tabDelivery Note`.name LIKE "%s" ORDER BY `tabDelivery Note`.name DESC LIMIT 50', {company:doc.company, cond:cond});
+  return repl('SELECT DISTINCT `tabDelivery Note`.name, `tabDelivery Note`.customer_name  FROM `tabDelivery Note`, `tabDelivery Note Item` WHERE `tabDelivery Note`.company = "%(company)s" AND `tabDelivery Note`.docstatus = 1 AND ifnull(`tabDelivery Note`.per_installed,0) < 100 AND %(cond)s `tabDelivery Note`.name LIKE "%s" ORDER BY `tabDelivery Note`.name DESC LIMIT 50', {company:doc.company, cond:cond});
 }
 
 

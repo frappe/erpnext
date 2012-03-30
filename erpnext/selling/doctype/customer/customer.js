@@ -214,11 +214,11 @@ cur_frm.cscript.make_si_list = function(parent,doc){
 	lst.colwidths = ['5%','20%','20%','20%','20%','15%'];
 	lst.colnames = ['Sr.','Id','Posting Date','Due Date','Debit To','Grand Total'];
 	lst.coltypes = ['Data','Link','Data','Data','Link','Currency'];
-	lst.coloptions = ['','Receivable Voucher','','','Account',''];
+	lst.coloptions = ['','Sales Invoice','','','Account',''];
 
 
-	var q = repl("select name,posting_date,due_date,debit_to,grand_total from `tabReceivable Voucher` where customer='%(cust)s' order by posting_date desc", {'cust':doc.name});
-	var q_max = repl("select count(name) from `tabReceivable Voucher` where customer='%(cust)s'", {'cust':doc.name});
+	var q = repl("select name,posting_date,due_date,debit_to,grand_total from `tabSales Invoice` where customer='%(cust)s' order by posting_date desc", {'cust':doc.name});
+	var q_max = repl("select count(name) from `tabSales Invoice` where customer='%(cust)s'", {'cust':doc.name});
 	
-	cur_frm.cscript.run_list(lst,parent,q,q_max,doc,'Sales Invoice','Receivable Voucher');
+	cur_frm.cscript.run_list(lst,parent,q,q_max,doc,'Sales Invoice','Sales Invoice');
 }

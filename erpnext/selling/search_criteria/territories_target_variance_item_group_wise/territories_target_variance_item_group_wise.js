@@ -35,7 +35,7 @@ report.get_query = function() {
   territory = this.filter_fields_dict['Target Detail'+FILTER_SEP+'Territory'].get_value();
   target_on = this.filter_fields_dict['Target Detail'+FILTER_SEP+'Target On'].get_value();   
   under = this.filter_fields_dict['Target Detail'+FILTER_SEP+'Under'].get_value();   
-  if(under == 'Sales Invoice') under = 'Receivable Voucher';
+  if(under == 'Sales Invoice') under = 'Sales Invoice';
 
   if(target_on == 'Quantity'){
     q1 = 't1.target_qty AS "Target Quantity"';
@@ -49,7 +49,7 @@ report.get_query = function() {
     cond1 = 'ifnull(t1.target_amount,"")!=""';
     cond2 = 'ifnull(t5.target_amount,"")!=""';
   }
-  if(under =='Receivable Voucher')
+  if(under =='Sales Invoice')
     tab = 'RV';
   else
     tab = under;

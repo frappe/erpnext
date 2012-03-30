@@ -16,7 +16,7 @@
 		'dis_filters': 'fiscal_year',
 		'doc_type': 'Journal Voucher Detail',
 		'doctype': 'Search Criteria',
-		'filters': "{'Journal Voucher\x01Submitted':1,'Journal Voucher\x01Voucher Type':'','Journal Voucher\x01Is Opening':'','Journal Voucher\x01Fiscal Year':'','Journal Voucher\x01Company':'','Journal Voucher\x01TDS Applicable':'','Journal Voucher\x01TDS Category':'','Receivable Voucher\x01Aging Based On':'','Payable Voucher\x01Aging Based On':'Transaction Date','Journal Voucher Detail\x01Report Type':'CENVAT CREDIT ACCOUNT - INPUTS (R.G.23 A - PART II)'}",
+		'filters': "{'Journal Voucher\x01Submitted':1,'Journal Voucher\x01Voucher Type':'','Journal Voucher\x01Is Opening':'','Journal Voucher\x01Fiscal Year':'','Journal Voucher\x01Company':'','Journal Voucher\x01TDS Applicable':'','Journal Voucher\x01TDS Category':'','Sales Invoice\x01Aging Based On':'','Purchase Invoice\x01Aging Based On':'Transaction Date','Journal Voucher Detail\x01Report Type':'CENVAT CREDIT ACCOUNT - INPUTS (R.G.23 A - PART II)'}",
 		'module': 'Accounts',
 		'name': '__common__',
 		'page_len': 50,

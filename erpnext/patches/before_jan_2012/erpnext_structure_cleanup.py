@@ -85,7 +85,7 @@ def delete_unwanted_search_criteria():
 def delete_unwanted_mappers():
 	"deletes unwanted mappers"
 	
-	lst = ['Customer Issue-Maintenance Report', 'Enquiry-Service Quotation', 'Sales Order-Maintenance Report', 'Service Quotation-Service Order', 'Supplier Quotation-Purchase Order', 'Visit Schedule-Maintenance Report', 'RFQ-Supplier Quotation', 'Indent-RFQ']
+	lst = ['Customer Issue-Maintenance Report', 'Enquiry-Service Quotation', 'Sales Order-Maintenance Report', 'Service Quotation-Service Order', 'Supplier Quotation-Purchase Order', 'Visit Schedule-Maintenance Report', 'RFQ-Supplier Quotation', 'Purchase Request-RFQ']
 	for d in lst:
 		try:
 			delete_doc('DocType Mapper', d)
@@ -161,13 +161,13 @@ def sync_mapper():
 	"Put mappers into corresponding module"
 		
 	mappers = {
-		'Accounts':		('Delivery Note-Receivable Voucher', 'Project-Receivable Voucher', 'Purchase Order-Payable Voucher', 'Purchase Receipt-Payable Voucher', 'Sales Order-Receivable Voucher'), 
-		'Selling': 		('Delivery Note-Installation Note', 'Enquiry-Quotation', 'Lead-Enquiry', 'Lead-Customer', 'Project-Sales Order', 'Quotation-Sales Order', ), 
-		'Buying':		('Indent-Purchase Order', 'Sales Order-Indent'), 
-		'Stock':		('Purchase Order-Purchase Receipt', 'Project-Delivery Note', 'Receivable Voucher-Delivery Note', 'Sales Order-Delivery Note'), 
+		'Accounts':		('Delivery Note-Sales Invoice', 'Project-Sales Invoice', 'Purchase Order-Purchase Invoice', 'Purchase Receipt-Purchase Invoice', 'Sales Order-Sales Invoice'), 
+		'Selling': 		('Delivery Note-Installation Note', 'Opportunity-Quotation', 'Lead-Opportunity', 'Lead-Customer', 'Project-Sales Order', 'Quotation-Sales Order', ), 
+		'Buying':		('Purchase Request-Purchase Order', 'Sales Order-Purchase Request'), 
+		'Stock':		('Purchase Order-Purchase Receipt', 'Project-Delivery Note', 'Sales Invoice-Delivery Note', 'Sales Order-Delivery Note'), 
 		'Support':		('Customer Issue-Maintenance Visit', 'Sales Order-Maintenance Schedule', 'Sales Order-Maintenance Visit'), 
 		'Production':	('Production Forecast-Production Plan', 'Production Forecast-Production Planning Tool', 'Sales Order-Production Plan'), 
-		'HR':			('KRA Template-Appraisal', 'Salary Structure-Salary Slip')
+		'HR':			('Appraisal Template-Appraisal', 'Salary Structure-Salary Slip')
 	}
 	
 	for mod in mappers.keys():
@@ -195,7 +195,7 @@ def sync_mapper():
 #---------------------------------------
 def run_patches():
 	# update module
-	dt_module = {'LC PR Detail':'Stock', 'Landed Cost Detail':'Stock', 'Comment Widget Record': 'Core', 'Tag':'Core', 'Tag Detail': 'Core', 'POS Settings': 'Accounts', 'Menu Item': 'Setup', 'Menu Item Role': 'Setup'}
+	dt_module = {'Landed Cost Purchase Receipt':'Stock', 'Landed Cost Item':'Stock', 'Comment': 'Core', 'Tag':'Core', 'Tag Detail': 'Core', 'POS Settings': 'Accounts', 'Menu Item': 'Setup', 'Menu Item Role': 'Setup'}
 	for d in dt_module.keys():
 		sql("update `tabDocType` set module = '%s' where name = '%s'" % (dt_module[d], d))
 	delete_unwanted_mappers()

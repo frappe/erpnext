@@ -72,9 +72,9 @@ def get_invoice_details(doc, children, fiscal_year):
 		}, { ... }, ...]
 	"""
 	if doc.get('return_type')=='Sales Return':
-		obj = get_obj('Receivable Voucher', doc.get('sales_invoice_no'), with_children=1)
+		obj = get_obj('Sales Invoice', doc.get('sales_invoice_no'), with_children=1)
 	else:
-		obj = get_obj('Payable Voucher', doc.get('purchase_invoice_no'), with_children=1)
+		obj = get_obj('Purchase Invoice', doc.get('purchase_invoice_no'), with_children=1)
 	if not obj.doc.docstatus==1: return
 
 	# Build invoice account jv detail record
@@ -205,14 +205,14 @@ def get_delivery_note_details(doc, children, fiscal_year):
 	
 	dn_obj = get_obj('Delivery Note', doc['delivery_note_no'], with_children=1)
 	
-	inv_list = get_inv_list('tabRV Detail', 'delivery_note', doc['delivery_note_no'])
+	inv_list = get_inv_list('tabSales Invoice Item', 'delivery_note', doc['delivery_note_no'])
 
 	if inv_list:
 		jv_details_list = get_jv_details_from_inv_list(doc, children, fiscal_year, inv_list, jv_details_list)
 	
 	if not (inv_list and jv_details_list):
 		so_list = get_prev_doc_list(dn_obj, 'Sales Order')
-		inv_list = get_inv_list('tabRV Detail', 'sales_order', so_list)
+		inv_list = get_inv_list('tabSales Invoice Item', 'sales_order', so_list)
 		if inv_list:
 			jv_details_list = get_jv_details_from_inv_list(doc, children, fiscal_year, inv_list, jv_details_list)
 
@@ -228,14 +228,14 @@ def get_purchase_receipt_details(doc, children, fiscal_year):
 	
 	pr_obj = get_obj('Purchase Receipt', doc['purchase_receipt_no'], with_children=1)
 	
-	inv_list = get_inv_list('tabPV Detail', 'purchase_receipt', doc['purchase_receipt_no'])
+	inv_list = get_inv_list('tabPurchase Invoice Item', 'purchase_receipt', doc['purchase_receipt_no'])
 
 	if inv_list:
 		jv_details_list = get_jv_details_from_inv_list(doc, children, fiscal_year, inv_list, jv_details_list)
 	
 	if not (inv_list and jv_details_list):
 		po_list = get_prev_doc_list(pr_obj, 'Purchase Order')
-		inv_list = get_inv_list('tabPV Detail', 'purchase_order', po_list)
+		inv_list = get_inv_list('tabPurchase Invoice Item', 'purchase_order', po_list)
 		if inv_list:
 			jv_details_list = get_jv_details_from_inv_list(doc, children, fiscal_year, inv_list, jv_details_list)
 

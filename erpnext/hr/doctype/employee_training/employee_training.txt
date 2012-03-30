@@ -1,0 +1,95 @@
+# DocType, Employee Training
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2012-03-27 14:35:59',
+		'docstatus': 0,
+		'modified': '2012-03-27 14:35:59',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
+	},
+
+	# These values are common for all DocType
+	{
+		'colour': u'White:FFF',
+		'doctype': 'DocType',
+		'istable': 1,
+		'module': u'HR',
+		'name': '__common__',
+		'section_style': u'Simple',
+		'server_code_error': u' ',
+		'show_in_menu': 0,
+		'version': 5
+	},
+
+	# These values are common for all DocField
+	{
+		'doctype': u'DocField',
+		'name': '__common__',
+		'parent': u'Employee Training',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
+		'permlevel': 0
+	},
+
+	# DocType, Employee Training
+	{
+		'doctype': 'DocType',
+		'name': u'Employee Training'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'institute',
+		'fieldtype': u'Small Text',
+		'label': u'Institute / Conducted By',
+		'oldfieldname': u'institute',
+		'oldfieldtype': u'Small Text',
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'nature_of_training',
+		'fieldtype': u'Small Text',
+		'label': u'Program / Seminar Title',
+		'oldfieldname': u'nature_of_training',
+		'oldfieldtype': u'Small Text',
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'duration',
+		'fieldtype': u'Data',
+		'label': u'Duration',
+		'oldfieldname': u'duration',
+		'oldfieldtype': u'Data',
+		'reqd': 0
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'loc',
+		'fieldtype': u'Data',
+		'label': u'Location',
+		'oldfieldname': u'loc',
+		'oldfieldtype': u'Data',
+		'reqd': 0
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'certificate',
+		'fieldtype': u'Small Text',
+		'label': u'Certificate',
+		'oldfieldname': u'certificate',
+		'oldfieldtype': u'Small Text'
+	}
+]

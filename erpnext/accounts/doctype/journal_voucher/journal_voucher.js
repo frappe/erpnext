@@ -69,12 +69,12 @@ cur_frm.fields_dict["entries"].grid.get_field("cost_center").get_query = functio
 // ---------------------------------
 cur_frm.fields_dict['entries'].grid.get_field('against_voucher').get_query = function(doc) {
 	var d = locals[this.doctype][this.docname];
-	return "SELECT `tabPayable Voucher`.name, `tabPayable Voucher`.credit_to, `tabPayable Voucher`.outstanding_amount,`tabPayable Voucher`.bill_no, `tabPayable Voucher`.bill_date FROM `tabPayable Voucher` WHERE `tabPayable Voucher`.credit_to='"+d.account+"' AND `tabPayable Voucher`.outstanding_amount > 0 AND `tabPayable Voucher`.docstatus = 1 AND `tabPayable Voucher`.%(key)s LIKE '%s' ORDER BY `tabPayable Voucher`.name DESC LIMIT 200";
+	return "SELECT `tabPurchase Invoice`.name, `tabPurchase Invoice`.credit_to, `tabPurchase Invoice`.outstanding_amount,`tabPurchase Invoice`.bill_no, `tabPurchase Invoice`.bill_date FROM `tabPurchase Invoice` WHERE `tabPurchase Invoice`.credit_to='"+d.account+"' AND `tabPurchase Invoice`.outstanding_amount > 0 AND `tabPurchase Invoice`.docstatus = 1 AND `tabPurchase Invoice`.%(key)s LIKE '%s' ORDER BY `tabPurchase Invoice`.name DESC LIMIT 200";
 }
 
 cur_frm.fields_dict['entries'].grid.get_field('against_invoice').get_query = function(doc) {
 	var d = locals[this.doctype][this.docname];
-	return "SELECT `tabReceivable Voucher`.name, `tabReceivable Voucher`.debit_to, `tabReceivable Voucher`.outstanding_amount FROM `tabReceivable Voucher` WHERE `tabReceivable Voucher`.debit_to='"+d.account+"' AND `tabReceivable Voucher`.outstanding_amount > 0 AND `tabReceivable Voucher`.docstatus = 1 AND `tabReceivable Voucher`.%(key)s LIKE '%s' ORDER BY `tabReceivable Voucher`.name DESC LIMIT 200";
+	return "SELECT `tabSales Invoice`.name, `tabSales Invoice`.debit_to, `tabSales Invoice`.outstanding_amount FROM `tabSales Invoice` WHERE `tabSales Invoice`.debit_to='"+d.account+"' AND `tabSales Invoice`.outstanding_amount > 0 AND `tabSales Invoice`.docstatus = 1 AND `tabSales Invoice`.%(key)s LIKE '%s' ORDER BY `tabSales Invoice`.name DESC LIMIT 200";
 }
 
 // TDS Account Head
@@ -92,13 +92,13 @@ cur_frm.fields_dict['entries'].grid.onrowadd = function(doc, cdt, cdn){
 	}
 }
 
-// Get Outstanding of Payable & Receivable Voucher
+// Get Outstanding of Payable & Sales Invoice
 // -----------------------------------------------
 
 cur_frm.cscript.against_voucher = function(doc,cdt,cdn) {
 	var d = locals[cdt][cdn];
 	if (d.against_voucher && !flt(d.debit)) {
-		args = {'doctype': 'Payable Voucher', 'docname': d.against_voucher }
+		args = {'doctype': 'Purchase Invoice', 'docname': d.against_voucher }
 		get_server_fields('get_outstanding',docstring(args),'entries',doc,cdt,cdn,1,function(r,rt) { cur_frm.cscript.update_totals(doc); });
 	}
 }
@@ -106,7 +106,7 @@ cur_frm.cscript.against_voucher = function(doc,cdt,cdn) {
 cur_frm.cscript.against_invoice = function(doc,cdt,cdn) {
 	var d = locals[cdt][cdn];
 	if (d.against_invoice && !flt(d.credit)) {
-		args = {'doctype': 'Receivable Voucher', 'docname': d.against_invoice }
+		args = {'doctype': 'Sales Invoice', 'docname': d.against_invoice }
 		get_server_fields('get_outstanding',docstring(args),'entries',doc,cdt,cdn,1,function(r,rt) { cur_frm.cscript.update_totals(doc); });
 	}
 }
@@ -164,7 +164,7 @@ cur_frm.cscript['Get TDS'] = function(doc, dt, dn) {
 	});
 }
 
-// ***************** Get Print Heading based on Receivable Voucher *****************
+// ***************** Get Print Heading based on Sales Invoice *****************
 cur_frm.fields_dict['select_print_heading'].get_query = function(doc, cdt, cdn) {
 	return 'SELECT `tabPrint Heading`.name FROM `tabPrint Heading` WHERE `tabPrint Heading`.docstatus !=2 AND `tabPrint Heading`.name LIKE "%s" ORDER BY `tabPrint Heading`.name ASC LIMIT 50';
 }

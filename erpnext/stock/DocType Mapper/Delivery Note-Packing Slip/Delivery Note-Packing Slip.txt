@@ -84,10 +84,10 @@
 	{
 		'doctype': u'Table Mapper Detail',
 		'from_field': u'delivery_note_details',
-		'from_table': u'Delivery Note Detail',
+		'from_table': u'Delivery Note Item',
 		'match_id': 1,
 		'to_field': u'item_details',
-		'to_table': u'Packing Slip Detail',
+		'to_table': u'Packing Slip Item',
 		'validation_logic': u'IFNULL(packed_qty, 0) < IFNULL(qty, 0)'
 	}
 ]

@@ -12,17 +12,17 @@
 
 	# These values are common for all Search Criteria
 	{
-		'add_cond': '`tabQuotation`.enq_no!=`tabEnquiry`.name\n',
+		'add_cond': '`tabQuotation`.enq_no!=`tabOpportunity`.name\n',
 		'add_tab': 'tabQuotation',
-		'columns': 'Enquiry\x01ID,Enquiry\x01Owner',
-		'criteria_name': 'Enquiry-Quotations to be sent',
-		'doc_type': 'Enquiry',
+		'columns': 'Opportunity\x01ID,Opportunity\x01Owner',
+		'criteria_name': 'Opportunity-Quotations to be sent',
+		'doc_type': 'Opportunity',
 		'doctype': 'Search Criteria',
 		'filters': '{}',
 		'module': 'Home',
 		'name': '__common__',
 		'page_len': 50,
-		'sort_by': '`tabEnquiry`.`name`',
+		'sort_by': '`tabOpportunity`.`name`',
 		'sort_order': 'DESC',
 		'standard': 'Yes'
 	},

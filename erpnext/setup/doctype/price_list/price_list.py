@@ -62,12 +62,12 @@ class DocType:
 				if sql("select name from tabItem where name=%s", line[0]):
 					if self.is_currency_valid(line[2]):
 						# if price exists
-						ref_ret_detail = sql("select name from `tabRef Rate Detail` where parent=%s and price_list_name=%s and ref_currency=%s", \
+						ref_ret_detail = sql("select name from `tabItem Price` where parent=%s and price_list_name=%s and ref_currency=%s", \
 							(line[0], self.doc.name, line[2]))
 						if ref_ret_detail:
-							sql("update `tabRef Rate Detail` set ref_rate=%s where name=%s", (line[1], ref_ret_detail[0][0]))
+							sql("update `tabItem Price` set ref_rate=%s where name=%s", (line[1], ref_ret_detail[0][0]))
 						else:
-							d = Document('Ref Rate Detail')
+							d = Document('Item Price')
 							d.parent = line[0]
 							d.parentfield = 'ref_rate_details'
 							d.parenttype = 'Item'
@@ -87,8 +87,8 @@ class DocType:
 
 	# clear prices
 	def clear_prices(self):
-		cnt = sql("select count(*) from `tabRef Rate Detail` where price_list_name = %s", self.doc.name)
-		sql("delete from `tabRef Rate Detail` where price_list_name = %s", self.doc.name)
+		cnt = sql("select count(*) from `tabItem Price` where price_list_name = %s", self.doc.name)
+		sql("delete from `tabItem Price` where price_list_name = %s", self.doc.name)
 		msgprint("%s prices cleared" % cnt[0][0])
 
 	# Update CSV data

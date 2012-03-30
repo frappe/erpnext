@@ -13,9 +13,9 @@
 	# These values are common for all Search Criteria
 	{
 		'add_cond': 'IFNULL(`tabDelivery Note`.`project_name`,"")!=""',
-		'columns': 'Delivery Note\x01ID,Delivery Note\x01Project Name,Delivery Note\x01Customer,Delivery Note\x01Customer Name,Delivery Note Detail\x01Item Code,Delivery Note Detail\x01Item Name,Delivery Note Detail\x01Quantity,Delivery Note\x01Posting Date,Delivery Note\x01% Billed,Delivery Note Detail\x01Amount*',
+		'columns': 'Delivery Note\x01ID,Delivery Note\x01Project Name,Delivery Note\x01Customer,Delivery Note\x01Customer Name,Delivery Note Item\x01Item Code,Delivery Note Item\x01Item Name,Delivery Note Item\x01Quantity,Delivery Note\x01Posting Date,Delivery Note\x01% Billed,Delivery Note Item\x01Amount*',
 		'criteria_name': 'Projectwise Delivered Qty and Costs',
-		'doc_type': 'Delivery Note Detail',
+		'doc_type': 'Delivery Note Item',
 		'doctype': 'Search Criteria',
 		'filters': "{'Delivery Note\x01Submitted':1,'Delivery Note\x01Status':'Submitted','Delivery Note\x01Fiscal Year':''}",
 		'module': 'Projects',

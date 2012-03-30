@@ -312,10 +312,10 @@
 		'doctype': u'DocField',
 		'fieldname': u'kra_template',
 		'fieldtype': u'Link',
-		'label': u'KRA Template',
+		'label': u'Appraisal Template',
 		'oldfieldname': u'kra_template',
 		'oldfieldtype': u'Link',
-		'options': u'KRA Template',
+		'options': u'Appraisal Template',
 		'permlevel': 0
 	},
 
@@ -351,10 +351,10 @@
 		'doctype': u'DocField',
 		'fieldname': u'appraisal_details',
 		'fieldtype': u'Table',
-		'label': u'Appraisal Details',
+		'label': u'Appraisal Goals',
 		'oldfieldname': u'appraisal_details',
 		'oldfieldtype': u'Table',
-		'options': u'Appraisal Detail',
+		'options': u'Appraisal Goal',
 		'permlevel': 0
 	},
 

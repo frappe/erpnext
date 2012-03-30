@@ -84,10 +84,10 @@ for r in res:
   r.append(terr and terr[0][0] or '')
   
   outstanding_amt, opening_amt, cond, due_date = 0,0, '', ''
-  # if entry against Receivable Voucher
-  if r[col_idx['Against Voucher']] and r[col_idx['Voucher Type']] == 'Receivable Voucher':
+  # if entry against Sales Invoice
+  if r[col_idx['Against Voucher']] and r[col_idx['Voucher Type']] == 'Sales Invoice':
     # get due date
-    due_date = sql("select due_date from `tabReceivable Voucher` where name = '%s'" % r[col_idx['Against Voucher']])
+    due_date = sql("select due_date from `tabSales Invoice` where name = '%s'" % r[col_idx['Against Voucher']])
     due_date = due_date and cstr(due_date[0][0]) or ''
 
     # get booking amt
@@ -97,7 +97,7 @@ for r in res:
     cond =  "and against_voucher = '%s' and against_voucher is not null" % r[col_idx['Against Voucher']]
 
   # if entry against JV & and not adjusted within period
-  elif r[col_idx['Against Voucher Type']] == 'Receivable Voucher' and sql("select name from `tabReceivable Voucher` where name = '%s' and (posting_date < '%s' or posting_date > '%s') and docstatus = 1" % (r[col_idx['Against Voucher']], from_date, to_date)):
+  elif r[col_idx['Against Voucher Type']] == 'Sales Invoice' and sql("select name from `tabSales Invoice` where name = '%s' and (posting_date < '%s' or posting_date > '%s') and docstatus = 1" % (r[col_idx['Against Voucher']], from_date, to_date)):
     cond = " and voucher_no = '%s' and ifnull(against_voucher, '') = '%s'" % (r[col_idx['Voucher No']], r[col_idx['Against Voucher']])
   # if entry against JV and unadjusted
   elif not r[col_idx['Against Voucher']]:
@@ -108,7 +108,7 @@ for r in res:
     # add to total outstanding
     total_outstanding_amt += flt(outstanding_amt)
     # add to total booking amount
-    if outstanding_amt and r[col_idx['Voucher Type']] == 'Receivable Voucher' and r[col_idx['Against Voucher']]:
+    if outstanding_amt and r[col_idx['Voucher Type']] == 'Sales Invoice' and r[col_idx['Against Voucher']]:
       total_opening_amt += flt(opening_amt)
 
   r += [due_date, opening_amt, outstanding_amt]

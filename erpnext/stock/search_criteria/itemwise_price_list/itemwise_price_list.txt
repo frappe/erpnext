@@ -12,11 +12,11 @@
 
 	# These values are common for all Search Criteria
 	{
-		'columns': 'Item\x01Item Name,Item\x01Item Group,Ref Rate Detail\x01Price List Name,Ref Rate Detail\x01Ref Rate,Ref Rate Detail\x01Currency',
+		'columns': 'Item\x01Item Name,Item\x01Item Group,Item Price\x01Price List Name,Item Price\x01Ref Rate,Item Price\x01Currency',
 		'criteria_name': 'Itemwise Price List',
-		'doc_type': 'Ref Rate Detail',
+		'doc_type': 'Item Price',
 		'doctype': 'Search Criteria',
-		'filters': "{'Item\x01Saved':1,'Ref Rate Detail\x01Price List Name':'','Ref Rate Detail\x01Currency':''}",
+		'filters': "{'Item\x01Saved':1,'Item Price\x01Price List Name':'','Item Price\x01Currency':''}",
 		'module': 'Stock',
 		'name': '__common__',
 		'page_len': 50,

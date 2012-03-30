@@ -17,11 +17,11 @@
 
 // Get Query functions 
 cur_frm.fields_dict['s_bom'].get_query = function(doc) {
-  return 'SELECT `tabBill Of Materials`.`name` FROM `tabBill Of Materials` WHERE `tabBill Of Materials`.`docstatus` = 1 AND `tabBill Of Materials`.%(key)s LIKE "%s" ORDER BY `tabBill Of Materials`.`name` DESC LIMIT 50';
+  return 'SELECT `tabBOM`.`name` FROM `tabBOM` WHERE `tabBOM`.`docstatus` = 1 AND `tabBOM`.%(key)s LIKE "%s" ORDER BY `tabBOM`.`name` DESC LIMIT 50';
 }
 
 cur_frm.fields_dict['r_bom'].get_query = function(doc) {
-  return 'SELECT `tabBill Of Materials`.`name` FROM `tabBill Of Materials` WHERE `tabBill Of Materials`.`docstatus` = 1 and `tabBill Of Materials`.%(key)s LIKE "%s" ORDER BY `tabBill Of Materials`.`name` DESC LIMIT 50';
+  return 'SELECT `tabBOM`.`name` FROM `tabBOM` WHERE `tabBOM`.`docstatus` = 1 and `tabBOM`.%(key)s LIKE "%s" ORDER BY `tabBOM`.`name` DESC LIMIT 50';
 }
 
 cur_frm.fields_dict['s_item'].get_query = function(doc) {

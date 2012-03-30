@@ -22,7 +22,7 @@ def execute():
 	"""
 	webnotes.conn.sql("""
 		UPDATE `tabDocField` SET options=NULL
-		WHERE parent='DocLayer' AND fieldname='doc_type'
+		WHERE parent='Customize Form' AND fieldname='doc_type'
 	""")
 	from webnotes.modules import reload_doc
 	reload_doc('core', 'doctype', 'doclayer')

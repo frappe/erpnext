@@ -20,7 +20,7 @@ wn.require('erpnext/utilities/doctype/sms_control/sms_control.js');
 
 cur_frm.cscript.onload = function(doc, cdt, cdn) {
   if(user =='Guest'){
-    hide_field(['status', 'naming_series', 'order_lost_reason', 'customer', 'rating', 'fax', 'website', 'territory', 'TerritoryHelp', 'address_line1', 'address_line2', 'city', 'state', 'country', 'pincode', 'address', 'lead_owner', 'market_segment', 'industry', 'campaign_name', 'interested_in', 'company', 'fiscal_year', 'contact_by', 'contact_date', 'last_contact_date', 'contact_date_ref', 'to_discuss', 'More Info', 'follow_up', 'Communication History', 'cc_to', 'subject', 'message', 'Attachment Html', 'Create New File', 'lead_attachment_detail', 'Send Email', 'Email', 'Create Customer', 'Create Enquiry', 'Next Steps', 'transaction_date', 'type', 'source']);
+    hide_field(['status', 'naming_series', 'order_lost_reason', 'customer', 'rating', 'fax', 'website', 'territory', 'TerritoryHelp', 'address_line1', 'address_line2', 'city', 'state', 'country', 'pincode', 'address', 'lead_owner', 'market_segment', 'industry', 'campaign_name', 'interested_in', 'company', 'fiscal_year', 'contact_by', 'contact_date', 'last_contact_date', 'contact_date_ref', 'to_discuss', 'More Info', 'follow_up', 'Communication History', 'cc_to', 'subject', 'message', 'Attachment Html', 'Create New File', 'lead_attachment_detail', 'Send Email', 'Email', 'Create Customer', 'Create Opportunity', 'Next Steps', 'transaction_date', 'type', 'source']);
     doc.source = 'Website';
   }
   if(!doc.status) set_multiple(dt,dn,{status:'Open'});
@@ -40,7 +40,7 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
   cur_frm.clear_custom_buttons()
   if(!doc.__islocal && !in_list(['Converted', 'Lead Lost'], doc.status)) {
     cur_frm.add_custom_button('Create Customer', cur_frm.cscript['Create Customer']);
-    cur_frm.add_custom_button('Create Enquiry', cur_frm.cscript['Create Enquiry']);
+    cur_frm.add_custom_button('Create Opportunity', cur_frm.cscript['Create Opportunity']);
     cur_frm.add_custom_button('Send SMS', cur_frm.cscript['Send SMS']);
   }
 }
@@ -130,9 +130,9 @@ cur_frm.cscript['Send Email'] = function(doc,cdt,cdn){
   }
 }
 
-// Create New Enquiry
+// Create New Opportunity
 // ===============================================================
-cur_frm.cscript['Create Enquiry'] = function(){
+cur_frm.cscript['Create Opportunity'] = function(){
   var doc = cur_frm.doc;
   $c('runserverobj',args={ 'method':'check_status', 'docs':compress_doclist([doc])},
     function(r,rt){
@@ -140,16 +140,16 @@ cur_frm.cscript['Create Enquiry'] = function(){
         msgprint("This lead is now converted to customer. Please create enquiry on behalf of customer");
       }
       else{
-        n = createLocal("Enquiry");
+        n = createLocal("Opportunity");
         $c('dt_map', args={
-          'docs':compress_doclist([locals["Enquiry"][n]]),
+          'docs':compress_doclist([locals["Opportunity"][n]]),
           'from_doctype':'Lead',
-          'to_doctype':'Enquiry',
+          'to_doctype':'Opportunity',
           'from_docname':doc.name,
-          'from_to_list':"[['Lead', 'Enquiry']]"
+          'from_to_list':"[['Lead', 'Opportunity']]"
         }
         , function(r,rt) {
-            loaddoc("Enquiry", n);
+            loaddoc("Opportunity", n);
           }
         );
       }

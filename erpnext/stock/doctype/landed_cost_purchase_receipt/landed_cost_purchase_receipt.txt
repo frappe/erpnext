@@ -1,0 +1,65 @@
+# DocType, Landed Cost Purchase Receipt
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2012-03-27 14:36:34',
+		'docstatus': 0,
+		'modified': '2012-03-27 14:36:34',
+		'modified_by': u'Administrator',
+		'owner': u'wasim@webnotestech.com'
+	},
+
+	# These values are common for all DocType
+	{
+		'colour': u'White:FFF',
+		'default_print_format': u'Standard',
+		'doctype': 'DocType',
+		'istable': 1,
+		'module': u'Stock',
+		'name': '__common__',
+		'section_style': u'Simple',
+		'server_code_error': u' ',
+		'show_in_menu': 0,
+		'version': 5
+	},
+
+	# These values are common for all DocField
+	{
+		'doctype': u'DocField',
+		'name': '__common__',
+		'parent': u'Landed Cost Purchase Receipt',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
+		'permlevel': 0
+	},
+
+	# DocType, Landed Cost Purchase Receipt
+	{
+		'doctype': 'DocType',
+		'name': u'Landed Cost Purchase Receipt'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'purchase_receipt',
+		'fieldtype': u'Link',
+		'label': u'Purchase Receipt',
+		'oldfieldname': u'purchase_receipt_no',
+		'oldfieldtype': u'Link',
+		'options': u'Purchase Receipt',
+		'width': u'220px'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'select_pr',
+		'fieldtype': u'Check',
+		'label': u'Select PR',
+		'oldfieldname': u'include_in_landed_cost',
+		'oldfieldtype': u'Check',
+		'width': u'120px'
+	}
+]

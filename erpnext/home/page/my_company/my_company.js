@@ -702,14 +702,14 @@ MemberConversation = function(parent, uid, fullname) {
 			get_query: function() {
 				if(uid==user) {
 					return repl("SELECT comment, owner, comment_docname, creation, docstatus " +
-					"FROM `tabComment Widget Record` "+
+					"FROM `tabComment` "+
 					"WHERE comment_doctype='My Company' " +
 					"AND comment_docname='%(user)s' " +
 					"ORDER BY creation DESC ", {user:user});
 
 				} else {
 					return repl("SELECT comment, owner, comment_docname, creation, docstatus " +
-					"FROM `tabComment Widget Record` "+
+					"FROM `tabComment` "+
 					"WHERE comment_doctype='My Company' " +
 					"AND ((owner='%(user)s' AND comment_docname='%(uid)s') " +
 					"OR (owner='%(uid)s' AND comment_docname='%(user)s')) " +

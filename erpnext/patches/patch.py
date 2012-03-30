@@ -47,7 +47,7 @@ def execute(patch_no):
 	elif patch_no == 306:
 		sql("update `tabDocField` set options = '\nAccount\nCompany\nCustomer\nSupplier\nEmployee\nWarehouse\nItem' where parent = 'Rename Tool' and fieldname = 'select_doctype'")
 		sql("update `tabDocField` set options = 'link:Item' where parent = 'Raw Materials Supplied' and fieldname = 'po_item'")
-		sql("update `tabDocField` set options = 'Sales Order' where parent = 'Indent Detail' and fieldname = 'sales_order_no'")
+		sql("update `tabDocField` set options = 'Sales Order' where parent = 'Purchase Request Item' and fieldname = 'sales_order_no'")
 		sql("update `tabDocField` set options = 'link:Company', fieldtype = 'Select' where parent = 'Stock Ledger Entry' and fieldname = 'company'")
 		reload_doc('utilities', 'doctype', 'rename_tool')
 	elif patch_no == 307:
@@ -74,7 +74,7 @@ def execute(patch_no):
 			for d in rec:
 				sql("update `tab%s` set docstatus = %s where name = '%s'" % (d[0], d[2]=='No' and 1 or 2, d[1]))
 
-		other_dt = ['Enquiry', 'Quotation', 'Sales Order', 'Indent', 'Purchase Order', 'Production Order', 'Customer Issue', 'Installation Note']
+		other_dt = ['Opportunity', 'Quotation', 'Sales Order', 'Purchase Request', 'Purchase Order', 'Production Order', 'Customer Issue', 'Installation Note']
 		for dt in other_dt:
 			rec = sql("select name, status from `tab%s` where modified >= '2011-07-06 10:00:00'" % dt)
 			for r in rec:
@@ -86,7 +86,7 @@ def execute(patch_no):
 			sql("update `tab%s` set status = 'Submitted' where docstatus = 1 and modified >='2011-07-06 10:00:00'" % dt)
 			sql("update `tab%s` set status = 'Cancelled' where docstatus = 2 and modified >='2011-07-06 10:00:00'" % dt)
 
-		dt_list = ['Enquiry', 'Quotation', 'Sales Order', 'Indent', 'Purchase Order', 'Production Order', 'Customer Issue', 'Installation Note', 'Receivable Voucher', 'Payable Voucher', 'Delivery Note', 'Purchase Receipt', 'Journal Voucher', 'Stock Entry']
+		dt_list = ['Opportunity', 'Quotation', 'Sales Order', 'Purchase Request', 'Purchase Order', 'Production Order', 'Customer Issue', 'Installation Note', 'Sales Invoice', 'Purchase Invoice', 'Delivery Note', 'Purchase Receipt', 'Journal Voucher', 'Stock Entry']
 		for d in dt_list:
 			tbl = sql("select options from `tabDocField` where fieldtype = 'Table' and parent = '%s'" % d)
 			for t in tbl:
@@ -221,21 +221,21 @@ def execute(patch_no):
 		reload_doc('stock','doctype','delivery_note')
 
 		# delete billed_qty field
-		sql("delete from `tabDocField` where fieldname = 'billed_qty' and parent in ('Sales Order Detail', 'Delivery Note Detail')")
+		sql("delete from `tabDocField` where fieldname = 'billed_qty' and parent in ('Sales Order Item', 'Delivery Note Item')")
 
 		# update billed amt in item table in so and dn
-		sql("""	update `tabSales Order Detail` so
-				set billed_amt = (select sum(amount) from `tabRV Detail` where `so_detail`= so.name and docstatus=1 and parent not like 'old%%'), modified = now()""")
+		sql("""	update `tabSales Order Item` so
+				set billed_amt = (select sum(amount) from `tabSales Invoice Item` where `so_detail`= so.name and docstatus=1 and parent not like 'old%%'), modified = now()""")
 
-		sql(""" update `tabDelivery Note Detail` dn
-				set billed_amt = (select sum(amount) from `tabRV Detail` where `dn_detail`= dn.name and docstatus=1 and parent not like 'old%%'), modified = now()""")
+		sql(""" update `tabDelivery Note Item` dn
+				set billed_amt = (select sum(amount) from `tabSales Invoice Item` where `dn_detail`= dn.name and docstatus=1 and parent not like 'old%%'), modified = now()""")
 
 		# calculate % billed based on item table
 		sql("""	update `tabSales Order` so
-				set per_billed = (select sum(if(amount > ifnull(billed_amt, 0), billed_amt, amount))/sum(amount)*100 from `tabSales Order Detail` where parent = so.name), modified = now()""")
+				set per_billed = (select sum(if(amount > ifnull(billed_amt, 0), billed_amt, amount))/sum(amount)*100 from `tabSales Order Item` where parent = so.name), modified = now()""")
 
 		sql("""	update `tabDelivery Note` dn
-				set per_billed = (select sum(if(amount > ifnull(billed_amt, 0), billed_amt, amount))/sum(amount)*100 from `tabDelivery Note Detail` where parent = dn.name), modified = now()""")
+				set per_billed = (select sum(if(amount > ifnull(billed_amt, 0), billed_amt, amount))/sum(amount)*100 from `tabDelivery Note Item` where parent = dn.name), modified = now()""")
 
 		# update billing status based on % billed
 		sql("""update `tabSales Order` set billing_status = if(ifnull(per_billed,0) < 0.001, 'Not Billed',
@@ -314,7 +314,7 @@ def execute(patch_no):
 		reload_doc('stock', 'doctype', 'delivery_note')
 		reload_doc('stock', 'doctype', 'delivery_note_detail')
 	elif patch_no == 355:
-		sql("update `tabDocField` set print_hide =1 where fieldname in ('pack_no', 'pack_gross_wt', 'weight_uom', 'pack_nett_wt') and parent = 'Delivery Note Detail'")
+		sql("update `tabDocField` set print_hide =1 where fieldname in ('pack_no', 'pack_gross_wt', 'weight_uom', 'pack_nett_wt') and parent = 'Delivery Note Item'")
 	elif patch_no == 356:
 		sql("update `tabDocField` set print_hide =1 where fieldname = 'print_packing_slip' and parent = 'Delivery Note'")
 	elif patch_no == 357:
@@ -348,7 +348,7 @@ def execute(patch_no):
 	elif patch_no == 364:
 		sql("""delete from `tabField Mapper Detail` 
 			where to_field in ('qty', 'amount', 'export_amount') 
-			and parent in ('Sales Order-Receivable Voucher', 'Delivery Note-Receivable Voucher')
+			and parent in ('Sales Order-Sales Invoice', 'Delivery Note-Sales Invoice')
 		""")
 		mappers = sql("select name, module from `tabDocType Mapper`")
 		for d in mappers:
@@ -461,8 +461,8 @@ def execute(patch_no):
 		reload_doc('accounts', 'doctype', 'ir_payment_detail')
 		reload_doc('accounts', 'Module Def', 'Accounts')
 	elif patch_no == 382:
-		if sql("select count(name) from `tabDocField` where label = 'Get Specification Details' and parent = 'QA Inspection Report' and fieldtype = 'Button'")[0][0] > 1:
-			sql("delete from `tabDocField` where label = 'Get Specification Details' and parent = 'QA Inspection Report' and fieldtype = 'Button' limit 1")
+		if sql("select count(name) from `tabDocField` where label = 'Get Specification Details' and parent = 'Quality Inspection' and fieldtype = 'Button'")[0][0] > 1:
+			sql("delete from `tabDocField` where label = 'Get Specification Details' and parent = 'Quality Inspection' and fieldtype = 'Button' limit 1")
 	elif patch_no == 383:
 		reload_doc('accounts', 'doctype', 'cost_center')
 	elif patch_no == 384:

@@ -114,9 +114,9 @@ class DocType:
 	#----------------------------------------------------------------------------------------------
 	def check_freezing_date(self, adv_adj):
 		if not adv_adj:
-			acc_frozen_upto = get_value('Manage Account', None, 'acc_frozen_upto')
+			acc_frozen_upto = get_value('Global Defaults', None, 'acc_frozen_upto')
 			if acc_frozen_upto:
-				bde_auth_role = get_value( 'Manage Account', None,'bde_auth_role')
+				bde_auth_role = get_value( 'Global Defaults', None,'bde_auth_role')
 				if getdate(self.doc.posting_date) <= getdate(acc_frozen_upto) and not bde_auth_role in webnotes.user.get_roles():
 					msgprint("You are not authorized to do/modify back dated accounting entries before %s." % getdate(acc_frozen_upto).strftime('%d-%m-%Y'), raise_exception=1)
 
@@ -234,12 +234,12 @@ class DocType:
 		bal = flt(sql("select sum(debit)-sum(credit) from `tabGL Entry` where against_voucher=%s and against_voucher_type=%s and ifnull(is_cancelled,'No') = 'No'", (self.doc.against_voucher, self.doc.against_voucher_type))[0][0] or 0.0)
 		tds = 0
 		
-		if self.doc.against_voucher_type=='Payable Voucher':
+		if self.doc.against_voucher_type=='Purchase Invoice':
 			# amount to debit
 			bal = -bal
 			
 			# Check if tds applicable
-			tds = sql("select total_tds_on_voucher from `tabPayable Voucher` where name = '%s'" % self.doc.against_voucher)
+			tds = sql("select total_tds_on_voucher from `tabPurchase Invoice` where name = '%s'" % self.doc.against_voucher)
 			tds = tds and flt(tds[0][0]) or 0
 		
 		# Validation : Outstanding can not be negative
@@ -257,7 +257,7 @@ class DocType:
 		#check for user role Freezed
 		master_type=sql("select master_type, master_name from `tabAccount` where name='%s' " %self.doc.account)
 		tot_outstanding = 0	#needed when there is no GL Entry in the system for that acc head
-		if (self.doc.voucher_type=='Journal Voucher' or self.doc.voucher_type=='Receivable Voucher') and (master_type and master_type[0][0]=='Customer' and master_type[0][1]):
+		if (self.doc.voucher_type=='Journal Voucher' or self.doc.voucher_type=='Sales Invoice') and (master_type and master_type[0][0]=='Customer' and master_type[0][1]):
 			dbcr = sql("select sum(debit),sum(credit) from `tabGL Entry` where account = '%s' and is_cancelled='No'" % self.doc.account)
 			if dbcr:
 				tot_outstanding = flt(dbcr[0][0])-flt(dbcr[0][1])+flt(self.doc.debit)-flt(self.doc.credit)

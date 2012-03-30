@@ -243,7 +243,7 @@
 		'label': u'Charge',
 		'oldfieldname': u'charge',
 		'oldfieldtype': u'Link',
-		'options': u'Other Charges'
+		'options': u'Sales Taxes and Charges Master'
 	},
 
 	# DocField
@@ -266,7 +266,7 @@
 		'label': u'Terms',
 		'oldfieldname': u'tc_name',
 		'oldfieldtype': u'Link',
-		'options': u'Term'
+		'options': u'Terms and Conditions'
 	},
 
 	# DocField

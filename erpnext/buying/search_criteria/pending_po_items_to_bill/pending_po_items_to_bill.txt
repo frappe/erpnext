@@ -12,12 +12,12 @@
 
 	# These values are common for all Search Criteria
 	{
-		'add_col': '(CASE WHEN (`tabPO Detail`.qty- ifnull(`tabPO Detail`.billed_qty, 0) > 0 ) THEN (`tabPO Detail`.qty-ifnull(`tabPO Detail`.billed_qty, 0) ) ELSE 0 END) AS "Pending To Bill"',
-		'add_cond': '(`tabPO Detail`.qty - ifnull(`tabPO Detail`.received_qty, 0) > 0 or `tabPO Detail`.qty - ifnull(`tabPO Detail`.billed_qty, 0) > 0)\n`tabPurchase Order`.status != "Stopped"',
-		'columns': 'Purchase Order\x01ID,Purchase Order\x01Supplier,Purchase Order\x01Supplier Name,Purchase Order\x01Status,Purchase Order\x01PO Date,Purchase Order\x01Fiscal Year,PO Detail\x01Indent No,PO Detail\x01Item Code,PO Detail\x01Item Name,PO Detail\x01Description,PO Detail\x01Quantity,PO Detail\x01UOM,PO Detail\x01Received Qty',
+		'add_col': '(CASE WHEN (`tabPurchase Order Item`.qty- ifnull(`tabPurchase Order Item`.billed_qty, 0) > 0 ) THEN (`tabPurchase Order Item`.qty-ifnull(`tabPurchase Order Item`.billed_qty, 0) ) ELSE 0 END) AS "Pending To Bill"',
+		'add_cond': '(`tabPurchase Order Item`.qty - ifnull(`tabPurchase Order Item`.received_qty, 0) > 0 or `tabPurchase Order Item`.qty - ifnull(`tabPurchase Order Item`.billed_qty, 0) > 0)\n`tabPurchase Order`.status != "Stopped"',
+		'columns': 'Purchase Order\x01ID,Purchase Order\x01Supplier,Purchase Order\x01Supplier Name,Purchase Order\x01Status,Purchase Order\x01PO Date,Purchase Order\x01Fiscal Year,Purchase Order Item\x01Purchase Request No,Purchase Order Item\x01Item Code,Purchase Order Item\x01Item Name,Purchase Order Item\x01Description,Purchase Order Item\x01Quantity,Purchase Order Item\x01UOM,Purchase Order Item\x01Received Qty',
 		'criteria_name': 'Pending PO Items To Bill',
 		'description': 'Pending PO Items To Bill',
-		'doc_type': 'PO Detail',
+		'doc_type': 'Purchase Order Item',
 		'doctype': 'Search Criteria',
 		'filters': "{'Purchase Order\x01Saved':1,'Purchase Order\x01Submitted':1,'Purchase Order\x01Status':'','Purchase Order\x01Fiscal Year':''}",
 		'module': 'Buying',

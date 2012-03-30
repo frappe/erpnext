@@ -370,7 +370,7 @@
 		'label': u'Lost Reason',
 		'oldfieldname': u'order_lost_reason',
 		'oldfieldtype': u'Link',
-		'options': u'Order Lost Reason',
+		'options': u'Quotation Lost Reason',
 		'permlevel': 0
 	},
 
@@ -746,10 +746,10 @@
 		'doctype': u'DocField',
 		'fieldname': u'follow_up',
 		'fieldtype': u'Table',
-		'label': u'Follow up',
+		'label': u'Communication Log',
 		'oldfieldname': u'follow_up',
 		'oldfieldtype': u'Table',
-		'options': u'Follow up',
+		'options': u'Communication Log',
 		'permlevel': 0
 	}
 ]

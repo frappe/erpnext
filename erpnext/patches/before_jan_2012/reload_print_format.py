@@ -26,8 +26,8 @@ def execute():
 	reload_doc('accounts', 'Print Format', 'Form 16A Print Format')
 	reload_doc('accounts', 'Print Format', 'Cheque Printing Format')
 	
-	if not webnotes.conn.sql("select format from `tabDocFormat` where name = 'POS Invoice' and parent = 'Receivable Voucher'"):		
-		dt_obj = get_obj('DocType', 'Receivable Voucher', with_children = 1)
+	if not webnotes.conn.sql("select format from `tabDocFormat` where name = 'POS Invoice' and parent = 'Sales Invoice'"):		
+		dt_obj = get_obj('DocType', 'Sales Invoice', with_children = 1)
 		ch = addchild(dt_obj.doc, 'formats', 'DocFormat', 1)
 		ch.format = 'POS Invoice'
 		ch.save(1)

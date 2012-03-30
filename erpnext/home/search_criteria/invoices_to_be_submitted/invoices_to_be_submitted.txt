@@ -12,15 +12,15 @@
 
 	# These values are common for all Search Criteria
 	{
-		'columns': 'Receivable Voucher\x01ID,Receivable Voucher\x01Debit To,Receivable Voucher\x01Voucher Date,Receivable Voucher\x01Due Date',
+		'columns': 'Sales Invoice\x01ID,Sales Invoice\x01Debit To,Sales Invoice\x01Voucher Date,Sales Invoice\x01Due Date',
 		'criteria_name': 'Invoices-To be submitted',
-		'doc_type': 'Receivable Voucher',
+		'doc_type': 'Sales Invoice',
 		'doctype': 'Search Criteria',
-		'filters': "{'Receivable Voucher\x01Saved':1,'Receivable Voucher\x01Is Opening':'','Receivable Voucher\x01Fiscal Year':''}",
+		'filters': "{'Sales Invoice\x01Saved':1,'Sales Invoice\x01Is Opening':'','Sales Invoice\x01Fiscal Year':''}",
 		'module': 'Home',
 		'name': '__common__',
 		'page_len': 50,
-		'sort_by': '`tabReceivable Voucher`.`name`',
+		'sort_by': '`tabSales Invoice`.`name`',
 		'sort_order': 'DESC',
 		'standard': 'Yes'
 	},

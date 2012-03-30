@@ -25,7 +25,7 @@ elif based_on == 'Delivery Note':
   cols = [['Delivery Note No','Link','150px','Delivery Note'], ['Status','Data','100px',''], ['Project Name','Link','200px','Project'], ['Customer','Link','150px','Customer'], ['Customer Name','Data','200px',''], ['% Installed','Currency','100px',''], ['% Billed','Currency','100px',''], ['Grand Total','Currency','150px','']]
 
 elif based_on == 'Sales Invoice':
-  cols = [['Sales Invoice No','Link','150px','Receivable Voucher'], ['Debit To','Data','150px',''], ['Project Name','Link','200px','Project'], ['Customer','Link','150px','Customer'], ['Customer Name','Data','200px',''], ['Grand Total','Currency','150px','']]
+  cols = [['Sales Invoice No','Link','150px','Sales Invoice'], ['Debit To','Data','150px',''], ['Project Name','Link','200px','Project'], ['Customer','Link','150px','Customer'], ['Customer Name','Data','200px',''], ['Grand Total','Currency','150px','']]
 
 
 for c in cols:

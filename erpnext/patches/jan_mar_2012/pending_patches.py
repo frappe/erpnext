@@ -38,8 +38,8 @@ def execute():
 		
 
 		
-	if sql("select count(name) from `tabDocField` where label = 'Get Specification Details' and parent = 'QA Inspection Report' and fieldtype = 'Button'")[0][0] > 1:
-		sql("delete from `tabDocField` where label = 'Get Specification Details' and parent = 'QA Inspection Report' and fieldtype = 'Button' limit 1")
+	if sql("select count(name) from `tabDocField` where label = 'Get Specification Details' and parent = 'Quality Inspection' and fieldtype = 'Button'")[0][0] > 1:
+		sql("delete from `tabDocField` where label = 'Get Specification Details' and parent = 'Quality Inspection' and fieldtype = 'Button' limit 1")
 	
 	reload_doc('stock', 'DocType Mapper', 'Purchase Order-Purchase Receipt')
 		

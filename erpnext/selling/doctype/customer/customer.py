@@ -253,19 +253,19 @@ class DocType:
 			('Contact', 'customer'),
 			('Customer Issue', 'customer'),
 			('Delivery Note', 'customer'),
-			('Enquiry', 'customer'),
+			('Opportunity', 'customer'),
 			('Installation Note', 'customer'),
 			('Maintenance Schedule', 'customer'),
 			('Maintenance Visit', 'customer'),
 			('Project', 'customer'),
 			('Quotation', 'customer'),
-			('Receivable Voucher', 'customer'),
+			('Sales Invoice', 'customer'),
 			('Sales Order', 'customer'),
 			('Serial No', 'customer'),
 			('Shipping Address', 'customer'),
 			('Stock Entry', 'customer'),
 			('Support Ticket', 'customer'),
-			('Ticket', 'customer')]
+			('Task', 'customer')]
 			for rec in update_fields:
 				sql("update `tab%s` set customer_name = '%s' where %s = '%s'" %(rec[0],newdn,rec[1],olddn))
 				

@@ -39,9 +39,9 @@ cur_frm.cscript.refresh = function(doc,cdt,cdn){
 
 
 cur_frm.cscript.refresh_appraisal_details = function(doc, cdt, cdn){
-	var val = getchildren('Appraisal Detail', doc.name, 'appraisal_details', doc.doctype);
+	var val = getchildren('Appraisal Goal', doc.name, 'appraisal_details', doc.doctype);
 	for(var i = 0; i<val.length; i++){
-		set_multiple('Appraisal Detail', val[i].name, {'target_achieved':'', 'score':'', 'scored_earned':''}, 'appraisal_details');
+		set_multiple('Appraisal Goal', val[i].name, {'target_achieved':'', 'score':'', 'scored_earned':''}, 'appraisal_details');
 	}
 	doc.total_score = '';
 	refresh_field('appraisal_details');
@@ -62,7 +62,7 @@ cur_frm.cscript.employee = function(doc,cdt,cdn){
 
 cur_frm.cscript['Calculate Total Score'] = function(doc,cdt,cdn){
 	//get_server_fields('calculate_total','','',doc,cdt,cdn,1);
-	var val = getchildren('Appraisal Detail', doc.name, 'appraisal_details', doc.doctype);
+	var val = getchildren('Appraisal Goal', doc.name, 'appraisal_details', doc.doctype);
 	var total =0;
 	for(var i = 0; i<val.length; i++){
 		total = flt(total)+flt(val[i].score_earned)
@@ -161,7 +161,7 @@ cur_frm.cscript.score = function(doc,cdt,cdn){
 }
 
 cur_frm.cscript.calculate_total = function(doc,cdt,cdn){
-	var val = getchildren('Appraisal Detail', doc.name, 'appraisal_details', doc.doctype);
+	var val = getchildren('Appraisal Goal', doc.name, 'appraisal_details', doc.doctype);
 	var total =0;
 	for(var i = 0; i<val.length; i++){
 		total = flt(total)+flt(val[i].score_earned);

@@ -41,9 +41,9 @@ class DocType:
   def get_monthwise_amount(self,lst):
     lst = lst.split(',')
     if not lst[1]:
-      ret = convert_to_lists(sql("SELECT SUM(grand_total) AMOUNT,CASE MONTH(due_date) WHEN 1 THEN 'JAN' WHEN 2 THEN 'FEB' WHEN 3 THEN 'MAR' WHEN 4 THEN 'APR' WHEN 5 THEN 'MAY' WHEN 6 THEN 'JUN' WHEN 7 THEN 'JUL' WHEN 8 THEN 'AUG' WHEN 9 THEN 'SEP' WHEN 10 THEN 'OCT' WHEN 11 THEN 'NOV' WHEN 12 THEN 'DEC' END MONTHNAME FROM `tabReceivable Voucher` WHERE docstatus = 1 AND fiscal_year = '%s' GROUP BY MONTH(due_date) ORDER BY MONTH(due_date)"%lst[0]))
+      ret = convert_to_lists(sql("SELECT SUM(grand_total) AMOUNT,CASE MONTH(due_date) WHEN 1 THEN 'JAN' WHEN 2 THEN 'FEB' WHEN 3 THEN 'MAR' WHEN 4 THEN 'APR' WHEN 5 THEN 'MAY' WHEN 6 THEN 'JUN' WHEN 7 THEN 'JUL' WHEN 8 THEN 'AUG' WHEN 9 THEN 'SEP' WHEN 10 THEN 'OCT' WHEN 11 THEN 'NOV' WHEN 12 THEN 'DEC' END MONTHNAME FROM `tabSales Invoice` WHERE docstatus = 1 AND fiscal_year = '%s' GROUP BY MONTH(due_date) ORDER BY MONTH(due_date)"%lst[0]))
     else:
-      ret = convert_to_lists(sql("select sum(t2.amount) AMOUNT ,CASE MONTH(t1.due_date) WHEN 1 THEN 'JAN' WHEN 2 THEN 'FEB' WHEN 3 THEN 'MAR' WHEN 4 THEN 'APR' WHEN 5 THEN 'MAY' WHEN 6 THEN 'JUN' WHEN 7 THEN 'JUL' WHEN 8 THEN 'AUG' WHEN 9 THEN 'SEP' WHEN 10 THEN 'OCT' WHEN 11 THEN 'NOV' WHEN 12 THEN 'DEC' END MONTHNAME from `tabReceivable Voucher` t1,`tabRV Detail` t2 WHERE t1.name = t2.parent and t1.docstatus = 1 and t2.item_group = '%s' AND t1.fiscal_year = '%s' GROUP BY MONTH(t1.due_date) ORDER BY MONTH(t1.due_date)"%(lst[1],lst[0])))
+      ret = convert_to_lists(sql("select sum(t2.amount) AMOUNT ,CASE MONTH(t1.due_date) WHEN 1 THEN 'JAN' WHEN 2 THEN 'FEB' WHEN 3 THEN 'MAR' WHEN 4 THEN 'APR' WHEN 5 THEN 'MAY' WHEN 6 THEN 'JUN' WHEN 7 THEN 'JUL' WHEN 8 THEN 'AUG' WHEN 9 THEN 'SEP' WHEN 10 THEN 'OCT' WHEN 11 THEN 'NOV' WHEN 12 THEN 'DEC' END MONTHNAME from `tabSales Invoice` t1,`tabSales Invoice Item` t2 WHERE t1.name = t2.parent and t1.docstatus = 1 and t2.item_group = '%s' AND t1.fiscal_year = '%s' GROUP BY MONTH(t1.due_date) ORDER BY MONTH(t1.due_date)"%(lst[1],lst[0])))
     
     m =cint(sql("select month('%s')"%(get_defaults()['year_start_date']))[0][0])
 
@@ -68,13 +68,13 @@ class DocType:
     cases = self.get_week_cases(lst[0],lst[1])
           
     if not lst[2]:
-      query = "SELECT SUM(grand_total) AMOUNT,CASE WEEK(due_date)"+ cases +"END Weekly FROM `tabReceivable Voucher` WHERE MONTH(due_date) = %d AND docstatus = 1 AND fiscal_year = '%s' GROUP BY Weekly  ORDER BY Weekly"
+      query = "SELECT SUM(grand_total) AMOUNT,CASE WEEK(due_date)"+ cases +"END Weekly FROM `tabSales Invoice` WHERE MONTH(due_date) = %d AND docstatus = 1 AND fiscal_year = '%s' GROUP BY Weekly  ORDER BY Weekly"
       
       ret = convert_to_lists(sql(query%(cint(lst[0]),lst[1])))
     
     else:
           
-      query = "SELECT SUM(t2.amount) AMOUNT,CASE WEEK(t1.due_date)" + cases + "END Weekly FROM `tabReceivable Voucher` t1, `tabRV Detail` t2 WHERE MONTH(t1.due_date) = %d AND t1.docstatus = 1 AND t1.fiscal_year = '%s' AND t1.name = t2.parent AND t2.item_group ='%s' GROUP BY Weekly  ORDER BY Weekly"
+      query = "SELECT SUM(t2.amount) AMOUNT,CASE WEEK(t1.due_date)" + cases + "END Weekly FROM `tabSales Invoice` t1, `tabSales Invoice Item` t2 WHERE MONTH(t1.due_date) = %d AND t1.docstatus = 1 AND t1.fiscal_year = '%s' AND t1.name = t2.parent AND t2.item_group ='%s' GROUP BY Weekly  ORDER BY Weekly"
       
       ret =convert_to_lists(sql(query%(cint(lst[0]),lst[1],lst[2])))
  
@@ -113,12 +113,12 @@ class DocType:
       if(m1 == 13): m1 = 1 
     
     if not lst[1]:
-      query = "SELECT SUM(grand_total) AMOUNT,CASE WEEK(due_date)"+cases+"END Weekly, month(due_date) month FROM `tabReceivable Voucher` WHERE docstatus = 1 AND fiscal_year = '%s' GROUP BY `month`,weekly ORDER BY `month`,weekly"
+      query = "SELECT SUM(grand_total) AMOUNT,CASE WEEK(due_date)"+cases+"END Weekly, month(due_date) month FROM `tabSales Invoice` WHERE docstatus = 1 AND fiscal_year = '%s' GROUP BY `month`,weekly ORDER BY `month`,weekly"
       ret = convert_to_lists(sql(query%lst[0]))
     
     else:
     
-      query = "SELECT SUM(t2.amount) AMOUNT,CASE WEEK(t1.due_date)" + cases + "END Weekly, month(due_date) month FROM `tabReceivable Voucher` t1, `tabRV Detail` t2 WHERE t1.docstatus = 1 AND t1.fiscal_year = '%s' AND t1.name = t2.parent AND t2.item_group ='%s' GROUP BY Weekly  ORDER BY Weekly"
+      query = "SELECT SUM(t2.amount) AMOUNT,CASE WEEK(t1.due_date)" + cases + "END Weekly, month(due_date) month FROM `tabSales Invoice` t1, `tabSales Invoice Item` t2 WHERE t1.docstatus = 1 AND t1.fiscal_year = '%s' AND t1.name = t2.parent AND t2.item_group ='%s' GROUP BY Weekly  ORDER BY Weekly"
       ret = convert_to_lists(sql(query%(lst[0],lst[1])))
       
     

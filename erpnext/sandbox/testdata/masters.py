@@ -237,7 +237,7 @@ main_masters = {
 		),
 		Document(
 			fielddata = {
-				'doctype': 'Ref Rate Detail',
+				'doctype': 'Item Price',
 				'parentfield': 'ref_rate_details',
 				'parenttype': 'Item',
 				'parent' : 'it',

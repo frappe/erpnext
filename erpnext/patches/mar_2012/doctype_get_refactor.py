@@ -111,17 +111,17 @@ def remove_custom_from_docfield(cf):
 			f.get('fieldname')))
 
 def create_file_list():
-	should_exist = ['Website Settings', 'Web Page', 'Timesheet', 'Ticket',
+	should_exist = ['Website Settings', 'Web Page', 'Timesheet', 'Task',
 		'Support Ticket', 'Supplier', 'Style Settings', 'Stock Reconciliation',
-		'Stock Entry', 'Serial No', 'Sales Order', 'Receivable Voucher',
+		'Stock Entry', 'Serial No', 'Sales Order', 'Sales Invoice',
 		'Quotation', 'Question', 'Purchase Receipt', 'Purchase Order',
 		'Project', 'Profile', 'Production Order', 'Product', 'Print Format',
-		'Price List', 'Payable Voucher', 'Page', 'Module Def',
+		'Price List', 'Purchase Invoice', 'Page', 'Module Def',
 		'Maintenance Visit', 'Maintenance Schedule', 'Letter Head',
-		'Leave Application', 'Lead', 'Journal Voucher', 'Item', 'Indent',
-		'Expense Voucher', 'Enquiry', 'Employee', 'Delivery Note',
+		'Leave Application', 'Lead', 'Journal Voucher', 'Item', 'Purchase Request',
+		'Expense Claim', 'Opportunity', 'Employee', 'Delivery Note',
 		'Customer Issue', 'Customer', 'Contact Us Settings', 'Company',
-		'Bulk Rename Tool', 'Blog', 'Bill Of Materials', 'About Us Settings']
+		'Bulk Rename Tool', 'Blog', 'BOM', 'About Us Settings']
 
 	from webnotes.model.code import get_obj
 

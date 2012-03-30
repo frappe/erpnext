@@ -1,0 +1,104 @@
+# DocType, Salary Slip Deduction
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2012-03-27 14:36:00',
+		'docstatus': 0,
+		'modified': '2012-03-27 14:36:00',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
+	},
+
+	# These values are common for all DocType
+	{
+		'colour': u'White:FFF',
+		'doctype': 'DocType',
+		'istable': 1,
+		'module': u'HR',
+		'name': '__common__',
+		'section_style': u'Simple',
+		'server_code_error': u' ',
+		'show_in_menu': 0,
+		'version': 9
+	},
+
+	# These values are common for all DocField
+	{
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'name': '__common__',
+		'parent': u'Salary Slip Deduction',
+		'parentfield': u'fields',
+		'parenttype': u'DocType'
+	},
+
+	# These values are common for all DocPerm
+	{
+		'create': 1,
+		'doctype': u'DocPerm',
+		'name': '__common__',
+		'parent': u'Salary Slip Deduction',
+		'parentfield': u'permissions',
+		'parenttype': u'DocType',
+		'permlevel': 0,
+		'read': 1,
+		'role': u'System Manager',
+		'write': 1
+	},
+
+	# DocType, Salary Slip Deduction
+	{
+		'doctype': 'DocType',
+		'name': u'Salary Slip Deduction'
+	},
+
+	# DocPerm
+	{
+		'doctype': u'DocPerm'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'd_type',
+		'fieldtype': u'Link',
+		'label': u'Type',
+		'oldfieldname': u'd_type',
+		'oldfieldtype': u'Data',
+		'options': u'Deduction Type',
+		'permlevel': 0,
+		'width': u'200px'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'd_amount',
+		'fieldtype': u'Currency',
+		'label': u'Amount',
+		'oldfieldname': u'd_amount',
+		'oldfieldtype': u'Currency',
+		'permlevel': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'd_modified_amount',
+		'fieldtype': u'Currency',
+		'label': u'Modified Amount',
+		'permlevel': 0,
+		'trigger': u'Client'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'd_depends_on_lwp',
+		'fieldtype': u'Check',
+		'label': u'Depends on LWP',
+		'permlevel': 0,
+		'trigger': u'Client'
+	}
+]

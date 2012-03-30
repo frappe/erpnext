@@ -12,16 +12,16 @@
 
 	# These values are common for all Search Criteria
 	{
-		'add_cond': "`tabIndent`.status='Draft'",
-		'columns': 'Indent\x01ID,Indent\x01Owner,Indent\x01Indent Date,Indent\x01Remarks',
-		'criteria_name': 'Indent-To be submitted',
-		'doc_type': 'Indent',
+		'add_cond': "`tabPurchase Request`.status='Draft'",
+		'columns': 'Purchase Request\x01ID,Purchase Request\x01Owner,Purchase Request\x01Purchase Request Date,Purchase Request\x01Remarks',
+		'criteria_name': 'Purchase Request-To be submitted',
+		'doc_type': 'Purchase Request',
 		'doctype': 'Search Criteria',
-		'filters': "{'Indent\x01Saved':1,'Indent\x01Status':'Draft','Indent\x01Fiscal Year':''}",
+		'filters': "{'Purchase Request\x01Saved':1,'Purchase Request\x01Status':'Draft','Purchase Request\x01Fiscal Year':''}",
 		'module': 'Home',
 		'name': '__common__',
 		'page_len': 50,
-		'sort_by': '`tabIndent`.`name`',
+		'sort_by': '`tabPurchase Request`.`name`',
 		'sort_order': 'DESC',
 		'standard': 'Yes'
 	},

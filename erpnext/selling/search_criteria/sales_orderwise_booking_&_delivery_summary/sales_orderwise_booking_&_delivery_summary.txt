@@ -12,11 +12,11 @@
 
 	# These values are common for all Search Criteria
 	{
-		'add_col': "SUM(CASE WHEN `tabSales Order`.`status` = 'Stopped' THEN (`tabSales Order Detail`.`delivered_qty` * `tabSales Order Detail`.`basic_rate`) ELSE (`tabSales Order Detail`.`qty` * `tabSales Order Detail`.`basic_rate`) END) AS 'Booking Total'\nSUM(`tabSales Order Detail`.`delivered_qty` * `tabSales Order Detail`.`basic_rate`) AS 'Delivered Amount'",
+		'add_col': "SUM(CASE WHEN `tabSales Order`.`status` = 'Stopped' THEN (`tabSales Order Item`.`delivered_qty` * `tabSales Order Item`.`basic_rate`) ELSE (`tabSales Order Item`.`qty` * `tabSales Order Item`.`basic_rate`) END) AS 'Booking Total'\nSUM(`tabSales Order Item`.`delivered_qty` * `tabSales Order Item`.`basic_rate`) AS 'Delivered Amount'",
 		'columns': 'Sales Order\x01ID,Sales Order\x01Status,Sales Order\x01% Billed,Sales Order\x01Sales Order Date,Sales Order\x01Customer,Sales Order\x01Customer Name,Sales Order\x01Territory',
 		'criteria_name': 'Sales Orderwise Booking & Delivery Summary',
 		'description': 'Sales Orderwise Booking & Delivery Summary',
-		'doc_type': 'Sales Order Detail',
+		'doc_type': 'Sales Order Item',
 		'doctype': 'Search Criteria',
 		'filters': "{'Sales Order\x01Submitted':1,'Sales Order\x01Status':'','Sales Order\x01Fiscal Year':''}",
 		'group_by': '`tabSales Order`.`name`',

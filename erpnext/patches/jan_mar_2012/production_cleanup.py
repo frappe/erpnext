@@ -22,10 +22,10 @@ def execute():
 	
 	# Production Planning Tool
 	#---------------------------------------------------------------
-	#delete_doc('DocType', 'PP Detail')
-	#delete_doc('DocType', 'PP SO Detail')
+	#delete_doc('DocType', 'Production Plan Item')
+	#delete_doc('DocType', 'Production Plan Sales Order')
 	#delete_doc('DocType', 'Production Planning Tool')
-	sql("delete from `tabDocField` where parent in ('Production Planning Tool', 'PP Detail', 'PP SO Detail')")
+	sql("delete from `tabDocField` where parent in ('Production Planning Tool', 'Production Plan Item', 'Production Plan Sales Order')")
 	
 	reload_doc('production', 'doctype', 'production_planning_tool')
 	reload_doc('production', 'doctype', 'pp_detail')
@@ -42,7 +42,7 @@ def execute():
 	""")
 
 
-	# Bill Of Materials
+	# BOM
 	#---------------------------------------------------------------
 	reload_doc('production', 'doctype', 'bill_of_materials')
 	reload_doc('production', 'doctype', 'bom_material')
@@ -50,17 +50,17 @@ def execute():
 	reload_doc('production', 'doctype', 'flat_bom_detail')
 
 	#copy values
-	sql("""update `tabBill Of Materials` set rm_cost_as_per = 'Valuation Rate', 
+	sql("""update `tabBOM` set rm_cost_as_per = 'Valuation Rate', 
 		raw_material_cost = dir_mat_as_per_mar,	total_cost = cost_as_per_mar, costing_date = cost_as_on""")
 
-	sql("update `tabBOM Material` set rate = moving_avg_rate, amount = amount_as_per_mar")
+	sql("update `tabBOM Item` set rate = moving_avg_rate, amount = amount_as_per_mar")
 
-	sql("update `tabFlat BOM Detail` set rate = moving_avg_rate, amount = amount_as_per_mar")
+	sql("update `tabBOM Explosion Item` set rate = moving_avg_rate, amount = amount_as_per_mar")
 
 
 
 	# delete depricated flds from bom
-	sql("""	delete from `tabDocField` where parent = 'Bill Of Materials' 
+	sql("""	delete from `tabDocField` where parent = 'BOM' 
 		and (
 			label in ('TreeView1', 'Set as Default BOM', 'Activate BOM', 'Inactivate BOM') 
 			or fieldname in ('cost_as_per_mar', 'cost_as_per_lpr', 'cost_as_per_sr', 'cost_as_on',
@@ -72,14 +72,14 @@ def execute():
 	sql("delete from `tabDocField` where parent = 'BOM Operation' and fieldname in ('details', 'workstation_capacity')")
 
 	# delete depricated flds from bom material
-	sql("""delete from `tabDocField` where parent = 'BOM Material' 
+	sql("""delete from `tabDocField` where parent = 'BOM Item' 
 		and fieldname in ('dir_mat_as_per_mar', 'dir_mat_as_per_sr', 'dir_mat_as_per_lpr', 'operating_cost', 'value_as_per_mar', 
 			'value_as_per_sr', 'value_as_per_lpr', 'moving_avg_rate', 'standard_rate', 'last_purchase_rate', 'amount_as_per_sr', 
 			'amount_as_per_lpr', 'amount_as_per_mar')	
 	""")
 
 	# delete depricated flds from flat bom
-	sql("""delete from tabDocField where parent = 'Flat BOM Detail' 
+	sql("""delete from tabDocField where parent = 'BOM Explosion Item' 
 		and fieldname in ('moving_avg_rate', 'standard_rate', 'last_purchase_rate', 'amount_as_per_mar', 
 			'amount_as_per_sr', 'amount_as_per_lpr', 'flat_bom_no', 'bom_mat_no', 'is_pro_applicable')
 	""")

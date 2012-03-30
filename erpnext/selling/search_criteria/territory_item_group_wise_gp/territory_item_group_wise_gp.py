@@ -63,16 +63,16 @@ for r in res:
     dn = sql("select name from `tabItem` where item_group in %s"%(cn))
     for n in dn:
       
-      dt = sql("select sum(qty),sum(amount) from `tabDelivery Note Detail` where item_code ='%s' and docstatus = 1"%n[0])  
+      dt = sql("select sum(qty),sum(amount) from `tabDelivery Note Item` where item_code ='%s' and docstatus = 1"%n[0])  
           
       qty += dt[0][0] and dt[0][0] or 0
       amt += dt[0][1] and dt[0][1] or 0  
-      prt = sql("select distinct t1.name from `tabDelivery Note` t1, `tabDelivery Note Detail` t2 where t1.name = t2.parent and t2.item_code = '%s' and t1.docstatus = 1 and t2.docstatus =1 order by t1.name"%n[0])
+      prt = sql("select distinct t1.name from `tabDelivery Note` t1, `tabDelivery Note Item` t2 where t1.name = t2.parent and t2.item_code = '%s' and t1.docstatus = 1 and t2.docstatus =1 order by t1.name"%n[0])
       for p in prt:
-        d1 = sql("select qty from `tabDelivery Note Detail` where parent = '%s' and parenttype ='Delivery Note' and docstatus =1 and item_code = '%s'"%(p[0],n[0]))
+        d1 = sql("select qty from `tabDelivery Note Item` where parent = '%s' and parenttype ='Delivery Note' and docstatus =1 and item_code = '%s'"%(p[0],n[0]))
         for t in d1:
           tot_val_rate = 0
-          packing_list_items = sql("select item_code, warehouse, qty from `tabDelivery Note Packing Detail` where parent = '%s' and parent_item = '%s' and docstatus = 1 order by item_code, warehouse, qty"%(p[0],n[0]))
+          packing_list_items = sql("select item_code, warehouse, qty from `tabDelivery Note Packing Item` where parent = '%s' and parent_item = '%s' and docstatus = 1 order by item_code, warehouse, qty"%(p[0],n[0]))
                            
           for d in packing_list_items:
             if d[1]:
@@ -89,15 +89,15 @@ for r in res:
 
     for n in dn:
 
-      dt = sql("select sum(qty), sum(amount) from `tabDelivery Note Detail` where parent = '%s' and docstatus = 1"%n[0])
+      dt = sql("select sum(qty), sum(amount) from `tabDelivery Note Item` where parent = '%s' and docstatus = 1"%n[0])
       qty += dt[0][0] and dt[0][0] or 0
       amt += dt[0][1] and dt[0][1] or 0
 
-      d1 = sql("select item_code,qty from `tabDelivery Note Detail` where parent = '%s' and parenttype ='Delivery Note' and docstatus =1"%n[0])
+      d1 = sql("select item_code,qty from `tabDelivery Note Item` where parent = '%s' and parenttype ='Delivery Note' and docstatus =1"%n[0])
 
       for t in d1:
         tot_val_rate = 0
-        packing_list_items = sql("select item_code, warehouse, qty from `tabDelivery Note Packing Detail` where parent = '%s' and parent_item = '%s' and docstatus = 1 order by item_code, warehouse,qty"%(n[0],t[0]))
+        packing_list_items = sql("select item_code, warehouse, qty from `tabDelivery Note Packing Item` where parent = '%s' and parent_item = '%s' and docstatus = 1 order by item_code, warehouse,qty"%(n[0],t[0]))
        
         for d in packing_list_items:
           if d[1]:

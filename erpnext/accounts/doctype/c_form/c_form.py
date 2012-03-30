@@ -39,9 +39,9 @@ class DocType:
 		
 		if len(getlist(self.doclist, 'invoice_details')):
 			inv = "'" + "', '".join([d.invoice_no for d in getlist(self.doclist, 'invoice_details')]) + "'"
-			sql("""update `tabReceivable Voucher` set c_form_no = '%s', modified ='%s'
+			sql("""update `tabSales Invoice` set c_form_no = '%s', modified ='%s'
 				where name in (%s)"""%(self.doc.name, self.doc.modified, inv))
-			sql("""update `tabReceivable Voucher` set c_form_no = '', modified = %s where name not
+			sql("""update `tabSales Invoice` set c_form_no = '', modified = %s where name not
 				in (%s) and ifnull(c_form_no, '') = %s""", (self.doc.modified, self.doc.name, inv))
 		else:
 			msgprint("Please enter atleast 1 invoice in the table below", raise_exception=1)
@@ -51,7 +51,7 @@ class DocType:
 		"""	Pull details from invoices for referrence """
 
 		inv = sql("""select posting_date, territory, net_total, grand_total from
-			`tabReceivable Voucher` where name = %s""", invoice_no)	
+			`tabSales Invoice` where name = %s""", invoice_no)	
 		ret = {
 			'invoice_date' : inv and getdate(inv[0][0]).strftime('%Y-%m-%d') or '',
 			'territory'    : inv and inv[0][1] or '',
@@ -67,7 +67,7 @@ class DocType:
 
 		for d in getlist(self.doclist, 'invoice_details'):
 			inv = sql("""select c_form_applicable, c_form_no from
-				`tabReceivable Voucher` where name = %s""", invoice_no)
+				`tabSales Invoice` where name = %s""", invoice_no)
 			if not inv:
 				msgprint("Invoice: %s is not exists in the system, please check." % d.invoice_no, raise_exception=1)
 			elif inv[0][0] != 'Yes':

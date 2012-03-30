@@ -19,8 +19,8 @@ cur_frm.add_fetch('employee', 'company', 'company');
 // On load
 //=======================================================================
 cur_frm.cscript.onload = function(doc, dt, dn){
-  e_tbl = getchildren('Earning Detail', doc.name, 'earning_details', doc.doctype);
-  d_tbl = getchildren('Deduction Detail', doc.name, 'deduction_details', doc.doctype);
+  e_tbl = getchildren('Salary Structure Earning', doc.name, 'earning_details', doc.doctype);
+  d_tbl = getchildren('Salary Structure Deduction', doc.name, 'deduction_details', doc.doctype);
   if (e_tbl.length == 0 && d_tbl.length == 0)
     $c_obj(make_doclist(doc.doctype,doc.name),'make_earn_ded_table','', function(r, rt) { refresh_many(['earning_details', 'deduction_details']);});
 }
@@ -60,7 +60,7 @@ cur_frm.cscript['Make Salary Slip'] = function(){
       'from_doctype':'Salary Structure',
       'to_doctype':'Salary Slip',
       'from_docname':doc.name,
-      'from_to_list':"[['Salary Structure', 'Salary Slip'], ['Earning Detail', 'SS Earning Detail'], ['Deduction Detail', 'SS Deduction Detail']]"
+      'from_to_list':"[['Salary Structure', 'Salary Slip'], ['Earning Detail', 'Salary Slip Earning'], ['Deduction Detail', 'Salary Slip Deduction']]"
       }, 
       function(r,rt) {
         n.fiscal_year = sys_defaults.fiscal_year;
@@ -98,8 +98,8 @@ cur_frm.cscript.d_modified_amt = function(doc, cdt, cdn){
 // calculate totals
 //=======================================================================
 var calculate_totals = function(doc, cdt, cdn) {
-  var tbl1 = getchildren('Earning Detail', doc.name, 'earning_details', doc.doctype);
-  var tbl2 = getchildren('Deduction Detail', doc.name, 'deduction_details', doc.doctype);
+  var tbl1 = getchildren('Salary Structure Earning', doc.name, 'earning_details', doc.doctype);
+  var tbl2 = getchildren('Salary Structure Deduction', doc.name, 'deduction_details', doc.doctype);
   
   var total_earn = 0; var total_ded = 0;
   for(var i = 0; i < tbl1.length; i++){

@@ -12,9 +12,9 @@
 
 	# These values are common for all Search Criteria
 	{
-		'columns': 'Purchase Order\x01ID,Purchase Order\x01PO Date,Purchase Order\x01Grand Total,PO Detail\x01Item Code,PO Detail\x01Item Name,PO Detail\x01Quantity,PO Detail\x01Stock UOM,PO Detail\x01Purchase Rate,PO Detail\x01Amount,PO Detail\x01Warehouse',
+		'columns': 'Purchase Order\x01ID,Purchase Order\x01PO Date,Purchase Order\x01Grand Total,Purchase Order Item\x01Item Code,Purchase Order Item\x01Item Name,Purchase Order Item\x01Quantity,Purchase Order Item\x01Stock UOM,Purchase Order Item\x01Purchase Rate,Purchase Order Item\x01Amount,Purchase Order Item\x01Warehouse',
 		'criteria_name': 'Itemwise Purchase Details',
-		'doc_type': 'PO Detail',
+		'doc_type': 'Purchase Order Item',
 		'doctype': 'Search Criteria',
 		'filters': "{'Purchase Order\x01Saved':1,'Purchase Order\x01Submitted':1,'Purchase Order\x01Status':'','Purchase Order\x01Company Name':''}",
 		'module': 'Buying',

@@ -25,7 +25,7 @@
 cur_frm.cscript.load_taxes = function(doc, cdt, cdn, callback) {
 	// run if this is not executed from dt_map...
 	doc = locals[doc.doctype][doc.name];
-	if(doc.customer || getchildren('RV Tax Detail', doc.name, 'other_charges', doc.doctype).length) {
+	if(doc.customer || getchildren('Sales Taxes and Charges', doc.name, 'other_charges', doc.doctype).length) {
 		if(callback) {
 			callback(doc, cdt, cdn);
 		}
@@ -105,7 +105,7 @@ var set_dynamic_label_par = function(doc, cdt, cdn, base_curr) {
 	cur_frm.fields_dict['conversion_rate'].label_span.innerHTML = "Conversion Rate (" + doc.currency +' -> '+ base_curr + ')';
 	cur_frm.fields_dict['plc_conversion_rate'].label_span.innerHTML = 'Price List Currency Conversion Rate (' + doc.price_list_currency +' -> '+ base_curr + ')';
 
-	if (doc.doctype == 'Receivable Voucher') {
+	if (doc.doctype == 'Sales Invoice') {
 		cur_frm.fields_dict['total_advance'].label_span.innerHTML = 'Total Advance (' + base_curr + ')';
 		cur_frm.fields_dict['outstanding_amount'].label_span.innerHTML = 'Outstanding Amount (' + base_curr + ')';
 	}
@@ -127,12 +127,12 @@ var set_dynamic_label_child = function(doc, cdt, cdn, base_curr) {
 
 	//tax table flds
 	tax_cols = {'tax_amount': 'Amount', 'total': 'Total'};
-	for (d in tax_cols) $('[data-grid-fieldname="RV Tax Detail-'+d+'"]').html(tax_cols[d]+' ('+base_curr+')');
+	for (d in tax_cols) $('[data-grid-fieldname="Sales Taxes and Charges-'+d+'"]').html(tax_cols[d]+' ('+base_curr+')');
 		
-	if (doc.doctype == 'Receivable Voucher') {
+	if (doc.doctype == 'Sales Invoice') {
 		// advance table flds
 		adv_cols = {'advance_amount': 'Advance Amount', 'allocated_amount': 'Allocated Amount'}
-		for (d in adv_cols) $('[data-grid-fieldname="Advance Adjustment Detail-'+d+'"]').html(adv_cols[d]+' ('+base_curr+')');	
+		for (d in adv_cols) $('[data-grid-fieldname="Sales Invoice Advance-'+d+'"]').html(adv_cols[d]+' ('+base_curr+')');	
 	}
 }
 
@@ -359,7 +359,7 @@ cur_frm.cscript.export_rate = function(doc,cdt,cdn) {
 
 // ************* GET OTHER CHARGES BASED ON COMPANY *************
 cur_frm.fields_dict.charge.get_query = function(doc) {
-	return 'SELECT DISTINCT `tabOther Charges`.name FROM `tabOther Charges` WHERE `tabOther Charges`.company = "'+doc.company+'" AND `tabOther Charges`.company is not NULL AND `tabOther Charges`.docstatus != 2 AND `tabOther Charges`.%(key)s LIKE "%s" ORDER BY `tabOther Charges`.name LIMIT 50';
+	return 'SELECT DISTINCT `tabSales Taxes and Charges Master`.name FROM `tabSales Taxes and Charges Master` WHERE `tabSales Taxes and Charges Master`.company = "'+doc.company+'" AND `tabSales Taxes and Charges Master`.company is not NULL AND `tabSales Taxes and Charges Master`.docstatus != 2 AND `tabSales Taxes and Charges Master`.%(key)s LIKE "%s" ORDER BY `tabSales Taxes and Charges Master`.name LIMIT 50';
 }
 
 // ********************* Get Charges ****************************
@@ -390,7 +390,7 @@ cur_frm.cscript.recalc = function(doc, n) {
 	if(n > 0) cur_frm.cscript.update_fname_table(doc , tname , fname , n, other_fname); // updates all values in table (i.e. amount, export amount, net total etc.)
 	
 	if(flt(doc.net_total) > 0) {
-		var cl = getchildren('RV Tax Detail', doc.name, other_fname,doc.doctype);
+		var cl = getchildren('Sales Taxes and Charges', doc.name, other_fname,doc.doctype);
 		for(var i = 0; i<cl.length; i++){
 			cl[i].total_tax_amount = 0;
 			cl[i].total_amount = 0;
@@ -433,7 +433,7 @@ cur_frm.cscript.calc_doc_values = function(doc, cdt, cdn, tname, fname, other_fn
 	}
 
 	var inclusive_rate = 0
-	var d = getchildren('RV Tax Detail', doc.name, other_fname,doc.doctype);
+	var d = getchildren('Sales Taxes and Charges', doc.name, other_fname,doc.doctype);
 	for(var j = 0; j<d.length; j++){
 		other_charges_total += flt(d[j].tax_amount);
 		if(d[j].included_in_print_rate) {
@@ -463,7 +463,7 @@ cur_frm.cscript.calc_other_charges = function(doc , tname , fname , other_fname)
 		'<b style="padding: 8px 0px;">Calculation Details for Other Charges:</b>';
 
 	var cl = getchildren(tname, doc.name, fname);
-	var tax = getchildren('RV Tax Detail', doc.name, other_fname,doc.doctype);
+	var tax = getchildren('Sales Taxes and Charges', doc.name, other_fname,doc.doctype);
 	
 	// Make display table
 	var otc = make_table(cur_frm.fields_dict['Other Charges Calculation'].disp_area,
@@ -486,7 +486,7 @@ cur_frm.cscript.calc_other_charges = function(doc , tname , fname , other_fname)
 		// Add Item Code in new Row
 		$td(otc,i+1,0).innerHTML = cl[i].item_code ? cl[i].item_code : cl[i].description;
 		
-		//var tax = getchildren('RV Tax Detail', doc.name, other_fname,doc.doctype);
+		//var tax = getchildren('Sales Taxes and Charges', doc.name, other_fname,doc.doctype);
 		var total = net_total;
 		
 		
@@ -512,7 +512,7 @@ cur_frm.cscript.calc_other_charges = function(doc , tname , fname , other_fname)
 			tax[t].tax_amount += flt(tax_amount);			 
 			var total_amount = flt(tax[t].tax_amount);
 			total_tax_amount = flt(tax[t].total_tax_amount) + flt(total_amount);
-			set_multiple('RV Tax Detail', tax[t].name, { 'item_wise_tax_detail':tax[t].item_wise_tax_detail, 'amount':roundNumber(flt(total_amount), 2), 'total':roundNumber(flt(total)+flt(tax[t].tax_amount), 2)}, other_fname);
+			set_multiple('Sales Taxes and Charges', tax[t].name, { 'item_wise_tax_detail':tax[t].item_wise_tax_detail, 'amount':roundNumber(flt(total_amount), 2), 'total':roundNumber(flt(total)+flt(tax[t].tax_amount), 2)}, other_fname);
 			prev_total += flt(tax[t].total_amount);	 // for previous row total
 			total += flt(tax[t].tax_amount);		 // for adding total to previous amount
 
@@ -582,7 +582,7 @@ cur_frm.cscript.check_charge_type_and_get_tax_amount = function( doc, tax, t, cl
 
 // ********************** Functions for inclusive value calc ******************************
 cur_frm.cscript.consider_incl_rate = function(doc, other_fname) {
-	var tax_list = getchildren('RV Tax Detail', doc.name, other_fname, doc.doctype);
+	var tax_list = getchildren('Sales Taxes and Charges', doc.name, other_fname, doc.doctype);
 	for(var i=0; i<tax_list.length; i++) {
 		if(tax_list[i].included_in_print_rate) {
 			return true;
@@ -605,7 +605,7 @@ cur_frm.cscript.back_calc_basic_rate = function(doc, tname, fname, child, other_
 		}
 	};
 
-	var tax_list = getchildren('RV Tax Detail', doc.name, other_fname, doc.doctype);
+	var tax_list = getchildren('Sales Taxes and Charges', doc.name, other_fname, doc.doctype);
 	var total = 1;
 	var temp_tax_list = [];
 	var amt = 0;
@@ -649,7 +649,7 @@ cur_frm.cscript.included_in_print_rate = function(doc, cdt, cdn) {
 			refresh_field('included_in_print_rate', tax.name, cur_frm.cscript.other_fname);
 		} else if(inList(['On Previous Row Total', 'On Previous Row Amount'], tax.charge_type)){
 			if(tax.row_id) {
-				var tax_list = getchildren('RV Tax Detail', doc.name, cur_frm.cscript.other_fname, doc.doctype);
+				var tax_list = getchildren('Sales Taxes and Charges', doc.name, cur_frm.cscript.other_fname, doc.doctype);
 				if(tax_list[tax.row_id-1].charge_type=='Actual') {
 					msgprint("Row of type 'Actual' cannot be depended on for type '" + tax.charge_type + "'\
 						when using tax inclusive prices.<br />\
@@ -746,7 +746,7 @@ cur_frm.cscript['Re-Calculate Values'] = function(doc, cdt, cdn) {
 cur_frm.cscript['Calculate Charges'] = function(doc, cdt, cdn) {
 	var other_fname	= cur_frm.cscript.other_fname;
 
-	var cl = getchildren('RV Tax Detail', doc.name, other_fname, doc.doctype);
+	var cl = getchildren('Sales Taxes and Charges', doc.name, other_fname, doc.doctype);
 	for(var i = 0; i<cl.length; i++){
 		cl[i].total_tax_amount = 0;
 		cl[i].total_amount = 0;
@@ -821,7 +821,7 @@ cur_frm.cscript.allocated_percentage = function(doc, cdt, cdn) {
 // =================================================================================
 cur_frm.cscript.validate = function(doc, cdt, cdn) {
 	cur_frm.cscript.validate_items(doc);
-	var cl = getchildren('Other Charges', doc.name, 'other_charges');
+	var cl = getchildren('Sales Taxes and Charges Master', doc.name, 'other_charges');
 	for(var i =0;i<cl.length;i++) {
 		if(!cl[i].amount) {
 			alert("Please Enter Amount in Row no. "+cl[i].idx+" in Other Charges table");

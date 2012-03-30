@@ -12,16 +12,16 @@
 
 	# These values are common for all Search Criteria
 	{
-		'add_cond': '`tabReceivable Voucher`.due_date>now() \n`tabReceivable Voucher`.outstanding_amount!=0\n`tabReceivable Voucher`.docstatus=1',
-		'columns': 'Receivable Voucher\x01ID,Receivable Voucher\x01Owner,Receivable Voucher\x01Debit To,Receivable Voucher\x01Voucher Date,Receivable Voucher\x01Due Date,Receivable Voucher\x01Outstanding Amount',
+		'add_cond': '`tabSales Invoice`.due_date>now() \n`tabSales Invoice`.outstanding_amount!=0\n`tabSales Invoice`.docstatus=1',
+		'columns': 'Sales Invoice\x01ID,Sales Invoice\x01Owner,Sales Invoice\x01Debit To,Sales Invoice\x01Voucher Date,Sales Invoice\x01Due Date,Sales Invoice\x01Outstanding Amount',
 		'criteria_name': 'Invoices-To receive payment',
-		'doc_type': 'Receivable Voucher',
+		'doc_type': 'Sales Invoice',
 		'doctype': 'Search Criteria',
-		'filters': "{'Receivable Voucher\x01Submitted':1,'Receivable Voucher\x01Is Opening':'','Receivable Voucher\x01Fiscal Year':''}",
+		'filters': "{'Sales Invoice\x01Submitted':1,'Sales Invoice\x01Is Opening':'','Sales Invoice\x01Fiscal Year':''}",
 		'module': 'Home',
 		'name': '__common__',
 		'page_len': 50,
-		'sort_by': '`tabReceivable Voucher`.`name`',
+		'sort_by': '`tabSales Invoice`.`name`',
 		'sort_order': 'DESC',
 		'standard': 'Yes'
 	},

@@ -138,7 +138,7 @@
 		'label': u'Task Id',
 		'oldfieldname': u'task_id',
 		'oldfieldtype': u'Link',
-		'options': u'Ticket',
+		'options': u'Task',
 		'permlevel': 0,
 		'search_index': 1,
 		'width': u'150px'

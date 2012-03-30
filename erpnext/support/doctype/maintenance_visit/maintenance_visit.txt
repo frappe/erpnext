@@ -460,10 +460,10 @@
 		'doctype': u'DocField',
 		'fieldname': u'maintenance_visit_details',
 		'fieldtype': u'Table',
-		'label': u'Maintenance Visit Detail',
+		'label': u'Maintenance Visit Purpose',
 		'oldfieldname': u'maintenance_visit_details',
 		'oldfieldtype': u'Table',
-		'options': u'Maintenance Visit Detail',
+		'options': u'Maintenance Visit Purpose',
 		'permlevel': 0
 	},
 

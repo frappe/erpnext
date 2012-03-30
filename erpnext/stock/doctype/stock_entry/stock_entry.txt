@@ -301,7 +301,7 @@
 		'fieldtype': u'Link',
 		'hidden': 1,
 		'label': u'Sales Invoice No',
-		'options': u'Receivable Voucher',
+		'options': u'Sales Invoice',
 		'permlevel': 0,
 		'print_hide': 1
 	},
@@ -466,7 +466,7 @@
 		'fieldname': u'bom_no',
 		'fieldtype': u'Link',
 		'label': u'BOM No',
-		'options': u'Bill Of Materials',
+		'options': u'BOM',
 		'permlevel': 0
 	},
 

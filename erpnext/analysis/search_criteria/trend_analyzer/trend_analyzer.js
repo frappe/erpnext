@@ -80,14 +80,14 @@ report.get_query = function() {
     add_col = '';
     add_tables = '';
     sp_cond = '';
-    if(trans == 'Sales Invoice') trans = 'Receivable Voucher';
-    else if(trans == 'Purchase Invoice') trans = 'Payable Voucher';
+    if(trans == 'Sales Invoice') trans = 'Sales Invoice';
+    else if(trans == 'Purchase Invoice') trans = 'Purchase Invoice';
 
     trans_det = trans+' Detail'
 
-    if(trans == 'Receivable Voucher') trans_det = 'RV Detail';
-    else if(trans == 'Payable Voucher') trans_det = 'PV Detail';
-    else if(trans == 'Purchase Order') trans_det = 'PO Detail';
+    if(trans == 'Sales Invoice') trans_det = 'Sales Invoice Item';
+    else if(trans == 'Purchase Invoice') trans_det = 'Purchase Invoice Item';
+    else if(trans == 'Purchase Order') trans_det = 'Purchase Order Item';
 
     if(order_type != '') add_code += ' AND t1.order_type = '+order_type;
 
@@ -117,7 +117,7 @@ report.get_query = function() {
                                   if(supp_type) add_cond += ' AND t1.supplier_type = "'+supp_type+'"';
                                   break;
       case 'Project'        :     pro = this.get_filter('Profile', 'Project').get_value();
-      							  if (inList(['Purchase Order', 'Purchase Receipt', 'Payable Voucher'], trans)) {
+      							  if (inList(['Purchase Order', 'Purchase Receipt', 'Purchase Invoice'], trans)) {
 									  col = 'DISTINCT t2.project_name';
     	                              if(pro) add_cond += ' AND t2.project_name = "'+pro+'"';
     	                          } else {

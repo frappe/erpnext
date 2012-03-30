@@ -19,10 +19,10 @@ import webnotes
 def execute():
 	"""rename from getfle"""
 	l = [
-		('Quotation Detail', 'description'),
-		('Sales Order Detail', 'description'),
-		('Delivery Note Detail', 'description'),
-		('RV Detail', 'description'),
+		('Quotation Item', 'description'),
+		('Sales Order Item', 'description'),
+		('Delivery Note Item', 'description'),
+		('Sales Invoice Item', 'description'),
 		('Item', 'description_html'),
 		('Letter Head', 'content')
 	]

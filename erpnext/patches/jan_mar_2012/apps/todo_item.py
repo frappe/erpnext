@@ -16,7 +16,7 @@
 
 def execute():
 	"""
-		* Reload ToDo Item
+		* Reload ToDo
 	"""
 	from webnotes.modules import reload_doc
 	reload_doc('utilities', 'doctype', 'todo_item')

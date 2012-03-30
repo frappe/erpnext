@@ -13,14 +13,14 @@
 	# These values are common for all Search Criteria
 	{
 		'add_col': "`tabAccount`.`parent_account` AS 'Parent Account'\n`tabCustomer`.`territory` AS 'Territory'\n`tabCustomer`.`customer_details` AS 'Customer Details'",
-		'add_cond': "ifnull(`tabReceivable Voucher`.`is_opening`, 'No') = 'No'\n`tabAccount`.name =`tabReceivable Voucher`.debit_to\n`tabCustomer`.`name` = `tabAccount`.`master_name`",
+		'add_cond': "ifnull(`tabSales Invoice`.`is_opening`, 'No') = 'No'\n`tabAccount`.name =`tabSales Invoice`.debit_to\n`tabCustomer`.`name` = `tabAccount`.`master_name`",
 		'add_tab': '`tabAccount`\n`tabCustomer`',
-		'columns': 'Receivable Voucher\x01ID,Receivable Voucher\x01Posting Date,Receivable Voucher\x01Debit To',
+		'columns': 'Sales Invoice\x01ID,Sales Invoice\x01Posting Date,Sales Invoice\x01Debit To',
 		'criteria_name': 'Sales Register',
 		'dis_filters': 'fiscal_year',
-		'doc_type': 'Receivable Voucher',
+		'doc_type': 'Sales Invoice',
 		'doctype': 'Search Criteria',
-		'filters': "{'Receivable Voucher\x01Submitted':1,'Receivable Voucher\x01Is Opening':''}",
+		'filters': "{'Sales Invoice\x01Submitted':1,'Sales Invoice\x01Is Opening':''}",
 		'module': 'Accounts',
 		'name': '__common__',
 		'page_len': 50,

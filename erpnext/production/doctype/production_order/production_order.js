@@ -109,7 +109,7 @@ cur_frm.fields_dict['project_name'].get_query = function(doc, dt, dn) {
 
 cur_frm.fields_dict['bom_no'].get_query = function(doc)  {
   if (doc.production_item){
-    return 'SELECT DISTINCT `tabBill Of Materials`.`name` FROM `tabBill Of Materials` WHERE `tabBill Of Materials`.`is_active` = "Yes" AND `tabBill Of Materials`.docstatus = 1 AND `tabBill Of Materials`.`item` = "' + cstr(doc.production_item) + '" AND`tabBill Of Materials`.%(key)s LIKE "%s" ORDER BY `tabBill Of Materials`.`name` LIMIT 50';
+    return 'SELECT DISTINCT `tabBOM`.`name` FROM `tabBOM` WHERE `tabBOM`.`is_active` = "Yes" AND `tabBOM`.docstatus = 1 AND `tabBOM`.`item` = "' + cstr(doc.production_item) + '" AND`tabBOM`.%(key)s LIKE "%s" ORDER BY `tabBOM`.`name` LIMIT 50';
   }
   else {
     alert(" Please Enter Production Item First.")

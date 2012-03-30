@@ -1,0 +1,132 @@
+# DocType, Payment to Invoice Matching Tool Detail
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2012-03-27 14:35:43',
+		'docstatus': 0,
+		'modified': '2012-03-27 14:35:43',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
+	},
+
+	# These values are common for all DocType
+	{
+		'colour': u'White:FFF',
+		'default_print_format': u'Standard',
+		'doctype': 'DocType',
+		'istable': 1,
+		'module': u'Accounts',
+		'name': '__common__',
+		'section_style': u'Simple',
+		'show_in_menu': 0,
+		'version': 14
+	},
+
+	# These values are common for all DocField
+	{
+		'doctype': u'DocField',
+		'name': '__common__',
+		'parent': u'Payment to Invoice Matching Tool Detail',
+		'parentfield': u'fields',
+		'parenttype': u'DocType'
+	},
+
+	# DocType, Payment to Invoice Matching Tool Detail
+	{
+		'doctype': 'DocType',
+		'name': u'Payment to Invoice Matching Tool Detail'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'selected',
+		'fieldtype': u'Check',
+		'label': u'Select',
+		'permlevel': 0,
+		'reqd': 1,
+		'width': u'60px'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'voucher_no',
+		'fieldtype': u'Link',
+		'label': u'Voucher No',
+		'options': u'Journal Voucher',
+		'permlevel': 1,
+		'reqd': 0,
+		'width': u'140px'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'amt_due',
+		'fieldtype': u'Currency',
+		'label': u'Amt Due',
+		'permlevel': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'amt_to_be_reconciled',
+		'fieldtype': u'Currency',
+		'label': u'Amt to be reconciled',
+		'permlevel': 0,
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'posting_date',
+		'fieldtype': u'Date',
+		'label': u'Posting Date',
+		'permlevel': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'total_amt',
+		'fieldtype': u'Currency',
+		'label': u'Total Amt',
+		'permlevel': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'against_account',
+		'fieldtype': u'Data',
+		'label': u'Against Account',
+		'permlevel': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'remarks',
+		'fieldtype': u'Small Text',
+		'label': u'Remarks',
+		'permlevel': 1,
+		'width': u'200px'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'voucher_detail_no',
+		'fieldtype': u'Data',
+		'hidden': 1,
+		'label': u'Voucher Detail No',
+		'no_column': 0,
+		'permlevel': 1,
+		'print_hide': 1,
+		'reqd': 0
+	}
+]

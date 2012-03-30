@@ -133,10 +133,10 @@
 		'doctype': u'DocField',
 		'fieldname': u'holiday_list_details',
 		'fieldtype': u'Table',
-		'label': u'Holiday List Details',
+		'label': u'Holidays',
 		'oldfieldname': u'holiday_list_details',
 		'oldfieldtype': u'Table',
-		'options': u'Holiday List Detail',
+		'options': u'Holiday',
 		'permlevel': 0,
 		'reqd': 0
 	},

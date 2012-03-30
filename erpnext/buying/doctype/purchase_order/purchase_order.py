@@ -39,7 +39,7 @@ class DocType(TransactionBase):
 		self.doc = doc
 		self.doclist = doclist
 		self.defaults = get_defaults()
-		self.tname = 'PO Detail'
+		self.tname = 'Purchase Order Item'
 		self.fname = 'po_details'
 
 	# Autoname
@@ -81,18 +81,18 @@ class DocType(TransactionBase):
 	def get_bin_details(self, arg = ''):
 		return get_obj(dt='Purchase Common').get_bin_details(arg)
 
-	# Pull Indent
+	# Pull Purchase Request
 	def get_indent_details(self):
 		#self.validate_prev_docname() 
 		if self.doc.indent_no:
-			get_obj('DocType Mapper','Indent-Purchase Order').dt_map('Indent','Purchase Order',self.doc.indent_no, self.doc, self.doclist, "[['Indent','Purchase Order'],['Indent Detail', 'PO Detail']]")
+			get_obj('DocType Mapper','Purchase Request-Purchase Order').dt_map('Purchase Request','Purchase Order',self.doc.indent_no, self.doc, self.doclist, "[['Purchase Request','Purchase Order'],['Purchase Request Item', 'Purchase Order Item']]")
 			for d in getlist(self.doclist, 'po_details'):			
 				if d.item_code:
 					item = sql("select last_purchase_rate from tabItem where name = '%s'" %(d.item_code), as_dict=1)
 					d.purchase_rate = item and flt(item[0]['last_purchase_rate']) or 0
 					d.import_rate = flt(item and flt(item[0]['last_purchase_rate']) or 0) / flt(self.doc.fields.has_key('conversion_rate') and flt(self.doc.conversion_rate) or 1)
 		if self.doc.supplier_qtn:
-			get_obj('DocType Mapper','Supplier Quotation-Purchase Order').dt_map('Supplier Quotation','Purchase Order',self.doc.supplier_qtn, self.doc, self.doclist, "[['Supplier Quotation','Purchase Order'],['Supplier Quotation Detail', 'PO Detail']]")
+			get_obj('DocType Mapper','Supplier Quotation-Purchase Order').dt_map('Supplier Quotation','Purchase Order',self.doc.supplier_qtn, self.doc, self.doclist, "[['Supplier Quotation','Purchase Order'],['Supplier Quotation Detail', 'Purchase Order Item']]")
 	
 	# GET TERMS & CONDITIONS
 	# =====================================================================================
@@ -176,22 +176,22 @@ class DocType(TransactionBase):
 				if is_stopped:
 					po_qty = flt(d.qty) > flt(d.received_qty) and flt( flt(flt(d.qty) - flt(d.received_qty)) * flt(d.conversion_factor))or 0 
 				
-				# No updates in Indent on Stop / Unstop
-				if cstr(d.prevdoc_doctype) == 'Indent' and not is_stopped:
+				# No updates in Purchase Request on Stop / Unstop
+				if cstr(d.prevdoc_doctype) == 'Purchase Request' and not is_stopped:
 					# get qty and pending_qty of prevdoc 
-					curr_ref_qty = pc_obj.get_qty( d.doctype, 'prevdoc_detail_docname', d.prevdoc_detail_docname, 'Indent Detail', 'Indent - Purchase Order', self.doc.name)
+					curr_ref_qty = pc_obj.get_qty( d.doctype, 'prevdoc_detail_docname', d.prevdoc_detail_docname, 'Purchase Request Item', 'Purchase Request - Purchase Order', self.doc.name)
 					max_qty, qty, curr_qty = flt(curr_ref_qty.split('~~~')[1]), flt(curr_ref_qty.split('~~~')[0]), 0
 					
 					if flt(qty) + flt(po_qty) > flt(max_qty):
 						curr_qty = flt(max_qty) - flt(qty)
-						# special case as there is no restriction for Indent - Purchase Order 
+						# special case as there is no restriction for Purchase Request - Purchase Order 
 						curr_qty = (curr_qty > 0) and curr_qty or 0
 					else:
 						curr_qty = flt(po_qty)
 					
 					ind_qty = -flt(curr_qty)
 
-				#==> Update Bin's Indent Qty by +- ind_qty and Ordered Qty by +- qty
+				#==> Update Bin's Purchase Request Qty by +- ind_qty and Ordered Qty by +- qty
 				get_obj('Warehouse', d.warehouse).update_bin(0, 0, (is_submit and 1 or -1) * flt(po_qty), (is_submit and 1 or -1) * flt(ind_qty), 0, d.item_code, self.doc.transaction_date)
 
 	def check_modified_date(self):
@@ -252,12 +252,12 @@ class DocType(TransactionBase):
 		self.check_for_stopped_status(pc_obj)
 		
 		# 2.Check if Purchase Receipt has been submitted against current Purchase Order
-		pc_obj.check_docstatus(check = 'Next', doctype = 'Purchase Receipt', docname = self.doc.name, detail_doctype = 'Purchase Receipt Detail')
+		pc_obj.check_docstatus(check = 'Next', doctype = 'Purchase Receipt', docname = self.doc.name, detail_doctype = 'Purchase Receipt Item')
 
-		# 3.Check if Payable Voucher has been submitted against current Purchase Order
-		#pc_obj.check_docstatus(check = 'Next', doctype = 'Payable Voucher', docname = self.doc.name, detail_doctype = 'PV Detail')
+		# 3.Check if Purchase Invoice has been submitted against current Purchase Order
+		#pc_obj.check_docstatus(check = 'Next', doctype = 'Purchase Invoice', docname = self.doc.name, detail_doctype = 'Purchase Invoice Item')
 		
-		submitted = sql("select t1.name from `tabPayable Voucher` t1,`tabPV Detail` t2 where t1.name = t2.parent and t2.purchase_order = '%s' and t1.docstatus = 1" % self.doc.name)
+		submitted = sql("select t1.name from `tabPurchase Invoice` t1,`tabPurchase Invoice Item` t2 where t1.name = t2.parent and t2.purchase_order = '%s' and t1.docstatus = 1" % self.doc.name)
 		if submitted:
 			msgprint("Purchase Invoice : " + cstr(submitted[0][0]) + " has already been submitted !")
 			raise Exception
@@ -265,7 +265,7 @@ class DocType(TransactionBase):
 		# 4.Set Status as Cancelled
 		set(self.doc,'status','Cancelled')
 
-		# 5.Update Indents Pending Qty and accordingly it's Status 
+		# 5.Update Purchase Requests Pending Qty and accordingly it's Status 
 		pc_obj.update_prevdoc_detail(self,is_submit = 0)
 		
 		# 6.Update Bin	
@@ -294,12 +294,12 @@ class DocType(TransactionBase):
 					self.add_bom(d)
 				
 			self.delete_irrelevant_raw_material()
-			#---------------calculate amt in	PO Raw Material Detail-------------
+			#---------------calculate amt in	Purchase Order Item Supplied-------------
 			self.calculate_amount(d)
 			
 	def add_bom(self, d):
 		#----- fetching default bom from Bill of Materials instead of Item Master --
-		bom_det = sql("select t1.item, t2.item_code, t2.qty_consumed_per_unit, t2.moving_avg_rate, t2.value_as_per_mar, t2.stock_uom, t2.name, t2.parent from `tabBill Of Materials` t1, `tabBOM Material` t2 where t2.parent = t1.name and t1.item = '%s' and ifnull(t1.is_default,0) = 1 and t1.docstatus = 1" % d.item_code)
+		bom_det = sql("select t1.item, t2.item_code, t2.qty_consumed_per_unit, t2.moving_avg_rate, t2.value_as_per_mar, t2.stock_uom, t2.name, t2.parent from `tabBOM` t1, `tabBOM Item` t2 where t2.parent = t1.name and t1.item = '%s' and ifnull(t1.is_default,0) = 1 and t1.docstatus = 1" % d.item_code)
 		
 		if not bom_det:
 			msgprint("No default BOM exists for item: %s" % d.item_code)
@@ -308,9 +308,9 @@ class DocType(TransactionBase):
 			#-------------- add child function--------------------
 			chgd_rqd_qty = []
 			for i in bom_det:
-				if i and not sql("select name from `tabPO Raw Material Detail` where reference_name = '%s' and bom_detail_no = '%s' and parent = '%s' " %(d.name, i[6], self.doc.name)):
+				if i and not sql("select name from `tabPurchase Order Item Supplied` where reference_name = '%s' and bom_detail_no = '%s' and parent = '%s' " %(d.name, i[6], self.doc.name)):
 
-					rm_child = addchild(self.doc, 'po_raw_material_details', 'PO Raw Material Detail', 1, self.doclist)
+					rm_child = addchild(self.doc, 'po_raw_material_details', 'Purchase Order Item Supplied', 1, self.doclist)
 
 					rm_child.reference_name = d.name
 					rm_child.bom_detail_no = i and i[6] or ''
@@ -340,7 +340,7 @@ class DocType(TransactionBase):
 	#--------------------------------------------------------------	
 	def delete_irrelevant_raw_material(self):
 		for d in getlist(self.doclist,'po_raw_material_details'):
-			if not sql("select name from `tabPO Detail` where name = '%s' and parent = '%s'and item_code = '%s'" % (d.reference_name, self.doc.name, d.main_item_code)):
+			if not sql("select name from `tabPurchase Order Item` where name = '%s' and parent = '%s'and item_code = '%s'" % (d.reference_name, self.doc.name, d.main_item_code)):
 				d.parent = 'old_par:'+self.doc.name
 				d.save()
 		

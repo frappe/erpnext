@@ -34,7 +34,7 @@ cur_frm.cscript.refresh = function(doc) {
 
 cur_frm.fields_dict['default_bom'].get_query = function(doc) {
    //var d = locals[this.doctype][this.docname];
-   return 'SELECT DISTINCT `tabBill Of Materials`.`name` FROM `tabBill Of Materials` WHERE `tabBill Of Materials`.`item` = "' + doc.item_code + '"  AND `tabBill Of Materials`.`is_active` = "No" and `tabBill Of Materials`.docstatus != 2 AND `tabBill Of Materials`.%(key)s LIKE "%s" ORDER BY `tabBill Of Materials`.`name` LIMIT 50'
+   return 'SELECT DISTINCT `tabBOM`.`name` FROM `tabBOM` WHERE `tabBOM`.`item` = "' + doc.item_code + '"  AND `tabBOM`.`is_active` = "No" and `tabBOM`.docstatus != 2 AND `tabBOM`.%(key)s LIKE "%s" ORDER BY `tabBOM`.`name` LIMIT 50'
 }
 
 
@@ -127,7 +127,7 @@ cur_frm.cscript.validate = function(doc,cdt,cdn){
   cur_frm.cscript.weight_to_validate(doc,cdt,cdn);
 }
 
-//===========Fill Default Currency in "Ref Rate Details====================
+//===========Fill Default Currency in "Item Prices====================
 cur_frm.fields_dict['ref_rate_details'].grid.onrowadd = function(doc, cdt, cdn){
 	locals[cdt][cdn].ref_currency = sys_defaults.currency;
 	refresh_field('ref_currency',cdn,'ref_rate_details');

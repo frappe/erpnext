@@ -444,10 +444,10 @@
 		'doctype': u'DocField',
 		'fieldname': u'installed_item_details',
 		'fieldtype': u'Table',
-		'label': u'Installed Item Details',
+		'label': u'Installation Note Item',
 		'oldfieldname': u'installed_item_details',
 		'oldfieldtype': u'Table',
-		'options': u'Installed Item Details',
+		'options': u'Installation Note Item',
 		'permlevel': 0
 	}
 ]

@@ -40,7 +40,7 @@ report.get_query = function() {
 
   date_fld = 'transaction_date';
   if(based_on == 'Sales Invoice') {
-    based_on = 'Receivable Voucher';
+    based_on = 'Sales Invoice';
     date_fld = 'voucher_date';
   }
 

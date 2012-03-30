@@ -12,15 +12,15 @@
 
 	# These values are common for all Search Criteria
 	{
-		'add_col': "SUM(`tabReceivable Voucher`.`total_commission`) AS 'Total Commission'\nSUM(`tabReceivable Voucher`.`net_total`) AS 'Net Total'\n((SUM(`tabReceivable Voucher`.`total_commission`) / SUM(`tabReceivable Voucher`.`net_total`)) * 100) AS 'Average Commission Rate'",
-		'add_cond': '`tabReceivable Voucher`.`net_total` > 0\n`tabReceivable Voucher`.`total_commission` > 0',
-		'columns': 'Receivable Voucher\x01Business Associate',
+		'add_col': "SUM(`tabSales Invoice`.`total_commission`) AS 'Total Commission'\nSUM(`tabSales Invoice`.`net_total`) AS 'Net Total'\n((SUM(`tabSales Invoice`.`total_commission`) / SUM(`tabSales Invoice`.`net_total`)) * 100) AS 'Average Commission Rate'",
+		'add_cond': '`tabSales Invoice`.`net_total` > 0\n`tabSales Invoice`.`total_commission` > 0',
+		'columns': 'Sales Invoice\x01Business Associate',
 		'criteria_name': 'Business Associate Commission Report',
 		'description': 'Track total commission given to your Business Associate',
-		'doc_type': 'Receivable Voucher',
+		'doc_type': 'Sales Invoice',
 		'doctype': 'Search Criteria',
-		'filters': "{'Receivable Voucher\x01Submitted':1}",
-		'group_by': '`tabReceivable Voucher`.sales_partner',
+		'filters': "{'Sales Invoice\x01Submitted':1}",
+		'group_by': '`tabSales Invoice`.sales_partner',
 		'module': 'Accounts',
 		'name': '__common__',
 		'page_len': 50,

@@ -12,10 +12,10 @@
 
 	# These values are common for all Search Criteria
 	{
-		'criteria_name': 'Pending Expense Vouchers',
-		'doc_type': 'Expense Voucher',
+		'criteria_name': 'Pending Expense Claims',
+		'doc_type': 'Expense Claim',
 		'doctype': 'Search Criteria',
-		'filters': "{'Expense Voucher\x01Approval Status':'','Expense Voucher\x01Fiscal Year':''}",
+		'filters': "{'Expense Claim\x01Approval Status':'','Expense Claim\x01Fiscal Year':''}",
 		'module': 'HR',
 		'name': '__common__',
 		'page_len': 50,

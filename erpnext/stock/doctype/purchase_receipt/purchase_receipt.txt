@@ -568,10 +568,10 @@
 		'doctype': u'DocField',
 		'fieldname': u'purchase_receipt_details',
 		'fieldtype': u'Table',
-		'label': u'Purchase Receipt Details',
+		'label': u'Purchase Receipt Items',
 		'oldfieldname': u'purchase_receipt_details',
 		'oldfieldtype': u'Table',
-		'options': u'Purchase Receipt Detail',
+		'options': u'Purchase Receipt Item',
 		'permlevel': 0,
 		'print_hide': 0,
 		'reqd': 0
@@ -624,7 +624,7 @@
 		'label': u'Purchase Other Charges',
 		'oldfieldname': u'purchase_other_charges',
 		'oldfieldtype': u'Link',
-		'options': u'Purchase Other Charges',
+		'options': u'Purchase Taxes and Charges Master',
 		'permlevel': 0,
 		'print_hide': 1
 	},
@@ -649,7 +649,7 @@
 		'label': u'Purchase Tax Details',
 		'oldfieldname': u'purchase_tax_details',
 		'oldfieldtype': u'Table',
-		'options': u'Purchase Tax Detail',
+		'options': u'Purchase Taxes and Charges',
 		'permlevel': 0
 	},
 
@@ -853,7 +853,7 @@
 		'label': u'Select Terms',
 		'oldfieldname': u'tc_name',
 		'oldfieldtype': u'Link',
-		'options': u'Term',
+		'options': u'Terms and Conditions',
 		'permlevel': 0,
 		'print_hide': 1
 	},
@@ -1147,11 +1147,11 @@
 		'doctype': u'DocField',
 		'fieldname': u'pr_raw_material_details',
 		'fieldtype': u'Table',
-		'label': u'PR Raw Material Details',
+		'label': u'Purchase Receipt Item Supplieds',
 		'no_copy': 1,
 		'oldfieldname': u'pr_raw_material_details',
 		'oldfieldtype': u'Table',
-		'options': u'PR Raw Material Detail',
+		'options': u'Purchase Receipt Item Supplied',
 		'permlevel': 1,
 		'print_hide': 1
 	},

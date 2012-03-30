@@ -84,7 +84,7 @@ class DocType:
     #  self.doc.address = comp_address
     
     if self.doc.status == 'Lead Lost' and not self.doc.order_lost_reason:
-      msgprint("Please Enter Order Lost Reason")
+      msgprint("Please Enter Quotation Lost Reason")
       raise Exception  
     
     if self.doc.source == 'Campaign' and not self.doc.campaign_name and session['user'] != 'Guest':
@@ -204,7 +204,7 @@ Cheers!
 #---------------------- Add details in follow up table----------------
   def add_in_follow_up(self,message,type):
     import datetime
-    child = addchild( self.doc, 'follow_up', 'Follow up', 1, self.doclist)
+    child = addchild( self.doc, 'follow_up', 'Communication Log', 1, self.doclist)
     child.date = datetime.datetime.now().date().strftime('%Y-%m-%d')
     child.notes = message
     child.follow_up_type = type

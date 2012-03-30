@@ -25,5 +25,5 @@ def execute():
 	reload_doc('setup', 'doctype', 'manage_account')
 
 
-	for d in ['Receivable Voucher', 'Delivery Note', 'Sales Order', 'Quotation']:
+	for d in ['Sales Invoice', 'Delivery Note', 'Sales Order', 'Quotation']:
 		webnotes.conn.sql("update `tab%s` set price_list_currency = currency, plc_conversion_rate = conversion_rate" % d)

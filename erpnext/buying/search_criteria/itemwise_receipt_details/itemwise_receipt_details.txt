@@ -12,9 +12,9 @@
 
 	# These values are common for all Search Criteria
 	{
-		'columns': 'Purchase Receipt\x01ID,Purchase Receipt\x01Posting Date,Purchase Receipt Detail\x01Item Code,Purchase Receipt Detail\x01Item Name,Purchase Receipt Detail\x01Accepted Quantity,Purchase Receipt Detail\x01Rejected Quantity,Purchase Receipt Detail\x01Accepted Warehouse,Purchase Receipt Detail\x01Rejected Warehouse,Purchase Receipt Detail\x01Amount',
+		'columns': 'Purchase Receipt\x01ID,Purchase Receipt\x01Posting Date,Purchase Receipt Item\x01Item Code,Purchase Receipt Item\x01Item Name,Purchase Receipt Item\x01Accepted Quantity,Purchase Receipt Item\x01Rejected Quantity,Purchase Receipt Item\x01Accepted Warehouse,Purchase Receipt Item\x01Rejected Warehouse,Purchase Receipt Item\x01Amount',
 		'criteria_name': 'Itemwise Receipt Details',
-		'doc_type': 'Purchase Receipt Detail',
+		'doc_type': 'Purchase Receipt Item',
 		'doctype': 'Search Criteria',
 		'filters': "{'Purchase Receipt\x01Saved':1,'Purchase Receipt\x01Submitted':1,'Purchase Receipt\x01Status':'','Purchase Receipt\x01Fiscal Year':''}",
 		'module': 'Buying',

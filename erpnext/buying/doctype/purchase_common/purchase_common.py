@@ -38,23 +38,23 @@ class DocType(TransactionBase):
 		self.doc = doc
 		self.doclist = doclist
 
-		self.chk_tol_for_list = ['Indent - Purchase Order', 'Purchase Order - Purchase Receipt', 'Purchase Order - Payable Voucher']
+		self.chk_tol_for_list = ['Purchase Request - Purchase Order', 'Purchase Order - Purchase Receipt', 'Purchase Order - Purchase Invoice']
 
-		self.update_qty = {'Indent - Purchase Order'						: 'ordered_qty',
+		self.update_qty = {'Purchase Request - Purchase Order'						: 'ordered_qty',
 											 'Purchase Order - Purchase Receipt'	: 'received_qty',
-											 'Purchase Order - Payable Voucher'	 : 'billed_qty',
-											 'Purchase Receipt - Payable Voucher' : 'billed_qty'}
+											 'Purchase Order - Purchase Invoice'	 : 'billed_qty',
+											 'Purchase Receipt - Purchase Invoice' : 'billed_qty'}
 
-		self.update_percent_field = {'Indent - Purchase Order'						: 'per_ordered',
+		self.update_percent_field = {'Purchase Request - Purchase Order'						: 'per_ordered',
 									 'Purchase Order - Purchase Receipt'	: 'per_received',
-									 'Purchase Order - Payable Voucher'	 : 'per_billed',
-									 'Purchase Receipt - Payable Voucher' : 'per_billed'}
+									 'Purchase Order - Purchase Invoice'	 : 'per_billed',
+									 'Purchase Receipt - Purchase Invoice' : 'per_billed'}
 
 		# used in validation for items and update_prevdoc_detail
-		self.doctype_dict = {'Indent'						 : 'Indent Detail',
+		self.doctype_dict = {'Purchase Request'						 : 'Purchase Request Item',
 							 'Supplier Quotation' : 'Supplier Quotation Detail',
-							 'Purchase Order'		 : 'PO Detail',
-							 'Purchase Receipt'	 : 'Purchase Receipt Detail'}
+							 'Purchase Order'		 : 'Purchase Order Item',
+							 'Purchase Receipt'	 : 'Purchase Receipt Item'}
  
 		self.repair_percent_field = {
 												 'ordered_qty' : 'per_ordered',
@@ -62,15 +62,15 @@ class DocType(TransactionBase):
 												 'billed_qty'	: 'per_billed'}
 
 		self.repair_fields = {
-									'Indent Detail'			 : ['ordered_qty'],
-									'PO Detail'				 : ['received_qty', 'billed_qty'],
-									'Purchase Receipt Detail': ['billed_qty']
+									'Purchase Request Item'			 : ['ordered_qty'],
+									'Purchase Order Item'				 : ['received_qty', 'billed_qty'],
+									'Purchase Receipt Item': ['billed_qty']
 							 }
 
 		self.next_dt_detail = {
-									'ordered_qty' : 'PO Detail',
-									'billed_qty'	: 'PV Detail',
-									'received_qty': 'Purchase Receipt Detail'
+									'ordered_qty' : 'Purchase Order Item',
+									'billed_qty'	: 'Purchase Invoice Item',
+									'received_qty': 'Purchase Receipt Item'
 								}
 
 		self.msg = []
@@ -81,7 +81,7 @@ class DocType(TransactionBase):
 			item = sql("select lead_time_days from `tabItem` where name = '%s' and (ifnull(end_of_life,'')='' or end_of_life = '0000-00-00' or end_of_life >	now())" % cstr(d.item_code) , as_dict = 1)
 			ltd = item and cint(item[0]['lead_time_days']) or 0
 			if ltd and obj.doc.transaction_date:
-				if d.fields.has_key('lead_time_date') or obj.doc.doctype == 'Indent':
+				if d.fields.has_key('lead_time_date') or obj.doc.doctype == 'Purchase Request':
 					d.lead_time_date = cstr(add_days( obj.doc.transaction_date, cint(ltd)))
 				if not d.fields.has_key('prevdoc_docname') or (d.fields.has_key('prevdoc_docname') and not d.prevdoc_docname):
 					d.schedule_date =	cstr( add_days( obj.doc.transaction_date, cint(ltd)))
@@ -108,7 +108,7 @@ class DocType(TransactionBase):
 	# Get TERMS AND CONDITIONS
 	# =======================================================================================
 	def get_tc_details(self,obj):
-		r = sql("select terms from `tabTerm` where name = %s", obj.doc.tc_name)
+		r = sql("select terms from `tabTerms and Conditions` where name = %s", obj.doc.tc_name)
 		if r: obj.doc.terms = r[0][0]
 
 	# Get Item Details
@@ -141,7 +141,7 @@ class DocType(TransactionBase):
 		}
 		
 		# get min_order_qty from item
-		if obj.doc.doctype == 'Indent':
+		if obj.doc.doctype == 'Purchase Request':
 			ret['min_order_qty'] = item and flt(item[0]['min_order_qty']) or 0
 		
 		# get projected qty from bin
@@ -221,7 +221,7 @@ class DocType(TransactionBase):
 			bin = sql("select projected_qty from `tabBin` where item_code = %s and warehouse = %s", (d.item_code, d.warehouse), as_dict = 1)
 			
 			f_lst ={'projected_qty': bin and flt(bin[0]['projected_qty']) or 0, 'ordered_qty': 0, 'received_qty' : 0, 'billed_qty': 0}
-			if d.doctype == 'Purchase Receipt Detail':
+			if d.doctype == 'Purchase Receipt Item':
 				f_lst.pop('received_qty')
 			for x in f_lst :
 				if d.fields.has_key(x):
@@ -261,7 +261,7 @@ class DocType(TransactionBase):
 					raise Exception
 				
 				#	Check if UOM has been modified.
-				if not cstr(data[0]['uom']) == cstr(d.uom) and not cstr(d.prevdoc_doctype) == 'Indent':
+				if not cstr(data[0]['uom']) == cstr(d.uom) and not cstr(d.prevdoc_doctype) == 'Purchase Request':
 					msgprint("Please check UOM %s of Item %s which is not present in %s %s ." % (d.uom, d.item_code, d.prevdoc_doctype, d.prevdoc_docname))
 					raise Exception
 			
@@ -379,11 +379,11 @@ class DocType(TransactionBase):
 	def get_qty(self,curr_doctype,ref_tab_fname,ref_tab_dn,ref_doc_tname, transaction, curr_parent_name):
 		# Get total Quantities of current doctype (eg. PR) except for qty of this transaction
 		#------------------------------
-		# please check as UOM changes from Indent - Purchase Order ,so doing following else uom should be same .
+		# please check as UOM changes from Purchase Request - Purchase Order ,so doing following else uom should be same .
 		# i.e. in PO uom is NOS then in PR uom should be NOS
-		# but if in Indent uom KG it can change in PO
+		# but if in Purchase Request uom KG it can change in PO
 		
-		get_qty = (transaction == 'Indent - Purchase Order') and 'qty * conversion_factor' or 'qty'
+		get_qty = (transaction == 'Purchase Request - Purchase Order') and 'qty * conversion_factor' or 'qty'
 		qty = sql("select sum(%s) from `tab%s` where %s = '%s' and docstatus = 1 and parent != '%s'"% ( get_qty, curr_doctype, ref_tab_fname, ref_tab_dn, curr_parent_name))
 		qty = qty and flt(qty[0][0]) or 0 
 		
@@ -403,10 +403,10 @@ class DocType(TransactionBase):
 		qty, max_qty, max_qty_plus_tol = flt(curr_ref_qty.split('~~~')[0]), flt(curr_ref_qty.split('~~~')[1]), flt(curr_ref_qty.split('~~~')[1])
 
 		# Qty above Tolerance should be allowed only once.
-		# But there is special case for Transaction 'Indent-Purhcase Order' that there should be no restriction
-		# One can create any no. of PO against same Indent!!!
+		# But there is special case for Transaction 'Purchase Request-Purhcase Order' that there should be no restriction
+		# One can create any no. of PO against same Purchase Request!!!
 		if qty >= max_qty and is_submit and flt(curr_qty) > 0:
-			reason = (curr_parent_doctype == 'Purchase Order') and 'Ordered' or (curr_parent_doctype == 'Purchase Receipt') and 'Received' or (curr_parent_doctype == 'Payable Voucher') and 'Billed'
+			reason = (curr_parent_doctype == 'Purchase Order') and 'Ordered' or (curr_parent_doctype == 'Purchase Receipt') and 'Received' or (curr_parent_doctype == 'Purchase Invoice') and 'Billed'
 			msgprint("Error: Item Code : '%s' of '%s' is already %s." %(item_code,ref_dn,reason))
 			raise Exception
 		
@@ -414,7 +414,7 @@ class DocType(TransactionBase):
 		tolerance = flt(get_value('Item',item_code,'tolerance') or 0)
 		
 		if not(tolerance):
-			tolerance = flt(get_value('Manage Account',None,'tolerance') or 0)
+			tolerance = flt(get_value('Global Defaults',None,'tolerance') or 0)
 
 		if is_submit:
 			qty = qty + flt(curr_qty)
@@ -425,7 +425,7 @@ class DocType(TransactionBase):
 				max_qty_plus_tol = max_qty * (1 + (flt(tolerance)/ 100))
 
 				if max_qty_plus_tol < qty:
-					reason = (curr_parent_doctype == 'Purchase Order') and 'Ordered' or (curr_parent_doctype == 'Purchase Receipt') and 'Received' or (curr_parent_doctype == 'Payable Voucher') and 'Billed'
+					reason = (curr_parent_doctype == 'Purchase Order') and 'Ordered' or (curr_parent_doctype == 'Purchase Receipt') and 'Received' or (curr_parent_doctype == 'Purchase Invoice') and 'Billed'
 					msgprint("error:Already %s Qty for %s is %s and maximum allowed Qty is %s" % (cstr(reason), item_code, cstr(flt(qty) - flt(curr_qty)) , cstr(max_qty_plus_tol)))
 					raise Exception
 
@@ -451,12 +451,12 @@ class DocType(TransactionBase):
 			
 			if d.fields.has_key('prevdoc_docname') and d.prevdoc_docname:
 				transaction = cstr(d.prevdoc_doctype) + ' - ' + cstr(obj.doc.doctype)
-				curr_qty = (transaction == 'Indent - Purchase Order') and flt(d.qty) * flt(d.conversion_factor) or flt(d.qty)
+				curr_qty = (transaction == 'Purchase Request - Purchase Order') and flt(d.qty) * flt(d.conversion_factor) or flt(d.qty)
 				self.update_ref_doctype_dict( flt(curr_qty), d.doctype, d.prevdoc_docname, d.prevdoc_doctype, 'prevdoc_detail_docname', d.prevdoc_detail_docname, transaction, d.item_code, is_submit, obj.doc.doctype, obj.doc.name)
 			
 			# for payable voucher
 			if d.fields.has_key('purchase_order') and d.purchase_order:
-				curr_qty = sql("select sum(qty) from `tabPV Detail` where po_detail = '%s' and parent = '%s'" % (cstr(d.po_detail), cstr(obj.doc.name)))
+				curr_qty = sql("select sum(qty) from `tabPurchase Invoice Item` where po_detail = '%s' and parent = '%s'" % (cstr(d.po_detail), cstr(obj.doc.name)))
 				curr_qty = curr_qty and flt(curr_qty[0][0]) or 0
 				self.update_ref_doctype_dict( curr_qty, d.doctype, d.purchase_order, 'Purchase Order', 'po_detail', d.po_detail, 'Purchase Order - ' + cstr(obj.doc.doctype), d.item_code, is_submit,	obj.doc.doctype, obj.doc.name)
 
@@ -487,9 +487,9 @@ class DocType(TransactionBase):
 	def update_last_purchase_rate(self, obj, is_submit):
 		for d in getlist(obj.doclist,obj.fname):
 			# get last purchase rate from Purchase Order
-			po_lpr = sql ("select t2.purchase_rate/t2.conversion_factor as rate, t1.transaction_date as date from `tabPurchase Order` t1, `tabPO Detail` t2	where t1.name = t2.parent and t2.item_code = '%s' and t1.docstatus = 1 and t1.name != '%s' order by t1.transaction_date DESC limit 1"% (d.item_code, obj.doc.name), as_dict = 1 )
+			po_lpr = sql ("select t2.purchase_rate/t2.conversion_factor as rate, t1.transaction_date as date from `tabPurchase Order` t1, `tabPurchase Order Item` t2	where t1.name = t2.parent and t2.item_code = '%s' and t1.docstatus = 1 and t1.name != '%s' order by t1.transaction_date DESC limit 1"% (d.item_code, obj.doc.name), as_dict = 1 )
 			# get last purchase rate from purchase receipt
-			pr_lpr = sql ("select t2.purchase_rate/t2.conversion_factor as rate, t1.posting_date as date, t1.posting_time from `tabPurchase Receipt` t1, `tabPurchase Receipt Detail` t2	where t1.name = t2.parent and t2.item_code = '%s' and t1.docstatus = 1	and t1.name != '%s' order by t1.posting_date DESC, t1.posting_time DESC limit 1"% (d.item_code, obj.doc.name), as_dict = 1 )
+			pr_lpr = sql ("select t2.purchase_rate/t2.conversion_factor as rate, t1.posting_date as date, t1.posting_time from `tabPurchase Receipt` t1, `tabPurchase Receipt Item` t2	where t1.name = t2.parent and t2.item_code = '%s' and t1.docstatus = 1	and t1.name != '%s' order by t1.posting_date DESC, t1.posting_time DESC limit 1"% (d.item_code, obj.doc.name), as_dict = 1 )
 			# compare dates of Po & Pr
 			date_diff1	= sql("select DATEDIFF('%s', '%s')" % ( po_lpr and po_lpr[0]['date'] or '0000-00-00', pr_lpr and pr_lpr[0]['date'] or '0000-00-00'))
 
@@ -520,9 +520,9 @@ class DocType(TransactionBase):
 	def get_purchase_tax_details(self,obj):
 		self.doc.clear_table(obj.doclist,'purchase_tax_details')
 		idx = 0
-		other_charge = sql("select category, add_deduct_tax, charge_type,row_id,description,account_head,rate,tax_amount from `tabPurchase Tax Detail` where parent = '%s' order by idx" %(obj.doc.purchase_other_charges), as_dict = 1)
+		other_charge = sql("select category, add_deduct_tax, charge_type,row_id,description,account_head,rate,tax_amount from `tabPurchase Taxes and Charges` where parent = '%s' order by idx" %(obj.doc.purchase_other_charges), as_dict = 1)
 		for other in other_charge:
-			d =	addchild(obj.doc, 'purchase_tax_details', 'Purchase Tax Detail', 1, obj.doclist)
+			d =	addchild(obj.doc, 'purchase_tax_details', 'Purchase Taxes and Charges', 1, obj.doclist)
 			d.category = other['category']
 			d.add_deduct_tax = other['add_deduct_tax']
 			d.charge_type = other['charge_type']
@@ -570,7 +570,7 @@ class DocType(TransactionBase):
 #=================================================================================
 
 	def get_next_dt_detail_qty(self, next_dt_detail, name, curr_dt, f):
-		get_qty = (curr_dt == 'Indent') and 'qty * conversion_factor' or 'qty'
+		get_qty = (curr_dt == 'Purchase Request') and 'qty * conversion_factor' or 'qty'
 		qty = sql("select sum(%s) from `tab%s` where %s = '%s' and docstatus = 1"% (get_qty, next_dt_detail, (f == 'billed_qty') and (curr_dt == 'Purchase Order' and 'po_detail' or 'pr_detail') or 'prevdoc_detail_docname', name))
 		return qty and flt(qty[0][0]) or 0
 

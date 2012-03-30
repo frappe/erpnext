@@ -1,0 +1,159 @@
+# DocType, Production Plan Item
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2012-03-27 14:36:03',
+		'docstatus': 0,
+		'modified': '2012-03-27 14:36:03',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
+	},
+
+	# These values are common for all DocType
+	{
+		'autoname': u'PPID/.#####',
+		'colour': u'White:FFF',
+		'default_print_format': u'Standard',
+		'doctype': 'DocType',
+		'istable': 1,
+		'module': u'Production',
+		'name': '__common__',
+		'section_style': u'Simple',
+		'server_code_error': u' ',
+		'show_in_menu': 0,
+		'version': 27
+	},
+
+	# These values are common for all DocField
+	{
+		'doctype': u'DocField',
+		'name': '__common__',
+		'parent': u'Production Plan Item',
+		'parentfield': u'fields',
+		'parenttype': u'DocType'
+	},
+
+	# DocType, Production Plan Item
+	{
+		'doctype': 'DocType',
+		'name': u'Production Plan Item'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'sales_order',
+		'fieldtype': u'Data',
+		'label': u'Sales Order',
+		'oldfieldname': u'source_docname',
+		'oldfieldtype': u'Data',
+		'permlevel': 1
+	},
+
+	# DocField
+	{
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'item_code',
+		'fieldtype': u'Link',
+		'label': u'Item Code',
+		'oldfieldname': u'item_code',
+		'oldfieldtype': u'Link',
+		'options': u'Item',
+		'permlevel': 0,
+		'reqd': 1,
+		'trigger': u'Client',
+		'width': u'150px'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'bom_no',
+		'fieldtype': u'Link',
+		'label': u'BOM No',
+		'oldfieldname': u'bom_no',
+		'oldfieldtype': u'Link',
+		'options': u'BOM',
+		'permlevel': 0,
+		'reqd': 1,
+		'width': u'100px'
+	},
+
+	# DocField
+	{
+		'default': u'0.00',
+		'doctype': u'DocField',
+		'fieldname': u'so_pending_qty',
+		'fieldtype': u'Currency',
+		'label': u'SO Pending Qty',
+		'oldfieldname': u'prevdoc_reqd_qty',
+		'oldfieldtype': u'Currency',
+		'permlevel': 1,
+		'reqd': 0,
+		'width': u'100px'
+	},
+
+	# DocField
+	{
+		'default': u'0.00',
+		'doctype': u'DocField',
+		'fieldname': u'planned_qty',
+		'fieldtype': u'Currency',
+		'label': u'Planned Qty',
+		'oldfieldname': u'planned_qty',
+		'oldfieldtype': u'Currency',
+		'permlevel': 0,
+		'reqd': 1,
+		'width': u'100px'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'stock_uom',
+		'fieldtype': u'Data',
+		'label': u'UOM',
+		'oldfieldname': u'stock_uom',
+		'oldfieldtype': u'Data',
+		'permlevel': 1,
+		'reqd': 1,
+		'width': u'80px'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'description',
+		'fieldtype': u'Text',
+		'label': u'Description',
+		'oldfieldname': u'description',
+		'oldfieldtype': u'Text',
+		'permlevel': 1,
+		'width': u'200px'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'parent_packing_item',
+		'fieldtype': u'Link',
+		'label': u'Parent Packing Item',
+		'oldfieldname': u'parent_item',
+		'oldfieldtype': u'Link',
+		'options': u'Item',
+		'permlevel': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'is_pro_created',
+		'fieldtype': u'Check',
+		'label': u'Is PRO Created',
+		'oldfieldname': u'pro_created',
+		'oldfieldtype': u'Check',
+		'permlevel': 1
+	}
+]

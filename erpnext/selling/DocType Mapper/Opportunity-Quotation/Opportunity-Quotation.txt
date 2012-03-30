@@ -1,0 +1,146 @@
+# DocType Mapper, Opportunity-Quotation
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2010-08-08 17:09:34',
+		'docstatus': 0,
+		'modified': '2011-09-14 12:36:24',
+		'modified_by': 'Administrator',
+		'owner': 'Administrator'
+	},
+
+	# These values are common for all Table Mapper Detail
+	{
+		'doctype': 'Table Mapper Detail',
+		'name': '__common__',
+		'parent': 'Opportunity-Quotation',
+		'parentfield': 'table_mapper_details',
+		'parenttype': 'DocType Mapper',
+		'validation_logic': 'docstatus=1'
+	},
+
+	# These values are common for all Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'name': '__common__',
+		'parent': 'Opportunity-Quotation',
+		'parentfield': 'field_mapper_details',
+		'parenttype': 'DocType Mapper'
+	},
+
+	# These values are common for all DocType Mapper
+	{
+		'doctype': u'DocType Mapper',
+		'from_doctype': 'Opportunity',
+		'module': 'Selling',
+		'name': '__common__',
+		'ref_doc_submitted': 1,
+		'to_doctype': 'Quotation'
+	},
+
+	# DocType Mapper, Opportunity-Quotation
+	{
+		'doctype': u'DocType Mapper',
+		'name': 'Opportunity-Quotation'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'uom',
+		'map': 'Yes',
+		'match_id': 1,
+		'to_field': 'stock_uom'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'name',
+		'map': 'Yes',
+		'match_id': 0,
+		'to_field': 'enq_no'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'parent',
+		'map': 'Yes',
+		'match_id': 1,
+		'to_field': 'prevdoc_docname'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'parenttype',
+		'map': 'Yes',
+		'match_id': 1,
+		'to_field': 'prevdoc_doctype'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'enquiry_from',
+		'map': 'Yes',
+		'match_id': 0,
+		'to_field': 'quotation_to'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'enquiry_type',
+		'map': 'Yes',
+		'match_id': 0,
+		'to_field': 'order_type'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'transaction_date',
+		'map': 'No',
+		'match_id': 0,
+		'to_field': 'transaction_date'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'status',
+		'map': 'No',
+		'match_id': 0,
+		'to_field': 'status'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': 'Field Mapper Detail',
+		'from_field': 'naming_series',
+		'map': 'No',
+		'match_id': 0,
+		'to_field': 'naming_series'
+	},
+
+	# Table Mapper Detail
+	{
+		'doctype': 'Table Mapper Detail',
+		'from_table': 'Opportunity',
+		'match_id': 0,
+		'to_table': 'Quotation'
+	},
+
+	# Table Mapper Detail
+	{
+		'doctype': 'Table Mapper Detail',
+		'from_field': 'enq_details',
+		'from_table': 'Opportunity Item',
+		'match_id': 1,
+		'to_field': 'quotation_details',
+		'to_table': 'Quotation Item'
+	}
+]

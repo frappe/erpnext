@@ -63,7 +63,7 @@ class DocType:
 				raise Exception
 
 		if self.doc.bom_no:
-			bom = sql("""select name from `tabBill Of Materials`	where name = %s and docstatus = 1 
+			bom = sql("""select name from `tabBOM`	where name = %s and docstatus = 1 
 				and is_active = 'Yes' and item = %s""", (self.doc.bom_no, self.doc.production_item), as_dict =1)
 			if not bom:
 				msgprint("""Incorrect BOM: %s entered. 

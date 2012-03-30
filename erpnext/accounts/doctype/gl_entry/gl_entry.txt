@@ -207,7 +207,7 @@
 		'label': u'Voucher Type',
 		'oldfieldname': u'voucher_type',
 		'oldfieldtype': u'Select',
-		'options': u'Journal Voucher\nReceivable Voucher\nPayable Voucher',
+		'options': u'Journal Voucher\nSales Invoice\nPurchase Invoice',
 		'search_index': 0
 	},
 

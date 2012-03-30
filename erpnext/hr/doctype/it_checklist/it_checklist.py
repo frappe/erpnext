@@ -87,11 +87,11 @@ class DocType:
       if ret_name:
         for b in ret_name:
           #get earning amount of basic 
-          ret_basic = sql("select e_amount from `tabSS Earning Detail` where parent = '%s' and e_type = 'Basic'"%(b[0]))
+          ret_basic = sql("select e_amount from `tabSalary Slip Earning` where parent = '%s' and e_type = 'Basic'"%(b[0]))
           sum_basic += ret_basic[0][0] or 0  
           
           #get deduction amount of Provident Fund
-          ret_pf = sql("select d_amount from `tabSS Deduction Detail` where parent = '%s' and d_type = 'Provident Fund'"%(b[0]))
+          ret_pf = sql("select d_amount from `tabSalary Slip Deduction` where parent = '%s' and d_type = 'Provident Fund'"%(b[0]))
           
           sum_pf += ret_pf[0][0] or 0
                   
@@ -103,7 +103,7 @@ class DocType:
    
     self.doc.basic = self.doc.gross_income = 0
     #query return list of earning types and resp. modified amount
-    ret = convert_to_lists(sql("select e.e_type, e.modified_value from `tabEarning Detail` e , `tabSalary Structure` s where s.is_active = 'Yes' and s.employee='%s' and e.parent = s.name" %(self.doc.employee)))
+    ret = convert_to_lists(sql("select e.e_type, e.modified_value from `tabSalary Structure Earning` e , `tabSalary Structure` s where s.is_active = 'Yes' and s.employee='%s' and e.parent = s.name" %(self.doc.employee)))
     hra_count=1
     if ret:
       count = 0.0
@@ -132,7 +132,7 @@ class DocType:
     self.doc.pf = 0.0    
               
     #query returns amount 
-    ret_ded = sql("select d.d_modified_amt from `tabDeduction Detail` d , `tabSalary Structure` s where s.is_active = 'Yes' and s.employee='%s' and d.parent = s.name and d.d_type = 'Provident Fund'" %(self.doc.employee))
+    ret_ded = sql("select d.d_modified_amt from `tabSalary Structure Deduction` d , `tabSalary Structure` s where s.is_active = 'Yes' and s.employee='%s' and d.parent = s.name and d.d_type = 'Provident Fund'" %(self.doc.employee))
     
     if not ret_ded:
       msgprint("PF Amount in Salary Structure is zero")
@@ -257,7 +257,7 @@ class DocType:
     if (self.doc.ann_rent > 0):
     
       #query return sum of earning types amount where earning type = 'HRA'
-      ret_sal_slip = sql("select sum(e.e_amount) from `tabSS Earning Detail` e , `tabSalary Slip` s where s.fiscal_year = '%s' and s.docstatus = 1 and s.employee='%s' and e.parent = s.name and e.e_type = 'House Rent Allowance'" %(self.doc.fiscal_year,self.doc.employee))
+      ret_sal_slip = sql("select sum(e.e_amount) from `tabSalary Slip Earning` e , `tabSalary Slip` s where s.fiscal_year = '%s' and s.docstatus = 1 and s.employee='%s' and e.parent = s.name and e.e_type = 'House Rent Allowance'" %(self.doc.fiscal_year,self.doc.employee))
       if not ret_sal_slip:
         ret_sal_slip = 0.00
       else:
@@ -422,7 +422,7 @@ class DocType:
   def calc_tax_pm(self):
        
     ret_income_tax = 0
-    ret_income_tax = sql("select sum(d.d_amount) from `tabSS Deduction Detail` d , `tabSalary Slip` s where s.docstatus = 1 and s.fiscal_year = '%s' and s.employee='%s' and d.parent = s.name and d.d_type = 'Income Tax'" %(self.doc.fiscal_year,self.doc.employee))
+    ret_income_tax = sql("select sum(d.d_amount) from `tabSalary Slip Deduction` d , `tabSalary Slip` s where s.docstatus = 1 and s.fiscal_year = '%s' and s.employee='%s' and d.parent = s.name and d.d_type = 'Income Tax'" %(self.doc.fiscal_year,self.doc.employee))
     
     new_tot_income = cint(self.doc.tax_tot_income) + cint(self.doc.edu_cess) - (cint(ret_income_tax[0][0]) or 0)
     

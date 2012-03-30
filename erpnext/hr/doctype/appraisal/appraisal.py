@@ -46,10 +46,10 @@ class DocType:
 	
 	def fetch_kra(self):
 		if not self.doc.kra_template:
-			msgprint("Please select KRA Template to be be fetched")
+			msgprint("Please select Appraisal Template to be be fetched")
 			raise Exception
 		self.doc.clear_table(self.doclist,'appraisal_details')
-		get_obj('DocType Mapper', 'KRA Template-Appraisal').dt_map('KRA Template', 'Appraisal', self.doc.kra_template, self.doc, self.doclist, "[['KRA Template','Appraisal'],['KRA Sheet', 'Appraisal Detail']]")
+		get_obj('DocType Mapper', 'Appraisal Template-Appraisal').dt_map('Appraisal Template', 'Appraisal', self.doc.kra_template, self.doc, self.doclist, "[['Appraisal Template','Appraisal'],['Appraisal Template Goal', 'Appraisal Goal']]")
 	
 	def validate_dates(self):
 		if getdate(self.doc.start_date) > getdate(self.doc.end_date):

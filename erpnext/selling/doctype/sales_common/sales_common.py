@@ -43,7 +43,7 @@ def get_comp_base_currency(arg=None):
 @webnotes.whitelist()
 def get_price_list_currency(arg=None):
 	""" Get all currency in which price list is maintained"""
-	plc = webnotes.conn.sql("select distinct ref_currency from `tabRef Rate Detail` where price_list_name = %s", webnotes.form_dict['price_list'])
+	plc = webnotes.conn.sql("select distinct ref_currency from `tabItem Price` where price_list_name = %s", webnotes.form_dict['price_list'])
 	plc = [d[0] for d in plc]
 	base_currency = get_comp_base_currency(webnotes.form_dict['company'])
 	return plc, base_currency
@@ -54,18 +54,18 @@ class DocType(TransactionBase):
 		self.doc, self.doclist = d,dl
 
 		self.doctype_dict = {
-			'Sales Order'		: 'Sales Order Detail',
-			'Delivery Note'		: 'Delivery Note Detail',
-			'Receivable Voucher':'RV Detail',
-			'Installation Note' : 'Installed Item Details'
+			'Sales Order'		: 'Sales Order Item',
+			'Delivery Note'		: 'Delivery Note Item',
+			'Sales Invoice':'Sales Invoice Item',
+			'Installation Note' : 'Installation Note Item'
 		}
 												 
 		self.ref_doctype_dict= {}
 
 		self.next_dt_detail = {
-			'delivered_qty' : 'Delivery Note Detail',
-			'billed_qty'		: 'RV Detail',
-			'installed_qty' : 'Installed Item Details'}
+			'delivered_qty' : 'Delivery Note Item',
+			'billed_qty'		: 'Sales Invoice Item',
+			'installed_qty' : 'Installation Note Item'}
 
 		self.msg = []
 
@@ -130,12 +130,12 @@ class DocType(TransactionBase):
 		obj.doc.customer_group	=	details and details[0]['customer_group'] or ''
 		obj.doc.sales_partner	 =	details and details[0]['default_sales_partner'] or ''
 		obj.doc.commission_rate =	details and flt(details[0]['default_commission_rate']) or ''
-		if obj.doc.doctype != 'Receivable Voucher':
+		if obj.doc.doctype != 'Sales Invoice':
 			obj.doc.delivery_address =	details and details[0]['address'] or ''
 			self.get_contact_details(obj,primary = 1) # get primary contact details
 		self.get_sales_person_details(obj) # get default sales person details
 
-		if obj.doc.doctype == 'Receivable Voucher' and inv_det_reqd:
+		if obj.doc.doctype == 'Sales Invoice' and inv_det_reqd:
 			self.get_invoice_details(obj) # get invoice details
 	
 	
@@ -177,7 +177,7 @@ class DocType(TransactionBase):
 	
 	# ***************** Get Ref rate as entered in Item Master ********************
 	def get_ref_rate(self, item_code, price_list_name, price_list_currency, plc_conv_rate):
-		ref_rate = webnotes.conn.sql("select ref_rate from `tabRef Rate Detail` where parent = %s and price_list_name = %s and ref_currency = %s", (item_code, price_list_name, price_list_currency))
+		ref_rate = webnotes.conn.sql("select ref_rate from `tabItem Price` where parent = %s and price_list_name = %s and ref_currency = %s", (item_code, price_list_name, price_list_currency))
 		base_ref_rate = ref_rate and flt(ref_rate[0][0]) * flt(plc_conv_rate) or 0
 		return base_ref_rate
 
@@ -209,9 +209,9 @@ class DocType(TransactionBase):
 			if default: add_cond = 'ifnull(t2.is_default,0) = 1'
 			else: add_cond = 't1.parent = "'+cstr(obj.doc.charge)+'"'
 			idx = 0
-			other_charge = webnotes.conn.sql("select t1.charge_type,t1.row_id,t1.description,t1.account_head,t1.rate,t1.tax_amount,t1.included_in_print_rate, t1.cost_center_other_charges from `tabRV Tax Detail` t1, `tabOther Charges` t2 where t1.parent = t2.name and t2.company = '%s' and %s order by t1.idx" % (obj.doc.company, add_cond), as_dict = 1)
+			other_charge = webnotes.conn.sql("select t1.charge_type,t1.row_id,t1.description,t1.account_head,t1.rate,t1.tax_amount,t1.included_in_print_rate, t1.cost_center_other_charges from `tabSales Taxes and Charges` t1, `tabSales Taxes and Charges Master` t2 where t1.parent = t2.name and t2.company = '%s' and %s order by t1.idx" % (obj.doc.company, add_cond), as_dict = 1)
 			for other in other_charge:
-				d =	addchild(obj.doc, 'other_charges', 'RV Tax Detail', 1, obj.doclist)
+				d =	addchild(obj.doc, 'other_charges', 'Sales Taxes and Charges', 1, obj.doclist)
 				d.charge_type = other['charge_type']
 				d.row_id = other['row_id']
 				d.description = other['description']
@@ -227,7 +227,7 @@ class DocType(TransactionBase):
 	# Get TERMS AND CONDITIONS
 	# =======================================================================================
 	def get_tc_details(self,obj):
-		r = webnotes.conn.sql("select terms from `tabTerm` where name = %s", obj.doc.tc_name)
+		r = webnotes.conn.sql("select terms from `tabTerms and Conditions` where name = %s", obj.doc.tc_name)
 		if r: obj.doc.terms = r[0][0]
 
 #---------------------------------------- Get Tax Details -------------------------------#
@@ -336,7 +336,7 @@ class DocType(TransactionBase):
 		return webnotes.conn.sql("select name from `tabSales BOM` where name=%s and docstatus != 2", item_code)
 	
 	def get_sales_bom_items(self, item_code):
-		return webnotes.conn.sql("select item_code, qty, uom from `tabSales BOM Detail` where parent=%s", item_code)
+		return webnotes.conn.sql("select item_code, qty, uom from `tabSales BOM Item` where parent=%s", item_code)
 
 
 	# --------------
@@ -354,7 +354,7 @@ class DocType(TransactionBase):
 				# Eg.: if SO qty is 10 and there is tolerance of 20%, then it will allow DN of 12.
 				# But in this case reserved qty should only be reduced by 10 and not 12.
 
-				tot_qty, max_qty, tot_amt, max_amt = self.get_curr_and_ref_doc_details(d.doctype, 'prevdoc_detail_docname', d.prevdoc_detail_docname, 'Sales Order Detail', obj.doc.name, obj.doc.doctype)
+				tot_qty, max_qty, tot_amt, max_amt = self.get_curr_and_ref_doc_details(d.doctype, 'prevdoc_detail_docname', d.prevdoc_detail_docname, 'Sales Order Item', obj.doc.name, obj.doc.doctype)
 				if((flt(tot_qty) + flt(qty) > flt(max_qty))):
 					reserved_qty = -(flt(max_qty)-flt(tot_qty))
 				else:	
@@ -405,7 +405,7 @@ class DocType(TransactionBase):
 	def add_packing_list_item(self,obj, item_code, qty, warehouse, line):
 		bin = self.get_bin_qty(item_code, warehouse)
 		item = self.get_packing_item_details(item_code)
-		pi = addchild(obj.doc, 'packing_details', 'Delivery Note Packing Detail', 1, obj.doclist)
+		pi = addchild(obj.doc, 'packing_details', 'Delivery Note Packing Item', 1, obj.doclist)
 		pi.parent_item = item_code
 		pi.item_code = item_code
 		pi.item_name = item['item_name']
@@ -511,7 +511,7 @@ class DocType(TransactionBase):
 		import datetime
 		for d in getlist(obj.doclist, obj.fname):
 			if d.prevdoc_doctype and d.prevdoc_docname:
-				if d.prevdoc_doctype == 'Receivable Voucher':
+				if d.prevdoc_doctype == 'Sales Invoice':
 					dt = webnotes.conn.sql("select posting_date from `tab%s` where name = '%s'" % (d.prevdoc_doctype, d.prevdoc_docname))
 				else:
 					dt = webnotes.conn.sql("select transaction_date from `tab%s` where name = '%s'" % (d.prevdoc_doctype, d.prevdoc_docname))
@@ -537,7 +537,7 @@ class StatusUpdater:
 			- Update Percent
 			- Validate over delivery
 			
-		From Receivable Voucher 
+		From Sales Invoice 
 			- Update Billed Amt
 			- Update Percent
 			- Validate over billing
@@ -559,30 +559,30 @@ class StatusUpdater:
 	
 	def validate_all_qty(self):
 		"""
-			Validates over-billing / delivery / installation in Delivery Note, Receivable Voucher, Installation Note
+			Validates over-billing / delivery / installation in Delivery Note, Sales Invoice, Installation Note
 			To called after update_all_qty
 		"""
 		if self.obj.doc.doctype=='Delivery Note':
 			self.validate_qty({
-				'source_dt'		:'Delivery Note Detail',
+				'source_dt'		:'Delivery Note Item',
 				'compare_field'	:'delivered_qty',
 				'compare_ref_field'	:'qty',
-				'target_dt'		:'Sales Order Detail',
+				'target_dt'		:'Sales Order Item',
 				'join_field'	:'prevdoc_detail_docname'
 			})
-		elif self.obj.doc.doctype=='Receivable Voucher':
+		elif self.obj.doc.doctype=='Sales Invoice':
 			self.validate_qty({
-				'source_dt'		:'RV Detail',
+				'source_dt'		:'Sales Invoice Item',
 				'compare_field'	:'billed_amt',
 				'compare_ref_field'	:'amount',
-				'target_dt'		:'Sales Order Detail',
+				'target_dt'		:'Sales Order Item',
 				'join_field'	:'so_detail'
 			})
 			self.validate_qty({
-				'source_dt'		:'RV Detail',
+				'source_dt'		:'Sales Invoice Item',
 				'compare_field'	:'billed_amt',
 				'compare_ref_field'	:'amount',
-				'target_dt'		:'Delivery Note Detail',
+				'target_dt'		:'Delivery Note Item',
 				'join_field'	:'dn_detail'
 			}, no_tolerance =1)
 		elif self.obj.doc.doctype=='Installation Note':
@@ -590,7 +590,7 @@ class StatusUpdater:
 				'source_dt'		:'Installation Item Details',
 				'compare_field'	:'installed_qty',
 				'compare_ref_field'	:'qty',
-				'target_dt'		:'Delivery Note Detail',
+				'target_dt'		:'Delivery Note Item',
 				'join_field'	:'dn_detail'
 			}, no_tolerance =1)
 
@@ -606,7 +606,7 @@ class StatusUpdater:
 
 		if not(tolerance):
 			if self.global_tolerance == None:
-				self.global_tolerance = flt(get_value('Manage Account',None,'tolerance') or 0)
+				self.global_tolerance = flt(get_value('Global Defaults',None,'tolerance') or 0)
 			tolerance = self.global_tolerance
 		
 		self.tolerance[item_code] = tolerance
@@ -675,11 +675,11 @@ class StatusUpdater:
 		if self.obj.doc.doctype=='Delivery Note':
 			self.update_qty({
 				'target_field'			:'delivered_qty',
-				'target_dt'				:'Sales Order Detail',
+				'target_dt'				:'Sales Order Item',
 				'target_parent_dt'		:'Sales Order',
 				'target_parent_field'	:'per_delivered',
 				'target_ref_field'		:'qty',
-				'source_dt'				:'Delivery Note Detail',
+				'source_dt'				:'Delivery Note Item',
 				'source_field'			:'qty',
 				'join_field'			:'prevdoc_detail_docname',
 				'percent_join_field'	:'prevdoc_docname',
@@ -687,14 +687,14 @@ class StatusUpdater:
 				'keyword'				:'Delivered'
 			})
 			
-		elif self.obj.doc.doctype=='Receivable Voucher':
+		elif self.obj.doc.doctype=='Sales Invoice':
 			self.update_qty({
 				'target_field'			:'billed_amt',
-				'target_dt'				:'Sales Order Detail',
+				'target_dt'				:'Sales Order Item',
 				'target_parent_dt'		:'Sales Order',
 				'target_parent_field'	:'per_billed',
 				'target_ref_field'		:'amount',
-				'source_dt'				:'RV Detail',
+				'source_dt'				:'Sales Invoice Item',
 				'source_field'			:'amount',
 				'join_field'			:'so_detail',
 				'percent_join_field'	:'sales_order',
@@ -704,11 +704,11 @@ class StatusUpdater:
 
 			self.update_qty({
 				'target_field'			:'billed_amt',
-				'target_dt'				:'Delivery Note Detail',
+				'target_dt'				:'Delivery Note Item',
 				'target_parent_dt'		:'Delivery Note',
 				'target_parent_field'	:'per_billed',
 				'target_ref_field'		:'amount',
-				'source_dt'				:'RV Detail',
+				'source_dt'				:'Sales Invoice Item',
 				'source_field'			:'amount',
 				'join_field'			:'dn_detail',
 				'percent_join_field'	:'delivery_note',
@@ -719,11 +719,11 @@ class StatusUpdater:
 		if self.obj.doc.doctype=='Installation Note':
 			self.update_qty({
 				'target_field'			:'installed_qty',
-				'target_dt'				:'Delivery Note Detail',
+				'target_dt'				:'Delivery Note Item',
 				'target_parent_dt'		:'Delivery Note',
 				'target_parent_field'	:'per_installed',
 				'target_ref_field'		:'qty',
-				'source_dt'				:'Installed Item Details',
+				'source_dt'				:'Installation Note Item',
 				'source_field'			:'qty',
 				'join_field'			:'prevdoc_detail_docname',
 				'percent_join_field'	:'prevdoc_docname',

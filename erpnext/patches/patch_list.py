@@ -28,7 +28,7 @@ patch_list = [
 	{
 		'patch_module': 'patches.jan_mar_2012',
 		'patch_file': 'rename_doctype_indent',
-		'description': 'Add DocType Label: Indent to Purchase Requisition'
+		'description': 'Add DocType Label: Purchase Request to Purchase Requisition'
 	},
 	{
 		'patch_module': 'patches.jan_mar_2012',

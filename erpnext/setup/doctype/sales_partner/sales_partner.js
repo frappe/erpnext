@@ -138,12 +138,12 @@ cur_frm.cscript.make_si_list = function(parent,doc){
 	lst.colwidths = ['5%','25%','20%','25%','25%'];
 	lst.colnames = ['Sr.','Id','Invoice Date','Total Commission','Grand Total'];
 	lst.coltypes = ['Data','Link','Data','Data','Currency','Currency'];
-	lst.coloptions = ['','Receivable Voucher','','','',''];
+	lst.coloptions = ['','Sales Invoice','','','',''];
 
 	cur_frm.cscript.set_list_opts(lst);
 
-	var q = repl("select name,posting_date, total_commission,grand_total from `tabReceivable Voucher` where sales_partner='%(sp)s'", {'sp':doc.name});
-	var q_max = repl("select count(name) from `tabReceivable Voucher` where sales_partner='%(cust)s'", {'sp':doc.name});
+	var q = repl("select name,posting_date, total_commission,grand_total from `tabSales Invoice` where sales_partner='%(sp)s'", {'sp':doc.name});
+	var q_max = repl("select count(name) from `tabSales Invoice` where sales_partner='%(cust)s'", {'sp':doc.name});
 	
-	cur_frm.cscript.run_list(lst,parent,q,q_max,doc,'Sales Invoice','Receivable Voucher');	
+	cur_frm.cscript.run_list(lst,parent,q,q_max,doc,'Sales Invoice','Sales Invoice');	
 }

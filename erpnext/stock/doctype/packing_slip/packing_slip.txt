@@ -126,7 +126,7 @@
 		'doctype': u'DocField',
 		'fieldname': u'packing_slip_details',
 		'fieldtype': u'Section Break',
-		'label': u'Packing Slip Details',
+		'label': u'Packing Slip Items',
 		'permlevel': 0
 	},
 
@@ -235,7 +235,7 @@
 		'fieldname': u'item_details',
 		'fieldtype': u'Table',
 		'label': u'Items',
-		'options': u'Packing Slip Detail',
+		'options': u'Packing Slip Item',
 		'permlevel': 0
 	},
 

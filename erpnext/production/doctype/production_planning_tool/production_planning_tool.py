@@ -75,7 +75,7 @@ class DocType:
 			select 
 				distinct t1.name, t1.transaction_date, t1.customer, t1.grand_total 
 			from 
-				`tabSales Order` t1, `tabSales Order Detail` t2, `tabDelivery Note Packing Detail` t3, tabItem t4
+				`tabSales Order` t1, `tabSales Order Item` t2, `tabDelivery Note Packing Item` t3, tabItem t4
 			where 
 				t1.name = t2.parent and t1.name = t3.parent and t3.parenttype = 'Sales Order' and t1.docstatus = 1 and t2.item_code = t3.parent_item 
 				and t4.name = t3.item_code and  t1.status != 'Stopped' and t1.company = '%s' and ifnull(t2.qty, 0) > ifnull(t2.delivered_qty, 0) 
@@ -117,7 +117,7 @@ class DocType:
 			so_list.append(d.sales_order)
 		for r in open_so:
 			if cstr(r['name']) not in so_list:
-				pp_so = addchild(self.doc, 'pp_so_details', 'PP SO Detail', 1, self.doclist)
+				pp_so = addchild(self.doc, 'pp_so_details', 'Production Plan Sales Order', 1, self.doclist)
 				pp_so.sales_order = r['name']
 				pp_so.sales_order_date = cstr(r['transaction_date'])
 				pp_so.customer = cstr(r['customer'])
@@ -147,7 +147,7 @@ class DocType:
 				t0.name, t2.parent_item, t2.item_code, 
 				(t1.qty - ifnull(t1.delivered_qty,0)) * (ifnull(t2.qty,0) / ifnull(t1.qty,1)) as 'pending_qty' 
 			from
-				`tabSales Order` t0, `tabSales Order Detail` t1, `tabDelivery Note Packing Detail` t2, `tabItem` t3
+				`tabSales Order` t0, `tabSales Order Item` t1, `tabDelivery Note Packing Item` t2, `tabItem` t3
 			where 
 				t0.name = t1.parent and t0.name = t2.parent and t1.name = t2.parent_detail_docname
 				and t0.name in (%s) and t0.docstatus = 1 and t1.qty > ifnull(t1.delivered_qty,0) and t3.name = t2.item_code 
@@ -164,7 +164,7 @@ class DocType:
 
 		for p in packing_items:	
 			item_details = sql("select description, stock_uom, default_bom from tabItem where name=%s", p['item_code'])
-			pi = addchild(self.doc, 'pp_details', 'PP Detail', 1, self.doclist)
+			pi = addchild(self.doc, 'pp_details', 'Production Plan Item', 1, self.doclist)
 			pi.sales_order				= p['name']
 			pi.parent_packing_item		= p['parent_item']
 			pi.item_code				= p['item_code']
@@ -191,7 +191,7 @@ class DocType:
 		if not d.bom_no:
 			msgprint("Please enter bom no for item: %s at row no: %s" % (d.item_code, d.idx), raise_exception=1)
 		else:
-			bom = sql("""select name from `tabBill Of Materials` where item = %s and docstatus = 1 
+			bom = sql("""select name from `tabBOM` where item = %s and docstatus = 1 
 				and name = %s and ifnull(is_active, 'No') = 'Yes'""", (d.item_code, d.bom_no), as_dict = 1)
 			if not bom:
 				msgprint("""Incorrect BOM No: %s entered for item: %s at row no: %s
@@ -216,7 +216,7 @@ class DocType:
 				# so no childs of SA items
 				fl_bom_items = sql("""
 					select item_code, ifnull(sum(qty_consumed_per_unit), 0) * '%s', description, stock_uom 
-					from `tabBOM Material` 
+					from `tabBOM Item` 
 					where parent = '%s' and docstatus < 2 
 					group by item_code
 				""" % (flt(bom_dict[bom]), bom))
@@ -229,7 +229,7 @@ class DocType:
 					from 
 						( 
 							select distinct fb.name, fb.description, fb.item_code, fb.qty_consumed_per_unit, fb.stock_uom 
-							from `tabFlat BOM Detail` fb,`tabItem` it 
+							from `tabBOM Explosion Item` fb,`tabItem` it 
 							where it.name = fb.item_code and ifnull(it.is_pro_applicable, 'No') = 'No'
 							and ifnull(it.is_sub_contracted_item, 'No') = 'No' and fb.docstatus<2 and fb.parent=%s
 						) a

@@ -77,7 +77,7 @@ class DocType:
         msgprint("Please enter from date and to date")
       else:
         idx = 1
-        pv_det= sql("Select name,credit_to,grand_total,posting_date, ded_amount from `tabPayable Voucher` where tds_category='%s' And posting_date>= '%s' And posting_date <='%s'  and docstatus=1 and ded_amount > 0 Order By posting_date"%(self.doc.tds_category,self.doc.from_date,self.doc.to_date))
+        pv_det= sql("Select name,credit_to,grand_total,posting_date, ded_amount from `tabPurchase Invoice` where tds_category='%s' And posting_date>= '%s' And posting_date <='%s'  and docstatus=1 and ded_amount > 0 Order By posting_date"%(self.doc.tds_category,self.doc.from_date,self.doc.to_date))
         if pv_det:
           idx = self.make_tds_table(pv_det, idx)
         

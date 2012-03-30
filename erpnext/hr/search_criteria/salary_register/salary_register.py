@@ -19,8 +19,8 @@ for r in res:
   if not sal_slips_ids == '': sal_slips_ids +=","
   sal_slips_ids+="'%s'"%r[col_idx['ID']]
 
-earn_heads =[i[0] for i in sql("select distinct e_type from `tabSS Earning Detail` where parent in (%s)"%sal_slips_ids)]
-ded_heads =[i[0] for i in sql("select distinct d_type from `tabSS Deduction Detail` where parent in (%s)"%sal_slips_ids)]
+earn_heads =[i[0] for i in sql("select distinct e_type from `tabSalary Slip Earning` where parent in (%s)"%sal_slips_ids)]
+ded_heads =[i[0] for i in sql("select distinct d_type from `tabSalary Slip Deduction` where parent in (%s)"%sal_slips_ids)]
 
 col=[]
 
@@ -57,9 +57,9 @@ for r in res:
 
   for i in range(6,len(colnames)):
     if colnames[i] not in ('Arrear Amount','Encashment Amount','Net Pay','Gross Pay','Total Deduction'):
-      amt = sql("select e_modified_amount from `tabSS Earning Detail` where e_type = '%s' and parent = '%s'"%(colnames[i],r[0]))
+      amt = sql("select e_modified_amount from `tabSalary Slip Earning` where e_type = '%s' and parent = '%s'"%(colnames[i],r[0]))
       if not amt:
-        amt = sql("select d_modified_amount from `tabSS Deduction Detail` where d_type = '%s' and parent = '%s'"%(colnames[i],r[0]))
+        amt = sql("select d_modified_amount from `tabSalary Slip Deduction` where d_type = '%s' and parent = '%s'"%(colnames[i],r[0]))
       amt = amt and amt[0][0] or 0
       r.append(flt(amt))
       

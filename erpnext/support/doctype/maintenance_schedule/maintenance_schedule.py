@@ -44,7 +44,7 @@ class DocType(TransactionBase):
   def pull_sales_order_detail(self):
     self.doc.clear_table(self.doclist, 'item_maintenance_detail')
     self.doc.clear_table(self.doclist, 'maintenance_schedule_detail')
-    self.doclist = get_obj('DocType Mapper', 'Sales Order-Maintenance Schedule').dt_map('Sales Order', 'Maintenance Schedule', self.doc.sales_order_no, self.doc, self.doclist, "[['Sales Order', 'Maintenance Schedule'],['Sales Order Detail', 'Item Maintenance Detail']]")
+    self.doclist = get_obj('DocType Mapper', 'Sales Order-Maintenance Schedule').dt_map('Sales Order', 'Maintenance Schedule', self.doc.sales_order_no, self.doc, self.doclist, "[['Sales Order', 'Maintenance Schedule'],['Sales Order Item', 'Maintenance Schedule Item']]")
   
   #pull item details 
   #-------------------
@@ -213,7 +213,7 @@ class DocType(TransactionBase):
   def validate_sales_order(self):
     for d in getlist(self.doclist, 'item_maintenance_detail'):
       if d.prevdoc_docname:
-        chk = sql("select t1.name from `tabMaintenance Schedule` t1, `tabItem Maintenance Detail` t2 where t2.parent=t1.name and t2.prevdoc_docname=%s and t1.docstatus=1", d.prevdoc_docname)
+        chk = sql("select t1.name from `tabMaintenance Schedule` t1, `tabMaintenance Schedule Item` t2 where t2.parent=t1.name and t2.prevdoc_docname=%s and t1.docstatus=1", d.prevdoc_docname)
         if chk:
           msgprint("Maintenance Schedule against "+d.prevdoc_docname+" already exist")
           raise Exception

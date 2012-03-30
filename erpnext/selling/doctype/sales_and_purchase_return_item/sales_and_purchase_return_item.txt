@@ -1,0 +1,142 @@
+# DocType, Sales and Purchase Return Item
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2012-03-27 14:36:14',
+		'docstatus': 0,
+		'modified': '2012-03-27 14:36:14',
+		'modified_by': u'Administrator',
+		'owner': u'wasim@webnotestech.com'
+	},
+
+	# These values are common for all DocType
+	{
+		'colour': u'White:FFF',
+		'doctype': 'DocType',
+		'istable': 1,
+		'module': u'Selling',
+		'name': '__common__',
+		'section_style': u'Simple',
+		'server_code_error': u' ',
+		'show_in_menu': 0,
+		'version': 8
+	},
+
+	# These values are common for all DocField
+	{
+		'doctype': u'DocField',
+		'name': '__common__',
+		'parent': u'Sales and Purchase Return Item',
+		'parentfield': u'fields',
+		'parenttype': u'DocType'
+	},
+
+	# DocType, Sales and Purchase Return Item
+	{
+		'doctype': 'DocType',
+		'name': u'Sales and Purchase Return Item'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'item_code',
+		'fieldtype': u'Link',
+		'label': u'Item Code',
+		'oldfieldname': u'item_code',
+		'oldfieldtype': u'Link',
+		'options': u'Item',
+		'permlevel': 1,
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'description',
+		'fieldtype': u'Data',
+		'label': u'Description',
+		'oldfieldname': u'description',
+		'oldfieldtype': u'Data',
+		'permlevel': 1,
+		'width': u'300px'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'uom',
+		'fieldtype': u'Link',
+		'label': u'UOM',
+		'oldfieldname': u'uom',
+		'oldfieldtype': u'Link',
+		'options': u'UOM',
+		'permlevel': 1,
+		'search_index': 0
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'rate',
+		'fieldtype': u'Currency',
+		'label': u'Rate',
+		'oldfieldname': u'rate',
+		'oldfieldtype': u'Currency',
+		'permlevel': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'qty',
+		'fieldtype': u'Data',
+		'label': u'Qty',
+		'oldfieldname': u'qty',
+		'oldfieldtype': u'Data',
+		'permlevel': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'returned_qty',
+		'fieldtype': u'Data',
+		'label': u'Returned Qty',
+		'oldfieldname': u'returned_qty',
+		'oldfieldtype': u'Data',
+		'permlevel': 0,
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'serial_no',
+		'fieldtype': u'Small Text',
+		'label': u'Serial No',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'batch_no',
+		'fieldtype': u'Data',
+		'label': u'Batch No',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'detail_name',
+		'fieldtype': u'Data',
+		'hidden': 1,
+		'label': u'Detail Name',
+		'oldfieldname': u'detail_name',
+		'oldfieldtype': u'Data',
+		'permlevel': 1
+	}
+]

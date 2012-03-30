@@ -118,7 +118,7 @@
 		'no_copy': 1,
 		'oldfieldname': u'against_voucher',
 		'oldfieldtype': u'Link',
-		'options': u'Payable Voucher',
+		'options': u'Purchase Invoice',
 		'permlevel': 0,
 		'search_index': 1,
 		'trigger': u'Client'
@@ -134,7 +134,7 @@
 		'no_copy': 1,
 		'oldfieldname': u'against_invoice',
 		'oldfieldtype': u'Link',
-		'options': u'Receivable Voucher',
+		'options': u'Sales Invoice',
 		'permlevel': 0,
 		'search_index': 1,
 		'trigger': u'Client'

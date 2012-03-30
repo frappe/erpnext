@@ -33,7 +33,7 @@ def delete_fields_dn_detail():
 			'print_packing_slip', 'shipping_mark', 'packed_by',
 			'packing_checked_by', 'Text', 'pack_size'
 		],
-		'Delivery Note Detail': [
+		'Delivery Note Item': [
 			'pack_no', 'pack_gross_wt', 'weight_uom', 
 			'pack_nett_wt', 'no_of_packs', 'pack_unit', 'pack_size', 
 			'packed_by', 'packing_checked_by'

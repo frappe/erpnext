@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-cur_frm.cscript.tname = "Purchase Receipt Detail";
+cur_frm.cscript.tname = "Purchase Receipt Item";
 cur_frm.cscript.fname = "purchase_receipt_details";
 cur_frm.cscript.other_fname = "purchase_tax_details";
 
@@ -63,7 +63,7 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 
 
 	if(doc.docstatus == 1){
-		var ch = getchildren('Purchase Receipt Detail',doc.name,'purchase_receipt_details');
+		var ch = getchildren('Purchase Receipt Item',doc.name,'purchase_receipt_details');
 		allow_billing = 0;
 		for(var i in ch){
 			if(ch[i].qty > ch[i].billed_qty) allow_billing = 1;
@@ -173,7 +173,7 @@ cur_frm.cscript.received_qty = function(doc, cdt, cdn) {
 			'stock_qty': 0,
 			'rejected_qty' : 0
 		}
-	set_multiple('Purchase Receipt Detail', cdn, ret, 'purchase_receipt_details');
+	set_multiple('Purchase Receipt Item', cdn, ret, 'purchase_receipt_details');
 	cur_frm.cscript.calc_amount(doc, 2);
 }
 
@@ -190,7 +190,7 @@ cur_frm.cscript.qty = function(doc, cdt, cdn) {
 			'rejected_qty' : 0
 		}
 		// => Set Qty = 0 and rejected_qty = 0
-		set_multiple('Purchase Receipt Detail', cdn, ret, 'purchase_receipt_details');
+		set_multiple('Purchase Receipt Item', cdn, ret, 'purchase_receipt_details');
 		cur_frm.cscript.calc_amount(doc, 2);
 		// => Return
 		return
@@ -201,7 +201,7 @@ cur_frm.cscript.qty = function(doc, cdt, cdn) {
 			'rejected_qty':flt(d.received_qty) - flt(d.qty)
 		}
 		// => Set Rejected Qty = Received Qty - Qty
-		set_multiple('Purchase Receipt Detail', cdn, ret, 'purchase_receipt_details');
+		set_multiple('Purchase Receipt Item', cdn, ret, 'purchase_receipt_details');
 		// => Calculate Amount
 		cur_frm.cscript.calc_amount(doc, 2);
 		cur_frm.cscript.update_stock_qty(doc,cdt,cdn);
@@ -220,7 +220,7 @@ cur_frm.cscript.rejected_qty = function(doc, cdt, cdn) {
 			'rejected_qty' : 0
 		}
 		// => Set Qty = 0 and rejected_qty = 0
-		set_multiple('Purchase Receipt Detail', cdn, ret, 'purchase_receipt_details');
+		set_multiple('Purchase Receipt Item', cdn, ret, 'purchase_receipt_details');
 		cur_frm.cscript.calc_amount(doc, 2);
 		// => Return
 		return
@@ -231,7 +231,7 @@ cur_frm.cscript.rejected_qty = function(doc, cdt, cdn) {
 			'qty':flt(d.received_qty) - flt(d.rejected_qty)
 		}
 		// => Set Qty = Received Qty - Rejected Qty
-		set_multiple('Purchase Receipt Detail', cdn, ret, 'purchase_receipt_details');
+		set_multiple('Purchase Receipt Item', cdn, ret, 'purchase_receipt_details');
 		// Calculate Amount
 		cur_frm.cscript.calc_amount(doc, 2);
 		cur_frm.cscript.update_stock_qty(doc,cdt,cdn);
@@ -250,7 +250,7 @@ cur_frm.fields_dict['purchase_order_no'].get_query = function(doc) {
 //---------------------------------
 
 cur_frm.fields_dict.purchase_receipt_details.grid.get_field("qa_no").get_query = function(doc) {
-	return 'SELECT `tabQA Inspection Report`.name FROM `tabQA Inspection Report` WHERE `tabQA Inspection Report`.docstatus = 1 AND `tabQA Inspection Report`.%(key)s LIKE "%s"';
+	return 'SELECT `tabQuality Inspection`.name FROM `tabQuality Inspection` WHERE `tabQuality Inspection`.docstatus = 1 AND `tabQuality Inspection`.%(key)s LIKE "%s"';
 }
 
 // On Button Click Functions
@@ -259,15 +259,15 @@ cur_frm.fields_dict.purchase_receipt_details.grid.get_field("qa_no").get_query =
 
 // ================================ Make Purchase Invoice ==========================================
 cur_frm.cscript['Make Purchase Invoice'] = function() {
-	n = createLocal('Payable Voucher');
+	n = createLocal('Purchase Invoice');
 	$c('dt_map', args={
-		'docs':compress_doclist([locals['Payable Voucher'][n]]),
+		'docs':compress_doclist([locals['Purchase Invoice'][n]]),
 		'from_doctype': cur_frm.doc.doctype,
-		'to_doctype':'Payable Voucher',
+		'to_doctype':'Purchase Invoice',
 		'from_docname': cur_frm.doc.name,
-		'from_to_list':"[['Purchase Receipt','Payable Voucher'],['Purchase Receipt Detail','PV Detail'],['Purchase Tax Detail','Purchase Tax Detail']]"
+		'from_to_list':"[['Purchase Receipt','Purchase Invoice'],['Purchase Receipt Item','Purchase Invoice Item'],['Purchase Taxes and Charges','Purchase Taxes and Charges']]"
 		}, function(r,rt) {
-			loaddoc('Payable Voucher', n);
+			loaddoc('Purchase Invoice', n);
 		}
 	);
 }
@@ -289,7 +289,7 @@ cur_frm.pformat.purchase_order_no = function(doc, cdt, cdn){
 
 	out ='';
 	
-	var cl = getchildren('Purchase Receipt Detail',doc.name,'purchase_receipt_details');
+	var cl = getchildren('Purchase Receipt Item',doc.name,'purchase_receipt_details');
 
 	// outer table	
 	var out='<div><table class="noborder" style="width:100%"><tr><td style="width: 50%"></td><td>';

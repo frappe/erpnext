@@ -39,7 +39,7 @@ out, tot_amount, tot_val_amount, tot_gross_profit = [], 0, 0, 0
 
 for r in res:
   tot_val_rate = 0
-  packing_list_items = sql("select item_code, warehouse, qty from `tabDelivery Note Packing Detail` where parent = %s and parent_item = %s", (r[col_idx['ID']], r[col_idx['Item Code']]))
+  packing_list_items = sql("select item_code, warehouse, qty from `tabDelivery Note Packing Item` where parent = %s and parent_item = %s", (r[col_idx['ID']], r[col_idx['Item Code']]))
   for d in packing_list_items:
     if d[1]:
       val_rate = sql("select valuation_rate from `tabStock Ledger Entry` where item_code = %s and warehouse = %s and voucher_type = 'Delivery Note' and voucher_no = %s and is_cancelled = 'No'", (d[0], d[1], r[col_idx['ID']]))

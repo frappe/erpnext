@@ -1,0 +1,140 @@
+# DocType, Opportunity Item
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2012-03-27 14:36:08',
+		'docstatus': 0,
+		'modified': '2012-03-27 14:36:08',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
+	},
+
+	# These values are common for all DocType
+	{
+		'colour': u'White:FFF',
+		'doctype': 'DocType',
+		'istable': 1,
+		'module': u'Selling',
+		'name': '__common__',
+		'section_style': u'Simple',
+		'server_code_error': u' ',
+		'show_in_menu': 0,
+		'version': 59
+	},
+
+	# These values are common for all DocField
+	{
+		'doctype': u'DocField',
+		'name': '__common__',
+		'parent': u'Opportunity Item',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
+		'permlevel': 0
+	},
+
+	# DocType, Opportunity Item
+	{
+		'doctype': 'DocType',
+		'name': u'Opportunity Item'
+	},
+
+	# DocField
+	{
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'item_code',
+		'fieldtype': u'Link',
+		'label': u'Item Code',
+		'oldfieldname': u'item_code',
+		'oldfieldtype': u'Link',
+		'options': u'Item',
+		'reqd': 0,
+		'trigger': u'Client'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'item_name',
+		'fieldtype': u'Data',
+		'label': u'Item Name',
+		'oldfieldname': u'item_name',
+		'oldfieldtype': u'Data',
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'description',
+		'fieldtype': u'Text',
+		'label': u'Description',
+		'oldfieldname': u'description',
+		'oldfieldtype': u'Text',
+		'reqd': 1,
+		'width': u'300px'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'item_group',
+		'fieldtype': u'Link',
+		'hidden': 1,
+		'label': u'Item Group',
+		'oldfieldname': u'item_group',
+		'oldfieldtype': u'Link',
+		'options': u'Item Group',
+		'print_hide': 1,
+		'search_index': 0
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'brand',
+		'fieldtype': u'Link',
+		'hidden': 1,
+		'label': u'Brand',
+		'oldfieldname': u'brand',
+		'oldfieldtype': u'Link',
+		'options': u'Brand',
+		'print_hide': 1,
+		'search_index': 0
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'basic_rate',
+		'fieldtype': u'Currency',
+		'hidden': 1,
+		'label': u'Basic Rate',
+		'oldfieldname': u'basic_rate',
+		'oldfieldtype': u'Currency',
+		'print_hide': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'qty',
+		'fieldtype': u'Currency',
+		'label': u'Qty',
+		'oldfieldname': u'qty',
+		'oldfieldtype': u'Currency'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'uom',
+		'fieldtype': u'Link',
+		'label': u'UOM',
+		'oldfieldname': u'uom',
+		'oldfieldtype': u'Link',
+		'options': u'UOM',
+		'search_index': 0
+	}
+]

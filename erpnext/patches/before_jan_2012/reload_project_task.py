@@ -19,5 +19,5 @@
 """
 def execute():
 	from webnotes.modules import reload_doc
-	reload_doc('Projects', 'DocType', 'Ticket')
+	reload_doc('Projects', 'DocType', 'Task')
 

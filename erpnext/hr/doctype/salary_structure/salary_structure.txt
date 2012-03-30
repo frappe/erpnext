@@ -352,7 +352,7 @@
 		'label': u'Earning1',
 		'oldfieldname': u'earning_details',
 		'oldfieldtype': u'Table',
-		'options': u'Earning Detail',
+		'options': u'Salary Structure Earning',
 		'permlevel': 0
 	},
 
@@ -380,7 +380,7 @@
 		'label': u'Deduction1',
 		'oldfieldname': u'deduction_details',
 		'oldfieldtype': u'Table',
-		'options': u'Deduction Detail',
+		'options': u'Salary Structure Deduction',
 		'permlevel': 0
 	},
 

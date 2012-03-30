@@ -123,10 +123,10 @@
 	{
 		'doctype': 'Table Mapper Detail',
 		'from_field': 'delivery_note_details',
-		'from_table': 'Delivery Note Detail',
+		'from_table': 'Delivery Note Item',
 		'match_id': 1,
 		'to_field': 'installed_item_details',
-		'to_table': 'Installed Item Details',
+		'to_table': 'Installation Note Item',
 		'validation_logic': 'qty > ifnull(installed_qty,0) and docstatus = 1'
 	},
 
@@ -147,7 +147,7 @@
 		'reference_doctype_key': 'prevdoc_doctype',
 		'reference_key': 'prevdoc_docname',
 		'to_field': 'installed_item_details',
-		'to_table': 'Installed Item Details',
+		'to_table': 'Installation Note Item',
 		'validation_logic': 'docstatus = 1'
 	}
 ]

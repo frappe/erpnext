@@ -22,8 +22,8 @@ report.customize_filters = function() {
   //this.filter_fields_dict['Sales Order'+FILTER_SEP +'Sales Order Date'].df.filter_hide = 0;
   //this.filter_fields_dict['Sales Order'+FILTER_SEP +'Sales Order Date'].df.in_first_page = 1;
   
-  this.filter_fields_dict['Sales Order Detail'+FILTER_SEP +'Item Code'].df.filter_hide = 0;
-  this.filter_fields_dict['Sales Order Detail'+FILTER_SEP +'Item Code'].df.in_first_page = 1;
+  this.filter_fields_dict['Sales Order Item'+FILTER_SEP +'Item Code'].df.filter_hide = 0;
+  this.filter_fields_dict['Sales Order Item'+FILTER_SEP +'Item Code'].df.in_first_page = 1;
 
   this.filter_fields_dict['Sales Order'+FILTER_SEP +'Company'].df.filter_hide = 0;
   this.filter_fields_dict['Sales Order'+FILTER_SEP +'Company'].df.in_first_page = 1;

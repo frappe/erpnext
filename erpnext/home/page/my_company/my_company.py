@@ -134,7 +134,7 @@ def post_comment(arg):
 	arg = load_json(arg)
 	
 	from webnotes.model.doc import Document
-	d = Document('Comment Widget Record')
+	d = Document('Comment')
 	d.comment_doctype = 'My Company'
 	d.comment_docname = arg['uid'] # to
 	d.owner = webnotes.user.name
@@ -174,7 +174,7 @@ def post_comment(arg):
 #
 @webnotes.whitelist()
 def set_read_all_messages(arg=''):
-	webnotes.conn.sql("""UPDATE `tabComment Widget Record`
+	webnotes.conn.sql("""UPDATE `tabComment`
 	SET docstatus = 1
 	WHERE comment_doctype = 'My Company'
 	AND comment_docname = %s

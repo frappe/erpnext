@@ -74,7 +74,7 @@ cur_frm.cscript['Make Maintenance Visit'] = function(doc, cdt, cdn) {
                   'from_doctype':'Customer Issue',
                   'to_doctype':'Maintenance Visit',
                   'from_docname':doc.name,
-            'from_to_list':"[['Customer Issue', 'Maintenance Visit'], ['Customer Issue', 'Maintenance Visit Detail']]"
+            'from_to_list':"[['Customer Issue', 'Maintenance Visit'], ['Customer Issue', 'Maintenance Visit Purpose']]"
           }
           , function(r,rt) {
             loaddoc("Maintenance Visit", n);

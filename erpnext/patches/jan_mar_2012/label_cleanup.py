@@ -16,14 +16,14 @@ def execute():
 
 	webnotes.conn.sql("""delete from `tabDocField` 
 		where label in ('Note1', 'OT Notes', 'Note', 'Note HTML', 'Rates HTML') 
-		and parent in ('Quotation', 'Sales Order', 'Delivery Note', 'Receivable Voucher', 'Purchase Order')""")
+		and parent in ('Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice', 'Purchase Order')""")
 
 
 	del_flds = {
-		'Sales Order Detail':	"'delivery_date', 'confirmation_date'", 
+		'Sales Order Item':	"'delivery_date', 'confirmation_date'", 
 		'Delivery Note':		"'supplier', 'supplier_address', 'purchase_receipt_no', 'purchase_order_no', 'transaction_date'",
-		'Receivable Voucher':	"'voucher_date'",
-		'Payable Voucher':		"'voucher_date'",
+		'Sales Invoice':	"'voucher_date'",
+		'Purchase Invoice':		"'voucher_date'",
 		'Purchase Receipt':		"'transaction_date'"
 	} 
 

@@ -22,7 +22,7 @@ if based_on == 'Purchase Order':
   col = [['Purchase Order ID','Link','Purchase Order'],['Status','Data',''],['Project Name','Link','Project'],['Supplier','Link','Supplier'],['Supplier Name','Data',''],['% Received','Data',''],['% Billed','Data',''],['Grand Total','Currency','']] 
 
 elif based_on == 'Purchase Invoice':
-  col = [['Purchase Receipt ID','Link','Payable Voucher'],['Status','Data',''],['Project Name','Link','Project'],['Supplier','Link','Supplier'],['Supplier Name','Data',''],['Grand Total','Currency','']]
+  col = [['Purchase Receipt ID','Link','Purchase Invoice'],['Status','Data',''],['Project Name','Link','Project'],['Supplier','Link','Supplier'],['Supplier Name','Data',''],['Grand Total','Currency','']]
 
 elif based_on == 'Purchase Receipt':
   col = [['Purchase Invoice ID','Link','Purchase Receipt'],['Credit To','Data',''],['Project Name','Link','Project'],['Supplier','Link','Supplier'],['Supplier Name','Data',''],['Grand Total','Currency','']]

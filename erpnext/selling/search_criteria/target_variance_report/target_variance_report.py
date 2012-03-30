@@ -108,14 +108,14 @@ for r in res:
     actual = 0
     if based_on == 'Cost Center' or based_on == 'Sales Partner':
       if group_by =='Item Group':
-        actual = sql("select sum(ifnull(t2.amount,0)) from `tab%s` t1, `tab%s Detail` t2, `tabItem` t3 where t2.parenttype = '%s' and t2.parent = t1.name and t1.%s = '%s' and t3.name = t2.item_code and t3.item_group = '%s' and t1.docstatus = 1 and t1.%s between '%s' and '%s'" % (under, (under == 'Receivable Voucher') and 'RV' or under, under, based_on_fn, r[0], r[1], date_fn, mon_list[count][data['start_date']], mon_list[count][data['end_date']]))
+        actual = sql("select sum(ifnull(t2.amount,0)) from `tab%s` t1, `tab%s Detail` t2, `tabItem` t3 where t2.parenttype = '%s' and t2.parent = t1.name and t1.%s = '%s' and t3.name = t2.item_code and t3.item_group = '%s' and t1.docstatus = 1 and t1.%s between '%s' and '%s'" % (under, (under == 'Sales Invoice') and 'RV' or under, under, based_on_fn, r[0], r[1], date_fn, mon_list[count][data['start_date']], mon_list[count][data['end_date']]))
         actual = flt(actual[0][0])
       else:
         actual = sql("select sum(ifnull(net_total,0)) from `tab%s` where %s = '%s' and docstatus = 1 and %s between '%s' and '%s' " % (under, based_on_fn, r[0], date_fn, mon_list[count][data['start_date']], mon_list[count][data['end_date']]))
         actual = flt(actual[0][0])
     elif based_on == 'Sales Person':
       if group_by =='Item Group':
-        actual = sql("select sum(ifnull(t2.amount,0) * ifnull(t3.allocated_percentage,0) / 100) from `tab%s` t1, `tab%s Detail` t2, `tabSales Team` t3, `tabItem` t4 where t2.parent = t1.name and t3.parent = t1.name and t3.%s = '%s' and t4.name = t2.item_code and t4.item_group = '%s' and t1.docstatus != 2 and t1.docstatus = 1 and t1.%s between '%s' and '%s' "%(under, (under == 'Receivable Voucher') and 'RV' or under, based_on_fn, r[0], r[1], date_fn, mon_list[count][data['start_date']], mon_list[count][data['end_date']]))
+        actual = sql("select sum(ifnull(t2.amount,0) * ifnull(t3.allocated_percentage,0) / 100) from `tab%s` t1, `tab%s Detail` t2, `tabSales Team` t3, `tabItem` t4 where t2.parent = t1.name and t3.parent = t1.name and t3.%s = '%s' and t4.name = t2.item_code and t4.item_group = '%s' and t1.docstatus != 2 and t1.docstatus = 1 and t1.%s between '%s' and '%s' "%(under, (under == 'Sales Invoice') and 'RV' or under, based_on_fn, r[0], r[1], date_fn, mon_list[count][data['start_date']], mon_list[count][data['end_date']]))
         actual = flt(actual[0][0])
       else:
         actual = sql("select sum(ifnull(t2.allocated_amount,0)) from `tab%s` t1, `tabSales Team` t2 where t2.%s = '%s' and t2.parenttype='%s' and t1.docstatus != 2 and t2.parent = t1.name and t1.%s between '%s' and '%s'"%(under, based_on_fn, r[0], under, date_fn, mon_list[count][data['start_date']], mon_list[count][data['end_date']]))

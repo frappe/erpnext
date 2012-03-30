@@ -12,12 +12,12 @@
 
 	# These values are common for all Search Criteria
 	{
-		'add_col': 'SUM(`tabSales Order Detail`.`qty` - ifnull(`tabSales Order Detail`.`delivered_qty`, 0)) AS "Pending Qty"',
-		'add_cond': '`tabSales Order`.status != "Stopped"\n`tabSales Order Detail`.`qty` > ifnull(`tabSales Order Detail`.`delivered_qty`, 0)',
+		'add_col': 'SUM(`tabSales Order Item`.`qty` - ifnull(`tabSales Order Item`.`delivered_qty`, 0)) AS "Pending Qty"',
+		'add_cond': '`tabSales Order`.status != "Stopped"\n`tabSales Order Item`.`qty` > ifnull(`tabSales Order Item`.`delivered_qty`, 0)',
 		'columns': 'Sales Order\x01ID,Sales Order\x01Customer,Sales Order\x01Customer Name,Sales Order\x01Customer Address,Sales Order\x01Status,Sales Order\x01%  Delivered,Sales Order\x01% Billed,Sales Order\x01Sales Order Date,Sales Order\x01Territory,Sales Order\x01Email Id',
 		'criteria_name': 'Sales Orderwise Pending Qty To Deliver',
 		'description': 'Sales Orderwise Pending Qty To Deliver',
-		'doc_type': 'Sales Order Detail',
+		'doc_type': 'Sales Order Item',
 		'doctype': 'Search Criteria',
 		'filters': "{'Sales Order\x01Saved':1,'Sales Order\x01Submitted':1,'Sales Order\x01Status':'','Sales Order\x01Fiscal Year':''}",
 		'group_by': '`tabSales Order`.`name`',

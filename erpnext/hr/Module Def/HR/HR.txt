@@ -114,8 +114,8 @@
 	# Module Def Item
 	{
 		'description': 'Submit Employees Expenses',
-		'display_name': 'Expense Voucher',
-		'doc_name': 'Expense Voucher',
+		'display_name': 'Expense Claim',
+		'doc_name': 'Expense Claim',
 		'doc_type': 'Forms',
 		'doctype': 'Module Def Item',
 		'fields': 'status\nemployee\nemployee_name\nposting_date\ntotal_claimed_amount\ntotal_sanctioned_amount\nexp_approver',
@@ -286,8 +286,8 @@
 
 	# Module Def Item
 	{
-		'display_name': 'Pending Expense Vouchers',
-		'doc_name': 'Expense Voucher',
+		'display_name': 'Pending Expense Claims',
+		'doc_name': 'Expense Claim',
 		'doc_type': 'Reports',
 		'doctype': 'Module Def Item',
 		'idx': 25
@@ -295,8 +295,8 @@
 
 	# Module Def Item
 	{
-		'display_name': 'Expense Vouchers',
-		'doc_name': 'Expense Voucher',
+		'display_name': 'Expense Claims',
+		'doc_name': 'Expense Claim',
 		'doc_type': 'Reports',
 		'doctype': 'Module Def Item',
 		'idx': 26

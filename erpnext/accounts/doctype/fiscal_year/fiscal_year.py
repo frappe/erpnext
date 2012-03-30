@@ -178,8 +178,8 @@ class DocType:
 	# ====================================================================================
 	def clear_outstanding(self):
 		# clear o/s of current year
-		sql("update `tabPayable Voucher` set outstanding_amount = 0 where fiscal_year=%s and company=%s", (self.doc.name, self.doc.company))
-		sql("update `tabReceivable Voucher` set outstanding_amount = 0 where fiscal_year=%s and company=%s", (self.doc.name, self.doc.company))
+		sql("update `tabPurchase Invoice` set outstanding_amount = 0 where fiscal_year=%s and company=%s", (self.doc.name, self.doc.company))
+		sql("update `tabSales Invoice` set outstanding_amount = 0 where fiscal_year=%s and company=%s", (self.doc.name, self.doc.company))
 
 	# Update Voucher Outstanding
 	def update_voucher_outstanding(self):
@@ -190,7 +190,7 @@ class DocType:
 			# get voucher balance
 			bal = sql("select sum(debit)-sum(credit) from `tabGL Entry` where against_voucher=%s and against_voucher_type=%s and ifnull(is_cancelled, 'No') = 'No'", (d[0], d[1]))
 			bal = bal and flt(bal[0][0]) or 0.0
-			if d[1] == 'Payable Voucher':
+			if d[1] == 'Purchase Invoice':
 				bal = -bal
 			# set voucher balance
 			sql("update `tab%s` set outstanding_amount=%s where name='%s'"% (d[1], bal, d[0]))

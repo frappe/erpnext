@@ -12,9 +12,9 @@
 
 	# These values are common for all Search Criteria
 	{
-		'columns': 'Sales Order\x01ID,Sales Order\x01Customer,Sales Order Detail\x01Item Code,Sales Order Detail\x01Item Name,Sales Order Detail\x01Quantity,Sales Order Detail\x01Basic Rate*,Sales Order Detail\x01Amount*,Sales Order Detail\x01Delivered Qty,Sales Order Detail\x01Billed Qty,Sales Order\x01Company',
+		'columns': 'Sales Order\x01ID,Sales Order\x01Customer,Sales Order Item\x01Item Code,Sales Order Item\x01Item Name,Sales Order Item\x01Quantity,Sales Order Item\x01Basic Rate*,Sales Order Item\x01Amount*,Sales Order Item\x01Delivered Qty,Sales Order Item\x01Billed Qty,Sales Order\x01Company',
 		'criteria_name': 'Itemwise Sales Details',
-		'doc_type': 'Sales Order Detail',
+		'doc_type': 'Sales Order Item',
 		'doctype': 'Search Criteria',
 		'filters': "{'Sales Order\x01Submitted':1,'Sales Order\x01Status':'','Sales Order\x01Fiscal Year':''}",
 		'module': 'Selling',

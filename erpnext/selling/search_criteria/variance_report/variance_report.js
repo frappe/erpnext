@@ -22,7 +22,7 @@ report.customize_filters = function() {
   this.add_filter({fieldname:'period', label:'Period', fieldtype:'Select', options:'Monthly'+NEWLINE+'Quarterly'+NEWLINE+'Half Yearly'+NEWLINE+'Annual',report_default:'Quarterly',ignore : 1, parent:'Target Detail'});
 //  this.add_filter({fieldname:'item_group', label:'Item Group', fieldtype:'Link', options:'Item Group', ignore : 1, parent:'Target Detail'});
   this.add_filter({fieldname:'group_by', label:'Group By', fieldtype:'Select', options:NEWLINE+'Item Group',ignore : 1, parent:'Target Detail'});
-  this.add_filter({fieldname:'under', label:'Under',fieldtype:'Select', options:'Sales Order'+NEWLINE+'Delivery Note'+NEWLINE+'Receivable Voucher',report_default:'Sales Order',ignore : 1, parent:'Target Detail'});
+  this.add_filter({fieldname:'under', label:'Under',fieldtype:'Select', options:'Sales Order'+NEWLINE+'Delivery Note'+NEWLINE+'Sales Invoice',report_default:'Sales Order',ignore : 1, parent:'Target Detail'});
 }  
 
 //this.mytabs.items['Select Columns'].hide()

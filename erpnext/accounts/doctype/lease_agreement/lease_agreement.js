@@ -90,5 +90,5 @@ cur_frm.add_fetch('invoice','grand_total','invoice_amount');
 
 cur_frm.fields_dict.invoice.get_query=function(doc){
 
-	return "SELECT tv.name FROM `tabReceivable Voucher` tv WHERE debit_to='"+doc.account+"' and  tv.%(key)s like '%s' ORDER BY tv.name LIMIT 50"
+	return "SELECT tv.name FROM `tabSales Invoice` tv WHERE debit_to='"+doc.account+"' and  tv.%(key)s like '%s' ORDER BY tv.name LIMIT 50"
 }

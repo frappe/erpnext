@@ -154,7 +154,7 @@ class DocType:
 	def update_permissions(self,args=''):
 		args = eval(args)
 		di = args['perm_dict']
-		doctype_keys = di.keys()	# ['Enquiry','Competitor','Zone','State']
+		doctype_keys = di.keys()	# ['Opportunity','Competitor','Zone','State']
 		for parent in doctype_keys:
 			for permlevel in di[parent].keys():
 				for role in di[parent][permlevel].keys(): 

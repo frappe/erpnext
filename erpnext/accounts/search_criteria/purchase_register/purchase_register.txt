@@ -12,12 +12,12 @@
 
 	# These values are common for all Search Criteria
 	{
-		'add_cond': "`tabPayable Voucher`.is_opening != 'Yes'\n`tabPayable Voucher`.name not like 'OP/%'",
-		'columns': 'Payable Voucher\x01ID,Payable Voucher\x01Voucher Date,Payable Voucher\x01Posting Date,Payable Voucher\x01Credit To,Payable Voucher\x01Expense Head',
+		'add_cond': "`tabPurchase Invoice`.is_opening != 'Yes'\n`tabPurchase Invoice`.name not like 'OP/%'",
+		'columns': 'Purchase Invoice\x01ID,Purchase Invoice\x01Voucher Date,Purchase Invoice\x01Posting Date,Purchase Invoice\x01Credit To,Purchase Invoice\x01Expense Head',
 		'criteria_name': 'Purchase Register',
-		'doc_type': 'Payable Voucher',
+		'doc_type': 'Purchase Invoice',
 		'doctype': 'Search Criteria',
-		'filters': "{'Payable Voucher\x01Submitted':1}",
+		'filters': "{'Purchase Invoice\x01Submitted':1}",
 		'module': 'Accounts',
 		'name': '__common__',
 		'standard': 'Yes'

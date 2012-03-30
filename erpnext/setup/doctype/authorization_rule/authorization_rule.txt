@@ -88,7 +88,7 @@
 		'label': u'Transaction',
 		'oldfieldname': u'transaction',
 		'oldfieldtype': u'Select',
-		'options': u'\nDelivery Note\nPurchase Invoice\nPurchase Order\nPurchase Receipt\nQuotation\nSales Invoice\nSales Order\nStock Entry\nExpense Voucher\nAppraisal',
+		'options': u'\nDelivery Note\nPurchase Invoice\nPurchase Order\nPurchase Receipt\nQuotation\nSales Invoice\nSales Order\nStock Entry\nExpense Claim\nAppraisal',
 		'reqd': 1
 	},
 

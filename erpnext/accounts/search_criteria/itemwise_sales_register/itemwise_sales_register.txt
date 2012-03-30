@@ -12,16 +12,16 @@
 
 	# These values are common for all Search Criteria
 	{
-		'columns': 'RV Detail\x01Item,RV Detail\x01Item Name,RV Detail\x01Item Group,Receivable Voucher\x01ID,Receivable Voucher\x01Voucher Date,Receivable Voucher\x01Posting Date,Receivable Voucher\x01Debit To,RV Detail\x01Cost Center,Receivable Voucher\x01Territory,RV Detail\x01Income Account,RV Detail\x01Qty,RV Detail\x01Basic Rate*,RV Detail\x01Amount*',
+		'columns': 'Sales Invoice Item\x01Item,Sales Invoice Item\x01Item Name,Sales Invoice Item\x01Item Group,Sales Invoice\x01ID,Sales Invoice\x01Voucher Date,Sales Invoice\x01Posting Date,Sales Invoice\x01Debit To,Sales Invoice Item\x01Cost Center,Sales Invoice\x01Territory,Sales Invoice Item\x01Income Account,Sales Invoice Item\x01Qty,Sales Invoice Item\x01Basic Rate*,Sales Invoice Item\x01Amount*',
 		'criteria_name': 'Itemwise Sales Register',
-		'doc_type': 'RV Detail',
+		'doc_type': 'Sales Invoice Item',
 		'doctype': 'Search Criteria',
-		'filters': "{'Receivable Voucher\x01Submitted':1,'Receivable Voucher\x01From Posting Date\x01lower':'','Receivable Voucher\x01To Posting Date\x01upper':'','Receivable Voucher\x01Is Opening':'','Receivable Voucher\x01Company':'','Receivable Voucher\x01Fiscal Year':''}",
+		'filters': "{'Sales Invoice\x01Submitted':1,'Sales Invoice\x01From Posting Date\x01lower':'','Sales Invoice\x01To Posting Date\x01upper':'','Sales Invoice\x01Is Opening':'','Sales Invoice\x01Company':'','Sales Invoice\x01Fiscal Year':''}",
 		'module': 'Accounts',
 		'name': '__common__',
 		'page_len': 50,
-		'parent_doc_type': 'Receivable Voucher',
-		'sort_by': '`tabRV Detail`.`income_account`',
+		'parent_doc_type': 'Sales Invoice',
+		'sort_by': '`tabSales Invoice Item`.`income_account`',
 		'sort_order': 'DESC',
 		'standard': 'Yes'
 	},

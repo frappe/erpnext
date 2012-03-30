@@ -45,7 +45,7 @@ class DocType:
   # --------------
   def get_rates(self):
     for d in getlist(self.doclist, "sales_bom_items"):
-      r = sql("select ref_rate from `tabRef Rate Detail` where price_list_name=%s and parent=%s and ref_currency = %s", (self.doc.price_list, d.item_code, self.doc.currency))
+      r = sql("select ref_rate from `tabItem Price` where price_list_name=%s and parent=%s and ref_currency = %s", (self.doc.price_list, d.item_code, self.doc.currency))
       d.rate = r and flt(r[0][0]) or 0.00
 
 
@@ -53,7 +53,7 @@ class DocType:
   # -----------------
   def get_item_details(self, name):
     det = sql("select description, stock_uom from `tabItem` where name = '%s' " % cstr(name))
-    rate = sql("select ref_rate from `tabRef Rate Detail` where price_list_name = %s and parent = %s and ref_currency = %s", (self.doc.price_list, name, self.doc.currency))
+    rate = sql("select ref_rate from `tabItem Price` where price_list_name = %s and parent = %s and ref_currency = %s", (self.doc.price_list, name, self.doc.currency))
     return {'description' : det and det[0][0] or '', 'uom': det and det[0][1] or '', 'rate': rate and flt(rate[0][0]) or 0.00}
 
 
@@ -107,7 +107,7 @@ class DocType:
       msgprint("Please enter Currency.")
       raise Exception
     for d in getlist(self.doclist, "sales_bom_items"):
-      item_rate = sql("select ref_rate,ref_currency from `tabRef Rate Detail` where price_list_name=%s and parent=%s", (p, d.item_code))      
+      item_rate = sql("select ref_rate,ref_currency from `tabItem Price` where price_list_name=%s and parent=%s", (p, d.item_code))      
       if not item_rate:
         msgprint("Item %s does not have a rate for Price List %s. Did not update rates for this Price List" % (d.item_code, p))
         raise Exception
@@ -118,7 +118,7 @@ class DocType:
       count += 1
       ref_rate += (flt(d.qty) * flt(item_rate[0][0]))
       
-    pld = addchild(i,"ref_rate_details", "Ref Rate Detail")
+    pld = addchild(i,"ref_rate_details", "Item Price")
     pld.price_list_name = p
     pld.ref_rate = flt(ref_rate)
     pld.ref_currency = currency
@@ -136,7 +136,7 @@ class DocType:
     i.item_group = self.doc.item_group
 	
     # clear old rates
-    sql("delete from `tabRef Rate Detail` where parent=%s", i.name)
+    sql("delete from `tabItem Price` where parent=%s", i.name)
     
     # update rates
     new_rates = {}
@@ -193,14 +193,14 @@ class DocType:
       return
     
     # get all Sales BOM that have the first item  
-    sbl = sql("select distinct parent from `tabSales BOM Detail` where item_code=%s", il[0].item_code)
+    sbl = sql("select distinct parent from `tabSales BOM Item` where item_code=%s", il[0].item_code)
     
     # check all siblings
     sub_items = [[d.item_code, flt(d.qty)] for d in il]
     
     for s in sbl:
       if not cstr(s[0]) == cstr(self.doc.name) :
-        t = sql("select item_code, qty from `tabSales BOM Detail` where parent=%s", s[0])
+        t = sql("select item_code, qty from `tabSales BOM Item` where parent=%s", s[0])
         t = [[d[0], flt(d[1])] for d in t]
   
         if self.has_same_items(sub_items, t):

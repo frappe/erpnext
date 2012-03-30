@@ -42,7 +42,7 @@ pscript['onload_{{ doc.name }}'] = function(wrapper) {
 	wrapper.comment_list = new wn.ui.Listing({
 		parent: $(wrapper).find('.web-main-section').get(0),
 		query: 'select comment, comment_by_fullname, modified\
-			from `tabComment Widget Record` where comment_doctype="Page"\
+			from `tabComment` where comment_doctype="Page"\
 			and comment_docname="{{ doc.name }}"',
 		no_result_message: 'Be the first one to comment',
 		render_row: function(parent, data) {

@@ -123,7 +123,7 @@ class DocType:
 		if fg_item and bom_no:
 			# re-calculate cost for production item from bom
 			get_obj('BOM Control').calculate_cost(bom_no)
-			bom_obj = get_obj('Bill Of Materials', bom_no)
+			bom_obj = get_obj('BOM', bom_no)
 			in_rate = flt(bom_obj.doc.total_cost) / (flt(bom_obj.doc.quantity) or 1)
 		elif wh:
 			in_rate = get_obj('Valuation Control').get_incoming_rate(dt, tm, item, wh, qty, serial_no)
@@ -168,7 +168,7 @@ class DocType:
 			# so no childs of SA items
 			fl_bom_sa_items = sql("""
 				select item_code, ifnull(sum(qty_consumed_per_unit), 0) * '%s', description, stock_uom 
-				from `tabBOM Material` 
+				from `tabBOM Item` 
 				where parent = '%s' and docstatus < 2 
 				group by item_code
 			""" % (fg_qty, bom_no))
@@ -183,7 +183,7 @@ class DocType:
 				from 
 					( 
 						select distinct fb.name, fb.description, fb.item_code, fb.qty_consumed_per_unit, fb.stock_uom 
-						from `tabFlat BOM Detail` fb,`tabItem` it 
+						from `tabBOM Explosion Item` fb,`tabItem` it 
 						where it.name = fb.item_code and ifnull(it.is_pro_applicable, 'No') = 'No'
 						and ifnull(it.is_sub_contracted_item, 'No') = 'No' and fb.docstatus<2 and fb.parent=%s
 					) a
@@ -251,7 +251,7 @@ class DocType:
 			fg_item_dict = {cstr(pro_obj.doc.production_item) : [self.doc.fg_completed_qty, pro_obj.doc.description, pro_obj.doc.stock_uom]}
 		elif self.doc.purpose == 'Other' and self.doc.bom_no:
 			sw, tw = '', ''
-			item = sql("select item, description, uom from `tabBill Of Materials` where name = %s", self.doc.bom_no, as_dict=1)
+			item = sql("select item, description, uom from `tabBOM` where name = %s", self.doc.bom_no, as_dict=1)
 			fg_item_dict = {item[0]['item'] : [self.doc.fg_completed_qty, item[0]['description'], item[0]['uom']]}
 
 		if fg_item_dict:
@@ -357,7 +357,7 @@ class DocType:
 	def validate_bom_belongs_to_item(self):
 		for d in getlist(self.doclist, 'mtn_details'):
 			if d.bom_no and not webnotes.conn.sql("""\
-					SELECT name FROM `tabBill Of Materials`
+					SELECT name FROM `tabBOM`
 					WHERE item = %s and name = %s
 				""", (d.item_code, d.bom_no)):
 				msgprint("BOM %s does not belong to Item: %s at row %s" % (d.bom_no, d.item_code, d.idx), raise_exception=1)
@@ -498,7 +498,7 @@ class DocType:
 		
 
 	def get_cust_values(self):
-		tbl = self.doc.delivery_note_no and 'Delivery Note' or 'Receivable Voucher'
+		tbl = self.doc.delivery_note_no and 'Delivery Note' or 'Sales Invoice'
 		record_name = self.doc.delivery_note_no or self.doc.sales_invoice_no
 		res = sql("select customer,customer_name, customer_address from `tab%s` where name = '%s'" % (tbl, record_name))
 		ret = {

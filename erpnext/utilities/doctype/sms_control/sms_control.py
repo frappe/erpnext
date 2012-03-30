@@ -79,7 +79,7 @@ class DocType:
 
 	def get_sender_name(self):
 		"returns name as SMS sender"
-		sender_name = webnotes.conn.get_value('Manage Account', None, 'sms_sender_name') or 'ERPNXT'
+		sender_name = webnotes.conn.get_value('Global Defaults', None, 'sms_sender_name') or 'ERPNXT'
 		if len(sender_name) > 6:
 			msgprint("""
 				As per TRAI rule, sender name must be exactly 6 characters.

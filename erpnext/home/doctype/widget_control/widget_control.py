@@ -37,7 +37,7 @@ class DocType:
     import time
     args = eval(args)
     if(args['comment']):
-      cmt = Document('Comment Widget Record')
+      cmt = Document('Comment')
       for arg in args:
         cmt.fields[arg] = args[arg]
       cmt.comment_date = nowdate()
@@ -49,4 +49,4 @@ class DocType:
         
   def remove_comment(self, args):
     args = json.loads(args)
-    sql("delete from `tabComment Widget Record` where name=%s",args['id'])
+    sql("delete from `tabComment` where name=%s",args['id'])

@@ -72,7 +72,7 @@ class DocType:
 		"""
 			Check packed qty across packing slips and delivery note
 		"""
-		# Get Delivery Note Details, Item Quantity Dict and No. of Cases for this Packing slip
+		# Get Delivery Note Items, Item Quantity Dict and No. of Cases for this Packing slip
 		dn_details, ps_item_qty, no_of_cases = self.get_details_for_packing()
 
 		for item in dn_details:
@@ -84,7 +84,7 @@ class DocType:
 	def get_details_for_packing(self):
 		"""
 			Returns
-			* 'Delivery Note Details' query result as a list of dict
+			* 'Delivery Note Items' query result as a list of dict
 			* Item Quantity dict of current packing slip doc
 			* No. of Cases of this packing slip
 		"""
@@ -96,7 +96,7 @@ class DocType:
 
 		res = webnotes.conn.sql("""\
 			SELECT item_code, IFNULL(SUM(qty), 0) as qty, IFNULL(packed_qty, 0) as packed_qty, stock_uom
-			FROM `tabDelivery Note Detail`
+			FROM `tabDelivery Note Item`
 			WHERE parent = "%s" AND item_code IN (%s)
 			GROUP BY item_code""" % (self.doc.delivery_note, item_codes),
 			as_dict=1)
@@ -143,7 +143,7 @@ class DocType:
 		if event not in ['submit', 'cancel']:
 			raise Exception('update_packed_quantity can only be called on submit or cancel')
 
-		# Get Delivery Note Details, Item Quantity Dict and No. of Cases for this Packing slip
+		# Get Delivery Note Items, Item Quantity Dict and No. of Cases for this Packing slip
 		dn_details, ps_item_qty, no_of_cases = self.get_details_for_packing()
 
 		for item in dn_details:
@@ -158,7 +158,7 @@ class DocType:
 					Please try again or contact support@erpnext.com" % item['item_code'], raise_exception=1)
 
 			webnotes.conn.sql("""\
-				UPDATE `tabDelivery Note Detail`
+				UPDATE `tabDelivery Note Item`
 				SET packed_qty = %s
 				WHERE parent = %s AND item_code = %s""",
 				(new_packed_qty, self.doc.delivery_note, item['item_code']))			
@@ -166,7 +166,7 @@ class DocType:
 
 	def update_item_details(self):
 		"""
-			Fill empty columns in Packing Slip Detail
+			Fill empty columns in Packing Slip Item
 		"""
 		self.doc.from_case_no = self.get_recommended_case_no()
 

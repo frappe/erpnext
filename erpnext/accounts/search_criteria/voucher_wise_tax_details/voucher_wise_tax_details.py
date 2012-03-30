@@ -15,7 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 if filter_values.get('based_on') == 'Sales Invoice':
-  based_on_dt = 'Receivable Voucher'
+  based_on_dt = 'Sales Invoice'
 else:
   based_on_dt = filter_values.get('based_on')
 

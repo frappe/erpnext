@@ -433,7 +433,7 @@
 		'in_filter': 1,
 		'label': u'Delivery Document Type',
 		'no_copy': 1,
-		'options': u'\nDelivery Note\nReceivable Voucher\nStock Entry',
+		'options': u'\nDelivery Note\nSales Invoice\nStock Entry',
 		'permlevel': 1
 	},
 

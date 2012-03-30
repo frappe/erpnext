@@ -15,7 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 // Module CRM
-cur_frm.cscript.tname = "Quotation Detail";
+cur_frm.cscript.tname = "Quotation Item";
 cur_frm.cscript.fname = "quotation_details";
 cur_frm.cscript.other_fname = "other_charges";
 cur_frm.cscript.sales_team_fname = "sales_team";
@@ -91,8 +91,8 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 		cur_frm.add_custom_button('Send SMS', cur_frm.cscript['Send SMS']);
 	}
 
-	if (!doc.docstatus) hide_field(['Update Follow up']);
-	else unhide_field(['Update Follow up']);
+	if (!doc.docstatus) hide_field(['Update Communication Log']);
+	else unhide_field(['Update Communication Log']);
 }
 
 
@@ -151,11 +151,11 @@ cur_frm.cscript.lead = function(doc, cdt, cdn) {
 cur_frm.fields_dict['enq_no'].get_query = function(doc,cdt,cdn){
 	var cond='';
 	var cond1='';
-	if(doc.order_type) cond = 'ifnull(`tabEnquiry`.enquiry_type, "") = "'+doc.order_type+'" AND';
-	if(doc.customer) cond1 = '`tabEnquiry`.customer = "'+doc.customer+'" AND';
-	else if(doc.lead) cond1 = '`tabEnquiry`.lead = "'+doc.lead+'" AND';
+	if(doc.order_type) cond = 'ifnull(`tabOpportunity`.enquiry_type, "") = "'+doc.order_type+'" AND';
+	if(doc.customer) cond1 = '`tabOpportunity`.customer = "'+doc.customer+'" AND';
+	else if(doc.lead) cond1 = '`tabOpportunity`.lead = "'+doc.lead+'" AND';
 
-	return repl('SELECT `tabEnquiry`.`name` FROM `tabEnquiry` WHERE `tabEnquiry`.`docstatus` = 1 AND `tabEnquiry`.status = "Submitted" AND %(cond)s %(cond1)s `tabEnquiry`.`name` LIKE "%s" ORDER BY `tabEnquiry`.`name` ASC LIMIT 50', {cond:cond, cond1:cond1});
+	return repl('SELECT `tabOpportunity`.`name` FROM `tabOpportunity` WHERE `tabOpportunity`.`docstatus` = 1 AND `tabOpportunity`.status = "Submitted" AND %(cond)s %(cond1)s `tabOpportunity`.`name` LIKE "%s" ORDER BY `tabOpportunity`.`name` ASC LIMIT 50', {cond:cond, cond1:cond1});
 }
 
 // Make Sales Order
@@ -170,7 +170,7 @@ cur_frm.cscript['Make Sales Order'] = function() {
 			'from_doctype':'Quotation',
 			'to_doctype':'Sales Order',
 			'from_docname':doc.name,
-			'from_to_list':"[['Quotation', 'Sales Order'], ['Quotation Detail', 'Sales Order Detail'],['RV Tax Detail','RV Tax Detail'], ['Sales Team', 'Sales Team'], ['TC Detail', 'TC Detail']]"
+			'from_to_list':"[['Quotation', 'Sales Order'], ['Quotation Item', 'Sales Order Item'],['Sales Taxes and Charges','Sales Taxes and Charges'], ['Sales Team', 'Sales Team'], ['TC Detail', 'TC Detail']]"
 		}, function(r,rt) {
 			loaddoc("Sales Order", n);
 		});
@@ -178,7 +178,7 @@ cur_frm.cscript['Make Sales Order'] = function() {
 }
 
 //pull enquiry details
-cur_frm.cscript['Pull Enquiry Detail'] = function(doc,cdt,cdn){
+cur_frm.cscript['Pull Opportunity Detail'] = function(doc,cdt,cdn){
 
 	var callback = function(r,rt){
 		if(r.message){
@@ -200,7 +200,7 @@ cur_frm.cscript['Pull Enquiry Detail'] = function(doc,cdt,cdn){
 
 //update follow up
 //=================================================================================
-cur_frm.cscript['Update Follow up'] = function(doc){
+cur_frm.cscript['Update Communication Log'] = function(doc){
 
 	$c_obj(make_doclist(doc.doctype, doc.name),'update_followup_details','',function(r, rt){
 		refresh_field('follow_up');
@@ -264,10 +264,10 @@ cur_frm.cscript['Declare Order Lost'] = function(){
 // ========================================================================================
 cur_frm.cscript['Get Report'] = function(doc,cdt,cdn) {
 	var callback = function(report){
-	report.set_filter('Sales Order Detail', 'Quotation No.',doc.name)
+	report.set_filter('Sales Order Item', 'Quotation No.',doc.name)
 	report.dt.run();
  }
- loadreport('Sales Order Detail','Itemwise Sales Details', callback);
+ loadreport('Sales Order Item','Itemwise Sales Details', callback);
 }
 
 
@@ -309,20 +309,20 @@ cur_frm.fields_dict['quotation_details'].grid.get_field('item_code').get_query= 
 		(\
 			select q.item_code,q.quote_rate from\
 			(\
-				select q.transaction_date,qd.item_code,basic_rate as quote_rate from `tabQuotation Detail` qd, `tabQuotation` q where q.name=qd.parent and q.docstatus=1 and customer='%(cust)s'\
+				select q.transaction_date,qd.item_code,basic_rate as quote_rate from `tabQuotation Item` qd, `tabQuotation` q where q.name=qd.parent and q.docstatus=1 and customer='%(cust)s'\
 			)q,\
 			(\
-				select qd.item_code,max(transaction_date) as transaction_date from `tabQuotation Detail` qd, `tabQuotation` q where q.name=qd.parent and q.docstatus=1 and customer='%(cust)s' group by qd.item_code\
+				select qd.item_code,max(transaction_date) as transaction_date from `tabQuotation Item` qd, `tabQuotation` q where q.name=qd.parent and q.docstatus=1 and customer='%(cust)s' group by qd.item_code\
 			)m where q.item_code=m.item_code and q.transaction_date=m.transaction_date\
 		)q on i.item_code=q.item_code\
 		left join\
 		(\
 			select r.item_code,r.sales_rate from\
 			(\
-				select r.voucher_date,rd.item_code,basic_rate as sales_rate from `tabRV Detail` rd, `tabReceivable Voucher` r where r.name=rd.parent and r.docstatus=1 and customer='%(cust)s'\
+				select r.voucher_date,rd.item_code,basic_rate as sales_rate from `tabSales Invoice Item` rd, `tabSales Invoice` r where r.name=rd.parent and r.docstatus=1 and customer='%(cust)s'\
 			)r,\
 			(\
-				select rd.item_code,max(voucher_date) as voucher_date from `tabRV Detail` rd, `tabReceivable Voucher` r where r.name=rd.parent and r.docstatus=1 and customer='%(cust)s' group by rd.item_code\
+				select rd.item_code,max(voucher_date) as voucher_date from `tabSales Invoice Item` rd, `tabSales Invoice` r where r.name=rd.parent and r.docstatus=1 and customer='%(cust)s' group by rd.item_code\
 			)m where r.item_code=m.item_code and r.voucher_date=m.voucher_date\
 		)s on i.item_code=s.item_code ORDER BY item_code LIMIT 50",{cust:doc.customer, cond:cond});
 	else

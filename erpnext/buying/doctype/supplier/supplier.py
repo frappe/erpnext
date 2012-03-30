@@ -171,7 +171,7 @@ class DocType:
 			('Supplier', 'name'),
 			('Address', 'supplier'),
 			('Contact', 'supplier'),
-			('Payable Voucher', 'supplier'),
+			('Purchase Invoice', 'supplier'),
 			('Purchase Order', 'supplier'),
 			('Purchase Receipt', 'supplier'),
 			('Serial No', 'supplier')]

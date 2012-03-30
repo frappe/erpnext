@@ -102,7 +102,7 @@ class DocType(TransactionBase):
 		if based_on == 'Grand Total': auth_value = total
 		elif based_on == 'Customerwise Discount':
 			if doc_obj:
-				if doc_obj.doc.doctype == 'Receivable Voucher': customer = doc_obj.doc.customer
+				if doc_obj.doc.doctype == 'Sales Invoice': customer = doc_obj.doc.customer
 				else: customer = doc_obj.doc.customer_name
 				add_cond = " and master_name = '"+make_esc("'")(cstr(customer))+"'"
 		if based_on == 'Itemwise Discount':
@@ -116,8 +116,8 @@ class DocType(TransactionBase):
 	# Check Approving Authority for transactions other than expense voucher and Appraisal
 	# -------------------------
 	def validate_approving_authority(self, doctype_name,company, total, doc_obj = ''):
-		if doctype_name == 'Payable Voucher': doctype_name = 'Purchase Invoice'
-		elif doctype_name == 'Receivable Voucher': doctype_name = 'Sales Invoice'
+		if doctype_name == 'Purchase Invoice': doctype_name = 'Purchase Invoice'
+		elif doctype_name == 'Sales Invoice': doctype_name = 'Sales Invoice'
 		av_dis = 0
 		if doc_obj:
 			ref_rate, basic_rate = 0, 0
@@ -192,7 +192,7 @@ class DocType(TransactionBase):
 		rule ={}
 		
 		if doc_obj:
-			if doctype_name == 'Expense Voucher':
+			if doctype_name == 'Expense Claim':
 				rule = self.get_value_based_rule(doctype_name,doc_obj.doc.employee,doc_obj.doc.total_claimed_amount, doc_obj.doc.company)
 			elif doctype_name == 'Appraisal':
 				rule = sql("select name, to_emp, to_designation, approving_role, approving_user from `tabAuthorization Rule` where transaction=%s and (to_emp=%s or to_designation IN (select designation from `tabEmployee` where name=%s)) and company = %s and docstatus!=2",(doctype_name,doc_obj.doc.employee, doc_obj.doc.employee, doc_obj.doc.company),as_dict=1)				

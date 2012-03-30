@@ -24,7 +24,7 @@ def execute():
     sr = sql("""select name, item_code, purchase_document_no from `tabSerial No`
             where docstatus = 1 and purchase_document_type = 'Purchase Receipt'""")
     for d in sr:
-        val_rate = sql("""select valuation_rate from `tabPurchase Receipt Detail`
+        val_rate = sql("""select valuation_rate from `tabPurchase Receipt Item`
             where item_code = %s and parent = %s""", (d[1], d[2]))
         sql("""update `tabSerial No` set purchase_rate = %s where name = %s""",
            (val_rate and flt(val_rate[0][0]) or 0, d[0]))

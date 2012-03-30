@@ -1,0 +1,66 @@
+# DocType, Appraisal Template Goal
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2012-03-27 14:35:58',
+		'docstatus': 0,
+		'modified': '2012-03-27 14:35:58',
+		'modified_by': u'Administrator',
+		'owner': u'ashwini@webnotestech.com'
+	},
+
+	# These values are common for all DocType
+	{
+		'autoname': u'KSHEET.#####',
+		'colour': u'White:FFF',
+		'doctype': 'DocType',
+		'istable': 1,
+		'module': u'HR',
+		'name': '__common__',
+		'section_style': u'Simple',
+		'server_code_error': u' ',
+		'version': 6
+	},
+
+	# These values are common for all DocField
+	{
+		'doctype': u'DocField',
+		'name': '__common__',
+		'parent': u'Appraisal Template Goal',
+		'parentfield': u'fields',
+		'parenttype': u'DocType',
+		'permlevel': 0,
+		'reqd': 1
+	},
+
+	# DocType, Appraisal Template Goal
+	{
+		'doctype': 'DocType',
+		'name': u'Appraisal Template Goal'
+	},
+
+	# DocField
+	{
+		'colour': u'White:FFF',
+		'description': u'Key Performance Area',
+		'doctype': u'DocField',
+		'fieldname': u'kra',
+		'fieldtype': u'Small Text',
+		'label': u'KRA',
+		'oldfieldname': u'kra',
+		'oldfieldtype': u'Small Text',
+		'width': u'200px'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'per_weightage',
+		'fieldtype': u'Currency',
+		'label': u'Weightage (%)',
+		'oldfieldname': u'per_weightage',
+		'oldfieldtype': u'Currency',
+		'width': u'100px'
+	}
+]

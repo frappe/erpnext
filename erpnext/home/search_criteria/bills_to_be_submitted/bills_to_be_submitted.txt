@@ -12,15 +12,15 @@
 
 	# These values are common for all Search Criteria
 	{
-		'columns': 'Payable Voucher\x01ID,Payable Voucher\x01Voucher Date,Payable Voucher\x01Due Date,Payable Voucher\x01Credit To,Payable Voucher\x01Bill No,Payable Voucher\x01Bill Date,Payable Voucher\x01Outstanding Amount',
+		'columns': 'Purchase Invoice\x01ID,Purchase Invoice\x01Voucher Date,Purchase Invoice\x01Due Date,Purchase Invoice\x01Credit To,Purchase Invoice\x01Bill No,Purchase Invoice\x01Bill Date,Purchase Invoice\x01Outstanding Amount',
 		'criteria_name': 'Bills-To be submitted',
-		'doc_type': 'Payable Voucher',
+		'doc_type': 'Purchase Invoice',
 		'doctype': 'Search Criteria',
-		'filters': "{'Payable Voucher\x01Saved':1,'Payable Voucher\x01Is Opening':'','Payable Voucher\x01Fiscal Year':''}",
+		'filters': "{'Purchase Invoice\x01Saved':1,'Purchase Invoice\x01Is Opening':'','Purchase Invoice\x01Fiscal Year':''}",
 		'module': 'Home',
 		'name': '__common__',
 		'page_len': 50,
-		'sort_by': '`tabPayable Voucher`.`name`',
+		'sort_by': '`tabPurchase Invoice`.`name`',
 		'sort_order': 'DESC',
 		'standard': 'Yes'
 	},

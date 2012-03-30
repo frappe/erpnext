@@ -99,7 +99,7 @@ class DocType:
 
 			'new_enquiries': self.generate_new_type_query({
 				'type': 'new_enquiries',
-				'doctype': 'Enquiry'
+				'doctype': 'Opportunity'
 			}),
 
 			'new_quotations': self.generate_new_type_query({
@@ -110,7 +110,7 @@ class DocType:
 
 			'new_sales_orders': self.generate_new_type_query({
 				'type': 'new_sales_orders',
-				'doctype': 'Receivable Voucher',
+				'doctype': 'Sales Invoice',
 				'sum_col': 'grand_total'
 			}),
 

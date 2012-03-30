@@ -12,14 +12,14 @@
 
 	# These values are common for all Search Criteria
 	{
-		'add_col': "SUM(`tabDelivery Note Detail`.`qty` - `tabDelivery Note Detail`.`billed_qty`) AS 'Pending Qty'\nSUM((`tabDelivery Note Detail`.`qty` - `tabDelivery Note Detail`.`billed_qty`) * `tabDelivery Note Detail`.`basic_rate`) AS 'Pending Amount'",
+		'add_col': "SUM(`tabDelivery Note Item`.`qty` - `tabDelivery Note Item`.`billed_qty`) AS 'Pending Qty'\nSUM((`tabDelivery Note Item`.`qty` - `tabDelivery Note Item`.`billed_qty`) * `tabDelivery Note Item`.`basic_rate`) AS 'Pending Amount'",
 		'add_cond': "`tabDelivery Note`.status != 'Stopped'\nCASE WHEN `tabDelivery Note`.`per_billed` IS NULL OR `tabDelivery Note`.per_billed = '' THEN 0 < 100 ELSE `tabDelivery Note`.per_billed <100 END",
-		'columns': 'Delivery Note\x01ID,Delivery Note\x01Owner,Delivery Note\x01Status,Delivery Note\x01Customer Name,Delivery Note\x01Voucher Date,Delivery Note\x01% Billed,Delivery Note\x01Posting Date,Delivery Note\x01Company Name,Delivery Note\x01Fiscal Year,Delivery Note Detail\x01Item Code,Delivery Note Detail\x01Against Document No,Delivery Note Detail\x01Document Type,Delivery Note Detail\x01Against Document Detail No',
+		'columns': 'Delivery Note\x01ID,Delivery Note\x01Owner,Delivery Note\x01Status,Delivery Note\x01Customer Name,Delivery Note\x01Voucher Date,Delivery Note\x01% Billed,Delivery Note\x01Posting Date,Delivery Note\x01Company Name,Delivery Note\x01Fiscal Year,Delivery Note Item\x01Item Code,Delivery Note Item\x01Against Document No,Delivery Note Item\x01Document Type,Delivery Note Item\x01Against Document Detail No',
 		'criteria_name': 'Delivery Note Itemwise Pending To Bill',
-		'doc_type': 'Delivery Note Detail',
+		'doc_type': 'Delivery Note Item',
 		'doctype': 'Search Criteria',
 		'filters': "{'Delivery Note\x01Saved':1,'Delivery Note\x01Submitted':1,'Delivery Note\x01Status':'','Delivery Note\x01Company Name':'','Delivery Note\x01Fiscal Year':''}",
-		'group_by': '`tabDelivery Note Detail`.item_code, `tabDelivery Note`.`name`',
+		'group_by': '`tabDelivery Note Item`.item_code, `tabDelivery Note`.`name`',
 		'module': 'Selling',
 		'name': '__common__',
 		'page_len': 50,

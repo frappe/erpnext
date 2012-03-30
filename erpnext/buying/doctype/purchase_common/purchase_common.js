@@ -79,7 +79,7 @@ var set_dynamic_label_par = function(doc, cdt, cdn, base_curr) {
 	for (d in par_cols_import) cur_frm.fields_dict[d].label_area.innerHTML = par_cols_import[d]+' (' + doc.currency + ')';
 	cur_frm.fields_dict['conversion_rate'].label_area.innerHTML = "Conversion Rate (" + doc.currency +' -> '+ base_curr + ')';
 
-	if (doc.doctype == 'Payable Voucher') {
+	if (doc.doctype == 'Purchase Invoice') {
 		cur_frm.fields_dict['total_tds_on_voucher'].label_area.innerHTML = 'Total TDS On Voucher (' + base_curr + ')';
 		cur_frm.fields_dict['outstanding_amount'].label_area.innerHTML = 'Outstanding Amount (' + base_curr + ')';
 		cur_frm.fields_dict['tds_amount_on_advance'].label_area.innerHTML = 'TDS Amount On Advance (' + base_curr + ')';
@@ -103,12 +103,12 @@ var set_dynamic_label_child = function(doc, cdt, cdn, base_curr) {
 	for (f in item_cols_base) {
 		cur_frm.fields_dict[cur_frm.cscript.fname].grid.set_column_disp(f, hide);
 	}
-	if (doc.doctype == 'Payable Voucher') {
+	if (doc.doctype == 'Purchase Invoice') {
 		$('[data-grid-fieldname="'+cur_frm.cscript.tname+'-rate"]').html('Rate ('+base_curr+')');
 		cur_frm.fields_dict[cur_frm.cscript.fname].grid.set_column_disp('rate', hide);
 		// advance table flds
 		adv_cols = {'advance_amount': 'Advance Amount', 'allocated_amount': 'Allocated Amount', 'tds_amount': 'TDS Amount', 'tds_allocated': 'TDS Allocated'}
-		for (d in adv_cols) $('[data-grid-fieldname="Advance Allocation Detail-'+d+'"]').html(adv_cols[d]+' ('+base_curr+')');	
+		for (d in adv_cols) $('[data-grid-fieldname="Purchase Invoice Advance-'+d+'"]').html(adv_cols[d]+' ('+base_curr+')');	
 	}
 	else {
 		$('[data-grid-fieldname="'+cur_frm.cscript.tname+'-purchase_rate"]').html('Rate ('+base_curr+')');
@@ -117,7 +117,7 @@ var set_dynamic_label_child = function(doc, cdt, cdn, base_curr) {
 
 	//tax table flds
 	tax_cols = {'tax_amount': 'Amount', 'total': 'Aggregate Total'};
-	for (d in tax_cols) $('[data-grid-fieldname="Purchase Tax Detail-'+d+'"]').html(tax_cols[d]+' ('+base_curr+')');	
+	for (d in tax_cols) $('[data-grid-fieldname="Purchase Taxes and Charges-'+d+'"]').html(tax_cols[d]+' ('+base_curr+')');	
 }
 
 // Change label dynamically based on currency
@@ -282,7 +282,7 @@ cur_frm.cscript.validate = function(doc, cdt, cdn) {
 	cur_frm.cscript.calc_amount(doc, 1);
 
 	// calculate advances if pv
-	if(doc.doctype == 'Payable Voucher') calc_total_advance(doc, cdt, cdn);
+	if(doc.doctype == 'Purchase Invoice') calc_total_advance(doc, cdt, cdn);
 }
 
 // **************** RE-CALCULATE VALUES ***************************
@@ -294,7 +294,7 @@ cur_frm.cscript['Re-Calculate Values'] = function(doc, cdt, cdn) {
 cur_frm.cscript['Calculate Tax'] = function(doc, cdt, cdn) {
 	var other_fname	= cur_frm.cscript.other_fname;
 
-	var cl = getchildren('Purchase Tax Detail', doc.name, other_fname, doc.doctype);
+	var cl = getchildren('Purchase Taxes and Charges', doc.name, other_fname, doc.doctype);
 	for(var i = 0; i<cl.length; i++){
 		cl[i].total_tax_amount = 0;
 		cl[i].total_amount = 0;
@@ -336,7 +336,7 @@ cur_frm.cscript.calc_amount = function(doc, n) {
 	
 	for(var i=0;i<cl.length;i++) 
 	{
-	var rate_fld = (doc.doctype != 'Payable Voucher') ? 'purchase_rate': 'rate';
+	var rate_fld = (doc.doctype != 'Purchase Invoice') ? 'purchase_rate': 'rate';
 		var tmp = {};
 	if(!cl[i].discount_rate) cl[i].discount_rate = 0;
 
@@ -406,7 +406,7 @@ cur_frm.cscript.val_cal_charges = function(doc, tname, fname, other_fname){
 
 	doc = locals[doc.doctype][doc.name]
 	if(flt(doc.net_total) > 0) {
-		var cl = getchildren('Purchase Tax Detail', doc.name, other_fname,doc.doctype);
+		var cl = getchildren('Purchase Taxes and Charges', doc.name, other_fname,doc.doctype);
 		for(var i = 0; i<cl.length; i++){
 			cl[i].total_tax_amount = 0;
 			cl[i].total_amount = 0;
@@ -436,7 +436,7 @@ cur_frm.cscript.calc_other_charges = function(doc , tname , fname , other_fname)
 	
 	cur_frm.fields_dict['Tax Calculation'].disp_area.innerHTML = '<b style="padding: 8px 0px;">Calculation Details for Other Charges and Landed cost:</b>';
 	var cl = getchildren(tname, doc.name, fname);
-	var tax = getchildren('Purchase Tax Detail', doc.name, other_fname,doc.doctype);
+	var tax = getchildren('Purchase Taxes and Charges', doc.name, other_fname,doc.doctype);
 	// make display table
 	// ------------------
 	var otc = make_table(cur_frm.fields_dict['Tax Calculation'].disp_area, cl.length + 1, tax.length + 1, '90%',[],{border:'1px solid #AAA',padding:'2px'});
@@ -447,8 +447,8 @@ cur_frm.cscript.calc_other_charges = function(doc , tname , fname , other_fname)
 	
 	for(var i=0;i<cl.length;i++) {
 		var item_tax = 0;
-		if(doc.doctype != 'Payable Voucher') net_total += flt(flt(cl[i].qty) * flt(cl[i].purchase_rate));
-		else if(doc.doctype == 'Payable Voucher') net_total += flt(flt(cl[i].qty) * flt(cl[i].rate));
+		if(doc.doctype != 'Purchase Invoice') net_total += flt(flt(cl[i].qty) * flt(cl[i].purchase_rate));
+		else if(doc.doctype == 'Purchase Invoice') net_total += flt(flt(cl[i].qty) * flt(cl[i].rate));
 
 		var prev_total = flt(cl[i].amount);
 		if(cl[i].item_tax_rate) {
@@ -463,7 +463,7 @@ cur_frm.cscript.calc_other_charges = function(doc , tname , fname , other_fname)
 		//--------------------------
 		$td(otc,i+1,0).innerHTML = cl[i].item_code;
 		
-		var tax = getchildren('Purchase Tax Detail', doc.name, other_fname,doc.doctype);
+		var tax = getchildren('Purchase Taxes and Charges', doc.name, other_fname,doc.doctype);
 		var total = net_total;
 		for(var t=0;t<tax.length;t++){
  
@@ -491,12 +491,12 @@ cur_frm.cscript.calc_other_charges = function(doc , tname , fname , other_fname)
 				var total_amount = flt(tax[t].tax_amount);
 				total_tax_amount = flt(tax[t].total_tax_amount) + flt(total_amount);
 				if(tax[t].category != "For Valuation"){
-					set_multiple('Purchase Tax Detail', tax[t].name, { 'item_wise_tax_detail':tax[t].item_wise_tax_detail, 'amount':total_amount, 'total':flt(total)+flt(tax[t].tax_amount)/*_tax_amount)*/}, other_fname);
+					set_multiple('Purchase Taxes and Charges', tax[t].name, { 'item_wise_tax_detail':tax[t].item_wise_tax_detail, 'amount':total_amount, 'total':flt(total)+flt(tax[t].tax_amount)/*_tax_amount)*/}, other_fname);
 					prev_total += flt(tax[t].total_amount);
 					total += flt(tax[t].tax_amount);	// for adding total to previous amount			 
 				}
 				else{
-					set_multiple('Purchase Tax Detail', tax[t].name, { 'item_wise_tax_detail':tax[t].item_wise_tax_detail, 'amount':total_amount, 'total':flt(total)/*_tax_amount)*/}, other_fname);
+					set_multiple('Purchase Taxes and Charges', tax[t].name, { 'item_wise_tax_detail':tax[t].item_wise_tax_detail, 'amount':total_amount, 'total':flt(total)/*_tax_amount)*/}, other_fname);
 					prev_total = prev_total;
 				}
 				//prev_total += flt(tax[t].total_amount);	 // for previous row total
@@ -519,12 +519,12 @@ cur_frm.cscript.calc_other_charges = function(doc , tname , fname , other_fname)
 				var total_amount = flt(tax[t].tax_amount);
 				total_tax_amount = flt(tax[t].total_tax_amount) - flt(total_amount);
 				if(tax[t].category != "For Valuation"){
-					set_multiple('Purchase Tax Detail', tax[t].name, { 'item_wise_tax_detail':tax[t].item_wise_tax_detail, 'tax_amount':total_amount, 'total':flt(total)-flt(tax[t].tax_amount)/*_tax_amount)*/}, other_fname);
+					set_multiple('Purchase Taxes and Charges', tax[t].name, { 'item_wise_tax_detail':tax[t].item_wise_tax_detail, 'tax_amount':total_amount, 'total':flt(total)-flt(tax[t].tax_amount)/*_tax_amount)*/}, other_fname);
 					prev_total -= flt(tax[t].total_amount); 
 					total -= flt(tax[t].tax_amount);	// for adding total to previous amount			 
 				}
 				else{
-					set_multiple('Purchase Tax Detail', tax[t].name, { 'item_wise_tax_detail':tax[t].item_wise_tax_detail, 'tax_amount':total_amount, 'total':flt(total)/*_tax_amount)*/}, other_fname);
+					set_multiple('Purchase Taxes and Charges', tax[t].name, { 'item_wise_tax_detail':tax[t].item_wise_tax_detail, 'tax_amount':total_amount, 'total':flt(total)/*_tax_amount)*/}, other_fname);
 					prev_total = prev_total;
 				}
 				//prev_total += flt(tax[t].total_amount);	 // for previous row total
@@ -557,7 +557,7 @@ cur_frm.cscript.calc_doc_values = function(doc, tname, fname, other_fname) {
 	for(var i = 0; i<cl.length; i++){
 		net_total += flt(cl[i].amount);
 	}
-	var d = getchildren('Purchase Tax Detail', doc.name, other_fname,doc.doctype);
+	var d = getchildren('Purchase Taxes and Charges', doc.name, other_fname,doc.doctype);
 	for(var j = 0; j<d.length; j++){
 		if(d[j].category != 'For Valuation'){
 			
@@ -587,7 +587,7 @@ cur_frm.cscript.calc_doc_values = function(doc, tname, fname, other_fname) {
 	refresh_many(['net_total','total_taxes','grand_total']);
 
 
-	if(doc.doctype == 'Payable Voucher'){
+	if(doc.doctype == 'Purchase Invoice'){
 		calculate_outstanding(doc);
 	}
 }

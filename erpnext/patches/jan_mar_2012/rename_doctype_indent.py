@@ -26,16 +26,16 @@ def execute():
 
 def create_doctype_label():
 	"""
-		Creates a DocType Label Record for Indent
+		Creates a DocType Label Record for Purchase Request
 	"""
 	res = webnotes.conn.sql("""\
 		SELECT name FROM `tabDocType Label`
-		WHERE name='Indent'
+		WHERE name='Purchase Request'
 	""")
 	if not(res and res[0] and res[0][0]):
 		from webnotes.model.doc import Document
 		doclabel = Document('DocType Label')
-		doclabel.dt = 'Indent'
+		doclabel.dt = 'Purchase Request'
 		doclabel.dt_label = 'Purchase Requisition'
 		doclabel.save(1)
 

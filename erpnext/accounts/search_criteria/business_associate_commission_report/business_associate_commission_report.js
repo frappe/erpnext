@@ -16,8 +16,8 @@
 
 report.customize_filters = function() {
   this.hide_all_filters();
-  this.filter_fields_dict['Receivable Voucher'+FILTER_SEP +'Sales Partner'].df.filter_hide = 0;
-  this.filter_fields_dict['Receivable Voucher'+FILTER_SEP +'Sales Partner'].df.in_first_page = 1;
+  this.filter_fields_dict['Sales Invoice'+FILTER_SEP +'Sales Partner'].df.filter_hide = 0;
+  this.filter_fields_dict['Sales Invoice'+FILTER_SEP +'Sales Partner'].df.in_first_page = 1;
 
 }
 

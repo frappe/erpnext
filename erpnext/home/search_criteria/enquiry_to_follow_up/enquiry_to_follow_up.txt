@@ -12,16 +12,16 @@
 
 	# These values are common for all Search Criteria
 	{
-		'add_cond': "`tabEnquiry`.name=`tabQuotation`.enq_no\n`tabEnquiry`.docstatus=1\n`tabQuotation`.status='Submitted'",
-		'columns': 'Enquiry\x01ID,Enquiry\x01Owner,Enquiry\x01Company,Enquiry\x01Fiscal Year',
-		'criteria_name': 'Enquiry-To follow up',
-		'doc_type': 'Enquiry',
+		'add_cond': "`tabOpportunity`.name=`tabQuotation`.enq_no\n`tabOpportunity`.docstatus=1\n`tabQuotation`.status='Submitted'",
+		'columns': 'Opportunity\x01ID,Opportunity\x01Owner,Opportunity\x01Company,Opportunity\x01Fiscal Year',
+		'criteria_name': 'Opportunity-To follow up',
+		'doc_type': 'Opportunity',
 		'doctype': 'Search Criteria',
-		'filters': "{'Enquiry\x01Fiscal Year':''}",
+		'filters': "{'Opportunity\x01Fiscal Year':''}",
 		'module': 'Home',
 		'name': '__common__',
 		'page_len': 50,
-		'sort_by': '`tabEnquiry`.`name`',
+		'sort_by': '`tabOpportunity`.`name`',
 		'sort_order': 'DESC',
 		'standard': 'Yes'
 	},

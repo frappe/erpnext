@@ -16,7 +16,7 @@
 		'criteria_name': 'Accounts Payable',
 		'doc_type': 'GL Entry',
 		'doctype': 'Search Criteria',
-		'filters': "{'GL Entry\x01Is Cancelled':'','GL Entry\x01Fiscal Year':'','GL Entry\x01Company':'','Payable Voucher\x01Aging Based On':'Posting Date','GL Entry\x01Range 1':'30','GL Entry\x01Range 2':'45','GL Entry\x01Range 3':'60','GL Entry\x01Range 4':'90'}",
+		'filters': "{'GL Entry\x01Is Cancelled':'','GL Entry\x01Fiscal Year':'','GL Entry\x01Company':'','Purchase Invoice\x01Aging Based On':'Posting Date','GL Entry\x01Range 1':'30','GL Entry\x01Range 2':'45','GL Entry\x01Range 3':'60','GL Entry\x01Range 4':'90'}",
 		'module': 'Accounts',
 		'name': '__common__',
 		'sort_by': '`tabGL Entry`.`name`',

@@ -96,7 +96,7 @@
 		'from_table': 'PF Detail',
 		'match_id': 1,
 		'to_field': 'pp_details',
-		'to_table': 'PP Detail',
+		'to_table': 'Production Plan Item',
 		'validation_logic': 'docstatus =1 and qty > planned_qty '
 	}
 ]

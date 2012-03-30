@@ -25,19 +25,19 @@ def get_list(arg=None):
 
 	if webnotes.form_dict['contact'] == webnotes.session['user']:
 		# set all messages as read
-		webnotes.conn.sql("""UPDATE `tabComment Widget Record`
+		webnotes.conn.sql("""UPDATE `tabComment`
 		set docstatus = 1 where comment_doctype in ('My Company', 'Message')
 		and comment_docname = %s
 		""", webnotes.user.name)
 				
 		# return messages
-		return webnotes.conn.sql("""select * from `tabComment Widget Record` 
+		return webnotes.conn.sql("""select * from `tabComment` 
 		where (owner=%(contact)s or comment_docname=%(user)s)
 		and comment_doctype in ('My Company', 'Message')
 		order by creation desc
 		limit %(limit_start)s, %(limit_page_length)s""", webnotes.form_dict, as_dict=1)		
 	else:
-		return webnotes.conn.sql("""select * from `tabComment Widget Record` 
+		return webnotes.conn.sql("""select * from `tabComment` 
 		where (owner=%(contact)s and comment_docname=%(user)s)
 		or (owner=%(user)s and comment_docname=%(contact)s)
 		and comment_doctype in ('My Company', 'Message')
@@ -63,7 +63,7 @@ def post(arg=None):
 		arg = {}
 		arg.update(webnotes.form_dict)
 	from webnotes.model.doc import Document
-	d = Document('Comment Widget Record')
+	d = Document('Comment')
 	d.comment = arg['txt']
 	d.comment_docname = arg['contact']
 	d.comment_doctype = 'Message'
@@ -71,6 +71,6 @@ def post(arg=None):
 	
 @webnotes.whitelist()
 def delete(arg=None):
-	webnotes.conn.sql("""delete from `tabComment Widget Record` where name=%s""", 
+	webnotes.conn.sql("""delete from `tabComment` where name=%s""", 
 		webnotes.form_dict['name']);
 	

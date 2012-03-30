@@ -297,7 +297,7 @@ class DocType:
 			add.remarks = d[1]
 			add.advance_amount = flt(d[2])
 			add.allocate_amount = 0
-			if table_name == 'Advance Allocation Detail':
+			if table_name == 'Purchase Invoice Advance':
 				add.tds_amount = flt(d[4])
 
 	# Clear rows which is not adjusted
@@ -319,7 +319,7 @@ class DocType:
 				get_obj(dt='GL Control').make_gl_entries(jv_obj.doc, jv_obj.doclist, cancel =1, adv_adj =1)
 
 				# update ref in JV Detail
-				webnotes.conn.sql("update `tabJournal Voucher Detail` set %s = '%s' where name = '%s'" % (doctype=='Payable Voucher' and 'against_voucher' or 'against_invoice', cstr(against_document_no), d.jv_detail_no))
+				webnotes.conn.sql("update `tabJournal Voucher Detail` set %s = '%s' where name = '%s'" % (doctype=='Purchase Invoice' and 'against_voucher' or 'against_invoice', cstr(against_document_no), d.jv_detail_no))
 
 				# re-submit JV
 				jv_obj = get_obj('Journal Voucher', d.journal_voucher, with_children =1)
@@ -351,7 +351,7 @@ class DocType:
 		balance = flt(advance) - flt(allocate)
 
 		# update old entry
-		webnotes.conn.sql("update `tabJournal Voucher Detail` set %s = '%s', %s = '%s' where name = '%s'" % (dr_or_cr, flt(allocate), doctype == "Payable Voucher" and 'against_voucher' or 'against_invoice',cstr(against_document_no), jv_detail_no))
+		webnotes.conn.sql("update `tabJournal Voucher Detail` set %s = '%s', %s = '%s' where name = '%s'" % (dr_or_cr, flt(allocate), doctype == "Purchase Invoice" and 'against_voucher' or 'against_invoice',cstr(against_document_no), jv_detail_no))
 
 		# new entry with balance amount
 		add = addchild(jv_obj.doc, 'entries', 'Journal Voucher Detail', 1, jv_obj.doclist)
@@ -390,8 +390,8 @@ class DocType:
 
 			against_fld = {
 				'Journal Voucher' : 'against_jv',
-				'Receivable Voucher' : 'against_invoice',
-				'Payable Voucher' : 'against_voucher'
+				'Sales Invoice' : 'against_invoice',
+				'Purchase Invoice' : 'against_voucher'
 			}
 			
 			d['against_fld'] = against_fld[d['against_voucher_type']]
@@ -462,7 +462,7 @@ class DocType:
 		# Get Balance from GL Entries
 		bal = webnotes.conn.sql("select sum(debit)-sum(credit) from `tabGL Entry` where against_voucher=%s and against_voucher_type=%s", (voucher_obj.doc.name , voucher_obj.doc.doctype))
 		bal = bal and flt(bal[0][0]) or 0.0
-		if cstr(voucher_obj.doc.doctype) == 'Payable Voucher':
+		if cstr(voucher_obj.doc.doctype) == 'Purchase Invoice':
 			bal = -bal
 
 		# Check outstanding Amount
@@ -520,11 +520,11 @@ def manage_recurring_invoices():
 		Create recurring invoices on specific date by copying the original one
 		and notify the concerned people
 	"""	
-	rv = webnotes.conn.sql("""select name, recurring_id from `tabReceivable Voucher` where ifnull(convert_into_recurring_invoice, 0) = 1 
+	rv = webnotes.conn.sql("""select name, recurring_id from `tabSales Invoice` where ifnull(convert_into_recurring_invoice, 0) = 1 
 			and next_date = %s and next_date <= end_date and docstatus=1 order by next_date	desc""", nowdate())
 	for d in rv:
-		if not webnotes.conn.sql("""select name from `tabReceivable Voucher` where posting_date = %s and recurring_id = %s and docstatus=1""", (nowdate(), d[1])):
-			prev_rv = get_obj('Receivable Voucher', d[0], with_children=1)
+		if not webnotes.conn.sql("""select name from `tabSales Invoice` where posting_date = %s and recurring_id = %s and docstatus=1""", (nowdate(), d[1])):
+			prev_rv = get_obj('Sales Invoice', d[0], with_children=1)
 			new_rv = create_new_invoice(prev_rv)
 
 			send_notification(new_rv)

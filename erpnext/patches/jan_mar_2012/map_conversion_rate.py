@@ -33,10 +33,10 @@ def execute():
 			}]
 		},
 		{
-			'parent': 'Purchase Order-Payable Voucher',
+			'parent': 'Purchase Order-Purchase Invoice',
 			'map': [{
 				'from_table': 'Purchase Order',
-				'to_table': 'Payable Voucher',
+				'to_table': 'Purchase Invoice',
 				'fields': [['conversion_rate', 'conversion_rate', 'Yes']]
 			}]
 		},

@@ -414,10 +414,10 @@
 		'doctype': u'DocField',
 		'fieldname': u'earning_details',
 		'fieldtype': u'Table',
-		'label': u'Earning Details',
+		'label': u'Salary Structure Earnings',
 		'oldfieldname': u'earning_details',
 		'oldfieldtype': u'Table',
-		'options': u'SS Earning Detail',
+		'options': u'Salary Slip Earning',
 		'permlevel': 0
 	},
 
@@ -441,7 +441,7 @@
 		'label': u'Deduction Details',
 		'oldfieldname': u'deduction_details',
 		'oldfieldtype': u'Table',
-		'options': u'SS Deduction Detail',
+		'options': u'Salary Slip Deduction',
 		'permlevel': 0
 	},
 

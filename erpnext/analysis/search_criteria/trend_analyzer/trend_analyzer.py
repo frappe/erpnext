@@ -39,16 +39,16 @@ project = filter_values.get('project')
 # ********************************************* SET DEFAULTS **************************************************
 # Details Table
 # --------------
-if trans == 'Sales Invoice': trans = 'Receivable Voucher'
-elif trans == 'Purchase Invoice': trans = 'Payable Voucher'
+if trans == 'Sales Invoice': trans = 'Sales Invoice'
+elif trans == 'Purchase Invoice': trans = 'Purchase Invoice'
 
 trans_det = trans+' Detail'
 
-if trans == 'Receivable Voucher': trans_det = 'RV Detail'
-elif trans == 'Payable Voucher': trans_det = 'PV Detail'
-elif trans == 'Purchase Order': trans_det = 'PO Detail'
+if trans == 'Sales Invoice': trans_det = 'Sales Invoice Item'
+elif trans == 'Purchase Invoice': trans_det = 'Purchase Invoice Item'
+elif trans == 'Purchase Order': trans_det = 'Purchase Order Item'
 
-col_names, query_val = get_obj('TA Control').get_single_year_query_value(fiscal_year, period, trans, trans_det)
+col_names, query_val = get_obj('Trend Analyzer Control').get_single_year_query_value(fiscal_year, period, trans, trans_det)
 query_val += 'SUM(t2.qty), SUM(t2.amount)'
 
 col_names.append('Total (Qty)')
@@ -134,7 +134,7 @@ if supplier_type or based_on == 'Supplier Type':
 
 # Project
 if project or based_on == 'Project':
-	if trans in ['Purchase Order', 'Purchase Receipt', 'Payable Voucher']:
+	if trans in ['Purchase Order', 'Purchase Receipt', 'Purchase Invoice']:
 		add_cond += ' AND t2.project_name = "%s"' % (based_on != 'Project' and project or '%(value)s')
 	else:
 		add_cond += ' AND t1.project_name = "%s"' % (based_on != 'Project' and project or '%(value)s')

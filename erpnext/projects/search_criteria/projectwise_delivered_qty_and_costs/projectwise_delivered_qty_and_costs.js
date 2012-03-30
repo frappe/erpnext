@@ -17,7 +17,7 @@
 report.customize_filters = function() {
   this.hide_all_filters();
 
-  //this.add_filter({fieldname:'item_code', label:'Item Code', fieldtype:'Link', options:'Item',ignore : 1,parent:'Delivery Note Detail'});
+  //this.add_filter({fieldname:'item_code', label:'Item Code', fieldtype:'Link', options:'Item',ignore : 1,parent:'Delivery Note Item'});
 
   this.filter_fields_dict['Delivery Note'+FILTER_SEP +'Project Name'].df.filter_hide = 0;
   this.filter_fields_dict['Delivery Note'+FILTER_SEP +'Company'].df.filter_hide = 0;

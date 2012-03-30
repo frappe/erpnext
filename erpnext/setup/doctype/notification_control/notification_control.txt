@@ -91,7 +91,7 @@
 		'fieldname': u'enquiry',
 		'fieldtype': u'Check',
 		'hidden': 1,
-		'label': u'Enquiry',
+		'label': u'Opportunity',
 		'print_hide': 1
 	},
 
@@ -166,7 +166,7 @@
 		'doctype': u'DocField',
 		'fieldname': u'expense_voucher',
 		'fieldtype': u'Check',
-		'label': u'Expense Voucher'
+		'label': u'Expense Claim'
 	},
 
 	# DocField
@@ -291,7 +291,7 @@
 		'fieldname': u'expense_voucher_approved_message',
 		'fieldtype': u'Text',
 		'hidden': 1,
-		'label': u'Expense Voucher Approved Message',
+		'label': u'Expense Claim Approved Message',
 		'print_hide': 1
 	},
 
@@ -301,7 +301,7 @@
 		'fieldname': u'expense_voucher_rejected_message',
 		'fieldtype': u'Text',
 		'hidden': 1,
-		'label': u'Expense Voucher Rejected Message',
+		'label': u'Expense Claim Rejected Message',
 		'print_hide': 1
 	}
 ]

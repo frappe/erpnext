@@ -110,7 +110,7 @@ elif patch_no == 48:
 elif patch_no == 49:
 	webnotes.conn.sql("update tabDocType set autoname = '' where name = 'Search Criteria'")
 elif patch_no == 50:
-	sql("update tabDocField set in_filter = 1 where fieldname in ('cost_center', 'income_account', 'Item Group') and parent = 'RV Detail'")
+	sql("update tabDocField set in_filter = 1 where fieldname in ('cost_center', 'income_account', 'Item Group') and parent = 'Sales Invoice Item'")
 elif patch_no == 51:
 	sql("update tabDocField set options = 'link:Print Heading' where fieldtype = 'Select' and fieldname = 'select_print_heading' and parent = 'POS Setting'")
 elif patch_no == 52:
@@ -140,10 +140,10 @@ elif patch_no == 58:
 
 	# insert new module items
 	from webnotes.model.doc import make_autoname
-	if not sql("select name from `tabModule Def Item` where parent='Projects' and doc_name='Ticket'"):
+	if not sql("select name from `tabModule Def Item` where parent='Projects' and doc_name='Task'"):
 		sql("""insert into `tabModule Def Item`
 			(name, parent, parenttype, parentfield, docstatus, doc_type, doc_name, display_name, idx) values
-			(%s, 'Projects', 'Module Def', 'items', 0, 'Forms', 'Ticket', 'Task', 1)""", make_autoname('MDI.#####'))
+			(%s, 'Projects', 'Module Def', 'items', 0, 'Forms', 'Task', 'Task', 1)""", make_autoname('MDI.#####'))
 
 	if not sql("select name from `tabModule Def Item` where parent='Projects' and doc_name='Timesheet'"):
 		sql("""insert into `tabModule Def Item`
@@ -168,11 +168,11 @@ elif patch_no == 62:
 
 	# Adding Status Filter
 	sql("update tabDocType set search_fields = concat('status,',search_fields) where name IN ('Delivery Note','Leave Transaction')")
-	# Import Other Charges
+	# Import Sales Taxes and Charges Master
 
 	import_from_files(record_list=[['setup','doctype','other_charges']])
 elif patch_no == 63:
-	sql("update `tabDocField` set permlevel = 1 where fieldname in ('return_date', 'return_details') and parent = 'Sales and Purchase Return Wizard'")
+	sql("update `tabDocField` set permlevel = 1 where fieldname in ('return_date', 'return_details') and parent = 'Sales and Purchase Return Tool'")
 	import_from_files(record_list = [['accounts', 'doctype', 'rv_detail'], ['material_management', 'doctype', 'sales_and_purchase_return_wizard'], ['material_management', 'doctype', 'stock_entry']])
 
 elif patch_no == 64:
@@ -192,7 +192,7 @@ elif patch_no == 66:
 	from webnotes.session_cache import clear_cache
 	clear_cache(webnotes.session['user'])
 elif patch_no == 67:
-	sql("update `tabDocField` set in_filter = 1 where fieldname = 'brand' and parent = 'RV Detail'")
+	sql("update `tabDocField` set in_filter = 1 where fieldname = 'brand' and parent = 'Sales Invoice Item'")
 	sql("delete from `tabModule Def Item` where (display_name = 'Sales Invoice' and parent = 'CRM') or (display_name = 'Purchase Invoice' and parent = 'SRM')")
 elif patch_no == 68:
 	from webnotes.modules.import_module import import_from_files
@@ -232,7 +232,7 @@ elif patch_no == 69:
 
 
 	# map tables
-	tbl_list = ['Experience In Company Detail', 'Previous Experience Detail', 'Educational Qualifications Detail']
+	tbl_list = ['Employee Internal Work History', 'Employee External Work History', 'Employee Education']
 	for t in tbl_list:
 		sql("update `tab%s` t1, `tabEmployee Profile` t2 set t1.parent = t2.employee, t1.parenttype = 'Employee' where t1.parent = t2.name" % t)
 
@@ -264,8 +264,8 @@ elif patch_no == 70:
 
 elif patch_no == 71:
 	# Make Stock Qty and Conversion Factor field editable. Also no need to mention Conversion factor in table can do it directly
-	sql("update `tabDocField` set `permlevel` = 0, `width` = '100px', `trigger` = 'Client' where parent IN ('PO Detail','Purchase Receipt Detail') and fieldname in ('stock_qty','conversion_factor')")
-	sql("update `tabDocField` set `width` = '100px' where parent IN ('PO Detail','Purchase Receipt Detail') and fieldname = 'stock_uom'")
+	sql("update `tabDocField` set `permlevel` = 0, `width` = '100px', `trigger` = 'Client' where parent IN ('Purchase Order Item','Purchase Receipt Item') and fieldname in ('stock_qty','conversion_factor')")
+	sql("update `tabDocField` set `width` = '100px' where parent IN ('Purchase Order Item','Purchase Receipt Item') and fieldname = 'stock_uom'")
 
 elif patch_no == 72:
 	# Core Patch
@@ -304,16 +304,16 @@ elif patch_no == 76:
 	p = get_obj('Patch Util')
 	p.set_field_property('Salary Structure', 'is_active', 'default', 'Yes')
 	p.set_field_property('Salary Structure', 'ctc', 'reqd', '1')
-	p.set_field_property('Earning Detail', 'modified_value', 'width', '')
-	p.set_field_property('Earning Detail', 'modified_value', 'trigger', 'Client')
-	p.set_field_property('Deduction Detail', 'd_modified_amt', 'width', '')
-	p.set_field_property('Earning Detail', 'd_modified_amt', 'trigger', 'Client')
+	p.set_field_property('Salary Structure Earning', 'modified_value', 'width', '')
+	p.set_field_property('Salary Structure Earning', 'modified_value', 'trigger', 'Client')
+	p.set_field_property('Salary Structure Deduction', 'd_modified_amt', 'width', '')
+	p.set_field_property('Salary Structure Earning', 'd_modified_amt', 'trigger', 'Client')
 	sql("Update tabDocField set `description` = 'You can create more earning and deduction type from Setup --> HR' where label = 'Earning & Deduction' and parent = 'Salary Structure' and fieldtype = 'Section Break'")
 
 	# delete
 	sql("update `tabSalary Structure` set net_pay = total")
 	sql("delete from tabDocField where label in ('LWP Help', 'Calculate Total', 'Total') and parent = 'Salary Structure'")
-	sql("delete from tabDocPerm where parent in ('Earning Detail', 'Deduction Detail')")
+	sql("delete from tabDocPerm where parent in ('Salary Structure Earning', 'Salary Structure Deduction')")
 
 
 	# permission
@@ -339,14 +339,14 @@ elif patch_no == 78:
 	p.set_field_property('Salary Slip', 'bank_name', 'permlevel', '1')
 	p.set_field_property('Salary Slip', 'leave_without_pay', 'permlevel', '0')
 	p.set_field_property('Salary Slip', 'leave_without_pay', 'trigger', 'Client')
-	p.set_field_property('SS Earning Detail', 'e_type', 'permlevel', '0')
-	p.set_field_property('SS Earning Detail', 'e_type', 'fieldtype', 'Link')
-	p.set_field_property('SS Earning Detail', 'e_type', 'options', 'Earning Type')
-	p.set_field_property('SS Deduction Detail', 'd_type', 'permlevel', '0')
-	p.set_field_property('SS Deduction Detail', 'd_type', 'fieldtype', 'Link')
-	p.set_field_property('SS Deduction Detail', 'd_type', 'options', 'Deduction Type')
-	sql("update `tabSS Earning Detail` set e_modified_amount = e_amount")
-	sql("update `tabSS Deduction Detail` set d_modified_amount = d_amount")
+	p.set_field_property('Salary Slip Earning', 'e_type', 'permlevel', '0')
+	p.set_field_property('Salary Slip Earning', 'e_type', 'fieldtype', 'Link')
+	p.set_field_property('Salary Slip Earning', 'e_type', 'options', 'Earning Type')
+	p.set_field_property('Salary Slip Deduction', 'd_type', 'permlevel', '0')
+	p.set_field_property('Salary Slip Deduction', 'd_type', 'fieldtype', 'Link')
+	p.set_field_property('Salary Slip Deduction', 'd_type', 'options', 'Deduction Type')
+	sql("update `tabSalary Slip Earning` set e_modified_amount = e_amount")
+	sql("update `tabSalary Slip Deduction` set d_modified_amount = d_amount")
 
 	# permission
 	p.delete_permission('Salary Slip', 'Administrator', 0)
@@ -358,8 +358,8 @@ elif patch_no == 79:
 	import_from_files(record_list=[['hr','doctype','leave_application'],['hr','doctype','leave_allocation'],['hr','doctype','leave_control_panel'],['hr','doctype','holiday_list'],['hr','doctype','holiday_list_detail'],['hr','Module Def','HR']])
 elif patch_no == 80:
 	# Holiday List
-	sql("update `tabHoliday List Detail` set description = holiday_name")
-	sql("delete from tabDocField where parent = 'Holiday List Detail' and fieldname = 'holiday_name'")
+	sql("update `tabHoliday` set description = holiday_name")
+	sql("delete from tabDocField where parent = 'Holiday' and fieldname = 'holiday_name'")
 	sql("update tabDocField set fieldtype = 'Select', options = 'link:Fiscal Year' where parent = 'Holiday List' and fieldname = 'fiscal_year'")
 	sql("delete from tabDocPerm where role in ('Administrator','HR User') and parent = 'Holiday List'")
 
@@ -422,8 +422,8 @@ elif patch_no == 83:
 	webnotes.conn.sql("set foreign_key_checks=1")
 elif patch_no == 84:
 	p = get_obj('Patch Util')
-	p.set_field_property('SS Earning Detail', 'e_amount', 'permlevel', '1')
-	p.set_field_property('SS Deduction Detail', 'd_amount', 'permlevel', '1')
+	p.set_field_property('Salary Slip Earning', 'e_amount', 'permlevel', '1')
+	p.set_field_property('Salary Slip Deduction', 'd_amount', 'permlevel', '1')
 elif patch_no == 85:
 	# permission
 	p = get_obj('Patch Util')
@@ -451,16 +451,16 @@ elif patch_no == 91:
 	webnotes.conn.set_global("system_message", """<h3>System Updates</h3>Based on user feedback, we have cleaned up HR module (Partly):<ul><li>Employee and Employee Profile are merged into a single document</li><li>Salary Structure and Salary Slip are now more user friendly</li><li>Leave Transaction document is now divided into 2 documents Leave Application and Leave Allocation</li></ul>We will work on Reports, Attendance and other documents of Payroll module next week<br><br> Do send us your feedback!""")
 	webnotes.conn.set_global("system_message_id", "5")
 elif patch_no == 92:
-	sql("update tabDocField set label = 'Get Charges' where parent IN ('Sales Order','Delivery Note','Receivable Voucher') and label = 'Get Other Charges' and fieldtype = 'Button'")
+	sql("update tabDocField set label = 'Get Charges' where parent IN ('Sales Order','Delivery Note','Sales Invoice') and label = 'Get Other Charges' and fieldtype = 'Button'")
 	# Automated Other Charges Calculation basis
-	sql("update tabDocField set options = '', `trigger` = 'Client' where parent IN ('Quotation','Sales Order','Delivery Note','Receivable Voucher') and label = 'Get Charges' and fieldtype = 'Button'")
+	sql("update tabDocField set options = '', `trigger` = 'Client' where parent IN ('Quotation','Sales Order','Delivery Note','Sales Invoice') and label = 'Get Charges' and fieldtype = 'Button'")
 elif patch_no == 93:
-	sql("update `tabTable Mapper Detail` set validation_logic = 'qty > ifnull(billed_qty,0) and docstatus = 1' where parent = 'Sales Order-Receivable Voucher' and from_table = 'Sales Order Detail'")
-	sql("update `tabField Mapper Detail` set from_field = 'customer' where to_field = 'customer' and parent = 'Sales Order-Receivable Voucher'")
+	sql("update `tabTable Mapper Detail` set validation_logic = 'qty > ifnull(billed_qty,0) and docstatus = 1' where parent = 'Sales Order-Sales Invoice' and from_table = 'Sales Order Item'")
+	sql("update `tabField Mapper Detail` set from_field = 'customer' where to_field = 'customer' and parent = 'Sales Order-Sales Invoice'")
 elif patch_no == 94:
 	import_from_files(record_list=[['selling','doctype','sms_center']])
 elif patch_no == 95:
-	import_from_files(record_list=[['mapper','DocType Mapper','Sales Order-Receivable Voucher'], ['mapper','DocType Mapper','Delivery Note-Receivable Voucher']])
+	import_from_files(record_list=[['mapper','DocType Mapper','Sales Order-Sales Invoice'], ['mapper','DocType Mapper','Delivery Note-Sales Invoice']])
 elif patch_no == 96:
 	sql("delete from `tabModule Def Item` where doc_type = 'Reports' and display_name = 'Cenvat Credit - Input or Capital Goods' and parent = 'Accounts'")
 elif patch_no == 97:
@@ -515,7 +515,7 @@ elif patch_no == 110:
 elif patch_no == 111:
 	sql("update tabDocType set search_fields = 'transfer_date, from_warehouse, to_warehouse, purpose, remarks' where name = 'Stock Entry'")
 elif patch_no == 112:
-	sql("delete from tabDocField where label = 'Get Other Charges' and fieldtype = 'Button' and parent = 'Receivable Voucher'")
+	sql("delete from tabDocField where label = 'Get Other Charges' and fieldtype = 'Button' and parent = 'Sales Invoice'")
 elif patch_no == 113:
 	sql("update tabDocField set reqd = 1 where parent = 'Customer' and fieldname = 'phone_1'")
 elif patch_no == 114:
@@ -547,7 +547,7 @@ elif patch_no == 116:
 	import_from_files(record_list = [['Projects', 'DocType', 'Timesheet Detail']])
 elif patch_no == 117:
 	op = '\n' + 'Walk In'
-	sql("update `tabDocField` set `options` = concat(options, %s) where parent = 'Enquiry' and fieldname = 'source' and options not like '%%Walk%%'", op)
+	sql("update `tabDocField` set `options` = concat(options, %s) where parent = 'Opportunity' and fieldname = 'source' and options not like '%%Walk%%'", op)
 elif patch_no == 118:
 	from webnotes.utils import get_defaults
 	ss = sql("select name, net_pay from `tabSalary Slip`")
@@ -558,9 +558,9 @@ elif patch_no == 118:
 elif patch_no == 119:
 	sql("update tabDocType set in_create = 1 where name = 'Profile'")
 elif patch_no == 120:
-	sql("update tabDocField set permlevel = 0 where parent = 'Sales and Purchase Return Wizard' and fieldname = 'return_date'")
+	sql("update tabDocField set permlevel = 0 where parent = 'Sales and Purchase Return Tool' and fieldname = 'return_date'")
 elif patch_no == 121:
-	import_from_files(record_list = [['CRM', 'DocType', 'Return Detail'], ['Material Management', 'DocType', 'Sales and Purchase Return Wizard']])
+	import_from_files(record_list = [['CRM', 'DocType', 'Sales and Purchase Return Item'], ['Material Management', 'DocType', 'Sales and Purchase Return Tool']])
 elif patch_no == 122:
 	sql("delete from tabDocField where (fieldname = 'serial_no' or label = 'Warrany Status') and parent = 'Sales Order'")
 elif patch_no == 123:
@@ -574,26 +574,26 @@ elif patch_no == 125:
 elif patch_no == 126:
 	sql("delete from tabDocField where parent = 'Delivery Note' and label in ('Make Sales Invoice', 'Make Installation Note', 'Intro Note')")
 elif patch_no == 127:
-	sql("delete from tabDocPerm where role = 'All' and parent = 'Expense Voucher' and (permlevel = 0 or permlevel = 2)")
+	sql("delete from tabDocPerm where role = 'All' and parent = 'Expense Claim' and (permlevel = 0 or permlevel = 2)")
 	p = get_obj('Patch Util')
-	p.add_permission('Expense Voucher', 'Employee', 0, read = 1, write = 1, create = 1, submit = 1, cancel = 1, amend = 1, match = 'owner')
-	p.add_permission('Expense Voucher', 'HR Manager', 0, read = 1, write = 1, create = 1, submit = 1, cancel = 1, amend = 1)
-	p.add_permission('Expense Voucher', 'HR User', 0, read = 1, write = 1, create = 1, submit = 1, cancel = 1, amend = 1)
+	p.add_permission('Expense Claim', 'Employee', 0, read = 1, write = 1, create = 1, submit = 1, cancel = 1, amend = 1, match = 'owner')
+	p.add_permission('Expense Claim', 'HR Manager', 0, read = 1, write = 1, create = 1, submit = 1, cancel = 1, amend = 1)
+	p.add_permission('Expense Claim', 'HR User', 0, read = 1, write = 1, create = 1, submit = 1, cancel = 1, amend = 1)
 elif patch_no == 128:
 	from webnotes.modules import import_module
 	import_module.import_from_files(record_list=[['selling','doctype','sales_order'], ['selling','doctype','sales_order_detail'],  ['stock','doctype','delivery_note'], ['stock','doctype','delivery_note_detail']])
 elif patch_no == 129:
-	sql("update `tabTable Mapper Detail` set validation_logic = '(qty > ifnull(billed_qty, 0) or amount > ifnull(billed_amt, 0)) and docstatus = 1' where parent = 'Sales Order-Receivable Voucher' and from_table = 'Sales Order Detail' and to_table = 'RV Detail'")
-	sql("update `tabTable Mapper Detail` set validation_logic = '(qty > ifnull(billed_qty, 0) or amount > ifnull(billed_amt, 0)) and docstatus = 1' where parent = 'Delivery Note-Receivable Voucher' and from_table = 'Delivery Note Detail' and to_table = 'RV Detail'")
+	sql("update `tabTable Mapper Detail` set validation_logic = '(qty > ifnull(billed_qty, 0) or amount > ifnull(billed_amt, 0)) and docstatus = 1' where parent = 'Sales Order-Sales Invoice' and from_table = 'Sales Order Item' and to_table = 'Sales Invoice Item'")
+	sql("update `tabTable Mapper Detail` set validation_logic = '(qty > ifnull(billed_qty, 0) or amount > ifnull(billed_amt, 0)) and docstatus = 1' where parent = 'Delivery Note-Sales Invoice' and from_table = 'Delivery Note Item' and to_table = 'Sales Invoice Item'")
 elif patch_no == 130:
 	# update from rv
 	from webnotes.model.code import get_obj
 	from webnotes.utils import cstr
-	for d in sql("select name, docstatus from `tabReceivable Voucher` where ifnull(docstatus,0) != 0"):
+	for d in sql("select name, docstatus from `tabSales Invoice` where ifnull(docstatus,0) != 0"):
 		sql("COMMIT")
 		sql("START TRANSACTION")
 		try:
-			obj = get_obj('Receivable Voucher', cstr(d[0]), with_children = 1)
+			obj = get_obj('Sales Invoice', cstr(d[0]), with_children = 1)
 			is_submit = 1
 			if cint(d[1]) == 2: is_submit = 0
 			get_obj('Sales Common').update_prevdoc_detail(is_submit, obj)
@@ -615,17 +615,17 @@ elif patch_no == 130:
 			pass
 		sql("COMMIT")
 elif patch_no == 131:
-	sql("update `tabDocType` set allow_trash = 1 where name = 'Purchase Other Charges'")
-	sql("update tabDocPerm set `cancel` = 1 where parent = 'Purchase Other Charges' and permlevel = 0 and `read` = 1 and `write` = 1")
+	sql("update `tabDocType` set allow_trash = 1 where name = 'Purchase Taxes and Charges Master'")
+	sql("update tabDocPerm set `cancel` = 1 where parent = 'Purchase Taxes and Charges Master' and permlevel = 0 and `read` = 1 and `write` = 1")
 elif patch_no == 132:
-	sql("update tabDocField set no_copy = 0 where parent = 'Receivable Voucher' and fieldname = 'customer'")
+	sql("update tabDocField set no_copy = 0 where parent = 'Sales Invoice' and fieldname = 'customer'")
 elif patch_no == 133:
 	from webnotes.modules import import_module
 	import_module.import_from_files(record_list=[['accounts','doctype','receivable_voucher']])
 elif patch_no == 134:
-	sql("update tabDocField set no_copy = 1 where parent = 'Receivable Voucher' and fieldname = 'posting_time'")
+	sql("update tabDocField set no_copy = 1 where parent = 'Sales Invoice' and fieldname = 'posting_time'")
 elif patch_no == 135:
-	sql("update tabDocField set `default` = 'Today' where parent = 'Receivable Voucher' and fieldname = 'due_date'")
+	sql("update tabDocField set `default` = 'Today' where parent = 'Sales Invoice' and fieldname = 'due_date'")
 elif patch_no == 136:
 	from webnotes.modules import import_module
 	import_module.import_from_files(record_list=[['accounts','doctype','rv_detail']])
@@ -636,7 +636,7 @@ elif patch_no == 138:
 	sql("update `tabDocType` set allow_attach = 1 where name = 'Price List'")
 elif patch_no == 139:
 	from webnotes.modules import import_module
-	import_module.import_from_files(record_list=[['mapper','DocType Mapper','Sales Order-Receivable Voucher'], ['mapper','DocType Mapper','Delivery Note-Receivable Voucher']])
+	import_module.import_from_files(record_list=[['mapper','DocType Mapper','Sales Order-Sales Invoice'], ['mapper','DocType Mapper','Delivery Note-Sales Invoice']])
 elif patch_no == 140:
 	from webnotes.modules import import_module
 	import_module.import_from_files(record_list=[['accounts','doctype','rv_detail']])
@@ -660,7 +660,7 @@ elif patch_no == 145:
 elif patch_no == 146:
 	import_from_files(record_list=[['accounts','doctype','account']])
 elif patch_no == 147:
-	import_from_files(record_list=[['mapper', 'DocType Mapper', 'Purchase Order-Payable Voucher'], ['mapper', 'DocType Mapper', 'Purchase Receipt-Payable Voucher'], ['mapper', 'DocType Mapper', 'Purchase Order-Purchase Receipt']])
+	import_from_files(record_list=[['mapper', 'DocType Mapper', 'Purchase Order-Purchase Invoice'], ['mapper', 'DocType Mapper', 'Purchase Receipt-Purchase Invoice'], ['mapper', 'DocType Mapper', 'Purchase Order-Purchase Receipt']])
 elif patch_no == 148:
 	sql("delete from `tabDocField` where (fieldname = 'account_balances' or label = 'Balances') and parent = 'Account'")
 	sql("update tabDocType set istable = 0, section_style = 'Simple', search_fields = 'account, period, fiscal_year, balance' where name = 'Account Balance'")
@@ -700,8 +700,8 @@ elif patch_no == 158:
 elif patch_no == 159:
 	sql("update tabAccount set account_type = 'Chargeable' where account_name in ('Advertising and Publicity', 'Freight & Forwarding Charges', 'Miscellaneous Expenses', 'Sales Promotion Expenses')")
 elif patch_no == 160:
-	sql("update `tabDocType` set search_fields = 'posting_date, due_date, debit_to, fiscal_year, grand_total, outstanding_amount' where name = 'Receivable Voucher'")
-	sql("update `tabDocType` set search_fields = 'posting_date, credit_to, fiscal_year, bill_no, grand_total, outstanding_amount' where name = 'Payable Voucher'")
+	sql("update `tabDocType` set search_fields = 'posting_date, due_date, debit_to, fiscal_year, grand_total, outstanding_amount' where name = 'Sales Invoice'")
+	sql("update `tabDocType` set search_fields = 'posting_date, credit_to, fiscal_year, bill_no, grand_total, outstanding_amount' where name = 'Purchase Invoice'")
 elif patch_no == 161:
 	sql("update tabDocType set autoname = 'field:batch_id' where name = 'Batch'")
 	sql("update tabDocField set no_copy = 1 where parent = 'Batch' and fieldname = 'batch_id'")
@@ -724,7 +724,7 @@ elif patch_no == 168:
 elif patch_no == 169:
 	import_from_files(record_list=[['accounts', 'doctype', 'pv_detail'], ['accounts', 'doctype', 'rv_detail']])
 elif patch_no == 170:
-	import_from_files(record_list=[['mapper', 'DocType Mapper', 'Delivery Note-Receivable Voucher']])
+	import_from_files(record_list=[['mapper', 'DocType Mapper', 'Delivery Note-Sales Invoice']])
 elif patch_no == 171:
 	import_from_files(record_list=[['buying', 'doctype', 'supplier']])
 elif patch_no == 172:
@@ -735,9 +735,9 @@ elif patch_no == 173:
 	sql("delete from tabDocField where label = 'Get Other Charges' and parent = 'Delivery Note'")
 	sql("update tabDocField set reqd = 0 where fieldname = 'posting_time' and parent = 'Serial No'")
 elif patch_no == 174:
-	c = sql("select count(name) from `tabField Mapper Detail` where parent = 'Delivery Note-Receivable Voucher' and from_field = 'description' and to_field = 'description' and match_id = 2")
+	c = sql("select count(name) from `tabField Mapper Detail` where parent = 'Delivery Note-Sales Invoice' and from_field = 'description' and to_field = 'description' and match_id = 2")
 	if c and cint(c[0][0]) > 1:
-		sql("update `tabField Mapper Detail` set match_id = 1 where parent = 'Delivery Note-Receivable Voucher' and from_field = 'description' and to_field = 'description' limit 1")
+		sql("update `tabField Mapper Detail` set match_id = 1 where parent = 'Delivery Note-Sales Invoice' and from_field = 'description' and to_field = 'description' limit 1")
 elif patch_no == 175:
 	import webnotes
 	webnotes.conn.set_global("system_message", """If your financial year starts on 1st April then you have make some changes in the system to start entry in the new year.<br>We have made some guidelines regarding the basic steps you should follow. Please click on link <a href='http://erpnext.blogspot.com/2011/03/how-to-start-entries-in-new-fiscal-year.html'>How to start Entries in the New Fiscal Year in ERPNext?</a>""")
@@ -762,7 +762,7 @@ elif patch_no == 181:
 elif patch_no == 182:
 	sql("update tabDocField set options = CONCAT(options, '\nWrite Off Voucher') where fieldname = 'voucher_type' and parent = 'Journal Voucher'")
 elif patch_no == 183:
-	sql("delete from tabDocField where label = 'SMS' and fieldtype = 'Section Break' and parent in  ('Enquiry', 'Lead', 'Sales Order', 'Delivery Note')")
+	sql("delete from tabDocField where label = 'SMS' and fieldtype = 'Section Break' and parent in  ('Opportunity', 'Lead', 'Sales Order', 'Delivery Note')")
 elif patch_no == 184:
 	from webnotes.model import delete_doc
 	delete_doc('DocType', 'Feed')
@@ -789,11 +789,11 @@ elif patch_no==186:
 	from webnotes.modules import reload_doc
 	reload_doc('event_updates','doctype','feed')
 elif patch_no == 187:
-	sql("update tabDocType set autoname = '' where name = 'QA Inspection Report'")
+	sql("update tabDocType set autoname = '' where name = 'Quality Inspection'")
 elif patch_no == 188:
 	import_from_files(record_list = [['buying', 'doctype', 'qa_inspection_report']])
 elif patch_no == 189:
-	sql("update `tabDocField` set allow_on_submit = 1 where fieldname in ('entries', 'other_charges') and parent = 'Receivable Voucher'")
+	sql("update `tabDocField` set allow_on_submit = 1 where fieldname in ('entries', 'other_charges') and parent = 'Sales Invoice'")
 elif patch_no == 190:
 	sql("update tabDocField set permlevel=0 where fieldname = 'fiscal_year' and parent = 'Stock Entry'")
 elif patch_no == 191:
@@ -815,9 +815,9 @@ elif patch_no == 197:
 	sql("update `tabDocField` set permlevel = 0, in_filter = 1 where fieldname = 'warranty_amc_status' and parent = 'Customer Issue'")
 	import_from_files(record_list = [['support', 'doctype', 'customer_issue']])
 elif patch_no == 198:
-	sql("delete from `tabDocField` where (label in ('SMS', 'Send SMS') or fieldname in ('message', 'customer_mobile_no')) and parent in ('Quoattion', 'Sales Order', 'Delivery Note', 'Receivable Voucher')")
+	sql("delete from `tabDocField` where (label in ('SMS', 'Send SMS') or fieldname in ('message', 'customer_mobile_no')) and parent in ('Quoattion', 'Sales Order', 'Delivery Note', 'Sales Invoice')")
 	sql("delete from `tabDocField` where label in ('SMS', 'Send SMS') and parent = 'Purchase Order'")
-	sql("delete from `tabDocField` where (label in ('Send SMS', 'SMS Html') or fieldname in ('sms_message', 'lead_sms_detail', 'enquiry_sms_detail')) and parent in ('Lead', 'Enquiry')")
+	sql("delete from `tabDocField` where (label in ('Send SMS', 'SMS Html') or fieldname in ('sms_message', 'lead_sms_detail', 'enquiry_sms_detail')) and parent in ('Lead', 'Opportunity')")
 	from webnotes.model import delete_doc
 	delete_doc('DocType', 'Lead SMS Detail')
 	delete_doc('DocType', 'Enquiry SMS Detail')
@@ -846,7 +846,7 @@ elif patch_no == 207:
 	import_from_files(record_list = [['setup', 'doctype', 'company']])
 elif patch_no == 208:
 	sql("delete from `tabDocField` where (label in ('SMS', 'Send SMS') or fieldname in ('message', 'customer_mobile_no')) and parent ='Quotation'")
-	default_currency = get_obj('Manage Account').doc.default_currency
+	default_currency = get_obj('Global Defaults').doc.default_currency
 	sql("update tabCompany set default_currency = '%s'" % default_currency)
 elif patch_no == 209:
 	import_from_files(record_list = [['setup', 'doctype', 'company']])
@@ -869,7 +869,7 @@ elif patch_no == 216:
 	import_from_files(record_list = [['stock', 'doctype', 'serial_no'], ['stock', 'doctype', 'stock_ledger_entry']])
 elif patch_no == 217:
 	sql("update tabDocField set options = '\nIn Store\nDelivered\nNot in Use' where fieldname = 'status' and parent = 'Serial No'")
-	sql("update tabDocField set no_copy = 1 where fieldname = 'serial_no' and parent = 'Delivery Note Detail'")
+	sql("update tabDocField set no_copy = 1 where fieldname = 'serial_no' and parent = 'Delivery Note Item'")
 	sql("update tabDocField set no_copy = 1 where fieldname = 'serial_no' and parent = 'Stock Entry Detail'")
 elif patch_no == 218:
 	for d in sql("select name from `tabSerial No`"):
@@ -895,7 +895,7 @@ elif patch_no == 220:
 elif patch_no == 221:
 	sql("update tabDocField set reqd = 1 where fieldname in ('purchase_rate', 'warehouse') and parent = 'Serial No'")
 elif patch_no == 222:
-	sql("update tabDocField set options = '\nDelivery Note\nReceivable Voucher\nStock Entry' where fieldname = 'delivery_document_type' and parent = 'Serial No'")
+	sql("update tabDocField set options = '\nDelivery Note\nSales Invoice\nStock Entry' where fieldname = 'delivery_document_type' and parent = 'Serial No'")
 elif patch_no == 223:
 	sql("update tabDocField set hidden = 0 where fieldname in ('pay_to_recd_from', 'total_amount', 'total_amount_in_words') and parent = 'Journal Voucher'")
 	sql("update tabDocField set permlevel = 0 where fieldname = 'pay_to_recd_from' and parent = 'Journal Voucher'")
@@ -921,16 +921,16 @@ elif patch_no == 229:
 elif patch_no == 230:
 	reload_doc('buying', 'doctype', 'indent')
 	reload_doc('buying', 'doctype', 'indent_detail')
-	reload_doc('Mapper', 'DocType Mapper', 'Sales Order-Indent')
+	reload_doc('Mapper', 'DocType Mapper', 'Sales Order-Purchase Request')
 elif patch_no == 231:
-	reload_doc('Mapper', 'DocType Mapper', 'Sales Order-Indent')
+	reload_doc('Mapper', 'DocType Mapper', 'Sales Order-Purchase Request')
 elif patch_no == 232:
-	sql("update `tabDocField` set options = 'Sales Order' where fieldname = 'sales_order_no' and parent = 'Indent'")
+	sql("update `tabDocField` set options = 'Sales Order' where fieldname = 'sales_order_no' and parent = 'Purchase Request'")
 elif patch_no == 233:
-	reload_doc('Mapper', 'DocType Mapper', 'Sales Order-Receivable Voucher')
-	reload_doc('Mapper', 'DocType Mapper', 'Delivery Note-Receivable Voucher')
+	reload_doc('Mapper', 'DocType Mapper', 'Sales Order-Sales Invoice')
+	reload_doc('Mapper', 'DocType Mapper', 'Delivery Note-Sales Invoice')
 elif patch_no == 234:
-	sql("update `tabTable Mapper Detail` set validation_logic = 'docstatus=1' where parent = 'Sales Order-Indent' and from_table = 'Sales Order Detail'")
+	sql("update `tabTable Mapper Detail` set validation_logic = 'docstatus=1' where parent = 'Sales Order-Purchase Request' and from_table = 'Sales Order Item'")
 elif patch_no == 235:
 	for sc in sql("""select name from `tabSearch Criteria` where ifnull(name,'')
 		like 'srch%' or ifnull(name,'') like '%stdsrch'"""):
@@ -943,7 +943,7 @@ elif patch_no == 236:
 	# warehouse not mandatory for delivered serial nos
 	sql("update tabDocField set reqd=0 where parent='Serial No' and fieldname='warehouse'")
 elif patch_no == 237:
-	sql("update tabDocField set depends_on = 'eval:doc.is_pos==1' where fieldname = 'cash_bank_account' and parent = 'Receivable Voucher'")
+	sql("update tabDocField set depends_on = 'eval:doc.is_pos==1' where fieldname = 'cash_bank_account' and parent = 'Sales Invoice'")
 elif patch_no == 238:
 	reload_doc('accounts', 'doctype', 'receivable_voucher')
 	reload_doc('accounts', 'GL Mapper', 'POS with write off')
@@ -1007,15 +1007,15 @@ elif patch_no == 253:
 	reload_doc('accounts', 'Module Def', 'Accounts')
 
 	from webnotes.model.db_schema import updatedb
-	updatedb('Ledger Balance Export')
-	updatedb('Ledger Detail')
+	updatedb('Multi Ledger Report')
+	updatedb('Multi Ledger Report Detail')
 elif patch_no == 254:
 	reload_doc('setup', 'doctype', 'sms_settings')
 	reload_doc('setup', 'doctype', 'static_parameter_detail')
 
 	from webnotes.model.db_schema import updatedb
 	updatedb('SMS Settings')
-	updatedb('Static Parameter Detail')
+	updatedb('SMS Parameter')
 elif patch_no == 255:
 	from patches.old_patches.customer_address import run_old_data_sync_patch
 	run_old_data_sync_patch()
@@ -1029,18 +1029,18 @@ elif patch_no == 257:
 elif patch_no == 258:
 	sql("update tabDocField set `default`=NULL where fieldname = 'naming_series'")
 elif patch_no == 259:
-	sql("update `tabQuotation Detail` set description = replace(description, 'http://46.4.50.84/v170-test/', '')")
-	sql("update `tabSales Order Detail` set description = replace(description, 'http://46.4.50.84/v170-test/', '')")
-	sql("update `tabRV Detail` set description = replace(description, 'http://46.4.50.84/v170-test/', '')")
-	sql("update `tabDelivery Note Detail` set description = replace(description, 'http://46.4.50.84/v170-test/', '')")
+	sql("update `tabQuotation Item` set description = replace(description, 'http://46.4.50.84/v170-test/', '')")
+	sql("update `tabSales Order Item` set description = replace(description, 'http://46.4.50.84/v170-test/', '')")
+	sql("update `tabSales Invoice Item` set description = replace(description, 'http://46.4.50.84/v170-test/', '')")
+	sql("update `tabDelivery Note Item` set description = replace(description, 'http://46.4.50.84/v170-test/', '')")
 elif patch_no == 260:
 	sql("update `tabLetter Head` set content = replace(content, 'http://46.4.50.84/v170/', '')")
 	sql("update `tabSingles` set value = replace(value, 'http://46.4.50.84/v170/', '') where field in ('letter_head', 'client_name') and doctype = 'Control Panel'")
 	sql("update `tabItem` set description_html = replace(description_html, 'http://46.4.50.84/v170/', '')")
-	sql("update `tabQuotation Detail` set description = replace(description, 'http://46.4.50.84/v170/', '')")
-	sql("update `tabSales Order Detail` set description = replace(description, 'http://46.4.50.84/v170/', '')")
-	sql("update `tabRV Detail` set description = replace(description, 'http://46.4.50.84/v170/', '')")
-	sql("update `tabDelivery Note Detail` set description = replace(description, 'http://46.4.50.84/v170/', '')")
+	sql("update `tabQuotation Item` set description = replace(description, 'http://46.4.50.84/v170/', '')")
+	sql("update `tabSales Order Item` set description = replace(description, 'http://46.4.50.84/v170/', '')")
+	sql("update `tabSales Invoice Item` set description = replace(description, 'http://46.4.50.84/v170/', '')")
+	sql("update `tabDelivery Note Item` set description = replace(description, 'http://46.4.50.84/v170/', '')")
 elif patch_no == 261:
 	sql("update `tabPrint Format` set html = replace(html, 'customer_address', 'address_display')")
 elif patch_no == 262:
@@ -1116,7 +1116,7 @@ elif patch_no == 279:
 		for d in rec:
 			sql("update `tab%s` set docstatus = %s where name = '%s'" % (d[0], d[2]=='No' and 1 or 2, d[1]))
 
-	other_dt = ['Enquiry', 'Quotation', 'Sales Order', 'Indent', 'Purchase Order', 'Production Order', 'Customer Issue', 'Installation Note']
+	other_dt = ['Opportunity', 'Quotation', 'Sales Order', 'Purchase Request', 'Purchase Order', 'Production Order', 'Customer Issue', 'Installation Note']
 	for dt in other_dt:
 		rec = sql("select name, status from `tab%s` where modified >= '2011-06-15 01:00:00'" % dt)
 		for r in rec:
@@ -1129,7 +1129,7 @@ elif patch_no == 281:
 		sql("update `tab%s` set status = 'Submitted' where docstatus = 1 and modified >='2011-06-15 01:00:00'" % dt)
 		sql("update `tab%s` set status = 'Cancelled' where docstatus = 2 and modified >='2011-06-15 01:00:00'" % dt)
 elif patch_no == 282:
-	dt_list = ['Enquiry', 'Quotation', 'Sales Order', 'Indent', 'Purchase Order', 'Production Order', 'Customer Issue', 'Installation Note', 'Receivable Voucher', 'Payable Voucher', 'Delivery Note', 'Purchase Receipt', 'Journal Voucher', 'Stock Entry']
+	dt_list = ['Opportunity', 'Quotation', 'Sales Order', 'Purchase Request', 'Purchase Order', 'Production Order', 'Customer Issue', 'Installation Note', 'Sales Invoice', 'Purchase Invoice', 'Delivery Note', 'Purchase Receipt', 'Journal Voucher', 'Stock Entry']
 	for d in dt_list:
 		tbl = sql("select options from `tabDocField` where fieldtype = 'Table' and parent = '%s'" % d)
 		for t in tbl:
@@ -1149,7 +1149,7 @@ elif patch_no == 287:
 elif patch_no == 288:
 	reload_doc('accounts', 'doctype', 'payable_voucher')
 elif patch_no == 289:
-	sql("update `tabDocType` set subject = 'From %(supplier_name)s worth %(grand_total)s due on %(due_date)s | %(outstanding_amount)s outstanding' where name = 'Payable Voucher'")
+	sql("update `tabDocType` set subject = 'From %(supplier_name)s worth %(grand_total)s due on %(due_date)s | %(outstanding_amount)s outstanding' where name = 'Purchase Invoice'")
 	sql("update `tabDocType` set search_fields = 'status,transaction_date,customer,lead,order_type' where name = 'Quotation'")
 elif patch_no == 290:
 	count = sql("""SELECT * FROM  `tabModule Def`
@@ -1187,7 +1187,7 @@ elif patch_no == 297:
 	reload_doc('hr', 'doctype', 'salary_slip')
 elif patch_no == 298:
 	sql("update `tabDocField` set options = 'link:Company' where parent = 'Attendance' and fieldname = 'company'")
-	sql("update `tabDocField` set options = 'link:Company' where parent = 'Expense Voucher' and fieldname = 'company'")
+	sql("update `tabDocField` set options = 'link:Company' where parent = 'Expense Claim' and fieldname = 'company'")
 	sql("update `tabDocField` set options = 'link:Company' where parent = 'Appraisal' and fieldname = 'company'")
 elif patch_no == 299:
 	sql("update `tabDocPerm` set `match` = NULL where parent = 'Employee' and role = 'Employee'")

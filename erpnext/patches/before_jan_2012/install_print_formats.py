@@ -39,7 +39,7 @@ def prepare_pf_dict(args_list):
 pf_to_install = prepare_pf_dict([
 	{
 		'name' : 'Sales Invoice',
-		'doc_type' : 'Receivable Voucher',
+		'doc_type' : 'Sales Invoice',
 		'module' : 'Accounts'
 	},
 	{

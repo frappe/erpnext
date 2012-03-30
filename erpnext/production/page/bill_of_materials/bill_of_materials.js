@@ -489,7 +489,7 @@ function TreeNode(tree, parent, head_op, label, imagesrc, onclick, onexpand) {
     if(i==1) {
       var c = $a(this.tab.rows[0].cells[i], 'div', 'link_type', {overflow:'hidden', width:'100%'});
       c.bom_no = label[tree.col_details[i][3]]
-      c.onclick = function() { loaddoc("Bill Of Materials", this.bom_no); }
+      c.onclick = function() { loaddoc("BOM", this.bom_no); }
       c.innerHTML = label[tree.col_details[i][3]];
     }
     if(this.is_item == 1 && i > 1 && i < 6) {

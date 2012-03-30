@@ -17,14 +17,14 @@
 # add additional columns
 
 cl = [c[0] for c in sql("""select distinct account_head 
-						   from `tabRV Tax Detail` 
-						   where parenttype='Receivable Voucher' 
+						   from `tabSales Taxes and Charges` 
+						   where parenttype='Sales Invoice' 
 						   and docstatus=1 
 						   order by account_head asc""")]
 
 income_acc = [c[0] for c in sql("""select distinct income_account 
-								   from `tabRV Detail` 
-								   where parenttype='Receivable Voucher' 
+								   from `tabSales Invoice Item` 
+								   where parenttype='Sales Invoice' 
 								   and docstatus=1 
 								   order by income_account asc""")]
 
@@ -53,9 +53,9 @@ for r in res:
 
 	#Get amounts for income account
 	income_acc_list = sql("""select income_account, sum(amount) 
-						     from `tabRV Detail` 
+						     from `tabSales Invoice Item` 
 						     where parent = %s 
-						     and parenttype='Receivable Voucher'
+						     and parenttype='Sales Invoice'
 						     group by income_account""", (r[col_idx['ID']],))
 
 	#convert the result to dictionary for easy retrieval  
@@ -78,9 +78,9 @@ for r in res:
 
 	#Get tax for account heads
 	acc_head_tax = sql("""select account_head, tax_amount 
-						  from `tabRV Tax Detail` 
+						  from `tabSales Taxes and Charges` 
 						  where parent = '%s' 
-						  and parenttype = 'Receivable Voucher'""" %(r[col_idx['ID']],))
+						  and parenttype = 'Sales Invoice'""" %(r[col_idx['ID']],))
 
 	#Convert the result to dictionary for easy retrieval
 	acc_head_tax_dict = {}

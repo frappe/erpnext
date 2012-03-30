@@ -46,5 +46,5 @@ cur_frm.fields_dict['pp_details'].grid.get_field('item_code').get_query = functi
 
 cur_frm.fields_dict['pp_details'].grid.get_field('bom_no').get_query = function(doc) {
   var d = locals[this.doctype][this.docname];
-  return 'SELECT DISTINCT `tabBill Of Materials`.`name` FROM `tabBill Of Materials` WHERE `tabBill Of Materials`.`item` = "' + d.item_code + '" AND `tabBill Of Materials`.`is_active` = "Yes" AND `tabBill Of Materials`.docstatus = 1 AND `tabBill Of Materials`.`name` like "%s" ORDER BY `tabBill Of Materials`.`name` LIMIT 50';
+  return 'SELECT DISTINCT `tabBOM`.`name` FROM `tabBOM` WHERE `tabBOM`.`item` = "' + d.item_code + '" AND `tabBOM`.`is_active` = "Yes" AND `tabBOM`.docstatus = 1 AND `tabBOM`.`name` like "%s" ORDER BY `tabBOM`.`name` LIMIT 50';
 }

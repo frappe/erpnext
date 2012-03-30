@@ -12,9 +12,9 @@
 
 	# These values are common for all Search Criteria
 	{
-		'columns': 'Lead\x01ID,Follow up\x01Date,Follow up\x01Notes,Follow up\x01Follow up type',
+		'columns': 'Lead\x01ID,Communication Log\x01Date,Communication Log\x01Notes,Communication Log\x01Communication Log type',
 		'criteria_name': 'Follow-up Report',
-		'doc_type': 'Follow up',
+		'doc_type': 'Communication Log',
 		'doctype': 'Search Criteria',
 		'filters': "{'Lead\x01Status':'','Lead\x01Source':'','Lead\x01Lead Type':'','Lead\x01Rating':'','Lead\x01Market Segment':'','Lead\x01Fiscal Year':''}",
 		'module': 'Selling',

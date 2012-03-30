@@ -39,7 +39,7 @@ class DocType(TransactionBase):
 		self.doc = doc
 		self.doclist = doclist
 		self.defaults = get_defaults()
-		self.tname = 'Purchase Receipt Detail'
+		self.tname = 'Purchase Receipt Item'
 		self.fname = 'purchase_receipt_details'
 		self.count = 0
 
@@ -96,7 +96,7 @@ class DocType(TransactionBase):
 	# Pull Purchase Order
 	def get_po_details(self):
 		self.validate_prev_docname()
-		get_obj('DocType Mapper', 'Purchase Order-Purchase Receipt').dt_map('Purchase Order', 'Purchase Receipt', self.doc.purchase_order_no, self.doc, self.doclist, "[['Purchase Order','Purchase Receipt'],['PO Detail', 'Purchase Receipt Detail'],['Purchase Tax Detail','Purchase Tax Detail']]")
+		get_obj('DocType Mapper', 'Purchase Order-Purchase Receipt').dt_map('Purchase Order', 'Purchase Receipt', self.doc.purchase_order_no, self.doc, self.doclist, "[['Purchase Order','Purchase Receipt'],['Purchase Order Item', 'Purchase Receipt Item'],['Purchase Taxes and Charges','Purchase Taxes and Charges']]")
 
 	# validate if PO has been pulled twice
 	def validate_prev_docname(self):
@@ -155,7 +155,7 @@ class DocType(TransactionBase):
 	#check in manage account if purchase order required or not.
 	# ====================================================================================
 	def po_required(self):
-		res = sql("select value from `tabSingles` where doctype = 'Manage Account' and field = 'po_required'")
+		res = sql("select value from `tabSingles` where doctype = 'Global Defaults' and field = 'po_required'")
 		if res and res[0][0]== 'Yes':
 			 for d in getlist(self.doclist,'purchase_receipt_details'):
 				 if not d.prevdoc_docname:
@@ -216,7 +216,7 @@ class DocType(TransactionBase):
 				# Check If Prevdoc Doctype is Purchase Order
 				if cstr(d.prevdoc_doctype) == 'Purchase Order':
 					# get qty and pending_qty of prevdoc
-					curr_ref_qty = pc_obj.get_qty( d.doctype, 'prevdoc_detail_docname', d.prevdoc_detail_docname, 'PO Detail', 'Purchase Order - Purchase Receipt', self.doc.name)
+					curr_ref_qty = pc_obj.get_qty( d.doctype, 'prevdoc_detail_docname', d.prevdoc_detail_docname, 'Purchase Order Item', 'Purchase Order - Purchase Receipt', self.doc.name)
 					max_qty, qty, curr_qty = flt(curr_ref_qty.split('~~~')[1]), flt(curr_ref_qty.split('~~~')[0]), 0
 
 					if flt(qty) + flt(pr_qty) > flt(max_qty):
@@ -267,7 +267,7 @@ class DocType(TransactionBase):
 			ins_reqd = sql("select inspection_required from `tabItem` where name = %s", (d.item_code), as_dict = 1)
 			ins_reqd = ins_reqd and ins_reqd[0]['inspection_required'] or 'No'
 			if ins_reqd == 'Yes' and not d.qa_no:
-				msgprint("Item: " + d.item_code + " requires QA Inspection. Please enter QA No or report to authorized person to create QA Inspection Report")
+				msgprint("Item: " + d.item_code + " requires QA Inspection. Please enter QA No or report to authorized person to create Quality Inspection")
 
 	# Check for Stopped status
 	def check_for_stopped_status(self, pc_obj):
@@ -304,7 +304,7 @@ class DocType(TransactionBase):
 	#On Cancel
 	#----------------------------------------------------------------------------------------------------
 	def check_next_docstatus(self):
-		submit_rv = sql("select t1.name from `tabPayable Voucher` t1,`tabPV Detail` t2 where t1.name = t2.parent and t2.purchase_receipt = '%s' and t1.docstatus = 1" % (self.doc.name))
+		submit_rv = sql("select t1.name from `tabPurchase Invoice` t1,`tabPurchase Invoice Item` t2 where t1.name = t2.parent and t2.purchase_receipt = '%s' and t1.docstatus = 1" % (self.doc.name))
 		if submit_rv:
 			msgprint("Purchase Invoice : " + cstr(self.submit_rv[0][0]) + " has already been submitted !")
 			raise Exception , "Validation Error."
@@ -314,10 +314,10 @@ class DocType(TransactionBase):
 		pc_obj = get_obj('Purchase Common')
 
 		self.check_for_stopped_status(pc_obj)
-		# 1.Check if Payable Voucher has been submitted against current Purchase Order
-		# pc_obj.check_docstatus(check = 'Next', doctype = 'Payable Voucher', docname = self.doc.name, detail_doctype = 'PV Detail')
+		# 1.Check if Purchase Invoice has been submitted against current Purchase Order
+		# pc_obj.check_docstatus(check = 'Next', doctype = 'Purchase Invoice', docname = self.doc.name, detail_doctype = 'Purchase Invoice Item')
 
-		submitted = sql("select t1.name from `tabPayable Voucher` t1,`tabPV Detail` t2 where t1.name = t2.parent and t2.purchase_receipt = '%s' and t1.docstatus = 1" % self.doc.name)
+		submitted = sql("select t1.name from `tabPurchase Invoice` t1,`tabPurchase Invoice Item` t2 where t1.name = t2.parent and t2.purchase_receipt = '%s' and t1.docstatus = 1" % self.doc.name)
 		if submitted:
 			msgprint("Purchase Invoice : " + cstr(submitted[0][0]) + " has already been submitted !")
 			raise Exception
@@ -331,7 +331,7 @@ class DocType(TransactionBase):
 		# 4.Update Bin
 		self.update_stock(is_submit = 0)
 
-		# 5.Update Indents Pending Qty and accordingly it's Status
+		# 5.Update Purchase Requests Pending Qty and accordingly it's Status
 		pc_obj.update_prevdoc_detail(self, is_submit = 0)
 
 		# 6. Update last purchase rate
@@ -365,13 +365,13 @@ class DocType(TransactionBase):
 					self.add_bom(d)
 
 			self.delete_irrelevant_raw_material()
-			#---------------calculate amt in	PR Raw Material Detail-------------
+			#---------------calculate amt in	Purchase Receipt Item Supplied-------------
 			self.calculate_amount(d)
 
 
 	def add_bom(self, d):
 		#----- fetching default bom from Bill of Materials instead of Item Master --
-		bom_det = sql("select t1.item, t2.item_code, t2.qty_consumed_per_unit, t2.moving_avg_rate, t2.value_as_per_mar, t2.stock_uom, t2.name, t2.description from `tabBill Of Materials` t1, `tabBOM Material` t2 where t2.parent = t1.name and t1.item = '%s' and ifnull(t1.is_default,0) = 1 and t1.docstatus = 1 and t2.docstatus =1" % d.item_code)
+		bom_det = sql("select t1.item, t2.item_code, t2.qty_consumed_per_unit, t2.moving_avg_rate, t2.value_as_per_mar, t2.stock_uom, t2.name, t2.description from `tabBOM` t1, `tabBOM Item` t2 where t2.parent = t1.name and t1.item = '%s' and ifnull(t1.is_default,0) = 1 and t1.docstatus = 1 and t2.docstatus =1" % d.item_code)
 		if not bom_det:
 			msgprint("No default BOM exists for item: %s" % d.item_code)
 			raise Exception
@@ -380,9 +380,9 @@ class DocType(TransactionBase):
 			chgd_rqd_qty = []
 			for i in bom_det:
 
-				if i and not sql("select name from `tabPR Raw Material Detail` where reference_name = '%s' and bom_detail_no = '%s' and parent = '%s' " %(d.name, i[6], self.doc.name)):
+				if i and not sql("select name from `tabPurchase Receipt Item Supplied` where reference_name = '%s' and bom_detail_no = '%s' and parent = '%s' " %(d.name, i[6], self.doc.name)):
 
-					rm_child = addchild(self.doc, 'pr_raw_material_details', 'PR Raw Material Detail', 1, self.doclist)
+					rm_child = addchild(self.doc, 'pr_raw_material_details', 'Purchase Receipt Item Supplied', 1, self.doclist)
 
 					rm_child.reference_name = d.name
 					rm_child.bom_detail_no = i and i[6] or ''
@@ -419,7 +419,7 @@ class DocType(TransactionBase):
 	#--------------------------------------------------------------
 	def delete_irrelevant_raw_material(self):
 		for d in getlist(self.doclist,'pr_raw_material_details'):
-			if not sql("select name from `tabPurchase Receipt Detail` where name = '%s' and parent = '%s' and item_code = '%s'" % (d.reference_name, self.doc.name, d.main_item_code)):
+			if not sql("select name from `tabPurchase Receipt Item` where name = '%s' and parent = '%s' and item_code = '%s'" % (d.reference_name, self.doc.name, d.main_item_code)):
 				d.parent = 'old_par:'+self.doc.name
 				d.save()
 

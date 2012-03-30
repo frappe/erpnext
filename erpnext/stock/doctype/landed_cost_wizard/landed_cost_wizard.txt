@@ -176,8 +176,8 @@
 		'doctype': u'DocField',
 		'fieldname': u'lc_pr_details',
 		'fieldtype': u'Table',
-		'label': u'LC PR Details',
-		'options': u'LC PR Detail'
+		'label': u'Landed Cost Purchase Receipts',
+		'options': u'Landed Cost Purchase Receipt'
 	},
 
 	# DocField
@@ -193,7 +193,7 @@
 		'doctype': u'DocField',
 		'fieldname': u'landed_cost',
 		'fieldtype': u'Link',
-		'label': u'Select Landed Cost Details Master',
+		'label': u'Select Landed Cost Items Master',
 		'options': u'Landed Cost Master'
 	},
 
@@ -212,8 +212,8 @@
 		'doctype': u'DocField',
 		'fieldname': u'landed_cost_details',
 		'fieldtype': u'Table',
-		'label': u'Landed Cost Details',
-		'options': u'Landed Cost Detail'
+		'label': u'Landed Cost Items',
+		'options': u'Landed Cost Item'
 	},
 
 	# DocField
