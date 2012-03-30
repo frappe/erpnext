@@ -3,29 +3,29 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-12-14 10:23:31',
+		'creation': '2012-03-30 13:33:32',
 		'docstatus': 0,
-		'modified': '2010-11-12 09:23:17',
-		'modified_by': 'Administrator',
-		'owner': 'ashwini@webnotestech.com'
+		'modified': '2012-03-30 13:33:32',
+		'modified_by': u'Administrator',
+		'owner': u'ashwini@webnotestech.com'
 	},
 
 	# These values are common for all Search Criteria
 	{
-		'criteria_name': 'Projectwise Purchase Details',
-		'doc_type': 'Purchase Order',
+		'criteria_name': u'Projectwise Purchase Details',
+		'doc_type': u'Purchase Order',
 		'doctype': 'Search Criteria',
-		'filters': "{'Purchase Order\x01Status':'','Purchase Order\x01Fiscal Year':''}",
-		'module': 'Projects',
+		'filters': u"{'Purchase Order\x01Status':'','Purchase Order\x01Fiscal Year':''}",
+		'module': u'Projects',
 		'name': '__common__',
 		'page_len': 50,
-		'sort_order': 'DESC',
-		'standard': 'Yes'
+		'sort_order': u'DESC',
+		'standard': u'Yes'
 	},
 
 	# Search Criteria, projectwise_purchase_details
 	{
 		'doctype': 'Search Criteria',
-		'name': 'projectwise_purchase_details'
+		'name': u'projectwise_purchase_details'
 	}
 ]

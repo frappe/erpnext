@@ -3,114 +3,114 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2011-05-20 10:07:55',
+		'creation': '2011-05-06 12:42:44',
 		'docstatus': 0,
-		'modified': '2011-09-14 12:36:25',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-30 13:33:31',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all Table Mapper Detail
 	{
-		'doctype': 'Table Mapper Detail',
+		'doctype': u'Table Mapper Detail',
 		'name': '__common__',
-		'parent': 'Sales Order-Purchase Request',
-		'parentfield': 'table_mapper_details',
-		'parenttype': 'DocType Mapper'
+		'parent': u'Sales Order-Purchase Request',
+		'parentfield': u'table_mapper_details',
+		'parenttype': u'DocType Mapper'
 	},
 
 	# These values are common for all Field Mapper Detail
 	{
-		'doctype': 'Field Mapper Detail',
+		'doctype': u'Field Mapper Detail',
 		'name': '__common__',
-		'parent': 'Sales Order-Purchase Request',
-		'parentfield': 'field_mapper_details',
-		'parenttype': 'DocType Mapper'
+		'parent': u'Sales Order-Purchase Request',
+		'parentfield': u'field_mapper_details',
+		'parenttype': u'DocType Mapper'
 	},
 
 	# These values are common for all DocType Mapper
 	{
 		'doctype': 'DocType Mapper',
-		'from_doctype': 'Sales Order',
-		'module': 'Buying',
+		'from_doctype': u'Sales Order',
+		'module': u'Buying',
 		'name': '__common__',
 		'ref_doc_submitted': 1,
-		'to_doctype': 'Purchase Request'
+		'to_doctype': u'Purchase Request'
 	},
 
 	# DocType Mapper, Sales Order-Purchase Request
 	{
 		'doctype': 'DocType Mapper',
-		'name': 'Sales Order-Purchase Request'
+		'name': u'Sales Order-Purchase Request'
 	},
 
 	# Field Mapper Detail
 	{
-		'checking_operator': '>=',
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'transaction_date',
-		'map': 'No',
+		'checking_operator': u'>=',
+		'doctype': u'Field Mapper Detail',
+		'from_field': u'transaction_date',
+		'map': u'No',
 		'match_id': 0,
-		'to_field': 'transaction_date'
+		'to_field': u'transaction_date'
 	},
 
 	# Field Mapper Detail
 	{
-		'checking_operator': '=',
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'company',
-		'map': 'Yes',
+		'checking_operator': u'=',
+		'doctype': u'Field Mapper Detail',
+		'from_field': u'company',
+		'map': u'Yes',
 		'match_id': 0,
-		'to_field': 'company'
+		'to_field': u'company'
 	},
 
 	# Field Mapper Detail
 	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'parent',
-		'map': 'Yes',
+		'doctype': u'Field Mapper Detail',
+		'from_field': u'parent',
+		'map': u'Yes',
 		'match_id': 1,
-		'to_field': 'sales_order_no'
+		'to_field': u'sales_order_no'
 	},
 
 	# Field Mapper Detail
 	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'stock_uom',
-		'map': 'Yes',
+		'doctype': u'Field Mapper Detail',
+		'from_field': u'stock_uom',
+		'map': u'Yes',
 		'match_id': 1,
-		'to_field': 'uom'
+		'to_field': u'uom'
 	},
 
 	# Field Mapper Detail
 	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'reserved_warehouse',
-		'map': 'Yes',
+		'doctype': u'Field Mapper Detail',
+		'from_field': u'reserved_warehouse',
+		'map': u'Yes',
 		'match_id': 1,
-		'to_field': 'warehouse'
+		'to_field': u'warehouse'
 	},
 
 	# Table Mapper Detail
 	{
-		'doctype': 'Table Mapper Detail',
-		'from_field': 'sales_order_details',
-		'from_table': 'Sales Order Item',
+		'doctype': u'Table Mapper Detail',
+		'from_field': u'sales_order_details',
+		'from_table': u'Sales Order Item',
 		'match_id': 1,
-		'reference_doctype_key': 'prevdoc_doctype',
-		'reference_key': 'prevdoc_detail_docname',
-		'to_field': 'indent_details',
-		'to_table': 'Purchase Request Item',
-		'validation_logic': 'docstatus=1'
+		'reference_doctype_key': u'prevdoc_doctype',
+		'reference_key': u'prevdoc_detail_docname',
+		'to_field': u'indent_details',
+		'to_table': u'Purchase Request Item',
+		'validation_logic': u'docstatus=1'
 	},
 
 	# Table Mapper Detail
 	{
-		'doctype': 'Table Mapper Detail',
-		'from_table': 'Sales Order',
+		'doctype': u'Table Mapper Detail',
+		'from_table': u'Sales Order',
 		'match_id': 0,
-		'reference_key': 'prevdoc_docname',
-		'to_table': 'Purchase Request',
-		'validation_logic': 'docstatus = 1'
+		'reference_key': u'prevdoc_docname',
+		'to_table': u'Purchase Request',
+		'validation_logic': u'docstatus = 1'
 	}
 ]

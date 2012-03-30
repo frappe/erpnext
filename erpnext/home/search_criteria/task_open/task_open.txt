@@ -3,32 +3,32 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:09:32',
+		'creation': '2012-03-30 14:50:44',
 		'docstatus': 0,
-		'modified': '2010-07-16 13:03:49',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-30 14:50:44',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all Search Criteria
 	{
-		'add_cond': "`tabTask`.status='Open'",
-		'columns': 'Task\x01ID,Task\x01Subject,Task\x01Priority,Task\x01Raised By,Task\x01Allocated To',
-		'criteria_name': 'Task-Open',
-		'doc_type': 'Task',
+		'add_cond': u"`tabTask`.status='Open'",
+		'columns': u'Task\x01ID,Task\x01Subject,Task\x01Priority,Task\x01Raised By,Task\x01Allocated To',
+		'criteria_name': u'Task-Open',
+		'doc_type': u'Task',
 		'doctype': 'Search Criteria',
-		'filters': "{'Task\x01Priority':''}",
-		'module': 'Home',
+		'filters': u"{'Task\x01Priority':''}",
+		'module': u'Home',
 		'name': '__common__',
 		'page_len': 50,
-		'sort_by': '`tabTask`.`name`',
-		'sort_order': 'DESC',
-		'standard': 'Yes'
+		'sort_by': u'`tabTask`.`name`',
+		'sort_order': u'DESC',
+		'standard': u'Yes'
 	},
 
 	# Search Criteria, task-open
 	{
 		'doctype': 'Search Criteria',
-		'name': 'task-open'
+		'name': u'task-open'
 	}
 ]

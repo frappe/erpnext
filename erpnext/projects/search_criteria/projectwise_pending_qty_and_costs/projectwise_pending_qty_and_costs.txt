@@ -3,34 +3,34 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-09-01 15:48:09',
+		'creation': '2012-03-30 13:33:32',
 		'docstatus': 0,
-		'modified': '2010-08-30 14:21:20',
-		'modified_by': 'Administrator',
-		'owner': 'ashwini@webnotestech.com'
+		'modified': '2012-03-30 13:33:32',
+		'modified_by': u'Administrator',
+		'owner': u'ashwini@webnotestech.com'
 	},
 
 	# These values are common for all Search Criteria
 	{
-		'add_col': "SUM(`tabSales Order Item`.`qty` - `tabSales Order Item`.`delivered_qty`) AS 'Pending Qty'\nSUM((`tabSales Order Item`.`qty` - `tabSales Order Item`.`delivered_qty`)* `tabSales Order Item`.basic_rate) AS 'Pending Amount'",
-		'add_cond': '`tabSales Order Item`.`qty` > `tabSales Order Item`.`delivered_qty`\nIFNULL(`tabSales Order`.`project_name`,"")!=""\n`tabSales Order`.order_type = \'Sales\'',
-		'columns': 'Sales Order\x01ID,Sales Order\x01Project Name,Sales Order\x01Customer,Sales Order\x01Customer Name,Sales Order Item\x01Item Code,Sales Order Item\x01Item Name,Sales Order\x01%  Delivered,Sales Order\x01% Billed,Sales Order\x01Sales Order Date,Sales Order\x01Expected Delivery Date',
-		'criteria_name': 'Projectwise Pending Qty and Costs',
-		'doc_type': 'Sales Order Item',
+		'add_col': u"SUM(`tabSales Order Item`.`qty` - `tabSales Order Item`.`delivered_qty`) AS 'Pending Qty'\nSUM((`tabSales Order Item`.`qty` - `tabSales Order Item`.`delivered_qty`)* `tabSales Order Item`.basic_rate) AS 'Pending Amount'",
+		'add_cond': u'`tabSales Order Item`.`qty` > `tabSales Order Item`.`delivered_qty`\nIFNULL(`tabSales Order`.`project_name`,"")!=""\n`tabSales Order`.order_type = \'Sales\'',
+		'columns': u'Sales Order\x01ID,Sales Order\x01Project Name,Sales Order\x01Customer,Sales Order\x01Customer Name,Sales Order Item\x01Item Code,Sales Order Item\x01Item Name,Sales Order\x01%  Delivered,Sales Order\x01% Billed,Sales Order\x01Sales Order Date,Sales Order\x01Expected Delivery Date',
+		'criteria_name': u'Projectwise Pending Qty and Costs',
+		'doc_type': u'Sales Order Item',
 		'doctype': 'Search Criteria',
-		'filters': "{'Sales Order\x01Submitted':1,'Sales Order\x01Status':'Submitted','Sales Order\x01Fiscal Year':''}",
-		'module': 'Projects',
+		'filters': u"{'Sales Order\x01Submitted':1,'Sales Order\x01Status':'Submitted','Sales Order\x01Fiscal Year':''}",
+		'module': u'Projects',
 		'name': '__common__',
 		'page_len': 50,
-		'parent_doc_type': 'Sales Order',
-		'sort_by': '`tabSales Order`.`name`',
-		'sort_order': 'DESC',
-		'standard': 'Yes'
+		'parent_doc_type': u'Sales Order',
+		'sort_by': u'`tabSales Order`.`name`',
+		'sort_order': u'DESC',
+		'standard': u'Yes'
 	},
 
 	# Search Criteria, projectwise_pending_qty_and_costs
 	{
 		'doctype': 'Search Criteria',
-		'name': 'projectwise_pending_qty_and_costs'
+		'name': u'projectwise_pending_qty_and_costs'
 	}
 ]

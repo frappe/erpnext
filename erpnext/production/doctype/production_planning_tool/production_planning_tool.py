@@ -246,7 +246,7 @@ class DocType:
 
 
 	def get_csv(self):
-		item_list = [['Item Code', 'Description', 'Stock UOM', 'Required Qty', 'Indented Qty', 'Ordered Qty', 'Actual Qty']]
+		item_list = [['Item Code', 'Description', 'Stock UOM', 'Required Qty', 'Quantity Requested for Purchase', 'Ordered Qty', 'Actual Qty']]
 		for d in self.item_dict:
 			item_qty= sql("select sum(indented_qty), sum(ordered_qty), sum(actual_qty) from `tabBin` where item_code = %s", d)
 			item_list.append([d, self.item_dict[d][1], self.item_dict[d][2], self.item_dict[d][0], flt(item_qty[0][0]), flt(item_qty[0][1]), flt(item_qty[0][2])])

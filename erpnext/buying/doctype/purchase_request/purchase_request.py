@@ -166,7 +166,7 @@ class DocType:
 	# On Submit Functions
 	#----------------------------------------------------------------------------
 	
-	# Update Indented Qty in Bin
+	# Update Quantity Requested for Purchase in Bin
 	def update_bin(self, is_submit, is_stopped):
 		for d in getlist(self.doclist, 'indent_details'):
 			# Step 1:=> Check if is_stock_item == 'Yes'

@@ -3,30 +3,30 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-12-14 10:23:28',
+		'creation': '2012-03-30 14:50:43',
 		'docstatus': 0,
-		'modified': '2010-11-30 16:26:42',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-30 14:50:43',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all Search Criteria
 	{
-		'criteria_name': 'General Ledger',
-		'doc_type': 'GL Entry',
+		'criteria_name': u'General Ledger',
+		'doc_type': u'GL Entry',
 		'doctype': 'Search Criteria',
-		'filters': "{'GL Entry\x01From Posting Date\x01lower':'','GL Entry\x01To Posting Date\x01upper':'','GL Entry\x01Voucher Type':'','GL Entry\x01Is Cancelled':'No','GL Entry\x01Is Opening':'','GL Entry\x01Fiscal Year':'','GL Entry\x01Company':''}",
-		'module': 'Accounts',
+		'filters': u"{'GL Entry\x01From Posting Date\x01lower':'','GL Entry\x01To Posting Date\x01upper':'','GL Entry\x01Voucher Type':'','GL Entry\x01Is Cancelled':'No','GL Entry\x01Is Opening':'','GL Entry\x01Fiscal Year':'','GL Entry\x01Company':''}",
+		'module': u'Accounts',
 		'name': '__common__',
 		'page_len': 50,
-		'sort_by': '`tabGL Entry`.`name`',
-		'sort_order': 'DESC',
-		'standard': 'Yes'
+		'sort_by': u'`tabGL Entry`.`name`',
+		'sort_order': u'DESC',
+		'standard': u'Yes'
 	},
 
 	# Search Criteria, general_ledger
 	{
 		'doctype': 'Search Criteria',
-		'name': 'general_ledger'
+		'name': u'general_ledger'
 	}
 ]

@@ -438,7 +438,7 @@
 		'doctype': u'DocField',
 		'fieldname': u'deduction_details',
 		'fieldtype': u'Table',
-		'label': u'Deduction Details',
+		'label': u'Deductions',
 		'oldfieldname': u'deduction_details',
 		'oldfieldtype': u'Table',
 		'options': u'Salary Slip Deduction',

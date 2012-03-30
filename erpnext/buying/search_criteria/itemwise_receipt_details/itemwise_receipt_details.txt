@@ -3,32 +3,32 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-12-14 10:23:19',
+		'creation': '2012-03-30 14:50:43',
 		'docstatus': 0,
-		'modified': '2010-10-22 14:36:11',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-30 14:50:43',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all Search Criteria
 	{
-		'columns': 'Purchase Receipt\x01ID,Purchase Receipt\x01Posting Date,Purchase Receipt Item\x01Item Code,Purchase Receipt Item\x01Item Name,Purchase Receipt Item\x01Accepted Quantity,Purchase Receipt Item\x01Rejected Quantity,Purchase Receipt Item\x01Accepted Warehouse,Purchase Receipt Item\x01Rejected Warehouse,Purchase Receipt Item\x01Amount',
-		'criteria_name': 'Itemwise Receipt Details',
-		'doc_type': 'Purchase Receipt Item',
+		'columns': u'Purchase Receipt\x01ID,Purchase Receipt\x01Posting Date,Purchase Receipt Item\x01Item Code,Purchase Receipt Item\x01Item Name,Purchase Receipt Item\x01Accepted Quantity,Purchase Receipt Item\x01Rejected Quantity,Purchase Receipt Item\x01Accepted Warehouse,Purchase Receipt Item\x01Rejected Warehouse,Purchase Receipt Item\x01Amount',
+		'criteria_name': u'Itemwise Receipt Details',
+		'doc_type': u'Purchase Receipt Item',
 		'doctype': 'Search Criteria',
-		'filters': "{'Purchase Receipt\x01Saved':1,'Purchase Receipt\x01Submitted':1,'Purchase Receipt\x01Status':'','Purchase Receipt\x01Fiscal Year':''}",
-		'module': 'Buying',
+		'filters': u"{'Purchase Receipt\x01Saved':1,'Purchase Receipt\x01Submitted':1,'Purchase Receipt\x01Status':'','Purchase Receipt\x01Fiscal Year':''}",
+		'module': u'Buying',
 		'name': '__common__',
 		'page_len': 50,
-		'parent_doc_type': 'Purchase Receipt',
-		'sort_by': '`tabPurchase Receipt`.`name`',
-		'sort_order': 'DESC',
-		'standard': 'Yes'
+		'parent_doc_type': u'Purchase Receipt',
+		'sort_by': u'`tabPurchase Receipt`.`name`',
+		'sort_order': u'DESC',
+		'standard': u'Yes'
 	},
 
 	# Search Criteria, itemwise_receipt_details
 	{
 		'doctype': 'Search Criteria',
-		'name': 'itemwise_receipt_details'
+		'name': u'itemwise_receipt_details'
 	}
 ]

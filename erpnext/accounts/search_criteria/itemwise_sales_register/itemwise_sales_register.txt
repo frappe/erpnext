@@ -3,32 +3,32 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2011-01-19 17:33:33',
+		'creation': '2012-03-30 14:50:43',
 		'docstatus': 0,
-		'modified': '2011-06-20 16:30:41',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-30 14:50:43',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all Search Criteria
 	{
-		'columns': 'Sales Invoice Item\x01Item,Sales Invoice Item\x01Item Name,Sales Invoice Item\x01Item Group,Sales Invoice\x01ID,Sales Invoice\x01Voucher Date,Sales Invoice\x01Posting Date,Sales Invoice\x01Debit To,Sales Invoice Item\x01Cost Center,Sales Invoice\x01Territory,Sales Invoice Item\x01Income Account,Sales Invoice Item\x01Qty,Sales Invoice Item\x01Basic Rate*,Sales Invoice Item\x01Amount*',
-		'criteria_name': 'Itemwise Sales Register',
-		'doc_type': 'Sales Invoice Item',
+		'columns': u'Sales Invoice Item\x01Item,Sales Invoice Item\x01Item Name,Sales Invoice Item\x01Item Group,Sales Invoice\x01ID,Sales Invoice\x01Voucher Date,Sales Invoice\x01Posting Date,Sales Invoice\x01Debit To,Sales Invoice Item\x01Cost Center,Sales Invoice\x01Territory,Sales Invoice Item\x01Income Account,Sales Invoice Item\x01Qty,Sales Invoice Item\x01Basic Rate*,Sales Invoice Item\x01Amount*',
+		'criteria_name': u'Itemwise Sales Register',
+		'doc_type': u'Sales Invoice Item',
 		'doctype': 'Search Criteria',
-		'filters': "{'Sales Invoice\x01Submitted':1,'Sales Invoice\x01From Posting Date\x01lower':'','Sales Invoice\x01To Posting Date\x01upper':'','Sales Invoice\x01Is Opening':'','Sales Invoice\x01Company':'','Sales Invoice\x01Fiscal Year':''}",
-		'module': 'Accounts',
+		'filters': u"{'Sales Invoice\x01Submitted':1,'Sales Invoice\x01From Posting Date\x01lower':'','Sales Invoice\x01To Posting Date\x01upper':'','Sales Invoice\x01Is Opening':'','Sales Invoice\x01Company':'','Sales Invoice\x01Fiscal Year':''}",
+		'module': u'Accounts',
 		'name': '__common__',
 		'page_len': 50,
-		'parent_doc_type': 'Sales Invoice',
-		'sort_by': '`tabSales Invoice Item`.`income_account`',
-		'sort_order': 'DESC',
-		'standard': 'Yes'
+		'parent_doc_type': u'Sales Invoice',
+		'sort_by': u'`tabSales Invoice Item`.`income_account`',
+		'sort_order': u'DESC',
+		'standard': u'Yes'
 	},
 
 	# Search Criteria, itemwise_sales_register
 	{
 		'doctype': 'Search Criteria',
-		'name': 'itemwise_sales_register'
+		'name': u'itemwise_sales_register'
 	}
 ]

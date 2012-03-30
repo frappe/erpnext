@@ -3,32 +3,32 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2011-09-06 15:36:58',
+		'creation': '2012-03-30 13:33:32',
 		'docstatus': 0,
-		'modified': '2011-09-06 15:50:28',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-30 13:33:32',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all Search Criteria
 	{
-		'columns': 'Sales Taxes and Charges\x01Type,Sales Taxes and Charges\x01Account Head,Sales Taxes and Charges\x01Cost Center,Sales Taxes and Charges\x01Description,Sales Taxes and Charges\x01Rate,Sales Taxes and Charges\x01Amount*,Sales Taxes and Charges\x01Total*',
-		'criteria_name': 'Voucher wise tax details',
-		'doc_type': 'Sales Taxes and Charges',
+		'columns': u'Sales Taxes and Charges\x01Type,Sales Taxes and Charges\x01Account Head,Sales Taxes and Charges\x01Cost Center,Sales Taxes and Charges\x01Description,Sales Taxes and Charges\x01Rate,Sales Taxes and Charges\x01Amount*,Sales Taxes and Charges\x01Total*',
+		'criteria_name': u'Voucher wise tax details',
+		'doc_type': u'Sales Taxes and Charges',
 		'doctype': 'Search Criteria',
-		'filters': "{'Delivery Note\x01Submitted':1,'Delivery Note\x01Status':'','Delivery Note\x01Fiscal Year':''}",
-		'module': 'Accounts',
+		'filters': u"{'Delivery Note\x01Submitted':1,'Delivery Note\x01Status':'','Delivery Note\x01Fiscal Year':''}",
+		'module': u'Accounts',
 		'name': '__common__',
 		'page_len': 50,
-		'parent_doc_type': 'Delivery Note',
-		'sort_by': '`tabSales Taxes and Charges`.`parent`',
-		'sort_order': 'DESC',
-		'standard': 'Yes'
+		'parent_doc_type': u'Delivery Note',
+		'sort_by': u'`tabSales Taxes and Charges`.`parent`',
+		'sort_order': u'DESC',
+		'standard': u'Yes'
 	},
 
 	# Search Criteria, voucher_wise_tax_details
 	{
 		'doctype': 'Search Criteria',
-		'name': 'voucher_wise_tax_details'
+		'name': u'voucher_wise_tax_details'
 	}
 ]

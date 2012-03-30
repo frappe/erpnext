@@ -3,31 +3,31 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-12-14 10:23:25',
+		'creation': '2012-03-30 14:50:44',
 		'docstatus': 0,
-		'modified': '2010-12-01 09:54:34',
-		'modified_by': 'Administrator',
-		'owner': 'harshada@webnotestech.com'
+		'modified': '2012-03-30 14:50:44',
+		'modified_by': u'Administrator',
+		'owner': u'harshada@webnotestech.com'
 	},
 
 	# These values are common for all Search Criteria
 	{
-		'columns': 'Employee\x01ID',
-		'criteria_name': 'New or left employees for a month',
-		'doc_type': 'Employee',
+		'columns': u'Employee\x01ID',
+		'criteria_name': u'New or left employees for a month',
+		'doc_type': u'Employee',
 		'doctype': 'Search Criteria',
-		'filters': "{'Employee\x01Saved':1,'Employee\x01Submitted':1,'Employee\x01Gender':'','Employee\x01Month of Birth':'','Employee\x01Status':''}",
-		'module': 'HR',
+		'filters': u"{'Employee\x01Saved':1,'Employee\x01Submitted':1,'Employee\x01Gender':'','Employee\x01Month of Birth':'','Employee\x01Status':''}",
+		'module': u'HR',
 		'name': '__common__',
 		'page_len': 50,
-		'sort_by': '`tabEmployee`.`name`',
-		'sort_order': 'DESC',
-		'standard': 'Yes'
+		'sort_by': u'`tabEmployee`.`name`',
+		'sort_order': u'DESC',
+		'standard': u'Yes'
 	},
 
 	# Search Criteria, new_or_left_employees_for_a_month
 	{
 		'doctype': 'Search Criteria',
-		'name': 'new_or_left_employees_for_a_month'
+		'name': u'new_or_left_employees_for_a_month'
 	}
 ]

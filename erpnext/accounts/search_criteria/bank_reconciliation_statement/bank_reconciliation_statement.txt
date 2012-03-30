@@ -3,34 +3,34 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-11-01 10:56:14',
+		'creation': '2012-03-30 13:33:31',
 		'docstatus': 0,
-		'modified': '2010-10-29 16:36:00',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-30 13:33:31',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all Search Criteria
 	{
-		'add_cond': "(`tabJournal Voucher Detail`.credit >= 0 or `tabJournal Voucher Detail`.credit is null)\n(`tabJournal Voucher`.cheque_no is not null or `tabJournal Voucher`.cheque_no != '')\n(ifnull(`tabJournal Voucher`.clearance_date, '0000-00-00') >'%(clearance_date1)s' or `tabJournal Voucher`.clearance_date is null or `tabJournal Voucher`.clearance_date = '0000-00-00')\n(`tabJournal Voucher`.posting_date <= '%(clearance_date1)s')",
-		'columns': 'Journal Voucher\x01ID,Journal Voucher\x01Posting Date,Journal Voucher\x01Cheque No,Journal Voucher\x01Cheque Date,Journal Voucher\x01Clearance Date,Journal Voucher Detail\x01Account,Journal Voucher Detail\x01Debit,Journal Voucher Detail\x01Credit,Journal Voucher Detail\x01Against Account',
-		'criteria_name': 'Bank Reconciliation Statement',
-		'dis_filters': 'clearance_date\nfiscal_year',
-		'doc_type': 'Journal Voucher Detail',
+		'add_cond': u"(`tabJournal Voucher Detail`.credit >= 0 or `tabJournal Voucher Detail`.credit is null)\n(`tabJournal Voucher`.cheque_no is not null or `tabJournal Voucher`.cheque_no != '')\n(ifnull(`tabJournal Voucher`.clearance_date, '0000-00-00') >'%(clearance_date1)s' or `tabJournal Voucher`.clearance_date is null or `tabJournal Voucher`.clearance_date = '0000-00-00')\n(`tabJournal Voucher`.posting_date <= '%(clearance_date1)s')",
+		'columns': u'Journal Voucher\x01ID,Journal Voucher\x01Posting Date,Journal Voucher\x01Cheque No,Journal Voucher\x01Cheque Date,Journal Voucher\x01Clearance Date,Journal Voucher Detail\x01Account,Journal Voucher Detail\x01Debit,Journal Voucher Detail\x01Credit,Journal Voucher Detail\x01Against Account',
+		'criteria_name': u'Bank Reconciliation Statement',
+		'dis_filters': u'clearance_date\nfiscal_year',
+		'doc_type': u'Journal Voucher Detail',
 		'doctype': 'Search Criteria',
-		'filters': "{'Journal Voucher\x01Submitted':1,'Journal Voucher\x01Voucher Type':'','Journal Voucher\x01Is Opening':'','Journal Voucher\x01Company':'','Journal Voucher\x01TDS Applicable':'','Journal Voucher\x01TDS Category':''}",
-		'module': 'Accounts',
+		'filters': u"{'Journal Voucher\x01Submitted':1,'Journal Voucher\x01Voucher Type':'','Journal Voucher\x01Is Opening':'','Journal Voucher\x01Company':'','Journal Voucher\x01TDS Applicable':'','Journal Voucher\x01TDS Category':''}",
+		'module': u'Accounts',
 		'name': '__common__',
 		'page_len': 50,
-		'parent_doc_type': 'Journal Voucher',
-		'sort_by': '`tabJournal Voucher`.`name`',
-		'sort_order': 'DESC',
-		'standard': 'Yes'
+		'parent_doc_type': u'Journal Voucher',
+		'sort_by': u'`tabJournal Voucher`.`name`',
+		'sort_order': u'DESC',
+		'standard': u'Yes'
 	},
 
 	# Search Criteria, bank_reconciliation_statement
 	{
 		'doctype': 'Search Criteria',
-		'name': 'bank_reconciliation_statement'
+		'name': u'bank_reconciliation_statement'
 	}
 ]

@@ -3,32 +3,32 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-09-01 15:48:09',
+		'creation': '2012-03-30 13:33:32',
 		'docstatus': 0,
-		'modified': '2010-08-30 14:21:59',
-		'modified_by': 'Administrator',
-		'owner': 'harshada@webnotestech.com'
+		'modified': '2012-03-30 13:33:32',
+		'modified_by': u'Administrator',
+		'owner': u'harshada@webnotestech.com'
 	},
 
 	# These values are common for all Search Criteria
 	{
-		'add_cond': "ifnull(`tabSales Order`.project_name ,'') != ''",
-		'columns': 'Sales Order\x01ID,Sales Order\x01Status,Sales Order\x01Project Name,Sales Order\x01Customer,Sales Order\x01Sales Order Date,Sales Order\x01Expected Delivery Date,Sales Order\x01Quotation No,Sales Order\x01%  Delivered,Sales Order\x01% Billed,Sales Order\x01Grand Total*',
-		'criteria_name': 'Projectwise Sales Orders',
-		'doc_type': 'Sales Order',
+		'add_cond': u"ifnull(`tabSales Order`.project_name ,'') != ''",
+		'columns': u'Sales Order\x01ID,Sales Order\x01Status,Sales Order\x01Project Name,Sales Order\x01Customer,Sales Order\x01Sales Order Date,Sales Order\x01Expected Delivery Date,Sales Order\x01Quotation No,Sales Order\x01%  Delivered,Sales Order\x01% Billed,Sales Order\x01Grand Total*',
+		'criteria_name': u'Projectwise Sales Orders',
+		'doc_type': u'Sales Order',
 		'doctype': 'Search Criteria',
-		'filters': "{'Sales Order\x01Saved':1,'Sales Order\x01Submitted':1,'Sales Order\x01Status':'','Sales Order\x01Fiscal Year':''}",
-		'module': 'Projects',
+		'filters': u"{'Sales Order\x01Saved':1,'Sales Order\x01Submitted':1,'Sales Order\x01Status':'','Sales Order\x01Fiscal Year':''}",
+		'module': u'Projects',
 		'name': '__common__',
 		'page_len': 50,
-		'sort_by': '`tabSales Order`.`name`',
-		'sort_order': 'DESC',
-		'standard': 'Yes'
+		'sort_by': u'`tabSales Order`.`name`',
+		'sort_order': u'DESC',
+		'standard': u'Yes'
 	},
 
 	# Search Criteria, projectwise_sales_orders
 	{
 		'doctype': 'Search Criteria',
-		'name': 'projectwise_sales_orders'
+		'name': u'projectwise_sales_orders'
 	}
 ]

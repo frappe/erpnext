@@ -3,31 +3,31 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-12-14 10:23:25',
+		'creation': '2012-03-30 14:50:44',
 		'docstatus': 0,
-		'modified': '2010-08-04 09:19:01',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-30 14:50:44',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all Search Criteria
 	{
-		'columns': 'Salary Structure\x01ID,Salary Structure\x01Employee,Salary Structure\x01From Date,Salary Structure\x01To Date,Salary Structure\x01Fiscal Year,Salary Structure\x01Branch,Salary Structure\x01Designation,Salary Structure\x01Department,Salary Structure\x01Grade,Salary Structure\x01Is Active,Salary Structure\x01Total Earning,Salary Structure\x01Total Deduction,Salary Structure\x01CTC,Salary Structure\x01Total',
-		'criteria_name': 'Salary Structure Details',
-		'doc_type': 'Salary Structure',
+		'columns': u'Salary Structure\x01ID,Salary Structure\x01Employee,Salary Structure\x01From Date,Salary Structure\x01To Date,Salary Structure\x01Fiscal Year,Salary Structure\x01Branch,Salary Structure\x01Designation,Salary Structure\x01Department,Salary Structure\x01Grade,Salary Structure\x01Is Active,Salary Structure\x01Total Earning,Salary Structure\x01Total Deduction,Salary Structure\x01CTC,Salary Structure\x01Total',
+		'criteria_name': u'Salary Structure Details',
+		'doc_type': u'Salary Structure',
 		'doctype': 'Search Criteria',
-		'filters': "{'Salary Structure\x01Branch':'','Salary Structure\x01Designation':'','Salary Structure\x01Department':'','Salary Structure\x01Grade':'','Salary Structure\x01Is Active':''}",
-		'module': 'HR',
+		'filters': u"{'Salary Structure\x01Branch':'','Salary Structure\x01Designation':'','Salary Structure\x01Department':'','Salary Structure\x01Grade':'','Salary Structure\x01Is Active':''}",
+		'module': u'HR',
 		'name': '__common__',
 		'page_len': 50,
-		'sort_by': '`tabSalary Structure`.`name`',
-		'sort_order': 'DESC',
-		'standard': 'Yes'
+		'sort_by': u'`tabSalary Structure`.`name`',
+		'sort_order': u'DESC',
+		'standard': u'Yes'
 	},
 
 	# Search Criteria, salary_structure_details
 	{
 		'doctype': 'Search Criteria',
-		'name': 'salary_structure_details'
+		'name': u'salary_structure_details'
 	}
 ]

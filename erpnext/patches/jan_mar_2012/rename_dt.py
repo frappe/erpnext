@@ -7,27 +7,10 @@ from webnotes.modules.module_manager import reload_doc
 from webnotes.utils import make_esc
 import os
 
-def execute3():
-	# Dt Mapper renaming
-	ren_mapper = get_mapper_to_be_renamed()
-	# Rename mapper in db
-	rename_in_db(ren_mapper, 'DocType Mapper', 0)
-
-	#---------------------------------------------------
-	# GL Mapper renaming
-	gl_mapper = {'Receivable Voucher': 'Sales Invoice', 'Payable Voucher': 'Purchase Invoice'}
-	rename_in_db(gl_mapper, 'GL Mapper', 0)
-
-
-	#---------------------------------------------------
-	# remove dt label
-	webnotes.conn.sql("""delete from `tabDocType Label` where name in ('Ticket', 'Receivable Voucher', 
-		'QA Inspection Report', 'Payable Voucher', 'Manage Account', 'Indent', 'DocLayer')""")
-
 def execute():
-	update_local_file_system()
+	update_file_content({'Follow up': 'Communication'})
 
-def execute2():
+def execute1():
 	# delete dt, mapper
 	delete_dt_and_mapper()
 	
@@ -61,13 +44,36 @@ def execute2():
 	for d in ren_mapper:
 		mod = '_'.join(webnotes.conn.sql("select module from `tabDocType Mapper` where name = %s", ren_mapper[d])[0][0].lower().split())
 		reload_doc(mod, 'DocType Mapper', ren_mapper[d])
+	
+	webnotes.conn.sql("DELETE FROM `tabSearch Criteria` WHERE name=''")
+	webnotes.conn.sql("""UPDATE `tabSearch Criteria` SET standard='No'
+			WHERE name IN ('appraisal_custom', 'bills-to_be_paid',
+			'bills-to_be_submitted', 'cenvat_credit_-_input_or_capital_goods',
+			'custom_test', 'custom_test1', 'delivery_note-to_be_billed',
+			'delivery_note-to_be_submitted', 'delivery_notes',
+			'employee_leave_balance_report', 'flat_bom_report',
+			'general_ledger1', 'lead_interested',
+			'payables_-_as_on_outstanding', 'periodical_budget_report',
+			'projectwise_delivered_qty_and_costs_as_per_purchase_cost',
+			'projectwise_pending_qty_and_costs_as_per_purchase_cost', 'sales',
+			'sales_order1', 'sales_order_pending_items',
+			'territory_wise_sales_-_target_vs_actual_', 'test_report')""")
 
 	# reload custom search criteria
-	for d in  webnotes.conn.sql("""select name, module from `tabSearch Criteria` where ifnull(standard, 'Yes') = 'Yes' and ifnull(disabled, 0) = 0"""):
-		reload_doc(d[1], 'search_criteria', d[0])
+	for d in  webnotes.conn.sql("""select name, module from
+			`tabSearch Criteria` where ifnull(standard, 'No') = 'Yes' and ifnull(disabled, 0) = 0"""):
+		print d
+		reload_doc(d[1], 'search_criteria', d[0].replace('-', '_'))
+	
+	webnotes.conn.sql("""DELETE FROM `tabPrint Format`
+			WHERE name IN ('Delivery Note Format', 'Purchase Order Format',
+			'Quotation Format', 'Receivable Voucher Format', 'Sales Order',
+			'SalesInvoiceModern_test', 'SalesInvoiceStdNew',
+			'Service Order Format', 'Service Quotation Format')""")
 
 	# reload custom print format
-	for d in webnotes.conn.sql("select name, module from `tabPrint Format` where ifnull(standard, 'Yes') = 'Yes'"):
+	for d in webnotes.conn.sql("""select name, module from `tabPrint Format`
+			where ifnull(standard, 'No') = 'Yes'"""):
 		reload_doc(d[1], 'Print Format', d[0])
 
 	#  Reload GL Mapper
@@ -172,8 +178,6 @@ def get_dt_to_be_renamed():
 		'QA Inspection Report'		:	'Quality Inspection',
 		'Ticket'					:	'Task',
 		'Manage Account'			:	'Global Defaults',
-		'DocLayer'					:	'Customize Form View',
-		'DocLayerField'				:	'CFV Field',
 		'ToDo Item'					:	'ToDo',
 		'Term'						:	'Terms and Conditions',
 		'Static Parameter Detail'	:	'SMS Parameter',
@@ -268,17 +272,21 @@ def update_local_file_system():
 	rendt = get_dt_to_be_renamed()
 
 	# replace dt in js/py file
-	#update_file_content(rendt)
+	update_file_content(rendt)
 	# git mv
-	#rename_dt_files(rendt)
+	rename_dt_files(rendt)
 
 
 	# Mapper renaming
 	ren_mapper = get_mapper_to_be_renamed()
 
 	rename_mapper_files(ren_mapper)
-	
 
+	os.system('git mv erpnext/accounts/GL\ Mapper/Payable\ Voucher erpnext/accounts/GL\ Mapper/Purchase\ Invoice')
+	os.system('git mv erpnext/accounts/GL\ Mapper/Purchase\ Invoice/Payable\ Voucher.txt erpnext/accounts/GL\ Mapper/Purchase\ Invoice/Purchase\ Invoice.txt')
+	os.system('git mv erpnext/accounts/GL\ Mapper/Receivable\ Voucher erpnext/accounts/GL\ Mapper/Sales\ Invoice')
+	os.system('git mv erpnext/accounts/GL\ Mapper/Sales\ Invoice/Receivable\ Voucher.txt erpnext/accounts/GL\ Mapper/Sales\ Invoice/Sales\ Invoice.txt')
+	
 	# git rm production dt mapper
 	os.system('git rm -r erpnext/production/DocType\ Mapper/')
 
@@ -312,7 +320,7 @@ def rename_dt_files(rendt):
 def rename_mapper_files(ren_mapper):
 	for d in ren_mapper:
 		# module
-		mod = '_'.join(webnotes.conn.sql("select module from `tabDocType Mapper` where name = %s", ren_mapper[d], debug=1)[0][0].lower().split())
+		mod = '_'.join(webnotes.conn.sql("select module from `tabDocType Mapper` where name = %s", ren_mapper[d])[0][0].lower().split())
 		path = 'erpnext/' + mod + '/DocType Mapper/'
 
 		# rename old dir

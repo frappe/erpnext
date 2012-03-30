@@ -1,0 +1,35 @@
+# Search Criteria, opportunity-quotations_to_be_sent
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2012-03-30 14:50:44',
+		'docstatus': 0,
+		'modified': '2012-03-30 14:50:44',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
+	},
+
+	# These values are common for all Search Criteria
+	{
+		'add_cond': u'`tabQuotation`.enq_no!=`tabOpportunity`.name\n',
+		'add_tab': u'tabQuotation',
+		'columns': u'Opportunity\x01ID,Opportunity\x01Owner',
+		'criteria_name': u'Opportunity-Quotations to be sent',
+		'doc_type': u'Opportunity',
+		'doctype': 'Search Criteria',
+		'filters': u'{}',
+		'module': u'Home',
+		'name': '__common__',
+		'page_len': 50,
+		'sort_by': u'`tabOpportunity`.`name`',
+		'sort_order': u'DESC',
+		'standard': u'Yes'
+	},
+
+	# Search Criteria, opportunity-quotations_to_be_sent
+	{
+		'doctype': 'Search Criteria',
+		'name': u'opportunity-quotations_to_be_sent'
+	}
+]

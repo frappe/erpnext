@@ -3,32 +3,32 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:09:31',
+		'creation': '2012-03-30 14:50:44',
 		'docstatus': 0,
-		'modified': '2010-05-13 17:47:45',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-30 14:50:44',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all Search Criteria
 	{
-		'add_cond': "`tabSales Order`.status='Draft'",
-		'columns': 'Sales Order\x01ID,Sales Order\x01Customer,Sales Order\x01Sales Order Date,Sales Order\x01Quotation No',
-		'criteria_name': 'Sales Order-To be submitted',
-		'doc_type': 'Sales Order',
+		'add_cond': u"`tabSales Order`.status='Draft'",
+		'columns': u'Sales Order\x01ID,Sales Order\x01Customer,Sales Order\x01Sales Order Date,Sales Order\x01Quotation No',
+		'criteria_name': u'Sales Order-To be submitted',
+		'doc_type': u'Sales Order',
 		'doctype': 'Search Criteria',
-		'filters': "{'Sales Order\x01Saved':1,'Sales Order\x01Fiscal Year':''}",
-		'module': 'Home',
+		'filters': u"{'Sales Order\x01Saved':1,'Sales Order\x01Fiscal Year':''}",
+		'module': u'Home',
 		'name': '__common__',
 		'page_len': 100,
-		'sort_by': '`tabSales Order`.`name`',
-		'sort_order': 'DESC',
-		'standard': 'Yes'
+		'sort_by': u'`tabSales Order`.`name`',
+		'sort_order': u'DESC',
+		'standard': u'Yes'
 	},
 
 	# Search Criteria, sales_order-to_be_submitted
 	{
 		'doctype': 'Search Criteria',
-		'name': 'sales_order-to_be_submitted'
+		'name': u'sales_order-to_be_submitted'
 	}
 ]

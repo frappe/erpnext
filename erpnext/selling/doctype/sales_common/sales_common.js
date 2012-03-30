@@ -96,7 +96,7 @@ cur_frm.cscript.customer = function(doc, cdt, cdn) {
 
 var set_dynamic_label_par = function(doc, cdt, cdn, base_curr) {
 	//parent flds
-	par_cols_base = {'net_total': 'Net Total', 'other_charges_total': 'Other Charges Total', 
+	par_cols_base = {'net_total': 'Net Total', 'other_charges_total': 'Taxes and Charges Total', 
 		'grand_total':	'Grand Total', 'rounded_total': 'Rounded Total', 'in_words': 'In Words'}
 	par_cols_export = {'grand_total_export': 'Grand Total', 'rounded_total_export':	'Rounded Total', 'in_words_export':	'In Words'};
 
@@ -363,8 +363,8 @@ cur_frm.fields_dict.charge.get_query = function(doc) {
 }
 
 // ********************* Get Charges ****************************
-cur_frm.cscript['Get Charges'] = function(doc, cdt, cdn) {
-	$c_obj(make_doclist(doc.doctype,doc.name),'get_other_charges','', function(r, rt) { cur_frm.cscript['Calculate Charges'](doc, cdt, cdn);});
+cur_frm.cscript['Get Taxes and Charges'] = function(doc, cdt, cdn) {
+	$c_obj(make_doclist(doc.doctype,doc.name),'get_other_charges','', function(r, rt) { cur_frm.cscript['Calculate Taxes and Charges'](doc, cdt, cdn);});
 }
 
 
@@ -459,14 +459,14 @@ cur_frm.cscript.calc_other_charges = function(doc , tname , fname , other_fname)
 	doc = locals[doc.doctype][doc.name];
 
 	// Make Display Area
-	cur_frm.fields_dict['Other Charges Calculation'].disp_area.innerHTML =
-		'<b style="padding: 8px 0px;">Calculation Details for Other Charges:</b>';
+	cur_frm.fields_dict['Taxes and Charges Calculation'].disp_area.innerHTML =
+		'<b style="padding: 8px 0px;">Calculation Details for Taxes and Charges:</b>';
 
 	var cl = getchildren(tname, doc.name, fname);
 	var tax = getchildren('Sales Taxes and Charges', doc.name, other_fname,doc.doctype);
 	
 	// Make display table
-	var otc = make_table(cur_frm.fields_dict['Other Charges Calculation'].disp_area,
+	var otc = make_table(cur_frm.fields_dict['Taxes and Charges Calculation'].disp_area,
 		cl.length + 1, tax.length + 1, '90%', [], { border:'1px solid #AAA', padding:'2px' });
 	$y(otc,{marginTop:'8px'});
 
@@ -740,10 +740,10 @@ cur_frm.cscript.get_item_wise_tax_detail = function( doc, rate, cl, i, tax, t) {
 // **************** RE-CALCULATE VALUES ***************************
 
 cur_frm.cscript['Re-Calculate Values'] = function(doc, cdt, cdn) {	
-	cur_frm.cscript['Calculate Charges'](doc,cdt,cdn);
+	cur_frm.cscript['Calculate Taxes and Charges'](doc,cdt,cdn);
 }
 
-cur_frm.cscript['Calculate Charges'] = function(doc, cdt, cdn) {
+cur_frm.cscript['Calculate Taxes and Charges'] = function(doc, cdt, cdn) {
 	var other_fname	= cur_frm.cscript.other_fname;
 
 	var cl = getchildren('Sales Taxes and Charges', doc.name, other_fname, doc.doctype);
@@ -824,11 +824,11 @@ cur_frm.cscript.validate = function(doc, cdt, cdn) {
 	var cl = getchildren('Sales Taxes and Charges Master', doc.name, 'other_charges');
 	for(var i =0;i<cl.length;i++) {
 		if(!cl[i].amount) {
-			alert("Please Enter Amount in Row no. "+cl[i].idx+" in Other Charges table");
+			alert("Please Enter Amount in Row no. "+cl[i].idx+" in Taxes and Charges table");
 			validated = false;
 		}
 	}
-	cur_frm.cscript['Calculate Charges'] (doc, cdt, cdn);
+	cur_frm.cscript['Calculate Taxes and Charges'] (doc, cdt, cdn);
 
 	if (cur_frm.cscript.calc_adjustment_amount) cur_frm.cscript.calc_adjustment_amount(doc);
 }

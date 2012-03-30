@@ -3,37 +3,37 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-09-01 15:48:09',
+		'creation': '2012-03-30 13:33:32',
 		'docstatus': 0,
-		'modified': '2010-08-30 13:04:44',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-30 13:33:32',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all Search Criteria
 	{
-		'add_col': "`tabPurchase Receipt`.`posting_date` AS 'PR Posting Date'",
-		'add_cond': "`tabPurchase Invoice Item`.`purchase_receipt`  = `tabPurchase Receipt`.`name`\n`tabPurchase Receipt`.`posting_date` >= '%(pr_posting_date)s'\n`tabPurchase Receipt`.`posting_date` <= '%(pr_posting_date1)s'\n`tabPurchase Receipt`.`posting_date` > `tabPurchase Invoice`.`posting_date`",
-		'add_tab': '`tabPurchase Receipt`',
-		'columns': 'Purchase Invoice\x01ID,Purchase Invoice\x01Voucher Date,Purchase Invoice\x01Posting Date,Purchase Invoice\x01Credit To,Purchase Invoice Item\x01Rate,Purchase Invoice Item\x01Qty,Purchase Invoice Item\x01Amount,Purchase Invoice Item\x01Pur Order,Purchase Invoice Item\x01Pur Receipt',
-		'criteria_name': 'Purchase in Transit',
-		'description': 'List of PR whose posting date is after PV posting date',
-		'dis_filters': '`tabPurchase Receipt`.`pr_posting_date`',
-		'doc_type': 'Purchase Invoice Item',
+		'add_col': u"`tabPurchase Receipt`.`posting_date` AS 'PR Posting Date'",
+		'add_cond': u"`tabPurchase Invoice Item`.`purchase_receipt`  = `tabPurchase Receipt`.`name`\n`tabPurchase Receipt`.`posting_date` >= '%(pr_posting_date)s'\n`tabPurchase Receipt`.`posting_date` <= '%(pr_posting_date1)s'\n`tabPurchase Receipt`.`posting_date` > `tabPurchase Invoice`.`posting_date`",
+		'add_tab': u'`tabPurchase Receipt`',
+		'columns': u'Purchase Invoice\x01ID,Purchase Invoice\x01Voucher Date,Purchase Invoice\x01Posting Date,Purchase Invoice\x01Credit To,Purchase Invoice Item\x01Rate,Purchase Invoice Item\x01Qty,Purchase Invoice Item\x01Amount,Purchase Invoice Item\x01Pur Order,Purchase Invoice Item\x01Pur Receipt',
+		'criteria_name': u'Purchase in Transit',
+		'description': u'List of PR whose posting date is after PV posting date',
+		'dis_filters': u'`tabPurchase Receipt`.`pr_posting_date`',
+		'doc_type': u'Purchase Invoice Item',
 		'doctype': 'Search Criteria',
-		'filters': "{'Purchase Invoice\x01Submitted':1,'Purchase Invoice\x01From Posting Date\x01lower':'2009-04-01','Purchase Invoice\x01To Posting Date\x01upper':'2010-01-11','Purchase Invoice\x01Is Opening':'','Purchase Invoice\x01Fiscal Year':'','Purchase Invoice\x01Company':'','Purchase Receipt\x01From PR Posting Date\x01lower':'2009-04-01','Purchase Receipt\x01To PR Posting Date\x01upper':'2010-01-11'}",
-		'module': 'Buying',
+		'filters': u"{'Purchase Invoice\x01Submitted':1,'Purchase Invoice\x01From Posting Date\x01lower':'2009-04-01','Purchase Invoice\x01To Posting Date\x01upper':'2010-01-11','Purchase Invoice\x01Is Opening':'','Purchase Invoice\x01Fiscal Year':'','Purchase Invoice\x01Company':'','Purchase Receipt\x01From PR Posting Date\x01lower':'2009-04-01','Purchase Receipt\x01To PR Posting Date\x01upper':'2010-01-11'}",
+		'module': u'Buying',
 		'name': '__common__',
 		'page_len': 50,
-		'parent_doc_type': 'Purchase Invoice',
-		'sort_by': '`tabPurchase Invoice`.`name`',
-		'sort_order': 'DESC',
-		'standard': 'Yes'
+		'parent_doc_type': u'Purchase Invoice',
+		'sort_by': u'`tabPurchase Invoice`.`name`',
+		'sort_order': u'DESC',
+		'standard': u'Yes'
 	},
 
 	# Search Criteria, purchase_in_transit
 	{
 		'doctype': 'Search Criteria',
-		'name': 'purchase_in_transit'
+		'name': u'purchase_in_transit'
 	}
 ]

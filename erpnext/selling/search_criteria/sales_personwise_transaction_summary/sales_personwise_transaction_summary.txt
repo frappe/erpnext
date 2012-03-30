@@ -3,31 +3,31 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2011-06-08 11:00:34',
+		'creation': '2012-03-30 14:50:44',
 		'docstatus': 0,
-		'modified': '2011-02-24 17:35:32',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-30 14:50:44',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all Search Criteria
 	{
-		'columns': 'Sales Person\x01ID',
-		'criteria_name': 'Sales Personwise Transaction Summary',
-		'doc_type': 'Sales Person',
+		'columns': u'Sales Person\x01ID',
+		'criteria_name': u'Sales Personwise Transaction Summary',
+		'doc_type': u'Sales Person',
 		'doctype': 'Search Criteria',
-		'filters': "{'Sales Person\x01Saved':1,'Sales Person\x01Submitted':1,'Sales Person\x01Country':'','Sales Person\x01State':''}",
-		'module': 'Selling',
+		'filters': u"{'Sales Person\x01Saved':1,'Sales Person\x01Submitted':1,'Sales Person\x01Country':'','Sales Person\x01State':''}",
+		'module': u'Selling',
 		'name': '__common__',
 		'page_len': 50,
-		'sort_by': '`tabSales Person`.`name`',
-		'sort_order': 'DESC',
-		'standard': 'Yes'
+		'sort_by': u'`tabSales Person`.`name`',
+		'sort_order': u'DESC',
+		'standard': u'Yes'
 	},
 
 	# Search Criteria, sales_personwise_transaction_summary
 	{
 		'doctype': 'Search Criteria',
-		'name': 'sales_personwise_transaction_summary'
+		'name': u'sales_personwise_transaction_summary'
 	}
 ]

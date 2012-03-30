@@ -3,33 +3,33 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-09-01 15:48:09',
+		'creation': '2012-03-30 14:50:44',
 		'docstatus': 0,
-		'modified': '2010-08-30 11:54:36',
-		'modified_by': 'Administrator',
-		'owner': 'harshada@webnotestech.com'
+		'modified': '2012-03-30 14:50:44',
+		'modified_by': u'Administrator',
+		'owner': u'harshada@webnotestech.com'
 	},
 
 	# These values are common for all Search Criteria
 	{
-		'add_cond': 'IFNULL(`tabDelivery Note`.`project_name`,"")!=""',
-		'columns': 'Delivery Note\x01ID,Delivery Note\x01Project Name,Delivery Note\x01Customer,Delivery Note\x01Customer Name,Delivery Note Item\x01Item Code,Delivery Note Item\x01Item Name,Delivery Note Item\x01Quantity,Delivery Note\x01Posting Date,Delivery Note\x01% Billed,Delivery Note Item\x01Amount*',
-		'criteria_name': 'Projectwise Delivered Qty and Costs',
-		'doc_type': 'Delivery Note Item',
+		'add_cond': u'IFNULL(`tabDelivery Note`.`project_name`,"")!=""',
+		'columns': u'Delivery Note\x01ID,Delivery Note\x01Project Name,Delivery Note\x01Customer,Delivery Note\x01Customer Name,Delivery Note Item\x01Item Code,Delivery Note Item\x01Item Name,Delivery Note Item\x01Quantity,Delivery Note\x01Posting Date,Delivery Note\x01% Billed,Delivery Note Item\x01Amount*',
+		'criteria_name': u'Projectwise Delivered Qty and Costs',
+		'doc_type': u'Delivery Note Item',
 		'doctype': 'Search Criteria',
-		'filters': "{'Delivery Note\x01Submitted':1,'Delivery Note\x01Status':'Submitted','Delivery Note\x01Fiscal Year':''}",
-		'module': 'Projects',
+		'filters': u"{'Delivery Note\x01Submitted':1,'Delivery Note\x01Status':'Submitted','Delivery Note\x01Fiscal Year':''}",
+		'module': u'Projects',
 		'name': '__common__',
 		'page_len': 50,
-		'parent_doc_type': 'Delivery Note',
-		'sort_by': '`tabDelivery Note`.`name`',
-		'sort_order': 'DESC',
-		'standard': 'Yes'
+		'parent_doc_type': u'Delivery Note',
+		'sort_by': u'`tabDelivery Note`.`name`',
+		'sort_order': u'DESC',
+		'standard': u'Yes'
 	},
 
 	# Search Criteria, projectwise_delivered_qty_and_costs
 	{
 		'doctype': 'Search Criteria',
-		'name': 'projectwise_delivered_qty_and_costs'
+		'name': u'projectwise_delivered_qty_and_costs'
 	}
 ]

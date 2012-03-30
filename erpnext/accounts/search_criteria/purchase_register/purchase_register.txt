@@ -3,29 +3,29 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-12-15 08:39:24',
+		'creation': '2012-03-30 13:33:32',
 		'docstatus': 0,
-		'modified': '2011-06-06 14:37:00',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-30 13:33:32',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all Search Criteria
 	{
-		'add_cond': "`tabPurchase Invoice`.is_opening != 'Yes'\n`tabPurchase Invoice`.name not like 'OP/%'",
-		'columns': 'Purchase Invoice\x01ID,Purchase Invoice\x01Voucher Date,Purchase Invoice\x01Posting Date,Purchase Invoice\x01Credit To,Purchase Invoice\x01Expense Head',
-		'criteria_name': 'Purchase Register',
-		'doc_type': 'Purchase Invoice',
+		'add_cond': u"`tabPurchase Invoice`.is_opening != 'Yes'\n`tabPurchase Invoice`.name not like 'OP/%'",
+		'columns': u'Purchase Invoice\x01ID,Purchase Invoice\x01Voucher Date,Purchase Invoice\x01Posting Date,Purchase Invoice\x01Credit To,Purchase Invoice\x01Expense Head',
+		'criteria_name': u'Purchase Register',
+		'doc_type': u'Purchase Invoice',
 		'doctype': 'Search Criteria',
-		'filters': "{'Purchase Invoice\x01Submitted':1}",
-		'module': 'Accounts',
+		'filters': u"{'Purchase Invoice\x01Submitted':1}",
+		'module': u'Accounts',
 		'name': '__common__',
-		'standard': 'Yes'
+		'standard': u'Yes'
 	},
 
 	# Search Criteria, purchase_register
 	{
 		'doctype': 'Search Criteria',
-		'name': 'purchase_register'
+		'name': u'purchase_register'
 	}
 ]

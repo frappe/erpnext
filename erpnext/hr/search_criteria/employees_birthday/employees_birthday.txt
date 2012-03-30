@@ -3,31 +3,31 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-12-14 10:33:12',
+		'creation': '2012-03-30 13:33:31',
 		'docstatus': 0,
-		'modified': '2010-08-04 13:15:28',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-30 13:33:31',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all Search Criteria
 	{
-		'columns': 'Employee\x01ID,Employee\x01Employee Name,Employee\x01Department,Employee\x01Gender,Employee\x01Date of Birth,Employee\x01Month of Birth',
-		'criteria_name': "Employee's Birthday",
-		'doc_type': 'Employee',
+		'columns': u'Employee\x01ID,Employee\x01Employee Name,Employee\x01Department,Employee\x01Gender,Employee\x01Date of Birth,Employee\x01Month of Birth',
+		'criteria_name': u"Employee's Birthday",
+		'doc_type': u'Employee',
 		'doctype': 'Search Criteria',
-		'filters': "{'Employee\x01Saved':1,'Employee\x01Gender':'','Employee\x01Month of Birth':'May','Employee\x01Status':''}",
-		'module': 'HR',
+		'filters': u"{'Employee\x01Saved':1,'Employee\x01Gender':'','Employee\x01Month of Birth':'May','Employee\x01Status':''}",
+		'module': u'HR',
 		'name': '__common__',
 		'page_len': 50,
-		'sort_by': '`tabEmployee`.`name`',
-		'sort_order': 'DESC',
-		'standard': 'Yes'
+		'sort_by': u'`tabEmployee`.`name`',
+		'sort_order': u'DESC',
+		'standard': u'Yes'
 	},
 
 	# Search Criteria, employees_birthday
 	{
 		'doctype': 'Search Criteria',
-		'name': 'employees_birthday'
+		'name': u'employees_birthday'
 	}
 ]

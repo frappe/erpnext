@@ -36,7 +36,7 @@ pscript.onload_Webforms = function(){
       lead_dv.innerHTML = '&lt;iframe src ="'+url+'?ac_name='+acc_id+'&embed=Lead" width ="400" height="800" frameborder="0"&gt;&lt;/iframe&gt;';
       cust_issue_dv.innerHTML = '&lt;iframe src ="'+url+'?ac_name='+acc_id+'&embed=Customer Issue" width ="400" height="500" frameborder="0"&gt;&lt;/iframe&gt;';
       job_dv.innerHTML = '&lt;iframe src ="'+url+'?ac_name='+acc_id+'&embed=Job Application"  width ="400" height="800" frameborder="0""&gt;&lt;/iframe&gt;';
-      ticket_dv.innerHTML = '&lt;iframe src ="'+url+'?ac_name='+acc_id+'&embed=Support Task"  width ="400" height="800" frameborder="0""&gt;&lt;/iframe&gt;';
+      ticket_dv.innerHTML = '&lt;iframe src ="'+url+'?ac_name='+acc_id+'&embed=Support Ticket"  width ="400" height="800" frameborder="0""&gt;&lt;/iframe&gt;';
     }
   }); 
 }

@@ -434,11 +434,11 @@
 
 	# DocField
 	{
-		'description': u'Add Terms and Conditions for the Purchase Requisition. You can also prepare a master Term Sheet and use the Template',
+		'description': u'Add Terms and Conditions for the Purchase Requisition. You can also prepare a Terms and Conditions Master and use the Template',
 		'doctype': u'DocField',
 		'fieldname': u'terms_section_break',
 		'fieldtype': u'Section Break',
-		'label': u'Terms',
+		'label': u'Terms and Conditions',
 		'oldfieldtype': u'Section Break',
 		'permlevel': 0
 	},
@@ -462,7 +462,7 @@
 		'doctype': u'DocField',
 		'fieldname': u'tc_name',
 		'fieldtype': u'Link',
-		'label': u'Select Terms',
+		'label': u'Select Terms and Conditions',
 		'oldfieldname': u'tc_name',
 		'oldfieldtype': u'Link',
 		'options': u'Terms and Conditions',
@@ -476,7 +476,7 @@
 		'doctype': u'DocField',
 		'fieldname': u'get_terms',
 		'fieldtype': u'Button',
-		'label': u'Get Terms',
+		'label': u'Get Terms and Conditions',
 		'oldfieldtype': u'Button',
 		'options': u'get_tc_details',
 		'permlevel': 0
@@ -487,7 +487,7 @@
 		'doctype': u'DocField',
 		'fieldname': u'terms_html',
 		'fieldtype': u'HTML',
-		'label': u'Terms HTML',
+		'label': u'Terms and Conditions HTML',
 		'oldfieldtype': u'HTML',
 		'options': u'You can add Terms and Notes that will be printed in the Transaction',
 		'permlevel': 0,
@@ -499,7 +499,7 @@
 		'doctype': u'DocField',
 		'fieldname': u'terms',
 		'fieldtype': u'Text Editor',
-		'label': u'Terms Content',
+		'label': u'Terms and Conditions Content',
 		'oldfieldname': u'terms',
 		'oldfieldtype': u'Text Editor',
 		'permlevel': 0

@@ -3,31 +3,31 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-09-01 15:48:09',
+		'creation': '2012-03-30 13:33:31',
 		'docstatus': 0,
-		'modified': '2010-08-30 13:21:32',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-30 13:33:31',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all Search Criteria
 	{
-		'columns': 'Customer Issue\x01ID,Customer Issue\x01Status,Customer Issue\x01Complaint Date,Customer Issue\x01Complaint,Customer Issue\x01Item Code,Customer Issue\x01Item Name,Customer Issue\x01Allocated To,Customer Issue\x01Allocated On,Customer Issue\x01Resolved By,Customer Issue\x01Resolution Date,Customer Issue\x01Customer Name,Customer Issue\x01Fiscal Year',
-		'criteria_name': 'Customer Issues',
-		'doc_type': 'Customer Issue',
+		'columns': u'Customer Issue\x01ID,Customer Issue\x01Status,Customer Issue\x01Complaint Date,Customer Issue\x01Complaint,Customer Issue\x01Item Code,Customer Issue\x01Item Name,Customer Issue\x01Allocated To,Customer Issue\x01Allocated On,Customer Issue\x01Resolved By,Customer Issue\x01Resolution Date,Customer Issue\x01Customer Name,Customer Issue\x01Fiscal Year',
+		'criteria_name': u'Customer Issues',
+		'doc_type': u'Customer Issue',
 		'doctype': 'Search Criteria',
-		'filters': "{'Customer Issue\x01Saved':1,'Customer Issue\x01Submitted':1,'Customer Issue\x01Status':'','Customer Issue\x01Fiscal Year':''}",
-		'module': 'Support',
+		'filters': u"{'Customer Issue\x01Saved':1,'Customer Issue\x01Submitted':1,'Customer Issue\x01Status':'','Customer Issue\x01Fiscal Year':''}",
+		'module': u'Support',
 		'name': '__common__',
 		'page_len': 50,
-		'sort_by': '`tabCustomer Issue`.`name`',
-		'sort_order': 'DESC',
-		'standard': 'Yes'
+		'sort_by': u'`tabCustomer Issue`.`name`',
+		'sort_order': u'DESC',
+		'standard': u'Yes'
 	},
 
 	# Search Criteria, customer_issues
 	{
 		'doctype': 'Search Criteria',
-		'name': 'customer_issues'
+		'name': u'customer_issues'
 	}
 ]

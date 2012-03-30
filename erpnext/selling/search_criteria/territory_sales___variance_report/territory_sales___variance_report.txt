@@ -3,31 +3,31 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:09:31',
+		'creation': '2012-03-30 14:50:44',
 		'docstatus': 0,
-		'modified': '2010-03-30 16:48:42',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-30 14:50:44',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all Search Criteria
 	{
-		'columns': 'Territory\x01ID',
-		'criteria_name': 'Territory Sales - Variance Report',
-		'doc_type': 'Territory',
+		'columns': u'Territory\x01ID',
+		'criteria_name': u'Territory Sales - Variance Report',
+		'doc_type': u'Territory',
 		'doctype': 'Search Criteria',
-		'filters': "{'Territory\x01State':'','Territory\x01Based On':'Sales Order','Territory\x01Fiscal Year':'2009-2010','Territory\x01Company':'Alpha Company','Territory\x01Period':'Quarterly'}",
-		'module': 'Selling',
+		'filters': u"{'Territory\x01State':'','Territory\x01Based On':'Sales Order','Territory\x01Fiscal Year':'2009-2010','Territory\x01Company':'Alpha Company','Territory\x01Period':'Quarterly'}",
+		'module': u'Selling',
 		'name': '__common__',
 		'page_len': 50,
-		'sort_by': 'ID',
-		'sort_order': 'DESC',
-		'standard': 'Yes'
+		'sort_by': u'ID',
+		'sort_order': u'DESC',
+		'standard': u'Yes'
 	},
 
 	# Search Criteria, territory_sales_-_variance_report
 	{
 		'doctype': 'Search Criteria',
-		'name': 'territory_sales_-_variance_report'
+		'name': u'territory_sales_-_variance_report'
 	}
 ]

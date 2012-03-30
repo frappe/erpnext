@@ -426,7 +426,7 @@
 	# DocField
 	{
 		'colour': u'White:FFF',
-		'description': u'Tax detail table fetched from item master as a string and stored in this field.\nUsed for Purchase Other Charges',
+		'description': u'Tax detail table fetched from item master as a string and stored in this field.\nUsed for Taxes and Charges',
 		'doctype': u'DocField',
 		'fieldname': u'item_tax_rate',
 		'fieldtype': u'Small Text',

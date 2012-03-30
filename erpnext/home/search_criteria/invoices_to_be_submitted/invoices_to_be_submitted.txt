@@ -3,31 +3,31 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:09:31',
+		'creation': '2012-03-30 14:50:43',
 		'docstatus': 0,
-		'modified': '2010-05-03 10:18:56',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-30 14:50:43',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all Search Criteria
 	{
-		'columns': 'Sales Invoice\x01ID,Sales Invoice\x01Debit To,Sales Invoice\x01Voucher Date,Sales Invoice\x01Due Date',
-		'criteria_name': 'Invoices-To be submitted',
-		'doc_type': 'Sales Invoice',
+		'columns': u'Sales Invoice\x01ID,Sales Invoice\x01Debit To,Sales Invoice\x01Voucher Date,Sales Invoice\x01Due Date',
+		'criteria_name': u'Invoices-To be submitted',
+		'doc_type': u'Sales Invoice',
 		'doctype': 'Search Criteria',
-		'filters': "{'Sales Invoice\x01Saved':1,'Sales Invoice\x01Is Opening':'','Sales Invoice\x01Fiscal Year':''}",
-		'module': 'Home',
+		'filters': u"{'Sales Invoice\x01Saved':1,'Sales Invoice\x01Is Opening':'','Sales Invoice\x01Fiscal Year':''}",
+		'module': u'Home',
 		'name': '__common__',
 		'page_len': 50,
-		'sort_by': '`tabSales Invoice`.`name`',
-		'sort_order': 'DESC',
-		'standard': 'Yes'
+		'sort_by': u'`tabSales Invoice`.`name`',
+		'sort_order': u'DESC',
+		'standard': u'Yes'
 	},
 
 	# Search Criteria, invoices-to_be_submitted
 	{
 		'doctype': 'Search Criteria',
-		'name': 'invoices-to_be_submitted'
+		'name': u'invoices-to_be_submitted'
 	}
 ]

@@ -3,32 +3,32 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:09:32',
+		'creation': '2012-03-30 14:50:44',
 		'docstatus': 0,
-		'modified': '2010-06-23 12:27:37',
-		'modified_by': 'Administrator',
-		'owner': 'harshada@webnotestech.com'
+		'modified': '2012-03-30 14:50:44',
+		'modified_by': u'Administrator',
+		'owner': u'harshada@webnotestech.com'
 	},
 
 	# These values are common for all Search Criteria
 	{
-		'columns': 'Sales Person\x01ID,Sales Person\x01Owner,Sales Person\x01Sales Person,Sales Person\x01Country,Sales Person\x01State,Target Detail\x01Item Group,Target Detail\x01Fiscal Year,Target Detail\x01Target  Amount',
-		'criteria_name': 'Target Variance Report',
+		'columns': u'Sales Person\x01ID,Sales Person\x01Owner,Sales Person\x01Sales Person,Sales Person\x01Country,Sales Person\x01State,Target Detail\x01Item Group,Target Detail\x01Fiscal Year,Target Detail\x01Target  Amount',
+		'criteria_name': u'Target Variance Report',
 		'disabled': 0,
-		'doc_type': 'Target Detail',
+		'doc_type': u'Target Detail',
 		'doctype': 'Search Criteria',
-		'filters': "{'Sales Person\x01Saved':1,'Sales Person\x01Submitted':1,'Sales Person\x01Country':'','Sales Person\x01State':'','Target Detail\x01Fiscal Year':''}",
-		'module': 'Selling',
+		'filters': u"{'Sales Person\x01Saved':1,'Sales Person\x01Submitted':1,'Sales Person\x01Country':'','Sales Person\x01State':'','Target Detail\x01Fiscal Year':''}",
+		'module': u'Selling',
 		'name': '__common__',
 		'page_len': 50,
-		'parent_doc_type': 'Sales Person',
-		'sort_order': 'DESC',
-		'standard': 'Yes'
+		'parent_doc_type': u'Sales Person',
+		'sort_order': u'DESC',
+		'standard': u'Yes'
 	},
 
 	# Search Criteria, target_variance_report
 	{
 		'doctype': 'Search Criteria',
-		'name': 'target_variance_report'
+		'name': u'target_variance_report'
 	}
 ]

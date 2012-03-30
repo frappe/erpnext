@@ -52,7 +52,6 @@ class DocType(TransactionBase):
 
 		# used in validation for items and update_prevdoc_detail
 		self.doctype_dict = {'Purchase Request'						 : 'Purchase Request Item',
-							 'Supplier Quotation' : 'Supplier Quotation Detail',
 							 'Purchase Order'		 : 'Purchase Order Item',
 							 'Purchase Receipt'	 : 'Purchase Receipt Item'}
  
@@ -155,7 +154,7 @@ class DocType(TransactionBase):
 			ret['lead_time_date'] = cstr(add_days(obj.doc.transaction_date, cint(item[0]['lead_time_days'])))
 		
 		#	get last purchase rate as per stock uom and default currency for following list of doctypes
-		if obj.doc.doctype in ['Supplier Quotation', 'Purchase Order', 'Purchase Receipt']:
+		if obj.doc.doctype in ['Purchase Order', 'Purchase Receipt']:
 			ret['purchase_ref_rate'] = item and flt(item[0]['last_purchase_rate']) or 0
 			ret['import_ref_rate'] = flt(item and flt(item[0]['last_purchase_rate']) or 0) / flt(obj.doc.fields.has_key('conversion_rate') and flt(obj.doc.conversion_rate) or 1)			
 			ret['purchase_rate'] = item and flt(item[0]['last_purchase_rate']) or 0
@@ -318,7 +317,7 @@ class DocType(TransactionBase):
 					msgprint(cstr(prevdoc_doctype) + ": " + cstr(prevdoc_docname) + " does not belong to the Company: " + cstr(obj.doc.company))
 					raise Exception
 
-				if prevdoc_doctype in ['Supplier Quotation','Purchase Order', 'Purchase Receipt']:
+				if prevdoc_doctype in ['Purchase Order', 'Purchase Receipt']:
 					dt = sql("select supplier, currency from `tab%s` where name = '%s'" % (prevdoc_doctype, name))
 					supplier = dt and dt[0][0] or ''
 					currency = dt and dt[0][1] or ''

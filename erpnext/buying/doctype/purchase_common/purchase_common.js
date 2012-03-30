@@ -71,9 +71,9 @@ cur_frm.cscript.update_item_details = function(doc, dt, dn, callback) {
 var set_dynamic_label_par = function(doc, cdt, cdn, base_curr) {
 	//parent flds
 	par_cols_base = {'net_total': 'Net Total', 'total_tax': 'Total Tax', 'grand_total':	'Grand Total', /*'rounded_total': 'Rounded Total',*/
-		'in_words': 'In Words', 'other_charges_added': 'Other Charges Added', 'other_charges_deducted': 'Other Charges Deducted'}
+		'in_words': 'In Words', 'other_charges_added': 'Taxes and Charges Added', 'other_charges_deducted': 'Taxes and Charges Deducted'}
 	par_cols_import = {'net_total_import': 'Net Total', 'grand_total_import': 'Grand Total', 'in_words_import':	'In Words', 
-		'other_charges_added_import': 'Other Charges Added', 'other_charges_deducted_import': 'Other Charges Deducted'};
+		'other_charges_added_import': 'Taxes and Charges Added', 'other_charges_deducted_import': 'Taxes and Charges Deducted'};
 
 	for (d in par_cols_base) cur_frm.fields_dict[d].label_area.innerHTML = par_cols_base[d]+' (' + base_curr + ')';
 	for (d in par_cols_import) cur_frm.fields_dict[d].label_area.innerHTML = par_cols_import[d]+' (' + doc.currency + ')';
@@ -434,7 +434,7 @@ cur_frm.cscript.calc_other_charges = function(doc , tname , fname , other_fname)
 	// ------------------
 
 	
-	cur_frm.fields_dict['Tax Calculation'].disp_area.innerHTML = '<b style="padding: 8px 0px;">Calculation Details for Other Charges and Landed cost:</b>';
+	cur_frm.fields_dict['Tax Calculation'].disp_area.innerHTML = '<b style="padding: 8px 0px;">Calculation Details for Taxes, Charges and Landed Cost:</b>';
 	var cl = getchildren(tname, doc.name, fname);
 	var tax = getchildren('Purchase Taxes and Charges', doc.name, other_fname,doc.doctype);
 	// make display table

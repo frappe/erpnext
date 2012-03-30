@@ -279,7 +279,7 @@
 		'doctype': u'DocField',
 		'fieldname': u'return_details',
 		'fieldtype': u'Section Break',
-		'label': u'Sales and Purchase Return Items',
+		'label': u'Return Details',
 		'oldfieldtype': u'Section Break',
 		'permlevel': 0
 	},

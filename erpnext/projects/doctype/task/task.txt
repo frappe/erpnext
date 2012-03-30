@@ -337,19 +337,7 @@
 		'oldfieldtype': u'Data',
 		'permlevel': 0
 	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'category',
-		'fieldtype': u'Link',
-		'label': u'Category',
-		'oldfieldname': u'category',
-		'oldfieldtype': u'Link',
-		'options': u'Task Category',
-		'permlevel': 0
-	},
-
+	
 	# DocField
 	{
 		'doctype': u'DocField',

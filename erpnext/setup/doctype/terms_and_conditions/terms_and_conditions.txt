@@ -157,7 +157,7 @@
 		'doctype': u'DocField',
 		'fieldname': u'terms',
 		'fieldtype': u'Text Editor',
-		'label': u'Terms',
+		'label': u'Terms and Conditions',
 		'oldfieldname': u'terms',
 		'oldfieldtype': u'Text Editor',
 		'permlevel': 0

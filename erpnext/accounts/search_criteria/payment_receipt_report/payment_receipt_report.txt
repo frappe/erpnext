@@ -3,31 +3,31 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:09:31',
+		'creation': '2012-03-30 14:50:44',
 		'docstatus': 0,
-		'modified': '2010-06-11 17:00:54',
-		'modified_by': 'Administrator',
-		'owner': 'jai@webnotestech.com'
+		'modified': '2012-03-30 14:50:44',
+		'modified_by': u'Administrator',
+		'owner': u'jai@webnotestech.com'
 	},
 
 	# These values are common for all Search Criteria
 	{
-		'columns': 'GL Entry\x01ID,GL Entry\x01Owner,GL Entry\x01Posting Date,GL Entry\x01Account,GL Entry\x01Cost Center,GL Entry\x01Against Voucher,GL Entry\x01Voucher Type,GL Entry\x01Voucher No,GL Entry\x01Remarks,GL Entry\x01Is Cancelled,GL Entry\x01Is Opening,GL Entry\x01Fiscal Year,GL Entry\x01Company',
-		'criteria_name': 'Payment Receipt Report',
-		'doc_type': 'GL Entry',
+		'columns': u'GL Entry\x01ID,GL Entry\x01Owner,GL Entry\x01Posting Date,GL Entry\x01Account,GL Entry\x01Cost Center,GL Entry\x01Against Voucher,GL Entry\x01Voucher Type,GL Entry\x01Voucher No,GL Entry\x01Remarks,GL Entry\x01Is Cancelled,GL Entry\x01Is Opening,GL Entry\x01Fiscal Year,GL Entry\x01Company',
+		'criteria_name': u'Payment Receipt Report',
+		'doc_type': u'GL Entry',
 		'doctype': 'Search Criteria',
-		'filters': "{'GL Entry\x01Voucher Type':'','GL Entry\x01Is Cancelled':'','GL Entry\x01Is Opening':'','GL Entry\x01Fiscal Year':''}",
-		'module': 'Accounts',
+		'filters': u"{'GL Entry\x01Voucher Type':'','GL Entry\x01Is Cancelled':'','GL Entry\x01Is Opening':'','GL Entry\x01Fiscal Year':''}",
+		'module': u'Accounts',
 		'name': '__common__',
 		'page_len': 50,
-		'sort_by': '`tabGL Entry`.`name`',
-		'sort_order': 'DESC',
-		'standard': 'Yes'
+		'sort_by': u'`tabGL Entry`.`name`',
+		'sort_order': u'DESC',
+		'standard': u'Yes'
 	},
 
 	# Search Criteria, payment_receipt_report
 	{
 		'doctype': 'Search Criteria',
-		'name': 'payment_receipt_report'
+		'name': u'payment_receipt_report'
 	}
 ]

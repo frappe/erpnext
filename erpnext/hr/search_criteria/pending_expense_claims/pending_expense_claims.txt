@@ -1,4 +1,4 @@
-# Search Criteria, pending_appraisals
+# Search Criteria, pending_expense_claims
 [
 
 	# These values are common in all dictionaries
@@ -12,22 +12,20 @@
 
 	# These values are common for all Search Criteria
 	{
-		'criteria_name': u'Pending Appraisals',
-		'disabled': 0,
-		'doc_type': u'Appraisal',
+		'criteria_name': u'Pending Expense Claims',
+		'doc_type': u'Expense Claim',
 		'doctype': 'Search Criteria',
-		'filters': u"{'Appraisal\x01Submitted':1,'Appraisal\x01Status':'Submitted','Appraisal\x01Fiscal Year':'','Appraisal\x01Approver':''}",
+		'filters': u"{'Expense Claim\x01Approval Status':'','Expense Claim\x01Fiscal Year':''}",
 		'module': u'HR',
 		'name': '__common__',
 		'page_len': 50,
-		'sort_by': u'`tabAppraisal`.`name`',
 		'sort_order': u'DESC',
 		'standard': u'Yes'
 	},
 
-	# Search Criteria, pending_appraisals
+	# Search Criteria, pending_expense_claims
 	{
 		'doctype': 'Search Criteria',
-		'name': u'pending_appraisals'
+		'name': u'pending_expense_claims'
 	}
 ]

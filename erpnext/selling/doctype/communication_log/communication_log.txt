@@ -70,7 +70,7 @@
 		'fieldname': u'follow_up_type',
 		'fieldtype': u'Select',
 		'in_filter': 1,
-		'label': u'Follow up type',
+		'label': u'Communication type',
 		'oldfieldname': u'follow_up_type',
 		'oldfieldtype': u'Select',
 		'options': u'\nPhone\nEmail\nSMS\nVisit\nOther'
@@ -82,7 +82,7 @@
 		'fieldname': u'follow_up_by',
 		'fieldtype': u'Link',
 		'in_filter': 1,
-		'label': u'Follow up by',
+		'label': u'Communication by',
 		'oldfieldname': u'follow_up_by',
 		'oldfieldtype': u'Link',
 		'options': u'Sales Person'

@@ -3,31 +3,31 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:09:31',
+		'creation': '2012-03-30 13:33:31',
 		'docstatus': 0,
-		'modified': '2010-06-10 13:19:39',
-		'modified_by': 'Administrator',
-		'owner': 'swarnalata@webnotestech.com'
+		'modified': '2012-03-30 13:33:31',
+		'modified_by': u'Administrator',
+		'owner': u'swarnalata@webnotestech.com'
 	},
 
 	# These values are common for all Search Criteria
 	{
-		'criteria_name': 'Cost Center wise Expense',
-		'dis_filters': 'fiscal_year',
-		'doc_type': 'GL Entry',
+		'criteria_name': u'Cost Center wise Expense',
+		'dis_filters': u'fiscal_year',
+		'doc_type': u'GL Entry',
 		'doctype': 'Search Criteria',
-		'filters': "{'GL Entry\x01Voucher Type':'','GL Entry\x01Is Cancelled':'','GL Entry\x01Fiscal Year':'','GL Entry\x01Company':''}",
-		'module': 'Accounts',
+		'filters': u"{'GL Entry\x01Voucher Type':'','GL Entry\x01Is Cancelled':'','GL Entry\x01Fiscal Year':'','GL Entry\x01Company':''}",
+		'module': u'Accounts',
 		'name': '__common__',
 		'page_len': 50,
-		'sort_by': '`tabGL Entry`.`name`',
-		'sort_order': 'DESC',
-		'standard': 'Yes'
+		'sort_by': u'`tabGL Entry`.`name`',
+		'sort_order': u'DESC',
+		'standard': u'Yes'
 	},
 
 	# Search Criteria, cost_center_wise_expense
 	{
 		'doctype': 'Search Criteria',
-		'name': 'cost_center_wise_expense'
+		'name': u'cost_center_wise_expense'
 	}
 ]

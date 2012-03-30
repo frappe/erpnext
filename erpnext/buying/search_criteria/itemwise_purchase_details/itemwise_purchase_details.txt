@@ -3,31 +3,31 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:09:31',
+		'creation': '2012-03-30 14:50:43',
 		'docstatus': 0,
-		'modified': '2010-03-31 12:39:57',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-30 14:50:43',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all Search Criteria
 	{
-		'columns': 'Purchase Order\x01ID,Purchase Order\x01PO Date,Purchase Order\x01Grand Total,Purchase Order Item\x01Item Code,Purchase Order Item\x01Item Name,Purchase Order Item\x01Quantity,Purchase Order Item\x01Stock UOM,Purchase Order Item\x01Purchase Rate,Purchase Order Item\x01Amount,Purchase Order Item\x01Warehouse',
-		'criteria_name': 'Itemwise Purchase Details',
-		'doc_type': 'Purchase Order Item',
+		'columns': u'Purchase Order\x01ID,Purchase Order\x01PO Date,Purchase Order\x01Grand Total,Purchase Order Item\x01Item Code,Purchase Order Item\x01Item Name,Purchase Order Item\x01Quantity,Purchase Order Item\x01Stock UOM,Purchase Order Item\x01Purchase Rate,Purchase Order Item\x01Amount,Purchase Order Item\x01Warehouse',
+		'criteria_name': u'Itemwise Purchase Details',
+		'doc_type': u'Purchase Order Item',
 		'doctype': 'Search Criteria',
-		'filters': "{'Purchase Order\x01Saved':1,'Purchase Order\x01Submitted':1,'Purchase Order\x01Status':'','Purchase Order\x01Company Name':''}",
-		'module': 'Buying',
+		'filters': u"{'Purchase Order\x01Saved':1,'Purchase Order\x01Submitted':1,'Purchase Order\x01Status':'','Purchase Order\x01Company Name':''}",
+		'module': u'Buying',
 		'name': '__common__',
-		'parent_doc_type': 'Purchase Order',
-		'sort_by': '`tabPurchase Order`.`name`',
-		'sort_order': 'DESC',
-		'standard': 'Yes'
+		'parent_doc_type': u'Purchase Order',
+		'sort_by': u'`tabPurchase Order`.`name`',
+		'sort_order': u'DESC',
+		'standard': u'Yes'
 	},
 
 	# Search Criteria, itemwise_purchase_details
 	{
 		'doctype': 'Search Criteria',
-		'name': 'itemwise_purchase_details'
+		'name': u'itemwise_purchase_details'
 	}
 ]

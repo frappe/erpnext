@@ -15,7 +15,7 @@
 		'_last_update': u'1328093379',
 		'allow_attach': 1,
 		'colour': u'White:FFF',
-		'description': u'A custom page is a simple page with the layout - headline, main section, side section\n\nEditing:\n\n- Editing is in [markdown format](http://daringfireball.net/projects/markdown/syntax)\n- You can also add images and embed html code\n\nAccessing the page:\n\n- The page can be accessed as #![page-name] after the main url\n\nIdeal for pages like FAQ, Terms, Help etc.\n\n',
+		'description': u'A custom page is a simple page with the layout - headline, main section, side section\n\nEditing:\n\n- Editing is in [markdown format](http://daringfireball.net/projects/markdown/syntax)\n- You can also add images and embed html code\n\nAccessing the page:\n\n- The page can be accessed as #![page-name] after the main url\n\nIdeal for pages like FAQ, Terms and Conditions, Help etc.\n\n',
 		'doctype': 'DocType',
 		'max_attachments': 5,
 		'module': u'Website',

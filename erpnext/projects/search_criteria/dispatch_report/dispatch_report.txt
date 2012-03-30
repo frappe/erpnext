@@ -3,32 +3,32 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-12-14 10:23:31',
+		'creation': '2012-03-30 13:33:31',
 		'docstatus': 0,
-		'modified': '2010-11-05 20:34:19',
-		'modified_by': 'Administrator',
-		'owner': 'ashwini@webnotestech.com'
+		'modified': '2012-03-30 13:33:31',
+		'modified_by': u'Administrator',
+		'owner': u'ashwini@webnotestech.com'
 	},
 
 	# These values are common for all Search Criteria
 	{
-		'columns': 'Delivery Note\x01ID,Delivery Note\x01Project Name,Delivery Note\x01Customer,Delivery Note\x01Customer Name,Delivery Note\x01Posting Date,Delivery Note Item\x01Item Code,Delivery Note Item\x01Item Name,Delivery Note Item\x01Quantity,Delivery Note Item\x01Amount*',
-		'criteria_name': 'Dispatch Report',
-		'doc_type': 'Delivery Note Item',
+		'columns': u'Delivery Note\x01ID,Delivery Note\x01Project Name,Delivery Note\x01Customer,Delivery Note\x01Customer Name,Delivery Note\x01Posting Date,Delivery Note Item\x01Item Code,Delivery Note Item\x01Item Name,Delivery Note Item\x01Quantity,Delivery Note Item\x01Amount*',
+		'criteria_name': u'Dispatch Report',
+		'doc_type': u'Delivery Note Item',
 		'doctype': 'Search Criteria',
-		'filters': "{'Delivery Note\x01Saved':1,'Delivery Note\x01Submitted':1,'Delivery Note\x01Status':'Submitted','Delivery Note\x01Fiscal Year':''}",
-		'module': 'Projects',
+		'filters': u"{'Delivery Note\x01Saved':1,'Delivery Note\x01Submitted':1,'Delivery Note\x01Status':'Submitted','Delivery Note\x01Fiscal Year':''}",
+		'module': u'Projects',
 		'name': '__common__',
 		'page_len': 50,
-		'parent_doc_type': 'Delivery Note',
-		'sort_by': '`tabDelivery Note`.`name`',
-		'sort_order': 'DESC',
-		'standard': 'Yes'
+		'parent_doc_type': u'Delivery Note',
+		'sort_by': u'`tabDelivery Note`.`name`',
+		'sort_order': u'DESC',
+		'standard': u'Yes'
 	},
 
 	# Search Criteria, dispatch_report
 	{
 		'doctype': 'Search Criteria',
-		'name': 'dispatch_report'
+		'name': u'dispatch_report'
 	}
 ]

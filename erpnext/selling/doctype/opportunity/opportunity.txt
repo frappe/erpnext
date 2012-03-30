@@ -426,7 +426,7 @@
 		'doctype': u'DocField',
 		'fieldname': u'enquiry_details',
 		'fieldtype': u'Table',
-		'label': u'Opportunity Details',
+		'label': u'Opportunity Items',
 		'oldfieldname': u'enquiry_details',
 		'oldfieldtype': u'Table',
 		'options': u'Opportunity Item',

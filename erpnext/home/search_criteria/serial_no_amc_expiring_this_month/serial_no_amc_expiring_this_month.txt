@@ -3,32 +3,32 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:09:32',
+		'creation': '2012-03-30 14:50:44',
 		'docstatus': 0,
-		'modified': '2010-07-29 15:01:33',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-30 14:50:44',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all Search Criteria
 	{
-		'add_cond': '`tab Serial No`.month(amc_expiry_date)=month(now()) \n`tab Serial No`.year(amc_expiry_date)=year(now())',
-		'columns': 'Serial No\x01ID,Serial No\x01Status,Serial No\x01AMC Expiry Date,Serial No\x01Customer Name',
-		'criteria_name': 'Serial No-AMC expiring this month',
-		'doc_type': 'Serial No',
+		'add_cond': u'`tab Serial No`.month(amc_expiry_date)=month(now()) \n`tab Serial No`.year(amc_expiry_date)=year(now())',
+		'columns': u'Serial No\x01ID,Serial No\x01Status,Serial No\x01AMC Expiry Date,Serial No\x01Customer Name',
+		'criteria_name': u'Serial No-AMC expiring this month',
+		'doc_type': u'Serial No',
 		'doctype': 'Search Criteria',
-		'filters': "{'Serial No\x01Saved':1,'Serial No\x01Submitted':1,'Serial No\x01Status':'','Serial No\x01Warranty Status':''}",
-		'module': 'Home',
+		'filters': u"{'Serial No\x01Saved':1,'Serial No\x01Submitted':1,'Serial No\x01Status':'','Serial No\x01Warranty Status':''}",
+		'module': u'Home',
 		'name': '__common__',
 		'page_len': 50,
-		'sort_by': '`tabSerial No`.`name`',
-		'sort_order': 'DESC',
-		'standard': 'Yes'
+		'sort_by': u'`tabSerial No`.`name`',
+		'sort_order': u'DESC',
+		'standard': u'Yes'
 	},
 
 	# Search Criteria, serial_no-amc_expiring_this_month
 	{
 		'doctype': 'Search Criteria',
-		'name': 'serial_no-amc_expiring_this_month'
+		'name': u'serial_no-amc_expiring_this_month'
 	}
 ]

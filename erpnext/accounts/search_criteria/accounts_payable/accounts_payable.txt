@@ -3,30 +3,30 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-10-22 16:28:49',
+		'creation': '2012-03-30 13:33:31',
 		'docstatus': 0,
-		'modified': '2010-10-22 15:16:03',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-30 13:33:31',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all Search Criteria
 	{
-		'columns': 'GL Entry\x01Posting Date,GL Entry\x01Account,GL Entry\x01Against Voucher,GL Entry\x01Voucher No',
-		'criteria_name': 'Accounts Payable',
-		'doc_type': 'GL Entry',
+		'columns': u'GL Entry\x01Posting Date,GL Entry\x01Account,GL Entry\x01Against Voucher,GL Entry\x01Voucher No',
+		'criteria_name': u'Accounts Payable',
+		'doc_type': u'GL Entry',
 		'doctype': 'Search Criteria',
-		'filters': "{'GL Entry\x01Is Cancelled':'','GL Entry\x01Fiscal Year':'','GL Entry\x01Company':'','Purchase Invoice\x01Aging Based On':'Posting Date','GL Entry\x01Range 1':'30','GL Entry\x01Range 2':'45','GL Entry\x01Range 3':'60','GL Entry\x01Range 4':'90'}",
-		'module': 'Accounts',
+		'filters': u"{'GL Entry\x01Is Cancelled':'','GL Entry\x01Fiscal Year':'','GL Entry\x01Company':'','Purchase Invoice\x01Aging Based On':'Posting Date','GL Entry\x01Range 1':'30','GL Entry\x01Range 2':'45','GL Entry\x01Range 3':'60','GL Entry\x01Range 4':'90'}",
+		'module': u'Accounts',
 		'name': '__common__',
-		'sort_by': '`tabGL Entry`.`name`',
-		'sort_order': 'DESC',
-		'standard': 'Yes'
+		'sort_by': u'`tabGL Entry`.`name`',
+		'sort_order': u'DESC',
+		'standard': u'Yes'
 	},
 
 	# Search Criteria, accounts_payable
 	{
 		'doctype': 'Search Criteria',
-		'name': 'accounts_payable'
+		'name': u'accounts_payable'
 	}
 ]

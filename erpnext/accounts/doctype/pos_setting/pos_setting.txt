@@ -263,7 +263,7 @@
 		'doctype': u'DocField',
 		'fieldname': u'tc_name',
 		'fieldtype': u'Link',
-		'label': u'Terms',
+		'label': u'Terms and Conditions',
 		'oldfieldname': u'tc_name',
 		'oldfieldtype': u'Link',
 		'options': u'Terms and Conditions'

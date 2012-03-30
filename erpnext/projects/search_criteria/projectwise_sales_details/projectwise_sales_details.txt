@@ -3,29 +3,29 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-12-14 10:23:31',
+		'creation': '2012-03-30 13:33:32',
 		'docstatus': 0,
-		'modified': '2010-11-12 09:21:11',
-		'modified_by': 'Administrator',
-		'owner': 'harshada@webnotestech.com'
+		'modified': '2012-03-30 13:33:32',
+		'modified_by': u'Administrator',
+		'owner': u'harshada@webnotestech.com'
 	},
 
 	# These values are common for all Search Criteria
 	{
-		'criteria_name': 'Projectwise Sales Details',
-		'doc_type': 'Sales Order',
+		'criteria_name': u'Projectwise Sales Details',
+		'doc_type': u'Sales Order',
 		'doctype': 'Search Criteria',
-		'filters': "{'Sales Order\x01Saved':1,'Sales Order\x01Submitted':1,'Sales Order\x01Status':''}",
-		'module': 'Projects',
+		'filters': u"{'Sales Order\x01Saved':1,'Sales Order\x01Submitted':1,'Sales Order\x01Status':''}",
+		'module': u'Projects',
 		'name': '__common__',
 		'page_len': 50,
-		'sort_order': 'DESC',
-		'standard': 'Yes'
+		'sort_order': u'DESC',
+		'standard': u'Yes'
 	},
 
 	# Search Criteria, projectwise_sales_details
 	{
 		'doctype': 'Search Criteria',
-		'name': 'projectwise_sales_details'
+		'name': u'projectwise_sales_details'
 	}
 ]

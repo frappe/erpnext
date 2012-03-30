@@ -189,7 +189,7 @@
 		'fieldname': u'indented_qty',
 		'fieldtype': u'Currency',
 		'in_filter': 0,
-		'label': u'Indented Quantity',
+		'label': u'Quantity Requested for Purchase',
 		'oldfieldname': u'indented_qty',
 		'oldfieldtype': u'Currency',
 		'search_index': 0

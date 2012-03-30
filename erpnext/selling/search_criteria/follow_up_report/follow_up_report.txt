@@ -3,32 +3,32 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-09-01 15:48:09',
+		'creation': '2012-03-30 13:33:32',
 		'docstatus': 0,
-		'modified': '2010-08-12 16:33:19',
-		'modified_by': 'Administrator',
-		'owner': 'ashwini@webnotestech.com'
+		'modified': '2012-03-30 13:33:32',
+		'modified_by': u'Administrator',
+		'owner': u'ashwini@webnotestech.com'
 	},
 
 	# These values are common for all Search Criteria
 	{
-		'columns': 'Lead\x01ID,Communication Log\x01Date,Communication Log\x01Notes,Communication Log\x01Communication Log type',
-		'criteria_name': 'Follow-up Report',
-		'doc_type': 'Communication Log',
+		'columns': u'Lead\x01ID,Communication Log\x01Date,Communication Log\x01Notes,Communication Log\x01Communication Log type',
+		'criteria_name': u'Follow-up Report',
+		'doc_type': u'Communication Log',
 		'doctype': 'Search Criteria',
-		'filters': "{'Lead\x01Status':'','Lead\x01Source':'','Lead\x01Lead Type':'','Lead\x01Rating':'','Lead\x01Market Segment':'','Lead\x01Fiscal Year':''}",
-		'module': 'Selling',
+		'filters': u"{'Lead\x01Status':'','Lead\x01Source':'','Lead\x01Lead Type':'','Lead\x01Rating':'','Lead\x01Market Segment':'','Lead\x01Fiscal Year':''}",
+		'module': u'Selling',
 		'name': '__common__',
 		'page_len': 50,
-		'parent_doc_type': 'Lead',
-		'sort_by': '`tabLead`.`name`',
-		'sort_order': 'DESC',
-		'standard': 'Yes'
+		'parent_doc_type': u'Lead',
+		'sort_by': u'`tabLead`.`name`',
+		'sort_order': u'DESC',
+		'standard': u'Yes'
 	},
 
 	# Search Criteria, follow-up_report
 	{
 		'doctype': 'Search Criteria',
-		'name': 'follow-up_report'
+		'name': u'follow-up_report'
 	}
 ]

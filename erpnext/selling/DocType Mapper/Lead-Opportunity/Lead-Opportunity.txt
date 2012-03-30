@@ -3,85 +3,85 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:09:34',
+		'creation': '2010-09-20 12:33:34',
 		'docstatus': 0,
-		'modified': '2011-09-14 12:36:24',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-30 13:33:31',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all Table Mapper Detail
 	{
-		'doctype': 'Table Mapper Detail',
-		'from_table': 'Lead',
+		'doctype': u'Table Mapper Detail',
+		'from_table': u'Lead',
 		'match_id': 0,
 		'name': '__common__',
-		'parent': 'Lead-Opportunity',
-		'parentfield': 'table_mapper_details',
-		'parenttype': 'DocType Mapper',
-		'to_table': 'Opportunity',
-		'validation_logic': 'name is not null'
+		'parent': u'Lead-Opportunity',
+		'parentfield': u'table_mapper_details',
+		'parenttype': u'DocType Mapper',
+		'to_table': u'Opportunity',
+		'validation_logic': u'name is not null'
 	},
 
 	# These values are common for all Field Mapper Detail
 	{
-		'doctype': 'Field Mapper Detail',
+		'doctype': u'Field Mapper Detail',
 		'match_id': 0,
 		'name': '__common__',
-		'parent': 'Lead-Opportunity',
-		'parentfield': 'field_mapper_details',
-		'parenttype': 'DocType Mapper'
+		'parent': u'Lead-Opportunity',
+		'parentfield': u'field_mapper_details',
+		'parenttype': u'DocType Mapper'
 	},
 
 	# These values are common for all DocType Mapper
 	{
 		'doctype': u'DocType Mapper',
-		'from_doctype': 'Lead',
-		'module': 'Selling',
+		'from_doctype': u'Lead',
+		'module': u'Selling',
 		'name': '__common__',
-		'to_doctype': 'Opportunity'
+		'to_doctype': u'Opportunity'
 	},
 
 	# DocType Mapper, Lead-Opportunity
 	{
 		'doctype': u'DocType Mapper',
-		'name': 'Lead-Opportunity'
+		'name': u'Lead-Opportunity'
 	},
 
 	# Field Mapper Detail
 	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'campaign_name',
-		'map': 'Yes',
-		'to_field': 'campaign'
+		'doctype': u'Field Mapper Detail',
+		'from_field': u'campaign_name',
+		'map': u'Yes',
+		'to_field': u'campaign'
 	},
 
 	# Field Mapper Detail
 	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'doctype',
-		'map': 'Yes',
-		'to_field': 'enquiry_from'
+		'doctype': u'Field Mapper Detail',
+		'from_field': u'doctype',
+		'map': u'Yes',
+		'to_field': u'enquiry_from'
 	},
 
 	# Field Mapper Detail
 	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'name',
-		'map': 'Yes',
-		'to_field': 'lead'
+		'doctype': u'Field Mapper Detail',
+		'from_field': u'name',
+		'map': u'Yes',
+		'to_field': u'lead'
 	},
 
 	# Field Mapper Detail
 	{
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'status',
-		'map': 'No',
-		'to_field': 'status'
+		'doctype': u'Field Mapper Detail',
+		'from_field': u'status',
+		'map': u'No',
+		'to_field': u'status'
 	},
 
 	# Table Mapper Detail
 	{
-		'doctype': 'Table Mapper Detail'
+		'doctype': u'Table Mapper Detail'
 	}
 ]

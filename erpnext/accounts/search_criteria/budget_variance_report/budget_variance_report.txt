@@ -3,31 +3,31 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-09-01 15:48:09',
+		'creation': '2012-03-30 13:33:31',
 		'docstatus': 0,
-		'modified': '2011-05-23 16:07:41',
-		'modified_by': 'Administrator',
-		'owner': 'harshada@webnotestech.com'
+		'modified': '2012-03-30 13:33:31',
+		'modified_by': u'Administrator',
+		'owner': u'harshada@webnotestech.com'
 	},
 
 	# These values are common for all Search Criteria
 	{
-		'criteria_name': 'Budget Variance Report',
-		'doc_type': 'Budget Detail',
+		'criteria_name': u'Budget Variance Report',
+		'doc_type': u'Budget Detail',
 		'doctype': 'Search Criteria',
-		'filters': "{'Budget Detail\x01Fiscal Year':''}",
-		'module': 'Accounts',
+		'filters': u"{'Budget Detail\x01Fiscal Year':''}",
+		'module': u'Accounts',
 		'name': '__common__',
 		'page_len': 50,
-		'parent_doc_type': 'Cost Center',
-		'sort_by': '`tabCost Center`.`lft`',
-		'sort_order': 'DESC',
-		'standard': 'Yes'
+		'parent_doc_type': u'Cost Center',
+		'sort_by': u'`tabCost Center`.`lft`',
+		'sort_order': u'DESC',
+		'standard': u'Yes'
 	},
 
 	# Search Criteria, budget_variance_report
 	{
 		'doctype': 'Search Criteria',
-		'name': 'budget_variance_report'
+		'name': u'budget_variance_report'
 	}
 ]

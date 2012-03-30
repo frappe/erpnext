@@ -3,31 +3,31 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-09-01 15:48:09',
+		'creation': '2012-03-30 14:50:45',
 		'docstatus': 0,
-		'modified': '2010-08-30 13:32:21',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-30 14:50:45',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all Search Criteria
 	{
-		'columns': 'Serial No\x01ID,Serial No\x01Item Code,Serial No\x01Description,Serial No\x01Status,Serial No\x01Item Group,Serial No\x01Purchase Receipt No,Serial No\x01Delivery Note No,Serial No\x01Customer,Serial No\x01Customer Name,Serial No\x01AMC Expiry Date,Serial No\x01Warranty Expiry Date',
-		'criteria_name': 'Warranty/AMC Expiry Details',
-		'doc_type': 'Serial No',
+		'columns': u'Serial No\x01ID,Serial No\x01Item Code,Serial No\x01Description,Serial No\x01Status,Serial No\x01Item Group,Serial No\x01Purchase Receipt No,Serial No\x01Delivery Note No,Serial No\x01Customer,Serial No\x01Customer Name,Serial No\x01AMC Expiry Date,Serial No\x01Warranty Expiry Date',
+		'criteria_name': u'Warranty/AMC Expiry Details',
+		'doc_type': u'Serial No',
 		'doctype': 'Search Criteria',
-		'filters': "{'Serial No\x01Saved':1,'Serial No\x01Status':'','Serial No\x01Maintenance Status':''}",
-		'module': 'Support',
+		'filters': u"{'Serial No\x01Saved':1,'Serial No\x01Status':'','Serial No\x01Maintenance Status':''}",
+		'module': u'Support',
 		'name': '__common__',
 		'page_len': 50,
-		'sort_by': '`tabSerial No`.`name`',
-		'sort_order': 'DESC',
-		'standard': 'Yes'
+		'sort_by': u'`tabSerial No`.`name`',
+		'sort_order': u'DESC',
+		'standard': u'Yes'
 	},
 
 	# Search Criteria, warranty-amc_expiry_details
 	{
 		'doctype': 'Search Criteria',
-		'name': 'warranty-amc_expiry_details'
+		'name': u'warranty-amc_expiry_details'
 	}
 ]

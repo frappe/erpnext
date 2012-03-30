@@ -3,32 +3,32 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-09-01 15:48:09',
+		'creation': '2012-03-30 14:50:43',
 		'docstatus': 0,
-		'modified': '2010-08-30 12:22:47',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-30 14:50:43',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all Search Criteria
 	{
-		'columns': 'Sales Order\x01ID,Sales Order\x01Customer,Sales Order Item\x01Item Code,Sales Order Item\x01Item Name,Sales Order Item\x01Quantity,Sales Order Item\x01Basic Rate*,Sales Order Item\x01Amount*,Sales Order Item\x01Delivered Qty,Sales Order Item\x01Billed Qty,Sales Order\x01Company',
-		'criteria_name': 'Itemwise Sales Details',
-		'doc_type': 'Sales Order Item',
+		'columns': u'Sales Order\x01ID,Sales Order\x01Customer,Sales Order Item\x01Item Code,Sales Order Item\x01Item Name,Sales Order Item\x01Quantity,Sales Order Item\x01Basic Rate*,Sales Order Item\x01Amount*,Sales Order Item\x01Delivered Qty,Sales Order Item\x01Billed Qty,Sales Order\x01Company',
+		'criteria_name': u'Itemwise Sales Details',
+		'doc_type': u'Sales Order Item',
 		'doctype': 'Search Criteria',
-		'filters': "{'Sales Order\x01Submitted':1,'Sales Order\x01Status':'','Sales Order\x01Fiscal Year':''}",
-		'module': 'Selling',
+		'filters': u"{'Sales Order\x01Submitted':1,'Sales Order\x01Status':'','Sales Order\x01Fiscal Year':''}",
+		'module': u'Selling',
 		'name': '__common__',
 		'page_len': 50,
-		'parent_doc_type': 'Sales Order',
-		'sort_by': '`tabSales Order`.`name`',
-		'sort_order': 'DESC',
-		'standard': 'Yes'
+		'parent_doc_type': u'Sales Order',
+		'sort_by': u'`tabSales Order`.`name`',
+		'sort_order': u'DESC',
+		'standard': u'Yes'
 	},
 
 	# Search Criteria, itemwise_sales_details
 	{
 		'doctype': 'Search Criteria',
-		'name': 'itemwise_sales_details'
+		'name': u'itemwise_sales_details'
 	}
 ]

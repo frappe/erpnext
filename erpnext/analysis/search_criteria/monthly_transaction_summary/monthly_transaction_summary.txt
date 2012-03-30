@@ -3,30 +3,30 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-09-20 13:00:43',
+		'creation': '2012-03-30 13:33:32',
 		'docstatus': 0,
-		'modified': '2010-09-17 16:02:25',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-30 13:33:32',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all Search Criteria
 	{
-		'columns': 'Profile\x01ID',
-		'criteria_name': 'Monthly Transaction Summary',
-		'doc_type': 'Profile',
+		'columns': u'Profile\x01ID',
+		'criteria_name': u'Monthly Transaction Summary',
+		'doc_type': u'Profile',
 		'doctype': 'Search Criteria',
-		'filters': "{'DocType\x01Period':'Monthly'}",
-		'module': 'Analysis',
+		'filters': u"{'DocType\x01Period':'Monthly'}",
+		'module': u'Analysis',
 		'name': '__common__',
-		'sort_by': '`tabProfile`.`name`',
-		'sort_order': 'DESC',
-		'standard': 'Yes'
+		'sort_by': u'`tabProfile`.`name`',
+		'sort_order': u'DESC',
+		'standard': u'Yes'
 	},
 
 	# Search Criteria, monthly_transaction_summary
 	{
 		'doctype': 'Search Criteria',
-		'name': 'monthly_transaction_summary'
+		'name': u'monthly_transaction_summary'
 	}
 ]

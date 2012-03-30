@@ -3,35 +3,35 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-12-15 08:39:24',
+		'creation': '2012-03-30 14:50:44',
 		'docstatus': 0,
-		'modified': '2010-08-10 10:48:01',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-30 14:50:44',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all Search Criteria
 	{
-		'add_col': "`tabAccount`.`parent_account` AS 'Parent Account'\n`tabCustomer`.`territory` AS 'Territory'\n`tabCustomer`.`customer_details` AS 'Customer Details'",
-		'add_cond': "ifnull(`tabSales Invoice`.`is_opening`, 'No') = 'No'\n`tabAccount`.name =`tabSales Invoice`.debit_to\n`tabCustomer`.`name` = `tabAccount`.`master_name`",
-		'add_tab': '`tabAccount`\n`tabCustomer`',
-		'columns': 'Sales Invoice\x01ID,Sales Invoice\x01Posting Date,Sales Invoice\x01Debit To',
-		'criteria_name': 'Sales Register',
-		'dis_filters': 'fiscal_year',
-		'doc_type': 'Sales Invoice',
+		'add_col': u"`tabAccount`.`parent_account` AS 'Parent Account'\n`tabCustomer`.`territory` AS 'Territory'\n`tabCustomer`.`customer_details` AS 'Customer Details'",
+		'add_cond': u"ifnull(`tabSales Invoice`.`is_opening`, 'No') = 'No'\n`tabAccount`.name =`tabSales Invoice`.debit_to\n`tabCustomer`.`name` = `tabAccount`.`master_name`",
+		'add_tab': u'`tabAccount`\n`tabCustomer`',
+		'columns': u'Sales Invoice\x01ID,Sales Invoice\x01Posting Date,Sales Invoice\x01Debit To',
+		'criteria_name': u'Sales Register',
+		'dis_filters': u'fiscal_year',
+		'doc_type': u'Sales Invoice',
 		'doctype': 'Search Criteria',
-		'filters': "{'Sales Invoice\x01Submitted':1,'Sales Invoice\x01Is Opening':''}",
-		'module': 'Accounts',
+		'filters': u"{'Sales Invoice\x01Submitted':1,'Sales Invoice\x01Is Opening':''}",
+		'module': u'Accounts',
 		'name': '__common__',
 		'page_len': 50,
-		'sort_by': '`Parent Account`',
-		'sort_order': 'DESC',
-		'standard': 'Yes'
+		'sort_by': u'`Parent Account`',
+		'sort_order': u'DESC',
+		'standard': u'Yes'
 	},
 
 	# Search Criteria, sales_register
 	{
 		'doctype': 'Search Criteria',
-		'name': 'sales_register'
+		'name': u'sales_register'
 	}
 ]

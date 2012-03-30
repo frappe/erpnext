@@ -19,14 +19,14 @@ report.customize_filters = function() {
   this.mytabs.items['More Filters'].hide()
   
   this.hide_all_filters();
-  this.add_filter({fieldname:'follow_up_on', label:'Follow up on', fieldtype:'Select', options:''+NEWLINE+'Lead'+NEWLINE+'Opportunity'+NEWLINE+'Quotation',ignore : 1,parent:'Follow up', in_first_page : 1, single_select :1});
+  this.add_filter({fieldname:'follow_up_on', label:'Communication on', fieldtype:'Select', options:''+NEWLINE+'Lead'+NEWLINE+'Opportunity'+NEWLINE+'Quotation',ignore : 1,parent:'Communication Log', in_first_page : 1, single_select :1});
   this.add_filter({fieldname:'lead_name', label:'Lead', fieldtype:'Link', options:'Lead', report_default:'', ignore : 1, parent:'Communication Log', in_first_page : 1});
   this.add_filter({fieldname:'enq_name', label:'Opportunity', fieldtype:'Link', options:'Opportunity', report_default:'', ignore : 1, parent:'Communication Log', in_first_page : 1});
   this.add_filter({fieldname:'qtn_name', label:'Quotation', fieldtype:'Link', options:'Quotation', report_default:'', ignore : 1, parent:'Communication Log', in_first_page : 1});
   
-  this.get_filter('Follow up', 'Follow up type').set_as_single();
-  this.set_filter_properties('Follow up', 'Follow up by', {filter_hide:0, in_first_page : 1});
-  this.set_filter_properties('Follow up', 'Follow up type', {filter_hide:0, in_first_page : 1});
+  this.get_filter('Communication Log', 'Communication type').set_as_single();
+  this.set_filter_properties('Communication Log', 'Communication by', {filter_hide:0, in_first_page : 1});
+  this.set_filter_properties('Communication Log', 'Communication type', {filter_hide:0, in_first_page : 1});
   this.set_filter_properties('Communication Log', 'From Date', {filter_hide:0, in_first_page : 1});
   this.set_filter_properties('Communication Log', 'To Date', {filter_hide:0, in_first_page : 1});
 
@@ -39,10 +39,10 @@ report.get_query = function() {
   var enq_id = this.filter_fields_dict['Communication Log'+FILTER_SEP+'Opportunity'].get_value();
   var quo_id = this.filter_fields_dict['Communication Log'+FILTER_SEP+'Quotation'].get_value();
 
-  var follow_up_on = this.filter_fields_dict['Follow up'+FILTER_SEP+'Follow up on'].get_value();
-  var follow_up_by = this.filter_fields_dict['Follow up'+FILTER_SEP+'Follow up by'].get_value();
+  var follow_up_on = this.filter_fields_dict['Communication Log'+FILTER_SEP+'Communication on'].get_value();
+  var follow_up_by = this.filter_fields_dict['Communication Log'+FILTER_SEP+'Communication by'].get_value();
 
-  var on_type = this.filter_fields_dict['Follow up'+FILTER_SEP+'Follow up type'].get_value();
+  var on_type = this.filter_fields_dict['Communication Log'+FILTER_SEP+'Communication type'].get_value();
   var from_date = this.filter_fields_dict['Communication Log'+FILTER_SEP+'From Date'].get_value();
   var to_date = this.filter_fields_dict['Communication Log'+FILTER_SEP+'To Date'].get_value();
   

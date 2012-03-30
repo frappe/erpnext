@@ -3,30 +3,30 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-10-12 15:19:31',
+		'creation': '2012-03-30 13:33:32',
 		'docstatus': 0,
-		'modified': '2010-09-25 12:14:49',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-30 13:33:32',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all Search Criteria
 	{
-		'criteria_name': 'Warranty/AMC Summary',
-		'doc_type': 'Serial No',
+		'criteria_name': u'Warranty/AMC Summary',
+		'doc_type': u'Serial No',
 		'doctype': 'Search Criteria',
-		'filters': "{'Serial No\x01Saved':1,'Serial No\x01Status':''}",
-		'module': 'Support',
+		'filters': u"{'Serial No\x01Saved':1,'Serial No\x01Status':''}",
+		'module': u'Support',
 		'name': '__common__',
 		'page_len': 50,
-		'sort_by': 'name',
-		'sort_order': 'DESC',
-		'standard': 'Yes'
+		'sort_by': u'name',
+		'sort_order': u'DESC',
+		'standard': u'Yes'
 	},
 
 	# Search Criteria, warranty-amc_summary
 	{
 		'doctype': 'Search Criteria',
-		'name': 'warranty-amc_summary'
+		'name': u'warranty-amc_summary'
 	}
 ]

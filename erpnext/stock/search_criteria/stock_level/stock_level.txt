@@ -3,34 +3,34 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-12-14 10:23:23',
+		'creation': '2012-03-30 14:50:44',
 		'docstatus': 0,
-		'modified': '2010-10-20 16:51:11',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-03-30 14:50:44',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all Search Criteria
 	{
-		'add_col': '`tabItem`.`item_name`\n`tabItem`.`description`',
-		'add_cond': '`tabItem`.name = `tabBin`.item_code',
-		'add_tab': '`tabItem`',
-		'columns': 'Bin\x01Warehouse,Bin\x01Item Code,Bin\x01UOM,Bin\x01Reserved Quantity,Bin\x01Actual Quantity,Bin\x01Ordered Quantity,Bin\x01Planned Qty,Bin\x01Projected Qty,Bin\x01Indented Quantity,Bin\x01Valuation Rate,Bin\x01Stock Value',
-		'criteria_name': 'Stock Level',
-		'doc_type': 'Bin',
+		'add_col': u'`tabItem`.`item_name`\n`tabItem`.`description`',
+		'add_cond': u'`tabItem`.name = `tabBin`.item_code',
+		'add_tab': u'`tabItem`',
+		'columns': u'Bin\x01Warehouse,Bin\x01Item Code,Bin\x01UOM,Bin\x01Reserved Quantity,Bin\x01Actual Quantity,Bin\x01Ordered Quantity,Bin\x01Planned Qty,Bin\x01Projected Qty,Bin\x01Quantity Requested for Purchase,Bin\x01Valuation Rate,Bin\x01Stock Value',
+		'criteria_name': u'Stock Level',
+		'doc_type': u'Bin',
 		'doctype': 'Search Criteria',
-		'filters': '{}',
-		'module': 'Stock',
+		'filters': u'{}',
+		'module': u'Stock',
 		'name': '__common__',
 		'page_len': 50,
-		'sort_by': '`tabBin`.`warehouse`',
-		'sort_order': 'DESC',
-		'standard': 'Yes'
+		'sort_by': u'`tabBin`.`warehouse`',
+		'sort_order': u'DESC',
+		'standard': u'Yes'
 	},
 
 	# Search Criteria, stock_level
 	{
 		'doctype': 'Search Criteria',
-		'name': 'stock_level'
+		'name': u'stock_level'
 	}
 ]

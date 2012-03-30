@@ -3,32 +3,32 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-20 12:20:56',
+		'creation': '2012-03-30 14:50:43',
 		'docstatus': 0,
-		'modified': '2010-08-20 12:15:17',
-		'modified_by': 'Administrator',
-		'owner': 'harshada@webnotestech.com'
+		'modified': '2012-03-30 14:50:43',
+		'modified_by': u'Administrator',
+		'owner': u'harshada@webnotestech.com'
 	},
 
 	# These values are common for all Search Criteria
 	{
-		'columns': 'Item\x01Item Name,Item\x01Item Group,Item Price\x01Price List Name,Item Price\x01Ref Rate,Item Price\x01Currency',
-		'criteria_name': 'Itemwise Price List',
-		'doc_type': 'Item Price',
+		'columns': u'Item\x01Item Name,Item\x01Item Group,Item Price\x01Price List Name,Item Price\x01Ref Rate,Item Price\x01Currency',
+		'criteria_name': u'Itemwise Price List',
+		'doc_type': u'Item Price',
 		'doctype': 'Search Criteria',
-		'filters': "{'Item\x01Saved':1,'Item Price\x01Price List Name':'','Item Price\x01Currency':''}",
-		'module': 'Stock',
+		'filters': u"{'Item\x01Saved':1,'Item Price\x01Price List Name':'','Item Price\x01Currency':''}",
+		'module': u'Stock',
 		'name': '__common__',
 		'page_len': 50,
-		'parent_doc_type': 'Item',
-		'sort_by': '`tabItem`.`item_name`',
-		'sort_order': 'DESC',
-		'standard': 'Yes'
+		'parent_doc_type': u'Item',
+		'sort_by': u'`tabItem`.`item_name`',
+		'sort_order': u'DESC',
+		'standard': u'Yes'
 	},
 
 	# Search Criteria, itemwise_price_list
 	{
 		'doctype': 'Search Criteria',
-		'name': 'itemwise_price_list'
+		'name': u'itemwise_price_list'
 	}
 ]

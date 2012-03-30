@@ -91,8 +91,6 @@ class DocType(TransactionBase):
 					item = sql("select last_purchase_rate from tabItem where name = '%s'" %(d.item_code), as_dict=1)
 					d.purchase_rate = item and flt(item[0]['last_purchase_rate']) or 0
 					d.import_rate = flt(item and flt(item[0]['last_purchase_rate']) or 0) / flt(self.doc.fields.has_key('conversion_rate') and flt(self.doc.conversion_rate) or 1)
-		if self.doc.supplier_qtn:
-			get_obj('DocType Mapper','Supplier Quotation-Purchase Order').dt_map('Supplier Quotation','Purchase Order',self.doc.supplier_qtn, self.doc, self.doclist, "[['Supplier Quotation','Purchase Order'],['Supplier Quotation Detail', 'Purchase Order Item']]")
 	
 	# GET TERMS & CONDITIONS
 	# =====================================================================================
@@ -115,12 +113,8 @@ class DocType(TransactionBase):
 	# validation
 	#-------------------------------------------------------------------------------------------------------------
 	def validate_doc(self,pc_obj):
-		# Please Check Supplier Quotation - Purchase ORder Transaction , it has to be discussed
-		if self.doc.supp_quo_no:
-			pc_obj.validate_doc(obj = self, prevdoc_doctype = 'Supplier Quotation', prevdoc_docname = cstr(self.doc.supp_quo_no))
-		else:
-			# Validate values with reference document
-			pc_obj.validate_reference_value(obj = self)
+		# Validate values with reference document
+		pc_obj.validate_reference_value(obj = self)
 
 	# Check for Stopped status 
 	def check_for_stopped_status(self, pc_obj):

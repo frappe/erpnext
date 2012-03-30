@@ -3,29 +3,29 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-12-14 10:23:28',
+		'creation': '2012-03-30 13:33:31',
 		'docstatus': 0,
-		'modified': '2010-11-22 17:02:05',
-		'modified_by': 'Administrator',
-		'owner': 'nabin@webnotestech.com'
+		'modified': '2012-03-30 13:33:31',
+		'modified_by': u'Administrator',
+		'owner': u'nabin@webnotestech.com'
 	},
 
 	# These values are common for all Search Criteria
 	{
-		'criteria_name': "Debtor's Ledger",
-		'doc_type': 'GL Entry',
+		'criteria_name': u"Debtor's Ledger",
+		'doc_type': u'GL Entry',
 		'doctype': 'Search Criteria',
-		'filters': "{'GL Entry\x01Voucher Type':'','GL Entry\x01Is Cancelled':'No','GL Entry\x01Is Opening':'','GL Entry\x01Fiscal Year':''}",
-		'module': 'Accounts',
+		'filters': u"{'GL Entry\x01Voucher Type':'','GL Entry\x01Is Cancelled':'No','GL Entry\x01Is Opening':'','GL Entry\x01Fiscal Year':''}",
+		'module': u'Accounts',
 		'name': '__common__',
 		'page_len': 50,
-		'sort_order': 'DESC',
-		'standard': 'Yes'
+		'sort_order': u'DESC',
+		'standard': u'Yes'
 	},
 
 	# Search Criteria, debtors_ledger
 	{
 		'doctype': 'Search Criteria',
-		'name': 'debtors_ledger'
+		'name': u'debtors_ledger'
 	}
 ]
