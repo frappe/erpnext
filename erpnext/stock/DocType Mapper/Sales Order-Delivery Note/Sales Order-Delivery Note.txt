@@ -5,7 +5,7 @@
 	{
 		'creation': '2010-09-20 12:33:35',
 		'docstatus': 0,
-		'modified': '2012-03-27 14:17:39',
+		'modified': '2012-04-02 13:05:03',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -125,6 +125,16 @@
 		'map': u'Yes',
 		'match_id': 1,
 		'to_field': u'export_amount'
+	},
+
+	# Field Mapper Detail
+	{
+		'checking_operator': u'=',
+		'doctype': u'Field Mapper Detail',
+		'from_field': u'basic_rate',
+		'map': u'Yes',
+		'match_id': 1,
+		'to_field': u'basic_rate'
 	},
 
 	# Field Mapper Detail

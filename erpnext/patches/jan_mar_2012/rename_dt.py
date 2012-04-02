@@ -7,10 +7,10 @@ from webnotes.modules.module_manager import reload_doc
 from webnotes.utils import make_esc
 import os
 
-def execute():
+def execute1():
 	update_file_content({'Follow up': 'Communication'})
 
-def execute1():
+def execute():
 	# delete dt, mapper
 	delete_dt_and_mapper()
 	
