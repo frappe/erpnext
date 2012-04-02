@@ -249,7 +249,7 @@ cur_frm.cscript['Create Quotation'] = function(){
 		'from_doctype':'Opportunity',
 		'to_doctype':'Quotation',
 		'from_docname':cur_frm.docname,
-		'from_to_list':"[['Enquiry', 'Quotation'],['Opportunity Item','Quotation Item']]"
+		'from_to_list':"[['Opportunity', 'Quotation'],['Opportunity Item','Quotation Item']]"
 	}
 	, function(r,rt) {
 		loaddoc("Quotation", n);

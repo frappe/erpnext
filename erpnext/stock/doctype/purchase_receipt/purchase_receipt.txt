@@ -646,7 +646,7 @@
 		'doctype': u'DocField',
 		'fieldname': u'purchase_tax_details',
 		'fieldtype': u'Table',
-		'label': u'Purchase Tax Details',
+		'label': u'Purchase Taxes and Charges',
 		'oldfieldname': u'purchase_tax_details',
 		'oldfieldtype': u'Table',
 		'options': u'Purchase Taxes and Charges',

@@ -30,7 +30,9 @@ def replace_code(start, txt1, txt2, extn):
 						content = f.read()
 				
 					if re.search(txt1, content):
-						search_replace_with_prompt(fpath, txt1, txt2)
+						res = search_replace_with_prompt(fpath, txt1, txt2)
+						if res == 'skip':
+							return 'skip'
 
 
 
@@ -47,10 +49,12 @@ def search_replace_with_prompt(fpath, txt1, txt2):
 			print '\n', fpath
 			print  colored(txt1, 'red').join(c[:-1].split(txt1))
 			a = ''
-			while a not in ['y', 'n', 'Y', 'N']:
-				a = raw_input('Do you want to Change [y/n]?')
+			while a.lower() not in ['y', 'n', 'skip']:
+				a = raw_input('Do you want to Change [y/n/skip]?')
 			if a.lower() == 'y':
 				c = c.replace(txt1, txt2)
+			elif a.lower() == 'skip':
+				return 'skip'
 		tmp.append(c)
 
 	with open(fpath, 'w') as f:

@@ -7,10 +7,12 @@ from webnotes.modules import reload_doc
 from webnotes.utils import make_esc
 import os
 
-def execute1():
-	update_file_content({'Follow up': 'Communication'})
-
 def execute():
+	rendt = get_dt_to_be_renamed()
+	rename_dt_files(rendt)
+	#update_local_file_system()
+
+def execute1():
 	# delete dt, mapper
 	delete_dt_and_mapper()
 	
@@ -104,6 +106,7 @@ def delete_dt_and_mapper():
 
 	for d in del_dt:
 		delete_doc('DocType', d)
+
 
 
 def rename_in_db(ren_data, data_type, is_doctype):
@@ -301,23 +304,30 @@ def update_local_file_system():
 def update_file_content(rendt):
 	for d in rendt:
 		print colored('Renaming... ' + d + ' --> '+ rendt[d], 'yellow')
-		for extn in ['js', 'py', 'txt']:
-			replace_code('/var/www/erpnext/', d, rendt[d], extn)
+		for extn in ['js', 'py', 'txt', 'html']:
+			res = replace_code('/var/www/erpnext/', d, rendt[d], extn)
+			if res == 'skip':
+				break
 		
 		
 def rename_dt_files(rendt):
 	for d in rendt:
 		mod = webnotes.conn.sql("select module from tabDocType where name = %s", rendt[d])[0][0]
-		path = 'erpnext/' + '_'.join(mod.lower().split()) + '/doctype/'
+		if mod == 'Core':
+			os.chdir('/var/www/erpnext/lib/')
+			path = 'py/core/doctype/'
+		else:
+			os.chdir('/var/www/erpnext/')
+			path = 'erpnext/' + '_'.join(mod.lower().split()) + '/doctype/'
 		old = '_'.join(d.lower().split())
 		new = '_'.join(rendt[d].lower().split())
 
+		print 'git mv ' + path + old + ' ' + path + new
 		# rename old dir
 		os.system('git mv ' + path + old + ' ' + path + new)
-		print 'git mv ' + path + old + ' ' + path + new
 
 		# rename all files in that dir
-		for extn in ['js', 'py', 'txt']:
+		for extn in ['js', 'py', 'txt', 'html']:
 			if os.path.exists(path + new + '/'+ old + '.' +extn):
 				os.system('git mv ' + path + new + '/'+ old + '.' +extn + ' ' + path + new + '/' + new + '.' +extn)
 				print 'git mv ' + path + new + '/'+ old + '.' +extn + ' ' + path + new + '/' + new + '.' +extn

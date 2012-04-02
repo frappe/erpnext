@@ -84,7 +84,7 @@ class DocType:
 
 	# =============================================================================
 	def check_bin_qty(self, bin_obj, qty_dict):
-		label_dict = {'actual_qty': 'Actual Qty', 'indented_qty': 'Indent Qty', 'ordered_qty': 'Ordered Qty', 'reserved_qty': 'Reserved Qty', 'planned_qty': 'Planned Qty'}
+		label_dict = {'actual_qty': 'Actual Qty', 'indented_qty': 'Quantity Requested for Purchase', 'ordered_qty': 'Ordered Qty', 'reserved_qty': 'Reserved Qty', 'planned_qty': 'Planned Qty'}
 		for f in qty_dict:
 			if flt(bin_obj.doc.fields[f]) != qty_dict[f]:
 				msgprint('<div style="color: RED"> Difference found in %s for Item:= %s and Warehouse:= %s (Before : %s; After : %s)</div>' % (label_dict[f], bin_obj.doc.item_code, bin_obj.doc.warehouse, cstr(bin_obj.doc.fields[f]), cstr(qty_dict[f])))

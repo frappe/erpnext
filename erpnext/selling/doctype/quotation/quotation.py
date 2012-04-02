@@ -54,7 +54,7 @@ class DocType(TransactionBase):
 	# --------------------
 	def pull_enq_details(self):
 		self.doc.clear_table(self.doclist, 'quotation_details')
-		get_obj('DocType Mapper', 'Enquiry-Quotation').dt_map('Enquiry', 'Quotation', self.doc.enq_no, self.doc, self.doclist, "[['Enquiry', 'Quotation'],['Opportunity Item', 'Quotation Item']]")
+		get_obj('DocType Mapper', 'Opportunity-Quotation').dt_map('Opportunity', 'Quotation', self.doc.enq_no, self.doc, self.doclist, "[['Opportunity', 'Quotation'],['Opportunity Item', 'Quotation Item']]")
 
 		self.get_adj_percent()
 
@@ -114,7 +114,7 @@ class DocType(TransactionBase):
 	def load_default_taxes(self):
 		return get_obj('Sales Common').load_default_taxes(self)
 
-	# Pull details from other charges master (Get Other Charges)
+	# Pull details from other charges master (Get Sales Taxes and Charges Master)
 	# ----------------------------------------------------------
 	def get_other_charges(self):
 		return get_obj('Sales Common').get_other_charges(self)	

@@ -255,10 +255,10 @@
 	{
 		'doctype': u'Table Mapper Detail',
 		'from_field': u'other_charges',
-		'from_table': u'RV Tax Detail',
+		'from_table': u'Sales Taxes and Charges',
 		'match_id': 2,
 		'to_field': u'other_charges',
-		'to_table': u'RV Tax Detail',
+		'to_table': u'Sales Taxes and Charges',
 		'validation_logic': u'name is not null'
 	},
 
@@ -277,12 +277,12 @@
 	{
 		'doctype': u'Table Mapper Detail',
 		'from_field': u'sales_order_details',
-		'from_table': u'Sales Order Detail',
+		'from_table': u'Sales Order Item',
 		'match_id': 1,
 		'reference_doctype_key': u'prevdoc_doctype',
 		'reference_key': u'prevdoc_detail_docname',
 		'to_field': u'delivery_note_details',
-		'to_table': u'Delivery Note Detail',
+		'to_table': u'Delivery Note Item',
 		'validation_logic': u'qty > ifnull(delivered_qty,0) and docstatus = 1'
 	},
 

@@ -178,7 +178,7 @@ class DocType:
 				qty =flt(d.qty)
 				if is_stopped:
 					qty = (d.qty > d.ordered_qty) and flt(flt(d.qty) - flt(d.ordered_qty)) or 0 
-				# Step 3 :=> Update Bin's Indent Qty by +- qty 
+				# Step 3 :=> Update Bin's Purchase Request Qty by +- qty 
 				get_obj('Warehouse', d.warehouse).update_bin(0, 0, 0, (is_submit and 1 or -1) * flt(qty), 0, d.item_code, self.doc.transaction_date)		
 		
 	# On Submit			
@@ -220,7 +220,7 @@ class DocType:
 		# Step 2:=> Check for stopped status
 		pc_obj.check_for_stopped_status( self.doc.doctype, self.doc.name)
 		
-		# Step 3:=> Check if Purchase Order has been submitted against current Indent
+		# Step 3:=> Check if Purchase Order has been submitted against current Purchase Request
 		pc_obj.check_docstatus(check = 'Next', doctype = 'Purchase Order', docname = self.doc.name, detail_doctype = 'Purchase Order Item')
 		# Step 4:=> Update Bin
 		self.update_bin(is_submit = 0, is_stopped = (cstr(self.doc.status) == 'Stopped') and 1 or 0)
@@ -229,7 +229,7 @@ class DocType:
 		set(self.doc,'status','Cancelled')
 
 
-	# Repair Indent
+	# Repair Purchase Request
 	# ===========================================
 	def repair_indent(self):
 		get_obj('Purchase Common', 'Purchase Common').repair_curr_doctype_details(self)

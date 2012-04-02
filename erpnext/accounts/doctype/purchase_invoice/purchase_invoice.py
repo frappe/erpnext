@@ -163,7 +163,7 @@ class DocType(TransactionBase):
 	def get_rate(self,arg):
 		return get_obj('Purchase Common').get_rate(arg,self)
 
-	# Pull details from other charges master (Get Other Charges)
+	# Get Purchase Taxes and Charges Master
 	# -----------------------------------------------------------
 	def get_purchase_tax_details(self):
 		return get_obj('Purchase Common').get_purchase_tax_details(self)

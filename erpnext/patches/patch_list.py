@@ -256,5 +256,10 @@ patch_list = [
 		'patch_module': 'patches.mar_2012',
 		'patch_file': 'delete_docformat',
 		'description': 'Deletes DocFormat from database' 
+	},
+	{
+		'patch_module': 'patches.mar_2012',
+		'patch_file': 'usertags',
+		'description': 'Adds _user_tags columns to tables' 
 	}
 ]

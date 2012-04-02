@@ -60,7 +60,7 @@ cur_frm.cscript['Make Salary Slip'] = function(){
       'from_doctype':'Salary Structure',
       'to_doctype':'Salary Slip',
       'from_docname':doc.name,
-      'from_to_list':"[['Salary Structure', 'Salary Slip'], ['Earning Detail', 'Salary Slip Earning'], ['Deduction Detail', 'Salary Slip Deduction']]"
+      'from_to_list':"[['Salary Structure', 'Salary Slip'], ['Salary Structure Earning', 'Salary Slip Earning'], ['Salary Structure Deduction', 'Salary Slip Deduction']]"
       }, 
       function(r,rt) {
         n.fiscal_year = sys_defaults.fiscal_year;

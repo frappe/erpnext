@@ -15,7 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-	Reload DocLayer, Customize Form Field and Print Format doctypes
+	Reload Customize Form, Customize Form Field and Print Format doctypes
 """
 def execute():
 	from webnotes.modules import reload_doc

@@ -151,7 +151,7 @@ class DocType(TransactionBase):
 		return get_obj('Sales Common').load_default_taxes(self)
 
 
-	# **** Pull details from other charges master (Get Other Charges) ****
+	# **** Pull details from other charges master (Get Sales Taxes and Charges Master) ****
 	def get_other_charges(self):
 		return get_obj('Sales Common').get_other_charges(self)
 
