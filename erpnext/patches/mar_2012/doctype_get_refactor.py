@@ -3,7 +3,7 @@ def execute():
 	"""
 		* Custom Field changes
 		* Add file_list to required tables
-		* Change floats/currency to decimal(14, 6)
+		* Change floats/currency to decimal(18, 6)
 		* Remove DocFormat from DocType's fields
 		* Remove 'no_column' from DocField
 		* Drop table DocFormat
@@ -151,7 +151,7 @@ def change_to_decimal():
 				flist.append(d.get('Field'))
 		if flist:
 			#print tab[0], flist
-			statements = ("MODIFY `%s` decimal(14,6)" % f for f in flist)
+			statements = ("MODIFY `%s` decimal(18,6)" % f for f in flist)
 			statements = ", \n".join(statements)
 			alter_tables_list.append("ALTER TABLE `%s` \n%s\n" % (tab[0],
 				statements))
