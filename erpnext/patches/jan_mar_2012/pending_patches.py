@@ -21,7 +21,6 @@ def execute():
 	sql = webnotes.conn.sql
 
 	reload_doc('hr', 'doctype', 'appraisal')
-	reload_doc('hr', 'doctype', 'appraisal_detail')
 
 	sql("update `tabDocField` set `hidden` = 0 where fieldname = 'group_or_ledger' and parent = 'Cost Center'")
 	sql("update tabDocPerm set amend = 0 where parent = 'Salary Structure'")
@@ -31,12 +30,7 @@ def execute():
 		sql("delete from `tabDocField` where label = 'View Ledger Entry' and parent = 'Journal Voucher' and fieldtype = 'Button' limit 1")
 	if sql("select count(name) from `tabDocField` where label = 'Get Balance' and parent = 'Journal Voucher' and fieldtype = 'Button'")[0][0] > 1:
 		sql("delete from `tabDocField` where label = 'Get Balance' and parent = 'Journal Voucher' and fieldtype = 'Button' limit 1")
-	
-	reload_doc('accounts', 'doctype', 'internal_reconciliation')
-	reload_doc('accounts', 'doctype', 'ir_payment_detail')
-	reload_doc('accounts', 'Module Def', 'Accounts')
-		
-
+			
 		
 	if sql("select count(name) from `tabDocField` where label = 'Get Specification Details' and parent = 'Quality Inspection' and fieldtype = 'Button'")[0][0] > 1:
 		sql("delete from `tabDocField` where label = 'Get Specification Details' and parent = 'Quality Inspection' and fieldtype = 'Button' limit 1")
@@ -44,8 +38,6 @@ def execute():
 	reload_doc('stock', 'DocType Mapper', 'Purchase Order-Purchase Receipt')
 		
 	reload_doc('accounts', 'doctype', 'cost_center')
-	reload_doc('stock', 'Module Def', 'Stock')
-	sql("delete from `tabModule Def Item` where display_name = 'Serial No' and parent = 'Support'")
 	sql("update `tabDocType` set subject = 'Item Code: %(item_code)s, Warehouse: %(warehouse)s' where name = 'Serial No'")
 
 	# Patch for adding packing related columns (packed by, checked by, shipping mark etc)

@@ -232,6 +232,7 @@ patch_list = [
 		'patch_file': 'delete_docformat',
 		'description': 'Deletes DocFormat from database' 
 	},
+	{
 		'patch_module': 'patches.jan_mar_2012',
 		'patch_file': 'reload_mapper',
 		'description': 'SO-DN, SO-Rv, DN-RV'

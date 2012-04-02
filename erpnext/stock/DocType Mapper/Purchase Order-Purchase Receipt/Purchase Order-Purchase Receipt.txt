@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-09-20 12:33:34',
+		'creation': '2010-08-08 17:09:35',
 		'docstatus': 0,
-		'modified': '2012-03-27 14:17:40',
+		'modified': '2012-04-02 14:03:39',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -189,6 +189,19 @@
 	{
 		'doctype': u'Table Mapper Detail',
 		'from_field': u'po_details',
+		'from_table': u'PO Detail',
+		'match_id': 1,
+		'reference_doctype_key': u'prevdoc_doctype',
+		'reference_key': u'prevdoc_detail_docname',
+		'to_field': u'purchase_receipt_details',
+		'to_table': u'Purchase Receipt Detail',
+		'validation_logic': u'docstatus=1 and qty > ifnull(received_qty,0)'
+	},
+
+	# Table Mapper Detail
+	{
+		'doctype': u'Table Mapper Detail',
+		'from_field': u'po_details',
 		'from_table': u'Purchase Order Item',
 		'match_id': 1,
 		'reference_doctype_key': u'prevdoc_doctype',
@@ -205,6 +218,17 @@
 		'match_id': 0,
 		'reference_key': u'prevdoc_docname',
 		'to_table': u'Purchase Receipt',
+		'validation_logic': u'docstatus = 1'
+	},
+
+	# Table Mapper Detail
+	{
+		'doctype': u'Table Mapper Detail',
+		'from_field': u'purchase_tax_details',
+		'from_table': u'Purchase Tax Detail',
+		'match_id': 2,
+		'to_field': u'purchase_tax_details',
+		'to_table': u'Purchase Tax Detail',
 		'validation_logic': u'docstatus = 1'
 	},
 

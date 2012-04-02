@@ -3,16 +3,6 @@ def execute():
 	from webnotes.model import delete_doc
 	from webnotes.modules import reload_doc
 
-	dt = {
-		'selling':	['quotation', 'sales_order', 'quotation_detail', 'sales_order_detail'], 
-		'stock':	['delivery_note', 'delivery_note_detail', 'purchase_receipt', 'purchase_receipt_detail'],
-		'accounts': ['receivable_voucher', 'payable_voucher', 'rv_detail', 'pv_detail', 'rv_tax_detail', 'purchase_tax_detail'],
-		'buying':	['purchase_order', 'po_detail']
-	}
-	for m in dt:
-		for d in dt[m]:
-			reload_doc(m, 'doctype', d)
-
 
 	webnotes.conn.sql("""delete from `tabDocField` 
 		where label in ('Note1', 'OT Notes', 'Note', 'Note HTML', 'Rates HTML') 

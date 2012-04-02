@@ -3,7 +3,7 @@ from webnotes.model import rename, delete_doc
 from webnotes.model.code import get_obj
 from wnf import replace_code
 from termcolor import colored
-from webnotes.modules.module_manager import reload_doc
+from webnotes.modules import reload_doc
 from webnotes.utils import make_esc
 import os
 
