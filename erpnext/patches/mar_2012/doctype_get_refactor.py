@@ -16,6 +16,9 @@ def execute():
 	change_to_decimal()
 
 def change_property_setter_fieldnames():
+	import webnotes.model.sync
+	webnotes.model.sync.sync('core', 'property_setter')
+	
 	docfield_list = webnotes.conn.sql("""\
 		SELECT name, fieldname FROM `tabDocField`""", as_list=1)
 	custom_field_list = webnotes.conn.sql("""\
