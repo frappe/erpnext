@@ -7,10 +7,10 @@ from webnotes.modules import reload_doc
 from webnotes.utils import make_esc
 import os
 
-def execute():
+def execute1():
 	update_file_content({'Follow up': 'Communication'})
 
-def execute1():
+def execute():
 	# delete dt, mapper
 	delete_dt_and_mapper()
 	
@@ -62,8 +62,11 @@ def execute1():
 	# reload custom search criteria
 	for d in  webnotes.conn.sql("""select name, module from
 			`tabSearch Criteria` where ifnull(standard, 'No') = 'Yes' and ifnull(disabled, 0) = 0"""):
-		print d
-		reload_doc(d[1], 'search_criteria', d[0].replace('-', '_'))
+		try:
+			reload_doc(d[1], 'search_criteria', d[0].replace('-', '_'))
+			print d
+		except Exception, e:
+			print "did not reload: " + str(d)
 	
 	webnotes.conn.sql("""DELETE FROM `tabPrint Format`
 			WHERE name IN ('Delivery Note Format', 'Purchase Order Format',
@@ -74,7 +77,10 @@ def execute1():
 	# reload custom print format
 	for d in webnotes.conn.sql("""select name, module from `tabPrint Format`
 			where ifnull(standard, 'No') = 'Yes'"""):
-		reload_doc(d[1], 'Print Format', d[0])
+		try:
+			reload_doc(d[1], 'Print Format', d[0])
+		except Exception, e:
+			print "did not reload: " + str(d)
 
 	#  Reload GL Mapper
 	for d in webnotes.conn.sql("select name from `tabGL Mapper`"):
