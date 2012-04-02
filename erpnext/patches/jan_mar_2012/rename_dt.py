@@ -7,12 +7,12 @@ from webnotes.modules import reload_doc
 from webnotes.utils import make_esc
 import os
 
-def execute():
+def execute1():
 	rendt = get_dt_to_be_renamed()
 	rename_dt_files(rendt)
 	#update_local_file_system()
 
-def execute1():
+def execute():
 	# delete dt, mapper
 	delete_dt_and_mapper()
 	
