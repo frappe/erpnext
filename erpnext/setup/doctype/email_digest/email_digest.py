@@ -240,7 +240,9 @@ class DocType:
 			Adds common conditions in dictionary "args"
 		"""
 		start_date, end_date = self.get_start_end_dates()
-		fiscal_start_date = webnotes.utils.get_defaults()['year_start_date']
+		fiscal_year = webnotes.utils.get_defaults()['fiscal_year']
+		fiscal_start_date = webnotes.conn.get_value('Fiscal Year', fiscal_year,
+				'year_start_date')
 
 		if 'new' in args['type']:
 			args.update({
