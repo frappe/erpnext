@@ -60,6 +60,7 @@ erpnext.todo.ToDoItem = Class.extend({
 		} else {
 			todo.link = '';
 		}
+		if(!todo.description) todo.description = '';
 		$('#todo-list').append(repl('<div class="todoitem">\
 				<span class="description">\
 					<span class="label %(labelclass)s">%(priority)s</span>\
