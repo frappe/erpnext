@@ -23,7 +23,7 @@ var display_activity_log = function(msg) {
 
 //Create salary slip
 //-----------------------
-cur_frm.cscript['Create Salary Slip'] = function(doc, cdt, cdn) {
+cur_frm.cscript.create_salary_slip = function(doc, cdt, cdn) {
 	var callback = function(r, rt){
 		if (r.message)
 			display_activity_log(r.message);
@@ -35,7 +35,7 @@ cur_frm.cscript['Create Salary Slip'] = function(doc, cdt, cdn) {
 
 //Submit salary slip
 //-----------------------
-cur_frm.cscript['Submit Salary Slip'] = function(doc, cdt, cdn) {
+cur_frm.cscript.submit_salary_slip = function(doc, cdt, cdn) {
 	var check = confirm("Do you really want to Submit all Salary Slip for month : " + doc.month+" and fiscal year : "+doc.fiscal_year);
 	if(check){
 		var callback = function(r, rt){
@@ -48,7 +48,7 @@ cur_frm.cscript['Submit Salary Slip'] = function(doc, cdt, cdn) {
 
 // Make Bank Voucher
 //-----------------------
-cur_frm.cscript['Make Bank Voucher'] = function(doc,cdt,cdn){
+cur_frm.cscript.make_bank_voucher = function(doc,cdt,cdn){
   if(doc.month && doc.fiscal_year){
   	cur_frm.cscript.make_jv(doc, cdt, cdn);
   }

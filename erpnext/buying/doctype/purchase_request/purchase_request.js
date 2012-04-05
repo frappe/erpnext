@@ -63,7 +63,7 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 			cur_frm.add_custom_button('Make Purchase Order', cur_frm.cscript['Make Purchase Order'])
 			cur_frm.add_custom_button('Stop ' + cur_frm.cscript.indent_doctype_label, cur_frm.cscript['Stop Purchase Requisition'])
 		}
-		cur_frm.add_custom_button('Send SMS', cur_frm.cscript['Send SMS']);
+		cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms);
 	}
  
 	if(doc.docstatus == 1 && doc.status == 'Stopped')

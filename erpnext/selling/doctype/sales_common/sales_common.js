@@ -363,8 +363,8 @@ cur_frm.fields_dict.charge.get_query = function(doc) {
 }
 
 // ********************* Get Charges ****************************
-cur_frm.cscript['Get Taxes and Charges'] = function(doc, cdt, cdn) {
-	$c_obj(make_doclist(doc.doctype,doc.name),'get_other_charges','', function(r, rt) { cur_frm.cscript['Calculate Taxes and Charges'](doc, cdt, cdn);});
+cur_frm.cscript.get_charges = function(doc, cdt, cdn) {
+	$c_obj(make_doclist(doc.doctype,doc.name),'get_other_charges','', function(r, rt) { cur_frm.cscript.calculate_charges(doc, cdt, cdn);});
 }
 
 
@@ -739,11 +739,11 @@ cur_frm.cscript.get_item_wise_tax_detail = function( doc, rate, cl, i, tax, t) {
 
 // **************** RE-CALCULATE VALUES ***************************
 
-cur_frm.cscript['Re-Calculate Values'] = function(doc, cdt, cdn) {	
-	cur_frm.cscript['Calculate Taxes and Charges'](doc,cdt,cdn);
+cur_frm.cscript.recalculate_values = function(doc, cdt, cdn) {	
+	cur_frm.cscript.calculate_charges(doc,cdt,cdn);
 }
 
-cur_frm.cscript['Calculate Taxes and Charges'] = function(doc, cdt, cdn) {
+cur_frm.cscript.calculate_charges = function(doc, cdt, cdn) {
 	var other_fname	= cur_frm.cscript.other_fname;
 
 	var cl = getchildren('Sales Taxes and Charges', doc.name, other_fname, doc.doctype);
@@ -828,7 +828,7 @@ cur_frm.cscript.validate = function(doc, cdt, cdn) {
 			validated = false;
 		}
 	}
-	cur_frm.cscript['Calculate Taxes and Charges'] (doc, cdt, cdn);
+	cur_frm.cscript.calculate_charges (doc, cdt, cdn);
 
 	if (cur_frm.cscript.calc_adjustment_amount) cur_frm.cscript.calc_adjustment_amount(doc);
 }

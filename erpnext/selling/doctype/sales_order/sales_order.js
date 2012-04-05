@@ -64,14 +64,14 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 
 	if(doc.docstatus==1) {
 		if(doc.status != 'Stopped') {
-			cur_frm.add_custom_button('Send SMS', cur_frm.cscript['Send SMS']);
+			cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms);
 			// delivery note
 			if(doc.per_delivered < 100 && doc.order_type!='Maintenance')
 				cur_frm.add_custom_button('Make Delivery', cur_frm.cscript['Make Delivery Note']);
 			
 			// maintenance
 			if(doc.per_delivered < 100 && doc.order_type=='Maintenance') {
-				cur_frm.add_custom_button('Make Maint. Visit', cur_frm.cscript['Make Maintenance Visit']);
+				cur_frm.add_custom_button('Make Maint. Visit', cur_frm.cscript.make_maintenance_visit);
 				cur_frm.add_custom_button('Make Maint. Schedule', cur_frm.cscript['Make Maintenance Schedule']);
 			}
 
@@ -135,7 +135,7 @@ cur_frm.fields_dict['contact_person'].get_query = function(doc, cdt, cdn) {
 	return 'SELECT name,CONCAT(first_name," ",ifnull(last_name,"")) As FullName,department,designation FROM tabContact WHERE customer = "'+ doc.customer +'" AND docstatus != 2 AND name LIKE "%s" ORDER BY name ASC LIMIT 50';
 }
 
-cur_frm.cscript['Pull Quotation Items'] = function(doc,dt,dn) {
+cur_frm.cscript.pull_quotation_details = function(doc,dt,dn) {
 	var callback = function(r,rt){
 		var doc = locals[cur_frm.doctype][cur_frm.docname];					
 		if(r.message){							
@@ -233,7 +233,7 @@ cur_frm.cscript['Make Maintenance Schedule'] = function() {
 }
 
 //------------ make maintenance visit ------------
-cur_frm.cscript['Make Maintenance Visit'] = function() {
+cur_frm.cscript.make_maintenance_visit = function() {
 	var doc = cur_frm.doc;
 
 	if (doc.docstatus == 1) { 

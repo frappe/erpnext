@@ -93,7 +93,7 @@ cur_frm.cscript.IGHelp = function(doc,dt,dn){
 // takes the first attachment and creates
 // a table with both image and attachment in HTML
 // in the "alternate_description" field
-cur_frm.cscript['Add Image'] = function(doc, dt, dn) {
+cur_frm.cscript.add_image = function(doc, dt, dn) {
 	if(!doc.file_list) {
 		msgprint('Please attach a file first!');
 	}

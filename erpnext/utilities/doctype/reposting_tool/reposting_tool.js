@@ -18,7 +18,7 @@ var bin_list = [];
 var msg = [];
 var binidx = 0;
 
-cur_frm.cscript['Repost Bin'] = function(doc,cdt,cdn) {
+cur_frm.cscript.repost_bin = function(doc,cdt,cdn) {
   args = {'check': 'Bin'};
   $c_obj('Reposting Tool','get_count_for_reposting', docstring(args), function(r,rt) {
        bin_list = r.message;
@@ -50,7 +50,7 @@ function repair_bin(){
 //======================================================
 var acc_list = [];
 var accidx = 0;
-cur_frm.cscript['Repost Account Balances'] = function(doc,cdt,cdn) {
+cur_frm.cscript.repost_account_balances = function(doc,cdt,cdn) {
   args = {'check': 'Account Balance'};
   $c_obj('Reposting Tool','get_count_for_reposting', docstring(args), function(r,rt) {
        acc_list = r.message;

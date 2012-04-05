@@ -137,7 +137,7 @@ cur_frm.cscript.rate = function(doc,dt,dn) {
 	refresh_field('ded_amount');
 	cur_frm.cscript.update_totals(doc); 
 }
-cur_frm.cscript['Get Balance'] = function(doc,dt,dn) {
+cur_frm.cscript.get_balance = function(doc,dt,dn) {
 	cur_frm.cscript.update_totals(doc); 
 	$c_obj(make_doclist(dt,dn), 'get_balance', '', function(r, rt){
 	cur_frm.refresh();
@@ -157,7 +157,7 @@ cur_frm.cscript.validate = function(doc,cdt,cdn) {
 
 // TDS
 // --------
-cur_frm.cscript['Get TDS'] = function(doc, dt, dn) {
+cur_frm.cscript.get_tds = function(doc, dt, dn) {
 	$c_obj(make_doclist(dt,dn), 'get_tds', '', function(r, rt){
 		cur_frm.refresh();
 		cur_frm.cscript.update_totals(doc);
@@ -181,7 +181,7 @@ cur_frm.cscript.select_print_heading = function(doc,cdt,cdn){
 }
 
 /****************** Get Accounting Entry *****************/
-cur_frm.cscript['View Ledger Entry'] = function(doc,cdt,cdn){
+cur_frm.cscript.view_ledger_entry = function(doc,cdt,cdn){
 	var callback = function(report){
 		report.set_filter('GL Entry', 'Voucher No',doc.name);
 		report.dt.run();

@@ -29,7 +29,7 @@ cur_frm.cscript.sales_order = function(doc,cdt,cdn) {
 }
 
 
-cur_frm.cscript['Download Raw Material'] = function(doc, cdt, cdn) {
+cur_frm.cscript.download_raw_material = function(doc, cdt, cdn) {
 	var callback = function(r, rt){
 		if (r.message) 
 			$c_obj_csv(make_doclist(cdt, cdn), 'download_raw_materials', '', '');

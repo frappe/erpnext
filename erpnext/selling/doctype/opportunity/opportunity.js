@@ -34,7 +34,7 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn){
 	if(doc.docstatus == 1) {
 		cur_frm.add_custom_button('Create Quotation', cur_frm.cscript['Create Quotation']);
 		cur_frm.add_custom_button('Opportunity Lost', cur_frm.cscript['Declare Opportunity Lost']);
-		cur_frm.add_custom_button('Send SMS', cur_frm.cscript['Send SMS']);
+		cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms);
 	}
 
 	//cur_frm.cscript.clear_values(doc,cdt,cdn);

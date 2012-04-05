@@ -108,15 +108,15 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 	if (!cur_frm.cscript.is_onload)	cur_frm.cscript.hide_price_list_currency(doc, dt, dn); 
 
 	if(doc.docstatus==1) {
-		cur_frm.add_custom_button('View Ledger', cur_frm.cscript['View Ledger Entry']);
-		cur_frm.add_custom_button('Send SMS', cur_frm.cscript['Send SMS']);
+		cur_frm.add_custom_button('View Ledger', cur_frm.cscript.view_ledger_entry);
+		cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms);
 		unhide_field('Repair Outstanding Amt');
 
 		if(doc.is_pos==1 && doc.update_stock!=1)
 			cur_frm.add_custom_button('Make Delivery', cur_frm.cscript['Make Delivery Note']);
 
 		if(doc.outstanding_amount!=0)
-			cur_frm.add_custom_button('Make Payment Entry', cur_frm.cscript['Make Bank Voucher']);
+			cur_frm.add_custom_button('Make Payment Entry', cur_frm.cscript.make_bank_voucher);
 	}
 	else
 		hide_field('Repair Outstanding Amt');
@@ -275,7 +275,7 @@ cur_frm.cscript.is_opening = function(doc, dt, dn) {
 /* **************************** TRIGGERS ********************************** */
 
 // Get Items based on SO or DN Selected
-cur_frm.cscript['Get Items'] = function(doc, dt, dn) {
+cur_frm.cscript.get_items = function(doc, dt, dn) {
 	var callback = function(r,rt) {
 		unhide_field(['customer_address','contact_person','customer_name','address_display','contact_display','contact_mobile','contact_email','territory','customer_group']);
 		cur_frm.refresh();
@@ -314,7 +314,7 @@ cur_frm.cscript['Make Delivery Note'] = function() {
 
 // Make Bank Voucher Button
 // -------------------------
-cur_frm.cscript['Make Bank Voucher'] = function(doc, dt, dn) {
+cur_frm.cscript.make_bank_voucher = function(doc, dt, dn) {
 	$c('accounts.get_default_bank_account', { company: cur_frm.doc.company }, function(r, rt) {
 		if(!r.exc) {
 		  cur_frm.cscript.make_jv(cur_frm.doc, null, null, r.message);
@@ -470,7 +470,7 @@ cur_frm.cscript.make_jv = function(doc, dt, dn, bank_account) {
 
 
 /****************** Get Accounting Entry *****************/
-cur_frm.cscript['View Ledger Entry'] = function(){
+cur_frm.cscript.view_ledger_entry = function(){
 	var callback = function(report){
 		report.set_filter('GL Entry', 'Voucher No',cur_frm.doc.name);
 		report.dt.run();

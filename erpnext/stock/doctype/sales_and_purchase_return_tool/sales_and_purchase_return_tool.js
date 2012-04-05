@@ -65,7 +65,7 @@ cur_frm.cscript.return_type = function(doc, cdt, cdn) {
 
 // Create item table
 //-------------------------------
-cur_frm.cscript['Get Items'] = function(doc, cdt, cdn) {
+cur_frm.cscript.get_items = function(doc, cdt, cdn) {
 	flag = 0
 	if(doc.return_type == 'Sales Return') {
 		if (doc.delivery_note_no && doc.sales_invoice_no) {
@@ -96,7 +96,7 @@ cur_frm.cscript.clear_fields = function(doc) {
 
 // Make Stock Entry
 //-------------------------------
-cur_frm.cscript['Make Stock Entry'] = function(doc, cdt, cdn) {
+cur_frm.cscript.make_stock_entry = function(doc, cdt, cdn) {
 	var cl = getchildren('Sales and Purchase Return Item', doc.name, 'return_details');
 	if (!cl.length)
 		msgprint("Item table can not be blank. Please click on 'Get Items'.");
@@ -170,7 +170,7 @@ cur_frm.cscript.map_child_fields = function(cl, se) {
 
 // Make excise voucher
 //-------------------------------
-cur_frm.cscript['Make Excise Invoice'] = function(doc) {
+cur_frm.cscript.make_excise_invoice = function(doc) {
 	var excise = LocalDB.create('Journal Voucher');
 	excise = locals['Journal Voucher'][excise];
 	excise.voucher_type = 'Excise Voucher';
@@ -178,7 +178,7 @@ cur_frm.cscript['Make Excise Invoice'] = function(doc) {
 }
 // Make debit note
 //------------------------------
-cur_frm.cscript['Make Debit Note'] = function(doc) {
+cur_frm.cscript.make_debit_note = function(doc) {
 	var doclist = make_doclist(doc.doctype, doc.name);
 	$c('accounts.get_new_jv_details', {
 			doclist: JSON.stringify(doclist),
@@ -191,7 +191,7 @@ cur_frm.cscript['Make Debit Note'] = function(doc) {
 }
 // Make credit note
 //------------------------------
-cur_frm.cscript['Make Credit Note'] = function(doc) {
+cur_frm.cscript.make_credit_note = function(doc) {
 	var doclist = make_doclist(doc.doctype, doc.name);
 	$c('accounts.get_new_jv_details', {
 			doclist: JSON.stringify(doclist),

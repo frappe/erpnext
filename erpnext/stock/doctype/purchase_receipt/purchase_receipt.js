@@ -69,7 +69,7 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 			if(ch[i].qty > ch[i].billed_qty) allow_billing = 1;
 		}
 	 cur_frm.add_custom_button('Make Purchase Invoice', cur_frm.cscript['Make Purchase Invoice']);
-	 cur_frm.add_custom_button('Send SMS', cur_frm.cscript['Send SMS']);
+	 cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms);
 	}
 	else{
 		hide_field(['Repair Purchase Receipt']);
@@ -109,7 +109,7 @@ cur_frm.fields_dict.contact_person.on_new = function(dn) {
 
 // Get Purchase Order Button
 // -----------------
-cur_frm.cscript['Pull Purchase Order Details'] = function(doc, dt, dn) {
+cur_frm.cscript.pull_purchase_order_details = function(doc, dt, dn) {
 	var callback = function(r,rt) { 
 		unhide_field(['supplier_address','contact_person','supplier_name','address_display', 'contact_display', 'contact_mobile','contact_email']);				
 		refresh_many(['supplier','supplier_address','contact_person', 'supplier_name', 'address_display', 'contact_display','contact_mobile', 'contact_email', 'purchase_receipt_details', 'purchase_tax_details']);

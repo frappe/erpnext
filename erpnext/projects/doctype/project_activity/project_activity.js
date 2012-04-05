@@ -88,7 +88,7 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
     unhide_field(fl); }
 }
 
-cur_frm.cscript['Add'] = function(doc, dt, dn) {
+cur_frm.cscript.add = function(doc, dt, dn) {
   var callback = function(r,rt) {
     
     // refresh listing

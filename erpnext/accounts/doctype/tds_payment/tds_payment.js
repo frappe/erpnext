@@ -44,7 +44,7 @@ cur_frm.cscript.from_date = function(doc,cdt,cdn){
 // Make Journal Voucher
 // --------------------
 
-cur_frm.cscript['Make Bank Voucher'] = function(doc, dt, dn) {  
+cur_frm.cscript.make_bank_voucher = function(doc, dt, dn) {  
   var call_back = function(r,rt) {
     cur_frm.cscript.make_jv(doc,dt,dn,r.message);
   }

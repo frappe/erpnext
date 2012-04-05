@@ -62,7 +62,7 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	if(doc.docstatus == 1 && doc.status != 'Stopped'){
 		var ch = getchildren('Purchase Order Item',doc.name,'po_details');
 		var allow_billing = 0; var allow_receipt = 0;
-		cur_frm.add_custom_button('Send SMS', cur_frm.cscript['Send SMS']);
+		cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms);
 
 		for(var i in ch){
 			if(ch[i].qty > ch[i].received_qty) allow_receipt = 1; 
@@ -159,7 +159,7 @@ cur_frm.fields_dict['supplier_qtn'].get_query = function(doc) {
 
 
 //========================= Get Last Purhase Rate =====================================
-cur_frm.cscript['Get Last Purchase Rate'] = function(doc, cdt, cdn){
+cur_frm.cscript.get_last_purchase_rate = function(doc, cdt, cdn){
 	$c_obj(make_doclist(doc.doctype, doc.name), 'get_last_purchase_rate', '', 
 			function(r, rt) { 
 				refresh_field(cur_frm.cscript.fname);

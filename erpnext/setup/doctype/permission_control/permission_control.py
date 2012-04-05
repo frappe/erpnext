@@ -74,8 +74,9 @@ class DocType:
 						d.fields.get('role')]) if perm.doctype=='DocPerm']
 
 		fl = ['', 'owner'] + [d.fieldname for d in doclist \
-				if d.doctype=='DocField' and d.fieldtype=='Link' \
-				and cstr(d.options)!='']
+				if d.doctype=='DocField' and ((d.fieldtype=='Link' \
+				and cstr(d.options)!='') or (d.fieldtype=='Select' and
+					'link:' in cstr(d.options).lower()))]
 
 		return {
 			'perms':ptype,

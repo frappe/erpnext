@@ -65,7 +65,7 @@ cur_frm.cscript.hide_unhide_group_ledger = function(doc) {
 
 // Convert group to ledger
 // -----------------------------------------
-cur_frm.cscript['Convert to Ledger'] = function(doc, cdt, cdn) {
+cur_frm.cscript.convert_to_ledger = function(doc, cdt, cdn) {
 	$c_obj(make_doclist(cdt,cdn),'convert_group_to_ledger','',function(r,rt) {
 		if(r.message == 1) {
 			doc.group_or_ledger = 'Ledger';
@@ -77,7 +77,7 @@ cur_frm.cscript['Convert to Ledger'] = function(doc, cdt, cdn) {
 
 // Convert ledger to group
 // -----------------------------------------
-cur_frm.cscript['Convert to Group'] = function(doc, cdt, cdn) {
+cur_frm.cscript.convert_to_group = function(doc, cdt, cdn) {
 	$c_obj(make_doclist(cdt,cdn),'convert_ledger_to_group','',function(r,rt) {
 		if(r.message == 1) {
 			doc.group_or_ledger = 'Group';

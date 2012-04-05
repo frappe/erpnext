@@ -63,7 +63,7 @@ cur_frm.fields_dict['contact_person'].get_query = function(doc, cdt, cdn) {
 
 
 
-cur_frm.cscript['Make Maintenance Visit'] = function(doc, cdt, cdn) {
+cur_frm.cscript.make_maintenance_visit = function(doc, cdt, cdn) {
   if (doc.docstatus == 1) { 
     $c_obj(make_doclist(doc.doctype, doc.name),'check_maintenance_visit','',
       function(r,rt){

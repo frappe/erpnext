@@ -60,7 +60,7 @@ cur_frm.fields_dict['contact_person'].get_query = function(doc, cdt, cdn) {
   return 'SELECT name,CONCAT(first_name," ",ifnull(last_name,"")) As FullName,department,designation FROM tabContact WHERE customer = "'+ doc.customer +'" AND docstatus != 2 AND name LIKE "%s" ORDER BY name ASC LIMIT 50';
 }
 
-cur_frm.cscript['Get Items'] = function(doc, dt, dn) {
+cur_frm.cscript.get_items = function(doc, dt, dn) {
   var callback = function(r,rt) { 
 	  unhide_field(['customer_address','contact_person','customer_name','address_display','contact_display','contact_mobile','contact_email','territory','customer_group']);
 	  cur_frm.refresh();

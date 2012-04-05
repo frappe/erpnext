@@ -44,7 +44,7 @@ cur_frm.cscript.onload = function(doc,cdt,cdn){
 cur_frm.cscript.refresh = function(doc,cdt,cdn) {
   cur_frm.clear_custom_buttons();
   if(doc.status == 'Pending Review' && (doc.senders_name == user_fullname || doc.senders_email == user)) {
-    cur_frm.add_custom_button('Declare Completed', cur_frm.cscript['Declare Completed']);
+    cur_frm.add_custom_button('Declare Completed', cur_frm.cscript.declare_completed);
     cur_frm.add_custom_button('Reopen Task', cur_frm.cscript['Reopen Task']);
   }
   if(doc.status == 'Open' && !doc.__islocal) {
@@ -111,7 +111,7 @@ cur_frm.cscript['Cancel Task'] = function(){
   });  
 }
 
-cur_frm.cscript['Declare Completed'] = function(){
+cur_frm.cscript.declare_completed = function(){
   $c_obj(make_doclist(cur_frm.doc.doctype, cur_frm.doc.name),'declare_completed', '',function(r, rt) {
     if(r.message == 'true'){
       doc.status = 'Closed'; //for refresh
