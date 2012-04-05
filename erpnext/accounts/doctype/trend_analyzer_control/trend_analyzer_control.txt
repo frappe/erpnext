@@ -1,0 +1,32 @@
+# DocType, Trend Analyzer Control
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2012-03-27 14:35:49',
+		'docstatus': 0,
+		'modified': '2012-03-27 14:35:49',
+		'modified_by': u'Administrator',
+		'owner': u'saumil@webnotestech.com'
+	},
+
+	# These values are common for all DocType
+	{
+		'colour': u'White:FFF',
+		'doctype': 'DocType',
+		'in_create': 1,
+		'issingle': 1,
+		'module': u'Accounts',
+		'name': '__common__',
+		'read_only': 1,
+		'section_style': u'Simple',
+		'server_code_error': u' ',
+		'version': 11
+	},
+
+	# DocType, Trend Analyzer Control
+	{
+		'doctype': 'DocType',
+		'name': u'Trend Analyzer Control'
+	}
+]

@@ -1,0 +1,34 @@
+# Search Criteria, invoices-overdue
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2012-04-03 12:49:51',
+		'docstatus': 0,
+		'modified': '2012-04-03 12:49:51',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
+	},
+
+	# These values are common for all Search Criteria
+	{
+		'add_cond': u'`tabSales Invoice`.due_date<now()\n`tabSales Invoice`.outstanding_amount!=0\n`tabSales Invoice`.docstatus=1',
+		'columns': u'Sales Invoice\x01ID,Sales Invoice\x01Debit To,Sales Invoice\x01Voucher Date,Sales Invoice\x01Due Date,Sales Invoice\x01Outstanding Amount',
+		'criteria_name': u'Invoices-Overdue',
+		'doc_type': u'Sales Invoice',
+		'doctype': 'Search Criteria',
+		'filters': u"{'Sales Invoice\x01Saved':1,'Sales Invoice\x01Submitted':1,'Sales Invoice\x01Is Opening':'','Sales Invoice\x01Fiscal Year':''}",
+		'module': u'Accounts',
+		'name': '__common__',
+		'page_len': 50,
+		'sort_by': u'`tabSales Invoice`.`name`',
+		'sort_order': u'DESC',
+		'standard': u'Yes'
+	},
+
+	# Search Criteria, invoices-overdue
+	{
+		'doctype': 'Search Criteria',
+		'name': u'invoices-overdue'
+	}
+]

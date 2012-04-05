@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-04-03 12:49:51',
+		'creation': '2012-03-30 14:50:44',
 		'docstatus': 0,
-		'modified': '2012-04-03 12:49:51',
+		'modified': '2012-04-05 17:23:13',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -16,11 +16,11 @@
 		'criteria_name': u'Monthly Salary Register',
 		'doc_type': u'Salary Slip',
 		'doctype': 'Search Criteria',
-		'filters': u"{'Salary Slip\x01Month':'','Salary Slip\x01Year':''}",
+		'filters': u'{"Salary Slip\\u0001Submitted":1,"Salary Slip\\u0001Company":[""],"Salary Slip\\u0001Month":[""]}',
 		'module': u'HR',
 		'name': '__common__',
 		'page_len': 50,
-		'sort_by': u'ID',
+		'sort_by': u'`tabSalary Slip`.`name`',
 		'sort_order': u'DESC',
 		'standard': u'Yes'
 	},

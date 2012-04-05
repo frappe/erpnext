@@ -1,0 +1,34 @@
+# Search Criteria, lead-to_follow_up
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2012-04-03 12:49:51',
+		'docstatus': 0,
+		'modified': '2012-04-03 12:49:51',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
+	},
+
+	# These values are common for all Search Criteria
+	{
+		'add_cond': u"`tabLead`.status!='Converted' \n`tabLead`.status!='Lead Lost' \n`tabLead`.status!='Not Interested'",
+		'columns': u'Lead\x01ID,Lead\x01Status,Lead\x01Lead Name,Lead\x01Lead Date,Lead\x01Lead Owner,Lead\x01Next Contact Date',
+		'criteria_name': u'Lead-To follow up',
+		'doc_type': u'Lead',
+		'doctype': 'Search Criteria',
+		'filters': u"{'Lead\x01Status':'','Lead\x01Source':'','Lead\x01Expected Month':'','Lead\x01Industry':'','Lead\x01Market Segment':'','Lead\x01Rating':''}",
+		'module': u'Selling',
+		'name': '__common__',
+		'page_len': 50,
+		'sort_by': u'`tabLead`.`name`',
+		'sort_order': u'DESC',
+		'standard': u'Yes'
+	},
+
+	# Search Criteria, lead-to_follow_up
+	{
+		'doctype': 'Search Criteria',
+		'name': u'lead-to_follow_up'
+	}
+]

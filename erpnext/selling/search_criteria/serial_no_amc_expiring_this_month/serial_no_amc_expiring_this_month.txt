@@ -1,0 +1,34 @@
+# Search Criteria, serial_no-amc_expiring_this_month
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2012-04-03 12:49:52',
+		'docstatus': 0,
+		'modified': '2012-04-03 12:49:52',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
+	},
+
+	# These values are common for all Search Criteria
+	{
+		'add_cond': u'`tab Serial No`.month(amc_expiry_date)=month(now()) \n`tab Serial No`.year(amc_expiry_date)=year(now())',
+		'columns': u'Serial No\x01ID,Serial No\x01Status,Serial No\x01AMC Expiry Date,Serial No\x01Customer Name',
+		'criteria_name': u'Serial No-AMC expiring this month',
+		'doc_type': u'Serial No',
+		'doctype': 'Search Criteria',
+		'filters': u"{'Serial No\x01Saved':1,'Serial No\x01Submitted':1,'Serial No\x01Status':'','Serial No\x01Warranty Status':''}",
+		'module': u'Selling',
+		'name': '__common__',
+		'page_len': 50,
+		'sort_by': u'`tabSerial No`.`name`',
+		'sort_order': u'DESC',
+		'standard': u'Yes'
+	},
+
+	# Search Criteria, serial_no-amc_expiring_this_month
+	{
+		'doctype': 'Search Criteria',
+		'name': u'serial_no-amc_expiring_this_month'
+	}
+]

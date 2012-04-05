@@ -7,13 +7,13 @@ from webnotes.modules import reload_doc
 from webnotes.utils import make_esc
 import os
 
-def execute():
+def execute1():
 	#rendt = get_dt_to_be_renamed()
 	#rename_dt_files(rendt)
 	#update_local_file_system()
 	replace_labels_with_fieldnames()
 
-def execute1():
+def execute():
 	# delete dt, mapper
 	delete_dt_and_mapper()
 	
@@ -65,7 +65,35 @@ def execute1():
 			'lease_receipt_summary_month_wise', 'lease_receipts_client_wise',
 			'lease_yearly_future_installment_inflows',
 			'monthly_ledger_summary_report', 'payables_-_as_on_outstanding',
-			'payment_report')""")
+			'payment_report', 'progressive_total_excise_duty',
+			'service_tax_credit_account_-_inputs',
+			'total_amout_collection_for_a_period_-_customerwise',
+			'invoices-to_be_submitted', 'invoices-to_receive_payment',
+			'opportunity-quotations_to_be_sent', 'purchase_order-to_be_billed',
+			'purchase_order-to_be_submitted',
+			'purchase_order-to_receive_items',
+			'purchase_request-purchase_order_to_be_made',
+			'purchase_request-to_be_submitted',
+			'sales-order_to_be_submitted', 'sales_order-overdue',
+			'sales_order-to_be_billed', 'sales_order-to_be_delivered',
+			'sales_order-to_be_submitted', 'task-open', 'appraisal_custom',
+			'employee_details', 'employee_in_company_experience',
+			'employee_leave_balance_report', 'employeewise_leave_transaction_details',
+			'pending_appraisals', 'pending_expense_claims', 'delivery_plan', 'flat_bom_report',
+			'dispatch_report', 'projectwise_delivered_qty_and_costs_as_per_purchase_cost', 
+			'projectwise_pending_qty_and_costs_as_per_purchase_cost', 'custom_test', 'custom_test1',
+			'delivery_notes', 'delivery_note_disabled', 'lead', 'lead_interested', 'lead_report',
+			'periodic_sales_summary', 'monthly_despatched_trend', 'sales', 'sales_order',
+			'sales_order1', 'sales_agentwise_commission', 'test_report', 'territory_wise_sales_-_target_vs_actual_')""")
+
+	webnotes.conn.sql("""
+		DELETE FROM `tabSearch Criteria`
+		WHERE name IN ('monthly_transaction_summary', 'trend_analyzer',
+		'yearly_transaction_summary', 'invoices-overdue', 'lead-to_follow_up',
+		'opportunity-to_follow_up', 'serial_no-amc_expiring_this_month',
+		'serial_no-warranty_expiring_this_month', )
+		AND IFNULL(standard, 'No') = 'Yes'
+		""")
 
 	# reload custom search criteria
 	for d in  webnotes.conn.sql("""select name, module from

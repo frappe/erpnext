@@ -1,0 +1,33 @@
+# Search Criteria, trend_analyzer
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2012-04-03 12:49:53',
+		'docstatus': 0,
+		'modified': '2012-04-03 12:49:53',
+		'modified_by': u'Administrator',
+		'owner': u'saumil@webnotestech.com'
+	},
+
+	# These values are common for all Search Criteria
+	{
+		'columns': u'Profile\x01ID,Profile\x01Owner',
+		'criteria_name': u'Trend Analyzer',
+		'doc_type': u'Profile',
+		'doctype': 'Search Criteria',
+		'filters': u'{}',
+		'module': u'Accounts',
+		'name': '__common__',
+		'page_len': 50,
+		'sort_by': u'`tabProfile`.`name`',
+		'sort_order': u'DESC',
+		'standard': u'Yes'
+	},
+
+	# Search Criteria, trend_analyzer
+	{
+		'doctype': 'Search Criteria',
+		'name': u'trend_analyzer'
+	}
+]
