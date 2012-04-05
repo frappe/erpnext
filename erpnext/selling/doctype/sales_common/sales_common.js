@@ -163,7 +163,7 @@ cur_frm.cscript.hide_price_list_currency = function(doc, cdt, cdn, callback1) {
 					if (pl_currency[0] == doc.currency) {
 						set_multiple(cdt, cdn, {price_list_currency:doc.currency, plc_conversion_rate:doc.conversion_rate});
 						hide_field(['price_list_currency', 'plc_conversion_rate']);
-					} else if (pl_currency[0] = r.message[1]) {
+					} else if (pl_currency[0] == r.message[1]) {
 						set_multiple(cdt, cdn, {price_list_currency:pl_currency[0], plc_conversion_rate:1})
 						hide_field(['price_list_currency', 'plc_conversion_rate']);
 					}					
