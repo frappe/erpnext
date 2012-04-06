@@ -14,9 +14,7 @@ def execute1():
 	replace_labels_with_fieldnames()
 
 def execute():
-	# delete dt, mapper
-	delete_dt_and_mapper()
-	
+
 	#---------------------------------------------------
 	# doctype renaming
 	rendt = get_dt_to_be_renamed()
@@ -45,9 +43,52 @@ def execute():
 	#---------------------------------------------------
 	# Reload mapper from file
 	for d in ren_mapper:
-		mod = '_'.join(webnotes.conn.sql("select module from `tabDocType Mapper` where name = %s", ren_mapper[d])[0][0].lower().split())
+		mod = '_'.join(webnotes.conn.sql("select module from `tabDocType Mapper` where name = %s", 
+			ren_mapper[d])[0][0].lower().split())
 		reload_doc(mod, 'DocType Mapper', ren_mapper[d])
+
+	delete_search_criteria()
+
+	# reload custom search criteria
+	#for d in  webnotes.conn.sql("""select name, module from
+	#		`tabSearch Criteria` where ifnull(standard, 'No') = 'Yes' and ifnull(disabled, 0) = 0"""):
+	#
+	for path, folders, files in os.walk(webnotes.defs.modules_path):
+		if not path.endswith('search_criteria'): continue
+		module = path.split(os.sep)[-2]
+		for sc in folders:
+			try:
+				reload_doc(module, 'search_criteria', sc)
+				print module, sc
+			except Exception, e:
+				print "did not reload: " + str(d)
 	
+	webnotes.conn.sql("""DELETE FROM `tabPrint Format`
+			WHERE name IN ('Delivery Note Format', 'Purchase Order Format',
+			'Quotation Format', 'Receivable Voucher Format', 'Sales Order',
+			'SalesInvoiceModern_test', 'SalesInvoiceStdNew',
+			'Service Order Format', 'Service Quotation Format')""")
+
+	# reload custom print format
+	for d in webnotes.conn.sql("""select name, module from `tabPrint Format`
+			where ifnull(standard, 'No') = 'Yes'"""):
+		try:
+			reload_doc(d[1], 'Print Format', d[0])
+		except Exception, e:
+			print "did not reload: " + str(d)
+
+	#  Reload GL Mapper
+	for d in webnotes.conn.sql("select name from `tabGL Mapper`"):
+		reload_doc('accounts', 'GL Mapper', d[0])
+		
+	#gl entry, stock ledger entry, 
+
+
+
+	# T0-do-list
+	# gl mapper name
+
+def delete_search_criteria():
 	webnotes.conn.sql("""DELETE FROM `tabSearch Criteria`
 			WHERE name IN ('', 'bills-to_be_paid',
 			'bills-to_be_submitted', 'cenvat_credit_-_input_or_capital_goods',
@@ -84,73 +125,17 @@ def execute():
 			'projectwise_pending_qty_and_costs_as_per_purchase_cost', 'custom_test', 'custom_test1',
 			'delivery_notes', 'delivery_note_disabled', 'lead', 'lead_interested', 'lead_report',
 			'periodic_sales_summary', 'monthly_despatched_trend', 'sales', 'sales_order',
-			'sales_order1', 'sales_agentwise_commission', 'test_report', 'territory_wise_sales_-_target_vs_actual_')""")
+			'sales_order1', 'sales_agentwise_commission', 'test_report', 
+			'territory_wise_sales_-_target_vs_actual_')""")
 
 	webnotes.conn.sql("""
 		DELETE FROM `tabSearch Criteria`
 		WHERE name IN ('monthly_transaction_summary', 'trend_analyzer',
 		'yearly_transaction_summary', 'invoices-overdue', 'lead-to_follow_up',
 		'opportunity-to_follow_up', 'serial_no-amc_expiring_this_month',
-		'serial_no-warranty_expiring_this_month', )
+		'serial_no-warranty_expiring_this_month')
 		AND IFNULL(standard, 'No') = 'Yes'
 		""")
-
-	# reload custom search criteria
-	for d in  webnotes.conn.sql("""select name, module from
-			`tabSearch Criteria` where ifnull(standard, 'No') = 'Yes' and ifnull(disabled, 0) = 0"""):
-		try:
-			reload_doc(d[1], 'search_criteria', d[0].replace('-', '_'))
-			print d
-		except Exception, e:
-			print "did not reload: " + str(d)
-	
-	webnotes.conn.sql("""DELETE FROM `tabPrint Format`
-			WHERE name IN ('Delivery Note Format', 'Purchase Order Format',
-			'Quotation Format', 'Receivable Voucher Format', 'Sales Order',
-			'SalesInvoiceModern_test', 'SalesInvoiceStdNew',
-			'Service Order Format', 'Service Quotation Format')""")
-
-	# reload custom print format
-	for d in webnotes.conn.sql("""select name, module from `tabPrint Format`
-			where ifnull(standard, 'No') = 'Yes'"""):
-		try:
-			reload_doc(d[1], 'Print Format', d[0])
-		except Exception, e:
-			print "did not reload: " + str(d)
-
-	#  Reload GL Mapper
-	for d in webnotes.conn.sql("select name from `tabGL Mapper`"):
-		reload_doc('accounts', 'GL Mapper', d[0])
-		
-	#gl entry, stock ledger entry, 
-
-
-
-	# T0-do-list
-	# gl mapper name
-
-
-
-def delete_dt_and_mapper():
-	del_mapper = ['Production Forecast-Production Planning Tool', 'Production Forecast-Production Plan', 'Sales Order-Production Plan']
-	for d in del_mapper:
-		delete_doc('DocType Mapper', d)
-
-	del_dt = ['Widget Control', 'Update Delivery Date Detail', 'Update Delivery	Date',
-			'Tag Detail', 'Supplier rating', 'Stylesheet', 'Question Tag',
-			'PRO PP Detail', 'PRO Detail', 'PPW Detail', 'PF Detail',
-			'Personalize', 'Patch Util', 'Page Template', 'Module Def Role',
-			'Module Def Item', 'File Group', 'File Browser Control', 'File',
-			'Educational Qualifications', 'Earn Deduction Detail',
-			'DocType Property Setter', 'Contact Detail', 'BOM Report Detail', 
-			'BOM Replace Utility Detail', 'BOM Replace Utility', 
-			'Absent Days Detail', 'Activity Dashboard Control', 'Raw Materials Supplied',
-			'Setup Wizard Control', 'Company Group', 'Lease Agreement', 'Lease Installment'] # docformat
-
-	for d in del_dt:
-		delete_doc('DocType', d)
-
-
 
 def rename_in_db(ren_data, data_type, is_doctype):
 	for d in ren_data:
@@ -166,7 +151,7 @@ def rename_in_db(ren_data, data_type, is_doctype):
 def update_dt_in_records(rendt):
 	for d in rendt:
 		# Feed, property setter, search criteria, gl mapper, form 16A, naming series options, doclayer - dodtype is not mentioed in options
-		dt_list = webnotes.conn.sql("select t1.parent, t1.fieldname from tabDocField t1, tabDocType t2 where t1.parent = t2.name and t1.fieldname in ('dt', 'doctype', 'doc_type', 'dt_type') and ifnull(t1.options, '') = '' and ifnull(t2.issingle, 0) = 0")
+		dt_list = webnotes.conn.sql("select t1.parent, t1.fieldname from tabDocField t1, tabDocType t2 where t1.parent = t2.name and t1.fieldname in ('dt', 'doctype', 'doc_type', 'dt_type') and ifnull(t1.options, '') = '' and ifnull(t2.issingle, 0) = 0 and t1.parent in ('Custom Field', 'Custom Script')")
 		for dt in dt_list:
 			webnotes.conn.sql("update `tab%s` set %s = replace(%s, '%s', '%s') where %s = '%s'" % (dt[0], dt[1], dt[1], d, rendt[d], dt[1], d))
 

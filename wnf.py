@@ -242,11 +242,11 @@ def run():
 	
 	elif options.sync_all is not None:
 		import webnotes.model.sync
-		webnotes.model.sync.sync_all()
+		webnotes.model.sync.sync_all(options.force or 0)
 
 	elif options.sync is not None:
 		import webnotes.model.sync
-		webnotes.model.sync.sync(options.sync[0], options.sync[1])
+		webnotes.model.sync.sync(options.sync[0], options.sync[1], options.force or 0)
 
 	# print messages
 	if webnotes.message_log:

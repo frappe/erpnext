@@ -19,7 +19,7 @@
 		'default_print_format': u'Standard',
 		'doctype': 'DocType',
 		'document_type': u'Master',
-		'module': u'Setup',
+		'module': u'Accounts',
 		'name': '__common__',
 		'section_style': u'Tabbed',
 		'server_code_error': u' ',

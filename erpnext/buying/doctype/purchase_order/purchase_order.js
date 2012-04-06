@@ -18,7 +18,7 @@ cur_frm.cscript.tname = "Purchase Order Item";
 cur_frm.cscript.fname = "po_details";
 cur_frm.cscript.other_fname = "purchase_tax_details";
 
-wn.require('erpnext/buying/doctype/purchase_other_charges/purchase_other_charges.js');
+wn.require('erpnext/accounts/doctype/purchase_taxes_and_charges_master/purchase_taxes_and_charges_master.js');
 wn.require('erpnext/buying/doctype/purchase_common/purchase_common.js');
 wn.require('erpnext/utilities/doctype/sms_control/sms_control.js');
 wn.require('erpnext/setup/doctype/notification_control/notification_control.js');

@@ -17,6 +17,7 @@
 import webnotes
 
 from webnotes.utils import load_json, cint, cstr
+import json
 
 # add a new question
 @webnotes.whitelist()
@@ -30,14 +31,14 @@ def add_question(arg):
 	d.save(1)
 	
 	if args['suggest']:
-		from home.page.my_company.my_company import post_comment
+		from utilities.page.messages import messages
 		for s in args['suggest']:
 			if s:
-				post_comment({
-					'uid': s,
-					'comment': 'Please help me and answer the question "%s" in the Knowledge Base' % d.question,
+				messages.post(json.dumps({
+					'contact': s,
+					'txt': 'Please help me and answer the question "%s" in the Knowledge Base' % d.question,
 					'notify': 1
-				})
+				}))
 	
 @webnotes.whitelist()
 def vote(arg):
