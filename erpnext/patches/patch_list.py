@@ -222,5 +222,10 @@ patch_list = [
 		'patch_file': 'so_rv_mapper_fix',
 		'description': 'SO-RV duplicate mapper entry removal'
 	},
+	{
+		'patch_module': 'patches.april_2012',
+		'patch_file': 'reload_c_form',
+		'description': 'Added attchemnt option and total field'
+	},
 
 ]
