@@ -46,6 +46,14 @@ class DocType:
 		else:
 			msgprint("Please enter atleast 1 invoice in the table below", raise_exception=1)
 
+		self.calculate_total_invoiced_amount()
+
+	def calculate_total_invoiced_amount(self):
+		total = 0
+		for d in getlist(self.doclist, 'invoice_details'):
+			total += flt(d.grand_total)
+		webnotes.conn.set(self.doc, 'total_invoiced_amount', total)
+
 
 	def get_invoice_details(self, invoice_no):
 		"""	Pull details from invoices for referrence """
