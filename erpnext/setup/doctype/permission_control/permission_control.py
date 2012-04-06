@@ -70,7 +70,10 @@ class DocType:
 			ret.append(p)
 						
 		# fields list
-		fl = ['', 'owner'] + [l[0] for l in sql("select fieldname from tabDocField where parent=%s and fieldtype='Link' and ifnull(options,'')!=''", doctype)]
+		fl = ['', 'owner'] + [l[0] for l in sql("""\
+			select fieldname from tabDocField where parent=%s
+			and ((fieldtype='Link' and ifnull(options,'')!='') or
+			(fieldtype='Select') and lcase(ifnull(options,'')) like 'link:%%')""", doctype)]
 						
 		return {'perms':ret, 'fields':fl}
 		
