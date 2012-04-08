@@ -1,6 +1,7 @@
 h1, h2, h3, h4, h5 {
 	font-family: "Open Sans", Helvetica, "Helvetica Neue", sans-serif;
-	font-weight: bold;
+	font-weight: normal;
+	color: #66ad78;
 }
 
 body {
@@ -14,6 +15,7 @@ span, div, td, input, textarea, button, select {
 
 body {
 	background: url(../images/redbeech.jpg) repeat;
+	color: #616161;
 }
 
 .small {
@@ -24,25 +26,6 @@ body {
 	margin: 11px auto;
 	text-align: center;
 }
-
-.module-icons {
-   background: url(../images/module-icons.png) no-repeat top left;
-   width:16px;
-   height:16px;
-}
-
-.module-icons-accounts{ background-position: 0 0;  } 
-.module-icons-analysis{ background-position: 0 -66px;  } 
-.module-icons-buying{ background-position: 0 -132px;  } 
-.module-icons-home{ background-position: 0 -198px;  } 
-.module-icons-hr{ background-position: 0 -264px;  } 
-.module-icons-people{ background-position: 0 -330px;  } 
-.module-icons-production{ background-position: 0 -396px;  } 
-.module-icons-projects{ background-position: 0 -462px;  } 
-.module-icons-selling{ background-position: 0 -528px;  } 
-.module-icons-setup{ background-position: 0 -594px;  } 
-.module-icons-stock{ background-position: 0 -660px;  } 
-.module-icons-support{ background-position: 0 -726px;  } 
 
 .navbar-new-comments {
 	margin: -3px 0px;

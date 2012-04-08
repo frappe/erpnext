@@ -1627,6 +1627,7 @@ button.btn.small, input[type="submit"].btn.small {
   font-weight: 400;
   src: local('Open Sans'), local('OpenSans'), url('../lib/css/fonts/opensans.woff') format('woff');
 }
+
 @font-face {
   font-family: 'Lato';
   font-style: normal;
@@ -1634,6 +1635,12 @@ button.btn.small, input[type="submit"].btn.small {
   src: local('Lato Regular'), local('Lato-Regular'), url('../lib/css/fonts/lato.woff') format('woff');
 }
 
+@font-face {
+  font-family: 'Cabin';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Cabin Regular'), local('Cabin-Regular'), url('../lib/css/fonts/cabin.woff') format('woff');
+}
 
 
 /*
@@ -1792,7 +1799,8 @@ div.stat-bar {
  */
 h1, h2, h3, h4, h5 {
 	font-family: "Open Sans", Helvetica, "Helvetica Neue", sans-serif;
-	font-weight: bold;
+	font-weight: normal;
+	color: #66ad78;
 }
 
 body {
@@ -1806,6 +1814,7 @@ span, div, td, input, textarea, button, select {
 
 body {
 	background: url(../images/redbeech.jpg) repeat;
+	color: #616161;
 }
 
 .small {
@@ -1816,25 +1825,6 @@ body {
 	margin: 11px auto;
 	text-align: center;
 }
-
-.module-icons {
-   background: url(../images/module-icons.png) no-repeat top left;
-   width:16px;
-   height:16px;
-}
-
-.module-icons-accounts{ background-position: 0 0;  } 
-.module-icons-analysis{ background-position: 0 -66px;  } 
-.module-icons-buying{ background-position: 0 -132px;  } 
-.module-icons-home{ background-position: 0 -198px;  } 
-.module-icons-hr{ background-position: 0 -264px;  } 
-.module-icons-people{ background-position: 0 -330px;  } 
-.module-icons-production{ background-position: 0 -396px;  } 
-.module-icons-projects{ background-position: 0 -462px;  } 
-.module-icons-selling{ background-position: 0 -528px;  } 
-.module-icons-setup{ background-position: 0 -594px;  } 
-.module-icons-stock{ background-position: 0 -660px;  } 
-.module-icons-support{ background-position: 0 -726px;  } 
 
 .navbar-new-comments {
 	margin: -3px 0px;
@@ -1884,19 +1874,7 @@ body {
  *	erpnext/website/css/website.css
  */
 .layout_wrapper {
-	padding: 20px;
-}
-
-h1 {
-	margin-bottom: 15px;
-}
-
-h2 {
-	margin-bottom: 11px;
-}
-
-h3 {
-	margin-bottom: 7px;
+	padding: 27px;
 }
 
 p, li {
@@ -1935,6 +1913,7 @@ pre {
 	margin-right: 15px;
 	color: #606060;
 	overflow-x: hidden;
+	font-size: 90%;
 }
 
 .web-page-status {

@@ -323,6 +323,20 @@ div.notice {
  */
 /* FORMS */
 
+.breadcrumbs-area {
+	margin-bottom: 8px;
+}
+
+.breadcrumbs {
+	background-color: #e8e8e8;
+	padding: 3px;
+	border-radius: 3px;
+}
+
+.breadcrumbs a {
+	color: #000000;
+}
+
 div.form-section-head {
 	margin: 11px 0px 3px 0px;
 	border-top: 1px solid #ccc;
@@ -1732,6 +1746,7 @@ div.stat-bar {
   font-weight: 400;
   src: local('Open Sans'), local('OpenSans'), url('../lib/css/fonts/opensans.woff') format('woff');
 }
+
 @font-face {
   font-family: 'Lato';
   font-style: normal;
@@ -1739,6 +1754,12 @@ div.stat-bar {
   src: local('Lato Regular'), local('Lato-Regular'), url('../lib/css/fonts/lato.woff') format('woff');
 }
 
+@font-face {
+  font-family: 'Cabin';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Cabin Regular'), local('Cabin-Regular'), url('../lib/css/fonts/cabin.woff') format('woff');
+}
 
 
 /*
@@ -3463,7 +3484,8 @@ button.btn.small, input[type="submit"].btn.small {
  */
 h1, h2, h3, h4, h5 {
 	font-family: "Open Sans", Helvetica, "Helvetica Neue", sans-serif;
-	font-weight: bold;
+	font-weight: normal;
+	color: #66ad78;
 }
 
 body {
@@ -3477,6 +3499,7 @@ span, div, td, input, textarea, button, select {
 
 body {
 	background: url(../images/redbeech.jpg) repeat;
+	color: #616161;
 }
 
 .small {
@@ -3487,25 +3510,6 @@ body {
 	margin: 11px auto;
 	text-align: center;
 }
-
-.module-icons {
-   background: url(../images/module-icons.png) no-repeat top left;
-   width:16px;
-   height:16px;
-}
-
-.module-icons-accounts{ background-position: 0 0;  } 
-.module-icons-analysis{ background-position: 0 -66px;  } 
-.module-icons-buying{ background-position: 0 -132px;  } 
-.module-icons-home{ background-position: 0 -198px;  } 
-.module-icons-hr{ background-position: 0 -264px;  } 
-.module-icons-people{ background-position: 0 -330px;  } 
-.module-icons-production{ background-position: 0 -396px;  } 
-.module-icons-projects{ background-position: 0 -462px;  } 
-.module-icons-selling{ background-position: 0 -528px;  } 
-.module-icons-setup{ background-position: 0 -594px;  } 
-.module-icons-stock{ background-position: 0 -660px;  } 
-.module-icons-support{ background-position: 0 -726px;  } 
 
 .navbar-new-comments {
 	margin: -3px 0px;
