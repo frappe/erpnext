@@ -192,7 +192,7 @@
 	{
 		'doctype': u'DocField',
 		'fieldname': u'section_break0',
-		'fieldtype': u'Section Break'
+		'fieldtype': u'Section Break',
 		'permlevel': 0
 	},
 
