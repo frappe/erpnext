@@ -3,23 +3,25 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-03-27 14:35:41',
+		'creation': '2011-12-14 11:40:47',
 		'docstatus': 0,
-		'modified': '2012-03-27 14:35:41',
+		'modified': '2012-04-06 17:29:50',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': u'1323255350',
+		'_last_update': u'1333712835',
+		'allow_attach': 1,
 		'colour': u'White:FFF',
 		'doctype': 'DocType',
+		'max_attachments': 3,
 		'module': u'Accounts',
 		'name': '__common__',
 		'section_style': u'Simple',
 		'show_in_menu': 0,
-		'version': 11
+		'version': 19
 	},
 
 	# These values are common for all DocField
@@ -79,6 +81,7 @@
 		'doctype': u'DocField',
 		'fieldname': u'column_break0',
 		'fieldtype': u'Column Break',
+		'permlevel': 0,
 		'width': u'50%'
 	},
 
@@ -89,6 +92,7 @@
 		'fieldtype': u'Select',
 		'label': u'Series',
 		'options': u'\nC-FORM/',
+		'permlevel': 0,
 		'reqd': 1
 	},
 
@@ -98,6 +102,7 @@
 		'fieldname': u'c_form_no',
 		'fieldtype': u'Data',
 		'label': u'C-Form No',
+		'permlevel': 0,
 		'reqd': 1
 	},
 
@@ -107,6 +112,7 @@
 		'fieldname': u'received_date',
 		'fieldtype': u'Date',
 		'label': u'Received Date',
+		'permlevel': 0,
 		'reqd': 1
 	},
 
@@ -117,6 +123,7 @@
 		'fieldtype': u'Link',
 		'label': u'Customer',
 		'options': u'Customer',
+		'permlevel': 0,
 		'reqd': 1
 	},
 
@@ -125,6 +132,7 @@
 		'doctype': u'DocField',
 		'fieldname': u'column_break1',
 		'fieldtype': u'Column Break',
+		'permlevel': 0,
 		'width': u'50%'
 	},
 
@@ -134,7 +142,8 @@
 		'fieldname': u'company',
 		'fieldtype': u'Select',
 		'label': u'Company',
-		'options': u'link:Company'
+		'options': u'link:Company',
+		'permlevel': 0
 	},
 
 	# DocField
@@ -144,6 +153,7 @@
 		'fieldtype': u'Select',
 		'label': u'Fiscal Year',
 		'options': u'link:Fiscal Year',
+		'permlevel': 0,
 		'reqd': 1
 	},
 
@@ -153,7 +163,8 @@
 		'fieldname': u'quarter',
 		'fieldtype': u'Select',
 		'label': u'Quarter',
-		'options': u'\nI\nII\nIII\nIV'
+		'options': u'\nI\nII\nIII\nIV',
+		'permlevel': 0
 	},
 
 	# DocField
@@ -162,6 +173,7 @@
 		'fieldname': u'total_amount',
 		'fieldtype': u'Currency',
 		'label': u'Total Amount',
+		'permlevel': 0,
 		'reqd': 1
 	},
 
@@ -172,6 +184,7 @@
 		'fieldtype': u'Select',
 		'label': u'State',
 		'options': u"link:State\ncountry='India'",
+		'permlevel': 0,
 		'reqd': 1
 	},
 
@@ -180,6 +193,7 @@
 		'doctype': u'DocField',
 		'fieldname': u'section_break0',
 		'fieldtype': u'Section Break'
+		'permlevel': 0
 	},
 
 	# DocField
@@ -188,6 +202,28 @@
 		'fieldname': u'invoice_details',
 		'fieldtype': u'Table',
 		'label': u'Invoice Details',
-		'options': u'C-Form Invoice Detail'
+		'options': u'C-Form Invoice Detail',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'total_invoiced_amount',
+		'fieldtype': u'Currency',
+		'label': u'Total Invoiced Amount',
+		'permlevel': 1,
+		'print_hide': 0
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'file_list',
+		'fieldtype': u'Text',
+		'hidden': 1,
+		'label': u'File List',
+		'permlevel': 0,
+		'print_hide': 1
 	}
 ]

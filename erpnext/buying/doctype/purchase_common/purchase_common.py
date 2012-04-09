@@ -226,7 +226,7 @@ class DocType(TransactionBase):
 				if d.fields.has_key(x):
 					d.fields[x] = f_lst[x]
 			
-			item = sql("select is_stock_item, is_purchase_item from tabItem where name=%s and (ifnull(end_of_life,'')=''	or end_of_life = '0000-00-00' or end_of_life >	now())", d.item_code)
+			item = sql("select is_stock_item, is_purchase_item, is_sub_contracted_item from tabItem where name=%s and (ifnull(end_of_life,'')='' or end_of_life = '0000-00-00' or end_of_life >	now())", d.item_code)
 			if not item:
 				msgprint("Item %s does not exist in Item Master." % cstr(d.item_code))
 				raise Exception
@@ -238,9 +238,10 @@ class DocType(TransactionBase):
 					raise Exception
 			
 			# validate purchase item
-			if not item[0][1]=='Yes':
-				msgprint("Item %s is not purchase item." % (d.item_code))
+			if item[0][1] != 'Yes' and item[0][2] != 'Yes':
+				msgprint("Item %s is not a purchase item or sub-contracted item. Please check" % (d.item_code))
 				raise Exception
+
 			
 			if d.fields.has_key('prevdoc_docname') and d.prevdoc_docname:
 				# check warehouse, uom	in previous doc and in current doc are same.
