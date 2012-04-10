@@ -261,5 +261,10 @@ patch_list = [
 		'patch_module': 'patches.mar_2012',
 		'patch_file': 'usertags',
 		'description': 'Adds _user_tags columns to tables' 
-	}
+	},
+	{
+		'patch_module': 'patches.april_2012',
+		'patch_file': 'reload_c_form',
+		'description': 'Added attchemnt option and total field'
+	},
 ]

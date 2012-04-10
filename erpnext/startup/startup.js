@@ -171,3 +171,4 @@ erpnext.set_user_background = function(src) {
 $(document).bind('startup', function() {
 	erpnext.startup.start();
 });
+

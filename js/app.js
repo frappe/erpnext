@@ -38,4 +38,4 @@ $(document).bind('toolbar_setup', function() {
 	}, function() {
 		$(this).find('.icon-home').removeClass('navbar-icon-home-hover');
 	});
-})
+});
