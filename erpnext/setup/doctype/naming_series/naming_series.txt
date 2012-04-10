@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-03-27 14:36:21',
+		'creation': '2012-04-10 13:01:16',
 		'docstatus': 0,
-		'modified': '2012-03-27 14:36:21',
+		'modified': '2012-04-10 18:45:34',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -13,9 +13,10 @@
 	# These values are common for all DocType
 	{
 		'colour': u'White:FFF',
+		'description': u'Set prefix for numbering series on your transactions',
 		'doctype': 'DocType',
-		'hide_heading': 1,
-		'hide_toolbar': 1,
+		'hide_heading': 0,
+		'hide_toolbar': 0,
 		'issingle': 1,
 		'module': u'Setup',
 		'name': '__common__',
@@ -23,7 +24,7 @@
 		'section_style': u'Tray',
 		'server_code_error': u' ',
 		'show_in_menu': 0,
-		'version': 58
+		'version': 66
 	},
 
 	# These values are common for all DocField
@@ -106,14 +107,6 @@
 		'fieldname': u'setup_series',
 		'fieldtype': u'Section Break',
 		'label': u'Setup Series'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'head_html',
-		'fieldtype': u'HTML',
-		'label': u'Head HTML'
 	},
 
 	# DocField

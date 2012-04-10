@@ -4,11 +4,15 @@ $.extend(wn.pages.modules_setup, {
 	modules: ['Activity', 'Accounts', 'Selling', 'Buying', 'Stock', 'Production', 'Projects', 
 		'Support', 'HR', 'Website', 'To Do', 'Messages', 'Calendar', 'Knowledge Base'],	
 	onload: function(wrapper) {
-		wn.pages.modules_setup.refresh(wn.boot.modules_list);
+		wn.pages.modules_setup.refresh_page(wn.boot.modules_list);
 	},
-	refresh: function(ml) {
+	refresh_page: function(ml) {
 		$('#modules-list').empty();
-				
+
+		// Hide Setup and Dashboard modules
+		ml.indexOf('Setup')!=-1 && ml.splice(ml.indexOf('Setup'), 1);
+		ml.indexOf('Dashboard')!=-1 && ml.splice(ml.indexOf('Dashboard'), 1);
+
 		// checked modules
 		for(i in ml) {
 			$('#modules-list').append(repl('<p style="cursor:move;">\

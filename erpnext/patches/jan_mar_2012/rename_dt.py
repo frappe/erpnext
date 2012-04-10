@@ -164,7 +164,7 @@ def update_dt_in_records(rendt):
 		webnotes.conn.sql("update `tabStock Ledger Entry` set voucher_type = replace(voucher_type, '%s', '%s') where voucher_type = '%s'" % (d, rendt[d], d))
 
 		# Custom fld: options
-		webnotes.conn.sql("update `tabCustom Field` set options = replace(options, %s, %s) where fieldtype in ('Link', 'Select')", (d, rendt[d]))
+		webnotes.conn.sql("update `tabCustom Field` set options = replace(options, %s, %s) where fieldtype in ('Link', 'Select', 'Table')", (d, rendt[d]))
 		
 		#Property Setter: value (if property=options)
 		webnotes.conn.sql("update `tabProperty Setter` set value = replace(value, %s, %s) where property = 'Options'", (d, rendt[d]))

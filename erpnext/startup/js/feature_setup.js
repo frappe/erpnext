@@ -84,7 +84,7 @@ pscript.feature_dict = {
 		'Delivery Note': {'delivery_note_details':['serial_no'],'packing_details':['serial_no']},
 		'Installation Note': {'installed_item_details':['serial_no']},
 		'Item': {'fields':['has_serial_no']},
-		'Maintenance Schedule': {'item_maintenance_details':['serial_no'],'maintenance_schedule_details':['serial_no']},
+		'Maintenance Schedule': {'item_maintenance_detail':['serial_no'],'maintenance_schedule_detail':['serial_no']},
 		'Maintenance Visit': {'maintenance_visit_details':['serial_no']},
 		'Purchase Receipt': {'purchase_receipt_details':['serial_no']},
 		'Quality Inspection': {'fields':['item_serial_no']},

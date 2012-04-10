@@ -20,9 +20,14 @@ cur_frm.cscript.onload = function(doc, cdt, cdn){
     set_field_options('select_doc_for_series', r.message);
   }
   $c_obj([doc],'get_transactions','',callback);
-  
+  cur_frm.cscript.refresh();
   // add page head
-  var ph = new PageHeader(cur_frm.fields_dict['Head HTML'].wrapper, 'Setup Series', 'Set prefix for numbering series on your transactions');
+  //var ph = new PageHeader(cur_frm.fields_dict['head_html'].wrapper, 'Setup Series', 'Set prefix for numbering series on your transactions');
+}
+
+cur_frm.cscript.refresh = function(doc, cdt, cdn) {
+  // hide buttons
+  $(cur_frm.frm_head.page_head.toolbar_area).toggle(false);
 }
 
 cur_frm.cscript.select_doc_for_series = function(doc, cdt, cdn) {
