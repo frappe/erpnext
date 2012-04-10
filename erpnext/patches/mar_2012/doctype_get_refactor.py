@@ -8,10 +8,11 @@ def execute():
 		* Remove 'no_column' from DocField
 		* Drop table DocFormat
 	"""
+	change_property_setter_fieldnames()
+	
 	import webnotes.model.sync
 	webnotes.model.sync.sync_all(force=1)
 	
-	change_property_setter_fieldnames()
 	handle_custom_fields()
 	create_file_list()
 
@@ -19,6 +20,8 @@ def execute():
 	change_to_decimal()
 
 def change_property_setter_fieldnames():
+	import webnotes.model.sync
+	webnotes.model.sync.sync('core', 'property_setter')
 	docfield_list = webnotes.conn.sql("""\
 		SELECT name, fieldname FROM `tabDocField`""", as_list=1)
 	custom_field_list = webnotes.conn.sql("""\
@@ -94,22 +97,23 @@ def create_prev_field_prop_setter(cf):
 			WHERE name = %s""", (similar_idx_label[0], f.get('name')))
 
 		prev_field = field_list[label_index]
-		webnotes.conn.sql("""\
-			DELETE FROM `tabProperty Setter`
+		res = webnotes.conn.sql("""\
+			SELECT name FROM `tabProperty Setter`
 			WHERE doc_type = %s
 			AND field_name = %s
 			AND property = 'previous_field'""", (f.get('dt'), f.get('fieldname')))
 
-		ps = Document('Property Setter', fielddata = {
-			'doctype_or_field': 'DocField',
-			'doc_type': f.get('dt'),
-			'field_name': f.get('fieldname'),
-			'property': 'previous_field',
-			'value': prev_field,
-			'property_type': 'Data',
-			'select_doctype': f.get('dt')
-		})
-		ps.save(1)
+		if not res:
+			ps = Document('Property Setter', fielddata = {
+				'doctype_or_field': 'DocField',
+				'doc_type': f.get('dt'),
+				'field_name': f.get('fieldname'),
+				'property': 'previous_field',
+				'value': prev_field,
+				'property_type': 'Data',
+				'select_doctype': f.get('dt')
+			})
+			ps.save(1)
 
 def remove_custom_from_docfield(cf):
 	for f in cf:
