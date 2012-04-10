@@ -8,17 +8,17 @@ def execute():
 		* Remove 'no_column' from DocField
 		* Drop table DocFormat
 	"""
+	import webnotes.model.sync
+	webnotes.model.sync.sync_all(force=1)
+	
 	change_property_setter_fieldnames()
 	handle_custom_fields()
-	#create_file_list()
+	create_file_list()
 
 	# do at last - needs commit due to DDL statements
 	change_to_decimal()
 
 def change_property_setter_fieldnames():
-	import webnotes.model.sync
-	webnotes.model.sync.sync('core', 'property_setter')
-	
 	docfield_list = webnotes.conn.sql("""\
 		SELECT name, fieldname FROM `tabDocField`""", as_list=1)
 	custom_field_list = webnotes.conn.sql("""\
@@ -40,7 +40,8 @@ def change_property_setter_fieldnames():
 				UPDATE `tabProperty Setter`
 				SET value = %s
 				WHERE name = %s""", (field_dict.get(value), name))
-
+	import patches.mar_2012.clean_property_setter
+	patches.mar_2012.clean_property_setter.execute()
 
 def handle_custom_fields():
 	"""
@@ -48,6 +49,7 @@ def handle_custom_fields():
 		* Create property setter entry of previous field
 		* Remove custom fields from tabDocField
 	"""
+	print "in handle custom fields"
 	cf = get_cf()
 	assign_idx(cf)
 	create_prev_field_prop_setter(cf)
@@ -61,9 +63,12 @@ def get_cf():
 def assign_idx(cf):
 	from webnotes.model.doctype import get
 	from webnotes.utils import cint
+	#print len(cf)
 	for f in cf:
+		#print f.get('dt'), f.get('name')
 		if f.get('idx'): continue
 		temp_doclist = get(f.get('dt'), form=0)
+		#print len(temp_doclist)
 		max_idx = max(d.idx for d in temp_doclist if d.doctype=='DocField')
 		if not max_idx: continue
 		webnotes.conn.sql("""\
@@ -119,7 +124,7 @@ def create_file_list():
 		'Stock Entry', 'Serial No', 'Sales Order', 'Sales Invoice',
 		'Quotation', 'Question', 'Purchase Receipt', 'Purchase Order',
 		'Project', 'Profile', 'Production Order', 'Product', 'Print Format',
-		'Price List', 'Purchase Invoice', 'Page', 'Module Def',
+		'Price List', 'Purchase Invoice', 'Page', 
 		'Maintenance Visit', 'Maintenance Schedule', 'Letter Head',
 		'Leave Application', 'Lead', 'Journal Voucher', 'Item', 'Purchase Request',
 		'Expense Claim', 'Opportunity', 'Employee', 'Delivery Note',
@@ -139,6 +144,7 @@ def create_file_list():
 		CacheItem(obj.doc.name).clear()
 
 def change_to_decimal():
+	print "in change to decimal"
 	webnotes.conn.commit()
 	tables = webnotes.conn.sql("SHOW TABLES")
 	alter_tables_list = []

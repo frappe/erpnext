@@ -249,11 +249,6 @@ patch_list = [
 	},
 	{
 		'patch_module': 'patches.mar_2012',
-		'patch_file': 'clean_property_setter',
-		'description': 'Cleanup Property Setter Entries' 
-	},
-	{
-		'patch_module': 'patches.mar_2012',
 		'patch_file': 'delete_docformat',
 		'description': 'Deletes DocFormat from database' 
 	},
