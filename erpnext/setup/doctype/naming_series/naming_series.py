@@ -19,6 +19,7 @@ import webnotes
 
 from webnotes.utils import cint, cstr
 from webnotes import msgprint, errprint
+import webnotes.model.doctype
 
 sql = webnotes.conn.sql
 	
@@ -31,13 +32,13 @@ class DocType:
 
 	#-----------------------------------------------------------------------------------------------------------------------------------
 	def get_transactions(self):
-		return "\n".join([''] + [i[0] for i in sql("SELECT `tabDocField`.`parent` FROM `tabDocField`, `tabDocType` WHERE `tabDocField`.`fieldname` = 'naming_series' and `tabDocType`.module !='Recycle Bin' and `tabDocType`.name=`tabDocField`.parent order by `tabDocField`.parent")])
+		return "\n".join([''] + [i[0] for i in sql("SELECT `tabDocField`.`parent` FROM `tabDocField`, `tabDocType` WHERE `tabDocField`.`fieldname` = 'naming_series' and `tabDocType`.name=`tabDocField`.parent order by `tabDocField`.parent")])
 	
 	#-----------------------------------------------------------------------------------------------------------------------------------
 	def get_options_for(self, doctype):
-		sr = sql("select options from `tabDocField` where parent='%s' and fieldname='naming_series'" % (doctype))
-		if sr and sr[0][0]:
-			return sr[0][0].split("\n")
+		sr = webnotes.model.doctype.get_property(doctype, 'naming_series')
+		if sr:
+			return sr.split("\n")
 		else:
 			return []
 	
@@ -50,7 +51,7 @@ class DocType:
 		options = self.scrub_options_list(ol)
 		
 		# validate names
-		[self.validate_series_name(i) for i in options]
+		for i in options: self.validate_series_name(i)
 		
 		if self.doc.user_must_always_select:
 			options = [''] + options
@@ -58,8 +59,28 @@ class DocType:
 		else:
 			default = options[0]
 		
-		# update
-		sql("update tabDocField set `options`=%s, `default`=%s where parent=%s and fieldname='naming_series'", ("\n".join(options), default, doctype))
+		# update in property setter
+		prop_dict = {'options': "\n".join(options), 'default': default}
+		for prop in prop_dict:
+			ps_exists = webnotes.conn.sql("""SELECT name FROM `tabProperty Setter`
+					WHERE doc_type = %s AND field_name = 'naming_series'
+					AND property = %s""", (doctype, prop))
+			if ps_exists:
+				ps = Document('Property Setter', ps_exists[0][0])
+				ps.value = prop_dict[prop]
+				ps.save()
+			else:
+				ps = Document('Property Setter', fielddata = {
+					'doctype_or_field': 'DocField',
+					'doc_type': doctype,
+					'field_name': 'naming_series',
+					'property': prop,
+					'value': prop_dict[prop],
+					'property_type': 'Select',
+					'select_doctype': doctype
+				})
+				ps.save(1)
+
 		self.doc.set_options = "\n".join(options)
 	
 	#-----------------------------------------------------------------------------------------------------------------------------------
@@ -73,7 +94,8 @@ class DocType:
 		from core.doctype.doctype.doctype import DocType
 		dt = DocType()
 	
-		sr = sql("select options, parent from `tabDocField` where fieldname='naming_series' and parent != %s", self.doc.select_doc_for_series)
+		parent = sql("select parent from `tabDocField` where fieldname='naming_series' and parent != %s", self.doc.select_doc_for_series)
+		sr = ([p[0], webnotes.model.doctype.get_property(p[0], 'naming_series')] for p in parent)
 		options = self.scrub_options_list(self.doc.set_options.split("\n"))
 		for series in options:
 			dt.validate_series(series, self.doc.select_doc_for_series)

@@ -240,7 +240,7 @@ wn.route=function(){wn._cur_route=window.location.hash;route=wn.get_route();swit
 wn.views.formview.show(route[1],route[2]);break;case"Report":wn.views.reportview.show(route[1],route[2]);break;default:wn.views.pageview.show(route[0]);}}
 wn.get_route=function(route){if(!route)
 route=window.location.hash;if(route.substr(0,1)=='#')route=route.substr(1);if(route.substr(0,1)=='!')route=route.substr(1);return $.map(route.split('/'),function(r){return decodeURIComponent(r);});}
-wn.set_route=function(){route=$.map(arguments,function(a){return encodeURIComponent(a)}).join('/');window.location.hash=route;}
+wn.set_route=function(){route=$.map(arguments,function(a){return encodeURIComponent(a)}).join('/');window.location.hash=route;set_favicon();}
 wn._cur_route=null;$(window).bind('hashchange',function(){if(location.hash==wn._cur_route)
 return;wn.route();if(wn.boot.analytics_code){try{eval(wn.boot.analytics_code);}catch(e){console.log(e);}}});
 /*
@@ -2178,7 +2178,7 @@ var setup_viewport=function(){wn.container=new wn.views.Container();if(user=='Gu
 user_defaults.hide_webnotes_toolbar=1;if(!cint(user_defaults.hide_webnotes_toolbar)||user=='Administrator'){wn.container.wntoolbar=new wn.ui.toolbar.Toolbar();}
 $(document).trigger('startup');try{if(wn.control_panel.custom_startup_code)
 eval(wn.control_panel.custom_startup_code);}catch(e){errprint(e);}
-var t=to_open();if(t){window.location.hash=t;}else if(home_page){loadpage(home_page);}
+var t=to_open();if(t){window.location.hash=t;set_favicon();}else if(home_page){loadpage(home_page);}
 wn.route();$dh('startup_div');$ds('body_div');}
 var callback=function(r,rt){if(r.exc)console.log(r.exc);setup_globals(r);setup_viewport();}
 if(wn.boot){LocalDB.sync(wn.boot.docs);callback(wn.boot,'');if(wn.boot.error_messages)
@@ -2205,12 +2205,16 @@ var resize_observers=[]
 function set_resize_observer(fn){if(resize_observers.indexOf(fn)==-1)resize_observers.push(fn);}
 window.onresize=function(){return;var ht=get_window_height();for(var i=0;i<resize_observers.length;i++){resize_observers[i](ht);}}
 get_window_height=function(){var ht=window.innerHeight?window.innerHeight:document.documentElement.offsetHeight?document.documentElement.offsetHeight:document.body.offsetHeight;return ht;}
+function set_favicon(){var link=$('link[type="image/x-icon"]').remove().attr("href");var favicon='\
+  <link rel="shortcut icon" href="'+link+'" type="image/x-icon"> \
+  <link rel="icon" href="'+link+'" type="image/x-icon">'
+$(favicon).appendTo('head');}
 /*
  *	js/app.js
  */
 wn.app={name:'ERPNext',license:'GNU/GPL - Usage Condition: All "erpnext" branding must be kept as it is',source:'https://github.com/webnotes/erpnext',publisher:'Web Notes Technologies Pvt Ltd, Mumbai',copyright:'&copy; Web Notes Technologies Pvt Ltd',version:'2.'+window._version_number}
 wn.modules_path='erpnext';wn.settings.no_history=true;$(document).bind('ready',function(){startup();});$(document).bind('toolbar_setup',function(){$('.brand').html('<b>erp</b>next\
-  <i class="icon-home icon-white navbar-icon-home" ></i>').hover(function(){$(this).find('.icon-home').addClass('navbar-icon-home-hover');},function(){$(this).find('.icon-home').removeClass('navbar-icon-home-hover');});})
+  <i class="icon-home icon-white navbar-icon-home" ></i>').hover(function(){$(this).find('.icon-home').addClass('navbar-icon-home-hover');},function(){$(this).find('.icon-home').removeClass('navbar-icon-home-hover');});});
 /*
  *	erpnext/startup/startup.js
  */
