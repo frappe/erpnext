@@ -109,7 +109,7 @@ div.comment { color: #444; }
 }
 
 .help {
-	margin: 3px 0px;
+	margin-bottom: 3px;
 	color: #888;
 }
 
@@ -322,6 +322,20 @@ div.notice {
  *	lib/css/legacy/forms.css
  */
 /* FORMS */
+
+.breadcrumbs-area {
+	margin-bottom: 8px;
+}
+
+.breadcrumbs {
+	background-color: #e8e8e8;
+	padding: 3px;
+	border-radius: 3px;
+}
+
+.breadcrumbs a {
+	color: #000000;
+}
 
 div.form-section-head {
 	margin: 11px 0px 3px 0px;
@@ -1763,7 +1777,6 @@ h6 {
   font-weight: bold;
   color: #333333;
   text-rendering: optimizelegibility;
-  margin-bottom: 0.3em;
 }
 h1 small,
 h2 small,
@@ -1775,37 +1788,37 @@ h6 small {
   color: #999999;
 }
 h1 {
-  font-size: 30px;
-  line-height: 36px;
+  font-size: 280%;
+  line-height: 120%;
 }
 h1 small {
-  font-size: 18px;
+  font-size: 150%;
 }
 h2 {
-  font-size: 24px;
-  line-height: 36px;
+  font-size: 200%;
+  line-height: 120%;
 }
 h2 small {
-  font-size: 18px;
+  font-size: 150%;
 }
 h3 {
-  line-height: 27px;
-  font-size: 18px;
+  font-size: 210%;
+  font-size: 150%;
 }
 h3 small {
-  font-size: 14px;
+  font-size: 130%;
 }
 h4, h5, h6 {
-  line-height: 18px;
+  font-size: 150%;
 }
 h4 {
-  font-size: 14px;
+  font-size: 113%;
 }
 h4 small {
-  font-size: 12px;
+  font-size: 100%;
 }
 h5 {
-  font-size: 12px;
+  font-size: 100%;
 }
 h6 {
   font-size: 11px;
@@ -3470,7 +3483,8 @@ button.btn.small, input[type="submit"].btn.small {
  */
 h1, h2, h3, h4, h5 {
 	font-family: "Open Sans", Helvetica, "Helvetica Neue", sans-serif;
-	font-weight: bold;
+	font-weight: normal;
+	margin-top: 0.2em;
 }
 
 body {
@@ -3484,6 +3498,7 @@ span, div, td, input, textarea, button, select {
 
 body {
 	background: url(../images/redbeech.jpg) repeat;
+	color: #616161;
 }
 
 .small {
@@ -3494,25 +3509,6 @@ body {
 	margin: 11px auto;
 	text-align: center;
 }
-
-.module-icons {
-   background: url(../images/module-icons.png) no-repeat top left;
-   width:16px;
-   height:16px;
-}
-
-.module-icons-accounts{ background-position: 0 0;  } 
-.module-icons-analysis{ background-position: 0 -66px;  } 
-.module-icons-buying{ background-position: 0 -132px;  } 
-.module-icons-home{ background-position: 0 -198px;  } 
-.module-icons-hr{ background-position: 0 -264px;  } 
-.module-icons-people{ background-position: 0 -330px;  } 
-.module-icons-production{ background-position: 0 -396px;  } 
-.module-icons-projects{ background-position: 0 -462px;  } 
-.module-icons-selling{ background-position: 0 -528px;  } 
-.module-icons-setup{ background-position: 0 -594px;  } 
-.module-icons-stock{ background-position: 0 -660px;  } 
-.module-icons-support{ background-position: 0 -726px;  } 
 
 .navbar-new-comments {
 	margin: -3px 0px;

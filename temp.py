@@ -39,17 +39,19 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 if __name__=='__main__':
 	import os
-	clicense = '\n'.join([('# ' + l) for l in license2.split('\n')])
-	
-	for wt in os.walk('lib/py/build/'):
+	#clicense = '\n'.join([('# ' + l) for l in license2.split('\n')])
+	cnt = 0	
+	for wt in os.walk('.'):
 		for fname in wt[2]:
-			if fname.endswith('.py'):
-				path = os.path.join(wt[0], fname)
-				with open(path, 'r') as codefile:
-					codetxt = codefile.read()
+			if fname.endswith('.js'):
+				cnt += 1
+				#path = os.path.join(wt[0], fname)
+				#with open(path, 'r') as codefile:
+				#	codetxt = codefile.read()
 				
-				if codetxt.strip():
-					with open(path, 'w') as codefile:
-						codefile.write(clicense + '\n\n' + codetxt)
+				#if codetxt.strip():
+				#	with open(path, 'w') as codefile:
+				#		codefile.write(clicense + '\n\n' + codetxt)
 				
-					print 'updated in ' + path				
+				#	print 'updated in ' + path	
+	print cnt
