@@ -18,7 +18,7 @@ cur_frm.cscript.tname = "Purchase Receipt Item";
 cur_frm.cscript.fname = "purchase_receipt_details";
 cur_frm.cscript.other_fname = "purchase_tax_details";
 
-wn.require('erpnext/buying/doctype/purchase_other_charges/purchase_other_charges.js');
+wn.require('erpnext/accounts/doctype/purchase_taxes_and_charges_master/purchase_taxes_and_charges_master.js');
 wn.require('erpnext/buying/doctype/purchase_common/purchase_common.js');
 wn.require('erpnext/utilities/doctype/sms_control/sms_control.js');
 wn.require('erpnext/setup/doctype/notification_control/notification_control.js');
@@ -69,7 +69,7 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 			if(ch[i].qty > ch[i].billed_qty) allow_billing = 1;
 		}
 	 cur_frm.add_custom_button('Make Purchase Invoice', cur_frm.cscript['Make Purchase Invoice']);
-	 cur_frm.add_custom_button('Send SMS', cur_frm.cscript['Send SMS']);
+	 cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms);
 	}
 	else{
 		hide_field(['Repair Purchase Receipt']);
@@ -109,7 +109,7 @@ cur_frm.fields_dict.contact_person.on_new = function(dn) {
 
 // Get Purchase Order Button
 // -----------------
-cur_frm.cscript['Pull Purchase Order Details'] = function(doc, dt, dn) {
+cur_frm.cscript.pull_purchase_order_details = function(doc, dt, dn) {
 	var callback = function(r,rt) { 
 		unhide_field(['supplier_address','contact_person','supplier_name','address_display', 'contact_display', 'contact_mobile','contact_email']);				
 		refresh_many(['supplier','supplier_address','contact_person', 'supplier_name', 'address_display', 'contact_display','contact_mobile', 'contact_email', 'purchase_receipt_details', 'purchase_tax_details']);

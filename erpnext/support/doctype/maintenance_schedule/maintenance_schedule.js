@@ -63,7 +63,7 @@ cur_frm.fields_dict['item_maintenance_detail'].grid.get_field('item_code').get_q
 }
 
 // Get Items based on SO Selected
-cur_frm.cscript['Get Items'] = function(doc, dt, dn) {
+cur_frm.cscript.get_items = function(doc, dt, dn) {
   var callback = function(r,rt) { 
 	  unhide_field(['customer_address','contact_person','customer_name','address_display','contact_display','contact_mobile','contact_email','territory','customer_group']);
 	  cur_frm.refresh();
@@ -114,7 +114,7 @@ cur_frm.cscript.periodicity = function(doc, cdt, cdn){
   }
 }
 
-cur_frm.cscript['Generate Schedule'] = function(doc, cdt, cdn) {
+cur_frm.cscript.generate_schedule = function(doc, cdt, cdn) {
   if (!doc.__islocal) {
     $c('runserverobj', args={'method':'generate_schedule', 'docs':compress_doclist(make_doclist(cdt,cdn))},
       function(r,rt){

@@ -42,7 +42,7 @@ cur_frm.fields_dict['territory'].get_query = function(doc,cdt,cdn) {
   return 'SELECT `tabTerritory`.`name`,`tabTerritory`.`parent_territory` FROM `tabTerritory` WHERE `tabTerritory`.`is_group` = "No" AND `tabTerritory`.`docstatus`!= 2 AND `tabTerritory`.%(key)s LIKE "%s"  ORDER BY  `tabTerritory`.`name` ASC LIMIT 50';
 }
 
-cur_frm.cscript['Get Items'] = function(doc, dt, dn) {
+cur_frm.cscript.get_items = function(doc, dt, dn) {
   var callback = function(r,rt) { 
 	  unhide_field(['customer_address','contact_person','customer_name','address_display','contact_display','contact_mobile','contact_email','territory','customer_group']);
 	  cur_frm.refresh();

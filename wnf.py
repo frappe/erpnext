@@ -18,9 +18,12 @@
 
 import os, sys
 
-def replace_code(start, txt1, txt2, extn):
+def replace_code(start, txt1, txt2, extn, search=None):
 	"""replace all txt1 by txt2 in files with extension (extn)"""
+	import webnotes.utils
 	import os, re
+	esc = webnotes.utils.make_esc('[]')
+	if not search: search = esc(txt1)
 	for wt in os.walk(start, followlinks=1):
 		for fn in wt[2]:
 			if fn.split('.')[-1]==extn:
@@ -29,7 +32,7 @@ def replace_code(start, txt1, txt2, extn):
 					with open(fpath, 'r') as f:
 						content = f.read()
 				
-					if re.search(txt1, content):
+					if re.search(search, content):
 						res = search_replace_with_prompt(fpath, txt1, txt2)
 						if res == 'skip':
 							return 'skip'
@@ -239,11 +242,11 @@ def run():
 	
 	elif options.sync_all is not None:
 		import webnotes.model.sync
-		webnotes.model.sync.sync_all()
+		webnotes.model.sync.sync_all(options.force or 0)
 
 	elif options.sync is not None:
 		import webnotes.model.sync
-		webnotes.model.sync.sync(options.sync[0], options.sync[1])
+		webnotes.model.sync.sync(options.sync[0], options.sync[1], options.force or 0)
 
 	# print messages
 	if webnotes.message_log:

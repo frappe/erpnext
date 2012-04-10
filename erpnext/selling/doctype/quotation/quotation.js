@@ -22,7 +22,7 @@ cur_frm.cscript.sales_team_fname = "sales_team";
 
 // =====================================================================================
 wn.require('erpnext/selling/doctype/sales_common/sales_common.js');
-wn.require('erpnext/setup/doctype/other_charges/other_charges.js');
+wn.require('erpnext/accounts/doctype/sales_taxes_and_charges_master/sales_taxes_and_charges_master.js');
 wn.require('erpnext/utilities/doctype/sms_control/sms_control.js');
 wn.require('erpnext/setup/doctype/notification_control/notification_control.js');
 
@@ -88,7 +88,7 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	if(doc.docstatus == 1 && doc.status!='Order Lost') {
 		cur_frm.add_custom_button('Make Sales Order', cur_frm.cscript['Make Sales Order']);
 		cur_frm.add_custom_button('Set as Lost', cur_frm.cscript['Declare Order Lost']);
-		cur_frm.add_custom_button('Send SMS', cur_frm.cscript['Send SMS']);
+		cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms);
 	}
 
 	if (!doc.docstatus) hide_field(['Update Communication Log']);
@@ -178,7 +178,7 @@ cur_frm.cscript['Make Sales Order'] = function() {
 }
 
 //pull enquiry details
-cur_frm.cscript['Pull Opportunity Detail'] = function(doc,cdt,cdn){
+cur_frm.cscript.pull_enquiry_detail = function(doc,cdt,cdn){
 
 	var callback = function(r,rt){
 		if(r.message){
@@ -292,7 +292,7 @@ cur_frm.cscript.quot_to_validate = function(doc,cdt,cdn){
 //===================validation function =================================
 
 cur_frm.cscript.validate = function(doc,cdt,cdn){
-	cur_frm.cscript['Re-Calculate Values'](doc, cdt, cdn);
+	cur_frm.cscript.recalculate_values(doc, cdt, cdn);
 	cur_frm.cscript.quot_to_validate(doc,cdt,cdn);
 }
 

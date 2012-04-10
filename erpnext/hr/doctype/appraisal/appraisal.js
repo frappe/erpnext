@@ -60,7 +60,7 @@ cur_frm.cscript.employee = function(doc,cdt,cdn){
 	}
 }
 
-cur_frm.cscript['Calculate Total Score'] = function(doc,cdt,cdn){
+cur_frm.cscript.calculate_total_score = function(doc,cdt,cdn){
 	//get_server_fields('calculate_total','','',doc,cdt,cdn,1);
 	var val = getchildren('Appraisal Goal', doc.name, 'appraisal_details', doc.doctype);
 	var total =0;
@@ -71,7 +71,7 @@ cur_frm.cscript['Calculate Total Score'] = function(doc,cdt,cdn){
 	refresh_field('total_score')
 }
 
-/*cur_frm.cscript['Declare Completed'] = function(doc,cdt,cdn){
+/*cur_frm.cscript.declare_completed = function(doc,cdt,cdn){
 	$c_obj(make_doclist(doc.doctype, doc.name),'declare_completed','', function(r,rt){
 		if(r.message){
 			refresh_field('Status');
@@ -80,7 +80,7 @@ cur_frm.cscript['Calculate Total Score'] = function(doc,cdt,cdn){
 	});
 }*/
 
-cur_frm.cscript['Declare Completed'] = function(doc,cdt,cdn){
+cur_frm.cscript.declare_completed = function(doc,cdt,cdn){
 	var declare_completed_dialog;
 	
 	set_declare_completed_dialog = function() {

@@ -60,7 +60,7 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 	}, 1);
 }
 
-cur_frm.cscript['Add/Remove Recipients'] = function(doc, dt, dn) {
+cur_frm.cscript.addremove_recipients = function(doc, dt, dn) {
 	// Get profile list
 	$c_obj(make_doclist(dt, dn), 'get_profiles', '', function(r, rt) {
 		if(r.exc) {

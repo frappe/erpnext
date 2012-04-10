@@ -3,33 +3,33 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-12-14 10:23:28',
+		'creation': '2012-04-03 12:49:53',
 		'docstatus': 0,
-		'modified': '2011-06-22 12:29:43',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		'modified': '2012-04-03 12:49:53',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
 	},
 
 	# These values are common for all Search Criteria
 	{
-		'columns': 'Account\x01ID',
-		'criteria_name': 'Trial Balance',
-		'description': 'Trial Balance',
-		'dis_filters': 'transaction_date',
-		'doc_type': 'Account',
+		'columns': u'Account\x01ID',
+		'criteria_name': u'Trial Balance',
+		'description': u'Trial Balance',
+		'dis_filters': u'transaction_date',
+		'doc_type': u'Account',
 		'doctype': 'Search Criteria',
-		'filters': "{'Account\x01Group or Ledger':'Ledger','Account\x01Is PL Account':'','Account\x01Account Type':'','Account\x01Show Group Balance':''}",
-		'module': 'Accounts',
+		'filters': u"{'Account\x01Group or Ledger':'Ledger','Account\x01Is PL Account':'','Account\x01Account Type':'','Account\x01Show Group Balance':''}",
+		'module': u'Accounts',
 		'name': '__common__',
 		'page_len': 50,
-		'sort_by': '`tabAccount`.`name`',
-		'sort_order': 'DESC',
-		'standard': 'Yes'
+		'sort_by': u'`tabAccount`.`name`',
+		'sort_order': u'DESC',
+		'standard': u'Yes'
 	},
 
 	# Search Criteria, trial_balance
 	{
 		'doctype': 'Search Criteria',
-		'name': 'trial_balance'
+		'name': u'trial_balance'
 	}
 ]

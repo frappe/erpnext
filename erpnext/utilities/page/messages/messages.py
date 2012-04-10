@@ -68,9 +68,41 @@ def post(arg=None):
 	d.comment_docname = arg['contact']
 	d.comment_doctype = 'Message'
 	d.save()
+
+	import webnotes.utils
+	if webnotes.utils.cint(arg.get('notify')):
+		notify(arg)
 	
 @webnotes.whitelist()
 def delete(arg=None):
 	webnotes.conn.sql("""delete from `tabComment` where name=%s""", 
 		webnotes.form_dict['name']);
+
+def notify(arg=None):
+	from webnotes.utils import cstr
+	fn = webnotes.conn.sql('select first_name, last_name from tabProfile where name=%s', webnotes.user.name)[0]
+	if fn[0] or f[1]:
+		fn = cstr(fn[0]) + (fn[0] and ' ' or '') + cstr(fn[1])
+	else:
+		fn = webnotes.user.name
+
+	message = '''A new comment has been posted on your page by %s:
 	
+	<b>Comment:</b> %s
+	
+	To answer, please login to your erpnext account!
+
+	<a href='https://signin.erpnext.com'>https://signin.erpnext.com</a>
+	''' % (fn, arg['txt'])
+	
+	from webnotes.model.code import get_obj
+	note = get_obj('Notification Control')
+	email_msg = note.prepare_message({
+		'type': 'New Comment',
+		'message': message
+	})
+
+	sender = webnotes.user.name!='Administrator' and webnotes.user.name or 'support+admin_post@erpnext.com'
+	
+	from webnotes.utils.email_lib import sendmail
+	sendmail([arg['contact']], sender, email_msg, fn + ' has posted a new comment')	

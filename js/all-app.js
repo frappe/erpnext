@@ -1604,7 +1604,7 @@ d.cur_frm=f;d.dn=dn;d.table_form=f.meta.istable;f.refresh(dn);d.dialog.show();})
 /*
  *	lib/js/legacy/widgets/form/form_header.js
  */
-_f.FrmHeader=function(parent,frm){var me=this;this.wrapper=$a(parent,'div');if(frm.meta.in_dialog)$y(this.wrapper,{marginLeft:'8px',marginRight:'8px'});this.page_head=new PageHeader(this.wrapper);wn.views.breadcrumbs(this.page_head.breadcrumbs,frm.meta.module,frm.meta.name);this.dt_area=$a(this.page_head.main_head,'h1','',{marginRight:'8px',display:'inline'})
+_f.FrmHeader=function(parent,frm){var me=this;this.wrapper=$a(parent,'div');if(frm.meta.in_dialog)$y(this.wrapper,{marginLeft:'8px',marginRight:'8px'});this.page_head=new PageHeader(this.wrapper);wn.views.breadcrumbs(this.page_head.breadcrumbs,frm.meta.module,frm.meta.name);this.dt_area=$a(this.page_head.main_head,'span','',{marginRight:'8px',display:'inline'})
 var div=$a(null,'div','',{marginBottom:'4px'});this.page_head.wrapper.insertBefore(div,this.page_head.sub_head);this.dn_area=$a(div,'span','',{fontSize:'14px',fontWeight:'normal',marginRight:'8px',padding:'2px'})
 this.status_area=$a(div,'span','',{marginRight:'8px',marginBottom:'2px',cursor:'pointer',textShadow:'none'})}
 _f.FrmHeader.prototype.show=function(){$ds(this.wrapper);}
@@ -2190,8 +2190,9 @@ else if(nm=='Accounts Browser')
 pscript.make_chart(chart_type);}
 loadpage(nm,call_back);}
 var update_messages=function(reset){if(inList(['Guest'],user)||!wn.session_alive){return;}
-if(!reset){$c_page('home','event_updates','get_global_status_messages',null,function(r,rt){if(!r.exc){wn.container.wntoolbar.set_new_comments(r.message.unread_messages);var show_in_circle=function(parent_id,msg){var parent=$('#'+parent_id);if(parent){if(msg){parent.find('span:first').text(msg);parent.toggle(true);}else{parent.toggle(false);}}}
-show_in_circle('unread_messages',r.message.unread_messages.length);show_in_circle('open_support_tickets',r.message.open_support_tickets);show_in_circle('things_todo',r.message.things_todo);show_in_circle('todays_events',r.message.todays_events);}else{clearInterval(wn.updates.id);}});}else{wn.container.wntoolbar.set_new_comments(0);$('#unread_messages').toggle(false);}}
+if(!reset){var set_messages=function(r){if(!r.exc){wn.container.wntoolbar.set_new_comments(r.message.unread_messages);var show_in_circle=function(parent_id,msg){var parent=$('#'+parent_id);if(parent){if(msg){parent.find('span:first').text(msg);parent.toggle(true);}else{parent.toggle(false);}}}
+show_in_circle('unread_messages',r.message.unread_messages.length);show_in_circle('open_support_tickets',r.message.open_support_tickets);show_in_circle('things_todo',r.message.things_todo);show_in_circle('todays_events',r.message.todays_events);}else{clearInterval(wn.updates.id);}}
+wn.call({method:'startup.startup.get_global_status_messages',callback:set_messages});}else{wn.container.wntoolbar.set_new_comments(0);$('#unread_messages').toggle(false);}}
 erpnext.startup.set_periodic_updates=function(){wn.updates={};if(wn.updates.id){clearInterval(wn.updates.id);}
 wn.updates.id=setInterval(update_messages,60000);}
 erpnext.set_user_background=function(src){set_style(repl('body { background: url("files/%(src)s") repeat;}',{src:src}))}

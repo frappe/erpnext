@@ -26,7 +26,7 @@ cur_frm.cscript.onload = function(doc,cdt,cdn){
 }
 
 //download attendance template - csv file
-cur_frm.cscript['Get Template'] = function(doc,cdt,cdn){
+cur_frm.cscript.get_template = function(doc,cdt,cdn){
 
   if(doc.att_to_date && !doc.att_fr_date)
     alert("Please enter 'Attendance To Date'");
@@ -37,7 +37,7 @@ cur_frm.cscript['Get Template'] = function(doc,cdt,cdn){
 }
 
 //---------------------------------------------------------
-cur_frm.cscript['Import'] = function(doc,cdt,cdn){
+cur_frm.cscript.import = function(doc,cdt,cdn){
   if(!doc.file_list){
     alert("Please upload attendance data CSV file");
   }

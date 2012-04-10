@@ -17,7 +17,7 @@
 cur_frm.cscript.tname = "Purchase Invoice Item";
 cur_frm.cscript.fname = "entries";
 cur_frm.cscript.other_fname = "purchase_tax_details";
-wn.require('erpnext/buying/doctype/purchase_other_charges/purchase_other_charges.js');
+wn.require('erpnext/accounts/doctype/purchase_taxes_and_charges_master/purchase_taxes_and_charges_master.js');
 wn.require('erpnext/buying/doctype/purchase_common/purchase_common.js');
 
 // On Load
@@ -66,11 +66,11 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 
 	// Show / Hide button
 	if(doc.docstatus==1 && doc.outstanding_amount > 0)
-		cur_frm.add_custom_button('Make Payment Entry', cur_frm.cscript['Make Bank Voucher']);
+		cur_frm.add_custom_button('Make Payment Entry', cur_frm.cscript.make_bank_voucher);
 	
 	if(doc.docstatus==1) { 
 		unhide_field(['Repair Outstanding Amt']); 
-		cur_frm.add_custom_button('View Ledger', cur_frm.cscript['View Ledger Entry']);
+		cur_frm.add_custom_button('View Ledger', cur_frm.cscript.view_ledger_entry);
 	} else hide_field(['Repair Outstanding Amt']);
 	
 	cur_frm.cscript.is_opening(doc, dt, dn);
@@ -162,14 +162,14 @@ cur_frm.cscript.is_opening = function(doc, dt, dn) {
 
 // Recalculate Button
 // -------------------
-cur_frm.cscript['Recalculate'] = function(doc, cdt, cdn) {
-	cur_frm.cscript['Calculate Tax'](doc,cdt,cdn);
+cur_frm.cscript.recalculate = function(doc, cdt, cdn) {
+	cur_frm.cscript.calculate_tax(doc,cdt,cdn);
 	calc_total_advance(doc,cdt,cdn);
 }
 
 // Get Items Button
 // -----------------
-cur_frm.cscript['Get Items'] = function(doc, dt, dn) {
+cur_frm.cscript.get_items = function(doc, dt, dn) {
 	var callback = function(r,rt) { 
 		unhide_field(['supplier_address', 'contact_person', 'supplier_name', 'address_display', 'contact_display', 'contact_mobile','contact_email']);				
 		refresh_many(['credit_to','supplier','supplier_address','contact_person','supplier_name', 'address_display', 'contact_display','contact_mobile', 'contact_email','entries', 'purchase_receipt_main', 'purchase_order_main', 'purchase_tax_details']);
@@ -201,7 +201,7 @@ cur_frm.cscript.ded_amount = function(doc,dt,dn) {calculate_outstanding(doc);}
 
 // Get TDS Button
 // ---------------
-cur_frm.cscript['Get TDS'] = function(doc, dt, dn) {
+cur_frm.cscript.get_tds = function(doc, dt, dn) {
 	var callback = function(r,rt) {
 		cur_frm.refresh();
 		refresh_field('ded_amount');
@@ -231,7 +231,7 @@ cur_frm.cscript.allocated_amount = function(doc,cdt,cdn){
 
 // Make Journal Voucher
 // --------------------
-cur_frm.cscript['Make Bank Voucher'] = function() {
+cur_frm.cscript.make_bank_voucher = function() {
 	$c('accounts.get_default_bank_account', { company: cur_frm.doc.company }, function(r, rt) {
 		if(!r.exc) {
 			cur_frm.cscript.make_jv(cur_frm.doc, null, null, r.message);
@@ -399,7 +399,7 @@ cur_frm.cscript.select_print_heading = function(doc,cdt,cdn){
 }
 
 /****************** Get Accounting Entry *****************/
-cur_frm.cscript['View Ledger Entry'] = function(){
+cur_frm.cscript.view_ledger_entry = function(){
 	var callback = function(report){
 		report.set_filter('GL Entry', 'Voucher No',cur_frm.doc.name);
 		report.dt.run();

@@ -41,6 +41,6 @@ cur_frm.cscript.currency = function(doc, cdt, cdn) {
   $c_obj(make_doclist(cdt,cdn), 'get_rates', '', function(r,rt){refresh_field('sales_bom_items');});
 }
 
-cur_frm.cscript['Find Sales BOM'] = function(doc, dt, dn) {
+cur_frm.cscript.find_sales_bom = function(doc, dt, dn) {
   $c_obj(make_doclist(dt,dn), 'check_duplicate', 1, '');
 }

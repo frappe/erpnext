@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-03-27 14:36:48',
+		'creation': '2012-04-02 16:02:43',
 		'docstatus': 0,
-		'modified': '2012-03-27 14:36:48',
+		'modified': '2012-04-10 10:41:00',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -17,12 +17,12 @@
 		'colour': u'White:FFF',
 		'description': u'A custom page is a simple page with the layout - headline, main section, side section\n\nEditing:\n\n- Editing is in [markdown format](http://daringfireball.net/projects/markdown/syntax)\n- You can also add images and embed html code\n\nAccessing the page:\n\n- The page can be accessed as #![page-name] after the main url\n\nIdeal for pages like FAQ, Terms and Conditions, Help etc.\n\n',
 		'doctype': 'DocType',
-		'max_attachments': 5,
+		'max_attachments': 20,
 		'module': u'Website',
 		'name': '__common__',
 		'section_style': u'Simple',
 		'show_in_menu': 0,
-		'version': 6
+		'version': 11
 	},
 
 	# These values are common for all DocField
@@ -68,6 +68,14 @@
 
 	# DocField
 	{
+		'doctype': u'DocField',
+		'fieldname': u'sb0',
+		'fieldtype': u'Section Break',
+		'label': u'Title and Style'
+	},
+
+	# DocField
+	{
 		'colour': u'White:FFF',
 		'description': u'Title / headline of your page',
 		'doctype': u'DocField',
@@ -75,6 +83,42 @@
 		'fieldtype': u'Data',
 		'label': u'Title',
 		'reqd': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'layout',
+		'fieldtype': u'Select',
+		'label': u'Layout',
+		'options': u'Two column with header\nTwo column\nSingle column'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'cb1',
+		'fieldtype': u'Column Break',
+		'width': u'50%'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'text_align',
+		'fieldtype': u'Select',
+		'label': u'Text Align',
+		'options': u'Left\nCenter\nRight'
+	},
+
+	# DocField
+	{
+		'colour': u'White:FFF',
+		'description': u'Page content',
+		'doctype': u'DocField',
+		'fieldname': u'sb1',
+		'fieldtype': u'Section Break',
+		'label': u'Content'
 	},
 
 	# DocField
@@ -105,6 +149,16 @@
 		'fieldname': u'side_section',
 		'fieldtype': u'Code',
 		'label': u'Side Section'
+	},
+
+	# DocField
+	{
+		'colour': u'White:FFF',
+		'description': u'Link to other pages in the side bar and next section',
+		'doctype': u'DocField',
+		'fieldname': u'sb2',
+		'fieldtype': u'Section Break',
+		'label': u'Links'
 	},
 
 	# DocField

@@ -90,7 +90,7 @@ cur_frm.cscript.calculate_total = function(doc,cdt,cdn){
   }
 }
 
-cur_frm.cscript['Calculate Total Amount'] = function(doc,cdt,cdn){
+cur_frm.cscript.calculate_total_amount = function(doc,cdt,cdn){
   cur_frm.cscript.calculate_total(doc,cdt,cdn);
 }
 cur_frm.cscript.claim_amount = function(doc,cdt,cdn){
@@ -102,7 +102,7 @@ cur_frm.cscript.sanctioned_amount = function(doc,cdt,cdn){
 
 wn.require('erpnext/setup/doctype/notification_control/notification_control.js');
 
-cur_frm.cscript['Approve'] = function(doc,cdt,cdn){
+cur_frm.cscript.approve = function(doc,cdt,cdn){
 
   if(user == doc.exp_approver){
     var approve_voucher_dialog;
@@ -171,7 +171,7 @@ cur_frm.cscript['Approve'] = function(doc,cdt,cdn){
   }
 }
 
-cur_frm.cscript['Reject'] = function(doc,cdt,cdn){
+cur_frm.cscript.reject = function(doc,cdt,cdn){
   if(user == doc.exp_approver){
     var reject_voucher_dialog;
     
@@ -235,7 +235,7 @@ cur_frm.cscript['Reject'] = function(doc,cdt,cdn){
 
 //update follow up
 //=================================================================================
-cur_frm.cscript['Update Voucher'] = function(doc){
+cur_frm.cscript.update_voucher = function(doc){
 
   $c_obj(make_doclist(doc.doctype, doc.name),'update_voucher','',function(r, rt){
     refresh_field('expense_voucher_details');

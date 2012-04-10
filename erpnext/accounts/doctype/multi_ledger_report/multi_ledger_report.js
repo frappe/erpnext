@@ -14,6 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-cur_frm.cscript['Export Report'] = function(doc, cdt, cdn) {
+cur_frm.cscript.export_report = function(doc, cdt, cdn) {
 	$c_obj_csv(make_doclist(cdt, cdn), 'get_report_data', '');
 }

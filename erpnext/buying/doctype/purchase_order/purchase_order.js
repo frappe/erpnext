@@ -18,7 +18,7 @@ cur_frm.cscript.tname = "Purchase Order Item";
 cur_frm.cscript.fname = "po_details";
 cur_frm.cscript.other_fname = "purchase_tax_details";
 
-wn.require('erpnext/buying/doctype/purchase_other_charges/purchase_other_charges.js');
+wn.require('erpnext/accounts/doctype/purchase_taxes_and_charges_master/purchase_taxes_and_charges_master.js');
 wn.require('erpnext/buying/doctype/purchase_common/purchase_common.js');
 wn.require('erpnext/utilities/doctype/sms_control/sms_control.js');
 wn.require('erpnext/setup/doctype/notification_control/notification_control.js');
@@ -62,7 +62,7 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	if(doc.docstatus == 1 && doc.status != 'Stopped'){
 		var ch = getchildren('Purchase Order Item',doc.name,'po_details');
 		var allow_billing = 0; var allow_receipt = 0;
-		cur_frm.add_custom_button('Send SMS', cur_frm.cscript['Send SMS']);
+		cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms);
 
 		for(var i in ch){
 			if(ch[i].qty > ch[i].received_qty) allow_receipt = 1; 
@@ -159,7 +159,7 @@ cur_frm.fields_dict['supplier_qtn'].get_query = function(doc) {
 
 
 //========================= Get Last Purhase Rate =====================================
-cur_frm.cscript['Get Last Purchase Rate'] = function(doc, cdt, cdn){
+cur_frm.cscript.get_last_purchase_rate = function(doc, cdt, cdn){
 	$c_obj(make_doclist(doc.doctype, doc.name), 'get_last_purchase_rate', '', 
 			function(r, rt) { 
 				refresh_field(cur_frm.cscript.fname);

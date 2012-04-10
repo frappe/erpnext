@@ -41,7 +41,7 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
   if(!doc.__islocal && !in_list(['Converted', 'Lead Lost'], doc.status)) {
     cur_frm.add_custom_button('Create Customer', cur_frm.cscript['Create Customer']);
     cur_frm.add_custom_button('Create Opportunity', cur_frm.cscript['Create Opportunity']);
-    cur_frm.add_custom_button('Send SMS', cur_frm.cscript['Send SMS']);
+    cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms);
   }
 }
 
@@ -122,7 +122,7 @@ cur_frm.cscript['Create Customer'] = function(){
 
 // send email
 // ===============================================================
-cur_frm.cscript['Send Email'] = function(doc,cdt,cdn){
+cur_frm.cscript.send_email = function(doc,cdt,cdn){
   if(doc.__islocal != 1){
     $c_obj(make_doclist(doc.doctype, doc.name),'send_mail','',function(r,rt){});
   }else{

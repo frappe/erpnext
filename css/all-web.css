@@ -109,7 +109,7 @@ div.comment { color: #444; }
 }
 
 .help {
-	margin: 3px 0px;
+	margin-bottom: 3px;
 	color: #888;
 }
 
@@ -415,7 +415,6 @@ h6 {
   font-weight: bold;
   color: #333333;
   text-rendering: optimizelegibility;
-  margin-bottom: 0.3em;
 }
 h1 small,
 h2 small,
@@ -427,37 +426,37 @@ h6 small {
   color: #999999;
 }
 h1 {
-  font-size: 30px;
-  line-height: 36px;
+  font-size: 280%;
+  line-height: 120%;
 }
 h1 small {
-  font-size: 18px;
+  font-size: 150%;
 }
 h2 {
-  font-size: 24px;
-  line-height: 36px;
+  font-size: 200%;
+  line-height: 120%;
 }
 h2 small {
-  font-size: 18px;
+  font-size: 150%;
 }
 h3 {
-  line-height: 27px;
-  font-size: 18px;
+  font-size: 210%;
+  font-size: 150%;
 }
 h3 small {
-  font-size: 14px;
+  font-size: 130%;
 }
 h4, h5, h6 {
-  line-height: 18px;
+  font-size: 150%;
 }
 h4 {
-  font-size: 14px;
+  font-size: 113%;
 }
 h4 small {
-  font-size: 12px;
+  font-size: 100%;
 }
 h5 {
-  font-size: 12px;
+  font-size: 100%;
 }
 h6 {
   font-size: 11px;
@@ -1800,7 +1799,7 @@ div.stat-bar {
 h1, h2, h3, h4, h5 {
 	font-family: "Open Sans", Helvetica, "Helvetica Neue", sans-serif;
 	font-weight: normal;
-	color: #66ad78;
+	margin-top: 0.2em;
 }
 
 body {
@@ -1873,6 +1872,10 @@ body {
 /*
  *	erpnext/website/css/website.css
  */
+div#body_div, header .container, .content, #opened-page-selector, footer {
+	width: 900px;
+}
+
 .layout_wrapper {
 	padding: 27px;
 }
@@ -1978,3 +1981,42 @@ footer a:hover {
 .web-footer-menu ul li:last-child {
 	border-right: 0px solid #777 !important;
 }
+
+/* slide view */
+
+.next-slide {
+	margin: 0px -27px 100px -27px;
+	background: #ffffff; /* Old browsers */
+	background: -moz-linear-gradient(top,  #eeeeee 0%, #fff 100%); /* FF3.6+ */
+	background: -webkit-linear-gradient(top,  #eeeeee 0%, #fff 100%); /* Chrome10+,Safari5.1+ */
+	background: -o-linear-gradient(top,  #eeeeee 0%, #fff 100%); /* Opera 11.10+ */
+	background: -ms-linear-gradient(top,  #eeeeee 0%, #fff 100%); /* IE10+ */
+	background: linear-gradient(top,  #eeeeee 0%, #fff 100%); /* W3C */
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#eeeeee', endColorstr='#fff',GradientType=0 ); /* IE6-9 */
+	height: 36px;
+}
+
+.slide-shadow {
+	background: #eeeeee; /* Old browsers */
+	background: -moz-linear-gradient(top,  #bababa 0%,#eeeeee 100%); /* FF3.6+ */
+	background: -webkit-linear-gradient(top,  #bababa 0%,#eeeeee 100%); /* Chrome10+,Safari5.1+ */
+	background: -o-linear-gradient(top,  #bababa 0%,#eeeeee 100%); /* Opera 11.10+ */
+	background: -ms-linear-gradient(top,  #bababa 0%,#eeeeee 100%); /* IE10+ */
+	background: linear-gradient(top,  #bababa 0%,#eeeeee 100%); /* W3C */
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#bababa', endColorstr='#eeeeee',GradientType=0 ); /* IE6-9 */	
+	height: 3px;
+	margin: 100px -27px 0px -27px;
+	border-top: 1px solid #bababa;
+}
+
+.two-column {
+	width: 40%;
+	float: left;
+	padding: 5%;
+}
+
+.clear {
+	clear: both;
+}
+
+/* */

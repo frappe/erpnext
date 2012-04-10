@@ -8,14 +8,13 @@ from webnotes.utils import make_esc
 import os
 
 def execute1():
-	rendt = get_dt_to_be_renamed()
-	rename_dt_files(rendt)
+	#rendt = get_dt_to_be_renamed()
+	#rename_dt_files(rendt)
 	#update_local_file_system()
+	replace_labels_with_fieldnames()
 
 def execute():
-	# delete dt, mapper
-	delete_dt_and_mapper()
-	
+
 	#---------------------------------------------------
 	# doctype renaming
 	rendt = get_dt_to_be_renamed()
@@ -44,31 +43,25 @@ def execute():
 	#---------------------------------------------------
 	# Reload mapper from file
 	for d in ren_mapper:
-		mod = '_'.join(webnotes.conn.sql("select module from `tabDocType Mapper` where name = %s", ren_mapper[d])[0][0].lower().split())
+		mod = '_'.join(webnotes.conn.sql("select module from `tabDocType Mapper` where name = %s", 
+			ren_mapper[d])[0][0].lower().split())
 		reload_doc(mod, 'DocType Mapper', ren_mapper[d])
-	
-	webnotes.conn.sql("DELETE FROM `tabSearch Criteria` WHERE name=''")
-	webnotes.conn.sql("""UPDATE `tabSearch Criteria` SET standard='No'
-			WHERE name IN ('appraisal_custom', 'bills-to_be_paid',
-			'bills-to_be_submitted', 'cenvat_credit_-_input_or_capital_goods',
-			'custom_test', 'custom_test1', 'delivery_note-to_be_billed',
-			'delivery_note-to_be_submitted', 'delivery_notes',
-			'employee_leave_balance_report', 'flat_bom_report',
-			'general_ledger1', 'lead_interested',
-			'payables_-_as_on_outstanding', 'periodical_budget_report',
-			'projectwise_delivered_qty_and_costs_as_per_purchase_cost',
-			'projectwise_pending_qty_and_costs_as_per_purchase_cost', 'sales',
-			'sales_order1', 'sales_order_pending_items',
-			'territory_wise_sales_-_target_vs_actual_', 'test_report')""")
+
+	delete_search_criteria()
 
 	# reload custom search criteria
-	for d in  webnotes.conn.sql("""select name, module from
-			`tabSearch Criteria` where ifnull(standard, 'No') = 'Yes' and ifnull(disabled, 0) = 0"""):
-		try:
-			reload_doc(d[1], 'search_criteria', d[0].replace('-', '_'))
-			print d
-		except Exception, e:
-			print "did not reload: " + str(d)
+	#for d in  webnotes.conn.sql("""select name, module from
+	#		`tabSearch Criteria` where ifnull(standard, 'No') = 'Yes' and ifnull(disabled, 0) = 0"""):
+	#
+	for path, folders, files in os.walk(webnotes.defs.modules_path):
+		if not path.endswith('search_criteria'): continue
+		module = path.split(os.sep)[-2]
+		for sc in folders:
+			try:
+				reload_doc(module, 'search_criteria', sc)
+				print module, sc
+			except Exception, e:
+				print "did not reload: " + str(d)
 	
 	webnotes.conn.sql("""DELETE FROM `tabPrint Format`
 			WHERE name IN ('Delivery Note Format', 'Purchase Order Format',
@@ -95,19 +88,54 @@ def execute():
 	# T0-do-list
 	# gl mapper name
 
+def delete_search_criteria():
+	webnotes.conn.sql("""DELETE FROM `tabSearch Criteria`
+			WHERE name IN ('', 'bills-to_be_paid',
+			'bills-to_be_submitted', 'cenvat_credit_-_input_or_capital_goods',
+			'appraisal_custom', 'custom_test', 'custom_test1', 'delivery_note-to_be_billed',
+			'delivery_note-to_be_submitted', 'delivery_notes',
+			'employee_leave_balance_report', 'flat_bom_report',
+			'general_ledger1', 'lead_interested',
+			'payables_-_as_on_outstanding', 'periodical_budget_report',
+			'projectwise_delivered_qty_and_costs_as_per_purchase_cost',
+			'projectwise_pending_qty_and_costs_as_per_purchase_cost', 'sales',
+			'sales_order1', 'sales_order_pending_items',
+			'territory_wise_sales_-_target_vs_actual_', 'test_report',
+			'lease_agreement_list', 'lease_monthly_future_installment_inflows',
+			'lease_over_due_list', 'lease_overdue_age_wise',
+			'lease_receipt_summary_month_wise', 'lease_receipts_client_wise',
+			'lease_yearly_future_installment_inflows',
+			'monthly_ledger_summary_report', 'payables_-_as_on_outstanding',
+			'payment_report', 'progressive_total_excise_duty',
+			'service_tax_credit_account_-_inputs',
+			'total_amout_collection_for_a_period_-_customerwise',
+			'invoices-to_be_submitted', 'invoices-to_receive_payment',
+			'opportunity-quotations_to_be_sent', 'purchase_order-to_be_billed',
+			'purchase_order-to_be_submitted',
+			'purchase_order-to_receive_items',
+			'purchase_request-purchase_order_to_be_made',
+			'purchase_request-to_be_submitted',
+			'sales-order_to_be_submitted', 'sales_order-overdue',
+			'sales_order-to_be_billed', 'sales_order-to_be_delivered',
+			'sales_order-to_be_submitted', 'task-open', 'appraisal_custom',
+			'employee_details', 'employee_in_company_experience',
+			'employee_leave_balance_report', 'employeewise_leave_transaction_details',
+			'pending_appraisals', 'pending_expense_claims', 'delivery_plan', 'flat_bom_report',
+			'dispatch_report', 'projectwise_delivered_qty_and_costs_as_per_purchase_cost', 
+			'projectwise_pending_qty_and_costs_as_per_purchase_cost', 'custom_test', 'custom_test1',
+			'delivery_notes', 'delivery_note_disabled', 'lead', 'lead_interested', 'lead_report',
+			'periodic_sales_summary', 'monthly_despatched_trend', 'sales', 'sales_order',
+			'sales_order1', 'sales_agentwise_commission', 'test_report', 
+			'territory_wise_sales_-_target_vs_actual_')""")
 
-
-def delete_dt_and_mapper():
-	del_mapper = ['Production Forecast-Production Planning Tool', 'Production Forecast-Production Plan', 'Sales Order-Production Plan']
-	for d in del_mapper:
-		delete_doc('DocType Mapper', d)
-
-	del_dt = ['Widget Control', 'Update Delivery Date Detail', 'Update Delivery Date', 'Tag Detail', 'Supplier rating', 'Stylesheet', 'Question Tag', 'PRO PP Detail', 'PRO Detail', 'PPW Detail', 'PF Detail', 'Personalize', 'Patch Util', 'Page Template', 'Module Def Role', 'Module Def Item', 'File Group', 'File Browser Control', 'File', 'Educational Qualifications', 'Earn Deduction Detail', 'DocType Property Setter', 'Contact Detail', 'BOM Report Detail', 'BOM Replace Utility Detail', 'BOM Replace Utility', 'Absent Days Detail', 'Activity Dashboard Control', 'Raw Materials Supplied', 'Setup Wizard Control', 'Company Group'] # docformat
-
-	for d in del_dt:
-		delete_doc('DocType', d)
-
-
+	webnotes.conn.sql("""
+		DELETE FROM `tabSearch Criteria`
+		WHERE name IN ('monthly_transaction_summary', 'trend_analyzer',
+		'yearly_transaction_summary', 'invoices-overdue', 'lead-to_follow_up',
+		'opportunity-to_follow_up', 'serial_no-amc_expiring_this_month',
+		'serial_no-warranty_expiring_this_month')
+		AND IFNULL(standard, 'No') = 'Yes'
+		""")
 
 def rename_in_db(ren_data, data_type, is_doctype):
 	for d in ren_data:
@@ -123,7 +151,7 @@ def rename_in_db(ren_data, data_type, is_doctype):
 def update_dt_in_records(rendt):
 	for d in rendt:
 		# Feed, property setter, search criteria, gl mapper, form 16A, naming series options, doclayer - dodtype is not mentioed in options
-		dt_list = webnotes.conn.sql("select t1.parent, t1.fieldname from tabDocField t1, tabDocType t2 where t1.parent = t2.name and t1.fieldname in ('dt', 'doctype', 'doc_type', 'dt_type') and ifnull(t1.options, '') = '' and ifnull(t2.issingle, 0) = 0")
+		dt_list = webnotes.conn.sql("select t1.parent, t1.fieldname from tabDocField t1, tabDocType t2 where t1.parent = t2.name and t1.fieldname in ('dt', 'doctype', 'doc_type', 'dt_type') and ifnull(t1.options, '') = '' and ifnull(t2.issingle, 0) = 0 and t1.parent in ('Custom Field', 'Custom Script')")
 		for dt in dt_list:
 			webnotes.conn.sql("update `tab%s` set %s = replace(%s, '%s', '%s') where %s = '%s'" % (dt[0], dt[1], dt[1], d, rendt[d], dt[1], d))
 
@@ -347,3 +375,47 @@ def rename_mapper_files(ren_mapper):
 				+ ' ' + esc(path + ren_mapper[d] + '/' + ren_mapper[d] + '.txt'))
 		print 'git mv ' + esc(path + ren_mapper[d] + '/'+ d + '.txt') + ' ' + esc(path + ren_mapper[d] + '/' + ren_mapper[d] + '.txt')
 		
+
+def replace_labels_with_fieldnames():
+	"""
+		This is used for replacing instances like cur_frm.cscript['LABEL'] with
+		cur_frm.cscript.FIELDNAME in js files
+	"""
+	doctype = {}
+	doctype.update(prepare_dict_of_label_fieldname('/var/www/erpnext/erpnext/'))
+	doctype.update(prepare_dict_of_label_fieldname('/var/www/erpnext/lib/py'))
+	#print doctype
+	
+	for doc in doctype:
+		label_fieldname = doctype[doc]
+		for d in label_fieldname:
+			#label = "cur_frm.cscript['%s']" % d
+			#fieldname = "cur_frm.cscript.%s" % label_fieldname[d]
+			label = d
+			fieldname = label_fieldname[d]
+			print colored('Changing... ' + doc + ': ' + label + ' --> '+ fieldname, 'yellow')
+			#res = replace_code('/var/www/erpnext/', label, fieldname, 'js')
+			res = replace_code('/var/www/erpnext/', label, fieldname, 'js',
+					'hide_field\(.*%s' % label)
+			if res == 'skip':
+				break
+
+def prepare_dict_of_label_fieldname(module_path):
+	from webnotes.model.utils import peval_doclist
+	from webnotes.model.sync import get_file_path
+	doctype = {}
+	for path, folders, files in os.walk(module_path):
+		if path == module_path:
+			modules_list = folders
+		for f in files:
+			if f.endswith(".txt"):
+				rel_path = os.path.relpath(path, webnotes.defs.modules_path)
+				path_tuple = rel_path.split(os.sep)
+				if (len(path_tuple)==3 and path_tuple[0] in modules_list and
+						path_tuple[1] == 'doctype'):
+					file_name = f[:-4]
+					with open(get_file_path(path_tuple[0], file_name), 'r') as fn:
+						doclist = peval_doclist(fn.read())
+						doctype[file_name] = dict(([d.get('label'),d.get('fieldname')] \
+								for d in doclist if d.get('doctype')=='DocField'))
+	return doctype

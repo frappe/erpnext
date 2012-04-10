@@ -77,7 +77,7 @@ function SMSManager() {
 	}
 }
 
-cur_frm.cscript['Send SMS'] = function(doc,dt,dn) {
+cur_frm.cscript.send_sms = function(doc,dt,dn) {
 	var doc = cur_frm.doc;
 	var sms_man = new SMSManager();
 	var default_msg = {

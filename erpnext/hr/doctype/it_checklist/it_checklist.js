@@ -57,7 +57,7 @@ cur_frm.cscript.rent_acc = function(doc,cdt,cdn){
 //---------------------------------------------------------
 //On done button click check for all values filled or not, and accordingly add records in child tables
 
-cur_frm.cscript['Done']=function(doc,cdt,cdn){
+cur_frm.cscript.done=function(doc,cdt,cdn){
   var mydoc=doc;
 
   if(doc.employee && doc.fiscal_year && doc.metro && doc.sr_citizen && doc.part_sr_citizen && doc.basic && doc.gross_income){

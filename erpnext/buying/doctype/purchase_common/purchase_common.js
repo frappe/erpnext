@@ -287,11 +287,11 @@ cur_frm.cscript.validate = function(doc, cdt, cdn) {
 
 // **************** RE-CALCULATE VALUES ***************************
 
-cur_frm.cscript['Re-Calculate Values'] = function(doc, cdt, cdn) {
-	cur_frm.cscript['Calculate Tax'](doc,cdt,cdn);
+cur_frm.cscript.recalculate_values = function(doc, cdt, cdn) {
+	cur_frm.cscript.calculate_tax(doc,cdt,cdn);
 }
 
-cur_frm.cscript['Calculate Tax'] = function(doc, cdt, cdn) {
+cur_frm.cscript.calculate_tax = function(doc, cdt, cdn) {
 	var other_fname	= cur_frm.cscript.other_fname;
 
 	var cl = getchildren('Purchase Taxes and Charges', doc.name, other_fname, doc.doctype);
