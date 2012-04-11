@@ -32,12 +32,12 @@ cur_frm.cscript.onload = function(doc,dt,dn){
 cur_frm.cscript.refresh = function(doc,dt,dn){  
   
 	if(doc.__islocal){
-		hide_field(['Address HTML','Contact HTML']);
+		hide_field(['address_html', 'contact_html']);
 		//cur_frm.cscript.set_cl_msg(doc);
 		//cur_frm.cscript.set_hl_msg(doc);		
 	}
 	else{
-		unhide_field(['Address HTML','Contact HTML']);
+		unhide_field(['address_html', 'contact_html']);
 		// make lists
 		cur_frm.cscript.make_address(doc,dt,dn);
 		cur_frm.cscript.make_contact(doc,dt,dn);
@@ -49,7 +49,7 @@ cur_frm.cscript.refresh = function(doc,dt,dn){
 cur_frm.cscript.make_address = function() {
 	if(!cur_frm.address_list) {
 		cur_frm.address_list = new wn.ui.Listing({
-			parent: cur_frm.fields_dict['Address HTML'].wrapper,
+			parent: cur_frm.fields_dict['address_html'].wrapper,
 			page_length: 2,
 			new_doctype: "Address",			
 			get_query: function() {
@@ -73,7 +73,7 @@ cur_frm.cscript.make_address = function() {
 cur_frm.cscript.make_contact = function() {
 	if(!cur_frm.contact_list) {
 		cur_frm.contact_list = new wn.ui.Listing({
-			parent: cur_frm.fields_dict['Contact HTML'].wrapper,
+			parent: cur_frm.fields_dict['contact_html'].wrapper,
 			page_length: 2,
 			new_doctype: "Contact",
 			get_query: function() {
