@@ -917,14 +917,15 @@ div.dialog_wrapper {
 	display: none;
 	z-index: 90;
 	background-color: #FFF;
-	border: 3px solid #222;
-	box-shadow:1px 1px 5px #777;
-	-moz-box-shadow: 1px 1px 5px #777;
-	-webkit-box-shadow: 1px 1px 5px #777;
+	box-shadow:1px 1px 8px #444;
+	-moz-box-shadow: 1px 1px 8px #444;
+	-webkit-box-shadow: 1px 1px 8px #444;
 	
 	border-radius: 5px;
 	-moz-border-radius: 5px;
-	-webkit-border-radius: 5px;	
+	-webkit-border-radius: 5px;
+	
+	overflow: hidden;
 }
 
 div.dialog_head {
@@ -948,7 +949,7 @@ div.dialog_back {
 	left: 0px;
 	bottom: 0px;
 	right: 0px;
-	background-color: #EEE;
+	background-color: #aaa;
 	opacity: 0.6;
 	z-index: 50;
 	text-align: center;
@@ -1738,6 +1739,7 @@ div.appframe-titlebar {
 	background: linear-gradient(top,  #eeeeee 0%,#cccccc 100%); /* W3C */
 	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#eeeeee', endColorstr='#cccccc',GradientType=0 ); /* IE6-9 */
 	border-bottom: 1px solid #ccc;
+	min-height: 1.2em;
 }
 
 div.appframe-toolbar {
