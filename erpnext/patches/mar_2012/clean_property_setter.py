@@ -6,8 +6,34 @@ def execute():
 		* Remove docfield property setters if fieldname doesn't exist
 		* Remove prev_field properties if value fieldname doesn't exist
 	"""
+	change_property_setter_fieldnames()
 	clean_doctype_properties()
 	clean_docfield_properties()
+
+def change_property_setter_fieldnames():
+	import webnotes.model.sync
+	webnotes.model.sync.sync('core', 'property_setter')
+	docfield_list = webnotes.conn.sql("""\
+		SELECT name, fieldname FROM `tabDocField`""", as_list=1)
+	custom_field_list = webnotes.conn.sql("""\
+		SELECT name, fieldname FROM `tabCustom Field`""", as_list=1)
+	field_list = docfield_list + custom_field_list
+	property_setter_list = webnotes.conn.sql("""\
+		SELECT name, doc_name, value, property
+		FROM `tabProperty Setter`
+		WHERE doctype_or_field='DocField'""")
+	field_dict = dict(field_list)
+	for name, doc_name, value, prop in property_setter_list:
+		if doc_name in field_dict:
+			webnotes.conn.sql("""\
+				UPDATE `tabProperty Setter`
+				SET field_name = %s
+				WHERE name = %s""", (field_dict.get(doc_name), name))
+		if value in field_dict and prop=='previous_field':
+			webnotes.conn.sql("""\
+				UPDATE `tabProperty Setter`
+				SET value = %s
+				WHERE name = %s""", (field_dict.get(value), name))
 
 def clean_doctype_properties():
 	desc = webnotes.conn.sql("DESC `tabDocType`", as_dict=1)

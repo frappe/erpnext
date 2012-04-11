@@ -466,14 +466,14 @@ cur_frm.cscript.calc_other_charges = function(doc , tname , fname , other_fname)
 	doc = locals[doc.doctype][doc.name];
 
 	// Make Display Area
-	cur_frm.fields_dict['Taxes and Charges Calculation'].disp_area.innerHTML =
+	cur_frm.fields_dict['other_charges_calculation'].disp_area.innerHTML =
 		'<b style="padding: 8px 0px;">Calculation Details for Taxes and Charges:</b>';
 
 	var cl = getchildren(tname, doc.name, fname);
 	var tax = getchildren('Sales Taxes and Charges', doc.name, other_fname,doc.doctype);
 	
 	// Make display table
-	var otc = make_table(cur_frm.fields_dict['Taxes and Charges Calculation'].disp_area,
+	var otc = make_table(cur_frm.fields_dict['other_charges_calculation'].disp_area,
 		cl.length + 1, tax.length + 1, '90%', [], { border:'1px solid #AAA', padding:'2px' });
 	$y(otc,{marginTop:'8px'});
 
