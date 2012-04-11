@@ -5,8 +5,8 @@
 // make history list body
 // -----------------------
 cur_frm.cscript.make_hl_body = function(){
-	cur_frm.fields_dict['History HTML'].wrapper.innerHTML = '';
-	cur_frm.history_html = $a(cur_frm.fields_dict['History HTML'].wrapper,'div');
+	cur_frm.fields_dict['history_html'].wrapper.innerHTML = '';
+	cur_frm.history_html = $a(cur_frm.fields_dict['history_html'].wrapper,'div');
 }
 
 
