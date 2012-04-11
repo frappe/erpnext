@@ -359,9 +359,11 @@ wn.views.add_list_btn=function(parent,doctype){$(parent).append(repl('<span clas
 wn.provide('wn.views.doclistview');wn.provide('wn.doclistviews');wn.views.doclistview.pages={};wn.views.doclistview.show=function(doctype){var pagename=doctype+' List';var doctype=get_label_doctype(doctype);wn.model.with_doctype(doctype,function(){var page=wn.views.doclistview.pages[pagename];if(!page){var page=wn.container.add_page(pagename);page.doclistview=new wn.views.DocListView(doctype,page);wn.views.doclistview.pages[pagename]=page;}
 document.title=page.doclistview.label;wn.container.change_to(pagename);})}
 wn.views.DocListView=wn.ui.Listing.extend({init:function(doctype,page){this.doctype=doctype;this.$page=$(page);this.label=get_doctype_label(doctype);this.label=(this.label.toLowerCase().substr(-4)=='list')?this.label:(this.label+' List');this.make_page();this.setup();},make_page:function(){var me=this;this.$page.html(repl('<div class="layout-wrapper layout-wrapper-background">\
-   <div class="layout-main-section">\
+   <div class="page-app-bar">\
+    <span class="breadcrumbs-area"></span>\
     <a class="close" onclick="window.history.back();">&times;</a>\
-    <div class="breadcrumbs-area"></div>\
+   </div>\
+   <div class="layout-main-section">\
     <h1>%(label)s</h1>\
     <hr>\
     <div class="wnlist-area"><div class="help">Loading...</div></div>\
@@ -1605,26 +1607,26 @@ d.cur_frm=f;d.dn=dn;d.table_form=f.meta.istable;f.refresh(dn);d.dialog.show();})
  *	lib/js/legacy/widgets/form/form_header.js
  */
 _f.FrmHeader=Class.extend({init:function(parent,frm){this.buttons={};this.$w=$('<div class="form-header">\
-   <div class="form-header-main">\
+   <div class="page-app-bar">\
     <span class="label-area"></span>\
     <span class="breadcrumb-area"></span>\
     <span class="close">&times;</span>\
    </div>\
-   <div class="form-header-toolbar">\
+   <div class="page-app-toolbar">\
    </div>\
   </div>').appendTo(parent);this.$w.find('.close').click(function(){window.history.back();})},refresh:function(){wn.views.breadcrumbs($(this.$w.find('.breadcrumb-area')),cur_frm.meta.module,cur_frm.meta.name,cur_frm.docname);this.refresh_labels();this.refresh_toolbar();},refresh_labels:function(){var labinfo={0:['Draft',''],1:['Submitted','label-info'],2:['Cancelled','label-important']}[cint(cur_frm.doc.docstatus)];if(cur_frm.doc.__unsaved){labinfo[1]='label-warning'}
 this.$w.find('.label-area').html(repl('<span class="label %(lab_class)s">\
-   %(lab_status)s</span>',{lab_status:labinfo[0],lab_class:labinfo[1]}));},refresh_toolbar:function(){this.$w.find('.form-header-toolbar').empty();var p=cur_frm.get_doc_perms();if(cur_frm.meta.read_only_onload&&!cur_frm.doc.__islocal){if(!cur_frm.editable)
+   %(lab_status)s</span>',{lab_status:labinfo[0],lab_class:labinfo[1]}));},refresh_toolbar:function(){this.$w.find('.page-app-toolbar').empty();var p=cur_frm.get_doc_perms();if(cur_frm.meta.read_only_onload&&!cur_frm.doc.__islocal){if(!cur_frm.editable)
 this.add_button('Edit',function(){cur_frm.edit_doc();},'icon-pencil');else
 this.add_button('Print View',function(){cur_frm.is_editable[cur_frm.docname]=0;cur_frm.refresh();},'icon-print');}
-var docstatus=cint(cur_frm.doc.docstatus);if(docstatus==0&&p[WRITE]){this.add_button('Save',function(){cur_frm.save('Save');},'');this.buttons['Save'].addClass('btn-primary');}
+var docstatus=cint(cur_frm.doc.docstatus);if(docstatus==0&&p[WRITE]){this.add_button('Save',function(){cur_frm.save('Save');},'');this.buttons['Save'].addClass('btn-info');}
 if(docstatus==0&&p[SUBMIT]&&(!cur_frm.doc.__islocal))
 this.add_button('Submit',function(){cur_frm.savesubmit();},'icon-lock');if(docstatus==1&&p[SUBMIT]){this.add_button('Update',function(){cur_frm.savesubmit();},'');if(!cur_frm.doc.__unsaved)this.buttons['Update'].toggle(false);}
 if(docstatus==1&&p[CANCEL])
 this.add_button('Cancel',function(){cur_frm.savecancel()},'icon-remove');if(docstatus==2&&p[AMEND])
 this.add_button('Amend',function(){cur_frm.amend_doc()},'icon-pencil');},add_button:function(label,click,icon){args={label:label,icon:''};if(icon){args.icon='<i class="'+icon+'"></i>';}
 this.buttons[label]=$(repl('<button class="btn btn-small">\
-   %(icon)s %(label)s</button>',args)).click(click).appendTo(this.$w.find('.form-header-toolbar'));},show:function(){},hide:function(){},hide_close:function(){this.$w.find('.close').toggle(false);}})
+   %(icon)s %(label)s</button>',args)).click(click).appendTo(this.$w.find('.page-app-toolbar'));},show:function(){},hide:function(){},hide_close:function(){this.$w.find('.close').toggle(false);}})
 /*
  *	lib/js/legacy/widgets/form/form.js
  */

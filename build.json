@@ -72,6 +72,7 @@
 			"lib/css/legacy/sidebar.css",
 			"lib/css/Aristo/aristo.selected.css",
 			"lib/css/ui/list.css",
+			"lib/css/ui/views.css",
 			"lib/css/ui/fonts.css",
 			"lib/css/bootstrap/headings.css",
 			"lib/css/bootstrap/buttons.css",
