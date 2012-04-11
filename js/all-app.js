@@ -359,10 +359,7 @@ wn.views.add_list_btn=function(parent,doctype){$(parent).append(repl('<span clas
 wn.provide('wn.views.doclistview');wn.provide('wn.doclistviews');wn.views.doclistview.pages={};wn.views.doclistview.show=function(doctype){var pagename=doctype+' List';var doctype=get_label_doctype(doctype);wn.model.with_doctype(doctype,function(){var page=wn.views.doclistview.pages[pagename];if(!page){var page=wn.container.add_page(pagename);page.doclistview=new wn.views.DocListView(doctype,page);wn.views.doclistview.pages[pagename]=page;}
 document.title=page.doclistview.label;wn.container.change_to(pagename);})}
 wn.views.DocListView=wn.ui.Listing.extend({init:function(doctype,page){this.doctype=doctype;this.$page=$(page);this.label=get_doctype_label(doctype);this.label=(this.label.toLowerCase().substr(-4)=='list')?this.label:(this.label+' List');this.make_page();this.setup();},make_page:function(){var me=this;this.$page.html(repl('<div class="layout-wrapper layout-wrapper-background">\
-   <div class="page-app-bar">\
-    <span class="breadcrumbs-area"></span>\
-    <a class="close" onclick="window.history.back();">&times;</a>\
-   </div>\
+   <div class="appframe-area"></div>\
    <div class="layout-main-section">\
     <h1>%(label)s</h1>\
     <hr>\
@@ -377,7 +374,7 @@ wn.views.DocListView=wn.ui.Listing.extend({init:function(doctype,page){this.doct
     </div>\
    </div>\
    <div style="clear: both"></div>\
-  </div>',{label:this.label}));wn.views.breadcrumbs(this.$page.find('.breadcrumbs-area').get(0),locals.DocType[this.doctype].module);},setup:function(){var me=this;me.can_delete=wn.model.can_delete(me.doctype);me.meta=locals.DocType[me.doctype];me.$page.find('.wnlist-area').empty(),me.setup_docstatus_filter();me.setup_listview();me.init_list();me.init_stats();me.add_delete_option();},setup_docstatus_filter:function(){var me=this;this.can_submit=$.map(locals.DocPerm,function(d){if(d.parent==me.meta.name&&d.submit)return 1
+  </div>',{label:this.label}));this.appframe=new wn.views.AppFrame(this.$page.find('.appframe-area'));wn.views.breadcrumbs($('<span>').appendTo(this.appframe.$titlebar),locals.DocType[this.doctype].module);},setup:function(){var me=this;me.can_delete=wn.model.can_delete(me.doctype);me.meta=locals.DocType[me.doctype];me.$page.find('.wnlist-area').empty(),me.setup_docstatus_filter();me.setup_listview();me.init_list();me.init_stats();me.add_delete_option();},setup_docstatus_filter:function(){var me=this;this.can_submit=$.map(locals.DocPerm,function(d){if(d.parent==me.meta.name&&d.submit)return 1
 else return null;}).length;if(this.can_submit){this.$page.find('.show-docstatus').removeClass('hide');this.$page.find('.show-docstatus input').click(function(){me.run();})}},setup_listview:function(){if(this.meta.__listjs){eval(this.meta.__listjs);this.listview=new wn.doclistviews[this.doctype](this);}else{this.listview=new wn.views.ListView(this);}
 this.listview.parent=this;},init_list:function(){this.make({method:'webnotes.widgets.doclistview.get',get_args:this.get_args,parent:this.$page.find('.wnlist-area'),start:0,page_length:20,show_filters:true,show_grid:true,new_doctype:this.doctype,allow_delete:true,no_result_message:this.make_no_result(),columns:this.listview.fields});this.run();},make_no_result:function(){return repl('<div class="well"><p>No %(doctype_label)s found</p>\
   %(description)s\
@@ -916,6 +913,15 @@ if(frm){f.frm=frm;if(parent)
 f.layout_cell=parent.parentNode;}
 if(f.init)f.init();f.make_body();return f;}
 /*
+ *	lib/js/wn/views/appframe.js
+ */
+wn.views.AppFrame=Class.extend({init:function(parent){this.buttons={};this.$w=$('<div></div>').appendTo(parent);this.$titlebar=$('<div class="appframe-titlebar">\
+    <span class="close">&times;</span>\
+   </div>').appendTo(this.$w);this.$w.find('.close').click(function(){window.history.back();})},add_button:function(label,click,icon){if(!this.$w.find('.appframe-toolbar').length)
+this.$w.append('<div class="appframe-toolbar"></div>');args={label:label,icon:''};if(icon){args.icon='<i class="'+icon+'"></i>';}
+this.buttons[label]=$(repl('<button class="btn btn-small">\
+   %(icon)s %(label)s</button>',args)).click(click).appendTo(this.$w.find('.appframe-toolbar'));},clear_buttons:function(){this.$w.find('.appframe-toolbar').empty();}})
+/*
  *	lib/js/wn/ui/dialog.js
  */
 wn.widgets.FieldGroup=function(){this.first_button=false;this.make_fields=function(body,fl){$y(this.body,{padding:'11px'});this.fields_dict={};for(var i=0;i<fl.length;i++){var df=fl[i];var div=$a(body,'div','',{margin:'6px 0px'})
@@ -1173,7 +1179,7 @@ function upload_callback(id,fid){uploaders[id].callback(fid);}
  *	lib/js/legacy/wn/page_layout.js
  */
 wn.PageLayout=function(args){$.extend(this,args)
-this.wrapper=$a(this.parent,'div','layout-wrapper layout-wrapper-background');this.head=$a(this.wrapper,'div');this.main=$a(this.wrapper,'div','layout-main-section');this.sidebar_area=$a(this.wrapper,'div','layout-side-section');$a(this.wrapper,'div','',{clear:'both'});this.toolbar_area=$a(this.main,'div');this.body=$a(this.main,'div');this.footer=$a(this.main,'div');if(this.heading){this.page_head=new PageHeader(this.head,this.heading);}}
+this.wrapper=$a(this.parent,'div','layout-wrapper layout-wrapper-background');this.head=$a(this.wrapper,'div');this.main=$a(this.wrapper,'div','layout-main-section');this.sidebar_area=$a(this.wrapper,'div','layout-side-section');$a(this.wrapper,'div','',{clear:'both'});this.main_head=$a(this.main,'div','form-title');this.body=$a(this.main,'div');this.footer=$a(this.main,'div');if(this.heading){this.page_head=new PageHeader(this.head,this.heading);}}
 /*
  *	lib/js/legacy/wn/widgets/page_sidebar.js
  */
@@ -1606,27 +1612,19 @@ d.cur_frm=f;d.dn=dn;d.table_form=f.meta.istable;f.refresh(dn);d.dialog.show();})
 /*
  *	lib/js/legacy/widgets/form/form_header.js
  */
-_f.FrmHeader=Class.extend({init:function(parent,frm){this.buttons={};this.$w=$('<div class="form-header">\
-   <div class="page-app-bar">\
-    <span class="label-area"></span>\
-    <span class="breadcrumb-area"></span>\
-    <span class="close">&times;</span>\
-   </div>\
-   <div class="page-app-toolbar">\
-   </div>\
-  </div>').appendTo(parent);this.$w.find('.close').click(function(){window.history.back();})},refresh:function(){wn.views.breadcrumbs($(this.$w.find('.breadcrumb-area')),cur_frm.meta.module,cur_frm.meta.name,cur_frm.docname);this.refresh_labels();this.refresh_toolbar();},refresh_labels:function(){var labinfo={0:['Draft',''],1:['Submitted','label-info'],2:['Cancelled','label-important']}[cint(cur_frm.doc.docstatus)];if(cur_frm.doc.__unsaved){labinfo[1]='label-warning'}
+_f.FrmHeader=Class.extend({init:function(parent,frm){this.appframe=new wn.views.AppFrame(parent)
+this.appframe.$titlebar.append('<span class="label-area"></span>\
+    <span class="breadcrumb-area"></span>');this.$w=this.appframe.$w;},refresh:function(){wn.views.breadcrumbs($(this.$w.find('.breadcrumb-area')),cur_frm.meta.module,cur_frm.meta.name,cur_frm.docname);this.refresh_labels();this.refresh_toolbar();},refresh_labels:function(){var labinfo={0:['Draft',''],1:['Submitted','label-info'],2:['Cancelled','label-important']}[cint(cur_frm.doc.docstatus)];if(cur_frm.doc.__unsaved){labinfo[1]='label-warning'}
 this.$w.find('.label-area').html(repl('<span class="label %(lab_class)s">\
-   %(lab_status)s</span>',{lab_status:labinfo[0],lab_class:labinfo[1]}));},refresh_toolbar:function(){this.$w.find('.page-app-toolbar').empty();var p=cur_frm.get_doc_perms();if(cur_frm.meta.read_only_onload&&!cur_frm.doc.__islocal){if(!cur_frm.editable)
-this.add_button('Edit',function(){cur_frm.edit_doc();},'icon-pencil');else
-this.add_button('Print View',function(){cur_frm.is_editable[cur_frm.docname]=0;cur_frm.refresh();},'icon-print');}
-var docstatus=cint(cur_frm.doc.docstatus);if(docstatus==0&&p[WRITE]){this.add_button('Save',function(){cur_frm.save('Save');},'');this.buttons['Save'].addClass('btn-info');}
+   %(lab_status)s</span>',{lab_status:labinfo[0],lab_class:labinfo[1]}));},refresh_toolbar:function(){this.appframe.clear_buttons();var p=cur_frm.get_doc_perms();if(cur_frm.meta.read_only_onload&&!cur_frm.doc.__islocal){if(!cur_frm.editable)
+this.appframe.add_button('Edit',function(){cur_frm.edit_doc();},'icon-pencil');else
+this.appframe.add_button('Print View',function(){cur_frm.is_editable[cur_frm.docname]=0;cur_frm.refresh();},'icon-print');}
+var docstatus=cint(cur_frm.doc.docstatus);if(docstatus==0&&p[WRITE]){this.appframe.add_button('Save',function(){cur_frm.save('Save');},'');this.appframe.buttons['Save'].addClass('btn-info');}
 if(docstatus==0&&p[SUBMIT]&&(!cur_frm.doc.__islocal))
-this.add_button('Submit',function(){cur_frm.savesubmit();},'icon-lock');if(docstatus==1&&p[SUBMIT]){this.add_button('Update',function(){cur_frm.savesubmit();},'');if(!cur_frm.doc.__unsaved)this.buttons['Update'].toggle(false);}
+this.appframe.add_button('Submit',function(){cur_frm.savesubmit();},'icon-lock');if(docstatus==1&&p[SUBMIT]){this.appframe.add_button('Update',function(){cur_frm.savesubmit();},'');if(!cur_frm.doc.__unsaved)this.appframe.buttons['Update'].toggle(false);}
 if(docstatus==1&&p[CANCEL])
-this.add_button('Cancel',function(){cur_frm.savecancel()},'icon-remove');if(docstatus==2&&p[AMEND])
-this.add_button('Amend',function(){cur_frm.amend_doc()},'icon-pencil');},add_button:function(label,click,icon){args={label:label,icon:''};if(icon){args.icon='<i class="'+icon+'"></i>';}
-this.buttons[label]=$(repl('<button class="btn btn-small">\
-   %(icon)s %(label)s</button>',args)).click(click).appendTo(this.$w.find('.page-app-toolbar'));},show:function(){},hide:function(){},hide_close:function(){this.$w.find('.close').toggle(false);}})
+this.appframe.add_button('Cancel',function(){cur_frm.savecancel()},'icon-remove');if(docstatus==2&&p[AMEND])
+this.appframe.add_button('Amend',function(){cur_frm.amend_doc()},'icon-pencil');},show:function(){},hide:function(){},hide_close:function(){this.$w.find('.close').toggle(false);}})
 /*
  *	lib/js/legacy/widgets/form/form.js
  */
@@ -1640,8 +1638,8 @@ _f.Frm.prototype.setup_print_layout=function(){this.print_wrapper=$a(this.wrappe
 _f.Frm.prototype.onhide=function(){if(_f.cur_grid_cell)_f.cur_grid_cell.grid.cell_deselect();}
 _f.Frm.prototype.setup_std_layout=function(){this.page_layout=new wn.PageLayout({parent:this.wrapper,main_width:this.meta.in_dialog?'100%':'75%',sidebar_width:this.meta.in_dialog?'0%':'25%'})
 this.meta.section_style='Simple';this.layout=new Layout(this.page_layout.body,'100%');if(this.meta.in_dialog){$(this.page_layout.wrapper).removeClass('layout-wrapper-background');$(this.page_layout.main).removeClass('layout-main-section');$(this.page_layout.sidebar_area).toggle(false);}else{this.setup_sidebar();}
-this.setup_footer();if(!(this.meta.istable||user=='Guest'))
-this.frm_head=new _f.FrmHeader(this.page_layout.head,this);if(this.frm_head&&this.meta.in_dialog)this.frm_head.hide_close();if(this.meta.colour)
+this.setup_footer();if(!(this.meta.istable||user=='Guest'||this.meta.in_dialog))
+this.frm_head=new _f.FrmHeader(this.page_layout.head,this);if(this.meta.colour)
 this.layout.wrapper.style.backgroundColor='#'+this.meta.colour.split(':')[1];this.setup_fields_std();}
 _f.Frm.prototype.setup_print=function(){var l=[]
 this.default_format='Standard';for(var key in locals['Print Format']){if(locals['Print Format'][key].doc_type==this.meta.name){l.push(locals['Print Format'][key].name);}}
@@ -1682,7 +1680,8 @@ _f.Frm.prototype.defocus_rest=function(){if(_f.cur_grid_cell)_f.cur_grid_cell.gr
 _f.Frm.prototype.get_doc_perms=function(){var p=[0,0,0,0,0,0];for(var i=0;i<this.perm.length;i++){if(this.perm[i]){if(this.perm[i][READ])p[READ]=1;if(this.perm[i][WRITE])p[WRITE]=1;if(this.perm[i][SUBMIT])p[SUBMIT]=1;if(this.perm[i][CANCEL])p[CANCEL]=1;if(this.perm[i][AMEND])p[AMEND]=1;}}
 return p;}
 _f.Frm.prototype.refresh_header=function(){if(!this.meta.in_dialog){set_title(this.meta.issingle?this.doctype:this.docname);}
-if(this.frm_head)this.frm_head.refresh();if(wn.ui.toolbar.recent)wn.ui.toolbar.recent.add(this.doctype,this.docname,1);}
+this.page_layout.main_head.innerHTML='<h2>'+this.docname+'</h2>';if(this.frm_head)this.frm_head.refresh();if(wn.ui.toolbar.recent)
+wn.ui.toolbar.recent.add(this.doctype,this.docname,1);}
 _f.Frm.prototype.check_doc_perm=function(){var dt=this.parent_doctype?this.parent_doctype:this.doctype;var dn=this.parent_docname?this.parent_docname:this.docname;this.perm=get_perm(dt,dn);this.orig_perm=get_perm(dt,dn,1);if(!this.perm[0][READ]){if(user=='Guest'){if(_f.temp_access[dt]&&_f.temp_access[dt][dn]){this.perm=[[1,0,0]]
 return 1;}}
 window.back();return 0;}
@@ -1774,7 +1773,7 @@ _f.SectionBreak=function(){this.fields=[];this.set_input=function(){};this.make_
 _f.SectionBreak.prototype.make_body=function(){var me=this;if((!this.perm[this.df.permlevel])||(!this.perm[this.df.permlevel][READ])||this.df.hidden){return;}
 this.make_row();if(this.df.label){if(!this.df.description)
 this.df.description='';$(this.row.main_head).html(repl('<div class="form-section-head">\
-    <h2 class="head">%(label)s</h2>\
+    <h3 class="head">%(label)s</h3>\
     <div class="help small" \
      style="margin-top: 4px; margin-bottom: 8px;">%(description)s</div>\
    </div>',this.df));}else{$(this.wrapper).html('<div class="form-section-head"></div>');}

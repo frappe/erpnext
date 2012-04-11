@@ -131,6 +131,7 @@
 			"lib/js/legacy/utils/msgprint.js",
 			"lib/js/legacy/utils/printElement.js",
 			"lib/js/legacy/widgets/form/fields.js",
+			"lib/js/wn/views/appframe.js",
 			"lib/js/wn/ui/dialog.js",
 			"lib/js/wn/ui/button.js",
 			"lib/js/legacy/widgets/dialog.js",

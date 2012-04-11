@@ -169,7 +169,7 @@ div.loading_div {
 }
 
 div.std-footer {
-	margin: 13px 0px;
+	margin: 13px -15px;
 	border-top: 1px solid #AAA;
 	padding: 13px;
 }

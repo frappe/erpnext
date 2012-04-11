@@ -169,7 +169,7 @@ div.loading_div {
 }
 
 div.std-footer {
-	margin: 13px 0px;
+	margin: 13px -15px;
 	border-top: 1px solid #AAA;
 	padding: 13px;
 }
@@ -328,6 +328,13 @@ div.notice {
  */
 /* FORMS */
 
+div.form-title {
+	/*background-color: #e0eeff;*/
+	padding: 5px 11px 15px 11px;
+	margin: -15px -15px 0px -15px;
+	border-bottom: 1px solid #eee;
+}
+
 div.form-section-head {
 	margin: 11px -15px 3px -15px;
 	border-top: 1px solid #ccc;
@@ -337,7 +344,7 @@ div.form-section-head {
 div.form-layout-row:first-child .form-section-head {
 	border-top: 0px solid #ccc !important;
 	margin-top: 0px;
-	padding-top: 0px;
+	padding-top: 15px;
 }
 
 div.form-section-head h3 {
@@ -1712,10 +1719,6 @@ div.stat-bar {
 /*
  *	lib/css/ui/views.css
  */
-.breadcrumbs-area {
-	margin-bottom: 8px;
-}
-
 .breadcrumbs {
 	color: #000000;
 }
@@ -1724,7 +1727,7 @@ div.stat-bar {
 	color: #000000;
 }
 
-div.page-app-bar {
+div.appframe-titlebar {
 	padding: 6px;
 	background: #eeeeee; /* Old browsers */
 	background: -moz-linear-gradient(top,  #eeeeee 0%, #cccccc 100%); /* FF3.6+ */
@@ -1736,7 +1739,8 @@ div.page-app-bar {
 	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#eeeeee', endColorstr='#cccccc',GradientType=0 ); /* IE6-9 */
 	border-bottom: 1px solid #ccc;
 }
-div.page-app-toolbar {
+
+div.appframe-toolbar {
 	padding: 4px;
 	background: #eeeeee;
 	border-top: 1px solid #f8f8f8;
