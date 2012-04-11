@@ -151,7 +151,11 @@ def rename_in_db(ren_data, data_type, is_doctype):
 def update_dt_in_records(rendt):
 	for d in rendt:
 		# Feed, property setter, search criteria, gl mapper, form 16A, naming series options, doclayer - dodtype is not mentioed in options
-		dt_list = webnotes.conn.sql("select t1.parent, t1.fieldname from tabDocField t1, tabDocType t2 where t1.parent = t2.name and t1.fieldname in ('dt', 'doctype', 'doc_type', 'dt_type') and ifnull(t1.options, '') = '' and ifnull(t2.issingle, 0) = 0 and t1.parent in ('Custom Field', 'Custom Script')")
+		dt_list = webnotes.conn.sql("""select t1.parent, t1.fieldname from
+			tabDocField t1, tabDocType t2 where t1.parent = t2.name and
+			t1.fieldname in ('dt', 'doctype', 'doc_type', 'dt_type') and
+			ifnull(t1.options, '') = '' and ifnull(t2.issingle, 0) = 0 and
+			t1.parent in ('Custom Field', 'Custom Script', 'Property Setter')""")
 		for dt in dt_list:
 			webnotes.conn.sql("update `tab%s` set %s = replace(%s, '%s', '%s') where %s = '%s'" % (dt[0], dt[1], dt[1], d, rendt[d], dt[1], d))
 
