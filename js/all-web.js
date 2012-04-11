@@ -246,9 +246,11 @@ wn.views.add_list_btn=function(parent,doctype){$(parent).append(repl('<span clas
 wn.provide('wn.views.doclistview');wn.provide('wn.doclistviews');wn.views.doclistview.pages={};wn.views.doclistview.show=function(doctype){var pagename=doctype+' List';var doctype=get_label_doctype(doctype);wn.model.with_doctype(doctype,function(){var page=wn.views.doclistview.pages[pagename];if(!page){var page=wn.container.add_page(pagename);page.doclistview=new wn.views.DocListView(doctype,page);wn.views.doclistview.pages[pagename]=page;}
 document.title=page.doclistview.label;wn.container.change_to(pagename);})}
 wn.views.DocListView=wn.ui.Listing.extend({init:function(doctype,page){this.doctype=doctype;this.$page=$(page);this.label=get_doctype_label(doctype);this.label=(this.label.toLowerCase().substr(-4)=='list')?this.label:(this.label+' List');this.make_page();this.setup();},make_page:function(){var me=this;this.$page.html(repl('<div class="layout-wrapper layout-wrapper-background">\
-   <div class="layout-main-section">\
+   <div class="page-app-bar">\
+    <span class="breadcrumbs-area"></span>\
     <a class="close" onclick="window.history.back();">&times;</a>\
-    <div class="breadcrumbs-area"></div>\
+   </div>\
+   <div class="layout-main-section">\
     <h1>%(label)s</h1>\
     <hr>\
     <div class="wnlist-area"><div class="help">Loading...</div></div>\
