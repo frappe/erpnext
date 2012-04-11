@@ -196,6 +196,11 @@ div.std-footer-item {
 	box-shadow: 0px 0px 6px rgba(0,0,0,0.3);
 	background-color: #fff;
 	padding: 15px;
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	border-radius: 5px;	
+	margin-bottom: 30px;
+	overflow: hidden;
 }
 
 .layout-wrapper-background {
@@ -209,9 +214,9 @@ div.std-footer-item {
 	padding: 15px;
 	background-color: #FFF;
 	min-height: 600px;
-	-moz-box-shadow:    7px 0px 6px -2px #ddd;
-	-webkit-box-shadow: 7px 0px 6px -2px #ddd;
-	box-shadow:         7px 0px 6px -2px #ddd;
+	-moz-box-shadow:    4px 0px 3px #ddd;
+	-webkit-box-shadow: 4px 0px 3px #ddd;
+	box-shadow:         4px 0px 3px #ddd;
 }
 
 .layout-side-section {
@@ -328,23 +333,42 @@ div.notice {
 }
 
 .breadcrumbs {
-	background-color: #e8e8e8;
-	padding: 3px;
-	border-radius: 3px;
+	color: #000000;
 }
 
 .breadcrumbs a {
 	color: #000000;
 }
 
+div.form-header-main {
+	padding: 6px;
+	background: #eeeeee; /* Old browsers */
+	background: -moz-linear-gradient(top,  #eeeeee 0%, #cccccc 100%); /* FF3.6+ */
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#eeeeee), color-stop(100%,#cccccc)); /* Chrome,Safari4+ */
+	background: -webkit-linear-gradient(top,  #eeeeee 0%,#cccccc 100%); /* Chrome10+,Safari5.1+ */
+	background: -o-linear-gradient(top,  #eeeeee 0%,#cccccc 100%); /* Opera 11.10+ */
+	background: -ms-linear-gradient(top,  #eeeeee 0%,#cccccc 100%); /* IE10+ */
+	background: linear-gradient(top,  #eeeeee 0%,#cccccc 100%); /* W3C */
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#eeeeee', endColorstr='#cccccc',GradientType=0 ); /* IE6-9 */
+	border-bottom: 1px solid #ccc;
+}
+div.form-header-toolbar {
+	padding: 4px;
+	background: #eeeeee;
+	border-top: 1px solid #f8f8f8;
+	border-bottom: 1px solid #ccc;
+}
+
 div.form-section-head {
-	margin: 11px 0px 3px 0px;
+	margin: 11px -15px 3px -15px;
 	border-top: 1px solid #ccc;
-	padding-top: 11px;
+	padding: 11px 15px 0px 15px;
 }
 
 div.form-layout-row:first-child .form-section-head {
-	border-top: 0px solid #ccc !important;	
+	border-top: 0px solid #ccc !important;
+	margin-top: 0px;
+	padding-top: 0px;
 }
 
 div.form-section-head h3 {
@@ -1760,6 +1784,14 @@ div.stat-bar {
   font-weight: 400;
   src: local('Cabin Regular'), local('Cabin-Regular'), url('../lib/css/fonts/cabin.woff') format('woff');
 }
+
+@font-face {
+  font-family: 'Pacifico';
+  font-style: normal;
+  font-weight: normal;
+  src: local('Pacifico Regular'), local('Pacifico-Regular'), url('../lib/css/fonts/pacifico.woff') format('woff');
+}
+
 
 
 /*

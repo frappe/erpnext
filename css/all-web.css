@@ -196,6 +196,11 @@ div.std-footer-item {
 	box-shadow: 0px 0px 6px rgba(0,0,0,0.3);
 	background-color: #fff;
 	padding: 15px;
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	border-radius: 5px;	
+	margin-bottom: 30px;
+	overflow: hidden;
 }
 
 .layout-wrapper-background {
@@ -209,9 +214,9 @@ div.std-footer-item {
 	padding: 15px;
 	background-color: #FFF;
 	min-height: 600px;
-	-moz-box-shadow:    7px 0px 6px -2px #ddd;
-	-webkit-box-shadow: 7px 0px 6px -2px #ddd;
-	box-shadow:         7px 0px 6px -2px #ddd;
+	-moz-box-shadow:    4px 0px 3px #ddd;
+	-webkit-box-shadow: 4px 0px 3px #ddd;
+	box-shadow:         4px 0px 3px #ddd;
 }
 
 .layout-side-section {
@@ -1640,6 +1645,14 @@ button.btn.small, input[type="submit"].btn.small {
   font-weight: 400;
   src: local('Cabin Regular'), local('Cabin-Regular'), url('../lib/css/fonts/cabin.woff') format('woff');
 }
+
+@font-face {
+  font-family: 'Pacifico';
+  font-style: normal;
+  font-weight: normal;
+  src: local('Pacifico Regular'), local('Pacifico-Regular'), url('../lib/css/fonts/pacifico.woff') format('woff');
+}
+
 
 
 /*
