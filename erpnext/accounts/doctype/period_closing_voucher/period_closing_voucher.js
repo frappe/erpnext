@@ -8,35 +8,35 @@
 // 
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	See the
 // GNU General Public License for more details.
 // 
 // You should have received a copy of the GNU General Public License
-// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+// along with this program.	If not, see <http://www.gnu.org/licenses/>.
 
 
 //========================== On Load =================================================
 cur_frm.cscript.onload = function(doc, cdt, cdn) {
-  if (!doc.transaction_date) doc.transaction_date = dateutil.obj_to_str(new Date());
+	if (!doc.transaction_date) doc.transaction_date = dateutil.obj_to_str(new Date());
 }
 
 cur_frm.cscript.refresh = function(doc, cdt, cdn) {
-hide_field('Repost Account Balances');
-  hide_field('next_fiscal_year');
-  hide_field('Repost');
+	hide_field('repost_account_balances');
+	hide_field('next_fiscal_year');
+	hide_field('repost');
 
-  if (doc.docstatus == 1) { 
-    unhide_field('Repost Account Balances');
-    unhide_field('next_fiscal_year');
-    unhide_field('Repost');
-  }
+	if (doc.docstatus == 1) { 
+		unhide_field('repost_account_balances');
+		unhide_field('next_fiscal_year');
+		unhide_field('repost');
+	}
 }
 
 // ***************** Get Account Head *****************
 cur_frm.fields_dict['closing_account_head'].get_query = function(doc, cdt, cdn) {
-  return 'SELECT `tabAccount`.name FROM `tabAccount` WHERE `tabAccount`.is_pl_account = "No" AND `tabAccount`.debit_or_credit = "Credit" AND `tabAccount`.company = "'+ cstr(doc.company) +'" AND `tabAccount`.freeze_account = "No" AND `tabAccount`.group_or_ledger = "Ledger" AND `tabAccount`.%(key)s LIKE "%s" ORDER BY `tabAccount`.name ASC LIMIT 50';
+	return 'SELECT `tabAccount`.name FROM `tabAccount` WHERE `tabAccount`.is_pl_account = "No" AND `tabAccount`.debit_or_credit = "Credit" AND `tabAccount`.company = "'+ cstr(doc.company) +'" AND `tabAccount`.freeze_account = "No" AND `tabAccount`.group_or_ledger = "Ledger" AND `tabAccount`.%(key)s LIKE "%s" ORDER BY `tabAccount`.name ASC LIMIT 50';
 }
 
 cur_frm.cscript.acc_help = function(doc,dt,dn){
-  show_chart_browser('Accounts Browser','Account');
+	show_chart_browser('Accounts Browser','Account');
 }

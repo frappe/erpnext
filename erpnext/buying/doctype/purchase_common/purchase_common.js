@@ -432,12 +432,12 @@ cur_frm.cscript.calc_other_charges = function(doc , tname , fname , other_fname)
 	// ------------------
 
 	
-	cur_frm.fields_dict['Tax Calculation'].disp_area.innerHTML = '<b style="padding: 8px 0px;">Calculation Details for Taxes, Charges and Landed Cost:</b>';
+	cur_frm.fields_dict['tax_calculation'].disp_area.innerHTML = '<b style="padding: 8px 0px;">Calculation Details for Taxes, Charges and Landed Cost:</b>';
 	var cl = getchildren(tname, doc.name, fname);
 	var tax = getchildren('Purchase Taxes and Charges', doc.name, other_fname,doc.doctype);
 	// make display table
 	// ------------------
-	var otc = make_table(cur_frm.fields_dict['Tax Calculation'].disp_area, cl.length + 1, tax.length + 1, '90%',[],{border:'1px solid #AAA',padding:'2px'});
+	var otc = make_table(cur_frm.fields_dict['tax_calculation'].disp_area, cl.length + 1, tax.length + 1, '90%',[],{border:'1px solid #AAA',padding:'2px'});
 	$y(otc,{marginTop:'8px'});
 	
 	var tax_desc = {}; var tax_desc_rates = []; var net_total = 0;
