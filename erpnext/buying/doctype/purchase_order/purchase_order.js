@@ -81,8 +81,8 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	if(doc.docstatus == 1 && doc.status == 'Stopped')
 		cur_frm.add_custom_button('Unstop Purchase Order', cur_frm.cscript['Unstop Purchase Order']);
 
-	if(doc.docstatus == 1) unhide_field(['Repair Purchase Order']);
-	else hide_field(['Repair Purchase Order']);
+	if(doc.docstatus == 1) unhide_field(['repair_purchase_order']);
+	else hide_field(['repair_purchase_order']);
 }
 
 

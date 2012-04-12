@@ -29,10 +29,10 @@ cur_frm.cscript.onload = function(doc,dt,dn) {
 	if(!doc.posting_date) set_multiple(dt,dn,{posting_date:get_today()});  
 
 	if(cp.country == 'India') {
-		unhide_field(['TDS','tds_applicable','tds_category','Get TDS','tax_code','rate','ded_amount','total_tds_on_voucher','tds_amount_on_advance']);
+		unhide_field(['tds','tds_applicable','tds_category','get_tds','tax_code','rate','ded_amount','total_tds_on_voucher','tds_amount_on_advance']);
 	}
 	else {
-		hide_field(['TDS','tds_applicable','tds_category','Get TDS','tax_code','rate','ded_amount','total_tds_on_voucher','tds_amount_on_advance']);
+		hide_field(['tds','tds_applicable','tds_category','get_tds','tax_code','rate','ded_amount','total_tds_on_voucher','tds_amount_on_advance']);
 	}	
 	
 	if(doc.__islocal){
@@ -69,9 +69,9 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 		cur_frm.add_custom_button('Make Payment Entry', cur_frm.cscript.make_bank_voucher);
 	
 	if(doc.docstatus==1) { 
-		unhide_field(['Repair Outstanding Amt']); 
+		unhide_field(['repair_outstanding_amt']); 
 		cur_frm.add_custom_button('View Ledger', cur_frm.cscript.view_ledger_entry);
-	} else hide_field(['Repair Outstanding Amt']);
+	} else hide_field(['repair_outstanding_amt']);
 	
 	cur_frm.cscript.is_opening(doc, dt, dn);
 }

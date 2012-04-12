@@ -70,9 +70,9 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 		cur_frm.add_custom_button('Unstop ' + cur_frm.cscript.indent_doctype_label, cur_frm.cscript['Unstop Purchase Requisition'])
 		
 	if(doc.docstatus == 1)
-		unhide_field(['Repair Purchase Requisition']);
+		unhide_field(['repair_purchase_requisition']);
 	else
-		hide_field(['Repair Purchase Requisition']);
+		hide_field(['repair_purchase_requisition']);
 }
 
 //======================= validation ===================================

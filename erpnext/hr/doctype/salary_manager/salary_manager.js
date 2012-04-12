@@ -16,7 +16,7 @@
 
 var display_activity_log = function(msg) {
 	if(!pscript.ss_html)
-		pscript.ss_html = $a(cur_frm.fields_dict['Activity Log'].wrapper,'div','',{border:'1px solid #CCC', backgroundColor:'#CCC'});
+		pscript.ss_html = $a(cur_frm.fields_dict['activity_log'].wrapper,'div','',{border:'1px solid #CCC', backgroundColor:'#CCC'});
 	pscript.ss_html.innerHTML = '<div style="color:#EEE; background-color:#555;"><b><i>Activity Log:</i><br></b></div>';
 	pscript.ss_html.innerHTML += '<div style="color:#666; padding: 5px">'+ msg + '</div>';
 }

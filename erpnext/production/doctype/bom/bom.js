@@ -18,9 +18,9 @@
 cur_frm.cscript.refresh = function(doc,dt,dn){
 	if(!doc.__islocal) {
 		set_field_permlevel('item',1);
-		unhide_field('Update Cost as on today');
+		unhide_field('update_cost_as_on_today');
 	} else {
-		hide_field('Update Cost as on today');
+		hide_field('update_cost_as_on_today');
 	}
 }
 

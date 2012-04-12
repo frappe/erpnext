@@ -30,11 +30,11 @@ cur_frm.cscript.onload_post_render = function(doc,cdt,cdn){
 
 cur_frm.cscript.refresh = function(doc,cdt,cdn){
 	if(user == doc.kra_approver && doc.status == 'Submitted') 
-		unhide_field(['Update', 'Declare Completed', 'Calculate Total Score']);
-	else hide_field(['Update', 'Declare Completed', 'Calculate Total Score']);
+		unhide_field(['update', 'declare_completed', 'calculate_total_score']);
+	else hide_field(['update', 'declare_completed', 'calculate_total_score']);
 	
-	if(!doc.docstatus) unhide_field('Fetch Template');
-	else hide_field('Fetch Template');
+	if(!doc.docstatus) unhide_field('fetch_template');
+	else hide_field('fetch_template');
 }
 
 
@@ -119,7 +119,7 @@ cur_frm.cscript.declare_completed = function(doc,cdt,cdn){
 					$i('declare_completed_dialog_response').innerHTML = 'Done';
 					refresh_field('status');
 					declare_completed_dialog.refresh_dt();
-					hide_field(['Update', 'Declare Completed', 'Calculate Total Score']);
+					hide_field(['update', 'declare_completed', 'calculate_total_score']);
 					declare_completed_dialog.hide();
 				}
 				else if(r.message.status == 'Incomplete'){
