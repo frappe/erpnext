@@ -37,18 +37,17 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 	if(doc.__islocal){
 		hide_field(['supplier_name','supplier_address','contact_person','address_display','contact_display','contact_mobile','contact_email']);
 	}
-
 	// defined in purchase_common.js
 	//cur_frm.cscript.update_item_details(doc, cdt, cdn);		
 }
 
-cur_frm.cscript.onload_post_render = function(doc, cdt, cdn) {
-	var callback = function(doc, cdt, cdn) {
+cur_frm.cscript.onload_post_render = function(doc, dt, dn) {
+	var callback = function(doc, dt, dn) {
 		if(doc.__islocal){ 
 			cur_frm.cscript.get_default_schedule_date(doc);
 		}	
 	}
-	cur_frm.cscript.dynamic_label(doc, cdt, cdn, callback);
+	cur_frm.cscript.dynamic_label(doc, dt, dn, callback);
 }
 
 // ================================== Refresh ==========================================

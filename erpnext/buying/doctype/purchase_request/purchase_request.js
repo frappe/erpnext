@@ -19,7 +19,6 @@ cur_frm.cscript.fname = "indent_details";
 
 wn.require('erpnext/buying/doctype/purchase_common/purchase_common.js');
 wn.require('erpnext/utilities/doctype/sms_control/sms_control.js');
-cur_frm.cscript.indent_doctype_label =	get_doctype_label('Purchase Request');
 	
 //========================== On Load =================================================
 cur_frm.cscript.onload = function(doc, cdt, cdn) {
@@ -69,10 +68,6 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	if(doc.docstatus == 1 && doc.status == 'Stopped')
 		cur_frm.add_custom_button('Unstop ' + cur_frm.cscript.indent_doctype_label, cur_frm.cscript['Unstop Purchase Requisition'])
 		
-	if(doc.docstatus == 1)
-		unhide_field(['Repair Purchase Requisition']);
-	else
-		hide_field(['Repair Purchase Requisition']);
 }
 
 //======================= validation ===================================

@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-03-27 14:35:49',
+		'creation': '2012-04-11 13:17:40',
 		'docstatus': 0,
-		'modified': '2012-03-27 14:35:49',
+		'modified': '2012-04-12 14:52:49',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -22,7 +22,7 @@
 		'section_style': u'Tray',
 		'server_code_error': u' ',
 		'show_in_menu': 0,
-		'version': 34
+		'version': 37
 	},
 
 	# These values are common for all DocField
@@ -75,21 +75,6 @@
 	# DocField
 	{
 		'doctype': u'DocField',
-		'fieldname': u'item_name',
-		'fieldtype': u'Data',
-		'in_filter': 1,
-		'label': u'Item Name',
-		'oldfieldname': u'item_name',
-		'oldfieldtype': u'Data',
-		'permlevel': 0,
-		'reqd': 1,
-		'search_index': 1,
-		'width': u'100px'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
 		'fieldname': u'description',
 		'fieldtype': u'Text',
 		'label': u'Description',
@@ -97,7 +82,7 @@
 		'oldfieldtype': u'Text',
 		'permlevel': 0,
 		'reqd': 1,
-		'width': u'300px'
+		'width': u'250px'
 	},
 
 	# DocField
@@ -118,15 +103,61 @@
 
 	# DocField
 	{
+		'colour': u'White:FFF',
+		'default': u'0.00',
 		'doctype': u'DocField',
-		'fieldname': u'brand',
+		'fieldname': u'qty',
+		'fieldtype': u'Currency',
+		'label': u'Quantity',
+		'no_copy': 0,
+		'oldfieldname': u'qty',
+		'oldfieldtype': u'Currency',
+		'permlevel': 0,
+		'reqd': 1,
+		'trigger': u'Client',
+		'width': u'80px'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'uom',
 		'fieldtype': u'Link',
-		'label': u'Brand',
-		'oldfieldname': u'brand',
+		'label': u'Stock UOM',
+		'no_copy': 0,
+		'oldfieldname': u'uom',
 		'oldfieldtype': u'Link',
-		'options': u'Brand',
+		'options': u'UOM',
 		'permlevel': 1,
-		'print_hide': 1,
+		'reqd': 1,
+		'width': u'70px'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'lead_time_date',
+		'fieldtype': u'Date',
+		'label': u'Lead Time Date',
+		'no_copy': 1,
+		'oldfieldname': u'lead_time_date',
+		'oldfieldtype': u'Date',
+		'permlevel': 1,
+		'print_hide': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'item_name',
+		'fieldtype': u'Data',
+		'in_filter': 1,
+		'label': u'Item Name',
+		'oldfieldname': u'item_name',
+		'oldfieldtype': u'Data',
+		'permlevel': 0,
+		'reqd': 1,
+		'search_index': 1,
 		'width': u'100px'
 	},
 
@@ -150,47 +181,16 @@
 
 	# DocField
 	{
-		'colour': u'White:FFF',
-		'default': u'0.00',
 		'doctype': u'DocField',
-		'fieldname': u'qty',
-		'fieldtype': u'Currency',
-		'label': u'Quantity',
-		'no_copy': 0,
-		'oldfieldname': u'qty',
-		'oldfieldtype': u'Currency',
-		'permlevel': 0,
-		'reqd': 1,
-		'trigger': u'Client',
-		'width': u'50px'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'lead_time_date',
-		'fieldtype': u'Date',
-		'label': u'Lead Time Date',
-		'no_copy': 1,
-		'oldfieldname': u'lead_time_date',
-		'oldfieldtype': u'Date',
-		'permlevel': 1,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'uom',
+		'fieldname': u'brand',
 		'fieldtype': u'Link',
-		'label': u'Stock UOM',
-		'no_copy': 0,
-		'oldfieldname': u'uom',
+		'label': u'Brand',
+		'oldfieldname': u'brand',
 		'oldfieldtype': u'Link',
-		'options': u'UOM',
+		'options': u'Brand',
 		'permlevel': 1,
-		'reqd': 1,
-		'width': u'50px'
+		'print_hide': 1,
+		'width': u'100px'
 	},
 
 	# DocField
