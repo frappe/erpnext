@@ -198,14 +198,6 @@ class DocType(TransactionBase):
 			set(self.doc, 'order_lost_reason', arg)
 			return 'true'
 		
-	# ====================================================================================================================	
-	def update_follow_up(self):
-		
-		sql("delete from `tabCommunication Log` where parent = '%s'"%self.doc.name);
-		for d in getlist(self.doclist, 'follow_up'):		
-			d.save()
-		self.doc.save()
-		
 		
 	# On Send Email
 	# ====================================================================================================================

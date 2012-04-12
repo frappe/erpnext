@@ -71,7 +71,7 @@ cur_frm.cscript.onload = function(doc, dt, dn) {
       }
     }
   
-    lst.make(cur_frm.fields_dict['Updates HTML'].wrapper);
+    lst.make(cur_frm.fields_dict['updates_html'].wrapper);
     cur_frm.mylist = lst;
     lst.run();
   }
@@ -81,7 +81,7 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 
   // show activities only after project is saved
 
-  var fl = ['new_update','Add','hours','Updates HTML'];
+  var fl = ['new_update','add','hours','updates_html'];
   if(doc.__islocal) { 
     hide_field(fl);}
   else { 

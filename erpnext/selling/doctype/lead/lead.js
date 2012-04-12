@@ -20,7 +20,15 @@ wn.require('erpnext/utilities/doctype/sms_control/sms_control.js');
 
 cur_frm.cscript.onload = function(doc, cdt, cdn) {
   if(user =='Guest'){
-    hide_field(['status', 'naming_series', 'order_lost_reason', 'customer', 'rating', 'fax', 'website', 'territory', 'TerritoryHelp', 'address_line1', 'address_line2', 'city', 'state', 'country', 'pincode', 'address', 'lead_owner', 'market_segment', 'industry', 'campaign_name', 'interested_in', 'company', 'fiscal_year', 'contact_by', 'contact_date', 'last_contact_date', 'contact_date_ref', 'to_discuss', 'More Info', 'follow_up', 'Communication History', 'cc_to', 'subject', 'message', 'Attachment Html', 'Create New File', 'lead_attachment_detail', 'Send Email', 'Email', 'Create Customer', 'Create Opportunity', 'Next Steps', 'transaction_date', 'type', 'source']);
+    hide_field(['status', 'naming_series', 'order_lost_reason',
+	'customer', 'rating', 'fax', 'website', 'territory',
+	'TerritoryHelp', 'address_line1', 'address_line2', 'city', 'state',
+	'country', 'pincode', 'address', 'lead_owner', 'market_segment',
+	'industry', 'campaign_name', 'interested_in', 'company',
+	'fiscal_year', 'contact_by', 'contact_date', 'last_contact_date',
+	'contact_date_ref', 'to_discuss', 'more_info', 'follow_up',
+	'communication_history', 'cc_to', 'subject', 'message', 'lead_attachment_detail',
+	'Create Customer', 'Create Opportunity', 'transaction_date', 'type', 'source']);
     doc.source = 'Website';
   }
   if(!doc.status) set_multiple(dt,dn,{status:'Open'});
@@ -53,24 +61,6 @@ cur_frm.cscript.status = function(doc, cdt, cdn){
   cur_frm.cscript.refresh(doc, cdt, cdn);
 }
 
-/*
-// *********** Country ******************
-// This will show states belonging to country
-cur_frm.cscript.country = function(doc, cdt, cdn) {
-  var mydoc=doc;
-  $c('runserverobj', args={'method':'check_state', 'docs':compress_doclist([doc])},
-    function(r,rt){
-      if(r.message) {
-        var doc = locals[mydoc.doctype][mydoc.name];
-        doc.state = '';
-        get_field(doc.doctype, 'state' , doc.name).options = r.message;
-        refresh_field('state');
-      }
-    }
-  );
-}
-*/
-
 cur_frm.cscript.TerritoryHelp = function(doc,dt,dn){
   var call_back = function(){
     var sb_obj = new SalesBrowser();        
@@ -78,12 +68,6 @@ cur_frm.cscript.TerritoryHelp = function(doc,dt,dn){
   }
 
   loadpage('Sales Browser',call_back);
-}
-
-// Create New File
-// ===============================================================
-cur_frm.cscript['Create New File'] = function(doc){
-  new_doc("File");
 }
 
 //Trigger in Item Table

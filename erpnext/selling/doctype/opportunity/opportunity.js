@@ -21,12 +21,10 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn){
 	// 
 
 	if(!doc.docstatus){
-		hide_field(['Update Communication Log']);
-		hide_field(['email_id1','cc_to','subject','message','Attachment Html', 'Create New File', 'enquiry_attachment_detail','Send Email']);
+		hide_field(['email_id1','cc_to','subject','message', 'enquiry_attachment_detail']);
 	}
 	else{
-		unhide_field(['Update Communication Log']);
-		unhide_field(['email_id1','cc_to','subject','message','Attachment Html', 'Create New File', 'enquiry_attachment_detail','Send Email']);
+		unhide_field(['email_id1','cc_to','subject','message', 'enquiry_attachment_detail']);
 	}
 
 	
@@ -221,25 +219,6 @@ cur_frm.cscript.new_contact = function(){
 	loaddoc('Contact', tn);
 }
 */
-
-//=======================================================================================================================
-cur_frm.cscript['Create New File'] = function(doc){
-	var fl = LocalDB.create('File');
-	fl = locals['File'][fl];
-	loaddoc('File', fl.name);
-}
-
-//update follow up
-//=================================================================================
-cur_frm.cscript['Update Communication Log'] = function(doc,cdt,cdn){
-
-	$c_obj(make_doclist(doc.doctype, doc.name),'update_follow_up','',function(r, rt){
-		refresh_field('follow_up');
-		doc.__unsaved = 0;
-		cur_frm.refresh_header();
-	});
-}
-
  // Create New Quotation
 // =======================================================================================================================
 cur_frm.cscript['Create Quotation'] = function(){

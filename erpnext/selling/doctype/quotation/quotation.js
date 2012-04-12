@@ -90,9 +90,6 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 		cur_frm.add_custom_button('Set as Lost', cur_frm.cscript['Declare Order Lost']);
 		cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms);
 	}
-
-	if (!doc.docstatus) hide_field(['Update Communication Log']);
-	else unhide_field(['Update Communication Log']);
 }
 
 
@@ -198,18 +195,6 @@ cur_frm.cscript.pull_enquiry_detail = function(doc,cdt,cdn){
 
 }
 
-//update follow up
-//=================================================================================
-cur_frm.cscript['Update Communication Log'] = function(doc){
-
-	$c_obj(make_doclist(doc.doctype, doc.name),'update_followup_details','',function(r, rt){
-		refresh_field('follow_up');
-		doc.__unsaved = 0;
-		cur_frm.refresh_header();
-	});
-}
-
-
 // declare order lost
 //-------------------------
 cur_frm.cscript['Declare Order Lost'] = function(){
@@ -258,18 +243,6 @@ cur_frm.cscript['Declare Order Lost'] = function(){
 	}
 	qtn_lost_dialog.show();
 }
-
-
-// GET REPORT
-// ========================================================================================
-cur_frm.cscript['Get Report'] = function(doc,cdt,cdn) {
-	var callback = function(report){
-	report.set_filter('Sales Order Item', 'Quotation No.',doc.name)
-	report.dt.run();
- }
- loadreport('Sales Order Item','Itemwise Sales Details', callback);
-}
-
 
 //===================== Quotation to validation - either customer or lead mandatory ====================
 cur_frm.cscript.quot_to_validate = function(doc,cdt,cdn){

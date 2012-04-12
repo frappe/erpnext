@@ -92,9 +92,9 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 			cur_frm.add_custom_button('Unstop', cur_frm.cscript['Unstop Sales Order']);
 	}
 		
-		unhide_field(['Repair Sales Order', 'Send SMS', 'message', 'customer_mobile_no'])
+		unhide_field(['repair_sales_order', 'Send SMS', 'message', 'customer_mobile_no'])
 	} else {
-		hide_field(['Repair Sales Order', 'Send SMS', 'message', 'customer_mobile_no'])
+		hide_field(['repair_sales_order', 'Send SMS', 'message', 'customer_mobile_no'])
 	}
 }
 

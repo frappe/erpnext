@@ -16,7 +16,10 @@ def execute():
 			'BOM Replace Utility Detail', 'BOM Replace Utility', 
 			'Absent Days Detail', 'Activity Dashboard Control', 'Raw Materials Supplied',
 			'Setup Wizard Control', 'Company Group', 'Lease Agreement', 'Lease Installment',
-			'Terms and Conditions', 'Time Sheet', 'Time Sheet Detail', 'Naming Series Options'],
+			'Terms and Conditions', 'Time Sheet', 'Time Sheet Detail', 'Naming Series Options',
+			'Invest 80 Declaration Detail', 'IT Checklist', 'Chapter VI A Detail', 'Declaration Detail',
+			'Personalize', 'Salary Slip Control Panel',
+			],
 		'Page'		:	['File Browser'],
 		'DocType Mapper': ['Production Forecast-Production Planning Tool', 'Production Forecast-Production Plan', 'Sales Order-Production Plan']
 	}
