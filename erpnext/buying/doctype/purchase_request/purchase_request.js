@@ -19,7 +19,6 @@ cur_frm.cscript.fname = "indent_details";
 
 wn.require('erpnext/buying/doctype/purchase_common/purchase_common.js');
 wn.require('erpnext/utilities/doctype/sms_control/sms_control.js');
-cur_frm.cscript.indent_doctype_label =	get_doctype_label('Purchase Request');
 	
 //========================== On Load =================================================
 cur_frm.cscript.onload = function(doc, cdt, cdn) {
@@ -61,18 +60,13 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 		}
 		if(!is_closed) {
 			cur_frm.add_custom_button('Make Purchase Order', cur_frm.cscript['Make Purchase Order'])
-			cur_frm.add_custom_button('Stop ' + cur_frm.cscript.indent_doctype_label, cur_frm.cscript['Stop Purchase Requisition'])
+			cur_frm.add_custom_button('Stop Purchase Request', cur_frm.cscript['Stop Purchase Requisition'])
 		}
 		cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms);
 	}
  
 	if(doc.docstatus == 1 && doc.status == 'Stopped')
-		cur_frm.add_custom_button('Unstop ' + cur_frm.cscript.indent_doctype_label, cur_frm.cscript['Unstop Purchase Requisition'])
-		
-	if(doc.docstatus == 1)
-		unhide_field(['repair_purchase_requisition']);
-	else
-		hide_field(['repair_purchase_requisition']);
+		cur_frm.add_custom_button('Unstop Purchase Request', cur_frm.cscript['Unstop Purchase Requisition'])
 }
 
 //======================= validation ===================================
@@ -90,7 +84,7 @@ cur_frm.cscript.transaction_date = function(doc,cdt,cdn){
 cur_frm.cscript.qty = function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
 	if (flt(d.qty) < flt(d.min_order_qty))
-		alert("Warning: " + cur_frm.cscript.indent_doctype_label + " Qty is less than Minimum Order Qty");
+		alert("Warning: Purchase Requested Qty is less than Minimum Order Qty");
 }
 
 // On Button Click Functions
@@ -116,7 +110,7 @@ cur_frm.cscript['Make Purchase Order'] = function() {
 // ==================================================================================================
 cur_frm.cscript['Stop Purchase Requisition'] = function() {
 	var doc = cur_frm.doc;
-	var check = confirm("Do you really want to STOP this " + cur_frm.cscript.indent_doctype_label + "?");
+	var check = confirm("Do you really want to STOP this Purchase Request?");
 
 	if (check) {
 		$c('runserverobj', args={'method':'update_status', 'arg': 'Stopped', 'docs': compress_doclist(make_doclist(doc.doctype, doc.name))}, function(r,rt) {
@@ -129,7 +123,7 @@ cur_frm.cscript['Stop Purchase Requisition'] = function() {
 //====================================================================================================
 cur_frm.cscript['Unstop Purchase Requisition'] = function(){
 	var doc = cur_frm.doc
-	var check = confirm("Do you really want to UNSTOP this " + cur_frm.cscript.indent_doctype_label + "?");
+	var check = confirm("Do you really want to UNSTOP this Purchase Request?");
 	
 	if (check) {
 		$c('runserverobj', args={'method':'update_status', 'arg': 'Submitted','docs': compress_doclist(make_doclist(doc.doctype, doc.name))}, function(r,rt) {

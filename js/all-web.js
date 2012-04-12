@@ -53,7 +53,7 @@ var type=wn.assets.extn(src);if(wn.assets.handler[type]){wn.assets.handler[type]
  *	lib/js/wn/require.js
  */
 wn.require=function(items){if(typeof items==="string"){items=[items];}
-var l=items.length;for(var i=0;i<l;i++){var src=items[i];if(!(src in wn.assets.executed_)){wn.assets.execute(src);}}}
+var l=items.length;for(var i=0;i<l;i++){var src=items[i];wn.assets.execute(src);}}
 /*
  *	lib/js/wn/dom.js
  */
@@ -735,8 +735,7 @@ function unfreeze(){if(!fcount)return;fcount--;if(!fcount){$dh(dialog_back);}}
 function loadreport(dt,rep_name,onload){if(rep_name)
 wn.set_route('Report',dt,rep_name);else
 wn.set_route('Report',dt);}
-function loaddoc(doctype,name,onload){doctype=get_label_doctype(doctype);wn.model.with_doctype(doctype,function(){if(locals.DocType[doctype].in_dialog){console.log(1)
-_f.edit_record(doctype,name);}else{wn.set_route('Form',doctype,name);}})}
+function loaddoc(doctype,name,onload){wn.model.with_doctype(doctype,function(){if(locals.DocType[doctype].in_dialog){_f.edit_record(doctype,name);}else{wn.set_route('Form',doctype,name);}})}
 var load_doc=loaddoc;function new_doc(doctype,onload,in_dialog,on_save_callback,cdt,cdn,cnic){doctype=get_label_doctype(doctype);wn.model.with_doctype(doctype,function(){if(locals.DocType[doctype].in_dialog){_f.edit_record(doctype,'New '+doctype);}else{wn.set_route('Form',doctype,'New '+doctype);}})}
 var newdoc=new_doc;var pscript={};function loadpage(page_name,call_back,no_history){wn.set_route(page_name);}
 function loaddocbrowser(dt){wn.set_route('List',dt);}
