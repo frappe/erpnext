@@ -75,9 +75,9 @@ cur_frm.cscript.onload_post_render = function(doc, dt, dn) {
 // ------------
 cur_frm.cscript.hide_fields = function(doc, cdt, cdn) {
 	par_flds = ['project_name', 'due_date', 'sales_order_main',
-	'delivery_note_main', 'Get Items', 'is_opening', 'conversion_rate',
+	'delivery_note_main', 'get_items', 'is_opening', 'conversion_rate',
 	'source', 'cancel_reason', 'total_advance', 'gross_profit',
-	'gross_profit_percent', 'Get Advances Received',
+	'gross_profit_percent', 'get_advances_received',
 	'advance_adjustment_details', 'sales_partner', 'commission_rate',
 	'total_commission', 'repair_outstanding_amt'];
 	

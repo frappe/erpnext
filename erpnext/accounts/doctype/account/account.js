@@ -51,8 +51,8 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 // -----------------------------------------
 cur_frm.cscript.hide_unhide_group_ledger = function(doc) {
   hide_field(['Convert to Group', 'Convert to Ledger']);
-  if (cstr(doc.group_or_ledger) == 'Group') unhide_field('Convert to Ledger');
-  else if (cstr(doc.group_or_ledger) == 'Ledger') unhide_field('Convert to Group');
+  if (cstr(doc.group_or_ledger) == 'Group') unhide_field('convert_to_ledger');
+  else if (cstr(doc.group_or_ledger) == 'Ledger') unhide_field('convert_to_ledger');
 }
 
 // Convert group to ledger

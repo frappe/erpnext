@@ -20,10 +20,10 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 	if (!doc.voucher_date) doc.voucher_date = dateutil.obj_to_str(new Date());
 
 	if(cp.country == 'India') {
-		unhide_field(['tds_applicable','tds_category','Get TDS','tax_code','rate','ded_amount','supplier_account']);
+		unhide_field(['tds_applicable','tds_category','get_tds','tax_code','rate','ded_amount','supplier_account']);
 	}
 	else {
-		hide_field(['tds_applicable','tds_category','Get TDS','tax_code','rate','ded_amount','supplier_account']);
+		hide_field(['tds_applicable','tds_category','get_tds','tax_code','rate','ded_amount','supplier_account']);
 	}
 
 	cur_frm.cscript.load_defaults(doc, cdt, cdn);
@@ -51,8 +51,8 @@ cur_frm.cscript.is_opening = function(doc, cdt, cdn) {
 	hide_field('aging_date');
 	if (doc.is_opening == 'Yes') unhide_field('aging_date');
 	
-	if(doc.docstatus==1) { unhide_field('View Ledger Entry'); }
-	else hide_field('View Ledger Entry');
+	if(doc.docstatus==1) { unhide_field('view_ledger_entry'); }
+	else hide_field('view_ledger_entry');
 }
 
 cur_frm.cscript.refresh = cur_frm.cscript.is_opening;

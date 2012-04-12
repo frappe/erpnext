@@ -1756,8 +1756,7 @@ this.copy_doc(fn,1);}
 _f.get_value=function(dt,dn,fn){if(locals[dt]&&locals[dt][dn])
 return locals[dt][dn][fn];}
 _f.set_value=function(dt,dn,fn,v){var d=locals[dt][dn];if(!d){console.log('_f.set_value - '+fn+': "'+dt+','+dn+'" not found');return;}
-var changed=d[fn]!=v;if(changed&&(d[fn]==null||v==null)&&(cstr(d[fn])==cstr(v)))changed=0;if(changed){d[fn]=v;d.__unsaved=1;console.log(d.doctype);var frm=wn.views.formview[d.doctype].frm;try{if(d.parent&&d.parenttype){locals[d.parenttype][d.parent].__unsaved=1;frm=wn.views.formview[d.parenttype].frm;}}catch(e){if(d.parent&&d.parenttype)
-errprint('Setting __unsaved error:'+d.name+','+d.parent+','+d.parenttype);}
+var changed=d[fn]!=v;if(changed&&(d[fn]==null||v==null)&&(cstr(d[fn])==cstr(v)))changed=0;if(changed){d[fn]=v;d.__unsaved=1;if(d.parent&&d.parenttype){locals[d.parenttype][d.parent].__unsaved=1;var frm=wn.views.formview[d.parenttype].frm;}else{locals[d.doctype][d.name].__unsaved=1;var frm=wn.views.formview[d.doctype].frm;}
 if(frm&&frm==cur_frm&&frm.frm_head){frm.frm_head.refresh_labels();}}}
 _f.Frm.prototype.show_comments=function(){if(!cur_frm.comments){cur_frm.comments=new Dialog(540,400,'Comments');cur_frm.comments.comment_body=$a(cur_frm.comments.body,'div','dialog_frm');$y(cur_frm.comments.body,{backgroundColor:'#EEE'});cur_frm.comments.list=new CommentList(cur_frm.comments.comment_body);}
 cur_frm.comments.list.dt=cur_frm.doctype;cur_frm.comments.list.dn=cur_frm.docname;cur_frm.comments.show();cur_frm.comments.list.run();}
