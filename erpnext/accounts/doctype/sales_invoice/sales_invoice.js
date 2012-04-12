@@ -32,7 +32,7 @@ wn.require('erpnext/setup/doctype/notification_control/notification_control.js')
 cur_frm.cscript.onload = function(doc,dt,dn) {
 	if(!doc.customer && doc.debit_to) get_field(dt, 'debit_to', dn).print_hide = 0;
 	if (doc.__islocal) {
-		if(!doc.voucher_date) set_multiple(dt,dn,{voucher_date:get_today()});
+		//if(!doc.voucher_date) set_multiple(dt,dn,{voucher_date:get_today()});
 		if(!doc.due_date) set_multiple(dt,dn,{due_date:get_today()});
 		if(!doc.posting_date) set_multiple(dt,dn,{posting_date:get_today()});
 		if(!doc.currency && sys_defaults.currency) set_multiple(dt,dn,{currency:sys_defaults.currency});
@@ -74,7 +74,12 @@ cur_frm.cscript.onload_post_render = function(doc, dt, dn) {
 // Hide Fields
 // ------------
 cur_frm.cscript.hide_fields = function(doc, cdt, cdn) {
-	par_flds = ['project_name', 'due_date', 'sales_order_main', 'delivery_note_main', 'Get Items', 'is_opening', 'conversion_rate', 'source', 'cancel_reason', 'total_advance', 'gross_profit', 'gross_profit_percent', 'Get Advances Received', 'advance_adjustment_details', 'sales_partner', 'commission_rate', 'total_commission', 'Repair Outstanding Amt'];
+	par_flds = ['project_name', 'due_date', 'sales_order_main',
+	'delivery_note_main', 'Get Items', 'is_opening', 'conversion_rate',
+	'source', 'cancel_reason', 'total_advance', 'gross_profit',
+	'gross_profit_percent', 'Get Advances Received',
+	'advance_adjustment_details', 'sales_partner', 'commission_rate',
+	'total_commission', 'repair_outstanding_amt'];
 	
 	item_flds_normal = ['sales_order', 'delivery_note']
 	item_flds_pos = ['warehouse', 'serial_no', 'batch_no', 'actual_qty', 'delivered_qty']
@@ -110,7 +115,7 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 	if(doc.docstatus==1) {
 		cur_frm.add_custom_button('View Ledger', cur_frm.cscript.view_ledger_entry);
 		cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms);
-		unhide_field('Repair Outstanding Amt');
+		unhide_field('repair_outstanding_amt');
 
 		if(doc.is_pos==1 && doc.update_stock!=1)
 			cur_frm.add_custom_button('Make Delivery', cur_frm.cscript['Make Delivery Note']);
@@ -119,7 +124,7 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 			cur_frm.add_custom_button('Make Payment Entry', cur_frm.cscript.make_bank_voucher);
 	}
 	else
-		hide_field('Repair Outstanding Amt');
+		hide_field('repair_outstanding_amt');
 }
 
 //fetch retail transaction related fields
