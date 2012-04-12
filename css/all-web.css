@@ -214,9 +214,9 @@ div.std-footer-item {
 	padding: 15px;
 	background-color: #FFF;
 	min-height: 600px;
-	-moz-box-shadow:    4px 0px 3px #ddd;
-	-webkit-box-shadow: 4px 0px 3px #ddd;
-	box-shadow:         4px 0px 3px #ddd;
+	-moz-box-shadow:    2px 0px 1px #ddd;
+	-webkit-box-shadow: 2px 0px 1px #ddd;
+	box-shadow:         2px 0px 1px #ddd;
 }
 
 .layout-side-section {
