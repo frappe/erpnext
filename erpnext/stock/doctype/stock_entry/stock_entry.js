@@ -26,8 +26,8 @@ var cfn_set_fields = function(doc, cdt, cdn) {
   hide_field(lst);  
 
   if (doc.purpose == 'Production Order' || doc.purpose == 'Other'){
-    unhide_field('Get Items');
-    hide_field(['from_warehouse', 'to_warehouse','purchase_receipt_no','delivery_note_no', 'sales_invoice_no','Warehouse HTML', 'transporter', 'is_excisable_goods', 'excisable_goods']);
+    unhide_field('get_items');
+    hide_field(['from_warehouse', 'to_warehouse','purchase_receipt_no','delivery_note_no', 'sales_invoice_no','warehouse_html', 'transporter', 'is_excisable_goods', 'excisable_goods']);
 	if (doc.purpose=='Production Order') unhide_field(['production_order', 'process']);
     
 	doc.from_warehouse = '';
@@ -42,7 +42,7 @@ var cfn_set_fields = function(doc, cdt, cdn) {
   }
   else{
     unhide_field(['from_warehouse', 'to_warehouse']);
-    hide_field(['production_order', 'process', 'Get Items', 'fg_completed_qty','purchase_receipt_no','delivery_note_no', 'sales_invoice_no']);
+    hide_field(['production_order', 'process', 'get_items', 'fg_completed_qty','purchase_receipt_no','delivery_note_no', 'sales_invoice_no']);
     doc.production_order = '';
     doc.process = '';
     doc.fg_completed_qty = 0;

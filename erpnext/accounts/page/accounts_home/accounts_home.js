@@ -16,6 +16,8 @@
 
 pscript['onload_accounts-home'] = function(wrapper) {
 	erpnext.module_page.setup_page('Accounts', wrapper);
+	wrapper.appframe = new wn.ui.AppFrame($(wrapper).find('.appframe-area'));
+	
 	if(wn.control_panel.country!='India') {
 		$('.india-specific').toggle(false);
 	}

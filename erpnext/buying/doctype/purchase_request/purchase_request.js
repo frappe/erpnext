@@ -60,13 +60,13 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 		}
 		if(!is_closed) {
 			cur_frm.add_custom_button('Make Purchase Order', cur_frm.cscript['Make Purchase Order'])
-			cur_frm.add_custom_button('Stop Purchase Request', cur_frm.cscript['Stop Purchase Requisition'])
+			cur_frm.add_custom_button('Stop Purchase Request', cur_frm.cscript['Stop Purchase Request'])
 		}
 		cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms);
 	}
  
 	if(doc.docstatus == 1 && doc.status == 'Stopped')
-		cur_frm.add_custom_button('Unstop Purchase Request', cur_frm.cscript['Unstop Purchase Requisition'])
+		cur_frm.add_custom_button('Unstop Purchase Request', cur_frm.cscript['Unstop Purchase Request'])
 }
 
 //======================= validation ===================================
@@ -108,7 +108,7 @@ cur_frm.cscript['Make Purchase Order'] = function() {
 
 // Stop INDENT
 // ==================================================================================================
-cur_frm.cscript['Stop Purchase Requisition'] = function() {
+cur_frm.cscript['Stop Purchase Request'] = function() {
 	var doc = cur_frm.doc;
 	var check = confirm("Do you really want to STOP this Purchase Request?");
 
@@ -121,7 +121,7 @@ cur_frm.cscript['Stop Purchase Requisition'] = function() {
 
 // Un Stop INDENT
 //====================================================================================================
-cur_frm.cscript['Unstop Purchase Requisition'] = function(){
+cur_frm.cscript['Unstop Purchase Request'] = function(){
 	var doc = cur_frm.doc
 	var check = confirm("Do you really want to UNSTOP this Purchase Request?");
 	

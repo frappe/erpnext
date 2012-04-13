@@ -77,7 +77,7 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 
 			// indent
 			if(doc.order_type != 'Maintenance')
-				cur_frm.add_custom_button('Make ' + get_doctype_label('Purchase Request'), cur_frm.cscript['Make Purchase Requisition']);
+				cur_frm.add_custom_button('Make ' + get_doctype_label('Purchase Request'), cur_frm.cscript['Make Purchase Request']);
 			
 			// sales invoice
 			if(doc.per_billed < 100)
@@ -92,9 +92,9 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 			cur_frm.add_custom_button('Unstop', cur_frm.cscript['Unstop Sales Order']);
 	}
 		
-		unhide_field(['repair_sales_order', 'Send SMS', 'message', 'customer_mobile_no'])
+		unhide_field(['Send SMS', 'message', 'customer_mobile_no'])
 	} else {
-		hide_field(['repair_sales_order', 'Send SMS', 'message', 'customer_mobile_no'])
+		hide_field(['Send SMS', 'message', 'customer_mobile_no'])
 	}
 }
 
@@ -263,7 +263,7 @@ cur_frm.cscript.make_maintenance_visit = function() {
 
 // make indent
 // ================================================================================================
-cur_frm.cscript['Make Purchase Requisition'] = function() {
+cur_frm.cscript['Make Purchase Request'] = function() {
 	var doc = cur_frm.doc;
 	if (doc.docstatus == 1) { 
 	n = createLocal("Purchase Request");
