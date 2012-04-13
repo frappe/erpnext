@@ -69,10 +69,8 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 		cur_frm.add_custom_button('Make Payment Entry', cur_frm.cscript.make_bank_voucher);
 	
 	if(doc.docstatus==1) { 
-		unhide_field(['repair_outstanding_amt']); 
 		cur_frm.add_custom_button('View Ledger', cur_frm.cscript.view_ledger_entry);
-	} else hide_field(['repair_outstanding_amt']);
-	
+	}	
 	cur_frm.cscript.is_opening(doc, dt, dn);
 }
 

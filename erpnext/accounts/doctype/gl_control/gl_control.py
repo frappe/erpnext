@@ -450,43 +450,6 @@ class DocType:
 		if not ret:
 			msgprint("Payment Entry has been modified after you pulled it. Please pull it again.", raise_exception=1)
 		
-######################################################################################################################
-		
-
-
-	# Repair Outstanding Amount
-	#---------------------------------
-	def repair_voucher_outstanding(self, voucher_obj):
-		msg = []
-
-		# Get Balance from GL Entries
-		bal = webnotes.conn.sql("select sum(debit)-sum(credit) from `tabGL Entry` where against_voucher=%s and against_voucher_type=%s", (voucher_obj.doc.name , voucher_obj.doc.doctype))
-		bal = bal and flt(bal[0][0]) or 0.0
-		if cstr(voucher_obj.doc.doctype) == 'Purchase Invoice':
-			bal = -bal
-
-		# Check outstanding Amount
-		if flt(voucher_obj.doc.outstanding_amount) != flt(bal):
-			msgprint('<div style="color: RED"> Difference found in Outstanding Amount of %s : %s (Before : %s; After : %s) </div>' % (voucher_obj.doc.doctype, voucher_obj.doc.name, voucher_obj.doc.outstanding_amount, bal))
-			msg.append('<div style="color: RED"> Difference found in Outstanding Amount of %s : %s (Before : %s; After : %s) </div>' % (voucher_obj.doc.doctype, voucher_obj.doc.name, voucher_obj.doc.outstanding_amount, bal))
-
-			# set voucher balance
-			#webnotes.conn.sql("update `tab%s` set outstanding_amount=%s where name='%s'" % (voucher_obj.doc.doctype, bal, voucher_obj.doc.name))
-			webnotes.conn.set(voucher_obj.doc, 'outstanding_amount', flt(bal))
-
-		# Send Mail
-		if msg:
-			email_msg = """ Dear Administrator,
-
-In Account := %s User := %s has Repaired Outstanding Amount For %s : %s and following was found:-
-
-%s
-
-""" % (webnotes.conn.get_value('Control Panel', None,'account_id'), session['user'], voucher_obj.doc.doctype, voucher_obj.doc.name, '\n'.join(msg))
-
-			sendmail(['support@iwebnotes.com'], subject='Repair Outstanding Amount', parts = [('text/plain', email_msg)])
-		# Acknowledge User
-		msgprint(cstr(voucher_obj.doc.doctype) + " : " + cstr(voucher_obj.doc.name) + " has been checked" + cstr(msg and " and repaired successfully." or ". No changes Found."))
 
 	def repost_illegal_cancelled(self, after_date='2011-01-01'):
 		"""

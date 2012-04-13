@@ -15,7 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 cur_frm.cscript.refresh = function(doc) {	
-	if (doc.docstatus) hide_field('Steps');
+	if (doc.docstatus) hide_field('steps');
 }
 
 cur_frm.cscript.download_template = function(doc, cdt, cdn) {

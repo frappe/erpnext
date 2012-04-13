@@ -509,7 +509,3 @@ class DocType(TransactionBase):
 	def on_update(self):
 		pass
 
-	# Repair Sales Order
-	# ===========================================
-	def repair_sales_order(self):
-		get_obj('Sales Common', 'Sales Common').repair_curr_doctype_details(self)

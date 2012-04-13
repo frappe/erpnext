@@ -558,8 +558,3 @@ class DocType(TransactionBase):
 	def on_update(self):
 		pass
 		
-########################################################################
-# Repair Outstanding
-#######################################################################
-	def repair_pv_outstanding(self):
-		get_obj(dt = 'GL Control').repair_voucher_outstanding(self)

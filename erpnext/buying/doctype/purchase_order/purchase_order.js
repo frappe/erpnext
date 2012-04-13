@@ -33,6 +33,7 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 	if(!doc.currency) doc.currency = sys_defaults.currency;
 	if(!doc.status) set_multiple(cdt,cdn,{status:'Draft'});
 	if(!doc.transaction_date) set_multiple(cdt,cdn,{transaction_date:get_today()});
+	if(!doc.is_subcontracted) set_multiple(cdt, cdn, {is_subcontracted:'No'});
 	
 	if(doc.__islocal){
 		hide_field(['supplier_name','supplier_address','contact_person','address_display','contact_display','contact_mobile','contact_email']);
@@ -79,9 +80,6 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 		
 	if(doc.docstatus == 1 && doc.status == 'Stopped')
 		cur_frm.add_custom_button('Unstop Purchase Order', cur_frm.cscript['Unstop Purchase Order']);
-
-	if(doc.docstatus == 1) unhide_field(['repair_purchase_order']);
-	else hide_field(['repair_purchase_order']);
 }
 
 
