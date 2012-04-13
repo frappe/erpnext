@@ -22,8 +22,8 @@ cur_frm.cscript.onload = function(doc,cdt,cdn){
 }
 
 cur_frm.cscript.refresh = function(doc,ct,cdn){
-  if(!doc.docstatus) hide_field('Make Maintenance Visit');
-  else if(doc.docstatus && (doc.status == 'Open' || doc.status == 'Work In Progress')) unhide_field('Make Maintenance Visit');
+  if(!doc.docstatus) hide_field('make_maintenance_visit');
+  else if(doc.docstatus && (doc.status == 'Open' || doc.status == 'Work In Progress')) unhide_field('make_maintenance_visit');
 }
 
 
