@@ -14,8 +14,11 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-pscript['onshow_Accounts Browser'] = function(){
+pscript['onshow_Accounts Browser'] = function(wrapper){
 	wn.require('lib/js/legacy/widgets/tree.js');
+
+	wrapper.appframe = new wn.ui.AppFrame($(wrapper).find('.appframe-area'));
+	wrapper.appframe.add_button('New Company', function() { newdoc('Company'); }, 'icon-plus');
 
 	var route = decodeURIComponent(location.hash);
 	if(route.indexOf('/')!=-1) {
@@ -107,13 +110,8 @@ pscript.make_chart = function(b) {
   pscript.make_group_area();
   pscript.make_ledger_area();
   pscript.make_new_acc_dialog();
-  pscript.make_new_comp();
   pscript.make_new_cost_center_dialog();
 
-}
-//New company link
-pscript.make_new_comp = function(){
-  $i('ab_body').page_head.add_button('New Company', function() { new_doc('Company'); }, 0, 'ui-icon-plus');
 }
 
 pscript.make_ac_tree = function() {
