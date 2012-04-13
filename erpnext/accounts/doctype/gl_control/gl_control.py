@@ -35,12 +35,6 @@ class DocType:
 		self.doc, self.doclist = d, dl
 		self.entries = []
 
-	# Get Company List
-	# ----------------
-	def get_companies(self,arg=''):
-		ret = webnotes.conn.sql("select name, abbr from tabCompany where docstatus != 2")
-		return {'cl':[r[0] for r in ret]}
-
 	def get_company_currency(self,arg=''):
 		dcc = TransactionBase().get_company_currency(arg)
 		return dcc
