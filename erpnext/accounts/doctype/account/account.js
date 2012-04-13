@@ -33,9 +33,9 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
   // hide India specific fields
   var cp = wn.control_panel;
   if(cp.country == 'India')
-    unhide_field(['pan_number', 'tds_applicable', 'tds_details', 'TDS']);
+    unhide_field(['pan_number', 'tds_applicable', 'tds_details', 'tds']);
   else
-    hide_field(['pan_number', 'tds_applicable', 'tds_details', 'TDS']);
+    hide_field(['pan_number', 'tds_applicable', 'tds_details', 'tds']);
 }
 
 // Refresh
@@ -50,7 +50,7 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 // Hide/unhide group or ledger
 // -----------------------------------------
 cur_frm.cscript.hide_unhide_group_ledger = function(doc) {
-  hide_field(['Convert to Group', 'Convert to Ledger']);
+  hide_field(['convert_to_group', 'convert_to_ledger']);
   if (cstr(doc.group_or_ledger) == 'Group') unhide_field('convert_to_ledger');
   else if (cstr(doc.group_or_ledger) == 'Ledger') unhide_field('convert_to_ledger');
 }
