@@ -31,8 +31,9 @@ in_transaction = webnotes.conn.in_transaction
 convert_to_lists = webnotes.conn.convert_to_lists
 	
 # -----------------------------------------------------------------------------------------
+from utilities.transaction_base import TransactionBase
 
-class DocType:
+class DocType(TransactionBase):
 	def __init__(self, doc, doclist=[]):
 		self.doc = doc
 		self.doclist = doclist
@@ -510,10 +511,11 @@ class DocType:
 
 
 	def get_cust_addr(self):
-		res = sql("select customer_name,address from `tabCustomer` where name = '%s'"%self.doc.customer)
+		res = sql("select customer_name from `tabCustomer` where name = '%s'"%self.doc.customer)
+		addr = self.get_address_text(customer = self.doc.customer)
 		ret = { 
 			'customer_name'		: res and res[0][0] or '',
-			'customer_address' : res and res[0][1] or ''}
+			'customer_address' : addr and addr[0] or ''}
 
 		return ret
 
@@ -530,7 +532,8 @@ class DocType:
 
 	def get_supp_addr(self):
 		res = sql("select supplier_name,address from `tabSupplier` where name = '%s'"%self.doc.supplier)
+		addr = self.get_address_text(supplier = self.doc.supplier)
 		ret = {
 			'supplier_name' : res and res[0][0] or '',
-			'supplier_address' : res and res[0][1] or ''}
+			'supplier_address' : addr and addr[0] or ''}
 		return ret
