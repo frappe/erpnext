@@ -17,6 +17,7 @@
 cur_frm.cscript.onload = function(doc, cdt, cdn) {
   if (!doc.posting_date) doc.posting_date = dateutil.obj_to_str(new Date());
   if (!doc.transfer_date) doc.transfer_date = dateutil.obj_to_str(new Date());
+  if(!doc.purpose) set_multiple(cdt, cdn, {purpose:'Material Issue'});
   cfn_set_fields(doc, cdt, cdn);
 }
 
