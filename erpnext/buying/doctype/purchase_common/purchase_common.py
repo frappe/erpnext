@@ -55,17 +55,6 @@ class DocType(TransactionBase):
 							 'Purchase Order'		 : 'Purchase Order Item',
 							 'Purchase Receipt'	 : 'Purchase Receipt Item'}
  
-		self.repair_percent_field = {
-												 'ordered_qty' : 'per_ordered',
-												 'received_qty': 'per_received',
-												 'billed_qty'	: 'per_billed'}
-
-		self.repair_fields = {
-									'Purchase Request Item'			 : ['ordered_qty'],
-									'Purchase Order Item'				 : ['received_qty', 'billed_qty'],
-									'Purchase Receipt Item': ['billed_qty']
-							 }
-
 		self.next_dt_detail = {
 									'ordered_qty' : 'Purchase Order Item',
 									'billed_qty'	: 'Purchase Invoice Item',
@@ -563,64 +552,3 @@ class DocType(TransactionBase):
 			if d.prevdoc_doctype and d.prevdoc_docname:
 				dt = sql("select transaction_date from `tab%s` where name = '%s'" % (d.prevdoc_doctype, d.prevdoc_docname))
 				d.prevdoc_date = dt and dt[0][0].strftime('%Y-%m-%d') or ''
-
-
-#=================================================================================
-# REPAIR OPTION
-#=================================================================================
-
-	def get_next_dt_detail_qty(self, next_dt_detail, name, curr_dt, f):
-		get_qty = (curr_dt == 'Purchase Request') and 'qty * conversion_factor' or 'qty'
-		qty = sql("select sum(%s) from `tab%s` where %s = '%s' and docstatus = 1"% (get_qty, next_dt_detail, (f == 'billed_qty') and (curr_dt == 'Purchase Order' and 'po_detail' or 'pr_detail') or 'prevdoc_detail_docname', name))
-		return qty and flt(qty[0][0]) or 0
-
-	def repair_curr_qty_details(self, obj):
-		self.repair_fields_list, count, percent =	self.repair_fields[obj.tname], {}, {}
-		# Check and Update Fields in Detail Table 
-		for d in getlist(obj.doclist, obj.fname):
-			for f in self.repair_fields_list:
-				qty, update_qty = d.fields.get(f,0), self.get_next_dt_detail_qty(self.next_dt_detail[f], d.name, obj.doc.doctype, f)
-
-				# Check qty
-				if flt(qty) != flt(update_qty):
-					msgprint('<div style="color: RED"> Difference found in %s (Before : %s; After : %s) in %s of %s : %s in Row No : %s </div>' % (f, qty, update_qty, obj.tname, obj.doc.doctype, obj.doc.name, d.name))
-					self.msg.append('<div style="color: RED"> Difference found in %s (Before : %s; After : %s) in %s of %s : %s in Row No : %s</div>' % (f, qty, update_qty, obj.tname, obj.doc.doctype, obj.doc.name, d.name))
-					# update qty
-					#sql("update `tab%s` set %s = '%s' where name = '%s'"% (obj.tname, f, update_qty, d.name))
-					set(d, f, update_qty)
-
-				# Calculate percentage
-				if flt(d.qty) - flt(update_qty) <= 0:
-					percent[f] = percent.get(f, 0) + 100
-				else:
-					percent[f] = percent.get(f, 0) + (flt(update_qty)/flt(d.qty) * 100)
-				count[f] = count.get(f,0) + 1
-
-		return count, percent
-
-	def repair_curr_percent_detail(self, obj, count, percent):
-		import math
-		for f in self.repair_fields_list:
-			per_complete, update_per_complete = flt(obj.doc.fields.get(self.repair_percent_field[f], 0)), math.floor(flt(percent[f]) / flt(count[f]))
-			if flt(obj.doc.fields.get(self.repair_percent_field[f], 0)) != flt(update_per_complete):
-				msgprint('<div style="color: RED">Difference found in %s (Before : %s; After : %s) in	%s : %s </div>' % (self.repair_percent_field[f], per_complete, update_per_complete, obj.doc.doctype, obj.doc.name))
-				self.msg.append('<div style="color: RED">Difference found in %s (Before : %s; After : %s) in	%s : %s </div>' % (self.repair_percent_field[f], per_complete, update_per_complete, obj.doc.doctype, obj.doc.name))
-				#sql("update `tab%s` set %s = '%s' where name = '%s'" % (obj.doc.doctype, self.repair_percent_field[f], update_per_complete, obj.doc.name))
-				set(obj.doc, self.repair_percent_field[f], update_per_complete)
-
-	def send_mail(self, obj):
-		email_msg = """ Dear Administrator,
-
-In Account := %s User := %s has Reposted %s : %s and following was found:-
-
-%s
-
-""" % (get_value('Control Panel', None,'account_id'), session['user'], obj.doc.doctype, obj.doc.name, '\n'.join(self.msg))
-
-		sendmail(['jai@webnotestech.com'], subject='Repair Option', parts = [('text/plain', email_msg)])
-
-	def repair_curr_doctype_details(self, obj):
-		count, percent = self.repair_curr_qty_details(obj)
-		self.repair_curr_percent_detail(obj, count, percent)
-		if self.msg: self.send_mail(obj)
-		msgprint('<div style="color: GREEN"> ' + cstr(obj.doc.doctype) + ' : ' + cstr(obj.doc.name) + ' has been checked' + cstr(self.msg and ' and repaired successfully.' or '. No changes Found.' + '</div>'))

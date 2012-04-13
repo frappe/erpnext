@@ -231,9 +231,3 @@ class DocType:
 		
 		# Step 5:=> Set Status
 		set(self.doc,'status','Cancelled')
-
-
-	# Repair Purchase Request
-	# ===========================================
-	def repair_indent(self):
-		get_obj('Purchase Common', 'Purchase Common').repair_curr_doctype_details(self)

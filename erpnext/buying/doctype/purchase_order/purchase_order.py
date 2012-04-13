@@ -363,8 +363,3 @@ class DocType(TransactionBase):
 	# **** Pull details from other charges master (Get Other Charges) ****
 	def get_purchase_tax_details(self):
 		return get_obj('Purchase Common').get_purchase_tax_details(self)
-
-	# Repair Purchase Order
-	# ===========================================
-	def repair_purchase_order(self):
-		get_obj('Purchase Common', 'Purchase Common').repair_curr_doctype_details(self)

@@ -48,6 +48,7 @@ def execute():
 		reload_doc(mod, 'DocType Mapper', ren_mapper[d])
 
 	delete_search_criteria()
+	change_report_module()
 
 	# reload custom search criteria
 	#for d in  webnotes.conn.sql("""select name, module from
@@ -126,7 +127,8 @@ def delete_search_criteria():
 			'delivery_notes', 'delivery_note_disabled', 'lead', 'lead_interested', 'lead_report',
 			'periodic_sales_summary', 'monthly_despatched_trend', 'sales', 'sales_order',
 			'sales_order1', 'sales_agentwise_commission', 'test_report', 
-			'territory_wise_sales_-_target_vs_actual_')""")
+			'territory_wise_sales_-_target_vs_actual_', 
+			'pending_po_items_to_bill1', 'pending_po_items_to_receive1')""")
 
 	webnotes.conn.sql("""
 		DELETE FROM `tabSearch Criteria`
@@ -136,6 +138,11 @@ def delete_search_criteria():
 		'serial_no-warranty_expiring_this_month')
 		AND IFNULL(standard, 'No') = 'Yes'
 		""")
+
+def change_report_module():
+	reports = {'itemwise_receipt_details': 'Stock'}
+	for k in reports:
+		sql("update `tabSearch Criteria` set module = %s where name = %s", (reports[k], k))
 
 def rename_in_db(ren_data, data_type, is_doctype):
 	for d in ren_data:
