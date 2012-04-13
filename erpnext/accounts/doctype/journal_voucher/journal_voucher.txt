@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-03-27 14:35:43',
+		'creation': '2012-04-13 11:55:50',
 		'docstatus': 0,
-		'modified': '2012-03-27 14:45:48',
+		'modified': '2012-04-13 12:28:24',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -25,7 +25,7 @@
 		'show_in_menu': 0,
 		'subject': u' ',
 		'tag_fields': u'voucher_type',
-		'version': 311
+		'version': 312
 	},
 
 	# These values are common for all DocField
@@ -55,30 +55,6 @@
 
 	# DocPerm
 	{
-		'amend': 1,
-		'cancel': 1,
-		'create': 1,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Accounts User',
-		'submit': 1,
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Accounts User',
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
 		'amend': 0,
 		'cancel': 0,
 		'create': 0,
@@ -99,6 +75,30 @@
 		'role': u'Accounts Manager',
 		'submit': 1,
 		'write': 1
+	},
+
+	# DocPerm
+	{
+		'amend': 1,
+		'cancel': 1,
+		'create': 1,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Accounts User',
+		'submit': 1,
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Accounts User',
+		'submit': 0,
+		'write': 0
 	},
 
 	# DocField
@@ -526,7 +526,7 @@
 		'doctype': u'DocField',
 		'fieldname': u'pay_to_recd_from',
 		'fieldtype': u'Data',
-		'hidden': 0,
+		'hidden': 1,
 		'label': u'Pay To / Recd From',
 		'no_copy': 1,
 		'permlevel': 0,
@@ -539,7 +539,7 @@
 		'doctype': u'DocField',
 		'fieldname': u'total_amount',
 		'fieldtype': u'Data',
-		'hidden': 0,
+		'hidden': 1,
 		'label': u'Total Amount',
 		'no_copy': 1,
 		'permlevel': 1,
@@ -552,7 +552,7 @@
 		'doctype': u'DocField',
 		'fieldname': u'total_amount_in_words',
 		'fieldtype': u'Data',
-		'hidden': 0,
+		'hidden': 1,
 		'label': u'Total Amount in Words',
 		'no_copy': 1,
 		'permlevel': 1,

@@ -334,7 +334,7 @@ div.notice {
 
 div.form-title {
 	/*background-color: #e0eeff;*/
-	padding: 5px 19px 15px 19px;
+	padding: 5px 11px 15px 11px;
 	margin: -15px -15px 0px -15px;
 	border-bottom: 1px solid #eee;
 }
@@ -342,7 +342,7 @@ div.form-title {
 div.form-section-head {
 	margin: 11px -15px 3px -15px;
 	border-top: 1px solid #ccc;
-	padding: 11px 23px 0px 23px;
+	padding: 11px 15px 0px 15px;
 }
 
 div.form-layout-row:first-child .form-section-head {
