@@ -23,7 +23,10 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 
 var cfn_set_fields = function(doc, cdt, cdn) {
   lst = ['supplier','supplier_name','supplier_address','customer','customer_name','customer_address'];
-  hide_field(lst);  
+  if (in_list(['Material Issue', 'Material Transfer', 'Material Receipt', 'Production Order', 'Subcontracting', 'Other'], doc.purpose)) {
+    hide_field(lst);
+  } else unhide_field(lst);
+
 
   if (doc.purpose == 'Production Order' || doc.purpose == 'Other'){
     unhide_field('get_items');
@@ -52,6 +55,7 @@ var cfn_set_fields = function(doc, cdt, cdn) {
   if(doc.purpose == 'Purchase Return'){
     doc.customer=doc.customer_name = doc.customer_address=doc.delivery_note_no=doc.sales_invoice_no='';
     unhide_field(['supplier','supplier_name','supplier_address','purchase_receipt_no']);
+
   }
   else if(doc.purpose == 'Sales Return'){
     doc.supplier=doc.supplier_name = doc.supplier_address=doc.purchase_receipt_no='';
