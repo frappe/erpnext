@@ -487,8 +487,4 @@ class DocType(TransactionBase):
 		self.set_actual_qty()
 		get_obj('Stock Ledger').scrub_serial_nos(self)
 
-	# Repair Delivery Note
-	# ===========================================
-	def repair_delivery_note(self):
-		get_obj('Sales Common', 'Sales Common').repair_curr_doctype_details(self)
 

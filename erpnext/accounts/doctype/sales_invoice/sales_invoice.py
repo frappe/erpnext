@@ -679,13 +679,6 @@ class DocType(TransactionBase):
 
 		webnotes.conn.set(self.doc,'outstanding_amount',flt(self.doc.grand_total) - flt(self.doc.total_advance) - flt(self.doc.paid_amount) - flt(self.doc.write_off_amount))
 
-########################################################################
-# Repair Outstanding
-
-	def repair_rv_outstanding(self):
-		get_obj(dt = 'GL Control').repair_voucher_outstanding(self)
-
-
 	#-------------------------------------------------------------------------------------
 	def on_update_after_submit(self):
 		self.convert_into_recurring()

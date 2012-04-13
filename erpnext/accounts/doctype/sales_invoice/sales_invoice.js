@@ -79,7 +79,7 @@ cur_frm.cscript.hide_fields = function(doc, cdt, cdn) {
 	'source', 'cancel_reason', 'total_advance', 'gross_profit',
 	'gross_profit_percent', 'get_advances_received',
 	'advance_adjustment_details', 'sales_partner', 'commission_rate',
-	'total_commission', 'repair_outstanding_amt'];
+	'total_commission'];
 	
 	item_flds_normal = ['sales_order', 'delivery_note']
 	item_flds_pos = ['warehouse', 'serial_no', 'batch_no', 'actual_qty', 'delivered_qty']
@@ -115,7 +115,6 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 	if(doc.docstatus==1) {
 		cur_frm.add_custom_button('View Ledger', cur_frm.cscript.view_ledger_entry);
 		cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms);
-		unhide_field('repair_outstanding_amt');
 
 		if(doc.is_pos==1 && doc.update_stock!=1)
 			cur_frm.add_custom_button('Make Delivery', cur_frm.cscript['Make Delivery Note']);
@@ -123,8 +122,6 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 		if(doc.outstanding_amount!=0)
 			cur_frm.add_custom_button('Make Payment Entry', cur_frm.cscript.make_bank_voucher);
 	}
-	else
-		hide_field('repair_outstanding_amt');
 }
 
 //fetch retail transaction related fields
