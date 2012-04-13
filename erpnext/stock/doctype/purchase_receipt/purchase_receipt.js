@@ -71,9 +71,6 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	 cur_frm.add_custom_button('Make Purchase Invoice', cur_frm.cscript['Make Purchase Invoice']);
 	 cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms);
 	}
-	else{
-		hide_field(['Repair Purchase Receipt']);
-	}
 }
 
 
