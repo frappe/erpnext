@@ -3,16 +3,16 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-08-08 17:09:25',
+		'creation': '2009-05-12 16:46:45',
 		'docstatus': 0,
-		'modified': '2012-03-21 11:00:48',
+		'modified': '2012-04-13 14:12:02',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
-		'_last_update': u'1332233897',
+		'_last_update': u'1334303911',
 		'allow_attach': 0,
 		'allow_copy': 0,
 		'allow_email': 0,
@@ -41,7 +41,7 @@
 		'subject': u'%(remarks)s',
 		'tag_fields': u'purpose',
 		'use_template': 0,
-		'version': 259
+		'version': 263
 	},
 
 	# These values are common for all DocField
@@ -71,26 +71,26 @@
 
 	# DocPerm
 	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
+		'amend': 1,
+		'cancel': 1,
+		'create': 1,
 		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Material Manager',
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'permlevel': 1,
+		'permlevel': 0,
 		'role': u'Material User',
-		'submit': 0,
-		'write': 0
+		'submit': 1,
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'amend': 1,
+		'cancel': 1,
+		'create': 1,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Material Manager',
+		'submit': 1,
+		'write': 1
 	},
 
 	# DocPerm
@@ -102,30 +102,6 @@
 		'permlevel': 0,
 		'role': u'Production User',
 		'submit': 1,
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Production User',
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'permlevel': 2,
-		'role': u'Production User',
-		'submit': 0,
 		'write': 1
 	},
 
@@ -148,20 +124,25 @@
 		'create': 0,
 		'doctype': u'DocPerm',
 		'permlevel': 1,
-		'role': u'Production Manager',
+		'role': u'All',
 		'submit': 0,
 		'write': 0
 	},
 
 	# DocPerm
 	{
-		'amend': 0,
-		'cancel': 0,
 		'create': 0,
 		'doctype': u'DocPerm',
 		'permlevel': 2,
+		'role': u'Production User',
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'doctype': u'DocPerm',
+		'permlevel': 2,
 		'role': u'Production Manager',
-		'submit': 0,
 		'write': 1
 	},
 
@@ -191,12 +172,13 @@
 		'doctype': u'DocField',
 		'fieldname': u'naming_series',
 		'fieldtype': u'Select',
+		'hidden': 0,
 		'in_filter': 0,
 		'label': u'Series',
 		'no_copy': 1,
 		'oldfieldname': u'naming_series',
 		'oldfieldtype': u'Select',
-		'options': u'STE',
+		'options': u'\nSTE',
 		'permlevel': 0,
 		'print_hide': 1,
 		'report_hide': 0,
@@ -211,6 +193,7 @@
 		'doctype': u'DocField',
 		'fieldname': u'amendment_date',
 		'fieldtype': u'Date',
+		'hidden': 0,
 		'in_filter': 0,
 		'label': u'Amendment Date',
 		'no_copy': 1,
@@ -219,6 +202,7 @@
 		'permlevel': 0,
 		'print_hide': 1,
 		'report_hide': 0,
+		'reqd': 0,
 		'search_index': 0
 	},
 
@@ -229,6 +213,7 @@
 		'doctype': u'DocField',
 		'fieldname': u'purpose',
 		'fieldtype': u'Select',
+		'hidden': 0,
 		'in_filter': 1,
 		'label': u'Purpose',
 		'no_copy': 0,
@@ -236,6 +221,7 @@
 		'oldfieldtype': u'Select',
 		'options': u'Material Issue\nMaterial Receipt\nMaterial Transfer\nSales Return\nPurchase Return\nSubcontracting\nProduction Order\nOther',
 		'permlevel': 0,
+		'print_hide': 0,
 		'report_hide': 0,
 		'reqd': 1,
 		'search_index': 0,
@@ -259,6 +245,7 @@
 		'permlevel': 0,
 		'print_hide': 1,
 		'report_hide': 0,
+		'reqd': 0,
 		'search_index': 1,
 		'trigger': u'Client'
 	},
@@ -280,6 +267,7 @@
 		'permlevel': 0,
 		'print_hide': 1,
 		'report_hide': 0,
+		'reqd': 0,
 		'search_index': 1,
 		'trigger': u'Client'
 	},
@@ -303,7 +291,7 @@
 		'doctype': u'DocField',
 		'fieldname': u'supplier',
 		'fieldtype': u'Link',
-		'hidden': 1,
+		'hidden': 0,
 		'in_filter': 0,
 		'label': u'Supplier',
 		'no_copy': 0,
@@ -313,6 +301,7 @@
 		'permlevel': 0,
 		'print_hide': 1,
 		'report_hide': 0,
+		'reqd': 0,
 		'search_index': 0,
 		'trigger': u'Client'
 	},
@@ -323,13 +312,16 @@
 		'doctype': u'DocField',
 		'fieldname': u'supplier_name',
 		'fieldtype': u'Data',
+		'hidden': 0,
 		'in_filter': 0,
 		'label': u'Supplier Name',
 		'no_copy': 0,
 		'oldfieldname': u'supplier_name',
 		'oldfieldtype': u'Data',
 		'permlevel': 1,
+		'print_hide': 0,
 		'report_hide': 0,
+		'reqd': 0,
 		'search_index': 0
 	},
 
@@ -340,14 +332,16 @@
 		'doctype': u'DocField',
 		'fieldname': u'supplier_address',
 		'fieldtype': u'Small Text',
-		'hidden': 1,
+		'hidden': 0,
 		'in_filter': 0,
 		'label': u'Supplier Address',
 		'no_copy': 0,
 		'oldfieldname': u'supplier_address',
 		'oldfieldtype': u'Small Text',
 		'permlevel': 0,
+		'print_hide': 0,
 		'report_hide': 0,
+		'reqd': 0,
 		'search_index': 0,
 		'trigger': u'Client'
 	},
@@ -359,7 +353,7 @@
 		'doctype': u'DocField',
 		'fieldname': u'customer',
 		'fieldtype': u'Link',
-		'hidden': 1,
+		'hidden': 0,
 		'in_filter': 0,
 		'label': u'Customer',
 		'no_copy': 0,
@@ -369,6 +363,7 @@
 		'permlevel': 0,
 		'print_hide': 1,
 		'report_hide': 0,
+		'reqd': 0,
 		'search_index': 0,
 		'trigger': u'Client'
 	},
@@ -379,14 +374,16 @@
 		'doctype': u'DocField',
 		'fieldname': u'customer_name',
 		'fieldtype': u'Data',
-		'hidden': 1,
+		'hidden': 0,
 		'in_filter': 0,
 		'label': u'Customer Name',
 		'no_copy': 0,
 		'oldfieldname': u'customer_name',
 		'oldfieldtype': u'Data',
 		'permlevel': 1,
+		'print_hide': 0,
 		'report_hide': 0,
+		'reqd': 0,
 		'search_index': 0
 	},
 
@@ -396,14 +393,16 @@
 		'doctype': u'DocField',
 		'fieldname': u'customer_address',
 		'fieldtype': u'Small Text',
-		'hidden': 1,
+		'hidden': 0,
 		'in_filter': 0,
 		'label': u'Customer Address',
 		'no_copy': 0,
 		'oldfieldname': u'customer_address',
 		'oldfieldtype': u'Small Text',
 		'permlevel': 0,
+		'print_hide': 0,
 		'report_hide': 0,
+		'reqd': 0,
 		'search_index': 0
 	},
 
@@ -424,6 +423,7 @@
 		'permlevel': 0,
 		'print_hide': 1,
 		'report_hide': 0,
+		'reqd': 0,
 		'search_index': 0,
 		'trigger': u'Client'
 	},
@@ -445,6 +445,7 @@
 		'permlevel': 0,
 		'print_hide': 1,
 		'report_hide': 0,
+		'reqd': 0,
 		'search_index': 1,
 		'trigger': u'Client'
 	},
@@ -479,6 +480,7 @@
 		'doctype': u'DocField',
 		'fieldname': u'fg_completed_qty',
 		'fieldtype': u'Currency',
+		'hidden': 0,
 		'in_filter': 0,
 		'label': u'FG Completed Qty',
 		'no_copy': 0,
@@ -487,6 +489,7 @@
 		'permlevel': 0,
 		'print_hide': 1,
 		'report_hide': 0,
+		'reqd': 0,
 		'search_index': 0,
 		'trigger': u'Client'
 	},
@@ -511,6 +514,7 @@
 		'doctype': u'DocField',
 		'fieldname': u'from_warehouse',
 		'fieldtype': u'Link',
+		'hidden': 0,
 		'in_filter': 0,
 		'label': u'Source Warehouse',
 		'no_copy': 0,
@@ -533,6 +537,7 @@
 		'doctype': u'DocField',
 		'fieldname': u'to_warehouse',
 		'fieldtype': u'Link',
+		'hidden': 0,
 		'in_filter': 0,
 		'label': u'Target Warehouse',
 		'no_copy': 0,
@@ -576,6 +581,7 @@
 		'doctype': u'DocField',
 		'fieldname': u'transfer_date',
 		'fieldtype': u'Date',
+		'hidden': 0,
 		'in_filter': 1,
 		'label': u'Transfer Date',
 		'no_copy': 1,
@@ -595,6 +601,7 @@
 		'doctype': u'DocField',
 		'fieldname': u'posting_date',
 		'fieldtype': u'Date',
+		'hidden': 0,
 		'in_filter': 1,
 		'label': u'Posting Date',
 		'no_copy': 1,
@@ -613,6 +620,7 @@
 		'doctype': u'DocField',
 		'fieldname': u'posting_time',
 		'fieldtype': u'Time',
+		'hidden': 0,
 		'in_filter': 0,
 		'label': u'Posting Time',
 		'no_copy': 1,
@@ -631,6 +639,7 @@
 		'doctype': u'DocField',
 		'fieldname': u'amended_from',
 		'fieldtype': u'Link',
+		'hidden': 0,
 		'in_filter': 0,
 		'label': u'Amended From',
 		'no_copy': 1,
@@ -640,6 +649,7 @@
 		'permlevel': 1,
 		'print_hide': 1,
 		'report_hide': 0,
+		'reqd': 0,
 		'search_index': 0
 	},
 
@@ -649,6 +659,7 @@
 		'doctype': u'DocField',
 		'fieldname': u'transporter',
 		'fieldtype': u'Data',
+		'hidden': 0,
 		'in_filter': 0,
 		'label': u'Transporter',
 		'no_copy': 0,
@@ -657,6 +668,7 @@
 		'permlevel': 0,
 		'print_hide': 1,
 		'report_hide': 0,
+		'reqd': 0,
 		'search_index': 0
 	},
 
@@ -666,6 +678,7 @@
 		'doctype': u'DocField',
 		'fieldname': u'is_excisable_goods',
 		'fieldtype': u'Select',
+		'hidden': 0,
 		'in_filter': 0,
 		'label': u'Is Excisable Goods',
 		'no_copy': 0,
@@ -675,6 +688,7 @@
 		'permlevel': 0,
 		'print_hide': 1,
 		'report_hide': 0,
+		'reqd': 0,
 		'search_index': 0
 	},
 
@@ -684,6 +698,7 @@
 		'doctype': u'DocField',
 		'fieldname': u'excisable_goods',
 		'fieldtype': u'Select',
+		'hidden': 0,
 		'in_filter': 0,
 		'label': u'Excisable Goods',
 		'no_copy': 0,
@@ -693,6 +708,7 @@
 		'permlevel': 0,
 		'print_hide': 1,
 		'report_hide': 0,
+		'reqd': 0,
 		'search_index': 0
 	},
 
@@ -712,6 +728,7 @@
 		'permlevel': 0,
 		'print_hide': 1,
 		'report_hide': 0,
+		'reqd': 0,
 		'search_index': 0
 	},
 
@@ -721,6 +738,7 @@
 		'doctype': u'DocField',
 		'fieldname': u'remarks',
 		'fieldtype': u'Text',
+		'hidden': 0,
 		'in_filter': 0,
 		'label': u'Remarks',
 		'no_copy': 1,
@@ -795,6 +813,7 @@
 		'permlevel': 0,
 		'print_hide': 1,
 		'report_hide': 0,
+		'reqd': 0,
 		'search_index': 0
 	},
 
@@ -814,6 +833,7 @@
 		'doctype': u'DocField',
 		'fieldname': u'mtn_details',
 		'fieldtype': u'Table',
+		'hidden': 0,
 		'in_filter': 0,
 		'label': u'MTN Details',
 		'no_copy': 0,
@@ -823,6 +843,7 @@
 		'permlevel': 0,
 		'print_hide': 0,
 		'report_hide': 0,
+		'reqd': 0,
 		'search_index': 0
 	},
 
@@ -832,6 +853,7 @@
 		'doctype': u'DocField',
 		'fieldname': u'total_amount',
 		'fieldtype': u'Currency',
+		'hidden': 0,
 		'in_filter': 0,
 		'label': u'Total Amount',
 		'no_copy': 0,
@@ -840,6 +862,7 @@
 		'permlevel': 1,
 		'print_hide': 1,
 		'report_hide': 0,
+		'reqd': 0,
 		'search_index': 0
 	},
 
@@ -858,6 +881,7 @@
 		'doctype': u'DocField',
 		'fieldname': u'company',
 		'fieldtype': u'Link',
+		'hidden': 0,
 		'in_filter': 1,
 		'label': u'Company',
 		'no_copy': 0,
@@ -877,6 +901,7 @@
 		'doctype': u'DocField',
 		'fieldname': u'fiscal_year',
 		'fieldtype': u'Select',
+		'hidden': 0,
 		'in_filter': 0,
 		'label': u'Fiscal Year',
 		'no_copy': 0,
@@ -896,6 +921,7 @@
 		'doctype': u'DocField',
 		'fieldname': u'select_print_heading',
 		'fieldtype': u'Link',
+		'hidden': 0,
 		'in_filter': 0,
 		'label': u'Select Print Heading',
 		'no_copy': 0,
@@ -903,7 +929,9 @@
 		'oldfieldtype': u'Link',
 		'options': u'Print Heading',
 		'permlevel': 0,
+		'print_hide': 0,
 		'report_hide': 0,
+		'reqd': 0,
 		'search_index': 0
 	}
 ]
