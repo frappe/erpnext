@@ -207,5 +207,25 @@ patch_list = [
 		'patch_file': 'update_se_fld_options',
 		'description': 'Purpose SE: Others to Other' 
 	},
+	{
+		'patch_module': 'patches.jan_mar_2012',
+		'patch_file': 'reload_mapper',
+		'description': 'SO-DN, SO-Rv, DN-RV'
+	},
+	{
+		'patch_module': 'patches.jan_mar_2012',
+		'patch_file': 'mapper_fix',
+		'description': 'DN-RV duplicate table entry'
+	},
+	{
+		'patch_module': 'patches.mar_2012',
+		'patch_file': 'so_rv_mapper_fix',
+		'description': 'SO-RV duplicate mapper entry removal'
+	},
+	{
+		'patch_module': 'patches.april_2012',
+		'patch_file': 'reload_c_form',
+		'description': 'Added attchemnt option and total field'
+	},
 
 ]

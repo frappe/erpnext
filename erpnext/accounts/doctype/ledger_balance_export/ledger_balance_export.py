@@ -35,45 +35,111 @@ class DocType:
 		yr = sql("select name from `tabFiscal Year` where %s between year_start_date and date_sub(date_add(year_start_date,interval 1 year), interval 1 day)",dt)
 		return yr and yr[0][0] or ''
 
-	# Get gl entries for the period and account
-	def get_gl_entries(self, lft, rgt):
-		gle = sql("select t1.posting_date, t1.voucher_type, t1.voucher_no, t1.debit, t1.credit, t1.remarks from `tabGL Entry` t1, `tabAccount` t2 WHERE t1.posting_date >= %s AND t1.posting_date <= %s and ifnull(t1.is_opening, 'No') = 'No' AND t1.account = t2.name AND t2.lft >= %s AND t2.rgt <= %s and ifnull(t1.is_cancelled, 'No') = 'No'", (self.doc.from_date, self.doc.to_date, lft, rgt), as_dict=1)
+
+	def validate_date(self):
+		"""check for from date and to date within same year"""
+		if not sql("select name from `tabFiscal Year` where %s between year_start_date and date_sub(date_add(year_start_date,interval 1 year), interval 1 day) and %s between year_start_date and date_sub(date_add(year_start_date,interval 1 year), interval 1 day)",(self.doc.from_date, self.doc.to_date)):
+			msgprint("From Date and To Date must be within same year")
+			raise Exception
+
+		if not self.doc.from_date or not self.doc.to_date:
+			msgprint("From Date and To Date is mandatory")
+			raise Exception
+
+	
+	def add_header(self):
+		title = 'Ledger Balances Between ' + getdate(self.doc.from_date).strftime('%d-%m-%Y') + ' and ' + getdate(self.doc.to_date).strftime('%d-%m-%Y')
+		return [[title], ['Account', 'Opening(Dr)', 'Opening (Cr)', 'Debit', 'Credit', 'Closing(Dr)', 'Closing(Cr)'], ['', '', '', '', '', '', '', 'Posting Date', 'Voucher Type', 'Voucher No', 'Debit', 'Credit', 'Remarks']]
+		
+
+
+	def get_account_subtree(self, acc):		
+		return sql("""
+			SELECT 
+				CONCAT(REPEAT('    ', COUNT(parent.name) - (sub_tree.depth + 1)), node.name) as account, 
+				node.lft AS lft, node.rgt AS rgt, 
+				node.debit_or_credit as dr_or_cr, node.group_or_ledger as group_or_ledger, node.is_pl_account as is_pl_account
+			FROM tabAccount AS node,
+				tabAccount AS parent,
+				tabAccount AS sub_parent,
+				(
+					SELECT node.name, (COUNT(parent.name) - 1) AS depth
+					FROM tabAccount AS node, tabAccount AS parent
+					WHERE node.lft BETWEEN parent.lft AND parent.rgt
+					AND node.name = %s
+					GROUP BY node.name
+					ORDER BY node.lft
+			    )AS sub_tree
+			WHERE node.lft BETWEEN parent.lft AND parent.rgt
+		        AND node.lft BETWEEN sub_parent.lft AND sub_parent.rgt
+				AND sub_parent.name = sub_tree.name
+			GROUP BY node.name
+			ORDER BY node.lft""", acc, as_dict = 1)
+
+
+
+	def show_acc_summary(self, glc, acc_det):
+		from_date_year = self.get_year(add_days(self.doc.from_date, -1))
+		to_date_year = self.get_year(self.doc.to_date)
+		acc = acc_det['account'].strip()
+
+		if from_date_year == to_date_year:
+			debit_on_fromdate, credit_on_fromdate, opening = glc.get_as_on_balance(acc, from_date_year, add_days(self.doc.from_date, -1), acc_det['dr_or_cr'], acc_det['lft'], acc_det['rgt']) # opening = closing of prev_date
+		elif acc_det['is_pl_account'] == 'No': # if there is no previous year in system and not pl account
+			opening = sql("select opening from `tabAccount Balance` where account = %s and period = %s", (acc, to_date_year))
+			debit_on_fromdate, credit_on_fromdate, opening = 0, 0, flt(opening[0][0])
+		else: # if pl account and there is no previous year in system
+			debit_on_fromdate, credit_on_fromdate, opening = 0,0,0
+		
+		# closing balance
+		#--------------------------------
+		debit_on_todate, credit_on_todate, closing = glc.get_as_on_balance(acc, to_date_year, self.doc.to_date, acc_det['dr_or_cr'], acc_det['lft'], acc_det['rgt']) 
+
+		# transaction betn the period
+		#----------------------------------------
+		debit = flt(debit_on_todate) - flt(debit_on_fromdate)
+		credit = flt(credit_on_todate) - flt(credit_on_fromdate)
+	
+		# Debit / Credit
+		if acc_det['dr_or_cr'] == 'Credit':
+			opening, closing = -1*opening, -1*closing
+
+		return [acc_det['account'], flt(opening>0 and opening or 0), flt(opening<0 and -opening or 0), 
+				debit, credit, flt(closing>0.01 and closing or 0), flt(closing<-0.01 and -closing or 0)]
+
+
+	def show_gl_entries(self, acc):
+		"""Get gl entries for the period and account"""
+		gle = sql("select posting_date, voucher_type, voucher_no, debit, credit, remarks from `tabGL Entry` WHERE account = %s and posting_date >= %s AND posting_date <= %s and ifnull(is_opening,	'No') = 'No' and ifnull(is_cancelled, 'No') = 'No'", (acc, self.doc.from_date, self.doc.to_date), as_dict=1)
 		entries, dr, cr = [], 0, 0
 		for d in gle:
-			dr, cr = dr + flt(d['debit']), cr + flt(d['credit'])
-			entries.append(['', d['posting_date'], d['voucher_type'], d['voucher_no'], d['debit'], d['credit'], d['remarks']])
-		return entries, dr, cr
+			entries.append(['', '', '', '', '', '', '', d['posting_date'], d['voucher_type'], d['voucher_no'], d['debit'], d['credit'], d['remarks']])
+		return entries
+
+
+
 
 	# Get Report Data
 	def get_report_data(self):
-		from_date_year = self.get_year(add_days(self.doc.from_date, -1))
-		to_date_year = self.get_year(self.doc.to_date)
+		self.validate_date()
 
-		# result initiatlization
-		header = 'Ledger Balances Between ' + getdate(self.doc.from_date).strftime('%d-%m-%Y') + ' and ' + getdate(self.doc.to_date).strftime('%d-%m-%Y')
-		res = [[header], ['Account', 'Posting Date', 'Voucher Type', 'Voucher No', 'Debit', 'Credit', 'Remarks']]
+		res = []
+		res += self.add_header()
+
 		glc = get_obj('GL Control')
 
 		for d in getlist(self.doclist, 'ledger_details'):
 			# Fetch acc details
-			acc_det = sql("select debit_or_credit, is_pl_account, lft, rgt from tabAccount where name = '%s'" % d.account, as_dict=1)[0]
+			sub_tree = self.get_account_subtree(d.account)
 
-			# Opening
-			opening = glc.get_as_on_balance(d.account, from_date_year, add_days(self.doc.from_date, -1), acc_det['debit_or_credit'], acc_det['lft'], acc_det['rgt'])[2]
-			if acc_det['debit_or_credit'] == 'Credit':
-				opening = -1*opening
+			for acc_det in sub_tree:
+				acc_summary = self.show_acc_summary(glc, acc_det)
+				res.append(acc_summary)
+				
+				# Show gl entries if account is ledger
+				if acc_det['group_or_ledger'] == 'Ledger' and (acc_summary[3] or acc_summary[4]):
+					gle = self.show_gl_entries(acc_det['account'].strip())
+					res += gle
 
-			# GL Entries
-			gle, debit, credit = self.get_gl_entries(acc_det['lft'], acc_det['rgt'])
-
-			# Closing
-			closing = opening + debit - credit
-
-			# Append to result
-			res.append([d.account])
-			res += gle
-			res.append(['', '', '', 'Total Debit/Credit', debit, credit])
-			res.append(['', '', '', 'Opening Balance', opening])
-			res.append(['', '', '', 'Closing Balance', closing])
 
 		return res
