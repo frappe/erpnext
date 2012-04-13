@@ -56,7 +56,7 @@ class DocType:
 			
 		# update year start date and year end date from fiscal_year
 		ysd = webnotes.conn.sql("""select year_start_date from `tabFiscal Year` 
-			where name=%s""", self.doc.fiscal_year)
+			where name=%s""", self.doc.current_fiscal_year)
 			
 		ysd = ysd and ysd[0][0] or ''
 		from webnotes.utils import get_first_day, get_last_day
