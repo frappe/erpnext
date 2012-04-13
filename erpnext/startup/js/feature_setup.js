@@ -30,10 +30,10 @@ pscript.feature_dict = {
 	'fs_projects': {
 		'BOM': {'fields':['project_name']},
 		'Delivery Note': {'fields':['project_name']},
-		'Purchase Invoice': {'fields':['project_name']},
+		'Purchase Invoice': {'entries':['project_name']},
 		'Production Order': {'fields':['project_name']},
-		'Purchase Order': {'fields':['project_name']},
-		'Purchase Receipt': {'fields':['project_name']},
+		'Purchase Order': {'po_details':['project_name']},
+		'Purchase Receipt': {'purchase_receipt_details':['project_name']},
 		'Sales Invoice': {'fields':['project_name']},
 		'Sales Order': {'fields':['project_name']},
 		'Stock Entry': {'fields':['project_name']},

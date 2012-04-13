@@ -334,10 +334,9 @@ cur_frm.cscript.tax_code = function(doc, dt, dn) {
 }
 
 /* ***************************** UTILITY FUNCTIONS ************************ */
-
 // Calculate Advance
 // ------------------
-var calc_total_advance = function(doc,cdt,cdn) {
+calc_total_advance = function(doc,cdt,cdn) {
 	var doc = locals[doc.doctype][doc.name];
 	var el = getchildren('Purchase Invoice Advance',doc.name,'advance_allocation_details')
 	var tot_tds=0;
