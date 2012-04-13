@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-03-27 14:36:40',
+		'creation': '2012-04-11 13:18:57',
 		'docstatus': 0,
-		'modified': '2012-03-27 14:36:40',
+		'modified': '2012-04-11 17:47:35',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -25,7 +25,7 @@
 		'section_style': u'Tabbed',
 		'server_code_error': u' ',
 		'show_in_menu': 0,
-		'version': 58
+		'version': 59
 	},
 
 	# These values are common for all DocField
@@ -51,6 +51,78 @@
 	{
 		'doctype': 'DocType',
 		'name': u'Warehouse'
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 2,
+		'role': u'Material User',
+		'submit': 0,
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Material User',
+		'submit': 0,
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Material User',
+		'submit': 0,
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 2,
+		'role': u'Material Manager',
+		'submit': 0,
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Material Manager',
+		'submit': 0,
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Material Manager',
+		'submit': 0,
+		'write': 0
 	},
 
 	# DocPerm
@@ -81,91 +153,19 @@
 
 	# DocPerm
 	{
-		'create': 0,
+		'cancel': 1,
+		'create': 1,
 		'doctype': u'DocPerm',
-		'permlevel': 2,
+		'permlevel': 0,
 		'role': u'System Manager',
 		'write': 1
 	},
 
 	# DocPerm
 	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Material Manager',
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Material Manager',
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
 		'create': 0,
 		'doctype': u'DocPerm',
 		'permlevel': 2,
-		'role': u'Material Manager',
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Material User',
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Material User',
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'permlevel': 2,
-		'role': u'Material User',
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'cancel': 1,
-		'create': 1,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
 		'role': u'System Manager',
 		'write': 1
 	},
@@ -268,7 +268,7 @@
 	{
 		'doctype': u'DocField',
 		'fieldname': u'phone_no',
-		'fieldtype': u'Int',
+		'fieldtype': u'Data',
 		'label': u'Phone No',
 		'oldfieldname': u'phone_no',
 		'oldfieldtype': u'Int',
@@ -280,7 +280,7 @@
 	{
 		'doctype': u'DocField',
 		'fieldname': u'mobile_no',
-		'fieldtype': u'Int',
+		'fieldtype': u'Data',
 		'label': u'Mobile No',
 		'oldfieldname': u'mobile_no',
 		'oldfieldtype': u'Int',
