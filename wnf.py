@@ -179,9 +179,14 @@ def run():
 		os.system('git status')
 	
 	elif options.pull:
+		from build.project import update_version
 		os.system('git pull %s %s' % (options.pull[0], options.pull[1]))
 		os.chdir('lib')
 		os.system('git pull %s %s' % (options.pull[0], options.pull[1]))
+
+		# update js code version (clear to localStorage)
+		update_version()
+		
 
 	elif options.push:
 		os.system('git commit -a -m "%s"' % options.push[2])
