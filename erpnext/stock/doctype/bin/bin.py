@@ -78,10 +78,7 @@ class DocType:
 				msg = """Actual Qty(%s) in Bin is mismatched with total number(%s) of serial no in store 
 					for item: '%s' and warehouse: '%s'""" % \
 					(self.doc.actual_qty, sr_count, self.doc.item_code, self.doc.warehouse)
-					
-				if getattr(webnotes.defs,'admin_email_notification',1):
-					sendmail(['developers@iwebnotes.com'], sender='automail@webnotestech.com', \
-						subject='Serial No Count vs Bin Actual Qty', parts=[['text/plain', msg]])			
+
 				msgprint(msg, raise_exception=1)
 
 	# --------------------------------

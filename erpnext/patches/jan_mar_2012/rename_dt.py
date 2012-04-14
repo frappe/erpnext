@@ -1,4 +1,5 @@
 import webnotes
+import conf
 from webnotes.model import rename, delete_doc
 from webnotes.model.code import get_obj
 from wnf import replace_code
@@ -54,7 +55,7 @@ def execute():
 	#for d in  webnotes.conn.sql("""select name, module from
 	#		`tabSearch Criteria` where ifnull(standard, 'No') = 'Yes' and ifnull(disabled, 0) = 0"""):
 	#
-	for path, folders, files in os.walk(webnotes.defs.modules_path):
+	for path, folders, files in os.walk(conf.modules_path):
 		if not path.endswith('search_criteria'): continue
 		module = path.split(os.sep)[-2]
 		for sc in folders:
@@ -420,7 +421,7 @@ def prepare_dict_of_label_fieldname(module_path):
 			modules_list = folders
 		for f in files:
 			if f.endswith(".txt"):
-				rel_path = os.path.relpath(path, webnotes.defs.modules_path)
+				rel_path = os.path.relpath(path, conf.modules_path)
 				path_tuple = rel_path.split(os.sep)
 				if (len(path_tuple)==3 and path_tuple[0] in modules_list and
 						path_tuple[1] == 'doctype'):

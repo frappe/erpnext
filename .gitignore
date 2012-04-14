@@ -1,11 +1,10 @@
 *.pyc
 *.comp.js
 .DS_Store
-server_tools
-services
 user_files
 patch.log
 lib
+conf.py
 version.num
 user_files
 *.sql*

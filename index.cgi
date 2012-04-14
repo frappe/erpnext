@@ -27,6 +27,7 @@ import cgi, cgitb, os, sys
 cgitb.enable()
 
 # import libs
+sys.path.append('.')
 sys.path.append('lib/py')
 sys.path.append('erpnext')
 

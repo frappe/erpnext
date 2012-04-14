@@ -71,15 +71,7 @@ class DocType:
 			pr.save(1)
 		
 		# Update Membership Type at Gateway
-		import webnotes.defs
 		from webnotes.utils import cint
-		if hasattr(webnotes.defs, 'sync_with_gateway') and \
-				cint(webnotes.defs.sync_with_gateway) or 0:		
-			if 'System Manager' in role_list : membership_type = 'Administrator'
-			else : membership_type = 'Member'
-
-			import server_tools.gateway_utils
-			server_tools.gateway_utils.update_membership_type(cstr(arg['usr']), membership_type)
 
 		sql("delete from __SessionCache where user=%s", cstr(arg['usr']))
 
