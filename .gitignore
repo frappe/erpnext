@@ -6,6 +6,6 @@ services
 user_files
 patch.log
 lib
-versions-local.db
+version.num
 user_files
 *.sql*
