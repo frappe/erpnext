@@ -10,11 +10,28 @@ html {
 body {	
 	margin: 0px;
 	padding: 0px;
-	font-family: Arial, Helvetica, Sans;
 	font-size: 14px;
 	color: #000;
 	background-color: #e2e2e2;
 }
+
+/* font settings */
+
+h1, h2, h3, h4, h5 {
+	font-family: "Helvetica Neue", Helvetica, "Helvetica Neue", sans-serif;
+	font-weight: normal;
+	margin-top: 0.2em;
+}
+
+body {
+	font-family: "Helvetica Neue", Helvetica, "Helvetica Neue", sans-serif;
+	font-size: 13px;
+}
+
+span, div, td, input, textarea, button, select {
+	font-family: inherit;
+}
+
 
 pre { margin: 0px; padding: 0px; }
 
