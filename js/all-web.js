@@ -266,7 +266,7 @@ this.listview.parent=this;},init_list:function(){this.make({method:'webnotes.wid
   %(description)s\
   <hr>\
   <p><button class="btn btn-info btn-small"\
-    onclick="wn.set_route(\'Form\', \'%(doctype)s\', \'New %(doctype)s\');"\
+    onclick="newdoc(\'%(doctype)s\');"\
     >Make a new %(doctype_label)s</button>\
   </p></div>',{doctype_label:get_doctype_label(this.doctype),doctype:this.doctype,description:wn.markdown(locals.DocType[this.doctype].description||'')});},render_row:function(row,data){data.doctype=this.doctype;this.listview.render(row,data,this);},get_query_fields:function(){return this.listview.fields;},get_args:function(){return{doctype:this.doctype,fields:this.get_query_fields(),filters:this.filter_list.get_filters(),docstatus:this.can_submit?$.map(this.$page.find('.show-docstatus :checked'),function(inp){return $(inp).attr('data-docstatus')}):[]}},add_delete_option:function(){var me=this;if(this.can_delete){this.add_button('Delete',function(){me.delete_items();},'icon-remove')}},delete_items:function(){var me=this;var dl=$.map(me.$page.find('.list-delete:checked'),function(e){return $(e).data('name');});if(!dl.length)
 return;if(!confirm('This is PERMANENT action and you cannot undo. Continue?')){return;}
