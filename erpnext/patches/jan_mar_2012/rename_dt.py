@@ -129,7 +129,7 @@ def delete_search_criteria():
 			'periodic_sales_summary', 'monthly_despatched_trend', 'sales', 'sales_order',
 			'sales_order1', 'sales_agentwise_commission', 'test_report', 
 			'territory_wise_sales_-_target_vs_actual_', 
-			'pending_po_items_to_bill1', 'pending_po_items_to_receive1')""")
+			'pending_po_items_to_bill1', 'pending_po_items_to_receive1', 'expense_vouchers', 'pending_expense_vouchers')""")
 
 	webnotes.conn.sql("""
 		DELETE FROM `tabSearch Criteria`
