@@ -143,7 +143,7 @@ def delete_search_criteria():
 def change_report_module():
 	reports = {'itemwise_receipt_details': 'Stock'}
 	for k in reports:
-		sql("update `tabSearch Criteria` set module = %s where name = %s", (reports[k], k))
+		webnotes.conn.sql("update `tabSearch Criteria` set module = %s where name = %s", (reports[k], k))
 
 def rename_in_db(ren_data, data_type, is_doctype):
 	for d in ren_data:
