@@ -24,6 +24,9 @@ pscript['onload_Accounts Browser'] = function(wrapper){
 	wn.require('lib/js/wn/ui/tree.js');
 	wrapper.appframe = new wn.ui.AppFrame($(wrapper).find('.appframe-area'));
 	wrapper.appframe.add_button('New Company', function() { newdoc('Company'); }, 'icon-plus');
+	wrapper.appframe.add_button('Refresh', function() {  
+			wrapper.$company_select.change();
+		}, 'icon-refresh');
 
 	// company-select
 	wrapper.$company_select = $('<select class="accbrowser-company-select"></select>')
@@ -73,6 +76,7 @@ erpnext.AccountsChart = Class.extend({
 		$(wrapper).find('.tree-area').empty();
 		var me = this;
 		me.ctype = ctype;
+		me.company = company;
 		this.tree = new wn.ui.Tree({
 			parent: $(wrapper).find('.tree-area'), 
 			label: company,
@@ -105,84 +109,133 @@ erpnext.AccountsChart = Class.extend({
 			+encodeURIComponent(data.value)+'">Edit</a>').appendTo(link.toolbar);
 
 		if(data.expandable) {
-			link.toolbar.append(' | <a>Add Child</a>');
-		} else {
-			link.toolbar.append(' | <a>View Ledger</a>');
+			link.toolbar.append(' | <a onclick="erpnext.account_chart.new_node();">Add Child</a>');
+		} else if(this.ctype=='Account') {
+			link.toolbar.append(' | <a onclick="erpnext.account_chart.show_ledger();">View Ledger</a>');
 		}		
 	},
-	new_account: function() {
-	  var d = new Dialog(300,400,'Create A New Account');
-	  d.make_body([
-	    ['HTML','Heading'],
-	    ['Data','New Account Name'],
-	    ['Select','Group or Ledger','Specify whether the new account is a Ledger or Group'],
-	    ['Select','Account Type','[Optional] Specify the type of this account'],
-	    ['Data','Tax Rate','Specify the default tax rate'],
-			['Select','Master Type','Specify the master type of this account'],
-	    ['Button','Create']
-	  ]);
-
-	  add_sel_options(d.widgets['Group or Ledger'], ['Group', 'Ledger'],'Group');
-	  add_sel_options(d.widgets['Account Type'], ['', 'Fixed Asset Account','Bank or Cash','Expense Account','Tax','Income Account','Chargeable'], '');
-		add_sel_options(d.widgets['Master Type'], ['NA', 'Supplier','Customer','Employee'],'NA');
-
-	  // hide / show account type
-	  d.widgets['Group or Ledger'].onchange = function() {
-	    if(sel_val(this)=='Ledger')$ds(d.rows['Account Type']);
-	    else $dh(d.rows['Account Type']);
-	  }
-
-	  // hide / show tax rate
-	  d.widgets['Account Type'].onchange = function() {
-	    if(sel_val(this)=='Tax' || sel_val(this)=='Chargeable')$ds(d.rows['Tax Rate']);
-	    else $dh(d.rows['Tax Rate']);
-	  }
-
-	  d.onshow = function() {
-	    $dh(this.rows['Account Type']);
-	    $dh(this.rows['Tax Rate']);
-	    this.widgets['Group or Ledger'].selectedIndex = 0;
-	    this.widgets['Account Type'].selectedIndex = 0;
-			this.widgets['Master Type'].selectedIndex = 0;
-	    d.widgets['New Account Name'].value = '';
-	    d.widgets['Tax Rate'].value = '';
-	  }
-
-	  d.widgets['Create'].onclick = function() {
-	    if(!d.widgets['New Account Name'].value) {
-	      msgprint('Please enter New Account Name'); return;
-	    }
-			if(!sel_val(d.widgets['Master Type'])) {
-	      msgprint('Please enter master type of this new account'); return;
-	    }
-	    args = {
-	      'account_name' : d.widgets['New Account Name'].value,
-	      'parent_account' : pscript.cur_node.rec.name,
-	      'group_or_ledger' : sel_val(d.widgets['Group or Ledger']),
-	      'company' : sel_val(pscript.ab_company_sel),
-	      'account_type' : sel_val(d.widgets['Account Type']),
-	      'tax_rate' : d.widgets['Tax Rate'].value,
-	      'master_type': sel_val(d.widgets['Master Type'])
-	    }
-	    $c_obj('GL Control', 'add_ac', docstring(args), function(r,rt) { d.hide(); pscript.group_area.ref_btn.onclick(); });
-	  }
-	  pscript.new_acc_dialog = d;
-
+	show_ledger: function() {
+		var me = this;
+		var node = me.selected_node();
+		wn.set_route('Report', 'GL Entry', 'General Ledger', 
+			this.ctype + '=' + node.data('label'));
 	},
+	new_node: function() {
+		if(this.ctype=='Account') {
+			this.new_account();
+		} else {
+			this.new_cost_center();
+		}
+	},
+	selected_node: function() {
+		return this.tree.$w.find('.tree-link.selected');
+	},
+	new_account: function() {
+		var me = this;
+		
+		// the dialog
+		var d = new wn.ui.Dialog({
+			title:'New Account',
+			fields: [
+				{fieldtype:'Data', fieldname:'account_name', label:'New Account Name', reqd:true},
+				{fieldtype:'Select', fieldname:'group_or_ledger', label:'Group or Ledger',
+					options:'Group\nLedger'},
+				{fieldtype:'Select', fieldname:'account_type', label:'Account Type',
+					options: ['', 'Fixed Asset Account', 'Bank or Cash', 'Expense Account', 'Tax',
+						'Income Account', 'Chargeable'].join('\n') },
+				{fieldtype:'Float', fieldname:'tax_rate', label:'Tax Rate'},
+				{fieldtype:'Select', fieldname:'master_type', label:'Master Type',
+					options: ['NA', 'Supplier', 'Customer', 'Employee'].join('\n') },
+				{fieldtype:'Button', fieldname:'create_new', label:'Create New' }
+			]
+		})
 
+		var fd = d.fields_dict;
+		
+		// account type if ledger
+		$(fd.group_or_ledger.input).change(function() {
+			if($(this).val()=='Group') {
+				$(fd.account_type.wrapper).toggle(false);
+				$(fd.master_type.wrapper).toggle(false);
+				$(fd.tax_rate.wrapper).toggle(false);
+			} else {
+				$(fd.account_type.wrapper).toggle(true);
+				$(fd.master_type.wrapper).toggle(true);
+				if(fd.account_type.get_value()=='Tax') {
+					$(fd.tax_rate.wrapper).toggle(true);
+				}
+			}
+		});
+		
+		// tax rate if tax
+		$(fd.account_type.input).change(function() {
+			if($(this).val()=='Tax') {
+				$(fd.tax_rate.wrapper).toggle(true);				
+			} else {
+				$(fd.tax_rate.wrapper).toggle(false);				
+			}
+		})
+		
+		// create
+		$(fd.create_new.input).click(function() {
+			var btn = this;
+			$(btn).set_working();
+			var v = d.get_values();
+			if(!v) return;
+					
+			var node = me.selected_node();
+			v.parent_account = node.data('label');
+			v.company = me.company;
+			
+		    $c_obj('GL Control', 'add_ac', v, 
+				function(r,rt) { 
+					$(btn).done_working();
+					d.hide();
+					node.trigger('reload'); 	
+				});
+		});
+		
+		// show
+		d.onshow = function() {
+			$(fd.group_or_ledger.input).change();
+		}
+		d.show();
+	},
+	
 	new_cost_center: function(){
-	  pscript.cc_dialog = new Dialog(300,400,'Create A New Cost Center');
-	  pscript.cc_dialog.make_body([
-	    ['HTML','Heading'],
-	    ['Data','New Cost Center Name'],
-	    ['Select','Group or Ledger','Specify whether the new cost center is a Ledger or Group'],
-	    ['Button','Create']
-	    ]);
-
-	  add_sel_options(pscript.cc_dialog.widgets['Group or Ledger'], ['Group','Ledger'], 'Group');
-
-	  pscript.new_cost_center_dialog = pscript.cc_dialog;
-	}	
+		var me = this;
+		// the dialog
+		var d = new wn.ui.Dialog({
+			title:'New Cost Center',
+			fields: [
+				{fieldtype:'Data', fieldname:'cost_center_name', label:'New Cost Center Name', reqd:true},
+				{fieldtype:'Select', fieldname:'group_or_ledger', label:'Group or Ledger',
+					options:'Group\nLedger'},
+				{fieldtype:'Button', fieldname:'create_new', label:'Create New' }
+			]
+		})		
+	
+		// create
+		$(d.fields_dict.create_new.input).click(function() {
+			var btn = this;
+			$(btn).set_working();
+			var v = d.get_values();
+			if(!v) return;
+			
+			var node = me.selected_node();
+			
+			v.parent_cost_center = node.data('label');
+			v.company_name = me.company;
+			
+		    $c_obj('GL Control', 'add_cc', v, 
+				function(r,rt) { 
+					$(btn).done_working();
+					d.hide();
+					node.trigger('reload'); 	
+				});
+		});
+		d.show();
+	}
 });
 
 /*
