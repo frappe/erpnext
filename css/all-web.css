@@ -1425,6 +1425,10 @@ div.std-footer-item {
 	padding: 0px;
 }
 
+.layout-section {
+	padding: 15px;	
+}
+
 .layout-main-section {
 	width: 71%;
 	float: left;
@@ -1847,214 +1851,34 @@ div.stat-bar {
 
 
 /*
- *	erpnext/startup/startup.css
+ *	lib/css/ui/views.css
  */
-h1, h2, h3, h4, h5 {
-	font-family: "Helvetica Neue", "Open Sans", Helvetica, sans-serif;
-	font-weight: normal;
-	margin-top: 0.2em;
+
+.breadcrumbs {
+	color: #000000;
 }
 
-body {
-	font-family: "Helvetica Neue", "Open Sans", Helvetica, sans-serif;
-	font-size: 13px;
+.breadcrumbs a {
+	color: #000000;
 }
 
-span, div, td, input, textarea, button, select {
-	font-family: inherit;
-}
-
-body {
-	background: url(../images/redbeech.jpg) repeat;
-	color: #616161;
-}
-
-.small {
-	font-size: 11.5px;
-}
-
-.erpnext-footer {
-	margin: 11px auto;
-	text-align: center;
-}
-
-.navbar-new-comments {
-	margin: -3px 0px;
-	padding: 2px;
-	min-width: 20px;
-	text-align: center;
-	display: inline-block;
-	border-radius: 2px;
-	color: #999999;
-	background-color: #333131;
-}
-
-.navbar-new-comments:hover,
-.navbar-new-comments:active,
-.navbar-new-comments:focus {
-	color: #fff;
-}
-
-.navbar-new-comments-true {
-	color: #fff;
-	background-color: #B00D07;
-}
-
-/*extra size menus for recent*/
-.dropdown-menu#toolbar-recent, .dropdown-menu#toolbar-options, .dropdown-menu#toolbar-help{
-	min-width: 160px !important;
-	max-width: 260px !important;
-}
-
-
-/*
- *	erpnext/website/css/website.css
- */
-div#body_div, header .container, .content, #opened-page-selector, footer {
-	width: 900px;
-}
-
-.layout_wrapper {
-	padding: 27px;
-}
-
-p, li {
-	line-height: 1.6em;
-}
-
-pre {
-    background-color: #F8F8F8;
-    border: 1px solid #CCCCCC;
-    border-radius: 3px 3px 3px 3px;
-    font-size: 13px;
-    line-height: 19px;
-    overflow: auto;
-    padding: 6px 10px;
-	margin-bottom: 9px;
-}
-
-.web-content input[type="text"], .web-content input[type="password"], .web-content select {
-	min-width: 180px;
-}
-
-.web-head-section {
-	margin-bottom: 20px
-}
-
-.web-main-section {
-	width: 65%;
-	float: left;
-	margin-bottom: 20px;
-}
-
-.web-side-section {
-	width: 30%;
-	float: right;
-	margin-bottom: 20px;
-	margin-right: 15px;
-	color: #606060;
-	overflow-x: hidden;
-	font-size: 90%;
-}
-
-.web-page-status {
-	padding: 7px;
-	color: #777;
-	clear: both;
-	text-align: right;
-}
-
-.web-page-status a,
-.web-page-status a:hover,
-.web-page-status a:visited {
-	padding: 2px;
-	background-color: #777;
-	color: #FFF;
-	text-decoration: none;
-}
-
-.web-page-status a:hover {
-	background-color: #444;
-}
-
-footer {
-	color: #777;	
-}
-
-.web-footer {
-	color: inherit;
-	text-align: center;
-	margin: 10px;
-	line-height: 1.7;
-}
-
-.web-footer div, .web-footer a {
-	font-size: 11px;
-}
-
-.web-footer-menu {
-	margin-bottom: 7px;
-}
-footer a, footer a:visited {
-	color: #777;
-}
-
-footer a:hover {
-	background-color: #777;
-	color: #fff;
-}
-
-.web-footer-menu ul {
-	list-style: none;
-	margin: 0px;
-	padding: 0px;
-}
-
-.web-footer-menu ul li {
-	display: inline;
-	padding: 2px 15px;
-	border-right: 1px solid #999;
-}
-
-.web-footer-menu ul li:last-child {
-	border-right: 0px solid #777 !important;
-}
-
-/* slide view */
-
-.next-slide {
-	margin: 0px -27px 100px -27px;
-	background: #ffffff; /* Old browsers */
-	background: -moz-linear-gradient(top,  #eeeeee 0%, #fff 100%); /* FF3.6+ */
-	background: -webkit-linear-gradient(top,  #eeeeee 0%, #fff 100%); /* Chrome10+,Safari5.1+ */
-	background: -o-linear-gradient(top,  #eeeeee 0%, #fff 100%); /* Opera 11.10+ */
-	background: -ms-linear-gradient(top,  #eeeeee 0%, #fff 100%); /* IE10+ */
-	background: linear-gradient(top,  #eeeeee 0%, #fff 100%); /* W3C */
-	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#eeeeee', endColorstr='#fff',GradientType=0 ); /* IE6-9 */
-	height: 36px;
-}
-
-.slide-shadow {
+div.appframe-titlebar {
+	padding: 6px;
 	background: #eeeeee; /* Old browsers */
-	background: -moz-linear-gradient(top,  #bababa 0%,#eeeeee 100%); /* FF3.6+ */
-	background: -webkit-linear-gradient(top,  #bababa 0%,#eeeeee 100%); /* Chrome10+,Safari5.1+ */
-	background: -o-linear-gradient(top,  #bababa 0%,#eeeeee 100%); /* Opera 11.10+ */
-	background: -ms-linear-gradient(top,  #bababa 0%,#eeeeee 100%); /* IE10+ */
-	background: linear-gradient(top,  #bababa 0%,#eeeeee 100%); /* W3C */
-	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#bababa', endColorstr='#eeeeee',GradientType=0 ); /* IE6-9 */	
-	height: 3px;
-	margin: 100px -27px 0px -27px;
-	border-top: 1px solid #bababa;
+	background: -moz-linear-gradient(top,  #eeeeee 0%, #cccccc 100%); /* FF3.6+ */
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#eeeeee), color-stop(100%,#cccccc)); /* Chrome,Safari4+ */
+	background: -webkit-linear-gradient(top,  #eeeeee 0%,#cccccc 100%); /* Chrome10+,Safari5.1+ */
+	background: -o-linear-gradient(top,  #eeeeee 0%,#cccccc 100%); /* Opera 11.10+ */
+	background: -ms-linear-gradient(top,  #eeeeee 0%,#cccccc 100%); /* IE10+ */
+	background: linear-gradient(top,  #eeeeee 0%,#cccccc 100%); /* W3C */
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#eeeeee', endColorstr='#cccccc',GradientType=0 ); /* IE6-9 */
+	border-bottom: 1px solid #aaa;
+	min-height: 1.2em;
 }
 
-.two-column {
-	width: 40%;
-	float: left;
-	padding: 5%;
+div.appframe-toolbar {
+	padding: 4px;
+	background: #eeeeee;
+	border-top: 1px solid #f8f8f8;
+	border-bottom: 1px solid #ccc;
 }
-
-.clear {
-	clear: both;
-}
-
-/* */

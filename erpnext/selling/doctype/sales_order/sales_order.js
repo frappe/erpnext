@@ -86,15 +86,10 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 			// stop
 			if(doc.per_delivered < 100 || doc.per_billed < 100)
 				cur_frm.add_custom_button('Stop!', cur_frm.cscript['Stop Sales Order']);
-	} else {
-		
+		} else {	
 			// un-stop
 			cur_frm.add_custom_button('Unstop', cur_frm.cscript['Unstop Sales Order']);
-	}
-		
-		unhide_field(['Send SMS', 'message', 'customer_mobile_no'])
-	} else {
-		hide_field(['Send SMS', 'message', 'customer_mobile_no'])
+		}
 	}
 }
 

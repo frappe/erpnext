@@ -1945,6 +1945,10 @@ div.std-footer-item {
 	padding: 0px;
 }
 
+.layout-section {
+	padding: 15px;	
+}
+
 .layout-main-section {
 	width: 71%;
 	float: left;
@@ -2201,6 +2205,29 @@ div.time_field select{
 	width: 45px;
 }
 
+/* sidebar */
+
+div.sidebar-comment-wrapper input {
+	width: 50%;
+}
+div.sidebar-comment-message {
+	margin-top: 8px;
+	color: #777;
+}
+
+div.sidebar-comment-text {
+	font-size: 12px;
+	font-weight: bold;
+	margin-top: 8px;
+	color: #444;
+}
+div.sidebar-comment-info {
+	color: #777;
+}
+
+/*
+ *	lib/css/legacy/fields.css
+ */
 /* Documents */
 
 .frm_field_table {
@@ -2265,26 +2292,6 @@ div.time_field select{
 
 .field-to-update {
 	background-color:#FEE;
-}
-
-/* sidebar */
-
-div.sidebar-comment-wrapper input {
-	width: 50%;
-}
-div.sidebar-comment-message {
-	margin-top: 8px;
-	color: #777;
-}
-
-div.sidebar-comment-text {
-	font-size: 12px;
-	font-weight: bold;
-	margin-top: 8px;
-	color: #444;
-}
-div.sidebar-comment-info {
-	color: #777;
 }
 
 /*
@@ -3494,7 +3501,7 @@ div.appframe-titlebar {
 	background: -ms-linear-gradient(top,  #eeeeee 0%,#cccccc 100%); /* IE10+ */
 	background: linear-gradient(top,  #eeeeee 0%,#cccccc 100%); /* W3C */
 	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#eeeeee', endColorstr='#cccccc',GradientType=0 ); /* IE6-9 */
-	border-bottom: 1px solid #ccc;
+	border-bottom: 1px solid #aaa;
 	min-height: 1.2em;
 }
 
@@ -3557,65 +3564,4 @@ div.appframe-toolbar {
   src: local('Pacifico Regular'), local('Pacifico-Regular'), url('../lib/css/fonts/pacifico.woff') format('woff');
 }
 
-
-
-/*
- *	erpnext/startup/startup.css
- */
-h1, h2, h3, h4, h5 {
-	font-family: "Helvetica Neue", "Open Sans", Helvetica, sans-serif;
-	font-weight: normal;
-	margin-top: 0.2em;
-}
-
-body {
-	font-family: "Helvetica Neue", "Open Sans", Helvetica, sans-serif;
-	font-size: 13px;
-}
-
-span, div, td, input, textarea, button, select {
-	font-family: inherit;
-}
-
-body {
-	background: url(../images/redbeech.jpg) repeat;
-	color: #616161;
-}
-
-.small {
-	font-size: 11.5px;
-}
-
-.erpnext-footer {
-	margin: 11px auto;
-	text-align: center;
-}
-
-.navbar-new-comments {
-	margin: -3px 0px;
-	padding: 2px;
-	min-width: 20px;
-	text-align: center;
-	display: inline-block;
-	border-radius: 2px;
-	color: #999999;
-	background-color: #333131;
-}
-
-.navbar-new-comments:hover,
-.navbar-new-comments:active,
-.navbar-new-comments:focus {
-	color: #fff;
-}
-
-.navbar-new-comments-true {
-	color: #fff;
-	background-color: #B00D07;
-}
-
-/*extra size menus for recent*/
-.dropdown-menu#toolbar-recent, .dropdown-menu#toolbar-options, .dropdown-menu#toolbar-help{
-	min-width: 160px !important;
-	max-width: 260px !important;
-}
 
