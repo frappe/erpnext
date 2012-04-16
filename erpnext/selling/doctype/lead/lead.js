@@ -47,7 +47,7 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
   //---------------
   cur_frm.clear_custom_buttons()
   if(!doc.__islocal && !in_list(['Converted', 'Lead Lost'], doc.status)) {
-    cur_frm.add_custom_button('Create Customer', cur_frm.cscript['Create Customer']);
+	if (doc.source != 'Existing Customer') cur_frm.add_custom_button('Create Customer', cur_frm.cscript['Create Customer']);
     cur_frm.add_custom_button('Create Opportunity', cur_frm.cscript['Create Opportunity']);
     cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms);
   }

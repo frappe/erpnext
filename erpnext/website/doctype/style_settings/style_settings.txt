@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-03-27 14:36:48',
+		'creation': '2012-04-02 16:02:43',
 		'docstatus': 0,
-		'modified': '2012-03-27 14:36:48',
+		'modified': '2012-04-16 13:36:48',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -23,7 +23,7 @@
 		'name': '__common__',
 		'section_style': u'Simple',
 		'show_in_menu': 0,
-		'version': 18
+		'version': 19
 	},
 
 	# These values are common for all DocField
@@ -95,7 +95,7 @@
 		'fieldname': u'font',
 		'fieldtype': u'Select',
 		'label': u'Font',
-		'options': u'\nLucida Grande\nVerdana\nArial\nGeorgia\nTahoma\nLato\nOpen Sans',
+		'options': u'\nHelvetica Neue\nLucida Grande\nVerdana\nArial\nGeorgia\nTahoma\nLato\nOpen Sans',
 		'permlevel': 0
 	},
 
@@ -115,7 +115,7 @@
 		'fieldname': u'heading_font',
 		'fieldtype': u'Select',
 		'label': u'Heading Font',
-		'options': u'\nLucida Grande\nVerdana\nArial\nGeorgia\nTahoma\nLato\nOpen Sans',
+		'options': u'\nHelvetica Neue\nLucida Grande\nVerdana\nArial\nGeorgia\nTahoma\nLato\nOpen Sans',
 		'permlevel': 0
 	},
 
