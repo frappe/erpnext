@@ -195,7 +195,7 @@ class DocType:
 		"""Update workstation rate and calculates totals"""
 		total_op_cost = 0
 		for d in getlist(self.doclist, 'bom_operations'):
-			hour_rate = sql("select hour_rate from `tabWorkstation` where name = %s", d.workstation)
+			hour_rate = sql("select hour_rate from `tabWorkstation` where name = %s", cstr(d.workstation))
 			d.hour_rate = hour_rate and flt(hour_rate[0][0]) or 0
 			d.operating_cost = flt(d.hour_rate) * flt(d.time_in_mins) / 60
 			total_op_cost += d.operating_cost
