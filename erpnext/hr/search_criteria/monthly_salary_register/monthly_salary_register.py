@@ -43,8 +43,8 @@ for r in res:
   for d1 in li:
     d2 = '%s'%d1
     
-    earn_ret=convert_to_lists(sql("select e_type,e_amount from `tabSS Earning Detail` where parent = '%s'"%r[col_idx['ID']]))
-    ded_ret=convert_to_lists(sql("select d_type,d_amount from `tabSS Deduction Detail` where parent = '%s'"%r[col_idx['ID']]))
+    earn_ret=convert_to_lists(sql("select e_type,e_amount from `tabSalary Slip Earning` where parent = '%s'"%r[col_idx['ID']]))
+    ded_ret=convert_to_lists(sql("select d_type,d_amount from `tabSalary Slip Deduction` where parent = '%s'"%r[col_idx['ID']]))
     
 
     for e in earn_ret:
@@ -78,7 +78,7 @@ for lst in earn_type_lst:
   for r in res:
    
     lst0 = '%s'%lst[0]
-    total_ear += r[col_idx[lst0]]
+    total_ear += flt(r[col_idx[lst0]])
     
   total.append(total_ear) 
   
@@ -87,7 +87,7 @@ for lst in ded_type_lst:
   total_ded = 0
   for r in res:
     lst0 = '%s'%lst[0]
-    total_ded += r[col_idx[lst0]]
+    total_ded += flt(r[col_idx[lst0]])
     
   total.append(total_ded) 
 
