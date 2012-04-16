@@ -1425,6 +1425,10 @@ div.std-footer-item {
 	padding: 0px;
 }
 
+.layout-section {
+	padding: 15px;	
+}
+
 .layout-main-section {
 	width: 71%;
 	float: left;
@@ -1845,6 +1849,39 @@ div.stat-bar {
 
 
 
+
+/*
+ *	lib/css/ui/views.css
+ */
+
+.breadcrumbs {
+	color: #000000;
+}
+
+.breadcrumbs a {
+	color: #000000;
+}
+
+div.appframe-titlebar {
+	padding: 6px;
+	background: #eeeeee; /* Old browsers */
+	background: -moz-linear-gradient(top,  #eeeeee 0%, #cccccc 100%); /* FF3.6+ */
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#eeeeee), color-stop(100%,#cccccc)); /* Chrome,Safari4+ */
+	background: -webkit-linear-gradient(top,  #eeeeee 0%,#cccccc 100%); /* Chrome10+,Safari5.1+ */
+	background: -o-linear-gradient(top,  #eeeeee 0%,#cccccc 100%); /* Opera 11.10+ */
+	background: -ms-linear-gradient(top,  #eeeeee 0%,#cccccc 100%); /* IE10+ */
+	background: linear-gradient(top,  #eeeeee 0%,#cccccc 100%); /* W3C */
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#eeeeee', endColorstr='#cccccc',GradientType=0 ); /* IE6-9 */
+	border-bottom: 1px solid #aaa;
+	min-height: 1.2em;
+}
+
+div.appframe-toolbar {
+	padding: 4px;
+	background: #eeeeee;
+	border-top: 1px solid #f8f8f8;
+	border-bottom: 1px solid #ccc;
+}
 
 /*
  *	erpnext/startup/startup.css

@@ -1945,6 +1945,10 @@ div.std-footer-item {
 	padding: 0px;
 }
 
+.layout-section {
+	padding: 15px;	
+}
+
 .layout-main-section {
 	width: 71%;
 	float: left;
@@ -2201,6 +2205,29 @@ div.time_field select{
 	width: 45px;
 }
 
+/* sidebar */
+
+div.sidebar-comment-wrapper input {
+	width: 50%;
+}
+div.sidebar-comment-message {
+	margin-top: 8px;
+	color: #777;
+}
+
+div.sidebar-comment-text {
+	font-size: 12px;
+	font-weight: bold;
+	margin-top: 8px;
+	color: #444;
+}
+div.sidebar-comment-info {
+	color: #777;
+}
+
+/*
+ *	lib/css/legacy/fields.css
+ */
 /* Documents */
 
 .frm_field_table {
@@ -2265,26 +2292,6 @@ div.time_field select{
 
 .field-to-update {
 	background-color:#FEE;
-}
-
-/* sidebar */
-
-div.sidebar-comment-wrapper input {
-	width: 50%;
-}
-div.sidebar-comment-message {
-	margin-top: 8px;
-	color: #777;
-}
-
-div.sidebar-comment-text {
-	font-size: 12px;
-	font-weight: bold;
-	margin-top: 8px;
-	color: #444;
-}
-div.sidebar-comment-info {
-	color: #777;
 }
 
 /*
@@ -3494,7 +3501,7 @@ div.appframe-titlebar {
 	background: -ms-linear-gradient(top,  #eeeeee 0%,#cccccc 100%); /* IE10+ */
 	background: linear-gradient(top,  #eeeeee 0%,#cccccc 100%); /* W3C */
 	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#eeeeee', endColorstr='#cccccc',GradientType=0 ); /* IE6-9 */
-	border-bottom: 1px solid #ccc;
+	border-bottom: 1px solid #aaa;
 	min-height: 1.2em;
 }
 

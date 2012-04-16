@@ -925,14 +925,15 @@ if(f.init)f.init();f.make_body();return f;}
 wn.ui.AppFrame=Class.extend({init:function(parent){this.buttons={};this.$w=$('<div></div>').appendTo(parent);this.$titlebar=$('<div class="appframe-titlebar">\
    <span class="appframe-title"></span>\
    <span class="close">&times;</span>\
-  </div>').appendTo(this.$w);this.$w.find('.close').click(function(){window.history.back();})},add_button:function(label,click,icon){if(!this.$w.find('.appframe-toolbar').length)
+  </div>').appendTo(this.$w);this.$w.find('.close').click(function(){window.history.back();})},title:function(txt){this.$titlebar.find('.appframe-title').text(txt);},add_button:function(label,click,icon){if(!this.$w.find('.appframe-toolbar').length)
 this.$w.append('<div class="appframe-toolbar"></div>');args={label:label,icon:''};if(icon){args.icon='<i class="'+icon+'"></i>';}
 this.buttons[label]=$(repl('<button class="btn btn-small">\
    %(icon)s %(label)s</button>',args)).click(click).appendTo(this.$w.find('.appframe-toolbar'));return this.buttons[label];},clear_buttons:function(){this.$w.find('.appframe-toolbar').empty();}})
 /*
  *	lib/js/wn/ui/dialog.js
  */
-wn.widgets.FieldGroup=function(){this.first_button=false;this.make_fields=function(body,fl){$y(this.body,{padding:'11px'});this.fields_dict={};for(var i=0;i<fl.length;i++){var df=fl[i];var div=$a(body,'div','',{margin:'6px 0px'})
+wn.widgets.FieldGroup=function(){this.first_button=false;this.make_fields=function(body,fl){if(!window.make_field){wn.require('lib/css/legacy/fields.css');wn.require('lib/js/legacy/widgets/form/fields.js');wn.require('lib/js/wn/ui/button.js');}
+$y(this.body,{padding:'11px'});this.fields_dict={};for(var i=0;i<fl.length;i++){var df=fl[i];var div=$a(body,'div','',{margin:'6px 0px'})
 f=make_field(df,null,div,null);f.not_in_form=1;this.fields_dict[df.fieldname]=f
 f.refresh();if(df.fieldtype=='Button'&&!this.first_button){$(f.input).addClass('btn-info');this.first_button=true;}}}
 this.get_values=function(){var ret={};var errors=[];for(var key in this.fields_dict){var f=this.fields_dict[key];var v=f.get_value?f.get_value():null;if(f.df.reqd&&!v)
@@ -955,7 +956,8 @@ $ds(this.wrapper);freeze();this.display=true;cur_dialog=this;if(this.onshow)this
 this.hide=function(){if(this.onhide)this.onhide();unfreeze();$dh(this.wrapper);this.display=false;cur_dialog=null;}
 this.no_cancel=function(){this.appframe.$titlebar.find('.close').toggle(false);}
 if(opts)this.make();}
-wn.widgets.Dialog.prototype=new wn.widgets.FieldGroup();$(document).bind('keydown',function(e){if(cur_dialog&&!cur_dialog.no_cancel_flag&&e.which==27){cur_dialog.hide();}});
+wn.widgets.Dialog.prototype=new wn.widgets.FieldGroup();wn.provide('wn.ui');wn.ui.Dialog=wn.widgets.Dialog
+$(document).bind('keydown',function(e){if(cur_dialog&&!cur_dialog.no_cancel_flag&&e.which==27){cur_dialog.hide();}});
 /*
  *	lib/js/wn/ui/button.js
  */
