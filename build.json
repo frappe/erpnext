@@ -44,14 +44,15 @@
 
 	{
 		"css/all-web.css": [
-			"lib/css/legacy/body.css",
-			"lib/css/legacy/messages.css",
-			"lib/css/legacy/dialog.css",
 			"lib/css/bootstrap/headings.css",
 			"lib/css/bootstrap/buttons.css",
 			"lib/css/bootstrap/navbar.css",
 			"lib/css/bootstrap/dropdown.css",
 			"lib/css/bootstrap/tooltip.css",
+			"lib/css/legacy/body.css",
+			"lib/css/legacy/messages.css",
+			"lib/css/legacy/dialog.css",
+			"lib/css/ui/common.css",
 			"lib/css/ui/fonts.css",
 			"lib/css/ui/list.css",
 			"erpnext/startup/startup.css",
@@ -61,6 +62,14 @@
 	
 	{
 		"css/all-app.css": [
+			"lib/css/bootstrap/headings.css",
+			"lib/css/bootstrap/buttons.css",
+			"lib/css/bootstrap/navbar.css",
+			"lib/css/bootstrap/dropdown.css",
+			"lib/css/bootstrap/tooltip.css",
+			"lib/css/bootstrap/label.css",
+			"lib/css/bootstrap/icons.css",
+			"lib/css/bootstrap/popover.css",
 			"lib/css/legacy/body.css",
 			"lib/css/legacy/messages.css",
 			"lib/css/legacy/forms.css",
@@ -71,17 +80,10 @@
 			"lib/css/legacy/tabs.css",
 			"lib/css/legacy/sidebar.css",
 			"lib/css/Aristo/aristo.selected.css",
+			"lib/css/ui/common.css",
 			"lib/css/ui/list.css",
 			"lib/css/ui/views.css",
 			"lib/css/ui/fonts.css",
-			"lib/css/bootstrap/headings.css",
-			"lib/css/bootstrap/buttons.css",
-			"lib/css/bootstrap/navbar.css",
-			"lib/css/bootstrap/dropdown.css",
-			"lib/css/bootstrap/tooltip.css",
-			"lib/css/bootstrap/label.css",
-			"lib/css/bootstrap/icons.css",
-			"lib/css/bootstrap/popover.css",
 			"erpnext/startup/startup.css"
 		]
 	},
@@ -107,7 +109,7 @@
 			"lib/js/legacy/wn/widgets/footer.js",
 			"lib/js/legacy/model/local_data.js",
 			"lib/js/legacy/model/doclist.js",
-			"lib/js/legacy/app.js",
+			"lib/js/wn/app.js",
 			"js/app.js",
 			"erpnext/startup/startup.js",
 			"erpnext/website/js/topbar.js"
@@ -168,7 +170,7 @@
 			"lib/js/legacy/wn/widgets/form/comments.js",
 			"lib/js/legacy/wn/widgets/form/attachments.js",
 			"lib/js/legacy/wn/widgets/form/assign_to.js",
-			"lib/js/legacy/app.js",
+			"lib/js/wn/app.js",
 			"js/app.js",
 			"erpnext/startup/startup.js",
 			"erpnext/startup/js/modules.js",

@@ -8,11 +8,6 @@ wn.app = {
 }
 
 wn.modules_path = 'erpnext';
-wn.settings.no_history = true;
-
-$(document).bind('ready', function() {
-	startup();
-});
 
 $(document).bind('toolbar_setup', function() {
 	$('.brand').html('<b>erp</b>next\

@@ -1,11 +1,11 @@
 h1, h2, h3, h4, h5 {
-	font-family: "Open Sans", Helvetica, "Helvetica Neue", sans-serif;
+	font-family: "Helvetica Neue", "Open Sans", Helvetica, sans-serif;
 	font-weight: normal;
 	margin-top: 0.2em;
 }
 
 body {
-	font-family: "Open Sans", Helvetica, "Helvetica Neue", sans-serif;
+	font-family: "Helvetica Neue", "Open Sans", Helvetica, sans-serif;
 	font-size: 13px;
 }
 
@@ -44,24 +44,9 @@ body {
 	color: #fff;
 }
 
-
 .navbar-new-comments-true {
 	color: #fff;
 	background-color: #B00D07;
-}
-
-.navbar-icon-home {
-	vertical-align: middle;
-	opacity:0.4;
-	Filter:alpha(opacity=40); /* For IE8 and earlier */
-}
-
-.navbar-icon-home:hover,
-.navbar-icon-home:focus,
-.navbar-icon-home:active,
-.navbar-icon-home-hover{
-	opacity:1;
-	Filter:alpha(opacity=100); /* For IE8 and earlier */
 }
 
 /*extra size menus for recent*/

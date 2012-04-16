@@ -240,7 +240,7 @@ wn.views.add_list_btn=function(parent,doctype){$(parent).append(repl('<span clas
 /*
  *	lib/js/wn/views/doclistview.js
  */
-wn.provide('wn.views.doclistview');wn.provide('wn.doclistviews');wn.views.doclistview.pages={};wn.views.doclistview.show=function(doctype){var pagename=doctype+' List';var doctype=get_label_doctype(doctype);wn.model.with_doctype(doctype,function(){var page=wn.views.doclistview.pages[pagename];if(!page){var page=wn.container.add_page(pagename);page.doclistview=new wn.views.DocListView(doctype,page);wn.views.doclistview.pages[pagename]=page;}
+wn.provide('wn.views.doclistview');wn.provide('wn.doclistviews');wn.views.doclistview.pages={};wn.views.doclistview.show=function(doctype){var pagename=doctype+' List';var doctype=get_label_doctype(doctype);wn.model.with_doctype(doctype,function(r){if(r&&r['403'])return;var page=wn.views.doclistview.pages[pagename];if(!page){var page=wn.container.add_page(pagename);page.doclistview=new wn.views.DocListView(doctype,page);wn.views.doclistview.pages[pagename]=page;}
 document.title=page.doclistview.label;wn.container.change_to(pagename);})}
 wn.views.DocListView=wn.ui.Listing.extend({init:function(doctype,page){this.doctype=doctype;this.$page=$(page);this.label=get_doctype_label(doctype);this.label=(this.label.toLowerCase().substr(-4)=='list')?this.label:(this.label+' List');this.make_page();this.setup();},make_page:function(){var me=this;this.$page.html(repl('<div class="layout-wrapper layout-wrapper-background">\
    <div class="appframe-area"></div>\
@@ -312,14 +312,18 @@ if(data.docstatus==0||data.docstatus==null){data.docstatus_icon='icon-pencil';da
 /*
  *	lib/js/wn/views/pageview.js
  */
-wn.provide('wn.views.pageview');wn.views.pageview={pages:{},with_page:function(name,callback){if(!locals.Page[name]){wn.call({method:'webnotes.widgets.page.getpage',args:{'name':name},callback:callback});}else{callback();}},show:function(name){if(!name)name=wn.boot.home_page;wn.views.pageview.with_page(name,function(r){if(r&&r.exc){if(!wn.pages['404'])wn.views.make_404();wn.container.change_to('404');}else if(!wn.pages[name]){wn.views.pageview.pages[name]=new wn.views.Page(name);}
+wn.provide('wn.views.pageview');wn.views.pageview={pages:{},with_page:function(name,callback){if(!locals.Page[name]){wn.call({method:'webnotes.widgets.page.getpage',args:{'name':name},callback:callback});}else{callback();}},show:function(name){if(!name)name=wn.boot.home_page;wn.views.pageview.with_page(name,function(r){if(r&&r.exc){if(!r['403'])wn.container.change_to('404');}else if(!wn.pages[name]){wn.views.pageview.pages[name]=new wn.views.Page(name);}
 wn.container.change_to(name);});}}
 wn.views.Page=Class.extend({init:function(name){this.name=name;var me=this;this.pagedoc=locals.Page[this.name];this.wrapper=wn.container.add_page(this.name);this.wrapper.label=this.pagedoc.title||this.pagedoc.name;this.wrapper.innerHTML=this.pagedoc.content;wn.dom.eval(this.pagedoc.__script||this.pagedoc.script||'');wn.dom.set_style(this.pagedoc.style);this.trigger('onload');$(this.wrapper).bind('show',function(){cur_frm=null;me.trigger('onshow');me.trigger('refresh');});},trigger:function(eventname){var me=this;try{if(pscript[eventname+'_'+this.name]){pscript[eventname+'_'+this.name](me.wrapper);}else if(me.wrapper[eventname]){me.wrapper[eventname](me.wrapper);}}catch(e){console.log(e);}}})
 wn.views.make_404=function(){var page=wn.container.add_page('404');$(page).html('<div class="layout-wrapper">\
   <h1>Not Found</h1><br>\
   <p>Sorry we were unable to find what you were looking for.</p>\
   <p><a href="#">Go back to home</a></p>\
-  </div>')};
+  </div>').toggle(false);};wn.views.make_403=function(){var page=wn.container.add_page('403');$(page).html('<div class="layout-wrapper">\
+  <h1>Not Permitted</h1><br>\
+  <p>Sorry you are not permitted to view this page.</p>\
+  <p><a href="#">Go back to home</a></p>\
+  </div>').toggle(false);};
 /*
  *	lib/js/wn/views/formview.js
  */
@@ -339,9 +343,10 @@ if(!rb.forbidden){wn.container.change_to('Report Builder');}});}}
  */
 wn.provide('wn.request');wn.request.url='index.cgi';wn.request.prepare=function(opts){if(opts.btn)$(opts.btn).set_working();if(opts.show_spinner)set_loading();if(opts.freeze)freeze();if(!opts.args.cmd){console.log(opts)
 throw"Incomplete Request";}}
-wn.request.cleanup=function(opts,r){if(opts.btn)$(opts.btn).done_working();if(opts.show_spinner)hide_loading();if(opts.freeze)unfreeze();if(wn.boot.sid&&wn.get_cookie('sid')!=wn.boot.sid){msgprint('Session expired');setTimeout('redirect_to_login()',3000);return;}
+wn.request.cleanup=function(opts,r){if(opts.btn)$(opts.btn).done_working();if(opts.show_spinner)hide_loading();if(opts.freeze)unfreeze();if(wn.boot.sid&&wn.get_cookie('sid')!=wn.boot.sid){msgprint('Session expired');setTimeout('wn.app.redirect_to_login()',3000);return;}
 if(r.server_messages)msgprint(r.server_messages)
-if(r.exc){console.log(r.exc);};if(r.docs)LocalDB.sync(r.docs);}
+if(r.exc){console.log(r.exc);};if(r['403']){wn.container.change_to('403');}
+if(r.docs)LocalDB.sync(r.docs);}
 wn.request.call=function(opts){wn.request.prepare(opts);$.ajax({url:opts.url||wn.request.url,data:opts.args,type:opts.type||'POST',dataType:opts.dataType||'json',success:function(r,xhr){wn.request.cleanup(opts,r);opts.success(r,xhr.responseText);},error:function(xhr,textStatus){wn.request.cleanup(opts,{});show_alert('Unable to complete request: '+textStatus)
 if(opts.error)opts.error(xhr)}})}
 wn.call=function(opts){var args=$.extend({},opts.args)
@@ -352,13 +357,13 @@ wn.request.call({args:args,success:opts.callback,error:opts.error,btn:opts.btn,f
  *	lib/js/core.js
  */
 if(!console){var console={log:function(txt){alert(txt);}}}
-wn.versions.check();$(document).bind('ready',function(){var base=window.location.href.split('#')[0];$.each($('a[softlink!="false"]'),function(i,v){if(v.href.substr(0,base.length)==base){var path=(v.href.substr(base.length));if(path.substr(0,1)!='#'){v.href=base+'#'+path;}}});if(!wn.settings.no_history&&window.location.hash){wn.page.set(window.location.hash.substr(1));}});
+wn.versions.check();$(document).bind('ready',function(){wn.app=new wn.Application();});
 
 /*
  *	lib/js/legacy/globals.js
  */
 wn.provide('wn.widgets.form');wn.provide('wn.widgets.report');wn.provide('wn.utils');wn.provide('wn.model');wn.provide('wn.profile');wn.provide('wn.session');wn.provide('_f');wn.provide('_p');wn.provide('_r');wn.provide('_c');wn.provide('_e');wn.provide('_startup_data')
-wn.settings.no_history=1;var NEWLINE='\n';var login_file='';var version='v170';var profile=null;var session={};var is_testing=false;var user=null;var user_defaults=null;var user_roles=null;var user_fullname=null;var user_email=null;var user_img={};var home_page=null;var pscript={};var selector=null;var top_index=91;var _f={};var _p={};var _e={};var _r={};var FILTER_SEP='\1';var frms={};var cur_frm=null;var pscript={};var validated=true;var validation_message='';var tinymce_loaded=null;
+wn.settings.no_history=1;var NEWLINE='\n';var profile=null;var user=null;var user_defaults=null;var user_roles=null;var user_fullname=null;var user_email=null;var user_img={};var pscript={};var selector=null;var top_index=91;var _f={};var _p={};var _e={};var _r={};var FILTER_SEP='\1';var frms={};var cur_frm=null;var pscript={};var validated=true;var validation_message='';var tinymce_loaded=null;
 /*
  *	lib/js/legacy/utils/datatype.js
  */
@@ -570,7 +575,8 @@ var t=make_table(msg_dialog.rows['Msg'],1,2,'100%',['20px','250px'],{padding:'2p
 if(!msg_dialog.display)msg_dialog.show();var has_msg=msg_dialog.msg_area.innerHTML?1:0;var m=$a(msg_dialog.msg_area,'div','');if(has_msg)$y(m,{marginTop:'4px'});$dh(msg_dialog.msg_icon);if(msg.substr(0,6).toLowerCase()=='error:'){msg_dialog.msg_icon.src='lib/images/icons/error.gif';$di(msg_dialog.msg_icon);msg=msg.substr(6);}else if(msg.substr(0,8).toLowerCase()=='message:'){msg_dialog.msg_icon.src='lib/images/icons/application.gif';$di(msg_dialog.msg_icon);msg=msg.substr(8);}else if(msg.substr(0,3).toLowerCase()=='ok:'){msg_dialog.msg_icon.src='lib/images/icons/accept.gif';$di(msg_dialog.msg_icon);msg=msg.substr(3);}
 m.innerHTML=replace_newlines(msg);if(m.offsetHeight>200){$y(m,{height:'200px',width:'400px',overflow:'auto'})}
 msg_dialog.custom_onhide=callback;}
-var growl_area;function show_alert(txt,id){if(!growl_area){growl_area=$a(popup_cont,'div','',{position:'fixed',bottom:'8px',right:'8px',width:'320px',zIndex:10});}
+var growl_area;function show_alert(txt,id){if(!growl_area){if(!$('#dialog-container').length){$('<div id="dialog-container">').appendTo('body');}
+growl_area=$a($i('dialog-container'),'div','',{position:'fixed',bottom:'8px',right:'8px',width:'320px',zIndex:10});}
 var wrapper=$a(growl_area,'div','',{position:'relative'});var body=$a(wrapper,'div','notice');var c=$a(body,'i','icon-remove-sign',{cssFloat:'right',cursor:'pointer'});$(c).click(function(){$dh(this.wrapper)});c.wrapper=wrapper;var t=$a(body,'div','',{color:'#FFF'});$(t).html(txt);if(id){$(t).attr('id',id);}
 $(wrapper).hide().fadeIn(1000);}
 /*
@@ -597,7 +603,8 @@ this.set_value=function(key,val){var f=this.fields_dict[key];if(f){f.set_input(v
 this.set_values=function(dict){for(var key in dict){if(this.fields_dict[key]){this.set_value(key,dict[key]);}}}
 this.clear=function(){for(key in this.fields_dict){var f=this.fields_dict[key];if(f){f.set_input(f.df['default']||'');}}}}
 wn.widgets.Dialog=function(opts){this.opts=opts;this.display=false;this.make=function(opts){if(opts)
-this.opts=opts;if(!this.opts.width)this.opts.width=480;this.wrapper=$a(popup_cont,'div','dialog_wrapper');if(this.opts.width)
+this.opts=opts;if(!this.opts.width)this.opts.width=480;if(!$('#dialog-container').length){$('<div id="dialog-container">').appendTo('body');}
+this.wrapper=$('<div class="dialog_wrapper">').appendTo('#dialog-container').get(0);if(this.opts.width)
 this.wrapper.style.width=this.opts.width+'px';this.make_head();this.body=$a(this.wrapper,'div','dialog_body');if(this.opts.fields)
 this.make_fields(this.body,this.opts.fields);}
 this.make_head=function(){var me=this;this.appframe=new wn.ui.AppFrame(this.wrapper);this.appframe.$titlebar.find('.close').unbind('click').click(function(){if(me.oncancel)me.oncancel();me.hide();});this.set_title(this.opts.title);}
@@ -804,14 +811,8 @@ var Meta={};var local_dt={};Meta.make_local_dt=function(dt,dn){var dl=make_docli
 Meta.get_field=function(dt,fn,dn){if(dn&&local_dt[dt]&&local_dt[dt][dn]){return local_dt[dt][dn][fn];}else{if(fields[dt])var d=fields[dt][fn];if(d)return d;}
 return{};}
 Meta.set_field_property=function(fn,key,val,doc){if(!doc&&(cur_frm.doc))doc=cur_frm.doc;try{local_dt[doc.doctype][doc.name][fn][key]=val;refresh_field(fn);}catch(e){alert("Client Script Error: Unknown values for "+doc.name+','+fn+'.'+key+'='+val);}}
-function get_doctype_label(dt){if(session.dt_labels&&session.dt_labels[dt])
-return session.dt_labels[dt]
-else
-return dt}
-function get_label_doctype(label){if(session.rev_dt_labels&&session.rev_dt_labels[label])
-return session.rev_dt_labels[label]
-else
-return label}
+function get_doctype_label(dt){return dt}
+function get_label_doctype(label){return label}
 var getchildren=LocalDB.getchildren;var get_field=Meta.get_field;var createLocal=LocalDB.create;
 /*
  *	lib/js/legacy/model/doclist.js
@@ -835,51 +836,21 @@ if(all_clear)all_clear=false;}}
 if(errfld.length)msgprint('<b>Mandatory fields required in '+
 (doc.parenttype?(fields[doc.parenttype][doc.parentfield].label+' (Table)'):get_doctype_label(doc.doctype))+':</b>\n'+errfld.join('\n'));return all_clear;}
 /*
- *	lib/js/legacy/app.js
+ *	lib/js/wn/app.js
  */
-var popup_cont;var session={};if(!wn)var wn={};function startup(){popup_cont=$a(document.getElementsByTagName('body')[0],'div');var setup_globals=function(r){wn.boot=r;profile=r.profile;user=r.profile.name;user_fullname=wn.user_info(user).fullname;user_defaults=profile.defaults;user_roles=profile.roles;user_email=profile.email;home_page=r.home_page;_p.letter_heads=r.letter_heads;sys_defaults=r.sysdefaults;session.rt=profile.can_read;if(r.ipinfo)session.ipinfo=r.ipinfo;session.dt_labels=r.dt_labels;session.rev_dt_labels={}
-if(r.dt_labels){for(key in r.dt_labels)session.rev_dt_labels[r.dt_labels[key]]=key;}
-wn.control_panel=r.control_panel;}
-var setup_viewport=function(){wn.container=new wn.views.Container();if(user=='Guest')
-user_defaults.hide_webnotes_toolbar=1;if(!cint(user_defaults.hide_webnotes_toolbar)||user=='Administrator'){wn.container.wntoolbar=new wn.ui.toolbar.Toolbar();}
-$(document).trigger('startup');try{if(wn.control_panel.custom_startup_code)
-eval(wn.control_panel.custom_startup_code);}catch(e){console.log('Error in evaluating custom startup code:');console.log(e);}
-var t=to_open();if(t){window.location.hash=t;set_favicon();}else if(home_page){loadpage(home_page);}
-wn.route();$dh('startup_div');$ds('body_div');}
-var callback=function(r,rt){if(r.exc)console.log(r.exc);setup_globals(r);setup_viewport();}
-if(wn.boot){LocalDB.sync(wn.boot.docs);callback(wn.boot,'');if(wn.boot.error_messages)
+wn.Application=Class.extend({init:function(){this.load_bootinfo();this.make_page_container();this.make_nav_bar();this.set_favicon();$(document).trigger('startup');wn.route();},load_bootinfo:function(){LocalDB.sync(wn.boot.docs);wn.user=wn.boot.profile.name;wn.control_panel=wn.boot.control_panel;if(wn.boot.error_messages)
 console.log(wn.boot.error_messages)
 if(wn.boot.server_messages)
-msgprint(wn.boot.server_messages);}else{if($i('startup_div'))
-$c('startup',{},callback,null,1);}}
-function to_open(){if(get_url_arg('page'))
-return get_url_arg('page');var h=location.hash;if(h){return h.substr(1);}}
-function logout(){$c('logout',args={},function(r,rt){if(r.exc){console.log(r.exc);return;}
-redirect_to_login();});}
-function redirect_to_login(){if(login_file)
-window.location.href=login_file;else{window.location.reload();}}
-_p.def_print_style_body="html, body, div, span, td { font-family: Arial, Helvetica; font-size: 12px; }"+"\npre { margin:0; padding:0;}"
-_p.def_print_style_other="\n.simpletable, .noborder { border-collapse: collapse; margin-bottom: 10px;}"
-+"\n.simpletable td {border: 1pt solid #000; vertical-align: top; padding: 2px; }"
-+"\n.noborder td { vertical-align: top; }"
-_p.go=function(html){var d=document.createElement('div')
-d.innerHTML=html
-$(d).printElement();}
-_p.preview=function(html){var w=window.open('');w.document.write(html)
-w.document.close();}
-var resize_observers=[]
-function set_resize_observer(fn){if(resize_observers.indexOf(fn)==-1)resize_observers.push(fn);}
-window.onresize=function(){return;var ht=get_window_height();for(var i=0;i<resize_observers.length;i++){resize_observers[i](ht);}}
-get_window_height=function(){var ht=window.innerHeight?window.innerHeight:document.documentElement.offsetHeight?document.documentElement.offsetHeight:document.body.offsetHeight;return ht;}
-function set_favicon(){var link=$('link[type="image/x-icon"]').remove().attr("href");var favicon='\
-  <link rel="shortcut icon" href="'+link+'" type="image/x-icon"> \
-  <link rel="icon" href="'+link+'" type="image/x-icon">'
-$(favicon).appendTo('head');}
+msgprint(wn.boot.server_messages);this.set_globals();},set_globals:function(){profile=wn.boot.profile;user=wn.boot.profile.name;user_fullname=wn.user_info(user).fullname;user_defaults=profile.defaults;user_roles=profile.roles;user_email=profile.email;sys_defaults=wn.boot.sysdefaults;},make_page_container:function(){wn.container=new wn.views.Container();wn.views.make_403();wn.views.make_404();$('#startup_div').toggle(false);$('#body_div').toggle(true);},make_nav_bar:function(){if(wn.user!='Guest'){wn.container.wntoolbar=new wn.ui.toolbar.Toolbar();}},logout:function(){var me=this;wn.call({method:'logout',callback:function(r){if(r.exc){console.log(r.exc);return;}
+me.redirect_to_login();}})},redirect_to_login:function(){window.location.hash='';window.location.reload();},set_favicon:function(){var link=$('link[type="image/x-icon"]').remove().attr("href");var favicon='\
+   <link rel="shortcut icon" href="'+link+'" type="image/x-icon"> \
+   <link rel="icon" href="'+link+'" type="image/x-icon">'
+$(favicon).appendTo('head');}})
 /*
  *	js/app.js
  */
 wn.app={name:'ERPNext',license:'GNU/GPL - Usage Condition: All "erpnext" branding must be kept as it is',source:'https://github.com/webnotes/erpnext',publisher:'Web Notes Technologies Pvt Ltd, Mumbai',copyright:'&copy; Web Notes Technologies Pvt Ltd',version:'2.'+window._version_number}
-wn.modules_path='erpnext';wn.settings.no_history=true;$(document).bind('ready',function(){startup();});$(document).bind('toolbar_setup',function(){$('.brand').html('<b>erp</b>next\
+wn.modules_path='erpnext';$(document).bind('toolbar_setup',function(){$('.brand').html('<b>erp</b>next\
   <i class="icon-home icon-white navbar-icon-home" ></i>').hover(function(){$(this).find('.icon-home').addClass('navbar-icon-home-hover');},function(){$(this).find('.icon-home').removeClass('navbar-icon-home-hover');});});
 /*
  *	erpnext/startup/startup.js
