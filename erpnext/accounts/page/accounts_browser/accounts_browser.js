@@ -102,7 +102,7 @@ erpnext.AccountsChart = Class.extend({
 		var data = $(link).data('node-data');
 		if(!data) return;
 
-		link.toolbar = $('<span class="accbrowser-node-toolbar"></span>').insertAfter(link);
+		link.toolbar = $('<span class="tree-node-toolbar"></span>').insertAfter(link);
 		
 		// edit
 		$('<a href="#!Form/'+encodeURIComponent(this.ctype)+'/'
@@ -112,7 +112,7 @@ erpnext.AccountsChart = Class.extend({
 			link.toolbar.append(' | <a onclick="erpnext.account_chart.new_node();">Add Child</a>');
 		} else if(this.ctype=='Account') {
 			link.toolbar.append(' | <a onclick="erpnext.account_chart.show_ledger();">View Ledger</a>');
-		}		
+		}
 	},
 	show_ledger: function() {
 		var me = this;
