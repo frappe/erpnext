@@ -1,5 +1,8 @@
 wn.pages['activity'].onload = function(wrapper) {
+	wrapper.appframe = new wn.ui.AppFrame($(wrapper).find('.layout-appframe'));
+	wrapper.appframe.title('Activity');
 	var list = new wn.ui.Listing({
+		appframe: wrapper.appframe,
 		method: 'home.page.activity.activity.get_feed',
 		parent: $('#activity-list'),
 		render_row: function(row, data) {
