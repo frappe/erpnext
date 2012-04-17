@@ -1372,12 +1372,12 @@ wn.ui.toolbar.Toolbar=Class.extend({init:function(){this.make();this.make_home()
     onclick="return false;">Tools<b class="caret"></b></a>\
    <ul class="dropdown-menu" id="toolbar-tools">\
     <li><a href="#" onclick="return err_console.show();">Error Console</a></li>\
-    <li><a href="#" onclick="return wn.ui.toolbar.clear_cache();">Clear Cache</a></li>\
+    <li><a href="#" onclick="return wn.ui.toolbar.clear_cache();">Clear Cache & Refresh</a></li>\
     <li><a href="#" onclick="return wn.ui.toolbar.show_about();">About</a></li>\
    </ul>\
   </li>');if(has_common(user_roles,['Administrator','System Manager'])){$('#toolbar-tools').append('<li><a href="#" \
     onclick="return wn.ui.toolbar.download_backup();">\
-    Download Backup</a></li>');}},set_user_name:function(){var fn=user_fullname;if(fn.length>15)fn=fn.substr(0,12)+'...';$('#toolbar-user-link').html(fn+'<b class="caret"></b>');},make_logout:function(){$('#toolbar-user').append('<li><a href="#" onclick="return wn.app.logout();">Logout</a></li>');}});wn.ui.toolbar.clear_cache=function(){localStorage&&localStorage.clear();$c('webnotes.session_cache.clear',{},function(r,rt){show_alert(r.message);});return false;}
+    Download Backup</a></li>');}},set_user_name:function(){var fn=user_fullname;if(fn.length>15)fn=fn.substr(0,12)+'...';$('#toolbar-user-link').html(fn+'<b class="caret"></b>');},make_logout:function(){$('#toolbar-user').append('<li><a href="#" onclick="return wn.app.logout();">Logout</a></li>');}});wn.ui.toolbar.clear_cache=function(){localStorage&&localStorage.clear();$c('webnotes.session_cache.clear',{},function(r,rt){if(!r.exc){show_alert(r.message);location.reload();}});return false;}
 wn.ui.toolbar.download_backup=function(){$c('webnotes.utils.backups.get_backup',{},function(r,rt){});return false;}
 wn.ui.toolbar.show_about=function(){try{wn.require('lib/js/wn/misc/about.js');wn.ui.misc.about();}catch(e){console.log(e);}
 return false;}
