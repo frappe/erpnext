@@ -193,9 +193,14 @@ class DocType(TransactionBase):
 
 			item = webnotes.conn.sql("select default_income_account, default_sales_cost_center, default_warehouse from tabItem where name = '%s'" %(args['item_code']), as_dict=1)
 
-			ret['income_account'] = item and item[0]['default_income_account'] or dtl and dtl[0]['income_account'] or args['income_account']
-			ret['cost_center'] = item and item[0]['default_sales_cost_center'] or dtl and dtl[0]['cost_center'] or args['cost_center']
-			ret['warehouse'] = item and item[0]['default_warehouse'] or dtl and dtl[0]['warehouse'] or args['warehouse']
+			ret['income_account'] = item and item[0].get('default_income_account') \
+				or (dtl and dtl[0].get('income_account') or args.get('income_account'))
+
+			ret['cost_center'] = item and item[0].get('default_sales_cost_center') \
+				or (dtl and dtl[0].get('cost_center') or args.get('cost_center'))
+			
+			ret['warehouse'] = item and item[0].get('default_warehouse') \
+				or (dtl and dtl[0].get('warehouse') or args.get('warehouse'))
 
 			if ret['warehouse']:
 				actual_qty = webnotes.conn.sql("select actual_qty from `tabBin` where item_code = '%s' and warehouse = '%s'" % (args['item_code'], ret['warehouse']))

@@ -1,3 +1,3 @@
 install_docs = [
-	{"doctype":"Role", "name":"Projects User"},
+	{"doctype":"Role", "role_name":"Projects User", "name":"Projects User"},
 ]

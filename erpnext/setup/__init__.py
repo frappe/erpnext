@@ -1,3 +1,3 @@
 install_docs = [
-	{'doctype':'Role', 'name': 'System Manager'}
+	{'doctype':'Role', 'role_name': 'System Manager', 'name': 'System Manager'}
 ]
