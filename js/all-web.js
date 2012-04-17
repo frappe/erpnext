@@ -75,7 +75,7 @@ $(ele).css('-box-shadow','0px 0px '+spread+'px rgba(0,0,0,0.3);')}
 /*
  *	lib/js/wn/model.js
  */
-wn.provide('wn.model');wn.model={no_value_type:['Section Break','Column Break','HTML','Table','Button','Image'],new_names:{},with_doctype:function(doctype,callback){if(locals.DocType[doctype]){callback();}else{wn.call({method:'webnotes.widgets.form.load.getdoctype',args:{doctype:doctype},callback:callback});}},with_doc:function(doctype,name,callback){if(!name)name=doctype;if(locals[doctype]&&locals[doctype][name]){callback(name);}else{wn.call({method:'webnotes.widgets.form.load.getdoc',args:{doctype:doctype,name:name},callback:function(r){callback(name);}});}},can_delete:function(doctype){if(!doctype)return false;return locals.DocType[doctype].allow_trash&&wn.boot.profile.can_cancel.indexOf(doctype)!=-1;}}
+wn.provide('wn.model');wn.model={no_value_type:['Section Break','Column Break','HTML','Table','Button','Image'],new_names:{},with_doctype:function(doctype,callback){if(locals.DocType[doctype]){callback();}else{wn.call({method:'webnotes.widgets.form.load.getdoctype',args:{doctype:doctype},callback:callback});}},with_doc:function(doctype,name,callback){if(!name)name=doctype;if(locals[doctype]&&locals[doctype][name]){callback(name);}else{wn.call({method:'webnotes.widgets.form.load.getdoc',args:{doctype:doctype,name:name},callback:function(r){callback(name,r);}});}},can_delete:function(doctype){if(!doctype)return false;return locals.DocType[doctype].allow_trash&&wn.boot.profile.can_cancel.indexOf(doctype)!=-1;}}
 /*
  *	lib/js/wn/misc/tools.js
  */
@@ -330,7 +330,7 @@ wn.views.make_404=function(){var page=wn.container.add_page('404');$(page).html(
  *	lib/js/wn/views/formview.js
  */
 wn.provide('wn.views.formview');wn.views.formview={show:function(dt,dn){if(wn.model.new_names[dn])
-dn=wn.model.new_names[dn];wn.model.with_doctype(dt,function(){wn.model.with_doc(dt,dn,function(dn){if(!(locals[dt]&&locals[dt][dn])){wn.container.change_to('404');return;}
+dn=wn.model.new_names[dn];wn.model.with_doctype(dt,function(){wn.model.with_doc(dt,dn,function(dn,r){if(r&&r['403'])return;if(!(locals[dt]&&locals[dt][dn])){wn.container.change_to('404');return;}
 if(!wn.views.formview[dt]){wn.views.formview[dt]=wn.container.add_page('Form - '+dt);wn.views.formview[dt].frm=new _f.Frm(dt,wn.views.formview[dt]);}
 wn.container.change_to('Form - '+dt);wn.views.formview[dt].frm.refresh(dn);});})},create:function(dt){var new_name=LocalDB.create(dt);wn.set_route('Form',dt,new_name);}}
 /*
