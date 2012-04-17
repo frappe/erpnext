@@ -38,7 +38,6 @@ class DocType:
 # ------------------------------------- Home page module details -----------------------------------------
 	
 	def delete_cache(self):
-		sql("delete from __DocTypeCache")
 		com = sql("select abbr, name from tabCompany")
 		for d in com:
 			sql("update `tabCompany` set receivables_group = '%s' where (receivables_group = '%s' or receivables_group = '' or receivables_group is null) and name = '%s'" % ('Accounts Receivable - '+cstr(d[0]), 'Accounts Receivables - '+cstr(d[0]), d[1]))
