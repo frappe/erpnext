@@ -29,7 +29,6 @@ cur_frm.cscript.onload = function(doc, dt, dn){
 //=======================================================================
 cur_frm.cscript.refresh = function(doc, dt, dn){
   if((!doc.__islocal) && (doc.is_active == 'Yes')){
-    cur_frm.add_custom_button('Make IT Checklist', cur_frm.cscript['Make IT Checklist']);
     cur_frm.add_custom_button('Make Salary Slip', cur_frm.cscript['Make Salary Slip']);
   
     get_field(doc.doctype, 'employee', doc.name).permlevel = 1;
@@ -37,16 +36,6 @@ cur_frm.cscript.refresh = function(doc, dt, dn){
   }
 }
 
-// Make IT checklist
-//=======================================================================
-cur_frm.cscript['Make IT Checklist']=function(){
-  var itc = LocalDB.create('IT Checklist');
-  itc = locals['IT Checklist'][itc];
-  itc.employee = cur_frm.doc.employee;
-  itc.fiscal_year = sys_defaults.fiscal_year;
-  itc.is_cheklist_active='Yes';
-  loaddoc('IT Checklist', itc.name);
-}
 
 // Make Salry Slip
 //=======================================================================

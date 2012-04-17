@@ -28,13 +28,6 @@ def change_password(arg):
 	if not webnotes.conn.sql('select name from tabProfile where name=%s and password=password(%s)', (webnotes.session['user'], arg['old_password'])):
 		webnotes.msgprint('Old password is not correct', raise_exception=1)
 	
-	import webnotes.defs
-	from webnotes.utils import cint
-	if hasattr(webnotes.defs, 'sync_with_gateway') and \
-			cint(webnotes.defs.sync_with_gateway) or 0:	
-		import server_tools.gateway_utils
-		webnotes.msgprint(server_tools.gateway_utils.change_password(arg['old_password'], arg['new_password'])['message'])
-
 	from webnotes.utils import nowdate
 	webnotes.conn.sql("update tabProfile set password=password(%s), modified=%s where name=%s",(arg['new_password'], nowdate(), webnotes.session['user']))
 	webnotes.msgprint('Password Updated');

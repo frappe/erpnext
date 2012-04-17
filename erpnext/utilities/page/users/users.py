@@ -83,15 +83,7 @@ def update_security(args=''):
 	webnotes.conn.set_value('Profile', args['user'], 'enabled', int(args.get('enabled',0)) or 0)
 
 	if args.get('new_password') and args.get('sys_admin_pwd'):
-		import webnotes.defs
 		from webnotes.utils import cint
-		if hasattr(webnotes.defs, 'sync_with_gateway') and \
-				cint(webnotes.defs.sync_with_gateway) or 0:
-			import server_tools.gateway_utils
-			res = server_tools.gateway_utils.change_password('', args['new_password'], 
-				args['user'], args['sys_admin_pwd'])
-			if 'Traceback' not in res['message']:
-				webnotes.msgprint(res['message'])
 		webnotes.conn.sql("update tabProfile set password=password(%s) where name=%s", 
 			(args['new_password'], args['user']))
 	else: 
@@ -106,14 +98,6 @@ def update_security(args=''):
 @webnotes.whitelist()
 def add_user(args):
 	args = json.loads(args)
-	# erpnext-saas
-	import webnotes.defs
-	from webnotes.utils import cint
-	if hasattr(webnotes.defs, 'sync_with_gateway') and \
-			cint(webnotes.defs.sync_with_gateway) or 0:	
-		from server_tools.gateway_utils import add_user_gateway
-		add_user_gateway(args)
-	
 	add_profile(args)
 	
 @webnotes.whitelist()
@@ -174,14 +158,6 @@ def delete(arg=None):
 	"""delete user"""
 	webnotes.conn.sql("update tabProfile set enabled=0, docstatus=2 where name=%s", 
 		webnotes.form_dict['uid'])
-	# erpnext-saas
-	import webnotes.defs
-	from webnotes.utils import cint
-	if hasattr(webnotes.defs, 'sync_with_gateway') and \
-			cint(webnotes.defs.sync_with_gateway) or 0:
-		from server_tools.gateway_utils import remove_user_gateway
-		remove_user_gateway(webnotes.form_dict['uid'])
-
 	webnotes.login_manager.logout(user=webnotes.form_dict['uid'])
 	
 welcome_txt = """

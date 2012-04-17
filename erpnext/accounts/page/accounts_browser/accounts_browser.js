@@ -14,37 +14,235 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-pscript['onshow_Accounts Browser'] = function(wrapper){
-	wn.require('lib/js/legacy/widgets/tree.js');
+// tree of chart of accounts / cost centers
+// multiple companies
+// add node
+// edit node
+// see ledger
 
+pscript['onload_Accounts Browser'] = function(wrapper){
+	wn.require('lib/js/wn/ui/tree.js');
 	wrapper.appframe = new wn.ui.AppFrame($(wrapper).find('.appframe-area'));
 	wrapper.appframe.add_button('New Company', function() { newdoc('Company'); }, 'icon-plus');
+	wrapper.appframe.add_button('Refresh', function() {  
+			wrapper.$company_select.change();
+		}, 'icon-refresh');
 
-	var route = decodeURIComponent(location.hash);
-	if(route.indexOf('/')!=-1) {
-		var chart_type = route.split('/')[1];
-		pscript.make_chart(chart_type);
-		return;
+	// company-select
+	wrapper.$company_select = $('<select class="accbrowser-company-select"></select>')
+		.change(function() {
+			var ctype = wn.get_route()[1] || 'Account';
+			erpnext.account_chart = new erpnext.AccountsChart(ctype, $(this).val(), wrapper);
+		})
+		.appendTo(wrapper.appframe.$w.find('.appframe-toolbar'));
+		
+	// default company
+	if(sys_defaults.company) {
+		$('<option>')
+			.html(sys_defaults.company)
+			.attr('value', sys_defaults.company)
+			.appendTo(wrapper.$company_select);
+
+		wrapper.$company_select
+			.val(sys_defaults.company).change();
 	}
-	
-	// if the user directly loads the page, ask to select the chart
-	var parent = $i('ab_body');
-	parent.innerHTML = 'Please select your chart: '
-	var sel = $a(parent,'select');
-	add_sel_options(sel, ['Account', 'Cost Center'], 'Account');
-	var btn = $btn(parent, 'Go', function() { pscript.make_chart(sel_val(sel)); }, {marginTop:'8px'});
+
+	// load up companies
+	wn.call({
+		method:'accounts.page.accounts_browser.accounts_browser.get_companies',
+		callback: function(r) {
+			wrapper.$company_select.empty();
+			$.each(r.message, function(i, v) {
+				$('<option>').html(v).attr('value', v).appendTo(wrapper.$company_select);
+			});
+			wrapper.$company_select.val(sys_defaults.company || r[0]);
+		}
+	});
 }
 
-pscript.make_chart = function(b) {
-  pscript.chart_type = b;
-  $i('ab_header').innerHTML ='';
-  $i('ab_body').innerHTML ='';
+pscript['onshow_Accounts Browser'] = function(wrapper){
+	// set route
+	var ctype = wn.get_route()[1] || 'Account';
+	wrapper.appframe.title('Chart of '+ctype+'s');  
 
-  //===============comment area========================================
-  var comment = $a($i('ab_body'),'div','comment',{marginBottom:"8px"});
-  comment.innerHTML = "Note: Explore and click on the tree node to add a new child";
-  
-  var select_area = $a('ab_body', 'div', '', {margin:'8px 0px'});
+	if(erpnext.account_chart && erpnext.account_chart.ctype != ctype) {
+		wrapper.$company_select.change();
+	} 
+
+}
+
+erpnext.AccountsChart = Class.extend({
+	init: function(ctype, company, wrapper) {
+		$(wrapper).find('.tree-area').empty();
+		var me = this;
+		me.ctype = ctype;
+		me.company = company;
+		this.tree = new wn.ui.Tree({
+			parent: $(wrapper).find('.tree-area'), 
+			label: company,
+			args: {ctype: ctype},
+			method: 'accounts.page.accounts_browser.accounts_browser.get_children',
+			click: function(link) {
+				if(me.cur_toolbar) 
+					$(me.cur_toolbar).toggle(false);
+
+				if(!link.toolbar) 
+					me.make_link_toolbar(link);
+
+				if(link.toolbar) {
+					me.cur_toolbar = link.toolbar;
+					$(me.cur_toolbar).toggle(true);					
+				}
+			
+			}
+		});
+		this.tree.rootnode.$a.click();		
+	},
+	make_link_toolbar: function(link) {
+		var data = $(link).data('node-data');
+		if(!data) return;
+
+		link.toolbar = $('<span class="accbrowser-node-toolbar"></span>').insertAfter(link);
+		
+		// edit
+		$('<a href="#!Form/'+encodeURIComponent(this.ctype)+'/'
+			+encodeURIComponent(data.value)+'">Edit</a>').appendTo(link.toolbar);
+
+		if(data.expandable) {
+			link.toolbar.append(' | <a onclick="erpnext.account_chart.new_node();">Add Child</a>');
+		} else if(this.ctype=='Account') {
+			link.toolbar.append(' | <a onclick="erpnext.account_chart.show_ledger();">View Ledger</a>');
+		}		
+	},
+	show_ledger: function() {
+		var me = this;
+		var node = me.selected_node();
+		wn.set_route('Report', 'GL Entry', 'General Ledger', 
+			this.ctype + '=' + node.data('label'));
+	},
+	new_node: function() {
+		if(this.ctype=='Account') {
+			this.new_account();
+		} else {
+			this.new_cost_center();
+		}
+	},
+	selected_node: function() {
+		return this.tree.$w.find('.tree-link.selected');
+	},
+	new_account: function() {
+		var me = this;
+		
+		// the dialog
+		var d = new wn.ui.Dialog({
+			title:'New Account',
+			fields: [
+				{fieldtype:'Data', fieldname:'account_name', label:'New Account Name', reqd:true},
+				{fieldtype:'Select', fieldname:'group_or_ledger', label:'Group or Ledger',
+					options:'Group\nLedger'},
+				{fieldtype:'Select', fieldname:'account_type', label:'Account Type',
+					options: ['', 'Fixed Asset Account', 'Bank or Cash', 'Expense Account', 'Tax',
+						'Income Account', 'Chargeable'].join('\n') },
+				{fieldtype:'Float', fieldname:'tax_rate', label:'Tax Rate'},
+				{fieldtype:'Select', fieldname:'master_type', label:'Master Type',
+					options: ['NA', 'Supplier', 'Customer', 'Employee'].join('\n') },
+				{fieldtype:'Button', fieldname:'create_new', label:'Create New' }
+			]
+		})
+
+		var fd = d.fields_dict;
+		
+		// account type if ledger
+		$(fd.group_or_ledger.input).change(function() {
+			if($(this).val()=='Group') {
+				$(fd.account_type.wrapper).toggle(false);
+				$(fd.master_type.wrapper).toggle(false);
+				$(fd.tax_rate.wrapper).toggle(false);
+			} else {
+				$(fd.account_type.wrapper).toggle(true);
+				$(fd.master_type.wrapper).toggle(true);
+				if(fd.account_type.get_value()=='Tax') {
+					$(fd.tax_rate.wrapper).toggle(true);
+				}
+			}
+		});
+		
+		// tax rate if tax
+		$(fd.account_type.input).change(function() {
+			if($(this).val()=='Tax') {
+				$(fd.tax_rate.wrapper).toggle(true);				
+			} else {
+				$(fd.tax_rate.wrapper).toggle(false);				
+			}
+		})
+		
+		// create
+		$(fd.create_new.input).click(function() {
+			var btn = this;
+			$(btn).set_working();
+			var v = d.get_values();
+			if(!v) return;
+					
+			var node = me.selected_node();
+			v.parent_account = node.data('label');
+			v.company = me.company;
+			
+		    $c_obj('GL Control', 'add_ac', v, 
+				function(r,rt) { 
+					$(btn).done_working();
+					d.hide();
+					node.trigger('reload'); 	
+				});
+		});
+		
+		// show
+		d.onshow = function() {
+			$(fd.group_or_ledger.input).change();
+		}
+		d.show();
+	},
+	
+	new_cost_center: function(){
+		var me = this;
+		// the dialog
+		var d = new wn.ui.Dialog({
+			title:'New Cost Center',
+			fields: [
+				{fieldtype:'Data', fieldname:'cost_center_name', label:'New Cost Center Name', reqd:true},
+				{fieldtype:'Select', fieldname:'group_or_ledger', label:'Group or Ledger',
+					options:'Group\nLedger'},
+				{fieldtype:'Button', fieldname:'create_new', label:'Create New' }
+			]
+		})		
+	
+		// create
+		$(d.fields_dict.create_new.input).click(function() {
+			var btn = this;
+			$(btn).set_working();
+			var v = d.get_values();
+			if(!v) return;
+			
+			var node = me.selected_node();
+			
+			v.parent_cost_center = node.data('label');
+			v.company_name = me.company;
+			
+		    $c_obj('GL Control', 'add_cc', v, 
+				function(r,rt) { 
+					$(btn).done_working();
+					d.hide();
+					node.trigger('reload'); 	
+				});
+		});
+		d.show();
+	}
+});
+
+/*
+pscript.make_chart = function(b, wrapper) {
+	pscript.ctype = b;
+	$(wrapper).find('.tree-area').empty()
+	$(wrapper).find('.layout-sidesection').empty()
   
   //================== table body======================================  
   var ac_main_grid = make_table($i('ab_body'),1,2,'100%',['60%','40%'],{border:"0px", padding:"4px",tableLayout: "fixed", borderCollapse: "collapse"});
@@ -55,7 +253,7 @@ pscript.make_chart = function(b) {
   pscript.acc_period_bal = $a($td(ac_main_grid,0,1),'div');
   
   //=====================footer area ==================================
-  if (pscript.chart_type == 'Account') {
+  if (pscript.ctype == 'Account') {
     var footer = $a($i('ab_body'),'div','',{backgroundColor: "#FFD", padding: "8px", color: "#444", fontSize: "12px", marginTop: "14px"});
     
     var help1 = $a(footer,'span');
@@ -65,12 +263,7 @@ pscript.make_chart = function(b) {
 
   // header and toolbar
   // ------------------
-  
-  var h1 = 'Chart of '+pscript.chart_type+'s';
-  if(pscript.chart_type == 'Account') var d = 'accounting';
-  else var d = 'cost center';
-  var desc = 'Manage multiple companies and the '+d+' structures of each company.';
-  $i('ab_body').page_head = new PageHeader('ab_header',h1,desc);
+  wrapper.appframe.$titlebar.find('.appframe-title').html('Chart of '+pscript.ctype+'s');  
 
   // select company
   // --------------
@@ -115,8 +308,8 @@ pscript.make_chart = function(b) {
 }
 
 pscript.make_ac_tree = function() {
-  //var type= sel_val($i('chart_type'))
-  var type= pscript.chart_type;
+  //var type= sel_val($i('ctype'))
+  var type= pscript.ctype;
   var tree = new Tree(pscript.account_tree, '90%');
   pscript.ac_tree = tree;
 
@@ -171,9 +364,9 @@ pscript.make_ac_tree = function() {
     }
 
     if (type=='Account'){
-      var arg = [node.rec.name, node.rec.account_name, sel_val(pscript.ab_company_sel), pscript.chart_type];
+      var arg = [node.rec.name, node.rec.account_name, sel_val(pscript.ab_company_sel), pscript.ctype];
     } else{
-        var arg = [node.rec.name, node.rec.cost_center_name,sel_val(pscript.ab_company_sel), pscript.chart_type];
+        var arg = [node.rec.name, node.rec.cost_center_name,sel_val(pscript.ab_company_sel), pscript.ctype];
     }
 
     $c_obj('GL Control','get_cl',arg.join(','),callback);
@@ -338,10 +531,6 @@ pscript.make_ledger_area = function() {
   pscript.gl_rep.innerHTML = '<img src="lib/images/icons/report.png" style="margin-right: 8px"><span class="link_type">Open Ledger</span>';
   pscript.gl_rep.onclick = function(){ pscript.make_report('gl'); }
 
-  //Budget report link
-  /*pscript.cc_rep = $a(pscript.ledger_area, 'div','', {fontSize: '14px',marginBottom: '8px', fontWeight: 'bold'});
-  pscript.cc_rep.innerHTML = '<img src="images/icons/report.png" style="margin-right: 8px"><span class="link_type">Budget vs Actual Analysis Report</span>';
-  pscript.cc_rep.onclick = function(){ pscript.make_report('budget'); }*/
 }
 
 pscript.make_report = function(flag){
@@ -352,12 +541,6 @@ pscript.make_report = function(flag){
     }
     loadreport('GL Entry','General Ledger',callback);
   }
-  /*else {
-    loadreport('Budget Detail','Periodical Budget Report',function(f){
-      f.set_filter('Cost Center','ID',pscript.cur_node.rec.name);
-      f.dt.run();
-    });
-  }*/
 }
 
 // New Account
@@ -435,3 +618,4 @@ pscript.make_new_cost_center_dialog = function(){
 
   pscript.new_cost_center_dialog = pscript.cc_dialog;
 }
+*/

@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2009-05-12 16:46:45',
+		'creation': '2012-04-16 15:08:16',
 		'docstatus': 0,
-		'modified': '2012-04-13 14:12:02',
+		'modified': '2012-04-16 15:54:45',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -41,7 +41,7 @@
 		'subject': u'%(remarks)s',
 		'tag_fields': u'purpose',
 		'use_template': 0,
-		'version': 263
+		'version': 264
 	},
 
 	# These values are common for all DocField
@@ -76,43 +76,7 @@
 		'create': 1,
 		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'role': u'Material User',
-		'submit': 1,
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'amend': 1,
-		'cancel': 1,
-		'create': 1,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
 		'role': u'Material Manager',
-		'submit': 1,
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'amend': 1,
-		'cancel': 1,
-		'create': 1,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Production User',
-		'submit': 1,
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'amend': 1,
-		'cancel': 1,
-		'create': 1,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Production Manager',
 		'submit': 1,
 		'write': 1
 	},
@@ -124,9 +88,52 @@
 		'create': 0,
 		'doctype': u'DocPerm',
 		'permlevel': 1,
-		'role': u'All',
+		'role': u'Material Manager',
 		'submit': 0,
 		'write': 0
+	},
+
+	# DocPerm
+	{
+		'amend': 1,
+		'cancel': 1,
+		'create': 1,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Material User',
+		'submit': 1,
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Material User',
+		'submit': 0,
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'amend': 1,
+		'cancel': 1,
+		'create': 1,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Production User',
+		'submit': 1,
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Production User'
 	},
 
 	# DocPerm
@@ -140,6 +147,25 @@
 
 	# DocPerm
 	{
+		'amend': 1,
+		'cancel': 1,
+		'create': 1,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Production Manager',
+		'submit': 1,
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Production Manager'
+	},
+
+	# DocPerm
+	{
 		'doctype': u'DocPerm',
 		'permlevel': 2,
 		'role': u'Production Manager',
@@ -149,6 +175,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'warehouse_section',
 		'fieldtype': u'Section Break',
 		'label': u'Warehouse',
 		'oldfieldtype': u'Section Break',
@@ -158,6 +185,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'col1',
 		'fieldtype': u'Column Break',
 		'oldfieldtype': u'Column Break',
 		'permlevel': 0,
@@ -498,6 +526,7 @@
 	{
 		'colour': u'White:FFF',
 		'doctype': u'DocField',
+		'fieldname': u'warehouse_html',
 		'fieldtype': u'HTML',
 		'label': u'Warehouse HTML',
 		'no_copy': 0,
@@ -568,6 +597,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'col2',
 		'fieldtype': u'Column Break',
 		'oldfieldtype': u'Column Break',
 		'permlevel': 0,
@@ -773,6 +803,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'items_section',
 		'fieldtype': u'Section Break',
 		'label': u'Items',
 		'oldfieldtype': u'Section Break',
@@ -782,6 +813,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'get_stock_and_rate',
 		'fieldtype': u'Button',
 		'label': u'Get Stock and Rate',
 		'oldfieldtype': u'Button',
@@ -793,6 +825,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'col3',
 		'fieldtype': u'Column Break',
 		'oldfieldtype': u'Column Break',
 		'permlevel': 0
@@ -803,6 +836,7 @@
 		'allow_on_submit': 0,
 		'colour': u'White:FFF',
 		'doctype': u'DocField',
+		'fieldname': u'get_items',
 		'fieldtype': u'Button',
 		'hidden': 0,
 		'in_filter': 0,
@@ -820,6 +854,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'item_section',
 		'fieldtype': u'Section Break',
 		'oldfieldtype': u'Section Break',
 		'options': u'Simple',
@@ -869,6 +904,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'other_details_section',
 		'fieldtype': u'Section Break',
 		'label': u'Other Details',
 		'oldfieldtype': u'Section Break',

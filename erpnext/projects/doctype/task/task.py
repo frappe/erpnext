@@ -51,7 +51,7 @@ class DocType:
 	
 	def get_allocated_to_name(self):
 		as_em = sql("select first_name, last_name from `tabProfile` where name=%s",str(self.doc.allocated_to))
-		ret = { 'allocated_to_name' : as_em and (as_em[0][0] + ' ' + as_em[0][1]) or ''}
+		ret = { 'allocated_to_name' : as_em and (cstr(as_em[0][0]) + ' ' + cstr(as_em[0][1])) or ''}
 		return ret
 
 	# validate
@@ -95,7 +95,7 @@ class DocType:
 				sql("delete from tabEvent where ref_type='Task' and ref_name=%s", self.doc.name)
 				self.add_calendar_event()
 			else:
-				msgprint("An Expeted start date has not been set for this task.Please set a, 'Expected Start date'\
+				msgprint("An Expeted start date has not been set for this task.Please set 'Expected Start date'\
 				to add an event to allocated persons calender.You can save a task without this also.")
 			
 			

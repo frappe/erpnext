@@ -63,12 +63,7 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	
 	if(doc.per_installed < 100 && doc.docstatus==1) cur_frm.add_custom_button('Make Installation Note', cur_frm.cscript['Make Installation Note']);
 
-	if (doc.docstatus!=1) {
-		hide_field(['Send SMS', 'message', 'customer_mobile_no');
-	} else {
-		cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms);
-		unhide_field(['Send SMS', 'message', 'customer_mobile_no');
-	}
+	if (doc.docstatus==1) cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms);
 
 	if(doc.docstatus==0 && !doc.__islocal) {
 		cur_frm.add_custom_button('Make Packing Slip', cur_frm.cscript['Make Packing Slip']);

@@ -1,4 +1,5 @@
 import webnotes
+import conf
 from webnotes.model import rename, delete_doc
 from webnotes.model.code import get_obj
 from wnf import replace_code
@@ -54,7 +55,7 @@ def execute():
 	#for d in  webnotes.conn.sql("""select name, module from
 	#		`tabSearch Criteria` where ifnull(standard, 'No') = 'Yes' and ifnull(disabled, 0) = 0"""):
 	#
-	for path, folders, files in os.walk(webnotes.defs.modules_path):
+	for path, folders, files in os.walk(conf.modules_path):
 		if not path.endswith('search_criteria'): continue
 		module = path.split(os.sep)[-2]
 		for sc in folders:
@@ -128,7 +129,8 @@ def delete_search_criteria():
 			'periodic_sales_summary', 'monthly_despatched_trend', 'sales', 'sales_order',
 			'sales_order1', 'sales_agentwise_commission', 'test_report', 
 			'territory_wise_sales_-_target_vs_actual_', 
-			'pending_po_items_to_bill1', 'pending_po_items_to_receive1')""")
+			'pending_po_items_to_bill1', 'pending_po_items_to_receive1', 
+			'expense_vouchers', 'pending_expense_vouchers', 'shortage_to_indent')""")
 
 	webnotes.conn.sql("""
 		DELETE FROM `tabSearch Criteria`
@@ -142,7 +144,7 @@ def delete_search_criteria():
 def change_report_module():
 	reports = {'itemwise_receipt_details': 'Stock'}
 	for k in reports:
-		sql("update `tabSearch Criteria` set module = %s where name = %s", (reports[k], k))
+		webnotes.conn.sql("update `tabSearch Criteria` set module = %s where name = %s", (reports[k], k))
 
 def rename_in_db(ren_data, data_type, is_doctype):
 	for d in ren_data:
@@ -420,7 +422,7 @@ def prepare_dict_of_label_fieldname(module_path):
 			modules_list = folders
 		for f in files:
 			if f.endswith(".txt"):
-				rel_path = os.path.relpath(path, webnotes.defs.modules_path)
+				rel_path = os.path.relpath(path, conf.modules_path)
 				path_tuple = rel_path.split(os.sep)
 				if (len(path_tuple)==3 and path_tuple[0] in modules_list and
 						path_tuple[1] == 'doctype'):
