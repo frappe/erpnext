@@ -1,7 +1,7 @@
 // render
 wn.doclistviews['Sales Invoice'] = wn.views.ListView.extend({
 	init: function(d) {
-		this._super(d)
+		this._super(d);
 		this.fields = this.fields.concat([
 			"`tabSales Invoice`.customer_name", 
 			"ifnull(`tabSales Invoice`.outstanding_amount,0) as outstanding_amount", 
