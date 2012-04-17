@@ -359,7 +359,7 @@ wn.request.call({args:args,success:opts.callback,error:opts.error,btn:opts.btn,f
  *	lib/js/core.js
  */
 if(!console){var console={log:function(txt){alert(txt);}}}
-wn.versions.check();$(document).bind('ready',function(){wn.app=new wn.Application();});
+wn.versions.check();$(document).bind('ready',function(){wn.provide('wn.app');$.extend(wn.app,new wn.Application());});
 
 /*
  *	lib/js/legacy/globals.js
@@ -855,7 +855,7 @@ $(favicon).appendTo('head');}})
 /*
  *	js/app.js
  */
-wn.app={name:'ERPNext',license:'GNU/GPL - Usage Condition: All "erpnext" branding must be kept as it is',source:'https://github.com/webnotes/erpnext',publisher:'Web Notes Technologies Pvt Ltd, Mumbai',copyright:'&copy; Web Notes Technologies Pvt Ltd',version:'2.'+window._version_number}
+wn.provide('erpnext');wn.provide('wn.app');erpnext.set_about=function(){$.extend(wn.app,{name:'ERPNext',license:'GNU/GPL - Usage Condition: All "erpnext" branding must be kept as it is',source:'https://github.com/webnotes/erpnext',publisher:'Web Notes Technologies Pvt Ltd, Mumbai',copyright:'&copy; Web Notes Technologies Pvt Ltd',version:'2.'+window._version_number});}
 wn.modules_path='erpnext';$(document).bind('toolbar_setup',function(){$('.brand').html('<b>erp</b>next\
   <i class="icon-home icon-white navbar-icon-home" ></i>').hover(function(){$(this).find('.icon-home').addClass('navbar-icon-home-hover');},function(){$(this).find('.icon-home').removeClass('navbar-icon-home-hover');});});
 /*
@@ -870,7 +870,7 @@ if(user=='Guest'){if(wn.boot.custom_css){set_style(wn.boot.custom_css);}
 if(wn.boot.website_settings.title_prefix){wn.title_prefix=wn.boot.website_settings.title_prefix;}}else{wn.boot.profile.allow_modules=wn.boot.profile.allow_modules.concat(['To Do','Knowledge Base','Calendar','Activity','Messages'])
 if(user_roles.indexOf('Accounts Manager')!=-1){wn.boot.profile.allow_modules.push('Dashboard');}
 erpnext.toolbar.setup();erpnext.startup.set_periodic_updates();if(in_list(user_roles,'System Manager')&&(wn.boot.setup_complete=='No')){wn.require("erpnext/startup/js/complete_setup.js");erpnext.complete_setup();}}
-$('#startup_div').toggle(false);}
+erpnext.set_about();$('#startup_div').toggle(false);}
 show_chart_browser=function(nm,chart_type){var call_back=function(){if(nm=='Sales Browser'){var sb_obj=new SalesBrowser();sb_obj.set_val(chart_type);}
 else if(nm=='Accounts Browser')
 pscript.make_chart(chart_type);}

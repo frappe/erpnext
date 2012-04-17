@@ -1,10 +1,14 @@
-wn.app = {
-	name: 'ERPNext',
-	license: 'GNU/GPL - Usage Condition: All "erpnext" branding must be kept as it is',
-	source: 'https://github.com/webnotes/erpnext',
-	publisher: 'Web Notes Technologies Pvt Ltd, Mumbai',
-	copyright: '&copy; Web Notes Technologies Pvt Ltd',
-	version: '2.' + window._version_number
+wn.provide('erpnext');
+erpnext.set_about = function() {
+	wn.provide('wn.app');
+	$.extend(wn.app, {
+		name: 'ERPNext',
+		license: 'GNU/GPL - Usage Condition: All "erpnext" branding must be kept as it is',
+		source: 'https://github.com/webnotes/erpnext',
+		publisher: 'Web Notes Technologies Pvt Ltd, Mumbai',
+		copyright: '&copy; Web Notes Technologies Pvt Ltd',
+		version: '2.' + window._version_number
+	});
 }
 
 wn.modules_path = 'erpnext';

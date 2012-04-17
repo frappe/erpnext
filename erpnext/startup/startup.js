@@ -89,6 +89,8 @@ erpnext.startup.start = function() {
 
 	}
 
+	erpnext.set_about();
+
 	$('#startup_div').toggle(false);
 }
 
@@ -172,4 +174,3 @@ erpnext.set_user_background = function(src) {
 $(document).bind('startup', function() {
 	erpnext.startup.start();
 });
-
