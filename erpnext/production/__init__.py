@@ -1,4 +1,4 @@
 install_docs = [
-	{"doctype":"Role", "name":"Production Manager"},
-	{"doctype":"Role", "name":"Production User"},
+	{"doctype":"Role", "role_name":"Production Manager", "name":"Production Manager"},
+	{"doctype":"Role", "role_name":"Production User", "name":"Production User"},
 ]

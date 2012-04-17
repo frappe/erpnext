@@ -19,8 +19,8 @@ from webnotes.utils import flt
 from webnotes.model.code import get_obj
 
 install_docs = [
-	{"doctype":"Role", "name":"Accounts Manager"},
-	{"doctype":"Role", "name":"Accounts User"}
+	{"doctype":"Role", "role_name":"Accounts Manager", "name":"Accounts Manager"},
+	{"doctype":"Role", "role_name":"Accounts User", "name":"Accounts User"}
 ]
 
 @webnotes.whitelist()

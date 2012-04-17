@@ -1,5 +1,5 @@
 install_docs = [
-	{"doctype":"Role", "name":"Employee"},
-	{"doctype":"Role", "name":"HR Manager"},
-	{"doctype":"Role", "name":"HR User"},
+	{"doctype":"Role", "role_name":"Employee", "name":"Employee"},
+	{"doctype":"Role", "role_name":"HR Manager", "name":"HR Manager"},
+	{"doctype":"Role", "role_name":"HR User", "name":"HR User"},
 ]

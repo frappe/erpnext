@@ -1,4 +1,4 @@
 install_docs = [
-	{"doctype":"Role", "name":"Blogger"},
-	{"doctype":"Role", "name":"Website Manager"},
+	{"doctype":"Role", "role_name":"Blogger", "name":"Blogger"},
+	{"doctype":"Role", "role_name":"Website Manager", "name":"Website Manager"},
 ]
