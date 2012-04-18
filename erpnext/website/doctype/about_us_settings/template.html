@@ -1,9 +1,10 @@
-<div class="layout_wrapper">
+<div class="layout-wrapper layout-wrapper-background">
 	<div class="web-content" id="content-about-us">
-		{% if doc.headline %}
-			<h1>{{ doc.headline }}</h1>
-		{% endif %}
-		<div class="web-main-section">
+		<div class="layout-main-section">
+			{% if doc.headline %}
+				<h1>{{ doc.headline }}</h1>
+			{% endif %}
+			
 			{{ doc.main_section_html }}
 			
 			{% if doc.about_team %}
@@ -28,7 +29,7 @@
 				</table>
 			{% endif %}
 		</div>
-		<div class="web-side-section">
+		<div class="layout-side-section">
 			{{ doc.side_section_html }}
 		</div>
 		<div style="clear: both"></div>

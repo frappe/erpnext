@@ -17,7 +17,7 @@
 
 pscript.onload_blog = function(wrapper) {
 	wrapper.blog_list = new wn.ui.Listing({
-		parent: $(wrapper).find('.web-main-section').get(0),
+		parent: $(wrapper).find('.layout-main-section').get(0),
 		query: 'select tabBlog.name, title, left(content, 300) as content, tabBlog.modified, \
 			ifnull(first_name, "") as first_name, ifnull(last_name, "") as last_name \
 			from tabProfile, tabBlog\

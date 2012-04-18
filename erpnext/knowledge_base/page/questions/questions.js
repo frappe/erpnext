@@ -17,6 +17,9 @@
 pscript.onload_questions = function(wrapper) {	
 	body = $(wrapper).find('.layout-main-section').get(0);
 	
+	wrapper.appframe = new wn.ui.AppFrame($(wrapper).find('.layout-appframe'));
+	wrapper.appframe.title('Knowledge Base');
+	
 	// kb
 	var kb = new KnowledgeBase(body);
 	
@@ -60,7 +63,7 @@ function KnowledgeBase(w) {
 		if(this.search.value==$(this.search).attr('default_text')) {
 			msgprint('Please enter some text'); return;
 		}
-		this.suggest();
+		this.add_question([]);
 	}
 	
 	// suggest a few users who can answer
@@ -123,7 +126,7 @@ function KnowledgeBase(w) {
 						cond += ' and t1.`_user_tags` like "%' + f + '%"'
 					}
 				}
-				return repl('select t1.name, t1.owner, t1.question, t1.points, t1.modified, t1._user_tags, '
+				return repl('select t1.name, t1.owner, t1.question, t1.modified, t1._user_tags, '
 				+'t1._users_voted, t2.first_name, t2.last_name '
 				+'from tabQuestion t1, tabProfile t2 '
 				+'where t1.docstatus!=2 '

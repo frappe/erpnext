@@ -15,6 +15,9 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 pscript['onload_question-view'] = function(wrapper) {
+	wrapper.appframe = new wn.ui.AppFrame($(wrapper).find('.layout-appframe'));
+	wrapper.appframe.title('<a href="#questions">Knowledge Base</a>');
+
 	wrapper.add_answer_area = $('.add-answer-area').get(0);
 }
 
@@ -71,12 +74,10 @@ KBQuestionView = function(w, qid, qtext) {
 	
 	// add a link to open add answer
 	this.make_answer_box_link = function() {
-		$('.add-answer-link').html('<button class="btn btn-small">\
-			<i class="icon-plus"></i> Add you answer</button>').find('button').click(
-				function() {
-					$(this).toggle(false);
-					me.make_answer_box();
-				});
+		wn.pages['question-view'].appframe.add_button('Add your answer', function() {
+			$(this).toggle(false);
+			me.make_answer_box();
+		}, 'icon-plus');
 	}
 	
 	// answer box
@@ -130,21 +131,21 @@ KBAnswerList = function(args) {
 	$.extend(this, args);
 	
 	this.make_list = function() {
-	
+		wn.pages['question-view'].appframe.clear_buttons();
 		this.list = new wn.ui.Listing({
 			parent: me.parent,
+			appframe: wn.pages['question-view'].appframe,
 			as_dict: 1,
 			no_result_message: 'No answers yet, be the first one to answer!',
 			render_row: function(body, data) {
 				new KBAnswer(body, data, me)
 			},
 			get_query: function() {
-				return repl("SELECT t1.name, t1.owner, t1.answer, t1.points, t1._users_voted, t2.first_name, "
+				return repl("SELECT t1.name, t1.owner, t1.answer, t1._users_voted, t2.first_name, "
 					+"t2.last_name, t1.modified from tabAnswer t1, tabProfile t2 "
 					+"where question='%(qid)s' and t1.owner = t2.name "
-					+"order by t1.points desc, t1.modified desc", {qid: me.qid})
-			},
-			title: 'Answers'
+					+"order by t1.modified desc", {qid: me.qid})
+			}
 		});
 		
 		this.list.run();
@@ -158,7 +159,6 @@ KBAnswerList = function(args) {
 // kb answer
 // answer
 // by xxx | on xxx
-// points yyy
 KBAnswer = function(body, data, ans_list) {
 	body.className = 'qv-answer';
 	var edtxt = new EditableText({
@@ -169,7 +169,7 @@ KBAnswer = function(body, data, ans_list) {
 		text: data.answer,
 		inp_class: 'qv-ans-input',
 		disp_class: 'qv-ans-text',
-		rich_text: 1
+		height: '300px'
 	});	
 	
 	$(edtxt.wrapper).addClass('well');

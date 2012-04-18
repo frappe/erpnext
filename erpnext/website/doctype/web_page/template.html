@@ -1,26 +1,21 @@
-<div class="layout_wrapper">
+<div class="layout-wrapper layout-wrapper-background">
 	<div class="web-content" id="content-{{ doc.name }}" 
 		style="text-align: {{ doc.text_align }};">
-		{% if doc.head_section and doc.layout=='Two column with header' %}
-		<div class="web-head-section">
-			{{ doc.head_section_html }}
-		</div>
-		{% endif %}
 		
 		{% if doc.layout.startswith('Two column') %}
-		<div class="web-main-section">
+		<div class="layout-main-section">
+		{% else %}
+		<div class="layout-main">
 		{% endif %}
 			{{ doc.main_section_html }}
 			{% if doc.next_page_html %}
 				{{ doc.next_page_html }}
 			{% endif %}
 
-		{% if doc.layout.startswith('Two column') %}
 		</div>
-		{% endif %}
 		
 		{% if doc.layout.startswith('Two column') %}
-		<div class="web-side-section">
+		<div class="layout-side-section">
 			{{ doc.side_section_html }}
 			{% if doc.see_also %}
 			<div class="info-box">

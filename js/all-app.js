@@ -186,7 +186,7 @@ wn.dom.set_box_shadow=function(ele,spread){$(ele).css('-moz-box-shadow','0px 0px
 $(ele).css('-webkit-box-shadow','0px 0px '+spread+'px rgba(0,0,0,0.3);')
 $(ele).css('-box-shadow','0px 0px '+spread+'px rgba(0,0,0,0.3);')};(function($){$.fn.add_options=function(options_list){for(var i=0;i<options_list.length;i++){var v=options_list[i];value=v.value||v;label=v.label||v;$('<option>').html(label).attr('value',value).appendTo(this);}
 $(this).val(options_list[0].value||options_list[0]);}
-$.fn.set_working=function(){var ele=this.get(0);if(ele.loading_img){$di(ele.loading_img)}else{ele.disabled=1;ele.loading_img=$('<img src="lib/images/ui/button-load.gif" \
+$.fn.set_working=function(){var ele=this.get(0);if(ele.loading_img){$(ele.loading_img).toggle(true);}else{ele.disabled=1;ele.loading_img=$('<img src="lib/images/ui/button-load.gif" \
     style="margin-left: 4px; margin-bottom: -2px; display: inline;" />').insertAfter(ele);}}
 $.fn.done_working=function(){var ele=this.get(0);ele.disabled=0;if(ele.loading_img){$(ele.loading_img).toggle(false);};}})(jQuery);
 /*
@@ -433,7 +433,7 @@ if(data.docstatus==0||data.docstatus==null){data.docstatus_icon='icon-pencil';da
  */
 wn.provide('wn.views.pageview');wn.views.pageview={pages:{},with_page:function(name,callback){if(!locals.Page[name]){wn.call({method:'webnotes.widgets.page.getpage',args:{'name':name},callback:callback});}else{callback();}},show:function(name){if(!name)name=wn.boot.home_page;wn.views.pageview.with_page(name,function(r){if(r&&r.exc){if(!r['403'])wn.container.change_to('404');}else if(!wn.pages[name]){wn.views.pageview.pages[name]=new wn.views.Page(name);}
 wn.container.change_to(name);});}}
-wn.views.Page=Class.extend({init:function(name){this.name=name;var me=this;this.pagedoc=locals.Page[this.name];this.wrapper=wn.container.add_page(this.name);this.wrapper.label=this.pagedoc.title||this.pagedoc.name;this.wrapper.innerHTML=this.pagedoc.content;wn.dom.eval(this.pagedoc.__script||this.pagedoc.script||'');wn.dom.set_style(this.pagedoc.style);this.trigger('onload');$(this.wrapper).bind('show',function(){cur_frm=null;me.trigger('onshow');me.trigger('refresh');});},trigger:function(eventname){var me=this;try{if(pscript[eventname+'_'+this.name]){pscript[eventname+'_'+this.name](me.wrapper);}else if(me.wrapper[eventname]){me.wrapper[eventname](me.wrapper);}}catch(e){console.log(e);}}})
+wn.views.Page=Class.extend({init:function(name){this.name=name;var me=this;this.pagedoc=locals.Page[this.name];this.wrapper=wn.container.add_page(this.name);this.wrapper.label=this.pagedoc.title||this.pagedoc.name;this.wrapper.innerHTML=this.pagedoc.content;wn.dom.eval(this.pagedoc.__script||this.pagedoc.script||'');wn.dom.set_style(this.pagedoc.style||'');this.trigger('onload');$(this.wrapper).bind('show',function(){cur_frm=null;me.trigger('onshow');me.trigger('refresh');});},trigger:function(eventname){var me=this;try{if(pscript[eventname+'_'+this.name]){pscript[eventname+'_'+this.name](me.wrapper);}else if(me.wrapper[eventname]){me.wrapper[eventname](me.wrapper);}}catch(e){console.log(e);}}})
 wn.views.make_404=function(){var page=wn.container.add_page('404');$(page).html('<div class="layout-wrapper">\
   <h1>Not Found</h1><br>\
   <p>Sorry we were unable to find what you were looking for.</p>\
@@ -929,7 +929,7 @@ if(f.init)f.init();f.make_body();return f;}
 wn.ui.AppFrame=Class.extend({init:function(parent){this.buttons={};this.$w=$('<div></div>').appendTo(parent);this.$titlebar=$('<div class="appframe-titlebar">\
    <span class="appframe-title"></span>\
    <span class="close">&times;</span>\
-  </div>').appendTo(this.$w);this.$w.find('.close').click(function(){window.history.back();})},title:function(txt){this.$titlebar.find('.appframe-title').text(txt);},add_button:function(label,click,icon){if(!this.$w.find('.appframe-toolbar').length)
+  </div>').appendTo(this.$w);this.$w.find('.close').click(function(){window.history.back();})},title:function(txt){this.$titlebar.find('.appframe-title').html(txt);},add_button:function(label,click,icon){if(!this.$w.find('.appframe-toolbar').length)
 this.$w.append('<div class="appframe-toolbar"></div>');args={label:label,icon:''};if(icon){args.icon='<i class="'+icon+'"></i>';}
 this.buttons[label]=$(repl('<button class="btn btn-small">\
    %(icon)s %(label)s</button>',args)).click(click).appendTo(this.$w.find('.appframe-toolbar'));return this.buttons[label];},clear_buttons:function(){this.$w.find('.appframe-toolbar').empty();}})
