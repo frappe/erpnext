@@ -183,6 +183,7 @@ class DocType:
 	# get moving average inventory values
 	# ------------------------------------
 	def get_moving_average_inventory_values(self, val_rate, in_rate, opening_qty, actual_qty, is_cancelled):
+		#msgprint(actual_qty)
 		if flt(in_rate) <= 0: # In case of delivery/stock issue in_rate = 0 or wrong incoming rate
 			in_rate = val_rate
 
@@ -191,9 +192,8 @@ class DocType:
 		# 2. cancelled entry
 		# 3. val_rate is negative
 		# Otherwise it will be calculated as per moving average
-		elif actual_qty > 0 and (opening_qty + actual_qty) > 0 and is_cancelled == 'No' and ((opening_qty * val_rate) + (actual_qty * in_rate)) > 0:
-			if opening_qty < 0:
-				opening_qty = 0
+		if actual_qty > 0 and (opening_qty + actual_qty) > 0 and is_cancelled == 'No' and ((opening_qty * val_rate) + (actual_qty * in_rate)) > 0:
+			opening_qty = opening_qty > 0 and opening_qty or 0
 			val_rate = ((opening_qty *val_rate) + (actual_qty * in_rate)) / (opening_qty + actual_qty)
 		elif (opening_qty + actual_qty) <= 0:
 			val_rate = 0
@@ -250,8 +250,10 @@ class DocType:
 	# get stock value
 	# ----------------
 	def get_stock_value(self, val_method, cqty, stock_val, serial_nos):
-		if val_method == 'Moving Average' or serial_nos:
+		if serial_nos:
 			stock_val = flt(stock_val) * flt(cqty)
+		elif val_method == 'Moving Average':
+			stock_val = flt(cqty) > 0 and flt(stock_val) * flt(cqty) or 0
 		elif val_method == 'FIFO':
 			stock_val = sum([flt(d[0])*flt(d[1]) for d in self.fcfs_bal])
 		return stock_val
