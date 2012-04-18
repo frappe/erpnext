@@ -126,7 +126,7 @@ function KnowledgeBase(w) {
 						cond += ' and t1.`_user_tags` like "%' + f + '%"'
 					}
 				}
-				return repl('select t1.name, t1.owner, t1.question, t1.points, t1.modified, t1._user_tags, '
+				return repl('select t1.name, t1.owner, t1.question, t1.modified, t1._user_tags, '
 				+'t1._users_voted, t2.first_name, t2.last_name '
 				+'from tabQuestion t1, tabProfile t2 '
 				+'where t1.docstatus!=2 '
