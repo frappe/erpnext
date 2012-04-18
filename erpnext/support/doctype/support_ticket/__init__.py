@@ -96,7 +96,7 @@ class SupportMailbox(POP3Mailbox):
 		d.raised_by = mail.mail['From']
 		d.content_type = content_type
 		d.status = 'Open'
-		d.naming_series = (opts and opts.split("\n")[0]) or 'SUP'
+		d.naming_series = opts and opts.split("\n")[0] or 'SUP'
 		try:
 			d.save(1)
 		except:

@@ -27,7 +27,7 @@ cur_frm.cscript.onload = function(doc, cdt, cdn){
 
 cur_frm.cscript.refresh = function(doc, cdt, cdn) {
   // hide buttons
-  $(cur_frm.frm_head.page_head.toolbar_area).toggle(false);
+  $('.appframe-toolbar').toggle(false);
 }
 
 cur_frm.cscript.select_doc_for_series = function(doc, cdt, cdn) {
