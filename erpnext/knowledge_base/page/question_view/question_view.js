@@ -141,10 +141,10 @@ KBAnswerList = function(args) {
 				new KBAnswer(body, data, me)
 			},
 			get_query: function() {
-				return repl("SELECT t1.name, t1.owner, t1.answer, t1.points, t1._users_voted, t2.first_name, "
+				return repl("SELECT t1.name, t1.owner, t1.answer, t1._users_voted, t2.first_name, "
 					+"t2.last_name, t1.modified from tabAnswer t1, tabProfile t2 "
 					+"where question='%(qid)s' and t1.owner = t2.name "
-					+"order by t1.points desc, t1.modified desc", {qid: me.qid})
+					+"order by t1.modified desc", {qid: me.qid})
 			}
 		});
 		
@@ -159,7 +159,6 @@ KBAnswerList = function(args) {
 // kb answer
 // answer
 // by xxx | on xxx
-// points yyy
 KBAnswer = function(body, data, ans_list) {
 	body.className = 'qv-answer';
 	var edtxt = new EditableText({
