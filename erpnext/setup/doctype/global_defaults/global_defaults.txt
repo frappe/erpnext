@@ -5,7 +5,7 @@
 	{
 		'creation': '2012-04-18 17:00:50',
 		'docstatus': 0,
-		'modified': '2012-04-18 17:15:47',
+		'modified': '2012-04-18 17:24:45',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -99,39 +99,6 @@
 		'permlevel': 2,
 		'role': u'System Manager',
 		'write': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'system',
-		'fieldtype': u'Section Break',
-		'label': u'System'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'description': u'Example: http://frappe.erpnext.com',
-		'doctype': u'DocField',
-		'fieldname': u'account_url',
-		'fieldtype': u'Data',
-		'label': u'Account URL'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'column_break0',
-		'fieldtype': u'Column Break'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'sms_sender_name',
-		'fieldtype': u'Data',
-		'label': u'SMS Sender Name'
 	},
 
 	# DocField
@@ -549,5 +516,21 @@
 		'fieldtype': u'Select',
 		'label': u'Employee Records to be created by ',
 		'options': u'\nNaming Series\nEmployee Number'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'system',
+		'fieldtype': u'Section Break',
+		'label': u'System'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'sms_sender_name',
+		'fieldtype': u'Data',
+		'label': u'SMS Sender Name'
 	}
 ]
