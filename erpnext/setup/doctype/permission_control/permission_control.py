@@ -68,7 +68,8 @@ class DocType:
 				'create': cint(perm.create),
 				'cancel': cint(perm.cancel),
 				'submit': cint(perm.submit),
-				'amend': cint(perm.amend)
+				'amend': cint(perm.amend),
+				'match': perm.match
 				} for perm in sorted(doclist,
 					key=lambda d: [d.fields.get('permlevel'),
 						d.fields.get('role')]) if perm.doctype=='DocPerm']
