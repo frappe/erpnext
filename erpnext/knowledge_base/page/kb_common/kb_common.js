@@ -116,59 +116,68 @@ EditableText = function(args) {
 	$.extend(this, args);
 	var me = this;
 	
-	this.wrapper = $a(me.parent, 'div');
-	this.display = $a(me.wrapper, 'div', me.disp_class, '', me.text);
-	this.input = $a(me.wrapper, 'textarea', me.inp_class, {display:'none'});
+	me.$w = $(repl('<div class="ed-text">\
+		<div class="ed-text-display %(disp_class)s"></div>\
+		<a class="ed-text-edit" style="cursor: pointer; float: right;">[edit]</a>\
+		<textarea class="ed-text-input %(inp_class)s hide"></textarea><br>\
+		<div class="help hide">Formatted as <a href="http://en.wikipedia.org/wiki/Markdown#Syntax_examples"\
+		 	target="_blank">markdown</div>\
+		<button class="btn btn-small btn-info hide ed-text-save">Save</button>\
+		<a class="ed-text-cancel hide" style="cursor: pointer;">Cancel</a>\
+	</div>', args)).appendTo(me.parent);
 	
-	var div = $a(me.wrapper, 'div', '', {marginTop:'5px', height:'23px'});
-	
-	// edit text
-	this.edit_btn = $a(div, 'a', '', {cursor:'pointer'}, '[edit]');
-
-	this.edit_btn.onclick = function() {
-		me.input.value = me.display.innerHTML;
-		me.show_as_input();
+	this.set_display = function(txt) {
+		me.$w.find('.ed-text-display').html(wn.markdown(txt));
+		me.text = txt;
 	}
+	
+	this.set_display(me.text);
+	
+	if(me.height) me.$w.find('.ed-text-input').css('height', me.height);
+	
+	// edit
+	me.$w.find('.ed-text-edit').click(function() {
+		me.$w.find('.ed-text-input').val(me.text);
+		me.show_as_input();
+	})
 	
 	// save button - save the new text
-	// check if text is written
-	this.save_btn = $btn(div, 'Save', function() {
-		var v = me.rich_text ? wn.tinymce.get_value(me.input) : me.input.value;
-		if(!v) {
-			msgprint('Please write something!');
-			return;
+	me.$w.find('.ed-text-save').click(
+		function() {
+			var v = me.$w.find('.ed-text-input').val();
+			// check if text is written
+			if(!v) {
+				msgprint('Please write something!');
+				return;
+			}
+			var btn = this;
+			$(btn).set_working();
+			$c_page('knowledge_base', 'question_view', 'update_item', {
+					dt: me.dt, dn: me.dn, fn: me.fieldname, text: v
+				}, 
+				function(r) {
+					$(btn).done_working();
+					if(r.exc) {msgprint(r.exc); return; }
+					me.set_display(v);
+					me.show_as_text();
+				});
 		}
-		me.save_btn.set_working();
-		$c_page('knowledge_base', 'question_view', 'update_item', {
-				dt: me.dt, dn: me.dn, fn: me.fieldname, text: v
-			}, 
-			function(r, rt) {
-				me.save_btn.done_working();
-				if(r.exc) {msgprint(r.exc); return; }
-				me.display.innerHTML = v;
-				me.show_as_text();
-			});
-	}, {display: 'none'});
+	)
+	
 
 	// cancel button
-	this.cancel_btn = $a(div, 'span', 'link_type', {color: '#555', display:'none'}, 'Cancel', {marginLeft:'7px'});
-	this.cancel_btn.onclick = function() {
+	me.$w.find('.ed-text-cancel').click(function() {
 		me.show_as_text();		
-	}
+	})
 
 	this.show_as_text = function() {
-		$ds(me.display); $ds(me.edit_btn);
-		if(me.rich_text)
-			wn.tinymce.remove(me.input);
-		$dh(me.input); $dh(me.save_btn); $dh(me.cancel_btn);
-				
+		me.$w.find('.ed-text-display, .ed-text-edit').toggle(true);
+		me.$w.find('.ed-text-input, .ed-text-save, .ed-text-cancel, .help').toggle(false);
 	}
 
 	this.show_as_input = function() {
-		$ds(me.input); $ds(me.save_btn); $ds(me.cancel_btn); 
-		$dh(me.edit_btn); $dh(me.display);
-		if(me.rich_text)
-			wn.tinymce.add_simple(me.input, '300px');
-	}	
+		me.$w.find('.ed-text-display, .ed-text-edit').toggle(false);
+		me.$w.find('.ed-text-input, .ed-text-save, .ed-text-cancel, .help').toggle(true);
+	}
 
 }
