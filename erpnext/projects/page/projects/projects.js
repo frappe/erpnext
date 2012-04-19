@@ -74,7 +74,7 @@ GanttChart.prototype.make_date = function(label,idx) {
 	var w = this.make_filter(label,idx);
 	var i = $a(w, 'input');
 
-	var user_fmt = wn.control_panel.date_format;
+	var user_fmt = wn.boot.sysdefaults.date_format;
 	if(!this.user_fmt)this.user_fmt = 'dd-mm-yy';
 
 	$(i).datepicker({
