@@ -257,18 +257,21 @@ cur_frm.fields_dict['territory'].get_query = function(doc,cdt,cdn) {
 //------------------------for printing without amount----------
 
 var set_print_hide= function(doc, cdt, cdn){
+	var dn_fields = wn.meta.docfield_map['Delivery Note'];
+	var dn_item_fields = wn.meta.docfield_map['Delivery Note Item'];
+	
 	if (doc.print_without_amount) {
-		fields['Delivery Note']['currency'].print_hide = 1;
-		fields['Delivery Note Item']['export_rate'].print_hide = 1;
-		fields['Delivery Note Item']['adj_rate'].print_hide = 1;
-		fields['Delivery Note Item']['ref_rate'].print_hide = 1;
-		fields['Delivery Note Item']['export_amount'].print_hide = 1;
+		dn_fields['currency'].print_hide = 1;
+		dn_item_fields['export_rate'].print_hide = 1;
+		dn_item_fields['adj_rate'].print_hide = 1;
+		dn_item_fields['ref_rate'].print_hide = 1;
+		dn_item_fields['export_amount'].print_hide = 1;
 	} else {
-		fields['Delivery Note']['currency'].print_hide = 0;
-		fields['Delivery Note Item']['export_rate'].print_hide = 0;
-		fields['Delivery Note Item']['adj_rate'].print_hide = 0;
-		fields['Delivery Note Item']['ref_rate'].print_hide = 0;
-		fields['Delivery Note Item']['export_amount'].print_hide = 0;
+		dn_fields['currency'].print_hide = 0;
+		dn_item_fields['export_rate'].print_hide = 0;
+		dn_item_fields['adj_rate'].print_hide = 0;
+		dn_item_fields['ref_rate'].print_hide = 0;
+		dn_item_fields['export_amount'].print_hide = 0;
 	}
 }
 

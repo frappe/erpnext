@@ -24,7 +24,7 @@ pscript.onload_questions = function(wrapper) {
 	var kb = new KnowledgeBase(body);
 	
 	// sidebar
-	this.sidebar = new wn.widgets.PageSidebar($(wrapper).find('.layout-side-section').get(0), {
+	this.sidebar = new wn.widgets.PageSidebar($(wrapper).find('.questions-tags').get(0), {
 		sections: [
 			{
 				title: 'Top Tags',
@@ -113,6 +113,7 @@ function KnowledgeBase(w) {
 		this.list = new wn.ui.Listing({
 			parent: this.list_area,
 			no_results_message: 'No questions found. Ask a new question!',
+			appframe: wn.pages.questions.appframe,
 			as_dict: 1,
 			get_query: function() {
 				

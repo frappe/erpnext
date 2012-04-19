@@ -3349,9 +3349,6 @@ div.list-row {
 	border-bottom: 1px solid #eee;
 	padding: 5px 0px;
 }
-div.list-row:hover {
-	background-color: #eef
-}
 
 div.list-row .label {
 	margin-right: 4px;
