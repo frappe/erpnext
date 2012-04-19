@@ -34,7 +34,6 @@ keydict = {
     'valuation_method': 'default_valuation_method',
 	'date_format': 'date_format',
 	'currency_format':'default_currency_format',
-	'account_url':'account_url'
 }
 
 class DocType:
