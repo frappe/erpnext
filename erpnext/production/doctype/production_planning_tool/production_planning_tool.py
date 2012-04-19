@@ -201,6 +201,7 @@ class DocType:
 
 	def download_raw_materials(self):
 		""" Create csv data for required raw material to produce finished goods"""
+		self.test = []
 		bom_dict = self.get_distinct_bom(action = 'download_rm')
 		self.get_raw_materials(bom_dict)
 		return self.get_csv()
@@ -241,8 +242,9 @@ class DocType:
 
 
 	def make_items_dict(self, item_list):
+		
 		for i in item_list:
-			self.item_dict[i[0]] = [(flt(self.item_dict.get(i[1], 0)) + flt(i[1])), i[2], i[3]]
+			self.item_dict[i[0]] = [(flt(self.item_dict.get(i[0], [0])[0]) + flt(i[1])), i[2], i[3]]
 
 
 	def get_csv(self):
@@ -250,6 +252,7 @@ class DocType:
 		for d in self.item_dict:
 			item_qty= sql("select sum(indented_qty), sum(ordered_qty), sum(actual_qty) from `tabBin` where item_code = %s", d)
 			item_list.append([d, self.item_dict[d][1], self.item_dict[d][2], self.item_dict[d][0], flt(item_qty[0][0]), flt(item_qty[0][1]), flt(item_qty[0][2])])
+		item_list.append(self.test)
 		return item_list
 		
 
