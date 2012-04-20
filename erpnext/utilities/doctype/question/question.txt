@@ -18,7 +18,7 @@
 		'colour': u'White:FFF',
 		'doctype': 'DocType',
 		'in_create': 1,
-		'module': u'Knowledge Base',
+		'module': u'Utilities',
 		'name': '__common__',
 		'read_only': 1,
 		'section_style': u'Simple',
