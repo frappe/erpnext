@@ -21,7 +21,8 @@ def execute():
 			'Personalize', 'Salary Slip Control Panel',
 			],
 		'Page'		:	['File Browser', 'Bill of Materials'],
-		'DocType Mapper': ['Production Forecast-Production Planning Tool', 'Production Forecast-Production Plan', 'Sales Order-Production Plan']
+		'DocType Mapper': ['Production Forecast-Production Planning Tool', 'Production Forecast-Production Plan', 'Sales Order-Production Plan'],
+		'Module Def': ['Knowledge Base']
 	}
 
 	for d in del_rec:
