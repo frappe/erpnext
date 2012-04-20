@@ -86,13 +86,19 @@ cur_frm.cscript.hide_fields = function(doc, cdt, cdn) {
 	
 	if(cint(doc.is_pos) == 1) {
 		hide_field(par_flds);
+		$(cur_frm.fields_dict.payments_section.row.wrapper).toggle(true);
+		$(cur_frm.fields_dict.advances.row.wrapper).toggle(false);
 		for(f in item_flds_normal) cur_frm.fields_dict['entries'].grid.set_column_disp(item_flds_normal[f], false);
 		for(f in item_flds_pos) cur_frm.fields_dict['entries'].grid.set_column_disp(item_flds_pos[f], (doc.update_stock==1?true:false));
 	} else {
 		unhide_field(par_flds);
+		$(cur_frm.fields_dict.payments_section.row.wrapper).toggle(false);
+		$(cur_frm.fields_dict.advances.row.wrapper).toggle(true);
 		for(f in item_flds_normal) cur_frm.fields_dict['entries'].grid.set_column_disp(item_flds_normal[f], true);
 		for(f in item_flds_pos) cur_frm.fields_dict['entries'].grid.set_column_disp(item_flds_pos[f], false);
 	}
+	if (doc.docstatus==1) $(cur_frm.fields_dict.recurring_invoice.row.wrapper).toggle(true);
+	else $(cur_frm.fields_dict.recurring_invoice.row.wrapper).toggle(false);
 
 	// India related fields
 	var cp = wn.control_panel;
@@ -236,9 +242,21 @@ cur_frm.cscript.debit_to = function(doc,dt,dn) {
 //refresh advance amount
 //-------------------------------------------------
 
-cur_frm.cscript.paid_amount = function(doc,dt,dn){
+
+cur_frm.cscript.write_off_outstanding_amount_automatically = function(doc) {
+	if (doc.write_off_outstanding_amount_automatically == 1) 
+		doc.write_off_amount = flt(doc.grand_total) - flt(doc.paid_amount);
+	
 	doc.outstanding_amount = flt(doc.grand_total) - flt(doc.paid_amount) - flt(doc.write_off_amount);
-	refresh_field('outstanding_amount');
+	refresh_field(['write_off_amount', 'outstanding_amount']);
+}
+
+cur_frm.cscript.paid_amount = function(doc) {
+	cur_frm.cscript.write_off_outstanding_amount_automatically(doc);
+}
+
+cur_frm.cscript.write_off_amount = function(doc) {
+	cur_frm.cscript.write_off_outstanding_amount_automatically(doc);
 }
 
 

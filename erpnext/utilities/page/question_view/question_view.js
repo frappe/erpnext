@@ -16,7 +16,7 @@
 
 pscript['onload_question-view'] = function(wrapper) {
 	wrapper.appframe = new wn.ui.AppFrame($(wrapper).find('.layout-appframe'));
-	wrapper.appframe.title('<a href="#questions">Knowledge Base</a>');
+	wrapper.appframe.title('<span class="breadcrumbs"><a href="#questions">Knowledge Base</a></span>');
 
 	wrapper.add_answer_area = $('.add-answer-area').get(0);
 }
