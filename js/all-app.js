@@ -214,7 +214,7 @@ if(!wn.boot.user_info[uid].fullname)
 wn.boot.user_info[uid].fullname=uid;if(!wn.boot.user_info[uid].image)
 wn.boot.user_info[uid].image=def.image;return wn.boot.user_info[uid];}
 wn.provide('wn.user');$.extend(wn.user,{name:wn.boot.profile.name,has_role:function(rl){if(typeof rl=='string')rl=[rl];for(var i in rl){if(wn.boot.profile.roles.indexOf(rl[i])!=-1)
-return true;}}})
+return true;}},is_report_manager:function(){return wn.user.has_role(['Administrator','System Manager','Report Manager']);}})
 wn.session_alive=true;$(document).bind('mousemove',function(){wn.session_alive=true;if(wn.session_alive_timeout)
 clearTimeout(wn.session_alive_timeout);wn.session_alive_timeout=setTimeout('wn.session_alive=false;',30000);})
 /*
@@ -251,7 +251,7 @@ throw new SyntaxError('JSON.parse');};}}());
 wn.re_route={}
 wn.route=function(){if(wn.re_route[window.location.hash]){window.location.hash=wn.re_route[window.location.hash];}
 wn._cur_route=window.location.hash;route=wn.get_route();switch(route[0]){case"List":wn.views.doclistview.show(route[1]);break;case"Form":if(route.length>3){route[2]=route.splice(2).join('/');}
-wn.views.formview.show(route[1],route[2]);break;case"Report":wn.views.reportview.show(route[1],route[2]);break;case"Report2":wn.views.reportview2.show(route[1],route[2]);break;default:wn.views.pageview.show(route[0]);}}
+wn.views.formview.show(route[1],route[2]);break;case"Report":wn.views.reportview.show(route[1],route[2]);break;case"Report2":wn.views.reportview2.show();break;default:wn.views.pageview.show(route[0]);}}
 wn.get_route=function(route){if(!route)
 route=window.location.hash;if(route.substr(0,1)=='#')route=route.substr(1);if(route.substr(0,1)=='!')route=route.substr(1);return $.map(route.split('/'),function(r){return decodeURIComponent(r);});}
 wn.set_route=function(){route=$.map(arguments,function(a){return encodeURIComponent(a)}).join('/');window.location.hash=route;wn.app.set_favicon();}
@@ -268,11 +268,11 @@ this.prepare_opts();$.extend(this,this.opts);$(this.parent).html(repl('\
     \
     <div class="list-filters hide">\
      <div class="show_filters well">\
+      <div class="filter_area"></div>\
       <div>\
        <button class="btn btn-small add-filter-btn">\
         <i class="icon-plus"></i> Add Filter</button>\
       </div>\
-      <div class="filter_area"></div>\
      </div>\
     </div>\
     \
@@ -327,7 +327,7 @@ return this.filters[i];}}});wn.ui.Filter=Class.extend({init:function(opts){$.ext
    <option value="=">Equals</option>\
    <option value="like">Like</option>\
    <option value=">=">Greater or equals</option>\
-   <option value=">=">Less or equals</option>\
+   <option value="<=">Less or equals</option>\
    <option value=">">Greater than</option>\
    <option value="<">Less than</option>\
    <option value="in">In</option>\
@@ -345,8 +345,9 @@ df.fieldtype=df.original_type;else
 df.original_type=df.fieldtype;df.description='';df.reqd=0;if(fieldtype){df.fieldtype=fieldtype;return;}
 if(df.fieldtype=='Check'){df.fieldtype='Select';df.options='No\nYes';}else if(['Text','Text Editor','Code','Link'].indexOf(df.fieldtype)!=-1){df.fieldtype='Data';}},set_default_condition:function(df,fieldtype){if(!fieldtype){if(df.fieldtype=='Data'){this.$w.find('.condition').val('like');}else{this.$w.find('.condition').val('=');}}},get_value:function(){var me=this;var val=me.field.get_value();var cond=me.$w.find('.condition').val();if(me.field.df.original_type=='Check'){val=(val=='Yes'?1:0);}
 if(cond=='like'){val=val+'%';}
-return[me.fieldselect.$select.find('option:selected').attr('table'),me.field.df.fieldname,me.$w.find('.condition').val(),cstr(val)];}});wn.ui.FieldSelect=Class.extend({init:function(parent,doctype,filter_fields){this.doctype=doctype;this.fields_by_name={};this.$select=$('<select>').appendTo(parent);if(filter_fields){for(var i in filter_fields)
-this.add_field_option(this.filter_fields[i])}else{this.build_options();}},build_options:function(){var me=this;me.table_fields=[];var std_filters=[{fieldname:'name',fieldtype:'Data',label:'ID',parent:me.doctype},{fieldname:'modified',fieldtype:'Date',label:'Last Modified',parent:me.doctype},{fieldname:'owner',fieldtype:'Data',label:'Created By',parent:me.doctype},{fieldname:'creation',fieldtype:'Date',label:'Created On',parent:me.doctype},{fieldname:'_user_tags',fieldtype:'Data',label:'Tags',parent:me.doctype}];$.each(std_filters.concat(wn.meta.docfield_list[me.doctype]),function(i,df){me.add_field_option(df);});$.each(me.table_fields,function(i,table_df){if(table_df.options){$.each(wn.meta.docfield_list[table_df.options],function(i,df){me.add_field_option(df);});}});},add_field_option:function(df){var me=this;if(me.doctype&&df.parent==me.doctype){var label=df.label;var table=me.doctype;if(df.fieldtype=='Table')me.table_fields.push(df);}else{var label=df.label+' ('+df.parent+')';var table=df.parent;}
+return[me.fieldselect.$select.find('option:selected').attr('table'),me.field.df.fieldname,me.$w.find('.condition').val(),cstr(val)];}});wn.ui.FieldSelect=Class.extend({init:function(parent,doctype,filter_fields,with_blank){this.doctype=doctype;this.fields_by_name={};this.with_blank=with_blank;this.$select=$('<select>').appendTo(parent);if(filter_fields){for(var i in filter_fields)
+this.add_field_option(this.filter_fields[i])}else{this.build_options();}},build_options:function(){var me=this;me.table_fields=[];var std_filters=[{fieldname:'name',fieldtype:'Data',label:'ID',parent:me.doctype},{fieldname:'modified',fieldtype:'Date',label:'Last Modified',parent:me.doctype},{fieldname:'owner',fieldtype:'Data',label:'Created By',parent:me.doctype},{fieldname:'creation',fieldtype:'Date',label:'Created On',parent:me.doctype},{fieldname:'_user_tags',fieldtype:'Data',label:'Tags',parent:me.doctype}];if(this.with_blank){this.$select.append($('<option>',{value:''}).text(''));}
+$.each(std_filters.concat(wn.meta.docfield_list[me.doctype]),function(i,df){me.add_field_option(df);});$.each(me.table_fields,function(i,table_df){if(table_df.options){$.each(wn.meta.docfield_list[table_df.options],function(i,df){me.add_field_option(df);});}});},add_field_option:function(df){var me=this;if(me.doctype&&df.parent==me.doctype){var label=df.label;var table=me.doctype;if(df.fieldtype=='Table')me.table_fields.push(df);}else{var label=df.label+' ('+df.parent+')';var table=df.parent;}
 if(wn.model.no_value_type.indexOf(df.fieldtype)==-1&&!me.fields_by_name[df.fieldname]){this.$select.append($('<option>',{value:df.fieldname,table:table}).text(label));me.fields_by_name[df.fieldname]=df;}}})
 /*
  *	lib/js/wn/views/container.js
@@ -465,11 +466,27 @@ wn.container.change_to('Form - '+dt);wn.views.formview[dt].frm.refresh(dn);});})
 wn.views.reportview={show:function(dt,rep_name){wn.require('lib/js/legacy/report.compressed.js');dt=get_label_doctype(dt);if(!_r.rb_con){_r.rb_con=new _r.ReportContainer();}
 _r.rb_con.set_dt(dt,function(rb){if(rep_name){var t=rb.current_loaded;rb.load_criteria(rep_name);if((rb.dt)&&(!rb.dt.has_data()||rb.current_loaded!=t)){rb.dt.run();}}
 if(!rb.forbidden){wn.container.change_to('Report Builder');}});}}
-wn.views.reportview2={show:function(dt){var page_name='Report-'+dt;if(!wn.pages[page_name])
-new wn.views.ReportView(dt);else
-wn.container.change_to(page_name);}}
-wn.views.ReportView=wn.ui.Listing.extend({init:function(doctype){var me=this;this.import_slickgrid();this.doctype=doctype;this.tab_name='`tab'+doctype+'`';this.columns=[['name'],['owner'],['creation'],['modified']];this.page=wn.container.add_page('Report-'+doctype);wn.model.with_doctype(doctype,function(){me.make_page();me.setup();me.make_column_picker();me.make_export();});},import_slickgrid:function(){wn.require('lib/js/lib/slickgrid/slick.grid.css');wn.require('lib/js/lib/slickgrid/slick-default-theme.css');wn.require('lib/js/lib/slickgrid/jquery.event.drag.min.js');wn.require('lib/js/lib/slickgrid/slick.core.js');wn.require('lib/js/lib/slickgrid/slick.grid.js');wn.dom.set_style('.slick-cell { font-size: 12px; }');},make_page:function(){wn.ui.make_app_page({parent:this.page,title:'Report - '+this.doctype,single_column:true});wn.container.change_to(this.page.label);},setup:function(){var me=this;this.make({appframe:this.page.appframe,method:'webnotes.widgets.doclistview.get',get_args:this.get_args,parent:$(this.page).find('.layout-main'),start:0,page_length:20,show_filters:true,show_grid:true,new_doctype:this.doctype,allow_delete:true,});this.run();},get_args:function(){var me=this;return{doctype:this.doctype,fields:$.map(this.columns,function(v){return(v[1]?('`tab'+v[1]+'`'):me.tab_name)+'.'+v[0]}),filters:this.filter_list.get_filters(),docstatus:['0','1','2']}},build_columns:function(){var me=this;return $.map(this.columns,function(c){return{id:c[0],field:c[0],name:(wn.meta.docfield_map[c[1]||me.doctype][c[0]]?wn.meta.docfield_map[c[1]||me.doctype][c[0]].label:toTitle(c[0])),width:120}});},render_list:function(){var columns=[{id:'_idx',field:'_idx',name:'Sr.',width:40}].concat(this.build_columns());$.each(this.data,function(i,v){v._idx=i+1;});var options={enableCellNavigation:true,enableColumnReorder:false};var grid=new Slick.Grid(this.$w.find('.result-list').css('border','1px solid grey').css('height','500px').get(0),this.data,columns,options);},make_column_picker:function(){var me=this;this.column_picker=new wn.ui.ColumnPicker(this);this.page.appframe.add_button('Pick Columns',function(){me.column_picker.show(me.columns);},'icon-th-list');},make_export:function(){var me=this;if(wn.user.has_role(['Administrator','System Manager','Data Export'])){this.page.appframe.add_button('Export',function(){me.export();},'icon-download-alt');}},export:function(){var args=this.get_args();args.cmd='webnotes.widgets.doclistview.export_query'
-open_url_post(wn.request.url,args)}});wn.ui.ColumnPicker=Class.extend({init:function(list){this.list=list;this.doctype=list.doctype;this.selects={};},show:function(columns){wn.require('lib/js/lib/jquery/jquery.ui.sortable.js');var me=this;if(!this.dialog){this.dialog=new wn.ui.Dialog({title:'Pick Columns',width:'400'});}
+wn.views.reportview2={show:function(dt){var route=wn.get_route();var page_name=window.location.hash.substr(1);if(wn.pages[page_name]){wn.container.change_to(wn.pages[page_name]);}else{if(route[1]){new wn.views.ReportView(route[1],route[2]);}else{}}}}
+wn.views.ReportView=wn.ui.Listing.extend({init:function(doctype,docname){var me=this;this.page_name=window.location.hash.substr(1);this.import_slickgrid();this.doctype=doctype;this.docname=docname;this.tab_name='`tab'+doctype+'`';this.make_page();wn.model.with_doctype(doctype,function(){me.setup();if(docname){wn.model.with_doc('Report',docname,function(r){me.set_columns_and_filters(JSON.parse(locals['Report'][docname].json));me.run();});}else{me.run();}});},import_slickgrid:function(){wn.require('lib/js/lib/slickgrid/slick.grid.css');wn.require('lib/js/lib/slickgrid/slick-default-theme.css');wn.require('lib/js/lib/slickgrid/jquery.event.drag.min.js');wn.require('lib/js/lib/slickgrid/slick.core.js');wn.require('lib/js/lib/slickgrid/slick.grid.js');wn.dom.set_style('.slick-cell { font-size: 12px; }');},make_page:function(){this.page=wn.container.add_page(this.page_name);var title='Report: '+this.doctype;if(this.docname)title+=' - '+this.docname;wn.ui.make_app_page({parent:this.page,title:title,single_column:true});wn.container.change_to(this.page_name);},set_init_columns:function(){var columns=[['name'],['owner']];$.each(wn.meta.docfield_list[this.doctype],function(i,df){if(df.in_filter&&df.fieldname!='naming_series'){columns.push([df.fieldname]);}});this.columns=columns;},setup:function(){var me=this;this.make({appframe:this.page.appframe,method:'webnotes.widgets.doclistview.get',get_args:this.get_args,parent:$(this.page).find('.layout-main'),start:0,page_length:20,show_filters:true,new_doctype:this.doctype,allow_delete:true,});this.make_column_picker();this.make_sorter();this.make_export();this.set_init_columns();this.make_save();},set_columns_and_filters:function(opts){var me=this;if(opts.columns)this.columns=opts.columns;if(opts.filters)$.each(opts.filters,function(i,f){me.filter_list.add_filter(f[1],f[2],f[3]);});if(opts.sort_by)this.sort_by_select.val(opts.sort_by);if(opts.sort_order)this.sort_order_select.val(opts.sort_order);if(opts.sort_by_next)this.sort_by_next_select.val(opts.sort_by_next);if(opts.sort_order_next)this.sort_order_next_select.val(opts.sort_order_next);},get_args:function(){var me=this;return{doctype:this.doctype,fields:$.map(this.columns,function(v){return me.get_full_column_name(v)}),order_by:this.get_order_by(),filters:this.filter_list.get_filters(),docstatus:['0','1','2']}},get_order_by:function(){var order_by=this.get_full_column_name([this.sort_by_select.val()])
++' '+this.sort_order_select.val()
+if(this.sort_by_next_select.val()){order_by+=', '+this.get_full_column_name([this.sort_by_next_select.val()])
++' '+this.sort_order_next_select.val()}
+return order_by;},get_full_column_name:function(v){return(v[1]?('`tab'+v[1]+'`'):this.tab_name)+'.'+v[0];},build_columns:function(){var me=this;return $.map(this.columns,function(c){return{id:c[0],field:c[0],name:(wn.meta.docfield_map[c[1]||me.doctype][c[0]]?wn.meta.docfield_map[c[1]||me.doctype][c[0]].label:toTitle(c[0])),width:120}});},render_list:function(){var columns=[{id:'_idx',field:'_idx',name:'Sr.',width:40}].concat(this.build_columns());$.each(this.data,function(i,v){v._idx=i+1;});var options={enableCellNavigation:true,enableColumnReorder:false};var grid=new Slick.Grid(this.$w.find('.result-list').css('border','1px solid grey').css('height','500px').get(0),this.data,columns,options);},make_column_picker:function(){var me=this;this.column_picker=new wn.ui.ColumnPicker(this);this.page.appframe.add_button('Pick Columns',function(){me.column_picker.show(me.columns);},'icon-th-list');},make_sorter:function(){var me=this;this.sort_dialog=new wn.ui.Dialog({title:'Sorting Preferences'});$(this.sort_dialog.body).html('<p class="help">Sort By</p>\
+   <div class="sort-column"></div>\
+   <div><select class="sort-order" style="margin-top: 10px; width: 60%;">\
+    <option value="asc">Ascending</option>\
+    <option value="desc">Descending</option>\
+   </select></div>\
+   <hr><p class="help">Then By (optional)</p>\
+   <div class="sort-column-1"></div>\
+   <div><select class="sort-order-1" style="margin-top: 10px; width: 60%;">\
+    <option value="asc">Ascending</option>\
+    <option value="desc">Descending</option>\
+   </select></div><hr>\
+   <div><button class="btn btn-small btn-info">Update</div>');this.sort_by_select=new wn.ui.FieldSelect($(this.sort_dialog.body).find('.sort-column'),this.doctype).$select;this.sort_by_select.css('width','60%');this.sort_order_select=$(this.sort_dialog.body).find('.sort-order');this.sort_by_next_select=new wn.ui.FieldSelect($(this.sort_dialog.body).find('.sort-column-1'),this.doctype,null,true).$select;this.sort_by_next_select.css('width','60%');this.sort_order_next_select=$(this.sort_dialog.body).find('.sort-order-1');this.sort_by_select.val('modified');this.sort_order_select.val('desc');this.sort_by_next_select.val('');this.sort_order_next_select.val('desc');this.page.appframe.add_button('Sort By',function(){me.sort_dialog.show();},'icon-arrow-down');$(this.sort_dialog.body).find('.btn-info').click(function(){me.sort_dialog.hide();me.run();});},make_export:function(){var me=this;if(wn.user.is_report_manager()){this.page.appframe.add_button('Export',function(){var args=me.get_args();args.cmd='webnotes.widgets.doclistview.export_query'
+open_url_post(wn.request.url,args);},'icon-download-alt');}},make_save:function(){var me=this;if(wn.user.is_report_manager()){this.page.appframe.add_button('Save',function(){if(me.docname){var name=me.docname}else{var name=prompt('Select Report Name');if(!name){return;}}
+wn.call({method:'webnotes.widgets.doclistview.save_report',args:{name:name,doctype:me.doctype,json:JSON.stringify({filters:me.filter_list.get_filters(),columns:me.columns,sort_by:me.sort_by_select.val(),sort_order:me.sort_order_select.val(),sort_by_next:me.sort_by_next_select.val(),sort_order_next:me.sort_order_next_select.val()})},callback:function(r){if(r.message!=me.docname)
+wn.set_route('Report2',me.doctype,me.docname);}});},'icon-upload');}}});wn.ui.ColumnPicker=Class.extend({init:function(list){this.list=list;this.doctype=list.doctype;this.selects={};},show:function(columns){wn.require('lib/js/lib/jquery/jquery.ui.sortable.js');var me=this;if(!this.dialog){this.dialog=new wn.ui.Dialog({title:'Pick Columns',width:'400'});}
 $(this.dialog.body).html('<div class="help">Drag to sort columns</div>\
    <div class="column-list"></div>\
    <div><button class="btn btn-small btn-add"><i class="icon-plus"></i>\
