@@ -126,7 +126,6 @@ class DocType(TransactionBase):
 		
 		if self.doc.debit_to:
 			self.doc.customer = webnotes.conn.get_value('Account',self.doc.debit_to,'master_name')
-		#	get_obj('Sales Common').get_customer_details(self, inv_det_reqd = 0)
 
 
 	# Pull Details of Delivery Note or Sales Order Selected
@@ -467,8 +466,6 @@ class DocType(TransactionBase):
 		sales_com_obj.validate_max_discount(self, 'entries')	 #verify whether rate is not greater than tolerance
 		sales_com_obj.get_allocated_sum(self)	# this is to verify that the allocated % of sales persons is 100%
 		sales_com_obj.validate_fiscal_year(self.doc.fiscal_year,self.doc.posting_date,'Posting Date')
-		if not self.doc.customer:
-			get_obj('Sales Common').get_customer_details(self, inv_det_reqd = 0)
 		self.validate_customer()
 		self.validate_debit_to_acc()
 		self.validate_debit_acc()

@@ -76,24 +76,6 @@ cur_frm.cscript.update_item_details = function(doc, dt, dn, callback) {
 }
 
 
-
-// ============== Customer and its primary contact Details ============================
-cur_frm.cscript.customer = function(doc, cdt, cdn) {
-	if(doc.customer){
-		if (!doc.company) {
-			msgprint("Please select company to proceed");
-			doc.customer = '';
-			refresh_field('customer');
-		} else {
-			var callback = function(r, rt){
-				cur_frm.refresh();
-			}
-			$c_obj(make_doclist(doc.doctype, doc.name), 'get_customer_details', '',callback);
-		}
-	}
-}
-
-
 var set_dynamic_label_par = function(doc, cdt, cdn, base_curr) {
 	//parent flds
 	par_cols_base = {'net_total': 'Net Total', 'other_charges_total': 'Taxes and Charges Total', 

@@ -33,9 +33,9 @@ class TransactionBase:
 		self.doc.contact_display = contact_text or ''
 		self.doc.contact_email = contact_email or ''
 		self.doc.contact_mobile = contact_mobile or ''
-	
-		self.get_customer_details(self.doc.customer)
+
 		if args != 'onload':
+			self.get_customer_details(self.doc.customer)
 			self.get_sales_person(self.doc.customer)
 		
 	# Get Customer Default Shipping Address - first load
@@ -50,8 +50,8 @@ class TransactionBase:
 		self.doc.contact_email = contact_email or ''
 		self.doc.contact_mobile = contact_mobile or ''
 		
-		self.get_customer_details(self.doc.customer)
 		if self.doc.doctype != 'Quotation' and args != 'onload':
+			self.get_customer_details(self.doc.customer)
 			self.get_sales_person(self.doc.customer)			
 
 	# Get Customer Address
@@ -118,13 +118,18 @@ class TransactionBase:
 	# Get Customer Details
 	# -----------------------
 	def get_customer_details(self, name):		
-		customer_details = webnotes.conn.sql("select customer_name, customer_group, territory, default_sales_partner, default_commission_rate from tabCustomer where name = '%s' and docstatus != 2" %(name), as_dict = 1)
+		customer_details = webnotes.conn.sql("select customer_name, customer_group, territory, default_sales_partner, default_commission_rate, default_price_list from tabCustomer where name = '%s' and docstatus != 2" %(name), as_dict = 1)
 		if customer_details:
 			self.doc.customer_name = customer_details[0]['customer_name'] or ''
 			self.doc.customer_group = customer_details[0]['customer_group'] or ''
 			self.doc.territory = customer_details[0]['territory'] or ''
 			self.doc.sales_partner = customer_details[0]['default_sales_partner'] or ''
 			self.doc.commission_rate = customer_details[0]['default_commission_rate'] or ''
+			def_price_list = customer_details[0]['default_price_list'] or ''
+			if not def_price_list:
+				cg_price_list = webnotes.conn.sql("select default_price_list from `tabCustomer Group` where name = %s", customer_details[0]['customer_group'])
+				def_price_list = cg_price_list and cg_price_list[0][0] or ''
+			self.doc.price_list_name = def_price_list or self.doc.price_list_name
 			
 	# Get Customer Shipping Address
 	# -----------------------
