@@ -78,9 +78,9 @@ EditableText = function(args) {
 	
 	me.$w = $(repl('<div class="ed-text">\
 		<div class="ed-text-display %(disp_class)s"></div>\
-		<a class="ed-text-edit" style="cursor: pointer; float: right;">[edit]</a>\
-		<textarea class="ed-text-input %(inp_class)s hide"></textarea><br>\
-		<div class="help hide">Formatted as <a href="http://en.wikipedia.org/wiki/Markdown#Syntax_examples"\
+		<a class="ed-text-edit" style="cursor: pointer; float: right; margin-top: -16px;">[edit]</a>\
+		<textarea class="ed-text-input %(inp_class)s hide"></textarea>\
+		<div class="help hide"><br>Formatted as <a href="http://en.wikipedia.org/wiki/Markdown#Syntax_examples"\
 		 	target="_blank">markdown</a></div>\
 		<button class="btn btn-small btn-info hide ed-text-save">Save</button>\
 		<a class="ed-text-cancel hide" style="cursor: pointer;">Cancel</a>\
