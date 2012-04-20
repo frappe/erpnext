@@ -184,7 +184,7 @@ cur_frm.fields_dict['quotation_no'].get_query = function(doc) {
 	if(doc.order_type) cond = ' ifnull(`tabQuotation`.order_type, "") = "'+doc.order_type+'" and';
 	if(doc.customer) cond += ' ifnull(`tabQuotation`.customer, "") = "'+doc.customer+'" and';
 	
-	return repl('SELECT DISTINCT name, customer, transaction_date	FROM `tabQuotation` WHERE `tabQuotation`.company = "' + doc.company + '" and `tabQuotation`.`docstatus` = 1 and `tabQuotation`.status != "Order Lost" and %(cond)s `tabQuotation`.%(key)s LIKE "%s" ORDER BY `tabQuotation`.`name` DESC LIMIT 50', {cond:cond});
+	return repl('SELECT DISTINCT name, customer, transaction_date FROM `tabQuotation` WHERE `tabQuotation`.company = "' + doc.company + '" and `tabQuotation`.`docstatus` = 1 and `tabQuotation`.status != "Order Lost" and %(cond)s `tabQuotation`.%(key)s LIKE "%s" ORDER BY `tabQuotation`.`name` DESC LIMIT 50', {cond:cond});
 }
 
 

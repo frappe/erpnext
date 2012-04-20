@@ -242,14 +242,21 @@ class DocType:
 
 	def make_items_dict(self, item_list):
 		for i in item_list:
-			self.item_dict[i[0]] = [(flt(self.item_dict.get(i[1], 0)) + flt(i[1])), i[2], i[3]]
+			self.item_dict[i[0]] = [(flt(self.item_dict.get(i[0], [0])[0]) + flt(i[1])), i[2], i[3]]
 
 
 	def get_csv(self):
-		item_list = [['Item Code', 'Description', 'Stock UOM', 'Required Qty', 'Quantity Requested for Purchase', 'Ordered Qty', 'Actual Qty']]
+		item_list = [['Item Code', 'Description', 'Stock UOM', 'Required Qty', 'Warehouse', 'Quantity Requested for Purchase', 'Ordered Qty', 'Actual Qty']]
 		for d in self.item_dict:
-			item_qty= sql("select sum(indented_qty), sum(ordered_qty), sum(actual_qty) from `tabBin` where item_code = %s", d)
-			item_list.append([d, self.item_dict[d][1], self.item_dict[d][2], self.item_dict[d][0], flt(item_qty[0][0]), flt(item_qty[0][1]), flt(item_qty[0][2])])
+			item_list.append([d, self.item_dict[d][1], self.item_dict[d][2], self.item_dict[d][0]]),
+			item_qty= sql("select warehouse, indented_qty, ordered_qty, actual_qty from `tabBin` where item_code = %s", d)
+			i_qty, o_qty, a_qty = 0,0,0
+			for w in item_qty:
+				i_qty, o_qty, a_qty = i_qty + flt(w[1]), o_qty + flt(w[2]), a_qty + flt(w[3])
+				item_list.append(['', '', '', '', w[0], flt(w[1]), flt(w[2]), flt(w[3])])
+			if item_qty:
+				item_list.append(['', '', '', '', 'Total', i_qty, o_qty, a_qty])
+
 		return item_list
 		
 

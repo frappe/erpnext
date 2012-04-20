@@ -16,9 +16,9 @@
 
 report.customize_filters = function() {
   this.hide_all_filters();
-  filter_list = ['From Voucher Date', 'To Voucher Date', 'Debit To', 'From Posting Date', 'To Posting Date']
-  for(var i=0;i<filter_list.length;i++)
-    this.filter_fields_dict['Sales Invoice'+FILTER_SEP +filter_list[i]].df.filter_hide = 0;
+  filter_list = ['Debit To', 'From Posting Date', 'To Posting Date']
+  for(var i=0;i<filter_list.length;i++) 
+    this.filter_fields_dict['Receivable Voucher'+FILTER_SEP +filter_list[i]].df.filter_hide = 0;
 
   this.filter_fields_dict['Sales Invoice Item'+FILTER_SEP +'Item'].df.filter_hide = 0;
   this.filter_fields_dict['Sales Invoice Item'+FILTER_SEP +'Item Group'].df.filter_hide = 0;
