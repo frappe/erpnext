@@ -74,13 +74,6 @@ class DocType(TransactionBase):
 			get_obj('DocType Mapper', 'Project-Sales Order').dt_map('Project', 'Sales Order', self.doc.project_name, self.doc, self.doclist, "[['Project', 'Sales Order']]")
 			
 	
-	# Get Customer Details
-	# ---------------------
-	#def get_customer_details(self):
-	#	sales_com_obj = get_obj('Sales Common')
-	#	sales_com_obj.get_customer_details(self)
-	#	sales_com_obj.get_shipping_details(self)
-
 	# Get contact person details based on customer selected
 	# ------------------------------------------------------
 	def get_contact_details(self):

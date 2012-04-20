@@ -119,24 +119,6 @@ class DocType(TransactionBase):
 			acc_head = webnotes.conn.sql("select name from `tabAccount` where name = '%s' and docstatus != 2" % (cstr(obj.doc.customer) + " - " + get_value('Company', obj.doc.company, 'abbr')))
 			obj.doc.debit_to = acc_head and acc_head[0][0] or ''
 
-
-	# Get Customer Details along with its primary contact details
-	# ==============================================================
-	def get_customer_details(self, obj = '', inv_det_reqd = 1):
-		details = webnotes.conn.sql("select customer_name,address, territory, customer_group, default_sales_partner, default_commission_rate from `tabCustomer` where name = '%s' and docstatus != 2" %(obj.doc.customer), as_dict = 1)
-		obj.doc.customer_name = details and details[0]['customer_name'] or ''
-		obj.doc.customer_address =	details and details[0]['address'] or ''
-		obj.doc.territory = details and details[0]['territory'] or ''
-		obj.doc.customer_group	=	details and details[0]['customer_group'] or ''
-		obj.doc.sales_partner	 =	details and details[0]['default_sales_partner'] or ''
-		obj.doc.commission_rate =	details and flt(details[0]['default_commission_rate']) or ''
-		if obj.doc.doctype != 'Sales Invoice':
-			obj.doc.delivery_address =	details and details[0]['address'] or ''
-			self.get_contact_details(obj,primary = 1) # get primary contact details
-		self.get_sales_person_details(obj) # get default sales person details
-
-		if obj.doc.doctype == 'Sales Invoice' and inv_det_reqd:
-			self.get_invoice_details(obj) # get invoice details
 	
 	
 	# Get Item Details

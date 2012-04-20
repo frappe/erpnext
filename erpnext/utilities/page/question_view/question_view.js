@@ -65,7 +65,7 @@ KBQuestionView = function(w, qid, qtext) {
 	// check if users has answered 
 	// (if no) then add a box to add a new answer
 	this.make_add_answer = function() {
-		$c_page('knowledge_base', 'question_view', 'has_answered', qid, function(r, rt) {
+		$c_page('utilities', 'question_view', 'has_answered', qid, function(r, rt) {
 			if(r.message=='No') {
 				me.make_answer_box_link();
 			}
@@ -92,7 +92,7 @@ KBQuestionView = function(w, qid, qtext) {
 			var v = wn.tinymce.get_value(me.input);
 			if(!v) { msgprint('Write something!'); return; }
 			me.btn.set_working();
-			$c_page('knowledge_base', 'question_view', 'add_answer', {qid: qid, answer:v}, 
+			$c_page('utilities', 'question_view', 'add_answer', {qid: qid, answer:v}, 
 				function(r, rt) {
 					me.btn.done_working();
 					me.ans_list.list.run();
@@ -107,7 +107,7 @@ KBQuestionView = function(w, qid, qtext) {
 			this.make();
 		}
 		else {
-			$c_page('knowledge_base', 'question_view', 'get_question', qid, function(r, rt) {
+			$c_page('utilities', 'question_view', 'get_question', qid, function(r, rt) {
 				qtext = r.message;
 				me.make();
 			});
@@ -185,4 +185,4 @@ KBAnswer = function(body, data, ans_list) {
 }
 
 
-wn.require('erpnext/knowledge_base/page/kb_common/kb_common.js');
+wn.require('erpnext/utilities/page/kb_common/kb_common.js');

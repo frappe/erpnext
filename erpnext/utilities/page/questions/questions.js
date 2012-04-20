@@ -88,7 +88,7 @@ function KnowledgeBase(w) {
 	
 	// add a new question to the database
 	this.add_question = function(suggest_list) {
-		$c_page('knowledge_base', 'questions', 'add_question', {
+		$c_page('utilities', 'questions', 'add_question', {
 			question: this.search.value,
 			suggest: suggest_list
 		}, function(r,rt) {
@@ -219,4 +219,4 @@ KBQuestion = function(parent, det, kb) {
 	this.make()
 }
 
-wn.require('erpnext/knowledge_base/page/kb_common/kb_common.js');
+wn.require('erpnext/utilities/page/kb_common/kb_common.js');
