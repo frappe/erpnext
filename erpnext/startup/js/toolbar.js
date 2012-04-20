@@ -43,11 +43,6 @@ erpnext.toolbar.setup = function() {
 	$('#toolbar-help').append('<li><a href="http://www.providesupport.com?messenger=iwebnotes" target="_blank">\
 		Live Chat (Office Hours)</a></li>')
 
-	// billing
-	if(pscript.is_erpnext_saas && is_system_manager) {
-		$('#toolbar-user').append('<li><a href="#billing">Billing</a></li>')
-	}
-
 	$.extend(wn.container.wntoolbar, {
 		set_new_comments: function(new_comments) {
 			var navbar_nc = $('.navbar-new-comments');

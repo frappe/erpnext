@@ -373,7 +373,7 @@ wn.settings.no_history=1;var NEWLINE='\n';var profile=null;var user=null;var use
  *	lib/js/legacy/utils/datatype.js
  */
 wn.utils.full_name=function(fn,ln){return fn+(ln?' ':'')+(ln?ln:'')}
-function fmt_money(v){if(v==null||v=='')return'0.00';v=(v+'').replace(/,/g,'');v=parseFloat(v);if(isNaN(v)){return'';}else{var cp=wn.control_panel;var val=2;if(cp.currency_format=='Millions')val=3;v=v.toFixed(2);var delimiter=",";amount=v+'';var a=amount.split('.',2)
+function fmt_money(v){if(v==null||v=='')return'0.00';v=(v+'').replace(/,/g,'');v=parseFloat(v);if(isNaN(v)){return'';}else{var val=2;if(wn.boot.sysdefaults.currency_format=='Millions')val=3;v=v.toFixed(2);var delimiter=",";amount=v+'';var a=amount.split('.',2)
 var d=a[1];var i=parseInt(a[0]);if(isNaN(i)){return'';}
 var minus='';if(v<0){minus='-';}
 i=Math.abs(i);var n=new String(i);var a=[];if(n.length>3)
@@ -864,7 +864,7 @@ wn.modules_path='erpnext';$(document).bind('toolbar_setup',function(){$('.brand'
  *	erpnext/startup/startup.js
  */
 var current_module;var is_system_manager=0;wn.provide('erpnext.startup');erpnext.modules={'Selling':'selling-home','Accounts':'accounts-home','Stock':'stock-home','Buying':'buying-home','Support':'support-home','Projects':'projects-home','Production':'production-home','Website':'website-home','HR':'hr-home','Setup':'Setup','Activity':'activity','To Do':'todo','Calendar':'calendar','Messages':'messages','Knowledge Base':'questions','Dashboard':'dashboard'}
-erpnext.startup.set_globals=function(){wn.control_panel.sync_with_gateway=wn.boot.sync_with_gateway
+wn.provide('wn.modules');$.extend(wn.modules,erpnext.modules);wn.modules['Core']='Setup';erpnext.startup.set_globals=function(){wn.control_panel.sync_with_gateway=wn.boot.sync_with_gateway
 pscript.is_erpnext_saas=cint(wn.control_panel.sync_with_gateway)
 if(inList(user_roles,'System Manager'))is_system_manager=1;}
 erpnext.startup.start=function(){$('#startup_div').html('Starting up...').toggle(true);erpnext.startup.set_globals();if(wn.boot.user_background){erpnext.set_user_background(wn.boot.user_background);}
