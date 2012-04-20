@@ -56,7 +56,7 @@ KBItemToolbar = function(args, kb) {
 			console.log(1);
 			this.innerHTML = 'deleting...'; 
 			this.disabled = 1;
-			$c_page('knowledge_base', 'questions', 'delete', {
+			$c_page('utilities', 'questions', 'delete', {
 				dt: me.doctype, dn: me.det.name}, function(r,rt) {
 				// reload the list
 				kb.list.run()
@@ -78,9 +78,9 @@ EditableText = function(args) {
 	
 	me.$w = $(repl('<div class="ed-text">\
 		<div class="ed-text-display %(disp_class)s"></div>\
-		<a class="ed-text-edit" style="cursor: pointer; float: right;">[edit]</a>\
-		<textarea class="ed-text-input %(inp_class)s hide"></textarea><br>\
-		<div class="help hide">Formatted as <a href="http://en.wikipedia.org/wiki/Markdown#Syntax_examples"\
+		<a class="ed-text-edit" style="cursor: pointer; float: right; margin-top: -16px;">[edit]</a>\
+		<textarea class="ed-text-input %(inp_class)s hide"></textarea>\
+		<div class="help hide"><br>Formatted as <a href="http://en.wikipedia.org/wiki/Markdown#Syntax_examples"\
 		 	target="_blank">markdown</a></div>\
 		<button class="btn btn-small btn-info hide ed-text-save">Save</button>\
 		<a class="ed-text-cancel hide" style="cursor: pointer;">Cancel</a>\
@@ -112,7 +112,7 @@ EditableText = function(args) {
 			}
 			var btn = this;
 			$(btn).set_working();
-			$c_page('knowledge_base', 'question_view', 'update_item', {
+			$c_page('utilities', 'question_view', 'update_item', {
 					dt: me.dt, dn: me.dn, fn: me.fieldname, text: v
 				}, 
 				function(r) {

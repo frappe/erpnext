@@ -24,7 +24,7 @@ pscript.onload_questions = function(wrapper) {
 	var kb = new KnowledgeBase(body);
 	
 	// sidebar
-	this.sidebar = new wn.widgets.PageSidebar($(wrapper).find('.layout-side-section').get(0), {
+	this.sidebar = new wn.widgets.PageSidebar($(wrapper).find('.questions-tags').get(0), {
 		sections: [
 			{
 				title: 'Top Tags',
@@ -88,7 +88,7 @@ function KnowledgeBase(w) {
 	
 	// add a new question to the database
 	this.add_question = function(suggest_list) {
-		$c_page('knowledge_base', 'questions', 'add_question', {
+		$c_page('utilities', 'questions', 'add_question', {
 			question: this.search.value,
 			suggest: suggest_list
 		}, function(r,rt) {
@@ -113,6 +113,7 @@ function KnowledgeBase(w) {
 		this.list = new wn.ui.Listing({
 			parent: this.list_area,
 			no_results_message: 'No questions found. Ask a new question!',
+			appframe: wn.pages.questions.appframe,
 			as_dict: 1,
 			get_query: function() {
 				
@@ -218,4 +219,4 @@ KBQuestion = function(parent, det, kb) {
 	this.make()
 }
 
-wn.require('erpnext/knowledge_base/page/kb_common/kb_common.js');
+wn.require('erpnext/utilities/page/kb_common/kb_common.js');

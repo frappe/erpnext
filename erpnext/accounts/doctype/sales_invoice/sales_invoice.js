@@ -171,6 +171,7 @@ cur_frm.cscript.customer = function(doc,dt,dn,onload) {
 					get_server_fields('get_cust_and_due_date','','',doc,dt,dn,1,
 					function(doc, dt, dn) {
 						cur_frm.refresh();
+						cur_frm.cscript.price_list_name(doc, dt, dn);
 					});
 					
 				}

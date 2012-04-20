@@ -79,6 +79,7 @@ cur_frm.cscript.customer = function(doc,dt,dn,onload) {
 			var doc = locals[cur_frm.doctype][cur_frm.docname];
 			if(doc.customer) unhide_field(['customer_address','contact_person','customer_name','address_display','contact_display','contact_mobile','contact_email','territory','customer_group','shipping_address']);
 			cur_frm.refresh();
+			cur_frm.cscript.price_list_name(doc, dt, dn); 
 	} 
 	var args = onload ? 'onload':''
 	if(doc.customer) $c_obj(make_doclist(doc.doctype, doc.name), 'get_default_customer_shipping_address', args, callback);
@@ -257,18 +258,21 @@ cur_frm.fields_dict['territory'].get_query = function(doc,cdt,cdn) {
 //------------------------for printing without amount----------
 
 var set_print_hide= function(doc, cdt, cdn){
+	var dn_fields = wn.meta.docfield_map['Delivery Note'];
+	var dn_item_fields = wn.meta.docfield_map['Delivery Note Item'];
+	
 	if (doc.print_without_amount) {
-		fields['Delivery Note']['currency'].print_hide = 1;
-		fields['Delivery Note Item']['export_rate'].print_hide = 1;
-		fields['Delivery Note Item']['adj_rate'].print_hide = 1;
-		fields['Delivery Note Item']['ref_rate'].print_hide = 1;
-		fields['Delivery Note Item']['export_amount'].print_hide = 1;
+		dn_fields['currency'].print_hide = 1;
+		dn_item_fields['export_rate'].print_hide = 1;
+		dn_item_fields['adj_rate'].print_hide = 1;
+		dn_item_fields['ref_rate'].print_hide = 1;
+		dn_item_fields['export_amount'].print_hide = 1;
 	} else {
-		fields['Delivery Note']['currency'].print_hide = 0;
-		fields['Delivery Note Item']['export_rate'].print_hide = 0;
-		fields['Delivery Note Item']['adj_rate'].print_hide = 0;
-		fields['Delivery Note Item']['ref_rate'].print_hide = 0;
-		fields['Delivery Note Item']['export_amount'].print_hide = 0;
+		dn_fields['currency'].print_hide = 0;
+		dn_item_fields['export_rate'].print_hide = 0;
+		dn_item_fields['adj_rate'].print_hide = 0;
+		dn_item_fields['ref_rate'].print_hide = 0;
+		dn_item_fields['export_amount'].print_hide = 0;
 	}
 }
 

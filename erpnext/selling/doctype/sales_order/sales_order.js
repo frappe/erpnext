@@ -99,6 +99,8 @@ cur_frm.cscript.customer = function(doc,dt,dn) {
 		var callback2  = function(r, rt) {
 			if(doc.customer) unhide_field(['customer_address', 'contact_person', 'customer_name', 'address_display', 'contact_display', 'contact_mobile', 'contact_email', 'territory','customer_group','shipping_address']);
 			cur_frm.refresh();
+			cur_frm.cscript.price_list_name(doc, dt, dn); 
+
 		}
 		var doc = locals[cur_frm.doctype][cur_frm.docname];
 		get_server_fields('get_shipping_address',doc.customer,'',doc, dt, dn, 0, callback2);
