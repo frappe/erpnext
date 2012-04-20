@@ -157,3 +157,8 @@ cur_frm.fields_dict['bom_materials'].grid.get_field('bom_no').get_query = functi
 	return 'SELECT DISTINCT `tabBOM`.`name`, `tabBOM`.`remarks` FROM `tabBOM` WHERE `tabBOM`.`item` = "' + d.item_code + '" AND `tabBOM`.`is_active` = "Yes" AND `tabBOM`.docstatus = 1 AND `tabBOM`.`name` like "%s" ORDER BY `tabBOM`.`name` LIMIT 50';
 }
 
+cur_frm.cscript.validate = function(doc, dt, dn) {
+	calculate_op_cost(doc, dt, dn);
+	calculate_rm_cost(doc, dt, dn);
+	calculate_total(doc);
+}

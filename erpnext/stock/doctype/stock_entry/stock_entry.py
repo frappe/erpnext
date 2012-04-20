@@ -265,9 +265,6 @@ class DocType(TransactionBase):
 			if flt(d.transfer_qty) <= 0:
 				msgprint("Transfer Quantity can not be less than or equal to zero at Row No " + cstr(d.idx))
 				raise Exception
-			if d.s_warehouse and flt(d.transfer_qty) > flt(d.actual_qty):
-				msgprint("Transfer Quantity is more than Available Qty at Row No " + cstr(d.idx))
-				raise Exception
 
 
 	def calc_amount(self):

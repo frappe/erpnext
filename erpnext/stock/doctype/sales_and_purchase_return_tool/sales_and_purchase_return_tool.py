@@ -42,9 +42,9 @@ class DocType :
   def pull_item_details(self):
     if self.doc.return_type == 'Sales Return':
       if self.doc.delivery_note_no:
-        det = sql("select t1.name, t1.item_code, t1.description, t1.qty, t1.uom, t2.basic_rate, t3.customer, t3.customer_name, t3.customer_address, t2.serial_no, t2.batch_no from `tabDelivery Note Packing Item` t1, `tabDelivery Note Item` t2, `tabDelivery Note` t3 where t1.parent = t3.name and t2.parent = t3.name and t1.parent_detail_docname = t2.name and t3.name = '%s' and t3.docstatus = 1" % self.doc.delivery_note_no)
+        det = sql("select t1.name, t1.item_code, t1.description, t1.qty, t1.uom, t2.export_rate * t3.conversion_rate, t3.customer, t3.customer_name, t3.customer_address, t2.serial_no, t2.batch_no from `tabDelivery Note Packing Detail` t1, `tabDelivery Note Detail` t2, `tabDelivery Note` t3 where t1.parent = t3.name and t2.parent = t3.name and t1.parent_detail_docname = t2.name and t3.name = '%s' and t3.docstatus = 1" % self.doc.delivery_note_no)
       elif self.doc.sales_invoice_no:
-        det = sql("select t1.name, t1.item_code, t1.description, t1.qty, t1.stock_uom, t1.basic_rate, t2.customer, t2.customer_name, t2.customer_address, t1.serial_no from `tabSales Invoice Item` t1, `tabSales Invoice` t2 where t1.parent = t2.name and t2.name = '%s' and t2.docstatus = 1" % self.doc.sales_invoice_no)
+        det = sql("select t1.name, t1.item_code, t1.description, t1.qty, t1.stock_uom, t1.export_rate * t2.conversion_rate, t2.customer, t2.customer_name, t2.customer_address, t1.serial_no from `tabRV Detail` t1, `tabReceivable Voucher` t2 where t1.parent = t2.name and t2.name = '%s' and t2.docstatus = 1" % self.doc.sales_invoice_no)
     elif self.doc.return_type == 'Purchase Return' and self.doc.purchase_receipt_no:
       det = sql("select t1.name, t1.item_code, t1.description, t1.received_qty, t1.uom, t1.purchase_rate, t2.supplier, t2.supplier_name, t2.supplier_address, t1.serial_no, t1.batch_no from `tabPurchase Receipt Item` t1, `tabPurchase Receipt` t2 where t1.parent = t2.name and t2.name = '%s' and t2.docstatus = 1" % self.doc.purchase_receipt_no)
 

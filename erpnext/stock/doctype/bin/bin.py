@@ -180,18 +180,20 @@ class DocType:
 	# get moving average inventory values
 	# ------------------------------------
 	def get_moving_average_inventory_values(self, val_rate, in_rate, opening_qty, actual_qty, is_cancelled):
+		#msgprint(actual_qty)
 		if flt(in_rate) <= 0: # In case of delivery/stock issue in_rate = 0 or wrong incoming rate
 			in_rate = val_rate
-		if in_rate and val_rate == 0: # First entry
-			val_rate = in_rate
 
 		# val_rate is same as previous entry if :
 		# 1. actual qty is negative(delivery note / stock entry)
 		# 2. cancelled entry
 		# 3. val_rate is negative
 		# Otherwise it will be calculated as per moving average
-		elif actual_qty > 0 and (opening_qty + actual_qty) > 0 and is_cancelled == 'No' and ((opening_qty * val_rate) + (actual_qty * in_rate)) > 0:
+		if actual_qty > 0 and (opening_qty + actual_qty) > 0 and is_cancelled == 'No' and ((opening_qty * val_rate) + (actual_qty * in_rate)) > 0:
+			opening_qty = opening_qty > 0 and opening_qty or 0
 			val_rate = ((opening_qty *val_rate) + (actual_qty * in_rate)) / (opening_qty + actual_qty)
+		elif (opening_qty + actual_qty) <= 0:
+			val_rate = 0
 		stock_val = val_rate
 		return val_rate, stock_val
 
@@ -245,8 +247,10 @@ class DocType:
 	# get stock value
 	# ----------------
 	def get_stock_value(self, val_method, cqty, stock_val, serial_nos):
-		if val_method == 'Moving Average' or serial_nos:
+		if serial_nos:
 			stock_val = flt(stock_val) * flt(cqty)
+		elif val_method == 'Moving Average':
+			stock_val = flt(cqty) > 0 and flt(stock_val) * flt(cqty) or 0
 		elif val_method == 'FIFO':
 			stock_val = sum([flt(d[0])*flt(d[1]) for d in self.fcfs_bal])
 		return stock_val
@@ -274,6 +278,11 @@ class DocType:
 		# get valuation method
 		val_method = get_obj('Valuation Control').get_valuation_method(self.doc.item_code)
 
+		# allow negative stock (only for moving average method)
+		from webnotes.utils import get_defaults
+		allow_negative_stock = get_defaults().get('allow_negative_stock', 0)
+
+
 		# recalculate the balances for all stock ledger entries
 		# after the prev sle
 		sll = sql("""
@@ -286,10 +295,10 @@ class DocType:
 			order by timestamp(posting_date, posting_time) asc, name asc""", \
 				(self.doc.item_code, self.doc.warehouse, \
 					prev_sle.get('posting_date','1900-01-01'), prev_sle.get('posting_time', '12:00')), as_dict = 1)
-
 		for sle in sll:
 			# block if stock level goes negative on any date
-			self.validate_negative_stock(cqty, sle)
+			if val_method != 'Moving Average' or flt(allow_negative_stock) == 0:
+				self.validate_negative_stock(cqty, sle)
 
 			stock_val, in_rate = 0, sle['incoming_rate'] # IN
 			serial_nos = sle["serial_no"] and ("'"+"', '".join(cstr(sle["serial_no"]).split('\n')) \

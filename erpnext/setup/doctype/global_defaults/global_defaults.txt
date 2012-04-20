@@ -5,7 +5,7 @@
 	{
 		'creation': '2012-04-18 17:00:50',
 		'docstatus': 0,
-		'modified': '2012-04-18 17:24:45',
+		'modified': '2012-04-19 17:24:45',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -224,6 +224,16 @@
 		'fieldtype': u'Select',
 		'label': u'Default Valuation Method',
 		'options': u'FIFO\nMoving Average'
+	},	
+	
+	# DocField
+	{
+		'colour': u'White:FFF',
+		'description': u'Applicable only if valuation method is moving average',
+		'doctype': u'DocField',
+		'fieldname': u'allow_negative_stock',
+		'fieldtype': u'Check',
+		'label': u'Allow Negative Stock'
 	},
 
 	# DocField

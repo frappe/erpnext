@@ -322,7 +322,6 @@ class DocType(TransactionBase):
 	def on_submit(self):
 		self.validate_packed_qty()
 		set(self.doc, 'message', 'Items against your Order #%s have been delivered. Delivery #%s: ' % (self.doc.po_no, self.doc.name))
-		self.check_qty_in_stock()
 		# Check for Approving Authority
 		get_obj('Authorization Control').validate_approving_authority(self.doc.doctype, self.doc.company, self.doc.grand_total, self)
 		sl_obj = get_obj("Stock Ledger")
@@ -360,14 +359,6 @@ class DocType(TransactionBase):
 				+ ", Packed: " + cstr(d[2])) for d in packing_error_list])
 			webnotes.msgprint("Packing Error:\n" + err_msg, raise_exception=1)
 
-
-	# *********** Checks whether actual quantity is present in warehouse *************
-	def check_qty_in_stock(self):
-		for d in getlist(self.doclist, 'packing_details'):
-			is_stock_item = sql("select is_stock_item from `tabItem` where name = '%s'" % d.item_code)[0][0]
-			if is_stock_item == 'Yes' and d.warehouse and flt(d.qty) > flt(d.actual_qty):
-				msgprint("For Item: " + cstr(d.item_code) + " at Warehouse: " + cstr(d.warehouse) + " Quantity: " + cstr(d.qty) +" is not Available. (Must be less than or equal to " + cstr(d.actual_qty) + " )")
-				raise Exception, "Validation Error"
 
 
 
