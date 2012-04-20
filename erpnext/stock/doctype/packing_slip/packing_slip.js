@@ -20,9 +20,12 @@ cur_frm.fields_dict['delivery_note'].get_query = function(doc, cdt, cdn) {
 
 
 cur_frm.fields_dict['item_details'].grid.get_field('item_code').get_query = function(doc, cdt, cdn) {
-	return 'SELECT name, description FROM `tabItem` WHERE name IN ( \
+	console.log(doc.delivery_note);
+	var query = 'SELECT name, description FROM `tabItem` WHERE name IN ( \
 		SELECT item_code FROM `tabDelivery Note Item` dnd \
-		WHERE parent="'	+ doc.delivery_note + '" AND qty > packed_qty) AND %(key)s LIKE "%s" LIMIT 50';
+		WHERE parent="'	+ doc.delivery_note + '" AND IFNULL(qty, 0) > IFNULL(packed_qty, 0)) AND %(key)s LIKE "%s" LIMIT 50';
+	console.log(query);
+	return query;
 }
 
 

@@ -83,10 +83,6 @@ def boot_session(bootinfo):
 			
 		bootinfo['user_background'] = webnotes.conn.get_value("Profile", webnotes.session['user'], 'background_image') or ''
 
-		import conf
-		bootinfo['sync_with_gateway'] = hasattr(conf, 'sync_with_gateway') and \
-				cint(conf.sync_with_gateway) or 0
-
 
 def get_letter_heads():
 	"""load letter heads with startup"""

@@ -38,9 +38,12 @@ erpnext.modules = {
 	'Dashboard': 'dashboard'
 }
 
+// wn.modules is used in breadcrumbs for getting module home page
+wn.provide('wn.modules');
+$.extend(wn.modules, erpnext.modules);
+wn.modules['Core'] = 'Setup';
+
 erpnext.startup.set_globals = function() {
-	wn.control_panel.sync_with_gateway = wn.boot.sync_with_gateway
-	pscript.is_erpnext_saas = cint(wn.control_panel.sync_with_gateway)
 	if(inList(user_roles,'System Manager')) is_system_manager = 1;
 }
 

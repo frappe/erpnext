@@ -20,8 +20,9 @@ def execute():
 			'Invest 80 Declaration Detail', 'IT Checklist', 'Chapter VI A Detail', 'Declaration Detail',
 			'Personalize', 'Salary Slip Control Panel',
 			],
-		'Page'		:	['File Browser'],
-		'DocType Mapper': ['Production Forecast-Production Planning Tool', 'Production Forecast-Production Plan', 'Sales Order-Production Plan']
+		'Page'		:	['File Browser', 'Bill of Materials'],
+		'DocType Mapper': ['Production Forecast-Production Planning Tool', 'Production Forecast-Production Plan', 'Sales Order-Production Plan'],
+		'Module Def': ['Knowledge Base']
 	}
 
 	for d in del_rec:
