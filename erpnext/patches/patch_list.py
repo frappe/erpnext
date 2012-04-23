@@ -277,4 +277,9 @@ patch_list = [
 		'patch_file': 'after_sync_cleanup',
 		'description': 'cleanup after sync'
 	},
+	{
+		'patch_module': 'patches.april_2012',
+		'patch_file': 'change_cacheitem_schema',
+		'description': 'Modified datatype of `value` column from text to longtext'
+	},
 ]

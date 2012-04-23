@@ -238,7 +238,6 @@
 	# DocField
 	{
 		'colour': u'White:FFF',
-		'default': u'Purchase - TC',
 		'doctype': u'DocField',
 		'fieldname': u'cost_center',
 		'fieldtype': u'Link',
