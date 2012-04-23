@@ -88,8 +88,8 @@ var set_dynamic_label_par = function(doc, cdt, cdn, base_curr) {
 	cur_frm.fields_dict['plc_conversion_rate'].label_span.innerHTML = 'Price List Currency Conversion Rate (' + doc.price_list_currency +' -> '+ base_curr + ')';
 
 	if (doc.doctype == 'Sales Invoice') {
-		cur_frm.fields_dict['total_advance'].label_span.innerHTML = 'Total Advance (' + base_curr + ')';
-		cur_frm.fields_dict['outstanding_amount'].label_span.innerHTML = 'Outstanding Amount (' + base_curr + ')';
+		si_cols = {'total_advance': 'Total Advance', 'outstanding_amount': 'Outstanding Amount', 'paid_amount': 'Paid Amount', 'write_off_amount': 'Write Off Amount'}
+		for (d in si_cols) cur_frm.fields_dict[d].label_span.innerHTML = si_cols[d] + ' (' + base_curr + ')';
 	}
 }
 
