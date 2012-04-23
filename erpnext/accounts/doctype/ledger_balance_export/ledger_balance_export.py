@@ -134,10 +134,10 @@ class DocType:
 
 			for acc_det in sub_tree:
 				acc_summary = self.get_acc_summary(glc, acc_det)
-				if acc_summary[2] or acc_summary[3]:
+				if acc_summary[0] or acc_summary[1] or acc_summary[2] or acc_summary[3] or acc_summary[4] or acc_summary[5]:
 					res.append([acc_det['account']])
 					# Show gl entries if account is ledger
-					if acc_det['group_or_ledger'] == 'Ledger':
+					if acc_det['group_or_ledger'] == 'Ledger' and (acc_summary[2] or acc_summary[3]):
 						gle = self.show_gl_entries(acc_det['account'].strip())
 						res += gle
 	
