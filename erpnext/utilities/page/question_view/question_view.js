@@ -21,10 +21,9 @@ pscript['onload_question-view'] = function(wrapper) {
 	wrapper.add_answer_area = $('.add-answer-area').get(0);
 }
 
-pscript['refresh_question-view'] = function() {
+pscript['refresh_question-view'] = function(wrapper) {
 	// href
 	var qid = window.location.hash.split('/')[1];
-	console.log(qid)
 	if(qid) {
 		pscript.question_view(qid);
 	}
@@ -40,6 +39,7 @@ KBQuestionView = function(w, qid, qtext) {
 		
 	this.make_question = function() {
 		$(w).find('.qv-question-wrapper').empty();
+		$(w.add_answer_area).empty();
 		new EditableText({
 			parent: $(w).find('.qv-question-wrapper').get(0),
 			dt: 'Question',
