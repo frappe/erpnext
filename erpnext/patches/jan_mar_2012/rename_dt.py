@@ -82,6 +82,9 @@ def execute():
 	#  Reload GL Mapper
 	for d in webnotes.conn.sql("select name from `tabGL Mapper`"):
 		reload_doc('accounts', 'GL Mapper', d[0])
+	reload_doc('accounts', 'GL Mapper', 'Purchase Invoice with write off')
+
+
 		
 	#gl entry, stock ledger entry, 
 

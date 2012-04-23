@@ -158,6 +158,14 @@ cur_frm.cscript.is_opening = function(doc, dt, dn) {
 	if (doc.is_opening == 'Yes') unhide_field('aging_date');
 }
 
+cur_frm.cscript.write_off_amount = function(doc) {
+	doc.total_amount_to_pay = flt(doc.grand_total) - flt(doc.ded_amount) - flt(doc.write_off_amount);
+	doc.outstanding_amount = flt(doc.total_amount_to_pay) - flt(doc.total_advance);
+	refresh_many(['outstanding_amount', 'total_amount_to_pay']);
+}
+
+
+
 // Recalculate Button
 // -------------------
 cur_frm.cscript.recalculate = function(doc, cdt, cdn) {
@@ -347,7 +355,7 @@ calc_total_advance = function(doc,cdt,cdn) {
 			tot_tds += flt(el[i].tds_allocated)
 		}
 	}
-	doc.total_amount_to_pay = flt(doc.grand_total) - flt(doc.ded_amount);
+	doc.total_amount_to_pay = flt(doc.grand_total) - flt(doc.ded_amount) - flt(doc.write_off_amount);
 	doc.tds_amount_on_advance = flt(tot_tds);
 	doc.total_advance = flt(total_advance);
 	doc.outstanding_amount = flt(doc.total_amount_to_pay) - flt(total_advance);

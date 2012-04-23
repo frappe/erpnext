@@ -52,11 +52,7 @@ class DocType(TransactionBase):
 	# ----------
 	def get_credit_to(self):
 		acc_head = sql("select name, credit_days from `tabAccount` where (name = %s or (master_name = %s and master_type = 'supplier')) and docstatus != 2", (cstr(self.doc.supplier) + " - " + self.get_company_abbr(),self.doc.supplier))		
-		#supp_detail = sql("select supplier_name,address from `tabSupplier` where name = %s", self.doc.supplier, as_dict =1)
-		#ret = {
-		#	'supplier_name' : supp_detail and supp_detail[0]['supplier_name'] or '',
-		#	'supplier_address': supp_detail and supp_detail[0]['address'] or ''
-		#}
+
 		ret = {}
 		if acc_head and acc_head[0][0]:
 			ret['credit_to'] = acc_head[0][0]
@@ -68,7 +64,7 @@ class DocType(TransactionBase):
 		
 	def get_cust(self):
 		ret = {}
-		if self.doc.credit_to:			
+		if self.doc.credit_to:
 			ret['supplier'] = get_value('Account',self.doc.credit_to,'master_name')
 			
 		return ret
@@ -364,7 +360,8 @@ class DocType(TransactionBase):
 						else:
 							get_obj('TDS Control').get_tds_amount(self)
 							self.doc.total_tds_on_voucher = self.doc.ded_amount
-							self.doc.total_amount_to_pay=flt(self.doc.grand_total)-flt(self.doc.ded_amount)-flt(self.doc.other_tax_deducted)
+							self.doc.total_amount_to_pay=flt(self.doc.grand_total) - flt(self.doc.ded_amount) - self.doc.write_off_amount
+							self.doc.outstanding_amount = self.doc.total_amount_to_pay - flt(self.doc.total_advance)
 					elif self.doc.tds_applicable == 'No':
 						self.doc.tds_category = ''
 						self.doc.tax_code = ''
@@ -416,6 +413,10 @@ class DocType(TransactionBase):
 					 msgprint("Purchase Receipt No. required against item %s"%d.item_code)
 					 raise Exception
 
+	def validate_write_off_account(self):
+		if self.doc.write_off_amount and not self.doc.write_off_account:
+			msgprint("Please enter Write Off Account", raise_exception=1)
+
 	# VALIDATE
 	# ====================================================================================
 	def validate(self):
@@ -455,6 +456,8 @@ class DocType(TransactionBase):
 
 		#FY validation
 		get_obj('Sales Common').validate_fiscal_year(self.doc.fiscal_year,self.doc.posting_date,'Posting Date')
+		
+		self.validate_write_off_account()
 		
 		#get Purchase Common Obj
 		pc_obj = get_obj(dt='Purchase Common')
@@ -507,6 +510,8 @@ class DocType(TransactionBase):
 		if lst:
 			get_obj('GL Control').reconcile_against_document(lst)
 
+
+
 	# On Submit
 	#--------------------------------------------------------------------
 	def on_submit(self):
@@ -517,11 +522,17 @@ class DocType(TransactionBase):
 		
 		
 		# this sequence because outstanding may get -negative
-		get_obj(dt='GL Control').make_gl_entries(self.doc, self.doclist)
-		
+		self.make_gl_entries()
+				
 		self.update_against_document_in_jv()
 		
 		get_obj(dt = 'Purchase Common').update_prevdoc_detail(self, is_submit = 1)
+
+
+	def make_gl_entries(self, is_cancel = 0):
+		get_obj(dt='GL Control').make_gl_entries(self.doc, self.doclist, cancel = is_cancel, \
+			use_mapper = (self.doc.write_off_account and self.doc.write_off_amount and 'Purchase Invoice with write off' or ''))
+
 
 
 
@@ -542,7 +553,7 @@ class DocType(TransactionBase):
 		# Check whether tds payment voucher has been created against this voucher
 		self.check_tds_payment_voucher()
 		
-		get_obj(dt='GL Control').make_gl_entries(self.doc, self.doclist, cancel=1)
+		self.make_gl_entries(is_cancel=1)
 		get_obj(dt = 'Purchase Common').update_prevdoc_detail(self, is_submit = 0)
 
 

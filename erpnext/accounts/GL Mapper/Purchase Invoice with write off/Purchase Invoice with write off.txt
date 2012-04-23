@@ -1,0 +1,131 @@
+# GL Mapper, Purchase Invoice with write off
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2012-04-23 11:43:56',
+		'docstatus': 0,
+		'modified': '2012-04-23 11:43:56',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
+	},
+
+	# These values are common for all GL Mapper
+	{
+		'doc_type': u'Purchase Invoice with write off',
+		'doctype': 'GL Mapper',
+		'name': '__common__'
+	},
+
+	# These values are common for all GL Mapper Detail
+	{
+		'doctype': u'GL Mapper Detail',
+		'name': '__common__',
+		'parent': u'Purchase Invoice with write off',
+		'parentfield': u'fields',
+		'parenttype': u'GL Mapper'
+	},
+
+	# GL Mapper, Purchase Invoice with write off
+	{
+		'doctype': 'GL Mapper',
+		'name': u'Purchase Invoice with write off'
+	},
+
+	# GL Mapper Detail
+	{
+		'account': u'expense_head',
+		'against': u'parent:credit_to',
+		'aging_date': u'parent:aging_date',
+		'company': u'parent:company',
+		'cost_center': u'cost_center',
+		'credit': u'value:0',
+		'debit': u'amount',
+		'doctype': u'GL Mapper Detail',
+		'fiscal_year': u'parent:fiscal_year',
+		'is_opening': u'parent:is_opening',
+		'posting_date': u'parent:posting_date',
+		'remarks': u'parent:remarks',
+		'table_field': u'entries',
+		'transaction_date': u'parent:voucher_date',
+		'voucher_no': u'parent:name',
+		'voucher_type': u'parent:doctype'
+	},
+
+	# GL Mapper Detail
+	{
+		'account': u'account_head',
+		'against': u'parent:credit_to',
+		'aging_date': u'parent:aging_date',
+		'company': u'parent:company',
+		'cost_center': u'cost_center',
+		'credit': u"value:d.fields.get('category') != 'For Valuation' and d.fields.get('add_deduct_tax') == 'Deduct' and d.fields.get('tax_amount') or 0",
+		'debit': u"value:d.fields.get('category') != 'For Valuation' and d.fields.get('add_deduct_tax') == 'Add' and d.fields.get('tax_amount') or 0",
+		'doctype': u'GL Mapper Detail',
+		'fiscal_year': u'parent:fiscal_year',
+		'is_opening': u'parent:is_opening',
+		'posting_date': u'parent:posting_date',
+		'remarks': u'parent:remarks',
+		'table_field': u'purchase_tax_details',
+		'transaction_date': u'parent:voucher_date',
+		'voucher_no': u'parent:name',
+		'voucher_type': u'parent:doctype'
+	},
+
+	# GL Mapper Detail
+	{
+		'account': u'tax_code',
+		'against': u'credit_to',
+		'aging_date': u'aging_date',
+		'company': u'company',
+		'credit': u'ded_amount',
+		'debit': u'value:0',
+		'doctype': u'GL Mapper Detail',
+		'fiscal_year': u'fiscal_year',
+		'is_opening': u'is_opening',
+		'posting_date': u'posting_date',
+		'remarks': u'remarks',
+		'transaction_date': u'voucher_date',
+		'voucher_no': u'name',
+		'voucher_type': u'doctype'
+	},
+
+	# GL Mapper Detail
+	{
+		'account': u'credit_to',
+		'against': u'against_expense_account',
+		'against_voucher': u'name',
+		'against_voucher_type': u"value:'Purchase Invoice'",
+		'aging_date': u'aging_date',
+		'company': u'company',
+		'credit': u'total_amount_to_pay',
+		'debit': u'value:0',
+		'doctype': u'GL Mapper Detail',
+		'fiscal_year': u'fiscal_year',
+		'is_opening': u'is_opening',
+		'posting_date': u'posting_date',
+		'remarks': u'remarks',
+		'transaction_date': u'voucher_date',
+		'voucher_no': u'name',
+		'voucher_type': u'doctype'
+	},
+
+	# GL Mapper Detail
+	{
+		'account': u'write_off_account',
+		'against': u'credit_to',
+		'aging_date': u'aging_date',
+		'company': u'company',
+		'cost_center': u'write_off_cost_center',
+		'credit': u'write_off_amount',
+		'debit': u'value:0',
+		'doctype': u'GL Mapper Detail',
+		'fiscal_year': u'fiscal_year',
+		'is_opening': u'is_opening',
+		'posting_date': u'posting_date',
+		'remarks': u'remarks',
+		'transaction_date': u'voucher_date',
+		'voucher_no': u'name',
+		'voucher_type': u'doctype'
+	}
+]

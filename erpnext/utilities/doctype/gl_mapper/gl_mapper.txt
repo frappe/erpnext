@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-03-27 14:36:46',
+		'creation': '2012-04-13 11:56:40',
 		'docstatus': 0,
-		'modified': '2012-03-27 14:36:46',
+		'modified': '2012-04-23 12:27:38',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -21,7 +21,7 @@
 		'section_style': u'Simple',
 		'server_code_error': u' ',
 		'show_in_menu': 0,
-		'version': 3
+		'version': 1
 	},
 
 	# These values are common for all DocField
@@ -36,6 +36,7 @@
 
 	# These values are common for all DocPerm
 	{
+		'create': 0,
 		'doctype': u'DocPerm',
 		'name': '__common__',
 		'parent': u'GL Mapper',
@@ -55,7 +56,6 @@
 	{
 		'amend': 0,
 		'cancel': 0,
-		'create': 0,
 		'doctype': u'DocPerm',
 		'role': u'Accounts User',
 		'submit': 0,
