@@ -140,6 +140,7 @@ var set_dynamic_label_child = function(doc, cdt, cdn, base_curr) {
 //------------------------------------------------------------------
 
 cur_frm.cscript.dynamic_label = function(doc, cdt, cdn, base_curr, callback) {
+	cur_frm.cscript.base_currency = base_curr;
 	set_dynamic_label_par(doc, cdt, cdn, base_curr);
 	set_dynamic_label_child(doc, cdt, cdn, base_curr);
 
