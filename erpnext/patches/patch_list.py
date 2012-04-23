@@ -227,5 +227,10 @@ patch_list = [
 		'patch_file': 'reload_c_form',
 		'description': 'Added attchemnt option and total field'
 	},
+	{
+		'patch_module': 'patches.april_2012',
+		'patch_file': 'remove_default_from_rv_detail',
+		'description': ''
+	},
 
 ]
