@@ -84,14 +84,10 @@ def execute():
 		reload_doc('accounts', 'GL Mapper', d[0])
 	reload_doc('accounts', 'GL Mapper', 'Purchase Invoice with write off')
 
+	webnotes.conn.sql("update `tabDocType` set module = 'Utilities' where module = 'Knowledge Base'")
+	webnotes.conn.sql("update `tabPage` set module = 'Utilities' where module = 'Knowledge Base'")
 
 		
-	#gl entry, stock ledger entry, 
-
-
-
-	# T0-do-list
-	# gl mapper name
 
 def delete_search_criteria():
 	webnotes.conn.sql("""DELETE FROM `tabSearch Criteria`

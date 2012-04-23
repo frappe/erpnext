@@ -18,15 +18,15 @@ def execute():
 			'Setup Wizard Control', 'Company Group', 'Lease Agreement', 'Lease Installment',
 			'Terms and Conditions', 'Time Sheet', 'Time Sheet Detail', 'Naming Series Options',
 			'Invest 80 Declaration Detail', 'IT Checklist', 'Chapter VI A Detail', 'Declaration Detail',
-			'Personalize', 'Salary Slip Control Panel',
+			'Personalize', 'Salary Slip Control Panel', 'Question Control'
 			],
 		'Page'		:	['File Browser', 'Bill of Materials'],
 		'DocType Mapper': ['Production Forecast-Production Planning Tool', 'Production Forecast-Production Plan', 'Sales Order-Production Plan'],
-		'Module Def': ['Knowledge Base']
 	}
 
 	for d in del_rec:
 		for r in del_rec[d]:
+			print 'Deleted', d, ' - ', r
 			if d=='DocType':
 				sql("delete from tabFeed where doc_type=%s", r)
 			delete_doc(d, r)

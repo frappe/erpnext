@@ -272,4 +272,9 @@ patch_list = [
 		'patch_file': 'naming_series_patch',
 		'description': 'Move naming series options into property setter'
 	},
+	{
+		'patch_module': 'patches.april_2012',
+		'patch_file': 'after_sync_cleanup',
+		'description': 'cleanup after sync'
+	},
 ]
