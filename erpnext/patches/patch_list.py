@@ -242,5 +242,10 @@ patch_list = [
 		'patch_file': 'update_permlevel_in_address',
 		'description': 'updated permlevel in address'
 	},
+	{
+		'patch_module': 'patches.april_2012',
+		'patch_file': 'update_appraisal_permission',
+		'description': 'updated permission in appraisal'
+	},
 
 ]
