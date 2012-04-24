@@ -211,7 +211,7 @@ class DocType:
 		import datetime
 		for d in getlist(obj.doclist, fname):
 			if d.serial_no:
-				serial_nos = self.get_sr_no_list(d.serial_no, d.qty)
+				serial_nos = self.get_sr_no_list(d.serial_no)
 				for a in serial_nos:
 					serial_no = a.strip()
 					if is_incoming:
