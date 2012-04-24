@@ -237,5 +237,10 @@ patch_list = [
 		'patch_file': 'update_role_in_address',
 		'description': 'updated roles in address'
 	},
+	{
+		'patch_module': 'patches.april_2012',
+		'patch_file': 'update_permlevel_in_address',
+		'description': 'updated permlevel in address'
+	},
 
 ]
