@@ -232,5 +232,10 @@ patch_list = [
 		'patch_file': 'remove_default_from_rv_detail',
 		'description': ''
 	},
+	{
+		'patch_module': 'patches.april_2012',
+		'patch_file': 'update_role_in_address',
+		'description': 'updated roles in address'
+	},
 
 ]
