@@ -62,15 +62,10 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 
 
 	if(doc.docstatus == 1){
-		var ch = getchildren('Purchase Receipt Detail',doc.name,'purchase_receipt_details');
-		allow_billing = 0;
-		for(var i in ch){
-			if(ch[i].qty > ch[i].billed_qty) allow_billing = 1;
-		}
-	 cur_frm.add_custom_button('Make Purchase Invoice', cur_frm.cscript['Make Purchase Invoice']);
-	 cur_frm.add_custom_button('Send SMS', cur_frm.cscript['Send SMS']);
-	}
-	else{
+		if (doc.per_billed < 100) cur_frm.add_custom_button('Make Purchase Invoice', cur_frm.cscript['Make Purchase Invoice']);
+		cur_frm.add_custom_button('Send SMS', cur_frm.cscript['Send SMS']);
+		unhide_field(['Repair Purchase Receipt']);
+	} else{
 		hide_field(['Repair Purchase Receipt']);
 	}
 }

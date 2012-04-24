@@ -58,22 +58,10 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	if (!cur_frm.cscript.is_onload) cur_frm.cscript.dynamic_label(doc, cdt, cdn);
 
 	if(doc.docstatus == 1 && doc.status != 'Stopped'){
-		var ch = getchildren('PO Detail',doc.name,'po_details');
-		var allow_billing = 0; var allow_receipt = 0;
 		cur_frm.add_custom_button('Send SMS', cur_frm.cscript['Send SMS']);
-
-		for(var i in ch){
-			if(ch[i].qty > ch[i].received_qty) allow_receipt = 1; 
-			if(ch[i].qty > ch[i].billed_qty) allow_billing = 1;
-		}
-		if(allow_receipt)
-			cur_frm.add_custom_button('Make Purchase Receipt', cur_frm.cscript['Make Purchase Receipt']);
-			
-	if(allow_billing)
-			cur_frm.add_custom_button('Make Invoice', cur_frm.cscript['Make Purchase Invoice']);
-
-		if(allow_billing || allow_receipt)
-			cur_frm.add_custom_button('Stop', cur_frm.cscript['Stop Purchase Order']);
+		if(doc.per_received < 100) cur_frm.add_custom_button('Make Purchase Receipt', cur_frm.cscript['Make Purchase Receipt']);	
+		if(doc.per_billed < 100) cur_frm.add_custom_button('Make Invoice', cur_frm.cscript['Make Purchase Invoice']);
+		if(doc.per_billed < 100 || doc.per_received < 100) cur_frm.add_custom_button('Stop', cur_frm.cscript['Stop Purchase Order']);
 	}
 		
 	if(doc.docstatus == 1 && doc.status == 'Stopped')
