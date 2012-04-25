@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-03-27 14:36:36',
+		'creation': '2012-04-23 16:00:21',
 		'docstatus': 0,
-		'modified': '2012-03-27 14:45:51',
+		'modified': '2012-04-24 15:07:42',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -24,7 +24,7 @@
 		'section_style': u'Simple',
 		'server_code_error': u' ',
 		'show_in_menu': 0,
-		'version': 40
+		'version': 1
 	},
 
 	# These values are common for all DocField
@@ -50,30 +50,6 @@
 	{
 		'doctype': 'DocType',
 		'name': u'Sales BOM'
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 1,
-		'create': 1,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Sales User',
-		'submit': 0,
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Sales User',
-		'submit': 0,
-		'write': 0
 	},
 
 	# DocPerm
@@ -124,15 +100,28 @@
 		'write': 0
 	},
 
-	# DocField
+	# DocPerm
 	{
-		'doctype': u'DocField',
-		'fieldname': u'trash_reason',
-		'fieldtype': u'Small Text',
-		'label': u'Trash Reason',
-		'oldfieldname': u'trash_reason',
-		'oldfieldtype': u'Small Text',
-		'permlevel': 1
+		'amend': 0,
+		'cancel': 1,
+		'create': 1,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Sales User',
+		'submit': 0,
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Sales User',
+		'submit': 0,
+		'write': 0
 	},
 
 	# DocField
@@ -145,7 +134,7 @@
 		'oldfieldname': u'new_item_code',
 		'oldfieldtype': u'Data',
 		'permlevel': 1,
-		'reqd': 0
+		'reqd': 1
 	},
 
 	# DocField
@@ -156,7 +145,8 @@
 		'label': u'New Item Name',
 		'oldfieldname': u'new_item_name',
 		'oldfieldtype': u'Data',
-		'permlevel': 0
+		'permlevel': 0,
+		'reqd': 1
 	},
 
 	# DocField
@@ -167,7 +157,7 @@
 		'label': u'New Item Brand',
 		'oldfieldname': u'new_item_brand',
 		'oldfieldtype': u'Data',
-		'permlevel': 1
+		'permlevel': 0
 	},
 
 	# DocField
@@ -178,7 +168,8 @@
 		'label': u'New Description',
 		'oldfieldname': u'description',
 		'oldfieldtype': u'Text',
-		'permlevel': 1,
+		'permlevel': 0,
+		'reqd': 1,
 		'width': u'300px'
 	},
 
@@ -191,7 +182,8 @@
 		'oldfieldname': u'item_group',
 		'oldfieldtype': u'Link',
 		'options': u'Item Group',
-		'permlevel': 0
+		'permlevel': 0,
+		'reqd': 1
 	},
 
 	# DocField
@@ -267,7 +259,7 @@
 		'fieldtype': u'Date',
 		'label': u'Amendment Date',
 		'no_copy': 1,
-		'permlevel': 0,
+		'permlevel': 1,
 		'print_hide': 1
 	},
 
@@ -281,5 +273,16 @@
 		'options': u'Sales Invoice',
 		'permlevel': 1,
 		'print_hide': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'trash_reason',
+		'fieldtype': u'Small Text',
+		'label': u'Trash Reason',
+		'oldfieldname': u'trash_reason',
+		'oldfieldtype': u'Small Text',
+		'permlevel': 1
 	}
 ]
