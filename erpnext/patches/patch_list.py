@@ -247,5 +247,10 @@ patch_list = [
 		'patch_file': 'update_appraisal_permission',
 		'description': 'updated permission in appraisal'
 	},
+	{
+		'patch_module': 'patches.april_2012',
+		'patch_file': 'serial_no_fixes',
+		'description': 'fixes for sle creation while import'
+	},
 
 ]
