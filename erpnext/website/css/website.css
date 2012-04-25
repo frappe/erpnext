@@ -2,8 +2,8 @@ div#body_div, header .container, .content, #opened-page-selector, footer {
 	width: 900px;
 }
 
-.layout_wrapper {
-	padding: 27px;
+div#body_div {
+	margin-top: 90px;
 }
 
 p, li {
@@ -19,10 +19,6 @@ pre {
     overflow: auto;
     padding: 6px 10px;
 	margin-bottom: 9px;
-}
-
-.web-content input[type="text"], .web-content input[type="password"], .web-content select {
-	min-width: 180px;
 }
 
 .web-head-section {
@@ -47,6 +43,7 @@ pre {
 
 .web-page-status {
 	padding: 7px;
+	margin-top: -20px;
 	color: #777;
 	clear: both;
 	text-align: right;
@@ -77,19 +74,11 @@ footer {
 }
 
 .web-footer div, .web-footer a {
-	font-size: 11px;
+	font-size: 14px;
 }
 
 .web-footer-menu {
 	margin-bottom: 7px;
-}
-footer a, footer a:visited {
-	color: #777;
-}
-
-footer a:hover {
-	background-color: #777;
-	color: #fff;
 }
 
 .web-footer-menu ul {
@@ -136,9 +125,8 @@ footer a:hover {
 }
 
 .two-column {
-	width: 40%;
+	width: 50%;
 	float: left;
-	padding: 5%;
 }
 
 .clear {

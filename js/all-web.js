@@ -240,7 +240,7 @@ if(wn.model.no_value_type.indexOf(df.fieldtype)==-1&&!me.fields_by_name[df.field
 /*
  *	lib/js/wn/views/container.js
  */
-wn.provide('wn.pages');wn.provide('wn.views');wn.views.Container=Class.extend({init:function(){this.container=$('#body_div').get(0);this.page=null;this.pagewidth=$('#body_div').width();this.pagemargin=50;},add_page:function(label,onshow,onhide){var page=$('<div class="content"></div>').appendTo(this.container).get(0);if(onshow)
+wn.provide('wn.pages');wn.provide('wn.views');wn.views.Container=Class.extend({init:function(){this.container=$('#body_div').get(0);this.page=null;this.pagewidth=$('#body_div').width();this.pagemargin=50;},add_page:function(label,onshow,onhide){var page=$('<div class="content"></div>').attr('id',"page-"+label).appendTo(this.container).get(0);if(onshow)
 $(page).bind('show',onshow);if(onshow)
 $(page).bind('hide',onhide);page.label=label;wn.pages[label]=page;return page;},change_to:function(label){if(this.page&&this.page.label==label){return;}
 var me=this;if(label.tagName){var page=label;}else{var page=wn.pages[label];}

@@ -3,6 +3,7 @@ body {
 	background: url("files/{{ doc.background_image }}") repeat;
 {% elif doc.background_color %}
 	background-color: #{{ doc.background_color }};
+	background-image: none;
 {% endif %}	
 {% if doc.font %}
 	font-family: '{{ doc.font }}', Verdana, Sans !important;

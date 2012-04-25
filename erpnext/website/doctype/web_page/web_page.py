@@ -44,6 +44,14 @@ class DocType:
 		with open(os.path.join(os.path.dirname(__file__), 'template.html'), 'r') as f:
 			p.content = Template(f.read()).render(doc=self.doc)
 
+		p.title = self.doc.title
+		
+		if self.doc.insert_code:
+			p.script = self.doc.javascript
+
+		if self.doc.insert_style:
+			p.style = self.doc.css
+
 		p.save()
 		
 		website.utils.add_guest_access_to_page(p.name)

@@ -353,7 +353,7 @@ if(wn.model.no_value_type.indexOf(df.fieldtype)==-1&&!me.fields_by_name[df.field
 /*
  *	lib/js/wn/views/container.js
  */
-wn.provide('wn.pages');wn.provide('wn.views');wn.views.Container=Class.extend({init:function(){this.container=$('#body_div').get(0);this.page=null;this.pagewidth=$('#body_div').width();this.pagemargin=50;},add_page:function(label,onshow,onhide){var page=$('<div class="content"></div>').appendTo(this.container).get(0);if(onshow)
+wn.provide('wn.pages');wn.provide('wn.views');wn.views.Container=Class.extend({init:function(){this.container=$('#body_div').get(0);this.page=null;this.pagewidth=$('#body_div').width();this.pagemargin=50;},add_page:function(label,onshow,onhide){var page=$('<div class="content"></div>').attr('id',"page-"+label).appendTo(this.container).get(0);if(onshow)
 $(page).bind('show',onshow);if(onshow)
 $(page).bind('hide',onhide);page.label=label;wn.pages[label]=page;return page;},change_to:function(label){if(this.page&&this.page.label==label){return;}
 var me=this;if(label.tagName){var page=label;}else{var page=wn.pages[label];}
@@ -1710,7 +1710,8 @@ _f.Frm.prototype.email_doc=function(){if(!_e.dialog)_e.make();sel=this.print_sel
 c.appendChild(this.print_sel);c.cur_sel=this.print_sel;_e.dialog.widgets['Send With Attachments'].checked=0;if(cur_frm.doc.file_list){$ds(_e.dialog.rows['Send With Attachments']);}else{$dh(_e.dialog.rows['Send With Attachments']);}
 _e.dialog.widgets['Subject'].value=get_doctype_label(this.meta.name)+': '+this.docname;_e.dialog.show();}
 _f.Frm.prototype.rename_notify=function(dt,old,name){this.is_editable[name]=this.is_editable[old];delete this.is_editable[old];if(this.docname==old)
-this.docname=name;if(this&&this.opendocs[old]){local_dt[dt][name]=local_dt[dt][old];local_dt[dt][old]=null;}
+this.docname=name;else
+return;if(this&&this.opendocs[old]){local_dt[dt][name]=local_dt[dt][old];local_dt[dt][old]=null;}
 delete this.opendocs[old];this.opendocs[name]=true;wn.re_route[window.location.hash]='Form/'+encodeURIComponent(this.doctype)+'/'+encodeURIComponent(name);wn.set_route('Form',this.doctype,name);}
 _f.Frm.prototype.setup_meta=function(){this.meta=get_local('DocType',this.doctype);this.perm=get_perm(this.doctype);if(this.meta.istable){this.meta.in_dialog=1}
 this.setup_print();}

@@ -5,7 +5,7 @@
 	{
 		'creation': '2012-04-02 16:02:43',
 		'docstatus': 0,
-		'modified': '2012-04-10 10:41:00',
+		'modified': '2012-04-25 16:03:57',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -22,7 +22,7 @@
 		'name': '__common__',
 		'section_style': u'Simple',
 		'show_in_menu': 0,
-		'version': 11
+		'version': 16
 	},
 
 	# These values are common for all DocField
@@ -88,15 +88,6 @@
 	# DocField
 	{
 		'doctype': u'DocField',
-		'fieldname': u'layout',
-		'fieldtype': u'Select',
-		'label': u'Layout',
-		'options': u'Two column with header\nTwo column\nSingle column'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
 		'fieldname': u'cb1',
 		'fieldtype': u'Column Break',
 		'width': u'50%'
@@ -105,10 +96,10 @@
 	# DocField
 	{
 		'doctype': u'DocField',
-		'fieldname': u'text_align',
+		'fieldname': u'layout',
 		'fieldtype': u'Select',
-		'label': u'Text Align',
-		'options': u'Left\nCenter\nRight'
+		'label': u'Layout',
+		'options': u'Two column with header\nTwo column\nSingle column'
 	},
 
 	# DocField
@@ -158,29 +149,49 @@
 		'doctype': u'DocField',
 		'fieldname': u'sb2',
 		'fieldtype': u'Section Break',
-		'label': u'Links'
+		'label': u'More'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'text_align',
+		'fieldtype': u'Select',
+		'label': u'Text Align',
+		'options': u'Left\nCenter\nRight'
 	},
 
 	# DocField
 	{
 		'colour': u'White:FFF',
-		'description': u'Link for next page appears at the bottom of the page',
 		'doctype': u'DocField',
-		'fieldname': u'next_page',
-		'fieldtype': u'Link',
-		'label': u'Next Page',
-		'options': u'Page'
+		'fieldname': u'insert_code',
+		'fieldtype': u'Check',
+		'label': u'Insert Code'
 	},
 
 	# DocField
 	{
-		'colour': u'White:FFF',
-		'description': u'Related pages appear on the right side of the link and are linked both ways.',
 		'doctype': u'DocField',
-		'fieldname': u'related_pages',
-		'fieldtype': u'Table',
-		'label': u'Related Pages',
-		'options': u'Related Page'
+		'fieldname': u'javascript',
+		'fieldtype': u'Code',
+		'label': u'Javascript'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'insert_style',
+		'fieldtype': u'Check',
+		'label': u'Insert Style'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'css',
+		'fieldtype': u'Code',
+		'label': u'CSS'
 	},
 
 	# DocField
