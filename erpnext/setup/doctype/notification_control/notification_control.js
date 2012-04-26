@@ -14,19 +14,19 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-cur_frm.cscript.select_transaction = function(doc, dt, dn) {
+cur_frm.cscript.select_transaction = function(doc, cdt, cdn) {
   if(doc.select_transaction) {
     var callback = function(r,rt) {
-      var doc = locals[dt][dn];
+      var doc = locals[cdt][cdn];
       doc.custom_message = r.message;
       refresh_field('custom_message');
     }
-    $c_obj('Notification Control','get_message',doc.select_transaction, callback)
+    $c_obj(make_doclist(cdt, cdn),'get_message',doc.select_transaction, callback)
 }
 }
 
 cur_frm.cscript.notify = function(doc, args) {
-	$c_obj('Notification Control', 'get_formatted_message', {
+	$c_obj(make_doclist(doc.doctype, doc.name), 'get_formatted_message', {
 		type: args['type'],
 		doctype: args['doctype'],
 		contact_name: args['contact_name'] || doc.contact_display

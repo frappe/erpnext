@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-03-27 14:36:37',
+		'creation': '2012-04-23 16:00:23',
 		'docstatus': 0,
-		'modified': '2012-03-27 14:36:37',
+		'modified': '2012-04-26 13:01:57',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -13,6 +13,7 @@
 	# These values are common for all DocType
 	{
 		'_last_update': u'1325570647',
+		'allow_attach': 1,
 		'allow_trash': 1,
 		'autoname': u'field:serial_no',
 		'colour': u'White:FFF',
@@ -27,7 +28,7 @@
 		'show_in_menu': 0,
 		'subject': u'Item Code: %(item_code)s, Warehouse: %(warehouse)s',
 		'tag_fields': u'status',
-		'version': 191
+		'version': 1
 	},
 
 	# These values are common for all DocField
@@ -53,6 +54,54 @@
 	{
 		'doctype': 'DocType',
 		'name': u'Serial No'
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Material Manager',
+		'submit': 0,
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Material Manager',
+		'submit': 0,
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Material User',
+		'submit': 0,
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Material User',
+		'submit': 0,
+		'write': 0
 	},
 
 	# DocPerm
@@ -87,54 +136,6 @@
 		'doctype': u'DocPerm',
 		'permlevel': 1,
 		'role': u'Sales Master Manager'
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Material Manager',
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Material Manager',
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Material User',
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Material User',
-		'submit': 0,
-		'write': 0
 	},
 
 	# DocField
@@ -700,5 +701,30 @@
 		'oldfieldname': u'trash_reason',
 		'oldfieldtype': u'Small Text',
 		'permlevel': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'file_list',
+		'fieldtype': u'Text',
+		'hidden': 1,
+		'label': u'File List',
+		'no_copy': 1,
+		'permlevel': 0,
+		'print_hide': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'sle_exists',
+		'fieldtype': u'Check',
+		'hidden': 1,
+		'label': u'SLE Exists',
+		'no_copy': 1,
+		'permlevel': 1,
+		'print_hide': 1,
+		'report_hide': 1
 	}
 ]
