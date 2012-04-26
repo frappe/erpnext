@@ -41,6 +41,8 @@ class DocType:
 				msgprint("""Not enough quantity (requested: %(actual_qty)s, current: %(batch_bal)s in Batch 
 		<b>%(batch_no)s</b> for Item <b>%(item_code)s</b> at Warehouse<b>%(warehouse)s</b> 
 		as on %(posting_date)s %(posting_time)s""" % self.doc.fields, raise_exception = 1)
+
+			self.doc.fields.pop('batch_bal')
 			 
 
 	# mandatory
