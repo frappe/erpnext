@@ -44,6 +44,7 @@ class DocType:
 	def update_stock(self, actual_qty=0, reserved_qty=0, ordered_qty=0, indented_qty=0, planned_qty=0, dt=None, sle_id='', posting_time='', serial_no = '', is_cancelled = 'No',doc_type='',doc_name='',is_amended='No'):
 		if not dt: 
 			dt = nowdate()
+			
 		# update the stock values (for current quantities)
 		self.doc.actual_qty = flt(self.doc.actual_qty) + flt(actual_qty)
 		self.doc.ordered_qty = flt(self.doc.ordered_qty) + flt(ordered_qty)
@@ -298,7 +299,7 @@ class DocType:
 			order by timestamp(posting_date, posting_time) asc, name asc""", \
 				(self.doc.item_code, self.doc.warehouse, \
 					prev_sle.get('posting_date','1900-01-01'), prev_sle.get('posting_time', '12:00')), as_dict = 1)
-		for sle in sll:
+		for sle in sll:		
 			# block if stock level goes negative on any date
 			if val_method != 'Moving Average' or flt(allow_negative_stock) == 0:
 				self.validate_negative_stock(cqty, sle)
