@@ -24,10 +24,10 @@ $.extend(cur_frm.cscript, {
 	refresh: function(doc) {
 		cur_frm.cscript.layout(doc);
 	},
-	insert_style: function() {
+	insert_style: function(doc) {
 		cur_frm.cscript.layout(doc);		
 	},
-	insert_code: function() {
+	insert_code: function(doc) {
 		cur_frm.cscript.layout(doc);		
 	}
 })
