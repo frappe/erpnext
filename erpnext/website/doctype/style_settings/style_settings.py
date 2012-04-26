@@ -28,6 +28,8 @@ class DocType:
 		self.doc.small_font_size = str(int(self.doc.font_size[:-2])-2) + 'px'
 		
 		self.doc.custom_css = temp.render(doc = self.doc)
+		if self.doc.add_css:
+			self.doc.custom_css += '\n\n/* User CSS */\n\n' + self.doc.add_css
 		
 		from webnotes.session_cache import clear_cache
 		clear_cache('Guest')
