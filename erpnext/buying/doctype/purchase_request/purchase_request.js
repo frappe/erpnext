@@ -46,19 +46,10 @@ cur_frm.cscript.get_item_defaults = function(doc) {
 
 //======================= Refresh =====================================
 cur_frm.cscript.refresh = function(doc, cdt, cdn) { 
-
-	// Unhide Fields in Next Steps
-	// ---------------------------------
-	
 	cur_frm.clear_custom_buttons();
 
 	if(doc.docstatus == 1 && doc.status != 'Stopped'){
-		var ch = getchildren('Purchase Request Item',doc.name,'indent_details');
-		var is_closed = 1;
-		for(var i in ch){
-			if(flt(ch[i].qty) > flt(ch[i].ordered_qty)) is_closed = 0;
-		}
-		if(!is_closed) {
+		if(doc.per_ordered < 100) {
 			cur_frm.add_custom_button('Make Purchase Order', cur_frm.cscript['Make Purchase Order'])
 			cur_frm.add_custom_button('Stop Purchase Request', cur_frm.cscript['Stop Purchase Request'])
 		}

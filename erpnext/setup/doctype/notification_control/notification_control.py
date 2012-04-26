@@ -39,7 +39,7 @@ class DocType:
 
 	# set custom text
 	# ---------------
-	def set_message(self, arg=''):
+	def set_message(self, arg = ''):
 		fn = self.doc.select_transaction.lower().replace(' ', '_') + '_message'
 		webnotes.conn.set(self.doc, fn, self.doc.custom_message)
 		msgprint("Custom Message for %s updated!" % self.doc.select_transaction)

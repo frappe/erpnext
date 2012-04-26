@@ -35,11 +35,14 @@ class DocType:
 	def actual_amt_check(self):
 		if self.doc.batch_no:
 			batch_bal = flt(sql("select sum(actual_qty) from `tabStock Ledger Entry` where warehouse = '%s' and item_code = '%s' and batch_no = '%s'"%(self.doc.warehouse,self.doc.item_code,self.doc.batch_no))[0][0])
-	
+			self.doc.fields.update({'batch_bal': batch_bal})
+
 			if (batch_bal + self.doc.actual_qty) < 0:
 				msgprint("""Not enough quantity (requested: %(actual_qty)s, current: %(batch_bal)s in Batch 
 		<b>%(batch_no)s</b> for Item <b>%(item_code)s</b> at Warehouse<b>%(warehouse)s</b> 
-		as on %(posting_date)s %(posting_time)s""" % self.doc.fields.update({'batch_bal': batch_bal}), raise_exception = 1)
+		as on %(posting_date)s %(posting_time)s""" % self.doc.fields, raise_exception = 1)
+
+			self.doc.fields.pop('batch_bal')
 			 
 
 	# mandatory
@@ -89,9 +92,17 @@ class DocType:
 			if getdate(self.doc.posting_date) <= getdate(stock_frozen_upto) and not stock_auth_role in webnotes.user.get_roles():
 				msgprint("You are not authorized to do / modify back dated stock entries before %s" % getdate(stock_frozen_upto).strftime('%d-%m-%Y'), raise_exception=1)
 
+	def validate_posting_time(self):
+		""" Validate posting time format"""
+		if self.doc.posting_time and len(cstr(self.doc.posting_time)) == 8 and cstr(self.doc.posting_time)[-2:] != '00':
+			msgprint("Wrong format of posting time, can not complete the transaction. If you think \
+				you entered posting time correctly, please contact ERPNext support team.")
+			raise Exception
+	
 
 	def validate(self):
 		self.validate_mandatory()
+		self.validate_posting_time()
 		self.validate_item()
 		self.actual_amt_check()
 		self.check_stock_frozen_date()

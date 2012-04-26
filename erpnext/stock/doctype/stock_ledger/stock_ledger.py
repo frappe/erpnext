@@ -128,6 +128,7 @@ class DocType:
 		s.modified					=	nowdate()
 		s.modified_by				=	session['user']
 		s.serial_no					=	serial_no
+		s.sle_exists				=	1
 		s.fiscal_year				=	obj.doc.fiscal_year
 		s.company					=	obj.doc.company
 		s.save(new_rec)
@@ -211,7 +212,7 @@ class DocType:
 		import datetime
 		for d in getlist(obj.doclist, fname):
 			if d.serial_no:
-				serial_nos = self.get_sr_no_list(d.serial_no, d.qty)
+				serial_nos = self.get_sr_no_list(d.serial_no)
 				for a in serial_nos:
 					serial_no = a.strip()
 					if is_incoming:

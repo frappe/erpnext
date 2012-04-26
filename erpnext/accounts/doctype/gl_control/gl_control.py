@@ -198,10 +198,17 @@ class DocType:
 	# ----------------
 	def save_entries(self, cancel, adv_adj, update_outstanding):
 		for le in self.entries:
-			# cancel
-			if cancel or flt(le.debit) < 0 or flt(le.credit) < 0:
+			#toggle debit, credit if negative entry
+			if flt(le.debit) < 0 or flt(le.credit) < 0:
 				tmp=le.debit
 				le.debit, le.credit = abs(flt(le.credit)), abs(flt(tmp))
+			
+			# toggled debit/credit in two separate condition because both should be executed at the 
+			# time of cancellation when there is negative amount (tax discount)
+			if cancel:
+				tmp=le.debit
+				le.debit, le.credit = abs(flt(le.credit)), abs(flt(tmp))
+
 
 			le_obj = get_obj(doc=le)
 			# validate except on_cancel
