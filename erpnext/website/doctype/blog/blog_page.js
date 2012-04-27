@@ -18,32 +18,28 @@
 
 pscript['onload_{{ doc.name }}'] = function(wrapper) {
 	// sidebar
-	var side = $(wrapper).find('.web-side-section')
-		.append('<h4>Recent Posts</h4>').get(0);
-		
 	wrapper.recent_list = new wn.ui.Listing({
-		parent: side,
+		parent: $(wrapper).find('.recent-posts'),
+		no_toolbar: true,
 		query: 'select name, title, left(content, 100) as content from tabBlog\
-			where ifnull(published,1)=1',
+			where ifnull(published,0)=1 and name!="{{ doc.name }}" order by modified desc',
 		hide_refresh: true,
 		render_row: function(parent, data) {
-			if(data.content.length==100) data.content += '...';
+			console.log(data);
+			if(data.content && data.content.length==100) data.content += '...';
 			parent.innerHTML = repl('<a href="#!%(name)s">%(title)s</a>\
 				<div class="comment">%(content)s</div><br>', data);
 		},
-		page_length: 5
+		page_length: 5,
 	});
 	wrapper.recent_list.run();
-	
-	
-	// comments
-	$(wrapper).find('.web-main-section').append('<hr><h3>Comments</h3>');
-
+		
 	wrapper.comment_list = new wn.ui.Listing({
-		parent: $(wrapper).find('.web-main-section').get(0),
+		parent: $(wrapper).find('.blog-comments').get(0),
+		no_toolbar: true,
 		query: 'select comment, comment_by_fullname, modified\
 			from `tabComment` where comment_doctype="Page"\
-			and comment_docname="{{ doc.name }}"',
+			and comment_docname="{{ doc.name }}" order by modified desc',
 		no_result_message: 'Be the first one to comment',
 		render_row: function(parent, data) {
 			data.comment_date = prettyDate(data.modified);
@@ -57,7 +53,7 @@ pscript['onload_{{ doc.name }}'] = function(wrapper) {
 	wrapper.comment_list.run();
 	
 	// add comment
-	$(wrapper).find('.web-main-section').append('<br><button class="btn add-comment">\
+	$(wrapper).find('.layout-main-section').append('<br><button class="btn add-comment">\
 		Add Comment</button>');
 	$(wrapper).find('button.add-comment').click(function(){
 		d = new wn.widgets.Dialog({

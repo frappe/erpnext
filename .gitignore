@@ -1,7 +1,7 @@
 *.pyc
 *.comp.js
 .DS_Store
-user_files
+files
 patch.log
 lib
 conf.py
