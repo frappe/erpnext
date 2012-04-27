@@ -34,7 +34,10 @@ def on_login_post_session(login_manager):
 				sid!=%s""", \
 			(webnotes.session['user'], webnotes.session['sid']), as_list=1)
 
-	if webnotes.session['user'] not in ('Guest', 'demo@webnotestech.com') and webnotes.conn.cur_db_name!='accounts':
+		# check if account is expired
+		check_if_expired()
+
+	if webnotes.session['user'] not in ('Guest', 'demo@webnotestech.com'):
 		# create feed
 		from webnotes.utils import nowtime
 		home.make_feed('Login', 'Profile', login_manager.user, login_manager.user,
@@ -79,6 +82,11 @@ def boot_session(bootinfo):
 			tabCompany limit 1""") and 'Yes' or 'No'
 			
 		bootinfo['user_background'] = webnotes.conn.get_value("Profile", webnotes.session['user'], 'background_image') or ''
+		
+		# load subscription info
+		import conf
+		if hasattr(conf, 'max_users'): bootinfo['max_users'] = conf.max_users
+		if hasattr(conf, 'expires_on'): bootinfo['expires_on'] = conf.expires_on
 
 
 def get_letter_heads():
@@ -87,27 +95,37 @@ def get_letter_heads():
 	ret = webnotes.conn.sql("""select name, content from `tabLetter Head` 
 		where ifnull(disabled,0)=0""")
 	return dict(ret)
+	
 
-def login_as(login_manager):
-	"""
-		Login as functionality -- allows signin from signin.erpnext.com
-	"""
-	# login as user
-	user = webnotes.form.getvalue('login_as')
-	if user:
-		if isinstance(webnotes.session, dict):
-			webnotes.session['user'] = user
-		else:
-			webnotes.session = {'user': user}
-		
-		login_manager.user = user
-		first_name, last_name = webnotes.conn.sql("select first_name, last_name from `tabProfile` where name=%s", user)[0]
-
-		login_manager.user_fullname = (first_name and first_name or "") + (last_name and " " + last_name or "")
-
-		# alisaing here... so check if the user is disabled
-		if not webnotes.conn.sql("select ifnull(enabled,0) from tabProfile where name=%s", user)[0][0]:
-			# throw execption
-			webnotes.msgprint("Authentication Failed", raise_exception=1)
-
-	return login_manager
+def check_if_expired():
+	"""check if account is expired. If expired, do not allow login"""
+	import conf
+	# check if expires_on is specified
+	if not hasattr(conf, 'expires_on'): return
+	
+	# check if expired
+	from datetime import datetime, date
+	expires_on = datetime.strptime(conf.expires_on, '%Y-%m-%d').date()
+	if date.today() <= expires_on: return
+	
+	# if expired, stop user from logging in
+	from webnotes.utils import formatdate
+	if 'System Manager' in webnotes.user.roles:
+		webnotes.response['server_messages'] = """Oops! \
+			Your subscription expired on <b>%s</b>.
+			
+			Nothing catastrophic.
+			
+			Just drop in a mail at <b>support@erpnext.com</b> and \
+			we will guide you to get your account re-activated.""" % formatdate(conf.expires_on)
+	else:
+		webnotes.response['server_messages'] = """Oops! \
+			Your subscription expired on <b>%s</b>.
+			
+			Nothing catastrophic.
+					
+			Just ask your System Manager to drop in a mail at <b>support@erpnext.com</b> and \
+			we will guide him to get your account re-activated.""" % formatdate(conf.expires_on)
+	
+	webnotes.response['message'] = 'Account Expired'
+	raise webnotes.AuthenticationError

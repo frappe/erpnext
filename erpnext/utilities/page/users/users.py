@@ -103,9 +103,24 @@ def add_user(args):
 @webnotes.whitelist()
 def add_profile(args):
 	from webnotes.utils import validate_email_add, now
-	email = args['user']
-			
+	email = args['user']		
 	sql = webnotes.conn.sql
+		
+	# validate max number of users exceeded or not
+	import conf
+	if hasattr(conf, 'max_users'):
+		active_users = sql("""select count(*) from tabProfile
+			where ifnull(enabled, 0)=1 and docstatus<2
+			and name not in ('Administrator', 'Guest')""")[0][0]
+		if active_users >= conf.max_users:
+			# same message as in users.js
+			webnotes.msgprint("""Alas! <br />\
+				You already have <b>%(active_users)s</b> active users, \
+				which is the maximum number that you are currently allowed to add. <br /><br /> \
+				So, to add more users, you can:<br /> \
+				1. <b>Upgrade to the unlimited users plan</b>, or<br /> \
+				2. <b>Disable one or more of your existing users and try again</b>""" \
+				% {'active_users': active_users}, raise_exception=1)
 	
 	if not email:
 		email = webnotes.form_dict.get('user')

@@ -21,53 +21,16 @@ from webnotes.model.doc import Document, addchild
 from webnotes.model.code import get_obj
 from webnotes import session, form, msgprint
 
-sql = webnotes.conn.sql
-
 class DocType:
 	def __init__(self, d, dl):
 		self.doc, self.doclist = d, dl
-	
-	#Default Naming Series
-	#---------------------------------------------------
-	def naming_series(self):
-		ns = [['TDS Payment', 'TDSP'], ['Purchase Invoice', 'BILL'], ['Journal Voucher', 'JV'], ['Sales Invoice', 'INV'], ['Lead', 'Lead'], ['Purchase Request', 'IDT'], ['Opportunity', 'Opportunity'], ['Purchase Order', 'PO'], ['Quotation', 'QTN'], ['Purchase Receipt', 'GRN'], ['Stock Entry', 'STE'], ['Sales Order', 'SO'], ['Delivery Note', 'DN'], ['Employee', 'EMP/']]
-		for r in ns: 
-			rec = Document('Naming Series')
-			rec.select_doc_for_series = r[0]
-			rec.new_series = r[1]
-			rec_obj = get_obj(doc=rec)
-			rec_obj.add_series()
-
-	# set account details
-	#-----------------------
-	def set_account_details(self, args):
-		"""
-			Called from gateway after allocation
-		"""
-		import json
-		args = json.loads(args)
-
-		self.set_cp_defaults(args['company'], args['industry'], args['time_zone'], args['country'], args['account_name'])
-		self.create_profile(args['user'], args['first_name'], args['last_name'], args.get('pwd'))
-
-		# Domain related updates
-		try:
-			from server_tools.gateway_utils import add_domain_map
-			add_domain_map(args)
-		except ImportError, e:
-			pass
-
-		# add record in domain_list of Website Settings
-		account_url = args['url_name'] + '.erpnext.com'
-		webnotes.conn.set_value('Website Settings', 'Website Settings',
-				'subdomain', account_url)
-		
 	
 	# Account Setup
 	# ---------------
 	def setup_account(self, args):
 		import webnotes, json
 		args = json.loads(args)
+		webnotes.conn.begin()
 
 		curr_fiscal_year, fy_start_date, fy_abbr = self.get_fy_details(args.get('fy_start'))
 
@@ -117,6 +80,7 @@ class DocType:
 
 		# Set 
 		self.set_defaults(def_args)
+		self.set_cp_defaults(**args)
 
 		self.create_feed_and_todo()
 
@@ -126,6 +90,7 @@ class DocType:
 		import webnotes.utils
 		user_fullname = (args.get('first_name') or '') + (args.get('last_name')
 				and (" " + args.get('last_name')) or '')
+		webnotes.conn.commit()
 		return {'sys_defaults': webnotes.utils.get_defaults(), 'user_fullname': user_fullname}
 
 	def create_feed_and_todo(self):
@@ -204,14 +169,12 @@ class DocType:
 
 	# Set Control Panel Defaults
 	# --------------------------
-	def set_cp_defaults(self, cname, industry, timezone, country, acc_name):
+	def set_cp_defaults(self, industry, country, timezone, company_name):
 		cp = Document('Control Panel','Control Panel')
-		cp.account_id = acc_name
-		cp.company_name = cname
+		cp.company_name = company_name
 		cp.industry = industry
 		cp.time_zone = timezone
 		cp.country = country
-		cp.client_name = '<div style="padding:4px; font-size:20px;">'+cname+'</div>'
 		cp.save()
 			
 	# Create Profile
@@ -239,24 +202,3 @@ class DocType:
 			d = addchild(pr,'userroles', 'UserRole', 1)
 			d.role = r
 			d.save(1)
-		
-	
-	def is_setup_okay(self, args):
-		"""
-		Validates if setup has been performed after database allocation
-		"""
-
-		from server_tools.gateway_utils import get_total_users
-		
-		args = eval(args)		
-		cp_defaults = webnotes.conn.get_value('Control Panel', None, 'account_id')
-		user_profile = webnotes.conn.get_value('Profile', args['user'], 'name')
-		
-		from webnotes.utils import cint
-		
-		total_users = get_total_users()
-						
-		if (cp_defaults==args['account_name']) and user_profile and \
-		   (total_users==cint(args['total_users'])):
-		   return 'True'
-		
