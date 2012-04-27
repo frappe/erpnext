@@ -1728,7 +1728,6 @@ body {
 	padding: 0px;
 	font-size: 14px;
 	color: #000;
-	background-color: #e2e2e2;
 }
 
 /* font settings */
@@ -1848,12 +1847,12 @@ div.comment { color: #444; }
 div#body_div {
 	display: none;
 	padding-right: 7px;
-	width: 900px;
-	margin: auto;
-	margin-top: 56px;
+	padding-top: 70px;
+	padding-bottom: 50px;
 }
 
 .content {
+	margin: auto;
 	width: 900px;
 }
 
@@ -1864,23 +1863,19 @@ div#body_div {
     transition: background 1s ease-in;
 }
 
-footer {
-	width: 900px;
-	margin: auto;
-}
 header .container {
 	width: 900px;
 	margin: auto;
 }
 
 @media (max-width: 1200px) {
-	div#body_div, header .container, .content, #opened-page-selector, footer {
+	header .container, .content {
 		width: 900px;
 	}
 }
 
 @media (min-width: 1200px) {
-	div#body_div, header .container, .content, #opened-page-selector, footer {
+	header .container, .content {
 		width: 1100px;
 	}
 }
@@ -1931,7 +1926,6 @@ div.std-footer-item {
 	-webkit-border-radius: 5px;
 	-moz-border-radius: 5px;
 	border-radius: 5px;	
-	margin-bottom: 30px;
 	overflow: hidden;
 }
 
@@ -3581,7 +3575,6 @@ span, div, td, input, textarea, button, select {
 }
 
 body {
-	background: url(../images/redbeech.jpg) repeat;
 	color: #616161;
 }
 

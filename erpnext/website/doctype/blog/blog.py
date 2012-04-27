@@ -32,9 +32,11 @@ class DocType():
 		self.doc.name = website.utils.page_name(self.doc.title)
 	
 	def validate(self):
-		"""write/update 'Page' with the blog"""		
+		"""write/update 'Page' with the blog"""
+		if self.doc.page_name:
+			webnotes.conn.sql("""delete from tabPage where name=%s""", self.doc.page_name)
+		
 		p = website.utils.add_page(self.doc.title)
-		self.doc.name = p.name
 		
 		from jinja2 import Template
 		import markdown2
@@ -54,11 +56,11 @@ class DocType():
 		p.save()
 		
 		website.utils.add_guest_access_to_page(p.name)
+		self.doc.page_name = p.name
 		
 		# cleanup
 		for f in ['content_html', 'full_name', 'updated']:
 			if f in self.doc.fields:
-				del self.doc.fields[f]
-				
+				del self.doc.fields[f]				
 
 			

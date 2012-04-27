@@ -1,4 +1,4 @@
-body {
+#body_div {
 {% if doc.background_image %}
 	background: url("files/{{ doc.background_image }}") repeat;
 {% elif doc.background_color %}

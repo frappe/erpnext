@@ -17,18 +17,22 @@
 
 pscript.onload_blog = function(wrapper) {
 	wrapper.blog_list = new wn.ui.Listing({
-		parent: $(wrapper).find('.layout-main-section').get(0),
-		query: 'select tabBlog.name, title, left(content, 300) as content, tabBlog.modified, \
+		parent: $(wrapper).find('#blog-list').get(0),
+		query: 'select tabBlog.name, title, left(content, 1000) as content, tabBlog.modified, \
 			ifnull(first_name, "") as first_name, ifnull(last_name, "") as last_name \
 			from tabProfile, tabBlog\
-		 	where ifnull(published,1)=1 and tabBlog.owner = tabProfile.name',
+		 	where ifnull(published,0)=1 and tabBlog.owner = tabProfile.name',
 		hide_refresh: true,
+		no_toolbar: true,
 		render_row: function(parent, data) {
-			if(data.content.length==300) data.content += '...';
+			if(data.content && data.content.length==1000) data.content += '... (read on)';
+			data.content = wn.markdown(data.content);
+			if(data.last_name) data.last_name = ' ' + data.last_name;
 			data.date = prettyDate(data.modified);
-			parent.innerHTML = repl('<h3><a href="#!%(name)s">%(title)s</a></h3>\
-				<p><div class="help">By %(first_name)s %(last_name)s on %(date)s</div></p>\
-				<div class="comment">%(content)s</div><br>', data);
+			parent.innerHTML = repl('<h2>%(title)s</h2>\
+				<p><div class="help">By %(first_name)s%(last_name)s, %(date)s</div></p>\
+				<p>%(content)s</p>\
+				<a href="#!%(name)s">Read Full Text</a><br>', data);
 		},
 		page_length: 10
 	});

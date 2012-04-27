@@ -14,19 +14,16 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-if not filter_values.get('based_on'):
-  msgprint("Please Select Based On")
-  raise Exception
 cols, columns = [], []
 # Add columns
 # ------------
 based_on = filter_values.get('based_on').split(NEWLINE)
-if len(based_on) == 1:
+if len(based_on) == 1 and based_on[0]:
   if based_on[0] == 'Item Code':
     cols = ["Item Code", "Item Name", "Description", "Stock UOM"]
   elif based_on[0] == 'Warehouse':
     cols = ["Warehouse", "Warehouse Type"]
-elif len(based_on) == 2:
+else:
   cols = ["Item Code", "Item Name", "Description", "Stock UOM", "Warehouse",  "Warehouse Type"]
 
 for d in cols:
@@ -65,7 +62,7 @@ out=[]
 cl_bal,tot_stock = 0,0
   
 for r in res:
-  if len(based_on) == 1:
+  if len(based_on) == 1 and based_on[0]:
     if based_on[0] == 'Item Code': closing_balance, stock_value = get_values(msgprint, flt, posting_date, item_code = r[col_idx['Item Code']])
     elif based_on[0] == 'Warehouse': closing_balance, stock_value = get_values(msgprint, flt, posting_date, warehouse = r[col_idx['Warehouse']])
     r.append(closing_balance)

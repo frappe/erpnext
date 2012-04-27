@@ -188,7 +188,7 @@ erpnext.startup.set_periodic_updates = function() {
 }
 
 erpnext.set_user_background = function(src) {
-	set_style(repl('body { background: url("files/%(src)s") repeat;}', {src:src}))
+	set_style(repl('#body_div { background: url("files/%(src)s") repeat;}', {src:src}))
 }
 
 // start

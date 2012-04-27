@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-04-23 16:00:21',
+		'creation': '2012-04-26 13:04:56',
 		'docstatus': 0,
-		'modified': '2012-04-24 15:07:42',
+		'modified': '2012-04-27 11:00:18',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -15,7 +15,6 @@
 		'_last_update': u'1322549701',
 		'allow_trash': 1,
 		'colour': u'White:FFF',
-		'default_print_format': u'Standard',
 		'doctype': 'DocType',
 		'document_type': u'Master',
 		'is_submittable': 1,
@@ -127,6 +126,24 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'basic_section',
+		'fieldtype': u'Section Break',
+		'label': u'Basic Section',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'col1',
+		'fieldtype': u'Column Break',
+		'permlevel': 0,
+		'width': u'50%'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
 		'fieldname': u'new_item_code',
 		'fieldtype': u'Data',
 		'label': u'New Item Code',
@@ -176,6 +193,15 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'col2',
+		'fieldtype': u'Column Break',
+		'permlevel': 0,
+		'width': u'50%'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
 		'fieldname': u'item_group',
 		'fieldtype': u'Link',
 		'label': u'Item Group',
@@ -184,6 +210,18 @@
 		'options': u'Item Group',
 		'permlevel': 0,
 		'reqd': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'stock_uom',
+		'fieldtype': u'Link',
+		'label': u'Stock UOM',
+		'oldfieldname': u'stock_uom',
+		'oldfieldtype': u'Link',
+		'options': u'UOM',
+		'permlevel': 0
 	},
 
 	# DocField
@@ -216,42 +254,6 @@
 
 	# DocField
 	{
-		'colour': u'White:FFF',
-		'doctype': u'DocField',
-		'fieldname': u'find_sales_bom',
-		'fieldtype': u'Button',
-		'label': u'Find Sales BOM',
-		'oldfieldtype': u'Button',
-		'permlevel': 0,
-		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'sales_bom_items',
-		'fieldtype': u'Table',
-		'label': u'Sales BOM Items',
-		'oldfieldname': u'sales_bom_items',
-		'oldfieldtype': u'Table',
-		'options': u'Sales BOM Item',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'stock_uom',
-		'fieldtype': u'Link',
-		'label': u'Stock UOM',
-		'oldfieldname': u'stock_uom',
-		'oldfieldtype': u'Link',
-		'options': u'UOM',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
 		'depends_on': u'eval:doc.amended_from',
 		'description': u'The date at which current entry is corrected in the system.',
 		'doctype': u'DocField',
@@ -270,9 +272,42 @@
 		'fieldtype': u'Link',
 		'label': u'Amended From',
 		'no_copy': 1,
-		'options': u'Sales Invoice',
+		'options': u'Sales BOM',
 		'permlevel': 1,
 		'print_hide': 1
+	},
+
+	# DocField
+	{
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'find_sales_bom',
+		'fieldtype': u'Button',
+		'label': u'Find Sales BOM',
+		'oldfieldtype': u'Button',
+		'permlevel': 0,
+		'trigger': u'Client'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'item_section',
+		'fieldtype': u'Section Break',
+		'label': u'Items',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'sales_bom_items',
+		'fieldtype': u'Table',
+		'label': u'Sales BOM Items',
+		'oldfieldname': u'sales_bom_items',
+		'oldfieldtype': u'Table',
+		'options': u'Sales BOM Item',
+		'permlevel': 0
 	},
 
 	# DocField

@@ -49,14 +49,14 @@ class DocType:
 	
 	def add_header(self):
 		title = 'Ledger Balances Between ' + getdate(self.doc.from_date).strftime('%d-%m-%Y') + ' and ' + getdate(self.doc.to_date).strftime('%d-%m-%Y')
-		return [[title], ['Account', 'Opening(Dr)', 'Opening (Cr)', 'Debit', 'Credit', 'Closing(Dr)', 'Closing(Cr)'], ['', '', '', '', '', '', '', 'Posting Date', 'Voucher Type', 'Voucher No', 'Debit', 'Credit', 'Remarks']]
+		return [[title], ['Account', 'Posting Date', 'Voucher Type', 'Voucher No', 'Debit', 'Credit', 'Remarks']]
 		
 
 
 	def get_account_subtree(self, acc):		
 		return sql("""
 			SELECT 
-				CONCAT(REPEAT('    ', COUNT(parent.name) - (sub_tree.depth + 1)), node.name) as account, 
+				CONCAT(REPEAT('     ', COUNT(parent.name) - (sub_tree.depth + 1)), node.name) as account, 
 				node.lft AS lft, node.rgt AS rgt, 
 				node.debit_or_credit as dr_or_cr, node.group_or_ledger as group_or_ledger, node.is_pl_account as is_pl_account
 			FROM tabAccount AS node,
@@ -78,7 +78,7 @@ class DocType:
 
 
 
-	def show_acc_summary(self, glc, acc_det):
+	def get_acc_summary(self, glc, acc_det):
 		from_date_year = self.get_year(add_days(self.doc.from_date, -1))
 		to_date_year = self.get_year(self.doc.to_date)
 		acc = acc_det['account'].strip()
@@ -104,8 +104,8 @@ class DocType:
 		if acc_det['dr_or_cr'] == 'Credit':
 			opening, closing = -1*opening, -1*closing
 
-		return [acc_det['account'], flt(opening>0 and opening or 0), flt(opening<0 and -opening or 0), 
-				debit, credit, flt(closing>0.01 and closing or 0), flt(closing<-0.01 and -closing or 0)]
+		return flt(opening>0 and opening or 0), flt(opening<0 and -opening or 0), \
+			debit, credit, flt(closing>0.01 and closing or 0), flt(closing<-0.01 and -closing or 0)
 
 
 	def show_gl_entries(self, acc):
@@ -113,7 +113,7 @@ class DocType:
 		gle = sql("select posting_date, voucher_type, voucher_no, debit, credit, remarks from `tabGL Entry` WHERE account = %s and posting_date >= %s AND posting_date <= %s and ifnull(is_opening,	'No') = 'No' and ifnull(is_cancelled, 'No') = 'No'", (acc, self.doc.from_date, self.doc.to_date), as_dict=1)
 		entries, dr, cr = [], 0, 0
 		for d in gle:
-			entries.append(['', '', '', '', '', '', '', d['posting_date'], d['voucher_type'], d['voucher_no'], d['debit'], d['credit'], d['remarks']])
+			entries.append(['', d['posting_date'], d['voucher_type'], d['voucher_no'], d['debit'], d['credit'], d['remarks']])
 		return entries
 
 
@@ -133,13 +133,17 @@ class DocType:
 			sub_tree = self.get_account_subtree(d.account)
 
 			for acc_det in sub_tree:
-				acc_summary = self.show_acc_summary(glc, acc_det)
-				res.append(acc_summary)
-				
-				# Show gl entries if account is ledger
-				if acc_det['group_or_ledger'] == 'Ledger' and (acc_summary[3] or acc_summary[4]):
-					gle = self.show_gl_entries(acc_det['account'].strip())
-					res += gle
-
+				acc_summary = self.get_acc_summary(glc, acc_det)
+				if acc_summary[0] or acc_summary[1] or acc_summary[2] or acc_summary[3] or acc_summary[4] or acc_summary[5]:
+					res.append([acc_det['account']])
+					# Show gl entries if account is ledger
+					if acc_det['group_or_ledger'] == 'Ledger' and (acc_summary[2] or acc_summary[3]):
+						gle = self.show_gl_entries(acc_det['account'].strip())
+						res += gle
+	
+					# Totals
+					res.append(['', '', '', 'Total Debit/Credit', acc_summary[2], acc_summary[3]])
+					res.append(['', '', '', 'Opening Balance', acc_summary[0], acc_summary[1]])
+					res.append(['', '', '', 'Closing Balance', acc_summary[4], acc_summary[5]])
 
 		return res
