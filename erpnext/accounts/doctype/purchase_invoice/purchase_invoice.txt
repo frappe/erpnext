@@ -5,7 +5,7 @@
 	{
 		'creation': '2012-04-13 11:56:17',
 		'docstatus': 0,
-		'modified': '2012-04-23 12:08:52',
+		'modified': '2012-04-27 11:21:21',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -188,20 +188,6 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
-		'fieldname': u'amended_from',
-		'fieldtype': u'Link',
-		'label': u'Amended From',
-		'no_copy': 1,
-		'oldfieldname': u'amended_from',
-		'oldfieldtype': u'Link',
-		'options': u'Purchase Invoice',
-		'permlevel': 1,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
 		'colour': u'White:FFF',
 		'doctype': u'DocField',
 		'fieldname': u'supplier',
@@ -357,6 +343,20 @@
 		'print_hide': 1,
 		'reqd': 0,
 		'search_index': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'amended_from',
+		'fieldtype': u'Link',
+		'label': u'Amended From',
+		'no_copy': 1,
+		'oldfieldname': u'amended_from',
+		'oldfieldtype': u'Link',
+		'options': u'Purchase Invoice',
+		'permlevel': 1,
+		'print_hide': 1
 	},
 
 	# DocField
