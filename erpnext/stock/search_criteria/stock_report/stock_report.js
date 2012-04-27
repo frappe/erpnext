@@ -19,7 +19,7 @@ report.customize_filters = function() {
   this.mytabs.items['Select Columns'].hide()
   this.mytabs.items['More Filters'].hide()
   this.hide_all_filters();
-  this.add_filter({fieldname:'based_on', label:'Based On', fieldtype:'Select', options:'Warehouse'+NEWLINE+'Item Code',report_default:'Warehouse',ignore : 1,parent:'Stock Ledger Entry'});
+  this.add_filter({fieldname:'based_on', label:'Based On', fieldtype:'Select', options:'Warehouse'+NEWLINE+'Item Code',ignore : 1,parent:'Stock Ledger Entry'});
   this.filter_fields_dict['Stock Ledger Entry'+FILTER_SEP +'To Posting Date'].df.filter_hide = 0;
   this.filter_fields_dict['Stock Ledger Entry'+FILTER_SEP +'Item Code'].df.filter_hide = 0;
   this.filter_fields_dict['Stock Ledger Entry'+FILTER_SEP +'Warehouse'].df.filter_hide = 0;
@@ -57,8 +57,8 @@ report.get_query = function(){
     ware_type_cond = repl(' AND `tabWarehouse`.warehouse_type IN (%(war)s)', {war: war.substr(0,war.length-1)})
   }
   
-  if(based_on.length == 1){
-    if(based_on == 'Item Code'){
+  if(based_on.length == 1 && based_on[0]){
+    if(based_on[0] == 'Item Code'){
       cols = '`tabItem`.name AS "Item Code", `tabItem`.item_name AS "Item Name", `tabItem`.description AS "Description", `tabItem`.stock_uom AS "Stock UOM"';
       cond = '(IFNULL(`tabItem`.`end_of_life`,"") = "" OR `tabItem`.`end_of_life` = "0000-00-00" OR `tabItem`.`end_of_life` > NOW()) AND `tabItem`.is_stock_item = "Yes"';
       if(item_code) cond += repl(' AND `tabItem`.name = %(item)s', {item:'"'+item_code+'"'});
@@ -66,7 +66,7 @@ report.get_query = function(){
       tables = '`tabItem`';
       group_by = '`tabStock Ledger Entry`.item_code';
     }
-    else if(based_on == 'Warehouse'){
+    else if(based_on[0] == 'Warehouse'){
       cols = '`tabWarehouse`.name AS "Warehouse", `tabWarehouse`.warehouse_type AS "Warehouse Type"';
       cond = '`tabWarehouse`.docstatus < 2'
       if(warehouse) cond += repl(' AND `tabWarehouse`.name = %(warehouse)s', {warehouse:'"'+warehouse+'"'});
@@ -74,8 +74,7 @@ report.get_query = function(){
       tables = '`tabWarehouse`';
       group_by = '`tabStock Ledger Entry`.warehouse';
     }
-  }
-  else if(based_on.length == 2){
+  } else {
     cols = '`tabItem`.name AS "Item Code", `tabItem`.item_name AS "Item Name", `tabItem`.description AS "Description", `tabItem`.stock_uom AS "Stock UOM", `tabWarehouse`.name AS "Warehouse",  `tabWarehouse`.warehouse_type AS "Warehouse Type"';
     cond = '(IFNULL(`tabItem`.`end_of_life`,"") = "" OR `tabItem`.`end_of_life` = "0000-00-00" OR `tabItem`.`end_of_life` > NOW()) AND `tabItem`.is_stock_item = "Yes" AND `tabWarehouse`.docstatus < 2';
     if(item_code) cond += repl(" AND `tabItem`.name = %(item)s", {item:"'"+item_code+"'"});
