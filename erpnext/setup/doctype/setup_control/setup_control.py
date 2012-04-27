@@ -30,6 +30,7 @@ class DocType:
 	def setup_account(self, args):
 		import webnotes, json
 		args = json.loads(args)
+		webnotes.conn.begin()
 
 		curr_fiscal_year, fy_start_date, fy_abbr = self.get_fy_details(args.get('fy_start'))
 
@@ -89,6 +90,7 @@ class DocType:
 		import webnotes.utils
 		user_fullname = (args.get('first_name') or '') + (args.get('last_name')
 				and (" " + args.get('last_name')) or '')
+		webnotes.conn.commit()
 		return {'sys_defaults': webnotes.utils.get_defaults(), 'user_fullname': user_fullname}
 
 	def create_feed_and_todo(self):
