@@ -21,8 +21,6 @@ from webnotes.model.doc import Document, addchild
 from webnotes.model.code import get_obj
 from webnotes import session, form, msgprint
 
-sql = webnotes.conn.sql
-
 class DocType:
 	def __init__(self, d, dl):
 		self.doc, self.doclist = d, dl
