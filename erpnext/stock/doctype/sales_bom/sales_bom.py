@@ -67,7 +67,7 @@ class DocType:
         msgprint("Sales Bom Item " + d.item_code +" cannot be child item.")
         raise Exception
       # Check if is_main_item is modified once saved
-      if not self.doc.fields.get('__islocal') and d.is_main_item == "Yes" and cstr(d.item_code) != cstr(self.doc.name)[:-3] :
+      if not self.doc.fields.get('__islocal') and d.is_main_item == "Yes" and cstr(d.item_code) != cstr(self.doc.new_item_code)[:-3]:
         msgprint("Modifying the main item is not allowed.")
         raise Exception
     if len(is_main_item) > 1:
@@ -193,19 +193,17 @@ class DocType:
       return
     
     # get all Sales BOM that have the first item  
-    sbl = sql("select distinct parent from `tabSales BOM Detail` where item_code=%s", il[0].item_code)
+    sbl = sql("select distinct parent from `tabSales BOM Detail` where item_code=%s and parent != %s and docstatus != 2", (il[0].item_code, self.doc.name))
     
     # check all siblings
     sub_items = [[d.item_code, flt(d.qty)] for d in il]
-    
     for s in sbl:
-      if not cstr(s[0]) == cstr(self.doc.name) :
-        t = sql("select item_code, qty from `tabSales BOM Detail` where parent=%s", s[0])
-        t = [[d[0], flt(d[1])] for d in t]
+      t = sql("select item_code, qty from `tabSales BOM Detail` where parent=%s and docstatus != 2", s[0])
+      t = [[d[0], flt(d[1])] for d in t]
   
-        if self.has_same_items(sub_items, t):
-          msgprint("%s has the same Sales BOM details" % s[0])
-          raise Exception
+      if self.has_same_items(sub_items, t):
+        msgprint("%s has the same Sales BOM details" % s[0])
+        raise Exception
     if finder:
       msgprint("There is no Sales BOM present with the following Combination.")
 
