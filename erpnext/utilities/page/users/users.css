@@ -33,3 +33,14 @@ table.user-perm td, table.user-perm th {
 	border-bottom: 1px solid #aaa;
 	min-width: 30px;
 }
+
+.subscription-info-box {
+	margin: 0px 11px;
+	background-color: #EEEEEE;
+    border: 1px solid #DDDBDB;
+    padding: 5px 3px;
+}
+
+.subscription-info {
+	padding: 0px 10px;
+}

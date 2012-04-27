@@ -63,6 +63,21 @@ $.extend(wn.pages.users, {
 				}
 			}
 		});
+		if(!$('.subscription-info').length && (wn.boot.max_users || wn.boot.expires_on)) {
+			var $sub_info = $('<div class="subscription-info-box"><div>').insertAfter('.help');
+			if(wn.boot.max_users) {
+				$sub_info.append(repl('\
+				<span class="subscription-info"> \
+					Max Users: <b>%(max_users)s</b> \
+				</span>', { max_users: wn.boot.max_users }));
+			}
+			if(wn.boot.expires_on) {
+				$sub_info.append(repl('\
+				<span class="subscription-info"> \
+				Expires On: <b>%(expires_on)s</b> \
+				</span>', { expires_on: dateutil.str_to_user(wn.boot.expires_on) }));
+			}
+		}
 	},
 	render: function(data) {
 		if(data.file_list) {
@@ -207,6 +222,17 @@ $.extend(wn.pages.users, {
 	},
 	add_user: function() {
 		var me = wn.pages.users;
+		var active_users = $('.user-card:not(.disabled)');
+		if(wn.boot.max_users && (active_users.length >= wn.boot.max_users)) {
+			msgprint(repl("Alas! <br />\
+			You already have <b>%(active_users)s</b> active users, \
+			which is the maximum number that you are currently allowed to add. <br /><br /> \
+			So, to add more users, you can:<br /> \
+			1. <b>Upgrade to the unlimited users plan</b>, or<br /> \
+			2. <b>Disable one or more of your existing users and try again</b>",
+				{active_users: active_users.length}));
+			return;
+		}
 		var d = new wn.widgets.Dialog({
 			title: 'Add User',
 			width: 400,
