@@ -48,6 +48,7 @@ erpnext.startup.set_globals = function() {
 }
 
 erpnext.startup.start = function() {
+	console.log('Starting up...');
 	$('#startup_div').html('Starting up...').toggle(true);
 	
 	
@@ -87,9 +88,26 @@ erpnext.startup.start = function() {
 		// complete registration
 		if(in_list(user_roles,'System Manager') && (wn.boot.setup_complete=='No')) { 
 			wn.require("erpnext/startup/js/complete_setup.js");
-			erpnext.complete_setup(); 
+			erpnext.complete_setup.show(); 
 		}
-
+		
+		if(wn.boot.expires_on) {
+			var today = dateutil.str_to_obj(dateutil.get_today());
+			var expires_on = dateutil.str_to_obj(wn.boot.expires_on);
+			var diff = dateutil.get_diff(expires_on, today);
+			if (0 <= diff && diff <= 15) {
+				var expiry_string = diff==0 ? "today" : repl("in %(diff)s day(s)", { diff: diff });
+				$('header').append(repl('<div class="expiry-info"> \
+					Ahem! Your ERPNext subscription will <b>expire %(expiry_string)s</b>. \
+					Please renew your subscription to continue using ERPNext \
+					(and remove this annoying banner). \
+				</div>', { expiry_string: expiry_string }));
+			} else if (diff < 0) {
+				$('header').append(repl('<div class="expiry-info"> \
+					Ahem! This ERPNext subscription <b>has expired</b> and should be deleted. \
+				</div>', { expiry_string: expiry_string }));
+			}
+		}
 	}
 
 	erpnext.set_about();
