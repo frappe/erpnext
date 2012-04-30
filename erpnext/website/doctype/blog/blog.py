@@ -33,6 +33,10 @@ class DocType():
 	
 	def validate(self):
 		"""write/update 'Page' with the blog"""
+		# we need the name for the templates
+		if not self.doc.name:
+			self.autoname()
+		
 		if self.doc.page_name:
 			webnotes.conn.sql("""delete from tabPage where name=%s""", self.doc.page_name)
 		

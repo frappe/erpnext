@@ -67,7 +67,7 @@ def boot_session(bootinfo):
 			parent_label, parentfield
 			from `tabTop Bar Item` where parent='Website Settings' order by idx asc""", as_dict=1)
 		bootinfo['startup_code'] = \
-			webnotes.conn.get_value('Website Settings', None, 'startup_code')		
+			webnotes.conn.get_value('Website Settings', None, 'startup_code')
 	else:	
 		bootinfo['letter_heads'] = get_letter_heads()
 

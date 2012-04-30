@@ -5,7 +5,7 @@
 	{
 		'creation': '2012-04-02 16:38:02',
 		'docstatus': 0,
-		'modified': '2012-04-27 16:41:40',
+		'modified': '2012-04-30 14:20:56',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -23,7 +23,7 @@
 		'name': '__common__',
 		'section_style': u'Simple',
 		'show_in_menu': 0,
-		'version': 11
+		'version': 1
 	},
 
 	# These values are common for all DocField
@@ -107,6 +107,16 @@
 		'options': u'Web Page',
 		'permlevel': 0,
 		'reqd': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'default_product_category',
+		'fieldtype': u'Link',
+		'label': u'Default Product Category',
+		'options': u'Item Group',
+		'permlevel': 0
 	},
 
 	# DocField

@@ -1,26 +1,19 @@
-<div class="layout_wrapper">
+<div class="layout-wrapper layout-wrapper-background">
 	<div class="web-content" id="content-product-{{ doc.name }}">
-		<h1>{{ doc.title }}</h1>
-		<div class="web-main-section">
+		<div class="layout-main-section">
+			<h1>{{ doc.item_name }}</h1>
 			<div style="float: left;">
-				<image src="files/{{ doc.full_image }}" style="width: 300px; 
+				<br><br>
+				<image src="files/{{ doc.website_image }}" style="width: 300px; 
 					margin-left: 15px;" />
+				<br><br>
 				{{ doc.long_description_html }}
 				<button class="btn primary product-inquiry" 
 					data-product="{{ doc.name }}"
 					data-description="{{ doc.short_description }}">Send Inquiry</button>
 			</div>
 		</div>
-		<div class="web-side-section">
-			<div class="info-box round">
-				<p><b>Item Code:</b> {{ doc.item }}</p>
-				<p>{{ doc.short_description }}</p>
-				<p><button class="btn primary product-inquiry" 
-					data-product="{{ doc.name }}"
-					data-description="{{ doc.short_description }}">Send Inquiry</button>
-				</p>
-			</div>
-			<br>
+		<div class="layout-side-section">
 			<h4>More Categories</h4>
 			<div class="more-categories"></div>
 			<br>

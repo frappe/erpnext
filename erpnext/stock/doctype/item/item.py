@@ -156,6 +156,9 @@ class DocType:
 		if self.doc.has_serial_no == 'Yes' and self.doc.is_stock_item == 'No':
 			msgprint("'Has Serial No' can not be 'Yes' for non-stock item", raise_exception=1)
 
+		# make product page
+		self.make_page()
+
 	def check_non_asset_warehouse(self):
 		if self.doc.is_asset_item == "Yes":
 			existing_qty = sql("select t1.warehouse, t1.actual_qty from tabBin t1, tabWarehouse t2 where t1.item_code=%s and (t2.warehouse_type!='Fixed Asset' or t2.warehouse_type is null) and t1.warehouse=t2.name and t1.actual_qty > 0", self.doc.name)
@@ -208,3 +211,35 @@ Total Available Qty: %s
 	def on_rename(self,newdn,olddn):
 		sql("update tabItem set item_code = %s where name = %s", (newdn, olddn))
 
+	def make_page(self):
+		if self.doc.show_in_website=='Yes':
+
+			import website.utils
+
+			if self.doc.page_name:
+				import webnotes.model
+				webnotes.model.delete_doc('Page', self.doc.page_name)
+				
+			p = website.utils.add_page("Product " + self.doc.item_name)
+			self.doc.page_name = p.name
+
+			from jinja2 import Template
+			import markdown2
+			import os
+
+
+			self.doc.long_description_html = markdown2.markdown(self.doc.description or '')
+
+			with open(os.path.join(os.path.dirname(__file__), 'template.html'), 'r') as f:
+				p.content = Template(f.read()).render(doc=self.doc)
+
+			with open(os.path.join(os.path.dirname(__file__), 'product_page.js'), 'r') as f:
+				p.script = Template(f.read()).render(doc=self.doc)
+
+			p.save()
+
+			website.utils.add_guest_access_to_page(p.name)
+
+			del self.doc.fields['long_description_html']
+
+			

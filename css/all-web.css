@@ -1805,6 +1805,24 @@ h1, h2, h3, h4, h5 {
 body {
 	font-family: "Helvetica Neue", Helvetica, "Helvetica Neue", sans-serif;
 	font-size: 13px;
+	background-color: #eee;
+}
+
+footer {
+	background: #b7b7b7; /* Old browsers */
+	background: -moz-linear-gradient(top,  #b7b7b7 0%, #eeeeee 36%); /* FF3.6+ */
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#b7b7b7), color-stop(36%,#eeeeee)); /* Chrome,Safari4+ */
+	background: -webkit-linear-gradient(top,  #b7b7b7 0%,#eeeeee 36%); /* Chrome10+,Safari5.1+ */
+	background: -o-linear-gradient(top,  #b7b7b7 0%,#eeeeee 36%); /* Opera 11.10+ */
+	background: -ms-linear-gradient(top,  #b7b7b7 0%,#eeeeee 36%); /* IE10+ */
+	background: linear-gradient(top,  #b7b7b7 0%,#eeeeee 36%); /* W3C */
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#b7b7b7', endColorstr='#eeeeee',GradientType=0 ); /* IE6-9 */
+	border-top: 1px solid #999;
+	text-align: center;
+	color: inherit;
+	padding: 10px;
+	font-size: 12px;
+	line-height: 1.7;	
 }
 
 span, div, td, input, textarea, button, select {
@@ -1910,10 +1928,10 @@ div.comment { color: #444; }
 }
 
 div#body_div {
-	display: none;
 	padding-right: 7px;
 	padding-top: 70px;
 	padding-bottom: 50px;
+	min-height: 400px;
 }
 
 .content {
@@ -2597,21 +2615,7 @@ pre {
 
 
 footer {
-	background-color: #eee;
-	box-shadow: inset 0 10px 10px rgba(0,0,0,0.3), inset 0 3px 3px rgba(0,0,0,0.3);
-	border-top: 1px solid #555;
-	padding-top: 10px;
-	text-align: center;
-}
 
-.web-footer {
-	color: inherit;
-	padding: 10px;
-	line-height: 1.7;
-}
-
-.web-footer div, .web-footer a {
-	font-size: 12px;
 }
 
 .web-footer-menu {
