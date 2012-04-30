@@ -325,7 +325,7 @@ class DocType:
 			where name=%s""", (cqty, flt(val_rate), cstr(self.fcfs_bal), stock_val, sle['name']))
 		
 		# update the bin
-		if sll:
+		if sll or not prev_sle:
 			sql("update `tabBin` set valuation_rate=%s, actual_qty=%s, stock_value = %s where name=%s", \
 				(flt(val_rate), cqty, flt(stock_val), self.doc.name))
 
