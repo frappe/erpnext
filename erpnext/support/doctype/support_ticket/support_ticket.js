@@ -48,14 +48,14 @@ $.extend(cur_frm.cscript, {
 	},
 	
 	refresh: function(doc) {
-		cs.make_listing(doc);
+		cur_frm.cscript.make_listing(doc);
 		if(!doc.__islocal) {											
 			if(in_list(user_roles,'System Manager')) {
-		      if(doc.status!='Closed') cur_frm.add_custom_button('Close Ticket', cs['Close Ticket']);	
-			  if(doc.status=='Closed') cur_frm.add_custom_button('Re-Open Ticket', cs['Re-Open Ticket']);		
+		      if(doc.status!='Closed') cur_frm.add_custom_button('Close Ticket', cur_frm.cscript['Close Ticket']);	
+			  if(doc.status=='Closed') cur_frm.add_custom_button('Re-Open Ticket', cur_frm.cscript['Re-Open Ticket']);		
 			}else if(doc.allocated_to) {
 			  set_field_permlevel('status',2);
-			  if(user==doc.allocated_to && doc.status!='Closed') cur_frm.add_custom_button('Close Ticket', cs['Close Ticket']);
+			  if(user==doc.allocated_to && doc.status!='Closed') cur_frm.add_custom_button('Close Ticket', cur_frm.cscript['Close Ticket']);
 			}
 			
 			// can't change the main message & subject once set  
@@ -81,7 +81,7 @@ $.extend(cur_frm.cscript, {
 		}, null, -1)
 		
 		// render thread		
-		cs.thread_list = new wn.ui.Listing({
+		cur_frm.cscript.thread_list = new wn.ui.Listing({
 			parent: $a(cur_frm.fields_dict['thread_html'].wrapper, 'div'),
 			no_result_message: 'No responses yet',
 			get_query: function() {
@@ -93,7 +93,7 @@ $.extend(cur_frm.cscript, {
 				new EmailMessage(parent, data, list, idx);
 			}
 		});
-		cs.thread_list.run();
+		cur_frm.cscript.thread_list.run();
 
 	},
 	
