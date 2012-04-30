@@ -270,7 +270,7 @@ class DocType:
 		
 		# if no prev sle, start from the first one (for repost)
 		if not prev_sle:
-			cqty, cval, val_rate, self.fcfs_bal = 0, 0, 0, []
+			cqty, cval, val_rate, stock_val, self.fcfs_bal = 0, 0, 0, 0, []
 		
 		# normal
 		else:
