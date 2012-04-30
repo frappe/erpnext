@@ -326,7 +326,7 @@ class DocType:
 		
 		# update the bin
 		if sll or not prev_sle:
-			sql("update `tabBin` set valuation_rate=%s, actual_qty=%s, stock_value = %s where name=%s", \
+			sql("update `tabBin` set valuation_rate=%s, actual_qty=%s, stock_value = %s, projected_qty = (actual_qty + indented_qty + ordered_qty + planned_qty - reserved_qty) where name=%s", \
 				(flt(val_rate), cqty, flt(stock_val), self.doc.name))
 
 
