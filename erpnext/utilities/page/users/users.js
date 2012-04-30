@@ -223,7 +223,7 @@ $.extend(wn.pages.users, {
 	add_user: function() {
 		var me = wn.pages.users;
 		var active_users = $('.user-card:not(.disabled)');
-		if(wn.boot.max_users && (active_users.length >= wn.boot.max_users) && wn.boot.max_users) {
+		if(wn.boot.max_users && (active_users.length >= wn.boot.max_users)) {
 			msgprint(repl("Alas! <br />\
 			You already have <b>%(active_users)s</b> active users, \
 			which is the maximum number that you are currently allowed to add. <br /><br /> \
