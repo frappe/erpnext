@@ -830,7 +830,7 @@ if(wn.boot.website_settings.title_prefix){wn.title_prefix=wn.boot.website_settin
 if(wn.boot.startup_code){eval(wn.boot.startup_code);}}else{wn.boot.profile.allow_modules=wn.boot.profile.allow_modules.concat(['To Do','Knowledge Base','Calendar','Activity','Messages'])
 if(user_roles.indexOf('Accounts Manager')!=-1){wn.boot.profile.allow_modules.push('Dashboard');}
 erpnext.toolbar.setup();erpnext.startup.set_periodic_updates();if(in_list(user_roles,'System Manager')&&(wn.boot.setup_complete=='No')){wn.require("erpnext/startup/js/complete_setup.js");erpnext.complete_setup.show();}
-if(wn.boot.expires_on){var today=dateutil.str_to_obj(dateutil.get_today());var expires_on=dateutil.str_to_obj(wn.boot.expires_on);var diff=dateutil.get_diff(expires_on,today);if(0<=diff&&diff<=15){var expiry_string=diff==0?"today":repl("in %(diff)s day(s)",{diff:diff});$('header').append(repl('<div class="expiry-info"> \
+if(wn.boot.expires_on&&in_list(user_roles,'System Manager')){var today=dateutil.str_to_obj(dateutil.get_today());var expires_on=dateutil.str_to_obj(wn.boot.expires_on);var diff=dateutil.get_diff(expires_on,today);if(0<=diff&&diff<=15){var expiry_string=diff==0?"today":repl("in %(diff)s day(s)",{diff:diff});$('header').append(repl('<div class="expiry-info"> \
      Ahem! Your ERPNext subscription will <b>expire %(expiry_string)s</b>. \
      Please renew your subscription to continue using ERPNext \
      (and remove this annoying banner). \
@@ -843,9 +843,9 @@ else if(nm=='Accounts Browser')
 pscript.make_chart(chart_type);}
 loadpage(nm,call_back);}
 var update_messages=function(reset){if(inList(['Guest'],user)||!wn.session_alive){return;}
-if(!reset){var set_messages=function(r){if(!r.exc){wn.container.wntoolbar.set_new_comments(r.message.unread_messages);var show_in_circle=function(parent_id,msg){var parent=$('#'+parent_id);if(parent){if(msg){parent.find('span:first').text(msg);parent.toggle(true);}else{parent.toggle(false);}}}
+if(!reset){var set_messages=function(r){if(!r.exc){erpnext.toolbar.set_new_comments(r.message.unread_messages);var show_in_circle=function(parent_id,msg){var parent=$('#'+parent_id);if(parent){if(msg){parent.find('span:first').text(msg);parent.toggle(true);}else{parent.toggle(false);}}}
 show_in_circle('unread_messages',r.message.unread_messages.length);show_in_circle('open_support_tickets',r.message.open_support_tickets);show_in_circle('things_todo',r.message.things_todo);show_in_circle('todays_events',r.message.todays_events);}else{clearInterval(wn.updates.id);}}
-wn.call({method:'startup.startup.get_global_status_messages',callback:set_messages});}else{wn.container.wntoolbar.set_new_comments(0);$('#unread_messages').toggle(false);}}
+wn.call({method:'startup.startup.get_global_status_messages',callback:set_messages});}else{erpnext.toolbar.set_new_comments(0);$('#unread_messages').toggle(false);}}
 erpnext.startup.set_periodic_updates=function(){wn.updates={};if(wn.updates.id){clearInterval(wn.updates.id);}
 wn.updates.id=setInterval(update_messages,60000);}
 erpnext.set_user_background=function(src){set_style(repl('#body_div { background: url("files/%(src)s") repeat;}',{src:src}))}

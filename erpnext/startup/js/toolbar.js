@@ -43,25 +43,7 @@ erpnext.toolbar.setup = function() {
 	$('#toolbar-help').append('<li><a href="http://www.providesupport.com?messenger=iwebnotes" target="_blank">\
 		Live Chat (Office Hours)</a></li>')
 
-	$.extend(wn.container.wntoolbar, {
-		set_new_comments: function(new_comments) {
-			var navbar_nc = $('.navbar-new-comments');
-			if(new_comments && new_comments.length>0) {
-				navbar_nc.text(new_comments.length);
-				navbar_nc.addClass('navbar-new-comments-true')
-				$.each(new_comments, function(i, v) {
-					var msg = 'New Message: ' + (v[1].length<=100 ? v[1] : (v[1].substr(0, 100) + "..."));
-					var id = v[0].replace('/', '-');
-					if(!$('#' + id)[0]) { show_alert(msg, id); }
-				})
-			} else {
-				navbar_nc.removeClass('navbar-new-comments-true');
-				navbar_nc.text(0);
-			}
-		}
-	});
-
-	wn.container.wntoolbar.set_new_comments();
+	erpnext.toolbar.set_new_comments();
 }
 
 erpnext.toolbar.add_modules = function() {
@@ -73,8 +55,9 @@ erpnext.toolbar.add_modules = function() {
 		</li>').prependTo('.navbar .nav:first');
 	
 	// if no modules list then show all
-	if(wn.boot.modules_list)
-		wn.boot.modules_list = JSON.parse(wn.boot.modules_list);
+	if(wn.boot.modules_list && typeof(wn.boot.modules_list) == 'string') {
+		wn.boot.modules_list = JSON.parse(wn.boot.modules_list);	
+	}
 	else
 		wn.boot.modules_list = keys(erpnext.modules).sort();
 
@@ -106,5 +89,21 @@ erpnext.toolbar.add_modules = function() {
 		<li><a href="#!Setup" data-module="Setup">Setup</a></li>');
 	}
 	
+}
+
+erpnext.toolbar.set_new_comments = function(new_comments) {
+	var navbar_nc = $('.navbar-new-comments');
+	if(new_comments && new_comments.length>0) {
+		navbar_nc.text(new_comments.length);
+		navbar_nc.addClass('navbar-new-comments-true')
+		$.each(new_comments, function(i, v) {
+			var msg = 'New Message: ' + (v[1].length<=100 ? v[1] : (v[1].substr(0, 100) + "..."));
+			var id = v[0].replace('/', '-');
+			if(!$('#' + id)[0]) { show_alert(msg, id); }
+		})
+	} else {
+		navbar_nc.removeClass('navbar-new-comments-true');
+		navbar_nc.text(0);
+	}
 }
 
