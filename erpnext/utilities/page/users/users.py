@@ -112,7 +112,7 @@ def add_profile(args):
 		active_users = sql("""select count(*) from tabProfile
 			where ifnull(enabled, 0)=1 and docstatus<2
 			and name not in ('Administrator', 'Guest')""")[0][0]
-		if active_users >= conf.max_users:
+		if active_users >= conf.max_users and not conf.max_users:
 			# same message as in users.js
 			webnotes.msgprint("""Alas! <br />\
 				You already have <b>%(active_users)s</b> active users, \
