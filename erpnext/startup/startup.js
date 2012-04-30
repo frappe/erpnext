@@ -79,7 +79,7 @@ erpnext.startup.start = function() {
 		
 		// setup toolbar
 		erpnext.toolbar.setup();
-				
+		
 		// set interval for updates
 		erpnext.startup.set_periodic_updates();
 
@@ -93,7 +93,6 @@ erpnext.startup.start = function() {
 			wn.require("erpnext/startup/js/complete_setup.js");
 			erpnext.complete_setup.show(); 
 		}
-		
 		if(wn.boot.expires_on && in_list(user_roles, 'System Manager')) {
 			var today = dateutil.str_to_obj(dateutil.get_today());
 			var expires_on = dateutil.str_to_obj(wn.boot.expires_on);
@@ -111,6 +110,7 @@ erpnext.startup.start = function() {
 				</div>', { expiry_string: expiry_string }));
 			}
 		}
+		
 	}
 
 	erpnext.set_about();
@@ -144,7 +144,7 @@ var update_messages = function(reset) {
 		var set_messages = function(r) {
 			if(!r.exc) {
 				// This function is defined in toolbar.js
-				wn.container.wntoolbar.set_new_comments(r.message.unread_messages);
+				erpnext.toolbar.set_new_comments(r.message.unread_messages);
 				
 				var show_in_circle = function(parent_id, msg) {
 					var parent = $('#'+parent_id);
@@ -174,7 +174,7 @@ var update_messages = function(reset) {
 		});
 	
 	} else {
-		wn.container.wntoolbar.set_new_comments(0);
+		erpnext.toolbar.set_new_comments(0);
 		$('#unread_messages').toggle(false);
 	}
 }
