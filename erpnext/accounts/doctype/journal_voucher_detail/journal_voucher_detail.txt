@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-03-27 14:35:43',
+		'creation': '2012-04-02 16:01:23',
 		'docstatus': 0,
-		'modified': '2012-03-27 14:35:43',
+		'modified': '2012-04-30 16:05:46',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -22,7 +22,7 @@
 		'section_style': u'Tray',
 		'server_code_error': u' ',
 		'show_in_menu': 0,
-		'version': 3
+		'version': 1
 	},
 
 	# These values are common for all DocField
@@ -54,34 +54,7 @@
 		'reqd': 1,
 		'search_index': 1,
 		'trigger': u'Client',
-		'width': u'180px'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'cost_center',
-		'fieldtype': u'Link',
-		'in_filter': 1,
-		'label': u'Cost Center',
-		'oldfieldname': u'cost_center',
-		'oldfieldtype': u'Link',
-		'options': u'Cost Center',
-		'permlevel': 0,
-		'search_index': 0,
-		'width': u'180px'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'balance',
-		'fieldtype': u'Data',
-		'label': u'Balance',
-		'no_copy': 1,
-		'oldfieldname': u'balance',
-		'oldfieldtype': u'Data',
-		'permlevel': 1
+		'width': u'250px'
 	},
 
 	# DocField
@@ -106,6 +79,33 @@
 		'oldfieldtype': u'Currency',
 		'permlevel': 0,
 		'trigger': u'Client'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'cost_center',
+		'fieldtype': u'Link',
+		'in_filter': 1,
+		'label': u'Cost Center',
+		'oldfieldname': u'cost_center',
+		'oldfieldtype': u'Link',
+		'options': u'Cost Center',
+		'permlevel': 0,
+		'search_index': 0,
+		'width': u'180px'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'balance',
+		'fieldtype': u'Data',
+		'label': u'Account Balance',
+		'no_copy': 1,
+		'oldfieldname': u'balance',
+		'oldfieldtype': u'Data',
+		'permlevel': 1
 	},
 
 	# DocField

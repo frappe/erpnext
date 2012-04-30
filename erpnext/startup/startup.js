@@ -215,3 +215,12 @@ erpnext.send_message = function(opts) {
 		}
 	});
 }
+
+erpnext.hide_naming_series = function() {
+	if(cur_frm.fields_dict.naming_series) {
+		hide_field('naming_series');
+		if(cur_frm.doc.__islocal) {
+			unhide_field('naming_series');
+		}
+	}
+}

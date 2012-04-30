@@ -17,16 +17,7 @@
 wn.require('erpnext/utilities/doctype/sms_control/sms_control.js');
 
 cur_frm.cscript.refresh = function(doc, cdt, cdn){
-
-	// 
-
-	if(!doc.docstatus){
-		hide_field(['email_id1','cc_to','subject','message', 'enquiry_attachment_detail']);
-	}
-	else{
-		unhide_field(['email_id1','cc_to','subject','message', 'enquiry_attachment_detail']);
-	}
-
+    erpnext.hide_naming_series();
 	
 	cur_frm.clear_custom_buttons();
 	if(doc.docstatus == 1) {
@@ -35,7 +26,6 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn){
 		cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms);
 	}
 
-	//cur_frm.cscript.clear_values(doc,cdt,cdn);
 }
 
 // ONLOAD
