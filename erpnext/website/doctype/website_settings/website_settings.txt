@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-03-27 14:36:48',
+		'creation': '2012-04-02 16:38:02',
 		'docstatus': 0,
-		'modified': '2012-03-27 14:36:48',
+		'modified': '2012-04-27 16:41:40',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -23,7 +23,7 @@
 		'name': '__common__',
 		'section_style': u'Simple',
 		'show_in_menu': 0,
-		'version': 9
+		'version': 11
 	},
 
 	# These values are common for all DocField
@@ -194,7 +194,7 @@
 		'doctype': u'DocField',
 		'fieldname': u'subdomain',
 		'fieldtype': u'Text',
-		'label': u'Your ERPNext provided hostname',
+		'label': u'Subdomain',
 		'permlevel': 1,
 		'reqd': 0
 	},
@@ -215,29 +215,18 @@
 		'doctype': u'DocField',
 		'fieldname': u'analytics',
 		'fieldtype': u'Section Break',
-		'label': u'Analytics',
+		'label': u'Startup',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
 		'colour': u'White:FFF',
-		'description': u'Code pasted in the head tag to start an Analytics engine like Google Analytics',
+		'description': u'Bind events on startup and page change',
 		'doctype': u'DocField',
-		'fieldname': u'analytics_code',
-		'fieldtype': u'Text',
-		'label': u'Analytics Code',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'description': u"Function to be called when page is changed. (_gaq.push['_trackPageview'] for Google Code)",
-		'doctype': u'DocField',
-		'fieldname': u'analytics_call',
-		'fieldtype': u'Text',
-		'label': u'Analytics Call',
+		'fieldname': u'startup_code',
+		'fieldtype': u'Code',
+		'label': u'Startup Code',
 		'permlevel': 0
 	}
 ]

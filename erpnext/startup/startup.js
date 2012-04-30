@@ -65,6 +65,9 @@ erpnext.startup.start = function() {
 		if(wn.boot.website_settings.title_prefix) {
 			wn.title_prefix = wn.boot.website_settings.title_prefix;
 		}
+		if(wn.boot.startup_code) {
+			eval(wn.boot.startup_code);
+		}
 	} else {
 		// always allow apps
 		wn.boot.profile.allow_modules = wn.boot.profile.allow_modules.concat(
@@ -195,3 +198,20 @@ erpnext.set_user_background = function(src) {
 $(document).bind('startup', function() {
 	erpnext.startup.start();
 });
+
+// subject, sender, description
+erpnext.send_message = function(opts) {
+	if(opts.btn) {
+		$(opts.btn).start_working();
+	}
+	wn.call({
+		method: 'website.send_message',
+		args: opts,
+		callback: function(r) { 
+			if(opts.btn) {
+				$(opts.btn).done_working();
+			}
+			if(opts.callback)opts.callback(r) 
+		}
+	});
+}
