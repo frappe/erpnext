@@ -27,8 +27,13 @@ class DocType:
 
 	def validate(self):
 		"""make page for this product"""
-		if not self.doc.name:				
-			self.doc.name = website.utils.page_name(self.doc.title)
+
+		# we need the name for the templates
+		if not self.doc.name:
+			self.autoname()
+
+		if self.doc.page_name:
+			webnotes.conn.sql("""delete from tabPage where name=%s""", self.doc.page_name)
 
 		p = website.utils.add_page(self.doc.name)
 		
@@ -38,9 +43,7 @@ class DocType:
 	
 		self.doc.updated = global_date_format(self.doc.modified)
 		website.utils.markdown(self.doc, ['head_section','main_section', 'side_section'])
-		
-		self.add_page_links()
-		
+				
 		with open(os.path.join(os.path.dirname(__file__), 'template.html'), 'r') as f:
 			p.content = Template(f.read()).render(doc=self.doc)
 

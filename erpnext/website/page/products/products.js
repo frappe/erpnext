@@ -19,11 +19,10 @@ erpnext.products = {}
 wn.require('erpnext/website/js/product_category.js');
 
 pscript.onload_products = function(wrapper) {
-	sys_defaults.default_product_category = JSON.parse(sys_defaults.default_product_category);
+	erpnext.make_product_categories(wrapper);
 	erpnext.products.wrapper = wrapper;	
 
 	// make lists
-	erpnext.make_product_categories(wrapper);
 	erpnext.products.make_product_list(wrapper);
 	
 	// button
@@ -42,15 +41,15 @@ pscript.onshow_products = function(wrapper) {
 }
 
 erpnext.products.get_group = function() {
-	var route = window.location.hash.split('/');
+	route = wn.get_route();
 	if(route.length>1) {
 		// from url
-		var grp = erpnext.product_item_group[route[1]];
+		var grp = route[1];
 		var label = route[1];
 	} else {
 		// default
-		var grp = sys_defaults.default_product_category.item_group;
-		var label = sys_defaults.default_product_category.label;
+		var grp = wn.boot.website_settings.default_product_category;
+		var label = wn.boot.website_settings.default_product_category;
 	}
 	erpnext.products.cur_group = grp;
 	return {grp:grp, label:label};
@@ -58,32 +57,39 @@ erpnext.products.get_group = function() {
 
 erpnext.products.make_product_list = function(wrapper) {
 	wrapper.mainlist = new wn.ui.Listing({
-		parent: $(wrapper).find('.web-main-section').get(0),
+		parent: $(wrapper).find('.products-list').get(0),
 		run_btn: $(wrapper).find('.products-search .btn').get(0),
-		hide_refresh: true,
+		no_toolbar: true,
 		get_query: function() {
 			var srch = $('input[name="products-search"]').val()
-			var search_cond = 'and (t1.short_description like "%%(srch)s%"\
-				or t1.title like "%%(srch)s%")';
+			var search_cond = 'and (description like "%%(srch)s%"\
+				or item_name like "%%(srch)s%")';
 			args = {
 				search_cond: srch ? repl(search_cond, {srch:srch}) : '',
 				cat: erpnext.products.cur_group
 			};
-			return repl('select t1.name, t1.title, t1.thumbnail_image, \
-				t1.page_name, t1.short_description \
-				from tabProduct t1, tabItem t2 \
-				where t1.item = t2.name \
-				and ifnull(t1.published,0)=1 \
-				and t2.item_group="%(cat)s" \
+			return repl('select name, item_name, website_image, \
+				description, page_name \
+				from tabItem \
+				where is_sales_item="Yes" \
+				and item_group="%(cat)s" \
 				%(search_cond)s', args)
 		},
 		render_row: function(parent, data) {
-			parent.innerHTML = repl('<div style="float:left; width: 115px;">\
-				<img src="files/%(thumbnail_image)s" style="width:100px;"></div>\
+			parent.innerHTML = repl('<div style="float:left; width: 115px;" class="img-area">\
+				</div>\
 				<div style="float:left; width: 400px">\
-					<p><b><a href="#!%(page_name)s">%(title)s</a></b></p>\
-					<p>%(short_description)s</p></div>\
-				<div style="clear: both;"></div><hr />', data);
+					<p><b><a href="#!%(page_name)s">%(item_name)s</a></b></p>\
+					<p>%(description)s</p></div>\
+				<div style="clear: both;"></div>', data);
+				
+			if(data.website_image) {
+				$(parent).find('.img-area').append(repl(
+					'<img src="files/%(website_image)s" style="width:100px;">', data))
+			} else {
+				$(parent).find('.img-area').append(wn.dom.placeholder(70, 
+					data.item_name));
+			}
 		}
 	});
 }

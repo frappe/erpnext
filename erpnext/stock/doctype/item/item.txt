@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-03-27 14:36:31',
+		'creation': '2012-04-02 16:02:29',
 		'docstatus': 0,
-		'modified': '2012-03-27 18:51:27',
+		'modified': '2012-04-30 14:08:08',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -29,7 +29,7 @@
 		'show_in_menu': 0,
 		'subject': u'%(item_name)s',
 		'tag_fields': u'item_group',
-		'version': 172
+		'version': 1
 	},
 
 	# These values are common for all DocField
@@ -59,6 +59,73 @@
 
 	# DocPerm
 	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Material Manager',
+		'submit': 0,
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Material Manager',
+		'submit': 0,
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Material User',
+		'submit': 0,
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Material User',
+		'submit': 0,
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'cancel': 1,
+		'create': 1,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Material Master Manager',
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Material Master Manager',
+		'write': 0
+	},
+
+	# DocPerm
+	{
 		'cancel': 1,
 		'create': 1,
 		'doctype': u'DocPerm',
@@ -69,76 +136,9 @@
 
 	# DocPerm
 	{
-		'create': 0,
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Material Master Manager',
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'cancel': 1,
-		'create': 1,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Material Master Manager',
-		'write': 1
-	},
-
-	# DocPerm
-	{
 		'doctype': u'DocPerm',
 		'permlevel': 1,
 		'role': u'System Manager'
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Material Manager',
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Material Manager',
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Material User',
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Material User',
-		'submit': 0,
-		'write': 0
 	},
 
 	# DocField
@@ -725,6 +725,26 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'show_in_website',
+		'fieldtype': u'Select',
+		'label': u'Show in Website',
+		'options': u'No\nYes',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'website_image',
+		'fieldtype': u'Select',
+		'label': u'website_image',
+		'options': u'attach_files:',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
 		'fieldname': u'max_discount',
 		'fieldtype': u'Currency',
 		'label': u'Max Discount (%)',
@@ -763,6 +783,17 @@
 		'oldfieldname': u'sales_rate',
 		'oldfieldtype': u'Currency',
 		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'colour': u'White:FFF',
+		'description': u'website page link',
+		'doctype': u'DocField',
+		'fieldname': u'page_name',
+		'fieldtype': u'Data',
+		'label': u'Page Name',
+		'permlevel': 1
 	},
 
 	# DocField

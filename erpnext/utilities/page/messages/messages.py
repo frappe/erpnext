@@ -55,6 +55,7 @@ def get_active_users(arg=None):
 
 @webnotes.whitelist()
 def post(arg=None):
+	import webnotes
 	"""post message"""
 	if arg:
 		import json
