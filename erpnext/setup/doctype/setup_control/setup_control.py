@@ -33,6 +33,7 @@ class DocType:
 		webnotes.conn.begin()
 
 		curr_fiscal_year, fy_start_date, fy_abbr = self.get_fy_details(args.get('fy_start'))
+		#webnotes.msgprint(self.get_fy_details(args.get('fy_start')))
 
 		args['name'] = webnotes.session.get('user')
 

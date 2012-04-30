@@ -94,7 +94,7 @@ erpnext.startup.start = function() {
 			erpnext.complete_setup.show(); 
 		}
 		
-		if(wn.boot.expires_on) {
+		if(wn.boot.expires_on && in_list(user_roles, 'System Manager')) {
 			var today = dateutil.str_to_obj(dateutil.get_today());
 			var expires_on = dateutil.str_to_obj(wn.boot.expires_on);
 			var diff = dateutil.get_diff(expires_on, today);
