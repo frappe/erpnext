@@ -106,7 +106,7 @@ erpnext.startup.start = function() {
 				</div>', { expiry_string: expiry_string }));
 			} else if (diff < 0) {
 				$('header').append(repl('<div class="expiry-info"> \
-					This ERPNext subscription <b>has expired</b> and should be deleted. \
+					This ERPNext subscription <b>has expired</b>. \
 				</div>', { expiry_string: expiry_string }));
 			}
 		}
@@ -214,13 +214,4 @@ erpnext.send_message = function(opts) {
 			if(opts.callback)opts.callback(r) 
 		}
 	});
-}
-
-erpnext.hide_naming_series = function() {
-	if(cur_frm.fields_dict.naming_series) {
-		hide_field('naming_series');
-		if(cur_frm.doc.__islocal) {
-			unhide_field('naming_series');
-		}
-	}
 }
