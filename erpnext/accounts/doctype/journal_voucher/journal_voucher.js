@@ -29,6 +29,10 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 	cur_frm.cscript.load_defaults(doc, cdt, cdn);
 }
 
+cur_frm.cscript.refresh = function(doc) {
+	cur_frm.cscript.is_opening(doc)
+	erpnext.hide_naming_series();
+}
 
 cur_frm.cscript.load_defaults = function(doc, cdt, cdn) {
 	if(!cur_frm.doc.__islocal || !cur_frm.doc.company) { return; }
@@ -54,8 +58,6 @@ cur_frm.cscript.is_opening = function(doc, cdt, cdn) {
 	if(doc.docstatus==1) { unhide_field('view_ledger_entry'); }
 	else hide_field('view_ledger_entry');
 }
-
-cur_frm.cscript.refresh = cur_frm.cscript.is_opening;
 
 cur_frm.fields_dict['entries'].grid.get_field('account').get_query = function(doc) {
 	return "SELECT `tabAccount`.name FROM `tabAccount` WHERE `tabAccount`.company='"+doc.company+"' AND tabAccount.group_or_ledger = 'Ledger' AND tabAccount.docstatus != 2 AND `tabAccount`.%(key)s LIKE '%s' ORDER BY `tabAccount`.name DESC LIMIT 50";

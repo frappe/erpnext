@@ -175,7 +175,7 @@ Cheers!
     
     ev = Document('Event')
     ev.owner = in_calendar_of
-    ev.description = 'Contact ' + cstr(self.doc.lead_name) + '.By : ' + cstr(self.doc.contact_by) + '.To Discuss : ' + cstr(self.doc.to_discuss)
+    ev.description = 'Contact ' + cstr(self.doc.lead_name) + '.By : ' + cstr(self.doc.contact_by) + '.To Discuss : ' + cstr(self.doc.remark)
     ev.event_date = self.doc.contact_date
     ev.event_hour = '10:00'
     ev.event_type = 'Private'

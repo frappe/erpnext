@@ -51,6 +51,7 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
     cur_frm.add_custom_button('Create Opportunity', cur_frm.cscript['Create Opportunity']);
     cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms);
   }
+  erpnext.hide_naming_series();
 }
 
 

@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-03-27 14:36:12',
+		'creation': '2012-04-02 16:02:08',
 		'docstatus': 0,
-		'modified': '2012-03-27 18:48:29',
+		'modified': '2012-04-30 15:41:16',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -33,7 +33,7 @@
 		'show_in_menu': 0,
 		'subject': u'To %(customer_name)s on %(transaction_date)s worth %(currency)s %(grand_total_export)s',
 		'tag_fields': u'status',
-		'version': 622
+		'version': 1
 	},
 
 	# These values are common for all DocField
@@ -51,8 +51,7 @@
 		'name': '__common__',
 		'parent': u'Quotation',
 		'parentfield': u'permissions',
-		'parenttype': u'DocType',
-		'read': 1
+		'parenttype': u'DocType'
 	},
 
 	# DocType, Quotation
@@ -63,11 +62,45 @@
 
 	# DocPerm
 	{
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'user print'
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 1,
+		'read': 1,
+		'role': u'Sales Manager',
+		'submit': 0,
+		'write': 0
+	},
+
+	# DocPerm
+	{
 		'amend': 1,
 		'cancel': 1,
 		'create': 1,
 		'doctype': u'DocPerm',
 		'permlevel': 0,
+		'read': 1,
+		'role': u'Sales Manager',
+		'submit': 1,
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'amend': 1,
+		'cancel': 1,
+		'create': 1,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'read': 1,
 		'role': u'Sales User',
 		'submit': 1,
 		'write': 1
@@ -80,6 +113,7 @@
 		'create': 0,
 		'doctype': u'DocPerm',
 		'permlevel': 1,
+		'read': 1,
 		'role': u'Sales User',
 		'submit': 0,
 		'write': 0
@@ -90,40 +124,18 @@
 		'doctype': u'DocPerm',
 		'match': u'customer_name',
 		'permlevel': 0,
+		'read': 1,
 		'role': u'Customer'
 	},
 
 	# DocPerm
 	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Sales Manager',
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
 		'amend': 1,
 		'cancel': 1,
 		'create': 1,
 		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'role': u'Sales Manager',
-		'submit': 1,
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'amend': 1,
-		'cancel': 1,
-		'create': 1,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
+		'read': 1,
 		'role': u'Maintenance Manager',
 		'submit': 1,
 		'write': 1
@@ -133,6 +145,7 @@
 	{
 		'doctype': u'DocPerm',
 		'permlevel': 1,
+		'read': 1,
 		'role': u'Maintenance Manager'
 	},
 
@@ -143,6 +156,7 @@
 		'create': 1,
 		'doctype': u'DocPerm',
 		'permlevel': 0,
+		'read': 1,
 		'role': u'Maintenance User',
 		'submit': 1,
 		'write': 1
@@ -152,6 +166,7 @@
 	{
 		'doctype': u'DocPerm',
 		'permlevel': 1,
+		'read': 1,
 		'role': u'Maintenance User'
 	},
 
@@ -183,7 +198,7 @@
 		'doctype': u'DocField',
 		'fieldname': u'naming_series',
 		'fieldtype': u'Select',
-		'label': u'Series',
+		'label': u'Naming Series',
 		'no_copy': 1,
 		'oldfieldname': u'naming_series',
 		'oldfieldtype': u'Select',
@@ -286,7 +301,7 @@
 		'doctype': u'DocField',
 		'fieldname': u'lead_name',
 		'fieldtype': u'Text',
-		'label': u'Name',
+		'label': u'Lead Name',
 		'permlevel': 1
 	},
 
@@ -295,16 +310,7 @@
 		'doctype': u'DocField',
 		'fieldname': u'customer_name',
 		'fieldtype': u'Data',
-		'label': u'Name',
-		'permlevel': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'organization',
-		'fieldtype': u'Data',
-		'label': u'Organization',
+		'label': u'Customer Name',
 		'permlevel': 1
 	},
 
@@ -507,6 +513,31 @@
 
 	# DocField
 	{
+		'allow_on_submit': 1,
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'quotation_details',
+		'fieldtype': u'Table',
+		'label': u'Quotation Items',
+		'oldfieldname': u'quotation_details',
+		'oldfieldtype': u'Table',
+		'options': u'Quotation Item',
+		'permlevel': 0,
+		'width': u'40px'
+	},
+
+	# DocField
+	{
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'section_break0',
+		'fieldtype': u'Section Break',
+		'options': u'Simple',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
 		'colour': u'White:FFF',
 		'description': u'Select the price list as entered in "Price List" master. This will pull the reference rates of items against this price list as specified in "Item" master.',
 		'doctype': u'DocField',
@@ -632,31 +663,6 @@
 		'print_hide': 0,
 		'report_hide': 0,
 		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'doctype': u'DocField',
-		'fieldname': u'section_break0',
-		'fieldtype': u'Section Break',
-		'options': u'Simple',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'allow_on_submit': 1,
-		'colour': u'White:FFF',
-		'doctype': u'DocField',
-		'fieldname': u'quotation_details',
-		'fieldtype': u'Table',
-		'label': u'Quotation Items',
-		'oldfieldname': u'quotation_details',
-		'oldfieldtype': u'Table',
-		'options': u'Quotation Item',
-		'permlevel': 0,
-		'width': u'40px'
 	},
 
 	# DocField

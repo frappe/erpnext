@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-04-13 11:55:50',
+		'creation': '2012-04-30 12:08:36',
 		'docstatus': 0,
-		'modified': '2012-04-13 12:28:24',
+		'modified': '2012-04-30 15:59:52',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -25,7 +25,7 @@
 		'show_in_menu': 0,
 		'subject': u' ',
 		'tag_fields': u'voucher_type',
-		'version': 312
+		'version': 1
 	},
 
 	# These values are common for all DocField
@@ -114,65 +114,11 @@
 	# DocField
 	{
 		'doctype': u'DocField',
-		'fieldname': u'1_select_series_and_dates',
-		'fieldtype': u'Section Break',
-		'label': u'1. Select Series and Dates',
-		'oldfieldtype': u'Section Break',
-		'options': u'Simple',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
 		'fieldname': u'column_break0',
 		'fieldtype': u'Column Break',
 		'oldfieldtype': u'Column Break',
 		'permlevel': 0,
 		'width': u'50%'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'voucher_type',
-		'fieldtype': u'Select',
-		'in_filter': 1,
-		'label': u'Voucher Type',
-		'oldfieldname': u'voucher_type',
-		'oldfieldtype': u'Select',
-		'options': u'\nJournal Entry\nBank Voucher\nCash Voucher\nCredit Card Voucher\nDebit Note\nCredit Note\nContra Voucher\nExcise Voucher\nWrite Off Voucher',
-		'permlevel': 0,
-		'print_hide': 0,
-		'search_index': 1
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'depends_on': u"eval:doc.voucher_type == 'Write Off Voucher'",
-		'doctype': u'DocField',
-		'fieldname': u'write_off_amount',
-		'fieldtype': u'Currency',
-		'label': u'Write Off Amount <=',
-		'permlevel': 0,
-		'print_hide': 1,
-		'report_hide': 1
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'default': u'Accounts Receivable',
-		'depends_on': u"eval:doc.voucher_type == 'Write Off Voucher'",
-		'doctype': u'DocField',
-		'fieldname': u'write_off_based_on',
-		'fieldtype': u'Select',
-		'label': u'Write Off Based On',
-		'options': u'Accounts Receivable\nAccounts Payable',
-		'permlevel': 0,
-		'print_hide': 1,
-		'report_hide': 1
 	},
 
 	# DocField
@@ -194,20 +140,27 @@
 
 	# DocField
 	{
-		'colour': u'White:FFF',
-		'default': u'Today',
 		'doctype': u'DocField',
-		'fieldname': u'voucher_date',
-		'fieldtype': u'Date',
+		'fieldname': u'voucher_type',
+		'fieldtype': u'Select',
 		'in_filter': 1,
-		'label': u'Voucher Date',
-		'no_copy': 1,
-		'oldfieldname': u'voucher_date',
-		'oldfieldtype': u'Date',
+		'label': u'Voucher Type',
+		'oldfieldname': u'voucher_type',
+		'oldfieldtype': u'Select',
+		'options': u'\nJournal Entry\nBank Voucher\nCash Voucher\nCredit Card Voucher\nDebit Note\nCredit Note\nContra Voucher\nExcise Voucher\nWrite Off Voucher',
 		'permlevel': 0,
 		'print_hide': 0,
-		'reqd': 1,
 		'search_index': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'column_break1',
+		'fieldtype': u'Column Break',
+		'oldfieldtype': u'Column Break',
+		'permlevel': 0,
+		'width': u'50%'
 	},
 
 	# DocField
@@ -229,65 +182,102 @@
 	# DocField
 	{
 		'doctype': u'DocField',
-		'fieldname': u'due_date',
-		'fieldtype': u'Date',
-		'label': u'Due Date',
-		'oldfieldname': u'due_date',
-		'oldfieldtype': u'Date',
+		'fieldname': u'2_add_edit_gl_entries',
+		'fieldtype': u'Section Break',
+		'label': u'Journal Entries',
+		'oldfieldtype': u'Section Break',
+		'options': u'Simple',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'allow_on_submit': 1,
+		'doctype': u'DocField',
+		'fieldname': u'entries',
+		'fieldtype': u'Table',
+		'label': u'Entries',
+		'oldfieldname': u'entries',
+		'oldfieldtype': u'Table',
+		'options': u'Journal Voucher Detail',
 		'permlevel': 0,
 		'print_hide': 0
 	},
 
 	# DocField
 	{
-		'description': u'The date at which current entry is corrected in the system.',
 		'doctype': u'DocField',
-		'fieldname': u'amendment_date',
-		'fieldtype': u'Date',
-		'label': u'Amendment Date',
-		'no_copy': 1,
-		'oldfieldname': u'amendment_date',
-		'oldfieldtype': u'Date',
-		'permlevel': 0,
-		'print_hide': 1
+		'fieldname': u'section_break99',
+		'fieldtype': u'Section Break',
+		'options': u'Simple',
+		'permlevel': 0
 	},
 
 	# DocField
 	{
 		'doctype': u'DocField',
-		'fieldname': u'amended_from',
-		'fieldtype': u'Link',
-		'label': u'Amended From',
+		'fieldname': u'total_debit',
+		'fieldtype': u'Currency',
+		'in_filter': 1,
+		'label': u'Total Debit',
 		'no_copy': 1,
-		'oldfieldname': u'amended_from',
-		'oldfieldtype': u'Link',
-		'options': u'Journal Voucher',
+		'oldfieldname': u'total_debit',
+		'oldfieldtype': u'Currency',
+		'permlevel': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'total_credit',
+		'fieldtype': u'Currency',
+		'in_filter': 1,
+		'label': u'Total Credit',
+		'no_copy': 1,
+		'oldfieldname': u'total_credit',
+		'oldfieldtype': u'Currency',
+		'permlevel': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'column_break99',
+		'fieldtype': u'Column Break',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'difference',
+		'fieldtype': u'Currency',
+		'label': u'Difference',
+		'no_copy': 1,
+		'oldfieldname': u'difference',
+		'oldfieldtype': u'Currency',
 		'permlevel': 1,
 		'print_hide': 1
 	},
 
 	# DocField
 	{
-		'colour': u'White:FFF',
-		'depends_on': u"eval:doc.voucher_type == 'Write Off Voucher'",
 		'doctype': u'DocField',
-		'fieldname': u'get_outstanding_invoices',
+		'fieldname': u'get_balance',
 		'fieldtype': u'Button',
-		'label': u'Get Outstanding Invoices',
-		'options': u'get_outstanding_invoices',
+		'label': u'Make Difference Entry',
+		'oldfieldtype': u'Button',
 		'permlevel': 0,
-		'print_hide': 1,
-		'trigger': u'Server'
+		'trigger': u'Client'
 	},
 
 	# DocField
 	{
 		'doctype': u'DocField',
-		'fieldname': u'column_break1',
-		'fieldtype': u'Column Break',
-		'oldfieldtype': u'Column Break',
-		'permlevel': 0,
-		'width': u'50%'
+		'fieldname': u'reference',
+		'fieldtype': u'Section Break',
+		'label': u'Reference',
+		'permlevel': 0
 	},
 
 	# DocField
@@ -334,6 +324,14 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'column_break98',
+		'fieldtype': u'Column Break',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
 		'fieldname': u'user_remark',
 		'fieldtype': u'Small Text',
 		'in_filter': 1,
@@ -356,101 +354,6 @@
 		'oldfieldtype': u'Small Text',
 		'permlevel': 1,
 		'reqd': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'2_add_edit_gl_entries',
-		'fieldtype': u'Section Break',
-		'label': u'2. Add / Edit GL Entries',
-		'oldfieldtype': u'Section Break',
-		'options': u'Simple',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'allow_on_submit': 1,
-		'doctype': u'DocField',
-		'fieldname': u'entries',
-		'fieldtype': u'Table',
-		'label': u'Entries',
-		'oldfieldname': u'entries',
-		'oldfieldtype': u'Table',
-		'options': u'Journal Voucher Detail',
-		'permlevel': 0,
-		'print_hide': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'get_balance',
-		'fieldtype': u'Button',
-		'label': u'Get Balance',
-		'oldfieldtype': u'Button',
-		'permlevel': 0,
-		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'total_debit',
-		'fieldtype': u'Currency',
-		'in_filter': 1,
-		'label': u'Total Debit',
-		'no_copy': 1,
-		'oldfieldname': u'total_debit',
-		'oldfieldtype': u'Currency',
-		'permlevel': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'total_credit',
-		'fieldtype': u'Currency',
-		'in_filter': 1,
-		'label': u'Total Credit',
-		'no_copy': 1,
-		'oldfieldname': u'total_credit',
-		'oldfieldtype': u'Currency',
-		'permlevel': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'difference',
-		'fieldtype': u'Currency',
-		'label': u'Difference',
-		'no_copy': 1,
-		'oldfieldname': u'difference',
-		'oldfieldtype': u'Currency',
-		'permlevel': 1,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'addtional_info',
-		'fieldtype': u'Section Break',
-		'label': u'Addtional Info',
-		'oldfieldtype': u'Section Break',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'column_break2',
-		'fieldtype': u'Column Break',
-		'oldfieldtype': u'Column Break',
-		'permlevel': 0,
-		'width': u'50%'
 	},
 
 	# DocField
@@ -479,6 +382,38 @@
 
 	# DocField
 	{
+		'doctype': u'DocField',
+		'fieldname': u'due_date',
+		'fieldtype': u'Date',
+		'label': u'Due Date',
+		'oldfieldname': u'due_date',
+		'oldfieldtype': u'Date',
+		'permlevel': 0,
+		'print_hide': 0
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'addtional_info',
+		'fieldtype': u'Section Break',
+		'label': u'More Info',
+		'oldfieldtype': u'Section Break',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'column_break2',
+		'fieldtype': u'Column Break',
+		'oldfieldtype': u'Column Break',
+		'permlevel': 0,
+		'width': u'50%'
+	},
+
+	# DocField
+	{
 		'colour': u'White:FFF',
 		'default': u'No',
 		'doctype': u'DocField',
@@ -497,6 +432,8 @@
 
 	# DocField
 	{
+		'colour': u'White:FFF',
+		'description': u'For opening invoice entry, this date will reflect in the period-wise aging report.',
 		'doctype': u'DocField',
 		'fieldname': u'aging_date',
 		'fieldtype': u'Date',
@@ -510,15 +447,73 @@
 
 	# DocField
 	{
+		'colour': u'White:FFF',
+		'default': u'Accounts Receivable',
+		'depends_on': u"eval:doc.voucher_type == 'Write Off Voucher'",
 		'doctype': u'DocField',
-		'fieldname': u'cancel_reason',
-		'fieldtype': u'Data',
-		'label': u'Cancel Reason',
+		'fieldname': u'write_off_based_on',
+		'fieldtype': u'Select',
+		'label': u'Write Off Based On',
+		'options': u'Accounts Receivable\nAccounts Payable',
+		'permlevel': 0,
+		'print_hide': 1,
+		'report_hide': 1
+	},
+
+	# DocField
+	{
+		'colour': u'White:FFF',
+		'depends_on': u"eval:doc.voucher_type == 'Write Off Voucher'",
+		'doctype': u'DocField',
+		'fieldname': u'write_off_amount',
+		'fieldtype': u'Currency',
+		'label': u'Write Off Amount <=',
+		'permlevel': 0,
+		'print_hide': 1,
+		'report_hide': 1
+	},
+
+	# DocField
+	{
+		'colour': u'White:FFF',
+		'depends_on': u"eval:doc.voucher_type == 'Write Off Voucher'",
+		'doctype': u'DocField',
+		'fieldname': u'get_outstanding_invoices',
+		'fieldtype': u'Button',
+		'label': u'Get Outstanding Invoices',
+		'options': u'get_outstanding_invoices',
+		'permlevel': 0,
+		'print_hide': 1,
+		'trigger': u'Server'
+	},
+
+	# DocField
+	{
+		'colour': u'White:FFF',
+		'default': u'Today',
+		'description': u'Date of entry (not posting to ledgers)',
+		'doctype': u'DocField',
+		'fieldname': u'voucher_date',
+		'fieldtype': u'Date',
+		'in_filter': 1,
+		'label': u'Voucher Date',
 		'no_copy': 1,
-		'oldfieldname': u'cancel_reason',
-		'oldfieldtype': u'Data',
-		'permlevel': 1,
-		'print_hide': 1
+		'oldfieldname': u'voucher_date',
+		'oldfieldtype': u'Date',
+		'permlevel': 0,
+		'print_hide': 0,
+		'reqd': 1,
+		'search_index': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'column_break3',
+		'fieldtype': u'Column Break',
+		'oldfieldtype': u'Column Break',
+		'permlevel': 0,
+		'width': u'50%'
 	},
 
 	# DocField
@@ -558,16 +553,6 @@
 		'permlevel': 1,
 		'print_hide': 1,
 		'report_hide': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'column_break3',
-		'fieldtype': u'Column Break',
-		'oldfieldtype': u'Column Break',
-		'permlevel': 0,
-		'width': u'50%'
 	},
 
 	# DocField
@@ -618,6 +603,47 @@
 		'print_hide': 1,
 		'report_hide': 1,
 		'trigger': u'Client'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'amended_from',
+		'fieldtype': u'Link',
+		'label': u'Amended From',
+		'no_copy': 1,
+		'oldfieldname': u'amended_from',
+		'oldfieldtype': u'Link',
+		'options': u'Journal Voucher',
+		'permlevel': 1,
+		'print_hide': 1
+	},
+
+	# DocField
+	{
+		'description': u'The date at which current entry is corrected in the system.',
+		'doctype': u'DocField',
+		'fieldname': u'amendment_date',
+		'fieldtype': u'Date',
+		'label': u'Amendment Date',
+		'no_copy': 1,
+		'oldfieldname': u'amendment_date',
+		'oldfieldtype': u'Date',
+		'permlevel': 0,
+		'print_hide': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'cancel_reason',
+		'fieldtype': u'Data',
+		'label': u'Cancel Reason',
+		'no_copy': 1,
+		'oldfieldname': u'cancel_reason',
+		'oldfieldtype': u'Data',
+		'permlevel': 1,
+		'print_hide': 1
 	},
 
 	# DocField
