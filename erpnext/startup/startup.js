@@ -72,10 +72,6 @@ erpnext.startup.start = function() {
 		// always allow apps
 		wn.boot.profile.allow_modules = wn.boot.profile.allow_modules.concat(
 			['To Do', 'Knowledge Base', 'Calendar', 'Activity', 'Messages'])
-		// allow dashboard to accounts manager
-		if(user_roles.indexOf('Accounts Manager')!=-1) {
-			wn.boot.profile.allow_modules.push('Dashboard');
-		}
 		
 		// setup toolbar
 		erpnext.toolbar.setup();

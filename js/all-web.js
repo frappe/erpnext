@@ -841,7 +841,6 @@ erpnext.startup.start=function(){console.log('Starting up...');$('#startup_div')
 if(user=='Guest'){if(wn.boot.custom_css){set_style(wn.boot.custom_css);}
 if(wn.boot.website_settings.title_prefix){wn.title_prefix=wn.boot.website_settings.title_prefix;}
 if(wn.boot.startup_code){eval(wn.boot.startup_code);}}else{wn.boot.profile.allow_modules=wn.boot.profile.allow_modules.concat(['To Do','Knowledge Base','Calendar','Activity','Messages'])
-if(user_roles.indexOf('Accounts Manager')!=-1){wn.boot.profile.allow_modules.push('Dashboard');}
 erpnext.toolbar.setup();erpnext.startup.set_periodic_updates();$('footer').html('<div class="web-footer erpnext-footer">\
    <a href="#!attributions">ERPNext | Attributions and License</a></div>');if(in_list(user_roles,'System Manager')&&(wn.boot.setup_complete=='No')){wn.require("erpnext/startup/js/complete_setup.js");erpnext.complete_setup.show();}
 if(wn.boot.expires_on&&in_list(user_roles,'System Manager')){var today=dateutil.str_to_obj(dateutil.get_today());var expires_on=dateutil.str_to_obj(wn.boot.expires_on);var diff=dateutil.get_diff(expires_on,today);if(0<=diff&&diff<=15){var expiry_string=diff==0?"today":repl("in %(diff)s day(s)",{diff:diff});$('header').append(repl('<div class="expiry-info"> \
