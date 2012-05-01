@@ -25,18 +25,10 @@ wn.require('erpnext/setup/doctype/notification_control/notification_control.js')
 
 //========================== On Load ================================================================
 cur_frm.cscript.onload = function(doc, cdt, cdn) {
-
 	if(!doc.fiscal_year && doc.__islocal){ set_default_values(doc);}
 	if (!doc.posting_date) doc.posting_date = dateutil.obj_to_str(new Date());
 	if (!doc.transaction_date) doc.transaction_date = dateutil.obj_to_str(new Date());
 	if (!doc.status) doc.status = 'Draft';
-	
-	if(doc.__islocal){
-		hide_field(['supplier_name','supplier_address','contact_person','address_display','contact_display','contact_mobile','contact_email']);
-	}
-	
-	if(doc.supplier) unhide_field(['supplier_name','supplier_address','contact_person','address_display','contact_display','contact_mobile','contact_email']);
-	
 }
 
 cur_frm.cscript.onload_post_render = function(doc, dt, dn) {
@@ -54,13 +46,13 @@ cur_frm.cscript.onload_post_render = function(doc, dt, dn) {
 
 //========================== Refresh ===============================================================
 cur_frm.cscript.refresh = function(doc, cdt, cdn) { 
-
-	// Unhide Fields in Next Steps
-	// ---------------------------------
 	cur_frm.clear_custom_buttons();
+	
+	erpnext.hide_naming_series();
+	if(doc.supplier) $(cur_frm.fields_dict.contact_section.row.wrapper).toggle(true);
+	else $(cur_frm.fields_dict.contact_section.row.wrapper).toggle(false);
 
 	if (!cur_frm.cscript.is_onload) cur_frm.cscript.dynamic_label(doc, cdt, cdn);
-
 
 	if(doc.docstatus == 1){
 		if (doc.per_billed < 100) cur_frm.add_custom_button('Make Purchase Invoice', cur_frm.cscript['Make Purchase Invoice']);
@@ -72,7 +64,7 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 //Supplier
 cur_frm.cscript.supplier = function(doc,dt,dn) {
 	if(doc.supplier) get_server_fields('get_default_supplier_address', JSON.stringify({supplier: doc.supplier}),'', doc, dt, dn, 1);
-	if(doc.supplier) unhide_field(['supplier_name','supplier_address','contact_person','address_display','contact_display','contact_mobile','contact_email']);
+	if(doc.supplier) $(cur_frm.fields_dict.contact_section.row.wrapper).toggle(true);
 }
 
 cur_frm.cscript.supplier_address = cur_frm.cscript.contact_person = function(doc,dt,dn) {		
@@ -103,7 +95,7 @@ cur_frm.fields_dict.contact_person.on_new = function(dn) {
 // -----------------
 cur_frm.cscript.pull_purchase_order_details = function(doc, dt, dn) {
 	var callback = function(r,rt) { 
-		unhide_field(['supplier_address','contact_person','supplier_name','address_display', 'contact_display', 'contact_mobile','contact_email']);				
+		//unhide_field(['supplier_address','contact_person','supplier_name','address_display', 'contact_display', 'contact_mobile','contact_email']);				
 		refresh_many(['supplier','supplier_address','contact_person', 'supplier_name', 'address_display', 'contact_display','contact_mobile', 'contact_email', 'purchase_receipt_details', 'purchase_tax_details']);
 	}
 	$c_obj(make_doclist(dt,dn),'get_po_details','',callback);

@@ -5,7 +5,7 @@
 	{
 		'creation': '2012-04-13 11:56:17',
 		'docstatus': 0,
-		'modified': '2012-04-27 11:21:21',
+		'modified': '2012-05-01 15:03:52',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -188,45 +188,10 @@
 
 	# DocField
 	{
-		'colour': u'White:FFF',
-		'doctype': u'DocField',
-		'fieldname': u'supplier',
-		'fieldtype': u'Link',
-		'hidden': 0,
-		'label': u'Supplier',
-		'oldfieldname': u'supplier',
-		'oldfieldtype': u'Link',
-		'options': u'Supplier',
-		'permlevel': 0,
-		'print_hide': 1,
-		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'supplier_address',
-		'fieldtype': u'Link',
-		'label': u'Supplier Address',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'contact_person',
-		'fieldtype': u'Link',
-		'label': u'Contact Person',
-		'options': u'Contact',
-		'permlevel': 0,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
 		'doctype': u'DocField',
 		'fieldname': u'supplier_name',
 		'fieldtype': u'Text',
+		'hidden': 1,
 		'label': u'Name',
 		'oldfieldname': u'supplier_name',
 		'oldfieldtype': u'Data',
@@ -238,6 +203,7 @@
 		'doctype': u'DocField',
 		'fieldname': u'address_display',
 		'fieldtype': u'Small Text',
+		'hidden': 1,
 		'label': u'Address',
 		'permlevel': 1
 	},
@@ -247,6 +213,7 @@
 		'doctype': u'DocField',
 		'fieldname': u'contact_display',
 		'fieldtype': u'Small Text',
+		'hidden': 1,
 		'label': u'Contact',
 		'permlevel': 1
 	},
@@ -256,6 +223,7 @@
 		'doctype': u'DocField',
 		'fieldname': u'contact_mobile',
 		'fieldtype': u'Text',
+		'hidden': 1,
 		'label': u'Mobile No',
 		'permlevel': 1
 	},
@@ -265,6 +233,7 @@
 		'doctype': u'DocField',
 		'fieldname': u'contact_email',
 		'fieldtype': u'Text',
+		'hidden': 1,
 		'label': u'Contact Email',
 		'permlevel': 1,
 		'print_hide': 1
@@ -296,21 +265,6 @@
 		'permlevel': 0,
 		'print_hide': 1,
 		'reqd': 1,
-		'search_index': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'due_date',
-		'fieldtype': u'Date',
-		'in_filter': 1,
-		'label': u'Due Date',
-		'no_copy': 0,
-		'oldfieldname': u'due_date',
-		'oldfieldtype': u'Date',
-		'permlevel': 0,
-		'print_hide': 0,
 		'search_index': 1
 	},
 
@@ -348,46 +302,6 @@
 	# DocField
 	{
 		'doctype': u'DocField',
-		'fieldname': u'amended_from',
-		'fieldtype': u'Link',
-		'label': u'Amended From',
-		'no_copy': 1,
-		'oldfieldname': u'amended_from',
-		'oldfieldtype': u'Link',
-		'options': u'Purchase Invoice',
-		'permlevel': 1,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		'description': u'The date at which current entry is corrected in the system.',
-		'doctype': u'DocField',
-		'fieldname': u'amendment_date',
-		'fieldtype': u'Date',
-		'label': u'Amendment Date',
-		'no_copy': 1,
-		'oldfieldname': u'amendment_date',
-		'oldfieldtype': u'Date',
-		'permlevel': 0,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'mode_of_payment',
-		'fieldtype': u'Select',
-		'label': u'Mode of Payment',
-		'oldfieldname': u'mode_of_payment',
-		'oldfieldtype': u'Select',
-		'options': u'link:Mode of Payment',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
 		'fieldname': u'items',
 		'fieldtype': u'Section Break',
 		'label': u'Items',
@@ -397,15 +311,67 @@
 
 	# DocField
 	{
+		'allow_on_submit': 1,
 		'doctype': u'DocField',
-		'fieldname': u'currency',
-		'fieldtype': u'Select',
-		'label': u'Bill Currency',
-		'oldfieldname': u'currency',
-		'oldfieldtype': u'Select',
-		'options': u'link:Currency',
-		'permlevel': 0,
+		'fieldname': u'entries',
+		'fieldtype': u'Table',
+		'label': u'Entries',
+		'oldfieldname': u'entries',
+		'oldfieldtype': u'Table',
+		'options': u'Purchase Invoice Item',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'section_break0',
+		'fieldtype': u'Section Break',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'description': u'Will be calculated automatically when you enter the details',
+		'doctype': u'DocField',
+		'fieldname': u'net_total',
+		'fieldtype': u'Currency',
+		'label': u'Net Total',
+		'oldfieldname': u'net_total',
+		'oldfieldtype': u'Currency',
+		'permlevel': 1,
 		'print_hide': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'net_total_import',
+		'fieldtype': u'Currency',
+		'label': u'Net Total (Import)',
+		'oldfieldname': u'net_total_import',
+		'oldfieldtype': u'Currency',
+		'permlevel': 1,
+		'print_hide': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'recalculate',
+		'fieldtype': u'Button',
+		'label': u'Recalculate',
+		'oldfieldtype': u'Button',
+		'permlevel': 0,
+		'trigger': u'Client'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'column_break2',
+		'fieldtype': u'Column Break',
+		'permlevel': 0
 	},
 
 	# DocField
@@ -426,9 +392,14 @@
 	# DocField
 	{
 		'doctype': u'DocField',
-		'fieldname': u'column_break2',
-		'fieldtype': u'Column Break',
-		'permlevel': 0
+		'fieldname': u'currency',
+		'fieldtype': u'Select',
+		'label': u'Bill Currency',
+		'oldfieldname': u'currency',
+		'oldfieldtype': u'Select',
+		'options': u'link:Currency',
+		'permlevel': 0,
+		'print_hide': 1
 	},
 
 	# DocField
@@ -473,63 +444,6 @@
 		'oldfieldtype': u'Button',
 		'options': u'pull_details',
 		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'section_break0',
-		'fieldtype': u'Section Break',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'allow_on_submit': 1,
-		'doctype': u'DocField',
-		'fieldname': u'entries',
-		'fieldtype': u'Table',
-		'label': u'Entries',
-		'oldfieldname': u'entries',
-		'oldfieldtype': u'Table',
-		'options': u'Purchase Invoice Item',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'recalculate',
-		'fieldtype': u'Button',
-		'label': u'Recalculate',
-		'oldfieldtype': u'Button',
-		'permlevel': 0,
-		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		'description': u'Will be calculated automatically when you enter the details',
-		'doctype': u'DocField',
-		'fieldname': u'net_total',
-		'fieldtype': u'Currency',
-		'label': u'Net Total',
-		'oldfieldname': u'net_total',
-		'oldfieldtype': u'Currency',
-		'permlevel': 1,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'net_total_import',
-		'fieldtype': u'Currency',
-		'label': u'Net Total (Import)',
-		'oldfieldname': u'net_total_import',
-		'oldfieldtype': u'Currency',
-		'permlevel': 1,
-		'print_hide': 1
 	},
 
 	# DocField
@@ -619,6 +533,64 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'contact_section',
+		'fieldtype': u'Section Break',
+		'label': u'Contact Info',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'supplier',
+		'fieldtype': u'Link',
+		'hidden': 0,
+		'label': u'Supplier',
+		'oldfieldname': u'supplier',
+		'oldfieldtype': u'Link',
+		'options': u'Supplier',
+		'permlevel': 0,
+		'print_hide': 1,
+		'trigger': u'Client'
+	},
+
+	# DocField
+	{
+		'colour': u'White:FFF',
+		'depends_on': u'eval:doc.supplier',
+		'doctype': u'DocField',
+		'fieldname': u'supplier_address',
+		'fieldtype': u'Link',
+		'label': u'Supplier Address',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'col_break23',
+		'fieldtype': u'Column Break',
+		'permlevel': 0,
+		'width': u'50%'
+	},
+
+	# DocField
+	{
+		'colour': u'White:FFF',
+		'depends_on': u'eval:doc.supplier',
+		'doctype': u'DocField',
+		'fieldname': u'contact_person',
+		'fieldtype': u'Link',
+		'label': u'Contact Person',
+		'options': u'Contact',
+		'permlevel': 0,
+		'print_hide': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
 		'fieldname': u'more_info',
 		'fieldtype': u'Section Break',
 		'label': u'More Info',
@@ -671,6 +643,34 @@
 
 	# DocField
 	{
+		'doctype': u'DocField',
+		'fieldname': u'amended_from',
+		'fieldtype': u'Link',
+		'label': u'Amended From',
+		'no_copy': 1,
+		'oldfieldname': u'amended_from',
+		'oldfieldtype': u'Link',
+		'options': u'Purchase Invoice',
+		'permlevel': 1,
+		'print_hide': 1
+	},
+
+	# DocField
+	{
+		'description': u'The date at which current entry is corrected in the system.',
+		'doctype': u'DocField',
+		'fieldname': u'amendment_date',
+		'fieldtype': u'Date',
+		'label': u'Amendment Date',
+		'no_copy': 1,
+		'oldfieldname': u'amendment_date',
+		'oldfieldtype': u'Date',
+		'permlevel': 0,
+		'print_hide': 1
+	},
+
+	# DocField
+	{
 		'allow_on_submit': 1,
 		'colour': u'White:FFF',
 		'doctype': u'DocField',
@@ -685,6 +685,33 @@
 		'print_hide': 1,
 		'report_hide': 1,
 		'trigger': u'Client'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'due_date',
+		'fieldtype': u'Date',
+		'in_filter': 1,
+		'label': u'Due Date',
+		'no_copy': 0,
+		'oldfieldname': u'due_date',
+		'oldfieldtype': u'Date',
+		'permlevel': 0,
+		'print_hide': 0,
+		'search_index': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'mode_of_payment',
+		'fieldtype': u'Select',
+		'label': u'Mode of Payment',
+		'oldfieldname': u'mode_of_payment',
+		'oldfieldtype': u'Select',
+		'options': u'link:Mode of Payment',
+		'permlevel': 0
 	},
 
 	# DocField
@@ -1003,6 +1030,17 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'column_break8',
+		'fieldtype': u'Column Break',
+		'oldfieldtype': u'Column Break',
+		'permlevel': 0,
+		'print_hide': 1,
+		'width': u'50%'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
 		'fieldname': u'total_amount_to_pay',
 		'fieldtype': u'Currency',
 		'hidden': 0,
@@ -1040,17 +1078,6 @@
 		'permlevel': 1,
 		'print_hide': 1,
 		'search_index': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'column_break8',
-		'fieldtype': u'Column Break',
-		'oldfieldtype': u'Column Break',
-		'permlevel': 0,
-		'print_hide': 1,
-		'width': u'50%'
 	},
 
 	# DocField

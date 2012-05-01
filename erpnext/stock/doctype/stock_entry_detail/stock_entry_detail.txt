@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-03-27 14:36:38',
+		'creation': '2012-04-13 11:56:38',
 		'docstatus': 0,
-		'modified': '2012-03-27 14:36:38',
+		'modified': '2012-05-01 16:16:20',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -22,7 +22,7 @@
 		'section_style': u'Tray',
 		'server_code_error': u' ',
 		'show_in_menu': 0,
-		'version': 26
+		'version': 1
 	},
 
 	# These values are common for all DocField
@@ -69,19 +69,6 @@
 	# DocField
 	{
 		'doctype': u'DocField',
-		'fieldname': u'fg_item',
-		'fieldtype': u'Check',
-		'in_filter': 1,
-		'label': u'FG Item',
-		'oldfieldname': u'fg_item',
-		'oldfieldtype': u'Check',
-		'permlevel': 0,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
 		'fieldname': u'item_code',
 		'fieldtype': u'Link',
 		'in_filter': 1,
@@ -110,36 +97,6 @@
 	# DocField
 	{
 		'doctype': u'DocField',
-		'fieldname': u'batch_no',
-		'fieldtype': u'Link',
-		'label': u'Batch No',
-		'oldfieldname': u'batch_no',
-		'oldfieldtype': u'Link',
-		'options': u'Batch',
-		'permlevel': 0,
-		'print_hide': 1,
-		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'actual_qty',
-		'fieldtype': u'Read Only',
-		'in_filter': 1,
-		'label': u'Actual Qty (at source)',
-		'no_copy': 1,
-		'oldfieldname': u'actual_qty',
-		'oldfieldtype': u'Read Only',
-		'permlevel': 1,
-		'print_hide': 1,
-		'reqd': 0,
-		'search_index': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
 		'fieldname': u'qty',
 		'fieldtype': u'Currency',
 		'label': u'Qty',
@@ -148,19 +105,6 @@
 		'permlevel': 0,
 		'reqd': 1,
 		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'reqd_qty',
-		'fieldtype': u'Currency',
-		'in_filter': 0,
-		'label': u'Reqd Qty',
-		'oldfieldname': u'reqd_qty',
-		'oldfieldtype': u'Currency',
-		'permlevel': 3,
-		'print_hide': 1
 	},
 
 	# DocField
@@ -176,58 +120,6 @@
 		'permlevel': 0,
 		'reqd': 1,
 		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'conversion_factor',
-		'fieldtype': u'Currency',
-		'label': u'Conversion Factor',
-		'oldfieldname': u'conversion_factor',
-		'oldfieldtype': u'Currency',
-		'permlevel': 1,
-		'reqd': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'stock_uom',
-		'fieldtype': u'Link',
-		'in_filter': 0,
-		'label': u'Stock UOM',
-		'oldfieldname': u'stock_uom',
-		'oldfieldtype': u'Link',
-		'options': u'UOM',
-		'permlevel': 1,
-		'reqd': 1,
-		'search_index': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'transfer_qty',
-		'fieldtype': u'Currency',
-		'label': u'Stock Qty',
-		'oldfieldname': u'transfer_qty',
-		'oldfieldtype': u'Currency',
-		'permlevel': 1,
-		'reqd': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'serial_no',
-		'fieldtype': u'Text',
-		'label': u'Serial No',
-		'no_copy': 1,
-		'oldfieldname': u'serial_no',
-		'oldfieldtype': u'Text',
-		'permlevel': 0,
-		'reqd': 0
 	},
 
 	# DocField
@@ -255,6 +147,101 @@
 
 	# DocField
 	{
+		'doctype': u'DocField',
+		'fieldname': u'serial_no',
+		'fieldtype': u'Text',
+		'label': u'Serial No',
+		'no_copy': 1,
+		'oldfieldname': u'serial_no',
+		'oldfieldtype': u'Text',
+		'permlevel': 0,
+		'reqd': 0
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'batch_no',
+		'fieldtype': u'Link',
+		'label': u'Batch No',
+		'oldfieldname': u'batch_no',
+		'oldfieldtype': u'Link',
+		'options': u'Batch',
+		'permlevel': 0,
+		'print_hide': 1,
+		'trigger': u'Client'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'reqd_qty',
+		'fieldtype': u'Currency',
+		'in_filter': 0,
+		'label': u'Reqd Qty',
+		'oldfieldname': u'reqd_qty',
+		'oldfieldtype': u'Currency',
+		'permlevel': 3,
+		'print_hide': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'actual_qty',
+		'fieldtype': u'Read Only',
+		'in_filter': 1,
+		'label': u'Actual Qty (at source)',
+		'no_copy': 1,
+		'oldfieldname': u'actual_qty',
+		'oldfieldtype': u'Read Only',
+		'permlevel': 1,
+		'print_hide': 1,
+		'reqd': 0,
+		'search_index': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'conversion_factor',
+		'fieldtype': u'Currency',
+		'label': u'Conversion Factor',
+		'oldfieldname': u'conversion_factor',
+		'oldfieldtype': u'Currency',
+		'permlevel': 1,
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'transfer_qty',
+		'fieldtype': u'Currency',
+		'label': u'Stock Qty',
+		'oldfieldname': u'transfer_qty',
+		'oldfieldtype': u'Currency',
+		'permlevel': 1,
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'stock_uom',
+		'fieldtype': u'Link',
+		'in_filter': 0,
+		'label': u'Stock UOM',
+		'oldfieldname': u'stock_uom',
+		'oldfieldtype': u'Link',
+		'options': u'UOM',
+		'permlevel': 1,
+		'reqd': 1,
+		'search_index': 0
+	},
+
+	# DocField
+	{
 		'description': u'BOM No. for a Finished Good Item',
 		'doctype': u'DocField',
 		'fieldname': u'bom_no',
@@ -262,5 +249,18 @@
 		'label': u'BOM No.',
 		'options': u'BOM',
 		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'fg_item',
+		'fieldtype': u'Check',
+		'in_filter': 1,
+		'label': u'FG Item',
+		'oldfieldname': u'fg_item',
+		'oldfieldtype': u'Check',
+		'permlevel': 0,
+		'print_hide': 1
 	}
 ]

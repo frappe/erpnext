@@ -23,21 +23,12 @@ wn.require('erpnext/buying/doctype/purchase_common/purchase_common.js');
 // On Load
 // --------
 cur_frm.cscript.onload = function(doc,dt,dn) {
-	var cp = wn.control_panel;
-
 	if(!doc.voucher_date) set_multiple(dt,dn,{voucher_date:get_today()});
 	if(!doc.posting_date) set_multiple(dt,dn,{posting_date:get_today()});  
-
-	if(cp.country == 'India') {
-		unhide_field(['tds','tds_applicable','tds_category','get_tds','tax_code','rate','ded_amount','total_tds_on_voucher','tds_amount_on_advance']);
-	}
-	else {
-		hide_field(['tds','tds_applicable','tds_category','get_tds','tax_code','rate','ded_amount','total_tds_on_voucher','tds_amount_on_advance']);
-	}	
 	
-	if(doc.__islocal){
-		hide_field(['supplier_address', 'contact_person', 'supplier_name', 'address_display', 'contact_display', 'contact_mobile', 'contact_email']);
-	}
+	tds_flds = ['tds','tds_applicable','tds_category','get_tds','tax_code','rate','ded_amount','total_tds_on_voucher','tds_amount_on_advance'];
+	if(wn.control_panel.country == 'India') unhide_field(tds_flds);
+	else hide_field(tds_flds);
 }
 
 
@@ -60,6 +51,7 @@ cur_frm.cscript.onload_post_render = function(doc, dt, dn) {
 cur_frm.cscript.refresh = function(doc, dt, dn) {
 	
 	cur_frm.clear_custom_buttons();
+	erpnext.hide_naming_series();
 
 	if (!cur_frm.cscript.is_onload) cur_frm.cscript.dynamic_label(doc, dt, dn);
 
@@ -99,7 +91,7 @@ cur_frm.cscript.supplier = function(doc,dt,dn) {
 	}
 
 	if(doc.supplier) get_server_fields('get_default_supplier_address', JSON.stringify({supplier: doc.supplier}),'', doc, dt, dn, 1,callback);
-	if(doc.supplier) unhide_field(['supplier_address','contact_person','supplier_name','address_display','contact_display','contact_mobile','contact_email']);
+	if(doc.supplier) unhide_field(['supplier_address','contact_person']);
 }
 
 cur_frm.cscript.supplier_address = cur_frm.cscript.contact_person = function(doc,dt,dn) {
@@ -124,7 +116,7 @@ cur_frm.cscript.credit_to = function(doc,dt,dn) {
 	var callback = function(r,rt) {
 			var doc = locals[cur_frm.doctype][cur_frm.docname];		
 			if(doc.supplier) get_server_fields('get_default_supplier_address', JSON.stringify({supplier: doc.supplier}),'', doc, dt, dn, 1);
-			if(doc.supplier) unhide_field(['supplier_address','contact_person','supplier_name','address_display','contact_display','contact_mobile','contact_email']);
+			if(doc.supplier) unhide_field(['supplier_address','contact_person']);
 			cur_frm.refresh();
 	}
 
@@ -177,7 +169,7 @@ cur_frm.cscript.recalculate = function(doc, cdt, cdn) {
 // -----------------
 cur_frm.cscript.get_items = function(doc, dt, dn) {
 	var callback = function(r,rt) { 
-		unhide_field(['supplier_address', 'contact_person', 'supplier_name', 'address_display', 'contact_display', 'contact_mobile','contact_email']);				
+		unhide_field(['supplier_address', 'contact_person']);				
 		refresh_many(['credit_to','supplier','supplier_address','contact_person','supplier_name', 'address_display', 'contact_display','contact_mobile', 'contact_email','entries', 'purchase_receipt_main', 'purchase_order_main', 'purchase_tax_details']);
 	}
 	$c_obj(make_doclist(dt,dn),'pull_details','',callback);

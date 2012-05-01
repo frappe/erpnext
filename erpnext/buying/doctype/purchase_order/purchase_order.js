@@ -34,12 +34,6 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 	if(!doc.status) set_multiple(cdt,cdn,{status:'Draft'});
 	if(!doc.transaction_date) set_multiple(cdt,cdn,{transaction_date:get_today()});
 	if(!doc.is_subcontracted) set_multiple(cdt, cdn, {is_subcontracted:'No'});
-	
-	if(doc.__islocal){
-		hide_field(['supplier_name','supplier_address','contact_person','address_display','contact_display','contact_mobile','contact_email']);
-	}
-	// defined in purchase_common.js
-	//cur_frm.cscript.update_item_details(doc, cdt, cdn);		
 }
 
 cur_frm.cscript.onload_post_render = function(doc, dt, dn) {
@@ -56,6 +50,7 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	// Show buttons
 	// ---------------------------------
 	cur_frm.clear_custom_buttons();
+	erpnext.hide_naming_series();
 
 	if (!cur_frm.cscript.is_onload) cur_frm.cscript.dynamic_label(doc, cdt, cdn);
 
@@ -68,6 +63,9 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 		
 	if(doc.docstatus == 1 && doc.status == 'Stopped')
 		cur_frm.add_custom_button('Unstop Purchase Order', cur_frm.cscript['Unstop Purchase Order']);
+	
+	if(doc.supplier) $(cur_frm.fields_dict.contact_section.row.wrapper).toggle(true);
+	else $(cur_frm.fields_dict.contact_section.row.wrapper).toggle(false);
 }
 
 
@@ -75,7 +73,7 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 //Supplier
 cur_frm.cscript.supplier = function(doc,dt,dn) {
 	if(doc.supplier) get_server_fields('get_default_supplier_address', JSON.stringify({supplier: doc.supplier}),'', doc, dt, dn, 1);
-	if(doc.supplier) unhide_field(['supplier_name','supplier_address','contact_person','address_display','contact_display','contact_mobile','contact_email']);
+	if(doc.supplier) $(cur_frm.fields_dict.contact_section.row.wrapper).toggle(true);
 }
 
 cur_frm.cscript.supplier_address = cur_frm.cscript.contact_person = function(doc,dt,dn) {		

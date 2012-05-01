@@ -47,6 +47,7 @@ cur_frm.cscript.get_item_defaults = function(doc) {
 //======================= Refresh =====================================
 cur_frm.cscript.refresh = function(doc, cdt, cdn) { 
 	cur_frm.clear_custom_buttons();
+	erpnext.hide_naming_series();
 
 	if(doc.docstatus == 1 && doc.status != 'Stopped'){
 		if(doc.per_ordered < 100) {

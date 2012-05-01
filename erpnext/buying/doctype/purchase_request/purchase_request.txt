@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-04-11 13:17:39',
+		'creation': '2012-04-13 11:56:20',
 		'docstatus': 0,
-		'modified': '2012-04-12 14:36:23',
+		'modified': '2012-05-01 13:02:17',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -27,7 +27,7 @@
 		'server_code_error': u' ',
 		'show_in_menu': 0,
 		'subject': u'%(per_ordered)s% ordered',
-		'version': 202
+		'version': 1
 	},
 
 	# These values are common for all DocField
@@ -162,17 +162,6 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
-		'fieldname': u'column_break0',
-		'fieldtype': u'Column Break',
-		'oldfieldtype': u'Column Break',
-		'permlevel': 0,
-		'print_hide': 0,
-		'width': u'50%'
-	},
-
-	# DocField
-	{
 		'colour': u'White:FFF',
 		'description': u'To manage multiple series please go to Setup > Manage Series',
 		'doctype': u'DocField',
@@ -186,16 +175,6 @@
 		'permlevel': 0,
 		'print_hide': 1,
 		'reqd': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'column_break1',
-		'fieldtype': u'Column Break',
-		'oldfieldtype': u'Column Break',
-		'permlevel': 0,
-		'width': u'50%'
 	},
 
 	# DocField
@@ -230,10 +209,35 @@
 
 	# DocField
 	{
+		'allow_on_submit': 1,
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'indent_details',
+		'fieldtype': u'Table',
+		'label': u'Purchase Requisition Details',
+		'no_copy': 0,
+		'oldfieldname': u'indent_details',
+		'oldfieldtype': u'Table',
+		'options': u'Purchase Request Item',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'section_break1',
+		'fieldtype': u'Section Break',
+		'options': u'Simple',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
 		'doctype': u'DocField',
 		'fieldname': u'column_break4',
 		'fieldtype': u'Column Break',
-		'permlevel': 0
+		'permlevel': 0,
+		'width': u'50%'
 	},
 
 	# DocField
@@ -257,7 +261,8 @@
 		'doctype': u'DocField',
 		'fieldname': u'column_break5',
 		'fieldtype': u'Column Break',
-		'permlevel': 0
+		'permlevel': 0,
+		'width': u'50%'
 	},
 
 	# DocField
@@ -272,30 +277,6 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
-		'fieldname': u'section_break1',
-		'fieldtype': u'Section Break',
-		'options': u'Simple',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'allow_on_submit': 1,
-		'colour': u'White:FFF',
-		'doctype': u'DocField',
-		'fieldname': u'indent_details',
-		'fieldtype': u'Table',
-		'label': u'Purchase Requisition Details',
-		'no_copy': 0,
-		'oldfieldname': u'indent_details',
-		'oldfieldtype': u'Table',
-		'options': u'Purchase Request Item',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
 		'colour': u'White:FFF',
 		'default': u'Give additional details about the indent.',
 		'description': u'Filing in Additional Information about the Purchase Requisition will help you analyze your data better.',
@@ -305,6 +286,16 @@
 		'label': u'More Info',
 		'oldfieldtype': u'Section Break',
 		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'column_break1',
+		'fieldtype': u'Column Break',
+		'oldfieldtype': u'Column Break',
+		'permlevel': 0,
+		'width': u'50%'
 	},
 
 	# DocField
@@ -361,12 +352,41 @@
 
 	# DocField
 	{
+		'colour': u'White:FFF',
+		'description': u'After cancelling the Purchase Requisition, a dialog box will ask you reason for cancellation which will be reflected in this field',
+		'doctype': u'DocField',
+		'fieldname': u'cancel_reason',
+		'fieldtype': u'Data',
+		'label': u'Cancel Reason',
+		'no_copy': 1,
+		'oldfieldname': u'cancel_reason',
+		'oldfieldtype': u'Data',
+		'permlevel': 1,
+		'print_hide': 1
+	},
+
+	# DocField
+	{
 		'doctype': u'DocField',
 		'fieldname': u'column_break2',
 		'fieldtype': u'Column Break',
 		'oldfieldtype': u'Column Break',
 		'permlevel': 0,
 		'width': u'50%'
+	},
+
+	# DocField
+	{
+		'allow_on_submit': 1,
+		'doctype': u'DocField',
+		'fieldname': u'letter_head',
+		'fieldtype': u'Select',
+		'label': u'Letter Head',
+		'oldfieldname': u'letter_head',
+		'oldfieldtype': u'Select',
+		'options': u'link:Letter Head',
+		'permlevel': 0,
+		'print_hide': 1
 	},
 
 	# DocField
@@ -406,35 +426,6 @@
 	# DocField
 	{
 		'doctype': u'DocField',
-		'fieldname': u'remark',
-		'fieldtype': u'Small Text',
-		'label': u'Remarks',
-		'no_copy': 1,
-		'oldfieldname': u'remark',
-		'oldfieldtype': u'Small Text',
-		'permlevel': 0,
-		'print_hide': 0,
-		'width': u'150px'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'description': u'After cancelling the Purchase Requisition, a dialog box will ask you reason for cancellation which will be reflected in this field',
-		'doctype': u'DocField',
-		'fieldname': u'cancel_reason',
-		'fieldtype': u'Data',
-		'label': u'Cancel Reason',
-		'no_copy': 1,
-		'oldfieldname': u'cancel_reason',
-		'oldfieldtype': u'Data',
-		'permlevel': 1,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
 		'fieldname': u'amended_from',
 		'fieldtype': u'Data',
 		'label': u'Amended From',
@@ -463,6 +454,20 @@
 
 	# DocField
 	{
+		'doctype': u'DocField',
+		'fieldname': u'remark',
+		'fieldtype': u'Small Text',
+		'label': u'Remarks',
+		'no_copy': 1,
+		'oldfieldname': u'remark',
+		'oldfieldtype': u'Small Text',
+		'permlevel': 0,
+		'print_hide': 0,
+		'width': u'150px'
+	},
+
+	# DocField
+	{
 		'description': u'Add Terms and Conditions for the Purchase Requisition. You can also prepare a Terms and Conditions Master and use the Template',
 		'doctype': u'DocField',
 		'fieldname': u'terms_section_break',
@@ -470,20 +475,6 @@
 		'label': u'Terms and Conditions',
 		'oldfieldtype': u'Section Break',
 		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'allow_on_submit': 1,
-		'doctype': u'DocField',
-		'fieldname': u'letter_head',
-		'fieldtype': u'Select',
-		'label': u'Letter Head',
-		'oldfieldname': u'letter_head',
-		'oldfieldtype': u'Select',
-		'options': u'link:Letter Head',
-		'permlevel': 0,
-		'print_hide': 1
 	},
 
 	# DocField
@@ -514,34 +505,12 @@
 	# DocField
 	{
 		'doctype': u'DocField',
-		'fieldname': u'terms_html',
-		'fieldtype': u'HTML',
-		'label': u'Terms and Conditions HTML',
-		'oldfieldtype': u'HTML',
-		'options': u'You can add Terms and Notes that will be printed in the Transaction',
-		'permlevel': 0,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
 		'fieldname': u'terms',
 		'fieldtype': u'Text Editor',
 		'label': u'Terms and Conditions Content',
 		'oldfieldname': u'terms',
 		'oldfieldtype': u'Text Editor',
 		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'column_break3',
-		'fieldtype': u'Column Break',
-		'oldfieldtype': u'Column Break',
-		'permlevel': 0,
-		'print_hide': 1
 	},
 
 	# DocField

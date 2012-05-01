@@ -24,8 +24,9 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 
 var cfn_set_fields = function(doc, cdt, cdn) {
   lst = ['supplier','supplier_name','supplier_address','customer','customer_name','customer_address'];
-  if (in_list(['Material Issue', 'Material Transfer', 'Material Receipt', 'Production Order', 'Subcontracting', 'Other'], doc.purpose)) {
+  if (in_list(['Material Issue', 'Material Transfer', 'Material Receipt', 'Sales Return', 'Purchase Return', 'Production Order', 'Subcontracting', 'Other'], doc.purpose)) {
     hide_field(lst);
+	$(cur_frm.fields_dict.contact_section.row.wrapper).toggle(false);
   } else unhide_field(lst);
 
 
@@ -33,7 +34,8 @@ var cfn_set_fields = function(doc, cdt, cdn) {
     unhide_field('get_items');
     hide_field(['from_warehouse', 'to_warehouse','purchase_receipt_no','delivery_note_no', 'sales_invoice_no','warehouse_html', 'transporter', 'is_excisable_goods', 'excisable_goods']);
 	if (doc.purpose=='Production Order') unhide_field(['production_order', 'process']);
-    
+	else hide_field(['production_order', 'process']);
+
 	doc.from_warehouse = '';
     doc.to_warehosue = '';
     if (doc.process == 'Backflush' || doc.purpose == 'Other'){
@@ -56,16 +58,29 @@ var cfn_set_fields = function(doc, cdt, cdn) {
   if(doc.purpose == 'Purchase Return'){
     doc.customer=doc.customer_name = doc.customer_address=doc.delivery_note_no=doc.sales_invoice_no='';
     unhide_field(['supplier','supplier_name','supplier_address','purchase_receipt_no']);
-
+	$(cur_frm.fields_dict.contact_section.row.wrapper).toggle(true);
   }
   else if(doc.purpose == 'Sales Return'){
     doc.supplier=doc.supplier_name = doc.supplier_address=doc.purchase_receipt_no='';
     unhide_field(['customer','customer_name','customer_address','delivery_note_no', 'sales_invoice_no']);
+	$(cur_frm.fields_dict.contact_section.row.wrapper).toggle(true);
   } else{
-    doc.customer=doc.customer_name=doc.customer_address=doc.delivery_note_no=doc.sales_invoice_no=doc.supplier=doc.supplier_name = doc.supplier_address=doc.purchase_receipt_no='';
+    doc.customer=doc.customer_name=doc.customer_address=doc.delivery_note_no=doc.sales_invoice_no='';
+	doc.supplier=doc.supplier_name = doc.supplier_address=doc.purchase_receipt_no='';
   }
   refresh_many(lst);
 }
+
+//Refresh
+cur_frm.cscript.refresh = function(doc, cdt, cdn) { 
+	erpnext.hide_naming_series();
+
+	//India related
+	excise_flds = ['is_excisable_goods', 'excisable_goods', 'under_rule']
+	if(wn.control_panel.country == 'India') unhide_field(excise_flds);
+	else hide_field(excise_flds);
+}
+
 
 cur_frm.cscript.delivery_note_no = function(doc,cdt,cdn){
   if(doc.delivery_note_no) get_server_fields('get_cust_values','','',doc,cdt,cdn,1);
