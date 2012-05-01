@@ -158,7 +158,7 @@ wn.get_route_str=function(route){if(!route)
 route=window.location.hash;if(route.substr(0,1)=='#')route=route.substr(1);if(route.substr(0,1)=='!')route=route.substr(1);return route;}
 wn.set_route=function(){route=$.map(arguments,function(a){return encodeURIComponent(a)}).join('/');window.location.hash=route;wn.app.set_favicon();}
 wn._cur_route=null;$(window).bind('hashchange',function(){if(location.hash==wn._cur_route)
-return;wn.route();if(wn.boot.analytics_code){try{eval(wn.boot.analytics_code);}catch(e){console.log(e);}}});
+return;wn.route();});
 /*
  *	lib/js/wn/ui/listing.js
  */
@@ -823,7 +823,7 @@ if(errfld.length)msgprint('<b>Mandatory fields required in '+
 wn.Application=Class.extend({init:function(){this.load_bootinfo();this.make_page_container();this.make_nav_bar();this.set_favicon();$(document).trigger('startup');wn.route();},load_bootinfo:function(){LocalDB.sync(wn.boot.docs);wn.control_panel=wn.boot.control_panel;if(wn.boot.error_messages)
 console.log(wn.boot.error_messages)
 if(wn.boot.server_messages)
-msgprint(wn.boot.server_messages);this.set_globals();},set_globals:function(){profile=wn.boot.profile;user=wn.boot.profile.name;user_fullname=wn.user_info(user).fullname;user_defaults=profile.defaults;user_roles=profile.roles;user_email=profile.email;sys_defaults=wn.boot.sysdefaults;},make_page_container:function(){wn.container=new wn.views.Container();wn.views.make_403();wn.views.make_404();},make_nav_bar:function(){if(wn.user.name!='Guest'){wn.container.wntoolbar=new wn.ui.toolbar.Toolbar();}},logout:function(){var me=this;wn.call({method:'logout',callback:function(r){if(r.exc){console.log(r.exc);return;}
+msgprint(wn.boot.server_messages);this.set_globals();},set_globals:function(){profile=wn.boot.profile;user=wn.boot.profile.name;user_fullname=wn.user_info(user).fullname;user_defaults=profile.defaults;user_roles=profile.roles;user_email=profile.email;sys_defaults=wn.boot.sysdefaults;},make_page_container:function(){wn.container=new wn.views.Container();wn.views.make_403();wn.views.make_404();},make_nav_bar:function(){if(wn.user.name!='Guest'){wn.container.wntoolbar=new wn.ui.toolbar.Toolbar();}},logout:function(){var me=this;wn.call({method:'logout',callback:function(r){if(r.exc){console.log(r.exc);}
 me.redirect_to_login();}})},redirect_to_login:function(){window.location.hash='';window.location.reload();},set_favicon:function(){var link=$('link[type="image/x-icon"]').remove().attr("href");var favicon='\
    <link rel="shortcut icon" href="'+link+'" type="image/x-icon"> \
    <link rel="icon" href="'+link+'" type="image/x-icon">'
