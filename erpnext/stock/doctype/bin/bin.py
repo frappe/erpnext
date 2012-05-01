@@ -267,7 +267,7 @@ class DocType:
 		
 		# if no prev sle, start from the first one (for repost)
 		if not prev_sle:
-			cqty, cval, val_rate, self.fcfs_bal = 0, 0, 0, []
+			cqty, cval, val_rate, stock_val, self.fcfs_bal = 0, 0, 0, 0, []
 		
 		# normal
 		else:
@@ -322,8 +322,8 @@ class DocType:
 			where name=%s""", (cqty, flt(val_rate), cstr(self.fcfs_bal), stock_val, sle['name']))
 		
 		# update the bin
-		if sll:
-			sql("update `tabBin` set valuation_rate=%s, actual_qty=%s, stock_value = %s where name=%s", \
+		if sll or not prev_sle:
+			sql("update `tabBin` set valuation_rate=%s, actual_qty=%s, stock_value = %s, projected_qty = (actual_qty + indented_qty + ordered_qty + planned_qty - reserved_qty) where name=%s", \
 				(flt(val_rate), cqty, flt(stock_val), self.doc.name))
 
 

@@ -157,3 +157,7 @@ class DocType:
 	
 	def on_cancel(self):
 		set(self.doc, 'approval_status', 'Cancelled')
+
+	def get_formatted_message(self, args):
+		""" get formatted message for auto notification"""
+		return get_obj('Notification Control').get_formatted_message(args)

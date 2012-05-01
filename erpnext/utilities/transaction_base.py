@@ -18,6 +18,7 @@ import webnotes
 from webnotes.utils import load_json, cint, cstr, flt, get_defaults
 from webnotes.model.doc import Document, addchild, removechild, getchildren
 from webnotes.model.doclist import getlist, copy_doclist
+from webnotes.model.code import get_obj
 from webnotes import msgprint
 
 class TransactionBase:
@@ -230,3 +231,8 @@ class TransactionBase:
 		ret = webnotes.conn.sql("select default_currency from tabCompany where name = '%s'" %(name))
 		dcc = ret and ret[0][0] or get_defaults()['currency']						
 		return dcc	
+	
+
+	def get_formatted_message(self, args):
+		""" get formatted message for auto notification"""
+		return get_obj('Notification Control').get_formatted_message(args)

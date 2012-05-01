@@ -99,6 +99,12 @@ class DocType:
 				you entered posting time correctly, please contact ERPNext support team.")
 			raise Exception
 	
+	def scrub_posting_time(self):
+		if not self.doc.posting_time or self.doc.posting_time == '12:0':
+			self.doc.posting_time = '00:00'
+		if len(self.doc.posting_time.split(':')) > 2:
+			self.doc.posting_time = '00:00'
+			
 
 	def validate(self):
 		self.validate_mandatory()
@@ -106,3 +112,4 @@ class DocType:
 		self.validate_item()
 		self.actual_amt_check()
 		self.check_stock_frozen_date()
+		self.scrub_posting_time()

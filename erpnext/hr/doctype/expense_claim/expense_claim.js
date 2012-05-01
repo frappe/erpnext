@@ -247,7 +247,8 @@ cur_frm.cscript.update_voucher = function(doc){
 cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
 	var args = {
 		type: 'Expense Claim',
-		doctype: 'Expense Claim'
+		doctype: 'Expense Claim',
+		send_to: doc.exp_approver
 	}
 	cur_frm.cscript.notify(doc, args);
 }

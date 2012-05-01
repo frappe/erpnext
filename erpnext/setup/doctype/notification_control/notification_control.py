@@ -23,7 +23,7 @@ from webnotes.model.code import get_obj
 from webnotes import msgprint
 
 sql = webnotes.conn.sql
-	
+
 # -----------------------------------------------------------------------------------------
 # Notification control
 class DocType:

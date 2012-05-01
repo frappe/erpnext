@@ -84,6 +84,7 @@ class DocType(TransactionBase):
 	def get_comm_rate(self, sales_partner):
 		return get_obj('Sales Common').get_comm_rate(sales_partner, self)
 
+
 # SALES ORDER DETAILS TRIGGER FUNCTIONS
 # ================================================================================
 	# Get Item Details

@@ -307,5 +307,10 @@ patch_list = [
 		'patch_file': 'serial_no_fixes',
 		'description': 'fixes for sle creation while import'
 	},
+	{
+		'patch_module': 'patches.april_2012',
+		'patch_file': 'repost_stock_for_posting_time',
+		'description': 'repost stock for posting time 00:00:seconds'
+	},
 
 ]
