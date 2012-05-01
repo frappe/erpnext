@@ -314,7 +314,7 @@ class DocType(TransactionBase):
 	# ------------------------------------------------
 	def validate_debit_to_acc(self):
 		if self.doc.customer and self.doc.debit_to and not cint(self.doc.is_pos):
-			acc_head = sql("select master_name from `tabAccount` where name = %s and docstatus != 2", self.doc.debit_to)
+			acc_head = webnotes.conn.sql("select master_name from `tabAccount` where name = %s and docstatus != 2", self.doc.debit_to)
 			
 			if (acc_head and cstr(acc_head[0][0]) != cstr(self.doc.customer)) or \
 				(not acc_head and (self.doc.debit_to != cstr(self.doc.customer) + " - " + self.get_company_abbr())):
