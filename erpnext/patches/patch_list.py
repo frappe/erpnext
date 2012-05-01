@@ -238,6 +238,11 @@ patch_list = [
 		'description': 'Patch related to property setter cleanup' 
 	},
 	{
+		'patch_module': 'patches.april_2012',
+		'patch_file': 'naming_series_patch',
+		'description': 'Move naming series options into property setter'
+	},
+	{
 		'patch_module': 'patches.jan_mar_2012',
 		'patch_file': 'rename_dt',
 		'description': 'Rename DocType Patch'
@@ -266,11 +271,6 @@ patch_list = [
 		'patch_module': 'patches.april_2012',
 		'patch_file': 'reload_c_form',
 		'description': 'Added attchemnt option and total field'
-	},
-	{
-		'patch_module': 'patches.april_2012',
-		'patch_file': 'naming_series_patch',
-		'description': 'Move naming series options into property setter'
 	},
 	{
 		'patch_module': 'patches.april_2012',
