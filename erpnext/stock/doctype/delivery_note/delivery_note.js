@@ -70,6 +70,9 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 		cur_frm.add_custom_button('Make Packing Slip', cur_frm.cscript['Make Packing Slip']);
 	}
 	
+	if(doc.customer) $(cur_frm.fields_dict.contact_info.row.wrapper).toggle(true);
+	else $(cur_frm.fields_dict.contact_info.row.wrapper).toggle(false);
+	
 	set_print_hide(doc, cdt, cdn);
 }
 

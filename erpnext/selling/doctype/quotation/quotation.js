@@ -92,6 +92,9 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	}
 
 	erpnext.hide_naming_series();
+	
+	if(doc.customer || doc.lead) $(cur_frm.fields_dict.contact_section.row.wrapper).toggle(true);
+	else $(cur_frm.fields_dict.contact_section.row.wrapper).toggle(false);
 }
 
 

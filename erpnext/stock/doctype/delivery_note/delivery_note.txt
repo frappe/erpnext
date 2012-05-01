@@ -5,7 +5,7 @@
 	{
 		'creation': '2012-04-13 11:56:34',
 		'docstatus': 0,
-		'modified': '2012-04-30 20:41:10',
+		'modified': '2012-05-01 12:33:31',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -877,6 +877,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'contact_info',
 		'fieldtype': u'Section Break',
 		'label': u'Contact Info',
 		'permlevel': 0

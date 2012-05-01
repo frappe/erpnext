@@ -38,7 +38,6 @@ cur_frm.cscript.onload = function(doc,dt,dn) {
 		if(!doc.currency && sys_defaults.currency) set_multiple(dt,dn,{currency:sys_defaults.currency});
 		if(!doc.price_list_currency) set_multiple(dt, dn, {price_list_currency: doc.currency, plc_conversion_rate: 1});
 
- 		hide_field(['customer_address', 'contact_person','customer_name','address_display', 'contact_display', 'contact_mobile', 'contact_email', 'territory', 'customer_group']);
 	}
 }
 
@@ -100,6 +99,9 @@ cur_frm.cscript.hide_fields = function(doc, cdt, cdn) {
 	if (doc.docstatus==1) $(cur_frm.fields_dict.recurring_invoice.row.wrapper).toggle(true);
 	else $(cur_frm.fields_dict.recurring_invoice.row.wrapper).toggle(false);
 
+	if(doc.customer) $(cur_frm.fields_dict.contact_section.row.wrapper).toggle(true);
+	else $(cur_frm.fields_dict.contact_section.row.wrapper).toggle(false);
+
 	// India related fields
 	var cp = wn.control_panel;
 	if (cp.country == 'India') unhide_field(['c_form_applicable', 'c_form_no']);
@@ -113,6 +115,8 @@ cur_frm.cscript.hide_fields = function(doc, cdt, cdn) {
 cur_frm.cscript.refresh = function(doc, dt, dn) {
 	cur_frm.cscript.is_opening(doc, dt, dn);
 	cur_frm.cscript.hide_fields(doc, dt, dn);
+	erpnext.hide_naming_series();
+
 	// Show / Hide button
 	cur_frm.clear_custom_buttons();
 
@@ -188,7 +192,7 @@ cur_frm.cscript.customer = function(doc,dt,dn,onload) {
 	var args = onload ? 'onload':''
 	if(doc.customer) $c_obj(make_doclist(doc.doctype, doc.name), 'get_default_customer_address', args, callback);
 
-	if(doc.customer) unhide_field(['customer_address','contact_person','customer_name','address_display','contact_display','contact_mobile','contact_email','territory','customer_group']);
+	if(doc.customer) unhide_field(['customer_address','contact_person', 'territory','customer_group']);
 	
 }
 
@@ -228,7 +232,7 @@ cur_frm.cscript.debit_to = function(doc,dt,dn) {
 	var callback = function(r,rt) {
 			var doc = locals[cur_frm.doctype][cur_frm.docname];
 			if(doc.customer) $c_obj(make_doclist(dt,dn), 'get_default_customer_address', '', callback2);
-			if(doc.customer) unhide_field(['customer_address','contact_person','customer_name','address_display','contact_display','contact_mobile','contact_email','territory','customer_group']);
+			if(doc.customer) unhide_field(['customer_address','contact_person','territory','customer_group']);
 			cur_frm.refresh();
 	}
 
@@ -298,7 +302,7 @@ cur_frm.cscript.is_opening = function(doc, dt, dn) {
 // Get Items based on SO or DN Selected
 cur_frm.cscript.get_items = function(doc, dt, dn) {
 	var callback = function(r,rt) {
-		unhide_field(['customer_address','contact_person','customer_name','address_display','contact_display','contact_mobile','contact_email','territory','customer_group']);
+		unhide_field(['customer_address','contact_person', 'territory','customer_group']);
 		cur_frm.refresh();
 	}
 	get_server_fields('pull_details','','',doc, dt, dn,1,callback);

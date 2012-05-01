@@ -61,6 +61,9 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	erpnext.hide_naming_series();
 
 	if (!cur_frm.cscript.is_onload) cur_frm.cscript.hide_price_list_currency(doc, cdt, cdn); 
+	
+	if(doc.customer) $(cur_frm.fields_dict.contact_info.row.wrapper).toggle(true);
+	else $(cur_frm.fields_dict.contact_info.row.wrapper).toggle(false);
 
 	if(doc.docstatus==1) {
 		if(doc.status != 'Stopped') {
