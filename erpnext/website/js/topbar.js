@@ -98,7 +98,7 @@ erpnext.Footer = Class.extend({
 		}
 		$('footer').html(repl('<div class="web-footer">\
 			<div class="web-footer-menu"><ul></ul></div>\
-			<div class="web-footer-copyright">&copy; %(copyright)s | %(address)s</div>\
+			<div class="web-footer-copyright">&copy; %(copyright)s</div>\
 			<div class="web-footer-powered">Powered by \
 				<a href="https://erpnext.com">erpnext.com</a></div>\
 		</div>', wn.boot.website_settings));

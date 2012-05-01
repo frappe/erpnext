@@ -890,7 +890,7 @@ erpnext.header_link_settings(item);$parent_li.find('.dropdown-menu').append(repl
 if(!wn.boot.website_settings.address){wn.boot.website_settings.address='';}
 $('footer').html(repl('<div class="web-footer">\
    <div class="web-footer-menu"><ul></ul></div>\
-   <div class="web-footer-copyright">&copy; %(copyright)s | %(address)s</div>\
+   <div class="web-footer-copyright">&copy; %(copyright)s</div>\
    <div class="web-footer-powered">Powered by \
     <a href="https://erpnext.com">erpnext.com</a></div>\
   </div>',wn.boot.website_settings));this.make_items();},make_items:function(){var items=wn.boot.website_menus
