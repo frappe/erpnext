@@ -68,7 +68,7 @@
 		'permlevel': 0,
 		'print_hide': 1,
 		'reqd': 1,
-		'width': u'150'
+		'width': u'150px'
 	},
 
 	# DocField
