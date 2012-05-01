@@ -403,7 +403,7 @@ me.list.run();});this.dialog.show();},add_column:function(c){var w=$('<div style
  */
 wn.provide('wn.request');wn.request.url='index.cgi';wn.request.prepare=function(opts){if(opts.btn)$(opts.btn).set_working();if(opts.show_spinner)set_loading();if(opts.freeze)freeze();if(!opts.args.cmd){console.log(opts)
 throw"Incomplete Request";}}
-wn.request.cleanup=function(opts,r){if(opts.btn)$(opts.btn).done_working();if(opts.show_spinner)hide_loading();if(opts.freeze)unfreeze();if(wn.boot.sid&&wn.get_cookie('sid')!=wn.boot.sid){msgprint('Session expired');setTimeout('wn.app.redirect_to_login()',3000);return;}
+wn.request.cleanup=function(opts,r){if(opts.btn)$(opts.btn).done_working();if(opts.show_spinner)hide_loading();if(opts.freeze)unfreeze();if(wn.boot.sid&&wn.get_cookie('sid')!=wn.boot.sid){msgprint('Session Expired. Logging you out');wn.app.logout();return;}
 if(r.server_messages)msgprint(r.server_messages)
 if(r.exc){console.log(r.exc);};if(r['403']){wn.container.change_to('403');}
 if(r.docs)LocalDB.sync(r.docs);}
@@ -642,10 +642,11 @@ $(wrapper).hide().fadeIn(1000);}
 /*
  *	lib/js/wn/ui/appframe.js
  */
-wn.ui.AppFrame=Class.extend({init:function(parent){this.buttons={};this.$w=$('<div></div>').appendTo(parent);this.$titlebar=$('<div class="appframe-titlebar">\
+wn.ui.AppFrame=Class.extend({init:function(parent,title){this.buttons={};this.$w=$('<div></div>').appendTo(parent);this.$titlebar=$('<div class="appframe-titlebar">\
    <span class="appframe-title"></span>\
    <span class="close">&times;</span>\
-  </div>').appendTo(this.$w);this.$w.find('.close').click(function(){window.history.back();})},title:function(txt){this.$titlebar.find('.appframe-title').html(txt);},add_button:function(label,click,icon){if(!this.$w.find('.appframe-toolbar').length)
+  </div>').appendTo(this.$w);this.$w.find('.close').click(function(){window.history.back();})
+if(title)this.title(title);},title:function(txt){this.$titlebar.find('.appframe-title').html(txt);},add_button:function(label,click,icon){if(!this.$w.find('.appframe-toolbar').length)
 this.$w.append('<div class="appframe-toolbar"></div>');args={label:label,icon:''};if(icon){args.icon='<i class="'+icon+'"></i>';}
 this.buttons[label]=$(repl('<button class="btn btn-small">\
    %(icon)s %(label)s</button>',args)).click(click).appendTo(this.$w.find('.appframe-toolbar'));return this.buttons[label];},clear_buttons:function(){this.$w.find('.appframe-toolbar').empty();}});wn.ui.make_app_page=function(opts){if(opts.single_column){$(opts.parent).html('<div class="layout-wrapper layout-wrapper-appframe">\
@@ -830,8 +831,7 @@ $(favicon).appendTo('head');}})
  *	js/app.js
  */
 wn.provide('erpnext');erpnext.set_about=function(){wn.provide('wn.app');$.extend(wn.app,{name:'ERPNext',license:'GNU/GPL - Usage Condition: All "erpnext" branding must be kept as it is',source:'https://github.com/webnotes/erpnext',publisher:'Web Notes Technologies Pvt Ltd, Mumbai',copyright:'&copy; Web Notes Technologies Pvt Ltd',version:'2'});}
-wn.modules_path='erpnext';$(document).bind('toolbar_setup',function(){$('.brand').html('<b>erp</b>next\
-  <i class="icon-home icon-white navbar-icon-home" ></i>').hover(function(){$(this).find('.icon-home').addClass('navbar-icon-home-hover');},function(){$(this).find('.icon-home').removeClass('navbar-icon-home-hover');});});
+wn.modules_path='erpnext';$(document).bind('toolbar_setup',function(){$('.brand').html((wn.boot.website_settings.brand_html||'erpnext')+' <i class="icon-home icon-white navbar-icon-home" ></i>').css('max-width','200px').css('overflow','hidden').hover(function(){$(this).find('.icon-home').addClass('navbar-icon-home-hover');},function(){$(this).find('.icon-home').removeClass('navbar-icon-home-hover');});});
 /*
  *	erpnext/startup/startup.js
  */
@@ -841,14 +841,14 @@ erpnext.startup.start=function(){console.log('Starting up...');$('#startup_div')
 if(user=='Guest'){if(wn.boot.custom_css){set_style(wn.boot.custom_css);}
 if(wn.boot.website_settings.title_prefix){wn.title_prefix=wn.boot.website_settings.title_prefix;}
 if(wn.boot.startup_code){eval(wn.boot.startup_code);}}else{wn.boot.profile.allow_modules=wn.boot.profile.allow_modules.concat(['To Do','Knowledge Base','Calendar','Activity','Messages'])
-if(user_roles.indexOf('Accounts Manager')!=-1){wn.boot.profile.allow_modules.push('Dashboard');}
-erpnext.toolbar.setup();erpnext.startup.set_periodic_updates();if(in_list(user_roles,'System Manager')&&(wn.boot.setup_complete=='No')){wn.require("erpnext/startup/js/complete_setup.js");erpnext.complete_setup.show();}
+erpnext.toolbar.setup();erpnext.startup.set_periodic_updates();$('footer').html('<div class="web-footer erpnext-footer">\
+   <a href="#!attributions">ERPNext | Attributions and License</a></div>');if(in_list(user_roles,'System Manager')&&(wn.boot.setup_complete=='No')){wn.require("erpnext/startup/js/complete_setup.js");erpnext.complete_setup.show();}
 if(wn.boot.expires_on&&in_list(user_roles,'System Manager')){var today=dateutil.str_to_obj(dateutil.get_today());var expires_on=dateutil.str_to_obj(wn.boot.expires_on);var diff=dateutil.get_diff(expires_on,today);if(0<=diff&&diff<=15){var expiry_string=diff==0?"today":repl("in %(diff)s day(s)",{diff:diff});$('header').append(repl('<div class="expiry-info"> \
      Your ERPNext subscription will <b>expire %(expiry_string)s</b>. \
      Please renew your subscription to continue using ERPNext \
      (and remove this annoying banner). \
     </div>',{expiry_string:expiry_string}));}else if(diff<0){$('header').append(repl('<div class="expiry-info"> \
-     This ERPNext subscription <b>has expired</b> and should be deleted. \
+     This ERPNext subscription <b>has expired</b>. \
     </div>',{expiry_string:expiry_string}));}}}
 erpnext.set_about();$('#startup_div').toggle(false);}
 show_chart_browser=function(nm,chart_type){var call_back=function(){if(nm=='Sales Browser'){var sb_obj=new SalesBrowser();sb_obj.set_val(chart_type);}
@@ -869,7 +869,7 @@ erpnext.hide_naming_series=function(){if(cur_frm.fields_dict.naming_series){hide
 /*
  *	erpnext/website/js/topbar.js
  */
-wn.provide('erpnext.navbar');erpnext.navbar.Navbar=Class.extend({init:function(){this.make();$('.brand').html(wn.boot.website_settings.brand_html);this.make_items();$('.dropdown-toggle').dropdown();},make:function(){$('header').append('<div class="navbar navbar-fixed-top">\
+wn.provide('erpnext.navbar');erpnext.navbar.Navbar=Class.extend({init:function(){this.make();$('.brand').html(wn.boot.website_settings.brand_html||sys_defaults.company);this.make_items();$('.dropdown-toggle').dropdown();},make:function(){$('header').append('<div class="navbar navbar-fixed-top">\
    <div class="navbar-inner">\
    <div class="container">\
     <a class="brand">[brand]</a>\
@@ -881,15 +881,19 @@ wn.provide('erpnext.navbar');erpnext.navbar.Navbar=Class.extend({init:function()
     </ul>\
    </div>\
    </div>\
-   </div>');$('.brand').attr('href','#!'+(wn.boot.website_settings.home_page||'Login Page'))},make_items:function(){var items=wn.boot.website_menus;for(var i=0;i<items.length;i++){var item=items[i];if(!item.parent_label&&item.parentfield=='top_bar_items'){item.route=item.url||item.custom_page;$('header .nav:first').append(repl('<li data-label="%(label)s">\
-     <a href="#!%(route)s">%(label)s</a></li>',item))}}
+   </div>');$('.brand').attr('href','#!'+(wn.boot.website_settings.home_page||'Login Page'))},make_items:function(){var items=wn.boot.website_menus;for(var i=0;i<items.length;i++){var item=items[i];if(!item.parent_label&&item.parentfield=='top_bar_items'){console.log(item)
+erpnext.header_link_settings(item);$('header .nav:first').append(repl('<li data-label="%(label)s">\
+     <a href="%(route)s" %(target)s>%(label)s</a></li>',item));}}
 for(var i=0;i<items.length;i++){var item=items[i];if(item.parent_label&&item.parentfield=='top_bar_items'){$parent_li=$(repl('header li[data-label="%(parent_label)s"]',item));if(!$parent_li.hasClass('dropdown')){$parent_li.addClass('dropdown');$parent_li.find('a:first').addClass('dropdown-toggle').attr('data-toggle','dropdown').attr('href','').append('<b class="caret"></b>').click(function(){return false;});$parent_li.append('<ul class="dropdown-menu"></ul>');}
-item.route=item.url||item.custom_page;$parent_li.find('.dropdown-menu').append(repl('<li data-label="%(label)s">\
-     <a href="#!%(route)s">%(label)s</a></li>',item))}}}});erpnext.Footer=Class.extend({init:function(){$('footer').html(repl('<div class="web-footer">\
+erpnext.header_link_settings(item);$parent_li.find('.dropdown-menu').append(repl('<li data-label="%(label)s">\
+     <a href="%(route)s" %(target)s>%(label)s</a></li>',item))}}}});erpnext.Footer=Class.extend({init:function(){if(!wn.boot.website_settings.copyright){wn.boot.website_settings.copyright=sys_defaults.company;}
+if(!wn.boot.website_settings.address){wn.boot.website_settings.address='';}
+$('footer').html(repl('<div class="web-footer">\
    <div class="web-footer-menu"><ul></ul></div>\
-   <div class="web-footer-copyright">&copy; %(copyright)s | %(address)s</div>\
+   <div class="web-footer-copyright">&copy; %(copyright)s</div>\
    <div class="web-footer-powered">Powered by \
     <a href="https://erpnext.com">erpnext.com</a></div>\
   </div>',wn.boot.website_settings));this.make_items();},make_items:function(){var items=wn.boot.website_menus
-for(var i=0;i<items.length;i++){var item=items[i];if(!item.parent_label&&item.parentfield=='footer_items'){item.route=item.url||item.custom_page;$('.web-footer-menu ul').append(repl('<li><a href="#!%(route)s" \
-     data-label="%(label)s">%(label)s</a></li>',item))}}}});$(document).bind('startup',function(){erpnext.footer=new erpnext.Footer();erpnext.navbar.navbar=new erpnext.navbar.Navbar();})
+for(var i=0;i<items.length;i++){var item=items[i];if(!item.parent_label&&item.parentfield=='footer_items'){erpnext.header_link_settings(item);$('.web-footer-menu ul').append(repl('<li><a href="%(route)s" %(target)s\
+     data-label="%(label)s">%(label)s</a></li>',item))}}}});erpnext.header_link_settings=function(item){item.route=item.url||item.custom_page;if(item.route.substr(0,4)=='http'){item.target='target="_blank"';}else{item.target='';item.route='#!'+item.route;}}
+$(document).bind('startup',function(){erpnext.footer=new erpnext.Footer();erpnext.navbar.navbar=new erpnext.navbar.Navbar();})

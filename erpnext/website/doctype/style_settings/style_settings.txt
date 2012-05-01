@@ -5,7 +5,7 @@
 	{
 		'creation': '2012-04-02 16:02:43',
 		'docstatus': 0,
-		'modified': '2012-04-25 10:00:35',
+		'modified': '2012-05-01 15:58:16',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -23,7 +23,7 @@
 		'name': '__common__',
 		'section_style': u'Simple',
 		'show_in_menu': 0,
-		'version': 23
+		'version': 1
 	},
 
 	# These values are common for all DocField
@@ -91,21 +91,8 @@
 
 	# DocField
 	{
-		'colour': u'White:FFF',
-		'description': u'Select a white footer foreground color if you have a dark background',
-		'doctype': u'DocField',
-		'fieldname': u'footer_font_color',
-		'fieldtype': u'Select',
-		'label': u'Footer Font Color',
-		'options': u'\nwhite',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
 		'doctype': u'DocField',
 		'fieldtype': u'Column Break',
-		'label': u'Fonts',
 		'permlevel': 0,
 		'width': u'50%'
 	},
@@ -143,6 +130,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'css',
 		'fieldtype': u'Section Break',
 		'label': u'CSS',
 		'permlevel': 0

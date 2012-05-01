@@ -21,7 +21,8 @@ pscript.onload_blog = function(wrapper) {
 		query: 'select tabBlog.name, title, left(content, 1000) as content, tabBlog.modified, \
 			ifnull(first_name, "") as first_name, ifnull(last_name, "") as last_name \
 			from tabProfile, tabBlog\
-		 	where ifnull(published,0)=1 and tabBlog.owner = tabProfile.name',
+		 	where ifnull(published,0)=1 and tabBlog.owner = tabProfile.name \
+			order by tabBlog.modified desc',
 		hide_refresh: true,
 		no_toolbar: true,
 		render_row: function(parent, data) {

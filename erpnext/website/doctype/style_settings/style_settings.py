@@ -25,6 +25,9 @@ class DocType:
 		with open('erpnext/website/doctype/style_settings/custom_template.css', 'r') as f:
 			temp = Template(f.read())
 		
+		if not self.doc.font_size:
+			self.doc.font_size = '13px'
+			
 		self.doc.small_font_size = str(int(self.doc.font_size[:-2])-2) + 'px'
 		
 		self.doc.custom_css = temp.render(doc = self.doc)

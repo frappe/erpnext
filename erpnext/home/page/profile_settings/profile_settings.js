@@ -16,7 +16,6 @@
 
 pscript['onload_profile-settings'] = function() {
 	var wrapper = wn.pages['profile-settings'];
-	wrapper.className = 'layout_wrapper';
 	pscript.myprofile = new MyProfile(wrapper)
 }
 
@@ -25,11 +24,11 @@ MyProfile = function(wrapper) {
 	var me = this;
 	
 	this.make = function() {
-		this.head = new PageHeader(this.wrapper, 'My Profile Settings');
-		this.head.add_button('Change Password', this.change_password);
-		this.head.add_button('Change Background', this.change_background);
+		this.wrapper.appframe = new wn.ui.AppFrame($(this.wrapper).find('.layout-appframe'), 'Profile Settings');
+		this.wrapper.appframe.add_button('Change Password', this.change_password);
+		this.wrapper.appframe.add_button('Change Background', this.change_background);
 		
-		this.tab = make_table($a(this.wrapper, 'div', '', {marginTop:'19px'}), 
+		this.tab = make_table($a($(this.wrapper).find('.layout-main').get(0), 'div', '', {marginTop:'19px'}), 
 			1, 2, '90%', ['50%', '50%'], {padding:'11px'})
 		this.img = $a($td(this.tab, 0, 0), 'img', '', {width: '120px', maxHeight:'200px'});
 		this.img.src = wn.user_info(user).image;

@@ -72,10 +72,6 @@ erpnext.startup.start = function() {
 		// always allow apps
 		wn.boot.profile.allow_modules = wn.boot.profile.allow_modules.concat(
 			['To Do', 'Knowledge Base', 'Calendar', 'Activity', 'Messages'])
-		// allow dashboard to accounts manager
-		if(user_roles.indexOf('Accounts Manager')!=-1) {
-			wn.boot.profile.allow_modules.push('Dashboard');
-		}
 		
 		// setup toolbar
 		erpnext.toolbar.setup();
@@ -85,8 +81,8 @@ erpnext.startup.start = function() {
 
 		// border to the body
 		// ------------------
-		//$('footer').html('<div class="web-footer erpnext-footer">\
-		//	<a href="#!attributions">ERPNext | Attributions and License</a></div>');
+		$('footer').html('<div class="web-footer erpnext-footer">\
+			<a href="#!attributions">ERPNext | Attributions and License</a></div>');
 
 		// complete registration
 		if(in_list(user_roles,'System Manager') && (wn.boot.setup_complete=='No')) { 
@@ -106,7 +102,7 @@ erpnext.startup.start = function() {
 				</div>', { expiry_string: expiry_string }));
 			} else if (diff < 0) {
 				$('header').append(repl('<div class="expiry-info"> \
-					This ERPNext subscription <b>has expired</b> and should be deleted. \
+					This ERPNext subscription <b>has expired</b>. \
 				</div>', { expiry_string: expiry_string }));
 			}
 		}

@@ -18,11 +18,19 @@ import webnotes
 
 from webnotes.utils import load_json, cint, nowdate
 
+
+def check_demo():
+	demo_user = 'demo@webnotestech.com'
+	if webnotes.session['user']==demo_user:
+		webnotes.msgprint("Can't change in demo", raise_exception=1)
+	
+
 @webnotes.whitelist()
 def change_password(arg):
 	"""
 		Change password
 	"""
+	check_demo()
 	arg = load_json(arg)
 	
 	if not webnotes.conn.sql('select name from tabProfile where name=%s and password=password(%s)', (webnotes.session['user'], arg['old_password'])):
@@ -44,6 +52,7 @@ def set_user_details(arg=None):
 	"""
 		updates user details given in argument
 	"""
+	check_demo()
 	from webnotes.model.doc import Document
 	
 	p = Document('Profile', webnotes.user.name)
@@ -59,6 +68,7 @@ def set_user_image(fid, fname):
 	"""
 		Set uploaded image as user image
 	"""
+	check_demo()
 	from webnotes.utils.file_manager import add_file_list, remove_file
 	user = webnotes.session['user']
 	
@@ -76,6 +86,7 @@ def set_user_background(fid, fname):
 	"""
 		Set uploaded image as user image
 	"""
+	check_demo()
 	from webnotes.utils.file_manager import add_file_list, remove_file
 	user = webnotes.session['user']
 	
