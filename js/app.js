@@ -14,8 +14,8 @@ erpnext.set_about = function() {
 wn.modules_path = 'erpnext';
 
 $(document).bind('toolbar_setup', function() {
-	$('.brand').html('<b>erp</b>next\
-		<i class="icon-home icon-white navbar-icon-home" ></i>')
+	$('.brand').html($wn.boot.website_settings.brand_html.substr(0,15) || 'erpnext' +
+	' <i class="icon-home icon-white navbar-icon-home" ></i>')
 	.hover(function() {
 		$(this).find('.icon-home').addClass('navbar-icon-home-hover');
 	}, function() {

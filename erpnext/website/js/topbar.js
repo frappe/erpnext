@@ -27,7 +27,7 @@ wn.provide('erpnext.navbar');
 erpnext.navbar.Navbar = Class.extend({
 	init: function() {
 		this.make();
-		$('.brand').html(wn.boot.website_settings.brand_html);
+		$('.brand').html(wn.boot.website_settings.brand_html || sys_defaults.company);
 		this.make_items();
 		$('.dropdown-toggle').dropdown();
 	},
@@ -54,9 +54,11 @@ erpnext.navbar.Navbar = Class.extend({
 		for(var i=0;i<items.length;i++) {
 			var item = items[i];
 			if(!item.parent_label && item.parentfield=='top_bar_items') {
-				item.route = item.url || item.custom_page;
+				console.log(item)
+				erpnext.header_link_settings(item);
+
 				$('header .nav:first').append(repl('<li data-label="%(label)s">\
-					<a href="#!%(route)s">%(label)s</a></li>', item))
+					<a href="%(route)s" %(target)s>%(label)s</a></li>', item));
 			}
 		}
 		
@@ -77,18 +79,23 @@ erpnext.navbar.Navbar = Class.extend({
 						});
 					$parent_li.append('<ul class="dropdown-menu"></ul>');
 				}
-				item.route = item.url || item.custom_page;
+				erpnext.header_link_settings(item);
 				$parent_li.find('.dropdown-menu').append(repl('<li data-label="%(label)s">\
-					<a href="#!%(route)s">%(label)s</a></li>', item))
+					<a href="%(route)s" %(target)s>%(label)s</a></li>', item))
 			}
 		}
 	}
 });
 
-
 // footer
 erpnext.Footer = Class.extend({
 	init: function() {
+		if(!wn.boot.website_settings.copyright) {
+			wn.boot.website_settings.copyright = sys_defaults.company;
+		}
+		if(!wn.boot.website_settings.address) {
+			wn.boot.website_settings.address = '';
+		}
 		$('footer').html(repl('<div class="web-footer">\
 			<div class="web-footer-menu"><ul></ul></div>\
 			<div class="web-footer-copyright">&copy; %(copyright)s | %(address)s</div>\
@@ -102,13 +109,24 @@ erpnext.Footer = Class.extend({
 		for(var i=0;i<items.length;i++) {
 			var item = items[i];
 			if(!item.parent_label && item.parentfield=='footer_items') {
-				item.route = item.url || item.custom_page;
-				$('.web-footer-menu ul').append(repl('<li><a href="#!%(route)s" \
+				erpnext.header_link_settings(item);
+				$('.web-footer-menu ul').append(repl('<li><a href="%(route)s" %(target)s\
 					data-label="%(label)s">%(label)s</a></li>', item))
 			}
 		}
 	}
 });
+
+// customize hard / soft links
+erpnext.header_link_settings = function(item) {
+	item.route = item.url || item.custom_page;
+	if(item.route.substr(0,4)=='http') {
+		item.target = 'target="_blank"';				
+	} else {
+		item.target = '';
+		item.route = '#!' + item.route;
+	}	
+}
 
 $(document).bind('startup', function() {
 	erpnext.footer = new erpnext.Footer();
