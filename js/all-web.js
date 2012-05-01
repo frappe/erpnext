@@ -97,7 +97,8 @@ wn.provide('wn.model');wn.model={no_value_type:['Section Break','Column Break','
  *	lib/js/wn/meta.js
  */
 wn.provide('wn.meta.docfield_map');wn.provide('wn.meta.docfield_list');wn.provide('wn.meta.doctypes');$.extend(wn.meta,{add_field:function(df){wn.provide('wn.meta.docfield_map.'+df.parent);wn.meta.docfield_map[df.parent][df.fieldname||df.label]=df;if(!wn.meta.docfield_list[df.parent])
-wn.meta.docfield_list[df.parent]=[]
+wn.meta.docfield_list[df.parent]=[];for(var i in wn.meta.docfield_list[df.parent]){var d=wn.meta.docfield_list[df.parent][i];if(df.fieldname==d.fieldname)
+return;}
 wn.meta.docfield_list[df.parent].push(df);}});
 /*
  *	lib/js/wn/misc/tools.js
