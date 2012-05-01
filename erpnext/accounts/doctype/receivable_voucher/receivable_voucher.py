@@ -313,15 +313,13 @@ class DocType(TransactionBase):
 	# Validates Debit To Account and Customer Matches
 	# ------------------------------------------------
 	def validate_debit_to_acc(self):
-		if self.doc.customer and not cint(self.doc.is_pos):
-			acc_head = webnotes.conn.sql("select name from `tabAccount` where name = %s and docstatus != 2", (cstr(self.doc.customer) + " - " + self.get_company_abbr()))
-			if acc_head and acc_head[0][0]:
-				if not cstr(acc_head[0][0]) == cstr(self.doc.debit_to):
-					msgprint("Debit To %s do not match with Customer %s for Company %s i.e. %s" %(self.doc.debit_to,self.doc.customer,self.doc.company,cstr(acc_head[0][0])))
-					raise Exception, "Validation Error "
-			if not acc_head:
-				 msgprint("%s does not have an Account Head in %s. You must first create it from the Customer Master" % (self.doc.customer, self.doc.company))
-				 raise Exception, "Validation Error "
+		if self.doc.customer and self.doc.debit_to and not cint(self.doc.is_pos):
+			acc_head = sql("select master_name from `tabAccount` where name = %s and docstatus != 2", self.doc.debit_to)
+			
+			if (acc_head and cstr(acc_head[0][0]) != cstr(self.doc.customer)) or \
+				(not acc_head and (self.doc.debit_to != cstr(self.doc.customer) + " - " + self.get_company_abbr())):
+				msgprint("Debit To: %s do not match with Customer: %s for Company: %s.\n If both correctly entered, please select Master Type \
+					and Master Name in account master." %(self.doc.debit_to, self.doc.customer,self.doc.company), raise_exception=1)
 
 
 	# Validate Debit To Account
