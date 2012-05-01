@@ -15,16 +15,11 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 cur_frm.cscript.onload = function(doc, cdt, cdn) {
-	var cp = wn.control_panel;
-
 	if (!doc.voucher_date) doc.voucher_date = dateutil.obj_to_str(new Date());
 
-	if(cp.country == 'India') {
-		unhide_field(['tds_applicable','tds_category','get_tds','tax_code','rate','ded_amount','supplier_account']);
-	}
-	else {
-		hide_field(['tds_applicable','tds_category','get_tds','tax_code','rate','ded_amount','supplier_account']);
-	}
+	var cp = wn.control_panel;
+	if(cp.country == 'India') $(cur_frm.fields_dict.tds.row.wrapper).toggle(true);
+	else $(cur_frm.fields_dict.tds.row.wrapper).toggle(false);
 
 	cur_frm.cscript.load_defaults(doc, cdt, cdn);
 }
