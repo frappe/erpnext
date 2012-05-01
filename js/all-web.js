@@ -830,7 +830,7 @@ $(favicon).appendTo('head');}})
  *	js/app.js
  */
 wn.provide('erpnext');erpnext.set_about=function(){wn.provide('wn.app');$.extend(wn.app,{name:'ERPNext',license:'GNU/GPL - Usage Condition: All "erpnext" branding must be kept as it is',source:'https://github.com/webnotes/erpnext',publisher:'Web Notes Technologies Pvt Ltd, Mumbai',copyright:'&copy; Web Notes Technologies Pvt Ltd',version:'2'});}
-wn.modules_path='erpnext';$(document).bind('toolbar_setup',function(){$('.brand').html($wn.boot.website_settings.brand_html.substr(0,15)||'erpnext'+' <i class="icon-home icon-white navbar-icon-home" ></i>').hover(function(){$(this).find('.icon-home').addClass('navbar-icon-home-hover');},function(){$(this).find('.icon-home').removeClass('navbar-icon-home-hover');});});
+wn.modules_path='erpnext';$(document).bind('toolbar_setup',function(){$('.brand').html(wn.boot.website_settings.brand_html.substr(0,15)||'erpnext'+' <i class="icon-home icon-white navbar-icon-home" ></i>').hover(function(){$(this).find('.icon-home').addClass('navbar-icon-home-hover');},function(){$(this).find('.icon-home').removeClass('navbar-icon-home-hover');});});
 /*
  *	erpnext/startup/startup.js
  */
@@ -864,6 +864,7 @@ erpnext.set_user_background=function(src){set_style(repl('#body_div { background
 $(document).bind('startup',function(){erpnext.startup.start();});erpnext.send_message=function(opts){if(opts.btn){$(opts.btn).start_working();}
 wn.call({method:'website.send_message',args:opts,callback:function(r){if(opts.btn){$(opts.btn).done_working();}
 if(opts.callback)opts.callback(r)}});}
+erpnext.hide_naming_series=function(){if(cur_frm.fields_dict.naming_series){hide_field('naming_series');if(cur_frm.doc.__islocal){unhide_field('naming_series');}}}
 /*
  *	erpnext/website/js/topbar.js
  */
