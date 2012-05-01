@@ -90,6 +90,8 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 		cur_frm.add_custom_button('Set as Lost', cur_frm.cscript['Declare Order Lost']);
 		cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms);
 	}
+
+	erpnext.hide_naming_series();
 }
 
 
@@ -103,9 +105,7 @@ cur_frm.cscript.customer = function(doc,dt,dn) {
 
 	if(doc.customer) $c_obj(make_doclist(doc.doctype, doc.name), 
 		'get_default_customer_address', '', callback);
-	if(doc.customer) unhide_field(['customer_address','contact_person','customer_name',
-		'address_display','contact_display','contact_mobile','contact_email','territory',
-		'customer_group']);
+	if(doc.customer) unhide_field(['customer_address','contact_person','territory', 'customer_group']);
 }
 
 cur_frm.cscript.customer_address = cur_frm.cscript.contact_person = function(doc,dt,dn) {
@@ -141,7 +141,7 @@ cur_frm.fields_dict['lead'].get_query = function(doc,cdt,cdn){
 
 cur_frm.cscript.lead = function(doc, cdt, cdn) {
 	if(doc.lead) get_server_fields('get_lead_details', doc.lead,'', doc, cdt, cdn, 1);
-	if(doc.lead) unhide_field(['lead_name','address_display','contact_mobile','contact_email','territory', 'organization']);
+	if(doc.lead) unhide_field('territory');
 }
 
 
@@ -183,10 +183,10 @@ cur_frm.cscript.pull_enquiry_detail = function(doc,cdt,cdn){
 			doc.quotation_to = r.message;
 
 			if(doc.quotation_to == 'Lead') {
-					unhide_field(['lead','lead_name','address_display','contact_mobile','contact_email','territory']);
+					unhide_field('lead');
 			}
 			else if(doc.quotation_to == 'Customer') {
-				unhide_field(['customer','customer_address','contact_person','address_display','contact_display','contact_mobile','contact_email','territory','customer_group']);
+				unhide_field(['customer','customer_address','contact_person','territory','customer_group']);
 			}
 			refresh_many(['quotation_details','quotation_to','customer','customer_address','contact_person','lead','lead_name','address_display','contact_display','contact_mobile','contact_email','territory','customer_group','order_type']);
 		}

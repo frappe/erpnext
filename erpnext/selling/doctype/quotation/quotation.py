@@ -65,10 +65,6 @@ class DocType(TransactionBase):
 	def get_contact_details(self):
 		return get_obj('Sales Common').get_contact_details(self,0)
 	
-	# Clear Quotation Items
-	# -----------------------
-	def clear_quotation_details(self):
-		self.doc.clear_table(self.doclist, 'quotation_details')	
 	
 		
 # QUOTATION DETAILS TRIGGER FUNCTIONS

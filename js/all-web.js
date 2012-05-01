@@ -844,11 +844,11 @@ if(wn.boot.startup_code){eval(wn.boot.startup_code);}}else{wn.boot.profile.allow
 if(user_roles.indexOf('Accounts Manager')!=-1){wn.boot.profile.allow_modules.push('Dashboard');}
 erpnext.toolbar.setup();erpnext.startup.set_periodic_updates();if(in_list(user_roles,'System Manager')&&(wn.boot.setup_complete=='No')){wn.require("erpnext/startup/js/complete_setup.js");erpnext.complete_setup.show();}
 if(wn.boot.expires_on&&in_list(user_roles,'System Manager')){var today=dateutil.str_to_obj(dateutil.get_today());var expires_on=dateutil.str_to_obj(wn.boot.expires_on);var diff=dateutil.get_diff(expires_on,today);if(0<=diff&&diff<=15){var expiry_string=diff==0?"today":repl("in %(diff)s day(s)",{diff:diff});$('header').append(repl('<div class="expiry-info"> \
-     Ahem! Your ERPNext subscription will <b>expire %(expiry_string)s</b>. \
+     Your ERPNext subscription will <b>expire %(expiry_string)s</b>. \
      Please renew your subscription to continue using ERPNext \
      (and remove this annoying banner). \
     </div>',{expiry_string:expiry_string}));}else if(diff<0){$('header').append(repl('<div class="expiry-info"> \
-     Ahem! This ERPNext subscription <b>has expired</b> and should be deleted. \
+     This ERPNext subscription <b>has expired</b> and should be deleted. \
     </div>',{expiry_string:expiry_string}));}}}
 erpnext.set_about();$('#startup_div').toggle(false);}
 show_chart_browser=function(nm,chart_type){var call_back=function(){if(nm=='Sales Browser'){var sb_obj=new SalesBrowser();sb_obj.set_val(chart_type);}
@@ -865,7 +865,7 @@ erpnext.set_user_background=function(src){set_style(repl('#body_div { background
 $(document).bind('startup',function(){erpnext.startup.start();});erpnext.send_message=function(opts){if(opts.btn){$(opts.btn).start_working();}
 wn.call({method:'website.send_message',args:opts,callback:function(r){if(opts.btn){$(opts.btn).done_working();}
 if(opts.callback)opts.callback(r)}});}
-erpnext.hide_naming_series=function(){console.log(1);if(cur_frm.fields_dict.naming_series){hide_field('naming_series');if(cur_frm.doc.__islocal){unhide_field('naming_series');}}}
+erpnext.hide_naming_series=function(){if(cur_frm.fields_dict.naming_series){hide_field('naming_series');if(cur_frm.doc.__islocal){unhide_field('naming_series');}}}
 /*
  *	erpnext/website/js/topbar.js
  */

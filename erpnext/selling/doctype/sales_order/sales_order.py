@@ -84,12 +84,6 @@ class DocType(TransactionBase):
 	def get_comm_rate(self, sales_partner):
 		return get_obj('Sales Common').get_comm_rate(sales_partner, self)
 
-	# Clear Sales Order Items Table
-	# --------------------------------
-	def clear_sales_order_details(self):
-		self.doc.clear_table(self.doclist, 'sales_order_details')
-		
-
 # SALES ORDER DETAILS TRIGGER FUNCTIONS
 # ================================================================================
 	# Get Item Details

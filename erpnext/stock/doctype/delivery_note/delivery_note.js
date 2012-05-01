@@ -55,6 +55,7 @@ cur_frm.cscript.onload_post_render = function(doc, dt, dn) {
 // ================================================================================================
 cur_frm.cscript.refresh = function(doc, cdt, cdn) { 
 	cur_frm.clear_custom_buttons();
+	erpnext.hide_naming_series();
 	
 	if (!cur_frm.cscript.is_onload) cur_frm.cscript.hide_price_list_currency(doc, cdt, cdn); 
 
@@ -77,7 +78,7 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 cur_frm.cscript.customer = function(doc,dt,dn,onload) {	
 	var callback = function(r,rt) {
 			var doc = locals[cur_frm.doctype][cur_frm.docname];
-			if(doc.customer) unhide_field(['customer_address','contact_person','customer_name','address_display','contact_display','contact_mobile','contact_email','territory','customer_group','shipping_address']);
+			if(doc.customer) unhide_field(['customer_address','contact_person','territory','customer_group']);
 			cur_frm.refresh();
 			cur_frm.cscript.price_list_name(doc, dt, dn); 
 	} 
@@ -113,7 +114,7 @@ cur_frm.cscript.get_items = function(doc,dt,dn) {
 		if(r.message){							
 			doc.sales_order_no = r.message;			
 			if(doc.sales_order_no) {					
-					unhide_field(['customer_address','contact_person','customer_name','address_display','contact_display','contact_mobile','contact_email','territory','customer_group']);														
+					unhide_field(['customer_address','contact_person','territory','customer_group']);														
 			}			
 			refresh_many(['delivery_note_details','customer','customer_address','contact_person','customer_name','address_display','contact_display','contact_mobile','contact_email','territory','customer_group']);
 		}
