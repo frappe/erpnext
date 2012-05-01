@@ -248,7 +248,8 @@ $import(Notification Control)
 cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
 	var args = {
 		type: 'Expense Voucher',
-		doctype: 'Expense Voucher'
+		doctype: 'Expense Voucher',
+		send_to: doc.exp_approver
 	}
 	cur_frm.cscript.notify(doc, args);
 }

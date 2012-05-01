@@ -90,7 +90,8 @@ class DocType(TransactionBase):
 	# -------------------------------------
 	def get_comm_rate(self, sales_partner):
 		return get_obj('Sales Common').get_comm_rate(sales_partner, self)
-
+	
+	
 	# Clear Sales Order Details Table
 	# --------------------------------
 	def clear_sales_order_details(self):

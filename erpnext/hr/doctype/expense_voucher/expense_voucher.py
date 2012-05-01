@@ -98,8 +98,6 @@ class DocType:
       set(self.doc, 'remark', self.doc.remark)   
     set(self.doc, 'approval_status', 'Rejected')    
 
-    # on approval notification
-    #get_obj('Notification Control').notify_contact('Expense Voucher Rejected', self.doc.doctype, self.doc.name, self.doc.email_id, self.doc.employee_name)
 
     return cstr('Rejected')
   
@@ -157,3 +155,8 @@ class DocType:
   
   def on_cancel(self):
     set(self.doc, 'approval_status', 'Cancelled')
+
+
+  def get_formatted_message(self, args):
+    """ get formatted message for auto notification"""
+    return get_obj('Notification Control').get_formatted_message(args)
