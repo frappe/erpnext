@@ -19,18 +19,6 @@
 }
 {% endif %}
 
-{% if doc.footer_font_color %}
-footer {
-	color: {{ doc.footer_font_color }};
-}
-footer a, footer a:visited, footer a:hover {
-	color: {{ doc.footer_font_color }};
-}
-.web-footer-menu ul li {
-	border-right: 1px solid {{ doc.footer_font_color }};
-}
-{% endif %}
-
 {% if doc.heading_font %}
 h1, h2, h3, h4, h5 {
 	font-family: '{{ doc.heading_font}}', Arial, 'Helvetica Neue' !important;
