@@ -64,7 +64,8 @@ $.extend(wn.pages.users, {
 			}
 		});
 		if(!$('.subscription-info').length && (wn.boot.max_users || wn.boot.expires_on)) {
-			var $sub_info = $('<div class="subscription-info-box"><div>').insertAfter('.help');
+			var $sub_info = $('<div class="subscription-info-box"><div>')
+					.insertAfter($(wn.pages.users).find('.help'));
 			if(wn.boot.max_users) {
 				$sub_info.append(repl('\
 				<span class="subscription-info"> \
