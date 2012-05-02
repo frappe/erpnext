@@ -312,5 +312,10 @@ patch_list = [
 		'patch_file': 'repost_stock_for_posting_time',
 		'description': 'repost stock for posting time 00:00:seconds'
 	},
+	{
+		'patch_module': 'patches.may_2012',
+		'patch_file': 'cleanup_property_setter',
+		'description': 'cleanup_property_setter'
+	},
 
 ]
