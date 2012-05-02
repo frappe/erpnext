@@ -20,7 +20,7 @@ def execute():
 			'Invest 80 Declaration Detail', 'IT Checklist', 'Chapter VI A Detail', 'Declaration Detail',
 			'Personalize', 'Salary Slip Control Panel', 'Question Control'
 			],
-		'Page'		:	['File Browser', 'Bill of Materials', 'question-view', 'questions'],
+		'Page'		:	['File Browser', 'Bill of Materials', 'question-view'],
 		'DocType Mapper': ['Production Forecast-Production Planning Tool', 'Production Forecast-Production Plan', 'Sales Order-Production Plan'],
 	}
 
