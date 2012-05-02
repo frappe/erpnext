@@ -112,26 +112,13 @@ erpnext.startup.start = function() {
 	erpnext.set_about();
 	if(wn.control_panel.custom_startup_code)
 		eval(wn.control_panel.custom_startup_code);
-}
-
-// chart of accounts
-// ====================================================================
-show_chart_browser = function(nm, chart_type){
-
-  var call_back = function(){
-    if(nm == 'Sales Browser'){
-      var sb_obj = new SalesBrowser();
-      sb_obj.set_val(chart_type);
-    }
-    else if(nm == 'Accounts Browser')
-      pscript.make_chart(chart_type);
-  }
-  loadpage(nm,call_back);
+		
+	$('body').append('<a class="erpnext-logo" title="Powered by ERPNext" href="http://erpnext.com" target="_blank"></a>')
 }
 
 
 // ========== Update Messages ============
-var update_messages = function(reset) {
+erpnext.update_messages = function(reset) {
 	// Updates Team Messages
 	
 	if(inList(['Guest'], user) || !wn.session_alive) { return; }
@@ -183,7 +170,7 @@ erpnext.startup.set_periodic_updates = function() {
 		clearInterval(wn.updates.id);
 	}
 
-	wn.updates.id = setInterval(update_messages, 60000);
+	wn.updates.id = setInterval(erpnext.update_messages, 60000);
 }
 
 erpnext.set_user_background = function(src) {
