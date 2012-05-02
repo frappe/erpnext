@@ -392,8 +392,7 @@
 		'oldfieldtype': u'Table',
 		'options': u'Sales Order Item',
 		'permlevel': 0,
-		'print_hide': 0,
-		'width': u'40px'
+		'print_hide': 0
 	},
 
 	# DocField
