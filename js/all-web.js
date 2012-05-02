@@ -852,17 +852,13 @@ if(wn.boot.expires_on&&in_list(user_roles,'System Manager')){var today=dateutil.
      This ERPNext subscription <b>has expired</b>. \
     </div>',{expiry_string:expiry_string}));}}}
 erpnext.set_about();if(wn.control_panel.custom_startup_code)
-eval(wn.control_panel.custom_startup_code);}
-show_chart_browser=function(nm,chart_type){var call_back=function(){if(nm=='Sales Browser'){var sb_obj=new SalesBrowser();sb_obj.set_val(chart_type);}
-else if(nm=='Accounts Browser')
-pscript.make_chart(chart_type);}
-loadpage(nm,call_back);}
-var update_messages=function(reset){if(inList(['Guest'],user)||!wn.session_alive){return;}
+eval(wn.control_panel.custom_startup_code);$('body').append('<a class="erpnext-logo" title="Powered by ERPNext" href="http://erpnext.com" target="_blank"></a>')}
+erpnext.update_messages=function(reset){if(inList(['Guest'],user)||!wn.session_alive){return;}
 if(!reset){var set_messages=function(r){if(!r.exc){erpnext.toolbar.set_new_comments(r.message.unread_messages);var show_in_circle=function(parent_id,msg){var parent=$('#'+parent_id);if(parent){if(msg){parent.find('span:first').text(msg);parent.toggle(true);}else{parent.toggle(false);}}}
 show_in_circle('unread_messages',r.message.unread_messages.length);show_in_circle('open_support_tickets',r.message.open_support_tickets);show_in_circle('things_todo',r.message.things_todo);show_in_circle('todays_events',r.message.todays_events);}else{clearInterval(wn.updates.id);}}
 wn.call({method:'startup.startup.get_global_status_messages',callback:set_messages});}else{erpnext.toolbar.set_new_comments(0);$('#unread_messages').toggle(false);}}
 erpnext.startup.set_periodic_updates=function(){wn.updates={};if(wn.updates.id){clearInterval(wn.updates.id);}
-wn.updates.id=setInterval(update_messages,60000);}
+wn.updates.id=setInterval(erpnext.update_messages,60000);}
 erpnext.set_user_background=function(src){set_style(repl('#body_div { background: url("files/%(src)s") repeat;}',{src:src}))}
 $(document).bind('startup',function(){erpnext.startup.start();});erpnext.send_message=function(opts){if(opts.btn){$(opts.btn).start_working();}
 wn.call({method:'website.send_message',args:opts,callback:function(r){if(opts.btn){$(opts.btn).done_working();}
@@ -892,8 +888,6 @@ if(!wn.boot.website_settings.address){wn.boot.website_settings.address='';}
 $('footer').html(repl('<div class="web-footer">\
    <div class="web-footer-menu"><ul></ul></div>\
    <div class="web-footer-copyright">&copy; %(copyright)s</div>\
-   <div class="web-footer-powered">Powered by \
-    <a href="https://erpnext.com">erpnext.com</a></div>\
   </div>',wn.boot.website_settings));this.make_items();},make_items:function(){var items=wn.boot.website_menus
 for(var i=0;i<items.length;i++){var item=items[i];if(!item.parent_label&&item.parentfield=='footer_items'){erpnext.header_link_settings(item);$('.web-footer-menu ul').append(repl('<li><a href="%(route)s" %(target)s\
      data-label="%(label)s">%(label)s</a></li>',item))}}}});erpnext.header_link_settings=function(item){item.route=item.url||item.custom_page;if(item.route&&item.route.substr(0,4)=='http'){item.target='target="_blank"';}else{item.target='';item.route='#!'+item.route;}}

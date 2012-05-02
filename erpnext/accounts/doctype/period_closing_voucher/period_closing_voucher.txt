@@ -241,17 +241,6 @@
 	# DocField
 	{
 		'doctype': u'DocField',
-		'fieldname': u'coa_help',
-		'fieldtype': u'HTML',
-		'label': u'CoA Help',
-		'oldfieldtype': u'HTML',
-		'options': u'<a href="javascript:cur_frm.cscript.acc_help();">To create Account Head, click here</a>',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
 		'fieldname': u'remarks',
 		'fieldtype': u'Small Text',
 		'label': u'Remarks',

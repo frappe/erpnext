@@ -1961,7 +1961,7 @@ footer {
 	color: inherit;
 	padding: 10px;
 	font-size: 12px;
-	line-height: 1.7;	
+	line-height: 1.7;
 }
 
 span, div, td, input, textarea, button, select {
@@ -2222,9 +2222,21 @@ div.std-footer-item {
 	vertical-align: middle;
 	overflow: hidden;
 	margin: 0px 3px;
+	border-radius: 3px;
+	-moz-border-radius: 3px;
+	-webkit-border-radius: 3px;
 }
 .avatar-small img {
 	width: 24px; 
+}
+
+.erpnext-logo {
+	position: fixed;
+	bottom: 5px;
+	left: 5px;
+	height: 40px;
+	width: 40px;
+	background: url('../images/erpnext-fade.png') no-repeat top left;
 }
 
 /*
