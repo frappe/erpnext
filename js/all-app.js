@@ -1888,10 +1888,9 @@ this.input.onchange=function(){me.set(me.editor.getContent());me.run_trigger();}
 this.get_value=function(){return me.editor.getContent();}}else{wn.require('lib/js/lib/ace/ace.js');$(this.input_area).css('border','1px solid #aaa');this.pre=$a(this.input_area,'pre','',{position:'relative',height:'400px',width:'100%'});this.input={};this.myid=wn.dom.set_unique_id(this.pre);this.editor=ace.edit(this.myid);if(me.df.options=='Markdown'||me.df.options=='HTML'){wn.require('lib/js/lib/ace/mode-html.js');var HTMLMode=require("ace/mode/html").Mode;me.editor.getSession().setMode(new HTMLMode());}
 else if(me.df.options=='Javascript'){wn.require('lib/js/lib/ace/mode-javascript.js');var JavascriptMode=require("ace/mode/javascript").Mode;me.editor.getSession().setMode(new JavascriptMode());}
 else if(me.df.options=='Python'){wn.require('lib/js/lib/ace/mode-python.js');var PythonMode=require("ace/mode/python").Mode;me.editor.getSession().setMode(new PythonMode());}
-this.input.set_input=function(v){me.editor.getSession().setValue(v);}
-me.editor.getSession().on('change',function(){me.set(me.get_value());me.run_trigger();})
+this.input.set_input=function(v){me.setting_value=true;me.editor.getSession().setValue(v);me.setting_value=false;}
 this.get_value=function(){return me.editor.getSession().getValue();}
-$(this.wrapper).bind('refresh',function(){me.editor.resize();});$(cur_frm.wrapper).bind('render_complete',function(){me.editor.resize();});}}
+$(cur_frm.wrapper).bind('render_complete',function(){me.editor.resize();me.editor.getSession().on('change',function(){if(me.setting_value)return;var val=me.get_value();if(locals[cur_frm.doctype][cur_frm.docname][me.df.fieldname]!=val){me.set(me.get_value());me.run_trigger();}})});}}
 _f.CodeField.prototype.init_editor=function(){var me=this;this.editor=tinymce.get(this.myid);this.editor.onKeyUp.add(function(ed,e){me.set(ed.getContent());});this.editor.onPaste.add(function(ed,e){me.set(ed.getContent());});this.editor.onSetContent.add(function(ed,e){me.set(ed.getContent());});var c=locals[cur_frm.doctype][cur_frm.docname][this.df.fieldname];if(cur_frm&&c){this.editor.setContent(c);}}
 _f.CodeField.prototype.set_disp=function(val){$y(this.disp_area,{width:'90%'})
 if(this.df.fieldtype=='Text Editor'){this.disp_area.innerHTML=val;}else{this.disp_area.innerHTML='<textarea class="code_text" readonly=1>'+val+'</textarea>';}}
