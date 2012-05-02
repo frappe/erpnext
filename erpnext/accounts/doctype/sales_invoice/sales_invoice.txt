@@ -5,7 +5,7 @@
 	{
 		'creation': '2012-04-13 11:56:18',
 		'docstatus': 0,
-		'modified': '2012-05-01 12:15:53',
+		'modified': '2012-05-02 09:57:50',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -194,6 +194,23 @@
 		'print_hide': 1,
 		'reqd': 1,
 		'search_index': 1,
+		'trigger': u'Client'
+	},
+
+	# DocField
+	{
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'customer',
+		'fieldtype': u'Link',
+		'hidden': 0,
+		'label': u'Customer',
+		'no_copy': 0,
+		'oldfieldname': u'customer',
+		'oldfieldtype': u'Link',
+		'options': u'Customer',
+		'permlevel': 0,
+		'print_hide': 1,
 		'trigger': u'Client'
 	},
 
@@ -960,23 +977,6 @@
 		'fieldtype': u'Column Break',
 		'permlevel': 0,
 		'width': u'50%'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'doctype': u'DocField',
-		'fieldname': u'customer',
-		'fieldtype': u'Link',
-		'hidden': 0,
-		'label': u'Customer',
-		'no_copy': 0,
-		'oldfieldname': u'customer',
-		'oldfieldtype': u'Link',
-		'options': u'Customer',
-		'permlevel': 0,
-		'print_hide': 1,
-		'trigger': u'Client'
 	},
 
 	# DocField
