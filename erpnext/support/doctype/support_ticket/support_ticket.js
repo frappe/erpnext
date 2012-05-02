@@ -48,6 +48,7 @@ $.extend(cur_frm.cscript, {
 	},
 	
 	refresh: function(doc) {
+		erpnext.hide_naming_series();
 		cur_frm.cscript.make_listing(doc);
 		if(!doc.__islocal) {											
 			if(in_list(user_roles,'System Manager')) {
