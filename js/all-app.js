@@ -1889,7 +1889,7 @@ this.get_value=function(){return me.editor.getContent();}}else{wn.require('lib/j
 else if(me.df.options=='Javascript'){wn.require('lib/js/lib/ace/mode-javascript.js');var JavascriptMode=require("ace/mode/javascript").Mode;me.editor.getSession().setMode(new JavascriptMode());}
 else if(me.df.options=='Python'){wn.require('lib/js/lib/ace/mode-python.js');var PythonMode=require("ace/mode/python").Mode;me.editor.getSession().setMode(new PythonMode());}
 this.input.set_input=function(v){me.editor.getSession().setValue(v);}
-this.input.onchange=function(){me.set(me.get_value());me.run_trigger();}
+me.editor.getSession().on('change',function(){me.set(me.get_value());me.run_trigger();})
 this.get_value=function(){return me.editor.getSession().getValue();}
 $(this.wrapper).bind('refresh',function(){me.editor.resize();});$(cur_frm.wrapper).bind('render_complete',function(){me.editor.resize();});}}
 _f.CodeField.prototype.init_editor=function(){var me=this;this.editor=tinymce.get(this.myid);this.editor.onKeyUp.add(function(ed,e){me.set(ed.getContent());});this.editor.onPaste.add(function(ed,e){me.set(ed.getContent());});this.editor.onSetContent.add(function(ed,e){me.set(ed.getContent());});var c=locals[cur_frm.doctype][cur_frm.docname][this.df.fieldname];if(cur_frm&&c){this.editor.setContent(c);}}
