@@ -43,21 +43,17 @@ cur_frm.fields_dict.purchase_receipt_no.get_query = function(doc) {
 //----------------------------------
 cur_frm.cscript.return_type = function(doc, cdt, cdn) {
 	var cp = wn.control_panel;
-	hide_field(['purchase_receipt_no', 'delivery_note_no', 'sales_invoice_no',
-		'return_details', 'get_items', 'Make Excise Invoice', 'Make Stock Entry',
-		'Make Debit Note', 'Make Credit Note']);
+	hide_field(['purchase_receipt_no', 'delivery_note_no', 'sales_invoice_no', 'return_details', 'get_items', 'make_excise_invoice', 'make_stock_entry', 'make_debit_note', 'make_credit_note']);
 
 	if(doc.return_type == 'Sales Return') {
-		unhide_field(['delivery_note_no', 'sales_invoice_no', 'get_items',
-			'return_details', 'Make Credit Note', 'Make Stock Entry']);
+		unhide_field(['delivery_note_no', 'sales_invoice_no', 'get_items', 'return_details', 'make_credit_note', 'make_stock_entry']);
 		
-		if(cp.country == 'India') {	unhide_field(['Make Excise Invoice']); }
+		if(cp.country == 'India') {	unhide_field(['make_excise_invoice']); }
 
 	} else if(doc.return_type == 'Purchase Return') {
-		unhide_field(['purchase_receipt_no', 'get_items', 'return_details',
-			'Make Debit Note', 'Make Stock Entry']);
+		unhide_field(['purchase_receipt_no', 'get_items', 'return_details', 'make_debit_note', 'make_stock_entry']);
 
-		if(cp.country == 'India') {	unhide_field(['Make Excise Invoice']); }
+		if(cp.country == 'India') {	unhide_field(['make_excise_invoice']);}
 	}
 	
 	cur_frm.cscript.clear_fields(doc);
