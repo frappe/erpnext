@@ -883,8 +883,7 @@ wn.provide('erpnext.navbar');erpnext.navbar.Navbar=Class.extend({init:function()
     </ul>\
    </div>\
    </div>\
-   </div>');$('.brand').attr('href','#!'+(wn.boot.website_settings.home_page||'Login Page'))},make_items:function(){var items=wn.boot.website_menus;for(var i=0;i<items.length;i++){var item=items[i];if(!item.parent_label&&item.parentfield=='top_bar_items'){console.log(item)
-erpnext.header_link_settings(item);$('header .nav:first').append(repl('<li data-label="%(label)s">\
+   </div>');$('.brand').attr('href','#!'+(wn.boot.website_settings.home_page||'Login Page'))},make_items:function(){var items=wn.boot.website_menus;for(var i=0;i<items.length;i++){var item=items[i];if(!item.parent_label&&item.parentfield=='top_bar_items'){erpnext.header_link_settings(item);$('header .nav:first').append(repl('<li data-label="%(label)s">\
      <a href="%(route)s" %(target)s>%(label)s</a></li>',item));}}
 for(var i=0;i<items.length;i++){var item=items[i];if(item.parent_label&&item.parentfield=='top_bar_items'){$parent_li=$(repl('header li[data-label="%(parent_label)s"]',item));if(!$parent_li.hasClass('dropdown')){$parent_li.addClass('dropdown');$parent_li.find('a:first').addClass('dropdown-toggle').attr('data-toggle','dropdown').attr('href','').append('<b class="caret"></b>').click(function(){return false;});$parent_li.append('<ul class="dropdown-menu"></ul>');}
 erpnext.header_link_settings(item);$parent_li.find('.dropdown-menu').append(repl('<li data-label="%(label)s">\
@@ -897,5 +896,5 @@ $('footer').html(repl('<div class="web-footer">\
     <a href="https://erpnext.com">erpnext.com</a></div>\
   </div>',wn.boot.website_settings));this.make_items();},make_items:function(){var items=wn.boot.website_menus
 for(var i=0;i<items.length;i++){var item=items[i];if(!item.parent_label&&item.parentfield=='footer_items'){erpnext.header_link_settings(item);$('.web-footer-menu ul').append(repl('<li><a href="%(route)s" %(target)s\
-     data-label="%(label)s">%(label)s</a></li>',item))}}}});erpnext.header_link_settings=function(item){item.route=item.url||item.custom_page;if(item.route.substr(0,4)=='http'){item.target='target="_blank"';}else{item.target='';item.route='#!'+item.route;}}
+     data-label="%(label)s">%(label)s</a></li>',item))}}}});erpnext.header_link_settings=function(item){item.route=item.url||item.custom_page;if(item.route&&item.route.substr(0,4)=='http'){item.target='target="_blank"';}else{item.target='';item.route='#!'+item.route;}}
 $(document).bind('startup',function(){erpnext.footer=new erpnext.Footer();erpnext.navbar.navbar=new erpnext.navbar.Navbar();})
