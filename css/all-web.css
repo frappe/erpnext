@@ -2480,6 +2480,9 @@ div.appframe-titlebar {
 	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#eeeeee', endColorstr='#cccccc',GradientType=0 ); /* IE6-9 */
 	border-bottom: 1px solid #aaa;
 	min-height: 1.2em;
+	border-radius: 5px 5px 0px 0px;
+	-webkit-border-radius: 5px 5px 0px 0px;
+	-moz-border-radius: 5px 5px 0px 0px;
 }
 
 div.appframe-toolbar {
