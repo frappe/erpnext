@@ -317,5 +317,10 @@ patch_list = [
 		'patch_file': 'cleanup_property_setter',
 		'description': 'cleanup_property_setter'
 	},
+	{
+		'patch_module': 'patches.may_2012',
+		'patch_file': 'rename_prev_doctype',
+		'description': 'rename prev doctype fix'
+	},
 
 ]
