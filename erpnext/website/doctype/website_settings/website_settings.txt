@@ -5,7 +5,7 @@
 	{
 		'creation': '2012-04-02 16:38:02',
 		'docstatus': 0,
-		'modified': '2012-04-30 14:20:56',
+		'modified': '2012-05-02 15:24:12',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -237,6 +237,7 @@
 		'fieldname': u'startup_code',
 		'fieldtype': u'Code',
 		'label': u'Startup Code',
+		'options': u'Javascript',
 		'permlevel': 0
 	}
 ]
