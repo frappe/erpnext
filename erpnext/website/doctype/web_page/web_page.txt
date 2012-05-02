@@ -5,7 +5,7 @@
 	{
 		'creation': '2012-04-02 16:02:43',
 		'docstatus': 0,
-		'modified': '2012-04-28 10:03:45',
+		'modified': '2012-05-02 15:24:31',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -22,7 +22,7 @@
 		'name': '__common__',
 		'section_style': u'Simple',
 		'show_in_menu': 0,
-		'version': 17
+		'version': 1
 	},
 
 	# These values are common for all DocField
@@ -124,6 +124,7 @@
 		'fieldname': u'head_section',
 		'fieldtype': u'Text',
 		'label': u'Head Section',
+		'options': u'Markdown',
 		'permlevel': 0
 	},
 
@@ -135,6 +136,7 @@
 		'fieldname': u'main_section',
 		'fieldtype': u'Code',
 		'label': u'Main Section',
+		'options': u'Markdown',
 		'permlevel': 0
 	},
 
@@ -146,6 +148,7 @@
 		'fieldname': u'side_section',
 		'fieldtype': u'Code',
 		'label': u'Side Section',
+		'options': u'Markdown',
 		'permlevel': 0
 	},
 
@@ -186,6 +189,7 @@
 		'fieldname': u'javascript',
 		'fieldtype': u'Code',
 		'label': u'Javascript',
+		'options': u'Javascript',
 		'permlevel': 0
 	},
 
@@ -204,6 +208,7 @@
 		'fieldname': u'css',
 		'fieldtype': u'Code',
 		'label': u'CSS',
+		'options': u'CSS',
 		'permlevel': 0
 	},
 
