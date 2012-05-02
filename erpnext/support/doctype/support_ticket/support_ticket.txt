@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-03-27 14:36:43',
+		'creation': '2012-04-02 16:02:42',
 		'docstatus': 0,
-		'modified': '2012-03-27 14:36:43',
+		'modified': '2012-05-02 11:33:24',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -26,7 +26,7 @@
 		'show_in_menu': 0,
 		'subject': u'%(subject)s',
 		'tag_fields': u'status,allocated_to',
-		'version': 153
+		'version': 1
 	},
 
 	# These values are common for all DocField
@@ -41,6 +41,7 @@
 	# These values are common for all DocPerm
 	{
 		'amend': 0,
+		'cancel': 0,
 		'doctype': u'DocPerm',
 		'name': '__common__',
 		'parent': u'Support Ticket',
@@ -58,7 +59,6 @@
 
 	# DocPerm
 	{
-		'cancel': 0,
 		'create': 1,
 		'doctype': u'DocPerm',
 		'permlevel': 0,
@@ -68,7 +68,6 @@
 
 	# DocPerm
 	{
-		'cancel': 0,
 		'create': 1,
 		'doctype': u'DocPerm',
 		'permlevel': 0,
@@ -78,7 +77,6 @@
 
 	# DocPerm
 	{
-		'cancel': 1,
 		'create': 1,
 		'doctype': u'DocPerm',
 		'permlevel': 0,
@@ -88,7 +86,6 @@
 
 	# DocPerm
 	{
-		'cancel': 0,
 		'create': 0,
 		'doctype': u'DocPerm',
 		'permlevel': 1,
@@ -98,12 +95,26 @@
 
 	# DocPerm
 	{
-		'cancel': 0,
 		'create': 0,
 		'doctype': u'DocPerm',
 		'permlevel': 2,
 		'role': u'Support Team',
 		'write': 0
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'naming_series',
+		'fieldtype': u'Select',
+		'hidden': 0,
+		'label': u'Naming Series',
+		'no_copy': 1,
+		'options': u'SUP',
+		'permlevel': 0,
+		'print_hide': 1,
+		'reqd': 0,
+		'search_index': 0
 	},
 
 	# DocField
@@ -396,20 +407,5 @@
 		'no_copy': 1,
 		'permlevel': 0,
 		'print_hide': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'naming_series',
-		'fieldtype': u'Select',
-		'hidden': 1,
-		'label': u'Series',
-		'no_copy': 1,
-		'options': u'SUP',
-		'permlevel': 0,
-		'print_hide': 1,
-		'reqd': 0,
-		'search_index': 0
 	}
 ]

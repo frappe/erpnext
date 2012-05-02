@@ -1798,12 +1798,12 @@ body {
 /* font settings */
 
 h1, h2, h3, h4, h5 {
-	font-family: "Helvetica Neue", Helvetica, "Helvetica Neue", sans-serif;
+	font-family: Arial, sans-serif;
 	margin-top: 0.2em;
 }
 
 body {
-	font-family: "Helvetica Neue", Helvetica, "Helvetica Neue", sans-serif;
+	font-family: Arial, sans-serif;
 	font-size: 13px;
 	background-color: #eee;
 }
@@ -2481,12 +2481,12 @@ div.appframe-toolbar {
  *	erpnext/startup/startup.css
  */
 h1, h2, h3, h4, h5 {
-	font-family: "Helvetica Neue", "Open Sans", Helvetica, sans-serif;
+	font-family: Arial, Helvetica, sans-serif;
 	margin-top: 0.2em;
 }
 
 body {
-	font-family: "Helvetica Neue", "Open Sans", Helvetica, sans-serif;
+	font-family: Arial, Helvetica, sans-serif;
 	font-size: 13px;
 }
 

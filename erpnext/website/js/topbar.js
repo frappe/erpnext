@@ -54,9 +54,7 @@ erpnext.navbar.Navbar = Class.extend({
 		for(var i=0;i<items.length;i++) {
 			var item = items[i];
 			if(!item.parent_label && item.parentfield=='top_bar_items') {
-				console.log(item)
 				erpnext.header_link_settings(item);
-
 				$('header .nav:first').append(repl('<li data-label="%(label)s">\
 					<a href="%(route)s" %(target)s>%(label)s</a></li>', item));
 			}
@@ -120,7 +118,7 @@ erpnext.Footer = Class.extend({
 // customize hard / soft links
 erpnext.header_link_settings = function(item) {
 	item.route = item.url || item.custom_page;
-	if(item.route.substr(0,4)=='http') {
+	if(item.route && item.route.substr(0,4)=='http') {
 		item.target = 'target="_blank"';				
 	} else {
 		item.target = '';
