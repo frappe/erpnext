@@ -83,7 +83,7 @@ cur_frm.cscript.customer = function(doc,dt,dn,onload) {
 			var doc = locals[cur_frm.doctype][cur_frm.docname];
 			if(doc.customer) unhide_field(['customer_address','contact_person','territory','customer_group']);
 			cur_frm.refresh();
-			cur_frm.cscript.price_list_name(doc, dt, dn); 
+			if(!onload) cur_frm.cscript.price_list_name(doc, dt, dn); 
 	} 
 	var args = onload ? 'onload':''
 	if(doc.customer) $c_obj(make_doclist(doc.doctype, doc.name), 'get_default_customer_shipping_address', args, callback);

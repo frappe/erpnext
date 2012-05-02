@@ -102,7 +102,7 @@ cur_frm.cscript.customer = function(doc,dt,dn) {
 		var callback2  = function(r, rt) {
 			if(doc.customer) unhide_field(['customer_address', 'contact_person', 'territory','customer_group','shipping_address']);
 			cur_frm.refresh();
-			cur_frm.cscript.price_list_name(doc, dt, dn); 
+			if(!onload) cur_frm.cscript.price_list_name(doc, dt, dn); 
 
 		}
 		var doc = locals[cur_frm.doctype][cur_frm.docname];
