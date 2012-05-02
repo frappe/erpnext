@@ -852,7 +852,8 @@ if(wn.boot.expires_on&&in_list(user_roles,'System Manager')){var today=dateutil.
     </div>',{expiry_string:expiry_string}));}else if(diff<0){$('header').append(repl('<div class="expiry-info"> \
      This ERPNext subscription <b>has expired</b>. \
     </div>',{expiry_string:expiry_string}));}}}
-erpnext.set_about();$('#startup_div').toggle(false);}
+erpnext.set_about();if(wn.control_panel.custom_startup_code)
+eval(wn.control_panel.custom_startup_code);}
 show_chart_browser=function(nm,chart_type){var call_back=function(){if(nm=='Sales Browser'){var sb_obj=new SalesBrowser();sb_obj.set_val(chart_type);}
 else if(nm=='Accounts Browser')
 pscript.make_chart(chart_type);}

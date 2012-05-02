@@ -110,8 +110,8 @@ erpnext.startup.start = function() {
 	}
 
 	erpnext.set_about();
-
-	$('#startup_div').toggle(false);
+	if(wn.control_panel.custom_startup_code)
+		eval(wn.control_panel.custom_startup_code);
 }
 
 // chart of accounts
