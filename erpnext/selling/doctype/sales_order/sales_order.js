@@ -98,18 +98,20 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 
 //customer
 cur_frm.cscript.customer = function(doc,dt,dn) {
+	var pl = doc.price_list_name;
 	var callback = function(r,rt) {
 		var callback2  = function(r, rt) {
+
 			if(doc.customer) unhide_field(['customer_address', 'contact_person', 'territory','customer_group','shipping_address']);
 			cur_frm.refresh();
-			if(!onload) cur_frm.cscript.price_list_name(doc, dt, dn); 
+			
+			if(!onload && (pl != doc.price_list_name)) cur_frm.cscript.price_list_name(doc, dt, dn);
 
 		}
 		var doc = locals[cur_frm.doctype][cur_frm.docname];
 		get_server_fields('get_shipping_address',doc.customer,'',doc, dt, dn, 0, callback2);
 			
 	}	 
-
 	if(doc.customer) $c_obj(make_doclist(doc.doctype, doc.name), 'get_default_customer_address', '', callback);
 }
 
