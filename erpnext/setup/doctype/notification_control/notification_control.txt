@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-03-27 14:36:22',
+		'creation': '2012-05-03 16:16:21',
 		'docstatus': 0,
-		'modified': '2012-03-27 14:36:22',
+		'modified': '2012-05-03 16:23:29',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -22,7 +22,7 @@
 		'name': '__common__',
 		'section_style': u'Simple',
 		'server_code_error': u' ',
-		'version': 79
+		'version': 1
 	},
 
 	# These values are common for all DocField
@@ -88,16 +88,6 @@
 	# DocField
 	{
 		'doctype': u'DocField',
-		'fieldname': u'enquiry',
-		'fieldtype': u'Check',
-		'hidden': 1,
-		'label': u'Opportunity',
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
 		'fieldname': u'quotation',
 		'fieldtype': u'Check',
 		'label': u'Quotation'
@@ -122,7 +112,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
-		'fieldname': u'receivable_voucher',
+		'fieldname': u'sales_invoice',
 		'fieldtype': u'Check',
 		'label': u'Sales Invoice'
 	},
@@ -155,16 +145,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
-		'fieldname': u'payable_voucher',
-		'fieldtype': u'Check',
-		'label': u'Purchase Invoice',
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'expense_voucher',
+		'fieldname': u'expense_claim',
 		'fieldtype': u'Check',
 		'label': u'Expense Claim'
 	},
@@ -184,7 +165,7 @@
 		'fieldname': u'select_transaction',
 		'fieldtype': u'Select',
 		'label': u'Select Transaction',
-		'options': u'\nQuotation\nSales Order\nDelivery Note\nSales Invoice\nPayment Received\nPurchase Order\nPurchase Receipt\nPayment Sent',
+		'options': u'\nQuotation\nSales Order\nDelivery Note\nSales Invoice\nPurchase Order\nPurchase Receipt\nExpense Claim\nExpense Claim Approved\nExpense Claim Rejected',
 		'trigger': u'Client'
 	},
 
@@ -248,16 +229,6 @@
 	# DocField
 	{
 		'doctype': u'DocField',
-		'fieldname': u'payment_received_message',
-		'fieldtype': u'Text',
-		'hidden': 1,
-		'label': u'Payment Received Message',
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
 		'fieldname': u'purchase_order_message',
 		'fieldtype': u'Text',
 		'hidden': 1,
@@ -278,17 +249,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
-		'fieldname': u'payment_sent_message',
-		'fieldtype': u'Text',
-		'hidden': 1,
-		'label': u'Payment Sent Message',
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'expense_voucher_approved_message',
+		'fieldname': u'expense_claim_approved_message',
 		'fieldtype': u'Text',
 		'hidden': 1,
 		'label': u'Expense Claim Approved Message',
@@ -298,7 +259,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
-		'fieldname': u'expense_voucher_rejected_message',
+		'fieldname': u'expense_claim_rejected_message',
 		'fieldtype': u'Text',
 		'hidden': 1,
 		'label': u'Expense Claim Rejected Message',
