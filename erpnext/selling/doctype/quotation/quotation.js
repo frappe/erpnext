@@ -65,7 +65,7 @@ cur_frm.cscript.lead_cust_show = function(doc,cdt,cdn){
 	if(doc.quotation_to == 'Lead') unhide_field(['lead']);
 	else if(doc.quotation_to == 'Customer') unhide_field(['customer']);
 	
-	doc.lead = doc.lead_name = doc.customer = doc.customer_address = doc.contact_person = doc.address_display = doc.contact_display = doc.contact_mobile = doc.contact_email = doc.territory = doc.customer_group = doc.organization = "";
+	doc.lead = doc.lead_name = doc.customer = doc.customer_name = doc.customer_address = doc.contact_person = doc.address_display = doc.contact_display = doc.contact_mobile = doc.contact_email = doc.territory = doc.customer_group = doc.organization = "";
 }
 
 
@@ -144,8 +144,10 @@ cur_frm.fields_dict['lead'].get_query = function(doc,cdt,cdn){
 }
 
 cur_frm.cscript.lead = function(doc, cdt, cdn) {
-	if(doc.lead) get_server_fields('get_lead_details', doc.lead,'', doc, cdt, cdn, 1);
-	if(doc.lead) unhide_field('territory');
+	if(doc.lead) {
+		get_server_fields('get_lead_details', doc.lead,'', doc, cdt, cdn, 1, callback);
+		unhide_field('territory');
+	}
 }
 
 
