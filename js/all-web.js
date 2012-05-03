@@ -335,6 +335,8 @@ $(parent).append(repl('<span class="bar-outer" style="width: 30px; float: right"
     <span class="bar-inner %(fully_delivered)s" \
      style="width: %(percent)s%;"></span>\
    </span>',args));}
+else if(opts.type=='link'&&opts.doctype){$(parent).append(repl('<a href="#!Form/'+opts.doctype+'/'
++data[opts.content]+'">'+data[opts.content]+'</a>',data));}
 else if(data[opts.content]){$(parent).append(' '+data[opts.content]);}},render:function(row,data){var me=this;this.prepare_data(data);rowhtml='';$.each(this.columns,function(i,v){rowhtml+=repl('<td style="width: %(width)s"></td>',v);});var tr=$(row).html('<table><tbody><tr>'+rowhtml+'</tr></tbody></table>').find('tr').get(0);$.each(this.columns,function(i,v){me.render_column(data,tr.cells[i],v);});},prepare_data:function(data){data.fullname=wn.user_info(data.owner).fullname;data.avatar=wn.user_info(data.owner).image;data.when=dateutil.str_to_user(data.modified).split(' ')[0];var diff=dateutil.get_diff(dateutil.get_today(),data.modified.split(' ')[0]);if(diff==0){data.when='Today'}
 if(diff==1){data.when='Yesterday'}
 if(diff==2){data.when='2 days ago'}

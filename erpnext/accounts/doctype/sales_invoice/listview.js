@@ -9,8 +9,6 @@ wn.doclistviews['Sales Invoice'] = wn.views.ListView.extend({
 			"`tabSales Invoice`.currency", 
 			"ifnull(`tabSales Invoice`.grand_total_export,0) as grand_total_export"
 		]);
-
-		this.stats = this.stats.concat(['company']);		
 	},
 	prepare_data: function(data) {
 		this._super(data);

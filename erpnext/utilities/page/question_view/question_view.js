@@ -84,12 +84,13 @@ KBQuestionView = function(w, qid, qtext) {
 	// text area + add button
 	this.make_answer_box = function() {
 		$ds(w.add_answer_area);
-		$a(w.add_answer_area, 'h3', '', {}, 'Add Your Answer')
+		$(w.add_answer_area, '<h3>Add your Answer</h3>\
+			<div class="help">In markdown format</div>');
 		this.input = $a(w.add_answer_area, 'textarea');
-		wn.tinymce.add_simple(this.input);
+		//wn.tinymce.add_simple(this.input);
 		
 		this.btn = $btn($a(w.add_answer_area, 'div'), 'Post', function() {
-			var v = wn.tinymce.get_value(me.input);
+			var v = $(me.input).val();
 			if(!v) { msgprint('Write something!'); return; }
 			me.btn.set_working();
 			$c_page('utilities', 'question_view', 'add_answer', {qid: qid, answer:v}, 
