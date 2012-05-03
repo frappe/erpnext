@@ -145,7 +145,7 @@ cur_frm.fields_dict['lead'].get_query = function(doc,cdt,cdn){
 
 cur_frm.cscript.lead = function(doc, cdt, cdn) {
 	if(doc.lead) {
-		get_server_fields('get_lead_details', doc.lead,'', doc, cdt, cdn, 1, callback);
+		get_server_fields('get_lead_details', doc.lead,'', doc, cdt, cdn, 1);
 		unhide_field('territory');
 	}
 }
