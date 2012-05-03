@@ -142,7 +142,7 @@ class DocType:
 						r['value'] = float(r['debit'] - r['credit'])
 				#webnotes.msgprint(query)
 				#webnotes.msgprint(res)
-				result[query] = (res and len(res)==1) and res[0] or (res and res or None)
+				result[query] = res and (len(res)==1 and res[0]) or (res or None)
 				if result[query] is None:
 					del result[query]
 		
