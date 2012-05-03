@@ -126,7 +126,7 @@ erpnext.desktop.show_pending_notifications = function() {
 	add_circle('todo', 'things_todo', 'Things To Do');
 	add_circle('calendar', 'todays_events', 'Todays Events');
 
-	update_messages();
+	erpnext.update_messages();
 
 }
 
