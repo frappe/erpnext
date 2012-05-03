@@ -142,7 +142,7 @@ class DocType:
 						r['value'] = float(r['debit'] - r['credit'])
 				#webnotes.msgprint(query)
 				#webnotes.msgprint(res)
-				result[query] = (res and len(res)==1) and res[0] or (res and res or None)
+				result[query] = res and (len(res)==1 and res[0]) or (res or None)
 				if result[query] is None:
 					del result[query]
 		
@@ -502,126 +502,143 @@ class DocType:
 		body_dict = {
 
 			'invoiced_amount': {
-				'table': 'invoiced_amount' in result and table({
-					'head': 'Invoiced Amount',
-					'body': currency_amount_str \
-						% (currency, fmt_money(result['invoiced_amount']['debit']))
-				}),
+				'table': result.get('invoiced_amount') and \
+					table({
+						'head': 'Invoiced Amount',
+						'body': currency_amount_str \
+							% (currency, fmt_money(result['invoiced_amount'].get('debit')))
+					}),
 				'idx': 300
 			},
 
 			'payables': {
-				'table': 'payables' in result and table({
-					'head': 'Payables',
-					'body': currency_amount_str \
-						% (currency, fmt_money(result['payables']['credit']))
-				}),
+				'table': result.get('payables') and \
+					table({
+						'head': 'Payables',
+						'body': currency_amount_str \
+							% (currency, fmt_money(result['payables'].get('credit')))
+					}),
 				'idx': 200
 			},
 
 			'collections': {
-				'table': 'collections' in result and table({
-					'head': 'Collections',
-					'body': currency_amount_str \
-						% (currency, fmt_money(result['collections']['credit']))
-				}),
+				'table': result.get('collections') and \
+					table({
+						'head': 'Collections',
+						'body': currency_amount_str \
+							% (currency, fmt_money(result['collections'].get('credit')))
+					}),
 				'idx': 301
 			},
 
 			'payments': {
-				'table': 'payments' in result and table({
-					'head': 'Payments',
-					'body': currency_amount_str \
-						% (currency, fmt_money(result['payments']['debit']))
-				}),
+				'table': result.get('payments') and \
+					table({
+						'head': 'Payments',
+						'body': currency_amount_str \
+							% (currency, fmt_money(result['payments'].get('debit')))
+					}),
 				'idx': 201
 			},
 
 			'income': {
-				'table': 'income' in result and table({
-					'head': 'Income',
-					'body': currency_amount_str \
-						% (currency, fmt_money(result['income']['value']))
-				}),
+				'table': result.get('income') and \
+					table({
+						'head': 'Income',
+						'body': currency_amount_str \
+							% (currency, fmt_money(result['income'].get('value')))
+					}),
 				'idx': 302
 			},
 
 			'income_year_to_date': {
-				'table': 'income_year_to_date' in result and table({
-					'head': 'Income Year To Date',
-					'body': currency_amount_str \
-						% (currency, fmt_money(result['income_year_to_date']['value']))
-				}),
+				'table': result.get('income_year_to_date') and \
+					table({
+						'head': 'Income Year To Date',
+						'body': currency_amount_str \
+							% (currency, fmt_money(result['income_year_to_date'].get('value')))
+					}),
 				'idx': 303
 			},
 
 			'expenses_booked': {
-				'table': 'expenses_booked' in result and table({
-					'head': 'Expenses Booked',
-					'body': currency_amount_str \
-						% (currency, fmt_money(result['expenses_booked']['value']))
-				}),
+				'table': result.get('expenses_booked') and \
+					table({
+						'head': 'Expenses Booked',
+						'body': currency_amount_str \
+							% (currency, fmt_money(result['expenses_booked'].get('value')))
+					}),
 				'idx': 202
 			},
 
 			'bank_balance': {
-				'table': 'bank_balance' in result and result['bank_balance'] and table({
-					'head': 'Bank Balance',
-					'body': [
-						[
-							"<span style='font-size: 16px; font-weight: normal'>%s</span>" % bank['name'],
-							currency_amount_str % (currency, fmt_money(bank['value']))
-						] for bank in result.get('bank_balance', [])
-					]
-				}),
+				'table': result.get('bank_balance') and \
+					table({
+						'head': 'Bank Balance',
+						'body': [
+							[
+								"<span style='font-size: 16px; font-weight: normal'>%s</span>" \
+									% bank['name'],
+								currency_amount_str % (currency, fmt_money(bank.get('value')))
+							] for bank in (isinstance(result['bank_balance'], list) and \
+								result['bank_balance'] or \
+								[result['bank_balance']])
+						]
+					}),
 				'idx': 400
 			},
 
 			'new_leads': {
-				'table': 'new_leads' in result and table({
-					'head': 'New Leads',
-					'body': '%s' % result['new_leads']['count']
-				}),
+				'table': result.get('new_leads') and \
+					table({
+						'head': 'New Leads',
+						'body': '%s' % result['new_leads'].get('count')
+					}),
 				'idx': 100
 			},
 
 			'new_enquiries': {
-				'table': 'new_enquiries' in result and table({
-					'head': 'New Enquiries',
-					'body': '%s' % result['new_enquiries']['count']
-				}),
+				'table': result.get('new_enquiries') and \
+					table({
+						'head': 'New Enquiries',
+						'body': '%s' % result['new_enquiries'].get('count')
+					}),
 				'idx': 101
 			},
 
 			'new_quotations': {
-				'table': 'new_quotations' in result and table({
-					'head': 'New Quotations',
-					'body': '%s' % result['new_quotations']['count']
-				}),
+				'table': result.get('new_quotations') and \
+					table({
+						'head': 'New Quotations',
+						'body': '%s' % result['new_quotations'].get('count')
+					}),
 				'idx': 102
 			},
 
 			'new_sales_orders': {
-				'table': 'new_sales_orders' in result and table({
-					'head': 'New Sales Orders',
-					'body': '%s' % result['new_sales_orders']['count']
-				}),
+				'table': result.get('new_sales_orders') and \
+					table({
+						'head': 'New Sales Orders',
+						'body': '%s' % result['new_sales_orders'].get('count')
+					}),
 				'idx': 103
 			},
 
 			'new_purchase_orders': {
-				'table': 'new_purchase_orders' in result and table({
-					'head': 'New Purchase Orders',
-					'body': '%s' % result['new_purchase_orders']['count']
-				}),
+				'table': result.get('new_purchase_orders') and \
+					table({
+						'head': 'New Purchase Orders',
+						'body': '%s' % result['new_purchase_orders'].get('count')
+					}),
 				'idx': 104
 			},
 
 			'new_transactions': {
-				'table': 'new_transactions' in result and table({
-					'head': 'New Transactions',
-					'body': '%s' % result['new_transactions']['count']
-				}),
+				'table': result.get('new_transactions') and \
+					table({
+						'head': 'New Transactions',
+						'body': '%s' % result['new_transactions'].get('count')
+					}),
 				'idx': 105
 			}
 
