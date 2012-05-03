@@ -79,11 +79,12 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 
 //customer
 cur_frm.cscript.customer = function(doc,dt,dn,onload) {	
+	var pl = doc.price_list_name;
 	var callback = function(r,rt) {
 			var doc = locals[cur_frm.doctype][cur_frm.docname];
 			if(doc.customer) unhide_field(['customer_address','contact_person','territory','customer_group']);
 			cur_frm.refresh();
-			if(!onload) cur_frm.cscript.price_list_name(doc, dt, dn); 
+			if(!onload && (pl != doc.price_list_name)) cur_frm.cscript.price_list_name(doc, dt, dn); 
 	} 
 	var args = onload ? 'onload':''
 	if(doc.customer) $c_obj(make_doclist(doc.doctype, doc.name), 'get_default_customer_shipping_address', args, callback);

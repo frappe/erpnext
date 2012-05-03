@@ -173,6 +173,7 @@ cur_frm.cscript.warehouse = function(doc, cdt , cdn) {
 
 //Customer
 cur_frm.cscript.customer = function(doc,dt,dn,onload) {
+	var pl = doc.price_list_name;
 	var callback = function(r,rt) {
 			var callback2 = function(doc, dt, dn) {
 				doc = locals[dt][dn];
@@ -180,7 +181,7 @@ cur_frm.cscript.customer = function(doc,dt,dn,onload) {
 					get_server_fields('get_cust_and_due_date','','',doc,dt,dn,1,
 					function(doc, dt, dn) {
 						cur_frm.refresh();
-						if (!onload) cur_frm.cscript.price_list_name(doc, dt, dn);
+						if (!onload && (pl != doc.price_list_name)) cur_frm.cscript.price_list_name(doc, dt, dn);
 					});
 					
 				}
