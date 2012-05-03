@@ -508,7 +508,8 @@ class DocType:
 						'body': currency_amount_str \
 							% (currency, fmt_money(result['invoiced_amount'].get('debit')))
 					}),
-				'idx': 300
+				'idx': 300,
+				'value': result.get('invoiced_amount') and result['invoiced_amount'].get('debit')
 			},
 
 			'payables': {
@@ -518,7 +519,8 @@ class DocType:
 						'body': currency_amount_str \
 							% (currency, fmt_money(result['payables'].get('credit')))
 					}),
-				'idx': 200
+				'idx': 200,
+				'value': result.get('payables') and result['payables'].get('credit')
 			},
 
 			'collections': {
@@ -528,7 +530,8 @@ class DocType:
 						'body': currency_amount_str \
 							% (currency, fmt_money(result['collections'].get('credit')))
 					}),
-				'idx': 301
+				'idx': 301,
+				'value': result.get('collections') and result['collections'].get('credit')
 			},
 
 			'payments': {
@@ -538,7 +541,8 @@ class DocType:
 						'body': currency_amount_str \
 							% (currency, fmt_money(result['payments'].get('debit')))
 					}),
-				'idx': 201
+				'idx': 201,
+				'value': result.get('payments') and result['payments'].get('debit')
 			},
 
 			'income': {
@@ -548,7 +552,8 @@ class DocType:
 						'body': currency_amount_str \
 							% (currency, fmt_money(result['income'].get('value')))
 					}),
-				'idx': 302
+				'idx': 302,
+				'value': result.get('income') and result['income'].get('value')
 			},
 
 			'income_year_to_date': {
@@ -558,7 +563,9 @@ class DocType:
 						'body': currency_amount_str \
 							% (currency, fmt_money(result['income_year_to_date'].get('value')))
 					}),
-				'idx': 303
+				'idx': 303,
+				'value': result.get('income_year_to_date') and \
+				 	result['income_year_to_date'].get('value')
 			},
 
 			'expenses_booked': {
@@ -568,7 +575,8 @@ class DocType:
 						'body': currency_amount_str \
 							% (currency, fmt_money(result['expenses_booked'].get('value')))
 					}),
-				'idx': 202
+				'idx': 202,
+				'value': result.get('expenses_booked') and result['expenses_booked'].get('value')
 			},
 
 			'bank_balance': {
@@ -585,7 +593,8 @@ class DocType:
 								[result['bank_balance']])
 						]
 					}),
-				'idx': 400
+				'idx': 0,
+				'value': 0.1
 			},
 
 			'new_leads': {
@@ -594,7 +603,8 @@ class DocType:
 						'head': 'New Leads',
 						'body': '%s' % result['new_leads'].get('count')
 					}),
-				'idx': 100
+				'idx': 100,
+				'value': result.get('new_leads') and result['new_leads'].get('count')
 			},
 
 			'new_enquiries': {
@@ -603,7 +613,8 @@ class DocType:
 						'head': 'New Enquiries',
 						'body': '%s' % result['new_enquiries'].get('count')
 					}),
-				'idx': 101
+				'idx': 101,
+				'value': result.get('new_enquiries') and result['new_enquiries'].get('count')
 			},
 
 			'new_quotations': {
@@ -612,7 +623,8 @@ class DocType:
 						'head': 'New Quotations',
 						'body': '%s' % result['new_quotations'].get('count')
 					}),
-				'idx': 102
+				'idx': 102,
+				'value': result.get('new_quotations') and result['new_quotations'].get('count')
 			},
 
 			'new_sales_orders': {
@@ -621,7 +633,8 @@ class DocType:
 						'head': 'New Sales Orders',
 						'body': '%s' % result['new_sales_orders'].get('count')
 					}),
-				'idx': 103
+				'idx': 103,
+				'value': result.get('new_sales_orders') and result['new_sales_orders'].get('count')
 			},
 
 			'new_purchase_orders': {
@@ -630,7 +643,9 @@ class DocType:
 						'head': 'New Purchase Orders',
 						'body': '%s' % result['new_purchase_orders'].get('count')
 					}),
-				'idx': 104
+				'idx': 104,
+				'value': result.get('new_purchase_orders') and \
+				 	result['new_purchase_orders'].get('count')
 			},
 
 			'new_transactions': {
@@ -639,7 +654,8 @@ class DocType:
 						'head': 'New Transactions',
 						'body': '%s' % result['new_transactions'].get('count')
 					}),
-				'idx': 105
+				'idx': 105,
+				'value': result.get('new_transactions') and result['new_transactions'].get('count')
 			}
 
 			#'stock_below_rl': 
@@ -648,11 +664,20 @@ class DocType:
 		table_list = []
 
 		# Sort these keys depending on idx value
-		bd_keys = sorted(body_dict, key=lambda x: body_dict[x]['idx'])
+		bd_keys = sorted(body_dict, key=lambda x: \
+			(-webnotes.utils.flt(body_dict[x]['value']), body_dict[x]['idx']))
+
+		new_section = False
 
 		for k in bd_keys:
 			if self.doc.fields[k]:
 				if k in result:
+					if not body_dict[k].get('value') and not new_section:
+						if len(table_list) % 2 != 0:
+							table_list.append("")
+						table_list.append("<hr />")
+						table_list.append("<hr />")
+						new_section = True
 					table_list.append(body_dict[k]['table'])
 				elif k in ['collections', 'payments']:
 					table_list.append(\
