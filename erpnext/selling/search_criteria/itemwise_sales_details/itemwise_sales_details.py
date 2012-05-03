@@ -15,13 +15,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 out=[]
-qty,amt,del_qty,bil_qty=0,0,0,0
+qty,amt,del_qty,bill_amt=0,0,0,0
 
 for r in res:
   qty += flt(r[col_idx['Quantity']])
   amt += flt(r[col_idx['Amount*']])
   del_qty += flt(r[col_idx['Delivered Qty']])
-  bil_qty += flt(r[col_idx['Billed Qty']])
+  bill_amt += flt(r[col_idx['Billed Amt']])
   out.append(r)
 
 
@@ -31,5 +31,5 @@ l_row[col_idx['Item Name']] = '<b>TOTALS</b>'
 l_row[col_idx['Quantity']] = qty
 l_row[col_idx['Amount*']] = amt
 l_row[col_idx['Delivered Qty']] = del_qty
-l_row[col_idx['Billed Qty']] = bil_qty
+l_row[col_idx['Billed Amt']] = bill_amt
 out.append(l_row)
