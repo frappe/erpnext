@@ -100,10 +100,11 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 
 //customer
 cur_frm.cscript.customer = function(doc,dt,dn) {
+	var pl = doc.price_list_name;
 	var callback = function(r,rt) {
 		var doc = locals[cur_frm.doctype][cur_frm.docname];
 		cur_frm.refresh();		
-		cur_frm.cscript.price_list_name(doc, dt, dn); 
+		if (pl != doc.price_list_name) cur_frm.cscript.price_list_name(doc, dt, dn); 
 	}
 
 	if(doc.customer) $c_obj(make_doclist(doc.doctype, doc.name), 

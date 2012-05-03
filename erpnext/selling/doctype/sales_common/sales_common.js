@@ -143,23 +143,23 @@ cur_frm.cscript.hide_price_list_currency = function(doc, cdt, cdn, callback1) {
 				unhide_field(['price_list_currency', 'plc_conversion_rate']);
 				
 				if (pl_currency.length==1) {
-					set_multiple(cdt, cdn, {price_list_currency:pl_currency[0]});
+					if (doc.price_list_currency != pl_currency[0]) set_multiple(cdt, cdn, {price_list_currency:pl_currency[0]});
 					if (pl_currency[0] == doc.currency) {
-						set_multiple(cdt, cdn, {plc_conversion_rate:doc.conversion_rate});
+						if(doc.plc_conversion_rate != doc.conversion_rate) set_multiple(cdt, cdn, {plc_conversion_rate:doc.conversion_rate});
 						hide_field(['price_list_currency', 'plc_conversion_rate']);
 					} else if (pl_currency[0] == r.message[1]) {
-						set_multiple(cdt, cdn, {plc_conversion_rate:1})
+						if (doc.plc_conversion_rate != 1) set_multiple(cdt, cdn, {plc_conversion_rate:1})
 						hide_field(['price_list_currency', 'plc_conversion_rate']);
 					}					
 				}
 
 				if (r.message[1] == doc.currency) {
-					set_multiple(cdt, cdn, {conversion_rate:1});
+					if (doc.conversion_rate != 1) set_multiple(cdt, cdn, {conversion_rate:1});
 					hide_field(['conversion_rate', 'grand_total_export', 'in_words_export', 'rounded_total_export']);
 				} else unhide_field(['conversion_rate', 'grand_total_export', 'in_words_export', 'rounded_total_export']);
 
 				if (r.message[1] == doc.price_list_currency) {
-					set_multiple(cdt, cdn, {plc_conversion_rate:1});
+					if (doc.plc_conversion_rate != 1) set_multiple(cdt, cdn, {plc_conversion_rate:1});
 					hide_field('plc_conversion_rate');
 				} else unhide_field('plc_conversion_rate');
 				
