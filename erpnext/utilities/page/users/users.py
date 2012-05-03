@@ -77,9 +77,9 @@ def update_roles(arg=None):
 @webnotes.whitelist()
 def update_security(args=''):
 	args = json.loads(args)
-	webnotes.conn.set_value('Profile', args['user'], 'restrict_ip', args.get('restrict_ip'))
-	webnotes.conn.set_value('Profile', args['user'], 'login_after', args.get('login_after'))
-	webnotes.conn.set_value('Profile', args['user'], 'login_before', args.get('login_before'))
+	webnotes.conn.set_value('Profile', args['user'], 'restrict_ip', args.get('restrict_ip') or '')
+	webnotes.conn.set_value('Profile', args['user'], 'login_after', args.get('login_after') or None)
+	webnotes.conn.set_value('Profile', args['user'], 'login_before', args.get('login_before') or None)
 	webnotes.conn.set_value('Profile', args['user'], 'enabled', int(args.get('enabled',0)) or 0)
 
 	if args.get('new_password') and args.get('sys_admin_pwd'):

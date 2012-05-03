@@ -37,7 +37,8 @@ cur_frm.cscript.notify = function(doc, args) {
 				if(user!='Administrator') {
 					return user;
 				} else {
-					return (wn.control_panel.auto_email_id || 'automail@erpnext.com');
+					return (wn.control_panel.auto_email_id || 
+						'ERPNext Notification<automail@erpnext.com>');
 				}
 			})();
 			if(res.send) {
