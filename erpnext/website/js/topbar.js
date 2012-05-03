@@ -40,7 +40,7 @@ erpnext.navbar.Navbar = Class.extend({
 				</ul>\
 				<img src="lib/images/ui/spinner.gif" id="spinner"/>\
 				<ul class="nav pull-right">\
-					<li><a href="#!Login Page">Login</a></li>\
+					<li id="#login-topbar-item"><a href="#!Login Page">Login</a></li>\
 				</ul>\
 			</div>\
 			</div>\

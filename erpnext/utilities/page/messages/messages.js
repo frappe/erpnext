@@ -19,7 +19,7 @@ wn.provide('erpnext.messages');
 wn.pages.messages.onload = function(wrapper) {
 	erpnext.messages.show_active_users();
 	erpnext.messages.make_list();
-	update_messages('reset'); //Resets notification icons
+	erpnext.update_messages('reset'); //Resets notification icons
 	
 	// post message
 	$('#message-post').click(function() {
