@@ -580,7 +580,9 @@ class DocType:
 								"<span style='font-size: 16px; font-weight: normal'>%s</span>" \
 									% bank['name'],
 								currency_amount_str % (currency, fmt_money(bank.get('value')))
-							] for bank in result['bank_balance']
+							] for bank in (isinstance(result['bank_balance'], list) and \
+								result['bank_balance'] or \
+								[result['bank_balance']])
 						]
 					}),
 				'idx': 400
