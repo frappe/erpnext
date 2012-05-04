@@ -2009,7 +2009,7 @@ _p.def_print_style_other="\n.simpletable, .noborder { border-collapse: collapse;
 _p.go=function(html){var d=document.createElement('div')
 d.innerHTML=html
 $(d).printElement();}
-_p.preview=function(html){var w=window.open('');w.document.write(html)
+_p.preview=function(html){var w=window.open('');if(!w)return;w.document.write(html)
 w.document.close();}
 $.extend(_p,{show_dialog:function(){if(!_p.dialog){_p.make_dialog();}
 _p.dialog.show();},make_dialog:function(){var d=new Dialog(360,140,'Print Formats',[['HTML','Select'],['Check','No Letterhead'],['HTML','Buttons']]);$btn(d.widgets.Buttons,'Print',function(){_p.build(sel_val(cur_frm.print_sel),_p.go,d.widgets['No Letterhead'].checked);},{cssFloat:'right',marginBottom:'16px',marginLeft:'7px'},'green');$btn(d.widgets.Buttons,'Preview',function(){_p.build(sel_val(cur_frm.print_sel),_p.preview,d.widgets['No Letterhead'].checked);},{cssFloat:'right',marginBottom:'16px'},'');d.onshow=function(){var c=_p.dialog.widgets['Select'];if(c.cur_sel&&c.cur_sel.parentNode==c){c.removeChild(c.cur_sel);}

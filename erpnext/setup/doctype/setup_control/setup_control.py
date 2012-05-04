@@ -81,7 +81,12 @@ class DocType:
 
 		# Set 
 		self.set_defaults(def_args)
-		self.set_cp_defaults(**args)
+		
+		cp_args = {}
+		for k in ['industry', 'country', 'timezone', 'company_name']:
+			cp_args[k] = args[k]
+		
+		self.set_cp_defaults(**cp_args)
 
 		self.create_feed_and_todo()
 
