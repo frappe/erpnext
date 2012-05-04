@@ -183,7 +183,6 @@ class DocType(TransactionBase):
 		self.validate_reference_value()
 		self.validate_for_items()
 		sales_com_obj.make_packing_list(self,'delivery_note_details')
-		get_obj('Stock Ledger').validate_serial_no(self, 'packing_details')
 		sales_com_obj.validate_max_discount(self, 'delivery_note_details')						 #verify whether rate is not greater than max discount
 		sales_com_obj.get_allocated_sum(self)	# this is to verify that the allocated % of sales persons is 100%
 		sales_com_obj.check_conversion_rate(self)
@@ -325,6 +324,7 @@ class DocType(TransactionBase):
 		# Check for Approving Authority
 		get_obj('Authorization Control').validate_approving_authority(self.doc.doctype, self.doc.company, self.doc.grand_total, self)
 		sl_obj = get_obj("Stock Ledger")
+		sl_obj.validate_serial_no(self, 'packing_details')
 		sl_obj.validate_serial_no_warehouse(self, 'packing_details')
 		sl_obj.update_serial_record(self, 'packing_details', is_submit = 1, is_incoming = 0)
 		get_obj("Sales Common").update_prevdoc_detail(1,self)
