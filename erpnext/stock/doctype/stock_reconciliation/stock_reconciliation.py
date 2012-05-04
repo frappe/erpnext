@@ -51,16 +51,16 @@ class DocType:
 		"""Convert csv data into list"""
 		count = 2
 		for s in data:
-			if s[0].strip() != 'Item Code': # remove the labels
-				# validate
-				if (submit and len(s) != 4) or (not submit and len(s) != 6):
-					msgprint("Data entered at Row No " + cstr(count) + " in Attachment File is not in correct format.", raise_exception=1)
-					self.validated = 0
-				self.validate_item(s[0], count)
-				self.validate_warehouse(s[1], count)
+			if count == 2: continue
+			# validate
+			if (submit and len(s) != 4) or (not submit and len(s) != 6):
+				msgprint("Data entered at Row No " + cstr(count) + " in Attachment File is not in correct format.", raise_exception=1)
+				self.validated = 0
+			self.validate_item(s[0], count)
+			self.validate_warehouse(s[1], count)
 			
-				self.data.append(s)
-				count += 1
+			self.data.append(s)
+			count += 1
 			
 		if not self.validated:
 			raise Exception
@@ -175,7 +175,7 @@ class DocType:
 		"""Add diffs column in attached file"""
 		
 		# add header
-		out = "'Item Code', 'Warehouse', 'Qty', 'Valuation Rate', 'Qty Diff', 'Val Rate Diff'"
+		out = "Item Code, Warehouse, Qty, Valuation Rate, Qty Diff, Val Rate Diff"
 		
 		# add data
 		for d in self.data:
