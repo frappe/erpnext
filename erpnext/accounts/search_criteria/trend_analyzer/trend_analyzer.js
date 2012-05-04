@@ -80,14 +80,8 @@ report.get_query = function() {
     add_col = '';
     add_tables = '';
     sp_cond = '';
-    if(trans == 'Sales Invoice') trans = 'Sales Invoice';
-    else if(trans == 'Purchase Invoice') trans = 'Purchase Invoice';
 
-    trans_det = trans+' Detail'
-
-    if(trans == 'Sales Invoice') trans_det = 'Sales Invoice Item';
-    else if(trans == 'Purchase Invoice') trans_det = 'Purchase Invoice Item';
-    else if(trans == 'Purchase Order') trans_det = 'Purchase Order Item';
+    trans_det = trans+' Item'
 
     if(order_type != '') add_code += ' AND t1.order_type = '+order_type;
 
