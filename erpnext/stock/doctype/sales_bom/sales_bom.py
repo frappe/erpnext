@@ -38,8 +38,7 @@ class DocType:
 		self.doc, self.doclist = d,dl
 
 	def autoname(self):
-		self.doc.name = make_autoname(self.doc.new_item_code)
-
+		self.doc.name = self.doc.new_item_code
 	
 	# Get Ref Rates
 	# --------------
@@ -67,9 +66,9 @@ class DocType:
 				msgprint("Sales Bom Item " + d.item_code +" cannot be child item.")
 				raise Exception
 			# Check if is_main_item is modified once saved
-			if not self.doc.fields.get('__islocal') and d.is_main_item == "Yes" and cstr(d.item_code) != cstr(self.doc.new_item_code)[:-3] :
-				msgprint("Modifying the main item is not allowed.")
-				raise Exception
+			#if not self.doc.fields.get('__islocal') and d.is_main_item == "Yes" and cstr(d.item_code) != cstr(self.doc.new_item_code)[:-3] :
+			#	msgprint("Modifying the main item is not allowed.")
+			#	raise Exception
 		if len(is_main_item) > 1:
 			msgprint('Main item cannot be more than one.')
 			raise Exception , " Validation Error."

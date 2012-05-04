@@ -22,7 +22,9 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 }
 
 cur_frm.cscript.refresh = function(doc, cdt, cdn) {
-   
+	if(!doc.__islocal) {
+		hide_field('new_item_code');
+	}
 }
 
 /* Get Item Code */
