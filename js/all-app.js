@@ -331,8 +331,8 @@ if(this.onrun)this.onrun();if(this.callback)this.callback(r);},render_list:funct
 /*
  *	lib/js/wn/ui/filters.js
  */
-wn.ui.FilterList=Class.extend({init:function(opts){wn.require('lib/js/legacy/widgets/form/fields.js');$.extend(this,opts);this.filters=[];this.$w=this.$parent;this.set_events();},set_events:function(){var me=this;this.$w.find('.add-filter-btn').bind('click',function(){me.add_filter();});},show_filters:function(){this.$w.find('.show_filters').slideToggle();if(!this.filters.length)
-this.add_filter();},add_filter:function(fieldname,condition,value){this.filters.push(new wn.ui.Filter({flist:this,fieldname:fieldname,condition:condition,value:value}));if(fieldname){this.$w.find('.show_filters').slideDown();}},get_filters:function(){var values=[];$.each(this.filters,function(i,f){if(f.field)
+wn.ui.FilterList=Class.extend({init:function(opts){wn.require('lib/js/legacy/widgets/form/fields.js');$.extend(this,opts);this.filters=[];this.$w=this.$parent;this.set_events();},set_events:function(){var me=this;this.$w.find('.add-filter-btn').bind('click',function(){me.add_filter();});},show_filters:function(){this.$w.find('.show_filters').toggle();if(!this.filters.length)
+this.add_filter();},add_filter:function(fieldname,condition,value){this.filters.push(new wn.ui.Filter({flist:this,fieldname:fieldname,condition:condition,value:value}));if(fieldname){this.$w.find('.show_filters').toggle(true);}},get_filters:function(){var values=[];$.each(this.filters,function(i,f){if(f.field)
 values.push(f.get_value());})
 return values;},update_filters:function(){var fl=[];$.each(this.filters,function(i,f){if(f.field)fl.push(f);})
 this.filters=fl;},get_filter:function(fieldname){for(var i in this.filters){if(this.filters[i].field.df.fieldname==fieldname)
@@ -1045,7 +1045,7 @@ $(me.loading_img).toggle(false);}});this.make();}
 /*
  *	lib/js/wn/ui/search.js
  */
-wn.ui.Search=Class.extend({init:function(opts){$.extend(this,opts);var me=this;wn.model.with_doctype(this.doctype,function(r){me.make();me.dialog.show();});},make:function(){var me=this;this.dialog=new wn.ui.Dialog({title:this.doctype+' Search',width:500});this.list=new wn.ui.Listing({parent:$(this.dialog.body),appframe:this.dialog.appframe,new_doctype:this.doctype,doctype:this.doctype,method:'webnotes.widgets.doclistview.get',show_filters:true,style:'compact',get_args:function(){if(me.query){me.page_length=50;return{query:me.query}}else{return{doctype:me.doctype,fields:['`tab'+me.doctype+'`.name'],filters:me.list.filter_list.get_filters(),docstatus:['0','1']}}},render_row:function(parent,data){$ln=$('<a style="cursor: pointer;" data-name="'+data.name+'">'
+wn.ui.Search=Class.extend({init:function(opts){$.extend(this,opts);var me=this;wn.model.with_doctype(this.doctype,function(r){me.make();me.dialog.show();me.list.$w.find('.list-filters input[type="text"]').focus();});},make:function(){var me=this;this.dialog=new wn.ui.Dialog({title:this.doctype+' Search',width:500});this.list=new wn.ui.Listing({parent:$(this.dialog.body),appframe:this.dialog.appframe,new_doctype:this.doctype,doctype:this.doctype,method:'webnotes.widgets.doclistview.get',show_filters:true,style:'compact',get_args:function(){if(me.query){me.page_length=50;return{query:me.query}}else{return{doctype:me.doctype,fields:['`tab'+me.doctype+'`.name'],filters:me.list.filter_list.get_filters(),docstatus:['0','1']}}},render_row:function(parent,data){$ln=$('<a style="cursor: pointer;" data-name="'+data.name+'">'
 +data.name+'</a>').appendTo(parent).click(function(){var val=$(this).attr('data-name');me.dialog.hide();if(me.callback)
 me.callback(val);else
 wn.set_route('Form',me.doctype,val);});}});this.list.filter_list.add_filter('name','like');this.list.run();}})
