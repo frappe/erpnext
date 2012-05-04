@@ -47,13 +47,13 @@ class DocType:
 
 		return content
 
-	def convert_into_list(self, data):
+	def convert_into_list(self, data, submit = 1):
 		"""Convert csv data into list"""
-		count = 1
+		count = 2
 		for s in data:
 			if s[0].strip() != 'Item Code': # remove the labels
 				# validate
-				if len(s) != 4:
+				if (submit and len(s) != 4) or (not submit and len(s) != 6):
 					msgprint("Data entered at Row No " + cstr(count) + " in Attachment File is not in correct format.", raise_exception=1)
 					self.validated = 0
 				self.validate_item(s[0], count)
@@ -66,17 +66,16 @@ class DocType:
 			raise Exception
 
 
-	def get_reconciliation_data(self,submit = 0):
+	def get_reconciliation_data(self,submit = 1):
 		"""Read and validate csv data"""
 		import csv 
 		data = csv.reader(self.get_csv_file_data().splitlines())
-		self.convert_into_list(data)
+		self.convert_into_list(data, submit)
 		
 
 	def validate_item(self, item, count):
 		""" Validate item exists and non-serialized"""
-		det = sql("select item_code, has_serial_no from `tabItem` \
-				where name = %s", cstr(item), as_dict = 1)
+		det = sql("select item_code, has_serial_no from `tabItem` where name = %s", cstr(item), as_dict = 1)
 		if not det:
 			msgprint("Item: " + cstr(item) + " mentioned at Row No. " + cstr(count) + "does not exist in the system")
 			self.validated = 0
@@ -199,5 +198,5 @@ class DocType:
 
 
 	def on_cancel(self):
-		self.validate()
+		self.get_reconciliation_data(submit = 0)
 		self.do_stock_reco(is_submit = -1)

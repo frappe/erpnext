@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-04-26 13:04:56',
+		'creation': '2012-04-30 12:08:49',
 		'docstatus': 0,
-		'modified': '2012-04-27 11:00:18',
+		'modified': '2012-05-04 09:53:08',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -15,6 +15,7 @@
 		'_last_update': u'1322549701',
 		'allow_trash': 1,
 		'colour': u'White:FFF',
+		'description': u'Aggregate item and accessories to form a Sales Item. There is no inventory of the new item but of the sub-components.',
 		'doctype': 'DocType',
 		'document_type': u'Master',
 		'is_submittable': 1,
@@ -143,6 +144,8 @@
 
 	# DocField
 	{
+		'colour': u'White:FFF',
+		'description': u'Item code of the new aggregate item.',
 		'doctype': u'DocField',
 		'fieldname': u'new_item_code',
 		'fieldtype': u'Data',
@@ -150,12 +153,12 @@
 		'no_copy': 1,
 		'oldfieldname': u'new_item_code',
 		'oldfieldtype': u'Data',
-		'permlevel': 1,
 		'reqd': 1
 	},
 
 	# DocField
 	{
+		'colour': u'White:FFF',
 		'doctype': u'DocField',
 		'fieldname': u'new_item_name',
 		'fieldtype': u'Data',
@@ -221,7 +224,8 @@
 		'oldfieldname': u'stock_uom',
 		'oldfieldtype': u'Link',
 		'options': u'UOM',
-		'permlevel': 0
+		'permlevel': 0,
+		'reqd': 1
 	},
 
 	# DocField
@@ -280,17 +284,7 @@
 	# DocField
 	{
 		'colour': u'White:FFF',
-		'doctype': u'DocField',
-		'fieldname': u'find_sales_bom',
-		'fieldtype': u'Button',
-		'label': u'Find Sales BOM',
-		'oldfieldtype': u'Button',
-		'permlevel': 0,
-		'trigger': u'Client'
-	},
-
-	# DocField
-	{
+		'description': u'List items that form a package. One of the items has to be a "main item".',
 		'doctype': u'DocField',
 		'fieldname': u'item_section',
 		'fieldtype': u'Section Break',
@@ -308,6 +302,19 @@
 		'oldfieldtype': u'Table',
 		'options': u'Sales BOM Item',
 		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'colour': u'White:FFF',
+		'description': u'Add a few items and find if there are any Sales BOM created with the same combination to help you identify duplication.',
+		'doctype': u'DocField',
+		'fieldname': u'find_sales_bom',
+		'fieldtype': u'Button',
+		'label': u'Find Sales BOM',
+		'oldfieldtype': u'Button',
+		'permlevel': 0,
+		'trigger': u'Client'
 	},
 
 	# DocField
