@@ -327,5 +327,10 @@ patch_list = [
 		'patch_file': 'cleanup_notification_control',
 		'description': 'cleanup notification control'
 	},
+	{
+		'patch_module': 'patches.may_2012',
+		'patch_file': 'renamedt_in_custom_search_criteria',
+		'description': 'raname dt in custom search criteria'
+	},
 
 ]
