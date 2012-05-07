@@ -40,10 +40,8 @@ def markdown(doc, fields):
 
 def page_name(title):
 	"""make page name from title, and check that there is no duplicate"""
-	import re
-	name = title.lower()
-	name = re.sub('[~!@#$%^&*()<>,."\']', '', name)
-	return '-'.join(name.split()[:4])
+	import webnotes.cms
+	return webnotes.cms.page_name(title)
 	
 def add_page(title):
 	"""add a custom page with title"""
@@ -59,7 +57,7 @@ def add_page(title):
 	p.standard = 'No'
 
 	return p
-	
+
 def add_guest_access_to_page(page):
 	"""add Guest in Page Role"""
 	if not webnotes.conn.sql("""select parent from `tabPage Role`
@@ -68,3 +66,81 @@ def add_guest_access_to_page(page):
 		d.parent = page
 		d.role = 'Guest'
 		d.save()
+
+def get_header():
+	"""get page header"""
+
+	from webnotes.model.doc import Document
+	from jinja2 import Template
+
+	def get_item(l, label):
+		for i in l:
+			if i['label']==label:
+				return i
+
+	top_bar_items = webnotes.conn.sql("""select * from `tabTop Bar Item`
+		where parent='Website Settings' and parentfield='top_bar_items'
+		order by idx asc""", as_dict=1)
+		
+	# build child items
+	for t in top_bar_items:
+		if t.get('parent_label'):
+			pi = get_item(t['parent_label'])
+			if not pi['child_items']:
+				pi['child_items'] = []
+			pi['child_items'].append(t)
+
+	website_settings = Document('Website Settings', 'Website Settings')
+	
+	return Template("""<div class="navbar navbar-fixed-top">
+		<div class="navbar-inner">
+		<div class="container">
+			<a class="brand">{{ brand }}</a>
+			<ul class="nav">
+				{% for page in top_bar_items %}
+					{% if not page.parent_label %}
+					<li data-label="{{ page.label }}">
+						<a href="{{ page.url }}" {{ page.target }}>
+						{{ page.label }}
+						{% if page.child_items %}
+							<ul class="dropdown-menu">
+							{% for child in page.child_items %}
+								<li data-label="{{ child.label }}">
+									<a href="{{ child.url }}" {{ child.target }}>
+							{% endfor %}
+							</ul>
+						{% endif %}
+						</a></li>
+					{% endif %}
+				{% endfor %}
+			</ul>
+			<img src="images/lib/ui/spinner.gif" id="spinner"/>
+			<ul class="nav pull-right">
+				<li id="login-topbar-item"><a href="#!Login Page">Login</a></li>
+			</ul>
+		</div>
+		</div>
+		</div>""").render(top_bar_items = top_bar_items, 
+			brand=website_settings.brand_html or webnotes.get_default('company') or 'ERPNext')
+			
+def get_footer():
+	"""get page footer"""
+	
+	from webnotes.model.doc import Document
+	from jinja2 import Template
+
+	website_settings = Document('Website Settings', 'Website Settings')
+
+	website_settings.footer_items = webnotes.conn.sql("""select * from `tabTop Bar Item`
+		where parent='Website Settings' and parentfield='footer_items'
+		order by idx asc""", as_dict=1)
+
+	return Template("""<div class="web-footer">
+		<div class="web-footer-menu"><ul>
+		{% for item in footer_items %}
+			<li><a href="{{ item.url }}" {{ item.target }}
+				data-label="{{ item.label }}">{{ item.label }}</a></li>
+		{% endfor %}
+		</ul></div>
+		<div class="web-footer-copyright">&copy; {{ copyright }}
+		</div>""").render(website_settings.fields)

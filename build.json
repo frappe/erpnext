@@ -1,19 +1,20 @@
 {
-	"css/all-web.css": [
+	"public/css/all-web.css": [
 		"erpnext/startup/startup.css",
 		"erpnext/website/css/website.css"	
 	],
-	"css/all-app.css": [
+	"public/css/all-app.css": [
 		"erpnext/startup/startup.css"
 	],
-	"js/all-web.js": [
+	"public/js/all-web.js": [
 		"erpnext/startup/startup.js",
-		"erpnext/website/js/topbar.js"
+		"conf.js"
 	],
-	"js/all-app.js": [
+	"public/js/all-app.js": [
 		"erpnext/startup/startup.js",
 		"erpnext/startup/js/modules.js",
 		"erpnext/startup/js/toolbar.js",
-		"erpnext/startup/js/feature_setup.js"
+		"erpnext/startup/js/feature_setup.js",
+		"conf.js"
 	]
 }

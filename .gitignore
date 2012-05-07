@@ -1,10 +1,14 @@
 *.pyc
 *.comp.js
 .DS_Store
-files
 patch.log
 lib
 conf.py
 version.num
-user_files
-*.sql*
+public/*.html
+!public/blank.html
+!public/unsupported.html
+public/js/lib
+public/images/lib
+public/files
+public/backups

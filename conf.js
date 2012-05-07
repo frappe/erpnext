@@ -13,6 +13,7 @@ erpnext.set_about = function() {
 
 wn.modules_path = 'erpnext';
 
+// add toolbar icon
 $(document).bind('toolbar_setup', function() {
 	$('.brand').html((wn.boot.website_settings.brand_html || 'erpnext') +
 	' <i class="icon-home icon-white navbar-icon-home" ></i>')

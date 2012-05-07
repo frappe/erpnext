@@ -23,7 +23,7 @@ pscript['onload_Sales Dashboard'] = function() {
   //pscript.dx_axis = [];
 
 	wn.require('lib/css/lib/jqplot.css');
-	wn.require('lib/js/lib/jqplot/jquery.jqplot.min.js');
+	wn.require('js/lib/jqplot/jquery.jqplot.min.js');
 	pscript.all_onchnge();
 }
 //=======================================================================

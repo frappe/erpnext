@@ -89,6 +89,7 @@ def boot_session(bootinfo):
 		if hasattr(conf, 'expires_on'): bootinfo['expires_on'] = conf.expires_on
 
 
+
 def get_letter_heads():
 	"""load letter heads with startup"""
 	import webnotes
@@ -129,3 +130,23 @@ def check_if_expired():
 	
 	webnotes.response['message'] = 'Account Expired'
 	raise webnotes.AuthenticationError
+
+#### website
+
+def get_web_script():
+	"""returns web startup script"""
+	return webnotes.conn.get_value('Website Settings', None, 'startup_code') or ''
+
+def get_web_style():
+	"""returns web css"""
+	return webnotes.conn.get_value('Style Settings', None, 'custom_css') or ''
+
+def get_web_header():
+	"""get website header"""
+	from website.utils import get_header
+	return get_header()
+
+def get_web_footer():
+	"""get website footer"""
+	from website.utils import get_footer
+	return get_footer()

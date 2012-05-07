@@ -107,7 +107,7 @@ cur_frm.cscript.make_contact = function() {
 
 // make purchase order list
 cur_frm.cscript.make_po_list = function(parent, doc){
-	wn.require('lib/js/legacy/widgets/listing.js');
+	wn.require('js/listing.js');
 	var lst = new Listing();
 	lst.colwidths = ['5%','25%','20%','25%','25%'];
 	lst.colnames = ['Sr.','Id','Status','PO Date','Grand Total'];
@@ -122,7 +122,7 @@ cur_frm.cscript.make_po_list = function(parent, doc){
 
 // make purchase receipt list
 cur_frm.cscript.make_pr_list = function(parent,doc){
-	wn.require('lib/js/legacy/widgets/listing.js');
+	wn.require('js/listing.js');
 	var lst = new Listing();
 	lst.colwidths = ['5%','20%','20%','20%','15%','20%'];
 	lst.colnames = ['Sr.','Id','Status','Receipt Date','% Billed','Grand Total'];
@@ -137,7 +137,7 @@ cur_frm.cscript.make_pr_list = function(parent,doc){
 
 // make purchase invoice list
 cur_frm.cscript.make_pi_list = function(parent,doc){
-	wn.require('lib/js/legacy/widgets/listing.js');
+	wn.require('js/listing.js');
 	var lst = new Listing();
 	lst.colwidths = ['5%','20%','20%','20%','15%','20%'];
 	lst.colnames = ['Sr.','Id','Posting Date','Credit To','Bill Date','Grand Total'];

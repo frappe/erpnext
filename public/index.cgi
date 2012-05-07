@@ -27,11 +27,11 @@ import cgi, cgitb, os, sys
 cgitb.enable()
 
 # import libs
-sys.path.append('.')
+sys.path.append('..')
 
 import conf
 
-sys.path.append('lib/py')
+sys.path.append('../lib/py')
 sys.path.append(conf.modules_path)
 
 import webnotes
@@ -72,11 +72,9 @@ def respond():
 	if 'cmd' in webnotes.form_dict:
 		webnotes.handler.handle()
 	else:
-		import webnotes.cms.index
 		print "Content-Type: text/html"
-		webnotes.handler.print_cookies()
 		print
-		print webnotes.cms.index.get()
+		print "<html><head><script>window.location.href='index.html';</script></head></html>"
 
 if __name__=="__main__":
 	if init():

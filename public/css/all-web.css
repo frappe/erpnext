@@ -1206,7 +1206,7 @@ button.btn.small, input[type="submit"].btn.small {
   *margin-right: .3em;
   line-height: 14px;
   vertical-align: text-top;
-  background-image: url("../lib/images/icons/glyphicons-halflings.png");
+  background-image: url("../images/lib/icons/glyphicons-halflings.png");
   background-position: 14px 14px;
   background-repeat: no-repeat;
 }
@@ -1217,7 +1217,7 @@ button.btn.small, input[type="submit"].btn.small {
 }
 
 .icon-white {
-  background-image: url("../lib/images/icons/glyphicons-halflings-white.png");
+  background-image: url("../images/lib/icons/glyphicons-halflings-white.png");
 }
 
 .icon-glass {
