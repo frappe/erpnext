@@ -39,14 +39,8 @@ project = filter_values.get('project')
 # ********************************************* SET DEFAULTS **************************************************
 # Details Table
 # --------------
-if trans == 'Sales Invoice': trans = 'Sales Invoice'
-elif trans == 'Purchase Invoice': trans = 'Purchase Invoice'
 
-trans_det = trans+' Detail'
-
-if trans == 'Sales Invoice': trans_det = 'Sales Invoice Item'
-elif trans == 'Purchase Invoice': trans_det = 'Purchase Invoice Item'
-elif trans == 'Purchase Order': trans_det = 'Purchase Order Item'
+trans_det = trans+' Item'
 
 col_names, query_val = get_obj('Trend Analyzer Control').get_single_year_query_value(fiscal_year, period, trans, trans_det)
 query_val += 'SUM(t2.qty), SUM(t2.amount)'

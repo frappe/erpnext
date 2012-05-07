@@ -24,3 +24,7 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 cur_frm.cscript.refresh = function(doc, cdt, cdn) {
    
 }
+
+cur_frm.fields_dict.landed_cost.grid.get_field('account_head').get_query = function(doc, cdt, cdn) {
+	return 'SELECT tabAccount.name FROM tabAccount WHERE tabAccount.group_or_ledger="Ledger" AND tabAccount.docstatus != 2 AND (tabAccount.account_type = "Tax" OR tabAccount.account_type = "Chargeable" or (tabAccount.is_pl_account = "Yes" and tabAccount.debit_or_credit = "Debit")) AND  tabAccount.name LIKE "%s"';
+}

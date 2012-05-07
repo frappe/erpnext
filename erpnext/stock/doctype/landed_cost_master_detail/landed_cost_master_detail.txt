@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-03-27 14:36:34',
+		'creation': '2012-05-03 11:00:55',
 		'docstatus': 0,
-		'modified': '2012-03-27 14:36:34',
+		'modified': '2012-05-04 13:02:35',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -19,13 +19,12 @@
 		'name': '__common__',
 		'section_style': u'Simple',
 		'server_code_error': u' ',
-		'version': 2
+		'version': 1
 	},
 
 	# These values are common for all DocField
 	{
 		'doctype': u'DocField',
-		'fieldtype': u'Data',
 		'name': '__common__',
 		'oldfieldtype': u'Data',
 		'parent': u'Landed Cost Master Detail',
@@ -44,14 +43,17 @@
 	{
 		'doctype': u'DocField',
 		'fieldname': u'account_head',
+		'fieldtype': u'Link',
 		'label': u'Account Head',
-		'oldfieldname': u'account_head'
+		'oldfieldname': u'account_head',
+		'options': u'Account'
 	},
 
 	# DocField
 	{
 		'doctype': u'DocField',
 		'fieldname': u'description',
+		'fieldtype': u'Data',
 		'label': u'Description',
 		'oldfieldname': u'description',
 		'width': u'300px'
