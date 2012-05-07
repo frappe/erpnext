@@ -58,6 +58,10 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 		if (doc.per_billed < 100) cur_frm.add_custom_button('Make Purchase Invoice', cur_frm.cscript['Make Purchase Invoice']);
 		cur_frm.add_custom_button('Send SMS', cur_frm.cscript['Send SMS']);
 	}
+	
+	if(wn.boot.control_panel.country == 'India') {
+		unhide_field(['challan_no', 'challan_date']);
+	}
 }
 
 

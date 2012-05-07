@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-04-13 11:56:36',
+		'creation': '2012-05-07 16:44:47',
 		'docstatus': 0,
-		'modified': '2012-05-01 14:34:43',
+		'modified': '2012-05-07 16:54:34',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -58,54 +58,6 @@
 
 	# DocPerm
 	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Material Manager',
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'amend': 1,
-		'cancel': 1,
-		'create': 1,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Material Manager',
-		'submit': 1,
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Material User',
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'amend': 1,
-		'cancel': 1,
-		'create': 1,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Material User',
-		'submit': 1,
-		'write': 1
-	},
-
-	# DocPerm
-	{
 		'amend': 1,
 		'cancel': 1,
 		'create': 1,
@@ -136,6 +88,54 @@
 		'doctype': u'DocPerm',
 		'permlevel': 2,
 		'role': u'All',
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Material Manager',
+		'submit': 0,
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'amend': 1,
+		'cancel': 1,
+		'create': 1,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Material Manager',
+		'submit': 1,
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Material User',
+		'submit': 0,
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'amend': 1,
+		'cancel': 1,
+		'create': 1,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Material User',
+		'submit': 1,
 		'write': 1
 	},
 
@@ -293,6 +293,40 @@
 		'print_hide': 1,
 		'reqd': 1,
 		'search_index': 0,
+		'width': u'100px'
+	},
+
+	# DocField
+	{
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'challan_no',
+		'fieldtype': u'Data',
+		'hidden': 1,
+		'label': u'Challan No',
+		'no_copy': 1,
+		'oldfieldname': u'challan_no',
+		'oldfieldtype': u'Data',
+		'permlevel': 0,
+		'print_hide': 0,
+		'reqd': 0,
+		'width': u'100px'
+	},
+
+	# DocField
+	{
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'challan_date',
+		'fieldtype': u'Date',
+		'hidden': 1,
+		'label': u'Challan Date',
+		'no_copy': 1,
+		'oldfieldname': u'challan_date',
+		'oldfieldtype': u'Date',
+		'permlevel': 0,
+		'print_hide': 0,
+		'reqd': 0,
 		'width': u'100px'
 	},
 
@@ -1110,38 +1144,6 @@
 		'fieldtype': u'Column Break',
 		'permlevel': 0,
 		'width': u'50%'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'doctype': u'DocField',
-		'fieldname': u'challan_no',
-		'fieldtype': u'Data',
-		'label': u'Challan No',
-		'no_copy': 1,
-		'oldfieldname': u'challan_no',
-		'oldfieldtype': u'Data',
-		'permlevel': 0,
-		'print_hide': 0,
-		'reqd': 0,
-		'width': u'100px'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'doctype': u'DocField',
-		'fieldname': u'challan_date',
-		'fieldtype': u'Date',
-		'label': u'Challan Date',
-		'no_copy': 1,
-		'oldfieldname': u'challan_date',
-		'oldfieldtype': u'Date',
-		'permlevel': 0,
-		'print_hide': 0,
-		'reqd': 0,
-		'width': u'100px'
 	},
 
 	# DocField
