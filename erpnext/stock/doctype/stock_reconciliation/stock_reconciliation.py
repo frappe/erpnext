@@ -49,8 +49,9 @@ class DocType:
 
 	def convert_into_list(self, data, submit = 1):
 		"""Convert csv data into list"""
-		count = 2
+		count = 1
 		for s in data:
+			count += 1
 			if count == 2: continue
 			# validate
 			if (submit and len(s) != 4) or (not submit and len(s) != 6):
@@ -60,7 +61,6 @@ class DocType:
 			self.validate_warehouse(s[1], count)
 			
 			self.data.append(s)
-			count += 1
 			
 		if not self.validated:
 			raise Exception
