@@ -40,7 +40,8 @@ class DocType:
 			webnotes.conn.sql("""delete from tabPage where name=%s""", self.doc.page_name)
 
 		p = website.utils.add_page(self.doc.name)
-			
+		self.doc.page_name = p.name
+		
 		self.doc.updated = global_date_format(self.doc.modified)
 		website.utils.markdown(self.doc, ['head_section','main_section', 'side_section'])
 				

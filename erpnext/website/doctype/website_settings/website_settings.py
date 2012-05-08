@@ -35,7 +35,7 @@ class DocType:
 		"""rewrite all web pages"""
 		import webnotes
 		from webnotes.model.code import get_obj
-		
+			
 		for p in webnotes.conn.sql("""select name from tabPage where docstatus=0
 			and web_page = 'Yes'"""):
 			get_obj('Page', p[0]).write_cms_page()

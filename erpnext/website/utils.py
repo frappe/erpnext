@@ -95,7 +95,7 @@ def get_header():
 	return Template("""<div class="navbar navbar-fixed-top">
 		<div class="navbar-inner">
 		<div class="container">
-			<a class="brand">{{ brand }}</a>
+			<a class="brand" href="index.html">{{ brand }}</a>
 			<ul class="nav">
 				{% for page in top_bar_items %}
 					{% if not page.parent_label %}

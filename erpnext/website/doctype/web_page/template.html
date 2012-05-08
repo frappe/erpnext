@@ -2,7 +2,7 @@
 	<div class="web-content" 
 		style="text-align: {{ doc.text_align }};">
 		
-		{% if doc.layout.startswith('Two column') %}
+		{% if doc.layout and doc.layout.startswith('Two column') %}
 		<div class="layout-main-section">
 		{% else %}
 		<div class="layout-main">
@@ -14,7 +14,7 @@
 
 		</div>
 		
-		{% if doc.layout.startswith('Two column') %}
+		{% if doc.layout and doc.layout.startswith('Two column') %}
 		<div class="layout-side-section">
 			{{ doc.side_section_html }}
 			{% if doc.see_also %}
