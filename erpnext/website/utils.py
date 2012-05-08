@@ -116,7 +116,7 @@ def get_header():
 			</ul>
 			<img src="images/lib/ui/spinner.gif" id="spinner"/>
 			<ul class="nav pull-right">
-				<li id="login-topbar-item"><a href="#!Login Page">Login</a></li>
+				<li id="login-topbar-item"><a href="login-page.html">Login</a></li>
 			</ul>
 		</div>
 		</div>

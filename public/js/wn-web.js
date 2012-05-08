@@ -1,5 +1,5 @@
-window._version_number = "d9f42d1e15307de62f68d890d4e40adbe2472a85153ddc965775bebd";
-window.home_page = "Login Page";
+window._version_number = "c1dee2b8be9abfbe2a74619482b586b538f7253911fcb06c4c950b10";
+window.home_page = "index";
 // footer signup widget
 // automatically adds it to the .layout-main div of the page
 // adds events and also random goodies.
