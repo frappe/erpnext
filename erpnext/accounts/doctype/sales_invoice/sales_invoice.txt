@@ -5,7 +5,7 @@
 	{
 		'creation': '2012-04-13 11:56:18',
 		'docstatus': 0,
-		'modified': '2012-05-04 11:56:59',
+		'modified': '2012-05-08 17:17:51',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -136,7 +136,6 @@
 	# DocField
 	{
 		'colour': u'White:FFF',
-		'depends_on': u'eval:doc.retail_transaction!="Yes"',
 		'description': u'To manage multiple series please go to Setup > Manage Series',
 		'doctype': u'DocField',
 		'fieldname': u'naming_series',
