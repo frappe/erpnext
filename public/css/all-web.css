@@ -2427,6 +2427,7 @@ div.stat-label {
 	position: relative;
 	padding: 3px;
 	text-align: center;
+	font-size: 11px;
 }
 div.stat-label, div.stat-label a {
 	z-index: 5;
@@ -2436,19 +2437,26 @@ div.stat-item {
 	position: relative;
 	margin-bottom: 7px;
 	background-color: #fff;
-	height: 22px;
+	height: 18px;
 	border: 2px solid #aaa;
-	border-radius: 11px;
+	border-radius: 9px;
 	overflow: hidden;
 }
 
 div.stat-bar {
 	position: absolute;
 	left: 0px;
-	background-color: #DEF9A7;
-	border-radius: 11px 0px 0px 11px;
 	height: 100%;
 	z-index: 0;
+
+	background: #e0ff84; /* Old browsers */
+	background: -moz-linear-gradient(top,  #e0ff84 0%, #a4e567 100%); /* FF3.6+ */
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#e0ff84), color-stop(100%,#a4e567)); /* Chrome,Safari4+ */
+	background: -webkit-linear-gradient(top,  #e0ff84 0%,#a4e567 100%); /* Chrome10+,Safari5.1+ */
+	background: -o-linear-gradient(top,  #e0ff84 0%,#a4e567 100%); /* Opera 11.10+ */
+	background: -ms-linear-gradient(top,  #e0ff84 0%,#a4e567 100%); /* IE10+ */
+	background: linear-gradient(top,  #e0ff84 0%,#a4e567 100%); /* W3C */
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e0ff84', endColorstr='#a4e567',GradientType=0 ); /* IE6-9 */
 }
 
 /*
