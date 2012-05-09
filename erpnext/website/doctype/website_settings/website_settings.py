@@ -26,11 +26,14 @@ class DocType:
 		"""
 		self.set_home_page()
 		self.validate_domain_list()	
+
+
+	def on_update(self):
 		self.rewrite_pages()
 		
 		from webnotes.session_cache import clear_cache
 		clear_cache('Guest')
-
+		
 	def rewrite_pages(self):
 		"""rewrite all web pages"""
 		import webnotes

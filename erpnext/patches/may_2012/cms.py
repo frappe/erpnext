@@ -5,3 +5,7 @@ def execute():
 	
 	# rewrite pages
 	get_obj('Website Settings').rewrite_pages()
+	
+	ss = get_obj('Style Settings')
+	ss.validate()
+	ss.on_update()
