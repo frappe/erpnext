@@ -8,6 +8,7 @@ version.num
 public/*.html
 !public/blank.html
 !public/unsupported.html
+!public/app.html
 public/js/lib
 public/images/lib
 public/files
