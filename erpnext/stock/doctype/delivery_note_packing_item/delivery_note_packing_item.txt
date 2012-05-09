@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-03-27 14:36:30',
+		'creation': '2012-04-13 11:56:35',
 		'docstatus': 0,
-		'modified': '2012-03-27 14:36:30',
+		'modified': '2012-05-09 12:55:23',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -20,7 +20,7 @@
 		'section_style': u'Tray',
 		'server_code_error': u' ',
 		'show_in_menu': 0,
-		'version': 17
+		'version': 1
 	},
 
 	# These values are common for all DocField
@@ -137,6 +137,15 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'batch_no',
+		'fieldtype': u'Data',
+		'label': u'Batch No',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
 		'fieldname': u'actual_qty',
 		'fieldtype': u'Currency',
 		'label': u'Actual Qty',
@@ -173,34 +182,6 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
-		'fieldname': u'planned_qty',
-		'fieldtype': u'Currency',
-		'hidden': 1,
-		'label': u'Planned Qty ',
-		'no_copy': 1,
-		'oldfieldname': u'planned_qty',
-		'oldfieldtype': u'Currency',
-		'permlevel': 1,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'produced_qty',
-		'fieldtype': u'Currency',
-		'hidden': 1,
-		'label': u'Produced Qty',
-		'no_copy': 1,
-		'oldfieldname': u'produced_qty',
-		'oldfieldtype': u'Currency',
-		'permlevel': 1,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
 		'colour': u'White:FFF',
 		'doctype': u'DocField',
 		'fieldname': u'prevdoc_doctype',
@@ -209,47 +190,6 @@
 		'label': u'Prevdoc DocType',
 		'oldfieldname': u'prevdoc_doctype',
 		'oldfieldtype': u'Data',
-		'permlevel': 1,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		'description': u'The date at which current entry is made in system.',
-		'doctype': u'DocField',
-		'fieldname': u'transaction_date',
-		'fieldtype': u'Date',
-		'hidden': 0,
-		'label': u'Sales Order Date',
-		'oldfieldname': u'transaction_date',
-		'oldfieldtype': u'Date',
-		'permlevel': 1,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'delivery_date',
-		'fieldtype': u'Date',
-		'hidden': 0,
-		'label': u'Expected Delivery Date',
-		'oldfieldname': u'delivery_date',
-		'oldfieldtype': u'Date',
-		'permlevel': 1,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'confirmation_date',
-		'fieldtype': u'Date',
-		'hidden': 1,
-		'label': u'Confirmed delivery date',
-		'no_copy': 1,
-		'oldfieldname': u'confirmation_date',
-		'oldfieldtype': u'Date',
 		'permlevel': 1,
 		'print_hide': 1
 	},

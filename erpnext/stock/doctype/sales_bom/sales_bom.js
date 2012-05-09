@@ -23,7 +23,7 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 
 cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	if(!doc.__islocal) {
-		hide_field('new_item_code');
+		get_field(doc.doctype, 'new_item_code', doc.name).permlevel = 1;
 	}
 }
 

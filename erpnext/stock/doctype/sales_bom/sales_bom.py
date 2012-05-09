@@ -62,13 +62,9 @@ class DocType:
 			if d.is_main_item == 'Yes':
 				is_main_item.append(d.item_code)
 			# Check that Sales Bom Item cannot be child of Sales Bom.
-			if sql("select name from `tabSales BOM` where name = '%s' " % d.item_code):
-				msgprint("Sales Bom Item " + d.item_code +" cannot be child item.")
+			if d.item_code == self.doc.new_item_code:
+				msgprint("Sales Bom Item " + d.new_item_code +" cannot be child item.")
 				raise Exception
-			# Check if is_main_item is modified once saved
-			#if not self.doc.fields.get('__islocal') and d.is_main_item == "Yes" and cstr(d.item_code) != cstr(self.doc.new_item_code)[:-3] :
-			#	msgprint("Modifying the main item is not allowed.")
-			#	raise Exception
 		if len(is_main_item) > 1:
 			msgprint('Main item cannot be more than one.')
 			raise Exception , " Validation Error."
@@ -81,8 +77,7 @@ class DocType:
 	# Make Item
 	# ---------
 	def create_new_item(self):
-		i = Document("Item")
-		
+		i = Document("Item")		
 		i.item_code = self.doc.new_item_code
 		i.item_name = self.doc.new_item_name
 		i.name = i.item_code
@@ -106,7 +101,7 @@ class DocType:
 				sql("delete from `tabItem Price` where parent=%s and price_list_name = %s", (i.name, self.doc.price_list))
 				
 				pld = addchild(i,"ref_rate_details", "Item Price")
-				pld.price_list_name = self.doc.price_List
+				pld.price_list_name = self.doc.price_list
 				pld.ref_rate = flt(ref_rate)
 				pld.ref_currency = self.doc.currency
 				pld.save()
@@ -121,14 +116,11 @@ class DocType:
 		i.stock_uom = self.doc.stock_uom 
 		i.item_group = self.doc.item_group
 		
-		# update rates
-		new_rates = {}
-		self.update_ref_rate(i)
 
 		i.item_name = self.doc.new_item_name
 		i.description = self.doc.description
 
-		# set default as 'No' or 0 in Item Master	as per TIC/3456
+		# set default as 'No' or 0
 		i.is_sample_item = 'No'
 		i.is_asset_item = 'No'
 		i.is_purchase_item = 'No'
@@ -138,8 +130,10 @@ class DocType:
 		i.inspection_required = 'No'
 		i.has_serial_no = 'No'
 		i.lead_time_days = flt(0)
+		# update rates
+		self.update_ref_rate(i)
 		i.save()
-		msgprint("Items updated successfully.")
+		msgprint("Items: %s updated successfully. To update more details open and edit item master" % self.doc.new_item_code)
 
 
 	def validate(self):
