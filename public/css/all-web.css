@@ -2327,7 +2327,7 @@ div.dialog_row table td textarea {
 
 /* list-row */
 div.list-row {
-	border-bottom: 1px solid #eee;
+	border-bottom: 1px solid #ddd;
 	padding: 5px 0px;
 }
 
@@ -2415,15 +2415,11 @@ span.bar-empty {
 /* stats */
 
 div.stat-wrapper {
-	margin-bottom: 19px;	
+	margin-bottom: 19px;
 }
 
 div.stat-grid {
-	border: 2px solid #bbb;
-	background-color: white;
-	border-radius: 5px;
-	-moz-border-radius: 5px;
-	-webkit-border-radius: 5px;
+	margin-top: 9px;
 	overflow: hidden;
 }
 
@@ -2438,23 +2434,22 @@ div.stat-label, div.stat-label a {
 
 div.stat-item {
 	position: relative;
-	border-bottom: 1px solid #ddd;
-}
-div.stat-item:last-child {
-	border-bottom: 0px solid #ddd;	
+	margin-bottom: 7px;
+	background-color: #fff;
+	height: 22px;
+	border: 2px solid #aaa;
+	border-radius: 11px;
+	overflow: hidden;
 }
 
 div.stat-bar {
 	position: absolute;
 	left: 0px;
-	background-color: #def;
+	background-color: #DEF9A7;
+	border-radius: 11px 0px 0px 11px;
 	height: 100%;
 	z-index: 0;
 }
-
-
-
-
 
 /*
  *	lib/css/ui/views.css

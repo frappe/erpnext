@@ -25,7 +25,7 @@ wn.doclistviews['Purchase Request'] = wn.views.ListView.extend({
 		{width: '5%', content:'avatar'},
 		{width: '3%', content:'docstatus'},
 		{width: '17%', content:'name'},
-		{width: '53%', content:'status_html+tags+remark', css: {'color': '#aaa'}},
+		{width: '53%', content:'status_html+tags+remark', css: {'color': '#222'}},
 		{width: '10%', content: 'per_ordered', type:'bar-graph', label:'Ordered'},
 		{width: '12%', content:'modified', css: {'text-align': 'right', 'color':'#777'}}
 	]

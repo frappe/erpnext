@@ -26,7 +26,7 @@ wn.doclistviews['Lead'] = wn.views.ListView.extend({
 	columns: [
 		{width: '20%', content:'name'},
 		{width: '12%', content:'status_html'},
-		{width: '55%', content:'tags+lead_name', css: {color:'#aaa'}},
+		{width: '55%', content:'tags+lead_name', css: {color:'#222'}},
 		{width: '13%', content:'modified', css: {'text-align': 'right', 'color':'#777'}}
 	]
 })
