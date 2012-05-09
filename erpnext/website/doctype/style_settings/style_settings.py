@@ -21,8 +21,9 @@ class DocType:
 	def validate(self):
 		"""make custom css"""
 		from jinja2 import Template
+		import os
 		
-		with open('erpnext/website/doctype/style_settings/custom_template.css', 'r') as f:
+		with open(os.path.dirname(__file__), 'custom_template.css'), 'r') as f:
 			temp = Template(f.read())
 		
 		if not self.doc.font_size:
