@@ -34,11 +34,25 @@ class DocType:
 	def rewrite_pages(self):
 		"""rewrite all web pages"""
 		import webnotes
+		from webnotes.model.doclist import DocList
 		from webnotes.model.code import get_obj
+		
+		# rewrite all web pages
+		for name in webnotes.conn.sql("""select name from `tabWeb Page` where docstatus=0"""):
+			DocList('Web Page', name[0]).save()
+
+		# rewrite all blog pages
+		for name in webnotes.conn.sql("""select name from `tabBlog` where docstatus=0 
+			and ifnull(published,0)=1"""):
+			DocList('Blog', name[0]).save()
 			
-		for p in webnotes.conn.sql("""select name from tabPage where docstatus=0
-			and web_page = 'Yes'"""):
-			get_obj('Page', p[0]).write_cms_page()
+		from webnotes.cms.make import make_web_core
+		make_web_core()
+		
+		get_obj('Page', 'blog').write_cms_page(force=True)
+		
+		webnotes.msgprint('Rebuilt all blogs and pages')
+		
 		
 	def set_home_page(self):
 

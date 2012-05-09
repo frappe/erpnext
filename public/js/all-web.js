@@ -24,9 +24,7 @@ wn.provide('wn.settings');wn.provide('wn.ui');
 /*
  *	lib/js/wn/versions.js
  */
-wn.versions={check:function(){if(window.localStorage){if(window._version_number==-1||parseInt(localStorage._version_number)!=parseInt(window._version_number)){var localversion=localStorage._version_number;localStorage.clear();console.log("Cache cleared - version: "+localversion
-+' to '+_version_number)}
-localStorage.setItem('_version_number',window._version_number);}}}
+wn.versions={check:function(){if(window.localStorage){var localversion=localStorage._version_number;localStorage.clear();}}}
 /*
  *	lib/js/wn/assets.js
  */

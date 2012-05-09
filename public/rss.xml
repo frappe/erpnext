@@ -21,7 +21,8 @@ import cgi, cgitb, os, sys
 cgitb.enable()
 
 # import libs
-sys.path.append('lib/py')
+sys.path.append('..')
+sys.path.append('../lib/py')
 
 import webnotes
 import webnotes.auth
@@ -29,7 +30,13 @@ import webnotes.auth
 if __name__=='__main__':
 	webnotes.http_request = webnotes.auth.HTTPRequest()
 	from webnotes.cms import feed
-	xml = feed.generate()
-	print 'Content-Type: text/xml'
-	print
-	print xml
+	try:
+		print 'Content-Type: text/xml'
+		print
+		xml = feed.generate()
+		print xml
+	except Exception, e:
+		print 'Content-Type: text/html'
+		print
+		import webnotes.utils
+		print webnotes.utils.getTraceback()
