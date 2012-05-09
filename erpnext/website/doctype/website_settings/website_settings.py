@@ -50,6 +50,7 @@ class DocType:
 		make_web_core()
 		
 		get_obj('Page', 'blog').write_cms_page(force=True)
+		get_obj('Page', 'Login Page').write_cms_page(force=True)
 		
 		webnotes.msgprint('Rebuilt all blogs and pages')
 		

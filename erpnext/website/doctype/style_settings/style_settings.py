@@ -33,6 +33,9 @@ class DocType:
 		self.doc.custom_css = temp.render(doc = self.doc)
 		if self.doc.add_css:
 			self.doc.custom_css += '\n\n/* User CSS */\n\n' + self.doc.add_css
+
+		from webnotes.cms.make import make_web_core
+		make_web_core()
 		
 		from webnotes.session_cache import clear_cache
 		clear_cache('Guest')
