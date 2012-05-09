@@ -169,27 +169,6 @@ cur_frm.cscript.hide_price_list_currency = function(doc, cdt, cdn, callback1) {
 	}
 }
 
-
-//====================opens territory tree page ==================
-cur_frm.cscript.TerritoryHelp = function(doc,dt,dn){
-	var call_back = function(){
-
-		var sb_obj = new SalesBrowser();				
-		sb_obj.set_val('Territory');
-	}
-	loadpage('Sales Browser',call_back);
-}
-
-//====================opens customer group tree page ==================
-cur_frm.cscript.CGHelp = function(doc,dt,dn){
-	var call_back = function(){
-		var sb_obj = new SalesBrowser();				
-		sb_obj.set_val('Customer Group');
-	}
-	loadpage('Sales Browser',call_back);
-}
-
-
 // TRIGGERS FOR CALCULATIONS
 // =====================================================================================================
 

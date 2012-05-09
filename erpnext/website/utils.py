@@ -67,7 +67,7 @@ def add_guest_access_to_page(page):
 		d.role = 'Guest'
 		d.save()
 
-def get_header():
+def get_header(page_name):
 	"""get page header"""
 
 	from webnotes.model.doc import Document
@@ -123,7 +123,7 @@ def get_header():
 		</div>""").render(top_bar_items = top_bar_items, 
 			brand=website_settings.brand_html or webnotes.get_default('company') or 'ERPNext')
 			
-def get_footer():
+def get_footer(page_name):
 	"""get page footer"""
 	
 	from webnotes.model.doc import Document

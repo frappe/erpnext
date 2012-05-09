@@ -141,12 +141,12 @@ def get_web_style():
 	"""returns web css"""
 	return webnotes.conn.get_value('Style Settings', None, 'custom_css') or ''
 
-def get_web_header():
+def get_web_header(page_name):
 	"""get website header"""
 	from website.utils import get_header
-	return get_header()
+	return get_header(page_name)
 
-def get_web_footer():
+def get_web_footer(page_name):
 	"""get website footer"""
 	from website.utils import get_footer
-	return get_footer()
+	return get_footer(page_name)
