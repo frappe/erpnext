@@ -337,5 +337,10 @@ patch_list = [
 		'patch_file': 'stock_reco_patch',
 		'description': 'stock reco patch: store diff info in field'
 	},
+	{
+		'patch_module': 'patches.may_2012',
+		'patch_file': 'reload_reports',
+		'description': 'reload reports: itemwise sales/delivery details'
+	},
 
 ]
