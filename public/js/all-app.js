@@ -153,7 +153,8 @@ var l=items.length;for(var i=0;i<l;i++){var src=items[i];wn.assets.execute(src);
 /*
  *	lib/js/wn/dom.js
  */
-wn.provide('wn.dom');wn.dom={id_count:0,by_id:function(id){return document.getElementById(id);},set_unique_id:function(ele){var id='unique-'+wn.dom.id_count;ele.setAttribute('id',id);wn.dom.id_count++;return id;},eval:function(txt){if(!txt)return;var el=document.createElement('script');el.appendChild(document.createTextNode(txt));document.getElementsByTagName('head')[0].appendChild(el);},set_style:function(txt){if(!txt)return;var se=document.createElement('style');se.type="text/css";if(se.styleSheet){se.styleSheet.cssText=txt;}else{se.appendChild(document.createTextNode(txt));}
+wn.provide('wn.dom');wn.dom={id_count:0,by_id:function(id){return document.getElementById(id);},set_unique_id:function(ele){var id='unique-'+wn.dom.id_count;if(ele)
+ele.setAttribute('id',id);wn.dom.id_count++;return id;},eval:function(txt){if(!txt)return;var el=document.createElement('script');el.appendChild(document.createTextNode(txt));document.getElementsByTagName('head')[0].appendChild(el);},set_style:function(txt){if(!txt)return;var se=document.createElement('style');se.type="text/css";if(se.styleSheet){se.styleSheet.cssText=txt;}else{se.appendChild(document.createTextNode(txt));}
 document.getElementsByTagName('head')[0].appendChild(se);},add:function(parent,newtag,className,cs,innerHTML,onclick){if(parent&&parent.substr)parent=wn.dom.by_id(parent);var c=document.createElement(newtag);if(parent)
 parent.appendChild(c);if(className){if(newtag.toLowerCase()=='img')
 c.src=className
@@ -931,6 +932,17 @@ if(this.$ul){this.$ul.empty();}
 this.load();},addnode:function(label,expandable){if(!this.$ul){this.$ul=$('<ul>').toggle(false).appendTo(this.parent);}
 return new wn.ui.TreeNode({tree:this.tree,parent:$('<li>').appendTo(this.$ul),label:label,expandable:expandable});},load:function(){var me=this;args=$.extend(this.tree.args,{parent:this.label});$(me.$a).set_working();wn.call({method:this.tree.method,args:args,callback:function(r){$(me.$a).done_working();$.each(r.message,function(i,v){node=me.addnode(v.value||v,v.expandable);node.$a.data('node-data',v);});me.loaded=true;me.selectnode();}})}})
 /*
+ *	lib/js/wn/upload.js
+ */
+wn.upload={make:function(opts){var id=wn.dom.set_unique_id();$(opts.parent).append(repl('<iframe id="%(id)s" name="%(id)s" src="blank.html" \
+    style="width:0px; height:0px; border:0px"></iframe>\
+   <form method="POST" enctype="multipart/form-data" \
+    action="%(action)s" target="%(id)s">\
+    <input type="file" name="filedata" /><br>\
+    <input type="submit" class="btn btn-small" value="Upload" />\
+   </form>',{id:id,action:wn.request.url}));opts.args.cmd='uploadfile';opts.args._id=id;for(key in opts.args){if(opts.args[key]){$('<input type="hidden">').attr('name',key).attr('value',opts.args[key]).appendTo($(opts.parent).find('form'));}}
+$('#'+id).get(0).callback=opts.callback},callback:function(id,file_id,args){$('#'+id).get(0).callback(file_id,args);}}
+/*
  *	lib/js/wn/misc/about.js
  */
 wn.provide('wn.ui.misc');wn.ui.misc.about=function(){if(!wn.ui.misc.about_dialog){var d=new wn.widgets.Dialog({title:'About wnframework'})
@@ -1273,14 +1285,6 @@ var load_doc=loaddoc;function new_doc(doctype,onload,in_dialog,on_save_callback,
 var newdoc=new_doc;var pscript={};function loadpage(page_name,call_back,no_history){wn.set_route(page_name);}
 function loaddocbrowser(dt){wn.set_route('List',dt);}
 /*
- *	lib/js/legacy/webpage/uploader.js
- */
-var uploaders={};var upload_frame_count=0;Uploader=function(parent,args,callback){var id='frame'+upload_frame_count;upload_frame_count++;this.callback=callback;var div=$a(parent,'div');div.innerHTML='<iframe id="'+id+'" name="'+id+'" src="blank.html" \
-  style="width:0px; height:0px; border:0px"></iframe>';var div=$a(parent,'div');div.innerHTML='<form method="POST" enctype="multipart/form-data" action="'+wn.request.url+'" target="'+id+'"></form>';var ul_form=div.childNodes[0];var f_list=[];var inp_fdata=$a_input($a(ul_form,'span'),'file',{name:'filedata'},{marginLeft:'7px'});if(!('cmd'in args)){var inp=$a_input($a(ul_form,'span'),'hidden',{name:'cmd'});inp.value='uploadfile';}
-var inp=$a_input($a(ul_form,'span'),'hidden',{name:'uploader_id'});inp.value=id;var inp=$a_input($a(ul_form,'span'),'submit',null,{marginLeft:'7px'});inp.value='Upload';$y(inp,{width:'80px'});for(var key in args){var inp=$a_input($a(ul_form,'span'),'hidden',{name:key});inp.value=args[key];}
-uploaders[id]=this;}
-function upload_callback(id,fid){uploaders[id].callback(fid);}
-/*
  *	lib/js/legacy/wn/page_layout.js
  */
 wn.PageLayout=function(args){$.extend(this,args)
@@ -1412,7 +1416,7 @@ wn.ui.toolbar.Search=wn.ui.toolbar.SelectorDialog.extend({init:function(){this._
 /*
  *	lib/js/wn/ui/toolbar/report.js
  */
-wn.ui.toolbar.Report=wn.ui.toolbar.SelectorDialog.extend({init:function(){this._super({title:"Start Report For",execute:function(val){loadreport(val,null,null,null,1);},});this.set_values(profile.can_get_report.join(',').split(','));}});
+wn.ui.toolbar.Report=wn.ui.toolbar.SelectorDialog.extend({init:function(){this._super({title:"Start Report For",execute:function(val){wn.set_route('Report2',val);},});this.set_values(profile.can_get_report.join(',').split(','));}});
 /*
  *	lib/js/wn/ui/toolbar/recent.js
  */
@@ -2211,7 +2215,7 @@ var doc=locals[me.frm.doctype][me.frm.docname];var fl=doc.file_list?doc.file_lis
 this.add_attachment=function(){if(!this.dialog){this.dialog=new wn.widgets.Dialog({title:'Add Attachment',width:400})
 $y(this.dialog.body,{margin:'13px'})
 this.dialog.make();}
-this.dialog.body.innerHTML='';this.dialog.show();this.uploader=new Uploader(this.dialog.body,{from_form:1,doctype:doctype,docname:docname,at_id:this.at_id},wn.widgets.form.file_upload_done);}
+this.dialog.body.innerHTML='';this.dialog.show();wn.upload.make({parent:this.dialog.body,args:{from_form:1,doctype:doctype,docname:docname},callback:wn.widgets.form.file_upload_done});}
 this.make();}
 wn.widgets.form.sidebar.Attachment=function(parent,filedet,frm){filedet=filedet.split(',')
 this.filename=filedet[0];this.fileid=filedet[1];this.frm=frm;var me=this;this.wrapper=$a(parent,'div','sidebar-comment-message');this.remove_fileid=function(){var doc=locals[me.frm.doctype][me.frm.docname];var fl=doc.file_list.split('\n');new_fl=[];for(var i=0;i<fl.length;i++){if(fl[i].split(',')[1]!=me.fileid)new_fl.push(fl[i]);}
@@ -2220,7 +2224,7 @@ var display_name=this.fileid;if(this.fileid.substr(0,8)=='FileData')
 display_name=this.filename;this.ln=$a(this.wrapper,'a','link_type small',{},display_name);this.ln.href='files/'+this.fileid;this.ln.target='_blank';this.del=$a(this.wrapper,'span','close','','&#215;');this.del.onclick=function(){var yn=confirm("Are you sure you want to delete the attachment?")
 if(yn){var callback=function(r,rt){locals[me.frm.doctype][me.frm.docname].modified=r.message;$dh(me.wrapper);me.remove_fileid();frm.refresh();}
 $c('webnotes.widgets.form.utils.remove_attach',args={'fid':me.fileid,dt:me.frm.doctype,dn:me.frm.docname},callback);}}}
-wn.widgets.form.file_upload_done=function(doctype,docname,fileid,filename,at_id,new_timestamp){var at_id=cint(at_id);var doc=locals[doctype][docname];if(doc.file_list){var fl=doc.file_list.split('\n')
+wn.widgets.form.file_upload_done=function(doctype,docname,fileid,filename,at_id,new_timestamp){var doc=locals[doctype][docname];if(doc.file_list){var fl=doc.file_list.split('\n')
 fl.push(filename+','+fileid)
 doc.file_list=fl.join('\n');}
 else

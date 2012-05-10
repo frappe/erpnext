@@ -2438,7 +2438,7 @@ div.stat-item {
 	margin-bottom: 7px;
 	background-color: #fff;
 	height: 18px;
-	border: 2px solid #aaa;
+	border: 1px solid #aaa;
 	border-radius: 9px;
 	overflow: hidden;
 }
