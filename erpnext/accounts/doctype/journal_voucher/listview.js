@@ -4,7 +4,8 @@ wn.doclistviews['Journal Voucher'] = wn.views.ListView.extend({
 		this.fields = this.fields.concat([
 			'`tabJournal Voucher`.voucher_type',
 			'`tabJournal Voucher`.remark',
-			'`tabJournal Voucher`.total_debit'
+			'`tabJournal Voucher`.total_debit',
+			'`tabJournal Voucher`.company',
 		]);
 		this.stats = this.stats.concat(['voucher_type']);
 	},
@@ -25,7 +26,7 @@ wn.doclistviews['Journal Voucher'] = wn.views.ListView.extend({
 		{
 			width: '18%', 
 			content: function(parent, data) { 
-				$(parent).html(fmt_money(data.total_debit)) 
+				$(parent).html(wn.boot.company[data.company].default_currency + ' ' + fmt_money(data.total_debit)) 
 			},
 			css: {'text-align':'right'}
 		},
