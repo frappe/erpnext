@@ -332,5 +332,10 @@ patch_list = [
 		'patch_file': 'renamedt_in_custom_search_criteria',
 		'description': 'raname dt in custom search criteria'
 	},
+	{
+		'patch_module': 'patches.may_2012',
+		'patch_file': 'stock_reco_patch',
+		'description': 'stock reco patch: store diff info in field'
+	},
 
 ]
