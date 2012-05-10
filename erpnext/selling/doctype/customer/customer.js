@@ -154,7 +154,7 @@ cur_frm.fields_dict['lead_name'].get_query = function(doc,dt,dn){
 // make quotation list
 // --------------------
 cur_frm.cscript.make_qtn_list = function(parent,doc){
-	wn.require('lib/js/legacy/widgets/listing.js');
+	wn.require('js/listing.js');
 
 	var lst = new Listing();
 	lst.colwidths = ['5%','20%','20%','20%','20%','15%'];
@@ -172,7 +172,7 @@ cur_frm.cscript.make_qtn_list = function(parent,doc){
 // make so list
 // -------------
 cur_frm.cscript.make_so_list = function(parent,doc){
-	wn.require('lib/js/legacy/widgets/listing.js');
+	wn.require('js/listing.js');
 
 	var lst = new Listing();
 	lst.colwidths = ['5%','20%','20%','30%','25%'];
@@ -190,7 +190,7 @@ cur_frm.cscript.make_so_list = function(parent,doc){
 // make dn list
 // -------------
 cur_frm.cscript.make_dn_list = function(parent,doc){
-	wn.require('lib/js/legacy/widgets/listing.js');
+	wn.require('js/listing.js');
 
 	var lst = new Listing();
 	lst.colwidths = ['5%','20%','20%','20%','20%','15%'];
@@ -208,7 +208,7 @@ cur_frm.cscript.make_dn_list = function(parent,doc){
 // make si list
 // -------------
 cur_frm.cscript.make_si_list = function(parent,doc){
-	wn.require('lib/js/legacy/widgets/listing.js');
+	wn.require('js/listing.js');
 	
 	var lst = new Listing();
 	lst.colwidths = ['5%','20%','20%','20%','20%','15%'];

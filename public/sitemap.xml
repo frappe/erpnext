@@ -16,20 +16,21 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 import cgi, cgitb, os, sys
 cgitb.enable()
 
 # import libs
-sys.path.append('lib/py')
+sys.path.append('..')
+sys.path.append('../lib/py')
 
 import webnotes
 import webnotes.auth
 
 if __name__=='__main__':
 	webnotes.http_request = webnotes.auth.HTTPRequest()
-	from webnotes.cms import feed
-	xml = feed.generate()
+	domain = os.environ.get('HTTP_HOST')
+	protocol = os.environ.get('HTTPS') and 'https://' or 'http://'
+	from webnotes.cms import sitemap
 	print 'Content-Type: text/xml'
 	print
-	print xml
+	print sitemap.generate(protocol + domain + '/')

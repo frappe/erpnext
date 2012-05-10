@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-03-27 14:36:48',
+		'creation': '2012-04-02 16:02:43',
 		'docstatus': 0,
-		'modified': '2012-03-27 14:36:48',
+		'modified': '2012-05-07 15:21:00',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -19,7 +19,7 @@
 		'name': '__common__',
 		'section_style': u'Simple',
 		'show_in_menu': 0,
-		'version': 4
+		'version': 1
 	},
 
 	# These values are common for all DocField
@@ -43,16 +43,8 @@
 		'doctype': u'DocField',
 		'fieldname': u'label',
 		'fieldtype': u'Data',
-		'label': u'Label'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'custom_page',
-		'fieldtype': u'Link',
-		'label': u'Page',
-		'options': u'Page'
+		'label': u'Label',
+		'width': u'120px'
 	},
 
 	# DocField
@@ -60,7 +52,17 @@
 		'doctype': u'DocField',
 		'fieldname': u'url',
 		'fieldtype': u'Data',
-		'label': u'URL'
+		'label': u'URL',
+		'width': u'200px'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'target',
+		'fieldtype': u'Select',
+		'label': u'Target',
+		'options': u'\ntarget = "_blank"'
 	},
 
 	# DocField

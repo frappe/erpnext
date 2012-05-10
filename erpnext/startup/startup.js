@@ -53,22 +53,12 @@ erpnext.startup.start = function() {
 	
 	
 	erpnext.startup.set_globals();
-
-	if(wn.boot.user_background) {
-		erpnext.set_user_background(wn.boot.user_background);
-	}
 		
-	if(user == 'Guest'){
-		if(wn.boot.custom_css) {
-			set_style(wn.boot.custom_css);
+	if(user != 'Guest'){
+		if(wn.boot.user_background) {
+			erpnext.set_user_background(wn.boot.user_background);
 		}
-		if(wn.boot.website_settings.title_prefix) {
-			wn.title_prefix = wn.boot.website_settings.title_prefix;
-		}
-		if(wn.boot.startup_code) {
-			eval(wn.boot.startup_code);
-		}
-	} else {
+
 		// always allow apps
 		wn.boot.profile.allow_modules = wn.boot.profile.allow_modules.concat(
 			['To Do', 'Knowledge Base', 'Calendar', 'Activity', 'Messages'])
@@ -106,14 +96,14 @@ erpnext.startup.start = function() {
 				</div>', { expiry_string: expiry_string }));
 			}
 		}
-		
+		erpnext.set_about();
+		if(wn.control_panel.custom_startup_code)
+			eval(wn.control_panel.custom_startup_code);		
 	}
 
-	erpnext.set_about();
-	if(wn.control_panel.custom_startup_code)
-		eval(wn.control_panel.custom_startup_code);
 		
-	$('body').append('<a class="erpnext-logo" title="Powered by ERPNext" href="http://erpnext.com" target="_blank"></a>')
+	$('body').append('<a class="erpnext-logo" title="Powered by ERPNext" \
+		href="http://erpnext.com" target="_blank"></a>')
 }
 
 

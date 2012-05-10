@@ -25,7 +25,7 @@ wn.doclistviews['Quotation'] = wn.views.ListView.extend({
 		{width: '5%', content:'avatar'},
 		{width: '3%', content:'docstatus'},
 		{width: '15%', content:'name'},
-		{width: '47%', content:'tags+quotation_name', css: {color:'#aaa'}},
+		{width: '47%', content:'tags+quotation_name', css: {color:'#222'}},
 		{
 			width: '18%', 
 			content: function(parent, data) { 

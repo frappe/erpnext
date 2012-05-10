@@ -21,7 +21,7 @@ wn.doclistviews['Journal Voucher'] = wn.views.ListView.extend({
 		{width: '3%', content:'docstatus'},
 		{width: '12%', content:'name'},
 		{width: '15%', content:'voucher_type'},
-		{width: '38%', content:'tags+remark', css: {'color':'#aaa'}},
+		{width: '38%', content:'tags+remark', css: {'color':'#222'}},
 		{
 			width: '18%', 
 			content: function(parent, data) { 

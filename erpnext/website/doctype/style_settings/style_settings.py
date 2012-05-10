@@ -21,8 +21,9 @@ class DocType:
 	def validate(self):
 		"""make custom css"""
 		from jinja2 import Template
+		import os
 		
-		with open('erpnext/website/doctype/style_settings/custom_template.css', 'r') as f:
+		with open(os.path.join(os.path.dirname(__file__), 'custom_template.css'), 'r') as f:
 			temp = Template(f.read())
 		
 		if not self.doc.font_size:
@@ -38,5 +39,9 @@ class DocType:
 		clear_cache('Guest')
 		
 		del self.doc.fields['small_font_size']
-		
+	
+	def on_update(self):
+		"""rebuild pages"""
+		from webnotes.cms.make import make_web_core
+		make_web_core()
 		

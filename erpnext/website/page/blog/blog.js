@@ -33,7 +33,7 @@ pscript.onload_blog = function(wrapper) {
 			parent.innerHTML = repl('<h2>%(title)s</h2>\
 				<p><div class="help">By %(first_name)s%(last_name)s, %(date)s</div></p>\
 				<p>%(content)s</p>\
-				<a href="#!%(name)s">Read Full Text</a><br>', data);
+				<a href="%(name)s.html">Read Full Text</a><br>', data);
 		},
 		page_length: 10
 	});

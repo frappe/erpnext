@@ -46,8 +46,9 @@ class DocType():
 		import markdown2
 		import os
 		from webnotes.utils import global_date_format, get_fullname
+		from webnotes.model.code import get_obj
 		
-		self.doc.content_html = markdown2.markdown(self.doc.content or '')
+		self.doc.content_html = unicode(markdown2.markdown(self.doc.content or ''))
 		self.doc.full_name = get_fullname(self.doc.owner)
 		self.doc.updated = global_date_format(self.doc.modified)
 		
@@ -56,14 +57,16 @@ class DocType():
 		
 		with open(os.path.join(os.path.dirname(__file__), 'blog_page.js'), 'r') as f:
 			p.script = Template(f.read()).render(doc=self.doc)
-				
+			
+		p.web_page = 'Yes'
 		p.save()
+		get_obj(doc=p).write_cms_page()
 		
 		website.utils.add_guest_access_to_page(p.name)
 		self.doc.page_name = p.name
 		
 		# cleanup
-		for f in ['content_html', 'full_name', 'updated']:
+		for f in ['full_name', 'updated', 'content_html']:
 			if f in self.doc.fields:
 				del self.doc.fields[f]				
 

@@ -38,7 +38,7 @@ erpnext.navbar.Navbar = Class.extend({
 				<a class="brand">[brand]</a>\
 				<ul class="nav">\
 				</ul>\
-				<img src="lib/images/ui/spinner.gif" id="spinner"/>\
+				<img src="images/lib/ui/spinner.gif" id="spinner"/>\
 				<ul class="nav pull-right">\
 					<li id="login-topbar-item"><a href="#!Login Page">Login</a></li>\
 				</ul>\
@@ -75,7 +75,7 @@ erpnext.navbar.Navbar = Class.extend({
 						.click(function() {
 							return false;
 						});
-					$parent_li.append('<ul class="dropdown-menu"></ul>');
+					$parent_li.append('');
 				}
 				erpnext.header_link_settings(item);
 				$parent_li.find('.dropdown-menu').append(repl('<li data-label="%(label)s">\
@@ -126,5 +126,5 @@ erpnext.header_link_settings = function(item) {
 
 $(document).bind('startup', function() {
 	erpnext.footer = new erpnext.Footer();
-	erpnext.navbar.navbar = new erpnext.navbar.Navbar();	
+	//erpnext.navbar.navbar = new erpnext.navbar.Navbar();	
 })

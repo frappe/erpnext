@@ -21,7 +21,6 @@
 // see ledger
 
 pscript['onload_Accounts Browser'] = function(wrapper){
-	wn.require('lib/js/wn/ui/tree.js');
 	wrapper.appframe = new wn.ui.AppFrame($(wrapper).find('.appframe-area'));
 	wrapper.appframe.add_button('New Company', function() { newdoc('Company'); }, 'icon-plus');
 	wrapper.appframe.add_button('Refresh', function() {  
@@ -340,7 +339,7 @@ pscript.make_ac_tree = function() {
           var imgsrc=null;
           var has_children = true;
           if(cl[i].group_or_ledger=='Ledger') {
-            var imgsrc = 'lib/images/icons/page.png';
+            var imgsrc = 'images/lib/icons/page.png';
             has_children = false;
           }
           var t = tree.addNode(n, cl[i].account_name, imgsrc,tree.std_onclick, has_children ? tree.std_onexp : null);
@@ -353,7 +352,7 @@ pscript.make_ac_tree = function() {
           var imgsrc=null;
           var has_children = true;
           if(cl[i].group_or_ledger=='Ledger') {
-            var imgsrc = 'lib/images/icons/page.png';
+            var imgsrc = 'images/lib/icons/page.png';
             has_children = false;
           }
           var t = tree.addNode(n, cl[i].cost_center_name, imgsrc,tree.std_onclick, has_children ? tree.std_onexp : null);
@@ -470,7 +469,7 @@ pscript.make_group_area = function(type) {
 
   // refresh
    ref_btn = $a(pscript.group_area, 'div', '', {fontSize: '14px',marginBottom: '8px', marginTop: '24px', fontWeight: 'bold'});
-  ref_btn.innerHTML = '<img src="lib/images/icons/page_refresh.gif" style="margin-right: 8px"><span class="link_type">Refresh Tree</span>';
+  ref_btn.innerHTML = '<img src="images/lib/icons/page_refresh.gif" style="margin-right: 8px"><span class="link_type">Refresh Tree</span>';
   ref_btn.onclick= function() {
     pscript.cur_node.clear_child_nodes();
     pscript.cur_node.expand();
@@ -528,7 +527,7 @@ pscript.make_ledger_area = function() {
 
   //General ledger report link
   pscript.gl_rep = $a(pscript.ledger_area, 'div','', {fontSize: '14px',marginBottom: '8px', fontWeight: 'bold'});
-  pscript.gl_rep.innerHTML = '<img src="lib/images/icons/report.png" style="margin-right: 8px"><span class="link_type">Open Ledger</span>';
+  pscript.gl_rep.innerHTML = '<img src="images/lib/icons/report.png" style="margin-right: 8px"><span class="link_type">Open Ledger</span>';
   pscript.gl_rep.onclick = function(){ pscript.make_report('gl'); }
 
 }

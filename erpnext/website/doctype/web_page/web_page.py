@@ -27,6 +27,10 @@ class DocType:
 
 	def validate(self):
 		"""make page for this product"""
+		from jinja2 import Template
+		from webnotes.utils import global_date_format
+		from webnotes.model.code import get_obj
+		import os
 
 		# we need the name for the templates
 		if not self.doc.name:
@@ -36,11 +40,8 @@ class DocType:
 			webnotes.conn.sql("""delete from tabPage where name=%s""", self.doc.page_name)
 
 		p = website.utils.add_page(self.doc.name)
+		self.doc.page_name = p.name
 		
-		from jinja2 import Template
-		from webnotes.utils import global_date_format
-		import os
-	
 		self.doc.updated = global_date_format(self.doc.modified)
 		website.utils.markdown(self.doc, ['head_section','main_section', 'side_section'])
 				
@@ -48,6 +49,7 @@ class DocType:
 			p.content = Template(f.read()).render(doc=self.doc)
 
 		p.title = self.doc.title
+		p.web_page = 'Yes'
 		
 		if self.doc.insert_code:
 			p.script = self.doc.javascript
@@ -56,6 +58,7 @@ class DocType:
 			p.style = self.doc.css
 
 		p.save()
+		get_obj(doc=p).write_cms_page()
 		
 		website.utils.add_guest_access_to_page(p.name)
 		self.cleanup_temp()
