@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-03-27 14:36:40',
+		'creation': '2012-04-13 11:56:39',
 		'docstatus': 0,
-		'modified': '2012-03-27 14:45:52',
+		'modified': '2012-05-10 11:54:52',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -27,7 +27,7 @@
 		'server_code_error': u' ',
 		'show_in_menu': 0,
 		'subject': u'Date: %(reconciliation_date)s, Time: %(reconciliation_time)s',
-		'version': 107
+		'version': 1
 	},
 
 	# These values are common for all DocField
@@ -157,6 +157,17 @@
 		'oldfieldname': u'file_list',
 		'oldfieldtype': u'Text',
 		'permlevel': 1,
+		'print_hide': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'diff_info',
+		'fieldtype': u'Text',
+		'hidden': 1,
+		'label': u'Diff Info',
+		'permlevel': 0,
 		'print_hide': 1
 	},
 

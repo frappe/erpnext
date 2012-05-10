@@ -16,5 +16,14 @@
 		"erpnext/startup/js/toolbar.js",
 		"erpnext/startup/js/feature_setup.js",
 		"conf.js"
-	]
+	],
+	"public/js/kb_common.js": [
+		"erpnext/utilities/page/kb_common/kb_common.js",
+	],
+	"public/js/complete_setup.js": [
+		"erpnext/startup/js/complete_setup.js",
+	],
+	"public/js/product_category.js": [
+		"erpnext/website/js/product_category.js",
+	],
 }

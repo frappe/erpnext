@@ -16,7 +16,7 @@
 
 erpnext.products = {}
 
-wn.require('erpnext/website/js/product_category.js');
+wn.require('js/product_category.js');
 
 pscript.onload_products = function(wrapper) {
 	erpnext.make_product_categories(wrapper);

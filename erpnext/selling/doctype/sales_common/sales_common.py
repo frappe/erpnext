@@ -311,16 +311,6 @@ class DocType(TransactionBase):
 			}
 		return ret
 		
-
-	# Make Packing List from Sales BOM
-	# =======================================================================
-	def has_sales_bom(self, item_code):
-		return webnotes.conn.sql("select name from `tabSales BOM` where name=%s and docstatus != 2", item_code)
-	
-	def get_sales_bom_items(self, item_code):
-		return webnotes.conn.sql("select item_code, qty, uom from `tabSales BOM Item` where parent=%s", item_code)
-
-
 	# --------------
 	# get item list
 	# --------------
@@ -345,8 +335,9 @@ class DocType(TransactionBase):
 			warehouse = (obj.fname == "sales_order_details") and d.reserved_warehouse or d.warehouse
 			
 			if self.has_sales_bom(d.item_code):
-				for i in self.get_sales_bom_items(d.item_code):
-					il.append([warehouse, i[0], flt(flt(i[1])* qty), flt(flt(i[1])*reserved_qty), i[2], d.batch_no, d.serial_no])
+				for p in getlist(obj.doclist, 'packing_details'):
+					if p.parent_item == d.item_code:
+						il.append([warehouse, p.item_code, flt(p.qty)*qty, flt(p.qty)* reserved_qty, p.uom, p.batch_no, p.serial_no])
 			else:
 				il.append([warehouse, d.item_code, qty, reserved_qty, d.stock_uom, d.batch_no, d.serial_no])
 		return il
@@ -371,12 +362,16 @@ class DocType(TransactionBase):
 		return qty, max_qty, amt, max_amt
 
 
+	# Make Packing List from Sales BOM
+	# =======================================================================
+	def has_sales_bom(self, item_code):
+		return webnotes.conn.sql("select name from `tabSales BOM` where new_item_code=%s and docstatus != 2", item_code)
+	
+	def get_sales_bom_items(self, item_code):
+		return webnotes.conn.sql("""select t1.item_code, t1.qty, t1.uom 
+			from `tabSales BOM Item` t1, `tabSales BOM` t2 
+			where t2.new_item_code=%s and t1.parent = t2.name""", item_code, as_dict=1)
 
-
-
-	# -----------------------
-	# add packing list items
-	# -----------------------
 	def get_packing_item_details(self, item):
 		return webnotes.conn.sql("select item_name, description, stock_uom from `tabItem` where name = %s", item, as_dict = 1)[0]
 
@@ -384,12 +379,22 @@ class DocType(TransactionBase):
 		det = webnotes.conn.sql("select actual_qty, projected_qty from `tabBin` where item_code = '%s' and warehouse = '%s'" % (item, warehouse), as_dict = 1)
 		return det and det[0] or ''
 
-	def add_packing_list_item(self,obj, item_code, qty, warehouse, line):
-		bin = self.get_bin_qty(item_code, warehouse)
-		item = self.get_packing_item_details(item_code)
-		pi = addchild(obj.doc, 'packing_details', 'Delivery Note Packing Item', 1, obj.doclist)
-		pi.parent_item = item_code
-		pi.item_code = item_code
+	def update_packing_list_item(self,obj, packing_item_code, qty, warehouse, line):
+		bin = self.get_bin_qty(packing_item_code, warehouse)
+		item = self.get_packing_item_details(packing_item_code)
+
+		# check if exists
+		exists = 0
+		for d in getlist(obj.doclist, 'packing_details'):
+			if d.parent_item == line.item_code and d.item_code == packing_item_code:
+				pi, exists = d, 1
+				break
+
+		if not exists:
+			pi = addchild(obj.doc, 'packing_details', 'Delivery Note Packing Item', 1, obj.doclist)
+
+		pi.parent_item = line.item_code
+		pi.item_code = packing_item_code
 		pi.item_name = item['item_name']
 		pi.parent_detail_docname = line.name
 		pi.description = item['description']
@@ -399,7 +404,9 @@ class DocType(TransactionBase):
 		pi.projected_qty = bin and flt(bin['projected_qty']) or 0
 		pi.warehouse = warehouse
 		pi.prevdoc_doctype = line.prevdoc_doctype
-		pi.serial_no = cstr(line.serial_no)
+		if packing_item_code == line.item_code:
+			pi.serial_no = cstr(line.serial_no)
+			pi.batch_no = cstr(line.batch_no)
 		pi.idx = self.packing_list_idx
 		self.packing_list_idx += 1
 
@@ -408,15 +415,14 @@ class DocType(TransactionBase):
 	# make packing list from sales bom if exists or directly copy item with balance
 	# ------------------ 
 	def make_packing_list(self, obj, fname):
-		obj.doc.clear_table(obj.doclist, 'packing_details')
 		self.packing_list_idx = 0
 		for d in getlist(obj.doclist, fname):
 			warehouse = fname == "sales_order_details" and d.reserved_warehouse or d.warehouse
 			if self.has_sales_bom(d.item_code):
 				for i in self.get_sales_bom_items(d.item_code):
-					self.add_packing_list_item(obj, i[0], flt(i[1])*flt(d.qty), warehouse, d)
+					self.update_packing_list_item(obj, i['item_code'], flt(i['qty'])*flt(d.qty), warehouse, d)
 			else:
-				self.add_packing_list_item(obj, d.item_code, d.qty, warehouse, d)
+				self.update_packing_list_item(obj, d.item_code, d.qty, warehouse, d)
 
 
 	# Get total in words

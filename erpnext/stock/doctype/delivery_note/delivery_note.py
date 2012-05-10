@@ -416,7 +416,6 @@ class DocType(TransactionBase):
 				if not d[0]:
 					msgprint("Message: Please enter Warehouse for item %s as it is stock item."% d[1])
 					raise Exception
-				# if prevdoc_doctype = "Sales Order"
 				if d[3] < 0 :
 					# Reduce Reserved Qty from warehouse
 					bin = get_obj('Warehouse', d[0]).update_bin(0, flt(update_stock) * flt(d[3]), 0, 0, 0, d[1], self.doc.transaction_date,doc_type=self.doc.doctype,doc_name=self.doc.name, is_amended = (self.doc.amended_from and 'Yes' or 'No'))

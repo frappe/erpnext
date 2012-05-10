@@ -25,7 +25,7 @@ pscript['onload_{{ doc.name }}'] = function(wrapper) {
 			where ifnull(published,0)=1 and name!="{{ doc.name }}" order by modified desc',
 		hide_refresh: true,
 		render_row: function(parent, data) {
-			console.log(data);
+			//console.log(data);
 			if(data.content && data.content.length==100) data.content += '...';
 			parent.innerHTML = repl('<a href="%(name)s.html">%(title)s</a>\
 				<div class="comment">%(content)s</div><br>', data);

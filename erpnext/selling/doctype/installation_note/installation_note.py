@@ -138,7 +138,7 @@ class DocType(TransactionBase):
       
       if d.serial_no:
 
-        sr_list = get_sr_no_list(d.serial_no, d.qty)
+        sr_list = get_sr_no_list(d.serial_no, d.qty, d.item_code)
         self.is_serial_no_exist(d.item_code, sr_list)
         
         prevdoc_s_no = self.get_prevdoc_serial_no(d.prevdoc_detail_docname, d.prevdoc_docname)

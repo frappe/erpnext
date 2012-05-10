@@ -119,7 +119,6 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 
 	// Show / Hide button
 	cur_frm.clear_custom_buttons();
-
 	if (!cur_frm.cscript.is_onload)	cur_frm.cscript.hide_price_list_currency(doc, dt, dn); 
 
 	if(doc.docstatus==1) {

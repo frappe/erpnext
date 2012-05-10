@@ -2260,7 +2260,7 @@ wn.provide('wn.modules');$.extend(wn.modules,erpnext.modules);wn.modules['Core']
 erpnext.startup.start=function(){console.log('Starting up...');$('#startup_div').html('Starting up...').toggle(true);erpnext.startup.set_globals();if(user!='Guest'){if(wn.boot.user_background){erpnext.set_user_background(wn.boot.user_background);}
 wn.boot.profile.allow_modules=wn.boot.profile.allow_modules.concat(['To Do','Knowledge Base','Calendar','Activity','Messages'])
 erpnext.toolbar.setup();erpnext.startup.set_periodic_updates();$('footer').html('<div class="web-footer erpnext-footer">\
-   <a href="#!attributions">ERPNext | Attributions and License</a></div>');if(in_list(user_roles,'System Manager')&&(wn.boot.setup_complete=='No')){wn.require("erpnext/startup/js/complete_setup.js");erpnext.complete_setup.show();}
+   <a href="#!attributions">ERPNext | Attributions and License</a></div>');if(in_list(user_roles,'System Manager')&&(wn.boot.setup_complete=='No')){wn.require("js/complete_setup.js");erpnext.complete_setup.show();}
 if(wn.boot.expires_on&&in_list(user_roles,'System Manager')){var today=dateutil.str_to_obj(dateutil.get_today());var expires_on=dateutil.str_to_obj(wn.boot.expires_on);var diff=dateutil.get_diff(expires_on,today);if(0<=diff&&diff<=15){var expiry_string=diff==0?"today":repl("in %(diff)s day(s)",{diff:diff});$('header').append(repl('<div class="expiry-info"> \
      Your ERPNext subscription will <b>expire %(expiry_string)s</b>. \
      Please renew your subscription to continue using ERPNext \

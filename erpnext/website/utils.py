@@ -72,6 +72,7 @@ def get_header(page_name):
 
 	from webnotes.model.doc import Document
 	from jinja2 import Template
+	import webnotes.utils
 
 	def get_item(l, label):
 		for i in l:
@@ -121,7 +122,7 @@ def get_header(page_name):
 		</div>
 		</div>
 		</div>""").render(top_bar_items = top_bar_items, 
-			brand=website_settings.brand_html or webnotes.get_default('company') or 'ERPNext')
+			brand=website_settings.brand_html or webnotes.utils.get_defaults('company') or 'ERPNext')
 			
 def get_footer(page_name):
 	"""get page footer"""

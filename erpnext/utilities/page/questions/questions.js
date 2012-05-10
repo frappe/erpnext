@@ -220,4 +220,4 @@ KBQuestion = function(parent, det, kb) {
 	this.make()
 }
 
-wn.require('erpnext/utilities/page/kb_common/kb_common.js');
+wn.require('js/kb_common.js');

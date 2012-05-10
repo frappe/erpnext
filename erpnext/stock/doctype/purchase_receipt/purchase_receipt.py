@@ -114,7 +114,7 @@ class DocType(TransactionBase):
 
 			# If Reject Qty than Rejected warehouse is mandatory
 			if flt(d.rejected_qty) and (not self.doc.rejected_warehouse):
-				msgprint("Rejected Warehouse is necessary if there are rejections. See 'Receipt Items'")
+				msgprint("Rejected Warehouse is necessary if there are rejections.")
 				raise Exception
 
 			# Check Received Qty = Accepted Qty + Rejected Qty
@@ -198,6 +198,15 @@ class DocType(TransactionBase):
 
 		self.update_rw_material_detail()
 		get_obj('Stock Ledger').scrub_serial_nos(self)
+		self.scrub_rejected_serial_nos()
+
+
+	def scrub_rejected_serial_nos(self):
+		for d in getlist(self.doclist, 'purchase_receipt_details'):
+			if d.rejected_serial_no:
+				d.rejected_serial_no = d.rejected_serial_no.replace(',', '\n')
+				d.save()
+
 
 
 	# On Submit
@@ -232,7 +241,7 @@ class DocType(TransactionBase):
 				self.make_sl_entry(d, d.warehouse, flt(pr_qty), d.valuation_rate, is_submit)
 				# UPDATE actual to rejected warehouse by rejected qty
 				if flt(d.rejected_qty) > 0:
-					self.make_sl_entry(d, self.doc.rejected_warehouse, flt(d.rejected_qty) * flt(d.conversion_factor), d.valuation_rate, is_submit)
+					self.make_sl_entry(d, self.doc.rejected_warehouse, flt(d.rejected_qty) * flt(d.conversion_factor), d.valuation_rate, is_submit, rejected = 1)
 
 		self.bk_flush_supp_wh(is_submit)
 
@@ -241,24 +250,29 @@ class DocType(TransactionBase):
 
 
 	# make Stock Entry
-	def make_sl_entry(self, d, wh, qty, in_value, is_submit):
+	def make_sl_entry(self, d, wh, qty, in_value, is_submit, rejected = 0):
+		if rejected:
+			serial_no = d.rejected_serial_no
+		else:
+			serial_no = d.serial_no
+
 		self.values.append({
-			'item_code'					 : d.fields.has_key('item_code') and d.item_code or d.rm_item_code,
-			'warehouse'					 : wh,
+			'item_code'					: d.fields.has_key('item_code') and d.item_code or d.rm_item_code,
+			'warehouse'					: wh,
 			'transaction_date'			: getdate(self.doc.modified).strftime('%Y-%m-%d'),
 			'posting_date'				: self.doc.posting_date,
 			'posting_time'				: self.doc.posting_time,
 			'voucher_type'				: 'Purchase Receipt',
-			'voucher_no'					: self.doc.name,
-			'voucher_detail_no'	 : d.name,
-			'actual_qty'					: qty,
-			'stock_uom'					 : d.stock_uom,
-			'incoming_rate'			 : in_value,
-			'company'						 : self.doc.company,
-			'fiscal_year'				 : self.doc.fiscal_year,
+			'voucher_no'				: self.doc.name,
+			'voucher_detail_no'			: d.name,
+			'actual_qty'				: qty,
+			'stock_uom'					: d.stock_uom,
+			'incoming_rate'				: in_value,
+			'company'					: self.doc.company,
+			'fiscal_year'				: self.doc.fiscal_year,
 			'is_cancelled'				: (is_submit==1) and 'No' or 'Yes',
-			'batch_no'						: d.batch_no,
-			'serial_no'					 : d.serial_no
+			'batch_no'					: d.batch_no,
+			'serial_no'					: serial_no
 			})
 
 
