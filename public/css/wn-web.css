@@ -1,9 +1,9 @@
 #body_div {
 
-	background: url("files/indian-textile-5.gif") repeat;
+	background: url("../files/indian-textile-5.gif") repeat;
 	
 
-	font-family: 'Lato', Verdana, Sans !important;
+	font-family: 'Arial', Verdana, Sans !important;
 
 
 	font-size: 14px !important;
@@ -17,10 +17,8 @@
 
 
 
-
-
 h1, h2, h3, h4, h5 {
-	font-family: 'Lato', Arial, 'Helvetica Neue' !important;
+	font-family: 'Arial', Arial, 'Helvetica Neue' !important;
 }	
 
 
@@ -93,7 +91,7 @@ h2 {
   clear: both;
   margin: -50px;
   margin-top: 50px;
-  background-color: #DEE1D0; //#E7DFCA;
+  background-color: #FFFAED;
   padding: 50px;
 }
 
@@ -119,19 +117,12 @@ h2 {
   padding: 4px;
 }
 
-.avatar {
-  height: 75px;
-  width: 75px;
-  border-radius: 100px 100px 100px 100px;
-  overflow: hidden;
-}
-
 .link-big {
   font-size: 140%;
 }
 
 .sticky {
-  background-color: #FFFBC4;
+  background-color: #F0EDDD;
   padding: 15px;
   margin-left: 15px;
   font-size: 12px;
