@@ -25,7 +25,7 @@ wn.doclistviews['Journal Voucher'] = wn.views.ListView.extend({
 		{
 			width: '18%', 
 			content: function(parent, data) { 
-				$(parent).html(sys_defaults.currency + ' ' + fmt_money(data.total_debit)) 
+				$(parent).html(fmt_money(data.total_debit)) 
 			},
 			css: {'text-align':'right'}
 		},
