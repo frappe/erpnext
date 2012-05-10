@@ -48,14 +48,14 @@ if not os.path.exists(os.path.join(erpnext_path, 'logs')):
 # setup lib -- framework repo with read only access
 # change this if you have your own fork
 if not os.path.exists(os.path.join(erpnext_path, 'lib')):
-	os.system('git clone git://github.com/webnotes/wnframework.git')
+	os.system('git clone git://github.com/webnotes/wnframework.git lib')
 
 # setup symlinks in public
 if not os.path.exists(os.path.join(erpnext_path, 'public', 'js', 'lib')):
 	os.symlink(os.path.join(erpnext_path, 'lib', 'js', 'lib'),
 		os.path.join(erpnext_path, 'public', 'js', 'lib'))
 if not os.path.exists(os.path.join(erpnext_path, 'public', 'images', 'lib')):
-	os.symlink(os.path.join(eprnext_path, 'lib', 'images'),
+	os.symlink(os.path.join(erpnext_path, 'lib', 'images'),
 		os.path.join(erpnext_path, 'public', 'images', 'lib'))
 
 # extract master
