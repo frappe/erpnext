@@ -91,7 +91,7 @@ if not os.path.exists(os.path.join(erpnext_path, 'conf.py')):
 # install db
 import sys
 sys.path.append(erpnext_path)
-sys.path.append(os.path.join(erpnext_path, 'lib'))
+sys.path.append(os.path.join(erpnext_path, 'lib', 'py'))
 import conf
 sys.path.append(conf.modules_path)
 
