@@ -116,6 +116,7 @@ To Do:
 
 * Configure apache/http conf file to point to public folder
 * chown recursively all files in your folder to apache user
+* login using: user="Administrator" and password="admin"
 """
 
 print steps_remaining
