@@ -16,7 +16,7 @@
 
 import webnotes
 from webnotes.utils import cstr, flt, get_defaults, nowdate
-from webnotes import msgprint
+from webnotes import msgprint, errprint
 from webnotes.model.code import get_obj
 sql = webnotes.conn.sql
 	
@@ -28,22 +28,30 @@ class DocType:
 		self.doclist = doclist
 		self.validated = 1
 		self.data = []
+		self.val_method = get_defaults()['valuation_method']
 
 	def get_template(self):
-		return [['Item Code', 'Warehouse', 'Quantity', 'Valuation Rate']]
+		if self.val_method == 'Moving Average':
+			return [['Item Code', 'Warehouse', 'Quantity', 'Valuation Rate']]
+		else:
+			return [['Item Code', 'Warehouse', 'Quantity', 'Incoming Rate']]
 
-	def get_csv_file_data(self):
+
+	def get_csv_file_data(self, submit = 1):
 		"""Get csv data"""
-		filename = self.doc.file_list.split(',')
-		if not filename:
-			msgprint("Please Attach File. ", raise_exception=1)
+		if submit:
+			filename = self.doc.file_list.split(',')
+			if not filename:
+				msgprint("Please Attach File. ", raise_exception=1)
 			
-		from webnotes.utils import file_manager
-		fn, content = file_manager.get_file(filename[1])
+			from webnotes.utils import file_manager
+			fn, content = file_manager.get_file(filename[1])
 		
-		# NOTE: Don't know why this condition exists
-		if not isinstance(content, basestring) and hasattr(content, 'tostring'):
-		  content = content.tostring()
+			# NOTE: Don't know why this condition exists
+			if not isinstance(content, basestring) and hasattr(content, 'tostring'):
+				content = content.tostring()
+		else:
+			content = self.doc.diff_info
 
 		return content
 
@@ -69,7 +77,7 @@ class DocType:
 	def get_reconciliation_data(self,submit = 1):
 		"""Read and validate csv data"""
 		import csv 
-		data = csv.reader(self.get_csv_file_data().splitlines())
+		data = csv.reader(self.get_csv_file_data(submit).splitlines())
 		self.convert_into_list(data, submit)
 		
 
@@ -96,7 +104,6 @@ class DocType:
 
 	def validate(self):
 		"""Validate attachment data"""
-		#self.data = [['it', 'wh1', 20, 150]]
 		if self.doc.file_list:
 			self.get_reconciliation_data()
 
@@ -105,17 +112,32 @@ class DocType:
 	def get_system_stock(self, it, wh):
 		"""get actual qty on reconciliation date and time as per system"""
 		bin = sql("select name from tabBin where item_code=%s and warehouse=%s", (it, wh))
-		prev_sle = bin and get_obj('Bin', bin[0][0]).get_sle_prev_timebucket(self.doc.reconciliation_date, self.doc.reconciliation_time) or {}
+		prev_sle = bin and get_obj('Bin', bin[0][0]).get_prev_sle(self.doc.reconciliation_date, self.doc.reconciliation_time) or {}
 		return {
 			'actual_qty': prev_sle.get('bin_aqat', 0), 
 			'stock_uom' : sql("select stock_uom from tabItem where name = %s", it)[0][0], 
 			'val_rate'  : prev_sle.get('valuation_rate', 0)
 		}
 
+		
+	def get_incoming_rate(self, row, qty_diff, sys_stock, is_submit):
+		"""Calculate incoming rate to maintain valuation rate"""
+		if qty_diff and is_submit:
+			if self.val_method == 'Moving Average':
+				in_rate = flt(row[3]) + (flt(sys_stock['actual_qty'])*(flt(row[3]) - flt(sys_stock['val_rate'])))/ flt(qty_diff)
+			elif not sys_stock and not row[3]:
+				msgprint("Incoming Rate is mandatory for item: %s and warehouse: %s" % (rpw[0], row[1]), raise_exception=1)
+			else:
+				in_rate = qty_diff > 0 and row[3] or 0
+		else:
+			in_rate = 0
+
+		return in_rate
+
 
 	def make_sl_entry(self, is_submit, row, qty_diff, sys_stock):
 		"""Make stock ledger entry"""
-		in_rate = self.get_incoming_rate(row, qty_diff, sys_stock)	
+		in_rate = self.get_incoming_rate(row, qty_diff, sys_stock, is_submit)
 		values = [{
 				'item_code'					: row[0],
 				'warehouse'					: row[1],
@@ -133,14 +155,16 @@ class DocType:
 				'is_cancelled'			 	: (is_submit==1) and 'No' or 'Yes',
 				'batch_no'					: '',
 				'serial_no'					: ''
-		 }]		
+		 }]
 		get_obj('Stock Ledger', 'Stock Ledger').update_stock(values)
 		
-		
-	def get_incoming_rate(self, row, qty_diff, sys_stock):
-		"""Calculate incoming rate to maintain valuation rate"""
-		in_rate = flt(row[3]) + (flt(sys_stock['actual_qty'])*(flt(row[3]) - flt(sys_stock['val_rate'])))/ flt(qty_diff)
-		return in_rate
+
+	
+	def make_entry_for_valuation(self, row, sys_stock, is_submit):
+		self.make_sl_entry(is_submit, row, 1, sys_stock)
+		sys_stock['val_rate'] = row[3]
+		sys_stock['actual_qty'] += 1
+		self.make_sl_entry(is_submit, row, -1, sys_stock)
 
 
 	def do_stock_reco(self, is_submit = 1):
@@ -159,33 +183,34 @@ class DocType:
 			# Make sl entry
 			if qty_diff:
 				self.make_sl_entry(is_submit, row, qty_diff, sys_stock)
-			elif rate_diff:
-				self.make_sl_entry(is_submit, row, 1, sys_stock)
-				sys_stock['val_rate'] = row[3]
-				sys_stock['actual_qty'] += 1
-				self.make_sl_entry(is_submit, row, -1, sys_stock)
+				sys_stock['actual_qty'] += qty_diff
+
+
+			if (not qty_diff and rate_diff) or qty_diff < 0 and self.val_method == 'Moving Average':
+				self.make_entry_for_valuation(row, sys_stock, is_submit)
 
 			if is_submit == 1:
-				self.add_data_in_CSV(qty_diff, rate_diff)
+				self.store_diff_info(qty_diff, rate_diff)
 				
 			msgprint("Stock Reconciliation Completed Successfully...")
 			
 
-	def add_data_in_CSV(self, qty_diff, rate_diff):
+	def store_diff_info(self, qty_diff, rate_diff):
 		"""Add diffs column in attached file"""
 		
 		# add header
-		out = "Item Code, Warehouse, Qty, Valuation Rate, Qty Diff, Val Rate Diff"
+		if self.val_method == 'Moving Average':
+			out = "Item Code, Warehouse, Qty, Valuation Rate, Qty Diff, Rate Diff"
+		else:
+			out = "Item Code, Warehouse, Qty, Incoming Rate, Qty Diff, Rate Diff"
+
 		
 		# add data
 		for d in self.data:
 			s = [cstr(i) for i in d] + [cstr(qty_diff), cstr(rate_diff)]
 			out += "\n" + ','.join(s)
-		
-		# write to file
-		fname = self.doc.file_list.split(',')
-		from webnotes.utils import file_manager
-		file_manager.write_file(fname[1], out)
+
+		webnotes.conn.set(self.doc, 'diff_info', out)
 		
 			
 

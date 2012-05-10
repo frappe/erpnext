@@ -334,8 +334,13 @@ patch_list = [
 	},
 	{
 		'patch_module': 'patches.may_2012',
+		'patch_file': 'stock_reco_patch',
+		'description': 'stock reco patch: store diff info in field'
+	},
+	{
+		'patch_module': 'patches.may_2012',
 		'patch_file': 'cms',
 		'description': 'generate html pages'
 	},
-
+	
 ]

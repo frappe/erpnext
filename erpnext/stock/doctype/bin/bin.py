@@ -181,8 +181,7 @@ class DocType:
 	# get moving average inventory values
 	# ------------------------------------
 	def get_moving_average_inventory_values(self, val_rate, in_rate, opening_qty, actual_qty, is_cancelled):
-		#msgprint(actual_qty)
-		if flt(in_rate) <= 0: # In case of delivery/stock issue in_rate = 0 or wrong incoming rate
+		if flt(in_rate) == 0: # In case of delivery/stock issue in_rate = 0 or wrong incoming rate
 			in_rate = val_rate
 
 		# val_rate is same as previous entry if :
