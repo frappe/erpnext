@@ -106,6 +106,11 @@ os.system("lib/wnf.py -l")
 # force sync all
 os.system("lib/wnf.py --sync_all -f")
 
+# set filemode false
+os.system("git config core.filemode false")
+os.chdir(os.path.join(erpnext_path, 'lib'))
+os.system("git config core.filemode false")
+
 steps_remaining = """
 To Do:
 

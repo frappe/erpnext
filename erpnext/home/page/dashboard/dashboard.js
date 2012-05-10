@@ -16,7 +16,7 @@
 
 pscript.onload_dashboard = function() {
 	// load jqplot
-	wn.require('lib/css/lib/jqplot.css');
+	wn.require('js/lib/jqplot/css/jqplot.css');
 	wn.require('js/lib/jqplot/jquery.jqplot.min.js');
 	wn.require('js/lib/jqplot/jqplot-plugins/jqplot.barRenderer.js'); 
 	wn.require('js/lib/jqplot/jqplot-plugins/jqplot.canvasAxisTickRenderer.min.js');
