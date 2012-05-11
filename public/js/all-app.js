@@ -184,9 +184,9 @@ wn.dom.set_box_shadow=function(ele,spread){$(ele).css('-moz-box-shadow','0px 0px
 $(ele).css('-webkit-box-shadow','0px 0px '+spread+'px rgba(0,0,0,0.3);')
 $(ele).css('-box-shadow','0px 0px '+spread+'px rgba(0,0,0,0.3);')};(function($){$.fn.add_options=function(options_list){for(var i=0;i<options_list.length;i++){var v=options_list[i];value=v.value||v;label=v.label||v;$('<option>').html(label).attr('value',value).appendTo(this);}
 $(this).val(options_list[0].value||options_list[0]);}
-$.fn.set_working=function(){var ele=this.get(0);if(ele.loading_img){$(ele.loading_img).toggle(true);}else{ele.disabled=1;ele.loading_img=$('<img src="images/lib/ui/button-load.gif" \
+$.fn.set_working=function(){var ele=this.get(0);$(ele).attr('disabled','disabled');if(ele.loading_img){$(ele.loading_img).toggle(true);}else{ele.loading_img=$('<img src="images/lib/ui/button-load.gif" \
     style="margin-left: 4px; margin-bottom: -2px; display: inline;" />').insertAfter(ele);}}
-$.fn.done_working=function(){var ele=this.get(0);ele.disabled=0;if(ele.loading_img){$(ele.loading_img).toggle(false);};}})(jQuery);
+$.fn.done_working=function(){var ele=this.get(0);$(ele).attr('disabled',null);if(ele.loading_img){$(ele.loading_img).toggle(false);};}})(jQuery);
 /*
  *	lib/js/wn/model.js
  */
@@ -843,7 +843,7 @@ this.wrapper=this.prev_button.wrapper;this.input_area=this.prev_button.input_are
 _f.ButtonField.prototype.make_input=function(){var me=this;if(!this.prev_button){$y(this.input_area,{marginTop:'4px',marginBottom:'4px'});}
 if(!this.button_area)
 this.button_area=$a(this.input_area,'span','',{marginRight:'4px'});this.input=$btn(this.button_area,me.df.label,null,{fontWeight:'bold'},null,1)
-this.input.onclick=function(){if(me.not_in_form)return;this.disabled='disabled';if(cur_frm.cscript[me.df.fieldname]&&(!me.in_filter)){cur_frm.runclientscript(me.df.fieldname,me.doctype,me.docname);this.disabled=false;}else{cur_frm.runscript(me.df.options,me);this.disabled=false;}}}
+$(this.input).click(function(){if(me.not_in_form)return;if(cur_frm.cscript[me.df.fieldname]&&(!me.in_filter)){cur_frm.runclientscript(me.df.fieldname,me.doctype,me.docname);}else{cur_frm.runscript(me.df.options,me);}});}
 _f.ButtonField.prototype.hide=function(){$dh(this.button_area);};_f.ButtonField.prototype.show=function(){$ds(this.button_area);};_f.ButtonField.prototype.set=function(v){};_f.ButtonField.prototype.set_disp=function(val){}
 function make_field(docfield,doctype,parent,frm,in_grid,hide_label){switch(docfield.fieldtype.toLowerCase()){case'data':var f=new DataField();break;case'password':var f=new DataField();break;case'int':var f=new IntField();break;case'float':var f=new FloatField();break;case'currency':var f=new CurrencyField();break;case'read only':var f=new ReadOnlyField();break;case'link':var f=new LinkField();break;case'date':var f=new DateField();break;case'time':var f=new TimeField();break;case'html':var f=new HTMLField();break;case'check':var f=new CheckField();break;case'text':var f=new TextField();break;case'small text':var f=new TextField();break;case'select':var f=new SelectField();break;case'button':var f=new _f.ButtonField();break;case'code':var f=new _f.CodeField();break;case'text editor':var f=new _f.CodeField();break;case'table':var f=new _f.TableField();break;case'section break':var f=new _f.SectionBreak();break;case'column break':var f=new _f.ColumnBreak();break;case'image':var f=new _f.ImageField();break;}
 f.parent=parent;f.doctype=doctype;f.df=docfield;f.perm=frm?frm.perm:[[1,1,1]];if(_f)
@@ -904,12 +904,10 @@ $(document).bind('keydown',function(e){if(cur_dialog&&!cur_dialog.no_cancel_flag
 /*
  *	lib/js/wn/ui/button.js
  */
-wn.ui.Button=function(args){var me=this;$.extend(this,{make:function(){me.btn=wn.dom.add(args.parent,'button','btn btn-small '+(args.css_class||''));me.btn.args=args;me.loading_img=wn.dom.add(me.btn.args.parent,'img','',{margin:'0px 4px -2px 4px',display:'none'});me.loading_img.src='images/lib/ui/button-load.gif';if(args.is_ajax)wn.dom.css(me.btn,{marginRight:'24px'});me.btn.innerHTML=args.label;me.btn.user_onclick=args.onclick;$(me.btn).bind('click',function(){if(!this.disabled&&this.user_onclick)
+wn.ui.Button=function(args){var me=this;$.extend(this,{make:function(){me.btn=wn.dom.add(args.parent,'button','btn btn-small '+(args.css_class||''));me.btn.args=args;me.loading_img=wn.dom.add(me.btn.args.parent,'img','',{margin:'0px 4px -2px 4px',display:'none'});me.loading_img.src='images/lib/ui/button-load.gif';me.btn.innerHTML=args.label;me.btn.user_onclick=args.onclick;$(me.btn).bind('click',function(){if(!this.disabled&&this.user_onclick)
 this.user_onclick(this);})
 me.btn.set_working=me.set_working;me.btn.done_working=me.done_working;if(me.btn.args.style)
-wn.dom.css(me.btn,args.style);},set_working:function(){me.btn.disabled='disabled';if(me.btn.args.is_ajax){$(me.btn).css('margin-right','0px');}
-$(me.loading_img).css('display','inline');},done_working:function(){me.btn.disabled=false;if(me.btn.args.is_ajax){$(me.btn).css('margin-right','24px');}
-$(me.loading_img).toggle(false);}});this.make();}
+wn.dom.css(me.btn,args.style);},set_working:function(){me.btn.disabled='disabled';$(me.loading_img).css('display','inline');},done_working:function(){me.btn.disabled=false;$(me.loading_img).toggle(false);}});this.make();}
 /*
  *	lib/js/wn/ui/search.js
  */
@@ -1684,7 +1682,7 @@ this.wrapper=this.prev_button.wrapper;this.input_area=this.prev_button.input_are
 _f.ButtonField.prototype.make_input=function(){var me=this;if(!this.prev_button){$y(this.input_area,{marginTop:'4px',marginBottom:'4px'});}
 if(!this.button_area)
 this.button_area=$a(this.input_area,'span','',{marginRight:'4px'});this.input=$btn(this.button_area,me.df.label,null,{fontWeight:'bold'},null,1)
-this.input.onclick=function(){if(me.not_in_form)return;this.disabled='disabled';if(cur_frm.cscript[me.df.fieldname]&&(!me.in_filter)){cur_frm.runclientscript(me.df.fieldname,me.doctype,me.docname);this.disabled=false;}else{cur_frm.runscript(me.df.options,me);this.disabled=false;}}}
+$(this.input).click(function(){if(me.not_in_form)return;if(cur_frm.cscript[me.df.fieldname]&&(!me.in_filter)){cur_frm.runclientscript(me.df.fieldname,me.doctype,me.docname);}else{cur_frm.runscript(me.df.options,me);}});}
 _f.ButtonField.prototype.hide=function(){$dh(this.button_area);};_f.ButtonField.prototype.show=function(){$ds(this.button_area);};_f.ButtonField.prototype.set=function(v){};_f.ButtonField.prototype.set_disp=function(val){}
 function make_field(docfield,doctype,parent,frm,in_grid,hide_label){switch(docfield.fieldtype.toLowerCase()){case'data':var f=new DataField();break;case'password':var f=new DataField();break;case'int':var f=new IntField();break;case'float':var f=new FloatField();break;case'currency':var f=new CurrencyField();break;case'read only':var f=new ReadOnlyField();break;case'link':var f=new LinkField();break;case'date':var f=new DateField();break;case'time':var f=new TimeField();break;case'html':var f=new HTMLField();break;case'check':var f=new CheckField();break;case'text':var f=new TextField();break;case'small text':var f=new TextField();break;case'select':var f=new SelectField();break;case'button':var f=new _f.ButtonField();break;case'code':var f=new _f.CodeField();break;case'text editor':var f=new _f.CodeField();break;case'table':var f=new _f.TableField();break;case'section break':var f=new _f.SectionBreak();break;case'column break':var f=new _f.ColumnBreak();break;case'image':var f=new _f.ImageField();break;}
 f.parent=parent;f.doctype=doctype;f.df=docfield;f.perm=frm?frm.perm:[[1,1,1]];if(_f)
@@ -1830,8 +1828,10 @@ if(!me.meta.istable){me.refresh(r.docname);}
 if(call_back){call_back(r);}}
 var me=this;var ret_fn_err=function(r){var doc=locals[me.doctype][me.docname];me.savingflag=false;ret_fn(r);}
 this.savingflag=true;if(this.docname&&validated){scroll(0,0);return this.savedoc(save_action,ret_fn,ret_fn_err);}}
-_f.Frm.prototype.runscript=function(scriptname,callingfield,onrefresh){var me=this;if(this.docname){var doclist=compress_doclist(make_doclist(this.doctype,this.docname));if(callingfield)callingfield.input.disabled=true;$c('runserverobj',{'docs':doclist,'method':scriptname},function(r,rtxt){if(onrefresh)
-onrefresh(r,rtxt);me.refresh_fields();me.refresh_dependency();if(callingfield)callingfield.input.done_working();});}}
+_f.Frm.prototype.runscript=function(scriptname,callingfield,onrefresh){var me=this;if(this.docname){var doclist=compress_doclist(make_doclist(this.doctype,this.docname));if(callingfield)
+$(callingfield.input).set_working();$c('runserverobj',{'docs':doclist,'method':scriptname},function(r,rtxt){if(onrefresh)
+onrefresh(r,rtxt);me.refresh_fields();me.refresh_dependency();if(callingfield)
+$(callingfield.input).done_working();});}}
 _f.Frm.prototype.runclientscript=function(caller,cdt,cdn){var _dt=this.parent_doctype?this.parent_doctype:this.doctype;var _dn=this.parent_docname?this.parent_docname:this.docname;var doc=get_local(_dt,_dn);if(!cdt)cdt=this.doctype;if(!cdn)cdn=this.docname;var ret=null;try{if(this.cscript[caller])
 ret=this.cscript[caller](doc,cdt,cdn);if(this.cscript['custom_'+caller])
 ret+=this.cscript['custom_'+caller](doc,cdt,cdn);}catch(e){console.log(e);}

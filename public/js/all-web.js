@@ -71,9 +71,9 @@ wn.dom.set_box_shadow=function(ele,spread){$(ele).css('-moz-box-shadow','0px 0px
 $(ele).css('-webkit-box-shadow','0px 0px '+spread+'px rgba(0,0,0,0.3);')
 $(ele).css('-box-shadow','0px 0px '+spread+'px rgba(0,0,0,0.3);')};(function($){$.fn.add_options=function(options_list){for(var i=0;i<options_list.length;i++){var v=options_list[i];value=v.value||v;label=v.label||v;$('<option>').html(label).attr('value',value).appendTo(this);}
 $(this).val(options_list[0].value||options_list[0]);}
-$.fn.set_working=function(){var ele=this.get(0);if(ele.loading_img){$(ele.loading_img).toggle(true);}else{ele.disabled=1;ele.loading_img=$('<img src="images/lib/ui/button-load.gif" \
+$.fn.set_working=function(){var ele=this.get(0);$(ele).attr('disabled','disabled');if(ele.loading_img){$(ele.loading_img).toggle(true);}else{ele.loading_img=$('<img src="images/lib/ui/button-load.gif" \
     style="margin-left: 4px; margin-bottom: -2px; display: inline;" />').insertAfter(ele);}}
-$.fn.done_working=function(){var ele=this.get(0);ele.disabled=0;if(ele.loading_img){$(ele.loading_img).toggle(false);};}})(jQuery);
+$.fn.done_working=function(){var ele=this.get(0);$(ele).attr('disabled',null);if(ele.loading_img){$(ele.loading_img).toggle(false);};}})(jQuery);
 /*
  *	lib/js/wn/model.js
  */
