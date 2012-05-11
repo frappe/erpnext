@@ -34,9 +34,8 @@ class DocType:
 			self.doc.name = self.doc.first_name + (self.doc.last_name and ' ' + self.doc.last_name or '') + '-' + self.doc.supplier
 		elif self.doc.sales_partner:
 			self.doc.name = self.doc.first_name + (self.doc.last_name and ' ' + self.doc.last_name or '') + '-' + self.doc.sales_partner	
-		
-		# filter out bad characters in name
-		#self.doc.name = self.doc.name.replace('&','and').replace('.','').replace("'",'').replace('"','').replace(',','')			
+		else:
+			self.doc.name = self.doc.first_name + (self.doc.last_name and ' ' + self.doc.last_name or '')
 
 #----------------------
 # Call to Validate

@@ -2016,6 +2016,7 @@ li {
 }
 
 hr {
+  clear: both;
   margin: 18px 0;
   border: 0;
   border-top: 1px solid #e5e5e5;
