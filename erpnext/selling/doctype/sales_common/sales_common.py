@@ -156,6 +156,22 @@ class DocType(TransactionBase):
 			ret['base_ref_rate'] = flt(base_ref_rate)
 			ret['basic_rate'] = flt(base_ref_rate)
 		return ret
+
+
+	def get_item_defaults(self, args):
+		item = webnotes.conn.sql("""select default_warehouse, default_income_account, default_sales_cost_center from `tabItem` 
+			where name = '%s' and (ifnull(end_of_life,'') = '' or end_of_life > now() or end_of_life = '0000-00-00') 
+			and (is_sales_item = 'Yes' or is_service_item = 'Yes') """ % (args['item_code']), as_dict=1)
+		ret = {
+			'reserved_warehouse'	: item and item[0]['default_warehouse'] or '',
+			'warehouse'				: item and item[0]['default_warehouse'] or args.get('warehouse'),
+			'income_account'		: item and item[0]['default_income_account'] or args.get('income_account'),
+			'cost_center'			: item and item[0]['default_sales_cost_center'] or args.get('cost_center')
+		}
+
+		return ret
+
+
 	
 	# ***************** Get Ref rate as entered in Item Master ********************
 	def get_ref_rate(self, item_code, price_list_name, price_list_currency, plc_conv_rate):
