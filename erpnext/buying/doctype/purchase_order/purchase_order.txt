@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-04-13 11:56:19',
+		'creation': '2012-05-11 12:00:15',
 		'docstatus': 0,
-		'modified': '2012-05-01 13:13:28',
+		'modified': '2012-05-11 16:59:10',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -58,6 +58,18 @@
 
 	# DocPerm
 	{
+		'amend': 1,
+		'cancel': 1,
+		'create': 1,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Production Manager',
+		'submit': 1,
+		'write': 1
+	},
+
+	# DocPerm
+	{
 		'amend': 0,
 		'cancel': 0,
 		'create': 0,
@@ -107,35 +119,48 @@
 	# DocPerm
 	{
 		'amend': 1,
-		'cancel': 1,
+		'cancel': 0,
 		'create': 1,
 		'doctype': u'DocPerm',
 		'permlevel': 0,
 		'role': u'Purchase User',
-		'submit': 1,
+		'submit': 0,
 		'write': 1
 	},
 
 	# DocPerm
 	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
 		'doctype': u'DocPerm',
 		'permlevel': 1,
-		'role': u'All'
+		'role': u'All',
+		'submit': 0,
+		'write': 0
 	},
 
 	# DocPerm
 	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
 		'doctype': u'DocPerm',
-		'match': u'supplier',
 		'permlevel': 0,
-		'role': u'Supplier'
+		'role': u'Supplier',
+		'submit': 0,
+		'write': 0
 	},
 
 	# DocPerm
 	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
 		'doctype': u'DocPerm',
 		'permlevel': 2,
 		'role': u'All',
+		'submit': 0,
 		'write': 1
 	},
 
@@ -405,12 +430,12 @@
 	# DocField
 	{
 		'colour': u'White:FFF',
-		'description': u'You can make a purchase order from multiple Purchase Requisitions. Select Purchase Requisitions one by one and click on the button below.',
+		'description': u'You can make a purchase order from multiple Purchase Requests. Select Purchase Requests one by one and click on the button below.',
 		'doctype': u'DocField',
 		'fieldname': u'indent_no',
 		'fieldtype': u'Link',
 		'hidden': 0,
-		'label': u'Select Purchase Requisition',
+		'label': u'Select Purchase Request',
 		'no_copy': 1,
 		'oldfieldname': u'indent_no',
 		'oldfieldtype': u'Link',
