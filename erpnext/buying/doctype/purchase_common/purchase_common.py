@@ -268,7 +268,7 @@ class DocType(TransactionBase):
 			from `tabPurchase Order` po, `tabPurchase Order Item` po_item
 			where po.docstatus = 1 and po_item.item_code = %s and po.name != %s and 
 				po.name = po_item.parent
-			order by po.transaction_date DESC
+			order by po.transaction_date desc, po.name desc
 			limit 1""", (item_code, doc_name), as_dict=1)
 		
 		# get last purchase receipt item details		
@@ -278,7 +278,7 @@ class DocType(TransactionBase):
 			from `tabPurchase Receipt` pr, `tabPurchase Receipt Item` pr_item
 			where pr.docstatus = 1 and pr_item.item_code = %s and pr.name != %s and
 				pr.name = pr_item.parent
-			order by pr.posting_date DESC, pr.posting_time DESC
+			order by pr.posting_date desc, pr.posting_time desc, pr.name desc
 			limit 1""", (item_code, doc_name), as_dict=1)
 
 		# get the latest of the two
