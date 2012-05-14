@@ -342,5 +342,14 @@ patch_list = [
 		'patch_file': 'cms',
 		'description': 'generate html pages'
 	},
-	
+	{
+		'patch_module': 'patches.may_2012',
+		'patch_file': 'reload_reports',
+		'description': 'reload reports: itemwise sales/delivery details'
+	},
+	{
+		'patch_module': 'patches.may_2012',
+		'patch_file': 'page_role_series_fix',
+		'description': 'reset series of page role at max'
+	},
 ]

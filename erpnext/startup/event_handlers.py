@@ -88,6 +88,13 @@ def boot_session(bootinfo):
 		if hasattr(conf, 'max_users'): bootinfo['max_users'] = conf.max_users
 		if hasattr(conf, 'expires_on'): bootinfo['expires_on'] = conf.expires_on
 
+		company = webnotes.conn.sql("select name, default_currency from `tabCompany`", as_dict=1)
+		company_dict = {}
+		for c in company:
+			company_dict.setdefault(c['name'], {}).update(c)
+
+		bootinfo['company'] = company_dict
+
 
 
 def get_letter_heads():

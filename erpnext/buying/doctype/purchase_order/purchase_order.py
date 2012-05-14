@@ -75,7 +75,7 @@ class DocType(TransactionBase):
 
 	# Get UOM Details
 	def get_uom_details(self, arg = ''):
-		return get_obj(dt='Purchase Common').get_uom_details(arg)
+		return get_obj('Purchase Common').get_uom_details(arg)
 
 	# get available qty at warehouse
 	def get_bin_details(self, arg = ''):
@@ -86,11 +86,20 @@ class DocType(TransactionBase):
 		#self.validate_prev_docname() 
 		if self.doc.indent_no:
 			get_obj('DocType Mapper','Purchase Request-Purchase Order').dt_map('Purchase Request','Purchase Order',self.doc.indent_no, self.doc, self.doclist, "[['Purchase Request','Purchase Order'],['Purchase Request Item', 'Purchase Order Item']]")
+			pcomm = get_obj('Purchase Common')
 			for d in getlist(self.doclist, 'po_details'):			
-				if d.item_code:
-					item = sql("select last_purchase_rate from tabItem where name = '%s'" %(d.item_code), as_dict=1)
-					d.purchase_rate = item and flt(item[0]['last_purchase_rate']) or 0
-					d.import_rate = flt(item and flt(item[0]['last_purchase_rate']) or 0) / flt(self.doc.fields.has_key('conversion_rate') and flt(self.doc.conversion_rate) or 1)
+				if d.item_code and not d.purchase_rate:
+					last_purchase_details, last_purchase_date = pcomm.get_last_purchase_details(d.item_code, self.doc.name)
+					if last_purchase_details:
+						conversion_factor = d.conversion_factor or 1.0
+						conversion_rate = self.doc.fields.get('conversion_rate') or 1.0
+						d.purchase_ref_rate = last_purchase_details['purchase_ref_rate'] * conversion_factor
+						d.discount_rate = last_purchase_details['discount_rate']
+						d.purchase_rate = last_purchase_details['purchase_rate'] * conversion_factor
+						d.import_ref_rate = d.purchase_ref_rate / conversion_rate
+						d.import_rate = d.purchase_rate / conversion_rate						
+					else:
+						d.purchase_ref_rate = d.discount_rate = d.purchase_rate = d.import_ref_rate = d.import_rate = 0.0
 	
 	# GET TERMS & CONDITIONS
 	# =====================================================================================

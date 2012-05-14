@@ -97,10 +97,18 @@ class DocType(TransactionBase):
 			self.validate_duplicate_docname('purchase_order')
 			self.doclist = get_obj('DocType Mapper', 'Purchase Order-Purchase Invoice').dt_map('Purchase Order', 'Purchase Invoice', self.doc.purchase_order_main, self.doc, self.doclist, "[['Purchase Order', 'Purchase Invoice'],['Purchase Order Item', 'Purchase Invoice Item'], ['Purchase Taxes and Charges','Purchase Taxes and Charges']]")
 		
-		ret = self.get_credit_to()
+		self.get_expense_account('entries')
 
+		ret = self.get_credit_to()
 		if ret.has_key('credit_to'):
 			self.doc.credit_to = ret['credit_to']
+
+	def get_expense_account(self, doctype):
+		for d in getlist(self.doclist, doctype):			
+			if d.item_code:
+				item = webnotes.conn.sql("select purchase_account, cost_center from tabItem where name = '%s'" %(d.item_code), as_dict=1)
+				d.expense_head = item and item[0]['purchase_account'] or ''
+				d.cost_center = item and item[0]['cost_center'] or ''
 			
 
 	# Get Item Details
@@ -119,31 +127,43 @@ class DocType(TransactionBase):
 
 	def get_pv_details(self, arg):
 		import json
-		item_det = sql("select item_name, brand, description, item_group,purchase_account,cost_center, last_purchase_rate from tabItem where name=%s",arg,as_dict=1)
-		lpr = item_det and flt(item_det[0]['last_purchase_rate']) or 0
-		import_lpr = lpr / flt(self.doc.conversion_rate) or 1
-
+		item_det = sql("select item_name, brand, description, item_group, purchase_account, cost_center from tabItem where name=%s",arg,as_dict=1)
+		
 		tax = sql("select tax_type, tax_rate from `tabItem Tax` where parent = %s" , arg)
 		t = {}
 		for x in tax: t[x[0]] = flt(x[1])
 		ret = {
-			'item_name' : item_det and item_det[0]['item_name'] or '',
-			'brand' : item_det and item_det[0]['brand'] or '',
-			'description' : item_det and item_det[0]['description'] or '',
-			'item_group'	: item_det and item_det[0]['item_group'] or '',
-			'rate' : lpr,
-			'purchase_ref_rate' : lpr,
-			'import_ref_rate' : import_lpr,
-			'import_rate' : import_lpr,
-			'qty' : 0.00,
-			'amount' : 0.00,
-			'expense_head' : item_det and item_det[0]['purchase_account'] or '',
-			'cost_center' : item_det and item_det[0]['cost_center'] or '',
-			'item_tax_rate'			: json.dumps(t)
+			'item_name': item_det and item_det[0]['item_name'] or '',
+			'brand': item_det and item_det[0]['brand'] or '',
+			'description': item_det and item_det[0]['description'] or '',
+			'item_group': item_det and item_det[0]['item_group'] or '',
+			'rate': 0.00,
+			'purchase_ref_rate': 0.00,
+			'import_ref_rate': 0.00,
+			'import_rate': 0.00,
+			'qty': 0.00,
+			'amount': 0.00,
+			'discount_rate': 0.00,
+			'expense_head': item_det and item_det[0]['purchase_account'] or '',
+			'cost_center': item_det and item_det[0]['cost_center'] or '',
+			'item_tax_rate': json.dumps(t)
 		}
+		
+		# get last purchase rate
+		last_purchase_details, last_purchase_date = get_obj('Purchase Common').get_last_purchase_details(arg, self.doc.name)
+		if last_purchase_details:
+			purchase_ref_rate = last_purchase_details['purchase_ref_rate']
+			purchase_rate = last_purchase_details['purchase_rate']
+			conversion_rate = self.doc.conversion_rate or 1.0
+			ret.update({
+				'purchase_ref_rate': purchase_ref_rate,
+				'discount_rate': last_purchase_details['discount_rate'],
+				'rate': purchase_rate,
+				'import_ref_rate': purchase_ref_rate / conversion_rate,
+				'import_rate': purchase_rate / conversion_rate,
+			})	
 
 		return ret
-
 
 		
 	# Advance Allocation
