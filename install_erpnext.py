@@ -106,6 +106,15 @@ os.system("lib/wnf.py -l")
 # force sync all
 os.system("lib/wnf.py --sync_all -f")
 
+# create website files
+#from webnotes.model.code import get_obj
+# rewrite pages
+#get_obj('Website Settings').rewrite_pages()
+
+#ss = get_obj('Style Settings')
+#ss.validate()
+#ss.on_update()
+
 # set filemode false
 os.system("git config core.filemode false")
 os.chdir(os.path.join(erpnext_path, 'lib'))
