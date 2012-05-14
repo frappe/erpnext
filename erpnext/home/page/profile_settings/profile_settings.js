@@ -108,44 +108,42 @@ MyProfile = function(wrapper) {
 	this.change_image = function() {
 		var d = new wn.widgets.Dialog({
 			title: 'Set your Profile'
-		})
-		me.uploader = new Uploader(d.body, {
-				modulename:'home.page.profile_settings.profile_settings',
-				method: 'set_user_image'
-			}, 
-			pscript.user_image_upload, 1)
+		});
+		
+		wn.upload.make({
+			parent: d.body,
+			args: {
+				method: 'home.page.profile_settings.profile_settings.set_user_image'
+			},
+			callback: function(fid) {
+				if(fid) {
+					d.hide();
+					wn.boot.user_info[user].image = 'files/' + fid;
+					pscript.myprofile.img.src = 'files/' + fid;
+				}
+			}
+		});
 		d.show();
-		pscript.open_dialog = d;
 	}
 	
 	this.change_background = function() {
 		var d = new wn.widgets.Dialog({
 			title: 'Set Background Image'
 		})
-		me.uploader = new Uploader(d.body, {
-				modulename:'home.page.profile_settings.profile_settings',
-				method: 'set_user_background'
-			}, 
-			pscript.background_change, 1)
+
+		wn.upload.make({
+			parent: d.body,
+			args: {
+				method: 'home.page.profile_settings.profile_settings.set_user_background'
+			},
+			callback: function(fid) {
+				if(fid) {
+					d.hide();
+					erpnext.set_user_background(fid);		
+				}				
+			}
+		});				
 		d.show();
-		pscript.open_dialog = d;
 	}
 	this.make();
-}
-
-pscript.background_change = function(fid) {
-	msgprint('File Uploaded');
-	if(fid) {
-		erpnext.set_user_background(fid);		
-		pscript.open_dialog.hide();
-	}
-}
-
-pscript.user_image_upload = function(fid) {
-	msgprint('File Uploaded');
-	if(fid) {
-		pscript.open_dialog.hide();
-		wn.boot.user_info[user].image = 'files/' + fid;
-		pscript.myprofile.img.src = 'files/' + fid;
-	}
 }

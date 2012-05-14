@@ -2016,6 +2016,7 @@ li {
 }
 
 hr {
+  clear: both;
   margin: 18px 0;
   border: 0;
   border-top: 1px solid #e5e5e5;
@@ -3202,7 +3203,7 @@ div.stat-item {
 	margin-bottom: 7px;
 	background-color: #fff;
 	height: 18px;
-	border: 2px solid #aaa;
+	border: 1px solid #aaa;
 	border-radius: 9px;
 	overflow: hidden;
 }

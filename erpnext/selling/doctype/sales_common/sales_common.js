@@ -333,7 +333,11 @@ cur_frm.fields_dict.charge.get_query = function(doc) {
 
 // ********************* Get Charges ****************************
 cur_frm.cscript.get_charges = function(doc, cdt, cdn) {
-	$c_obj(make_doclist(doc.doctype,doc.name),'get_other_charges','', function(r, rt) { cur_frm.cscript.calculate_charges(doc, cdt, cdn);});
+	$c_obj(make_doclist(doc.doctype,doc.name),
+		'get_other_charges',
+		'', 
+		function(r, rt) { cur_frm.cscript.calculate_charges(doc, cdt, cdn);}
+		,null,null,cur_frm.fields_dict.get_charges.input);
 }
 
 
