@@ -17,7 +17,7 @@
 # Please edit this list and import only required elements
 import webnotes
 
-from webnotes.utils import add_days, add_months, add_years, cint, cstr, date_diff, default_fields, flt, fmt_money, formatdate, generate_hash, getTraceback, get_defaults, get_first_day, get_last_day, getdate, has_common, month_name, now, nowdate, replace_newlines, sendmail, set_default, str_esc_quote, user_format, validate_email_add
+from webnotes.utils import add_days, add_months, add_years, cint, cstr, date_diff, default_fields, flt, fmt_money, formatdate, generate_hash, getTraceback, get_defaults, get_first_day, get_last_day, getdate, has_common, month_name, now, nowdate, replace_newlines, set_default, str_esc_quote, user_format, validate_email_add
 from webnotes.model import db_exists
 from webnotes.model.doc import Document, addchild, removechild, getchildren, make_autoname, SuperDocType
 from webnotes.model.doclist import getlist, copy_doclist
@@ -188,6 +188,7 @@ class DocType(TransactionBase):
 	# Send mail
 	#=======================================================
 	def send_mail_funct(self):	 
+		from webnotes.utils.email_lib import sendmail
 		emailid_ret=sql("select company_email from `tabEmployee` where name = '%s'"%self.doc.employee)
 		if emailid_ret:
 			receiver = cstr(emailid_ret[0][0]) 
@@ -278,6 +279,6 @@ class DocType(TransactionBase):
 					<td width='25%%'><b>Net Pay(in words) : </td><td colspan = '3' width = '50%%'>%s</b></td>
 				</tr>
 			</table></div>'''%(cstr(letter_head[0][0]),cstr(self.doc.employee), cstr(self.doc.employee_name), cstr(self.doc.month), cstr(self.doc.fiscal_year), cstr(self.doc.department), cstr(self.doc.branch), cstr(self.doc.designation), cstr(self.doc.grade), cstr(self.doc.bank_account_no), cstr(self.doc.bank_name), cstr(self.doc.arrear_amount), cstr(self.doc.payment_days), earn_table, ded_table, cstr(flt(self.doc.gross_pay)), cstr(flt(self.doc.total_deduction)), cstr(flt(self.doc.net_pay)), cstr(self.doc.total_in_words))
-			sendmail([receiver], sender='automail@erpnext.com', subject=subj, parts=[['text/plain', msg]])
+			sendmail([receiver], subject=subj, msg = msg)
 		else:
 			msgprint("Company Email ID not found.")

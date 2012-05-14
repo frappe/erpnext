@@ -97,10 +97,18 @@ class DocType(TransactionBase):
 			self.validate_duplicate_docname('purchase_order')
 			self.doclist = get_obj('DocType Mapper', 'Purchase Order-Purchase Invoice').dt_map('Purchase Order', 'Purchase Invoice', self.doc.purchase_order_main, self.doc, self.doclist, "[['Purchase Order', 'Purchase Invoice'],['Purchase Order Item', 'Purchase Invoice Item'], ['Purchase Taxes and Charges','Purchase Taxes and Charges']]")
 		
-		ret = self.get_credit_to()
+		self.get_expense_account('entries')
 
+		ret = self.get_credit_to()
 		if ret.has_key('credit_to'):
 			self.doc.credit_to = ret['credit_to']
+
+	def get_expense_account(self, doctype):
+		for d in getlist(self.doclist, doctype):			
+			if d.item_code:
+				item = webnotes.conn.sql("select purchase_account, cost_center from tabItem where name = '%s'" %(d.item_code), as_dict=1)
+				d.expense_head = item and item[0]['purchase_account'] or ''
+				d.cost_center = item and item[0]['cost_center'] or ''
 			
 
 	# Get Item Details

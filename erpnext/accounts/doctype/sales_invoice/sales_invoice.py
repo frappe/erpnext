@@ -177,14 +177,13 @@ class DocType(TransactionBase):
 					arg = {'item_code':doc.fields.get('item_code'), 'income_account':doc.fields.get('income_account'), 
 						'cost_center': doc.fields.get('cost_center'), 'warehouse': doc.fields.get('warehouse')};
 
-					ret = obj.get_item_details(arg, self)
-					ret = self.get_pos_details(arg, ret)
+					ret = self.get_pos_details(arg)
 					for r in ret:
 						if not doc.fields.get(r):
 							doc.fields[r] = ret[r]		
 
 
-	def get_pos_details(self, args, ret):
+	def get_pos_details(self, args, ret = {}):
 		if args['item_code'] and cint(self.doc.is_pos) == 1:
 			dtl = webnotes.conn.sql("select income_account, warehouse, cost_center from `tabPOS Setting` where user = '%s' and company = '%s'" % (session['user'], self.doc.company), as_dict=1)				 
 			if not dtl:
