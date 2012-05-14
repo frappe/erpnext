@@ -171,5 +171,6 @@ def get_support_mails():
 	"""
 		Gets new emails from support inbox and updates / creates Support Ticket records
 	"""
-	SupportMailbox().get_messages()
-
+	import webnotes
+	if webnotes.conn.get_value('Email Settings', None, 'sync_support_mails'):
+		SupportMailbox().get_messages()

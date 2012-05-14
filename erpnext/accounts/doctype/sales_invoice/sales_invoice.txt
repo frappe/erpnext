@@ -5,7 +5,7 @@
 	{
 		'creation': '2012-04-13 11:56:18',
 		'docstatus': 0,
-		'modified': '2012-05-08 17:17:51',
+		'modified': '2012-05-14 14:09:43',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -859,7 +859,8 @@
 		'fieldname': u'write_off_outstanding_amount_automatically',
 		'fieldtype': u'Check',
 		'label': u'Write Off Outstanding Amount Automatically',
-		'permlevel': 0
+		'permlevel': 0,
+		'print_hide': 1
 	},
 
 	# DocField
