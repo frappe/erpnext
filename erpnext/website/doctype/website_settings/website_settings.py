@@ -27,7 +27,6 @@ class DocType:
 		self.set_home_page()
 		self.validate_domain_list()	
 
-
 	def on_update(self):
 		self.rewrite_pages()
 		
@@ -41,13 +40,16 @@ class DocType:
 		from webnotes.model.code import get_obj
 		
 		# rewrite all web pages
-		for name in webnotes.conn.sql("""select name from `tabWeb Page` where docstatus=0"""):
+		for name in webnotes.conn.sql("""select name, modified from `tabWeb Page` 
+			where docstatus=0"""):
 			DocList('Web Page', name[0]).save()
+			webnotes.conn.set_value('Web Page', name[0], 'modified', name[1])
 
 		# rewrite all blog pages
-		for name in webnotes.conn.sql("""select name from `tabBlog` where docstatus=0 
-			and ifnull(published,0)=1"""):
+		for name in webnotes.conn.sql("""select name, modified from `tabBlog` 
+			where docstatus=0 and ifnull(published,0)=1"""):
 			DocList('Blog', name[0]).save()
+			webnotes.conn.set_value('Blog', name[0], 'modified', name[1])
 			
 		from webnotes.cms.make import make_web_core
 		make_web_core()

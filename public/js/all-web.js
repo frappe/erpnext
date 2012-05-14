@@ -386,7 +386,7 @@ wn.datetime.time_to_ampm=function(v){if(!v){var d=new Date();var t=[d.getHours()
 if(t.length!=2){show_alert('[set_time] Incorect time format');return;}
 if(t[1].length==1)t[1]='0'+t[1];if(cint(t[0])==0)var ret=['12',t[1],'AM'];else if(cint(t[0])<12)var ret=[cint(t[0])+'',t[1],'AM'];else if(cint(t[0])==12)var ret=['12',t[1],'PM'];else var ret=[(cint(t[0])-12)+'',t[1],'PM'];return ret;}
 wn.datetime.time_to_hhmm=function(hh,mm,am){if(am=='AM'&&hh=='12'){hh='00';}else if(am=='PM'&&hh!='12'){hh=cint(hh)+12;}
-return hh+':'+mm;}
+if(!mm)mm='00';if(!hh)hh='00';return hh+':'+mm;}
 function prettyDate(time){if(!time)return''
 var date=time;if(typeof(time)=="string")
 date=new Date((time||"").replace(/-/g,"/").replace(/[TZ]/g," ").replace(/\.[0-9]*/,""));var diff=(((new Date()).getTime()-date.getTime())/1000),day_diff=Math.floor(diff/86400);if(isNaN(day_diff)||day_diff<0)
