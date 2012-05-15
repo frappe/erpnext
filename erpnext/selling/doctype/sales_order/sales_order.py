@@ -100,7 +100,7 @@ class DocType(TransactionBase):
 				if doc.fields.get('item_code'):
 					arg = {'item_code':doc.fields.get('item_code'), 'income_account':doc.fields.get('income_account'), 
 						'cost_center': doc.fields.get('cost_center'), 'warehouse': doc.fields.get('warehouse')};
-					ret = obj.get_item_defaults(arg, self)
+					ret = obj.get_item_defaults(arg)
 					for r in ret:
 						if not doc.fields.get(r):
 							doc.fields[r] = ret[r]					

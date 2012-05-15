@@ -352,4 +352,10 @@ patch_list = [
 		'patch_file': 'page_role_series_fix',
 		'description': 'reset series of page role at max'
 	},
+	{
+		'patch_module': 'patches.may_2012',
+		'patch_file': 'reload_sales_invoice_pf',
+		'description': 'Reload sales invoice print formats'
+	},
+
 ]
