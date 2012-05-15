@@ -97,7 +97,7 @@ class DocType:
 				msgprint("Serial no is mandatory for item: "+ d.item_code, raise_exception = 1)
 
 			# validate rejected serial nos
-			if fname == 'purchase_receipt_details' and d.rejected_qty and ar_required == 'Yes' and not d.rejected_serial_no:
+			if fname == 'purchase_receipt_details' and flt(d.rejected_qty) > 0 and ar_required == 'Yes' and not d.rejected_serial_no:
 				msgprint("Rejected serial no is mandatory for rejected qty of item: "+ d.item_code, raise_exception = 1)
 				
 				
