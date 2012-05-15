@@ -1,143 +1,20 @@
-#body_div {
+body {
 
-	background: url("files/indian-textile-5.gif") repeat;
+	background-color: #9CA2AD;
 	
 
-	font-family: 'Lato', Verdana, Sans !important;
-
-
-	font-size: 14px !important;
 
 }
 
 
-.small {
-	font-size: 12px !important;
+footer {
+	color: white;
+}
+footer a, footer a:visited, footer a:hover {
+	color: white;
+}
+.web-footer-menu ul li {
+	border-right: 1px solid white;
 }
 
 
-
-
-
-h1, h2, h3, h4, h5 {
-	font-family: 'Lato', Arial, 'Helvetica Neue' !important;
-}	
-
-
-/* User CSS */
-
-hr {
-  clear: both;
-}
-
-p {
-  margin-top: 2px;
-}
-
-
-.hand {
-  font-family: Pacifico;
-  font-size: 18px;
-}
-
-h1.top {
-  text-align: center;
-}
-
-.sub-head {
-  text-align: center;
-  color: #888;
-  font-size: 18px;
-  margin: 10px 0px;
-}
-
-.layout-main, .layout-main-section {
-  padding: 50px;
-}
-
-.layout-main-section {
-  width: 60%;
-}
-
-.layout-side-section {
-  padding-top: 50px;
-}
-
-h2 {
-  //font-family: Pacifico;
-  font-size: 20px;
-  font-weight: bold;
-  color: #CC0000;
-  padding: 25px 0px 25px 0px;
-  clear: both;
-  text-align: left;
-}
-
-.center {
-  text-align: center;
-}
-
-.left {
-  width: 375px;
-  padding-right: 25px;
-  float: left;
-}
-
-.right {
-  width: 375px;
-  padding-left: 25px;
-  float: left;
-}
-
-.page-footer {
-  clear: both;
-  margin: -50px;
-  margin-top: 50px;
-  background-color: #DEE1D0; //#E7DFCA;
-  padding: 50px;
-}
-
-.page-footer input {
-  width: 140px;
-  font-size: 17px;
-  padding: 4px;
-  margin-top: 2px;
-}
-
-.page-footer .section-head {
-  padding: 0px; 
-  margin-bottom: 7px;
-}
-
-.green {
-  color: green;
-}
-
-.web-form input, .web-form textarea {
-  width: 400px;
-  font-size: 17px;
-  padding: 4px;
-}
-
-.avatar {
-  height: 75px;
-  width: 75px;
-  border-radius: 100px 100px 100px 100px;
-  overflow: hidden;
-}
-
-.link-big {
-  font-size: 140%;
-}
-
-.sticky {
-  background-color: #FFFBC4;
-  padding: 15px;
-  margin-left: 15px;
-  font-size: 12px;
-  color: #444;
-  width: 240px;
-  min-height: 120px;
-  float: right;
-  box-shadow: 2px 2px 6px #973;
-}

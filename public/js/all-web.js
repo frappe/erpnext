@@ -383,11 +383,11 @@ return(hh.length==1?'0'+hh:hh)+':'+(mm.length==1?'0'+mm:mm);}}
 wn.datetime.only_date=function(val){if(val==null||val=='')return null;if(val.search(':')!=-1){var tmp=val.split(' ');var d=tmp[0].split('-');}else{var d=val.split('-');}
 if(d.length==3)
 val=d[2]+'-'+d[1]+'-'+d[0];return val;}
-wn.datetime.time_to_ampm=function(v){if(!v){var d=new Date();var t=[d.getHours(),cint(d.getMinutes()/5)*5]}else{var t=v.split(':');}
+wn.datetime.time_to_ampm=function(v){if(!v){var d=new Date();var t=[d.getHours(),cint(d.getMinutes()/5)*5+'']}else{var t=v.split(':');}
 if(t.length!=2){show_alert('[set_time] Incorect time format');return;}
 if(t[1].length==1)t[1]='0'+t[1];if(cint(t[0])==0)var ret=['12',t[1],'AM'];else if(cint(t[0])<12)var ret=[cint(t[0])+'',t[1],'AM'];else if(cint(t[0])==12)var ret=['12',t[1],'PM'];else var ret=[(cint(t[0])-12)+'',t[1],'PM'];return ret;}
 wn.datetime.time_to_hhmm=function(hh,mm,am){if(am=='AM'&&hh=='12'){hh='00';}else if(am=='PM'&&hh!='12'){hh=cint(hh)+12;}
-return hh+':'+mm;}
+if(!mm)mm='00';if(!hh)hh='00';return hh+':'+mm;}
 function prettyDate(time){if(!time)return''
 var date=time;if(typeof(time)=="string")
 date=new Date((time||"").replace(/-/g,"/").replace(/[TZ]/g," ").replace(/\.[0-9]*/,""));var diff=(((new Date()).getTime()-date.getTime())/1000),day_diff=Math.floor(diff/86400);if(isNaN(day_diff)||day_diff<0)
@@ -553,6 +553,13 @@ this.no_cancel=function(){this.appframe.$titlebar.find('.close').toggle(false);}
 if(opts)this.make();}
 wn.widgets.Dialog.prototype=new wn.widgets.FieldGroup();wn.provide('wn.ui');wn.ui.Dialog=wn.widgets.Dialog
 $(document).bind('keydown',function(e){if(cur_dialog&&!cur_dialog.no_cancel_flag&&e.which==27){cur_dialog.hide();}});
+/*
+ *	lib/js/wn/ui/button.js
+ */
+wn.ui.Button=function(args){var me=this;$.extend(this,{make:function(){me.btn=wn.dom.add(args.parent,'button','btn btn-small '+(args.css_class||''));me.btn.args=args;me.loading_img=wn.dom.add(me.btn.args.parent,'img','',{margin:'0px 4px -2px 4px',display:'none'});me.loading_img.src='images/lib/ui/button-load.gif';me.btn.innerHTML=args.label;me.btn.user_onclick=args.onclick;$(me.btn).bind('click',function(){if(!this.disabled&&this.user_onclick)
+this.user_onclick(this);})
+me.btn.set_working=me.set_working;me.btn.done_working=me.done_working;if(me.btn.args.style)
+wn.dom.css(me.btn,args.style);},set_working:function(){me.btn.disabled='disabled';$(me.loading_img).css('display','inline');},done_working:function(){me.btn.disabled=false;$(me.loading_img).toggle(false);}});this.make();}
 /*
  *	lib/js/legacy/widgets/dialog.js
  */
