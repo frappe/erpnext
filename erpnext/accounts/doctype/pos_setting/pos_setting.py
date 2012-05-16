@@ -49,5 +49,5 @@ class DocType:
 		if res:
 			if res[0][1]:
 				msgprint("POS Setting '%s' already created for user: '%s' and company: '%s'"%(res[0][0], res[0][1], self.doc.company), raise_exception=1)
-		else:
-			msgprint("Global POS Setting already created - %s for this company: '%s'" % (res[0][0], self.doc.company), raise_exception=1)
+			else:
+				msgprint("Global POS Setting already created - %s for this company: '%s'" % (res[0][0], self.doc.company), raise_exception=1)
