@@ -34,18 +34,20 @@ convert_to_lists = webnotes.conn.convert_to_lists
 
 
 class DocType:
-  def __init__(self,doc,doclist=[]):
-    self.doc, self.doclist = doc,doclist
+	def __init__(self,doc,doclist=[]):
+		self.doc, self.doclist = doc,doclist
 
-  #--------------------get naming series from sales invoice-----------------
-  def get_series(self):
-    res = sql("select options from `tabDocField` where parent='Sales Invoice' and fieldname = 'naming_series'")
-    return res and cstr(res[0][0]) or ''
-  
-  def validate(self):
-    res = sql("select name, user from `tabPOS Setting` where ifnull(user, '') = '%s' and name != '%s' and company = '%s'" % (self.doc.user, self.doc.name, self.doc.company))
-    if res:
-      if res[0][1]:
-        msgprint("POS Setting '%s' already created for user: '%s' and company: '%s'"%(res[0][0], res[0][1], self.doc.company), raise_exception=1)
-      else:
-        msgprint("Global POS Setting already created - %s for this company: '%s'" % (res[0][0], self.doc.company), raise_exception=1)
+	#--------------------get naming series from sales invoice-----------------
+	def get_series(self):
+		import webnotes.model.doctype
+		docfield = webnotes.model.doctype.get('Sales Invoice')
+		series = [d.options for d in docfield if d.doctype == 'DocField' and d.fieldname == 'naming_series']
+		return series and series[0] or ''
+
+	def validate(self):
+		res = sql("select name, user from `tabPOS Setting` where ifnull(user, '') = '%s' and name != '%s' and company = '%s'" % (self.doc.user, self.doc.name, self.doc.company))
+		if res:
+			if res[0][1]:
+				msgprint("POS Setting '%s' already created for user: '%s' and company: '%s'"%(res[0][0], res[0][1], self.doc.company), raise_exception=1)
+		else:
+			msgprint("Global POS Setting already created - %s for this company: '%s'" % (res[0][0], self.doc.company), raise_exception=1)
