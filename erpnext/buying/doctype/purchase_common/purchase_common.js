@@ -268,7 +268,7 @@ cur_frm.cscript.import_ref_rate = function(doc, cdt, cdn) {
 var is_item_table = function(doc,cdt,cdn) {
 	// Step 1 :=>Get all childrens/ rows from Detail Table
 	var cl = getchildren(tname, doc.name, fname);
-	// Step 2 :=> If there are no rows then set validated = false, I hope this will stop further execution of code.
+	// Step 2 :=> If there are no rows then set validated = false, this will stop further execution of code.
 	if (cl.length == 0) {
 		alert("There is no item in table"); validated = false;
 	}
