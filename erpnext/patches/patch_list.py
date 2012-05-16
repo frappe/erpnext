@@ -352,5 +352,10 @@ patch_list = [
 		'patch_file': 'reload_sales_invoice_pf',
 		'description': 'Reload sales invoice print formats'
 	},
+	{
+		'patch_module': 'patches.may_2012',
+		'patch_file': 'std_pf_readonly',
+		'description': 'Make standard print formats readonly for system manager'
+	},
 
 ]
