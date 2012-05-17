@@ -37,7 +37,7 @@ col.append(['Arrear Amount','Currency','150px',''])
 col.append(['Encashment Amount','Currency','170px',''])
 col.append(['Gross Pay','Currency','150px',''])
 for d in ded_heads:
-  l = (len(d)*9) 
+  l = (len(cstr(d))*9) 
   if l < 150 : col_width = '150px'
   else:  col_width = '%spx'%(l)
   col.append([d,'Currency',col_width,''])
