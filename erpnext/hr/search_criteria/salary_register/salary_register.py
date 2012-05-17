@@ -19,13 +19,14 @@ for r in res:
   if not sal_slips_ids == '': sal_slips_ids +=","
   sal_slips_ids+="'%s'"%r[col_idx['ID']]
 
-earn_heads =[i[0] for i in sql("select distinct e_type from `tabSalary Slip Earning` where parent in (%s)"%sal_slips_ids)]
-ded_heads =[i[0] for i in sql("select distinct d_type from `tabSalary Slip Deduction` where parent in (%s)"%sal_slips_ids)]
+earn_heads, ded_heads = [], []
+if res:
+  earn_heads =[i[0] for i in sql("select distinct e_type from `tabSalary Slip Earning` where parent in (%s)"%sal_slips_ids)]
+  ded_heads =[i[0] for i in sql("select distinct d_type from `tabSalary Slip Deduction` where parent in (%s)"%sal_slips_ids)]
 
 col=[]
-
 for e in earn_heads:
-  l = (len(e)*9) 
+  l = (len(cstr(e))*9) 
   if l < 150 :
     col_width = '150px'
   else:
@@ -35,7 +36,6 @@ for e in earn_heads:
 col.append(['Arrear Amount','Currency','150px',''])
 col.append(['Encashment Amount','Currency','170px',''])
 col.append(['Gross Pay','Currency','150px',''])
-
 for d in ded_heads:
   l = (len(d)*9) 
   if l < 150 : col_width = '150px'
@@ -54,7 +54,6 @@ for c in col:
 
 grand_tot = 0
 for r in res:
-
   for i in range(6,len(colnames)):
     if colnames[i] not in ('Arrear Amount','Encashment Amount','Net Pay','Gross Pay','Total Deduction'):
       amt = sql("select e_modified_amount from `tabSalary Slip Earning` where e_type = '%s' and parent = '%s'"%(colnames[i],r[0]))
@@ -65,7 +64,6 @@ for r in res:
       
     else:
       fld_nm = cstr(colnames[i]).lower().replace(' ','_')
-      errprint(fld_nm)
       tot = sql("select %s from `tabSalary Slip` where name ='%s'"%(fld_nm,r[0]))
       tot = tot and flt(tot[0][0]) or 0
       if colnames[i] == 'Net Pay':
