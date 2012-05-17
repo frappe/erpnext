@@ -316,9 +316,6 @@ class DocType:
 
 
 	def on_update(self):
-		if self.doc.item != cstr(self.doc.name.split('/')[1]):
-			msgprint("Cannot change Item once the Bill Of Material is created.")
-			raise Exception
 		self.check_recursion()
 
 
