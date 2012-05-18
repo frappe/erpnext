@@ -5,21 +5,21 @@
 	{
 		'creation': '2012-05-14 14:54:44',
 		'docstatus': 0,
-		'modified': '2012-05-17 18:02:38',
+		'modified': '2012-05-18 11:15:00',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
 
 	# These values are common for all Search Criteria
 	{
-		'add_col': u'(`tabSales Order Item`.qty - ifnull(`tabSales Order Item`.delivered_qty, 0)) AS "Qty To Deliver"\n(`tabSales Order Item`.qty - ifnull(`tabSales Order Item`.billed_qty, 0)) AS "Qty To Bill"\n(`tabSales Order Item`.qty - ifnull(`tabSales Order Item`.delivered_qty, 0))*`tabSales Order Item`.basic_rate AS "Amount To Deliver"\n(`tabSales Order Item`.qty - ifnull(`tabSales Order Item`.billed_qty, 0))*`tabSales Order Item`.basic_rate AS "Amount To Bill"',
+		'add_col': u'(`tabSales Order Item`.qty - ifnull(`tabSales Order Item`.delivered_qty, 0)) AS "Qty To Deliver"\n(`tabSales Order Item`.qty - ifnull(`tabSales Order Item`.delivered_qty, 0))*`tabSales Order Item`.basic_rate AS "Amount To Deliver"\n(`tabSales Order Item`.qty - ifnull(`tabSales Order Item`.billed_qty, 0))*`tabSales Order Item`.basic_rate AS "Amount To Bill"',
 		'add_cond': u'(`tabSales Order Item`.qty - ifnull(`tabSales Order Item`.delivered_qty, 0) > 0 or `tabSales Order Item`.qty - ifnull(`tabSales Order Item`.billed_qty, 0) > 0)\n`tabSales Order`.status != "Stopped"',
-		'columns': u'Sales Order\x01ID,Sales Order\x01Sales Order Date,Sales Order\x01Customer,Sales Order\x01Customer Name,Sales Order Item\x01Item Code,Sales Order Item\x01Item Name,Sales Order Item\x01Description,Sales Order Item\x01Quantity,Sales Order Item\x01Delivered Qty,Sales Order Item\x01Billed Qty',
+		'columns': u'Sales Order\x01ID,Sales Order\x01Sales Order Date,Sales Order\x01Customer,Sales Order Item\x01Item Code,Sales Order Item\x01Item Name,Sales Order Item\x01Description,Sales Order Item\x01Quantity,Sales Order Item\x01Delivered Qty',
 		'criteria_name': u'Sales Order Pending Items',
 		'description': u'Sales Order Pending Items',
 		'doc_type': u'Sales Order Item',
 		'doctype': 'Search Criteria',
-		'filters': u"{'Sales Order\x01Submitted':1,'Sales Order\x01Status':'','Sales Order\x01Fiscal Year':''}",
+		'filters': u'{"Sales Order\\u0001Submitted":1,"Sales Order\\u0001Fiscal Year":[],"Sales Order\\u0001Status":[]}',
 		'module': u'Selling',
 		'name': '__common__',
 		'page_len': 50,
