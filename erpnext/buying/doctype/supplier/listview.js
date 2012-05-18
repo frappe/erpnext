@@ -4,8 +4,9 @@ wn.doclistviews['Supplier'] = wn.views.ListView.extend({
 		this._super(d)
 		this.fields = this.fields.concat([
 			"`tabSupplier`.supplier_type",
+			"`tabSupplier`.supplier_name",
 		]);
-		this.stats = this.stats.concat([]);
+		//this.stats = this.stats.concat(['company']);
 	},
 
 	prepare_data: function(data) {
@@ -14,7 +15,8 @@ wn.doclistviews['Supplier'] = wn.views.ListView.extend({
 	
 	columns: [
 		{width: '5%', content:'avatar'},
-		{width: '50%', content:'name'},
+		{width: '20%', content:'name'},
+		{width: '30%', content:'supplier_name'},
 		{width: '10%', content:'tags'},
 		{width: '23%', content:'supplier_type', css: {'color': '#aaa'}},
 		{width: '12%', content:'modified', css: {'text-align': 'right', 'color':'#777'}}

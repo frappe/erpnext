@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-03-27 14:36:13',
+		'creation': '2012-05-15 12:14:54',
 		'docstatus': 0,
-		'modified': '2012-03-27 14:36:13',
+		'modified': '2012-05-18 18:21:08',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -23,7 +23,7 @@
 		'section_style': u'Tray',
 		'server_code_error': u' ',
 		'show_in_menu': 0,
-		'version': 33
+		'version': 1
 	},
 
 	# These values are common for all DocField
@@ -105,6 +105,21 @@
 		'reqd': 1,
 		'search_index': 0,
 		'trigger': u'Client',
+		'width': u'100px'
+	},
+
+	# DocField
+	{
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'stock_uom',
+		'fieldtype': u'Data',
+		'label': u'UOM',
+		'oldfieldname': u'stock_uom',
+		'oldfieldtype': u'Data',
+		'permlevel': 1,
+		'print_hide': 0,
+		'reqd': 0,
 		'width': u'100px'
 	},
 
@@ -220,21 +235,6 @@
 		'reqd': 0,
 		'search_index': 0,
 		'trigger': u'Client',
-		'width': u'100px'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'doctype': u'DocField',
-		'fieldname': u'stock_uom',
-		'fieldtype': u'Data',
-		'label': u'UOM',
-		'oldfieldname': u'stock_uom',
-		'oldfieldtype': u'Data',
-		'permlevel': 1,
-		'print_hide': 0,
-		'reqd': 0,
 		'width': u'100px'
 	},
 

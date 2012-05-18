@@ -362,5 +362,10 @@ patch_list = [
 		'patch_file': 'reload_so_pending_items',
 		'description': 'reload so pending items'
 	},
+	{
+		'patch_module': 'patches.may_2012',
+		'patch_file': 'customize_form_cleanup',
+		'description': 'cleanup customize form records'
+	},
 
 ]
