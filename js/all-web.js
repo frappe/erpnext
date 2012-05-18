@@ -157,6 +157,8 @@ this.prepare_opts();$.extend(this,this.opts);$(this.parent).html(repl('\
      <div class="show_filters well">\
       <div class="filter_area"></div>\
       <div>\
+       <button class="btn btn-small btn-info search-btn">\
+        <i class="icon-refresh icon-white"></i> Search</button>\
        <button class="btn btn-small add-filter-btn">\
         <i class="icon-plus"></i> Add Filter</button>\
       </div>\
@@ -203,7 +205,7 @@ if(this.onrun)this.onrun();if(this.callback)this.callback(r);},render_list:funct
 /*
  *	lib/js/wn/ui/filters.js
  */
-wn.ui.FilterList=Class.extend({init:function(opts){wn.require('lib/js/legacy/widgets/form/fields.js');$.extend(this,opts);this.filters=[];this.$w=this.$parent;this.set_events();},set_events:function(){var me=this;this.$w.find('.add-filter-btn').bind('click',function(){me.add_filter();});},show_filters:function(){this.$w.find('.show_filters').toggle();if(!this.filters.length)
+wn.ui.FilterList=Class.extend({init:function(opts){wn.require('lib/js/legacy/widgets/form/fields.js');$.extend(this,opts);this.filters=[];this.$w=this.$parent;this.set_events();},set_events:function(){var me=this;this.$w.find('.add-filter-btn').bind('click',function(){me.add_filter();});this.$w.find('.search-btn').bind('click',function(){me.listobj.run();});},show_filters:function(){this.$w.find('.show_filters').toggle();if(!this.filters.length)
 this.add_filter();},add_filter:function(fieldname,condition,value){this.filters.push(new wn.ui.Filter({flist:this,fieldname:fieldname,condition:condition,value:value}));if(fieldname){this.$w.find('.show_filters').toggle(true);}},get_filters:function(){var values=[];$.each(this.filters,function(i,f){if(f.field)
 values.push(f.get_value());})
 return values;},update_filters:function(){var fl=[];$.each(this.filters,function(i,f){if(f.field)fl.push(f);})
