@@ -12,6 +12,9 @@ wn.doclistviews['Item'] = wn.views.ListView.extend({
 	prepare_data: function(data) {
 		this._super(data);
 		data.description = repl("%(item_name)s | %(description)s", data);
+		if(data.description && data.description.length > 50) {
+			data.description = '<span title="'+data.description+'">' + data.description.substr(0,50) + '...</span>';
+		}
 	},
 	
 	columns: [

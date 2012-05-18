@@ -7,7 +7,7 @@ wn.doclistviews['Journal Voucher'] = wn.views.ListView.extend({
 			'`tabJournal Voucher`.total_debit',
 			'`tabJournal Voucher`.company',
 		]);
-		this.stats = this.stats.concat(['voucher_type']);
+		this.stats = this.stats.concat(['voucher_type', 'company']);
 	},
 	prepare_data: function(data) {
 		this._super(data);
