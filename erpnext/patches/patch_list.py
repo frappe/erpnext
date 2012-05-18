@@ -357,5 +357,10 @@ patch_list = [
 		'patch_file': 'std_pf_readonly',
 		'description': 'Make standard print formats readonly for system manager'
 	},
+	{
+		'patch_module': 'patches.may_2012',
+		'patch_file': 'reload_so_pending_items',
+		'description': 'reload so pending items'
+	},
 
 ]
