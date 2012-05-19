@@ -18,18 +18,18 @@
 pscript.onload_blog = function(wrapper) {
 	wrapper.blog_list = new wn.ui.Listing({
 		parent: $(wrapper).find('#blog-list').get(0),
-		query: 'select tabBlog.name, title, left(content, 1000) as content, tabBlog.modified, \
+		query: 'select tabBlog.name, title, left(content, 1000) as content, tabBlog.creation, \
 			ifnull(first_name, "") as first_name, ifnull(last_name, "") as last_name \
 			from tabProfile, tabBlog\
 		 	where ifnull(published,0)=1 and tabBlog.owner = tabProfile.name \
-			order by tabBlog.modified desc',
+			order by tabBlog.creation desc',
 		hide_refresh: true,
 		no_toolbar: true,
 		render_row: function(parent, data) {
 			if(data.content && data.content.length==1000) data.content += '... (read on)';
 			data.content = wn.markdown(data.content);
 			if(data.last_name) data.last_name = ' ' + data.last_name;
-			data.date = prettyDate(data.modified);
+			data.date = prettyDate(data.creation);
 			parent.innerHTML = repl('<h2>%(title)s</h2>\
 				<p><div class="help">By %(first_name)s%(last_name)s, %(date)s</div></p>\
 				<p>%(content)s</p>\

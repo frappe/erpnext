@@ -22,7 +22,7 @@ pscript['onload_{{ doc.name }}'] = function(wrapper) {
 		parent: $(wrapper).find('.recent-posts'),
 		no_toolbar: true,
 		query: 'select name, title, left(content, 100) as content from tabBlog\
-			where ifnull(published,0)=1 and name!="{{ doc.name }}" order by modified desc',
+			where ifnull(published,0)=1 and name!="{{ doc.name }}" order by creation desc',
 		hide_refresh: true,
 		render_row: function(parent, data) {
 			//console.log(data);
@@ -37,12 +37,12 @@ pscript['onload_{{ doc.name }}'] = function(wrapper) {
 	wrapper.comment_list = new wn.ui.Listing({
 		parent: $(wrapper).find('.blog-comments').get(0),
 		no_toolbar: true,
-		query: 'select comment, comment_by_fullname, modified\
+		query: 'select comment, comment_by_fullname, creation\
 			from `tabComment` where comment_doctype="Page"\
-			and comment_docname="{{ doc.name }}" order by modified desc',
+			and comment_docname="{{ doc.name }}" order by creation desc',
 		no_result_message: 'Be the first one to comment',
 		render_row: function(parent, data) {
-			data.comment_date = prettyDate(data.modified);
+			data.comment_date = prettyDate(data.creation);
 			$(parent).html(repl("<div style='color:#777'>\
 				%(comment_by_fullname)s | %(comment_date)s:\
 				</div>\
