@@ -367,5 +367,10 @@ patch_list = [
 		'patch_file': 'customize_form_cleanup',
 		'description': 'cleanup customize form records'
 	},
+	{
+		'patch_module': 'patches.may_2012',
+		'patch_file': 'clear_session_cache',
+		'description': 'clears session cache as shifting to json format'
+	},
 
 ]
