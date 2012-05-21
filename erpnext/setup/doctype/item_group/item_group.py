@@ -63,7 +63,17 @@ class DocType:
 			raise Exception
 	
 	def on_trash(self):
-		ig = sql("select name from `tabItem` where ifnull(item_group, '') = %s", self.doc.name)
+		item = sql("select name from `tabItem` where ifnull(item_group, '') = %s", self.doc.name)
+		item = [d[0] for d in item]
+		
 		if ig:
 			msgprint("""Item Group: %s can not be trashed/deleted because it is used in item: %s. 
-				To trash/delete this, remove/change item group in item master""" % (self.doc.name, ig[0][0] or ''), raise_exception=1)
+				To trash/delete this, remove/change item group in item master""" % (self.doc.name, item or ''), raise_exception=1)
+				
+		if sql("select name from `tabItem Group` where parent_item_group = %s and docstatus != 2", self.doc.name):
+			msgprint("Child item group exists for this item group. You can not trash/cancel/delete this item group.", raise_exception=1)
+		
+		
+		# rebuild tree
+		set(self.doc,'old_parent', '')
+		self.update_nsm_model()
