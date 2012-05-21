@@ -1,17 +1,16 @@
 // render
-wn.doclistviews['Item'] = wn.views.ListView.extend({
+wn.doclistviews['Batch'] = wn.views.ListView.extend({
 	init: function(d) {
 		this._super(d)
 		this.fields = this.fields.concat([
-			"`tabItem`.item_name",
-			"`tabItem`.description",
+			"`tabBatch`.item",
+			"`tabBatch`.description",
 		]);
-		this.stats = this.stats.concat(['default_warehouse', 'brand']);
+		this.stats = this.stats.concat(['company']);
 	},
 
 	prepare_data: function(data) {
 		this._super(data);
-		data.description = repl("%(item_name)s | %(description)s", data);
 		if(data.description && data.description.length > 50) {
 			data.description = '<span title="'+data.description+'">' + 
 				data.description.substr(0,50) + '...</span>';
@@ -19,9 +18,11 @@ wn.doclistviews['Item'] = wn.views.ListView.extend({
 	},
 	
 	columns: [
+		{width: '3%', content:'check'},
 		{width: '5%', content:'avatar'},
-		{width: '20%', content:'name'},
-		{width: '63%', content:'tags+description', css: {'color': '#777'}},
+		{width: '15%', content:'name'},
+		{width: '15%', content:'item'},
+		{width: '50%', content:'tags+description'},
 		{width: '12%', content:'modified', css: {'text-align': 'right', 'color':'#777'}}
 	]
 });
