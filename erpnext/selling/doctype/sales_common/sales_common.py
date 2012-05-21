@@ -432,6 +432,7 @@ class DocType(TransactionBase):
 	# ------------------ 
 	def make_packing_list(self, obj, fname):
 		self.packing_list_idx = 0
+		parent_items = []
 		for d in getlist(obj.doclist, fname):
 			warehouse = fname == "sales_order_details" and d.reserved_warehouse or d.warehouse
 			if self.has_sales_bom(d.item_code):
@@ -439,6 +440,16 @@ class DocType(TransactionBase):
 					self.update_packing_list_item(obj, i['item_code'], flt(i['qty'])*flt(d.qty), warehouse, d)
 			else:
 				self.update_packing_list_item(obj, d.item_code, d.qty, warehouse, d)
+			if d.item_code not in parent_items:
+				parent_items.append(d.item_code)
+				
+		self.cleanup_packing_list(obj, parent_items)
+		
+	def cleanup_packing_list(self, obj, parent_items):
+		"""Remove all those parent items which are no longer present in main item table"""
+		for d in getlist(obj.doclist, 'packing_details'):
+			if d.parent_item not in parent_items:
+				d.parent = ''
 
 
 	# Get total in words
