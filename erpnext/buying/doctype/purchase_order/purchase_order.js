@@ -130,16 +130,6 @@ cur_frm.fields_dict['indent_no'].get_query = function(doc) {
 	return 'SELECT DISTINCT `tabPurchase Request`.`name` FROM `tabPurchase Request` WHERE `tabPurchase Request`.company = "' + doc.company + '" and `tabPurchase Request`.`docstatus` = 1 and `tabPurchase Request`.`status` != "Stopped" and ifnull(`tabPurchase Request`.`per_ordered`,0) < 100 and `tabPurchase Request`.%(key)s LIKE "%s" ORDER BY `tabPurchase Request`.`name` DESC LIMIT 50';
 }
 
-/*
-//*********** get approved supplier quotation ********************
-cur_frm.fields_dict['supplier_qtn'].get_query = function(doc) {
-	var cond='';
-	if(doc.supplier) cond = 'ifnull(`tabSupplier Quotation`.supplier, "") = "'+doc.supplier+'" and';
-	
-	return repl('SELECT DISTINCT `tabSupplier Quotation`.`name` FROM `tabSupplier Quotation` WHERE `tabSupplier Quotation`.company = "%(company)s" and`tabSupplier Quotation`.`docstatus` = 1 and `tabSupplier Quotation`.`approval_status` = "Approved" and %(cond)s `tabSupplier Quotation`.%(key)s LIKE "%s" ORDER BY `tabSupplier Quotation`.`name` DESC LIMIT 50', {company:doc.company,cond:cond});
-}
-*/
-
 
 //========================= Get Last Purhase Rate =====================================
 cur_frm.cscript.get_last_purchase_rate = function(doc, cdt, cdn){
