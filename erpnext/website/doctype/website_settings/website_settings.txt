@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-04-02 16:38:02',
+		'creation': '2012-05-03 18:43:46',
 		'docstatus': 0,
-		'modified': '2012-05-02 15:24:12',
+		'modified': '2012-05-21 14:59:25',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -215,6 +215,7 @@
 		'doctype': u'DocField',
 		'fieldname': u'domain_list',
 		'fieldtype': u'Text',
+		'hidden': 1,
 		'label': u'Domain List',
 		'permlevel': 0,
 		'reqd': 0
