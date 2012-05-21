@@ -86,8 +86,8 @@ def get_header(page_name):
 	# build child items
 	for t in top_bar_items:
 		if t.get('parent_label'):
-			pi = get_item(t['parent_label'])
-			if not pi['child_items']:
+			pi = get_item(top_bar_items, t['parent_label'])
+			if 'child_items' not in pi:
 				pi['child_items'] = []
 			pi['child_items'].append(t)
 
