@@ -136,7 +136,7 @@ class DocType:
 	# check if child exists
 	# ==================================================================
 	def check_if_child_exists(self):
-		return sql("select name from `tabAccount` where parent_account = %s and docstatus != 2", self.doc.name, debug=0)
+		return sql("select name from `tabAccount` where parent_account = %s and docstatus != 2", self.doc.name)
 	
 	# Update balance
 	# ==================================================================

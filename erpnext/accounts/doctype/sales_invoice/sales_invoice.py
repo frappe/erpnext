@@ -98,7 +98,13 @@ class DocType(TransactionBase):
 	# Get Account Head to which amount needs to be Debited based on Customer
 	# ----------------------------------------------------------------------
 	def get_customer_account(self):
-		acc_head = webnotes.conn.sql("select name from `tabAccount` where (name = %s or (master_name = %s and master_type = 'customer')) and docstatus != 2", (cstr(self.doc.customer) + " - " + self.get_company_abbr(),self.doc.customer))
+		if not self.doc.company:
+			msgprint("Please select company first and re-select the customer after doing so", raise_exception=1)
+			
+		acc_head = webnotes.conn.sql("""select name from `tabAccount` 
+			where (name = %s or (master_name = %s and master_type = 'customer')) and docstatus != 2""", 
+			(cstr(self.doc.customer) + " - " + self.get_company_abbr(),self.doc.customer))
+			
 		if acc_head and acc_head[0][0]:
 			return acc_head[0][0]
 		else:

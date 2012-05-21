@@ -21,7 +21,7 @@ from webnotes.model.doc import Document
 from webnotes.model.doclist import getlist
 from webnotes.model.code import get_obj
 from webnotes import session, form, is_testing, msgprint, errprint
-from webnotes.utils import flt
+from webnotes.utils import flt, cstr
 
 sql = webnotes.conn.sql
 convert_to_lists = webnotes.conn.convert_to_lists
@@ -77,4 +77,19 @@ class DocType:
 		d.sales_person_id = self.doc.name
 		d.is_sales_person = 1
 		
-		d.save(new = (not d.name))		
+		d.save(new = (not d.name))
+		
+
+	def on_trash(self):
+		st = sql("select parent, parenttype from `tabSales Team` where ifnull(sales_person, '') = %s and docstatus != 2", self.doc.name)
+		st = [(d[1] + ' : ' + d[0]) for d in st]
+		if st:
+			msgprint("""Sales Person: %s can not be trashed/deleted because it is used in  %s. 
+				To trash/delete this, remove/change sales person in %s""" % (self.doc.name, st or '', st or ''), raise_exception=1)
+
+		if sql("select name from `tabSales Person` where parent_sales_person = %s and docstatus != 2", self.doc.name):
+			msgprint("Child sales person exists for this sales person. You can not trash/cancel this sales person.", raise_exception=1)
+
+		# rebuild tree
+		webnotes.conn.set(self.doc,'old_parent', '')
+		self.update_nsm_model()

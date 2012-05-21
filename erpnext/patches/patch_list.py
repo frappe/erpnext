@@ -377,5 +377,10 @@ patch_list = [
 		'patch_file': 'cs_server_readonly',
 		'description': 'Make server custom script readonly for system manager'
 	},
+	{
+		'patch_module': 'patches.may_2012',
+		'patch_file': 'clear_session_cache',
+		'description': 'clears session cache as shifting to json format'
+	},
 
 ]

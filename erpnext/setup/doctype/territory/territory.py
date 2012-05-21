@@ -78,7 +78,17 @@ class DocType:
 
 
 	def on_trash(self):
-		terr = sql("select name from `tabCustomer` where ifnull(territory, '') = %s", self.doc.name)
-		if terr:
-			msgprint("""Territory: %s can not be trashed/deleted because it is used in territory: %s. 
-				To trash/delete this, remove/change territory in customer master""" % (self.doc.name, terr[0][0] or ''), raise_exception=1)
+		cust = sql("select name from `tabCustomer` where ifnull(territory, '') = %s", self.doc.name)
+		cust = [d[0] for d in cust]		
+		
+		if cust:
+			msgprint("""Territory: %s can not be trashed/deleted because it is used in customer: %s. 
+				To trash/delete this, remove/change territory in customer master""" % (self.doc.name, cust or ''), raise_exception=1)
+				
+				
+		if sql("select name from `tabTerritory` where parent_territory = %s and docstatus != 2", self.doc.name):
+			msgprint("Child territory exists for this territory. You can not trash/cancel/delete this territory.", raise_exception=1)
+
+		# rebuild tree
+		set(self.doc,'old_parent', '')
+		self.update_nsm_model()

@@ -73,7 +73,7 @@ aging_based_on = 'Aging Date'
 if filter_values.has_key('aging_based_on') and filter_values['aging_based_on']:
 	aging_based_on = filter_values['aging_based_on'].split(NEWLINE)[-1]
 
-if	len(res) > 600 and from_export == 0:
+if	len(res) > 2000 and from_export == 0:
 	msgprint("This is a very large report and cannot be shown in the browser as it is likely to make your browser very slow.Please select Account or click on 'Export' to open in excel")
 	raise Exception
 
