@@ -372,5 +372,10 @@ patch_list = [
 		'patch_file': 'customize_form_cleanup',
 		'description': 'cleanup customize form records'
 	},
+	{
+		'patch_module': 'patches.may_2012',
+		'patch_file': 'cs_server_readonly',
+		'description': 'Make server custom script readonly for system manager'
+	},
 
 ]
