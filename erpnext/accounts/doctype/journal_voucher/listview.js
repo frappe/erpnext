@@ -18,11 +18,12 @@ wn.doclistviews['Journal Voucher'] = wn.views.ListView.extend({
 		}
 	},
 	columns: [
-		{width: '5%', content:'avatar'},
-		{width: '3%', content:'docstatus'},
-		{width: '12%', content:'name'},
-		{width: '15%', content:'voucher_type'},
-		{width: '38%', content:'tags+remark', css: {'color':'#222'}},
+		{width: '3%', content: 'check'},
+		{width: '5%', content: 'avatar'},	
+		{width: '3%', content: 'docstatus'},
+		{width: '12%', content: 'name'},
+		{width: '15%', content: 'voucher_type'},
+		{width: '32%', content: 'tags+remark', css: {'color':'#222'}},
 		{
 			width: '18%', 
 			content: function(parent, data) { 
@@ -30,6 +31,6 @@ wn.doclistviews['Journal Voucher'] = wn.views.ListView.extend({
 			},
 			css: {'text-align':'right'}
 		},
-		{width: '12%', content:'modified', css: {'text-align': 'right', 'color':'#777'}}		
+		{width: '12%', content: 'modified', css: {'text-align': 'right', 'color':'#777'}}		
 	],
 });

@@ -21,10 +21,11 @@ wn.doclistviews['BOM'] = wn.views.ListView.extend({
 	},
 
 	columns: [
+		{width: '3%', content: 'check'},
 		{width: '3%', content: 'docstatus'},
 		{width: '15%', content: 'name'},
 		{width: '15%', content: 'item'},
-		{width: '26%', content: 'description+tags'},
+		{width: '23%', content: 'description+tags'},
 		{
 			width: '12%', 
 			content: function(parent, data) { 

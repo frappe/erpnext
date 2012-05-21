@@ -20,9 +20,10 @@ wn.doclistviews['Appraisal'] = wn.views.ListView.extend({
 	},
 	
 	columns: [
+		{width: '3%', content: 'check'},
 		{width: '3%', content: 'docstatus'},
 		{width: '15%', content: 'name'},
-		{width: '28%', content: 'employee_name'},
+		{width: '25%', content: 'employee_name'},
 		{width: '12%', content: 'status+tags'},
 		{width: '12%', content: 'total_score', css: {'text-align': 'right'}},
 		{width: '30%', content:'date_range',

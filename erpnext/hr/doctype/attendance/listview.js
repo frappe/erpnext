@@ -17,9 +17,10 @@ wn.doclistviews['Attendance'] = wn.views.ListView.extend({
 	},
 	
 	columns: [
+		{width: '3%', content: 'check'},
 		{width: '3%', content:'docstatus'},
 		{width: '12%', content:'name'},
-		{width: '50%', content:'employee_name'},
+		{width: '47%', content:'employee_name'},
 		{width: '13%', content:'status'},
 		{width: '10%', content:'tags'},
 		//{width: '23%', content:'supplier_type', css: {'color': '#aaa'}},

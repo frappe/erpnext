@@ -14,11 +14,12 @@ wn.doclistviews['Supplier'] = wn.views.ListView.extend({
 	},
 	
 	columns: [
+		{width: '3%', content: 'check'},
 		{width: '5%', content:'avatar'},
 		{width: '20%', content:'name'},
 		{width: '30%', content:'supplier_name'},
 		{width: '10%', content:'tags'},
-		{width: '23%', content:'supplier_type', css: {'color': '#aaa'}},
+		{width: '20%', content:'supplier_type', css: {'color': '#aaa'}},
 		{width: '12%', content:'modified', css: {'text-align': 'right', 'color':'#777'}}
 	]
 });

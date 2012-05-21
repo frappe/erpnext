@@ -44,10 +44,11 @@ wn.doclistviews['Support Ticket'] = wn.views.ListView.extend({
 	},
 	
 	columns: [
+		{width: '3%', content: 'check'},
 		{width: '3%', content:'check'},
 		{width: '20%', content:'name'},
 		{width: '10%', content:'status_html'},		
-		{width: '53%', content:'tags+description', css: {color:'#222'}},
+		{width: '50%', content:'tags+description', css: {color:'#222'}},
 		{width: '14%', content:'modified', css: {'text-align': 'right', 'color':'#777'}}
 	]
 

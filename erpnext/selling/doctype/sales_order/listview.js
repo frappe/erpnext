@@ -13,10 +13,11 @@ wn.doclistviews['Sales Order'] = wn.views.ListView.extend({
 	},
 	
 	columns: [
+		{width: '3%', content: 'check'},
 		{width: '5%', content:'avatar'},
 		{width: '3%', content:'docstatus'},
 		{width: '15%', content:'name'},
-		{width: '35%', content:'tags+customer_name', css: {color:'#222'}},
+		{width: '32%', content:'tags+customer_name', css: {color:'#222'}},
 		{
 			width: '18%', 
 			content: function(parent, data) { 

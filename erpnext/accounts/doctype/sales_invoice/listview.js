@@ -15,10 +15,11 @@ wn.doclistviews['Sales Invoice'] = wn.views.ListView.extend({
 		data.paid = flt((data.grand_total - data.outstanding_amount) / data.grand_total * 100, 2);
 	},
 	columns: [
-		{width: '5%', content:'avatar'},
-		{width: '3%', content:'docstatus'},
-		{width: '15%', content:'name'},
-		{width: '37%', content:'tags+customer_name', css: {color:'#222'}},
+		{width: '3%', content: 'check'},
+		{width: '5%', content: 'avatar'},
+		{width: '3%', content: 'docstatus'},
+		{width: '15%', content: 'name'},
+		{width: '34%', content: 'tags+customer_name', css: {color:'#222'}},
 		{
 			width: '18%', 
 			content: function(parent, data) { 

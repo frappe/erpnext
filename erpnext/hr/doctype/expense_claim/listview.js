@@ -22,10 +22,11 @@ wn.doclistviews['Expense Claim'] = wn.views.ListView.extend({
 	},
 	
 	columns: [
+		{width: '3%', content: 'check'},
 		{width: '5%', content: 'avatar'},
 		{width: '3%', content: 'docstatus'},
 		{width: '12%', content: 'name'},
-		{width: '44%', content: 'employee_name+tags'},
+		{width: '41%', content: 'employee_name+tags'},
 		{width: '10%', content: 'approval_status'},
 		{
 			width: '12%',

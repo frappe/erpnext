@@ -24,10 +24,11 @@ wn.doclistviews['Salary Slip'] = wn.views.ListView.extend({
 	},
 	
 	columns: [
+		{width: '3%', content: 'check'},
 		{width: '3%', content: 'docstatus'},
 		{width: '14%', content: 'name'},
 		{width: '20%', content: 'employee_name'},
-		{width: '30%', content: 'description+tags', css: {'color': '#aaa'}},
+		{width: '27%', content: 'description+tags', css: {'color': '#aaa'}},
 		{width: '17%', content:'month', css: {'text-align': 'right', 'color':'#aaa'}},
 		{
 			width: '16%',
