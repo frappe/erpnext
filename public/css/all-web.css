@@ -1962,6 +1962,9 @@ header .container {
 	header .container, .content {
 		width: 1100px;
 	}
+	div#body_div {
+		min-height: 600px;
+	}
 }
 
 div.no_script {

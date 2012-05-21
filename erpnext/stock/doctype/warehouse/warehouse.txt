@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-04-11 13:18:57',
+		'creation': '2012-05-15 12:15:13',
 		'docstatus': 0,
-		'modified': '2012-04-11 17:47:35',
+		'modified': '2012-05-21 18:02:46',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -25,7 +25,7 @@
 		'section_style': u'Tabbed',
 		'server_code_error': u' ',
 		'show_in_menu': 0,
-		'version': 59
+		'version': 1
 	},
 
 	# These values are common for all DocField
@@ -321,19 +321,6 @@
 
 	# DocField
 	{
-		'colour': u'White:FFF',
-		'doctype': u'DocField',
-		'fieldname': u'state',
-		'fieldtype': u'Select',
-		'label': u'State',
-		'oldfieldname': u'state',
-		'oldfieldtype': u'Select',
-		'options': u'\nSelect country first',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
 		'doctype': u'DocField',
 		'fieldname': u'city',
 		'fieldtype': u'Data',
@@ -342,6 +329,19 @@
 		'oldfieldtype': u'Data',
 		'permlevel': 0,
 		'reqd': 0
+	},
+
+	# DocField
+	{
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'state',
+		'fieldtype': u'Data',
+		'label': u'State',
+		'oldfieldname': u'state',
+		'oldfieldtype': u'Select',
+		'options': u'Suggest',
+		'permlevel': 0
 	},
 
 	# DocField
