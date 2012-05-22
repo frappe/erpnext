@@ -150,75 +150,113 @@ cur_frm.fields_dict['lead_name'].get_query = function(doc,dt,dn){
 
 /* ********************************* transaction history ************************************** */
 
+cur_frm.render_transaction_history_row = function(data) {
+	console.log(data.modified);
+	data.grand_total = fmt_money(data.grand_total);
+	data.modified = wn.datetime.only_date(data.modified);
+	return repl('\
+		<table><tr> \
+			<td width="30%" title="Id"> \
+				<a href="#!Form/%(doctype)s/%(name)s">%(name)s</a> \
+			</td> \
+			<td width="20%" title="Status">%(status)s</td> \
+			<td width="30%" title="Grand Total" style="text-align: right;"> \
+				%(currency)s %(grand_total)s \
+			</td> \
+			<td width="20%" title="Modified Date" style="text-align: right;"> \
+				%(modified)s \
+			</td> \
+		</tr></table>', data);
+}
+
+cur_frm.get_query_transaction_history = function(args) {
+	return repl("\
+		select name, status, modified, currency, \
+			grand_total \
+		from `tab%(doctype)s` \
+		where customer='%(customer)s' \
+		order by modified desc", args);
+}
+
+cur_frm.render_transaction_history = function(parent, doc, doctype, get_query, render_row) {
+	$(parent).css({
+		'padding-top': '10px',
+	});
+	
+	cur_frm.transaction_list = new wn.ui.Listing({
+		parent: parent,
+		page_length: 10,
+		get_query: get_query || function() {
+			return cur_frm.get_query_transaction_history({
+				customer: doc.name,
+				doctype: doctype,
+			});
+		},
+		as_dict: 1,
+		no_result_message: repl('No %(doctype)s created for this customer', { doctype: doctype }),
+		render_row: function(wrapper, data) {
+			data.doctype = doctype;
+			render_html = render_row
+						? render_row(data)
+						: cur_frm.render_transaction_history_row(data);
+			$(wrapper).html(render_html);
+		},
+	});
+	
+	cur_frm.transaction_list.run();
+}
 // --------------------
 // make quotation list
 // --------------------
 cur_frm.cscript.make_qtn_list = function(parent,doc){
-	wn.require('js/listing.js');
-
-	var lst = new Listing();
-	lst.colwidths = ['5%','20%','20%','20%','20%','15%'];
-	lst.colnames = ['Sr.','Id','Status','Quotation Date','Contact Person','Grand Total'];
-	lst.coltypes = ['Data','Link','Data','Data','Data','Currency'];
-	lst.coloptions = ['','Quotation','','','',''];
-
-	var q = repl("select name,status,transaction_date, contact_person, grand_total from tabQuotation where customer='%(cust)s' order by transaction_date desc", {'cust':doc.name});
-	var q_max = repl("select count(name) from tabQuotation where customer='%(cust)s'", {'cust':doc.name});
-	
-	cur_frm.cscript.run_list(lst,parent,q,q_max,doc,'Quotation','Quotation');
+	cur_frm.render_transaction_history(parent, doc, 'Quotation');
 }
 
 // -------------
 // make so list
 // -------------
 cur_frm.cscript.make_so_list = function(parent,doc){
-	wn.require('js/listing.js');
-
-	var lst = new Listing();
-	lst.colwidths = ['5%','20%','20%','30%','25%'];
-	lst.colnames = ['Sr.','Id','Status','Sales Order Date','Grand Total'];
-	lst.coltypes = ['Data','Link','Data','Data','Currency'];
-	lst.coloptions = ['','Sales Order','','',''];
-
-	var q = repl("select name,status,transaction_date, grand_total from `tabSales Order` where customer='%(cust)s' order by transaction_date desc", {'cust':doc.name});
-	var q_max = repl("select count(name) from `tabSales Order` where customer='%(cust)s'", {'cust':doc.name});
-	
-	cur_frm.cscript.run_list(lst,parent,q,q_max,doc,'Sales Order','Sales Order');
+	cur_frm.render_transaction_history(parent, doc, 'Sales Order');
 }
+
 
 // -------------
 // make dn list
 // -------------
 cur_frm.cscript.make_dn_list = function(parent,doc){
-	wn.require('js/listing.js');
-
-	var lst = new Listing();
-	lst.colwidths = ['5%','20%','20%','20%','20%','15%'];
-	lst.colnames = ['Sr.','Id','Status','Delivery Note Date','Territory','Grand Total'];
-	lst.coltypes = ['Data','Link','Data','Data','Link','Currency'];
-	lst.coloptions = ['','Delivery Note','','','Territory',''];
-
-	var q = repl("select name,status,transaction_date,territory,grand_total from `tabDelivery Note` where customer='%(cust)s' order by transaction_date desc", {'cust':doc.name});
-	var q_max = repl("select count(name) from `tabDelivery Note` where customer='%(cust)s'", {'cust':doc.name});
-	
-	cur_frm.cscript.run_list(lst,parent,q,q_max,doc,'Delivery Note','Delivery Note');
+	cur_frm.render_transaction_history(parent, doc, 'Delivery Note');
 }
 
 // -------------
 // make si list
 // -------------
 cur_frm.cscript.make_si_list = function(parent,doc){
-	wn.require('js/listing.js');
-	
-	var lst = new Listing();
-	lst.colwidths = ['5%','20%','20%','20%','20%','15%'];
-	lst.colnames = ['Sr.','Id','Posting Date','Due Date','Debit To','Grand Total'];
-	lst.coltypes = ['Data','Link','Data','Data','Link','Currency'];
-	lst.coloptions = ['','Sales Invoice','','','Account',''];
-
-
-	var q = repl("select name,posting_date,due_date,debit_to,grand_total from `tabSales Invoice` where customer='%(cust)s' order by posting_date desc", {'cust':doc.name});
-	var q_max = repl("select count(name) from `tabSales Invoice` where customer='%(cust)s'", {'cust':doc.name});
-	
-	cur_frm.cscript.run_list(lst,parent,q,q_max,doc,'Sales Invoice','Sales Invoice');
+	cur_frm.render_transaction_history(parent, doc, 'Sales Invoice', function() {
+		return repl("\
+			select name, outstanding_amount, modified, currency, \
+				grand_total \
+			from `tab%(doctype)s` \
+			where customer='%(customer)s' \
+			order by modified desc", { doctype: 'Sales Invoice', customer: doc.name });
+	}, function(data) {
+		data.grand_total = fmt_money(data.grand_total);
+		data.modified = wn.datetime.only_date(data.modified);
+		data.outstanding_amount = fmt_money(data.outstanding_amount);
+		return repl('\
+			<table><tr> \
+				<td width="30%" title="Id"> \
+					<a href="#!Form/%(doctype)s/%(name)s">%(name)s</a> \
+				</td> \
+				<td width="20%" title="Outstanding Amount" \
+					style="text-align: right; color: #777"> \
+					%(currency)s %(outstanding_amount)s \
+				</td>\
+				<td width="30%" title="Grand Total" style="text-align: right;"> \
+					%(currency)s %(grand_total)s\
+				</td> \
+				<td width="20%" title="Modified Date" style="text-align: right;"> \
+					%(modified)s \
+				</td> \
+			</tr></table>', data);
+	});
 }
