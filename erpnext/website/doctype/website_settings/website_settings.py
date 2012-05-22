@@ -50,7 +50,7 @@ class DocType:
 			where docstatus=0 and ifnull(published,0)=1"""):
 			DocList('Blog', name[0]).save()
 			webnotes.conn.set_value('Blog', name[0], 'modified', name[1])
-			
+		
 		from webnotes.cms.make import make_web_core
 		make_web_core()
 		

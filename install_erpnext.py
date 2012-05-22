@@ -106,14 +106,7 @@ os.system("lib/wnf.py -l")
 # force sync all
 os.system("lib/wnf.py --sync_all -f")
 
-# create website files
-from webnotes.model.code import get_obj
-# rewrite pages
-ws = get_obj('Website Settings')
-ws.rewrite_pages()
-ss = get_obj('Style Settings')
-ss.validate()
-ss.on_update()
+os.system("lib/wnf.py --cms")
 
 # set filemode false
 os.system("git config core.filemode false")

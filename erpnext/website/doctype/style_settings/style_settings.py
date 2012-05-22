@@ -23,7 +23,9 @@ class DocType:
 		from jinja2 import Template
 		import os
 		
-		with open(os.path.join(os.path.dirname(__file__), 'custom_template.css'), 'r') as f:
+		with open(os.path.join(
+				os.path.dirname(os.path.abspath(__file__)), 
+				'custom_template.css'), 'r') as f:
 			temp = Template(f.read())
 		
 		if not self.doc.font_size:
