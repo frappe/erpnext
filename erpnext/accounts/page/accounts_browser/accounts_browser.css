@@ -18,3 +18,12 @@ span.tree-node-toolbar {
 	font-weight: bold;
 	text-decoration: underline;
 }
+
+span.balance-area {
+	float: right; 
+	height: 13px;
+}
+
+span.balance-bold {
+	font-weight: bold;
+}
