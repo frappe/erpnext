@@ -8,4 +8,5 @@ def execute():
 	
 	ss = get_obj('Style Settings')
 	ss.validate()
+	ss.doc.save()
 	ss.on_update()
