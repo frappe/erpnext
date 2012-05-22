@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-04-18 17:00:50',
+		'creation': '2012-04-20 14:02:53',
 		'docstatus': 0,
-		'modified': '2012-04-19 17:24:45',
+		'modified': '2012-05-22 14:11:21',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -224,8 +224,8 @@
 		'fieldtype': u'Select',
 		'label': u'Default Valuation Method',
 		'options': u'FIFO\nMoving Average'
-	},	
-	
+	},
+
 	# DocField
 	{
 		'colour': u'White:FFF',
@@ -506,6 +506,14 @@
 		'fieldtype': u'Select',
 		'label': u'Purchase Receipt Required',
 		'options': u'No\nYes'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'maintain_same_rate',
+		'fieldtype': u'Check',
+		'label': u'Maintain same rate throughout purchase cycle'
 	},
 
 	# DocField
