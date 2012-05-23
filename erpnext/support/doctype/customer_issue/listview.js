@@ -52,7 +52,7 @@ wn.doclistviews['Customer Issue'] = wn.views.ListView.extend({
 		{width: '3%', content: 'docstatus'},
 		{width: '20%', content: 'name'},
 		{width: '10%', content: 'status_html'},
-		{width: '47%', content: 'tags+complaint', css: {color:'#777'}},
+		{width: '47%', content: 'complaint+tags', css: {color:'#777'}},
 		{width: '12%', content: 'modified',
 			css: {'text-align': 'right', 'color':'#777'}}
 	]
