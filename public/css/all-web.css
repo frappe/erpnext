@@ -1958,12 +1958,18 @@ header .container {
 	}
 }
 
-@media (min-width: 1200px) {
+@media (min-width: 1200px) and (max-width: 1599px) {
+	header .container, .content {
+		width: 1100px;
+	}
+}
+
+@media (min-width: 1600px) {
 	header .container, .content {
 		width: 1100px;
 	}
 	div#body_div {
-		min-height: 600px;
+		min-height: 900px;
 	}
 }
 
