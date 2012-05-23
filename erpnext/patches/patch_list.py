@@ -392,5 +392,9 @@ patch_list = [
 		'patch_file': 'create_report_manager_role',
 		'description': 'Create report manager role if not exists'
 	},
-	
+	{
+		'patch_module': 'patches.may_2012',
+		'patch_file': 'reload_customer_address_contact',
+		'description': 'Reload report customer address contact'
+	},
 ]
