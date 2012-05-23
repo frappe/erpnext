@@ -151,7 +151,6 @@ cur_frm.fields_dict['lead_name'].get_query = function(doc,dt,dn){
 /* ********************************* transaction history ************************************** */
 
 cur_frm.render_transaction_history_row = function(data) {
-	console.log(data.modified);
 	data.grand_total = fmt_money(data.grand_total);
 	data.modified = wn.datetime.only_date(data.modified);
 	return repl('\
