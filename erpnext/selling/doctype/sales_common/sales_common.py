@@ -402,7 +402,7 @@ class DocType(TransactionBase):
 		# check if exists
 		exists = 0
 		for d in getlist(obj.doclist, 'packing_details'):
-			if d.parent_item == line.item_code and d.item_code == packing_item_code:
+			if d.parent_item == line.item_code and d.item_code == packing_item_code and d.parent_detail_docname == line.name:
 				pi, exists = d, 1
 				break
 
@@ -440,15 +440,15 @@ class DocType(TransactionBase):
 					self.update_packing_list_item(obj, i['item_code'], flt(i['qty'])*flt(d.qty), warehouse, d)
 			else:
 				self.update_packing_list_item(obj, d.item_code, d.qty, warehouse, d)
-			if d.item_code not in parent_items:
-				parent_items.append(d.item_code)
+			if [d.item_code, d.name] not in parent_items:
+				parent_items.append([d.item_code, d.name])
 				
 		self.cleanup_packing_list(obj, parent_items)
 		
 	def cleanup_packing_list(self, obj, parent_items):
 		"""Remove all those parent items which are no longer present in main item table"""
 		for d in getlist(obj.doclist, 'packing_details'):
-			if d.parent_item not in parent_items:
+			if [d.parent_item, d.parent_detail_docname] not in parent_items:
 				d.parent = ''
 
 
