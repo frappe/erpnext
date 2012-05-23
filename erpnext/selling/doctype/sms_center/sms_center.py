@@ -47,7 +47,6 @@ class DocType:
     if self.doc.send_to == 'All Sales Partner Contact':
       where_clause = self.doc.sales_partner and " and ifnull(is_sales_partner, 0) = 1 and sales_aprtner = '%s'" % self.doc.sales_partner or " and ifnull(is_sales_partner, 0) = 1"
     if self.doc.send_to in ['All Contact', 'All Customer Contact', 'All Supplier Contact', 'All Sales Partner Contact']:
-      msgprint("select CONCAT(ifnull(first_name,''),'',ifnull(last_name,'')), mobile_no from `tabContact` where ifnull(mobile_no,'')!='' and docstatus != 2 %s" % where_clause)
       rec = sql("select CONCAT(ifnull(first_name,''),'',ifnull(last_name,'')), mobile_no from `tabContact` where ifnull(mobile_no,'')!='' and docstatus != 2 %s" % where_clause)
     elif self.doc.send_to == 'All Lead (Open)':
       rec = sql("select lead_name, mobile_no from tabLead where ifnull(mobile_no,'')!='' and docstatus != 2 and status = 'Open'")

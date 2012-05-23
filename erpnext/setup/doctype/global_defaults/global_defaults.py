@@ -35,7 +35,8 @@ keydict = {
 	'date_format': 'date_format',
 	'currency_format':'default_currency_format',
 	'account_url':'account_url',
-	'allow_negative_stock' : 'allow_negative_stock'
+	'allow_negative_stock' : 'allow_negative_stock',
+	'maintain_same_rate' : 'maintain_same_rate'
 }
 
 class DocType:

@@ -382,5 +382,15 @@ patch_list = [
 		'patch_file': 'clear_session_cache',
 		'description': 'clears session cache as shifting to json format'
 	},
-
+	{
+		'patch_module': 'patches.may_2012',
+		'patch_file': 'same_purchase_rate_patch',
+		'description': 'Main same rate throughout pur cycle: in global defaults, by default set true'
+	},
+	{
+		'patch_module': 'patches.may_2012',
+		'patch_file': 'create_report_manager_role',
+		'description': 'Create report manager role if not exists'
+	},
+	
 ]

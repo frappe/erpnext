@@ -35,20 +35,18 @@ class DocType:
 		elif self.doc.sales_partner:
 			self.doc.name = self.doc.sales_partner + '-' + self.doc.address_type
 			
-		# filter out bad characters in name
-		#self.doc.name = self.doc.name.replace('&','and').replace('.','').replace("'",'').replace('"','').replace(',','').replace('`','')
 
-#----------------------
-# Call to Validate
-#----------------------
 	def validate(self):
+		self.validate_for_whom()
 		self.validate_primary_address()
 		self.validate_shipping_address()
 
-#----------------------
-# Validate that there can only be one primary address for particular customer, supplier
-#----------------------
+	def validate_for_whom(self):
+		if not (self.doc.customer or self.doc.supplier or self.doc.sales_partner):
+			msgprint("Please enter value in atleast one of customer, supplier and sales partner field", raise_exception=1)
+	
 	def validate_primary_address(self):
+		"""Validate that there can only be one primary address for particular customer, supplier"""
 		sql = webnotes.conn.sql
 		if self.doc.is_primary_address == 1:
 			if self.doc.customer: 
@@ -69,10 +67,8 @@ class DocType:
 					self.doc.is_primary_address = 1
 
 				
-#----------------------
-# Validate that there can only be one shipping address for particular customer, supplier
-#----------------------
 	def validate_shipping_address(self):
+		"""Validate that there can only be one shipping address for particular customer, supplier"""
 		sql = webnotes.conn.sql
 		if self.doc.is_shipping_address == 1:
 			if self.doc.customer: 

@@ -312,18 +312,14 @@ class DocType(TransactionBase):
 		supplier = ''
 		if d.purchase_order and not d.purchase_order in self.po_list:
 			supplier = sql("select supplier from `tabPurchase Order` where name = '%s'" % d.purchase_order)[0][0]
-			doctype = 'purchase order'
-			doctype_no = cstr(d.purchase_order)
 			if supplier and not cstr(self.doc.supplier) == cstr(supplier):
-				msgprint("Supplier name %s do not match with supplier name	of %s %s." %(self.doc.supplier,doctype,doctype_no))
+				msgprint("Supplier name %s do not match with supplier name	of purhase order: %s." %(self.doc.supplier,cstr(d.purchase_order)))
 				raise Exception , " Validation Error "
 
 		if d.purchase_receipt and not d.purchase_receipt in self.pr_list:
 			supplier = sql("select supplier from `tabPurchase Receipt` where name = '%s'" % d.purchase_receipt)[0][0]
-			doctype = 'purchase receipt'
-			doctype_no = cstr(d.purchase_receipt)
 			if supplier and not cstr(self.doc.supplier) == cstr(supplier):
-				msgprint("Supplier name %s do not match with supplier name	of %s %s." %(self.doc.supplier,doctype,doctype_no))
+				msgprint("Supplier name %s do not match with supplier name	of %s %s." %(self.doc.supplier,cstr(d.purchase_receipt)))
 				raise Exception , " Validation Error "
 
 	# Validate values with reference document
@@ -337,7 +333,7 @@ class DocType(TransactionBase):
 	def validate_po_pr(self, d):
 		# check po / pr for qty and rates and currency and conversion rate
 
-		# always import_rate must be equal to import_rate of purchase order
+		# currency, import_rate must be equal to currency, import_rate of purchase order
 		if d.purchase_order and not d.purchase_order in self.po_list:
 			# currency
 			currency = cstr(sql("select currency from `tabPurchase Order` where name = '%s'" % d.purchase_order)[0][0])
@@ -346,7 +342,7 @@ class DocType(TransactionBase):
 				raise Exception
 			# import_rate
 			rate = flt(sql('select import_rate from `tabPurchase Order Item` where item_code=%s and parent=%s and name = %s', (d.item_code, d.purchase_order, d.po_detail))[0][0])
-			if abs(rate - flt(d.import_rate)) > 1:
+			if abs(rate - flt(d.import_rate)) > 1 and cint(get_defaults('maintain_same_rate')):
 				msgprint("Import Rate for %s in the Purchase Order is %s. Rate must be same as Purchase Order Rate" % (d.item_code,rate))
 				raise Exception
 									
