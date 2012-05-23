@@ -17,7 +17,7 @@ wn.doclistviews['Purchase Order'] = wn.views.ListView.extend({
 		{width: '5%', content: 'avatar'},
 		{width: '3%', content: 'docstatus'},
 		{width: '15%', content: 'name'},
-		{width: '28%', content: 'tags+supplier_name', css: {color:'#222'}},
+		{width: '28%', content: 'supplier_name+tags', css: {color:'#222'}},
 		{
 			width: '18%', 
 			content: function(parent, data) { 

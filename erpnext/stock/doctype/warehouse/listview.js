@@ -29,7 +29,7 @@ wn.doclistviews['Warehouse'] = wn.views.ListView.extend({
 		{width: '5%', content:'avatar'},
 		{width: '20%', content:'name'},
 		{width: '15%', content:'warehouse_type'},
-		{width: '45%', content:'tags+address'},
+		{width: '45%', content:'address+tags'},
 		{width: '12%', content:'modified', css: {'text-align': 'right', 'color':'#777'}}
 	]
 });

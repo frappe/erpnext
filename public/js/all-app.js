@@ -918,11 +918,12 @@ wn.ui.Tree=Class.extend({init:function(args){$.extend(this,args);this.nodes={};t
    .tree-link { cursor: pointer; }\
   ")}})
 wn.ui.TreeNode=Class.extend({init:function(args){var me=this;$.extend(this,args);this.loaded=false;this.expanded=false;this.tree.nodes[this.label]=this;this.$a=$('<a class="tree-link">').click(function(){if(me.expandable&&me.tree.method&&!me.loaded){me.load()}else{me.selectnode();}
-if(me.tree.click)me.tree.click(this);}).bind('reload',function(){me.reload();}).data('label',this.label).appendTo(this.parent);if(this.expandable){this.$a.append('<i class="icon-folder-close"></i> '+this.label);}else{this.$a.append('<i class="icon-file"></i> '+this.label);}},selectnode:function(){if(this.$ul){this.$ul.toggle();this.$a.find('i').removeClass();if(this.$ul.css('display').toLowerCase()=='block'){this.$a.find('i').addClass('icon-folder-open');}else{this.$a.find('i').addClass('icon-folder-close');}}
+if(me.tree.click)me.tree.click(this);}).bind('reload',function(){me.reload();}).data('label',this.label).appendTo(this.parent);if(this.expandable){this.$a.append('<i class="icon-folder-close"></i> '+this.label);}else{this.$a.append('<i class="icon-file"></i> '+this.label);}
+if(this.tree.onrender){this.tree.onrender(this);}},selectnode:function(){if(this.$ul){this.$ul.toggle();this.$a.find('i').removeClass();if(this.$ul.css('display').toLowerCase()=='block'){this.$a.find('i').addClass('icon-folder-open');}else{this.$a.find('i').addClass('icon-folder-close');}}
 this.tree.$w.find('a.selected').removeClass('selected');this.$a.toggleClass('selected');this.expanded=!this.expanded;},reload:function(){if(this.expanded){this.$a.click();}
 if(this.$ul){this.$ul.empty();}
-this.load();},addnode:function(label,expandable){if(!this.$ul){this.$ul=$('<ul>').toggle(false).appendTo(this.parent);}
-return new wn.ui.TreeNode({tree:this.tree,parent:$('<li>').appendTo(this.$ul),label:label,expandable:expandable});},load:function(){var me=this;args=$.extend(this.tree.args,{parent:this.label});$(me.$a).set_working();wn.call({method:this.tree.method,args:args,callback:function(r){$(me.$a).done_working();$.each(r.message,function(i,v){node=me.addnode(v.value||v,v.expandable);node.$a.data('node-data',v);});me.loaded=true;me.selectnode();}})}})
+this.load();},addnode:function(data){if(!this.$ul){this.$ul=$('<ul>').toggle(false).appendTo(this.parent);}
+return new wn.ui.TreeNode({tree:this.tree,parent:$('<li>').appendTo(this.$ul),label:data.value,expandable:data.expandable,data:data});},load:function(){var me=this;args=$.extend(this.tree.args,{parent:this.label});$(me.$a).set_working();wn.call({method:this.tree.method,args:args,callback:function(r){$(me.$a).done_working();$.each(r.message,function(i,v){node=me.addnode(v);node.$a.data('node-data',v);});me.loaded=true;me.selectnode();}})}})
 /*
  *	lib/js/wn/upload.js
  */
@@ -1019,7 +1020,8 @@ else if(data[opts.content]){$(parent).append(' '+data[opts.content]);}},render:f
 if(diff==1){data.when='Yesterday'}
 if(diff==2){data.when='2 days ago'}
 if(data.docstatus==0||data.docstatus==null){data.docstatus_icon='icon-pencil';data.docstatus_title='Editable';}else if(data.docstatus==1){data.docstatus_icon='icon-lock';data.docstatus_title='Submitted';}else if(data.docstatus==2){data.docstatus_icon='icon-remove';data.docstatus_title='Cancelled';}
-for(key in data){if(data[key]==null){data[key]='';}}},add_user_tags:function(parent,data){var me=this;if(data._user_tags){$.each(data._user_tags.split(','),function(i,t){if(t){$('<span class="label label-info" style="cursor: pointer">'
+for(key in data){if(data[key]==null){data[key]='';}}},add_user_tags:function(parent,data){var me=this;if(data._user_tags){if($(parent).html().length>0){$(parent).append('<br />');}
+$.each(data._user_tags.split(','),function(i,t){if(t){$('<span class="label label-info" style="cursor: pointer; line-height: 200%">'
 +strip(t)+'</span>').click(function(){me.doclistview.set_filter('_user_tags',$(this).text())}).appendTo(parent);}});}},show_hide_check_column:function(){if(!this.doclistview.can_delete){this.columns=$.map(this.columns,function(v,i){if(v.content!='check')return v});}}})
 /*
  *	lib/js/wn/views/formview.js

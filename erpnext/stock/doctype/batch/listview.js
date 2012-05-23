@@ -22,7 +22,7 @@ wn.doclistviews['Batch'] = wn.views.ListView.extend({
 		{width: '5%', content:'avatar'},
 		{width: '15%', content:'name'},
 		{width: '15%', content:'item'},
-		{width: '50%', content:'tags+description'},
+		{width: '50%', content:'description+tags'},
 		{width: '12%', content:'modified', css: {'text-align': 'right', 'color':'#777'}}
 	]
 });

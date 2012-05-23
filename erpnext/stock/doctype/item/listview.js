@@ -22,7 +22,7 @@ wn.doclistviews['Item'] = wn.views.ListView.extend({
 		{width: '3%', content: 'check'},
 		{width: '5%', content:'avatar'},
 		{width: '20%', content:'name'},
-		{width: '60%', content:'tags+description', css: {'color': '#222'}},
+		{width: '60%', content:'description+tags', css: {'color': '#222'}},
 		{width: '12%', content:'modified', css: {'text-align': 'right', 'color':'#777'}}
 	]
 });
