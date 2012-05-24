@@ -79,7 +79,12 @@ class SupportMailbox(POP3Mailbox):
 				
 				st = get_obj('Support Ticket', thread_id)
 				st.make_response_record(content, mail.mail['From'], content_type)
-				webnotes.conn.set(st.doc, 'status', 'Open')
+				
+				# to update modified date
+				#webnotes.conn.set(st.doc, 'status', 'Open')
+				st.doc.status = 'Open'
+				st.doc.save()
+				
 				update_feed(st.doc, 'on_update')
 				webnotes.conn.commit()
 				# extract attachments

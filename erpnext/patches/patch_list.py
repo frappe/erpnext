@@ -397,4 +397,9 @@ patch_list = [
 		'patch_file': 'reload_customer_address_contact',
 		'description': 'Reload report customer address contact'
 	},
+	{
+		'patch_module': 'patches.may_2012',
+		'patch_file': 'profile_perm_patch',
+		'description': 'Make profile readonly for role All'
+	},
 ]
