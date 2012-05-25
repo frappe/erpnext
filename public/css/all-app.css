@@ -3276,49 +3276,49 @@ div.appframe-toolbar {
   font-family: 'Pontano Sans';
   font-style: normal;
   font-weight: 800;
-  src: url('../lib/css/fonts/pontanosans.woff') format('woff');
+  src: url('fonts/pontanosans.woff') format('woff');
 }
 
 @font-face {
   font-family: 'Droid Sans';
   font-style: normal;
   font-weight: normal;
-  src: local('Droid Sans'), local('DroidSans'), url('../lib/css/fonts/droidsans.woff') format('woff');
+  src: local('Droid Sans'), local('DroidSans'), url('fonts/droidsans.woff') format('woff');
 }
 
 @font-face {
   font-family: 'PT Sans';
   font-style: normal;
   font-weight: normal;
-  src: local('PT Sans'), local('PTSans-Regular'), url('../lib/css/fonts/ptsans.woff') format('woff');
+  src: local('PT Sans'), local('PTSans-Regular'), url('fonts/ptsans.woff') format('woff');
 }
 
 @font-face {
   font-family: 'Open Sans';
   font-style: normal;
   font-weight: 400;
-  src: local('Open Sans'), local('OpenSans'), url('../lib/css/fonts/opensans.woff') format('woff');
+  src: local('Open Sans'), local('OpenSans'), url('fonts/opensans.woff') format('woff');
 }
 
 @font-face {
   font-family: 'Lato';
   font-style: normal;
   font-weight: 400;
-  src: local('Lato Regular'), local('Lato-Regular'), url('../lib/css/fonts/lato.woff') format('woff');
+  src: local('Lato Regular'), local('Lato-Regular'), url('fonts/lato.woff') format('woff');
 }
 
 @font-face {
   font-family: 'Cabin';
   font-style: normal;
   font-weight: 400;
-  src: local('Cabin Regular'), local('Cabin-Regular'), url('../lib/css/fonts/cabin.woff') format('woff');
+  src: local('Cabin Regular'), local('Cabin-Regular'), url('fonts/cabin.woff') format('woff');
 }
 
 @font-face {
   font-family: 'Pacifico';
   font-style: normal;
   font-weight: normal;
-  src: local('Pacifico Regular'), local('Pacifico-Regular'), url('../lib/css/fonts/pacifico.woff') format('woff');
+  src: local('Pacifico Regular'), local('Pacifico-Regular'), url('fonts/pacifico.woff') format('woff');
 }
 
 
