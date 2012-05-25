@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-03-27 14:36:47',
+		'creation': '2012-05-03 18:43:31',
 		'docstatus': 0,
-		'modified': '2012-03-27 14:36:47',
+		'modified': '2012-05-25 11:58:44',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -24,7 +24,7 @@
 		'name': '__common__',
 		'section_style': u'Simple',
 		'show_in_menu': 0,
-		'version': 7
+		'version': 1
 	},
 
 	# These values are common for all DocField
@@ -68,7 +68,7 @@
 		'fieldname': u'select_doctype',
 		'fieldtype': u'Select',
 		'label': u'Select DocType',
-		'options': u'\nAccount\nCompany\nCustomer\nSupplier\nEmployee\nWarehouse\nItem'
+		'options': u'\nAccount\nCompany\nCustomer\nSupplier\nEmployee\nWarehouse\nItem\nProfile'
 	},
 
 	# DocField
