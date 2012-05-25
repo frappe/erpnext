@@ -353,7 +353,8 @@ class DocType(TransactionBase):
 			if self.has_sales_bom(d.item_code):
 				for p in getlist(obj.doclist, 'packing_details'):
 					if p.parent_item == d.item_code:
-						il.append([warehouse, p.item_code, flt(p.qty)*qty, flt(p.qty)* reserved_qty, p.uom, p.batch_no, p.serial_no])
+						# the packing details table's qty is already multiplied with parent's qty
+						il.append([warehouse, p.item_code, flt(p.qty), (flt(p.qty)/qty)*(reserved_qty), p.uom, p.batch_no, p.serial_no])
 			else:
 				il.append([warehouse, d.item_code, qty, reserved_qty, d.stock_uom, d.batch_no, d.serial_no])
 		return il
