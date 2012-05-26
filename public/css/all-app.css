@@ -3328,6 +3328,14 @@ div.appframe-toolbar {
   src: local('Oleo Script'), local('OleoScript-Regular'), url('fonts/oleoscript.woff') format('woff');
 }
 
+@font-face {
+  font-family: 'Cookie';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Cookie-Regular'), url('fonts/cookie.woff') format('woff');
+}
+
+
 /*
  *	lib/js/lib/Aristo/aristo.selected.css
  */
