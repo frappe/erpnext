@@ -2316,7 +2316,12 @@ div.dialog_row table td textarea {
   src: local('Pacifico Regular'), local('Pacifico-Regular'), url('fonts/pacifico.woff') format('woff');
 }
 
-
+@font-face {
+  font-family: 'Satisfy';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Satisfy'), url('fonts/satisfy.woff') format('woff');
+}
 
 /*
  *	lib/css/ui/list.css

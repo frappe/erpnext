@@ -3321,7 +3321,12 @@ div.appframe-toolbar {
   src: local('Pacifico Regular'), local('Pacifico-Regular'), url('fonts/pacifico.woff') format('woff');
 }
 
-
+@font-face {
+  font-family: 'Satisfy';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Satisfy'), url('fonts/satisfy.woff') format('woff');
+}
 
 /*
  *	lib/js/lib/Aristo/aristo.selected.css
