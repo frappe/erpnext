@@ -3322,10 +3322,10 @@ div.appframe-toolbar {
 }
 
 @font-face {
-  font-family: 'Satisfy';
+  font-family: 'Oleo Script';
   font-style: normal;
   font-weight: 400;
-  src: local('Satisfy'), url('fonts/satisfy.woff') format('woff');
+  src: local('Oleo Script'), local('OleoScript-Regular'), url('fonts/oleoscript.woff') format('woff');
 }
 
 /*
