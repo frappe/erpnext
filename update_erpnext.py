@@ -15,3 +15,5 @@ for cmd in cmd_list:
 		print "status: %s" % stat
 		print "output: %s" % op
 		break
+		
+print "update_erpnext.py --> run success."
