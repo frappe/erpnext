@@ -402,4 +402,9 @@ patch_list = [
 		'patch_file': 'profile_perm_patch',
 		'description': 'Make profile readonly for role All'
 	},
+	{
+		'patch_module': 'patches.may_2012',
+		'patch_file': 'remove_euro_currency',
+		'description': 'Remove EURO currency and replace with EUR'
+	},
 ]
