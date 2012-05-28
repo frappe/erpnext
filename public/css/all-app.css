@@ -3335,6 +3335,13 @@ div.appframe-toolbar {
   src: local('Cookie-Regular'), url('fonts/cookie.woff') format('woff');
 }
 
+@font-face {
+  font-family: 'Marck Script';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Marck Script'), local('MarckScript-Regular'), url('fonts/marckscript.woff') format('woff');
+}
+
 
 /*
  *	lib/js/lib/Aristo/aristo.selected.css
