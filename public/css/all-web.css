@@ -2330,6 +2330,13 @@ div.dialog_row table td textarea {
   src: local('Cookie-Regular'), url('fonts/cookie.woff') format('woff');
 }
 
+@font-face {
+  font-family: 'Marck Script';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Marck Script'), local('MarckScript-Regular'), url('fonts/marckscript.woff') format('woff');
+}
+
 
 /*
  *	lib/css/ui/list.css
