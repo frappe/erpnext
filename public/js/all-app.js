@@ -959,7 +959,7 @@ wn.views.DocListView=wn.ui.Listing.extend({init:function(doctype){this.doctype=d
     <div class="wnlist-area"><div class="help">Loading...</div></div>\
    </div>\
    <div class="layout-side-section">\
-    <div class="stat-wrapper show-docstatus hide">\
+    <div class="show-docstatus hide" style="margin-bottom: 19px">\
      <h4>Show</h4>\
      <div><input data-docstatus="0" type="checkbox" checked="checked" /> Drafts</div>\
      <div><input data-docstatus="1" type="checkbox" checked="checked" /> Submitted</div>\
