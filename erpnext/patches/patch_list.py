@@ -228,14 +228,14 @@ patch_list = [
 		'description': 'SO-RV duplicate mapper entry removal'
 	},
 	{
-		'patch_module': 'patches.jan_mar_2012',
-		'patch_file': 'sync_ref_db',
-		'description': 'Deletes non required doctypes'
-	},
-	{
 		'patch_module': 'patches.mar_2012',
 		'patch_file': 'clean_property_setter',
 		'description': 'Patch related to property setter cleanup' 
+	},
+	{
+		'patch_module': 'patches.jan_mar_2012',
+		'patch_file': 'sync_ref_db',
+		'description': 'Deletes non required doctypes'
 	},
 	{
 		'patch_module': 'patches.april_2012',

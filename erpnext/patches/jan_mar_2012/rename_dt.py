@@ -1,6 +1,6 @@
 import webnotes
 import conf
-from webnotes.model import rename, delete_doc
+import webnotes.model
 from webnotes.model.code import get_obj
 from wnf import replace_code
 from termcolor import colored
@@ -150,10 +150,13 @@ def rename_in_db(ren_data, data_type, is_doctype):
 		print colored('Renaming... ' + d + ' --> '+ ren_data[d], 'yellow')
 		#rename
 		try:
-			rename(data_type, d, ren_data[d], is_doctype)
+			webnotes.model.rename(data_type, d, ren_data[d], is_doctype)
 		except Exception, e:
-			print e
-			pass
+			if e.args[0]!=1050:
+				raise e
+			else:
+				print e
+				pass
 
 
 def update_dt_in_records(rendt):
