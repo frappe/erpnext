@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-03-27 14:36:05',
+		'creation': '2012-05-15 12:14:48',
 		'docstatus': 0,
-		'modified': '2012-03-27 14:45:50',
+		'modified': '2012-05-28 19:03:56',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -23,7 +23,7 @@
 		'section_style': u'Tabbed',
 		'server_code_error': u' ',
 		'show_in_menu': 0,
-		'version': 190
+		'version': 1
 	},
 
 	# These values are common for all DocField
@@ -323,6 +323,7 @@
 		'fieldname': u'produced_qty',
 		'fieldtype': u'Currency',
 		'label': u'Produced Qty',
+		'no_copy': 1,
 		'oldfieldname': u'produced_qty',
 		'oldfieldtype': u'Currency',
 		'permlevel': 1

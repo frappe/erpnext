@@ -20,17 +20,17 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 	
 	var route = wn.get_route();
 	if(route[1]=='Supplier') {
-		var supplier = locals.Supplier[route[2]]
+		var supplier = wn.container.page.frm.doc;
 		doc.supplier = supplier.name;
 		doc.supplier_name = supplier.supplier_name;
 		doc.address_type = 'Office';
 	} else if(route[1]=='Customer') {
-		var customer = locals.Customer[route[2]]
+		var customer = wn.container.page.frm.doc;
 		doc.customer = customer.name;
 		doc.customer_name = customer.customer_name;
 		doc.address_type = 'Office';
 	} else if(route[1]=='Sales Partner') {
-		var sp = locals['Sales Partner'][route[2]];
+		var sp = wn.container.page.frm.doc;
 		doc.sales_partner = sp.name;
 		doc.address_type = 'Office';				
 	}
