@@ -437,6 +437,10 @@ class DocType(TransactionBase):
 			pi.serial_no = cstr(line.serial_no)
 			pi.batch_no = cstr(line.batch_no)
 		pi.idx = self.packing_list_idx
+		
+		# has to be saved, since this function is called on_update of delivery note
+		pi.save()
+		
 		self.packing_list_idx += 1
 
 

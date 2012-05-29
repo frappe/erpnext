@@ -182,7 +182,6 @@ class DocType(TransactionBase):
 		#self.validate_prevdoc_details()
 		self.validate_reference_value()
 		self.validate_for_items()
-		sales_com_obj.make_packing_list(self,'delivery_note_details')
 		sales_com_obj.validate_max_discount(self, 'delivery_note_details')						 #verify whether rate is not greater than max discount
 		sales_com_obj.get_allocated_sum(self)	# this is to verify that the allocated % of sales persons is 100%
 		sales_com_obj.check_conversion_rate(self)
@@ -474,6 +473,7 @@ class DocType(TransactionBase):
 
 	# on update
 	def on_update(self):
+		get_obj('Sales Common').make_packing_list(self,'delivery_note_details')
 		self.set_actual_qty()
 		get_obj('Stock Ledger').scrub_serial_nos(self)
 
