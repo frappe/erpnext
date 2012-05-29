@@ -407,9 +407,21 @@ class DocType(TransactionBase):
 		if not default_currency:
 			msgprint('Message: Please enter default currency in Company Master')
 			raise Exception
-		if (obj.doc.currency == default_currency and flt(obj.doc.conversion_rate) != 1.00) or not obj.doc.conversion_rate or (obj.doc.currency != default_currency and flt(obj.doc.conversion_rate) == 1.00):
-			msgprint("Message: Please Enter Appropriate Conversion Rate.")
-			raise Exception
+			
+		if obj.doc.conversion_rate == 0:
+			msgprint('Conversion Rate cannot be 0', raise_exception=1)
+		elif not obj.doc.conversion_rate:
+			msgprint('Please specify Conversion Rate', raise_exception=1)
+		elif obj.doc.currency == default_currency and \
+				flt(obj.doc.conversion_rate) != 1.00:
+			msgprint("""Conversion Rate should be equal to 1.00, \
+						since the specified Currency and the company's currency \
+						are same""", raise_exception=1)
+		elif obj.doc.currency != default_currency and \
+				flt(obj.doc.conversion_rate) == 1.00:
+			msgprint("""Conversion Rate should not be equal to 1.00, \
+						since the specified Currency and the company's currency \
+						are different""", raise_exception=1)
 
 	def validate_doc(self, obj, prevdoc_doctype, prevdoc_docname):
 		if prevdoc_docname :
