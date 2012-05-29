@@ -13,4 +13,5 @@ def execute():
 				webnotes.conn.sql("""\
 					update `%s` set `%s`='EUR'
 					where `%s`='EURO'""" % (tab, field, field))
+	webnotes.conn.sql("update `tabSingles` set value='EUR' where value='EURO'")
 	webnotes.conn.sql("delete from `tabCurrency` where name='EURO'")
