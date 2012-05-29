@@ -2284,9 +2284,11 @@ erpnext.hide_naming_series=function(){if(cur_frm.fields_dict.naming_series){hide
  */
 wn.provide('erpnext.module_page');erpnext.module_page.setup_page=function(module,wrapper){erpnext.module_page.hide_links(wrapper);erpnext.module_page.make_list(module,wrapper);$(wrapper).find("a[title]").tooltip({delay:{show:500,hide:100}});}
 erpnext.module_page.hide_links=function(wrapper){$(wrapper).find('[href*="List/"]').each(function(){var href=$(this).attr('href');var dt=href.split('/')[1];if(wn.boot.profile.all_read.indexOf(get_label_doctype(dt))==-1){var txt=$(this).text();$(this).parent().css('color','#999').html(txt);}});$(wrapper).find('[data-doctype]').each(function(){var dt=$(this).attr('data-doctype');if(wn.boot.profile.all_read.indexOf(dt)==-1){var txt=$(this).text();$(this).parent().css('color','#999').html(txt);}});$(wrapper).find('[href*="Form/"]').each(function(){var href=$(this).attr('href');var dt=href.split('/')[1];if(wn.boot.profile.all_read.indexOf(get_label_doctype(dt))==-1){var txt=$(this).text();$(this).parent().css('color','#999').html(txt);}});}
-erpnext.module_page.make_list=function(module,wrapper){wrapper.list=new wn.ui.Listing({parent:$(wrapper).find('.reports-list').get(0),method:'utilities.get_report_list',render_row:function(row,data){if(!data.parent_doc_type)data.parent_doc_type=data.doc_type;$(row).html(repl('<a href="#!Report/%(doc_type)s/%(criteria_name)s" \
+erpnext.module_page.make_list=function(module,wrapper){var $w=$(wrapper).find('.reports-list');var $parent1=$('<div style="width: 45%; float: left; margin-right: 4.5%"></div>').appendTo($w);var $parent2=$('<div style="width: 45%; float: left;"></div>').appendTo($w);wrapper.list1=new wn.ui.Listing({parent:$parent1,method:'utilities.get_sc_list',render_row:function(row,data){if(!data.parent_doc_type)data.parent_doc_type=data.doc_type;$(row).html(repl('<a href="#!Report/%(doc_type)s/%(criteria_name)s" \
     data-doctype="%(parent_doc_type)s">\
-    %(criteria_name)s</a>',data))},args:{module:module},no_refresh:true,callback:function(r){erpnext.module_page.hide_links(wrapper)}});wrapper.list.run();}
+    %(criteria_name)s</a>',data))},args:{module:module},no_refresh:true,callback:function(r){erpnext.module_page.hide_links($parent1)}});wrapper.list1.run();wrapper.list2=new wn.ui.Listing({parent:$parent2,method:'utilities.get_report_list',render_row:function(row,data){$(row).html(repl('<a href="#!Report2/%(ref_doctype)s/%(name)s" \
+    data-doctype="%(ref_doctype)s">\
+    %(name)s</a>',data))},args:{module:module},no_refresh:true,callback:function(r){erpnext.module_page.hide_links($parent2)}});wrapper.list2.run();}
 /*
  *	erpnext/startup/js/toolbar.js
  */
