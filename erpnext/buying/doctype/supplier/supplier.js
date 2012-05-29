@@ -105,47 +105,48 @@ cur_frm.cscript.make_contact = function() {
 	cur_frm.contact_list.run();
 }
 
-// make purchase order list
-cur_frm.cscript.make_po_list = function(parent, doc){
-	wn.require('js/listing.js');
-	var lst = new Listing();
-	lst.colwidths = ['5%','25%','20%','25%','25%'];
-	lst.colnames = ['Sr.','Id','Status','PO Date','Grand Total'];
-	lst.coltypes = ['Data','Link','Data','Data','Currency'];
-	lst.coloptions = ['','Purchase Order','','','',''];
 
-	var q = repl("select name,status,transaction_date, grand_total from `tabPurchase Order` where supplier='%(sup)s' order by transaction_date desc", {'sup':doc.name});
-	var q_max = repl("select count(name) from `tabPurchase Order` where supplier='%(sup)s'", {'sup':doc.name});
-	
-	cur_frm.cscript.run_list(lst,parent,q,q_max,doc,'Purchase Order','Purchase Order');
+// Transaction History
+
+cur_frm.cscript.make_po_list = function(parent, doc) {
+	cur_frm.cscript.render_transaction_history(parent, doc, 'Purchase Order', 
+		[
+			{fieldname: 'name', width: '28%', label: 'Id', type: 'Link'},
+			{fieldname: 'status', width: '25%', label: 'Status', type: 'Data'},
+			{fieldname: 'modified', width: '12%', label: 'Last Modified On', 
+				type: 'Date', style: 'text-align: right; color: #777'},
+			{fieldname: 'currency', width: '0%', label: 'Currency', 
+				style: 'display: hidden'},
+			{fieldname: 'grand_total', width: '35%', label: 'Grand Total', 
+				type: 'Currency', style: 'text-align: right'},
+		]);
 }
 
-// make purchase receipt list
-cur_frm.cscript.make_pr_list = function(parent,doc){
-	wn.require('js/listing.js');
-	var lst = new Listing();
-	lst.colwidths = ['5%','20%','20%','20%','15%','20%'];
-	lst.colnames = ['Sr.','Id','Status','Receipt Date','% Billed','Grand Total'];
-	lst.coltypes = ['Data','Link','Data','Data','Currency','Currency'];
-	lst.coloptions = ['','Purchase Receipt','','','',''];
-	
-	var q = repl("select name,status,transaction_date,per_billed,grand_total from `tabPurchase Receipt` where supplier='%(sup)s' order by transaction_date desc", {'sup':doc.name});
-	var q_max = repl("select count(name) from `tabPurchase Receipt` where supplier='%(sup)s'", {'sup':doc.name});
-	
-	cur_frm.cscript.run_list(lst,parent,q,q_max,doc,'Purchase Receipt','Purchase Receipt');
+cur_frm.cscript.make_pr_list = function(parent, doc) {
+	cur_frm.cscript.render_transaction_history(parent, doc, 'Purchase Receipt', 
+		[
+			{fieldname: 'name', width: '28%', label: 'Id', type: 'Link'},
+			{fieldname: 'status', width: '15%', label: 'Status', type: 'Data'},
+			{fieldname: 'per_billed', width: '10%', label: '% Billed', 
+				type: 'Percentage', style: 'text-align: right'},
+			{fieldname: 'modified', width: '12%', label: 'Last Modified On', 
+				type: 'Date', style: 'text-align: right; color: #777'},
+			{fieldname: 'currency', width: '0%', label: 'Currency', 
+				style: 'display: hidden'},
+			{fieldname: 'grand_total', width: '35%', label: 'Grand Total', 
+				type: 'Currency', style: 'text-align: right'},
+		]);
 }
 
-// make purchase invoice list
-cur_frm.cscript.make_pi_list = function(parent,doc){
-	wn.require('js/listing.js');
-	var lst = new Listing();
-	lst.colwidths = ['5%','20%','20%','20%','15%','20%'];
-	lst.colnames = ['Sr.','Id','Posting Date','Credit To','Bill Date','Grand Total'];
-	lst.coltypes = ['Data','Link','Data','Data','Currency','Currency'];
-	lst.coloptions = ['','Purchase Invoice','','','',''];
-
-	var q = repl("select name, posting_date, credit_to, bill_date, grand_total from `tabPurchase Invoice` where supplier='%(sup)s' order by posting_date desc", {'sup':doc.name});
-	var q_max = repl("select count(name) from `tabPurchase Invoice` where supplier='%(sup)s'", {'sup':doc.name});
-	
-	cur_frm.cscript.run_list(lst,parent,q,q_max,doc,'Purchase Invoice','Purchase Invoice');	
+cur_frm.cscript.make_pi_list = function(parent, doc) {
+	cur_frm.cscript.render_transaction_history(parent, doc, 'Purchase Invoice', 
+		[
+			{fieldname: 'name', width: '30%', label: 'Id', type: 'Link'},
+			{fieldname: 'modified', width: '35%', label: 'Last Modified On', 
+				type: 'Date', style: 'text-align: right; color: #777'},
+			{fieldname: 'currency', width: '0%', label: 'Currency', 
+				style: 'display: hidden'},
+			{fieldname: 'grand_total', width: '35%', label: 'Grand Total', 
+				type: 'Currency', style: 'text-align: right'},
+		]);
 }
