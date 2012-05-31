@@ -80,15 +80,6 @@ cur_frm.fields_dict['item_group'].get_query = function(doc,cdt,cdn) {
   return 'SELECT `tabItem Group`.`name`,`tabItem Group`.`parent_item_group` FROM `tabItem Group` WHERE `tabItem Group`.`is_group` = "No" AND `tabItem Group`.`docstatus`!= 2 AND `tabItem Group`.%(key)s LIKE "%s"  ORDER BY  `tabItem Group`.`name` ASC LIMIT 50'
 }
 
-cur_frm.cscript.IGHelp = function(doc,dt,dn){
-  var call_back = function(){
-    var sb_obj = new SalesBrowser();
-    sb_obj.set_val('Item Group');
-
-  }
-  loadpage('Sales Browser',call_back);
-}
-
 // for description from attachment
 // takes the first attachment and creates
 // a table with both image and attachment in HTML

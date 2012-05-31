@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-03-27 14:36:25',
+		'creation': '2012-04-13 11:56:32',
 		'docstatus': 0,
-		'modified': '2012-03-27 18:50:08',
+		'modified': '2012-05-31 11:39:33',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -27,7 +27,7 @@
 		'section_style': u'Simple',
 		'server_code_error': u' ',
 		'show_in_menu': 0,
-		'version': 87
+		'version': 1
 	},
 
 	# These values are common for all DocField
@@ -59,62 +59,62 @@
 
 	# DocPerm
 	{
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Sales Manager',
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Sales Manager',
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Sales Master Manager',
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Sales User',
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Sales User',
+		'write': 0
+	},
+
+	# DocPerm
+	{
 		'cancel': 1,
 		'create': 1,
 		'doctype': u'DocPerm',
 		'permlevel': 0,
 		'role': u'Sales Master Manager',
 		'write': 1
-	},
-
-	# DocPerm
-	{
-		'cancel': 0,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Sales Manager',
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'cancel': 0,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Sales Manager',
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'cancel': 0,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Sales Master Manager',
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'cancel': 0,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Sales User',
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'cancel': 0,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Sales User',
-		'write': 0
 	},
 
 	# DocField
@@ -176,7 +176,7 @@
 		'fieldtype': u'HTML',
 		'label': u'TerritoryHelp',
 		'oldfieldtype': u'HTML',
-		'options': u'<a href="javascript:cur_frm.cscript.TerritoryHelp();">To manage Territory, click here</a>',
+		'options': u'<a href="#!Sales Browser/Territory">To manage Territories, click here</a>',
 		'permlevel': 0
 	},
 

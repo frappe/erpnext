@@ -38,15 +38,6 @@ cur_frm.cscript.country = function(doc, cdt, cdn) {
   );
 }
 
-cur_frm.cscript.TreePage = function(nm){
-  var call_back = function(){
-    var sb_obj = new SalesBrowser();        
-    sb_obj.set_val(nm);
-
-  }
-  loadpage('Sales Browser',call_back);
-
-}
 
 //get query select sales person
 cur_frm.fields_dict['parent_sales_person'].get_query = function(doc,cdt,cdn) {

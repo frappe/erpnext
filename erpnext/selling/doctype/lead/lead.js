@@ -22,7 +22,7 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
   if(user =='Guest'){
     hide_field(['status', 'naming_series', 'order_lost_reason',
 	'customer', 'rating', 'fax', 'website', 'territory',
-	'TerritoryHelp', 'address_line1', 'address_line2', 'city', 'state',
+	'address_line1', 'address_line2', 'city', 'state',
 	'country', 'pincode', 'address', 'lead_owner', 'market_segment',
 	'industry', 'campaign_name', 'interested_in', 'company',
 	'fiscal_year', 'contact_by', 'contact_date', 'last_contact_date',
@@ -62,14 +62,6 @@ cur_frm.cscript.status = function(doc, cdt, cdn){
   cur_frm.cscript.refresh(doc, cdt, cdn);
 }
 
-cur_frm.cscript.TerritoryHelp = function(doc,dt,dn){
-  var call_back = function(){
-    var sb_obj = new SalesBrowser();        
-    sb_obj.set_val('Territory');
-  }
-
-  loadpage('Sales Browser',call_back);
-}
 
 //Trigger in Item Table
 //===================================
