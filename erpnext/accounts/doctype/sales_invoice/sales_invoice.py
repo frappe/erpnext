@@ -508,29 +508,16 @@ class DocType(TransactionBase):
 					msgprint("Delivery Note : "+ cstr(d.delivery_note) +" is not submitted")
 					raise Exception , "Validation Error."
 
+
 	#Set Actual Qty based on item code and warehouse
 	#------------------------------------------------------
 	def set_actual_qty(self):
-		for d in getlist(self.doclist, 'delivery_note_details'):
-			if d.item_code and d.warehouse:
-				actual_qty = webnotes.conn.sql("select actual_qty from `tabBin` where item_code = '%s' and warehouse = '%s'" % (d.item_code, d.warehouse))
-				d.actual_qty = actual_qty and flt(actual_qty[0][0]) or 0					
-
-	# Check qty in stock depends on item code and warehouse
-	#-------------------------------------------------------
-	def check_qty_in_stock(self):
 		for d in getlist(self.doclist, 'entries'):
-			is_stock_item = webnotes.conn.sql("select is_stock_item from `tabItem` where name = '%s'" % d.item_code)[0][0]
-			actual_qty = 0
 			if d.item_code and d.warehouse:
 				actual_qty = webnotes.conn.sql("select actual_qty from `tabBin` where item_code = '%s' and warehouse = '%s'" % (d.item_code, d.warehouse))
-				actual_qty = actual_qty and flt(actual_qty[0][0]) or 0
+				d.actual_qty = actual_qty and flt(actual_qty[0][0]) or 0
 
-			if is_stock_item == 'Yes' and flt(d.qty) > flt(actual_qty):
-				msgprint("For Item: " + cstr(d.item_code) + " at Warehouse: " + cstr(d.warehouse) + " Quantity: " + cstr(d.qty) +" is not Available. (Must be less than or equal to " + cstr(actual_qty) + " )")
-				raise Exception, "Validation Error"
 
-	
 
 	# ********************** Make Stock Entry ************************************
 	def make_sl_entry(self, d, wh, qty, in_value, update_stock):
@@ -569,7 +556,6 @@ class DocType(TransactionBase):
 
 	#-------------------POS Stock Updatation Part----------------------------------------------
 	def pos_update_stock(self):
-		self.check_qty_in_stock()	
 		self.update_stock_ledger(update_stock = 1)
 	
 	# ********** Get Actual Qty of item in warehouse selected *************
