@@ -421,8 +421,8 @@ class DocType(TransactionBase):
 				raise Exception
 
 	def validate_pos(self):
-		if not self.doc.cash_bank_account:
-			msgprint("Cash/Bank Account is mandatory for POS entry")
+		if not self.doc.cash_bank_account and flt(self.doc.paid_amount):
+			msgprint("Cash/Bank Account is mandatory for POS, for making payment entry")
 			raise Exception
 		if (flt(self.doc.paid_amount) + flt(self.doc.write_off_amount) - round(flt(self.doc.grand_total), 2))>0.001:
 			msgprint("(Paid amount + Write Off Amount) can not be greater than Grand Total")
@@ -676,8 +676,14 @@ class DocType(TransactionBase):
 					if not d.warehouse:
 						d.warehouse = cstr(w)
 
-			if flt(self.doc.paid_amount) == 0: 
-				webnotes.conn.set(self.doc,'paid_amount',(flt(self.doc.grand_total) - flt(self.doc.write_off_amount)))
+			if flt(self.doc.paid_amount) == 0:
+				if self.doc.cash_bank_account: 
+					webnotes.conn.set(self.doc, 'paid_amount', 
+						(flt(self.doc.grand_total) - flt(self.doc.write_off_amount)))
+				else:
+					# show message that the amount is not paid
+					webnotes.conn.set(self.doc,'paid_amount',0)
+					webnotes.msgprint("Note: Payment Entry not created since 'Cash/Bank Account' was not specified.")
 
 		else:
 			webnotes.conn.set(self.doc,'paid_amount',0)

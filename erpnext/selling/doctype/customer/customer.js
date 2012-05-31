@@ -141,114 +141,64 @@ cur_frm.fields_dict['lead_name'].get_query = function(doc,dt,dn){
 	return 'SELECT `tabLead`.`name` FROM `tabLead` WHERE `tabLead`.`status`!="Converted" AND `tabLead`.%(key)s LIKE "%s" ORDER BY `tabLead`.`name` ASC LIMIT 50';	
 }
 
-/* ********************************* transaction history ************************************** */
 
-cur_frm.render_transaction_history_row = function(data) {
-	data.grand_total = fmt_money(data.grand_total);
-	data.modified = wn.datetime.only_date(data.modified);
-	return repl('\
-		<table><tr> \
-			<td width="30%" title="Id"> \
-				<a href="#!Form/%(doctype)s/%(name)s">%(name)s</a> \
-			</td> \
-			<td width="20%" title="Status">%(status)s</td> \
-			<td width="30%" title="Grand Total" style="text-align: right;"> \
-				%(currency)s %(grand_total)s \
-			</td> \
-			<td width="20%" title="Modified Date" style="text-align: right;"> \
-				%(modified)s \
-			</td> \
-		</tr></table>', data);
+// Transaction History
+// functions called by these functions are defined in contact_control.js
+cur_frm.cscript.make_qtn_list = function(parent, doc) {
+	cur_frm.cscript.render_transaction_history(parent, doc, 'Quotation', 
+		[
+			{fieldname: 'name', width: '28%', label: 'Id', type: 'Link'},
+			{fieldname: 'status', width: '25%', label: 'Status', type: 'Data'},
+			{fieldname: 'modified', width: '12%', label: 'Last Modified On', 
+				type: 'Date', style: 'text-align: right; color: #777'},
+			{fieldname: 'currency', width: '0%', label: 'Currency', 
+				style: 'display: hidden'},
+			{fieldname: 'grand_total', width: '35%', label: 'Grand Total', 
+				type: 'Currency', style: 'text-align: right'},
+		]);
 }
 
-cur_frm.get_query_transaction_history = function(args) {
-	return repl("\
-		select name, status, modified, currency, \
-			grand_total \
-		from `tab%(doctype)s` \
-		where customer='%(customer)s' \
-		order by modified desc", args);
+cur_frm.cscript.make_so_list = function(parent, doc) {
+	cur_frm.cscript.render_transaction_history(parent, doc, 'Sales Order', 
+		[
+			{fieldname: 'name', width: '28%', label: 'Id', type: 'Link'},
+			{fieldname: 'status', width: '25%', label: 'Status', type: 'Data'},
+			{fieldname: 'modified', width: '12%', label: 'Last Modified On', 
+				type: 'Date', style: 'text-align: right; color: #777'},
+			{fieldname: 'currency', width: '0%', label: 'Currency', 
+				style: 'display: hidden'},
+			{fieldname: 'grand_total', width: '35%', label: 'Grand Total', 
+				type: 'Currency', style: 'text-align: right'},
+		]);
 }
 
-cur_frm.render_transaction_history = function(parent, doc, doctype, get_query, render_row) {
-	$(parent).css({
-		'padding-top': '10px',
-	});
-	
-	cur_frm.transaction_list = new wn.ui.Listing({
-		parent: parent,
-		page_length: 10,
-		get_query: get_query || function() {
-			return cur_frm.get_query_transaction_history({
-				customer: doc.name,
-				doctype: doctype,
-			});
-		},
-		as_dict: 1,
-		no_result_message: repl('No %(doctype)s created for this customer', { doctype: doctype }),
-		render_row: function(wrapper, data) {
-			data.doctype = doctype;
-			render_html = render_row
-						? render_row(data)
-						: cur_frm.render_transaction_history_row(data);
-			$(wrapper).html(render_html);
-		},
-	});
-	
-	cur_frm.transaction_list.run();
-}
-// --------------------
-// make quotation list
-// --------------------
-cur_frm.cscript.make_qtn_list = function(parent,doc){
-	cur_frm.render_transaction_history(parent, doc, 'Quotation');
-}
-
-// -------------
-// make so list
-// -------------
-cur_frm.cscript.make_so_list = function(parent,doc){
-	cur_frm.render_transaction_history(parent, doc, 'Sales Order');
+cur_frm.cscript.make_dn_list = function(parent, doc) {
+	cur_frm.cscript.render_transaction_history(parent, doc, 'Delivery Note', 
+		[
+			{fieldname: 'name', width: '28%', label: 'Id', type: 'Link'},
+			{fieldname: 'status', width: '25%', label: 'Status', type: 'Data'},
+			{fieldname: 'modified', width: '12%', label: 'Last Modified On', 
+				type: 'Date', style: 'text-align: right; color: #777'},
+			{fieldname: 'currency', width: '0%', label: 'Currency', 
+				style: 'display: hidden'},
+			{fieldname: 'grand_total', width: '35%', label: 'Grand Total', 
+				type: 'Currency', style: 'text-align: right'},
+		]);
 }
 
 
-// -------------
-// make dn list
-// -------------
-cur_frm.cscript.make_dn_list = function(parent,doc){
-	cur_frm.render_transaction_history(parent, doc, 'Delivery Note');
-}
-
-// -------------
-// make si list
-// -------------
-cur_frm.cscript.make_si_list = function(parent,doc){
-	cur_frm.render_transaction_history(parent, doc, 'Sales Invoice', function() {
-		return repl("\
-			select name, outstanding_amount, modified, currency, \
-				grand_total \
-			from `tab%(doctype)s` \
-			where customer='%(customer)s' \
-			order by modified desc", { doctype: 'Sales Invoice', customer: doc.name });
-	}, function(data) {
-		data.grand_total = fmt_money(data.grand_total);
-		data.modified = wn.datetime.only_date(data.modified);
-		data.outstanding_amount = fmt_money(data.outstanding_amount);
-		return repl('\
-			<table><tr> \
-				<td width="30%" title="Id"> \
-					<a href="#!Form/%(doctype)s/%(name)s">%(name)s</a> \
-				</td> \
-				<td width="20%" title="Outstanding Amount" \
-					style="text-align: right; color: #777"> \
-					%(currency)s %(outstanding_amount)s \
-				</td>\
-				<td width="30%" title="Grand Total" style="text-align: right;"> \
-					%(currency)s %(grand_total)s\
-				</td> \
-				<td width="20%" title="Modified Date" style="text-align: right;"> \
-					%(modified)s \
-				</td> \
-			</tr></table>', data);
-	});
+cur_frm.cscript.make_si_list = function(parent, doc) {
+	cur_frm.cscript.render_transaction_history(parent, doc, 'Sales Invoice', 
+		[
+			{fieldname: 'name', width: '28%', label: 'Id', type: 'Link'},
+			{fieldname: 'outstanding_amount', width: '25%',
+				label: 'Outstanding Amount',
+				type: 'Currency', style: 'text-align: right; color: #777'},
+			{fieldname: 'modified', width: '12%', label: 'Last Modified On', 
+				type: 'Date', style: 'text-align: right; color: #777'},
+			{fieldname: 'currency', width: '0%', label: 'Currency', 
+				style: 'display: hidden'},
+			{fieldname: 'grand_total', width: '35%', label: 'Grand Total', 
+				type: 'Currency', style: 'text-align: right'},
+		]);
 }

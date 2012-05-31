@@ -102,7 +102,7 @@ class DocType(TransactionBase):
 
       scheduled_date =sql("select scheduled_date from `tabMaintenance Schedule Detail` \
         where incharge_name='%s' and item_code='%s' and parent='%s' " %(d.incharge_name, \
-        d.item_code, self.doc.name), as_dict=1, debug=1)
+        d.item_code, self.doc.name), as_dict=1)
 
       for key in scheduled_date:
         if email_map[d.incharge_name]:

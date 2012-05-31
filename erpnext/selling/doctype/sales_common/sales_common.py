@@ -207,20 +207,31 @@ class DocType(TransactionBase):
 			if default: add_cond = 'ifnull(t2.is_default,0) = 1'
 			else: add_cond = 't1.parent = "'+cstr(obj.doc.charge)+'"'
 			idx = 0
-			other_charge = webnotes.conn.sql("select t1.charge_type,t1.row_id,t1.description,t1.account_head,t1.rate,t1.tax_amount,t1.included_in_print_rate, t1.cost_center_other_charges from `tabSales Taxes and Charges` t1, `tabSales Taxes and Charges Master` t2 where t1.parent = t2.name and t2.company = '%s' and %s order by t1.idx" % (obj.doc.company, add_cond), as_dict = 1)
+			other_charge = webnotes.conn.sql("""\
+				select t1.*
+				from
+					`tabSales Taxes and Charges` t1,
+					`tabSales Taxes and Charges Master` t2
+				where
+					t1.parent = t2.name and
+					t2.company = '%s' and
+					%s
+				order by t1.idx""" % (obj.doc.company, add_cond), as_dict=1)
+			from webnotes.model import default_fields
 			for other in other_charge:
-				d =	addchild(obj.doc, 'other_charges', 'Sales Taxes and Charges', 1, obj.doclist)
-				d.charge_type = other['charge_type']
-				d.row_id = other['row_id']
-				d.description = other['description']
-				d.account_head = other['account_head']
-				d.cost_center_other_charges = other['cost_center_other_charges']
-				d.rate = flt(other['rate'])
-				d.tax_amount = flt(other['tax_amount'])
-				d.included_in_print_rate = cint(other['included_in_print_rate'])
+				# remove default fields like parent, parenttype etc.
+				# from query results
+				for field in default_fields:
+					if field in other: del other[field]
+
+				d = addchild(obj.doc, 'other_charges', 'Sales Taxes and Charges', 1,
+						obj.doclist)
+				d.fields.update(other)
+				d.rate = flt(d.rate)
+				d.tax_amount = flt(d.tax_rate)
+				d.included_in_print_rate = cint(d.included_in_print_rate)
 				d.idx = idx
 				idx += 1
-			
 			
 	# Get TERMS AND CONDITIONS
 	# =======================================================================================
@@ -352,8 +363,10 @@ class DocType(TransactionBase):
 			
 			if self.has_sales_bom(d.item_code):
 				for p in getlist(obj.doclist, 'packing_details'):
-					if p.parent_item == d.item_code:
-						il.append([warehouse, p.item_code, flt(p.qty)*qty, flt(p.qty)* reserved_qty, p.uom, p.batch_no, p.serial_no])
+					#if p.parent_item == d.item_code: -- this fails when item with same name appears more than once in delivery note item table
+					if p.parent_detail_docname == d.name:
+						# the packing details table's qty is already multiplied with parent's qty
+						il.append([warehouse, p.item_code, flt(p.qty), (flt(p.qty)/qty)*(reserved_qty), p.uom, p.batch_no, p.serial_no])
 			else:
 				il.append([warehouse, d.item_code, qty, reserved_qty, d.stock_uom, d.batch_no, d.serial_no])
 		return il
@@ -424,6 +437,10 @@ class DocType(TransactionBase):
 			pi.serial_no = cstr(line.serial_no)
 			pi.batch_no = cstr(line.batch_no)
 		pi.idx = self.packing_list_idx
+		
+		# has to be saved, since this function is called on_update of delivery note
+		pi.save()
+		
 		self.packing_list_idx += 1
 
 

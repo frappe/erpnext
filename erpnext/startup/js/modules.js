@@ -61,22 +61,40 @@ erpnext.module_page.hide_links = function(wrapper) {
 
 erpnext.module_page.make_list = function(module, wrapper) {
 	// make project listing
-	wrapper.list = new wn.ui.Listing({
-		parent: $(wrapper).find('.reports-list').get(0),
-		method: 'utilities.get_report_list',
+	var $w = $(wrapper).find('.reports-list');
+	var $parent1 = $('<div style="width: 45%; float: left; margin-right: 4.5%"></div>').appendTo($w);
+	var $parent2 = $('<div style="width: 45%; float: left;"></div>').appendTo($w);
+
+	wrapper.list1 = new wn.ui.Listing({
+		parent: $parent1,
+		method: 'utilities.get_sc_list',
 		render_row: function(row, data) {
 			if(!data.parent_doc_type) data.parent_doc_type = data.doc_type;
 			$(row).html(repl('<a href="#!Report/%(doc_type)s/%(criteria_name)s" \
 				data-doctype="%(parent_doc_type)s">\
 				%(criteria_name)s</a>', data))
 		},
-		args: {
-			module: module
-		},
+		args: { module: module },
 		no_refresh: true,
 		callback: function(r) {
-			erpnext.module_page.hide_links(wrapper)
+			erpnext.module_page.hide_links($parent1)
 		}
 	});
-	wrapper.list.run();	
+	wrapper.list1.run();	
+
+	wrapper.list2 = new wn.ui.Listing({
+		parent: $parent2,
+		method: 'utilities.get_report_list',
+		render_row: function(row, data) {
+			$(row).html(repl('<a href="#!Report2/%(ref_doctype)s/%(name)s" \
+				data-doctype="%(ref_doctype)s">\
+				%(name)s</a>', data))
+		},
+		args: { module: module },
+		no_refresh: true,
+		callback: function(r) {
+			erpnext.module_page.hide_links($parent2)
+		}
+	});
+	wrapper.list2.run();
 }

@@ -228,14 +228,14 @@ patch_list = [
 		'description': 'SO-RV duplicate mapper entry removal'
 	},
 	{
-		'patch_module': 'patches.jan_mar_2012',
-		'patch_file': 'sync_ref_db',
-		'description': 'Deletes non required doctypes'
-	},
-	{
 		'patch_module': 'patches.mar_2012',
 		'patch_file': 'clean_property_setter',
 		'description': 'Patch related to property setter cleanup' 
+	},
+	{
+		'patch_module': 'patches.jan_mar_2012',
+		'patch_file': 'sync_ref_db',
+		'description': 'Deletes non required doctypes'
 	},
 	{
 		'patch_module': 'patches.april_2012',
@@ -392,5 +392,19 @@ patch_list = [
 		'patch_file': 'create_report_manager_role',
 		'description': 'Create report manager role if not exists'
 	},
-	
+	{
+		'patch_module': 'patches.may_2012',
+		'patch_file': 'reload_customer_address_contact',
+		'description': 'Reload report customer address contact'
+	},
+	{
+		'patch_module': 'patches.may_2012',
+		'patch_file': 'profile_perm_patch',
+		'description': 'Make profile readonly for role All'
+	},
+	{
+		'patch_module': 'patches.may_2012',
+		'patch_file': 'remove_euro_currency',
+		'description': 'Remove EURO currency and replace with EUR'
+	},
 ]
