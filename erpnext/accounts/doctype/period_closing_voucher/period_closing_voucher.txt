@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-03-27 14:35:46',
+		'creation': '2012-04-13 11:56:17',
 		'docstatus': 0,
-		'modified': '2012-03-27 14:45:49',
+		'modified': '2012-05-31 11:38:17',
 		'modified_by': u'Administrator',
 		'owner': u'jai@webnotestech.com'
 	},
@@ -24,7 +24,7 @@
 		'section_style': u'Simple',
 		'server_code_error': u' ',
 		'show_in_menu': 0,
-		'version': 123
+		'version': 1
 	},
 
 	# These values are common for all DocField
@@ -96,6 +96,20 @@
 
 	# DocPerm
 	{
+		'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'System Manager'
+	},
+
+	# DocPerm
+	{
+		'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Accounts Manager'
+	},
+
+	# DocPerm
+	{
 		'amend': 1,
 		'cancel': 1,
 		'create': 1,
@@ -115,20 +129,6 @@
 		'role': u'Accounts Manager',
 		'submit': 1,
 		'write': 1
-	},
-
-	# DocPerm
-	{
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'System Manager'
-	},
-
-	# DocPerm
-	{
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Accounts Manager'
 	},
 
 	# DocField
@@ -236,6 +236,17 @@
 		'permlevel': 0,
 		'reqd': 1,
 		'trigger': u'Client'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'coa_help',
+		'fieldtype': u'HTML',
+		'label': u'CoA Help',
+		'oldfieldtype': u'HTML',
+		'options': u'<a href="#!Accounts Browser/Account">To manage Account Head, click here</a>',
+		'permlevel': 0
 	},
 
 	# DocField

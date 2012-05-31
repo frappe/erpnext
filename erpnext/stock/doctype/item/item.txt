@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-04-02 16:02:29',
+		'creation': '2012-04-30 18:33:53',
 		'docstatus': 0,
-		'modified': '2012-04-30 14:08:08',
+		'modified': '2012-05-31 11:18:10',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -216,7 +216,7 @@
 		'fieldtype': u'HTML',
 		'label': u'IGHelp',
 		'oldfieldtype': u'HTML',
-		'options': u'<a href="javascript:cur_frm.cscript.IGHelp();">To manage Item Group, click here</a>',
+		'options': u'<a href="#!Sales Browser/Item Group">To manage Item Groups, click here</a>',
 		'permlevel': 0
 	},
 
