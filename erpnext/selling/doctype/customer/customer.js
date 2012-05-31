@@ -15,6 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 wn.require('erpnext/setup/doctype/contact_control/contact_control.js');
+wn.require('erpnext/support/doctype/communication/communication.js');
 
 /* ********************************* onload ********************************************* */
 
@@ -31,6 +32,8 @@ cur_frm.cscript.onload = function(doc,dt,dn){
   	//cur_frm.cscript.make_sl_body();
 
 	cur_frm.cscript.load_defaults(doc, dt, dn);
+	
+	cur_frm.cscript.make_communication_body();
 }
 
 cur_frm.cscript.load_defaults = function(doc, dt, dn) {
@@ -62,6 +65,7 @@ cur_frm.cscript.refresh = function(doc,dt,dn) {
 		cur_frm.cscript.make_address(doc,dt,dn);
 		cur_frm.cscript.make_contact(doc,dt,dn);
 		cur_frm.cscript.make_history(doc,dt,dn);
+		cur_frm.cscript.render_communication_list(doc, cdt, cdn);
 		//cur_frm.cscript.make_shipping_address(doc,dt,dn);
 	}
 }
@@ -150,61 +154,83 @@ cur_frm.fields_dict['lead_name'].get_query = function(doc,dt,dn){
 
 
 // Transaction History
-// functions called by these functions are defined in contact_control.js
+// functions called by these functions are defined in communication.js
 cur_frm.cscript.make_qtn_list = function(parent, doc) {
-	cur_frm.cscript.render_transaction_history(parent, doc, 'Quotation', 
-		[
-			{fieldname: 'name', width: '28%', label: 'Id', type: 'Link'},
-			{fieldname: 'status', width: '25%', label: 'Status', type: 'Data'},
-			{fieldname: 'modified', width: '12%', label: 'Last Modified On', 
-				type: 'Date', style: 'text-align: right; color: #777'},
-			{fieldname: 'currency', width: '0%', label: 'Currency', 
-				style: 'display: hidden'},
-			{fieldname: 'grand_total', width: '35%', label: 'Grand Total', 
-				type: 'Currency', style: 'text-align: right'},
-		]);
+	cur_frm.cscript.get_common_list_view(parent, doc, 'Quotation');
 }
 
 cur_frm.cscript.make_so_list = function(parent, doc) {
-	cur_frm.cscript.render_transaction_history(parent, doc, 'Sales Order', 
-		[
-			{fieldname: 'name', width: '28%', label: 'Id', type: 'Link'},
-			{fieldname: 'status', width: '25%', label: 'Status', type: 'Data'},
-			{fieldname: 'modified', width: '12%', label: 'Last Modified On', 
-				type: 'Date', style: 'text-align: right; color: #777'},
-			{fieldname: 'currency', width: '0%', label: 'Currency', 
-				style: 'display: hidden'},
-			{fieldname: 'grand_total', width: '35%', label: 'Grand Total', 
-				type: 'Currency', style: 'text-align: right'},
-		]);
+	cur_frm.cscript.get_common_list_view(parent, doc, 'Sales Order');
 }
 
 cur_frm.cscript.make_dn_list = function(parent, doc) {
-	cur_frm.cscript.render_transaction_history(parent, doc, 'Delivery Note', 
-		[
-			{fieldname: 'name', width: '28%', label: 'Id', type: 'Link'},
-			{fieldname: 'status', width: '25%', label: 'Status', type: 'Data'},
-			{fieldname: 'modified', width: '12%', label: 'Last Modified On', 
-				type: 'Date', style: 'text-align: right; color: #777'},
-			{fieldname: 'currency', width: '0%', label: 'Currency', 
-				style: 'display: hidden'},
-			{fieldname: 'grand_total', width: '35%', label: 'Grand Total', 
-				type: 'Currency', style: 'text-align: right'},
-		]);
+	cur_frm.cscript.get_common_list_view(parent, doc, 'Delivery Note');
+}
+
+cur_frm.cscript.get_common_list_view = function(parent, doc, doctype) {
+	var ListView = wn.views.ListView.extend({
+		init: function(doclistview) {
+			this._super(doclistview);
+			this.fields = this.fields.concat([
+				"`tab" + doctype + "`.status",
+				"`tab" + doctype + "`.currency",
+				"ifnull(`tab" + doctype + "`.grand_total_export, 0) as grand_total_export",
+				
+			]);
+		},
+
+		prepare_data: function(data) {
+			this._super(data);
+			data.grand_total_export = data.currency + " " + fmt_money(data.grand_total_export)
+		},
+
+		columns: [
+			{width: '3%', content: 'docstatus'},
+			{width: '25%', content: 'name'},
+			{width: '25%', content: 'status'},
+			{width: '35%', content: 'grand_total_export', css: {'text-align': 'right'}},			
+			{width: '12%', content:'modified', css: {'text-align': 'right'}}		
+		],
+	});
+	
+	cur_frm.cscript.render_list(doc, doctype, parent, ListView);
 }
 
 cur_frm.cscript.make_si_list = function(parent, doc) {
-	cur_frm.cscript.render_transaction_history(parent, doc, 'Sales Invoice', 
-		[
-			{fieldname: 'name', width: '28%', label: 'Id', type: 'Link'},
-			{fieldname: 'outstanding_amount', width: '25%',
-				label: 'Outstanding Amount',
-				type: 'Currency', style: 'text-align: right; color: #777'},
-			{fieldname: 'modified', width: '12%', label: 'Last Modified On', 
-				type: 'Date', style: 'text-align: right; color: #777'},
-			{fieldname: 'currency', width: '0%', label: 'Currency', 
-				style: 'display: hidden'},
-			{fieldname: 'grand_total', width: '35%', label: 'Grand Total', 
-				type: 'Currency', style: 'text-align: right'},
-		]);
+	var ListView = wn.views.ListView.extend({
+		init: function(doclistview) {
+			this._super(doclistview);
+			this.fields = this.fields.concat([
+				"ifnull(`tabSales Invoice`.outstanding_amount, 0) as outstanding_amount",
+				"`tabSales Invoice`.currency",
+				"ifnull(`tabSales Invoice`.conversion_rate, 0) as conversion_rate",
+				"ifnull(`tabSales Invoice`.grand_total_export, 0) as grand_total_export",
+				
+			]);
+		},
+
+		prepare_data: function(data) {
+			this._super(data);
+			if (data.outstanding_amount) {
+				data.outstanding_amount = data.currency + " " + 
+					fmt_money(flt(data.outstanding_amount)/flt(data.conversion_rate)) + 
+					" [outstanding]";
+				
+			} else {
+				data.outstanding_amount = '';
+			}
+			data.grand_total_export = data.currency + " " + fmt_money(data.grand_total_export);
+		},
+
+		columns: [
+			{width: '3%', content: 'docstatus'},
+			{width: '25%', content: 'name'},
+			{width: '25%', content: 'outstanding_amount',
+				css: {'text-align': 'right', 'color': '#777'}},
+			{width: '35%', content: 'grand_total_export', css: {'text-align': 'right'}},
+			{width: '12%', content:'modified', css: {'text-align': 'right'}}
+		],
+	});
+	
+	cur_frm.cscript.render_list(doc, 'Sales Invoice', parent, ListView);
 }

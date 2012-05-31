@@ -15,6 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 wn.require('erpnext/setup/doctype/contact_control/contact_control.js');
+wn.require('erpnext/support/doctype/communication/communication.js');
 
 cur_frm.cscript.onload = function(doc,dt,dn){
 
@@ -28,6 +29,7 @@ cur_frm.cscript.onload = function(doc,dt,dn){
 	// make contact, history list body
 	//cur_frm.cscript.make_cl_body();
 	cur_frm.cscript.make_hl_body();
+	cur_frm.cscript.make_communication_body();
 }
 
 cur_frm.cscript.refresh = function(doc,dt,dn) {
@@ -44,7 +46,8 @@ cur_frm.cscript.refresh = function(doc,dt,dn) {
 		// make lists
 		cur_frm.cscript.make_address(doc,dt,dn);
 		cur_frm.cscript.make_contact(doc,dt,dn);
-		cur_frm.cscript.make_history(doc,dt,dn);  	
+		cur_frm.cscript.render_communication_list(doc, cdt, cdn);
+		cur_frm.cscript.make_history(doc,dt,dn);
   }
 }
 
@@ -109,44 +112,88 @@ cur_frm.cscript.make_contact = function() {
 // Transaction History
 
 cur_frm.cscript.make_po_list = function(parent, doc) {
-	cur_frm.cscript.render_transaction_history(parent, doc, 'Purchase Order', 
-		[
-			{fieldname: 'name', width: '28%', label: 'Id', type: 'Link'},
-			{fieldname: 'status', width: '25%', label: 'Status', type: 'Data'},
-			{fieldname: 'modified', width: '12%', label: 'Last Modified On', 
-				type: 'Date', style: 'text-align: right; color: #777'},
-			{fieldname: 'currency', width: '0%', label: 'Currency', 
-				style: 'display: hidden'},
-			{fieldname: 'grand_total', width: '35%', label: 'Grand Total', 
-				type: 'Currency', style: 'text-align: right'},
-		]);
+	var ListView = wn.views.ListView.extend({
+		init: function(doclistview) {
+			this._super(doclistview);
+			this.fields = this.fields.concat([
+				"`tabPurchase Order`.status",
+				"`tabPurchase Order`.currency",
+				"ifnull(`tabPurchase Order`.grand_total_import, 0) as grand_total_import",
+				
+			]);
+		},
+
+		prepare_data: function(data) {
+			this._super(data);
+			data.grand_total_import = data.currency + " " + fmt_money(data.grand_total_import);
+		},
+
+		columns: [
+			{width: '3%', content: 'docstatus'},
+			{width: '20%', content: 'name'},
+			{width: '30%', content: 'status',
+				css: {'text-align': 'right', 'color': '#777'}},
+			{width: '35%', content: 'grand_total_import', css: {'text-align': 'right'}},
+			{width: '12%', content:'modified', css: {'text-align': 'right'}}
+		],
+	});
+	
+	cur_frm.cscript.render_list(doc, 'Purchase Order', parent, ListView);
 }
 
 cur_frm.cscript.make_pr_list = function(parent, doc) {
-	cur_frm.cscript.render_transaction_history(parent, doc, 'Purchase Receipt', 
-		[
-			{fieldname: 'name', width: '28%', label: 'Id', type: 'Link'},
-			{fieldname: 'status', width: '15%', label: 'Status', type: 'Data'},
-			{fieldname: 'per_billed', width: '10%', label: '% Billed', 
-				type: 'Percentage', style: 'text-align: right'},
-			{fieldname: 'modified', width: '12%', label: 'Last Modified On', 
-				type: 'Date', style: 'text-align: right; color: #777'},
-			{fieldname: 'currency', width: '0%', label: 'Currency', 
-				style: 'display: hidden'},
-			{fieldname: 'grand_total', width: '35%', label: 'Grand Total', 
-				type: 'Currency', style: 'text-align: right'},
-		]);
+	var ListView = wn.views.ListView.extend({
+		init: function(doclistview) {
+			this._super(doclistview);
+			this.fields = this.fields.concat([
+				"`tabPurchase Receipt`.status",
+				"`tabPurchase Receipt`.currency",
+				"ifnull(`tabPurchase Receipt`.grand_total_import, 0) as grand_total_import",
+				"ifnull(`tabPurchase Receipt`.per_billed, 0) as per_billed",
+			]);
+		},
+
+		prepare_data: function(data) {
+			this._super(data);
+			data.grand_total_import = data.currency + " " + fmt_money(data.grand_total_import);
+		},
+
+		columns: [
+			{width: '3%', content: 'docstatus'},
+			{width: '20%', content: 'name'},
+			{width: '20%', content: 'status',
+				css: {'text-align': 'right', 'color': '#777'}},
+			{width: '35%', content: 'grand_total_import', css: {'text-align': 'right'}},
+			{width: '10%', content: 'per_billed', type: 'bar-graph', label: 'Billed'},
+			{width: '12%', content:'modified', css: {'text-align': 'right'}}
+		],
+	});
+	
+	cur_frm.cscript.render_list(doc, 'Purchase Receipt', parent, ListView);
 }
 
 cur_frm.cscript.make_pi_list = function(parent, doc) {
-	cur_frm.cscript.render_transaction_history(parent, doc, 'Purchase Invoice', 
-		[
-			{fieldname: 'name', width: '30%', label: 'Id', type: 'Link'},
-			{fieldname: 'modified', width: '35%', label: 'Last Modified On', 
-				type: 'Date', style: 'text-align: right; color: #777'},
-			{fieldname: 'currency', width: '0%', label: 'Currency', 
-				style: 'display: hidden'},
-			{fieldname: 'grand_total', width: '35%', label: 'Grand Total', 
-				type: 'Currency', style: 'text-align: right'},
-		]);
+	var ListView = wn.views.ListView.extend({
+		init: function(doclistview) {
+			this._super(doclistview);
+			this.fields = this.fields.concat([
+				"`tabPurchase Invoice`.currency",
+				"ifnull(`tabPurchase Invoice`.grand_total_import, 0) as grand_total_import",
+			]);
+		},
+
+		prepare_data: function(data) {
+			this._super(data);
+			data.grand_total_import = data.currency + " " + fmt_money(data.grand_total_import);
+		},
+
+		columns: [
+			{width: '3%', content: 'docstatus'},
+			{width: '30%', content: 'name'},
+			{width: '55%', content: 'grand_total_import', css: {'text-align': 'right'}},
+			{width: '12%', content:'modified', css: {'text-align': 'right'}}
+		],
+	});
+	
+	cur_frm.cscript.render_list(doc, 'Purchase Invoice', parent, ListView);
 }

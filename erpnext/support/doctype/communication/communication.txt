@@ -1,0 +1,396 @@
+# DocType, Communication
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2012-05-29 16:56:41',
+		'docstatus': 0,
+		'modified': '2012-05-31 14:46:44',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
+	},
+
+	# These values are common for all DocType
+	{
+		'allow_attach': 1,
+		'description': u'Keep a track of all communications',
+		'doctype': 'DocType',
+		'module': u'Support',
+		'name': '__common__',
+		'version': 1
+	},
+
+	# These values are common for all DocField
+	{
+		'doctype': u'DocField',
+		'name': '__common__',
+		'parent': u'Communication',
+		'parentfield': u'fields',
+		'parenttype': u'DocType'
+	},
+
+	# These values are common for all DocPerm
+	{
+		'doctype': u'DocPerm',
+		'name': '__common__',
+		'parent': u'Communication',
+		'parentfield': u'permissions',
+		'parenttype': u'DocType',
+		'read': 1,
+		'write': 1
+	},
+
+	# DocType, Communication
+	{
+		'doctype': 'DocType',
+		'name': u'Communication'
+	},
+
+	# DocPerm
+	{
+		'create': 1,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Support Team'
+	},
+
+	# DocPerm
+	{
+		'create': 1,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Sales Manager'
+	},
+
+	# DocPerm
+	{
+		'create': 1,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Sales User'
+	},
+
+	# DocPerm
+	{
+		'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Sales Manager'
+	},
+
+	# DocPerm
+	{
+		'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Support Manager'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'basic_info',
+		'fieldtype': u'Section Break',
+		'label': u'Basic Info',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'colour': u'White:FFF',
+		'default': u'COMM-',
+		'doctype': u'DocField',
+		'fieldname': u'naming_series',
+		'fieldtype': u'Select',
+		'hidden': 1,
+		'label': u'Naming Series',
+		'options': u'COMM-',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'category',
+		'fieldtype': u'Select',
+		'label': u'Category',
+		'options': u'\nSales\nComplaint\nHelp\nSuggestion\nMiscellaneous',
+		'permlevel': 0,
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'action',
+		'fieldtype': u'Select',
+		'label': u'Action',
+		'options': u'\nCreated Opportunity\nSent Quotation\nCreated Support Ticket\nCreated Customer Issue\nNo Action',
+		'permlevel': 0,
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'column_break2',
+		'fieldtype': u'Column Break',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'subject',
+		'fieldtype': u'Small Text',
+		'label': u'Subject',
+		'permlevel': 0,
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'section_break1',
+		'fieldtype': u'Section Break',
+		'options': u'simple',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'content',
+		'fieldtype': u'Text Editor',
+		'label': u'Content',
+		'permlevel': 0,
+		'reqd': 0
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'additional_info',
+		'fieldtype': u'Section Break',
+		'label': u'Additional Info',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'column_break3',
+		'fieldtype': u'Column Break',
+		'label': u'Communication With / Related To',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'lead',
+		'fieldtype': u'Link',
+		'hidden': 0,
+		'label': u'Lead',
+		'options': u'Lead',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'contact',
+		'fieldtype': u'Link',
+		'label': u'Contact',
+		'options': u'Contact',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'customer',
+		'fieldtype': u'Link',
+		'label': u'Customer',
+		'options': u'Customer',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'supplier',
+		'fieldtype': u'Link',
+		'label': u'Supplier',
+		'options': u'Supplier',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'opportunity',
+		'fieldtype': u'Link',
+		'label': u'Opportunity',
+		'options': u'Opportunity',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'quotation',
+		'fieldtype': u'Link',
+		'label': u'Quotation',
+		'options': u'Quotation',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'support_ticket',
+		'fieldtype': u'Link',
+		'label': u'Support Ticket',
+		'options': u'Support Ticket',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'column_break1',
+		'fieldtype': u'Column Break',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'next_action',
+		'fieldtype': u'Select',
+		'label': u'Next Action',
+		'options': u'\nFollow Up\nCreate Opportunity\nSend Quotation\nCreate Support Ticket\nCreate Customer Issue',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'next_action_date',
+		'fieldtype': u'Date',
+		'label': u'Next Action Date',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'medium',
+		'fieldtype': u'Select',
+		'label': u'Medium',
+		'options': u'\nChat\nPhone\nEmail\nSMS\nVisit\nOther',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'phone_no',
+		'fieldtype': u'Data',
+		'label': u'Phone No.',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'email_address',
+		'fieldtype': u'Data',
+		'label': u'Email Address',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'section_break2',
+		'fieldtype': u'Section Break',
+		'options': u'simple',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'column_break4',
+		'fieldtype': u'Column Break',
+		'label': u'Communication Carried Out By',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'colour': u'White:FFF',
+		'default': u'__user',
+		'doctype': u'DocField',
+		'fieldname': u'profile',
+		'fieldtype': u'Link',
+		'label': u'Profile',
+		'options': u'Profile',
+		'permlevel': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'sales_person',
+		'fieldtype': u'Link',
+		'label': u'Sales Person',
+		'options': u'Sales Person',
+		'permlevel': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'column_break5',
+		'fieldtype': u'Column Break',
+		'label': u'Communication Carried Out On',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'colour': u'White:FFF',
+		'default': u'Today',
+		'doctype': u'DocField',
+		'fieldname': u'communication_date',
+		'fieldtype': u'Date',
+		'label': u'Date',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'file_list',
+		'fieldtype': u'Text',
+		'hidden': 1,
+		'label': u'File List',
+		'no_copy': 1,
+		'permlevel': 0,
+		'print_hide': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'_user_tags',
+		'fieldtype': u'Data',
+		'hidden': 1,
+		'label': u'User Tags',
+		'no_copy': 1,
+		'permlevel': 0,
+		'print_hide': 1
+	}
+]

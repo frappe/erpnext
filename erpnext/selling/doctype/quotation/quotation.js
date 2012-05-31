@@ -25,6 +25,7 @@ wn.require('erpnext/selling/doctype/sales_common/sales_common.js');
 wn.require('erpnext/accounts/doctype/sales_taxes_and_charges_master/sales_taxes_and_charges_master.js');
 wn.require('erpnext/utilities/doctype/sms_control/sms_control.js');
 wn.require('erpnext/setup/doctype/notification_control/notification_control.js');
+wn.require('erpnext/support/doctype/communication/communication.js');
 
 // ONLOAD
 // ===================================================================================
@@ -39,7 +40,7 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 
 	if(!doc.company && sys_defaults.company) set_multiple(cdt,cdn,{company:sys_defaults.company});
 	if(!doc.fiscal_year && sys_defaults.fiscal_year) set_multiple(cdt,cdn,{fiscal_year:sys_defaults.fiscal_year});
-
+	
 	if(doc.quotation_to) {
 		if(doc.quotation_to == 'Customer') {
 			hide_field(['lead', 'lead_name']);
@@ -48,9 +49,11 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 			hide_field(['customer','customer_address','contact_person', 'customer_name','contact_display', 'customer_group']);
 		}
 	}
+	cur_frm.cscript.make_communication_body();
+
 }
 
-cur_frm.cscript.onload_post_render = function(doc, dt, dn) {
+cur_frm.cscript.onload_post_render = function(doc, dt, dn) {	
 	var callback = function(doc, dt, dn) {
 		// defined in sales_common.js
 		cur_frm.cscript.update_item_details(doc, dt, dn);
@@ -95,6 +98,8 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	
 	if(doc.customer || doc.lead) $(cur_frm.fields_dict.contact_section.row.wrapper).toggle(true);
 	else $(cur_frm.fields_dict.contact_section.row.wrapper).toggle(false);
+	
+	if (!doc.__islocal) cur_frm.cscript.render_communication_list(doc, cdt, cdn);
 }
 
 

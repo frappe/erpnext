@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-03-27 14:35:52',
+		'creation': '2012-05-15 12:14:41',
 		'docstatus': 0,
-		'modified': '2012-03-27 14:35:52',
+		'modified': '2012-05-31 13:18:29',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -25,7 +25,7 @@
 		'show_in_menu': 0,
 		'subject': u' ',
 		'tag_fields': u'supplier_type',
-		'version': 87
+		'version': 1
 	},
 
 	# These values are common for all DocField
@@ -55,6 +55,30 @@
 
 	# DocPerm
 	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Purchase Manager',
+		'submit': 0,
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Purchase Manager',
+		'submit': 0,
+		'write': 0
+	},
+
+	# DocPerm
+	{
 		'doctype': u'DocPerm',
 		'permlevel': 1,
 		'role': u'Purchase Master Manager'
@@ -70,30 +94,6 @@
 		'role': u'Purchase Master Manager',
 		'submit': 0,
 		'write': 1
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Purchase Manager',
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Purchase Manager',
-		'submit': 0,
-		'write': 0
 	},
 
 	# DocField
@@ -216,6 +216,24 @@
 		'fieldtype': u'HTML',
 		'label': u'Contact HTML',
 		'permlevel': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'communication_history',
+		'fieldtype': u'Section Break',
+		'label': u'Communication History',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'communication_html',
+		'fieldtype': u'HTML',
+		'label': u'Communication HTML',
+		'permlevel': 0
 	},
 
 	# DocField
