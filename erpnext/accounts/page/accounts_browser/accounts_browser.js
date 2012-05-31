@@ -99,9 +99,11 @@ erpnext.AccountsChart = Class.extend({
 			
 			},
 			onrender: function(treenode) {
-				var bal = treenode.data && treenode.data.balance.split(' ') || ['',''];
-				treenode.parent.append('<span class="balance-area"><span style="color: #aaa">'+ bal[0] + '</span> ' 
-					+ bal[1] + '</span>');
+				if (ctype == 'Account') {
+					var bal = treenode.data && treenode.data.balance.split(' ') || ['',''];
+					treenode.parent.append('<span class="balance-area"><span style="color: #aaa">'+ bal[0] + '</span> ' 
+						+ bal[1] + '</span>');
+				}
 			}
 		});
 		this.tree.rootnode.$a.click();
