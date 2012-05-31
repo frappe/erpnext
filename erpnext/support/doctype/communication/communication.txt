@@ -5,7 +5,7 @@
 	{
 		'creation': '2012-05-29 16:56:41',
 		'docstatus': 0,
-		'modified': '2012-05-31 14:46:44',
+		'modified': '2012-05-31 16:14:39',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -266,28 +266,9 @@
 	# DocField
 	{
 		'doctype': u'DocField',
-		'fieldname': u'next_action',
+		'fieldname': u'communication_medium',
 		'fieldtype': u'Select',
-		'label': u'Next Action',
-		'options': u'\nFollow Up\nCreate Opportunity\nSend Quotation\nCreate Support Ticket\nCreate Customer Issue',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'next_action_date',
-		'fieldtype': u'Date',
-		'label': u'Next Action Date',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'medium',
-		'fieldtype': u'Select',
-		'label': u'Medium',
+		'label': u'Communication Medium',
 		'options': u'\nChat\nPhone\nEmail\nSMS\nVisit\nOther',
 		'permlevel': 0
 	},
@@ -333,9 +314,9 @@
 		'colour': u'White:FFF',
 		'default': u'__user',
 		'doctype': u'DocField',
-		'fieldname': u'profile',
+		'fieldname': u'user',
 		'fieldtype': u'Link',
-		'label': u'Profile',
+		'label': u'User',
 		'options': u'Profile',
 		'permlevel': 1
 	},

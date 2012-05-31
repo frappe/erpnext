@@ -1,5 +1,5 @@
 cur_frm.cscript.refresh = function(doc, dt, dn) {
-	if(!doc.islocal) {
+	if(!doc.__islocal) {
 		var field_list = ['lead', 'customer', 'supplier', 'contact', 'opportunity',
 			'quotation', 'support_ticket'];
 		var hide_list = [];
@@ -52,6 +52,7 @@ cur_frm.cscript.render_communication_list = function(doc, dt, dn) {
 			{width: '12%', content:'communication_date',
 				css: {'text-align': 'right', 'color':'#777'}}		
 		],
+		
 	});
 	
 	cur_frm.cscript.render_list(doc, 'Communication', cur_frm.communication_html,
@@ -65,8 +66,7 @@ cur_frm.cscript.render_communication_list = function(doc, dt, dn) {
 
 
 // Render List
-cur_frm.cscript.render_list = function(doc, doctype, wrapper, ListView,
-		new_doc_constructor) {
+cur_frm.cscript.render_list = function(doc, doctype, wrapper, ListView, make_new_doc) {
 	wn.model.with_doctype(doctype, function(r) {
 		if(r && r['403']) {
 			return;
@@ -76,86 +76,14 @@ cur_frm.cscript.render_list = function(doc, doctype, wrapper, ListView,
 			default_filters: [
 				[doctype, doc.doctype.toLowerCase(), '=', doc.name],
 			],
-			new_doc_constructor: new_doc_constructor || null,
 		});
+		
+		if (make_new_doc) {
+			RecordListView = RecordListView.extend({
+				make_new_doc: make_new_doc,
+			});
+		}
+		
 		var record_list_view = new RecordListView(doctype, wrapper, ListView);
 	});
-}
-
-
-
-// Transaction List related functions
-cur_frm.cscript.render_list2 = function(parent, doc, doctype, args) {
-	$(parent).css({ 'padding-top': '10px' });
-	cur_frm.transaction_list = new wn.ui.Listing({
-		parent: parent,
-		page_length: 10,
-		get_query: function() {
-			return cur_frm.cscript.get_query_list({
-				parent: doc.doctype.toLowerCase(),
-				parent_name: doc.name,
-				doctype: doctype,
-				fields: (function() {
-					var fields = [];
-					for(var i in args) {
-						fields.push(args[i].fieldname);
-					}
-					return fields.join(", ");
-				})(),
-			});
-		},
-		as_dict: 1,
-		no_result_message: repl('No %(doctype)s created for this %(parent)s', 
-								{ doctype: doctype, parent: doc.doctype }),
-		render_row: function(wrapper, data) {
-			render_html = cur_frm.cscript.render_list_row(data, args, doctype);
-			$(wrapper).html(render_html);
-		},
-	});
-	cur_frm.transaction_list.run();
-}
-
-cur_frm.cscript.render_list_row = function(data, args, doctype) {
-	var content = [];
-	var currency = data.currency;
-	for (var a in args) {
-		for (var d in data) {
-			if (args[a].fieldname === d && args[a].fieldname !== 'currency') {
-				if (args[a].type === 'Link') {
-					data[d] = repl('<a href="#!Form/%(doctype)s/%(name)s">\
-						%(name)s</a>', { doctype: doctype, name: data[d]});
-				} else if (args[a].type === 'Currency') {
-					data[d] = currency + " " + fmt_money(data[d]);
-				} else if (args[a].type === 'Percentage') {
-					data[d] = flt(data[d]) + '%';
-				} else if (args[a].type === 'Date') {
-					data[d] = wn.datetime.only_date(data[d]);
-				}
-				if (args[a].style == undefined) {
-					args[a].style = '';
-				}
-				data[d] = repl('\
-					<td width="%(width)s" title="%(title)s" style="%(style)s">\
-					%(content)s</td>',
-					{
-						content: data[d],
-						width: args[a].width,
-						title: args[a].label,
-						style: args[a].style,
-					});
-				content.push(data[d]);
-				break;
-			}
-		}
-	}
-	content = content.join("\n");
-	return '<table><tr>' + content + '</tr></table>';
-}
-
-cur_frm.cscript.get_query_list = function(args) {
-	var query = repl("\
-		select %(fields)s from `tab%(doctype)s` \
-		where %(parent)s = '%(parent_name)s' \
-		order by modified desc", args);
-	return query;
 }
