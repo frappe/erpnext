@@ -286,7 +286,7 @@ class DocType(TransactionBase):
 	#-----------------------------------------------------------------------------------------------
 	def validate_order_type(self):
 		#validate delivery date
-		if self.doc.order_type != 'Maintenance' and not self.doc.delivery_date:
+		if self.doc.order_type == 'Sales' and not self.doc.delivery_date:
 			msgprint("Please enter 'Expected Delivery Date'")
 			raise Exception
 		
