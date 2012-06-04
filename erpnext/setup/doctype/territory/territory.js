@@ -31,7 +31,7 @@ cur_frm.cscript.onload = function(){
 
 //get query select territory
 cur_frm.fields_dict['parent_territory'].get_query = function(doc,cdt,cdn) {
-  return 'SELECT `tabTerritory`.`name`,`tabTerritory`.`parent_territory` FROM `tabTerritory` WHERE `tabTerritory`.`is_group` = "Yes" AND `tabTerritory`.`docstatus`!= 2 AND (`tabTerritory`.`rgt` > '+doc.rgt+' or `tabTerritory`.`lft` < '+doc.lft+') AND `tabTerritory`.`name` !="'+doc.territory_name+'" AND `tabTerritory`.%(key)s LIKE "%s" ORDER BY  `tabTerritory`.`name` ASC LIMIT 50';
+  return 'SELECT `tabTerritory`.`name`,`tabTerritory`.`parent_territory` FROM `tabTerritory` WHERE `tabTerritory`.`is_group` = "Yes" AND `tabTerritory`.`docstatus`!= 2 AND `tabTerritory`.`name` !="'+doc.territory_name+'" AND `tabTerritory`.%(key)s LIKE "%s" ORDER BY  `tabTerritory`.`name` ASC LIMIT 50';
 }
 
 
