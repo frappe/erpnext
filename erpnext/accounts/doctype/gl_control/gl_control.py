@@ -485,8 +485,8 @@ def manage_recurring_invoices():
 		and notify the concerned people
 	"""	
 	rv = webnotes.conn.sql("""select name, recurring_id from `tabSales Invoice` where ifnull(convert_into_recurring_invoice, 0) = 1 
-			and next_date = %s and next_date <= ifnull(end_date, '2199-12-31') and docstatus=1""", nowdate(), debug=1)
-	msgprint(rv)
+			and next_date = %s and next_date <= ifnull(end_date, '2199-12-31') and docstatus=1""", nowdate())
+			
 	for d in rv:
 		if not webnotes.conn.sql("""select name from `tabSales Invoice` where posting_date = %s and recurring_id = %s and docstatus=1""", (nowdate(), d[1])):
 			prev_rv = get_obj('Sales Invoice', d[0], with_children=1)
@@ -587,6 +587,5 @@ def send_notification(new_rv):
 
 
 	msg = hd + tbl + totals
-	msgprint(msg)
 	from webnotes.utils.email_lib import sendmail
 	sendmail(new_rv.doc.notification_email_address.split(", "), subject=subject, msg = msg)
