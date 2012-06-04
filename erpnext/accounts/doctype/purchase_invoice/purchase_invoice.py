@@ -127,7 +127,7 @@ class DocType(TransactionBase):
 
 	def get_pv_details(self, arg):
 		import json
-		item_det = sql("select item_name, brand, description, item_group, purchase_account, cost_center from tabItem where name=%s",arg,as_dict=1)
+		item_det = sql("select item_name, brand, description, item_group, purchase_account, cost_center, stock_uom from tabItem where name=%s",arg,as_dict=1)
 		
 		tax = sql("select tax_type, tax_rate from `tabItem Tax` where parent = %s" , arg)
 		t = {}
@@ -146,7 +146,8 @@ class DocType(TransactionBase):
 			'discount_rate': 0.00,
 			'expense_head': item_det and item_det[0]['purchase_account'] or '',
 			'cost_center': item_det and item_det[0]['cost_center'] or '',
-			'item_tax_rate': json.dumps(t)
+			'item_tax_rate': json.dumps(t),
+			'uom': item_det and item_det[0]['stock_uom'] or ''
 		}
 		
 		# get last purchase rate
