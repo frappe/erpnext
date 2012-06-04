@@ -85,7 +85,7 @@ class DocType:
 			msgprint("Please create naming series for Attendance.\nGo to Setup--> Numbering Series.")
 			raise Exception
 		else:
-			sr = series[0][0] or ''
+			sr = series[0] or ''
 		
 		return {'fy':fy,'comp':comp,'sr':sr}
 
