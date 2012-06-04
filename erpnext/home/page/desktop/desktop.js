@@ -125,6 +125,7 @@ erpnext.desktop.show_pending_notifications = function() {
 	add_circle('support', 'open_support_tickets', 'Open Support Tickets');
 	add_circle('todo', 'things_todo', 'Things To Do');
 	add_circle('calendar', 'todays_events', 'Todays Events');
+	add_circle('project', 'open_tasks', 'Open Tasks');
 
 	erpnext.update_messages();
 

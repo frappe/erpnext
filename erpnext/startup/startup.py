@@ -20,6 +20,15 @@ def get_open_support_tickets():
 		WHERE status = 'Open'""")
 	return open_support_tickets and cint(open_support_tickets[0][0]) or 0
 
+def get_open_tasks():
+	"""
+		Returns a count of open tasks
+	"""
+	from webnotes.utils import cint
+	return webnotes.conn.sql("""\
+		SELECT COUNT(*) FROM `tabTask`
+		WHERE status = 'Open'""")[0][0]
+
 def get_things_todo():
 	"""
 		Returns a count of incomplete todos
@@ -51,4 +60,5 @@ def get_global_status_messages(arg=None):
 		'open_support_tickets': get_open_support_tickets(),
 		'things_todo': get_things_todo(),
 		'todays_events': get_todays_events(),
+		'open_tasks': get_open_tasks()
 	}
