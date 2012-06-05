@@ -7,6 +7,9 @@
 cur_frm.cscript.make_hl_body = function(){
 	cur_frm.fields_dict['history_html'].wrapper.innerHTML = '';
 	cur_frm.history_html = $a(cur_frm.fields_dict['history_html'].wrapper,'div');
+	$(cur_frm.history_html).css({
+		'min-height': '320px',
+	});
 }
 
 // make history

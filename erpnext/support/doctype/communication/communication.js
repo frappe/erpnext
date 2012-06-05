@@ -16,6 +16,9 @@ cur_frm.cscript.make_communication_body = function() {
 	var communication_wrapper = cur_frm.fields_dict.communication_html.wrapper;
 	communication_wrapper.innerHTML = '';
 	cur_frm.communication_html = $a(communication_wrapper, 'div');
+	$(cur_frm.communication_html).css({
+		'min-height': '275px',
+	});
 }
 
 cur_frm.cscript.render_communication_list = function(doc, dt, dn) {
