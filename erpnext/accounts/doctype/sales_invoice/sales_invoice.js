@@ -390,7 +390,7 @@ cur_frm.fields_dict['territory'].get_query = function(doc,cdt,cdn) {
 // Income Account in Details Table
 // --------------------------------
 cur_frm.fields_dict.entries.grid.get_field("income_account").get_query = function(doc) {
-	return 'SELECT tabAccount.name FROM tabAccount WHERE tabAccount.debit_or_credit="Credit" AND tabAccount.group_or_ledger="Ledger" AND tabAccount.docstatus!=2 AND tabAccount.company="'+doc.company+'" AND tabAccount.%(key)s LIKE "%s"';
+	return 'SELECT tabAccount.name FROM tabAccount WHERE (tabAccount.debit_or_credit="Credit" OR tabAccount.account_type = "Income Account") AND tabAccount.group_or_ledger="Ledger" AND tabAccount.docstatus!=2 AND tabAccount.company="'+doc.company+'" AND tabAccount.%(key)s LIKE "%s"';
 }
 
 // warehouse in detail table
