@@ -61,7 +61,7 @@ class DocType:
 
   def validate(self): 
     if self.doc.lft and self.doc.rgt:
-      res = sql("select name from `tabTerritory` where is_group = 'Yes' and docstatus!= 2 and (rgt > %s or lft < %s) and name ='%s' and name !='%s'"%(self.doc.rgt,self.doc.lft,self.doc.parent_territory,self.doc.territory_name))
+      res = sql("select name from `tabTerritory` where is_group = 'Yes' and docstatus!= 2 and name ='%s' and name !='%s'"%(self.doc.parent_territory,self.doc.territory_name))
       if not res:
         msgprint("Please enter proper parent territory.") 
         raise Exception
