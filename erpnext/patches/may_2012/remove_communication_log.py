@@ -17,6 +17,7 @@ def execute():
 def move_customizations():
 	import webnotes.model.doc
 	import webnotes.model.doctype
+
 	res = webnotes.conn.sql("""\
 		delete from `tabProperty Setter`
 		where property='previous_field'
@@ -28,14 +29,13 @@ def move_customizations():
 	for r in res:
 		d = webnotes.model.doc.Document('Custom Field', r[0])
 		d.dt = 'Communication'
-		d.validate()
 		d.save()
-		d.on_update()
-		
+	from webnotes.model.db_schema import updatedb
+	updatedb('Communication')
+
 	res = webnotes.conn.sql("""\
 		select field_name from `tabProperty Setter`
 		where doc_type='Communication Log' and field_name is not null""")
-	
 	
 	doclist = webnotes.model.doctype.get('Communication', 0)
 	field_list = [d.fieldname for d in doclist if d.doctype=='DocField']
@@ -49,16 +49,26 @@ def move_customizations():
 	webnotes.conn.sql("""\
 		delete from `tabProperty Setter`
 		where doc_type='Communication Log'""")
+		
+	from webnotes.utils.cache import CacheItem
+	CacheItem('Communication').clear()
 
 def remove_communication_log():
 	import webnotes
 	import webnotes.model
 	import webnotes.model.doc
+	import webnotes.model.doctype
+	
+	webnotes.conn.auto_commit_on_many_writes = True
 	
 	# get all communication log records
 	comm_log_list = webnotes.conn.sql("select * from `tabCommunication Log`",
 						as_dict=1)
-
+	
+	field_list = [d.fieldname for d in \
+		webnotes.model.doctype.get('Communication', 0) \
+		if d.doctype=='DocField']
+	
 	# copy it to communication
 	for comm_log in comm_log_list:
 		d = webnotes.model.doc.Document('Communication')
@@ -68,9 +78,10 @@ def remove_communication_log():
 				d.fields[key] = comm_log[key]
 		
 		parenttype = (comm_log.get('parenttype') or '').lower()
-		if parenttype in d.fields.keys():
+		if parenttype in field_list:
 			d.fields[parenttype] = comm_log.get('parent')
 		
+		d.naming_series = 'COMM-'
 		d.subject = 'Follow Up'
 		d.content = comm_log.get('notes') or ''
 		d.medium = comm_log.get('follow_up_type') or ''
@@ -78,7 +89,7 @@ def remove_communication_log():
 		d.communication_date = comm_log.get('date')
 		d.category = 'Miscellaneous'
 		d.action = 'No Action'
-		d.save()
+		d.save(ignore_fields=1)
 	
 	# delete records with parent type "Customer", "Lead", "Supplier"
 	webnotes.conn.sql("""\

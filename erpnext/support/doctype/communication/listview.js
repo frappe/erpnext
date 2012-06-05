@@ -19,7 +19,7 @@ wn.doclistviews['Communication'] = wn.views.ListView.extend({
 
 		if(data.content && data.content.length > 50) {
 			data.content = '<span title="'+data.content+'">' +
-				data.description.substr(0,50) + '...</span>';
+				data.content.substr(0,50) + '...</span>';
 		}
 	},
 
