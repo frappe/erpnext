@@ -407,4 +407,9 @@ patch_list = [
 		'patch_file': 'remove_euro_currency',
 		'description': 'Remove EURO currency and replace with EUR'
 	},
+	{
+		'patch_module': 'patches.may_2012',
+		'patch_file': 'remove_communication_log',
+		'description': 'Remove Communication Log and replace it with Communication'
+	},
 ]
