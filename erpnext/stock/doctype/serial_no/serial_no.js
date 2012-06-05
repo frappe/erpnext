@@ -59,3 +59,12 @@ cur_frm.cscript.supplier = function(doc,dt,dn) {
   if(doc.supplier) get_server_fields('get_default_supplier_address', JSON.stringify({supplier: doc.supplier}),'', doc, dt, dn, 1);
   if(doc.supplier) unhide_field(['supplier_name','address_display']);
 }
+
+//item code
+//----------
+cur_frm.fields_dict['item_code'].get_query = function(doc,cdt,cdn) {
+  return 'SELECT `tabItem`.`name`,`tabItem`.`description` FROM `tabItem` \
+	WHERE `tabItem`.`docstatus`!= 2 AND ifnull(`tabItem`.`has_serial_no`, "No") = "Yes" \
+	AND (ifnull(`tabItem`.`end_of_life`,"") = "" OR `tabItem`.`end_of_life` > NOW() OR `tabItem`.`end_of_life`="0000-00-00") \
+	AND `tabItem`.%(key)s LIKE "%s"  ORDER BY  `tabItem`.`name` ASC LIMIT 50';
+}

@@ -137,13 +137,6 @@ cur_frm.fields_dict['customer_group'].get_query = function(doc,dt,dn) {
 	return 'SELECT `tabCustomer Group`.`name`, `tabCustomer Group`.`parent_customer_group` FROM `tabCustomer Group` WHERE `tabCustomer Group`.`is_group` = "No" AND `tabCustomer Group`.`docstatus`!= 2 AND `tabCustomer Group`.%(key)s LIKE "%s" ORDER BY	`tabCustomer Group`.`name` ASC LIMIT 50';
 }
 
-cur_frm.cscript.CGHelp = function(doc,dt,dn){
-	var call_back = function(){
-		var sb_obj = new SalesBrowser();				
-		sb_obj.set_val('Customer Group');
-	}
-	loadpage('Sales Browser',call_back);
-}
 
 // -----
 // lead
@@ -195,6 +188,7 @@ cur_frm.cscript.get_common_list_view = function(parent, doc, doctype) {
 	
 	cur_frm.cscript.render_list(doc, doctype, parent, ListView);
 }
+
 
 cur_frm.cscript.make_si_list = function(parent, doc) {
 	var ListView = wn.views.ListView.extend({

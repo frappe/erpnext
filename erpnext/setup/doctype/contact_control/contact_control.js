@@ -66,16 +66,6 @@ cur_frm.cscript.country = function(doc, dt, dn) {
   cur_frm.cscript.get_states(doc, dt, dn);
 }
 
-// territory help - cutsomer + sales partner
-// -----------------------------------------
-cur_frm.cscript.TerritoryHelp = function(doc,dt,dn){
-  var call_back = function(){
-
-    var sb_obj = new SalesBrowser();        
-    sb_obj.set_val('Territory');
-  }
-  loadpage('Sales Browser',call_back);
-}
 
 // get query select Territory
 // ---------------------------

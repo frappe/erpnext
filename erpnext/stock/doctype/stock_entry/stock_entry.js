@@ -37,7 +37,8 @@ var cfn_set_fields = function(doc, cdt, cdn) {
 	else hide_field(['production_order', 'process']);
 
 	doc.from_warehouse = '';
-    doc.to_warehosue = '';
+    doc.to_warehouse = '';
+	refresh_field(['from_warehosue', 'to_warehouse']);
     if (doc.process == 'Backflush' || doc.purpose == 'Other'){
       unhide_field('fg_completed_qty');
     }

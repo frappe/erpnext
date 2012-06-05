@@ -114,7 +114,7 @@ class DocType(TransactionBase):
     """ Add calendar event for Maintenece Schedule in calendar of Allocated person"""
     event = Document('Event')
     event.owner = incharge_email
-    event.description = "Item Code:%s and Reference:%s" %(item_code,self.doc.name)
+    event.description = "Reference:%s, Item Code:%s and Customer: %s" %(self.doc.name, item_code, self.doc.customer)
     event.event_date = scheduled_date
     event.event_hour =  '10:00'
     event.event_type = 'Private'
