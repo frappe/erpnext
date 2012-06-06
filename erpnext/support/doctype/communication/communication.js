@@ -71,7 +71,7 @@ cur_frm.cscript.render_communication_list = function(doc, dt, dn) {
 // Render List
 cur_frm.cscript.render_list = function(doc, doctype, wrapper, ListView, make_new_doc) {
 	wn.model.with_doctype(doctype, function(r) {
-		if(r && r['403']) {
+		if(r) {
 			return;
 		}
 		var RecordListView = wn.views.RecordListView.extend({
