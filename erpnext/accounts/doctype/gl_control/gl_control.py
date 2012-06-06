@@ -485,7 +485,8 @@ def manage_recurring_invoices():
 		and notify the concerned people
 	"""	
 	rv = webnotes.conn.sql("""select name, recurring_id from `tabSales Invoice` where ifnull(convert_into_recurring_invoice, 0) = 1 
-			and next_date = %s and next_date <= end_date and docstatus=1 order by next_date	desc""", nowdate())
+			and next_date = %s and next_date <= ifnull(end_date, '2199-12-31') and docstatus=1""", nowdate())
+			
 	for d in rv:
 		if not webnotes.conn.sql("""select name from `tabSales Invoice` where posting_date = %s and recurring_id = %s and docstatus=1""", (nowdate(), d[1])):
 			prev_rv = get_obj('Sales Invoice', d[0], with_children=1)
@@ -503,6 +504,8 @@ def create_new_invoice(prev_rv):
 	new_rv.doc.posting_date = new_rv.doc.next_date
 	new_rv.doc.aging_date = new_rv.doc.next_date
 	new_rv.doc.due_date = add_days(new_rv.doc.next_date, cint(date_diff(prev_rv.doc.due_date, prev_rv.doc.posting_date)))
+	new_rv.doc.invoice_period_from_date = get_next_month_date(new_rv.doc.invoice_period_from_date)
+	new_rv.doc.invoice_period_to_date = get_next_month_date(new_rv.doc.invoice_period_to_date)
 	new_rv.doc.owner = prev_rv.doc.owner
 	new_rv.doc.save()
 
@@ -511,6 +514,21 @@ def create_new_invoice(prev_rv):
 	new_rv.update_after_submit()
 
 	return new_rv
+
+def get_next_month_date(dt):
+	import datetime
+	m = getdate(dt).month + 1
+	y = getdate(dt).year
+	d = getdate(dt).day
+	if m > 12:
+		m, y = 1, y+1
+	try:
+		next_month_date = datetime.date(y, m, d)
+	except:
+		import calendar
+		last_day = calendar.monthrange(y, m)[1]
+		next_month_date = datetime.date(y, m, last_day)
+	return next_month_date.strftime("%Y-%m-%d")
 
 
 def send_notification(new_rv):
@@ -528,7 +546,7 @@ def send_notification(new_rv):
 				</tr>
 			</table>
 		''' % (com, new_rv.doc.name, new_rv.doc.customer, new_rv.doc.address_display, getdate(new_rv.doc.posting_date).strftime("%d-%m-%Y"), \
-		getdate(add_days(add_months(new_rv.doc.posting_date, -1), 1)).strftime("%d-%m-%Y"), getdate(new_rv.doc.posting_date).strftime("%d-%m-%Y"),\
+		getdate(new_rv.doc.invoice_period_from_date).strftime("%d-%m-%Y"), getdate(new_rv.doc.invoice_period_to_date).strftime("%d-%m-%Y"),\
 		getdate(new_rv.doc.due_date).strftime("%d-%m-%Y"))
 	
 	
@@ -570,5 +588,4 @@ def send_notification(new_rv):
 
 	msg = hd + tbl + totals
 	from webnotes.utils.email_lib import sendmail
-	sendmail(recipients = new_rv.doc.notification_email_address.split(", "), \
-		sender=new_rv.doc.owner, subject=subject, parts=[['text/plain', msg]])
+	sendmail(new_rv.doc.notification_email_address.split(", "), subject=subject, msg = msg)

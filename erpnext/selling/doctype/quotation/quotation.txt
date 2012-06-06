@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-04-30 18:40:10',
+		'creation': '2012-05-21 11:43:59',
 		'docstatus': 0,
-		'modified': '2012-04-30 20:30:45',
+		'modified': '2012-05-31 11:43:18',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -51,8 +51,7 @@
 		'name': '__common__',
 		'parent': u'Quotation',
 		'parentfield': u'permissions',
-		'parenttype': u'DocType',
-		'read': 1
+		'parenttype': u'DocType'
 	},
 
 	# DocType, Quotation
@@ -63,11 +62,19 @@
 
 	# DocPerm
 	{
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'user print'
+	},
+
+	# DocPerm
+	{
 		'amend': 0,
 		'cancel': 0,
 		'create': 0,
 		'doctype': u'DocPerm',
 		'permlevel': 1,
+		'read': 1,
 		'role': u'Sales Manager',
 		'submit': 0,
 		'write': 0
@@ -80,6 +87,7 @@
 		'create': 1,
 		'doctype': u'DocPerm',
 		'permlevel': 0,
+		'read': 1,
 		'role': u'Sales Manager',
 		'submit': 1,
 		'write': 1
@@ -92,6 +100,7 @@
 		'create': 1,
 		'doctype': u'DocPerm',
 		'permlevel': 0,
+		'read': 1,
 		'role': u'Sales User',
 		'submit': 1,
 		'write': 1
@@ -104,6 +113,7 @@
 		'create': 0,
 		'doctype': u'DocPerm',
 		'permlevel': 1,
+		'read': 1,
 		'role': u'Sales User',
 		'submit': 0,
 		'write': 0
@@ -114,6 +124,7 @@
 		'doctype': u'DocPerm',
 		'match': u'customer_name',
 		'permlevel': 0,
+		'read': 1,
 		'role': u'Customer'
 	},
 
@@ -124,6 +135,7 @@
 		'create': 1,
 		'doctype': u'DocPerm',
 		'permlevel': 0,
+		'read': 1,
 		'role': u'Maintenance Manager',
 		'submit': 1,
 		'write': 1
@@ -133,6 +145,7 @@
 	{
 		'doctype': u'DocPerm',
 		'permlevel': 1,
+		'read': 1,
 		'role': u'Maintenance Manager'
 	},
 
@@ -143,6 +156,7 @@
 		'create': 1,
 		'doctype': u'DocPerm',
 		'permlevel': 0,
+		'read': 1,
 		'role': u'Maintenance User',
 		'submit': 1,
 		'write': 1
@@ -152,6 +166,7 @@
 	{
 		'doctype': u'DocPerm',
 		'permlevel': 1,
+		'read': 1,
 		'role': u'Maintenance User'
 	},
 
@@ -1240,12 +1255,11 @@
 		'allow_on_submit': 1,
 		'colour': u'White:FFF',
 		'doctype': u'DocField',
-		'fieldname': u'follow_up',
-		'fieldtype': u'Table',
-		'label': u'Communication Log',
+		'fieldname': u'communication_html',
+		'fieldtype': u'HTML',
+		'label': u'Communication HTML',
 		'oldfieldname': u'follow_up',
 		'oldfieldtype': u'Table',
-		'options': u'Communication Log',
 		'permlevel': 0,
 		'print_hide': 1,
 		'width': u'40px'

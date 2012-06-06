@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-04-02 16:02:08',
+		'creation': '2012-05-15 12:14:52',
 		'docstatus': 0,
-		'modified': '2012-04-30 15:20:50',
+		'modified': '2012-05-30 12:43:03',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -314,13 +314,13 @@
 	# DocField
 	{
 		'allow_on_submit': 0,
+		'colour': u'White:FFF',
 		'doctype': u'DocField',
-		'fieldname': u'follow_up',
-		'fieldtype': u'Table',
-		'label': u'Communication Log',
+		'fieldname': u'communication_html',
+		'fieldtype': u'HTML',
+		'label': u'Communication HTML',
 		'oldfieldname': u'follow_up',
 		'oldfieldtype': u'Table',
-		'options': u'Communication Log',
 		'permlevel': 0
 	},
 

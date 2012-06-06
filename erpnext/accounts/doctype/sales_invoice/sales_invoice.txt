@@ -5,7 +5,7 @@
 	{
 		'creation': '2012-04-13 11:56:18',
 		'docstatus': 0,
-		'modified': '2012-05-14 14:09:43',
+		'modified': '2012-06-04 14:40:59',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -1498,11 +1498,25 @@
 	{
 		'allow_on_submit': 1,
 		'depends_on': u'eval:doc.convert_into_recurring_invoice==1',
-		'description': u'The date on which recurring invoice will be stop',
+		'description': u'Start date of the invoice period',
 		'doctype': u'DocField',
-		'fieldname': u'end_date',
+		'fieldname': u'invoice_period_from_date',
 		'fieldtype': u'Date',
-		'label': u'End Date',
+		'label': u'Invoice Period From Date',
+		'no_copy': 1,
+		'permlevel': 0,
+		'print_hide': 1
+	},
+
+	# DocField
+	{
+		'allow_on_submit': 1,
+		'depends_on': u'eval:doc.convert_into_recurring_invoice==1',
+		'description': u'End date of the invoice period',
+		'doctype': u'DocField',
+		'fieldname': u'invoice_period_to_date',
+		'fieldtype': u'Date',
+		'label': u'Invoice Period To Date',
 		'no_copy': 1,
 		'permlevel': 0,
 		'print_hide': 1
@@ -1556,6 +1570,20 @@
 		'label': u'Next Date',
 		'no_copy': 1,
 		'permlevel': 1,
+		'print_hide': 1
+	},
+
+	# DocField
+	{
+		'allow_on_submit': 1,
+		'depends_on': u'eval:doc.convert_into_recurring_invoice==1',
+		'description': u'The date on which recurring invoice will be stop',
+		'doctype': u'DocField',
+		'fieldname': u'end_date',
+		'fieldtype': u'Date',
+		'label': u'End Date',
+		'no_copy': 1,
+		'permlevel': 0,
 		'print_hide': 1
 	},
 

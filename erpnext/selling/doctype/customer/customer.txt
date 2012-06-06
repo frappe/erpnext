@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-04-13 11:56:26',
+		'creation': '2012-05-15 12:14:51',
 		'docstatus': 0,
-		'modified': '2012-04-19 17:12:24',
+		'modified': '2012-05-31 11:41:06',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -301,6 +301,24 @@
 		'label': u'Contact HTML',
 		'oldfieldtype': u'HTML',
 		'permlevel': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'communication_history',
+		'fieldtype': u'Section Break',
+		'label': u'Communication History',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'communication_html',
+		'fieldtype': u'HTML',
+		'label': u'Communication HTML',
+		'permlevel': 0
 	},
 
 	# DocField

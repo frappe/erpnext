@@ -15,6 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 wn.require('erpnext/utilities/doctype/sms_control/sms_control.js');
+wn.require('erpnext/support/doctype/communication/communication.js');
 
 cur_frm.cscript.refresh = function(doc, cdt, cdn){
     erpnext.hide_naming_series();
@@ -25,7 +26,7 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn){
 		cur_frm.add_custom_button('Opportunity Lost', cur_frm.cscript['Declare Opportunity Lost']);
 		cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms);
 	}
-
+	if(!doc.__islocal) cur_frm.cscript.render_communication_list(doc, cdt, cdn);
 }
 
 // ONLOAD
@@ -49,6 +50,7 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 
 	// setup fetch
 	cur_frm.cscript.set_fetch();
+	cur_frm.cscript.make_communication_body();
 }
 
 cur_frm.cscript.onload_post_render = function(doc, cdt, cdn) {

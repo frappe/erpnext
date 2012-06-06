@@ -683,6 +683,8 @@ class DocType(TransactionBase):
 
 	def convert_into_recurring(self):
 		if self.doc.convert_into_recurring_invoice:
+			if not self.doc.invoice_period_from_date or not self.doc.invoice_period_to_date:
+				msgprint("Invoice period from date and to date is mandatory for recurring invoice", raise_exception=1)
 			self.set_next_date()
 			if not self.doc.recurring_id:
 				webnotes.conn.set(self.doc, 'recurring_id', make_autoname('RECINV/.#####'))

@@ -292,7 +292,7 @@ cur_frm.fields_dict['select_print_heading'].get_query = function(doc, cdt, cdn) 
 // Expense Head
 // -------------
 cur_frm.fields_dict['entries'].grid.get_field("expense_head").get_query = function(doc) {
-	return 'SELECT tabAccount.name FROM tabAccount WHERE tabAccount.debit_or_credit="Debit" AND tabAccount.group_or_ledger="Ledger" AND tabAccount.docstatus != 2 AND tabAccount.company="'+doc.company+'" AND tabAccount.%(key)s LIKE "%s"';
+	return 'SELECT tabAccount.name FROM tabAccount WHERE (tabAccount.debit_or_credit="Debit" OR tabAccount.account_type = "Expense Account") AND tabAccount.group_or_ledger="Ledger" AND tabAccount.docstatus != 2 AND tabAccount.company="'+doc.company+'" AND tabAccount.%(key)s LIKE "%s"';
 }
 cur_frm.cscript.expense_head = function(doc, cdt, cdn){
 	var d = locals[cdt][cdn];
