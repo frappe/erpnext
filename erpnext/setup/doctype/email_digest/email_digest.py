@@ -461,13 +461,13 @@ class DocType:
 			table_body = ""
 			
 			if isinstance(args['body'], basestring):
-				return """<p><b>%(head)s:</b> %(body)s</p>""" % args
+				return """<p>%(head)s: <span style='font-size: 110%%; font-weight: bold;'>%(body)s</span></p>""" % args
 			else:
-				return """<p><b>%(head)s:</b> """ +\
-				 	"".join(map(lambda b: "<p>%s</p>" % b, args['body']))
+				return ("""<p>%(head)s:</p> """ % args) +\
+				 	"".join(map(lambda b: "<p style='margin-left: 17px;'>%s</p>" % b, args['body']))
 
 
-		currency_amount_str = "<span style='color: grey; font-size: 12px'>%s</span> %s"
+		currency_amount_str = "<span style='color: grey;'>%s</span> %s"
 
 		body_dict = {
 
@@ -552,13 +552,11 @@ class DocType:
 			'bank_balance': {
 				'table': result.get('bank_balance') and \
 					table({
-						'head': 'Bank Balance',
-						'body': [
-							[
-								"<span style='font-size: 16px; font-weight: normal'>%s</span>" \
-									% bank['name'],
-								currency_amount_str % (currency, fmt_money(bank.get('value')))
-							] for bank in (isinstance(result['bank_balance'], list) and \
+						'head': 'Bank / Cash Balance',
+						'body': [(bank['name'] + ": <span style='font-size: 110%%; font-weight: bold;'>" \
+									+ currency_amount_str % \
+									(currency, fmt_money(bank.get('value'))) + '</span>')
+							for bank in (isinstance(result['bank_balance'], list) and \
 								result['bank_balance'] or \
 								[result['bank_balance']])
 						]
