@@ -459,43 +459,13 @@ class DocType:
 
 		def table(args):
 			table_body = ""
+			
 			if isinstance(args['body'], basestring):
-				table_body = """\
-					<tbody><tr>
-						<td style='padding: 5px; font-size: 24px; \
-						font-weight: bold; background: #F7F7F5'>""" + \
-					args['body'] + \
-					"""\
-						</td>
-					</tr></tbody>"""
+				return """<p><b>%(head)s:</b> %(body)s</p>""" % args
+			else:
+				return """<p><b>%(head)s:</b> """ +\
+				 	"".join(map(lambda b: "<p>%s</p>" % b, args['body']))
 
-			elif isinstance(args['body'], list):
-				body_rows = []
-				for rows in args['body']:
-					for r in rows:
-						body_rows.append("""\
-							<tr>
-								<td style='padding: 5px; font-size: 24px; \
-								font-weight: bold; background: #F7F7F5'>""" \
-								+ r + """\
-								</td>
-							</tr>""")
-
-					body_rows.append("<tr><td style='background: #F7F7F5'><br></td></tr>")
-
-				table_body = "<tbody>" + "".join(body_rows) + "</tbody>"
-
-			table_head = """\
-				<thead><tr>
-					<td style='padding: 5px; background: #D8D8D4; font-size: 16px; font-weight: bold'>""" \
-					+ args['head'] + """\
-					</td>
-				</tr></thead>"""
-
-			return "<table style='border-collapse: collapse; width: 100%;'>" \
-				+ table_head \
-				+ table_body \
-				+ "</table>"
 
 		currency_amount_str = "<span style='color: grey; font-size: 12px'>%s</span> %s"
 
@@ -669,50 +639,33 @@ class DocType:
 
 		new_section = False
 
+		def set_new_section(new_section):
+			if not new_section:
+				table_list.append("<hr /><h4>No Updates For:</h4><br>")
+				new_section = True
+			return new_section			
+
 		for k in bd_keys:
 			if self.doc.fields[k]:
 				if k in result:
 					if not body_dict[k].get('value') and not new_section:
-						if len(table_list) % 2 != 0:
-							table_list.append("")
-						table_list.append("<hr />")
-						table_list.append("<hr />")
-						new_section = True
+						new_section = set_new_section(new_section)
 					table_list.append(body_dict[k]['table'])
 				elif k in ['collections', 'payments']:
+					new_section = set_new_section(new_section)
 					table_list.append(\
-						"<div style='font-size: 16px; color: grey'>[" + \
+						"<p>[" + \
 							k.capitalize() + \
 							"]<br />Missing: Account of type 'Bank or Cash'\
-						</div>")
+						</p>")
 				elif k=='bank_balance':
+					new_section = set_new_section(new_section)
 					table_list.append(\
-						"<div style='font-size: 16px; color: grey'>[" + \
+						"<p>[" + \
 							"Bank Balance" + \
 							"]<br />Alert: GL Entry not found for Account of type 'Bank or Cash'\
-						</div>")
+						</p>")
 					
-		
-		i = 0
-		result = []
-		op_len = len(table_list)
-		while(True):
-			if i>=op_len:
-				break
-			elif (op_len - i) == 1:
-				result.append("""\
-					<tr>
-						<td style='width: 50%%; vertical-align: top;'>%s</td>
-						<td></td>
-					</tr>""" % (table_list[i]))
-			else:
-				result.append("""\
-					<tr>
-						<td style='width: 50%%; vertical-align: top;'>%s</td>
-						<td>%s</td>
-					</tr>""" % (table_list[i], table_list[i+1]))
-			
-			i = i + 2
 
 		from webnotes.utils import formatdate
 		start_date, end_date = self.get_start_end_dates()
@@ -721,18 +674,16 @@ class DocType:
 			or (formatdate(str(start_date)) + " to " + (formatdate(str(end_date))))
 
 		email_body = """
-			<div style='width: 100%%'>
-				<div style='padding: 10px; margin: auto; text-align: center; line-height: 80%%'>
-					<p style='font-weight: bold; font-size: 24px'>%s</p>
-					<p style='font-size: 16px; color: grey'>%s</p>
-					<p style='font-size: 20px; font-weight: bold'>%s</p>
-				</div>
-				<table cellspacing=15 style='width: 100%%'>""" \
+					<h2>%s</h2>
+					<p style='color: grey'>%s</p>
+					<h4>%s</h4>
+					<hr>
+				""" \
 					% ((self.doc.frequency + " Digest"), \
 						digest_daterange, self.doc.company) \
-				+ "".join(result) + """\
-				</table><br><p></p>
-			</div>"""
+				+ "".join(table_list) + """\
+				<br><p></p>
+			"""
 
 		return email_body
 
