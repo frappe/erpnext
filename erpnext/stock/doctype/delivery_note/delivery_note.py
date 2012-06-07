@@ -122,6 +122,9 @@ class DocType(TransactionBase):
 						if not doc.fields.get(r):
 							doc.fields[r] = ret[r]					
 
+	def get_barcode_details(self, barcode):
+		return get_obj('Sales Common').get_barcode_details(barcode)
+
 
 	# *** Re-calculates Basic Rate & amount based on Price List Selected ***
 	def get_adj_percent(self, arg=''):

@@ -412,4 +412,9 @@ patch_list = [
 		'patch_file': 'remove_communication_log',
 		'description': 'Remove Communication Log and replace it with Communication'
 	},
+	{
+		'patch_module': 'patches.june_2012',
+		'patch_file': 'barcode_in_feature_setup',
+		'description': 'Track item by barcode'
+	},
 ]

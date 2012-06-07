@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-03-27 14:35:48',
+		'creation': '2012-04-13 11:56:18',
 		'docstatus': 0,
-		'modified': '2012-03-27 14:35:48',
+		'modified': '2012-06-07 19:05:06',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -22,7 +22,7 @@
 		'section_style': u'Tray',
 		'server_code_error': u' ',
 		'show_in_menu': 0,
-		'version': 29
+		'version': 1
 	},
 
 	# These values are common for all DocField
@@ -38,6 +38,16 @@
 	{
 		'doctype': 'DocType',
 		'name': u'Sales Invoice Item'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'barcode',
+		'fieldtype': u'Data',
+		'label': u'Barcode',
+		'permlevel': 0,
+		'print_hide': 1
 	},
 
 	# DocField

@@ -127,6 +127,12 @@ class DocType:
 			if bom and bom[0][0]:
 				msgprint("%s should be 'Yes'. As Item %s is present in one or many Active BOMs." % (cstr(check), cstr(self.doc.name)))
 				raise Exception
+				
+	def validate_barcode(self):
+		if self.doc.barcode:
+			duplicate = sql("select name from tabItem where barcode = %s and name != %s", (self.doc.barcode, self.doc.name))
+			if duplicate:
+				msgprint("Barcode: %s already used in item: %s" % (self.doc.barcode, cstr(duplicate[0][0])), raise_exception = 1)
 
 	def validate(self):
 		fl = {'is_manufactured_item'	:'Is Manufactured Item',
@@ -139,6 +145,7 @@ class DocType:
 		self.check_ref_rate_detail()
 		self.fill_customer_code()
 		self.check_item_tax()
+		self.validate_barcode()
 		if not self.doc.min_order_qty:
 			self.doc.min_order_qty = 0
 		self.check_non_asset_warehouse()

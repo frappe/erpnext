@@ -5,7 +5,7 @@
 	{
 		'creation': '2012-04-30 18:33:53',
 		'docstatus': 0,
-		'modified': '2012-05-31 11:18:10',
+		'modified': '2012-06-07 16:16:24',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -233,6 +233,15 @@
 		'permlevel': 0,
 		'print_hide': 1,
 		'reqd': 0
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'barcode',
+		'fieldtype': u'Data',
+		'label': u'Barcode',
+		'permlevel': 0
 	},
 
 	# DocField

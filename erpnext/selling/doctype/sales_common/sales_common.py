@@ -128,12 +128,13 @@ class DocType(TransactionBase):
 		if not obj.doc.price_list_name:
 			msgprint("Please Select Price List before selecting Items")
 			raise Exception
-		item = webnotes.conn.sql("select description, item_name, brand, item_group, stock_uom, default_warehouse, default_income_account, default_sales_cost_center, description_html from `tabItem` where name = '%s' and (ifnull(end_of_life,'')='' or end_of_life >	now() or end_of_life = '0000-00-00') and (is_sales_item = 'Yes' or is_service_item = 'Yes')" % (args['item_code']), as_dict=1)
+		item = webnotes.conn.sql("select description, item_name, brand, item_group, stock_uom, default_warehouse, default_income_account, default_sales_cost_center, description_html, barcode from `tabItem` where name = '%s' and (ifnull(end_of_life,'')='' or end_of_life >	now() or end_of_life = '0000-00-00') and (is_sales_item = 'Yes' or is_service_item = 'Yes')" % (args['item_code']), as_dict=1)
 		tax = webnotes.conn.sql("select tax_type, tax_rate from `tabItem Tax` where parent = %s" , args['item_code'])
 		t = {}
 		for x in tax: t[x[0]] = flt(x[1])
 		ret = {
 			'description'			: item and item[0]['description_html'] or item[0]['description'],
+			'barcode'				: item and item[0]['barcode'] or '',
 			'item_group'			: item and item[0]['item_group'] or '',
 			'item_name'				: item and item[0]['item_name'] or '',
 			'brand'					: item and item[0]['brand'] or '',
@@ -171,13 +172,30 @@ class DocType(TransactionBase):
 
 		return ret
 
-
 	
 	# ***************** Get Ref rate as entered in Item Master ********************
 	def get_ref_rate(self, item_code, price_list_name, price_list_currency, plc_conv_rate):
 		ref_rate = webnotes.conn.sql("select ref_rate from `tabItem Price` where parent = %s and price_list_name = %s and ref_currency = %s", (item_code, price_list_name, price_list_currency))
 		base_ref_rate = ref_rate and flt(ref_rate[0][0]) * flt(plc_conv_rate) or 0
 		return base_ref_rate
+
+	def get_barcode_details(self, barcode):
+		item = webnotes.conn.sql("select name, end_of_life, is_sales_item, is_service_item \
+			from `tabItem` where barcode = %s", barcode, as_dict=1)
+		ret = {}
+		if not item:
+			msgprint("""No item found for this barcode: %s. 
+				May be barcode not updated in item master. Please check""" % barcode)
+		elif item[0]['end_of_life'] and getdate(cstr(item[0]['end_of_life'])) < nowdate():
+			msgprint("Item: %s has been expired. Please check 'End of Life' field in item master" % item[0]['name'])
+		elif item[0]['is_sales_item'] == 'No' and item[0]['is_service_item'] == 'No':
+			msgprint("Item: %s is not a sales or service item" % item[0]['name'])
+		elif len(item) > 1:
+			msgprint("There are multiple item for this barcode. \nPlease select item code manually")
+		else:
+			ret = {'item_code': item and item[0]['name'] or ''}
+			
+		return ret
 
 		
 	# ****** Re-cancellculates Basic Rate & amount based on Price List Selected ******

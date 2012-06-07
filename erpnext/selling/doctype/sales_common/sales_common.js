@@ -265,6 +265,16 @@ cur_frm.cscript.item_code = function(doc, cdt, cdn) {
 	}
 }
 
+//Barcode
+//
+cur_frm.cscript.barcode = function(doc, cdt, cdn) {
+	var d = locals[cdt][cdn];
+	var callback = function(r, rt) {
+		cur_frm.cscript.item_code(doc, cdt, cdn);
+	}
+	get_server_fields('get_barcode_details', d.barcode, cur_frm.cscript.fname, doc, cdt, cdn, 1, callback);
+}
+
 
 // *********************** QUANTITY ***************************
 cur_frm.cscript.qty = function(doc, cdt, cdn) { cur_frm.cscript.recalc(doc, 1); }
