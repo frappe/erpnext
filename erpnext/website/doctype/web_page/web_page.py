@@ -33,7 +33,7 @@ class DocType:
 		import os
 
 		# we need the name for the templates
-		if not self.doc.name:
+		if self.doc.name.startswith('New Web Page'):
 			self.autoname()
 
 		if self.doc.page_name:
