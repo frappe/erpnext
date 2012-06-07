@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-05-29 16:56:41',
+		'creation': '2012-06-07 11:02:55',
 		'docstatus': 0,
-		'modified': '2012-05-31 16:14:39',
+		'modified': '2012-06-07 11:24:20',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -31,12 +31,14 @@
 
 	# These values are common for all DocPerm
 	{
+		'amend': 0,
 		'doctype': u'DocPerm',
 		'name': '__common__',
 		'parent': u'Communication',
 		'parentfield': u'permissions',
 		'parenttype': u'DocType',
 		'read': 1,
+		'submit': 0,
 		'write': 1
 	},
 
@@ -48,6 +50,7 @@
 
 	# DocPerm
 	{
+		'cancel': 0,
 		'create': 1,
 		'doctype': u'DocPerm',
 		'permlevel': 0,
@@ -56,6 +59,7 @@
 
 	# DocPerm
 	{
+		'cancel': 0,
 		'create': 1,
 		'doctype': u'DocPerm',
 		'permlevel': 0,
@@ -64,6 +68,7 @@
 
 	# DocPerm
 	{
+		'cancel': 0,
 		'create': 1,
 		'doctype': u'DocPerm',
 		'permlevel': 0,
@@ -72,6 +77,8 @@
 
 	# DocPerm
 	{
+		'cancel': 0,
+		'create': 0,
 		'doctype': u'DocPerm',
 		'permlevel': 1,
 		'role': u'Sales Manager'
@@ -79,9 +86,29 @@
 
 	# DocPerm
 	{
+		'cancel': 0,
+		'create': 0,
 		'doctype': u'DocPerm',
 		'permlevel': 1,
 		'role': u'Support Manager'
+	},
+
+	# DocPerm
+	{
+		'cancel': 1,
+		'create': 1,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Administrator'
+	},
+
+	# DocPerm
+	{
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Administrator'
 	},
 
 	# DocField
@@ -112,7 +139,7 @@
 		'fieldname': u'category',
 		'fieldtype': u'Select',
 		'label': u'Category',
-		'options': u'\nSales\nComplaint\nHelp\nSuggestion\nMiscellaneous',
+		'options': u'\nSales\nComplaint\nHelp\nSuggestion\nMiscellaneous\nSent Mail',
 		'permlevel': 0,
 		'reqd': 1
 	},
@@ -123,7 +150,7 @@
 		'fieldname': u'action',
 		'fieldtype': u'Select',
 		'label': u'Action',
-		'options': u'\nCreated Opportunity\nSent Quotation\nCreated Support Ticket\nCreated Customer Issue\nNo Action',
+		'options': u'\nCreated Opportunity\nSent Quotation\nCreated Support Ticket\nCreated Customer Issue\nNo Action\nSent Mail',
 		'permlevel': 0,
 		'reqd': 1
 	},
