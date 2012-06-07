@@ -700,7 +700,7 @@ if(this.txt){try{this.txt.focus();}catch(e){}
 this.txt.field_object=this;}}
 function DataField(){}DataField.prototype=new Field();DataField.prototype.make_input=function(){var me=this;this.input=$a_input(this.input_area,this.df.fieldtype=='Password'?'password':'text');this.get_value=function(){var v=this.input.value;if(this.validate)
 v=this.validate(v);return v;}
-this.input.name=this.df.fieldname;$(this.input).change(function(){me.set_value(me.get_value&&me.get_value()||$(this.input).val());});this.set_value=function(val){if(!me.last_value)me.last_value='';if(me.validate){val=me.validate(val);me.input.value=val==undefined?'':val;}
+this.input.name=this.df.fieldname;$(this.input).change(function(){me.set_value(me.get_value?me.get_value():$(this.input).val());});this.set_value=function(val){if(!me.last_value)me.last_value='';if(me.validate){val=me.validate(val);me.input.value=val==undefined?'':val;}
 me.set(val);if(me.format_input)
 me.format_input();if(in_list(['Currency','Float','Int'],me.df.fieldtype)){if(flt(me.last_value)==flt(val)){me.last_value=val;return;}}
 me.last_value=val;me.run_trigger();}
@@ -1541,7 +1541,7 @@ if(this.txt){try{this.txt.focus();}catch(e){}
 this.txt.field_object=this;}}
 function DataField(){}DataField.prototype=new Field();DataField.prototype.make_input=function(){var me=this;this.input=$a_input(this.input_area,this.df.fieldtype=='Password'?'password':'text');this.get_value=function(){var v=this.input.value;if(this.validate)
 v=this.validate(v);return v;}
-this.input.name=this.df.fieldname;$(this.input).change(function(){me.set_value(me.get_value&&me.get_value()||$(this.input).val());});this.set_value=function(val){if(!me.last_value)me.last_value='';if(me.validate){val=me.validate(val);me.input.value=val==undefined?'':val;}
+this.input.name=this.df.fieldname;$(this.input).change(function(){me.set_value(me.get_value?me.get_value():$(this.input).val());});this.set_value=function(val){if(!me.last_value)me.last_value='';if(me.validate){val=me.validate(val);me.input.value=val==undefined?'':val;}
 me.set(val);if(me.format_input)
 me.format_input();if(in_list(['Currency','Float','Int'],me.df.fieldtype)){if(flt(me.last_value)==flt(val)){me.last_value=val;return;}}
 me.last_value=val;me.run_trigger();}

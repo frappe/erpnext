@@ -38,9 +38,9 @@ cur_frm.cscript.render_communication_list = function(doc, dt, dn) {
 			this._super(data);
 			data.creation = wn.datetime.str_to_user(data.communication_date);
 
-			// replace double quote with blank string
-			data.content = cstr(data.subject).replace(/"/gi, '')
-				+ " | " + cstr(data.content).replace(/"/gi, '');
+			// escape double quote
+			data.content = cstr(data.subject).replace(/"/gi, '\"')
+				+ " | " + cstr(data.content).replace(/"/gi, '\"');
 
 			if(data.content && data.content.length > 50) {
 				data.content = '<span title="'+data.content+'">' +
