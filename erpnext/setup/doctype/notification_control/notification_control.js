@@ -42,8 +42,8 @@ cur_frm.cscript.notify = function(doc, args) {
 				}
 			})();
 			if(res.send) {
+				var print_heading = (doc.select_print_heading || args['type'])
 				if(validate_email(args['send_to'] || doc.contact_email || '')) {
-					var print_heading = (doc.select_print_heading || args['type'])
 					sendmail(
 						args['send_to'] || doc.contact_email,
 						send_from,
@@ -55,7 +55,8 @@ cur_frm.cscript.notify = function(doc, args) {
 					msgprint('This ' + print_heading + ' is being sent to <b>'
 						+ (args['send_to'] || doc.contact_email) + '</b><br />...');
 				} else {
-					msgprint('Invalid/Missing Email Address. ' + print_heading + ' not sent.');
+					msgprint('Invalid/Missing Email Address of Contact. Auto notification for ' 
+						+ print_heading + ' not sent.');
 				}
 			}
 		}

@@ -22,4 +22,4 @@ def send_message():
 		webnotes.msgprint('Please give us your email id so that we can write back to you', raise_exception=True)
 	
 	d.save()
-	webnotes.msgprint('Thank you for your query, we will get back to you asap.')
+	webnotes.msgprint('Thank you!')
