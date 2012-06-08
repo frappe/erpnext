@@ -92,3 +92,22 @@ cur_frm.cscript.render_list = function(doc, doctype, wrapper, ListView, make_new
 		var record_list_view = new RecordListView(doctype, wrapper, ListView);
 	});
 }
+
+
+cur_frm.cscript.contact = function(doc, dt, dn) {
+	if (doc.contact) {
+		wn.call({
+			method: 'support.doctype.communication.communication.get_customer_supplier',
+			args: {
+				contact: doc.contact
+			},
+			callback: function(r, rt) {
+				if (!r.exc && r.message) {
+					doc = locals[doc.doctype][doc.name];
+					doc[r.message['fieldname']] = r.message['value'];
+					refresh_field(r.message['fieldname']);
+				}
+			},
+		});
+	}
+}

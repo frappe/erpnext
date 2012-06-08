@@ -17,6 +17,26 @@
 import webnotes
 from webnotes.model.doc import make_autoname
 
+@webnotes.whitelist()
+def get_customer_supplier(args=None):
+	"""
+		Get Customer/Supplier, given a contact, if a unique match exists
+	"""
+	import webnotes
+	if not args: args = webnotes.form_dict
+	if not args.get('contact'):
+		raise Exception, "Please specify a contact to fetch Customer/Supplier"
+	result = webnotes.conn.sql("""\
+		select customer, supplier
+		from `tabContact`
+		where name = %s""", args.get('contact'), as_dict=1)
+	if result and len(result)==1 and (result[0]['customer'] or result[0]['supplier']):
+		return {
+			'fieldname': result[0]['customer'] and 'customer' or 'supplier',
+			'value': result[0]['customer'] or result[0]['supplier']
+		}
+	return {}
+
 class DocType():
 	def __init__(self, doc, doclist=[]):
 		self.doc = doc
