@@ -3844,10 +3844,6 @@ span, div, td, input, textarea, button, select {
 	font-family: inherit;
 }
 
-body {
-	color: #616161;
-}
-
 .small {
 	font-size: 11.5px;
 }
