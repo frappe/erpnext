@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-05-21 11:43:59',
+		'creation': '2012-06-08 15:33:49',
 		'docstatus': 0,
-		'modified': '2012-05-31 11:43:18',
+		'modified': '2012-06-08 16:10:44',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -51,7 +51,8 @@
 		'name': '__common__',
 		'parent': u'Quotation',
 		'parentfield': u'permissions',
-		'parenttype': u'DocType'
+		'parenttype': u'DocType',
+		'read': 1
 	},
 
 	# DocType, Quotation
@@ -62,19 +63,11 @@
 
 	# DocPerm
 	{
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'user print'
-	},
-
-	# DocPerm
-	{
 		'amend': 0,
 		'cancel': 0,
 		'create': 0,
 		'doctype': u'DocPerm',
 		'permlevel': 1,
-		'read': 1,
 		'role': u'Sales Manager',
 		'submit': 0,
 		'write': 0
@@ -87,7 +80,6 @@
 		'create': 1,
 		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'read': 1,
 		'role': u'Sales Manager',
 		'submit': 1,
 		'write': 1
@@ -100,7 +92,6 @@
 		'create': 1,
 		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'read': 1,
 		'role': u'Sales User',
 		'submit': 1,
 		'write': 1
@@ -113,7 +104,6 @@
 		'create': 0,
 		'doctype': u'DocPerm',
 		'permlevel': 1,
-		'read': 1,
 		'role': u'Sales User',
 		'submit': 0,
 		'write': 0
@@ -124,7 +114,6 @@
 		'doctype': u'DocPerm',
 		'match': u'customer_name',
 		'permlevel': 0,
-		'read': 1,
 		'role': u'Customer'
 	},
 
@@ -135,7 +124,6 @@
 		'create': 1,
 		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'read': 1,
 		'role': u'Maintenance Manager',
 		'submit': 1,
 		'write': 1
@@ -145,7 +133,6 @@
 	{
 		'doctype': u'DocPerm',
 		'permlevel': 1,
-		'read': 1,
 		'role': u'Maintenance Manager'
 	},
 
@@ -156,7 +143,6 @@
 		'create': 1,
 		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'read': 1,
 		'role': u'Maintenance User',
 		'submit': 1,
 		'write': 1
@@ -166,7 +152,6 @@
 	{
 		'doctype': u'DocPerm',
 		'permlevel': 1,
-		'read': 1,
 		'role': u'Maintenance User'
 	},
 
@@ -281,6 +266,16 @@
 		'fieldtype': u'Data',
 		'hidden': 1,
 		'label': u'Customer Name',
+		'permlevel': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'organization',
+		'fieldtype': u'Data',
+		'hidden': 1,
+		'label': u'Organization',
 		'permlevel': 1
 	},
 

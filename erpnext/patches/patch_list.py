@@ -422,4 +422,9 @@ patch_list = [
 		'patch_file': 'copy_uom_for_pur_inv_item',
 		'description': 'Copy uom for pur inv item from PO and PR item table'
 	},
+	{
+		'patch_module': 'patches.june_2012',
+		'patch_file': 'fetch_organization_from_lead',
+		'description': 'Fetch organization from lead in quote'
+	},
 ]
