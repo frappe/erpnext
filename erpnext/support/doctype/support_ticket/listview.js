@@ -33,9 +33,9 @@ wn.doclistviews['Support Ticket'] = wn.views.ListView.extend({
 			me.set_filter('status', $(this).text());
 		});
 		
-		// replace double quote with blank string
-		data.description = cstr(data.subject).replace(/"/gi, '')
-			+ " | " + cstr(data.description).replace(/"/gi, '');
+		// escape double quotes
+		data.description = cstr(data.subject).replace(/"/gi, '\"')
+			+ " | " + cstr(data.description).replace(/"/gi, '\"');
 		
 		// description
 		if(data.description && data.description.length > 50) {
