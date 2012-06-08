@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-03-27 14:36:21',
+		'creation': '2012-04-13 11:56:31',
 		'docstatus': 0,
-		'modified': '2012-03-27 14:36:21',
+		'modified': '2012-06-07 18:41:50',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -22,7 +22,7 @@
 		'name_case': u'Title Case',
 		'section_style': u'Simple',
 		'show_in_menu': 1,
-		'version': 26
+		'version': 1
 	},
 
 	# These values are common for all DocField
@@ -102,6 +102,15 @@
 		'fieldname': u'fs_brands',
 		'fieldtype': u'Check',
 		'label': u'Brands'
+	},
+
+	# DocField
+	{
+		'description': u'To track items using barcode. You will be able to enter items in Delivery Note and Sales Invoice by scanning barcode of item.',
+		'doctype': u'DocField',
+		'fieldname': u'fs_item_barcode',
+		'fieldtype': u'Check',
+		'label': u'Item Barcode'
 	},
 
 	# DocField

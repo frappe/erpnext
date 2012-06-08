@@ -211,6 +211,9 @@ class DocType(TransactionBase):
 				ret['actual_qty']= actual_qty and flt(actual_qty[0][0]) or 0
 		return ret
 
+	def get_barcode_details(self, barcode):
+		return get_obj('Sales Common').get_barcode_details(barcode)
+
 
 	# Fetch ref rate from item master as per selected price list
 	def get_adj_percent(self, arg=''):

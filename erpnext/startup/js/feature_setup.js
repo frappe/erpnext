@@ -93,6 +93,11 @@ pscript.feature_dict = {
 		'Stock Entry': {'mtn_details':['serial_no']},
 		'Stock Ledger Entry': {'fields':['serial_no']}
 	},
+	'fs_item_barcode': {
+		'Item': {'fields': ['barcode']},
+		'Delivery Note': {'delivery_note_details': ['barcode']},
+		'Sales Invoice': {'entries': ['barcode']}
+	},
 	'fs_item_group_in_details': {
 		'Delivery Note': {'delivery_note_details':['item_group']},
 		'Opportunity': {'enquiry_details':['item_group']},

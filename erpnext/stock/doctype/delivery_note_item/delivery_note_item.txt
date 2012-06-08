@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-03-27 14:36:29',
+		'creation': '2012-04-13 11:56:35',
 		'docstatus': 0,
-		'modified': '2012-03-27 14:36:29',
+		'modified': '2012-06-07 17:57:14',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -23,7 +23,7 @@
 		'section_style': u'Tray',
 		'server_code_error': u' ',
 		'show_in_menu': 0,
-		'version': 56
+		'version': 1
 	},
 
 	# These values are common for all DocField
@@ -39,6 +39,16 @@
 	{
 		'doctype': 'DocType',
 		'name': u'Delivery Note Item'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'barcode',
+		'fieldtype': u'Data',
+		'label': u'Barcode',
+		'permlevel': 0,
+		'print_hide': 1
 	},
 
 	# DocField

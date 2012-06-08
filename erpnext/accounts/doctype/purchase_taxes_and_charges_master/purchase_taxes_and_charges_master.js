@@ -127,7 +127,7 @@ cur_frm.cscript.row_id = function(doc, cdt, cdn) {
 /*---------------------- Get rate if account_head has account_type as TAX or CHARGEABLE-------------------------------------*/
 
 cur_frm.fields_dict['purchase_tax_details'].grid.get_field("account_head").get_query = function(doc,cdt,cdn) {
-  return 'SELECT tabAccount.name FROM tabAccount WHERE tabAccount.group_or_ledger="Ledger" AND tabAccount.docstatus != 2 AND (tabAccount.account_type in ("Tax", "Chargeable", "Expense") or (tabAccount.is_pl_account = "Yes" and tabAccount.debit_or_credit = "Debit")) AND tabAccount.company = "' + doc.company + '" AND  tabAccount.name LIKE "%s"'
+  return 'SELECT tabAccount.name FROM tabAccount WHERE tabAccount.group_or_ledger="Ledger" AND tabAccount.docstatus != 2 AND (tabAccount.account_type in ("Tax", "Chargeable", "Expense Account") or (tabAccount.is_pl_account = "Yes" and tabAccount.debit_or_credit = "Debit")) AND tabAccount.company = "' + doc.company + '" AND  tabAccount.name LIKE "%s"'
 }
 
 
