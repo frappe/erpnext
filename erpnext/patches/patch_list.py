@@ -417,4 +417,9 @@ patch_list = [
 		'patch_file': 'barcode_in_feature_setup',
 		'description': 'Track item by barcode'
 	},
+	{
+		'patch_module': 'patches.june_2012',
+		'patch_file': 'copy_uom_for_pur_inv_item',
+		'description': 'Copy uom for pur inv item from PO and PR item table'
+	},
 ]
