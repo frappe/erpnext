@@ -31,8 +31,10 @@ You will have to set your origin in git remote
 
 ## Forums
 
-- [User / Functional](http://groups.google.com/group/erpnext-user-forum)
-- [Technical](http://groups.google.com/group/wnframework)
+Please join our forums for more questions:
+
+- [Developer Forum](http://groups.google.com/group/erpnext-developer-forum)
+- [User Forum](http://groups.google.com/group/erpnext-user-forum)
 
 ## License
 
