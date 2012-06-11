@@ -74,7 +74,7 @@ class DocType:
 		        AND node.lft BETWEEN sub_parent.lft AND sub_parent.rgt
 				AND sub_parent.name = sub_tree.name
 			GROUP BY node.name
-			ORDER BY node.lft""", acc, as_dict = 1)
+			ORDER BY node.lft""", acc, as_dict = 1, as_utf8=1)
 
 
 
@@ -110,7 +110,7 @@ class DocType:
 
 	def show_gl_entries(self, acc):
 		"""Get gl entries for the period and account"""
-		gle = sql("select posting_date, voucher_type, voucher_no, debit, credit, remarks from `tabGL Entry` WHERE account = %s and posting_date >= %s AND posting_date <= %s and ifnull(is_opening,	'No') = 'No' and ifnull(is_cancelled, 'No') = 'No'", (acc, self.doc.from_date, self.doc.to_date), as_dict=1)
+		gle = sql("select posting_date, voucher_type, voucher_no, debit, credit, remarks from `tabGL Entry` WHERE account = %s and posting_date >= %s AND posting_date <= %s and ifnull(is_opening,	'No') = 'No' and ifnull(is_cancelled, 'No') = 'No'", (acc, self.doc.from_date, self.doc.to_date), as_dict=1, as_utf8=1)
 		entries, dr, cr = [], 0, 0
 		for d in gle:
 			entries.append(['', d['posting_date'], d['voucher_type'], d['voucher_no'], d['debit'], d['credit'], d['remarks']])
