@@ -385,7 +385,7 @@ class DocType:
 		""" Notify user about auto creation of indent"""
 		
 		from webnotes.utils.email_lib import sendmail
-		email_list=[d[0] for d in sql("select parent from tabUserRole where role in ('Purchase Manager','Material Manager') ")]
+		email_list=[d[0] for d in sql("select parent from tabUserRole where role in ('Purchase Manager','Material Manager') and parent not in ('Administrator', 'All', 'Guest')")]
 		msg='A Purchase Request has been raised for item %s: %s on %s '%(doc_type, doc_name, nowdate())
 		sendmail(email_list, subject='Auto Purchase Request Generation Notification', msg = msg)	
 
