@@ -66,7 +66,7 @@ class DocType:
 		item = sql("select name from `tabItem` where ifnull(item_group, '') = %s", self.doc.name)
 		item = [d[0] for d in item]
 		
-		if ig:
+		if item:
 			msgprint("""Item Group: %s can not be trashed/deleted because it is used in item: %s. 
 				To trash/delete this, remove/change item group in item master""" % (self.doc.name, item or ''), raise_exception=1)
 				
