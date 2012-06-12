@@ -376,7 +376,7 @@ class DocType:
 		indent_obj.on_submit()
 		msgprint("Item: " + self.doc.item_code + " is to be re-ordered. Purchase Request %s raised. It was generated from %s %s"%(indent.name,doc_type, doc_name ))
 		if(i['email_notify']):
-			send_email_notification(doc_type,doc_name)
+			self.send_email_notification(doc_type,doc_name)
 			
 
 
