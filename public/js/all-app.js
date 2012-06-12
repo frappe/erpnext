@@ -1257,18 +1257,6 @@ function freeze(){if(!dialog_back){dialog_back=$a($i('body_div'),'div','dialog_b
 $ds(dialog_back);fcount++;}
 function unfreeze(){if(!fcount)return;fcount--;if(!fcount){$dh(dialog_back);}}
 /*
- *	lib/js/legacy/webpage/error_console.js
- */
-var err_console;var err_list=[];function errprint(t){if(!err_list)err_list=[];err_list.push('<pre style="font-family: Courier, Fixed; font-size: 11px; \
-  border-bottom: 1px solid #AAA; overflow: auto; width: 90%;">'+t+'</pre>');}
-$(document).bind('startup',function(){err_console=new Dialog(640,480,'Error Console')
-err_console.make_body([['HTML','Error List'],['Button','Clear'],['HTML','Error Report']]);var span=$a(err_console.widgets['Error Report'],'span','link_type');span.innerHTML='Send Error Report';span.onclick=function(){msg=prompt('How / where did you get the error [optional]')
-var call_back=function(r,rt){err_console.hide();msgprint("Error Report Sent")}
-$c('webnotes.utils.send_error_report',{'err_msg':err_console.rows['Error List'].innerHTML,'msg':msg},call_back);}
-err_console.widgets['Clear'].onclick=function(){err_list=[];err_console.rows['Error List'].innerHTML='';err_console.hide();}
-err_console.onshow=function(){err_console.rows['Error List'].innerHTML='<div style="padding: 16px; height: 360px; width: 90%; overflow: auto;">'
-+err_list.join('<div style="height: 10px; margin-bottom: 10px; border-bottom: 1px solid #AAA"></div>')+'</div>';}});
-/*
  *	lib/js/legacy/webpage/loaders.js
  */
 function loadreport(dt,rep_name,onload){if(rep_name)
@@ -1457,7 +1445,6 @@ wn.ui.toolbar.Toolbar=Class.extend({init:function(){this.make();this.make_home()
    <a class="dropdown-toggle" data-toggle="dropdown" href="#" \
     onclick="return false;">Tools<b class="caret"></b></a>\
    <ul class="dropdown-menu" id="toolbar-tools">\
-    <li><a href="#" onclick="return err_console.show();">Error Console</a></li>\
     <li><a href="#" onclick="return wn.ui.toolbar.clear_cache();">Clear Cache & Refresh</a></li>\
     <li><a href="#" onclick="return wn.ui.toolbar.show_about();">About</a></li>\
    </ul>\
