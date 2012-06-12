@@ -20,7 +20,8 @@ erpnext.todo.refresh = function() {
 	wn.call({
 		method: 'utilities.page.todo.todo.get',
 		callback: function(r,rt) {
-			$('#todo-list').empty();
+			$('#todo-list div.todo-content').empty();
+			$('#assigned-todo-list div.todo-content').empty();
 			if(r.message) {
 				for(var i in r.message) {
 					new erpnext.todo.ToDoItem(r.message[i]);
@@ -46,11 +47,23 @@ erpnext.todo.ToDoItem = Class.extend({
 		}
 		todo.labelclass = label_map[todo.priority];
 		todo.userdate = dateutil.str_to_user(todo.date) || '';
+		
+		todo.fullname = '';
 		if(todo.assigned_by) {
 			todo.fullname = repl("[By %(fullname)s] ", {
 				fullname: wn.boot.user_info[todo.assigned_by].fullname
-			})
-		} else { todo.fullname = ''; }
+			});
+		}
+		
+		var parent_list = "#todo-list";
+		if(todo.owner !== user) {
+			parent_list = "#assigned-todo-list";
+			todo.fullname = repl("[To %(fullname)s] ", {
+				fullname: wn.boot.user_info[todo.owner].fullname
+			});
+		}
+		parent_list += " div.todo-content";
+		
 		if(todo.reference_name && todo.reference_type) {
 			todo.link = repl('<a href="#!Form/%(reference_type)s/%(reference_name)s">\
 						%(reference_type)s: %(reference_name)s</a>', todo);
@@ -61,16 +74,22 @@ erpnext.todo.ToDoItem = Class.extend({
 			todo.link = '';
 		}
 		if(!todo.description) todo.description = '';
-		$('#todo-list').append(repl('<div class="todoitem">\
+		
+		todo.desc = todo.description.replace(/\n/g, "<br>");
+		
+		$(parent_list).append(repl('\
+			<div class="todoitem">\
+				<span class="label %(labelclass)s">%(priority)s</span>\
 				<span class="description">\
-					<span class="label %(labelclass)s">%(priority)s</span>\
 					<span class="help" style="margin-right: 7px">%(userdate)s</span>\
-					%(fullname)s%(description)s</span>\
-					<span class="ref_link">&rarr; &nbsp;\
+					%(fullname)s%(desc)s\
+					<span class="ref_link"><br>\
 					%(link)s</span>\
-					<a href="#" class="close">&times;</a>\
-		</div>', todo));
-		$todo = $('div.todoitem:last');
+				</span>\
+				<span class="close-span"><a href="#" class="close">&times;</a></span>\
+			</div>\
+			<div class="todo-separator"></div>', todo));
+		$todo = $(parent_list + ' div.todoitem:last');
 		
 		if(todo.checked) {
 			$todo.find('.description').css('text-decoration', 'line-through');

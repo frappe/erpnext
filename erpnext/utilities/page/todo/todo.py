@@ -22,9 +22,9 @@ def get(arg=None):
 	"""get todo list"""
 	return webnotes.conn.sql("""select name, owner, description, date,
 		priority, checked, reference_type, reference_name, assigned_by
-		from `tabToDo` where owner=%s 
+		from `tabToDo` where (owner=%s or assigned_by=%s)
 		order by field(priority, 'High', 'Medium', 'Low') asc, date asc""",
-		webnotes.session['user'], as_dict=1)
+		(webnotes.session['user'], webnotes.session['user']), as_dict=1)
 
 @webnotes.whitelist()		
 def edit(arg=None):
@@ -35,7 +35,7 @@ def edit(arg=None):
 	d.date = args['date']
 	d.priority = args['priority']
 	d.checked = args.get('checked', 0)
-	d.owner = webnotes.session['user']
+	if not d.owner: d.owner = webnotes.session['user']
 	d.save(not args.get('name') and 1 or 0)
 
 	if args.get('name') and d.checked:

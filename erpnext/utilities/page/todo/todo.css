@@ -1,8 +1,6 @@
 .todoitem {
-	padding-bottom: 11px;
-	border-bottom: 1px solid #DEB85F;
-	margin-bottom: 5px;
-	height: 14px;
+	padding-bottom: 3px;
+	min-height: 45px;
 	clear: both;
 }
 
@@ -10,23 +8,42 @@
 	width: 50px;
 	display: inline-block;
 	text-align: center;
-	margin-right: 7px;
+	margin-right: 11px;
+	margin-top: 3px;
+	float: left;
 }
 
 .todoitem .close {
 	margin-left: 14px;
-	font-size: 14px;
-	float: left;
+	font-size: 17px;
+}
+
+.todoitem .close-span {
+	display: inline-block;
+	float: right;
 }
 
 .todoitem .ref_link {
-	float: left;
-	margin-left: 10px;
-	display: inline-block;
 	line-height: 18px;
 }
 
 .todoitem .description {
 	cursor: pointer;
+	padding: 3px 0px;
+	display: inline-block;
+}
+
+#todo-list, #assigned-todo-list {
 	float: left;
+	width: 50%;
+}
+
+.todo-separator {
+	border-bottom: 1px solid #DEB85F;
+	margin-bottom: 5px;
+	clear: both;
+}
+
+.todo-content {
+	padding-right: 15px;
 }
