@@ -19,15 +19,16 @@ wn.doclistviews['Lead'] = wn.views.ListView.extend({
 			data.label_type = 'info'
 		}
 		data.status_html = repl('<span class="label label-%(label_type)s">%(status)s</span>', data);
-		
-		data.lead_name = (data.rating ? ('['+data.rating+'] ') : '') + '['+data.source+'] ' + data.lead_name;
+		data.lead_name = repl("<a href=\"#!Form/Lead/%(name)s\">%(lead_name)s</a>",
+			data);
+		data.lead_status = (data.rating ? ('['+data.rating+'] ') : '') + '['+data.source+']';
 	},
 
 	columns: [
 		{width: '3%', content: 'check'},
-		{width: '20%', content:'name'},
+		{width: '30%', content:'lead_name'},
 		{width: '12%', content:'status_html'},
-		{width: '52%', content:'lead_name+tags', css: {color:'#222'}},
+		{width: '42%', content:'lead_status+tags', css: {color:'#222'}},
 		{width: '13%', content:'modified', css: {'text-align': 'right', 'color':'#777'}}
 	]
 })
