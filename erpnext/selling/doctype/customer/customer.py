@@ -235,10 +235,16 @@ class DocType:
 		for rec in sql("select * from `tabContact` where customer='%s'" %(self.doc.name), as_dict=1):
 			sql("delete from `tabContact` where name=%s",(rec['name']))
 	
+	def delete_customer_communication(self):
+		webnotes.conn.sql("""\
+			delete from `tabCommunication`
+			where customer = %s and supplier is null""", self.doc.name)
+	
 # ******************************************************* on trash *********************************************************
 	def on_trash(self):
 		self.delete_customer_address()
 		self.delete_customer_contact()
+		self.delete_customer_communication()
 		if self.doc.lead_name:
 			sql("update `tabLead` set status='Interested' where name=%s",self.doc.lead_name)
 			
