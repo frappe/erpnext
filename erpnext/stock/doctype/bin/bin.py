@@ -17,12 +17,13 @@
 # Please edit this list and import only required elements
 import webnotes
 
-from webnotes.utils import add_days, add_months, add_years, cint, cstr, date_diff, default_fields, flt, fmt_money, formatdate, generate_hash, getTraceback, get_defaults, get_first_day, get_last_day, getdate, has_common, month_name, now, nowdate, replace_newlines, sendmail, set_default, str_esc_quote, user_format, validate_email_add
+from webnotes.utils import add_days, add_months, add_years, cint, cstr, date_diff, default_fields, flt, fmt_money, formatdate, generate_hash, getTraceback, get_defaults, get_first_day, get_last_day, getdate, has_common, month_name, now, nowdate, replace_newlines, set_default, str_esc_quote, user_format, validate_email_add
 from webnotes.model import db_exists
 from webnotes.model.doc import Document, addchild, getchildren, make_autoname
 from webnotes.model.doclist import getlist, copy_doclist
 from webnotes.model.code import get_obj, get_server_obj, run_server_obj, updatedb, check_syntax
 from webnotes import session, form, is_testing, msgprint, errprint
+
 
 set = webnotes.conn.set
 sql = webnotes.conn.sql
@@ -382,11 +383,11 @@ class DocType:
 
 	def send_email_notification(self,doc_type,doc_name):
 		""" Notify user about auto creation of indent"""
-
-		email_list=[d for d in sql("select parent from tabUserRole where role in ('Purchase Manager','Material Manager') ")]
-		msg1='A Purchase Request has been raised for item %s: %s on %s '%(doc_type, doc_name, nowdate())
-		sendmail(email_list, sender='automail@webnotestech.com', \
-		subject='Auto Purchase Request Generation Notification', parts=[['text/plain',msg1]])	
+		
+		from webnotes.utils.email_lib import sendmail
+		email_list=[d[0] for d in sql("select parent from tabUserRole where role in ('Purchase Manager','Material Manager') and parent not in ('Administrator', 'All', 'Guest')")]
+		msg='A Purchase Request has been raised for item %s: %s on %s '%(doc_type, doc_name, nowdate())
+		sendmail(email_list, subject='Auto Purchase Request Generation Notification', msg = msg)	
 
 
 
