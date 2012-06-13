@@ -14,7 +14,7 @@
 }
 
 .todoitem .close {
-	margin-left: 14px;
+	margin-left: 5px;
 	font-size: 17px;
 }
 
@@ -31,6 +31,7 @@
 	cursor: pointer;
 	padding: 3px 0px;
 	display: inline-block;
+	width: 80%;
 }
 
 #todo-list, #assigned-todo-list {
