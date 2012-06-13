@@ -30,7 +30,7 @@ cur_frm.cscript.load_taxes = function(doc, cdt, cdn, callback) {
 			callback(doc, cdt, cdn);
 		}
 	} else {
-		$c_obj([doc],'load_default_taxes','',function(r,rt){
+		$c_obj(make_doclist(doc.doctype, doc.name),'load_default_taxes','',function(r,rt){
 			refresh_field('other_charges');
 			if(callback) callback(doc, cdt, cdn);
 		});
@@ -72,6 +72,8 @@ cur_frm.cscript.update_item_details = function(doc, dt, dn, callback) {
 				cur_frm.cscript.load_defaults(doc, dt, dn, callback);
 			}
 		});
+	} else {
+		cur_frm.cscript.load_taxes(doc, dt, dn, callback);
 	}
 }
 

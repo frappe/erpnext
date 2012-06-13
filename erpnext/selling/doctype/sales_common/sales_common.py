@@ -214,12 +214,15 @@ class DocType(TransactionBase):
 	# Load Default Taxes
 	# ====================
 	def load_default_taxes(self, obj):
-		self.get_other_charges(obj,1)
+		if cstr(obj.doc.charge):
+			self.get_other_charges(obj)
+		else:
+			self.get_other_charges(obj, 1)
 
 		
 	# Get other charges from Master
 	# =================================================================================
-	def get_other_charges(self,obj,default = 0):
+	def get_other_charges(self,obj, default=0):
 		obj.doc.clear_table(obj.doclist,'other_charges')
 		if not getlist(obj.doclist, 'other_charges'):
 			if default: add_cond = 'ifnull(t2.is_default,0) = 1'
