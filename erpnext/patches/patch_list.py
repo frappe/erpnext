@@ -427,4 +427,9 @@ patch_list = [
 		'patch_file': 'fetch_organization_from_lead',
 		'description': 'Fetch organization from lead in quote'
 	},
+	{
+		'patch_module': 'patches.june_2012',
+		'patch_file': 'reports_list_permission',
+		'description': 'allow read permission to all for report list'
+	},
 ]

@@ -20,14 +20,31 @@ erpnext.todo.refresh = function() {
 	wn.call({
 		method: 'utilities.page.todo.todo.get',
 		callback: function(r,rt) {
-			$('#todo-list div.todo-content').empty();
-			$('#assigned-todo-list div.todo-content').empty();
+			var todo_list = $('#todo-list div.todo-content');
+			var assigned_todo_list = $('#assigned-todo-list div.todo-content');
+			todo_list.empty();
+			assigned_todo_list.empty();
+			
+			var nothing_to_do = function() {
+				$('#todo-list div.todo-content')
+					.html('<div class="help-box">Nothing to do :)</div>');
+			}
+			
+			var nothing_delegated = function() {
+				$('#assigned-todo-list div.todo-content')
+					.html('<div class="help-box">Nothing assigned to other users. \
+							Use "Assign To" in a form to delegate work.</div>');
+			}
+			
 			if(r.message) {
 				for(var i in r.message) {
 					new erpnext.todo.ToDoItem(r.message[i]);
 				}
+				if (!todo_list.html()) { nothing_to_do(); }
+				if (!assigned_todo_list.html()) { nothing_delegated(); }
 			} else {
-				$('#todo-list').html('<div class="help-box">Nothing to do :)</div>');
+				nothing_to_do();
+				nothing_delegated();				
 			}
 		}
 	});
