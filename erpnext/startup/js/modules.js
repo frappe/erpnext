@@ -80,7 +80,7 @@ erpnext.module_page.make_list = function(module, wrapper) {
 			erpnext.module_page.hide_links($parent1)
 		}
 	});
-	wrapper.list1.run();	
+	wrapper.list1.run();
 
 	wrapper.list2 = new wn.ui.Listing({
 		parent: $parent2,
@@ -97,4 +97,12 @@ erpnext.module_page.make_list = function(module, wrapper) {
 		}
 	});
 	wrapper.list2.run();
+	
+	// show link to all reports
+	$parent1.find('.list-toolbar-wrapper')
+		.prepend("<div class=\"show-all-reports\">\
+			<a href=\"#List/Search Criteria\"> [ Show List Of All Reports ]</a></div>");
+	$parent2.find('.list-toolbar-wrapper')
+		.prepend("<div class=\"show-all-reports\">\
+			<a href=\"#List/Report\"> [ Show List Of All Reports (Beta) ]</a></div>");
 }

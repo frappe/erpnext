@@ -2588,6 +2588,10 @@ span, div, td, input, textarea, button, select {
 	z-index: 1;
 }
 
+.show-all-reports {
+	margin-top: 5px;
+	font-size: 11px;
+}
 
 /*
  *	erpnext/website/css/website.css

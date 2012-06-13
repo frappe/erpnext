@@ -2277,7 +2277,9 @@ erpnext.module_page.make_list=function(module,wrapper){var $w=$(wrapper).find('.
     data-doctype="%(parent_doc_type)s">\
     %(criteria_name)s</a>',data))},args:{module:module},no_refresh:true,callback:function(r){erpnext.module_page.hide_links($parent1)}});wrapper.list1.run();wrapper.list2=new wn.ui.Listing({parent:$parent2,method:'utilities.get_report_list',render_row:function(row,data){$(row).html(repl('<a href="#!Report2/%(ref_doctype)s/%(name)s" \
     data-doctype="%(ref_doctype)s">\
-    %(name)s</a>',data))},args:{module:module},no_refresh:true,callback:function(r){erpnext.module_page.hide_links($parent2)}});wrapper.list2.run();}
+    %(name)s</a>',data))},args:{module:module},no_refresh:true,callback:function(r){erpnext.module_page.hide_links($parent2)}});wrapper.list2.run();$parent1.find('.list-toolbar-wrapper').prepend("<div class=\"show-all-reports\">\
+   <a href=\"#List/Search Criteria\"> [ Show List Of All Reports ]</a></div>");$parent2.find('.list-toolbar-wrapper').prepend("<div class=\"show-all-reports\">\
+   <a href=\"#List/Report\"> [ Show List Of All Reports (Beta) ]</a></div>");}
 /*
  *	erpnext/startup/js/toolbar.js
  */
