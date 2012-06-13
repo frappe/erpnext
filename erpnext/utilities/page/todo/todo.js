@@ -81,8 +81,10 @@ erpnext.todo.ToDoItem = Class.extend({
 			<div class="todoitem">\
 				<span class="label %(labelclass)s">%(priority)s</span>\
 				<span class="description">\
+					<span class="popup-on-click">\
 					<span class="help" style="margin-right: 7px">%(userdate)s</span>\
 					%(fullname)s%(desc)s\
+					</span>\
 					<span class="ref_link"><br>\
 					%(link)s</span>\
 				</span>\
@@ -98,7 +100,7 @@ erpnext.todo.ToDoItem = Class.extend({
 		if(!todo.reference_type)
 			$todo.find('.ref_link').toggle(false);
 		
-		$todo.find('.description')
+		$todo.find('.popup-on-click')
 			.data('todo', todo)
 			.click(function() {
 				erpnext.todo.make_dialog($(this).data('todo'));
