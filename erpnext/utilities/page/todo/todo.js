@@ -67,16 +67,18 @@ erpnext.todo.ToDoItem = Class.extend({
 		
 		todo.fullname = '';
 		if(todo.assigned_by) {
+			var assigned_by = wn.boot.user_info[todo.assigned_by]
 			todo.fullname = repl("[By %(fullname)s] &nbsp;", {
-				fullname: wn.boot.user_info[todo.assigned_by].fullname
+				fullname: (assigned_by ? assigned_by.fullname : todo.assigned_by),
 			});
 		}
 		
 		var parent_list = "#todo-list";
 		if(todo.owner !== user) {
 			parent_list = "#assigned-todo-list";
+			var owner = wn.boot.user_info[todo.owner];
 			todo.fullname = repl("[To %(fullname)s] &nbsp;", {
-				fullname: wn.boot.user_info[todo.owner].fullname
+				fullname: (owner ? owner.fullname : todo.owner),
 			});
 		}
 		parent_list += " div.todo-content";
