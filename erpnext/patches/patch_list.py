@@ -437,4 +437,9 @@ patch_list = [
 		'patch_file': 'support_ticket_autoreply',
 		'description': 'New Send Autoreply checkbox in Email Settings'
 	},
+	{
+		'patch_module': 'patches.june_2012',
+		'patch_file': 'series_unique_patch',
+		'description': "add unique constraint to series table's name column"
+	},
 ]
