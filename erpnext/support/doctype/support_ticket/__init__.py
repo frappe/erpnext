@@ -15,7 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import webnotes
-from webnotes.utils import cstr
+from webnotes.utils import cstr, cint
 
 from webnotes.utils.email_lib.receive import POP3Mailbox
 
@@ -113,7 +113,8 @@ class SupportMailbox(POP3Mailbox):
 			update_feed(d, 'on_update')
 
 			# send auto reply
-			self.send_auto_reply(d)
+			if cint(self.email_settings.send_autoreply):
+				self.send_auto_reply(d)
 
 			webnotes.conn.commit()
 			
