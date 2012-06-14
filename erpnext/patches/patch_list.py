@@ -432,4 +432,9 @@ patch_list = [
 		'patch_file': 'reports_list_permission',
 		'description': 'allow read permission to all for report list'
 	},
+	{
+		'patch_module': 'patches.june_2012',
+		'patch_file': 'support_ticket_autoreply',
+		'description': 'New Send Autoreply checkbox in Email Settings'
+	},
 ]

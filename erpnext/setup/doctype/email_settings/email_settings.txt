@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-03-27 14:36:20',
+		'creation': '2012-05-15 12:15:01',
 		'docstatus': 0,
-		'modified': '2012-03-27 14:36:20',
+		'modified': '2012-06-14 14:47:49',
 		'modified_by': u'Administrator',
 		'owner': u'harshada@webnotestech.com'
 	},
@@ -25,7 +25,7 @@
 		'name': '__common__',
 		'section_style': u'Simple',
 		'server_code_error': u' ',
-		'version': 35
+		'version': 1
 	},
 
 	# These values are common for all DocField
@@ -233,10 +233,20 @@
 	# DocField
 	{
 		'colour': u'White:FFF',
+		'default': u'1',
+		'doctype': u'DocField',
+		'fieldname': u'send_autoreply',
+		'fieldtype': u'Check',
+		'label': u'Send Autoreply'
+	},
+
+	# DocField
+	{
+		'colour': u'White:FFF',
 		'description': u'Autoreply when a new mail is received',
 		'doctype': u'DocField',
 		'fieldname': u'support_autoreply',
 		'fieldtype': u'Text',
-		'label': u'Autoreply'
+		'label': u'Custom Autoreply Message'
 	}
 ]
