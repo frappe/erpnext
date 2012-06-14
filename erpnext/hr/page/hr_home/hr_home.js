@@ -15,6 +15,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 pscript['onload_hr-home'] = function(wrapper) {
-	wrapper.appframe = new wn.ui.AppFrame($(wrapper).find('.appframe-area'));
+	wrapper.appframe = new wn.ui.AppFrame($(wrapper).find('.appframe-area') ,'Human Resources');
 	erpnext.module_page.setup_page('HR', wrapper);
 }

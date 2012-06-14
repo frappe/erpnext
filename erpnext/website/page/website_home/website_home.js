@@ -15,6 +15,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 pscript['onload_website-home'] = function(wrapper) {
-	wrapper.appframe = new wn.ui.AppFrame($(wrapper).find('.appframe-area'));
+	wrapper.appframe = new wn.ui.AppFrame($(wrapper).find('.appframe-area'), 'Website');
 	erpnext.module_page.setup_page('Website', wrapper);
 }

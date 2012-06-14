@@ -2493,12 +2493,8 @@ div.stat-bar {
  *	lib/css/ui/views.css
  */
 
-.breadcrumbs {
-	color: #000000;
-}
-
-.breadcrumbs a {
-	color: #000000;
+.breadcrumb-area, .breadcrumb-area span {
+	vertical-align: middle;
 }
 
 div.appframe-titlebar {
@@ -2516,6 +2512,14 @@ div.appframe-titlebar {
 	border-radius: 5px 5px 0px 0px;
 	-webkit-border-radius: 5px 5px 0px 0px;
 	-moz-border-radius: 5px 5px 0px 0px;
+
+	text-shadow: 0px 1px 1px #fff;
+	color: #555;
+}
+
+span.appframe-title {
+	font-size: 160%;
+	font-weight: bold;
 }
 
 div.appframe-toolbar {

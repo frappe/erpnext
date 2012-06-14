@@ -101,8 +101,8 @@ erpnext.module_page.make_list = function(module, wrapper) {
 	// show link to all reports
 	$parent1.find('.list-toolbar-wrapper')
 		.prepend("<div class=\"show-all-reports\">\
-			<a href=\"#List/Search Criteria\"> [ Show List Of All Reports ]</a></div>");
+			<a href=\"#List/Search Criteria\"> [ List Of All Reports ]</a></div>");
 	$parent2.find('.list-toolbar-wrapper')
 		.prepend("<div class=\"show-all-reports\">\
-			<a href=\"#List/Report\"> [ Show List Of All Reports (Beta) ]</a></div>");
+			<a href=\"#List/Report\"> [ List Of All Reports (New) ]</a></div>");
 }

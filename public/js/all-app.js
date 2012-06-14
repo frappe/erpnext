@@ -950,11 +950,9 @@ wn.ui.misc.about_dialog.show();}
  */
 wn.provide('wn.views.doclistview');wn.provide('wn.doclistviews');wn.views.doclistview.show=function(doctype){var page_name=wn.get_route_str();if(wn.pages[page_name]){wn.container.change_to(wn.pages[page_name]);}else{var route=wn.get_route();if(route[1]){wn.model.with_doctype(route[1],function(r){if(r&&r['403']){return;}
 new wn.views.DocListView(route[1]);});}}}
-wn.views.DocListView=wn.ui.Listing.extend({init:function(doctype){this.doctype=doctype;this.label=get_doctype_label(doctype);this.label=(this.label.toLowerCase().substr(-4)=='list')?this.label:(this.label+' List');this.make_page();this.setup();},make_page:function(){var me=this;var page_name=wn.get_route_str();var page=wn.container.add_page(page_name);wn.container.change_to(page_name);this.$page=$(page);this.$page.html(repl('<div class="layout-wrapper layout-wrapper-background">\
+wn.views.DocListView=wn.ui.Listing.extend({init:function(doctype){this.doctype=doctype;this.label=get_doctype_label(doctype);this.label=(this.label.toLowerCase().substr(-4)=='list')?this.label:(this.label+' List');this.make_page();this.setup();},make_page:function(){var me=this;var page_name=wn.get_route_str();var page=wn.container.add_page(page_name);wn.container.change_to(page_name);this.$page=$(page);this.$page.html('<div class="layout-wrapper layout-wrapper-background">\
    <div class="appframe-area"></div>\
    <div class="layout-main-section">\
-    <h1>%(label)s</h1>\
-    <hr>\
     <div class="wnlist-area"><div class="help">Loading...</div></div>\
    </div>\
    <div class="layout-side-section">\
@@ -966,7 +964,7 @@ wn.views.DocListView=wn.ui.Listing.extend({init:function(doctype){this.doctype=d
     </div>\
    </div>\
    <div style="clear: both"></div>\
-  </div>',{label:this.label}));this.appframe=new wn.ui.AppFrame(this.$page.find('.appframe-area'));wn.views.breadcrumbs($('<span>').appendTo(this.appframe.$titlebar),locals.DocType[this.doctype].module);},setup:function(){var me=this;me.can_delete=wn.model.can_delete(me.doctype);me.meta=locals.DocType[me.doctype];me.$page.find('.wnlist-area').empty(),me.setup_docstatus_filter();me.setup_listview();me.init_list();me.init_stats();me.make_report_button();me.add_delete_option();},make_report_button:function(){var me=this;if(wn.boot.profile.can_get_report.indexOf(this.doctype)!=-1){this.appframe.add_button('Build Report',function(){wn.set_route('Report2',me.doctype);},'icon-th')}},setup_docstatus_filter:function(){var me=this;this.can_submit=$.map(locals.DocPerm,function(d){if(d.parent==me.meta.name&&d.submit)return 1
+  </div>');this.appframe=new wn.ui.AppFrame(this.$page.find('.appframe-area'));wn.views.breadcrumbs($('<span class="breadcrumb-area">').appendTo(this.appframe.$titlebar),locals.DocType[this.doctype].module,this.doctype);},setup:function(){var me=this;me.can_delete=wn.model.can_delete(me.doctype);me.meta=locals.DocType[me.doctype];me.$page.find('.wnlist-area').empty(),me.setup_docstatus_filter();me.setup_listview();me.init_list();me.init_stats();me.make_report_button();me.add_delete_option();},make_report_button:function(){var me=this;if(wn.boot.profile.can_get_report.indexOf(this.doctype)!=-1){this.appframe.add_button('Build Report',function(){wn.set_route('Report2',me.doctype);},'icon-th')}},setup_docstatus_filter:function(){var me=this;this.can_submit=$.map(locals.DocPerm,function(d){if(d.parent==me.meta.name&&d.submit)return 1
 else return null;}).length;if(this.can_submit){this.$page.find('.show-docstatus').removeClass('hide');this.$page.find('.show-docstatus input').click(function(){me.run();})}},setup_listview:function(){if(this.meta.__listjs){eval(this.meta.__listjs);this.listview=new wn.doclistviews[this.doctype](this);}else{this.listview=new wn.views.ListView(this);}
 this.listview.parent=this;this.wrapper=this.$page.find('.wnlist-area');this.page_length=20;this.allow_delete=true;},init_list:function(auto_run){this.make({method:'webnotes.widgets.doclistview.get',get_args:this.get_args,parent:this.wrapper,start:0,page_length:this.page_length,show_filters:true,show_grid:true,new_doctype:this.doctype,allow_delete:this.allow_delete,no_result_message:this.make_no_result(),columns:this.listview.fields});if((auto_run!==false)&&(auto_run!==0))this.run();},make_no_result:function(){return repl('<div class="well"><p>No %(doctype_label)s found</p>\
   %(description)s\
@@ -1270,7 +1268,7 @@ function loaddocbrowser(dt){wn.set_route('List',dt);}
  *	lib/js/legacy/wn/page_layout.js
  */
 wn.PageLayout=function(args){$.extend(this,args)
-this.wrapper=$a(this.parent,'div','layout-wrapper layout-wrapper-background');this.head=$a(this.wrapper,'div');this.main=$a(this.wrapper,'div','layout-main-section');this.sidebar_area=$a(this.wrapper,'div','layout-side-section');$a(this.wrapper,'div','',{clear:'both'});this.main_head=$a(this.main,'div','form-title');this.body=$a(this.main,'div');this.footer=$a(this.main,'div');if(this.heading){this.page_head=new PageHeader(this.head,this.heading);}}
+this.wrapper=$a(this.parent,'div','layout-wrapper layout-wrapper-background');this.head=$a(this.wrapper,'div');this.main=$a(this.wrapper,'div','layout-main-section');this.sidebar_area=$a(this.wrapper,'div','layout-side-section');$a(this.wrapper,'div','',{clear:'both'});this.body=$a(this.main,'div');this.footer=$a(this.main,'div');if(this.heading){this.page_head=new PageHeader(this.head,this.heading);}}
 /*
  *	lib/js/legacy/wn/widgets/page_sidebar.js
  */
@@ -1458,11 +1456,8 @@ return false;}
 /*
  *	lib/js/wn/views/breadcrumbs.js
  */
-wn.provide('wn.views');wn.views.breadcrumbs=function(parent,module,doctype,name){$(parent).empty();var $bspan=$(repl('<span class="breadcrumbs">\
-  <a href="#%(home_page)s">Home</a></span>',{home_page:wn.boot.home_page}));if(module&&wn.modules[module]){$bspan.append(repl(' / <a href="#!%(module_page)s">%(module)s Home</a>',{module:module,module_page:wn.modules[module]}))}
-if(doctype&&(locals.DocType[doctype]&&!locals.DocType[doctype].issingle)){$bspan.append(repl(' / <a href="#!List/%(doctype)s">%(doctype)s</a>',{doctype:doctype}))}
-if(name){$bspan.append(' / '+name.bold())}
-$bspan.appendTo(parent);}
+wn.provide('wn.views');wn.views.breadcrumbs=function(parent,module,doctype,name){$(parent).empty();var $bspan=$(parent);if(name){$bspan.append('<span class="appframe-title">'+name+'</span>');}else if(doctype){$bspan.append('<span class="appframe-title">'+doctype+' List </span>');}else if(module){$bspan.append('<span class="appframe-title">'+module+'</span>');}
+if(name&&doctype&&(!locals['DocType'][doctype].issingle)){$bspan.append(repl('<span> in <a href="#!List/%(doctype)s">%(doctype)s List</a></span>',{doctype:doctype}))};if(doctype&&module&&wn.modules&&wn.modules[module]){$bspan.append(repl('<span> in <a href="#!%(module_page)s">%(module)s</a></span>',{module:module,module_page:wn.modules[module]}))}}
 /*
  *	lib/js/legacy/widgets/form/fields.js
  */
@@ -1694,11 +1689,11 @@ d.cur_frm=f;d.dn=dn;d.table_form=f.meta.istable;f.refresh(dn);$(f.page_layout.wr
  *	lib/js/legacy/widgets/form/form_header.js
  */
 _f.FrmHeader=Class.extend({init:function(parent,frm){this.appframe=new wn.ui.AppFrame(parent)
-this.appframe.$titlebar.append('<span class="label-area"></span>\
+this.appframe.$titlebar.append('</span>\
     <span class="breadcrumb-area"></span>');this.$w=this.appframe.$w;},refresh:function(){wn.views.breadcrumbs($(this.$w.find('.breadcrumb-area')),cur_frm.meta.module,cur_frm.meta.name,cur_frm.docname);this.refresh_labels();this.refresh_toolbar();},refresh_labels:function(){var labinfo={0:['Saved','label-success'],1:['Submitted','label-info'],2:['Cancelled','label-important']}[cint(cur_frm.doc.docstatus)];if(labinfo[0]=='Saved'&&cur_frm.meta.is_submittable){labinfo[0]='Saved, to Submit';}
 if(cur_frm.doc.__unsaved||cur_frm.doc.__islocal){labinfo[0]='Not Saved';labinfo[1]='label-warning'}
-this.set_label(labinfo);if(cur_frm.doc.__unsaved&&cint(cur_frm.doc.docstatus)==1&&this.appframe.buttons['Update']){this.appframe.buttons['Update'].toggle(true);}},set_label:function(labinfo){this.$w.find('.label-area').html(repl('<span class="label %(lab_class)s">\
-   %(lab_status)s</span>',{lab_status:labinfo[0],lab_class:labinfo[1]}));},refresh_toolbar:function(){this.appframe.clear_buttons();var p=cur_frm.get_doc_perms();if(cur_frm.meta.read_only_onload&&!cur_frm.doc.__islocal){if(!cur_frm.editable)
+this.set_label(labinfo);if(cur_frm.doc.__unsaved&&cint(cur_frm.doc.docstatus)==1&&this.appframe.buttons['Update']){this.appframe.buttons['Update'].toggle(true);}},set_label:function(labinfo){this.$w.find('.label').remove();$(repl('<span class="label %(lab_class)s">\
+   %(lab_status)s</span>',{lab_status:labinfo[0],lab_class:labinfo[1]})).insertBefore(this.$w.find('.breadcrumb-area'))},refresh_toolbar:function(){this.appframe.clear_buttons();var p=cur_frm.get_doc_perms();if(cur_frm.meta.read_only_onload&&!cur_frm.doc.__islocal){if(!cur_frm.editable)
 this.appframe.add_button('Edit',function(){cur_frm.edit_doc();},'icon-pencil');else
 this.appframe.add_button('Print View',function(){cur_frm.is_editable[cur_frm.docname]=0;cur_frm.refresh();},'icon-print');}
 var docstatus=cint(cur_frm.doc.docstatus);if(docstatus==0&&p[WRITE]){this.appframe.add_button('Save',function(){cur_frm.save('Save');},'');this.appframe.buttons['Save'].addClass('btn-info');}
@@ -1765,7 +1760,7 @@ _f.Frm.prototype.defocus_rest=function(){if(_f.cur_grid_cell)_f.cur_grid_cell.gr
 _f.Frm.prototype.get_doc_perms=function(){var p=[0,0,0,0,0,0];for(var i=0;i<this.perm.length;i++){if(this.perm[i]){if(this.perm[i][READ])p[READ]=1;if(this.perm[i][WRITE])p[WRITE]=1;if(this.perm[i][SUBMIT])p[SUBMIT]=1;if(this.perm[i][CANCEL])p[CANCEL]=1;if(this.perm[i][AMEND])p[AMEND]=1;}}
 return p;}
 _f.Frm.prototype.refresh_header=function(){if(!this.meta.in_dialog){set_title(this.meta.issingle?this.doctype:this.docname);}
-this.page_layout.main_head.innerHTML='<h2>'+this.docname+'</h2>';if(this.frm_head)this.frm_head.refresh();if(wn.ui.toolbar.recent)
+if(this.frm_head)this.frm_head.refresh();if(wn.ui.toolbar.recent)
 wn.ui.toolbar.recent.add(this.doctype,this.docname,1);}
 _f.Frm.prototype.check_doc_perm=function(){var dt=this.parent_doctype?this.parent_doctype:this.doctype;var dn=this.parent_docname?this.parent_docname:this.docname;this.perm=get_perm(dt,dn);this.orig_perm=get_perm(dt,dn,1);if(!this.perm[0][READ]){if(user=='Guest'){if(_f.temp_access[dt]&&_f.temp_access[dt][dn]){this.perm=[[1,0,0]]
 return 1;}}
@@ -2278,8 +2273,8 @@ erpnext.module_page.make_list=function(module,wrapper){var $w=$(wrapper).find('.
     %(criteria_name)s</a>',data))},args:{module:module},no_refresh:true,callback:function(r){erpnext.module_page.hide_links($parent1)}});wrapper.list1.run();wrapper.list2=new wn.ui.Listing({parent:$parent2,method:'utilities.get_report_list',render_row:function(row,data){$(row).html(repl('<a href="#!Report2/%(ref_doctype)s/%(name)s" \
     data-doctype="%(ref_doctype)s">\
     %(name)s</a>',data))},args:{module:module},no_refresh:true,callback:function(r){erpnext.module_page.hide_links($parent2)}});wrapper.list2.run();$parent1.find('.list-toolbar-wrapper').prepend("<div class=\"show-all-reports\">\
-   <a href=\"#List/Search Criteria\"> [ Show List Of All Reports ]</a></div>");$parent2.find('.list-toolbar-wrapper').prepend("<div class=\"show-all-reports\">\
-   <a href=\"#List/Report\"> [ Show List Of All Reports (Beta) ]</a></div>");}
+   <a href=\"#List/Search Criteria\"> [ List Of All Reports ]</a></div>");$parent2.find('.list-toolbar-wrapper').prepend("<div class=\"show-all-reports\">\
+   <a href=\"#List/Report\"> [ List Of All Reports (New) ]</a></div>");}
 /*
  *	erpnext/startup/js/toolbar.js
  */
