@@ -45,28 +45,33 @@ class DocType:
 			out_email.port = cint(self.doc.mail_port)
 			out_email.use_ssl = self.doc.use_ssl
 			try:
+				err_msg = "Login Id or Mail Password missing. Please enter and try again."
+				if not (self.doc.mail_login and self.doc.mail_password):
+					raise AttributeError, err_msg
 				out_email.login = self.doc.mail_login.encode('utf-8')
 				out_email.password =  self.doc.mail_password.encode('utf-8')
 			except AttributeError, e:
-				webnotes.msgprint('Login Id or Mail Password missing. Please enter and try again.')
-				webnotes.msgprint(e)
+				webnotes.msgprint(err_msg)
+				raise e
 			
 			try:
 				sess = out_email.smtp_connect()
+				
 				try:
 					sess.quit()
 				except:
 					pass
 			except _socket.error, e:
 				# Invalid mail server -- due to refusing connection
-				webnotes.msgprint('Invalid Outgoing Mail Server. Please rectify and try again.')
-				webnotes.msgprint(e)
+				webnotes.msgprint('Invalid Outgoing Mail Server or Port. Please rectify and try again.')
+				raise e
 			except smtplib.SMTPAuthenticationError, e:
 				webnotes.msgprint('Invalid Login Id or Mail Password. Please rectify and try again.')
+				raise e
 			except smtplib.SMTPException, e:
 				webnotes.msgprint('There is something wrong with your Outgoing Mail Settings. \
 				Please contact us at support@erpnext.com')
-				webnotes.msgprint(e)
+				raise e
 		
 
 	def validate_incoming(self):
@@ -81,11 +86,14 @@ class DocType:
 			inc_email.host = self.doc.support_host.encode('utf-8')
 			inc_email.use_ssl = self.doc.support_use_ssl
 			try:
+				err_msg = 'User Name or Support Password missing. Please enter and try again.'
+				if not (self.doc.support_username and self.doc.support_password):
+					raise AttributeError, err_msg
 				inc_email.username = self.doc.support_username.encode('utf-8')
 				inc_email.password = self.doc.support_password.encode('utf-8')
 			except AttributeError, e:
-				webnotes.msgprint('User Name or Support Password missing. Please enter and try again.')
-				webnotes.msgprint(e)
+				webnotes.msgprint(err_msg)
+				raise e
 
 			pop_mb = POP3Mailbox(inc_email)
 			
@@ -94,7 +102,7 @@ class DocType:
 			except _socket.error, e:
 				# Invalid mail server -- due to refusing connection
 				webnotes.msgprint('Invalid POP3 Mail Server. Please rectify and try again.')
-				webnotes.msgprint(e)
+				raise e
 			except poplib.error_proto, e:
 				webnotes.msgprint('Invalid User Name or Support Password. Please rectify and try again.')
-				webnotes.msgprint(e)
+				raise e
