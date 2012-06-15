@@ -1,0 +1,32 @@
+{% extends "outer.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block header %}
+	{{ super() }}
+	{% if script %}
+	<script>
+	window.page_name = "{{ name }}";
+
+	$(document).bind('app_ready', function() {
+		var _page = new wn.views.Page(window.page_name);
+	
+		// page script
+		{{ script }}
+	
+		// trigger onload
+		_page.trigger('onload');
+	
+		// activate page
+		wn.container.change_to(window.page_name);
+	});
+	</script>
+	{% endif %}
+	{% if style %}
+	<style>{{ style }}</style>
+	{% endif %}
+{% endblock %}
+
+{% block content %}
+	{{ content }}
+{% endblock %}
