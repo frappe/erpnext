@@ -2,6 +2,8 @@
 
 """
 return a dynamic page from website templates
+
+all html pages except login-page.html get generated here
 """
 
 import cgi, cgitb, os, sys
@@ -29,6 +31,11 @@ def get_outer_env():
 		'copyright': webnotes.conn.get_value('Website Settings', None, 'copyright'),
 	}
 	
+def get_page_by_short_name(page_name):
+	"""get page by shortname"""
+	import webnotes
+	return webnotes.conn.sql("""select name from `tabWeb Page` where page_name=%s""", page_name)[0][0]
+	
 def get_html():
 	import webnotes
 	from jinja2 import Environment, FileSystemLoader
@@ -42,12 +49,17 @@ def get_html():
 	webnotes.connect()
 
 	if 'page' in webnotes.form_dict:
-		try:
-			page = Document('Page', webnotes.form_dict['page'])
-			page.fields.update(get_outer_env())
-			return jenv.get_template('page.html').render(page.fields)
-		except Exception, e:
-			return jenv.get_template('404.html').render(get_outer_env())
+		page_name = webnotes.form_dict['page']
+		if page_name.endswith('.html'):
+			page_name = page_name[:-5]
+		
+		#try:
+		page_name = get_page_by_short_name(page_name)
+		page = Document('Web Page', page_name)
+		page.fields.update(get_outer_env())
+		return jenv.get_template('page.html').render(page.fields)
+		#except Exception, e:
+		#	return jenv.get_template('404.html').render(get_outer_env())
 	else:
 		return jenv.get_template('404.html').render(get_outer_env())
 		

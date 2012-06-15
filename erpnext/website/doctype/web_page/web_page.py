@@ -28,60 +28,29 @@ class DocType:
 	def validate(self):
 		"""make page for this product"""
 		from jinja2 import Template
-		from webnotes.utils import global_date_format
-		from webnotes.model.code import get_obj
 		import os
 
 		# we need the name for the templates
 		if self.doc.name.startswith('New Web Page'):
 			self.autoname()
 
-		if self.doc.page_name:
-			webnotes.conn.sql("""delete from tabPage where name=%s""", self.doc.page_name)
-
-		p = website.utils.add_page(self.doc.name)
-		self.doc.page_name = p.name
+		# page name updates with the title
+		self.doc.page_name = website.utils.page_name(self.doc.title)
 		
-		self.doc.updated = global_date_format(self.doc.modified)
+		# markdown
 		website.utils.markdown(self.doc, ['head_section','main_section', 'side_section'])
-				
+		
+		# make page layout
 		with open(os.path.join(os.path.dirname(__file__), 'template.html'), 'r') as f:
-			p.content = Template(f.read()).render(doc=self.doc)
-
-		p.title = self.doc.title
-		p.web_page = 'Yes'
+			self.doc.content = Template(f.read()).render(doc=self.doc)
 		
-		if self.doc.insert_code:
-			p.script = self.doc.javascript
-
-		if self.doc.insert_style:
-			p.style = self.doc.css
-
-		p.save()
-		get_obj(doc=p).write_cms_page()
-		
-		website.utils.add_guest_access_to_page(p.name)
 		self.cleanup_temp()
 		self.if_home_clear_cache()
-			
-	def add_page_links(self):
-		"""add links for next_page and see_also"""
-		if self.doc.next_page:
-			self.doc.next_page_html = """<div class="info-box round" style="text-align: right">
-				<b>Next:</b>
-				<a href="#!%(name)s">%(title)s</a></div>""" % {"name":self.doc.next_page, \
-						"title": webnotes.conn.get_value("Page", self.doc.next_page, "title")}
-
-		self.doc.see_also = ''
-		for d in self.doclist:
-			if d.doctype=='Related Page':
-				tmp = {"page":d.page, "title":webnotes.conn.get_value('Page', d.page, 'title')}
-				self.doc.see_also += """<div><a href="#!%(page)s">%(title)s</a></div>""" % tmp
 				
 	def cleanup_temp(self):
 		"""cleanup temp fields"""
-		fl = ['main_section_html', 'side_section_html', 'see_also', \
-			'next_page_html', 'head_section_html', 'updated']
+		fl = ['main_section_html', 'side_section_html', \
+			'head_section_html']
 		for f in fl:
 			if f in self.doc.fields:
 				del self.doc.fields[f]

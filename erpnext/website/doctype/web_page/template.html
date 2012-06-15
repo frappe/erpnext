@@ -8,21 +8,11 @@
 		<div class="layout-main">
 		{% endif %}
 			{{ doc.main_section_html }}
-			{% if doc.next_page_html %}
-				{{ doc.next_page_html }}
-			{% endif %}
-
 		</div>
 		
 		{% if doc.layout and doc.layout.startswith('Two column') %}
 		<div class="layout-side-section">
 			{{ doc.side_section_html }}
-			{% if doc.see_also %}
-			<div class="info-box">
-				<h4>See Also</h4>
-				{{ doc.see_also }}
-			</div>
-			{% endif %}
 		</div>
 		{% endif %}
 		<div style="clear: both"></div>

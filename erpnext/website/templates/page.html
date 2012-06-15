@@ -4,7 +4,7 @@
 
 {% block header %}
 	{{ super() }}
-	{% if script %}
+	{% if insert_code %}
 	<script>
 	window.page_name = "{{ name }}";
 
@@ -12,7 +12,7 @@
 		var _page = new wn.views.Page(window.page_name);
 	
 		// page script
-		{{ script }}
+		{{ insert_code }}
 	
 		// trigger onload
 		_page.trigger('onload');
@@ -22,8 +22,8 @@
 	});
 	</script>
 	{% endif %}
-	{% if style %}
-	<style>{{ style }}</style>
+	{% if insert_style %}
+	<style>{{ insert_style }}</style>
 	{% endif %}
 {% endblock %}
 
