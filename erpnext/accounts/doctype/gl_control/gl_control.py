@@ -484,11 +484,13 @@ def manage_recurring_invoices():
 		Create recurring invoices on specific date by copying the original one
 		and notify the concerned people
 	"""	
-	rv = webnotes.conn.sql("""select name, recurring_id from `tabSales Invoice` where ifnull(convert_into_recurring_invoice, 0) = 1 
-			and next_date = %s and next_date <= ifnull(end_date, '2199-12-31') and docstatus=1""", nowdate())
+	rv = webnotes.conn.sql("""select name, recurring_id from `tabSales Invoice` \
+		where ifnull(convert_into_recurring_invoice, 0) = 1 and next_date = %s \
+		and next_date <= ifnull(end_date, '2199-12-31') and docstatus=1""", nowdate())
 			
 	for d in rv:
-		if not webnotes.conn.sql("""select name from `tabSales Invoice` where posting_date = %s and recurring_id = %s and docstatus=1""", (nowdate(), d[1])):
+		if not webnotes.conn.sql("""select name from `tabSales Invoice` \
+			where posting_date = %s and recurring_id = %s and docstatus=1""", (nowdate(), d[1])):
 			prev_rv = get_obj('Sales Invoice', d[0], with_children=1)
 			new_rv = create_new_invoice(prev_rv)
 
@@ -499,13 +501,16 @@ def create_new_invoice(prev_rv):
 	# clone rv
 	new_rv = clone(prev_rv)
 
+	mdict = {'Monthly': 1, 'Quarterly': 3, 'Half-yearly': 6, 'Yearly': 12}
+	mcount = mdict[prev_rv.doc.recurring_type]
+
 	# update new rv 
 
 	new_rv.doc.posting_date = new_rv.doc.next_date
 	new_rv.doc.aging_date = new_rv.doc.next_date
 	new_rv.doc.due_date = add_days(new_rv.doc.next_date, cint(date_diff(prev_rv.doc.due_date, prev_rv.doc.posting_date)))
-	new_rv.doc.invoice_period_from_date = get_next_month_date(new_rv.doc.invoice_period_from_date)
-	new_rv.doc.invoice_period_to_date = get_next_month_date(new_rv.doc.invoice_period_to_date)
+	new_rv.doc.invoice_period_from_date = get_next_date(new_rv.doc.invoice_period_from_date, mcount)
+	new_rv.doc.invoice_period_to_date = get_next_date(new_rv.doc.invoice_period_to_date, mcount)
 	new_rv.doc.owner = prev_rv.doc.owner
 	new_rv.doc.save()
 
@@ -515,13 +520,13 @@ def create_new_invoice(prev_rv):
 
 	return new_rv
 
-def get_next_month_date(dt):
+def get_next_date(dt, mcount):
 	import datetime
-	m = getdate(dt).month + 1
+	m = getdate(dt).month + mcount
 	y = getdate(dt).year
 	d = getdate(dt).day
 	if m > 12:
-		m, y = 1, y+1
+		m, y = m-12, y+1
 	try:
 		next_month_date = datetime.date(y, m, d)
 	except:
