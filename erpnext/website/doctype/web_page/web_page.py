@@ -25,7 +25,7 @@ class DocType:
 		"""name from title"""
 		self.doc.name = website.utils.page_name(self.doc.title)
 
-	def validate(self):
+	def on_update(self):
 		"""make page for this product"""
 		from jinja2 import Template
 		from webnotes.utils import global_date_format
@@ -62,6 +62,9 @@ class DocType:
 		
 		website.utils.add_guest_access_to_page(p.name)
 		self.cleanup_temp()
+
+		self.doc.save()
+
 		self.if_home_clear_cache()
 			
 	def add_page_links(self):
