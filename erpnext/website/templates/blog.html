@@ -1,4 +1,7 @@
-{% extends "index.html" %}
+{% extends "outer.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
 
 {% block content %}
 <div class="layout-wrapper layout-wrapper-background">
@@ -28,7 +31,9 @@
 </div>
 
 <script>
-wrapper.blog_list = new wn.ui.Listing({
+
+// if not a specific blog, show listing
+erpnext.blog_list = new wn.ui.Listing({
 	parent: $(wrapper).find('#blog-list').get(0),
 	query: 'select tabBlog.name, title, left(content, 1000) as content, tabBlog.creation, \
 		ifnull(first_name, "") as first_name, ifnull(last_name, "") as last_name \
@@ -49,5 +54,5 @@ wrapper.blog_list = new wn.ui.Listing({
 	},
 	page_length: 10
 });
-wrapper.blog_list.run();
+erpnext.blog_list.run();
 </script>
