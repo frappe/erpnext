@@ -15,6 +15,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # add expense head columns
+from webnotes.utils import flt, cint, cstr
+
 expense_acc = [c[0] for c in sql("""select distinct expense_head 
 									from `tabPurchase Invoice Item` 
 									where parenttype='Purchase Invoice' 
@@ -90,7 +92,6 @@ for r in res:
 		
 	# get tax amount
 	total_tax = 0
-	grand_total = 0
 	for c in tax_acc:	
 		val = acc_head_tax_dict.get(c, 0)
 		total_tax += val
