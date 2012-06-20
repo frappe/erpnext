@@ -108,7 +108,7 @@ class DocType:
 			msgprint("Supplier Type is mandatory")
 			raise Exception
 		
-		if not sql("select name from tabAccount where name=%s", (self.doc.supplier_type + " - " + abbr)):
+		if not sql("select name from tabAccount where name=%s and debit_or_credit = 'Credit' and ifnull(is_pl_account, 'No') = 'No'", (self.doc.supplier_type + " - " + abbr)):
 
 			# if not group created , create it
 			self.add_account(self.doc.supplier_type, self.get_payables_group(), abbr)

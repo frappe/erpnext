@@ -15,6 +15,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # add expense head columns
+from webnotes.utils import flt, cint, cstr
+
 expense_acc = [c[0] for c in sql("""select distinct expense_head 
 									from `tabPurchase Invoice Item` 
 									where parenttype='Purchase Invoice' 
@@ -39,7 +41,7 @@ tax_acc = [c[0] for c in sql("""select distinct account_head
 							    order by account_head asc""")]
 						   
 tax_acc.append('Total Tax')
-tax_acc.append('GrandTotal')
+tax_acc.append('Grand Total')
 
 for c in tax_acc:
 	if c:
@@ -58,56 +60,41 @@ for r in res:
 	exp_head_amount = sql("""select expense_head, sum(amount) 
 							 from `tabPurchase Invoice Item` 
 							 where parent = %s and parenttype='Purchase Invoice'
-							 group by expense_head""", (r[col_idx['ID']],))
+							 group by expense_head""", (r[col_idx['ID']]))
   
 	#convert the result to dictionary for easy retrieval  
 	exp_head_amount_dict = {}
 	for e in exp_head_amount:
 		exp_head_amount_dict[e[0]] = e[1]
   
-	exp_head_keys = exp_head_amount_dict.keys()
-
-	net_total = 0
-	
+	net_total = 0	
 	# get expense amount
 	for i in expense_acc:
-		val = 0
-	
-		#check if expense head exists in dict
-		if i in exp_head_keys:
-			val = exp_head_amount_dict[i]
-		val = flt(val and val or 0)
+		val = exp_head_amount_dict.get(i, 0)
 		net_total += val
-		r.append(val)
-		
+		r.append(val)		
 	r.append(net_total)
 
 	#Get tax for account heads
-	acc_head_tax = sql("""select account_head, tax_amount 
+	acc_head_tax = sql("""select account_head, sum(tax_amount) 
 						  from `tabPurchase Taxes and Charges` 
 						  where parent = '%s' 
 						  and parenttype = 'Purchase Invoice' 
 						  and add_deduct_tax = 'Add' 
-						  and category in ('For Total', 'For Both')""" %(r[col_idx['ID']],))
+						  and category in ('For Total', 'For Both')
+						  group by account_head
+						""" %(r[col_idx['ID']],))
 
 	#Convert the result to dictionary for easy retrieval
 	acc_head_tax_dict = {}
 	for a in acc_head_tax:
-		acc_head_tax_dict[a[0]] = a[1]
+		acc_head_tax_dict[a[0]] = flt(a[1])
 		
-	acc_head_keys = acc_head_tax_dict.keys()
-
 	# get tax amount
 	total_tax = 0
-	grand_total = 0
-	for c in tax_acc:
-		val = 0
-		if c:			
-			#check if account head exists in dict
-			if c in acc_head_keys:
-				val = acc_head_tax_dict[c]		
-			val = flt(val and val or 0)
-			total_tax += val
-			r.append(val)
+	for c in tax_acc:	
+		val = acc_head_tax_dict.get(c, 0)
+		total_tax += val
+		r.append(val)
 	r.append(total_tax)
 	r.append(flt(total_tax)+ flt(net_total))	# grand total

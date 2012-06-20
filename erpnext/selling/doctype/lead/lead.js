@@ -45,15 +45,24 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 	cur_frm.cscript.make_communication_body();
 }
 
+cur_frm.cscript.refresh_custom_buttons = function() {
+	cur_frm.clear_custom_buttons();
+	if(!doc.__islocal && !in_list(['Converted', 'Lead Lost'], doc.status)) {
+		if (doc.source != 'Existing Customer') {
+			cur_frm.add_custom_button('Create Customer',
+				cur_frm.cscript['Create Customer']);
+		}
+		cur_frm.add_custom_button('Create Opportunity',
+			cur_frm.cscript['Create Opportunity']);
+		cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms);
+	}
+}
+
 cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	// custom buttons
 	//---------------
-	cur_frm.clear_custom_buttons()
-	if(!doc.__islocal && !in_list(['Converted', 'Lead Lost'], doc.status)) {
-	if (doc.source != 'Existing Customer') cur_frm.add_custom_button('Create Customer', cur_frm.cscript['Create Customer']);
-		cur_frm.add_custom_button('Create Opportunity', cur_frm.cscript['Create Opportunity']);
-		cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms);
-	}
+	cur_frm.cscript.refresh_custom_buttons();
+	
 	erpnext.hide_naming_series();
 	
 	if (!doc.__islocal) cur_frm.cscript.render_communication_list(doc, cdt, cdn);
