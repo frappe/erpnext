@@ -12,7 +12,7 @@
 		var _page = new wn.views.Page(window.page_name);
 	
 		// page script
-		{{ insert_code }}
+		{{ javascript }}
 	
 		// trigger onload
 		_page.trigger('onload');
@@ -23,7 +23,7 @@
 	</script>
 	{% endif %}
 	{% if insert_style %}
-	<style>{{ insert_style }}</style>
+	<style>{{ css }}</style>
 	{% endif %}
 {% endblock %}
 
