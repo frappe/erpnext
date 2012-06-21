@@ -15,6 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # add additional columns
+from webnotes.utils import flt, cint, cstr
 
 cl = [c[0] for c in sql("""select distinct account_head 
 						   from `tabSales Taxes and Charges` 
@@ -61,41 +62,30 @@ for r in res:
 	#convert the result to dictionary for easy retrieval  
 	income_acc_dict = {}
 	for ia in income_acc_list:
-		income_acc_dict[ia[0]] = ia[1] 
+		income_acc_dict[ia[0]] = flt(ia[1])
 	
-	income_acc_keys = income_acc_dict.keys()
-
 	net_total = 0
 	for i in income_acc:
-		val = 0
-		#check if income account exists in dict
-		if i in income_acc_keys:
-			val = income_acc_dict[i]
-		val = flt(val and val or 0)
+		val = income_acc_dict.get(i, 0)
 		net_total += val
 		r.append(val)
 	r.append(net_total)
 
 	#Get tax for account heads
-	acc_head_tax = sql("""select account_head, tax_amount 
+	acc_head_tax = sql("""select account_head, sum(tax_amount)
 						  from `tabSales Taxes and Charges` 
 						  where parent = '%s' 
-						  and parenttype = 'Sales Invoice'""" %(r[col_idx['ID']],))
+						  and parenttype = 'Sales Invoice'
+						  group by account_head""" %(r[col_idx['ID']],))
 
 	#Convert the result to dictionary for easy retrieval
 	acc_head_tax_dict = {}
 	for a in acc_head_tax:
-		acc_head_tax_dict[a[0]] = a[1]
-
-	acc_head_keys = acc_head_tax_dict.keys()
+		acc_head_tax_dict[a[0]] = flt(a[1])
 
 	total_tax = 0
 	for c in cl:
-		val = 0
-		#check if account head exists in dict
-		if c in acc_head_keys:
-			val = acc_head_tax_dict[c]
-		val = flt(val and val or 0)
+		val = acc_head_tax_dict.get(c, 0)
 		total_tax += val
 		r.append(val)
 	r.append(total_tax)
