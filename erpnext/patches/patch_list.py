@@ -442,4 +442,9 @@ patch_list = [
 		'patch_file': 'series_unique_patch',
 		'description': "add unique constraint to series table's name column"
 	},
+	{
+		'patch_module': 'patches.june_2012',
+		'patch_file': 'set_recurring_type',
+		'description': "set recurring type as monthly in old"
+	},
 ]

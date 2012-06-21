@@ -686,7 +686,9 @@ class DocType(TransactionBase):
 
 	def convert_into_recurring(self):
 		if self.doc.convert_into_recurring_invoice:
-			if not self.doc.invoice_period_from_date or not self.doc.invoice_period_to_date:
+			if not self.doc.recurring_type:
+				msgprint("Please select recurring type", raise_exception=1)
+			elif not self.doc.invoice_period_from_date or not self.doc.invoice_period_to_date:
 				msgprint("Invoice period from date and to date is mandatory for recurring invoice", raise_exception=1)
 			self.set_next_date()
 			if not self.doc.recurring_id:
@@ -702,10 +704,11 @@ class DocType(TransactionBase):
 						will be generated e.g. 05, 28 etc.""", raise_exception=1)
 
 		import datetime
-		m = getdate(self.doc.posting_date).month + 1
+		mcount = {'Monthly': 1, 'Quarterly': 3, 'Half-yearly': 6, 'Yearly': 12}
+		m = getdate(self.doc.posting_date).month + mcount[self.doc.recurring_type]
 		y = getdate(self.doc.posting_date).year
 		if m > 12:
-			m, y = 1, y+1
+			m, y = m-12, y+1
 		try:
 			next_date = datetime.date(y, m, cint(self.doc.repeat_on_day_of_month))
 		except:

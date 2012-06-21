@@ -25,7 +25,7 @@ class DocType:
 		"""name from title"""
 		self.doc.name = website.utils.page_name(self.doc.title)
 
-	def validate(self):
+	def on_update(self):
 		"""make page for this product"""
 		from jinja2 import Template
 		import os
@@ -45,6 +45,9 @@ class DocType:
 			self.doc.content = Template(f.read()).render(doc=self.doc)
 		
 		self.cleanup_temp()
+
+		self.doc.save()
+
 		self.if_home_clear_cache()
 				
 	def cleanup_temp(self):

@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-04-13 11:56:18',
+		'creation': '2012-06-11 12:09:54',
 		'docstatus': 0,
-		'modified': '2012-06-04 14:40:59',
+		'modified': '2012-06-17 21:37:40',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -1478,6 +1478,21 @@
 		'permlevel': 0,
 		'print_hide': 1,
 		'trigger': u'Client'
+	},
+
+	# DocField
+	{
+		'allow_on_submit': 1,
+		'depends_on': u'eval:doc.convert_into_recurring_invoice==1',
+		'description': u'Select the period when the invoice will be generated automatically',
+		'doctype': u'DocField',
+		'fieldname': u'recurring_type',
+		'fieldtype': u'Select',
+		'label': u'Recurring Type',
+		'no_copy': 1,
+		'options': u'Monthly\nQuarterly\nHalf-yearly\nYearly',
+		'permlevel': 0,
+		'print_hide': 1
 	},
 
 	# DocField
