@@ -1,3 +1,6 @@
+{% extends "page.html" %}
+
+{% block javascript %}
 // ERPNext - web based ERP (http://erpnext.com)
 // Copyright (C) 2012 Web Notes Technologies Pvt Ltd
 // 
@@ -15,14 +18,13 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 // js inside blog page
-
-pscript['onload_{{ doc.name }}'] = function(wrapper) {
+wn.pages['{{ name }}'].onload = function(wrapper) {
 	// sidebar
 	wrapper.recent_list = new wn.ui.Listing({
 		parent: $(wrapper).find('.recent-posts'),
 		no_toolbar: true,
 		query: 'select name, title, left(content, 100) as content from tabBlog\
-			where ifnull(published,0)=1 and name!="{{ doc.name }}" order by creation desc',
+			where ifnull(published,0)=1 and name!="{{ name }}" order by creation desc',
 		hide_refresh: true,
 		render_row: function(parent, data) {
 			//console.log(data);
@@ -33,13 +35,13 @@ pscript['onload_{{ doc.name }}'] = function(wrapper) {
 		page_length: 5,
 	});
 	wrapper.recent_list.run();
-		
+
 	wrapper.comment_list = new wn.ui.Listing({
 		parent: $(wrapper).find('.blog-comments').get(0),
 		no_toolbar: true,
 		query: 'select comment, comment_by_fullname, creation\
 			from `tabComment` where comment_doctype="Page"\
-			and comment_docname="{{ doc.name }}" order by creation desc',
+			and comment_docname="{{ name }}" order by creation desc',
 		no_result_message: 'Be the first one to comment',
 		render_row: function(parent, data) {
 			data.comment_date = prettyDate(data.creation);
@@ -48,10 +50,10 @@ pscript['onload_{{ doc.name }}'] = function(wrapper) {
 				</div>\
 				<p style='margin-left: 20px;'>%(comment)s</p><br>", data))
 		},
-		hide_refresh: true
+		hide_refresh: true,
 	});
 	wrapper.comment_list.run();
-	
+
 	// add comment
 	$(wrapper).find('.layout-main-section').append('<br><button class="btn add-comment">\
 		Add Comment</button>');
@@ -70,7 +72,7 @@ pscript['onload_{{ doc.name }}'] = function(wrapper) {
 			var args = d.get_values();
 			if(!args) return;
 			args.comment_doctype = 'Page';
-			args.comment_docname = '{{ doc.name }}';
+			args.comment_docname = '{{ name }}';
 			$(btn).set_working();
 			$c('webnotes.widgets.form.comments.add_comment', args, function(r) {
 				$(btn).done_working();
@@ -81,3 +83,5 @@ pscript['onload_{{ doc.name }}'] = function(wrapper) {
 		d.show();
 	})
 }
+
+{% endblock %}

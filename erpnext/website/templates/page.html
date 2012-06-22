@@ -12,7 +12,9 @@
 		var _page = new wn.views.Page(window.page_name);
 	
 		// page script
+		{% block javascript %}
 		{{ javascript }}
+		{% endblock %}
 	
 		// trigger onload
 		_page.trigger('onload');

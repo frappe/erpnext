@@ -16,51 +16,22 @@
 
 import webnotes
 import website.utils
+import website.web_page
 
-class DocType:
+class DocType(website.web_page.Page):
 	def __init__(self, d, dl):
+		super(DocType, self).__init__('Web Page')
 		self.doc, self.doclist = d, dl
-	
-	def autoname(self):
-		"""name from title"""
-		self.doc.name = website.utils.page_name(self.doc.title)
 
 	def on_update(self):
-		"""make page for this product"""
-		from jinja2 import Template
-		import os
-
-		# we need the name for the templates
-		if self.doc.name.startswith('New Web Page'):
-			self.autoname()
-
-		# page name updates with the title
-		self.doc.page_name = website.utils.page_name(self.doc.title)
-		
-		# markdown
-		website.utils.markdown(self.doc, ['head_section','main_section', 'side_section'])
-		
-		# make page layout
-		with open(os.path.join(os.path.dirname(__file__), 'template.html'), 'r') as f:
-			self.doc.content = Template(f.read()).render(doc=self.doc)
-		
-		self.cleanup_temp()
-
-		self.doc.save()
-
+		super(DocType, self).on_update()
 		self.if_home_clear_cache()
-				
-	def cleanup_temp(self):
-		"""cleanup temp fields"""
-		fl = ['main_section_html', 'side_section_html', \
-			'head_section_html']
-		for f in fl:
-			if f in self.doc.fields:
-				del self.doc.fields[f]
-				
+
 	def if_home_clear_cache(self):
 		"""if home page, clear cache"""
 		if webnotes.conn.get_value("Website Settings", None, "home_page")==self.doc.name:
 			from webnotes.session_cache import clear_cache
-			clear_cache('Guest')			
-	
+			clear_cache('Guest')
+			
+	def get_html(self):
+		self.markdown_to_html(['head_section','main_section', 'side_section'])

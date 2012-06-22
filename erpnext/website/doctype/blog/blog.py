@@ -22,52 +22,17 @@ naming for same name files: file.gif, file-1.gif, file-2.gif etc
 
 import webnotes
 import website.utils
+import website.web_page
 
-class DocType():
+class DocType(website.web_page.Page):
 	def __init__(self, d, dl):
+		super(DocType, self).__init__('Blog')
 		self.doc, self.doclist = d, dl
-		
-	def autoname(self):
-		"""save file by its name"""
-		self.doc.name = website.utils.page_name(self.doc.title)
-	
-	def validate(self):
-		"""write/update 'Page' with the blog"""
-		# we need the name for the templates
-		if not self.doc.name:
-			self.autoname()
-		
-		if self.doc.page_name:
-			webnotes.conn.sql("""delete from tabPage where name=%s""", self.doc.page_name)
-		
-		p = website.utils.add_page(self.doc.title)
-		
-		from jinja2 import Template
-		import markdown2
-		import os
+
+	def get_html(self):
+		# temp fields
 		from webnotes.utils import global_date_format, get_fullname
-		from webnotes.model.code import get_obj
-		
-		self.doc.content_html = unicode(markdown2.markdown(self.doc.content or ''))
 		self.doc.full_name = get_fullname(self.doc.owner)
 		self.doc.updated = global_date_format(self.doc.modified)
-		
-		with open(os.path.join(os.path.dirname(__file__), 'template.html'), 'r') as f:
-			p.content = Template(f.read()).render(doc=self.doc)
-		
-		with open(os.path.join(os.path.dirname(__file__), 'blog_page.js'), 'r') as f:
-			p.script = Template(f.read()).render(doc=self.doc)
-			
-		p.web_page = 'Yes'
-		p.save()
-		get_obj(doc=p).write_cms_page()
-		
-		website.utils.add_guest_access_to_page(p.name)
-		self.doc.page_name = p.name
-		
-		# cleanup
-		for f in ['full_name', 'updated', 'content_html']:
-			if f in self.doc.fields:
-				del self.doc.fields[f]				
 
-			
+		self.markdown_to_html(['content'])

@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-04-02 16:02:43',
+		'creation': '2012-06-19 15:02:20',
 		'docstatus': 0,
-		'modified': '2012-06-15 17:18:59',
+		'modified': '2012-06-22 18:49:02',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -36,13 +36,15 @@
 
 	# These values are common for all DocPerm
 	{
+		'amend': 0,
 		'doctype': u'DocPerm',
 		'name': '__common__',
 		'parent': u'Web Page',
 		'parentfield': u'permissions',
 		'parenttype': u'DocType',
 		'read': 1,
-		'role': u'Website Manager'
+		'role': u'Website Manager',
+		'submit': 0
 	},
 
 	# DocType, Web Page
@@ -53,6 +55,7 @@
 
 	# DocPerm
 	{
+		'cancel': 1,
 		'create': 1,
 		'doctype': u'DocPerm',
 		'permlevel': 0,
@@ -61,8 +64,11 @@
 
 	# DocPerm
 	{
+		'cancel': 0,
+		'create': 0,
 		'doctype': u'DocPerm',
-		'permlevel': 1
+		'permlevel': 1,
+		'write': 0
 	},
 
 	# DocField
@@ -160,17 +166,6 @@
 		'fieldtype': u'Code',
 		'label': u'Side Section',
 		'options': u'Markdown',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'doctype': u'DocField',
-		'fieldname': u'content',
-		'fieldtype': u'Code',
-		'hidden': 1,
-		'label': u'Content',
 		'permlevel': 0
 	},
 
