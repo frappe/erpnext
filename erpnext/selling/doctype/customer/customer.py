@@ -239,12 +239,20 @@ class DocType:
 		webnotes.conn.sql("""\
 			delete from `tabCommunication`
 			where customer = %s and supplier is null""", self.doc.name)
-	
-# ******************************************************* on trash *********************************************************
+			
+	def delete_customer_account(self):
+		"""delete customer's ledger if exist and check balance before deletion"""
+		acc = sql("select name from `tabAccount` where master_type = 'Customer' \
+			and master_name = %s and docstatus < 2", self.doc.name)
+		if acc:
+			from webnotes.model import delete_doc
+			delete_doc('Account', acc[0][0])
+
 	def on_trash(self):
 		self.delete_customer_address()
 		self.delete_customer_contact()
 		self.delete_customer_communication()
+		self.delete_customer_account()
 		if self.doc.lead_name:
 			sql("update `tabLead` set status='Interested' where name=%s",self.doc.lead_name)
 			
