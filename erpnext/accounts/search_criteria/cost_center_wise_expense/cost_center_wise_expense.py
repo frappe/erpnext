@@ -18,8 +18,8 @@
 # -----------
 row_list = [['Cost Center','Data','160px'],
             ['Account','Data','160px'],
-            ['Debit','Data','120px'],
-            ['Credit','Data','120px'], 
+            ['Debit','Currency','120px'],
+            ['Credit','Currency','120px'], 
             ['Expense','Currency','120px']]  
 
 for r in row_list:
