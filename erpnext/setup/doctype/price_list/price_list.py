@@ -57,7 +57,7 @@ class DocType:
 		updated = 0
 		
 		for line in data:
-			if len(line)==3:
+			if line and len(line)==3:
 				# if item exists
 				if sql("select name from tabItem where name=%s", line[0]):
 					if self.is_currency_valid(line[2]):
