@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-03-27 14:36:22',
+		'creation': '2012-05-15 12:15:02',
 		'docstatus': 0,
-		'modified': '2012-03-27 14:36:22',
+		'modified': '2012-06-22 10:51:23',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -19,12 +19,13 @@
 		'colour': u'White:FFF',
 		'doctype': 'DocType',
 		'document_type': u'Master',
+		'max_attachments': 1,
 		'module': u'Setup',
 		'name': '__common__',
 		'section_style': u'Simple',
 		'server_code_error': u' ',
 		'show_in_menu': 0,
-		'version': 6
+		'version': 1
 	},
 
 	# These values are common for all DocField
@@ -56,52 +57,52 @@
 
 	# DocPerm
 	{
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Sales Manager',
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Sales Manager',
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Sales User',
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Sales User',
+		'write': 0
+	},
+
+	# DocPerm
+	{
 		'cancel': 1,
 		'create': 1,
 		'doctype': u'DocPerm',
 		'permlevel': 0,
 		'role': u'Sales Master Manager',
 		'write': 1
-	},
-
-	# DocPerm
-	{
-		'cancel': 0,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Sales Manager',
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'cancel': 0,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Sales Manager',
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'cancel': 0,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Sales User',
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'cancel': 0,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Sales User',
-		'write': 0
 	},
 
 	# DocField
