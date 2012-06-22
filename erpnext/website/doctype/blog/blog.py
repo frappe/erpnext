@@ -29,7 +29,16 @@ class DocType(website.web_page.Page):
 		super(DocType, self).__init__('Blog')
 		self.doc, self.doclist = d, dl
 
+	def on_update(self):
+		super(DocType, self).on_update()
+		if not webnotes.utils.cint(self.doc.published):
+			self.delete_web_cache(self.doc.page_name)
+
 	def get_html(self):
+		# this is for double precaution. usually it wont reach this code if not published
+		if not webnotes.utils.cint(self.doc.published):
+			raise Exception, "This blog has not been published yet!"
+		
 		# temp fields
 		from webnotes.utils import global_date_format, get_fullname
 		self.doc.full_name = get_fullname(self.doc.owner)
