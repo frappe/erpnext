@@ -67,7 +67,7 @@ class DocType:
   # Fetch voucherwise tds details
   #-------------------------------
   def get_tds_list(self):
-    self.doc.clear_table(self.doclist,'tds_payment_details')
+    self.doclist = self.doc.clear_table(self.doclist,'tds_payment_details')
     self.doc.total_tds = 0
     import datetime
     if not self.doc.tds_category:

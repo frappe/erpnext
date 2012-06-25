@@ -621,7 +621,7 @@ class DocType(TransactionBase):
 	# Get other charges from Master
 	# =================================================================================
 	def get_purchase_tax_details(self,obj):
-		self.doc.clear_table(obj.doclist,'purchase_tax_details')
+		obj.doclist = self.doc.clear_table(obj.doclist,'purchase_tax_details')
 		idx = 0
 		other_charge = sql("select category, add_deduct_tax, charge_type,row_id,description,account_head,rate,tax_amount from `tabPurchase Taxes and Charges` where parent = '%s' order by idx" %(obj.doc.purchase_other_charges), as_dict = 1)
 		for other in other_charge:
@@ -636,6 +636,7 @@ class DocType(TransactionBase):
 			d.tax_amount = flt(other['tax_amount'])
 			d.idx = idx
 			idx += 1
+		return obj.doclist
 
 
 	# Get Tax rate if account type is TAX

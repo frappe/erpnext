@@ -56,7 +56,7 @@ class DocType(TransactionBase):
       msgprint("You can not fetch details of both, Sales Order and Customer Issue, in same Maintenance Visit")
       raise Exception
     
-    self.doc.clear_table(self.doclist, 'maintenance_visit_details')
+    self.doclist = self.doc.clear_table(self.doclist, 'maintenance_visit_details')
     
     if self.doc.sales_order_no:
       self.doclist = get_obj('DocType Mapper', 'Sales Order-Maintenance Visit').dt_map('Sales Order', 'Maintenance Visit', self.doc.sales_order_no, self.doc, self.doclist, "[['Sales Order', 'Maintenance Visit'],['Sales Order Item', 'Maintenance Visit Purpose']]")

@@ -240,7 +240,7 @@ class DocType(TransactionBase):
 			consider_sa_items_as_rm = self.doc.consider_sa_items_as_raw_materials
 			
 		self.get_raw_materials(bom_no, fg_qty, consider_sa_items_as_rm)
-		self.doc.clear_table(self.doclist, 'mtn_details', 1)
+		self.doclist = self.doc.clear_table(self.doclist, 'mtn_details', 1)
 
 		sw = (self.doc.process == 'Backflush') and cstr(pro_obj.doc.wip_warehouse) or ''
 		tw = (self.doc.process == 'Material Transfer') and cstr(pro_obj.doc.wip_warehouse) or ''

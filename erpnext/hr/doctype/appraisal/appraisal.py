@@ -48,7 +48,7 @@ class DocType:
 		if not self.doc.kra_template:
 			msgprint("Please select Appraisal Template to be be fetched")
 			raise Exception
-		self.doc.clear_table(self.doclist,'appraisal_details')
+		self.doclist = self.doc.clear_table(self.doclist,'appraisal_details')
 		get_obj('DocType Mapper', 'Appraisal Template-Appraisal').dt_map('Appraisal Template', 'Appraisal', self.doc.kra_template, self.doc, self.doclist, "[['Appraisal Template','Appraisal'],['Appraisal Template Goal', 'Appraisal Goal']]")
 	
 	def validate_dates(self):
