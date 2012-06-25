@@ -160,13 +160,9 @@ cur_frm.fields_dict['sales_order_no'].get_query = function(doc) {
 	var cond = '';
 	
 	if(doc.customer) {
-		if(doc.currency) cond = '`tabSales Order`.customer = "'+doc.customer+'" and `tabSales Order`.currency = "'+doc.currency+'" and';
-		else cond = '`tabSales Order`.customer = "'+doc.customer+'" and';
+		cond = '`tabSales Order`.customer = "'+doc.customer+'" and';
 	}
-	else {
-		if(doc.currency) cond = '`tabSales Order`.currency = "'+doc.currency+'" and';
-		else cond = '';
-	}
+
 	if(doc.project_name){
 		cond += '`tabSales Order`.project_name ="'+doc.project_name+'"';
 	}
