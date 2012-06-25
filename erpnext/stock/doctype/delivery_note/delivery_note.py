@@ -297,13 +297,13 @@ class DocType(TransactionBase):
 	# check if same item, warehouse present in prevdoc
 	# ------------------------------------------------------------------
 	def validate_items_with_prevdoc(self, d):
-		if d.prevdoc_doctype == 'Sales Order':
-			data = sql("select item_code, reserved_warehouse from `tabSales Order Item` where parent = '%s' and name = '%s'" % (d.prevdoc_docname, d.prevdoc_detail_docname))
-		if d.prevdoc_doctype == 'Purchase Receipt':
-			data = sql("select item_code, rejected_warehouse from `tabPurchase Receipt Item` where parent = '%s' and name = '%s'" % (d.prevdoc_docname, d.prevdoc_detail_docname))
-		if not data or data[0][0] != d.item_code or data[0][1] != d.warehouse:
-			msgprint("Item: %s / Warehouse: %s is not matching with Sales Order: %s. Sales Order might be modified after fetching data from it. Please delete items and fetch again." % (d.item_code, d.warehouse, d.prevdoc_docname))
-			raise Exception
+		prev_item_dt = (d.prevdoc_doctype == 'Sales Order') and 'Sales Order Item' or 'Purchase Receipt Item'
+		data = sql("select item_code from `tab%s` where parent = '%s' and name = '%s'"\
+		 	% (prev_item_dt, d.prevdoc_docname, d.prevdoc_detail_docname))
+		if not data or data[0][0] != d.item_code:
+			msgprint("Item: %s is not matching with Sales Order: %s. Sales Order might be modified after \
+				fetching data from it. Please delete items and fetch again." \
+				% (d.item_code, d.prevdoc_docname), raise_exception=1)
 
 
 	# ********* UPDATE CURRENT STOCK *****************************
@@ -413,16 +413,19 @@ class DocType(TransactionBase):
 	def update_stock_ledger(self, update_stock, is_stopped = 0):
 		self.values = []
 		for d in self.get_item_list(is_stopped):
-			stock_item = sql("SELECT is_stock_item, is_sample_item FROM tabItem where name = '%s'"%(d[1]), as_dict = 1) # stock ledger will be updated only if it is a stock item
+			stock_item = sql("SELECT is_stock_item, is_sample_item FROM tabItem where name = '%s'"%(d['item_code']), as_dict = 1) # stock ledger will be updated only if it is a stock item
 			if stock_item[0]['is_stock_item'] == "Yes":
-				if not d[0]:
-					msgprint("Message: Please enter Warehouse for item %s as it is stock item."% d[1])
+				if not d['warehouse']:
+					msgprint("Message: Please enter Warehouse for item %s as it is stock item."% d['item_code'])
 					raise Exception
-				if d[3] < 0 :
-					# Reduce Reserved Qty from warehouse
-					bin = get_obj('Warehouse', d[0]).update_bin(0, flt(update_stock) * flt(d[3]), 0, 0, 0, d[1], self.doc.transaction_date,doc_type=self.doc.doctype,doc_name=self.doc.name, is_amended = (self.doc.amended_from and 'Yes' or 'No'))
+				if d['reserved_qty'] < 0 :
+					# Reduce reserved qty from reserved warehouse mentioned in so
+					bin = get_obj('Warehouse', d['reserved_warehouse']).update_bin(0, flt(update_stock) * flt(d['reserved_qty']), \
+						0, 0, 0, d['item_code'], self.doc.transaction_date,doc_type=self.doc.doctype, \
+						doc_name=self.doc.name, is_amended = (self.doc.amended_from and 'Yes' or 'No'))
+						
 				# Reduce actual qty from warehouse
-				self.make_sl_entry(d, d[0], - flt(d[2]) , 0, update_stock)
+				self.make_sl_entry(d, d['warehouse'], - flt(d['qty']) , 0, update_stock)
 		get_obj('Stock Ledger', 'Stock Ledger').update_stock(self.values)
 
 
@@ -434,22 +437,22 @@ class DocType(TransactionBase):
 	# ********************** Make Stock Entry ************************************
 	def make_sl_entry(self, d, wh, qty, in_value, update_stock):
 		self.values.append({
-			'item_code'					 : d[1],
-			'warehouse'					 : wh,
-			'transaction_date'		: getdate(self.doc.modified).strftime('%Y-%m-%d'),
+			'item_code'					: d['item_code'],
+			'warehouse'					: wh,
+			'transaction_date'			: getdate(self.doc.modified).strftime('%Y-%m-%d'),
 			'posting_date'				: self.doc.posting_date,
 			'posting_time'				: self.doc.posting_time,
 			'voucher_type'				: 'Delivery Note',
-			'voucher_no'					: self.doc.name,
-			'voucher_detail_no'	 : '',
-			'actual_qty'					: qty,
-			'stock_uom'					 : d[4],
-			'incoming_rate'			 : in_value,
-			'company'						 : self.doc.company,
-			'fiscal_year'				 : self.doc.fiscal_year,
+			'voucher_no'				: self.doc.name,
+			'voucher_detail_no'	 		: '',
+			'actual_qty'				: qty,
+			'stock_uom'					: d['uom'],
+			'incoming_rate'			 	: in_value,
+			'company'					: self.doc.company,
+			'fiscal_year'				: self.doc.fiscal_year,
 			'is_cancelled'				: (update_stock==1) and 'No' or 'Yes',
-			'batch_no'						: d[5],
-			'serial_no'					 : d[6]
+			'batch_no'					: d['batch_no'],
+			'serial_no'					: d['serial_no']
 		})
 
 
