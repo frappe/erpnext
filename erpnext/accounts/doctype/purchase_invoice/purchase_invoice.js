@@ -116,7 +116,7 @@ cur_frm.cscript.credit_to = function(doc,dt,dn) {
 	var callback = function(r,rt) {
 			var doc = locals[cur_frm.doctype][cur_frm.docname];		
 			if(doc.supplier) get_server_fields('get_default_supplier_address', JSON.stringify({supplier: doc.supplier}),'', doc, dt, dn, 1);
-			if(doc.supplier) unhide_field(['supplier_address','contact_person']);
+			if(doc.supplier) unhide_field(['address_display','contact_display']);
 			cur_frm.refresh();
 	}
 
