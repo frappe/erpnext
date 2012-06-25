@@ -447,4 +447,9 @@ patch_list = [
 		'patch_file': 'set_recurring_type',
 		'description': "set recurring type as monthly in old"
 	},
+	{
+		'patch_module': 'patches.june_2012',
+		'patch_file': 'alter_tabsessions',
+		'description': "alter tabsessions to change user column definition"
+	},
 ]

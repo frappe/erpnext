@@ -169,6 +169,13 @@ class DocType:
 		get_obj('Account', self.doc.parent_account).update_balance(fy, period_det, flag)
 		msgprint('Balances updated')
 	
+	def validate_mandatory(self):
+		if not self.doc.debit_or_credit:
+			msgprint("Debit or Credit field is mandatory", raise_exception=1)
+		if not self.doc.is_pl_account:
+			msgprint("Is PL Account field is mandatory", raise_exception=1)
+
+
 	# VALIDATE
 	# ==================================================================
 	def validate(self): 
@@ -177,6 +184,7 @@ class DocType:
 		self.validate_parent()
 		self.validate_duplicate_account()
 		self.validate_root_details()
+		self.validate_mandatory()
 	
 		# Defaults
 		if not self.doc.parent_account:
