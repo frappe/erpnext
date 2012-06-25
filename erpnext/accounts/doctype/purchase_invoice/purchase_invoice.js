@@ -397,9 +397,5 @@ cur_frm.cscript.select_print_heading = function(doc,cdt,cdn){
 
 /****************** Get Accounting Entry *****************/
 cur_frm.cscript.view_ledger_entry = function(){
-	var callback = function(report){
-		report.set_filter('GL Entry', 'Voucher No',cur_frm.doc.name);
-		report.dt.run();
-	}
-	loadreport('GL Entry','General Ledger', callback);
+	wn.set_route('Report', 'GL Entry', 'General Ledger', 'Voucher No='+cur_frm.doc.name);
 }

@@ -1032,7 +1032,8 @@ wn.container.change_to('Form - '+dt);wn.views.formview[dt].frm.refresh(dn);});})
  *	lib/js/wn/views/reportview.js
  */
 wn.views.reportview={show:function(dt,rep_name){wn.require('js/report-legacy.js');dt=get_label_doctype(dt);if(!_r.rb_con){_r.rb_con=new _r.ReportContainer();}
-_r.rb_con.set_dt(dt,function(rb){if(rep_name){var t=rb.current_loaded;rb.load_criteria(rep_name);if((rb.dt)&&(!rb.dt.has_data()||rb.current_loaded!=t)){rb.dt.run();}}
+_r.rb_con.set_dt(dt,function(rb){if(rep_name){var t=rb.current_loaded;var route_changed=(rb.current_route!=wn.get_route_str())
+rb.load_criteria(rep_name);if(rb.dt&&route_changed){rb.dt.run();}}
 if(!rb.forbidden){wn.container.change_to('Report Builder');}});}}
 wn.views.reportview2={show:function(dt){var page_name=wn.get_route_str();if(wn.pages[page_name]){wn.container.change_to(wn.pages[page_name]);}else{var route=wn.get_route();if(route[1]){new wn.views.ReportViewPage(route[1],route[2]);}else{wn.set_route('404');}}}}
 wn.views.ReportViewPage=Class.extend({init:function(doctype,docname){this.doctype=doctype;this.docname=docname;this.page_name=wn.get_route_str();this.make_page();var me=this;wn.model.with_doctype(doctype,function(){me.make_report_view();if(docname){wn.model.with_doc('Report',docname,function(r){me.reportview.set_columns_and_filters(JSON.parse(locals['Report'][docname].json));me.reportview.run();});}else{me.reportview.run();}});},make_page:function(){this.page=wn.container.add_page(this.page_name);wn.ui.make_app_page({parent:this.page,single_column:true});wn.container.change_to(this.page_name);},make_report_view:function(){wn.views.breadcrumbs($('<span>').appendTo(this.page.appframe.$titlebar),locals.DocType[this.doctype].module);this.reportview=new wn.views.ReportView(this.doctype,this.docname,this.page)}})

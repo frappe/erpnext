@@ -494,12 +494,8 @@ cur_frm.cscript.make_jv = function(doc, dt, dn, bank_account) {
 
 
 /****************** Get Accounting Entry *****************/
-cur_frm.cscript.view_ledger_entry = function(){
-	var callback = function(report){
-		report.set_filter('GL Entry', 'Voucher No',cur_frm.doc.name);
-		report.dt.run();
-	}
-	loadreport('GL Entry','General Ledger', callback);
+cur_frm.cscript.view_ledger_entry = function(){	
+	wn.set_route('Report', 'GL Entry', 'General Ledger', 'Voucher No='+cur_frm.doc.name);
 }
 
 // Default values for recurring invoices
