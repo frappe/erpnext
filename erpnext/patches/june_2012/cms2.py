@@ -33,6 +33,12 @@ def save_pages():
 				select name from `tabBlog`
 				where docstatus = 0 and ifnull(published, 0) = 1"""
 		},
+		{
+			'doctype': 'Item',
+			'query': """\
+				select name from `tabItem`
+				where docstatus = 0 and ifnull(show_in_website, 'No') = 'Yes'"""
+		}
 	]
 	
 	for s in save_list:

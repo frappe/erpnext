@@ -29,18 +29,14 @@ class Page(object):
 	def validate(self):
 		if self.doc.name:
 			self.old_page_name = webnotes.conn.get_value(self.doctype, self.doc.name, 'page_name')
-	
+
 	def on_update(self):
 		# page name updates with the title
 		self.update_page_name()
 		
-		# delete web cache entry of old name
-		if hasattr(self, 'old_page_name') and self.old_page_name != self.doc.page_name:
-			self.delete_web_cache(self.old_page_name)
-
 		self.clear_web_cache()
 
-		self.doc.save(ignore_fields=1)
+		self.doc.save()
 		
 	def on_trash(self):
 		"""delete Web Cache entry"""
@@ -63,6 +59,11 @@ class Page(object):
 			if web cache entry doesn't exist, it creates one
 			if duplicate entry exists for another doctype, it raises exception
 		"""
+		# delete web cache entry of old name
+		if hasattr(self, 'old_page_name') and self.old_page_name and \
+				self.old_page_name != self.doc.page_name:
+			self.delete_web_cache(self.old_page_name)
+		
 		website.web_cache.clear_web_cache(self.doctype, self.doc.name, self.doc.page_name)
 		
 	def delete_web_cache(self, page_name):

@@ -32,7 +32,7 @@ def load_from_web_cache(page_name, comments, template):
 		where name = %s""", page_name)
 	
 	# if page doesn't exist, raise exception
-	if not res and page_name not in ['404', 'index']:
+	if not res and page_name not in ['404', 'index', 'blog', 'products']:
 		raise Exception, "Page %s not found" % page_name
 	
 	html, doc_type, doc_name = res and res[0] or (None, None, None)
@@ -52,23 +52,37 @@ def load_into_web_cache(page_name, template, doc_type, doc_name):
 	import webnotes
 	outer_env_dict = get_outer_env()
 	
-	if page_name == '404':
+	if page_name in ['404', 'blog', 'products']:
 		args = outer_env_dict
+		args.update({
+			'name': page_name,
+		})
 	else:
 		if page_name == 'index':
 			page_name, doc_type, doc_name = get_index_page()
 
 		from webnotes.model.code import get_obj
 		obj = get_obj(doc_type, doc_name)
-		obj.get_html()
+		if hasattr(obj, 'get_html'):
+			obj.get_html()
 		args = obj.doc.fields
 		args.update(outer_env_dict)
 	
+	# decide template and update args
 	if doc_type == 'Blog':
-		template = 'blog.html'
-		args['insert_code'] = 1
+		template = 'blog/blog.html'
+		args.update({ 'insert_code': 1 })
+	elif doc_type == 'Item':
+		template = 'product/product.html'
+		args.update({ 'insert_code': 1 })
 	elif doc_type == 'Web Page':
 		template = 'web_page.html'
+	elif page_name == 'blog':
+		template = 'blog/blog_list.html'
+		args.update({ 'insert_code': 1 })
+	elif page_name == 'products':
+		template = 'product/product_list.html'
+		args.update({ 'insert_code': 1 })
 	
 	html = build_html(args, template)
 	

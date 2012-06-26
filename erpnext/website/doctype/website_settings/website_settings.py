@@ -54,8 +54,13 @@ class DocType:
 		from webnotes.cms.make import make_web_core
 		make_web_core()
 		
-		get_obj('Page', 'blog').write_cms_page(force=True)
-		get_obj('Page', 'Login Page').write_cms_page(force=True)
+		import website.web_cache
+		for page in ['blog', 'products']:
+			website.web_cache.delete_web_cache(page)
+			website.web_cache.clear_web_cache(None, None, page)
+		
+		#get_obj('Page', 'blog').write_cms_page(force=True)
+		#get_obj('Page', 'Login Page').write_cms_page(force=True)
 		
 		webnotes.msgprint('Rebuilt all blogs and pages')
 		

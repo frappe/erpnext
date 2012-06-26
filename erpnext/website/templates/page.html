@@ -24,9 +24,14 @@
 	});
 	</script>
 	{% endif %}
+	
+	{% block css %}
 	{% if insert_style %}
+	
 	<style>{{ css }}</style>
+
 	{% endif %}
+	{% endblock %}
 {% endblock %}
 
 {% block content %}
