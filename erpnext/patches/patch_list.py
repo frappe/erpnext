@@ -457,4 +457,9 @@ patch_list = [
 		'patch_file': 'delete_old_parent_entries',
 		'description': "delete entries of child table having parent like old_par%% or ''"
 	},
+	{
+		'patch_module': 'patches.april_2012',
+		'patch_file': 'delete_about_contact',
+		'description': "delete depracated doctypes of website module"
+	},
 ]
