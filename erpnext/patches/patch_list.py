@@ -452,4 +452,9 @@ patch_list = [
 		'patch_file': 'alter_tabsessions',
 		'description': "alter tabsessions to change user column definition"
 	},
+	{
+		'patch_module': 'patches.june_2012',
+		'patch_file': 'delete_old_parent_entries',
+		'description': "delete entries of child table having parent like old_par%% or ''"
+	},
 ]
