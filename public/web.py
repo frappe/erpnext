@@ -48,13 +48,26 @@ def get_html(page_name):
 	page_name = scrub_page_name(page_name)
 	
 	if page_name == '404':
-		comments = """error: %s""" % webnotes.getTraceback()
-		template = '404.html'
+		traceback = webnotes.getTraceback()
+		
+		# script is used to display traceback in error console
+		args = {
+			'comments': """error: %s""" % traceback,
+			'template': '404.html',
+		}
+		# 	'script': """(function() {
+		# 		var error = "ERROR: %s";
+		# 		console.log(error);
+		# 	})();""" % traceback.replace('"', '\\"').replace('\n', ' \\\n'),
+		# }
+				
 	else:
-		comments = """page: %s""" % page_name
-		template = 'page.html'
+		args = {
+			'comments': """page: %s""" % page_name,
+			'template': 'page.html',
+		}
 	
-	html = website.web_cache.load_from_web_cache(page_name, comments, template)
+	html = website.web_cache.load_from_web_cache(page_name, **args)
 	
 	return html
 

@@ -15,7 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # used by web.py
-def load_from_web_cache(page_name, comments, template):
+def load_from_web_cache(page_name, comments, template): #, script=None):
 	"""
 		* search for page in cache
 		* if html exists, return
@@ -45,6 +45,9 @@ def load_from_web_cache(page_name, comments, template):
 
 	from webnotes.utils import cstr
 	html += """\n<!-- %s -->""" % cstr(comments)
+	
+	# show error in error console
+	# if script: html += """\n\n<script>\n%s\n</script>""" % cstr(script)
 	return html
 
 def load_into_web_cache(page_name, template, doc_type, doc_name):

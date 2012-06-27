@@ -9,9 +9,11 @@
 				<h1>{{ item_name }}</h1>
 				<div style="float: left;">
 					<br><br>
+					{% if website_image %}
 					<image src="files/{{ website_image }}" style="width: 300px; 
 						margin-left: 15px;" />
 					<br><br>
+					{% endif %}
 					{{ web_description_html }}
 					<button class="btn primary product-inquiry" 
 						data-product="{{ name }}"

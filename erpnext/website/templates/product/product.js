@@ -1,6 +1,7 @@
-{% extends "page.html" %}
+{% extends "product/product_category.js" %}
 
 {% block javascript %}
+{{ super() }}
 // ERPNext - web based ERP (http://erpnext.com)
 // Copyright (C) 2012 Web Notes Technologies Pvt Ltd
 // 
@@ -16,14 +17,13 @@
 // 
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-wn.require('js/product_category.js');
-
+wn.provide('erpnext.products');
 wn.pages['{{ name }}'].onload = function(wrapper) {
-	console.log('loaded page');
 	wrapper.product_group = "{{ item_group }}";
 	wrapper.product_name = "{{ name }}";
-	erpnext.make_product_categories(wrapper);
+	erpnext.products.make_product_categories(wrapper);
+	
+	// TODO make this working
 	$(wrapper).find('.product-inquiry').click(function() {
 		loadpage('contact', function() {
 			$('#content-contact-us [name="contact-message"]').val("Hello,\n\n\
@@ -43,23 +43,33 @@ wn.pages['{{ name }}'].onload = function(wrapper) {
 				cat: wrapper.product_group,
 				name: wrapper.product_name
 			};
-			return repl('select name, item_name, website_image, \
+			var query = repl('select name, item_name, website_image, \
 				page_name, description \
 				from tabItem \
+				where is_sales_item="Yes" \
 				and ifnull(show_in_website, "No")="Yes" \
-				and name != "%(name)s" \
+				and name != "%(name)s" and docstatus = 0 \
 				and item_group="%(cat)s" order by modified desc', args)
+			return query
 		},
 		render_row: function(parent, data) {
-			if(data.short_description.length > 100) {
-				data.short_description = data.short_description.substr(0,100) + '...';
+			if(data.description.length > 100) {
+				data.description = data.description.substr(0,100) + '...';
 			}
-			parent.innerHTML = repl('<div style="float:left; width: 60px;">\
-				<img src="files/%(website_image)s" style="width:55px;"></div>\
+			parent.innerHTML = repl('\
+				<div style="float:left; width: 60px; padding-bottom: 5px" class="img-area"></div>\
 				<div style="float:left; width: 180px">\
 					<b><a href="%(page_name)s.html">%(item_name)s</a></b>\
 					<p>%(description)s</p></div>\
 				<div style="clear: both; margin-bottom: 15px;"></div>', data);
+				
+			if(data.website_image) {
+				$(parent).find('.img-area').append(repl(
+					'<img src="files/%(website_image)s" style="width:55px;">', data))
+			} else {
+				$(parent).find('.img-area').append(wn.dom.placeholder(50, 
+					data.item_name));
+			}
 		}
 	});
 	wrapper.similar.run();
