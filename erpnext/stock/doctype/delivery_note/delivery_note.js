@@ -175,7 +175,7 @@ cur_frm.cscript.delivery_type = function(doc, cdt, cdn) {
 	if (doc.delivery_type = 'Sample') cfn_set_fields(doc, cdt, cdn);
 }
 
-cur_frm.cscript.serial_no = function(doc, cdt , cdn) {
+cur_frm.cscript.serial_no = function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
 	if (d.serial_no) {
 		 get_server_fields('get_serial_details',d.serial_no,'delivery_note_details',doc,cdt,cdn,1);
