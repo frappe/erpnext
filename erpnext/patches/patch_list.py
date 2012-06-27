@@ -452,4 +452,9 @@ patch_list = [
 		'patch_file': 'alter_tabsessions',
 		'description': "alter tabsessions to change user column definition"
 	},
+	{
+		'patch_module': 'patches.april_2012',
+		'patch_file': 'delete_about_contact',
+		'description': "delete depracated doctypes of website module"
+	},
 ]
