@@ -62,8 +62,8 @@ class DocType:
 			count += 1
 			if count == 2:
 				if s[0] != 'Item Code' or s[1] != 'Warehouse':
-					msgprint("First row of the attachment always should be 'Item Code, Warehouse, Quantity \
-						and Valuation Rate/Incoming Rate'", raise_exception=1)
+					msgprint("First row of the attachment always should be same as template(Item Code, Warehouse, Quantity \
+						and Valuation Rate/Incoming Rate)", raise_exception=1)
 				else:
 					continue
 			# validate
@@ -199,7 +199,7 @@ class DocType:
 				r = [cstr(i) for i in row] + [cstr(qty_diff), cstr(rate_diff)]
 				self.store_diff_info(r)
 				
-			msgprint("Stock Reconciliation Completed Successfully...")
+		msgprint("Stock Reconciliation Completed Successfully...")
 			
 
 	def store_diff_info(self, r):
