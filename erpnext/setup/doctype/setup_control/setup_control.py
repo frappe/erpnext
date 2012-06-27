@@ -89,6 +89,8 @@ class DocType:
 		self.set_cp_defaults(**cp_args)
 
 		self.create_feed_and_todo()
+		
+		self.create_email_digest()
 
 		webnotes.clear_cache()
 		msgprint("Company setup is complete")
@@ -127,6 +129,44 @@ class DocType:
 		d.reference_type = 'Supplier'
 		d.save(1)
 
+	def create_email_digest(self):
+		"""
+			create a default weekly email digest
+			* Weekly Digest
+			* For all companies
+			* Recipients: System Managers
+			* Full content
+			* Enabled by default
+		"""
+		import webnotes
+		companies_list = webnotes.conn.sql("SELECT company_name FROM `tabCompany`", as_list=1)
+
+		import webnotes.utils
+		system_managers = webnotes.utils.get_system_managers_list()
+		if not system_managers: return
+		
+		from webnotes.model.doc import Document
+		for company in companies_list:
+			if company and company[0]:
+				edigest = Document('Email Digest')
+				edigest.name = "Default Weekly Digest - " + company[0]
+				edigest.company = company[0]
+				edigest.frequency = 'Weekly'
+				edigest.recipient_list = "\n".join(system_managers)
+				for f in ['new_leads', 'new_enquiries', 'new_quotations',
+						'new_sales_orders', 'new_purchase_orders',
+						'new_transactions', 'payables', 'payments',
+						'expenses_booked', 'invoiced_amount', 'collections',
+						'income', 'bank_balance', 'stock_below_rl',
+						'income_year_to_date', 'enabled']:
+					edigest.fields[f] = 1
+				exists = webnotes.conn.sql("""\
+					SELECT name FROM `tabEmail Digest`
+					WHERE name = %s""", edigest.name)
+				if (exists and exists[0]) and exists[0][0]:
+					continue
+				else:
+					edigest.save(1)
 		
 	# Get Fiscal year Details
 	# ------------------------

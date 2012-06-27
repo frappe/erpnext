@@ -458,12 +458,15 @@ class DocType(TransactionBase):
 	# ===============================================================================================
 	def update_stock_ledger(self, update_stock, clear = 0):
 		for d in self.get_item_list(clear):
-			stock_item = sql("SELECT is_stock_item FROM tabItem where name = '%s'"%(d[1]),as_dict = 1)			 # stock ledger will be updated only if it is a stock item
+			stock_item = sql("SELECT is_stock_item FROM tabItem where name = '%s'"%(d['item_code']),as_dict = 1)
+			# stock ledger will be updated only if it is a stock item
 			if stock_item and stock_item[0]['is_stock_item'] == "Yes":
-				if not d[0]:
-					msgprint("Message: Please enter Reserved Warehouse for item %s as it is stock item."% d[1])
+				if not d['reserved_warehouse']:
+					msgprint("Message: Please enter Reserved Warehouse for item %s as it is stock item."% d['item_code'])
 					raise Exception
-				bin = get_obj('Warehouse', d[0]).update_bin( 0, flt(update_stock) * flt(d[2]), 0, 0, 0, d[1], self.doc.transaction_date,doc_type=self.doc.doctype,doc_name=self.doc.name, is_amended = (self.doc.amended_from and 'Yes' or 'No'))
+				bin = get_obj('Warehouse', d['reserved_warehouse']).update_bin( 0, flt(update_stock) * flt(d['qty']), \
+					0, 0, 0, d['item_code'], self.doc.transaction_date,doc_type=self.doc.doctype,\
+					doc_name=self.doc.name, is_amended = (self.doc.amended_from and 'Yes' or 'No'))
 	
 	# Gets Items from packing list
 	#=================================

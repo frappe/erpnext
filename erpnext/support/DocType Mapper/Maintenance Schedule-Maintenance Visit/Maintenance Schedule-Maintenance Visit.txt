@@ -1,0 +1,99 @@
+# DocType Mapper, Maintenance Schedule-Maintenance Visit
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2012-06-27 13:18:25',
+		'docstatus': 0,
+		'modified': '2012-06-27 13:18:25',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
+	},
+
+	# These values are common for all Table Mapper Detail
+	{
+		'doctype': u'Table Mapper Detail',
+		'name': '__common__',
+		'parent': u'Maintenance Schedule-Maintenance Visit',
+		'parentfield': u'table_mapper_details',
+		'parenttype': u'DocType Mapper',
+		'validation_logic': u'docstatus=1'
+	},
+
+	# These values are common for all Field Mapper Detail
+	{
+		'doctype': u'Field Mapper Detail',
+		'map': u'Yes',
+		'name': '__common__',
+		'parent': u'Maintenance Schedule-Maintenance Visit',
+		'parentfield': u'field_mapper_details',
+		'parenttype': u'DocType Mapper'
+	},
+
+	# These values are common for all DocType Mapper
+	{
+		'doctype': u'DocType Mapper',
+		'from_doctype': u'Maintenance Schedule',
+		'module': u'Support',
+		'name': '__common__',
+		'ref_doc_submitted': 1,
+		'to_doctype': u'Maintenance Visit'
+	},
+
+	# DocType Mapper, Maintenance Schedule-Maintenance Visit
+	{
+		'doctype': u'DocType Mapper',
+		'name': u'Maintenance Schedule-Maintenance Visit'
+	},
+
+	# Field Mapper Detail
+	{
+		'checking_operator': u'=',
+		'doctype': u'Field Mapper Detail',
+		'from_field': u'customer',
+		'match_id': 0,
+		'to_field': u'customer'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': u'Field Mapper Detail',
+		'from_field': u'name',
+		'match_id': 0,
+		'to_field': u'maintenance_schedule'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': u'Field Mapper Detail',
+		'from_field': u'parent',
+		'match_id': 1,
+		'to_field': u'prevdoc_docname'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': u'Field Mapper Detail',
+		'from_field': u'parenttype',
+		'match_id': 1,
+		'to_field': u'prevdoc_doctype'
+	},
+
+	# Table Mapper Detail
+	{
+		'doctype': u'Table Mapper Detail',
+		'from_field': u'item_maintenance_detail',
+		'from_table': u'Maintenance Schedule Item',
+		'match_id': 1,
+		'to_field': u'maintenance_visit_details',
+		'to_table': u'Maintenance Visit Purpose'
+	},
+
+	# Table Mapper Detail
+	{
+		'doctype': u'Table Mapper Detail',
+		'from_table': u'Maintenance Schedule',
+		'match_id': 0,
+		'to_table': u'Maintenance Visit'
+	}
+]
