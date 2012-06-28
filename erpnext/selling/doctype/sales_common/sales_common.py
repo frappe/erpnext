@@ -159,6 +159,10 @@ class DocType(TransactionBase):
 			ret['export_rate'] = flt(base_ref_rate)/flt(obj.doc.conversion_rate)
 			ret['base_ref_rate'] = flt(base_ref_rate)
 			ret['basic_rate'] = flt(base_ref_rate)
+			
+		if ret['warehouse'] or ret['reserved_warehouse']:
+			av_qty = self.get_available_qty({'item_code': args['item_code'], 'warehouse': ret['warehouse'] or ret['reserved_warehouse']})
+			ret.update(av_qty)
 		return ret
 
 
@@ -173,6 +177,14 @@ class DocType(TransactionBase):
 			'cost_center'			: item and item[0]['default_sales_cost_center'] or args.get('cost_center')
 		}
 
+		return ret
+
+	def get_available_qty(self,args):
+		tot_avail_qty = webnotes.conn.sql("select projected_qty, actual_qty from `tabBin` where item_code = '%s' and warehouse = '%s'" % (args['item_code'], args['warehouse']), as_dict=1)
+		ret = {
+			 'projected_qty' : tot_avail_qty and flt(tot_avail_qty[0]['projected_qty']) or 0,
+			 'actual_qty' : tot_avail_qty and flt(tot_avail_qty[0]['actual_qty']) or 0
+		}
 		return ret
 
 	

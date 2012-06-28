@@ -133,12 +133,7 @@ class DocType(TransactionBase):
 
 	# ********** Get Actual Qty of item in warehouse selected *************
 	def get_actual_qty(self,args):
-		args = eval(args)
-		actual_qty = sql("select actual_qty from `tabBin` where item_code = '%s' and warehouse = '%s'" % (args['item_code'], args['warehouse']), as_dict=1)
-		ret = {
-			 'actual_qty' : actual_qty and flt(actual_qty[0]['actual_qty']) or 0
-		}
-		return ret
+		return get_obj('Sales Common').get_available_qty(eval(args))
 
 
 # OTHER CHARGES TRIGGER FUNCTIONS

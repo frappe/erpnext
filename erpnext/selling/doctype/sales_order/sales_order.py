@@ -117,13 +117,7 @@ class DocType(TransactionBase):
 	# Get projected qty of item based on warehouse selected
 	# -----------------------------------------------------
 	def get_available_qty(self,args):
-		args = eval(args)
-		tot_avail_qty = sql("select projected_qty, actual_qty from `tabBin` where item_code = '%s' and warehouse = '%s'" % (args['item_code'], args['warehouse']), as_dict=1)
-		ret = {
-			 'projected_qty' : tot_avail_qty and flt(tot_avail_qty[0]['projected_qty']) or 0,
-			 'actual_qty' : tot_avail_qty and flt(tot_avail_qty[0]['actual_qty']) or 0
-		}
-		return ret
+		return get_obj('Sales Common').get_available_qty(eval(args))
 	
 # OTHER CHARGES TRIGGER FUNCTIONS
 # ====================================================================================
