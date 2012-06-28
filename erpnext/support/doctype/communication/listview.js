@@ -16,8 +16,10 @@ wn.doclistviews['Communication'] = wn.views.ListView.extend({
 		this.prepare_when(data, data.creation);
 
 		// escape double quote
-		data.content = cstr(data.subject).replace(/"/gi, '\"')
-			+ " | " + cstr(data.content).replace(/"/gi, '\"');
+		data.content = cstr(data.subject)
+			+ " | " + cstr(data.content);
+		data.content = data.content.replace(/"/gi, '\"')
+						.replace(/</gi, '&lt;').replace(/>/gi, '&gt;');
 
 		if(data.content && data.content.length > 50) {
 			data.content = '<span title="'+data.content+'">' +
