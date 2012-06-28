@@ -13,7 +13,7 @@ wn.doclistviews['Communication'] = wn.views.ListView.extend({
 
 	prepare_data: function(data) {
 		this._super(data);
-		data.creation = wn.datetime.only_date(data.creation);
+		this.prepare_when(data, data.creation);
 
 		// escape double quote
 		data.content = cstr(data.subject).replace(/"/gi, '\"')
@@ -31,7 +31,7 @@ wn.doclistviews['Communication'] = wn.views.ListView.extend({
 		{width: '15%', content: 'name'},
 		{width: '15%', content: 'category'},
 		{width: '55%', content: 'content+tags'},
-		{width: '12%', content:'creation',
+		{width: '12%', content:'when',
 			css: {'text-align': 'right', 'color':'#777'}}		
 	],
 });

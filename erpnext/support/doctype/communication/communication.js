@@ -36,7 +36,7 @@ cur_frm.cscript.render_communication_list = function(doc, dt, dn) {
 
 		prepare_data: function(data) {
 			this._super(data);
-			data.creation = wn.datetime.str_to_user(data.communication_date);
+			this.prepare_when(data, data.creation);
 
 			// escape double quote
 			data.content = cstr(data.subject).replace(/"/gi, '\"')
@@ -54,7 +54,7 @@ cur_frm.cscript.render_communication_list = function(doc, dt, dn) {
 			{width: '15%', content: 'name'},
 			{width: '15%', content: 'category'},
 			{width: '55%', content: 'content'},
-			{width: '12%', content:'communication_date',
+			{width: '12%', content:'when',
 				css: {'text-align': 'right', 'color':'#777'}}		
 		],
 		
