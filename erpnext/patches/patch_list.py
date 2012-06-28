@@ -457,4 +457,9 @@ patch_list = [
 		'patch_file': 'delete_about_contact',
 		'description': "delete depracated doctypes of website module"
 	},
+	{
+		'patch_module': 'patches.june_2012',
+		'patch_file': 'cache_item_table',
+		'description': "create cache item table again"
+	},
 ]
