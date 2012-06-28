@@ -12,8 +12,9 @@ wn.doclistviews['Employee'] = wn.views.ListView.extend({
 			"`tabEmployee`.company",
 			"`tabEmployee`.reports_to",
 			"`tabEmployee`.date_of_joining",
+			"`tabEmployee`.status",
 		]);
-		this.stats = this.stats.concat(['company']);
+		this.stats = this.stats.concat(['status', 'company']);
 	},
 
 	prepare_data: function(data) {
@@ -32,14 +33,22 @@ wn.doclistviews['Employee'] = wn.views.ListView.extend({
 		data.company && concat_list.push(data.company);
 		data.branch && concat_list.push(data.branch);
 		data.description = concat_list.join(", ");
+		
+		if(data.status=='Left') {
+			data.label_type = 'important';
+		} else if(data.status=='Active') {
+			data.label_type = 'success';
+		}
+		data.status_html = repl('<span class="label label-%(label_type)s" \
+			support_list_status="%(status)s">%(status)s</span>', data);
 	},
 	
 	columns: [
 		{width: '3%', content: 'check'},
-		{width: '3%', content: 'docstatus'},
 		{width: '12%', content: 'name'},
 		{width: '25%', content: 'employee_name'},
-		{width: '45%', content: 'description+tags',
+		{width: '10%', content: 'status_html'},
+		{width: '38%', content: 'description+tags',
 			css: {'color': '#aaa'}},
 		{width: '12%', content:'date_of_joining',
 			css: {'text-align': 'right', 'color': '#777'}},
