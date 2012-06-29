@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-03-27 14:36:34',
+		'creation': '2012-05-15 12:15:08',
 		'docstatus': 0,
-		'modified': '2012-03-27 14:45:49',
+		'modified': '2012-06-29 12:24:16',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -15,6 +15,7 @@
 		'_last_update': u'1328091392',
 		'autoname': u'PS.#######',
 		'colour': u'White:FFF',
+		'description': u'Generate packing slips for packages to be delivered. Used to notify package number, package contents and its weight.',
 		'doctype': 'DocType',
 		'document_type': u'Transaction',
 		'is_submittable': 1,
@@ -26,7 +27,7 @@
 		'section_style': u'Simple',
 		'show_in_menu': 0,
 		'subject': u'[%(delivery_note)s] Case Nos: %(from_case_no)s - %(to_case_no)s  |  Net Weight: %(net_weight_pkg)s %(net_weight_uom)s  |  Gross Weight: %(gross_weight_pkg)s %(gross_weight_uom)s',
-		'version': 40
+		'version': 1
 	},
 
 	# These values are common for all DocField
@@ -140,6 +141,8 @@
 
 	# DocField
 	{
+		'colour': u'White:FFF',
+		'description': u'Indicates that the package is a part of this delivery',
 		'doctype': u'DocField',
 		'fieldname': u'delivery_note',
 		'fieldtype': u'Link',
@@ -190,10 +193,11 @@
 	# DocField
 	{
 		'colour': u'White:FFF',
+		'description': u'Identification of the package for the delivery (for print)',
 		'doctype': u'DocField',
 		'fieldname': u'from_case_no',
 		'fieldtype': u'Data',
-		'label': u'From Case No.',
+		'label': u'From Package No.',
 		'no_copy': 1,
 		'permlevel': 0,
 		'reqd': 1,
@@ -211,10 +215,11 @@
 	# DocField
 	{
 		'colour': u'White:FFF',
+		'description': u'If more than one package of the same type (for print)',
 		'doctype': u'DocField',
 		'fieldname': u'to_case_no',
 		'fieldtype': u'Data',
-		'label': u'To Case No.',
+		'label': u'To Package No.',
 		'no_copy': 1,
 		'permlevel': 0,
 		'width': u'50px'
@@ -251,6 +256,7 @@
 	# DocField
 	{
 		'colour': u'White:FFF',
+		'description': u'The net weight of this package. (calculated automatically as sum of net weight of items)',
 		'doctype': u'DocField',
 		'fieldname': u'net_weight_pkg',
 		'fieldtype': u'Currency',
@@ -281,6 +287,7 @@
 	# DocField
 	{
 		'colour': u'White:FFF',
+		'description': u'The gross weight of the package. Usually net weight + packaging material weight. (for print)',
 		'doctype': u'DocField',
 		'fieldname': u'gross_weight_pkg',
 		'fieldtype': u'Currency',
@@ -303,7 +310,7 @@
 
 	# DocField
 	{
-		'depends_on': u'eval:doc.amended_from',
+		'colour': u'White:FFF',
 		'doctype': u'DocField',
 		'fieldname': u'misc_details',
 		'fieldtype': u'Section Break',
