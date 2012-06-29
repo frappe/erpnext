@@ -5,7 +5,7 @@
 	{
 		'creation': '2012-05-15 12:15:08',
 		'docstatus': 0,
-		'modified': '2012-06-29 12:22:43',
+		'modified': '2012-06-29 12:24:16',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -15,7 +15,7 @@
 		'_last_update': u'1328091392',
 		'autoname': u'PS.#######',
 		'colour': u'White:FFF',
-		'description': u'Generate packing slips for packages to be delivered. Used to notify case/package number, package contents and its weight.',
+		'description': u'Generate packing slips for packages to be delivered. Used to notify package number, package contents and its weight.',
 		'doctype': 'DocType',
 		'document_type': u'Transaction',
 		'is_submittable': 1,
@@ -287,7 +287,7 @@
 	# DocField
 	{
 		'colour': u'White:FFF',
-		'description': u'The gross weight of the package. Usually net weight + packaging material weight.',
+		'description': u'The gross weight of the package. Usually net weight + packaging material weight. (for print)',
 		'doctype': u'DocField',
 		'fieldname': u'gross_weight_pkg',
 		'fieldtype': u'Currency',
