@@ -28,8 +28,8 @@ wn.doclistviews['Communication'] = wn.views.ListView.extend({
 	},
 
 	columns: [
+		{width: '3%', content: 'check'},
 		{width: '5%', content: 'avatar'},
-		{width: '3%', content: 'docstatus'},
 		{width: '15%', content: 'name'},
 		{width: '15%', content: 'category'},
 		{width: '55%', content: 'content+tags'},
