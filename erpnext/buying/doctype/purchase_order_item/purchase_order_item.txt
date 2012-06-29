@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-03-27 14:35:50',
+		'creation': '2012-05-15 12:14:38',
 		'docstatus': 0,
-		'modified': '2012-03-27 14:35:50',
+		'modified': '2012-06-29 13:05:33',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -22,7 +22,7 @@
 		'section_style': u'Tray',
 		'server_code_error': u' ',
 		'show_in_menu': 0,
-		'version': 65
+		'version': 1
 	},
 
 	# These values are common for all DocField
@@ -72,6 +72,19 @@
 		'reqd': 1,
 		'search_index': 1,
 		'trigger': u'Client'
+	},
+
+	# DocField
+	{
+		'colour': u'White:FFF',
+		'description': u'If Supplier Part Number exists for given Item, it gets stored here',
+		'doctype': u'DocField',
+		'fieldname': u'supplier_part_no',
+		'fieldtype': u'Data',
+		'hidden': 1,
+		'label': u'Supplier Part Number',
+		'permlevel': 1,
+		'print_hide': 1
 	},
 
 	# DocField

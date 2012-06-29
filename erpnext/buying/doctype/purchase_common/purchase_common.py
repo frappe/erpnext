@@ -131,7 +131,7 @@ class DocType(TransactionBase):
 			'warehouse': wh,
 			'item_tax_rate': json.dumps(t),
 			'batch_no': '',
-			'discount_rate': 0		
+			'discount_rate': 0
 		}
 		
 		# get min_order_qty from item
@@ -169,6 +169,14 @@ class DocType(TransactionBase):
 					'import_ref_rate': 0,
 					'import_rate': 0,
 				})
+		
+		if obj.doc.doctype == 'Purchase Order':
+			supplier_part_no = webnotes.conn.sql("""\
+				select supplier_part_no from `tabItem Supplier`
+				where parent = %s and parenttype = 'Item' and
+				supplier = %s""", (arg['item_code'], obj.doc.supplier))
+			if supplier_part_no and supplier_part_no[0][0]:
+				ret['supplier_part_no'] = supplier_part_no[0][0]
 		
 		return ret
 
