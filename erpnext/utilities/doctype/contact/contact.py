@@ -21,7 +21,6 @@ from webnotes.model.doc import Document
 from webnotes import session, form, msgprint, errprint
 
 # -----------------------------------------------------------------------------------------
-
 class DocType:
 	def __init__(self, doc, doclist=[]):
 		self.doc = doc
