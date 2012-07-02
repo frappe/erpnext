@@ -517,6 +517,7 @@ class DocType(TransactionBase):
 		for d in getlist(obj.doclist, 'packing_details'):
 			if [d.parent_item, d.parent_detail_docname] not in parent_items:
 				d.parent = ''
+				d.save()
 
 
 	# Get total in words
