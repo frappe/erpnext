@@ -467,4 +467,9 @@ patch_list = [
 		'patch_file': 'reload_pr_po_mapper',
 		'description': "order date should be greater than equal to request date"
 	},
+	{
+		'patch_module': 'patches.july_2012',
+		'patch_file': 'packing_list_cleanup_and_serial_no',
+		'description': "packing list cleanup and serial no status update"
+	},
 ]
