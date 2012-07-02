@@ -472,4 +472,9 @@ patch_list = [
 		'patch_file': 'reload_pr_po_mapper',
 		'description': "order date should be greater than equal to request date"
 	},
+	{
+		'patch_module': 'patches.july_2012',
+		'patch_file': 'address_contact_perms',
+		'description': "sync address contact perms"
+	},
 ]
