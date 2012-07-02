@@ -101,8 +101,11 @@ erpnext.AccountsChart = Class.extend({
 			onrender: function(treenode) {
 				if (ctype == 'Account') {
 					var bal = treenode.data && treenode.data.balance.split(' ') || ['',''];
-					treenode.parent.append('<span class="balance-area"><span style="color: #aaa">'+ bal[0] + '</span> ' 
-						+ bal[1] + '</span>');
+					if (bal && flt(bal[1])) {
+						treenode.parent.append('<span class="balance-area">\
+							<span style="color: #aaa">'+ bal[0] + '</span> ' 
+							+ fmt_money(bal[1]) + '</span>');
+					}
 				}
 			}
 		});
