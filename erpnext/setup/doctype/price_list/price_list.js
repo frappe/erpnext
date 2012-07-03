@@ -32,6 +32,6 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 
 cur_frm.cscript.clear_prices = function(doc, cdt, cdn) {
 	if(confirm("This action will clear all rates for '"+ doc.name +"' from the Item Master and cannot be un-done. Are you sure you want to continue?")) {
-		$c_obj([doc], 'clear_prices', '', function(r, rt) { });
+		$c_obj(make_doclist(doc.doctype, doc.name), 'clear_prices', '', function(r, rt) { });
 	}
 }

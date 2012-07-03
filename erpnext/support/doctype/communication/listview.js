@@ -13,11 +13,13 @@ wn.doclistviews['Communication'] = wn.views.ListView.extend({
 
 	prepare_data: function(data) {
 		this._super(data);
-		data.creation = wn.datetime.only_date(data.creation);
+		this.prepare_when(data, data.creation);
 
 		// escape double quote
-		data.content = cstr(data.subject).replace(/"/gi, '\"')
-			+ " | " + cstr(data.content).replace(/"/gi, '\"');
+		data.content = cstr(data.subject)
+			+ " | " + cstr(data.content);
+		data.content = data.content.replace(/"/gi, '\"')
+						.replace(/</gi, '&lt;').replace(/>/gi, '&gt;');
 
 		if(data.content && data.content.length > 50) {
 			data.content = '<span title="'+data.content+'">' +
@@ -26,12 +28,12 @@ wn.doclistviews['Communication'] = wn.views.ListView.extend({
 	},
 
 	columns: [
+		{width: '3%', content: 'check'},
 		{width: '5%', content: 'avatar'},
-		{width: '3%', content: 'docstatus'},
 		{width: '15%', content: 'name'},
 		{width: '15%', content: 'category'},
 		{width: '55%', content: 'content+tags'},
-		{width: '12%', content:'creation',
+		{width: '12%', content:'when',
 			css: {'text-align': 'right', 'color':'#777'}}		
 	],
 });

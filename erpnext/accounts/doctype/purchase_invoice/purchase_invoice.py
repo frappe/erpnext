@@ -170,7 +170,7 @@ class DocType(TransactionBase):
 	# Advance Allocation
 	# -------------------
 	def get_advances(self):
-		get_obj('GL Control').get_advances( self, self.doc.credit_to, 'Purchase Invoice Advance','advance_allocation_details','debit')
+		self.doclist = get_obj('GL Control').get_advances(self, self.doc.credit_to, 'Purchase Invoice Advance','advance_allocation_details','debit')
 		
 		
 	# ============= OTHER CHARGES ====================
@@ -183,7 +183,7 @@ class DocType(TransactionBase):
 	# Get Purchase Taxes and Charges Master
 	# -----------------------------------------------------------
 	def get_purchase_tax_details(self):
-		return get_obj('Purchase Common').get_purchase_tax_details(self)
+		self.doclist =  get_obj('Purchase Common').get_purchase_tax_details(self)
 
 
 	def get_rate1(self,acc):

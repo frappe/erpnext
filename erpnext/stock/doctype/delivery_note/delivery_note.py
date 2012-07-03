@@ -65,7 +65,7 @@ class DocType(TransactionBase):
 	# *************** Pull Sales Order Items ************************
 	def pull_sales_order_details(self):
 		self.validate_prev_docname()
-		self.doc.clear_table(self.doclist,'other_charges')
+		self.doclist = self.doc.clear_table(self.doclist,'other_charges')
 
 		if self.doc.sales_order_no:
 			get_obj('DocType Mapper', 'Sales Order-Delivery Note').dt_map('Sales Order', 'Delivery Note', self.doc.sales_order_no, self.doc, self.doclist, "[['Sales Order', 'Delivery Note'],['Sales Order Item', 'Delivery Note Item'],['Sales Taxes and Charges','Sales Taxes and Charges'],['Sales Team','Sales Team']]")
@@ -146,12 +146,12 @@ class DocType(TransactionBase):
 	# Load Default Charges
 	# ----------------------------------------------------------
 	def load_default_taxes(self):
-		return get_obj('Sales Common').load_default_taxes(self)
+		self.doclist = get_obj('Sales Common').load_default_taxes(self)
 
 
 	# **** Pull details from other charges master (Get Sales Taxes and Charges Master) ****
 	def get_other_charges(self):
-		return get_obj('Sales Common').get_other_charges(self)
+		self.doclist = get_obj('Sales Common').get_other_charges(self)
 
 
 	#check in manage account if sales order required or not.

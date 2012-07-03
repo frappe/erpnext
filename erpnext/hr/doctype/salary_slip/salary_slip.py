@@ -70,8 +70,8 @@ class DocType(TransactionBase):
 	# Pull struct details
 	#=======================================================
 	def pull_sal_struct(self, struct):
-		self.doc.clear_table(self.doclist, 'earning_details')
-		self.doc.clear_table(self.doclist, 'deduction_details')
+		self.doclist = self.doc.clear_table(self.doclist, 'earning_details')
+		self.doclist = self.doc.clear_table(self.doclist, 'deduction_details')
 
 		get_obj('DocType Mapper', 'Salary Structure-Salary Slip').dt_map('Salary Structure', 'Salary Slip', struct, self.doc, self.doclist, "[['Salary Structure', 'Salary Slip'],['Salary Structure Earning', 'Salary Slip Earning'],['Salary Structure Deduction','Salary Slip Deduction']]")
 

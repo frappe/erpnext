@@ -95,5 +95,5 @@ cur_frm.cscript.add = function(doc, dt, dn) {
     cur_frm.mylist.run();
 
   }
-  $c_obj([doc],'add_update','',callback);
+  $c_obj(make_doclist(doc.doctype, doc.name),'add_update','',callback);
 }

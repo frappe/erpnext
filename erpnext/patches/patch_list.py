@@ -453,6 +453,11 @@ patch_list = [
 		'description': "alter tabsessions to change user column definition"
 	},
 	{
+		'patch_module': 'patches.june_2012',
+		'patch_file': 'delete_old_parent_entries',
+		'description': "delete entries of child table having parent like old_par%% or ''"
+	},
+	{
 		'patch_module': 'patches.april_2012',
 		'patch_file': 'delete_about_contact',
 		'description': "delete depracated doctypes of website module"
@@ -469,7 +474,12 @@ patch_list = [
 	},
 	{
 		'patch_module': 'patches.july_2012',
+		'patch_file': 'address_contact_perms',
+		'description': "sync address contact perms"
+	},
+	{
+		'patch_module': 'patches.july_2012',
 		'patch_file': 'packing_list_cleanup_and_serial_no',
 		'description': "packing list cleanup and serial no status update"
-	},
+	},	
 ]

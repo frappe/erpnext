@@ -45,7 +45,7 @@ class DocType:
 
 
 	def get_item_specification_details(self):
-		self.doc.clear_table(self.doclist, 'qa_specification_details')
+		self.doclist = self.doc.clear_table(self.doclist, 'qa_specification_details')
 		specification = sql("select specification, value from `tabItem Quality Inspection Parameter` \
 			where parent = '%s' order by idx" % (self.doc.item_code))
 		for d in specification:

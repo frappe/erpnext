@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-03-27 14:36:46',
+		'creation': '2012-07-02 19:57:48',
 		'docstatus': 0,
-		'modified': '2012-03-27 14:36:46',
+		'modified': '2012-07-02 20:24:17',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -26,7 +26,7 @@
 		'server_code_error': u' ',
 		'show_in_menu': 0,
 		'subject': u'%(first_name)s %(last_name)s - Email: %(email_id)s | Contact: %(phone)s | Mobile: %(mobile_no)s',
-		'version': 245
+		'version': 1
 	},
 
 	# These values are common for all DocField
@@ -56,6 +56,16 @@
 
 	# DocPerm
 	{
+		'cancel': 1,
+		'create': 1,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'System Manager',
+		'write': 1
+	},
+
+	# DocPerm
+	{
 		'amend': 0,
 		'cancel': 1,
 		'create': 1,
@@ -68,36 +78,11 @@
 
 	# DocPerm
 	{
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'All',
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'doctype': u'DocPerm',
-		'permlevel': 2,
-		'role': u'All'
-	},
-
-	# DocPerm
-	{
 		'cancel': 1,
 		'create': 1,
 		'doctype': u'DocPerm',
 		'permlevel': 0,
 		'role': u'Purchase Master Manager',
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'cancel': 1,
-		'create': 1,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'System Manager',
 		'write': 1
 	},
 
@@ -113,6 +98,13 @@
 		'doctype': u'DocPerm',
 		'permlevel': 0,
 		'role': u'Purchase User'
+	},
+
+	# DocPerm
+	{
+		'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'All'
 	},
 
 	# DocField

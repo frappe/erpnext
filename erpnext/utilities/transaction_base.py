@@ -214,7 +214,7 @@ class TransactionBase:
 	# Get Sales Person Details of Customer
 	# ------------------------------------
 	def get_sales_person(self, name):			
-		self.doc.clear_table(self.doclist,'sales_team')
+		self.doclist = self.doc.clear_table(self.doclist,'sales_team')
 		idx = 0
 		for d in webnotes.conn.sql("select sales_person, allocated_percentage, allocated_amount, incentives from `tabSales Team` where parent = '%s'" % name):
 			ch = addchild(self.doc, 'sales_team', 'Sales Team', 1, self.doclist)

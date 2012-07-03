@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-03-27 14:36:45',
+		'creation': '2012-07-02 19:57:47',
 		'docstatus': 0,
-		'modified': '2012-03-27 14:36:45',
+		'modified': '2012-07-02 20:24:15',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -24,7 +24,7 @@
 		'search_fields': u'customer, supplier, sales_partner, country, state',
 		'section_style': u'Simple',
 		'show_in_menu': 0,
-		'version': 43
+		'version': 1
 	},
 
 	# These values are common for all DocField
@@ -38,17 +38,12 @@
 
 	# These values are common for all DocPerm
 	{
-		'cancel': 1,
-		'create': 1,
 		'doctype': u'DocPerm',
 		'name': '__common__',
 		'parent': u'Address',
 		'parentfield': u'permissions',
 		'parenttype': u'DocType',
-		'permlevel': 0,
-		'read': 1,
-		'role': u'All',
-		'write': 1
+		'read': 1
 	},
 
 	# DocType, Address
@@ -59,7 +54,116 @@
 
 	# DocPerm
 	{
-		'doctype': u'DocPerm'
+		'cancel': 1,
+		'create': 1,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'System Manager',
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'cancel': 1,
+		'create': 1,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Sales Master Manager',
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'cancel': 1,
+		'create': 1,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Purchase Master Manager',
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'cancel': 0,
+		'create': 1,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Maintenance Manager',
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'cancel': 0,
+		'create': 1,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Accounts Manager',
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'create': 1,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Sales Manager',
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'create': 1,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Purchase Manager',
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'create': 1,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Sales User',
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'create': 1,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Purchase User',
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'create': 1,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Maintenance User',
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'create': 1,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Accounts User',
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'All',
+		'write': 0
 	},
 
 	# DocField
