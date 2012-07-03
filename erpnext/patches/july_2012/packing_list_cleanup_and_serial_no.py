@@ -1,5 +1,6 @@
 def execute():
 	import webnotes
+	from webnotes.utils import flt
 	wrong_plist = webnotes.conn.sql("""
 	    select dnpi.name, dnpi.parent, dnpi.docstatus, dnpi.serial_no
 		from `tabDelivery Note Packing Item` dnpi
