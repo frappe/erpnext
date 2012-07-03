@@ -140,13 +140,13 @@ class DocType(TransactionBase):
 		# Delivery Note
 		if self.doc.delivery_note_main:
 			self.validate_prev_docname('delivery note')
-			self.doc.clear_table(self.doclist,'other_charges')			
+			self.doclist = self.doc.clear_table(self.doclist,'other_charges')			
 			self.doclist = get_obj('DocType Mapper', 'Delivery Note-Sales Invoice').dt_map('Delivery Note', 'Sales Invoice', self.doc.delivery_note_main, self.doc, self.doclist, "[['Delivery Note', 'Sales Invoice'],['Delivery Note Item', 'Sales Invoice Item'],['Sales Taxes and Charges','Sales Taxes and Charges'],['Sales Team','Sales Team']]")			
 			self.get_income_account('entries')
 		# Sales Order
 		elif self.doc.sales_order_main:
 			self.validate_prev_docname('sales order')
-			self.doc.clear_table(self.doclist,'other_charges')
+			self.doclist = self.doc.clear_table(self.doclist,'other_charges')
 			get_obj('DocType Mapper', 'Sales Order-Sales Invoice').dt_map('Sales Order', 'Sales Invoice', self.doc.sales_order_main, self.doc, self.doclist, "[['Sales Order', 'Sales Invoice'],['Sales Order Item', 'Sales Invoice Item'],['Sales Taxes and Charges','Sales Taxes and Charges'], ['Sales Team', 'Sales Team']]")
 			self.get_income_account('entries')
 			
@@ -240,18 +240,17 @@ class DocType(TransactionBase):
 	# Load Default Charges
 	# ----------------------------------------------------------
 	def load_default_taxes(self):
-		return get_obj('Sales Common').load_default_taxes(self)
+		self.doclist = get_obj('Sales Common').load_default_taxes(self)
 
 	# Get Sales Taxes and Charges Master Details
 	# --------------------------
 	def get_other_charges(self):
-		return get_obj('Sales Common').get_other_charges(self)
-		
+		self.doclist = get_obj('Sales Common').get_other_charges(self)
 
 	# Get Advances
 	# -------------
 	def get_advances(self):
-		get_obj('GL Control').get_advances(self, self.doc.debit_to, 'Sales Invoice Advance', 'advance_adjustment_details', 'credit')
+		self.doclist = get_obj('GL Control').get_advances(self, self.doc.debit_to, 'Sales Invoice Advance', 'advance_adjustment_details', 'credit')
 
 	#pull project customer
 	#-------------------------

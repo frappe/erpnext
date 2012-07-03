@@ -60,7 +60,12 @@ class DocType:
 		count = 1
 		for s in data:
 			count += 1
-			if count == 2: continue
+			if count == 2:
+				if s[0] != 'Item Code' or s[1] != 'Warehouse':
+					msgprint("First row of the attachment always should be same as template(Item Code, Warehouse, Quantity \
+						and Valuation Rate/Incoming Rate)", raise_exception=1)
+				else:
+					continue
 			# validate
 			if (submit and len(s) != 4) or (not submit and len(s) != 6):
 				msgprint("Data entered at Row No " + cstr(count) + " in Attachment File is not in correct format.", raise_exception=1)
@@ -172,6 +177,7 @@ class DocType:
 			Make stock entry of qty diff, calculate incoming rate to maintain valuation rate.
 			If no qty diff, but diff in valuation rate, make (+1,-1) entry to update valuation
 		"""
+		self.diff_info = ''
 		for row in self.data:
 			# Get qty as per system
 			sys_stock = self.get_system_stock(row[0],row[1])
@@ -190,29 +196,28 @@ class DocType:
 				self.make_entry_for_valuation(row, sys_stock, is_submit)
 
 			if is_submit == 1:
-				self.store_diff_info(qty_diff, rate_diff)
+				r = [cstr(i) for i in row] + [cstr(qty_diff), cstr(rate_diff)]
+				self.store_diff_info(r)
 				
-			msgprint("Stock Reconciliation Completed Successfully...")
+		msgprint("Stock Reconciliation Completed Successfully...")
 			
 
-	def store_diff_info(self, qty_diff, rate_diff):
+	def store_diff_info(self, r):
 		"""Add diffs column in attached file"""
 		
 		# add header
-		if self.val_method == 'Moving Average':
-			out = "Item Code, Warehouse, Qty, Valuation Rate, Qty Diff, Rate Diff"
-		else:
-			out = "Item Code, Warehouse, Qty, Incoming Rate, Qty Diff, Rate Diff"
+		if not self.diff_info:
+			if self.val_method == 'Moving Average':
+				self.diff_info += "Item Code, Warehouse, Qty, Valuation Rate, Qty Diff, Rate Diff"
+			else:
+				self.diff_info += "Item Code, Warehouse, Qty, Incoming Rate, Qty Diff, Rate Diff"
 
 		
 		# add data
-		for d in self.data:
-			s = [cstr(i) for i in d] + [cstr(qty_diff), cstr(rate_diff)]
-			out += "\n" + ','.join(s)
-
-		webnotes.conn.set(self.doc, 'diff_info', out)
+		self.diff_info += "\n" + ','.join(r)
 		
-			
+		webnotes.conn.set(self.doc, 'diff_info', self.diff_info)
+		
 
 	def on_submit(self):
 		if not self.doc.file_list:
@@ -220,7 +225,6 @@ class DocType:
 		else:
 			self.do_stock_reco(is_submit = 1)
 			
-
 
 	def on_cancel(self):
 		self.get_reconciliation_data(submit = 0)

@@ -73,7 +73,7 @@ class DocType:
 			Payment entry will be decided based on account type (Dr/Cr)
 		"""
 
-		self.doc.clear_table(self.doclist, 'ir_payment_details')		
+		self.doclist = self.doc.clear_table(self.doclist, 'ir_payment_details')		
 		gle = self.get_gl_entries()
 		self.create_payment_table(gle)
 

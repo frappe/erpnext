@@ -322,7 +322,7 @@ class DocType:
 
 	def add_to_flat_bom_detail(self, is_submit = 0):
 		"Add items to Flat BOM table"
-		self.doc.clear_table(self.doclist, 'flat_bom_details', 1)
+		self.doclist = self.doc.clear_table(self.doclist, 'flat_bom_details', 1)
 		for d in self.cur_flat_bom_items:
 			ch = addchild(self.doc, 'flat_bom_details', 'BOM Explosion Item', 1, self.doclist)
 			for i in d.keys():

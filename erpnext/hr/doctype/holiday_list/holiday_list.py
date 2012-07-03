@@ -113,7 +113,7 @@ class DocType:
   # clear table
   # ------------
   def clear_table(self):
-    self.doc.clear_table(self.doclist,'holiday_list_details')
+    self.doclist = self.doc.clear_table(self.doclist,'holiday_list_details')
 
 
 # ***************************************** validate *************************************************

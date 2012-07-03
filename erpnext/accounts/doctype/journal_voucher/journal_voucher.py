@@ -378,7 +378,7 @@ class DocType:
   # get outstanding invoices
   # -------------------------
   def get_outstanding_invoices(self):
-    self.doc.clear_table(self.doclist, 'entries')
+    self.doclist = self.doc.clear_table(self.doclist, 'entries')
     total = 0
     for d in self.get_values():
       total += flt(d[2])

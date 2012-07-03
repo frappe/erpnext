@@ -26,7 +26,7 @@ cur_frm.cscript.onload = function(){
 }
 cur_frm.cscript.country = function(doc, cdt, cdn) {
   var mydoc=doc;
-  $c('runserverobj', args={'method':'check_state', 'docs':compress_doclist([doc])},
+  $c('runserverobj', args={'method':'check_state', 'docs':compress_doclist(make_doclist(doc.doctype, doc.name))},
     function(r,rt){
       if(r.message) {
         var doc = locals[mydoc.doctype][mydoc.name];

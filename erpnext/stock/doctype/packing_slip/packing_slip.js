@@ -52,6 +52,14 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 	}
 }
 
+cur_frm.cscript.refresh = function(doc, dt, dn) {
+	if(!doc.amended_from) {
+		hide_field('misc_details');
+	} else {
+		unhide_field('misc_details');
+	}
+}
+
 
 cur_frm.cscript.update_item_details = function(doc) {
 	$c_obj(make_doclist(doc.doctype, doc.name), 'update_item_details', '', function(r, rt) {

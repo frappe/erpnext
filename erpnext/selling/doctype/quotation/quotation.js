@@ -50,10 +50,9 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 		}
 	}
 	cur_frm.cscript.make_communication_body();
-
 }
 
-cur_frm.cscript.onload_post_render = function(doc, dt, dn) {	
+cur_frm.cscript.onload_post_render = function(doc, dt, dn) {
 	var callback = function(doc, dt, dn) {
 		// defined in sales_common.js
 		cur_frm.cscript.update_item_details(doc, dt, dn);

@@ -35,8 +35,9 @@ convert_to_lists = webnotes.conn.convert_to_lists
 from utilities.transaction_base import TransactionBase
 
 class DocType(TransactionBase):
-	def __init__(self, doc, doclist=[]):
+	def __init__(self, doc, doclist=None):
 		self.doc = doc
+		if not doclist: doclist = []
 		self.doclist = doclist
 		self.tname = 'Sales Order Item'
 		self.fname = 'sales_order_details'
@@ -55,10 +56,10 @@ class DocType(TransactionBase):
 	# Pull Quotation Items
 	# -----------------------
 	def pull_quotation_details(self):
-		self.doc.clear_table(self.doclist, 'other_charges')
-		self.doc.clear_table(self.doclist, 'sales_order_details')
-		self.doc.clear_table(self.doclist, 'sales_team')
-		self.doc.clear_table(self.doclist, 'tc_details')
+		self.doclist = self.doc.clear_table(self.doclist, 'other_charges')
+		self.doclist = self.doc.clear_table(self.doclist, 'sales_order_details')
+		self.doclist = self.doc.clear_table(self.doclist, 'sales_team')
+		self.doclist = self.doc.clear_table(self.doclist, 'tc_details')
 		if self.doc.quotation_no:				
 			get_obj('DocType Mapper', 'Quotation-Sales Order').dt_map('Quotation', 'Sales Order', self.doc.quotation_no, self.doc, self.doclist, "[['Quotation', 'Sales Order'],['Quotation Item', 'Sales Order Item'],['Sales Taxes and Charges','Sales Taxes and Charges'],['Sales Team','Sales Team'],['TC Detail','TC Detail']]")			
 		else:
@@ -116,13 +117,7 @@ class DocType(TransactionBase):
 	# Get projected qty of item based on warehouse selected
 	# -----------------------------------------------------
 	def get_available_qty(self,args):
-		args = eval(args)
-		tot_avail_qty = sql("select projected_qty, actual_qty from `tabBin` where item_code = '%s' and warehouse = '%s'" % (args['item_code'], args['warehouse']), as_dict=1)
-		ret = {
-			 'projected_qty' : tot_avail_qty and flt(tot_avail_qty[0]['projected_qty']) or 0,
-			 'actual_qty' : tot_avail_qty and flt(tot_avail_qty[0]['actual_qty']) or 0
-		}
-		return ret
+		return get_obj('Sales Common').get_available_qty(eval(args))
 	
 # OTHER CHARGES TRIGGER FUNCTIONS
 # ====================================================================================
@@ -135,12 +130,12 @@ class DocType(TransactionBase):
 	# Load Default Charges
 	# ----------------------------------------------------------
 	def load_default_taxes(self):
-		return get_obj('Sales Common').load_default_taxes(self)
+		self.doclist = get_obj('Sales Common').load_default_taxes(self)
 
 	# Pull details from other charges master (Get Sales Taxes and Charges Master)
 	# ----------------------------------------------------------
 	def get_other_charges(self):
-		return get_obj('Sales Common').get_other_charges(self)
+		self.doclist = get_obj('Sales Common').get_other_charges(self)
  
  
 # GET TERMS & CONDITIONS
@@ -322,7 +317,7 @@ class DocType(TransactionBase):
 				# this is to verify that the allocated % of sales persons is 100%
 		sales_com_obj.get_allocated_sum(self)
 		sales_com_obj.make_packing_list(self,'sales_order_details')
-		
+
 				# get total in words
 		dcc = TransactionBase().get_company_currency(self.doc.company)		
 		self.doc.in_words = sales_com_obj.get_total_in_words(dcc, self.doc.rounded_total)
@@ -457,12 +452,15 @@ class DocType(TransactionBase):
 	# ===============================================================================================
 	def update_stock_ledger(self, update_stock, clear = 0):
 		for d in self.get_item_list(clear):
-			stock_item = sql("SELECT is_stock_item FROM tabItem where name = '%s'"%(d[1]),as_dict = 1)			 # stock ledger will be updated only if it is a stock item
+			stock_item = sql("SELECT is_stock_item FROM tabItem where name = '%s'"%(d['item_code']),as_dict = 1)
+			# stock ledger will be updated only if it is a stock item
 			if stock_item and stock_item[0]['is_stock_item'] == "Yes":
-				if not d[0]:
-					msgprint("Message: Please enter Reserved Warehouse for item %s as it is stock item."% d[1])
+				if not d['reserved_warehouse']:
+					msgprint("Message: Please enter Reserved Warehouse for item %s as it is stock item."% d['item_code'])
 					raise Exception
-				bin = get_obj('Warehouse', d[0]).update_bin( 0, flt(update_stock) * flt(d[2]), 0, 0, 0, d[1], self.doc.transaction_date,doc_type=self.doc.doctype,doc_name=self.doc.name, is_amended = (self.doc.amended_from and 'Yes' or 'No'))
+				bin = get_obj('Warehouse', d['reserved_warehouse']).update_bin( 0, flt(update_stock) * flt(d['qty']), \
+					0, 0, 0, d['item_code'], self.doc.transaction_date,doc_type=self.doc.doctype,\
+					doc_name=self.doc.name, is_amended = (self.doc.amended_from and 'Yes' or 'No'))
 	
 	# Gets Items from packing list
 	#=================================

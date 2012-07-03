@@ -77,7 +77,7 @@ class DocType(TransactionBase):
 	# Get TDS Return acknowledgement
 	#-------------------------------
 	def get_return_ack_details(self):
-		self.doc.clear_table(self.doclist, 'form_16A_ack_details')
+		self.doclist = self.doc.clear_table(self.doclist, 'form_16A_ack_details')
 		if not (self.doc.from_date and self.doc.to_date):
 			msgprint("Please enter From Date, To Date")
 		else:
@@ -90,7 +90,7 @@ class DocType(TransactionBase):
 	# Get tds payment details
 	#-------------------------------
 	def get_tds(self):
-		self.doc.clear_table(self.doclist,'form_16A_tax_details')
+		self.doclist = self.doc.clear_table(self.doclist,'form_16A_tax_details')
 		import datetime
 		if self.doc.from_date and self.doc.to_date and self.doc.tds_category:			
 			tot=0.0

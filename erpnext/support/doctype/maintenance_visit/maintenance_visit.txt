@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-03-27 14:36:42',
+		'creation': '2012-06-11 12:10:15',
 		'docstatus': 0,
-		'modified': '2012-03-27 14:45:49',
+		'modified': '2012-06-27 12:50:00',
 		'modified_by': u'Administrator',
 		'owner': u'ashwini@webnotestech.com'
 	},
@@ -26,7 +26,7 @@
 		'show_in_menu': 0,
 		'subject': u'To %(customer_name)s on %(mntc_date)s',
 		'tag_fields': u'completion_status,maintenance_type',
-		'version': 95
+		'version': 1
 	},
 
 	# These values are common for all DocField
@@ -144,30 +144,8 @@
 		'permlevel': 0,
 		'print_hide': 1,
 		'reqd': 1,
-		'search_index': 1,
+		'search_index': 0,
 		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'customer_address',
-		'fieldtype': u'Link',
-		'label': u'Customer Address',
-		'options': u'Address',
-		'permlevel': 0,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'contact_person',
-		'fieldtype': u'Link',
-		'label': u'Contact Person',
-		'options': u'Contact',
-		'permlevel': 0,
-		'print_hide': 1
 	},
 
 	# DocField
@@ -175,7 +153,8 @@
 		'doctype': u'DocField',
 		'fieldname': u'customer_name',
 		'fieldtype': u'Data',
-		'label': u'Name',
+		'hidden': 1,
+		'label': u'Customer Name',
 		'permlevel': 1
 	},
 
@@ -184,6 +163,7 @@
 		'doctype': u'DocField',
 		'fieldname': u'address_display',
 		'fieldtype': u'Small Text',
+		'hidden': 1,
 		'label': u'Address',
 		'permlevel': 1
 	},
@@ -193,6 +173,7 @@
 		'doctype': u'DocField',
 		'fieldname': u'contact_display',
 		'fieldtype': u'Small Text',
+		'hidden': 1,
 		'label': u'Contact',
 		'permlevel': 1
 	},
@@ -202,6 +183,7 @@
 		'doctype': u'DocField',
 		'fieldname': u'contact_mobile',
 		'fieldtype': u'Data',
+		'hidden': 1,
 		'label': u'Mobile No',
 		'permlevel': 1
 	},
@@ -211,40 +193,9 @@
 		'doctype': u'DocField',
 		'fieldname': u'contact_email',
 		'fieldtype': u'Data',
+		'hidden': 1,
 		'label': u'Contact Email',
 		'permlevel': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'company',
-		'fieldtype': u'Select',
-		'in_filter': 1,
-		'label': u'Company',
-		'oldfieldname': u'company',
-		'oldfieldtype': u'Select',
-		'options': u'link:Company',
-		'permlevel': 0,
-		'print_hide': 1,
-		'reqd': 1,
-		'search_index': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'fiscal_year',
-		'fieldtype': u'Select',
-		'in_filter': 1,
-		'label': u'Fiscal Year',
-		'oldfieldname': u'fiscal_year',
-		'oldfieldtype': u'Select',
-		'options': u'link:Fiscal Year',
-		'permlevel': 0,
-		'print_hide': 1,
-		'reqd': 1,
-		'search_index': 0
 	},
 
 	# DocField
@@ -281,72 +232,6 @@
 		'oldfieldname': u'mntc_time',
 		'oldfieldtype': u'Time',
 		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'default': u'Draft',
-		'doctype': u'DocField',
-		'fieldname': u'status',
-		'fieldtype': u'Data',
-		'label': u'Status',
-		'no_copy': 1,
-		'oldfieldname': u'status',
-		'oldfieldtype': u'Data',
-		'options': u'\nDraft\nCancelled\nSubmitted',
-		'permlevel': 1,
-		'reqd': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'amended_from',
-		'fieldtype': u'Data',
-		'label': u'Amended From',
-		'no_copy': 1,
-		'oldfieldname': u'amended_from',
-		'oldfieldtype': u'Data',
-		'permlevel': 1,
-		'print_hide': 1,
-		'width': u'150px'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'amendment_date',
-		'fieldtype': u'Date',
-		'label': u'Amendment Date',
-		'no_copy': 1,
-		'oldfieldname': u'amendment_date',
-		'oldfieldtype': u'Date',
-		'permlevel': 0,
-		'print_hide': 1,
-		'width': u'100px'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'territory',
-		'fieldtype': u'Link',
-		'label': u'Territory',
-		'options': u'Territory',
-		'permlevel': 0,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'customer_group',
-		'fieldtype': u'Link',
-		'label': u'Customer Group',
-		'options': u'Customer Group',
-		'permlevel': 0,
-		'print_hide': 1
 	},
 
 	# DocField
@@ -435,6 +320,17 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'maintenance_schedule',
+		'fieldtype': u'Link',
+		'in_filter': 1,
+		'label': u'Maintenance Schedule',
+		'options': u'Maintenance Schedule',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
 		'fieldname': u'get_items',
 		'fieldtype': u'Button',
 		'label': u'Get Items',
@@ -470,9 +366,9 @@
 	# DocField
 	{
 		'doctype': u'DocField',
-		'fieldname': u'feedback',
+		'fieldname': u'more_info',
 		'fieldtype': u'Section Break',
-		'label': u'Feedback',
+		'label': u'More Info',
 		'oldfieldtype': u'Section Break',
 		'permlevel': 0
 	},
@@ -486,5 +382,150 @@
 		'oldfieldname': u'customer_feedback',
 		'oldfieldtype': u'Small Text',
 		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'col_break3',
+		'fieldtype': u'Column Break',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'colour': u'White:FFF',
+		'default': u'Draft',
+		'doctype': u'DocField',
+		'fieldname': u'status',
+		'fieldtype': u'Data',
+		'label': u'Status',
+		'no_copy': 1,
+		'oldfieldname': u'status',
+		'oldfieldtype': u'Data',
+		'options': u'\nDraft\nCancelled\nSubmitted',
+		'permlevel': 1,
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'amended_from',
+		'fieldtype': u'Data',
+		'label': u'Amended From',
+		'no_copy': 1,
+		'oldfieldname': u'amended_from',
+		'oldfieldtype': u'Data',
+		'permlevel': 1,
+		'print_hide': 1,
+		'width': u'150px'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'amendment_date',
+		'fieldtype': u'Date',
+		'label': u'Amendment Date',
+		'no_copy': 1,
+		'oldfieldname': u'amendment_date',
+		'oldfieldtype': u'Date',
+		'permlevel': 0,
+		'print_hide': 1,
+		'width': u'100px'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'company',
+		'fieldtype': u'Select',
+		'in_filter': 1,
+		'label': u'Company',
+		'oldfieldname': u'company',
+		'oldfieldtype': u'Select',
+		'options': u'link:Company',
+		'permlevel': 0,
+		'print_hide': 1,
+		'reqd': 1,
+		'search_index': 0
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'fiscal_year',
+		'fieldtype': u'Select',
+		'in_filter': 1,
+		'label': u'Fiscal Year',
+		'oldfieldname': u'fiscal_year',
+		'oldfieldtype': u'Select',
+		'options': u'link:Fiscal Year',
+		'permlevel': 0,
+		'print_hide': 1,
+		'reqd': 1,
+		'search_index': 0
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'contact_info_section',
+		'fieldtype': u'Section Break',
+		'label': u'Contact Info',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'customer_address',
+		'fieldtype': u'Link',
+		'label': u'Customer Address',
+		'options': u'Address',
+		'permlevel': 0,
+		'print_hide': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'contact_person',
+		'fieldtype': u'Link',
+		'label': u'Contact Person',
+		'options': u'Contact',
+		'permlevel': 0,
+		'print_hide': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'col_break4',
+		'fieldtype': u'Column Break',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'territory',
+		'fieldtype': u'Link',
+		'label': u'Territory',
+		'options': u'Territory',
+		'permlevel': 0,
+		'print_hide': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'customer_group',
+		'fieldtype': u'Link',
+		'label': u'Customer Group',
+		'options': u'Customer Group',
+		'permlevel': 0,
+		'print_hide': 1
 	}
 ]

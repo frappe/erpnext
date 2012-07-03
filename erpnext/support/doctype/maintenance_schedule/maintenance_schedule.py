@@ -42,8 +42,8 @@ class DocType(TransactionBase):
   # pull sales order details
   #--------------------------
   def pull_sales_order_detail(self):
-    self.doc.clear_table(self.doclist, 'item_maintenance_detail')
-    self.doc.clear_table(self.doclist, 'maintenance_schedule_detail')
+    self.doclist = self.doc.clear_table(self.doclist, 'item_maintenance_detail')
+    self.doclist = self.doc.clear_table(self.doclist, 'maintenance_schedule_detail')
     self.doclist = get_obj('DocType Mapper', 'Sales Order-Maintenance Schedule').dt_map('Sales Order', 'Maintenance Schedule', self.doc.sales_order_no, self.doc, self.doclist, "[['Sales Order', 'Maintenance Schedule'],['Sales Order Item', 'Maintenance Schedule Item']]")
   
   #pull item details 
@@ -60,7 +60,7 @@ class DocType(TransactionBase):
   #-------------------------------------
   def generate_schedule(self):
     import datetime
-    self.doc.clear_table(self.doclist, 'maintenance_schedule_detail')
+    self.doclist = self.doc.clear_table(self.doclist, 'maintenance_schedule_detail')
     count = 0
     sql("delete from `tabMaintenance Schedule Detail` where parent='%s'" %(self.doc.name))
     for d in getlist(self.doclist, 'item_maintenance_detail'):

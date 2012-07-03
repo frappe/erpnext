@@ -131,7 +131,7 @@ class DocType(TransactionBase):
 			'warehouse': wh,
 			'item_tax_rate': json.dumps(t),
 			'batch_no': '',
-			'discount_rate': 0		
+			'discount_rate': 0
 		}
 		
 		# get min_order_qty from item
@@ -169,6 +169,14 @@ class DocType(TransactionBase):
 					'import_ref_rate': 0,
 					'import_rate': 0,
 				})
+		
+		if obj.doc.doctype == 'Purchase Order':
+			supplier_part_no = webnotes.conn.sql("""\
+				select supplier_part_no from `tabItem Supplier`
+				where parent = %s and parenttype = 'Item' and
+				supplier = %s""", (arg['item_code'], obj.doc.supplier))
+			if supplier_part_no and supplier_part_no[0][0]:
+				ret['supplier_part_no'] = supplier_part_no[0][0]
 		
 		return ret
 
@@ -621,7 +629,7 @@ class DocType(TransactionBase):
 	# Get other charges from Master
 	# =================================================================================
 	def get_purchase_tax_details(self,obj):
-		self.doc.clear_table(obj.doclist,'purchase_tax_details')
+		obj.doclist = self.doc.clear_table(obj.doclist,'purchase_tax_details')
 		idx = 0
 		other_charge = sql("select category, add_deduct_tax, charge_type,row_id,description,account_head,rate,tax_amount from `tabPurchase Taxes and Charges` where parent = '%s' order by idx" %(obj.doc.purchase_other_charges), as_dict = 1)
 		for other in other_charge:
@@ -636,6 +644,7 @@ class DocType(TransactionBase):
 			d.tax_amount = flt(other['tax_amount'])
 			d.idx = idx
 			idx += 1
+		return obj.doclist
 
 
 	# Get Tax rate if account type is TAX

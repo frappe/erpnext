@@ -8,11 +8,11 @@
 # 
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	See the
 # GNU General Public License for more details.
 # 
 # You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# along with this program.	If not, see <http://www.gnu.org/licenses/>.
 
 # Please edit this list and import only required elements
 import webnotes
@@ -34,30 +34,35 @@ convert_to_lists = webnotes.conn.convert_to_lists
 
 
 class DocType:
-  def __init__(self, doc, doclist=[]):
-    self.doc = doc
-    self.doclist = doclist
+	def __init__(self, doc, doclist=[]):
+		self.doc = doc
+		self.doclist = doclist
 
-  # Autoname
-  # ---------
-  def autoname(self):
-    self.doc.name = make_autoname(self.doc.naming_series+'.#####')
-
-
-  def get_item_specification_details(self):
-    self.doc.clear_table(self.doclist, 'qa_specification_details')
-    specification = sql("select specification, value from `tabItem Quality Inspection Parameter` where parent = '%s' order by idx" % (self.doc.item_code))
-    for d in specification:
-      child = addchild(self.doc, 'qa_specification_details', 'Quality Inspection Reading', 1, self.doclist)
-      child.specification = d[0]
-      child.value = d[1]
-      child.status = 'Accepted'
-
-  def on_submit(self):
-    if self.doc.purchase_receipt_no:
-      sql("update `tabPurchase Receipt Item` set qa_no = '%s' where parent = '%s' and item_code = '%s'" % (self.doc.name, self.doc.purchase_receipt_no, self.doc.item_code))
+	# Autoname
+	# ---------
+	def autoname(self):
+		self.doc.name = make_autoname(self.doc.naming_series+'.#####')
 
 
-  def on_cancel(self):
-    if self.doc.purchase_receipt_no:
-      sql("update `tabPurchase Receipt Item` set qa_no = '' where parent = '%s' and item_code = '%s'" % (self.doc.purchase_receipt_no, self.doc.item_code))
+	def get_item_specification_details(self):
+		self.doclist = self.doc.clear_table(self.doclist, 'qa_specification_details')
+		specification = sql("select specification, value from `tabItem Quality Inspection Parameter` \
+			where parent = '%s' order by idx" % (self.doc.item_code))
+		for d in specification:
+			child = addchild(self.doc, 'qa_specification_details', 'Quality Inspection Reading', 1, self.doclist)
+			child.specification = d[0]
+			child.value = d[1]
+			child.status = 'Accepted'
+
+	def on_submit(self):
+		if self.doc.purchase_receipt_no:
+			sql("update `tabPurchase Receipt Item` t1, `tabPurchase Receipt` t2 set t1.qa_no = '%s', t2.modified = '%s' \
+				where t1.parent = '%s' and t1.item_code = '%s' and t1.parent = t2.name" \
+				% (self.doc.name, self.doc.modified, self.doc.purchase_receipt_no, self.doc.item_code))
+		
+
+	def on_cancel(self):
+		if self.doc.purchase_receipt_no:
+			sql("update `tabPurchase Receipt Item` t1, `tabPurchase Receipt` t2 set t1.qa_no = '', t2.modified = '%s' \
+				where t1.parent = '%s' and t1.item_code = '%s' and t1.parent = t2.name" \
+				% (self.doc.modified, self.doc.purchase_receipt_no, self.doc.item_code))

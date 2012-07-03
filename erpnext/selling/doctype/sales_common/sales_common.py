@@ -72,9 +72,11 @@ class DocType(TransactionBase):
 
 	# Get Sales Person Details
 	# ==========================
+	
+	# TODO: To be deprecated if not in use
 	def get_sales_person_details(self, obj):
 		if obj.doc.doctype != 'Quotation':
-			obj.doc.clear_table(obj.doclist,'sales_team')
+			obj.doclist = obj.doc.clear_table(obj.doclist,'sales_team')
 			idx = 0
 			for d in webnotes.conn.sql("select sales_person, allocated_percentage, allocated_amount, incentives from `tabSales Team` where parent = '%s'" % obj.doc.customer):
 				ch = addchild(obj.doc, 'sales_team', 'Sales Team', 1, obj.doclist)
@@ -84,6 +86,7 @@ class DocType(TransactionBase):
 				ch.incentives = d and flt(d[3]) or 0
 				ch.idx = idx
 				idx += 1
+		return obj.doclist
 
 
 	# Get customer's contact person details
@@ -156,6 +159,10 @@ class DocType(TransactionBase):
 			ret['export_rate'] = flt(base_ref_rate)/flt(obj.doc.conversion_rate)
 			ret['base_ref_rate'] = flt(base_ref_rate)
 			ret['basic_rate'] = flt(base_ref_rate)
+			
+		if ret['warehouse'] or ret['reserved_warehouse']:
+			av_qty = self.get_available_qty({'item_code': args['item_code'], 'warehouse': ret['warehouse'] or ret['reserved_warehouse']})
+			ret.update(av_qty)
 		return ret
 
 
@@ -170,6 +177,14 @@ class DocType(TransactionBase):
 			'cost_center'			: item and item[0]['default_sales_cost_center'] or args.get('cost_center')
 		}
 
+		return ret
+
+	def get_available_qty(self,args):
+		tot_avail_qty = webnotes.conn.sql("select projected_qty, actual_qty from `tabBin` where item_code = '%s' and warehouse = '%s'" % (args['item_code'], args['warehouse']), as_dict=1)
+		ret = {
+			 'projected_qty' : tot_avail_qty and flt(tot_avail_qty[0]['projected_qty']) or 0,
+			 'actual_qty' : tot_avail_qty and flt(tot_avail_qty[0]['actual_qty']) or 0
+		}
 		return ret
 
 	
@@ -215,15 +230,15 @@ class DocType(TransactionBase):
 	# ====================
 	def load_default_taxes(self, obj):
 		if cstr(obj.doc.charge):
-			self.get_other_charges(obj)
+			return self.get_other_charges(obj)
 		else:
-			self.get_other_charges(obj, 1)
+			return self.get_other_charges(obj, 1)
 
 		
 	# Get other charges from Master
 	# =================================================================================
 	def get_other_charges(self,obj, default=0):
-		obj.doc.clear_table(obj.doclist,'other_charges')
+		obj.doclist = obj.doc.clear_table(obj.doclist, 'other_charges')
 		if not getlist(obj.doclist, 'other_charges'):
 			if default: add_cond = 'ifnull(t2.is_default,0) = 1'
 			else: add_cond = 't1.parent = "'+cstr(obj.doc.charge)+'"'
@@ -253,6 +268,7 @@ class DocType(TransactionBase):
 				d.included_in_print_rate = cint(d.included_in_print_rate)
 				d.idx = idx
 				idx += 1
+		return obj.doclist
 			
 	# Get TERMS AND CONDITIONS
 	# =======================================================================================
@@ -358,46 +374,64 @@ class DocType(TransactionBase):
 				'rate'	:	rate and flt(rate[0]['tax_rate']) or 0
 			}
 		return ret
-		
-	# --------------
-	# get item list
-	# --------------
+
+
 	def get_item_list(self, obj, is_stopped):
+		"""get item list"""
 		il = []
 		for d in getlist(obj.doclist,obj.fname):
-			reserved_qty = 0		# used for delivery note
+			reserved_wh, reserved_qty = '', 0		# used for delivery note
 			qty = flt(d.qty)
 			if is_stopped:
 				qty = flt(d.qty) > flt(d.delivered_qty) and flt(flt(d.qty) - flt(d.delivered_qty)) or 0
 				
-			if d.prevdoc_doctype == 'Sales Order':			# used in delivery note to reduce reserved_qty 
+			if d.prevdoc_doctype == 'Sales Order':			
+				# used in delivery note to reduce reserved_qty 
 				# Eg.: if SO qty is 10 and there is tolerance of 20%, then it will allow DN of 12.
 				# But in this case reserved qty should only be reduced by 10 and not 12.
 
-				tot_qty, max_qty, tot_amt, max_amt = self.get_curr_and_ref_doc_details(d.doctype, 'prevdoc_detail_docname', d.prevdoc_detail_docname, 'Sales Order Item', obj.doc.name, obj.doc.doctype)
+				tot_qty, max_qty, tot_amt, max_amt, reserved_wh = self.get_curr_and_ref_doc_details(d.doctype, 'prevdoc_detail_docname', d.prevdoc_detail_docname, obj.doc.name, obj.doc.doctype)
 				if((flt(tot_qty) + flt(qty) > flt(max_qty))):
 					reserved_qty = -(flt(max_qty)-flt(tot_qty))
 				else:	
 					reserved_qty = - flt(qty)
-			
-			warehouse = (obj.fname == "sales_order_details") and d.reserved_warehouse or d.warehouse
-			
+					
+			if obj.doc.doctype == 'Sales Order':
+				reserved_wh = d.reserved_warehouse
+						
 			if self.has_sales_bom(d.item_code):
 				for p in getlist(obj.doclist, 'packing_details'):
-					#if p.parent_item == d.item_code: -- this fails when item with same name appears more than once in delivery note item table
 					if p.parent_detail_docname == d.name:
 						# the packing details table's qty is already multiplied with parent's qty
-						il.append([warehouse, p.item_code, flt(p.qty), (flt(p.qty)/qty)*(reserved_qty), p.uom, p.batch_no, p.serial_no])
+						il.append({
+							'warehouse': d.warehouse,
+							'reserved_warehouse': reserved_wh,
+							'item_code': p.item_code,
+							'qty': flt(p.qty),
+							'reserved_qty': (flt(p.qty)/qty)*(reserved_qty),
+							'uom': p.uom,
+							'batch_no': p.batch_no,
+							'serial_no': p.serial_no
+						})
 			else:
-				il.append([warehouse, d.item_code, qty, reserved_qty, d.stock_uom, d.batch_no, d.serial_no])
+				il.append({
+					'warehouse': d.warehouse,
+					'reserved_warehouse': reserved_wh,
+					'item_code': d.item_code,
+					'qty': qty,
+					'reserved_qty': reserved_qty,
+					'uom': d.stock_uom,
+					'batch_no': d.batch_no,
+					'serial_no': d.serial_no
+				})
 		return il
 
-	# ---------------------------------------------------------------------------------------------
-	# get qty, amount already billed or delivered against curr line item for current doctype
-	# For Eg: SO-RV get total qty, amount from SO and also total qty, amount against that SO in RV
-	# ---------------------------------------------------------------------------------------------
-	def get_curr_and_ref_doc_details(self, curr_doctype, ref_tab_fname, ref_tab_dn, ref_doc_tname, curr_parent_name, curr_parent_doctype):
-		# Get total qty, amt of current doctype (eg RV) except for qty, amt of this transaction
+
+	def get_curr_and_ref_doc_details(self, curr_doctype, ref_tab_fname, ref_tab_dn, curr_parent_name, curr_parent_doctype):
+		""" Get qty, amount already billed or delivered against curr line item for current doctype
+			For Eg: SO-RV get total qty, amount from SO and also total qty, amount against that SO in RV
+		"""
+		#Get total qty, amt of current doctype (eg RV) except for qty, amt of this transaction
 		if curr_parent_doctype == 'Installation Note':
 			curr_det = webnotes.conn.sql("select sum(qty) from `tab%s` where %s = '%s' and docstatus = 1 and parent != '%s'"% (curr_doctype, ref_tab_fname, ref_tab_dn, curr_parent_name))
 			qty, amt = curr_det and flt(curr_det[0][0]) or 0, 0
@@ -406,10 +440,9 @@ class DocType(TransactionBase):
 			qty, amt = curr_det and flt(curr_det[0][0]) or 0, curr_det and flt(curr_det[0][1]) or 0
 
 		# get total qty of ref doctype
-		ref_det = webnotes.conn.sql("select qty, amount from `tab%s` where name = '%s' and docstatus = 1"% (ref_doc_tname, ref_tab_dn))
-		max_qty, max_amt = ref_det and flt(ref_det[0][0]) or 0, ref_det and flt(ref_det[0][1]) or 0
-
-		return qty, max_qty, amt, max_amt
+		so_det = webnotes.conn.sql("select qty, amount, reserved_warehouse from `tabSales Order Item` where name = '%s' and docstatus = 1"% ref_tab_dn)
+		max_qty, max_amt, res_wh = so_det and flt(so_det[0][0]) or 0, so_det and flt(so_det[0][1]) or 0, so_det and cstr(so_det[0][2]) or ''
+		return qty, max_qty, amt, max_amt, res_wh
 
 
 	# Make Packing List from Sales BOM
@@ -484,11 +517,22 @@ class DocType(TransactionBase):
 		self.cleanup_packing_list(obj, parent_items)
 		
 	def cleanup_packing_list(self, obj, parent_items):
-		"""Remove all those parent items which are no longer present in main item table"""
+		"""Remove all those child items which are no longer present in main item table"""
+		delete_list = []
 		for d in getlist(obj.doclist, 'packing_details'):
 			if [d.parent_item, d.parent_detail_docname] not in parent_items:
-				d.parent = ''
+				# mark for deletion from doclist
+				delete_list.append(d.name)
 
+		if not delete_list: return
+		
+		# delete from doclist
+		obj.doclist = filter(lambda d: d.name not in delete_list, obj.doclist)
+		
+		# delete from db
+		webnotes.conn.sql("""\
+			delete from `tabDelivery Note Packing Item`
+			where name in ("%s")""" % '", "'.join(delete_list))
 
 	# Get total in words
 	# ==================================================================	

@@ -99,7 +99,7 @@ $.extend(cur_frm.cscript, {
 	},
 	
 	send: function(doc, dt, dn) {
-		$c_obj([doc], 'send_response', '', function(r,rt) {
+		$c_obj(make_doclist(doc.doctype, doc.name), 'send_response', '', function(r,rt) {
 			locals[dt][dn].new_response = '';
 			if(!(r.exc || r.server_messages)) {
 				cur_frm.refresh();
@@ -124,7 +124,7 @@ $.extend(cur_frm.cscript, {
 		var answer = confirm("Close Ticket "+doc.name+"?\n\nAllocated To: "+doc.allocated_to+"\n\nSubject: "+doc.subject+"");
 		if(answer) {
 			if(doc.name) 
-				$c_obj([doc],'close_ticket','',function(r,rt) {
+				$c_obj(make_doclist(doc.doctype, doc.name),'close_ticket','',function(r,rt) {
 					if(!r.exc) {
 						cur_frm.refresh();
 					}
@@ -138,7 +138,7 @@ $.extend(cur_frm.cscript, {
 		var answer = confirm("Re-Open Ticket "+doc.name+"?\n\nAllocated To: "+doc.allocated_to+"\n\nSubject: "+doc.subject+"");
 		if(answer) {
 			if(doc.name) 
-				$c_obj([doc],'reopen_ticket','',function(r,rt) {
+				$c_obj(make_doclist(doc.doctype, doc.name),'reopen_ticket','',function(r,rt) {
 					if(!r.exc) {
 						cur_frm.refresh();
 					}

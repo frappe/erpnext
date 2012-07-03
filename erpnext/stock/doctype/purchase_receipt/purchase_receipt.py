@@ -370,7 +370,7 @@ class DocType(TransactionBase):
 							raise Exception
 						self.add_bom(d)
 					else:
-						self.doc.clear_table(self.doclist,'pr_raw_material_details',1)
+						self.doclist = self.doc.clear_table(self.doclist,'pr_raw_material_details',1)
 						self.doc.save()
 				elif item_det[0][1] == 'No':
 					if not self.doc.supplier_warehouse:
@@ -479,4 +479,4 @@ class DocType(TransactionBase):
 
 	# **** Pull details from other charges master (Get Other Charges) ****
 	def get_purchase_tax_details(self):
-		return get_obj('Purchase Common').get_purchase_tax_details(self)
+		self.doclist = get_obj('Purchase Common').get_purchase_tax_details(self)

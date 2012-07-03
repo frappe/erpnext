@@ -57,7 +57,7 @@ class DocType :
   # Create Item Table
   # -----------------------------
   def create_item_table(self, det):
-    self.doc.clear_table(self.doclist, 'return_details', 1)
+    self.doclist = self.doc.clear_table(self.doclist, 'return_details', 1)
     for i in det:
       ch = addchild(self.doc, 'return_details', 'Sales and Purchase Return Item', 1, self.doclist)
       ch.detail_name = i and i[0] or ''
@@ -73,5 +73,5 @@ class DocType :
   # Clear return table
   # --------------------------------
   def clear_return_table(self):
-    self.doc.clear_table(self.doclist, 'return_details', 1)
+    self.doclist = self.doc.clear_table(self.doclist, 'return_details', 1)
     self.doc.save()

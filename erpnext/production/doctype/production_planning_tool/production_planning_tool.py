@@ -58,13 +58,13 @@ class DocType:
 
 	def clear_so_table(self):
 		""" Clears sales order table"""
-		self.doc.clear_table(self.doclist, 'pp_so_details')
+		self.doclist = self.doc.clear_table(self.doclist, 'pp_so_details')
 
 
 
 	def clear_item_table(self):
 		""" Clears item table"""
-		self.doc.clear_table(self.doclist, 'pp_details')
+		self.doclist = self.doc.clear_table(self.doclist, 'pp_details')
 
 
 
