@@ -5,7 +5,7 @@
 	{
 		'creation': '2012-07-02 19:57:48',
 		'docstatus': 0,
-		'modified': '2012-07-02 20:24:17',
+		'modified': '2012-07-03 12:54:52',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -88,16 +88,74 @@
 
 	# DocPerm
 	{
+		'create': 1,
 		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'role': u'Sales User'
+		'role': u'Sales Manager',
+		'write': 1
 	},
 
 	# DocPerm
 	{
+		'create': 1,
 		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'role': u'Purchase User'
+		'role': u'Purchase Manager',
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'create': 1,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Maintenance Manager',
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'create': 1,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Accounts Manager',
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'create': 1,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Sales User',
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'create': 1,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Purchase User',
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'create': 1,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Maintenance User',
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'create': 1,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Accounts User',
+		'write': 1
 	},
 
 	# DocPerm
