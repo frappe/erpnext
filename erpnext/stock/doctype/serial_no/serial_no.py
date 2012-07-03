@@ -107,7 +107,7 @@ class DocType(TransactionBase):
 	def on_trash(self):
 		if self.doc.status == 'Delivered':
 			msgprint("Cannot trash Serial No : %s as it is already Delivered" % (self.doc.name), raise_exception = 1)
-		else:
+		elif self.doc.status == 'In Store': 
 			webnotes.conn.set(self.doc, 'status', 'Not in Use')
 			self.make_stock_ledger_entry(-1)
 
