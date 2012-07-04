@@ -481,5 +481,10 @@ patch_list = [
 		'patch_module': 'patches.july_2012',
 		'patch_file': 'packing_list_cleanup_and_serial_no',
 		'description': "packing list cleanup and serial no status update"
-	},	
+	},
+	{
+		'patch_module': 'patches.july_2012',
+		'patch_file': 'deprecate_import_data_control',
+		'description': "deprecate doctype - Import Data Control and page - Import Data"
+	},
 ]
