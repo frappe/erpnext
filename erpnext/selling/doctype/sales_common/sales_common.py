@@ -532,7 +532,9 @@ class DocType(TransactionBase):
 		# delete from db
 		webnotes.conn.sql("""\
 			delete from `tabDelivery Note Packing Item`
-			where name in ("%s")""" % '", "'.join(delete_list))
+			where name in (%s)"""
+			% (", ".join(["%s"] * len(delete_list))),
+			tuple(delete_list))
 
 	# Get total in words
 	# ==================================================================	
