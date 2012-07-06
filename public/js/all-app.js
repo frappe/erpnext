@@ -1114,8 +1114,8 @@ LayoutCell.prototype.set_width=function(row,width){var w=100;var n_cells=row.cel
 for(var i=0;i<n_cells;i++){if(!row.cells[i].estimated_width){w=w-cint(row.cells[i].style.width);cells_with_no_width--;}}
 for(var i=0;i<n_cells;i++){if(row.cells[i].estimated_width)
 $y(row.cells[i],{width:cint(w/cells_with_no_width)+'%'})}}
-LayoutCell.prototype.show=function(){$ds(this.cell);}
-LayoutCell.prototype.hide=function(){$dh(this.cell);}
+LayoutCell.prototype.show=function(){$ds(this.wrapper);}
+LayoutCell.prototype.hide=function(){$dh(this.wrapper);}
 /*
  *	lib/js/legacy/widgets/tabbedpage.js
  */
@@ -1747,7 +1747,7 @@ _f.Frm.prototype.setup_fields_std=function(){var fl=wn.meta.docfield_list[this.d
 var sec;for(var i=0;i<fl.length;i++){var f=fl[i];if(f.fieldtype=='Section Break'&&fl[i+1]&&fl[i+1].fieldtype=='Section Break')
 continue;var fn=f.fieldname?f.fieldname:f.label;var fld=make_field(f,this.doctype,this.layout.cur_cell,this);this.fields[this.fields.length]=fld;this.fields_dict[fn]=fld;if(sec&&['Section Break','Column Break'].indexOf(f.fieldtype)==-1){fld.parent_section=sec;sec.fields.push(fld);}
 if(f.fieldtype=='Section Break'){sec=fld;this.sections.push(fld);}
-if((f.fieldtype=='Section Break')&&(fl[i+1])&&(fl[i+1].fieldtype!='Column Break')&&!f.hidden){var c=this.layout.addcell();$y(c.wrapper,{padding:'8px'});}}}
+if((f.fieldtype=='Section Break')&&(fl[i+1])&&(fl[i+1].fieldtype!='Column Break')){var c=this.layout.addcell();$y(c.wrapper,{padding:'8px'});}}}
 _f.Frm.prototype.add_custom_button=function(label,fn,icon){this.frm_head.appframe.add_button(label,fn,icon);}
 _f.Frm.prototype.clear_custom_buttons=function(){this.frm_head.refresh_toolbar()}
 _f.Frm.prototype.add_fetch=function(link_field,src_field,tar_field){if(!this.fetch_dict[link_field]){this.fetch_dict[link_field]={'columns':[],'fields':[]}}
