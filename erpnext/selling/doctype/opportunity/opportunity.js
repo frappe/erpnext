@@ -140,79 +140,8 @@ cur_frm.fields_dict['enquiry_details'].grid.get_field('item_code').get_query = f
 	else 
 		return 'SELECT tabItem.name,tabItem.item_name,tabItem.description FROM tabItem WHERE tabItem.is_sales_item="Yes" AND (ifnull(`tabItem`.`end_of_life`,"") = "" OR `tabItem`.`end_of_life` > NOW() OR `tabItem`.`end_of_life`="0000-00-00") AND tabItem.%(key)s LIKE "%s" LIMIT 50';
 }
-	
- //Fetch Item Details
-//====================================================================================================================
-cur_frm.cscript.item_code = function(doc, cdt, cdn) {
-	var d = locals[cdt][cdn];
-	if (d.item_code) {
-		get_server_fields('get_item_details',d.item_code,'enquiry_details',doc,cdt,cdn,1);
-	}
-}
 
-/*
- //Fetch Customer Details
-//======================================================================================================================
-cur_frm.cscript.customer = function(doc, cdt, cdn){
-	if (doc.customer) {
-		get_server_fields('get_cust_address',doc.customer,'',doc,cdt,cdn,1);
-	}
-}
-*/
-
-/*
-//=======================================================================================================================
-cur_frm.fields_dict['contact_person'].get_query = function(doc, cdt, cdn) {
-	return 'SELECT `tabContact`.contact_name FROM `tabContact` WHERE `tabContact`.is_customer = 1 AND `tabContact`.customer = "'+ doc.customer+'" AND `tabContact`.docstatus != 2 AND `tabContact`.contact_name LIKE "%s" ORDER BY `tabContact`.contact_name ASC LIMIT 50';
-}
-*/
-
-/*
-//=======================================================================================================================
-cur_frm.cscript.contact_person = function(doc, cdt, cdn){
-	if (doc.contact_person) {
-		arg = {};
-		arg.contact_person = doc.contact_person;
-		arg.customer = doc.customer;
-		get_server_fields('get_contact_details',docstring(arg),'',doc,cdt,cdn,1);
-	}
-}
-*/
-
-/*
-// hide - unhide fields based on lead or customer..
-//=======================================================================================================================
-cur_frm.cscript.clear_values = function(doc,cdt,cdn) {
-	if(doc.enquiry_from == 'Lead') {
-		doc.customer = doc.customer_name = doc.contact_person = doc.customer_group = "";
-	}
-	else if(doc.enquiry_from == 'Customer') {
-		doc.lead =	doc.lead_name = "";
-	}
-	refresh_many(['lead','lead_name','customer','customer_name','contact_person','customer_group']);
-}
-*/
-
-/*
-//================ hide - unhide fields on basis of enquiry from either lead or customer =============================== 
-cur_frm.cscript.enquiry_from = function(doc,cdt,cdn){
-	cur_frm.cscript.clear_values(doc,cdt,cdn);
-	 doc.address = doc.territory = doc.contact_no = doc.email_id = "";
-	 refresh_many(['territory','address','contact_no','email_id']);
-}
-*/
-
-/*
-//================ create new contact ============================================================================
-cur_frm.cscript.new_contact = function(){
-	tn = createLocal('Contact');
-	locals['Contact'][tn].is_customer = 1;
-	if(doc.customer) locals['Contact'][tn].customer = doc.customer;
-	loaddoc('Contact', tn);
-}
-*/
- // Create New Quotation
-// =======================================================================================================================
+// Create New Quotation
 cur_frm.cscript['Create Quotation'] = function(){
 	n = createLocal("Quotation");
 	$c('dt_map', args={
@@ -284,39 +213,5 @@ cur_frm.cscript['Declare Opportunity Lost'] = function(){
 }
 
 //get query select Territory
-//=======================================================================================================================
 cur_frm.fields_dict['territory'].get_query = function(doc,cdt,cdn) {
 	return 'SELECT `tabTerritory`.`name`,`tabTerritory`.`parent_territory` FROM `tabTerritory` WHERE `tabTerritory`.`is_group` = "No" AND `tabTerritory`.`docstatus`!= 2 AND `tabTerritory`.%(key)s LIKE "%s"	ORDER BY	`tabTerritory`.`name` ASC LIMIT 50';}
-
-/*
-//===================== Opportunity From validation - either customer or lead is mandatory =====================================
-cur_frm.cscript.enq_frm_validate = function(doc,cdt,cdn){
-	
-	if(doc.enquiry_from == 'Lead'){
-		if(!doc.lead){
-			alert("Lead is mandatory.");	
-			validated = false; 
-		}
-	}
-	else if(doc.enquiry_from == 'Customer'){
-			if(!doc.customer){
-			alert("Customer is mandatory.");
-			validated = false;
-		}
-		else if(!doc.contact_person){
-			alert("Contact Person is mandatory.");
-			validated = false;
-		}
-		else if(!doc.customer_group){
-			alert("Customer Group is mandatory.");
-			validated = false;
-		}
-	} 
-}
-*/
-
-//===================validation function ==============================================================================
-
-cur_frm.cscript.validate = function(doc,cdt,cdn){
-	//cur_frm.cscript.enq_frm_validate(doc,cdt,cdn);
-}
