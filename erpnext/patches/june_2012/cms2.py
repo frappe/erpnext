@@ -18,6 +18,12 @@ def cleanup():
 		delete from `tabPage`
 		where module='Website' and ifnull(web_page, 'No') = 'Yes'""")
 	
+	# change show_in_website value in item table to 0 or 1
+	webnotes.conn.sql("""\
+		update `tabItem`
+		set show_in_website = if(show_in_website = 'Yes', 1, 0)
+		where show_in_website is not null""")
+	
 def save_pages():
 	"""save all web pages, blogs to create content"""
 	import webnotes

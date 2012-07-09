@@ -1,23 +1,30 @@
 {% extends "product/product.js" %}
 
-{% block title %}{{ item_name }} [{{ name }}]{% endblock %}
+{% block title %}
+	{% if item_name != name %}
+		{{ item_name }} [{{ name }}]
+	{% else %}
+		{{ item_name }}
+	{% endif %}
+{% endblock %}
 
 {% block content %}
 	<div class="layout-wrapper layout-wrapper-background">
 		<div class="web-content" id="content-product-{{ name }}">
 			<div class="layout-main-section">
 				<h1>{{ item_name }}</h1>
-				<div style="float: left;">
+				<div class="product-page-content">
 					<br><br>
 					{% if website_image %}
-					<image src="files/{{ website_image }}" style="width: 300px; 
-						margin-left: 15px;" />
-					<br><br>
+					<image src="files/{{ website_image }}" />
+					{% else %}
+					<div class="img-area"></div>
+					<span style="font-size: 11px">This is an auto-generated Image</span>
 					{% endif %}
+					<br><br>
+					<div class="web-long-description">
 					{{ web_description_html }}
-					<button class="btn primary product-inquiry" 
-						data-product="{{ name }}"
-						data-description="{{ description }}">Send Inquiry</button>
+					</div>
 				</div>
 			</div>
 			<div class="layout-side-section">
@@ -30,4 +37,41 @@
 			<div style="clear: both"></div>
 		</div>
 	</div>
+{% endblock %}
+
+{% block css %}
+	<style>
+		.web-long-description {
+			font-size: 18px;
+			line-height: 200%;
+		}
+		.product-page-content {
+			float: left;
+		}
+		/* product page image css */
+		.product-page-content img {
+			max-width: 100%;
+		}
+		
+		/* similar products listing */
+		.similar-products .img-area img {
+			max-width: 55px;
+			max-height: 55px;
+		}
+		
+		.similar-products .img-area {
+			float: left;
+			width: 30%;
+			margin-top: 0.3em;
+		}
+		
+		.similar-product-description {
+			float: left;
+			width: 70%;
+		}
+		
+		.similar-product-description span {
+			font-size: 12px;
+		}
+</style>
 {% endblock %}

@@ -2,17 +2,6 @@
 
 {% block title %}Products{% endblock %}
 
-{% block css %}
-	<style>
-		h3 > a, h3 > a:link, h3 > a:visited, h3 > a:active,
-		h3 > a:hover, h3 > a:focus {
-			text-decoration: none;
-			color: inherit;
-		}
-	</style>
-{% endblock %}
-
-
 {% block content %}
 	<div class="layout-wrapper layout-wrapper-background">
 		<div class="web-content" id="content-products">
@@ -29,10 +18,24 @@
 			</div>
 			
 			<div class="layout-side-section">
-				<h3><a href="products.html">Categories</a></h3>
+				<h3>Categories</h3>
 				<div class="more-categories"></div>
 			</div>
 			<div style="clear: both"></div>
 		</div>
 	</div>
+{% endblock %}
+
+{% block css %}
+	<style>
+		.img-area {
+			float:left;
+			width: 115px;
+		}
+		
+		.product-list-description {
+			float:left;
+			width: 400px;
+		}
+	</style>
 {% endblock %}

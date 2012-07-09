@@ -225,37 +225,6 @@ Total Available Qty: %s
 	def on_rename(self,newdn,olddn):
 		sql("update tabItem set item_code = %s where name = %s", (newdn, olddn))
 
-	# def make_page(self):
-	# 	if self.doc.show_in_website=='Yes':
-	# 
-	# 		import website.utils
-	# 
-	# 		if self.doc.page_name:
-	# 			import webnotes.model
-	# 			webnotes.model.delete_doc('Page', self.doc.page_name)
-	# 			
-	# 		p = website.utils.add_page("Product " + self.doc.item_name)
-	# 		self.doc.page_name = p.name
-	# 
-	# 		from jinja2 import Template
-	# 		import markdown2
-	# 		import os
-	# 
-	# 
-	# 		self.doc.long_description_html = markdown2.markdown(self.doc.description or '')
-	# 
-	# 		with open(os.path.join(os.path.dirname(__file__), 'template.html'), 'r') as f:
-	# 			p.content = Template(f.read()).render(doc=self.doc)
-	# 
-	# 		with open(os.path.join(os.path.dirname(__file__), 'product_page.js'), 'r') as f:
-	# 			p.script = Template(f.read()).render(doc=self.doc)
-	# 
-	# 		p.save()
-	# 
-	# 		website.utils.add_guest_access_to_page(p.name)
-	# 
-	# 		del self.doc.fields['long_description_html']
-	# 		
 	def clear_web_cache(self):
 		import website.web_cache
 		
@@ -263,14 +232,22 @@ Total Available Qty: %s
 				self.doc.page_name != self.old_page_name:
 			website.web_cache.delete_web_cache(self.old_page_name)
 		
-		if self.doc.show_in_website == 'Yes':
+		if self.doc.show_in_website:
 			website.web_cache.clear_web_cache(self.doc.doctype, self.doc.name, self.doc.page_name)
 		else:
 			website.web_cache.delete_web_cache(self.doc.page_name)
 	
 	def update_page_name(self):
 		import website.utils
-		self.doc.page_name = website.utils.page_name(self.doc.name + " " + self.doc.item_name)
+		
+		# if same name, do not repeat twice
+		if self.doc.name == self.doc.item_name:
+			page_name = self.doc.name
+		else:
+			page_name = self.doc.name + " " + self.doc.item_name
+
+		self.doc.page_name = website.utils.page_name(page_name)
+
 		webnotes.conn.set_value('Item', self.doc.name, 'page_name', self.doc.page_name)
 	
 		# no need to check for uniqueness, as name is unique
@@ -279,5 +256,3 @@ Total Available Qty: %s
 		import markdown2
 		self.doc.web_description_html = markdown2.markdown(self.doc.description or '',
 										extras=["wiki-tables"])
-		
-		

@@ -32,7 +32,8 @@ def load_from_web_cache(page_name, comments, template): #, script=None):
 		where name = %s""", page_name)
 	
 	# if page doesn't exist, raise exception
-	if not res and page_name not in ['404', 'index', 'blog', 'products']:
+	page_exception_list = ['404', 'index', 'blog', 'products', 'login-page']
+	if not res and page_name not in page_exception_list:
 		raise Exception, "Page %s not found" % page_name
 	
 	html, doc_type, doc_name = res and res[0] or (None, None, None)
@@ -55,7 +56,7 @@ def load_into_web_cache(page_name, template, doc_type, doc_name):
 	import webnotes
 	outer_env_dict = get_outer_env()
 	
-	if page_name in ['404', 'blog', 'products']:
+	if page_name in ['404', 'blog', 'products', 'login-page']:
 		args = outer_env_dict
 		args.update({
 			'name': page_name,
@@ -80,12 +81,14 @@ def load_into_web_cache(page_name, template, doc_type, doc_name):
 		args.update({ 'insert_code': 1 })
 	elif doc_type == 'Web Page':
 		template = 'web_page.html'
-	elif page_name == 'blog':
-		template = 'blog/blog_list.html'
+	else:
 		args.update({ 'insert_code': 1 })
-	elif page_name == 'products':
-		template = 'product/product_list.html'
-		args.update({ 'insert_code': 1 })
+		if page_name == 'blog':
+			template = 'blog/blog_list.html'
+		elif page_name == 'products':
+			template = 'product/product_list.html'
+		elif page_name == 'login-page':
+			template = 'login/login.html'
 	
 	html = build_html(args, template)
 	

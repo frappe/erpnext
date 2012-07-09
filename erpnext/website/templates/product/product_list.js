@@ -31,8 +31,6 @@ wn.pages['{{ name }}'].onload = function(wrapper) {
 	// make lists
 	erpnext.products.make_product_list(wrapper);
 	
-	// erpnext.products.product_list.run();
-	
 	// bind search button or enter key
 	$(wrapper).find('.products-search .btn').click(function() {
 		erpnext.products.product_list.run();
@@ -51,30 +49,22 @@ erpnext.products.make_product_list = function(wrapper) {
 		parent: $(wrapper).find('#products-list').get(0),
 		run_btn: $(wrapper).find('.products-search .btn').get(0),
 		no_toolbar: true,
-		get_query: function() {
-			var srch = $('input[name="products-search"]').val()
-			var search_cond = 'and (description like "%%(srch)s%"\
-				or item_name like "%%(srch)s%")';
-			var product_group_cond = 'and item_group="%(group)s"';
-			var cur_group = erpnext.products.cur_group
-			args = {
-				search_cond: srch ? repl(search_cond, {srch:srch}) : '',
-				cat: cur_group ? repl(product_group_cond, {group: cur_group}) : '',
+		method: 'website.product.get_product_list',
+		get_args: function() {
+			return {
+				search: $('input[name="products-search"]').val() || '',
+				product_group: erpnext.products.cur_group || '',
 			};
-			return repl('select name, item_name, website_image, \
-				description, page_name \
-				from tabItem \
-				where is_sales_item="Yes" \
-				%(cat)s \
-				and docstatus = 0 and ifnull(show_in_website, "No")="Yes"\
-				%(search_cond)s', args)
 		},
 		render_row: function(parent, data) {
+			if (!data.web_short_description) {
+				data.web_short_description = data.description;
+			}
 			parent.innerHTML = repl('\
-				<div style="float:left; width: 115px;" class="img-area"></div>\
-				<div style="float:left; width: 400px">\
-					<p><b><a href="%(page_name)s.html">%(item_name)s</a></b></p>\
-					<p>%(description)s</p></div>\
+				<a href="%(page_name)s.html"><div class="img-area"></div></a>\
+				<div class="product-list-description">\
+					<h4><a href="%(page_name)s.html">%(item_name)s</a></h4>\
+					<p>%(web_short_description)s</p></div>\
 				<div style="clear: both;"></div>', data);
 				
 			if(data.website_image) {
