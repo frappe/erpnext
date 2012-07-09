@@ -3219,6 +3219,8 @@ div.stat-item {
 	height: 18px;
 	border: 1px solid #aaa;
 	border-radius: 9px;
+	-webkit-border-radius: 9px;
+	-moz-border-radius: 9px;
 	overflow: hidden;
 }
 
@@ -3227,6 +3229,10 @@ div.stat-bar {
 	left: 0px;
 	height: 100%;
 	z-index: 0;
+	/* So that this div is also curved like the enclosing one */
+	border-radius: 9px;
+	-webkit-border-radius: 9px;
+	-moz-border-radius: 9px;
 
 	background: #e0ff84; /* Old browsers */
 	background: -moz-linear-gradient(top,  #e0ff84 0%, #a4e567 100%); /* FF3.6+ */
