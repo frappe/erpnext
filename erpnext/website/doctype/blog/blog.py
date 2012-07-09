@@ -35,6 +35,8 @@ class DocType(website.web_page.Page):
 			self.delete_web_cache(self.doc.page_name)
 
 	def get_html(self):
+		import webnotes.utils
+		
 		# this is for double precaution. usually it wont reach this code if not published
 		if not webnotes.utils.cint(self.doc.published):
 			raise Exception, "This blog has not been published yet!"
@@ -45,3 +47,12 @@ class DocType(website.web_page.Page):
 		self.doc.updated = global_date_format(self.doc.modified)
 
 		self.markdown_to_html(['content'])
+
+		comment_list = webnotes.conn.sql("""\
+			select comment, comment_by_fullname, creation
+			from `tabComment` where comment_doctype="Blog"
+			and comment_docname=%s order by creation""", self.doc.name, as_dict=1)
+		
+		self.doc.comment_list = comment_list or []
+		for comment in self.doc.comment_list:
+			comment['comment_date'] = webnotes.utils.pretty_date(comment['creation'])

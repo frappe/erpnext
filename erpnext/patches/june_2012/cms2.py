@@ -23,6 +23,13 @@ def cleanup():
 		update `tabItem`
 		set show_in_website = if(show_in_website = 'Yes', 1, 0)
 		where show_in_website is not null""")
+		
+	# move comments from comment_doctype Page to Blog
+	webnotes.conn.sql("""\
+		update `tabComment` comm, `tabBlog` blog
+		set comm.comment_doctype = 'Blog', comm.comment_docname = blog.name
+		where comm.comment_docname = blog.page_name""")
+	
 	
 def save_pages():
 	"""save all web pages, blogs to create content"""

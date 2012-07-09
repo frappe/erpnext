@@ -11,21 +11,51 @@
 				{{ content_html }}
 				<hr><h3>Comments</h3>
 				<br>
-				<div class="blog-comments"></div>
+				<div class="blog-comments">
+					{% for comment in comment_list %}
+					<div class="comment-row">
+						<div class="comment-title">
+							{{ comment.comment_by_fullname }} - {{ comment.comment_date }}:
+							{{ comment.comment_date_type }}
+						</div>
+						<p class="comment-content">{{ comment.comment }}</p>
+						<hr>
+					</div>
+					{% endfor %}
+				</div>
 			</div>
 
 			<div class="layout-side-section">
 				<p><a href="blog.html">All Blogs</a></p>
-				<h4>Recent Posts</h4>
-				<div class="recent-posts" style="min-height: 100px;"></div>
+				<br />
 				<h4>Subscribe</h4>
 				<p>
 					<img src="images/feed.png" style="margin-right: 4px; margin-bottom: -4px">
 					<a href="rss.xml" target="_blank">RSS Feed</a>
 				</p>
+				<br />
+				<h4>Recent Posts</h4>
+				<div class="recent-posts" style="min-height: 100px;"></div>
 			</div>
 
 			<div style="clear: both"></div>
 		</div>
 	</div>
+{% endblock %}
+
+{% block css %}
+	<style>
+		.comment-title {
+			color:#777;
+		}
+		
+		.comment-content {
+			margin-left: 20px;
+		}
+		
+/*		.comment-row {
+			padding: 5px 0px;
+		}
+*/	</style>
+	
 {% endblock %}

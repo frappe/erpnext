@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-05-03 18:43:46',
+		'creation': '2012-05-21 15:54:09',
 		'docstatus': 0,
-		'modified': '2012-05-21 14:59:25',
+		'modified': '2012-07-09 16:20:58',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -18,7 +18,7 @@
 		'doctype': 'DocType',
 		'document_type': u'Other',
 		'issingle': 1,
-		'max_attachments': 1,
+		'max_attachments': 10,
 		'module': u'Website',
 		'name': '__common__',
 		'section_style': u'Simple',
@@ -180,21 +180,21 @@
 	# DocField
 	{
 		'doctype': u'DocField',
-		'fieldname': u'file_list',
-		'fieldtype': u'Text',
-		'hidden': 1,
-		'label': u'File List',
-		'no_copy': 1,
-		'permlevel': 0,
-		'print_hide': 1
+		'fieldname': u'misc_section',
+		'fieldtype': u'Section Break',
+		'label': u'Misc',
+		'permlevel': 0
 	},
 
 	# DocField
 	{
+		'colour': u'White:FFF',
+		'description': u'An icon file with .ico extension. Should be 16 x 16 px. Generated using a favicon generator. [<a href="http://favicon-generator.org/" target="_blank">favicon-generator.org</a>]',
 		'doctype': u'DocField',
-		'fieldname': u'domains',
-		'fieldtype': u'Section Break',
-		'label': u'Domains',
+		'fieldname': u'favicon',
+		'fieldtype': u'Select',
+		'label': u'FavIcon',
+		'options': u'attach_files:',
 		'permlevel': 0
 	},
 
@@ -219,6 +219,18 @@
 		'label': u'Domain List',
 		'permlevel': 0,
 		'reqd': 0
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'file_list',
+		'fieldtype': u'Text',
+		'hidden': 1,
+		'label': u'File List',
+		'no_copy': 1,
+		'permlevel': 0,
+		'print_hide': 1
 	},
 
 	# DocField

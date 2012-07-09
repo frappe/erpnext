@@ -18,7 +18,10 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 // js inside blog page
+wn.provide('erpnext.blog');
 wn.pages['{{ name }}'].onload = function(wrapper) {
+	erpnext.blog.wrapper = wrapper;
+	
 	// sidebar
 	wrapper.recent_list = new wn.ui.Listing({
 		parent: $(wrapper).find('.recent-posts'),
@@ -31,57 +34,72 @@ wn.pages['{{ name }}'].onload = function(wrapper) {
 			if(data.content && data.content.length==100) data.content += '...';
 			parent.innerHTML = repl('<a href="%(name)s.html">%(title)s</a>\
 				<div class="comment">%(content)s</div><br>', data);
+			
+			// adjust page height depending on sidebar height
+			erpnext.blog.adjust_page_height(wrapper);
 		},
 		page_length: 5,
 	});
 	wrapper.recent_list.run();
-
-	wrapper.comment_list = new wn.ui.Listing({
-		parent: $(wrapper).find('.blog-comments').get(0),
-		no_toolbar: true,
-		query: 'select comment, comment_by_fullname, creation\
-			from `tabComment` where comment_doctype="Page"\
-			and comment_docname="{{ name }}" order by creation desc',
-		no_result_message: 'Be the first one to comment',
-		render_row: function(parent, data) {
-			data.comment_date = prettyDate(data.creation);
-			$(parent).html(repl("<div style='color:#777'>\
-				%(comment_by_fullname)s | %(comment_date)s:\
-				</div>\
-				<p style='margin-left: 20px;'>%(comment)s</p><br>", data))
-		},
-		hide_refresh: true,
-	});
-	wrapper.comment_list.run();
-
-	// add comment
-	$(wrapper).find('.layout-main-section').append('<br><button class="btn add-comment">\
-		Add Comment</button>');
-	$(wrapper).find('button.add-comment').click(function(){
-		d = new wn.widgets.Dialog({
-			title: 'Add Comment',
-			fields: [
-				{fieldname:'comment_by_fullname', label:'Your Name', reqd:1, fieldtype:'Data'},
-				{fieldname:'comment_by', label:'Email Id', reqd:1, fieldtype:'Data'},
-				{fieldname:'comment', label:'Comment', reqd:1, fieldtype:'Text'},
-				{fieldname:'post', label:'Post', fieldtype:'Button'}
-			]
-		});
-		d.fields_dict.post.input.onclick = function() {
-			var btn = this;
-			var args = d.get_values();
-			if(!args) return;
-			args.comment_doctype = 'Page';
-			args.comment_docname = '{{ name }}';
-			$(btn).set_working();
-			$c('webnotes.widgets.form.comments.add_comment', args, function(r) {
-				$(btn).done_working();
-				d.hide();
-				wrapper.comment_list.refresh();
-			})
-		}
-		d.show();
-	})
 }
+
+erpnext.blog.adjust_page_height = function(wrapper) {
+	if (!wrapper) { wrapper = erpnext.blog.wrapper; }
+	if (!wrapper) { return; }
+
+	// adjust page height based on sidebar height
+	var $main_page = $(wrapper).find('.layout-main-section');
+	var $sidebar = $(wrapper).find('.layout-side-section');
+	if ($sidebar.height() > $main_page.height()) {
+		$main_page.height($sidebar.height());
+	}
+}
+	// wrapper.comment_list = new wn.ui.Listing({
+	// 	parent: $(wrapper).find('.blog-comments').get(0),
+	// 	no_toolbar: true,
+	// 	query: 'select comment, comment_by_fullname, creation\
+	// 		from `tabComment` where comment_doctype="Page"\
+	// 		and comment_docname="{{ name }}" order by creation desc',
+	// 	no_result_message: 'Be the first one to comment',
+	// 	render_row: function(parent, data) {
+	// 		data.comment_date = prettyDate(data.creation);
+	// 		$(parent).html(repl("<div style='color:#777'>\
+	// 			%(comment_by_fullname)s | %(comment_date)s:\
+	// 			</div>\
+	// 			<p style='margin-left: 20px;'>%(comment)s</p><br>", data))
+	// 	},
+	// 	hide_refresh: true,
+	// });
+	// wrapper.comment_list.run();
+	// 
+	// // add comment
+	// $(wrapper).find('.layout-main-section').append('<br><button class="btn add-comment">\
+	// 	Add Comment</button>');
+	// $(wrapper).find('button.add-comment').click(function(){
+	// 	d = new wn.widgets.Dialog({
+	// 		title: 'Add Comment',
+	// 		fields: [
+	// 			{fieldname:'comment_by_fullname', label:'Your Name', reqd:1, fieldtype:'Data'},
+	// 			{fieldname:'comment_by', label:'Email Id', reqd:1, fieldtype:'Data'},
+	// 			{fieldname:'comment', label:'Comment', reqd:1, fieldtype:'Text'},
+	// 			{fieldname:'post', label:'Post', fieldtype:'Button'}
+	// 		]
+	// 	});
+	// 	d.fields_dict.post.input.onclick = function() {
+	// 		var btn = this;
+	// 		var args = d.get_values();
+	// 		if(!args) return;
+	// 		args.comment_doctype = 'Page';
+	// 		args.comment_docname = '{{ name }}';
+	// 		$(btn).set_working();
+	// 		$c('webnotes.widgets.form.comments.add_comment', args, function(r) {
+	// 			$(btn).done_working();
+	// 			d.hide();
+	// 			wrapper.comment_list.refresh();
+	// 		})
+	// 	}
+	// 	d.show();
+	// })
+
 
 {% endblock %}

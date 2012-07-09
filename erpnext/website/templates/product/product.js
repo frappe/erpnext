@@ -25,18 +25,25 @@ wn.pages['{{ name }}'].onload = function(wrapper) {
 	erpnext.products.make_similar_products(wrapper);
 
 	// if website image missing, autogenerate one
-	var $img = $('.product-page-content').find('.img-area');
+	var $img = $(wrapper).find('.product-page-content .img-area');
 	if ($img && $img.length > 0) {
 		$img.append(wn.dom.placeholder(160, "{{ item_name }}"));
 	}
 	
+	erpnext.products.adjust_page_height(wrapper);
+	
+}
+
+erpnext.products.adjust_page_height = function(wrapper) {
+	if (!wrapper) { wrapper = erpnext.products.wrapper; }
+	if (!wrapper) { return; }
+
 	// adjust page height based on sidebar height
-	var $main_page = $('.layout-main-section');
-	var $sidebar = $('.layout-side-section');
+	var $main_page = $(wrapper).find('.layout-main-section');
+	var $sidebar = $(wrapper).find('.layout-side-section');
 	if ($sidebar.height() > $main_page.height()) {
 		$main_page.height($sidebar.height());
 	}
-	
 }
 
 erpnext.products.make_similar_products = function(wrapper) {
@@ -78,6 +85,9 @@ erpnext.products.make_similar_products = function(wrapper) {
 				$(parent).find('.img-area').append(wn.dom.placeholder(55, 
 					data.item_name));
 			}
+			
+			// adjust page height, if sidebar height keeps increasing
+			erpnext.products.adjust_page_height(wrapper);
 		}
 	});
 	wrapper.similar.run();

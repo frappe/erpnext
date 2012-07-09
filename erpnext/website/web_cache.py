@@ -73,17 +73,15 @@ def load_into_web_cache(page_name, template, doc_type, doc_name):
 		args.update(outer_env_dict)
 	
 	# decide template and update args
-	if doc_type == 'Blog':
-		template = 'blog/blog.html'
-		args.update({ 'insert_code': 1 })
-	elif doc_type == 'Item':
-		template = 'product/product.html'
-		args.update({ 'insert_code': 1 })
-	elif doc_type == 'Web Page':
+	if doc_type == 'Web Page':
 		template = 'web_page.html'
 	else:
 		args.update({ 'insert_code': 1 })
-		if page_name == 'blog':
+		if doc_type == 'Blog':
+			template = 'blog/blog.html'
+		elif doc_type == 'Item':
+			template = 'product/product.html'
+		elif page_name == 'blog':
 			template = 'blog/blog_list.html'
 		elif page_name == 'products':
 			template = 'product/product_list.html'
@@ -120,6 +118,7 @@ def get_outer_env():
 			
 		'brand': webnotes.conn.get_value('Website Settings', None, 'brand_html'),
 		'copyright': webnotes.conn.get_value('Website Settings', None, 'copyright'),
+		'favicon': webnotes.conn.get_value('Website Settings', None, 'favicon')
 	}
 
 def get_index_page():

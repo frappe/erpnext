@@ -1,16 +1,7 @@
 {% extends "login/login.js" %}
 
-{% block css %}
-	<style>
-		#login_wrapper {
-			width: 300px !important;
-			margin: 20px auto;
-		}
-
-		.login-banner {
-			margin-bottom: 20px;
-		}
-	</style>
+{% block title %}
+	Login Page
 {% endblock %}
 
 {% block content %}
@@ -50,4 +41,17 @@
 	</div>
 	</div>
 
+{% endblock %}
+
+{% block css %}
+	<style>
+		#login_wrapper {
+			width: 300px !important;
+			margin: 20px auto;
+		}
+
+		.login-banner {
+			margin-bottom: 20px;
+		}
+	</style>
 {% endblock %}
