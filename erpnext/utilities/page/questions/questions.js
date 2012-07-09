@@ -14,8 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-pscript.onload_questions = function(wrapper) {	
-	console.log(1);
+pscript.onload_questions = function(wrapper) {
 	body = $(wrapper).find('.layout-main-section').get(0);
 	
 	wrapper.appframe = new wn.ui.AppFrame($(wrapper).find('.layout-appframe'));
