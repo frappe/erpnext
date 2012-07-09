@@ -163,6 +163,15 @@ class DocType(TransactionBase):
 		if ret['warehouse'] or ret['reserved_warehouse']:
 			av_qty = self.get_available_qty({'item_code': args['item_code'], 'warehouse': ret['warehouse'] or ret['reserved_warehouse']})
 			ret.update(av_qty)
+			
+		# get customer code for given item from Item Customer Detail
+		customer_item_code_row = webnotes.conn.sql("""\
+			select ref_code from `tabItem Customer Detail`
+			where parent = %s and customer_name = %s""",
+			(args['item_code'], obj.doc.customer))
+		if customer_item_code_row and customer_item_code_row[0][0]:
+			ret['customer_item_code'] = customer_item_code_row[0][0]
+		
 		return ret
 
 
