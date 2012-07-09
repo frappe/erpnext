@@ -48,11 +48,6 @@ erpnext.todo.refresh = function() {
 			}
 		}
 	});
-	
-	$('#add-todo').click(function() {
-		erpnext.todo.make_dialog({
-			date:get_today(), priority:'Medium', checked:0, description:''});
-	})
 }
 
 erpnext.todo.ToDoItem = Class.extend({
@@ -196,7 +191,15 @@ erpnext.todo.save = function(btn) {
 	});
 }
 
-wn.pages.todo.onload = function() {
+wn.pages.todo.onload = function(wrapper) {
+	// create app frame
+	wrapper.appframe = new wn.ui.AppFrame($(wrapper).find('.appframe-area'), 'To Do');
+	wrapper.appframe.add_button('Refresh', erpnext.todo.refresh, 'icon-refresh');
+	wrapper.appframe.add_button('Add', function() {
+		erpnext.todo.make_dialog({
+			date:get_today(), priority:'Medium', checked:0, description:''});
+	}, 'icon-plus');
+
 	// load todos
 	erpnext.todo.refresh();
 }
