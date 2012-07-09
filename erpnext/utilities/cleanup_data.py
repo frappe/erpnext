@@ -110,11 +110,10 @@ def delete_masters():
 def reset_series():
 	# Reset series
 	webnotes.conn.sql("""update tabSeries set current = 0 where name not in \
-		('FL', 'PERM', 'UR', '_SRCH', 'FileData/', 'TD', 'MI', 'EV', 'MIR', \
-		'DEF', '', 'TW', 'Ann/', 'Login Page/', 'DF', 'MDR', 'MDI', 'FMD/', \
-		'TMD/', 'GLMDetail', 'Event Updates/', '__NSO', '_ACB', 'UCDD/', 'EVP', \
-		'RFD/', 'INVTD', 'CWR/', 'TDI', 'CustomField', 'SRCH/C/', 'Letter/', 'MSD', \
-		'Mail/', 'AR', 'SA', 'SMSLOG/')
+		('Ann/', 'BSD', 'DEF', 'DF', 'EV', 'Event Updates/', 'FileData-', \
+		'FL', 'FMD/', 'GLM Detail', 'Login Page/', 'MDI', 'MDR', 'MI', 'MIR', \
+		'PERM', 'PR', 'SRCH/C/', 'TD', 'TIC/', 'TMD/', 'TW', 'UR', '_FEED', \
+		'_SRCH', '_TRIGGER', '__NSO', 'CustomField', 'Letter')
 	""")
 	print "Series updated"
 
