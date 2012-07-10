@@ -5,7 +5,7 @@
 	{
 		'creation': '2012-07-03 13:30:47',
 		'docstatus': 0,
-		'modified': '2012-07-10 16:37:55',
+		'modified': '2012-07-10 18:06:51',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -223,28 +223,6 @@
 		'print_hide': 1,
 		'report_hide': 1,
 		'reqd': 1,
-		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'doctype': u'DocField',
-		'fieldname': u'convert_to_group',
-		'fieldtype': u'Button',
-		'label': u'Convert to Group',
-		'permlevel': 0,
-		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'doctype': u'DocField',
-		'fieldname': u'convert_to_ledger',
-		'fieldtype': u'Button',
-		'label': u'Convert to Ledger',
-		'permlevel': 0,
 		'trigger': u'Client'
 	},
 

@@ -2059,7 +2059,7 @@ div.fix_ff_cursor { overflow: auto; }
 div.comment { color: #444; }
 
 .small {
-	font-size: 11px;
+	font-size: 12px;
 }
 
 .help {
@@ -2317,6 +2317,13 @@ div.form-title {
 .appframe-titlebar .label {
 	vertical-align: middle;
 	margin-right: 7px;
+}
+
+div.form-intro-area {
+	background-color: #ffe;
+	padding: 9px 9px 0px 9px;
+	border: 1px dashed #fc7;
+	margin-bottom: 15px;
 }
 
 div.form-section-head {
