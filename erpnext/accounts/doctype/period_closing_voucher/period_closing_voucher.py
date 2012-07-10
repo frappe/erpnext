@@ -42,7 +42,8 @@ class DocType:
 
 
 	def validate_account_head(self):
-		acc_det = sql("select debit_or_credit, is_pl_account, group_or_ledger, company from `tabAccount` where name = '%s'" % (self.doc.closing_account_head))
+		acc_det = sql("select debit_or_credit, is_pl_account, group_or_ledger, company \
+			from `tabAccount` where name = '%s'" % (self.doc.closing_account_head))
 
 		# Account should be under liability 
 		if cstr(acc_det[0][0]) != 'Credit' or cstr(acc_det[0][1]) != 'No':
@@ -71,15 +72,27 @@ class DocType:
 			raise Exception
 
 		# Period Closing Entry
-		pce = sql("select name from `tabPeriod Closing Voucher` where posting_date > '%s' and fiscal_year = '%s' and docstatus = 1" % (self.doc.posting_date, self.doc.fiscal_year))
+		pce = sql("select name from `tabPeriod Closing Voucher` \
+			where posting_date > '%s' and fiscal_year = '%s' and docstatus = 1" \
+			% (self.doc.posting_date, self.doc.fiscal_year))
 		if pce and pce[0][0]:
-			msgprint("Another Period Closing Entry: %s has been made after posting date: %s" % (cstr(pce[0][0]), self.doc.posting_date))
+			msgprint("Another Period Closing Entry: %s has been made after posting date: %s"\
+			 % (cstr(pce[0][0]), self.doc.posting_date))
 			raise Exception
 		 
 		
 	def validate_pl_balances(self):
-		income_bal = sql("select sum(ifnull(t1.debit,0))-sum(ifnull(t1.credit,0)) from `tabGL Entry` t1, tabAccount t2 where t1.account = t2.name and t1.posting_date between '%s' and '%s' and t2.debit_or_credit = 'Credit' and t2.group_or_ledger = 'Ledger' and ifnull(t2.freeze_account, 'No') = 'No' and t2.is_pl_account = 'Yes' and t2.docstatus < 2 and t2.company = '%s'" % (self.year_start_date, self.doc.posting_date, self.doc.company))
-		expense_bal = sql("select sum(ifnull(t1.debit,0))-sum(ifnull(t1.credit,0)) from `tabGL Entry` t1, tabAccount t2 where t1.account = t2.name and t1.posting_date between '%s' and '%s' and t2.debit_or_credit = 'Debit' and t2.group_or_ledger = 'Ledger' and ifnull(t2.freeze_account, 'No') = 'No' and t2.is_pl_account = 'Yes' and t2.docstatus < 2 and t2.company = '%s'" % (self.year_start_date, self.doc.posting_date, self.doc.company))
+		income_bal = sql("select sum(ifnull(t1.debit,0))-sum(ifnull(t1.credit,0)) \
+			from `tabGL Entry` t1, tabAccount t2 where t1.account = t2.name \
+			and t1.posting_date between '%s' and '%s' and t2.debit_or_credit = 'Credit' \
+			and t2.group_or_ledger = 'Ledger' and t2.is_pl_account = 'Yes' and t2.docstatus < 2 \
+			and t2.company = '%s'" % (self.year_start_date, self.doc.posting_date, self.doc.company))
+			
+		expense_bal = sql("select sum(ifnull(t1.debit,0))-sum(ifnull(t1.credit,0)) \
+			from `tabGL Entry` t1, tabAccount t2 where t1.account = t2.name \
+			and t1.posting_date between '%s' and '%s' and t2.debit_or_credit = 'Debit' \
+			and t2.group_or_ledger = 'Ledger' and t2.is_pl_account = 'Yes' and t2.docstatus < 2 \
+			and t2.company = '%s'" % (self.year_start_date, self.doc.posting_date, self.doc.company))
 		
 		income_bal = income_bal and income_bal[0][0] or 0
 		expense_bal = expense_bal and expense_bal[0][0] or 0
@@ -91,7 +104,12 @@ class DocType:
 		
 	def get_pl_balances(self, d_or_c):
 		"""Get account (pl) specific balance"""
-		acc_bal = sql("select	t1.account, sum(ifnull(t1.debit,0))-sum(ifnull(t1.credit,0)) from `tabGL Entry` t1, `tabAccount` t2 where t1.account = t2.name and t2.group_or_ledger = 'Ledger' and ifnull(t2.freeze_account, 'No') = 'No' and ifnull(t2.is_pl_account, 'No') = 'Yes' and ifnull(is_cancelled, 'No') = 'No' and t2.debit_or_credit = '%s' and t2.docstatus < 2 and t2.company = '%s' and t1.posting_date between '%s' and '%s' group by t1.account " % (d_or_c, self.doc.company, self.year_start_date, self.doc.posting_date))
+		acc_bal = sql("select	t1.account, sum(ifnull(t1.debit,0))-sum(ifnull(t1.credit,0)) \
+			from `tabGL Entry` t1, `tabAccount` t2 where t1.account = t2.name and t2.group_or_ledger = 'Ledger' \
+ 			and ifnull(t2.is_pl_account, 'No') = 'Yes' and ifnull(is_cancelled, 'No') = 'No' \
+			and t2.debit_or_credit = '%s' and t2.docstatus < 2 and t2.company = '%s' \
+			and t1.posting_date between '%s' and '%s' group by t1.account " \
+			% (d_or_c, self.doc.company, self.year_start_date, self.doc.posting_date))
 		return acc_bal
 
 	 
