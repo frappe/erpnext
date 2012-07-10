@@ -53,7 +53,7 @@ class DocType:
 		if not self.doc.group_or_ledger:
 			msgprint("Please select Group or Ledger value", raise_exception=1)
 			
-		if self.doc.cost_center_name != 'Root' and not self.parent_cost_center:
+		if self.doc.cost_center_name != 'Root' and not self.doc.parent_cost_center:
 			msgprint("Please enter parent cost center", raise_exception=1)
 		
 	#-------------------------------------------------------------------------
