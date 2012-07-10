@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-03-27 14:35:41',
+		'creation': '2012-07-03 13:30:47',
 		'docstatus': 0,
-		'modified': '2012-03-27 14:35:41',
+		'modified': '2012-07-10 16:37:55',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -27,7 +27,7 @@
 		'section_style': u'Simple',
 		'server_code_error': u' ',
 		'show_in_menu': 0,
-		'version': 109
+		'version': 1
 	},
 
 	# These values are common for all DocField
@@ -61,6 +61,42 @@
 		'cancel': 0,
 		'create': 0,
 		'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Accounts Manager',
+		'submit': 0,
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 1,
+		'create': 1,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Accounts Manager',
+		'submit': 0,
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Accounts User',
+		'submit': 0,
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
 		'permlevel': 0,
 		'role': u'Accounts User',
 		'submit': 0,
@@ -84,40 +120,13 @@
 		'role': u'All'
 	},
 
-	# DocPerm
+	# DocField
 	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Accounts Manager',
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 1,
-		'create': 1,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Accounts Manager',
-		'submit': 0,
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Accounts User',
-		'submit': 0,
-		'write': 0
+		'doctype': u'DocField',
+		'fieldname': u'sb0',
+		'fieldtype': u'Section Break',
+		'label': u'Cost Center Details',
+		'permlevel': 0
 	},
 
 	# DocField
@@ -148,7 +157,7 @@
 
 	# DocField
 	{
-		'description': u'Select company name first.',
+		'colour': u'White:FFF',
 		'doctype': u'DocField',
 		'fieldname': u'parent_cost_center',
 		'fieldtype': u'Link',
@@ -178,13 +187,24 @@
 
 	# DocField
 	{
+		'colour': u'White:FFF',
 		'doctype': u'DocField',
 		'fieldname': u'company_abbr',
 		'fieldtype': u'Data',
+		'hidden': 1,
 		'label': u'Company Abbr',
 		'oldfieldname': u'company_abbr',
 		'oldfieldtype': u'Data',
 		'permlevel': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'cb0',
+		'fieldtype': u'Column Break',
+		'permlevel': 0,
+		'width': u'50%'
 	},
 
 	# DocField
@@ -230,6 +250,19 @@
 
 	# DocField
 	{
+		'colour': u'White:FFF',
+		'description': u'Define Budget for this Cost Center',
+		'doctype': u'DocField',
+		'fieldname': u'sb1',
+		'fieldtype': u'Section Break',
+		'label': u'Budget',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'colour': u'White:FFF',
+		'description': u'Select Budget Distribution, if you want to track based on seasonality.',
 		'doctype': u'DocField',
 		'fieldname': u'distribution_id',
 		'fieldtype': u'Link',
@@ -242,6 +275,8 @@
 
 	# DocField
 	{
+		'colour': u'White:FFF',
+		'description': u'Add rows to set budgets on Accounts. To set budget actions, see the company master.',
 		'doctype': u'DocField',
 		'fieldname': u'budget_details',
 		'fieldtype': u'Table',
