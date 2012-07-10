@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-04-13 11:56:35',
+		'creation': '2012-06-08 16:08:01',
 		'docstatus': 0,
-		'modified': '2012-06-07 17:57:14',
+		'modified': '2012-07-09 11:06:26',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -66,6 +66,17 @@
 		'search_index': 1,
 		'trigger': u'Client',
 		'width': u'150px'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'customer_item_code',
+		'fieldtype': u'Data',
+		'hidden': 1,
+		'label': u"Customer's Item Code",
+		'permlevel': 1,
+		'print_hide': 1
 	},
 
 	# DocField
