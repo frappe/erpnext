@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-03-27 14:35:39',
+		'creation': '2012-07-03 13:30:50',
 		'docstatus': 0,
-		'modified': '2012-03-27 14:35:39',
+		'modified': '2012-07-10 18:34:16',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -26,7 +26,7 @@
 		'section_style': u'Tray',
 		'server_code_error': u' ',
 		'show_in_menu': 0,
-		'version': 138
+		'version': 1
 	},
 
 	# These values are common for all DocField
@@ -58,12 +58,32 @@
 
 	# DocPerm
 	{
-		'cancel': 1,
-		'create': 1,
+		'cancel': 0,
+		'create': 0,
 		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'role': u'Accounts User',
+		'role': u'Auditor',
 		'write': 1
+	},
+
+	# DocPerm
+	{
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Auditor',
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 2,
+		'role': u'Auditor',
+		'write': 0
 	},
 
 	# DocPerm
@@ -91,6 +111,26 @@
 		'cancel': 0,
 		'create': 0,
 		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Accounts User',
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'cancel': 1,
+		'create': 1,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Accounts Manager',
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
 		'permlevel': 1,
 		'role': u'Accounts User',
 		'write': 0
@@ -104,16 +144,6 @@
 		'permlevel': 1,
 		'role': u'Accounts Manager',
 		'write': 0
-	},
-
-	# DocPerm
-	{
-		'cancel': 1,
-		'create': 1,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Accounts Manager',
-		'write': 1
 	},
 
 	# DocPerm
@@ -141,7 +171,7 @@
 		'doctype': u'DocField',
 		'fieldname': u'properties',
 		'fieldtype': u'Section Break',
-		'label': u'Properties',
+		'label': u'Account Details',
 		'oldfieldtype': u'Section Break',
 		'permlevel': 0
 	},
@@ -168,20 +198,6 @@
 		'permlevel': 1,
 		'reqd': 1,
 		'search_index': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'parent_account',
-		'fieldtype': u'Link',
-		'label': u'Parent Account',
-		'oldfieldname': u'parent_account',
-		'oldfieldtype': u'Link',
-		'options': u'Account',
-		'permlevel': 0,
-		'search_index': 1,
-		'trigger': u'Client'
 	},
 
 	# DocField
@@ -216,26 +232,6 @@
 	# DocField
 	{
 		'doctype': u'DocField',
-		'fieldname': u'convert_to_group',
-		'fieldtype': u'Button',
-		'label': u'Convert to Group',
-		'permlevel': 0,
-		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'convert_to_ledger',
-		'fieldtype': u'Button',
-		'label': u'Convert to Ledger',
-		'permlevel': 0,
-		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
 		'fieldname': u'debit_or_credit',
 		'fieldtype': u'Data',
 		'in_filter': 1,
@@ -258,6 +254,44 @@
 		'options': u'Yes\nNo',
 		'permlevel': 1,
 		'search_index': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'company',
+		'fieldtype': u'Link',
+		'in_filter': 1,
+		'label': u'Company',
+		'oldfieldname': u'company',
+		'oldfieldtype': u'Link',
+		'options': u'Company',
+		'permlevel': 1,
+		'reqd': 1,
+		'search_index': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'column_break1',
+		'fieldtype': u'Column Break',
+		'permlevel': 0,
+		'width': u'50%'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'parent_account',
+		'fieldtype': u'Link',
+		'label': u'Parent Account',
+		'oldfieldname': u'parent_account',
+		'oldfieldtype': u'Link',
+		'options': u'Account',
+		'permlevel': 0,
+		'search_index': 1,
+		'trigger': u'Client'
 	},
 
 	# DocField
@@ -292,38 +326,16 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
-		'fieldname': u'column_break1',
-		'fieldtype': u'Column Break',
-		'permlevel': 0,
-		'width': u'50%'
-	},
-
-	# DocField
-	{
+		'colour': u'White:FFF',
+		'description': u'If the account is frozen, entries are allowed for the "Account Manager" only.',
 		'doctype': u'DocField',
 		'fieldname': u'freeze_account',
 		'fieldtype': u'Select',
-		'label': u'Freeze Account',
+		'label': u'Frozen',
 		'oldfieldname': u'freeze_account',
 		'oldfieldtype': u'Select',
 		'options': u'No\nYes',
 		'permlevel': 2
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'company',
-		'fieldtype': u'Link',
-		'in_filter': 1,
-		'label': u'Company',
-		'oldfieldname': u'company',
-		'oldfieldtype': u'Link',
-		'options': u'Company',
-		'permlevel': 1,
-		'reqd': 1,
-		'search_index': 1
 	},
 
 	# DocField

@@ -14,17 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-// Fetch parent details
-// -----------------------------------------
-cur_frm.add_fetch('parent_account', 'debit_or_credit', 'debit_or_credit');
-cur_frm.add_fetch('parent_account', 'is_pl_account', 'is_pl_account');
-
-// Hide tax rate based on account type
-// -----------------------------------------
-cur_frm.cscript.account_type = function(doc, cdt, cdn) {
-  if(doc.account_type == 'Tax') unhide_field(['tax_rate']);
-  else hide_field(['tax_rate']);
-}
 
 // Onload
 // -----------------------------------------
@@ -47,22 +36,36 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
   cur_frm.cscript.hide_unhide_group_ledger(doc);
 }
 
+// Fetch parent details
+// -----------------------------------------
+cur_frm.add_fetch('parent_account', 'debit_or_credit', 'debit_or_credit');
+cur_frm.add_fetch('parent_account', 'is_pl_account', 'is_pl_account');
+
+// Hide tax rate based on account type
+// -----------------------------------------
+cur_frm.cscript.account_type = function(doc, cdt, cdn) {
+  if(doc.account_type == 'Tax') unhide_field(['tax_rate']);
+  else hide_field(['tax_rate']);
+}
+
 // Hide/unhide group or ledger
 // -----------------------------------------
 cur_frm.cscript.hide_unhide_group_ledger = function(doc) {
-  hide_field(['convert_to_group', 'convert_to_ledger']);
-  if (cstr(doc.group_or_ledger) == 'Group') unhide_field('convert_to_ledger');
-  else if (cstr(doc.group_or_ledger) == 'Ledger') unhide_field('convert_to_group');
+	if (cstr(doc.group_or_ledger) == 'Group') {
+		cur_frm.add_custom_button('Convert to Ledger', 
+			function() { cur_frm.cscript.convert_to_ledger(); }, 'icon-retweet')
+	} else if (cstr(doc.group_or_ledger) == 'Ledger') {
+		cur_frm.add_custom_button('Convert to Group', 
+			function() { cur_frm.cscript.convert_to_group(); }, 'icon-retweet')
+	}
 }
-
 // Convert group to ledger
 // -----------------------------------------
 cur_frm.cscript.convert_to_ledger = function(doc, cdt, cdn) {
-  $c_obj(make_doclist(cdt,cdn),'convert_group_to_ledger','',function(r,rt) {
+  $c_obj(cur_frm.get_doclist(),'convert_group_to_ledger','',function(r,rt) {
     if(r.message == 1) {
-      doc.group_or_ledger = 'Ledger';
       refresh_field('group_or_ledger');
-      cur_frm.cscript.hide_unhide_group_ledger(doc);
+      cur_frm.cscript.hide_unhide_group_ledger(cur_frm.get_doc());
     }
   });
 }
@@ -70,11 +73,11 @@ cur_frm.cscript.convert_to_ledger = function(doc, cdt, cdn) {
 // Convert ledger to group
 // -----------------------------------------
 cur_frm.cscript.convert_to_group = function(doc, cdt, cdn) {
-  $c_obj(make_doclist(cdt,cdn),'convert_ledger_to_group','',function(r,rt) {
+  $c_obj(cur_frm.get_doclist(),'convert_ledger_to_group','',function(r,rt) {
     if(r.message == 1) {
       doc.group_or_ledger = 'Group';
       refresh_field('group_or_ledger');
-      cur_frm.cscript.hide_unhide_group_ledger(doc);
+      cur_frm.cscript.hide_unhide_group_ledger(cur_frm.get_doc());
     }
   });
 }
