@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-04-30 12:08:49',
+		'creation': '2012-07-03 13:30:44',
 		'docstatus': 0,
-		'modified': '2012-05-04 09:53:08',
+		'modified': '2012-07-11 19:17:51',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -15,10 +15,10 @@
 		'_last_update': u'1322549701',
 		'allow_trash': 1,
 		'colour': u'White:FFF',
-		'description': u'Aggregate item and accessories to form a Sales Item. There is no inventory of the new item but of the sub-components.',
+		'description': u'Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the packed **Item**. \n\nThe package **Item** will have "Is Stock Item" as "No" and "Is Sales Item" as "Yes".\n\nFor Example: If you are selling Laptops and Backpacks separately and have a special price if the customer buys both, then the Laptop + Backpack will be a new Sales BOM Item.\n\nNote: BOM = Bill of Materials',
 		'doctype': 'DocType',
 		'document_type': u'Master',
-		'is_submittable': 1,
+		'is_submittable': 0,
 		'module': u'Stock',
 		'name': '__common__',
 		'section_style': u'Simple',
@@ -33,17 +33,20 @@
 		'name': '__common__',
 		'parent': u'Sales BOM',
 		'parentfield': u'fields',
-		'parenttype': u'DocType'
+		'parenttype': u'DocType',
+		'permlevel': 0
 	},
 
 	# These values are common for all DocPerm
 	{
+		'amend': 0,
 		'doctype': u'DocPerm',
 		'name': '__common__',
 		'parent': u'Sales BOM',
 		'parentfield': u'permissions',
 		'parenttype': u'DocType',
-		'read': 1
+		'read': 1,
+		'submit': 0
 	},
 
 	# DocType, Sales BOM
@@ -54,73 +57,61 @@
 
 	# DocPerm
 	{
-		'amend': 0,
 		'cancel': 0,
-		'create': 0,
+		'create': 1,
 		'doctype': u'DocPerm',
 		'permlevel': 1,
 		'role': u'Material Manager',
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'amend': 1,
-		'cancel': 1,
-		'create': 1,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Material Manager',
-		'submit': 1,
 		'write': 1
 	},
 
 	# DocPerm
 	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Material User',
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Material User',
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
 		'cancel': 1,
 		'create': 1,
 		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'role': u'Sales User',
-		'submit': 0,
+		'role': u'Material Manager',
 		'write': 1
 	},
 
 	# DocPerm
 	{
-		'amend': 0,
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Material User',
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Material User',
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'cancel': 1,
+		'create': 1,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Sales User',
+		'write': 1
+	},
+
+	# DocPerm
+	{
 		'cancel': 0,
 		'create': 0,
 		'doctype': u'DocPerm',
 		'permlevel': 1,
 		'role': u'Sales User',
-		'submit': 0,
 		'write': 0
 	},
 
@@ -129,167 +120,32 @@
 		'doctype': u'DocField',
 		'fieldname': u'basic_section',
 		'fieldtype': u'Section Break',
-		'label': u'Basic Section',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'col1',
-		'fieldtype': u'Column Break',
-		'permlevel': 0,
-		'width': u'50%'
+		'label': u'Sales BOM Item'
 	},
 
 	# DocField
 	{
 		'colour': u'White:FFF',
-		'description': u'Item code of the new aggregate item.',
+		'description': u'The Item that represents the Package. This Item must have "Is Stock Item" as "No" and "Is Sales Item" as "Yes"',
 		'doctype': u'DocField',
 		'fieldname': u'new_item_code',
-		'fieldtype': u'Data',
-		'label': u'New Item Code',
+		'fieldtype': u'Link',
+		'label': u'Parent Item',
 		'no_copy': 1,
 		'oldfieldname': u'new_item_code',
 		'oldfieldtype': u'Data',
+		'options': u'Item',
 		'reqd': 1
 	},
 
 	# DocField
 	{
 		'colour': u'White:FFF',
-		'doctype': u'DocField',
-		'fieldname': u'new_item_name',
-		'fieldtype': u'Data',
-		'label': u'New Item Name',
-		'oldfieldname': u'new_item_name',
-		'oldfieldtype': u'Data',
-		'permlevel': 0,
-		'reqd': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'new_item_brand',
-		'fieldtype': u'Data',
-		'label': u'New Item Brand',
-		'oldfieldname': u'new_item_brand',
-		'oldfieldtype': u'Data',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'description',
-		'fieldtype': u'Text',
-		'label': u'New Description',
-		'oldfieldname': u'description',
-		'oldfieldtype': u'Text',
-		'permlevel': 0,
-		'reqd': 1,
-		'width': u'300px'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'col2',
-		'fieldtype': u'Column Break',
-		'permlevel': 0,
-		'width': u'50%'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'item_group',
-		'fieldtype': u'Link',
-		'label': u'Item Group',
-		'oldfieldname': u'item_group',
-		'oldfieldtype': u'Link',
-		'options': u'Item Group',
-		'permlevel': 0,
-		'reqd': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'stock_uom',
-		'fieldtype': u'Link',
-		'label': u'Stock UOM',
-		'oldfieldname': u'stock_uom',
-		'oldfieldtype': u'Link',
-		'options': u'UOM',
-		'permlevel': 0,
-		'reqd': 1
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'doctype': u'DocField',
-		'fieldname': u'price_list',
-		'fieldtype': u'Select',
-		'label': u'Price List',
-		'oldfieldname': u'price_list',
-		'oldfieldtype': u'Select',
-		'options': u'link:Price List',
-		'permlevel': 0,
-		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'doctype': u'DocField',
-		'fieldname': u'currency',
-		'fieldtype': u'Select',
-		'label': u'Currency',
-		'oldfieldname': u'currency',
-		'oldfieldtype': u'Select',
-		'options': u'link:Currency',
-		'permlevel': 0,
-		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		'depends_on': u'eval:doc.amended_from',
-		'description': u'The date at which current entry is corrected in the system.',
-		'doctype': u'DocField',
-		'fieldname': u'amendment_date',
-		'fieldtype': u'Date',
-		'label': u'Amendment Date',
-		'no_copy': 1,
-		'permlevel': 1,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'amended_from',
-		'fieldtype': u'Link',
-		'label': u'Amended From',
-		'no_copy': 1,
-		'options': u'Sales BOM',
-		'permlevel': 1,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'description': u'List items that form a package. One of the items has to be a "main item".',
+		'description': u'List items that form the package.',
 		'doctype': u'DocField',
 		'fieldname': u'item_section',
 		'fieldtype': u'Section Break',
-		'label': u'Items',
-		'permlevel': 0
+		'label': u'Package Items'
 	},
 
 	# DocField
@@ -301,30 +157,6 @@
 		'oldfieldname': u'sales_bom_items',
 		'oldfieldtype': u'Table',
 		'options': u'Sales BOM Item',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'description': u'Add a few items and find if there are any Sales BOM created with the same combination to help you identify duplication.',
-		'doctype': u'DocField',
-		'fieldname': u'find_sales_bom',
-		'fieldtype': u'Button',
-		'label': u'Find Sales BOM',
-		'oldfieldtype': u'Button',
-		'permlevel': 0,
-		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'trash_reason',
-		'fieldtype': u'Small Text',
-		'label': u'Trash Reason',
-		'oldfieldname': u'trash_reason',
-		'oldfieldtype': u'Small Text',
-		'permlevel': 1
+		'reqd': 1
 	}
 ]

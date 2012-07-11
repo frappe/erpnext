@@ -1229,7 +1229,7 @@ d.set_search=function(dt){if(d.style!='Search'){d.rows['Result'].innerHTML='';d.
 d.style='Search';if(d.input){d.input=null;sel_type=null;}
 d.sel_type=get_label_doctype(dt);d.set_title('Quick Search for '+dt);}
 $(inp).keydown(function(e){if(e.which==13){if(!btn.disabled)btn.onclick();}})
-d.set_query_description=function(txt){if(!txt)txt=d.input&&d.input.query_description||null;if(txt){d.rows['Help'].innerHTML='<div class="help-box" style="margin-top:0px">'+txt+'</div>';}else{d.rows['Help'].innerHTML=''}}
+d.set_query_description=function(txt){txt=d.input&&d.input.query_description||txt;if(txt){d.rows['Help'].innerHTML='<div class="help-box" style="margin-top:0px">'+txt+'</div>';}else{d.rows['Help'].innerHTML=''}}
 d.onshow=function(){if(d.set_doctype!=d.sel_type){d.rows['Result'].innerHTML='';d.values_len=0;}
 inp.value='';if(d.input&&d.input.txt.value){inp.value=d.input.txt.value;}
 try{inp.focus();}catch(e){}

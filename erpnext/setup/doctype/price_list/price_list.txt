@@ -5,7 +5,7 @@
 	{
 		'creation': '2012-07-03 13:30:55',
 		'docstatus': 0,
-		'modified': '2012-07-11 17:06:32',
+		'modified': '2012-07-11 17:35:10',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -20,6 +20,7 @@
 		'allow_trash': 1,
 		'autoname': u'field:price_list_name',
 		'colour': u'White:FFF',
+		'description': u'Maintain multiple selling rates for the same **Item** using **Price Lists**. You can upload / edit multiple prices by downloading and uploading the template.',
 		'doctype': 'DocType',
 		'document_type': u'Master',
 		'max_attachments': 1,

@@ -40,8 +40,7 @@ class DocType:
 		"""download 3 column template with all Items"""
 		default_currency = webnotes.conn.get_default('currency')
 		item_list = webnotes.conn.sql("""select name from tabItem where 
-			ifnull(is_stock_item,'')='Yes' and (ifnull(is_sales_item,'')='Yes'
-				or ifnull(is_service_item,'')='Yes')""")
+			(ifnull(is_sales_item,'')='Yes' or ifnull(is_service_item,'')='Yes')""")
 		data = [self.get_price(i[0], default_currency) for i in item_list]
 		return [['Item', 'Rate', 'Currency']] + data
 	
