@@ -251,7 +251,7 @@ Total Available Qty: %s
 	
 		# no need to check for uniqueness, as name is unique
 		
-	def get_html(self):
+	def prepare_template_args(self):
 		import markdown2
 		self.doc.web_description_html = markdown2.markdown(self.doc.description or '',
 										extras=["wiki-tables"])

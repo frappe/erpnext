@@ -55,12 +55,6 @@ def get_html(page_name):
 			'comments': """error: %s""" % traceback,
 			'template': '404.html',
 		}
-		# 	'script': """(function() {
-		# 		var error = "ERROR: %s";
-		# 		console.log(error);
-		# 	})();""" % traceback.replace('"', '\\"').replace('\n', ' \\\n'),
-		# }
-				
 	else:
 		args = {
 			'comments': """page: %s""" % page_name,

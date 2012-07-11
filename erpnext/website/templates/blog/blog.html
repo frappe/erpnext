@@ -9,19 +9,17 @@
 				<div class="help">By {{ full_name }} on {{ updated }}</div>
 				<br>
 				{{ content_html }}
-				<hr><h3>Comments</h3>
-				<br>
+				<hr>
+				<h3>Comments</h3><br>
 				<div class="blog-comments">
-					{% for comment in comment_list %}
-					<div class="comment-row">
-						<div class="comment-title">
-							{{ comment.comment_by_fullname }} - {{ comment.comment_date }}:
-							{{ comment.comment_date_type }}
-						</div>
-						<p class="comment-content">{{ comment.comment }}</p>
-						<hr>
+					<div class="no-result help hide">
+						<p>Be the first one to comment</p>
+						<br />
 					</div>
-					{% endfor %}
+
+					{% include 'blog/comment.html' %}
+
+					<button class="btn add-comment">Add Comment</button>
 				</div>
 			</div>
 

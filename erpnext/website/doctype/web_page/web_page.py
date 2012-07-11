@@ -33,5 +33,5 @@ class DocType(website.web_page.Page):
 			from webnotes.session_cache import clear_cache
 			clear_cache('Guest')
 			
-	def get_html(self):
+	def prepare_template_args(self):
 		self.markdown_to_html(['head_section','main_section', 'side_section'])

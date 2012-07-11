@@ -34,7 +34,7 @@ class DocType(website.web_page.Page):
 		if not webnotes.utils.cint(self.doc.published):
 			self.delete_web_cache(self.doc.page_name)
 
-	def get_html(self):
+	def prepare_template_args(self):
 		import webnotes.utils
 		
 		# this is for double precaution. usually it wont reach this code if not published

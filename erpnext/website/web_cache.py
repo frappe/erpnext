@@ -15,7 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # used by web.py
-def load_from_web_cache(page_name, comments, template): #, script=None):
+def load_from_web_cache(page_name, comments, template):
 	"""
 		* search for page in cache
 		* if html exists, return
@@ -47,30 +47,13 @@ def load_from_web_cache(page_name, comments, template): #, script=None):
 	from webnotes.utils import cstr
 	html += """\n<!-- %s -->""" % cstr(comments)
 	
-	# show error in error console
-	# if script: html += """\n\n<script>\n%s\n</script>""" % cstr(script)
 	return html
 
 def load_into_web_cache(page_name, template, doc_type, doc_name):
 	"""build html and store it in web cache"""
 	import webnotes
-	outer_env_dict = get_outer_env()
-	
-	if page_name in ['404', 'blog', 'products', 'login-page']:
-		args = outer_env_dict
-		args.update({
-			'name': page_name,
-		})
-	else:
-		if page_name == 'index':
-			page_name, doc_type, doc_name = get_index_page()
 
-		from webnotes.model.code import get_obj
-		obj = get_obj(doc_type, doc_name)
-		if hasattr(obj, 'get_html'):
-			obj.get_html()
-		args = obj.doc.fields
-		args.update(outer_env_dict)
+	args = prepare_args(page_name, doc_type, doc_name)
 	
 	# decide template and update args
 	if doc_type == 'Web Page':
@@ -96,6 +79,26 @@ def load_into_web_cache(page_name, template, doc_type, doc_name):
 	webnotes.conn.commit()
 	
 	return html
+	
+def prepare_args(page_name, doc_type, doc_name, with_outer_env=1):
+	if page_name in ['404', 'blog', 'products', 'login-page']:
+		args = {
+			'name': page_name,
+		}
+	else:
+		if page_name == 'index':
+			page_name, doc_type, doc_name = get_index_page()
+
+		from webnotes.model.code import get_obj
+		obj = get_obj(doc_type, doc_name)
+		if hasattr(obj, 'prepare_template_args'):
+			obj.prepare_template_args()
+		args = obj.doc.fields
+
+	outer_env_dict = with_outer_env and get_outer_env() or {}
+	args.update(outer_env_dict)
+	
+	return args
 
 def build_html(args, template):
 	"""build html using jinja2 templates"""
