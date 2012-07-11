@@ -5,7 +5,7 @@
 	{
 		'creation': '2012-07-03 13:30:47',
 		'docstatus': 0,
-		'modified': '2012-07-11 14:04:33',
+		'modified': '2012-07-11 14:41:39',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -230,7 +230,7 @@
 	# DocField
 	{
 		'colour': u'White:FFF',
-		'description': u'Define Budget for this Cost Center',
+		'description': u'Define Budget for this Cost Center. To set budget action, see <a href="#!List/Company">Company Master</a>',
 		'doctype': u'DocField',
 		'fieldname': u'sb1',
 		'fieldtype': u'Section Break',
@@ -255,7 +255,7 @@
 	# DocField
 	{
 		'colour': u'White:FFF',
-		'description': u'Add rows to set budgets on Accounts. To set budget actions, see the company master.',
+		'description': u'Add rows to set annual budgets on Accounts.',
 		'doctype': u'DocField',
 		'fieldname': u'budget_details',
 		'fieldtype': u'Table',

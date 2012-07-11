@@ -86,9 +86,8 @@ cur_frm.cscript.hide_unhide_group_ledger = function(doc) {
 // -----------------------------------------
 cur_frm.cscript.convert_to_ledger = function(doc, cdt, cdn) {
   $c_obj(cur_frm.get_doclist(),'convert_group_to_ledger','',function(r,rt) {
-    if(r.message == 1) {
-      refresh_field('group_or_ledger');
-      cur_frm.cscript.hide_unhide_group_ledger(cur_frm.get_doc());
+    if(r.message == 1) {  
+	  cur_frm.refresh();
     }
   });
 }
@@ -98,9 +97,7 @@ cur_frm.cscript.convert_to_ledger = function(doc, cdt, cdn) {
 cur_frm.cscript.convert_to_group = function(doc, cdt, cdn) {
   $c_obj(cur_frm.get_doclist(),'convert_ledger_to_group','',function(r,rt) {
     if(r.message == 1) {
-      doc.group_or_ledger = 'Group';
-      refresh_field('group_or_ledger');
-      cur_frm.cscript.hide_unhide_group_ledger(cur_frm.get_doc());
+	  cur_frm.refresh();
     }
   });
 }

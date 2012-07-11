@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-03-27 14:36:19',
+		'creation': '2012-07-03 13:30:55',
 		'docstatus': 0,
-		'modified': '2012-03-27 14:36:19',
+		'modified': '2012-07-11 14:43:55',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -23,7 +23,7 @@
 		'section_style': u'Tabbed',
 		'server_code_error': u' ',
 		'show_in_menu': 0,
-		'version': 96
+		'version': 1
 	},
 
 	# These values are common for all DocField
@@ -85,11 +85,11 @@
 
 	# DocField
 	{
-		'description': u'Please Enter Company Name and Abbr and save the document. Once saved Accounting Settings will be populated automatically',
+		'colour': u'White:FFF',
 		'doctype': u'DocField',
 		'fieldname': u'details',
 		'fieldtype': u'Section Break',
-		'label': u'Details',
+		'label': u'Company Details',
 		'oldfieldtype': u'Section Break',
 		'permlevel': 0
 	},
@@ -106,6 +106,14 @@
 		'oldfieldtype': u'Data',
 		'permlevel': 0,
 		'reqd': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'cb0',
+		'fieldtype': u'Column Break',
+		'permlevel': 0
 	},
 
 	# DocField
@@ -253,6 +261,8 @@
 
 	# DocField
 	{
+		'colour': u'White:FFF',
+		'description': u'For reference only.',
 		'doctype': u'DocField',
 		'fieldname': u'company_info',
 		'fieldtype': u'Section Break',
