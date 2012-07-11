@@ -421,8 +421,7 @@ class DocType:
 				sender='notifications+email_digest@erpnext.com',
 				reply_to='support@erpnext.com',
 				subject=self.doc.frequency + ' Digest',
-				msg=email_body,
-				from_defs=1
+				msg=email_body
 			)
 		except Exception, e:
 			webnotes.msgprint('There was a problem in sending your email. Please contact support@erpnext.com')
