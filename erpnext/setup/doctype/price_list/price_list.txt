@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-05-15 12:15:02',
+		'creation': '2012-07-03 13:30:55',
 		'docstatus': 0,
-		'modified': '2012-06-22 10:51:23',
+		'modified': '2012-07-11 17:06:32',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -14,6 +14,9 @@
 	{
 		'_last_update': u'1303100817',
 		'allow_attach': 1,
+		'allow_copy': 1,
+		'allow_email': 1,
+		'allow_print': 1,
 		'allow_trash': 1,
 		'autoname': u'field:price_list_name',
 		'colour': u'White:FFF',
@@ -34,7 +37,8 @@
 		'name': '__common__',
 		'parent': u'Price List',
 		'parentfield': u'fields',
-		'parenttype': u'DocType'
+		'parenttype': u'DocType',
+		'permlevel': 0
 	},
 
 	# These values are common for all DocPerm
@@ -108,48 +112,12 @@
 	# DocField
 	{
 		'doctype': u'DocField',
-		'fieldname': u'trash_reason',
-		'fieldtype': u'Small Text',
-		'label': u'Trash Reason',
-		'oldfieldname': u'trash_reason',
-		'oldfieldtype': u'Small Text',
-		'permlevel': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
 		'fieldname': u'price_list_name',
 		'fieldtype': u'Data',
 		'label': u'Price List Name',
 		'oldfieldname': u'price_list_name',
 		'oldfieldtype': u'Data',
-		'permlevel': 0,
 		'reqd': 1
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'depends_on': u'eval:!doc.__islocal',
-		'doctype': u'DocField',
-		'fieldname': u'price_help',
-		'fieldtype': u'HTML',
-		'label': u'Price Help',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'depends_on': u'eval:!doc.__islocal',
-		'description': u'Click on this button to clear prices for this list in all items',
-		'doctype': u'DocField',
-		'fieldname': u'clear_prices',
-		'fieldtype': u'Button',
-		'label': u'Clear Prices',
-		'permlevel': 0,
-		'trigger': u'Client'
 	},
 
 	# DocField
@@ -158,21 +126,6 @@
 		'fieldname': u'file_list',
 		'fieldtype': u'Text',
 		'hidden': 1,
-		'label': u'File List',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'depends_on': u'eval:!doc.__islocal',
-		'description': u'Update prices from the attachment',
-		'doctype': u'DocField',
-		'fieldname': u'update_prices',
-		'fieldtype': u'Button',
-		'label': u'Update Prices',
-		'options': u'update_prices',
-		'permlevel': 0,
-		'trigger': u'Server'
+		'label': u'File List'
 	}
 ]

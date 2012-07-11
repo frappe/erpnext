@@ -34,9 +34,9 @@ cur_frm.cscript.set_breadcrumbs = function(barea) {
 }
 
 cur_frm.cscript.refresh = function(doc, cdt, cdn) {
-	cur_frm.toggle_fields('cost_center_name', doc.__islocal)
-
 	var intro_txt = '';
+	cur_frm.toggle_fields('cost_center_name', doc.__islocal);
+
 	if(!doc.__islocal && doc.group_or_ledger=='Group') {
 		intro_txt += '<p><b>Note:</b> This is Cost Center is a <i>Group</i>, \
 			Accounting Entries are not allowed against groups.</p>';

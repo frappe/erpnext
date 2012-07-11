@@ -30,11 +30,11 @@ cur_frm.cscript.set_breadcrumbs = function(barea) {
 // Refresh
 // -----------------------------------------
 cur_frm.cscript.refresh = function(doc, cdt, cdn) {
+	cur_frm.toggle_fields('account_name', doc.__islocal);
+	
 	// hide fields if group
 	cur_frm.toggle_fields(['account_type', 'master_type', 'master_name', 'freeze_account', 
 		'credit_days', 'credit_limit', 'tax_rate'], doc.group_or_ledger=='Ledger')	
-
-	cur_frm.toggle_fields('account_name', doc.__islocal)
 
 	// read-only for root accounts
   	root_acc = ['Application of Funds (Assets)','Expenses','Income','Source of Funds (Liabilities)'];
