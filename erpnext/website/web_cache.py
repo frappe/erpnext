@@ -81,14 +81,14 @@ def load_into_web_cache(page_name, template, doc_type, doc_name):
 	return html
 	
 def prepare_args(page_name, doc_type, doc_name, with_outer_env=1):
+	if page_name == 'index':
+		page_name, doc_type, doc_name = get_index_page()
+
 	if page_name in ['404', 'blog', 'products', 'login-page']:
 		args = {
 			'name': page_name,
 		}
 	else:
-		if page_name == 'index':
-			page_name, doc_type, doc_name = get_index_page()
-
 		from webnotes.model.code import get_obj
 		obj = get_obj(doc_type, doc_name)
 		if hasattr(obj, 'prepare_template_args'):
@@ -129,6 +129,8 @@ def get_index_page():
 	doc_type = 'Web Page'
 	doc_name = webnotes.conn.get_value('Website Settings', None, 'home_page')
 	page_name = webnotes.conn.get_value(doc_type, doc_name, 'page_name')
+	if not page_name:
+		page_name = 'login-page'
 	return page_name, doc_type, doc_name
 
 # cache management
