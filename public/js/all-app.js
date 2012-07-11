@@ -1220,14 +1220,14 @@ args.colnames=colnames.join(',');args.report_name=report_name?report_name:'';ope
  *	lib/js/legacy/webpage/search.js
  */
 search_fields={};function setlinkvalue(name){selector.input.set_input_value(name);selector.hide();}
-function makeselector(){var d=new Dialog(540,440,'Search');d.make_body([['Data','Beginning With','Tip: You can use wildcard "%"'],['Select','Search By'],['Button','Search'],['HTML','Help'],['HTML','Result']]);var inp=d.widgets['Beginning With'];var field_sel=d.widgets['Search By'];var btn=d.widgets['Search'];d.sel_type='';d.values_len=0;d.set=function(input,type,label){d.sel_type=type;d.input=input;if(d.style!='Link'){d.rows['Result'].innerHTML='';d.values_len=0;}
+function makeselector(){var d=new Dialog(540,440,'Search');d.make_body([['HTML','Help'],['Data','Beginning With','Tip: You can use wildcard "%"'],['Select','Search By'],['Button','Search'],['HTML','Result']]);var inp=d.widgets['Beginning With'];var field_sel=d.widgets['Search By'];var btn=d.widgets['Search'];d.sel_type='';d.values_len=0;d.set=function(input,type,label){d.sel_type=type;d.input=input;if(d.style!='Link'){d.rows['Result'].innerHTML='';d.values_len=0;}
 d.style='Link';d.set_query_description()
-if(!d.sel_type)d.sel_type='Value';d.set_title('Select a "'+d.sel_type+'" for field "'+label+'"');}
+if(!d.sel_type)d.sel_type='Value';d.set_title("Select");d.set_query_description('Select a "'+d.sel_type+'" for field "'+label+'"');}
 d.set_search=function(dt){if(d.style!='Search'){d.rows['Result'].innerHTML='';d.values_len=0;}
 d.style='Search';if(d.input){d.input=null;sel_type=null;}
 d.sel_type=get_label_doctype(dt);d.set_title('Quick Search for '+dt);}
 $(inp).keydown(function(e){if(e.which==13){if(!btn.disabled)btn.onclick();}})
-d.set_query_description=function(){if(d.input&&d.input.query_description){d.rows['Help'].innerHTML='<div class="help_box">'+d.input.query_description+'</div>';}else{d.rows['Help'].innerHTML=''}}
+d.set_query_description=function(txt){if(!txt)txt=d.input&&d.input.query_description||null;if(txt){d.rows['Help'].innerHTML='<div class="help-box" style="margin-top:0px">'+txt+'</div>';}else{d.rows['Help'].innerHTML=''}}
 d.onshow=function(){if(d.set_doctype!=d.sel_type){d.rows['Result'].innerHTML='';d.values_len=0;}
 inp.value='';if(d.input&&d.input.txt.value){inp.value=d.input.txt.value;}
 try{inp.focus();}catch(e){}
@@ -1743,7 +1743,7 @@ this.setup_print();}
 _f.Frm.prototype.setup_sidebar=function(){this.sidebar=new wn.widgets.form.sidebar.Sidebar(this);}
 _f.Frm.prototype.setup_footer=function(){var me=this;var f=this.page_layout.footer;f.save_area=$a(this.page_layout.footer,'div','',{display:'none',marginTop:'11px'});f.help_area=$a(this.page_layout.footer,'div');var b=$btn(f.save_area,'Save',function(){cur_frm.save('Save');},{marginLeft:'0px'},'green');f.show_save=function(){$ds(me.page_layout.footer.save_area);}
 f.hide_save=function(){$dh(me.page_layout.footer.save_area);}}
-_f.Frm.prototype.set_intro=function(txt){if(!this.intro_area){this.intro_area=$('<div class="form-intro-area">').insertBefore(this.page_layout.body.firstChild);}
+_f.Frm.prototype.set_intro=function(txt){if(!this.intro_area){this.intro_area=$('<div class="help-box form-intro-area">').insertBefore(this.page_layout.body.firstChild);}
 if(txt){this.intro_area.html(txt);}else{this.intro_area.remove();this.intro_area=null;}}
 _f.Frm.prototype.setup_fields_std=function(){var fl=wn.meta.docfield_list[this.doctype];fl.sort(function(a,b){return a.idx-b.idx});if(fl[0]&&fl[0].fieldtype!="Section Break"||get_url_arg('embed')){this.layout.addrow();if(fl[0].fieldtype!="Column Break"){var c=this.layout.addcell();$y(c.wrapper,{padding:'8px'});}}
 var sec;for(var i=0;i<fl.length;i++){var f=fl[i];if(f.fieldtype=='Section Break'&&fl[i+1]&&fl[i+1].fieldtype=='Section Break')
@@ -1851,6 +1851,8 @@ _f.Frm.prototype.show_comments=function(){if(!cur_frm.comments){cur_frm.comments
 cur_frm.comments.list.dt=cur_frm.doctype;cur_frm.comments.list.dn=cur_frm.docname;cur_frm.comments.show();cur_frm.comments.list.run();}
 _f.Frm.prototype.get_doc=function(){return locals[this.doctype][this.docname];}
 _f.Frm.prototype.get_doclist=function(){return make_doclist(this.doctype,this.docname);}
+_f.Frm.prototype.toggle_fields=function(fields,show){if(show){unhide_field(fields)}
+else{hide_field(fields)}}
 /*
  *	lib/js/legacy/widgets/form/form_fields.js
  */
@@ -1939,7 +1941,7 @@ var me=this;if(cell.cellIndex){var ft=hc.fieldtype;if(ft=='Link'&&cur_frm.doc.do
 $(document).bind('click',function(e){var me=this;var is_target_toolbar=function(){return $(e.target).parents('.grid_tbarlinks').length;}
 var is_target_input=function(){if(e.target.tagName.toLowerCase()=='option')return true;return $(e.target).parents().get().indexOf(_f.cur_grid_cell)!=-1;}
 if(_f.cur_grid_cell&&!is_target_input()&&!is_target_toolbar()){if(!(text_dialog&&text_dialog.display)&&!datepicker_active&&!(selector&&selector.display)){setTimeout('_f.cur_grid_cell.grid.cell_deselect()',500);return false;}}});_f.Grid.prototype.cell_deselect=function(){if(_f.cur_grid_cell){var c=_f.cur_grid_cell;c.grid.remove_template(c);c.div.className='grid_cell_div';if(c.is_odd)c.div.style.border='2px solid '+c.grid.alt_row_bg;else c.div.style.border='2px solid #FFF';_f.cur_grid_cell=null;}}
-_f.Grid.prototype.cell_select=function(cell,ri,ci){if(_f.cur_grid_cell==cell&&cell.hc)return;if(ri!=null&&ci!=null)
+_f.Grid.prototype.cell_select=function(cell,ri,ci){if(cell&&_f.cur_grid_cell==cell&&cell.hc)return;if(ri!=null&&ci!=null)
 cell=this.tab.rows[ri].cells[ci];var hc=this.head_row.cells[cell.cellIndex];if(!hc.template){this.make_template(hc);}
 hc.template.perm=this.field?this.field.perm:hc.perm;if(hc.fieldname&&hc.template.get_status()=='Write'){this.cell_deselect();cell.div.style.border='2px solid #88F';_f.cur_grid_cell=cell;this.add_template(cell);}}
 _f.Grid.prototype.add_template=function(cell){if(!cell.row.docname&&this.add_newrow){this.add_newrow();this.cell_select(cell);}else{var hc=this.head_row.cells[cell.cellIndex];cell.div.innerHTML='';cell.div.appendChild(hc.template.wrapper);hc.template.activate(cell.row.docname);hc.template.activated=1;cell.hc=hc;if(hc.template.input&&hc.template.input.set_width){hc.template.input.set_width($(cell).width());}}}
@@ -1995,7 +1997,7 @@ var r=this.append_row();r.cells[0].div.innerHTML='<b style="font-size: 18px;">*<
 _f.FormGrid.prototype.check_selected=function(){if(!_f.cur_grid_cell){show_alert('Select a cell first');return false;}
 if(_f.cur_grid_cell.grid!=this){show_alert('Select a cell first');return false;}
 return true;}
-_f.FormGrid.prototype.delete_row=function(dt,dn){if(dt&&dn){LocalDB.delete_record(dt,dn);this.refresh();}else{if(!this.check_selected())return;var r=_f.cur_grid_cell.row;if(r.is_newrow)return;var ci=_f.cur_grid_cell.cellIndex;var ri=_f.cur_grid_cell.row.rowIndex;LocalDB.delete_record(this.doctype,r.docname);this.refresh();if(ri<(this.tab.rows.length-2))
+_f.FormGrid.prototype.delete_row=function(dt,dn){if(dt&&dn){LocalDB.delete_record(dt,dn);this.refresh();}else{if(!this.check_selected())return;var r=_f.cur_grid_cell.row;if(r.is_newrow)return;var ci=_f.cur_grid_cell.cellIndex;var ri=_f.cur_grid_cell.row.rowIndex;LocalDB.delete_record(this.doctype,r.docname);this.refresh();if(ri<(this.tab.rows.length-1))
 this.cell_select(null,ri,ci);else _f.cur_grid_cell=null;}
 this.set_unsaved();}
 _f.FormGrid.prototype.move_row=function(up){if(!this.check_selected())return;var r=_f.cur_grid_cell.row;if(r.is_newrow)return;if(up&&r.rowIndex>0){var swap_row=this.tab.rows[r.rowIndex-1];}else if(!up){var len=this.tab.rows.length;if(this.tab.rows[len-1].is_newrow)
@@ -2134,10 +2136,10 @@ set_field_options=function(n,txt){var df=get_field(cur_frm.doctype,n,cur_frm.doc
 set_field_permlevel=function(n,level){var df=get_field(cur_frm.doctype,n,cur_frm.docname);if(df)df.permlevel=level;refresh_field(n);}
 hide_field=function(n){function _hide_field(n,hidden){var df=get_field(cur_frm.doctype,n,cur_frm.docname);if(df){df.hidden=hidden;refresh_field(n);}
 else{console.log("hide_field cannot find field "+n);}}
-if(cur_frm){if(n.substr)_hide_field(n,1);else{for(var i in n)_hide_field(n[i],1)}}}
+if(cur_frm){if(typeof n=='string')_hide_field(n,1);else{for(var i in n)_hide_field(n[i],1)}}}
 unhide_field=function(n){function _hide_field(n,hidden){var df=get_field(cur_frm.doctype,n,cur_frm.docname);if(df){df.hidden=hidden;refresh_field(n);}
 else{console.log("unhide_field cannot find field "+n);}}
-if(cur_frm){if(n.substr)_hide_field(n,0);else{for(var i in n)_hide_field(n[i],0)}}}
+if(cur_frm){if(typeof n=='string')_hide_field(n,0);else{for(var i in n)_hide_field(n[i],0)}}}
 get_field_obj=function(fn){return cur_frm.fields_dict[fn];}
 /*
  *	lib/js/legacy/widgets/form/form_comments.js

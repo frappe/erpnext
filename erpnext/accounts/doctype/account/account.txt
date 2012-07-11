@@ -5,7 +5,7 @@
 	{
 		'creation': '2012-07-03 13:30:50',
 		'docstatus': 0,
-		'modified': '2012-07-10 18:34:16',
+		'modified': '2012-07-11 09:21:01',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -296,6 +296,8 @@
 
 	# DocField
 	{
+		'colour': u'White:FFF',
+		'description': u'Setting Account Type helps in selecting this Account in transactions.',
 		'doctype': u'DocField',
 		'fieldname': u'account_type',
 		'fieldtype': u'Select',
@@ -312,7 +314,7 @@
 	# DocField
 	{
 		'colour': u'White:FFF',
-		'description': u'If Account Type is "Tax" then the default rate is required.',
+		'description': u'Rate at which this tax is applied',
 		'doctype': u'DocField',
 		'fieldname': u'tax_rate',
 		'fieldtype': u'Currency',
@@ -340,6 +342,7 @@
 
 	# DocField
 	{
+		'colour': u'White:FFF',
 		'doctype': u'DocField',
 		'fieldname': u'credit_days',
 		'fieldtype': u'Int',
@@ -366,13 +369,15 @@
 
 	# DocField
 	{
+		'colour': u'White:FFF',
+		'description': u'If this Account represents a Customer, Supplier or Employee, set it here.',
 		'doctype': u'DocField',
 		'fieldname': u'master_type',
 		'fieldtype': u'Select',
 		'label': u'Master Type',
 		'oldfieldname': u'master_type',
 		'oldfieldtype': u'Select',
-		'options': u'\nNA\nSupplier\nCustomer\nEmployee',
+		'options': u'\nSupplier\nCustomer\nEmployee',
 		'permlevel': 0
 	},
 
@@ -386,116 +391,5 @@
 		'oldfieldtype': u'Link',
 		'permlevel': 0,
 		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'tds',
-		'fieldtype': u'Section Break',
-		'label': u'TDS',
-		'oldfieldtype': u'Section Break',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'pan_number',
-		'fieldtype': u'Data',
-		'label': u'PAN Number',
-		'oldfieldname': u'pan_number',
-		'oldfieldtype': u'Data',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'default': u'No',
-		'doctype': u'DocField',
-		'fieldname': u'tds_applicable',
-		'fieldtype': u'Select',
-		'label': u'TDS Applicable',
-		'oldfieldname': u'tds_applicable',
-		'oldfieldtype': u'Select',
-		'options': u'\nYes\nNo',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'tds_details',
-		'fieldtype': u'Table',
-		'label': u'TDS Details',
-		'oldfieldname': u'tds_details',
-		'oldfieldtype': u'Table',
-		'options': u'TDS Detail',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'description': u"Don't delete this field at any cost",
-		'doctype': u'DocField',
-		'fieldname': u'old_parent',
-		'fieldtype': u'Link',
-		'hidden': 1,
-		'label': u'Old Parent',
-		'no_copy': 1,
-		'oldfieldname': u'old_parent',
-		'oldfieldtype': u'Data',
-		'options': u'Account',
-		'permlevel': 0,
-		'report_hide': 1
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'description': u"Don't delete this field at any cost",
-		'doctype': u'DocField',
-		'fieldname': u'lft',
-		'fieldtype': u'Int',
-		'hidden': 1,
-		'in_filter': 1,
-		'label': u'Lft',
-		'no_copy': 1,
-		'oldfieldname': u'lft',
-		'oldfieldtype': u'Int',
-		'permlevel': 3,
-		'print_hide': 1,
-		'report_hide': 1,
-		'search_index': 1
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'description': u"Don't delete this field at any cost",
-		'doctype': u'DocField',
-		'fieldname': u'rgt',
-		'fieldtype': u'Int',
-		'hidden': 1,
-		'in_filter': 1,
-		'label': u'Rgt',
-		'no_copy': 1,
-		'oldfieldname': u'rgt',
-		'oldfieldtype': u'Int',
-		'permlevel': 3,
-		'print_hide': 1,
-		'report_hide': 1,
-		'search_index': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'trash_reason',
-		'fieldtype': u'Small Text',
-		'label': u'Trash Reason',
-		'oldfieldname': u'trash_reason',
-		'oldfieldtype': u'Small Text',
-		'permlevel': 1
 	}
 ]
