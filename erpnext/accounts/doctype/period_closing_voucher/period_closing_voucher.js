@@ -20,17 +20,6 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 	if (!doc.transaction_date) doc.transaction_date = dateutil.obj_to_str(new Date());
 }
 
-cur_frm.cscript.refresh = function(doc, cdt, cdn) {
-	hide_field('repost_account_balances');
-	hide_field('next_fiscal_year');
-	hide_field('repost');
-
-	if (doc.docstatus == 1) { 
-		unhide_field('repost_account_balances');
-		unhide_field('next_fiscal_year');
-		unhide_field('repost');
-	}
-}
 
 // ***************** Get Account Head *****************
 cur_frm.fields_dict['closing_account_head'].get_query = function(doc, cdt, cdn) {
