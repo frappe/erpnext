@@ -75,6 +75,7 @@ def load_into_web_cache(page_name, template, doc_type, doc_name):
 	
 	# save html in web cache
 	webnotes.conn.begin()
+	clear_web_cache(doc_type, doc_name, page_name)
 	webnotes.conn.set_value('Web Cache', page_name, 'html', html)
 	webnotes.conn.commit()
 	
