@@ -14,6 +14,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+page_exception_list = ['404', 'blog', 'products', 'login-page']
+
 # used by web.py
 def load_from_web_cache(page_name, comments, template):
 	"""
@@ -23,17 +25,13 @@ def load_from_web_cache(page_name, comments, template):
 	"""
 	import webnotes
 	import conf
-	
-	if page_name == 'index':
-		page_name = get_index_page()[0]
 
 	res = webnotes.conn.sql("""\
 		select html, doc_type, doc_name from `tabWeb Cache`
 		where name = %s""", page_name)
 	
 	# if page doesn't exist, raise exception
-	page_exception_list = ['404', 'index', 'blog', 'products', 'login-page']
-	if not res and page_name not in page_exception_list:
+	if not res and page_name not in page_exception_list + ['index']:
 		raise Exception, "Page %s not found" % page_name
 	
 	html, doc_type, doc_name = res and res[0] or (None, None, None)
@@ -75,7 +73,8 @@ def load_into_web_cache(page_name, template, doc_type, doc_name):
 	
 	# save html in web cache
 	webnotes.conn.begin()
-	clear_web_cache(doc_type, doc_name, page_name)
+	if page_name in page_exception_list + ['index']:
+		clear_web_cache(doc_type, doc_name, page_name)
 	webnotes.conn.set_value('Web Cache', page_name, 'html', html)
 	webnotes.conn.commit()
 	
@@ -85,7 +84,7 @@ def prepare_args(page_name, doc_type, doc_name, with_outer_env=1):
 	if page_name == 'index':
 		page_name, doc_type, doc_name = get_index_page()
 
-	if page_name in ['404', 'blog', 'products', 'login-page']:
+	if page_name in page_exception_list:
 		args = {
 			'name': page_name,
 		}
@@ -143,7 +142,7 @@ def clear_web_cache(doc_type, doc_name, page_name):
 		* if a record like (some other type, name) exists, raise exception that the page name is not unique
 	"""
 	import webnotes
-	res = webnotes.conn.get_value('Web Cache', page_name, 'doc_type')
+	res = webnotes.conn.get_value('Web Cache', page_name, ['doc_type', 'name'])
 	if not res:
 		import webnotes.model.doc
 		d = webnotes.model.doc.Document('Web Cache')
@@ -152,11 +151,11 @@ def clear_web_cache(doc_type, doc_name, page_name):
 		d.doc_name = doc_name
 		d.html = None
 		d.save()
-	elif res == doc_type:
+	elif not doc_type or res[0] == doc_type:
 		webnotes.conn.set_value('Web Cache', page_name, 'html', None)
 	else:
 		webnotes.msgprint("""Page with name "%s" already exists as a %s.
-			Please save it with another name.""" % (page_name, res), raise_exception=1)
+			Please save it with another name.""" % (page_name, res[0]), raise_exception=1)
 		
 def clear_all_web_cache():
 	import webnotes
@@ -174,6 +173,29 @@ def delete_web_cache(page_name):
 		delete from `tabWeb Cache`
 		where name=%s""", page_name)
 		
-def build_web_cache():
-	"""build web cache so that pages can load faster"""
-	pass
+def rebuild_web_cache():
+	"""build web cache entries"""
+	import webnotes
+	from webnotes.model.doclist import DocList
+	save_list = [
+		{
+			'doctype': 'Web Page',
+			'query': """select name from `tabWeb Page` where docstatus=0"""
+		},
+		{
+			'doctype': 'Blog',
+			'query': """\
+				select name from `tabBlog`
+				where docstatus = 0 and ifnull(published, 0) = 1"""
+		},
+		{
+			'doctype': 'Item',
+			'query': """\
+				select name from `tabItem`
+				where docstatus = 0 and ifnull(show_in_website, 0) = 1"""
+		}
+	]
+	
+	for s in save_list:
+		for p in webnotes.conn.sql(s['query'], as_dict=1):
+			DocList(s['doctype'], p['name']).save()
