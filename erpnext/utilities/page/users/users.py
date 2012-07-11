@@ -167,7 +167,7 @@ def send_welcome_mail(email, args):
 			'Website Settings', 'subdomain') or ""
 	})
 	if not args.get('last_name'): args['last_name'] = ''
-	sendmail_md(pr.email, subject="Welcome to ERPNext", msg=welcome_txt % args, from_defs=1)
+	sendmail_md(pr.email, subject="Welcome to ERPNext", msg=welcome_txt % args)
 
 #
 # delete user

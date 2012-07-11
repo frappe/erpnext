@@ -61,8 +61,7 @@ class DocType:
 			if cstr(d.uom) in check_list:
 				msgprint("UOM %s has been entered more than once in Conversion Factor Details." % cstr(d.uom))
 				raise Exception
-
-			if not cstr(d.uom) in check_list:
+			else:
 				check_list.append(cstr(d.uom))
 
 			if cstr(d.uom) == cstr(self.doc.stock_uom):

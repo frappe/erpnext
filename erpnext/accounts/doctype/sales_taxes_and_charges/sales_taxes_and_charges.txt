@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-03-27 14:35:48',
+		'creation': '2012-05-15 12:14:34',
 		'docstatus': 0,
-		'modified': '2012-03-27 14:35:48',
+		'modified': '2012-07-04 13:27:05',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -23,7 +23,7 @@
 		'section_style': u'Tray',
 		'server_code_error': u' ',
 		'show_in_menu': 0,
-		'version': 20
+		'version': 1
 	},
 
 	# These values are common for all DocField
@@ -213,11 +213,12 @@
 		'doctype': u'DocField',
 		'fieldname': u'included_in_print_rate',
 		'fieldtype': u'Check',
-		'label': u'Included in Print Rate',
+		'label': u'Is this Tax included in Basic Rate?',
 		'no_column': 0,
 		'no_copy': 1,
 		'permlevel': 0,
 		'print_hide': 1,
-		'report_hide': 1
+		'report_hide': 1,
+		'width': u'150px'
 	}
 ]

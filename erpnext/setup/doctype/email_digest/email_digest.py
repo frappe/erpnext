@@ -255,7 +255,10 @@ class DocType:
 				args['sum_if_reqd'] = "IFNULL(SUM(IFNULL(%(sum_col)s, 0)), 0) AS '%(sum_col)s'," % args
 			
 			if args['type'] == 'new_transactions':
-				args['company_condition'] = ''
+				# tabFeed doesn't have company column
+				# using this arg to set condition of feed_type as null
+				# so that comments, logins and assignments are not counted
+				args['company_condition'] = "feed_type IS NULL AND"
 			else:
 				args['company_condition'] = "company = '%(company)s' AND" % args
 				
@@ -418,8 +421,7 @@ class DocType:
 				sender='notifications+email_digest@erpnext.com',
 				reply_to='support@erpnext.com',
 				subject=self.doc.frequency + ' Digest',
-				msg=email_body,
-				from_defs=1
+				msg=email_body
 			)
 		except Exception, e:
 			webnotes.msgprint('There was a problem in sending your email. Please contact support@erpnext.com')

@@ -54,24 +54,13 @@ class DocType:
 				webnotes.msgprint(err_msg)
 				raise e
 			
+			# exceptions are handled in smtp_connect
+			sess = out_email.smtp_connect()
+			
 			try:
-				sess = out_email.smtp_connect()
-				
-				try:
-					sess.quit()
-				except:
-					pass
-			except _socket.error, e:
-				# Invalid mail server -- due to refusing connection
-				webnotes.msgprint('Invalid Outgoing Mail Server or Port. Please rectify and try again.')
-				raise e
-			except smtplib.SMTPAuthenticationError, e:
-				webnotes.msgprint('Invalid Login Id or Mail Password. Please rectify and try again.')
-				raise e
-			except smtplib.SMTPException, e:
-				webnotes.msgprint('There is something wrong with your Outgoing Mail Settings. \
-				Please contact us at support@erpnext.com')
-				raise e
+				sess.quit()
+			except:
+				pass
 		
 
 	def validate_incoming(self):

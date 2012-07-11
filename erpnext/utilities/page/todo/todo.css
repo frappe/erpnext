@@ -48,3 +48,8 @@
 .todo-content {
 	padding-right: 15px;
 }
+
+.layout-main {
+	background-color: #FFFDC9;
+	min-height: 300px;
+}

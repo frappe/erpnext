@@ -49,6 +49,13 @@ class DocType:
 		}
 		return ret
 		
+	def validate_mandatory(self):
+		if not self.doc.group_or_ledger:
+			msgprint("Please select Group or Ledger value", raise_exception=1)
+			
+		if self.doc.cost_center_name != 'Root' and not self.doc.parent_cost_center:
+			msgprint("Please enter parent cost center", raise_exception=1)
+		
 	#-------------------------------------------------------------------------
 	def convert_group_to_ledger(self):
 		if self.check_if_child_exists():
@@ -78,6 +85,16 @@ class DocType:
 	def check_if_child_exists(self):
 		return sql("select name from `tabCost Center` where parent_cost_center = %s and docstatus != 2", self.doc.name)
 
+
+	def validate_budget_details(self):
+		check_acc_list = []
+		for d in getlist(self.doclist, 'budget_details'):
+			if [d.account, d.fiscal_year] in check_acc_list:
+				msgprint("Account " + cstr(d.account) + "has been entered more than once for fiscal year " + cstr(d.fiscal_year), raise_exception=1)
+			else: 
+				check_acc_list.append([d.account, d.fiscal_year])
+		
+
 	#-------------------------------------------------------------------------
 	def validate(self):
 		"""
@@ -86,12 +103,8 @@ class DocType:
 		if (self.doc.__islocal or not self.doc.name) and sql("select name from `tabCost Center` where cost_center_name = %s and company_name=%s", (self.doc.cost_center_name, self.doc.company_name)):
 			msgprint("Cost Center Name already exists, please rename", raise_exception=1)
 			
-		check_acc_list = []
-		for d in getlist(self.doclist, 'budget_details'):
-			if [d.account, d.fiscal_year] in check_acc_list:
-				msgprint("Account " + cstr(d.account) + "has been entered more than once for fiscal year " + cstr(d.fiscal_year), raise_exception=1)
-			else: 
-				check_acc_list.append([d.account, d.fiscal_year])
+		self.validate_mandatory()
+		self.validate_budget_details()
 			
 	#-------------------------------------------------------------------------
 	def update_nsm_model(self):

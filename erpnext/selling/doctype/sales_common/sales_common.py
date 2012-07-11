@@ -163,6 +163,15 @@ class DocType(TransactionBase):
 		if ret['warehouse'] or ret['reserved_warehouse']:
 			av_qty = self.get_available_qty({'item_code': args['item_code'], 'warehouse': ret['warehouse'] or ret['reserved_warehouse']})
 			ret.update(av_qty)
+			
+		# get customer code for given item from Item Customer Detail
+		customer_item_code_row = webnotes.conn.sql("""\
+			select ref_code from `tabItem Customer Detail`
+			where parent = %s and customer_name = %s""",
+			(args['item_code'], obj.doc.customer))
+		if customer_item_code_row and customer_item_code_row[0][0]:
+			ret['customer_item_code'] = customer_item_code_row[0][0]
+		
 		return ret
 
 
@@ -411,7 +420,8 @@ class DocType(TransactionBase):
 							'reserved_qty': (flt(p.qty)/qty)*(reserved_qty),
 							'uom': p.uom,
 							'batch_no': p.batch_no,
-							'serial_no': p.serial_no
+							'serial_no': p.serial_no,
+							'name': d.name
 						})
 			else:
 				il.append({
@@ -422,7 +432,8 @@ class DocType(TransactionBase):
 					'reserved_qty': reserved_qty,
 					'uom': d.stock_uom,
 					'batch_no': d.batch_no,
-					'serial_no': d.serial_no
+					'serial_no': d.serial_no,
+					'name': d.name
 				})
 		return il
 
@@ -532,7 +543,9 @@ class DocType(TransactionBase):
 		# delete from db
 		webnotes.conn.sql("""\
 			delete from `tabDelivery Note Packing Item`
-			where name in ("%s")""" % '", "'.join(delete_list))
+			where name in (%s)"""
+			% (", ".join(["%s"] * len(delete_list))),
+			tuple(delete_list))
 
 	# Get total in words
 	# ==================================================================	
