@@ -1920,7 +1920,7 @@ div.fix_ff_cursor { overflow: auto; }
 div.comment { color: #444; }
 
 .small {
-	font-size: 11px;
+	font-size: 12px;
 }
 
 .help {
@@ -2145,23 +2145,13 @@ div.notice {
 }
 
 .help_box, .help-box {
-	background-color:#FFC;
-	font-size: 13px;
-	color: #864;
-	padding: 7px;
+	background-color: #ffe;
+	color: #874;
+	padding: 9px 9px 9px 9px;
+	border: 1px dashed #fc7;
 	margin: 11px 0px;
-	border: 1px solid #EEB;
 }
 
-.help_box_big {
-	background-color:#FFC;
-	color: #864;
-	padding: 7px;
-	margin: 7px 0px;
-	border: 1px solid #EEB;
-	text-align: center;
-	font-size: 14px;
-}
 
 /*
  *	lib/css/legacy/dialog.css
