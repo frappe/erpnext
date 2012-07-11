@@ -123,6 +123,7 @@ class DocType:
 			ac.fields[d] = arg[d]
 		ac.old_parent = ''
 		ac_obj = get_obj(doc=ac)
+		ac_obj.doc.freeze_account='No'
 		ac_obj.validate()
 		ac_obj.doc.save(1)
 		ac_obj.on_update()

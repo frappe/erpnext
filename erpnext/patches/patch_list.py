@@ -487,4 +487,9 @@ patch_list = [
 		'patch_file': 'deprecate_import_data_control',
 		'description': "deprecate doctype - Import Data Control and page - Import Data"
 	},
+	{
+		'patch_module': 'patches.july_2012',
+		'patch_file': 'default_freeze_account',
+		'description': "set default freeze_account as 'No' where NULL"
+	},
 ]

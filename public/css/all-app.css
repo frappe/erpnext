@@ -2259,6 +2259,14 @@ div.std-footer-item {
 
 div.fetching { color: #888; text-align:right; }
 
+.msgprint {
+	min-height: 60px; 
+	max-height: 500px;
+	padding: 9px;
+	color: #333;
+	overflow: auto;
+}
+
 div.notice {
 	postion: absolute;
 	background-color: #000;
@@ -3275,6 +3283,8 @@ div.appframe-toolbar {
 	border-top: 1px solid #f8f8f8;
 	border-bottom: 1px solid #ccc;
 }
+
+
 
 /*
  *	lib/css/ui/fonts.css
