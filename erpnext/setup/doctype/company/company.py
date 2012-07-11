@@ -167,6 +167,7 @@ class DocType:
 		ac.old_parent = ''
 		ac_obj = get_obj(doc=ac)
 		ac_obj.doc.freeze_account='No'
+		ac_obj.doc.master_type = ''
 		ac_obj.validate()
 		ac_obj.doc.save(1)
 		ac_obj.on_update()

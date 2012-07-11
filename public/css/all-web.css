@@ -2105,9 +2105,25 @@ div.std-footer-item {
 	position: fixed;
 	bottom: 5px;
 	left: 5px;
-	height: 40px;
-	width: 40px;
+	height: 30px;
+	width: 30px;
 	background: url('../images/erpnext-fade.png') no-repeat top left;
+}
+
+.markdown p {
+	font-size: 13px;
+}
+
+.markdown h1 {
+	margin-bottom: 9px;
+}
+
+.markdown h2 {
+	margin-bottom: 7px;
+}
+
+.markdown h3, .markdown h4 {
+	margin-bottom: 5px;
 }
 
 /*

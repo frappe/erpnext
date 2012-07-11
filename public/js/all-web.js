@@ -89,7 +89,7 @@ wn.meta.docfield_list[df.parent].push(df);}});
  *	lib/js/wn/misc/tools.js
  */
 wn.markdown=function(txt){if(!wn.md2html){wn.require('js/lib/showdown.js');wn.md2html=new Showdown.converter();}
-return wn.md2html.makeHtml(txt);}
+return'<div class="markdown">'+wn.md2html.makeHtml(txt)+'</div>';}
 /*
  *	lib/js/wn/misc/user.js
  */

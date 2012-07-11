@@ -5,7 +5,7 @@
 	{
 		'creation': '2012-07-03 13:30:50',
 		'docstatus': 0,
-		'modified': '2012-07-11 09:21:01',
+		'modified': '2012-07-11 13:58:44',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -17,6 +17,7 @@
 		'allow_trash': 1,
 		'colour': u'White:FFF',
 		'default_print_format': u'Standard',
+		'description': u'An **Account** is heading under which financial and business transactions are carried on. For example, \u201cTravel Expense\u201d is an account, \u201cCustomer Zoe\u201d, \u201cSupplier Mae\u201d are accounts. \n\n**Note:** ERPNext creates accounts for Customers and Suppliers automatically.\n\n### Groups and Ledgers\n\nThere are two main kinds of Accounts in ERPNext - Group and Ledger. Groups can have sub-groups and ledgers within them, whereas ledgers are the leaf nodes of your chart and cannot be further classified.\n\nAccounting Transactions can only be made against Ledger Accounts (not Groups)\n',
 		'doctype': 'DocType',
 		'document_type': u'Master',
 		'in_create': 1,

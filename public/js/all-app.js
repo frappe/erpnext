@@ -202,7 +202,7 @@ wn.meta.docfield_list[df.parent].push(df);}});
  *	lib/js/wn/misc/tools.js
  */
 wn.markdown=function(txt){if(!wn.md2html){wn.require('js/lib/showdown.js');wn.md2html=new Showdown.converter();}
-return wn.md2html.makeHtml(txt);}
+return'<div class="markdown">'+wn.md2html.makeHtml(txt)+'</div>';}
 /*
  *	lib/js/wn/misc/user.js
  */
@@ -1706,7 +1706,7 @@ if(docstatus==0&&p[SUBMIT]&&(!cur_frm.doc.__islocal))
 this.appframe.add_button('Submit',function(){cur_frm.savesubmit();},'icon-lock');if(docstatus==1&&p[SUBMIT]){this.appframe.add_button('Update',function(){cur_frm.saveupdate();},'');if(!cur_frm.doc.__unsaved)this.appframe.buttons['Update'].toggle(false);}
 if(docstatus==1&&p[CANCEL])
 this.appframe.add_button('Cancel',function(){cur_frm.savecancel()},'icon-remove');if(docstatus==2&&p[AMEND])
-this.appframe.add_button('Amend',function(){cur_frm.amend_doc()},'icon-pencil');if(cur_frm.meta.description){this.appframe.add_help_button(wn.markdown('## '+cur_frm.doctype+'\n<br>\n'
+this.appframe.add_button('Amend',function(){cur_frm.amend_doc()},'icon-pencil');if(cur_frm.meta.description){this.appframe.add_help_button(wn.markdown('## '+cur_frm.doctype+'\n\n'
 +cur_frm.meta.description));}},show:function(){},hide:function(){},hide_close:function(){this.$w.find('.close').toggle(false);}})
 /*
  *	lib/js/legacy/widgets/form/form.js
@@ -1858,7 +1858,7 @@ else{hide_field(fields)}}
  *	lib/js/legacy/widgets/form/form_fields.js
  */
 _f.ColumnBreak=function(){this.set_input=function(){};}
-_f.ColumnBreak.prototype.make_body=function(){this.cell=this.frm.layout.addcell(this.df.width);$y(this.cell.wrapper,{padding:'8px'});_f.cur_col_break_width=this.df.width;var fn=this.df.fieldname?this.df.fieldname:this.df.label;if(this.df&&this.df.label){this.label=$a(this.cell.wrapper,'div','','',this.df.label);}}
+_f.ColumnBreak.prototype.make_body=function(){this.cell=this.frm.layout.addcell(this.df.width);$y(this.cell.wrapper,{padding:'8px'});_f.cur_col_break_width=this.df.width;var fn=this.df.fieldname?this.df.fieldname:this.df.label;if(this.df&&this.df.label){this.label=$a(this.cell.wrapper,'h4','','',this.df.label);}}
 _f.ColumnBreak.prototype.refresh=function(layout){var hidden=0;if((!this.perm[this.df.permlevel])||(!this.perm[this.df.permlevel][READ])||this.df.hidden){hidden=1;}
 if(this.set_hidden!=hidden){if(hidden)
 this.cell.hide();else

@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-03-27 14:35:41',
+		'creation': '2012-07-03 13:30:47',
 		'docstatus': 0,
-		'modified': '2012-03-27 14:35:41',
+		'modified': '2012-07-11 14:32:16',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -21,7 +21,7 @@
 		'section_style': u'Tray',
 		'server_code_error': u' ',
 		'show_in_menu': 0,
-		'version': 6
+		'version': 1
 	},
 
 	# These values are common for all DocField
@@ -60,16 +60,5 @@
 		'oldfieldname': u'percentage_allocation',
 		'oldfieldtype': u'Currency',
 		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'aggregate_percentage',
-		'fieldtype': u'Currency',
-		'label': u'Aggregate Percentage',
-		'oldfieldname': u'aggregate_percentage',
-		'oldfieldtype': u'Currency',
-		'permlevel': 2
 	}
 ]

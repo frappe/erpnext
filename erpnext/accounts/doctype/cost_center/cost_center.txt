@@ -5,7 +5,7 @@
 	{
 		'creation': '2012-07-03 13:30:47',
 		'docstatus': 0,
-		'modified': '2012-07-10 18:06:51',
+		'modified': '2012-07-11 14:04:33',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -18,6 +18,7 @@
 		'autoname': u'field:cost_center_name',
 		'colour': u'White:FFF',
 		'default_print_format': u'Standard',
+		'description': u'**Chart of Accounts** is mainly for reporting information for governmental purposes and less for how business actually performs. \n\nMost businesses have multiple activities like different product lines, market segments, areas of business that share some common overheads but should ideally have their own structure to report whether they are profitable or not. For this purpose, there is an alternate structure, called the **Cost Centers**.\n\nA tree of **Cost Centers** to cab be designed to reflect the different units of an organization. Each Income / Expense entry is also tagged against a **Cost Center** and hence you can get Profit and Loss against a **Cost Center** too.\n\n### Budgeting\n\n**Cost Centers** can be used for budgeting purposes too. A budget can be set against each **Account** and the system will either stop, warn or ignore the budget based on the settings in the **Company** master.\n\nBudgets can also be distributed seasonally using **Budget Distribution**.',
 		'doctype': 'DocType',
 		'document_type': u'Master',
 		'in_create': 1,
