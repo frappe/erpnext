@@ -119,7 +119,7 @@ def get_outer_env():
 			where parent='Website Settings' and parentfield='footer_items'
 			order by idx asc""", as_dict=1),
 			
-		'brand': webnotes.conn.get_value('Website Settings', None, 'brand_html'),
+		'brand': webnotes.conn.get_value('Website Settings', None, 'brand_html') or 'ERPNext',
 		'copyright': webnotes.conn.get_value('Website Settings', None, 'copyright'),
 		'favicon': webnotes.conn.get_value('Website Settings', None, 'favicon')
 	}
