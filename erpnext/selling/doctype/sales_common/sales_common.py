@@ -385,7 +385,7 @@ class DocType(TransactionBase):
 		return ret
 
 
-	def get_item_list(self, obj, is_stopped):
+	def get_item_list(self, obj, is_stopped=0):
 		"""get item list"""
 		il = []
 		for d in getlist(obj.doclist,obj.fname):
@@ -394,7 +394,7 @@ class DocType(TransactionBase):
 			if is_stopped:
 				qty = flt(d.qty) > flt(d.delivered_qty) and flt(flt(d.qty) - flt(d.delivered_qty)) or 0
 				
-			if d.prevdoc_doctype == 'Sales Order':			
+			if d.prevdoc_doctype == 'Sales Order':
 				# used in delivery note to reduce reserved_qty 
 				# Eg.: if SO qty is 10 and there is tolerance of 20%, then it will allow DN of 12.
 				# But in this case reserved qty should only be reduced by 10 and not 12.
@@ -413,7 +413,7 @@ class DocType(TransactionBase):
 					if p.parent_detail_docname == d.name:
 						# the packing details table's qty is already multiplied with parent's qty
 						il.append({
-							'warehouse': d.warehouse,
+							'warehouse': p.warehouse,
 							'reserved_warehouse': reserved_wh,
 							'item_code': p.item_code,
 							'qty': flt(p.qty),
@@ -496,23 +496,21 @@ class DocType(TransactionBase):
 		pi.qty = flt(qty)
 		pi.actual_qty = bin and flt(bin['actual_qty']) or 0
 		pi.projected_qty = bin and flt(bin['projected_qty']) or 0
-		pi.warehouse = warehouse
 		pi.prevdoc_doctype = line.prevdoc_doctype
-		if packing_item_code == line.item_code:
-			pi.serial_no = cstr(line.serial_no)
+		if not pi.warehouse:
+			pi.warehouse = warehouse
+		if not pi.batch_no:
 			pi.batch_no = cstr(line.batch_no)
 		pi.idx = self.packing_list_idx
 		
-		# has to be saved, since this function is called on_update of delivery note
+		# saved, since this function is called on_update of delivery note
 		pi.save()
 		
 		self.packing_list_idx += 1
 
 
-	# ------------------
-	# make packing list from sales bom if exists or directly copy item with balance
-	# ------------------ 
 	def make_packing_list(self, obj, fname):
+		"""make packing list for sales bom item"""
 		self.packing_list_idx = 0
 		parent_items = []
 		for d in getlist(obj.doclist, fname):
@@ -520,10 +518,9 @@ class DocType(TransactionBase):
 			if self.has_sales_bom(d.item_code):
 				for i in self.get_sales_bom_items(d.item_code):
 					self.update_packing_list_item(obj, i['item_code'], flt(i['qty'])*flt(d.qty), warehouse, d)
-			else:
-				self.update_packing_list_item(obj, d.item_code, d.qty, warehouse, d)
-			if [d.item_code, d.name] not in parent_items:
-				parent_items.append([d.item_code, d.name])
+
+				if [d.item_code, d.name] not in parent_items:
+					parent_items.append([d.item_code, d.name])
 				
 		self.cleanup_packing_list(obj, parent_items)
 		
