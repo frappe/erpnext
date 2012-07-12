@@ -14,35 +14,20 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
- 
-
-cur_frm.cscript.onload = function(doc, cdt, cdn) {
-    
-  if(!doc.price_list) set_multiple(cdt,cdn,{price_list:sys_defaults.price_list_name});
-}
-
 cur_frm.cscript.refresh = function(doc, cdt, cdn) {
+	cur_frm.enable_fields('new_item_code', doc.__islocal);
 	if(!doc.__islocal) {
-		get_field(doc.doctype, 'new_item_code', doc.name).permlevel = 1;
+		cur_frm.add_custom_button("Check for Duplicates", function() {
+			cur_frm.call_server('check_duplicate', 1)			
+		}, 'icon-search')
 	}
 }
 
-/* Get Item Code */
-cur_frm.cscript.item_code = function(doc, dt, dn) {
-  var d = locals[dt][dn];
-  if (d.item_code){
-    get_server_fields('get_item_details', d.item_code, 'sales_bom_items', doc ,dt, dn, 1);
-  }
+cur_frm.fields_dict.new_item_code.get_query = function() {
+	return 'select name, description from tabItem where is_stock_item="No" and is_sales_item="Yes"\
+		and name not in (select name from `tabSales BOM`)\
+		and `%(key)s` like "%s"'
 }
-
-cur_frm.cscript.price_list = function(doc, cdt, cdn) {
-  $c_obj(make_doclist(cdt,cdn), 'get_rates', '', function(r,rt){refresh_field('sales_bom_items');});
-}
-
-cur_frm.cscript.currency = function(doc, cdt, cdn) {
-  $c_obj(make_doclist(cdt,cdn), 'get_rates', '', function(r,rt){refresh_field('sales_bom_items');});
-}
-
-cur_frm.cscript.find_sales_bom = function(doc, dt, dn) {
-  $c_obj(make_doclist(dt,dn), 'check_duplicate', 1, '');
-}
+cur_frm.fields_dict.new_item_code.query_description = 'Select Item where "Is Stock Item" is "No" \
+	and "Is Sales Item" is "Yes" and there is no other Sales BOM';
+	

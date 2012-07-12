@@ -2244,9 +2244,25 @@ div.std-footer-item {
 	position: fixed;
 	bottom: 5px;
 	left: 5px;
-	height: 40px;
-	width: 40px;
+	height: 30px;
+	width: 30px;
 	background: url('../images/erpnext-fade.png') no-repeat top left;
+}
+
+.markdown p {
+	font-size: 13px;
+}
+
+.markdown h1 {
+	margin-bottom: 9px;
+}
+
+.markdown h2 {
+	margin-bottom: 7px;
+}
+
+.markdown h3, .markdown h4 {
+	margin-bottom: 5px;
 }
 
 /*
@@ -2258,6 +2274,14 @@ div.std-footer-item {
 .btn-img { cursor: pointer; }
 
 div.fetching { color: #888; text-align:right; }
+
+.msgprint {
+	min-height: 60px; 
+	max-height: 500px;
+	padding: 9px;
+	color: #333;
+	overflow: auto;
+}
 
 div.notice {
 	postion: absolute;
@@ -3275,6 +3299,8 @@ div.appframe-toolbar {
 	border-top: 1px solid #f8f8f8;
 	border-bottom: 1px solid #ccc;
 }
+
+
 
 /*
  *	lib/css/ui/fonts.css

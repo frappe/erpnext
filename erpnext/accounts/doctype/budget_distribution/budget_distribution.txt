@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-03-27 14:35:41',
+		'creation': '2012-07-03 13:30:50',
 		'docstatus': 0,
-		'modified': '2012-03-27 14:35:41',
+		'modified': '2012-07-11 14:37:30',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -15,6 +15,7 @@
 		'allow_trash': 1,
 		'autoname': u'field:distribution_id',
 		'colour': u'White:FFF',
+		'description': u'**Budget Distribution** helps you distribute your budget across months if you have seasonality in your business.\n\nTo distribute a budget using this distribution, set this **Budget Distribution** in the **Cost Center**',
 		'doctype': 'DocType',
 		'module': u'Accounts',
 		'name': '__common__',
@@ -22,7 +23,7 @@
 		'section_style': u'Simple',
 		'server_code_error': u' ',
 		'show_in_menu': 0,
-		'version': 24
+		'version': 1
 	},
 
 	# These values are common for all DocField
@@ -108,13 +109,16 @@
 
 	# DocField
 	{
+		'colour': u'White:FFF',
+		'description': u'Name of the Budget Distribution',
 		'doctype': u'DocField',
 		'fieldname': u'distribution_id',
 		'fieldtype': u'Data',
-		'label': u'Distribution ID',
+		'label': u'Distribution Name',
 		'oldfieldname': u'distribution_id',
 		'oldfieldtype': u'Data',
-		'permlevel': 0
+		'permlevel': 0,
+		'reqd': 1
 	},
 
 	# DocField
