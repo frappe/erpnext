@@ -281,4 +281,4 @@ class DocType(TransactionBase):
 			</table></div>'''%(cstr(letter_head[0][0]),cstr(self.doc.employee), cstr(self.doc.employee_name), cstr(self.doc.month), cstr(self.doc.fiscal_year), cstr(self.doc.department), cstr(self.doc.branch), cstr(self.doc.designation), cstr(self.doc.grade), cstr(self.doc.bank_account_no), cstr(self.doc.bank_name), cstr(self.doc.arrear_amount), cstr(self.doc.payment_days), earn_table, ded_table, cstr(flt(self.doc.gross_pay)), cstr(flt(self.doc.total_deduction)), cstr(flt(self.doc.net_pay)), cstr(self.doc.total_in_words))
 			sendmail([receiver], subject=subj, msg = msg)
 		else:
-			msgprint("Company Email ID not found.")
+			msgprint("Company Email ID not found, hence mail not sent")

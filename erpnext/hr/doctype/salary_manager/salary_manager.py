@@ -24,7 +24,6 @@ from webnotes.model.doclist import getlist, copy_doclist
 from webnotes.model.code import get_obj, get_server_obj, run_server_obj, updatedb, check_syntax
 from webnotes import session, form, is_testing, msgprint, errprint
 
-set = webnotes.conn.set
 sql = webnotes.conn.sql
 get_value = webnotes.conn.get_value
 in_transaction = webnotes.conn.in_transaction
@@ -84,7 +83,7 @@ class DocType:
 		emp_list = self.get_emp_list()
 		log = ""
 		if emp_list:
-			log = "<table><tr><td colspan = 2>Following Salary Slip has been created: </td></tr><tr><td><u>SAL SLIP ID</u></td><td><u>EMPLOYEE NAME</u></td></tr>"
+			log = "<table width=100%><tr><td colspan = 2>Following Salary Slip has been created: </td></tr><tr><td width=50%><u>SAL SLIP ID</u></td><td width=50%><u>EMPLOYEE NAME</u></td></tr>"
 		else:
 			log = "<table><tr><td colspan = 2>No employee found for the above selected criteria</td></tr>"
 			
@@ -111,7 +110,7 @@ class DocType:
 				for d in getlist(ss_obj.doclist, 'deduction_details'):
 					d.save()
 					
-				log += '<tr><td>' + ss.name + '</td><td>' + ss_obj.doc.employee_name + '</td></tr>'
+				log += '<tr><td width=50%>' + ss.name + '</td><td width=50%>' + ss_obj.doc.employee_name + '</td></tr>'
 		log += '</table>'
 		return log	
 				
@@ -132,28 +131,49 @@ class DocType:
 		"""
 			Submit all salary slips based on selected criteria
 		"""
-		ss_list = self.get_sal_slip_list()
-		log = ""
-		if ss_list:
-			log = 	"""<table>
-						<tr>
-							<td colspan = 2>Following Salary Slip has been submitted: </td>
-						</tr>
-						<tr>
-							<td><u>SAL SLIP ID</u></td>
-							<td><u>EMPLOYEE NAME</u></td>
-						</tr>
-					"""
-		else:
-			log = "<table><tr><td colspan = 2>No salary slip found to submit for the above selected criteria</td></tr>"
-			
+		ss_list = self.get_sal_slip_list()		
+		not_submitted_ss = []
 		for ss in ss_list:
 			ss_obj = get_obj("Salary Slip",ss[0],with_children=1)
-			set(ss_obj.doc, 'docstatus', 1)
-			ss_obj.on_submit()
+			try:
+				webnotes.conn.set(ss_obj.doc, 'email_check', cint(self.doc.send_mail))
+				if cint(self.doc.send_email) == 1:
+					ss_obj.send_mail_funct()
+					
+				webnotes.conn.set(ss_obj.doc, 'docstatus', 1)
+			except Exception,e:
+				not_submitted_ss.append(ss[0])
+				msgprint(e)
+				continue
+				
+		return self.create_log(ss_list, not_submitted_ss)
+		
+		
+	def create_log(self, all_ss, not_submitted_ss):
+		log = ''
+		if not all_ss:
+			log = "No salary slip found to submit for the above selected criteria"
+		else:
+			all_ss = [d[0] for d in all_ss]
 			
-			log += '<tr><td>' + ss[0] + '</td><td>' + ss_obj.doc.employee_name + '</td></tr>'
-		log += '</table>'	
+		submitted_ss = list(set(all_ss) - set(not_submitted_ss))		
+		if submitted_ss:
+			mail_sent_msg = self.doc.send_email and " (Mail has been sent to the employee)" or ""
+			log = """
+			<b>Submitted Salary Slips%s:</b>\
+			<br><br> %s <br><br>
+			""" % (mail_sent_msg, '<br>'.join(submitted_ss))
+			
+		if not_submitted_ss:
+			log += """
+				<b>Not Submitted Salary Slips: </b>\
+				<br><br> %s <br><br> \
+				Reason: <br>\
+				May be company email id specified in employee master is not valid. <br> \
+				Please mention correct email id in employee master or if you don't want to \
+				send mail, uncheck 'Send Email' checkbox. <br>\
+				Then try to submit Salary Slip again.
+			"""% ('<br>'.join(not_submitted_ss))
 		return log	
 			
 			
