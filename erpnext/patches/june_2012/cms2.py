@@ -66,10 +66,14 @@ def save_pages():
 
 	import webnotes
 	from webnotes.model.doclist import DocList
+	import webnotes.modules.patch_handler
 
 	for dt in query_map:
 		for result in webnotes.conn.sql(query_map[dt], as_dict=1):
-			DocList(dt, result['name']).save()
+			try:
+				DocList(dt, result['name']).save()
+			except Exception, e:
+				webnotes.modules.patch_handler.log(str(e))
 			
 def save_website_settings():
 	from webnotes.model.code import get_obj
