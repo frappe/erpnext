@@ -33,6 +33,9 @@ class DocType(website.web_page.Page):
 		super(DocType, self).on_update()
 		if not webnotes.utils.cint(self.doc.published):
 			self.delete_web_cache(self.doc.page_name)
+		else:
+			import website.blog
+			website.blog.get_blog_content(self.doc.page_name)
 
 	def prepare_template_args(self):
 		import webnotes.utils
