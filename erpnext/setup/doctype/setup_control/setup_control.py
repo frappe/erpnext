@@ -49,8 +49,7 @@ class DocType:
 		master_dict = {'Fiscal Year':{
 			'year': curr_fiscal_year,
 			'year_start_date': fy_start_date,
-			'company': args.get('company_name'),
-			'is_fiscal_year_closed': 'No'}}
+			'company': args.get('company_name')}}
 		self.create_records(master_dict)
 		
 		# Company

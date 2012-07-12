@@ -197,51 +197,6 @@ class DocType(TransactionBase):
 		get_obj('DocType Mapper', 'Sales Order-Delivery Note', with_children = 1).validate_reference_value(self, self.doc.name)
 
 
-	def validate_prevdoc_details(self):
-		for d in getlist(self.doclist,'delivery_note_details'):
-			prevdoc = d.prevdoc_doctype
-			prevdoc_docname = d.prevdoc_docname
-
-			if prevdoc_docname and prevdoc:
-				# Validates Transaction Date of DN and previous doc (i.e. SO , PO, PR)
-				trans_date = sql("select posting_date from `tab%s` where name = '%s'" %(prevdoc,prevdoc_docname))[0][0]
-				if trans_date and getdate(self.doc.posting_date) < (trans_date):
-					msgprint("Your Posting Date cannot be before "+cstr(prevdoc)+" Date.")
-					raise Exception
-				# Validates DN and previous doc details
-				get_name = sql("select name from `tab%s` where name = '%s'" % (prevdoc, prevdoc_docname))
-				name = get_name and get_name[0][0] or ''
-				if name:	#check for incorrect docname
-					if prevdoc == 'Sales Order':
-						dt = sql("select company, docstatus, customer, currency, sales_partner from `tab%s` where name = '%s'" % (prevdoc, name))
-						cust_name = dt and dt[0][2] or ''
-						if cust_name != self.doc.customer:
-							msgprint(cstr(prevdoc) + ": " + cstr(prevdoc_docname) + " customer :" + cstr(cust_name) + " does not match with customer : " + cstr(self.doc.customer) + " of current document.")
-							raise Exception, "Validation Error. "
-						sal_partner = dt and dt[0][4] or ''
-						if sal_partner != self.doc.sales_partner:
-							msgprint(cstr(prevdoc) + ": " + cstr(prevdoc_docname) + " sales partner name :" + cstr(sal_partner) + " does not match with sales partner name : " + cstr(self.doc.sales_partner_name) + " of current document.")
-							raise Exception, "Validation Error. "
-					else:
-						dt = sql("select company, docstatus, supplier, currency from `tab%s` where name = '%s'" % (prevdoc, name))
-						supp_name = dt and dt[0][2] or ''
-						company_name = dt and dt[0][0] or ''
-						docstatus = dt and dt[0][1] or 0
-						currency = dt and dt[0][3] or ''
-						if (currency != self.doc.currency):
-							msgprint(cstr(prevdoc) + ": " + cstr(prevdoc_docname) + " currency : "+ cstr(currency) + "does not match with Currency: " + cstr(self.doc.currency) + "of current document")
-							raise Exception, "Validation Error."
-						if (company_name != self.doc.company):
-							msgprint(cstr(prevdoc) + ": " + cstr(prevdoc_docname) + " does not belong to the Company: " + cstr(self.doc.company_name))
-							raise Exception, "Validation Error."
-						if (docstatus != 1):
-							msgprint(cstr(prevdoc) + ": " + cstr(prevdoc_docname) + " is not Submitted Document.")
-							raise Exception, "Validation Error."
-				else:
-					msgprint(cstr(prevdoc) + ": " + cstr(prevdoc_docname) + " is not a valid " + cstr(prevdoc))
-					raise Exception, "Validation Error."
-
-
 	def validate_for_items(self):
 		check_list, chk_dupl_itm = [], []
 		for d in getlist(self.doclist,'delivery_note_details'):
@@ -292,11 +247,22 @@ class DocType(TransactionBase):
 		set(self.doc, 'message', 'Items against your Order #%s have been delivered. Delivery #%s: ' % (self.doc.po_no, self.doc.name))
 		# Check for Approving Authority
 		get_obj('Authorization Control').validate_approving_authority(self.doc.doctype, self.doc.company, self.doc.grand_total, self)
+		
+		# validate serial no for item table (non-sales-bom item) and packing list (sales-bom item)
 		sl_obj = get_obj("Stock Ledger")
+		sl_obj.validate_serial_no(self, 'delivery_note_details')
+		sl_obj.validate_serial_no_warehouse(self, 'delivery_note_details')
 		sl_obj.validate_serial_no(self, 'packing_details')
 		sl_obj.validate_serial_no_warehouse(self, 'packing_details')
+		
+		# update delivery details in serial no
+		sl_obj.update_serial_record(self, 'delivery_note_details', is_submit = 1, is_incoming = 0)
 		sl_obj.update_serial_record(self, 'packing_details', is_submit = 1, is_incoming = 0)
+		
+		# update delivered qty in sales order
 		get_obj("Sales Common").update_prevdoc_detail(1,self)
+		
+		# create stock ledger entry
 		self.update_stock_ledger(update_stock = 1)
 
 		self.credit_limit()
@@ -332,10 +298,14 @@ class DocType(TransactionBase):
 		sales_com_obj = get_obj(dt = 'Sales Common')
 		sales_com_obj.check_stop_sales_order(self)
 		self.check_next_docstatus()
-		get_obj('Stock Ledger').update_serial_record(self, 'packing_details', is_submit = 0, is_incoming = 0)
+		
+		# remove delivery details from serial no
+		sl = get_obj('Stock Ledger')		
+		sl.update_serial_record(self, 'delivery_note_details', is_submit = 0, is_incoming = 0)
+		sl.update_serial_record(self, 'packing_details', is_submit = 0, is_incoming = 0)
+		
 		sales_com_obj.update_prevdoc_detail(0,self)
 		self.update_stock_ledger(update_stock = -1)
-		# :::::: set DN status :::::::
 		set(self.doc, 'status', 'Cancelled')
 		self.cancel_packing_slips()
 
@@ -435,7 +405,8 @@ class DocType(TransactionBase):
 
 	def on_update(self):
 		get_obj('Sales Common').make_packing_list(self,'delivery_note_details')
-		self.set_actual_qty()
-		get_obj('Stock Ledger').scrub_serial_nos(self)
+		sl = get_obj('Stock Ledger')
+		sl.scrub_serial_nos(self)
+		sl.scrub_serial_nos(self, 'packing_details')
 
 

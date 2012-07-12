@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-06-11 12:09:54',
+		'creation': '2012-07-05 11:04:09',
 		'docstatus': 0,
-		'modified': '2012-06-17 21:37:40',
+		'modified': '2012-07-11 12:19:49',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -348,6 +348,16 @@
 		'oldfieldtype': u'Table',
 		'options': u'Sales Invoice Item',
 		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'sales_bom_help',
+		'fieldtype': u'HTML',
+		'label': u'Sales BOM Help',
+		'permlevel': 0,
+		'print_hide': 1
 	},
 
 	# DocField
@@ -1339,6 +1349,27 @@
 		'oldfieldname': u'advance_adjustment_details',
 		'oldfieldtype': u'Table',
 		'options': u'Sales Invoice Advance',
+		'permlevel': 0,
+		'print_hide': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'packing_list',
+		'fieldtype': u'Section Break',
+		'label': u'Packing List',
+		'permlevel': 0,
+		'print_hide': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'packing_details',
+		'fieldtype': u'Table',
+		'label': u'Packing Details',
+		'options': u'Delivery Note Packing Item',
 		'permlevel': 0,
 		'print_hide': 1
 	},

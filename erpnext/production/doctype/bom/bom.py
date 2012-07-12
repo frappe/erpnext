@@ -106,7 +106,6 @@ class DocType:
 		return ret_item
 
 
-
 	def get_rm_rate(self, arg):
 		"""	Get raw material rate as per selected method, if bom exists takes bom cost """
 
@@ -293,7 +292,6 @@ class DocType:
 		self.validate_main_item()
 		self.validate_operations()
 		self.validate_materials()
-		self.validate_operations()
 
 
 
@@ -351,8 +349,6 @@ class DocType:
 				'qty_consumed_per_unit' : flt(d['qty_consumed_per_unit'])*qty/flt(self.doc.quantity)
 
 			})
-
-
 
 
 	# Get Current Flat BOM Items
