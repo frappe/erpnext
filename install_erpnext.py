@@ -109,11 +109,56 @@ os.chdir(os.path.join(erpnext_path, 'lib'))
 os.system("git config core.filemode false")
 
 steps_remaining = """
+Notes:
+------
+
+sample apache conf file
+#-----------------------------------------------------------
+SetEnv PYTHON_EGG_CACHE /var/www
+
+# you can change 99 to any other port
+
+Listen 99
+NameVirtualHost *:99
+<VirtualHost *:99>
+	ServerName localhost
+	DocumentRoot {path to erpnext's folder}/public
+    AddHandler cgi-script .cgi .xml .py
+
+	<Directory {path to erpnext's folder}/public/>
+		# directory specific options
+		Options +Indexes +FollowSymLinks +ExecCGI
+		
+		# directory's index file
+		DirectoryIndex web.py
+
+		# rewrite rule
+		RewriteEngine on
+		
+		# condition 1:
+		# ignore login-page.html, app.html, blank.html, unsupported.html
+		RewriteCond %{REQUEST_URI} ^((?!app\.html|blank\.html|unsupported\.html).)*$
+		
+		# condition 2: if there are no slashes
+		# and file is .html or does not containt a .
+		RewriteCond %{REQUEST_URI} ^(?!.+/)((.+\.html)|([^.]+))$
+
+		# rewrite if both of the above conditions are true
+		RewriteRule ^(.+)$ web.py?page=$1 [NC,L]
+		
+		AllowOverride all
+		Order Allow,Deny
+		Allow from all
+	</Directory>
+</VirtualHost>
+#-----------------------------------------------------------
+
 To Do:
 
 * Configure apache/http conf file to point to public folder
 * chown recursively all files in your folder to apache user
 * login using: user="Administrator" and password="admin"
+
 """
 
 print steps_remaining
