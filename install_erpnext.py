@@ -127,7 +127,7 @@ NameVirtualHost *:99
 
 	<Directory {path to erpnext's folder}/public/>
 		# directory specific options
-		Options +Indexes +FollowSymLinks +ExecCGI
+		Options -Indexes +FollowSymLinks +ExecCGI
 		
 		# directory's index file
 		DirectoryIndex web.py

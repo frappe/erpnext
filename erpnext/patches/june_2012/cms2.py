@@ -42,6 +42,16 @@ def cleanup():
 	webnotes.model.delete_doc('Page', 'blog')
 	webnotes.model.delete_doc('Page', 'about')
 
+	import os
+	import conf
+	# delete other html files
+	exception_list = ['app.html', 'unsupported.html', 'blank.html']
+	conf_dir = os.path.dirname(os.path.abspath(conf.__file__))
+	public_path = os.path.join(conf_dir, 'public')
+	for f in os.listdir(public_path):
+		if f.endswith('.html') and f not in exception_list:
+			os.remove(os.path.join(public_path, f))
+
 def save_pages():
 	"""save all web pages, blogs to create content"""
 	query_map = {
