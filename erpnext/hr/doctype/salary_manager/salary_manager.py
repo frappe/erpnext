@@ -45,14 +45,14 @@ class DocType:
 		"""
 		
 		cond = self.get_filter_condition()
+		cond += self.get_joining_releiving_condition()
 		
 		emp_list = sql("""
 			select t1.name
 			from `tabEmployee` t1, `tabSalary Structure` t2 
 			where t1.docstatus!=2 and t2.docstatus != 2 
-			and ifnull(t1.status, 'Left') = 'Active' and ifnull(t2.is_active, 'No') = 'Yes' 
 			and t1.name = t2.employee
-		%s """% cond)
+		%s """% cond, debug=1)
 
 		return emp_list
 		
@@ -63,15 +63,45 @@ class DocType:
 		cond = ''
 		for f in ['company', 'branch', 'department', 'designation', 'grade']:
 			if self.doc.fields.get(f):
-				cond += " and t1." + f + " = '" + self.doc.fields.get(f) + "'"
-				
+				cond += " and t1." + f + " = '" + self.doc.fields.get(f) + "'"		
+		
 		return cond
+
+		
+	def get_joining_releiving_condition(self):
+		m = self.get_month_details(self.doc.fiscal_year, self.doc.month)
+		cond = """
+			and ifnull(t1.date_of_joining, '0000-00-00') <= '%(month_end_date)s' 
+			and ifnull(t1.relieving_date, '2199-12-31') >= '%(month_start_date)s' 
+		""" % m
+		return cond
+		
 		
 		
 	def check_mandatory(self):
 		for f in ['company', 'month', 'fiscal_year']:
 			if not self.doc.fields[f]:
 				msgprint("Please select %s to proceed" % f, raise_exception=1)
+		
+	
+	def get_month_details(self, year, month):
+		ysd = sql("select year_start_date from `tabFiscal Year` where name ='%s'"%year)[0][0]
+		if ysd:
+			from dateutil.relativedelta import relativedelta
+			import calendar, datetime
+			diff_mnt = cint(month)-cint(ysd.month)
+			if diff_mnt<0:
+				diff_mnt = 12-int(ysd.month)+cint(month)
+			msd = ysd + relativedelta(months=diff_mnt) # month start date
+			month_days = cint(calendar.monthrange(cint(msd.year) ,cint(month))[1]) # days in month
+			med = datetime.date(msd.year, cint(month), month_days) # month end date
+			return {
+				'year': msd.year, 
+				'month_start_date': msd, 
+				'month_end_date': med, 
+				'month_days': month_days
+			}
+
 		
 		
 	def create_sal_slip(self):
@@ -81,12 +111,7 @@ class DocType:
 		"""
 		
 		emp_list = self.get_emp_list()
-		log = ""
-		if emp_list:
-			log = "<table width=100%><tr><td colspan = 2>Following Salary Slip has been created: </td></tr><tr><td width=50%><u>SAL SLIP ID</u></td><td width=50%><u>EMPLOYEE NAME</u></td></tr>"
-		else:
-			log = "<table><tr><td colspan = 2>No employee found for the above selected criteria</td></tr>"
-			
+		ss_list = []
 		for emp in emp_list:
 			if not sql("""select name from `tabSalary Slip` 
 					where docstatus!= 2 and employee = %s and month = %s and fiscal_year = %s and company = %s
@@ -110,9 +135,18 @@ class DocType:
 				for d in getlist(ss_obj.doclist, 'deduction_details'):
 					d.save()
 					
-				log += '<tr><td width=50%>' + ss.name + '</td><td width=50%>' + ss_obj.doc.employee_name + '</td></tr>'
-		log += '</table>'
-		return log	
+				ss_list.append(ss.name)
+		
+		return self.create_log(ss_list)
+	
+		
+	def create_log(self, ss_list):
+		log = "<b>No employee for the above selected criteria OR salary slip already created</b>"
+		if ss_list:
+			log = "<b>Created Salary Slip has been created: </b>\
+			<br><br>%s" % '<br>'.join(ss_list)
+		return log
+	
 				
 	def get_sal_slip_list(self):
 		"""
@@ -146,10 +180,10 @@ class DocType:
 				msgprint(e)
 				continue
 				
-		return self.create_log(ss_list, not_submitted_ss)
+		return self.create_submit_log(ss_list, not_submitted_ss)
 		
 		
-	def create_log(self, all_ss, not_submitted_ss):
+	def create_submit_log(self, all_ss, not_submitted_ss):
 		log = ''
 		if not all_ss:
 			log = "No salary slip found to submit for the above selected criteria"
@@ -188,7 +222,7 @@ class DocType:
 		""" % (self.doc.month, self.doc.fiscal_year, cond))
 		
 		return flt(tot[0][0])
-		
+	
 		
 	def get_acc_details(self):
 		"""
