@@ -17,9 +17,10 @@
 import webnotes
 from webnotes.model.doclist import getlist
 from webnotes import msgprint
-	
 
-class DocType:
+from webnotes.utils.nestedset import DocTypeNestedSet
+
+class DocType(DocTypeNestedSet):
 	def __init__(self,d,dl):
 		self.doc, self.doclist = d,dl
 		self.nsm_parent_field = 'parent_cost_center'
@@ -78,7 +79,6 @@ class DocType:
 				msgprint("Account " + d.account + "has been entered more than once for fiscal year " + d.fiscal_year, raise_exception=1)
 			else: 
 				check_acc_list.append([d.account, d.fiscal_year])
-		
 
 	def validate(self):
 		"""
@@ -89,21 +89,3 @@ class DocType:
 			
 		self.validate_mandatory()
 		self.validate_budget_details()
-			
-	def update_nsm_model(self):
-		"""
-			update Nested Set Model
-		"""
-		import webnotes.utils.nestedset
-		webnotes.utils.nestedset.update_nsm(self)
-			
-	def on_update(self):
-		self.update_nsm_model()
-		
-	def on_trash(self):
-		if self.check_if_child_exists():
-			msgprint("Child exists for this cost center. You can not trash this account.", raise_exception=1)			
-			
-		# rebuild tree
-		webnotes.conn.set_value(self.doc,'old_parent', '')
-		self.update_nsm_model()

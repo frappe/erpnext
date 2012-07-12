@@ -34,6 +34,8 @@ pscript['onshow_Sales Browser'] = function(wrapper){
 
 	wrapper.appframe.clear_breadcrumbs();
 	wrapper.appframe.add_breadcrumb(ctype+' Tree')
+	document.title = ctype+' Tree';
+	
 	wrapper.appframe.add_breadcrumb(' in <a href="#!selling-home">Selling</a>');
 
 	if(erpnext.sales_chart && erpnext.sales_chart.ctype != ctype) {

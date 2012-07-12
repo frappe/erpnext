@@ -14,30 +14,19 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+cur_frm.cscript.set_breadcrumbs = function(barea) {
+	cur_frm.frm_head.appframe.add_breadcrumb(cur_frm.docname);
+	cur_frm.frm_head.appframe.add_breadcrumb(' in <a href="#!Sales Browser/Sales Person">\
+		Sales Person Tree</a>');
+	cur_frm.frm_head.appframe.add_breadcrumb(' in <a href="#!selling-home">Selling</a>');
+}
 
 cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 }
 
 cur_frm.cscript.onload = function(){
-  if(doc.__islocal){
-    doc.parent_sales_person = 'Root';
-    refresh('parent_sales_person');
-  }
-}
-cur_frm.cscript.country = function(doc, cdt, cdn) {
-  var mydoc=doc;
-  $c('runserverobj', args={'method':'check_state', 'docs':compress_doclist(make_doclist(doc.doctype, doc.name))},
-    function(r,rt){
-      if(r.message) {
-        var doc = locals[mydoc.doctype][mydoc.name];
-        doc.state = '';
-        get_field(doc.doctype, 'state' , doc.name).options = r.message;
-        refresh_field('state');
-      }
-    }  
-  );
-}
 
+}
 
 //get query select sales person
 cur_frm.fields_dict['parent_sales_person'].get_query = function(doc,cdt,cdn) {

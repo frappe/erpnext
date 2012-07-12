@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-04-13 11:56:32',
+		'creation': '2012-07-03 13:30:54',
 		'docstatus': 0,
-		'modified': '2012-05-31 11:28:32',
+		'modified': '2012-07-12 10:33:10',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -16,6 +16,7 @@
 		'allow_trash': 1,
 		'autoname': u'field:sales_person_name',
 		'colour': u'White:FFF',
+		'description': u'All Sales Transactions can be tagged against multiple **Sales Persons** so that you can set and monitor targets.',
 		'doctype': 'DocType',
 		'document_type': u'Master',
 		'in_create': 1,
@@ -129,17 +130,6 @@
 	# DocField
 	{
 		'doctype': u'DocField',
-		'fieldname': u'general_info',
-		'fieldtype': u'Section Break',
-		'label': u'General Info',
-		'oldfieldtype': u'Section Break',
-		'options': u'Simple',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
 		'fieldname': u'sales_person_name',
 		'fieldtype': u'Data',
 		'in_filter': 1,
@@ -170,17 +160,6 @@
 	# DocField
 	{
 		'doctype': u'DocField',
-		'fieldname': u'sphelp',
-		'fieldtype': u'HTML',
-		'label': u'SPHelp',
-		'oldfieldtype': u'HTML',
-		'options': u'<a href="#!Sales Browser/Sales Person">To manage Sales Person, click here</a>',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
 		'fieldname': u'is_group',
 		'fieldtype': u'Select',
 		'label': u'Has Child Node',
@@ -194,129 +173,18 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'cb0',
+		'fieldtype': u'Column Break',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
 		'fieldname': u'employee',
 		'fieldtype': u'Link',
 		'label': u'Employee',
 		'options': u'Employee',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'department',
-		'fieldtype': u'Data',
-		'label': u'Department',
-		'oldfieldname': u'department',
-		'oldfieldtype': u'Data',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'designation',
-		'fieldtype': u'Data',
-		'label': u'Designation',
-		'oldfieldname': u'designation',
-		'oldfieldtype': u'Data',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'mobile_no',
-		'fieldtype': u'Data',
-		'label': u'Mobile No',
-		'oldfieldname': u'mobile_no',
-		'oldfieldtype': u'Data',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'column_break0',
-		'fieldtype': u'Column Break',
-		'oldfieldtype': u'Column Break',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'email_id',
-		'fieldtype': u'Data',
-		'label': u'Email Id',
-		'oldfieldname': u'email_id',
-		'oldfieldtype': u'Data',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'country',
-		'fieldtype': u'Select',
-		'in_filter': 1,
-		'label': u'Country',
-		'oldfieldname': u'country',
-		'oldfieldtype': u'Select',
-		'options': u'link:Country',
-		'permlevel': 0,
-		'search_index': 0,
-		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'state',
-		'fieldtype': u'Select',
-		'in_filter': 1,
-		'label': u'State',
-		'oldfieldname': u'state',
-		'oldfieldtype': u'Select',
-		'options': u'link:State',
-		'permlevel': 0,
-		'search_index': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'city',
-		'fieldtype': u'Data',
-		'label': u'City',
-		'oldfieldname': u'city',
-		'oldfieldtype': u'Data',
-		'permlevel': 0,
-		'reqd': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'territory',
-		'fieldtype': u'Link',
-		'hidden': 0,
-		'label': u'Territory',
-		'oldfieldname': u'territory',
-		'oldfieldtype': u'Link',
-		'options': u'Territory',
-		'permlevel': 0,
-		'search_index': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'territory_help',
-		'fieldtype': u'HTML',
-		'label': u'Territory Help',
-		'oldfieldtype': u'HTML',
-		'options': u'<a href="#!Sales Browser/Territory">To manage Territories, click here</a>',
 		'permlevel': 0
 	},
 
@@ -368,25 +236,13 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
-		'fieldname': u'distribution_id',
-		'fieldtype': u'Link',
-		'label': u'Distribution Id',
-		'oldfieldname': u'distribution_id',
-		'oldfieldtype': u'Link',
-		'options': u'Budget Distribution',
-		'permlevel': 0,
-		'search_index': 0
-	},
-
-	# DocField
-	{
+		'colour': u'White:FFF',
+		'description': u'Set targets Item Group-wise for this Sales Person.',
 		'doctype': u'DocField',
 		'fieldname': u'target_details_section_break',
 		'fieldtype': u'Section Break',
-		'label': u'Target Details',
+		'label': u'Sales Person Targets',
 		'oldfieldtype': u'Section Break',
-		'options': u'Simple',
 		'permlevel': 0
 	},
 
@@ -400,5 +256,20 @@
 		'oldfieldtype': u'Table',
 		'options': u'Target Detail',
 		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'colour': u'White:FFF',
+		'description': u'Select Budget Distribution to unevenly distribute targets across months.',
+		'doctype': u'DocField',
+		'fieldname': u'distribution_id',
+		'fieldtype': u'Link',
+		'label': u'Target Distribution',
+		'oldfieldname': u'distribution_id',
+		'oldfieldtype': u'Link',
+		'options': u'Budget Distribution',
+		'permlevel': 0,
+		'search_index': 0
 	}
 ]

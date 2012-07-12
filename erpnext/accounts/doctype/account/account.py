@@ -210,6 +210,7 @@ class DocType:
 			
 	# ON UPDATE
 	def on_update(self):
+		
 		# update nsm
 		self.update_nsm_model()		
 		# Add curret year balance
@@ -256,8 +257,8 @@ class DocType:
 		self.check_balance_before_trash()
 		
 		# rebuild tree
-		set(self.doc,'old_parent', '')
-		self.update_nsm_model()
+		from webnotes.utils.nestedset import update_remove_node
+		update_remove_node('Account', self.doc.name)
 
 		# delete all cancelled gl entry of this account
 		sql("delete from `tabGL Entry` where account = %s and ifnull(is_cancelled, 'No') = 'Yes'", self.doc.name)
