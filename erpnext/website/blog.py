@@ -94,6 +94,9 @@ def add_comment(args=None):
 	website.web_cache.clear_cache(args.get('page_name'),
 		args.get('comment_doctype'), args.get('comment_docname'))
 	
+	# loads fresh blog into cache
+	get_blog_content(args.get('page_name'))
+	
 	import webnotes.utils
 	
 	comment['comment_date'] = webnotes.utils.pretty_date(comment['creation'])
