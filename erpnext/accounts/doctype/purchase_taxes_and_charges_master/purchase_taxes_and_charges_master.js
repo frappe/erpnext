@@ -22,7 +22,7 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 }
 
 cur_frm.cscript.refresh = function(doc, cdt, cdn) {
-   
+   cur_frm.set_footnote(wn.markdown(cur_frm.meta.description));
 }
 
 cur_frm.pformat.purchase_tax_details= function(doc){
@@ -74,7 +74,7 @@ cur_frm.cscript.add_deduct_tax = function(doc, cdt, cdn) {
     alert("Please select Category first");
     d.add_deduct_tax = '';
   }
-  else if(d.category != 'For Total' && d.add_deduct_tax == 'Deduct'){
+  else if(d.category != 'Total' && d.add_deduct_tax == 'Deduct'){
     alert("You cannot Deduct when category is for valuation or for both(i.e total and valuation)");
     d.add_deduct_tax = '';
   }
@@ -91,8 +91,8 @@ cur_frm.cscript.charge_type = function(doc, cdt, cdn) {
     alert("You cannot select Charge Type as 'On Previous Row Amount' or 'On Previous Row Total' for first row");
     d.charge_type = '';
   }
-  else if((d.category == 'For Valuation' || d.category == 'For Both') && (d.charge_type == 'On Previous Row Amount' || d.charge_type == 'On Previous Row Total')){
-    alert("You cannot select charge type as 'On Previous Row Amount' or 'On Previous Row Total' for valuation. You can select only 'For Total' option for previous row amount or previous row total")
+  else if((d.category == 'Valuation' || d.category == 'Valuation and Total') && (d.charge_type == 'On Previous Row Amount' || d.charge_type == 'On Previous Row Total')){
+    alert("You cannot select charge type as 'On Previous Row Amount' or 'On Previous Row Total' for valuation. You can select only 'Total' option for previous row amount or previous row total")
     d.charge_type = '';
   }
   validated = false;

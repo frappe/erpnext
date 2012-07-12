@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-03-27 14:36:25',
+		'creation': '2012-07-03 13:30:54',
 		'docstatus': 0,
-		'modified': '2012-03-27 14:36:25',
+		'modified': '2012-07-12 11:37:56',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -17,6 +17,7 @@
 		'autoname': u'field:title',
 		'colour': u'White:FFF',
 		'default_print_format': u'Standard',
+		'description': u'Standard Terms and Conditions that can be added to Sales and Purchases.\n\nExamples:\n\n1. Validity of the offer.\n1. Payment Terms (In Advance, On Credit, part advance etc).\n1. What is extra (or payable by the Customer).\n1. Safety / usage warning.\n1. Warranty if any.\n1. Returns Policy.\n1. Terms of shipping, if applicable.\n1. Ways of addressing disputes, indemnity, liability, etc.\n1. Address and Contact of your Company.',
 		'doctype': 'DocType',
 		'document_type': u'Master',
 		'module': u'Setup',
@@ -24,7 +25,7 @@
 		'section_style': u'Simple',
 		'server_code_error': u' ',
 		'show_in_menu': 0,
-		'version': 11
+		'version': 1
 	},
 
 	# These values are common for all DocField
@@ -50,6 +51,42 @@
 	{
 		'doctype': 'DocType',
 		'name': u'Terms and Conditions'
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Sales Master Manager',
+		'submit': 0,
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 1,
+		'create': 1,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Sales Master Manager',
+		'submit': 0,
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Sales User',
+		'submit': 0,
+		'write': 0
 	},
 
 	# DocPerm
@@ -89,42 +126,6 @@
 		'permlevel': 0,
 		'role': u'Accounts User',
 		'write': 1
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Sales Master Manager',
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 1,
-		'create': 1,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Sales Master Manager',
-		'submit': 0,
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Sales User',
-		'submit': 0,
-		'write': 0
 	},
 
 	# DocField
