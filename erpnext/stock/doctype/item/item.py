@@ -86,8 +86,7 @@ class DocType:
 	def on_trash(self):
 		sql("delete from tabBin where item_code='%s'"%(self.doc.item_code))
 		
-		import website.web_cache
-		website.web_cache.delete_web_cache(self.doc.page_name)
+		self.delete_web_cache(self.doc.page_name)
 
 	# Check whether Ref Rate is not entered twice for same Price List and Currency
 	def check_ref_rate_detail(self):
@@ -224,17 +223,21 @@ Total Available Qty: %s
 	def on_rename(self,newdn,olddn):
 		sql("update tabItem set item_code = %s where name = %s", (newdn, olddn))
 
-	def clear_web_cache(self):
+	def delete_web_cache(self, page_name):
 		import website.web_cache
-		
+		website.web_cache.delete_cache(page_name)
+
+	def clear_web_cache(self):
 		if hasattr(self, 'old_page_name') and self.old_page_name and \
 				self.doc.page_name != self.old_page_name:
-			website.web_cache.delete_web_cache(self.old_page_name)
+			self.delete_web_cache(self.doc.page_name)
 		
 		if self.doc.show_in_website:
-			website.web_cache.clear_web_cache(self.doc.doctype, self.doc.name, self.doc.page_name)
+			import website.web_cache
+			website.web_cache.create_cache(self.doc.page_name, self.doc.doctype, self.doc.name)
+			website.web_cache.clear_cache(self.doc.page_name, self.doc.doctype, self.doc.name)
 		else:
-			website.web_cache.delete_web_cache(self.doc.page_name)
+			self.delete_web_cache(self.doc.page_name)
 	
 	def update_page_name(self):
 		import website.utils

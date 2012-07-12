@@ -52,9 +52,8 @@ def add_comment(args=None):
 	
 	# since comments are embedded in the page, clear the web cache
 	import website.web_cache
-	website.web_cache.clear_web_cache(
-		args.get('comment_doctype'), args.get('comment_docname'),
-		args.get('page_name'))
+	website.web_cache.clear_cache(args.get('page_name'),
+		args.get('comment_doctype'), args.get('comment_docname'))
 	
 	import webnotes.utils
 	
@@ -62,7 +61,7 @@ def add_comment(args=None):
 	template_args = { 'comment_list': [comment] }
 	
 	# get html of comment row
-	comment_html = website.web_cache.build_html(template_args, 'blog/comment.html')
+	comment_html = website.web_cache.build_html(template_args, 'html/comment.html')
 
 	return comment_html
 	

@@ -64,11 +64,12 @@ class Page(object):
 				self.old_page_name != self.doc.page_name:
 			self.delete_web_cache(self.old_page_name)
 		
-		website.web_cache.clear_web_cache(self.doctype, self.doc.name, self.doc.page_name)
+		website.web_cache.create_cache(self.doc.page_name, self.doc.doctype, self.doc.name)
+		website.web_cache.clear_cache(self.doc.page_name, self.doc.doctype, self.doc.name)
 		
 	def delete_web_cache(self, page_name):
 		"""delete entry of page name from Web Cache"""
-		website.web_cache.delete_web_cache(page_name)
+		website.web_cache.delete_cache(page_name)
 
 	def markdown_to_html(self, fields_list):
 		"""convert fields from markdown to html"""

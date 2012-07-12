@@ -2,9 +2,12 @@ def execute():
 	import webnotes
 	import webnotes.model.sync
 	
-	# sync web page, blog doctype
+	# sync doctypes required for the patch
+	webnotes.model.sync.sync('website', 'web_cache')
 	webnotes.model.sync.sync('website', 'web_page')
 	webnotes.model.sync.sync('website', 'blog')
+	webnotes.model.sync.sync('website', 'website_settings')
+	webnotes.model.sync.sync('stock', 'item')
 
 	cleanup()
 
@@ -29,9 +32,29 @@ def cleanup():
 		update `tabComment` comm, `tabBlog` blog
 		set comm.comment_doctype = 'Blog', comm.comment_docname = blog.name
 		where comm.comment_docname = blog.page_name""")
-	
-	
+		
+	# delete deprecated pages
+	import webnotes.model
+	webnotes.model.delete_doc('Page', 'products')
+	webnotes.model.delete_doc('Page', 'contact')
+	webnotes.model.delete_doc('Page', 'blog')
+	webnotes.model.delete_doc('Page', 'about')
+
 def save_pages():
 	"""save all web pages, blogs to create content"""
-	import website.web_cache
-	website.web_cache.rebuild_web_cache()
+	query_map = {
+		'Web Page': """select name from `tabWeb Page` where docstatus=0""",
+		'Blog': """\
+			select name from `tabBlog`
+			where docstatus = 0 and ifnull(published, 0) = 1""",
+		'Item': """\
+			select name from `tabItem`
+			where docstatus = 0 and ifnull(show_in_website, 0) = 1""",
+	}
+
+	import webnotes
+	from webnotes.model.doclist import DocList
+
+	for dt in query_map:
+		for result in webnotes.conn.sql(query_map[dt], as_dict=1):
+			DocList(dt, result['name']).save()

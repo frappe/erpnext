@@ -1,0 +1,48 @@
+{% extends "html/page.html" %}
+
+{% block javascript %}
+	{% include "js/product_page.js" %}
+{% endblock %}
+
+{% block css %}
+	{% include "css/product_page.css" %}
+{% endblock %}
+
+{% block title %}
+	{% if item_name != name %}
+		{{ item_name }} [{{ name }}]
+	{% else %}
+		{{ item_name }}
+	{% endif %}
+{% endblock %}
+
+{% block content %}
+	<div class="layout-wrapper layout-wrapper-background">
+		<div class="web-content" id="content-product-{{ name }}">
+			<div class="layout-main-section">
+				<h1>{{ item_name }}</h1>
+				<div class="product-page-content">
+					<br><br>
+					{% if website_image %}
+					<image src="files/{{ website_image }}" />
+					{% else %}
+					<div class="img-area"></div>
+					<span style="font-size: 11px">This is an auto-generated Image</span>
+					{% endif %}
+					<br><br>
+					<div class="web-long-description">
+					{{ web_description_html }}
+					</div>
+				</div>
+			</div>
+			<div class="layout-side-section">
+				<h4>More Categories</h4>
+				<div class="more-categories"></div>
+				<br>
+				<h4>Similar Products</h4>
+				<div class="similar-products"></div>
+			</div>
+			<div style="clear: both"></div>
+		</div>
+	</div>
+{% endblock %}
