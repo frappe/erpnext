@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-03-27 14:36:20',
+		'creation': '2012-07-03 13:30:54',
 		'docstatus': 0,
-		'modified': '2012-03-27 14:36:20',
+		'modified': '2012-07-12 16:29:08',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -15,13 +15,14 @@
 		'_last_update': u'1324556758',
 		'autoname': u'Prompt',
 		'colour': u'White:FFF',
+		'description': u'Send regular summary reports via Email.',
 		'doctype': 'DocType',
 		'document_type': u'System',
 		'module': u'Setup',
 		'name': '__common__',
 		'section_style': u'Simple',
 		'show_in_menu': 0,
-		'version': 81
+		'version': 1
 	},
 
 	# These values are common for all DocField
@@ -70,7 +71,7 @@
 		'doctype': u'DocField',
 		'fieldname': u'settings',
 		'fieldtype': u'Section Break',
-		'label': u'Settings',
+		'label': u'Email Digest Settings',
 		'permlevel': 0
 	},
 
@@ -146,16 +147,6 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
-		'fieldname': u'addremove_recipients',
-		'fieldtype': u'Button',
-		'label': u'Add/Remove Recipients',
-		'permlevel': 0,
-		'trigger': u'Client'
-	},
-
-	# DocField
-	{
 		'description': u'Note: Email will not be sent to disabled users',
 		'doctype': u'DocField',
 		'fieldname': u'recipient_list',
@@ -167,7 +158,19 @@
 
 	# DocField
 	{
+		'doctype': u'DocField',
+		'fieldname': u'addremove_recipients',
+		'fieldtype': u'Button',
+		'label': u'Add/Remove Recipients',
+		'permlevel': 0,
+		'trigger': u'Client'
+	},
+
+	# DocField
+	{
+		'colour': u'White:FFF',
 		'depends_on': u'eval:doc.use_standard',
+		'description': u'Check all the items below that you want to send in this digest.',
 		'doctype': u'DocField',
 		'fieldname': u'select_digest_content',
 		'fieldtype': u'Section Break',
@@ -242,6 +245,14 @@
 		'fieldname': u'payables',
 		'fieldtype': u'Check',
 		'label': u'Payables',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'cb1',
+		'fieldtype': u'Column Break',
 		'permlevel': 0
 	},
 
@@ -322,36 +333,6 @@
 		'fieldtype': u'Check',
 		'hidden': 1,
 		'label': u'Stock Items below re-order level',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'depends_on': u'eval:!doc.use_standard',
-		'doctype': u'DocField',
-		'fieldname': u'enter_custom_code',
-		'fieldtype': u'Section Break',
-		'label': u'Enter Custom Code',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'depends_on': u'eval:!doc.use_standard',
-		'doctype': u'DocField',
-		'fieldname': u'custom_code',
-		'fieldtype': u'Code',
-		'label': u'Custom Python Code',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'depends_on': u'eval:!doc.use_standard',
-		'doctype': u'DocField',
-		'fieldname': u'email_template',
-		'fieldtype': u'Code',
-		'label': u'Email Template',
 		'permlevel': 0
 	}
 ]

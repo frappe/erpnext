@@ -33,9 +33,21 @@ class DocType:
 	def validate_main_item(self):
 		"""main item must have Is Stock Item as No and Is Sales Item as Yes"""
 		if not webnotes.conn.sql("""select name from tabItem where name=%s and
-			ifnull(is_stock_item,'')='No' and ifnull(is_sales_item,'')='Yes'"""):
+			ifnull(is_stock_item,'')='No' and ifnull(is_sales_item,'')='Yes'""", self.doc.new_item_code):
 			webnotes.msgprint("""Parent Item %s is either a Stock Item or a not a Sales Item""",
 				raise_exception=1)
+
+	def get_item_details(self, name):
+		det = webnotes.conn.sql("""select description, stock_uom from `tabItem` 
+			where name = %s""", name)
+		rate = webnotes.conn.sql("""select ref_rate from `tabItem Price` 
+			where price_list_name = %s and parent = %s 
+			and ref_currency = %s""", (self.doc.price_list, name, self.doc.currency))
+		return {
+			'description' : det and det[0][0] or '', 
+			'uom': det and det[0][1] or '', 
+			'rate': rate and flt(rate[0][0]) or 0.00
+		}
 
 	def check_duplicate(self, finder=0):
 		il = getlist(self.doclist, "sales_bom_items")
@@ -60,7 +72,6 @@ class DocType:
 				raise Exception
 		if finder:
 			webnotes.msgprint("There is no Sales BOM present with the following Combination.")
-
 
 	def has_same_items(self, l1, l2):
 		if len(l1)!=len(l2): return 0
