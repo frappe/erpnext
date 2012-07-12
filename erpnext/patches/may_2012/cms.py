@@ -4,7 +4,7 @@ def execute():
 	from webnotes.model.code import get_obj
 	
 	# rewrite pages
-	get_obj('Website Settings').rewrite_pages()
+	get_obj('Website Settings').on_update()
 	
 	ss = get_obj('Style Settings')
 	ss.validate()

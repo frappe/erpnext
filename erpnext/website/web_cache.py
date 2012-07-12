@@ -167,6 +167,7 @@ def build_html(args):
 
 # cache management
 def search_cache(page_name):
+	if not page_name: return ()
 	import webnotes
 	return webnotes.conn.sql("""\
 		select html, doc_type, doc_name
@@ -193,13 +194,14 @@ def clear_cache(page_name, doc_type=None, doc_name=None):
 		* if page_name, doc_type and doc_name match, clear cache's copy
 		* else, raise exception that such a page already exists
 	"""
+	import webnotes
+
 	if not page_name:
 		webnotes.conn.sql("""update `tabWeb Cache` set html = ''""")
 		return
 	
 	result = search_cache(page_name)
-	
-	import webnotes
+
 	if not doc_type or (result and result[0][1] == doc_type and result[0][2] == doc_name):
 		webnotes.conn.set_value('Web Cache', page_name, 'html', '')
 	else:
