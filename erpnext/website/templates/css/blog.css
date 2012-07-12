@@ -1,0 +1,7 @@
+	<style>
+		h2 > a, h2 > a:link, h2 > a:visited, h2 > a:active,
+		h2 > a:hover, h2 > a:focus {
+			text-decoration: none;
+			color: inherit;
+		}
+	</style>

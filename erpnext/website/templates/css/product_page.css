@@ -1,0 +1,34 @@
+	<style>
+		.web-long-description {
+			font-size: 18px;
+			line-height: 200%;
+		}
+		.product-page-content {
+			float: left;
+		}
+		/* product page image css */
+		.product-page-content img {
+			max-width: 100%;
+		}
+		
+		/* similar products listing */
+		.similar-products .img-area img {
+			max-width: 55px;
+			max-height: 55px;
+		}
+		
+		.similar-products .img-area {
+			float: left;
+			width: 30%;
+			margin-top: 0.3em;
+		}
+		
+		.similar-product-description {
+			float: left;
+			width: 70%;
+		}
+		
+		.similar-product-description span {
+			font-size: 12px;
+		}
+	</style>

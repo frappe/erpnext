@@ -29,8 +29,23 @@ cur_frm.cscript.refresh = function(doc) {
 		}
 		$c_obj(make_doclist(doc.doctype, doc.name),'check_if_sle_exists','',callback);
 	}
+	
+	cur_frm.cscript.hide_website_fields(doc);
 }
 
+cur_frm.cscript.hide_website_fields = function(doc) {
+	var website_fields_list = ['page_name', 'website_image', 'web_short_description',
+								'web_long_description']
+	if (cint(doc.show_in_website)) {
+		unhide_field(website_fields_list);
+	} else {
+		hide_field(website_fields_list);
+	}
+}
+
+cur_frm.cscript.show_in_website = function(doc, dt, dn) {
+	cur_frm.cscript.hide_website_fields(doc);
+}
 
 cur_frm.fields_dict['default_bom'].get_query = function(doc) {
    //var d = locals[this.doctype][this.docname];
