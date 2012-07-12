@@ -32,6 +32,9 @@ class DocType(website.web_page.Page):
 		if webnotes.conn.get_value("Website Settings", None, "home_page")==self.doc.name:
 			from webnotes.session_cache import clear_cache
 			clear_cache('Guest')
+			import website.web_cache
+			website.web_cache.clear_cache(self.doc.page_name)
+			website.web_cache.clear_cache('index')
 			
 	def prepare_template_args(self):
 		self.markdown_to_html(['head_section','main_section', 'side_section'])
