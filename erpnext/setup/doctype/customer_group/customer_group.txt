@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-04-13 11:56:30',
+		'creation': '2012-07-03 13:30:55',
 		'docstatus': 0,
-		'modified': '2012-04-19 17:50:43',
+		'modified': '2012-07-12 09:47:20',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -22,6 +22,7 @@
 		'in_create': 1,
 		'module': u'Setup',
 		'name': '__common__',
+		'read_only': 1,
 		'search_fields': u'name,parent_customer_group',
 		'section_style': u'Simple',
 		'server_code_error': u' ',
@@ -142,18 +143,6 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
-		'fieldname': u'description',
-		'fieldtype': u'Text',
-		'label': u'Description',
-		'oldfieldname': u'description',
-		'oldfieldtype': u'Text',
-		'permlevel': 0,
-		'width': u'300px'
-	},
-
-	# DocField
-	{
 		'colour': u'White:FFF',
 		'doctype': u'DocField',
 		'fieldname': u'parent_customer_group',
@@ -184,6 +173,16 @@
 
 	# DocField
 	{
+		'doctype': u'DocField',
+		'fieldname': u'cb0',
+		'fieldtype': u'Column Break',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'colour': u'White:FFF',
+		'description': u'This Price List will be selected as default for all Customers under this Group.',
 		'doctype': u'DocField',
 		'fieldname': u'default_price_list',
 		'fieldtype': u'Link',
