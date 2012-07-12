@@ -58,10 +58,10 @@ def add_comment(args=None):
 	import webnotes.utils
 	
 	comment['comment_date'] = webnotes.utils.pretty_date(comment['creation'])
-	template_args = { 'comment_list': [comment] }
+	template_args = { 'comment_list': [comment], 'template': 'html/comment.html' }
 	
 	# get html of comment row
-	comment_html = website.web_cache.build_html(template_args, 'html/comment.html')
+	comment_html = website.web_cache.build_html(template_args)
 
 	return comment_html
 	

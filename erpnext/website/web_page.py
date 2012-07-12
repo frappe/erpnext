@@ -52,7 +52,8 @@ class Page(object):
 			(self.doc.page_name, self.doc.name))
 		if res and res[0][0] > 0:
 			webnotes.msgprint("""A %s with the same title already exists.
-				Please change the title and save again.""" % self.doctype, raise_exception=1)
+				Please change the title of %s and save again."""
+				% (self.doctype, self.doc.name), raise_exception=1)
 
 	def clear_web_cache(self):
 		"""
