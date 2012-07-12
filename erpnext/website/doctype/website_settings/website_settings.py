@@ -36,6 +36,10 @@ class DocType:
 		import website.web_cache
 		website.web_cache.refresh_cache()
 		
+		# create blog pages
+		import webnotes.cms.feed
+		webnotes.cms.feed.generate()
+		
 		from webnotes.session_cache import clear_cache
 		clear_cache('Guest')
 
