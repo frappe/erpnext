@@ -13,6 +13,8 @@ def execute():
 
 	save_pages()
 	
+	save_website_settings()
+	
 def cleanup():
 	import webnotes
 		
@@ -58,3 +60,14 @@ def save_pages():
 	for dt in query_map:
 		for result in webnotes.conn.sql(query_map[dt], as_dict=1):
 			DocList(dt, result['name']).save()
+			
+def save_website_settings():
+	from webnotes.model.code import get_obj
+	
+	# rewrite pages
+	get_obj('Website Settings').on_update()
+	
+	ss = get_obj('Style Settings')
+	ss.validate()
+	ss.doc.save()
+	ss.on_update()

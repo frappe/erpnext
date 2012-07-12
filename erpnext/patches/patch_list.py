@@ -339,11 +339,6 @@ patch_list = [
 	},
 	{
 		'patch_module': 'patches.may_2012',
-		'patch_file': 'cms',
-		'description': 'generate html pages'
-	},
-	{
-		'patch_module': 'patches.may_2012',
 		'patch_file': 'reload_reports',
 		'description': 'reload reports: itemwise sales/delivery details'
 	},
@@ -486,5 +481,10 @@ patch_list = [
 		'patch_module': 'patches.july_2012',
 		'patch_file': 'deprecate_import_data_control',
 		'description': "deprecate doctype - Import Data Control and page - Import Data"
+	},
+	{
+		'patch_module': 'patches.june_2012',
+		'patch_file': 'cms2',
+		'description': 'cms2 release patches'
 	},
 ]
