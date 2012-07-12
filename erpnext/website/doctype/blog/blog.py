@@ -44,7 +44,7 @@ class DocType(website.web_page.Page):
 		# temp fields
 		from webnotes.utils import global_date_format, get_fullname
 		self.doc.full_name = get_fullname(self.doc.owner)
-		self.doc.updated = global_date_format(self.doc.modified)
+		self.doc.updated = global_date_format(self.doc.creation)
 
 		self.markdown_to_html(['content'])
 
