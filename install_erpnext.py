@@ -101,12 +101,7 @@ inst.import_from_db(new_dbname, source_path=os.path.join(erpnext_path, 'data', '
 
 # apply patches
 os.chdir(erpnext_path)
-os.system("lib/wnf.py -l")
-
-# force sync all
-os.system("lib/wnf.py --sync_all -f")
-
-os.system("lib/wnf.py --cms")
+os.system("lib/wnf.py --update origin master")
 
 # set filemode false
 os.system("git config core.filemode false")
