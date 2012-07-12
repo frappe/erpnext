@@ -104,7 +104,7 @@ def add_comment(args=None):
 
 	return comment_html
 
-def get_content(blog_page_name):
+def get_blog_content(blog_page_name):
 	import website.web_cache
 	content = website.web_cache.get_html(blog_page_name)
 	
