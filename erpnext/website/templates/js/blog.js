@@ -26,7 +26,7 @@ wn.pages['{{ name }}'].onload = function(wrapper) {
 				data.content += repl('... <a href="%(name)s.html">(read on)</a>', data);
 			}
 			parent.innerHTML = repl('<h2><a href="%(name)s.html">%(title)s</a></h2>\
-				<p>%(content)s</p><br>', data);
+				%(content)s<br /><br />', data);
 		},
 		page_length: 10
 	});
