@@ -37,10 +37,11 @@ def cleanup():
 		
 	# delete deprecated pages
 	import webnotes.model
-	webnotes.model.delete_doc('Page', 'products')
-	webnotes.model.delete_doc('Page', 'contact')
-	webnotes.model.delete_doc('Page', 'blog')
-	webnotes.model.delete_doc('Page', 'about')
+	for page in ['products', 'contact', 'blog', 'about']:
+		try:
+			webnotes.model.delete_doc('Page', page)
+		except Exception, e:
+			webnotes.modules.patch_handler.log(str(e))
 
 	import os
 	import conf
@@ -71,7 +72,7 @@ def save_pages():
 	for dt in query_map:
 		for result in webnotes.conn.sql(query_map[dt], as_dict=1):
 			try:
-				DocList(dt, result['name']).save()
+				DocList(dt, result['name'].encode('utf-8')).save()
 			except Exception, e:
 				webnotes.modules.patch_handler.log(str(e))
 			
