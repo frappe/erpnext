@@ -239,6 +239,7 @@ def refresh_cache(build=None):
 		for result in webnotes.conn.sql(query_map[dt], as_dict=1):
 			create_cache(result['page_name'], dt, result['name'])
 			clear_cache(result['page_name'], dt, result['name'])
+			if build and dt in build: load_into_cache(result['page_name'])
 			
 	for page_name in get_predefined_pages():
 		create_cache(page_name, None, None)
