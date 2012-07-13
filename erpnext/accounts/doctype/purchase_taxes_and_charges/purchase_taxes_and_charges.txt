@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-03-27 14:35:46',
+		'creation': '2012-07-03 13:30:49',
 		'docstatus': 0,
-		'modified': '2012-03-27 14:35:46',
+		'modified': '2012-07-12 14:08:27',
 		'modified_by': u'Administrator',
 		'owner': u'wasim@webnotestech.com'
 	},
@@ -24,7 +24,7 @@
 		'section_style': u'Tray',
 		'server_code_error': u' ',
 		'show_in_menu': 0,
-		'version': 13
+		'version': 1
 	},
 
 	# These values are common for all DocField
@@ -45,34 +45,6 @@
 	# DocField
 	{
 		'doctype': u'DocField',
-		'fieldname': u'category',
-		'fieldtype': u'Select',
-		'label': u'Category',
-		'oldfieldname': u'category',
-		'oldfieldtype': u'Select',
-		'options': u'\nFor Total\nFor Valuation\nFor Both',
-		'permlevel': 0,
-		'reqd': 1
-	},
-
-	# DocField
-	{
-		'default': u'Add',
-		'doctype': u'DocField',
-		'fieldname': u'add_deduct_tax',
-		'fieldtype': u'Select',
-		'label': u'Add or Deduct',
-		'oldfieldname': u'add_deduct_tax',
-		'oldfieldtype': u'Select',
-		'options': u'\nAdd\nDeduct',
-		'permlevel': 0,
-		'reqd': 1,
-		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
 		'fieldname': u'charge_type',
 		'fieldtype': u'Select',
 		'label': u'Type',
@@ -82,46 +54,6 @@
 		'permlevel': 0,
 		'reqd': 1,
 		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'row_id',
-		'fieldtype': u'Data',
-		'hidden': 0,
-		'label': u'Enter Row',
-		'oldfieldname': u'row_id',
-		'oldfieldtype': u'Data',
-		'permlevel': 0,
-		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'doctype': u'DocField',
-		'fieldname': u'item_wise_tax_detail',
-		'fieldtype': u'Small Text',
-		'hidden': 1,
-		'label': u'Item Wise Tax Detail ',
-		'oldfieldname': u'item_wise_tax_detail',
-		'oldfieldtype': u'Small Text',
-		'permlevel': 1,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'description',
-		'fieldtype': u'Small Text',
-		'label': u'Description',
-		'oldfieldname': u'description',
-		'oldfieldtype': u'Small Text',
-		'permlevel': 0,
-		'reqd': 1,
-		'width': u'300px'
 	},
 
 	# DocField
@@ -149,6 +81,19 @@
 		'options': u'Cost Center',
 		'permlevel': 0,
 		'trigger': u'Client'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'description',
+		'fieldtype': u'Small Text',
+		'label': u'Description',
+		'oldfieldname': u'description',
+		'oldfieldtype': u'Small Text',
+		'permlevel': 0,
+		'reqd': 1,
+		'width': u'300px'
 	},
 
 	# DocField
@@ -182,10 +127,68 @@
 		'doctype': u'DocField',
 		'fieldname': u'total',
 		'fieldtype': u'Currency',
-		'label': u'Aggregate Total',
+		'label': u'Total',
 		'oldfieldname': u'total',
 		'oldfieldtype': u'Currency',
 		'permlevel': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'row_id',
+		'fieldtype': u'Data',
+		'hidden': 0,
+		'label': u'Enter Row',
+		'oldfieldname': u'row_id',
+		'oldfieldtype': u'Data',
+		'permlevel': 0,
+		'trigger': u'Client'
+	},
+
+	# DocField
+	{
+		'colour': u'White:FFF',
+		'description': u'For Both',
+		'doctype': u'DocField',
+		'fieldname': u'category',
+		'fieldtype': u'Select',
+		'label': u'Consider Tax or Charge for',
+		'oldfieldname': u'category',
+		'oldfieldtype': u'Select',
+		'options': u'Valuation and Total\nValuation\nTotal',
+		'permlevel': 0,
+		'reqd': 1
+	},
+
+	# DocField
+	{
+		'colour': u'White:FFF',
+		'default': u'Add',
+		'doctype': u'DocField',
+		'fieldname': u'add_deduct_tax',
+		'fieldtype': u'Select',
+		'label': u'Add or Deduct',
+		'oldfieldname': u'add_deduct_tax',
+		'oldfieldtype': u'Select',
+		'options': u'Add\nDeduct',
+		'permlevel': 0,
+		'reqd': 1,
+		'trigger': u'Client'
+	},
+
+	# DocField
+	{
+		'colour': u'White:FFF',
+		'doctype': u'DocField',
+		'fieldname': u'item_wise_tax_detail',
+		'fieldtype': u'Small Text',
+		'hidden': 1,
+		'label': u'Item Wise Tax Detail ',
+		'oldfieldname': u'item_wise_tax_detail',
+		'oldfieldtype': u'Small Text',
+		'permlevel': 1,
+		'print_hide': 1
 	},
 
 	# DocField

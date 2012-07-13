@@ -483,8 +483,21 @@ patch_list = [
 		'description': "deprecate doctype - Import Data Control and page - Import Data"
 	},
 	{
-		'patch_module': 'patches.june_2012',
+		'patch_module': 'patches.july_2012',
+		'patch_file': 'default_freeze_account',
+		'description': "set default freeze_account as 'No' where NULL"
+	},
+	{
+		'patch_module': 'patches.july_2012',
+		'patch_file': 'update_purchase_tax',
+		'description': "rename options in purchase taxes and charges"
+	},
+	{	'patch_module': 'patches.june_2012',
 		'patch_file': 'cms2',
 		'description': 'cms2 release patches'
+	},
+	{	'patch_module': 'patches.july_2012',
+		'patch_file': 'auth_table',
+		'description': 'create new __Auth table'
 	},
 ]

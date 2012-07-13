@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-03-27 14:36:37',
+		'creation': '2012-07-03 13:30:46',
 		'docstatus': 0,
-		'modified': '2012-03-27 14:36:37',
+		'modified': '2012-07-11 18:56:27',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -20,7 +20,7 @@
 		'section_style': u'Tray',
 		'server_code_error': u' ',
 		'show_in_menu': 0,
-		'version': 3
+		'version': 1
 	},
 
 	# These values are common for all DocField
@@ -41,18 +41,6 @@
 	# DocField
 	{
 		'doctype': u'DocField',
-		'fieldname': u'is_main_item',
-		'fieldtype': u'Select',
-		'label': u'Is Main Item',
-		'oldfieldname': u'is_main_item',
-		'oldfieldtype': u'Select',
-		'options': u'\nYes\nNo',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
 		'fieldname': u'item_code',
 		'fieldtype': u'Link',
 		'label': u'Item',
@@ -62,6 +50,18 @@
 		'permlevel': 0,
 		'reqd': 1,
 		'trigger': u'Client'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'qty',
+		'fieldtype': u'Currency',
+		'label': u'Qty',
+		'oldfieldname': u'qty',
+		'oldfieldtype': u'Currency',
+		'permlevel': 0,
+		'reqd': 1
 	},
 
 	# DocField
@@ -85,18 +85,6 @@
 		'oldfieldname': u'rate',
 		'oldfieldtype': u'Currency',
 		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'qty',
-		'fieldtype': u'Currency',
-		'label': u'Qty',
-		'oldfieldname': u'qty',
-		'oldfieldtype': u'Currency',
-		'permlevel': 0,
-		'reqd': 1
 	},
 
 	# DocField

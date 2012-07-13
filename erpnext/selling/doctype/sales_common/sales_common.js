@@ -127,8 +127,32 @@ cur_frm.cscript.dynamic_label = function(doc, cdt, cdn, base_curr, callback) {
 	cur_frm.cscript.base_currency = base_curr;
 	set_dynamic_label_par(doc, cdt, cdn, base_curr);
 	set_dynamic_label_child(doc, cdt, cdn, base_curr);
+	set_sales_bom_help(doc);
 
 	if (callback) callback(doc, cdt, cdn);
+}
+
+// Help for Sales BOM items
+var set_sales_bom_help = function(doc) {
+	if (getchildren('Delivery Note Packing Item', doc.name, 'packing_details').length) {
+		$(cur_frm.fields_dict.packing_list.row.wrapper).toggle(true);
+		
+		if (inList(['Delivery Note', 'Sales Invoice'], doc.doctype)) {
+			help_msg = "<div class='help-box'> \
+				For 'Sales BOM' items, warehouse, serial no and batch no \
+				will be considered from the 'Packing List' table. \
+				If warehouse and batch no are same for all packing items for any 'Sales BOM' item, \
+				those values can be entered in the main item table, values will be copied to 'Packing List' table. \
+			</div>";
+			get_field(doc.doctype, 'sales_bom_help', doc.name).options = help_msg;
+		} 
+	} else {
+		$(cur_frm.fields_dict.packing_list.row.wrapper).toggle(false);
+		if (inList(['Delivery Note', 'Sales Invoice'], doc.doctype)) {
+			get_field(doc.doctype, 'sales_bom_help', doc.name).options = '';
+		}
+	}
+	refresh_field('sales_bom_help');
 }
 
 
@@ -340,7 +364,12 @@ cur_frm.cscript.export_rate = function(doc,cdt,cdn) {
 
 // ************* GET OTHER CHARGES BASED ON COMPANY *************
 cur_frm.fields_dict.charge.get_query = function(doc) {
-	return 'SELECT DISTINCT `tabSales Taxes and Charges Master`.name FROM `tabSales Taxes and Charges Master` WHERE `tabSales Taxes and Charges Master`.company = "'+doc.company+'" AND `tabSales Taxes and Charges Master`.company is not NULL AND `tabSales Taxes and Charges Master`.docstatus != 2 AND `tabSales Taxes and Charges Master`.%(key)s LIKE "%s" ORDER BY `tabSales Taxes and Charges Master`.name LIMIT 50';
+	return 'SELECT DISTINCT `tabSales Taxes and Charges Master`.name FROM \
+		`tabSales Taxes and Charges Master` WHERE `tabSales Taxes and Charges Master`.company = "'
+		+doc.company+'" AND `tabSales Taxes and Charges Master`.company is not NULL \
+		AND `tabSales Taxes and Charges Master`.docstatus != 2 \
+		AND `tabSales Taxes and Charges Master`.%(key)s LIKE "%s" \
+		ORDER BY `tabSales Taxes and Charges Master`.name LIMIT 50';
 }
 
 // ********************* Get Charges ****************************

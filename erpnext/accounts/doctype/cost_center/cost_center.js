@@ -26,17 +26,25 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
  
 }
 
-cur_frm.cscript.refresh = function(doc, cdt, cdn) {
-	cur_frm.cscript.hide_unhide_group_ledger(doc);
-	cur_frm.add_custom_button('Back To Chart of Cost Centers', function() {
-		wn.set_route('Accounts Browser', 'Cost Center');
-	}, 'icon-arrow-left')
+cur_frm.cscript.set_breadcrumbs = function(barea) {
+	cur_frm.frm_head.appframe.add_breadcrumb(cur_frm.docname);
+	cur_frm.frm_head.appframe.add_breadcrumb(' in <a href="#!Accounts Browser/Cost Center">\
+		Chart of Cost Centers</a>');
+	cur_frm.frm_head.appframe.add_breadcrumb(' in <a href="#!accounts-home">Accounts</a>');
+}
 
+cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	var intro_txt = '';
+	cur_frm.toggle_fields('cost_center_name', doc.__islocal);
+
 	if(!doc.__islocal && doc.group_or_ledger=='Group') {
 		intro_txt += '<p><b>Note:</b> This is Cost Center is a <i>Group</i>, \
 			Accounting Entries are not allowed against groups.</p>';
 	}
+
+	cur_frm.cscript.hide_unhide_group_ledger(doc);
+	
+	cur_frm.toggle_fields('sb1', doc.group_or_ledger=='Ledger')
 	cur_frm.set_intro(intro_txt);
 }
 
@@ -80,8 +88,7 @@ cur_frm.cscript.hide_unhide_group_ledger = function(doc) {
 cur_frm.cscript.convert_to_ledger = function(doc, cdt, cdn) {
 	$c_obj(cur_frm.get_doclist(),'convert_group_to_ledger','',function(r,rt) {
 		if(r.message == 1) {
-			refresh_field('group_or_ledger');
-			cur_frm.cscript.hide_unhide_group_ledger(cur_frm.get_doc());
+			cur_frm.refresh();
 		}
 	});
 }
@@ -91,8 +98,7 @@ cur_frm.cscript.convert_to_ledger = function(doc, cdt, cdn) {
 cur_frm.cscript.convert_to_group = function(doc, cdt, cdn) {
 	$c_obj(cur_frm.get_doclist(),'convert_ledger_to_group','',function(r,rt) {
 		if(r.message == 1) {
-			refresh_field('group_or_ledger');
-			cur_frm.cscript.hide_unhide_group_ledger(cur_frm.get_doc());
+			cur_frm.refresh();
 		}
 	});
 }

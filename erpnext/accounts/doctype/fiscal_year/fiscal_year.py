@@ -204,9 +204,6 @@ class DocType:
 		if sql("select name from `tabFiscal Year` where year_start_date < %s", self.doc.year_start_date) and not self.doc.past_year:
 			msgprint("Please enter Past Year", raise_exception=1)
 
-		if not self.doc.is_fiscal_year_closed:
-			self.doc.is_fiscal_year_closed = 'No'
-
 
 	# on update
 	def on_update(self):

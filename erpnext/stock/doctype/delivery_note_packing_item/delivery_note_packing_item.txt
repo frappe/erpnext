@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-04-13 11:56:35',
+		'creation': '2012-06-11 12:10:10',
 		'docstatus': 0,
-		'modified': '2012-05-09 12:55:23',
+		'modified': '2012-07-10 12:05:31',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -111,7 +111,7 @@
 		'oldfieldname': u'warehouse',
 		'oldfieldtype': u'Link',
 		'options': u'Warehouse',
-		'permlevel': 1
+		'permlevel': 0
 	},
 
 	# DocField

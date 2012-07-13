@@ -14,21 +14,22 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
- 
-
-cur_frm.cscript.onload = function(){
-   
-  if(doc.__islocal){
-    doc.parent_customer_group = 'Root';
-    refresh('parent_customer_group');
-  }
+cur_frm.cscript.set_breadcrumbs = function(barea) {
+	cur_frm.frm_head.appframe.add_breadcrumb(cur_frm.docname);
+	cur_frm.frm_head.appframe.add_breadcrumb(' in <a href="#!Sales Browser/Customer Group">\
+		Customer Group Tree</a>');
+	cur_frm.frm_head.appframe.add_breadcrumb(' in <a href="#!selling-home">Selling</a>');
 }
 
+ 
 cur_frm.cscript.refresh = function(doc, cdt, cdn) {
    
 }
 
 //get query select Customer Group
 cur_frm.fields_dict['parent_customer_group'].get_query = function(doc,cdt,cdn) {
-  return 'SELECT `tabCustomer Group`.`name`,`tabCustomer Group`.`parent_customer_group` FROM `tabCustomer Group` WHERE `tabCustomer Group`.`is_group` = "Yes" AND `tabCustomer Group`.`docstatus`!= 2 AND `tabCustomer Group`.%(key)s LIKE "%s" ORDER BY  `tabCustomer Group`.`name` ASC LIMIT 50';
+  return 'SELECT `tabCustomer Group`.`name`,`tabCustomer Group`.`parent_customer_group` \
+	FROM `tabCustomer Group` WHERE `tabCustomer Group`.`is_group` = "Yes" AND \
+		`tabCustomer Group`.`docstatus`!= 2 AND `tabCustomer Group`.%(key)s LIKE "%s" \
+		ORDER BY  `tabCustomer Group`.`name` ASC LIMIT 50';
 }

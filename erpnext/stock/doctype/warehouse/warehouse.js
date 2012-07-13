@@ -14,6 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+cur_frm.cscript.refresh = function(doc) {
+	cur_frm.toggle_fields('warehouse_name', doc.__islocal);
+}
+
 cur_frm.cscript.country = function(doc, cdt, cdn) {
   var mydoc=doc;
   $c('runserverobj', args={'method':'check_state', 'docs':compress_doclist(make_doclist(doc.doctype, doc.name))},

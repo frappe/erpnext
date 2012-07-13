@@ -20,33 +20,39 @@
 cur_frm.cscript.onload = function(doc, cdt, cdn) {
 }
 
+cur_frm.cscript.set_breadcrumbs = function(barea) {
+	cur_frm.frm_head.appframe.add_breadcrumb(cur_frm.docname);
+	cur_frm.frm_head.appframe.add_breadcrumb(' in <a href="#!Accounts Browser/Account">\
+		Chart of Accounts</a>');
+	cur_frm.frm_head.appframe.add_breadcrumb(' in <a href="#!accounts-home">Accounts</a>');
+}
+
 // Refresh
 // -----------------------------------------
 cur_frm.cscript.refresh = function(doc, cdt, cdn) {
-	// read-only for root accounts
-  	root_acc = ['Application of Funds (Assets)','Expenses','Income','Source of Funds (Liabilities)'];
-	if(inList(root_acc, doc.account_name))
-		cur_frm.perm = [[1,0,0], [1,0,0]];
-
+	cur_frm.toggle_fields('account_name', doc.__islocal);
+	
 	// hide fields if group
 	cur_frm.toggle_fields(['account_type', 'master_type', 'master_name', 'freeze_account', 
-		'credit_days', 'credit_limit'], doc.group_or_ledger=='Ledger')	
+		'credit_days', 'credit_limit', 'tax_rate'], doc.group_or_ledger=='Ledger')	
 
-	// credit days and type if customer or supplier
-	cur_frm.toggle_fields(['credit_days', 'credit_limit'], 
-		in_list(['Customer', 'Supplier'], doc.master_type))
+	// read-only for root accounts
+  	root_acc = ['Application of Funds (Assets)','Expenses','Income','Source of Funds (Liabilities)'];
+	if(in_list(root_acc, doc.account_name)) {
+		cur_frm.perm = [[1,0,0], [1,0,0]];
+		cur_frm.set_intro("This is a root account and cannot be edited.");
+	} else {
+		// credit days and type if customer or supplier
+		cur_frm.set_intro(null);
+		cur_frm.toggle_fields(['credit_days', 'credit_limit'], 
+			in_list(['Customer', 'Supplier'], doc.master_type))
 
-	// hide tax_rate
-	cur_frm.cscript.account_type(doc, cdt, cdn);
+		// hide tax_rate
+		cur_frm.cscript.account_type(doc, cdt, cdn);
 
-	// show / hide convert buttons
-	cur_frm.cscript.hide_unhide_group_ledger(doc);
-	
-	// back to chart of accounts
-	cur_frm.add_custom_button('Back To Chart of Accounts', function() {
-		wn.set_route('Accounts Browser', 'Account');
-	}, 'icon-arrow-left')
-	
+		// show / hide convert buttons
+		cur_frm.cscript.hide_unhide_group_ledger(doc);		
+	}
 }
 
 // Fetch parent details
@@ -57,8 +63,12 @@ cur_frm.add_fetch('parent_account', 'is_pl_account', 'is_pl_account');
 // Hide tax rate based on account type
 // -----------------------------------------
 cur_frm.cscript.account_type = function(doc, cdt, cdn) {
-	cur_frm.toggle_fields(['tax_rate'], doc.account_type == 'Tax')
-	cur_frm.toggle_fields(['master_type', 'master_name'], cstr(doc.account_type)=='')
+	if(doc.group_or_ledger=='Ledger') {
+		cur_frm.toggle_fields(['tax_rate'], 
+			doc.account_type == 'Tax');
+		cur_frm.toggle_fields(['master_type', 'master_name'], 
+			cstr(doc.account_type)=='');		
+	}
 }
 
 // Hide/unhide group or ledger
@@ -76,9 +86,8 @@ cur_frm.cscript.hide_unhide_group_ledger = function(doc) {
 // -----------------------------------------
 cur_frm.cscript.convert_to_ledger = function(doc, cdt, cdn) {
   $c_obj(cur_frm.get_doclist(),'convert_group_to_ledger','',function(r,rt) {
-    if(r.message == 1) {
-      refresh_field('group_or_ledger');
-      cur_frm.cscript.hide_unhide_group_ledger(cur_frm.get_doc());
+    if(r.message == 1) {  
+	  cur_frm.refresh();
     }
   });
 }
@@ -88,9 +97,7 @@ cur_frm.cscript.convert_to_ledger = function(doc, cdt, cdn) {
 cur_frm.cscript.convert_to_group = function(doc, cdt, cdn) {
   $c_obj(cur_frm.get_doclist(),'convert_ledger_to_group','',function(r,rt) {
     if(r.message == 1) {
-      doc.group_or_ledger = 'Group';
-      refresh_field('group_or_ledger');
-      cur_frm.cscript.hide_unhide_group_ledger(cur_frm.get_doc());
+	  cur_frm.refresh();
     }
   });
 }

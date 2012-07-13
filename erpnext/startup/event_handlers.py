@@ -40,8 +40,9 @@ def on_login_post_session(login_manager):
 	if webnotes.session['user'] not in ('Guest', 'demo@webnotestech.com'):
 		# create feed
 		from webnotes.utils import nowtime
+		from webnotes.profile import get_user_fullname
 		home.make_feed('Login', 'Profile', login_manager.user, login_manager.user,
-			'%s logged in at %s' % (login_manager.user_fullname, nowtime()), 
+			'%s logged in at %s' % (get_user_fullname, nowtime()), 
 			login_manager.user=='Administrator' and '#8CA2B3' or '#1B750D')		
 
 

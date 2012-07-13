@@ -8,33 +8,47 @@
 // 
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	See the
 // GNU General Public License for more details.
 // 
 // You should have received a copy of the GNU General Public License
-// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+// along with this program.	If not, see <http://www.gnu.org/licenses/>.
 
 // Settings
 cur_frm.cscript.onload = function(doc, cdt, cdn){
-  var callback = function(r, rt){
-    set_field_options('select_doc_for_series', r.message);
-  }
-  $c_obj(make_doclist(doc.doctype, doc.name),'get_transactions','',callback);
-  cur_frm.cscript.refresh();
-  // add page head
-  //var ph = new PageHeader(cur_frm.fields_dict['head_html'].wrapper, 'Setup Series', 'Set prefix for numbering series on your transactions');
+	cur_frm.call_server('get_transactions', '', cur_frm.cscript.update_selects);
+	
+	cur_frm.cscript.select_doc_for_series(doc);
 }
 
-cur_frm.cscript.refresh = function(doc, cdt, cdn) {
-  // hide buttons
-  $('.appframe-toolbar').toggle(false);
+cur_frm.cscript.update_selects = function(r) {
+	set_field_options('select_doc_for_series', r.message.transactions);
+	set_field_options('prefix', r.message.prefixes);
 }
+
 
 cur_frm.cscript.select_doc_for_series = function(doc, cdt, cdn) {
-  var callback = function(r, rt){
-    locals[cdt][cdn].set_options = r.message;
-    refresh_field('set_options');
-  }
+	cur_frm.toggle_fields(['help_html','set_options', 'user_must_always_select', 'update'], 
+		doc.select_doc_for_series)
 
-  $c_obj(make_doclist(doc.doctype, doc.name),'get_options','',callback)
+	var callback = function(r, rt){
+		locals[cdt][cdn].set_options = r.message;
+		refresh_field('set_options');
+		if(r.message && r.message.split('\n')[0]=='') {
+			cur_frm.set_value('user_must_always_select', 1)
+		}
+	}
+
+	if(doc.select_doc_for_series)
+		$c_obj(make_doclist(doc.doctype, doc.name),'get_options','',callback)
+}
+
+cur_frm.cscript.update = function() {
+	cur_frm.call_server('update_series', '', cur_frm.cscript.update_selects)
+}
+
+cur_frm.cscript.prefix = function(doc) {
+	cur_frm.call_server('get_current', '', function(r) {
+		refresh_field('current_value');
+	})
 }

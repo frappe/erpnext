@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-05-15 12:14:34',
+		'creation': '2012-07-04 16:40:13',
 		'docstatus': 0,
-		'modified': '2012-07-04 13:27:05',
+		'modified': '2012-07-12 13:50:43',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -113,7 +113,7 @@
 		'doctype': u'DocField',
 		'fieldname': u'tax_amount',
 		'fieldtype': u'Currency',
-		'label': u'Amount*',
+		'label': u'Amount',
 		'oldfieldname': u'tax_amount',
 		'oldfieldtype': u'Currency',
 		'permlevel': 0,
@@ -126,7 +126,7 @@
 		'doctype': u'DocField',
 		'fieldname': u'total',
 		'fieldtype': u'Currency',
-		'label': u'Total*',
+		'label': u'Total',
 		'oldfieldname': u'total',
 		'oldfieldtype': u'Currency',
 		'permlevel': 1
