@@ -116,7 +116,7 @@ cur_frm.cscript.add_to_rec_list = function(doc, tab, length) {
 		}
 	}
 	doc.recipient_list = rec_list.join('\n');
-	//console.log(doc.recipient_list);
 	cur_frm.rec_dialog.hide();
+	cur_frm.save();
 	cur_frm.refresh_fields();
 }

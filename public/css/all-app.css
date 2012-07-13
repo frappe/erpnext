@@ -2309,10 +2309,13 @@ div.notice {
 
 .help_box, .help-box {
 	background-color: #ffe;
-	color: #874;
 	padding: 9px 9px 9px 9px;
 	border: 1px dashed #fc7;
 	margin: 11px 0px;
+}
+
+.help-box, .help-box p, .help-box h1, .help-box h2, .help-box h3, .help-box h4 {
+	color: #643;
 }
 
 

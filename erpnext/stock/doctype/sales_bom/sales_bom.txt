@@ -5,7 +5,7 @@
 	{
 		'creation': '2012-07-03 13:30:44',
 		'docstatus': 0,
-		'modified': '2012-07-11 19:17:51',
+		'modified': '2012-07-12 18:00:16',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -15,7 +15,7 @@
 		'_last_update': u'1322549701',
 		'allow_trash': 1,
 		'colour': u'White:FFF',
-		'description': u'Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the packed **Item**. \n\nThe package **Item** will have "Is Stock Item" as "No" and "Is Sales Item" as "Yes".\n\nFor Example: If you are selling Laptops and Backpacks separately and have a special price if the customer buys both, then the Laptop + Backpack will be a new Sales BOM Item.\n\nNote: BOM = Bill of Materials',
+		'description': u'Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**. \n\nThe package **Item** will have "Is Stock Item" as "No" and "Is Sales Item" as "Yes".\n\nFor Example: If you are selling Laptops and Backpacks separately and have a special price if the customer buys both, then the Laptop + Backpack will be a new Sales BOM Item.\n\nNote: BOM = Bill of Materials',
 		'doctype': 'DocType',
 		'document_type': u'Master',
 		'is_submittable': 0,

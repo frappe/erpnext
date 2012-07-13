@@ -19,9 +19,9 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
   // 
 }
 
-/*cur_frm.cscript.refresh = function(doc, cdt, cdn) {
-   
-}*/
+cur_frm.cscript.refresh = function(doc, cdt, cdn) {
+   cur_frm.set_footnote(wn.markdown(cur_frm.meta.description));
+}
 
 // For customizing print
 cur_frm.pformat.net_total = function(doc) {

@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-05-15 12:15:01',
+		'creation': '2012-07-03 13:30:55',
 		'docstatus': 0,
-		'modified': '2012-06-14 14:47:49',
+		'modified': '2012-07-12 16:16:27',
 		'modified_by': u'Administrator',
 		'owner': u'harshada@webnotestech.com'
 	},
@@ -18,6 +18,7 @@
 		'allow_print': 1,
 		'colour': u'White:FFF',
 		'default_print_format': u'Standard',
+		'description': u'Email Settings for Outgoing and Incoming Emails.',
 		'doctype': 'DocType',
 		'in_create': 1,
 		'issingle': 1,
@@ -70,6 +71,8 @@
 
 	# DocField
 	{
+		'colour': u'White:FFF',
+		'description': u'Set your outgoing mail SMTP settings here. All system generated notifications, emails will go from this mail server. If you are not sure, leave this blank to use ERPNext servers (emails will still be sent from your email id) or contact your email provider.',
 		'doctype': u'DocField',
 		'fieldname': u'outgoing_mails',
 		'fieldtype': u'Section Break',
@@ -78,27 +81,12 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
-		'fieldname': u'html1',
-		'fieldtype': u'HTML',
-		'label': u'1',
-		'options': u'<div class="help_box">Set your outgoing mail settings here. All system generated notifications, emails will go from this mail server</div>'
-	},
-
-	# DocField
-	{
+		'colour': u'White:FFF',
+		'description': u'SMTP Server (e.g. smtp.gmail.com)',
 		'doctype': u'DocField',
 		'fieldname': u'outgoing_mail_server',
 		'fieldtype': u'Data',
 		'label': u'Outgoing Mail Server'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'mail_port',
-		'fieldtype': u'Int',
-		'label': u'Mail Port'
 	},
 
 	# DocField
@@ -111,6 +99,25 @@
 
 	# DocField
 	{
+		'colour': u'White:FFF',
+		'description': u'If non standard port (e.g. 587)',
+		'doctype': u'DocField',
+		'fieldname': u'mail_port',
+		'fieldtype': u'Int',
+		'label': u'Mail Port'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'cb0',
+		'fieldtype': u'Column Break'
+	},
+
+	# DocField
+	{
+		'colour': u'White:FFF',
+		'description': u'Set Login and Password if authentication is required.',
 		'doctype': u'DocField',
 		'fieldname': u'mail_login',
 		'fieldtype': u'Data',
@@ -127,6 +134,8 @@
 
 	# DocField
 	{
+		'colour': u'White:FFF',
+		'description': u'System generated mails will be sent from this email id.',
 		'doctype': u'DocField',
 		'fieldname': u'auto_email_id',
 		'fieldtype': u'Data',
@@ -144,19 +153,12 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
-		'fieldname': u'html2',
-		'fieldtype': u'HTML',
-		'label': u'2',
-		'options': u'<div class="help_box">To automatically create Support Tickets from your incoming mail, set your pop3 settings here.</div>'
-	},
-
-	# DocField
-	{
+		'colour': u'White:FFF',
+		'description': u'To automatically create Support Tickets from your incoming mail, set your POP3 settings here. You must ideally create a separate email id for the erp system so that all emails will be synced into the system from that mail id. If you are not sure, please contact your EMail Provider.',
 		'doctype': u'DocField',
 		'fieldname': u'section_break0',
 		'fieldtype': u'Section Break',
-		'options': u'Simple'
+		'label': u'Incoming Mail Setting'
 	},
 
 	# DocField
@@ -216,7 +218,7 @@
 	# DocField
 	{
 		'doctype': u'DocField',
-		'fieldname': u'column_break0',
+		'fieldname': u'cb1',
 		'fieldtype': u'Column Break'
 	},
 
