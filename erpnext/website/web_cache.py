@@ -225,6 +225,8 @@ def refresh_cache(build=None):
 	
 	# webnotes.conn.sql("delete from `tabWeb Cache`")
 	
+	clear_cache(None)
+	
 	query_map = {
 		'Web Page': """select page_name, name from `tabWeb Page` where docstatus=0""",
 		'Blog': """\
@@ -236,12 +238,11 @@ def refresh_cache(build=None):
 	}
 
 	for dt in query_map:
-		for result in webnotes.conn.sql(query_map[dt], as_dict=1):
-			create_cache(result['page_name'], dt, result['name'])
-			clear_cache(result['page_name'], dt, result['name'])
-			if build and dt in build: load_into_cache(result['page_name'])
+		if build and dt in build: 
+			for result in webnotes.conn.sql(query_map[dt], as_dict=1):
+				create_cache(result['page_name'], dt, result['name'])
+				load_into_cache(result['page_name'])
 			
 	for page_name in get_predefined_pages():
 		create_cache(page_name, None, None)
-		clear_cache(page_name, None, None)
 		if build: load_into_cache(page_name)

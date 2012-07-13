@@ -41,7 +41,7 @@ def cleanup():
 		try:
 			webnotes.model.delete_doc('Page', page)
 		except Exception, e:
-			webnotes.modules.patch_handler.log(str(e))
+			webnotes.modules.patch_handler.log(unicode(e))
 
 	import os
 	import conf
@@ -74,7 +74,7 @@ def save_pages():
 			try:
 				DocList(dt, result['name'].encode('utf-8')).save()
 			except Exception, e:
-				webnotes.modules.patch_handler.log(str(e))
+				webnotes.modules.patch_handler.log(unicode(e))
 			
 def save_website_settings():
 	from webnotes.model.code import get_obj
