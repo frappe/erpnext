@@ -23,7 +23,4 @@
 	"public/js/complete_setup.js": [
 		"erpnext/startup/js/complete_setup.js",
 	],
-	"public/js/product_category.js": [
-		"erpnext/website/js/product_category.js",
-	],
 }

@@ -1,0 +1,59 @@
+{#
+	requires, brand, top_bar_items, footer_items, copyright, content
+#}
+
+{% extends "html/base.html" %}
+
+{% block body %}
+
+	<header>
+		<div class="navbar navbar-fixed-top">
+			<div class="navbar-inner">
+			<div class="container">
+				<a class="brand" href="index.html">{{ brand }}</a>
+				<ul class="nav">
+					{% for page in top_bar_items %}
+						{% if not page.parent_label %}
+						<li data-label="{{ page.label }}">
+							<a href="{{ page.url }}" {{ page.target }}>
+							{{ page.label }}
+							{% if page.child_items %}
+								<ul class="dropdown-menu">
+								{% for child in page.child_items %}
+									<li data-label="{{ child.label }}">
+										<a href="{{ child.url }}" {{ child.target }}>
+								{% endfor %}
+								</ul>
+							{% endif %}
+							</a></li>
+						{% endif %}
+					{% endfor %}
+				</ul>
+				<img src="images/lib/ui/spinner.gif" id="spinner"/>
+				<ul class="nav pull-right">
+					<li id="login-topbar-item"><a href="login.html">Login</a></li>
+				</ul>
+			</div>
+			</div>
+			</div>	
+	</header>
+	<div id="body_div">
+		<div class="content" id="page-{{ name }}" style="display: block;">
+		{% block content %}
+		{% endblock %}
+		</div>
+	</div>
+	<footer><div class="web-footer">
+		<div class="web-footer-menu"><ul>
+		{% for item in footer_items %}
+			<li><a href="{{ item.url }}" {{ item.target }}
+				data-label="{{ item.label }}">{{ item.label }}</a></li>
+		{% endfor %}
+		</ul></div>
+		{% if copyright %}
+		<div class="web-footer-copyright">&copy; {{ copyright }}
+		{% endif %}
+		</div>
+	</footer>
+
+{% endblock %}

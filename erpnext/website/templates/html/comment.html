@@ -1,0 +1,14 @@
+{#
+	this template generates comment rows for a blog
+	it is to be included in the blog/blog.html template
+#}
+
+{% for comment in comment_list %}
+<div class="comment-row">
+	<div class="comment-title">
+		{{ comment.comment_by_fullname }} - {{ comment.comment_date }}:
+	</div>
+	<p class="comment-content">{{ comment.comment }}</p>
+	<hr>
+</div>
+{% endfor %}

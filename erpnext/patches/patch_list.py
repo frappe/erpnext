@@ -339,11 +339,6 @@ patch_list = [
 	},
 	{
 		'patch_module': 'patches.may_2012',
-		'patch_file': 'cms',
-		'description': 'generate html pages'
-	},
-	{
-		'patch_module': 'patches.may_2012',
 		'patch_file': 'reload_reports',
 		'description': 'reload reports: itemwise sales/delivery details'
 	},
@@ -491,5 +486,10 @@ patch_list = [
 		'patch_module': 'patches.july_2012',
 		'patch_file': 'default_freeze_account',
 		'description': "set default freeze_account as 'No' where NULL"
+	},
+	{
+		'patch_module': 'patches.june_2012',
+		'patch_file': 'cms2',
+		'description': 'cms2 release patches'
 	},
 ]

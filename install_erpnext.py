@@ -48,7 +48,7 @@ if not os.path.exists(os.path.join(erpnext_path, 'logs')):
 # setup lib -- framework repo with read only access
 # change this if you have your own fork
 if not os.path.exists(os.path.join(erpnext_path, 'lib')):
-	os.system('git clone git://github.com/webnotes/wnframework.git lib')
+	os.system('git clone https://github.com/webnotes/wnframework.git lib')
 
 # setup symlinks in public
 if not os.path.exists(os.path.join(erpnext_path, 'public', 'js', 'lib')):
@@ -101,12 +101,7 @@ inst.import_from_db(new_dbname, source_path=os.path.join(erpnext_path, 'data', '
 
 # apply patches
 os.chdir(erpnext_path)
-os.system("lib/wnf.py -l")
-
-# force sync all
-os.system("lib/wnf.py --sync_all -f")
-
-os.system("lib/wnf.py --cms")
+os.system("lib/wnf.py --update origin master")
 
 # set filemode false
 os.system("git config core.filemode false")
@@ -114,11 +109,56 @@ os.chdir(os.path.join(erpnext_path, 'lib'))
 os.system("git config core.filemode false")
 
 steps_remaining = """
+Notes:
+------
+
+sample apache conf file
+#-----------------------------------------------------------
+SetEnv PYTHON_EGG_CACHE /var/www
+
+# you can change 99 to any other port
+
+Listen 99
+NameVirtualHost *:99
+<VirtualHost *:99>
+	ServerName localhost
+	DocumentRoot {path to erpnext's folder}/public
+    AddHandler cgi-script .cgi .xml .py
+
+	<Directory {path to erpnext's folder}/public/>
+		# directory specific options
+		Options -Indexes +FollowSymLinks +ExecCGI
+		
+		# directory's index file
+		DirectoryIndex web.py
+
+		# rewrite rule
+		RewriteEngine on
+		
+		# condition 1:
+		# ignore login-page.html, app.html, blank.html, unsupported.html
+		RewriteCond %{REQUEST_URI} ^((?!app\.html|blank\.html|unsupported\.html).)*$
+		
+		# condition 2: if there are no slashes
+		# and file is .html or does not containt a .
+		RewriteCond %{REQUEST_URI} ^(?!.+/)((.+\.html)|([^.]+))$
+
+		# rewrite if both of the above conditions are true
+		RewriteRule ^(.+)$ web.py?page=$1 [NC,L]
+		
+		AllowOverride all
+		Order Allow,Deny
+		Allow from all
+	</Directory>
+</VirtualHost>
+#-----------------------------------------------------------
+
 To Do:
 
 * Configure apache/http conf file to point to public folder
 * chown recursively all files in your folder to apache user
 * login using: user="Administrator" and password="admin"
+
 """
 
 print steps_remaining

@@ -46,6 +46,8 @@ class DocType:
 		return ret
 
 	def on_update(self):
+		self.update_page_name()
+		
 		bin = sql("select stock_uom from `tabBin` where item_code = '%s' " % self.doc.item_code)
 		if bin and cstr(bin[0][0]) != cstr(self.doc.stock_uom):
 			msgprint("Please Update Stock UOM with the help of Stock UOM Replace Utility.")
@@ -78,9 +80,13 @@ class DocType:
 			child.conversion_factor = 1
 			child.save()
 
+		self.clear_web_cache()
+
 	# On delete 1. Delete BIN (if none of the corrosponding transactions present, it gets deleted. if present, rolled back due to exception)
 	def on_trash(self):
 		sql("delete from tabBin where item_code='%s'"%(self.doc.item_code))
+		
+		self.delete_web_cache(self.doc.page_name)
 
 	# Check whether Ref Rate is not entered twice for same Price List and Currency
 	def check_ref_rate_detail(self):
@@ -162,9 +168,9 @@ class DocType:
 		if self.doc.has_serial_no == 'Yes' and self.doc.is_stock_item == 'No':
 			msgprint("'Has Serial No' can not be 'Yes' for non-stock item", raise_exception=1)
 
-		# make product page
-		self.make_page()
-
+		if self.doc.name:
+			self.old_page_name = webnotes.conn.get_value('Item', self.doc.name, 'page_name')
+		
 	def check_non_asset_warehouse(self):
 		if self.doc.is_asset_item == "Yes":
 			existing_qty = sql("select t1.warehouse, t1.actual_qty from tabBin t1, tabWarehouse t2 where t1.item_code=%s and (t2.warehouse_type!='Fixed Asset' or t2.warehouse_type is null) and t1.warehouse=t2.name and t1.actual_qty > 0", self.doc.name)
@@ -217,35 +223,38 @@ Total Available Qty: %s
 	def on_rename(self,newdn,olddn):
 		sql("update tabItem set item_code = %s where name = %s", (newdn, olddn))
 
-	def make_page(self):
-		if self.doc.show_in_website=='Yes':
+	def delete_web_cache(self, page_name):
+		import website.web_cache
+		website.web_cache.delete_cache(page_name)
 
-			import website.utils
+	def clear_web_cache(self):
+		if hasattr(self, 'old_page_name') and self.old_page_name and \
+				self.doc.page_name != self.old_page_name:
+			self.delete_web_cache(self.doc.page_name)
+		
+		if self.doc.show_in_website:
+			import website.web_cache
+			website.web_cache.create_cache(self.doc.page_name, self.doc.doctype, self.doc.name)
+			website.web_cache.clear_cache(self.doc.page_name, self.doc.doctype, self.doc.name)
+		else:
+			self.delete_web_cache(self.doc.page_name)
+	
+	def update_page_name(self):
+		import website.utils
+		
+		# if same name, do not repeat twice
+		if self.doc.name == self.doc.item_name:
+			page_name = self.doc.name
+		else:
+			page_name = self.doc.name + " " + self.doc.item_name
 
-			if self.doc.page_name:
-				import webnotes.model
-				webnotes.model.delete_doc('Page', self.doc.page_name)
-				
-			p = website.utils.add_page("Product " + self.doc.item_name)
-			self.doc.page_name = p.name
+		self.doc.page_name = website.utils.page_name(page_name)
 
-			from jinja2 import Template
-			import markdown2
-			import os
-
-
-			self.doc.long_description_html = markdown2.markdown(self.doc.description or '')
-
-			with open(os.path.join(os.path.dirname(__file__), 'template.html'), 'r') as f:
-				p.content = Template(f.read()).render(doc=self.doc)
-
-			with open(os.path.join(os.path.dirname(__file__), 'product_page.js'), 'r') as f:
-				p.script = Template(f.read()).render(doc=self.doc)
-
-			p.save()
-
-			website.utils.add_guest_access_to_page(p.name)
-
-			del self.doc.fields['long_description_html']
-
-			
+		webnotes.conn.set_value('Item', self.doc.name, 'page_name', self.doc.page_name)
+	
+		# no need to check for uniqueness, as name is unique
+		
+	def prepare_template_args(self):
+		import markdown2
+		self.doc.web_description_html = markdown2.markdown(self.doc.description or '',
+										extras=["wiki-tables"])

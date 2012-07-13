@@ -1,0 +1,29 @@
+{% extends "html/page.html" %}
+
+{% block javascript %}
+	{% if insert_code %}
+		{{ javascript }}
+	{% endif %}
+{% endblock %}
+
+{% block content %}
+	<div class="layout-wrapper layout-wrapper-background">
+		<div class="web-content" style="text-align: {{ text_align }};">
+
+			{% if layout and layout.startswith('Two column') %}
+			<div class="layout-main-section">
+			{% else %}
+			<div class="layout-main">
+			{% endif %}
+				{{ main_section_html }}
+			</div>
+
+			{% if layout and layout.startswith('Two column') %}
+			<div class="layout-side-section">
+				{{ side_section_html }}
+			</div>
+			{% endif %}
+			<div style="clear: both"></div>
+		</div>
+	</div>
+{% endblock %}

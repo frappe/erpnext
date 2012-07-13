@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-04-02 16:02:43',
+		'creation': '2012-06-19 15:02:20',
 		'docstatus': 0,
-		'modified': '2012-05-02 15:24:31',
+		'modified': '2012-06-22 18:49:02',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -36,13 +36,15 @@
 
 	# These values are common for all DocPerm
 	{
+		'amend': 0,
 		'doctype': u'DocPerm',
 		'name': '__common__',
 		'parent': u'Web Page',
 		'parentfield': u'permissions',
 		'parenttype': u'DocType',
 		'read': 1,
-		'role': u'Website Manager'
+		'role': u'Website Manager',
+		'submit': 0
 	},
 
 	# DocType, Web Page
@@ -53,6 +55,7 @@
 
 	# DocPerm
 	{
+		'cancel': 1,
 		'create': 1,
 		'doctype': u'DocPerm',
 		'permlevel': 0,
@@ -61,8 +64,11 @@
 
 	# DocPerm
 	{
+		'cancel': 0,
+		'create': 0,
 		'doctype': u'DocPerm',
-		'permlevel': 1
+		'permlevel': 1,
+		'write': 0
 	},
 
 	# DocField
@@ -88,6 +94,17 @@
 
 	# DocField
 	{
+		'colour': u'White:FFF',
+		'description': u'Page url name (auto-generated) ',
+		'doctype': u'DocField',
+		'fieldname': u'page_name',
+		'fieldtype': u'Data',
+		'label': u'Page Name',
+		'permlevel': 1
+	},
+
+	# DocField
+	{
 		'doctype': u'DocField',
 		'fieldname': u'cb1',
 		'fieldtype': u'Column Break',
@@ -101,7 +118,7 @@
 		'fieldname': u'layout',
 		'fieldtype': u'Select',
 		'label': u'Layout',
-		'options': u'Two column with header\nTwo column\nSingle column',
+		'options': u'Single column\nTwo column\nTwo column with header',
 		'permlevel': 0
 	},
 
@@ -176,6 +193,7 @@
 	# DocField
 	{
 		'colour': u'White:FFF',
+		'description': u'Add code as &lt;script&gt;',
 		'doctype': u'DocField',
 		'fieldname': u'insert_code',
 		'fieldtype': u'Check',
@@ -210,15 +228,6 @@
 		'label': u'CSS',
 		'options': u'CSS',
 		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'page_name',
-		'fieldtype': u'Data',
-		'label': u'Page Name',
-		'permlevel': 1
 	},
 
 	# DocField

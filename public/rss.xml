@@ -27,8 +27,12 @@ sys.path.append('../lib/py')
 import webnotes
 import webnotes.auth
 
+import conf
+sys.path.append(conf.modules_path)
+
 if __name__=='__main__':
-	webnotes.http_request = webnotes.auth.HTTPRequest()
+	# webnotes.http_request = webnotes.auth.HTTPRequest()
+	webnotes.connect()
 	from webnotes.cms import feed
 	try:
 		print 'Content-Type: text/xml'

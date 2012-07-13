@@ -22,52 +22,40 @@ naming for same name files: file.gif, file-1.gif, file-2.gif etc
 
 import webnotes
 import website.utils
+import website.web_page
 
-class DocType():
+class DocType(website.web_page.Page):
 	def __init__(self, d, dl):
+		super(DocType, self).__init__('Blog')
 		self.doc, self.doclist = d, dl
-		
-	def autoname(self):
-		"""save file by its name"""
-		self.doc.name = website.utils.page_name(self.doc.title)
-	
-	def validate(self):
-		"""write/update 'Page' with the blog"""
-		# we need the name for the templates
-		if not self.doc.name:
-			self.autoname()
-		
-		if self.doc.page_name:
-			webnotes.conn.sql("""delete from tabPage where name=%s""", self.doc.page_name)
-		
-		p = website.utils.add_page(self.doc.title)
-		
-		from jinja2 import Template
-		import markdown2
-		import os
-		from webnotes.utils import global_date_format, get_fullname
-		from webnotes.model.code import get_obj
-		
-		self.doc.content_html = unicode(markdown2.markdown(self.doc.content or ''))
-		self.doc.full_name = get_fullname(self.doc.owner)
-		self.doc.updated = global_date_format(self.doc.modified)
-		
-		with open(os.path.join(os.path.dirname(__file__), 'template.html'), 'r') as f:
-			p.content = Template(f.read()).render(doc=self.doc)
-		
-		with open(os.path.join(os.path.dirname(__file__), 'blog_page.js'), 'r') as f:
-			p.script = Template(f.read()).render(doc=self.doc)
-			
-		p.web_page = 'Yes'
-		p.save()
-		get_obj(doc=p).write_cms_page()
-		
-		website.utils.add_guest_access_to_page(p.name)
-		self.doc.page_name = p.name
-		
-		# cleanup
-		for f in ['full_name', 'updated', 'content_html']:
-			if f in self.doc.fields:
-				del self.doc.fields[f]				
 
-			
+	def on_update(self):
+		super(DocType, self).on_update()
+		if not webnotes.utils.cint(self.doc.published):
+			self.delete_web_cache(self.doc.page_name)
+		else:
+			import website.blog
+			website.blog.get_blog_content(self.doc.page_name)
+
+	def prepare_template_args(self):
+		import webnotes.utils
+		
+		# this is for double precaution. usually it wont reach this code if not published
+		if not webnotes.utils.cint(self.doc.published):
+			raise Exception, "This blog has not been published yet!"
+		
+		# temp fields
+		from webnotes.utils import global_date_format, get_fullname
+		self.doc.full_name = get_fullname(self.doc.owner)
+		self.doc.updated = global_date_format(self.doc.creation)
+
+		self.markdown_to_html(['content'])
+
+		comment_list = webnotes.conn.sql("""\
+			select comment, comment_by_fullname, creation
+			from `tabComment` where comment_doctype="Blog"
+			and comment_docname=%s order by creation""", self.doc.name, as_dict=1)
+		
+		self.doc.comment_list = comment_list or []
+		for comment in self.doc.comment_list:
+			comment['comment_date'] = webnotes.utils.pretty_date(comment['creation'])
