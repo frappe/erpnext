@@ -223,7 +223,7 @@ def refresh_cache(build=None):
 	"""delete and re-create web cache entries"""
 	import webnotes
 	
-	webnotes.conn.sql("delete from `tabWeb Cache`")
+	# webnotes.conn.sql("delete from `tabWeb Cache`")
 	
 	query_map = {
 		'Web Page': """select page_name, name from `tabWeb Page` where docstatus=0""",
