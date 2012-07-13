@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-04-02 16:02:43',
+		'creation': '2012-05-28 19:22:38',
 		'docstatus': 0,
-		'modified': '2012-04-26 16:58:27',
+		'modified': '2012-06-22 18:56:16',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -21,7 +21,7 @@
 		'name': '__common__',
 		'section_style': u'Simple',
 		'show_in_menu': 0,
-		'version': 5
+		'version': 1
 	},
 
 	# These values are common for all DocField
@@ -51,6 +51,7 @@
 
 	# DocPerm
 	{
+		'cancel': 1,
 		'create': 1,
 		'doctype': u'DocPerm',
 		'permlevel': 0,
@@ -71,7 +72,14 @@
 	{
 		'doctype': u'DocPerm',
 		'permlevel': 1,
-		'role': u'All'
+		'role': u'Website Manager'
+	},
+
+	# DocPerm
+	{
+		'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Blogger'
 	},
 
 	# DocField
@@ -99,6 +107,7 @@
 		'fieldname': u'content',
 		'fieldtype': u'Code',
 		'label': u'Content',
+		'options': u'Markdown',
 		'permlevel': 0,
 		'reqd': 0
 	},
@@ -106,19 +115,11 @@
 	# DocField
 	{
 		'doctype': u'DocField',
-		'fieldname': u'content_html',
-		'fieldtype': u'Text',
-		'label': u'Content HTML',
-		'permlevel': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
 		'fieldname': u'page_name',
 		'fieldtype': u'Data',
+		'hidden': 1,
 		'label': u'Page Name',
-		'permlevel': 0
+		'permlevel': 1
 	},
 
 	# DocField

@@ -1,0 +1,52 @@
+{% extends "html/page.html" %}
+
+{% block javascript %}
+	{% include "js/login.js" %}
+{% endblock %}
+
+{% block css %}
+	{% include "css/login.css" %}
+{% endblock %}
+
+{% block title %}
+	Login Page
+{% endblock %}
+
+{% block content %}
+	<div class="layout-wrapper layout-wrapper-appframe" id='login_wrapper'>
+	<div class="appframe-area"></div>
+	<div class="layout-main" style="padding: 15px;">
+	<form autocomplete="on">
+		<table border="0" cellspacing="8">
+			<tbody>
+				<tr>
+					<td>Login Id</td>
+					<td><input id="login_id" type="text" style="width: 180px"/></td>
+				</tr>
+				<tr>
+					<td>Password</td>
+					<td><input id="password" type="password" style="width: 180px" /></td>
+				</tr>
+				<tr>
+					<td style="text-align:right"><input id="remember_me" type="checkbox" /></td>
+					<td>Remember Me</td>
+				</tr>
+				<tr>
+					<td>&nbsp;</td>
+					<td id="login_message">&nbsp;</td>
+				</tr>
+				<tr>
+					<td>&nbsp;</td>
+					<td>
+						<button type="submit" id="login_btn" class="btn btn-small btn-primary">Login</button>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</form>
+	<p style="margin-left: 72px;"><span class="link_type" 
+		onclick="erpnext.login.show_forgot_password()">Forgot Password</span></p>
+	</div>
+	</div>
+
+{% endblock %}
