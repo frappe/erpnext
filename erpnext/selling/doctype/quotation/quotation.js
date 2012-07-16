@@ -63,7 +63,9 @@ cur_frm.cscript.onload_post_render = function(doc, dt, dn) {
 // hide - unhide fields based on lead or customer..
 // =======================================================================================================================
 cur_frm.cscript.lead_cust_show = function(doc,cdt,cdn){
-	hide_field(['lead', 'lead_name','customer','customer_address','contact_person','customer_name','address_display','contact_display','contact_mobile','contact_email','territory','customer_group', 'organization']);
+	hide_field(['lead', 'lead_name','customer','customer_address','contact_person',
+		'customer_name','address_display','contact_display','contact_mobile','contact_email',
+		'territory','customer_group', 'organization']);
 	if(doc.quotation_to == 'Lead') unhide_field(['lead']);
 	else if(doc.quotation_to == 'Customer') unhide_field(['customer']);
 	
