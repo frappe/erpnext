@@ -496,4 +496,8 @@ patch_list = [
 		'patch_file': 'cms2',
 		'description': 'cms2 release patches'
 	},
+	{	'patch_module': 'patches.july_2012',
+		'patch_file': 'auth_table',
+		'description': 'create new __Auth table'
+	},
 ]

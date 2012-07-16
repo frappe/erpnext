@@ -30,9 +30,13 @@ def get(arg=None):
 
 @webnotes.whitelist()
 def get_roles(arg=None):
-	"""return all roles"""
+	"""return all roles except standard"""
+	return _get_roles(webnotes.form_dict['uid'])
+
+def _get_roles(user):
+	"""return all roles except standard"""
 	return [r[0] for r in webnotes.conn.sql("""select name from tabRole
-		where name not in ('Administrator', 'Guest', 'All') order by name""")]
+		where name not in ('Administrator', 'Guest', 'All') order by name""", user)]
 
 @webnotes.whitelist()
 def get_user_roles(arg=None):

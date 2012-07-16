@@ -59,6 +59,7 @@ erpnext.login.doLogin = function(){
       args['remember_me'] = 1;
 
 	$('#login_btn').set_working();
+	$('#login_message').empty();
 	
     $c("login", args, erpnext.login.onLoginReply);
 
