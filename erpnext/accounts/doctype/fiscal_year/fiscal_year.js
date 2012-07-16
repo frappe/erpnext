@@ -1,3 +1,3 @@
 cur_frm.cscript.refresh = function(doc, dt, dn) {
-	cur_frm.enable_fields('year_start_date', doc.__islocal)
+	cur_frm.toggle_enable('year_start_date', doc.__islocal)
 }

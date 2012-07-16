@@ -134,6 +134,7 @@ cur_frm.cscript.dynamic_label = function(doc, cdt, cdn, base_curr, callback) {
 
 // Help for Sales BOM items
 var set_sales_bom_help = function(doc) {
+	if(!cur_frm.fields_dict.packing_list) return;
 	if (getchildren('Delivery Note Packing Item', doc.name, 'packing_details').length) {
 		$(cur_frm.fields_dict.packing_list.row.wrapper).toggle(true);
 		
@@ -144,12 +145,12 @@ var set_sales_bom_help = function(doc) {
 				If warehouse and batch no are same for all packing items for any 'Sales BOM' item, \
 				those values can be entered in the main item table, values will be copied to 'Packing List' table. \
 			</div>";
-			get_field(doc.doctype, 'sales_bom_help', doc.name).options = help_msg;
+			wn.meta.get_docfield(doc.doctype, 'sales_bom_help', doc.name).options = help_msg;
 		} 
 	} else {
 		$(cur_frm.fields_dict.packing_list.row.wrapper).toggle(false);
 		if (inList(['Delivery Note', 'Sales Invoice'], doc.doctype)) {
-			get_field(doc.doctype, 'sales_bom_help', doc.name).options = '';
+			wn.meta.get_docfield(doc.doctype, 'sales_bom_help', doc.name).options = '';
 		}
 	}
 	refresh_field('sales_bom_help');

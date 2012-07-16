@@ -2558,6 +2558,10 @@ div.sidebar-comment-info {
 	background-color:#FEE;
 }
 
+.field-has-error {
+	border: 2px solid #C00;
+}
+
 /*
  *	lib/css/legacy/grid.css
  */
