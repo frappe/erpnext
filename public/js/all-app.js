@@ -1787,6 +1787,7 @@ if(this.doc.docstatus==0){$(this.wrapper).find('.form-layout-row :input:first').
 this.runclientscript('edit_status_changed');}
 $(cur_frm.wrapper).trigger('render_complete');}}
 _f.Frm.prototype.refresh_footer=function(){var f=this.page_layout.footer;if(f.save_area){if(this.editable&&(!this.meta.in_dialog||this.in_form)&&this.doc.docstatus==0&&!this.meta.istable&&this.get_doc_perms()[WRITE]&&(this.fields&&this.fields.length>7)){f.show_save();}else{f.hide_save();}}}
+_f.Frm.prototype.refresh_field=function(fname){cur_frm.fields_dict[fname]&&cur_frm.fields_dict[fname].refresh&&cur_frm.fields_dict[fname].refresh();}
 _f.Frm.prototype.refresh_fields=function(){for(var i=0;i<this.fields.length;i++){var f=this.fields[i];f.perm=this.perm;f.docname=this.docname;var fn=f.df.fieldname||f.df.label;if(fn)
 f.df=wn.meta.get_docfield(this.doctype,fn,this.docname);if(f.df.fieldtype!='Section Break'&&f.refresh){f.refresh();}}
 $.each(this.sections,function(i,f){f.refresh(true);})
@@ -1850,8 +1851,11 @@ _f.Frm.prototype.show_comments=function(){if(!cur_frm.comments){cur_frm.comments
 cur_frm.comments.list.dt=cur_frm.doctype;cur_frm.comments.list.dn=cur_frm.docname;cur_frm.comments.show();cur_frm.comments.list.run();}
 _f.Frm.prototype.get_doc=function(){return locals[this.doctype][this.docname];}
 _f.Frm.prototype.get_doclist=function(){return make_doclist(this.doctype,this.docname);}
-_f.Frm.prototype.field_map=function(fnames,fn){if(typeof fnames=='string')fnames=[fnames];$.each(fnames,function(i,f){var field=wn.meta.get_docfield(cur_frm.doctype,f,cur_frm.docname)
-if(field){fn(field);field.refresh&&field.refresh();};})}
+_f.Frm.prototype.field_map=function(fnames,fn){if(typeof fnames=='string'){if(fnames=='*'){fnames=keys(this.fields_dict);}else{fnames=[fnames];}}
+$.each(fnames,function(i,f){var field=wn.meta.get_docfield(cur_frm.doctype,f,cur_frm.docname)
+if(field){fn(field);cur_frm.refresh_field(f);};})}
+_f.Frm.prototype.set_df_property=function(fieldname,property,value){var field=wn.meta.get_docfield(cur_frm.doctype,fieldname,cur_frm.docname)
+if(field){field[property]=value;cur_frm.refresh_field(fieldname);};}
 _f.Frm.prototype.toggle_enable=function(fnames,enable){cur_frm.field_map(fnames,function(field){field.disabled=enable?false:true;});}
 _f.Frm.prototype.toggle_reqd=function(fnames,mandatory){cur_frm.field_map(fnames,function(field){field.reqd=mandatory?true:false;});}
 _f.Frm.prototype.toggle_display=function(fnames,show){cur_frm.field_map(fnames,function(field){field.hidden=show?false:true;});}
@@ -2133,16 +2137,12 @@ refresh_many=function(flist,dn,table_field){for(var i in flist){if(table_field)r
 set_field_tip=function(n,txt){var df=wn.meta.get_docfield(cur_frm.doctype,n,cur_frm.docname);if(df)df.description=txt;if(cur_frm&&cur_frm.fields_dict){if(cur_frm.fields_dict[n])
 cur_frm.fields_dict[n].comment_area.innerHTML=replace_newlines(txt);else
 errprint('[set_field_tip] Unable to set field tip: '+n);}}
-refresh_field=function(n,docname,table_field){if(typeof n==typeof[])refresh_many(n,docname,table_field);if(table_field){if(_f.frm_dialog&&_f.frm_dialog.display){if(_f.frm_dialog.cur_frm.fields_dict[n]&&_f.frm_dialog.cur_frm.fields_dict[n].refresh)
-_f.frm_dialog.cur_frm.fields_dict[n].refresh();}else{var g=_f.cur_grid_cell;if(g)var hc=g.grid.head_row.cells[g.cellIndex];if(g&&hc&&hc.fieldname==n&&g.row.docname==docname){hc.template.refresh();}else{cur_frm.fields_dict[table_field].grid.refresh_cell(docname,n);}}}else if(cur_frm&&cur_frm.fields_dict){if(cur_frm.fields_dict[n]&&cur_frm.fields_dict[n].refresh)
-cur_frm.fields_dict[n].refresh();}}
-set_field_options=function(n,txt){var df=wn.meta.get_docfield(cur_frm.doctype,n,cur_frm.docname);if(df)df.options=txt;refresh_field(n);}
-set_field_permlevel=function(n,level){var df=wn.meta.get_docfield(cur_frm.doctype,n,cur_frm.docname);if(df)df.permlevel=level;refresh_field(n);}
-hide_field=function(n){function _hide_field(n,hidden){var df=wn.meta.get_docfield(cur_frm.doctype,n,cur_frm.docname);if(df){df.hidden=hidden;refresh_field(n);}
-else{console.log("hide_field cannot find field "+n);}}
+refresh_field=function(n,docname,table_field){if(typeof n==typeof[])refresh_many(n,docname,table_field);if(table_field){if(_f.frm_dialog&&_f.frm_dialog.display){_f.frm_dialog.cur_frm.refresh_field(n);}else{var g=_f.cur_grid_cell;if(g)var hc=g.grid.head_row.cells[g.cellIndex];if(g&&hc&&hc.fieldname==n&&g.row.docname==docname){hc.template.refresh();}else{cur_frm.fields_dict[table_field].grid.refresh_cell(docname,n);}}}else if(cur_frm){cur_frm.refresh_field(n)}}
+set_field_options=function(n,txt){cur_frm.set_df_property(n,'options',txt)}
+set_field_permlevel=function(n,level){cur_frm.set_df_property(n,'permlevel',level)}
+hide_field=function(n){function _hide_field(n,hidden){cur_frm.set_df_property(n,'hidden',hidden)}
 if(cur_frm){if(typeof n=='string')_hide_field(n,1);else{for(var i in n)_hide_field(n[i],1)}}}
-unhide_field=function(n){function _hide_field(n,hidden){var df=wn.meta.get_docfield(cur_frm.doctype,n,cur_frm.docname);if(df){df.hidden=hidden;refresh_field(n);}
-else{console.log("unhide_field cannot find field "+n);}}
+unhide_field=function(n){function _hide_field(n,hidden){cur_frm.set_df_property(n,'hidden',hidden)}
 if(cur_frm){if(typeof n=='string')_hide_field(n,0);else{for(var i in n)_hide_field(n[i],0)}}}
 /*
  *	lib/js/legacy/widgets/form/form_comments.js
