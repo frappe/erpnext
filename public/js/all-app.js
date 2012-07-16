@@ -1035,7 +1035,7 @@ _r.rb_con.set_dt(dt,function(rb){if(rep_name){var route_changed=(rb.current_rout
 rb.load_criteria(rep_name);if(rb.dt&&route_changed){rb.dt.run();}}
 if(!rb.forbidden){wn.container.change_to('Report Builder');}});}}
 wn.views.reportview2={show:function(dt){var page_name=wn.get_route_str();if(wn.pages[page_name]){wn.container.change_to(wn.pages[page_name]);}else{var route=wn.get_route();if(route[1]){new wn.views.ReportViewPage(route[1],route[2]);}else{wn.set_route('404');}}}}
-wn.views.ReportViewPage=Class.extend({init:function(doctype,docname){this.doctype=doctype;this.docname=docname;this.page_name=wn.get_route_str();this.make_page();var me=this;wn.model.with_doctype(doctype,function(){me.make_report_view();if(docname){wn.model.with_doc('Report',docname,function(r){me.reportview.set_columns_and_filters(JSON.parse(locals['Report'][docname].json));me.reportview.run();});}else{me.reportview.run();}});},make_page:function(){this.page=wn.container.add_page(this.page_name);wn.ui.make_app_page({parent:this.page,single_column:true});wn.container.change_to(this.page_name);},make_report_view:function(){wn.views.breadcrumbs($('<span>').appendTo(this.page.appframe.$titlebar),locals.DocType[this.doctype].module);this.reportview=new wn.views.ReportView(this.doctype,this.docname,this.page)}})
+wn.views.ReportViewPage=Class.extend({init:function(doctype,docname){this.doctype=doctype;this.docname=docname;this.page_name=wn.get_route_str();this.make_page();var me=this;wn.model.with_doctype(doctype,function(){me.make_report_view();if(docname){wn.model.with_doc('Report',docname,function(r){me.reportview.set_columns_and_filters(JSON.parse(locals['Report'][docname].json));me.reportview.run();});}else{me.reportview.run();}});},make_page:function(){this.page=wn.container.add_page(this.page_name);wn.ui.make_app_page({parent:this.page,single_column:true});wn.container.change_to(this.page_name);},make_report_view:function(){this.page.appframe.add_breadcrumb(locals.DocType[this.doctype].module);this.reportview=new wn.views.ReportView(this.doctype,this.docname,this.page)}})
 wn.views.ReportView=wn.ui.Listing.extend({init:function(doctype,docname,page){var me=this;$(page).find('.layout-main').html('Loading Report...');this.import_slickgrid();$(page).find('.layout-main').empty();this.doctype=doctype;this.docname=docname;this.page=page;this.tab_name='`tab'+doctype+'`';this.setup();},import_slickgrid:function(){wn.require('js/lib/slickgrid/slick.grid.css');wn.require('js/lib/slickgrid/slick-default-theme.css');wn.require('js/lib/slickgrid/jquery.event.drag.min.js');wn.require('js/lib/slickgrid/slick.core.js');wn.require('js/lib/slickgrid/slick.grid.js');wn.dom.set_style('.slick-cell { font-size: 12px; }');},set_init_columns:function(){var columns=[['name'],['owner']];$.each(wn.meta.docfield_list[this.doctype],function(i,df){if(df.in_filter&&df.fieldname!='naming_series'&&df.fieldtype!='Table'){columns.push([df.fieldname]);}});this.columns=columns;},setup:function(){var me=this;this.make({title:'Report: '+(this.docname?(this.doctype+' - '+this.docname):this.doctype),appframe:this.page.appframe,method:'webnotes.widgets.doclistview.get',get_args:this.get_args,parent:$(this.page).find('.layout-main'),start:0,page_length:20,show_filters:true,new_doctype:this.doctype,allow_delete:true,});this.make_column_picker();this.make_sorter();this.make_export();this.set_init_columns();this.make_save();},set_columns_and_filters:function(opts){var me=this;if(opts.columns)this.columns=opts.columns;if(opts.filters)$.each(opts.filters,function(i,f){me.filter_list.add_filter(f[1],f[2],f[3]);});if(opts.sort_by)this.sort_by_select.val(opts.sort_by);if(opts.sort_order)this.sort_order_select.val(opts.sort_order);if(opts.sort_by_next)this.sort_by_next_select.val(opts.sort_by_next);if(opts.sort_order_next)this.sort_order_next_select.val(opts.sort_order_next);},get_args:function(){var me=this;return{doctype:this.doctype,fields:$.map(this.columns,function(v){return me.get_full_column_name(v)}),order_by:this.get_order_by(),filters:this.filter_list.get_filters(),docstatus:['0','1','2']}},get_order_by:function(){var order_by=this.get_selected_table_and_column(this.sort_by_select)
 +' '+this.sort_order_select.val()
 if(this.sort_by_next_select.val()){order_by+=', '+this.get_selected_table_and_column(this.sort_by_next_select)
@@ -1314,7 +1314,9 @@ delete locals[dt][dn];}
 function get_local(dt,dn){return locals[dt]?locals[dt][dn]:null;}
 LocalDB.sync=function(list){if(list._kl)list=expand_doclist(list);if(list){LocalDB.clear_locals(list[0].doctype,list[0].name);}
 for(var i=0;i<list.length;i++){var d=list[i];if(!d.name)
-d.name=LocalDB.get_localname(d.doctype);LocalDB.add(d.doctype,d.name);locals[d.doctype][d.name]=d;if(d.doctype=='DocField')wn.meta.add_field(d);if(d.localname){wn.model.new_names[d.localname]=d.name;$(document).trigger('rename',[d.doctype,d.localname,d.name]);delete locals[d.doctype][d.localname];}}}
+d.name=LocalDB.get_localname(d.doctype);LocalDB.add(d.doctype,d.name);locals[d.doctype][d.name]=d;if(cur_frm&&cur_frm.doctype==d.doctype&&cur_frm.docname==d.name){cur_frm.doc=d;}
+if(d.doctype=='DocField')
+wn.meta.add_field(d);if(d.localname){wn.model.new_names[d.localname]=d.name;$(document).trigger('rename',[d.doctype,d.localname,d.name]);delete locals[d.doctype][d.localname];}}}
 LocalDB.clear_locals=function(dt,dn){var doclist=make_doclist(dt,dn,1);$.each(doclist,function(i,v){v&&delete locals[v.doctype][v.name];});}
 local_name_idx={};LocalDB.get_localname=function(doctype){if(!local_name_idx[doctype])local_name_idx[doctype]=1;var n='New '+get_doctype_label(doctype)+' '+local_name_idx[doctype];local_name_idx[doctype]++;return n;}
 LocalDB.set_default_values=function(doc){var doctype=doc.doctype;var docfields=wn.meta.docfield_list[doctype];if(!docfields){return;}
@@ -1773,9 +1775,10 @@ _f.Frm.prototype.check_doc_perm=function(){var dt=this.parent_doctype?this.paren
 return 1;}}
 window.back();return 0;}
 return 1}
-_f.Frm.prototype.refresh=function(docname){if(docname){if(this.docname!=docname&&(!this.meta.in_dialog||this.in_form)&&!this.meta.istable)scroll(0,0);this.docname=docname;}
+_f.Frm.prototype.refresh=function(docname){if(docname){if(this.docname!=docname&&(!this.meta.in_dialog||this.in_form)&&!this.meta.istable)
+scroll(0,0);this.docname=docname;}
 if(!this.meta.istable){cur_frm=this;this.parent.cur_frm=this;}
-if(this.docname){if(!this.check_doc_perm())return;if(!this.setup_done)this.setup();this.runclientscript('set_perm',this.doctype,this.docname);this.doc=get_local(this.doctype,this.docname);cur_frm.cscript.is_onload=false;if(!this.opendocs[this.docname]){cur_frm.cscript.is_onload=true;this.setnewdoc(this.docname);}
+if(this.docname){if(!this.check_doc_perm())return;this.doc=get_local(this.doctype,this.docname);if(!this.setup_done)this.setup();this.runclientscript('set_perm',this.doctype,this.docname);cur_frm.cscript.is_onload=false;if(!this.opendocs[this.docname]){cur_frm.cscript.is_onload=true;this.setnewdoc(this.docname);}
 if(this.doc.__islocal)
 this.is_editable[this.docname]=1;this.editable=this.is_editable[this.docname];if(!this.doc.__archived&&(this.editable||(!this.editable&&this.meta.istable))){if(this.print_wrapper){$dh(this.print_wrapper);$ds(this.page_layout.wrapper);}
 if(!this.meta.istable){this.refresh_header();this.sidebar&&this.sidebar.refresh();}
@@ -1784,6 +1787,7 @@ if(this.doc.docstatus==0){$(this.wrapper).find('.form-layout-row :input:first').
 this.runclientscript('edit_status_changed');}
 $(cur_frm.wrapper).trigger('render_complete');}}
 _f.Frm.prototype.refresh_footer=function(){var f=this.page_layout.footer;if(f.save_area){if(this.editable&&(!this.meta.in_dialog||this.in_form)&&this.doc.docstatus==0&&!this.meta.istable&&this.get_doc_perms()[WRITE]&&(this.fields&&this.fields.length>7)){f.show_save();}else{f.hide_save();}}}
+_f.Frm.prototype.refresh_field=function(fname){cur_frm.fields_dict[fname]&&cur_frm.fields_dict[fname].refresh&&cur_frm.fields_dict[fname].refresh();}
 _f.Frm.prototype.refresh_fields=function(){for(var i=0;i<this.fields.length;i++){var f=this.fields[i];f.perm=this.perm;f.docname=this.docname;var fn=f.df.fieldname||f.df.label;if(fn)
 f.df=wn.meta.get_docfield(this.doctype,fn,this.docname);if(f.df.fieldtype!='Section Break'&&f.refresh){f.refresh();}}
 $.each(this.sections,function(i,f){f.refresh(true);})
@@ -1847,8 +1851,11 @@ _f.Frm.prototype.show_comments=function(){if(!cur_frm.comments){cur_frm.comments
 cur_frm.comments.list.dt=cur_frm.doctype;cur_frm.comments.list.dn=cur_frm.docname;cur_frm.comments.show();cur_frm.comments.list.run();}
 _f.Frm.prototype.get_doc=function(){return locals[this.doctype][this.docname];}
 _f.Frm.prototype.get_doclist=function(){return make_doclist(this.doctype,this.docname);}
-_f.Frm.prototype.field_map=function(fnames,fn){if(typeof fnames=='string')fnames=[fnames];$.each(fnames,function(i,f){var field=wn.meta.get_docfield(cur_frm.doctype,f,cur_frm.docname)
-if(field){fn(field);field.refresh&&field.refresh();};})}
+_f.Frm.prototype.field_map=function(fnames,fn){if(typeof fnames=='string'){if(fnames=='*'){fnames=keys(this.fields_dict);}else{fnames=[fnames];}}
+$.each(fnames,function(i,f){var field=wn.meta.get_docfield(cur_frm.doctype,f,cur_frm.docname)
+if(field){fn(field);cur_frm.refresh_field(f);};})}
+_f.Frm.prototype.set_df_property=function(fieldname,property,value){var field=wn.meta.get_docfield(cur_frm.doctype,fieldname,cur_frm.docname)
+if(field){field[property]=value;cur_frm.refresh_field(fieldname);};}
 _f.Frm.prototype.toggle_enable=function(fnames,enable){cur_frm.field_map(fnames,function(field){field.disabled=enable?false:true;});}
 _f.Frm.prototype.toggle_reqd=function(fnames,mandatory){cur_frm.field_map(fnames,function(field){field.reqd=mandatory?true:false;});}
 _f.Frm.prototype.toggle_display=function(fnames,show){cur_frm.field_map(fnames,function(field){field.hidden=show?false:true;});}
@@ -2130,16 +2137,12 @@ refresh_many=function(flist,dn,table_field){for(var i in flist){if(table_field)r
 set_field_tip=function(n,txt){var df=wn.meta.get_docfield(cur_frm.doctype,n,cur_frm.docname);if(df)df.description=txt;if(cur_frm&&cur_frm.fields_dict){if(cur_frm.fields_dict[n])
 cur_frm.fields_dict[n].comment_area.innerHTML=replace_newlines(txt);else
 errprint('[set_field_tip] Unable to set field tip: '+n);}}
-refresh_field=function(n,docname,table_field){if(typeof n==typeof[])refresh_many(n,docname,table_field);if(table_field){if(_f.frm_dialog&&_f.frm_dialog.display){if(_f.frm_dialog.cur_frm.fields_dict[n]&&_f.frm_dialog.cur_frm.fields_dict[n].refresh)
-_f.frm_dialog.cur_frm.fields_dict[n].refresh();}else{var g=_f.cur_grid_cell;if(g)var hc=g.grid.head_row.cells[g.cellIndex];if(g&&hc&&hc.fieldname==n&&g.row.docname==docname){hc.template.refresh();}else{cur_frm.fields_dict[table_field].grid.refresh_cell(docname,n);}}}else if(cur_frm&&cur_frm.fields_dict){if(cur_frm.fields_dict[n]&&cur_frm.fields_dict[n].refresh)
-cur_frm.fields_dict[n].refresh();}}
-set_field_options=function(n,txt){var df=wn.meta.get_docfield(cur_frm.doctype,n,cur_frm.docname);if(df)df.options=txt;refresh_field(n);}
-set_field_permlevel=function(n,level){var df=wn.meta.get_docfield(cur_frm.doctype,n,cur_frm.docname);if(df)df.permlevel=level;refresh_field(n);}
-hide_field=function(n){function _hide_field(n,hidden){var df=wn.meta.get_docfield(cur_frm.doctype,n,cur_frm.docname);if(df){df.hidden=hidden;refresh_field(n);}
-else{console.log("hide_field cannot find field "+n);}}
+refresh_field=function(n,docname,table_field){if(typeof n==typeof[])refresh_many(n,docname,table_field);if(table_field){if(_f.frm_dialog&&_f.frm_dialog.display){_f.frm_dialog.cur_frm.refresh_field(n);}else{var g=_f.cur_grid_cell;if(g)var hc=g.grid.head_row.cells[g.cellIndex];if(g&&hc&&hc.fieldname==n&&g.row.docname==docname){hc.template.refresh();}else{cur_frm.fields_dict[table_field].grid.refresh_cell(docname,n);}}}else if(cur_frm){cur_frm.refresh_field(n)}}
+set_field_options=function(n,txt){cur_frm.set_df_property(n,'options',txt)}
+set_field_permlevel=function(n,level){cur_frm.set_df_property(n,'permlevel',level)}
+hide_field=function(n){function _hide_field(n,hidden){cur_frm.set_df_property(n,'hidden',hidden)}
 if(cur_frm){if(typeof n=='string')_hide_field(n,1);else{for(var i in n)_hide_field(n[i],1)}}}
-unhide_field=function(n){function _hide_field(n,hidden){var df=wn.meta.get_docfield(cur_frm.doctype,n,cur_frm.docname);if(df){df.hidden=hidden;refresh_field(n);}
-else{console.log("unhide_field cannot find field "+n);}}
+unhide_field=function(n){function _hide_field(n,hidden){cur_frm.set_df_property(n,'hidden',hidden)}
 if(cur_frm){if(typeof n=='string')_hide_field(n,0);else{for(var i in n)_hide_field(n[i],0)}}}
 /*
  *	lib/js/legacy/widgets/form/form_comments.js
