@@ -78,3 +78,7 @@
 .field-to-update {
 	background-color:#FEE;
 }
+
+.field-has-error {
+	border: 2px solid #C00;
+}

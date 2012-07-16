@@ -15,7 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 cur_frm.cscript.refresh = function(doc, cdt, cdn) {
-	cur_frm.enable_fields('new_item_code', doc.__islocal);
+	cur_frm.toggle_enable('new_item_code', doc.__islocal);
 	if(!doc.__islocal) {
 		cur_frm.add_custom_button("Check for Duplicates", function() {
 			cur_frm.call_server('check_duplicate', 1)			

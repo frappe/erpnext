@@ -30,10 +30,10 @@ cur_frm.cscript.set_breadcrumbs = function(barea) {
 // Refresh
 // -----------------------------------------
 cur_frm.cscript.refresh = function(doc, cdt, cdn) {
-	cur_frm.toggle_fields('account_name', doc.__islocal);
+	cur_frm.toggle_display('account_name', doc.__islocal);
 	
 	// hide fields if group
-	cur_frm.toggle_fields(['account_type', 'master_type', 'master_name', 'freeze_account', 
+	cur_frm.toggle_display(['account_type', 'master_type', 'master_name', 'freeze_account', 
 		'credit_days', 'credit_limit', 'tax_rate'], doc.group_or_ledger=='Ledger')	
 
 	// read-only for root accounts
@@ -44,7 +44,7 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	} else {
 		// credit days and type if customer or supplier
 		cur_frm.set_intro(null);
-		cur_frm.toggle_fields(['credit_days', 'credit_limit'], 
+		cur_frm.toggle_display(['credit_days', 'credit_limit'], 
 			in_list(['Customer', 'Supplier'], doc.master_type))
 
 		// hide tax_rate
@@ -64,9 +64,9 @@ cur_frm.add_fetch('parent_account', 'is_pl_account', 'is_pl_account');
 // -----------------------------------------
 cur_frm.cscript.account_type = function(doc, cdt, cdn) {
 	if(doc.group_or_ledger=='Ledger') {
-		cur_frm.toggle_fields(['tax_rate'], 
+		cur_frm.toggle_display(['tax_rate'], 
 			doc.account_type == 'Tax');
-		cur_frm.toggle_fields(['master_type', 'master_name'], 
+		cur_frm.toggle_display(['master_type', 'master_name'], 
 			cstr(doc.account_type)=='');		
 	}
 }

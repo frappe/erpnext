@@ -14,10 +14,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# add startup propertes
 
-add_in_head = """
-<style>
+# default settings that can be made for a profile.
+import webnotes
 
-</style>
-"""
+product_name = "ERPNext"
+profile_defaults = {
+	"Company": "company",
+	"Territory": "territory"
+}
+	
