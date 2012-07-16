@@ -283,34 +283,50 @@ cur_frm.cscript.validate = function(doc,cdt,cdn){
 //================ Last Quoted Price and Last Sold Price suggestion ======================
 cur_frm.fields_dict['quotation_details'].grid.get_field('item_code').get_query= function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
-	var cond = (doc.order_type == 'Maintenance')? " and tabItem.is_service_item = 'Yes'" : " and tabItem.is_sales_item = 'Yes'"
-	if(doc.customer)
-		return repl("SELECT i.name,i.item_code,concat('Last quoted at - ',cast(quote_rate as char)) as quote_rate,concat('Last sold at - ',cast(sales_rate as char)) as sales_rate, i.item_name, i.description FROM\
-		(\
-			select item_code,name, item_name, description from tabItem where tabItem.%(key)s like '%s' %(cond)s\
-		)i\
-		left join\
-		(\
-			select q.item_code,q.quote_rate from\
-			(\
-				select q.transaction_date,qd.item_code,qd.basic_rate as quote_rate from `tabQuotation Item` qd, `tabQuotation` q where q.name=qd.parent and q.docstatus=1 and customer='%(cust)s'\
-			)q,\
-			(\
-				select qd.item_code,max(q.transaction_date) as transaction_date from `tabQuotation Item` qd, `tabQuotation` q where q.name=qd.parent and q.docstatus=1 and customer='%(cust)s' group by qd.item_code\
-			)m where q.item_code=m.item_code and q.transaction_date=m.transaction_date\
-		)q on i.item_code=q.item_code\
-		left join\
-		(\
-			select r.item_code,r.sales_rate from\
-			(\
-				select r.voucher_date,rd.item_code,rd.basic_rate as sales_rate from `tabSales Invoice Item` rd, `tabSales Invoice` r where r.name=rd.parent and r.docstatus=1 and r.customer='%(cust)s'\
-			)r,\
-			(\
-				select rd.item_code,max(r.voucher_date) as voucher_date from `tabSales Invoice Item` rd, `tabSales Invoice` r where r.name=rd.parent and r.docstatus=1 and r.customer='%(cust)s' group by rd.item_code\
-			)m where r.item_code=m.item_code and r.voucher_date=m.voucher_date\
-		)s on i.item_code=s.item_code ORDER BY i.item_code LIMIT 50",{cust:doc.customer, cond:cond});
-	else
+	var cond = (doc.order_type == 'Maintenance') ? " and item.is_service_item = 'Yes'" : " and item.is_sales_item = 'Yes'";
+	if(doc.customer) {
+		var export_rate_field = wn.meta.get_docfield(cdt, 'export_rate', cdn);
+		var precision = (export_rate_field && export_rate_field.fieldtype) === 'Float' ? 6 : 2;
+		return repl("\
+			select \
+				item.name, \
+				( \
+					select concat('Last Quote @ ', q.currency, ' ', \
+						format(q_item.export_rate, %(precision)s)) \
+					from `tabQuotation` q, `tabQuotation Item` q_item \
+					where \
+						q.name = q_item.parent \
+						and q_item.item_code = item.name \
+						and q.docstatus = 1 \
+						and q.customer = \"%(cust)s\" \
+					order by q.transaction_date desc \
+					limit 1 \
+				) as quote_rate, \
+				( \
+					select concat('Last Sale @ ', si.currency, ' ', \
+						format(si_item.basic_rate, %(precision)s)) \
+					from `tabSales Invoice` si, `tabSales Invoice Item` si_item \
+					where \
+						si.name = si_item.parent \
+						and si_item.item_code = item.name \
+						and si.docstatus = 1 \
+						and si.customer = \"%(cust)s\" \
+					order by si.voucher_date desc \
+					limit 1 \
+				) as sales_rate, \
+				item.item_name, item.description \
+			from `tabItem` item \
+			where \
+				item.%(key)s like \"%s\" \
+				%(cond)s \
+				limit 25", {
+					cust: doc.customer,
+					cond: cond,
+					precision: precision
+				});
+	} else {
 		return repl("SELECT name, item_name, description FROM tabItem WHERE `tabItem`.%(key)s LIKE '%s' %(cond)s ORDER BY tabItem.item_code DESC LIMIT 50", {cond:cond});
+	}
 }
 
 cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
