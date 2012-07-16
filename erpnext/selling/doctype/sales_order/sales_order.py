@@ -181,18 +181,27 @@ class DocType(TransactionBase):
 			if getdate(self.doc.transaction_date) > getdate(self.doc.delivery_date):
 				msgprint("Expected Delivery Date cannot be before Sales Order Date")
 				raise Exception
-
-	# Validate P.O Date
-	# ------------------
-	def validate_po_date(self):
-		# validate p.o date v/s delivery date
-		if self.doc.po_date and self.doc.delivery_date and getdate(self.doc.po_date) > getdate(self.doc.delivery_date):
-			msgprint("Expected Delivery Date cannot be before Purchase Order Date")
-			raise Exception	
 		# amendment date is necessary if document is amended
 		if self.doc.amended_from and not self.doc.amendment_date:
 			msgprint("Please Enter Amendment Date")
 			raise Exception
+	
+
+	# Validate P.O Date
+	# ------------------
+	def validate_po(self):
+		# validate p.o date v/s delivery date
+		if self.doc.po_date and self.doc.delivery_date and getdate(self.doc.po_date) > getdate(self.doc.delivery_date):
+			msgprint("Expected Delivery Date cannot be before Purchase Order Date")
+			raise Exception	
+		
+		if self.doc.po_no and self.doc.customer:
+			so = webnotes.conn.sql("select name from `tabSales Order` \
+				where ifnull(po_no, '') = %s and name != %s and docstatus < 2\
+				and customer = %s", (self.doc.po_no, self.doc.name, self.doc.customer))
+			if so and so[0][0]:
+				msgprint("""Another Sales Order (%s) exists against same PO No and Customer. 
+					Please be sure, you are not making duplicate entry.""" % so[0][0])
 	
 	# Validations of Details Table
 	# -----------------------------
@@ -305,7 +314,7 @@ class DocType(TransactionBase):
 		self.validate_order_type()
 		self.validate_mandatory()
 		self.validate_proj_cust()
-		self.validate_po_date()
+		self.validate_po()
 		#self.validate_reference_value()
 		self.validate_for_items()
 		sales_com_obj = get_obj(dt = 'Sales Common')
