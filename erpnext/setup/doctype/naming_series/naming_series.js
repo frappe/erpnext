@@ -28,7 +28,7 @@ cur_frm.cscript.update_selects = function(r) {
 
 
 cur_frm.cscript.select_doc_for_series = function(doc, cdt, cdn) {
-	cur_frm.toggle_fields(['help_html','set_options', 'user_must_always_select', 'update'], 
+	cur_frm.toggle_display(['help_html','set_options', 'user_must_always_select', 'update'], 
 		doc.select_doc_for_series)
 
 	var callback = function(r, rt){

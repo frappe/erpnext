@@ -14,17 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
- 
-//onload if cost center is group
-cur_frm.cscript.onload = function(doc, cdt, cdn) {
-	if(!doc.__islocal && doc.docstatus == 0){
-		get_field(doc.doctype,'group_or_ledger',doc.name).permlevel = 1;
-		refresh_field('group_or_ledger');
-		get_field(doc.doctype,'company_name',doc.name).permlevel = 1;
-		refresh_field('company_name');
-	}
- 
-}
 
 cur_frm.cscript.set_breadcrumbs = function(barea) {
 	cur_frm.frm_head.appframe.add_breadcrumb(cur_frm.docname);
@@ -35,7 +24,8 @@ cur_frm.cscript.set_breadcrumbs = function(barea) {
 
 cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	var intro_txt = '';
-	cur_frm.toggle_fields('cost_center_name', doc.__islocal);
+	cur_frm.toggle_display('cost_center_name', doc.__islocal);
+	cur_frm.toggle_enable(['group_or_ledger', 'company_name'], doc.__islocal);
 
 	if(!doc.__islocal && doc.group_or_ledger=='Group') {
 		intro_txt += '<p><b>Note:</b> This is Cost Center is a <i>Group</i>, \
@@ -44,7 +34,7 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 
 	cur_frm.cscript.hide_unhide_group_ledger(doc);
 	
-	cur_frm.toggle_fields('sb1', doc.group_or_ledger=='Ledger')
+	cur_frm.toggle_display('sb1', doc.group_or_ledger=='Ledger')
 	cur_frm.set_intro(intro_txt);
 }
 

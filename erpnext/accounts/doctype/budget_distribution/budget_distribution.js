@@ -26,5 +26,5 @@ cur_frm.cscript.onload = function(doc,cdt,cdn){
 }
 
 cur_frm.cscript.refresh = function(doc,cdt,cdn){
-	cur_frm.toggle_fields('distribution_id', doc.__islocal);
+	cur_frm.toggle_display('distribution_id', doc.__islocal);
 }
