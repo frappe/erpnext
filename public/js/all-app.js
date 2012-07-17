@@ -1768,7 +1768,7 @@ if(this.frm_head)this.frm_head.refresh();if(wn.ui.toolbar.recent)
 wn.ui.toolbar.recent.add(this.doctype,this.docname,1);}
 _f.Frm.prototype.check_doc_perm=function(){var dt=this.parent_doctype?this.parent_doctype:this.doctype;var dn=this.parent_docname?this.parent_docname:this.docname;this.perm=get_perm(dt,dn);this.orig_perm=get_perm(dt,dn,1);if(!this.perm[0][READ]){if(user=='Guest'){if(_f.temp_access[dt]&&_f.temp_access[dt][dn]){this.perm=[[1,0,0]]
 return 1;}}
-window.back();return 0;}
+window.history.back();return 0;}
 return 1}
 _f.Frm.prototype.refresh=function(docname){if(docname){if(this.docname!=docname&&(!this.meta.in_dialog||this.in_form)&&!this.meta.istable)scroll(0,0);this.docname=docname;}
 if(!this.meta.istable){cur_frm=this;this.parent.cur_frm=this;}
