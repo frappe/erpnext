@@ -500,4 +500,9 @@ patch_list = [
 		'patch_file': 'auth_table',
 		'description': 'create new __Auth table'
 	},
+	{
+		'patch_module': 'patches.july_2012',
+		'patch_file': 'remove_event_role_owner_match',
+		'description': "Remove Owner match from Event DocType's Permissions"
+	},
 ]
