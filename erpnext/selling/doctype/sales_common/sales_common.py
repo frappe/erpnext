@@ -537,7 +537,8 @@ class DocType(TransactionBase):
 				# mark for deletion from doclist
 				delete_list.append(d.name)
 
-		if not delete_list: return
+		if not delete_list:
+			return obj.doclist
 		
 		# delete from doclist
 		obj.doclist = filter(lambda d: d.name not in delete_list, obj.doclist)
