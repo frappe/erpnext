@@ -3,7 +3,7 @@ def repost_reserved_qty():
 	bins = webnotes.conn.sql("select item_code, warehouse, name, reserved_qty from `tabBin`")
 	for d in bins:
 		reserved_qty = webnotes.conn.sql("""
-			select sum((dnpi.qty/so_item.qty)*(so_item.qty - ifnull(so_item.delivered_qty, 0))) 
+			select sum((dnpi.qty/so_item.qty)*(so_item.qty - ifnull(so_item.delivered_qty, 0))), so.transaction_date 
 			
 			from `tabDelivery Note Packing Item` dnpi, `tabSales Order Item` so_item, `tabSales Order` so
 			
@@ -17,12 +17,13 @@ def repost_reserved_qty():
 			and dnpi.item_code = %s
 			and dnpi.warehouse = %s
 		""", (d[0], d[1]))
-		if flt(d[3]) != reserved_qty:
+		if flt(d[3]) != flt(reserved_qty[0][0]):
 			print d, reserved_qty
-		# webnotes.conn.sql("""
-		# 	update `tabBin` set reserved_qty = %s where name = %s
-		# """, (reserved_qty and reserved_qty[0][0] or 0, d[2]))
+		#webnotes.conn.sql("""
+		#	update `tabBin` set reserved_qty = %s where name = %s
+		#""", (reserved_qty and reserved_qty[0][0] or 0, d[2]))
 		
+repost_reserved_qty()
 
 def cleanup_wrong_sle():
 	sle = webnotes.conn.sql("""
