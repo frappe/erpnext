@@ -65,9 +65,6 @@ cur_frm.cscript.update_item_details = function(doc, dt, dn, callback) {
 	}
 }
 
-
-
-
 var set_dynamic_label_par = function(doc, cdt, cdn, base_curr) {
 	//parent flds
 	par_cols_base = {'net_total': 'Net Total', 'total_tax': 'Total Tax', 'grand_total':	'Grand Total', /*'rounded_total': 'Rounded Total',*/

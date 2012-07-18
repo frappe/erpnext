@@ -90,8 +90,15 @@ cur_frm.cscript.supplier = function(doc,dt,dn) {
 		cur_frm.cscript.calc_amount(doc, 1);
 	}
 
-	if(doc.supplier) get_server_fields('get_default_supplier_address', JSON.stringify({supplier: doc.supplier}),'', doc, dt, dn, 1,callback);
-	if(doc.supplier) unhide_field(['supplier_address','contact_person']);
+	if (doc.supplier) {
+		get_server_fields('get_default_supplier_address',
+			JSON.stringify({ supplier: doc.supplier }),'', doc, dt, dn, 1, function(doc, dt, dn) {
+				cur_frm.refresh();
+				callback(doc, dt, dn);
+			});
+		unhide_field(['supplier_address','contact_person']);
+	}
+
 }
 
 cur_frm.cscript.supplier_address = cur_frm.cscript.contact_person = function(doc,dt,dn) {
@@ -113,14 +120,19 @@ cur_frm.fields_dict.contact_person.on_new = function(dn) {
 
 cur_frm.cscript.credit_to = function(doc,dt,dn) {
 
-	var callback = function(r,rt) {
-			var doc = locals[cur_frm.doctype][cur_frm.docname];		
-			if(doc.supplier) get_server_fields('get_default_supplier_address', JSON.stringify({supplier: doc.supplier}),'', doc, dt, dn, 1);
-			if(doc.supplier) unhide_field(['supplier_address','contact_person']);
+	var callback = function(doc, dt, dn) {
+			var doc = locals[doc.doctype][doc.name];
+			if(doc.supplier) {
+				get_server_fields('get_default_supplier_address',
+					JSON.stringify({ supplier: doc.supplier }), '', doc, dt, dn, 1, function() {
+						cur_frm.refresh();
+					});
+				unhide_field(['supplier_address','contact_person']);
+			}
 			cur_frm.refresh();
 	}
 
-	get_server_fields('get_cust','','',doc,dt,dn,1,callback);	
+	get_server_fields('get_cust', '', '', doc, dt, dn, 1, callback);
 }
 
 

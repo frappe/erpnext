@@ -34,7 +34,7 @@ wn.doclistviews['Sales Order'] = wn.views.ListView.extend({
 
 				if (order_type === 'sales') {
 					me.render_icon(parent, 'icon-tag', data.order_type);
-					me.render_bar_graph(parent, data, 'per_billed', 'Delivered');
+					me.render_bar_graph(parent, data, 'per_delivered', 'Delivered');
 				} else if (order_type === 'maintenance') {
 					me.render_icon(parent, 'icon-wrench', data.order_type);
 				}

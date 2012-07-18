@@ -116,22 +116,32 @@ class TransactionBase:
 		contact_mobile = details and details[0]['mobile_no'] or ''
 		return contact_display, contact_name, contact_email, contact_mobile
 
-	# Get Customer Details
-	# -----------------------
-	def get_customer_details(self, name):		
-		customer_details = webnotes.conn.sql("select customer_name, customer_group, territory, default_sales_partner, default_commission_rate, default_price_list from tabCustomer where name = '%s' and docstatus != 2" %(name), as_dict = 1)
+	def get_customer_details(self, name):
+		"""
+			Get customer details like name, group, territory
+			and other such defaults
+		"""
+		customer_details = webnotes.conn.sql("""\
+			select
+				customer_name, customer_group, territory,
+				default_sales_partner, default_commission_rate, default_currency,
+				default_price_list
+			from `tabCustomer`
+			where name = %s and docstatus < 2""", name, as_dict=1)
 		if customer_details:
-			self.doc.customer_name = customer_details[0]['customer_name'] or ''
-			self.doc.customer_group = customer_details[0]['customer_group'] or ''
-			self.doc.territory = customer_details[0]['territory'] or ''
-			self.doc.sales_partner = customer_details[0]['default_sales_partner'] or ''
-			self.doc.commission_rate = customer_details[0]['default_commission_rate'] or ''
-			def_price_list = customer_details[0]['default_price_list'] or ''
-			if not def_price_list:
-				cg_price_list = webnotes.conn.sql("select default_price_list from `tabCustomer Group` where name = %s", customer_details[0]['customer_group'])
-				def_price_list = cg_price_list and cg_price_list[0][0] or ''
-			self.doc.price_list_name = def_price_list or self.doc.price_list_name
+			for f in ['customer_name', 'customer_group', 'territory']:
+				self.doc.fields[f] = customer_details[0][f] or self.doc.fields.get(f)
 			
+			# fields prepended with default in Customer doctype
+			for f in ['sales_partner', 'commission_rate', 'currency']:
+				self.doc.fields[f] = customer_details[0]["default_%s" % f] or self.doc.fields.get(f)
+			
+			# optionally fetch default price list from Customer Group
+			self.doc.price_list_name = (customer_details[0]['default_price_list']
+				or webnotes.conn.get_value('Customer Group', self.doc.customer_group,
+					'default_price_list')
+				or self.doc.fields.get('price_list_name'))
+
 	# Get Customer Shipping Address
 	# -----------------------
 	def get_shipping_address(self, name):
@@ -194,7 +204,7 @@ class TransactionBase:
 		contact_text, contact_name, contact_email, contact_mobile = self.get_contact_text(contact_name=args['contact'])
 		ret = {
 			'supplier_address' : address_name,
-			'address_display' : address_text,			
+			'address_display' : address_text,
 			'contact_person' : contact_name,
 			'contact_display' : contact_text,
 			'contact_email' : contact_email,
@@ -204,12 +214,20 @@ class TransactionBase:
 	
 	# Get Supplier Details
 	# -----------------------
-	def get_supplier_details(self, name):		
-		supplier_details = webnotes.conn.sql("select supplier_name from tabSupplier where name = '%s' and docstatus != 2" %(name), as_dict = 1)
-		ret = {
-			'supplier_name' : supplier_details and supplier_details[0]['supplier_name'] or ''
-		}
-		return ret
+	def get_supplier_details(self, name):
+		supplier_details = webnotes.conn.sql("""\
+			select supplier_name, default_currency
+			from `tabSupplier`
+			where name = %s and docstatus < 2""", name, as_dict=1)
+		if supplier_details:
+			return {
+				'supplier_name': (supplier_details[0]['supplier_name']
+					or self.doc.fields.get('supplier_name')),
+				'currency': (supplier_details[0]['default_currency']
+					or self.doc.fields.get('currency')),
+			}
+		else:
+			return {}
 		
 	# Get Sales Person Details of Customer
 	# ------------------------------------

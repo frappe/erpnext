@@ -5,7 +5,7 @@
 	{
 		'creation': '2012-05-15 12:14:41',
 		'docstatus': 0,
-		'modified': '2012-05-31 13:18:29',
+		'modified': '2012-07-18 17:41:49',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -261,6 +261,19 @@
 		'permlevel': 0,
 		'reqd': 1,
 		'search_index': 0
+	},
+
+	# DocField
+	{
+		'colour': u'White:FFF',
+		'description': u'This currency will get fetched in Purchase transactions of this supplier',
+		'doctype': u'DocField',
+		'fieldname': u'default_currency',
+		'fieldtype': u'Select',
+		'label': u'Default Currency',
+		'no_copy': 1,
+		'options': u'link:Currency',
+		'permlevel': 0
 	},
 
 	# DocField
