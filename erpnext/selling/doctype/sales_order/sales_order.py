@@ -316,7 +316,7 @@ class DocType(TransactionBase):
 		sales_com_obj.validate_max_discount(self,'sales_order_details')
 				# this is to verify that the allocated % of sales persons is 100%
 		sales_com_obj.get_allocated_sum(self)
-		sales_com_obj.make_packing_list(self,'sales_order_details')
+		self.doclist = sales_com_obj.make_packing_list(self,'sales_order_details')
 
 				# get total in words
 		dcc = TransactionBase().get_company_currency(self.doc.company)		
