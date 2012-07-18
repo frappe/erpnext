@@ -404,9 +404,8 @@ class DocType(TransactionBase):
 
 
 	def on_update(self):
-		get_obj('Sales Common').make_packing_list(self,'delivery_note_details')
+		self.doclist = get_obj('Sales Common').make_packing_list(self,'delivery_note_details')
 		sl = get_obj('Stock Ledger')
 		sl.scrub_serial_nos(self)
 		sl.scrub_serial_nos(self, 'packing_details')
-
 

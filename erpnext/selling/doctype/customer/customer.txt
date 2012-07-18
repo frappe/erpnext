@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-05-15 12:14:51',
+		'creation': '2012-07-18 16:07:05',
 		'docstatus': 0,
-		'modified': '2012-05-31 11:41:06',
+		'modified': '2012-07-18 17:11:25',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -365,6 +365,19 @@
 		'fieldtype': u'Link',
 		'label': u'Default Price List',
 		'options': u'Price List',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'colour': u'White:FFF',
+		'description': u'This currency will get fetched in Sales transactions of this customer',
+		'doctype': u'DocField',
+		'fieldname': u'default_currency',
+		'fieldtype': u'Select',
+		'label': u'Default Currency',
+		'no_copy': 1,
+		'options': u'link:Currency',
 		'permlevel': 0
 	},
 

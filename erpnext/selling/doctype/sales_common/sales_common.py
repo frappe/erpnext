@@ -410,7 +410,7 @@ class DocType(TransactionBase):
 						
 			if self.has_sales_bom(d.item_code):
 				for p in getlist(obj.doclist, 'packing_details'):
-					if p.parent_detail_docname == d.name:
+					if p.parent_detail_docname == d.name and p.parent_item == d.item_code:
 						# the packing details table's qty is already multiplied with parent's qty
 						il.append({
 							'warehouse': p.warehouse,
@@ -522,7 +522,9 @@ class DocType(TransactionBase):
 				if [d.item_code, d.name] not in parent_items:
 					parent_items.append([d.item_code, d.name])
 				
-		self.cleanup_packing_list(obj, parent_items)
+		obj.doclist = self.cleanup_packing_list(obj, parent_items)
+		
+		return obj.doclist
 		
 	def cleanup_packing_list(self, obj, parent_items):
 		"""Remove all those child items which are no longer present in main item table"""
@@ -532,7 +534,8 @@ class DocType(TransactionBase):
 				# mark for deletion from doclist
 				delete_list.append(d.name)
 
-		if not delete_list: return
+		if not delete_list:
+			return obj.doclist
 		
 		# delete from doclist
 		obj.doclist = filter(lambda d: d.name not in delete_list, obj.doclist)
@@ -543,6 +546,8 @@ class DocType(TransactionBase):
 			where name in (%s)"""
 			% (", ".join(["%s"] * len(delete_list))),
 			tuple(delete_list))
+			
+		return obj.doclist
 
 	# Get total in words
 	# ==================================================================	

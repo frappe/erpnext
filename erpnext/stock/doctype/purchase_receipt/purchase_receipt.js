@@ -64,11 +64,15 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	}
 }
 
-
 //Supplier
 cur_frm.cscript.supplier = function(doc,dt,dn) {
-	if(doc.supplier) get_server_fields('get_default_supplier_address', JSON.stringify({supplier: doc.supplier}),'', doc, dt, dn, 1);
-	if(doc.supplier) $(cur_frm.fields_dict.contact_section.row.wrapper).toggle(true);
+	if (doc.supplier) {
+		get_server_fields('get_default_supplier_address',
+			JSON.stringify({ supplier: doc.supplier }),'', doc, dt, dn, 1, function() {
+				cur_frm.refresh();
+			});
+		$(cur_frm.fields_dict.contact_section.row.wrapper).toggle(true);
+	}
 }
 
 cur_frm.cscript.supplier_address = cur_frm.cscript.contact_person = function(doc,dt,dn) {		
