@@ -16,6 +16,7 @@
 
 
 # default settings that can be made for a profile.
+from __future__ import unicode_literals
 import webnotes
 
 product_name = "ERPNext"

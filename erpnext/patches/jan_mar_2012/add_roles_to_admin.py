@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 def execute():
 	"""
 		Adds various roles to Administrator. This patch is for making master db

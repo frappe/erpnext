@@ -7,6 +7,7 @@
 # This script can be executed from lib/wnf.py using 
 # lib/wnf.py --cleanup-data
 
+from __future__ import unicode_literals
 import sys
 sys.path.append("lib/py")
 sys.path.append(".")

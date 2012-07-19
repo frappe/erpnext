@@ -15,6 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # TODO take backup before running this patch
+from __future__ import unicode_literals
 def execute():
 	"""
 		* Restore archived data from arc tables

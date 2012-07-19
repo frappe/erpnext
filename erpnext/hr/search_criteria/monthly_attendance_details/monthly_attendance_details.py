@@ -16,6 +16,7 @@
 
 #add column employee, employee name
 #--------------------------------------------------------------------------------------
+from __future__ import unicode_literals
 col =[['Employee','Link','155px','Employee'],['Employee Name','Data','150px','']]
 
 for c in col:

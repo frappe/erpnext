@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 def execute():
 	import webnotes
 	sr = webnotes.conn.sql("select max(name) from `tabPage Role`")

@@ -16,6 +16,7 @@
 
 # html generation functions
 
+from __future__ import unicode_literals
 template_map = {
 	'Web Page': 'html/web_page.html',
 	'Blog': 'html/blog_page.html',

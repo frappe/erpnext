@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 col_defs = [
 	{'label': 'Id', 'type': 'Link', 'width': '', 'options': 'Customer'},
 	{'label': 'Customer Name'},

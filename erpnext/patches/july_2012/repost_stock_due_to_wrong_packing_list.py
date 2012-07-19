@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 def repost_reserved_qty():
 	import webnotes
 	bins = webnotes.conn.sql("select item_code, warehouse, name, reserved_qty from `tabBin`")
