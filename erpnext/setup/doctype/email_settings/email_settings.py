@@ -37,20 +37,20 @@ class DocType:
 			Checks incoming email settings
 		"""
 		if self.doc.outgoing_mail_server:
-			from webnotes.utils import cint
+			from webnotes.utils import cint, get_encoded_string
 			import _socket
 			from webnotes.utils.email_lib.send import EMail
 			import smtplib
 			out_email = EMail()
-			out_email.server = self.doc.outgoing_mail_server.encode('utf-8')
+			out_email.server = get_encoded_string(self.doc.outgoing_mail_server)
 			out_email.port = cint(self.doc.mail_port)
 			out_email.use_ssl = self.doc.use_ssl
 			try:
 				err_msg = "Login Id or Mail Password missing. Please enter and try again."
 				if not (self.doc.mail_login and self.doc.mail_password):
 					raise AttributeError, err_msg
-				out_email.login = self.doc.mail_login.encode('utf-8')
-				out_email.password =  self.doc.mail_password.encode('utf-8')
+				out_email.login = get_encoded_string(self.doc.mail_login)
+				out_email.password =  get_encoded_string(self.doc.mail_password)
 			except AttributeError, e:
 				webnotes.msgprint(err_msg)
 				raise e
@@ -72,15 +72,17 @@ class DocType:
 			from webnotes.utils.email_lib.receive import POP3Mailbox
 			from webnotes.model.doc import Document
 			import _socket, poplib
+			from webnotes.utils import get_encoded_string
+			
 			inc_email = Document('Incoming Email Settings')
-			inc_email.host = self.doc.support_host.encode('utf-8')
+			inc_email.host = get_encoded_string(self.doc.support_host)
 			inc_email.use_ssl = self.doc.support_use_ssl
 			try:
 				err_msg = 'User Name or Support Password missing. Please enter and try again.'
 				if not (self.doc.support_username and self.doc.support_password):
 					raise AttributeError, err_msg
-				inc_email.username = self.doc.support_username.encode('utf-8')
-				inc_email.password = self.doc.support_password.encode('utf-8')
+				inc_email.username = get_encoded_string(self.doc.support_username)
+				inc_email.password = get_encoded_string(self.doc.support_password)
 			except AttributeError, e:
 				webnotes.msgprint(err_msg)
 				raise e

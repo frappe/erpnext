@@ -41,6 +41,7 @@ def init():
 
 def respond():
 	import webnotes
+	from webnotes.utils import get_encoded_string
 	try:
 		if 'page' in webnotes.form_dict:
 			html = get_html(webnotes.form_dict['page'])
@@ -52,7 +53,7 @@ def respond():
 
 	print "Content-Type: text/html"
 	print
-	print html.encode('utf-8')
+	print get_encoded_string(html)
 
 def get_html(page_name):
 	import website.utils

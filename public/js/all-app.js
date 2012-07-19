@@ -1844,7 +1844,7 @@ newdoc.amendment_date=dateutil.obj_to_str(new Date());}
 this.copy_doc(fn,1);}
 _f.get_value=function(dt,dn,fn){if(locals[dt]&&locals[dt][dn])
 return locals[dt][dn][fn];}
-_f.Frm.prototype.set_value_in_locals=function(dt,dn,fn,v){var d=locals[dt][dn];var changed=d[fn]!=v;if(changed&&(d[fn]==null||v==null)&&(cstr(d[fn])==cstr(v)))
+_f.Frm.prototype.set_value_in_locals=function(dt,dn,fn,v){var d=locals[dt][dn];if(!d)return;var changed=d[fn]!=v;if(changed&&(d[fn]==null||v==null)&&(cstr(d[fn])==cstr(v)))
 changed=false;if(changed){d[fn]=v;if(d.parenttype)
 d.__unsaved=1;this.set_unsaved();}}
 _f.Frm.prototype.set_unsaved=function(){if(cur_frm.doc.__unsaved)return;cur_frm.doc.__unsaved=1;cur_frm.frm_head.refresh_labels()}
