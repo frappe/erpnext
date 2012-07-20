@@ -506,4 +506,9 @@ patch_list = [
 		'patch_file': 'remove_event_role_owner_match',
 		'description': "Remove Owner match from Event DocType's Permissions"
 	},
+	{
+		'patch_module': 'patches.july_2012',
+		'patch_file': 'deprecate_bulk_rename',
+		'description': "Remove Bulk Rename Tool"
+	},
 ]
