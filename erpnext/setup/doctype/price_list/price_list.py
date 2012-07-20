@@ -52,8 +52,9 @@ class DocType:
 	
 	# update prices in Price List
 	def update_prices(self):
-		import csv 
-		data = csv.reader(self.get_csv_data().splitlines())
+		from core.page.data_import_tool.data_import_tool import read_csv_content
+		
+		data = read_csv_content(self.get_csv_data())
 				
 		updated = 0
 		
@@ -98,9 +99,5 @@ class DocType:
 		except Exception, e:
 			webnotes.msgprint("Unable to open attached file. Please try again.")
 			raise e
-	
-		# NOTE: Don't know why this condition exists
-		if not isinstance(content, basestring) and hasattr(content, 'tostring'):
-		  content = content.tostring()
 
 		return content	

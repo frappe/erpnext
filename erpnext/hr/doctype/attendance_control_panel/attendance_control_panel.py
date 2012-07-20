@@ -49,7 +49,7 @@ class DocType:
 		res = sql("select name, employee_name from `tabEmployee` where status = 'Active' and docstatus !=2") 
 	 
 		for d in dt:
-			for r in res:			 
+			for r in res:
 				lst.append([r[0],r[1],d,'',fy,comp,sr])
 
 		return lst
@@ -69,7 +69,7 @@ class DocType:
 		else:
 			r = 1
 		dateList = [getdate(self.doc.att_fr_date)+datetime.timedelta(days=i) for i in range(0,r)]
-		dt=([str(date) for date in dateList])
+		dt=([formatdate(cstr(date)) for date in dateList])
 		
 		return dt
 

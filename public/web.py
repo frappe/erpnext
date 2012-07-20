@@ -16,13 +16,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+"""
+	return a dynamic page from website templates
+
+	all html pages related to website are generated here
+"""
 from __future__ import unicode_literals
-"""
-return a dynamic page from website templates
-
-all html pages except login-page.html get generated here
-"""
-
 import cgi, cgitb, os, sys
 cgitb.enable()
 
@@ -33,10 +32,8 @@ sys.path.append('../lib/py')
 sys.path.append(conf.modules_path)
 
 def init():
-	import webnotes
-	webnotes.form = cgi.FieldStorage(keep_blank_values=True)
-	for key in webnotes.form.keys():
-		webnotes.form_dict[key] = webnotes.form.getvalue(key)
+	import webnotes.handler
+	webnotes.handler.get_cgi_fields()
 	webnotes.connect()
 
 def respond():
@@ -50,10 +47,19 @@ def respond():
 			html = get_html('index')
 	except Exception, e:
 		html = get_html('404')
-
-	print "Content-Type: text/html"
-	print
-	print get_encoded_string(html)
+		
+	content = []
+	import webnotes.handler
+	html = get_encoded_string(html)
+	html, content = webnotes.handler.gzip_response(html, content)
+	
+	content += [
+		"Content-Type: text/html",
+		"",
+	]
+	
+	webnotes.handler.print_content(content)
+	print html
 
 def get_html(page_name):
 	import website.utils

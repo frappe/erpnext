@@ -42,10 +42,7 @@ import webnotes.auth
 from webnotes.utils import cstr
 
 def init():
-	# make the form_dict
-	webnotes.form = cgi.FieldStorage(keep_blank_values=True)
-	for key in webnotes.form.keys():
-		webnotes.form_dict[key] = cstr(webnotes.form.getvalue(key))
+	webnotes.handler.get_cgi_fields()
 	
 	# init request
 	try:
