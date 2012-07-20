@@ -23,6 +23,7 @@ from webnotes.model.doc import Document, addchild, getchildren, make_autoname
 from webnotes.model.doclist import getlist, copy_doclist, clone
 from webnotes.model.code import get_obj
 from webnotes import session, form, is_testing, msgprint, errprint
+from webnotes.utils.email_lib import sendmail
 
 in_transaction = webnotes.conn.in_transaction
 convert_to_lists = webnotes.conn.convert_to_lists
@@ -489,14 +490,78 @@ def manage_recurring_invoices():
 	rv = webnotes.conn.sql("""select name, recurring_id from `tabSales Invoice` \
 		where ifnull(convert_into_recurring_invoice, 0) = 1 and next_date = %s \
 		and next_date <= ifnull(end_date, '2199-12-31') and docstatus=1""", nowdate())
-			
+	
+	
+	exception_list = []
 	for d in rv:
 		if not webnotes.conn.sql("""select name from `tabSales Invoice` \
 			where posting_date = %s and recurring_id = %s and docstatus=1""", (nowdate(), d[1])):
-			prev_rv = get_obj('Sales Invoice', d[0], with_children=1)
-			new_rv = create_new_invoice(prev_rv)
+			try:
+				prev_rv = get_obj('Sales Invoice', d[0], with_children=1)
+				new_rv = create_new_invoice(prev_rv)
 
-			send_notification(new_rv)
+				send_notification(new_rv)
+				webnotes.conn.commit()
+			except Exception, e:
+				webnotes.conn.rollback()
+
+				webnotes.conn.begin()
+				webnotes.conn.sql("update `tabSales Invoice` set \
+					convert_into_recurring_invoice = 0 where name = %s", d[0])
+				notify_errors(d[0], prev_rv.doc.owner)
+				webnotes.conn.commit()
+
+				exception_list.append(e)
+			finally:
+				webnotes.conn.begin()
+			
+	if exception_list:
+		exception_message = "\n\n".join([cstr(d) for d in exception_list])
+		raise Exception, exception_message
+		
+		
+def notify_errors(inv, owner):
+	exception_msg = """
+		Dear User,
+
+		An error occured while creating recurring invoice from %s.
+
+		May be there are some invalid email ids mentioned in the invoice.
+
+		To stop sending repetitive error notifications from the system, we have unchecked \
+		"Convert into Recurring" field in the invoice %s.
+
+
+		Please correct the invoice and make the invoice recurring again. 
+
+		<b>It is necessary to take this action today itself for the above mentioned recurring invoice \
+		to be generated. If delayed, you will have to manually change the "Repeat on Day of Month" field \
+		of this invoice for generating the recurring invoice.</b>
+
+		Regards,
+		Administrator
+		
+	""" % (inv, inv)
+	subj = "[Urgent] Error while creating recurring invoice from %s" % inv
+	import webnotes.utils
+	recipients = webnotes.utils.get_system_managers_list()
+	recipients += ['support@erpnext.com', owner]
+	assign_task_to_owner(inv, exception_msg, recipients)
+	sendmail(recipients, subject=subj, msg = exception_msg)
+	
+	
+
+def assign_task_to_owner(inv, msg, users):
+	for d in users:
+		from webnotes.widgets.form import assign_to
+		args = {
+			'assign_to' 	:	d,
+			'doctype'		:	'Sales Invoice',
+			'name'			:	inv,
+			'description'	:	msg,
+			'priority'		:	'Urgent'
+		}
+		assign_to.add(args)
 
 
 def create_new_invoice(prev_rv):
@@ -594,5 +659,5 @@ def send_notification(new_rv):
 
 
 	msg = hd + tbl + totals
-	from webnotes.utils.email_lib import sendmail
-	sendmail(new_rv.doc.notification_email_address.split(", "), subject=subject, msg = msg)
+	recipients = new_rv.doc.notification_email_address.replace('\n', '').replace(' ', '').split(",")
+	sendmail(recipients, subject=subject, msg = msg)
