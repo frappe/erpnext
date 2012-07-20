@@ -236,7 +236,7 @@ class DocType:
 	
 	def update_serial_no(self, sr_no, rate):
 		""" update valuation rate in serial no"""
-		sr_no = sr_no.split('\n')
+		sr_no = cstr(sr_no).split('\n')
 		for d in sr_no:
 			sql("update `tabSerial No` set purchase_rate = %s where name = %s", (rate, d))
 
