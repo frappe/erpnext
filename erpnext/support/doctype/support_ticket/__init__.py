@@ -67,7 +67,9 @@ class SupportMailbox(POP3Mailbox):
 			import re
 			re_result = re.findall('(?<=\<)(\S+)(?=\>)', mail.mail['From'])
 			if re_result and re_result[0]: email_id = re_result[0]
-
+		
+		from webnotes.utils import decode_email_header
+		full_email_id = decode_email_header(mail.mail['From'])
 
 		for thread_id in thread_list:
 			exists = webnotes.conn.sql("""\
@@ -79,7 +81,7 @@ class SupportMailbox(POP3Mailbox):
 				from webnotes.model.code import get_obj
 				
 				st = get_obj('Support Ticket', thread_id)
-				st.make_response_record(content, mail.mail['From'], content_type)
+				st.make_response_record(content, full_email_id, content_type)
 				
 				# to update modified date
 				#webnotes.conn.set(st.doc, 'status', 'Open')
@@ -99,7 +101,7 @@ class SupportMailbox(POP3Mailbox):
 		d = Document('Support Ticket')
 		d.description = content
 		d.subject = mail.mail['Subject']
-		d.raised_by = mail.mail['From']
+		d.raised_by = full_email_id
 		d.content_type = content_type
 		d.status = 'Open'
 		d.naming_series = opts and opts.split("\n")[0] or 'SUP'
