@@ -128,7 +128,7 @@ cur_frm.fields_dict['item_code'].get_query = function(doc, cdt, cdn) {
 	else{
 		return 'SELECT `tabItem`.name, `tabItem`.item_name, `tabItem`.description \
 			FROM `tabItem` \
-			WHERE `tabItem`.docstatus != 2 AND `tabItem`.name LIKE "%s" ORDER BY `tabItem`.name ASC LIMIT 50';
+			WHERE `tabItem`.docstatus != 2 AND `tabItem`.%(key)s LIKE "%s" ORDER BY `tabItem`.name ASC LIMIT 50';
 	}
 }
 
