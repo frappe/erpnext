@@ -511,4 +511,9 @@ patch_list = [
 		'patch_file': 'deprecate_bulk_rename',
 		'description': "Remove Bulk Rename Tool"
 	},
+	{
+		'patch_module': 'patches.july_2012',
+		'patch_file': 'unicode_conf',
+		'description': "appends from __future__ import unicode_literals to py files if necessary"
+	},
 ]
