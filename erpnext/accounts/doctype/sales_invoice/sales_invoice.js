@@ -499,12 +499,9 @@ cur_frm.cscript.view_ledger_entry = function(){
 }
 
 // Default values for recurring invoices
-cur_frm.cscript.convert_into_recurring_invoice = function(doc) {
-	if (doc.convert_into_recurring_invoice) {
-		doc.repeat_on_day_of_month = doc.posting_date.split('-')[2];
-		doc.notification_email_address = [doc.owner, doc.contact_email].join(', ');
-		refresh_field(['repeat_on_day_of_month', 'notification_email_address']);
-	}		
+cur_frm.cscript.convert_into_recurring_invoice = function(doc, dt, dn) {
+	if (doc.convert_into_recurring_invoice)
+		get_server_fields('set_default_recurring_values','','',doc, dt, dn, 0);
 }
 
 cur_frm.cscript.on_submit = function(doc, cdt, cdn) {

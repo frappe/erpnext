@@ -679,10 +679,31 @@ class DocType(TransactionBase):
 		webnotes.conn.set(self.doc,'outstanding_amount',flt(self.doc.grand_total) - flt(self.doc.total_advance) - flt(self.doc.paid_amount) - flt(self.doc.write_off_amount))
 
 	#-------------------------------------------------------------------------------------
+
+	def set_default_recurring_values(self):
+		owner_email = self.doc.owner
+		if owner_email.lower() == 'administrator':
+			owner_email = webnotes.conn.sql("select ifnull(email, '') \
+				from `tabProfile` where name = 'Administrator'")[0][0]
+		ret = {
+			'repeat_on_day_of_month' : getdate(self.doc.posting_date).day,
+			'notification_email_address' : ', '.join([cstr(owner_email), self.doc.contact_email])
+		}
+		return ret
+		
+	def validate_notification_email_id(self):
+		from webnotes.utils import validate_email_add
+		email_ids = self.doc.notification_email_address.replace('\n', '').replace(' ', '').split(",")
+		for add in email_ids:
+			if add and not validate_email_add(add):
+				msgprint("%s is not a valid email address" % add, raise_exception=1)
+		
+		
 	def on_update_after_submit(self):
+		self.validate_notification_email_id()
 		self.convert_into_recurring()
 		
-
+		
 	def convert_into_recurring(self):
 		if self.doc.convert_into_recurring_invoice:
 			if not self.doc.recurring_type:
