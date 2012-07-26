@@ -69,7 +69,7 @@ class DocType:
 	def validate(self):
 		import string		
 		if self.doc.status == 'Lead Lost' and not self.doc.order_lost_reason:
-			msgprint("Please Enter Quotation Lost Reason")
+			msgprint("Please Enter Lost Reason under More Info section")
 			raise Exception	
 		
 		if self.doc.source == 'Campaign' and not self.doc.campaign_name and session['user'] != 'Guest':

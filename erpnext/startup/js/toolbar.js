@@ -34,7 +34,7 @@ erpnext.toolbar.setup = function() {
 		<ul class="dropdown-menu" id="toolbar-help">\
 		</ul></li>')
 
-	$('#toolbar-help').append('<li><a href="http://erpnext.blogspot.com/2011/03/erpnext-help.html" target="_blank">\
+	$('#toolbar-help').append('<li><a href="https://erpnext.com/manual" target="_blank">\
 		Documentation</a></li>')
 
 	$('#toolbar-help').append('<li><a href="http://groups.google.com/group/erpnext-user-forum" target="_blank">\

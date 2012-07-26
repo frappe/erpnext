@@ -636,10 +636,82 @@ class DocType(TransactionBase):
 			sales_com_obj.update_prevdoc_detail(0,self)
 
 		self.make_gl_entries(is_cancel=1)
-		
 
+	# Get Warehouse
+	def get_warehouse(self):
+		w = webnotes.conn.sql("select warehouse from `tabPOS Setting` where ifnull(user,'') = '%s' and company = '%s'" % (session['user'], self.doc.company))
+		w = w and w[0][0] or ''
+		if not w:
+			ps = webnotes.conn.sql("select name, warehouse from `tabPOS Setting` where ifnull(user,'') = '' and company = '%s'" % self.doc.company)
+			if not ps:
+				msgprint("To make POS entry, please create POS Setting from Setup --> Accounts --> POS Setting and refresh the system.")
+				raise Exception
+			elif not ps[0][1]:
+				msgprint("Please enter warehouse in POS Setting")
+			else:
+				w = ps[0][1]
+		return w
+
+	# on update
+	def on_update(self):
+		# Set default warehouse from pos setting
+		#----------------------------------------
+		if cint(self.doc.is_pos) == 1:
+			self.set_actual_qty()
+			w = self.get_warehouse()
+			if w:
+				for d in getlist(self.doclist, 'entries'):
+					if not d.warehouse:
+						d.warehouse = cstr(w)
+
+			if flt(self.doc.paid_amount) == 0:
+				if self.doc.cash_bank_account: 
+					webnotes.conn.set(self.doc, 'paid_amount', 
+						(flt(self.doc.grand_total) - flt(self.doc.write_off_amount)))
+				else:
+					# show message that the amount is not paid
+					webnotes.conn.set(self.doc,'paid_amount',0)
+					webnotes.msgprint("Note: Payment Entry not created since 'Cash/Bank Account' was not specified.")
+
+		else:
+			webnotes.conn.set(self.doc,'paid_amount',0)
+
+		webnotes.conn.set(self.doc,'outstanding_amount',flt(self.doc.grand_total) - flt(self.doc.total_advance) - flt(self.doc.paid_amount) - flt(self.doc.write_off_amount))
+
+	#-------------------------------------------------------------------------------------
+
+	def set_default_recurring_values(self):
+		from webnotes.utils import cstr
+
+		owner_email = self.doc.owner
+		if owner_email.lower() == 'administrator':
+			owner_email = cstr(webnotes.conn.get_value("Profile", "Administrator", "email"))
+		
+		ret = {
+			'repeat_on_day_of_month' : getdate(self.doc.posting_date).day,
+			'notification_email_address' : ', '.join([owner_email, cstr(self.doc.contact_email)]),
+		}
+		return ret
+		
+	def validate_notification_email_id(self):
+		if self.doc.notification_email_address:
+			from webnotes.utils import validate_email_add
+			for add in self.doc.notification_email_address.replace('\n', '').replace(' ', '').split(","):
+				if add and not validate_email_add(add):
+					msgprint("%s is not a valid email address" % add, raise_exception=1)
+		else:
+			msgprint("Notification Email Addresses not specified for recurring invoice",
+				raise_exception=1)
+		
+		
+	def on_update_after_submit(self):
+		self.convert_into_recurring()
+		
+		
 	def convert_into_recurring(self):
 		if self.doc.convert_into_recurring_invoice:
+			self.validate_notification_email_id()
+			
 			if not self.doc.recurring_type:
 				msgprint("Please select recurring type", raise_exception=1)
 			elif not self.doc.invoice_period_from_date or not self.doc.invoice_period_to_date:
@@ -673,6 +745,3 @@ class DocType(TransactionBase):
 
 		webnotes.conn.set(self.doc, 'next_date', next_date)
 
-
-	def on_update_after_submit(self):
-		self.convert_into_recurring()

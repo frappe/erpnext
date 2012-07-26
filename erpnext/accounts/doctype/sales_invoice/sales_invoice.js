@@ -499,12 +499,9 @@ cur_frm.cscript.view_ledger_entry = function(){
 }
 
 // Default values for recurring invoices
-cur_frm.cscript.convert_into_recurring_invoice = function(doc) {
-	if (doc.convert_into_recurring_invoice) {
-		doc.repeat_on_day_of_month = doc.posting_date.split('-')[2];
-		doc.notification_email_address = [doc.owner, doc.contact_email].join(', ');
-		refresh_field(['repeat_on_day_of_month', 'notification_email_address']);
-	}		
+cur_frm.cscript.convert_into_recurring_invoice = function(doc, dt, dn) {
+	if (doc.convert_into_recurring_invoice)
+		get_server_fields('set_default_recurring_values','','',doc, dt, dn, 0);
 }
 
 cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
@@ -513,4 +510,18 @@ cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
 		doctype: 'Sales Invoice'
 	}
 	cur_frm.cscript.notify(doc, args);
+}
+
+cur_frm.cscript.invoice_period_from_date = function(doc, dt, dn) {
+	if(doc.invoice_period_from_date) {
+		var recurring_type_map = { 'Monthly': 1, 'Quarterly': 3, 'Half-yearly': 6, 'Yearly': 12 };
+
+		var months = $(recurring_type_map).attr(doc.recurring_type);
+		if(months) {
+			var to_date = wn.datetime.add_months(doc.invoice_period_from_date,
+				months);
+			doc.invoice_period_to_date = wn.datetime.add_days(to_date, -1);
+			refresh_field('invoice_period_to_date');
+		}
+	}
 }

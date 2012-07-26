@@ -555,6 +555,9 @@ def notify_errors(inv, owner):
 
 def assign_task_to_owner(inv, msg, users):
 	for d in users:
+		if d.lower() == 'administrator':
+			d = webnotes.conn.sql("select ifnull(email_id, '') \
+				from `tabProfile` where name = 'Administrator'")[0][0]
 		from webnotes.widgets.form import assign_to
 		args = {
 			'assign_to' 	:	d,

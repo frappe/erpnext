@@ -5,7 +5,7 @@
 	{
 		'creation': '2012-04-03 12:49:53',
 		'docstatus': 0,
-		'modified': '2012-04-03 12:49:53',
+		'modified': '2012-07-23 11:49:53',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -14,7 +14,6 @@
 	{
 		'columns': u'Account\x01ID',
 		'criteria_name': u'Trial Balance',
-		'description': u'Trial Balance',
 		'dis_filters': u'transaction_date',
 		'doc_type': u'Account',
 		'doctype': 'Search Criteria',
