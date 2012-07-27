@@ -497,5 +497,9 @@ patch_list = [
 		'patch_file': 'sync_trial_balance',
 		'description': "sync trial balance"
 	},
-	
+	{
+		'patch_module': 'patches.july_2012',
+		'patch_file': 'blog_guest_permission',
+	},
+
 ]
