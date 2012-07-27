@@ -404,14 +404,13 @@ class DocType(TransactionBase):
 
 	#check in manage account if sales order / delivery note required or not.
 	def so_dn_required(self):
-		dict = {'Sales Order':'so_required','Delivery Note':'dn_required'}
-		for i in dict:	
-			res = webnotes.conn.sql("select value from `tabSingles` where doctype = 'Global Defaults' and field = '%s'"%dict[i])
-			if res and res[0][0] == 'Yes':
+		dic = {'Sales Order':'so_required','Delivery Note':'dn_required'}
+		for i in dic:	
+			if webnotes.conn.get_value('Global Defaults', 'Global Defaults', dic[i]) == 'Yes':
 				for d in getlist(self.doclist,'entries'):
-					if not d.fields[i.lower().replace(' ','_')]:
-						msgprint("%s No. required against item %s"%(i,d.item_code))
-						raise Exception
+					if webnotes.conn.get_value('Item', d.item_code, 'is_stock_item') == 'Yes' \
+						and not d.fields[i.lower().replace(' ','_')]:
+						msgprint("%s is mandatory for stock item which is not mentioed against item: %s"%(i,d.item_code), raise_exception=1)
 
 	#check for does customer belong to same project as entered..
 	#-------------------------------------------------------------------------------------------------
