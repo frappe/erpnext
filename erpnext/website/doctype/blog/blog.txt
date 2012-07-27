@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-05-28 19:22:38',
+		'creation': '2012-07-13 13:02:27',
 		'docstatus': 0,
-		'modified': '2012-06-22 18:56:16',
+		'modified': '2012-07-27 14:15:24',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -40,6 +40,7 @@
 		'parent': u'Blog',
 		'parentfield': u'permissions',
 		'parenttype': u'DocType',
+		'permlevel': 0,
 		'read': 1
 	},
 
@@ -51,10 +52,8 @@
 
 	# DocPerm
 	{
-		'cancel': 1,
 		'create': 1,
 		'doctype': u'DocPerm',
-		'permlevel': 0,
 		'role': u'Website Manager',
 		'write': 1
 	},
@@ -63,7 +62,6 @@
 	{
 		'create': 1,
 		'doctype': u'DocPerm',
-		'permlevel': 0,
 		'role': u'Blogger',
 		'write': 1
 	},
@@ -71,15 +69,8 @@
 	# DocPerm
 	{
 		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Website Manager'
-	},
-
-	# DocPerm
-	{
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Blogger'
+		'role': u'Guest',
+		'write': 0
 	},
 
 	# DocField
