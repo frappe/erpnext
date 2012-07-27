@@ -141,8 +141,7 @@ class DocType(TransactionBase):
 
 	def so_required(self):
 		"""check in manage account if sales order required or not"""
-		res = sql("select value from `tabSingles` where doctype = 'Global Defaults' and field = 'so_required'")
-		if res and res[0][0] == 'Yes':
+		if webnotes.conn.get_value('Global Defaults', 'Global Defaults', 'so_required') == 'Yes':
 			 for d in getlist(self.doclist,'delivery_note_details'):
 				 if not d.prevdoc_docname:
 					 msgprint("Sales Order No. required against item %s"%d.item_code)
