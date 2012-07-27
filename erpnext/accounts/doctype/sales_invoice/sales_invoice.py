@@ -680,31 +680,37 @@ class DocType(TransactionBase):
 	#-------------------------------------------------------------------------------------
 
 	def set_default_recurring_values(self):
+		from webnotes.utils import cstr
+
 		owner_email = self.doc.owner
 		if owner_email.lower() == 'administrator':
-			owner_email = webnotes.conn.sql("select ifnull(email, '') \
-				from `tabProfile` where name = 'Administrator'")[0][0]
+			owner_email = cstr(webnotes.conn.get_value("Profile", "Administrator", "email"))
+		
 		ret = {
 			'repeat_on_day_of_month' : getdate(self.doc.posting_date).day,
-			'notification_email_address' : ', '.join([cstr(owner_email), self.doc.contact_email])
+			'notification_email_address' : ', '.join([owner_email, cstr(self.doc.contact_email)]),
 		}
 		return ret
 		
 	def validate_notification_email_id(self):
-		from webnotes.utils import validate_email_add
-		email_ids = self.doc.notification_email_address.replace('\n', '').replace(' ', '').split(",")
-		for add in email_ids:
-			if add and not validate_email_add(add):
-				msgprint("%s is not a valid email address" % add, raise_exception=1)
+		if self.doc.notification_email_address:
+			from webnotes.utils import validate_email_add
+			for add in self.doc.notification_email_address.replace('\n', '').replace(' ', '').split(","):
+				if add and not validate_email_add(add):
+					msgprint("%s is not a valid email address" % add, raise_exception=1)
+		else:
+			msgprint("Notification Email Addresses not specified for recurring invoice",
+				raise_exception=1)
 		
 		
 	def on_update_after_submit(self):
-		self.validate_notification_email_id()
 		self.convert_into_recurring()
 		
 		
 	def convert_into_recurring(self):
 		if self.doc.convert_into_recurring_invoice:
+			self.validate_notification_email_id()
+			
 			if not self.doc.recurring_type:
 				msgprint("Please select recurring type", raise_exception=1)
 			elif not self.doc.invoice_period_from_date or not self.doc.invoice_period_to_date:
