@@ -69,17 +69,6 @@ cur_frm.cscript.calculate_total = function(doc,cdt,cdn){
 		}
 		doc.total_claimed_amount = flt(total_claim);
 		refresh_field('total_claimed_amount');
-		
-		$c_obj(make_doclist(doc.doctype, doc.name),'validate_approver','', function(r,rt){
-			if(r.message){
-				if(r.message['valid_approver'] == 'No'){
-					doc.exp_approver ='';
-				}
-				get_field(doc.doctype, 'exp_approver' , doc.name).options = '';
-				get_field(doc.doctype, 'exp_approver' , doc.name).options = r.message['app_lst'];
-				refresh_field('exp_approver');
-			}
-		});
 	}
 	else if(doc.approval_status == 'Submitted'){
 		var val = getchildren('Expense Claim Detail', doc.name, 'expense_voucher_details', doc.doctype);

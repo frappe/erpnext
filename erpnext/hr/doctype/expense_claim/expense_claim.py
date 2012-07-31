@@ -127,17 +127,7 @@ class DocType:
 		if not self.doc.exp_approver:
 			msgprint("Please select Expense Claim approver")
 			raise Exception
-	
-	def validate_approver(self):
-		app_lst = self.get_approver_lst()
-		if self.doc.exp_approver and self.doc.exp_approver not in app_lst:
-			msgprint("Approver "+self.doc.exp_approver+" is not authorized to approve this expense voucher. Please select another approver")
-			valid_app = 'No'
-		else:
-			valid_app = 'Yes'
-		ret = {'app_lst':("\n" + "\n".join(app_lst)), 'valid_approver':valid_app}
-		return ret
-	
+		
 	def on_submit(self):
 		self.validate_exp_details()
 		set(self.doc, 'approval_status', 'Submitted')
