@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-03-27 14:36:27',
+		'creation': '2012-05-15 12:15:04',
 		'docstatus': 0,
-		'modified': '2012-03-27 14:36:27',
+		'modified': '2012-07-31 17:23:42',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -26,7 +26,7 @@
 		'section_style': u'Simple',
 		'server_code_error': u' ',
 		'show_in_menu': 0,
-		'version': 115
+		'version': 1
 	},
 
 	# These values are common for all DocField
@@ -36,7 +36,7 @@
 		'parent': u'Bin',
 		'parentfield': u'fields',
 		'parenttype': u'DocType',
-		'permlevel': 1
+		'permlevel': 0
 	},
 
 	# These values are common for all DocPerm
@@ -46,6 +46,7 @@
 		'parent': u'Bin',
 		'parentfield': u'permissions',
 		'parenttype': u'DocType',
+		'permlevel': 0,
 		'read': 1
 	},
 
@@ -58,28 +59,24 @@
 	# DocPerm
 	{
 		'doctype': u'DocPerm',
-		'permlevel': 1,
 		'role': u'Sales Manager'
 	},
 
 	# DocPerm
 	{
 		'doctype': u'DocPerm',
-		'permlevel': 1,
 		'role': u'Sales User'
 	},
 
 	# DocPerm
 	{
 		'doctype': u'DocPerm',
-		'permlevel': 1,
 		'role': u'Purchase Manager'
 	},
 
 	# DocPerm
 	{
 		'doctype': u'DocPerm',
-		'permlevel': 1,
 		'role': u'Purchase User'
 	},
 
@@ -89,7 +86,6 @@
 		'cancel': 0,
 		'create': 0,
 		'doctype': u'DocPerm',
-		'permlevel': 1,
 		'role': u'Material User',
 		'submit': 0,
 		'write': 0
@@ -101,7 +97,6 @@
 		'cancel': 0,
 		'create': 0,
 		'doctype': u'DocPerm',
-		'permlevel': 0,
 		'role': u'Material Manager',
 		'submit': 0,
 		'write': 0
@@ -162,7 +157,7 @@
 		'doctype': u'DocField',
 		'fieldname': u'actual_qty',
 		'fieldtype': u'Currency',
-		'in_filter': 0,
+		'in_filter': 1,
 		'label': u'Actual Quantity',
 		'oldfieldname': u'actual_qty',
 		'oldfieldtype': u'Currency',
