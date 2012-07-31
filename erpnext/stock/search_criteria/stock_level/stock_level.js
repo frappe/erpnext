@@ -15,6 +15,8 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 report.customize_filters = function() {
-  this.add_filter({fieldname:'item_name', label:'Item Name', fieldtype:'Data', options:'', parent:'Item', in_first_page : 1});
-  this.add_filter({fieldname:'description', label:'Description', fieldtype:'Small Text', options: '', parent:'Item', in_first_page : 1});
+  this.add_filter({fieldname:'item_name', label:'Item Name', fieldtype:'Data', options:'', parent:'Item', in_first_page : 0});
+  this.add_filter({fieldname:'description', label:'Description', fieldtype:'Small Text', options: '', parent:'Item', in_first_page : 0});
+  this.add_filter({fieldname:'item_group', label:'Item Group', fieldtype:'link', options: 'Item Group', parent:'Item', in_first_page : 1});
+  this.add_filter({fieldname:'brand', label:'Brand', fieldtype:'link', options: 'Brand', parent:'Item', in_first_page : 1});
 }
