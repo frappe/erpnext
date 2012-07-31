@@ -34,6 +34,8 @@ def get_blog_list(args=None):
 		from webnotes.utils import global_date_format, get_fullname
 		res['full_name'] = get_fullname(res['owner'])
 		res['published'] = global_date_format(res['published'])
+		if not res['content']:
+			res['content'] = website.web_cache.get_html(res['name'])
 		res['content'] = split_blog_content(res['content'])
 		res['content'] = res['content'][:1000]
 
@@ -93,9 +95,6 @@ def add_comment(args=None):
 	import website.web_cache
 	website.web_cache.clear_cache(args.get('page_name'),
 		args.get('comment_doctype'), args.get('comment_docname'))
-	
-	# loads fresh blog into cache
-	get_blog_content(args.get('page_name'))
 	
 	import webnotes.utils
 	
