@@ -99,20 +99,8 @@ class DocType:
 			set(self.doc, 'remark', self.doc.remark)	 
 		set(self.doc, 'approval_status', 'Rejected')		
 
-		# on approval notification
-		#get_obj('Notification Control').notify_contact('Expense Claim Rejected', self.doc.doctype, self.doc.name, self.doc.email_id, self.doc.employee_name)
-
 		return cstr('Rejected')
 	
-	def validate_curr_exp(self):
-		for d in getlist(self.doclist, 'expense_voucher_details'):
-			if flt(d.sanctioned_amount) > 0:
-				if self.doc.approval_status == 'Draft':
-					msgprint("Sanctioned amount can be added by Approver person only for submitted Expense Claim")
-					raise Exception
-				elif self.doc.approval_status == 'Submitted' and session['user'] != self.doc.exp_approver:
-					msgprint("Sanctioned amount can be added only by expense voucher Approver")
-					raise Exception
 	
 	def validate_fiscal_year(self):
 		fy=sql("select year_start_date from `tabFiscal Year` where name='%s'"%self.doc.fiscal_year)
@@ -123,7 +111,6 @@ class DocType:
 			raise Exception
 		
 	def validate(self):
-		self.validate_curr_exp()
 		self.validate_fiscal_year()
 	
 	def on_update(self):
@@ -141,17 +128,7 @@ class DocType:
 		if not self.doc.exp_approver:
 			msgprint("Please select Expense Claim approver")
 			raise Exception
-	
-	def validate_approver(self):
-		app_lst = self.get_approver_lst()
-		if self.doc.exp_approver and self.doc.exp_approver not in app_lst:
-			msgprint("Approver "+self.doc.exp_approver+" is not authorized to approve this expense voucher. Please select another approver")
-			valid_app = 'No'
-		else:
-			valid_app = 'Yes'
-		ret = {'app_lst':("\n" + "\n".join(app_lst)), 'valid_approver':valid_app}
-		return ret
-	
+		
 	def on_submit(self):
 		self.validate_exp_details()
 		set(self.doc, 'approval_status', 'Submitted')
