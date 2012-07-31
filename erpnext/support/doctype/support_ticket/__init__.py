@@ -70,9 +70,7 @@ class SupportMailbox(POP3Mailbox):
 		
 		from webnotes.utils import decode_email_header
 		
-		# replace double quotes with blank
-		# double quotes in header prohibit decoding of header
-		full_email_id = decode_email_header(mail.mail['From'].replace('"', ''))
+		full_email_id = decode_email_header(mail.mail['From'])
 
 		for thread_id in thread_list:
 			exists = webnotes.conn.sql("""\
@@ -104,9 +102,7 @@ class SupportMailbox(POP3Mailbox):
 		d = Document('Support Ticket')
 		d.description = content
 		
-		# replace double quotes with blank
-		# double quotes in header prohibit decoding of header
-		d.subject = decode_email_header(mail.mail['Subject'].replace('"', ''))
+		d.subject = decode_email_header(mail.mail['Subject'])
 		
 		d.raised_by = full_email_id
 		d.content_type = content_type
