@@ -87,13 +87,17 @@ class DocType:
 		for d in getlist(obj.doclist, fname):
 			is_stock_item = get_value('Item', d.item_code, 'is_stock_item')
 			ar_required = get_value('Item', d.item_code, 'has_serial_no')
-			if cstr(d.serial_no).strip():
+			
+			# [bug fix] need to strip serial nos of all spaces and new lines for validation
+			serial_no = cstr(d.serial_no).strip()
+			
+			if serial_no:
 				if is_stock_item != 'Yes':
 					msgprint("Serial No is not required for non-stock item: %s" % d.item_code, raise_exception=1)
 				elif ar_required != 'Yes':
 					msgprint("If serial no required, please select 'Yes' in 'Has Serial No' in Item :" + d.item_code + \
 						', otherwise please remove serial no', raise_exception=1)
-			elif ar_required == 'Yes' and not d.serial_no:
+			elif ar_required == 'Yes' and not serial_no:
 				msgprint("Serial no is mandatory for item: "+ d.item_code, raise_exception = 1)
 
 			# validate rejected serial nos
