@@ -27,23 +27,23 @@ cur_frm.cscript.onload = function(doc,cdt,cdn){
 		for(var i = 0; i<val.length; i++){
 			val[i].sanctioned_amount ='';
 		}
-		//doc.total_claimed_amount = '';
 		doc.total_sanctioned_amount = '';
 		refresh_many(['sanctioned_amount', 'total_sanctioned_amount']);
 	}
 }
 
 cur_frm.cscript.refresh = function(doc,cdt,cdn){
-	if((user == doc.exp_approver && doc.approval_status == 'Submitted') || doc.docstatus == 0) unhide_field('calculate_total_amount');
-	else hide_field('calculate_total_amount');
-	
-	if(user == doc.exp_approver && doc.approval_status == 'Submitted')	unhide_field(['update_voucher', 'approve', 'reject']);
-
-	else hide_field(['update_voucher', 'approve', 'reject']);
-
-	
-	if(user == doc.exp_approver && doc.approval_status == 'Submitted') set_field_permlevel('remark', 0);
-	else set_field_permlevel('remark', 1);
+	hide_field('calculate_total_amount');
+	if(user == doc.exp_approver && doc.approval_status == 'Submitted'){
+		unhide_field(['update_voucher', 'approve', 'reject', 'calculate_total_amount']);
+		cur_frm.fields_dict['expense_voucher_details'].grid.set_column_disp('sanctioned_amount', true);
+		set_field_permlevel('remark', 0);
+	} else {
+		hide_field(['update_voucher', 'approve', 'reject']);
+		cur_frm.fields_dict['expense_voucher_details'].grid.set_column_disp('sanctioned_amount', false);
+		set_field_permlevel('remark', 1);
+	}
+	if (doc.docstatus == 0) unhide_field('calculate_total_amount');
 }
 
 cur_frm.cscript.employee = function(doc,cdt,cdn){
@@ -63,7 +63,9 @@ cur_frm.cscript.calculate_total = function(doc,cdt,cdn){
 		var val = getchildren('Expense Claim Detail', doc.name, 'expense_voucher_details', doc.doctype);
 		var total_claim =0;
 		for(var i = 0; i<val.length; i++){
+			if(!doc.claim_amount) val[i].sanctioned_amount = val[i].claim_amount;
 			total_claim = flt(total_claim)+flt(val[i].claim_amount);
+			refresh_field('sactioned_amount', val[i].name, 'expense_voucher_details'); 
 		}
 		doc.total_claimed_amount = flt(total_claim);
 		refresh_field('total_claimed_amount');
@@ -72,7 +74,10 @@ cur_frm.cscript.calculate_total = function(doc,cdt,cdn){
 		var val = getchildren('Expense Claim Detail', doc.name, 'expense_voucher_details', doc.doctype);
 		var total_sanctioned = 0;
 		for(var i = 0; i<val.length; i++){
+			if(!doc.claim_amount) val[i].sanctioned_amount = val[i].claim_amount;
 			total_sanctioned = flt(total_sanctioned)+flt(val[i].sanctioned_amount);
+			refresh_field('sactioned_amount', val[i].name, 'expense_voucher_details'); 
+			
 		}
 		doc.total_sanctioned_amount = flt(total_sanctioned);
 		refresh_field('total_sanctioned_amount');
