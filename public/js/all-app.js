@@ -746,7 +746,7 @@ LinkField.prototype.set_input_value=function(val){var me=this;me.set_input_value
 if(cur_frm){if(val==locals[me.doctype][me.docname][me.df.fieldname]){me.run_trigger();return;}}
 me.set(val);if(_f.cur_grid_cell)
 _f.cur_grid_cell.grid.cell_deselect();if(locals[me.doctype][me.docname][me.df.fieldname]&&!val){me.run_trigger();return;}
-me.validate_link(val,from_selector);}
+if(val){me.validate_link(val,from_selector);}}
 LinkField.prototype.validate_link=function(val,from_selector){var me=this;var fetch='';if(cur_frm.fetch_dict[me.df.fieldname])
 fetch=cur_frm.fetch_dict[me.df.fieldname].columns.join(', ');$c('webnotes.widgets.form.utils.validate_link',{'value':val,'options':me.df.options,'fetch':fetch},function(r,rt){if(r.message=='Ok'){if($(me.txt).val()!=val){if((me.grid&&!from_selector)||(!me.grid)){$(me.txt).val(val);}}
 if(r.fetch_values)
@@ -1572,7 +1572,7 @@ LinkField.prototype.set_input_value=function(val){var me=this;me.set_input_value
 if(cur_frm){if(val==locals[me.doctype][me.docname][me.df.fieldname]){me.run_trigger();return;}}
 me.set(val);if(_f.cur_grid_cell)
 _f.cur_grid_cell.grid.cell_deselect();if(locals[me.doctype][me.docname][me.df.fieldname]&&!val){me.run_trigger();return;}
-me.validate_link(val,from_selector);}
+if(val){me.validate_link(val,from_selector);}}
 LinkField.prototype.validate_link=function(val,from_selector){var me=this;var fetch='';if(cur_frm.fetch_dict[me.df.fieldname])
 fetch=cur_frm.fetch_dict[me.df.fieldname].columns.join(', ');$c('webnotes.widgets.form.utils.validate_link',{'value':val,'options':me.df.options,'fetch':fetch},function(r,rt){if(r.message=='Ok'){if($(me.txt).val()!=val){if((me.grid&&!from_selector)||(!me.grid)){$(me.txt).val(val);}}
 if(r.fetch_values)
@@ -2288,7 +2288,7 @@ wn.provide('erpnext.toolbar');erpnext.toolbar.setup=function(){erpnext.toolbar.a
    onclick="return false;">Help<b class="caret"></b></a>\
   <ul class="dropdown-menu" id="toolbar-help">\
   </ul></li>')
-$('#toolbar-help').append('<li><a href="http://erpnext.blogspot.com/2011/03/erpnext-help.html" target="_blank">\
+$('#toolbar-help').append('<li><a href="https://erpnext.com/manual" target="_blank">\
   Documentation</a></li>')
 $('#toolbar-help').append('<li><a href="http://groups.google.com/group/erpnext-user-forum" target="_blank">\
   Forum</a></li>')
