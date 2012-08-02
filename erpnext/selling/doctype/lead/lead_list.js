@@ -4,8 +4,7 @@ wn.doclistviews['Lead'] = wn.views.ListView.extend({
 		this.fields = this.fields.concat([
 			'tabLead.lead_name',
 			'tabLead.status',
-			'tabLead.source',
-			'tabLead.rating'
+			'tabLead.source'
 		]);
 		this.stats = this.stats.concat(['status', 'source', 'rating', 'company']);
 	},

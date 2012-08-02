@@ -41,3 +41,37 @@ def page_name(title):
 	name = title.lower()
 	name = re.sub('[~!@#$%^&*()<>,."\']', '', name)
 	return '-'.join(name.split()[:4])
+
+def render(page_name):
+	"""render html page"""
+	import webnotes
+	try:
+		if page_name:
+			html = get_html(page_name)
+		else:
+			html = get_html('index')
+	except Exception, e:
+		html = get_html('404')
+
+	print "Content-Type: text/html"
+	print
+	print html.encode('utf-8')
+	
+def get_html(page_name):
+	"""get page html"""
+	page_name = scrub_page_name(page_name)
+	comments = get_comments(page_name)
+	
+	import website.web_cache
+	html = website.web_cache.get_html(page_name, comments)
+	return html
+
+def get_comments(page_name):
+	import webnotes
+	
+	if page_name == '404':
+		comments = """error: %s""" % webnotes.getTraceback()
+	else:
+		comments = """page: %s""" % page_name
+		
+	return comments	
