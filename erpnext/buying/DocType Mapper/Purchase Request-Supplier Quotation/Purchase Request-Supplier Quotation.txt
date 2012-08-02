@@ -1,0 +1,124 @@
+# DocType Mapper, Purchase Request-Supplier Quotation
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2012-08-02 18:36:26',
+		'docstatus': 0,
+		'modified': '2012-08-02 18:37:32',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
+	},
+
+	# These values are common for all Table Mapper Detail
+	{
+		'doctype': u'Table Mapper Detail',
+		'name': '__common__',
+		'parent': u'Purchase Request-Supplier Quotation',
+		'parentfield': u'table_mapper_details',
+		'parenttype': u'DocType Mapper'
+	},
+
+	# These values are common for all Field Mapper Detail
+	{
+		'doctype': u'Field Mapper Detail',
+		'name': '__common__',
+		'parent': u'Purchase Request-Supplier Quotation',
+		'parentfield': u'field_mapper_details',
+		'parenttype': u'DocType Mapper'
+	},
+
+	# These values are common for all DocType Mapper
+	{
+		'doctype': u'DocType Mapper',
+		'from_doctype': u'Purchase Request',
+		'module': u'Buying',
+		'name': '__common__',
+		'ref_doc_submitted': 1,
+		'to_doctype': u'Supplier Quotation'
+	},
+
+	# DocType Mapper, Purchase Request-Supplier Quotation
+	{
+		'doctype': u'DocType Mapper',
+		'name': u'Purchase Request-Supplier Quotation'
+	},
+
+	# Field Mapper Detail
+	{
+		'checking_operator': u'=',
+		'doctype': u'Field Mapper Detail',
+		'from_field': u'company',
+		'map': u'Yes',
+		'match_id': 0,
+		'to_field': u'company'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': u'Field Mapper Detail',
+		'from_field': u'parenttype',
+		'map': u'Yes',
+		'match_id': 1,
+		'to_field': u'prevdoc_doctype'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': u'Field Mapper Detail',
+		'from_field': u'parent',
+		'map': u'Yes',
+		'match_id': 1,
+		'to_field': u'prevdoc_docname'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': u'Field Mapper Detail',
+		'from_field': u'name',
+		'map': u'Yes',
+		'match_id': 1,
+		'to_field': u'prevdoc_detail_docname'
+	},
+
+	# Field Mapper Detail
+	{
+		'doctype': u'Field Mapper Detail',
+		'from_field': u'uom',
+		'map': u'Yes',
+		'match_id': 1,
+		'to_field': u'stock_uom'
+	},
+
+	# Field Mapper Detail
+	{
+		'checking_operator': u'>=',
+		'doctype': u'Field Mapper Detail',
+		'from_field': u'transaction_date',
+		'map': u'No',
+		'match_id': 0,
+		'to_field': u'transaction_date'
+	},
+
+	# Table Mapper Detail
+	{
+		'doctype': u'Table Mapper Detail',
+		'from_table': u'Purchase Request',
+		'match_id': 0,
+		'reference_key': u'prevdoc_docname',
+		'to_table': u'Supplier Quotation',
+		'validation_logic': u'docstatus = 1'
+	},
+
+	# Table Mapper Detail
+	{
+		'doctype': u'Table Mapper Detail',
+		'from_field': u'indent_details',
+		'from_table': u'Purchase Request Item',
+		'match_id': 1,
+		'reference_doctype_key': u'prevdoc_doctype',
+		'to_field': u'quotation_details',
+		'to_table': u'Supplier Quotation Item',
+		'validation_logic': u'docstatus =1'
+	}
+]

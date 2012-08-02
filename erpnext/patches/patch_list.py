@@ -505,4 +505,8 @@ patch_list = [
 		'patch_module': 'patches.july_2012',
 		'patch_file': 'bin_permission',
 	},
+	{
+		'patch_module': 'patches.july_2012',
+		'patch_file': 'project_patch_repeat',
+	},
 ]
