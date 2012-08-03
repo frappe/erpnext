@@ -1,23 +1,45 @@
+import webnotes
+
+def execute():
+	# add index
+	webnotes.conn.commit()
+	webnotes.conn.sql("""drop index item_code_warehouse on `tabDelivery Note Packing Item`""")
+	webnotes.conn.sql("""create index item_code_warehouse
+		on `tabDelivery Note Packing Item` (item_code, warehouse)""")
+	webnotes.conn.begin()
+
+	repost_reserved_qty()
+	cleanup_wrong_sle()
+
 def repost_reserved_qty():
-	import webnotes
 	from webnotes.utils import flt
 	bins = webnotes.conn.sql("select item_code, warehouse, name, reserved_qty from `tabBin`")
+	i = 0
 	for d in bins:
+		i += 1
+		print i
 		reserved_qty = webnotes.conn.sql("""
-			select sum((dnpi.qty/so_item.qty)*(so_item.qty - ifnull(so_item.delivered_qty, 0))) 
-			
-			from `tabDelivery Note Packing Item` dnpi, `tabSales Order Item` so_item, `tabSales Order` so
-			
-			where dnpi.item_code = %s
-			and dnpi.warehouse = %s
-			and dnpi.parent = so.name
-			and so_item.parent = so.name
-			and dnpi.parenttype = 'Sales Order'
-			and dnpi.parent_detail_docname = so_item.name
-			and dnpi.parent_item = so_item.item_code
-			and so.docstatus = 1
-			and so.status != 'Stopped'
-		""", (d[0], d[1]))
+			select sum((dnpi_qty / so_item_qty) * (so_item_qty - so_item_delivered_qty))
+			from (select
+			qty as dnpi_qty,
+			(
+				select qty from `tabSales Order Item`
+				where name = dnpi.parent_detail_docname
+			) as so_item_qty,
+			(
+				select ifnull(delivered_qty, 0) from `tabSales Order Item`
+				where name = dnpi.parent_detail_docname
+			) as so_item_delivered_qty
+			from 
+			(
+				select qty, parent_detail_docname
+				from `tabDelivery Note Packing Item` dnpi_in
+				where item_code = %s and warehouse = %s
+				and parenttype="Sales Order"
+				and exists (select * from `tabSales Order` so
+				where name = dnpi_in.parent and docstatus = 1 and status != 'Stopped')
+			) dnpi) tab""", (d[0], d[1]))
+
 		if flt(d[3]) != flt(reserved_qty[0][0]):
 			print d[3], reserved_qty[0][0]
 			webnotes.conn.sql("""
@@ -68,8 +90,3 @@ def repost_bin(item, wh):
 		where item_code = %s and warehouse = %s", (item, wh))
 			
 	get_obj('Bin', bin[0][0]).update_entries_after(posting_date = '2012-07-01', posting_time = '12:05')
-	
-	
-def execute():
-	repost_reserved_qty()
-	cleanup_wrong_sle()

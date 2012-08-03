@@ -509,4 +509,8 @@ patch_list = [
 		'patch_module': 'patches.july_2012',
 		'patch_file': 'project_patch_repeat',
 	},
+	{
+		'patch_module': 'patches.july_2012',
+		'patch_file': 'repost_stock_due_to_wrong_packing_list',
+	},
 ]
