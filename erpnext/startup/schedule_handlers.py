@@ -42,7 +42,7 @@ def execute_daily():
 	run_fn(send)
 
 	# send bulk emails
-	from webnotes.utils.email_lib.bulk import cleanup
+	from webnotes.utils.email_lib.bulk import clear_outbox
 	run_fn(clear_outbox)
 
 def execute_weekly():
