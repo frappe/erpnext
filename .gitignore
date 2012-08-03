@@ -5,13 +5,12 @@ patch.log
 lib
 conf.py
 version.num
-public/*.html
-!public/blank.html
-!public/unsupported.html
-!public/app.html
 public/js/lib
 public/images/lib
 public/files
 public/backups
 public/css/wn-web.css
 public/js/wn-web.js
+backups
+files
+logs

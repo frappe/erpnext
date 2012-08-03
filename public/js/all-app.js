@@ -2130,13 +2130,12 @@ _f.frm_dialog.cur_frm.fields_dict[n].refresh();}else{var g=_f.cur_grid_cell;if(g
 cur_frm.fields_dict[n].refresh();}}
 set_field_options=function(n,txt){var df=get_field(cur_frm.doctype,n,cur_frm.docname);if(df)df.options=txt;refresh_field(n);}
 set_field_permlevel=function(n,level){var df=get_field(cur_frm.doctype,n,cur_frm.docname);if(df)df.permlevel=level;refresh_field(n);}
-hide_field=function(n){function _hide_field(n,hidden){var df=get_field(cur_frm.doctype,n,cur_frm.docname);if(df){df.hidden=hidden;refresh_field(n);}
-else{console.log("hide_field cannot find field "+n);}}
-if(cur_frm){if(n.substr)_hide_field(n,1);else{for(var i in n)_hide_field(n[i],1)}}}
-unhide_field=function(n){function _hide_field(n,hidden){var df=get_field(cur_frm.doctype,n,cur_frm.docname);if(df){df.hidden=hidden;refresh_field(n);}
-else{console.log("unhide_field cannot find field "+n);}}
-if(cur_frm){if(n.substr)_hide_field(n,0);else{for(var i in n)_hide_field(n[i],0)}}}
+toggle_field=function(n,hidden){var df_obj=get_field_obj(n);var df=get_field(cur_frm.doctype,n,cur_frm.docname);if(df){if(df_obj.df.fieldtype==="Section Break"){$(df_obj.row.wrapper).toggle(hidden?false:true);}else if(df_obj.df.fieldtype==="Column Break"){$(df_obj.cell.wrapper).toggle(hidden?false:true);}else{df.hidden=hidden;refresh_field(n);}}
+else{console.log((hidden?"hide_field":"unhide_field")+" cannot find field "+n);}}
+hide_field=function(n){if(cur_frm){if(n.substr)toggle_field(n,1);else{for(var i in n)toggle_field(n[i],1)}}}
+unhide_field=function(n){if(cur_frm){if(n.substr)toggle_field(n,0);else{for(var i in n)toggle_field(n[i],0)}}}
 get_field_obj=function(fn){return cur_frm.fields_dict[fn];}
+set_missing_values=function(doc,dict){var fields_to_set={};$.each(dict,function(i,v){if(!doc[i]){fields_to_set[i]=v;}});if(fields_to_set){set_multiple(doc.doctype,doc.name,fields_to_set);}}
 /*
  *	lib/js/legacy/widgets/form/form_comments.js
  */

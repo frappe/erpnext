@@ -121,27 +121,21 @@ var set_dynamic_label_child = function(doc, cdt, cdn, base_curr) {
 //------------------------------------------------------------------
 
 cur_frm.cscript.dynamic_label = function(doc, cdt, cdn, callback1) {
-	var callback = function(r, rt) {
-		if (r.message) base_curr = r.message;
-		else base_curr = sys_defaults['currency'];
-		
-		if (base_curr == doc.currency) {
-			set_multiple(cdt, cdn, {conversion_rate:1});
-			hide_field(['conversion_rate', 'net_total_import','grand_total_import', 'in_words_import', 'other_charges_added_import', 'other_charges_deducted_import']);
-		} else unhide_field(['conversion_rate', 'net_total_import','grand_total_import', 'in_words_import', 'other_charges_added_import', 'other_charges_deducted_import']);
-
-		set_dynamic_label_par(doc, cdt, cdn, base_curr);
-		set_dynamic_label_child(doc, cdt, cdn, base_curr);
-
-		if(callback1) callback1(doc, cdt, cdn);
+	var base_currency = wn.boot.company[doc.company].default_currency || sys_defaults['currency'];
+	
+	if (doc.currency === base_currency) {
+		set_multiple(cdt, cdn, {conversion_rate:1});
+		hide_field(['conversion_rate', 'net_total_import','grand_total_import',
+			'in_words_import', 'other_charges_added_import', 'other_charges_deducted_import']);
+	} else {
+		unhide_field(['conversion_rate', 'net_total_import','grand_total_import',
+			'in_words_import', 'other_charges_added_import', 'other_charges_deducted_import']);
 	}
-
-	if (doc.company == sys_defaults['company']) callback('', '');
-	else wn.call({
-		method: 'selling.doctype.sales_common.sales_common.get_comp_base_currency',
-		args: {company: doc.company},
-		callback: callback
-	});
+	
+	set_dynamic_label_par(doc, cdt, cdn, base_currency);
+	set_dynamic_label_child(doc, cdt, cdn, base_currency);
+	
+	if (callback1) callback1(doc, cdt, cdn);
 }
 
 cur_frm.cscript.currency = function(doc, cdt, cdn) {
