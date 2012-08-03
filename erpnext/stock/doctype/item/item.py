@@ -182,27 +182,6 @@ class DocType:
 				self.doc.is_asset_item = 'No'
 				raise Exception
 
-	def check_min_inventory_level(self):
-		if self.doc.minimum_inventory_level:
-			total_qty = sql("select sum(projected_qty) from tabBin where item_code = %s",self.doc.name)
-			if flt(total_qty) < flt(self.doc.minimum_inventory_level):
-				msgprint("Your minimum inventory level is reached")
-				send_to = []
-				send = sql("select t1.email from `tabProfile` t1,`tabUserRole` t2 where t2.role IN ('Material Master Manager','Purchase Manager') and t2.parent = t1.name")
-				for d in send:
-					send_to.append(d[0])
-				msg = '''
-Minimum Inventory Level Reached
-
-Item Code: %s
-Item Name: %s
-Minimum Inventory Level: %s
-Total Available Qty: %s
-
-''' % (self.doc.item_code, self.doc.item_name, self.doc.minimum_inventory_level, total_qty)
-
-				sendmail(send_to, sender='automail@webnotestech.com', subject='Minimum Inventory Level Reached', parts=[['text/plain', msg]])
-
 	def get_file_details(self, arg = ''):
 		file = sql("select file_group, description from tabFile where name = %s", eval(arg)['file_name'], as_dict = 1)
 

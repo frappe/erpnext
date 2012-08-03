@@ -25,27 +25,26 @@ def execute_all():
 		* get support email
 		* recurring invoice
 	"""
-	try:
-		from support.doctype.support_ticket import get_support_mails
-		get_support_mails()
-	except Exception, e:
-		scheduler.log('get_support_mails')
+	# pull emails
+	from support.doctype.support_ticket import get_support_mails
+	run_fn(get_support_mails)
 
-	try:
-		from accounts.doctype.gl_control.gl_control import manage_recurring_invoices
-		manage_recurring_invoices()
-	except Exception, e:
-		scheduler.log('manage_recurring_invoices')
-
+	# run recurring invoices
+	from accounts.doctype.gl_control.gl_control import manage_recurring_invoices
+	run_fn(manage_recurring_invoices)
 	
+	# bulk email
+	from webnotes.utils.email_lib.bulk import flush
+	run_fn(flush)
 	
 def execute_daily():
-	"""email digest"""
-	try:
-		from setup.doctype.email_digest.email_digest import send
-		send()
-	except Exception, e:
-		scheduler.log('email_digest.send')
+	# email digest
+	from setup.doctype.email_digest.email_digest import send
+	run_fn(send)
+
+	# send bulk emails
+	from webnotes.utils.email_lib.bulk import clear_outbox
+	run_fn(clear_outbox)
 
 def execute_weekly():
 	pass
@@ -55,3 +54,9 @@ def execute_monthly():
 
 def execute_hourly():
 	pass
+	
+def run_fn(fn):
+	try:
+		fn()
+	except Exception, e:
+		scheduler.log(fn.func_name)

@@ -38,49 +38,8 @@ def init():
 
 def respond():
 	import webnotes
-	from webnotes.utils import get_encoded_string
-	try:
-		if 'page' in webnotes.form_dict:
-			html = get_html(webnotes.form_dict['page'])
-		else:
-			# show home page
-			html = get_html('index')
-	except Exception, e:
-		html = get_html('404')
-		
-	content = []
-	import webnotes.handler
-	html = get_encoded_string(html)
-	html, content = webnotes.handler.gzip_response(html, content)
-	
-	content += [
-		"Content-Type: text/html",
-		"",
-	]
-	
-	webnotes.handler.print_content(content)
-	print html
-
-def get_html(page_name):
 	import website.utils
-	page_name = website.utils.scrub_page_name(page_name)
-	
-	comments = get_comments(page_name)
-	
-	import website.web_cache
-	html = website.web_cache.get_html(page_name, comments)
-	
-	return html
-
-def get_comments(page_name):
-	import webnotes
-	
-	if page_name == '404':
-		comments = """error: %s""" % webnotes.getTraceback()
-	else:
-		comments = """page: %s""" % page_name
-		
-	return comments
+	return website.utils.render(webnotes.form_dict.get('page'))
 
 if __name__=="__main__":
 	init()

@@ -416,7 +416,6 @@ class DocType:
 
 		from webnotes.utils.email_lib import sendmail
 		try:
-			#webnotes.msgprint('in send')
 			sendmail(
 				recipients=recipient_list,
 				sender='notifications+email_digest@erpnext.com',

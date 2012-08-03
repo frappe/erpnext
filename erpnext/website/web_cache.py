@@ -92,6 +92,7 @@ def get_predefined_pages():
 	return page_list
 
 def prepare_args(page_name):
+	import webnotes
 	if page_name == 'index':
 		page_name = get_home_page()
 
@@ -99,6 +100,7 @@ def prepare_args(page_name):
 		args = {
 			'template': 'pages/%s.html' % page_name,
 			'name': page_name,
+			'webnotes': webnotes
 		}
 	else:
 		args = get_doc_fields(page_name)

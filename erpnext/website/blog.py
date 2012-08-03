@@ -107,6 +107,25 @@ def add_comment(args=None):
 
 	return comment_html
 
+@webnotes.whitelist(allow_guest=True)
+def add_subscriber():
+	"""add blog subscriber to lead"""
+	full_name = webnotes.form_dict.get('your_name')
+	email = webnotes.form_dict.get('your_email_address')
+	name = webnotes.conn.sql("""select name from tabLead where email_id=%s""", email)
+	
+	from webnotes.model.doc import Document
+	if name:
+		lead = Document('Lead', name[0][0])
+	else:
+		lead = Document('Lead')
+		
+	lead.unsubscribed = 0
+	lead.blog_subscriber = 1
+	lead.lead_name = full_name
+	lead.email_id = email
+	lead.save()
+		
 def get_blog_content(blog_page_name):
 	import website.web_cache
 	content = website.web_cache.get_html(blog_page_name)

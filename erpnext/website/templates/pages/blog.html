@@ -2,6 +2,7 @@
 
 {% block javascript %}
 	{% include "js/blog.js" %}
+	{% include "js/blog_subscribe.js" %}
 {% endblock %}
 
 {% block css %}
@@ -23,17 +24,9 @@
 			</div>
 			
 			<div class="layout-side-section">
-				<!-- for later
-				<h4>Get Updates</h4>
-				<p>
-				<input name="blog-subscribe">
-				<button class="btn" id="blog-subscribe">Subscribe</button>
-				</p>-->
-				<h4>Subscribe</h4>
-				<p>
-				<img src="images/feed.png" style="margin-right: 4px; margin-bottom: -4px">
-				<a href="rss.xml" target="_blank">RSS Feed</a>
-				</p>
+				{% block blog_subscribe %}
+					{% include "html/blog_subscribe.html" %}
+				{% endblock %}
 			</div>
 			<div style="clear: both"></div>
 		</div>

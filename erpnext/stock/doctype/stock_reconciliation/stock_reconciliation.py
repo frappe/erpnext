@@ -79,9 +79,8 @@ class DocType:
 	def get_reconciliation_data(self,submit = 1):
 		"""Read and validate csv data"""
 		import csv
-		from webnotes.utils import get_encoded_string
 		from core.page.data_import_tool.data_import_tool import read_csv_content
-		csv_content = get_encoded_string(self.get_csv_file_data(submit))
+		csv_content = self.get_csv_file_data(submit).encode('utf-8')
 		data = read_csv_content(csv_content)
 		self.convert_into_list(data, submit)
 		

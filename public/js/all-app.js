@@ -869,7 +869,8 @@ opts.parent.appframe=new wn.ui.AppFrame($(opts.parent).find('.layout-appframe'))
  *	lib/js/wn/ui/dialog.js
  */
 wn.widgets.FieldGroup=function(){this.first_button=false;this.make_fields=function(body,fl){if(!window.make_field){wn.require('css/fields.css');wn.require('js/fields.js');}
-$y(this.body,{padding:'11px'});this.fields_dict={};for(var i=0;i<fl.length;i++){var df=fl[i];var div=$a(body,'div','',{margin:'6px 0px'})
+$y(this.body,{padding:'11px'});this.fields_dict={};for(var i=0;i<fl.length;i++){var df=fl[i];if(!df.fieldname&&df.label){df.fieldname=df.label.replace(/ /g,'_').toLowerCase();}
+var div=$a(body,'div','',{margin:'6px 0px'})
 f=make_field(df,null,div,null);f.not_in_form=1;this.fields_dict[df.fieldname]=f
 f.refresh();if(df.fieldtype=='Button'&&!this.first_button){$(f.input).addClass('btn-info');this.first_button=true;}}}
 this.catch_enter_as_submit=function(){var me=this;$(this.body).find(':input[type="text"], :input[type="password"]').keypress(function(e){if(e.which==13){$(me.body).find('.btn-info:first').click();}})}
@@ -2141,10 +2142,12 @@ errprint('[set_field_tip] Unable to set field tip: '+n);}}
 refresh_field=function(n,docname,table_field){if(typeof n==typeof[])refresh_many(n,docname,table_field);if(table_field){if(_f.frm_dialog&&_f.frm_dialog.display){_f.frm_dialog.cur_frm.refresh_field(n);}else{var g=_f.cur_grid_cell;if(g)var hc=g.grid.head_row.cells[g.cellIndex];if(g&&hc&&hc.fieldname==n&&g.row.docname==docname){hc.template.refresh();}else{cur_frm.fields_dict[table_field].grid.refresh_cell(docname,n);}}}else if(cur_frm){cur_frm.refresh_field(n)}}
 set_field_options=function(n,txt){cur_frm.set_df_property(n,'options',txt)}
 set_field_permlevel=function(n,level){cur_frm.set_df_property(n,'permlevel',level)}
-hide_field=function(n){function _hide_field(n,hidden){cur_frm.set_df_property(n,'hidden',hidden)}
-if(cur_frm){if(typeof n=='string')_hide_field(n,1);else{for(var i in n)_hide_field(n[i],1)}}}
-unhide_field=function(n){function _hide_field(n,hidden){cur_frm.set_df_property(n,'hidden',hidden)}
-if(cur_frm){if(typeof n=='string')_hide_field(n,0);else{for(var i in n)_hide_field(n[i],0)}}}
+toggle_field=function(n,hidden){var df_obj=get_field_obj(n);var df=get_field(cur_frm.doctype,n,cur_frm.docname);if(df){if(df_obj.df.fieldtype==="Section Break"){$(df_obj.row.wrapper).toggle(hidden?false:true);}else if(df_obj.df.fieldtype==="Column Break"){$(df_obj.cell.wrapper).toggle(hidden?false:true);}else{df.hidden=hidden;refresh_field(n);}}
+else{console.log((hidden?"hide_field":"unhide_field")+" cannot find field "+n);}}
+hide_field=function(n){if(cur_frm){if(n.substr)toggle_field(n,1);else{for(var i in n)toggle_field(n[i],1)}}}
+unhide_field=function(n){if(cur_frm){if(n.substr)toggle_field(n,0);else{for(var i in n)toggle_field(n[i],0)}}}
+get_field_obj=function(fn){return cur_frm.fields_dict[fn];}
+set_missing_values=function(doc,dict){var fields_to_set={};$.each(dict,function(i,v){if(!doc[i]){fields_to_set[i]=v;}});if(fields_to_set){set_multiple(doc.doctype,doc.name,fields_to_set);}}
 /*
  *	lib/js/legacy/widgets/form/form_comments.js
  */

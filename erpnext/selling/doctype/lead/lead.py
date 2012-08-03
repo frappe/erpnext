@@ -83,14 +83,8 @@ class DocType:
 		
 	
 	def on_update(self):
-		# Add to calendar
-		# ========================================================================
 		if self.doc.contact_by:
 			self.add_calendar_event()
-		
-		if session['user'] == 'Guest':
-			if self.doc.email_id:
-				self.send_email_notification()
 		
 		if not self.doc.naming_series:
 			if session['user'] == 'Guest':
@@ -103,37 +97,6 @@ class DocType:
 			else:
 				msgprint("Please specify naming series")
 				raise Exception
-	
-	def send_email_notification(self):
-		if not validate_email_add(self.doc.email_id.strip(' ')):
-			msgprint('error:%s is not a valid email id' % self.doc.email_id.strip(' '))
-			raise Exception
-		else:
-			subject = 'Thank you for interest in erpnext'
-			 
-			sendmail([self.doc.email_id.strip(' ')], sender = sender_email[0][0], subject = subject , parts = [['text/html', self.get_notification_msg()]])
-			msgprint("Mail Sent")
-	
-	def get_notification_msg(self):
-		t = """
-			<html>
-				<body>
-					Dear %s,<br><br>
-
-					Thank you for contacting us.<br><br>
-
-					You have left following message for us,<br>
-					%s
-					<br><br>
-
-					You will receive reply on this shortly.<br><br>
-
-					Cheers!
-				</body>
-			</html>
-		""" % (self.doc.lead_name, self.doc.remark)
-
-		return t
 
 	# Add to Calendar
 	# ===========================================================================
@@ -158,25 +121,6 @@ class DocType:
 		ev.ref_name = self.doc.name
 		ev.save(1)
 
-
-#-----------------Email-------------------------------------------- 
-	def send_emails(self, email=[], subject='', message=''):
-		if email:
-			sendmail(email, sender = webnotes.user.name, subject = subject , parts = [['text/html', message]])
-			msgprint("Mail Sent")
-			self.add_in_follow_up(message,'Email')
-
-#-------------------------Checking Sent Mails Details----------------------------------------------				
-	def send_mail(self):
-		if not self.doc.subject or not self.doc.message:
-			msgprint("Please enter subject & message in their respective fields.")
-		elif not self.doc.email_id:
-			msgprint("Recipient not specified. Please add email id of lead in 'Email id' field provided in 'Contact Info' section.")
-			raise Exception
-		else :
-		 self.send_emails([self.doc.email_id.strip(' ')], subject = self.doc.subject ,message = self.doc.message)
-
-#---------------------- Add details in follow up table----------------
 	def add_in_follow_up(self,message,type):
 		import datetime
 		child = addchild( self.doc, 'follow_up', 'Communication Log', 1, self.doclist)

@@ -25,44 +25,25 @@ class DocType:
 		self.doc,self.doclist = doc,doclist
 
 	def validate(self):
-		"""
-			Checks connectivity to email servers before saving
-		"""
+		"""Checks connectivity to email servers before saving"""
 		self.validate_outgoing()
 		self.validate_incoming()
 
-	
 	def validate_outgoing(self):
-		"""
-			Checks incoming email settings
-		"""
+		"""Checks incoming email settings"""
+		self.doc.encode()
 		if self.doc.outgoing_mail_server:
-			from webnotes.utils import cint, get_encoded_string
-			import _socket
-			from webnotes.utils.email_lib.send import EMail
-			import smtplib
-			out_email = EMail()
-			out_email.server = get_encoded_string(self.doc.outgoing_mail_server)
-			out_email.port = cint(self.doc.mail_port)
-			out_email.use_ssl = self.doc.use_ssl
-			try:
-				err_msg = "Login Id or Mail Password missing. Please enter and try again."
-				if not (self.doc.mail_login and self.doc.mail_password):
-					raise AttributeError, err_msg
-				out_email.login = get_encoded_string(self.doc.mail_login)
-				out_email.password =  get_encoded_string(self.doc.mail_password)
-			except AttributeError, e:
-				webnotes.msgprint(err_msg)
-				raise e
-			
-			# exceptions are handled in smtp_connect
-			sess = out_email.smtp_connect()
-			
-			try:
-				sess.quit()
-			except:
-				pass
-		
+			from webnotes.utils import cint
+			from webnotes.utils.email_lib.smtp import SMTPServer
+			smtpserver = SMTPServer(login = self.doc.mail_login,
+				password = self.doc.mail_password,
+				server = self.doc.outgoing_mail_server,
+				port = cint(self.doc.mail_port),
+				use_ssl = self.doc.use_ssl
+			)
+						
+			# exceptions are handled in session connect
+			sess = smtpserver.sess
 
 	def validate_incoming(self):
 		"""
@@ -72,17 +53,17 @@ class DocType:
 			from webnotes.utils.email_lib.receive import POP3Mailbox
 			from webnotes.model.doc import Document
 			import _socket, poplib
-			from webnotes.utils import get_encoded_string
 			
 			inc_email = Document('Incoming Email Settings')
-			inc_email.host = get_encoded_string(self.doc.support_host)
+			inc_email.encode()
+			inc_email.host = self.doc.support_host
 			inc_email.use_ssl = self.doc.support_use_ssl
 			try:
 				err_msg = 'User Name or Support Password missing. Please enter and try again.'
 				if not (self.doc.support_username and self.doc.support_password):
 					raise AttributeError, err_msg
-				inc_email.username = get_encoded_string(self.doc.support_username)
-				inc_email.password = get_encoded_string(self.doc.support_password)
+				inc_email.username = self.doc.support_username
+				inc_email.password = self.doc.support_password
 			except AttributeError, e:
 				webnotes.msgprint(err_msg)
 				raise e

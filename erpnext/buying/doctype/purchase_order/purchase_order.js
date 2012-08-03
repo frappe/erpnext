@@ -23,7 +23,6 @@ wn.require('erpnext/buying/doctype/purchase_common/purchase_common.js');
 wn.require('erpnext/utilities/doctype/sms_control/sms_control.js');
 wn.require('erpnext/setup/doctype/notification_control/notification_control.js');
 
-//========================== On Load =================================================
 cur_frm.cscript.onload = function(doc, cdt, cdn) {
 
 	if(!doc.fiscal_year && doc.__islocal){ //set_default_values(doc);
@@ -37,22 +36,14 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 }
 
 cur_frm.cscript.onload_post_render = function(doc, dt, dn) {
-	var callback = function(doc, dt, dn) {
-		if(doc.__islocal){ 
-			cur_frm.cscript.get_default_schedule_date(doc);
-		}	
-	}
-	cur_frm.cscript.dynamic_label(doc, dt, dn, callback);
+	if(doc.__islocal) cur_frm.cscript.get_default_schedule_date(doc);
 }
 
-// ================================== Refresh ==========================================
 cur_frm.cscript.refresh = function(doc, cdt, cdn) { 
-	// Show buttons
-	// ---------------------------------
 	cur_frm.clear_custom_buttons();
 	erpnext.hide_naming_series();
 
-	if (!cur_frm.cscript.is_onload) cur_frm.cscript.dynamic_label(doc, cdt, cdn);
+	cur_frm.cscript.dynamic_label(doc, cdt, cdn);
 
 	if(doc.docstatus == 1 && doc.status != 'Stopped'){
 		cur_frm.add_custom_button('Send SMS', cur_frm.cscript['Send SMS']);
@@ -68,7 +59,6 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	else $(cur_frm.fields_dict.contact_section.row.wrapper).toggle(false);
 }
 
-//Supplier
 cur_frm.cscript.supplier = function(doc,dt,dn) {
 	if (doc.supplier) {
 		get_server_fields('get_default_supplier_address',
@@ -102,33 +92,14 @@ cur_frm.fields_dict.contact_person.on_new = function(dn) {
 	locals['Contact'][dn].supplier_name = locals[cur_frm.doctype][cur_frm.docname].supplier_name;
 }
 
-
-
-
-
-//================ create new contact ============================================================================
-cur_frm.cscript.new_contact = function(){
-	tn = createLocal('Contact');
-	locals['Contact'][tn].is_supplier = 1;
-	if(doc.supplier) locals['Contact'][tn].supplier = doc.supplier;
-	loaddoc('Contact', tn);
-}
-
-//======================= transaction date =============================
 cur_frm.cscript.transaction_date = function(doc,cdt,cdn){
-	if(doc.__islocal){ 
-		cur_frm.cscript.get_default_schedule_date(doc);
-	}
+	if(doc.__islocal){ cur_frm.cscript.get_default_schedule_date(doc); }
 }
 
-
-// ---------------------- Get project name --------------------------
 cur_frm.fields_dict['po_details'].grid.get_field('project_name').get_query = function(doc, cdt, cdn) {
 	return 'SELECT `tabProject`.name FROM `tabProject` WHERE `tabProject`.status = "Open" AND `tabProject`.name LIKE "%s" ORDER BY `tabProject`.name ASC LIMIT 50';
 }
 
-//==================== Purchase Request No Get Query =======================================================
-//===== Only those Purchase Requests status != 'Completed' and docstatus = 1 i.e. submitted=================
 cur_frm.fields_dict['indent_no'].get_query = function(doc) {
 	return 'SELECT DISTINCT `tabPurchase Request`.`name` FROM `tabPurchase Request` WHERE `tabPurchase Request`.company = "' + doc.company + '" and `tabPurchase Request`.`docstatus` = 1 and `tabPurchase Request`.`status` != "Stopped" and ifnull(`tabPurchase Request`.`per_ordered`,0) < 100 and `tabPurchase Request`.%(key)s LIKE "%s" ORDER BY `tabPurchase Request`.`name` DESC LIMIT 50';
 }
@@ -203,10 +174,6 @@ cur_frm.cscript['Unstop Purchase Order'] = function() {
 	}
 }
 
-// ***************** Get Print Heading	*****************
-cur_frm.fields_dict['select_print_heading'].get_query = function(doc, cdt, cdn) {
-	return 'SELECT `tabPrint Heading`.name FROM `tabPrint Heading` WHERE `tabPrint Heading`.docstatus !=2 AND `tabPrint Heading`.name LIKE "%s" ORDER BY `tabPrint Heading`.name ASC LIMIT 50';
-}
 //****************** For print sales order no and date*************************
 cur_frm.pformat.indent_no = function(doc, cdt, cdn){
 	//function to make row of table

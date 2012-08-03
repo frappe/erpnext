@@ -14,24 +14,12 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-pscript.onload_unsubscribe = function(wrapper) {
-	var email = window.location.hash.split('/').splice(-1);
-	$(wrapper).find('input[name="unsubscribe"]').val(email)
-	
-	$('#btn-unsubscribe').click(function() {
-		var email = $(wrapper).find('input[name="unsubscribe"]').val();
-		if(email) {
-			var btn = this;
-			wn.call({
-				module:'website',
-				page:'unsubscribe',
-				method:'unsubscribe',
-				args:email,
-				btn: this,
-				callback: function() {
-					$(wrapper).find('input[name="unsubscribe"]').val('');
-				}
+cur_frm.cscript.refresh = function(doc) {
+	if(!doc.__islocal && doc.published && !doc.email_sent) {
+		cur_frm.add_custom_button('Email Subscribers', function() {
+			$c_obj(make_doclist(doc.doctype, doc.name), 'send_emails', '', function(r) {
+				cur_frm.refresh();
 			});
-		}
-	});
+		})
+	}
 }

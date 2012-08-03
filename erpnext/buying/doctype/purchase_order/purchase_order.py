@@ -84,7 +84,6 @@ class DocType(TransactionBase):
 
 	# Pull Purchase Request
 	def get_indent_details(self):
-		#self.validate_prev_docname() 
 		if self.doc.indent_no:
 			get_obj('DocType Mapper','Purchase Request-Purchase Order').dt_map('Purchase Request','Purchase Order',self.doc.indent_no, self.doc, self.doclist, "[['Purchase Request','Purchase Order'],['Purchase Request Item', 'Purchase Order Item']]")
 			pcomm = get_obj('Purchase Common')
@@ -102,26 +101,13 @@ class DocType(TransactionBase):
 					else:
 						d.purchase_ref_rate = d.discount_rate = d.purchase_rate = d.import_ref_rate = d.import_rate = 0.0
 	
-	# GET TERMS & CONDITIONS
-	# =====================================================================================
 	def get_tc_details(self):
+		"""get terms & conditions"""
 		return get_obj('Purchase Common').get_tc_details(self)
 
-
-
-	# validate if indent has been pulled twice
-	def validate_prev_docname(self):
-		for d in getlist(self.doclist, 'po_details'): 
-			if d.prevdoc_docname and self.doc.indent_no == d.prevdoc_docname:
-				msgprint(cstr(self.doc.indent_no) + " indent details have already been pulled. ")
-				raise Exception
-
-	# get last purchase rate
 	def get_last_purchase_rate(self):
 		get_obj('Purchase Common').get_last_purchase_rate(self)
 		
-	# validation
-	#-------------------------------------------------------------------------------------------------------------
 	def validate_doc(self,pc_obj):
 		# Validate values with reference document
 		pc_obj.validate_reference_value(obj = self)
@@ -234,16 +220,14 @@ class DocType(TransactionBase):
 		get_obj('Authorization Control').validate_approving_authority(self.doc.doctype, self.doc.company, self.doc.grand_total)
 		
 		# Step 4 :=> Update Current PO No. in Supplier as last_purchase_order.
-		update_supplier = sql("update `tabSupplier` set last_purchase_order = '%s' where name = '%s'" % (self.doc.name, self.doc.supplier))
+		update_supplier = webnotes.conn.set_value("Supplier", self.doc.supplier,
+			"last_purchase_order", self.doc.name)
 
 		# Step 5 :=> Update last purchase rate
 		pc_obj.update_last_purchase_rate(self, is_submit = 1)
 
 		# Step 6 :=> Set Status
 		set(self.doc,'status','Submitted')
-		
-		self.doc.indent_no = '';
-	
 	 
 	# On Cancel
 	# -------------------------------------------------------------------------------------------------------
