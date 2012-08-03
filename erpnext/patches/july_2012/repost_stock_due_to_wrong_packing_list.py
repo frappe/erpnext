@@ -3,7 +3,6 @@ import webnotes
 def execute():
 	# add index
 	webnotes.conn.commit()
-	webnotes.conn.sql("""drop index item_code_warehouse on `tabDelivery Note Packing Item`""")
 	webnotes.conn.sql("""create index item_code_warehouse
 		on `tabDelivery Note Packing Item` (item_code, warehouse)""")
 	webnotes.conn.begin()
