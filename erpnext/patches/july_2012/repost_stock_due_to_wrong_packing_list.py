@@ -3,8 +3,11 @@ import webnotes
 def execute():
 	# add index
 	webnotes.conn.commit()
-	webnotes.conn.sql("""create index item_code_warehouse
-		on `tabDelivery Note Packing Item` (item_code, warehouse)""")
+	try:
+		webnotes.conn.sql("""create index item_code_warehouse
+			on `tabDelivery Note Packing Item` (item_code, warehouse)""")
+	except:
+		pass
 	webnotes.conn.begin()
 
 	repost_reserved_qty()
@@ -72,9 +75,6 @@ def cleanup_wrong_sle():
 def create_comment(dn):
 	from webnotes.model.doc import Document
 	cmt = Document('Comment')
-	for arg in ['comment', 'comment_by', 'comment_by_fullname', 'comment_doctype', \
-		'comment_docname']:
-		cmt.fields[arg] = args[arg]
 	cmt.comment = 'Cancelled by administrator due to wrong entry in packing list'
 	cmt.comment_by = 'Administrator'
 	cmt.comment_by_fullname = 'Administrator'
