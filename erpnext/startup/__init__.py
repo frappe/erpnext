@@ -15,9 +15,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # add startup propertes
-
-add_in_head = """
-<style>
-
-</style>
-"""
+mail_footer = """<div style="padding: 7px; text-align: right; color: #888"><small>Sent via 
+	<a style="color: #888" href="https://erpnext.com">ERPNext</a></div>"""
+	
+def get_monthly_bulk_mail_limit():
+	import webnotes
+	# if global settings, then 500 or unlimited
+	if webnotes.conn.get_value('Email Settings', None, 'outgoing_mail_server'):
+		return 999999
+	else:
+		return 500

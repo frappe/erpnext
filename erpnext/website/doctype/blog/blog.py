@@ -29,6 +29,31 @@ class DocType(website.web_page.Page):
 		super(DocType, self).__init__('Blog')
 		self.doc, self.doclist = d, dl
 
+	def send_emails(self):
+		"""send emails to subscribers"""
+		if self.doc.email_sent:
+			webnotes.msgprint("""Blog Subscribers already updated""", raise_exception=1)
+		
+		from webnotes.utils.email_lib.bulk import send
+		from markdown2 import markdown
+		import webnotes.utils
+		
+		# get leads that are subscribed to the blog
+		recipients = [e[0] for e in webnotes.conn.sql("""select distinct email_id from tabLead where
+			ifnull(blog_subscriber,0)=1""")]
+
+		# make heading as link
+		content = '<h2><a href="%s/%s.html">%s</a></h2>\n\n%s' % (webnotes.utils.get_request_site_address(),
+			self.doc.page_name, self.doc.title, markdown(self.doc.content))
+
+		# send the blog
+		send(recipients = recipients, doctype='Lead', email_field='email_id',
+			first_name_field = 'lead_name', last_name_field="", subject=self.doc.title,
+			message = markdown(content))
+		
+		webnotes.conn.set(self.doc, 'email_sent', 1)
+		webnotes.msgprint("""Scheduled to send to %s subscribers""" % len(recipients))
+
 	def on_update(self):
 		super(DocType, self).on_update()
 		if not webnotes.utils.cint(self.doc.published):

@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-07-13 13:02:27',
+		'creation': '2012-07-27 19:32:53',
 		'docstatus': 0,
-		'modified': '2012-07-27 14:15:24',
+		'modified': '2012-08-03 12:18:36',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -111,6 +111,16 @@
 		'hidden': 1,
 		'label': u'Page Name',
 		'permlevel': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'email_sent',
+		'fieldtype': u'Check',
+		'hidden': 1,
+		'label': u'Email Sent',
+		'permlevel': 0
 	},
 
 	# DocField
