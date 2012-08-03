@@ -8,15 +8,15 @@ def repost_reserved_qty():
 			
 			from `tabDelivery Note Packing Item` dnpi, `tabSales Order Item` so_item, `tabSales Order` so
 			
-			where dnpi.parent = so.name
+			where dnpi.item_code = %s
+			and dnpi.warehouse = %s
+			and dnpi.parent = so.name
 			and so_item.parent = so.name
 			and dnpi.parenttype = 'Sales Order'
 			and dnpi.parent_detail_docname = so_item.name
 			and dnpi.parent_item = so_item.item_code
 			and so.docstatus = 1
 			and so.status != 'Stopped'
-			and dnpi.item_code = %s
-			and dnpi.warehouse = %s
 		""", (d[0], d[1]))
 		if flt(d[3]) != flt(reserved_qty[0][0]):
 			print d[3], reserved_qty[0][0]
