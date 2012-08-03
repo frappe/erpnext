@@ -55,7 +55,7 @@ def get_recent_blog_list(args=None):
 	if not args: args = webnotes.form_dict
 	
 	query = """\
-		select name, title, left(content, 100) as content
+		select name, page_name, title, left(content, 100) as content
 		from tabBlog
 		where ifnull(published,0)=1 and
 		name!=%(name)s order by creation desc"""

@@ -59,7 +59,7 @@ erpnext.blog.render_recent_list = function(wrapper) {
 		hide_refresh: true,
 		render_row: function(parent, data) {
 			if(data.content && data.content.length>=100) data.content += '...';
-			parent.innerHTML = repl('<a href="%(name)s.html">%(title)s</a>\
+			parent.innerHTML = repl('<a href="%(page_name)s.html">%(title)s</a>\
 				<div class="comment">%(content)s</div><br>', data);
 			
 			// adjust page height depending on sidebar height

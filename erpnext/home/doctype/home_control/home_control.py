@@ -118,22 +118,6 @@ class DocType:
 						out[dt][s[0]] = cint(cnt)
 		return out
 		
-	def send_feedback(self, args):
-		args = json.loads(args)
-		
-		fb_sender = sql("select concat_ws(' ',first_name, last_name), email from tabProfile where name=%s", session['user'])
-		fb_subject = 'Feedback : ' + args['subject']
-
-
-		fb_msg = '''
-			<div style="font-size:14px; padding:8px; border:1px solid #DDF">
-			<div style="margin-bottom:16px">%s wrote,</div>
-			<div>%s</div>
-			</div>
-		''' % (fb_sender[0][0], args['feedback'])
-		
-		sendmail('info@webnotestech.com', fb_sender[0][1], msg = fb_msg, subject=args['subject'],parts=[], cc=[], attach=[])
-
 	def get_dt_help(self,dt):
 		return sql("select description from tabDocType where name=%s",dt)[0][0] or ''
 
