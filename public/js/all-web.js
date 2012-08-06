@@ -281,8 +281,9 @@ wn.provide('wn.request');wn.request.url='server.py';wn.request.prepare=function(
 throw"Incomplete Request";}}
 wn.request.cleanup=function(opts,r){if(opts.btn)$(opts.btn).done_working();if(opts.show_spinner)hide_loading();if(opts.freeze)unfreeze();if(wn.boot&&wn.boot.sid&&wn.get_cookie('sid')!=wn.boot.sid){if(!wn.app.logged_out){msgprint('Session Expired. Logging you out');wn.app.logout();}
 return;}
-if(r.server_messages)msgprint(r.server_messages)
-if(r.exc){console.log(r.exc);};if(r['403']){wn.container.change_to('403');}
+if(r.server_messages){r.server_messages=JSON.parse(r.server_messages)
+msgprint(r.server_messages);}
+if(r.exc){r.exc=JSON.parse(r.exc);if(r.exc instanceof Array){$.each(r.exc,function(i,v){if(v)console.log(v);})}else{console.log(r.exc);}};if(r['403']){wn.container.change_to('403');}
 if(r.docs){LocalDB.sync(r.docs);}}
 wn.request.call=function(opts){wn.request.prepare(opts);$.ajax({url:opts.url||wn.request.url,data:opts.args,type:opts.type||'POST',dataType:opts.dataType||'json',success:function(r,xhr){wn.request.cleanup(opts,r);opts.success&&opts.success(r,xhr.responseText);},error:function(xhr,textStatus){wn.request.cleanup(opts,{});show_alert('Unable to complete request: '+textStatus)
 opts.error&&opts.error(xhr)}})}
@@ -492,7 +493,9 @@ document.body.appendChild(temp);temp.submit();return temp;}
 /*
  *	lib/js/legacy/utils/msgprint.js
  */
-var msg_dialog;function msgprint(msg,title){if(!msg)return;if(typeof(msg)!='string')
+var msg_dialog;function msgprint(msg,title){if(!msg)return;if(msg instanceof Array){$.each(msg,function(i,v){if(v)msgprint(v);})
+return;}
+if(typeof(msg)!='string')
 msg=JSON.stringify(msg);if(msg.substr(0,8)=='__small:'){show_alert(msg.substr(8));return;}
 if(!msg_dialog){msg_dialog=new wn.ui.Dialog({title:"Message",onhide:function(){msg_dialog.msg_area.empty();}});msg_dialog.msg_area=$('<div class="msgprint">').appendTo(msg_dialog.body);}
 if(msg.search(/<br>|<p>|<li>/)==-1)
@@ -666,6 +669,7 @@ var dl=[];dl[0]=locals[dt][dn];for(var ndt in locals){if(locals[ndt]){for(var nd
 return dl;}
 var Meta={};var local_dt={};Meta.make_local_dt=function(dt,dn){var dl=make_doclist('DocType',dt);if(!local_dt[dt])local_dt[dt]={};if(!local_dt[dt][dn])local_dt[dt][dn]={};for(var i=0;i<dl.length;i++){var d=dl[i];if(d.doctype=='DocField'){var key=d.fieldname?d.fieldname:d.label;local_dt[dt][dn][key]=copy_dict(d);}}}
 Meta.set_field_property=function(fn,key,val,doc){if(!doc&&(cur_frm.doc))doc=cur_frm.doc;try{local_dt[doc.doctype][doc.name][fn][key]=val;refresh_field(fn);}catch(e){alert("Client Script Error: Unknown values for "+doc.name+','+fn+'.'+key+'='+val);}}
+Meta.get_field=function(dt,fn,dn){try{return local_dt[dt][dn][fn];}catch(e){return null;}}
 function get_doctype_label(dt){return dt}
 function get_label_doctype(label){return label}
 var getchildren=LocalDB.getchildren;var createLocal=LocalDB.create;
@@ -699,10 +703,7 @@ if(errfld.length)msgprint('<b>Mandatory fields required in '+
  */
 wn.Application=Class.extend({init:function(){var me=this;if(window.app){wn.call({method:'startup',callback:function(r,rt){wn.provide('wn.boot');wn.boot=r;if(wn.boot.profile.name=='Guest'){window.location='index.html';return;}
 me.startup();}})}else{this.startup();}},startup:function(){this.load_bootinfo();this.make_page_container();this.make_nav_bar();this.set_favicon();$(document).trigger('startup');if(wn.boot){wn.route();}
-$(document).trigger('app_ready');},load_bootinfo:function(){if(wn.boot){LocalDB.sync(wn.boot.docs);wn.control_panel=wn.boot.control_panel;if(wn.boot.error_messages)
-console.log(wn.boot.error_messages)
-if(wn.boot.server_messages)
-msgprint(wn.boot.server_messages);this.set_globals();}else{this.set_as_guest();}},set_globals:function(){profile=wn.boot.profile;user=wn.boot.profile.name;user_fullname=wn.user_info(user).fullname;user_defaults=profile.defaults;user_roles=profile.roles;user_email=profile.email;sys_defaults=wn.boot.sysdefaults;},set_as_guest:function(){profile={name:'Guest'};user='Guest';user_fullname='Guest';user_defaults={};user_roles=['Guest'];user_email='';sys_defaults={};},make_page_container:function(){wn.container=new wn.views.Container();wn.views.make_403();wn.views.make_404();},make_nav_bar:function(){if(wn.boot){wn.container.wntoolbar=new wn.ui.toolbar.Toolbar();}},logout:function(){var me=this;me.logged_out=true;wn.call({method:'logout',callback:function(r){if(r.exc){console.log(r.exc);}
+$(document).trigger('app_ready');},load_bootinfo:function(){if(wn.boot){LocalDB.sync(wn.boot.docs);wn.control_panel=wn.boot.control_panel;this.set_globals();}else{this.set_as_guest();}},set_globals:function(){profile=wn.boot.profile;user=wn.boot.profile.name;user_fullname=wn.user_info(user).fullname;user_defaults=profile.defaults;user_roles=profile.roles;user_email=profile.email;sys_defaults=wn.boot.sysdefaults;},set_as_guest:function(){profile={name:'Guest'};user='Guest';user_fullname='Guest';user_defaults={};user_roles=['Guest'];user_email='';sys_defaults={};},make_page_container:function(){wn.container=new wn.views.Container();wn.views.make_403();wn.views.make_404();},make_nav_bar:function(){if(wn.boot){wn.container.wntoolbar=new wn.ui.toolbar.Toolbar();}},logout:function(){var me=this;me.logged_out=true;wn.call({method:'logout',callback:function(r){if(r.exc){console.log(r.exc);}
 me.redirect_to_login();}})},redirect_to_login:function(){window.location.href='index.html';},set_favicon:function(){var link=$('link[type="image/x-icon"]').remove().attr("href");var favicon='\
    <link rel="shortcut icon" href="'+link+'" type="image/x-icon"> \
    <link rel="icon" href="'+link+'" type="image/x-icon">'
