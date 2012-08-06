@@ -21,7 +21,7 @@ from utilities.transaction_base import TransactionBase
 class DocType(TransactionBase):
 	def __init__(self, doc, doclist=None):
 		self.doc, self.doclist = doc, doclist or []
-		self.tname, self.fname = "Supplier Quotation Item", "quotation_item"
+		self.tname, self.fname = "Supplier Quotation Item", "quotation_items"
 
 	def autoname(self):
 		"""autoname based on naming series value"""
@@ -66,16 +66,14 @@ class DocType(TransactionBase):
 				self.doc, self.doclist, """[['Purchase Request', 'Supplier Quotation'],
 				['Purchase Request Item', 'Supplier Quotation Item']]""")
 			
-			for d in getlist(self.doclist, "quotation_details"):
+			from webnotes.model.doclist import getlist
+			for d in getlist(self.doclist, self.fname):
 				if d.item_code and not d.purchase_rate:
 					d.purchase_ref_rate = d.discount_rate = d.purchase_rate = 0.0
 					d.import_ref_rate = d.import_rate = 0.0
 	
 	def get_purchase_tax_details(self):
 		self.doclist = get_obj('Purchase Common').get_purchase_tax_details(self)
-
-	def get_uom_details(self, args=None):
-		return get_obj('Purchase Common').get_uom_details(args)
 
 	def validate_fiscal_year(self):
 		get_obj(dt = 'Purchase Common').validate_fiscal_year( \
