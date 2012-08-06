@@ -122,7 +122,6 @@ var set_dynamic_label_child = function(doc, cdt, cdn, base_curr) {
 
 cur_frm.cscript.dynamic_label = function(doc, cdt, cdn, callback1) {
 	var base_currency = wn.boot.company[doc.company].default_currency || sys_defaults['currency'];
-	
 	if (doc.currency === base_currency) {
 		set_multiple(cdt, cdn, {conversion_rate:1});
 		hide_field(['conversion_rate', 'net_total_import','grand_total_import',
@@ -633,4 +632,8 @@ cur_frm.cscript.check_charge_type_and_get_tax_amount = function(doc, tax, t, cl,
 			return tax_amount = flt(rate) * (flt(tax[row-1].total_tax_amount)-flt(tax[row-1].total_amount)) / 100;
 		 }
 	}
+}
+
+cur_frm.cscript.toggle_contact_section = function(doc) {
+	doc.supplier ? unhide_field("contact_section") : hide_field("contact_section");
 }
