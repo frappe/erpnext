@@ -40,7 +40,8 @@ def repost_reserved_qty():
 				and parenttype="Sales Order"
 				and exists (select * from `tabSales Order` so
 				where name = dnpi_in.parent and docstatus = 1 and status != 'Stopped')
-			) dnpi) tab""", (d[0], d[1]))
+			) dnpi) tab
+			where so_item_qty >= so_item_delivered_qty""", (d[0], d[1]))
 
 		if flt(d[3]) != flt(reserved_qty[0][0]):
 			print d[3], reserved_qty[0][0]
