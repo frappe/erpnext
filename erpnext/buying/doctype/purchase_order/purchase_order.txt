@@ -5,7 +5,7 @@
 	{
 		'creation': '2012-07-02 14:44:19',
 		'docstatus': 0,
-		'modified': '2012-08-02 13:43:50',
+		'modified': '2012-08-06 17:14:19',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -464,9 +464,35 @@
 		'fieldtype': u'Button',
 		'hidden': 0,
 		'label': u'Get Items',
+		'no_copy': 0,
 		'oldfieldtype': u'Button',
 		'options': u'get_indent_details',
-		'permlevel': 0
+		'permlevel': 0,
+		'print_hide': 1
+	},
+
+	# DocField
+	{
+		'description': u'You can make a purchase order from multiple Supplier Quotations. Select Supplier Quotations one by one and click on the button below.',
+		'doctype': u'DocField',
+		'fieldname': u'supplier_quotation',
+		'fieldtype': u'Link',
+		'label': u'Select Supplier Quotation',
+		'no_copy': 1,
+		'options': u'Supplier Quotation',
+		'permlevel': 0,
+		'print_hide': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'get_supplier_quotation_items',
+		'fieldtype': u'Button',
+		'label': u'Get Items',
+		'options': u'get_supplier_quotation_items',
+		'permlevel': 0,
+		'print_hide': 1
 	},
 
 	# DocField
@@ -477,7 +503,8 @@
 		'fieldtype': u'Section Break',
 		'label': u'Taxes',
 		'oldfieldtype': u'Section Break',
-		'permlevel': 0
+		'permlevel': 0,
+		'print_hide': 0
 	},
 
 	# DocField

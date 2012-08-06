@@ -86,7 +86,7 @@ class DocType(TransactionBase):
 		if self.doc.indent_no:
 			get_obj('DocType Mapper','Purchase Request-Purchase Order').dt_map('Purchase Request','Purchase Order',self.doc.indent_no, self.doc, self.doclist, "[['Purchase Request','Purchase Order'],['Purchase Request Item', 'Purchase Order Item']]")
 			pcomm = get_obj('Purchase Common')
-			for d in getlist(self.doclist, 'po_details'):			
+			for d in getlist(self.doclist, 'po_details'):
 				if d.item_code and not d.purchase_rate:
 					last_purchase_details, last_purchase_date = pcomm.get_last_purchase_details(d.item_code, self.doc.name)
 					if last_purchase_details:
@@ -99,6 +99,19 @@ class DocType(TransactionBase):
 						d.import_rate = d.purchase_rate / conversion_rate						
 					else:
 						d.purchase_ref_rate = d.discount_rate = d.purchase_rate = d.import_ref_rate = d.import_rate = 0.0
+						
+	def get_supplier_quotation_items(self):
+		if self.doc.supplier_quotation:
+			get_obj("DocType Mapper", "Supplier Quotation-Purchase Order").dt_map("Supplier Quotation",
+				"Purchase Order", self.doc.supplier_quotation, self.doc, self.doclist,
+				"""[['Supplier Quotation', 'Purchase Order'],
+				['Supplier Quotation Item', 'Purchase Order Item'],
+				['Purchase Taxes and Charges', 'Purchase Taxes and Charges']]""")
+			self.get_default_schedule_date()
+			for d in getlist(self.doclist, 'po_details'):
+				if d.prevdoc_detail_docname and not d.schedule_date:
+					d.schedule_date = webnotes.conn.get_value("Purchase Request Item",
+							d.prevdoc_detail_docname, "schedule_date")
 	
 	def get_tc_details(self):
 		"""get terms & conditions"""
