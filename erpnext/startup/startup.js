@@ -100,10 +100,6 @@ erpnext.startup.start = function() {
 		if(wn.control_panel.custom_startup_code)
 			eval(wn.control_panel.custom_startup_code);		
 	}
-
-		
-	$('body').append('<a class="erpnext-logo" title="Powered by ERPNext" \
-		href="http://erpnext.com" target="_blank"></a>')
 }
 
 
