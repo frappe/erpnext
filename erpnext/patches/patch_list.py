@@ -537,4 +537,8 @@ patch_list = [
 		'patch_module': 'patches.july_2012',
 		'patch_file': 'repost_stock_due_to_wrong_packing_list',
 	},
+	{
+		'patch_module': 'patches.july_2012',
+		'patch_file': 'supplier_quotation',
+	},
 ]
