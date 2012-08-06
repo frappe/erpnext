@@ -51,10 +51,11 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 
 	if(doc.docstatus == 1 && doc.status != 'Stopped'){
 		if(doc.per_ordered < 100) {
-			cur_frm.add_custom_button('Make Purchase Order', cur_frm.cscript['Make Purchase Order'])
-			cur_frm.add_custom_button('Stop Purchase Request', cur_frm.cscript['Stop Purchase Request'])
+			cur_frm.add_custom_button('Make Purchase Order', cur_frm.cscript['Make Purchase Order']);
+			cur_frm.add_custom_button('Stop Purchase Request', cur_frm.cscript['Stop Purchase Request']);
 		}
 		cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms);
+		cur_frm.add_custom_button("Make Supplier Quotation", cur_frm.cscript.make_supplier_quotation);
 	}
  
 	if(doc.docstatus == 1 && doc.status == 'Stopped')
@@ -123,4 +124,16 @@ cur_frm.cscript['Unstop Purchase Request'] = function(){
 			
 		});
 	}
+}
+
+cur_frm.cscript.make_supplier_quotation = function() {
+	var new_sq_name = createLocal("Supplier Quotation");
+	$c("dt_map", {
+		"docs": compress_doclist([locals['Supplier Quotation'][new_sq_name]]),
+		"from_doctype": cur_frm.doc.doctype,
+		"to_doctype": "Supplier Quotation",
+		"from_docname": cur_frm.doc.name,
+		"from_to_list": JSON.stringify([['Purchase Request', 'Supplier Quotation'],
+			['Purchase Request Item', 'Supplier Quotation Item']]),
+	}, function(r, rt) { loaddoc("Supplier Quotation", new_sq_name) });
 }

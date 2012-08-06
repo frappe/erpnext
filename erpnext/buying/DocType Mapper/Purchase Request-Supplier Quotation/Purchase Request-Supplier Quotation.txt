@@ -5,7 +5,7 @@
 	{
 		'creation': '2012-08-02 18:36:26',
 		'docstatus': 0,
-		'modified': '2012-08-02 18:37:32',
+		'modified': '2012-08-03 12:34:09',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -83,15 +83,6 @@
 
 	# Field Mapper Detail
 	{
-		'doctype': u'Field Mapper Detail',
-		'from_field': u'uom',
-		'map': u'Yes',
-		'match_id': 1,
-		'to_field': u'stock_uom'
-	},
-
-	# Field Mapper Detail
-	{
 		'checking_operator': u'>=',
 		'doctype': u'Field Mapper Detail',
 		'from_field': u'transaction_date',
@@ -117,7 +108,7 @@
 		'from_table': u'Purchase Request Item',
 		'match_id': 1,
 		'reference_doctype_key': u'prevdoc_doctype',
-		'to_field': u'quotation_details',
+		'to_field': u'quotation_items',
 		'to_table': u'Supplier Quotation Item',
 		'validation_logic': u'docstatus =1'
 	}
