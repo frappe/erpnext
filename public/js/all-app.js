@@ -2265,9 +2265,7 @@ if(wn.boot.expires_on&&in_list(user_roles,'System Manager')){var today=dateutil.
      This ERPNext subscription <b>has expired</b>. \
     </div>',{expiry_string:expiry_string}));}}
 erpnext.set_about();if(wn.control_panel.custom_startup_code)
-eval(wn.control_panel.custom_startup_code);}
-$('body').append('<a class="erpnext-logo" title="Powered by ERPNext" \
-  href="http://erpnext.com" target="_blank"></a>')}
+eval(wn.control_panel.custom_startup_code);}}
 erpnext.update_messages=function(reset){if(inList(['Guest'],user)||!wn.session_alive){return;}
 if(!reset){var set_messages=function(r){if(!r.exc){erpnext.toolbar.set_new_comments(r.message.unread_messages);var show_in_circle=function(parent_id,msg){var parent=$('#'+parent_id);if(parent){if(msg){parent.find('span:first').text(msg);parent.toggle(true);}else{parent.toggle(false);}}}
 show_in_circle('unread_messages',r.message.unread_messages.length);show_in_circle('open_support_tickets',r.message.open_support_tickets);show_in_circle('things_todo',r.message.things_todo);show_in_circle('todays_events',r.message.todays_events);show_in_circle('open_tasks',r.message.open_tasks);}else{clearInterval(wn.updates.id);}}
