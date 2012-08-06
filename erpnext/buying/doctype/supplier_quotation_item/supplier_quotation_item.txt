@@ -5,7 +5,7 @@
 	{
 		'creation': '2012-08-01 20:07:22',
 		'docstatus': 0,
-		'modified': '2012-08-02 16:00:52',
+		'modified': '2012-08-03 12:34:33',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -238,38 +238,6 @@
 		'print_hide': 0,
 		'reqd': 1,
 		'trigger': u'Client',
-		'width': u'100px'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'doctype': u'DocField',
-		'fieldname': u'conversion_factor',
-		'fieldtype': u'Currency',
-		'hidden': 0,
-		'label': u'UOM Conversion Factor',
-		'oldfieldname': u'conversion_factor',
-		'oldfieldtype': u'Currency',
-		'permlevel': 0,
-		'print_hide': 1,
-		'reqd': 1,
-		'trigger': u'Client',
-		'width': u'100px'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'stock_uom',
-		'fieldtype': u'Data',
-		'hidden': 0,
-		'label': u'Stock UOM',
-		'oldfieldname': u'stock_uom',
-		'oldfieldtype': u'Data',
-		'permlevel': 1,
-		'print_hide': 1,
-		'reqd': 1,
 		'width': u'100px'
 	},
 
