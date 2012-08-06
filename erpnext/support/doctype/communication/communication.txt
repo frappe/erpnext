@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-06-07 11:02:55',
+		'creation': '2012-06-26 11:58:13',
 		'docstatus': 0,
-		'modified': '2012-06-07 11:24:20',
+		'modified': '2012-08-03 16:10:35',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -15,6 +15,7 @@
 		'allow_attach': 1,
 		'description': u'Keep a track of all communications',
 		'doctype': 'DocType',
+		'document_type': u'Master',
 		'module': u'Support',
 		'name': '__common__',
 		'version': 1
@@ -86,7 +87,7 @@
 
 	# DocPerm
 	{
-		'cancel': 0,
+		'cancel': 1,
 		'create': 0,
 		'doctype': u'DocPerm',
 		'permlevel': 1,
@@ -99,16 +100,7 @@
 		'create': 1,
 		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'role': u'Administrator'
-	},
-
-	# DocPerm
-	{
-		'cancel': 0,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Administrator'
+		'role': u'Support Manager'
 	},
 
 	# DocField
