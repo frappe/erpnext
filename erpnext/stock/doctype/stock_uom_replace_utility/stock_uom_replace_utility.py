@@ -44,10 +44,6 @@ class DocType:
     if not cstr(self.doc.item_code):
       msgprint("Please Enter an Item.")
       raise Exception
-
-    if not cstr(self.doc.current_stock_uom):
-      msgprint("There is no Current Stock UOM for Item Code" + cstr(self.doc.item_code))
-      raise Exception
     
     if not cstr(self.doc.new_stock_uom):
       msgprint("Please Enter New Stock UOM.")
@@ -119,3 +115,5 @@ class DocType:
     
     # update bin
     self.update_bin()
+
+	get_obj("Item", self.doc.item_code).on_update()
