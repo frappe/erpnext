@@ -66,7 +66,7 @@ class DocType:
 
 			if cstr(d.uom) == cstr(self.doc.stock_uom):
 				if flt(d.conversion_factor) != 1:
-					msgprint("Conversion Fator of UOM : %s should be equal to 1. As UOM : %s is Stock UOM of Item: %s." % ( cstr(d.uom), cstr(d.uom), cstr(self.doc.name)))
+					msgprint("Conversion Factor of UOM : %s should be equal to 1. As UOM : %s is Stock UOM of Item: %s." % ( cstr(d.uom), cstr(d.uom), cstr(self.doc.name)))
 					raise Exception
 				# else set uom_exist as true
 				uom_exist='true'
