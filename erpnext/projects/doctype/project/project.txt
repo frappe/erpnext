@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-03-27 14:36:05',
+		'creation': '2012-05-03 18:41:42',
 		'docstatus': 0,
-		'modified': '2012-03-27 14:36:05',
+		'modified': '2012-08-07 15:48:47',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -29,7 +29,7 @@
 		'show_in_menu': 0,
 		'subject': u' ',
 		'tag_fields': u'status',
-		'version': 33
+		'version': 1
 	},
 
 	# These values are common for all DocField
@@ -43,12 +43,17 @@
 
 	# These values are common for all DocPerm
 	{
+		'cancel': 1,
+		'create': 1,
 		'doctype': u'DocPerm',
 		'name': '__common__',
 		'parent': u'Project',
 		'parentfield': u'permissions',
 		'parenttype': u'DocType',
-		'read': 1
+		'permlevel': 0,
+		'read': 1,
+		'role': u'Projects User',
+		'write': 1
 	},
 
 	# DocType, Project
@@ -59,33 +64,7 @@
 
 	# DocPerm
 	{
-		'amend': 0,
-		'cancel': 1,
-		'create': 1,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'All',
-		'submit': 0,
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 1,
-		'create': 1,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Projects User',
-		'submit': 0,
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'All'
+		'doctype': u'DocPerm'
 	},
 
 	# DocField
@@ -97,6 +76,15 @@
 		'fieldtype': u'Section Break',
 		'label': u'Basic Info',
 		'oldfieldtype': u'Section Break',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'cb_project_status',
+		'fieldtype': u'Column Break',
+		'label': u'Status',
 		'permlevel': 0
 	},
 
@@ -163,71 +151,10 @@
 	# DocField
 	{
 		'doctype': u'DocField',
-		'fieldname': u'project_value',
-		'fieldtype': u'Currency',
-		'label': u'Project Value',
-		'no_copy': 0,
-		'oldfieldname': u'project_value',
-		'oldfieldtype': u'Currency',
-		'permlevel': 0,
-		'reqd': 1,
-		'search_index': 0,
-		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'gross_margin_value',
-		'fieldtype': u'Currency',
-		'label': u'Gross Margin Value',
-		'no_copy': 0,
-		'oldfieldname': u'gross_margin_value',
-		'oldfieldtype': u'Currency',
-		'permlevel': 0,
-		'reqd': 1,
-		'search_index': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'per_gross_margin',
-		'fieldtype': u'Currency',
-		'label': u'Gross Margin %',
-		'no_copy': 0,
-		'oldfieldname': u'per_gross_margin',
-		'oldfieldtype': u'Currency',
-		'permlevel': 0,
-		'reqd': 1,
-		'search_index': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'est_material_cost',
-		'fieldtype': u'Currency',
-		'label': u'Estimated Material Cost',
-		'no_copy': 0,
-		'oldfieldname': u'est_material_cost',
-		'oldfieldtype': u'Currency',
-		'permlevel': 0,
-		'search_index': 0,
-		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'project_type',
-		'fieldtype': u'Data',
-		'label': u'Project Type',
-		'no_copy': 0,
-		'oldfieldname': u'project_type',
-		'oldfieldtype': u'Data',
-		'permlevel': 0,
-		'search_index': 0
+		'fieldname': u'cb_project_dates',
+		'fieldtype': u'Column Break',
+		'label': u'Dates',
+		'permlevel': 0
 	},
 
 	# DocField
@@ -273,51 +200,41 @@
 	# DocField
 	{
 		'doctype': u'DocField',
-		'fieldname': u'amended_from',
-		'fieldtype': u'Data',
-		'hidden': 1,
-		'label': u'Amended From',
-		'no_copy': 1,
-		'oldfieldname': u'amended_from',
+		'fieldname': u'project_type',
+		'fieldtype': u'Select',
+		'label': u'Project Type',
+		'no_copy': 0,
+		'oldfieldname': u'project_type',
 		'oldfieldtype': u'Data',
-		'permlevel': 1,
-		'print_hide': 0,
+		'options': u'Internal\nExternal\nOther',
+		'permlevel': 0,
 		'search_index': 0
 	},
 
 	# DocField
 	{
+		'colour': u'White:FFF',
+		'description': u'Important dates and commitments in your project life cycle',
 		'doctype': u'DocField',
-		'fieldname': u'amemdment_date',
-		'fieldtype': u'Date',
-		'hidden': 1,
-		'label': u'Amemdment Date',
-		'no_copy': 1,
-		'oldfieldname': u'amemdment_date',
-		'oldfieldtype': u'Date',
-		'permlevel': 1,
-		'search_index': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'project_details',
+		'fieldname': u'sb_milestones',
 		'fieldtype': u'Section Break',
-		'label': u'Project Details',
+		'label': u'Milestones',
 		'oldfieldtype': u'Section Break',
-		'options': u'Simple',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
 		'doctype': u'DocField',
-		'fieldname': u'column_break0',
-		'fieldtype': u'Column Break',
-		'oldfieldtype': u'Column Break',
+		'fieldname': u'project_milestones',
+		'fieldtype': u'Table',
+		'label': u'Project Milestones',
+		'no_copy': 0,
+		'oldfieldname': u'project_milestones',
+		'oldfieldtype': u'Table',
+		'options': u'Project Milestone',
 		'permlevel': 0,
-		'width': u'50%'
+		'search_index': 0
 	},
 
 	# DocField
@@ -325,6 +242,7 @@
 		'doctype': u'DocField',
 		'fieldname': u'section_break0',
 		'fieldtype': u'Section Break',
+		'label': u'Project Details',
 		'oldfieldtype': u'Section Break',
 		'options': u'Simple',
 		'permlevel': 0
@@ -340,6 +258,85 @@
 		'oldfieldname': u'notes',
 		'oldfieldtype': u'Text Editor',
 		'permlevel': 0,
+		'search_index': 0
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'project_details',
+		'fieldtype': u'Section Break',
+		'label': u'Project Costing',
+		'oldfieldtype': u'Section Break',
+		'options': u'Simple',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'project_value',
+		'fieldtype': u'Currency',
+		'label': u'Project Value',
+		'no_copy': 0,
+		'oldfieldname': u'project_value',
+		'oldfieldtype': u'Currency',
+		'permlevel': 0,
+		'reqd': 1,
+		'search_index': 0,
+		'trigger': u'Client'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'est_material_cost',
+		'fieldtype': u'Currency',
+		'label': u'Estimated Material Cost',
+		'no_copy': 0,
+		'oldfieldname': u'est_material_cost',
+		'oldfieldtype': u'Currency',
+		'permlevel': 0,
+		'search_index': 0,
+		'trigger': u'Client'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'column_break0',
+		'fieldtype': u'Column Break',
+		'label': u'Margin',
+		'oldfieldtype': u'Column Break',
+		'permlevel': 0,
+		'width': u'50%'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'gross_margin_value',
+		'fieldtype': u'Currency',
+		'label': u'Gross Margin Value',
+		'no_copy': 0,
+		'oldfieldname': u'gross_margin_value',
+		'oldfieldtype': u'Currency',
+		'permlevel': 0,
+		'reqd': 1,
+		'search_index': 0
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'per_gross_margin',
+		'fieldtype': u'Currency',
+		'label': u'Gross Margin %',
+		'no_copy': 0,
+		'oldfieldname': u'per_gross_margin',
+		'oldfieldtype': u'Currency',
+		'permlevel': 0,
+		'reqd': 1,
 		'search_index': 0
 	},
 
@@ -476,32 +473,6 @@
 
 	# DocField
 	{
-		'colour': u'White:FFF',
-		'description': u'Important dates and commitments in your project life cycle',
-		'doctype': u'DocField',
-		'fieldname': u'milestones',
-		'fieldtype': u'Section Break',
-		'label': u'Milestones',
-		'oldfieldtype': u'Section Break',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'project_milestones',
-		'fieldtype': u'Table',
-		'label': u'Project Milestones',
-		'no_copy': 0,
-		'oldfieldname': u'project_milestones',
-		'oldfieldtype': u'Table',
-		'options': u'Project Milestone',
-		'permlevel': 0,
-		'search_index': 0
-	},
-
-	# DocField
-	{
 		'doctype': u'DocField',
 		'fieldname': u'trash_reason',
 		'fieldtype': u'Small Text',
@@ -517,12 +488,15 @@
 
 	# DocField
 	{
+		'colour': u'White:FFF',
 		'doctype': u'DocField',
 		'fieldname': u'file_list',
 		'fieldtype': u'Small Text',
+		'hidden': 1,
 		'label': u'File List',
 		'no_copy': 1,
 		'permlevel': 0,
+		'print_hide': 1,
 		'search_index': 0
 	}
 ]
