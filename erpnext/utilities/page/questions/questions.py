@@ -49,7 +49,7 @@ def add_question(arg):
 	
 	from webnotes.model.doc import Document
 	d = Document('Question')
-	d.question = args['question'].title()
+	d.question = args['question']
 	d.points = 1
 	d.save(1)
 	
