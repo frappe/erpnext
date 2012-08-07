@@ -19,6 +19,29 @@ import webnotes
 from webnotes.utils import load_json, cint, cstr
 import json
 
+@webnotes.whitelist()
+def get_questions():
+	"""get list of questions"""
+	import json
+	conds = ''
+	
+	if 'search_text' in webnotes.form_dict:
+		conds = ' and t1.question like "%'+ webnotes.form_dict['search_text'] + '%"'
+		
+	if 'tag_filters' in webnotes.form_dict:
+		tag_filters = json.loads(webnotes.form_dict['tag_filters'])
+		for t in tag_filters:
+			conds += ' and t1._user_tags like "%'+ t +'%"'
+	
+	return webnotes.conn.sql("""select t1.name, t1.owner, t1.question, t1.modified, t1._user_tags,
+			t2.first_name, t2.last_name, (select count(*) from tabAnswer where
+			tabAnswer.question = t1.name) as answers
+		from tabQuestion t1, tabProfile t2
+		where t1.docstatus!=2
+		and t1.owner = t2.name
+		%(conds)s
+		order by t1.modified desc""" % {"conds":conds}, as_dict=1)
+
 # add a new question
 @webnotes.whitelist()
 def add_question(arg):
@@ -26,7 +49,7 @@ def add_question(arg):
 	
 	from webnotes.model.doc import Document
 	d = Document('Question')
-	d.question = args['question'].title()
+	d.question = args['question']
 	d.points = 1
 	d.save(1)
 	
@@ -39,20 +62,6 @@ def add_question(arg):
 					'txt': 'Please help me and answer the question "%s" in the Knowledge Base' % d.question,
 					'notify': 1
 				}))
-	
-@webnotes.whitelist()
-def vote(arg):
-	args = load_json(arg)
-	
-	res = webnotes.conn.sql("select points, _users_voted from `tab%s` where name=%s" % (args['dt'], '%s'), args['dn'])[0]
-	p = cint(res[0])
-	p = args['vote']=='up' and p+1 or p-1
-	
-	# update
-	webnotes.conn.sql("update `tab%s` set points=%s, _users_voted=%s where name=%s" % (args['dt'], '%s', '%s', '%s'), \
-		(p, cstr(res[1]) + ',' + webnotes.user.name, args['dn']))
-	
-	return p
 
 @webnotes.whitelist()
 def delete(arg):
