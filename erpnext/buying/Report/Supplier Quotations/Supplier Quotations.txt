@@ -1,0 +1,26 @@
+# Report, Supplier Quotations
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2012-08-07 14:52:42',
+		'docstatus': 0,
+		'modified': '2012-08-07 14:57:57',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
+	},
+
+	# These values are common for all Report
+	{
+		'doctype': 'Report',
+		'json': u'{"filters":[["Supplier Quotation","supplier","like","%%"],["Supplier Quotation Item","item_code","like","%%"]],"columns":[["name","Supplier Quotation"],["supplier","Supplier Quotation"],["item_code","Supplier Quotation Item"],["description","Supplier Quotation Item"],["qty","Supplier Quotation Item"],["currency","Supplier Quotation"],["import_rate","Supplier Quotation Item"],["import_amount","Supplier Quotation Item"]],"sort_by":"modified","sort_order":"desc","sort_by_next":"name","sort_order_next":"desc"}',
+		'name': '__common__',
+		'ref_doctype': u'Supplier Quotation'
+	},
+
+	# Report, Supplier Quotations
+	{
+		'doctype': 'Report',
+		'name': u'Supplier Quotations'
+	}
+]
