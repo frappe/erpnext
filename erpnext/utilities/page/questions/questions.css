@@ -14,6 +14,10 @@ div.kb-search-wrapper textarea {
 .kb-questions {
 }
 
+.un-answered {
+	color: #f33;
+}
+
 .kb-question-details {
 	margin: 11px 0px 11px 29px;
 }

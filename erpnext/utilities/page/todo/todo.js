@@ -89,7 +89,7 @@ erpnext.todo.ToDoItem = Class.extend({
 		}
 		if(!todo.description) todo.description = '';
 		
-		todo.desc = todo.description.replace(/\n/g, "<br>");
+		todo.desc = wn.markdown(todo.description);
 		
 		$(parent_list).append(repl('\
 			<div class="todoitem">\
@@ -145,7 +145,9 @@ erpnext.todo.make_dialog = function(det) {
 			title: 'To Do', 
 			fields: [
 				{fieldtype:'Date', fieldname:'date', label:'Event Date', reqd:1},
-				{fieldtype:'Text', fieldname:'description', label:'Description', reqd:1},
+				{fieldtype:'Text', fieldname:'description', label:'Description', 
+					reqd:1, description:'Use <a href="#markdown-reference">markdown</a> to \
+						format content'},
 				{fieldtype:'Check', fieldname:'checked', label:'Completed'},
 				{fieldtype:'Select', fieldname:'priority', label:'Priority', reqd:1, 'options':['Medium','High','Low'].join('\n')},
 				{fieldtype:'Button', fieldname:'save', label:'Save'}
