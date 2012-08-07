@@ -136,6 +136,7 @@ erpnext.update_messages = function(reset) {
 				show_in_circle('things_todo', r.message.things_todo);
 				show_in_circle('todays_events', r.message.todays_events);
 				show_in_circle('open_tasks', r.message.open_tasks);
+				show_in_circle('unanswered_questions', r.message.unanswered_questions);
 
 			} else {
 				clearInterval(wn.updates.id);

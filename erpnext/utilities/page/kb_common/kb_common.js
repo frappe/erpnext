@@ -25,6 +25,7 @@ KBItemToolbar = function(args, kb) {
 		this.wrapper = $a(this.parent, 'div', '', {});
 		this.line1 = $a(this.wrapper, 'div', '', {color: '#888', fontSize:'11px', margin:'7px 0px'});
 		this.make_timestamp();
+		this.make_answers();
 		if(this.with_tags)
 			this.make_tags();
 		this.setup_del();
@@ -43,6 +44,18 @@ KBItemToolbar = function(args, kb) {
 		}
 	}
 
+	this.make_answers = function() {
+		if(this.doctype=='Question') {
+			if(this.det.answers==0) {
+				this.line1.innerHTML += ' | no answers';
+			} else if(this.det.answers==1) {
+				this.line1.innerHTML += ' | 1 answer';
+			} else {
+				this.line1.innerHTML += ' | '+this.det.answers+' answers';
+			}
+		}
+	}
+	
 	this.make_tags = function() {
 		this.line1.innerHTML += ' | '
 		this.tags_area = $a(this.line1, 'span', 'kb-tags')

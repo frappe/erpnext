@@ -2,10 +2,12 @@
 /*
  *	erpnext/utilities/page/kb_common/kb_common.js
  */
-KBItemToolbar=function(args,kb){$.extend(this,args);var me=this;this.make=function(){this.wrapper=$a(this.parent,'div','',{});this.line1=$a(this.wrapper,'div','',{color:'#888',fontSize:'11px',margin:'7px 0px'});this.make_timestamp();if(this.with_tags)
+KBItemToolbar=function(args,kb){$.extend(this,args);var me=this;this.make=function(){this.wrapper=$a(this.parent,'div','',{});this.line1=$a(this.wrapper,'div','',{color:'#888',fontSize:'11px',margin:'7px 0px'});this.make_timestamp();this.make_answers();if(this.with_tags)
 this.make_tags();this.setup_del();}
 this.make_timestamp=function(){this.line1.innerHTML=repl('By %(name)s | %(when)s',{name:wn.utils.full_name(this.det.first_name,this.det.last_name),when:wn.datetime.comment_when(this.det.modified)});if(has_common(user_roles,['Administrator','System Manager'])){this.line1.innerHTML+=' | <a style="cursor:pointer;"\
     class="del-link">delete</a>';}}
+this.make_answers=function(){if(this.doctype=='Question')
+this.line1.innerHTML+=' | '+this.det.answers+' answers'}
 this.make_tags=function(){this.line1.innerHTML+=' | '
 this.tags_area=$a(this.line1,'span','kb-tags')
 this.tags=new TagList(this.tags_area,this.det._user_tags&&(this.det._user_tags.split(',')),this.doctype,this.det.name,0,kb.set_tag_filter)}
