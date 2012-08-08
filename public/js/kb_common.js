@@ -16,7 +16,7 @@ EditableText=function(args){$.extend(this,args);var me=this;me.$w=$(repl('<div c
   <div class="ed-text-display %(disp_class)s"></div>\
   <a class="ed-text-edit" style="cursor: pointer; float: right; margin-top: -16px;">[edit]</a>\
   <textarea class="ed-text-input %(inp_class)s hide"></textarea>\
-  <div class="help hide"><br>Formatted as <a href="http://en.wikipedia.org/wiki/Markdown#Syntax_examples"\
+  <div class="help hide"><br>Formatted as <a href="#markdown-reference"\
     target="_blank">markdown</a></div>\
   <button class="btn btn-small btn-info hide ed-text-save">Save</button>\
   <a class="ed-text-cancel hide" style="cursor: pointer;">Cancel</a>\

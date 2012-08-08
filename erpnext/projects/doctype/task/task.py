@@ -217,7 +217,7 @@ class DocType:
 		""" Add calendar event for task in calendar of Allocated person"""
 		event = Document('Event')
 		event.owner = self.doc.allocated_to
-		event.description = self.doc.name 
+		event.description = self.doc.subject 
 		event.event_date = self.doc.exp_start_date and self.doc.exp_start_date or ''
 		event.event_hour =  self.doc.event_hour and self.doc.event_hour or '10:00'
 		event.event_type = 'Private'

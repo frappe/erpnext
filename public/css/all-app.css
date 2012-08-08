@@ -1969,7 +1969,7 @@ span, div, td, input, textarea, button, select {
 }
 
 
-pre {
+.markdown pre {
     background-color: #F5F5F5;
     border: 1px solid rgba(0, 0, 0, 0.15);
     border-radius: 4px 4px 4px 4px;
@@ -1982,7 +1982,7 @@ pre {
     word-wrap: break-word;
 }
 
-code, pre {
+.markdown code, .markdown pre {
     border-radius: 3px 3px 3px 3px;
     color: #333333;
     font-family: Menlo,Monaco,Consolas,"Courier New",monospace;

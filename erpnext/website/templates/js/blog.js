@@ -22,10 +22,19 @@ wn.pages['{{ name }}'].onload = function(wrapper) {
 		hide_refresh: true,
 		no_toolbar: true,
 		render_row: function(parent, data) {
+			if(!data.comments) {
+				data.comment_text = 'No comments yet.'
+			} else if (data.comments=1) {
+				data.comment_text = '1 comment.'
+			} else {
+				data.comment_text = data.comments + ' comments.'
+			} 
+			
 			if(data.content && data.content.length==1000) {
 				data.content += repl('... <a href="%(name)s.html">(read on)</a>', data);
 			}
 			parent.innerHTML = repl('<h2><a href="%(name)s.html">%(title)s</a></h2>\
+				<div class="help">%(comment_text)s</div>\
 				%(content)s<br /><br />', data);
 		},
 		page_length: 10

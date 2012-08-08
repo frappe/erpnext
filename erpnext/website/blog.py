@@ -17,7 +17,8 @@ def get_blog_list(args=None):
 		select
 			cache.name as name, cache.html as content,
 			blog.owner as owner, blog.creation as published,
-			blog.title as title
+			blog.title as title, (select count(name) from `tabComment` where
+				comment_doctype='Blog' and comment_docname=blog.name) as comments
 		from `tabWeb Cache` cache, `tabBlog` blog
 		where cache.doc_type = 'Blog' and blog.page_name = cache.name
 		order by published desc, name asc"""
@@ -104,7 +105,24 @@ def add_comment(args=None):
 	
 	# get html of comment row
 	comment_html = website.web_cache.build_html(template_args)
-
+	
+	# notify commentors 
+	commentors = [d[0] for d in webnotes.conn.sql("""select comment_by from tabComment where
+		comment_doctype='Blog' and comment_docname=%s and
+		ifnull(unsubscribed, 0)=0""", args.get('comment_docname'))]
+	
+	blog = webnotes.conn.sql("""select * from tabBlog where name=%s""", 
+		args.get('comment_docname'), as_dict=1)[0]
+	
+	from webnotes.utils.email_lib.bulk import send
+	send(recipients=commentors + [blog['owner']], 
+		doctype='Comment', 
+		email_field='comment_by', 
+		first_name_field="comment_by_fullname",
+		last_name_field="NA", 
+		subject='New Comment on Blog: ' + blog['title'], 
+		message='<p>%(comment)s</p><p>By %(comment_by_fullname)s</p>' % args)
+	
 	return comment_html
 
 @webnotes.whitelist(allow_guest=True)
@@ -119,7 +137,8 @@ def add_subscriber():
 		lead = Document('Lead', name[0][0])
 	else:
 		lead = Document('Lead')
-		
+	
+	if not lead.source: lead.source = 'Blog'
 	lead.unsubscribed = 0
 	lead.blog_subscriber = 1
 	lead.lead_name = full_name

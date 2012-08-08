@@ -83,6 +83,7 @@ Calendar.prototype.show_event = function(ev, cal_ev) {
 		d.make_body([
 			['HTML','Heading']
 			,['Text','Description']
+			,['HTML', 'Ref Link']
 			,['Check', 'Public Event']
 			,['Check', 'Cancel Event']
 			,['HTML', 'Event Link']
@@ -111,12 +112,17 @@ Calendar.prototype.show_event = function(ev, cal_ev) {
 				this.widgets['Public Event'].checked = true;
 			
 			this.widgets['Event Link'].innerHTML = '';
+			this.widgets['Ref Link'].innerHTML = '';
 
-			// link
-			var div = $a(this.widgets['Event Link'], 'div', 'link_type', {margin:'4px 0px'});
-			div.onclick = function() { me.event_dialog.hide(); loaddoc('Event', me.event_dialog.ev.name); }
-			div.innerHTML = 'View Event details, add or edit participants';
-				
+			if(this.ev.ref_type) {
+				$(repl('<span>Reference: <a href="#Form/%(ref_type)s/%(ref_name)s" \
+					onclick="cur_dialog.hide()">%(ref_type)s: %(ref_name)s</a></span>', this.ev))
+						.appendTo(this.widgets['Ref Link'])
+			}
+
+			$(repl('<a href="#Form/Event/%(name)s" \
+				onclick="cur_dialog.hide()">More Options</a>', this.ev))
+					.appendTo(this.widgets['Event Link'])
 		}
 		
 		// event save
