@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-05-03 18:41:42',
+		'creation': '2012-08-08 13:25:19',
 		'docstatus': 0,
-		'modified': '2012-08-07 15:48:47',
+		'modified': '2012-08-08 13:55:01',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -225,6 +225,8 @@
 
 	# DocField
 	{
+		'colour': u'White:FFF',
+		'description': u'Milestones will be added as Events in the Calendar',
 		'doctype': u'DocField',
 		'fieldname': u'project_milestones',
 		'fieldtype': u'Table',
@@ -235,6 +237,26 @@
 		'options': u'Project Milestone',
 		'permlevel': 0,
 		'search_index': 0
+	},
+
+	# DocField
+	{
+		'colour': u'White:FFF',
+		'description': u'Tasks belonging to this Project.',
+		'doctype': u'DocField',
+		'fieldname': u'sb_tasks',
+		'fieldtype': u'Section Break',
+		'label': u'Tasks',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'project_tasks',
+		'fieldtype': u'HTML',
+		'label': u'Project Tasks',
+		'permlevel': 0
 	},
 
 	# DocField
@@ -282,7 +304,7 @@
 		'oldfieldname': u'project_value',
 		'oldfieldtype': u'Currency',
 		'permlevel': 0,
-		'reqd': 1,
+		'reqd': 0,
 		'search_index': 0,
 		'trigger': u'Client'
 	},
@@ -322,7 +344,7 @@
 		'oldfieldname': u'gross_margin_value',
 		'oldfieldtype': u'Currency',
 		'permlevel': 0,
-		'reqd': 1,
+		'reqd': 0,
 		'search_index': 0
 	},
 
@@ -336,7 +358,7 @@
 		'oldfieldname': u'per_gross_margin',
 		'oldfieldtype': u'Currency',
 		'permlevel': 0,
-		'reqd': 1,
+		'reqd': 0,
 		'search_index': 0
 	},
 

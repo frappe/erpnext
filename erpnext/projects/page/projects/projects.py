@@ -18,8 +18,11 @@ import webnotes
 
 @webnotes.whitelist()
 def get_tasks():
+	cond = ''
+	if webnotes.form_dict.get('project'):
+		cond = ' and project="%s"' % webnotes.form_dict.get('project')
 	return webnotes.conn.sql("""select name, project, subject, exp_start_date, exp_end_date, 
-		description from tabTask where 
+		description, status from tabTask where 
 		project is not null
 		and exp_start_date is not null 
-		and exp_end_date is not null""", as_dict=True)
+		and exp_end_date is not null %s""" % cond, as_dict=True)

@@ -23,4 +23,7 @@
 	"public/js/complete_setup.js": [
 		"erpnext/startup/js/complete_setup.js",
 	],
+	"public/js/gantt_task.js": [
+		"erpnext/projects/gantt_task.js",
+	]
 }

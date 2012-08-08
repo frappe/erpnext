@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-04-02 16:02:06',
+		'creation': '2012-06-04 14:05:07',
 		'docstatus': 0,
-		'modified': '2012-06-04 12:33:35',
+		'modified': '2012-08-08 14:01:34',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -14,7 +14,7 @@
 	{
 		'_last_update': u'1324880734',
 		'allow_trash': 1,
-		'autoname': u'TIC/.####',
+		'autoname': u'TASK.#####',
 		'colour': u'White:FFF',
 		'default_print_format': u'Standard',
 		'doctype': 'DocType',
@@ -35,7 +35,8 @@
 		'name': '__common__',
 		'parent': u'Task',
 		'parentfield': u'fields',
-		'parenttype': u'DocType'
+		'parenttype': u'DocType',
+		'permlevel': 0
 	},
 
 	# These values are common for all DocPerm
@@ -62,7 +63,6 @@
 		'doctype': u'DocPerm',
 		'permlevel': 0,
 		'role': u'All',
-		'submit': 0,
 		'write': 1
 	},
 
@@ -99,7 +99,6 @@
 		'fieldtype': u'Section Break',
 		'label': u'Task Details',
 		'oldfieldtype': u'Section Break',
-		'permlevel': 0,
 		'search_index': 0,
 		'width': u'50%'
 	},
@@ -113,31 +112,7 @@
 		'label': u'Subject',
 		'oldfieldname': u'subject',
 		'oldfieldtype': u'Data',
-		'permlevel': 0,
 		'reqd': 1
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'doctype': u'DocField',
-		'fieldname': u'allocated_to',
-		'fieldtype': u'Link',
-		'label': u'Allocated To',
-		'oldfieldname': u'allocated_to',
-		'oldfieldtype': u'Link',
-		'options': u'Profile',
-		'permlevel': 0,
-		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'task_email_notify',
-		'fieldtype': u'Check',
-		'label': u'Send Mail Notification',
-		'permlevel': 0
 	},
 
 	# DocField
@@ -148,7 +123,6 @@
 		'label': u'Expected Start Date',
 		'oldfieldname': u'exp_start_date',
 		'oldfieldtype': u'Date',
-		'permlevel': 0,
 		'reqd': 0
 	},
 
@@ -161,7 +135,6 @@
 		'label': u'Expected End Date',
 		'oldfieldname': u'exp_end_date',
 		'oldfieldtype': u'Date',
-		'permlevel': 0,
 		'reqd': 0,
 		'search_index': 1
 	},
@@ -172,7 +145,6 @@
 		'fieldname': u'column_break0',
 		'fieldtype': u'Column Break',
 		'oldfieldtype': u'Column Break',
-		'permlevel': 0,
 		'width': u'50%'
 	},
 
@@ -186,12 +158,12 @@
 		'oldfieldname': u'project',
 		'oldfieldtype': u'Link',
 		'options': u'Project',
-		'permlevel': 0,
 		'trigger': u'Client'
 	},
 
 	# DocField
 	{
+		'colour': u'White:FFF',
 		'doctype': u'DocField',
 		'fieldname': u'status',
 		'fieldtype': u'Select',
@@ -199,8 +171,7 @@
 		'no_copy': 1,
 		'oldfieldname': u'status',
 		'oldfieldtype': u'Select',
-		'options': u'Open\nPending Review\nClosed\nCancelled',
-		'permlevel': 1,
+		'options': u'Open\nWorking\nPending Review\nClosed\nCancelled',
 		'trigger': u'Client'
 	},
 
@@ -214,21 +185,8 @@
 		'oldfieldname': u'priority',
 		'oldfieldtype': u'Select',
 		'options': u'Low\nMedium\nHigh\nUrgent',
-		'permlevel': 0,
 		'reqd': 0,
 		'search_index': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'allocated_to_name',
-		'fieldtype': u'Data',
-		'hidden': 1,
-		'label': u'Allocated To Name',
-		'oldfieldname': u'allocated_to_name',
-		'oldfieldtype': u'Data',
-		'permlevel': 0
 	},
 
 	# DocField
@@ -237,8 +195,7 @@
 		'fieldname': u'section_break0',
 		'fieldtype': u'Section Break',
 		'oldfieldtype': u'Section Break',
-		'options': u'Simple',
-		'permlevel': 0
+		'options': u'Simple'
 	},
 
 	# DocField
@@ -249,113 +206,8 @@
 		'label': u'Details',
 		'oldfieldname': u'description',
 		'oldfieldtype': u'Text Editor',
-		'permlevel': 0,
 		'reqd': 0,
 		'width': u'300px'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'description': u'If linked to a Customer',
-		'doctype': u'DocField',
-		'fieldname': u'customer_details',
-		'fieldtype': u'Section Break',
-		'label': u'Customer Details',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'external_or_internal',
-		'fieldtype': u'Select',
-		'label': u'External or Internal',
-		'oldfieldname': u'external_or_internal',
-		'oldfieldtype': u'Select',
-		'options': u'External\nInternal',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'doctype': u'DocField',
-		'fieldname': u'customer',
-		'fieldtype': u'Link',
-		'label': u'Customer',
-		'oldfieldname': u'customer',
-		'oldfieldtype': u'Link',
-		'options': u'Customer',
-		'permlevel': 0,
-		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'customer_name',
-		'fieldtype': u'Data',
-		'label': u'Customer Name',
-		'oldfieldname': u'customer_name',
-		'oldfieldtype': u'Data',
-		'permlevel': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'senders_name',
-		'fieldtype': u'Data',
-		'in_filter': 1,
-		'label': u'Raised By',
-		'oldfieldname': u'senders_name',
-		'oldfieldtype': u'Data',
-		'permlevel': 0,
-		'reqd': 1,
-		'search_index': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'senders_email',
-		'fieldtype': u'Data',
-		'label': u'Email',
-		'oldfieldname': u'senders_email',
-		'oldfieldtype': u'Data',
-		'permlevel': 0,
-		'reqd': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'column_break25',
-		'fieldtype': u'Column Break',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'senders_contact_no',
-		'fieldtype': u'Data',
-		'label': u'Senders Contact No',
-		'oldfieldname': u'senders_contact_no',
-		'oldfieldtype': u'Data',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'senders_company',
-		'fieldtype': u'Data',
-		'label': u'Senders Company',
-		'oldfieldname': u'senders_company',
-		'oldfieldtype': u'Data',
-		'permlevel': 0
 	},
 
 	# DocField
@@ -364,8 +216,7 @@
 		'fieldname': u'time_and_budget',
 		'fieldtype': u'Section Break',
 		'label': u'Time and Budget',
-		'oldfieldtype': u'Section Break',
-		'permlevel': 0
+		'oldfieldtype': u'Section Break'
 	},
 
 	# DocField
@@ -375,7 +226,6 @@
 		'fieldtype': u'Column Break',
 		'label': u'Expected',
 		'oldfieldtype': u'Column Break',
-		'permlevel': 0,
 		'width': u'50%'
 	},
 
@@ -387,7 +237,6 @@
 		'label': u'Total Hours (Expected)',
 		'oldfieldname': u'exp_total_hrs',
 		'oldfieldtype': u'Data',
-		'permlevel': 0,
 		'reqd': 0
 	},
 
@@ -398,8 +247,7 @@
 		'fieldtype': u'Currency',
 		'label': u'Allocated Budget',
 		'oldfieldname': u'allocated_budget',
-		'oldfieldtype': u'Currency',
-		'permlevel': 0
+		'oldfieldtype': u'Currency'
 	},
 
 	# DocField
@@ -409,7 +257,6 @@
 		'fieldtype': u'Column Break',
 		'label': u'Actual',
 		'oldfieldtype': u'Column Break',
-		'permlevel': 0,
 		'width': u'50%'
 	},
 
@@ -420,8 +267,7 @@
 		'fieldtype': u'Date',
 		'label': u'Actual Start Date',
 		'oldfieldname': u'act_start_date',
-		'oldfieldtype': u'Date',
-		'permlevel': 0
+		'oldfieldtype': u'Date'
 	},
 
 	# DocField
@@ -431,8 +277,7 @@
 		'fieldtype': u'Date',
 		'label': u'Actual End Date',
 		'oldfieldname': u'act_end_date',
-		'oldfieldtype': u'Date',
-		'permlevel': 0
+		'oldfieldtype': u'Date'
 	},
 
 	# DocField
@@ -442,8 +287,7 @@
 		'fieldtype': u'Data',
 		'label': u'Total Hours (Actual)',
 		'oldfieldname': u'act_total_hrs',
-		'oldfieldtype': u'Data',
-		'permlevel': 0
+		'oldfieldtype': u'Data'
 	},
 
 	# DocField
@@ -453,8 +297,7 @@
 		'fieldtype': u'Currency',
 		'label': u'Actual Budget',
 		'oldfieldname': u'actual_budget',
-		'oldfieldtype': u'Currency',
-		'permlevel': 0
+		'oldfieldtype': u'Currency'
 	},
 
 	# DocField
@@ -462,20 +305,7 @@
 		'doctype': u'DocField',
 		'fieldname': u'more_details',
 		'fieldtype': u'Section Break',
-		'label': u'More Details',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'opening_date',
-		'fieldtype': u'Date',
-		'label': u'Creation Date',
-		'oldfieldname': u'opening_date',
-		'oldfieldtype': u'Date',
-		'permlevel': 0,
-		'reqd': 1
+		'label': u'More Details'
 	},
 
 	# DocField
@@ -488,8 +318,7 @@
 		'hidden': 1,
 		'label': u'Review Date',
 		'oldfieldname': u'review_date',
-		'oldfieldtype': u'Date',
-		'permlevel': 0
+		'oldfieldtype': u'Date'
 	},
 
 	# DocField
@@ -502,37 +331,6 @@
 		'hidden': 1,
 		'label': u'Closing Date',
 		'oldfieldname': u'closing_date',
-		'oldfieldtype': u'Date',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'amended_from',
-		'fieldtype': u'Data',
-		'hidden': 1,
-		'label': u'Amended From',
-		'no_copy': 1,
-		'oldfieldname': u'amended_from',
-		'oldfieldtype': u'Data',
-		'permlevel': 1,
-		'print_hide': 1,
-		'report_hide': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'amendment_date',
-		'fieldtype': u'Date',
-		'hidden': 1,
-		'label': u'Amendment Date',
-		'no_copy': 1,
-		'oldfieldname': u'amendment_date',
-		'oldfieldtype': u'Date',
-		'permlevel': 1,
-		'print_hide': 1,
-		'report_hide': 1
+		'oldfieldtype': u'Date'
 	}
 ]
