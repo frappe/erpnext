@@ -29,6 +29,7 @@ def get(arg=None):
 
 @webnotes.whitelist()		
 def edit(arg=None):
+	import markdown2
 	args = webnotes.form_dict
 
 	d = Document('ToDo', args.get('name') or None)

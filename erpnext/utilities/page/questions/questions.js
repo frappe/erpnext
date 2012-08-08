@@ -115,24 +115,16 @@ function KnowledgeBase(w) {
 			no_results_message: 'No questions found. Ask a new question!',
 			appframe: wn.pages.questions.appframe,
 			as_dict: 1,
-			get_query: function() {
-				
-				// filter by search string
-				var v = me.search.value==$(me.search).attr('default_text') ? '' : me.search.value;
-				cond = v ? (' and t1.question like "%'+v+'%"') : '';
-				
-				// filter by tags
-				if(me.tag_filter_dict) {
-					for(f in me.tag_filter_dict) {
-						cond += ' and t1.`_user_tags` like "%' + f + '%"'
-					}
+			method: 'utilities.page.questions.questions.get_questions',
+			get_args: function() {
+				var args = {};
+				if(me.search.value) {
+					args.search_text = me.search.value;
 				}
-				return repl('select t1.name, t1.owner, t1.question, t1.modified, t1._user_tags, '
-				+'t1._users_voted, t2.first_name, t2.last_name '
-				+'from tabQuestion t1, tabProfile t2 '
-				+'where t1.docstatus!=2 '
-				+'and t1.owner = t2.name'
-				+'%(cond)s order by t1.modified desc', {user:user, cond: cond})
+				if(me.tag_filter_dict) {
+					args.tag_filters = keys(me.tag_filter_dict);
+				}
+				return args
 			},
 			render_row: function(parent, data, listing) {
 				new KBQuestion(parent, data, me);
@@ -196,7 +188,11 @@ KBQuestion = function(parent, det, kb) {
 	
 	this.make = function() {
 		this.wrapper = $a(parent, 'div', 'kb-question-wrapper');
-		this.q_area = $a($a(this.wrapper, 'div'), 'h3', 'kb-questions link_type', {display:'inline', textDecoration:'none'}, det.question);
+		this.q_area = $a($a(this.wrapper, 'div'), 'h3', 
+			'kb-questions link_type', {display:'inline', textDecoration:'none'}, det.question);
+		if(det.answers==0) {
+			$(this.q_area).addClass('un-answered')
+		}
 
 		this.q_area.onclick = function() {
 			var q = this;

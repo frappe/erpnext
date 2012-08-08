@@ -1,0 +1,28 @@
+# Page, markdown-reference
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2012-08-07 12:35:30',
+		'docstatus': 0,
+		'modified': '2012-08-07 12:35:30',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
+	},
+
+	# These values are common for all Page
+	{
+		'doctype': 'Page',
+		'module': u'Utilities',
+		'name': '__common__',
+		'page_name': u'Markdown Reference',
+		'standard': u'Yes',
+		'title': u'Markdown Reference'
+	},
+
+	# Page, markdown-reference
+	{
+		'doctype': 'Page',
+		'name': u'markdown-reference'
+	}
+]

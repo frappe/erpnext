@@ -5,7 +5,7 @@
 	{
 		'creation': '2012-05-15 12:14:38',
 		'docstatus': 0,
-		'modified': '2012-06-29 13:05:33',
+		'modified': '2012-08-06 15:55:11',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -335,7 +335,7 @@
 		'fieldtype': u'Date',
 		'hidden': 1,
 		'in_filter': 1,
-		'label': u'Purchase Requisition Date',
+		'label': u'Purchase Request Date',
 		'oldfieldname': u'prevdoc_date',
 		'oldfieldtype': u'Date',
 		'permlevel': 1,
@@ -351,13 +351,37 @@
 		'fieldtype': u'Data',
 		'hidden': 1,
 		'in_filter': 1,
-		'label': u'Purchase Requisition Detail No',
+		'label': u'Purchase Request Detail No',
 		'no_copy': 0,
 		'oldfieldname': u'prevdoc_detail_docname',
 		'oldfieldtype': u'Data',
 		'permlevel': 1,
 		'print_hide': 1,
 		'search_index': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'supplier_quotation',
+		'fieldtype': u'Link',
+		'hidden': 1,
+		'in_filter': 0,
+		'label': u'Supplier Quotation',
+		'options': u'Supplier Quotation',
+		'permlevel': 1,
+		'search_index': 0
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'supplier_quotation_item',
+		'fieldtype': u'Link',
+		'hidden': 1,
+		'label': u'Supplier Quotation Item',
+		'options': u'Supplier Quotation Item',
+		'permlevel': 1
 	},
 
 	# DocField

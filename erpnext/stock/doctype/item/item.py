@@ -223,7 +223,7 @@ class DocType:
 		import website.utils
 		
 		# if same name, do not repeat twice
-		if self.doc.name == self.doc.item_name:
+		if self.doc.name == self.doc.item_name or not self.doc.item_name:
 			page_name = self.doc.name
 		else:
 			page_name = self.doc.name + " " + self.doc.item_name

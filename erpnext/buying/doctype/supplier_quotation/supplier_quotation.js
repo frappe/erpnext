@@ -47,13 +47,17 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 	}
 }
 
-cur_frm.cscript.toggle_contact_section = function(doc) {
-	console.log(doc.supplier);
-	doc.supplier ? unhide_field("contact_section") : hide_field("contact_section");
-}
-
-cur_frm.cscript.make_purchase_order = function(doc, dt, dn) {
-	
+cur_frm.cscript.make_purchase_order = function() {
+	var new_po_name = createLocal("Purchase Order");
+	$c("dt_map", {
+		"docs": compress_doclist([locals['Purchase Order'][new_po_name]]),
+		"from_doctype": cur_frm.doc.doctype,
+		"to_doctype": "Purchase Order",
+		"from_docname": cur_frm.doc.name,
+		"from_to_list": JSON.stringify([['Supplier Quotation', 'Purchase Order'],
+			['Supplier Quotation Item', 'Purchase Order Item'],
+			['Purchase Taxes and Charges', 'Purchase Taxes and Charges']]),
+	}, function(r, rt) { loaddoc("Purchase Order", new_po_name) });
 }
 
 cur_frm.cscript.supplier = function(doc, dt, dn) {
@@ -63,6 +67,10 @@ cur_frm.cscript.supplier = function(doc, dt, dn) {
 			function() { cur_frm.refresh(); });
 		cur_frm.cscript.toggle_contact_section(doc);
 	}
+}
+
+cur_frm.cscript.uom = function(doc, cdt, cdn) {
+	// no need to trigger updation of stock uom, as this field doesn't exist in supplier quotation
 }
 
 cur_frm.fields_dict['quotation_items'].grid.get_field('project_name').get_query = 
@@ -81,7 +89,6 @@ cur_frm.fields_dict['indent_no'].get_query = function(doc) {
 		`tabPurchase Request`.%(key)s LIKE \"%s\" \
 		order by `tabPurchase Request`.`name` desc limit 50";
 }
-
 
 cur_frm.cscript.supplier_address = function(doc, dt, dn) {
 	if (doc.supplier) {

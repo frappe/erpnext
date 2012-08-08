@@ -24,15 +24,15 @@ wn.require('erpnext/utilities/doctype/sms_control/sms_control.js');
 wn.require('erpnext/setup/doctype/notification_control/notification_control.js');
 
 cur_frm.cscript.onload = function(doc, cdt, cdn) {
-
-	if(!doc.fiscal_year && doc.__islocal){ //set_default_values(doc);
-		doc.fiscal_year = sys_defaults.fiscal_year;
-	}
-	if(!doc.conversion_rate) doc.conversion_rate = 1;
-	if(!doc.currency) doc.currency = sys_defaults.currency;
-	if(!doc.status) set_multiple(cdt,cdn,{status:'Draft'});
-	if(!doc.transaction_date) set_multiple(cdt,cdn,{transaction_date:get_today()});
-	if(!doc.is_subcontracted) set_multiple(cdt, cdn, {is_subcontracted:'No'});
+	// set missing values in parent doc
+	set_missing_values(doc, {
+		fiscal_year: sys_defaults.fiscal_year,
+		conversion_rate: 1,
+		currency: sys_defaults.currency,
+		status: "Draft",
+		transaction_date: get_today(),
+		is_subcontracted: "No"
+	});
 }
 
 cur_frm.cscript.onload_post_render = function(doc, dt, dn) {
@@ -55,8 +55,7 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	if(doc.docstatus == 1 && doc.status == 'Stopped')
 		cur_frm.add_custom_button('Unstop Purchase Order', cur_frm.cscript['Unstop Purchase Order']);
 	
-	if(doc.supplier) $(cur_frm.fields_dict.contact_section.row.wrapper).toggle(true);
-	else $(cur_frm.fields_dict.contact_section.row.wrapper).toggle(false);
+	cur_frm.cscript.toggle_contact_section(doc);
 }
 
 cur_frm.cscript.supplier = function(doc,dt,dn) {
