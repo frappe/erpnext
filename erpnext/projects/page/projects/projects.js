@@ -14,14 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-pscript.queries_bg_dict = {
-	'Urgent':'RED',
-	'High':'ORANGE',
-	'Low':'BLUE',
-	'Closed':'GREEN',
-	'Pending Review':'YELLOW'
-}
-
 pscript.onload_Projects = function(wrapper) {
 	wn.ui.make_app_page({parent:wrapper, title:'Gantt Chart: All Tasks', single_column:true});
 	
@@ -46,7 +38,15 @@ pscript.onload_Projects = function(wrapper) {
 						label: v.subject,
 						desc: v.description || v.subject,
 						from: '/Date("'+v.exp_start_date+'")/',
-						to: '/Date("'+v.exp_end_date+'")/'					
+						to: '/Date("'+v.exp_end_date+'")/',
+						customClass: {
+							'Open':'ganttRed',
+							'Pending Review':'ganttOrange',
+							'Working':'',
+							'Completed':'ganttGreen',
+							'Cancelled':'ganttGray'
+						}[v.status],
+						dataObj: v
 					}]
 				})
 			})
@@ -59,10 +59,10 @@ pscript.onload_Projects = function(wrapper) {
 				minScale: "weeks",
 				maxScale: "months",
 				onItemClick: function(data) {
-					alert("Item clicked - show some details");
+					wn.set_route('Form', 'Task', data.name);
 				},
 				onAddClick: function(dt, rowId) {
-					//alert("Empty space clicked - add an item!");
+					
 				}
 			});
 			

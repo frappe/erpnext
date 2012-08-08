@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-04-02 16:02:06',
+		'creation': '2012-06-04 14:05:07',
 		'docstatus': 0,
-		'modified': '2012-06-04 12:33:35',
+		'modified': '2012-08-08 12:53:33',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -14,7 +14,7 @@
 	{
 		'_last_update': u'1324880734',
 		'allow_trash': 1,
-		'autoname': u'TIC/.####',
+		'autoname': u'TASK.#####',
 		'colour': u'White:FFF',
 		'default_print_format': u'Standard',
 		'doctype': 'DocType',
@@ -54,44 +54,6 @@
 		'name': u'Task'
 	},
 
-	# DocPerm
-	{
-		'amend': 1,
-		'cancel': 1,
-		'create': 1,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'All',
-		'submit': 0,
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'All',
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'amend': 1,
-		'cancel': 1,
-		'create': 1,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Projects User',
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Projects User'
-	},
-
 	# DocField
 	{
 		'doctype': u'DocField',
@@ -115,29 +77,6 @@
 		'oldfieldtype': u'Data',
 		'permlevel': 0,
 		'reqd': 1
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'doctype': u'DocField',
-		'fieldname': u'allocated_to',
-		'fieldtype': u'Link',
-		'label': u'Allocated To',
-		'oldfieldname': u'allocated_to',
-		'oldfieldtype': u'Link',
-		'options': u'Profile',
-		'permlevel': 0,
-		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'task_email_notify',
-		'fieldtype': u'Check',
-		'label': u'Send Mail Notification',
-		'permlevel': 0
 	},
 
 	# DocField
@@ -192,6 +131,7 @@
 
 	# DocField
 	{
+		'colour': u'White:FFF',
 		'doctype': u'DocField',
 		'fieldname': u'status',
 		'fieldtype': u'Select',
@@ -199,8 +139,8 @@
 		'no_copy': 1,
 		'oldfieldname': u'status',
 		'oldfieldtype': u'Select',
-		'options': u'Open\nPending Review\nClosed\nCancelled',
-		'permlevel': 1,
+		'options': u'Open\nWorking\nPending Review\nClosed\nCancelled',
+		'permlevel': 0,
 		'trigger': u'Client'
 	},
 
@@ -217,18 +157,6 @@
 		'permlevel': 0,
 		'reqd': 0,
 		'search_index': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'allocated_to_name',
-		'fieldtype': u'Data',
-		'hidden': 1,
-		'label': u'Allocated To Name',
-		'oldfieldname': u'allocated_to_name',
-		'oldfieldtype': u'Data',
-		'permlevel': 0
 	},
 
 	# DocField
@@ -300,32 +228,6 @@
 		'oldfieldname': u'customer_name',
 		'oldfieldtype': u'Data',
 		'permlevel': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'senders_name',
-		'fieldtype': u'Data',
-		'in_filter': 1,
-		'label': u'Raised By',
-		'oldfieldname': u'senders_name',
-		'oldfieldtype': u'Data',
-		'permlevel': 0,
-		'reqd': 1,
-		'search_index': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'senders_email',
-		'fieldtype': u'Data',
-		'label': u'Email',
-		'oldfieldname': u'senders_email',
-		'oldfieldtype': u'Data',
-		'permlevel': 0,
-		'reqd': 0
 	},
 
 	# DocField
@@ -534,5 +436,42 @@
 		'permlevel': 1,
 		'print_hide': 1,
 		'report_hide': 1
+	},
+
+	# DocPerm
+	{
+		'amend': 1,
+		'cancel': 1,
+		'create': 1,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'All',
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'All',
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'amend': 1,
+		'cancel': 1,
+		'create': 1,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Projects User',
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Projects User'
 	}
 ]
