@@ -23,10 +23,6 @@
 	float: right;
 }
 
-.todoitem .ref_link {
-	line-height: 18px;
-}
-
 .todoitem .description {
 	cursor: pointer;
 	padding: 3px 0px;
