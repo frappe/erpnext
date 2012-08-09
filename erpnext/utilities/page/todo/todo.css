@@ -28,7 +28,6 @@
 }
 
 .todoitem .description {
-	cursor: pointer;
 	padding: 3px 0px;
 	display: inline-block;
 	width: 80%;
