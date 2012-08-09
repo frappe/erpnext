@@ -1969,7 +1969,25 @@ span, div, td, input, textarea, button, select {
 }
 
 
-pre { margin: 0px; padding: 0px; }
+.markdown pre {
+    background-color: #F5F5F5;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    border-radius: 4px 4px 4px 4px;
+    display: block;
+    font-size: 12.025px;
+    line-height: 18px;
+    margin: 0 0 15px;
+    padding: 8.5px;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.markdown code, .markdown pre {
+    border-radius: 3px 3px 3px 3px;
+    color: #333333;
+    font-family: Menlo,Monaco,Consolas,"Courier New",monospace;
+    font-size: 12px;
+}
 
 button { margin: 2px; margin-left: 0px; }
 

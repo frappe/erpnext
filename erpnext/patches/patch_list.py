@@ -517,4 +517,8 @@ patch_list = [
 		'patch_module': 'patches.july_2012',
 		'patch_file': 'supplier_quotation',
 	},
+	{
+		'patch_module': 'patches.august_2012',
+		'patch_file': 'report_supplier_quotations',
+	},
 ]
