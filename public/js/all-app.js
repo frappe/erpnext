@@ -1803,7 +1803,7 @@ if(me.fields_dict['trash_reason']){if(me.doc.trash_reason&&me.doc.docstatus==2){
 if(me.meta.autoname&&me.meta.autoname.substr(0,6)=='field:'&&!me.doc.__islocal){var fn=me.meta.autoname.substr(6);cur_frm.toggle_display(fn,false);}}
 _f.Frm.prototype.refresh_dependency=function(){var me=this;var doc=locals[this.doctype][this.docname];var has_dep=false;for(fkey in me.fields){var f=me.fields[fkey];f.dependencies_clear=true;if(f.df.depends_on){has_dep=true;}}
 if(!has_dep)return;for(var i=me.fields.length-1;i>=0;i--){var f=me.fields[i];f.guardian_has_value=true;if(f.df.depends_on){var v=doc[f.df.depends_on];if(f.df.depends_on.substr(0,5)=='eval:'){f.guardian_has_value=eval(f.df.depends_on.substr(5));}else if(f.df.depends_on.substr(0,3)=='fn:'){f.guardian_has_value=me.runclientscript(f.df.depends_on.substr(3),me.doctype,me.docname);}else{if(v||(v==0&&!v.substr)){}else{f.guardian_has_value=false;}}
-if(f.guardian_has_value){f.df.hidden=false;f.refresh()}else{f.df.hidden=true;f.refresh()}}}}
+if(f.guardian_has_value){f.df.hidden=0;f.refresh()}else{f.df.hidden=1;f.refresh()}}}}
 _f.Frm.prototype.setnewdoc=function(docname){if(this.opendocs[docname]){this.docname=docname;return;}
 Meta.make_local_dt(this.doctype,docname);this.docname=docname;var me=this;var viewname=docname;if(this.meta.issingle)viewname=this.doctype;this.runclientscript('onload',this.doctype,this.docname);this.is_editable[docname]=1;if(this.meta.read_only_onload)this.is_editable[docname]=0;this.opendocs[docname]=true;}
 _f.Frm.prototype.edit_doc=function(){this.is_editable[this.docname]=true;this.refresh();}
