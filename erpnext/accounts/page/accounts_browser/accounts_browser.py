@@ -35,7 +35,8 @@ def get_children():
 		currency = webnotes.conn.sql("select default_currency from `tabCompany` where name = %s", company)[0][0]
 		for each in acc:
 			bal = webnotes.conn.sql("select balance from `tabAccount Balance` \
-				where account = %s and period = %s", (each.get('value'), get_defaults('fiscal_year')))[0][0]
+				where account = %s and period = %s", (each.get('value'), get_defaults('fiscal_year')))
+			bal = bal and bal[0][0] or 0
 			each['balance'] = currency + ' ' + cstr(bal)
 		
 	return acc
