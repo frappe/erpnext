@@ -209,7 +209,6 @@ class DocType(TransactionBase):
 			if ret['warehouse']:
 				actual_qty = webnotes.conn.sql("select actual_qty from `tabBin` where item_code = '%s' and warehouse = '%s'" % (args['item_code'], ret['warehouse']))
 				ret['actual_qty']= actual_qty and flt(actual_qty[0][0]) or 0
-			msgprint(ret)
 		return ret
 
 	def get_barcode_details(self, barcode):
