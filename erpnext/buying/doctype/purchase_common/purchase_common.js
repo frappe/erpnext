@@ -637,3 +637,14 @@ cur_frm.cscript.check_charge_type_and_get_tax_amount = function(doc, tax, t, cl,
 cur_frm.cscript.toggle_contact_section = function(doc) {
 	cur_frm.toggle_display("contact_section", doc.supplier);
 }
+
+cur_frm.cscript.project_name = function(doc, cdt, cdn) {
+	var item_doc = locals[cdt][cdn];
+	if (item_doc.project_name) {
+		$.each(getchildren(cur_frm.cscript.tname, doc.name, cur_frm.cscript.fname, doc.doctype),
+			function(i, v) {
+				if (v && !v.project_name) v.project_name = item_doc.project_name;
+			});
+		refresh_field(cur_frm.cscript.fname);
+	}
+}
