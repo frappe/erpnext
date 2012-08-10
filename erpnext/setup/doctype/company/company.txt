@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-03-27 14:36:19',
+		'creation': '2012-05-15 12:15:00',
 		'docstatus': 0,
-		'modified': '2012-03-27 14:36:19',
+		'modified': '2012-08-10 12:15:45',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -23,7 +23,7 @@
 		'section_style': u'Tabbed',
 		'server_code_error': u' ',
 		'show_in_menu': 0,
-		'version': 96
+		'version': 1
 	},
 
 	# These values are common for all DocField
@@ -125,7 +125,6 @@
 
 	# DocField
 	{
-		'depends_on': u'eval:!doc.__islocal',
 		'doctype': u'DocField',
 		'fieldname': u'default_settings',
 		'fieldtype': u'Section Break',
