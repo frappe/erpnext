@@ -548,5 +548,9 @@ patch_list = [
 	{
 		'patch_module': 'patches.august_2012',
 		'patch_file': 'task_allocated_to_assigned',
+	},
+	{
+		'patch_module': 'patches.august_2012',
+		'patch_file': 'change_profile_permission',
 	}
 ]
