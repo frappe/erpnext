@@ -87,18 +87,19 @@ def add_comment(args=None):
 		}
 	"""
 	import webnotes
+	import webnotes.utils, markdown2
+	import webnotes.widgets.form.comments	
+	import website.web_cache
 	
 	if not args: args = webnotes.form_dict
+	args['comment'] = markdown2.markdown(args.get('comment') or '')
 	
-	import webnotes.widgets.form.comments
 	comment = webnotes.widgets.form.comments.add_comment(args)
 	
 	# since comments are embedded in the page, clear the web cache
-	import website.web_cache
 	website.web_cache.clear_cache(args.get('page_name'),
 		args.get('comment_doctype'), args.get('comment_docname'))
 	
-	import webnotes.utils
 	
 	comment['comment_date'] = webnotes.utils.pretty_date(comment['creation'])
 	template_args = { 'comment_list': [comment], 'template': 'html/comment.html' }
@@ -115,13 +116,13 @@ def add_comment(args=None):
 		args.get('comment_docname'), as_dict=1)[0]
 	
 	from webnotes.utils.email_lib.bulk import send
-	send(recipients=commentors + [blog['owner']], 
+	send(recipients=list(set(commentors + [blog['owner']]), 
 		doctype='Comment', 
 		email_field='comment_by', 
 		first_name_field="comment_by_fullname",
 		last_name_field="NA", 
 		subject='New Comment on Blog: ' + blog['title'], 
-		message='<p>%(comment)s</p><p>By %(comment_by_fullname)s</p>' % args)
+		message='%(comment)s<p>By %(comment_by_fullname)s</p>' % args)
 	
 	return comment_html
 
