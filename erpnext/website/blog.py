@@ -116,7 +116,7 @@ def add_comment(args=None):
 		args.get('comment_docname'), as_dict=1)[0]
 	
 	from webnotes.utils.email_lib.bulk import send
-	send(recipients=list(set(commentors + [blog['owner']]), 
+	send(recipients=list(set(commentors + [blog['owner']])), 
 		doctype='Comment', 
 		email_field='comment_by', 
 		first_name_field="comment_by_fullname",
