@@ -73,7 +73,7 @@ class DocType(DocTypeNestedSet):
 	def validate_budget_details(self):
 		check_acc_list = []
 		for d in getlist(self.doclist, 'budget_details'):
-			if doc.group_or_ledger=="Group":
+			if self.doc.group_or_ledger=="Group":
 				msgprint("Budget cannot be set for Group Cost Centers", raise_exception=1)
 				
 			if [d.account, d.fiscal_year] in check_acc_list:
