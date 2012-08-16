@@ -33,8 +33,8 @@ class DocType:
 		if self.doc.outgoing_mail_server:
 			from webnotes.utils import cint
 			from webnotes.utils.email_lib.smtp import SMTPServer
-			smtpserver = SMTPServer(login = self.doc.mail_login,
-				password = self.doc.mail_password,
+			smtpserver = SMTPServer(login = self.doc.mail_login.encode("utf-8"),
+				password = self.doc.mail_password.encode("utf-8"),
 				server = self.doc.outgoing_mail_server,
 				port = cint(self.doc.mail_port),
 				use_ssl = self.doc.use_ssl
