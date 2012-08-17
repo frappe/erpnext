@@ -17,7 +17,10 @@
 //c-form js file
 // -----------------------------
 cur_frm.fields_dict.invoice_details.grid.get_field("invoice_no").get_query = function(doc) {
-	return 'SELECT `tabSales Invoice`.`name` FROM `tabSales Invoice` WHERE `tabSales Invoice`.`company` = "' +doc.company+'" AND `tabSales Invoice`.%(key)s LIKE "%s" AND `tabSales Invoice`.`customer` = "' + doc.customer + '" AND `tabSales Invoice`.`docstatus` = 1 and `tabSales Invoice`.`c_form_applicable` = "Yes" and ifnull(`tabSales Invoice`.c_form_no, "") = "" ORDER BY `tabSales Invoice`.`name` ASC LIMIT 50';
+	cond = ""
+	if (doc.customer) cond += ' AND `tabSales Invoice`.`customer` = "' + cstr(doc.customer) + '"';
+	if (doc.company) cond += ' AND `tabSales Invoice`.`company` = "' + cstr(doc.company) + '"';
+	return 'SELECT `tabSales Invoice`.`name` FROM `tabSales Invoice` WHERE `tabSales Invoice`.`docstatus` = 1 and `tabSales Invoice`.`c_form_applicable` = "Yes" and ifnull(`tabSales Invoice`.c_form_no, "") = ""'+cond+' AND `tabSales Invoice`.%(key)s LIKE "%s" ORDER BY `tabSales Invoice`.`name` ASC LIMIT 50';
 }
 
 cur_frm.cscript.invoice_no = function(doc, cdt, cdn) {

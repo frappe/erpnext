@@ -38,6 +38,7 @@ cur_frm.cscript.onload = function(doc, dt, dn) {
 cur_frm.cscript.refresh = function(doc, dt, dn) {
 	erpnext.hide_naming_series();
 	cur_frm.cscript.dynamic_label(doc, dt, dn);
+	cur_frm.cscript.load_taxes(doc, dt, dn);
 	
 	cur_frm.cscript.toggle_contact_section(doc);
 	

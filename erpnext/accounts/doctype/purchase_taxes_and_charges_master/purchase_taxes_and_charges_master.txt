@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-07-03 13:30:50',
+		'creation': '2012-05-15 12:14:32',
 		'docstatus': 0,
-		'modified': '2012-07-12 14:10:35',
+		'modified': '2012-08-17 09:57:04',
 		'modified_by': u'Administrator',
 		'owner': u'wasim@webnotestech.com'
 	},
@@ -105,6 +105,25 @@
 		'oldfieldtype': u'Data',
 		'reqd': 1,
 		'search_index': 0
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'is_default',
+		'fieldtype': u'Check',
+		'label': u'Default'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'company',
+		'fieldtype': u'Link',
+		'in_filter': 1,
+		'label': u'Company',
+		'options': u'Company',
+		'reqd': 1
 	},
 
 	# DocField
