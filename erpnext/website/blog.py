@@ -92,7 +92,7 @@ def add_comment(args=None):
 	import website.web_cache
 	
 	if not args: args = webnotes.form_dict
-	args['comment'] = markdown2.markdown(args.get('comment') or '')
+	args['comment'] = unicode(markdown2.markdown(args.get('comment') or ''))
 	
 	comment = webnotes.widgets.form.comments.add_comment(args)
 	
