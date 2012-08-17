@@ -56,6 +56,7 @@ class DocType(TransactionBase):
 
 	# Get Item Details
 	def get_item_details(self, arg =''):
+		import json
 		if arg:
 			return get_obj(dt='Purchase Common').get_item_details(self,arg)
 		else:
@@ -359,13 +360,11 @@ class DocType(TransactionBase):
 		self.update_rw_material_detail()
 		
 
-# OTHER CHARGES TRIGGER FUNCTIONS
-# ====================================================================================
-	
-	# *********** Get Tax rate if account type is TAX ********************
 	def get_rate(self,arg):
-		return get_obj('Purchase Common').get_rate(arg,self)
+		return get_obj('Purchase Common').get_rate(arg,self)	
+	
+	def load_default_taxes(self):
+		self.doclist = get_obj('Purchase Common').load_default_taxes(self)
 
-	# **** Pull details from other charges master (Get Other Charges) ****
 	def get_purchase_tax_details(self):
 		self.doclist = get_obj('Purchase Common').get_purchase_tax_details(self)

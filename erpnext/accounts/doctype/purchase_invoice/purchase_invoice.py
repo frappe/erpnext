@@ -173,15 +173,13 @@ class DocType(TransactionBase):
 		self.doclist = get_obj('GL Control').get_advances(self, self.doc.credit_to, 'Purchase Invoice Advance','advance_allocation_details','debit')
 		
 		
-	# ============= OTHER CHARGES ====================
-	
-	# Get Tax rate if account type is TAX
-	# ------------------------------------
 	def get_rate(self,arg):
 		return get_obj('Purchase Common').get_rate(arg,self)
 
-	# Get Purchase Taxes and Charges Master
-	# -----------------------------------------------------------
+	def load_default_taxes(self):
+		self.doclist = get_obj('Purchase Common').load_default_taxes(self)
+	
+	
 	def get_purchase_tax_details(self):
 		self.doclist =  get_obj('Purchase Common').get_purchase_tax_details(self)
 

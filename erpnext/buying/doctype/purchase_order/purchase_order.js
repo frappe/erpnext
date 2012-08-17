@@ -36,7 +36,10 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 }
 
 cur_frm.cscript.onload_post_render = function(doc, dt, dn) {
-	if(doc.__islocal) cur_frm.cscript.get_default_schedule_date(doc);
+	var callback = function(doc, dt, dn) {
+		if(doc.__islocal) cur_frm.cscript.get_default_schedule_date(doc);
+	}
+	cur_frm.cscript.update_item_details(doc, dt, dn, callback);
 }
 
 cur_frm.cscript.refresh = function(doc, cdt, cdn) { 

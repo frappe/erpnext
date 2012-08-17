@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-03-27 14:35:51',
+		'creation': '2012-05-15 12:14:32',
 		'docstatus': 0,
-		'modified': '2012-03-27 14:35:51',
+		'modified': '2012-08-17 09:57:04',
 		'modified_by': u'Administrator',
 		'owner': u'wasim@webnotestech.com'
 	},
@@ -24,7 +24,7 @@
 		'section_style': u'Simple',
 		'server_code_error': u' ',
 		'show_in_menu': 0,
-		'version': 18
+		'version': 1
 	},
 
 	# These values are common for all DocField
@@ -104,6 +104,14 @@
 		'oldfieldtype': u'Data',
 		'reqd': 1,
 		'search_index': 0
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'is_default',
+		'fieldtype': u'Check',
+		'label': u'Default'
 	},
 
 	# DocField

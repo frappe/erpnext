@@ -468,15 +468,11 @@ class DocType(TransactionBase):
 				d.current_stock = bin and flt(bin[0]['actual_qty']) or 0
 
 
-
-
-# OTHER CHARGES TRIGGER FUNCTIONS
-# ====================================================================================
-
-	# *********** Get Tax rate if account type is TAX ********************
 	def get_rate(self,arg):
 		return get_obj('Purchase Common').get_rate(arg,self)
-
-	# **** Pull details from other charges master (Get Other Charges) ****
+	
+	def load_default_taxes(self):
+		self.doclist = get_obj('Purchase Common').load_default_taxes(self)
+	
 	def get_purchase_tax_details(self):
 		self.doclist = get_obj('Purchase Common').get_purchase_tax_details(self)
