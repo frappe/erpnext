@@ -620,7 +620,7 @@ def send_notification(new_rv):
 					<td width = "50%%">Invoice Date	   : %s<br>Invoice Period : %s to %s <br>Due Date	   : %s</td>
 				</tr>
 			</table>
-		''' % (com, new_rv.doc.name, new_rv.doc.customer, new_rv.doc.address_display, getdate(new_rv.doc.posting_date).strftime("%d-%m-%Y"), \
+		''' % (com, new_rv.doc.name, new_rv.doc.customer_name, new_rv.doc.address_display, getdate(new_rv.doc.posting_date).strftime("%d-%m-%Y"), \
 		getdate(new_rv.doc.invoice_period_from_date).strftime("%d-%m-%Y"), getdate(new_rv.doc.invoice_period_to_date).strftime("%d-%m-%Y"),\
 		getdate(new_rv.doc.due_date).strftime("%d-%m-%Y"))
 	
