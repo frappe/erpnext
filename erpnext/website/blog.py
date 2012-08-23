@@ -101,7 +101,7 @@ def add_comment(args=None):
 		args.get('comment_doctype'), args.get('comment_docname'))
 	
 	
-	comment['comment_date'] = webnotes.utils.pretty_date(comment['creation'])
+	comment['comment_date'] = webnotes.utils.global_date_format(comment['creation'])
 	template_args = { 'comment_list': [comment], 'template': 'html/comment.html' }
 	
 	# get html of comment row
