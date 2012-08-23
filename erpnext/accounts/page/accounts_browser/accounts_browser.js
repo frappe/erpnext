@@ -120,15 +120,23 @@ erpnext.AccountsChart = Class.extend({
 		if(!data) return;
 
 		link.toolbar = $('<span class="tree-node-toolbar"></span>').insertAfter(link);
+		
+		var node_links = [];
 		// edit
-		$('<a href="#!Form/'+encodeURIComponent(this.ctype)+'/'
-			+encodeURIComponent(data.value)+'">Edit</a>').appendTo(link.toolbar);
-
-		if(data.expandable) {
-			link.toolbar.append(' | <a onclick="erpnext.account_chart.new_node();">Add Child</a>');
-		} else if(this.ctype=='Account') {
-			link.toolbar.append(' | <a onclick="erpnext.account_chart.show_ledger();">View Ledger</a>');
+		if (wn.boot.profile.can_read.indexOf(this.ctype) !== -1) {
+			node_links.push('<a href="#!Form/'+encodeURIComponent(this.ctype)+'/'
+				+encodeURIComponent(data.value)+'">Edit</a>');
 		}
+		if (data.expandable) {
+			if (wn.boot.profile.can_create.indexOf(this.ctype) !== -1 ||
+					wn.boot.profile.in_create.indexOf(this.ctype) !== -1) {
+				node_links.push('<a onclick="erpnext.account_chart.new_node();">Add Child</a>');
+			}
+		} else if (this.ctype === 'Account' && wn.boot.profile.can_read.indexOf("GL Entry") !== -1) {
+			node_links.push('<a onclick="erpnext.account_chart.show_ledger();">View Ledger</a>');
+		}
+		
+		link.toolbar.append(node_links.join(" | "));
 	},
 	show_ledger: function() {
 		var me = this;
