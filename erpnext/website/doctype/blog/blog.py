@@ -15,11 +15,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import unicode_literals
-"""
-record of files
-
-naming for same name files: file.gif, file-1.gif, file-2.gif etc
-"""
 
 import webnotes
 import website.utils
