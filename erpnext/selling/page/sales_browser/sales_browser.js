@@ -79,12 +79,21 @@ erpnext.SalesChart = Class.extend({
 		link.toolbar = $('<span class="tree-node-toolbar"></span>').insertAfter(link);
 		
 		// edit
-		$('<a href="#!Form/'+encodeURIComponent(this.ctype)+'/'
-			+encodeURIComponent(data.value)+'">Edit</a>').appendTo(link.toolbar);
+		var node_links = [];
+		
+		if (wn.boot.profile.can_read.indexOf(this.ctype) !== -1) {
+			node_links.push('<a href="#!Form/'+encodeURIComponent(this.ctype)+'/'
+				+encodeURIComponent(data.value)+'">Edit</a>');
+		}
 
 		if(data.expandable) {
-			link.toolbar.append(' | <a onclick="erpnext.sales_chart.new_node();">Add Child</a>');
+			if (wn.boot.profile.can_create.indexOf(this.ctype) !== -1 ||
+					wn.boot.profile.in_create.indexOf(this.ctype) !== -1) {
+				node_links.push('<a onclick="erpnext.sales_chart.new_node();">Add Child</a>');
+			}
 		}
+		
+		link.toolbar.append(node_links.join(" | "));
 	},
 	new_node: function() {
 		var me = this;
