@@ -82,6 +82,7 @@ class DocType():
 		send(recipients = recipients, subject = self.doc.subject, message = self.get_message(),
 			doctype = doctype, email_field = args["email_field"],
 			first_name_field = args["first_name_field"], last_name_field = "")
+		webnotes.msgprint("""Scheduled to send to %s""" % self.doc.test_email_id)
 		
 	def get_recipients(self, key):
 		recipients = webnotes.conn.sql(self.query_map[key])
@@ -97,7 +98,6 @@ class DocType():
 		
 	def send(self, query_key, doctype):
 		recipients = self.get_recipients(query_key)
-		webnotes.errprint(recipients)
 		args = self.dt_map[doctype]
 		self.send_count[doctype] = self.send_count.setdefault(doctype, 0) + len(recipients)
 		
