@@ -5,7 +5,7 @@
 	{
 		u'creation': '2012-08-23 18:49:12',
 		u'docstatus': 0,
-		u'modified': '2012-08-24 13:39:53',
+		u'modified': '2012-08-24 14:45:00',
 		u'modified_by': u'Administrator',
 		u'owner': u'Administrator'
 	},
@@ -99,6 +99,7 @@
 
 	# DocField
 	{
+		'colour': u'White:FFF',
 		u'doctype': u'DocField',
 		'fieldname': u'contacts',
 		'fieldtype': u'Check',
@@ -109,7 +110,6 @@
 	# DocField
 	{
 		'colour': u'White:FFF',
-		'default': u'0',
 		u'doctype': u'DocField',
 		'fieldname': u'customer_contacts',
 		'fieldtype': u'Check',
@@ -120,7 +120,6 @@
 	# DocField
 	{
 		'colour': u'White:FFF',
-		'default': u'0',
 		u'doctype': u'DocField',
 		'fieldname': u'leads',
 		'fieldtype': u'Check',
@@ -190,7 +189,6 @@
 	# DocField
 	{
 		'colour': u'White:FFF',
-		'default': u'0',
 		u'doctype': u'DocField',
 		'fieldname': u'email_sent',
 		'fieldtype': u'Check',
