@@ -15,6 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 cur_frm.cscript.refresh = function(doc) {
+	erpnext.hide_naming_series();
 	if(!doc.__islocal && !cint(doc.email_sent) && !doc.__unsaved) {
 		cur_frm.add_custom_button('Send', function() {
 			$c_obj(make_doclist(doc.doctype, doc.name), 'send_emails', '', function(r) {
