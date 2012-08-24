@@ -17,6 +17,7 @@
 from __future__ import unicode_literals
 
 import webnotes
+import webnotes.utils
 
 class DocType():
 	def __init__(self, d, dl):
@@ -77,9 +78,11 @@ class DocType():
 			
 	def test_send(self, doctype="Lead"):
 		args = self.dt_map[doctype]
+		sender = webnotes.utils.get_email_id(self.doc.owner)
 		recipients = self.doc.test_email_id.split(",")
 		from webnotes.utils.email_lib.bulk import send
-		send(recipients = recipients, subject = self.doc.subject, message = self.get_message(),
+		send(recipients = recipients, sender = sender, 
+			subject = self.doc.subject, message = self.get_message(),
 			doctype = doctype, email_field = args["email_field"],
 			first_name_field = args["first_name_field"], last_name_field = "")
 		webnotes.msgprint("""Scheduled to send to %s""" % self.doc.test_email_id)
@@ -98,10 +101,12 @@ class DocType():
 		
 	def send(self, query_key, doctype):
 		recipients = self.get_recipients(query_key)
+		sender = webnotes.utils.get_email_id(self.doc.owner)
 		args = self.dt_map[doctype]
 		self.send_count[doctype] = self.send_count.setdefault(doctype, 0) + len(recipients)
 		
 		from webnotes.utils.email_lib.bulk import send
-		send(recipients = recipients, subject = self.doc.subject, message = self.get_message(),
+		send(recipients = recipients, sender = sender, 
+			subject = self.doc.subject, message = self.get_message(),
 			doctype = doctype, email_field = args["email_field"],
 			first_name_field = args["first_name_field"], last_name_field = "")
