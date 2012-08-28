@@ -521,4 +521,8 @@ patch_list = [
 		'patch_module': 'patches.august_2012',
 		'patch_file': 'report_supplier_quotations',
 	},
+	{
+		'patch_module': 'patches.august_2012',
+		'patch_file': 'changed_blog_date_format',
+	},
 ]

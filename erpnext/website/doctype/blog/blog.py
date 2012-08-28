@@ -83,4 +83,4 @@ class DocType(website.web_page.Page):
 		
 		self.doc.comment_list = comment_list or []
 		for comment in self.doc.comment_list:
-			comment['comment_date'] = webnotes.utils.pretty_date(comment['creation'])
+			comment['comment_date'] = webnotes.utils.global_date_format(comment['creation'])
