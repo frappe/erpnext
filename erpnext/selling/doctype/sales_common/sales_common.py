@@ -736,7 +736,7 @@ class StatusUpdater:
 		tolerance = self.get_tolerance_for(item['item_code'])
 		overflow_percent = ((item[args['compare_field']] - item[args['compare_ref_field']]) / item[args['compare_ref_field']] * 100)
 	
-		if overflow_percent - tolerance > 0.0001:
+		if overflow_percent - tolerance > 0.01:
 			item['max_allowed'] = flt(item[args['compare_ref_field']] * (100+tolerance)/100)
 			item['reduce_by'] = item[args['compare_field']] - item['max_allowed']
 		
@@ -766,18 +766,19 @@ class StatusUpdater:
 				if item:
 					item = item[0]
 					item['idx'] = d.idx
-					item['compare_ref_field'] = args['compare_ref_field']
+					item['compare_ref_field'] = args['compare_ref_field'].replace('_', ' ')
 
 					if not item[args['compare_ref_field']]:
 						msgprint("As %(compare_ref_field)s for item: %(item_code)s in %(parenttype)s: %(parent)s is zero, system will not check over-delivery or over-billed" % item)
 					elif no_tolerance:
 						item['reduce_by'] = item[args['compare_field']] - item[args['compare_ref_field']]
-						msgprint("""
-							Row #%(idx)s: Max %(compare_ref_field)s allowed for <b>Item %(item_code)s</b> against 
-							<b>%(parenttype)s %(parent)s</b> is <b>""" % item 
-							+ cstr(item[args['compare_ref_field']]) + """</b>. 
+						if item['reduce_by'] > .01:
+							msgprint("""
+								Row #%(idx)s: Max %(compare_ref_field)s allowed for <b>Item %(item_code)s</b> against 
+								<b>%(parenttype)s %(parent)s</b> is <b>""" % item 
+								+ cstr(item[args['compare_ref_field']]) + """</b>. 
 							
-							You must reduce the %(compare_ref_field)s by %(reduce_by)s""" % item, raise_exception=1)
+								You must reduce the %(compare_ref_field)s by %(reduce_by)s""" % item, raise_exception=1)
 					
 					else:
 						self.check_overflow_with_tolerance(item, args)
