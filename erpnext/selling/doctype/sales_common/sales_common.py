@@ -689,14 +689,14 @@ class StatusUpdater:
 			self.validate_qty({
 				'source_dt'		:'Sales Invoice Item',
 				'compare_field'	:'billed_amt',
-				'compare_ref_field'	:'amount',
+				'compare_ref_field'	:'export_amount',
 				'target_dt'		:'Sales Order Item',
 				'join_field'	:'so_detail'
 			})
 			self.validate_qty({
 				'source_dt'		:'Sales Invoice Item',
 				'compare_field'	:'billed_amt',
-				'compare_ref_field'	:'amount',
+				'compare_ref_field'	:'export_amount',
 				'target_dt'		:'Delivery Note Item',
 				'join_field'	:'dn_detail'
 			}, no_tolerance =1)
@@ -808,9 +808,9 @@ class StatusUpdater:
 				'target_dt'				:'Sales Order Item',
 				'target_parent_dt'		:'Sales Order',
 				'target_parent_field'	:'per_billed',
-				'target_ref_field'		:'amount',
+				'target_ref_field'		:'export_amount',
 				'source_dt'				:'Sales Invoice Item',
-				'source_field'			:'amount',
+				'source_field'			:'export_amount',
 				'join_field'			:'so_detail',
 				'percent_join_field'	:'sales_order',
 				'status_field'			:'billing_status',
@@ -822,9 +822,9 @@ class StatusUpdater:
 				'target_dt'				:'Delivery Note Item',
 				'target_parent_dt'		:'Delivery Note',
 				'target_parent_field'	:'per_billed',
-				'target_ref_field'		:'amount',
+				'target_ref_field'		:'export_amount',
 				'source_dt'				:'Sales Invoice Item',
-				'source_field'			:'amount',
+				'source_field'			:'export_amount',
 				'join_field'			:'dn_detail',
 				'percent_join_field'	:'delivery_note',
 				'status_field'			:'billing_status',
