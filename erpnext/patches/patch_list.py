@@ -557,4 +557,8 @@ patch_list = [
 		'patch_module': 'patches.august_2012',
 		'patch_file': 'changed_blog_date_format',
 	},
+	{
+		'patch_module': 'patches.august_2012',
+		'patch_file': 'repost_billed_amt',
+	},
 ]
