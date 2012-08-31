@@ -51,7 +51,8 @@ class DocType:
 	
 	# update prices in Price List
 	def update_prices(self):
-		import csv 
+		webnotes.conn.auto_commit_on_many_writes = 1
+		import csv
 		data = csv.reader(self.get_csv_data().splitlines())
 				
 		updated = 0
@@ -84,6 +85,7 @@ class DocType:
 				msgprint("[Ignored] Incorrect format: %s" % str(line))
 		
 		msgprint("<b>%s</b> items updated" % updated)
+		webnotes.conn.auto_commit_on_many_writes = 0
 
 	# clear prices
 	def clear_prices(self):
