@@ -529,4 +529,8 @@ patch_list = [
 		'patch_module': 'patches.august_2012',
 		'patch_file': 'repost_billed_amt',
 	},
+	{
+		'patch_module': 'patches.august_2012',
+		'patch_file': 'remove_cash_flow_statement',
+	},
 ]
