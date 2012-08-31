@@ -36,4 +36,8 @@ wn.doclistviews['Communication'] = wn.views.ListView.extend({
 		{width: '12%', content:'when',
 			css: {'text-align': 'right', 'color':'#777'}}		
 	],
+	
+	make_new_doc: function(new_doctype) {
+		new_doc(new_doctype, 1);
+	}
 });

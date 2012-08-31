@@ -143,4 +143,4 @@ class DocType:
 		
 		if receiver_list:
 			msgprint(get_obj('SMS Control', 'SMS Control').send_sms(receiver_list, self.doc.sms_message))
-			self.add_in_follow_up(self.doc.sms_message,'SMS')
+			# self.add_in_follow_up(self.doc.sms_message,'SMS')
