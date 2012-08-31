@@ -90,6 +90,9 @@ cur_frm.cscript.render_list = function(doc, doctype, wrapper, ListView, make_new
 		}
 		
 		var record_list_view = new RecordListView(doctype, wrapper, ListView);
+		if (!cur_frm[doctype.toLowerCase().replace(" ", "_") + "_list"]) {
+			cur_frm[doctype.toLowerCase().replace(" ", "_") + "_list"] = record_list_view;
+		}
 	});
 }
 
@@ -110,4 +113,9 @@ cur_frm.cscript.contact = function(doc, dt, dn) {
 			},
 		});
 	}
+}
+
+cur_frm.cscript.hide_dialog = function() {
+	if(cur_frm.communication_list)
+		cur_frm.communication_list.run();
 }
