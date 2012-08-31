@@ -55,6 +55,7 @@ class DocType:
 		from core.page.data_import_tool.data_import_tool import read_csv_content
 		
 		data = read_csv_content(self.get_csv_data())
+		webnotes.conn.auto_commit_on_many_writes = 1
 				
 		updated = 0
 		
@@ -84,6 +85,7 @@ class DocType:
 					msgprint("[Ignored] Did not find Item '%s'" % line[1])
 		
 		msgprint("<b>%s</b> items updated" % updated)
+		webnotes.conn.auto_commit_on_many_writes = 0
 
 	# Update CSV data
 	def get_csv_data(self):
