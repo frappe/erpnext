@@ -5,7 +5,7 @@
 	{
 		'creation': '2012-06-26 11:58:13',
 		'docstatus': 0,
-		'modified': '2012-08-03 16:10:35',
+		'modified': '2012-08-31 13:14:16',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -16,6 +16,7 @@
 		'description': u'Keep a track of all communications',
 		'doctype': 'DocType',
 		'document_type': u'Master',
+		'in_dialog': 1,
 		'module': u'Support',
 		'name': '__common__',
 		'version': 1
@@ -145,6 +146,15 @@
 		'options': u'\nCreated Opportunity\nSent Quotation\nCreated Support Ticket\nCreated Customer Issue\nNo Action\nSent Mail',
 		'permlevel': 0,
 		'reqd': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'next_communication_date',
+		'fieldtype': u'Date',
+		'label': u'Next Communcation On',
+		'permlevel': 0
 	},
 
 	# DocField
