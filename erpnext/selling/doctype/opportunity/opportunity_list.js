@@ -6,6 +6,7 @@ wn.doclistviews['Opportunity'] = wn.views.ListView.extend({
 			'tabOpportunity.lead_name',
 			'tabOpportunity.customer_name',
 			'tabOpportunity.status',
+			'tabOpportunity.transaction_date',
 		]);
 		this.stats = this.stats.concat(['status', 'source', 'enquiry_from', 'company']);
 	},
@@ -33,6 +34,8 @@ wn.doclistviews['Opportunity'] = wn.views.ListView.extend({
 		{width: '15%', content:'name'},
 		{width: '18%', content:'status_html'},
 		{width: '52%', content:'enquiry_name+tags', css: {color:'#222'}},
-		{width: '12%', content:'modified', css: {'text-align': 'right', 'color':'#777'}}
+		{width: '12%', content:'transaction_date',
+			css: {'text-align': 'right', 'color':'#777'},
+			title: "Opportunity Date", type: "date"}
 	]
 })

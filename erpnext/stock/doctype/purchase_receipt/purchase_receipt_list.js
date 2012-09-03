@@ -5,6 +5,7 @@ wn.doclistviews['Purchase Receipt'] = wn.views.ListView.extend({
 		this.fields = this.fields.concat([
 			"`tabPurchase Receipt`.supplier_name",
 			"group_concat(`tabPurchase Receipt Item`.prevdoc_docname) as purchase_order_no",
+			"`tabPurchase Receipt`.posting_date",
 		]);
 		this.group_by = "`tabPurchase Receipt`.name";
 	},
@@ -14,7 +15,9 @@ wn.doclistviews['Purchase Receipt'] = wn.views.ListView.extend({
 			data.purchase_order_no = data.purchase_order_no.split(",");
 			var po_list = [];
 			$.each(data.purchase_order_no, function(i, v){
-				if(po_list.indexOf(v)==-1) po_list.push(v);
+				if(po_list.indexOf(v)==-1) po_list.push(
+					repl("<a href=\"#Form/Purchase Order/%(name)s\">%(name)s</a>",
+					{name: v}));
 			});
 			data.purchase_order_no = po_list.join(", ");
 		}
@@ -26,6 +29,8 @@ wn.doclistviews['Purchase Receipt'] = wn.views.ListView.extend({
 		{width: '15%', content:'name'},
 		{width: '32%', content:'supplier_name+tags', css: {color:'#222'}},
 		{width: '30%', content:'purchase_order_no'},
-		{width: '12%', content:'modified', css: {'text-align': 'right', 'color':'#777'}}
+		{width: '12%', content:'posting_date',
+			css: {'text-align': 'right', 'color':'#777'},
+			title: "Purhcase Receipt Date", type: "date"}
 	]
 });

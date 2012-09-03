@@ -6,6 +6,7 @@ wn.doclistviews['Journal Voucher'] = wn.views.ListView.extend({
 			'`tabJournal Voucher`.remark',
 			'`tabJournal Voucher`.total_debit',
 			'`tabJournal Voucher`.company',
+			"`tabJournal Voucher`.posting_date",
 		]);
 		this.stats = this.stats.concat(['voucher_type', 'company']);
 	},
@@ -31,6 +32,8 @@ wn.doclistviews['Journal Voucher'] = wn.views.ListView.extend({
 			},
 			css: {'text-align':'right'}
 		},
-		{width: '12%', content: 'modified', css: {'text-align': 'right', 'color':'#777'}}		
+		{width: '12%', content:'posting_date',
+			css: {'text-align': 'right', 'color':'#777'},
+			title: "Journal Voucher Date", type: "date"}
 	],
 });

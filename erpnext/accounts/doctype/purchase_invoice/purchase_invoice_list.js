@@ -9,6 +9,7 @@ wn.doclistviews['Purchase Invoice'] = wn.views.ListView.extend({
 			'IFNULL(`tabPurchase Invoice`.grand_total_import, 0) as grand_total_import',
 			'IFNULL(`tabPurchase Invoice`.grand_total, 0) as grand_total',
 			'IFNULL(`tabPurchase Invoice`.outstanding_amount, 0) as outstanding_amount',
+			"`tabPurchase Invoice`.posting_date"
 		]);
 		this.stats = this.stats.concat(['company']);
 	},
@@ -40,8 +41,8 @@ wn.doclistviews['Purchase Invoice'] = wn.views.ListView.extend({
 			css: {'text-align':'right'}
 		},
 		{width: '10%', content: 'paid', type:'bar-graph', label:'Paid'},
-		{width: '12%', content:'modified', css: {
-			'text-align': 'right', 'color':'#777'
-		}},
+		{width: '12%', content:'posting_date',
+			css: {'text-align': 'right', 'color':'#777'},
+			title: "Purchase Invoice Date", type: "date"},
 	]
 });
