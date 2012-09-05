@@ -26,6 +26,7 @@ cur_frm.cscript.select_transaction = function(doc, cdt, cdn) {
 }
 
 cur_frm.cscript.notify = function(doc, args) {
+	var doc = locals[doc.doctype][doc.name];
 	$c_obj(make_doclist(doc.doctype, doc.name), 'get_formatted_message', {
 		type: args['type'],
 		doctype: args['doctype'],
