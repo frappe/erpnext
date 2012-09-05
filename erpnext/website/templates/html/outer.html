@@ -14,18 +14,33 @@
 				<ul class="nav">
 					{% for page in top_bar_items %}
 						{% if not page.parent_label %}
-						<li data-label="{{ page.label }}">
-							<a href="{{ page.url }}" {{ page.target }}>
+						<li data-label="{{ page.label }}"
+							{% if page.child_items %}
+								class="dropdown"
+							{% endif %}>
+							<a href="{{ page.url or '#' }}" 
+								{% if page.child_items %}
+									class="dropdown-toggle"
+									onclick="return false;"
+								{% endif %}
+								{{ page.target or ''}}>
 							{{ page.label }}
 							{% if page.child_items %}
+								<b class="caret"></b>
+							</a>
 								<ul class="dropdown-menu">
 								{% for child in page.child_items %}
 									<li data-label="{{ child.label }}">
-										<a href="{{ child.url }}" {{ child.target }}>
+										<a href="{{ child.url }}" {{ child.target or '' }}>
+											{{ child.label }}
+										</a>
+									</li>
 								{% endfor %}
 								</ul>
+							{% else %}
+							</a>
 							{% endif %}
-							</a></li>
+							</li>
 						{% endif %}
 					{% endfor %}
 				</ul>
@@ -35,7 +50,8 @@
 				</ul>
 			</div>
 			</div>
-			</div>	
+			</div>
+			<script>$('.dropdown-toggle').dropdown()</script>
 	</header>
 	<div id="body_div">
 		<div class="content" id="page-{{ name }}" style="display: block;">
