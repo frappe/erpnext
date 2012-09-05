@@ -10,8 +10,10 @@ def execute():
 		pass
 	webnotes.conn.begin()
 
+	webnotes.conn.auto_commit_on_many_writes = 1
 	repost_reserved_qty()
 	cleanup_wrong_sle()
+	webnotes.conn.auto_commit_on_many_writes = 0
 
 def repost_reserved_qty():
 	from webnotes.utils import flt
