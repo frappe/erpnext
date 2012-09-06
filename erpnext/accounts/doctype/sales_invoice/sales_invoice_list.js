@@ -8,7 +8,8 @@ wn.doclistviews['Sales Invoice'] = wn.views.ListView.extend({
 			"ifnull(`tabSales Invoice`.outstanding_amount,0) as outstanding_amount", 
 			"ifnull(`tabSales Invoice`.grand_total,0) as grand_total", 
 			"`tabSales Invoice`.currency", 
-			"ifnull(`tabSales Invoice`.grand_total_export,0) as grand_total_export"
+			"ifnull(`tabSales Invoice`.grand_total_export,0) as grand_total_export",
+			"`tabSales Invoice`.posting_date",
 		]);
 	},
 	prepare_data: function(data) {
@@ -35,6 +36,8 @@ wn.doclistviews['Sales Invoice'] = wn.views.ListView.extend({
 			css: {'text-align':'right'}
 		},
 		{width: '10%', content: 'paid', type:'bar-graph', label:'Paid'},
-		{width: '12%', content:'modified', css: {'text-align': 'right', 'color':'#777'}}
+		{width: '12%', content:'posting_date',
+			css: {'text-align': 'right', 'color':'#777'},
+			title: "Sales Invoice Date", type: "date"}
 	]
 });

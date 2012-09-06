@@ -6,6 +6,7 @@ wn.doclistviews['Purchase Request'] = wn.views.ListView.extend({
 			"`tabPurchase Request`.status",
 			"IFNULL(`tabPurchase Request`.per_ordered, 0) as per_ordered",
 			"`tabPurchase Request`.remark",
+			"`tabPurchase Request`.transaction_date",
 		]);
 		this.stats = this.stats.concat(['status', 'company']);
 	},
@@ -28,7 +29,9 @@ wn.doclistviews['Purchase Request'] = wn.views.ListView.extend({
 		{width: '17%', content:'name'},
 		{width: '50%', content:'status_html+remark+tags', css: {'color': '#222'}},
 		{width: '10%', content: 'per_ordered', type:'bar-graph', label:'Ordered'},
-		{width: '12%', content:'modified', css: {'text-align': 'right', 'color':'#777'}}
+		{width: '12%', content:'transaction_date',
+			css: {'text-align': 'right', 'color':'#777'},
+			title: "Quotation Date", type: "date"}
 	]
 });
 
