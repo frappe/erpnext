@@ -89,6 +89,7 @@ class SupportMailbox(POP3Mailbox):
 				webnotes.conn.commit()
 				# extract attachments
 				self.save_attachments(st.doc, mail.attachments)
+				webnotes.conn.begin()
 				return
 				
 		from webnotes.model.doctype import get_property
@@ -117,9 +118,9 @@ class SupportMailbox(POP3Mailbox):
 				self.send_auto_reply(d)
 
 			webnotes.conn.commit()
-			
 			# extract attachments
 			self.save_attachments(d, mail.attachments)
+			webnotes.conn.begin()
 			
 
 	def save_attachments(self, doc, attachment_list=[]):
