@@ -87,14 +87,10 @@ class DocType(TransactionBase):
 						'cost_center': doc.fields.get('cost_center'),
 						'warehouse': doc.fields.get('warehouse')
 					}
-					fields_dict = obj.get_item_details(arg, self)
-					if fields_dict:
-						doc.fields.update(fields_dict)
-					#ret = obj.get_item_defaults(arg)
-					#for r in ret:
-					#	if not doc.fields.get(r):
-					#		doc.fields[r] = ret[r]					
-
+					res = obj.get_item_details(arg, self) or {}
+					for r in res:
+						if not doc.fields.get(r):
+							doc.fields[r] = res[r]
 
 	# Re-calculates Basic Rate & amount based on Price List Selected
 	# --------------------------------------------------------------
