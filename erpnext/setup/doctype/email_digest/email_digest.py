@@ -418,7 +418,6 @@ class DocType:
 			sendmail(
 				recipients=recipient_list,
 				sender='notifications+email_digest@erpnext.com',
-				reply_to='support@erpnext.com',
 				subject=self.doc.frequency + ' Digest',
 				msg=email_body
 			)
