@@ -57,7 +57,7 @@ def notify_assignment(d):
 	doc_name = d.reference_name
 	assigned_by = d.assigned_by
 	
-	if doc_type and doc_name and assigned_by and assigned_by != d.owner:
+	if doc_type and doc_name and assigned_by:
 		from webnotes.widgets.form import assign_to
 		assign_to.notify_assignment(assigned_by, d.owner, doc_type, doc_name)
 		
