@@ -48,7 +48,7 @@ def edit(arg=None):
 def delete(arg=None):
 	name = webnotes.form_dict['name']
 	d = Document('ToDo', name)
-	if d and d.name:
+	if d and d.name and d.owner != webnotes.session['user']:
 		notify_assignment(d)
 	webnotes.conn.sql("delete from `tabToDo` where name = %s", name)
 
@@ -57,7 +57,7 @@ def notify_assignment(d):
 	doc_name = d.reference_name
 	assigned_by = d.assigned_by
 	
-	if doc_type and doc_name and assigned_by:
+	if doc_type and doc_name and assigned_by and assigned_by != d.owner:
 		from webnotes.widgets.form import assign_to
 		assign_to.notify_assignment(assigned_by, d.owner, doc_type, doc_name)
 		
