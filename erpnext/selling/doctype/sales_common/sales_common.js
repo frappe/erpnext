@@ -222,7 +222,7 @@ cur_frm.cscript.price_list_name = function(doc, cdt, cdn) {
 
 // ******************** ITEM CODE ******************************** 
 cur_frm.fields_dict[cur_frm.cscript.fname].grid.get_field("item_code").get_query = function(doc, cdt, cdn) {
-	if (doc.order_type == 'Maintenance')
+	if (inList(['Maintenance', 'Service'], doc.order_type))
 		return 'SELECT tabItem.name,tabItem.item_name,tabItem.description \
 			FROM tabItem WHERE tabItem.is_service_item="Yes" \
 			AND tabItem.docstatus != 2 \
