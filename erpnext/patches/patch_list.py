@@ -573,4 +573,8 @@ patch_list = [
 		'patch_module': 'patches.september_2012',
 		'patch_file': 'stock_report_permissions_for_accounts',
 	},
+	{
+		'patch_module': 'patches.september_2012',
+		'patch_file': 'communication_delete_permission',
+	},
 ]
