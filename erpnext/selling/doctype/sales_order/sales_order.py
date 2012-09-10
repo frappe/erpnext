@@ -242,43 +242,16 @@ class DocType(TransactionBase):
 			msgprint("There are no items of the quotation selected.")
 			raise Exception
 
-	# validate sales/ service item against order type
-	#----------------------------------------------------
-	def validate_sales_mntc_item(self):
-		if self.doc.order_type == 'Maintenance':
-			item_field = 'is_service_item'
-			order_type = 'Maintenance Order'
-			item_type = 'service item'
-		else :
-			item_field = 'is_sales_item'
-			order_type = 'Sales Order'
-			item_type = 'sales item'
-		
-		for d in getlist(self.doclist, 'sales_order_details'):
-			res = sql("select %s from `tabItem` where name='%s'"% (item_field,d.item_code))
-			res = res and res[0][0] or 'No'
-			
-			if res == 'No':
-				msgprint("You can not select non "+item_type+" "+d.item_code+" in "+order_type)
-				raise Exception
-	
 	# validate sales/ maintenance quotation against order type
 	#------------------------------------------------------------------
 	def validate_sales_mntc_quotation(self):
 		for d in getlist(self.doclist, 'sales_order_details'):
 			if d.prevdoc_docname:
-				res = sql("select order_type from `tabQuotation` where name=%s", (d.prevdoc_docname))
-				res = res and res[0][0] or ''
-				
-				if self.doc.order_type== 'Maintenance' and res != 'Maintenance':
-					msgprint("You can not select non Maintenance Quotation against Maintenance Order")
-					raise Exception
-				elif self.doc.order_type != 'Maintenance' and res == 'Maintenance':
-					msgprint("You can not select non Sales Quotation against Sales Order")
-					raise Exception
+				res = sql("select name from `tabQuotation` where name=%s and order_type = %s", (d.prevdoc_docname, self.doc.order_type))
+				if not res:
+					msgprint("""Order Type (%s) should be same in Quotation: %s \
+						and current Sales Order""" % (self.doc.order_type, d.prevdoc_docname))
 
-	#do not allow sales item/quotation in maintenance order and service item/quotation in sales order
-	#-----------------------------------------------------------------------------------------------
 	def validate_order_type(self):
 		#validate delivery date
 		if self.doc.order_type == 'Sales' and not self.doc.delivery_date:
@@ -286,7 +259,6 @@ class DocType(TransactionBase):
 			raise Exception
 		
 		self.validate_sales_mntc_quotation()
-		self.validate_sales_mntc_item()
 
 	#check for does customer belong to same project as entered..
 	#-------------------------------------------------------------------------------------------------
