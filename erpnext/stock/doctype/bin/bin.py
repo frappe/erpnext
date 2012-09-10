@@ -344,7 +344,8 @@ class DocType:
 				and t1.docstatus != 2
 			""", self.doc.item_code)
 
-			if ((flt(ret[0]['re_order_level']) > flt(current_qty[0][0])) and ret[0]['re_order_level']):
+			if ret[0]["re_order_level"] and current_qty and \
+					(flt(ret[0]['re_order_level']) > flt(current_qty[0][0])):
 				self.create_auto_indent(ret[0], doc_type, doc_name, current_qty[0][0])
 
 	
