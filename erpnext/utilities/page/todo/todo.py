@@ -49,7 +49,7 @@ def edit(arg=None):
 def delete(arg=None):
 	name = webnotes.form_dict['name']
 	d = Document('ToDo', name)
-	if d and d.name:
+	if d and d.name and d.owner != webnotes.session['user']:
 		notify_assignment(d)
 	webnotes.conn.sql("delete from `tabToDo` where name = %s", name)
 
