@@ -3,7 +3,21 @@ from webnotes.utils import get_defaults, cstr
 
 @webnotes.whitelist()
 def get_companies():
-	return [r[0] for r in webnotes.conn.sql("""select name from tabCompany where docstatus!=2""")]
+	"""get a list of companies based on permission"""
+	
+	# check if match permission exists
+	res = webnotes.conn.sql("""select role, `match` from `tabDocPerm`
+		where parent='Account' and permlevel=0 and `read`=1""", as_dict=1)
+		
+	match = any((r["match"] for r in res 
+		if r["role"] in webnotes.user.roles and r["match"]=="company"))
+	
+	# if match == company is specified and companies are specified in user defaults
+	if match and webnotes.user.get_defaults().get("company"):
+		return webnotes.user.get_defaults().get("company")
+	else:
+		return [r[0] for r in webnotes.conn.sql("""select name from tabCompany
+			where docstatus!=2""")]
 	
 @webnotes.whitelist()
 def get_children():

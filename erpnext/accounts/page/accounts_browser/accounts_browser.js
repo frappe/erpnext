@@ -22,7 +22,12 @@
 
 pscript['onload_Accounts Browser'] = function(wrapper){
 	wrapper.appframe = new wn.ui.AppFrame($(wrapper).find('.appframe-area'));
-	wrapper.appframe.add_button('New Company', function() { newdoc('Company'); }, 'icon-plus');
+	
+	if (wn.boot.profile.can_create.indexOf("Company") !== -1) {
+		wrapper.appframe.add_button('New Company', function() { newdoc('Company'); },
+			'icon-plus');
+	}
+	
 	wrapper.appframe.add_button('Refresh', function() {  	
 			wrapper.$company_select.change();
 		}, 'icon-refresh');
@@ -35,17 +40,6 @@ pscript['onload_Accounts Browser'] = function(wrapper){
 		})
 		.appendTo(wrapper.appframe.$w.find('.appframe-toolbar'));
 		
-	// default company
-	if(sys_defaults.company) {
-		$('<option>')
-			.html(sys_defaults.company)
-			.attr('value', sys_defaults.company)
-			.appendTo(wrapper.$company_select);
-
-		wrapper.$company_select
-			.val(sys_defaults.company).change();
-	}
-
 	// load up companies
 	wn.call({
 		method:'accounts.page.accounts_browser.accounts_browser.get_companies',
@@ -54,7 +48,7 @@ pscript['onload_Accounts Browser'] = function(wrapper){
 			$.each(r.message, function(i, v) {
 				$('<option>').html(v).attr('value', v).appendTo(wrapper.$company_select);
 			});
-			wrapper.$company_select.val(sys_defaults.company || r[0]);
+			wrapper.$company_select.val(sys_defaults.company || r[0]).change();
 		}
 	});
 }
