@@ -537,4 +537,8 @@ patch_list = [
 		'patch_module': 'patches.august_2012',
 		'patch_file': 'reload_stock_ledger',
 	},
+	{
+		'patch_module': 'patches.september_2012',
+		'patch_file': 'stock_report_permissions_for_accounts',
+	},
 ]
