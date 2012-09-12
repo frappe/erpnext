@@ -27,10 +27,11 @@ wn.pages['chart-of-accounts'].onload = function(wrapper) {
 		title: 'Chart of Accounts',
 		single_column: true
 	});
-	wrapper.appframe.add_button("Refresh", function() {}, "icon-refresh").css("margin-right", "12px");
 	erpnext.coa.company_select = wrapper.appframe.add_select("Company", ["Loading..."]);
-	wrapper.appframe.add_date("Opening Date");
-	wrapper.appframe.add_date("Closing Date");
+	erpnext.coa.opening_date = wrapper.appframe.add_date("Opening Date")
+		.val(dateutil.str_to_user(sys_defaults.year_start_date));
+	erpnext.coa.closing_date = wrapper.appframe.add_date("Closing Date")
+		.val(dateutil.obj_to_user(new Date()));
 	
 	$('<div id="chart-of-accounts" style="height: 500px; border: 1px solid #aaa;">\
 		</div>').appendTo($(wrapper).find('.layout-main'));
@@ -48,6 +49,9 @@ wn.pages['chart-of-accounts'].onload = function(wrapper) {
 		erpnext.coa.load_slickgrid();
 		erpnext.coa.load_data($(this).val());
 	});
+	
+	erpnext.coa.opening_date.change(erpnext.coa.refresh);
+	erpnext.coa.closing_date.change(erpnext.coa.refresh);
 }
 
 erpnext.coa = {
@@ -63,6 +67,10 @@ erpnext.coa = {
 		wn.require('js/lib/slickgrid/slick.dataview.js');
 		wn.dom.set_style('.slick-cell { font-size: 12px; }');		
 	},
+	refresh: function() {
+		erpnext.coa.prepare_balances();
+		erpnext.coa.render();
+	},
 	load_data: function(company) {
 		wn.call({
 			module: "accounts",
@@ -70,12 +78,14 @@ erpnext.coa = {
 			method: "get_chart",
 			args: {company: company},
 			callback: function(r) {
-				erpnext.coa.prepare_data(r.message);
-				erpnext.coa.render()
+				erpnext.coa.gl = r.message.gl;
+				erpnext.coa.prepare_chart(r.message.chart);
+				erpnext.coa.prepare_balances();
+				erpnext.coa.render();
 			}
 		})
 	},
-	prepare_data: function(indata) {
+	prepare_chart: function(indata) {
 		var data = [];
 		var parent_map = {};
 		var data_by_name = {};
@@ -85,11 +95,12 @@ erpnext.coa = {
 					"id": v[0],
 					"name": v[0],
 					"parent": v[1],
-					"opening": Math.random() * 100,
-					"debits": Math.random() * 100,
-					"credits": Math.random() * 100
+					"opening": 0,
+					"debit": 0,
+					"credit": 0,
+					"closing": 0,
+					"debit_or_credit": v[2],
 				};
-				d["closing"] = d['opening'] + d['debits'] - d['credits'];
 
 				data.push(d);
 				data_by_name[d.name] = d;
@@ -102,6 +113,44 @@ erpnext.coa = {
 		erpnext.coa.data = data;
 		erpnext.coa.parent_map = parent_map;
 		erpnext.coa.data_by_name = data_by_name;
+	},
+	prepare_balances: function() {
+		var gl = erpnext.coa.gl;
+		var opening_date = dateutil.user_to_obj(erpnext.coa.opening_date.val());
+		var closing_date = dateutil.user_to_obj(erpnext.coa.closing_date.val());
+		$.each(erpnext.coa.data, function(i, v) {
+			v.opening = v.debit = v.credit = v.closing = 0;
+		});
+		$.each(gl, function(i, v) {
+			var posting_date = dateutil.str_to_obj(v[0]);
+			var account = erpnext.coa.data_by_name[v[1]];
+			// opening
+			if (posting_date < opening_date) {
+				if (account.debit_or_credit === "Debit") {
+					account.opening += (v[2] - v[3]);
+				} else {
+					account.opening += (v[3] - v[2]);
+				}
+			} else if (opening_date <= posting_date && posting_date <= closing_date) {
+				// in between
+				account.debit += v[2];
+				account.credit += v[3];
+			}
+			// closing
+			if (account.debit_or_credit === "Debit") {
+				account.closing = account.opening + account.debit - account.credit;
+			} else {
+				account.closing = account.opening + account.credit - account.debit;
+			}
+		});
+		
+		// format amount
+		$.each(erpnext.coa.data, function(i, v) {
+			v.opening = fmt_money(v.opening);
+			v.debit = fmt_money(v.debit);
+			v.credit = fmt_money(v.credit);
+			v.closing = fmt_money(v.closing);
+		});
 	},
 	set_indent: function(data, parent_map) {
 		$.each(data, function(i, d) {
@@ -128,8 +177,8 @@ erpnext.coa = {
 			{id: "name", name: "Account", field: "name", width: 400, cssClass: "cell-title", 
 				formatter: erpnext.coa.account_formatter},
 			{id: "opening", name: "Opening", field: "opening"},
-			{id: "debits", name: "Debits", field: "debits"},
-			{id: "credits", name: "Credits", field: "credits"},
+			{id: "debit", name: "Debit", field: "debit"},
+			{id: "credit", name: "Credit", field: "credit"},
 			{id: "closing", name: "Closing", field: "closing"}			
 		];
 		
@@ -141,6 +190,7 @@ erpnext.coa = {
 		// initialize the grid
 		var grid = new Slick.Grid("#chart-of-accounts", erpnext.coa.dataView, columns, options);
 		erpnext.coa.add_events(grid);
+		erpnext.coa.grid = grid;
 	},
 	add_events: function(grid) {
 		grid.onClick.subscribe(function (e, args) {

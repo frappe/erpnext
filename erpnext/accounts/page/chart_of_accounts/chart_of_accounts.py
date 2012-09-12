@@ -3,8 +3,13 @@ import webnotes
 @webnotes.whitelist()
 def get_chart():
 	company = webnotes.form_dict.get('company')
-	return webnotes.conn.sql("""select name, parent_account from 
-		tabAccount where company=%s and docstatus < 2 order by lft""", company)
+	res = {}
+	res["chart"] = webnotes.conn.sql("""select name, parent_account, debit_or_credit from 
+		tabAccount where company=%s and docstatus < 2 order by lft""", (company, ))
+	res["gl"] = webnotes.conn.sql("""select posting_date, account, ifnull(debit, 0), ifnull(credit, 0)
+		from `tabGL Entry` where company=%s and ifnull(is_cancelled, "No") = "No" 
+		order by posting_date""", (company, ))
+	return res
 
 @webnotes.whitelist()
 def get_companies():
