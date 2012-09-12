@@ -7,7 +7,9 @@ wn.doclistviews['Purchase Order'] = wn.views.ListView.extend({
 			"ifnull(`tabPurchase Order`.per_received,0) as per_received",
 			"ifnull(`tabPurchase Order`.per_billed,0) as per_billed",
 			"`tabPurchase Order`.currency", 
-			"ifnull(`tabPurchase Order`.grand_total_import,0) as grand_total_import"
+			"ifnull(`tabPurchase Order`.grand_total_import,0) as grand_total_import",
+			"`tabPurchase Order`.transaction_date",
+			
 		]);
 		this.stats = this.stats.concat(['status', 'company']);
 	},
@@ -27,7 +29,9 @@ wn.doclistviews['Purchase Order'] = wn.views.ListView.extend({
 		},
 		{width: '8%', content: 'per_received', type:'bar-graph', label:'Delivered'},
 		{width: '8%', content: 'per_billed', type:'bar-graph', label:'Billed'},
-		{width: '12%', content:'modified', css: {'text-align': 'right', 'color':'#777'}}
+		{width: '12%', content:'transaction_date',
+			css: {'text-align': 'right', 'color':'#777'},
+			title: "Purchase Order Date", type: "date"}
 	]
 
 });

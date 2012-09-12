@@ -78,35 +78,32 @@ cur_frm.cscript.hide_fields = function(doc, cdt, cdn) {
 	'source', 'cancel_reason', 'total_advance', 'gross_profit',
 	'gross_profit_percent', 'get_advances_received',
 	'advance_adjustment_details', 'sales_partner', 'commission_rate',
-	'total_commission'];
+	'total_commission', 'advances'];
 	
 	item_flds_normal = ['sales_order', 'delivery_note']
 	item_flds_pos = ['warehouse', 'serial_no', 'batch_no', 'actual_qty', 'delivered_qty']
 	
 	if(cint(doc.is_pos) == 1) {
 		hide_field(par_flds);
-		$(cur_frm.fields_dict.payments_section.row.wrapper).toggle(true);
-		$(cur_frm.fields_dict.advances.row.wrapper).toggle(false);
+		unhide_field('payments_section');
 		for(f in item_flds_normal) cur_frm.fields_dict['entries'].grid.set_column_disp(item_flds_normal[f], false);
 		for(f in item_flds_pos) cur_frm.fields_dict['entries'].grid.set_column_disp(item_flds_pos[f], (doc.update_stock==1?true:false));
 	} else {
+		hide_field('payments_section');
 		unhide_field(par_flds);
-		$(cur_frm.fields_dict.payments_section.row.wrapper).toggle(false);
-		$(cur_frm.fields_dict.advances.row.wrapper).toggle(true);
 		for(f in item_flds_normal) cur_frm.fields_dict['entries'].grid.set_column_disp(item_flds_normal[f], true);
 		for(f in item_flds_pos) cur_frm.fields_dict['entries'].grid.set_column_disp(item_flds_pos[f], false);
 	}
-	if (doc.docstatus==1) $(cur_frm.fields_dict.recurring_invoice.row.wrapper).toggle(true);
-	else $(cur_frm.fields_dict.recurring_invoice.row.wrapper).toggle(false);
+	if (doc.docstatus==1) unhide_field('recurring_invoice');
+	else hide_field('recurring_invoice');
 
-	if(doc.customer) $(cur_frm.fields_dict.contact_section.row.wrapper).toggle(true);
-	else $(cur_frm.fields_dict.contact_section.row.wrapper).toggle(false);
+	if(doc.customer) unhide_field('contact_section');
+	else hide_field('contact_section');
 
 	// India related fields
 	var cp = wn.control_panel;
 	if (cp.country == 'India') unhide_field(['c_form_applicable', 'c_form_no']);
 	else hide_field(['c_form_applicable', 'c_form_no']);
-
 }
 
 
@@ -114,7 +111,6 @@ cur_frm.cscript.hide_fields = function(doc, cdt, cdn) {
 // -------
 cur_frm.cscript.refresh = function(doc, dt, dn) {
 	cur_frm.cscript.is_opening(doc, dt, dn);
-	cur_frm.cscript.hide_fields(doc, dt, dn);
 	erpnext.hide_naming_series();
 
 	// Show / Hide button
@@ -131,6 +127,8 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 		if(doc.outstanding_amount!=0)
 			cur_frm.add_custom_button('Make Payment Entry', cur_frm.cscript.make_bank_voucher);
 	}
+	cur_frm.cscript.hide_fields(doc, dt, dn);
+	
 }
 
 //fetch retail transaction related fields
@@ -191,7 +189,7 @@ cur_frm.cscript.customer = function(doc,dt,dn,onload) {
 	var args = onload ? 'onload':''
 	if(doc.customer) $c_obj(make_doclist(doc.doctype, doc.name), 'get_default_customer_address', args, callback);
 
-	if(doc.customer) unhide_field(['customer_address','contact_person', 'territory','customer_group']);
+	if(doc.customer) unhide_field('contact_section');
 	
 }
 
@@ -231,7 +229,7 @@ cur_frm.cscript.debit_to = function(doc,dt,dn) {
 	var callback = function(r,rt) {
 			var doc = locals[cur_frm.doctype][cur_frm.docname];
 			if(doc.customer) $c_obj(make_doclist(dt,dn), 'get_default_customer_address', '', callback2);
-			if(doc.customer) unhide_field(['customer_address','contact_person','territory','customer_group']);
+			if(doc.customer) unhide_field('contact_section');
 			cur_frm.refresh();
 	}
 

@@ -15,11 +15,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import unicode_literals
-"""
-record of files
-
-naming for same name files: file.gif, file-1.gif, file-2.gif etc
-"""
 
 import webnotes
 import website.utils
@@ -84,4 +79,4 @@ class DocType(website.web_page.Page):
 		
 		self.doc.comment_list = comment_list or []
 		for comment in self.doc.comment_list:
-			comment['comment_date'] = webnotes.utils.pretty_date(comment['creation'])
+			comment['comment_date'] = webnotes.utils.global_date_format(comment['creation'])

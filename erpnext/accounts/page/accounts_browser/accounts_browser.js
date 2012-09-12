@@ -22,7 +22,12 @@
 
 pscript['onload_Accounts Browser'] = function(wrapper){
 	wrapper.appframe = new wn.ui.AppFrame($(wrapper).find('.appframe-area'));
-	wrapper.appframe.add_button('New Company', function() { newdoc('Company'); }, 'icon-plus');
+	
+	if (wn.boot.profile.can_create.indexOf("Company") !== -1) {
+		wrapper.appframe.add_button('New Company', function() { newdoc('Company'); },
+			'icon-plus');
+	}
+	
 	wrapper.appframe.add_button('Refresh', function() {  	
 			wrapper.$company_select.change();
 		}, 'icon-refresh');
@@ -35,17 +40,6 @@ pscript['onload_Accounts Browser'] = function(wrapper){
 		})
 		.appendTo(wrapper.appframe.$w.find('.appframe-toolbar'));
 		
-	// default company
-	if(sys_defaults.company) {
-		$('<option>')
-			.html(sys_defaults.company)
-			.attr('value', sys_defaults.company)
-			.appendTo(wrapper.$company_select);
-
-		wrapper.$company_select
-			.val(sys_defaults.company).change();
-	}
-
 	// load up companies
 	wn.call({
 		method:'accounts.page.accounts_browser.accounts_browser.get_companies',
@@ -54,7 +48,7 @@ pscript['onload_Accounts Browser'] = function(wrapper){
 			$.each(r.message, function(i, v) {
 				$('<option>').html(v).attr('value', v).appendTo(wrapper.$company_select);
 			});
-			wrapper.$company_select.val(sys_defaults.company || r[0]);
+			wrapper.$company_select.val(sys_defaults.company || r[0]).change();
 		}
 	});
 }
@@ -120,15 +114,23 @@ erpnext.AccountsChart = Class.extend({
 		if(!data) return;
 
 		link.toolbar = $('<span class="tree-node-toolbar"></span>').insertAfter(link);
+		
+		var node_links = [];
 		// edit
-		$('<a href="#!Form/'+encodeURIComponent(this.ctype)+'/'
-			+encodeURIComponent(data.value)+'">Edit</a>').appendTo(link.toolbar);
-
-		if(data.expandable) {
-			link.toolbar.append(' | <a onclick="erpnext.account_chart.new_node();">Add Child</a>');
-		} else if(this.ctype=='Account') {
-			link.toolbar.append(' | <a onclick="erpnext.account_chart.show_ledger();">View Ledger</a>');
+		if (wn.boot.profile.can_read.indexOf(this.ctype) !== -1) {
+			node_links.push('<a href="#!Form/'+encodeURIComponent(this.ctype)+'/'
+				+encodeURIComponent(data.value)+'">Edit</a>');
 		}
+		if (data.expandable) {
+			if (wn.boot.profile.can_create.indexOf(this.ctype) !== -1 ||
+					wn.boot.profile.in_create.indexOf(this.ctype) !== -1) {
+				node_links.push('<a onclick="erpnext.account_chart.new_node();">Add Child</a>');
+			}
+		} else if (this.ctype === 'Account' && wn.boot.profile.can_read.indexOf("GL Entry") !== -1) {
+			node_links.push('<a onclick="erpnext.account_chart.show_ledger();">View Ledger</a>');
+		}
+		
+		link.toolbar.append(node_links.join(" | "));
 	},
 	show_ledger: function() {
 		var me = this;

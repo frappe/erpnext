@@ -64,7 +64,7 @@ cur_frm.cscript.render_communication_list = function(doc, dt, dn) {
 		ListView, function(doctype) {
 			var new_doc = LocalDB.create(doctype);
 			new_doc = locals[doctype][new_doc];
-			new_doc[doc.doctype.toLowerCase()] = doc.name;
+			new_doc[doc.doctype.toLowerCase().replace(" ", "_")] = doc.name;
 			loaddoc(new_doc.doctype, new_doc.name);
 		});
 }
@@ -79,7 +79,7 @@ cur_frm.cscript.render_list = function(doc, doctype, wrapper, ListView, make_new
 		var RecordListView = wn.views.RecordListView.extend({
 			default_docstatus: ['0', '1', '2'],
 			default_filters: [
-				[doctype, doc.doctype.toLowerCase(), '=', doc.name],
+				[doctype, doc.doctype.toLowerCase().replace(" ", "_"), '=', doc.name],
 			],
 		});
 		
@@ -90,6 +90,9 @@ cur_frm.cscript.render_list = function(doc, doctype, wrapper, ListView, make_new
 		}
 		
 		var record_list_view = new RecordListView(doctype, wrapper, ListView);
+		if (!cur_frm[doctype.toLowerCase().replace(" ", "_") + "_list"]) {
+			cur_frm[doctype.toLowerCase().replace(" ", "_") + "_list"] = record_list_view;
+		}
 	});
 }
 
@@ -110,4 +113,9 @@ cur_frm.cscript.contact = function(doc, dt, dn) {
 			},
 		});
 	}
+}
+
+cur_frm.cscript.hide_dialog = function() {
+	if(cur_frm.communication_list)
+		cur_frm.communication_list.run();
 }

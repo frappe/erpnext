@@ -7,7 +7,8 @@ wn.doclistviews['Quotation'] = wn.views.ListView.extend({
 			"`tabQuotation`.lead_name",
 			"`tabQuotation`.customer_name",
 			"`tabQuotation`.currency", 
-			"ifnull(`tabQuotation`.grand_total_export,0) as grand_total_export"
+			"ifnull(`tabQuotation`.grand_total_export,0) as grand_total_export",
+			"`tabQuotation`.transaction_date",
 		]);
 		this.stats = this.stats.concat(['status', 'quotation_to', 'company']);
 	},
@@ -34,7 +35,9 @@ wn.doclistviews['Quotation'] = wn.views.ListView.extend({
 			},
 			css: {'text-align':'right'}
 		},
-		{width: '12%', content:'modified', css: {'text-align': 'right', 'color':'#777'}}
+		{width: '12%', content:'transaction_date',
+			css: {'text-align': 'right', 'color':'#777'},
+			title: "Quotation Date", type: "date"}
 	]
 
 });

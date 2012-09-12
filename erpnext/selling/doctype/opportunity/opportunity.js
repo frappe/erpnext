@@ -18,7 +18,7 @@ wn.require('erpnext/utilities/doctype/sms_control/sms_control.js');
 wn.require('erpnext/support/doctype/communication/communication.js');
 
 cur_frm.cscript.refresh = function(doc, cdt, cdn){
-    erpnext.hide_naming_series();
+	erpnext.hide_naming_series();
 	
 	cur_frm.clear_custom_buttons();
 	if(doc.docstatus == 1) {
@@ -62,7 +62,6 @@ cur_frm.cscript.onload_post_render = function(doc, cdt, cdn) {
 // fetch
 // ===============================================================
 cur_frm.cscript.set_fetch = function() {
-
 	// item
 	cur_frm.add_fetch('item_code', 'item_name', 'item_name');
 	cur_frm.add_fetch('item_code', 'stock_uom', 'uom');
@@ -71,7 +70,6 @@ cur_frm.cscript.set_fetch = function() {
 	cur_frm.add_fetch('item_code', 'brand', 'brand');
 
 	// customer
-
 }
 
 // hide - unhide fields on basis of enquiry_from lead or customer

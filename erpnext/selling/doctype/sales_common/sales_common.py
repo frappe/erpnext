@@ -687,14 +687,14 @@ class StatusUpdater:
 			self.validate_qty({
 				'source_dt'		:'Sales Invoice Item',
 				'compare_field'	:'billed_amt',
-				'compare_ref_field'	:'amount',
+				'compare_ref_field'	:'export_amount',
 				'target_dt'		:'Sales Order Item',
 				'join_field'	:'so_detail'
 			})
 			self.validate_qty({
 				'source_dt'		:'Sales Invoice Item',
 				'compare_field'	:'billed_amt',
-				'compare_ref_field'	:'amount',
+				'compare_ref_field'	:'export_amount',
 				'target_dt'		:'Delivery Note Item',
 				'join_field'	:'dn_detail'
 			}, no_tolerance =1)
@@ -734,7 +734,7 @@ class StatusUpdater:
 		tolerance = self.get_tolerance_for(item['item_code'])
 		overflow_percent = ((item[args['compare_field']] - item[args['compare_ref_field']]) / item[args['compare_ref_field']] * 100)
 	
-		if overflow_percent - tolerance > 0.0001:
+		if overflow_percent - tolerance > 0.01:
 			item['max_allowed'] = flt(item[args['compare_ref_field']] * (100+tolerance)/100)
 			item['reduce_by'] = item[args['compare_field']] - item['max_allowed']
 		
@@ -764,18 +764,19 @@ class StatusUpdater:
 				if item:
 					item = item[0]
 					item['idx'] = d.idx
-					item['compare_ref_field'] = args['compare_ref_field']
+					item['compare_ref_field'] = args['compare_ref_field'].replace('_', ' ')
 
 					if not item[args['compare_ref_field']]:
 						msgprint("As %(compare_ref_field)s for item: %(item_code)s in %(parenttype)s: %(parent)s is zero, system will not check over-delivery or over-billed" % item)
 					elif no_tolerance:
 						item['reduce_by'] = item[args['compare_field']] - item[args['compare_ref_field']]
-						msgprint("""
-							Row #%(idx)s: Max %(compare_ref_field)s allowed for <b>Item %(item_code)s</b> against 
-							<b>%(parenttype)s %(parent)s</b> is <b>""" % item 
-							+ cstr(item[args['compare_ref_field']]) + """</b>. 
+						if item['reduce_by'] > .01:
+							msgprint("""
+								Row #%(idx)s: Max %(compare_ref_field)s allowed for <b>Item %(item_code)s</b> against 
+								<b>%(parenttype)s %(parent)s</b> is <b>""" % item 
+								+ cstr(item[args['compare_ref_field']]) + """</b>. 
 							
-							You must reduce the %(compare_ref_field)s by %(reduce_by)s""" % item, raise_exception=1)
+								You must reduce the %(compare_ref_field)s by %(reduce_by)s""" % item, raise_exception=1)
 					
 					else:
 						self.check_overflow_with_tolerance(item, args)
@@ -806,9 +807,9 @@ class StatusUpdater:
 				'target_dt'				:'Sales Order Item',
 				'target_parent_dt'		:'Sales Order',
 				'target_parent_field'	:'per_billed',
-				'target_ref_field'		:'amount',
+				'target_ref_field'		:'export_amount',
 				'source_dt'				:'Sales Invoice Item',
-				'source_field'			:'amount',
+				'source_field'			:'export_amount',
 				'join_field'			:'so_detail',
 				'percent_join_field'	:'sales_order',
 				'status_field'			:'billing_status',
@@ -820,9 +821,9 @@ class StatusUpdater:
 				'target_dt'				:'Delivery Note Item',
 				'target_parent_dt'		:'Delivery Note',
 				'target_parent_field'	:'per_billed',
-				'target_ref_field'		:'amount',
+				'target_ref_field'		:'export_amount',
 				'source_dt'				:'Sales Invoice Item',
-				'source_field'			:'amount',
+				'source_field'			:'export_amount',
 				'join_field'			:'dn_detail',
 				'percent_join_field'	:'delivery_note',
 				'status_field'			:'billing_status',

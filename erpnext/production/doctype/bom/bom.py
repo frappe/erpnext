@@ -198,6 +198,7 @@ class DocType:
 			hour_rate = sql("select hour_rate from `tabWorkstation` where name = %s", cstr(d.workstation))
 			d.hour_rate = hour_rate and flt(hour_rate[0][0]) or 0
 			d.operating_cost = flt(d.hour_rate) * flt(d.time_in_mins) / 60
+			d.save()
 			total_op_cost += d.operating_cost
 		self.doc.operating_cost = total_op_cost
 
@@ -214,6 +215,7 @@ class DocType:
 				d.fields[k] = ret[k]
 
 			d.amount = flt(d.rate) * flt(d.qty)
+			d.save()
 			total_rm_cost += d.amount
 		self.doc.raw_material_cost = total_rm_cost
 

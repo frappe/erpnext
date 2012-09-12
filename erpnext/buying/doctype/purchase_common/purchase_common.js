@@ -29,10 +29,26 @@ cur_frm.cscript.get_default_schedule_date = function(doc) {
 		}
 }
 
+cur_frm.cscript.load_taxes = function(doc, cdt, cdn, callback) {
+	// run if this is not executed from dt_map...
+	doc = locals[doc.doctype][doc.name];
+	if(doc.supplier || getchildren('Purchase Taxes and Charges', doc.name, 'purchase_tax_details', doc.doctype).length) {
+		if(callback) {
+			callback(doc, cdt, cdn);
+		}
+	} else {
+		$c_obj(make_doclist(doc.doctype, doc.name),'load_default_taxes','',function(r,rt){
+			refresh_field('purchase_tax_details');
+			if(callback) callback(doc, cdt, cdn);
+		});
+	}
+}
+
+
 
 // Gets called after existing item details are update to fill in
 // remaining default values
-cur_frm.cscript.load_defaults = function(doc, dt, dn) {
+cur_frm.cscript.load_defaults = function(doc, dt, dn, callback) {
 	if(!cur_frm.doc.__islocal) { return; }
 
 	doc = locals[doc.doctype][doc.name];
@@ -46,6 +62,7 @@ cur_frm.cscript.load_defaults = function(doc, dt, dn) {
 		LocalDB.set_default_values(children[i]);
 	}
 	refresh_field(cur_frm.cscript.fname);
+	cur_frm.cscript.load_taxes(doc, dt, dn, callback);
 }
 
 // Update existing item details
@@ -58,10 +75,11 @@ cur_frm.cscript.update_item_details = function(doc, dt, dn, callback) {
 			if(!r.exc) {
 				refresh_field(cur_frm.cscript.fname);
 				doc = locals[doc.doctype][doc.name];
-				cur_frm.cscript.load_defaults(doc, dt, dn);
-				if(callback) callback(doc, dt, dn);
+				cur_frm.cscript.load_defaults(doc, dt, dn, callback);
 			}
 		});
+	} else {
+		cur_frm.cscript.load_taxes(doc, dt, dn, callback);
 	}
 }
 

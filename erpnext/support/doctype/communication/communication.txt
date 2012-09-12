@@ -5,7 +5,7 @@
 	{
 		'creation': '2012-06-26 11:58:13',
 		'docstatus': 0,
-		'modified': '2012-08-03 16:10:35',
+		'modified': '2012-08-31 16:44:13',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -16,6 +16,7 @@
 		'description': u'Keep a track of all communications',
 		'doctype': 'DocType',
 		'document_type': u'Master',
+		'in_dialog': 1,
 		'module': u'Support',
 		'name': '__common__',
 		'version': 1
@@ -150,6 +151,15 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'next_communication_date',
+		'fieldtype': u'Date',
+		'label': u'Next Communcation On',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
 		'fieldname': u'column_break2',
 		'fieldtype': u'Column Break',
 		'permlevel': 0
@@ -178,7 +188,7 @@
 	{
 		'doctype': u'DocField',
 		'fieldname': u'content',
-		'fieldtype': u'Text Editor',
+		'fieldtype': u'Text',
 		'label': u'Content',
 		'permlevel': 0,
 		'reqd': 0

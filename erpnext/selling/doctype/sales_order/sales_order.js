@@ -54,8 +54,6 @@ cur_frm.cscript.onload_post_render = function(doc, cdt, cdn) {
 }
 
 
-// Refresh
-//==================
 cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	cur_frm.clear_custom_buttons();
 	erpnext.hide_naming_series();
@@ -69,17 +67,17 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 		if(doc.status != 'Stopped') {
 			cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms);
 			// delivery note
-			if(doc.per_delivered < 100 && doc.order_type!='Maintenance')
+			if(doc.per_delivered < 100 && doc.order_type=='Sales')
 				cur_frm.add_custom_button('Make Delivery', cur_frm.cscript['Make Delivery Note']);
 			
 			// maintenance
-			if(doc.per_delivered < 100 && doc.order_type=='Maintenance') {
+			if(doc.per_delivered < 100 && (doc.order_type !='Sales')) {
 				cur_frm.add_custom_button('Make Maint. Visit', cur_frm.cscript.make_maintenance_visit);
 				cur_frm.add_custom_button('Make Maint. Schedule', cur_frm.cscript['Make Maintenance Schedule']);
 			}
 
 			// indent
-			if(doc.order_type != 'Maintenance')
+			if(!doc.order_type || (doc.order_type == 'Sales'))
 				cur_frm.add_custom_button('Make ' + get_doctype_label('Purchase Request'), cur_frm.cscript['Make Purchase Request']);
 			
 			// sales invoice

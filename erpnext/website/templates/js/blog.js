@@ -24,7 +24,7 @@ wn.pages['{{ name }}'].onload = function(wrapper) {
 		render_row: function(parent, data) {
 			if(!data.comments) {
 				data.comment_text = 'No comments yet.'
-			} else if (data.comments=1) {
+			} else if (data.comments===1) {
 				data.comment_text = '1 comment.'
 			} else {
 				data.comment_text = data.comments + ' comments.'
