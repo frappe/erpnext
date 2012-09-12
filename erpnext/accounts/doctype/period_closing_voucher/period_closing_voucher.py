@@ -68,7 +68,7 @@ class DocType:
 		self.year_end_date = yr and yr[0][1] or ''
 		
 		# Posting Date should be within closing year
-		if getdate(self.doc.posting_date) < self.year_start_date or getdate(self.doc.posting_date) > self.year_end_date:
+		if getdate(self.doc.posting_date) < getdate(self.year_start_date) or getdate(self.doc.posting_date) > getdate(self.year_end_date):
 			msgprint("Posting Date should be within Closing Fiscal Year")
 			raise Exception
 
