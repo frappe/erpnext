@@ -79,6 +79,10 @@ class DocType:
 			elif par and not self.doc.is_pl_account:
 				self.doc.is_pl_account = par[0][2]
 				self.doc.debit_or_credit = par[0][3]
+		elif self.doc.account_name not in ['Income','Source of Funds (Liabilities)',\
+		 	'Expenses','Application of Funds (Assets)']:
+			msgprint("Parent Account is mandatory", raise_exception=1)
+
 	
 	# Account name must be unique
 	# ==================================================================
