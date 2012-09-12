@@ -183,7 +183,7 @@ return cookies[c];}
 wn.dom.set_box_shadow=function(ele,spread){$(ele).css('-moz-box-shadow','0px 0px '+spread+'px rgba(0,0,0,0.3);')
 $(ele).css('-webkit-box-shadow','0px 0px '+spread+'px rgba(0,0,0,0.3);')
 $(ele).css('-box-shadow','0px 0px '+spread+'px rgba(0,0,0,0.3);')};(function($){$.fn.add_options=function(options_list){for(var i=0;i<options_list.length;i++){var v=options_list[i];value=v.value||v;label=v.label||v;$('<option>').html(label).attr('value',value).appendTo(this);}
-$(this).val(options_list[0].value||options_list[0]);}
+return $(this).val(options_list[0].value||options_list[0]);}
 $.fn.set_working=function(){var ele=this.get(0);$(ele).attr('disabled','disabled');if(ele.loading_img){$(ele.loading_img).toggle(true);}else{ele.loading_img=$('<img src="images/lib/ui/button-load.gif" \
     style="margin-left: 4px; margin-bottom: -2px; display: inline;" />').insertAfter(ele);}}
 $.fn.done_working=function(){var ele=this.get(0);$(ele).attr('disabled',null);if(ele.loading_img){$(ele.loading_img).toggle(false);};}})(jQuery);
@@ -854,10 +854,10 @@ wn.ui.AppFrame=Class.extend({init:function(parent,title){this.buttons={};this.$w
    <span class="appframe-title"></span>\
    <span class="close">&times;</span>\
   </div>').appendTo(this.$w);this.$w.find('.close').click(function(){window.history.back();})
-if(title)this.title(title);},title:function(txt){this.$titlebar.find('.appframe-title').html(txt);},add_button:function(label,click,icon){if(!this.$w.find('.appframe-toolbar').length)
-this.$w.append('<div class="appframe-toolbar"></div>');args={label:label,icon:''};if(icon){args.icon='<i class="'+icon+'"></i>';}
+if(title)this.title(title);},title:function(txt){this.$titlebar.find('.appframe-title').html(txt);},add_button:function(label,click,icon){this.add_toolbar();args={label:label,icon:''};if(icon){args.icon='<i class="'+icon+'"></i>';}
 this.buttons[label]=$(repl('<button class="btn btn-small">\
-   %(icon)s %(label)s</button>',args)).click(click).appendTo(this.$w.find('.appframe-toolbar'));return this.buttons[label];},clear_buttons:function(){this.$w.find('.appframe-toolbar').empty();}});wn.ui.make_app_page=function(opts){if(opts.single_column){$(opts.parent).html('<div class="layout-wrapper layout-wrapper-appframe">\
+   %(icon)s %(label)s</button>',args)).click(click).appendTo(this.toolbar);return this.buttons[label];},clear_buttons:function(){this.toolbar.empty();},add_toolbar:function(){if(!this.toolbar)
+this.$w.append('<div class="appframe-toolbar"></div>');this.toolbar=this.$w.find('.appframe-toolbar');},add_select:function(label,options){this.add_toolbar();return $("<select style='width: 160px;'>").add_options(options).appendTo(this.add_label(label));},add_label:function(label){return $("<span style='margin-right: 12px;'>"+label+" </span>").appendTo(this.toolbar);},add_date:function(label,date){this.add_toolbar();return $("<input style='width: 80px;'>").datepicker({dateFormat:sys_defaults.date_format.replace("yyyy","yy"),}).val(dateutil.str_to_user(date)||"").appendTo(this.add_label(label));},});wn.ui.make_app_page=function(opts){if(opts.single_column){$(opts.parent).html('<div class="layout-wrapper layout-wrapper-appframe">\
    <div class="layout-appframe"></div>\
    <div class="layout-main"></div>\
   </div>');}else{$(opts.parent).html('<div class="layout-wrapper layout-wrapper-background">\

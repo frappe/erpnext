@@ -1,0 +1,28 @@
+# Page, chart-of-accounts
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2012-09-12 14:43:52',
+		'docstatus': 0,
+		'modified': '2012-09-12 14:43:53',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
+	},
+
+	# These values are common for all Page
+	{
+		'doctype': 'Page',
+		'module': u'Accounts',
+		'name': '__common__',
+		'page_name': u'Chart of Accounts',
+		'standard': u'Yes',
+		'title': u'Chart of Accounts'
+	},
+
+	# Page, chart-of-accounts
+	{
+		'doctype': 'Page',
+		'name': u'chart-of-accounts'
+	}
+]
