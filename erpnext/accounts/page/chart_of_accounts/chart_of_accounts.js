@@ -41,7 +41,8 @@ wn.pages['chart-of-accounts'].onload = function(wrapper) {
 		page: "chart_of_accounts",
 		method: "get_companies",
 		callback: function(r) {
-			erpnext.coa.company_select.empty().add_options(r.message).change();
+			erpnext.coa.company_select.empty().add_options(r.message.companies).change();
+			erpnext.coa.fiscal_years = r.message.fiscal_years;
 		}
 	});
 	
@@ -100,6 +101,7 @@ erpnext.coa = {
 					"credit": 0,
 					"closing": 0,
 					"debit_or_credit": v[2],
+					"is_pl": v[3]
 				};
 
 				data.push(d);
@@ -118,18 +120,27 @@ erpnext.coa = {
 		var gl = erpnext.coa.gl;
 		var opening_date = dateutil.user_to_obj(erpnext.coa.opening_date.val());
 		var closing_date = dateutil.user_to_obj(erpnext.coa.closing_date.val());
+		var fiscal_year = erpnext.coa.get_fiscal_year(opening_date, closing_date);
+		if (!fiscal_year) return;
+		
 		$.each(erpnext.coa.data, function(i, v) {
 			v.opening = v.debit = v.credit = v.closing = 0;
 		});
+		
 		$.each(gl, function(i, v) {
 			var posting_date = dateutil.str_to_obj(v[0]);
 			var account = erpnext.coa.data_by_name[v[1]];
 			// opening
-			if (posting_date < opening_date) {
-				if (account.debit_or_credit === "Debit") {
-					account.opening += (v[2] - v[3]);
+			if (posting_date < opening_date || v[4] === "Yes") {
+				if (account.is_pl === "Yes" && posting_date <= dateutil.str_to_obj(fiscal_year[1])) {
+					// balance of previous fiscal_year should 
+					//	not be part of opening of pl account balance
 				} else {
-					account.opening += (v[3] - v[2]);
+					if (account.debit_or_credit === "Debit") {
+						account.opening += (v[2] - v[3]);
+					} else {
+						account.opening += (v[3] - v[2]);
+					}
 				}
 			} else if (opening_date <= posting_date && posting_date <= closing_date) {
 				// in between
@@ -151,6 +162,26 @@ erpnext.coa = {
 			v.credit = fmt_money(v.credit);
 			v.closing = fmt_money(v.closing);
 		});
+	},
+	get_fiscal_year: function(opening_date, closing_date) {
+		if (opening_date > closing_date) {
+			msgprint("Opening Date should be before Closing Date");
+			return;
+		}
+		
+		var fiscal_year = null;
+		$.each(erpnext.coa.fiscal_years, function(i, v) {
+			if (opening_date >= dateutil.str_to_obj(v[1]) && 
+				closing_date <= dateutil.str_to_obj(v[2])) {
+					fiscal_year = v;
+				}
+		});
+		
+		if (!fiscal_year) {
+			msgprint("Opening Date and Closing Date should be within same Fiscal Year");
+			return;
+		}
+		return fiscal_year;
 	},
 	set_indent: function(data, parent_map) {
 		$.each(data, function(i, d) {

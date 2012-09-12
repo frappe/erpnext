@@ -4,9 +4,10 @@ import webnotes
 def get_chart():
 	company = webnotes.form_dict.get('company')
 	res = {}
-	res["chart"] = webnotes.conn.sql("""select name, parent_account, debit_or_credit from 
+	res["chart"] = webnotes.conn.sql("""select name, parent_account, debit_or_credit, is_pl_account from 
 		tabAccount where company=%s and docstatus < 2 order by lft""", (company, ))
-	res["gl"] = webnotes.conn.sql("""select posting_date, account, ifnull(debit, 0), ifnull(credit, 0)
+	res["gl"] = webnotes.conn.sql("""select posting_date, account, ifnull(debit, 0), 
+		ifnull(credit, 0), ifnull(is_opening, 'No')
 		from `tabGL Entry` where company=%s and ifnull(is_cancelled, "No") = "No" 
 		order by posting_date""", (company, ))
 	return res
@@ -23,8 +24,14 @@ def get_companies():
 		if r["role"] in webnotes.user.roles and r["match"]=="company"))
 	
 	# if match == company is specified and companies are specified in user defaults
+	res = {}
 	if match and webnotes.user.get_defaults().get("company"):
-		return webnotes.user.get_defaults().get("company")
+		res["companies"] = webnotes.user.get_defaults().get("company")
 	else:
-		return [r[0] for r in webnotes.conn.sql("""select name from tabCompany
+		res["companies"] = [r[0] for r in webnotes.conn.sql("""select name from tabCompany
 			where docstatus!=2""")]
+	res["fiscal_years"] = webnotes.conn.sql("""select name, year_start_date, 
+		adddate(year_start_date, interval 1 year)
+		from `tabFiscal Year` where docstatus!=2 
+		order by year_start_date asc""")
+	return res
