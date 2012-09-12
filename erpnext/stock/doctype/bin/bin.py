@@ -333,7 +333,7 @@ class DocType:
 
 		if get_value('Global Defaults', None, 'auto_indent'):
 			#check if re-order is required
-			ret = sql("select re_order_level, item_name, description, brand, item_group, lead_time_days, min_order_qty, email_notify, re_order_qty from tabItem where item_code = %s", (self.doc.item_code), as_dict=1)
+			ret = sql("select re_order_level, item_name, description, brand, item_group, lead_time_days, min_order_qty, email_notify, re_order_qty from tabItem where name = %s", (self.doc.item_code), as_dict=1)
 			
 			current_qty = sql("""
 				select sum(t1.actual_qty) + sum(t1.indented_qty) + sum(t1.ordered_qty) -sum(t1.reserved_qty)
@@ -344,7 +344,8 @@ class DocType:
 				and t1.docstatus != 2
 			""", self.doc.item_code)
 
-			if ((flt(ret[0]['re_order_level']) > flt(current_qty[0][0])) and ret[0]['re_order_level']):
+			if ret[0]["re_order_level"] and current_qty and \
+					(flt(ret[0]['re_order_level']) > flt(current_qty[0][0])):
 				self.create_auto_indent(ret[0], doc_type, doc_name, current_qty[0][0])
 
 	
