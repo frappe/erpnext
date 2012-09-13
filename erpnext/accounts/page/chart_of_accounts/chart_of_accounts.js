@@ -27,43 +27,65 @@ wn.pages['chart-of-accounts'].onload = function(wrapper) {
 		title: 'Chart of Accounts',
 		single_column: true
 	});
-	erpnext.coa.company_select = wrapper.appframe.add_select("Company", ["Loading..."]);
-	erpnext.coa.opening_date = wrapper.appframe.add_date("Opening Date")
-		.val(dateutil.str_to_user(sys_defaults.year_start_date));
-	erpnext.coa.closing_date = wrapper.appframe.add_date("Closing Date")
-		.val(dateutil.obj_to_user(new Date()));
 	
-	erpnext.coa.waiting = $('<div class="well" style="width: 63%; margin: 30px auto;">\
-		<p style="text-align: center;">Building Trial Balance Report. \
-			Please wait for a few moments</p>\
-		<div class="progress progress-striped active">\
-			<div class="bar" style="width: 100%"></div></div>')
-		.appendTo($(wrapper).find('.layout-main'));
-	
-	$('<div id="chart-of-accounts" style="height: 500px; border: 1px solid #aaa;">\
-		</div>').appendTo($(wrapper).find('.layout-main'));
-	
-	wn.call({
-		module: "accounts",
-		page: "chart_of_accounts",
-		method: "get_companies",
-		callback: function(r) {
-			erpnext.coa.waiting.toggle();
-			erpnext.coa.company_select.empty().add_options(r.message.companies).change();
-			erpnext.coa.fiscal_years = r.message.fiscal_years;
-		}
-	});
-	
-	erpnext.coa.company_select.change(function() {
-		erpnext.coa.load_slickgrid();
-		erpnext.coa.load_data($(this).val());
-	});
-	
-	erpnext.coa.opening_date.change(erpnext.coa.refresh);
-	erpnext.coa.closing_date.change(erpnext.coa.refresh);
+	erpnext.coa.make_page(wrapper);
+	erpnext.coa.load_companies();
 }
-
 erpnext.coa = {
+	make_page: function(wrapper) {
+		erpnext.coa.company_select = wrapper.appframe
+			.add_select("Company", ["Loading..."])
+			.change(function() {
+				erpnext.coa.chart = new erpnext.ChartOfAccounts();
+			});
+
+		erpnext.coa.opening_date = wrapper.appframe.add_date("Opening Date")
+			.val(dateutil.str_to_user(sys_defaults.year_start_date));
+
+		var end_date = new Date();
+		if(end_date > dateutil.str_to_obj(sys_defaults.year_end_date)) 
+			end_date = sys_defaults.year_end_date;
+			
+		erpnext.coa.closing_date = wrapper.appframe.add_date("Closing Date")
+			.val(dateutil.obj_to_user(end_date));
+
+		erpnext.coa.refresh_btn = wrapper.appframe.add_button("Refresh", function() {
+			erpnext.coa.chart = new erpnext.ChartOfAccounts();
+		}, "icon-refresh");
+
+
+
+		erpnext.coa.waiting = $('<div class="well" style="width: 63%; margin: 30px auto;">\
+			<p style="text-align: center;">Building Trial Balance Report. \
+				Please wait for a few moments</p>\
+			<div class="progress progress-striped active">\
+				<div class="bar" style="width: 100%"></div></div>')
+			.appendTo($(wrapper).find('.layout-main'));
+
+		$('<div id="chart-of-accounts" style="height: 500px; border: 1px solid #aaa;">\
+			</div>').appendTo($(wrapper).find('.layout-main'));	
+			
+	},
+	load_companies: function() {
+		wn.call({
+			module: "accounts",
+			page: "chart_of_accounts",
+			method: "get_companies",
+			callback: function(r) {
+				erpnext.coa.waiting.toggle();
+				erpnext.coa.company_select.empty().add_options(r.message.companies)
+					.val(sys_defaults.company || r.message.companies[0]).change();
+				erpnext.coa.fiscal_years = r.message.fiscal_years;
+			}
+		});		
+	}
+};
+
+erpnext.ChartOfAccounts = Class.extend({
+	init: function() {
+		this.load_slickgrid();
+		this.load_data($(erpnext.coa.company_select).val());
+	},
 	load_slickgrid: function() {
 		// load tree
 		wn.require('js/lib/jquery/jquery.ui.sortable');
@@ -77,20 +99,20 @@ erpnext.coa = {
 		wn.dom.set_style('.slick-cell { font-size: 12px; }');		
 	},
 	refresh: function() {
-		erpnext.coa.prepare_balances();
-		erpnext.coa.render();
+		this.prepare_balances();
+		this.render();
 	},
 	load_data: function(company) {
+		var me = this;
 		wn.call({
 			module: "accounts",
 			page: "chart_of_accounts",
 			method: "get_chart",
 			args: {company: company},
 			callback: function(r) {
-				erpnext.coa.gl = r.message.gl;
-				erpnext.coa.prepare_chart(r.message.chart);
-				erpnext.coa.prepare_balances();
-				erpnext.coa.render();
+				me.gl = r.message.gl;
+				me.prepare_chart(r.message.chart);
+				me.refresh();
 			}
 		})
 	},
@@ -104,92 +126,125 @@ erpnext.coa = {
 					"id": v[0],
 					"name": v[0],
 					"parent": v[1],
-					"opening": 0,
+					"debit_or_credit": v[2],
+					"opening_debit": 0,
+					"opening_credit": 0,
 					"debit": 0,
 					"credit": 0,
-					"closing": 0,
-					"debit_or_credit": v[2],
+					"closing_debit": 0,
+					"closing_credit": 0,
 					"is_pl": v[3]
 				};
-
+				
 				data.push(d);
 				data_by_name[d.name] = d;
 				if(d.parent) {
 					parent_map[d.name] = d.parent;
-				}		
+				}
 			}
 		});
-		erpnext.coa.set_indent(data, parent_map);
-		erpnext.coa.data = data;
-		erpnext.coa.parent_map = parent_map;
-		erpnext.coa.data_by_name = data_by_name;
+		this.set_indent(data, parent_map);
+		this.data = data;
+		this.parent_map = parent_map;
+		this.data_by_name = data_by_name;
 	},
 	prepare_balances: function() {
-		var gl = erpnext.coa.gl;
-		var opening_date = dateutil.user_to_obj(erpnext.coa.opening_date.val());
-		var closing_date = dateutil.user_to_obj(erpnext.coa.closing_date.val());
-		var fiscal_year = erpnext.coa.get_fiscal_year(opening_date, closing_date);
-		if (!fiscal_year) return;
+		var gl = this.gl;
+		var me = this;
 		
-		$.each(erpnext.coa.data, function(i, v) {
-			v.opening = v.debit = v.credit = v.closing = 0;
+		this.opening_date = dateutil.user_to_obj(erpnext.coa.opening_date.val());
+		this.closing_date = dateutil.user_to_obj(erpnext.coa.closing_date.val());
+		this.set_fiscal_year();
+		if (!this.fiscal_year) return;
+		
+		$.each(this.data, function(i, v) {
+			v.opening_debit = v.opening_credit = v.debit 
+				= v.credit = v.closing_debit = v.closing_credit = 0;
 		});
 		
 		$.each(gl, function(i, v) {
+			v[1] = me.data[v[1]].name;
 			var posting_date = dateutil.str_to_obj(v[0]);
-			var account = erpnext.coa.data_by_name[v[1]];
-			// opening
-			if (posting_date < opening_date || v[4] === "Yes") {
-				if (account.is_pl === "Yes" && posting_date <= dateutil.str_to_obj(fiscal_year[1])) {
-					// balance of previous fiscal_year should 
-					//	not be part of opening of pl account balance
-				} else {
-					if (account.debit_or_credit === "Debit") {
-						account.opening += (v[2] - v[3]);
-					} else {
-						account.opening += (v[3] - v[2]);
-					}
-				}
-			} else if (opening_date <= posting_date && posting_date <= closing_date) {
-				// in between
-				account.debit += v[2];
-				account.credit += v[3];
-			}
-			// closing
-			if (account.debit_or_credit === "Debit") {
-				account.closing = account.opening + account.debit - account.credit;
-			} else {
-				account.closing = account.opening + account.credit - account.debit;
-			}
+			var account = me.data_by_name[v[1]];
+			me.update_balances(account, posting_date, v)
 		});
 		
+		this.update_groups();
+		this.format_balances();
+	},
+	update_balances: function(account, posting_date, v) {
+		// opening
+		if (posting_date < this.opening_date || v[4] === "Y") {
+			if (account.is_pl === "Yes" && posting_date <= dateutil.str_to_obj(this.fiscal_year[1])) {
+				// balance of previous fiscal_year should 
+				//	not be part of opening of pl account balance
+			} else {
+				if(account.debit_or_credit=='D') {
+					account.opening_debit += (v[2] - v[3]);
+				} else {
+					account.opening_credit += (v[3] - v[2]);
+				}
+			}
+		} else if (this.opening_date <= posting_date && posting_date <= this.closing_date) {
+			// in between
+			account.debit += v[2];
+			account.credit += v[3];
+		}
+		// closing
+		if(account.debit_or_credit=='D') {
+			account.closing_debit = account.opening_debit + account.debit - account.credit;
+		} else {
+			account.closing_credit = account.opening_credit - account.debit + account.credit;
+		}
+	},
+	update_groups: function() {
+		// update groups
+		var me= this;
+		$.each(this.data, function(i, account) {
+			// update groups
+			var parent = me.parent_map[account.name];
+			while(parent) {
+				parent_account = me.data_by_name[parent];
+				parent_account.opening_debit += account.opening_debit;
+				parent_account.opening_credit += account.opening_credit;
+				parent_account.debit += account.debit;
+				parent_account.credit += account.credit;
+				parent_account.closing_debit += account.closing_debit;
+				parent_account.closing_credit += account.closing_credit;
+				parent = me.parent_map[parent];
+			}			
+		});		
+	},
+	format_balances: function() {
 		// format amount
-		$.each(erpnext.coa.data, function(i, v) {
-			v.opening = fmt_money(v.opening);
+		$.each(this.data, function(i, v) {
+			v.opening_debit = fmt_money(v.opening_debit);
+			v.opening_credit = fmt_money(v.opening_credit);
 			v.debit = fmt_money(v.debit);
 			v.credit = fmt_money(v.credit);
-			v.closing = fmt_money(v.closing);
-		});
+			v.closing_debit = fmt_money(v.closing_debit);
+			v.closing_credit = fmt_money(v.closing_credit);
+		});		
 	},
-	get_fiscal_year: function(opening_date, closing_date) {
-		if (opening_date > closing_date) {
+	set_fiscal_year: function() {
+		if (this.opening_date > this.closing_date) {
 			msgprint("Opening Date should be before Closing Date");
 			return;
 		}
-		
-		var fiscal_year = null;
+			
+		this.fiscal_year = null;
+		var me = this;
 		$.each(erpnext.coa.fiscal_years, function(i, v) {
-			if (opening_date >= dateutil.str_to_obj(v[1]) && 
-				closing_date <= dateutil.str_to_obj(v[2])) {
-					fiscal_year = v;
+			if (me.opening_date >= dateutil.str_to_obj(v[1]) && 
+				me.closing_date <= dateutil.str_to_obj(v[2])) {
+					me.fiscal_year = v;
 				}
 		});
 		
-		if (!fiscal_year) {
+		if (!this.fiscal_year) {
 			msgprint("Opening Date and Closing Date should be within same Fiscal Year");
 			return;
 		}
-		return fiscal_year;
 	},
 	set_indent: function(data, parent_map) {
 		$.each(data, function(i, d) {
@@ -205,22 +260,19 @@ erpnext.coa = {
 		});
 	},
 	render: function() {
+		var me = this;
 		erpnext.coa.waiting.toggle(false);
-
-		// initialize the model
-		erpnext.coa.dataView = new Slick.Data.DataView({ inlineFilters: true });
-		erpnext.coa.dataView.beginUpdate();
-		erpnext.coa.dataView.setItems(erpnext.coa.data);
-		erpnext.coa.dataView.setFilter(erpnext.coa.filter)
-		erpnext.coa.dataView.endUpdate();
+		this.setup_dataview();
 
 		var columns = [
-			{id: "name", name: "Account", field: "name", width: 400, cssClass: "cell-title", 
-				formatter: erpnext.coa.account_formatter},
-			{id: "opening", name: "Opening", field: "opening"},
-			{id: "debit", name: "Debit", field: "debit"},
-			{id: "credit", name: "Credit", field: "credit"},
-			{id: "closing", name: "Closing", field: "closing"}			
+			{id: "name", name: "Account", field: "name", width: 300, cssClass: "cell-title", 
+				formatter: this.account_formatter},
+			{id: "opening_debit", name: "Opening (Dr)", field: "opening_debit", width: 100},
+			{id: "opening_credit", name: "Opening (Cr)", field: "opening_credit", width: 100},
+			{id: "debit", name: "Debit", field: "debit", width: 100},
+			{id: "credit", name: "Credit", field: "credit", width: 100},
+			{id: "closing_debit", name: "Closing (Dr)", field: "closing_debit", width: 100},
+			{id: "closing_credit", name: "Closing (Cr)", field: "closing_credit", width: 100}
 		];
 		
 		var options = {
@@ -229,14 +281,36 @@ erpnext.coa = {
 		};
 
 		// initialize the grid
-		var grid = new Slick.Grid("#chart-of-accounts", erpnext.coa.dataView, columns, options);
-		erpnext.coa.add_events(grid);
-		erpnext.coa.grid = grid;
+		var grid = new Slick.Grid("#chart-of-accounts", this.dataView, columns, options);
+		this.add_events(grid);
+		this.grid = grid;
+	},
+	setup_dataview: function() {
+		var me = this;
+		// initialize the model
+		this.dataView = new Slick.Data.DataView({ inlineFilters: true });
+		this.dataView.beginUpdate();
+		this.dataView.setItems(this.data);
+		this.dataView.setFilter(this.dataview_filter);
+		this.dataView.endUpdate();
+	},
+	dataview_filter: function(item) {
+		if (item.parent) {
+			var parent = item.parent;
+			while (parent) {
+				if (erpnext.coa.chart.data_by_name[parent]._collapsed) {
+					return false;
+				}
+				parent = erpnext.coa.chart.parent_map[parent];
+			}
+		}
+		return true;
 	},
 	add_events: function(grid) {
+		var me = this;
 		grid.onClick.subscribe(function (e, args) {
 			if ($(e.target).hasClass("toggle")) {
-				var item = erpnext.coa.dataView.getItem(args.row);
+				var item = me.dataView.getItem(args.row);
 				if (item) {
 					if (!item._collapsed) {
 						item._collapsed = true;
@@ -244,41 +318,29 @@ erpnext.coa = {
 						item._collapsed = false;
 					}
 
-					erpnext.coa.dataView.updateItem(item.id, item);
+					me.dataView.updateItem(item.id, item);
 				}
 				e.stopImmediatePropagation();
 			}
 		});
 
-		erpnext.coa.dataView.onRowsChanged.subscribe(function (e, args) {
+		this.dataView.onRowsChanged.subscribe(function (e, args) {
 			grid.invalidateRows(args.rows);
 			grid.render();
 		});
 		
-		erpnext.coa.dataView.onRowCountChanged.subscribe(function (e, args) {
+		this.dataView.onRowCountChanged.subscribe(function (e, args) {
 			grid.updateRowCount();
 			grid.render();
 		});
 		
 	},
-	filter: function(item) {
-		if (item.parent) {
-			var parent = item.parent;
-			while (parent) {
-				if (erpnext.coa.data_by_name[parent]._collapsed) {
-					return false;
-				}
-				parent = erpnext.coa.parent_map[parent];
-			}
-		}
-		return true;
-	},
 	account_formatter: function (row, cell, value, columnDef, dataContext) {
 		value = value.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
-		var data = erpnext.coa.data;
+		var data = erpnext.coa.chart.data;
 		var spacer = "<span style='display:inline-block;height:1px;width:" + 
 			(15 * dataContext["indent"]) + "px'></span>";
-		var idx = erpnext.coa.dataView.getIdxById(dataContext.id);
+		var idx = erpnext.coa.chart.dataView.getIdxById(dataContext.id);
 		if (data[idx + 1] && data[idx + 1].indent > data[idx].indent) {
 			if (dataContext._collapsed) {
 				return spacer + " <span class='toggle expand'></span>&nbsp;" + value;
@@ -289,4 +351,4 @@ erpnext.coa = {
 			return spacer + " <span class='toggle'></span>&nbsp;" + value;
 		}
 	}
-}
+});

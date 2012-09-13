@@ -4,12 +4,23 @@ import webnotes
 def get_chart():
 	company = webnotes.form_dict.get('company')
 	res = {}
-	res["chart"] = webnotes.conn.sql("""select name, parent_account, debit_or_credit, is_pl_account from 
+	res["chart"] = webnotes.conn.sql("""select name, parent_account, 
+		if(debit_or_credit="Debit", "D", ""), 
+		if(is_pl_account="Yes", "Y", "") from 
 		tabAccount where company=%s and docstatus < 2 order by lft""", (company, ))
+		
 	res["gl"] = webnotes.conn.sql("""select posting_date, account, ifnull(debit, 0), 
 		ifnull(credit, 0), ifnull(is_opening, 'No')
 		from `tabGL Entry` where company=%s and ifnull(is_cancelled, "No") = "No" 
-		order by posting_date""", (company, ))
+		order by posting_date""", (company, ), as_list=1)
+
+	idx_map = {}
+	for i in xrange(len(res["chart"])):
+		idx_map[res["chart"][i][0]] = i
+	
+	for d in res["gl"]:		
+		d[1] = idx_map[d[1]]
+		
 	return res
 
 @webnotes.whitelist()
