@@ -33,6 +33,13 @@ wn.pages['chart-of-accounts'].onload = function(wrapper) {
 	erpnext.coa.closing_date = wrapper.appframe.add_date("Closing Date")
 		.val(dateutil.obj_to_user(new Date()));
 	
+	erpnext.coa.waiting = $('<div class="well" style="width: 63%; margin: 30px auto;">\
+		<p style="text-align: center;">Building Trial Balance Report. \
+			Please wait for a few moments</p>\
+		<div class="progress progress-striped active">\
+			<div class="bar" style="width: 100%"></div></div>')
+		.appendTo($(wrapper).find('.layout-main'));
+	
 	$('<div id="chart-of-accounts" style="height: 500px; border: 1px solid #aaa;">\
 		</div>').appendTo($(wrapper).find('.layout-main'));
 	
@@ -41,6 +48,7 @@ wn.pages['chart-of-accounts'].onload = function(wrapper) {
 		page: "chart_of_accounts",
 		method: "get_companies",
 		callback: function(r) {
+			erpnext.coa.waiting.toggle();
 			erpnext.coa.company_select.empty().add_options(r.message.companies).change();
 			erpnext.coa.fiscal_years = r.message.fiscal_years;
 		}
@@ -197,6 +205,8 @@ erpnext.coa = {
 		});
 	},
 	render: function() {
+		erpnext.coa.waiting.toggle(false);
+
 		// initialize the model
 		erpnext.coa.dataView = new Slick.Data.DataView({ inlineFilters: true });
 		erpnext.coa.dataView.beginUpdate();
