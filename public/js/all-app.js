@@ -400,7 +400,7 @@ wn.request.call({args:args,success:opts.callback,error:opts.error,btn:opts.btn,f
  *	lib/js/core.js
  */
 if(!console){var console={log:function(txt){}}}
-window._version_number="031a31bad930de7f9e8157242afbcba4729d91ff9f957c0c897cafd6";$(document).ready(function(){wn.assets.check();wn.provide('wn.app');$.extend(wn.app,new wn.Application());});
+window._version_number="1e94c62f61174cfb7f98c2bdd377674ef06b81eff2e4d1c2dff88107";$(document).ready(function(){wn.assets.check();wn.provide('wn.app');$.extend(wn.app,new wn.Application());});
 
 /*
  *	lib/js/legacy/globals.js
