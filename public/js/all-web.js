@@ -287,7 +287,7 @@ wn.request.call({args:args,success:opts.callback,error:opts.error,btn:opts.btn,f
  *	lib/js/core.js
  */
 if(!console){var console={log:function(txt){}}}
-window._version_number="820949d75a1ddbb59843ce9171e6c532b5f5e6650784839c2a66d84a";$(document).ready(function(){wn.assets.check();wn.provide('wn.app');$.extend(wn.app,new wn.Application());});
+window._version_number="d58703b2c2e2a5dd1294cd924eb13c57161cf583571b48248ed44bbc";$(document).ready(function(){wn.assets.check();wn.provide('wn.app');$.extend(wn.app,new wn.Application());});
 
 /*
  *	lib/js/legacy/globals.js
