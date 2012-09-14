@@ -38,6 +38,18 @@ erpnext.coa = {
 			.change(function() {
 				erpnext.coa.chart = new erpnext.ChartOfAccounts();
 			});
+			
+		erpnext.coa.fiscal_year_select = wrapper.appframe
+			.add_select("Fiscal Year", ["Loading..."]).css("width", "100px")
+			.change(function() {
+				var selected_year = $(this).val();
+				var fiscal_year = $.map(erpnext.coa.fiscal_years, function(v) {
+					return v[0] === selected_year ? v : null;
+				});
+				erpnext.coa.opening_date.val(dateutil.str_to_user(fiscal_year[1]));
+				erpnext.coa.closing_date.val(dateutil.str_to_user(fiscal_year[2]));
+				erpnext.coa.refresh_btn.click();
+			})
 
 		erpnext.coa.opening_date = wrapper.appframe.add_date("Opening Date")
 			.val(dateutil.str_to_user(sys_defaults.year_start_date));
@@ -50,7 +62,7 @@ erpnext.coa = {
 			.val(dateutil.obj_to_user(end_date));
 
 		erpnext.coa.refresh_btn = wrapper.appframe.add_button("Refresh", function() {
-			erpnext.coa.chart = new erpnext.ChartOfAccounts();
+			erpnext.coa.chart.refresh();
 		}, "icon-refresh");
 
 
@@ -75,6 +87,9 @@ erpnext.coa = {
 				erpnext.coa.waiting.toggle();
 				erpnext.coa.company_select.empty().add_options(r.message.companies)
 					.val(sys_defaults.company || r.message.companies[0]).change();
+				erpnext.coa.fiscal_year_select.empty()
+					.add_options($.map(r.message.fiscal_years, function(v) { return v[0]; }))
+					.val(sys_defaults.fiscal_year);
 				erpnext.coa.fiscal_years = r.message.fiscal_years;
 			}
 		});		
@@ -88,20 +103,44 @@ erpnext.ChartOfAccounts = Class.extend({
 	},
 	load_slickgrid: function() {
 		// load tree
-		wn.require('js/lib/jquery/jquery.ui.sortable');
 		wn.require('js/lib/slickgrid/slick.grid.css');
 		wn.require('js/lib/slickgrid/slick-default-theme.css');
 		wn.require('js/lib/slickgrid/jquery.event.drag.min.js');
 		wn.require('js/lib/slickgrid/slick.core.js');
-		wn.require('js/lib/slickgrid/slick.formatters.js');
 		wn.require('js/lib/slickgrid/slick.grid.js');
 		wn.require('js/lib/slickgrid/slick.dataview.js');
-		wn.dom.set_style('.slick-cell { font-size: 12px; }');		
+		wn.dom.set_style('.slick-cell { font-size: 12px; }');
 	},
 	refresh: function() {
 		this.prepare_balances();
 		this.render();
 	},
+	render: function() {
+		var me = this;
+		erpnext.coa.waiting.toggle(false);
+		this.setup_dataview();
+
+		var columns = [
+			{id: "name", name: "Account", field: "name", width: 300, cssClass: "cell-title", 
+				formatter: this.account_formatter},
+			{id: "opening_debit", name: "Opening (Dr)", field: "opening_debit", width: 100},
+			{id: "opening_credit", name: "Opening (Cr)", field: "opening_credit", width: 100},
+			{id: "debit", name: "Debit", field: "debit", width: 100},
+			{id: "credit", name: "Credit", field: "credit", width: 100},
+			{id: "closing_debit", name: "Closing (Dr)", field: "closing_debit", width: 100},
+			{id: "closing_credit", name: "Closing (Cr)", field: "closing_credit", width: 100}
+		];
+		
+		var options = {
+			editable: false,
+			enableColumnReorder: false
+		};
+
+		// initialize the grid
+		var grid = new Slick.Grid("#chart-of-accounts", this.dataView, columns, options);
+		this.add_events(grid);
+		this.grid = grid;
+	},	
 	load_data: function(company) {
 		var me = this;
 		wn.call({
@@ -112,6 +151,9 @@ erpnext.ChartOfAccounts = Class.extend({
 			callback: function(r) {
 				me.gl = r.message.gl;
 				me.prepare_chart(r.message.chart);
+				$.each(me.gl, function(i, v) {
+					v[1] = me.accounts[v[1]].name;
+				});
 				me.refresh();
 			}
 		})
@@ -144,9 +186,9 @@ erpnext.ChartOfAccounts = Class.extend({
 			}
 		});
 		this.set_indent(data, parent_map);
-		this.data = data;
+		this.accounts = data;
 		this.parent_map = parent_map;
-		this.data_by_name = data_by_name;
+		this.accounts_by_name = data_by_name;
 	},
 	prepare_balances: function() {
 		var gl = this.gl;
@@ -157,15 +199,14 @@ erpnext.ChartOfAccounts = Class.extend({
 		this.set_fiscal_year();
 		if (!this.fiscal_year) return;
 		
-		$.each(this.data, function(i, v) {
+		$.each(this.accounts, function(i, v) {
 			v.opening_debit = v.opening_credit = v.debit 
 				= v.credit = v.closing_debit = v.closing_credit = 0;
 		});
 		
 		$.each(gl, function(i, v) {
-			v[1] = me.data[v[1]].name;
 			var posting_date = dateutil.str_to_obj(v[0]);
-			var account = me.data_by_name[v[1]];
+			var account = me.accounts_by_name[v[1]];
 			me.update_balances(account, posting_date, v)
 		});
 		
@@ -200,11 +241,11 @@ erpnext.ChartOfAccounts = Class.extend({
 	update_groups: function() {
 		// update groups
 		var me= this;
-		$.each(this.data, function(i, account) {
+		$.each(this.accounts, function(i, account) {
 			// update groups
 			var parent = me.parent_map[account.name];
 			while(parent) {
-				parent_account = me.data_by_name[parent];
+				parent_account = me.accounts_by_name[parent];
 				parent_account.opening_debit += account.opening_debit;
 				parent_account.opening_credit += account.opening_credit;
 				parent_account.debit += account.debit;
@@ -217,7 +258,7 @@ erpnext.ChartOfAccounts = Class.extend({
 	},
 	format_balances: function() {
 		// format amount
-		$.each(this.data, function(i, v) {
+		$.each(this.accounts, function(i, v) {
 			v.opening_debit = fmt_money(v.opening_debit);
 			v.opening_credit = fmt_money(v.opening_credit);
 			v.debit = fmt_money(v.debit);
@@ -259,38 +300,12 @@ erpnext.ChartOfAccounts = Class.extend({
 			d.indent = indent;
 		});
 	},
-	render: function() {
-		var me = this;
-		erpnext.coa.waiting.toggle(false);
-		this.setup_dataview();
-
-		var columns = [
-			{id: "name", name: "Account", field: "name", width: 300, cssClass: "cell-title", 
-				formatter: this.account_formatter},
-			{id: "opening_debit", name: "Opening (Dr)", field: "opening_debit", width: 100},
-			{id: "opening_credit", name: "Opening (Cr)", field: "opening_credit", width: 100},
-			{id: "debit", name: "Debit", field: "debit", width: 100},
-			{id: "credit", name: "Credit", field: "credit", width: 100},
-			{id: "closing_debit", name: "Closing (Dr)", field: "closing_debit", width: 100},
-			{id: "closing_credit", name: "Closing (Cr)", field: "closing_credit", width: 100}
-		];
-		
-		var options = {
-			editable: false,
-			enableColumnReorder: false
-		};
-
-		// initialize the grid
-		var grid = new Slick.Grid("#chart-of-accounts", this.dataView, columns, options);
-		this.add_events(grid);
-		this.grid = grid;
-	},
 	setup_dataview: function() {
 		var me = this;
 		// initialize the model
 		this.dataView = new Slick.Data.DataView({ inlineFilters: true });
 		this.dataView.beginUpdate();
-		this.dataView.setItems(this.data);
+		this.dataView.setItems(this.accounts);
 		this.dataView.setFilter(this.dataview_filter);
 		this.dataView.endUpdate();
 	},
@@ -298,7 +313,7 @@ erpnext.ChartOfAccounts = Class.extend({
 		if (item.parent) {
 			var parent = item.parent;
 			while (parent) {
-				if (erpnext.coa.chart.data_by_name[parent]._collapsed) {
+				if (erpnext.coa.chart.accounts_by_name[parent]._collapsed) {
 					return false;
 				}
 				parent = erpnext.coa.chart.parent_map[parent];
@@ -337,7 +352,7 @@ erpnext.ChartOfAccounts = Class.extend({
 	},
 	account_formatter: function (row, cell, value, columnDef, dataContext) {
 		value = value.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
-		var data = erpnext.coa.chart.data;
+		var data = erpnext.coa.chart.accounts;
 		var spacer = "<span style='display:inline-block;height:1px;width:" + 
 			(15 * dataContext["indent"]) + "px'></span>";
 		var idx = erpnext.coa.chart.dataView.getIdxById(dataContext.id);

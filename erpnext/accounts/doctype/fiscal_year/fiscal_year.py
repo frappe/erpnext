@@ -44,6 +44,7 @@ class DocType:
 		if not in_transaction:
 			sql("start transaction")
 		
+		self.rebuid_account_tree()		
 		self.clear_account_balances()
 		self.create_account_balances()
 		self.update_opening(self.doc.company)
@@ -51,7 +52,11 @@ class DocType:
 		sql("commit")
 		
 		msgprint("Account balance reposted for fiscal year: " + self.doc.name)
-
+		
+	def rebuid_account_tree(self):
+		from webnotes.utils.nestedset import rebuild_tree
+		rebuild_tree('Account', 'parent_account')
+		
 	def clear_account_balances(self):
 		# balances clear - `tabAccount Balance` for fiscal year
 		sql("update `tabAccount Balance` t1, tabAccount t2 set t1.opening=0, t1.balance=0, t1.debit=0, t1.credit=0 where t1.fiscal_year=%s and t2.company = %s and t1.account = t2.name", (self.doc.name, self.doc.company))
