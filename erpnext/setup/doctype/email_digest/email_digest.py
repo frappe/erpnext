@@ -110,7 +110,7 @@ class DocType:
 
 			'new_sales_orders': self.generate_new_type_query({
 				'type': 'new_sales_orders',
-				'doctype': 'Sales Invoice',
+				'doctype': 'Sales Order',
 				'sum_col': 'grand_total'
 			}),
 
@@ -132,7 +132,7 @@ class DocType:
 
 		for query in query_dict.keys():
 			if self.doc.fields[query] and query_dict[query]:
-				#webnotes.msgprint(query)
+				# webnotes.errprint(query)
 				res = webnotes.conn.sql(query_dict[query], as_dict=1)
 				if query in ['income', 'income_year_to_date']:
 					for r in res:
