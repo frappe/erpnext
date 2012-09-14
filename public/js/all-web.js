@@ -277,19 +277,19 @@ return;}
 if(r.server_messages)msgprint(r.server_messages)
 if(r.exc){console.log(r.exc);};if(r['403']){wn.container.change_to('403');}
 if(r.docs){LocalDB.sync(r.docs);}}
-wn.request.call=function(opts){wn.request.prepare(opts);var args={url:opts.url||wn.request.url,data:opts.args,type:opts.type||'POST',dataType:opts.dataType||'json',success:function(r,xhr){wn.request.cleanup(opts,r);opts.success(r,xhr.responseText);},error:function(xhr,textStatus){wn.request.cleanup(opts,{});show_alert('Unable to complete request: '+textStatus)
-if(opts.error)opts.error(xhr)}};if(opts.progress_bar){var interval=null;$.extend(args,{xhr:function(){var xhr=jquery.ajaxSettings.xhr();interval=setInterval(function(){if(xhr.readyState>2){var total=parseInt(xhr.getResponseHeader('Content-length'));var completed=parseInt(xhr.responseText.length);var percent=(100.0/total*completed).toFixed(2)
-opts.progress_bar.css('width',(percent<10?10:percent)+'%');}},50);},complete:function(){clearInterval(interval);}})}
-$.ajax(args)}
+wn.request.call=function(opts){wn.request.prepare(opts);var ajax_args={url:opts.url||wn.request.url,data:opts.args,type:opts.type||'POST',dataType:opts.dataType||'json',success:function(r,xhr){wn.request.cleanup(opts,r);opts.success(r,xhr.responseText);},error:function(xhr,textStatus){wn.request.cleanup(opts,{});show_alert('Unable to complete request: '+textStatus)
+if(opts.error)opts.error(xhr)}};if(opts.progress_bar){var interval=null;$.extend(ajax_args,{xhr:function(){var xhr=jQuery.ajaxSettings.xhr();interval=setInterval(function(){if(xhr.readyState>2){var total=parseInt(xhr.getResponseHeader('Content-length'));var completed=parseInt(xhr.responseText.length);var percent=(100.0/total*completed).toFixed(2)
+opts.progress_bar.css('width',(percent<10?10:percent)+'%');console.log(percent);}},50);return xhr;},complete:function(){clearInterval(interval);}})}
+console.log(ajax_args);$.ajax(ajax_args);}
 wn.call=function(opts){var args=$.extend({},opts.args)
 if(opts.module&&opts.page){args.cmd=opts.module+'.page.'+opts.page+'.'+opts.page+'.'+opts.method}else if(opts.method){args.cmd=opts.method;}
 for(key in args){if(args[key]&&typeof args[key]!='string'){args[key]=JSON.stringify(args[key]);}}
-wn.request.call({args:args,success:opts.callback,error:opts.error,btn:opts.btn,freeze:opts.freeze,show_spinner:!opts.no_spinner});}
+wn.request.call({args:args,success:opts.callback,error:opts.error,btn:opts.btn,freeze:opts.freeze,show_spinner:!opts.no_spinner,progress_bar:opts.progress_bar});}
 /*
  *	lib/js/core.js
  */
 if(!console){var console={log:function(txt){}}}
-window._version_number="8cf6494c9cf543eaf530304fc5ccd4ce065751aed728f2c1c4f57035";$(document).ready(function(){wn.assets.check();wn.provide('wn.app');$.extend(wn.app,new wn.Application());});
+window._version_number="%(_version_number)s";$(document).ready(function(){wn.assets.check();wn.provide('wn.app');$.extend(wn.app,new wn.Application());});
 
 /*
  *	lib/js/legacy/globals.js
