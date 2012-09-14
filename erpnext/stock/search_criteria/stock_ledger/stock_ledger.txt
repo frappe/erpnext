@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-04-16 11:42:44',
+		'creation': '2012-09-13 15:18:44',
 		'docstatus': 0,
-		'modified': '2012-04-16 16:00:35',
+		'modified': '2012-09-13 15:38:45',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -23,8 +23,8 @@
 		'module': u'Stock',
 		'name': '__common__',
 		'page_len': 50,
-		'sort_by': u'`tabStock Ledger Entry`.`item_code`',
-		'sort_order': u'DESC',
+		'sort_by': u'`tabStock Ledger Entry`.`posting_date`, `tabStock Ledger Entry`.`posting_time`, `tabStock Ledger Entry`.`name`',
+		'sort_order': u'ASC',
 		'standard': u'Yes'
 	},
 

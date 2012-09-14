@@ -1,0 +1,21 @@
+.cell-title {
+	font-weight: bold;
+}
+
+.cell-effort-driven {
+	text-align: center;
+}
+
+.toggle {
+	height: 9px;
+	width: 9px;
+	display: inline-block;
+}
+
+.toggle.expand {
+	background: url(images/expand.gif) no-repeat center center;
+}
+
+.toggle.collapse {
+	background: url(images/collapse.gif) no-repeat center center;
+}
