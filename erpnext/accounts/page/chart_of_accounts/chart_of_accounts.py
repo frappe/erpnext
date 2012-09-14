@@ -41,6 +41,7 @@ def get_companies():
 	else:
 		res["companies"] = [r[0] for r in webnotes.conn.sql("""select name from tabCompany
 			where docstatus!=2""")]
+	
 	res["fiscal_years"] = webnotes.conn.sql("""select name, year_start_date, 
 		adddate(year_start_date, interval 1 year)
 		from `tabFiscal Year` where docstatus!=2 

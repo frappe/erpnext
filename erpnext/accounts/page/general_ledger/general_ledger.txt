@@ -1,0 +1,28 @@
+# Page, general-ledger
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2012-09-13 13:50:13',
+		'docstatus': 0,
+		'modified': '2012-09-13 13:50:13',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
+	},
+
+	# These values are common for all Page
+	{
+		'doctype': 'Page',
+		'module': u'Accounts',
+		'name': '__common__',
+		'page_name': u'general-ledger',
+		'standard': u'Yes',
+		'title': u'General Ledger'
+	},
+
+	# Page, general-ledger
+	{
+		'doctype': 'Page',
+		'name': u'general-ledger'
+	}
+]
