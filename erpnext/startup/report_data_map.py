@@ -22,9 +22,9 @@ data_map = {
 	},
 	"GL Entry": {
 		"columns": ["account", "posting_date", "cost_center", "debit", "credit", "is_opening",
-			"company"],
+			"company", "voucher_type", "voucher_no", "remarks"],
 		"conditions": ["ifnull(is_cancelled, 'No')='No'"],
-		"order_by": "posting_date"
+		"order_by": "posting_date, account"
 	},
 	"Company": {
 		"columns": ["name"],
