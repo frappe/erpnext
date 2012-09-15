@@ -16,697 +16,330 @@
 
 from __future__ import unicode_literals
 import webnotes
-import webnotes.utils
+from webnotes.utils import fmt_money, formatdate, now_datetime, cstr
+from datetime import timedelta
+from dateutil.relativedelta import relativedelta
+
+content_sequence = ["income_year_to_date", "bank_balance",
+	"income", "expenses_booked", "collections", "payments",
+	"invoiced_amount", "payables",
+	"new_leads", "new_enquiries", "new_quotations", "new_sales_orders",
+	"new_delivery_notes", "new_purchase_requests", "new_supplier_quotations",
+	"new_purchase_orders", "new_purchase_receipts", "new_stock_entries",
+	"new_support_tickets", "new_communications", "new_projects"]
 
 class DocType:
 	def __init__(self, doc, doclist=[]):
 		self.doc, self.doclist = doc, doclist
-		self.sending = False
-
 
 	def get_profiles(self):
-		"""
-			Get a list of profiles
-		"""
+		"""get list of profiles"""
 		import webnotes
 		profile_list = webnotes.conn.sql("""
-			SELECT name, enabled FROM tabProfile
-			WHERE docstatus=0 AND name NOT IN ('Administrator', 'Guest')
-			ORDER BY enabled DESC, name ASC""", as_dict=1)
+			select name, enabled from tabProfile
+			where docstatus=0 and name not in ('Administrator', 'Guest')
+			order by enabled desc, name asc""", as_dict=1)
+
 		if self.doc.recipient_list:
 			recipient_list = self.doc.recipient_list.split("\n")
 		else:
 			recipient_list = []
 		for p in profile_list:
-			if p['name'] in recipient_list: p['checked'] = 1
-			else: p['checked'] = 0
+			p["checked"] = p["name"] in recipient_list and 1 or 0
+
 		webnotes.response['profile_list'] = profile_list
-
-
-	def get_standard_data(self):
-		"""
-			Executes standard queries
-		"""
-		res = {}
-		query_dict = {
-
-			'invoiced_amount': self.generate_gle_query({
-				'type': 'invoiced_amount',
-				'field': 'debit',
-				'master_type': 'Customer',
-			}),
-
-			'payables': self.generate_gle_query({
-				'type': 'payables',
-				'field': 'credit',
-				'master_type': 'Supplier',
-			}),
-
-			'collections': self.generate_gle_query({
-				'type': 'collections',
-				'field': 'credit',
-				'master_type': 'Customer',
-			}),
-
-			'payments': self.generate_gle_query({
-				'type': 'payments',
-				'field': 'debit',
-				'master_type': 'Supplier',
-			}),
-
-			'income': self.generate_gle_query({
-				'type': 'income',
-				'debit_or_credit': 'Credit'
-			}),
-
-			'income_year_to_date': self.generate_gle_query({
-				'type': 'income_year_to_date',
-				'debit_or_credit': 'Credit'
-			}),
-
-			'expenses_booked': self.generate_gle_query({
-				'type': 'expenses_booked',
-				'debit_or_credit': 'Debit'
-			}),
-
-			'bank_balance': self.generate_gle_query({
-				'type': 'bank_balance'
-			}),
-
-			'new_leads': self.generate_new_type_query({
-				'type': 'new_leads',
-				'doctype': 'Lead'
-			}),
-
-			'new_enquiries': self.generate_new_type_query({
-				'type': 'new_enquiries',
-				'doctype': 'Opportunity'
-			}),
-
-			'new_quotations': self.generate_new_type_query({
-				'type': 'new_quotations',
-				'doctype': 'Quotation',
-				'sum_col': 'grand_total'
-			}),
-
-			'new_sales_orders': self.generate_new_type_query({
-				'type': 'new_sales_orders',
-				'doctype': 'Sales Invoice',
-				'sum_col': 'grand_total'
-			}),
-
-			'new_purchase_orders': self.generate_new_type_query({
-				'type': 'new_purchase_orders',
-				'doctype': 'Purchase Order',
-				'sum_col': 'grand_total'
-			}),
-
-			'new_transactions': self.generate_new_type_query({
-				'type': 'new_transactions',
-				'doctype': 'Feed'
-			}),
-
-			'stock_below_rl': ""
-		}
-
-		result = {}
-
-		for query in query_dict.keys():
-			if self.doc.fields[query] and query_dict[query]:
-				#webnotes.msgprint(query)
-				res = webnotes.conn.sql(query_dict[query], as_dict=1)
-				if query in ['income', 'income_year_to_date']:
-					for r in res:
-						r['value'] = float(r['credit'] - r['debit'])
-				elif query in ['expenses_booked', 'bank_balance']:
-					for r in res:
-						r['value'] = float(r['debit'] - r['credit'])
-				#webnotes.msgprint(query)
-				#webnotes.msgprint(res)
-				result[query] = res and (len(res)==1 and res[0]) or (res or None)
-				if result[query] is None:
-					del result[query]
-		
-		return result
-
-
-	def generate_gle_query(self, args):
-		"""
-			Returns generated query string based 'tabGL Entry' and 'tabAccount'
-		"""
-		self.process_args(args)
-
-		query = None
-
-		if args['type'] in ['invoiced_amount', 'payables']:
-			query = """
-				SELECT
-					IFNULL(SUM(IFNULL(gle.%(field)s, 0)), 0) AS '%(field)s',
-					%(common_select)s
-				FROM
-					%(common_from)s
-				WHERE
-					%(common_where)s AND
-					ac.master_type = '%(master_type)s' AND
-					%(start_date_condition)s AND
-					%(end_date_condition)s""" % args
-
-		elif args['type'] in ['collections', 'payments']:
-			args['bc_accounts_regex'] = self.get_bc_accounts_regex()
-			if args['bc_accounts_regex']:
-				query = """
-					SELECT
-						IFNULL(SUM(IFNULL(gle.%(field)s, 0)), 0) AS '%(field)s',
-						%(common_select)s
-					FROM
-						%(common_from)s
-					WHERE
-						%(common_where)s AND
-						ac.master_type = '%(master_type)s' AND
-						gle.against REGEXP '%(bc_accounts_regex)s' AND
-						%(start_date_condition)s AND
-						%(end_date_condition)s""" % args
-
-		elif args['type'] in ['income', 'expenses_booked']:
-			query = """
-				SELECT
-					IFNULL(SUM(IFNULL(gle.debit, 0)), 0) AS 'debit',
-					IFNULL(SUM(IFNULL(gle.credit, 0)), 0) AS 'credit',
-					%(common_select)s
-				FROM
-					%(common_from)s
-				WHERE
-					%(common_where)s AND
-					ac.is_pl_account = 'Yes' AND
-					ac.debit_or_credit = '%(debit_or_credit)s' AND					
-					%(start_date_condition)s AND
-					%(end_date_condition)s""" % args
-
-		elif args['type'] == 'income_year_to_date':
-			query = """
-				SELECT
-					IFNULL(SUM(IFNULL(gle.debit, 0)), 0) AS 'debit',
-					IFNULL(SUM(IFNULL(gle.credit, 0)), 0) AS 'credit',
-					%(common_select)s
-				FROM
-					%(common_from)s
-				WHERE
-					%(common_where)s AND
-					ac.is_pl_account = 'Yes' AND
-					ac.debit_or_credit = '%(debit_or_credit)s' AND					
-					%(fiscal_start_date_condition)s AND
-					%(end_date_condition)s""" % args
-
-		elif args['type'] == 'bank_balance':
-			query = """
-				SELECT
-					ac.account_name AS 'name',
-					IFNULL(SUM(IFNULL(gle.debit, 0)), 0) AS 'debit',
-					IFNULL(SUM(IFNULL(gle.credit, 0)), 0) AS 'credit',
-					%(common_select)s
-				FROM
-					%(common_from)s
-				WHERE
-					%(common_where)s AND
-					ac.account_type = 'Bank or Cash' AND
-					%(end_date_condition)s
-				GROUP BY
-					ac.account_name""" % args
-
-		return query
-
-
-	def process_args(self, args):
-		"""
-			Adds common conditions in dictionary "args"
-		"""
-		start_date, end_date = self.get_start_end_dates()
-		fiscal_year = webnotes.utils.get_defaults()['fiscal_year']
-		fiscal_start_date = webnotes.conn.get_value('Fiscal Year', fiscal_year,
-				'year_start_date')
-
-		if 'new' in args['type']:
-			args.update({
-				'company': self.doc.company,
-				'start_date': start_date,
-				'end_date': end_date,
-				'sum_if_reqd': ''
-			})
-			if args['type'] in ['new_quotations', 'new_sales_orders', 'new_purchase_orders']:
-				args['sum_if_reqd'] = "IFNULL(SUM(IFNULL(%(sum_col)s, 0)), 0) AS '%(sum_col)s'," % args
-			
-			if args['type'] == 'new_transactions':
-				# tabFeed doesn't have company column
-				# using this arg to set condition of feed_type as null
-				# so that comments, logins and assignments are not counted
-				args['company_condition'] = "feed_type IS NULL AND"
-			else:
-				args['company_condition'] = "company = '%(company)s' AND" % args
-				
-		else:
-			args.update({
-				'common_select': "COUNT(*) AS 'count'",
-
-				'common_from': "`tabGL Entry` gle, `tabAccount` ac",
-
-				'common_where': """
-					gle.company = '%s' AND
-					gle.account = ac.name AND
-					ac.docstatus < 2 AND
-					IFNULL(gle.is_cancelled, 'No') = 'No'""" % self.doc.company,
-
-				'start_date_condition': "gle.posting_date >= '%s'" % start_date,
-
-				'end_date_condition': "gle.posting_date <= '%s'" % end_date,
-
-				'fiscal_start_date_condition': "gle.posting_date >= '%s'" % fiscal_start_date
-			})
-
-
-	def get_start_end_dates(self):
-		"""
-			Returns start and end date depending on the frequency of email digest
-		"""
-		from datetime import datetime, date, timedelta
-		from webnotes.utils import now_datetime
-		today = now_datetime().date()
-		year, month, day = today.year, today.month, today.day
-		
-		if self.doc.frequency == 'Daily':
-			if self.sending:
-				start_date = end_date = today - timedelta(days=1)
-			else:
-				start_date = end_date = today
-		
-		elif self.doc.frequency == 'Weekly':
-			if self.sending:
-				start_date = today - timedelta(days=today.weekday(), weeks=1)
-				end_date = start_date + timedelta(days=6)
-			else:
-				start_date = today - timedelta(days=today.weekday())
-				end_date = start_date + timedelta(days=6)
-
-		else:
-			import calendar
-			
-			if self.sending:
-				if month == 1:
-					year = year - 1
-					prev_month = 12
-				else:
-					prev_month = month - 1
-				start_date = date(year, prev_month, 1)
-				last_day = calendar.monthrange(year, prev_month)[1]
-				end_date = date(year, prev_month, last_day)
-			else:
-				start_date = date(year, month, 1)
-				last_day = calendar.monthrange(year, month)[1]
-				end_date = date(year, month, last_day)
-
-		return start_date, end_date
-
-
-	def generate_new_type_query(self, args):
-		"""
-			Returns generated query string for calculating new transactions created
-		"""
-		self.process_args(args)
-
-		query = """
-			SELECT
-				%(sum_if_reqd)s
-				COUNT(*) AS 'count'
-			FROM
-				`tab%(doctype)s`
-			WHERE
-				docstatus < 2 AND
-				%(company_condition)s
-				DATE(creation) >= '%(start_date)s' AND
-				DATE(creation) <= '%(end_date)s'""" % args
-
-		return query
 	
-	
-	def get_bc_accounts_regex(self):
-		"""
-			Returns a regular expression of 'Bank or Cash' type account list
-		"""
-		bc_account_list = webnotes.conn.sql("""
-			SELECT name
-			FROM `tabAccount`
-			WHERE account_type = 'Bank or Cash'""", as_list=1)
-		
-		if bc_account_list:		
-			return '(' + '|'.join([ac[0] for ac in bc_account_list]) + ')'
-	
-
-	def get(self):
-		"""
-			* Execute Query
-			* Prepare Email Body from Print Format
-		"""
-		result, email_body = self.execute_queries()
-		#webnotes.msgprint(result)
-		#webnotes.msgprint(email_body)
-		return result, email_body
-
-
-	def execute_queries(self):
-		"""
-			* If standard==1, execute get_standard_data
-			* If standard==0, execute python code in custom_code field
-		"""
-		result = {}
-		if int(self.doc.use_standard)==1:
-			result = self.get_standard_data()
-			email_body = self.get_standard_body(result)
-		else:
-			result, email_body = self.execute_custom_code(self.doc)
-
-		#webnotes.msgprint(result)
-
-		return result, email_body
-
-
-	def execute_custom_code(self, doc):
-		"""
-			Execute custom python code
-		"""
-		pass
-
-
 	def send(self):
-		"""
-			* Execute get method
-			* Send email to recipients
-		"""
-		if not self.doc.recipient_list: return
-
-		self.sending = True
-		result, email_body = self.get()
+		# send email only to enabled users
+		valid_users = [p[0] for p in webnotes.conn.sql("""select name from `tabProfile`
+			where enabled=1""")]
+		recipients = filter(lambda r: r in valid_users,
+			self.doc.recipient_list.split("\n"))
 		
-		recipient_list = self.doc.recipient_list.split("\n")
-
-		# before sending, check if user is disabled or not
-		# do not send if disabled
-		profile_list = webnotes.conn.sql("SELECT name, enabled FROM tabProfile", as_dict=1)
-		for profile in profile_list:
-			if profile['name'] in recipient_list and profile['enabled'] == 0:
-				del recipient_list[recipient_list.index(profile['name'])]
-
 		from webnotes.utils.email_lib import sendmail
-		try:
-			sendmail(
-				recipients=recipient_list,
-				sender='notifications+email_digest@erpnext.com',
-				subject=self.doc.frequency + ' Digest',
-				msg=email_body
-			)
-		except Exception, e:
-			webnotes.msgprint('There was a problem in sending your email. Please contact support@erpnext.com')
-			webnotes.errprint(webnotes.getTraceback())
+		sendmail(recipients=recipients, subject=(self.doc.frequency + " Digest"),
+			sender="ERPNext Notifications <notifications+email_digest@erpnext.com>",
+			msg=self.get_digest_msg())
+				
+	def get_digest_msg(self):
+		""""""
+		self.from_date, self.to_date = self.get_from_to_date()
+		self.currency = webnotes.conn.get_value("Company", self.doc.company,
+			"default_currency")
+		
+		out = []
+		for ctype in content_sequence:
+			if self.doc.fields.get(ctype) and hasattr(self, "get_"+ctype):
+				# appends [value, html]
+				out.append(getattr(self, "get_"+ctype)())
+		
+		return self.get_msg_html(out)
+		
+	def get_msg_html(self, out):
+		with_value = "\n".join([o[1] for o in out if o[0]])
+		
+		# seperate out no value items
+		no_value = [o[1] for o in out if not o[0]]
+		if no_value:
+			no_value = """<hr><h4>No Updates For:</h4><br>""" + "\n".join(no_value)
+		
+		date = self.doc.frequency == "Daily" and formatdate(self.from_date) or \
+			"%s to %s" % (formatdate(self.from_date), formatdate(self.to_date))
+		
+		msg = """<h2>%(digest)s</h2>
+			<p style='color: grey'>%(date)s</p>
+			<h4>%(company)s</h4>
+			<hr>
+			%(with_value)s
+			%(no_value)s""" % {
+				"digest": self.doc.frequency + " Digest",
+				"date": date,
+				"company": self.doc.company,
+				"with_value": with_value,
+				"no_value": no_value or ""
+			}
+		
+		return msg
+	
+	def get_income_year_to_date(self):
+		return self.get_income(webnotes.conn.get_defaults("year_start_date"), 
+			"Income Year To Date")
+			
+	def get_bank_balance(self):
+		# account is of type "Bank or Cash"
+		accounts = dict([[a["name"], [a["account_name"], 0]] for a in self.get_accounts()
+			if a["account_type"]=="Bank or Cash"])
+		ackeys = accounts.keys()
+		
+		for gle in self.get_gl_entries(None, self.to_date):
+			if gle["account"] in ackeys:
+				accounts[gle["account"]][1] += gle["debit"] - gle["credit"]
+		
+		# build html
+		out = self.get_html("Bank/Cash Balance", "", "")
+		for ac in ackeys:
+			out += "\n" + self.get_html(accounts[ac][0], self.currency,
+				fmt_money(accounts[ac][1]), style="margin-left: 17px")
+		return sum((accounts[ac][1] for ac in ackeys)), out
+		
+	def get_income(self, from_date=None, label=None):
+		# account is PL Account and Credit type account
+		accounts = [a["name"] for a in self.get_accounts()
+			if a["is_pl_account"]=="Yes" and a["debit_or_credit"]=="Credit"]
+			
+		income = 0
+		for gle in self.get_gl_entries(from_date or self.from_date, self.to_date):
+			if gle["account"] in accounts:
+				income += gle["credit"] - gle["debit"]
+		
+		return income, self.get_html(label or "Income", self.currency, fmt_money(income))
+		
+	def get_expenses_booked(self):
+		# account is PL Account and Debit type account
+		accounts = [a["name"] for a in self.get_accounts()
+			if a["is_pl_account"]=="Yes" and a["debit_or_credit"]=="Debit"]
+			
+		expense = 0
+		for gle in self.get_gl_entries(self.from_date, self.to_date):
+			if gle["account"] in accounts:
+				expense += gle["debit"] - gle["credit"]
+		
+		return expense, self.get_html("Expenses", self.currency, fmt_money(expense))
+	
+	def get_collections(self):
+		return self.get_party_total("Customer", "credit", "Collections")
+	
+	def get_payments(self):
+		return self.get_party_total("Supplier", "debit", "Payments")
+		
+	def get_party_total(self, party_type, gle_field, label):
+		import re
+		# account is of master_type Customer or Supplier
+		accounts = [a["name"] for a in self.get_accounts()
+			if a["master_type"]==party_type]
 
+		# account is "Bank or Cash"
+		bc_accounts = [a["name"] for a in self.get_accounts() 
+			if a["account_type"]=="Bank or Cash"]
+		bc_regex = re.compile("(%s)" % "|".join(bc_accounts))
+		
+		total = 0
+		for gle in self.get_gl_entries(self.from_date, self.to_date):
+			# check that its made against a bank or cash account
+			if gle["account"] in accounts and gle["against"] and \
+					bc_regex.findall(gle["against"]):
+				total += gle[gle_field]
+
+		return total, self.get_html(label, self.currency, fmt_money(total))
+		
+	def get_invoiced_amount(self):
+		# aka receivables
+		return self.get_booked_total("Customer", "debit", "Receivables")
+
+	def get_payables(self):
+		return self.get_booked_total("Supplier", "credit", "Payables")
+		
+	def get_booked_total(self, party_type, gle_field, label):
+		# account is of master_type Customer or Supplier
+		accounts = [a["name"] for a in self.get_accounts()
+			if a["master_type"]==party_type]
+	
+		total = 0
+		for gle in self.get_gl_entries(self.from_date, self.to_date):
+			if gle["account"] in accounts:
+				total += gle[gle_field]
+
+		return total, self.get_html(label, self.currency, fmt_money(total))
+		
+	def get_new_leads(self):
+		return self.get_new_count("Lead", "New Leads")
+		
+	def get_new_enquiries(self):
+		return self.get_new_count("Opportunity", "New Opportunities")
+	
+	def get_new_quotations(self):
+		return self.get_new_sum("Quotation", "New Quotations", "grand_total")
+		
+	def get_new_sales_orders(self):
+		return self.get_new_sum("Sales Order", "New Sales Orders", "grand_total")
+		
+	def get_new_delivery_notes(self):
+		return self.get_new_sum("Delivery Note", "New Delivery Notes", "grand_total")
+		
+	def get_new_purchase_requests(self):
+		return self.get_new_count("Purchase Request", "New Purchase Requests")
+		
+	def get_new_supplier_quotations(self):
+		return self.get_new_sum("Supplier Quotation", "New Supplier Quotations",
+			"grand_total")
+	
+	def get_new_purchase_orders(self):
+		return self.get_new_sum("Purchase Order", "New Purchase Orders", "grand_total")
+	
+	def get_new_purchase_receipts(self):
+		return self.get_new_sum("Purchase Receipt", "New Purchase Receipts",
+			"grand_total")
+	
+	def get_new_stock_entries(self):
+		return self.get_new_sum("Stock Entry", "New Stock Entries", "total_amount")
+		
+	def get_new_support_tickets(self):
+		return self.get_new_count("Support Ticket", "New Support Tickets", False)
+		
+	def get_new_communications(self):
+		return self.get_new_count("Communication", "New Communications", False)
+		
+	def get_new_projects(self):
+		return self.get_new_count("Project", "New Projects", False)
+	
+	def get_new_count(self, doctype, label, filter_by_company=True):
+		if filter_by_company:
+			company = """and company="%s" """ % self.doc.company
+		else:
+			company = ""
+		count = webnotes.conn.sql("""select count(*) from `tab%s`
+			where docstatus < 2 %s and
+			date(creation)>=%s and date(creation)<=%s""" % (doctype, company, "%s", "%s"),
+			(self.from_date, self.to_date))
+		count = count and count[0][0] or 0
+		
+		return count, self.get_html(label, None, count)
+		
+	def get_new_sum(self, doctype, label, sum_field):
+		count_sum = webnotes.conn.sql("""select count(*), sum(ifnull(`%s`, 0))
+			from `tab%s` where docstatus < 2 and company = %s and
+			date(creation)>=%s and date(creation)<=%s""" % (sum_field, doctype, "%s",
+			"%s", "%s"), (self.doc.company, self.from_date, self.to_date))
+		count, total = count_sum and count_sum[0] or (0, 0)
+		
+		return count, self.get_html(label, self.currency, 
+			"%s - (%s)" % (fmt_money(total), cstr(count)))
+		
+	def get_html(self, label, currency, value, style=None):
+		"""get html output"""
+		return """<p style="padding: 5px; %(style)s">
+			<span>%(label)s</span>: 
+			<span style="font-weight: bold; font-size: 110%%">
+				<span style="color: grey">%(currency)s</span>%(value)s
+			</span></p>""" % {
+				"style": style or "",
+				"label": label,
+				"currency": currency and (currency+" ") or "",
+				"value": value
+			}
+		
+	def get_gl_entries(self, from_date=None, to_date=None):
+		"""get valid GL Entries filtered by company and posting date"""
+		if from_date==self.from_date and to_date==self.to_date and \
+				hasattr(self, "gl_entries"):
+			return self.gl_entries
+		
+		gl_entries = webnotes.conn.sql("""select `account`, 
+			ifnull(credit, 0) as credit, ifnull(debit, 0) as debit, `against`
+			from `tabGL Entry`
+			where company=%s and ifnull(is_cancelled, "No")="No" and
+			posting_date <= %s %s""" % ("%s", "%s", 
+			from_date and "and posting_date>='%s'" % from_date or ""),
+			(self.doc.company, to_date or self.to_date), as_dict=1)
+		
+		# cache if it is the normal cases
+		if from_date==self.from_date and to_date==self.to_date:
+			self.gl_entries = gl_entries
+		
+		return gl_entries
+		
+	def get_accounts(self):
+		if not hasattr(self, "accounts"):
+			self.accounts = webnotes.conn.sql("""select name, is_pl_account,
+				debit_or_credit, account_type, account_name, master_type
+				from `tabAccount` where company=%s and docstatus < 2""",
+				(self.doc.company,), as_dict=1)
+		return self.accounts
+		
+	def get_from_to_date(self):
+		today = now_datetime().date()
+		
+		# decide from date based on email digest frequency
+		if self.doc.frequency == "Daily":
+			# from date, to_date is yesterday
+			from_date = to_date = today - timedelta(days=1)
+		elif self.doc.frequency == "Weekly":
+			# from date is the previous week's monday
+			from_date = today - timedelta(days=today.weekday(), weeks=1)
+			# to date is sunday i.e. the previous day
+			to_date = from_date + timedelta(days=6)
+		else:
+			# from date is the 1st day of the previous month
+			from_date = today - relativedelta(days=today.day-1, months=1)
+			# to date is the last day of the previous month
+			to_date = today - relativedelta(days=today.day)
+
+		return from_date, to_date
 
 	def get_next_sending(self):
-		import datetime
-		
-		start_date, end_date = self.get_start_end_dates()
-		
-		send_date = end_date + datetime.timedelta(days=1)
-		
-		from webnotes.utils import formatdate
-		str_date = formatdate(str(send_date))
+		from_date, to_date = self.get_from_to_date()
 
-		self.doc.next_send = str_date + " at midnight"
-
+		send_date = to_date + timedelta(days=1)
+		
+		if self.doc.frequency == "Daily":
+			next_send_date = send_date + timedelta(days=1)
+		elif self.doc.frequency == "Weekly":
+			next_send_date = send_date + timedelta(weeks=1)
+		else:
+			next_send_date = send_date + relativedelta(months=1)
+		self.doc.next_send = formatdate(next_send_date) + " at midnight"
+		
 		return send_date
-
-
+		
 	def onload(self):
-		"""
-
-		"""
 		self.get_next_sending()
 
-
-	def get_standard_body(self, result):
-		"""
-			Generate email body depending on the result
-		"""
-		from webnotes.utils import fmt_money
-		from webnotes.model.doc import Document
-		company = Document('Company', self.doc.company)
-		currency = company.default_currency
-
-		def table(args):
-			table_body = ""
-			
-			if isinstance(args['body'], basestring):
-				return """<p>%(head)s: <span style='font-size: 110%%; font-weight: bold;'>%(body)s</span></p>""" % args
-			else:
-				return ("""<p>%(head)s:</p> """ % args) +\
-				 	"".join(map(lambda b: "<p style='margin-left: 17px;'>%s</p>" % b, args['body']))
-
-
-		currency_amount_str = "<span style='color: grey;'>%s</span> %s"
-
-		body_dict = {
-
-			'invoiced_amount': {
-				'table': result.get('invoiced_amount') and \
-					table({
-						'head': 'Invoiced Amount',
-						'body': currency_amount_str \
-							% (currency, fmt_money(result['invoiced_amount'].get('debit')))
-					}),
-				'idx': 300,
-				'value': result.get('invoiced_amount') and result['invoiced_amount'].get('debit')
-			},
-
-			'payables': {
-				'table': result.get('payables') and \
-					table({
-						'head': 'Payables',
-						'body': currency_amount_str \
-							% (currency, fmt_money(result['payables'].get('credit')))
-					}),
-				'idx': 200,
-				'value': result.get('payables') and result['payables'].get('credit')
-			},
-
-			'collections': {
-				'table': result.get('collections') and \
-					table({
-						'head': 'Collections',
-						'body': currency_amount_str \
-							% (currency, fmt_money(result['collections'].get('credit')))
-					}),
-				'idx': 301,
-				'value': result.get('collections') and result['collections'].get('credit')
-			},
-
-			'payments': {
-				'table': result.get('payments') and \
-					table({
-						'head': 'Payments',
-						'body': currency_amount_str \
-							% (currency, fmt_money(result['payments'].get('debit')))
-					}),
-				'idx': 201,
-				'value': result.get('payments') and result['payments'].get('debit')
-			},
-
-			'income': {
-				'table': result.get('income') and \
-					table({
-						'head': 'Income',
-						'body': currency_amount_str \
-							% (currency, fmt_money(result['income'].get('value')))
-					}),
-				'idx': 302,
-				'value': result.get('income') and result['income'].get('value')
-			},
-
-			'income_year_to_date': {
-				'table': result.get('income_year_to_date') and \
-					table({
-						'head': 'Income Year To Date',
-						'body': currency_amount_str \
-							% (currency, fmt_money(result['income_year_to_date'].get('value')))
-					}),
-				'idx': 303,
-				'value': result.get('income_year_to_date') and \
-				 	result['income_year_to_date'].get('value')
-			},
-
-			'expenses_booked': {
-				'table': result.get('expenses_booked') and \
-					table({
-						'head': 'Expenses Booked',
-						'body': currency_amount_str \
-							% (currency, fmt_money(result['expenses_booked'].get('value')))
-					}),
-				'idx': 202,
-				'value': result.get('expenses_booked') and result['expenses_booked'].get('value')
-			},
-
-			'bank_balance': {
-				'table': result.get('bank_balance') and \
-					table({
-						'head': 'Bank / Cash Balance',
-						'body': [(bank['name'] + ": <span style='font-size: 110%%; font-weight: bold;'>" \
-									+ currency_amount_str % \
-									(currency, fmt_money(bank.get('value'))) + '</span>')
-							for bank in (isinstance(result['bank_balance'], list) and \
-								result['bank_balance'] or \
-								[result['bank_balance']])
-						]
-					}),
-				'idx': 0,
-				'value': 0.1
-			},
-
-			'new_leads': {
-				'table': result.get('new_leads') and \
-					table({
-						'head': 'New Leads',
-						'body': '%s' % result['new_leads'].get('count')
-					}),
-				'idx': 100,
-				'value': result.get('new_leads') and result['new_leads'].get('count')
-			},
-
-			'new_enquiries': {
-				'table': result.get('new_enquiries') and \
-					table({
-						'head': 'New Enquiries',
-						'body': '%s' % result['new_enquiries'].get('count')
-					}),
-				'idx': 101,
-				'value': result.get('new_enquiries') and result['new_enquiries'].get('count')
-			},
-
-			'new_quotations': {
-				'table': result.get('new_quotations') and \
-					table({
-						'head': 'New Quotations',
-						'body': '%s' % result['new_quotations'].get('count')
-					}),
-				'idx': 102,
-				'value': result.get('new_quotations') and result['new_quotations'].get('count')
-			},
-
-			'new_sales_orders': {
-				'table': result.get('new_sales_orders') and \
-					table({
-						'head': 'New Sales Orders',
-						'body': '%s' % result['new_sales_orders'].get('count')
-					}),
-				'idx': 103,
-				'value': result.get('new_sales_orders') and result['new_sales_orders'].get('count')
-			},
-
-			'new_purchase_orders': {
-				'table': result.get('new_purchase_orders') and \
-					table({
-						'head': 'New Purchase Orders',
-						'body': '%s' % result['new_purchase_orders'].get('count')
-					}),
-				'idx': 104,
-				'value': result.get('new_purchase_orders') and \
-				 	result['new_purchase_orders'].get('count')
-			},
-
-			'new_transactions': {
-				'table': result.get('new_transactions') and \
-					table({
-						'head': 'New Transactions',
-						'body': '%s' % result['new_transactions'].get('count')
-					}),
-				'idx': 105,
-				'value': result.get('new_transactions') and result['new_transactions'].get('count')
-			}
-
-			#'stock_below_rl': 
-		}
-
-		table_list = []
-
-		# Sort these keys depending on idx value
-		bd_keys = sorted(body_dict, key=lambda x: \
-			(-webnotes.utils.flt(body_dict[x]['value']), body_dict[x]['idx']))
-
-		new_section = False
-
-		def set_new_section(new_section):
-			if not new_section:
-				table_list.append("<hr /><h4>No Updates For:</h4><br>")
-				new_section = True
-			return new_section			
-
-		for k in bd_keys:
-			if self.doc.fields[k]:
-				if k in result:
-					if not body_dict[k].get('value') and not new_section:
-						new_section = set_new_section(new_section)
-					table_list.append(body_dict[k]['table'])
-				elif k in ['collections', 'payments']:
-					new_section = set_new_section(new_section)
-					table_list.append(\
-						"<p>[" + \
-							k.capitalize() + \
-							"]<br />Missing: Account of type 'Bank or Cash'\
-						</p>")
-				elif k=='bank_balance':
-					new_section = set_new_section(new_section)
-					table_list.append(\
-						"<p>[" + \
-							"Bank Balance" + \
-							"]<br />Alert: GL Entry not found for Account of type 'Bank or Cash'\
-						</p>")
-					
-
-		from webnotes.utils import formatdate
-		start_date, end_date = self.get_start_end_dates()
-		digest_daterange = self.doc.frequency=='Daily' \
-			and formatdate(str(start_date)) \
-			or (formatdate(str(start_date)) + " to " + (formatdate(str(end_date))))
-
-		email_body = """
-					<h2>%s</h2>
-					<p style='color: grey'>%s</p>
-					<h4>%s</h4>
-					<hr>
-				""" \
-					% ((self.doc.frequency + " Digest"), \
-						digest_daterange, self.doc.company) \
-				+ "".join(table_list) + """\
-				<br><p></p>
-			"""
-
-		return email_body
-
-
 def send():
-	"""
-
-	"""
-	edigest_list = webnotes.conn.sql("""
-		SELECT name FROM `tabEmail Digest`
-		WHERE enabled=1 and docstatus<2
-	""", as_list=1)
-
 	from webnotes.model.code import get_obj
-	from webnotes.utils import now_datetime
-
 	now_date = now_datetime().date()
 	
-	for ed in edigest_list:
-		if ed[0]:
-			ed_obj = get_obj('Email Digest', ed[0])
-			ed_obj.sending = True
-			send_date = ed_obj.get_next_sending()
-			#webnotes.msgprint([ed[0], now_date, send_date])
-
-			if (now_date == send_date):
-				ed_obj.send()
+	for ed in webnotes.conn.sql("""select name from `tabEmail Digest`
+			where enabled=1 and docstatus<2""", as_list=1):
+		ed_obj = get_obj('Email Digest', ed[0])
+		if (now_date == ed_obj.get_next_sending()):
+			ed_obj.send()
