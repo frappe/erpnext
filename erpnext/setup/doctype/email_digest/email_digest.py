@@ -16,7 +16,7 @@
 
 from __future__ import unicode_literals
 import webnotes
-from webnotes.utils import fmt_money, formatdate, now_datetime, cstr
+from webnotes.utils import fmt_money, formatdate, now_datetime, cstr, esc
 from datetime import timedelta
 from dateutil.relativedelta import relativedelta
 
@@ -118,8 +118,9 @@ class DocType:
 		# build html
 		out = self.get_html("Bank/Cash Balance", "", "")
 		for ac in ackeys:
-			out += "\n" + self.get_html(accounts[ac][0], self.currency,
-				fmt_money(accounts[ac][1]), style="margin-left: 17px")
+			if accounts[ac][1]:
+				out += "\n" + self.get_html(accounts[ac][0], self.currency,
+					fmt_money(accounts[ac][1]), style="margin-left: 17px")
 		return sum((accounts[ac][1] for ac in ackeys)), out
 		
 	def get_income(self, from_date=None, label=None):
@@ -159,9 +160,9 @@ class DocType:
 			if a["master_type"]==party_type]
 
 		# account is "Bank or Cash"
-		bc_accounts = [a["name"] for a in self.get_accounts() 
+		bc_accounts = [esc(a["name"], "()|") for a in self.get_accounts() 
 			if a["account_type"]=="Bank or Cash"]
-		bc_regex = re.compile("(%s)" % "|".join(bc_accounts))
+		bc_regex = re.compile("""(%s)""" % "|".join(bc_accounts))
 		
 		total = 0
 		for gle in self.get_gl_entries(self.from_date, self.to_date):
