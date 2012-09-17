@@ -19,4 +19,5 @@ def stock_perms():
 		'Sales and Purchase Return Tool') and role='All' and permlevel=0""")
 		
 def account_perms():
+	# since it is a child doctype, it does not need permissions
 	webnotes.conn.sql("""delete from tabDocPerm where parent='TDS Detail'""")
