@@ -215,4 +215,4 @@ KBQuestion = function(parent, det, kb) {
 	this.make()
 }
 
-wn.require('js/kb_common.js');
+wn.require('js/app/kb_common.js');

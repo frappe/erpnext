@@ -20,6 +20,11 @@ data_map = {
 			"company"],
 		"order_by": "lft"
 	},
+	"Cost Center": {
+		"columns": ["name", "parent_cost_center", "lft", "rgt", "debit_or_credit",
+			"company"],
+		"order_by": "lft"
+	},
 	"GL Entry": {
 		"columns": ["account", "posting_date", "cost_center", "debit", "credit", "is_opening",
 			"company", "voucher_type", "voucher_no", "remarks"],

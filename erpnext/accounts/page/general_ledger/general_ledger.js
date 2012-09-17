@@ -7,13 +7,11 @@ wn.pages['general-ledger'].onload = function(wrapper) {
 	
 	erpnext.general_ledger = new wn.views.GridReport({
 		title: "General Ledger",
+		page: wrapper,
 		parent: $(wrapper).find('.layout-main'),
 		appframe: wrapper.appframe,
 		doctypes: ["Company", "Account", "GL Entry"],
-		setup: function() {
-			this.setup_filters();
-			this.setup_columns();
-		},
+
 		setup_columns: function() {
 			this.columns = [
 				{id: "posting_date", name: "Posting Date", field: "posting_date", width: 100,
@@ -41,13 +39,19 @@ wn.pages['general-ledger'].onload = function(wrapper) {
 			];
 		},
 		filters: [
-			{fieldtype:"Select", label: "Company", options:"Company", default_value: "Select Company...",
+			{fieldtype:"Select", label: "Company", link:"Company", default_value: "Select Company...",
 				filter: function(val, item, opts) {
 					return item.company == val || val == opts.default_value || item._show;
 				}},
-			{fieldtype:"Select", label: "Account", options:"Account", default_value: "Select Account...",
-				filter: function(val, item, opts) {
-					return item.account == val || val == opts.default_value || item._show;
+			{fieldtype:"Select", label: "Account", link:"Account", default_value: "Select Account...",
+				filter: function(val, item, opts, me) {
+					if(val == opts.default_value || item._show) {
+						return true;
+					} else {
+						// true if GL Entry belongs to selected
+						// account ledger or group
+						return me.is_child_account(val, item.account);
+					}
 				}},
 			{fieldtype:"Data", label: "Voucher No",
 				filter: function(val, item, opts) {
@@ -64,13 +68,6 @@ wn.pages['general-ledger'].onload = function(wrapper) {
 			{fieldtype:"Button", label: "Refresh", icon:"icon-refresh icon-white", cssClass:"btn-info"},
 			{fieldtype:"Button", label: "Reset Filters"}
 		],
-		setup_filters: function() {
-			var me = this;
-			// default filters
-			this.init_filter_values();
-			this.filter_inputs.refresh.click(function() { me.set_route(); })
-			this.filter_inputs.reset_filters.click(function() { me.init_filter_values(); me.set_route(); })
-		},
 		init_filter_values: function() {
 			this.filter_inputs.company.val(sys_defaults.company);
 			this.filter_inputs.from_date.val(dateutil.str_to_user(sys_defaults.year_start_date));
@@ -78,10 +75,18 @@ wn.pages['general-ledger'].onload = function(wrapper) {
 			this.filter_inputs.voucher_no.val("");
 			this.filter_inputs.account.get(0).selectedIndex = 0;			
 		},
+		is_child_account: function(account, item_account) {
+			account = this.account_by_name[account];
+			item_account = this.account_by_name[item_account];
+			
+			return (item_account.lft >= account.lft && item_account.rgt <= account.rgt)			
+		},
 		prepare_data: function() {
 			// add Opening, Closing, Totals rows
 			// if filtered by account and / or voucher
 			var data = wn.report_dump.data["GL Entry"];
+			this.make_account_by_name();
+			var me = this;
 			
 			var account = this.filter_inputs.account.val();
 			var from_date = dateutil.user_to_obj(this.filter_inputs.from_date.val());
@@ -104,9 +109,11 @@ wn.pages['general-ledger'].onload = function(wrapper) {
 			}
 			
 			$.each(data, function(i, item) {
-				if((account!=default_account ? item.account==account : true) && 
+				if((account!=default_account ? me.is_child_account(account, item.account) : true) && 
 					(voucher_no ? item.voucher_no==voucher_no : true)) {
+
 					var date = dateutil.str_to_obj(item.posting_date);
+					
 					if(date < from_date) {
 						opening.debit += item.debit;
 						opening.credit += item.credit;
@@ -132,6 +139,13 @@ wn.pages['general-ledger'].onload = function(wrapper) {
 			
 			this.prepare_data_view(out);
 		},
+		make_account_by_name: function() {
+			this.account_by_name = {};
+			var me = this;
+			$.each(wn.report_dump.data['Account'], function(i, v) {
+				me.account_by_name[v.name] = v;
+			})
+		}
 	});
 
 }

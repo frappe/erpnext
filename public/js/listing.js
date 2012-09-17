@@ -11,13 +11,9 @@ if(!this.opts.hide_refresh){make_btn('Refresh','ui-icon-refresh',function(btn){m
 if(this.opts.show_new){make_btn('New ','ui-icon-document',function(){new_doc(me.dt);},1);}
 if(this.opts.show_report){make_btn('Report Builder','ui-icon-clipboard',function(){loadreport(me.dt,null,null,null,1);},0);}
 if(!this.opts.hide_export){make_btn('Export','ui-icon-circle-arrow-e',function(){me.do_export();});}
-if(!this.opts.hide_print){make_btn('Print','ui-icon-print',function(){me.do_print();});}
 if(this.opts.show_calc){make_btn('Calc','ui-icon-calculator',function(){me.do_calc();});$dh(me.buttons['Calc'])}
 this.loading_img=$a(this.btn_area,'img','',{display:'none',marginBottom:'-2px'});this.loading_img.src='images/lib/ui/button-load.gif';if(!keys(this.buttons).length)
 $dh(this.btn_area);}
-Listing.prototype.do_print=function(){this.build_query();if(!this.query){alert('No Query!');return;}
-args={query:this.query,title:this.head_text,colnames:this.colnames,colwidths:this.colwidths,coltypes:this.coltypes,has_index:(this.no_index?0:1),has_headings:1,check_limit:1,is_simple:1}
-wn.require('js/print_query.js');_p.print_query=new _p.PrintQuery();_p.print_query.show_dialog(args);}
 Listing.prototype.do_calc=function(){show_calc(this.result_tab,this.colnames,this.coltypes,0)}
 Listing.prototype.add_filter=function(label,ftype,options,tname,fname,cond){if(!this.filter_area){alert('[Listing] make() must be called before add_filter');}
 var me=this;if(!this.filter_set){var h=$a(this.filter_area,'div','',{fontSize:'14px',fontWeight:'bold',marginBottom:'4px'});h.innerHTML='Filter your search';this.filter_area.div=$a(this.filter_area,'div');this.perm=[[1,1],]

@@ -87,7 +87,7 @@ def boot_session(bootinfo):
 		
 		# load subscription info
 		import conf
-		for key in ['max_users', 'expires_on', 'max_space', 'status']:
+		for key in ['max_users', 'expires_on', 'max_space', 'status', 'developer_mode']:
 			if hasattr(conf, key): bootinfo[key] = getattr(conf, key)
 
 		company = webnotes.conn.sql("select name, default_currency from `tabCompany`", as_dict=1)
@@ -96,7 +96,7 @@ def boot_session(bootinfo):
 			company_dict.setdefault(c['name'], {}).update(c)
 
 		bootinfo['company'] = company_dict
-
+		
 def get_letter_heads():
 	"""load letter heads with startup"""
 	import webnotes

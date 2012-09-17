@@ -76,7 +76,7 @@ erpnext.startup.start = function() {
 
 		// complete registration
 		if(in_list(user_roles,'System Manager') && (wn.boot.setup_complete=='No')) { 
-			wn.require("js/complete_setup.js");
+			wn.require("js/app/complete_setup.js");
 			erpnext.complete_setup.show(); 
 		}
 		if(wn.boot.expires_on && in_list(user_roles, 'System Manager')) {

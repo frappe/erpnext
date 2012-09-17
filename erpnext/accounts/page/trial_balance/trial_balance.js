@@ -8,17 +8,20 @@
 // 
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	See the
 // GNU General Public License for more details.
 // 
 // You should have received a copy of the GNU General Public License
-// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+// along with this program.	If not, see <http://www.gnu.org/licenses/>.
 
-pscript.onload_Projects = function(wrapper) {
-	wn.ui.make_app_page({parent:wrapper, title:'Gantt Chart: All Tasks', single_column:true});
-	if(!erpnext.show_task_gantt)
-		wn.require('js/app/gantt_task.js');
+wn.require("js/app/account_tree_grid.js");
+wn.require("js/app/account_tree_grid.css");
 
-	var gantt_area = $('<div>').appendTo($(wrapper).find('.layout-main'));
-	erpnext.show_task_gantt(gantt_area);
+wn.pages['trial-balance'].onload = function(wrapper) { 
+	wn.ui.make_app_page({
+		parent: wrapper,
+		title: 'Trial Balance',
+		single_column: true
+	});
+	erpnext.trial_balance = new erpnext.AccountTreeGrid(wrapper, 'Trial Balance');
 }
