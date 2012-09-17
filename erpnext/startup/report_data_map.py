@@ -20,11 +20,16 @@ data_map = {
 			"company"],
 		"order_by": "lft"
 	},
+	"Cost Center": {
+		"columns": ["name", "parent_cost_center", "lft", "rgt", "debit_or_credit",
+			"company"],
+		"order_by": "lft"
+	},
 	"GL Entry": {
 		"columns": ["account", "posting_date", "cost_center", "debit", "credit", "is_opening",
-			"company"],
+			"company", "voucher_type", "voucher_no", "remarks"],
 		"conditions": ["ifnull(is_cancelled, 'No')='No'"],
-		"order_by": "posting_date"
+		"order_by": "posting_date, account"
 	},
 	"Company": {
 		"columns": ["name"],
@@ -32,6 +37,6 @@ data_map = {
 	},
 	"Fiscal Year": {
 		"columns": ["name", "year_start_date", 
-			"adddate(year_start_date, interval 1 year) as year_end_date"]
+			"adddate(adddate(year_start_date, interval 1 year), interval -1 day) as year_end_date"]
 	}
 }

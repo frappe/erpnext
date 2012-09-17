@@ -2570,6 +2570,18 @@ div.appframe-toolbar {
 	border-bottom: 1px solid #ccc;
 }
 
+div.appframe-toolbar .label {
+	margin: 2px 2px;
+}
+
+div.appframe-toolbar input, div.appframe-toolbar select {
+	font-size: 80%;
+	margin: 2px 2px;
+}
+div.appframe-toolbar button {
+	padding: 3px 7px !important;
+}
+
 
 
 /*
