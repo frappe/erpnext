@@ -22,7 +22,7 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 	cur_frm.add_custom_button('View Now', function() {
 		doc = locals[dt][dn];
 		if(doc.__unsaved != 1) {
-			$c_obj(make_doclist(dt, dn), 'get', '', function(r, rt) {
+			$c_obj(make_doclist(dt, dn), 'get_digest_msg', '', function(r, rt) {
 				if(r.exc) {
 					msgprint(err_msg);
 					console.log(r.exc);
@@ -33,7 +33,7 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 						width: 800
 					});
 
-					$a(d.body, 'div', '', '', r['message'][1]);
+					$a(d.body, 'div', '', '', r['message']);
 
 					d.show();
 				}

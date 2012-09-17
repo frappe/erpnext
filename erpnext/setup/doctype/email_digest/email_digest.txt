@@ -3,11 +3,11 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-07-03 13:30:54',
-		'docstatus': 0,
-		'modified': '2012-07-12 16:29:08',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
+		u'creation': '2012-07-12 23:29:44',
+		u'docstatus': 0,
+		u'modified': '2012-09-15 19:34:37',
+		u'modified_by': u'Administrator',
+		u'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
@@ -16,10 +16,10 @@
 		'autoname': u'Prompt',
 		'colour': u'White:FFF',
 		'description': u'Send regular summary reports via Email.',
-		'doctype': 'DocType',
+		u'doctype': u'DocType',
 		'document_type': u'System',
 		'module': u'Setup',
-		'name': '__common__',
+		u'name': u'__common__',
 		'section_style': u'Simple',
 		'show_in_menu': 0,
 		'version': 1
@@ -27,8 +27,8 @@
 
 	# These values are common for all DocField
 	{
-		'doctype': u'DocField',
-		'name': '__common__',
+		u'doctype': u'DocField',
+		u'name': u'__common__',
 		'parent': u'Email Digest',
 		'parentfield': u'fields',
 		'parenttype': u'DocType'
@@ -36,8 +36,8 @@
 
 	# These values are common for all DocPerm
 	{
-		'doctype': u'DocPerm',
-		'name': '__common__',
+		u'doctype': u'DocPerm',
+		u'name': u'__common__',
 		'parent': u'Email Digest',
 		'parentfield': u'permissions',
 		'parenttype': u'DocType',
@@ -47,28 +47,13 @@
 
 	# DocType, Email Digest
 	{
-		'doctype': 'DocType',
-		'name': u'Email Digest'
-	},
-
-	# DocPerm
-	{
-		'cancel': 1,
-		'create': 1,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'doctype': u'DocPerm',
-		'permlevel': 1
+		u'doctype': u'DocType',
+		u'name': u'Email Digest'
 	},
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'settings',
 		'fieldtype': u'Section Break',
 		'label': u'Email Digest Settings',
@@ -77,7 +62,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'column_break0',
 		'fieldtype': u'Column Break',
 		'permlevel': 0
@@ -85,7 +70,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'enabled',
 		'fieldtype': u'Check',
 		'label': u'Enabled',
@@ -94,7 +79,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'company',
 		'fieldtype': u'Select',
 		'label': u'For Company',
@@ -106,11 +91,11 @@
 	# DocField
 	{
 		'allow_on_submit': 0,
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'frequency',
 		'fieldtype': u'Select',
 		'label': u'How frequently?',
-		'options': u'\nDaily\nWeekly\nMonthly',
+		'options': u'Daily\nWeekly\nMonthly',
 		'permlevel': 0,
 		'reqd': 1
 	},
@@ -118,7 +103,7 @@
 	# DocField
 	{
 		'depends_on': u'eval:doc.enabled',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'next_send',
 		'fieldtype': u'Data',
 		'label': u'Next email will be sent on:',
@@ -127,19 +112,7 @@
 
 	# DocField
 	{
-		'default': u'1',
-		'doctype': u'DocField',
-		'fieldname': u'use_standard',
-		'fieldtype': u'Check',
-		'hidden': 1,
-		'label': u'Use standard?',
-		'permlevel': 0,
-		'search_index': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'column_break1',
 		'fieldtype': u'Column Break',
 		'permlevel': 0
@@ -148,7 +121,7 @@
 	# DocField
 	{
 		'description': u'Note: Email will not be sent to disabled users',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'recipient_list',
 		'fieldtype': u'Text',
 		'label': u'Recipients',
@@ -158,7 +131,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'addremove_recipients',
 		'fieldtype': u'Button',
 		'label': u'Add/Remove Recipients',
@@ -169,9 +142,8 @@
 	# DocField
 	{
 		'colour': u'White:FFF',
-		'depends_on': u'eval:doc.use_standard',
 		'description': u'Check all the items below that you want to send in this digest.',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'select_digest_content',
 		'fieldtype': u'Section Break',
 		'label': u'Select Digest Content',
@@ -180,8 +152,8 @@
 
 	# DocField
 	{
-		'depends_on': u'eval:doc.use_standard',
-		'doctype': u'DocField',
+		'colour': u'White:FFF',
+		u'doctype': u'DocField',
 		'fieldname': u'new_leads',
 		'fieldtype': u'Check',
 		'label': u'New Leads',
@@ -190,8 +162,7 @@
 
 	# DocField
 	{
-		'depends_on': u'eval:doc.use_standard',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'new_enquiries',
 		'fieldtype': u'Check',
 		'label': u'New Enquiries',
@@ -200,8 +171,7 @@
 
 	# DocField
 	{
-		'depends_on': u'eval:doc.use_standard',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'new_quotations',
 		'fieldtype': u'Check',
 		'label': u'New Quotations',
@@ -210,8 +180,7 @@
 
 	# DocField
 	{
-		'depends_on': u'eval:doc.use_standard',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'new_sales_orders',
 		'fieldtype': u'Check',
 		'label': u'New Sales Orders',
@@ -220,8 +189,34 @@
 
 	# DocField
 	{
-		'depends_on': u'eval:doc.use_standard',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
+		'fieldname': u'new_delivery_notes',
+		'fieldtype': u'Check',
+		'label': u'New Delivery Notes',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		u'doctype': u'DocField',
+		'fieldname': u'new_purchase_requests',
+		'fieldtype': u'Check',
+		'label': u'New Purchase Requests',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		u'doctype': u'DocField',
+		'fieldname': u'new_supplier_quotations',
+		'fieldtype': u'Check',
+		'label': u'New Supplier Quotations',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		u'doctype': u'DocField',
 		'fieldname': u'new_purchase_orders',
 		'fieldtype': u'Check',
 		'label': u'New Purchase Orders',
@@ -230,27 +225,52 @@
 
 	# DocField
 	{
-		'depends_on': u'eval:doc.use_standard',
-		'doctype': u'DocField',
-		'fieldname': u'new_transactions',
+		u'doctype': u'DocField',
+		'fieldname': u'new_purchase_receipts',
 		'fieldtype': u'Check',
-		'label': u'New Transactions',
+		'label': u'New Purchase Receipts',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'depends_on': u'eval:doc.use_standard',
-		'doctype': u'DocField',
-		'fieldname': u'payables',
+		u'doctype': u'DocField',
+		'fieldname': u'new_stock_entries',
 		'fieldtype': u'Check',
-		'label': u'Payables',
+		'label': u'New Stock Entries',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
+		'fieldname': u'new_support_tickets',
+		'fieldtype': u'Check',
+		'label': u'New Support Tickets',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		u'doctype': u'DocField',
+		'fieldname': u'new_communications',
+		'fieldtype': u'Check',
+		'label': u'New Communications',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		u'doctype': u'DocField',
+		'fieldname': u'new_projects',
+		'fieldtype': u'Check',
+		'label': u'New Projects',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		u'doctype': u'DocField',
 		'fieldname': u'cb1',
 		'fieldtype': u'Column Break',
 		'permlevel': 0
@@ -258,58 +278,7 @@
 
 	# DocField
 	{
-		'depends_on': u'eval:doc.use_standard',
-		'doctype': u'DocField',
-		'fieldname': u'payments',
-		'fieldtype': u'Check',
-		'label': u'Payments',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'depends_on': u'eval:doc.use_standard',
-		'doctype': u'DocField',
-		'fieldname': u'expenses_booked',
-		'fieldtype': u'Check',
-		'label': u'Expenses Booked',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'depends_on': u'eval:doc.use_standard',
-		'doctype': u'DocField',
-		'fieldname': u'invoiced_amount',
-		'fieldtype': u'Check',
-		'label': u'Invoiced Amount (Receivables)',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'depends_on': u'eval:doc.use_standard',
-		'doctype': u'DocField',
-		'fieldname': u'collections',
-		'fieldtype': u'Check',
-		'label': u'Collections',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'depends_on': u'eval:doc.use_standard',
-		'doctype': u'DocField',
-		'fieldname': u'income',
-		'fieldtype': u'Check',
-		'label': u'Income',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'depends_on': u'eval:doc.use_standard',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'income_year_to_date',
 		'fieldtype': u'Check',
 		'label': u'Income Year to Date',
@@ -318,8 +287,7 @@
 
 	# DocField
 	{
-		'depends_on': u'eval:doc.use_standard',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'bank_balance',
 		'fieldtype': u'Check',
 		'label': u'Bank Balance',
@@ -328,11 +296,70 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
-		'fieldname': u'stock_below_rl',
+		u'doctype': u'DocField',
+		'fieldname': u'income',
 		'fieldtype': u'Check',
-		'hidden': 1,
-		'label': u'Stock Items below re-order level',
+		'label': u'Income',
 		'permlevel': 0
+	},
+
+	# DocField
+	{
+		u'doctype': u'DocField',
+		'fieldname': u'expenses_booked',
+		'fieldtype': u'Check',
+		'label': u'Expenses Booked',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		u'doctype': u'DocField',
+		'fieldname': u'collections',
+		'fieldtype': u'Check',
+		'label': u'Collections',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		u'doctype': u'DocField',
+		'fieldname': u'payments',
+		'fieldtype': u'Check',
+		'label': u'Payments',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		u'doctype': u'DocField',
+		'fieldname': u'invoiced_amount',
+		'fieldtype': u'Check',
+		'label': u'Receivables',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		u'doctype': u'DocField',
+		'fieldname': u'payables',
+		'fieldtype': u'Check',
+		'label': u'Payables',
+		'permlevel': 0
+	},
+
+	# DocPerm
+	{
+		'cancel': 1,
+		'create': 1,
+		u'doctype': u'DocPerm',
+		'permlevel': 0,
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		u'doctype': u'DocPerm',
+		'permlevel': 1
 	}
 ]
