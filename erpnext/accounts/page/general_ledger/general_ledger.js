@@ -43,23 +43,23 @@ wn.pages['general-ledger'].onload = function(wrapper) {
 		filters: [
 			{fieldtype:"Select", label: "Company", options:"Company", default_value: "Select Company...",
 				filter: function(val, item, opts) {
-					return item.company == val || val == opts.default_value;
+					return item.company == val || val == opts.default_value || item._show;
 				}},
 			{fieldtype:"Select", label: "Account", options:"Account", default_value: "Select Account...",
 				filter: function(val, item, opts) {
-					return item.account == val || val == opts.default_value;
+					return item.account == val || val == opts.default_value || item._show;
 				}},
 			{fieldtype:"Data", label: "Voucher No",
 				filter: function(val, item, opts) {
 					if(!val) return true;
-					return item.voucher_no.indexOf(val)!=-1;
+					return (item.voucher_no && item.voucher_no.indexOf(val)!=-1) || item._show;
 				}},
 			{fieldtype:"Date", label: "From Date", filter: function(val, item) {
-				return dateutil.user_to_obj(val) <= dateutil.str_to_obj(item.posting_date);
+				return item._show || dateutil.user_to_obj(val) <= dateutil.str_to_obj(item.posting_date);
 			}},
 			{fieldtype:"Label", label: "To"},
 			{fieldtype:"Date", label: "To Date", filter: function(val, item) {
-				return dateutil.user_to_obj(val) >= dateutil.str_to_obj(item.posting_date);
+				return item._show || dateutil.user_to_obj(val) >= dateutil.str_to_obj(item.posting_date);
 			}},
 			{fieldtype:"Button", label: "Refresh", icon:"icon-refresh icon-white", cssClass:"btn-info"},
 			{fieldtype:"Button", label: "Reset Filters"}
@@ -79,7 +79,58 @@ wn.pages['general-ledger'].onload = function(wrapper) {
 			this.filter_inputs.account.get(0).selectedIndex = 0;			
 		},
 		prepare_data: function() {
-			this.prepare_data_view(wn.report_dump.data["GL Entry"]);
+			// add Opening, Closing, Totals rows
+			// if filtered by account and / or voucher
+			var data = wn.report_dump.data["GL Entry"];
+			
+			var account = this.filter_inputs.account.val();
+			var from_date = dateutil.user_to_obj(this.filter_inputs.from_date.val());
+			var to_date = dateutil.user_to_obj(this.filter_inputs.to_date.val());
+			var voucher_no = this.filter_inputs.voucher_no.val();
+			var default_account = this.filter_inputs.account.get(0).opts.default_value;
+			
+			if(to_date < from_date) {
+				msgprint("From Date must be before To Date");
+				return;
+			}
+			
+			var opening = {
+				account: "Opening", debit: 0.0, credit: 0.0, 
+					id:"_opening", _show: true, _style: "font-weight: bold"
+			}
+			var totals = {
+				account: "Totals", debit: 0.0, credit: 0.0, 
+					id:"_totals", _show: true, _style: "font-weight: bold"
+			}
+			
+			$.each(data, function(i, item) {
+				if((account!=default_account ? item.account==account : true) && 
+					(voucher_no ? item.voucher_no==voucher_no : true)) {
+					var date = dateutil.str_to_obj(item.posting_date);
+					if(date < from_date) {
+						opening.debit += item.debit;
+						opening.credit += item.credit;
+					} else if(date <= to_date) {
+						totals.debit += item.debit;
+						totals.credit += item.credit;						
+					}
+				}
+			})
+
+			var closing = {
+				account: "Closing (Opening + Totals)", debit: opening.debit + totals.debit, 
+					credit: opening.credit + totals.credit, 
+					id:"_closing", _show: true, _style: "font-weight: bold"
+			}
+								
+			
+			if(account != default_account) {
+				var out = [opening].concat(data).concat([totals, closing]);
+			} else {
+				var out = data.concat([totals]);
+			}
+			
+			this.prepare_data_view(out);
 		},
 	});
 
