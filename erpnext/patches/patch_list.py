@@ -577,4 +577,12 @@ patch_list = [
 		'patch_module': 'patches.september_2012',
 		'patch_file': 'reload_criteria_stock_ledger',
 	},
+	{
+		'patch_module': 'patches.september_2012',
+		'patch_file': 'all_permissions_patch',
+	},
+	{
+		'patch_module': 'patches.september_2012',
+		'patch_file': 'customer_permission_patch',
+	},
 ]
