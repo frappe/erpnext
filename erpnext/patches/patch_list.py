@@ -513,11 +513,6 @@ patch_list = [
 	},
 	{
 		'patch_module': 'patches.july_2012',
-		'patch_file': 'unicode_conf',
-		'description': "appends from __future__ import unicode_literals to py files if necessary"
-	},
-	{
-		'patch_module': 'patches.july_2012',
 		'patch_file': 'sync_trial_balance',
 		'description': "sync trial balance"
 	},
@@ -576,5 +571,13 @@ patch_list = [
 	{
 		'patch_module': 'patches.september_2012',
 		'patch_file': 'reload_criteria_stock_ledger',
+	},
+	{
+		'patch_module': 'patches.september_2012',
+		'patch_file': 'all_permissions_patch',
+	},
+	{
+		'patch_module': 'patches.september_2012',
+		'patch_file': 'customer_permission_patch',
 	},
 ]

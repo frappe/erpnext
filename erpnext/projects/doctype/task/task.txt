@@ -3,11 +3,11 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-06-04 14:05:07',
-		'docstatus': 0,
-		'modified': '2012-08-08 14:01:34',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
+		u'creation': '2012-08-08 15:39:55',
+		u'docstatus': 0,
+		u'modified': '2012-09-17 10:58:32',
+		u'modified_by': u'Administrator',
+		u'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
@@ -17,10 +17,10 @@
 		'autoname': u'TASK.#####',
 		'colour': u'White:FFF',
 		'default_print_format': u'Standard',
-		'doctype': 'DocType',
+		u'doctype': u'DocType',
 		'document_type': u'Master',
 		'module': u'Projects',
-		'name': '__common__',
+		u'name': u'__common__',
 		'section_style': u'Tray',
 		'server_code_error': u' ',
 		'show_in_menu': 0,
@@ -31,8 +31,8 @@
 
 	# These values are common for all DocField
 	{
-		'doctype': u'DocField',
-		'name': '__common__',
+		u'doctype': u'DocField',
+		u'name': u'__common__',
 		'parent': u'Task',
 		'parentfield': u'fields',
 		'parenttype': u'DocType',
@@ -41,60 +41,24 @@
 
 	# These values are common for all DocPerm
 	{
-		'doctype': u'DocPerm',
-		'name': '__common__',
+		u'doctype': u'DocPerm',
+		u'name': u'__common__',
 		'parent': u'Task',
 		'parentfield': u'permissions',
 		'parenttype': u'DocType',
-		'read': 1
+		'read': 1,
+		'role': u'Projects User'
 	},
 
 	# DocType, Task
 	{
-		'doctype': 'DocType',
-		'name': u'Task'
-	},
-
-	# DocPerm
-	{
-		'amend': 1,
-		'cancel': 1,
-		'create': 1,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'All',
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'All',
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'amend': 1,
-		'cancel': 1,
-		'create': 1,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Projects User',
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Projects User'
+		u'doctype': u'DocType',
+		u'name': u'Task'
 	},
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'task_details',
 		'fieldtype': u'Section Break',
 		'label': u'Task Details',
@@ -105,7 +69,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'subject',
 		'fieldtype': u'Data',
 		'in_filter': 1,
@@ -117,7 +81,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'exp_start_date',
 		'fieldtype': u'Date',
 		'label': u'Expected Start Date',
@@ -128,7 +92,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'exp_end_date',
 		'fieldtype': u'Date',
 		'in_filter': 1,
@@ -141,7 +105,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'column_break0',
 		'fieldtype': u'Column Break',
 		'oldfieldtype': u'Column Break',
@@ -151,7 +115,7 @@
 	# DocField
 	{
 		'colour': u'White:FFF',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'project',
 		'fieldtype': u'Link',
 		'label': u'Project',
@@ -164,7 +128,7 @@
 	# DocField
 	{
 		'colour': u'White:FFF',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'status',
 		'fieldtype': u'Select',
 		'label': u'Status',
@@ -177,7 +141,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'priority',
 		'fieldtype': u'Select',
 		'in_filter': 1,
@@ -191,7 +155,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'section_break0',
 		'fieldtype': u'Section Break',
 		'oldfieldtype': u'Section Break',
@@ -200,7 +164,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'description',
 		'fieldtype': u'Text Editor',
 		'label': u'Details',
@@ -212,7 +176,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'time_and_budget',
 		'fieldtype': u'Section Break',
 		'label': u'Time and Budget',
@@ -221,7 +185,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'expected',
 		'fieldtype': u'Column Break',
 		'label': u'Expected',
@@ -231,7 +195,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'exp_total_hrs',
 		'fieldtype': u'Data',
 		'label': u'Total Hours (Expected)',
@@ -242,7 +206,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'allocated_budget',
 		'fieldtype': u'Currency',
 		'label': u'Allocated Budget',
@@ -252,7 +216,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'actual',
 		'fieldtype': u'Column Break',
 		'label': u'Actual',
@@ -262,7 +226,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'act_start_date',
 		'fieldtype': u'Date',
 		'label': u'Actual Start Date',
@@ -272,7 +236,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'act_end_date',
 		'fieldtype': u'Date',
 		'label': u'Actual End Date',
@@ -282,7 +246,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'act_total_hrs',
 		'fieldtype': u'Data',
 		'label': u'Total Hours (Actual)',
@@ -292,7 +256,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'actual_budget',
 		'fieldtype': u'Currency',
 		'label': u'Actual Budget',
@@ -302,7 +266,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'more_details',
 		'fieldtype': u'Section Break',
 		'label': u'More Details'
@@ -312,7 +276,7 @@
 	{
 		'colour': u'White:FFF',
 		'depends_on': u'eval:doc.status == "Closed" || doc.status == "Pending Review"',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'review_date',
 		'fieldtype': u'Date',
 		'hidden': 1,
@@ -325,12 +289,27 @@
 	{
 		'colour': u'White:FFF',
 		'depends_on': u'eval:doc.status == "Closed"',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'closing_date',
 		'fieldtype': u'Date',
 		'hidden': 1,
 		'label': u'Closing Date',
 		'oldfieldname': u'closing_date',
 		'oldfieldtype': u'Date'
+	},
+
+	# DocPerm
+	{
+		'cancel': 1,
+		'create': 1,
+		u'doctype': u'DocPerm',
+		'permlevel': 0,
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		u'doctype': u'DocPerm',
+		'permlevel': 1
 	}
 ]

@@ -108,14 +108,21 @@ def delete_masters():
 
 
 
-def reset_series():
-	# Reset series
-	webnotes.conn.sql("""update tabSeries set current = 0 where name not in \
-		('Ann/', 'BSD', 'DEF', 'DF', 'EV', 'Event Updates/', 'FileData-', \
-		'FL', 'FMD/', 'GLM Detail', 'Login Page/', 'MDI', 'MDR', 'MI', 'MIR', \
-		'PERM', 'PR', 'SRCH/C/', 'TD', 'TIC/', 'TMD/', 'TW', 'UR', '_FEED', \
+def reset_all_series():
+	# Reset master series
+	webnotes.conn.sql("""update tabSeries set current = 0 where name not in 
+		('Ann/', 'BSD', 'DEF', 'DF', 'EV', 'Event Updates/', 'FileData-', 
+		'FL', 'FMD/', 'GLM Detail', 'Login Page/', 'MDI', 'MDR', 'MI', 'MIR', 
+		'PERM', 'PR', 'SRCH/C/', 'TD', 'TIC/', 'TMD/', 'TW', 'UR', '_FEED', 
 		'_SRCH', '_TRIGGER', '__NSO', 'CustomField', 'Letter')
 	""")
+	print "Series updated"
+		
+def reset_transaction_series():
+	webnotes.conn.sql("""update tabSeries set current = 0 where name in 
+		('JV', 'INV', 'BILL', 'SO', 'DN', 'PO', 'LEAD', 'ENQUIRY', 'ENQ', 'CI',
+		 'IN', 'PS', 'IDT', 'QAI', 'QTN', 'STE', 'SQTN', 'SUP', 'TDSP', 'SR', 
+		'POS', 'LAP', 'LAL', 'EXP')""")
 	print "Series updated"
 
 
@@ -185,12 +192,11 @@ def run():
 	# delete
 	delete_transactions()
 	
-	if cleanup_type == '1':	
-		print '\n', '*' * 10 + 'NOTE' + '*' * 10, '\n'
-		print "To reset series of the transactions go to Setup --> Numbering Series\n"
+	if cleanup_type == '1':
+		reset_transaction_series()
 	else:
 		delete_masters()
-		reset_series()
+		reset_all_series()
 		delete_main_masters()
 		reset_global_defaults()
 
