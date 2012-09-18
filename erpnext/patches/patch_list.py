@@ -513,11 +513,6 @@ patch_list = [
 	},
 	{
 		'patch_module': 'patches.july_2012',
-		'patch_file': 'unicode_conf',
-		'description': "appends from __future__ import unicode_literals to py files if necessary"
-	},
-	{
-		'patch_module': 'patches.july_2012',
 		'patch_file': 'sync_trial_balance',
 		'description': "sync trial balance"
 	},
