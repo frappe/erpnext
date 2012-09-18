@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 def execute():
 	import webnotes
 	doctype_list = webnotes.conn.sql("""SELECT name FROM `tabDocType`

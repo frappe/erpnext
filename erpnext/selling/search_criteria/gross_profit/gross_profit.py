@@ -16,6 +16,7 @@
 
 # Add Columns
 # ------------
+from __future__ import unicode_literals
 colnames[colnames.index('Rate*')] = 'Rate' 
 col_idx['Rate'] = col_idx['Rate*']
 col_idx.pop('Rate*')

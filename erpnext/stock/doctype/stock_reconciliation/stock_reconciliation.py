@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import unicode_literals
 import webnotes
 from webnotes.utils import cstr, flt, get_defaults, nowdate
 from webnotes import msgprint, errprint
@@ -46,10 +47,6 @@ class DocType:
 			
 			from webnotes.utils import file_manager
 			fn, content = file_manager.get_file(filename[1])
-		
-			# NOTE: Don't know why this condition exists
-			if not isinstance(content, basestring) and hasattr(content, 'tostring'):
-				content = content.tostring()
 		else:
 			content = self.doc.diff_info
 
@@ -81,8 +78,10 @@ class DocType:
 
 	def get_reconciliation_data(self,submit = 1):
 		"""Read and validate csv data"""
-		import csv 
-		data = csv.reader(self.get_csv_file_data(submit).splitlines())
+		import csv
+		from core.page.data_import_tool.data_import_tool import read_csv_content
+		csv_content = self.get_csv_file_data(submit).encode('utf-8')
+		data = read_csv_content(csv_content)
 		self.convert_into_list(data, submit)
 		
 
@@ -185,7 +184,7 @@ class DocType:
 			# Diff between file and system
 			qty_diff = row[2] != '~' and flt(row[2]) - flt(sys_stock['actual_qty']) or 0
 			rate_diff = row[3] != '~' and flt(row[3]) - flt(sys_stock['val_rate']) or 0
-
+			
 			# Make sl entry
 			if qty_diff:
 				self.make_sl_entry(is_submit, row, qty_diff, sys_stock)

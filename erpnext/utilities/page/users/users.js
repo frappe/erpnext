@@ -16,26 +16,37 @@
 
 $.extend(wn.pages.users, {
 	onload: function(wrapper) {
-		wn.pages.users.profiles = {};
-		wn.pages.users.refresh();
-		wn.pages.users.setup();
-		wn.pages.users.role_editor = new erpnext.RoleEditor();
+		var w = wn.pages.users;
+		wn.ui.make_app_page({
+			parent: w,
+			title: "Users",
+			single_column: true
+		});
+		w.profiles = {};
+		w.refresh();
+		w.setup();
+		w.role_editor = new erpnext.RoleEditor();
 	},
 	setup: function() {
+		wn.pages.users.appframe.add_button('+ Add User', function() {
+			wn.pages.users.add_user();
+		});
+		
 		// set roles
-		$('.users-area').on('click', '.btn.user-roles', function() {
+		var w = wn.pages.users;
+		$(w).on('click', '.btn.user-roles', function() {
 			var uid = $(this).parent().parent().attr('data-name');
 			wn.pages.users.role_editor.show(uid);
 		});
 
 		// settings
-		$('.users-area').on('click', '.btn.user-settings', function() {
+		$(w).on('click', '.btn.user-settings', function() {
 			var uid = $(this).parent().parent().attr('data-name');
 			wn.pages.users.show_settings(uid);
 		});
 		
 		// delete
-		$('.users-area').on('click', 'a.close', function() {
+		$(w).on('click', 'a.close', function() {
 			$card = $(this).parent();
 			var uid = $card.attr('data-name');
 			$card.css('opacity', 0.6);
@@ -55,7 +66,7 @@ $.extend(wn.pages.users, {
 		wn.call({
 			method:'utilities.page.users.users.get',
 			callback: function(r, rt) {
-				$('.users-area').empty();
+				$(wn.pages.users).find('.layout-main').empty();
 				for(var i in r.message) {
 					var p = r.message[i];
 					wn.pages.users.profiles[p.name] = p;
@@ -91,7 +102,7 @@ $.extend(wn.pages.users, {
 		if(!data.enabled) 
 			data.delete_html = '<a class="close" title="delete">&times;</a>';
 		
-		$('.users-area').append(repl('<div class="user-card" data-name="%(name)s">\
+		$(wn.pages.users).find('.layout-main').append(repl('<div class="user-card" data-name="%(name)s">\
 			%(delete_html)s\
 			<img src="%(imgsrc)s">\
 			<div class="user-info">\
@@ -103,7 +114,7 @@ $.extend(wn.pages.users, {
 		</div>', data));
 		
 		if(!data.enabled) {
-			$('.users-area .user-card:last')
+			$(wn.pages.users).find('.layout-main .user-card:last')
 				.addClass('disabled')
 				.find('.user-fullname').html('Disabled');
 		}
@@ -225,8 +236,7 @@ $.extend(wn.pages.users, {
 		var me = wn.pages.users;
 		var active_users = $('.user-card:not(.disabled)');
 		if(wn.boot.max_users && (active_users.length >= wn.boot.max_users)) {
-			msgprint(repl("Alas! <br />\
-			You already have <b>%(active_users)s</b> active users, \
+			msgprint(repl("You already have <b>%(active_users)s</b> active users, \
 			which is the maximum number that you are currently allowed to add. <br /><br /> \
 			So, to add more users, you can:<br /> \
 			1. <b>Upgrade to the unlimited users plan</b>, or<br /> \

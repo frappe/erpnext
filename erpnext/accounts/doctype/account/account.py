@@ -15,6 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # Please edit this list and import only required elements
+from __future__ import unicode_literals
 import webnotes
 
 from webnotes.utils import add_days, add_months, add_years, cint, cstr, date_diff, default_fields, flt, fmt_money, formatdate, generate_hash, getTraceback, get_defaults, get_first_day, get_last_day, getdate, has_common, month_name, now, nowdate, replace_newlines, sendmail, set_default, str_esc_quote, user_format, validate_email_add
@@ -43,7 +44,6 @@ class DocType:
 		self.doc.name = self.doc.account_name.strip() + ' - ' + company_abbr
 
 	# Get customer/supplier address
-	# ==================================================================
 	def get_address(self):		
 		add=sql("Select address from `tab%s` where name='%s'"%(self.doc.master_type,self.doc.master_name))
 		ret={'address':add[0][0]}
@@ -51,20 +51,17 @@ class DocType:
 
 
 	# check whether master name entered for supplier/customer
-	# ==================================================================
 	def validate_master_name(self):
 		if (self.doc.master_type == 'Customer' or self.doc.master_type == 'Supplier') and not self.doc.master_name:
 			msgprint("Message: Please enter Master Name once the account is created.")
 
 			
 	# Rate is mandatory for tax account	 
-	# ==================================================================
 	def validate_rate_for_tax(self):
 		if self.doc.account_type == 'Tax' and not self.doc.tax_rate:
 			msgprint("Please Enter Rate", raise_exception=1)
 
 	# Fetch Parent Details and validation for account not to be created under ledger
-	# ==================================================================
 	def validate_parent(self):
 		if self.doc.parent_account:
 			par = sql("select name, group_or_ledger, is_pl_account, debit_or_credit from tabAccount where name =%s",self.doc.parent_account)
@@ -85,13 +82,11 @@ class DocType:
 
 	
 	# Account name must be unique
-	# ==================================================================
 	def validate_duplicate_account(self):
 		if (self.doc.__islocal or (not self.doc.name)) and sql("select name from tabAccount where account_name=%s and company=%s", (self.doc.account_name, self.doc.company)):
 			msgprint("Account Name already exists, please rename", raise_exception=1)
 				
 	# validate root details
-	# ==================================================================
 	def validate_root_details(self):
 		#does not exists parent
 		if self.doc.account_name in ['Income','Source of Funds', 'Expenses','Application of Funds'] and self.doc.parent_account:
@@ -110,7 +105,6 @@ class DocType:
 			self.doc.is_pl_account = 'No'
 
 	# Convert group to ledger
-	# ==================================================================
 	def convert_group_to_ledger(self):
 		if self.check_if_child_exists():
 			msgprint("Account: %s has existing child. You can not convert this account to ledger" % (self.doc.name), raise_exception=1)
@@ -122,28 +116,28 @@ class DocType:
 			return 1
 
 	# Convert ledger to group
-	# ==================================================================
 	def convert_ledger_to_group(self):
 		if self.check_gle_exists():
-			msgprint("Account with existing transaction can not be converted to group.", raise_exception=1)
+			msgprint("Account with existing transaction can not be converted to group.", 
+				raise_exception=1)
+		elif self.doc.master_type or self.doc.account_type:
+			msgprint("Cannot covert to Group because Master Type or Account Type is selected.", 
+				raise_exception=1)
 		else:
 			self.doc.group_or_ledger = 'Group'
 			self.doc.save()
 			return 1
 
 	# Check if any previous balance exists
-	# ==================================================================
 	def check_gle_exists(self):
 		exists = sql("select name from `tabGL Entry` where account = '%s' and ifnull(is_cancelled, 'No') = 'No'" % (self.doc.name))
 		return exists and exists[0][0] or ''
 
 	# check if child exists
-	# ==================================================================
 	def check_if_child_exists(self):
 		return sql("select name from `tabAccount` where parent_account = %s and docstatus != 2", self.doc.name)
 	
 	# Update balance
-	# ==================================================================
 	def update_balance(self, fy, period_det, flag = 1):
 		# update in all parents
 		for p in period_det:
@@ -151,7 +145,6 @@ class DocType:
 
 
 	# change parent balance
-	# ==================================================================
 	def change_parent_bal(self):
 		period_det = []
 		fy = sql("select name from `tabFiscal Year` where if(ifnull(is_fiscal_year_closed, 'No'),ifnull(is_fiscal_year_closed, 'No'), 'No') = 'No'")
@@ -181,7 +174,6 @@ class DocType:
 
 
 	# VALIDATE
-	# ==================================================================
 	def validate(self): 
 		self.validate_master_name()
 		self.validate_rate_for_tax()
@@ -199,7 +191,6 @@ class DocType:
 			self.change_parent_bal()
 						 
 	# Add current fiscal year balance
-	# ==================================================================
 	def set_year_balance(self):
 		p = sql("select name, start_date, end_date, fiscal_year from `tabPeriod` where docstatus != 2 and period_type in ('Month', 'Year')")
 		for d in p:
@@ -217,29 +208,26 @@ class DocType:
 				ac.save(1)
 
 	# Update Node Set Model
-	# ==================================================================
 	def update_nsm_model(self):
 		import webnotes
 		import webnotes.utils.nestedset
 		webnotes.utils.nestedset.update_nsm(self)
 			
 	# ON UPDATE
-	# ==================================================================
 	def on_update(self):
+		
 		# update nsm
 		self.update_nsm_model()		
 		# Add curret year balance
 		self.set_year_balance()
 
 	# Check user role for approval process
-	# ==================================================================
 	def get_authorized_user(self):
 		# Check logged-in user is authorized
 		if get_value('Global Defaults', None, 'credit_controller') in webnotes.user.get_roles():
 			return 1
 			
 	# Check Credit limit for customer
-	# ==================================================================
 	def check_credit_limit(self, account, company, tot_outstanding):
 		# Get credit limit
 		credit_limit_from = 'Customer'
@@ -256,7 +244,6 @@ class DocType:
 				% (fmt_money(tot_outstanding), account, fmt_money(credit_limit), credit_limit_from), raise_exception=1)
 			
 	# Account with balance cannot be inactive
-	# ==================================================================
 	def check_balance_before_trash(self):
 		if self.check_gle_exists():
 			msgprint("Account with existing transaction (Sales Invoice / Purchase Invoice / Journal Voucher) can not be trashed", raise_exception=1)
@@ -265,20 +252,18 @@ class DocType:
 
 
 	# get current year balance
-	# ==================================================================
 	def get_curr_bal(self):
 		bal = sql("select balance from `tabAccount Balance` where period = '%s' and parent = '%s'" % (get_defaults()['fiscal_year'], self.doc.name),debug=0)
 		return bal and flt(bal[0][0]) or 0
 
 	# On Trash
-	# ==================================================================
 	def on_trash(self): 
 		# Check balance before trash
 		self.check_balance_before_trash()
 		
 		# rebuild tree
-		set(self.doc,'old_parent', '')
-		self.update_nsm_model()
+		from webnotes.utils.nestedset import update_remove_node
+		update_remove_node('Account', self.doc.name)
 
 		# delete all cancelled gl entry of this account
 		sql("delete from `tabGL Entry` where account = %s and ifnull(is_cancelled, 'No') = 'Yes'", self.doc.name)
@@ -287,7 +272,6 @@ class DocType:
 		sql("delete from `tabAccount Balance` where account = %s", self.doc.name)
 
 	# On restore
-	# ==================================================================
 	def on_restore(self):
 		# rebuild tree
 		self.update_nsm_model()
@@ -295,7 +279,6 @@ class DocType:
 		self.set_year_balance()
 	
 	# on rename
-	# ---------
 	def on_rename(self,newdn,olddn):
 		company_abbr = sql("select tc.abbr from `tabAccount` ta, `tabCompany` tc where ta.company = tc.name and ta.name=%s", olddn)[0][0]
 		

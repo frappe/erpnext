@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 def execute():
 	"""sync supplier quotatoin and create supplier quotation mappers"""
 	from webnotes.model.sync import sync

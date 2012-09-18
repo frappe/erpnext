@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 def execute():
 	"""drop and create __CacheItem table again"""
 	import webnotes

@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-03-27 14:35:41',
+		'creation': '2012-07-03 13:30:47',
 		'docstatus': 0,
-		'modified': '2012-03-27 14:35:41',
+		'modified': '2012-07-11 14:56:41',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -17,6 +17,7 @@
 		'autoname': u'field:year',
 		'colour': u'White:FFF',
 		'default_print_format': u'Standard',
+		'description': u'**Fiscal Year** represents a Financial Year. All accounting entries and other major transactions are tracked against **Fiscal Year**.',
 		'doctype': 'DocType',
 		'document_type': u'Master',
 		'module': u'Accounts',
@@ -24,7 +25,7 @@
 		'section_style': u'Tabbed',
 		'server_code_error': u' ',
 		'show_in_menu': 0,
-		'version': 57
+		'version': 1
 	},
 
 	# These values are common for all DocField
@@ -59,14 +60,14 @@
 
 	# DocPerm
 	{
-		'doctype': u'DocPerm'
+		'amend': 0,
+		'doctype': u'DocPerm',
+		'submit': 0
 	},
 
 	# DocPerm
 	{
-		'amend': 0,
-		'doctype': u'DocPerm',
-		'submit': 0
+		'doctype': u'DocPerm'
 	},
 
 	# DocField
@@ -74,7 +75,7 @@
 		'doctype': u'DocField',
 		'fieldname': u'year_details',
 		'fieldtype': u'Section Break',
-		'label': u'Year Details',
+		'label': u'Fiscal Year Details',
 		'oldfieldtype': u'Section Break',
 		'permlevel': 0
 	},
@@ -92,23 +93,13 @@
 
 	# DocField
 	{
+		'colour': u'White:FFF',
+		'description': u'For e.g. 2012, 2012-13',
 		'doctype': u'DocField',
 		'fieldname': u'year',
 		'fieldtype': u'Data',
 		'label': u'Year Name',
 		'oldfieldname': u'year',
-		'oldfieldtype': u'Data',
-		'permlevel': 0,
-		'reqd': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'abbreviation',
-		'fieldtype': u'Data',
-		'label': u'Abbreviation',
-		'oldfieldname': u'abbreviation',
 		'oldfieldtype': u'Data',
 		'permlevel': 0,
 		'reqd': 1
@@ -128,6 +119,9 @@
 
 	# DocField
 	{
+		'colour': u'White:FFF',
+		'default': u'No',
+		'description': u'Entries are not allowed against this Fiscal Year if the year is closed.',
 		'doctype': u'DocField',
 		'fieldname': u'is_fiscal_year_closed',
 		'fieldtype': u'Select',
@@ -137,65 +131,5 @@
 		'options': u'\nNo\nYes',
 		'permlevel': 0,
 		'reqd': 0
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'description': u"Click on the button below to reset balances from your previous year's closing and repost your balances. You can use this if your previous year balance sheet has been changed and you wish to update your current accounts.",
-		'doctype': u'DocField',
-		'fieldname': u'repost_accounts',
-		'fieldtype': u'Section Break',
-		'label': u'Repost Accounts',
-		'oldfieldtype': u'Section Break',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'past_year',
-		'fieldtype': u'Select',
-		'label': u'Past Year',
-		'oldfieldname': u'past_year',
-		'oldfieldtype': u'Select',
-		'options': u'link:Fiscal Year',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'company',
-		'fieldtype': u'Link',
-		'in_filter': 0,
-		'label': u'Company',
-		'oldfieldname': u'company',
-		'oldfieldtype': u'Link',
-		'options': u'Company',
-		'permlevel': 0,
-		'search_index': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'repost_account_balances',
-		'fieldtype': u'Button',
-		'label': u'Repost Account Balances',
-		'oldfieldtype': u'Button',
-		'options': u'repost',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'repost_voucher_outstanding',
-		'fieldtype': u'Button',
-		'label': u'Repost Voucher Outstanding',
-		'oldfieldtype': u'Button',
-		'options': u'update_voucher_outstanding',
-		'permlevel': 0
 	}
 ]

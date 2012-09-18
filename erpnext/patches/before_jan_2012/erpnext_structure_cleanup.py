@@ -17,6 +17,7 @@
 #Cleanup all unwanted documents and restructure of moduloes
 #----------------------------------------------------------
 
+from __future__ import unicode_literals
 import webnotes
 from webnotes.model import delete_doc
 from webnotes.modules import reload_doc

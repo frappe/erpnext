@@ -23,6 +23,7 @@
 # 
 
 
+from __future__ import unicode_literals
 import cgi, cgitb, os, sys
 cgitb.enable()
 
@@ -38,12 +39,11 @@ import webnotes
 import webnotes.handler
 import webnotes.auth
 
-def init():
-	# make the form_dict
-	webnotes.form = cgi.FieldStorage(keep_blank_values=True)
-	for key in webnotes.form.keys():
-		webnotes.form_dict[key] = webnotes.form.getvalue(key)
+from webnotes.utils import cstr
 
+def init():
+	webnotes.handler.get_cgi_fields()
+	
 	# init request
 	try:
 		webnotes.http_request = webnotes.auth.HTTPRequest()

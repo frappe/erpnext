@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import unicode_literals
 import webnotes
 
 from webnotes.utils import cint, cstr, flt, getdate, now, nowdate
@@ -49,9 +50,7 @@ class DocType:
 		master_dict = {'Fiscal Year':{
 			'year': curr_fiscal_year,
 			'year_start_date': fy_start_date,
-			'abbreviation': fy_abbr,
-			'company': args.get('company_name'),
-			'is_fiscal_year_closed': 'No'}}
+			'company': args.get('company_name')}}
 		self.create_records(master_dict)
 		
 		# Company

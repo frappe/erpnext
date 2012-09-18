@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 def execute():
 	"""New Send Autoreply checkbox in Email Settings"""
 	import webnotes

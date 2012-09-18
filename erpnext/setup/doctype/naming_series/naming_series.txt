@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-04-10 13:01:16',
+		'creation': '2012-07-03 13:30:54',
 		'docstatus': 0,
-		'modified': '2012-04-10 18:45:34',
+		'modified': '2012-07-12 15:59:52',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -16,7 +16,7 @@
 		'description': u'Set prefix for numbering series on your transactions',
 		'doctype': 'DocType',
 		'hide_heading': 0,
-		'hide_toolbar': 0,
+		'hide_toolbar': 1,
 		'issingle': 1,
 		'module': u'Setup',
 		'name': '__common__',
@@ -24,7 +24,7 @@
 		'section_style': u'Tray',
 		'server_code_error': u' ',
 		'show_in_menu': 0,
-		'version': 66
+		'version': 1
 	},
 
 	# These values are common for all DocField
@@ -123,7 +123,7 @@
 		'fieldname': u'help_html',
 		'fieldtype': u'HTML',
 		'label': u'Help HTML',
-		'options': u'<div style="padding: 8px; background-color: #FFD; margin: 8px 0px;">\nWrite the list of series options in the list below. Each on a new line<br>\nAllowed special characters are "/" and "-"<br>\nExamples:<br>\nINV-<br>\nINV-10-<br>\nINVK-<br>\n</div>'
+		'options': u'<div class="help-box">\nEdit list of Series in the box below. Each Series Prefix on a new line.<br><br>\nAllowed special characters are "/" and "-"<br>\nExamples:<br>\nINV-<br>\nINV-10-<br>\nINVK-<br>\n</div>'
 	},
 
 	# DocField
@@ -131,7 +131,7 @@
 		'doctype': u'DocField',
 		'fieldname': u'set_options',
 		'fieldtype': u'Text',
-		'label': u'Set Series'
+		'label': u'Series List for this Transaction'
 	},
 
 	# DocField
@@ -146,16 +146,17 @@
 
 	# DocField
 	{
+		'colour': u'White:FFF',
 		'doctype': u'DocField',
 		'fieldname': u'update',
 		'fieldtype': u'Button',
-		'label': u'Update',
-		'options': u'update_series'
+		'label': u'Update'
 	},
 
 	# DocField
 	{
-		'description': u'Set starting number for series of your transactions',
+		'colour': u'White:FFF',
+		'description': u'Change the starting / current sequence number of an existing series.',
 		'doctype': u'DocField',
 		'fieldname': u'update_series',
 		'fieldtype': u'Section Break',
@@ -166,24 +167,27 @@
 	{
 		'doctype': u'DocField',
 		'fieldname': u'prefix',
-		'fieldtype': u'Data',
+		'fieldtype': u'Select',
 		'label': u'Prefix'
 	},
 
 	# DocField
 	{
+		'colour': u'White:FFF',
+		'description': u'This is the number of the last created transaction with this prefix',
 		'doctype': u'DocField',
-		'fieldname': u'starts_from',
+		'fieldname': u'current_value',
 		'fieldtype': u'Int',
-		'label': u'Starts From'
+		'label': u'Current Value'
 	},
 
 	# DocField
 	{
+		'colour': u'White:FFF',
 		'doctype': u'DocField',
 		'fieldname': u'update_series_start',
 		'fieldtype': u'Button',
-		'label': u'Update Series Start',
+		'label': u'Update Series Number',
 		'options': u'update_series_start'
 	}
 ]

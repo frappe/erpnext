@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 def execute():
 	"""Make standard print formats readonly for system manager"""
 	import webnotes.model.doc

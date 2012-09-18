@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # validate Filters
+from __future__ import unicode_literals
 flt_dict = {'fiscal_year': 'Fiscal Year', 'period': 'Period', 'under' : 'Under', 'sales_person':'Sales Person', 'target_on':'Target On'}
 for f in flt_dict:
   if not filter_values.get(f):

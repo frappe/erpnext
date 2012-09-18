@@ -14,24 +14,34 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-//--------- ONLOAD -------------
-cur_frm.cscript.onload = function(doc, cdt, cdn) {
-}
-
 cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	if(doc.__islocal) {
-		set_field_options('price_help', ''); return;
+		cur_frm.set_intro("Save this list to begin.");
+		return;
 	}
 	if(!doc.file_list) {
-		set_field_options('price_help', '<div class="help_box">To upload a price list, please attach a (.csv) file with 3 columns - <b>Item Code, Price and Currency</b> (no headings necessary). See attachments box in the right column</div>')
-	} else {
-		set_field_options('price_help', '<div class="help_box">To update prices from the attachment, please click on "Update Prices"</div>')
-	}
-}
+		cur_frm.set_intro('<p>1. Click on "Download Template" \
+			to download the template of all Items.</p>'
+		+'<p>2. Update prices and Currency.</p>'
+		+'<p>3. Save it as a CSV (.csv) file.</p>'
+		+'<p>4. Upload the file.</p>');
+		
+		cur_frm.add_custom_button('Download Template', function() {
+			$c_obj_csv(cur_frm.get_doclist(), 'download_template');
+		}, 'icon-download')
+		
+		cur_frm.add_custom_button('Upload Price List', function() {
+			cur_frm.attachments.add_attachment();
+		}, 'icon-upload')
+		
 
-cur_frm.cscript.clear_prices = function(doc, cdt, cdn) {
-	if(confirm("This action will clear all rates for '"+ doc.name +"' from the Item Master and cannot be un-done. Are you sure you want to continue?")) {
-		$c_obj(make_doclist(doc.doctype, doc.name), 'clear_prices', '', function(r, rt) { });
+	} else {
+		cur_frm.set_intro('To update prices from the attachment, click on "Update Prices". \
+			To reset prices, delete the attachment (in the sidebar) and upload again.');
+		
+		// Update Prices
+		cur_frm.add_custom_button('Update Prices', function() {
+			cur_frm.call_server('update_prices');
+		}, 'icon-refresh')		
 	}
 }

@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# Please edit this list and import only required elements
+from __future__ import unicode_literals
 import webnotes
 
 from webnotes.utils import cint, cstr
@@ -22,23 +22,37 @@ from webnotes import msgprint, errprint
 import webnotes.model.doctype
 
 sql = webnotes.conn.sql
-	
-# -----------------------------------------------------------------------------------------
-
 
 class DocType:
 	def __init__(self, d, dl):
 		self.doc, self.doclist = d, dl
 
-	#-----------------------------------------------------------------------------------------------------------------------------------
-	def get_transactions(self):
-		return "\n".join([''] + [i[0] for i in sql("SELECT `tabDocField`.`parent` FROM `tabDocField`, `tabDocType` WHERE `tabDocField`.`fieldname` = 'naming_series' and `tabDocType`.name=`tabDocField`.parent order by `tabDocField`.parent")])
+	def get_transactions(self, arg=None):
+		return {
+			"transactions": "\n".join([''] + [i[0] for i in sql("""select `tabDocField`.`parent` 
+				FROM `tabDocField`, `tabDocType` WHERE `tabDocField`.`fieldname` = 'naming_series' 
+				and `tabDocType`.name=`tabDocField`.parent order by `tabDocField`.parent""")]),
+			"prefixes": "\n".join([''] + [i[0] for i in sql("""select name from tabSeries""")])}
 	
 	def scrub_options_list(self, ol):
 		options = filter(lambda x: x, [cstr(n.upper()).strip() for n in ol])
 		return options
+
+	def update_series(self, arg=None):
+		"""update series list"""
+		self.check_duplicate()
+		series_list = self.doc.set_options.split("\n")
+		
+		# set in doctype
+		self.set_series_for(self.doc.select_doc_for_series, series_list)
+		
+		# create series
+		map(self.insert_series, series_list)
+		
+		msgprint('Series Updated')
+		
+		return self.get_transactions()
 	
-	#-----------------------------------------------------------------------------------------------------------------------------------
 	def set_series_for(self, doctype, ol):
 		options = self.scrub_options_list(ol)
 		
@@ -78,14 +92,7 @@ class DocType:
 
 		from webnotes.utils.cache import CacheItem
 		CacheItem(doctype).clear()
-	
-	#-----------------------------------------------------------------------------------------------------------------------------------
-	def update_series(self):
-			self.check_duplicate()
-			self.set_series_for(self.doc.select_doc_for_series, self.doc.set_options.split("\n"))
-			msgprint('Series Updated')			
 			
-	#-----------------------------------------------------------------------------------------------------------------------------------
 	def check_duplicate(self):
 		from core.doctype.doctype.doctype import DocType
 		dt = DocType()
@@ -100,27 +107,31 @@ class DocType:
 					if series in i[0].split("\n"):
 						msgprint("Oops! Series name %s is already in use in %s. Please select a new one" % (series, i[1]), raise_exception=1)
 			
-	#-----------------------------------------------------------------------------------------------------------------------------------
 	def validate_series_name(self, n):
 		import re
 		if not re.match('[a-zA-Z0-9]+(([-/][a-zA-Z0-9])?[-/][a-zA-Z0-9]*)*',n):
 			msgprint('Special Characters except "-" and "/" not allowed in naming series')
 			raise Exception
 		
-	#-----------------------------------------------------------------------------------------------------------------------------------
 	def get_options(self, arg=''):
-		sr = webnotes.model.doctype.get_property(self.doc.select_doc_for_series, 'options', 'naming_series')
+		sr = webnotes.model.doctype.get_property(self.doc.select_doc_for_series, 
+			'options', 'naming_series')
 		return sr
 
+	def get_current(self, arg=None):
+		"""get series current"""
+		self.doc.current_value = webnotes.conn.sql("""select current from tabSeries where name=%s""", 
+			self.doc.prefix)[0][0]
 
-	#-----------------------------------------------------------------------------------------------------------------------------------
+	def insert_series(self, series):
+		"""insert series if missing"""
+		if not webnotes.conn.exists('Series', series):
+			sql("insert into tabSeries (name, current) values (%s,0)", (series))			
+
 	def update_series_start(self):
 		if self.doc.prefix:
-			ser_det = sql("select name from `tabSeries` where name = %s", self.doc.prefix)
-			if ser_det:
-				sql("update `tabSeries` set current = '%s' where name = '%s'" % (self.doc.starts_from-1,self.doc.prefix))
-			else:
-				sql("insert into tabSeries (name, current) values (%s,%s)",(cstr(self.doc.prefix),cint(self.doc.starts_from)-1))
+			self.insert_series(self.doc.prefix)
+			sql("update `tabSeries` set current = '%s' where name = '%s'" % (self.doc.current_value,self.doc.prefix))
 			msgprint("Series Updated Successfully")
 		else:
 			msgprint("Please select prefix first")

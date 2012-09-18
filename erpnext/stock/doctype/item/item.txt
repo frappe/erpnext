@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-06-08 12:54:51',
+		'creation': '2012-07-03 13:30:46',
 		'docstatus': 0,
-		'modified': '2012-07-04 11:10:51',
+		'modified': '2012-07-11 09:57:42',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -196,7 +196,7 @@
 	# DocField
 	{
 		'colour': u'White:FFF',
-		'description': u'Classify your item in any one item group by clicking on the magnifying glass',
+		'description': u'<a href="#!Sales Browser/Item Group">Manage Item Groups</a>',
 		'doctype': u'DocField',
 		'fieldname': u'item_group',
 		'fieldtype': u'Link',
@@ -207,17 +207,6 @@
 		'options': u'Item Group',
 		'permlevel': 0,
 		'reqd': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'ighelp',
-		'fieldtype': u'HTML',
-		'label': u'IGHelp',
-		'oldfieldtype': u'HTML',
-		'options': u'<a href="#!Sales Browser/Item Group">To manage Item Groups, click here</a>',
-		'permlevel': 0
 	},
 
 	# DocField

@@ -28,6 +28,10 @@
 .input_area input, select, textarea { 
 	font-size: 14px;
 	padding: 2px;
+
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
 }
 
 .input_area input { 
@@ -45,9 +49,16 @@
 	width: 80%; 
 	padding: 2px 0px; 
 	font-size: 12px; 
+	background-color: #eee;
+	padding: 2px;
+	border: 1px solid #ddd;
+	
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;	
 }
 .disp_area_no_val { 
-	height: 14px; 
+	min-height: 14px; 
 }
 
 .no_img {
@@ -66,4 +77,8 @@
 
 .field-to-update {
 	background-color:#FEE;
+}
+
+.field-has-error {
+	border: 2px solid #C00;
 }

@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import unicode_literals
 for c in range(0,len(colnames)):
   l = (len(colnames[c])*9) 
   if l < 150 : col_width = '150px'

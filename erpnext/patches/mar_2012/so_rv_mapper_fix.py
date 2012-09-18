@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 def execute():
 	import webnotes
 	count = webnotes.conn.sql("""SELECT COUNT(*) FROM `tabTable Mapper Detail`

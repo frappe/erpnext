@@ -16,6 +16,7 @@
 
 # Columns
 #----------
+from __future__ import unicode_literals
 cl = [['Account','Data', '200px'],['Debit/Credit', 'Data', '100px'], ['Group/Ledger', 'Data', '100px'], ['Is PL Account', 'Data', '100px'], ['Opening (Dr)','Data', '100px'], ['Opening (Cr)','Data', '100px'],['Debit', 'Data', '100px'],['Credit', 'Data', '100px'],['Closing (Dr)', 'Data', '100px'],['Closing (Cr)', 'Data', '100px']]
 for c in cl:
 	colnames.append(c[0])

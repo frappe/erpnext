@@ -85,11 +85,11 @@
 
 	# DocField
 	{
-		'description': u'Please Enter Company Name and Abbr and save the document. Once saved Accounting Settings will be populated automatically',
+		'colour': u'White:FFF',
 		'doctype': u'DocField',
 		'fieldname': u'details',
 		'fieldtype': u'Section Break',
-		'label': u'Details',
+		'label': u'Company Details',
 		'oldfieldtype': u'Section Break',
 		'permlevel': 0
 	},
@@ -106,6 +106,14 @@
 		'oldfieldtype': u'Data',
 		'permlevel': 0,
 		'reqd': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'cb0',
+		'fieldtype': u'Column Break',
+		'permlevel': 0
 	},
 
 	# DocField
@@ -252,6 +260,8 @@
 
 	# DocField
 	{
+		'colour': u'White:FFF',
+		'description': u'For reference only.',
 		'doctype': u'DocField',
 		'fieldname': u'company_info',
 		'fieldtype': u'Section Break',

@@ -15,6 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # ADD NEW COLUMNS
+from __future__ import unicode_literals
 row_list = [['Item Group','Data','150px',''],
             ['Out of AMC','Int','150px',''],
             ['Under AMC','Int','150px',''],

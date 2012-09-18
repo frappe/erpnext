@@ -9,7 +9,7 @@ wn.doclistviews['Project'] = wn.views.ListView.extend({
 			'`tabProject`.priority',
 			'IFNULL(`tabProject`.project_value, 0) as project_value',
 			'IFNULL(`tabProject`.per_gross_margin, 0) as per_gross_margin',
-			'`tabProject`.completion_date',
+			'`tabProject`.creation',
 		]);
 		//this.stats = this.stats.concat(['company']);
 	},
@@ -46,8 +46,8 @@ wn.doclistviews['Project'] = wn.views.ListView.extend({
 			},
 			css: {'text-align': 'right'},
 		},
-		{width: '12%', content:'completion_date', css: {
-			'text-align': 'right', 'color':'#777'
-		}},
+		{
+			width: '12%', content:'modified', css: {'text-align': 'right', 'color':'#777'}
+		},
 	]
 });

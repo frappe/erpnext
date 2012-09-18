@@ -14,6 +14,15 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+# default settings that can be made for a profile.
+from __future__ import unicode_literals
+
+product_name = "ERPNext"
+profile_defaults = {
+	"Company": "company",
+	"Territory": "territory"
+}
+	
 # add startup propertes
 mail_footer = """<div style="padding: 7px; text-align: right; color: #888"><small>Sent via 
 	<a style="color: #888" href="https://erpnext.com">ERPNext</a></div>"""

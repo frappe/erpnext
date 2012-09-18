@@ -15,6 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # Please edit this list and import only required elements
+from __future__ import unicode_literals
 import webnotes
 
 from webnotes.utils import add_days, add_months, add_years, cint, cstr,date_diff, default_fields, flt, fmt_money, formatdate, generate_hash,getTraceback, get_defaults, get_first_day, get_last_day, getdate, has_common,month_name, now, nowdate, replace_newlines, sendmail, set_default,str_esc_quote, user_format, validate_email_add
@@ -40,18 +41,12 @@ class DocType(TransactionBase):
 		self.fname = 'entries'
 
 
-	# Autoname
-	# ---------
 	def autoname(self):
 		self.doc.name = make_autoname(self.doc.naming_series+ '.#####')
 
 
-
-# ********************************* Trigger Functions ******************************
-
-	#Set retail related fields from pos settings
-	#-------------------------------------------------------------------------
 	def set_pos_fields(self):
+		"""Set retail related fields from pos settings"""
 		pos = webnotes.conn.sql("select * from `tabPOS Setting` where ifnull(user,'') = '%s' and company = '%s'" % (session['user'], self.doc.company), as_dict=1)
 		if not pos:
 			pos = webnotes.conn.sql("select * from `tabPOS Setting` where ifnull(user,'') = '' and company = '%s'" % (self.doc.company), as_dict=1)
@@ -79,9 +74,8 @@ class DocType(TransactionBase):
 			if self.doc.charge:		self.get_other_charges()
 
 
-	# Set default values related to pos for previously created sales invoice.
-	# -------------------------------------------------------------------------- 
 	def set_pos_item_values(self):
+		"""Set default values related to pos for previously created sales invoice."""
 		if cint(self.doc.is_pos) ==1:
 			dtl = webnotes.conn.sql("select income_account, warehouse, cost_center from `tabPOS Setting` where ifnull(user,'') = '%s' and company = '%s'" % (session['user'], self.doc.company), as_dict=1)
 			if not dtl:
@@ -94,10 +88,8 @@ class DocType(TransactionBase):
 				d.warehouse = item and item[0]['default_warehouse'] or dtl and dtl[0]['warehouse'] or d.warehouse
 
 
-			
-	# Get Account Head to which amount needs to be Debited based on Customer
-	# ----------------------------------------------------------------------
 	def get_customer_account(self):
+		"""Get Account Head to which amount needs to be Debited based on Customer"""
 		if not self.doc.company:
 			msgprint("Please select company first and re-select the customer after doing so", raise_exception=1)
 			
@@ -115,10 +107,8 @@ class DocType(TransactionBase):
 		return acc_head and {'debit_to' : acc_head} or {}
 
 
-
-	# Set Due Date = Posting Date + Credit Days
-	# -----------------------------------------
 	def get_cust_and_due_date(self):
+		"""Set Due Date = Posting Date + Credit Days"""
 		credit_days = 0
 		if self.doc.debit_to:
 			credit_days = webnotes.conn.sql("select credit_days from `tabAccount` where name='%s' and docstatus != 2" % self.doc.debit_to)
@@ -134,9 +124,8 @@ class DocType(TransactionBase):
 			self.doc.customer = webnotes.conn.get_value('Account',self.doc.debit_to,'master_name')
 
 
-	# Pull Details of Delivery Note or Sales Order Selected
-	# ------------------------------------------------------
 	def pull_details(self):
+		"""Pull Details of Delivery Note or Sales Order Selected"""
 		# Delivery Note
 		if self.doc.delivery_note_main:
 			self.validate_prev_docname('delivery note')
@@ -153,13 +142,13 @@ class DocType(TransactionBase):
 		ret = self.get_debit_to()
 		self.doc.debit_to = ret.get('debit_to')
 					
-	# onload pull income account
-	# --------------------------
+					
 	def load_default_accounts(self):
 		"""
 			Loads default accounts from items, customer when called from mapper
 		"""
 		self.get_income_account('entries')
+		
 		
 	def get_income_account(self,doctype):		
 		for d in getlist(self.doclist, doctype):			
@@ -168,8 +157,7 @@ class DocType(TransactionBase):
 				d.income_account = item and item[0]['default_income_account'] or ''
 				d.cost_center = item and item[0]['default_sales_cost_center'] or ''				
 
-	# Item Details
-	# -------------
+
 	def get_item_details(self, args=None):
 		import json
 		args = args and json.loads(args) or {}
@@ -215,61 +203,49 @@ class DocType(TransactionBase):
 		return get_obj('Sales Common').get_barcode_details(barcode)
 
 
-	# Fetch ref rate from item master as per selected price list
 	def get_adj_percent(self, arg=''):
+		"""Fetch ref rate from item master as per selected price list"""
 		get_obj('Sales Common').get_adj_percent(self)
 
 
-	# Get tax rate if account type is tax
-	# ------------------------------------
 	def get_rate(self,arg):
+		"""Get tax rate if account type is tax"""
 		get_obj('Sales Common').get_rate(arg)
 		
 		
-	# Get Commission rate of Sales Partner
-	# -------------------------------------
 	def get_comm_rate(self, sales_partner):
+		"""Get Commission rate of Sales Partner"""
 		return get_obj('Sales Common').get_comm_rate(sales_partner, self)	
 	
- 
-	# GET TERMS & CONDITIONS
-	# -------------------------------------
+	
 	def get_tc_details(self):
 		return get_obj('Sales Common').get_tc_details(self)
 
-	# Load Default Charges
-	# ----------------------------------------------------------
+
 	def load_default_taxes(self):
 		self.doclist = get_obj('Sales Common').load_default_taxes(self)
 
-	# Get Sales Taxes and Charges Master Details
-	# --------------------------
+
 	def get_other_charges(self):
 		self.doclist = get_obj('Sales Common').get_other_charges(self)
 
-	# Get Advances
-	# -------------
+
 	def get_advances(self):
 		self.doclist = get_obj('GL Control').get_advances(self, self.doc.debit_to, 'Sales Invoice Advance', 'advance_adjustment_details', 'credit')
 
-	#pull project customer
-	#-------------------------
+	
 	def pull_project_customer(self):
 		res = webnotes.conn.sql("select customer from `tabProject` where name = '%s'"%self.doc.project_name)
 		if res:
 			get_obj('DocType Mapper', 'Project-Sales Invoice').dt_map('Project', 'Sales Invoice', self.doc.project_name, self.doc, self.doclist, "[['Project', 'Sales Invoice']]")
 
-# ********************************** Server Utility Functions ******************************
-	
-	# Get Company Abbr.
-	# ------------------
+
 	def get_company_abbr(self):
 		return webnotes.conn.sql("select abbr from tabCompany where name=%s", self.doc.company)[0][0]
 		
-	
-	# Check whether sales order / delivery note items already pulled
-	#----------------------------------------------------------------
+		
 	def validate_prev_docname(self,doctype):
+		"""Check whether sales order / delivery note items already pulled"""
 		for d in getlist(self.doclist, 'entries'): 
 			if doctype == 'delivery note' and self.doc.delivery_note_main == d.delivery_note:
 				msgprint(cstr(self.doc.delivery_note_main) + " delivery note details have already been pulled.")
@@ -279,7 +255,6 @@ class DocType(TransactionBase):
 				raise Exception , "Validation Error. Sales order details have already been pulled."
 
 
-	#-----------------------------------------------------------------
 	def update_against_document_in_jv(self):
 		"""
 			Links invoice and advance voucher:
@@ -308,11 +283,8 @@ class DocType(TransactionBase):
 			get_obj('GL Control').reconcile_against_document(lst)
 	
 	
-	# ------------------------------------------------------------------------
 	def validate_customer(self):
-		"""
-			Validate customer name with SO and DN
-		"""
+		"""	Validate customer name with SO and DN"""
 		for d in getlist(self.doclist,'entries'):
 			dt = d.delivery_note and 'Delivery Note' or d.sales_order and 'Sales Order' or ''
 			if dt:
@@ -322,9 +294,8 @@ class DocType(TransactionBase):
 					msgprint("Customer %s does not match with customer of %s: %s." %(self.doc.customer, dt, dt_no), raise_exception=1)
 			
 
-	# Validates Debit To Account and Customer Matches
-	# ------------------------------------------------
-	def validate_debit_to_acc(self):
+	def validate_customer_account(self):
+		"""Validates Debit To Account and Customer Matches"""
 		if self.doc.customer and self.doc.debit_to and not cint(self.doc.is_pos):
 			acc_head = webnotes.conn.sql("select master_name from `tabAccount` where name = %s and docstatus != 2", self.doc.debit_to)
 			
@@ -334,11 +305,6 @@ class DocType(TransactionBase):
 					and Master Name in account master." %(self.doc.debit_to, self.doc.customer,self.doc.company), raise_exception=1)
 
 
-	# Validate Debit To Account
-	# 1. Account Exists
-	# 2. Is a Debit Account
-	# 3. Is a PL Account
-	# ---------------------------
 	def validate_debit_acc(self):
 		acc = webnotes.conn.sql("select debit_or_credit, is_pl_account from tabAccount where name = '%s' and docstatus != 2" % self.doc.debit_to)
 		if not acc:
@@ -352,9 +318,8 @@ class DocType(TransactionBase):
 			raise Exception
 
 
-	# Validate Fixed Asset Account and whether Income Account Entered Exists
-	# -----------------------------------------------------------------------
 	def validate_fixed_asset_account(self):
+		"""Validate Fixed Asset Account and whether Income Account Entered Exists"""
 		for d in getlist(self.doclist,'entries'):
 			item = webnotes.conn.sql("select name,is_asset_item,is_sales_item from `tabItem` where name = '%s' and (ifnull(end_of_life,'')='' or end_of_life = '0000-00-00' or end_of_life >	now())"% d.item_code)
 			acc =	webnotes.conn.sql("select account_type from `tabAccount` where name = '%s' and docstatus != 2" % d.income_account)
@@ -366,22 +331,16 @@ class DocType(TransactionBase):
 				raise Exception
 
 
-
-	# Set totals in words
-	#--------------------
 	def set_in_words(self):
 		dcc = TransactionBase().get_company_currency(self.doc.company)
 		self.doc.in_words = get_obj('Sales Common').get_total_in_words(dcc, self.doc.rounded_total)
 		self.doc.in_words_export = get_obj('Sales Common').get_total_in_words(self.doc.currency, self.doc.rounded_total_export)
 
-	# Clear Advances
-	# --------------
+
 	def clear_advances(self):
 		get_obj('GL Control').clear_advances(self, 'Sales Invoice Advance','advance_adjustment_details')
 
 
-	# set aging date
-	#-------------------
 	def set_aging_date(self):
 		if self.doc.is_opening != 'Yes':
 			self.doc.aging_date = self.doc.posting_date
@@ -390,20 +349,21 @@ class DocType(TransactionBase):
 			raise Exception
 			
 
-	# Set against account for debit to account
-	#------------------------------------------
 	def set_against_income_account(self):
+		"""Set against account for debit to account"""
 		against_acc = []
 		for d in getlist(self.doclist, 'entries'):
 			if d.income_account not in against_acc:
 				against_acc.append(d.income_account)
 		self.doc.against_income_account = ','.join(against_acc)
 
+
 	def add_remarks(self):
 		if not self.doc.remarks: self.doc.remarks = 'No Remarks'
 
-	#check in manage account if sales order / delivery note required or not.
+
 	def so_dn_required(self):
+		"""check in manage account if sales order / delivery note required or not."""
 		dic = {'Sales Order':'so_required','Delivery Note':'dn_required'}
 		for i in dic:	
 			if webnotes.conn.get_value('Global Defaults', 'Global Defaults', dic[i]) == 'Yes':
@@ -412,9 +372,9 @@ class DocType(TransactionBase):
 						and not d.fields[i.lower().replace(' ','_')]:
 						msgprint("%s is mandatory for stock item which is not mentioed against item: %s"%(i,d.item_code), raise_exception=1)
 
-	#check for does customer belong to same project as entered..
-	#-------------------------------------------------------------------------------------------------
+
 	def validate_proj_cust(self):
+		"""check for does customer belong to same project as entered.."""
 		if self.doc.project_name and self.doc.customer:
 			res = webnotes.conn.sql("select name from `tabProject` where name = '%s' and (customer = '%s' or ifnull(customer,'')='')"%(self.doc.project_name, self.doc.customer))
 			if not res:
@@ -430,20 +390,13 @@ class DocType(TransactionBase):
 			raise Exception
 
 
-	# ********* UPDATE CURRENT STOCK *****************************
-	def update_current_stock(self):
-		for d in getlist(self.doclist, 'entries'):
-			bin = webnotes.conn.sql("select actual_qty from `tabBin` where item_code = %s and warehouse = %s", (d.item_code, d.warehouse), as_dict = 1)
-			d.actual_qty = bin and flt(bin[0]['actual_qty']) or 0
-
 	def validate_item_code(self):
 		for d in getlist(self.doclist, 'entries'):
 			if not d.item_code:
 				msgprint("Please enter Item Code at line no : %s to update stock for POS or remove check from Update Stock in Basic Info Tab." % (d.idx))
 				raise Exception
 
-	# Validate Write Off Account
-	# -------------------------------
+
 	def validate_write_off_account(self):
 		if flt(self.doc.write_off_amount) and not self.doc.write_off_account:
 			msgprint("Please enter Write Off Account", raise_exception=1)
@@ -456,12 +409,22 @@ class DocType(TransactionBase):
 					and parent = %s""", (self.doc.amended_from,	self.doc.c_form_no))
 
 			webnotes.conn.set(self.doc, 'c_form_no', '')
+			
+
+	def update_current_stock(self):
+		for d in getlist(self.doclist, 'entries'):
+			if d.item_code and d.warehouse:
+				bin = webnotes.conn.sql("select actual_qty from `tabBin` where item_code = %s and warehouse = %s", (d.item_code, d.warehouse), as_dict = 1)
+				d.actual_qty = bin and flt(bin[0]['actual_qty']) or 0
+
+		for d in getlist(self.doclist, 'packing_details'):
+			bin = sql("select actual_qty, projected_qty from `tabBin` where item_code =	%s and warehouse = %s", (d.item_code, d.warehouse), as_dict = 1)
+			d.actual_qty = bin and flt(bin[0]['actual_qty']) or 0
+			d.projected_qty = bin and flt(bin[0]['projected_qty']) or 0
 	 
-	# VALIDATE
-	# ====================================================================================
+	
 	def validate(self):
 		self.so_dn_required()
-		#self.dn_required()
 		self.validate_proj_cust()
 		sales_com_obj = get_obj('Sales Common')
 		sales_com_obj.check_stop_sales_order(self)
@@ -471,7 +434,7 @@ class DocType(TransactionBase):
 		sales_com_obj.get_allocated_sum(self)	# this is to verify that the allocated % of sales persons is 100%
 		sales_com_obj.validate_fiscal_year(self.doc.fiscal_year,self.doc.posting_date,'Posting Date')
 		self.validate_customer()
-		self.validate_debit_to_acc()
+		self.validate_customer_account()
 		self.validate_debit_acc()
 		self.validate_fixed_asset_account()
 		self.add_remarks()
@@ -479,7 +442,9 @@ class DocType(TransactionBase):
 			self.validate_pos()
 			self.validate_write_off_account()
 			if cint(self.doc.update_stock):
-				get_obj('Stock Ledger').validate_serial_no(self, 'entries')
+				sl = get_obj('Stock Ledger')
+				sl.validate_serial_no(self, 'entries')
+				sl.validate_serial_no(self, 'packing_details')
 				self.validate_item_code()
 				self.update_current_stock()
 		self.set_in_words()
@@ -487,14 +452,62 @@ class DocType(TransactionBase):
 			self.doc.is_opening = 'No'
 		self.set_aging_date()
 		self.clear_advances()
-		# Set against account
 		self.set_against_income_account()
 		self.validate_c_form()
 
+
+	def get_warehouse(self):
+		w = webnotes.conn.sql("select warehouse from `tabPOS Setting` where ifnull(user,'') = '%s' and company = '%s'" % (session['user'], self.doc.company))
+		w = w and w[0][0] or ''
+		if not w:
+			ps = webnotes.conn.sql("select name, warehouse from `tabPOS Setting` where ifnull(user,'') = '' and company = '%s'" % self.doc.company)
+			if not ps:
+				msgprint("To make POS entry, please create POS Setting from Accounts --> POS Setting page and refresh the system.")
+				raise Exception
+			elif not ps[0][1]:
+				msgprint("Please enter warehouse in POS Setting")
+			else:
+				w = ps[0][1]
+		return w
+
+	
+	def make_packing_list(self):
+		get_obj('Sales Common').make_packing_list(self,'entries')
+		sl = get_obj('Stock Ledger')
+		sl.scrub_serial_nos(self)
+		sl.scrub_serial_nos(self, 'packing_details')
+
+
+	def on_update(self):
+		# Set default warehouse from pos setting
+		if cint(self.doc.is_pos) == 1:
+			if cint(self.doc.update_stock) == 1:
+				w = self.get_warehouse()
+				if w:
+					for d in getlist(self.doclist, 'entries'):
+						if not d.warehouse:
+							d.warehouse = cstr(w)
+							
+				self.make_packing_list()
+			else:
+				self.doclist = self.doc.clear_table(self.doclist, 'packing_details')
+
+			if flt(self.doc.paid_amount) == 0:
+				if self.doc.cash_bank_account: 
+					webnotes.conn.set(self.doc, 'paid_amount', 
+						(flt(self.doc.grand_total) - flt(self.doc.write_off_amount)))
+				else:
+					# show message that the amount is not paid
+					webnotes.conn.set(self.doc,'paid_amount',0)
+					webnotes.msgprint("Note: Payment Entry will not be created since 'Cash/Bank Account' was not specified.")
+
+		else:
+			self.doclist = self.doc.clear_table(self.doclist, 'packing_details')
+			webnotes.conn.set(self.doc,'paid_amount',0)
+
+		webnotes.conn.set(self.doc,'outstanding_amount',flt(self.doc.grand_total) - flt(self.doc.total_advance) - flt(self.doc.paid_amount) - flt(self.doc.write_off_amount))
+
 		
-# *************************************************** ON SUBMIT **********************************************
-	# Check Ref Document's docstatus
-	# -------------------------------
 	def check_prev_docstatus(self):
 		for d in getlist(self.doclist,'entries'):
 			if d.sales_order:
@@ -510,56 +523,45 @@ class DocType(TransactionBase):
 					raise Exception , "Validation Error."
 
 
-	#Set Actual Qty based on item code and warehouse
-	#------------------------------------------------------
-	def set_actual_qty(self):
-		for d in getlist(self.doclist, 'entries'):
-			if d.item_code and d.warehouse:
-				actual_qty = webnotes.conn.sql("select actual_qty from `tabBin` where item_code = '%s' and warehouse = '%s'" % (d.item_code, d.warehouse))
-				d.actual_qty = actual_qty and flt(actual_qty[0][0]) or 0
-
-
-
-	# ********************** Make Stock Entry ************************************
 	def make_sl_entry(self, d, wh, qty, in_value, update_stock):
-		st_uom = webnotes.conn.sql("select stock_uom from `tabItem` where name = '%s'"%d.item_code)
+		st_uom = webnotes.conn.sql("select stock_uom from `tabItem` where name = '%s'"%d['item_code'])
 		self.values.append({
-			'item_code'					 : d.item_code,
+			'item_code'					 : d['item_code'],
 			'warehouse'					 : wh,
 			'transaction_date'			: getdate(self.doc.modified).strftime('%Y-%m-%d'),
 			'posting_date'				: self.doc.posting_date,
 			'posting_time'				: self.doc.posting_time,
 			'voucher_type'				: 'Sales Invoice',
 			'voucher_no'					: cstr(self.doc.name),
-			'voucher_detail_no'	 : cstr(d.name), 
+			'voucher_detail_no'	 : cstr(d['name']), 
 			'actual_qty'					: qty, 
 			'stock_uom'					 : st_uom and st_uom[0][0] or '',
 			'incoming_rate'			 : in_value,
 			'company'						 : self.doc.company,
 			'fiscal_year'				 : self.doc.fiscal_year,
 			'is_cancelled'				: (update_stock==1) and 'No' or 'Yes',
-			'batch_no'						: cstr(d.batch_no),
-			'serial_no'					 : d.serial_no
-		})		
+			'batch_no'						: cstr(d['batch_no']),
+			'serial_no'					 : d['serial_no']
+		})	
 			
 
-	# UPDATE STOCK LEDGER
-	# ---------------------------------------------------------------------------
-	def update_stock_ledger(self, update_stock, clear = 0):
+	def update_stock_ledger(self, update_stock):
 		self.values = []
-		for d in getlist(self.doclist, 'entries'):
-			stock_item = webnotes.conn.sql("SELECT is_stock_item, is_sample_item FROM tabItem where name = '%s'"%(d.item_code), as_dict = 1) # stock ledger will be updated only if it is a stock item
+		items = get_obj('Sales Common').get_item_list(self)
+		for d in items:
+			stock_item = webnotes.conn.sql("SELECT is_stock_item, is_sample_item \
+				FROM tabItem where name = '%s'"%(d['item_code']), as_dict = 1)
 			if stock_item[0]['is_stock_item'] == "Yes":
+				if not d['warehouse']:
+					msgprint("Message: Please enter Warehouse for item %s as it is stock item." \
+						% d['item_code'], raise_exception=1)
+
 				# Reduce actual qty from warehouse
-				self.make_sl_entry( d, d.warehouse, - flt(d.qty) , 0, update_stock)
-		get_obj('Stock Ledger', 'Stock Ledger').update_stock(self.values, self.doc.amended_from and 'Yes' or 'No')
-
-
-	#-------------------POS Stock Updatation Part----------------------------------------------
-	def pos_update_stock(self):
-		self.update_stock_ledger(update_stock = 1)
+				self.make_sl_entry( d, d['warehouse'], - flt(d['qty']) , 0, update_stock)
+				
+		get_obj('Stock Ledger', 'Stock Ledger').update_stock(self.values)
 	
-	# ********** Get Actual Qty of item in warehouse selected *************
+
 	def get_actual_qty(self,args):
 		args = eval(args)
 		actual_qty = webnotes.conn.sql("select actual_qty from `tabBin` where item_code = '%s' and warehouse = '%s'" % (args['item_code'], args['warehouse']), as_dict=1)
@@ -568,23 +570,39 @@ class DocType(TransactionBase):
 		}
 		return ret
 
-	# Make GL Entries
-	# -------------------------
+
 	def make_gl_entries(self, is_cancel=0):
 		mapper = self.doc.is_pos and self.doc.write_off_account and 'POS with write off' or self.doc.is_pos and not self.doc.write_off_account and 'POS' or ''
 		update_outstanding = self.doc.is_pos and self.doc.write_off_account and 'No' or 'Yes'
 		get_obj(dt='GL Control').make_gl_entries(self.doc, self.doclist,cancel = is_cancel, use_mapper = mapper, update_outstanding = update_outstanding, merge_entries = cint(self.doc.is_pos) != 1 and 1 or 0)
 		
 
-	# On Submit
-	# ---------
+	def update_c_form(self):
+		"""Update amended id in C-form"""
+		if self.doc.c_form_no and self.doc.amended_from:
+			webnotes.conn.sql("""update `tabC-Form Invoice Detail` set invoice_no = %s,
+					invoice_date = %s, territory = %s, net_total = %s,
+					grand_total = %s where invoice_no = %s and parent = %s""", (self.doc.name, self.doc.amended_from, self.doc.c_form_no))
+
+
+	def check_next_docstatus(self):
+		submit_jv = webnotes.conn.sql("select t1.name from `tabJournal Voucher` t1,`tabJournal Voucher Detail` t2 where t1.name = t2.parent and t2.against_invoice = '%s' and t1.docstatus = 1" % (self.doc.name))
+		if submit_jv:
+			msgprint("Journal Voucher : " + cstr(submit_jv[0][0]) + " has been created against " + cstr(self.doc.doctype) + ". So " + cstr(self.doc.doctype) + " cannot be Cancelled.")
+			raise Exception, "Validation Error."
+
+
 	def on_submit(self):
 		if cint(self.doc.is_pos) == 1:
 			if cint(self.doc.update_stock) == 1:
 				sl_obj = get_obj("Stock Ledger")
 				sl_obj.validate_serial_no_warehouse(self, 'entries')
+				sl_obj.validate_serial_no_warehouse(self, 'packing_details')
+				
 				sl_obj.update_serial_record(self, 'entries', is_submit = 1, is_incoming = 0)
-				self.pos_update_stock()
+				sl_obj.update_serial_record(self, 'packing_details', is_submit = 1, is_incoming = 0)
+				
+				self.update_stock_ledger(update_stock=1)
 		else:
 			self.check_prev_docstatus()
 			get_obj("Sales Common").update_prevdoc_detail(1,self)
@@ -602,31 +620,13 @@ class DocType(TransactionBase):
 		self.update_c_form()
 
 
-	def update_c_form(self):
-		"""Update amended id in C-form"""
-		if self.doc.c_form_no and self.doc.amended_from:
-			webnotes.conn.sql("""update `tabC-Form Invoice Detail` set invoice_no = %s,
-					invoice_date = %s, territory = %s, net_total = %s,
-					grand_total = %s where invoice_no = %s and parent = %s""", (self.doc.name, self.doc.amended_from, self.doc.c_form_no))
-	
-
-			
-# *************************************************** ON CANCEL **********************************************
-	# Check Next Document's docstatus
-	# --------------------------------
-	def check_next_docstatus(self):
-		submit_jv = webnotes.conn.sql("select t1.name from `tabJournal Voucher` t1,`tabJournal Voucher Detail` t2 where t1.name = t2.parent and t2.against_invoice = '%s' and t1.docstatus = 1" % (self.doc.name))
-		if submit_jv:
-			msgprint("Journal Voucher : " + cstr(submit_jv[0][0]) + " has been created against " + cstr(self.doc.doctype) + ". So " + cstr(self.doc.doctype) + " cannot be Cancelled.")
-			raise Exception, "Validation Error."
-
-
-	# On Cancel
-	# ----------
 	def on_cancel(self):
 		if cint(self.doc.is_pos) == 1:
 			if cint(self.doc.update_stock) == 1:
-				get_obj('Stock Ledger').update_serial_record(self, 'entries', is_submit = 0, is_incoming = 0)
+				sl = get_obj('Stock Ledger')
+				sl.update_serial_record(self, 'entries', is_submit = 0, is_incoming = 0)
+				sl.update_serial_record(self, 'packing_details', is_submit = 0, is_incoming = 0)
+				
 				self.update_stock_ledger(update_stock = -1)
 		else:
 			sales_com_obj = get_obj(dt = 'Sales Common')
@@ -743,3 +743,4 @@ class DocType(TransactionBase):
 		next_date = next_date.strftime("%Y-%m-%d")
 
 		webnotes.conn.set(self.doc, 'next_date', next_date)
+

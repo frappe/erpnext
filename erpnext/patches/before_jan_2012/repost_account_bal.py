@@ -15,6 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
+from __future__ import unicode_literals
 def execute():
 	import webnotes
 	sql = webnotes.conn.sql

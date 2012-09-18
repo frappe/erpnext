@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 def execute():
 	"""Make profile readonly for role All"""
 	import webnotes.model.doc

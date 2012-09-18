@@ -1938,7 +1938,7 @@ div.fix_ff_cursor { overflow: auto; }
 div.comment { color: #444; }
 
 .small {
-	font-size: 11px;
+	font-size: 12px;
 }
 
 .help {
@@ -2123,9 +2123,25 @@ div.std-footer-item {
 	position: fixed;
 	bottom: 5px;
 	left: 5px;
-	height: 40px;
-	width: 40px;
+	height: 30px;
+	width: 30px;
 	background: url('../images/erpnext-fade.png') no-repeat top left;
+}
+
+.markdown p {
+	font-size: 13px;
+}
+
+.markdown h1 {
+	margin-bottom: 9px;
+}
+
+.markdown h2 {
+	margin-bottom: 7px;
+}
+
+.markdown h3, .markdown h4 {
+	margin-bottom: 5px;
 }
 
 /*
@@ -2137,6 +2153,14 @@ div.std-footer-item {
 .btn-img { cursor: pointer; }
 
 div.fetching { color: #888; text-align:right; }
+
+.msgprint {
+	min-height: 60px; 
+	max-height: 500px;
+	padding: 9px;
+	color: #333;
+	overflow: auto;
+}
 
 div.notice {
 	postion: absolute;
@@ -2163,23 +2187,16 @@ div.notice {
 }
 
 .help_box, .help-box {
-	background-color:#FFC;
-	font-size: 13px;
-	color: #864;
-	padding: 7px;
+	background-color: #ffe;
+	padding: 9px 9px 9px 9px;
+	border: 1px dashed #fc7;
 	margin: 11px 0px;
-	border: 1px solid #EEB;
 }
 
-.help_box_big {
-	background-color:#FFC;
-	color: #864;
-	padding: 7px;
-	margin: 7px 0px;
-	border: 1px solid #EEB;
-	text-align: center;
-	font-size: 14px;
+.help-box, .help-box p, .help-box h1, .help-box h2, .help-box h3, .help-box h4 {
+	color: #643;
 }
+
 
 /*
  *	lib/css/legacy/dialog.css
@@ -2552,6 +2569,20 @@ div.appframe-toolbar {
 	border-top: 1px solid #f8f8f8;
 	border-bottom: 1px solid #ccc;
 }
+
+div.appframe-toolbar .label {
+	margin: 2px 2px;
+}
+
+div.appframe-toolbar input, div.appframe-toolbar select {
+	font-size: 80%;
+	margin: 2px 2px;
+}
+div.appframe-toolbar button {
+	padding: 3px 7px !important;
+}
+
+
 
 /*
  *	erpnext/startup/startup.css

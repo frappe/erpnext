@@ -14,23 +14,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# Please edit this list and import only required elements
+from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import add_days, add_months, add_years, cint, cstr, date_diff, default_fields, flt, fmt_money, formatdate, generate_hash, getTraceback, get_defaults, get_first_day, get_last_day, getdate, has_common, month_name, now, nowdate, replace_newlines, sendmail, set_default, str_esc_quote, user_format, validate_email_add
-from webnotes.model import db_exists
-from webnotes.model.doc import Document, addchild, getchildren, make_autoname
-from webnotes.model.doclist import getlist, copy_doclist
-from webnotes.model.code import get_obj, get_server_obj, run_server_obj, updatedb, check_syntax
-from webnotes import session, form, is_testing, msgprint, errprint
-
-set = webnotes.conn.set
-sql = webnotes.conn.sql
-get_value = webnotes.conn.get_value
-in_transaction = webnotes.conn.in_transaction
-convert_to_lists = webnotes.conn.convert_to_lists
-	
-# -----------------------------------------------------------------------------------------
+from webnotes.model.doc import Document
+from webnotes import msgprint
 
 
 class DocType:
@@ -43,30 +31,44 @@ class DocType:
 		if currency in self.cl:
 			return 1
 			
-		if sql("select name from tabCurrency where name=%s", currency):
+		if webnotes.conn.sql("select name from tabCurrency where name=%s", currency):
 			self.cl.append(currency)
 			return 1
 		else:
 			return 0
+			
+	def download_template(self, arg=None):
+		"""download 3 column template with all Items"""
+		default_currency = webnotes.conn.get_default('currency')
+		item_list = webnotes.conn.sql("""select name from tabItem where 
+			(ifnull(is_sales_item,'')='Yes' or ifnull(is_service_item,'')='Yes')""")
+		data = [self.get_price(i[0], default_currency) for i in item_list]
+		return [['Item', 'Rate', 'Currency']] + data
+	
+	def get_price(self, item, default_currency):
+		rate = webnotes.conn.sql("""select ref_rate, ref_currency from `tabItem Price` 
+			where parent=%s and price_list_name=%s""", (item, self.doc.name))
+		return [item, rate and rate[0][0] or 0, rate and rate[0][1] or default_currency]
 	
 	# update prices in Price List
 	def update_prices(self):
+		from core.page.data_import_tool.data_import_tool import read_csv_content
+		
+		data = read_csv_content(self.get_csv_data())
 		webnotes.conn.auto_commit_on_many_writes = 1
-		import csv
-		data = csv.reader(self.get_csv_data().splitlines())
 				
 		updated = 0
 		
 		for line in data:
-			if line and len(line)==3:
+			if line and len(line)==3 and line[0]!='Item':
 				# if item exists
-				if sql("select name from tabItem where name=%s", line[0]):
+				if webnotes.conn.sql("select name from tabItem where name=%s", line[0]):
 					if self.is_currency_valid(line[2]):
 						# if price exists
-						ref_ret_detail = sql("select name from `tabItem Price` where parent=%s and price_list_name=%s and ref_currency=%s", \
+						ref_ret_detail = webnotes.conn.sql("select name from `tabItem Price` where parent=%s and price_list_name=%s and ref_currency=%s", \
 							(line[0], self.doc.name, line[2]))
 						if ref_ret_detail:
-							sql("update `tabItem Price` set ref_rate=%s where name=%s", (line[1], ref_ret_detail[0][0]))
+							webnotes.conn.sql("update `tabItem Price` set ref_rate=%s where name=%s", (line[1], ref_ret_detail[0][0]))
 						else:
 							d = Document('Item Price')
 							d.parent = line[0]
@@ -81,17 +83,9 @@ class DocType:
 						msgprint("[Ignored] Unknown currency '%s' for Item '%s'" % (line[2], line[0]))
 				else:
 					msgprint("[Ignored] Did not find Item '%s'" % line[1])
-			else:
-				msgprint("[Ignored] Incorrect format: %s" % str(line))
 		
 		msgprint("<b>%s</b> items updated" % updated)
 		webnotes.conn.auto_commit_on_many_writes = 0
-
-	# clear prices
-	def clear_prices(self):
-		cnt = sql("select count(*) from `tabItem Price` where price_list_name = %s", self.doc.name)
-		sql("delete from `tabItem Price` where price_list_name = %s", self.doc.name)
-		msgprint("%s prices cleared" % cnt[0][0])
 
 	# Update CSV data
 	def get_csv_data(self):
@@ -101,11 +95,11 @@ class DocType:
 
 		fid = self.doc.file_list.split(',')[1]
 		  
-		from webnotes.utils import file_manager
-		fn, content = file_manager.get_file(fid)
-	
-		# NOTE: Don't know why this condition exists
-		if not isinstance(content, basestring) and hasattr(content, 'tostring'):
-		  content = content.tostring()
+		try:
+			from webnotes.utils import file_manager
+			fn, content = file_manager.get_file(fid)
+		except Exception, e:
+			webnotes.msgprint("Unable to open attached file. Please try again.")
+			raise e
 
 		return content	

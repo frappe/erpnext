@@ -15,6 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # Please edit this list and import only required elements
+from __future__ import unicode_literals
 import webnotes
 
 from webnotes.utils import add_days, add_months, add_years, cint, cstr, date_diff, default_fields, flt, fmt_money, formatdate, generate_hash, getTraceback, get_defaults, get_first_day, get_last_day, getdate, has_common, month_name, now, nowdate, replace_newlines, set_default, str_esc_quote, user_format, validate_email_add
@@ -39,27 +40,22 @@ class DocType(TransactionBase):
 		self.doclist = doclist
 		
 		
-	# autoname
-	#=======================================================
 	def autoname(self):
 		self.doc.name = make_autoname('Sal Slip/' +self.doc.employee + '/.#####') 
 
-	# Get employee details
-	#=======================================================
-	def get_emp_and_leave_details(self):
-		# Get payment days
-		if self.doc.fiscal_year and self.doc.month:
-			self.get_leave_details()
 
-		# check sal structure
+	def get_emp_and_leave_details(self):
 		if self.doc.employee:
+			# Get payment days
+			if self.doc.fiscal_year and self.doc.month:
+				self.get_leave_details()
+
+			# check sal structure
 			struct = self.check_sal_struct()
 			if struct:
 				self.pull_sal_struct(struct)
 
 
-	# Check sal structure
-	#=======================================================
 	def check_sal_struct(self):
 		struct = sql("select name from `tabSalary Structure` where employee ='%s' and is_active = 'Yes' "%self.doc.employee)
 		if not struct:
@@ -67,8 +63,7 @@ class DocType(TransactionBase):
 			self.doc.employee = ''
 		return struct and struct[0][0] or ''
 
-	# Pull struct details
-	#=======================================================
+
 	def pull_sal_struct(self, struct):
 		self.doclist = self.doc.clear_table(self.doclist, 'earning_details')
 		self.doclist = self.doc.clear_table(self.doclist, 'deduction_details')
@@ -81,41 +76,48 @@ class DocType(TransactionBase):
 		self.doc.esic_no = basic_info[0][2]
 		self.doc.pf_no = basic_info[0][3]
 
-	# Get leave details
-	#=======================================================
-	def get_leave_details(self):
-		m = self.get_month_details()
-		lwp = self.calculate_lwp(m)
-		self.doc.total_days_in_month = m[3]
+
+	def get_leave_details(self, lwp=None):
+		m = get_obj('Salary Manager').get_month_details(self.doc.fiscal_year, self.doc.month)
+		
+		if not lwp:
+			lwp = self.calculate_lwp(m)
+		self.doc.total_days_in_month = m['month_days']
 		self.doc.leave_without_pay = lwp
-		self.doc.payment_days = flt(m[3]) - flt(lwp)
+		payment_days = flt(self.get_payment_days(m)) - flt(lwp)
+		self.doc.payment_days = payment_days > 0 and payment_days or 0
+		
 
-	# Get month details
-	#=======================================================
-	def get_month_details(self):
-		ysd = sql("select year_start_date from `tabFiscal Year` where name ='%s'"%self.doc.fiscal_year)[0][0]
-		if ysd:
-			from dateutil.relativedelta import relativedelta
-			import calendar, datetime
-			mnt = int(self.doc.month)
-			diff_mnt = int(mnt)-int(ysd.month)
-			if diff_mnt<0:
-				diff_mnt = 12-int(ysd.month)+int(mnt)
-			msd = ysd + relativedelta(months=diff_mnt) # month start date
-			month_days = cint(calendar.monthrange(cint(msd.year) ,cint(self.doc.month))[1]) # days in month
-			med = datetime.date(msd.year, cint(self.doc.month), month_days) # month end date
-			return msd.year, msd, med, month_days
+	def get_payment_days(self, m):
+		payment_days = m['month_days']
+		emp = webnotes.conn.sql("select date_of_joining, relieving_date from `tabEmployee` \
+			where name = %s", self.doc.employee, as_dict=1)[0]
+			
+		if emp['relieving_date']:
+			if getdate(emp['relieving_date']) > m['month_start_date'] and getdate(emp['relieving_date']) < m['month_end_date']:
+				payment_days = getdate(emp['relieving_date']).day
+			elif getdate(emp['relieving_date']) < m['month_start_date']:
+				payment_days = 0
+			
+		if emp['date_of_joining']:
+			if getdate(emp['date_of_joining']) > m['month_start_date'] and getdate(emp['date_of_joining']) < m['month_end_date']:
+				payment_days = payment_days - getdate(emp['date_of_joining']).day + 1
+			elif getdate(emp['date_of_joining']) > m['month_end_date']:
+				payment_days = 0
 
-	# Calculate LWP
-	#=======================================================
+		return payment_days
+
+
+
+
 	def calculate_lwp(self, m):
-		holidays = sql("select t1.holiday_date from `tabHoliday` t1, tabEmployee t2 where t1.parent = t2.holiday_list and t2.name = '%s' and t1.holiday_date between '%s' and '%s'" % (self.doc.employee, m[1], m[2]))
+		holidays = sql("select t1.holiday_date from `tabHoliday` t1, tabEmployee t2 where t1.parent = t2.holiday_list and t2.name = '%s' and t1.holiday_date between '%s' and '%s'" % (self.doc.employee, m['month_start_date'], m['month_end_date']))
 		if not holidays:
 			holidays = sql("select t1.holiday_date from `tabHoliday` t1, `tabHoliday List` t2 where t1.parent = t2.name and ifnull(t2.is_default, 0) = 1 and t2.fiscal_year = '%s'" % self.doc.fiscal_year)
 		holidays = [cstr(i[0]) for i in holidays]
 		lwp = 0
-		for d in range(m[3]):
-			dt = add_days(cstr(m[1]), d)
+		for d in range(m['month_days']):
+			dt = add_days(cstr(m['month_start_date']), d)
 			if dt not in holidays:
 				leave = sql("""
 					select t1.name, t1.half_day
@@ -130,8 +132,7 @@ class DocType(TransactionBase):
 					lwp = cint(leave[0][1]) and lwp + 0.5 or lwp + 1
 		return lwp
 					
-	# Check existing
-	#=======================================================
+
 	def check_existing(self):
 		ret_exist = sql("select name from `tabSalary Slip` where month = '%s' and fiscal_year = '%s' and docstatus != 2 and employee = '%s' and name !='%s'" % (self.doc.month,self.doc.fiscal_year,self.doc.employee,self.doc.name))
 		if ret_exist:
@@ -139,8 +140,7 @@ class DocType(TransactionBase):
 			self.doc.employee = ''
 			raise Exception
 
-	# Validate
-	#=======================================================
+
 	def validate(self):
 		self.check_existing()
 		dcc = TransactionBase().get_company_currency(self.doc.company)
@@ -155,6 +155,8 @@ class DocType(TransactionBase):
 		for d in getlist(self.doclist, 'earning_details'):
 			if cint(d.e_depends_on_lwp) == 1:
 				d.e_modified_amount = round(flt(d.e_amount)*flt(self.doc.payment_days)/cint(self.doc.total_days_in_month), 2)
+			elif not self.doc.payment_days:
+				d.e_modified_amount = 0
 			self.doc.gross_pay += d.e_modified_amount
 	
 	def calculate_ded_total(self):
@@ -165,6 +167,9 @@ class DocType(TransactionBase):
 		for d in getlist(self.doclist, 'deduction_details'):
 			if cint(d.d_depends_on_lwp) == 1:
 				d.d_modified_amount = round(flt(d.d_amount)*flt(self.doc.payment_days)/cint(self.doc.total_days_in_month), 2)
+			elif not self.doc.payment_days:
+				d.d_modified_amount = 0
+			
 			self.doc.total_deduction += d.d_modified_amount
 				
 	def calculate_net_pay(self):
@@ -176,17 +181,12 @@ class DocType(TransactionBase):
 		self.doc.net_pay = flt(self.doc.gross_pay) - flt(self.doc.total_deduction)
 		self.doc.rounded_total = round(self.doc.net_pay)
 		
-	# ON SUBMIT
-	#=======================================================
+
 	def on_submit(self):
 		if(self.doc.email_check == 1):			
 			self.send_mail_funct()
 			
-	
 
-
-	# Send mail
-	#=======================================================
 	def send_mail_funct(self):	 
 		from webnotes.utils.email_lib import sendmail
 		emailid_ret=sql("select company_email from `tabEmployee` where name = '%s'"%self.doc.employee)
@@ -281,4 +281,4 @@ class DocType(TransactionBase):
 			</table></div>'''%(cstr(letter_head[0][0]),cstr(self.doc.employee), cstr(self.doc.employee_name), cstr(self.doc.month), cstr(self.doc.fiscal_year), cstr(self.doc.department), cstr(self.doc.branch), cstr(self.doc.designation), cstr(self.doc.grade), cstr(self.doc.bank_account_no), cstr(self.doc.bank_name), cstr(self.doc.arrear_amount), cstr(self.doc.payment_days), earn_table, ded_table, cstr(flt(self.doc.gross_pay)), cstr(flt(self.doc.total_deduction)), cstr(flt(self.doc.net_pay)), cstr(self.doc.total_in_words))
 			sendmail([receiver], subject=subj, msg = msg)
 		else:
-			msgprint("Company Email ID not found.")
+			msgprint("Company Email ID not found, hence mail not sent")

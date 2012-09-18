@@ -127,8 +127,33 @@ cur_frm.cscript.dynamic_label = function(doc, cdt, cdn, base_curr, callback) {
 	cur_frm.cscript.base_currency = base_curr;
 	set_dynamic_label_par(doc, cdt, cdn, base_curr);
 	set_dynamic_label_child(doc, cdt, cdn, base_curr);
+	set_sales_bom_help(doc);
 
 	if (callback) callback(doc, cdt, cdn);
+}
+
+// Help for Sales BOM items
+var set_sales_bom_help = function(doc) {
+	if(!cur_frm.fields_dict.packing_list) return;
+	if (getchildren('Delivery Note Packing Item', doc.name, 'packing_details').length) {
+		$(cur_frm.fields_dict.packing_list.row.wrapper).toggle(true);
+		
+		if (inList(['Delivery Note', 'Sales Invoice'], doc.doctype)) {
+			help_msg = "<div class='help-box'> \
+				For 'Sales BOM' items, warehouse, serial no and batch no \
+				will be considered from the 'Packing List' table. \
+				If warehouse and batch no are same for all packing items for any 'Sales BOM' item, \
+				those values can be entered in the main item table, values will be copied to 'Packing List' table. \
+			</div>";
+			wn.meta.get_docfield(doc.doctype, 'sales_bom_help', doc.name).options = help_msg;
+		} 
+	} else {
+		$(cur_frm.fields_dict.packing_list.row.wrapper).toggle(false);
+		if (inList(['Delivery Note', 'Sales Invoice'], doc.doctype)) {
+			wn.meta.get_docfield(doc.doctype, 'sales_bom_help', doc.name).options = '';
+		}
+	}
+	refresh_field('sales_bom_help');
 }
 
 
@@ -318,7 +343,7 @@ cur_frm.cscript.basic_rate = function(doc, cdt, cdn) {
 				Please either <br /> \
 				* Specify Basic Rate (i.e. Rate which will be displayed in print) <br /> \
 				-- or -- <br />\
-				* Uncheck 'Included in Print Rate' in the tax entries of Taxes section.");
+				* Uncheck 'Is this Tax included in Basic Rate?' in the tax entries of Taxes section.");
 		}
 	}
 }
@@ -340,7 +365,12 @@ cur_frm.cscript.export_rate = function(doc,cdt,cdn) {
 
 // ************* GET OTHER CHARGES BASED ON COMPANY *************
 cur_frm.fields_dict.charge.get_query = function(doc) {
-	return 'SELECT DISTINCT `tabSales Taxes and Charges Master`.name FROM `tabSales Taxes and Charges Master` WHERE `tabSales Taxes and Charges Master`.company = "'+doc.company+'" AND `tabSales Taxes and Charges Master`.company is not NULL AND `tabSales Taxes and Charges Master`.docstatus != 2 AND `tabSales Taxes and Charges Master`.%(key)s LIKE "%s" ORDER BY `tabSales Taxes and Charges Master`.name LIMIT 50';
+	return 'SELECT DISTINCT `tabSales Taxes and Charges Master`.name FROM \
+		`tabSales Taxes and Charges Master` WHERE `tabSales Taxes and Charges Master`.company = "'
+		+doc.company+'" AND `tabSales Taxes and Charges Master`.company is not NULL \
+		AND `tabSales Taxes and Charges Master`.docstatus != 2 \
+		AND `tabSales Taxes and Charges Master`.%(key)s LIKE "%s" \
+		ORDER BY `tabSales Taxes and Charges Master`.name LIMIT 50';
 }
 
 // ********************* Get Charges ****************************
@@ -626,27 +656,15 @@ cur_frm.cscript.included_in_print_rate = function(doc, cdt, cdn) {
 	var tax = locals[cdt][cdn];
 	if(tax.included_in_print_rate==1) { 
 		if(!inList(['On Net Total', 'On Previous Row Total', 'On Previous Row Amount'], tax.charge_type)) {
-			msgprint("Included in Print Rate (i.e. Inclusive Price) is only valid for charges of type: <br /> \
+			msgprint("'Is this Tax included in Basic Rate?' (i.e. Inclusive Price) is only valid for charges of type: <br /> \
 				* On Net Total <br /> \
 				* On Previous Row Amount <br /> \
 				* On Previous Row Total");
 			tax.included_in_print_rate = 0;
 			refresh_field('included_in_print_rate', tax.name, cur_frm.cscript.other_fname);
-		} else if(inList(['On Previous Row Total', 'On Previous Row Amount'], tax.charge_type)){
-			if(tax.row_id) {
-				var tax_list = getchildren('Sales Taxes and Charges', doc.name, cur_frm.cscript.other_fname, doc.doctype);
-				if(tax_list[tax.row_id-1].charge_type=='Actual') {
-					msgprint("Row of type 'Actual' cannot be depended on for type '" + tax.charge_type + "'\
-						when using tax inclusive prices.<br />\
-						This will lead to incorrect values.<br /><br /> \
-						<b>Please specify correct value in 'Enter Row' column of <span style='color:red'>Row: "	
-						+ tax.idx + "</span> in Taxes table</b>");
-					validated = false;
-					tax.included_in_print_rate = 0;
-					refresh_field('included_in_print_rate', tax.name, cur_frm.cscript.other_fname);
-				}
-			}
-		}
+		} 
+		var tax_list = getchildren('Sales Taxes and Charges', doc.name, cur_frm.cscript.other_fname, doc.doctype);
+		cur_frm.cscript.validate_print_rate_option(doc, tax_list, tax.idx-1);
 	}
 }
 
@@ -728,6 +746,32 @@ cur_frm.cscript.recalculate_values = function(doc, cdt, cdn) {
 	cur_frm.cscript.calculate_charges(doc,cdt,cdn);
 }
 
+cur_frm.cscript.validate_print_rate_option = function(doc, taxes, i) {
+	if(in_list(['On Previous Row Amount','On Previous Row Total'], taxes[i].charge_type)) { 
+		if(!taxes[i].row_id){
+			alert("Please Enter Row on which amount needs to be calculated for row : "+taxes[i].idx);
+			validated = false;
+		} else if(taxes[i].included_in_print_rate && taxes[taxes[i].row_id-1].charge_type=='Actual') {
+			msgprint("Row of type 'Actual' cannot be depended on for type '" + taxes[i].charge_type + "'\
+				when using tax inclusive prices.<br />\
+				This will lead to incorrect values.<br /><br /> \
+				<b>Please specify correct value in 'Enter Row' column of <span style='color:red'>Row: "	
+				+ taxes[i].idx + "</span> in Taxes table</b>");
+			validated = false;
+			taxes[i].included_in_print_rate = 0;
+			refresh_field('included_in_print_rate', taxes[i].name, other_fname);
+		} else if ((taxes[i].included_in_print_rate && !taxes[taxes[i].row_id-1].included_in_print_rate) || 
+			(!taxes[i].included_in_print_rate && taxes[taxes[i].row_id-1].included_in_print_rate)) {
+			msgprint("If any row in the tax table depends on 'Previous Row Amount/Total', <br />\
+				'Is this Tax included in Basic Rate?' column should be same for both row <br />\
+				i.e for that row and the previous row. <br /><br />\
+				The same is violated for row #"+(i+1)+" and row #"+taxes[i].row_id
+			);
+			validated = false;
+		}		
+	}
+}
+
 cur_frm.cscript.calculate_charges = function(doc, cdt, cdn) {
 	var other_fname	= cur_frm.cscript.other_fname;
 
@@ -737,21 +781,7 @@ cur_frm.cscript.calculate_charges = function(doc, cdt, cdn) {
 		cl[i].total_amount = 0;
 		cl[i].tax_amount = 0;										// this is done to calculate other charges
 		cl[i].total = 0;
-		if(in_list(['On Previous Row Amount','On Previous Row Total'], cl[i].charge_type)) { 
-			if(!cl[i].row_id){
-				alert("Please Enter Row on which amount needs to be calculated for row : "+cl[i].idx);
-				validated = false;
-			} else if(cl[i].included_in_print_rate && cl[cl[i].row_id-1].charge_type=='Actual') {
-				msgprint("Row of type 'Actual' cannot be depended on for type '" + cl[i].charge_type + "'\
-					when using tax inclusive prices.<br />\
-					This will lead to incorrect values.<br /><br /> \
-					<b>Please specify correct value in 'Enter Row' column of <span style='color:red'>Row: "	
-					+ cl[i].idx + "</span> in Taxes table</b>");
-				validated = false;
-				cl[i].included_in_print_rate = 0;
-				refresh_field('included_in_print_rate', cl[i].name, other_fname);
-			}
-		}
+		cur_frm.cscript.validate_print_rate_option(doc, cl, i);
 	}
 	cur_frm.cscript.recalc(doc, 1);
 }

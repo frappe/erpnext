@@ -15,6 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #get company
+from __future__ import unicode_literals
 company = filter_values.get('company') or get_defaults()['company']
 
 # To date

@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import unicode_literals
 col = [['In Store Period (in days)', 'Data', '']]
 for c in col:
   colnames.append(str(c[0]))
