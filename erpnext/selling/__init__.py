@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 install_docs = [
 	{"doctype":"Role", "role_name":"Customer", "name":"Customer"},
 	{"doctype":"Role", "role_name":"Partner", "name":"Partner"},

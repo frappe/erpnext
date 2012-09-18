@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import unicode_literals
 """
 	This patch changes criteria name
 	of search criteria "employeewise_balance_leave_report"

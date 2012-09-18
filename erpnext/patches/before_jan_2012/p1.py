@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import unicode_literals
 def execute():
 	import webnotes
 	if not webnotes.conn.sql("select name from tabDocFormat where parent = 'Sales Invoice' and format != 'POS Invoice'"):

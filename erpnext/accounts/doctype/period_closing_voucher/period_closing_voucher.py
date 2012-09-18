@@ -15,6 +15,7 @@
 # along with this program.	If not, see <http://www.gnu.org/licenses/>.
 
 # Please edit this list and import only required elements
+from __future__ import unicode_literals
 import webnotes
 
 from webnotes.utils import add_days, add_months, add_years, cint, cstr, date_diff, default_fields, flt, fmt_money, formatdate, generate_hash, getTraceback, get_defaults, get_first_day, get_last_day, getdate, has_common, month_name, now, nowdate, replace_newlines, sendmail, set_default, str_esc_quote, user_format, validate_email_add
@@ -62,12 +63,12 @@ class DocType:
 
 
 	def validate_posting_date(self):
-		yr = sql("select start_date, end_date from `tabPeriod` where period_name = '%s'" % (self.doc.fiscal_year))
+		yr = sql("select start_date, end_date from `tabPeriod` where fiscal_year = '%s' and period_type = 'Year'" % (self.doc.fiscal_year))
 		self.year_start_date = yr and yr[0][0] or ''
 		self.year_end_date = yr and yr[0][1] or ''
 		
 		# Posting Date should be within closing year
-		if getdate(self.doc.posting_date) < self.year_start_date or getdate(self.doc.posting_date) > self.year_end_date:
+		if getdate(self.doc.posting_date) < getdate(self.year_start_date) or getdate(self.doc.posting_date) > getdate(self.year_end_date):
 			msgprint("Posting Date should be within Closing Fiscal Year")
 			raise Exception
 

@@ -17,11 +17,11 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-return a dynamic page from website templates
+	return a dynamic page from website templates
 
-all html pages except login-page.html get generated here
+	all html pages related to website are generated here
 """
-
+from __future__ import unicode_literals
 import cgi, cgitb, os, sys
 cgitb.enable()
 
@@ -32,10 +32,8 @@ sys.path.append('../lib/py')
 sys.path.append(conf.modules_path)
 
 def init():
-	import webnotes
-	webnotes.form = cgi.FieldStorage(keep_blank_values=True)
-	for key in webnotes.form.keys():
-		webnotes.form_dict[key] = webnotes.form.getvalue(key)
+	import webnotes.handler
+	webnotes.handler.get_cgi_fields()
 	webnotes.connect()
 
 def respond():

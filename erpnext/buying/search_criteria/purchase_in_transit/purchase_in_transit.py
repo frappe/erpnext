@@ -15,6 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #check mendatory
+from __future__ import unicode_literals
 if not filter_values.get('posting_date') or not filter_values.get('posting_date1'):
   msgprint("Please select From Posting Date and To Posting Date in 'Set Filters' section")
   raise Exception

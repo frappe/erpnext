@@ -15,6 +15,7 @@
 # along with this program.	If not, see <http://www.gnu.org/licenses/>.
 
 # Please edit this list and import only required elements
+from __future__ import unicode_literals
 import webnotes
 
 from webnotes.utils import add_days, add_months, add_years, cint, cstr, date_diff, default_fields, flt, fmt_money, formatdate, generate_hash, getTraceback, get_defaults, get_first_day, get_last_day, getdate, has_common, month_name, now, nowdate, replace_newlines, sendmail, set_default, str_esc_quote, user_format, validate_email_add
@@ -48,7 +49,7 @@ class DocType:
 		res = sql("select name, employee_name from `tabEmployee` where status = 'Active' and docstatus !=2") 
 	 
 		for d in dt:
-			for r in res:			 
+			for r in res:
 				lst.append([r[0],r[1],d,'',fy,comp,sr])
 
 		return lst
@@ -68,7 +69,7 @@ class DocType:
 		else:
 			r = 1
 		dateList = [getdate(self.doc.att_fr_date)+datetime.timedelta(days=i) for i in range(0,r)]
-		dt=([str(date) for date in dateList])
+		dt=([formatdate(cstr(date)) for date in dateList])
 		
 		return dt
 

@@ -16,6 +16,7 @@
 
 # Add columns
 # -----------
+from __future__ import unicode_literals
 row_list = [['Cost Center','Data','160px'],
             ['Account','Data','160px'],
             ['Debit','Currency','120px'],

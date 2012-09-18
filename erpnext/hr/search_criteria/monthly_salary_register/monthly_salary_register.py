@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 colwidths[col_idx['Employee Name']]="120px" 
 colwidths[col_idx['Leave Without Pay']] = '120px'
 

@@ -14,7 +14,29 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
- 
+
+cur_frm.cscript.set_breadcrumbs = function(barea) {
+	cur_frm.frm_head.appframe.add_breadcrumb(cur_frm.docname);
+	cur_frm.frm_head.appframe.add_breadcrumb(' in <a href="#!Accounts Browser/Cost Center">\
+		Chart of Cost Centers</a>');
+	cur_frm.frm_head.appframe.add_breadcrumb(' in <a href="#!accounts-home">Accounts</a>');
+}
+
+cur_frm.cscript.refresh = function(doc, cdt, cdn) {
+	var intro_txt = '';
+	cur_frm.toggle_display('cost_center_name', doc.__islocal);
+	cur_frm.toggle_enable(['group_or_ledger', 'company_name'], doc.__islocal);
+
+	if(!doc.__islocal && doc.group_or_ledger=='Group') {
+		intro_txt += '<p><b>Note:</b> This is Cost Center is a <i>Group</i>, \
+			Accounting Entries are not allowed against groups.</p>';
+	}
+
+	cur_frm.cscript.hide_unhide_group_ledger(doc);
+	
+	cur_frm.toggle_display('sb1', doc.group_or_ledger=='Ledger')
+	cur_frm.set_intro(intro_txt);
+}
 
 //Account filtering for cost center
 cur_frm.fields_dict['budget_details'].grid.get_field('account').get_query = function(doc) {
@@ -38,39 +60,25 @@ cur_frm.cscript.company_name = function(doc,cdt,cdn){
 	get_server_fields('get_abbr','','',doc,cdt,cdn,1);
 }
 
-//onload if cost center is group
-cur_frm.cscript.onload = function(doc, cdt, cdn) {
-	 
-	if(!doc.__islocal && doc.docstatus == 0){
-		get_field(doc.doctype,'group_or_ledger',doc.name).permlevel = 1;
-		refresh_field('group_or_ledger');
-		get_field(doc.doctype,'company_name',doc.name).permlevel = 1;
-		refresh_field('company_name');
-	}
- 
-}
-
-cur_frm.cscript.refresh = function(doc, cdt, cdn) {
-	cur_frm.cscript.hide_unhide_group_ledger(doc);
-}
-
 
 // Hide/unhide group or ledger
 // -----------------------------------------
 cur_frm.cscript.hide_unhide_group_ledger = function(doc) {
-	hide_field(['convert_to_group', 'convert_to_ledger']);
-	if (cstr(doc.group_or_ledger) == 'Group') unhide_field('convert_to_ledger');
-	else if (cstr(doc.group_or_ledger) == 'Ledger') unhide_field('convert_to_group');
+	if (cstr(doc.group_or_ledger) == 'Group') {
+		cur_frm.add_custom_button('Convert to Ledger', 
+			function() { cur_frm.cscript.convert_to_ledger(); }, 'icon-retweet')
+	} else if (cstr(doc.group_or_ledger) == 'Ledger') {
+		cur_frm.add_custom_button('Convert to Group', 
+			function() { cur_frm.cscript.convert_to_group(); }, 'icon-retweet')
+	}
 }
 
 // Convert group to ledger
 // -----------------------------------------
 cur_frm.cscript.convert_to_ledger = function(doc, cdt, cdn) {
-	$c_obj(make_doclist(cdt,cdn),'convert_group_to_ledger','',function(r,rt) {
+	$c_obj(cur_frm.get_doclist(),'convert_group_to_ledger','',function(r,rt) {
 		if(r.message == 1) {
-			doc.group_or_ledger = 'Ledger';
-			refresh_field('group_or_ledger');
-			cur_frm.cscript.hide_unhide_group_ledger(doc);
+			cur_frm.refresh();
 		}
 	});
 }
@@ -78,11 +86,9 @@ cur_frm.cscript.convert_to_ledger = function(doc, cdt, cdn) {
 // Convert ledger to group
 // -----------------------------------------
 cur_frm.cscript.convert_to_group = function(doc, cdt, cdn) {
-	$c_obj(make_doclist(cdt,cdn),'convert_ledger_to_group','',function(r,rt) {
+	$c_obj(cur_frm.get_doclist(),'convert_ledger_to_group','',function(r,rt) {
 		if(r.message == 1) {
-			doc.group_or_ledger = 'Group';
-			refresh_field('group_or_ledger');
-			cur_frm.cscript.hide_unhide_group_ledger(doc);
+			cur_frm.refresh();
 		}
 	});
 }

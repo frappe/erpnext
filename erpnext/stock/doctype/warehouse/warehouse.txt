@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-05-15 12:15:13',
+		'creation': '2012-07-03 13:30:45',
 		'docstatus': 0,
-		'modified': '2012-05-21 18:02:46',
+		'modified': '2012-07-11 10:18:07',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -17,6 +17,7 @@
 		'autoname': u'field:warehouse_name',
 		'colour': u'White:FFF',
 		'default_print_format': u'Standard',
+		'description': u'A logical Warehouse against which stock entries are made.\n\nThere are two main Warehouse Types that are significant in ERPNext.\n\n1. **Stores:** These are where your incoming **Items** are kept before they are consumed or sold. You can have as many \u201cStores\u201d type **Warehouses** as you wish. Stores type warehouses are significant because if you set an Item for automatic re-order, ERPNext will check its quantities in all \u201cStores\u201d type **Warehouses** when deciding whether to re-order or not.\n\n2. **Asset**: **Items** marked as type \u201cFixed Asset\u201d are maintained in Asset Type **Warehouses**. This helps you separate them for the **Items** that are consumed as a part of your regular operations or \u201cCost of Goods Sold\u201d.\n',
 		'doctype': 'DocType',
 		'document_type': u'Master',
 		'module': u'Stock',
@@ -173,17 +174,6 @@
 	# DocField
 	{
 		'doctype': u'DocField',
-		'fieldname': u'trash_reason',
-		'fieldtype': u'Small Text',
-		'label': u'Trash Reason',
-		'oldfieldname': u'trash_reason',
-		'oldfieldtype': u'Small Text',
-		'permlevel': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
 		'fieldname': u'warehouse_detail',
 		'fieldtype': u'Section Break',
 		'label': u'Warehouse Detail',
@@ -220,7 +210,6 @@
 	# DocField
 	{
 		'colour': u'White:FFF',
-		'description': u'The valuation of items in this warehouse will be considered for the company that is specified',
 		'doctype': u'DocField',
 		'fieldname': u'company',
 		'fieldtype': u'Link',
@@ -235,6 +224,17 @@
 
 	# DocField
 	{
+		'colour': u'White:FFF',
+		'description': u'For Reference Only.',
+		'doctype': u'DocField',
+		'fieldname': u'warehouse_contact_info',
+		'fieldtype': u'Section Break',
+		'label': u'Warehouse Contact Info',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
 		'doctype': u'DocField',
 		'fieldname': u'email_id',
 		'fieldtype': u'Data',
@@ -244,24 +244,6 @@
 		'oldfieldtype': u'Data',
 		'permlevel': 0,
 		'print_hide': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'auto_indent_mail',
-		'fieldtype': u'Select',
-		'hidden': 1,
-		'label': u'Send Reorder Alert Mail ',
-		'no_copy': 1,
-		'oldfieldname': u'auto_indent_mail',
-		'oldfieldtype': u'Select',
-		'options': u'No\nYes',
-		'permlevel': 0,
-		'print_hide': 1,
-		'report_hide': 1,
-		'reqd': 0,
-		'trigger': u'Client'
 	},
 
 	# DocField
@@ -357,6 +339,8 @@
 
 	# DocField
 	{
+		'colour': u'White:FFF',
+		'description': u'For Admin use only. Please report errors to support@erpnext.com',
 		'doctype': u'DocField',
 		'fieldname': u'repost_stock',
 		'fieldtype': u'Section Break',

@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-03-27 14:36:07',
+		'creation': '2012-07-03 13:30:38',
 		'docstatus': 0,
-		'modified': '2012-03-27 14:36:07',
+		'modified': '2012-07-12 13:21:52',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -17,6 +17,7 @@
 		'autoname': u'field:campaign_name',
 		'colour': u'White:FFF',
 		'default_print_format': u'Standard',
+		'description': u'Keep Track of Sales Campaigns. Keep track of Leads, Quotations, Sales Order etc from Campaigns to gauge Return on Investment. ',
 		'doctype': 'DocType',
 		'document_type': u'Master',
 		'module': u'Selling',
@@ -24,7 +25,7 @@
 		'section_style': u'Simple',
 		'server_code_error': u' ',
 		'show_in_menu': 0,
-		'version': 7
+		'version': 1
 	},
 
 	# These values are common for all DocField
@@ -56,62 +57,62 @@
 
 	# DocPerm
 	{
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Sales Manager',
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Sales Manager',
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Sales Master Manager',
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Sales User',
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Sales User',
+		'write': 0
+	},
+
+	# DocPerm
+	{
 		'cancel': 1,
 		'create': 1,
 		'doctype': u'DocPerm',
 		'permlevel': 0,
 		'role': u'Sales Master Manager',
 		'write': 1
-	},
-
-	# DocPerm
-	{
-		'cancel': 0,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Sales Manager',
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'cancel': 0,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Sales Manager',
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'cancel': 0,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Sales Master Manager',
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'cancel': 0,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Sales User',
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'cancel': 0,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Sales User',
-		'write': 0
 	},
 
 	# DocField

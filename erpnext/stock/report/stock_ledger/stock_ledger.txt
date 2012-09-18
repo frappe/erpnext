@@ -1,0 +1,26 @@
+# Report, Stock Ledger
+[
+
+	# These values are common in all dictionaries
+	{
+		'creation': '2012-09-06 18:47:05',
+		'docstatus': 0,
+		'modified': '2012-09-06 18:48:22',
+		'modified_by': u'Administrator',
+		'owner': u'Administrator'
+	},
+
+	# These values are common for all Report
+	{
+		'doctype': 'Report',
+		'json': u'{"filters":[["Stock Ledger Entry","is_cancelled","=","No"]],"columns":[["item_code","Stock Ledger Entry"],["warehouse","Stock Ledger Entry"],["posting_date","Stock Ledger Entry"],["posting_time","Stock Ledger Entry"],["actual_qty","Stock Ledger Entry"],["bin_aqat","Stock Ledger Entry"],["voucher_type","Stock Ledger Entry"],["voucher_no","Stock Ledger Entry"]],"sort_by":"Stock Ledger Entry.posting_date","sort_order":"desc","sort_by_next":"Stock Ledger Entry.posting_time","sort_order_next":"desc"}',
+		'name': '__common__',
+		'ref_doctype': u'Stock Ledger Entry'
+	},
+
+	# Report, Stock Ledger
+	{
+		'doctype': 'Report',
+		'name': u'Stock Ledger'
+	}
+]

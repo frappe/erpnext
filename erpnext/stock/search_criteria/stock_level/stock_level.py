@@ -14,5 +14,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import unicode_literals
 colwidths[col_idx['Reserved Quantity']]= "120px" 
 colwidths[col_idx['Ordered Quantity']] = "120px"

@@ -20,6 +20,11 @@ cur_frm.cscript.onload = function(doc,cdt,cdn){
       refresh_field('budget_distribution_details');
     }
     
-    $c('runserverobj',args={'method' : 'get_months', 'docs' : compress_doclist(make_doclist(doc.doctype, doc.name))},callback1);
+    $c('runserverobj',args={'method' : 'get_months', 'docs' : 
+		compress_doclist(make_doclist(doc.doctype, doc.name))},callback1);
   }
+}
+
+cur_frm.cscript.refresh = function(doc,cdt,cdn){
+	cur_frm.toggle_display('distribution_id', doc.__islocal);
 }

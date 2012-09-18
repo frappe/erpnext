@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import unicode_literals
 import webnotes
 from webnotes.utils import cint, cstr, flt, get_defaults, getdate, now, nowdate
 from webnotes.model.doc import Document, addchild, getchildren, make_autoname
@@ -104,7 +105,6 @@ class DocType:
 					 'rate'			: rate
 		}
 		return ret_item
-
 
 
 	def get_rm_rate(self, arg):
@@ -295,7 +295,6 @@ class DocType:
 		self.validate_main_item()
 		self.validate_operations()
 		self.validate_materials()
-		self.validate_operations()
 
 
 
@@ -353,8 +352,6 @@ class DocType:
 				'qty_consumed_per_unit' : flt(d['qty_consumed_per_unit'])*qty/flt(self.doc.quantity)
 
 			})
-
-
 
 
 	# Get Current Flat BOM Items

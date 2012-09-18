@@ -14,58 +14,11 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-pscript.queries_bg_dict = {
-	'Urgent':'RED',
-	'High':'ORANGE',
-	'Low':'BLUE',
-	'Closed':'GREEN',
-	'Pending Review':'YELLOW'
-}
-
 pscript.onload_Projects = function(wrapper) {
 	wn.ui.make_app_page({parent:wrapper, title:'Gantt Chart: All Tasks', single_column:true});
-	
-	$(wrapper).find('.layout-main').html('<div class="help-box">Loading...</div>')
-	
-	
-	wn.require('js/lib/jQuery.Gantt/css/style.css');
-	wn.require('js/lib/jQuery.Gantt/js/jquery.fn.gantt.min.js');
-	
-	wn.call({
-		method: 'projects.page.projects.projects.get_tasks',
-		callback: function(r) {
-			$(wrapper).find('.layout-main').empty();
-			
-			var source = [];
-			// projects
-			$.each(r.message, function(i,v) {
-				source.push({
-					name: v.project, 
-					desc: v.subject,
-					values: [{
-						label: v.subject,
-						desc: v.description || v.subject,
-						from: '/Date("'+v.exp_start_date+'")/',
-						to: '/Date("'+v.exp_end_date+'")/'					
-					}]
-				})
-			})
-			
-			var gantt_area = $('<div class="gantt">').appendTo($(wrapper).find('.layout-main'));
-			gantt_area.gantt({
-				source: source,
-				navigate: "scroll",
-				scale: "weeks",
-				minScale: "weeks",
-				maxScale: "months",
-				onItemClick: function(data) {
-					alert("Item clicked - show some details");
-				},
-				onAddClick: function(dt, rowId) {
-					//alert("Empty space clicked - add an item!");
-				}
-			});
-			
-		}
-	})
+	if(!erpnext.show_task_gantt)
+		wn.require('js/app/gantt_task.js');
+
+	var gantt_area = $('<div>').appendTo($(wrapper).find('.layout-main'));
+	erpnext.show_task_gantt(gantt_area);
 }

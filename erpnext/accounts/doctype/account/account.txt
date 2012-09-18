@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-03-27 14:35:39',
+		'creation': '2012-07-03 13:30:50',
 		'docstatus': 0,
-		'modified': '2012-03-27 14:35:39',
+		'modified': '2012-07-11 13:58:44',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -17,6 +17,7 @@
 		'allow_trash': 1,
 		'colour': u'White:FFF',
 		'default_print_format': u'Standard',
+		'description': u'An **Account** is heading under which financial and business transactions are carried on. For example, \u201cTravel Expense\u201d is an account, \u201cCustomer Zoe\u201d, \u201cSupplier Mae\u201d are accounts. \n\n**Note:** ERPNext creates accounts for Customers and Suppliers automatically.\n\n### Groups and Ledgers\n\nThere are two main kinds of Accounts in ERPNext - Group and Ledger. Groups can have sub-groups and ledgers within them, whereas ledgers are the leaf nodes of your chart and cannot be further classified.\n\nAccounting Transactions can only be made against Ledger Accounts (not Groups)\n',
 		'doctype': 'DocType',
 		'document_type': u'Master',
 		'in_create': 1,
@@ -26,7 +27,7 @@
 		'section_style': u'Tray',
 		'server_code_error': u' ',
 		'show_in_menu': 0,
-		'version': 138
+		'version': 1
 	},
 
 	# These values are common for all DocField
@@ -58,12 +59,32 @@
 
 	# DocPerm
 	{
-		'cancel': 1,
-		'create': 1,
+		'cancel': 0,
+		'create': 0,
 		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'role': u'Accounts User',
+		'role': u'Auditor',
 		'write': 1
+	},
+
+	# DocPerm
+	{
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Auditor',
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 2,
+		'role': u'Auditor',
+		'write': 0
 	},
 
 	# DocPerm
@@ -91,6 +112,26 @@
 		'cancel': 0,
 		'create': 0,
 		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Accounts User',
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'cancel': 1,
+		'create': 1,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Accounts Manager',
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
 		'permlevel': 1,
 		'role': u'Accounts User',
 		'write': 0
@@ -104,16 +145,6 @@
 		'permlevel': 1,
 		'role': u'Accounts Manager',
 		'write': 0
-	},
-
-	# DocPerm
-	{
-		'cancel': 1,
-		'create': 1,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Accounts Manager',
-		'write': 1
 	},
 
 	# DocPerm
@@ -141,7 +172,7 @@
 		'doctype': u'DocField',
 		'fieldname': u'properties',
 		'fieldtype': u'Section Break',
-		'label': u'Properties',
+		'label': u'Account Details',
 		'oldfieldtype': u'Section Break',
 		'permlevel': 0
 	},
@@ -168,20 +199,6 @@
 		'permlevel': 1,
 		'reqd': 1,
 		'search_index': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'parent_account',
-		'fieldtype': u'Link',
-		'label': u'Parent Account',
-		'oldfieldname': u'parent_account',
-		'oldfieldtype': u'Link',
-		'options': u'Account',
-		'permlevel': 0,
-		'search_index': 1,
-		'trigger': u'Client'
 	},
 
 	# DocField
@@ -216,26 +233,6 @@
 	# DocField
 	{
 		'doctype': u'DocField',
-		'fieldname': u'convert_to_group',
-		'fieldtype': u'Button',
-		'label': u'Convert to Group',
-		'permlevel': 0,
-		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'convert_to_ledger',
-		'fieldtype': u'Button',
-		'label': u'Convert to Ledger',
-		'permlevel': 0,
-		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
 		'fieldname': u'debit_or_credit',
 		'fieldtype': u'Data',
 		'in_filter': 1,
@@ -263,6 +260,46 @@
 	# DocField
 	{
 		'doctype': u'DocField',
+		'fieldname': u'company',
+		'fieldtype': u'Link',
+		'in_filter': 1,
+		'label': u'Company',
+		'oldfieldname': u'company',
+		'oldfieldtype': u'Link',
+		'options': u'Company',
+		'permlevel': 1,
+		'reqd': 1,
+		'search_index': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'column_break1',
+		'fieldtype': u'Column Break',
+		'permlevel': 0,
+		'width': u'50%'
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'parent_account',
+		'fieldtype': u'Link',
+		'label': u'Parent Account',
+		'oldfieldname': u'parent_account',
+		'oldfieldtype': u'Link',
+		'options': u'Account',
+		'permlevel': 0,
+		'search_index': 1,
+		'trigger': u'Client'
+	},
+
+	# DocField
+	{
+		'colour': u'White:FFF',
+		'description': u'Setting Account Type helps in selecting this Account in transactions.',
+		'doctype': u'DocField',
 		'fieldname': u'account_type',
 		'fieldtype': u'Select',
 		'in_filter': 1,
@@ -278,7 +315,7 @@
 	# DocField
 	{
 		'colour': u'White:FFF',
-		'description': u'If Account Type is "Tax" then the default rate is required.',
+		'description': u'Rate at which this tax is applied',
 		'doctype': u'DocField',
 		'fieldname': u'tax_rate',
 		'fieldtype': u'Currency',
@@ -292,19 +329,12 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
-		'fieldname': u'column_break1',
-		'fieldtype': u'Column Break',
-		'permlevel': 0,
-		'width': u'50%'
-	},
-
-	# DocField
-	{
+		'colour': u'White:FFF',
+		'description': u'If the account is frozen, entries are allowed for the "Account Manager" only.',
 		'doctype': u'DocField',
 		'fieldname': u'freeze_account',
 		'fieldtype': u'Select',
-		'label': u'Freeze Account',
+		'label': u'Frozen',
 		'oldfieldname': u'freeze_account',
 		'oldfieldtype': u'Select',
 		'options': u'No\nYes',
@@ -313,21 +343,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
-		'fieldname': u'company',
-		'fieldtype': u'Link',
-		'in_filter': 1,
-		'label': u'Company',
-		'oldfieldname': u'company',
-		'oldfieldtype': u'Link',
-		'options': u'Company',
-		'permlevel': 1,
-		'reqd': 1,
-		'search_index': 1
-	},
-
-	# DocField
-	{
+		'colour': u'White:FFF',
 		'doctype': u'DocField',
 		'fieldname': u'credit_days',
 		'fieldtype': u'Int',
@@ -354,13 +370,15 @@
 
 	# DocField
 	{
+		'colour': u'White:FFF',
+		'description': u'If this Account represents a Customer, Supplier or Employee, set it here.',
 		'doctype': u'DocField',
 		'fieldname': u'master_type',
 		'fieldtype': u'Select',
 		'label': u'Master Type',
 		'oldfieldname': u'master_type',
 		'oldfieldtype': u'Select',
-		'options': u'\nNA\nSupplier\nCustomer\nEmployee',
+		'options': u'\nSupplier\nCustomer\nEmployee',
 		'permlevel': 0
 	},
 
@@ -374,116 +392,5 @@
 		'oldfieldtype': u'Link',
 		'permlevel': 0,
 		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'tds',
-		'fieldtype': u'Section Break',
-		'label': u'TDS',
-		'oldfieldtype': u'Section Break',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'pan_number',
-		'fieldtype': u'Data',
-		'label': u'PAN Number',
-		'oldfieldname': u'pan_number',
-		'oldfieldtype': u'Data',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'default': u'No',
-		'doctype': u'DocField',
-		'fieldname': u'tds_applicable',
-		'fieldtype': u'Select',
-		'label': u'TDS Applicable',
-		'oldfieldname': u'tds_applicable',
-		'oldfieldtype': u'Select',
-		'options': u'\nYes\nNo',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'tds_details',
-		'fieldtype': u'Table',
-		'label': u'TDS Details',
-		'oldfieldname': u'tds_details',
-		'oldfieldtype': u'Table',
-		'options': u'TDS Detail',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'description': u"Don't delete this field at any cost",
-		'doctype': u'DocField',
-		'fieldname': u'old_parent',
-		'fieldtype': u'Link',
-		'hidden': 1,
-		'label': u'Old Parent',
-		'no_copy': 1,
-		'oldfieldname': u'old_parent',
-		'oldfieldtype': u'Data',
-		'options': u'Account',
-		'permlevel': 0,
-		'report_hide': 1
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'description': u"Don't delete this field at any cost",
-		'doctype': u'DocField',
-		'fieldname': u'lft',
-		'fieldtype': u'Int',
-		'hidden': 1,
-		'in_filter': 1,
-		'label': u'Lft',
-		'no_copy': 1,
-		'oldfieldname': u'lft',
-		'oldfieldtype': u'Int',
-		'permlevel': 3,
-		'print_hide': 1,
-		'report_hide': 1,
-		'search_index': 1
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'description': u"Don't delete this field at any cost",
-		'doctype': u'DocField',
-		'fieldname': u'rgt',
-		'fieldtype': u'Int',
-		'hidden': 1,
-		'in_filter': 1,
-		'label': u'Rgt',
-		'no_copy': 1,
-		'oldfieldname': u'rgt',
-		'oldfieldtype': u'Int',
-		'permlevel': 3,
-		'print_hide': 1,
-		'report_hide': 1,
-		'search_index': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'trash_reason',
-		'fieldtype': u'Small Text',
-		'label': u'Trash Reason',
-		'oldfieldname': u'trash_reason',
-		'oldfieldtype': u'Small Text',
-		'permlevel': 1
 	}
 ]

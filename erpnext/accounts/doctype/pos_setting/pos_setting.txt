@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-03-27 14:35:46',
+		'creation': '2012-06-11 12:09:53',
 		'docstatus': 0,
-		'modified': '2012-03-27 14:35:46',
+		'modified': '2012-07-16 16:27:51',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -22,7 +22,7 @@
 		'section_style': u'Simple',
 		'server_code_error': u' ',
 		'show_in_menu': 0,
-		'version': 33
+		'version': 1
 	},
 
 	# These values are common for all DocField
@@ -50,37 +50,6 @@
 	{
 		'doctype': 'DocType',
 		'name': u'POS Setting'
-	},
-
-	# DocPerm
-	{
-		'create': 1,
-		'doctype': u'DocPerm',
-		'role': u'System Manager',
-		'submit': 0,
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'create': 1,
-		'doctype': u'DocPerm',
-		'role': u'System Manager',
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'create': 1,
-		'doctype': u'DocPerm',
-		'role': u'Accounts Manager',
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'doctype': u'DocPerm',
-		'role': u'Accounts User'
 	},
 
 	# DocField
@@ -136,7 +105,7 @@
 		'default': u'1',
 		'doctype': u'DocField',
 		'fieldname': u'conversion_rate',
-		'fieldtype': u'Currency',
+		'fieldtype': u'Float',
 		'label': u'Conversion Rate',
 		'oldfieldname': u'conversion_rate',
 		'oldfieldtype': u'Currency',
@@ -279,5 +248,36 @@
 		'oldfieldname': u'select_print_heading',
 		'oldfieldtype': u'Select',
 		'options': u'link:Print Heading'
+	},
+
+	# DocPerm
+	{
+		'create': 1,
+		'doctype': u'DocPerm',
+		'role': u'System Manager',
+		'submit': 0,
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'create': 1,
+		'doctype': u'DocPerm',
+		'role': u'System Manager',
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'create': 1,
+		'doctype': u'DocPerm',
+		'role': u'Accounts Manager',
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'doctype': u'DocPerm',
+		'role': u'Accounts User'
 	}
 ]

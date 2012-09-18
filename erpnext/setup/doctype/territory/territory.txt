@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-04-13 11:56:32',
+		'creation': '2012-07-03 13:30:55',
 		'docstatus': 0,
-		'modified': '2012-05-31 11:39:33',
+		'modified': '2012-07-12 10:01:47',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -17,12 +17,14 @@
 		'autoname': u'field:territory_name',
 		'colour': u'White:FFF',
 		'default_print_format': u'Standard',
+		'description': u'You can create **Territories** If your organization operates in multiple regions (could be countries, states or cities). Once you group **Customers** by **Territories**, you can set annual targets for each **Item Group** and get reports that will show your actual performance in the territory v/s what you had planned.',
 		'doctype': 'DocType',
 		'document_type': u'Master',
 		'in_create': 1,
 		'module': u'Setup',
 		'name': '__common__',
 		'name_case': u'Title Case',
+		'read_only': 1,
 		'search_fields': u'name,parent_territory,territory_manager',
 		'section_style': u'Simple',
 		'server_code_error': u' ',
@@ -144,20 +146,6 @@
 	# DocField
 	{
 		'doctype': u'DocField',
-		'fieldname': u'territory_manager',
-		'fieldtype': u'Link',
-		'in_filter': 1,
-		'label': u'Territory Manager',
-		'oldfieldname': u'territory_manager',
-		'oldfieldtype': u'Link',
-		'options': u'Sales Person',
-		'permlevel': 0,
-		'search_index': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
 		'fieldname': u'parent_territory',
 		'fieldtype': u'Link',
 		'label': u'Parent Territory',
@@ -167,17 +155,6 @@
 		'permlevel': 0,
 		'reqd': 1,
 		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'territoryhelp',
-		'fieldtype': u'HTML',
-		'label': u'TerritoryHelp',
-		'oldfieldtype': u'HTML',
-		'options': u'<a href="#!Sales Browser/Territory">To manage Territories, click here</a>',
-		'permlevel': 0
 	},
 
 	# DocField
@@ -193,6 +170,30 @@
 		'options': u'\nYes\nNo',
 		'permlevel': 0,
 		'reqd': 1
+	},
+
+	# DocField
+	{
+		'doctype': u'DocField',
+		'fieldname': u'cb0',
+		'fieldtype': u'Column Break',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'colour': u'White:FFF',
+		'description': u'For reference',
+		'doctype': u'DocField',
+		'fieldname': u'territory_manager',
+		'fieldtype': u'Link',
+		'in_filter': 1,
+		'label': u'Territory Manager',
+		'oldfieldname': u'territory_manager',
+		'oldfieldtype': u'Link',
+		'options': u'Sales Person',
+		'permlevel': 0,
+		'search_index': 1
 	},
 
 	# DocField
@@ -247,22 +248,12 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
-		'fieldname': u'distribution_id',
-		'fieldtype': u'Link',
-		'label': u'Distribution Id',
-		'oldfieldname': u'distribution_id',
-		'oldfieldtype': u'Link',
-		'options': u'Budget Distribution',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
+		'colour': u'White:FFF',
+		'description': u'Set Item Group-wise budgets on this Territory. You can also include seasonality by setting the Distribution.',
 		'doctype': u'DocField',
 		'fieldname': u'target_details_section_break',
 		'fieldtype': u'Section Break',
-		'label': u'Target Details',
+		'label': u'Territory Targets',
 		'oldfieldtype': u'Section Break',
 		'permlevel': 0
 	},
@@ -272,10 +263,24 @@
 		'doctype': u'DocField',
 		'fieldname': u'target_details',
 		'fieldtype': u'Table',
-		'label': u'Target Details1',
+		'label': u'Target Details',
 		'oldfieldname': u'target_details',
 		'oldfieldtype': u'Table',
 		'options': u'Target Detail',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'colour': u'White:FFF',
+		'description': u'Select Budget Distribution to unevenly distribute targets across months.',
+		'doctype': u'DocField',
+		'fieldname': u'distribution_id',
+		'fieldtype': u'Link',
+		'label': u'Target Distribution',
+		'oldfieldname': u'distribution_id',
+		'oldfieldtype': u'Link',
+		'options': u'Budget Distribution',
 		'permlevel': 0
 	}
 ]

@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-05-03 16:16:21',
+		'creation': '2012-07-03 13:30:56',
 		'docstatus': 0,
-		'modified': '2012-05-03 16:23:29',
+		'modified': '2012-07-12 16:20:36',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -16,6 +16,7 @@
 		'allow_email': 1,
 		'allow_print': 1,
 		'colour': u'White:FFF',
+		'description': u'Send automatic emails to Contacts on Submitting transactions.',
 		'doctype': 'DocType',
 		'issingle': 1,
 		'module': u'Setup',
@@ -70,10 +71,12 @@
 
 	# DocField
 	{
+		'colour': u'White:FFF',
+		'description': u'When any of the checked transactions are "Submitted", an email is automatically sent to the associated "Contact" in that transaction, with the transaction as an attachment.',
 		'doctype': u'DocField',
 		'fieldname': u'send_autonotification_for',
 		'fieldtype': u'Section Break',
-		'label': u'Send Auto-notification for'
+		'label': u'Send Email Automatically on Submission of'
 	},
 
 	# DocField
@@ -152,6 +155,8 @@
 
 	# DocField
 	{
+		'colour': u'White:FFF',
+		'description': u'Customize the introductory text that goes as a part of that email. Each transaction has a separate introductory text.',
 		'doctype': u'DocField',
 		'fieldname': u'customize_the_notification',
 		'fieldtype': u'Section Break',

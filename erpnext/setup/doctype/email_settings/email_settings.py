@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import unicode_literals
 import webnotes
 sql = webnotes.conn.sql
 	
@@ -30,16 +31,17 @@ class DocType:
 
 	def validate_outgoing(self):
 		"""Checks incoming email settings"""
+		self.doc.encode()
 		if self.doc.outgoing_mail_server:
 			from webnotes.utils import cint
 			from webnotes.utils.email_lib.smtp import SMTPServer
-			smtpserver = SMTPServer(login = self.doc.mail_login.encode("utf-8"),
-				password = self.doc.mail_password.encode("utf-8"),
+			smtpserver = SMTPServer(login = self.doc.mail_login,
+				password = self.doc.mail_password,
 				server = self.doc.outgoing_mail_server,
 				port = cint(self.doc.mail_port),
 				use_ssl = self.doc.use_ssl
 			)
-			
+						
 			# exceptions are handled in session connect
 			sess = smtpserver.sess
 
@@ -51,15 +53,17 @@ class DocType:
 			from webnotes.utils.email_lib.receive import POP3Mailbox
 			from webnotes.model.doc import Document
 			import _socket, poplib
+			
 			inc_email = Document('Incoming Email Settings')
-			inc_email.host = self.doc.support_host.encode('utf-8')
+			inc_email.encode()
+			inc_email.host = self.doc.support_host
 			inc_email.use_ssl = self.doc.support_use_ssl
 			try:
 				err_msg = 'User Name or Support Password missing. Please enter and try again.'
 				if not (self.doc.support_username and self.doc.support_password):
 					raise AttributeError, err_msg
-				inc_email.username = self.doc.support_username.encode('utf-8')
-				inc_email.password = self.doc.support_password.encode('utf-8')
+				inc_email.username = self.doc.support_username
+				inc_email.password = self.doc.support_password
 			except AttributeError, e:
 				webnotes.msgprint(err_msg)
 				raise e

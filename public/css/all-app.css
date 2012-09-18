@@ -2288,7 +2288,7 @@ div.fix_ff_cursor { overflow: auto; }
 div.comment { color: #444; }
 
 .small {
-	font-size: 11px;
+	font-size: 12px;
 }
 
 .help {
@@ -2473,9 +2473,25 @@ div.std-footer-item {
 	position: fixed;
 	bottom: 5px;
 	left: 5px;
-	height: 40px;
-	width: 40px;
+	height: 30px;
+	width: 30px;
 	background: url('../images/erpnext-fade.png') no-repeat top left;
+}
+
+.markdown p {
+	font-size: 13px;
+}
+
+.markdown h1 {
+	margin-bottom: 9px;
+}
+
+.markdown h2 {
+	margin-bottom: 7px;
+}
+
+.markdown h3, .markdown h4 {
+	margin-bottom: 5px;
 }
 
 /*
@@ -2487,6 +2503,14 @@ div.std-footer-item {
 .btn-img { cursor: pointer; }
 
 div.fetching { color: #888; text-align:right; }
+
+.msgprint {
+	min-height: 60px; 
+	max-height: 500px;
+	padding: 9px;
+	color: #333;
+	overflow: auto;
+}
 
 div.notice {
 	postion: absolute;
@@ -2513,23 +2537,16 @@ div.notice {
 }
 
 .help_box, .help-box {
-	background-color:#FFC;
-	font-size: 13px;
-	color: #864;
-	padding: 7px;
+	background-color: #ffe;
+	padding: 9px 9px 9px 9px;
+	border: 1px dashed #fc7;
 	margin: 11px 0px;
-	border: 1px solid #EEB;
 }
 
-.help_box_big {
-	background-color:#FFC;
-	color: #864;
-	padding: 7px;
-	margin: 7px 0px;
-	border: 1px solid #EEB;
-	text-align: center;
-	font-size: 14px;
+.help-box, .help-box p, .help-box h1, .help-box h2, .help-box h3, .help-box h4 {
+	color: #643;
 }
+
 
 /*
  *	lib/css/legacy/forms.css
@@ -2548,6 +2565,11 @@ div.form-title {
 	margin-right: 7px;
 }
 
+div.form-intro-area {
+	padding: 9px 9px 0px 9px;
+	margin: 0px 0px 15px 0px;
+}
+
 div.form-section-head {
 	margin: 11px -15px 3px -15px;
 	border-top: 1px solid #ccc;
@@ -2557,7 +2579,7 @@ div.form-section-head {
 div.form-layout-row:first-child .form-section-head {
 	border-top: 0px solid #ccc !important;
 	margin-top: 0px;
-	padding-top: 15px;
+	padding-top: 0px;
 }
 
 div.form-section-head h3 {
@@ -2583,18 +2605,6 @@ div.page_break {
 	margin: 24px 0px;
 	border-top: 1px dashed #888;
 }
-
-div.grid_tbarlinks {
-	border-bottom: 0px;
-	background-color: #CCC;
-	padding: 4px 4px 2px 4px;
-	width: 190px;
-	float: right;
-
-	-moz-border-radius-topleft: 5px; -moz-border-radius-topright: 5px;
-	-webkit-border-top-left-radius: 5px; -webkit-border-top-right-radius: 5px;
-}
-
 
 div.dialog_frm {
 	position: relative;
@@ -2726,6 +2736,10 @@ div.sidebar-comment-info {
 .input_area input, select, textarea { 
 	font-size: 14px;
 	padding: 2px;
+
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
 }
 
 .input_area input { 
@@ -2743,9 +2757,16 @@ div.sidebar-comment-info {
 	width: 80%; 
 	padding: 2px 0px; 
 	font-size: 12px; 
+	background-color: #eee;
+	padding: 2px;
+	border: 1px solid #ddd;
+	
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;	
 }
 .disp_area_no_val { 
-	height: 14px; 
+	min-height: 14px; 
 }
 
 .no_img {
@@ -2766,52 +2787,46 @@ div.sidebar-comment-info {
 	background-color:#FEE;
 }
 
+.field-has-error {
+	border: 2px solid #C00;
+}
+
 /*
  *	lib/css/legacy/grid.css
  */
 
-
-/* Grid */
-
-
-/* --- Simple --- */
-.grid_wrapper_simple {
-	width: 100%;
-	margin-bottom: 8px;
-	border: 1px solid #AA9;
-}
-
-.grid_head_wrapper_simple {
-	padding: 0px;
-	border-bottom: 2px solid #AAA;
-}
-
-.grid_head_wrapper_simple td {
-	border-right: 1px solid #AA9;
-}
-
-.grid_head_wrapper_simple td div {
-	padding: 2px;
-}
-
-.grid_tab_wrapper_simple {
-}
-
-.grid_cell_simple {
-	padding: 2px;
-	background-color: #fff;
-	border-right: 1px solid #AA9;
-}
-
-
-/* --- Normal --- */
 .grid_wrapper {
 	position: relative;
 	overflow: auto;
 	border: 1px solid #AAA;
 	width: 100%;
 	margin-bottom: 8px;
-	background-color: #fff;	
+	background-color: #f8f8f8;	
+}
+
+div.grid_tbarlinks {
+	border-bottom: 0px;
+	padding: 4px 4px 2px 4px;
+	width: 190px;
+	float: right;
+	margin-right: 12px;
+
+	-webkit-border-top-left-radius: 5px;
+	-webkit-border-top-right-radius: 5px;
+	-moz-border-radius-topleft: 5px;
+	-moz-border-radius-topright: 5px;
+	border-top-left-radius: 5px;
+	border-top-right-radius: 5px;
+
+	background: #dddddd; /* Old browsers */
+	background: -moz-linear-gradient(top,  #dddddd 0%, #bbbbbb 100%); /* FF3.6+ */
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#dddddd), color-stop(100%,#bbbbbb)); /* Chrome,Safari4+ */
+	background: -webkit-linear-gradient(top,  #dddddd 0%,#bbbbbb 100%); /* Chrome10+,Safari5.1+ */
+	background: -o-linear-gradient(top,  #dddddd 0%,#bbbbbb 100%); /* Opera 11.10+ */
+	background: -ms-linear-gradient(top,  #dddddd 0%,#bbbbbb 100%); /* IE10+ */
+	background: linear-gradient(to bottom,  #dddddd 0%,#bbbbbb 100%); /* W3C */
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#dddddd', endColorstr='#bbbbbb',GradientType=0 ); /* IE6-9 */
+
 }
 
 .grid_tab_wrapper {
@@ -2842,11 +2857,19 @@ div.sidebar-comment-info {
 }
 
 .grid_head_table td {
-	background-color: #EEE;
 	border-right: 1px solid #AAA;
 	border-bottom: 1px solid #AAA;
 	height: 40px;
 	padding: 0px;
+
+	background: #eeeeee; /* Old browsers */
+	background: -moz-linear-gradient(top,  #eeeeee 0%, #cccccc 100%); /* FF3.6+ */
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#eeeeee), color-stop(100%,#cccccc)); /* Chrome,Safari4+ */
+	background: -webkit-linear-gradient(top,  #eeeeee 0%,#cccccc 100%); /* Chrome10+,Safari5.1+ */
+	background: -o-linear-gradient(top,  #eeeeee 0%,#cccccc 100%); /* Opera 11.10+ */
+	background: -ms-linear-gradient(top,  #eeeeee 0%,#cccccc 100%); /* IE10+ */
+	background: linear-gradient(to bottom,  #eeeeee 0%,#cccccc 100%); /* W3C */
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#eeeeee', endColorstr='#cccccc',GradientType=0 ); /* IE6-9 */
 }
 
 .grid_head_table td div {
@@ -3512,6 +3535,20 @@ div.appframe-toolbar {
 	border-top: 1px solid #f8f8f8;
 	border-bottom: 1px solid #ccc;
 }
+
+div.appframe-toolbar .label {
+	margin: 2px 2px;
+}
+
+div.appframe-toolbar input, div.appframe-toolbar select {
+	font-size: 80%;
+	margin: 2px 2px;
+}
+div.appframe-toolbar button {
+	padding: 3px 7px !important;
+}
+
+
 
 /*
  *	lib/css/ui/fonts.css

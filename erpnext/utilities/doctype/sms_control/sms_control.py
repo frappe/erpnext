@@ -15,6 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # Please edit this list and import only required elements
+from __future__ import unicode_literals
 import webnotes
 
 from webnotes.utils import cint, flt, load_json, nowdate, cstr

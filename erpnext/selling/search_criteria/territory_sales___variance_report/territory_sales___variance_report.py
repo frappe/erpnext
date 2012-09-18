@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import unicode_literals
 if filter_values.get('period'):
   period_values = filter_values['period']
   if len(period_values.split(NEWLINE))>1:

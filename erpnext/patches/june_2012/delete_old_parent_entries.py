@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 def execute():
 	"""delete entries of child table having parent like old_par%% or ''"""
 	import webnotes

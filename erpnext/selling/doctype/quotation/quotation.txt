@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-06-08 15:33:49',
+		'creation': '2012-07-05 11:04:12',
 		'docstatus': 0,
-		'modified': '2012-06-08 16:10:44',
+		'modified': '2012-07-16 16:23:50',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -59,100 +59,6 @@
 	{
 		'doctype': 'DocType',
 		'name': u'Quotation'
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Sales Manager',
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'amend': 1,
-		'cancel': 1,
-		'create': 1,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Sales Manager',
-		'submit': 1,
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'amend': 1,
-		'cancel': 1,
-		'create': 1,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Sales User',
-		'submit': 1,
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Sales User',
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'doctype': u'DocPerm',
-		'match': u'customer_name',
-		'permlevel': 0,
-		'role': u'Customer'
-	},
-
-	# DocPerm
-	{
-		'amend': 1,
-		'cancel': 1,
-		'create': 1,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Maintenance Manager',
-		'submit': 1,
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Maintenance Manager'
-	},
-
-	# DocPerm
-	{
-		'amend': 1,
-		'cancel': 1,
-		'create': 1,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Maintenance User',
-		'submit': 1,
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Maintenance User'
 	},
 
 	# DocField
@@ -547,7 +453,7 @@
 		'description': u"Rate at which Price list currency is converted to company's base currency",
 		'doctype': u'DocField',
 		'fieldname': u'plc_conversion_rate',
-		'fieldtype': u'Currency',
+		'fieldtype': u'Float',
 		'label': u'Price List Currency Conversion Rate',
 		'permlevel': 0,
 		'print_hide': 1,
@@ -590,7 +496,7 @@
 		'description': u"Rate at which customer's currency is converted to company's base currency",
 		'doctype': u'DocField',
 		'fieldname': u'conversion_rate',
-		'fieldtype': u'Currency',
+		'fieldtype': u'Float',
 		'label': u'Conversion Rate',
 		'oldfieldname': u'conversion_rate',
 		'oldfieldtype': u'Currency',
@@ -1271,5 +1177,99 @@
 		'no_copy': 1,
 		'permlevel': 0,
 		'print_hide': 1
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Sales Manager',
+		'submit': 0,
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'amend': 1,
+		'cancel': 1,
+		'create': 1,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Sales Manager',
+		'submit': 1,
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'amend': 1,
+		'cancel': 1,
+		'create': 1,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Sales User',
+		'submit': 1,
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
+		'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Sales User',
+		'submit': 0,
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'doctype': u'DocPerm',
+		'match': u'customer_name',
+		'permlevel': 0,
+		'role': u'Customer'
+	},
+
+	# DocPerm
+	{
+		'amend': 1,
+		'cancel': 1,
+		'create': 1,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Maintenance Manager',
+		'submit': 1,
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Maintenance Manager'
+	},
+
+	# DocPerm
+	{
+		'amend': 1,
+		'cancel': 1,
+		'create': 1,
+		'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Maintenance User',
+		'submit': 1,
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Maintenance User'
 	}
 ]

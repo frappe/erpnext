@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import unicode_literals
 def execute():
 	import webnotes
 	webnotes.conn.sql("update `tabDocField` set print_hide = 1 where fieldname in ('price_list_currency', 'plc_conversion_rate')")

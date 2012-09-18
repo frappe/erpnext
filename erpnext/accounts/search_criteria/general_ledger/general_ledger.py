@@ -16,6 +16,7 @@
 
 #get company letter head
 #---------------------------------------------------------------------
+from __future__ import unicode_literals
 l_head = sql("select content from `tabLetter Head` where ifnull(is_default, 0) = 1 and ifnull(disabled, 0) = 0")
 l_head = l_head and l_head[0][0] or ''
 

@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import unicode_literals
 import webnotes
 from webnotes.utils import cint
 import home
@@ -40,8 +41,9 @@ def on_login_post_session(login_manager):
 	if webnotes.session['user'] not in ('Guest', 'demo@webnotestech.com'):
 		# create feed
 		from webnotes.utils import nowtime
+		from webnotes.profile import get_user_fullname
 		home.make_feed('Login', 'Profile', login_manager.user, login_manager.user,
-			'%s logged in at %s' % (login_manager.user_fullname, nowtime()), 
+			'%s logged in at %s' % (get_user_fullname, nowtime()), 
 			login_manager.user=='Administrator' and '#8CA2B3' or '#1B750D')		
 
 
@@ -85,7 +87,7 @@ def boot_session(bootinfo):
 		
 		# load subscription info
 		import conf
-		for key in ['max_users', 'expires_on', 'max_space', 'status']:
+		for key in ['max_users', 'expires_on', 'max_space', 'status', 'developer_mode']:
 			if hasattr(conf, key): bootinfo[key] = getattr(conf, key)
 
 		company = webnotes.conn.sql("select name, default_currency from `tabCompany`", as_dict=1)
@@ -94,7 +96,7 @@ def boot_session(bootinfo):
 			company_dict.setdefault(c['name'], {}).update(c)
 
 		bootinfo['company'] = company_dict
-
+		
 def get_letter_heads():
 	"""load letter heads with startup"""
 	import webnotes

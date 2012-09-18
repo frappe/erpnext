@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import unicode_literals
 import webnotes
 
 from webnotes.utils import load_json, cint, nowdate
@@ -33,11 +34,14 @@ def change_password(arg):
 	check_demo()
 	arg = load_json(arg)
 	
-	if not webnotes.conn.sql('select name from tabProfile where name=%s and password=password(%s)', (webnotes.session['user'], arg['old_password'])):
+	if not webnotes.conn.sql("""select * from `__Auth` where `user`=%s
+			and password=password(%s)""",
+			(webnotes.session["user"], arg["old_password"])):
 		webnotes.msgprint('Old password is not correct', raise_exception=1)
-	
-	from webnotes.utils import nowdate
-	webnotes.conn.sql("update tabProfile set password=password(%s), modified=%s where name=%s",(arg['new_password'], nowdate(), webnotes.session['user']))
+
+	webnotes.conn.sql("""update `__Auth` set password=password(%s)
+		where `user`=%s""", (arg["new_password"], webnotes.session["user"]))
+
 	webnotes.msgprint('Password Updated');
 
 @webnotes.whitelist()

@@ -45,9 +45,13 @@ cur_frm.cscript.month = cur_frm.cscript.employee = cur_frm.cscript.fiscal_year;
 // Calculate total if lwp exists
 // ------------------------------------------------------------------------
 cur_frm.cscript.leave_without_pay = function(doc,dt,dn){
-	doc.payment_days = flt(doc.total_days_in_month) - flt(doc.leave_without_pay);
-	refresh_field('payment_days');
-	calculate_all(doc, dt, dn);
+	if (doc.employee && doc.fiscal_year && doc.month) {
+		$c_obj(make_doclist(doc.doctype,doc.name), 'get_leave_details',doc.leave_without_pay,function(r, rt) {
+			var doc = locals[dt][dn];
+			cur_frm.refresh();
+			calculate_all(doc, dt, dn);
+		});
+	}
 }
 
 // Calculate all

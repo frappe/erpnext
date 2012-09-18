@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 import webnotes
 import conf
 import webnotes.model

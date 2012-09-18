@@ -76,7 +76,7 @@ erpnext.startup.start = function() {
 
 		// complete registration
 		if(in_list(user_roles,'System Manager') && (wn.boot.setup_complete=='No')) { 
-			wn.require("js/complete_setup.js");
+			wn.require("js/app/complete_setup.js");
 			erpnext.complete_setup.show(); 
 		}
 		if(wn.boot.expires_on && in_list(user_roles, 'System Manager')) {
@@ -100,10 +100,6 @@ erpnext.startup.start = function() {
 		if(wn.control_panel.custom_startup_code)
 			eval(wn.control_panel.custom_startup_code);		
 	}
-
-		
-	$('body').append('<a class="erpnext-logo" title="Powered by ERPNext" \
-		href="http://erpnext.com" target="_blank"></a>')
 }
 
 

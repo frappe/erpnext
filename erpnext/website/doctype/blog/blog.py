@@ -14,11 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-"""
-record of files
-
-naming for same name files: file.gif, file-1.gif, file-2.gif etc
-"""
+from __future__ import unicode_literals
 
 import webnotes
 import website.utils

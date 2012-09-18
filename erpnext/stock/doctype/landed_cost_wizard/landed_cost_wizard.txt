@@ -3,11 +3,11 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-03-27 14:36:34',
-		'docstatus': 0,
-		'modified': '2012-03-27 14:36:34',
-		'modified_by': u'Administrator',
-		'owner': u'wasim@webnotestech.com'
+		u'creation': '2012-07-03 13:29:45',
+		u'docstatus': 0,
+		u'modified': '2012-09-17 10:54:21',
+		u'modified_by': u'Administrator',
+		u'owner': u'wasim@webnotestech.com'
 	},
 
 	# These values are common for all DocType
@@ -15,20 +15,20 @@
 		'_last_update': u'1321441191',
 		'colour': u'White:FFF',
 		'default_print_format': u'Standard',
-		'doctype': 'DocType',
+		u'doctype': u'DocType',
 		'issingle': 1,
 		'module': u'Stock',
-		'name': '__common__',
+		u'name': u'__common__',
 		'section_style': u'Simple',
 		'server_code_error': u' ',
 		'show_in_menu': 1,
-		'version': 35
+		'version': 1
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': u'DocField',
-		'name': '__common__',
+		u'doctype': u'DocField',
+		u'name': u'__common__',
 		'parent': u'Landed Cost Wizard',
 		'parentfield': u'fields',
 		'parenttype': u'DocType',
@@ -37,8 +37,8 @@
 
 	# These values are common for all DocPerm
 	{
-		'doctype': u'DocPerm',
-		'name': '__common__',
+		u'doctype': u'DocPerm',
+		u'name': u'__common__',
 		'parent': u'Landed Cost Wizard',
 		'parentfield': u'permissions',
 		'parenttype': u'DocType',
@@ -47,79 +47,13 @@
 
 	# DocType, Landed Cost Wizard
 	{
-		'doctype': 'DocType',
-		'name': u'Landed Cost Wizard'
-	},
-
-	# DocPerm
-	{
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'All',
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 1,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Purchase Manager',
-		'submit': 0,
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'create': 1,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'System Manager',
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'create': 1,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Purchase User',
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'All'
-	},
-
-	# DocPerm
-	{
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'System Manager'
-	},
-
-	# DocPerm
-	{
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Purchase User'
-	},
-
-	# DocPerm
-	{
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Purchase Manager'
+		u'doctype': u'DocType',
+		u'name': u'Landed Cost Wizard'
 	},
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'process',
 		'fieldtype': u'HTML',
 		'label': u'Process',
@@ -128,7 +62,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'section_break0',
 		'fieldtype': u'Section Break',
 		'options': u'Simple'
@@ -136,7 +70,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'from_pr_date',
 		'fieldtype': u'Date',
 		'label': u'From PR Date',
@@ -145,7 +79,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'to_pr_date',
 		'fieldtype': u'Date',
 		'label': u'To PR Date',
@@ -154,7 +88,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'currency',
 		'fieldtype': u'Select',
 		'label': u'Currency',
@@ -164,7 +98,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'get_purchase_receipt',
 		'fieldtype': u'Button',
 		'label': u'Get Purchase Receipt',
@@ -173,7 +107,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'lc_pr_details',
 		'fieldtype': u'Table',
 		'label': u'Landed Cost Purchase Receipts',
@@ -182,7 +116,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'section_break1',
 		'fieldtype': u'Section Break',
 		'options': u'Simple'
@@ -190,7 +124,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'landed_cost',
 		'fieldtype': u'Link',
 		'label': u'Select Landed Cost Items Master',
@@ -200,7 +134,7 @@
 	# DocField
 	{
 		'colour': u'White:FFF',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'get_details',
 		'fieldtype': u'Button',
 		'label': u'Get Details',
@@ -209,7 +143,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'landed_cost_details',
 		'fieldtype': u'Table',
 		'label': u'Landed Cost Items',
@@ -218,10 +152,68 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'update_pr',
 		'fieldtype': u'Button',
 		'label': u'Update PR',
 		'options': u'update_landed_cost'
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 1,
+		u'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Purchase Manager',
+		'submit': 0,
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'create': 1,
+		u'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'System Manager',
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'create': 1,
+		u'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Purchase User',
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		u'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'All'
+	},
+
+	# DocPerm
+	{
+		u'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'System Manager'
+	},
+
+	# DocPerm
+	{
+		u'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Purchase User'
+	},
+
+	# DocPerm
+	{
+		u'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Purchase Manager'
 	}
 ]

@@ -14,14 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
- 
-
-// ONLOAD
-// ===================================================================================
-cur_frm.cscript.onload = function(doc, cdt, cdn) {
-   
-}
-
-cur_frm.cscript.refresh = function(doc, cdt, cdn) {
-   
+cur_frm.cscript.refresh = function(doc) {
+	cur_frm.set_intro(doc.__islocal ? "" : "There is nothing to edit.")
 }

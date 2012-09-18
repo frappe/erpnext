@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 import webnotes
 
 @webnotes.whitelist(allow_guest=True)
@@ -16,7 +17,8 @@ def get_blog_list(args=None):
 		select
 			cache.name as name, cache.html as content,
 			blog.owner as owner, blog.creation as published,
-			blog.title as title
+			blog.title as title, (select count(name) from `tabComment` where
+				comment_doctype='Blog' and comment_docname=blog.name) as comments
 		from `tabWeb Cache` cache, `tabBlog` blog
 		where cache.doc_type = 'Blog' and blog.page_name = cache.name
 		order by published desc, name asc"""
@@ -85,25 +87,43 @@ def add_comment(args=None):
 		}
 	"""
 	import webnotes
+	import webnotes.utils, markdown2
+	import webnotes.widgets.form.comments	
+	import website.web_cache
 	
 	if not args: args = webnotes.form_dict
+	args['comment'] = unicode(markdown2.markdown(args.get('comment') or ''))
 	
-	import webnotes.widgets.form.comments
 	comment = webnotes.widgets.form.comments.add_comment(args)
 	
 	# since comments are embedded in the page, clear the web cache
-	import website.web_cache
 	website.web_cache.clear_cache(args.get('page_name'),
 		args.get('comment_doctype'), args.get('comment_docname'))
 	
-	import webnotes.utils
 	
 	comment['comment_date'] = webnotes.utils.global_date_format(comment['creation'])
 	template_args = { 'comment_list': [comment], 'template': 'html/comment.html' }
 	
 	# get html of comment row
 	comment_html = website.web_cache.build_html(template_args)
-
+	
+	# notify commentors 
+	commentors = [d[0] for d in webnotes.conn.sql("""select comment_by from tabComment where
+		comment_doctype='Blog' and comment_docname=%s and
+		ifnull(unsubscribed, 0)=0""", args.get('comment_docname'))]
+	
+	blog = webnotes.conn.sql("""select * from tabBlog where name=%s""", 
+		args.get('comment_docname'), as_dict=1)[0]
+	
+	from webnotes.utils.email_lib.bulk import send
+	send(recipients=list(set(commentors + [blog['owner']])), 
+		doctype='Comment', 
+		email_field='comment_by', 
+		first_name_field="comment_by_fullname",
+		last_name_field="NA", 
+		subject='New Comment on Blog: ' + blog['title'], 
+		message='%(comment)s<p>By %(comment_by_fullname)s</p>' % args)
+	
 	return comment_html
 
 @webnotes.whitelist(allow_guest=True)
@@ -118,7 +138,8 @@ def add_subscriber():
 		lead = Document('Lead', name[0][0])
 	else:
 		lead = Document('Lead')
-		
+	
+	if not lead.source: lead.source = 'Blog'
 	lead.unsubscribed = 0
 	lead.blog_subscriber = 1
 	lead.lead_name = full_name

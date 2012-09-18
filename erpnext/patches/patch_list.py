@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import unicode_literals
 patch_list = [
 	{
 		'patch_module': 'patches.jan_mar_2012',
@@ -483,14 +484,37 @@ patch_list = [
 		'description': "deprecate doctype - Import Data Control and page - Import Data"
 	},
 	{
-		'patch_module': 'patches.june_2012',
+		'patch_module': 'patches.july_2012',
+		'patch_file': 'default_freeze_account',
+		'description': "set default freeze_account as 'No' where NULL"
+	},
+	{
+		'patch_module': 'patches.july_2012',
+		'patch_file': 'update_purchase_tax',
+		'description': "rename options in purchase taxes and charges"
+	},
+	{	'patch_module': 'patches.june_2012',
 		'patch_file': 'cms2',
 		'description': 'cms2 release patches'
+	},
+	{	'patch_module': 'patches.july_2012',
+		'patch_file': 'auth_table',
+		'description': 'create new __Auth table'
 	},
 	{
 		'patch_module': 'patches.july_2012',
 		'patch_file': 'remove_event_role_owner_match',
 		'description': "Remove Owner match from Event DocType's Permissions"
+	},
+	{
+		'patch_module': 'patches.july_2012',
+		'patch_file': 'deprecate_bulk_rename',
+		'description': "Remove Bulk Rename Tool"
+	},
+	{
+		'patch_module': 'patches.july_2012',
+		'patch_file': 'unicode_conf',
+		'description': "appends from __future__ import unicode_literals to py files if necessary"
 	},
 	{
 		'patch_module': 'patches.july_2012',
@@ -523,6 +547,14 @@ patch_list = [
 	},
 	{
 		'patch_module': 'patches.august_2012',
+		'patch_file': 'task_allocated_to_assigned',
+	},
+	{
+		'patch_module': 'patches.august_2012',
+		'patch_file': 'change_profile_permission',
+	},
+	{
+		'patch_module': 'patches.august_2012',
 		'patch_file': 'changed_blog_date_format',
 	},
 	{
@@ -544,5 +576,13 @@ patch_list = [
 	{
 		'patch_module': 'patches.september_2012',
 		'patch_file': 'reload_criteria_stock_ledger',
+	},
+	{
+		'patch_module': 'patches.september_2012',
+		'patch_file': 'all_permissions_patch',
+	},
+	{
+		'patch_module': 'patches.september_2012',
+		'patch_file': 'customer_permission_patch',
 	},
 ]

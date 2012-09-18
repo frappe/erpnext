@@ -79,10 +79,10 @@ erpnext.todo.ToDoItem = Class.extend({
 		parent_list += " div.todo-content";
 		
 		if(todo.reference_name && todo.reference_type) {
-			todo.link = repl('<a href="#!Form/%(reference_type)s/%(reference_name)s">\
+			todo.link = repl('<br><a href="#!Form/%(reference_type)s/%(reference_name)s">\
 						%(reference_type)s: %(reference_name)s</a>', todo);
 		} else if(todo.reference_type) {
-			todo.link = repl('<a href="#!List/%(reference_type)s">\
+			todo.link = repl('<br><a href="#!List/%(reference_type)s">\
 						%(reference_type)s</a>', todo);
 		} else {
 			todo.link = '';
@@ -95,12 +95,10 @@ erpnext.todo.ToDoItem = Class.extend({
 			<div class="todoitem">\
 				<span class="label %(labelclass)s">%(priority)s</span>\
 				<span class="description">\
-					<span class="popup-on-click">\
 					<span class="help" style="margin-right: 7px">%(userdate)s</span>\
 					%(fullname)s%(desc)s\
-					</span>\
-					<span class="ref_link"><br>\
-					%(link)s</span>\
+					<span class="popup-on-click"><a href="#"> [edit]</a></span>\
+					<span class="ref_link">%(link)s</span>\
 				</span>\
 				<span class="close-span"><a href="#" class="close">&times;</a></span>\
 			</div>\

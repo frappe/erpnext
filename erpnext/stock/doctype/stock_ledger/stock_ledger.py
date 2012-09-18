@@ -15,6 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # Please edit this list and import only required elements
+from __future__ import unicode_literals
 import webnotes
 
 from webnotes.utils import add_days, add_months, add_years, cint, cstr, date_diff, default_fields, flt, fmt_money, formatdate, generate_hash, getTraceback, get_defaults, get_first_day, get_last_day, getdate, has_common, month_name, now, nowdate, replace_newlines, sendmail, set_default, str_esc_quote, user_format, validate_email_add
@@ -51,19 +52,16 @@ class DocType:
 		self.doclist = doclist
 
 
-	# -----------------
-	# scrub serial nos
-	# -----------------
-	def scrub_serial_nos(self, obj):
-		for d in getlist(obj.doclist, obj.fname):
+	def scrub_serial_nos(self, obj, table_name = ''):
+		if not table_name:
+			table_name = obj.fname
+		
+		for d in getlist(obj.doclist, table_name):
 			if d.serial_no:
 				d.serial_no = d.serial_no.replace(',', '\n')
 				d.save()
 
 
-	# -----------------------------
-	# validate serial no warehouse
-	# -----------------------------
 	def validate_serial_no_warehouse(self, obj, fname):
 		for d in getlist(obj.doclist, fname):
 			wh = d.warehouse or d.s_warehouse
@@ -80,10 +78,8 @@ class DocType:
 						msgprint("Serial No : %s for Item : %s doesn't exists in Warehouse : %s" % (s, d.item_code, wh), raise_exception = 1)
 
 
-	# ------------------------------------
-	# check whether serial no is required
-	# ------------------------------------
 	def validate_serial_no(self, obj, fname):
+		"""check whether serial no is required"""
 		for d in getlist(obj.doclist, fname):
 			is_stock_item = get_value('Item', d.item_code, 'is_stock_item')
 			ar_required = get_value('Item', d.item_code, 'has_serial_no')
@@ -105,18 +101,10 @@ class DocType:
 				msgprint("Rejected serial no is mandatory for rejected qty of item: "+ d.item_code, raise_exception = 1)
 				
 				
-
-
-
-	# -------------------
-	# get serial no list
-	# -------------------
 	def get_sr_no_list(self, sr_nos, qty = 0, item_code = ''):
 		return get_sr_no_list(sr_nos, qty, item_code)
 
-	# ---------------------
-	# set serial no values
-	# ---------------------
+
 	def set_pur_serial_no_values(self, obj, serial_no, d, s, new_rec):
 		item_details = sql("select item_group, warranty_period from `tabItem` where name = '%s' and \
 			(ifnull(end_of_life,'')='' or end_of_life = '0000-00-00' or end_of_life > now()) " %(d.item_code), as_dict=1)
@@ -147,9 +135,6 @@ class DocType:
 		s.save(new_rec)
 
 
-	# ----------------------------------
-	# update serial no purchase details
-	# ----------------------------------
 	def update_serial_purchase_details(self, obj, d, serial_no, is_submit, purpose = ''):
 		exists = sql("select name, status, docstatus from `tabSerial No` where name = '%s'" % (serial_no))
 		if is_submit:
@@ -172,9 +157,6 @@ class DocType:
 				sql("update `tabSerial No` set docstatus = 2, status = 'Not in Use', purchase_document_type = '', purchase_document_no = '', purchase_date = null, purchase_rate = 0, supplier = null, supplier_name = '', supplier_address = '', warehouse = '' where name = '%s'" % serial_no)
 
 
-	# -------------------------------
-	# check whether serial no exists
-	# -------------------------------
 	def check_serial_no_exists(self, serial_no, item_code):
 		chk = sql("select name, status, docstatus, item_code from `tabSerial No` where name = %s", (serial_no), as_dict=1)
 		if not chk:
@@ -186,9 +168,7 @@ class DocType:
 		elif chk and chk[0]['status'] == 'Delivered':
 			msgprint("Serial No: %s of Item : %s is already delivered." % (serial_no, item_code), raise_exception = 1)
 
-	# ---------------------
-	# set serial no values
-	# ---------------------
+
 	def set_delivery_serial_no_values(self, obj, serial_no):
 		s = Document('Serial No', serial_no)
 		s.delivery_document_type =	 obj.doc.doctype
@@ -207,9 +187,6 @@ class DocType:
 		s.save()
 
 
-	# ----------------------------------
-	# update serial no delivery details
-	# ----------------------------------
 	def update_serial_delivery_details(self, obj, d, serial_no, is_submit):
 		if is_submit:
 			self.check_serial_no_exists(serial_no, d.item_code)
@@ -218,9 +195,6 @@ class DocType:
 			sql("update `tabSerial No` set docstatus = 0, status = 'In Store', delivery_document_type = '', delivery_document_no = '', delivery_date = null, customer = null, customer_name = '', delivery_address = '', territory = null where name = '%s'" % (serial_no))
 
 
-	# ---------------------
-	# update serial record
-	# ---------------------
 	def update_serial_record(self, obj, fname, is_submit = 1, is_incoming = 0):
 		import datetime
 		for d in getlist(obj.doclist, fname):
@@ -239,11 +213,6 @@ class DocType:
 					self.update_serial_purchase_details(obj, d, a, is_submit)
 				
 				
-
-
-	# -------------
-	# update stock
-	# -------------
 	def update_stock(self, values, is_amended = 'No'):
 		for v in values:
 			sle_id, serial_nos = '', ''
@@ -265,9 +234,6 @@ class DocType:
 				v["posting_date"], sle_id, v["posting_time"], '', v["is_cancelled"],v["voucher_type"],v["voucher_no"], is_amended)
 
 
-	# -----------
-	# make entry
-	# -----------
 	def make_entry(self, args):
 		sle = Document(doctype = 'Stock Ledger Entry')
 		for k in args.keys():

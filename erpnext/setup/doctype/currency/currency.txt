@@ -3,17 +3,19 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-03-27 14:36:19',
+		'creation': '2012-07-03 13:30:55',
 		'docstatus': 0,
-		'modified': '2012-03-27 14:36:19',
+		'modified': '2012-07-11 16:11:45',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
+		'allow_trash': 1,
 		'autoname': u'field:currency_name',
 		'colour': u'White:FFF',
+		'description': u'**Currency** Master',
 		'doctype': 'DocType',
 		'in_create': 0,
 		'module': u'Setup',
@@ -22,7 +24,7 @@
 		'section_style': u'Simple',
 		'server_code_error': u' ',
 		'show_in_menu': 0,
-		'version': 3
+		'version': 1
 	},
 
 	# These values are common for all DocField
@@ -62,8 +64,15 @@
 
 	# DocPerm
 	{
+		'cancel': 1,
+		'doctype': u'DocPerm',
+		'role': u'Accounts Manager'
+	},
+
+	# DocPerm
+	{
 		'amend': 0,
-		'cancel': 0,
+		'cancel': 1,
 		'doctype': u'DocPerm',
 		'role': u'Sales Master Manager',
 		'submit': 0
@@ -76,12 +85,6 @@
 		'doctype': u'DocPerm',
 		'role': u'Purchase Master Manager',
 		'submit': 0
-	},
-
-	# DocPerm
-	{
-		'doctype': u'DocPerm',
-		'role': u'Accounts Manager'
 	},
 
 	# DocField

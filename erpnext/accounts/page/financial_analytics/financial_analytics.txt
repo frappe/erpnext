@@ -1,0 +1,28 @@
+# Page, financial-analytics
+[
+
+	# These values are common in all dictionaries
+	{
+		u'creation': '2012-09-17 13:46:47',
+		u'docstatus': 0,
+		u'modified': '2012-09-17 13:46:47',
+		u'modified_by': u'Administrator',
+		u'owner': u'Administrator'
+	},
+
+	# These values are common for all Page
+	{
+		u'doctype': u'Page',
+		'module': u'Accounts',
+		u'name': u'__common__',
+		'page_name': u'financial-analytics',
+		'standard': u'Yes',
+		'title': u'Financial Analytics'
+	},
+
+	# Page, financial-analytics
+	{
+		u'doctype': u'Page',
+		u'name': u'financial-analytics'
+	}
+]

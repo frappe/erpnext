@@ -1,4 +1,5 @@
 # dont run this patch
+from __future__ import unicode_literals
 def execute():
 	import webnotes
 	import webnotes.model.doctype
