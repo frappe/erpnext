@@ -636,49 +636,6 @@ class DocType(TransactionBase):
 
 		self.make_gl_entries(is_cancel=1)
 
-	# Get Warehouse
-	def get_warehouse(self):
-		w = webnotes.conn.sql("select warehouse from `tabPOS Setting` where ifnull(user,'') = '%s' and company = '%s'" % (session['user'], self.doc.company))
-		w = w and w[0][0] or ''
-		if not w:
-			ps = webnotes.conn.sql("select name, warehouse from `tabPOS Setting` where ifnull(user,'') = '' and company = '%s'" % self.doc.company)
-			if not ps:
-				msgprint("To make POS entry, please create POS Setting from Setup --> Accounts --> POS Setting and refresh the system.")
-				raise Exception
-			elif not ps[0][1]:
-				msgprint("Please enter warehouse in POS Setting")
-			else:
-				w = ps[0][1]
-		return w
-
-	# on update
-	def on_update(self):
-		# Set default warehouse from pos setting
-		#----------------------------------------
-		if cint(self.doc.is_pos) == 1:
-			self.set_actual_qty()
-			w = self.get_warehouse()
-			if w:
-				for d in getlist(self.doclist, 'entries'):
-					if not d.warehouse:
-						d.warehouse = cstr(w)
-
-			if flt(self.doc.paid_amount) == 0:
-				if self.doc.cash_bank_account: 
-					webnotes.conn.set(self.doc, 'paid_amount', 
-						(flt(self.doc.grand_total) - flt(self.doc.write_off_amount)))
-				else:
-					# show message that the amount is not paid
-					webnotes.conn.set(self.doc,'paid_amount',0)
-					webnotes.msgprint("Note: Payment Entry not created since 'Cash/Bank Account' was not specified.")
-
-		else:
-			webnotes.conn.set(self.doc,'paid_amount',0)
-
-		webnotes.conn.set(self.doc,'outstanding_amount',flt(self.doc.grand_total) - flt(self.doc.total_advance) - flt(self.doc.paid_amount) - flt(self.doc.write_off_amount))
-
-	#-------------------------------------------------------------------------------------
-
 	def set_default_recurring_values(self):
 		from webnotes.utils import cstr
 

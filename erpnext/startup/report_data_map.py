@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import unicode_literals
 data_map = {
 	"Account": {
 		"columns": ["name", "parent_account", "lft", "rgt", "debit_or_credit", "is_pl_account",
