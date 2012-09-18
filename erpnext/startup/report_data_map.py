@@ -38,5 +38,28 @@ data_map = {
 	"Fiscal Year": {
 		"columns": ["name", "year_start_date", 
 			"adddate(adddate(year_start_date, interval 1 year), interval -1 day) as year_end_date"]
+	},
+	"Stock Ledger Entry": {
+		"columns": ["posting_date", "posting_time", "item_code", "warehouse", "actual_qty as qty",
+			"voucher_type", "voucher_no"],
+		"condition": ["ifnull(is_cancelled, 'No')='No'"],
+		"order_by": "posting_date, posting_time, name",
+		"links": {
+			"item_code": ["Item", "name"],
+			"warehouse": ["Warehouse", "name"]
+		}
+	},
+	"Item": {
+		"columns": ["name", "if(item_name=name, '', item_name) as item_name", 
+			"item_group", "stock_uom", "brand"],
+		"order_by": "name"
+	},
+	"Item Group": {
+		"columns": ["name", "lft", "rgt", "parent_item_group"],
+		"order_by": "lft"
+	},
+	"Warehouse": {
+		"columns": ["name"],
+		"order_by": "name"
 	}
 }
