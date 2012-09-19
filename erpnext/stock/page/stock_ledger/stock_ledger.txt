@@ -1,0 +1,28 @@
+# Page, stock-ledger
+[
+
+	# These values are common in all dictionaries
+	{
+		u'creation': '2012-09-18 14:55:15',
+		u'docstatus': 0,
+		u'modified': '2012-09-18 14:55:15',
+		u'modified_by': u'Administrator',
+		u'owner': u'Administrator'
+	},
+
+	# These values are common for all Page
+	{
+		u'doctype': u'Page',
+		'module': u'Stock',
+		u'name': u'__common__',
+		'page_name': u'stock-ledger',
+		'standard': u'Yes',
+		'title': u'Stock Ledger'
+	},
+
+	# Page, stock-ledger
+	{
+		u'doctype': u'Page',
+		u'name': u'stock-ledger'
+	}
+]

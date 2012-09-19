@@ -279,7 +279,8 @@ return;}
 if(r.server_messages){r.server_messages=JSON.parse(r.server_messages)
 msgprint(r.server_messages);}
 if(r.exc){r.exc=JSON.parse(r.exc);if(r.exc instanceof Array){$.each(r.exc,function(i,v){if(v)console.log(v);})}else{console.log(r.exc);}};if(r['403']){wn.container.change_to('403');}
-if(r.docs){LocalDB.sync(r.docs);}}
+if(r.docs){LocalDB.sync(r.docs);}
+wn.last_response=r;}
 wn.request.call=function(opts){wn.request.prepare(opts);var ajax_args={url:opts.url||wn.request.url,data:opts.args,type:opts.type||'POST',dataType:opts.dataType||'json',success:function(r,xhr){wn.request.cleanup(opts,r);opts.success&&opts.success(r,xhr.responseText);},error:function(xhr,textStatus){wn.request.cleanup(opts,{});show_alert('Unable to complete request: '+textStatus)
 opts.error&&opts.error(xhr)}};if(opts.progress_bar){var interval=null;$.extend(ajax_args,{xhr:function(){var xhr=jQuery.ajaxSettings.xhr();interval=setInterval(function(){if(xhr.readyState>2){var total=parseInt(xhr.getResponseHeader('Original-Length')||0)||parseInt(xhr.getResponseHeader('Content-Length'));var completed=parseInt(xhr.responseText.length);var percent=(100.0/total*completed).toFixed(2);opts.progress_bar.css('width',(percent<10?10:percent)+'%');}},50);wn.last_xhr=xhr;return xhr;},complete:function(){opts.progress_bar.css('width','100%');clearInterval(interval);}})}
 $.ajax(ajax_args);}

@@ -41,11 +41,11 @@ wn.pages['general-ledger'].onload = function(wrapper) {
 		filters: [
 			{fieldtype:"Select", label: "Company", link:"Company", default_value: "Select Company...",
 				filter: function(val, item, opts) {
-					return item.company == val || val == opts.default_value || item._show;
+					return item.company == val || val == opts.default_value;
 				}},
 			{fieldtype:"Select", label: "Account", link:"Account", default_value: "Select Account...",
 				filter: function(val, item, opts, me) {
-					if(val == opts.default_value || item._show) {
+					if(val == opts.default_value) {
 						return true;
 					} else {
 						// true if GL Entry belongs to selected
@@ -56,14 +56,14 @@ wn.pages['general-ledger'].onload = function(wrapper) {
 			{fieldtype:"Data", label: "Voucher No",
 				filter: function(val, item, opts) {
 					if(!val) return true;
-					return (item.voucher_no && item.voucher_no.indexOf(val)!=-1) || item._show;
+					return (item.voucher_no && item.voucher_no.indexOf(val)!=-1);
 				}},
 			{fieldtype:"Date", label: "From Date", filter: function(val, item) {
-				return item._show || dateutil.user_to_obj(val) <= dateutil.str_to_obj(item.posting_date);
+				return dateutil.str_to_obj(val) <= dateutil.str_to_obj(item.posting_date);
 			}},
 			{fieldtype:"Label", label: "To"},
 			{fieldtype:"Date", label: "To Date", filter: function(val, item) {
-				return item._show || dateutil.user_to_obj(val) >= dateutil.str_to_obj(item.posting_date);
+				return dateutil.str_to_obj(val) >= dateutil.str_to_obj(item.posting_date);
 			}},
 			{fieldtype:"Button", label: "Refresh", icon:"icon-refresh icon-white", cssClass:"btn-info"},
 			{fieldtype:"Button", label: "Reset Filters"}
@@ -85,14 +85,15 @@ wn.pages['general-ledger'].onload = function(wrapper) {
 			// add Opening, Closing, Totals rows
 			// if filtered by account and / or voucher
 			var data = wn.report_dump.data["GL Entry"];
-			this.make_account_by_name();
+			var out = [];
+			
+			if(!this.account_by_name)
+				this.account_by_name = this.make_name_map(wn.report_dump.data["Account"]);
+				
 			var me = this;
 			
-			var account = this.filter_inputs.account.val();
-			var from_date = dateutil.user_to_obj(this.filter_inputs.from_date.val());
-			var to_date = dateutil.user_to_obj(this.filter_inputs.to_date.val());
-			var voucher_no = this.filter_inputs.voucher_no.val();
-			var default_account = this.filter_inputs.account.get(0).opts.default_value;
+			var from_date = dateutil.str_to_obj(this.from_date);
+			var to_date = dateutil.str_to_obj(this.to_date);
 			
 			if(to_date < from_date) {
 				msgprint("From Date must be before To Date");
@@ -109,8 +110,8 @@ wn.pages['general-ledger'].onload = function(wrapper) {
 			}
 			
 			$.each(data, function(i, item) {
-				if((account!=default_account ? me.is_child_account(account, item.account) : true) && 
-					(voucher_no ? item.voucher_no==voucher_no : true)) {
+				if((!me.is_default("account") ? me.is_child_account(me.account, item.account) : true) && 
+					(me.voucher_no ? item.voucher_no==me.voucher_no : true)) {
 
 					var date = dateutil.str_to_obj(item.posting_date);
 					
@@ -120,6 +121,10 @@ wn.pages['general-ledger'].onload = function(wrapper) {
 					} else if(date <= to_date) {
 						totals.debit += item.debit;
 						totals.credit += item.credit;						
+					}
+
+					if(me.apply_filters(item)) {
+						out.push(item);
 					}
 				}
 			})
@@ -131,21 +136,14 @@ wn.pages['general-ledger'].onload = function(wrapper) {
 			}
 								
 			
-			if(account != default_account) {
-				var out = [opening].concat(data).concat([totals, closing]);
+			if(!me.is_default("account")) {
+				var out = [opening].concat(out).concat([totals, closing]);
 			} else {
-				var out = data.concat([totals]);
+				var out = out.concat([totals]);
 			}
 			
 			this.prepare_data_view(out);
 		},
-		make_account_by_name: function() {
-			this.account_by_name = {};
-			var me = this;
-			$.each(wn.report_dump.data['Account'], function(i, v) {
-				me.account_by_name[v.name] = v;
-			})
-		}
 	});
 
 }
