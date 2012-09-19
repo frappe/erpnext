@@ -50,13 +50,13 @@ class DocType:
 
 		for d in dl:
 			nl = addchild(self.doc, 'entries', 'Bank Reconciliation Detail', 1, self.doclist)
-			nl.posting_date = str(d[5])
-			nl.voucher_id = str(d[0])
-			nl.cheque_number = str(d[1])
-			nl.cheque_date = str(d[2])
+			nl.posting_date = cstr(d[5])
+			nl.voucher_id = cstr(d[0])
+			nl.cheque_number = cstr(d[1])
+			nl.cheque_date = cstr(d[2])
 			nl.debit = flt(d[3])
 			nl.credit = flt(d[4])
-			nl.against_account = d[6]
+			nl.against_account = cstr(d[6])
 			self.doc.total_amount += flt(flt(d[4]) - flt(d[3]))
 
 	def update_details(self):
