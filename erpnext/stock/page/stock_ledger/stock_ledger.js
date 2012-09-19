@@ -173,14 +173,20 @@ wn.pages['stock-ledger'].onload = function(wrapper) {
 				grid: { hoverable: true, clickable: true },
 				xaxis: { mode: "time", 
 					min: dateutil.str_to_obj(this.from_date).getTime(),
-					max: dateutil.str_to_obj(this.to_date).getTime() }
+					max: dateutil.str_to_obj(this.to_date).getTime() },
+				zoom: {
+		            interactive: true
+		        },
+		        pan: {
+		            interactive: true
+		        }
 			}
 		},
 		get_tooltip_text: function(label, x, y) {
 			var d = new Date(x);
-			var date = dateutil.obj_to_user(d + " " + d.getHours() + ":" + d.getMinutes());
+			var date = dateutil.obj_to_user(d) + " " + d.getHours() + ":" + d.getMinutes();
 		 	var value = fmt_money(y);
-			return value + " on " + date;
+			return value.bold() + " on " + date;
 		},
 	});
 }
