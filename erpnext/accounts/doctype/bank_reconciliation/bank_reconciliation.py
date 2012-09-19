@@ -60,7 +60,13 @@ class DocType:
 			self.doc.total_amount += flt(flt(d[4]) - flt(d[3]))
 
 	def update_details(self):
+		vouchers = []
 		for d in getlist(self.doclist, 'entries'):
 			if d.clearance_date:
 				sql("update `tabJournal Voucher` set clearance_date = %s, modified = %s where name=%s", (d.clearance_date, nowdate(), d.voucher_id))
-		msgprint("Updated")
+				vouchers.append(d.voucher_id)
+
+		if vouchers:
+			msgprint("Clearance Date updated in %s" % vouchers)
+		else:
+			msgprint("Clearance Date not mentioned")
