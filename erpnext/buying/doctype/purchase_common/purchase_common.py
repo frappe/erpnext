@@ -269,7 +269,8 @@ class DocType(TransactionBase):
 					item_last_purchase_rate = webnotes.conn.get_value("Item",
 						d.item_code, "last_purchase_rate")
 					if item_last_purchase_rate:
-						d.purchase_ref_rate = item_last_purchase_rate
+						d.purchase_ref_rate = d.purchase_rate = d.import_ref_rate \
+							= d.import_rate = item_last_purchase_rate
 			
 	def get_last_purchase_details(self, item_code, doc_name):
 		import webnotes
