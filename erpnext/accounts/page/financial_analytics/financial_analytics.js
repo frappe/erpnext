@@ -36,19 +36,7 @@ erpnext.FinancialAnalytics = erpnext.AccountTreeGrid.extend({
 				var out = (val=='Profit and Loss') ? item.is_pl_account=='Yes' : item.is_pl_account!='Yes';
 				if(!out) return false;
 				
-				// show only non-zero values
-				if(!me.show_zero) {
-					for(var i=0, j=me.columns.length; i<j; i++) {
-						var col = me.columns[i];
-						if(col.formatter==me.currency_formatter) {
-							if(flt(item[col.field]) > 0.001) {
-								return true;
-							} 
-						}
-					}					
-					return false;
-				} 
-				return true;
+				return me.apply_zero_filter(val, item, opts, me);
 			}},
 		{fieldtype:"Select", label: "Company", link:"Company", default_value: "Select Company...",
 			filter: function(val, item, opts) {
@@ -151,9 +139,6 @@ erpnext.FinancialAnalytics = erpnext.AccountTreeGrid.extend({
 			me.filter_inputs.refresh.click();
 		});
 		this.wrapper.bind('make', function() {
-			me.wrapper.find('.show-zero').toggle(true).find('input').click(function(){
-				me.refresh();
-			});
 			me.wrapper.on("click", ".plot-check", function() {
 				var checked = $(this).attr("checked");
 				me.account_by_name[$(this).attr("data-id")].checked = checked ? true : false;
@@ -206,7 +191,6 @@ erpnext.FinancialAnalytics = erpnext.AccountTreeGrid.extend({
 		}
 		this.update_groups();
 		this.accounts_initialized = true;
-		this.show_zero = $('.show-zero input:checked').length;
 	},
 	add_balance: function(field, account, gl) {
 		account[field] = flt(account[field]) + 
@@ -233,7 +217,7 @@ erpnext.FinancialAnalytics = erpnext.AccountTreeGrid.extend({
 		var pl_or_bs = this.filter_inputs.pl_or_bs.val();
 		$.each(this.accounts, function(i, account) {
 			var show = pl_or_bs == "Profit and Loss" ? account.is_pl_account=="Yes" : account.is_pl_account!="Yes";
-			if (show && account.checked) {
+			if (show && account.checked && me.apply_filter(account, "company")) {
 				data.push({
 					label: account.name,
 					data: $.map(me.columns, function(col, idx) {
@@ -267,5 +251,5 @@ erpnext.FinancialAnalytics = erpnext.AccountTreeGrid.extend({
 				min: dateutil.str_to_obj(this.from_date).getTime(),
 				max: dateutil.str_to_obj(this.to_date).getTime() }
 		}
-	}
+	},
 })

@@ -42,8 +42,11 @@ erpnext.AccountTreeGrid = wn.views.GridReport.extend({
 	},
 	filters: [
 		{fieldtype:"Select", label: "Company", link:"Company", default_value: "Select Company...",
-			filter: function(val, item, opts) {
-				return item.company == val || val == opts.default_value || item._show;
+			filter: function(val, item, opts, me) {
+				if (item.company == val || val == opts.default_value) {
+					return me.apply_zero_filter(val, item, opts, me);
+				}
+				return false;
 			}},
 		{fieldtype:"Select", label: "Fiscal Year", link:"Fiscal Year", 
 			default_value: "Select Fiscal Year..."},
@@ -67,6 +70,7 @@ erpnext.AccountTreeGrid = wn.views.GridReport.extend({
 			});
 			me.set_route();
 		});
+		me.show_zero_check()
 	},
 	init_filter_values: function() {
 		this.filter_inputs.company.val(sys_defaults.company);
@@ -75,7 +79,8 @@ erpnext.AccountTreeGrid = wn.views.GridReport.extend({
 		this.filter_inputs.to_date.val(dateutil.str_to_user(sys_defaults.year_end_date));
 	},
 	prepare_data: function() {
-		var me = this;				
+		var me = this;
+		this.data = []			
 		if(this.accounts) {
 			// refresh -- only initialize
 			$.each(this.accounts, function(i, d) {
@@ -256,7 +261,9 @@ erpnext.AccountTreeGrid = wn.views.GridReport.extend({
 			}
 		});
 	},
-	custom_dataview_filter: function(item) {
+	dataview_filter: function(item) {
+		if(!wn.cur_grid_report.apply_filters(item)) return false;
+		
 		if (item.parent_account) {
 			var parent = item.parent_account;
 			while (parent) {

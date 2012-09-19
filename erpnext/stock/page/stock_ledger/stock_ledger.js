@@ -13,6 +13,7 @@ wn.pages['stock-ledger'].onload = function(wrapper) {
 		doctypes: ["Item", "Item Group", "Warehouse", "Stock Ledger Entry"],
 
 		setup_columns: function() {
+			this.hide_balance = (this.is_default("item_code") || this.voucher_no) ? true : false;
 			this.columns = [
 				{id: "posting_datetime", name: "Posting Date", field: "posting_datetime", width: 120,
 					formatter: this.date_formatter},
@@ -27,7 +28,8 @@ wn.pages['stock-ledger'].onload = function(wrapper) {
 				{id: "qty", name: "Qty", field: "qty", width: 100,
 					formatter: this.currency_formatter},
 				{id: "balance", name: "Balance", field: "balance", width: 100,
-					formatter: this.currency_formatter},
+					formatter: this.currency_formatter,
+					hidden: this.hide_balance},
 				{id: "voucher_type", name: "Voucher Type", field: "voucher_type", width: 120},
 				{id: "voucher_no", name: "Voucher No", field: "voucher_no", width: 160,
 					link_formatter: {
@@ -38,6 +40,7 @@ wn.pages['stock-ledger'].onload = function(wrapper) {
 				{id: "description", name: "Description", field: "description", width: 200,
 					formatter: this.text_formatter},
 			];
+			
 		},
 		filters: [
 			{fieldtype:"Select", label: "Warehouse", link:"Warehouse", default_value: "Select Warehouse...",
@@ -134,7 +137,7 @@ wn.pages['stock-ledger'].onload = function(wrapper) {
 			if(me.item_code != me.item_code_default && !me.voucher_no) {
 				var closing = {
 					item_code: "On " + dateutil.str_to_user(this.to_date), 
-					balane: me.item_by_name[sl.item_code].balance, qty: 0,
+					balance: (out ? out[out.length-1].balance : 0), qty: 0,
 					id:"_closing", _show: true, _style: "font-weight: bold"
 				};
 				var out = [opening].concat(out).concat([total_in, total_out, closing]);
@@ -142,6 +145,36 @@ wn.pages['stock-ledger'].onload = function(wrapper) {
 			
 			this.data = out;
 			this.prepare_data_view(out);			
+		},
+		get_plot_data: function() {
+			var data = [];
+			var me = this;
+			if(me.hide_balance) return false;
+			data.push({
+				label: me.item_code,
+				data: [[dateutil.str_to_obj(me.from_date).getTime(), me.data[0].balance]]
+					.concat($.map(me.data, function(col, idx) {
+						if (col.posting_datetime) {
+							return [[dateutil.str_to_obj(col.posting_datetime).getTime(), col.balance - col.qty],
+									[dateutil.str_to_obj(col.posting_datetime).getTime(), col.balance]]
+						}
+						return null;
+					})).concat([
+						// closing
+						[dateutil.str_to_obj(me.to_date).getTime(), me.data[me.data.length - 1].balance]
+					]),
+				points: {show: true},
+				lines: {show: true, fill: true},
+			});
+			return data;
+		},
+		get_plot_options: function() {
+			return {
+				grid: { hoverable: true, clickable: true },
+				xaxis: { mode: "time", 
+					min: dateutil.str_to_obj(this.from_date).getTime(),
+					max: dateutil.str_to_obj(this.to_date).getTime() }
+			}
 		},
 	});
 }

@@ -137,12 +137,56 @@ wn.pages['general-ledger'].onload = function(wrapper) {
 								
 			
 			if(!me.is_default("account")) {
+				if(me.account_by_name[me.account].debit_or_credit == "Debit") {
+					opening.debit -= opening.credit; opening.credit = 0;
+					closing.debit -= closing.credit; closing.credit = 0;
+				} else {
+					opening.credit -= opening.debit; opening.debit = 0;
+					closing.credit -= closing.debit; closing.debit = 0;
+				}
 				var out = [opening].concat(out).concat([totals, closing]);
 			} else {
 				var out = out.concat([totals]);
 			}
 			
+			// sanitize opening / closing
+			
+			this.data = out;
 			this.prepare_data_view(out);
+		},
+		get_plot_data: function() {
+			var data = [];
+			var me = this;
+			if(me.is_default("account") || me.voucher_no) return false;
+			var debit_or_credit = me.account_by_name[me.account].debit_or_credit;
+			var balance = debit_or_credit=="Debit" ? me.data[0].debit : me.data[0].credit;
+			data.push({
+				label: me.account,
+				data: [[dateutil.str_to_obj(me.from_date).getTime(), balance]]
+					.concat($.map(me.data, function(col, idx) {
+						if (col.posting_date) {
+							var diff = (debit_or_credit == "Debit" ? 1 : -1) * (flt(col.debit) - flt(col.credit));
+							balance += diff;
+							return [[dateutil.str_to_obj(col.posting_date).getTime(), balance - diff],
+									[dateutil.str_to_obj(col.posting_date).getTime(), balance]]
+						}
+						return null;
+					})).concat([
+						// closing
+						[dateutil.str_to_obj(me.to_date).getTime(), balance]
+					]),
+				points: {show: true},
+				lines: {show: true, fill: true},
+			});
+			return data;
+		},
+		get_plot_options: function() {
+			return {
+				grid: { hoverable: true, clickable: true },
+				xaxis: { mode: "time", 
+					min: dateutil.str_to_obj(this.from_date).getTime(),
+					max: dateutil.str_to_obj(this.to_date).getTime() }
+			}
 		},
 	});
 
