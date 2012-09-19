@@ -39,7 +39,7 @@ class DocType:
 		self.doc, self.doclist = d,dl
 		
 	def validate(self):
-		if self.doc.__islocal and len(self.doc.abbr) > 5:
+		if self.doc.fields.get('__islocal') and len(self.doc.abbr) > 5:
 			webnotes.msgprint("Abbreviation cannot have more than 5 characters",
 				raise_exception=1)
 	
