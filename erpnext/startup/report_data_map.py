@@ -15,6 +15,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import unicode_literals
+
+# mappings for table dumps
+# "remember to add indexes!"
+
 data_map = {
 	"Account": {
 		"columns": ["name", "parent_account", "lft", "rgt", "debit_or_credit", "is_pl_account",
@@ -30,7 +34,11 @@ data_map = {
 		"columns": ["account", "posting_date", "cost_center", "debit", "credit", "is_opening",
 			"company", "voucher_type", "voucher_no", "remarks"],
 		"conditions": ["ifnull(is_cancelled, 'No')='No'"],
-		"order_by": "posting_date, account"
+		"order_by": "posting_date, account",
+		"links": {
+			"account": ["Account", "name"],
+			"company": ["Company", "name"]
+		}
 	},
 	"Company": {
 		"columns": ["name"],
@@ -43,12 +51,13 @@ data_map = {
 	"Stock Ledger Entry": {
 		"columns": ["posting_date", "posting_time", "item_code", "warehouse", "actual_qty as qty",
 			"voucher_type", "voucher_no"],
-		"condition": ["ifnull(is_cancelled, 'No')='No'"],
+		"conditions": ["ifnull(is_cancelled, 'No')='No'"],
 		"order_by": "posting_date, posting_time, name",
 		"links": {
 			"item_code": ["Item", "name"],
 			"warehouse": ["Warehouse", "name"]
-		}
+		},
+		"force_index": "posting_sort_index"		
 	},
 	"Item": {
 		"columns": ["name", "if(item_name=name, '', item_name) as item_name", 

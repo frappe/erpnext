@@ -99,7 +99,6 @@ wn.pages['stock-ledger'].onload = function(wrapper) {
 			$.each(wn.report_dump.data["Item"], function(i, item) { item.balance = 0.0; });
 			
 			// 
-			var t = new Date();
 			for(var i=0, j=data.length; i<j; i++) {
 				var sl = data[i];
 				sl.description = me.item_by_name[sl.item_code].description;
@@ -121,7 +120,7 @@ wn.pages['stock-ledger'].onload = function(wrapper) {
 				if(!before_end) break;
 				
 				// apply filters
-				if(me.dataview_filter(sl)) {
+				if(me.apply_filters(sl)) {
 					out.push(sl);
 				}
 				
@@ -131,9 +130,7 @@ wn.pages['stock-ledger'].onload = function(wrapper) {
 					me.item_by_name[sl.item_code].balance = sl.balance;					
 				}
 			}
-			
-			console.log(new Date() - t);
-			
+						
 			if(me.item_code != me.item_code_default && !me.voucher_no) {
 				var closing = {
 					item_code: "On " + dateutil.str_to_user(this.to_date), 
