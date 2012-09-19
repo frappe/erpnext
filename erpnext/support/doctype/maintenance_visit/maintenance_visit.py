@@ -136,6 +136,7 @@ class DocType(TransactionBase):
 
 	def check_if_last_visit(self):
 		"""check if last maintenance visit against same sales order/ customer issue"""
+		check_for_docname = check_for_doctype = None
 		for d in getlist(self.doclist, 'maintenance_visit_details'):
 			if d.prevdoc_docname:
 				check_for_docname = d.prevdoc_docname

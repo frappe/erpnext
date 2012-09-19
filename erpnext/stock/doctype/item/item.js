@@ -18,6 +18,10 @@ cur_frm.cscript.refresh = function(doc) {
 	// make sensitive fields(has_serial_no, is_stock_item, valuation_method)
 	// read only if any stock ledger entry exists
 
+	if (!doc.__islocal) {
+		set_field_permlevel("item_code", 1);
+	}
+
 	if ((!doc.__islocal) && (doc.is_stock_item == 'Yes')) {
 		var callback = function(r, rt) {
 			if (r.message == 'exists') permlevel = 1;

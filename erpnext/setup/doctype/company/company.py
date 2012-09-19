@@ -37,6 +37,11 @@ convert_to_lists = webnotes.conn.convert_to_lists
 class DocType:
 	def __init__(self,d,dl):
 		self.doc, self.doclist = d,dl
+		
+	def validate(self):
+		if self.doc.fields.get('__islocal') and len(self.doc.abbr) > 5:
+			webnotes.msgprint("Abbreviation cannot have more than 5 characters",
+				raise_exception=1)
 	
 	# Create default accounts
 	# ---------------------------------------------------
