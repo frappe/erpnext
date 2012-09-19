@@ -29,12 +29,26 @@ wn.pages['financial-analytics'].onload = function(wrapper) {
 erpnext.FinancialAnalytics = erpnext.AccountTreeGrid.extend({
 	filters: [
 		{fieldtype:"Select", label: "PL or BS", options:["Profit and Loss", "Balance Sheet"],
-			filter: function(val, item, opts) {
-				if(val=='Profit and Loss') {
-					return item.is_pl_account=='Yes' || item._show;
-				} else {
-					return item.is_pl_account=='No' || item._show;
-				}
+			filter: function(val, item, opts, me) {
+				if(item._show) return true;
+				
+				// pl or bs
+				var out = (val=='Profit and Loss') ? item.is_pl_account=='Yes' : item.is_pl_account!='Yes';
+				if(!out) return false;
+				
+				// show only non-zero values
+				if(!me.show_zero) {
+					for(var i=0, j=me.columns.length; i<j; i++) {
+						var col = me.columns[i];
+						if(col.formatter==me.currency_formatter) {
+							if(flt(item[col.field]) > 0.001) {
+								return true;
+							} 
+						}
+					}					
+					return false;
+				} 
+				return true;
 			}},
 		{fieldtype:"Select", label: "Company", link:"Company", default_value: "Select Company...",
 			filter: function(val, item, opts) {
@@ -51,18 +65,15 @@ erpnext.FinancialAnalytics = erpnext.AccountTreeGrid.extend({
 		{fieldtype:"Button", label: "Reset Filters"}
 	],
 	setup_columns: function() {
-		this.columns = [
+		var std_columns = [
 			{id: "check", name: "Plot", field: "check", width: 30,
-				formatter: function(row, cell, value, columnDef, dataContext) {					
-					return repl("<input type='checkbox' account='%(name)s' \
-						class='plot-check' %(checked)s>", {
-							"name": dataContext.name,
-							"checked": dataContext.checked ? "checked" : ""
-						})
-				}},
+				formatter: this.check_formatter},
 			{id: "name", name: "Account", field: "name", width: 300,
 				formatter: this.account_formatter},
+			{id: "opening", name: "Opening", field: "opening", hidden: true,
+				formatter: this.currency_formatter}
 		];
+		this.columns = [];
 		
 		var me = this;
 		var range = this.filter_inputs.range.val();
@@ -70,27 +81,34 @@ erpnext.FinancialAnalytics = erpnext.AccountTreeGrid.extend({
 		this.to_date = dateutil.user_to_str(this.filter_inputs.to_date.val());
 		var date_diff = dateutil.get_diff(this.to_date, this.from_date);
 			
-		me.column_map = {};	
+		me.column_map = {};
+		
+		var add_column = function(date) {
+			me.columns.push({
+				id: date,
+				name: dateutil.str_to_user(date),
+				field: date,
+				formatter: me.currency_formatter,
+				width: 100
+			});
+		}
+		
 		var build_columns = function(condition) {
+			// add column for each date range
 			for(var i=0; i < date_diff; i++) {
 				var date = dateutil.add_days(me.from_date, i);
 				if(!condition) condition = function() { return true; }
 				
-				if(condition(date)) {
-					me.columns.push({
-						from_date: date,
-						id: date,
-						name: dateutil.str_to_user(date),
-						field: date,
-						formatter: me.currency_formatter,
-						width: 100
-					});					
-				}
+				if(condition(date)) add_column(date);
 				me.last_date = date;
-				me.column_map[date] = me.columns[me.columns.length-1];
+				
+				if(me.columns.length) {
+					me.column_map[date] = me.columns[me.columns.length-1];
+				}
 			}
 		}
 		
+		// make columns for all date ranges
 		if(range=='Daily') {
 			build_columns();
 		} else if(range=='Weekly') {
@@ -110,13 +128,38 @@ erpnext.FinancialAnalytics = erpnext.AccountTreeGrid.extend({
 			});			
 		} else if(range=='Yearly') {
 			build_columns(function(date) {
-				if(!me.last_date) return true;	
+				if(!me.last_date) return true;
 				return $.map(wn.report_dump.data['Fiscal Year'], function(v) { 
 						return date==v.year_start_date ? true : null;
 					}).length;
 			});
 		}
 		
+		// set label as last date of period
+		$.each(this.columns, function(i, col) {
+			col.name = me.columns[i+1]
+				? dateutil.str_to_user(dateutil.add_days(me.columns[i+1].id, -1))
+				: dateutil.str_to_user(me.to_date);				
+		});
+		
+		me.columns = std_columns.concat(me.columns);
+	},
+	setup_filters: function() {
+		var me = this;
+		this._super();
+		this.filter_inputs.pl_or_bs.change(function() {
+			me.filter_inputs.refresh.click();
+		});
+		this.wrapper.bind('make', function() {
+			me.wrapper.find('.show-zero').toggle(true).find('input').click(function(){
+				me.refresh();
+			});
+			me.wrapper.on("click", ".plot-check", function() {
+				var checked = $(this).attr("checked");
+				me.account_by_name[$(this).attr("data-id")].checked = checked ? true : false;
+				me.render_plot();			
+			});
+		});
 	},
 	init_filter_values: function() {
 		this._super();
@@ -127,7 +170,7 @@ erpnext.FinancialAnalytics = erpnext.AccountTreeGrid.extend({
 		
 		$.each(wn.report_dump.data['GL Entry'], function(i, gl) {
 			var posting_date = dateutil.str_to_obj(gl.posting_date);
-			var account = me.accounts_by_name[gl.account];
+			var account = me.account_by_name[gl.account];
 			var col = me.column_map[gl.posting_date];
 			
 			if(col) {
@@ -162,38 +205,27 @@ erpnext.FinancialAnalytics = erpnext.AccountTreeGrid.extend({
 			})
 		}
 		this.update_groups();
+		this.accounts_initialized = true;
+		this.show_zero = $('.show-zero input:checked').length;
 	},
 	add_balance: function(field, account, gl) {
 		account[field] = flt(account[field]) + 
-			((account.debit_or_credit == "Debit" ? 1 : -1) * (gl.debit - gl.credit))
+			((account.debit_or_credit == "Debit" ? 1 : -1) * (flt(gl.debit) - flt(gl.credit)))
 	},
 	init_account: function(d) {
+		// set 0 values for all columns
 		var me = this;
 		$.each(this.columns, function(i, col) {
 			if (col.formatter==me.currency_formatter) {
-				d[col.from_date] = 0;
+				d[col.id] = 0;
 			}
 		});
-	},
-	init_refresh: function() {
-		var me = this;
-		$.each(this.accounts || [], function(i, account) {
-			account.checked && me.preset_checks.push(account.name);
-		});
-	},
-	init_plot: function() {
-		var me = this;
-		if(this.preset_checks.length) {
-			$.each(me.preset_checks, function(i, name) {
-				me.accounts_by_name[name].checked = true;
-			});
-		} else {
-			$.each(this.accounts, function(i, account) {
-				if(!account.parent_account) {
-					account.checked = true;
-				}
-			});
+		
+		// check for default graphs
+		if(!this.accounts_initialized && !d.parent_account) {
+			d.checked = true;
 		}
+		
 	},
 	get_plot_data: function() {
 		var data = [];
@@ -205,22 +237,35 @@ erpnext.FinancialAnalytics = erpnext.AccountTreeGrid.extend({
 				data.push({
 					label: account.name,
 					data: $.map(me.columns, function(col, idx) {
-						if(col.formatter==me.currency_formatter)
-							return [[idx, account[col.field]]]
-					})
+						if(col.formatter==me.currency_formatter && !col.hidden) {
+							if (pl_or_bs == "Profit and Loss") {
+								return [[dateutil.str_to_obj(col.id).getTime(), account[col.field]], 
+									[dateutil.user_to_obj(col.name).getTime(), account[col.field]]];
+							} else {
+								return [[dateutil.user_to_obj(col.name).getTime(), account[col.field]]];
+							}							
+						}
+					}),
+					points: {show: true},
+					lines: {show: true, fill: true},
 				});
+				
+				if(pl_or_bs == "Balance Sheet") {
+					// prepend opening for balance sheet accounts
+					data[data.length-1].data = [[dateutil.str_to_obj(me.from_date).getTime(), 
+						account.opening]].concat(data[data.length-1].data);
+				}
 			}
 		});
 	
 		return data;
 	},
-	add_grid_events: function() {
-		this._super();
-		var me = this;
-		this.wrapper.find('.plot-check').click(function() {
-			var checked = $(this).attr("checked");
-			me.accounts_by_name[$(this).attr("account")].checked = checked ? true : false;
-			me.render_plot();
-		});
+	get_plot_options: function() {
+		return {
+			grid: { hoverable: true, clickable: true },
+			xaxis: { mode: "time", 
+				min: dateutil.str_to_obj(this.from_date).getTime(),
+				max: dateutil.str_to_obj(this.to_date).getTime() }
+		}
 	}
 })

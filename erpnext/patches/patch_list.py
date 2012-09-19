@@ -580,4 +580,8 @@ patch_list = [
 		'patch_module': 'patches.september_2012',
 		'patch_file': 'customer_permission_patch',
 	},
+	{
+		'patch_module': 'patches.september_2012',
+		'patch_file': 'add_stock_ledger_entry_index',
+	},
 ]

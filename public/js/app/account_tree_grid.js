@@ -75,24 +75,31 @@ erpnext.AccountTreeGrid = wn.views.GridReport.extend({
 		this.filter_inputs.to_date.val(dateutil.str_to_user(sys_defaults.year_end_date));
 	},
 	prepare_data: function() {
-		var me = this;
-		var data = [];
-		var parent_map = {};
-		var data_by_name = {};
-		$.each(wn.report_dump.data["Account"], function(i, v) {
-			var d = copy_dict(v);
-			me.init_account(d);
+		var me = this;				
+		if(this.accounts) {
+			// refresh -- only initialize
+			$.each(this.accounts, function(i, d) {
+				me.init_account(d);
+			})
+		} else {
+			// make accounts list
+			me.accounts = [];
+			me.parent_map = {};
+			me.account_by_name = {};
 
-			data.push(d);
-			data_by_name[d.name] = d;
-			if(d.parent_account) {
-				parent_map[d.name] = d.parent_account;
-			}
-		});
-		this.set_indent(data, parent_map);
-		this.accounts = data;
-		this.parent_map = parent_map;
-		this.accounts_by_name = data_by_name;
+			$.each(wn.report_dump.data["Account"], function(i, v) {
+				var d = copy_dict(v);
+
+				me.accounts.push(d);
+				me.account_by_name[d.name] = d;
+				if(d.parent_account) {
+					me.parent_map[d.name] = d.parent_account;
+				}
+				
+				me.init_account(d);
+			});			
+		}
+		this.set_indent();
 		this.prepare_balances();
 		this.prepare_data_view(this.accounts);
 	},
@@ -122,7 +129,7 @@ erpnext.AccountTreeGrid = wn.views.GridReport.extend({
 
 		$.each(gl, function(i, v) {
 			var posting_date = dateutil.str_to_obj(v.posting_date);
-			var account = me.accounts_by_name[v.account];
+			var account = me.account_by_name[v.account];
 			me.update_balances(account, posting_date, v)
 		});
 
@@ -159,16 +166,20 @@ erpnext.AccountTreeGrid = wn.views.GridReport.extend({
 		var me= this;
 		$.each(this.accounts, function(i, account) {
 			// update groups
-			var parent = me.parent_map[account.name];
-			while(parent) {
-				parent_account = me.accounts_by_name[parent];
-				$.each(me.columns, function(c, col) {
-					if (col.formatter == me.currency_formatter) {
-						parent_account[col.field] += account[col.field];
-					}
-				});
-				parent = me.parent_map[parent];
-			}			
+			if(account.rgt - account.lft == 1) {
+				var parent = me.parent_map[account.name];
+				while(parent) {
+					parent_account = me.account_by_name[parent];
+					$.each(me.columns, function(c, col) {
+						if (col.formatter == me.currency_formatter) {
+							parent_account[col.field] = 
+								flt(parent_account[col.field])
+								+ flt(account[col.field]);
+						}
+					});
+					parent = me.parent_map[parent];
+				}				
+			}
 		});		
 	},
 
@@ -192,14 +203,15 @@ erpnext.AccountTreeGrid = wn.views.GridReport.extend({
 			return;
 		}
 	},
-	set_indent: function(data, parent_map) {
-		$.each(data, function(i, d) {
+	set_indent: function() {
+		var me = this;
+		$.each(this.accounts, function(i, d) {
 			var indent = 0;
-			var parent = parent_map[d.name];
+			var parent = me.parent_map[d.name];
 			if(parent) {
 				while(parent) {
 					indent++;
-					parent = parent_map[parent];
+					parent = me.parent_map[parent];
 				}				
 			}
 			d.indent = indent;
@@ -248,7 +260,7 @@ erpnext.AccountTreeGrid = wn.views.GridReport.extend({
 		if (item.parent_account) {
 			var parent = item.parent_account;
 			while (parent) {
-				if (wn.cur_grid_report.accounts_by_name[parent]._collapsed) {
+				if (wn.cur_grid_report.account_by_name[parent]._collapsed) {
 					return false;
 				}
 				parent = wn.cur_grid_report.parent_map[parent];
