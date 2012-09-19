@@ -14,7 +14,8 @@ wn.doclistviews['Sales Invoice'] = wn.views.ListView.extend({
 	},
 	prepare_data: function(data) {
 		this._super(data);
-		data.paid = flt((data.grand_total - data.outstanding_amount) / data.grand_total * 100, 2);
+		data.paid = (data.docstatus == 1) ? 
+				flt((data.grand_total - data.outstanding_amount) / data.grand_total * 100, 2) : 0;
 	},
 	columns: [
 		{width: '3%', content: 'check'},
