@@ -175,8 +175,6 @@ wn.pages['stock-ledger'].onload = function(wrapper) {
 					min: dateutil.str_to_obj(this.from_date).getTime(),
 					max: dateutil.str_to_obj(this.to_date).getTime(),
 				},
-				zoom: {interactive: true},
-				pan: {interactive: true}
 			}
 		},
 		get_tooltip_text: function(label, x, y) {
