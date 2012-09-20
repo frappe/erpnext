@@ -11,20 +11,30 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.	If not, see <http://www.gnu.org/licenses/>.
 
-erpnext.AccountTreeGrid = wn.views.GridReport.extend({
+erpnext.AccountTreeGrid = wn.views.GridReportWithPlot.extend({
 	init: function(wrapper, title) {
 		this._super({
 			title: title,
 			page: wrapper,
 			parent: $(wrapper).find('.layout-main'),
 			appframe: wrapper.appframe,
-			doctypes: ["Company", "Fiscal Year", "Account", "GL Entry"]
+			doctypes: ["Company", "Fiscal Year", "Account", "GL Entry"],
+			tree_grid: {
+				show: true, 
+				parent_field: "parent_account", 
+				formatter: function(item) {
+					return repl('<a href="#general-ledger/account=%(enc_value)s">%(value)s</a>', {
+							value: item.name,
+							enc_value: encodeURIComponent(item.name)
+						});
+				}
+			},
 		});
 	},
 	setup_columns: function() {
 		this.columns = [
 			{id: "name", name: "Account", field: "name", width: 300, cssClass: "cell-title", 
-				formatter: this.account_formatter},
+				formatter: this.tree_formatter},
 			{id: "opening_debit", name: "Opening (Dr)", field: "opening_debit", width: 100,
 				formatter: this.currency_formatter},
 			{id: "opening_credit", name: "Opening (Cr)", field: "opening_credit", width: 100,
@@ -72,31 +82,24 @@ erpnext.AccountTreeGrid = wn.views.GridReport.extend({
 		});
 		me.show_zero_check()
 	},
-	init_filter_values: function() {
-		this.filter_inputs.company.val(sys_defaults.company);
-		this.filter_inputs.fiscal_year.val(sys_defaults.fiscal_year);
-		this.filter_inputs.from_date.val(dateutil.str_to_user(sys_defaults.year_start_date));
-		this.filter_inputs.to_date.val(dateutil.str_to_user(sys_defaults.year_end_date));
-	},
 	prepare_data: function() {
 		var me = this;
-		this.data = []			
-		if(this.accounts) {
+		if(this.data) {
 			// refresh -- only initialize
-			$.each(this.accounts, function(i, d) {
+			$.each(this.data, function(i, d) {
 				me.init_account(d);
 			})
 		} else {
 			// make accounts list
-			me.accounts = [];
+			me.data = [];
 			me.parent_map = {};
-			me.account_by_name = {};
+			me.item_by_name = {};
 
 			$.each(wn.report_dump.data["Account"], function(i, v) {
 				var d = copy_dict(v);
 
-				me.accounts.push(d);
-				me.account_by_name[d.name] = d;
+				me.data.push(d);
+				me.item_by_name[d.name] = d;
 				if(d.parent_account) {
 					me.parent_map[d.name] = d.parent_account;
 				}
@@ -106,18 +109,9 @@ erpnext.AccountTreeGrid = wn.views.GridReport.extend({
 		}
 		this.set_indent();
 		this.prepare_balances();
-		this.prepare_data_view(this.accounts);
+		
 	},
-	init_account: function(d) {
-		$.extend(d, {
-			"opening_debit": 0,
-			"opening_credit": 0,
-			"debit": 0,
-			"credit": 0,
-			"closing_debit": 0,
-			"closing_credit": 0				
-		});
-	},
+
 	prepare_balances: function() {
 		var gl = wn.report_dump.data['GL Entry'];
 		var me = this;
@@ -127,14 +121,14 @@ erpnext.AccountTreeGrid = wn.views.GridReport.extend({
 		this.set_fiscal_year();
 		if (!this.fiscal_year) return;
 
-		$.each(this.accounts, function(i, v) {
+		$.each(this.data, function(i, v) {
 			v.opening_debit = v.opening_credit = v.debit 
 				= v.credit = v.closing_debit = v.closing_credit = 0;
 		});
 
 		$.each(gl, function(i, v) {
 			var posting_date = dateutil.str_to_obj(v.posting_date);
-			var account = me.account_by_name[v.account];
+			var account = me.item_by_name[v.account];
 			me.update_balances(account, posting_date, v)
 		});
 
@@ -169,12 +163,12 @@ erpnext.AccountTreeGrid = wn.views.GridReport.extend({
 	update_groups: function() {
 		// update groups
 		var me= this;
-		$.each(this.accounts, function(i, account) {
+		$.each(this.data, function(i, account) {
 			// update groups
 			if(account.rgt - account.lft == 1) {
 				var parent = me.parent_map[account.name];
 				while(parent) {
-					parent_account = me.account_by_name[parent];
+					parent_account = me.item_by_name[parent];
 					$.each(me.columns, function(c, col) {
 						if (col.formatter == me.currency_formatter) {
 							parent_account[col.field] = 
@@ -208,71 +202,4 @@ erpnext.AccountTreeGrid = wn.views.GridReport.extend({
 			return;
 		}
 	},
-	set_indent: function() {
-		var me = this;
-		$.each(this.accounts, function(i, d) {
-			var indent = 0;
-			var parent = me.parent_map[d.name];
-			if(parent) {
-				while(parent) {
-					indent++;
-					parent = me.parent_map[parent];
-				}				
-			}
-			d.indent = indent;
-		});
-	},
-	account_formatter: function (row, cell, value, columnDef, dataContext) {
-		value = value.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
-		var data = wn.cur_grid_report.accounts;
-		var spacer = "<span style='display:inline-block;height:1px;width:" + 
-			(15 * dataContext["indent"]) + "px'></span>";
-		var idx = wn.cur_grid_report.dataView.getIdxById(dataContext.id);
-		var account_link = repl('<a href="#general-ledger/account=%(enc_value)s">%(value)s</a>', {
-				value: value,
-				enc_value: encodeURIComponent(value)
-			});
-			
-		if (data[idx + 1] && data[idx + 1].indent > data[idx].indent) {
-			if (dataContext._collapsed) {
-				return spacer + " <span class='toggle expand'></span>&nbsp;" + account_link;
-			} else {
-				return spacer + " <span class='toggle collapse'></span>&nbsp;" + account_link;
-			}
-		} else {
-			return spacer + " <span class='toggle'></span>&nbsp;" + account_link;
-		}
-	},
-	add_grid_events: function() {
-		var me = this;
-		this.grid.onClick.subscribe(function (e, args) {
-			if ($(e.target).hasClass("toggle")) {
-				var item = me.dataView.getItem(args.row);
-				if (item) {
-					if (!item._collapsed) {
-						item._collapsed = true;
-					} else {
-						item._collapsed = false;
-					}
-
-					me.dataView.updateItem(item.id, item);
-				}
-				e.stopImmediatePropagation();
-			}
-		});
-	},
-	dataview_filter: function(item) {
-		if(!wn.cur_grid_report.apply_filters(item)) return false;
-		
-		if (item.parent_account) {
-			var parent = item.parent_account;
-			while (parent) {
-				if (wn.cur_grid_report.account_by_name[parent]._collapsed) {
-					return false;
-				}
-				parent = wn.cur_grid_report.parent_map[parent];
-			}
-		}
-		return true;
-	}		
 });

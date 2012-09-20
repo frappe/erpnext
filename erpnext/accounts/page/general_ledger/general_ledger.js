@@ -68,13 +68,6 @@ wn.pages['general-ledger'].onload = function(wrapper) {
 			{fieldtype:"Button", label: "Refresh", icon:"icon-refresh icon-white", cssClass:"btn-info"},
 			{fieldtype:"Button", label: "Reset Filters"}
 		],
-		init_filter_values: function() {
-			this.filter_inputs.company.val(sys_defaults.company);
-			this.filter_inputs.from_date.val(dateutil.str_to_user(sys_defaults.year_start_date));
-			this.filter_inputs.to_date.val(dateutil.str_to_user(sys_defaults.year_end_date));
-			this.filter_inputs.voucher_no.val("");
-			this.filter_inputs.account.get(0).selectedIndex = 0;			
-		},
 		is_child_account: function(account, item_account) {
 			account = this.account_by_name[account];
 			item_account = this.account_by_name[item_account];
@@ -148,11 +141,8 @@ wn.pages['general-ledger'].onload = function(wrapper) {
 			} else {
 				var out = out.concat([totals]);
 			}
-			
-			// sanitize opening / closing
-			
+						
 			this.data = out;
-			this.prepare_data_view(out);
 		},
 		get_plot_data: function() {
 			var data = [];

@@ -15,7 +15,6 @@
 // along with this program.	If not, see <http://www.gnu.org/licenses/>.
 
 wn.require("js/app/account_tree_grid.js");
-wn.require("js/app/account_tree_grid.css");
 
 wn.pages['financial-analytics'].onload = function(wrapper) { 
 	wn.ui.make_app_page({
@@ -57,80 +56,13 @@ erpnext.FinancialAnalytics = erpnext.AccountTreeGrid.extend({
 			{id: "check", name: "Plot", field: "check", width: 30,
 				formatter: this.check_formatter},
 			{id: "name", name: "Account", field: "name", width: 300,
-				formatter: this.account_formatter},
+				formatter: this.tree_formatter},
 			{id: "opening", name: "Opening", field: "opening", hidden: true,
 				formatter: this.currency_formatter}
 		];
-		this.columns = [];
 		
-		var me = this;
-		var range = this.filter_inputs.range.val();
-		this.from_date = dateutil.user_to_str(this.filter_inputs.from_date.val());
-		this.to_date = dateutil.user_to_str(this.filter_inputs.to_date.val());
-		var date_diff = dateutil.get_diff(this.to_date, this.from_date);
-			
-		me.column_map = {};
-		
-		var add_column = function(date) {
-			me.columns.push({
-				id: date,
-				name: dateutil.str_to_user(date),
-				field: date,
-				formatter: me.currency_formatter,
-				width: 100
-			});
-		}
-		
-		var build_columns = function(condition) {
-			// add column for each date range
-			for(var i=0; i < date_diff; i++) {
-				var date = dateutil.add_days(me.from_date, i);
-				if(!condition) condition = function() { return true; }
-				
-				if(condition(date)) add_column(date);
-				me.last_date = date;
-				
-				if(me.columns.length) {
-					me.column_map[date] = me.columns[me.columns.length-1];
-				}
-			}
-		}
-		
-		// make columns for all date ranges
-		if(range=='Daily') {
-			build_columns();
-		} else if(range=='Weekly') {
-			build_columns(function(date) {
-				if(!me.last_date) return true;
-				return !(dateutil.get_diff(date, me.from_date) % 7)
-			});		
-		} else if(range=='Monthly') {
-			build_columns(function(date) {
-				if(!me.last_date) return true;
-				return dateutil.str_to_obj(me.last_date).getMonth() != dateutil.str_to_obj(date).getMonth()
-			});
-		} else if(range=='Quarterly') {
-			build_columns(function(date) {
-				if(!me.last_date) return true;
-				return dateutil.str_to_obj(date).getDate()==1 && in_list([0,3,6,9], dateutil.str_to_obj(date).getMonth())
-			});			
-		} else if(range=='Yearly') {
-			build_columns(function(date) {
-				if(!me.last_date) return true;
-				return $.map(wn.report_dump.data['Fiscal Year'], function(v) { 
-						return date==v.year_start_date ? true : null;
-					}).length;
-			});
-		}
-		
-		// set label as last date of period
-		$.each(this.columns, function(i, col) {
-			col.name = me.columns[i+1]
-				? dateutil.str_to_user(dateutil.add_days(me.columns[i+1].id, -1))
-				: dateutil.str_to_user(me.to_date);				
-		});
-		
-		me.columns = std_columns.concat(me.columns);
+		this.make_date_range_columns();		
+		this.columns = std_columns.concat(this.columns);
 	},
 	setup_filters: function() {
 		var me = this;
@@ -138,13 +70,7 @@ erpnext.FinancialAnalytics = erpnext.AccountTreeGrid.extend({
 		this.filter_inputs.pl_or_bs.change(function() {
 			me.filter_inputs.refresh.click();
 		});
-		this.wrapper.bind('make', function() {
-			me.wrapper.on("click", ".plot-check", function() {
-				var checked = $(this).attr("checked");
-				me.account_by_name[$(this).attr("data-id")].checked = checked ? true : false;
-				me.render_plot();			
-			});
-		});
+		this.setup_plot_check();
 	},
 	init_filter_values: function() {
 		this._super();
@@ -155,7 +81,7 @@ erpnext.FinancialAnalytics = erpnext.AccountTreeGrid.extend({
 		
 		$.each(wn.report_dump.data['GL Entry'], function(i, gl) {
 			var posting_date = dateutil.str_to_obj(gl.posting_date);
-			var account = me.account_by_name[gl.account];
+			var account = me.item_by_name[gl.account];
 			var col = me.column_map[gl.posting_date];
 			
 			if(col) {
@@ -176,7 +102,7 @@ erpnext.FinancialAnalytics = erpnext.AccountTreeGrid.extend({
 
 		// make balances as cumulative
 		if(me.filter_inputs.pl_or_bs.val()=='Balance Sheet') {
-			$.each(me.accounts, function(i, ac) {
+			$.each(me.data, function(i, ac) {
 				if((ac.rgt - ac.lft)==1 && ac.is_pl_account!='Yes') {
 					var opening = flt(ac.opening);
 					//if(opening) throw opening;
@@ -198,12 +124,7 @@ erpnext.FinancialAnalytics = erpnext.AccountTreeGrid.extend({
 	},
 	init_account: function(d) {
 		// set 0 values for all columns
-		var me = this;
-		$.each(this.columns, function(i, col) {
-			if (col.formatter==me.currency_formatter) {
-				d[col.id] = 0;
-			}
-		});
+		this.reset_item_values(d);
 		
 		// check for default graphs
 		if(!this.accounts_initialized && !d.parent_account) {
@@ -215,7 +136,7 @@ erpnext.FinancialAnalytics = erpnext.AccountTreeGrid.extend({
 		var data = [];
 		var me = this;
 		var pl_or_bs = this.filter_inputs.pl_or_bs.val();
-		$.each(this.accounts, function(i, account) {
+		$.each(this.data, function(i, account) {
 			var show = pl_or_bs == "Profit and Loss" ? account.is_pl_account=="Yes" : account.is_pl_account!="Yes";
 			if (show && account.checked && me.apply_filter(account, "company")) {
 				data.push({

@@ -15,7 +15,6 @@
 // along with this program.	If not, see <http://www.gnu.org/licenses/>.
 
 wn.require("js/app/account_tree_grid.js");
-wn.require("js/app/account_tree_grid.css");
 
 wn.pages['trial-balance'].onload = function(wrapper) { 
 	wn.ui.make_app_page({
