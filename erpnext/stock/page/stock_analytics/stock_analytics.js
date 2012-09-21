@@ -25,7 +25,7 @@ erpnext.StockAnalytics = wn.views.GridReportWithPlot.extend({
 							enc_value: encodeURIComponent(item.name)
 						});
 				}
-			}			
+			},		
 		})
 	},
 	setup_columns: function() {
@@ -35,10 +35,6 @@ erpnext.StockAnalytics = wn.views.GridReportWithPlot.extend({
 			{id: "name", name: "Item", field: "name", width: 300,
 				formatter: this.tree_formatter, doctype: "Item"},
 			{id: "opening", name: "Opening", field: "opening", hidden: true,
-				formatter: this.currency_formatter},
-			{id: "balance_qty", name: "Balance Qty", field: "balance_qty", hidden: true,
-				formatter: this.currency_formatter},
-			{id: "balance_value", name: "Balance Value", field: "balance_value", hidden: true,
 				formatter: this.currency_formatter}
 		];
 
@@ -46,7 +42,7 @@ erpnext.StockAnalytics = wn.views.GridReportWithPlot.extend({
 		this.columns = std_columns.concat(this.columns);
 	},
 	filters: [
-		{fieldtype:"Select", label: "Value or Qty", options:["Value", "Quantity"],
+		{fieldtype:"Select", label: "Value or Qty", options:["Value (Weighted Average)", "Value (FIFO)", "Quantity"],
 			filter: function(val, item, opts, me) {
 				return me.apply_zero_filter(val, item, opts, me);
 			}},
@@ -90,9 +86,9 @@ erpnext.StockAnalytics = wn.views.GridReportWithPlot.extend({
 	},
 	prepare_data: function() {
 		var me = this;
-		
+				
 		if(!this.data) {
-			var items = this.get_item_tree();
+			var items = this.prepare_tree("Item", "Item Group");
 
 			me.parent_map = {};
 			me.item_by_name = {};
@@ -109,6 +105,7 @@ erpnext.StockAnalytics = wn.views.GridReportWithPlot.extend({
 				me.reset_item_values(d);
 			});
 			this.set_indent();
+			this.data[0].checked = true;
 		} else {
 			// otherwise, only reset values
 			$.each(this.data, function(i, d) {
@@ -120,30 +117,20 @@ erpnext.StockAnalytics = wn.views.GridReportWithPlot.extend({
 		this.update_groups();
 		
 	},
-	get_item_tree: function() {
-		// prepare map with items in respective item group
-		var item_group_map = {};
-		$.each(wn.report_dump.data["Item"], function(i, item) {
-			var parent = item.parent_item_group
-			if(!item_group_map[parent]) item_group_map[parent] = [];
-			item_group_map[parent].push(item);
-		});
-		
-		// arrange items besides their parent item groups
-		var items = [];
-		$.each(wn.report_dump.data["Item Group"], function(i, group){
-			group.is_group = true;
-			items.push(group);
-			items = items.concat(item_group_map[group.name] || []);
-		});
-		return items;
-	},
 	prepare_balances: function() {
 		var me = this;
 		var from_date = dateutil.str_to_obj(this.from_date);
 		var to_date = dateutil.str_to_obj(this.to_date);
 		var data = wn.report_dump.data["Stock Ledger Entry"];
-		var is_value = me.value_or_qty == "Value";
+
+		var warehouse_item = {};
+		var get_warehouse_item = function(warehouse, item) {
+			if(!warehouse_item[warehouse]) warehouse_item[warehouse] = {};
+			if(!warehouse_item[warehouse][item]) warehouse_item[warehouse][item] = {
+				balance_qty: 0.0, balance_value: 0.0, fifo_stack: []
+			};
+			return warehouse_item[warehouse][item];
+		}
 				
 		for(var i=0, j=data.length; i<j; i++) {
 			var sl = data[i];
@@ -152,17 +139,13 @@ erpnext.StockAnalytics = wn.views.GridReportWithPlot.extend({
 			
 			if(me.is_default("warehouse") ? true : me.warehouse == sl.warehouse) {			
 				var item = me.item_by_name[sl.item_code];
-
-				// value
-				var rate = sl.qty > 0 ? sl.incoming_rate :
-					(item.balance_qty.toFixed(2) == 0.00 ? 0 : flt(item.balance_value) / flt(item.balance_qty));
-				var value_diff = (rate * sl.qty);
-								
-				// update balance
-				item.balance_qty += sl.qty;
-				item.balance_value += value_diff;
-
-				var diff = is_value ? value_diff : sl.qty;
+				
+				if(me.value_or_qty!="Quantity") {
+					var wh = get_warehouse_item(sl.warehouse, sl.item_code);
+					var diff = me.get_value_diff(wh, sl);
+				} else {
+					var diff = sl.qty;
+				}
 
 				if(posting_datetime < from_date) {
 					item.opening += diff;
@@ -173,6 +156,92 @@ erpnext.StockAnalytics = wn.views.GridReportWithPlot.extend({
 				}
 			}
 		}
+	},
+	get_value_diff: function(wh, sl) {
+		var is_fifo = this.value_or_qty== "Value (FIFO)";
+				
+		// value
+		if(sl.qty > 0) {
+			// incoming - rate is given
+			var rate = sl.incoming_rate;	
+			var add_qty = sl.qty;
+			if(wh.balance_qty < 0) {
+				// negative valuation
+				// only add value of quantity if
+				// the balance goes above 0
+				add_qty = wh.balance_qty + sl.qty;
+				if(add_qty < 0) {
+					add_qty = 0;
+				}
+			}
+			var value_diff = (rate * add_qty);
+			
+			if(add_qty)
+				wh.fifo_stack.push([add_qty, sl.incoming_rate]);					
+		} else {
+			// outgoing
+						
+			if(is_fifo)	{
+				var value_diff = this.get_fifo_value_diff(wh, sl);				
+			} else {
+				// average rate for weighted average
+				var rate = (wh.balance_qty.toFixed(2) == 0.00 ? 0 : 
+					flt(wh.balance_value) / flt(wh.balance_qty));
+				
+				// no change in value if negative qty
+				if((wh.balance_qty + sl.qty).toFixed(2) >= 0.00)
+					var value_diff = (rate * sl.qty);			
+				else 
+					var value_diff = -wh.balance_value;
+			}
+		}
+
+		// update balance (only needed in case of valuation)
+		wh.balance_qty += sl.qty;
+		wh.balance_value += value_diff;
+
+		if(sl.item_code=="0.5Motor") {
+			console.log([sl.voucher_no, sl.qty, sl.warehouse, value_diff]);
+			console.log(wh.fifo_stack);			
+		}
+		
+		return value_diff;
+	},
+	get_fifo_value_diff: function(wh, sl) {
+		// get exact rate from fifo stack
+		var fifo_stack = wh.fifo_stack.reverse();
+		var fifo_value_diff = 0.0;
+		var qty = -sl.qty;
+		
+		for(var i=0, j=fifo_stack.length; i<j; i++) {
+			var batch = fifo_stack.pop();
+			if(batch[0] >= qty) {
+				batch[0] = batch[0] - qty;
+				fifo_value_diff += (qty * batch[1]);
+				
+				qty = 0.0;
+				if(batch[0]) {
+					// batch still has qty put it back
+					fifo_stack.push(batch);
+				}
+				
+				// all qty found
+				break;
+			} else {
+				// consume this batch fully
+				fifo_value_diff += (batch[0] * batch[1]);
+				qty = qty - batch[0];
+			}
+		}
+		if(qty) {
+			// msgprint("Negative values not allowed for FIFO valuation!\
+			// Item " + sl.item_code.bold() + " on " + dateutil.str_to_user(sl.posting_datetime).bold() +
+			// " becomes negative. Values computed will not be accurate.");
+		}
+		
+		// reset the updated stack
+		wh.fifo_stack = fifo_stack.reverse();
+		return -fifo_value_diff;
 	},
 	update_groups: function() {
 		var me = this;
@@ -203,36 +272,7 @@ erpnext.StockAnalytics = wn.views.GridReportWithPlot.extend({
 			}
 		});
 	},
-	get_plot_data: function() {
-		var data = [];
-		var me = this;
-		$.each(this.data, function(i, item) {
-			if (item.checked) {
-				data.push({
-					label: item.name,
-					data: $.map(me.columns, function(col, idx) {
-						if(col.formatter==me.currency_formatter && !col.hidden) {
-							return [[dateutil.user_to_obj(col.name).getTime(), item[col.field]]]
-						}
-					}),
-					points: {show: true},
-					lines: {show: true, fill: true},
-				});
-				
-				// prepend opening 
-				data[data.length-1].data = [[dateutil.str_to_obj(me.from_date).getTime(), 
-					item.opening]].concat(data[data.length-1].data);
-			}
-		});
-	
-		return data;
-	},
-	get_plot_options: function() {
-		return {
-			grid: { hoverable: true, clickable: true },
-			xaxis: { mode: "time", 
-				min: dateutil.str_to_obj(this.from_date).getTime(),
-				max: dateutil.str_to_obj(this.to_date).getTime() }
-		}
+	get_plot_points: function(item, col, idx) {
+		return [[dateutil.user_to_obj(col.name).getTime(), item[col.field]]]
 	}
 });

@@ -164,13 +164,5 @@ erpnext.FinancialAnalytics = erpnext.AccountTreeGrid.extend({
 		});
 	
 		return data;
-	},
-	get_plot_options: function() {
-		return {
-			grid: { hoverable: true, clickable: true },
-			xaxis: { mode: "time", 
-				min: dateutil.str_to_obj(this.from_date).getTime(),
-				max: dateutil.str_to_obj(this.to_date).getTime() }
-		}
-	},
+	}
 })

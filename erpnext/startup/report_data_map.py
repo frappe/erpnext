@@ -20,6 +20,16 @@ from __future__ import unicode_literals
 # "remember to add indexes!"
 
 data_map = {
+	"Company": {
+		"columns": ["name"],
+		"conditions": ["docstatus < 2"]
+	},
+	"Fiscal Year": {
+		"columns": ["name", "year_start_date", 
+			"adddate(adddate(year_start_date, interval 1 year), interval -1 day) as year_end_date"]
+	},
+
+	# Accounts
 	"Account": {
 		"columns": ["name", "parent_account", "lft", "rgt", "debit_or_credit", "is_pl_account",
 			"company"],
@@ -40,13 +50,23 @@ data_map = {
 			"company": ["Company", "name"]
 		}
 	},
-	"Company": {
-		"columns": ["name"],
-		"conditions": ["docstatus < 2"]
+
+	# Stock
+	"Item": {
+		"columns": ["name", "if(item_name=name, '', item_name) as item_name", 
+			"item_group as parent_item_group", "stock_uom", "brand"],
+		"order_by": "name",
+		"links": {
+			"parent_item_group": ["Item Group", "name"],
+		}
 	},
-	"Fiscal Year": {
-		"columns": ["name", "year_start_date", 
-			"adddate(adddate(year_start_date, interval 1 year), interval -1 day) as year_end_date"]
+	"Item Group": {
+		"columns": ["name", "parent_item_group"],
+		"order_by": "lft"
+	},
+	"Warehouse": {
+		"columns": ["name"],
+		"order_by": "name"
 	},
 	"Stock Ledger Entry": {
 		"columns": ["posting_date", "posting_time", "item_code", "warehouse", "actual_qty as qty",
@@ -59,17 +79,41 @@ data_map = {
 		},
 		"force_index": "posting_sort_index"		
 	},
-	"Item": {
-		"columns": ["name", "if(item_name=name, '', item_name) as item_name", 
-			"item_group as parent_item_group", "stock_uom", "brand"],
-		"order_by": "name"
+
+	# Sales
+	"Customer": {
+		"columns": ["name", "if(customer_name=name, '', customer_name) as customer_name", 
+			"customer_group as parent_customer_group", "territory as parent_territory"],
+		"order_by": "name",
+		"links": {
+			"parent_customer_group": ["Customer Group", "name"],
+			"parent_territory": ["Territory", "name"],
+		}
 	},
-	"Item Group": {
-		"columns": ["name", "lft", "rgt", "parent_item_group"],
+	"Customer Group": {
+		"columns": ["name", "parent_customer_group"],
 		"order_by": "lft"
 	},
-	"Warehouse": {
-		"columns": ["name"],
-		"order_by": "name"
+	"Territory": {
+		"columns": ["name", "parent_territory"],
+		"order_by": "lft"
+	},
+	"Sales Invoice": {
+		"columns": ["name", "customer", "posting_date", "company"],
+		"conditions": ["docstatus=1"],
+		"order_by": "posting_date",
+		"links": {
+			"customer": ["Customer", "name"],
+			"company":["Company", "name"]
+		}
+	},
+	"Sales Invoice Item": {
+		"columns": ["parent", "item_code", "qty", "amount"],
+		"conditions": ["docstatus=1", "ifnull(parent, '')!=''"],
+		"order_by": "parent",
+		"links": {
+			"parent": ["Sales Invoice", "name"],
+			"item_code": ["Item", "name"]
+		}
 	}
 }
