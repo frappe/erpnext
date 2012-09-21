@@ -1,3 +1,19 @@
+// ERPNext - web based ERP (http://erpnext.com)
+// Copyright (C) 2012 Web Notes Technologies Pvt Ltd
+// 
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// 
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 wn.pages['stock-ledger'].onload = function(wrapper) { 
 	wn.ui.make_app_page({
 		parent: wrapper,
@@ -8,7 +24,9 @@ wn.pages['stock-ledger'].onload = function(wrapper) {
 	new erpnext.StockLedger(wrapper);
 }
 
-erpnext.StockLedger = wn.views.GridReportWithPlot.extend({
+wn.require("js/app/stock_grid_report.js");
+
+erpnext.StockLedger = erpnext.StockGridReport.extend({
 	init: function(wrapper) {
 		this._super({
 			title: "Stock Ledger",
@@ -28,15 +46,16 @@ erpnext.StockLedger = wn.views.GridReportWithPlot.extend({
 				link_formatter: {
 					filter_input: "item_code",
 					open_btn: true,
-					doctype: '"Item"'
 				}},
 			{id: "warehouse", name: "Warehouse", field: "warehouse", width: 100,
 				link_formatter: {filter_input: "warehouse"}},
 			{id: "qty", name: "Qty", field: "qty", width: 100,
 				formatter: this.currency_formatter},
-			{id: "balance", name: "Balance", field: "balance", width: 100,
+			{id: "balance", name: "Balance Qty", field: "balance", width: 100,
 				formatter: this.currency_formatter,
 				hidden: this.hide_balance},
+			{id: "balance_value", name: "Balance Value", field: "balance_value", width: 100,
+				formatter: this.currency_formatter, hidden: this.hide_balance},
 			{id: "voucher_type", name: "Voucher Type", field: "voucher_type", width: 120},
 			{id: "voucher_no", name: "Voucher No", field: "voucher_no", width: 160,
 				link_formatter: {
@@ -86,36 +105,53 @@ erpnext.StockLedger = wn.views.GridReportWithPlot.extend({
 
 		var opening = {
 			item_code: "On " + dateutil.str_to_user(this.from_date), qty: 0.0, balance: 0.0,
-				id:"_opening", _show: true, _style: "font-weight: bold"
+				id:"_opening", _show: true, _style: "font-weight: bold", balance_value: 0.0
 		}
 		var total_in = {
-			item_code: "Total In", qty: 0.0, balance: 0.0,
+			item_code: "Total In", qty: 0.0, balance: 0.0, balance_value: 0.0,
 				id:"_total_in", _show: true, _style: "font-weight: bold"
 		}
 		var total_out = {
-			item_code: "Total Out", qty: 0.0, balance: 0.0,
+			item_code: "Total Out", qty: 0.0, balance: 0.0, balance_value: 0.0,
 				id:"_total_out", _show: true, _style: "font-weight: bold"
 		}
 		
 		// clear balance
-		$.each(wn.report_dump.data["Item"], function(i, item) { item.balance = 0.0; });
+		$.each(wn.report_dump.data["Item"], function(i, item) {
+			item.balance = item.balance_value = 0.0; 
+		});
+		
+		// initialize warehouse-item map
+		this.item_warehouse = {};
 		
 		// 
 		for(var i=0, j=data.length; i<j; i++) {
 			var sl = data[i];
-			sl.description = me.item_by_name[sl.item_code].description;
+			var item = me.item_by_name[sl.item_code]
+			var wh = me.get_item_warehouse(sl.warehouse, sl.item_code);
+			sl.description = item.description;
 			sl.posting_datetime = sl.posting_date + " " + sl.posting_time;
 			var posting_datetime = dateutil.str_to_obj(sl.posting_datetime);
 			
+			var is_fifo = item.valuation_method ? item.valuation_method=="FIFO" 
+				: sys_defaults.valuation_method=="FIFO";
+			var value_diff = me.get_value_diff(wh, sl, is_fifo);
+
 			// opening, transactions, closing, total in, total out
 			var before_end = posting_datetime <= dateutil.str_to_obj(me.to_date + " 23:59:59");
 			if((!me.is_default("item_code") ? me.apply_filter(sl, "item_code") : true)
 				&& me.apply_filter(sl, "warehouse") && me.apply_filter(sl, "voucher_no")) {
 				if(posting_datetime < dateutil.str_to_obj(me.from_date)) {
 					opening.balance += sl.qty;
+					opening.balance_value += value_diff;
 				} else if(before_end) {
-					if(sl.qty > 0) total_in.qty += sl.qty;
-					else total_out.qty += (-1 * sl.qty);
+					if(sl.qty > 0) {
+						total_in.qty += sl.qty;
+						total_in.balance_value += value_diff;
+					} else {
+						total_out.qty += (-1 * sl.qty);
+						total_out.balance_value += value_diff;
+					}
 				}
 			}
 			
@@ -129,7 +165,10 @@ erpnext.StockLedger = wn.views.GridReportWithPlot.extend({
 			// update balance
 			if((!me.is_default("warehouse") ? me.apply_filter(sl, "warehouse") : true)) {
 				sl.balance = me.item_by_name[sl.item_code].balance + sl.qty;
-				me.item_by_name[sl.item_code].balance = sl.balance;					
+				me.item_by_name[sl.item_code].balance = sl.balance;
+				
+				sl.balance_value = me.item_by_name[sl.item_code].balance_value + value_diff;
+				me.item_by_name[sl.item_code].balance_value = sl.balance_value;		
 			}
 		}
 					
@@ -137,8 +176,10 @@ erpnext.StockLedger = wn.views.GridReportWithPlot.extend({
 			var closing = {
 				item_code: "On " + dateutil.str_to_user(this.to_date), 
 				balance: (out ? out[out.length-1].balance : 0), qty: 0,
+				balance_value: (out ? out[out.length-1].balance_value : 0),
 				id:"_closing", _show: true, _style: "font-weight: bold"
 			};
+			total_out.balance_value = -total_out.balance_value;
 			var out = [opening].concat(out).concat([total_in, total_out, closing]);
 		}
 		

@@ -1,3 +1,19 @@
+// ERPNext - web based ERP (http://erpnext.com)
+// Copyright (C) 2012 Web Notes Technologies Pvt Ltd
+// 
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// 
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 wn.pages['stock-analytics'].onload = function(wrapper) { 
 	wn.ui.make_app_page({
 		parent: wrapper,
@@ -8,7 +24,9 @@ wn.pages['stock-analytics'].onload = function(wrapper) {
 	new erpnext.StockAnalytics(wrapper);
 }
 
-erpnext.StockAnalytics = wn.views.GridReportWithPlot.extend({
+wn.require("js/app/stock_grid_report.js");
+
+erpnext.StockAnalytics = erpnext.StockGridReport.extend({
 	init: function(wrapper) {
 		this._super({
 			title: "Stock Analytics",
@@ -33,7 +51,7 @@ erpnext.StockAnalytics = wn.views.GridReportWithPlot.extend({
 			{id: "check", name: "Plot", field: "check", width: 30,
 				formatter: this.check_formatter},
 			{id: "name", name: "Item", field: "name", width: 300,
-				formatter: this.tree_formatter, doctype: "Item"},
+				formatter: this.tree_formatter},
 			{id: "opening", name: "Opening", field: "opening", hidden: true,
 				formatter: this.currency_formatter}
 		];
@@ -42,7 +60,8 @@ erpnext.StockAnalytics = wn.views.GridReportWithPlot.extend({
 		this.columns = std_columns.concat(this.columns);
 	},
 	filters: [
-		{fieldtype:"Select", label: "Value or Qty", options:["Value (Weighted Average)", "Value (FIFO)", "Quantity"],
+		{fieldtype:"Select", label: "Value or Qty", options:["Value (Weighted Average)", 
+			"Value (FIFO)", "Quantity"],
 			filter: function(val, item, opts, me) {
 				return me.apply_zero_filter(val, item, opts, me);
 			}},
@@ -123,15 +142,8 @@ erpnext.StockAnalytics = wn.views.GridReportWithPlot.extend({
 		var to_date = dateutil.str_to_obj(this.to_date);
 		var data = wn.report_dump.data["Stock Ledger Entry"];
 
-		var warehouse_item = {};
-		var get_warehouse_item = function(warehouse, item) {
-			if(!warehouse_item[warehouse]) warehouse_item[warehouse] = {};
-			if(!warehouse_item[warehouse][item]) warehouse_item[warehouse][item] = {
-				balance_qty: 0.0, balance_value: 0.0, fifo_stack: []
-			};
-			return warehouse_item[warehouse][item];
-		}
-				
+		this.item_warehouse = {};
+
 		for(var i=0, j=data.length; i<j; i++) {
 			var sl = data[i];
 			sl.posting_datetime = sl.posting_date + " " + sl.posting_time;
@@ -141,8 +153,9 @@ erpnext.StockAnalytics = wn.views.GridReportWithPlot.extend({
 				var item = me.item_by_name[sl.item_code];
 				
 				if(me.value_or_qty!="Quantity") {
-					var wh = get_warehouse_item(sl.warehouse, sl.item_code);
-					var diff = me.get_value_diff(wh, sl);
+					var wh = me.get_item_warehouse(sl.warehouse, sl.item_code);
+					var is_fifo = this.value_or_qty== "Value (FIFO)";
+					var diff = me.get_value_diff(wh, sl, is_fifo);
 				} else {
 					var diff = sl.qty;
 				}
@@ -156,92 +169,6 @@ erpnext.StockAnalytics = wn.views.GridReportWithPlot.extend({
 				}
 			}
 		}
-	},
-	get_value_diff: function(wh, sl) {
-		var is_fifo = this.value_or_qty== "Value (FIFO)";
-				
-		// value
-		if(sl.qty > 0) {
-			// incoming - rate is given
-			var rate = sl.incoming_rate;	
-			var add_qty = sl.qty;
-			if(wh.balance_qty < 0) {
-				// negative valuation
-				// only add value of quantity if
-				// the balance goes above 0
-				add_qty = wh.balance_qty + sl.qty;
-				if(add_qty < 0) {
-					add_qty = 0;
-				}
-			}
-			var value_diff = (rate * add_qty);
-			
-			if(add_qty)
-				wh.fifo_stack.push([add_qty, sl.incoming_rate]);					
-		} else {
-			// outgoing
-						
-			if(is_fifo)	{
-				var value_diff = this.get_fifo_value_diff(wh, sl);				
-			} else {
-				// average rate for weighted average
-				var rate = (wh.balance_qty.toFixed(2) == 0.00 ? 0 : 
-					flt(wh.balance_value) / flt(wh.balance_qty));
-				
-				// no change in value if negative qty
-				if((wh.balance_qty + sl.qty).toFixed(2) >= 0.00)
-					var value_diff = (rate * sl.qty);			
-				else 
-					var value_diff = -wh.balance_value;
-			}
-		}
-
-		// update balance (only needed in case of valuation)
-		wh.balance_qty += sl.qty;
-		wh.balance_value += value_diff;
-
-		if(sl.item_code=="0.5Motor") {
-			console.log([sl.voucher_no, sl.qty, sl.warehouse, value_diff]);
-			console.log(wh.fifo_stack);			
-		}
-		
-		return value_diff;
-	},
-	get_fifo_value_diff: function(wh, sl) {
-		// get exact rate from fifo stack
-		var fifo_stack = wh.fifo_stack.reverse();
-		var fifo_value_diff = 0.0;
-		var qty = -sl.qty;
-		
-		for(var i=0, j=fifo_stack.length; i<j; i++) {
-			var batch = fifo_stack.pop();
-			if(batch[0] >= qty) {
-				batch[0] = batch[0] - qty;
-				fifo_value_diff += (qty * batch[1]);
-				
-				qty = 0.0;
-				if(batch[0]) {
-					// batch still has qty put it back
-					fifo_stack.push(batch);
-				}
-				
-				// all qty found
-				break;
-			} else {
-				// consume this batch fully
-				fifo_value_diff += (batch[0] * batch[1]);
-				qty = qty - batch[0];
-			}
-		}
-		if(qty) {
-			// msgprint("Negative values not allowed for FIFO valuation!\
-			// Item " + sl.item_code.bold() + " on " + dateutil.str_to_user(sl.posting_datetime).bold() +
-			// " becomes negative. Values computed will not be accurate.");
-		}
-		
-		// reset the updated stack
-		wh.fifo_stack = fifo_stack.reverse();
-		return -fifo_value_diff;
 	},
 	update_groups: function() {
 		var me = this;

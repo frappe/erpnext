@@ -1,0 +1,28 @@
+# Page, stock-ageing
+[
+
+	# These values are common in all dictionaries
+	{
+		u'creation': '2012-09-21 18:21:31',
+		u'docstatus': 0,
+		u'modified': '2012-09-21 18:21:31',
+		u'modified_by': u'Administrator',
+		u'owner': u'Administrator'
+	},
+
+	# These values are common for all Page
+	{
+		u'doctype': u'Page',
+		'module': u'Stock',
+		u'name': u'__common__',
+		'page_name': u'stock-ageing',
+		'standard': u'Yes',
+		'title': u'Stock Ageing'
+	},
+
+	# Page, stock-ageing
+	{
+		u'doctype': u'Page',
+		u'name': u'stock-ageing'
+	}
+]

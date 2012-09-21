@@ -36,8 +36,7 @@ data_map = {
 		"order_by": "lft"
 	},
 	"Cost Center": {
-		"columns": ["name", "parent_cost_center", "lft", "rgt", "debit_or_credit",
-			"company"],
+		"columns": ["name", "lft", "rgt"],
 		"order_by": "lft"
 	},
 	"GL Entry": {
@@ -47,14 +46,15 @@ data_map = {
 		"order_by": "posting_date, account",
 		"links": {
 			"account": ["Account", "name"],
-			"company": ["Company", "name"]
+			"company": ["Company", "name"],
+			"cost_center": ["Cost Center", "name"]
 		}
 	},
 
 	# Stock
 	"Item": {
 		"columns": ["name", "if(item_name=name, '', item_name) as item_name", 
-			"item_group as parent_item_group", "stock_uom", "brand"],
+			"item_group as parent_item_group", "stock_uom", "brand", "valuation_method"],
 		"order_by": "name",
 		"links": {
 			"parent_item_group": ["Item Group", "name"],
@@ -115,5 +115,36 @@ data_map = {
 			"parent": ["Sales Invoice", "name"],
 			"item_code": ["Item", "name"]
 		}
+	},
+	"Supplier": {
+		"columns": ["name", "if(supplier_name=name, '', supplier_name) as supplier_name", 
+			"supplier_type as parent_supplier_type"],
+		"order_by": "name",
+		"links": {
+			"parent_supplier_type": ["Supplier Type", "name"],
+		}
+	},
+	"Supplier Type": {
+		"columns": ["name"],
+		"order_by": "name"
+	},
+	"Purchase Invoice": {
+		"columns": ["name", "supplier", "posting_date", "company"],
+		"conditions": ["docstatus=1"],
+		"order_by": "posting_date",
+		"links": {
+			"supplier": ["Supplier", "name"],
+			"company":["Company", "name"]
+		}
+	},
+	"Purchase Invoice Item": {
+		"columns": ["parent", "item_code", "qty", "amount"],
+		"conditions": ["docstatus=1", "ifnull(parent, '')!=''"],
+		"order_by": "parent",
+		"links": {
+			"parent": ["Purchase Invoice", "name"],
+			"item_code": ["Item", "name"]
+		}
 	}
+	
 }

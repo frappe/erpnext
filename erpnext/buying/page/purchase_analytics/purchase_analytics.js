@@ -14,33 +14,34 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-wn.pages['sales-analytics'].onload = function(wrapper) { 
+wn.pages['purchase-analytics'].onload = function(wrapper) { 
 	wn.ui.make_app_page({
 		parent: wrapper,
-		title: 'Sales Analytics',
+		title: 'Purchase Analytics',
 		single_column: true
-	});
-	new erpnext.SalesAnalytics(wrapper);
+	});					
+	
+	new erpnext.PurchaseAnalytics(wrapper);
 }
 
-erpnext.SalesAnalytics = wn.views.TreeGridReport.extend({
+erpnext.PurchaseAnalytics = wn.views.TreeGridReport.extend({
 	init: function(wrapper) {
 		this._super({
-			title: "Sales Analytics",
+			title: "Purchase Analytics",
 			page: wrapper,
 			parent: $(wrapper).find('.layout-main'),
 			appframe: wrapper.appframe,
-			doctypes: ["Item", "Item Group", "Customer", "Customer Group", "Company",
-				"Sales Invoice", "Sales Invoice Item", "Territory"],
+			doctypes: ["Item", "Item Group", "Supplier", "Supplier Type", "Company",
+				"Purchase Invoice", "Purchase Invoice Item"],
 			tree_grid: { show: true }
 		});
 		
 		this.tree_grids = {
-			"Customer Group": {
-				label: "Customer Group / Customer",
+			"Supplier Type": {
+				label: "Supplier Type / Supplier",
 				show: true, 
-				item_key: "customer",
-				parent_field: "parent_customer_group", 
+				item_key: "supplier",
+				parent_field: "parent_supplier_type", 
 				formatter: function(item) {
 					// return repl('<a href="#Report2/stock-invoices/customer=%(enc_value)s">%(value)s</a>', {
 					// 		value: item.name,
@@ -49,10 +50,10 @@ erpnext.SalesAnalytics = wn.views.TreeGridReport.extend({
 					return item.name;
 				}
 			},
-			"Customer": {
-				label: "Customer",
+			"Supplier": {
+				label: "Supplier",
 				show: false, 
-				item_key: "customer",
+				item_key: "supplier",
 				formatter: function(item) {
 					return item.name;
 				}
@@ -73,16 +74,7 @@ erpnext.SalesAnalytics = wn.views.TreeGridReport.extend({
 				formatter: function(item) {
 					return item.name;
 				}
-			},	
-			"Territory": {
-				label: "Territory / Customer",
-				show: true, 
-				item_key: "customer",
-				parent_field: "parent_territory", 
-				formatter: function(item) {
-					return item.name;
-				}
-			}			
+			},			
 		}
 	},
 	setup_columns: function() {
@@ -101,8 +93,8 @@ erpnext.SalesAnalytics = wn.views.TreeGridReport.extend({
 		this.columns = std_columns.concat(this.columns);
 	},
 	filters: [
-		{fieldtype:"Select", label: "Tree Type", options:["Customer Group", "Customer", 
-			"Item Group", "Item", "Territory"],
+		{fieldtype:"Select", label: "Tree Type", options:["Supplier Type", "Supplier", 
+			"Item Group", "Item"],
 			filter: function(val, item, opts, me) {
 				return me.apply_zero_filter(val, item, opts, me);
 			}},
@@ -139,14 +131,25 @@ erpnext.SalesAnalytics = wn.views.TreeGridReport.extend({
 	prepare_data: function() {
 		var me = this;
 		if (!this.tl) {
-			this.make_transaction_list("Sales Invoice", "Sales Invoice Item");
+			this.make_transaction_list("Purchase Invoice", "Purchase Invoice Item");
 
-			// add 'Not Set' Customer & Item
-			// (Customer / Item are not mandatory!!)
-			wn.report_dump.data["Customer"].push({
+			// add 'Not Set' Supplier & Item
+			// Add 'All Supplier Types' Supplier Type
+			// (Supplier / Item are not mandatory!!)
+			// Set parent supplier type for tree view
+			
+			$.each(wn.report_dump.data["Supplier Type"], function(i, v) {
+				v['parent_supplier_type'] = "All Supplier Types"
+			})
+			
+			wn.report_dump.data["Supplier Type"] = [{
+				name: "All Supplier Types", 
+				id: "All Supplier Types",
+			}].concat(wn.report_dump.data["Supplier Type"]);
+			
+			wn.report_dump.data["Supplier"].push({
 				name: "Not Set", 
-				parent_customer_group: "All Customer Groups",
-				parent_territory: "All Territories",
+				parent_supplier_type: "All Supplier Types",
 				id: "Not Set",
 			});
 
@@ -158,16 +161,14 @@ erpnext.SalesAnalytics = wn.views.TreeGridReport.extend({
 		}
 		
 		if(!this.data || me.item_type != me.tree_type) {
-			if(me.tree_type=='Customer') {
-				var items = wn.report_dump.data["Customer"];
-			} if(me.tree_type=='Customer Group') {
-				var items = this.prepare_tree("Customer", "Customer Group");
+			if(me.tree_type=='Supplier') {
+				var items = wn.report_dump.data["Supplier"];
+			} if(me.tree_type=='Supplier Type') {
+				var items = this.prepare_tree("Supplier", "Supplier Type");
 			} else if(me.tree_type=="Item Group") {
 				var items = this.prepare_tree("Item", "Item Group");
 			} else if(me.tree_type=="Item") {
 				var items = wn.report_dump.data["Item"];
-			} else if(me.tree_type=="Territory") {
-				var items = this.prepare_tree("Customer", "Territory");
 			}
 
 			me.item_type = me.tree_type
@@ -202,7 +203,6 @@ erpnext.SalesAnalytics = wn.views.TreeGridReport.extend({
 		} else {
 			this.set_totals(true);
 		}
-
 	},
 	prepare_balances: function() {
 		var me = this;
@@ -251,7 +251,7 @@ erpnext.SalesAnalytics = wn.views.TreeGridReport.extend({
 			})
 		});
 
-		if(sort)this.data = this.data.sort(function(a, b) { return a.total < b.total; });
+		if(sort)this.data = this.data.sort(function(a, b) { return b.total - a.total; });
 
 		if(!this.checked) {
 			this.data[0].checked = true;

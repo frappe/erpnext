@@ -55,7 +55,17 @@ erpnext.module_page.hide_links = function(wrapper) {
 			var txt = $(this).text();
 			$(this).parent().css('color', '#999').html(txt);
 		}
-	});}
+	});
+	
+	// pages
+	$(wrapper).find('[data-role]').each(function() {
+		if(!has_common(user_roles, [$(this).attr("data-role"), "System Manager"])) {
+			var html = $(this).html();
+			$(this).parent().css('color', '#999');
+			$(this).replaceWith(html);
+		}
+	});
+}
 
 // make list of reports
 

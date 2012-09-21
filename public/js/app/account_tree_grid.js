@@ -11,14 +11,14 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.	If not, see <http://www.gnu.org/licenses/>.
 
-erpnext.AccountTreeGrid = wn.views.GridReportWithPlot.extend({
+erpnext.AccountTreeGrid = wn.views.TreeGridReport.extend({
 	init: function(wrapper, title) {
 		this._super({
 			title: title,
 			page: wrapper,
 			parent: $(wrapper).find('.layout-main'),
 			appframe: wrapper.appframe,
-			doctypes: ["Company", "Fiscal Year", "Account", "GL Entry"],
+			doctypes: ["Company", "Fiscal Year", "Account", "GL Entry", "Cost Center"],
 			tree_grid: {
 				show: true, 
 				parent_field: "parent_account", 
@@ -110,6 +110,9 @@ erpnext.AccountTreeGrid = wn.views.GridReportWithPlot.extend({
 		this.set_indent();
 		this.prepare_balances();
 		
+	},
+	init_account: function(d) {
+		this.reset_item_values(d);	
 	},
 
 	prepare_balances: function() {

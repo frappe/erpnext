@@ -1,0 +1,28 @@
+# Page, purchase-analytics
+[
+
+	# These values are common in all dictionaries
+	{
+		u'creation': '2012-09-21 15:21:10',
+		u'docstatus': 0,
+		u'modified': '2012-09-21 15:21:10',
+		u'modified_by': u'Administrator',
+		u'owner': u'Administrator'
+	},
+
+	# These values are common for all Page
+	{
+		u'doctype': u'Page',
+		'module': u'Buying',
+		u'name': u'__common__',
+		'page_name': u'purchase-analytics',
+		'standard': u'Yes',
+		'title': u'Purchase Analytics'
+	},
+
+	# Page, purchase-analytics
+	{
+		u'doctype': u'Page',
+		u'name': u'purchase-analytics'
+	}
+]

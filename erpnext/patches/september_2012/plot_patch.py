@@ -3,6 +3,7 @@ def execute():
 	set_master_name_in_accounts()
 	set_customer_in_sales_invoices()
 	reset_lft_rgt()
+	add_analytics_role()
 
 def set_master_name_in_accounts():
 	accounts = webnotes.conn.sql("""select name, account_name, master_type from tabAccount
@@ -30,3 +31,10 @@ def reset_lft_rgt():
 	rebuild_tree("Cost Center", "parent_cost_center")
 	rebuild_tree("Sales Person", "parent_sales_person")
 	
+def add_analytics_role():
+	from webnotes.model.doc import Document
+	Document("Role", fielddata={
+		"name": "Analytics",
+		"role_name": "Analytics",
+		"module": "Setup",
+	}).save(1);
