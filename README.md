@@ -38,5 +38,6 @@ Please join our forums for more questions:
 
 ## License
 
-GNU/General Public License
+GNU/General Public License (see licence.txt)
 
+Along with the GPL, the name "ERPNext" must be retained in all derivatives.
