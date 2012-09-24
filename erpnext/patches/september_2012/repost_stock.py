@@ -18,8 +18,7 @@ from __future__ import unicode_literals
 def execute():
 	import webnotes
 	from webnotes.model.code import get_obj
-	bin = webnotes.conn.sql("select name from `tabBin` where item_code = 'NAS' \
-		and warehouse = 'MAHAPE'")
+	bin = webnotes.conn.sql("select name from `tabBin`")
 	i=0
 	for d in bin:
 	    try:
