@@ -97,12 +97,13 @@ erpnext.GeneralLedger = wn.views.GridReport.extend({
 		// filter accounts options by company
 		var accounts_by_company = this.make_accounts_by_company();
 		this.filter_inputs.company && this.filter_inputs.company.change(function() {
-			var company = $(this).val();
 			var $filter = me.filter_inputs.account;
+			var company = $(this).val();
+			var default_company = me.filter_inputs.company.get(0).opts.default_value;
 			$filter.empty().add_options([$filter.get(0).opts.default_value].concat(
 				$.map(wn.report_dump.data["Account"], function(ac) {
-					return accounts_by_company[company].indexOf(ac.name)!=-1 
-						? ac.name : null;
+					return (accounts_by_company[company].indexOf(ac.name)!=-1 ||
+						company===default_company) ? ac.name : null;
 				})));
 			me.filter_inputs.refresh.click();
 		});
