@@ -100,6 +100,7 @@ class DocType():
 		return self.message
 		
 	def send(self, query_key, doctype):
+		webnotes.conn.auto_commit_on_many_writes = True
 		recipients = self.get_recipients(query_key)
 		sender = webnotes.utils.get_email_id(self.doc.owner)
 		args = self.dt_map[doctype]
