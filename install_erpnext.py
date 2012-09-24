@@ -72,11 +72,9 @@ if not os.path.exists(os.path.join(erpnext_path, 'conf.py')):
 	# manipulate content
 	import re
 	
-	# set new_dbname, new_dbpassword, modules_path, files_path, backup_path, log_file_name
+	# set new_dbname, new_dbpassword, files_path, backup_path, log_file_name
 	content = re.sub("db_name.*", "db_name = '%s'" % new_dbname, content)
 	content = re.sub("db_password.*", "db_password = '%s'" % new_dbpassword, content)
-	content = re.sub("modules_path.*", "modules_path = '%s'" % \
-		os.path.join(erpnext_path, 'erpnext'), content)
 	content = re.sub("files_path.*", "files_path = '%s'" % \
 		os.path.join(erpnext_path, 'files'), content)
 	content = re.sub("backup_path.*", "backup_path = '%s'" % \
@@ -91,10 +89,9 @@ if not os.path.exists(os.path.join(erpnext_path, 'conf.py')):
 
 # install db
 import sys
-sys.path.append(erpnext_path)
-sys.path.append(os.path.join(erpnext_path, 'lib', 'py'))
-import conf
-sys.path.append(conf.modules_path)
+sys.path.append('.')
+sys.path.append('lib')
+sys.path.append('app')
 
 from webnotes.install_lib.install import Installer
 inst = Installer('root', root_pwd)
