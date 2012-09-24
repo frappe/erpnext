@@ -32,7 +32,7 @@ erpnext.FinancialAnalytics = erpnext.AccountTreeGrid.extend({
 				if(item._show) return true;
 				
 				// pl or bs
-				var out = (val=='Profit and Loss') ? item.is_pl_account=='Yes' : item.is_pl_account!='Yes';
+				var out = (val!='Balance Sheet') ? item.is_pl_account=='Yes' : item.is_pl_account!='Yes';
 				if(!out) return false;
 				
 				return me.apply_zero_filter(val, item, opts, me);
@@ -69,7 +69,7 @@ erpnext.FinancialAnalytics = erpnext.AccountTreeGrid.extend({
 		this._super();
 		this.filter_inputs.pl_or_bs.change(function() {
 			me.filter_inputs.refresh.click();
-		});
+		}).add_options($.map(wn.report_dump.data["Cost Center"], function(v) {return v.name;}));
 		this.setup_plot_check();
 	},
 	init_filter_values: function() {
@@ -79,29 +79,51 @@ erpnext.FinancialAnalytics = erpnext.AccountTreeGrid.extend({
 	prepare_balances: function() {
 		var me = this;
 		
+		// setup cost center map
+		if(!this.cost_center_by_name) {
+			this.cost_center_by_name = this.make_name_map(wn.report_dump.data["Cost Center"]);
+		}
+		
+		var cost_center = inList(["Balance Sheet", "Profit and Loss"], this.pl_or_bs) 
+			? null : this.cost_center_by_name[this.pl_or_bs];
+		
 		$.each(wn.report_dump.data['GL Entry'], function(i, gl) {
-			var posting_date = dateutil.str_to_obj(gl.posting_date);
-			var account = me.item_by_name[gl.account];
-			var col = me.column_map[gl.posting_date];
-			
-			if(col) {
-				if(gl.voucher_type=='Period Closing Voucher') {
-					// period closing voucher not to be added
-					// to profit and loss accounts (else will become zero!!)
-					if(account.is_pl_account!='Yes')
-						me.add_balance(col.field, account, gl);
+			var filter_by_cost_center = (function() {
+				if(cost_center) {
+					if(gl.cost_center) {
+						var gl_cost_center = me.cost_center_by_name[gl.cost_center];
+						return gl_cost_center.lft >= cost_center.lft && gl_cost_center.rgt <= cost_center.rgt;
+					} else {
+						return false;
+					}
 				} else {
-					me.add_balance(col.field, account, gl);
+					return true;
 				}
-				
-			} else if(account.is_pl_account!='Yes' 
-				&& (posting_date < dateutil.str_to_obj(me.from_date))) {
-				me.add_balance('opening', account, gl);
+			})();
+
+			if(filter_by_cost_center) {
+				var posting_date = dateutil.str_to_obj(gl.posting_date);
+				var account = me.item_by_name[gl.account];
+				var col = me.column_map[gl.posting_date];
+				if(col) {
+					if(gl.voucher_type=='Period Closing Voucher') {
+						// period closing voucher not to be added
+						// to profit and loss accounts (else will become zero!!)
+						if(account.is_pl_account!='Yes')
+							me.add_balance(col.field, account, gl);
+					} else {
+						me.add_balance(col.field, account, gl);
+					}
+
+				} else if(account.is_pl_account!='Yes' 
+					&& (posting_date < dateutil.str_to_obj(me.from_date))) {
+					me.add_balance('opening', account, gl);
+				}
 			}
 		});
 
 		// make balances as cumulative
-		if(me.filter_inputs.pl_or_bs.val()=='Balance Sheet') {
+		if(me.pl_or_bs=='Balance Sheet') {
 			$.each(me.data, function(i, ac) {
 				if((ac.rgt - ac.lft)==1 && ac.is_pl_account!='Yes') {
 					var opening = flt(ac.opening);
@@ -135,15 +157,16 @@ erpnext.FinancialAnalytics = erpnext.AccountTreeGrid.extend({
 	get_plot_data: function() {
 		var data = [];
 		var me = this;
-		var pl_or_bs = this.filter_inputs.pl_or_bs.val();
+		var pl_or_bs = this.pl_or_bs;
 		$.each(this.data, function(i, account) {
-			var show = pl_or_bs == "Profit and Loss" ? account.is_pl_account=="Yes" : account.is_pl_account!="Yes";
+			
+			var show = pl_or_bs != "Balance Sheet" ? account.is_pl_account=="Yes" : account.is_pl_account!="Yes";
 			if (show && account.checked && me.apply_filter(account, "company")) {
 				data.push({
 					label: account.name,
 					data: $.map(me.columns, function(col, idx) {
 						if(col.formatter==me.currency_formatter && !col.hidden) {
-							if (pl_or_bs == "Profit and Loss") {
+							if (pl_or_bs != "Balance Sheet") {
 								return [[dateutil.str_to_obj(col.id).getTime(), account[col.field]], 
 									[dateutil.user_to_obj(col.name).getTime(), account[col.field]]];
 							} else {
@@ -164,13 +187,5 @@ erpnext.FinancialAnalytics = erpnext.AccountTreeGrid.extend({
 		});
 	
 		return data;
-	},
-	get_plot_options: function() {
-		return {
-			grid: { hoverable: true, clickable: true },
-			xaxis: { mode: "time", 
-				min: dateutil.str_to_obj(this.from_date).getTime(),
-				max: dateutil.str_to_obj(this.to_date).getTime() }
-		}
-	},
+	}
 })

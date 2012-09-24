@@ -1,0 +1,28 @@
+# Page, sales-analytics
+[
+
+	# These values are common in all dictionaries
+	{
+		u'creation': '2012-09-21 12:06:14',
+		u'docstatus': 0,
+		u'modified': '2012-09-21 12:06:14',
+		u'modified_by': u'Administrator',
+		u'owner': u'Administrator'
+	},
+
+	# These values are common for all Page
+	{
+		u'doctype': u'Page',
+		'module': u'Selling',
+		u'name': u'__common__',
+		'page_name': u'sales-analytics',
+		'standard': u'Yes',
+		'title': u'Sales Analytics'
+	},
+
+	# Page, sales-analytics
+	{
+		u'doctype': u'Page',
+		u'name': u'sales-analytics'
+	}
+]

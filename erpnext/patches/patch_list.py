@@ -584,4 +584,8 @@ patch_list = [
 		'patch_module': 'patches.september_2012',
 		'patch_file': 'add_stock_ledger_entry_index',
 	},
+	{
+		'patch_module': 'patches.september_2012',
+		'patch_file': 'plot_patch',
+	},
 ]

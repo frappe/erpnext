@@ -1,3 +1,19 @@
+// ERPNext - web based ERP (http://erpnext.com)
+// Copyright (C) 2012 Web Notes Technologies Pvt Ltd
+// 
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// 
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 wn.pages['stock-analytics'].onload = function(wrapper) { 
 	wn.ui.make_app_page({
 		parent: wrapper,
@@ -8,7 +24,9 @@ wn.pages['stock-analytics'].onload = function(wrapper) {
 	new erpnext.StockAnalytics(wrapper);
 }
 
-erpnext.StockAnalytics = wn.views.GridReportWithPlot.extend({
+wn.require("js/app/stock_grid_report.js");
+
+erpnext.StockAnalytics = erpnext.StockGridReport.extend({
 	init: function(wrapper) {
 		this._super({
 			title: "Stock Analytics",
@@ -25,7 +43,7 @@ erpnext.StockAnalytics = wn.views.GridReportWithPlot.extend({
 							enc_value: encodeURIComponent(item.name)
 						});
 				}
-			}			
+			},		
 		})
 	},
 	setup_columns: function() {
@@ -33,12 +51,8 @@ erpnext.StockAnalytics = wn.views.GridReportWithPlot.extend({
 			{id: "check", name: "Plot", field: "check", width: 30,
 				formatter: this.check_formatter},
 			{id: "name", name: "Item", field: "name", width: 300,
-				formatter: this.tree_formatter, doctype: "Item"},
+				formatter: this.tree_formatter},
 			{id: "opening", name: "Opening", field: "opening", hidden: true,
-				formatter: this.currency_formatter},
-			{id: "balance_qty", name: "Balance Qty", field: "balance_qty", hidden: true,
-				formatter: this.currency_formatter},
-			{id: "balance_value", name: "Balance Value", field: "balance_value", hidden: true,
 				formatter: this.currency_formatter}
 		];
 
@@ -46,7 +60,8 @@ erpnext.StockAnalytics = wn.views.GridReportWithPlot.extend({
 		this.columns = std_columns.concat(this.columns);
 	},
 	filters: [
-		{fieldtype:"Select", label: "Value or Qty", options:["Value", "Quantity"],
+		{fieldtype:"Select", label: "Value or Qty", options:["Value (Weighted Average)", 
+			"Value (FIFO)", "Quantity"],
 			filter: function(val, item, opts, me) {
 				return me.apply_zero_filter(val, item, opts, me);
 			}},
@@ -90,9 +105,9 @@ erpnext.StockAnalytics = wn.views.GridReportWithPlot.extend({
 	},
 	prepare_data: function() {
 		var me = this;
-		
+				
 		if(!this.data) {
-			var items = this.get_item_tree();
+			var items = this.prepare_tree("Item", "Item Group");
 
 			me.parent_map = {};
 			me.item_by_name = {};
@@ -109,6 +124,7 @@ erpnext.StockAnalytics = wn.views.GridReportWithPlot.extend({
 				me.reset_item_values(d);
 			});
 			this.set_indent();
+			this.data[0].checked = true;
 		} else {
 			// otherwise, only reset values
 			$.each(this.data, function(i, d) {
@@ -120,31 +136,14 @@ erpnext.StockAnalytics = wn.views.GridReportWithPlot.extend({
 		this.update_groups();
 		
 	},
-	get_item_tree: function() {
-		// prepare map with items in respective item group
-		var item_group_map = {};
-		$.each(wn.report_dump.data["Item"], function(i, item) {
-			var parent = item.parent_item_group
-			if(!item_group_map[parent]) item_group_map[parent] = [];
-			item_group_map[parent].push(item);
-		});
-		
-		// arrange items besides their parent item groups
-		var items = [];
-		$.each(wn.report_dump.data["Item Group"], function(i, group){
-			group.is_group = true;
-			items.push(group);
-			items = items.concat(item_group_map[group.name] || []);
-		});
-		return items;
-	},
 	prepare_balances: function() {
 		var me = this;
 		var from_date = dateutil.str_to_obj(this.from_date);
 		var to_date = dateutil.str_to_obj(this.to_date);
 		var data = wn.report_dump.data["Stock Ledger Entry"];
-		var is_value = me.value_or_qty == "Value";
-				
+
+		this.item_warehouse = {};
+
 		for(var i=0, j=data.length; i<j; i++) {
 			var sl = data[i];
 			sl.posting_datetime = sl.posting_date + " " + sl.posting_time;
@@ -152,17 +151,14 @@ erpnext.StockAnalytics = wn.views.GridReportWithPlot.extend({
 			
 			if(me.is_default("warehouse") ? true : me.warehouse == sl.warehouse) {			
 				var item = me.item_by_name[sl.item_code];
-
-				// value
-				var rate = sl.qty > 0 ? sl.incoming_rate :
-					(item.balance_qty.toFixed(2) == 0.00 ? 0 : flt(item.balance_value) / flt(item.balance_qty));
-				var value_diff = (rate * sl.qty);
-								
-				// update balance
-				item.balance_qty += sl.qty;
-				item.balance_value += value_diff;
-
-				var diff = is_value ? value_diff : sl.qty;
+				
+				if(me.value_or_qty!="Quantity") {
+					var wh = me.get_item_warehouse(sl.warehouse, sl.item_code);
+					var is_fifo = this.value_or_qty== "Value (FIFO)";
+					var diff = me.get_value_diff(wh, sl, is_fifo);
+				} else {
+					var diff = sl.qty;
+				}
 
 				if(posting_datetime < from_date) {
 					item.opening += diff;
@@ -203,36 +199,7 @@ erpnext.StockAnalytics = wn.views.GridReportWithPlot.extend({
 			}
 		});
 	},
-	get_plot_data: function() {
-		var data = [];
-		var me = this;
-		$.each(this.data, function(i, item) {
-			if (item.checked) {
-				data.push({
-					label: item.name,
-					data: $.map(me.columns, function(col, idx) {
-						if(col.formatter==me.currency_formatter && !col.hidden) {
-							return [[dateutil.user_to_obj(col.name).getTime(), item[col.field]]]
-						}
-					}),
-					points: {show: true},
-					lines: {show: true, fill: true},
-				});
-				
-				// prepend opening 
-				data[data.length-1].data = [[dateutil.str_to_obj(me.from_date).getTime(), 
-					item.opening]].concat(data[data.length-1].data);
-			}
-		});
-	
-		return data;
-	},
-	get_plot_options: function() {
-		return {
-			grid: { hoverable: true, clickable: true },
-			xaxis: { mode: "time", 
-				min: dateutil.str_to_obj(this.from_date).getTime(),
-				max: dateutil.str_to_obj(this.to_date).getTime() }
-		}
+	get_plot_points: function(item, col, idx) {
+		return [[dateutil.user_to_obj(col.name).getTime(), item[col.field]]]
 	}
 });
