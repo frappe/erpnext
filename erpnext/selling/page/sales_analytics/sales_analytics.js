@@ -174,7 +174,7 @@ erpnext.SalesAnalytics = wn.views.TreeGridReport.extend({
 			me.parent_map = {};
 			me.item_by_name = {};
 			me.data = [];
-
+			
 			$.each(items, function(i, v) {
 				var d = copy_dict(v);
 

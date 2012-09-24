@@ -32,32 +32,18 @@ in_transaction = webnotes.conn.in_transaction
 convert_to_lists = webnotes.conn.convert_to_lists
 	
 # -----------------------------------------------------------------------------------------
-
-
-class DocType:
+from webnotes.utils.nestedset import DocTypeNestedSet
+class DocType(DocTypeNestedSet):
 	def __init__(self, doc, doclist=[]):
 		self.doc = doc
 		self.doclist = doclist
 		self.nsm_parent_field = 'parent_customer_group';
 
-
-	# update Node Set Model
-	def update_nsm_model(self):
-		import webnotes
-		import webnotes.utils.nestedset
-		webnotes.utils.nestedset.update_nsm(self)
-
-	# ON UPDATE
-	#--------------------------------------
-	def on_update(self):
-		# update nsm
-		self.update_nsm_model()   
-
-
 	def validate(self): 
 		if sql("select name from `tabCustomer Group` where name = %s and docstatus = 2", (self.doc.customer_group_name)):
 			msgprint("""Another %s record is trashed. 
 				To untrash please go to Setup & click on Trash."""%(self.doc.customer_group_name), raise_exception = 1)
+		self.validate_root_details("All Customer Groups", "parent_customer_group")
 
 	def on_trash(self):
 		cust = sql("select name from `tabCustomer` where ifnull(customer_group, '') = %s", self.doc.name)
@@ -72,4 +58,4 @@ class DocType:
 
 		# rebuild tree
 		webnotes.conn.set(self.doc,'old_parent', '')
-		self.update_nsm_model()
+		self.update_nsm()
