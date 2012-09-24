@@ -175,8 +175,8 @@ erpnext.StockLedger = erpnext.StockGridReport.extend({
 		if(me.item_code != me.item_code_default && !me.voucher_no) {
 			var closing = {
 				item_code: "On " + dateutil.str_to_user(this.to_date), 
-				balance: (out ? out[out.length-1].balance : 0), qty: 0,
-				balance_value: (out ? out[out.length-1].balance_value : 0),
+				balance: (out.length ? out[out.length-1].balance : 0), qty: 0,
+				balance_value: (out.length ? out[out.length-1].balance_value : 0),
 				id:"_closing", _show: true, _style: "font-weight: bold"
 			};
 			total_out.balance_value = -total_out.balance_value;

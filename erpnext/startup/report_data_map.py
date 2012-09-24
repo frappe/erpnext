@@ -31,8 +31,8 @@ data_map = {
 
 	# Accounts
 	"Account": {
-		"columns": ["name", "parent_account", "lft", "rgt", "debit_or_credit", "is_pl_account",
-			"company"],
+		"columns": ["name", "parent_account", "lft", "rgt", "debit_or_credit", 
+			"is_pl_account", "company"],
 		"order_by": "lft"
 	},
 	"Cost Center": {
