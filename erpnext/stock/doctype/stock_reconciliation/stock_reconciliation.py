@@ -226,7 +226,7 @@ class DocType:
 			
 
 	def on_cancel(self):
-		msgprint("Cancellation of stock reconciliation is temporarily suspended. The feature will come back within 2-3 days.")
+		msgprint("Cancellation of stock reconciliation is temporarily suspended. The feature will come back soon.")
 		raise Exception
 		self.get_reconciliation_data(submit = 0)
 		self.do_stock_reco(is_submit = -1)
