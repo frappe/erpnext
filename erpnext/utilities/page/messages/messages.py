@@ -93,8 +93,6 @@ def notify(arg=None):
 	<b>Comment:</b> %s
 	
 	To answer, please login to your erpnext account!
-
-	<a href='https://signin.erpnext.com'>https://signin.erpnext.com</a>
 	''' % (fn, arg['txt'])
 	
 	from webnotes.model.code import get_obj
