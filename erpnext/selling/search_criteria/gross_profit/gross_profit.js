@@ -15,7 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 report.customize_filters = function() {
-  this.mytabs.items['Select Columns'].hide();
+  //this.mytabs.items['Select Columns'].hide();
   this.mytabs.tabs['More Filters'].hide();
   this.hide_all_filters();
   this.filter_fields_dict['Delivery Note'+FILTER_SEP +'ID'].df.filter_hide = 0;

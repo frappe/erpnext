@@ -78,7 +78,7 @@ class DocType:
 			
 			if sr_count != self.doc.actual_qty:
 				msg = """Actual Qty(%s) in Bin is mismatched with total number(%s) 
-					of serial no in store for item: '%s' and warehouse: '%s'""" % 
+					of serial no in store for item: %s and warehouse: %s""" % \
 					(self.doc.actual_qty, sr_count, self.doc.item_code, self.doc.warehouse)
 
 				msgprint(msg, raise_exception=1)
@@ -209,15 +209,17 @@ class DocType:
 					break # nothing in store
 				
 				batch = self.fcfs_bal[0]
-				incoming_cost += flt(batch[1])*flt(withdraw)
 				
 				if batch[0] <= withdraw:
 					# not enough or exactly same qty in current batch, clear batch
+					incoming_cost += flt(batch[1])*flt(batch[0])
 					withdraw -= batch[0]
 					self.fcfs_bal.pop(0)
+					
 
 				else:
 					# all from current batch
+					incoming_cost += flt(batch[1])*flt(withdraw)
 					batch[0] -= withdraw
 					withdraw = 0
 			
@@ -294,7 +296,7 @@ class DocType:
 					prev_sle.get('posting_date','1900-01-01'), \
 					prev_sle.get('posting_time', '12:00')), as_dict = 1)
 					
-		for sle in sll:		
+		for sle in sll:
 			# block if stock level goes negative on any date
 			if val_method != 'Moving Average' or flt(allow_negative_stock) == 0:
 				self.validate_negative_stock(cqty, sle)
@@ -309,12 +311,11 @@ class DocType:
 			cqty += sle['actual_qty'] 
 			# Stock Value upto the sle
 			stock_val = self.get_stock_value(val_method, cqty, val_rate, serial_nos) 
-			
 			# update current sle 
 			sql("""update `tabStock Ledger Entry` 
-				set bin_aqat=%s, valuation_rate=%s, fcfs_stack=%s, stock_value=%s, incoming_rate
-				where name=%s""", (cqty, flt(val_rate), cstr(self.fcfs_bal), \
-					stock_val, in_rate, sle['name']))
+				set bin_aqat=%s, valuation_rate=%s, fcfs_stack=%s, stock_value=%s, 
+				incoming_rate = %s where name=%s""", \
+				(cqty, flt(val_rate), cstr(self.fcfs_bal), stock_val, in_rate, sle['name']))
 		
 		# update the bin
 		if sll or not prev_sle:
@@ -346,7 +347,7 @@ class DocType:
 				self.create_auto_indent(ret[0], doc_type, doc_name, current_qty[0][0])
 
 	def create_auto_indent(self, i , doc_type, doc_name, cur_qty):
-		"""	Create indent on reaching reorder level	"""\
+		"""	Create indent on reaching reorder level	"""
 		indent = Document('Purchase Request')
 		indent.transaction_date = nowdate()
 		indent.naming_series = 'IDT'

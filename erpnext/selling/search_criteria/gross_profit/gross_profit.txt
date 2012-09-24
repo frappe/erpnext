@@ -3,23 +3,23 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-04-03 12:49:51',
-		'docstatus': 0,
-		'modified': '2012-04-03 12:49:51',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
+		u'creation': '2012-05-14 18:22:18',
+		u'docstatus': 0,
+		u'modified': '2012-09-24 14:11:39',
+		u'modified_by': u'Administrator',
+		u'owner': u'Administrator'
 	},
 
 	# These values are common for all Search Criteria
 	{
-		'columns': u'Delivery Note\x01ID,Delivery Note\x01Posting Date,Delivery Note\x01Posting Time,Delivery Note Item\x01Item Code,Delivery Note Item\x01Item Name,Delivery Note Item\x01Description,Delivery Note\x01Project Name,Delivery Note Item\x01Quantity,Delivery Note Item\x01Rate*,Delivery Note Item\x01Amount*',
+		'columns': u'Delivery Note\x01ID,Delivery Note\x01Posting Date,Delivery Note\x01Posting Time,Delivery Note Item\x01Item Code,Delivery Note Item\x01Item Name,Delivery Note Item\x01Description,Delivery Note Item\x01Warehouse,Delivery Note\x01Project Name,Delivery Note Item\x01Quantity,Delivery Note Item\x01Rate*,Delivery Note Item\x01Amount*',
 		'criteria_name': u'Gross Profit',
 		'description': u'Invoice wise',
 		'doc_type': u'Delivery Note Item',
-		'doctype': 'Search Criteria',
-		'filters': u"{'Delivery Note\x01Submitted':1,'Delivery Note\x01Status':'','Delivery Note\x01Fiscal Year':''}",
+		u'doctype': u'Search Criteria',
+		'filters': u'{"Delivery Note\\u0001Submitted":1,"Delivery Note\\u0001Status":[],"Delivery Note\\u0001Fiscal Year":[]}',
 		'module': u'Selling',
-		'name': '__common__',
+		u'name': u'__common__',
 		'page_len': 50,
 		'parent_doc_type': u'Delivery Note',
 		'sort_by': u'`tabDelivery Note`.`name`',
@@ -29,7 +29,7 @@
 
 	# Search Criteria, gross_profit
 	{
-		'doctype': 'Search Criteria',
-		'name': u'gross_profit'
+		u'doctype': u'Search Criteria',
+		u'name': u'gross_profit'
 	}
 ]
