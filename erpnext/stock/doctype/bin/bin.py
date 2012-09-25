@@ -373,7 +373,7 @@ class DocType:
 		indent_obj.validate()
 		set(indent_obj.doc,'docstatus',1)
 		indent_obj.on_submit()
-		msgprint("""Item: is to be re-ordered. Purchase Request %s raised. 
+		msgprint("""Item: %s is to be re-ordered. Purchase Request %s raised. 
 			It was generated from %s %s""" % 
 			(self.doc.item_code, indent.name,doc_type, doc_name ))
 		if(i['email_notify']):
