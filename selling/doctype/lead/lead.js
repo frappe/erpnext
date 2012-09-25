@@ -16,8 +16,8 @@
 
 // Module CRM
 
-wn.require('erpnext/utilities/doctype/sms_control/sms_control.js');
-wn.require('erpnext/support/doctype/communication/communication.js');
+wn.require('app/utilities/doctype/sms_control/sms_control.js');
+wn.require('app/support/doctype/communication/communication.js');
 
 cur_frm.cscript.onload = function(doc, cdt, cdn) {
 	if(user =='Guest'){

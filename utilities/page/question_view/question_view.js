@@ -186,4 +186,4 @@ KBAnswer = function(body, data, ans_list) {
 }
 
 
-wn.require('erpnext/utilities/page/kb_common/kb_common.js');
+wn.require('app/utilities/page/kb_common/kb_common.js');

@@ -94,7 +94,7 @@ cur_frm.cscript.sanctioned_amount = function(doc,cdt,cdn){
 	cur_frm.cscript.calculate_total(doc,cdt,cdn);
 }
 
-wn.require('erpnext/setup/doctype/notification_control/notification_control.js');
+wn.require('app/setup/doctype/notification_control/notification_control.js');
 
 cur_frm.cscript.approve = function(doc,cdt,cdn){
 

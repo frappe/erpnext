@@ -18,7 +18,7 @@
 // ------
 // cur_frm.cscript.tname - Details table name
 // cur_frm.cscript.fname - Details fieldname
-// cur_frm.cscript.other_fname - wn.require('erpnext/accounts/doctype/sales_taxes_and_charges_master/sales_taxes_and_charges_master.js'); fieldname
+// cur_frm.cscript.other_fname - wn.require('app/accounts/doctype/sales_taxes_and_charges_master/sales_taxes_and_charges_master.js'); fieldname
 // cur_frm.cscript.sales_team_fname - Sales Team fieldname
 
 // ============== Load Default Taxes ===================

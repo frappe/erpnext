@@ -17,8 +17,8 @@
 cur_frm.cscript.tname = "Purchase Invoice Item";
 cur_frm.cscript.fname = "entries";
 cur_frm.cscript.other_fname = "purchase_tax_details";
-wn.require('erpnext/accounts/doctype/purchase_taxes_and_charges_master/purchase_taxes_and_charges_master.js');
-wn.require('erpnext/buying/doctype/purchase_common/purchase_common.js');
+wn.require('app/accounts/doctype/purchase_taxes_and_charges_master/purchase_taxes_and_charges_master.js');
+wn.require('app/buying/doctype/purchase_common/purchase_common.js');
 
 // On Load
 // --------

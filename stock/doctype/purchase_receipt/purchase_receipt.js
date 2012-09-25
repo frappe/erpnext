@@ -18,10 +18,10 @@ cur_frm.cscript.tname = "Purchase Receipt Item";
 cur_frm.cscript.fname = "purchase_receipt_details";
 cur_frm.cscript.other_fname = "purchase_tax_details";
 
-wn.require('erpnext/accounts/doctype/purchase_taxes_and_charges_master/purchase_taxes_and_charges_master.js');
-wn.require('erpnext/buying/doctype/purchase_common/purchase_common.js');
-wn.require('erpnext/utilities/doctype/sms_control/sms_control.js');
-wn.require('erpnext/setup/doctype/notification_control/notification_control.js');
+wn.require('app/accounts/doctype/purchase_taxes_and_charges_master/purchase_taxes_and_charges_master.js');
+wn.require('app/buying/doctype/purchase_common/purchase_common.js');
+wn.require('app/utilities/doctype/sms_control/sms_control.js');
+wn.require('app/setup/doctype/notification_control/notification_control.js');
 
 //========================== On Load ================================================================
 cur_frm.cscript.onload = function(doc, cdt, cdn) {

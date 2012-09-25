@@ -19,7 +19,7 @@
 cur_frm.cscript.refresh = function(doc) {
 	if(!doc.__islocal) {
 		// refresh gantt chart
-		wn.require('erpnext/projects/gantt_task.js');
+		wn.require('app/projects/gantt_task.js');
 		if(!cur_frm.gantt_area)
 			cur_frm.gantt_area = $('<div>')
 				.appendTo(cur_frm.fields_dict.project_tasks.wrapper);

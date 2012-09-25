@@ -17,8 +17,8 @@
 cur_frm.cscript.tname = "Purchase Request Item";
 cur_frm.cscript.fname = "indent_details";
 
-wn.require('erpnext/buying/doctype/purchase_common/purchase_common.js');
-wn.require('erpnext/utilities/doctype/sms_control/sms_control.js');
+wn.require('app/buying/doctype/purchase_common/purchase_common.js');
+wn.require('app/utilities/doctype/sms_control/sms_control.js');
 	
 //========================== On Load =================================================
 cur_frm.cscript.onload = function(doc, cdt, cdn) {

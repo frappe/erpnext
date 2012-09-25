@@ -14,8 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-wn.require('erpnext/utilities/doctype/sms_control/sms_control.js');
-wn.require('erpnext/support/doctype/communication/communication.js');
+wn.require('app/utilities/doctype/sms_control/sms_control.js');
+wn.require('app/support/doctype/communication/communication.js');
 
 cur_frm.cscript.refresh = function(doc, cdt, cdn){
 	erpnext.hide_naming_series();

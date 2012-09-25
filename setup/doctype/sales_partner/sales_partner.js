@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-wn.require('erpnext/setup/doctype/contact_control/contact_control.js');
+wn.require('app/setup/doctype/contact_control/contact_control.js');
 
 cur_frm.cscript.onload = function(doc,dt,dn){
 	// history doctypes and scripts

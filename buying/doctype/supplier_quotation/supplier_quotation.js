@@ -20,8 +20,8 @@ cur_frm.cscript.fname = "quotation_items";
 cur_frm.cscript.other_fname = "purchase_tax_details";
 
 // attach required files
-wn.require('erpnext/accounts/doctype/purchase_taxes_and_charges_master/purchase_taxes_and_charges_master.js');
-wn.require('erpnext/buying/doctype/purchase_common/purchase_common.js');
+wn.require('app/accounts/doctype/purchase_taxes_and_charges_master/purchase_taxes_and_charges_master.js');
+wn.require('app/buying/doctype/purchase_common/purchase_common.js');
 
 cur_frm.cscript.onload = function(doc, dt, dn) {
 	// set missing values in parent doc

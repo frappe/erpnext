@@ -17,7 +17,7 @@
 .sprite-todo{ background-position: 0 -1290px; width: 40px; height: 34px; } 
 .sprite-website{ background-position: 0 -1374px; width: 40px; height: 40px; } 
 
-.sprite-image { background-image: url("images/sprite-desktop.png"); }
+.sprite-image { background-image: url("app/images/sprite-desktop.png"); }
 
 
 .sprite-account{ margin-top: 8px; margin-left: 12px; } 
