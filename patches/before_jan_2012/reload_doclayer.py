@@ -29,5 +29,5 @@ def execute():
 	d.dt = "Customize Form"
 	d.dt_label = "Customize Form View"
 	d.save(1)
-	from webnotes.session_cache import clear
+	from webnotes.sessions import clear
 	clear()

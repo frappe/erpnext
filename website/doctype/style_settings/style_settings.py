@@ -38,7 +38,7 @@ class DocType:
 		if self.doc.add_css:
 			self.doc.custom_css += '\n\n/* User CSS */\n\n' + self.doc.add_css
 		
-		from webnotes.session_cache import clear_cache
+		from webnotes.sessions import clear_cache
 		clear_cache('Guest')
 		
 		del self.doc.fields['small_font_size']

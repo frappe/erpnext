@@ -23,7 +23,7 @@ from webnotes.model import db_exists
 from webnotes.model.doc import Document, addchild, getchildren, make_autoname
 from webnotes.model.doclist import getlist, copy_doclist
 from webnotes.model.code import get_obj, get_server_obj, run_server_obj, updatedb, check_syntax
-from webnotes import session, form, is_testing, msgprint, errprint
+from webnotes import session, form, msgprint, errprint
 
 
 set = webnotes.conn.set

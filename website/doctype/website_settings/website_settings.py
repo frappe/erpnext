@@ -38,7 +38,7 @@ class DocType:
 		#website.web_cache.refresh_cache(build=['Blog'])
 		website.web_cache.refresh_cache()
 
-		from webnotes.session_cache import clear_cache
+		from webnotes.sessions import clear_cache
 		clear_cache('Guest')
 
 	def set_home_page(self):

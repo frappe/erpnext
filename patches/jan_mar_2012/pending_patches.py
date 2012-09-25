@@ -46,7 +46,7 @@ def execute():
 	sql("update `tabDocField` set allow_on_submit = 1 where fieldname = 'page_break'")
 	sql("update `tabDocField` set allow_on_submit = 1 where fieldname in ('indent_details', 'po_details', 'purchase_receipt_details', 'entries', 'sales_order_details', 'delivery_note_details', 'quotation_details') and fieldtype = 'Table'")
 		
-	from webnotes.session_cache import clear_cache
+	from webnotes.sessions import clear_cache
 	clear_cache(webnotes.session['user'])
 
 	# FEATURES SETUP

@@ -19,7 +19,7 @@ import webnotes
 from webnotes.utils import add_days, cint, cstr, flt, getdate
 from webnotes.model.doclist import getlist
 from webnotes.model.code import get_obj
-from webnotes import session, form, is_testing, msgprint, errprint
+from webnotes import session, form, msgprint, errprint
 
 sql = webnotes.conn.sql
 get_value = webnotes.conn.get_value
