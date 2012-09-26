@@ -588,4 +588,16 @@ patch_list = [
 		'patch_module': 'patches.september_2012',
 		'patch_file': 'plot_patch',
 	},
+	{
+		'patch_module': 'patches.september_2012',
+		'patch_file': 'event_permission',
+	},
+	{
+		'patch_module': 'patches.september_2012',
+		'patch_file': 'repost_stock',
+	},
+	{
+		'patch_module': 'patches.september_2012',
+		'patch_file': 'reload_gross_profit',
+	},
 ]

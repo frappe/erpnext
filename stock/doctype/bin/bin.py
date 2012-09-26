@@ -40,10 +40,9 @@ class DocType:
 		self.doc = doc
 		self.doclist = doclist
 
-	# -------------
-	# stock update
-	# -------------
-	def update_stock(self, actual_qty=0, reserved_qty=0, ordered_qty=0, indented_qty=0, planned_qty=0, dt=None, sle_id='', posting_time='', serial_no = '', is_cancelled = 'No',doc_type='',doc_name='',is_amended='No'):
+	def update_stock(self, actual_qty=0, reserved_qty=0, ordered_qty=0, indented_qty=0, \
+	 		planned_qty=0, dt=None, sle_id='', posting_time='', serial_no = '', \
+			is_cancelled = 'No',doc_type='',doc_name='',is_amended='No'):
 		if not dt: 
 			dt = nowdate()
 			
@@ -73,13 +72,13 @@ class DocType:
 		"""
 		if sql("select name from `tabItem` where ifnull(has_serial_no, 'No') = 'Yes' and name = '%s'" % self.doc.item_code):
 			sr_count = sql("""select count(name) from `tabSerial No` 
-							where item_code = '%s' and warehouse = '%s' 
-							and status  ='In Store' and docstatus != 2
-							""" % (self.doc.item_code, self.doc.warehouse))[0][0]
+				where item_code = '%s' and warehouse = '%s' 
+				and status  ='In Store' and docstatus != 2
+				""" % (self.doc.item_code, self.doc.warehouse))[0][0]
 			
 			if sr_count != self.doc.actual_qty:
-				msg = """Actual Qty(%s) in Bin is mismatched with total number(%s) of serial no in store 
-					for item: '%s' and warehouse: '%s'""" % \
+				msg = """Actual Qty(%s) in Bin is mismatched with total number(%s) 
+					of serial no in store for item: %s and warehouse: %s""" % \
 					(self.doc.actual_qty, sr_count, self.doc.item_code, self.doc.warehouse)
 
 				msgprint(msg, raise_exception=1)
@@ -119,7 +118,6 @@ class DocType:
 
 		return sle and sle[0] or {}
 
-
 	def get_sle_prev_timebucket(self, posting_date = '1900-01-01', posting_time = '12:00'):
 		"""get previous stock ledger entry before current time-bucket"""
 		# get the last sle before the current time-bucket, so that all values
@@ -139,8 +137,6 @@ class DocType:
 
 		return sle and sle[0] or {}
 
-
-	#-------------------------------------------------------------
 	def validate_negative_stock(self, cqty, s):
 		"""
 			validate negative stock for entries current datetime onwards
@@ -157,33 +153,32 @@ class DocType:
 					s['posting_date'], s['posting_time'], s['voucher_type'], s['voucher_no']), \
 					raise_exception=1)
 
-
-	# ------------------------------------
-	def get_serialized_inventory_values(self, val_rate, in_rate, opening_qty, actual_qty, is_cancelled, serial_nos):
+	def get_serialized_inventory_values(self, val_rate, in_rate, opening_qty, \
+			actual_qty, is_cancelled, serial_nos):
 		"""
 			get serialized inventory values
 		"""
 		if flt(in_rate) < 0: # wrong incoming rate
 			in_rate = val_rate
-		elif flt(in_rate) == 0: # In case of delivery/stock issue, get average purchase rate of serial nos of current entry
-			in_rate = flt(sql("select ifnull(avg(purchase_rate), 0) from `tabSerial No` where name in (%s)" % (serial_nos))[0][0])
+		elif flt(in_rate) == 0 or flt(actual_qty) < 0: 
+			# In case of delivery/stock issue, get average purchase rate
+			# of serial nos of current entry
+			in_rate = flt(sql("""select ifnull(avg(purchase_rate), 0) 
+				from `tabSerial No` where name in (%s)""" % (serial_nos))[0][0])
 
 		if in_rate and val_rate == 0: # First entry
 			val_rate = in_rate
 		# val_rate is same as previous entry if val_rate is negative
 		# Otherwise it will be calculated as per moving average
-		elif opening_qty + actual_qty > 0 and ((opening_qty * val_rate) + (actual_qty * in_rate)) > 0:
-			val_rate = ((opening_qty *val_rate) + (actual_qty * in_rate)) / (opening_qty + actual_qty)
-		stock_val = val_rate
-		return val_rate, stock_val
+		elif opening_qty + actual_qty > 0 and ((opening_qty * val_rate) + \
+				(actual_qty * in_rate)) > 0:
+			val_rate = ((opening_qty *val_rate) + (actual_qty * in_rate)) / \
+				(opening_qty + actual_qty)
+		return val_rate, in_rate
 
-
-
-	# ------------------------------------
-	# get moving average inventory values
-	# ------------------------------------
 	def get_moving_average_inventory_values(self, val_rate, in_rate, opening_qty, actual_qty, is_cancelled):
-		if flt(in_rate) == 0: # In case of delivery/stock issue in_rate = 0 or wrong incoming rate
+		if flt(in_rate) == 0 or flt(actual_qty) < 0: 
+			# In case of delivery/stock issue in_rate = 0 or wrong incoming rate
 			in_rate = val_rate
 
 		# val_rate is same as previous entry if :
@@ -191,18 +186,15 @@ class DocType:
 		# 2. cancelled entry
 		# 3. val_rate is negative
 		# Otherwise it will be calculated as per moving average
-		if actual_qty > 0 and (opening_qty + actual_qty) > 0 and is_cancelled == 'No' and ((opening_qty * val_rate) + (actual_qty * in_rate)) > 0:
+		if actual_qty > 0 and (opening_qty + actual_qty) > 0 and is_cancelled == 'No' \
+				and ((opening_qty * val_rate) + (actual_qty * in_rate)) > 0:
 			opening_qty = opening_qty > 0 and opening_qty or 0
-			val_rate = ((opening_qty *val_rate) + (actual_qty * in_rate)) / (opening_qty + actual_qty)
+			val_rate = ((opening_qty *val_rate) + (actual_qty * in_rate)) / \
+				(opening_qty + actual_qty)
 		elif (opening_qty + actual_qty) <= 0:
 			val_rate = 0
-		stock_val = val_rate
-		return val_rate, stock_val
+		return val_rate, in_rate
 
-
-	# --------------------------
-	# get fifo inventory values
-	# --------------------------
 	def get_fifo_inventory_values(self, in_rate, actual_qty):
 		# add batch to fcfs balance
 		if actual_qty > 0:
@@ -210,49 +202,54 @@ class DocType:
 
 		# remove from fcfs balance
 		else:
+			incoming_cost = 0
 			withdraw = flt(abs(actual_qty))
 			while withdraw:
 				if not self.fcfs_bal:
 					break # nothing in store
 				
 				batch = self.fcfs_bal[0]
-			 
+				
 				if batch[0] <= withdraw:
 					# not enough or exactly same qty in current batch, clear batch
+					incoming_cost += flt(batch[1])*flt(batch[0])
 					withdraw -= batch[0]
 					self.fcfs_bal.pop(0)
+					
+
 				else:
 					# all from current batch
+					incoming_cost += flt(batch[1])*flt(withdraw)
 					batch[0] -= withdraw
 					withdraw = 0
+			
+			in_rate = incoming_cost / flt(abs(actual_qty))
 
 		fcfs_val = sum([flt(d[0])*flt(d[1]) for d in self.fcfs_bal])
 		fcfs_qty = sum([flt(d[0]) for d in self.fcfs_bal])
 		val_rate = fcfs_qty and fcfs_val / fcfs_qty or 0
 		
-		return val_rate
+		return val_rate, in_rate
 
-	# -------------------
-	# get valuation rate
-	# -------------------
 	def get_valuation_rate(self, val_method, serial_nos, val_rate, in_rate, stock_val, cqty, s):
 		if serial_nos:
-			val_rate, stock_val = self.get_serialized_inventory_values(val_rate, in_rate, opening_qty = cqty, actual_qty = s['actual_qty'], is_cancelled = s['is_cancelled'], serial_nos = serial_nos)
+			val_rate, in_rate = self.get_serialized_inventory_values( \
+				val_rate, in_rate, opening_qty = cqty, actual_qty = s['actual_qty'], \
+				is_cancelled = s['is_cancelled'], serial_nos = serial_nos)
 		elif val_method == 'Moving Average':
-			val_rate, stock_val = self.get_moving_average_inventory_values(val_rate, in_rate, opening_qty = cqty, actual_qty = s['actual_qty'], is_cancelled = s['is_cancelled'])
+			val_rate, in_rate = self.get_moving_average_inventory_values( \
+				val_rate, in_rate, opening_qty = cqty, actual_qty = s['actual_qty'], \
+				is_cancelled = s['is_cancelled'])
 		elif val_method == 'FIFO':
-			val_rate = self.get_fifo_inventory_values(in_rate, actual_qty = s['actual_qty'])
-		return val_rate, stock_val
+			val_rate, in_rate = self.get_fifo_inventory_values(in_rate, \
+				actual_qty = s['actual_qty'])
+		return val_rate, in_rate
 
-
-	# ----------------
-	# get stock value
-	# ----------------
-	def get_stock_value(self, val_method, cqty, stock_val, serial_nos):
+	def get_stock_value(self, val_method, cqty, val_rate, serial_nos):
 		if serial_nos:
-			stock_val = flt(stock_val) * flt(cqty)
+			stock_val = flt(val_rate) * flt(cqty)
 		elif val_method == 'Moving Average':
-			stock_val = flt(cqty) > 0 and flt(stock_val) * flt(cqty) or 0
+			stock_val = flt(cqty) > 0 and flt(val_rate) * flt(cqty) or 0
 		elif val_method == 'FIFO':
 			stock_val = sum([flt(d[0])*flt(d[1]) for d in self.fcfs_bal])
 		return stock_val
@@ -296,8 +293,10 @@ class DocType:
 			and timestamp(posting_date, posting_time) > timestamp(%s, %s)
 			order by timestamp(posting_date, posting_time) asc, name asc""", \
 				(self.doc.item_code, self.doc.warehouse, \
-					prev_sle.get('posting_date','1900-01-01'), prev_sle.get('posting_time', '12:00')), as_dict = 1)
-		for sle in sll:		
+					prev_sle.get('posting_date','1900-01-01'), \
+					prev_sle.get('posting_time', '12:00')), as_dict = 1)
+					
+		for sle in sll:
 			# block if stock level goes negative on any date
 			if val_method != 'Moving Average' or flt(allow_negative_stock) == 0:
 				self.validate_negative_stock(cqty, sle)
@@ -305,36 +304,34 @@ class DocType:
 			stock_val, in_rate = 0, sle['incoming_rate'] # IN
 			serial_nos = sle["serial_no"] and ("'"+"', '".join(cstr(sle["serial_no"]).split('\n')) \
 				+ "'") or ''
-
 			# Get valuation rate
-			val_rate, stock_val = self.get_valuation_rate(val_method, serial_nos, \
-				val_rate, in_rate, stock_val, cqty, sle) 
-			
+			val_rate, in_rate = self.get_valuation_rate(val_method, serial_nos, \
+				val_rate, in_rate, stock_val, cqty, sle)		
 			# Qty upto the sle
 			cqty += sle['actual_qty'] 
-
 			# Stock Value upto the sle
-			stock_val = self.get_stock_value(val_method, cqty, stock_val, serial_nos) 
-			
-			# update current sle --> will it be good to update incoming rate in sle 
-			# for outgoing stock entry?????
+			stock_val = self.get_stock_value(val_method, cqty, val_rate, serial_nos) 
+			# update current sle 
 			sql("""update `tabStock Ledger Entry` 
-			set bin_aqat=%s, valuation_rate=%s, fcfs_stack=%s, stock_value=%s 
-			where name=%s""", (cqty, flt(val_rate), cstr(self.fcfs_bal), stock_val, sle['name']))
+				set bin_aqat=%s, valuation_rate=%s, fcfs_stack=%s, stock_value=%s, 
+				incoming_rate = %s where name=%s""", \
+				(cqty, flt(val_rate), cstr(self.fcfs_bal), stock_val, in_rate, sle['name']))
 		
 		# update the bin
 		if sll or not prev_sle:
-			sql("update `tabBin` set valuation_rate=%s, actual_qty=%s, stock_value = %s, projected_qty = (actual_qty + indented_qty + ordered_qty + planned_qty - reserved_qty) where name=%s", \
-				(flt(val_rate), cqty, flt(stock_val), self.doc.name))
-
-
+			sql("""update `tabBin` set valuation_rate=%s, actual_qty=%s, stock_value = %s,
+				projected_qty = (actual_qty + indented_qty + ordered_qty + planned_qty -
+				reserved_qty) where name=%s
+			""", (flt(val_rate), cqty, flt(stock_val), self.doc.name))
 
 	def reorder_item(self,doc_type,doc_name):
 		""" Reorder item if stock reaches reorder level"""
 
 		if get_value('Global Defaults', None, 'auto_indent'):
 			#check if re-order is required
-			ret = sql("select re_order_level, item_name, description, brand, item_group, lead_time_days, min_order_qty, email_notify, re_order_qty from tabItem where name = %s", (self.doc.item_code), as_dict=1)
+			ret = sql("""select re_order_level, item_name, description, brand, item_group,
+			 	lead_time_days, min_order_qty, email_notify, re_order_qty 
+				from tabItem where name = %s""", (self.doc.item_code), as_dict=1)
 			
 			current_qty = sql("""
 				select sum(t1.actual_qty) + sum(t1.indented_qty) + sum(t1.ordered_qty) -sum(t1.reserved_qty)
@@ -349,17 +346,16 @@ class DocType:
 					(flt(ret[0]['re_order_level']) > flt(current_qty[0][0])):
 				self.create_auto_indent(ret[0], doc_type, doc_name, current_qty[0][0])
 
-	
-
 	def create_auto_indent(self, i , doc_type, doc_name, cur_qty):
 		"""	Create indent on reaching reorder level	"""
-
 		indent = Document('Purchase Request')
 		indent.transaction_date = nowdate()
 		indent.naming_series = 'IDT'
 		indent.company = get_defaults()['company']
 		indent.fiscal_year = get_defaults()['fiscal_year']
-		indent.remark = "This is an auto generated Purchase Request. It was raised because the (actual + ordered + indented - reserved) quantity reaches re-order level when %s %s was created"%(doc_type,doc_name)
+		indent.remark = """This is an auto generated Purchase Request. 
+			It was raised because the (actual + ordered + indented - reserved) quantity 
+			reaches re-order level when %s %s was created""" % (doc_type,doc_name)
 		indent.save(1)
 		indent_obj = get_obj('Purchase Request',indent.name,with_children=1)
 		indent_details_child = addchild(indent_obj.doc,'indent_details','Purchase Request Item',0)
@@ -377,27 +373,26 @@ class DocType:
 		indent_obj.validate()
 		set(indent_obj.doc,'docstatus',1)
 		indent_obj.on_submit()
-		msgprint("Item: " + self.doc.item_code + " is to be re-ordered. Purchase Request %s raised. It was generated from %s %s"%(indent.name,doc_type, doc_name ))
+		msgprint("""Item: %s is to be re-ordered. Purchase Request %s raised. 
+			It was generated from %s %s""" % 
+			(self.doc.item_code, indent.name,doc_type, doc_name ))
 		if(i['email_notify']):
 			self.send_email_notification(doc_type,doc_name)
 			
-
-
 	def send_email_notification(self,doc_type,doc_name):
 		""" Notify user about auto creation of indent"""
 		
 		from webnotes.utils.email_lib import sendmail
-		email_list=[d[0] for d in sql("select parent from tabUserRole where role in ('Purchase Manager','Material Manager') and parent not in ('Administrator', 'All', 'Guest')")]
-		msg='A Purchase Request has been raised for item %s: %s on %s '%(doc_type, doc_name, nowdate())
+		email_list=[d[0] for d in sql("""select parent from tabUserRole 
+			where role in ('Purchase Manager','Material Manager') 
+			and parent not in ('Administrator', 'All', 'Guest')""")]
+		msg="""A Purchase Request has been raised 
+			for item %s: %s on %s """ % (doc_type, doc_name, nowdate())
 		sendmail(email_list, subject='Auto Purchase Request Generation Notification', msg = msg)	
-
-
 
 	def validate(self):
 		self.validate_mandatory()
 
-	
-	# set defaults in bin
 	def validate_mandatory(self):
 		qf = ['actual_qty', 'reserved_qty', 'ordered_qty', 'indented_qty']
 		for f in qf:
