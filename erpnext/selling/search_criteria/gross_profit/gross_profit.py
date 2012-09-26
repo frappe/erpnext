@@ -86,6 +86,6 @@ l_row[col_idx['Project Name']] = '<b>TOTALS</b>'
 l_row[col_idx['Amount']] = fmt_money(tot_amount)
 l_row[col_idx['Purchase Cost']] = fmt_money(tot_pur_cost)
 l_row[col_idx['Gross Profit']] = fmt_money(flt(tot_amount) - flt(tot_pur_cost))
-l_row[col_idx['Gross Profit (%)']] = round((flt(tot_amount) - flt(tot_pur_cost))*100/ \
-flt(tot_amount), 2)
+l_row[col_idx['Gross Profit (%)']] = tot_amount and \
+	round((flt(tot_amount) - flt(tot_pur_cost))*100 / flt(tot_amount), 2)
 out.append(l_row)
