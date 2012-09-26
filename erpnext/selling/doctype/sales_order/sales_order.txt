@@ -3,11 +3,11 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-07-11 11:54:24',
-		'docstatus': 0,
-		'modified': '2012-07-16 16:24:26',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
+		u'creation': '2012-09-18 11:20:27',
+		u'docstatus': 0,
+		u'modified': '2012-09-26 13:05:15',
+		u'modified_by': u'Administrator',
+		u'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
@@ -16,13 +16,13 @@
 		'allow_attach': 1,
 		'colour': u'White:FFF',
 		'default_print_format': u'Standard',
-		'doctype': 'DocType',
+		u'doctype': u'DocType',
 		'document_type': u'Transaction',
 		'is_submittable': 1,
 		'is_transaction_doc': 1,
 		'issingle': 0,
 		'module': u'Selling',
-		'name': '__common__',
+		u'name': u'__common__',
 		'read_only_onload': 1,
 		'search_fields': u'status,transaction_date,customer,customer_name, territory,order_type,company',
 		'section_style': u'Tabbed',
@@ -35,8 +35,8 @@
 
 	# These values are common for all DocField
 	{
-		'doctype': u'DocField',
-		'name': '__common__',
+		u'doctype': u'DocField',
+		u'name': u'__common__',
 		'parent': u'Sales Order',
 		'parentfield': u'fields',
 		'parenttype': u'DocType'
@@ -44,24 +44,23 @@
 
 	# These values are common for all DocPerm
 	{
-		'doctype': u'DocPerm',
-		'name': '__common__',
+		u'doctype': u'DocPerm',
+		u'name': u'__common__',
 		'parent': u'Sales Order',
 		'parentfield': u'permissions',
-		'parenttype': u'DocType',
-		'read': 1
+		'parenttype': u'DocType'
 	},
 
 	# DocType, Sales Order
 	{
-		'doctype': 'DocType',
-		'name': u'Sales Order'
+		u'doctype': u'DocType',
+		u'name': u'Sales Order'
 	},
 
 	# DocField
 	{
 		'colour': u'White:FFF',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'basic_info',
 		'fieldtype': u'Section Break',
 		'label': u'Basic Info',
@@ -72,7 +71,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'column_break0',
 		'fieldtype': u'Column Break',
 		'in_filter': 0,
@@ -86,7 +85,7 @@
 	{
 		'colour': u'White:FFF',
 		'description': u'To manage multiple series please go to Setup > Manage Series',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'naming_series',
 		'fieldtype': u'Select',
 		'label': u'Series',
@@ -103,7 +102,7 @@
 	{
 		'colour': u'White:FFF',
 		'description': u'Select Customer',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'customer',
 		'fieldtype': u'Link',
 		'in_filter': 1,
@@ -120,7 +119,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'customer_name',
 		'fieldtype': u'Data',
 		'hidden': 1,
@@ -130,7 +129,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'address_display',
 		'fieldtype': u'Small Text',
 		'hidden': 1,
@@ -140,7 +139,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'contact_display',
 		'fieldtype': u'Small Text',
 		'hidden': 1,
@@ -150,7 +149,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'contact_mobile',
 		'fieldtype': u'Text',
 		'hidden': 1,
@@ -160,7 +159,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'contact_email',
 		'fieldtype': u'Text',
 		'hidden': 1,
@@ -173,7 +172,7 @@
 	{
 		'colour': u'White:FFF',
 		'default': u'Sales',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'order_type',
 		'fieldtype': u'Select',
 		'label': u'Order Type',
@@ -187,7 +186,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'column_break1',
 		'fieldtype': u'Column Break',
 		'oldfieldtype': u'Column Break',
@@ -199,7 +198,7 @@
 	{
 		'default': u'Today',
 		'description': u'The date at which current entry is made in system.',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'transaction_date',
 		'fieldtype': u'Date',
 		'in_filter': 1,
@@ -218,7 +217,7 @@
 	{
 		'colour': u'White:FFF',
 		'depends_on': u"eval:doc.order_type == 'Sales'",
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'delivery_date',
 		'fieldtype': u'Date',
 		'hidden': 0,
@@ -237,7 +236,7 @@
 	{
 		'colour': u'White:FFF',
 		'description': u'Purchase Order sent by customer',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'po_no',
 		'fieldtype': u'Data',
 		'hidden': 0,
@@ -254,7 +253,7 @@
 	{
 		'colour': u'White:FFF',
 		'depends_on': u'eval:doc.po_no',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'po_date',
 		'fieldtype': u'Date',
 		'hidden': 0,
@@ -269,7 +268,8 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		'colour': u'White:FFF',
+		u'doctype': u'DocField',
 		'fieldname': u'shipping_address_name',
 		'fieldtype': u'Data',
 		'hidden': 1,
@@ -282,9 +282,11 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		'colour': u'White:FFF',
+		u'doctype': u'DocField',
 		'fieldname': u'shipping_address',
 		'fieldtype': u'Small Text',
+		'hidden': 1,
 		'in_filter': 0,
 		'label': u'Shipping Address',
 		'permlevel': 1,
@@ -294,7 +296,7 @@
 	# DocField
 	{
 		'colour': u'White:FFF',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'items',
 		'fieldtype': u'Section Break',
 		'label': u'Items',
@@ -306,7 +308,7 @@
 	{
 		'allow_on_submit': 1,
 		'colour': u'White:FFF',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'sales_order_details',
 		'fieldtype': u'Table',
 		'label': u'Sales Order Items',
@@ -319,7 +321,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'section_break0',
 		'fieldtype': u'Section Break',
 		'permlevel': 0
@@ -327,7 +329,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'col_break20',
 		'fieldtype': u'Column Break',
 		'permlevel': 0,
@@ -336,7 +338,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'net_total',
 		'fieldtype': u'Currency',
 		'label': u'Net Total*',
@@ -350,7 +352,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'recalculate_values',
 		'fieldtype': u'Button',
 		'label': u'Re-Calculate Values',
@@ -363,7 +365,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'col_break_21',
 		'fieldtype': u'Column Break',
 		'permlevel': 0,
@@ -374,7 +376,7 @@
 	{
 		'colour': u'White:FFF',
 		'description': u'Quotation no against which this Sales Order is made ',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'quotation_no',
 		'fieldtype': u'Link',
 		'in_filter': 1,
@@ -394,7 +396,7 @@
 	{
 		'colour': u'White:FFF',
 		'depends_on': u'eval:doc.quotation_no',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'quotation_date',
 		'fieldtype': u'Date',
 		'hidden': 1,
@@ -410,7 +412,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'pull_quotation_details',
 		'fieldtype': u'Button',
 		'label': u'Pull Quotation Items',
@@ -422,7 +424,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'sec_break45',
 		'fieldtype': u'Section Break',
 		'label': u'Price List and Currency',
@@ -433,7 +435,7 @@
 	{
 		'colour': u'White:FFF',
 		'description': u'Select the price list as entered in "Price List" master. This will pull the reference rates of items against this price list as specified in "Item" master.',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'price_list_name',
 		'fieldtype': u'Select',
 		'label': u'Price List',
@@ -450,7 +452,7 @@
 	# DocField
 	{
 		'description': u'Select the currency in which price list is maintained',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'price_list_currency',
 		'fieldtype': u'Select',
 		'label': u'Price List Currency',
@@ -464,7 +466,7 @@
 	{
 		'colour': u'White:FFF',
 		'description': u"Rate at which Price list currency is converted to company's base currency",
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'plc_conversion_rate',
 		'fieldtype': u'Float',
 		'label': u'Price List Currency Conversion Rate',
@@ -475,7 +477,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'column_break2',
 		'fieldtype': u'Column Break',
 		'permlevel': 0,
@@ -486,7 +488,7 @@
 	{
 		'colour': u'White:FFF',
 		'description': u"Customer's currency",
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'currency',
 		'fieldtype': u'Select',
 		'label': u'Currency',
@@ -504,7 +506,7 @@
 		'colour': u'White:FFF',
 		'default': u'1.00',
 		'description': u"Rate at which customer's currency is converted to company's base currency",
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'conversion_rate',
 		'fieldtype': u'Float',
 		'label': u'Conversion Rate',
@@ -520,7 +522,7 @@
 	# DocField
 	{
 		'colour': u'White:FFF',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'taxes',
 		'fieldtype': u'Section Break',
 		'label': u'Taxes',
@@ -531,7 +533,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'charge',
 		'fieldtype': u'Link',
 		'label': u'Sales Taxes and Charges',
@@ -544,7 +546,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'get_charges',
 		'fieldtype': u'Button',
 		'label': u'Get Taxes and Charges',
@@ -555,7 +557,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'other_charges',
 		'fieldtype': u'Table',
 		'label': u'Sales Taxes and Charges',
@@ -567,7 +569,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'calculate_charges',
 		'fieldtype': u'Button',
 		'label': u'Calculate Taxes and Charges',
@@ -579,7 +581,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'other_charges_total',
 		'fieldtype': u'Currency',
 		'label': u'Taxes and Charges Total*',
@@ -592,7 +594,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'other_charges_calculation',
 		'fieldtype': u'HTML',
 		'label': u'Taxes and Charges Calculation',
@@ -604,7 +606,7 @@
 	# DocField
 	{
 		'colour': u'White:FFF',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'totals',
 		'fieldtype': u'Section Break',
 		'label': u'Totals',
@@ -615,7 +617,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'grand_total',
 		'fieldtype': u'Currency',
 		'label': u'Grand Total*',
@@ -629,7 +631,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'rounded_total',
 		'fieldtype': u'Currency',
 		'label': u'Rounded Total',
@@ -644,7 +646,7 @@
 	{
 		'colour': u'White:FFF',
 		'description': u'In Words will be visible once you save the Sales Order.',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'in_words',
 		'fieldtype': u'Data',
 		'label': u'In Words',
@@ -657,7 +659,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'column_break3',
 		'fieldtype': u'Column Break',
 		'oldfieldtype': u'Column Break',
@@ -668,7 +670,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'grand_total_export',
 		'fieldtype': u'Currency',
 		'label': u'Grand Total (Export)',
@@ -682,7 +684,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'rounded_total_export',
 		'fieldtype': u'Currency',
 		'label': u'Rounded Total (Export)',
@@ -696,7 +698,7 @@
 	# DocField
 	{
 		'colour': u'White:FFF',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'in_words_export',
 		'fieldtype': u'Data',
 		'label': u'In Words (Export)',
@@ -710,7 +712,7 @@
 	# DocField
 	{
 		'colour': u'White:FFF',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'terms_section_break',
 		'fieldtype': u'Section Break',
 		'label': u'Terms and Conditions',
@@ -721,7 +723,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'tc_name',
 		'fieldtype': u'Link',
 		'label': u'Select Terms and Conditions',
@@ -735,7 +737,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'get_terms',
 		'fieldtype': u'Button',
 		'label': u'Get Terms and Conditions',
@@ -747,7 +749,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'terms_html',
 		'fieldtype': u'HTML',
 		'label': u'Terms and Conditions HTML',
@@ -759,7 +761,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'terms',
 		'fieldtype': u'Text Editor',
 		'label': u'Terms and Conditions Details',
@@ -771,7 +773,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'contact_info',
 		'fieldtype': u'Section Break',
 		'label': u'Contact Info',
@@ -780,7 +782,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'col_break45',
 		'fieldtype': u'Column Break',
 		'permlevel': 0,
@@ -789,7 +791,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'customer_address',
 		'fieldtype': u'Link',
 		'hidden': 0,
@@ -802,7 +804,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'contact_person',
 		'fieldtype': u'Link',
 		'in_filter': 1,
@@ -814,7 +816,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'territory',
 		'fieldtype': u'Link',
 		'in_filter': 1,
@@ -828,7 +830,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'col_break46',
 		'fieldtype': u'Column Break',
 		'permlevel': 0,
@@ -839,7 +841,7 @@
 	{
 		'colour': u'White:FFF',
 		'description': u'Category of customer as entered in Customer master',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'customer_group',
 		'fieldtype': u'Link',
 		'in_filter': 1,
@@ -855,7 +857,7 @@
 	{
 		'colour': u'White:FFF',
 		'description': u'Filling in additional information about the Sales Order will help you analyze your data better.',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'more_info',
 		'fieldtype': u'Section Break',
 		'label': u'More Info',
@@ -866,7 +868,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'column_break4',
 		'fieldtype': u'Column Break',
 		'oldfieldtype': u'Column Break',
@@ -878,7 +880,7 @@
 	# DocField
 	{
 		'allow_on_submit': 1,
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'letter_head',
 		'fieldtype': u'Select',
 		'label': u'Letter Head',
@@ -893,7 +895,7 @@
 	{
 		'allow_on_submit': 1,
 		'colour': u'White:FFF',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'select_print_heading',
 		'fieldtype': u'Link',
 		'label': u'Select Print Heading',
@@ -910,7 +912,7 @@
 	{
 		'colour': u'White:FFF',
 		'depends_on': u"eval:doc.source == 'Campaign'",
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'campaign',
 		'fieldtype': u'Link',
 		'label': u'Campaign',
@@ -923,7 +925,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'amended_from',
 		'fieldtype': u'Data',
 		'hidden': 1,
@@ -940,7 +942,7 @@
 	{
 		'colour': u'White:FFF',
 		'description': u'The date at which current entry is corrected in the system.',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'amendment_date',
 		'fieldtype': u'Date',
 		'hidden': 1,
@@ -957,7 +959,7 @@
 	{
 		'colour': u'White:FFF',
 		'description': u'Select the relevant company name if you have multiple companies.',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'company',
 		'fieldtype': u'Link',
 		'in_filter': 1,
@@ -975,7 +977,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'fiscal_year',
 		'fieldtype': u'Select',
 		'in_filter': 1,
@@ -994,7 +996,7 @@
 	{
 		'colour': u'White:FFF',
 		'depends_on': u'eval:!doc.__islocal',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'cancel_reason',
 		'fieldtype': u'Data',
 		'label': u'Cancel Reason',
@@ -1008,7 +1010,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'column_break5',
 		'fieldtype': u'Column Break',
 		'oldfieldtype': u'Column Break',
@@ -1020,7 +1022,7 @@
 	# DocField
 	{
 		'colour': u'White:FFF',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'source',
 		'fieldtype': u'Select',
 		'label': u'Source',
@@ -1035,7 +1037,7 @@
 	{
 		'colour': u'White:FFF',
 		'description': u'Track this Sales Order against any Project',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'project_name',
 		'fieldtype': u'Link',
 		'in_filter': 1,
@@ -1051,7 +1053,7 @@
 	# DocField
 	{
 		'default': u'Draft',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'status',
 		'fieldtype': u'Select',
 		'in_filter': 1,
@@ -1072,7 +1074,7 @@
 		'colour': u'White:FFF',
 		'depends_on': u'eval:!doc.__islocal',
 		'description': u'% of materials delivered against this Sales Order',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'per_delivered',
 		'fieldtype': u'Currency',
 		'in_filter': 1,
@@ -1090,7 +1092,7 @@
 		'colour': u'White:FFF',
 		'depends_on': u'eval:!doc.__islocal',
 		'description': u'% of materials billed against this Sales Order',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'per_billed',
 		'fieldtype': u'Currency',
 		'in_filter': 1,
@@ -1105,7 +1107,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'delivery_status',
 		'fieldtype': u'Select',
 		'hidden': 1,
@@ -1119,7 +1121,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'billing_status',
 		'fieldtype': u'Select',
 		'hidden': 1,
@@ -1135,7 +1137,7 @@
 	{
 		'colour': u'White:FFF',
 		'description': u'Display all the individual items delivered with the main items',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'packing_list',
 		'fieldtype': u'Section Break',
 		'hidden': 0,
@@ -1148,7 +1150,7 @@
 	# DocField
 	{
 		'colour': u'White:FFF',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'packing_details',
 		'fieldtype': u'Table',
 		'label': u'Packing Details',
@@ -1161,7 +1163,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'sales_team_section_break',
 		'fieldtype': u'Section Break',
 		'label': u'Sales Team',
@@ -1172,7 +1174,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'column_break6',
 		'fieldtype': u'Column Break',
 		'permlevel': 0,
@@ -1184,7 +1186,7 @@
 	{
 		'colour': u'White:FFF',
 		'description': u'Name as entered in Sales Partner master',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'sales_partner',
 		'fieldtype': u'Link',
 		'in_filter': 1,
@@ -1201,7 +1203,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'column_break7',
 		'fieldtype': u'Column Break',
 		'permlevel': 0,
@@ -1211,7 +1213,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'commission_rate',
 		'fieldtype': u'Currency',
 		'label': u'Commission Rate',
@@ -1225,7 +1227,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'total_commission',
 		'fieldtype': u'Currency',
 		'label': u'Total Commission',
@@ -1238,7 +1240,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'section_break1',
 		'fieldtype': u'Section Break',
 		'options': u'Simple',
@@ -1248,7 +1250,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'sales_team',
 		'fieldtype': u'Table',
 		'label': u'Sales Team1',
@@ -1261,7 +1263,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'file_list',
 		'fieldtype': u'Text',
 		'hidden': 1,
@@ -1273,11 +1275,19 @@
 
 	# DocPerm
 	{
+		u'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Production Manager'
+	},
+
+	# DocPerm
+	{
 		'amend': 0,
 		'cancel': 0,
 		'create': 0,
-		'doctype': u'DocPerm',
+		u'doctype': u'DocPerm',
 		'permlevel': 1,
+		'read': 1,
 		'role': u'Sales Manager',
 		'submit': 0,
 		'write': 0
@@ -1288,8 +1298,9 @@
 		'amend': 1,
 		'cancel': 1,
 		'create': 1,
-		'doctype': u'DocPerm',
+		u'doctype': u'DocPerm',
 		'permlevel': 0,
+		'read': 1,
 		'role': u'Sales Manager',
 		'submit': 1,
 		'write': 1
@@ -1300,8 +1311,9 @@
 		'amend': 1,
 		'cancel': 1,
 		'create': 1,
-		'doctype': u'DocPerm',
+		u'doctype': u'DocPerm',
 		'permlevel': 0,
+		'read': 1,
 		'role': u'Sales User',
 		'submit': 1,
 		'write': 1
@@ -1312,8 +1324,9 @@
 		'amend': 0,
 		'cancel': 0,
 		'create': 0,
-		'doctype': u'DocPerm',
+		u'doctype': u'DocPerm',
 		'permlevel': 1,
+		'read': 1,
 		'role': u'Sales User',
 		'submit': 0,
 		'write': 0
@@ -1321,16 +1334,18 @@
 
 	# DocPerm
 	{
-		'doctype': u'DocPerm',
+		u'doctype': u'DocPerm',
 		'match': u'customer_name',
 		'permlevel': 0,
+		'read': 1,
 		'role': u'Customer'
 	},
 
 	# DocPerm
 	{
-		'doctype': u'DocPerm',
+		u'doctype': u'DocPerm',
 		'permlevel': 2,
+		'read': 1,
 		'role': u'Accounts User',
 		'write': 1
 	},
@@ -1340,8 +1355,9 @@
 		'amend': 1,
 		'cancel': 1,
 		'create': 1,
-		'doctype': u'DocPerm',
+		u'doctype': u'DocPerm',
 		'permlevel': 0,
+		'read': 1,
 		'role': u'Maintenance Manager',
 		'submit': 1,
 		'write': 1
@@ -1349,8 +1365,9 @@
 
 	# DocPerm
 	{
-		'doctype': u'DocPerm',
+		u'doctype': u'DocPerm',
 		'permlevel': 1,
+		'read': 1,
 		'role': u'Maintenance Manager'
 	},
 
@@ -1359,8 +1376,9 @@
 		'amend': 1,
 		'cancel': 1,
 		'create': 1,
-		'doctype': u'DocPerm',
+		u'doctype': u'DocPerm',
 		'permlevel': 0,
+		'read': 1,
 		'role': u'Maintenance User',
 		'submit': 1,
 		'write': 1
@@ -1368,8 +1386,9 @@
 
 	# DocPerm
 	{
-		'doctype': u'DocPerm',
+		u'doctype': u'DocPerm',
 		'permlevel': 1,
+		'read': 1,
 		'role': u'Maintenance User'
 	}
 ]
