@@ -7,7 +7,7 @@
 		"app/startup/startup.css"
 	],
 	"public/js/all-web.js": [
-		"erpnext/startup/startup.js",
+		"app/startup/startup.js",
 		"app/public/js/conf.js"
 	],
 	"public/js/all-app.js": [
