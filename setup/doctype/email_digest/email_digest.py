@@ -258,7 +258,7 @@ class DocType:
 		
 	def get_html(self, label, currency, value, style=None):
 		"""get html output"""
-		return """<p style="padding: 5px; %(style)s">
+		return """<p style="%(style)s">
 			<span>%(label)s</span>: 
 			<span style="font-weight: bold; font-size: 110%%">
 				<span style="color: grey">%(currency)s</span>%(value)s
@@ -293,7 +293,8 @@ class DocType:
 		if not hasattr(self, "accounts"):
 			self.accounts = webnotes.conn.sql("""select name, is_pl_account,
 				debit_or_credit, account_type, account_name, master_type
-				from `tabAccount` where company=%s and docstatus < 2""",
+				from `tabAccount` where company=%s and docstatus < 2
+				order by lft""",
 				(self.doc.company,), as_dict=1)
 		return self.accounts
 		
