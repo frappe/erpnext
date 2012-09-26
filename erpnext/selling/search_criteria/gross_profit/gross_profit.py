@@ -71,7 +71,8 @@ for r in res:
 	r.append(purchase_cost)
 	
 	gp = flt(r[col_idx['Amount']]) - flt(purchase_cost)
-	gp_percent = purchase_cost and round((gp*100/flt(r[col_idx['Amount']])), 2) or 0
+	gp_percent = r[col_idx['Amount']] and purchase_cost and \
+	 	round((gp*100/flt(r[col_idx['Amount']])), 2) or 0
 	r.append(fmt_money(gp))
 	r.append(fmt_money(gp_percent))
 	out.append(r)
