@@ -76,11 +76,10 @@ def import_multiple(common_values, data):
 				"against_journal_voucher:against_jv"], d, detail.fields)
 	
 	webnotes.conn.commit()
-	
 	for i in xrange(len(data)):
 		d = data[i]
 		jv = webnotes.DictObj()
-		webnotes.message_log = []
+
 		try:
 			d.posting_date = user_to_str(d.posting_date)
 			d.due_date = user_to_str(d.due_date)
@@ -123,7 +122,7 @@ def import_multiple(common_values, data):
 
 		webnotes.message_log = []
 			
-		return messages
+	return messages
 
 def get_common_values(rows):
 	start = False
@@ -155,7 +154,6 @@ def get_data(rows):
 			if r[0]=="--------Data----------":
 				start_row = i+2
 				columns = [c.replace(" ", "_").lower() for c in rows[i+1]]
-		
 	return data
 	
 @webnotes.whitelist()
