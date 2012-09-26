@@ -95,7 +95,7 @@ $.extend(wn.pages.users, {
 		if(data.file_list) {
 			data.imgsrc = 'files/' + data.file_list.split('\n')[0].split(',')[1];
 		} else {
-			data.imgsrc = 'images/lib/ui/no_img_' + (data.gender=='Female' ? 'f' : 'm') + '.gif';
+			data.imgsrc = 'lib/images/ui/no_img_' + (data.gender=='Female' ? 'f' : 'm') + '.gif';
 		}
 		data.fullname = wn.user_info(data.name).fullname;
 		data.delete_html = '';
