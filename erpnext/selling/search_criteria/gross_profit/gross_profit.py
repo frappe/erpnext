@@ -54,9 +54,13 @@ def get_purchase_cost(dn, item, wh, qty):
 	from webnotes.utils import flt
 	global sle
  	purchase_cost = 0
+	packing_items = sql("select item_code, qty from `tabSales BOM Item` where parent = %s", item)
+	if packing_items:
+		packing_items = [[t[0], flt(t[1])*qty] for t in packing_items]
+	else:
+		packing_items = [[item, qty]]
 	for d in sle:
-		if d['voucher_no'] == dn and d['item_code'] == item \
-				and d['warehouse'] == wh and abs(d['actual_qty']) == qty:
+		if d['voucher_no'] == dn and [d['item_code'], flt(abs(d['actual_qty']))] in packing_items:
 			purchase_cost += flt(d['incoming_rate'])*flt(abs(d['actual_qty']))
 	return purchase_cost
 			
@@ -67,7 +71,8 @@ for r in res:
 	r.append(purchase_cost)
 	
 	gp = flt(r[col_idx['Amount']]) - flt(purchase_cost)
-	gp_percent = purchase_cost and round((gp*100/purchase_cost), 2) or 0
+	gp_percent = r[col_idx['Amount']] and purchase_cost and \
+	 	round((gp*100/flt(r[col_idx['Amount']])), 2) or 0
 	r.append(fmt_money(gp))
 	r.append(fmt_money(gp_percent))
 	out.append(r)
@@ -81,6 +86,6 @@ l_row[col_idx['Project Name']] = '<b>TOTALS</b>'
 l_row[col_idx['Amount']] = fmt_money(tot_amount)
 l_row[col_idx['Purchase Cost']] = fmt_money(tot_pur_cost)
 l_row[col_idx['Gross Profit']] = fmt_money(flt(tot_amount) - flt(tot_pur_cost))
-l_row[col_idx['Gross Profit (%)']] = round((flt(tot_amount) - flt(tot_pur_cost))*100/ \
-flt(tot_pur_cost), 2)
+l_row[col_idx['Gross Profit (%)']] = tot_amount and \
+	round((flt(tot_amount) - flt(tot_pur_cost))*100 / flt(tot_amount), 2)
 out.append(l_row)
