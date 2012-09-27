@@ -45,7 +45,7 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 	cur_frm.cscript.make_communication_body();
 }
 
-cur_frm.cscript.refresh_custom_buttons = function() {
+cur_frm.cscript.refresh_custom_buttons = function(doc) {
 	cur_frm.clear_custom_buttons();
 	if(!doc.__islocal && !in_list(['Converted', 'Lead Lost'], doc.status)) {
 		if (doc.source != 'Existing Customer') {
@@ -61,7 +61,7 @@ cur_frm.cscript.refresh_custom_buttons = function() {
 cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	// custom buttons
 	//---------------
-	cur_frm.cscript.refresh_custom_buttons();
+	cur_frm.cscript.refresh_custom_buttons(doc);
 	
 	erpnext.hide_naming_series();
 	
