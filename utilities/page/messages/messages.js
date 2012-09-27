@@ -129,16 +129,20 @@ erpnext.Messages = Class.extend({
 				if(data.owner==user) {
 					data.cls = 'message-self';
 					data.comment_by_fullname = 'You';	
-					data.delete_html = repl('<a class="close" \
-						onclick="erpnext.messages.delete(this)"\
-						data-name="%(name)s">&times;</a>', data);
 				} else {
 					data.cls = 'message-other';
-					data.delete_html = '';
 					if(this.contact==user) {
 						data.reply_html = repl('<a href="#!messages/%(owner)s">\
 							<i class="icon-share-alt"></i> Reply</a>', data)
 					}
+				}
+
+				// delete
+				data.delete_html = "";
+				if(data.owner==user || data.comment.indexOf("assigned to")!=-1) {
+					data.delete_html = repl('<a class="close" \
+						onclick="erpnext.messages.delete(this)"\
+						data-name="%(name)s">&times;</a>', data);
 				}
 
 				wrapper.innerHTML = repl('<div class="message %(cls)s">%(delete_html)s\
