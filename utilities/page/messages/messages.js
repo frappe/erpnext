@@ -170,14 +170,16 @@ erpnext.Messages = Class.extend({
 				$("<h4>Users</h4><hr>").appendTo($body);
 				for(var i in r.message) {
 					var p = r.message[i];
-					p.fullname = wn.user_info(p.name).fullname;
-					p.name = p.name.replace('@', '__at__');
-					p.label_status = p.has_sessions ? "label-success" : "";
-					p.status = p.has_sessions ? "Online" : "Offline";
-					$(repl('<p><span class="label %(label_status)s">%(status)s</span>\
-						<a href="#!messages/%(name)s">%(fullname)s</a>\
-						</p>', p))
-						.appendTo($body);
+					if(p.name != user) {
+						p.fullname = wn.user_info(p.name).fullname;
+						p.name = p.name.replace('@', '__at__');
+						p.label_status = p.has_session ? "label-success" : "";
+						p.status = p.has_session ? "Online" : "Offline";
+						$(repl('<p><span class="label %(label_status)s">%(status)s</span>\
+							<a href="#!messages/%(name)s">%(fullname)s</a>\
+							</p>', p))
+							.appendTo($body);						
+					}
 				}
 			}
 		});
