@@ -1,4 +1,4 @@
-select
+SELECT
     `tabCustomer`.name,
     `tabCustomer`.customer_name,
     `tabAddress`.address_line1,
@@ -12,7 +12,7 @@ select
     `tabContact`.phone,
     `tabContact`.mobile_no,
     `tabContact`.email_id
-from
+FROM
     `tabCustomer`
     left join `tabAddress` on (
         `tabAddress`.customer=`tabCustomer`.name and
@@ -22,5 +22,7 @@ from
         `tabContact`.customer=`tabCustomer`.name and 
         ifnull(`tabContact`.is_primary_contact, 0)=1
     )
-order by
+WHERE
+	`tabCustomer`.docstatus<2
+ORDER BY
     `tabCustomer`.customer_name asc
