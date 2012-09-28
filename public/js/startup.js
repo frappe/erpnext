@@ -59,7 +59,7 @@ erpnext.startup.start = function() {
 			erpnext.set_user_background(wn.boot.user_background);
 		}
 		if(wn.boot.profile.defaults.theme) {
-			erpnext.set_theme(wn.boot.profile.defaults.theme[0].toLowerCase());
+			erpnext.set_theme(wn.boot.profile.defaults.theme[0]);
 		}
 
 		// always allow apps
@@ -213,35 +213,45 @@ Mousetrap.bind(["command+s", "ctrl+s"], function() {
 // theme setter
 
 erpnext.themes = {
-	metal: {
+	"Default": {
 		sidebar: "#f2f2f2",
 		titlebar: "#dfdfdf",
 		toolbar: "#e9e9e9"
 	},
-	desert: {
+	Desert: {
 		sidebar: "#FFFDF7",
 		titlebar: "#DAD4C2",
 		toolbar: "#FAF6E9"
 	},
-	tropic: {
+	Tropic: {
 		sidebar: "#FAFFF7",
 		toolbar: "#EEFAE9",
 		titlebar: "#D7ECD1"
 	},
-	sky: {
+	Sky: {
 		sidebar: "#F7FFFE",
 		toolbar: "#E9F9FA",
 		titlebar: "#D7F5F7"
 	},
-	snow: {
+	Snow: {
 		sidebar: "#fff",
 		titlebar: "#fff",
 		toolbar: "#fff"
 	},
-	sun: {
+	Sunny: {
 		sidebar: "#FFFFEF",
-		titlebar: "lightYellow",
-		toolbar: "#FFFDCA"		
+		titlebar: "#FFFDCA",
+		toolbar: "lightYellow"		
+	},
+	Floral: {
+		sidebar: "#FFF7F7",
+		titlebar: "#F7CBCB",
+		toolbar: "#FAE9EA"		
+	},
+	Ocean: {
+		sidebar: "#F2FFFE",
+		titlebar: "#8ACFC7",
+		toolbar: "#C3F3EE"
 	}
 }
 

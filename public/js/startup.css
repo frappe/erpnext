@@ -62,3 +62,25 @@ span, div, td, input, textarea, button, select {
 	margin-top: 5px;
 	font-size: 11px;
 }
+
+.small-module-icons-accounts{ background-position: 0 0; width: 14px; height: 17px; margin-top: -2px; margin-bottom: -2px; } 
+.small-module-icons-selling{ background-position: 0 -67px; width: 14px; height: 17px; margin-top: -2px; margin-bottom: -2px; } 
+.small-module-icons-calendar{ background-position: 0 -134px; width: 15px; height: 17px; margin-top: -2px; margin-bottom: -2px; } 
+.small-module-icons-dashboard{ background-position: 0 -201px; width: 17px; height: 12px; } 
+.small-module-icons-feed{ background-position: 0 -263px; width: 14px; height: 17px; margin-top: -2px; margin-bottom: -2px; } 
+.small-module-icons-hr{ background-position: 0 -330px; width: 17px; height: 14px; margin-top: -1px; } 
+.small-module-icons-kb{ background-position: 0 -394px; width: 10px; height: 17px; margin-top: -2px; margin-bottom: -2px; } 
+.small-module-icons-messages{ background-position: 0 -461px; width: 17px; height: 11px; } 
+.small-module-icons-production{ background-position: 0 -522px; width: 17px; height: 14px; margin-top: -1px; } 
+.small-module-icons-projects{ background-position: 0 -586px; width: 17px; height: 10px; } 
+.small-module-icons-buying{ background-position: 0 -646px; width: 17px; height: 17px; margin-top: -2px; margin-bottom: -2px; } 
+.small-module-icons-setup{ background-position: 0 -713px; width: 16px; height: 17px; margin-top: -2px; margin-bottom: -2px; } 
+.small-module-icons-stock{ background-position: 0 -780px; width: 14px; height: 17px; margin-top: -2px; margin-bottom: -2px; } 
+.small-module-icons-support{ background-position: 0 -847px; width: 17px; height: 17px; margin-top: -2px; margin-bottom: -2px; } 
+.small-module-icons-todo{ background-position: 0 -914px; width: 17px; height: 15px; margin-top: -1px; margin-bottom: -1px; } 
+.small-module-icons-website{ background-position: 0 -979px; width: 17px; height: 17px; margin-top: -2px; margin-bottom: -2px; } 
+
+.small-module-icons { 
+	background-image: url("../app/images/module-icons-small.png"); 
+	display: inline-block;
+}
