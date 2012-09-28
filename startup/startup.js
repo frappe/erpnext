@@ -206,8 +206,3 @@ Mousetrap.bind(["command+s", "ctrl+s"], function() {
 		cur_frm.save();
 	return false;
 });
-
-Mousetrap.bind(["command+n", "ctrl+n"], function() {
-	wn.ui.toolbar.new_dialog.show();
-	return false;
-});
