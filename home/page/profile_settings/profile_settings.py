@@ -110,3 +110,7 @@ def set_user_background():
 	webnotes.conn.set_value('Profile', user, 'background_image', fid)
 	
 	return fid
+
+@webnotes.whitelist()	
+def set_user_theme():
+	webnotes.conn.set_default("theme", webnotes.form_dict.theme, webnotes.session.user)

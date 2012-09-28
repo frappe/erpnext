@@ -1,20 +1,20 @@
 {
 	"public/css/all-web.css": [
-		"app/startup/startup.css",
+		"app/public/js/startup.css",
 		"app/website/css/website.css"	
 	],
 	"public/css/all-app.css": [
-		"app/startup/startup.css"
+		"app/public/js/startup.css"
 	],
 	"public/js/all-web.js": [
-		"app/startup/startup.js",
+		"app/public/js/startup.js",
 		"app/public/js/conf.js"
 	],
 	"public/js/all-app.js": [
-		"app/startup/startup.js",
-		"app/startup/js/modules.js",
-		"app/startup/js/toolbar.js",
-		"app/startup/js/feature_setup.js",
+		"app/public/js/startup.js",
+		"app/public/js/modules.js",
+		"app/public/js/toolbar.js",
+		"app/public/js/feature_setup.js",
 		"app/public/js/conf.js"
 	],
 }

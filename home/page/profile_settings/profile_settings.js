@@ -27,7 +27,18 @@ MyProfile = function(wrapper) {
 		this.wrapper.appframe = new wn.ui.AppFrame($(this.wrapper).find('.layout-appframe'), 'Profile Settings');
 		this.wrapper.appframe.add_button('Change Password', this.change_password);
 		this.wrapper.appframe.add_button('Change Background', this.change_background);
-		
+		this.wrapper.appframe.add_label("Set Theme:");
+		this.wrapper.appframe.add_select("Theme", 
+			["Default", "Desert", "Sky", "Tropic", "Snow", "Sun"]).change(function() {
+				erpnext.set_theme($(this).val().toLowerCase());
+			}).change(function() {
+				wn.call({
+					module: "home",
+					page: "profile_settings",
+					method: "set_user_theme",
+					args: {theme: $(this).val() }
+				})
+			});
 		this.tab = make_table($a($(this.wrapper).find('.layout-main').get(0), 'div', '', {marginTop:'19px'}), 
 			1, 2, '90%', ['50%', '50%'], {padding:'11px'})
 		this.img = $a($td(this.tab, 0, 0), 'img', '', {width: '120px', maxHeight:'200px'});
