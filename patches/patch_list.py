@@ -600,4 +600,8 @@ patch_list = [
 		'patch_module': 'patches.september_2012',
 		'patch_file': 'reload_gross_profit',
 	},
+	{
+		'patch_module': 'patches.september_2012',
+		'patch_file': 'rebuild_trees',
+	},
 ]
