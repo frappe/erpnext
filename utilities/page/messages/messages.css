@@ -1,17 +1,12 @@
 #message-post-text {
-	width: 50%;
 }
 
-#message-list {
-	
+#message-list {	
 }
 
 .message {
-	border-radius: 5px;
-	max-width: 60%;
-	min-width: 40%;
 	padding: 7px;
-	margin-bottom: 7px;
+	border-bottom: 1px solid #ccc;
 }
 
 .message .help {
@@ -22,14 +17,8 @@
 }
 
 .message-other {
-	background-color: #EBFF9C;
-	border: 1px solid #C3CF78;
-	float: right;
-	text-align: right;
 }
 
 .message-self {
 	background-color: #eee;
-	border: 1px solid #ccc;
-	float: left;	
 }

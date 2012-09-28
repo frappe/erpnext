@@ -28,13 +28,19 @@ erpnext.module_page.setup_page = function(module, wrapper) {
 // not have read permissions
 
 erpnext.module_page.hide_links = function(wrapper) {
+	function replace_link(link) {
+		var txt = $(link).text();
+		$(link).parent().css('color', '#999');
+		$(link).replaceWith('<span title="No read permission">'
+			+txt+'</span>');
+	}
+	
 	// lists
 	$(wrapper).find('[href*="List/"]').each(function() {
 		var href = $(this).attr('href');
 		var dt = href.split('/')[1];
 		if(wn.boot.profile.all_read.indexOf(get_label_doctype(dt))==-1) {
-			var txt = $(this).text();
-			$(this).parent().css('color', '#999').html(txt);
+			replace_link(this);
 		}
 	});
 	
@@ -42,8 +48,7 @@ erpnext.module_page.hide_links = function(wrapper) {
 	$(wrapper).find('[data-doctype]').each(function() {
 		var dt = $(this).attr('data-doctype');
 		if(wn.boot.profile.all_read.indexOf(dt)==-1) {
-			var txt = $(this).text();
-			$(this).parent().css('color', '#999').html(txt);
+			replace_link(this);
 		}
 	});
 	
@@ -52,8 +57,7 @@ erpnext.module_page.hide_links = function(wrapper) {
 		var href = $(this).attr('href');
 		var dt = href.split('/')[1];
 		if(wn.boot.profile.all_read.indexOf(get_label_doctype(dt))==-1) {
-			var txt = $(this).text();
-			$(this).parent().css('color', '#999').html(txt);
+			replace_link(this);
 		}
 	});
 	
@@ -62,7 +66,9 @@ erpnext.module_page.hide_links = function(wrapper) {
 		if(!has_common(user_roles, [$(this).attr("data-role"), "System Manager"])) {
 			var html = $(this).html();
 			$(this).parent().css('color', '#999');
-			$(this).replaceWith(html);
+			$(this).replaceWith('<span title="Only accessible by Roles: '+
+				$(this).attr("data-role") 
+				+' and System Manager">'+html+'</span>');
 		}
 	});
 }

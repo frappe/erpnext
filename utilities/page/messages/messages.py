@@ -48,7 +48,10 @@ def get_list(arg=None):
 
 @webnotes.whitelist()
 def get_active_users(arg=None):
-	return webnotes.conn.sql("""select name from tabProfile 
+	return webnotes.conn.sql("""select name,
+		(select count(*) from tabSessions where user=tabProfile.name
+			and timediff(now(), lastupdate) < time("01:00:00")) as has_session
+	 	from tabProfile 
 		where ifnull(enabled,0)=1 and
 		docstatus < 2 and 
 		name not in ('Administrator', 'Guest') 

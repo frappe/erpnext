@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		u'creation': '2012-07-18 20:34:41',
+		u'creation': '2012-09-21 09:56:34',
 		u'docstatus': 0,
-		u'modified': '2012-09-17 11:31:55',
+		u'modified': '2012-09-28 12:31:42',
 		u'modified_by': u'Administrator',
 		u'owner': u'Administrator'
 	},
@@ -454,23 +454,13 @@
 	# DocPerm
 	{
 		'amend': 0,
-		'cancel': 1,
-		'create': 1,
+		'cancel': 0,
+		'create': 0,
 		u'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Sales Master Manager',
+		'permlevel': 1,
+		'role': u'Sales Manager',
 		'submit': 0,
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'cancel': 1,
-		'create': 1,
-		u'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Accounts Manager',
-		'write': 1
+		'write': 0
 	},
 
 	# DocPerm
@@ -491,7 +481,7 @@
 		'cancel': 0,
 		'create': 0,
 		u'doctype': u'DocPerm',
-		'permlevel': 0,
+		'permlevel': 1,
 		'role': u'Sales User',
 		'submit': 0,
 		'write': 0
@@ -503,14 +493,40 @@
 		'cancel': 0,
 		'create': 0,
 		u'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'All',
+		'permlevel': 0,
+		'role': u'Sales User',
 		'submit': 0,
 		'write': 0
 	},
 
 	# DocPerm
 	{
+		'amend': 0,
+		'cancel': 1,
+		'create': 1,
+		u'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Sales Master Manager',
+		'submit': 0,
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
+		u'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Sales Master Manager',
+		'submit': 0,
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'cancel': 0,
+		'create': 0,
 		u'doctype': u'DocPerm',
 		'permlevel': 2,
 		'role': u'Accounts Manager',
@@ -519,6 +535,8 @@
 
 	# DocPerm
 	{
+		'cancel': 0,
+		'create': 0,
 		u'doctype': u'DocPerm',
 		'permlevel': 2,
 		'role': u'System Manager',
@@ -527,8 +545,31 @@
 
 	# DocPerm
 	{
+		'cancel': 0,
+		'create': 0,
 		u'doctype': u'DocPerm',
 		'permlevel': 2,
-		'role': u'All'
+		'role': u'All',
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'cancel': 1,
+		'create': 1,
+		u'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Accounts Manager',
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'cancel': 0,
+		'create': 0,
+		u'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'All',
+		'write': 0
 	}
 ]

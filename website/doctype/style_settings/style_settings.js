@@ -14,9 +14,9 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-wn.require('lib/js/lib/jscolor/jscolor.js');
 
 cur_frm.cscript.onload_post_render = function() {
+	wn.require('lib/public/js/lib/jscolor/jscolor.js');
 	cur_frm.fields_dict.background_color.input.className = 'color';
 	jscolor.bind();
 }

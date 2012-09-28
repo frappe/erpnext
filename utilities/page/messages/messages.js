@@ -17,71 +17,87 @@
 wn.provide('erpnext.messages');
 
 wn.pages.messages.onload = function(wrapper) {
-	erpnext.messages.show_active_users();
-	erpnext.messages.make_list();
-	erpnext.update_messages('reset'); //Resets notification icons
-	
-	// post message
-	$('#message-post').click(function() {
-		var txt = $('#message-post-text').val();
-		if(txt) {
-			wn.call({
-				module:'utilities',
-				page:'messages',
-				method:'post',
-				args: {
-					txt: txt,
-					contact: erpnext.messages.contact
-				},
-				callback:function(r,rt) {
-					$('#message-post-text').val('')
-					erpnext.messages.list.run();
-				},
-				btn: this
-			});
-		}
+	wn.ui.make_app_page({
+		parent: wrapper,
+		title: "Messages"
 	});
 	
-	// enable, disable button
-	$('#message-post-text').keyup(function(e) {
-		if($(this).val()) {
-			$('#message-post').attr('disabled', false);
-		} else {
-			$('#message-post').attr('disabled', true);
-		}
-		
-		if(e.which==13) {
-			$('#message-post').click();
-		}
-	})
+	$('<h3 id="message-title">Everyone</h3>\
+	<div id="show-everyone" style="display: none;">\
+		<a href="#messages" style="font-size: 80%;">\
+			Show messages from everyone</a></div><hr>\
+	<div id="post-message" style="display: none">\
+	<textarea style="width: 100%; height: 24px;"></textarea>\
+	<div><button class="btn btn-small">Post</button></div><hr>\
+	</div>\
+	<div class="all-messages"></div>').appendTo($(wrapper).find('.layout-main-section'));
+	
+	erpnext.messages = new erpnext.Messages(wrapper);
 }
 
 $(wn.pages.messages).bind('show', function() {
 	erpnext.messages.show();
-	setTimeout(erpnext.messages.refresh, 7000);
-	$('#message-post-text').focus();
+	setTimeout("erpnext.messages.refresh()", 7000);
 })
 
-erpnext.messages = {
+erpnext.Messages = Class.extend({
+	init: function(wrapper) {
+		this.wrapper = wrapper;
+		this.show_active_users();
+		this.make_post_message();
+		this.make_list();
+		//this.update_messages('reset'); //Resets notification icons		
+	},
+	make_post_message: function() {
+		var me = this;
+		$('#post-message textarea').keydown(function(e) {
+			if(e.which==13) {
+				$('#post-message .btn').click();
+				return false;
+			}
+		});
+		
+		$('#post-message .btn').click(function() {
+			var txt = $('#post-message textarea').val();
+			if(txt) {
+				wn.call({
+					module:'utilities',
+					page:'messages',
+					method:'post',
+					args: {
+						txt: txt,
+						contact: me.contact
+					},
+					callback:function(r,rt) {
+						$('#post-message textarea').val('')
+						me.list.run();
+					},
+					btn: this
+				});
+			}			
+		});
+	},
 	show: function() {
-		var contact = erpnext.messages.get_contact();
+		var contact = this.get_contact();
 
+		$('#message-title').text(contact==user ? "Everyone" :
+			wn.boot.user_info[contact].fullname)
+
+		$("#show-everyone").toggle(contact!=user);
+		
 		// can't send message to self
-		$(wn.pages.messages).find('.well').toggle(contact==user ? false : true);
+		$('#post-message').toggle(contact!=user);
 
-		$(wn.pages.messages).find('h1:first').html('Messages: ' 
-			+ (user==contact ? 'From everyone' : wn.user_info(contact).fullname));
-
-		erpnext.messages.contact = contact;
-		erpnext.messages.list.opts.args.contact = contact;
-		erpnext.messages.list.run();
+		this.contact = contact;
+		this.list.opts.args.contact = contact;
+		this.list.run();
 		
 	},
 	// check for updates every 5 seconds if page is active
 	refresh: function() {
-		setTimeout(erpnext.messages.refresh, 7000);
+		setTimeout("erpnext.messages.refresh()", 7000);
 		if(wn.container.page.label != 'Messages') return;
-		erpnext.messages.show();
+		this.show();
 	},
 	get_contact: function() {
 		var route = location.hash;
@@ -95,12 +111,14 @@ erpnext.messages = {
 		return user;	
 	},
 	make_list: function() {
-		erpnext.messages.list = new wn.ui.Listing({
-			parent: $('#message-list').get(0),
+		this.list = new wn.ui.Listing({
+			parent: $(this.wrapper).find('.all-messages'),
 			method: 'utilities.page.messages.messages.get_list',
 			args: {
 				contact: null
 			},
+			hide_refresh: true,
+			no_loading: true,
 			render_row: function(wrapper, data) {
 				$(wrapper).removeClass('list-row');
 				
@@ -111,16 +129,20 @@ erpnext.messages = {
 				if(data.owner==user) {
 					data.cls = 'message-self';
 					data.comment_by_fullname = 'You';	
-					data.delete_html = repl('<a class="close" \
-						onclick="erpnext.messages.delete(this)"\
-						data-name="%(name)s">&times;</a>', data);
 				} else {
 					data.cls = 'message-other';
-					data.delete_html = '';
-					if(erpnext.messages.contact==user) {
+					if(this.contact==user) {
 						data.reply_html = repl('<a href="#!messages/%(owner)s">\
 							<i class="icon-share-alt"></i> Reply</a>', data)
 					}
+				}
+
+				// delete
+				data.delete_html = "";
+				if(data.owner==user || data.comment.indexOf("assigned to")!=-1) {
+					data.delete_html = repl('<a class="close" \
+						onclick="erpnext.messages.delete(this)"\
+						data-name="%(name)s">&times;</a>', data);
 				}
 
 				wrapper.innerHTML = repl('<div class="message %(cls)s">%(delete_html)s\
@@ -142,22 +164,30 @@ erpnext.messages = {
 		});
 	},
 	show_active_users: function() {
+		var me = this;
 		wn.call({
 			module:'utilities',
 			page:'messages',
 			method:'get_active_users',
 			callback: function(r,rt) {
-				var $body = $(wn.pages.messages).find('.section-body');
+				var $body = $(me.wrapper).find('.layout-side-section');
+				$("<h4>Users</h4><hr>").appendTo($body);
 				for(var i in r.message) {
 					var p = r.message[i];
-					p.fullname = wn.user_info(p.name).fullname;
-					p.name = p.name.replace('@', '__at__');
-					$body.append(repl('<div class="section-item">\
-						<a href="#!messages/%(name)s">%(fullname)s</a></div>', p))
+					if(p.name != user) {
+						p.fullname = wn.user_info(p.name).fullname;
+						p.name = p.name.replace('@', '__at__');
+						p.label_status = p.has_session ? "label-success" : "";
+						p.status = p.has_session ? "Online" : "Offline";
+						$(repl('<p><span class="label %(label_status)s">%(status)s</span>\
+							<a href="#!messages/%(name)s">%(fullname)s</a>\
+							</p>', p))
+							.appendTo($body);						
+					}
 				}
 			}
 		});
 	}
-}
+});
 
 
