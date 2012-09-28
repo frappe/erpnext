@@ -83,7 +83,7 @@ class DocType:
 		
 	
 	def on_update(self):
-		if self.doc.contact_by:
+		if self.doc.contact_date:
 			self.add_calendar_event()
 		
 		if not self.doc.naming_series:
@@ -104,44 +104,19 @@ class DocType:
 		# delete any earlier event by this lead
 		sql("delete from tabEvent where ref_type='Lead' and ref_name=%s", self.doc.name)
 	
-		in_calendar_of = self.doc.lead_owner
-		
-		# get profile (id) if exists for contact_by
-		email_id = webnotes.conn.get_value('Sales Person', self.doc.contact_by, 'email_id')
-		if webnotes.conn.exists('Profile', email_id):
-			in_calendar_of = email_id
-		
+		# create new event
 		ev = Document('Event')
-		ev.owner = in_calendar_of
-		ev.description = 'Contact ' + cstr(self.doc.lead_name) + '.By : ' + cstr(self.doc.contact_by) + '.To Discuss : ' + cstr(self.doc.remark)
+		ev.owner = self.doc.lead_owner
+		ev.description = ('Contact ' + cstr(self.doc.lead_name)) + \
+			(self.doc.contact_by and ('. By : ' + cstr(self.doc.contact_by)) or '') + \
+			(self.doc.remark and ('.To Discuss : ' + cstr(self.doc.remark)) or '')
 		ev.event_date = self.doc.contact_date
 		ev.event_hour = '10:00'
 		ev.event_type = 'Private'
 		ev.ref_type = 'Lead'
 		ev.ref_name = self.doc.name
 		ev.save(1)
-
-	def add_in_follow_up(self,message,type):
-		import datetime
-		child = addchild( self.doc, 'follow_up', 'Communication Log', 1, self.doclist)
-		child.date = datetime.datetime.now().date().strftime('%Y-%m-%d')
-		child.notes = message
-		child.follow_up_type = type
-		child.save()
-
-#-------------------SMS----------------------------------------------
-	def send_sms(self):
-		if not self.doc.sms_message or not self.doc.mobile_no:
-			msgprint("Please enter mobile number in Basic Info Section and message in SMS Section ")
-			raise Exception
-		else:
-			receiver_list = []
-			if self.doc.mobile_no:
-				receiver_list.append(self.doc.mobile_no)
-			for d in getlist(self.doclist,'lead_sms_detail'):
-				if d.other_mobile_no:
-					receiver_list.append(d.other_mobile_no)
 		
-		if receiver_list:
-			msgprint(get_obj('SMS Control', 'SMS Control').send_sms(receiver_list, self.doc.sms_message))
-			# self.add_in_follow_up(self.doc.sms_message,'SMS')
+		event_user = addchild(ev, 'event_individuals', 'Event User')
+		event_user.person = self.doc.contact_by
+		event_user.save()

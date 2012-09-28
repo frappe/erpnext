@@ -30,10 +30,7 @@ def execute():
 			fy_obj = get_obj('Fiscal Year', f[0])
 			fy_obj.doc.past_year = prev_fy
 			fy_obj.doc.company = c[0]
-			fy_obj.doc.save()
-
-			fy_obj = get_obj('Fiscal Year', f[0])
 			fy_obj.repost()
 			prev_fy = f[0]
-			sql("commit")
-			sql("start transaction")
+			webnotes.conn.commit()
+			webnotes.conn.begin()
