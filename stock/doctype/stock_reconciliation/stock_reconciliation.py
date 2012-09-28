@@ -111,8 +111,6 @@ class DocType:
 		if self.doc.file_list:
 			self.get_reconciliation_data()
 
-			
-
 	def get_system_stock(self, it, wh):
 		"""get actual qty on reconciliation date and time as per system"""
 		bin = sql("select name from tabBin where item_code=%s and warehouse=%s", (it, wh))
@@ -123,10 +121,9 @@ class DocType:
 			'val_rate'  : prev_sle.get('valuation_rate', 0)
 		}
 
-		
-	def get_incoming_rate(self, row, qty_diff, sys_stock, is_submit):
+	def get_incoming_rate(self, row, qty_diff, sys_stock):
 		"""Calculate incoming rate to maintain valuation rate"""
-		if qty_diff and is_submit:
+		if qty_diff:
 			if self.val_method == 'Moving Average':
 				in_rate = flt(row[3]) + (flt(sys_stock['actual_qty'])*(flt(row[3]) - flt(sys_stock['val_rate'])))/ flt(qty_diff)
 			elif not sys_stock and not row[3]:
@@ -138,10 +135,9 @@ class DocType:
 
 		return in_rate
 
-
-	def make_sl_entry(self, is_submit, row, qty_diff, sys_stock):
+	def make_sl_entry(self, row, qty_diff, sys_stock):
 		"""Make stock ledger entry"""
-		in_rate = self.get_incoming_rate(row, qty_diff, sys_stock, is_submit)
+		in_rate = self.get_incoming_rate(row, qty_diff, sys_stock)
 		values = [{
 				'item_code'					: row[0],
 				'warehouse'					: row[1],
@@ -151,27 +147,24 @@ class DocType:
 				'voucher_type'			 	: self.doc.doctype,
 				'voucher_no'				: self.doc.name,
 				'voucher_detail_no'			: self.doc.name,
-				'actual_qty'				: flt(is_submit) * flt(qty_diff),
+				'actual_qty'				: flt(qty_diff),
 				'stock_uom'					: sys_stock['stock_uom'],
 				'incoming_rate'				: in_rate,
 				'company'					: get_defaults()['company'],
 				'fiscal_year'				: get_defaults()['fiscal_year'],
-				'is_cancelled'			 	: (is_submit==1) and 'No' or 'Yes',
+				'is_cancelled'			 	: 'No',
 				'batch_no'					: '',
 				'serial_no'					: ''
 		 }]
 		get_obj('Stock Ledger', 'Stock Ledger').update_stock(values)
 		
-
-	
-	def make_entry_for_valuation(self, row, sys_stock, is_submit):
-		self.make_sl_entry(is_submit, row, 1, sys_stock)
+	def make_entry_for_valuation(self, row, sys_stock):
+		self.make_sl_entry(row, 1, sys_stock)
 		sys_stock['val_rate'] = row[3]
 		sys_stock['actual_qty'] += 1
-		self.make_sl_entry(is_submit, row, -1, sys_stock)
+		self.make_sl_entry(row, -1, sys_stock)
 
-
-	def do_stock_reco(self, is_submit = 1):
+	def do_stock_reco(self):
 		"""
 			Make stock entry of qty diff, calculate incoming rate to maintain valuation rate.
 			If no qty diff, but diff in valuation rate, make (+1,-1) entry to update valuation
@@ -187,19 +180,18 @@ class DocType:
 			
 			# Make sl entry
 			if qty_diff:
-				self.make_sl_entry(is_submit, row, qty_diff, sys_stock)
+				self.make_sl_entry(row, qty_diff, sys_stock)
 				sys_stock['actual_qty'] += qty_diff
 
 
 			if (not qty_diff and rate_diff) or qty_diff < 0 and self.val_method == 'Moving Average':
-				self.make_entry_for_valuation(row, sys_stock, is_submit)
+				self.make_entry_for_valuation(row, sys_stock)
 
-			if is_submit == 1:
-				r = [cstr(i) for i in row] + [cstr(qty_diff), cstr(rate_diff)]
-				self.store_diff_info(r)
+
+			r = [cstr(i) for i in row] + [cstr(qty_diff), cstr(rate_diff)]
+			self.store_diff_info(r)
 				
 		msgprint("Stock Reconciliation Completed Successfully...")
-			
 
 	def store_diff_info(self, r):
 		"""Add diffs column in attached file"""
@@ -222,11 +214,25 @@ class DocType:
 		if not self.doc.file_list:
 			msgprint("Please attach file before submitting.", raise_exception=1)
 		else:
-			self.do_stock_reco(is_submit = 1)
+			self.do_stock_reco()
 			
 
 	def on_cancel(self):
-		msgprint("Cancellation of stock reconciliation is temporarily suspended. The feature will come back soon.")
-		raise Exception
+		self.cancel_stock_ledger_entries()
+		self.update_entries_after()
+		
+	def cancel_stock_ledger_entries(self):
+		webnotes.conn.sql("""
+			update `tabStock Ledger Entry` 
+			set is_cancelled = 'Yes'
+			where voucher_type = 'Stock Reconciliation' and voucher_no = %s
+		""", self.doc.name)
+
+	def update_entries_after(self):
 		self.get_reconciliation_data(submit = 0)
-		self.do_stock_reco(is_submit = -1)
+		from webnotes.model.code import get_obj
+		for d in self.data:
+			bin = webnotes.conn.sql("select name from `tabBin` where item_code = %s and \
+				warehouse = %s", (d[0], d[1]))
+			get_obj('Bin', bin[0][0]).update_entries_after(self.doc.reconciliation_date, \
+				self.doc.reconciliation_time)

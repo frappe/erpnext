@@ -3,11 +3,11 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-07-03 13:30:49',
-		'docstatus': 0,
-		'modified': '2012-07-12 14:08:27',
-		'modified_by': u'Administrator',
-		'owner': u'wasim@webnotestech.com'
+		u'creation': '2012-09-18 11:20:24',
+		u'docstatus': 0,
+		u'modified': '2012-09-28 12:19:57',
+		u'modified_by': u'Administrator',
+		u'owner': u'wasim@webnotestech.com'
 	},
 
 	# These values are common for all DocType
@@ -16,11 +16,11 @@
 		'autoname': u'PVTD.######',
 		'colour': u'White:FFF',
 		'default_print_format': u'Standard',
-		'doctype': 'DocType',
+		u'doctype': u'DocType',
 		'hide_heading': 1,
 		'istable': 1,
 		'module': u'Accounts',
-		'name': '__common__',
+		u'name': u'__common__',
 		'section_style': u'Tray',
 		'server_code_error': u' ',
 		'show_in_menu': 0,
@@ -29,8 +29,8 @@
 
 	# These values are common for all DocField
 	{
-		'doctype': u'DocField',
-		'name': '__common__',
+		u'doctype': u'DocField',
+		u'name': u'__common__',
 		'parent': u'Purchase Taxes and Charges',
 		'parentfield': u'fields',
 		'parenttype': u'DocType'
@@ -38,13 +38,13 @@
 
 	# DocType, Purchase Taxes and Charges
 	{
-		'doctype': 'DocType',
-		'name': u'Purchase Taxes and Charges'
+		u'doctype': u'DocType',
+		u'name': u'Purchase Taxes and Charges'
 	},
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'charge_type',
 		'fieldtype': u'Select',
 		'label': u'Type',
@@ -58,7 +58,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'account_head',
 		'fieldtype': u'Link',
 		'label': u'Account Head',
@@ -72,7 +72,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'cost_center',
 		'fieldtype': u'Link',
 		'label': u'Cost Center',
@@ -85,7 +85,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'description',
 		'fieldtype': u'Small Text',
 		'label': u'Description',
@@ -98,7 +98,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'rate',
 		'fieldtype': u'Currency',
 		'label': u'Rate',
@@ -111,7 +111,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'tax_amount',
 		'fieldtype': u'Currency',
 		'label': u'Amount',
@@ -124,7 +124,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'total',
 		'fieldtype': u'Currency',
 		'label': u'Total',
@@ -135,7 +135,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'row_id',
 		'fieldtype': u'Data',
 		'hidden': 0,
@@ -149,8 +149,8 @@
 	# DocField
 	{
 		'colour': u'White:FFF',
-		'description': u'For Both',
-		'doctype': u'DocField',
+		'default': u'Valuation and Total',
+		u'doctype': u'DocField',
 		'fieldname': u'category',
 		'fieldtype': u'Select',
 		'label': u'Consider Tax or Charge for',
@@ -165,7 +165,7 @@
 	{
 		'colour': u'White:FFF',
 		'default': u'Add',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'add_deduct_tax',
 		'fieldtype': u'Select',
 		'label': u'Add or Deduct',
@@ -180,7 +180,7 @@
 	# DocField
 	{
 		'colour': u'White:FFF',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'item_wise_tax_detail',
 		'fieldtype': u'Small Text',
 		'hidden': 1,
@@ -193,7 +193,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'parenttype',
 		'fieldtype': u'Data',
 		'hidden': 1,
@@ -209,7 +209,7 @@
 	# DocField
 	{
 		'description': u'Cheating Field\nPlease do not delete ',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'total_tax_amount',
 		'fieldtype': u'Currency',
 		'hidden': 1,
@@ -225,7 +225,7 @@
 	# DocField
 	{
 		'description': u'Cheating Field\nPlease do not delete ',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'total_amount',
 		'fieldtype': u'Currency',
 		'hidden': 1,
