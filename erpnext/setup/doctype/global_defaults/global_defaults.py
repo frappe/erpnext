@@ -42,14 +42,7 @@ keydict = {
 
 class DocType:
 	def __init__(self, d, dl):
-		self.doc, self.doclist = d, dl
-
-	def get_bal(self,arg):
-		"""get account balance (??)"""
-		from webnotes.utils import fmt_money, flt
-		bal = webnotes.conn.sql("select `tabAccount Balance`.balance,`tabAccount`.debit_or_credit from `tabAccount`,`tabAccount Balance` where `tabAccount Balance`.account=%s and `tabAccount Balance`.period=%s and `tabAccount Balance`.account=`tabAccount`.name ",(arg,self.doc.current_fiscal_year))
-		if bal:
-			return fmt_money(flt(bal[0][0])) + ' ' + bal[0][1]	
+		self.doc, self.doclist = d, dl	
 	
 	def on_update(self):
 		"""update defaults"""
