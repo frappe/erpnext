@@ -145,7 +145,14 @@ cur_frm.cscript.get_balance = function(doc,dt,dn) {
 
 cur_frm.cscript.account = function(doc,dt,dn) {
 	var d = locals[dt][dn];
-	$c_obj('GL Control','get_bal',d.account+'~~~'+doc.fiscal_year, function(r,rt) { d.balance = r.message; refresh_field('balance',d.name,'entries'); });
+	wn.call({
+		method: "accounts.utils.get_balance_on",
+		args: {account: d.account, date: doc.posting_date},
+		callback: function(r) {
+			d.balance = fmt_money(r.message);
+			refresh_field('balance',d.name,'entries');
+		}
+	});
 } 
 
 cur_frm.cscript.validate = function(doc,cdt,cdn) {

@@ -122,8 +122,8 @@ erpnext.AccountsChart = Class.extend({
 				+encodeURIComponent(data.value)+'">Edit</a>');
 		}
 		if (data.expandable) {
-			if (wn.boot.profile.can_create.indexOf(this.ctype) !== -1 ||
-					wn.boot.profile.in_create.indexOf(this.ctype) !== -1) {
+			if((wn.boot.profile.can_create.indexOf(this.ctype) !== -1) ||
+					(wn.boot.profile.in_create.indexOf(this.ctype) !== -1)) {
 				node_links.push('<a onclick="erpnext.account_chart.new_node();">Add Child</a>');
 			}
 		} else if (this.ctype === 'Account' && wn.boot.profile.can_read.indexOf("GL Entry") !== -1) {

@@ -15,30 +15,63 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import unicode_literals
-from webnotes.model.doc import make_autoname, Document, addchild
-# Posts JV
 
-def post_jv(data):
-	jv = Document('Journal Voucher')
-	jv.voucher_type = data.get('voucher_type')
-	jv.naming_series = data.get('naming_series')
-	jv.voucher_date = data.get('cheque_date')
-	jv.posting_date = data.get('cheque_date')
-	jv.cheque_no = data.get('cheque_number')
-	jv.cheque_date = data.get('cheque_date')
-	jv.fiscal_year = data.get('fiscal_year') # To be modified to take care
-	jv.company = data.get('company')
+import webnotes
+from webnotes.utils import nowdate
 
-	jv.save(1)
+def get_fiscal_year(date):
+	from webnotes.utils import formatdate
+	fy = webnotes.conn.sql("""select name, year_start_date, 
+		adddate(year_start_date, interval 1 year) 
+		from `tabFiscal Year`
+		where %s between year_start_date and adddate(year_start_date, 
+		interval 1 year)""", date)
+	
+	if not fy:
+		webnotes.msgprint("""%s not in any Fiscal Year""" % formatdate(date), raise_exception=1)
+	
+	return fy[0]
 
-	jc = addchild(jv,'entries','Journal Voucher Detail',0)
-	jc.account = data.get('debit_account')
-	jc.debit = data.get('amount')
-	jc.save()
+@webnotes.whitelist()
+def get_balance_on(account=None, date=None):
+	if not account and webnotes.form_dict.get("account"):
+		account = webnotes.form_dict.get("account")
+		date = webnotes.form_dict.get("date")
+		
+	cond = []
+	if date:
+		cond.append("posting_date <= '%s'" % date)
+	
+	acc = webnotes.conn.get_value('Account', account, \
+		['lft', 'rgt', 'debit_or_credit', 'is_pl_account', 'group_or_ledger'], as_dict=1)
+	
+	# for pl accounts, get balance within a fiscal year
+	if acc.is_pl_account == 'Yes':
+		cond.append("posting_date >= '%s' and voucher_type != 'Period Closing Voucher'" % \
+			get_fiscal_year(date or nowdate())[1])
+	
+	# different filter for group and ledger - improved performance
+	if acc.group_or_ledger=="Group":
+		cond.append("""exists (
+			select * from `tabAccount` ac where ac.name = gle.account
+			and ac.lft >= %s and ac.rgt <= %s
+		)""" % (acc.lft, acc.rgt))
+	else:
+		cond.append("""gle.account = "%s" """ % (account, ))
+	
+	# join conditional conditions
+	cond = " and ".join(cond)
+	if cond:
+		cond += " and "
+	
+	bal = webnotes.conn.sql("""
+		SELECT sum(ifnull(debit, 0)) - sum(ifnull(credit, 0)) 
+		FROM `tabGL Entry` gle
+		WHERE %s ifnull(is_cancelled, 'No') = 'No' """ % (cond, ))[0][0]
 
-	jc = addchild(jv,'entries','Journal Voucher Detail',0)
-	jc.account = data.get('credit_account')
-	jc.credit = data.get('amount')
-	jc.save()
+	# if credit account, it should calculate credit - debit
+	if bal and acc.debit_or_credit == 'Credit':
+		bal = -bal
 
-	return jv.name
+	# if bal is None, return 0
+	return bal or 0

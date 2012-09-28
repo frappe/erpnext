@@ -18,6 +18,7 @@ from __future__ import unicode_literals
 import webnotes
 from webnotes.utils import flt
 from webnotes.model.code import get_obj
+from accounts.utils import get_balance_on
 
 install_docs = [
 	{"doctype":"Role", "role_name":"Accounts Manager", "name":"Accounts Manager"},
@@ -107,7 +108,7 @@ def get_invoice_account_jv_record(doc, children, fiscal_year, obj):
 	
 	ret.update({
 		'account': account,
-		'balance': get_obj('GL Control').get_bal(account + "~~~" + fiscal_year)
+		'balance': get_balance_on(account, doc.get("return_date"))
 	})
 
 	return ret
@@ -140,7 +141,8 @@ def get_item_accountwise_jv_record(doc, children, fiscal_year, obj):
 			rec = {
 				'account': inv_ch.fields.get(ac_field),
 				'cost_center': inv_ch.fields.get('cost_center'),
-				'balance': get_obj('GL Control').get_bal(inv_ch.fields.get(ac_field) + "~~~" + fiscal_year)
+				'balance': get_balance_on(inv_ch.fields.get(ac_field),
+					doc.get("return_date"))
 			}
 			rec[amt_field] = amount
 			accwise_list.append(rec)

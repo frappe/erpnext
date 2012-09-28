@@ -121,117 +121,8 @@ class DocType:
 				if getdate(self.doc.posting_date) <= getdate(acc_frozen_upto) and not bde_auth_role in webnotes.user.get_roles():
 					msgprint("You are not authorized to do/modify back dated accounting entries before %s." % getdate(acc_frozen_upto).strftime('%d-%m-%Y'), raise_exception=1)
 
-	# create new bal if not exists
-	#-----------------------------
-	def create_new_balances(self, det):
-		# check
-		if sql("select count(t1.name) from `tabAccount Balance` t1, tabAccount t2 where t1.fiscal_year=%s and t2.lft <= %s and t2.rgt >= %s and t2.name = t1.account", (self.doc.fiscal_year, det[0][0], det[0][1]))[0][0] < 13*(cint(det[0][1]) - cint(det[0][0]) +1)/2:
-			period_list = self.get_period_list()
-			accounts = sql("select name from tabAccount where lft <= %s and rgt >= %s" % (det[0][0], det[0][1]))
-
-			for p in period_list:
-				for a in accounts:
-					# check if missing
-					if not sql("select name from `tabAccount Balance` where period=%s and account=%s and fiscal_year=%s", (p[0], a[0], self.doc.fiscal_year)):
-						d = Document('Account Balance')
-						d.account = a[0]
-						d.period = p[0]
-						d.start_date = p[1].strftime('%Y-%m-%d')
-						d.end_date = p[2].strftime('%Y-%m-%d')
-						d.fiscal_year = self.doc.fiscal_year
-						d.debit = 0
-						d.credit = 0
-						d.opening = 0
-						d.balance = 0
-						d.save(1)
-
-	# Post Balance
-	# ------------
-	def post_balance(self, acc, cancel):
-		# get details
-		det = sql("select lft, rgt, debit_or_credit from `tabAccount` where name='%s'" % acc)
-
-		# amount to debit
-		amt = flt(self.doc.debit) - flt(self.doc.credit)
-		if det[0][2] == 'Credit': amt = -amt
-
-		if cancel:
-			debit = -1 * flt(self.doc.credit)
-			credit = -1 * flt(self.doc.debit)
-		else:
-			debit = flt(self.doc.debit)
-			credit = flt(self.doc.credit)
-
-		self.create_new_balances(det)
-
-		# build dict
-		p = {
-			'debit': self.doc.is_opening=='No' and flt(debit) or 0
-			,'credit':self.doc.is_opening=='No' and flt(credit) or 0
-			,'opening': self.doc.is_opening=='Yes' and amt or 0
-			# end date condition only if it is not opening
-			,'end_date_condition':(self.doc.is_opening!='Yes' and ("and ab.end_date >= '"+self.doc.posting_date+"'") or '')
-			,'diff': amt
-			,'lft': cint(det[0][0])
-			,'rgt': cint(det[0][1])
-			,'posting_date': self.doc.posting_date
-			,'fiscal_year': self.doc.fiscal_year
-		}
-
-		# Update account balance for current year
-		sql("""update `tabAccount Balance` ab, `tabAccount` a 
-				set 
-					ab.debit = ifnull(ab.debit,0) + %(debit)s
-					,ab.credit = ifnull(ab.credit,0) + %(credit)s
-					,ab.opening = ifnull(ab.opening,0) + %(opening)s
-					,ab.balance = ifnull(ab.balance,0) + %(diff)s
-				where
-					a.lft <= %(lft)s
-					and a.rgt >= %(rgt)s
-					and ab.account = a.name
-					%(end_date_condition)s
-					and ab.fiscal_year = '%(fiscal_year)s' """ % p)
-
-		# Future year balances
-		# Update opening only where period_type is Year
-		sql("""update `tabAccount Balance` ab, `tabAccount` a, `tabFiscal Year` fy
-				set 
-					ab.opening = ifnull(ab.opening,0) + %(diff)s
-				where
-					a.lft <= %(lft)s
-					and a.rgt >= %(rgt)s
-					and ab.account = a.name
-					and ifnull(a.is_pl_account, 'No') = 'No'
-					and ab.period = ab.fiscal_year
-					and fy.name = ab.fiscal_year
-					and fy.year_start_date > '%(posting_date)s'""" % p)
-
-		# Update balance for all period for future years
-		sql("""update `tabAccount Balance` ab, `tabAccount` a, `tabFiscal Year` fy 
-				set 
-					ab.balance = ifnull(ab.balance,0) + %(diff)s
-				where
-					a.lft <= %(lft)s
-					and a.rgt >= %(rgt)s
-					and ab.account = a.name
-					and ifnull(a.is_pl_account, 'No') = 'No'
-					and fy.name = ab.fiscal_year
-					and fy.year_start_date > '%(posting_date)s'""" % p)
-
-
-
-			
-	# Get periods(month and year)
-	#-----------------------------
-	def get_period_list(self):
-		pl = sql("SELECT name, start_date, end_date, fiscal_year FROM tabPeriod WHERE fiscal_year = '%s' and period_type in ('Month', 'Year')" % (self.doc.fiscal_year))
-		return pl
-
-	# Voucher Balance
-	# ---------------	
 	def update_outstanding_amt(self):
 		# get final outstanding amt
-
 		bal = flt(sql("select sum(debit)-sum(credit) from `tabGL Entry` where against_voucher=%s and against_voucher_type=%s and ifnull(is_cancelled,'No') = 'No'", (self.doc.against_voucher, self.doc.against_voucher_type))[0][0] or 0.0)
 		tds = 0
 		
@@ -291,10 +182,7 @@ class DocType:
 		
 		# Posting date must be after freezing date
 		self.check_freezing_date(adv_adj)
-		
-		# Update current account balance
-		self.post_balance(self.doc.account, cancel)
-		
+
 		# Update outstanding amt on against voucher
 		if self.doc.against_voucher and self.doc.against_voucher_type not in ('Journal Voucher','POS') and update_outstanding == 'Yes':
 			self.update_outstanding_amt()

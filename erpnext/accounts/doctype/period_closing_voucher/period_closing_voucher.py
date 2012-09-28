@@ -63,7 +63,8 @@ class DocType:
 
 
 	def validate_posting_date(self):
-		yr = sql("select start_date, end_date from `tabPeriod` where fiscal_year = '%s' and period_type = 'Year'" % (self.doc.fiscal_year))
+		yr = sql("""select year_start_date, adddate(year_start_date, interval 1 year)
+			from `tabFiscal Year` where name=%s""", (self.doc.fiscal_year, ))
 		self.year_start_date = yr and yr[0][0] or ''
 		self.year_end_date = yr and yr[0][1] or ''
 		

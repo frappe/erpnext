@@ -5,8 +5,8 @@ def execute():
 	# add index
 	webnotes.conn.commit()
 	try:
-		webnotes.conn.sql("""create index item_code_warehouse
-			on `tabDelivery Note Packing Item` (item_code, warehouse)""")
+		webnotes.conn.sql("""alter table `tabDelivery Note Packing Item`
+			add index item_code_warehouse (item_code, warehouse)""")
 	except:
 		pass
 	webnotes.conn.begin()
