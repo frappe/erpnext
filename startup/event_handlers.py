@@ -118,22 +118,17 @@ def check_if_expired():
 	
 	# if expired, stop user from logging in
 	from webnotes.utils import formatdate
+	msg = """Oops! Your subscription expired on <b>%s</b>.
+		<br>Nothing catastrophic.<br>""" % formatdate(conf.expires_on)
+	
 	if 'System Manager' in webnotes.user.roles:
-		webnotes.response['server_messages'] = """Oops! \
-			Your subscription expired on <b>%s</b>.
-			
-			Nothing catastrophic.
-			
-			Just drop in a mail at <b>support@erpnext.com</b> and \
-			we will guide you to get your account re-activated.""" % formatdate(conf.expires_on)
+		msg += """Just drop in a mail at <b>support@erpnext.com</b> and
+			we will guide you to get your account re-activated."""
 	else:
-		webnotes.response['server_messages'] = """Oops! \
-			Your subscription expired on <b>%s</b>.
-			
-			Nothing catastrophic.
-					
-			Just ask your System Manager to drop in a mail at <b>support@erpnext.com</b> and \
-			we will guide him to get your account re-activated.""" % formatdate(conf.expires_on)
+		msg += """Just ask your System Manager to drop in a mail at <b>support@erpnext.com</b> and
+		we will guide him to get your account re-activated."""
+	
+	webnotes.msgprint(msg)
 	
 	webnotes.response['message'] = 'Account Expired'
 	raise webnotes.AuthenticationError

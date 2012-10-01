@@ -42,8 +42,8 @@ keydict = {
 
 class DocType:
 	def __init__(self, d, dl):
-		self.doc, self.doclist = d, dl	
-	
+		self.doc, self.doclist = d, dl
+
 	def on_update(self):
 		"""update defaults"""
 		

@@ -31,9 +31,6 @@ get_value = webnotes.conn.get_value
 in_transaction = webnotes.conn.in_transaction
 convert_to_lists = webnotes.conn.convert_to_lists
 
-# -----------------------------------------------------------------------------------------
-
-
 class DocType:
 	def __init__(self,d,dl):
 		self.doc, self.doclist = d,dl
@@ -234,9 +231,6 @@ class DocType:
 		if not rec:
 			# delete gl entry
 			sql("delete from `tabGL Entry` where company = %s", self.doc.name)
-
-			#delete tabAccount Balance
-			sql("delete ab.* from `tabAccount Balance` ab, `tabAccount` a where ab.account = a.name and a.company = %s", self.doc.name)
 
 			#delete tabAccount
 			sql("delete from `tabAccount` where company = %s order by lft desc, rgt desc", self.doc.name)

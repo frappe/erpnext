@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 import webnotes
-from webnotes.utils import get_defaults, cstr
+from webnotes.utils import get_defaults, fmt_money
+from accounts.utils import get_balance_on
 
 @webnotes.whitelist()
 def get_companies():
@@ -49,16 +50,7 @@ def get_children():
 	if ctype == 'Account':
 		currency = webnotes.conn.sql("select default_currency from `tabCompany` where name = %s", company)[0][0]
 		for each in acc:
-			bal = webnotes.conn.sql("select balance from `tabAccount Balance` \
-				where account = %s and period = %s", (each.get('value'), get_defaults('fiscal_year')))
-			bal = bal and bal[0][0] or 0
-			each['balance'] = currency + ' ' + cstr(bal)
+			bal = get_balance_on(each.get("value"))
+			each['balance'] = currency + ' ' + fmt_money(bal)
 		
 	return acc
-	
-
-@webnotes.whitelist()		
-def get_account_balance():
-	args = webnotes.form_dict
-	acc = args['acc']
-	return 'Rs. 100'

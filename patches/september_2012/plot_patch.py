@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 import webnotes
 def execute():
 	set_master_name_in_accounts()

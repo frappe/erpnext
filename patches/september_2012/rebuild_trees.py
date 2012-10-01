@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 def execute():
 	from webnotes.utils.nestedset import rebuild_tree
 
