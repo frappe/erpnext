@@ -94,7 +94,7 @@ erpnext.blog.make_comment_dialog = function(wrapper) {
 	
 	$comment_btn.click(function() {
 		if(!erpnext.blog.comment_dialog) {
-			var d = new wn.widgets.Dialog({
+			var d = new wn.ui.Dialog({
 				title: 'Add Comment',
 				fields: [
 					{

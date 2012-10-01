@@ -28,7 +28,7 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 					console.log(r.exc);
 				} else {
 					//console.log(arguments);
-					var d = new wn.widgets.Dialog({
+					var d = new wn.ui.Dialog({
 						title: 'Email Digest: ' + dn,
 						width: 800
 					});
@@ -68,7 +68,7 @@ cur_frm.cscript.addremove_recipients = function(doc, dt, dn) {
 		} else {
 			// Open a dialog and display checkboxes against email addresses
 			doc = locals[dt][dn];
-			var d = new wn.widgets.Dialog({
+			var d = new wn.ui.Dialog({
 				title: 'Add/Remove Recipients',
 				width: 400
 			});

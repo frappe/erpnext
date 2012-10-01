@@ -65,7 +65,7 @@ MyProfile = function(wrapper) {
 	//
 	this.make_form = function() {
 		var div = $a($td(this.tab, 0, 1), 'div');
-		this.form = new wn.widgets.FieldGroup()
+		this.form = new wn.ui.FieldGroup()
 		this.form.make_fields(div, [
 			{fieldname:'first_name', fieldtype:'Data',label:'First Name',reqd:1},
 			{fieldname:'last_name', fieldtype:'Data',label:'Last Name'},
@@ -89,7 +89,7 @@ MyProfile = function(wrapper) {
 	// change password
 	//
 	this.change_password = function() {
-		var d = new wn.widgets.Dialog({
+		var d = new wn.ui.Dialog({
 			title:'Change Password',
 			width: 400,
 			fields: [
@@ -121,7 +121,7 @@ MyProfile = function(wrapper) {
 	//
 	
 	this.change_image = function() {
-		var d = new wn.widgets.Dialog({
+		var d = new wn.ui.Dialog({
 			title: 'Set your Profile'
 		});
 		
@@ -142,7 +142,7 @@ MyProfile = function(wrapper) {
 	}
 	
 	this.change_background = function() {
-		var d = new wn.widgets.Dialog({
+		var d = new wn.ui.Dialog({
 			title: 'Set Background Image'
 		})
 

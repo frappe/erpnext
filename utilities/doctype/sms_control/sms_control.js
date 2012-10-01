@@ -50,7 +50,7 @@ function SMSManager() {
 		me.dialog.show();
 	}
 	this.make_dialog = function() {
-		var d = new wn.widgets.Dialog({
+		var d = new wn.ui.Dialog({
 			title: 'Send SMS',
 			width: 400,
 			fields: [

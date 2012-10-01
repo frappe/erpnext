@@ -120,7 +120,7 @@ Dashboard = function() {
 		},
 		
 		show_settings: function() {
-			var d = new wn.widgets.Dialog({
+			var d = new wn.ui.Dialog({
 				title: 'Set Company Settings',
 				width: 500,
 				fields: [

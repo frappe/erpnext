@@ -68,7 +68,7 @@ function KnowledgeBase(w) {
 	
 	// suggest a few users who can answer
 	this.suggest = function() {
-		this.dialog = new wn.widgets.Dialog({
+		this.dialog = new wn.ui.Dialog({
 			title: 'Suggest a users',
 			width: 400,
 			fields: [

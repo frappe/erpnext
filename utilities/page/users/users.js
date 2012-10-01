@@ -140,7 +140,7 @@ $.extend(wn.pages.users, {
 	},
 	make_settings_dialog: function() {
 		var me = wn.pages.users;
-		me.settings_dialog = new wn.widgets.Dialog({
+		me.settings_dialog = new wn.ui.Dialog({
 			title: 'Set User Security',
 			width: 500,
 			fields: [
@@ -205,7 +205,7 @@ $.extend(wn.pages.users, {
 	},
 	get_password: function(btn, args) {
 		var me = wn.pages.users;
-		var pass_d = new wn.widgets.Dialog({
+		var pass_d = new wn.ui.Dialog({
 			title: 'Your Password',
 			width: 300,
 			fields: [
@@ -244,7 +244,7 @@ $.extend(wn.pages.users, {
 				{active_users: active_users.length}));
 			return;
 		}
-		var d = new wn.widgets.Dialog({
+		var d = new wn.ui.Dialog({
 			title: 'Add User',
 			width: 400,
 			fields: [{
@@ -282,7 +282,7 @@ $.extend(wn.pages.users, {
 
 erpnext.RoleEditor = Class.extend({
 	init: function() {
-		this.dialog = new wn.widgets.Dialog({
+		this.dialog = new wn.ui.Dialog({
 			title: 'Set Roles'
 		});
 		var me = this;
@@ -407,7 +407,7 @@ erpnext.RoleEditor = Class.extend({
 		
 	},
 	make_perm_dialog: function() {
-		this.perm_dialog = new wn.widgets.Dialog({
+		this.perm_dialog = new wn.ui.Dialog({
 			title:'Role Permissions',
 			width: 500
 		});

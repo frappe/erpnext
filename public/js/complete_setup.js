@@ -25,7 +25,7 @@ $.extend(erpnext.complete_setup, {
 	},
 	
 	prepare_dialog: function() {	
-		var d = new wn.widgets.Dialog({
+		var d = new wn.ui.Dialog({
 			title: "Setup",
 			fields: [
 				{fieldname:'first_name', label:'Your First Name', fieldtype:'Data', reqd: 1},

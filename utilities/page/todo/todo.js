@@ -137,8 +137,7 @@ erpnext.todo.ToDoItem = Class.extend({
 
 erpnext.todo.make_dialog = function(det) {
 	if(!erpnext.todo.dialog) {
-		var dialog = new wn.widgets.Dialog();
-		dialog.make({
+		var dialog = new wn.ui.Dialog({
 			width: 480,
 			title: 'To Do', 
 			fields: [
