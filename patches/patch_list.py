@@ -513,11 +513,6 @@ patch_list = [
 	},
 	{
 		'patch_module': 'patches.july_2012',
-		'patch_file': 'sync_trial_balance',
-		'description': "sync trial balance"
-	},
-	{
-		'patch_module': 'patches.july_2012',
 		'patch_file': 'blog_guest_permission',
 	},
 	{
@@ -603,5 +598,13 @@ patch_list = [
 	{
 		'patch_module': 'patches.september_2012',
 		'patch_file': 'rebuild_trees',
+	},
+	{
+		'patch_module': 'patches.september_2012',
+		'patch_file': 'deprecate_account_balance',
+	},
+	{
+		'patch_module': 'patches.september_2012',
+		'patch_file': 'profile_delete_permission',
 	},
 ]

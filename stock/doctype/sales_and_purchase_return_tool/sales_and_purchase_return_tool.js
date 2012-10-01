@@ -191,7 +191,7 @@ cur_frm.cscript.make_credit_note = function(doc) {
 	var doclist = make_doclist(doc.doctype, doc.name);
 	$c('accounts.get_new_jv_details', {
 			doclist: JSON.stringify(doclist),
-			fiscal_year: sys_defaults.fiscal_year
+			fiscal_year: sys_defaults.fiscal_year,
 		}, function(r, rt) {
 		if(!r.exc) {
 			cur_frm.cscript.make_jv(doc, 'Credit Note', r.message);
@@ -210,7 +210,7 @@ cur_frm.cscript.make_jv = function(doc, dr_or_cr, children) {
 	jv.company = sys_defaults.company;
 	jv.fiscal_year = sys_defaults.fiscal_year;
 	jv.is_opening = 'No';
-	jv.posting_date = dateutil.obj_to_str(new Date());
+	jv.posting_date = doc.return_date;
 	jv.voucher_date = dateutil.obj_to_str(new Date());
 
 	// Add children
@@ -218,6 +218,7 @@ cur_frm.cscript.make_jv = function(doc, dr_or_cr, children) {
 		for(var i=0; i<children.length; i++) {
 			var ch = LocalDB.add_child(jv, 'Journal Voucher Detail', 'entries');
 			$.extend(ch, children[i]);
+			ch.balance = fmt_money(ch.balance);
 		}
 	}
 

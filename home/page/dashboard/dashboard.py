@@ -152,14 +152,9 @@ class DashboardWidget:
 			print acc
 			raise e
 
-		fiscal_year = self.get_fiscal_year(start)
-		if fiscal_year:
-			return self.glc.get_as_on_balance(acc, fiscal_year, start, debit_or_credit, lft, rgt)
-		else:
-			webnotes.msgprint('Please select the START DATE and END DATE such that\
-					they fall within <b>fiscal year(s)</b> as defined in\
-					Setup > System > Fiscal Year.', raise_exception=1)
-	
+		from accounts.utils import get_fiscal_year, get_balance_on
+		fy_end_date = get_fiscal_year(start)[2]
+		return get_balance_on(acc, fy_end_date)
 
 	def get_fiscal_year(self, dt):
 		"""
@@ -237,10 +232,10 @@ class DashboardWidget:
 			return self.get_account_amt(opts['account'], start, end, debit_or_credit)
 		
 		elif opts['type']=='receivables':
-			return self.get_account_balance(self.receivables_group, end)[2]
+			return self.get_account_balance(self.receivables_group, end)
 			
 		elif opts['type']=='payables':
-			return self.get_account_balance(self.payables_group, end)[2]
+			return self.get_account_balance(self.payables_group, end)
 
 		elif opts['type']=='collection':
 			return self.get_bank_amt('credit', 'Customer', start, end)
