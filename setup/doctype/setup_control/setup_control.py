@@ -231,7 +231,8 @@ class DocType:
 		pr.name = pr.email = user_email
 		pr.enabled = 1
 		pr.save(1)
-		if pwd: webnotes.conn.sql("UPDATE `tabProfile` SET password=PASSWORD(%s) WHERE name=%s", (pwd, user_email))
+		if pwd:
+			webnotes.conn.sql("UPDATE `__Auth` SET password=PASSWORD(%s) WHERE user=%s", (pwd, user_email))
 		self.add_roles(pr)
 	
 	def add_roles(self, pr):
