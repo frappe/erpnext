@@ -59,17 +59,11 @@ cur_frm.cscript.onload_post_render = function(doc, cdt, cdn) {
 	}
 }
 
-// fetch
-// ===============================================================
-cur_frm.cscript.set_fetch = function() {
-	// item
-	cur_frm.add_fetch('item_code', 'item_name', 'item_name');
-	cur_frm.add_fetch('item_code', 'stock_uom', 'uom');
-	cur_frm.add_fetch('item_code', 'description', 'description');
-	cur_frm.add_fetch('item_code', 'item_group', 'item_group');
-	cur_frm.add_fetch('item_code', 'brand', 'brand');
-
-	// customer
+cur_frm.cscript.item_code = function(doc, cdt, cdn) {
+	var d = locals[cdt][cdn];
+	if (d.item_code) {
+		get_server_fields('get_item_details',d.item_code, 'enquiry_details',doc, cdt,cdn,1);
+	}
 }
 
 // hide - unhide fields on basis of enquiry_from lead or customer
