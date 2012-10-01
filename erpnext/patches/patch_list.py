@@ -601,10 +601,10 @@ patch_list = [
 	},
 	{
 		'patch_module': 'patches.september_2012',
-<<<<<<< Updated upstream
 		'patch_file': 'deprecate_account_balance',
-=======
+	},
+	{
+		'patch_module': 'patches.september_2012',
 		'patch_file': 'profile_delete_permission',
->>>>>>> Stashed changes
 	},
 ]
