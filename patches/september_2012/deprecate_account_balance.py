@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 import webnotes
 from webnotes.model import delete_doc
 

@@ -16,6 +16,7 @@
 
 # Please edit this list and import only required elements
 
+from __future__ import unicode_literals
 import unittest
 import webnotes
 import webnotes.model

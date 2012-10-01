@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 import webnotes
 def execute():
 	webnotes.conn.sql("""update `tabDocPerm` set cancel=1

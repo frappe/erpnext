@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 import webnotes
 from webnotes.model.code import get_obj
 from webnotes.model.doc import addchild
