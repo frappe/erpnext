@@ -3,11 +3,11 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-03-27 14:35:58',
-		'docstatus': 0,
-		'modified': '2012-03-27 14:45:49',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
+		u'creation': '2012-05-15 12:14:45',
+		u'docstatus': 0,
+		u'modified': '2012-10-02 11:21:31',
+		u'modified_by': u'Administrator',
+		u'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
@@ -16,21 +16,21 @@
 		'autoname': u'LAL/.#####',
 		'colour': u'White:FFF',
 		'default_print_format': u'Standard',
-		'doctype': 'DocType',
+		u'doctype': u'DocType',
 		'is_submittable': 1,
 		'module': u'HR',
-		'name': '__common__',
+		u'name': u'__common__',
 		'search_fields': u'employee,employee_name,leave_type,total_leaves_allocated,fiscal_year',
 		'section_style': u'Simple',
 		'server_code_error': u' ',
 		'show_in_menu': 0,
-		'version': 1560
+		'version': 1
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': u'DocField',
-		'name': '__common__',
+		u'doctype': u'DocField',
+		u'name': u'__common__',
 		'parent': u'Leave Allocation',
 		'parentfield': u'fields',
 		'parenttype': u'DocType'
@@ -38,8 +38,8 @@
 
 	# These values are common for all DocPerm
 	{
-		'doctype': u'DocPerm',
-		'name': '__common__',
+		u'doctype': u'DocPerm',
+		u'name': u'__common__',
 		'parent': u'Leave Allocation',
 		'parentfield': u'permissions',
 		'parenttype': u'DocType',
@@ -48,58 +48,13 @@
 
 	# DocType, Leave Allocation
 	{
-		'doctype': 'DocType',
-		'name': u'Leave Allocation'
-	},
-
-	# DocPerm
-	{
-		'amend': 1,
-		'cancel': 1,
-		'create': 1,
-		'doctype': u'DocPerm',
-		'match': u'owner',
-		'permlevel': 0,
-		'role': u'HR User',
-		'submit': 1,
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'match': u'owner',
-		'permlevel': 0,
-		'role': u'HR User',
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'amend': 1,
-		'cancel': 1,
-		'create': 1,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'HR Manager',
-		'submit': 1,
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'HR Manager'
+		u'doctype': u'DocType',
+		u'name': u'Leave Allocation'
 	},
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'column_break0',
 		'fieldtype': u'Column Break',
 		'permlevel': 0,
@@ -109,7 +64,7 @@
 	# DocField
 	{
 		'colour': u'White:FFF',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'employee',
 		'fieldtype': u'Link',
 		'in_filter': 1,
@@ -125,7 +80,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'employee_name',
 		'fieldtype': u'Data',
 		'in_filter': 1,
@@ -137,7 +92,7 @@
 	# DocField
 	{
 		'colour': u'White:FFF',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'leave_type',
 		'fieldtype': u'Select',
 		'in_filter': 1,
@@ -155,7 +110,7 @@
 	{
 		'colour': u'White:FFF',
 		'default': u'Today',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'posting_date',
 		'fieldtype': u'Date',
 		'hidden': 0,
@@ -171,7 +126,7 @@
 	# DocField
 	{
 		'colour': u'White:FFF',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'fiscal_year',
 		'fieldtype': u'Select',
 		'in_filter': 1,
@@ -188,7 +143,7 @@
 	# DocField
 	{
 		'colour': u'White:FFF',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'description',
 		'fieldtype': u'Small Text',
 		'hidden': 0,
@@ -201,7 +156,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'column_break1',
 		'fieldtype': u'Column Break',
 		'permlevel': 0,
@@ -210,7 +165,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'carry_forward',
 		'fieldtype': u'Check',
 		'label': u'Carry Forward',
@@ -220,7 +175,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'carry_forwarded_leaves',
 		'fieldtype': u'Currency',
 		'label': u'Carry Forwarded Leaves',
@@ -230,7 +185,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'new_leaves_allocated',
 		'fieldtype': u'Currency',
 		'label': u'New Leaves Allocated',
@@ -240,7 +195,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'total_leaves_allocated',
 		'fieldtype': u'Currency',
 		'label': u'Total Leaves Allocated',
@@ -250,7 +205,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'amended_from',
 		'fieldtype': u'Data',
 		'hidden': 0,
@@ -265,7 +220,7 @@
 	# DocField
 	{
 		'description': u'The date at which current entry is corrected in the system.',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'amendment_date',
 		'fieldtype': u'Date',
 		'hidden': 0,
@@ -275,5 +230,37 @@
 		'oldfieldtype': u'Date',
 		'permlevel': 1,
 		'print_hide': 1
+	},
+
+	# DocPerm
+	{
+		'amend': 1,
+		'cancel': 1,
+		'create': 1,
+		u'doctype': u'DocPerm',
+		'match': u'owner',
+		'permlevel': 0,
+		'role': u'HR User',
+		'submit': 1,
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'amend': 1,
+		'cancel': 1,
+		'create': 1,
+		u'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'HR Manager',
+		'submit': 1,
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		u'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'All'
 	}
 ]

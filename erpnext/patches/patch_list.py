@@ -604,4 +604,8 @@ patch_list = [
 		'patch_module': 'patches.september_2012',
 		'patch_file': 'rebuild_trees',
 	},
+	{
+		'patch_module': 'patches.october_2012',
+		'patch_file': 'update_permission',
+	},
 ]
