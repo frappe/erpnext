@@ -3,11 +3,11 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-05-01 17:10:24',
-		'docstatus': 0,
-		'modified': '2012-05-04 10:05:25',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
+		u'creation': '2012-05-04 10:21:24',
+		u'docstatus': 0,
+		u'modified': '2012-10-02 16:43:51',
+		u'modified_by': u'Administrator',
+		u'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
@@ -15,10 +15,11 @@
 		'_last_update': u'1311251040',
 		'colour': u'White:FFF',
 		'default_print_format': u'Standard',
-		'doctype': 'DocType',
+		u'doctype': u'DocType',
 		'is_submittable': 1,
 		'module': u'Accounts',
-		'name': '__common__',
+		u'name': u'__common__',
+		'read_only_onload': 1,
 		'search_fields': u'voucher_type,posting_date, due_date, cheque_no',
 		'section_style': u'Tabbed',
 		'server_code_error': u' ',
@@ -30,8 +31,8 @@
 
 	# These values are common for all DocField
 	{
-		'doctype': u'DocField',
-		'name': '__common__',
+		u'doctype': u'DocField',
+		u'name': u'__common__',
 		'parent': u'Journal Voucher',
 		'parentfield': u'fields',
 		'parenttype': u'DocType'
@@ -39,8 +40,8 @@
 
 	# These values are common for all DocPerm
 	{
-		'doctype': u'DocPerm',
-		'name': '__common__',
+		u'doctype': u'DocPerm',
+		u'name': u'__common__',
 		'parent': u'Journal Voucher',
 		'parentfield': u'permissions',
 		'parenttype': u'DocType',
@@ -49,61 +50,13 @@
 
 	# DocType, Journal Voucher
 	{
-		'doctype': 'DocType',
-		'name': u'Journal Voucher'
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Accounts Manager',
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'amend': 1,
-		'cancel': 1,
-		'create': 1,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Accounts Manager',
-		'submit': 1,
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'amend': 1,
-		'cancel': 1,
-		'create': 1,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Accounts User',
-		'submit': 1,
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Accounts User',
-		'submit': 0,
-		'write': 0
+		u'doctype': u'DocType',
+		u'name': u'Journal Voucher'
 	},
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'basic_info',
 		'fieldtype': u'Section Break',
 		'label': u'Basic Info',
@@ -113,7 +66,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'column_break0',
 		'fieldtype': u'Column Break',
 		'oldfieldtype': u'Column Break',
@@ -125,7 +78,7 @@
 	{
 		'colour': u'White:FFF',
 		'description': u'To manage multiple series please go to Setup > Manage Series',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'naming_series',
 		'fieldtype': u'Select',
 		'label': u'Series',
@@ -140,7 +93,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'voucher_type',
 		'fieldtype': u'Select',
 		'in_filter': 1,
@@ -155,7 +108,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'column_break1',
 		'fieldtype': u'Column Break',
 		'oldfieldtype': u'Column Break',
@@ -166,7 +119,7 @@
 	# DocField
 	{
 		'description': u'The date at which current entry will get or has actually executed.',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'posting_date',
 		'fieldtype': u'Date',
 		'in_filter': 1,
@@ -181,7 +134,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'2_add_edit_gl_entries',
 		'fieldtype': u'Section Break',
 		'label': u'Journal Entries',
@@ -193,7 +146,7 @@
 	# DocField
 	{
 		'allow_on_submit': 1,
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'entries',
 		'fieldtype': u'Table',
 		'label': u'Entries',
@@ -206,7 +159,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'section_break99',
 		'fieldtype': u'Section Break',
 		'options': u'Simple',
@@ -215,7 +168,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'total_debit',
 		'fieldtype': u'Currency',
 		'in_filter': 1,
@@ -228,7 +181,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'total_credit',
 		'fieldtype': u'Currency',
 		'in_filter': 1,
@@ -241,7 +194,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'column_break99',
 		'fieldtype': u'Column Break',
 		'permlevel': 0
@@ -249,7 +202,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'difference',
 		'fieldtype': u'Currency',
 		'label': u'Difference',
@@ -262,7 +215,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'get_balance',
 		'fieldtype': u'Button',
 		'label': u'Make Difference Entry',
@@ -273,7 +226,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'reference',
 		'fieldtype': u'Section Break',
 		'label': u'Reference',
@@ -282,7 +235,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'cheque_no',
 		'fieldtype': u'Data',
 		'in_filter': 1,
@@ -296,7 +249,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'cheque_date',
 		'fieldtype': u'Date',
 		'label': u'Cheque Date',
@@ -308,7 +261,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'clearance_date',
 		'fieldtype': u'Date',
 		'in_filter': 1,
@@ -323,7 +276,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'column_break98',
 		'fieldtype': u'Column Break',
 		'permlevel': 0
@@ -331,7 +284,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'user_remark',
 		'fieldtype': u'Small Text',
 		'in_filter': 1,
@@ -345,7 +298,7 @@
 	# DocField
 	{
 		'description': u'User Remark will be added to Auto Remark',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'remark',
 		'fieldtype': u'Small Text',
 		'label': u'Remark',
@@ -358,7 +311,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'bill_no',
 		'fieldtype': u'Data',
 		'label': u'Bill No',
@@ -370,7 +323,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'bill_date',
 		'fieldtype': u'Date',
 		'label': u'Bill Date',
@@ -382,7 +335,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'due_date',
 		'fieldtype': u'Date',
 		'label': u'Due Date',
@@ -394,7 +347,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'addtional_info',
 		'fieldtype': u'Section Break',
 		'label': u'More Info',
@@ -404,7 +357,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'column_break2',
 		'fieldtype': u'Column Break',
 		'oldfieldtype': u'Column Break',
@@ -416,7 +369,7 @@
 	{
 		'colour': u'White:FFF',
 		'default': u'No',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'is_opening',
 		'fieldtype': u'Select',
 		'in_filter': 1,
@@ -434,7 +387,7 @@
 	{
 		'colour': u'White:FFF',
 		'description': u'For opening invoice entry, this date will reflect in the period-wise aging report.',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'aging_date',
 		'fieldtype': u'Date',
 		'label': u'Aging Date',
@@ -450,7 +403,7 @@
 		'colour': u'White:FFF',
 		'default': u'Accounts Receivable',
 		'depends_on': u"eval:doc.voucher_type == 'Write Off Voucher'",
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'write_off_based_on',
 		'fieldtype': u'Select',
 		'label': u'Write Off Based On',
@@ -464,7 +417,7 @@
 	{
 		'colour': u'White:FFF',
 		'depends_on': u"eval:doc.voucher_type == 'Write Off Voucher'",
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'write_off_amount',
 		'fieldtype': u'Currency',
 		'label': u'Write Off Amount <=',
@@ -477,7 +430,7 @@
 	{
 		'colour': u'White:FFF',
 		'depends_on': u"eval:doc.voucher_type == 'Write Off Voucher'",
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'get_outstanding_invoices',
 		'fieldtype': u'Button',
 		'label': u'Get Outstanding Invoices',
@@ -492,7 +445,7 @@
 		'colour': u'White:FFF',
 		'default': u'Today',
 		'description': u'Date of entry (not posting to ledgers)',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'voucher_date',
 		'fieldtype': u'Date',
 		'in_filter': 1,
@@ -508,7 +461,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'column_break3',
 		'fieldtype': u'Column Break',
 		'oldfieldtype': u'Column Break',
@@ -518,7 +471,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'pay_to_recd_from',
 		'fieldtype': u'Data',
 		'hidden': 0,
@@ -531,7 +484,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'total_amount',
 		'fieldtype': u'Data',
 		'hidden': 1,
@@ -544,7 +497,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'total_amount_in_words',
 		'fieldtype': u'Data',
 		'hidden': 1,
@@ -557,7 +510,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'fiscal_year',
 		'fieldtype': u'Select',
 		'in_filter': 1,
@@ -573,7 +526,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'company',
 		'fieldtype': u'Link',
 		'in_filter': 1,
@@ -591,7 +544,7 @@
 	{
 		'allow_on_submit': 1,
 		'colour': u'White:FFF',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'select_print_heading',
 		'fieldtype': u'Link',
 		'label': u'Select Print Heading',
@@ -607,7 +560,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'amended_from',
 		'fieldtype': u'Link',
 		'label': u'Amended From',
@@ -622,7 +575,7 @@
 	# DocField
 	{
 		'description': u'The date at which current entry is corrected in the system.',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'amendment_date',
 		'fieldtype': u'Date',
 		'label': u'Amendment Date',
@@ -635,7 +588,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'cancel_reason',
 		'fieldtype': u'Data',
 		'label': u'Cancel Reason',
@@ -648,7 +601,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'section_break0',
 		'fieldtype': u'Section Break',
 		'oldfieldtype': u'Section Break',
@@ -659,7 +612,7 @@
 	# DocField
 	{
 		'allow_on_submit': 1,
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'view_ledger_entry',
 		'fieldtype': u'Button',
 		'label': u'View Ledger Entry',
@@ -671,7 +624,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'tds',
 		'fieldtype': u'Section Break',
 		'label': u'TDS',
@@ -683,7 +636,7 @@
 	# DocField
 	{
 		'default': u'No',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'tds_applicable',
 		'fieldtype': u'Select',
 		'in_filter': 1,
@@ -700,7 +653,7 @@
 	# DocField
 	{
 		'colour': u'White:FFF',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'tds_category',
 		'fieldtype': u'Select',
 		'hidden': 0,
@@ -719,7 +672,7 @@
 	# DocField
 	{
 		'colour': u'White:FFF',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'supplier_account',
 		'fieldtype': u'Link',
 		'hidden': 0,
@@ -736,7 +689,7 @@
 	# DocField
 	{
 		'colour': u'White:FFF',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'get_tds',
 		'fieldtype': u'Button',
 		'label': u'Get TDS',
@@ -750,7 +703,7 @@
 	{
 		'colour': u'White:FFF',
 		'description': u'Tax Code will be populated based on account head mentioned in TDS Category master',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'tax_code',
 		'fieldtype': u'Link',
 		'label': u'TDS Account Head',
@@ -764,7 +717,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'rate',
 		'fieldtype': u'Currency',
 		'label': u'Rate',
@@ -778,7 +731,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'ded_amount',
 		'fieldtype': u'Currency',
 		'label': u'Amount',
@@ -788,5 +741,53 @@
 		'permlevel': 0,
 		'print_hide': 1,
 		'trigger': u'Client'
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
+		u'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Accounts Manager',
+		'submit': 0,
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'amend': 1,
+		'cancel': 1,
+		'create': 1,
+		u'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Accounts Manager',
+		'submit': 1,
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'amend': 1,
+		'cancel': 1,
+		'create': 1,
+		u'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Accounts User',
+		'submit': 1,
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
+		u'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Accounts User',
+		'submit': 0,
+		'write': 0
 	}
 ]
