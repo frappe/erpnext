@@ -24,13 +24,18 @@ def set_customer_in_sales_invoices():
 		
 def reset_lft_rgt():
 	from webnotes.utils.nestedset import rebuild_tree
-	
-	rebuild_tree("Item Group", "parent_item_group")
-	rebuild_tree("Customer Group", "parent_customer_group")
-	rebuild_tree("Territory", "parent_territory")
-	rebuild_tree("Account", "parent_account")
-	rebuild_tree("Cost Center", "parent_cost_center")
-	rebuild_tree("Sales Person", "parent_sales_person")
+	dt = [
+		["Item Group", "parent_item_group"], 
+		["Customer Group", "parent_customer_group"],
+		["Territory", "parent_territory"],
+		["Account", "parent_account"], 
+		["Cost Center", "parent_cost_center"],
+		["Sales Person", "parent_sales_person"]
+	]
+	for d in dt:
+		rebuild_tree(d[0], d[1])
+		webnotes.conn.commit()
+		webnotes.conn.begin()
 	
 def add_analytics_role():
 	from webnotes.model.doc import Document
