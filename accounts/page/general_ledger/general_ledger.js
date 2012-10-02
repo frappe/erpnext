@@ -102,8 +102,9 @@ erpnext.GeneralLedger = wn.views.GridReport.extend({
 			var default_company = me.filter_inputs.company.get(0).opts.default_value;
 			$filter.empty().add_options([$filter.get(0).opts.default_value].concat(
 				$.map(wn.report_dump.data["Account"], function(ac) {
-					return (accounts_by_company[company].indexOf(ac.name)!=-1 ||
-						company===default_company) ? ac.name : null;
+					return (company===default_company || 
+						accounts_by_company[company].indexOf(ac.name)!=-1) ? 
+						ac.name : null;
 				})));
 			me.filter_inputs.refresh.click();
 		});

@@ -66,7 +66,9 @@ class DocType(TransactionBase):
 	def get_cust(self):
 		ret = {}
 		if self.doc.credit_to:
-			ret['supplier'] = get_value('Account',self.doc.credit_to,'master_name')
+			acc = get_value('Account',self.doc.credit_to,['master_name', 'credit_days'])
+			ret['supplier'] = acc[0]
+			ret['due_date'] = add_days(cstr(self.doc.posting_date), acc and cint(acc[1]) or 0)
 			
 		return ret
 

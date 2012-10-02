@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		u'creation': '2012-07-03 13:29:45',
+		u'creation': '2012-09-19 12:24:41',
 		u'docstatus': 0,
-		u'modified': '2012-09-17 10:55:11',
+		u'modified': '2012-10-02 10:40:14',
 		u'modified_by': u'Administrator',
 		u'owner': u'wasim@webnotestech.com'
 	},
@@ -230,45 +230,37 @@
 
 	# DocPerm
 	{
+		'amend': 0,
+		'cancel': 0,
 		'create': 1,
 		u'doctype': u'DocPerm',
 		'permlevel': 0,
-		'role': u'Accounts Manager',
+		'role': u'Material User',
+		'submit': 0,
 		'write': 1
-	},
-
-	# DocPerm
-	{
-		u'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'All'
 	},
 
 	# DocPerm
 	{
 		'amend': 0,
 		'cancel': 0,
-		'create': 0,
+		'create': 1,
 		u'doctype': u'DocPerm',
-		'permlevel': 1,
+		'permlevel': 0,
+		'role': u'Material Manager',
+		'submit': 0,
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 1,
+		u'doctype': u'DocPerm',
+		'permlevel': 0,
 		'role': u'System Manager',
 		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		u'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Accounts Manager'
-	},
-
-	# DocPerm
-	{
-		'create': 1,
-		u'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Purchase Manager',
 		'write': 1
 	},
 
@@ -277,25 +269,7 @@
 		'create': 1,
 		u'doctype': u'DocPerm',
 		'permlevel': 0,
-		'role': u'Purchase User',
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'create': 1,
-		u'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Sales Manager',
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'create': 1,
-		u'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Sales User',
+		'role': u'Accounts Manager',
 		'write': 1
 	},
 
@@ -310,96 +284,8 @@
 
 	# DocPerm
 	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 1,
-		u'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'System Manager',
-		'submit': 0,
-		'write': 1
-	},
-
-	# DocPerm
-	{
 		u'doctype': u'DocPerm',
 		'permlevel': 1,
-		'role': u'Accounts User'
-	},
-
-	# DocPerm
-	{
-		u'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Sales User'
-	},
-
-	# DocPerm
-	{
-		u'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Sales Manager'
-	},
-
-	# DocPerm
-	{
-		u'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Purchase User'
-	},
-
-	# DocPerm
-	{
-		u'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Purchase Manager'
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		u'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Material Manager',
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 1,
-		u'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Material Manager',
-		'submit': 0,
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		u'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Material User',
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 1,
-		u'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Material User',
-		'submit': 0,
-		'write': 1
+		'role': u'All'
 	}
 ]
