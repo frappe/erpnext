@@ -15,8 +15,8 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 pscript['onload_accounts-home'] = function(wrapper) {
-	erpnext.module_page.setup_page('Accounts', wrapper);
 	wrapper.appframe = new wn.ui.AppFrame($(wrapper).find('.appframe-area'), 'Accounts');
+	erpnext.module_page.setup_page('Accounts', wrapper);
 	
 	if(wn.control_panel.country!='India') {
 		$('.india-specific').toggle(false);

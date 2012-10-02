@@ -14,9 +14,74 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+erpnext.modules = {
+	'Selling': 'selling-home',
+	'Accounts': 'accounts-home',
+	'Stock': 'stock-home',
+	'Buying': 'buying-home',
+	'Support': 'support-home',
+	'Projects': 'projects-home',
+	'Production': 'production-home',
+	'Website': 'website-home',
+	'HR': 'hr-home',
+	'Setup': 'Setup',
+	'Activity': 'activity',
+	'To Do': 'todo',
+	'Calendar': 'calendar',
+	'Messages': 'messages',
+	'Knowledge Base': 'questions',
+	'Dashboard': 'dashboard'
+}
+
+// wn.modules is used in breadcrumbs for getting module home page
+wn.provide('wn.modules');
+$.extend(wn.modules, erpnext.modules);
+wn.modules['Core'] = 'Setup';
+
+wn.module_css_classes  = {
+	'red': { start: '#A90329', middle: '#8F0222',	end: '#6D0019' },
+	'brown': { start: '#723e02', middle: '#633501', end: '#4a2700' },
+	'green': { start: '#4b5602', middle: '#3f4901', end: '#313800' },
+	'blue': { start: '#026584', middle: '#025770', end: '#004256' },
+	'yellow': { start: '#be7902', middle: '#a66a02', end: '#865500' },
+	'purple': { start: '#4d017d', middle: '#410169', end: '#310050' },
+	'ocean': { start: '#02a47e', middle: '#018d6c', end: '#006a51' },
+	'pink': { start: '#a40281', middle: '#8d016e', end: '#6a0053' },
+	'grey': { start: '#545454', middle: '#484848', end: '#363636' },
+	'dark-red': { start: '#68021a', middle: '#590116', end: '#440010' },
+	'leaf-green': { start: '#b0a400', middle: '#968c00', end: '#726a00' },
+	//'dark-blue': { start: '#023bae', middle: '#013295', end: '#002672' },
+	'bright-green': { start: '#03ad1f', middle: '#02941a', end: '#007213' },
+	'bright-yellow': { start: '#ffd65e', middle: '#febf04', end: '#ed9017' },
+	'peacock': { start: '#026584', middle: '#026584', end: '#322476' },
+	'violet': { start: '#50448e', middle: '#473b7f', end: '#3a3169' },
+	'ultra-dark-green': { start: '#014333', middle: '#01372b', end: '#002a20' },		
+}
+
+wn.module_css_map = {
+	'Accounts': 'blue',
+	'Selling': 'green',
+	'Stock': 'yellow',
+	'Buying': 'red',
+	'Support': 'purple',
+	'HR': 'ocean',
+	'Projects':	'violet',
+	'Production': 'dark-red',
+	'Website': 'leaf-green',
+	'Activity': 'brown',
+	'Setup': 'grey',
+	'Dashboard': 'bright-green',
+	'To Do': 'bright-yellow',
+	'Messages': 'pink',
+	'Calendar': 'peacock',
+	'Knowledge Base': 'ultra-dark-green'
+}
+
+
 wn.provide('erpnext.module_page');
 
 erpnext.module_page.setup_page = function(module, wrapper) {
+	wrapper.appframe.set_marker(module);
 	erpnext.module_page.hide_links(wrapper);
 	erpnext.module_page.make_list(module, wrapper);
 	$(wrapper).find("a[title]").tooltip({

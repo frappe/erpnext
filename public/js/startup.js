@@ -19,30 +19,6 @@ var is_system_manager = 0;
 
 wn.provide('erpnext.startup');
 
-erpnext.modules = {
-	'Selling': 'selling-home',
-	'Accounts': 'accounts-home',
-	'Stock': 'stock-home',
-	'Buying': 'buying-home',
-	'Support': 'support-home',
-	'Projects': 'projects-home',
-	'Production': 'production-home',
-	'Website': 'website-home',
-	'HR': 'hr-home',
-	'Setup': 'Setup',
-	'Activity': 'activity',
-	'To Do': 'todo',
-	'Calendar': 'calendar',
-	'Messages': 'messages',
-	'Knowledge Base': 'questions',
-	'Dashboard': 'dashboard'
-}
-
-// wn.modules is used in breadcrumbs for getting module home page
-wn.provide('wn.modules');
-$.extend(wn.modules, erpnext.modules);
-wn.modules['Core'] = 'Setup';
-
 erpnext.startup.set_globals = function() {
 	if(inList(user_roles,'System Manager')) is_system_manager = 1;
 }
@@ -168,11 +144,6 @@ erpnext.set_user_background = function(src) {
 	set_style(repl('#body_div { background: url("files/%(src)s") repeat;}', {src:src}))
 }
 
-// start
-$(document).bind('startup', function() {
-	erpnext.startup.start();
-});
-
 // subject, sender, description
 erpnext.send_message = function(opts) {
 	if(opts.btn) {
@@ -210,56 +181,7 @@ Mousetrap.bind(["command+s", "ctrl+s"], function() {
 	return false;
 });
 
-// theme setter
-
-erpnext.themes = {
-	"Default": {
-		sidebar: "#f2f2f2",
-		titlebar: "#dfdfdf",
-		toolbar: "#e9e9e9"
-	},
-	Desert: {
-		sidebar: "#FFFDF7",
-		titlebar: "#DAD4C2",
-		toolbar: "#FAF6E9"
-	},
-	Tropic: {
-		sidebar: "#FAFFF7",
-		toolbar: "#EEFAE9",
-		titlebar: "#D7ECD1"
-	},
-	Sky: {
-		sidebar: "#F7FFFE",
-		toolbar: "#E9F9FA",
-		titlebar: "#D7F5F7"
-	},
-	Snow: {
-		sidebar: "#fff",
-		titlebar: "#fff",
-		toolbar: "#fff"
-	},
-	Sunny: {
-		sidebar: "#FFFFEF",
-		titlebar: "#FFFDCA",
-		toolbar: "lightYellow"		
-	},
-	Floral: {
-		sidebar: "#FFF7F7",
-		titlebar: "#F7CBCB",
-		toolbar: "#FAE9EA"		
-	},
-	Ocean: {
-		sidebar: "#F2FFFE",
-		titlebar: "#8ACFC7",
-		toolbar: "#C3F3EE"
-	}
-}
-
-erpnext.set_theme = function(theme) {
-	wn.dom.set_style(repl(".layout-wrapper-background { \
-		background-color: %(sidebar)s !important; }\
-	.appframe-toolbar { \
-		background-color: %(toolbar)s !important; }\
-	.appframe-titlebar { \
-		background-color: %(titlebar)s !important; }", erpnext.themes[theme]));
-}
+// start
+$(document).bind('startup', function() {
+	erpnext.startup.start();
+});
