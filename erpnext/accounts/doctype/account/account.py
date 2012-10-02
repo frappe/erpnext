@@ -260,11 +260,8 @@ class DocType:
 	def on_trash(self): 
 		# Check balance before trash
 		self.check_balance_before_trash()
+		self.update_nsm_model()
 		
-		# rebuild tree
-		from webnotes.utils.nestedset import update_remove_node
-		update_remove_node('Account', self.doc.name)
-
 		# delete all cancelled gl entry of this account
 		sql("delete from `tabGL Entry` where account = %s and ifnull(is_cancelled, 'No') = 'Yes'", self.doc.name)
 
