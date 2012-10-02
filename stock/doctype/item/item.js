@@ -106,6 +106,7 @@ cur_frm.fields_dict['item_group'].get_query = function(doc,cdt,cdn) {
 cur_frm.cscript.add_image = function(doc, dt, dn) {
 	if(!doc.file_list) {
 		msgprint('Please attach a file first!');
+		return;
 	}
 
 	var f = doc.file_list.split('\n')[0];

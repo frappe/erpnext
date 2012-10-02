@@ -231,7 +231,12 @@ class DocType:
 		pr.name = pr.email = user_email
 		pr.enabled = 1
 		pr.save(1)
-		if pwd: webnotes.conn.sql("UPDATE `tabProfile` SET password=PASSWORD(%s) WHERE name=%s", (pwd, user_email))
+		if pwd:
+			webnotes.conn.sql("""insert into __Auth (user, `password`) 
+				values (%s, password(%s)) 
+				on duplicate key update `password`=password(%s)""", 
+				(user_email, pwd, pwd))
+				
 		self.add_roles(pr)
 	
 	def add_roles(self, pr):

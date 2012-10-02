@@ -30,7 +30,7 @@ wn.require('app/setup/doctype/notification_control/notification_control.js');
 // On Load
 // -------
 cur_frm.cscript.onload = function(doc,dt,dn) {
-	if(!doc.customer && doc.debit_to) get_field(dt, 'debit_to', dn).print_hide = 0;
+	if(!doc.customer && doc.debit_to) Meta.get_field(dt, 'debit_to', dn).print_hide = 0;
 	if (doc.__islocal) {
 		//if(!doc.voucher_date) set_multiple(dt,dn,{voucher_date:get_today()});
 		if(!doc.due_date) set_multiple(dt,dn,{due_date:get_today()});

@@ -14,23 +14,26 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 from __future__ import unicode_literals
 def execute():
 	import webnotes
-	sql = webnotes.conn.sql
-	from webnotes.model.code import get_obj
+	webnotes.conn.sql("""
+		delete from `tabDocPerm`
+		where 
+			role in ('Sales User', 'Sales Manager', 'Sales Master Manager', 
+				'Purchase User', 'Purchase Manager', 'Purchase Master Manager')
+			and parent = 'Sales and Purchase Return Tool'
+	""")
 	
-	# repost
-	comp = sql("select name from tabCompany where docstatus!=2")
-	fy = sql("select name from `tabFiscal Year` order by year_start_date asc")
-	for c in comp:
-		prev_fy = ''
-		for f in fy:
-			fy_obj = get_obj('Fiscal Year', f[0])
-			fy_obj.doc.past_year = prev_fy
-			fy_obj.doc.company = c[0]
-			fy_obj.repost()
-			prev_fy = f[0]
-			webnotes.conn.commit()
-			webnotes.conn.begin()
+	webnotes.conn.sql("""delete from `tabDocPerm` where ifnull(role, '') = ''""")
+	
+	if not webnotes.conn.sql("""select name from `tabDocPerm` where parent = 'Leave Application'
+			and role = 'Employee' and permlevel = 1"""):
+		from webnotes.model.code import get_obj
+		from webnotes.model.doc import addchild
+		leave_app = get_obj('DocType', 'Leave Application', with_children=1)
+		ch = addchild(leave_app.doc, 'permissions', 'DocPerm')
+		ch.role = 'Employee'
+		ch.permlevel = 1
+		ch.read = 1
+		ch.save()

@@ -42,13 +42,21 @@ class DocType(TransactionBase):
 		self.fname = 'enq_details'
 		self.tname = 'Opportunity Item'
 
-	# Autoname
-	# ====================================================================================================================
 	def autoname(self):
 		self.doc.name = make_autoname(self.doc.naming_series+'.####')
+		
+	def get_item_details(self, item_code):
+		item = sql("""select item_name, stock_uom, description_html, description, item_group, brand
+			from `tabItem` where name = %s""", item_code, as_dict=1)
+		ret = {
+			'item_name': item and item[0]['item_name'] or '',
+			'uom': item and item[0]['stock_uom'] or '',
+			'description': item and item[0]['description_html'] or item[0]['description'] or '',
+			'item_group': item and item[0]['item_group'] or '',
+			'brand': item and item[0]['brand'] or ''
+		}
+		return ret
 
-	#--------Get customer address-------
-	# ====================================================================================================================
 	def get_cust_address(self,name):
 		details = sql("select customer_name, address, territory, customer_group from `tabCustomer` where name = '%s' and docstatus != 2" %(name), as_dict = 1)
 		if details:
@@ -71,9 +79,7 @@ class DocType(TransactionBase):
 		else:
 			msgprint("Customer : %s does not exist in system." % (name))
 			raise Exception
-		
-
-	# ====================================================================================================================		
+			
 	def get_contact_details(self, arg):
 		arg = eval(arg)
 		contact = sql("select contact_no, email_id from `tabContact` where contact_name = '%s' and customer_name = '%s'" %(arg['contact_person'],arg['customer']), as_dict = 1)
@@ -83,18 +89,14 @@ class DocType(TransactionBase):
 		}
 		return ret
 		
-	# ====================================================================================================================
 	def on_update(self):
 		# Add to calendar
-		#if self.doc.contact_date and self.doc.last_contact_date != self.doc.contact_date:
 		if self.doc.contact_date and self.doc.contact_date_ref != self.doc.contact_date:
 			if self.doc.contact_by:
 				self.add_calendar_event()
 			set(self.doc, 'contact_date_ref',self.doc.contact_date)
 		set(self.doc, 'status', 'Draft')
-	
-	# Add to Calendar
-	# ====================================================================================================================
+
 	def add_calendar_event(self):
 		desc=''
 		user_lst =[]
@@ -133,8 +135,6 @@ class DocType(TransactionBase):
 			ch.person = d
 			ch.save(1)
 
-	#--------------Validation For Last Contact Date-----------------
-	# ====================================================================================================================
 	def set_last_contact_date(self):
 		if self.doc.contact_date_ref and self.doc.contact_date_ref != self.doc.contact_date:
 			if getdate(self.doc.contact_date_ref) < getdate(self.doc.contact_date):
@@ -142,16 +142,12 @@ class DocType(TransactionBase):
 			else:
 				msgprint("Contact Date Cannot be before Last Contact Date")
 				raise Exception
-	
-	# check if item present in item table
-	# ====================================================================================================================
+
 	def validate_item_details(self):
 		if not getlist(self.doclist, 'enquiry_details'):
 			msgprint("Please select items for which enquiry needs to be made")
 			raise Exception
-	
-	#check if enquiry date in the range of fiscal year selected
-	#=====================================================
+
 	def validate_fiscal_year(self):
 		fy=sql("select year_start_date from `tabFiscal Year` where name='%s'"%self.doc.fiscal_year)
 		ysd=fy and fy[0][0] or ""
@@ -166,19 +162,15 @@ class DocType(TransactionBase):
 		elif self.doc.enquiry_from == 'Customer' and not self.doc.customer:
 			msgprint("Customer is mandatory if 'Opportunity From' is selected as Customer", raise_exception=1)
 
-	
 	def validate(self):
 		self.validate_fiscal_year()
 		self.set_last_contact_date()
 		self.validate_item_details()
 		self.validate_lead_cust()
-		
-	# On Submit Functions
-	# ====================================================================================================================
+
 	def on_submit(self):
 		set(self.doc, 'status', 'Submitted')
-		
-	# ====================================================================================================================	
+	
 	def on_cancel(self):
 		chk = sql("select t1.name from `tabQuotation` t1, `tabQuotation Item` t2 where t2.parent = t1.name and t1.docstatus=1 and (t1.status!='Order Lost' and t1.status!='Cancelled') and t2.prevdoc_docname = %s",self.doc.name)
 		if chk:
@@ -187,8 +179,6 @@ class DocType(TransactionBase):
 		else:
 			set(self.doc, 'status', 'Cancelled')
 		
-	# declare as enquiry lost
-	#---------------------------
 	def declare_enquiry_lost(self,arg):
 		chk = sql("select t1.name from `tabQuotation` t1, `tabQuotation Item` t2 where t2.parent = t1.name and t1.docstatus=1 and (t1.status!='Order Lost' and t1.status!='Cancelled') and t2.prevdoc_docname = %s",self.doc.name)
 		if chk:
@@ -198,32 +188,3 @@ class DocType(TransactionBase):
 			set(self.doc, 'status', 'Opportunity Lost')
 			set(self.doc, 'order_lost_reason', arg)
 			return 'true'
-					
-	#---------------------- Add details in follow up table----------------
-	# ====================================================================================================================
-	def add_in_follow_up(self,message,type):
-		import datetime
-		child = addchild( self.doc, 'follow_up', 'Communication Log', 1, self.doclist)
-		child.date = datetime.datetime.now().date().strftime('%Y-%m-%d')
-		child.notes = message
-		child.follow_up_type = type
-		child.save()
-
-	#-------------------SMS----------------------------------------------
-	# ====================================================================================================================
-	def send_sms(self):
-		if not self.doc.sms_message:
-			msgprint("Please enter message in SMS Section ")
-			raise Exception
-		elif not getlist(self.doclist, 'enquiry_sms_detail'):
-			msgprint("Please mention mobile no. to which sms needs to be sent")
-			raise Exception
-		else:
-			receiver_list = []
-			for d in getlist(self.doclist,'enquiry_sms_detail'):
-				if d.other_mobile_no:
-					receiver_list.append(d.other_mobile_no)
-		
-		if receiver_list:
-			msgprint(get_obj('SMS Control', 'SMS Control').send_sms(receiver_list, self.doc.sms_message))
-			self.add_in_follow_up(self.doc.sms_message,'SMS')

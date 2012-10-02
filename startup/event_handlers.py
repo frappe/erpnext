@@ -118,8 +118,7 @@ def check_if_expired():
 	
 	# if expired, stop user from logging in
 	from webnotes.utils import formatdate
-	msg = """Oops! Your subscription expired on <b>%s</b>.
-		<br>Nothing catastrophic.<br>""" % formatdate(conf.expires_on)
+	msg = """Oops! Your subscription expired on <b>%s</b>.<br>""" % formatdate(conf.expires_on)
 	
 	if 'System Manager' in webnotes.user.roles:
 		msg += """Just drop in a mail at <b>support@erpnext.com</b> and
