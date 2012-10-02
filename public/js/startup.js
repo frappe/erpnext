@@ -38,6 +38,8 @@ erpnext.startup.start = function() {
 			erpnext.set_theme(wn.boot.profile.defaults.theme[0]);
 		}
 
+		erpnext.setup_mousetrap();
+		
 		// always allow apps
 		wn.boot.profile.allow_modules = wn.boot.profile.allow_modules.concat(
 			['To Do', 'Knowledge Base', 'Calendar', 'Activity', 'Messages'])
@@ -170,16 +172,18 @@ erpnext.hide_naming_series = function() {
 	}
 }
 
-Mousetrap.bind(["command+g", "ctrl+g"], function() {
-	wn.ui.toolbar.search.show();
-	return false;
-});
+erpnext.setup_mousetrap = function() {
+	Mousetrap.bind(["command+g", "ctrl+g"], function() {
+		wn.ui.toolbar.search.show();
+		return false;
+	});
 
-Mousetrap.bind(["command+s", "ctrl+s"], function() {
-	if(cur_frm)
-		cur_frm.save();
-	return false;
-});
+	Mousetrap.bind(["command+s", "ctrl+s"], function() {
+		if(cur_frm)
+			cur_frm.save();
+		return false;
+	});	
+}
 
 // start
 $(document).bind('startup', function() {
