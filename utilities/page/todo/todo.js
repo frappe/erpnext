@@ -27,24 +27,17 @@ erpnext.todo.refresh = function() {
 			
 			var nothing_to_do = function() {
 				$('#todo-list div.todo-content')
-					.html('<div class="help-box">Nothing to do :)</div>');
+					.html('<div class="alert">Nothing to do :)</div>');
 			}
 			
-			var nothing_delegated = function() {
-				$('#assigned-todo-list div.todo-content')
-					.html('<div class="help-box">Nothing assigned to other users. \
-							Use "Assign To" in a form to delegate work.</div>');
-			}
 			
 			if(r.message) {
 				for(var i in r.message) {
 					new erpnext.todo.ToDoItem(r.message[i]);
 				}
 				if (!todo_list.html()) { nothing_to_do(); }
-				if (!assigned_todo_list.html()) { nothing_delegated(); }
 			} else {
 				nothing_to_do();
-				nothing_delegated();				
 			}
 		}
 	});
@@ -70,7 +63,6 @@ erpnext.todo.ToDoItem = Class.extend({
 		
 		var parent_list = "#todo-list";
 		if(todo.owner !== user) {
-			parent_list = "#assigned-todo-list";
 			var owner = wn.boot.user_info[todo.owner];
 			todo.fullname = repl("[To %(fullname)s] &nbsp;", {
 				fullname: (owner ? owner.fullname : todo.owner),
@@ -79,7 +71,7 @@ erpnext.todo.ToDoItem = Class.extend({
 		parent_list += " div.todo-content";
 		
 		if(todo.reference_name && todo.reference_type) {
-			todo.link = repl('<br><a href="#!Form/%(reference_type)s/%(reference_name)s">\
+			todo.link = repl('<a href="#!Form/%(reference_type)s/%(reference_name)s">\
 						%(reference_type)s: %(reference_name)s</a>', todo);
 		} else if(todo.reference_type) {
 			todo.link = repl('<br><a href="#!List/%(reference_type)s">\
@@ -88,16 +80,14 @@ erpnext.todo.ToDoItem = Class.extend({
 			todo.link = '';
 		}
 		if(!todo.description) todo.description = '';
-		
-		todo.desc = wn.markdown(todo.description);
-		
+				
 		$(parent_list).append(repl('\
 			<div class="todoitem">\
 				<span class="label %(labelclass)s">%(priority)s</span>\
+				<span class="popup-on-click"><a href="#">[edit]</a></span>\
 				<span class="description">\
 					<span class="help" style="margin-right: 7px">%(userdate)s</span>\
-					%(fullname)s%(desc)s\
-					<span class="popup-on-click"><a href="#"> [edit]</a></span>\
+					%(fullname)s: %(description)s\
 					<span class="ref_link">%(link)s</span>\
 				</span>\
 				<span class="close-span"><a href="#" class="close">&times;</a></span>\
@@ -142,8 +132,7 @@ erpnext.todo.make_dialog = function(det) {
 			title: 'To Do', 
 			fields: [
 				{fieldtype:'Text', fieldname:'description', label:'Description', 
-					reqd:1, description:'Use <a href="#markdown-reference">markdown</a> to \
-						format content'},
+					reqd:1},
 				{fieldtype:'Date', fieldname:'date', label:'Event Date', reqd:1},
 				{fieldtype:'Check', fieldname:'checked', label:'Completed'},
 				{fieldtype:'Select', fieldname:'priority', label:'Priority', reqd:1, 'options':['Medium','High','Low'].join('\n')},

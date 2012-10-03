@@ -1,7 +1,5 @@
 // render
 wn.doclistviews['Support Ticket'] = wn.views.ListView.extend({
-	me: this,
-
 	init: function(d) {
 		this._super(d)
 		this.fields = this.fields.concat([
@@ -13,22 +11,22 @@ wn.doclistviews['Support Ticket'] = wn.views.ListView.extend({
 		this.show_hide_check_column();
 	},
 	
+	label_style: {
+		"status": {
+			"Open": "danger",
+			"Closed": "success",
+			"Hold": "info",
+			"Waiting for Customer": "info"
+		}
+	},
+	
 	prepare_data: function(data) {
 		this._super(data);
-		if(data.status=='Open' || data.status=='To Reply') {
-			data.label_type = 'important'
-		}
-		else if(data.status=='Closed') {
-			data.label_type = 'success'
-		}
-		else if(data.status=='Hold') {
-			data.label_type = 'info'
-		}
-		else if(data.status=='Waiting for Customer') {
-			data.label_type = 'info'
-			data.status = 'Waiting'
-		}
-		data.status_html = repl('<span class="label label-%(label_type)s">%(status)s</span>', data);
+		
+		data.label_style = this.label_style.status[data.status];
+		
+		data.status_html = repl('<span class="label \
+			label-%(label_style)s">%(status)s</span>', data);
 
 		// escape double quotes
 		data.description = cstr(data.subject)
