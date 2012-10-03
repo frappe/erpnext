@@ -1,5 +1,6 @@
 def execute():
 	import webnotes
+	from webnotes.utils import flt
 	vouchers = webnotes.conn.sql("""
 		select parent, parenttype, modified, sum(tax_amount) as tax from `tabPurchase Taxes and Charges`
 		where modified >= '2012-07-12'
