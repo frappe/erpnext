@@ -182,7 +182,7 @@ class DocType:
 			if le_map['table_field']:
 				for d in getlist(doclist,le_map['table_field']):
 					# purchase_tax_details is the table of other charges in purchase cycle
-					if le_map['table_field'] != 'purchase_tax_details' or (le_map['table_field'] == 'purchase_tax_details' and d.fields.get('category') != 'For Valuation'):
+					if le_map['table_field'] != 'purchase_tax_details' or (le_map['table_field'] == 'purchase_tax_details' and d.fields.get('category') != 'Valuation'):
 						self.make_single_entry(doc,d,le_map,cancel, merge_entries)
 			else:
 				self.make_single_entry(None,doc,le_map,cancel, merge_entries)

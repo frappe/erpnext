@@ -37,7 +37,7 @@ tax_acc = [c[0] for c in sql("""select distinct account_head
 							    from `tabPurchase Taxes and Charges` 
 							    where parenttype = 'Purchase Invoice' 
 							    and add_deduct_tax = 'Add' 
-							    and category in ('For Total', 'For Both')
+							    and category in ('Total', 'Valuation and Total')
 							    and docstatus=1
 							    order by account_head asc""")]
 						   
@@ -82,7 +82,7 @@ for r in res:
 						  where parent = '%s' 
 						  and parenttype = 'Purchase Invoice' 
 						  and add_deduct_tax = 'Add' 
-						  and category in ('For Total', 'For Both')
+						  and category in ('Total', 'Valuation and Total')
 						  group by account_head
 						""" %(r[col_idx['ID']],))
 

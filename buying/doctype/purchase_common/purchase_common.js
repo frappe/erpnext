@@ -498,7 +498,7 @@ cur_frm.cscript.calc_other_charges = function(doc , tname , fname , other_fname)
 				tax[t].tax_amount += flt(tax_amount);			 
 				var total_amount = flt(tax[t].tax_amount);
 				total_tax_amount = flt(tax[t].total_tax_amount) + flt(total_amount);
-				if(tax[t].category != "For Valuation"){
+				if(tax[t].category != "Valuation"){
 					set_multiple('Purchase Taxes and Charges', tax[t].name, { 'item_wise_tax_detail':tax[t].item_wise_tax_detail, 'amount':roundNumber(total_amount, 2), 'total':roundNumber(flt(total)+flt(tax[t].tax_amount), 2)}, other_fname);
 					prev_total += flt(tax[t].total_amount);
 					total += flt(tax[t].tax_amount);	// for adding total to previous amount			 
@@ -514,7 +514,7 @@ cur_frm.cscript.calc_other_charges = function(doc , tname , fname , other_fname)
 				else
 					$td(otc,i+1,t+1).innerHTML = '('+fmt_money(rate) + '%) ' +fmt_money(tax[t].total_amount);
 
-				if (tax[t].category != "For Total"){
+				if (tax[t].category != "Total"){
 					item_tax += tax[t].total_amount;
 				}
 			}
@@ -526,7 +526,7 @@ cur_frm.cscript.calc_other_charges = function(doc , tname , fname , other_fname)
 				tax[t].tax_amount += flt(tax_amount);
 				var total_amount = flt(tax[t].tax_amount);
 				total_tax_amount = flt(tax[t].total_tax_amount) - flt(total_amount);
-				if(tax[t].category != "For Valuation"){
+				if(tax[t].category != "Valuation"){
 					set_multiple('Purchase Taxes and Charges', tax[t].name, { 'item_wise_tax_detail':tax[t].item_wise_tax_detail, 'tax_amount':roundNumber(total_amount, 2), 'total':roundNumber(flt(total)-flt(tax[t].tax_amount), 2)}, other_fname);
 					prev_total -= flt(tax[t].total_amount); 
 					total -= flt(tax[t].tax_amount);	// for adding total to previous amount			 
@@ -542,7 +542,7 @@ cur_frm.cscript.calc_other_charges = function(doc , tname , fname , other_fname)
 				else
 					$td(otc,i+1,t+1).innerHTML = '('+fmt_money(rate) + '%) ' +fmt_money(tax[t].total_amount);
 
-				if (tax[t].category != "For Total"){
+				if (tax[t].category != "Total"){
 					item_tax -= tax[t].total_amount;
 				}
 			}			
@@ -608,7 +608,7 @@ cur_frm.cscript.calc_doc_values = function(doc, tname, fname, other_fname) {
 	}
 	var d = getchildren('Purchase Taxes and Charges', doc.name, other_fname,doc.doctype);
 	for(var j = 0; j<d.length; j++){
-		if(d[j].category != 'For Valuation'){
+		if(d[j].category != 'Valuation'){
 			
 			if(d[j].add_deduct_tax == 'Add'){
 				other_charges_added += flt(d[j].tax_amount);

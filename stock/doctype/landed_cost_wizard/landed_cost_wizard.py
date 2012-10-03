@@ -99,10 +99,10 @@ class DocType:
 				self.prwise_cost[pr] = self.prwise_cost.get(pr, 0) + amt
 				cumulative_grand_total += amt
 				
-				pr_oc_row = sql("select name from `tabPurchase Taxes and Charges` where parent = %s and category = 'For Valuation' and add_deduct_tax = 'Add' and charge_type = 'Actual' and account_head = %s",(pr, lc.account_head))
+				pr_oc_row = sql("select name from `tabPurchase Taxes and Charges` where parent = %s and category = 'Valuation' and add_deduct_tax = 'Add' and charge_type = 'Actual' and account_head = %s",(pr, lc.account_head))
 				if not pr_oc_row:	# add if not exists
 					ch = addchild(pr_obj.doc, 'purchase_tax_details', 'Purchase Taxes and Charges', 1)
-					ch.category = 'For Valuation'
+					ch.category = 'Valuation'
 					ch.add_deduct_tax = 'Add'
 					ch.charge_type = 'Actual'
 					ch.description = lc.description
@@ -201,7 +201,7 @@ class DocType:
 		total_amount = flt(ocd[oc].tax_amount)
 		total_tax_amount = flt(ocd[oc].total_tax_amount) + (add_ded * flt(total_amount))
 		
-		if ocd[oc].category != "For Valuation":	
+		if ocd[oc].category != "Valuation":	
 			prev_total += add_ded * flt(ocd[oc].total_amount)
 			total += add_ded * flt(ocd[oc].tax_amount)
 			ocd[oc].total = total
@@ -210,7 +210,7 @@ class DocType:
 			ocd[oc].total = flt(total)
 		ocd[oc].save()
 				
-		if ocd[oc].category != "For Total":
+		if ocd[oc].category != "Total":
 			item_tax += add_ded * ocd[oc].total_amount
 		
 		return total, prev_total, item_tax
