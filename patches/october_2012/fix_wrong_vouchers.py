@@ -5,11 +5,11 @@ def execute():
 
 	vouchers = webnotes.conn.sql("""
 		select 
-			parent, parenttype, modified, 
+			parent, parenttype, modified, docstatus, 
 			sum(if(category in ('Valuation and Total', 'Total') and add_deduct_tax='Add',
  				tax_amount, 0)) as tax_added, 
 			sum(if(category in ('Valuation and Total', 'Total') and add_deduct_tax='Deduct', 
- 				tax_amount, 0)) as tax_ded
+ 				tax_amount, 0)) as tax_ded			
 		from 
 			`tabPurchase Taxes and Charges`
 		where 
@@ -46,11 +46,12 @@ def execute():
 					(correct_total_tax, d['tax_added'], d['tax_ded'], d['parent']))
 					
 				# post gl entry
-				webnotes.conn.sql("""update `tabGL Entry` set is_cancelled = 'No' 
-					where voucher_type = %s and voucher_no = %s""", 
-					(d['parenttype'], d['parent']))
-				obj = get_obj(d['parenttype'], d['parent'], with_children=1)
-				obj.make_gl_entries()
+				if d['docstatus'] == 1:
+					webnotes.conn.sql("""update `tabGL Entry` set is_cancelled = 'No' 
+						where voucher_type = %s and voucher_no = %s""", 
+						(d['parenttype'], d['parent']))
+					obj = get_obj(d['parenttype'], d['parent'], with_children=1)
+					obj.make_gl_entries()
 				
 			else:
 				webnotes.conn.sql("""
