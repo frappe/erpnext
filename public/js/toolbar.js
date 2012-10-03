@@ -99,7 +99,9 @@ erpnext.toolbar.set_new_comments = function(new_comments) {
 		$.each(new_comments, function(i, v) {
 			var msg = 'New Message: ' + (v[1].length<=100 ? v[1] : (v[1].substr(0, 100) + "..."));
 			var id = v[0].replace('/', '-');
-			if(!$('#' + id)[0]) { show_alert(msg, id); }
+			if(!$('#' + id)[0]) { 
+				show_alert(msg).attr("id", id);
+			}
 		})
 	} else {
 		navbar_nc.removeClass('navbar-new-comments-true');
