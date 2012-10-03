@@ -12,5 +12,5 @@ def execute():
 	for d in vouchers:
 		total_tax = webnotes.conn.sql("""select total_tax from `tab%s` where name = %s""" %
 			(d[1], '%s'), d[0])
-		if flt(total_tax[0][0]) != flt(d[3]):
+		if total_tax and flt(total_tax[0][0]) != flt(d[3]):
 			print d
