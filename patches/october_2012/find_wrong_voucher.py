@@ -2,7 +2,7 @@ def execute():
 	import webnotes
 	from webnotes.utils import flt
 	vouchers = webnotes.conn.sql("""
-		select parent, parenttype, modified, sum(tax_amount) as tax from `tabPurchase Taxes and Charges`
+		select parent, parenttype, modified, sum(if(add_deduct_tax='Add', tax_amount, -tax_amount)) as tax from `tabPurchase Taxes and Charges`
 		where modified >= '2012-07-12'
 		and category in ('Total', 'Valuation and Total')
 		and parenttype != 'Purchase Taxes and Charges Master'
