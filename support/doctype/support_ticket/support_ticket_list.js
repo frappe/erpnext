@@ -5,7 +5,9 @@ wn.doclistviews['Support Ticket'] = wn.views.ListView.extend({
 		this.fields = this.fields.concat([
 			"`tabSupport Ticket`.status", 
 			"`tabSupport Ticket`.subject",
-			"`tabSupport Ticket`.description"
+			"`tabSupport Ticket`.description",
+			'`tabSupport Ticket`.modified_by'
+			
 		]);
 		this.stats = this.stats.concat(['status']);
 		this.show_hide_check_column();
@@ -38,10 +40,11 @@ wn.doclistviews['Support Ticket'] = wn.views.ListView.extend({
 	
 	columns: [
 		{width: '3%', content: 'check'},
+		{width: '5%', content:'avatar_modified'},
 		{width: '20%', content:'name'},
 		{width: '10%', content:'status_html'},		
 		{width: '50%', content:'description+tags', css: {color:'#222'}},
-		{width: '14%', content:'modified', css: {'text-align': 'right', 'color':'#777'}}
+		{width: '12%', content:'modified', css: {'text-align': 'right', 'color':'#777'}}
 	]
 
 });
