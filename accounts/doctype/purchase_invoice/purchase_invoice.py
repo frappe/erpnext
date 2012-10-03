@@ -481,7 +481,8 @@ class DocType(TransactionBase):
 		pc_obj = get_obj(dt='Purchase Common')
 		
 		 # get total in words
-		self.doc.in_words = pc_obj.get_total_in_words('Rs', self.doc.grand_total)
+		dcc = TransactionBase().get_company_currency(self.doc.company)
+		self.doc.in_words = pc_obj.get_total_in_words(dcc, self.doc.grand_total)
 		self.doc.in_words_import = pc_obj.get_total_in_words(self.doc.currency, self.doc.grand_total_import)
 # ***************************** SUBMIT *****************************
 	# Check Ref Document docstatus

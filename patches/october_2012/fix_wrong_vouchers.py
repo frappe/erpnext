@@ -2,7 +2,8 @@ def execute():
 	import webnotes
 	from webnotes.utils import flt
 	from webnotes.model.code import get_obj
-
+	from webnotes.utils import money_in_words
+	
 	vouchers = webnotes.conn.sql("""
 		select 
 			parent, parenttype, modified, docstatus, 
@@ -26,7 +27,7 @@ def execute():
 			(d['parenttype'], '%s'), d['parent'])
 		correct_total_tax = flt(d['tax_added']) - flt(d['tax_ded'])
 		
-		if flt(current_total_tax[0][0]) != correct_total_tax:
+		if flt(current_total_tax[0][0]) != correct_total_tax:			
 			if d['parenttype'] == 'Purchase Invoice':
 				webnotes.conn.sql("""
 					update `tab%s` 
@@ -43,15 +44,7 @@ def execute():
 					where 
 						name = %s
 				""" % (d['parenttype'], '%s', '%s', '%s', '%s'), 
-					(correct_total_tax, d['tax_added'], d['tax_ded'], d['parent']))
-					
-				# post gl entry
-				if d['docstatus'] == 1:
-					webnotes.conn.sql("""update `tabGL Entry` set is_cancelled = 'No' 
-						where voucher_type = %s and voucher_no = %s""", 
-						(d['parenttype'], d['parent']))
-					obj = get_obj(d['parenttype'], d['parent'], with_children=1)
-					obj.make_gl_entries()
+					(correct_total_tax, d['tax_added'], d['tax_ded'], d['parent']))				
 				
 			else:
 				webnotes.conn.sql("""
@@ -63,3 +56,22 @@ def execute():
 					where 
 						name = %s
 				""" % (d[1], '%s', '%s'), (correct_total_tax, d['parent']))
+			
+			# set in words
+			obj = get_obj(d['parenttype'], d['parent'], with_children=1)
+			
+			base_currency = webnotes.conn.get_value('Company', obj.doc.company, 'default_currency')\
+				or get_defaults('default_currency')
+				
+			webnotes.conn.set_value(d['parenttype'], d['parent'], \
+				'in_words', money_in_words(obj.doc.grand_total, base_currency))
+			webnotes.conn.set_value(d['parenttype'], d['parent'], \
+				'in_words_import', money_in_words(obj.doc.grand_total_import, obj.doc.currency))
+			
+			# fix gl entries
+			if d['parenttype'] == 'Purchase Invoice' and d['docstatus'] == 1:
+				webnotes.conn.sql("""update `tabGL Entry` set is_cancelled = 'No' 
+					where voucher_type = %s and voucher_no = %s""", 
+					(d['parenttype'], d['parent']))
+				
+				obj.make_gl_entries()
