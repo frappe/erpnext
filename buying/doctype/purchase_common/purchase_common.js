@@ -469,16 +469,18 @@ cur_frm.cscript.calc_other_charges = function(doc , tname , fname , other_fname)
 		//--------------------------
 		$td(otc,i+1,0).innerHTML = cl[i].item_code;
 		
-		var tax = getchildren('Purchase Taxes and Charges', doc.name, other_fname,doc.doctype);
 		var total = net_total;
 		for(var t=0;t<tax.length;t++){
  
 			var account = tax[t].account_head;
 			$td(otc,0,t+1).innerHTML = account?account:'';
 			//Check For Rate
-			if(cl[i].item_tax_rate && check_tax[account]!=null)	{rate = flt(check_tax[account]);}
-			else							 // if particular item doesn't have particular rate it will take other charges rate
+			if(cl[i].item_tax_rate && check_tax[account]!=null)	{
+				rate = flt(check_tax[account]);
+			} else {
+				// if particular item doesn't have particular rate it will take other charges rate
 				rate = flt(tax[t].rate);
+			}
 
 			//Check For Rate and get tax amount
 			var tax_amount = cur_frm.cscript.check_charge_type_and_get_tax_amount(doc,tax,t, cl[i], rate);
@@ -491,18 +493,18 @@ cur_frm.cscript.calc_other_charges = function(doc , tname , fname , other_fname)
 			if(tax[t].add_deduct_tax == 'Add'){
 				// this is calculation part for all types
 				if(tax[t].charge_type != "Actual") tax[t].item_wise_tax_detail += item_wise_tax_detail;
-				tax[t].total_amount = flt(tax_amount.toFixed(2));		 //stores actual tax amount in virtual field
-				tax[t].total_tax_amount = flt(prev_total.toFixed(2));			//stores total amount in virtual field
-				tax[t].tax_amount += flt(tax_amount.toFixed(2));			 
+				tax[t].total_amount = flt(tax_amount);		 //stores actual tax amount in virtual field
+				tax[t].total_tax_amount = flt(prev_total);			//stores total amount in virtual field
+				tax[t].tax_amount += flt(tax_amount);			 
 				var total_amount = flt(tax[t].tax_amount);
 				total_tax_amount = flt(tax[t].total_tax_amount) + flt(total_amount);
-				if(tax[t].category != "For Valuation"){
-					set_multiple('Purchase Taxes and Charges', tax[t].name, { 'item_wise_tax_detail':tax[t].item_wise_tax_detail, 'amount':total_amount, 'total':flt(total)+flt(tax[t].tax_amount)/*_tax_amount)*/}, other_fname);
+				if(tax[t].category != "Valuation"){
+					set_multiple('Purchase Taxes and Charges', tax[t].name, { 'item_wise_tax_detail':tax[t].item_wise_tax_detail, 'amount':roundNumber(total_amount, 2), 'total':roundNumber(flt(total)+flt(tax[t].tax_amount), 2)}, other_fname);
 					prev_total += flt(tax[t].total_amount);
 					total += flt(tax[t].tax_amount);	// for adding total to previous amount			 
 				}
 				else{
-					set_multiple('Purchase Taxes and Charges', tax[t].name, { 'item_wise_tax_detail':tax[t].item_wise_tax_detail, 'amount':total_amount, 'total':flt(total)/*_tax_amount)*/}, other_fname);
+					set_multiple('Purchase Taxes and Charges', tax[t].name, { 'item_wise_tax_detail':tax[t].item_wise_tax_detail, 'amount':roundNumber(total_amount, 2), 'total':roundNumber(flt(total), 2)}, other_fname);
 					prev_total = prev_total;
 				}
 				//prev_total += flt(tax[t].total_amount);	 // for previous row total
@@ -512,25 +514,25 @@ cur_frm.cscript.calc_other_charges = function(doc , tname , fname , other_fname)
 				else
 					$td(otc,i+1,t+1).innerHTML = '('+fmt_money(rate) + '%) ' +fmt_money(tax[t].total_amount);
 
-				if (tax[t].category != "For Total"){
+				if (tax[t].category != "Total"){
 					item_tax += tax[t].total_amount;
 				}
 			}
 			else if(tax[t].add_deduct_tax == 'Deduct'){
 				// this is calculation part for all types
 				if(tax[t].charge_type != "Actual") tax[t].item_wise_tax_detail += item_wise_tax_detail;
-				tax[t].total_amount = flt(tax_amount.toFixed(2));		 //stores actual tax amount in virtual field
-				tax[t].total_tax_amount = flt(prev_total.toFixed(2));			//stores total amount in virtual field
-				tax[t].tax_amount += flt(tax_amount.toFixed(2));
+				tax[t].total_amount = flt(tax_amount);		 //stores actual tax amount in virtual field
+				tax[t].total_tax_amount = flt(prev_total);			//stores total amount in virtual field
+				tax[t].tax_amount += flt(tax_amount);
 				var total_amount = flt(tax[t].tax_amount);
 				total_tax_amount = flt(tax[t].total_tax_amount) - flt(total_amount);
-				if(tax[t].category != "For Valuation"){
-					set_multiple('Purchase Taxes and Charges', tax[t].name, { 'item_wise_tax_detail':tax[t].item_wise_tax_detail, 'tax_amount':total_amount, 'total':flt(total)-flt(tax[t].tax_amount)/*_tax_amount)*/}, other_fname);
+				if(tax[t].category != "Valuation"){
+					set_multiple('Purchase Taxes and Charges', tax[t].name, { 'item_wise_tax_detail':tax[t].item_wise_tax_detail, 'tax_amount':roundNumber(total_amount, 2), 'total':roundNumber(flt(total)-flt(tax[t].tax_amount), 2)}, other_fname);
 					prev_total -= flt(tax[t].total_amount); 
 					total -= flt(tax[t].tax_amount);	// for adding total to previous amount			 
 				}
 				else{
-					set_multiple('Purchase Taxes and Charges', tax[t].name, { 'item_wise_tax_detail':tax[t].item_wise_tax_detail, 'tax_amount':total_amount, 'total':flt(total)/*_tax_amount)*/}, other_fname);
+					set_multiple('Purchase Taxes and Charges', tax[t].name, { 'item_wise_tax_detail':tax[t].item_wise_tax_detail, 'tax_amount':roundNumber(total_amount, 2), 'total':roundNumber(flt(total), 2)}, other_fname);
 					prev_total = prev_total;
 				}
 				//prev_total += flt(tax[t].total_amount);	 // for previous row total
@@ -540,7 +542,7 @@ cur_frm.cscript.calc_other_charges = function(doc , tname , fname , other_fname)
 				else
 					$td(otc,i+1,t+1).innerHTML = '('+fmt_money(rate) + '%) ' +fmt_money(tax[t].total_amount);
 
-				if (tax[t].category != "For Total"){
+				if (tax[t].category != "Total"){
 					item_tax -= tax[t].total_amount;
 				}
 			}			
@@ -549,66 +551,9 @@ cur_frm.cscript.calc_other_charges = function(doc , tname , fname , other_fname)
 		}
 		set_multiple(tname, cl[i].name, {'item_tax_amount': item_tax }, fname);
 	}
-}
-
-
-
-
-// ******* Calculation of total amounts of document (item amount + other charges)****************
-cur_frm.cscript.calc_doc_values = function(doc, tname, fname, other_fname) {
-	doc = locals[doc.doctype][doc.name];
-	var net_total = 0; var total_tax = 0; var other_charges_added = 0; 
-	var other_charges_deducted = 0;
-	var cl = getchildren(tname, doc.name, fname);
-	for(var i = 0; i<cl.length; i++){
-		net_total += flt(cl[i].amount);
+	for(var t=0;t<tax.length;t++){
+		tax[t].tax_amount = roundNumber(tax[t].tax_amount, 2);
 	}
-	var d = getchildren('Purchase Taxes and Charges', doc.name, other_fname,doc.doctype);
-	for(var j = 0; j<d.length; j++){
-		if(d[j].category != 'For Valuation'){
-			
-			if(d[j].add_deduct_tax == 'Add'){
-				other_charges_added += flt(d[j].tax_amount);
-				total_tax += flt(d[j].tax_amount);
-			}
-			if(d[j].add_deduct_tax == 'Deduct'){
-				other_charges_deducted += flt(d[j].tax_amount);
-				total_tax -= flt(d[j].tax_amount);
-			}
-		}
-	}
-	doc.net_total = flt(net_total);
-	doc.total_tax = flt(total_tax);
-
-	doc.other_charges_added = flt(other_charges_added);
-	doc.other_charges_deducted = flt(other_charges_deducted);
-	doc.grand_total = flt(flt(net_total) + flt(other_charges_added) - flt(other_charges_deducted));
-	doc.rounded_total = Math.round(doc.grand_total);
-	doc.net_total_import = flt(flt(net_total) / flt(doc.conversion_rate));
-	doc.other_charges_added_import = flt(flt(other_charges_added) / flt(doc.conversion_rate));
-	doc.other_charges_deducted_import = flt(flt(other_charges_deducted) / flt(doc.conversion_rate));
-	doc.grand_total_import = flt(flt(doc.grand_total) / flt(doc.conversion_rate));
-	doc.rounded_total_import = Math.round(doc.grand_total_import);
-
-	refresh_many(['net_total','total_taxes','grand_total']);
-
-
-	if(doc.doctype == 'Purchase Invoice'){
-		calculate_outstanding(doc);
-	}
-}
-
-var calculate_outstanding = function(doc) {
-	var t_tds_tax = 0.0;	
-	doc.total_tds_on_voucher = flt(doc.ded_amount);
-
-	// total amount to pay	
-	doc.total_amount_to_pay = flt(flt(doc.net_total) + flt(doc.other_charges_added) - flt(doc.other_charges_deducted) - flt(doc.total_tds_on_voucher));
-	
-	// outstanding amount 
-	if(doc.docstatus==0) doc.outstanding_amount = flt(doc.net_total) + flt(doc.other_charges_added) - flt(doc.other_charges_deducted) - flt(doc.total_tds_on_voucher) - flt(doc.total_advance);
-	
-	refresh_many(['total_tds_on_voucher','total_amount_to_pay', 'outstanding_amount']);
 }
 
 
@@ -651,6 +596,64 @@ cur_frm.cscript.check_charge_type_and_get_tax_amount = function(doc, tax, t, cl,
 		 }
 	}
 }
+
+// ******* Calculation of total amounts of document (item amount + other charges)****************
+cur_frm.cscript.calc_doc_values = function(doc, tname, fname, other_fname) {
+	doc = locals[doc.doctype][doc.name];
+	var net_total = 0; var total_tax = 0; var other_charges_added = 0; 
+	var other_charges_deducted = 0;
+	var cl = getchildren(tname, doc.name, fname);
+	for(var i = 0; i<cl.length; i++){
+		net_total += flt(cl[i].amount);
+	}
+	var d = getchildren('Purchase Taxes and Charges', doc.name, other_fname,doc.doctype);
+	for(var j = 0; j<d.length; j++){
+		if(d[j].category != 'Valuation'){
+			
+			if(d[j].add_deduct_tax == 'Add'){
+				other_charges_added += flt(d[j].tax_amount);
+				total_tax += flt(d[j].tax_amount);
+			}
+			if(d[j].add_deduct_tax == 'Deduct'){
+				other_charges_deducted += flt(d[j].tax_amount);
+				total_tax -= flt(d[j].tax_amount);
+			}
+		}
+	}
+	doc.net_total = flt(net_total);
+	doc.total_tax = flt(total_tax);
+
+	doc.other_charges_added = roundNumber(flt(other_charges_added), 2);
+	doc.other_charges_deducted = roundNumber(flt(other_charges_deducted), 2);
+	doc.grand_total = roundNumber(flt(flt(net_total) + flt(other_charges_added) - flt(other_charges_deducted)), 2);
+	doc.rounded_total = Math.round(doc.grand_total);
+	doc.net_total_import = roundNumber(flt(flt(net_total) / flt(doc.conversion_rate)), 2);
+	doc.other_charges_added_import = roundNumber(flt(flt(other_charges_added) / flt(doc.conversion_rate)), 2);
+	doc.other_charges_deducted_import = roundNumber(flt(flt(other_charges_deducted) / flt(doc.conversion_rate)), 2);
+	doc.grand_total_import = roundNumber(flt(flt(doc.grand_total) / flt(doc.conversion_rate)), 2);
+	doc.rounded_total_import = Math.round(doc.grand_total_import);
+
+	refresh_many(['net_total','total_taxes','grand_total']);
+
+
+	if(doc.doctype == 'Purchase Invoice'){
+		calculate_outstanding(doc);
+	}
+}
+
+var calculate_outstanding = function(doc) {
+	var t_tds_tax = 0.0;	
+	doc.total_tds_on_voucher = flt(doc.ded_amount);
+
+	// total amount to pay	
+	doc.total_amount_to_pay = flt(flt(doc.net_total) + flt(doc.other_charges_added) - flt(doc.other_charges_deducted) - flt(doc.total_tds_on_voucher));
+	
+	// outstanding amount 
+	if(doc.docstatus==0) doc.outstanding_amount = flt(doc.net_total) + flt(doc.other_charges_added) - flt(doc.other_charges_deducted) - flt(doc.total_tds_on_voucher) - flt(doc.total_advance);
+	
+	refresh_many(['total_tds_on_voucher','total_amount_to_pay', 'outstanding_amount']);
+}
+
 
 cur_frm.cscript.toggle_contact_section = function(doc) {
 	cur_frm.toggle_display("contact_section", doc.supplier);
