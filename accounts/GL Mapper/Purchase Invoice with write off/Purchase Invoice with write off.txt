@@ -3,24 +3,24 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-04-23 11:43:56',
-		'docstatus': 0,
-		'modified': '2012-04-23 11:43:56',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
+		u'creation': '2012-04-30 19:55:05',
+		u'docstatus': 0,
+		u'modified': '2012-10-03 11:08:09',
+		u'modified_by': u'Administrator',
+		u'owner': u'Administrator'
 	},
 
 	# These values are common for all GL Mapper
 	{
 		'doc_type': u'Purchase Invoice with write off',
-		'doctype': 'GL Mapper',
-		'name': '__common__'
+		u'doctype': u'GL Mapper',
+		u'name': u'__common__'
 	},
 
 	# These values are common for all GL Mapper Detail
 	{
-		'doctype': u'GL Mapper Detail',
-		'name': '__common__',
+		u'doctype': u'GL Mapper Detail',
+		u'name': u'__common__',
 		'parent': u'Purchase Invoice with write off',
 		'parentfield': u'fields',
 		'parenttype': u'GL Mapper'
@@ -28,8 +28,8 @@
 
 	# GL Mapper, Purchase Invoice with write off
 	{
-		'doctype': 'GL Mapper',
-		'name': u'Purchase Invoice with write off'
+		u'doctype': u'GL Mapper',
+		u'name': u'Purchase Invoice with write off'
 	},
 
 	# GL Mapper Detail
@@ -41,7 +41,7 @@
 		'cost_center': u'cost_center',
 		'credit': u'value:0',
 		'debit': u'amount',
-		'doctype': u'GL Mapper Detail',
+		u'doctype': u'GL Mapper Detail',
 		'fiscal_year': u'parent:fiscal_year',
 		'is_opening': u'parent:is_opening',
 		'posting_date': u'parent:posting_date',
@@ -59,9 +59,9 @@
 		'aging_date': u'parent:aging_date',
 		'company': u'parent:company',
 		'cost_center': u'cost_center',
-		'credit': u"value:d.fields.get('category') != 'For Valuation' and d.fields.get('add_deduct_tax') == 'Deduct' and d.fields.get('tax_amount') or 0",
-		'debit': u"value:d.fields.get('category') != 'For Valuation' and d.fields.get('add_deduct_tax') == 'Add' and d.fields.get('tax_amount') or 0",
-		'doctype': u'GL Mapper Detail',
+		'credit': u"value:d.fields.get('category') != 'Valuation' and d.fields.get('add_deduct_tax') == 'Deduct' and d.fields.get('tax_amount') or 0",
+		'debit': u"value:d.fields.get('category') != 'Valuation' and d.fields.get('add_deduct_tax') == 'Add' and d.fields.get('tax_amount') or 0",
+		u'doctype': u'GL Mapper Detail',
 		'fiscal_year': u'parent:fiscal_year',
 		'is_opening': u'parent:is_opening',
 		'posting_date': u'parent:posting_date',
@@ -80,7 +80,7 @@
 		'company': u'company',
 		'credit': u'ded_amount',
 		'debit': u'value:0',
-		'doctype': u'GL Mapper Detail',
+		u'doctype': u'GL Mapper Detail',
 		'fiscal_year': u'fiscal_year',
 		'is_opening': u'is_opening',
 		'posting_date': u'posting_date',
@@ -100,7 +100,7 @@
 		'company': u'company',
 		'credit': u'total_amount_to_pay',
 		'debit': u'value:0',
-		'doctype': u'GL Mapper Detail',
+		u'doctype': u'GL Mapper Detail',
 		'fiscal_year': u'fiscal_year',
 		'is_opening': u'is_opening',
 		'posting_date': u'posting_date',
@@ -119,7 +119,7 @@
 		'cost_center': u'write_off_cost_center',
 		'credit': u'write_off_amount',
 		'debit': u'value:0',
-		'doctype': u'GL Mapper Detail',
+		u'doctype': u'GL Mapper Detail',
 		'fiscal_year': u'fiscal_year',
 		'is_opening': u'is_opening',
 		'posting_date': u'posting_date',

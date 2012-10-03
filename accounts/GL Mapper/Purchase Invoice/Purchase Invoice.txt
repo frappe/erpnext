@@ -1,1 +1,112 @@
-[{'doc_type': 'Purchase Invoice', 'modified_by': 'nabin@webnotestech.com', 'name': 'Purchase Invoice', 'parent': None, 'creation': '2009-03-12 12:09:24', 'modified': '2010-05-26 16:48:58', 'module': 'Accounts', 'doctype': 'GL Mapper', 'idx': None, 'parenttype': None, 'owner': 'Administrator', 'docstatus': 0, 'parentfield': None}, {'creation': '2009-03-12 12:09:24', 'voucher_type': 'parent:doctype', 'doctype': 'GL Mapper Detail', 'owner': 'Administrator', 'cost_center': 'cost_center', 'voucher_no': 'parent:name', 'modified_by': 'nabin@webnotestech.com', 'against_voucher': None, 'table_field': 'entries', 'transaction_date': 'parent:voucher_date', 'debit': 'amount', 'docstatus': 0, 'parent': 'Purchase Invoice', 'company': 'parent:company', 'aging_date': 'parent:aging_date', 'fiscal_year': 'parent:fiscal_year', 'is_advance': None, 'remarks': 'parent:remarks', 'account': 'expense_head', 'name': 'GLMDetail00002', 'idx': 1, 'against_voucher_type': None, 'modified': '2010-05-26 16:48:58', 'against': 'parent:credit_to', 'credit': 'value:0', 'parenttype': 'GL Mapper', 'is_opening': 'parent:is_opening', 'posting_date': 'parent:posting_date', 'parentfield': 'fields'}, {'creation': '2009-03-12 12:09:24', 'voucher_type': 'parent:doctype', 'doctype': 'GL Mapper Detail', 'owner': 'Administrator', 'cost_center': 'cost_center', 'voucher_no': 'parent:name', 'modified_by': 'nabin@webnotestech.com', 'against_voucher': None, 'table_field': 'purchase_tax_details', 'transaction_date': 'parent:voucher_date', 'debit': "value:d.fields.get('category') != 'For Valuation' and d.fields.get('add_deduct_tax') == 'Add' and d.fields.get('tax_amount') or 0", 'docstatus': 0, 'parent': 'Purchase Invoice', 'company': 'parent:company', 'aging_date': 'parent:aging_date', 'fiscal_year': 'parent:fiscal_year', 'is_advance': None, 'remarks': 'parent:remarks', 'account': 'account_head', 'name': 'GLMDetail00003', 'idx': 2, 'against_voucher_type': None, 'modified': '2010-05-26 16:48:58', 'against': 'parent:credit_to', 'credit': "value:d.fields.get('category') != 'For Valuation' and d.fields.get('add_deduct_tax') == 'Deduct' and d.fields.get('tax_amount') or 0", 'parenttype': 'GL Mapper', 'is_opening': 'parent:is_opening', 'posting_date': 'parent:posting_date', 'parentfield': 'fields'}, {'creation': '2009-03-12 12:09:24', 'voucher_type': 'doctype', 'doctype': 'GL Mapper Detail', 'owner': 'Administrator', 'cost_center': '', 'voucher_no': 'name', 'modified_by': 'nabin@webnotestech.com', 'against_voucher': None, 'table_field': '', 'transaction_date': 'voucher_date', 'debit': 'value:0', 'docstatus': 0, 'parent': 'Purchase Invoice', 'company': 'company', 'aging_date': 'aging_date', 'fiscal_year': 'fiscal_year', 'is_advance': None, 'remarks': 'remarks', 'account': 'tax_code', 'name': 'GLMDetail00004', 'idx': 3, 'against_voucher_type': None, 'modified': '2010-05-26 16:48:58', 'against': 'credit_to', 'credit': 'ded_amount', 'parenttype': 'GL Mapper', 'is_opening': 'is_opening', 'posting_date': 'posting_date', 'parentfield': 'fields'}, {'creation': '2009-03-12 12:09:24', 'voucher_type': 'doctype', 'doctype': 'GL Mapper Detail', 'owner': 'Administrator', 'cost_center': '', 'voucher_no': 'name', 'modified_by': 'nabin@webnotestech.com', 'against_voucher': 'name', 'table_field': '', 'transaction_date': 'voucher_date', 'debit': 'value:0', 'docstatus': 0, 'parent': 'Purchase Invoice', 'company': 'company', 'aging_date': 'aging_date', 'fiscal_year': 'fiscal_year', 'is_advance': None, 'remarks': 'remarks', 'account': 'credit_to', 'name': 'GLMDetail00005', 'idx': 4, 'against_voucher_type': "value:'Purchase Invoice'", 'modified': '2010-05-26 16:48:58', 'against': 'against_expense_account', 'credit': 'total_amount_to_pay', 'parenttype': 'GL Mapper', 'is_opening': 'is_opening', 'posting_date': 'posting_date', 'parentfield': 'fields'}]
+# GL Mapper, Purchase Invoice
+[
+
+	# These values are common in all dictionaries
+	{
+		u'creation': '2012-04-30 19:55:04',
+		u'docstatus': 0,
+		u'modified': '2012-10-03 11:07:26',
+		u'modified_by': u'Administrator',
+		u'owner': u'Administrator'
+	},
+
+	# These values are common for all GL Mapper
+	{
+		'doc_type': u'Purchase Invoice',
+		u'doctype': u'GL Mapper',
+		u'name': u'__common__'
+	},
+
+	# These values are common for all GL Mapper Detail
+	{
+		u'doctype': u'GL Mapper Detail',
+		u'name': u'__common__',
+		'parent': u'Purchase Invoice',
+		'parentfield': u'fields',
+		'parenttype': u'GL Mapper'
+	},
+
+	# GL Mapper, Purchase Invoice
+	{
+		u'doctype': u'GL Mapper',
+		u'name': u'Purchase Invoice'
+	},
+
+	# GL Mapper Detail
+	{
+		'account': u'expense_head',
+		'against': u'parent:credit_to',
+		'aging_date': u'parent:aging_date',
+		'company': u'parent:company',
+		'cost_center': u'cost_center',
+		'credit': u'value:0',
+		'debit': u'amount',
+		u'doctype': u'GL Mapper Detail',
+		'fiscal_year': u'parent:fiscal_year',
+		'is_opening': u'parent:is_opening',
+		'posting_date': u'parent:posting_date',
+		'remarks': u'parent:remarks',
+		'table_field': u'entries',
+		'transaction_date': u'parent:voucher_date',
+		'voucher_no': u'parent:name',
+		'voucher_type': u'parent:doctype'
+	},
+
+	# GL Mapper Detail
+	{
+		'account': u'account_head',
+		'against': u'parent:credit_to',
+		'aging_date': u'parent:aging_date',
+		'company': u'parent:company',
+		'cost_center': u'cost_center',
+		'credit': u"value:d.fields.get('category') != 'Valuation' and d.fields.get('add_deduct_tax') == 'Deduct' and d.fields.get('tax_amount') or 0",
+		'debit': u"value:d.fields.get('category') != 'Valuation' and d.fields.get('add_deduct_tax') == 'Add' and d.fields.get('tax_amount') or 0",
+		u'doctype': u'GL Mapper Detail',
+		'fiscal_year': u'parent:fiscal_year',
+		'is_opening': u'parent:is_opening',
+		'posting_date': u'parent:posting_date',
+		'remarks': u'parent:remarks',
+		'table_field': u'purchase_tax_details',
+		'transaction_date': u'parent:voucher_date',
+		'voucher_no': u'parent:name',
+		'voucher_type': u'parent:doctype'
+	},
+
+	# GL Mapper Detail
+	{
+		'account': u'tax_code',
+		'against': u'credit_to',
+		'aging_date': u'aging_date',
+		'company': u'company',
+		'credit': u'ded_amount',
+		'debit': u'value:0',
+		u'doctype': u'GL Mapper Detail',
+		'fiscal_year': u'fiscal_year',
+		'is_opening': u'is_opening',
+		'posting_date': u'posting_date',
+		'remarks': u'remarks',
+		'transaction_date': u'voucher_date',
+		'voucher_no': u'name',
+		'voucher_type': u'doctype'
+	},
+
+	# GL Mapper Detail
+	{
+		'account': u'credit_to',
+		'against': u'against_expense_account',
+		'against_voucher': u'name',
+		'against_voucher_type': u"value:'Purchase Invoice'",
+		'aging_date': u'aging_date',
+		'company': u'company',
+		'credit': u'total_amount_to_pay',
+		'debit': u'value:0',
+		u'doctype': u'GL Mapper Detail',
+		'fiscal_year': u'fiscal_year',
+		'is_opening': u'is_opening',
+		'posting_date': u'posting_date',
+		'remarks': u'remarks',
+		'transaction_date': u'voucher_date',
+		'voucher_no': u'name',
+		'voucher_type': u'doctype'
+	}
+]
