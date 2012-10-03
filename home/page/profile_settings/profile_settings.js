@@ -65,13 +65,15 @@ MyProfile = function(wrapper) {
 	//
 	this.make_form = function() {
 		var div = $a($td(this.tab, 0, 1), 'div');
-		this.form = new wn.ui.FieldGroup()
-		this.form.make_fields(div, [
-			{fieldname:'first_name', fieldtype:'Data',label:'First Name',reqd:1},
-			{fieldname:'last_name', fieldtype:'Data',label:'Last Name'},
-			{fieldname:'bio', fieldtype:'Text',label:'Bio'},
-			{fieldname:'update', fieldtype:'Button',label:'Update'}
-		]);
+		this.form = new wn.ui.FieldGroup({
+			parent: div,
+			fields: [
+				{fieldname:'first_name', fieldtype:'Data',label:'First Name',reqd:1},
+				{fieldname:'last_name', fieldtype:'Data',label:'Last Name'},
+				{fieldname:'bio', fieldtype:'Text',label:'Bio'},
+				{fieldname:'update', fieldtype:'Button',label:'Update'}
+			]
+		});
 		
 		this.form.fields_dict.update.input.onclick = function() {
 			var v = me.form.get_values();
@@ -99,7 +101,6 @@ MyProfile = function(wrapper) {
 				{fieldname:'change', fieldtype:'Button', label:'Change'}
 			]
 		})
-		d.make();
 		d.fields_dict.change.input.onclick = function() {
 			var v = d.get_values();
 			if(v) {
