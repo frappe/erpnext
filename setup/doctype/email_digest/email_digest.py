@@ -338,7 +338,13 @@ class DocType:
 
 def send():
 	from webnotes.model.code import get_obj
+	from webnotes.utils import getdate
 	now_date = now_datetime().date()
+	
+	import conf
+	if hasattr(conf, "expires_on") and now_date > getdate(conf.expires_on):
+		# do not send email digests to expired accounts
+		return
 	
 	for ed in webnotes.conn.sql("""select name from `tabEmail Digest`
 			where enabled=1 and docstatus<2""", as_list=1):
