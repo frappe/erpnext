@@ -51,8 +51,8 @@ erpnext.login.doLogin = function(){
     var args = {};
     args['usr']=$i("login_id").value;
     args['pwd']=$i("password").value;
-    if($i('remember_me').checked) 
-      args['remember_me'] = 1;
+    //if($i('remember_me').checked) 
+      //args['remember_me'] = 1;
 
 	$('#login_btn').set_working();
 	$('#login_message').empty();

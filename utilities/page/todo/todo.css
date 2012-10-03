@@ -1,6 +1,5 @@
 .todoitem {
 	padding-bottom: 3px;
-	min-height: 45px;
 	clear: both;
 }
 
@@ -25,13 +24,10 @@
 
 .todoitem .description {
 	padding: 3px 0px;
-	display: inline-block;
-	width: 80%;
 }
 
-#todo-list, #assigned-todo-list {
-	float: left;
-	width: 50%;
+#todo-list {
+
 }
 
 .todo-separator {
@@ -47,4 +43,8 @@
 .todo-layout {
 	background-color: #FFFDC9;
 	min-height: 300px;
+}
+
+.popup-on-click {
+	margin: 0px 6px;
 }

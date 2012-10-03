@@ -21,7 +21,7 @@ wn.require('lib/js/lib/jQuery.Gantt/js/jquery.fn.gantt.min.js');
 
 erpnext.show_task_gantt = function(parent, project) {
 	
-	$(parent).css('min-height', '300px').html('<div class="help-box">Loading...</div>')
+	$(parent).css('min-height', '300px').html('<div class="alert">Loading...</div>')
 	
 	var get_source = function(r) {
 		var source = [];
@@ -56,7 +56,7 @@ erpnext.show_task_gantt = function(parent, project) {
 		callback: function(r) {
 			$(parent).empty();
 			if(!r.message.length) {
-				$(parent).html('<div class="help-box">No Tasks Yet.</div>');
+				$(parent).html('<div class="alert">No Tasks Yet.</div>');
 			} else {
 				var gantt_area = $('<div class="gantt">').appendTo(parent);
 				gantt_area.gantt({

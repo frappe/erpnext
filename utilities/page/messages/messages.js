@@ -24,7 +24,7 @@ wn.pages.messages.onload = function(wrapper) {
 	
 	$('<h3 id="message-title">Everyone</h3>\
 	<div id="show-everyone" style="display: none;">\
-		<a href="#messages" style="font-size: 80%;">\
+		<a href="#messages/'+user+'" style="font-size: 80%;">\
 			Show messages from everyone</a></div><hr>\
 	<div id="post-message" style="display: none">\
 	<textarea style="width: 100%; height: 24px;"></textarea>\
@@ -36,6 +36,9 @@ wn.pages.messages.onload = function(wrapper) {
 }
 
 $(wn.pages.messages).bind('show', function() {
+	// remove alerts
+	$('#alert-container .alert').remove();
+	
 	erpnext.messages.show();
 	setTimeout("erpnext.messages.refresh()", 7000);
 })
@@ -78,7 +81,7 @@ erpnext.Messages = Class.extend({
 		});
 	},
 	show: function() {
-		var contact = this.get_contact();
+		var contact = this.get_contact() || this.contact || user;
 
 		$('#message-title').text(contact==user ? "Everyone" :
 			wn.boot.user_info[contact].fullname)
@@ -108,7 +111,6 @@ erpnext.Messages = Class.extend({
 			}
 			return name;
 		}
-		return user;	
 	},
 	make_list: function() {
 		this.list = new wn.ui.Listing({
