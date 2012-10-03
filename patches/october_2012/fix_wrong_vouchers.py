@@ -31,8 +31,13 @@ def execute():
 				webnotes.conn.sql("""
 					update `tab%s` 
 					set 
-						total_tax = %s, other_charges_added = %s, other_charges_deducted = %s, 
-						grand_total = net_tatal + other_charges_added - other_charges_deducted, 
+						total_tax = %s, 
+						other_charges_added = %s, 
+						other_charges_added_import = other_charges_added / conversion_rate, 
+						other_charges_deducted = %s, 
+						other_charges_deducted_import = other_charges_deducted / conversion_rate, 
+						grand_total = net_total + other_charges_added - other_charges_deducted,
+						grand_total_import = grand_total / conversion_rate, 
 						total_amount_to_pay = grand_total - total_tds_on_voucher,
 						outstanding_amount = total_amount_to_pay - total_advance
 					where 
@@ -48,6 +53,12 @@ def execute():
 				obj.make_gl_entries()
 				
 			else:
-				webnotes.conn.sql("""update `tab%s` 
-					set total_tax = %s, grand_total = net_tatal + total_tax
-					where name = %s""" % (d[1], '%s', '%s'), (correct_total_tax, d['parent']))
+				webnotes.conn.sql("""
+					update `tab%s` 
+					set 
+						total_tax = %s, 
+						grand_total = net_total + total_tax, 
+						grand_total_import = grand_total / conversion_rate
+					where 
+						name = %s
+				""" % (d[1], '%s', '%s'), (correct_total_tax, d['parent']))
