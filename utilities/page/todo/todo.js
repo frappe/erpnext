@@ -56,7 +56,7 @@ erpnext.todo.ToDoItem = Class.extend({
 		todo.fullname = '';
 		if(todo.assigned_by) {
 			var assigned_by = wn.boot.user_info[todo.assigned_by]
-			todo.fullname = repl("[By %(fullname)s] &nbsp;", {
+			todo.fullname = repl("[By %(fullname)s] ".bold(), {
 				fullname: (assigned_by ? assigned_by.fullname : todo.assigned_by),
 			});
 		}
@@ -64,7 +64,7 @@ erpnext.todo.ToDoItem = Class.extend({
 		var parent_list = "#todo-list";
 		if(todo.owner !== user) {
 			var owner = wn.boot.user_info[todo.owner];
-			todo.fullname = repl("[To %(fullname)s] &nbsp;", {
+			todo.fullname = repl("[To %(fullname)s] ".bold(), {
 				fullname: (owner ? owner.fullname : todo.owner),
 			});
 		}
@@ -136,7 +136,7 @@ erpnext.todo.make_dialog = function(det) {
 				{fieldtype:'Date', fieldname:'date', label:'Event Date', reqd:1},
 				{fieldtype:'Check', fieldname:'checked', label:'Completed'},
 				{fieldtype:'Select', fieldname:'priority', label:'Priority', reqd:1, 'options':['Medium','High','Low'].join('\n')},
-				{fieldtype:'Button', fieldname:'save', label:'Save'}
+				{fieldtype:'Button', fieldname:'save', label:'Save (Ctrl+S)'}
 			]
 		});
 		
@@ -187,7 +187,15 @@ wn.pages.todo.onload = function(wrapper) {
 		erpnext.todo.make_dialog({
 			date:get_today(), priority:'Medium', checked:0, description:''});
 	}, 'icon-plus');
+	wrapper.appframe.add_ripped_paper_effect(wrapper);
 
 	// load todos
 	erpnext.todo.refresh();
+	
+	// save on click
+	wrapper.save_action = function() {
+		if(erpnext.todo.dialog && erpnext.todo.dialog.display) {
+			erpnext.todo.dialog.fields_dict.save.input.click();
+		}
+	};
 }

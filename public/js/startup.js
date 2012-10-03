@@ -182,6 +182,8 @@ erpnext.setup_mousetrap = function() {
 	Mousetrap.bind(["command+s", "ctrl+s"], function() {
 		if(cur_frm)
 			cur_frm.save();
+		else if(wn.container.page.save_action)
+			wn.container.page.save_action();
 		return false;
 	});	
 }
