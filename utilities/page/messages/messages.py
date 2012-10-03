@@ -33,15 +33,18 @@ def get_list(arg=None):
 				
 		# return messages
 		return webnotes.conn.sql("""select * from `tabComment` 
-		where (owner=%(contact)s or comment_docname=%(user)s)
-		and comment_doctype in ('My Company', 'Message')
+		where (owner=%(contact)s 
+			or comment_docname=%(user)s 
+			or (owner=comment_docname and ifnull(parenttype, "")!="Assignment"))
+		and comment_doctype ='Message'
 		order by creation desc
 		limit %(limit_start)s, %(limit_page_length)s""", webnotes.form_dict, as_dict=1)		
 	else:
 		return webnotes.conn.sql("""select * from `tabComment` 
 		where (owner=%(contact)s and comment_docname=%(user)s)
 		or (owner=%(user)s and comment_docname=%(contact)s)
-		and comment_doctype in ('My Company', 'Message')
+		or (owner=%(contact)s and comment_docname=%(contact)s)
+		and comment_doctype ='Message'
 		order by creation desc
 		limit %(limit_start)s, %(limit_page_length)s""", webnotes.form_dict, as_dict=1)
 		
