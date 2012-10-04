@@ -22,11 +22,11 @@ wn.pages.messages.onload = function(wrapper) {
 		title: "Messages"
 	});
 	
-	$('<h3 id="message-title">Everyone</h3>\
-	<div id="show-everyone" style="display: none;">\
-		<a href="#messages/'+user+'" style="font-size: 80%;">\
-			Show messages from everyone</a></div><hr>\
-	<div id="post-message" style="display: none">\
+	$('<div><div class="avatar avatar-large">\
+		<img id="avatar-image" src="lib/images/ui/avatar.png"></div>\
+		<h3 style="display: inline-block" id="message-title">Everyone</h3>\
+	</div><hr>\
+	<div id="post-message">\
 	<textarea style="width: 100%; height: 24px;"></textarea>\
 	<div><button class="btn btn-small">Post</button></div><hr>\
 	</div>\
@@ -40,7 +40,7 @@ $(wn.pages.messages).bind('show', function() {
 	$('#alert-container .alert').remove();
 	
 	erpnext.messages.show();
-	setTimeout("erpnext.messages.refresh()", 7000);
+	setTimeout("erpnext.messages.refresh()", 17000);
 })
 
 erpnext.Messages = Class.extend({
@@ -83,14 +83,15 @@ erpnext.Messages = Class.extend({
 	show: function() {
 		var contact = this.get_contact() || this.contact || user;
 
-		$('#message-title').text(contact==user ? "Everyone" :
-			wn.boot.user_info[contact].fullname)
+		$('#message-title').html(contact==user ? "Everyone" :
+			wn.user_info(contact).fullname)
+
+		$('#avatar-image').attr("src", wn.user_info(contact).image);
 
 		$("#show-everyone").toggle(contact!=user);
 		
-		// can't send message to self
-		$('#post-message').toggle(contact!=user);
-
+		$("#post-message button").text(contact==user ? "Post Publicly" : "Post to user")
+		
 		this.contact = contact;
 		this.list.opts.args.contact = contact;
 		this.list.run();
@@ -98,7 +99,7 @@ erpnext.Messages = Class.extend({
 	},
 	// check for updates every 5 seconds if page is active
 	refresh: function() {
-		setTimeout("erpnext.messages.refresh()", 7000);
+		setTimeout("erpnext.messages.refresh()", 17000);
 		if(wn.container.page.label != 'Messages') return;
 		this.show();
 	},
@@ -126,6 +127,8 @@ erpnext.Messages = Class.extend({
 				
 				data.creation = dateutil.comment_when(data.creation);
 				data.comment_by_fullname = wn.user_info(data.owner).fullname;
+				data.image = wn.user_info(data.owner).image;
+				data.mark_html = "";
 
 				data.reply_html = '';
 				if(data.owner==user) {
@@ -133,10 +136,6 @@ erpnext.Messages = Class.extend({
 					data.comment_by_fullname = 'You';	
 				} else {
 					data.cls = 'message-other';
-					if(this.contact==user) {
-						data.reply_html = repl('<a href="#!messages/%(owner)s">\
-							<i class="icon-share-alt"></i> Reply</a>', data)
-					}
 				}
 
 				// delete
@@ -146,11 +145,17 @@ erpnext.Messages = Class.extend({
 						onclick="erpnext.messages.delete(this)"\
 						data-name="%(name)s">&times;</a>', data);
 				}
+				
+				if(data.owner==data.comment_docname) {
+					data.mark_html = "<div class='message-mark' title='Public'\
+						style='background-color: green'></div>"
+				}
 
-				wrapper.innerHTML = repl('<div class="message %(cls)s">%(delete_html)s\
-						<b>%(comment)s</b>\
+				wrapper.innerHTML = repl('<div class="message %(cls)s">%(mark_html)s\
+						<span class="avatar avatar-small"><img src="%(image)s"></span><b>%(comment)s</b>\
+						%(delete_html)s\
 						<div class="help">by %(comment_by_fullname)s, %(creation)s</div>\
-						%(reply_html)s</div>\
+					</div>\
 					<div style="clear: both;"></div>', data);
 			}
 		});
@@ -173,15 +178,24 @@ erpnext.Messages = Class.extend({
 			method:'get_active_users',
 			callback: function(r,rt) {
 				var $body = $(me.wrapper).find('.layout-side-section');
-				$("<h4>Users</h4><hr>").appendTo($body);
+				$('<h4>Users</h4><hr>\
+					<div id="show-everyone">\
+						<a href="#messages/'+user+'" class="btn btn-small">\
+							Show messages from everyone</a><hr></div>\
+				').appendTo($body);
+				r.message.sort(function(a, b) { return b.has_session - a.has_session; });
 				for(var i in r.message) {
 					var p = r.message[i];
 					if(p.name != user) {
 						p.fullname = wn.user_info(p.name).fullname;
+						p.image = wn.user_info(p.name).image;
 						p.name = p.name.replace('@', '__at__');
-						p.label_status = p.has_session ? "label-success" : "";
+						p.status_color = p.has_session ? "green" : "#ddd";
 						p.status = p.has_session ? "Online" : "Offline";
-						$(repl('<p><span class="label %(label_status)s">%(status)s</span>\
+						$(repl('<p>\
+							<span class="avatar avatar-small" \
+								style="border: 3px solid %(status_color)s" \
+								title="%(status)s"><img src="%(image)s"></span>\
 							<a href="#!messages/%(name)s">%(fullname)s</a>\
 							</p>', p))
 							.appendTo($body);						

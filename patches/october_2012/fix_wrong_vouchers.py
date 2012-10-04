@@ -38,7 +38,7 @@ def execute():
 						other_charges_deducted = %s, 
 						other_charges_deducted_import = other_charges_deducted / conversion_rate, 
 						grand_total = net_total + other_charges_added - other_charges_deducted,
-						grand_total_import = grand_total / conversion_rate, 
+						grand_total_import = grand_total / conversion_rate,
 						total_amount_to_pay = grand_total - total_tds_on_voucher,
 						outstanding_amount = total_amount_to_pay - total_advance
 					where 
@@ -51,11 +51,17 @@ def execute():
 					update `tab%s` 
 					set 
 						total_tax = %s, 
+						other_charges_added = %s, 
+						other_charges_added_import = other_charges_added / conversion_rate, 
+						other_charges_deducted = %s, 
+						other_charges_deducted_import = other_charges_deducted / conversion_rate,
 						grand_total = net_total + total_tax, 
-						grand_total_import = grand_total / conversion_rate
+						grand_total_import = grand_total / conversion_rate,
+						rounded_total = round(grand_total)
 					where 
 						name = %s
-				""" % (d[1], '%s', '%s'), (correct_total_tax, d['parent']))
+				""" % (d['parenttype'], '%s', '%s', '%s', '%s'), 
+					(correct_total_tax, d['tax_added'], d['tax_ded'], d['parent']))
 			
 			# set in words
 			obj = get_obj(d['parenttype'], d['parent'], with_children=1)
@@ -70,7 +76,7 @@ def execute():
 			
 			# fix gl entries
 			if d['parenttype'] == 'Purchase Invoice' and d['docstatus'] == 1:
-				webnotes.conn.sql("""update `tabGL Entry` set is_cancelled = 'No' 
+				webnotes.conn.sql("""update `tabGL Entry` set is_cancelled = 'Yes' 
 					where voucher_type = %s and voucher_no = %s""", 
 					(d['parenttype'], d['parent']))
 				
