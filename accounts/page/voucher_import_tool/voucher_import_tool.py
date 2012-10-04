@@ -35,12 +35,12 @@ def upload():
 	rows = read_csv_content_from_uploaded_file()
 
 	common_values = get_common_values(rows)
-	data = get_data(rows)
+	data, start_idx = get_data(rows)
 	
 	if rows[0][0]=="Voucher Import :Single":
-		return import_single(common_values, data)
+		return import_single(common_values, data, start_idx)
 	else:
-		return import_multiple(common_values, data)
+		return import_multiple(common_values, data, start_idx)
 
 def map_fields(field_list, source, target):
 	for f in field_list:
@@ -49,12 +49,12 @@ def map_fields(field_list, source, target):
 		else:
 			target[f] = source.get(f)
 
-def import_multiple(common_values, data):
+def import_multiple(common_values, data, start_idx):
 	from webnotes.model.doc import Document
 	from webnotes.model.doclist import DocList
 	from webnotes.model.code import get_obj
-	from accounts.utils import get_fiscal_year_from_date
-	from webnotes.utils.dateutils import user_to_str
+	from accounts.utils import get_fiscal_year
+	from webnotes.utils.dateutils import parse_date
 
 	messages = []
 		
@@ -82,17 +82,17 @@ def import_multiple(common_values, data):
 		jv = webnotes.DictObj()
 
 		try:
-			d.posting_date = user_to_str(d.posting_date)
-			d.due_date = user_to_str(d.due_date)
-			d.ref_date = user_to_str(d.ref_date)
+			d.posting_date = parse_date(d.posting_date)
+			d.due_date = parse_date(d.due_date)
+			d.ref_date = parse_date(d.ref_date)
 			d.company = common_values.company
 						
 			jv = Document("Journal Voucher")
 			map_fields(["voucher_type", "posting_date", "naming_series", "remarks:remark",
-				"ref_no:cheque_no", "ref_date:cheque_date", "is_opening",
+				"ref_number:cheque_no", "ref_date:cheque_date", "is_opening",
 				"amount:total_debit", "amount:total_credit", "due_date", "company"], d, jv.fields)
 
-			jv.fiscal_year = get_fiscal_year_from_date(jv.posting_date)
+			jv.fiscal_year = get_fiscal_year(jv.posting_date)[0]
 
 			detail1 = Document("Journal Voucher Detail")
 			detail1.parent = True
@@ -112,13 +112,15 @@ def import_multiple(common_values, data):
 			doclist.submit()
 			webnotes.conn.commit()
 			
-			messages.append("<p style='color: green'>[row #%s] %s imported</p>" \
-				% (i, jv.name))
+			messages.append("""<p style='color: green'>[row #%s] 
+				<a href=\"#Form/Journal Voucher/%s\">%s</a> imported</p>""" \
+				% ((start_idx + 1) + i, jv.name, jv.name))
 			
 		except Exception, e:
 			webnotes.conn.rollback()
+			err_msg = webnotes.message_log and webnotes.message_log[0] or unicode(e)
 			messages.append("<p style='color: red'>[row #%s] %s failed: %s</p>" \
-				% (i, jv.name, webnotes.message_log and webnotes.message_log[0] or "No message"))
+				% ((start_idx + 1) + i, jv.name, err_msg or "No message"))
 			webnotes.errprint(webnotes.getTraceback())
 
 		webnotes.message_log = []
@@ -142,11 +144,13 @@ def get_common_values(rows):
 def get_data(rows):
 	start_row = 0
 	data = []
+	start_row_idx = 0
 	
 	for i in xrange(len(rows)):
 		r = rows[i]
 		if r[0]:
 			if start_row and i >= start_row:
+				if not start_row_idx: start_row_idx = i
 				d = webnotes.DictObj()
 				for cidx in xrange(len(columns)):
 					d[columns[cidx]] = r[cidx]
@@ -155,7 +159,8 @@ def get_data(rows):
 			if r[0]=="--------Data----------":
 				start_row = i+2
 				columns = [c.replace(" ", "_").lower() for c in rows[i+1]]
-	return data
+	
+	return data, start_row_idx
 	
 @webnotes.whitelist()
 def get_template_single():
