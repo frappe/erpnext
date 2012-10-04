@@ -26,6 +26,7 @@ wn.pages['stock-ageing'].onload = function(wrapper) {
 	
 }
 
+wn.require("lib/js/wn/views/grid_report.js");
 wn.require("app/js/stock_grid_report.js");
 
 erpnext.StockAgeing = erpnext.StockGridReport.extend({

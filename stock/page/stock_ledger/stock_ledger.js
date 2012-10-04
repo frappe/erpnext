@@ -24,6 +24,7 @@ wn.pages['stock-ledger'].onload = function(wrapper) {
 	new erpnext.StockLedger(wrapper);
 }
 
+wn.require("lib/js/wn/views/grid_report.js");
 wn.require("app/js/stock_grid_report.js");
 
 erpnext.StockLedger = erpnext.StockGridReport.extend({
