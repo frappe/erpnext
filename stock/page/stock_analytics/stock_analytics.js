@@ -24,6 +24,7 @@ wn.pages['stock-analytics'].onload = function(wrapper) {
 	new erpnext.StockAnalytics(wrapper);
 }
 
+wn.require("lib/js/wn/views/grid_report.js");
 wn.require("app/js/stock_grid_report.js");
 
 erpnext.StockAnalytics = erpnext.StockGridReport.extend({

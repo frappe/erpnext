@@ -67,7 +67,6 @@ class DocType:
 			return ret
 	
 	def validate(self):
-		import string		
 		if self.doc.status == 'Lead Lost' and not self.doc.order_lost_reason:
 			msgprint("Please Enter Lost Reason under More Info section")
 			raise Exception	
@@ -80,7 +79,6 @@ class DocType:
 			if not validate_email_add(self.doc.email_id):
 				msgprint('Please enter valid email id.')
 				raise Exception
-		
 	
 	def on_update(self):
 		if self.doc.contact_date:

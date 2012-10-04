@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		u'creation': '2012-09-21 15:21:10',
+		u'creation': '2012-09-21 20:15:16',
 		u'docstatus': 0,
-		u'modified': '2012-09-21 15:21:10',
+		u'modified': '2012-10-04 17:24:17',
 		u'modified_by': u'Administrator',
 		u'owner': u'Administrator'
 	},
@@ -20,9 +20,30 @@
 		'title': u'Purchase Analytics'
 	},
 
+	# These values are common for all Page Role
+	{
+		u'doctype': u'Page Role',
+		u'name': u'__common__',
+		'parent': u'purchase-analytics',
+		'parentfield': u'roles',
+		'parenttype': u'Page'
+	},
+
 	# Page, purchase-analytics
 	{
 		u'doctype': u'Page',
 		u'name': u'purchase-analytics'
+	},
+
+	# Page Role
+	{
+		u'doctype': u'Page Role',
+		'role': u'Analytics'
+	},
+
+	# Page Role
+	{
+		u'doctype': u'Page Role',
+		'role': u'Purchase Manager'
 	}
 ]

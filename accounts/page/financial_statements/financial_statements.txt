@@ -3,56 +3,47 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-10-12 15:19:32',
-		'docstatus': 0,
-		'modified': '2011-01-03 17:32:30',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		u'creation': '2012-06-14 15:07:28',
+		u'docstatus': 0,
+		u'modified': '2012-10-04 17:04:05',
+		u'modified_by': u'Administrator',
+		u'owner': u'Administrator'
 	},
 
 	# These values are common for all Page
 	{
-		'doctype': 'Page',
-		'module': 'Accounts',
-		'name': '__common__',
-		'page_name': 'Financial Statements',
+		u'doctype': u'Page',
+		'module': u'Accounts',
+		u'name': u'__common__',
+		'page_name': u'Financial Statements',
 		'show_in_menu': 0,
-		'standard': 'Yes'
+		'standard': u'Yes'
 	},
 
 	# These values are common for all Page Role
 	{
-		'doctype': 'Page Role',
-		'name': '__common__',
-		'parent': 'Financial Statements',
-		'parentfield': 'roles',
-		'parenttype': 'Page'
+		u'doctype': u'Page Role',
+		u'name': u'__common__',
+		'parent': u'Financial Statements',
+		'parentfield': u'roles',
+		'parenttype': u'Page'
 	},
 
 	# Page, Financial Statements
 	{
-		'doctype': 'Page',
-		'name': 'Financial Statements'
+		u'doctype': u'Page',
+		u'name': u'Financial Statements'
 	},
 
 	# Page Role
 	{
-		'doctype': 'Page Role',
-		'idx': 1,
-		'role': 'Accounts User'
+		u'doctype': u'Page Role',
+		'role': u'Accounts User'
 	},
 
 	# Page Role
 	{
-		'doctype': 'Page Role',
-		'idx': 2,
-		'role': 'Administrator'
-	},
-
-	# Page Role
-	{
-		'doctype': 'Page Role',
-		'idx': 3,
-		'role': 'Accounts Manager'
+		u'doctype': u'Page Role',
+		'role': u'Accounts Manager'
 	}
 ]

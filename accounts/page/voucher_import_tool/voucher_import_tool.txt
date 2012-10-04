@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		u'creation': '2012-09-26 15:21:57',
+		u'creation': '2012-10-02 18:51:49',
 		u'docstatus': 0,
-		u'modified': '2012-09-26 15:21:57',
+		u'modified': '2012-10-04 17:04:18',
 		u'modified_by': u'Administrator',
 		u'owner': u'Administrator'
 	},
@@ -20,9 +20,24 @@
 		'title': u'Voucher Import Tool'
 	},
 
+	# These values are common for all Page Role
+	{
+		u'doctype': u'Page Role',
+		u'name': u'__common__',
+		'parent': u'voucher-import-tool',
+		'parentfield': u'roles',
+		'parenttype': u'Page',
+		'role': u'Accounts Manager'
+	},
+
 	# Page, voucher-import-tool
 	{
 		u'doctype': u'Page',
 		u'name': u'voucher-import-tool'
+	},
+
+	# Page Role
+	{
+		u'doctype': u'Page Role'
 	}
 ]

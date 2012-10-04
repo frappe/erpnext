@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		u'creation': '2012-09-17 13:46:47',
+		u'creation': '2012-09-18 11:05:48',
 		u'docstatus': 0,
-		u'modified': '2012-09-17 13:46:47',
+		u'modified': '2012-10-04 17:02:43',
 		u'modified_by': u'Administrator',
 		u'owner': u'Administrator'
 	},
@@ -20,9 +20,36 @@
 		'title': u'Financial Analytics'
 	},
 
+	# These values are common for all Page Role
+	{
+		u'doctype': u'Page Role',
+		u'name': u'__common__',
+		'parent': u'financial-analytics',
+		'parentfield': u'roles',
+		'parenttype': u'Page'
+	},
+
 	# Page, financial-analytics
 	{
 		u'doctype': u'Page',
 		u'name': u'financial-analytics'
+	},
+
+	# Page Role
+	{
+		u'doctype': u'Page Role',
+		'role': u'Analytics'
+	},
+
+	# Page Role
+	{
+		u'doctype': u'Page Role',
+		'role': u'Accounts Manager'
+	},
+
+	# Page Role
+	{
+		u'doctype': u'Page Role',
+		'role': u'Accounts User'
 	}
 ]
