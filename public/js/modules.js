@@ -128,7 +128,10 @@ erpnext.module_page.hide_links = function(wrapper) {
 	
 	// pages
 	$(wrapper).find('[data-role]').each(function() {
-		if(!has_common(user_roles, [$(this).attr("data-role"), "System Manager"])) {
+		// can define multiple roles
+		var data_roles = $(this).attr("data-role").split(",").map(function(role) {
+			return role.trim(); });
+		if(!has_common(user_roles, ["System Manager"].concat(data_roles))) {
 			var html = $(this).html();
 			$(this).parent().css('color', '#999');
 			$(this).replaceWith('<span title="Only accessible by Roles: '+
