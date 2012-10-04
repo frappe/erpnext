@@ -619,4 +619,8 @@ patch_list = [
 		'patch_module': 'patches.october_2012',
 		'patch_file': 'fix_wrong_vouchers',
 	},
+	{
+		'patch_module': 'patches.october_2012',
+		'patch_file': 'remove_old_customer_contact_address',
+	},
 ]
