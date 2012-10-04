@@ -16,27 +16,39 @@
 
 from __future__ import unicode_literals
 import webnotes
+from webnotes.utils import cint
 
 @webnotes.whitelist()
 def get_sc_list(arg=None):
-	"""return list of reports for the given module module"""	
-	webnotes.response['values'] = webnotes.conn.sql("""select 
-		distinct criteria_name, doc_type, parent_doc_type
+	"""return list of reports for the given module module"""
+	limit_start = webnotes.form_dict.get("limit_start")
+	limit_page_length = webnotes.form_dict.get("limit_page_length")
+	module = webnotes.form_dict.get("module")
+	
+	webnotes.response['values'] = webnotes.conn.sql("""
+		select distinct criteria_name, doc_type, parent_doc_type
 		from `tabSearch Criteria` 
-		where module='%(module)s' 
-		and docstatus in (0, NULL)
-		and ifnull(disabled, 0) = 0 
-		order by criteria_name 
-		limit %(limit_start)s, %(limit_page_length)s""" % webnotes.form_dict, as_dict=True)
+		where module=%s 
+			and docstatus in (0, NULL)
+			and ifnull(disabled, 0) = 0 
+			order by criteria_name 
+			limit %s, %s""" % \
+		("%s", cint(limit_start), cint(limit_page_length)), (module,), as_dict=True)
 
 @webnotes.whitelist()
 def get_report_list():
 	"""return list on new style reports for modules"""
-	webnotes.response['values'] = webnotes.conn.sql("""select 
-		distinct tabReport.name, tabReport.ref_doctype
+	limit_start = webnotes.form_dict.get("limit_start")
+	limit_page_length = webnotes.form_dict.get("limit_page_length")
+	module = webnotes.form_dict.get("module")
+	
+	webnotes.response['values'] = webnotes.conn.sql("""
+		select distinct tabReport.name, tabReport.ref_doctype, 
+			if(ifnull(tabReport.query, '')!='', 1, 0) as is_query_report
 		from `tabReport`, `tabDocType`
-		where tabDocType.module='%(module)s' 
-		and tabDocType.name = tabReport.ref_doctype
-		and tabReport.docstatus in (0, NULL)
-		order by tabReport.name 
-		limit %(limit_start)s, %(limit_page_length)s""" % webnotes.form_dict, as_dict=True)
+		where tabDocType.module=%s
+			and tabDocType.name = tabReport.ref_doctype
+			and tabReport.docstatus in (0, NULL)
+			order by tabReport.name 
+			limit %s, %s""" % \
+		("%s", cint(limit_start), cint(limit_page_length)), (module,), as_dict=True)

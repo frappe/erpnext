@@ -3,26 +3,47 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-02-21 13:23:08',
-		'docstatus': 0,
-		'modified': '2012-02-21 13:23:08',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
+		u'creation': '2012-06-14 15:07:28',
+		u'docstatus': 0,
+		u'modified': '2012-10-04 16:58:11',
+		u'modified_by': u'Administrator',
+		u'owner': u'Administrator'
 	},
 
 	# These values are common for all Page
 	{
-		'doctype': 'Page',
+		u'doctype': u'Page',
 		'module': u'Accounts',
-		'name': '__common__',
+		u'name': u'__common__',
 		'page_name': u'accounts-home',
 		'standard': u'Yes',
 		'title': u'Accounts Home'
 	},
 
+	# These values are common for all Page Role
+	{
+		u'doctype': u'Page Role',
+		u'name': u'__common__',
+		'parent': u'accounts-home',
+		'parentfield': u'roles',
+		'parenttype': u'Page'
+	},
+
 	# Page, accounts-home
 	{
-		'doctype': 'Page',
-		'name': u'accounts-home'
+		u'doctype': u'Page',
+		u'name': u'accounts-home'
+	},
+
+	# Page Role
+	{
+		u'doctype': u'Page Role',
+		'role': u'Accounts Manager'
+	},
+
+	# Page Role
+	{
+		u'doctype': u'Page Role',
+		'role': u'Accounts User'
 	}
 ]

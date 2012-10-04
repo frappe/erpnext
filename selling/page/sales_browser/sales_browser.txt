@@ -3,49 +3,77 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2010-12-14 10:23:21',
-		'docstatus': 0,
-		'modified': '2010-12-24 11:56:34',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
+		u'creation': '2012-06-14 15:07:26',
+		u'docstatus': 0,
+		u'modified': '2012-10-04 17:34:55',
+		u'modified_by': u'Administrator',
+		u'owner': u'Administrator'
 	},
 
 	# These values are common for all Page
 	{
-		'doctype': 'Page',
-		'module': 'Selling',
-		'name': '__common__',
-		'page_name': 'Sales Browser',
+		u'doctype': u'Page',
+		'module': u'Selling',
+		u'name': u'__common__',
+		'page_name': u'Sales Browser',
 		'show_in_menu': 0,
-		'standard': 'Yes'
+		'standard': u'Yes'
 	},
 
 	# These values are common for all Page Role
 	{
-		'doctype': 'Page Role',
-		'name': '__common__',
-		'parent': 'Sales Browser',
-		'parentfield': 'roles',
-		'parenttype': 'Page'
+		u'doctype': u'Page Role',
+		u'name': u'__common__',
+		'parent': u'Sales Browser',
+		'parentfield': u'roles',
+		'parenttype': u'Page'
 	},
 
 	# Page, Sales Browser
 	{
-		'doctype': 'Page',
-		'name': 'Sales Browser'
+		u'doctype': u'Page',
+		u'name': u'Sales Browser'
 	},
 
 	# Page Role
 	{
-		'doctype': 'Page Role',
-		'idx': 1,
-		'role': 'Sales Master Manager'
+		u'doctype': u'Page Role',
+		'role': u'Sales Master Manager'
 	},
 
 	# Page Role
 	{
-		'doctype': 'Page Role',
-		'idx': 2,
-		'role': 'Material Master Manager'
+		u'doctype': u'Page Role',
+		'role': u'Material Master Manager'
+	},
+
+	# Page Role
+	{
+		u'doctype': u'Page Role',
+		'role': u'Accounts Manager'
+	},
+
+	# Page Role
+	{
+		u'doctype': u'Page Role',
+		'role': u'Sales Master Manager'
+	},
+
+	# Page Role
+	{
+		u'doctype': u'Page Role',
+		'role': u'Purchase Manager'
+	},
+
+	# Page Role
+	{
+		u'doctype': u'Page Role',
+		'role': u'Purchase Master Manager'
+	},
+
+	# Page Role
+	{
+		u'doctype': u'Page Role',
+		'role': u'Material Manager'
 	}
 ]

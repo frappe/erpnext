@@ -170,7 +170,8 @@ erpnext.module_page.make_list = function(module, wrapper) {
 		parent: $parent2,
 		method: 'utilities.get_report_list',
 		render_row: function(row, data) {
-			$(row).html(repl('<a href="#!Report2/%(ref_doctype)s/%(name)s" \
+			data.report_type = data.is_query_report ? "query-report" : "Report2"			
+			$(row).html(repl('<a href="#!%(report_type)s/%(ref_doctype)s/%(name)s" \
 				data-doctype="%(ref_doctype)s">\
 				%(name)s</a>', data))
 		},
