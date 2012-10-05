@@ -87,7 +87,7 @@ def import_multiple(common_values, data, start_idx):
 			
 			if d.ref_number:
 				if not d.ref_date:
-					raise webnotes.ValidationError, 
+					raise webnotes.ValidationError, \
 						"""Ref Date is Mandatory if Ref Number is specified"""
 				d.ref_date = parse_date(d.ref_date)
 				
