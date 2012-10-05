@@ -193,12 +193,6 @@ class DocType:
 			for fn in master_dict[d].keys():
 				rec.fields[fn] = master_dict[d][fn]
 				
-			# Note: I have no idea why this was there!
-			# # add blank fields
-			# for fn in rec.fields:
-			# 	if fn not in master_dict[d].keys()+['name','owner','doctype']:
-			# 		rec.fields[fn] = ''
-			
 			rec_obj = get_obj(doc=rec)
 			rec_obj.doc.save(1)
 			if hasattr(rec_obj, 'on_update'):

@@ -83,8 +83,14 @@ def import_multiple(common_values, data, start_idx):
 
 		try:
 			d.posting_date = parse_date(d.posting_date)
-			d.due_date = parse_date(d.due_date)
-			d.ref_date = parse_date(d.ref_date)
+			d.due_date = d.due_date and parse_date(d.due_date) or None
+			
+			if d.ref_number:
+				if not d.ref_date:
+					raise webnotes.ValidationError, 
+						"""Ref Date is Mandatory if Ref Number is specified"""
+				d.ref_date = parse_date(d.ref_date)
+				
 			d.company = common_values.company
 						
 			jv = Document("Journal Voucher")
@@ -120,7 +126,7 @@ def import_multiple(common_values, data, start_idx):
 			webnotes.conn.rollback()
 			err_msg = webnotes.message_log and webnotes.message_log[0] or unicode(e)
 			messages.append("<p style='color: red'>[row #%s] %s failed: %s</p>" \
-				% ((start_idx + 1) + i, jv.name, err_msg or "No message"))
+				% ((start_idx + 1) + i, jv.name or "", err_msg or "No message"))
 			webnotes.errprint(webnotes.getTraceback())
 
 		webnotes.message_log = []
