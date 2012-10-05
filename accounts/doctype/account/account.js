@@ -35,6 +35,10 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	// hide fields if group
 	cur_frm.toggle_display(['account_type', 'master_type', 'master_name', 'freeze_account', 
 		'credit_days', 'credit_limit', 'tax_rate'], doc.group_or_ledger=='Ledger')	
+		
+	// disable fields
+	cur_frm.toggle_enable(['account_name', 'debit_or_credit', 'group_or_ledger', 
+		'is_pl_account', 'company'], false);
 
 	// read-only for root accounts
   	root_acc = ['Application of Funds (Assets)','Expenses','Income','Source of Funds (Liabilities)'];
@@ -45,7 +49,7 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 		// credit days and type if customer or supplier
 		cur_frm.set_intro(null);
 		cur_frm.toggle_display(['credit_days', 'credit_limit'], 
-			in_list(['Customer', 'Supplier'], doc.master_type))
+			in_list(['Customer', 'Supplier'], doc.master_type));
 
 		// hide tax_rate
 		cur_frm.cscript.account_type(doc, cdt, cdn);
@@ -54,6 +58,12 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 		cur_frm.cscript.hide_unhide_group_ledger(doc);		
 	}
 }
+
+cur_frm.cscript.master_type = function(doc, cdt, cdn) {
+	cur_frm.toggle_display(['credit_days', 'credit_limit', 'master_name'], 
+		in_list(['Customer', 'Supplier'], doc.master_type));
+}
+
 
 // Fetch parent details
 // -----------------------------------------
