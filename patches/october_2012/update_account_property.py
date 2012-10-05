@@ -2,7 +2,7 @@ def execute():
 	import webnotes
 	from webnotes.utils.nestedset import rebuild_tree
 	rebuild_tree('Account', 'parent_account')
-	
+
 	roots = webnotes.conn.sql("""
 		select lft, rgt, debit_or_credit, is_pl_account, company from `tabAccount`
 		where ifnull(parent_account, '') = ''
