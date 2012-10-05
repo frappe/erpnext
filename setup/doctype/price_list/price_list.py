@@ -52,9 +52,9 @@ class DocType:
 	
 	# update prices in Price List
 	def update_prices(self):
-		from core.page.data_import_tool.data_import_tool import read_csv_content
+		from webnotes.utils.datautils import read_csv_content_from_attached_file
+		data = read_csv_content_from_attached_file(self.doc)
 		
-		data = read_csv_content(self.get_csv_data())
 		webnotes.conn.auto_commit_on_many_writes = 1
 				
 		updated = 0
@@ -86,20 +86,3 @@ class DocType:
 		
 		msgprint("<b>%s</b> items updated" % updated)
 		webnotes.conn.auto_commit_on_many_writes = 0
-
-	# Update CSV data
-	def get_csv_data(self):
-		if not self.doc.file_list:
-		  msgprint("File not attached!")
-		  raise Exception
-
-		fid = self.doc.file_list.split(',')[1]
-		  
-		try:
-			from webnotes.utils import file_manager
-			fn, content = file_manager.get_file(fid)
-		except Exception, e:
-			webnotes.msgprint("Unable to open attached file. Please try again.")
-			raise e
-
-		return content	

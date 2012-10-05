@@ -127,7 +127,7 @@ erpnext.module_page.hide_links = function(wrapper) {
 	// pages
 	$(wrapper).find('[data-role]').each(function() {
 		// can define multiple roles
-		var data_roles = $(this).attr("data-role").split(",").map(function(role) {
+		var data_roles = $.map($(this).attr("data-role").split(","), function(role) {
 			return role.trim(); });
 		if(!has_common(user_roles, ["System Manager"].concat(data_roles))) {
 			var html = $(this).html();
