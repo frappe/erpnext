@@ -47,6 +47,7 @@ erpnext.StockLedger = erpnext.StockGridReport.extend({
 				link_formatter: {
 					filter_input: "item_code",
 					open_btn: true,
+					doctype: '"Item"',
 				}},
 			{id: "warehouse", name: "Warehouse", field: "warehouse", width: 100,
 				link_formatter: {filter_input: "warehouse"}},

@@ -42,7 +42,10 @@ erpnext.StockAgeing = erpnext.StockGridReport.extend({
 	setup_columns: function() {
 		this.columns = [
 			{id: "name", name: "Item", field: "name", width: 300,
-				formatter: this.link_formatter},
+				link_formatter: {
+					open_btn: true,
+					doctype: '"Item"'
+				}},
 			{id: "average_age", name: "Average Age", field: "average_age",
 				formatter: this.currency_formatter},
 			{id: "earliest", name: "Earliest", field: "earliest",
