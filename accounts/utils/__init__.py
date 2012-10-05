@@ -21,14 +21,17 @@ from webnotes.utils import nowdate
 
 def get_fiscal_year(date):
 	from webnotes.utils import formatdate
+	# if year start date is 2012-04-01, year end date should be 2013-03-31 (hence subdate)
 	fy = webnotes.conn.sql("""select name, year_start_date, 
-		adddate(year_start_date, interval 1 year) 
+		subdate(adddate(year_start_date, interval 1 year), interval 1 day) 
+			as year_end_date
 		from `tabFiscal Year`
-		where %s between year_start_date and adddate(year_start_date, 
-		interval 1 year)""", date)
+		where %s >= year_start_date and %s < adddate(year_start_date, interval 1 year)""",
+		(date, date))
 	
 	if not fy:
-		webnotes.msgprint("""%s not in any Fiscal Year""" % formatdate(date), raise_exception=1)
+		webnotes.msgprint("""%s not in any Fiscal Year""" % formatdate(date),
+			raise_exception=1)
 	
 	return fy[0]
 
