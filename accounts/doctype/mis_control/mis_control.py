@@ -192,15 +192,12 @@ class DocType:
 		arg = eval(arg)
 		pl = ''
 		
-		self.define_periods(arg['year'], arg['period'])		# declares 1.period_list i.e. (['Jan','Feb','Mar'...] or ['Q1','Q2'...] or ['FY2009-2010']) based on period
-																											 #					2.period_start_date dict {'Jan':'01-01-2009'...}
-																											 #					3.period_start_date dict {'Jan':'31-01-2009'...}
+		self.define_periods(arg['year'], arg['period'])
 		self.return_data.append([4,'']+self.period_list)
 
 				
 		if arg['statement'] == 'Balance Sheet': pl = 'No'
 		if arg['statement'] == 'Profit & Loss': pl = 'Yes'
-		
 		self.get_children('',0,pl,arg['company'], arg['year'])
 				
 		#self.balance_pl_statement(acct, arg['statement'])
@@ -218,7 +215,7 @@ class DocType:
 		if cl:
 			for c in cl:
 				self.ac_details[c[1]] = [c[2], c[3], c[4]]
-				bal_list = self.get_period_balance(c[1])
+				bal_list = self.get_period_balance(c[1], pl)
 				if level==0: # top level - put balances as totals
 					self.return_data.append([level, c[0]] + ['' for b in bal_list])
 					totals = bal_list
@@ -297,9 +294,13 @@ class DocType:
 				self.period_start_date[pn] = fd
 				self.period_end_date[pn] = get_last_day(fd)
 			
-	def get_period_balance(self, acc):
-		ret = []
+	def get_period_balance(self, acc, pl):
+		ret, i = [], 0
 		for p in self.period_list:
 			period_end_date = self.period_end_date[p].strftime('%Y-%m-%d')
-			ret.append(get_balance_on(acc, period_end_date))
+			bal = get_balance_on(acc, period_end_date)
+			if pl=='Yes': 
+				bal = bal - sum(ret)
+				
+			ret.append(bal)
 		return ret

@@ -127,7 +127,7 @@ erpnext.FinancialAnalytics = erpnext.AccountTreeGrid.extend({
 		if(me.pl_or_bs=='Balance Sheet') {
 			$.each(me.data, function(i, ac) {
 				if((ac.rgt - ac.lft)==1 && ac.is_pl_account!='Yes') {
-					var opening = flt(ac.opening);
+					var opening = 0;
 					//if(opening) throw opening;
 					$.each(me.columns, function(i, col) {
 						if(col.formatter==me.currency_formatter) {
