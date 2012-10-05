@@ -38,19 +38,16 @@ class DocType:
 			return [['Item Code', 'Warehouse', 'Quantity', 'Incoming Rate']]
 
 
-	def get_csv_file_data(self, submit = 1):
+	def read_csv_content(self, submit = 1):
 		"""Get csv data"""
 		if submit:
-			filename = self.doc.file_list.split(',')
-			if not filename:
-				msgprint("Please Attach File. ", raise_exception=1)
-			
-			from webnotes.utils import file_manager
-			fn, content = file_manager.get_file(filename[1])
+			from webnotes.utils.datautils import read_csv_content_from_attached_file
+			data = read_csv_content_from_attached_file(self.doc)
 		else:
-			content = self.doc.diff_info
+			from webnotes.utils.datautils import read_csv_content
+			data = read_csv_content(self.doc.diff_info)
 
-		return content
+		return data
 
 	def convert_into_list(self, data, submit = 1):
 		"""Convert csv data into list"""
@@ -76,15 +73,11 @@ class DocType:
 			raise Exception
 
 
-	def get_reconciliation_data(self,submit = 1):
+	def get_reconciliation_data(self, submit = 1):
 		"""Read and validate csv data"""
-		import csv
-		from core.page.data_import_tool.data_import_tool import read_csv_content
-		csv_content = self.get_csv_file_data(submit).encode('utf-8')
-		data = read_csv_content(csv_content)
+		data = self.read_csv_content(submit)
 		self.convert_into_list(data, submit)
 		
-
 	def validate_item(self, item, count):
 		""" Validate item exists and non-serialized"""
 		det = sql("select item_code, has_serial_no from `tabItem` where name = %s", cstr(item), as_dict = 1)
