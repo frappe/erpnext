@@ -627,4 +627,8 @@ patch_list = [
 		'patch_module': 'patches.october_2012',
 		'patch_file': 'update_account_property',
 	},
+	{
+		'patch_module': 'patches.october_2012',
+		'patch_file': 'remove_old_trial_bal',
+	},
 ]
