@@ -37,7 +37,6 @@ erpnext.desktop.render = function() {
 		'Website': { sprite: 'website', label: 'Website'},
 		'Activity': { sprite: 'feed', label: 'Activity'},
 		'Setup': { sprite: 'setting', label: 'Setup'},
-		'Dashboard': { sprite: 'dashboard', label: 'Dashboard'},
 		'To Do': { sprite: 'todo', label: 'To Do'},
 		'Messages': { sprite: 'messages', label: 'Messages'},
 		'Calendar': { sprite: 'calendar', label: 'Calendar'},
@@ -61,12 +60,10 @@ erpnext.desktop.render = function() {
 	// setup
 	for(var i in wn.boot.modules_list) {
 		var m = wn.boot.modules_list[i];
-		if(!in_list(['Setup', 'Dashboard'], m) && wn.boot.profile.allow_modules.indexOf(m)!=-1)
+		if(!in_list(['Setup'], m) && wn.boot.profile.allow_modules.indexOf(m)!=-1)
 			add_icon(m);
 	}
 
-	if(user_roles.indexOf('Accounts Manager')!=-1)
-		add_icon('Dashboard')
 
 	if(user_roles.indexOf('System Manager')!=-1)
 		add_icon('Setup')

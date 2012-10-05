@@ -2,7 +2,6 @@
 .sprite-account{ background-position: 0 0; width: 32px; height: 40px; } 
 .sprite-buying{ background-position: 0 -90px; width: 40px; height: 40px; } 
 .sprite-calendar{ background-position: 0 -180px; width: 35px; height: 40px; } 
-.sprite-dashboard{ background-position: 0 -270px; width: 40px; height: 29px; } 
 .sprite-feed{ background-position: 0 -349px; width: 32px; height: 40px; } 
 .sprite-hr{ background-position: 0 -439px; width: 40px; height: 32px; } 
 .sprite-kb{ background-position: 0 -521px; width: 24px; height: 39px; } 
@@ -30,7 +29,6 @@
 .sprite-production{ margin-top: 10px; margin-left: 8px; } 
 .sprite-website{ margin-top: 8px; margin-left: 8px; } 
 .sprite-setting{ margin-top: 8px; margin-left: 8px; } 
-.sprite-dashboard{ margin-top: 14px; margin-left: 8px; } 
 .sprite-report{ margin-top: 8px; margin-left: 14px; } 
 
 .sprite-messages{ margin-top: 14px; margin-left: 8px; } 

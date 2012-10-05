@@ -30,7 +30,6 @@ erpnext.modules = {
 	'Calendar': 'calendar',
 	'Messages': 'messages',
 	'Knowledge Base': 'questions',
-	'Dashboard': 'dashboard'
 }
 
 // wn.modules is used in breadcrumbs for getting module home page
@@ -70,7 +69,6 @@ wn.module_css_map = {
 	'Website': 'leaf-green',
 	'Activity': 'brown',
 	'Setup': 'grey',
-	'Dashboard': 'bright-green',
 	'To Do': 'bright-yellow',
 	'Messages': 'pink',
 	'Calendar': 'peacock',

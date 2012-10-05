@@ -122,8 +122,6 @@ class DocType:
 	def get_dt_help(self,dt):
 		return sql("select description from tabDocType where name=%s",dt)[0][0] or ''
 
-	# get dashboard counts
-	# --------------------
 	def get_wip_counts(self):
 		#dtl = ['Lead', 'Enquiries', 'Sales Order', 'Invoices', 'Purchase Request', 'Purchase Order', 'Bills', 'Tasks', 'Delivery Note', 'Maintenance']
 		can_read_dt = ['Lead', 'Opportunity', 'Sales Order', 'Sales Invoice', 'Purchase Request', 'Purchase Order', 'Purchase Invoice', 'Delivery Note', 'Task', 'Serial No']
