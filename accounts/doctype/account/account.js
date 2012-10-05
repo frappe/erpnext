@@ -48,7 +48,7 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	} else {
 		// credit days and type if customer or supplier
 		cur_frm.set_intro(null);
-		cur_frm.toggle_display(['credit_days', 'credit_limit'], 
+		cur_frm.toggle_display(['credit_days', 'credit_limit', 'master_name'], 
 			in_list(['Customer', 'Supplier'], doc.master_type));
 
 		// hide tax_rate
