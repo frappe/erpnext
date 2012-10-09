@@ -80,17 +80,20 @@ erpnext.todo.ToDoItem = Class.extend({
 			todo.link = '';
 		}
 		if(!todo.description) todo.description = '';
+		todo.description_display = todo.description.replace(/\n\n/g, "<br>").trim();
 				
 		$(parent_list).append(repl('\
 			<div class="todoitem">\
-				<span class="label %(labelclass)s">%(priority)s</span>\
-				<span class="popup-on-click"><a href="#">[edit]</a></span>\
-				<span class="description">\
-					<span class="help" style="margin-right: 7px">%(userdate)s</span>\
-					%(fullname)s: %(description)s\
+				<div class="label %(labelclass)s">%(priority)s</div>\
+				<div class="popup-on-click"><a href="#">[edit]</a></div>\
+				<div class="todo-date-fullname">\
+					<div class="todo-date">%(userdate)s</div>\
+					%(fullname)s:\
+				</div>\
+				<div class="description">%(description_display)s\
 					<span class="ref_link">%(link)s</span>\
-				</span>\
-				<span class="close-span"><a href="#" class="close">&times;</a></span>\
+				</div>\
+				<div class="close-span"><a href="#" class="close">&times;</a></div>\
 			</div>\
 			<div class="todo-separator"></div>', todo));
 		$todo = $(parent_list + ' div.todoitem:last');

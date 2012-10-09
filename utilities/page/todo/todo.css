@@ -3,13 +3,23 @@
 	clear: both;
 }
 
+.todoitem div {
+	float: left;
+	display: inline-block;
+	padding: 3px;
+}
+
 .todoitem .label {
 	width: 50px;
-	display: inline-block;
-	text-align: center;
 	margin-right: 11px;
 	margin-top: 3px;
-	float: left;
+	text-align: center;
+}
+
+.todoitem .todo-date {
+	margin-top: -2px;
+	margin-right: 7px;
+	color: #aaa;
 }
 
 .todoitem .close {
@@ -18,16 +28,7 @@
 }
 
 .todoitem .close-span {
-	display: inline-block;
 	float: right;
-}
-
-.todoitem .description {
-	padding: 3px 0px;
-}
-
-#todo-list {
-
 }
 
 .todo-separator {
@@ -45,6 +46,6 @@
 	min-height: 300px;
 }
 
-.popup-on-click {
+.todoitem .popup-on-click {
 	margin: 0px 6px;
 }
