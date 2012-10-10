@@ -30,14 +30,6 @@ else:
 	from_date = filter_values['posting_date']
 	to_date = filter_values['posting_date1']
 
-from_date_year = sql("select name from `tabFiscal Year` where %s between year_start_date and date_sub(date_add(year_start_date,interval 1 year), interval 1 day)",from_date)
-if not from_date_year:
-	msgprint("From Date is out of range. Please check.", raise_exception=1)
-else:
-	from_date_year = from_date_year[0][0]
-#to_date_year = sql("select name from `tabFiscal Year` where %s between year_start_date and date_sub(date_add(year_start_date,interval 1 year), interval 1 day)",to_date)[0][0]
-
-
 # define columns
 #---------------------------------------------------------------------
 col = []
