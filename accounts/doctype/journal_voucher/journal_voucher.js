@@ -150,7 +150,7 @@ cur_frm.cscript.account = function(doc,dt,dn) {
 		args: {account: d.account, date: doc.posting_date},
 		callback: function(r) {
 			d.balance = fmt_money(r.message);
-			refresh_field('balance',d.name,'entries');
+			refresh_field('balance', d.name, 'entries');
 		}
 	});
 } 
