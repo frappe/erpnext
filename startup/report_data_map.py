@@ -26,17 +26,20 @@ data_map = {
 	},
 	"Fiscal Year": {
 		"columns": ["name", "year_start_date", 
-			"adddate(adddate(year_start_date, interval 1 year), interval -1 day) as year_end_date"]
+			"adddate(adddate(year_start_date, interval 1 year), interval -1 day) as year_end_date"],
+		"conditions": ["docstatus < 2"],
 	},
 
 	# Accounts
 	"Account": {
 		"columns": ["name", "parent_account", "lft", "rgt", "debit_or_credit", 
 			"is_pl_account", "company"],
+		"conditions": ["docstatus < 2"],
 		"order_by": "lft"
 	},
 	"Cost Center": {
 		"columns": ["name", "lft", "rgt"],
+		"conditions": ["docstatus < 2"],
 		"order_by": "lft"
 	},
 	"GL Entry": {
@@ -55,6 +58,7 @@ data_map = {
 	"Item": {
 		"columns": ["name", "if(item_name=name, '', item_name) as item_name", 
 			"item_group as parent_item_group", "stock_uom", "brand", "valuation_method"],
+		"conditions": ["docstatus < 2"],
 		"order_by": "name",
 		"links": {
 			"parent_item_group": ["Item Group", "name"],
@@ -62,10 +66,12 @@ data_map = {
 	},
 	"Item Group": {
 		"columns": ["name", "parent_item_group"],
+		"conditions": ["docstatus < 2"],
 		"order_by": "lft"
 	},
 	"Warehouse": {
 		"columns": ["name"],
+		"conditions": ["docstatus < 2"],
 		"order_by": "name"
 	},
 	"Stock Ledger Entry": {
@@ -84,6 +90,7 @@ data_map = {
 	"Customer": {
 		"columns": ["name", "if(customer_name=name, '', customer_name) as customer_name", 
 			"customer_group as parent_customer_group", "territory as parent_territory"],
+		"conditions": ["docstatus < 2"],
 		"order_by": "name",
 		"links": {
 			"parent_customer_group": ["Customer Group", "name"],
@@ -92,10 +99,12 @@ data_map = {
 	},
 	"Customer Group": {
 		"columns": ["name", "parent_customer_group"],
+		"conditions": ["docstatus < 2"],
 		"order_by": "lft"
 	},
 	"Territory": {
 		"columns": ["name", "parent_territory"],
+		"conditions": ["docstatus < 2"],
 		"order_by": "lft"
 	},
 	"Sales Invoice": {
@@ -119,6 +128,7 @@ data_map = {
 	"Supplier": {
 		"columns": ["name", "if(supplier_name=name, '', supplier_name) as supplier_name", 
 			"supplier_type as parent_supplier_type"],
+		"conditions": ["docstatus < 2"],
 		"order_by": "name",
 		"links": {
 			"parent_supplier_type": ["Supplier Type", "name"],
@@ -126,6 +136,7 @@ data_map = {
 	},
 	"Supplier Type": {
 		"columns": ["name"],
+		"conditions": ["docstatus < 2"],
 		"order_by": "name"
 	},
 	"Purchase Invoice": {
