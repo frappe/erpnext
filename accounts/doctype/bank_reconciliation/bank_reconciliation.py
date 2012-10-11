@@ -62,7 +62,7 @@ class DocType:
 	def update_details(self):
 		vouchers = []
 		for d in getlist(self.doclist, 'entries'):
-			if d.clearance_date:
+			if d.clearance_date and d.cheque_date:
 				if getdate(d.clearance_date) < getdate(d.cheque_date):
 					msgprint("Clearance Date can not be before Cheque Date (Row #%s)" % 
 						d.idx, raise_exception=1)
