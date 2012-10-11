@@ -171,7 +171,7 @@ erpnext.AccountTreeGrid = wn.views.TreeGridReport.extend({
 			if(account.rgt - account.lft == 1) {
 				var parent = me.parent_map[account.name];
 				while(parent) {
-					parent_account = me.item_by_name[parent];
+					var parent_account = me.item_by_name[parent];
 					$.each(me.columns, function(c, col) {
 						if (col.formatter == me.currency_formatter) {
 							parent_account[col.field] = 
