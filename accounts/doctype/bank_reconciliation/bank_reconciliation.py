@@ -62,12 +62,14 @@ class DocType:
 	def update_details(self):
 		vouchers = []
 		for d in getlist(self.doclist, 'entries'):
-			if d.clearance_date and d.cheque_date:
-				if getdate(d.clearance_date) < getdate(d.cheque_date):
+			if d.clearance_date:
+				if d.cheque_date and getdate(d.clearance_date) < getdate(d.cheque_date):
 					msgprint("Clearance Date can not be before Cheque Date (Row #%s)" % 
 						d.idx, raise_exception=1)
 					
-				sql("update `tabJournal Voucher` set clearance_date = %s, modified = %s where name=%s", (d.clearance_date, nowdate(), d.voucher_id))
+				sql("""update `tabJournal Voucher` 
+					set clearance_date = %s, modified = %s where name=%s""",
+					(d.clearance_date, nowdate(), d.voucher_id))
 				vouchers.append(d.voucher_id)
 
 		if vouchers:
