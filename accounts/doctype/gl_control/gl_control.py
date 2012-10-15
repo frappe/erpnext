@@ -438,7 +438,15 @@ def manage_recurring_invoices():
 		
 		
 def notify_errors(inv, owner):
+	import webnotes
 	from webnotes.utils import get_request_site_address
+	url = get_request_site_address()
+	if not url or url=='http://localhost':
+		new_url = webnotes.conn.get_value('Website Settings', 'Website Settings',
+			'subdomain')
+		if new_url:
+			url = new_url
+		
 	exception_msg = """
 		Dear User,
 
@@ -459,7 +467,7 @@ def notify_errors(inv, owner):
 		Regards,
 		Administrator
 		
-	""" % (inv, get_request_site_address(), inv)
+	""" % (inv, url, inv)
 	subj = "[Urgent] Error while creating recurring invoice from %s" % inv
 	import webnotes.utils
 	recipients = webnotes.utils.get_system_managers_list()
