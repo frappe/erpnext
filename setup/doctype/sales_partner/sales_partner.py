@@ -38,7 +38,6 @@ class DocType:
   def __init__(self, doc, doclist=[]):
     self.doc = doc
     self.doclist = doclist
-    self.prefix = is_testing and 'test' or 'tab'
 
   def validate(self):
     import string
