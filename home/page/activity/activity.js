@@ -1,6 +1,7 @@
 wn.pages['activity'].onload = function(wrapper) {
 	wrapper.appframe = new wn.ui.AppFrame($(wrapper).find('.layout-appframe'));
 	wrapper.appframe.title('Activity');
+	
 	var list = new wn.ui.Listing({
 		appframe: wrapper.appframe,
 		method: 'home.page.activity.activity.get_feed',
@@ -10,6 +11,13 @@ wn.pages['activity'].onload = function(wrapper) {
 		}
 	});
 	list.run();
+	
+	// Build Report Button
+	if(wn.boot.profile.can_get_report.indexOf("Feed")!=-1) {
+		wrapper.appframe.add_button('Build Report', function() {
+			wn.set_route('Report2', "Feed");
+		}, 'icon-th')
+	}
 }
 
 erpnext.last_feed_date = false;
