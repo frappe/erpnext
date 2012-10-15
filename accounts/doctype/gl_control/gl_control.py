@@ -438,14 +438,15 @@ def manage_recurring_invoices():
 		
 		
 def notify_errors(inv, owner):
+	from webnotes.utils import get_request_site_address
 	exception_msg = """
 		Dear User,
 
-		An error occured while creating recurring invoice from %s.
+		An error occured while creating recurring invoice from %s (at %s).
 
 		May be there are some invalid email ids mentioned in the invoice.
 
-		To stop sending repetitive error notifications from the system, we have unchecked \
+		To stop sending repetitive error notifications from the system, we have unchecked
 		"Convert into Recurring" field in the invoice %s.
 
 
@@ -458,11 +459,11 @@ def notify_errors(inv, owner):
 		Regards,
 		Administrator
 		
-	""" % (inv, inv)
+	""" % (inv, get_request_site_address(), inv)
 	subj = "[Urgent] Error while creating recurring invoice from %s" % inv
 	import webnotes.utils
 	recipients = webnotes.utils.get_system_managers_list()
-	recipients += ['support@erpnext.com', owner]
+	recipients += [webnotes.conn.get_value("Profile", owner, "email")]
 	assign_task_to_owner(inv, exception_msg, recipients)
 	sendmail(recipients, subject=subj, msg = exception_msg)
 	

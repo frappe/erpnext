@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		u'creation': '2012-05-04 10:21:24',
+		u'creation': '2012-10-02 18:51:46',
 		u'docstatus': 0,
-		u'modified': '2012-10-02 16:43:51',
+		u'modified': '2012-10-15 12:38:42',
 		u'modified_by': u'Administrator',
 		u'owner': u'Administrator'
 	},
@@ -235,11 +235,13 @@
 
 	# DocField
 	{
+		'colour': u'White:FFF',
+		'description': u'eg. Cheque Number',
 		u'doctype': u'DocField',
 		'fieldname': u'cheque_no',
 		'fieldtype': u'Data',
 		'in_filter': 1,
-		'label': u'Cheque No',
+		'label': u'Reference Number',
 		'no_copy': 1,
 		'oldfieldname': u'cheque_no',
 		'oldfieldtype': u'Data',
@@ -252,7 +254,7 @@
 		u'doctype': u'DocField',
 		'fieldname': u'cheque_date',
 		'fieldtype': u'Date',
-		'label': u'Cheque Date',
+		'label': u'Reference Date',
 		'no_copy': 1,
 		'oldfieldname': u'cheque_date',
 		'oldfieldtype': u'Date',
@@ -745,6 +747,30 @@
 
 	# DocPerm
 	{
+		'amend': 1,
+		'cancel': 1,
+		'create': 1,
+		u'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Accounts User',
+		'submit': 1,
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
+		u'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Accounts User',
+		'submit': 0,
+		'write': 0
+	},
+
+	# DocPerm
+	{
 		'amend': 0,
 		'cancel': 0,
 		'create': 0,
@@ -769,14 +795,14 @@
 
 	# DocPerm
 	{
-		'amend': 1,
-		'cancel': 1,
-		'create': 1,
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
 		u'doctype': u'DocPerm',
 		'permlevel': 0,
-		'role': u'Accounts User',
-		'submit': 1,
-		'write': 1
+		'role': u'Auditor',
+		'submit': 0,
+		'write': 0
 	},
 
 	# DocPerm
@@ -786,7 +812,7 @@
 		'create': 0,
 		u'doctype': u'DocPerm',
 		'permlevel': 1,
-		'role': u'Accounts User',
+		'role': u'Auditor',
 		'submit': 0,
 		'write': 0
 	}
