@@ -24,3 +24,15 @@ def send_message():
 	
 	d.save()
 	webnotes.msgprint('Thank you!')
+	
+def get_site_address():
+	from webnotes.utils import get_request_site_address
+	url = get_request_site_address()
+
+	if not url or url=='http://localhost':
+		new_url = webnotes.conn.get_value('Website Settings', 'Website Settings',
+			'subdomain')
+		if new_url:
+			url = "http://" + new_url
+			
+	return url
