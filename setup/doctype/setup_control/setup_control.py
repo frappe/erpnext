@@ -140,8 +140,8 @@ class DocType:
 		import webnotes
 		companies_list = webnotes.conn.sql("SELECT company_name FROM `tabCompany`", as_list=1)
 
-		import webnotes.utils
-		system_managers = webnotes.utils.get_system_managers_list()
+		from webnotes.profile import get_system_managers
+		system_managers = get_system_managers()
 		if not system_managers: return
 		
 		from webnotes.model.doc import Document
