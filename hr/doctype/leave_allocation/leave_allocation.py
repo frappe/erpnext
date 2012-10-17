@@ -8,131 +8,129 @@
 # 
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	See the
 # GNU General Public License for more details.
 # 
 # You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 # Please edit this list and import only required elements
 from __future__ import unicode_literals
 import webnotes
-
-from webnotes.utils import add_days, add_months, add_years, cint, cstr, date_diff, default_fields, flt, fmt_money, formatdate, getTraceback, get_defaults, get_first_day, get_last_day, getdate, has_common, month_name, now, nowdate, replace_newlines, sendmail, set_default, str_esc_quote, user_format, validate_email_add
-from webnotes.model import db_exists
-from webnotes.model.doc import Document, addchild, getchildren, make_autoname
-from webnotes.model.doclist import getlist, copy_doclist
-from webnotes.model.code import get_obj, get_server_obj, run_server_obj, updatedb, check_syntax
-from webnotes import session, form, msgprint, errprint
-
+from webnotes.utils import cint, flt
+from webnotes import msgprint
 set = webnotes.conn.set
 sql = webnotes.conn.sql
-get_value = webnotes.conn.get_value
-in_transaction = webnotes.conn.in_transaction
-convert_to_lists = webnotes.conn.convert_to_lists
-import datetime
 	
-# -----------------------------------------------------------------------------------------
 class DocType:
-  def __init__(self, doc, doclist):
-    self.doc = doc
-    self.doclist = doclist
+	def __init__(self, doc, doclist):
+		self.doc, self.doclist = doc, doclist
+		
+	def validate(self):
+		self.validate_new_leaves_allocated_value()
+		self.check_existing_leave_allocation()
+		self.validate_new_leaves_allocated()
+		
+	def on_update_after_submit(self):
+		self.validate_new_leaves_allocated_value()
+		self.validate_new_leaves_allocated()
 
+	def on_update(self):
+		self.get_total_allocated_leaves()
+		
+	def on_cancel(self):
+		self.check_for_leave_application()
+		
+	def validate_new_leaves_allocated_value(self):
+		"""validate that leave allocation is in multiples of 0.5"""
+		if flt(self.doc.new_leaves_allocated) % 0.5:
+			guess = round(flt(self.doc.new_leaves_allocated) * 2.0) / 2.0
+			
+			msgprint("""New Leaves Allocated should be a multiple of 0.5.
+				Perhaps you should enter %s or %s""" % (guess, guess + 0.5),
+				raise_exception=1)
+		
+	def check_existing_leave_allocation(self):
+		"""check whether leave for same type is already allocated or not"""
+		leave_allocation = sql("""select name from `tabLeave Allocation`
+			where employee=%s and leave_type=%s and fiscal_year=%s and docstatus=1""",
+			(self.doc.employee, self.doc.leave_type, self.doc.fiscal_year))
+		if leave_allocation:
+			msgprint("""%s is already allocated to Employee: %s for Fiscal Year: %s.
+				Please refere Leave Allocation: \
+				<a href="#Form/Leave Allocation/%s">%s</a>""" % \
+				(self.doc.leave_type, self.doc.employee, self.doc.fiscal_year,
+				leave_allocation[0][0], leave_allocation[0][0]), raise_exception=1)
+			
+	def validate_new_leaves_allocated(self):
+		"""check if Total Leaves Allocated >= Leave Applications"""
+		self.doc.total_leaves_allocated = flt(self.doc.carry_forwarded_leaves) + \
+			flt(self.doc.new_leaves_allocated)
+		leaves_applied = self.get_leaves_applied(self.doc.fiscal_year)
+		if leaves_applied > self.doc.total_leaves_allocated:
+			expected_new_leaves = flt(self.doc.new_leaves_allocated) + \
+				(leaves_applied - self.doc.total_leaves_allocated)
+			msgprint("""Employee: %s has already applied for %s leaves.
+				Hence, New Leaves Allocated should be atleast %s""" % \
+				(self.doc.employee, leaves_applied, expected_new_leaves),
+				raise_exception=1)
+		
+	def get_leave_bal(self, prev_fyear):
+		return self.get_leaves_allocated(prev_fyear) - self.get_leaves_applied(prev_fyear)
+		
+	def get_leaves_applied(self, fiscal_year):
+		leaves_applied = sql("""select SUM(ifnull(total_leave_days, 0))
+			from `tabLeave Application` where employee=%s and leave_type=%s
+			and fiscal_year=%s and docstatus=1""", 
+			(self.doc.employee, self.doc.leave_type, fiscal_year))
+		return leaves_applied and flt(leaves_applied[0][0]) or 0
 
-# ************************************************ utilities *************************************************
-  # --------------
-  # get leave bal
-  # --------------
-  def get_leave_bal(self, prev_fyear):
-    # leaves allocates
-    tot_leaves_all = sql("select SUM(total_leaves_allocated) from `tabLeave Allocation` where employee = '%s' and leave_type = '%s' and fiscal_year = '%s' and docstatus = 1 and name != '%s'" % (self.doc.employee, self.doc.leave_type, prev_fyear, self.doc.name))
-    tot_leaves_all = tot_leaves_all and flt(tot_leaves_all[0][0]) or 0
+	def get_leaves_allocated(self, fiscal_year):
+		leaves_allocated = sql("""select SUM(ifnull(total_leaves_allocated, 0))
+			from `tabLeave Allocation` where employee=%s and leave_type=%s
+			and fiscal_year=%s and docstatus=1 and name!=%s""",
+			(self.doc.employee, self.doc.leave_type, fiscal_year, self.doc.name))
+		return leaves_allocated and flt(leaves_allocated[0][0]) or 0
+	
+	def allow_carry_forward(self):
+		"""check whether carry forward is allowed or not for this leave type"""
+		cf = sql("""select is_carry_forward from `tabLeave Type` where name = %s""",
+			self.doc.leave_type)
+		cf = cf and cint(cf[0][0]) or 0
+		if not cf:
+			set(self.doc,'carry_forward',0)
+			msgprint("Sorry! You cannot carry forward %s" % (self.doc.leave_type),
+				raise_exception=1)
 
-    # leaves applied
-    tot_leaves_app = sql("select SUM(total_leave_days) from `tabLeave Application` where employee = '%s' and leave_type = '%s' and fiscal_year = '%s' and docstatus = 1" % (self.doc.employee, self.doc.leave_type, prev_fyear))
-    tot_leaves_app = tot_leaves_app and flt(tot_leaves_app[0][0]) or 0
+	def get_carry_forwarded_leaves(self):
+		if self.doc.carry_forward:
+			self.allow_carry_forward()
+		prev_fiscal_year = sql("""select name from `tabFiscal Year`
+			where name < %s order by name desc limit 1""", self.doc.fiscal_year)
+		prev_fiscal_year = prev_fiscal_year and prev_fiscal_year[0][0] or ''
+		prev_bal = 0
+		if prev_fiscal_year and cint(self.doc.carry_forward) == 1:
+			prev_bal = self.get_leave_bal(prev_fiscal_year)
+		ret = {
+			'carry_forwarded_leaves': prev_bal,
+			'total_leaves_allocated': flt(prev_bal) + flt(self.doc.new_leaves_allocated)
+		}
+		return ret
 
-    return tot_leaves_all - tot_leaves_app
+	def get_total_allocated_leaves(self):
+		leave_det = self.get_carry_forwarded_leaves()
+		set(self.doc,'carry_forwarded_leaves',flt(leave_det['carry_forwarded_leaves']))
+		set(self.doc,'total_leaves_allocated',flt(leave_det['total_leaves_allocated']))
 
- 
-# ******************************************** client triggers ***********************************************
+	def check_for_leave_application(self):
+		exists = sql("""select name from `tabLeave Application`
+			where employee=%s and leave_type=%s and fiscal_year=%s and docstatus=1""",
+			(self.doc.employee, self.doc.leave_type, self.doc.fiscal_year))
+		if exists:
+			msgprint("""Cannot cancel this Leave Allocation as \
+				Employee : %s has already applied for %s. 
+				Please check Leave Application: \
+				<a href="#Form/Leave Application/%s">%s</a>""" % \
+				(self.doc.employee, self.doc.leave_type, exists[0][0], exists[0][0]))
+			raise Exception
 
-  # ------------------------------------------------------------------
-  # check whether carry forward is allowed or not for this leave type
-  # ------------------------------------------------------------------
-  def allow_carry_forward(self):
-    cf = sql("select is_carry_forward from `tabLeave Type` where name = %s" , self.doc.leave_type)
-    cf = cf and cint(cf[0][0]) or 0
-    if not cf:
-      set(self.doc,'carry_forward',0)
-      msgprint("Sorry ! You cannot carry forward %s" % (self.doc.leave_type))
-      raise Exception
-
-  # ---------------------------
-  # get carry forwarded leaves
-  # ---------------------------
-  def get_carry_forwarded_leaves(self):
-    if self.doc.carry_forward: self.allow_carry_forward()
-    prev_fiscal_year = sql("select name from `tabFiscal Year` where name < '%s' order by name desc limit 1" % (self.doc.fiscal_year))
-    prev_fiscal_year = prev_fiscal_year and prev_fiscal_year[0][0] or ''
-    ret = {}
-    prev_bal = 0
-    if prev_fiscal_year and cint(self.doc.carry_forward) == 1:
-      prev_bal = self.get_leave_bal(prev_fiscal_year)
-    ret = {
-      'carry_forwarded_leaves'  :  prev_bal,
-      'total_leaves_allocated'   :  flt(prev_bal) + flt(self.doc.new_leaves_allocated)
-    }
-    return ret
-
-
-# ********************************************** validate *****************************************************
-
-  # ---------------------------
-  # get total allocated leaves
-  # ---------------------------
-  def get_total_allocated_leaves(self):
-    leave_det = self.get_carry_forwarded_leaves()
-    set(self.doc,'carry_forwarded_leaves',flt(leave_det['carry_forwarded_leaves']))
-    set(self.doc,'total_leaves_allocated',flt(leave_det['total_leaves_allocated']))
-
-  # ------------------------------------------------------------------------------------
-  # validate leave (i.e. check whether leave for same type is already allocated or not)
-  # ------------------------------------------------------------------------------------
-  def validate_allocated_leave(self):
-    l = sql("select name from `tabLeave Allocation` where employee = '%s' and leave_type = '%s' and fiscal_year = '%s' and docstatus = 1" % (self.doc.employee, self.doc.leave_type, self.doc.fiscal_year)) 
-    l = l and l[0][0] or ''
-    if l:
-      msgprint("%s is allocated to Employee: %s for Fiscal Year : %s. Please refer Leave Allocation : %s" % (self.doc.leave_type, self.doc.employee, self.doc.fiscal_year, l))
-      raise Exception
-
-  # ---------
-  # validate
-  # ---------
-  def validate(self):
-    self.validate_allocated_leave()
-
-  # ----------
-  # on update
-  # ----------
-  def on_update(self):
-    self.get_total_allocated_leaves()
-
-
-# ********************************************** cancel ********************************************************
-
-  # -------------------------
-  # check for applied leaves
-  # -------------------------
-  def check_for_leave_application(self):
-    chk = sql("select name from `tabLeave Application` where employee = '%s' and leave_type = '%s' and fiscal_year = '%s' and docstatus = 1" % (self.doc.employee, self.doc.leave_type, self.doc.fiscal_year))
-    chk = chk and chk[0][0] or ''
-    if chk:
-      msgprint("Cannot cancel this Leave Allocation as Employee : %s has already applied for %s. Please check Leave Application : %s" % (self.doc.employee, self.doc.leave_type, chk))
-      raise Exception
-
-  # -------
-  # cancel
-  # -------
-  def on_cancel(self):
-    self.check_for_leave_application()
