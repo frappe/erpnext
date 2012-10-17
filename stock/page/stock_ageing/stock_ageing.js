@@ -129,13 +129,15 @@ erpnext.StockAgeing = erpnext.StockGridReport.extend({
 			
 			$.each(full_fifo_stack, function(i, batch) {
 				var batch_age = dateutil.get_diff(me.to_date, batch[2]);
-				age_qty += batch_age * batch[1];
-				total_qty += batch[1];
+				age_qty += batch_age * batch[0];
+				total_qty += batch[0];
 				max_age = Math.max(max_age, batch_age);
-				if(min_age===null) min_age=batch_age; else min_age = Math.min(min_age, batch_age)
+				if(min_age===null) min_age=batch_age;
+				else min_age = Math.min(min_age, batch_age);
 			});
 			
-			item.average_age = total_qty.toFixed(2)==0.0 ? 0 : (age_qty / total_qty).toFixed(2);
+			item.average_age = total_qty.toFixed(2)==0.0 ? 0 
+				: (age_qty / total_qty).toFixed(2);
 			item.earliest = max_age || 0.0;
 			item.latest = min_age || 0.0;
 		});
