@@ -1,4 +1,4 @@
-SELECT DISTINCT `tabGL Entry`.`Aging_date`,`tabGL Entry`.`transaction_date`,`tabGL Entry`.`account`, `tabGL Entry`.`against_voucher_type`, `tabGL Entry`.`against_voucher`,`tabGL Entry`.`voucher_type`,`tabGL Entry`.`voucher_no`, `tabGL Entry`.`remarks`, `tabGL Entry`.`credit`
+SELECT DISTINCT `tabGL Entry`.`Aging_date`,`tabGL Entry`.`account`, `tabGL Entry`.`against_voucher_type`, `tabGL Entry`.`against_voucher`,`tabGL Entry`.`voucher_type`,`tabGL Entry`.`voucher_no`, `tabGL Entry`.`remarks`, `tabGL Entry`.`credit`
 FROM `tabGL Entry`,`tabAccount` 
 WHERE `tabGL Entry`.`posting_date`>= '%(posting_date)s'
  AND `tabGL Entry`.`posting_date`<= '%(posting_date1)s'
