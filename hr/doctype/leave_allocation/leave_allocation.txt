@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		u'creation': '2012-05-15 12:14:45',
+		u'creation': '2012-10-02 18:51:49',
 		u'docstatus': 0,
-		u'modified': '2012-10-02 11:21:31',
+		u'modified': '2012-10-17 12:51:44',
 		u'modified_by': u'Administrator',
 		u'owner': u'Administrator'
 	},
@@ -185,6 +185,7 @@
 
 	# DocField
 	{
+		'allow_on_submit': 1,
 		u'doctype': u'DocField',
 		'fieldname': u'new_leaves_allocated',
 		'fieldtype': u'Currency',
