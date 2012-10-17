@@ -8,11 +8,11 @@
 # 
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	See the
 # GNU General Public License for more details.
 # 
 # You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# along with this program.	If not, see <http://www.gnu.org/licenses/>.
 
 # Check mandatory filters
 # ------------------------------------------------------------------
@@ -40,25 +40,24 @@ for r in range(len(range_list)-1):
 # Add columns
 # ------------------------------------------------------------------
 data = [['Aging Date','Date','80px',''],
-				['Transaction Date','Date','80px',''],
-				['Account','Data','120px',''],
-				['Against Voucher Type','Data','120px',''],
-				['Against Voucher','Data','120px',''],
-				['Voucher Type','Data','120px',''],
-				['Voucher No','Data','120px',''],
-				['Remarks','Data','160px',''],
-				['Supplier Type', 'Data', '80px', ''],
-				['Due Date', 'Data', '80px', ''],
-				['Bill No','Data','80px',''],
-				['Bill Date','Data','80px',''],
-				['Opening Amt','Currency','120px',''],
-				['Outstanding Amt','Currency','120px',''],
-				['Age (Days)', 'Currency', '150px', ''],
-				['0-'+cstr(filter_values['range_1']),'Currency','100px',''],
-				[cstr(cint(filter_values['range_1']) + 1)+ '-' +cstr(filter_values['range_2']),'Currency','100px',''],
-				[cstr(cint(filter_values['range_2']) + 1)+ '-' +cstr(filter_values['range_3']),'Currency','100px',''],
-				[cstr(cint(filter_values['range_3']) + 1)+ '-' +cstr(filter_values['range_4']),'Currency','100px',''],
-				[cstr(filter_values['range_4']) + '-Above','Currency','100px','']]
+		['Account','Data','120px',''],
+		['Against Voucher Type','Data','120px',''],
+		['Against Voucher','Data','120px',''],
+		['Voucher Type','Data','120px',''],
+		['Voucher No','Data','120px',''],
+		['Remarks','Data','160px',''],
+		['Supplier Type', 'Data', '80px', ''],
+		['Due Date', 'Data', '80px', ''],
+		['Bill No','Data','80px',''],
+		['Bill Date','Data','80px',''],
+		['Opening Amt','Currency','120px',''],
+		['Outstanding Amt','Currency','120px',''],
+		['Age (Days)', 'Currency', '150px', ''],
+		['0-'+cstr(filter_values['range_1']),'Currency','100px',''],
+		[cstr(cint(filter_values['range_1']) + 1)+ '-' +cstr(filter_values['range_2']),'Currency','100px',''],
+		[cstr(cint(filter_values['range_2']) + 1)+ '-' +cstr(filter_values['range_3']),'Currency','100px',''],
+		[cstr(cint(filter_values['range_3']) + 1)+ '-' +cstr(filter_values['range_4']),'Currency','100px',''],
+		[cstr(filter_values['range_4']) + '-Above','Currency','100px','']]
 				
 
 for d in data:
@@ -97,12 +96,14 @@ for t in sql("select name, due_date, bill_no, bill_date from `tabPurchase Invoic
 pv_outside_period = [d[0] for d in sql("select distinct name from `tabPurchase Invoice` where (posting_date < '%s' or posting_date > '%s') and docstatus = 1" % (from_date, to_date))]
 
 
+from webnotes.utils import nowdate
+
 out = []
 total_booking_amt, total_outstanding_amt = 0,0
 
 for r in res:
 	outstanding_amt, due_date, bill_no, bill_date, cond = 0, '','','', ''
-	booking_amt = r.pop(8)
+	booking_amt = r.pop(7)
 	
 	# supplier type
 	r.append(supp_type_dict.get(r[col_idx['Account']], ''))	
@@ -141,6 +142,8 @@ for r in res:
 	# split into date ranges
 	val_l1 = val_l2 = val_l3 = val_l4 = val_l5_above= 0
 	if r[col_idx[aging_based_on]]:
+		if getdate(to_date) > getdate(nowdate()):
+			to_date = nowdate()
 		diff = (getdate(to_date) - getdate(r[col_idx[aging_based_on]])).days
 		if diff < cint(filter_values['range_1']):
 			val_l1 = outstanding_amt

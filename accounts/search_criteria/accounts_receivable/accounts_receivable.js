@@ -22,7 +22,7 @@ report.customize_filters = function() {
   this.filter_fields_dict['GL Entry'+FILTER_SEP +'To Posting Date'].df.filter_hide = 0;
   this.filter_fields_dict['GL Entry'+FILTER_SEP +'Account'].df.filter_hide = 0;
 
-  this.add_filter({fieldname:'aging_based_on', label:'Aging Based On', fieldtype:'Select', options:NEWLINE+'Transaction Date'+NEWLINE+'Aging Date'+NEWLINE+'Due Date',ignore : 1, parent:'Sales Invoice', report_default:'Aging Date'});
+  this.add_filter({fieldname:'aging_based_on', label:'Aging Based On', fieldtype:'Select', options:NEWLINE+'Aging Date'+NEWLINE+'Due Date',ignore : 1, parent:'Sales Invoice', report_default:'Aging Date'});
   this.add_filter({fieldname:'range_1', label:'Range 1', fieldtype:'Data', ignore : 1, parent:'GL Entry'});
   this.add_filter({fieldname:'range_2', label:'Range 2', fieldtype:'Data', ignore : 1, parent:'GL Entry'});
   this.add_filter({fieldname:'range_3', label:'Range 3', fieldtype:'Data', ignore : 1, parent:'GL Entry'});
@@ -34,5 +34,3 @@ report.customize_filters = function() {
 
   this.dt.set_no_limit(1);
 }
-
-//this.mytabs.items['Select Columns'].hide()
