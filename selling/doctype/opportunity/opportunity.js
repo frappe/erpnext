@@ -48,8 +48,6 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 		}
 	} 
 
-	// setup fetch
-	cur_frm.cscript.set_fetch();
 	cur_frm.cscript.make_communication_body();
 }
 
