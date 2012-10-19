@@ -18,14 +18,14 @@
 # ------------------------------------------------------------------
 
 from __future__ import unicode_literals
-if not filter_values.get('posting_date') or not filter_values.get('posting_date1'):
-	msgprint("Please select From Posting Date and To Posting Date ")
+if not filter_values.get('posting_date1'):
+	msgprint("Please select To Posting Date ")
 	raise Exception
 else:
-	from_date = filter_values.get('posting_date')
 	to_date = filter_values.get('posting_date1')
 
-if not filter_values['range_1'] or not filter_values['range_2'] or not filter_values['range_3'] or not filter_values['range_4']:
+if not filter_values['range_1'] or not filter_values['range_2'] \
+		or not filter_values['range_3'] or not filter_values['range_4']:
 	msgprint("Please select aging ranges in no of days in 'More Filters' ")
 	raise Exception
 
@@ -74,26 +74,25 @@ if filter_values.has_key('aging_based_on') and filter_values['aging_based_on']:
 	aging_based_on = filter_values['aging_based_on'].split(NEWLINE)[-1]
 
 if	len(res) > 2000 and from_export == 0:
-	msgprint("This is a very large report and cannot be shown in the browser as it is likely to make your browser very slow.Please select Account or click on 'Export' to open in excel")
-	raise Exception
-
-
-# ------------------------------------------------------------------
-# main loop starts here
-# ------------------------------------------------------------------
+	msgprint("""This is a very large report and cannot be shown in the browser 
+		as it is likely to make your browser very slow.
+		Please select Account or click on 'Export' to open in excel""", raise_exception=1)
 
 # get supplier type
 supp_type_dict = {}
-for each in sql("select t2.name, t1.supplier_type from tabSupplier t1, tabAccount t2 where t1.name = t2.account_name group by t2.name"):
+for each in sql("""select t2.name, t1.supplier_type from tabSupplier t1, tabAccount t2 
+		where t1.name = t2.account_name group by t2.name"""):
 	supp_type_dict[each[0]] = each[1]
 
 # get due_date, bill_no, bill_date from PV
 pv_dict = {}
-for t in sql("select name, due_date, bill_no, bill_date from `tabPurchase Invoice` group by name"):
+for t in sql("""select name, due_date, bill_no, bill_date 
+		from `tabPurchase Invoice` group by name"""):
 	pv_dict[t[0]] = [cstr(t[1]), t[2], cstr(t[3])]
 
-# pv outside this period
-pv_outside_period = [d[0] for d in sql("select distinct name from `tabPurchase Invoice` where (posting_date < '%s' or posting_date > '%s') and docstatus = 1" % (from_date, to_date))]
+# pv after to-date
+pv_after_to_date = [d[0] for d in sql("""select distinct name from `tabPurchase Invoice` 
+	where posting_date > %s and docstatus = 1""", (to_date,))]
 
 
 from webnotes.utils import nowdate
@@ -106,7 +105,7 @@ for r in res:
 	booking_amt = r.pop(7)
 	
 	# supplier type
-	r.append(supp_type_dict.get(r[col_idx['Account']], ''))	
+	r.append(supp_type_dict.get(r[col_idx['Account']], ''))
 	
 	if r[col_idx['Voucher Type']] == 'Purchase Invoice':
 		r += pv_dict.get(r[col_idx['Voucher No']], ['', '', ''])
@@ -118,23 +117,31 @@ for r in res:
 		cond = " and ifnull(against_voucher, '') = '%s'" % r[col_idx['Against Voucher']]
 
 	# if entry against JV & and not adjusted within period
-	elif r[col_idx['Against Voucher Type']] == 'Purchase Invoice' and r[col_idx['Against Voucher']] in pv_outside_period:
+	elif r[col_idx['Against Voucher Type']] == 'Purchase Invoice' \
+			and r[col_idx['Against Voucher']] in pv_after_to_date:
 		booking_amt = 0
-		cond = " and voucher_no = '%s' and ifnull(against_voucher, '') = '%s'" % (r[col_idx['Voucher No']], r[col_idx['Against Voucher']])
+		cond = """ and voucher_no = '%s' and ifnull(against_voucher, '') = '%s'""" \
+		 	% (r[col_idx['Voucher No']], r[col_idx['Against Voucher']])
 	
 	# if un-adjusted
 	elif not r[col_idx['Against Voucher']]:
 		booking_amt = 0
-		cond = " and ((voucher_no = '%s' and ifnull(against_voucher, '') = '') or (ifnull(against_voucher, '') = '%s' and voucher_type = 'Journal Voucher'))" % (r[col_idx['Voucher No']], r[col_idx['Voucher No']])
+		cond = """ and ((voucher_no = '%s' and ifnull(against_voucher, '') = '') 
+			or (ifnull(against_voucher, '') = '%s' and voucher_type = 'Journal Voucher'))""" \
+			% (r[col_idx['Voucher No']], r[col_idx['Voucher No']])
 
 	if cond:
-		outstanding_amt = flt(sql("select sum(ifnull(credit, 0))-sum(ifnull(debit, 0)) from `tabGL Entry` where account = '%s' and ifnull(is_cancelled, 'No') = 'No' and posting_date <= '%s' %s" % (r[col_idx['Account']], to_date, cond))[0][0] or 0)
+		outstanding_amt = flt(sql("""select sum(ifnull(credit, 0))-sum(ifnull(debit, 0)) 
+			from `tabGL Entry` where account = %s and ifnull(is_cancelled, 'No') = 'No' 
+			and posting_date <= %s %s"""
+			% ('%s', '%s', cond), (r[col_idx['Account']], to_date,))[0][0] or 0)
 
 		# add to total outstanding
 		total_outstanding_amt += flt(outstanding_amt)
 
 		# add to total booking amount
-		if outstanding_amt and r[col_idx['Voucher Type']] == 'Purchase Invoice' and r[col_idx['Against Voucher']]:
+		if outstanding_amt and r[col_idx['Voucher Type']] == 'Purchase Invoice' \
+				and r[col_idx['Against Voucher']]:
 			total_booking_amt += flt(booking_amt)
 
 	r += [booking_amt, outstanding_amt]
