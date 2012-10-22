@@ -59,6 +59,6 @@ if acc and acc[0][0] == 'Debit':
 else:
 	bank_bal = flt(opening)+flt(total_debit)-flt(total_credit)
 
-out.append(['','','','','','<font color = "#000"><b>Balance as per Company Books: </b></font>', opening,'',''])
-out.append(['','','','','','<font color = "#000"><b>Amounts not reflected in Bank: </b></font>', total_debit,total_credit,''])
-out.append(['','','','','','<font color = "#000"><b>Balance as per Bank: </b></font>', bank_bal,'',''])
+out.append(['','','','<font color = "#000"><b>Balance as per Company Books: </b></font>', opening,'', ''])
+out.append(['','','','<font color = "#000"><b>Amounts not reflected in Bank: </b></font>', total_debit,total_credit,''])
+out.append(['','','','<font color = "#000"><b>Balance as per Bank: </b></font>', bank_bal,'',''])
