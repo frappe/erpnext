@@ -48,7 +48,6 @@ class DocType(DocTypeNestedSet):
 	def on_trash(self):
 		cust = sql("select name from `tabCustomer` where ifnull(customer_group, '') = %s", self.doc.name)
 		cust = [d[0] for d in cust]
-		
 		if cust:
 			msgprint("""Customer Group: %s can not be trashed/deleted because it is used in customer: %s. 
 				To trash/delete this, remove/change customer group in customer master""" % (self.doc.name, cust or ''), raise_exception=1)
@@ -57,5 +56,4 @@ class DocType(DocTypeNestedSet):
 			msgprint("Child customer group exists for this customer group. You can not trash/cancel/delete this customer group.", raise_exception=1)
 
 		# rebuild tree
-		webnotes.conn.set(self.doc,'old_parent', '')
-		self.update_nsm()
+		super(DocType, self).on_trash()
