@@ -73,8 +73,8 @@ class DocType:
 		
 		# Update Membership Type at Gateway
 		from webnotes.utils import cint
-
-		sql("delete from __SessionCache where user=%s", cstr(arg['usr']))
+		
+		webnotes.clear_cache(cstr(arg['usr']))
 
 	# Save profile
 	def save_profile(self,arg):
