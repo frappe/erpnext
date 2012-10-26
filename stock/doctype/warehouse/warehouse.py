@@ -100,6 +100,10 @@ class DocType:
 			self.repost(item_code[0], self.doc.merge_with)
 			
 		webnotes.conn.auto_commit_on_many_writes = 0
+		
+		msgprint("Warehouse %s merged into %s. Now you can delete warehouse: %s" 
+			% (self.doc.name, self.doc.merge_with, self.doc.name))
+		
 
 	def repost(self, item_code, warehouse=None):
 		bin = self.get_bin(item_code, warehouse)
