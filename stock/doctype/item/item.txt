@@ -5,7 +5,7 @@
 	{
 		u'creation': '2012-07-12 22:19:45',
 		u'docstatus': 0,
-		u'modified': '2012-10-23 11:02:09',
+		u'modified': '2012-10-26 16:39:16',
 		u'modified_by': u'Administrator',
 		u'owner': u'Administrator'
 	},
@@ -288,6 +288,16 @@
 		'fieldname': u'email_notify',
 		'fieldtype': u'Check',
 		'label': u'Send Email Notification when stock reaches re-order level',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		u'doctype': u'DocField',
+		'fieldname': u'valuation_method',
+		'fieldtype': u'Select',
+		'label': u'Valuation Method',
+		'options': u'\nFIFO\nMoving Average',
 		'permlevel': 0
 	},
 
