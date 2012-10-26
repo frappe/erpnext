@@ -440,18 +440,30 @@ class DocType(TransactionBase):
 		if self.doc.production_order:
 			pro_obj = get_obj("Production Order", self.doc.production_order)
 			if flt(pro_obj.doc.docstatus) != 1:
-				msgprint("You cannot do any transaction against Production Order : %s, as it's not submitted" % (pro_obj.doc.name))
-				raise Exception
+				msgprint("""You cannot do any transaction against 
+					Production Order : %s, as it's not submitted"""
+					% (pro_obj.doc.name), raise_exception=1)
+					
 			if pro_obj.doc.status == 'Stopped':
-				msgprint("You cannot do any transaction against Production Order : %s, as it's status is 'Stopped'" % (pro_obj.doc.name))
-				raise Exception
+				msgprint("""You cannot do any transaction against Production Order : %s, 
+					as it's status is 'Stopped'"""% (pro_obj.doc.name), raise_exception=1)
+					
 			if getdate(pro_obj.doc.posting_date) > getdate(self.doc.posting_date):
-				msgprint("Posting Date of Stock Entry cannot be before Posting Date of Production Order "+ cstr(self.doc.production_order))
-				raise Exception
+				msgprint("""Posting Date of Stock Entry cannot be before Posting Date of 
+					Production Order: %s"""% cstr(self.doc.production_order), raise_exception=1)
+					
 			if self.doc.process == 'Backflush':
-				pro_obj.doc.produced_qty = flt(pro_obj.doc.produced_qty) + (is_submit and 1 or -1 ) * flt(self.doc.fg_completed_qty)
-				get_obj('Warehouse', pro_obj.doc.fg_warehouse).update_bin(0, 0, 0, 0, (is_submit and 1 or -1 ) * flt(self.doc.fg_completed_qty), pro_obj.doc.production_item, now())
-			pro_obj.doc.status = (flt(pro_obj.doc.qty) == flt(pro_obj.doc.produced_qty)) and 'Completed' or 'In Process'
+				pro_obj.doc.produced_qty = flt(pro_obj.doc.produced_qty) + \
+					(is_submit and 1 or -1 ) * flt(self.doc.fg_completed_qty)
+				args = {
+					"item_code": pro_obj.doc.production_item,
+					"posting_date": self.doc.posting_date,
+					"planned_qty": (is_submit and -1 or 1 ) * flt(self.doc.fg_completed_qty)
+				}
+				get_obj('Warehouse', pro_obj.doc.fg_warehouse).update_bin(args)
+				
+			pro_obj.doc.status = (flt(pro_obj.doc.qty)==flt(pro_obj.doc.produced_qty)) \
+				and 'Completed' or 'In Process'
 			pro_obj.doc.save()
 	
 

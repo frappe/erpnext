@@ -23,47 +23,45 @@ from webnotes.model import db_exists
 from webnotes.model.doc import Document, addchild, getchildren, make_autoname
 from webnotes.model.doclist import getlist, copy_doclist
 from webnotes.model.code import get_obj, get_server_obj, run_server_obj, updatedb, check_syntax
-from webnotes import session, form, msgprint, errprint
-
-
-set = webnotes.conn.set
+from webnotes import msgprint, errprint
 sql = webnotes.conn.sql
-get_value = webnotes.conn.get_value
-
-
-
-# -----------------------------------------------------------------------------------------
 
 
 class DocType:	
 	def __init__(self, doc, doclist=[]):
 		self.doc = doc
 		self.doclist = doclist
-
-	def update_stock(self, actual_qty=0, reserved_qty=0, ordered_qty=0, indented_qty=0, \
-	 		planned_qty=0, dt=None, sle_id='', posting_time='', serial_no = '', \
-			is_cancelled = 'No',doc_type='',doc_name='',is_amended='No'):
-		if not dt: 
-			dt = nowdate()
-			
-		# update the stock values (for current quantities)
-		self.doc.actual_qty = flt(self.doc.actual_qty) + flt(actual_qty)
-		self.doc.ordered_qty = flt(self.doc.ordered_qty) + flt(ordered_qty)
-		self.doc.reserved_qty = flt(self.doc.reserved_qty) + flt(reserved_qty)
-		self.doc.indented_qty = flt(self.doc.indented_qty) + flt(indented_qty)
-		self.doc.planned_qty = flt(self.doc.planned_qty) + flt(planned_qty)
-		self.doc.projected_qty = flt(self.doc.actual_qty) + flt(self.doc.ordered_qty) + flt(self.doc.indented_qty) + flt(self.doc.planned_qty) - flt(self.doc.reserved_qty)
-		self.doc.save()
-		if(( flt(actual_qty)<0 or flt(reserved_qty)>0 ) and is_cancelled == 'No' and is_amended=='No'):
-			self.reorder_item(doc_type,doc_name)
 		
-		if actual_qty:
+	def update_stock(self, args):
+		if not args.get("posting_date"):
+			posting_date = nowdate()
+			
+		self.update_qty(args)
+		
+		if (flt(args.get("actual_qty")) < 0 or flt(args.get("reserved_qty")) > 0) \
+				and args.get("is_cancelled") == 'No' and args.get("is_amended")=='No':
+			self.reorder_item(args.get("doc_type"), args.get("doc_name"))
+		
+		if args.get("actual_qty"):
 			# check actual qty with total number of serial no
-			if serial_no:
+			if args.get("serial_no"):
 				self.check_qty_with_serial_no()
 				
 			# update valuation and qty after transaction for post dated entry
-			self.update_entries_after(dt, posting_time)
+			self.update_entries_after(args.get("posting_date"), args.get("posting_time"))
+		
+	def update_qty(self, args):
+		# update the stock values (for current quantities)
+		self.doc.actual_qty = flt(self.doc.actual_qty) + flt(args.get("actual_qty", 0))
+		self.doc.ordered_qty = flt(self.doc.ordered_qty) + flt(args.get("ordered_qty", 0))
+		self.doc.reserved_qty = flt(self.doc.reserved_qty) + flt(args.get("reserved_qty"))
+		self.doc.indented_qty = flt(self.doc.indented_qty) + flt(args.get("indented_qty"))
+		self.doc.planned_qty = flt(self.doc.planned_qty) + flt(args.get("planned_qty"))
+		
+		self.doc.projected_qty = flt(self.doc.actual_qty) + flt(self.doc.ordered_qty) + \
+		 	flt(self.doc.indented_qty) + flt(self.doc.planned_qty) - flt(self.doc.reserved_qty)
+		
+		self.doc.save()
 
 	def check_qty_with_serial_no(self):
 		"""
@@ -327,7 +325,7 @@ class DocType:
 	def reorder_item(self,doc_type,doc_name):
 		""" Reorder item if stock reaches reorder level"""
 
-		if get_value('Global Defaults', None, 'auto_indent'):
+		if webnotes.conn.get_value('Global Defaults', None, 'auto_indent'):
 			#check if re-order is required
 			ret = sql("""select re_order_level, item_name, description, brand, item_group,
 			 	lead_time_days, min_order_qty, email_notify, re_order_qty 
@@ -371,7 +369,7 @@ class DocType:
 		indent_details_child.save()
 		indent_obj = get_obj('Purchase Request',indent.name,with_children=1)
 		indent_obj.validate()
-		set(indent_obj.doc,'docstatus',1)
+		webnotes.conn.set(indent_obj.doc,'docstatus',1)
 		indent_obj.on_submit()
 		msgprint("""Item: %s is to be re-ordered. Purchase Request %s raised. 
 			It was generated from %s %s""" % 
