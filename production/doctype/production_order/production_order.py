@@ -58,57 +58,63 @@ class DocType:
 
 	def validate(self):
 		if self.doc.production_item :
-			item_detail = sql("select name from `tabItem` where name = '%s' and docstatus != 2" % self.doc.production_item, as_dict = 1)
+			item_detail = sql("select name from `tabItem` where name = '%s' and docstatus != 2"
+			 	% self.doc.production_item, as_dict = 1)
 			if not item_detail:
-				msgprint("Item '%s' does not exist or cancelled in the system." % cstr(self.doc.production_item))
-				raise Exception
+				msgprint("Item '%s' does not exist or cancelled in the system." 
+					% cstr(self.doc.production_item), raise_exception=1)
 
 		if self.doc.bom_no:
 			bom = sql("""select name from `tabBOM`	where name = %s and docstatus = 1 
-				and is_active = 'Yes' and item = %s""", (self.doc.bom_no, self.doc.production_item), as_dict =1)
+				and is_active = 'Yes' and item = %s"""
+				, (self.doc.bom_no, self.doc.production_item), as_dict =1)
 			if not bom:
 				msgprint("""Incorrect BOM: %s entered. 
-					May be BOM not exists or inactive or not submitted or for some other item.""" % cstr(self.doc.bom_no))
-				raise Exception
+					May be BOM not exists or inactive or not submitted 
+					or for some other item.""" % cstr(self.doc.bom_no), raise_exception=1)
 
 
 	def stop_unstop(self, status):
 		""" Called from client side on Stop/Unstop event"""
 		self.update_status(status)
-		# Update Planned Qty of Production Item
-		qty = (flt(self.doc.qty) - flt(self.doc.produced_qty)) * ((status == 'Stopped') and -1 or 1)
-		get_obj('Warehouse', self.doc.fg_warehouse).update_bin(0, 0, 0, 0, flt(qty), self.doc.production_item, now())
+		qty = (flt(self.doc.qty)-flt(self.doc.produced_qty)) * ((status == 'Stopped') and -1 or 1)
+		self.update_planned_qty(qty)
 		msgprint("Production Order has been %s" % status)
-
 
 
 	def update_status(self, status):
 		if status == 'Stopped':
-			set(self.doc, 'status', cstr(status))
+			webnotes.conn.set(self.doc, 'status', cstr(status))
 		else:
 			if flt(self.doc.qty) == flt(self.doc.produced_qty):
-				set(self.doc, 'status', 'Completed')
+				webnotes.conn.set(self.doc, 'status', 'Completed')
 			if flt(self.doc.qty) > flt(self.doc.produced_qty):
-				set(self.doc, 'status', 'In Process')
+				webnotes.conn.set(self.doc, 'status', 'In Process')
 			if flt(self.doc.produced_qty) == 0:
-				set(self.doc, 'status', 'Submitted')
+				webnotes.conn.set(self.doc, 'status', 'Submitted')
 
 
 	def on_submit(self):
-		set(self.doc,'status', 'Submitted')
-		# increase Planned Qty of Prooduction Item by Qty
-		get_obj('Warehouse', self.doc.fg_warehouse).update_bin(0, 0, 0, 0,flt(self.doc.qty), self.doc.production_item, now())
-
-
+		webnotes.conn.set(self.doc,'status', 'Submitted')
+		self.update_planned_qty(self.doc.qty)
+		
 
 	def on_cancel(self):
 		# Check whether any stock entry exists against this Production Order
-		st = sql("select name from `tabStock Entry` where production_order = '%s' and docstatus = 1" % cstr(self.doc.name))
-		if st and st[0][0]:
+		stock_entry = sql("""select name from `tabStock Entry` 
+			where production_order = %s and docstatus = 1""", self.doc.name)
+		if stock_entry:
 			msgprint("""Submitted Stock Entry %s exists against this production order. 
-				Hence can not be cancelled.""" % st[0][0])
-			raise Exception
+				Hence can not be cancelled.""" % stock_entry[0][0], raise_exception=1)
 
-		set(self.doc,'status', 'Cancelled')
-		# decrease Planned Qty of Prooduction Item by Qty
-		get_obj('Warehouse', self.doc.fg_warehouse).update_bin(0, 0, 0, 0,-flt(self.doc.qty), self.doc.production_item, now())
+		webnotes.conn.set(self.doc,'status', 'Cancelled')
+		self.update_planned_qty(-self.doc.qty)
+
+	def update_planned_qty(self, qty):
+		"""update planned qty in bin"""
+		args = {
+			"item_code": self.doc.production_item,
+			"posting_date": nowdate(),
+			"planned_qty": flt(qty)
+		}
+		get_obj('Warehouse', self.doc.fg_warehouse).update_bin(args)

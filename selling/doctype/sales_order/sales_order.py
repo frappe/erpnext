@@ -350,7 +350,6 @@ class DocType(TransactionBase):
 	def on_submit(self):
 		self.check_prev_docstatus()		
 		self.update_stock_ledger(update_stock = 1)
-		self.set_sms_msg(1)
 		# update customer's last sales order no.
 		update_customer = sql("update `tabCustomer` set last_sales_order = '%s', modified = '%s' where name = '%s'" %(self.doc.name, self.doc.modified, self.doc.customer))
 		get_obj('Sales Common').check_credit(self,self.doc.grand_total)
@@ -373,7 +372,6 @@ class DocType(TransactionBase):
 			raise Exception
 		self.check_nextdoc_docstatus()
 		self.update_stock_ledger(update_stock = -1)
-		self.set_sms_msg()
 		
 		#update prevdoc status
 		self.update_prevdoc_status('cancel')
@@ -405,75 +403,44 @@ class DocType(TransactionBase):
 	def check_modified_date(self):
 		mod_db = sql("select modified from `tabSales Order` where name = '%s'" % self.doc.name)
 		date_diff = sql("select TIMEDIFF('%s', '%s')" % ( mod_db[0][0],cstr(self.doc.modified)))
-		
 		if date_diff and date_diff[0][0]:
-			msgprint(cstr(self.doc.doctype) +" => "+ cstr(self.doc.name) +" has been modified. Please Refresh. ")
-			raise Exception
+			msgprint("%s: %s has been modified after you have opened. Please Refresh"
+				% (self.doc.doctype, self.doc.name), raise_exception=1)
 
-	# STOP SALES ORDER
-	# ==============================================================================================			
-	# Stops Sales Order & no more transactions will be created against this Sales Order
 	def stop_sales_order(self):
 		self.check_modified_date()
 		self.update_stock_ledger(update_stock = -1,clear = 1)
-		# ::::::::: SET SO STATUS ::::::::::
 		set(self.doc, 'status', 'Stopped')
-		msgprint(self.doc.doctype + ": " + self.doc.name + " has been Stopped. To make transactions against this Sales Order you need to Unstop it.")
+		msgprint("""%s: %s has been Stopped. To make transactions against this Sales Order 
+			you need to Unstop it.""" % (self.doc.doctype, self.doc.name))
 
-	# UNSTOP SALES ORDER
-	# ==============================================================================================			
-	# Unstops Sales Order & now transactions can be continued against this Sales Order
 	def unstop_sales_order(self):
 		self.check_modified_date()
 		self.update_stock_ledger(update_stock = 1,clear = 1)
-		# ::::::::: SET SO STATUS ::::::::::
 		set(self.doc, 'status', 'Submitted')
-		msgprint(self.doc.doctype + ": " + self.doc.name + " has been Unstopped.")
+		msgprint("%s: %s has been Unstopped" % (self.doc.doctype, self.doc.name))
 
-	# UPDATE STOCK LEDGER
-	# ===============================================================================================
+
 	def update_stock_ledger(self, update_stock, clear = 0):
 		for d in self.get_item_list(clear):
-			stock_item = sql("SELECT is_stock_item FROM tabItem where name = '%s'"%(d['item_code']),as_dict = 1)
-			# stock ledger will be updated only if it is a stock item
-			if stock_item and stock_item[0]['is_stock_item'] == "Yes":
+			if webnotes.conn.get_value("Item", d['item_code'], "is_stock_item") == "Yes":
 				if not d['reserved_warehouse']:
-					msgprint("Message: Please enter Reserved Warehouse for item %s as it is stock item."% d['item_code'])
-					raise Exception
-				bin = get_obj('Warehouse', d['reserved_warehouse']).update_bin( 0, flt(update_stock) * flt(d['qty']), \
-					0, 0, 0, d['item_code'], self.doc.transaction_date,doc_type=self.doc.doctype,\
-					doc_name=self.doc.name, is_amended = (self.doc.amended_from and 'Yes' or 'No'))
-	
-	# Gets Items from packing list
-	#=================================
+					msgprint("""Please enter Reserved Warehouse for item %s 
+						as it is stock ite""" % d['item_code'], raise_exception=1)
+						
+				args = {
+					"item_code": d['item_code'],
+					"reserved_qty": flt(update_stock) * flt(d['qty']),
+					"posting_date": self.doc.transaction_date,
+					"doc_type": self.doc.doctype,
+					"doc_name": self.doc.name,
+					"is_amended": self.doc.amended_from and 'Yes' or 'No'
+				}
+				get_obj('Warehouse', d['reserved_warehouse']).update_bin(args)
+				
+				
 	def get_item_list(self, clear):
 		return get_obj('Sales Common').get_item_list( self, clear)
-		
-	# SET MESSAGE FOR SMS
-	#======================
-	def set_sms_msg(self, is_submitted = 0):
-		if is_submitted:
-			if not self.doc.amended_from:
-				msg = 'Sales Order: '+self.doc.name+' has been made against PO no: '+cstr(self.doc.po_no)
-				set(self.doc, 'message', msg)
-			else:
-				msg = 'Sales Order has been amended. New SO no:'+self.doc.name
-				set(self.doc, 'message', msg)
-		else:
-			msg = 'Sales Order: '+self.doc.name+' has been cancelled.'
-			set(self.doc, 'message', msg)
-		
-	# SEND SMS
-	# =========
-	def send_sms(self):
-		if not self.doc.customer_mobile_no:
-			msgprint("Please enter customer mobile no")
-		elif not self.doc.message:
-			msgprint("Please enter the message you want to send")
-		else:
-			msgprint(get_obj("SMS Control", "SMS Control").send_sms([self.doc.customer_mobile_no,], self.doc.message))
 
-	# on update
 	def on_update(self):
 		pass
-

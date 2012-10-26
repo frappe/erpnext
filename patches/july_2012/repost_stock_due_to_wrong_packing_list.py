@@ -24,27 +24,33 @@ def repost_reserved_qty():
 		i += 1
 		print i
 		reserved_qty = webnotes.conn.sql("""
-			select sum((dnpi_qty / so_item_qty) * (so_item_qty - so_item_delivered_qty))
-			from (select
-			qty as dnpi_qty,
-			(
-				select qty from `tabSales Order Item`
-				where name = dnpi.parent_detail_docname
-			) as so_item_qty,
-			(
-				select ifnull(delivered_qty, 0) from `tabSales Order Item`
-				where name = dnpi.parent_detail_docname
-			) as so_item_delivered_qty
+			select 
+				sum((dnpi_qty / so_item_qty) * (so_item_qty - so_item_delivered_qty))
 			from 
-			(
-				select qty, parent_detail_docname
-				from `tabDelivery Note Packing Item` dnpi_in
-				where item_code = %s and warehouse = %s
-				and parenttype="Sales Order"
-				and exists (select * from `tabSales Order` so
-				where name = dnpi_in.parent and docstatus = 1 and status != 'Stopped')
-			) dnpi) tab
-			where so_item_qty >= so_item_delivered_qty""", (d[0], d[1]))
+				(
+					select
+						qty as dnpi_qty,
+						(
+							select qty from `tabSales Order Item`
+							where name = dnpi.parent_detail_docname
+						) as so_item_qty,
+						(
+							select ifnull(delivered_qty, 0) from `tabSales Order Item`
+							where name = dnpi.parent_detail_docname
+						) as so_item_delivered_qty
+					from 
+					(
+						select qty, parent_detail_docname
+						from `tabDelivery Note Packing Item` dnpi_in
+						where item_code = %s and warehouse = %s
+						and parenttype="Sales Order"
+						and exists (select * from `tabSales Order` so
+						where name = dnpi_in.parent and docstatus = 1 and status != 'Stopped')
+					) dnpi
+				) tab 
+			where 
+				so_item_qty >= so_item_delivered_qty
+		""", (d[0], d[1]))
 
 		if flt(d[3]) != flt(reserved_qty[0][0]):
 			print d[3], reserved_qty[0][0]

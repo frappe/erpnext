@@ -218,16 +218,17 @@ class DocType(TransactionBase):
 		pc_obj = get_obj('Purchase Common')
 		self.values = []
 		for d in getlist(self.doclist, 'purchase_receipt_details'):
-			# Check if is_stock_item == 'Yes'
-			if sql("select is_stock_item from tabItem where name=%s", d.item_code)[0][0]=='Yes':
+			if webnotes.conn.get_value("Item", d.item_code, "is_stock_item") == "Yes":
 				ord_qty = 0
 				pr_qty = flt(d.qty) * flt(d.conversion_factor)
 
-				# Check If Prevdoc Doctype is Purchase Order
 				if cstr(d.prevdoc_doctype) == 'Purchase Order':
 					# get qty and pending_qty of prevdoc
-					curr_ref_qty = pc_obj.get_qty( d.doctype, 'prevdoc_detail_docname', d.prevdoc_detail_docname, 'Purchase Order Item', 'Purchase Order - Purchase Receipt', self.doc.name)
-					max_qty, qty, curr_qty = flt(curr_ref_qty.split('~~~')[1]), flt(curr_ref_qty.split('~~~')[0]), 0
+					curr_ref_qty = pc_obj.get_qty( d.doctype, 'prevdoc_detail_docname',
+					 	d.prevdoc_detail_docname, 'Purchase Order Item', 
+						'Purchase Order - Purchase Receipt', self.doc.name)
+					max_qty, qty, curr_qty = flt(curr_ref_qty.split('~~~')[1]), \
+					 	flt(curr_ref_qty.split('~~~')[0]), 0
 
 					if flt(qty) + flt(pr_qty) > flt(max_qty):
 						curr_qty = (flt(max_qty) - flt(qty)) * flt(d.conversion_factor)
@@ -235,11 +236,18 @@ class DocType(TransactionBase):
 						curr_qty = flt(pr_qty)
 
 					ord_qty = -flt(curr_qty)
-					# update order qty in bin
-					bin = get_obj('Warehouse', d.warehouse).update_bin(0, 0, (is_submit and 1 or -1) * flt(ord_qty), 0, 0, d.item_code, self.doc.posting_date)
+					
+					# update ordered qty in bin
+					args = {
+						"item_code": d.item_code,
+						"posting_date": self.doc.posting_date,
+						"ordered_qty": (is_submit and 1 or -1) * flt(ord_qty)
+					}
+					get_obj("Warehouse", d.warehouse).update_bin(args)
 
 				# UPDATE actual qty to warehouse by pr_qty
 				self.make_sl_entry(d, d.warehouse, flt(pr_qty), d.valuation_rate, is_submit)
+				
 				# UPDATE actual to rejected warehouse by rejected qty
 				if flt(d.rejected_qty) > 0:
 					self.make_sl_entry(d, self.doc.rejected_warehouse, flt(d.rejected_qty) * flt(d.conversion_factor), d.valuation_rate, is_submit, rejected = 1)

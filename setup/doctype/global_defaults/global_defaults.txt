@@ -3,11 +3,11 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-04-20 14:02:53',
-		'docstatus': 0,
-		'modified': '2012-05-22 14:11:21',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
+		u'creation': '2012-07-03 13:30:02',
+		u'docstatus': 0,
+		u'modified': '2012-10-23 10:57:41',
+		u'modified_by': u'Administrator',
+		u'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
@@ -18,12 +18,12 @@
 		'allow_print': 1,
 		'colour': u'White:FFF',
 		'default_print_format': u'Standard',
-		'doctype': 'DocType',
+		u'doctype': u'DocType',
 		'hide_toolbar': 0,
 		'in_create': 1,
 		'issingle': 1,
 		'module': u'Setup',
-		'name': '__common__',
+		u'name': u'__common__',
 		'read_only': 1,
 		'section_style': u'Tabbed',
 		'server_code_error': u' ',
@@ -33,8 +33,8 @@
 
 	# These values are common for all DocField
 	{
-		'doctype': u'DocField',
-		'name': '__common__',
+		u'doctype': u'DocField',
+		u'name': u'__common__',
 		'parent': u'Global Defaults',
 		'parentfield': u'fields',
 		'parenttype': u'DocType',
@@ -43,8 +43,8 @@
 
 	# These values are common for all DocPerm
 	{
-		'doctype': u'DocPerm',
-		'name': '__common__',
+		u'doctype': u'DocPerm',
+		u'name': u'__common__',
 		'parent': u'Global Defaults',
 		'parentfield': u'permissions',
 		'parenttype': u'DocType',
@@ -53,57 +53,13 @@
 
 	# DocType, Global Defaults
 	{
-		'doctype': 'DocType',
-		'name': u'Global Defaults'
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 1,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'System Manager',
-		'submit': 0,
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'create': 1,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'System Manager',
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'System Manager',
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'All'
-	},
-
-	# DocPerm
-	{
-		'doctype': u'DocPerm',
-		'permlevel': 2,
-		'role': u'System Manager',
-		'write': 1
+		u'doctype': u'DocType',
+		u'name': u'Global Defaults'
 	},
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'company',
 		'fieldtype': u'Section Break',
 		'label': u'Company'
@@ -111,7 +67,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'default_company',
 		'fieldtype': u'Link',
 		'label': u'Default Company',
@@ -121,7 +77,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'current_fiscal_year',
 		'fieldtype': u'Link',
 		'label': u'Current Fiscal Year',
@@ -131,7 +87,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'date_format',
 		'fieldtype': u'Select',
 		'label': u'Date Format',
@@ -140,7 +96,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'column_break1',
 		'fieldtype': u'Column Break',
 		'width': u'50%'
@@ -149,7 +105,7 @@
 	# DocField
 	{
 		'default': u'INR',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'default_currency',
 		'fieldtype': u'Select',
 		'label': u'Default Currency',
@@ -159,7 +115,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'default_currency_format',
 		'fieldtype': u'Select',
 		'label': u'Default Currency Format',
@@ -168,7 +124,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'default_currency_fraction',
 		'fieldtype': u'Data',
 		'label': u'Default Currency Fraction'
@@ -176,7 +132,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'stock',
 		'fieldtype': u'Section Break',
 		'label': u'Stock'
@@ -184,7 +140,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'column_break2',
 		'fieldtype': u'Column Break',
 		'width': u'50%'
@@ -192,7 +148,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'default_item_group',
 		'fieldtype': u'Link',
 		'label': u'Default Item Group',
@@ -201,7 +157,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'ighelp',
 		'fieldtype': u'HTML',
 		'label': u'IGHelp',
@@ -210,7 +166,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'default_stock_uom',
 		'fieldtype': u'Link',
 		'label': u'Default Stock UOM',
@@ -219,18 +175,9 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
-		'fieldname': u'default_valuation_method',
-		'fieldtype': u'Select',
-		'label': u'Default Valuation Method',
-		'options': u'FIFO\nMoving Average'
-	},
-
-	# DocField
-	{
 		'colour': u'White:FFF',
 		'description': u'Applicable only if valuation method is moving average',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'allow_negative_stock',
 		'fieldtype': u'Check',
 		'label': u'Allow Negative Stock'
@@ -238,7 +185,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'default_warehouse_type',
 		'fieldtype': u'Link',
 		'label': u'Default Warehouse Type',
@@ -247,7 +194,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'auto_indent',
 		'fieldtype': u'Check',
 		'label': u'Raise Purchase Request when stock reaches re-order level'
@@ -256,7 +203,7 @@
 	# DocField
 	{
 		'default': u'1',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'column_break3',
 		'fieldtype': u'Column Break',
 		'width': u'50%'
@@ -266,7 +213,7 @@
 	{
 		'colour': u'White:FFF',
 		'description': u'Percentage you are allowed to receive or deliver more against the quantity ordered. <p>For example: If you have ordered 100 units. and your Allowance is 10% then you are allowed to receive 110 units</p>',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'tolerance',
 		'fieldtype': u'Currency',
 		'label': u'Allowance Percent'
@@ -276,7 +223,7 @@
 	{
 		'colour': u'White:FFF',
 		'description': u'Stock level frozen up to this date, nobody can do / modify entry except authorized person',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'stock_frozen_upto',
 		'fieldtype': u'Date',
 		'label': u'Stock Frozen Upto'
@@ -286,7 +233,7 @@
 	{
 		'colour': u'White:FFF',
 		'description': u'Users with this role are allowed to do / modify stock entry before frozen date',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'stock_auth_role',
 		'fieldtype': u'Link',
 		'label': u'Authorized Role (Frozen Entry)',
@@ -295,7 +242,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'accounts',
 		'fieldtype': u'Section Break',
 		'label': u'Accounts'
@@ -305,7 +252,7 @@
 	{
 		'colour': u'White:FFF',
 		'description': u'Accounting entry frozen up to this date, nobody can do / modify entry except authorized person',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'acc_frozen_upto',
 		'fieldtype': u'Date',
 		'label': u'Accounts Frozen Upto'
@@ -315,7 +262,7 @@
 	{
 		'colour': u'White:FFF',
 		'description': u'Users with this role are allowed to do / modify accounting entry before frozen date',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'bde_auth_role',
 		'fieldtype': u'Link',
 		'label': u'Authourized Role (Frozen Entry)',
@@ -324,7 +271,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'credit_controller',
 		'fieldtype': u'Link',
 		'label': u'Credit Controller',
@@ -333,14 +280,14 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'column_break4',
 		'fieldtype': u'Column Break'
 	},
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'account_info',
 		'fieldtype': u'HTML',
 		'label': u'Account Info',
@@ -349,7 +296,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'selling',
 		'fieldtype': u'Section Break',
 		'label': u'Selling'
@@ -359,7 +306,7 @@
 	{
 		'colour': u'White:FFF',
 		'default': u'Customer Name',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'cust_master_name',
 		'fieldtype': u'Select',
 		'label': u'Customer Master created by ',
@@ -368,7 +315,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'default_customer_group',
 		'fieldtype': u'Link',
 		'label': u'Default Customer Group',
@@ -377,7 +324,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'cghelp',
 		'fieldtype': u'HTML',
 		'label': u'CGHelp',
@@ -386,7 +333,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'default_territory',
 		'fieldtype': u'Link',
 		'label': u'Default Territory',
@@ -395,7 +342,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'territoryhelp',
 		'fieldtype': u'HTML',
 		'label': u'TerritoryHelp',
@@ -404,7 +351,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'column_break5',
 		'fieldtype': u'Column Break',
 		'width': u'50%'
@@ -412,7 +359,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'default_price_list',
 		'fieldtype': u'Link',
 		'label': u'Default Price List',
@@ -421,7 +368,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'default_price_list_currency',
 		'fieldtype': u'Link',
 		'label': u'Default Price List Currency',
@@ -432,7 +379,7 @@
 	{
 		'colour': u'White:FFF',
 		'default': u'No',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'so_required',
 		'fieldtype': u'Select',
 		'label': u'Sales Order Required',
@@ -443,7 +390,7 @@
 	{
 		'colour': u'White:FFF',
 		'default': u'No',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'dn_required',
 		'fieldtype': u'Select',
 		'label': u'Delivery Note Required',
@@ -452,7 +399,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'buying',
 		'fieldtype': u'Section Break',
 		'label': u'Buying'
@@ -460,7 +407,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'default_supplier_type',
 		'fieldtype': u'Link',
 		'label': u'Default Supplier Type',
@@ -471,7 +418,7 @@
 	{
 		'colour': u'White:FFF',
 		'default': u'Supplier Name',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'supp_master_name',
 		'fieldtype': u'Select',
 		'label': u'Supplier Master created by ',
@@ -480,7 +427,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'column_break6',
 		'fieldtype': u'Column Break',
 		'width': u'50%'
@@ -490,7 +437,7 @@
 	{
 		'colour': u'White:FFF',
 		'default': u'No',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'po_required',
 		'fieldtype': u'Select',
 		'label': u'Purchase Order Required',
@@ -501,7 +448,7 @@
 	{
 		'colour': u'White:FFF',
 		'default': u'No',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'pr_required',
 		'fieldtype': u'Select',
 		'label': u'Purchase Receipt Required',
@@ -510,7 +457,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'maintain_same_rate',
 		'fieldtype': u'Check',
 		'label': u'Maintain same rate throughout purchase cycle'
@@ -518,7 +465,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'hr',
 		'fieldtype': u'Section Break',
 		'label': u'HR',
@@ -529,7 +476,7 @@
 	{
 		'colour': u'White:FFF',
 		'description': u'Employee record is created using selected field. ',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'emp_created_by',
 		'fieldtype': u'Select',
 		'label': u'Employee Records to be created by ',
@@ -538,7 +485,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'system',
 		'fieldtype': u'Section Break',
 		'label': u'System'
@@ -546,9 +493,53 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'sms_sender_name',
 		'fieldtype': u'Data',
 		'label': u'SMS Sender Name'
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 1,
+		u'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'System Manager',
+		'submit': 0,
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'create': 1,
+		u'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'System Manager',
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		u'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'All'
+	},
+
+	# DocPerm
+	{
+		u'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'System Manager',
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		u'doctype': u'DocPerm',
+		'permlevel': 2,
+		'role': u'System Manager',
+		'write': 1
 	}
 ]
