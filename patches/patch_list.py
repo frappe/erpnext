@@ -639,4 +639,8 @@ patch_list = [
 		'patch_module': 'patches.october_2012',
 		'patch_file': 'fix_cancelled_gl_entries',
 	},
+	{
+		'patch_module': 'patches.october_2012',
+		'patch_file': 'custom_script_delete_permission',
+	}
 ]
