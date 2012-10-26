@@ -3,11 +3,11 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-07-03 13:30:45',
-		'docstatus': 0,
-		'modified': '2012-07-11 10:18:07',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
+		u'creation': '2012-10-10 12:07:10',
+		u'docstatus': 0,
+		u'modified': '2012-10-25 15:03:49',
+		u'modified_by': u'Administrator',
+		u'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
@@ -18,10 +18,10 @@
 		'colour': u'White:FFF',
 		'default_print_format': u'Standard',
 		'description': u'A logical Warehouse against which stock entries are made.\n\nThere are two main Warehouse Types that are significant in ERPNext.\n\n1. **Stores:** These are where your incoming **Items** are kept before they are consumed or sold. You can have as many \u201cStores\u201d type **Warehouses** as you wish. Stores type warehouses are significant because if you set an Item for automatic re-order, ERPNext will check its quantities in all \u201cStores\u201d type **Warehouses** when deciding whether to re-order or not.\n\n2. **Asset**: **Items** marked as type \u201cFixed Asset\u201d are maintained in Asset Type **Warehouses**. This helps you separate them for the **Items** that are consumed as a part of your regular operations or \u201cCost of Goods Sold\u201d.\n',
-		'doctype': 'DocType',
+		u'doctype': u'DocType',
 		'document_type': u'Master',
 		'module': u'Stock',
-		'name': '__common__',
+		u'name': u'__common__',
 		'search_fields': u'warehouse_type',
 		'section_style': u'Tabbed',
 		'server_code_error': u' ',
@@ -31,8 +31,8 @@
 
 	# These values are common for all DocField
 	{
-		'doctype': u'DocField',
-		'name': '__common__',
+		u'doctype': u'DocField',
+		u'name': u'__common__',
 		'parent': u'Warehouse',
 		'parentfield': u'fields',
 		'parenttype': u'DocType'
@@ -40,8 +40,8 @@
 
 	# These values are common for all DocPerm
 	{
-		'doctype': u'DocPerm',
-		'name': '__common__',
+		u'doctype': u'DocPerm',
+		u'name': u'__common__',
 		'parent': u'Warehouse',
 		'parentfield': u'permissions',
 		'parenttype': u'DocType',
@@ -50,130 +50,13 @@
 
 	# DocType, Warehouse
 	{
-		'doctype': 'DocType',
-		'name': u'Warehouse'
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'permlevel': 2,
-		'role': u'Material User',
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Material User',
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Material User',
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'permlevel': 2,
-		'role': u'Material Manager',
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Material Manager',
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Material Manager',
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'All'
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 1,
-		'create': 1,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Material Master Manager',
-		'submit': 0,
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Material Master Manager'
-	},
-
-	# DocPerm
-	{
-		'cancel': 1,
-		'create': 1,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'System Manager',
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'create': 0,
-		'doctype': u'DocPerm',
-		'permlevel': 2,
-		'role': u'System Manager',
-		'write': 1
+		u'doctype': u'DocType',
+		u'name': u'Warehouse'
 	},
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'warehouse_detail',
 		'fieldtype': u'Section Break',
 		'label': u'Warehouse Detail',
@@ -183,7 +66,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'warehouse_name',
 		'fieldtype': u'Data',
 		'label': u'Warehouse Name',
@@ -196,7 +79,7 @@
 	# DocField
 	{
 		'colour': u'White:FFF',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'warehouse_type',
 		'fieldtype': u'Link',
 		'label': u'Warehouse Type',
@@ -210,7 +93,7 @@
 	# DocField
 	{
 		'colour': u'White:FFF',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'company',
 		'fieldtype': u'Link',
 		'in_filter': 1,
@@ -226,7 +109,7 @@
 	{
 		'colour': u'White:FFF',
 		'description': u'For Reference Only.',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'warehouse_contact_info',
 		'fieldtype': u'Section Break',
 		'label': u'Warehouse Contact Info',
@@ -235,7 +118,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'email_id',
 		'fieldtype': u'Data',
 		'hidden': 1,
@@ -248,7 +131,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'phone_no',
 		'fieldtype': u'Data',
 		'label': u'Phone No',
@@ -260,7 +143,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'mobile_no',
 		'fieldtype': u'Data',
 		'label': u'Mobile No',
@@ -272,7 +155,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'column_break0',
 		'fieldtype': u'Column Break',
 		'oldfieldtype': u'Column Break',
@@ -281,7 +164,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'address_line_1',
 		'fieldtype': u'Data',
 		'label': u'Address Line 1',
@@ -292,7 +175,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'address_line_2',
 		'fieldtype': u'Data',
 		'label': u'Address Line 2',
@@ -303,7 +186,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'city',
 		'fieldtype': u'Data',
 		'label': u'City',
@@ -316,7 +199,7 @@
 	# DocField
 	{
 		'colour': u'White:FFF',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'state',
 		'fieldtype': u'Data',
 		'label': u'State',
@@ -328,7 +211,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'pin',
 		'fieldtype': u'Int',
 		'label': u'PIN',
@@ -340,24 +223,92 @@
 	# DocField
 	{
 		'colour': u'White:FFF',
-		'description': u'For Admin use only. Please report errors to support@erpnext.com',
-		'doctype': u'DocField',
-		'fieldname': u'repost_stock',
+		'description': u'This feature is for merging duplicate warehouses. It will replace all the links of this warehouse by "Merge With" warehouse. After merging you can delete this warehouse, as stock level for this warehouse will be zero.',
+		u'doctype': u'DocField',
+		'fieldname': u'merge_warehouses_section',
 		'fieldtype': u'Section Break',
-		'label': u'Repost Stock',
-		'oldfieldtype': u'Section Break',
+		'label': u'Merge Warehouses',
 		'permlevel': 2
 	},
 
 	# DocField
 	{
-		'doctype': u'DocField',
-		'fieldname': u'repost_stock_ledger',
-		'fieldtype': u'Button',
-		'hidden': 0,
-		'label': u'Repost Stock Ledger',
-		'oldfieldtype': u'Button',
-		'options': u'repost_stock',
+		u'doctype': u'DocField',
+		'fieldname': u'merge_with',
+		'fieldtype': u'Link',
+		'label': u'Merge With',
+		'options': u'Warehouse',
 		'permlevel': 2
+	},
+
+	# DocField
+	{
+		u'doctype': u'DocField',
+		'fieldname': u'merge',
+		'fieldtype': u'Button',
+		'label': u'Merge',
+		'permlevel': 2
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 1,
+		'create': 1,
+		u'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Material Master Manager',
+		'submit': 0,
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'cancel': 1,
+		'create': 1,
+		u'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'System Manager',
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
+		u'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Material Manager',
+		'submit': 0,
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
+		u'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Material User',
+		'submit': 0,
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		u'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'All'
+	},
+
+	# DocPerm
+	{
+		'create': 0,
+		u'doctype': u'DocPerm',
+		'permlevel': 2,
+		'role': u'System Manager',
+		'write': 1
 	}
 ]

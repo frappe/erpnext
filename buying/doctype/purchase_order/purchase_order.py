@@ -162,42 +162,50 @@ class DocType(TransactionBase):
 		# Check for stopped status
 		self.check_for_stopped_status(pc_obj)
 		
-			
 		 # get total in words
 		dcc = TransactionBase().get_company_currency(self.doc.company)
 		self.doc.in_words = pc_obj.get_total_in_words(dcc, self.doc.grand_total)
 		self.doc.in_words_import = pc_obj.get_total_in_words(self.doc.currency, self.doc.grand_total_import)
 	
-	# update bin
-	# ----------
+
 	def update_bin(self, is_submit, is_stopped = 0):
 		pc_obj = get_obj('Purchase Common')
 		for d in getlist(self.doclist, 'po_details'):
 			#1. Check if is_stock_item == 'Yes'
-			if sql("select is_stock_item from tabItem where name=%s", d.item_code)[0][0]=='Yes':
-				
+			if webnotes.conn.get_value("Item", d.item_code, "is_stock_item") == "Yes":
 				ind_qty, po_qty = 0, flt(d.qty) * flt(d.conversion_factor)
 				if is_stopped:
-					po_qty = flt(d.qty) > flt(d.received_qty) and flt( flt(flt(d.qty) - flt(d.received_qty)) * flt(d.conversion_factor))or 0 
+					po_qty = flt(d.qty) > flt(d.received_qty) and \
+						flt( flt(flt(d.qty) - flt(d.received_qty))*flt(d.conversion_factor)) or 0 
 				
 				# No updates in Purchase Request on Stop / Unstop
 				if cstr(d.prevdoc_doctype) == 'Purchase Request' and not is_stopped:
 					# get qty and pending_qty of prevdoc 
-					curr_ref_qty = pc_obj.get_qty( d.doctype, 'prevdoc_detail_docname', d.prevdoc_detail_docname, 'Purchase Request Item', 'Purchase Request - Purchase Order', self.doc.name)
-					max_qty, qty, curr_qty = flt(curr_ref_qty.split('~~~')[1]), flt(curr_ref_qty.split('~~~')[0]), 0
+					curr_ref_qty = pc_obj.get_qty(d.doctype, 'prevdoc_detail_docname',
+					 	d.prevdoc_detail_docname, 'Purchase Request Item', 
+						'Purchase Request - Purchase Order', self.doc.name)
+					max_qty, qty, curr_qty = flt(curr_ref_qty.split('~~~')[1]), \
+					 	flt(curr_ref_qty.split('~~~')[0]), 0
 					
 					if flt(qty) + flt(po_qty) > flt(max_qty):
 						curr_qty = flt(max_qty) - flt(qty)
-						# special case as there is no restriction for Purchase Request - Purchase Order 
-						curr_qty = (curr_qty > 0) and curr_qty or 0
+						# special case as there is no restriction 
+						# for Purchase Request - Purchase Order 
+						curr_qty = curr_qty > 0 and curr_qty or 0
 					else:
 						curr_qty = flt(po_qty)
 					
 					ind_qty = -flt(curr_qty)
 
-				#==> Update Bin's Purchase Request Qty by +- ind_qty and Ordered Qty by +- qty
-				get_obj('Warehouse', d.warehouse).update_bin(0, 0, (is_submit and 1 or -1) * flt(po_qty), (is_submit and 1 or -1) * flt(ind_qty), 0, d.item_code, self.doc.transaction_date)
-
+				# Update ordered_qty and indented_qty in bin
+				args = {
+					"item_code" : d.item_code,
+					"ordered_qty" : (is_submit and 1 or -1) * flt(po_qty),
+					"indented_qty" : (is_submit and 1 or -1) * flt(ind_qty),
+					"posting_date": self.doc.transaction_date
+				}
+				get_obj("Warehouse", d.warehouse).update_bin(args)
+				
 	def check_modified_date(self):
 		mod_db = sql("select modified from `tabPurchase Order` where name = '%s'" % self.doc.name)
 		date_diff = sql("select TIMEDIFF('%s', '%s')" % ( mod_db[0][0],cstr(self.doc.modified)))

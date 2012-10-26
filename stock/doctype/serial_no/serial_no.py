@@ -73,8 +73,10 @@ class DocType(TransactionBase):
 		self.validate_item()
 
 	def on_update(self):
-		if self.doc.warehouse and self.doc.status == 'In Store' and cint(self.doc.sle_exists) == 0 and \
-			not sql("select name from `tabStock Ledger Entry` where serial_no = %s and ifnull(is_cancelled, 'No') = 'No'", self.doc.name):
+		if self.doc.warehouse and self.doc.status == 'In Store' \
+				and cint(self.doc.sle_exists) == 0 and \
+				not sql("""select name from `tabStock Ledger Entry` where serial_no = %s and 
+				 	ifnull(is_cancelled, 'No') = 'No'""", self.doc.name):
 			self.make_stock_ledger_entry(1)
 			webnotes.conn.set(self.doc, 'sle_exists', 1)
 

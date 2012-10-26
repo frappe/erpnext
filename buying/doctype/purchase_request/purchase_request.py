@@ -167,32 +167,29 @@ class DocType:
 		# Validate qty against SO
 		self.validate_qty_against_so()
 
-
-	# On Submit Functions
-	#----------------------------------------------------------------------------
 	
-	# Update Quantity Requested for Purchase in Bin
 	def update_bin(self, is_submit, is_stopped):
+		""" Update Quantity Requested for Purchase in Bin"""
+		
 		for d in getlist(self.doclist, 'indent_details'):
-			# Step 1:=> Check if is_stock_item == 'Yes'
-			if cstr(sql("select is_stock_item from `tabItem` where name = '%s'" % cstr(d.item_code))[0][0]) == 'Yes':
+			if webnotes.conn.get_value("Item", d.item_code, "is_stock_item") == "Yes":
 				if not d.warehouse:
-					msgprint('Please Enter Warehouse for Item %s as it is stock item.' % cstr(d.item_code))
-					raise Exception
-				# Step 2:=> Set Qty 
+					msgprint("Please Enter Warehouse for Item %s as it is stock item" 
+						% cstr(d.item_code), raise_exception=1)
+						
 				qty =flt(d.qty)
 				if is_stopped:
-					qty = (d.qty > d.ordered_qty) and flt(flt(d.qty) - flt(d.ordered_qty)) or 0 
-				# Step 3 :=> Update Bin's Purchase Request Qty by +- qty 
-				get_obj('Warehouse', d.warehouse).update_bin(0, 0, 0, (is_submit and 1 or -1) * flt(qty), 0, d.item_code, self.doc.transaction_date)		
+					qty = (d.qty > d.ordered_qty) and flt(flt(d.qty) - flt(d.ordered_qty)) or 0
+				
+				args = {
+					"item_code": d.item_code,
+					"indented_qty": (is_submit and 1 or -1) * flt(qty),
+					"posting_date": self.doc.transaction_date
+				}
+				get_obj('Warehouse', d.warehouse).update_bin(args)		
 		
-	# On Submit			
-	#---------------------------------------------------------------------------
 	def on_submit(self):
-		# Step 1:=> Set Status
 		set(self.doc,'status','Submitted')
-
-		# Step 2:=> Update Bin
 		self.update_bin(is_submit = 1, is_stopped = 0)
 	
 	def check_modified_date(self):
@@ -202,9 +199,7 @@ class DocType:
 		if date_diff and date_diff[0][0]:
 			msgprint(cstr(self.doc.doctype) +" => "+ cstr(self.doc.name) +" has been modified. Please Refresh. ")
 			raise Exception
-	
-	# On Stop / unstop
-	#------------------------------------------------------------------------------
+
 	def update_status(self, status):
 		self.check_modified_date()
 		# Step 1:=> Update Bin
@@ -216,8 +211,7 @@ class DocType:
 		# Step 3:=> Acknowledge User
 		msgprint(self.doc.doctype + ": " + self.doc.name + " has been %s." % ((status == 'Submitted') and 'Unstopped' or cstr(status)) )
  
-	# On Cancel
-	#-----------------------------------------------------------------------------
+
 	def on_cancel(self):
 		# Step 1:=> Get Purchase Common Obj
 		pc_obj = get_obj(dt='Purchase Common')
