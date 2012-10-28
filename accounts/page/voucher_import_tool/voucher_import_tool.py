@@ -1,33 +1,47 @@
 from __future__ import unicode_literals
 import webnotes
-from webnotes.utils import formatdate
+from webnotes.utils import formatdate, flt
 
 @webnotes.whitelist()
-def get_template_multiple():
-	"""download single template"""
+def get_template():
+	"""download template"""
+	template_type = webnotes.form_dict.get('type')
 	from webnotes.model.doctype import get_field_property
 	naming_options = get_field_property("Journal Voucher", "naming_series", "options")
 	voucher_type = get_field_property("Journal Voucher", "voucher_type", "options")
+	if template_type=="Two Accounts":
+		extra_note = ""
+		columns = '''"Naming Series","Voucher Type","Posting Date","Amount","Debit Account","Credit Account","Cost Center","Against Sales Invoice","Against Purchase Invoice","Against Journal Voucher","Remarks","Due Date","Ref Number","Ref Date"'''
+	else:
+		extra_note = '''
+"5. Put the account head as Data label each in a new column"
+"6. Put the Debit amount as +ve and Credit amount as -ve"'''
+		columns = '''"Naming Series","Voucher Type","Posting Date","Cost Center","Against Sales Invoice","Against Purchase Invoice","Against Journal Voucher","Remarks","Due Date","Ref Number","Ref Date"'''
 	
-	webnotes.response['result'] = '''"Voucher Import :Multiple"
+	
+	webnotes.response['result'] = '''"Voucher Import: %(template_type)s"
 "Each entry below will be a separate Journal Voucher."
 "Note:"
 "1. Dates in format: %(user_fmt)s"
 "2. Cost Center is required for Income or Expense accounts"
 "3. Naming Series Options: %(naming_options)s"
-"4. Voucher Type Options: %(voucher_type)s"
+"4. Voucher Type Options: %(voucher_type)s"%(extra_note)s
 "-------Common Values-----------"
 "Company:","%(default_company)s"
 "--------Data----------"
-"Naming Series","Voucher Type","Posting Date","Amount","Debit Account","Credit Account","Cost Center","Against Sales Invoice","Against Purchase Invoice","Against Journal Voucher","Remarks","Due Date","Ref Number","Ref Date"
+%(columns)s
 ''' % {
+		"template_type": template_type,
 		"user_fmt": webnotes.conn.get_value('Control Panel', None, 'date_format'),
 		"default_company": webnotes.conn.get_default("company"),
 		"naming_options": naming_options.replace("\n", ", "),
-		"voucher_type": voucher_type.replace("\n", ", ")
+		"voucher_type": voucher_type.replace("\n", ", "),
+		"extra_note": extra_note,
+		"columns": columns
 	}
 	webnotes.response['type'] = 'csv'
-	webnotes.response['doctype'] = "Voucher-Import-Single"
+	webnotes.response['doctype'] = "Voucher-Import-%s" % template_type
+
 
 @webnotes.whitelist()
 def upload():
@@ -35,12 +49,10 @@ def upload():
 	rows = read_csv_content_from_uploaded_file()
 
 	common_values = get_common_values(rows)
-	data, start_idx = get_data(rows)
+	company_abbr = webnotes.conn.get_value("Company", common_values.company, "abbr")
+	data, start_idx = get_data(rows, company_abbr)
 	
-	if rows[0][0]=="Voucher Import :Single":
-		return import_single(common_values, data, start_idx)
-	else:
-		return import_multiple(common_values, data, start_idx)
+	return import_vouchers(common_values, data, start_idx, rows[0][0])
 
 def map_fields(field_list, source, target):
 	for f in field_list:
@@ -49,7 +61,7 @@ def map_fields(field_list, source, target):
 		else:
 			target[f] = source.get(f)
 
-def import_multiple(common_values, data, start_idx):
+def import_vouchers(common_values, data, start_idx, import_type):
 	from webnotes.model.doc import Document
 	from webnotes.model.doclist import DocList
 	from webnotes.model.code import get_obj
@@ -78,7 +90,7 @@ def import_multiple(common_values, data, start_idx):
 	
 	webnotes.conn.commit()
 	for i in xrange(len(data)):
-		d = data[i]
+		d = data[i][0]
 		jv = webnotes.DictObj()
 
 		try:
@@ -100,21 +112,36 @@ def import_multiple(common_values, data, start_idx):
 
 			jv.fiscal_year = get_fiscal_year(jv.posting_date)[0]
 
-			detail1 = Document("Journal Voucher Detail")
-			detail1.parent = True
-			detail1.parentfield = "entries"
-			map_fields(["debit_account:account","amount:debit"], d, detail1.fields)
-			apply_cost_center_and_against_invoice(detail1, d)
+			details = []
+			if import_type == "Voucher Import: Two Accounts":
+				detail1 = Document("Journal Voucher Detail")
+				detail1.parent = True
+				detail1.parentfield = "entries"
+				map_fields(["debit_account:account","amount:debit"], d, detail1.fields)
+				apply_cost_center_and_against_invoice(detail1, d)
 		
 
-			detail2 = Document("Journal Voucher Detail")
-			detail2.parent = True
-			detail2.parentfield = "entries"
-			map_fields(["credit_account:account","amount:credit"], d, detail2.fields)
-			apply_cost_center_and_against_invoice(detail2, d)
-			
+				detail2 = Document("Journal Voucher Detail")
+				detail2.parent = True
+				detail2.parentfield = "entries"
+				map_fields(["credit_account:account","amount:credit"], d, detail2.fields)
+				apply_cost_center_and_against_invoice(detail2, d)
+				
+				details = [detail1, detail2]
+			elif import_type == "Voucher Import: Multiple Accounts":
+				accounts = data[i][1]
+				for acc in accounts:
+					detail = Document("Journal Voucher Detail")
+					detail.parent = True
+					detail.parentfield = "entries"
+					detail.account = acc
+					detail.debit = flt(accounts[acc]) > 0 and flt(accounts[acc]) or 0
+					detail.credit = flt(accounts[acc]) < 0 and -1*flt(accounts[acc]) or 0
+					apply_cost_center_and_against_invoice(detail, d)
+					details.append(detail)
+								
 			webnotes.conn.begin()
-			doclist = DocList([jv, detail1, detail2])
+			doclist = DocList([jv]+details)
 			doclist.submit()
 			webnotes.conn.commit()
 			
@@ -147,49 +174,34 @@ def get_common_values(rows):
 
 	return common_values
 	
-def get_data(rows):
+def get_data(rows, company_abbr):
 	start_row = 0
 	data = []
 	start_row_idx = 0
-	
 	for i in xrange(len(rows)):
 		r = rows[i]
 		if r[0]:
 			if start_row and i >= start_row:
 				if not start_row_idx: start_row_idx = i
-				d = webnotes.DictObj()
+				d, acc_dict = webnotes.DictObj(), webnotes.DictObj()
 				for cidx in xrange(len(columns)):
 					d[columns[cidx]] = r[cidx]
-				data.append(d)
+					
+				if accounts:
+					total = 0
+					for acc_idx in xrange(len(accounts)):
+						col_idx = len(columns) + acc_idx
+						acc_dict[accounts[acc_idx]] = r[col_idx]
+						if flt(r[col_idx]) > 0: total += flt(r[col_idx])
+					d['amount'] = total
+					
+				data.append([d, acc_dict])
+				
 
 			if r[0]=="--------Data----------":
 				start_row = i+2
-				columns = [c.replace(" ", "_").lower() for c in rows[i+1]]
+				columns = [c.replace(" ", "_").lower() for c in rows[i+1] 
+					if not c.endswith(company_abbr)]
+				accounts = [c for c in rows[i+1] if c.endswith(company_abbr)]
 	
 	return data, start_row_idx
-	
-@webnotes.whitelist()
-def get_template_single():
-	"""download single template"""
-	
-	webnotes.response['result'] = '''"Voucher Import :Single"
-"All entries below will be uploaded in one Journal Voucher."
-"Enter details below:"
-"-------Common Values-----------"
-"Voucher Series:",
-"Voucher Type:",
-"Posting Date:","%(posting_date)s"
-"Remarks:",
-"Is Opening:","No"
-"Company:","%(default_company)s"
-"------------------"
-"Enter rows below headings:"
-"Cost Center is required for Income or Expense accounts"
-"--------Data----------"
-"Account","Cost Center","Debit Amount","Credit Amount","Against Sales Invoice","Against Purchase Invoice","Against Journal Voucher"
-''' % {
-		"posting_date": formatdate(),
-		"default_company": webnotes.conn.get_default("company")
-	}
-	webnotes.response['type'] = 'csv'
-	webnotes.response['doctype'] = "Voucher-Import-Single"
