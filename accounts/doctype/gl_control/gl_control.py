@@ -192,7 +192,7 @@ class DocType:
 
 		# check total debit / credit
 		# Due to old wrong entries (total debit != total credit) some voucher could be cancelled
-		if abs(self.td - self.tc) > 0.005 and not cancel:
+		if abs(self.td - self.tc) > 0.01 and not cancel:
 			msgprint("Debit and Credit not equal for this voucher: Diff (Debit) is %s" % (self.td-self.tc))
 			raise Exception
 
