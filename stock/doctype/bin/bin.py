@@ -43,10 +43,6 @@ class DocType:
 			self.reorder_item(args.get("doc_type"), args.get("doc_name"))
 		
 		if args.get("actual_qty"):
-			# check actual qty with total number of serial no
-			if args.get("serial_no"):
-				self.check_qty_with_serial_no()
-				
 			# update valuation and qty after transaction for post dated entry
 			self.update_entries_after(args.get("posting_date"), args.get("posting_time"))
 		
@@ -62,28 +58,6 @@ class DocType:
 		 	flt(self.doc.indented_qty) + flt(self.doc.planned_qty) - flt(self.doc.reserved_qty)
 		
 		self.doc.save()
-
-	def check_qty_with_serial_no(self):
-		"""
-			check actual qty with total number of serial no in store
-			Temporary validation added on: 18-07-2011
-		"""
-		if sql("select name from `tabItem` where ifnull(has_serial_no, 'No') = 'Yes' and name = '%s'" % self.doc.item_code):
-			sr_count = sql("""select count(name) from `tabSerial No` 
-				where item_code = '%s' and warehouse = '%s' 
-				and status  ='In Store' and docstatus != 2
-				""" % (self.doc.item_code, self.doc.warehouse))[0][0]
-			
-			if sr_count != self.doc.actual_qty:
-				msg = """Actual Qty(%s) in Bin is mismatched with total number(%s) 
-					of serial no in store for item: %s and warehouse: %s""" % \
-					(self.doc.actual_qty, sr_count, self.doc.item_code, self.doc.warehouse)
-
-				msgprint(msg, raise_exception=1)
-
-	# --------------------------------
-	# get first stock ledger entry
-	# --------------------------------
 	
 	def get_first_sle(self):
 		sle = sql("""
