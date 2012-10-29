@@ -394,7 +394,9 @@ cur_frm.cscript.make_jv = function(doc, dt, dn, bank_account) {
 
 // ***************** Get project name *****************
 cur_frm.fields_dict['entries'].grid.get_field('project_name').get_query = function(doc, cdt, cdn) {
-	return 'SELECT `tabProject`.name FROM `tabProject` WHERE `tabProject`.status = "Open" AND `tabProject`.name LIKE "%s" ORDER BY `tabProject`.name ASC LIMIT 50';
+	return 'SELECT `tabProject`.name FROM `tabProject` \
+		WHERE `tabProject`.status not in ("Completed", "Cancelled") \
+		AND `tabProject`.name LIKE "%s" ORDER BY `tabProject`.name ASC LIMIT 50';
 }
 
 

@@ -376,7 +376,10 @@ cur_frm.fields_dict.write_off_cost_center.get_query = function(doc) {
 cur_frm.fields_dict['project_name'].get_query = function(doc, cdt, cdn) {
 	var cond = '';
 	if(doc.customer) cond = '(`tabProject`.customer = "'+doc.customer+'" OR IFNULL(`tabProject`.customer,"")="") AND';
-	return repl('SELECT `tabProject`.name FROM `tabProject` WHERE `tabProject`.status = "Open" AND %(cond)s `tabProject`.name LIKE "%s" ORDER BY `tabProject`.name ASC LIMIT 50', {cond:cond});
+	return repl('SELECT `tabProject`.name FROM `tabProject` \
+		WHERE `tabProject`.status not in ("Completed", "Cancelled") \
+		AND %(cond)s `tabProject`.name LIKE "%s" \
+		ORDER BY `tabProject`.name ASC LIMIT 50', {cond:cond});
 }
 
 //Territory
