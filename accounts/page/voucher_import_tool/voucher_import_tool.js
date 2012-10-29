@@ -9,8 +9,12 @@ wn.pages['voucher-import-tool'].onload = function(wrapper) {
 		<p class="help">Import multiple accounting entries via CSV (spreadsheet) file:</p>\
 		<h3>1. Download Template</h3><br>\
 		<div style="padding-left: 30px;">\
-			<button class="btn btn-small btn-download-multiple">Download</button>\
+			<button class="btn btn-small btn-download-two-accounts">Download</button>\
 			<p class="help">Import multiple vouchers with one debit and one credit entry</p>\
+		</div>\
+		<div style="padding-left: 30px;">\
+			<button class="btn btn-small btn-download-multiple-accounts">Download</button>\
+			<p class="help">Import multiple vouchers with multiple accounts</p>\
 		</div>\
 		<hr>\
 		<h3>2. Upload</h3><br>\
@@ -35,15 +39,17 @@ wn.pages['voucher-import-tool'].onload = function(wrapper) {
 	
 	wrapper.waiting = wn.messages.waiting($(wrapper).find('.working'), 
 		"Importing Vouchers...").toggle(false);
-	
-	$(wrapper).find(".btn-download-single").click(function() {
-		window.location.href = wn.request.url 
-			+ '?cmd=accounts.page.voucher_import_tool.voucher_import_tool.get_template_single';
+
+	$(wrapper).find(".btn-download-two-accounts").click(function() {
+		window.location.href = wn.request.url + 
+			'?cmd=accounts.page.voucher_import_tool.voucher_import_tool.get_template' + 	
+			'&type=Two Accounts';
 	});
 
-	$(wrapper).find(".btn-download-multiple").click(function() {
-		window.location.href = wn.request.url 
-			+ '?cmd=accounts.page.voucher_import_tool.voucher_import_tool.get_template_multiple';
+	$(wrapper).find(".btn-download-multiple-accounts").click(function() {
+		window.location.href = wn.request.url + 
+				'?cmd=accounts.page.voucher_import_tool.voucher_import_tool.get_template' + 
+				'&type=Multiple Accounts';
 	});
 	
 	// rename button
