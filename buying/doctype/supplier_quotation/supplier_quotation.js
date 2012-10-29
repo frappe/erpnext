@@ -77,7 +77,8 @@ cur_frm.cscript.uom = function(doc, cdt, cdn) {
 cur_frm.fields_dict['quotation_items'].grid.get_field('project_name').get_query = 
 	function(doc, cdt, cdn) {
 		return "select `tabProject`.name from `tabProject` \
-			where `tabProject`.status = \"Open\" and `tabProject`.name like \"%s\" \
+			where `tabProject`.status not in (\"Completed\", \"Cancelled\") \
+			and `tabProject`.name like \"%s\" \
 			order by `tabProject`.name ASC LIMIT 50";
 	}
 

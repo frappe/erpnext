@@ -28,13 +28,9 @@ class TransactionBase:
 	# -----------------------
 	def get_default_customer_address(self, args=''):
 		address_text, address_name = self.get_address_text(customer=self.doc.customer)
-		contact_text, contact_name, contact_email, contact_mobile = self.get_contact_text(customer=self.doc.customer)
 		self.doc.customer_address = address_name or ''
-		self.doc.contact_person = contact_name or ''
 		self.doc.address_display = address_text or ''
-		self.doc.contact_display = contact_text or ''
-		self.doc.contact_email = contact_email or ''
-		self.doc.contact_mobile = contact_mobile or ''
+		self.doc.fields.update(self.get_contact_text(customer=self.doc.customer))
 
 		if args != 'onload':
 			self.get_customer_details(self.doc.customer)
@@ -44,13 +40,9 @@ class TransactionBase:
 	# -----------------------
 	def get_default_customer_shipping_address(self, args=''):		
 		address_text, address_name = self.get_address_text(customer=self.doc.customer,is_shipping_address=1)
-		contact_text, contact_name, contact_email, contact_mobile = self.get_contact_text(customer=self.doc.customer)		
 		self.doc.customer_address = address_name or ''
-		self.doc.contact_person = contact_name or ''
 		self.doc.address_display = address_text or ''
-		self.doc.contact_display = contact_text or ''
-		self.doc.contact_email = contact_email or ''
-		self.doc.contact_mobile = contact_mobile or ''
+		self.doc.fields.update(self.get_contact_text(customer=self.doc.customer))
 		
 		if self.doc.doctype != 'Quotation' and args != 'onload':
 			self.get_customer_details(self.doc.customer)
@@ -61,15 +53,13 @@ class TransactionBase:
 	def get_customer_address(self, args):
 		args = load_json(args)		
 		address_text, address_name = self.get_address_text(address_name=args['address'])
-		contact_text, contact_name, contact_email, contact_mobile = self.get_contact_text(contact_name=args['contact'])
 		ret = {
 			'customer_address' : address_name,
-			'contact_person' : contact_name,
 			'address_display' : address_text,
-			'contact_display' : contact_text,
-			'contact_email' : contact_email,
-			'contact_mobile' : contact_mobile
 		}
+		
+		ret.update(self.get_contact_text(contact_name=args['contact']))
+		
 		return ret	
 			
 	# Get Address Text
@@ -112,11 +102,15 @@ class TransactionBase:
 		contact_display = ''.join([a[0]+cstr(extract(a[1])) for a in contact_fields if extract(a[1])])
 		if contact_display.startswith('\n'): contact_display = contact_display[1:]
 		
-		contact_name = details and details[0]['name'] or ''
-		contact_email = details and details[0]['email_id'] or ''
-		contact_mobile = details and details[0]['mobile_no'] or ''
-		return contact_display, contact_name, contact_email, contact_mobile
-
+		return {
+			"contact_display": contact_display,
+			"contact_person": details and details[0]["name"] or "",
+			"contact_email": details and details[0]["email_id"] or "",
+			"contact_mobile": details and details[0]["mobile_no"] or "",
+			"contact_designation": details and details[0]["designation"] or "",
+			"contact_department": details and details[0]["department"] or "",
+		}
+		
 	def get_customer_details(self, name):
 		"""
 			Get customer details like name, group, territory
@@ -185,15 +179,11 @@ class TransactionBase:
 	def get_default_supplier_address(self, args):
 		args = load_json(args)
 		address_text, address_name = self.get_address_text(supplier=args['supplier'])
-		contact_text, contact_name, contact_email, contact_mobile = self.get_contact_text(supplier=args['supplier'])
 		ret = {
 			'supplier_address' : address_name,
 			'address_display' : address_text,
-			'contact_person' : contact_name,
-			'contact_display' : contact_text,
-			'contact_email' : contact_email,
-			'contact_mobile' : contact_mobile						
 		}
+		ret.update(self.get_contact_text(supplier=args['supplier']))
 		ret.update(self.get_supplier_details(args['supplier']))
 		return ret
 		
@@ -202,15 +192,11 @@ class TransactionBase:
 	def get_supplier_address(self, args):
 		args = load_json(args)
 		address_text, address_name = self.get_address_text(address_name=args['address'])
-		contact_text, contact_name, contact_email, contact_mobile = self.get_contact_text(contact_name=args['contact'])
 		ret = {
 			'supplier_address' : address_name,
 			'address_display' : address_text,
-			'contact_person' : contact_name,
-			'contact_display' : contact_text,
-			'contact_email' : contact_email,
-			'contact_mobile' : contact_mobile
 		}
+		ret.update(self.get_contact_text(contact_name=args['contact']))
 		return ret
 	
 	# Get Supplier Details

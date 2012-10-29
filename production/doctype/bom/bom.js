@@ -145,7 +145,9 @@ cur_frm.fields_dict['item'].get_query = function(doc) {
 }
 
 cur_frm.fields_dict['project_name'].get_query = function(doc, dt, dn) {
-	return 'SELECT `tabProject`.name FROM `tabProject` WHERE `tabProject`.status = "Open" AND `tabProject`.name LIKE "%s" ORDER BY `tabProject`.name ASC LIMIT 50';
+	return 'SELECT `tabProject`.name FROM `tabProject` \
+		WHERE `tabProject`.status not in ("Completed", "Cancelled") \
+		AND `tabProject`.name LIKE "%s" ORDER BY `tabProject`.name ASC LIMIT 50';
 }
 
 cur_frm.fields_dict['bom_materials'].grid.get_field('item_code').get_query = function(doc) {
