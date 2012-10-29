@@ -17,7 +17,9 @@
 cur_frm.fields_dict['project'].get_query = function(doc,cdt,cdn){
   var cond='';
   if(doc.customer) cond = 'ifnull(`tabProject`.customer, "") = "'+doc.customer+'" AND';  
-  return repl('SELECT distinct `tabProject`.`name` FROM `tabProject` WHERE %(cond)s `tabProject`.`name` LIKE "%s" ORDER BY `tabProject`.`name` ASC LIMIT 50', {cond:cond});
+  return repl('SELECT distinct `tabProject`.`name` FROM `tabProject` \
+  	WHERE %(cond)s `tabProject`.`name` LIKE "%s" \
+	ORDER BY `tabProject`.`name` ASC LIMIT 50', {cond:cond});
 }
 
 
