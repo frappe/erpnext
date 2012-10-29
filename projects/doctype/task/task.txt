@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		u'creation': '2012-08-08 15:39:55',
+		u'creation': '2012-09-18 11:05:48',
 		u'docstatus': 0,
-		u'modified': '2012-09-17 10:58:32',
+		u'modified': '2012-10-29 14:24:55',
 		u'modified_by': u'Administrator',
 		u'owner': u'Administrator'
 	},
@@ -13,12 +13,14 @@
 	# These values are common for all DocType
 	{
 		'_last_update': u'1324880734',
+		'allow_attach': 1,
 		'allow_trash': 1,
 		'autoname': u'TASK.#####',
 		'colour': u'White:FFF',
 		'default_print_format': u'Standard',
 		u'doctype': u'DocType',
 		'document_type': u'Master',
+		'max_attachments': 5,
 		'module': u'Projects',
 		u'name': u'__common__',
 		'section_style': u'Tray',
@@ -296,6 +298,17 @@
 		'label': u'Closing Date',
 		'oldfieldname': u'closing_date',
 		'oldfieldtype': u'Date'
+	},
+
+	# DocField
+	{
+		u'doctype': u'DocField',
+		'fieldname': u'file_list',
+		'fieldtype': u'Text',
+		'hidden': 1,
+		'label': u'File List',
+		'no_copy': 1,
+		'print_hide': 1
 	},
 
 	# DocPerm
