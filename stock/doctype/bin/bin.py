@@ -40,7 +40,7 @@ class DocType:
 		
 		if (flt(args.get("actual_qty")) < 0 or flt(args.get("reserved_qty")) > 0) \
 				and args.get("is_cancelled") == 'No' and args.get("is_amended")=='No':
-			self.reorder_item(args.get("doc_type"), args.get("doc_name"))
+			self.reorder_item(args.get("voucher_type"), args.get("voucher_no"))
 		
 		if args.get("actual_qty"):
 			# update valuation and qty after transaction for post dated entry
@@ -346,18 +346,19 @@ class DocType:
 		webnotes.conn.set(indent_obj.doc,'docstatus',1)
 		indent_obj.on_submit()
 		msgprint("""Item: %s is to be re-ordered. Purchase Request %s raised. 
-			It was generated from %s %s""" % 
-			(self.doc.item_code, indent.name,doc_type, doc_name ))
+			It was generated from %s: %s""" % 
+			(self.doc.item_code, indent.name, doc_type, doc_name ))
 		if(i['email_notify']):
-			self.send_email_notification(doc_type,doc_name)
+			self.send_email_notification(doc_type, doc_name)
 			
-	def send_email_notification(self,doc_type,doc_name):
+	def send_email_notification(self, doc_type, doc_name):
 		""" Notify user about auto creation of indent"""
 		
 		from webnotes.utils.email_lib import sendmail
-		email_list=[d[0] for d in sql("""select parent from tabUserRole 
-			where role in ('Purchase Manager','Material Manager') 
-			and parent not in ('Administrator', 'All', 'Guest')""")]
+		email_list=[d[0] for d in sql("""select distinct r.parent from tabUserRole r, tabProfile p
+			where p.name = r.parent and p.enabled = 1 and p.docstatus < 2
+			and r.role in ('Purchase Manager','Material Manager') 
+			and p.name not in ('Administrator', 'All', 'Guest')""")]
 		msg="""A Purchase Request has been raised 
 			for item %s: %s on %s """ % (doc_type, doc_name, nowdate())
 		sendmail(email_list, subject='Auto Purchase Request Generation Notification', msg = msg)	

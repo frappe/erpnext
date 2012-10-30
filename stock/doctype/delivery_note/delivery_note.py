@@ -351,8 +351,8 @@ class DocType(TransactionBase):
 					# Reduce reserved qty from reserved warehouse mentioned in so
 					args = {
 						"item_code": d['item_code'],
-						"doc_type": self.doc.doctype,
-						"doc_name": self.doc.name,
+						"voucher_type": self.doc.doctype,
+						"voucher_no": self.doc.name,
 						"reserved_qty": flt(update_stock) * flt(d['reserved_qty']),
 						"posting_date": self.doc.posting_date,
 						"is_amended": self.doc.amended_from and 'Yes' or 'No'
