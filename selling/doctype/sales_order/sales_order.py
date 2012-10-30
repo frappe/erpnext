@@ -432,8 +432,8 @@ class DocType(TransactionBase):
 					"item_code": d['item_code'],
 					"reserved_qty": flt(update_stock) * flt(d['qty']),
 					"posting_date": self.doc.transaction_date,
-					"doc_type": self.doc.doctype,
-					"doc_name": self.doc.name,
+					"voucher_type": self.doc.doctype,
+					"voucher_no": self.doc.name,
 					"is_amended": self.doc.amended_from and 'Yes' or 'No'
 				}
 				get_obj('Warehouse', d['reserved_warehouse']).update_bin(args)
