@@ -106,7 +106,7 @@ def import_vouchers(common_values, data, start_idx, import_type):
 			d.company = common_values.company
 						
 			jv = Document("Journal Voucher")
-			map_fields(["voucher_type", "posting_date", "naming_series", "remarks:remark",
+			map_fields(["voucher_type", "posting_date", "naming_series", "remarks:user_remark",
 				"ref_number:cheque_no", "ref_date:cheque_date", "is_opening",
 				"amount:total_debit", "amount:total_credit", "due_date", "company"], d, jv.fields)
 
@@ -140,6 +140,10 @@ def import_vouchers(common_values, data, start_idx, import_type):
 					apply_cost_center_and_against_invoice(detail, d)
 					details.append(detail)
 								
+			if not details:
+				messages.append("""<p style='color: red'>No accounts found. 
+					If you entered accounts correctly, please check template once</p>""")
+				return
 			webnotes.conn.begin()
 			doclist = DocList([jv]+details)
 			doclist.submit()
