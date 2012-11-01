@@ -6,6 +6,7 @@ def execute():
 	
 	for name, insert_after in webnotes.conn.sql("""select name, insert_after
 			from `tabCustom Field`"""):
-		new_insert_after = regex.sub("", insert_after)
-		webnotes.conn.set_value("Custom Field", name, "insert_after", new_insert_after)
+		if insert_after:
+			new_insert_after = regex.sub("", insert_after)
+			webnotes.conn.set_value("Custom Field", name, "insert_after", new_insert_after)
 		
