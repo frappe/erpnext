@@ -642,5 +642,9 @@ patch_list = [
 	{
 		'patch_module': 'patches.october_2012',
 		'patch_file': 'custom_script_delete_permission',
-	}
+	},
+	{
+		'patch_module': 'patches.november_2012',
+		'patch_file': 'custom_field_insert_after',
+	},
 ]
