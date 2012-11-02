@@ -15,6 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 // show tasks
+wn.require("public/app/js/gantt_task.js");
 
 cur_frm.cscript.refresh = function(doc) {
 	if(!doc.__islocal) {
