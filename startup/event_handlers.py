@@ -26,7 +26,7 @@ def on_login_post_session(login_manager):
 		update login_from and delete parallel sessions
 	"""
 	# Clear previous sessions i.e. logout previous log-in attempts
-	exception_list = ['demo@webnotestech.com', 'Administrator', 'Guest']
+	exception_list = ['demo@erpnext.com', 'Administrator', 'Guest']
 	if webnotes.session['user'] not in exception_list:
 		sid_list = webnotes.conn.sql("""
 			DELETE FROM `tabSessions`
@@ -38,7 +38,7 @@ def on_login_post_session(login_manager):
 		# check if account is expired
 		check_if_expired()
 
-	if webnotes.session['user'] not in ('Guest', 'demo@webnotestech.com'):
+	if webnotes.session['user'] not in ('Guest', 'demo@erpnext.com'):
 		# create feed
 		from webnotes.utils import nowtime
 		from webnotes.profile import get_user_fullname

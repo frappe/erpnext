@@ -21,7 +21,7 @@ from webnotes.utils import load_json, cint, nowdate
 
 
 def check_demo():
-	demo_user = 'demo@webnotestech.com'
+	demo_user = 'demo@erpnext.com'
 	if webnotes.session['user']==demo_user:
 		webnotes.msgprint("Can't change in demo", raise_exception=1)
 	
