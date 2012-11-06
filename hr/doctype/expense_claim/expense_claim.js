@@ -46,6 +46,13 @@ cur_frm.cscript.refresh = function(doc,cdt,cdn){
 	if (doc.docstatus == 0) unhide_field('calculate_total_amount');
 }
 
+cur_frm.cscript.validate = function(doc) {
+	if(cint(doc.docstatus) == 0) {
+		doc.approval_status = "Draft";
+	}
+	cur_frm.cscript.calculate_total(doc);
+}
+
 cur_frm.cscript.employee = function(doc,cdt,cdn){
 	if(doc.employee){
 		$c_obj(make_doclist(doc.doctype, doc.name),'set_approver','', function(r,rt){

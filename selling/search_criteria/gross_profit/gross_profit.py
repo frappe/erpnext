@@ -14,22 +14,26 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.	If not, see <http://www.gnu.org/licenses/>.
 
-# Add Columns
-# ------------
+
 from __future__ import unicode_literals
 from webnotes.utils import flt
 
-colnames[colnames.index('Rate*')] = 'Rate' 
-col_idx['Rate'] = col_idx['Rate*']
-col_idx.pop('Rate*')
-colnames[colnames.index('Amount*')] = 'Amount' 
-col_idx['Amount'] = col_idx['Amount*']
-col_idx.pop('Amount*')
-
 columns = [
-	['Purchase Cost','Currency','150px',''],
-	['Gross Profit','Currency','150px',''],
- 	['Gross Profit (%)','Currrency','150px','']
+	['Delivery Note', 'Link', '120px', 'Delivery Note'],
+	['Posting Date', 'Date', '120px', ''],
+	['Posting Time', 'Data', '120px', ''],
+	['Item Code', 'Link', '120px', 'Item'],
+	['Item Name', 'Data', '120px', ''],
+	['Description', 'Data', '120px', ''],
+	['Warehouse', 'Link', '120px', 'Warehouse'],
+	['Project Name', 'Link', '120px', 'Project'],
+	['Quantity', 'Currency', '120px', ''],
+	['Rate', 'Currency', '120px', ''],
+	['Amount', 'Currency', '120px', ''],
+	#['DN Item Row Id', 'Data', '120px', ''],
+	['Purchase Cost', 'Currency', '150px', ''],
+	['Gross Profit', 'Currency', '150px', ''],
+ 	['Gross Profit (%)', 'Currrency', '150px', '']
 ]
 
 for c in columns:
@@ -41,7 +45,7 @@ for c in columns:
 
 sle = sql("""
 	select 
-		actual_qty, incoming_rate, voucher_no, item_code, warehouse
+		actual_qty, incoming_rate, voucher_no, item_code, warehouse, voucher_detail_no
 	from 
 		`tabStock Ledger Entry`
 	where 
@@ -50,7 +54,7 @@ sle = sql("""
 	order by posting_date desc, posting_time desc, name desc
 """, as_dict=1)
 
-def get_purchase_cost(dn, item, wh, qty):
+def get_purchase_cost(dn, item, wh, qty, dn_item_row_id):
 	from webnotes.utils import flt
 	global sle
  	purchase_cost = 0
@@ -61,13 +65,15 @@ def get_purchase_cost(dn, item, wh, qty):
 		packing_items = [[item, qty]]
 	for d in sle:
 		if d['voucher_no'] == dn and [d['item_code'], flt(abs(d['actual_qty']))] in packing_items:
-			purchase_cost += flt(d['incoming_rate'])*flt(abs(d['actual_qty']))
+			if not d['voucher_detail_no'] or d['voucher_detail_no'] == dn_item_row_id:
+				purchase_cost += flt(d['incoming_rate'])*flt(abs(d['actual_qty']))
 	return purchase_cost
 			
 out, tot_amount, tot_pur_cost = [], 0, 0
 for r in res:
-	purchase_cost = get_purchase_cost(r[col_idx['ID']], r[col_idx['Item Code']], \
-		r[col_idx['Warehouse']], r[col_idx['Quantity']])
+	purchase_cost = get_purchase_cost(r[col_idx['Delivery Note']], r[col_idx['Item Code']], \
+		r[col_idx['Warehouse']], r[col_idx['Quantity']], r[-1])
+	r.pop(-1)
 	r.append(purchase_cost)
 	
 	gp = flt(r[col_idx['Amount']]) - flt(purchase_cost)
@@ -79,7 +85,6 @@ for r in res:
 	
 	tot_amount += flt(r[col_idx['Amount']])
 	tot_pur_cost += flt(purchase_cost)
-
 # Add Total Row
 l_row = ['' for i in range(len(colnames))]
 l_row[col_idx['Project Name']] = '<b>TOTALS</b>'
