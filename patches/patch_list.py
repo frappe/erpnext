@@ -651,4 +651,8 @@ patch_list = [
 		'patch_module': 'patches.november_2012',
 		'patch_file': 'reload_stock_ledger_report',
 	},
+	{
+		'patch_module': 'patches.november_2012',
+		'patch_file': 'delete_item_sales_register1',
+	},
 ]
