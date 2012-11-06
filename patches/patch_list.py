@@ -647,4 +647,8 @@ patch_list = [
 		'patch_module': 'patches.november_2012',
 		'patch_file': 'custom_field_insert_after',
 	},
+	{
+		'patch_module': 'patches.november_2012',
+		'patch_file': 'reload_stock_ledger_report',
+	},
 ]
