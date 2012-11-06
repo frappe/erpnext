@@ -14,9 +14,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.	If not, see <http://www.gnu.org/licenses/>.
 
-
 from __future__ import unicode_literals
 from webnotes.utils import flt
+
+if not (filter_values.get('posting_date') or filter_values.get('posting_date1')):
+	msgprint("Please select From and To Posting Date", raise_exception=1)
 
 columns = [
 	['Delivery Note', 'Link', '120px', 'Delivery Note'],

@@ -5,6 +5,10 @@ SELECT
 FROM 
 	`tabDelivery Note Item` dn_item, `tabDelivery Note` dn 
 WHERE 
-	dn.docstatus = 1
- 	AND dn_item.parent = dn.name
+ 	dn_item.parent = dn.name
+	AND dn.docstatus = 1
+	AND dn.name like '%(name)s%%'
+	AND dn_item.item_code like '%(item_code)s%%'
+	AND dn.posting_date >= '%(posting_date)s'
+	AND dn.posting_date <= '%(posting_date1)s'
 ORDER BY dn.name DESC
