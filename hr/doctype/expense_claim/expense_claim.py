@@ -77,10 +77,13 @@ class DocType:
 			set(self.doc, 'remark', self.doc.remark)
 	
 	def approve_voucher(self):
+		missing_count = 0
 		for d in getlist(self.doclist, 'expense_voucher_details'):
 			if not d.sanctioned_amount:
-				msgprint("Please add 'Sanctioned Amount' for all expenses")
-				return cstr('Incomplete')
+				missing_count += 1
+		if missing_count == len(getlist(self.doclist, 'expense_voucher_details')):
+			msgprint("Please add 'Sanctioned Amount' for atleast one expense")
+			return cstr('Incomplete')
 		
 		if not self.doc.total_sanctioned_amount:
 			msgprint("Please calculate total sanctioned amount using button 'Calculate Total Amount'")
@@ -112,7 +115,7 @@ class DocType:
 		
 	def validate(self):
 		self.validate_fiscal_year()
-	
+		
 	def on_update(self):
 		set(self.doc, 'approval_status', 'Draft')
 	
