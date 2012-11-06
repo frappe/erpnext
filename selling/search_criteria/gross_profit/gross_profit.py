@@ -66,9 +66,15 @@ def get_purchase_cost(dn, item, wh, qty, dn_item_row_id):
 	else:
 		packing_items = [[item, qty]]
 	for d in sle:
-		if d['voucher_no'] == dn and [d['item_code'], flt(abs(d['actual_qty']))] in packing_items:
-			if not d['voucher_detail_no'] or d['voucher_detail_no'] == dn_item_row_id:
+		if packing_items:
+			 if d['voucher_no'] == dn \
+					and [d['item_code'], flt(abs(d['actual_qty']))] in packing_items \
+			 		and (not d['voucher_detail_no'] or d['voucher_detail_no'] == dn_item_row_id):
 				purchase_cost += flt(d['incoming_rate'])*flt(abs(d['actual_qty']))
+				packing_items.remove([d['item_code'], flt(abs(d['actual_qty']))])
+		else:
+			break
+				
 	return purchase_cost
 			
 out, tot_amount, tot_pur_cost = [], 0, 0
