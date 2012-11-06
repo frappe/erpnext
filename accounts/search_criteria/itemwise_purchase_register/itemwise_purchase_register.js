@@ -15,19 +15,29 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 report.customize_filters = function() {
-  this.hide_all_filters();
-  filter_list = ['From Voucher Date', 'To Voucher Date', 'Credit To', 'Is Opening', 'From Posting Date', 'To Posting Date']
-  for(var i=0;i<filter_list.length;i++)
-    this.filter_fields_dict['Purchase Invoice'+FILTER_SEP +filter_list[i]].df.filter_hide = 0;
+	var me = this;
+	var set_filter_property = function(dt, field, property, value) {
+		if (me.filter_fields_dict[dt + FILTER_SEP + field])
+			me.filter_fields_dict[dt + FILTER_SEP + field].df[property] = value;
+	}
+	
+	this.hide_all_filters();
+	filter_list = ['Credit To', 'Is Opening', 
+		'From Posting Date', 'To Posting Date', "Company"]
 
-  this.filter_fields_dict['Purchase Invoice Item'+FILTER_SEP +'Item'].df.filter_hide = 0;
+	for(var i=0;i<filter_list.length;i++) {
+		set_filter_property("Purchase Invoice", filter_list[i], "filter_hide", 0);
+	}
+	set_filter_property("Purchase Invoice Item", "Item", "filter_hide", 0);
 
-  this.filter_fields_dict['Purchase Invoice'+FILTER_SEP +'From Posting Date'].df.in_first_page = 1;
-  this.filter_fields_dict['Purchase Invoice'+FILTER_SEP +'To Posting Date'].df.in_first_page = 1;
-  this.filter_fields_dict['Purchase Invoice Item'+FILTER_SEP +'Item'].df.in_first_page = 1;
-
-  this.filter_fields_dict['Purchase Invoice'+FILTER_SEP +'From Posting Date'].df['report_default'] = sys_defaults.year_start_date;
-  this.filter_fields_dict['Purchase Invoice'+FILTER_SEP +'To Posting Date'].df['report_default'] = dateutil.obj_to_str(new Date());
-  this.filter_fields_dict['Purchase Invoice'+FILTER_SEP +'Company'].df['report_default']=sys_defaults.company
-
+	set_filter_property("Purchase Invoice", "From Posting Date", "in_first_page", 1);
+	set_filter_property("Purchase Invoice", "To Posting Date", "in_first_page", 1);
+	set_filter_property("Purchase Invoice", "Item", "in_first_page", 1);
+	
+	set_filter_property("Purchase Invoice", "From Posting Date", 
+		"report_default", sys_defaults.year_start_date);
+	set_filter_property("Purchase Invoice", "To Posting Date", 
+		"report_default", dateutil.obj_to_str(new Date()));
+	set_filter_property("Purchase Invoice", "Company", 
+		"report_default", sys_defaults.company);
 }
