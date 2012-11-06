@@ -3,11 +3,11 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-09-13 15:18:44',
-		'docstatus': 0,
-		'modified': '2012-09-13 15:38:45',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
+		u'creation': '2012-09-14 11:30:39',
+		u'docstatus': 0,
+		u'modified': '2012-11-06 10:27:11',
+		u'modified_by': u'Administrator',
+		u'owner': u'Administrator'
 	},
 
 	# These values are common for all Search Criteria
@@ -18,10 +18,10 @@
 		'columns': u'Stock Ledger Entry\x01Item Code,Stock Ledger Entry\x01Warehouse,Stock Ledger Entry\x01Posting Date,Stock Ledger Entry\x01Posting Time,Stock Ledger Entry\x01Actual Quantity,Stock Ledger Entry\x01Bin Actual Qty After Transaction,Stock Ledger Entry\x01Voucher Type,Stock Ledger Entry\x01Voucher No',
 		'criteria_name': u'Stock Ledger',
 		'doc_type': u'Stock Ledger Entry',
-		'doctype': 'Search Criteria',
-		'filters': u'{"Stock Ledger Entry\\u0001Warehouse Type":[""],"Stock Ledger Entry\\u0001Company":[""],"Stock Ledger Entry\\u0001Is Cancelled":[""],"Stock Ledger Entry\\u0001Is Stock Entry":[""]}',
+		u'doctype': u'Search Criteria',
+		'filters': u'{"Stock Ledger Entry\\u0001Warehouse Type":[],"Stock Ledger Entry\\u0001Company":[],"Stock Ledger Entry\\u0001Is Cancelled":["No"],"Stock Ledger Entry\\u0001Is Stock Entry":[]}',
 		'module': u'Stock',
-		'name': '__common__',
+		u'name': u'__common__',
 		'page_len': 50,
 		'sort_by': u'`tabStock Ledger Entry`.`posting_date`, `tabStock Ledger Entry`.`posting_time`, `tabStock Ledger Entry`.`name`',
 		'sort_order': u'ASC',
@@ -30,7 +30,7 @@
 
 	# Search Criteria, stock_ledger
 	{
-		'doctype': 'Search Criteria',
-		'name': u'stock_ledger'
+		u'doctype': u'Search Criteria',
+		u'name': u'stock_ledger'
 	}
 ]
