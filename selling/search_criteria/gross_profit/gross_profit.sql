@@ -8,7 +8,8 @@ WHERE
  	dn_item.parent = dn.name
 	AND dn.docstatus = 1
 	AND dn.name like '%(name)s%%'
-	AND dn_item.item_code like '%(item_code)s%%'
+	AND ifnull(dn_item.item_code, '') like '%(item_code)s%%'
+	AND ifnull(dn.project_name, '') like '%(project_name)s%%'
 	AND dn.posting_date >= '%(posting_date)s'
 	AND dn.posting_date <= '%(posting_date1)s'
 ORDER BY dn.name DESC
