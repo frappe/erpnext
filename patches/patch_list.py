@@ -653,6 +653,6 @@ patch_list = [
 	},
 	{
 		'patch_module': 'patches.november_2012',
-		'patch_file': 'delete_itemwise_sales_register1',
+		'patch_file': 'delete_item_sales_register1',
 	},
 ]
