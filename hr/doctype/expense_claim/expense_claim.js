@@ -63,7 +63,7 @@ cur_frm.cscript.calculate_total = function(doc,cdt,cdn){
 		var val = getchildren('Expense Claim Detail', doc.name, 'expense_voucher_details', doc.doctype);
 		var total_claim =0;
 		for(var i = 0; i<val.length; i++){
-			if(!doc.claim_amount) val[i].sanctioned_amount = val[i].claim_amount;
+			val[i].sanctioned_amount = val[i].claim_amount;
 			total_claim = flt(total_claim)+flt(val[i].claim_amount);
 			refresh_field('sactioned_amount', val[i].name, 'expense_voucher_details'); 
 		}
@@ -74,7 +74,6 @@ cur_frm.cscript.calculate_total = function(doc,cdt,cdn){
 		var val = getchildren('Expense Claim Detail', doc.name, 'expense_voucher_details', doc.doctype);
 		var total_sanctioned = 0;
 		for(var i = 0; i<val.length; i++){
-			if(!doc.claim_amount) val[i].sanctioned_amount = val[i].claim_amount;
 			total_sanctioned = flt(total_sanctioned)+flt(val[i].sanctioned_amount);
 			refresh_field('sactioned_amount', val[i].name, 'expense_voucher_details'); 
 			
@@ -97,6 +96,7 @@ cur_frm.cscript.sanctioned_amount = function(doc,cdt,cdn){
 wn.require('app/setup/doctype/notification_control/notification_control.js');
 
 cur_frm.cscript.approve = function(doc,cdt,cdn){
+	cur_frm.cscript.calculate_total(doc,cdt,cdn);
 
 	if(user == doc.exp_approver){
 		var approve_voucher_dialog;
@@ -166,6 +166,8 @@ cur_frm.cscript.approve = function(doc,cdt,cdn){
 }
 
 cur_frm.cscript.reject = function(doc,cdt,cdn){
+	cur_frm.cscript.calculate_total(doc,cdt,cdn);
+	
 	if(user == doc.exp_approver){
 		var reject_voucher_dialog;
 		
