@@ -17,7 +17,17 @@
 report.customize_filters = function() {
   this.hide_all_filters();
 
-  this.add_filter({fieldname:'transaction', label:'Transaction', fieldtype:'Select', options:'Quotation'+NEWLINE+'Sales Order'+NEWLINE+'Delivery Note'+NEWLINE+'Sales Invoice'+NEWLINE+'Purchase Order'+NEWLINE+'Purchase Receipt'+NEWLINE+'Purchase Invoice',report_default:'Delivery Note',ignore : 1,parent:'Profile',in_first_page : 1,single_select : 1});
+  // hide transaction based on permissions
+  var all_transactions = ["Quotation", "Sales Order", "Delivery Note", "Sales Invoice",
+    "Purchase Order", "Purchase Receipt", "Purchase Invoice"];
+  var transaction_list = [];
+  $.each(all_transactions, function(i, dt) {
+    if(wn.boot.profile.can_read.indexOf(dt)!=-1) {
+      transaction_list.push(dt);
+    }
+  });
+  
+  this.add_filter({fieldname:'transaction', label:'Transaction', fieldtype:'Select', options:transaction_list.join(NEWLINE),report_default:'Delivery Note',ignore : 1,parent:'Profile',in_first_page : 1,single_select : 1});
 
   this.add_filter({fieldname:'period', label:'Period', fieldtype:'Select', options:'Monthly'+NEWLINE+'Quarterly'+NEWLINE+'Half Yearly'+NEWLINE+'Annual',report_default:'Quarterly',ignore : 1, parent:'Profile',in_first_page:1,single_select:1});
 
