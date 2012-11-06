@@ -56,10 +56,11 @@ class DocType:
 		recipients = filter(lambda r: r in valid_users,
 			self.doc.recipient_list.split("\n"))
 		
-		from webnotes.utils.email_lib import sendmail
-		sendmail(recipients=recipients, subject=(self.doc.frequency + " Digest"),
-			sender="ERPNext Notifications <notifications+email_digest@erpnext.com>",
-			msg=self.get_digest_msg())
+		if recipients:
+			from webnotes.utils.email_lib import sendmail
+			sendmail(recipients=recipients, subject=(self.doc.frequency + " Digest"),
+				sender="ERPNext Notifications <notifications+email_digest@erpnext.com>",
+				msg=self.get_digest_msg())
 				
 	def get_digest_msg(self):
 		""""""
