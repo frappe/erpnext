@@ -77,7 +77,8 @@ class DocType:
 	# Account name must be unique
 	def validate_duplicate_account(self):
 		if (self.doc.fields.get('__islocal') or (not self.doc.name)) and sql("select name from tabAccount where account_name=%s and company=%s", (self.doc.account_name, self.doc.company)):
-			msgprint("Account Name already exists, please rename", raise_exception=1)
+			msgprint("Account Name: %s already exists, please rename" 
+				% self.doc.name, raise_exception=1)
 				
 	def validate_root_details(self):
 		#does not exists parent
