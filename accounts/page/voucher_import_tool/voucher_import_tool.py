@@ -89,77 +89,86 @@ def import_vouchers(common_values, data, start_idx, import_type):
 				"against_journal_voucher:against_jv"], d, detail.fields)
 	
 	webnotes.conn.commit()
-	for i in xrange(len(data)):
-		d = data[i][0]
-		jv = webnotes.DictObj()
-
-		try:
-			d.posting_date = parse_date(d.posting_date)
-			d.due_date = d.due_date and parse_date(d.due_date) or None
-			
-			if d.ref_number:
-				if not d.ref_date:
-					raise webnotes.ValidationError, \
-						"""Ref Date is Mandatory if Ref Number is specified"""
-				d.ref_date = parse_date(d.ref_date)
+	try:
+		webnotes.conn.begin()
+		for i in xrange(len(data)):
+			d = data[i][0]
+			if import_type == "Voucher Import: Two Accounts" and flt(d.get("amount")) == 0:
+				webnotes.message_log = ["Amount not specified"]
+				raise Exception
+			elif import_type == "Voucher Import: Multiple Accounts" and \
+			 		(flt(d.get("total_debit")) == 0 or flt(d.get("total_credit")) == 0):
+				webnotes.message_log = ["Total Debit and Total Credit amount can not be zero"]
+				raise Exception
+			else:
+				d.posting_date = parse_date(d.posting_date)
+				d.due_date = d.due_date and parse_date(d.due_date) or None
 				
-			d.company = common_values.company
+				if d.ref_number:
+					if not d.ref_date:
+						raise webnotes.ValidationError, \
+							"""Ref Date is Mandatory if Ref Number is specified"""
+					d.ref_date = parse_date(d.ref_date)
+				
+				d.company = common_values.company
 						
-			jv = Document("Journal Voucher")
-			map_fields(["voucher_type", "posting_date", "naming_series", "remarks:user_remark",
-				"ref_number:cheque_no", "ref_date:cheque_date", "is_opening",
-				"amount:total_debit", "amount:total_credit", "due_date", "company"], d, jv.fields)
+				jv = Document("Journal Voucher")
+				map_fields(["voucher_type", "posting_date", "naming_series", 
+					"remarks:user_remark", "ref_number:cheque_no", "ref_date:cheque_date",
+					"is_opening", "due_date", "company"], d, jv.fields)
 
-			jv.fiscal_year = get_fiscal_year(jv.posting_date)[0]
+				jv.fiscal_year = get_fiscal_year(jv.posting_date)[0]
 
-			details = []
-			if import_type == "Voucher Import: Two Accounts":
-				detail1 = Document("Journal Voucher Detail")
-				detail1.parent = True
-				detail1.parentfield = "entries"
-				map_fields(["debit_account:account","amount:debit"], d, detail1.fields)
-				apply_cost_center_and_against_invoice(detail1, d)
+				details = []
+				if import_type == "Voucher Import: Two Accounts":
+					map_fields(["amount:total_debit", "amount:total_credit"], d, jv.fields)
+					
+					detail1 = Document("Journal Voucher Detail")
+					detail1.parent = True
+					detail1.parentfield = "entries"
+					map_fields(["debit_account:account","amount:debit"], d, detail1.fields)
+					apply_cost_center_and_against_invoice(detail1, d)
 		
 
-				detail2 = Document("Journal Voucher Detail")
-				detail2.parent = True
-				detail2.parentfield = "entries"
-				map_fields(["credit_account:account","amount:credit"], d, detail2.fields)
-				apply_cost_center_and_against_invoice(detail2, d)
+					detail2 = Document("Journal Voucher Detail")
+					detail2.parent = True
+					detail2.parentfield = "entries"
+					map_fields(["credit_account:account","amount:credit"], d, detail2.fields)
+					apply_cost_center_and_against_invoice(detail2, d)
 				
-				details = [detail1, detail2]
-			elif import_type == "Voucher Import: Multiple Accounts":
-				accounts = data[i][1]
-				for acc in accounts:
-					detail = Document("Journal Voucher Detail")
-					detail.parent = True
-					detail.parentfield = "entries"
-					detail.account = acc
-					detail.debit = flt(accounts[acc]) > 0 and flt(accounts[acc]) or 0
-					detail.credit = flt(accounts[acc]) < 0 and -1*flt(accounts[acc]) or 0
-					apply_cost_center_and_against_invoice(detail, d)
-					details.append(detail)
+					details = [detail1, detail2]
+				elif import_type == "Voucher Import: Multiple Accounts":
+					map_fields(["total_debit", "total_credit"], d, jv.fields)
+					accounts = data[i][1]
+					for acc in accounts:
+						detail = Document("Journal Voucher Detail")
+						detail.parent = True
+						detail.parentfield = "entries"
+						detail.account = acc
+						detail.debit = flt(accounts[acc]) > 0 and flt(accounts[acc]) or 0
+						detail.credit = flt(accounts[acc]) < 0 and -1*flt(accounts[acc]) or 0
+						apply_cost_center_and_against_invoice(detail, d)
+						details.append(detail)
 								
-			if not details:
-				messages.append("""<p style='color: red'>No accounts found. 
-					If you entered accounts correctly, please check template once</p>""")
-				return
-			webnotes.conn.begin()
-			doclist = DocList([jv]+details)
-			doclist.submit()
-			webnotes.conn.commit()
+				if not details:
+					webnotes.message_log = ["""No accounts found. 
+						If you entered accounts correctly, please check template once"""]
+					raise Exception
+					
+				doclist = DocList([jv]+details)
+				doclist.submit()
 			
-			messages.append("""<p style='color: green'>[row #%s] 
-				<a href=\"#Form/Journal Voucher/%s\">%s</a> imported</p>""" \
-				% ((start_idx + 1) + i, jv.name, jv.name))
-			
-		except Exception, e:
-			webnotes.conn.rollback()
-			err_msg = webnotes.message_log and webnotes.message_log[0] or unicode(e)
-			messages.append("<p style='color: red'>[row #%s] %s failed: %s</p>" \
-				% ((start_idx + 1) + i, jv.name or "", err_msg or "No message"))
-			webnotes.errprint(webnotes.getTraceback())
-
+				messages.append("""<p style='color: green'>[row #%s] 
+					<a href=\"#Form/Journal Voucher/%s\">%s</a> imported</p>""" \
+					% ((start_idx + 1) + i, jv.name, jv.name))
+		webnotes.conn.commit()
+	except Exception, e:
+		webnotes.conn.rollback()
+		err_msg = webnotes.message_log and webnotes.message_log[0] or unicode(e)
+		messages.append("""<p style='color: red'>[row #%s] %s failed: %s</p>"""
+			% ((start_idx + 1) + i, jv.name or "", err_msg or "No message"))
+		messages.append("<p style='color: red'>All transactions rolled back</p>")
+		webnotes.errprint(webnotes.getTraceback())
 		webnotes.message_log = []
 			
 	return messages
@@ -192,12 +201,18 @@ def get_data(rows, company_abbr):
 					d[columns[cidx]] = r[cidx]
 					
 				if accounts:
-					total = 0
+					total_debit = total_credit = 0
 					for acc_idx in xrange(len(accounts)):
 						col_idx = len(columns) + acc_idx
-						acc_dict[accounts[acc_idx]] = r[col_idx]
-						if flt(r[col_idx]) > 0: total += flt(r[col_idx])
-					d['amount'] = total
+						if flt(r[col_idx]) != 0:
+							acc_dict[accounts[acc_idx]] = r[col_idx]
+						if flt(r[col_idx]) > 0:
+							total_debit += flt(r[col_idx])
+						else:
+							total_credit += abs(flt(r[col_idx]))
+							
+					d['total_debit'] = total_debit
+					d['total_credit'] = total_credit
 					
 				data.append([d, acc_dict])
 				
@@ -205,7 +220,7 @@ def get_data(rows, company_abbr):
 			if r[0]=="--------Data----------":
 				start_row = i+2
 				columns = [c.replace(" ", "_").lower() for c in rows[i+1] 
-					if not c.endswith(company_abbr)]
-				accounts = [c for c in rows[i+1] if c.endswith(company_abbr)]
+					if not c.endswith(" - " + company_abbr)]
+				accounts = [c for c in rows[i+1] if c.endswith(" - " + company_abbr)]
 	
 	return data, start_row_idx
