@@ -242,7 +242,6 @@ class DocType(TransactionBase):
 
 			# used for production plan
 			d.transaction_date = self.doc.transaction_date
-			d.delivery_date = self.doc.delivery_date
 
 			# gets total projected qty of item in warehouse selected (this case arises when warehouse is selected b4 item)
 			tot_avail_qty = sql("select projected_qty from `tabBin` where item_code = '%s' and warehouse = '%s'" % (d.item_code,d.reserved_warehouse))
