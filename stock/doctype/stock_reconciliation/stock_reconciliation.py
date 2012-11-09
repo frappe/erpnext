@@ -223,9 +223,13 @@ class DocType:
 		""", self.doc.name)
 
 	def update_entries_after(self):
-		self.get_reconciliation_data(submit = 0)
+		# get distinct combination of item_code and warehouse to update bin
+		item_warehouse = webnotes.conn.sql("""select distinct item_code, warehouse
+			from `tabStock Ledger Entry` where voucher_no = %s and is_cancelled = 'Yes'
+			and voucher_type = 'Stock Reconciliation'""", self.doc.name)
+		
 		from webnotes.model.code import get_obj
-		for d in self.data:
+		for d in item_warehouse:
 			bin = webnotes.conn.sql("select name from `tabBin` where item_code = %s and \
 				warehouse = %s", (d[0], d[1]))
 			get_obj('Bin', bin[0][0]).update_entries_after(self.doc.reconciliation_date, \
