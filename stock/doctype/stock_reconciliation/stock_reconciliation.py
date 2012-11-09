@@ -49,14 +49,15 @@ class DocType:
 
 		return data
 
-	def convert_into_list(self, data, submit = 1):
+	def convert_into_list(self, data, submit=1):
 		"""Convert csv data into list"""
 		count = 1
 		for s in data:
 			count += 1
-			if count == 2:
-				if s[0] != 'Item Code' or s[1] != 'Warehouse':
-					msgprint("First row of the attachment always should be same as template(Item Code, Warehouse, Quantity \
+			if count == 2 and submit:
+				if cstr(s[0]).strip() != 'Item Code' or cstr(s[1]).strip() != 'Warehouse':
+					msgprint("First row of the attachment always should be same as \
+						template(Item Code, Warehouse, Quantity \
 						and Valuation Rate/Incoming Rate)", raise_exception=1)
 				else:
 					continue
