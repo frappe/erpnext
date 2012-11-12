@@ -119,31 +119,23 @@ $.extend(cur_frm.cscript, {
 	}, 
 	
 	'Close Ticket': function() {
-		var doc = cur_frm.doc
-		
-		var answer = confirm("Close Ticket "+doc.name+"?\n\nAllocated To: "+doc.allocated_to+"\n\nSubject: "+doc.subject+"");
-		if(answer) {
-			if(doc.name) 
-				$c_obj(make_doclist(doc.doctype, doc.name),'close_ticket','',function(r,rt) {
-					if(!r.exc) {
-						cur_frm.refresh();
-					}
-				});
-		}
+		var doc = cur_frm.doc		
+		if(doc.name) 
+			$c_obj(make_doclist(doc.doctype, doc.name),'close_ticket','',function(r,rt) {
+				if(!r.exc) {
+					cur_frm.refresh();
+				}
+			});
 	},
 	
 	'Re-Open Ticket': function() {
-		var doc = cur_frm.doc
-		
-		var answer = confirm("Re-Open Ticket "+doc.name+"?\n\nAllocated To: "+doc.allocated_to+"\n\nSubject: "+doc.subject+"");
-		if(answer) {
-			if(doc.name) 
-				$c_obj(make_doclist(doc.doctype, doc.name),'reopen_ticket','',function(r,rt) {
-					if(!r.exc) {
-						cur_frm.refresh();
-					}
-				});
-		}
+		var doc = cur_frm.doc		
+		if(doc.name) 
+			$c_obj(make_doclist(doc.doctype, doc.name),'reopen_ticket','',function(r,rt) {
+				if(!r.exc) {
+					cur_frm.refresh();
+				}
+			});
 	}
 
 	

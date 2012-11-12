@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		u'creation': '2012-07-12 23:29:44',
+		u'creation': '2012-09-18 10:50:53',
 		u'docstatus': 0,
-		u'modified': '2012-09-15 19:34:37',
+		u'modified': '2012-11-12 16:13:36',
 		u'modified_by': u'Administrator',
 		u'owner': u'Administrator'
 	},
@@ -265,6 +265,15 @@
 		'fieldname': u'new_projects',
 		'fieldtype': u'Check',
 		'label': u'New Projects',
+		'permlevel': 0
+	},
+
+	# DocField
+	{
+		u'doctype': u'DocField',
+		'fieldname': u'open_tickets',
+		'fieldtype': u'Check',
+		'label': u'Open Tickets',
 		'permlevel': 0
 	},
 
