@@ -28,6 +28,22 @@ content_sequence = ["income_year_to_date", "bank_balance",
 	"new_purchase_orders", "new_purchase_receipts", "new_stock_entries",
 	"new_support_tickets", "new_communications", "new_projects", "open_tickets"]
 
+digest_template = 	"""<h2>%(digest)s</h2>
+<p style='color: grey'>%(date)s</p>
+<h4>%(company)s</h4>
+<hr>
+%(with_value)s
+%(no_value)s
+<hr>
+<p style="color: #888; font-size: 90%%">To change what you see here, 
+create more digests, go to Setup > Email Digest</p>"""
+
+row_template = """<p style="%(style)s">
+<span>%(label)s</span>: 
+<span style="font-weight: bold; font-size: 110%%">
+	<span style="color: grey">%(currency)s</span>%(value)s
+</span></p>"""
+
 class DocType:
 	def __init__(self, doc, doclist=[]):
 		self.doc, self.doclist = doc, doclist
@@ -87,12 +103,7 @@ class DocType:
 		date = self.doc.frequency == "Daily" and formatdate(self.from_date) or \
 			"%s to %s" % (formatdate(self.from_date), formatdate(self.to_date))
 		
-		msg = """<h2>%(digest)s</h2>
-			<p style='color: grey'>%(date)s</p>
-			<h4>%(company)s</h4>
-			<hr>
-			%(with_value)s
-			%(no_value)s""" % {
+		msg = digest_template % {
 				"digest": self.doc.frequency + " Digest",
 				"date": date,
 				"company": self.doc.company,
@@ -259,11 +270,7 @@ class DocType:
 		
 	def get_html(self, label, currency, value, style=None):
 		"""get html output"""
-		return """<p style="%(style)s">
-			<span>%(label)s</span>: 
-			<span style="font-weight: bold; font-size: 110%%">
-				<span style="color: grey">%(currency)s</span>%(value)s
-			</span></p>""" % {
+		return row_template % {
 				"style": style or "",
 				"label": label,
 				"currency": currency and (currency+" ") or "",
