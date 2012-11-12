@@ -20,13 +20,6 @@
 cur_frm.cscript.onload = function(doc, cdt, cdn) {
 }
 
-cur_frm.cscript.set_breadcrumbs = function(barea) {
-	cur_frm.frm_head.appframe.add_breadcrumb(cur_frm.docname);
-	cur_frm.frm_head.appframe.add_breadcrumb(' in <a href="#!Accounts Browser/Account">\
-		Chart of Accounts</a>');
-	cur_frm.frm_head.appframe.add_breadcrumb(' in <a href="#!accounts-home">Accounts</a>');
-}
-
 // Refresh
 // -----------------------------------------
 cur_frm.cscript.refresh = function(doc, cdt, cdn) {
@@ -55,7 +48,7 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 		cur_frm.cscript.account_type(doc, cdt, cdn);
 
 		// show / hide convert buttons
-		cur_frm.cscript.hide_unhide_group_ledger(doc);		
+		cur_frm.cscript.hide_unhide_group_ledger(doc);
 	}
 }
 
@@ -90,6 +83,10 @@ cur_frm.cscript.hide_unhide_group_ledger = function(doc) {
 	} else if (cstr(doc.group_or_ledger) == 'Ledger') {
 		cur_frm.add_custom_button('Convert to Group', 
 			function() { cur_frm.cscript.convert_to_group(); }, 'icon-retweet')
+			
+		cur_frm.add_custom_button('View Ledger', function() {
+			wn.set_route("general-ledger", "account=" + doc.name);
+		});
 	}
 }
 // Convert group to ledger

@@ -25,8 +25,6 @@ wn.pages['general-ledger'].onload = function(wrapper) {
 
 }
 
-wn.require("lib/js/wn/views/grid_report.js");
-
 erpnext.GeneralLedger = wn.views.GridReport.extend({
 	init: function(wrapper) {
 		this._super({
@@ -45,6 +43,7 @@ erpnext.GeneralLedger = wn.views.GridReport.extend({
 				link_formatter: {
 					filter_input: "account",
 					open_btn: true,
+					doctype: "'Account'"
 				}},
 			{id: "debit", name: "Debit", field: "debit", width: 100,
 				formatter: this.currency_formatter},

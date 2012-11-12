@@ -23,7 +23,6 @@ wn.pages['purchase-analytics'].onload = function(wrapper) {
 	
 	new erpnext.PurchaseAnalytics(wrapper);
 }
-wn.require("lib/js/wn/views/grid_report.js");
 
 erpnext.PurchaseAnalytics = wn.views.TreeGridReport.extend({
 	init: function(wrapper) {
