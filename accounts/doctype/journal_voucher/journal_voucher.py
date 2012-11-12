@@ -149,16 +149,16 @@ class DocType:
 	def validate_cheque_info(self):
 		if self.doc.voucher_type in ['Bank Voucher']:
 			if not self.doc.cheque_no or not self.doc.cheque_date:
-				msgprint("Cheque No & Cheque Date is required for " + cstr(self.doc.voucher_type))
+				msgprint("Reference No & Reference Date is required for " + cstr(self.doc.voucher_type))
 				raise Exception
 				
 		if self.doc.cheque_date and not self.doc.cheque_no:
-			msgprint("Cheque No is mandatory if you entered Cheque Date")
+			msgprint("Reference No is mandatory if you entered Reference Date")
 			raise Exception
 			
 	def validate_entries_for_advance(self):
 		for d in getlist(self.doclist,'entries'):
-			if not d.is_advance and not d.against_voucher and not d.against_invoice and d.against_jv:
+			if not d.is_advance and not d.against_voucher and not d.against_invoice and not d.against_jv:
 				master_type = self.get_master_type(d.account)
 				if (master_type == 'Customer' and flt(d.credit) > 0) or (master_type == 'Supplier' and flt(d.debit) > 0):
 					msgprint("Message: Please check Is Advance as 'Yes' against Account %s if this is an advance entry." % d.account)

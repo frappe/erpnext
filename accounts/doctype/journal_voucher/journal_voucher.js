@@ -74,6 +74,25 @@ cur_frm.fields_dict['entries'].grid.get_field('against_invoice').get_query = fun
 	return "SELECT `tabSales Invoice`.name, `tabSales Invoice`.debit_to, `tabSales Invoice`.outstanding_amount FROM `tabSales Invoice` WHERE `tabSales Invoice`.debit_to='"+d.account+"' AND `tabSales Invoice`.outstanding_amount > 0 AND `tabSales Invoice`.docstatus = 1 AND `tabSales Invoice`.%(key)s LIKE '%s' ORDER BY `tabSales Invoice`.name DESC LIMIT 200";
 }
 
+cur_frm.fields_dict['entries'].grid.get_field('against_jv').get_query = function(doc) {
+	var d = locals[this.doctype][this.docname];
+	
+	if(!d.account) {
+		msgprint("Please select Account first!")
+		throw "account not selected"
+	}
+	
+	return "SELECT `tabJournal Voucher`.name, `tabJournal Voucher`.posting_date,\
+		`tabJournal Voucher`.user_remark\
+		from `tabJournal Voucher`, `tabJournal Voucher Detail`\
+		where `tabJournal Voucher Detail`.account = '"+ esc_quotes(d.account) + "'\
+		and `tabJournal Voucher`.name like '%s'\
+		and `tabJournal Voucher`.docstatus=1\
+		and `tabJournal Voucher`.voucher_type='Journal Entry'\
+		and `tabJournal Voucher Detail`.parent = `tabJournal Voucher`.name";
+}
+
+
 // TDS Account Head
 cur_frm.fields_dict['tax_code'].get_query = function(doc) {
 	return "SELECT `tabTDS Category Account`.account_head FROM `tabTDS Category Account` WHERE `tabTDS Category Account`.parent = '"+doc.tds_category+"' AND `tabTDS Category Account`.company='"+doc.company+"' AND `tabTDS Category Account`.account_head LIKE '%s' ORDER BY `tabTDS Category Account`.account_head DESC LIMIT 50";
