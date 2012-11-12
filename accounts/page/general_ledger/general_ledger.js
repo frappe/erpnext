@@ -43,6 +43,7 @@ erpnext.GeneralLedger = wn.views.GridReport.extend({
 				link_formatter: {
 					filter_input: "account",
 					open_btn: true,
+					doctype: "'Account'"
 				}},
 			{id: "debit", name: "Debit", field: "debit", width: 100,
 				formatter: this.currency_formatter},

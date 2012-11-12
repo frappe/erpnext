@@ -85,8 +85,7 @@ cur_frm.cscript.hide_unhide_group_ledger = function(doc) {
 			function() { cur_frm.cscript.convert_to_group(); }, 'icon-retweet')
 			
 		cur_frm.add_custom_button('View Ledger', function() {
-			wn.set_route('Report', 'GL Entry', 'General Ledger', 
-				'Account=' + doc.name);
+			wn.set_route("general-ledger", "account=" + doc.name);
 		});
 	}
 }
