@@ -25,8 +25,6 @@ wn.pages['general-ledger'].onload = function(wrapper) {
 
 }
 
-wn.require("lib/js/wn/views/grid_report.js");
-
 erpnext.GeneralLedger = wn.views.GridReport.extend({
 	init: function(wrapper) {
 		this._super({
