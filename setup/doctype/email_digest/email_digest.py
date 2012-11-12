@@ -26,7 +26,7 @@ content_sequence = ["income_year_to_date", "bank_balance",
 	"new_leads", "new_enquiries", "new_quotations", "new_sales_orders",
 	"new_delivery_notes", "new_purchase_requests", "new_supplier_quotations",
 	"new_purchase_orders", "new_purchase_receipts", "new_stock_entries",
-	"new_support_tickets", "new_communications", "new_projects"]
+	"new_support_tickets", "new_communications", "new_projects", "open_tickets"]
 
 class DocType:
 	def __init__(self, doc, doclist=[]):
@@ -71,7 +71,7 @@ class DocType:
 		out = []
 		for ctype in content_sequence:
 			if self.doc.fields.get(ctype) and hasattr(self, "get_"+ctype):
-				# appends [value, html]
+				# appends [not "no updates", html]
 				out.append(getattr(self, "get_"+ctype)())
 		
 		return self.get_msg_html(out)
@@ -333,7 +333,19 @@ class DocType:
 		self.doc.next_send = formatdate(next_send_date) + " at midnight"
 		
 		return send_date
-		
+	
+	def get_open_tickets(self):
+		open_tickets = webnotes.conn.sql("""select name, subject, modified, raised_by
+			from `tabSupport Ticket` where status='Open'
+			order by modified desc limit 10""", as_dict=True)
+			
+		if open_tickets:
+			return 1, """<hr><h4>Latest Open Tickets (max 10):</h4>%s""" % \
+			 "".join(["<p>%(name)s: %(subject)s <br>by %(raised_by)s on %(modified)s</p>" % \
+				t for t in open_tickets])
+		else:
+			return 0, ""
+	
 	def onload(self):
 		self.get_next_sending()
 
