@@ -659,4 +659,8 @@ patch_list = [
 		'patch_module': 'patches.november_2012',
 		'patch_file': 'rename_employee_leave_balance_report',
 	},
+	{
+		'patch_module': 'patches.november_2012',
+		'patch_file': 'report_permissions',
+	},
 ]
