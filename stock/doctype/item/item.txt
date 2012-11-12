@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		u'creation': '2012-07-12 22:19:45',
+		u'creation': '2012-10-26 16:49:39',
 		u'docstatus': 0,
-		u'modified': '2012-10-26 16:39:16',
+		u'modified': '2012-11-12 18:15:45',
 		u'modified_by': u'Administrator',
 		u'owner': u'Administrator'
 	},
@@ -261,7 +261,7 @@
 	# DocField
 	{
 		'colour': u'White:FFF',
-		'description': u'The system will generate auto indent when stock reaches re-order level.',
+		'description': u'The system will generate a Purchase Request automatically when stock quantity goes below re-order level in warehouse of type "Stores" or "Reserved Warehouse".',
 		u'doctype': u'DocField',
 		'fieldname': u're_order_level',
 		'fieldtype': u'Currency',
@@ -274,7 +274,7 @@
 	# DocField
 	{
 		'colour': u'White:FFF',
-		'description': u'The system will create auto indent of re-order quantity when stock reaches re-order level',
+		'description': u'The quantity for the Purchase Request when the stock goes below re-order level.',
 		u'doctype': u'DocField',
 		'fieldname': u're_order_qty',
 		'fieldtype': u'Currency',
@@ -284,10 +284,12 @@
 
 	# DocField
 	{
+		'colour': u'White:FFF',
+		'description': u'Send an email to users of role "Material Manager" and "Purchase Manager" when re-order level is crossed.',
 		u'doctype': u'DocField',
 		'fieldname': u'email_notify',
 		'fieldtype': u'Check',
-		'label': u'Send Email Notification when stock reaches re-order level',
+		'label': u'Notify by Email on Re-order',
 		'permlevel': 0
 	},
 
@@ -928,6 +930,73 @@
 
 	# DocPerm
 	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
+		u'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Material Manager',
+		'submit': 0,
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
+		u'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Material Manager',
+		'submit': 0,
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
+		u'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Material User',
+		'submit': 0,
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'amend': 0,
+		'cancel': 0,
+		'create': 0,
+		u'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Material User',
+		'submit': 0,
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'cancel': 1,
+		'create': 1,
+		u'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Material Master Manager',
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'create': 0,
+		u'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Material Master Manager',
+		'write': 0
+	},
+
+	# DocPerm
+	{
 		'cancel': 1,
 		'create': 1,
 		u'doctype': u'DocPerm',
@@ -938,75 +1007,8 @@
 
 	# DocPerm
 	{
-		'create': 0,
-		u'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Material Master Manager',
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'cancel': 1,
-		'create': 1,
-		u'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Material Master Manager',
-		'write': 1
-	},
-
-	# DocPerm
-	{
 		u'doctype': u'DocPerm',
 		'permlevel': 1,
 		'role': u'System Manager'
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		u'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Material Manager',
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		u'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Material Manager',
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		u'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Material User',
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		u'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Material User',
-		'submit': 0,
-		'write': 0
 	}
 ]
