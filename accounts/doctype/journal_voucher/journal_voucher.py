@@ -43,6 +43,9 @@ class DocType:
 		self.is_approving_authority = -1
 
 	def autoname(self):
+		if not self.doc.naming_series:
+			webnotes.msgprint("""Naming Series is mandatory""", raise_exception=1)
+			
 		self.doc.name = make_autoname(self.doc.naming_series+'.#####')
 
 	def get_outstanding(self, args):

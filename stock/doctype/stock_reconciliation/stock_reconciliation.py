@@ -16,7 +16,7 @@
 
 from __future__ import unicode_literals
 import webnotes
-from webnotes.utils import cstr, flt, get_defaults, nowdate
+from webnotes.utils import cstr, flt, get_defaults, nowdate, formatdate
 from webnotes import msgprint, errprint
 from webnotes.model.code import get_obj
 sql = webnotes.conn.sql
@@ -229,8 +229,31 @@ class DocType:
 			and voucher_type = 'Stock Reconciliation'""", self.doc.name)
 		
 		from webnotes.model.code import get_obj
+		errors = []
 		for d in item_warehouse:
 			bin = webnotes.conn.sql("select name from `tabBin` where item_code = %s and \
 				warehouse = %s", (d[0], d[1]))
-			get_obj('Bin', bin[0][0]).update_entries_after(self.doc.reconciliation_date, \
-				self.doc.reconciliation_time)
+			try:
+				get_obj('Bin',
+					bin[0][0]).update_entries_after(self.doc.reconciliation_date,
+					self.doc.reconciliation_time, verbose=0)
+			except webnotes.ValidationError, e:
+				errors.append([d[0], d[1], e])
+		
+		if errors:
+			import re
+			error_msg = [["Item Code", "Warehouse", "Qty"]]
+			qty_regex = re.compile(": <b>(.*)</b>")
+			for e in errors:
+				qty = qty_regex.findall(unicode(e[2]))
+				qty = qty and abs(flt(qty[0])) or None
+				
+				error_msg.append([e[0], e[1], flt(qty)])
+			
+			webnotes.msgprint("""Your stock is going into negative value \
+				in a future transaction.
+				To cancel, you need to create a stock entry with the \
+				following values on %s %s""" % \
+				(formatdate(self.doc.reconciliation_date), self.doc.reconciliation_time))
+			webnotes.msgprint(error_msg, as_table=1, raise_exception=1)
+			

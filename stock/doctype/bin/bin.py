@@ -116,15 +116,17 @@ class DocType:
 		"""
 		diff = cqty + s['actual_qty']
 		if  diff < 0 and (abs(diff) > 0.0001) and s['is_cancelled'] == 'No':
-			msgprint("""
-				Negative stock error: 
-				Cannot complete this transaction because stock will 
-				become negative (%s) for Item <b>%s</b> in Warehouse 
-				<b>%s</b> on <b>%s %s</b> in Transaction %s %s""" % \
-				(str(diff), self.doc.item_code, self.doc.warehouse, \
-					s['posting_date'], s['posting_time'], s['voucher_type'], s['voucher_no']), \
-					raise_exception=1)
-
+			self.exc_list.append({
+				"diff": diff,
+				"posting_date": s["posting_date"],
+				"posting_time": s["posting_time"],
+				"voucher_type": s["voucher_type"],
+				"voucher_no": s["voucher_no"]
+			})
+			return True
+		else:
+			return False
+			
 	def get_serialized_inventory_values(self, val_rate, in_rate, opening_qty, \
 			actual_qty, is_cancelled, serial_nos):
 		"""
@@ -226,7 +228,7 @@ class DocType:
 			stock_val = sum([flt(d[0])*flt(d[1]) for d in self.fcfs_bal])
 		return stock_val
 
-	def update_entries_after(self, posting_date, posting_time):
+	def update_entries_after(self, posting_date, posting_time, verbose=1):
 		"""
 			update valution rate and qty after transaction 
 			from the current time-bucket onwards
@@ -267,11 +269,14 @@ class DocType:
 				(self.doc.item_code, self.doc.warehouse, \
 					prev_sle.get('posting_date','1900-01-01'), \
 					prev_sle.get('posting_time', '12:00')), as_dict = 1)
-					
+		
+		self.exc_list = []
 		for sle in sll:
 			# block if stock level goes negative on any date
 			if val_method != 'Moving Average' or flt(allow_negative_stock) == 0:
-				self.validate_negative_stock(cqty, sle)
+				if self.validate_negative_stock(cqty, sle):
+					cqty += sle['actual_qty']
+					continue
 
 			stock_val, in_rate = 0, sle['incoming_rate'] # IN
 			serial_nos = sle["serial_no"] and ("'"+"', '".join(cstr(sle["serial_no"]).split('\n')) \
@@ -288,6 +293,22 @@ class DocType:
 				set bin_aqat=%s, valuation_rate=%s, fcfs_stack=%s, stock_value=%s, 
 				incoming_rate = %s where name=%s""", \
 				(cqty, flt(val_rate), cstr(self.fcfs_bal), stock_val, in_rate, sle['name']))
+		
+		if self.exc_list:
+			deficiency = min(e["diff"] for e in self.exc_list)
+			msg = """Negative stock error: 
+				Cannot complete this transaction because stock will start
+				becoming negative (%s) for Item <b>%s</b> in Warehouse 
+				<b>%s</b> on <b>%s %s</b> in Transaction %s %s.
+				Total Quantity Deficiency: <b>%s</b>""" % \
+				(self.exc_list[0]["diff"], self.doc.item_code, self.doc.warehouse,
+				self.exc_list[0]["posting_date"], self.exc_list[0]["posting_time"],
+				self.exc_list[0]["voucher_type"], self.exc_list[0]["voucher_no"],
+				abs(deficiency))
+			if verbose:
+				msgprint(msg, raise_exception=1)
+			else:
+				raise webnotes.ValidationError, msg
 		
 		# update the bin
 		if sll or not prev_sle:
