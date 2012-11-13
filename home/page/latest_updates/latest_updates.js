@@ -1,6 +1,8 @@
 erpnext.updates = [
 	["13th November 2012", [
-		"Trial Balance (new): Feature to export Ledgers or Groups selectively. Indent Groups with spaces",
+		"Customize Form View: Validate correct 'Options' for Link and Table fields.",
+		"Report Builder (new): Added formatters for Date, Currency, Links etc.",
+		"Trial Balance (new): Feature to export Ledgers or Groups selectively. Indent Groups with spaces.",
 		"General Ledger (new): Will show entries with 'Is Opening' as Opening.",
 		"General Ledger (new): Show against account entries if filtered by account.",
 	]],
