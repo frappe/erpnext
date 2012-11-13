@@ -33,9 +33,13 @@ data_map = {
 	# Accounts
 	"Account": {
 		"columns": ["name", "parent_account", "lft", "rgt", "debit_or_credit", 
-			"is_pl_account", "company"],
+			"is_pl_account", "company", "group_or_ledger"],
 		"conditions": ["docstatus < 2"],
-		"order_by": "lft"
+		"order_by": "lft",
+		"links": {
+			"company": ["Company", "name"],
+		}
+		
 	},
 	"Cost Center": {
 		"columns": ["name", "lft", "rgt"],
