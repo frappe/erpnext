@@ -47,8 +47,6 @@ wn.pages['trial-balance'].onload = function(wrapper) {
 						return false;
 				});
 				
-				console.log(data);
-				
 				wn.downloadify(data, ["Report Manager", "System Manager"], me);
 				return false;
 			})
