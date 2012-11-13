@@ -33,12 +33,14 @@ wn.pages.messages.onload = function(wrapper) {
 	<div class="all-messages"></div>').appendTo($(wrapper).find('.layout-main-section'));
 	
 	erpnext.messages = new erpnext.Messages(wrapper);
+	erpnext.toolbar.set_new_comments(0);
 }
 
 $(wn.pages.messages).bind('show', function() {
 	// remove alerts
 	$('#alert-container .alert').remove();
 	
+	erpnext.toolbar.set_new_comments(0);	
 	erpnext.messages.show();
 	setTimeout("erpnext.messages.refresh()", 17000);
 })

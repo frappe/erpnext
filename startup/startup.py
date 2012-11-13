@@ -20,12 +20,12 @@ import webnotes
 def get_unread_messages():
 	"returns unread (docstatus-0 messages for a user)"
 	return webnotes.conn.sql("""\
-		SELECT name, comment
+		SELECT count(*)
 		FROM `tabComment`
 		WHERE comment_doctype IN ('My Company', 'Message')
 		AND comment_docname = %s
 		AND ifnull(docstatus,0)=0
-		""", webnotes.user.name, as_list=1)
+		""", webnotes.user.name)[0][0]
 
 def get_open_support_tickets():
 	"""Returns a count of open support tickets"""

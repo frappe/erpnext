@@ -135,8 +135,7 @@ erpnext.AccountsChart = Class.extend({
 	show_ledger: function() {
 		var me = this;
 		var node = me.selected_node();
-		wn.set_route('Report', 'GL Entry', 'General Ledger', 
-			this.ctype + '=' + node.data('label'));
+		wn.set_route("general-ledger", "account=" + node.data('label'));
 	},
 	new_node: function() {
 		if(this.ctype=='Account') {

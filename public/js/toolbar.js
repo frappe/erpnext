@@ -87,18 +87,9 @@ erpnext.toolbar.add_modules = function() {
 
 erpnext.toolbar.set_new_comments = function(new_comments) {
 	var navbar_nc = $('.navbar-new-comments');
-	if(wn.container.page && wn.container.page.page_name=="messages") 
-		return;
-	if(new_comments && new_comments.length>0) {
-		navbar_nc.text(new_comments.length);
+	if(cint(new_comments)) {
 		navbar_nc.addClass('navbar-new-comments-true')
-		$.each(new_comments, function(i, v) {
-			var msg = 'New Message: ' + (v[1].length<=100 ? v[1] : (v[1].substr(0, 100) + "..."));
-			var id = v[0].replace('/', '-');
-			if(!$('#' + id)[0]) { 
-				show_alert(msg).attr("id", id);
-			}
-		});
+		navbar_nc.text(new_comments);
 	} else {
 		navbar_nc.removeClass('navbar-new-comments-true');
 		navbar_nc.text(0);
