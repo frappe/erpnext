@@ -32,7 +32,6 @@ erpnext.modules = {
 	'Knowledge Base': 'questions',
 }
 
-// wn.modules is used in breadcrumbs for getting module home page
 wn.provide('wn.modules');
 $.extend(wn.modules, erpnext.modules);
 wn.modules['Core'] = 'Setup';
@@ -73,6 +72,15 @@ wn.module_css_map = {
 	'Messages': 'pink',
 	'Calendar': 'peacock',
 	'Knowledge Base': 'ultra-dark-green'
+}
+
+wn.get_module_color = function(module) {
+	try {
+		var color = wn.module_css_classes[wn.module_css_map[module]].middle;			
+	} catch(e) {
+		var color = "#000";
+	}
+	return color;	
 }
 
 
