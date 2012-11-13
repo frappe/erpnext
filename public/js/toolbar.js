@@ -87,11 +87,9 @@ erpnext.toolbar.add_modules = function() {
 
 erpnext.toolbar.set_new_comments = function(new_comments) {
 	var navbar_nc = $('.navbar-new-comments');
-	if(wn.container.page && wn.container.page.page_name=="messages") 
-		return;
-	if(new_comments) {
-		navbar_nc.text(new_comments);
+	if(cint(new_comments)) {
 		navbar_nc.addClass('navbar-new-comments-true')
+		navbar_nc.text(new_comments);
 	} else {
 		navbar_nc.removeClass('navbar-new-comments-true');
 		navbar_nc.text(0);

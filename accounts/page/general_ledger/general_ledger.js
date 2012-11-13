@@ -45,6 +45,9 @@ erpnext.GeneralLedger = wn.views.GridReport.extend({
 					open_btn: true,
 					doctype: "'Account'"
 				}},
+			{id: "against_accont", name: "Against Account", field: "against_account", 
+				width: 240, hidden: this.is_default("account")},
+
 			{id: "debit", name: "Debit", field: "debit", width: 100,
 				formatter: this.currency_formatter},
 			{id: "credit", name: "Credit", field: "credit", width: 100,
@@ -139,9 +142,11 @@ erpnext.GeneralLedger = wn.views.GridReport.extend({
 		var data = wn.report_dump.data["GL Entry"];
 		var out = [];
 		
-		if(!this.account_by_name)
+		if(!this.account_by_name) {
 			this.account_by_name = this.make_name_map(wn.report_dump.data["Account"]);
-			
+			this.make_voucher_acconuts_map();
+		}
+		
 		var me = this;
 		
 		var from_date = dateutil.str_to_obj(this.from_date);
@@ -167,7 +172,7 @@ erpnext.GeneralLedger = wn.views.GridReport.extend({
 				: true) && (me.voucher_no ? item.voucher_no==me.voucher_no : true)) {
 				var date = dateutil.str_to_obj(item.posting_date);
 				
-				if(date < from_date) {
+				if(date < from_date || item.is_opening=="Yes") {
 					opening.debit += item.debit;
 					opening.credit += item.credit;
 				} else if(date <= to_date) {
@@ -175,7 +180,12 @@ erpnext.GeneralLedger = wn.views.GridReport.extend({
 					totals.credit += item.credit;
 				}
 
-				if(me.apply_filters(item)) {
+				if(me.account) {
+					item.against_account = me.voucher_accounts[item.voucher_type + ":"
+						+ item.voucher_no][(item.debit > 0 ? "credits" : "debits")].join(", ");					
+				}
+
+				if(me.apply_filters(item) && item.is_opening=="No") {
 					out.push(item);
 				}
 			}
@@ -189,6 +199,8 @@ erpnext.GeneralLedger = wn.views.GridReport.extend({
 							
 		
 		if(!me.is_default("account")) {
+			me.appframe.set_title("General Ledger: " + me.account);
+			
 			if(me.account_by_name[me.account].debit_or_credit == "Debit") {
 				opening.debit -= opening.credit; opening.credit = 0;
 				closing.debit -= closing.credit; closing.credit = 0;
@@ -198,11 +210,34 @@ erpnext.GeneralLedger = wn.views.GridReport.extend({
 			}
 			var out = [opening].concat(out).concat([totals, closing]);
 		} else {
+			me.appframe.set_title("General Ledger");
 			var out = out.concat([totals]);
 		}
 					
 		this.data = out;
 	},
+	
+	make_voucher_acconuts_map: function() {
+		this.voucher_accounts = {};
+		var data = wn.report_dump.data["GL Entry"];
+		for(var i=0, j=data.length; i<j; i++) {
+			var gl = data[i];
+			
+			if(!this.voucher_accounts[gl.voucher_type + ":" + gl.voucher_no])
+				this.voucher_accounts[gl.voucher_type + ":" + gl.voucher_no] = {
+					debits: [],
+					credits: []
+				}
+				
+			var va = this.voucher_accounts[gl.voucher_type + ":" + gl.voucher_no];
+			if(gl.debit > 0) {
+				va.debits.push(gl.account);
+			} else {
+				va.credits.push(gl.account);
+			}
+		}
+	},
+	
 	get_plot_data: function() {
 		var data = [];
 		var me = this;
