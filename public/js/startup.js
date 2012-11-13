@@ -108,7 +108,7 @@ erpnext.update_messages = function(reset) {
 					}
 				}
 				
-				show_in_circle('unread_messages', r.message.unread_messages.length);
+				show_in_circle('unread_messages', r.message.unread_messages);
 				show_in_circle('open_support_tickets', r.message.open_support_tickets);
 				show_in_circle('things_todo', r.message.things_todo);
 				show_in_circle('todays_events', r.message.todays_events);
