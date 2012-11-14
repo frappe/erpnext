@@ -3,11 +3,11 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-08-08 13:25:19',
-		'docstatus': 0,
-		'modified': '2012-08-08 13:55:01',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
+		u'creation': '2012-08-09 11:38:30',
+		u'docstatus': 0,
+		u'modified': '2012-11-14 17:04:57',
+		u'modified_by': u'Administrator',
+		u'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
@@ -18,11 +18,11 @@
 		'autoname': u'field:project_name',
 		'colour': u'White:FFF',
 		'default_print_format': u'Standard',
-		'doctype': 'DocType',
+		u'doctype': u'DocType',
 		'document_type': u'Master',
 		'max_attachments': 4,
 		'module': u'Projects',
-		'name': '__common__',
+		u'name': u'__common__',
 		'search_fields': u'customer, status, priority, is_active',
 		'section_style': u'Tabbed',
 		'server_code_error': u' ',
@@ -34,8 +34,8 @@
 
 	# These values are common for all DocField
 	{
-		'doctype': u'DocField',
-		'name': '__common__',
+		u'doctype': u'DocField',
+		u'name': u'__common__',
 		'parent': u'Project',
 		'parentfield': u'fields',
 		'parenttype': u'DocType'
@@ -45,8 +45,8 @@
 	{
 		'cancel': 1,
 		'create': 1,
-		'doctype': u'DocPerm',
-		'name': '__common__',
+		u'doctype': u'DocPerm',
+		u'name': u'__common__',
 		'parent': u'Project',
 		'parentfield': u'permissions',
 		'parenttype': u'DocType',
@@ -58,20 +58,15 @@
 
 	# DocType, Project
 	{
-		'doctype': 'DocType',
-		'name': u'Project'
-	},
-
-	# DocPerm
-	{
-		'doctype': u'DocPerm'
+		u'doctype': u'DocType',
+		u'name': u'Project'
 	},
 
 	# DocField
 	{
 		'colour': u'White:FFF',
 		'description': u'Helps you keep track of your projects and links to Tasks. You can tag a task to a project to track its progress',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'basic_info',
 		'fieldtype': u'Section Break',
 		'label': u'Basic Info',
@@ -81,7 +76,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'cb_project_status',
 		'fieldtype': u'Column Break',
 		'label': u'Status',
@@ -91,7 +86,7 @@
 	# DocField
 	{
 		'description': u'Project will get saved and will be searchable with project name given',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'project_name',
 		'fieldtype': u'Data',
 		'label': u'Project Name',
@@ -106,7 +101,7 @@
 	{
 		'colour': u'White:FFF',
 		'default': u'Open',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'status',
 		'fieldtype': u'Select',
 		'in_filter': 1,
@@ -122,7 +117,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'is_active',
 		'fieldtype': u'Select',
 		'label': u'Is Active',
@@ -136,7 +131,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'priority',
 		'fieldtype': u'Select',
 		'label': u'Priority',
@@ -150,7 +145,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'cb_project_dates',
 		'fieldtype': u'Column Break',
 		'label': u'Dates',
@@ -159,7 +154,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'project_start_date',
 		'fieldtype': u'Date',
 		'in_filter': 1,
@@ -173,7 +168,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'completion_date',
 		'fieldtype': u'Date',
 		'label': u'Completion Date',
@@ -186,7 +181,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'act_completion_date',
 		'fieldtype': u'Date',
 		'label': u'Actual Completion Date',
@@ -199,7 +194,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'project_type',
 		'fieldtype': u'Select',
 		'label': u'Project Type',
@@ -215,7 +210,7 @@
 	{
 		'colour': u'White:FFF',
 		'description': u'Important dates and commitments in your project life cycle',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'sb_milestones',
 		'fieldtype': u'Section Break',
 		'label': u'Milestones',
@@ -227,7 +222,7 @@
 	{
 		'colour': u'White:FFF',
 		'description': u'Milestones will be added as Events in the Calendar',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'project_milestones',
 		'fieldtype': u'Table',
 		'label': u'Project Milestones',
@@ -243,7 +238,7 @@
 	{
 		'colour': u'White:FFF',
 		'description': u'Tasks belonging to this Project.',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'sb_tasks',
 		'fieldtype': u'Section Break',
 		'label': u'Tasks',
@@ -252,7 +247,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'project_tasks',
 		'fieldtype': u'HTML',
 		'label': u'Project Tasks',
@@ -261,7 +256,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'section_break0',
 		'fieldtype': u'Section Break',
 		'label': u'Project Details',
@@ -272,7 +267,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'notes',
 		'fieldtype': u'Text Editor',
 		'label': u'Notes',
@@ -285,7 +280,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'project_details',
 		'fieldtype': u'Section Break',
 		'label': u'Project Costing',
@@ -296,7 +291,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'project_value',
 		'fieldtype': u'Currency',
 		'label': u'Project Value',
@@ -311,7 +306,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'est_material_cost',
 		'fieldtype': u'Currency',
 		'label': u'Estimated Material Cost',
@@ -325,7 +320,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'column_break0',
 		'fieldtype': u'Column Break',
 		'label': u'Margin',
@@ -336,7 +331,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'gross_margin_value',
 		'fieldtype': u'Currency',
 		'label': u'Gross Margin Value',
@@ -350,7 +345,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'per_gross_margin',
 		'fieldtype': u'Currency',
 		'label': u'Gross Margin %',
@@ -364,7 +359,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'customer_details',
 		'fieldtype': u'Section Break',
 		'label': u'Customer Details',
@@ -376,7 +371,7 @@
 	{
 		'colour': u'White:FFF',
 		'description': u'Select name of Customer to whom project belongs',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'customer',
 		'fieldtype': u'Link',
 		'in_filter': 1,
@@ -394,7 +389,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'customer_name',
 		'fieldtype': u'Data',
 		'in_filter': 1,
@@ -408,7 +403,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'customer_address',
 		'fieldtype': u'Small Text',
 		'label': u'Customer Address',
@@ -422,7 +417,7 @@
 	# DocField
 	{
 		'colour': u'White:FFF',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'contact_person',
 		'fieldtype': u'Link',
 		'in_filter': 1,
@@ -430,6 +425,7 @@
 		'no_copy': 0,
 		'oldfieldname': u'contact_person',
 		'oldfieldtype': u'Link',
+		'options': u'Contact',
 		'permlevel': 0,
 		'reqd': 0,
 		'search_index': 0,
@@ -439,7 +435,7 @@
 	# DocField
 	{
 		'colour': u'White:FFF',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'territory',
 		'fieldtype': u'Link',
 		'in_filter': 1,
@@ -455,7 +451,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'contact_no',
 		'fieldtype': u'Data',
 		'label': u'Contact No',
@@ -468,7 +464,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'email_id',
 		'fieldtype': u'Data',
 		'label': u'Email Id',
@@ -481,7 +477,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'customer_group',
 		'fieldtype': u'Link',
 		'label': u'Customer Group',
@@ -495,7 +491,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'trash_reason',
 		'fieldtype': u'Small Text',
 		'hidden': 1,
@@ -511,7 +507,7 @@
 	# DocField
 	{
 		'colour': u'White:FFF',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'file_list',
 		'fieldtype': u'Small Text',
 		'hidden': 1,
@@ -520,5 +516,10 @@
 		'permlevel': 0,
 		'print_hide': 1,
 		'search_index': 0
+	},
+
+	# DocPerm
+	{
+		u'doctype': u'DocPerm'
 	}
 ]

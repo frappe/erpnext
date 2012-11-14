@@ -5,7 +5,7 @@
 	{
 		u'creation': '2012-07-03 13:30:40',
 		u'docstatus': 0,
-		u'modified': '2012-11-14 16:12:10',
+		u'modified': '2012-11-14 16:54:18',
 		u'modified_by': u'Administrator',
 		u'owner': u'Administrator'
 	},
@@ -358,7 +358,7 @@
 		'oldfieldtype': u'Link',
 		'options': u'Branch',
 		'permlevel': 0,
-		'reqd': 1
+		'reqd': 0
 	},
 
 	# DocField
@@ -373,7 +373,7 @@
 		'oldfieldtype': u'Link',
 		'options': u'Department',
 		'permlevel': 0,
-		'reqd': 1
+		'reqd': 0
 	},
 
 	# DocField
@@ -388,7 +388,7 @@
 		'oldfieldtype': u'Link',
 		'options': u'Designation',
 		'permlevel': 0,
-		'reqd': 1,
+		'reqd': 0,
 		'search_index': 1
 	},
 
