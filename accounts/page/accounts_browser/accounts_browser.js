@@ -22,6 +22,7 @@
 
 pscript['onload_Accounts Browser'] = function(wrapper){
 	wrapper.appframe = new wn.ui.AppFrame($(wrapper).find('.appframe-area'));
+	wrapper.appframe.add_module_tab("Accounts");
 	
 	if (wn.boot.profile.can_create.indexOf("Company") !== -1) {
 		wrapper.appframe.add_button('New Company', function() { newdoc('Company'); },
@@ -57,10 +58,7 @@ pscript['onshow_Accounts Browser'] = function(wrapper){
 	// set route
 	var ctype = wn.get_route()[1] || 'Account';
 
-	wrapper.appframe.clear_breadcrumbs();
-	wrapper.appframe.add_breadcrumb('Chart of '+ctype+'s');
-	document.title = 'Chart of '+ctype+'s';
-	wrapper.appframe.add_breadcrumb(' in <a href="#!accounts-home">Accounts</a>');
+	wrapper.appframe.set_title('Chart of '+ctype+'s');
 
 	if(erpnext.account_chart && erpnext.account_chart.ctype != ctype) {
 		wrapper.$company_select.change();

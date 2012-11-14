@@ -14,14 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-cur_frm.cscript.set_breadcrumbs = function(barea) {
-	cur_frm.frm_head.appframe.add_breadcrumb(cur_frm.docname);
-	cur_frm.frm_head.appframe.add_breadcrumb(' in <a href="#!Accounts Browser/Cost Center">\
-		Chart of Cost Centers</a>');
-	cur_frm.frm_head.appframe.add_breadcrumb(' in <a href="#!accounts-home">Accounts</a>');
-}
-
 cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	var intro_txt = '';
 	cur_frm.toggle_display('cost_center_name', doc.__islocal);
