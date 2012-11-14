@@ -1,4 +1,7 @@
 erpnext.updates = [
+	["14th November 2012", [
+		"Backups: Link to download both database and files.",
+	]],
 	["13th November 2012", [
 		"Customize Form View: Validate correct 'Options' for Link and Table fields.",
 		"Report Builder (new): Added formatters for Date, Currency, Links etc.",
