@@ -93,7 +93,12 @@ class DocType:
 		return self.get_msg_html(out)
 		
 	def get_msg_html(self, out):
-		with_value = "\n".join([o[1] for o in out if o[0]])
+		with_value = [o[1] for o in out if o[0]
+		
+		if with_value:
+			with_value = "\n".join(with_value)
+		else:
+			with_value = "<p>There were no updates in the items selected for this digest.</p>"
 		
 		# seperate out no value items
 		no_value = [o[1] for o in out if not o[0]]
@@ -351,7 +356,7 @@ class DocType:
 			 "".join(["<p>%(name)s: %(subject)s <br>by %(raised_by)s on %(modified)s</p>" % \
 				t for t in open_tickets])
 		else:
-			return 0, ""
+			return 0, "No Open Tickets!"
 	
 	def onload(self):
 		self.get_next_sending()

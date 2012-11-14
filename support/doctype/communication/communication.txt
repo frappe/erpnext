@@ -3,29 +3,29 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-06-26 11:58:13',
-		'docstatus': 0,
-		'modified': '2012-08-31 16:44:13',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
+		u'creation': '2012-08-31 17:14:18',
+		u'docstatus': 0,
+		u'modified': '2012-11-14 12:15:56',
+		u'modified_by': u'Administrator',
+		u'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
 		'allow_attach': 1,
 		'description': u'Keep a track of all communications',
-		'doctype': 'DocType',
+		u'doctype': u'DocType',
 		'document_type': u'Master',
 		'in_dialog': 1,
 		'module': u'Support',
-		'name': '__common__',
+		u'name': u'__common__',
 		'version': 1
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': u'DocField',
-		'name': '__common__',
+		u'doctype': u'DocField',
+		u'name': u'__common__',
 		'parent': u'Communication',
 		'parentfield': u'fields',
 		'parenttype': u'DocType'
@@ -33,80 +33,24 @@
 
 	# These values are common for all DocPerm
 	{
-		'amend': 0,
-		'doctype': u'DocPerm',
-		'name': '__common__',
+		u'doctype': u'DocPerm',
+		u'name': u'__common__',
 		'parent': u'Communication',
 		'parentfield': u'permissions',
 		'parenttype': u'DocType',
 		'read': 1,
-		'submit': 0,
 		'write': 1
 	},
 
 	# DocType, Communication
 	{
-		'doctype': 'DocType',
-		'name': u'Communication'
-	},
-
-	# DocPerm
-	{
-		'cancel': 0,
-		'create': 1,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Support Team'
-	},
-
-	# DocPerm
-	{
-		'cancel': 0,
-		'create': 1,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Sales Manager'
-	},
-
-	# DocPerm
-	{
-		'cancel': 0,
-		'create': 1,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Sales User'
-	},
-
-	# DocPerm
-	{
-		'cancel': 0,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Sales Manager'
-	},
-
-	# DocPerm
-	{
-		'cancel': 1,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Support Manager'
-	},
-
-	# DocPerm
-	{
-		'cancel': 1,
-		'create': 1,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Support Manager'
+		u'doctype': u'DocType',
+		u'name': u'Communication'
 	},
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'basic_info',
 		'fieldtype': u'Section Break',
 		'label': u'Basic Info',
@@ -117,7 +61,7 @@
 	{
 		'colour': u'White:FFF',
 		'default': u'COMM-',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'naming_series',
 		'fieldtype': u'Select',
 		'hidden': 1,
@@ -128,7 +72,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'category',
 		'fieldtype': u'Select',
 		'label': u'Category',
@@ -139,7 +83,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'action',
 		'fieldtype': u'Select',
 		'label': u'Action',
@@ -150,7 +94,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'next_communication_date',
 		'fieldtype': u'Date',
 		'label': u'Next Communcation On',
@@ -159,7 +103,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'column_break2',
 		'fieldtype': u'Column Break',
 		'permlevel': 0
@@ -167,7 +111,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'subject',
 		'fieldtype': u'Small Text',
 		'label': u'Subject',
@@ -177,7 +121,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'section_break1',
 		'fieldtype': u'Section Break',
 		'options': u'simple',
@@ -186,7 +130,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'content',
 		'fieldtype': u'Text',
 		'label': u'Content',
@@ -196,7 +140,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'additional_info',
 		'fieldtype': u'Section Break',
 		'label': u'Additional Info',
@@ -206,16 +150,16 @@
 	# DocField
 	{
 		'colour': u'White:FFF',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'column_break3',
 		'fieldtype': u'Column Break',
-		'label': u'Communication With / Related To',
+		'label': u'Related To',
 		'permlevel': 0
 	},
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'lead',
 		'fieldtype': u'Link',
 		'hidden': 0,
@@ -226,7 +170,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'contact',
 		'fieldtype': u'Link',
 		'label': u'Contact',
@@ -236,7 +180,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'customer',
 		'fieldtype': u'Link',
 		'label': u'Customer',
@@ -246,7 +190,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'supplier',
 		'fieldtype': u'Link',
 		'label': u'Supplier',
@@ -256,7 +200,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'opportunity',
 		'fieldtype': u'Link',
 		'label': u'Opportunity',
@@ -266,7 +210,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'quotation',
 		'fieldtype': u'Link',
 		'label': u'Quotation',
@@ -276,7 +220,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'support_ticket',
 		'fieldtype': u'Link',
 		'label': u'Support Ticket',
@@ -286,7 +230,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'column_break1',
 		'fieldtype': u'Column Break',
 		'permlevel': 0
@@ -294,7 +238,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'communication_medium',
 		'fieldtype': u'Select',
 		'label': u'Communication Medium',
@@ -304,7 +248,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'phone_no',
 		'fieldtype': u'Data',
 		'label': u'Phone No.',
@@ -313,7 +257,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'email_address',
 		'fieldtype': u'Data',
 		'label': u'Email Address',
@@ -322,7 +266,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'section_break2',
 		'fieldtype': u'Section Break',
 		'options': u'simple',
@@ -331,10 +275,10 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'column_break4',
 		'fieldtype': u'Column Break',
-		'label': u'Communication Carried Out By',
+		'label': u'By',
 		'permlevel': 0
 	},
 
@@ -342,7 +286,7 @@
 	{
 		'colour': u'White:FFF',
 		'default': u'__user',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'user',
 		'fieldtype': u'Link',
 		'label': u'User',
@@ -352,7 +296,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'sales_person',
 		'fieldtype': u'Link',
 		'label': u'Sales Person',
@@ -362,10 +306,10 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'column_break5',
 		'fieldtype': u'Column Break',
-		'label': u'Communication Carried Out On',
+		'label': u'On',
 		'permlevel': 0
 	},
 
@@ -373,7 +317,7 @@
 	{
 		'colour': u'White:FFF',
 		'default': u'Today',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'communication_date',
 		'fieldtype': u'Date',
 		'label': u'Date',
@@ -382,7 +326,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'file_list',
 		'fieldtype': u'Text',
 		'hidden': 1,
@@ -394,7 +338,7 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'_user_tags',
 		'fieldtype': u'Data',
 		'hidden': 1,
@@ -402,5 +346,61 @@
 		'no_copy': 1,
 		'permlevel': 0,
 		'print_hide': 1
+	},
+
+	# DocPerm
+	{
+		'create': 1,
+		u'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Support Team'
+	},
+
+	# DocPerm
+	{
+		'create': 1,
+		u'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Sales Manager'
+	},
+
+	# DocPerm
+	{
+		'create': 1,
+		u'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Sales User'
+	},
+
+	# DocPerm
+	{
+		u'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Sales Manager'
+	},
+
+	# DocPerm
+	{
+		u'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Support Manager'
+	},
+
+	# DocPerm
+	{
+		'cancel': 1,
+		'create': 1,
+		u'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Support Manager'
+	},
+
+	# DocPerm
+	{
+		'cancel': 1,
+		'create': 1,
+		u'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'System Manager'
 	}
 ]
