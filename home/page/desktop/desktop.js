@@ -60,7 +60,8 @@ erpnext.desktop.render = function() {
 	// setup
 	for(var i in wn.boot.modules_list) {
 		var m = wn.boot.modules_list[i];
-		if(!in_list(['Setup'], m) && wn.boot.profile.allow_modules.indexOf(m)!=-1)
+		if(!in_list(['Setup'], m) && wn.boot.profile.allow_modules.indexOf(m)!=-1
+			&& erpnext.modules[m])
 			add_icon(m);
 	}
 
