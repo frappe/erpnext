@@ -93,7 +93,7 @@ class DocType:
 		return self.get_msg_html(out)
 		
 	def get_msg_html(self, out):
-		with_value = [o[1] for o in out if o[0]
+		with_value = [o[1] for o in out if o[0]]
 		
 		if with_value:
 			with_value = "\n".join(with_value)
