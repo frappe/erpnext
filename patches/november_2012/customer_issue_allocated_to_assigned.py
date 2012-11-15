@@ -8,7 +8,6 @@ def execute():
 	webnotes.conn.sql("""delete from tabComment where comment like '%Form/Customer Issue%'""")
 	for t in webnotes.conn.sql("""select * from `tabCustomer Issue` 
 		where ifnull(allocated_to, '')!='' and ifnull(status, "")="Open" """, as_dict=1):
-		print t
 		add({
 			'doctype': "Customer Issue",
 			'name': t['name'],
