@@ -71,15 +71,6 @@ cur_frm.cscript.calculate_total_score = function(doc,cdt,cdn){
 	refresh_field('total_score')
 }
 
-/*cur_frm.cscript.declare_completed = function(doc,cdt,cdn){
-	$c_obj(make_doclist(doc.doctype, doc.name),'declare_completed','', function(r,rt){
-		if(r.message){
-			refresh_field('Status');
-			cur_frm.cscript.refresh(doc,cdt,cdn);
-		}
-	});
-}*/
-
 cur_frm.cscript.declare_completed = function(doc,cdt,cdn){
 	var declare_completed_dialog;
 	
