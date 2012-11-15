@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		u'creation': '2012-06-05 20:03:20',
+		u'creation': '2012-08-08 10:41:31',
 		u'docstatus': 0,
-		u'modified': '2012-08-06 14:49:48',
+		u'modified': '2012-11-15 12:36:41',
 		u'modified_by': u'Administrator',
 		u'owner': u'Administrator'
 	},
@@ -114,7 +114,7 @@
 		'fieldname': u'company_name',
 		'fieldtype': u'Data',
 		'in_filter': 1,
-		'label': u'Company Name',
+		'label': u'Organization Name (for Lead)',
 		'oldfieldname': u'company_name',
 		'oldfieldtype': u'Data',
 		'permlevel': 0,
@@ -626,6 +626,15 @@
 
 	# DocPerm
 	{
+		'create': 1,
+		u'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Guest',
+		'write': 1
+	},
+
+	# DocPerm
+	{
 		'amend': 0,
 		'cancel': 0,
 		'create': 0,
@@ -688,15 +697,6 @@
 		'permlevel': 0,
 		'role': u'System Manager',
 		'submit': 0,
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'create': 1,
-		u'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Guest',
 		'write': 1
 	}
 ]
