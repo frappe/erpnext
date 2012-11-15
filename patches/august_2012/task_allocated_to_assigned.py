@@ -11,5 +11,6 @@ def execute():
 			'assign_to': t['allocated_to'],
 			'assigned_by': t['owner'],
 			'description': t['subject'],
-			'date': t['creation']
+			'date': t['creation'],
+			"no_notification": True
 		})
