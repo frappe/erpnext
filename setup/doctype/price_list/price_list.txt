@@ -3,29 +3,29 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-07-03 13:30:55',
-		'docstatus': 0,
-		'modified': '2012-07-11 17:35:10',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
+		u'creation': '2012-07-12 23:29:45',
+		u'docstatus': 0,
+		u'modified': '2012-11-15 10:50:52',
+		u'modified_by': u'Administrator',
+		u'owner': u'Administrator'
 	},
 
 	# These values are common for all DocType
 	{
 		'_last_update': u'1303100817',
-		'allow_attach': 1,
+		'allow_attach': 0,
 		'allow_copy': 1,
 		'allow_email': 1,
 		'allow_print': 1,
 		'allow_trash': 1,
 		'autoname': u'field:price_list_name',
 		'colour': u'White:FFF',
-		'description': u'Maintain multiple selling rates for the same **Item** using **Price Lists**. You can upload / edit multiple prices by downloading and uploading the template.',
-		'doctype': 'DocType',
+		'description': u'Price List Master',
+		u'doctype': u'DocType',
 		'document_type': u'Master',
 		'max_attachments': 1,
 		'module': u'Setup',
-		'name': '__common__',
+		u'name': u'__common__',
 		'section_style': u'Simple',
 		'server_code_error': u' ',
 		'show_in_menu': 0,
@@ -34,8 +34,8 @@
 
 	# These values are common for all DocField
 	{
-		'doctype': u'DocField',
-		'name': '__common__',
+		u'doctype': u'DocField',
+		u'name': u'__common__',
 		'parent': u'Price List',
 		'parentfield': u'fields',
 		'parenttype': u'DocType',
@@ -45,8 +45,8 @@
 	# These values are common for all DocPerm
 	{
 		'amend': 0,
-		'doctype': u'DocPerm',
-		'name': '__common__',
+		u'doctype': u'DocPerm',
+		u'name': u'__common__',
 		'parent': u'Price List',
 		'parentfield': u'permissions',
 		'parenttype': u'DocType',
@@ -56,63 +56,13 @@
 
 	# DocType, Price List
 	{
-		'doctype': 'DocType',
-		'name': u'Price List'
-	},
-
-	# DocPerm
-	{
-		'cancel': 0,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Sales Manager',
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'cancel': 0,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Sales Manager',
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'cancel': 0,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Sales User',
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'cancel': 0,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Sales User',
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'cancel': 1,
-		'create': 1,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Sales Master Manager',
-		'write': 1
+		u'doctype': u'DocType',
+		u'name': u'Price List'
 	},
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'price_list_name',
 		'fieldtype': u'Data',
 		'label': u'Price List Name',
@@ -123,10 +73,70 @@
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		'depends_on': u'price_list_name',
+		u'doctype': u'DocField',
+		'fieldname': u'how_to_upload',
+		'fieldtype': u'HTML',
+		'label': u'How to upload',
+		'options': u'<div class="help">Use the <a href="#data-import-tool">Data Import Tool</a> to upload, update Item Prices in bulk:\n<ol> \n<li>Go to Data Import Tool.\n<li>Select "Item"\n<li>Check on "With Data"\n<li>Download "Item Price" from Child Tables.\n<li>Update the prices required and add new rows if required.\n<li>Check on "Overwrite"\n<li>Upload the modified sheet.\n</div>\n'
+	},
+
+	# DocField
+	{
+		u'doctype': u'DocField',
 		'fieldname': u'file_list',
 		'fieldtype': u'Text',
 		'hidden': 1,
 		'label': u'File List'
+	},
+
+	# DocPerm
+	{
+		'cancel': 0,
+		'create': 0,
+		u'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Sales Manager',
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'cancel': 0,
+		'create': 0,
+		u'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Sales Manager',
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'cancel': 0,
+		'create': 0,
+		u'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Sales User',
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'cancel': 0,
+		'create': 0,
+		u'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Sales User',
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'cancel': 1,
+		'create': 1,
+		u'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Sales Master Manager',
+		'write': 1
 	}
 ]

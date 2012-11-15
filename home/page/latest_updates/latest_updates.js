@@ -1,5 +1,8 @@
 erpnext.updates = [
 	["14th November 2012", [
+		"Letter Head: Show preview, make upload button more visible.",
+	]],
+	["14th November 2012", [
 		"Employee: If User ID is set, Employee Name will be updated in defaults and will appear automatically in all relevant forms.",
 		"Backups: Link to download both database and files.",
 	]],
