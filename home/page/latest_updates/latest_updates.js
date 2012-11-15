@@ -1,6 +1,9 @@
 erpnext.updates = [
 	["14th November 2012", [
+		"Customer Issue: Moved all allocations to 'Assigned' so that there is avoid duplication fo features.",
 		"Letter Head: Show preview, make upload button more visible.",
+		"Price List: Removed import, now import from Data Import Tool.",
+		"Data Import Tool: More help in template.",
 	]],
 	["14th November 2012", [
 		"Employee: If User ID is set, Employee Name will be updated in defaults and will appear automatically in all relevant forms.",
