@@ -121,7 +121,8 @@ class SupportMailbox(POP3Mailbox):
 
 			# send auto reply
 			if cint(self.email_settings.send_autoreply):
-				self.send_auto_reply(d)
+				if "MAILER-DAEMON" not in d.raised_by:
+					self.send_auto_reply(d)
 
 			webnotes.conn.commit()
 			# extract attachments
@@ -165,7 +166,7 @@ We will get back to you as soon as possible
 
 		""" + cstr(signature))
 
-		from webnotes.utils.email_lib import sendmail
+		from webnotes.utils.email_lib import sendmail		
 		
 		sendmail(\
 			recipients = [cstr(d.raised_by)], \
