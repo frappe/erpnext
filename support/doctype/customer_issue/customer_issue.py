@@ -44,20 +44,12 @@ class DocType(TransactionBase):
 	def autoname(self):
 		self.doc.name = make_autoname(self.doc.naming_series + '.######')
 		
-#check if maintenance schedule already generated
-#============================================
 	def check_maintenance_visit(self):
 		nm = sql("select t1.name from `tabMaintenance Visit` t1, `tabMaintenance Visit Purpose` t2 where t2.parent=t1.name and t2.prevdoc_docname=%s and t1.docstatus=1 and t1.completion_status='Fully Completed'", self.doc.name)
 		nm = nm and nm[0][0] or ''
 		
 		if not nm:
 			return 'No'
-	
-	def on_submit(self):
-		if session['user'] != 'Guest':
-			if not self.doc.allocated_to:
-				msgprint("Please select service person name whom you want to assign this issue")
-				raise Exception
 	
 	def validate(self):
 		if session['user'] != 'Guest' and not self.doc.customer:

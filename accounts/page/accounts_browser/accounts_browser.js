@@ -152,13 +152,16 @@ erpnext.AccountsChart = Class.extend({
 		var d = new wn.ui.Dialog({
 			title:'New Account',
 			fields: [
-				{fieldtype:'Data', fieldname:'account_name', label:'New Account Name', reqd:true},
+				{fieldtype:'Data', fieldname:'account_name', label:'New Account Name', reqd:true, 
+					description: "Name of new Account. Note: Please don't create accounts for Customers and Suppliers, \
+					they are created automatically from the Customer and Supplier master"},
 				{fieldtype:'Select', fieldname:'group_or_ledger', label:'Group or Ledger',
 					options:'Group\nLedger', description:'Further accounts can be made under Groups,\
 					 	but entries can be made against Ledger'},
 				{fieldtype:'Select', fieldname:'account_type', label:'Account Type',
 					options: ['', 'Fixed Asset Account', 'Bank or Cash', 'Expense Account', 'Tax',
-						'Income Account', 'Chargeable'].join('\n') },
+						'Income Account', 'Chargeable'].join('\n'),
+					description: "Optional. This setting will be used to filter in various transactions." },
 				{fieldtype:'Float', fieldname:'tax_rate', label:'Tax Rate'},
 				{fieldtype:'Button', fieldname:'create_new', label:'Create New' }
 			]
