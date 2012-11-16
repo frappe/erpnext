@@ -1,10 +1,11 @@
 erpnext.updates = [
-	["14th November 2012", [
+	["16th November 2012", [
 		"Appraisal: Cleaned up form and logic. Removed complex and unnecessary approval logic, \
 			the appraiser can select the template and role and make an appraisal. \
 			Normal user can see self created Appraisals. HR Manager can see all Appraisals.",
+		"Project: Bugfix in Gantt Chart (caused due to jquery conflict)",
 	]],
-	["14th November 2012", [
+	["15th November 2012", [
 		"Customer Issue: Moved all allocations to 'Assigned' so that there is avoid duplication fo features.",
 		"Letter Head: Show preview, make upload button more visible.",
 		"Price List: Removed import, now import from Data Import Tool.",

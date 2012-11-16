@@ -27,24 +27,26 @@ erpnext.show_task_gantt = function(parent, project) {
 		var source = [];
 		// projects
 		$.each(r.message, function(i,v) {
-			source.push({
-				name: v.project, 
-				desc: v.subject,
-				values: [{
-					label: v.subject,
-					desc: v.description || v.subject,
-					from: '/Date("'+v.exp_start_date+'")/',
-					to: '/Date("'+v.exp_end_date+'")/',
-					customClass: {
-						'Open':'ganttRed',
-						'Pending Review':'ganttOrange',
-						'Working':'',
-						'Completed':'ganttGreen',
-						'Cancelled':'ganttGray'
-					}[v.status],
-					dataObj: v
-				}]
-			})
+			if(v.exp_start_date && v.exp_end_date) {
+				source.push({
+					name: v.project, 
+					desc: v.subject,
+					values: [{
+						label: v.subject,
+						desc: v.description || v.subject,
+						from: '/Date("'+v.exp_start_date+'")/',
+						to: '/Date("'+v.exp_end_date+'")/',
+						customClass: {
+							'Open':'ganttRed',
+							'Pending Review':'ganttOrange',
+							'Working':'',
+							'Completed':'ganttGreen',
+							'Cancelled':'ganttGray'
+						}[v.status],
+						dataObj: v
+					}]
+				})				
+			}
 		});
 		return source	
 	}
@@ -63,7 +65,7 @@ erpnext.show_task_gantt = function(parent, project) {
 					source: get_source(r),
 					navigate: project ? "button" : "scroll",
 					scale: "weeks",
-					minScale: "weeks",
+					minScale: "day",
 					maxScale: "months",
 					onItemClick: function(data) {
 						wn.set_route('Form', 'Task', data.name);
