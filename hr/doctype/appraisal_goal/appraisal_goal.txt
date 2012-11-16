@@ -3,11 +3,11 @@
 
 	# These values are common in all dictionaries
 	{
-		'creation': '2012-03-27 14:35:53',
-		'docstatus': 0,
-		'modified': '2012-03-27 14:35:53',
-		'modified_by': u'Administrator',
-		'owner': u'ashwini@webnotestech.com'
+		u'creation': '2012-07-03 13:30:40',
+		u'docstatus': 0,
+		u'modified': '2012-11-15 17:50:24',
+		u'modified_by': u'Administrator',
+		u'owner': u'ashwini@webnotestech.com'
 	},
 
 	# These values are common for all DocType
@@ -15,19 +15,19 @@
 		'autoname': u'APRSLD.#####',
 		'colour': u'White:FFF',
 		'default_print_format': u'Standard',
-		'doctype': 'DocType',
+		u'doctype': u'DocType',
 		'istable': 1,
 		'module': u'HR',
-		'name': '__common__',
+		u'name': u'__common__',
 		'section_style': u'Simple',
 		'server_code_error': u' ',
-		'version': 15
+		'version': 1
 	},
 
 	# These values are common for all DocField
 	{
-		'doctype': u'DocField',
-		'name': '__common__',
+		u'doctype': u'DocField',
+		u'name': u'__common__',
 		'parent': u'Appraisal Goal',
 		'parentfield': u'fields',
 		'parenttype': u'DocType'
@@ -35,54 +35,43 @@
 
 	# DocType, Appraisal Goal
 	{
-		'doctype': 'DocType',
-		'name': u'Appraisal Goal'
+		u'doctype': u'DocType',
+		u'name': u'Appraisal Goal'
 	},
 
 	# DocField
 	{
 		'colour': u'White:FFF',
 		'description': u'Key Responsibility Area',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'kra',
 		'fieldtype': u'Small Text',
-		'label': u'KRA',
+		'label': u'Goal',
 		'oldfieldname': u'kra',
 		'oldfieldtype': u'Small Text',
 		'permlevel': 0,
-		'reqd': 1
+		'reqd': 1,
+		'width': u'240px'
 	},
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'per_weightage',
 		'fieldtype': u'Currency',
 		'label': u'Weightage (%)',
 		'oldfieldname': u'per_weightage',
 		'oldfieldtype': u'Currency',
 		'permlevel': 0,
-		'reqd': 1
-	},
-
-	# DocField
-	{
-		'allow_on_submit': 1,
-		'doctype': u'DocField',
-		'fieldname': u'target_achieved',
-		'fieldtype': u'Small Text',
-		'label': u'Target Achieved',
-		'no_copy': 1,
-		'oldfieldname': u'target_achieved',
-		'oldfieldtype': u'Small Text',
-		'permlevel': 0
+		'reqd': 1,
+		'width': u'70px'
 	},
 
 	# DocField
 	{
 		'allow_on_submit': 1,
 		'colour': u'White:FFF',
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'score',
 		'fieldtype': u'Currency',
 		'label': u'Score (0-5)',
@@ -92,18 +81,19 @@
 		'options': u'\n0\n1\n2\n3\n4\n5',
 		'permlevel': 0,
 		'trigger': u'Client',
-		'width': u'60px'
+		'width': u'70px'
 	},
 
 	# DocField
 	{
-		'doctype': u'DocField',
+		u'doctype': u'DocField',
 		'fieldname': u'score_earned',
 		'fieldtype': u'Currency',
 		'label': u'Score Earned',
 		'no_copy': 1,
 		'oldfieldname': u'score_earned',
 		'oldfieldtype': u'Currency',
-		'permlevel': 1
+		'permlevel': 1,
+		'width': u'70px'
 	}
 ]

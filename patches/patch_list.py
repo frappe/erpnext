@@ -667,4 +667,8 @@ patch_list = [
 		'patch_module': 'patches.november_2012',
 		'patch_file': 'customer_issue_allocated_to_assigned',
 	},
+	{
+		'patch_module': 'patches.november_2012',
+		'patch_file': 'reset_appraisal_permissions',
+	},
 ]
