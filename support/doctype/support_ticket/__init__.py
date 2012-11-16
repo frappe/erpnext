@@ -155,13 +155,9 @@ reply back to this mail.
 		
 We will get back to you as soon as possible
 ----------------------
-[This is an automatic response]
-
-		""" + cstr(signature)) + """
-----------------------
 Original Query:
 
-""" + d.description
+""" + d.description + "\n----------------------\n" + cstr(signature))
 
 		from webnotes.utils.email_lib import sendmail		
 		
