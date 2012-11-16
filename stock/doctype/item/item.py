@@ -85,7 +85,9 @@ class DocType:
 
 	# On delete 1. Delete BIN (if none of the corrosponding transactions present, it gets deleted. if present, rolled back due to exception)
 	def on_trash(self):
-		sql("delete from tabBin where item_code='%s'"%(self.doc.item_code))
+		sql("""delete from tabBin where item_code=%s""", self.doc.item_code)
+		sql("""delete from `tabStock Ledger Entry` 
+			where item_code=%s and is_cancelled='Yes' """, self.doc.item_code)
 		
 		self.delete_web_cache(self.doc.page_name)
 
@@ -164,7 +166,7 @@ class DocType:
 			msgprint("As Production Order can be made for this Item, then Is Stock Item Should be 'Yes' as we maintain it's stock. Refer Manufacturing and Inventory section.", raise_exception=1)
 
 		if self.doc.is_stock_item == "Yes" and not self.doc.default_warehouse:
-			msgprint("As we maintain stock of this item, its better to maintain default warehouse. To add default warehouse please go to 'Inventory' section. It will be fetched automatically while making Sales Order, Delivery Note, etc.. ", 1)
+			msgprint("Please set Default Warehouse for Stock Item", raise_exception=1)
 
 		if self.doc.has_serial_no == 'Yes' and self.doc.is_stock_item == 'No':
 			msgprint("'Has Serial No' can not be 'Yes' for non-stock item", raise_exception=1)
