@@ -5,7 +5,7 @@
 	{
 		u'creation': '2012-10-26 16:49:39',
 		u'docstatus': 0,
-		u'modified': '2012-11-12 18:15:45',
+		u'modified': '2012-11-16 12:35:02',
 		u'modified_by': u'Administrator',
 		u'owner': u'Administrator'
 	},
@@ -205,21 +205,6 @@
 	# DocField
 	{
 		'colour': u'White:FFF',
-		'description': u'Enter unit of measurement in which stock of this item is maintained in your warehouse.',
-		u'doctype': u'DocField',
-		'fieldname': u'stock_uom',
-		'fieldtype': u'Link',
-		'label': u'Default UoM',
-		'oldfieldname': u'stock_uom',
-		'oldfieldtype': u'Link',
-		'options': u'UOM',
-		'permlevel': 0,
-		'reqd': 1
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
 		'default': u'Yes',
 		'description': u'Select "Yes" if you are maintaining stock of this item in your Inventory.',
 		u'doctype': u'DocField',
@@ -235,6 +220,8 @@
 
 	# DocField
 	{
+		'colour': u'White:FFF',
+		'description': u'Mandatory if Stock Item is "Yes"',
 		u'doctype': u'DocField',
 		'fieldname': u'default_warehouse',
 		'fieldtype': u'Link',
@@ -243,6 +230,21 @@
 		'oldfieldtype': u'Link',
 		'options': u'Warehouse',
 		'permlevel': 0
+	},
+
+	# DocField
+	{
+		'colour': u'White:FFF',
+		'description': u'Enter unit of measurement in which stock of this item is maintained in your warehouse.',
+		u'doctype': u'DocField',
+		'fieldname': u'stock_uom',
+		'fieldtype': u'Link',
+		'label': u'Default UoM',
+		'oldfieldname': u'stock_uom',
+		'oldfieldtype': u'Link',
+		'options': u'UOM',
+		'permlevel': 0,
+		'reqd': 1
 	},
 
 	# DocField

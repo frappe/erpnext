@@ -31,6 +31,11 @@ cur_frm.cscript.refresh = function(doc) {
 	cur_frm.cscript.hide_website_fields(doc);
 }
 
+cur_frm.cscript.item_code = function(doc) {
+	if(!doc.item_name) cur_frm.set_value("item_name", doc.item_code);
+	if(!doc.description) cur_frm.set_value("description", doc.item_code);
+}
+
 cur_frm.cscript.hide_website_fields = function(doc) {
 	var website_fields_list = ['page_name', 'website_image', 'web_short_description',
 								'web_long_description'];

@@ -5,7 +5,7 @@
 	{
 		u'creation': '2012-08-08 10:41:31',
 		u'docstatus': 0,
-		u'modified': '2012-11-15 12:36:41',
+		u'modified': '2012-11-16 12:26:14',
 		u'modified_by': u'Administrator',
 		u'owner': u'Administrator'
 	},
@@ -321,7 +321,7 @@
 	# DocField
 	{
 		'colour': u'White:FFF',
-		'description': u'<a href="javascript:cur_frm.cscript.TerritoryHelp();">To manage Territory, click here</a>',
+		'description': u'<a href="#Sales Browser/Territory">To manage Territory, click here</a>',
 		u'doctype': u'DocField',
 		'fieldname': u'territory',
 		'fieldtype': u'Link',
