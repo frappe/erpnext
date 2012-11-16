@@ -90,10 +90,8 @@ class SupportMailbox(POP3Mailbox):
 				st.doc.save()
 				
 				update_feed(st.doc, 'on_update')
-				webnotes.conn.commit()
 				# extract attachments
 				self.save_attachments(st.doc, mail.attachments)
-				webnotes.conn.begin()
 				return
 				
 		from webnotes.model.doctype import get_property
@@ -124,10 +122,8 @@ class SupportMailbox(POP3Mailbox):
 				if "MAILER-DAEMON" not in d.raised_by:
 					self.send_auto_reply(d)
 
-			webnotes.conn.commit()
 			# extract attachments
 			self.save_attachments(d, mail.attachments)
-			webnotes.conn.begin()
 			
 
 	def save_attachments(self, doc, attachment_list=[]):
@@ -139,14 +135,12 @@ class SupportMailbox(POP3Mailbox):
 		"""
 		from webnotes.utils.file_manager import save_file, add_file_list
 		for attachment in attachment_list:
-			webnotes.conn.begin()
 			fid = save_file(attachment['filename'], attachment['content'], 'Support')
 			status = add_file_list('Support Ticket', doc.name, attachment['filename'], fid)
 			if not status:
 				doc.description = doc.description \
 					+ "\nCould not attach: " + cstr(attachment['filename'])
 				doc.save()
-			webnotes.conn.commit()
 
 		
 	def send_auto_reply(self, d):
