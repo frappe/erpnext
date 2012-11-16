@@ -165,9 +165,6 @@ class DocType:
 		if self.doc.is_pro_applicable == 'Yes' and self.doc.is_stock_item == 'No':
 			msgprint("As Production Order can be made for this Item, then Is Stock Item Should be 'Yes' as we maintain it's stock. Refer Manufacturing and Inventory section.", raise_exception=1)
 
-		if self.doc.is_stock_item == "Yes" and not self.doc.default_warehouse:
-			msgprint("Please set Default Warehouse for Stock Item", raise_exception=1)
-
 		if self.doc.has_serial_no == 'Yes' and self.doc.is_stock_item == 'No':
 			msgprint("'Has Serial No' can not be 'Yes' for non-stock item", raise_exception=1)
 

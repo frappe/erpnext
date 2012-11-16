@@ -5,7 +5,7 @@
 	{
 		u'creation': '2012-10-26 16:49:39',
 		u'docstatus': 0,
-		u'modified': '2012-11-16 12:35:02',
+		u'modified': '2012-11-16 16:50:57',
 		u'modified_by': u'Administrator',
 		u'owner': u'Administrator'
 	},
@@ -225,7 +225,7 @@
 		u'doctype': u'DocField',
 		'fieldname': u'default_warehouse',
 		'fieldtype': u'Link',
-		'label': u'Default Warehouse',
+		'label': u'Default Reserved Warehouse',
 		'oldfieldname': u'default_warehouse',
 		'oldfieldtype': u'Link',
 		'options': u'Warehouse',
