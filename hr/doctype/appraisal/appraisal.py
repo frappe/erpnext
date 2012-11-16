@@ -23,7 +23,6 @@ from webnotes.model.doclist import getlist
 from webnotes.model.code import get_obj
 from webnotes import msgprint
 
-set = webnotes.conn.set
 sql = webnotes.conn.sql
 
 
@@ -39,11 +38,9 @@ class DocType:
 		return emp_nm
 	
 	def fetch_kra(self):
-		if not self.doc.kra_template:
-			msgprint("Please select Appraisal Template to be be fetched")
-			raise Exception
 		self.doclist = self.doc.clear_table(self.doclist,'appraisal_details')
-		get_obj('DocType Mapper', 'Appraisal Template-Appraisal').dt_map('Appraisal Template', 'Appraisal', self.doc.kra_template, self.doc, self.doclist, "[['Appraisal Template','Appraisal'],['Appraisal Template Goal', 'Appraisal Goal']]")
+		get_obj('DocType Mapper', 'Appraisal Template-Appraisal').dt_map('Appraisal Template', 'Appraisal', 
+			self.doc.kra_template, self.doc, self.doclist, "[['Appraisal Template','Appraisal'],['Appraisal Template Goal', 'Appraisal Goal']]")
 	
 	def validate_dates(self):
 		if getdate(self.doc.start_date) > getdate(self.doc.end_date):
@@ -53,107 +50,37 @@ class DocType:
 	def validate_existing_appraisal(self):
 		chk = sql("select name from `tabAppraisal` where employee=%s and (status='Submitted' or status='Completed') and ((start_date>=%s and start_date<=%s) or (end_date>=%s and end_date<=%s))",(self.doc.employee,self.doc.start_date,self.doc.end_date,self.doc.start_date,self.doc.end_date))
 		if chk:
-			msgprint("You have already created Appraisal "+cstr(chk[0][0])+" in the current date range for employee "+cstr(self.doc.employee_name))
+			msgprint("You have already created Appraisal "\
+				+cstr(chk[0][0])+" in the current date range for employee "\
+				+cstr(self.doc.employee_name))
 			raise Exception
-	
-	def validate_curr_appraisal(self):
-		for d in getlist(self.doclist, 'appraisal_details'):
-			if d.target_achieved or d.score:
-				if self.doc.status == 'Draft':
-					msgprint("Target achieved or Score can be added only for submitted Appraisal")
-					raise Exception
-				elif self.doc.status == 'Submitted' and session['user'] != self.doc.kra_approver:
-					msgprint("Target achieved or Score can be added only by Appraisal Approver")
-					raise Exception
-			
-	
-	def validate_fiscal_year(self):
-		fy=sql("select year_start_date from `tabFiscal Year` where name='%s'"%self.doc.fiscal_year)
-		ysd=fy and fy[0][0] or ""
-		yed=add_days(str(ysd),365)
-		if str(self.doc.start_date) < str(ysd) or str(self.doc.start_date) > str(yed) or str(self.doc.end_date) < str(ysd) or str(self.doc.end_date) > str(yed):
-			msgprint("Appraisal date range is not within the Fiscal Year selected")
-			raise Exception
-	
+		
 	def validate(self):
+		if not self.doc.status:
+			self.doc.status = "Draft"
 		self.validate_dates()
 		self.validate_existing_appraisal()
-		self.validate_curr_appraisal()
-		self.validate_fiscal_year()
-	
-	def set_approver(self):
-		errprint('here')
-		ret={}
-		approver_lst =[]
-		emp_nm = self.get_employee_name()
-		approver_lst1 = get_obj('Authorization Control').get_approver_name(self.doc.doctype,0,self)
-		if approver_lst1:
-			approver_lst=approver_lst1
-		else:
-			approver_lst = [x[0] for x in sql("select distinct name from `tabProfile` where enabled=1 and name!='Administrator' and name!='Guest' and docstatus!=2")]
-		ret = {'app_lst':"\n" + "\n".join(approver_lst), 'emp_nm':cstr(emp_nm)}
-		return ret
+		self.calculate_total()
 	
 	def calculate_total(self):
-		total = 0
+		total, total_w  = 0, 0
 		for d in getlist(self.doclist, 'appraisal_details'):
+			
 			if d.score:
-				total = total + flt(d.score_earned)
-		ret={'total_score':flt(total)}
-		return ret
-	
-	def declare_completed(self):
-		ret={}
-		for d in getlist(self.doclist, 'appraisal_details'):
-			if not d.target_achieved or not d.score or not d.score_earned:
-				msgprint("Please add 'Target Achieved' and 'Score' for all KPI")
-				ret = {'status':'Incomplete'}
-				return ret
+				d.score_earned = flt(d.score) * flt(d.per_weightage) / 100
+				total = total + d.score_earned
+			total_w += flt(d.per_weightage)
+
+		if int(total_w) != 100:
+			msgprint("Total weightage assigned should be 100%. It is :" + str(total_w) + "%", 
+				raise_exception=1)
 		
-		if not self.doc.total_score:
-			msgprint("Please calculate total score using button 'Calculate Total Score'")
-			ret = {'status':'No Score'}
-			return ret
-		self.update_appraisal()
-		#set(self.doc, 'status', 'Completed')
-		ret = {'status':'Completed'}
-		return ret
-	
-	def update_appraisal(self):
-		for d in getlist(self.doclist, 'appraisal_details'):
-			if not d.kra or not d.per_weightage:
-				msgprint("Please remove the extra blank row added")
-				raise Exception
-			d.save()
-		if self.doc.total_score:
-			set(self.doc,'total_score',self.doc.total_score)
-	
-	def on_update(self):
-		set(self.doc, 'status', 'Draft')
-	
-	def validate_total_weightage(self):
-		total_w = 0
-		for d in getlist(self.doclist, 'appraisal_details'):
-			total_w = flt(total_w) + flt(d.per_weightage)
-		
-		if flt(total_w)>100 or flt(total_w)<100:
-			msgprint("Total of weightage assigned to KPI is "+cstr(total_w)+".It should be 100(%)")
-			raise Exception
-	
-	def validate_appraisal_detail(self):
-		if not self.doc.kra_approver:
-			msgprint("Please mention the name of Approver")
-			raise Exception
-		
-		if not getlist(self.doclist, 'appraisal_details'):
-			msgprint("Please add KRA Details")
-			raise Exception		
-		
-		self.validate_total_weightage()
-	
+		if total==0:
+			msgprint("Total can't be zero. You must atleast give some points!", raise_exception=1)
+		self.doc.total_score = total
+			
 	def on_submit(self):
-		self.validate_appraisal_detail()
-		set(self.doc, 'status', 'Submitted')
+		webnotes.conn.set(self.doc, 'status', 'Submitted')
 	
 	def on_cancel(self): 
-		set(self.doc, 'status', 'Cancelled')
+		webnotes.conn.set(self.doc, 'status', 'Cancelled')
