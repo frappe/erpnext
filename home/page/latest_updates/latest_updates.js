@@ -5,6 +5,7 @@ erpnext.updates = [
 			Normal user can see self created Appraisals. HR Manager can see all Appraisals.",
 		"Project: Bugfix in Gantt Chart (caused due to jquery conflict)",
 		"Serial No: Ability to rename.",
+		"Rename Tool: Added Serial No to rename tool.",
 	]],
 	["15th November 2012", [
 		"Customer Issue: Moved all allocations to 'Assigned' so that there is avoid duplication fo features.",
