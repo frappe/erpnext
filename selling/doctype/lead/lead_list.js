@@ -19,7 +19,7 @@ wn.doclistviews['Lead'] = wn.views.ListView.extend({
 			data.label_type = 'info'
 		}
 		data.status_html = repl('<span class="label label-%(label_type)s">%(status)s</span>', data);
-		data.lead_name = repl("<a href=\"#!Form/Lead/%(name)s\">%(lead_name)s</a>",
+		data.lead_name = repl("<a href=\"#!Form/Lead/%(name)s\">%(name): %(lead_name)s</a>",
 			data);
 		data.lead_status = (data.rating ? ('['+data.rating+'] ') : '') + '['+data.source+']';
 	},
