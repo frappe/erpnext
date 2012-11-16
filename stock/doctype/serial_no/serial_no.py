@@ -118,8 +118,23 @@ class DocType(TransactionBase):
 	def on_cancel(self):
 		self.on_trash()
 
-	# -----------
-	# on restore
-	# -----------
 	def on_restore(self):
 		self.make_stock_ledger_entry(1)
+	
+	def on_rename(self, new, old):
+		"""rename serial_no text fields"""
+		for dt in webnotes.conn.sql("""select parent from tabDocField 
+			where fieldname='serial_no' and fieldtype='Text'"""):
+			
+			for item in webnotes.conn.sql("""select name, serial_no from `tab%s` 
+				where serial_no like '%%%s%%'""" % (dt[0], old)):
+				
+				serial_nos = map(lambda i: i==old and new or i, item[1].split('\n'))
+				webnotes.conn.sql("""update `tab%s` set serial_no = %s 
+					where name=%s""" % (dt[0], '%s', '%s'),
+					('\n'.join(serial_nos), item[0]))
+
+				
+				
+			
+			
