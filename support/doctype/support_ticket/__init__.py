@@ -61,12 +61,12 @@ class SupportMailbox(POP3Mailbox):
 			
 		thread_list = mail.get_thread_id()
 
-
 		email_id = mail.mail['From']
 		if "<" in mail.mail['From']:
 			import re
 			re_result = re.findall('(?<=\<)(\S+)(?=\>)', mail.mail['From'])
-			if re_result and re_result[0]: email_id = re_result[0]
+			if re_result and re_result[0]: 
+				email_id = re_result[0]
 		
 		from webnotes.utils import decode_email_header
 		
@@ -119,13 +119,12 @@ class SupportMailbox(POP3Mailbox):
 
 			# send auto reply
 			if cint(self.email_settings.send_autoreply):
-				if "MAILER-DAEMON" not in d.raised_by:
+				if "mailer-daemon" not in d.raised_by.lower():
 					self.send_auto_reply(d)
 
 			# extract attachments
 			self.save_attachments(d, mail.attachments)
 			
-
 	def save_attachments(self, doc, attachment_list=[]):
 		"""
 			Saves attachments from email
@@ -141,13 +140,13 @@ class SupportMailbox(POP3Mailbox):
 				doc.description = doc.description \
 					+ "\nCould not attach: " + cstr(attachment['filename'])
 				doc.save()
-
 		
 	def send_auto_reply(self, d):
 		"""
 			Send auto reply to emails
 		"""
 		from webnotes.utils import cstr
+
 		signature = self.email_settings.fields.get('support_signature') or ''
 
 		response = self.email_settings.fields.get('support_autoreply') or ("""
@@ -155,10 +154,14 @@ A new Ticket has been raised for your query. If you have any additional informat
 reply back to this mail.
 		
 We will get back to you as soon as possible
-
+----------------------
 [This is an automatic response]
 
-		""" + cstr(signature))
+		""" + cstr(signature)) + """
+----------------------
+Original Query:
+
+""" + d.description
 
 		from webnotes.utils.email_lib import sendmail		
 		
