@@ -6,6 +6,14 @@ cur_frm.cscript.onload = function(doc) {
 			concat_ws(' ', first_name, middle_name, last_name) like \"%%%s\") \
 			limit 50";
 	};
+	
+	cur_frm.fields_dict.lead.get_query = function() {
+		return "select name, lead_name from `tabLead` \
+			where docstatus < 2 and \
+			(%(key)s like \"%s\" or lead_name like \"%%%s\" or \
+			company_name like \"%%%s\") \
+			order by lead_name asc limit 50";
+	};
 }
 
 cur_frm.cscript.refresh = function(doc, dt, dn) {

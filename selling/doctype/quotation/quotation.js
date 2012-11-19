@@ -148,10 +148,7 @@ cur_frm.fields_dict['contact_person'].get_query = function(doc, cdt, cdn) {
 	return 'SELECT name,CONCAT(first_name," ",ifnull(last_name,"")) As FullName,department,designation FROM tabContact WHERE customer = "'+ doc.customer +'" AND docstatus != 2 AND name LIKE "%s" ORDER BY name ASC LIMIT 50';
 }
 
-//lead
-cur_frm.fields_dict['lead'].get_query = function(doc,cdt,cdn){
-	return 'SELECT `tabLead`.name, `tabLead`.lead_name FROM `tabLead` WHERE `tabLead`.%(key)s LIKE "%s"	ORDER BY	`tabLead`.`name` ASC LIMIT 50';
-}
+cur_frm.fields_dict.lead.get_query = erpnext.utils.lead_query;
 
 cur_frm.cscript.lead = function(doc, cdt, cdn) {
 	if(doc.lead) {

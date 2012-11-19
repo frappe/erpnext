@@ -16,7 +16,7 @@
 
 wn.provide('erpnext.utils');
 
-// profile related get_query
+// searches for enabled profiles
 erpnext.utils.profile_query = function() {
 	return "select name, concat_ws(' ', first_name, middle_name, last_name) \
 		from `tabProfile` where ifnull(enabled, 0)=1 and docstatus < 2 and \
@@ -25,10 +25,18 @@ erpnext.utils.profile_query = function() {
 		order by name asc limit 50";
 };
 
-// employee related get query
+// searches for active employees
 erpnext.utils.employee_query = function() {
 	return "select name, employee_name from `tabEmployee` \
 		where status = 'Active' and docstatus < 2 and \
-		(employee_name like \"%%%s\" or %(key)s like \"%s\") \
+		(%(key)s like \"%s\" or employee_name like \"%%%s\") \
 		order by name asc limit 50";
+};
+
+// searches for leads which are not converted
+erpnext.utils.lead_query = function() {
+	return "select name, lead_name, company_name from `tabLead` \
+		where docstatus < 2 and ifnull(status, '') != 'Converted' and \
+		(%(key)s like \"%s\" or lead_name like \"%%%s\" or company_name like \"%%%s\") \
+		order by lead_name asc limit 50";
 };
