@@ -117,12 +117,7 @@ cur_frm.fields_dict['customer_group'].get_query = function(doc,dt,dn) {
 }
 
 
-// -----
-// lead
-// -----
-cur_frm.fields_dict['lead_name'].get_query = function(doc,dt,dn){
-	return 'SELECT `tabLead`.`name` FROM `tabLead` WHERE `tabLead`.`status`!="Converted" AND `tabLead`.%(key)s LIKE "%s" ORDER BY `tabLead`.`name` ASC LIMIT 50';	
-}
+cur_frm.fields_dict.lead_name.get_query = erpnext.utils.lead_query;
 
 
 // Transaction History
