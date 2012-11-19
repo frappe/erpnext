@@ -85,26 +85,15 @@ cur_frm.cscript.transaction = function(doc,cdt,cdn){
 }
 
 
-// System User Trigger
-// -------------------
-cur_frm.fields_dict['system_user'].get_query = function(doc) {
-  return 'SELECT tabProfile.name FROM tabProfile WHERE tabProfile.name not in ("Administrator","Guest") AND tabProfile.docstatus != 2 AND tabProfile.enabled = 1 AND tabProfile.%(key)s LIKE "%s" LIMIT 50'
-}
+cur_frm.fields_dict.system_user.get_query = erpnext.profile_query;
 
+cur_frm.fields_dict.approving_user.get_query = erpnext.profile_query;
 
 // System Role Trigger
 // -----------------------
 cur_frm.fields_dict['system_role'].get_query = function(doc) {
   return 'SELECT tabRole.name FROM tabRole WHERE tabRole.name not in ("Administrator","Guest","All") AND tabRole.%(key)s LIKE "%s" LIMIT 50'
 }
-
-
-// Approving User Trigger
-// -----------------------
-cur_frm.fields_dict['approving_user'].get_query = function(doc) {
-  return 'SELECT tabProfile.name FROM tabProfile WHERE tabProfile.name not in ("Administrator","Guest") AND tabProfile.docstatus != 2 AND tabProfile.enabled = 1 AND tabProfile.%(key)s LIKE "%s" LIMIT 50'
-}
-
 
 // Approving Role Trigger
 // -----------------------

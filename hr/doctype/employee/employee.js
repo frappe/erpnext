@@ -64,3 +64,5 @@ cur_frm.cscript.make_salary_structure = function(doc,dt,dn,det){
 	st.grade=doc.grade;
 	loaddoc('Salary Structure', st.name);
 }
+
+cur_frm.fields_dict.user_id.get_query = erpnext.utils.profile_query;

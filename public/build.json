@@ -15,5 +15,6 @@
 		"app/public/js/themes.js",
 		"app/public/js/toolbar.js",
 		"app/public/js/feature_setup.js",
+		"app/public/js/utils.js"
 	],
 }

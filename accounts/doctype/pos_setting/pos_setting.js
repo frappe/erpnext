@@ -52,3 +52,5 @@ cur_frm.fields_dict['territory'].get_query = function(doc,cdt,cdn) {
 cur_frm.fields_dict['select_print_heading'].get_query = function(doc, cdt, cdn) {
 	return 'SELECT `tabPrint Heading`.name FROM `tabPrint Heading` WHERE `tabPrint Heading`.docstatus !=2 AND `tabPrint Heading`.name LIKE "%s" ORDER BY `tabPrint Heading`.name ASC LIMIT 50';
 }
+
+cur_frm.fields_dict.user.get_query = erpnext.utils.profile_query;
