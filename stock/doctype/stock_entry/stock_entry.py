@@ -510,17 +510,20 @@ class DocType(TransactionBase):
 		
 
 	def get_cust_values(self):
-		tbl = self.doc.delivery_note_no and 'Delivery Note' or 'Sales Invoice'
-		record_name = self.doc.delivery_note_no or self.doc.sales_invoice_no
-		res = sql("select customer,customer_name, customer_address from `tab%s` where name = '%s'" % (tbl, record_name))
-		ret = {
-			'customer'				 : res and res[0][0] or '',
-			'customer_name'		: res and res[0][1] or '',
-			'customer_address' : res and res[0][2] or ''}
-
-		return ret
-
-
+		"""fetches customer details"""
+		if self.doc.delivery_note_no:
+			doctype = "Delivery Note"
+			name = self.doc.delivery_note_no
+		else:
+			doctype = "Sales Invoice"
+			name = self.doc.sales_invoice_no
+		
+		result = webnotes.conn.sql("""select customer, customer_name,
+			address_display as customer_address
+			from `tab%s` where name=%s""" % (doctype, "%s"), (name,), as_dict=1)
+		
+		return result and result[0] or {}
+		
 	def get_cust_addr(self):
 		res = sql("select customer_name from `tabCustomer` where name = '%s'"%self.doc.customer)
 		addr = self.get_address_text(customer = self.doc.customer)
@@ -530,17 +533,14 @@ class DocType(TransactionBase):
 
 		return ret
 
-
-		
 	def get_supp_values(self):
-		res = sql("select supplier,supplier_name,supplier_address from `tabPurchase Receipt` where name = '%s'"%self.doc.purchase_receipt_no)
-		ret = {
-			'supplier' : res and res[0][0] or '',
-			'supplier_name' :res and res[0][1] or '',
-			'supplier_address' : res and res[0][2] or ''}
-		return ret
+		result = webnotes.conn.sql("""select supplier, supplier_name,
+			address_display as supplier_address
+			from `tabPurchase Receipt` where name=%s""", (self.doc.purchase_receipt_no,),
+			as_dict=1)
 		
-
+		return result and result[0] or {}
+		
 	def get_supp_addr(self):
 		res = sql("select supplier_name,address from `tabSupplier` where name = '%s'"%self.doc.supplier)
 		addr = self.get_address_text(supplier = self.doc.supplier)
