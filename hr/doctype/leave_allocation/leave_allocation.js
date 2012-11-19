@@ -78,3 +78,5 @@ calculate_total_leaves_allocated = function(doc, dt, dn) {
     set_multiple(dt,dn,{carry_forwarded_leaves : 0,total_leaves_allocated : flt(doc.new_leaves_allocated)});
   }
 }
+
+cur_frm.fields_dict.employee.get_query = erpnext.utils.employee_query;

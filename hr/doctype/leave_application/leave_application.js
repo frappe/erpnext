@@ -99,3 +99,5 @@ calculate_total_days = function(doc, dt, dn) {
     }
   }
 }
+
+cur_frm.fields_dict.employee.get_query = erpnext.utils.employee_query;

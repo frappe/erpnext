@@ -255,3 +255,5 @@ cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
 	}
 	cur_frm.cscript.notify(doc, args);
 }
+
+cur_frm.fields_dict.employee.get_query = erpnext.utils.employee_query;

@@ -107,3 +107,5 @@ var calculate_totals = function(doc, cdt, cdn) {
 cur_frm.cscript.validate = function(doc, cdt, cdn) {
   calculate_totals(doc, cdt, cdn);
 }
+
+cur_frm.fields_dict.employee.get_query = erpnext.utils.employee_query;
