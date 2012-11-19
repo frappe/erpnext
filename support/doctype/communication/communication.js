@@ -1,3 +1,13 @@
+cur_frm.cscript.onload = function(doc) {
+	cur_frm.fields_dict.user.get_query = function() {
+		return "select name, concat_ws(' ', first_name, middle_name, last_name) \
+			from `tabProfile` where ifnull(enabled, 0)=1 and docstatus < 2 and \
+			(%(key)s like \"%s\" or \
+			concat_ws(' ', first_name, middle_name, last_name) like \"%%%s\") \
+			limit 50";
+	};
+}
+
 cur_frm.cscript.refresh = function(doc, dt, dn) {
 	if(!doc.__islocal) {
 		var field_list = ['lead', 'customer', 'supplier', 'contact', 'opportunity',

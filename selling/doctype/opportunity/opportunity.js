@@ -49,6 +49,10 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 	} 
 
 	cur_frm.cscript.make_communication_body();
+	
+	if(cur_frm.fields_dict.contact_by.df.options.match(/^Profile/)) {
+		cur_frm.fields_dict.contact_by.get_query = erpnext.utils.profile_query;
+	}
 }
 
 cur_frm.cscript.onload_post_render = function(doc, cdt, cdn) {
