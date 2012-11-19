@@ -189,4 +189,4 @@ EmailMessage = function(parent, args, list, idx) {
 	this.make();
 }
 
-cur_frm.fields_dict.allocated_to.get_query = erpnext.profile_query;
+cur_frm.fields_dict.allocated_to.get_query = erpnext.utils.profile_query;
