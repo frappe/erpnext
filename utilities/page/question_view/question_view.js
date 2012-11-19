@@ -183,8 +183,6 @@ KBAnswer = function(body, data, ans_list) {
 		with_tags: 0,
 		doctype: 'Answer'
 	}, ans_list)
-	
 }
 
-
-wn.require('app/utilities/page/kb_common/kb_common.js');
+wn.require('app/js/kb_common.js');

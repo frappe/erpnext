@@ -1,7 +1,8 @@
 erpnext.updates = [
 	["19th November 2012", [
-		"Sales Order: Bugfix - Shipping Address should be a Link field",
-		"Link Fields: Search Profile, Employee and Lead using Full Names instead of ID",
+		"Sales Order: Bugfix - Shipping Address should be a Link field.",
+		"Link Fields: Search Profile, Employee and Lead using Full Names instead of ID.",
+		"Knowledge Base: Always open links, embedded in an answer, in a new tab."
 	]],
 	["16th November 2012", [
 		"Appraisal: Cleaned up form and logic. Removed complex and unnecessary approval logic, \

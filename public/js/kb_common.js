@@ -100,7 +100,9 @@ EditableText = function(args) {
 	</div>', args)).appendTo(me.parent);
 	
 	this.set_display = function(txt) {
-		me.$w.find('.ed-text-display').html(wn.markdown(txt));
+		var display_wrapper = me.$w.find('.ed-text-display');
+		display_wrapper.html(wn.markdown(txt));
+		display_wrapper.find("a").attr("target", "blank");
 		me.text = txt;
 	}
 	
