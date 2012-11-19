@@ -5,7 +5,7 @@
 	{
 		u'creation': '2012-09-18 11:20:27',
 		u'docstatus': 0,
-		u'modified': '2012-09-26 13:05:15',
+		u'modified': '2012-09-26 13:05:20',
 		u'modified_by': u'Administrator',
 		u'owner': u'Administrator'
 	},
@@ -271,7 +271,7 @@
 		'colour': u'White:FFF',
 		u'doctype': u'DocField',
 		'fieldname': u'shipping_address_name',
-		'fieldtype': u'Data',
+		'fieldtype': u'Link',
 		'hidden': 1,
 		'in_filter': 1,
 		'label': u'Shipping Address Name',
