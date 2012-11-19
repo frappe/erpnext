@@ -92,3 +92,5 @@ cur_frm.cscript.calculate_total = function(doc,cdt,cdn){
 	doc.total_score = flt(total);
 	refresh_field('total_score');
 }
+
+cur_frm.fields_dict.employee.get_query = erpnext.utils.employee_query;

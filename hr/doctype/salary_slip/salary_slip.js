@@ -138,3 +138,5 @@ cur_frm.cscript.leave_encashment_amount = cur_frm.cscript.arrear_amount;
 cur_frm.cscript.validate = function(doc, dt, dn) {
 	calculate_all(doc, dt, dn);
 }
+
+cur_frm.fields_dict.employee.get_query = erpnext.utils.employee_query;

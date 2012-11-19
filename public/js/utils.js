@@ -22,5 +22,13 @@ erpnext.utils.profile_query = function() {
 		from `tabProfile` where ifnull(enabled, 0)=1 and docstatus < 2 and \
 		name not in ('Administrator', 'Guest') and (%(key)s like \"%s\" or \
 		concat_ws(' ', first_name, middle_name, last_name) like \"%%%s\") \
-		limit 50";
+		order by name asc limit 50";
+};
+
+// employee related get query
+erpnext.utils.employee_query = function() {
+	return "select name, employee_name from `tabEmployee` \
+		where status = 'Active' and docstatus < 2 and \
+		(employee_name like \"%%%s\" or %(key)s like \"%s\") \
+		order by name asc limit 50";
 };

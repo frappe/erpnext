@@ -66,3 +66,5 @@ cur_frm.cscript.make_salary_structure = function(doc,dt,dn,det){
 }
 
 cur_frm.fields_dict.user_id.get_query = erpnext.utils.profile_query;
+
+cur_frm.fields_dict.reports_to.get_query = erpnext.utils.employee_query;

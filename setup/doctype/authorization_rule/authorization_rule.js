@@ -85,9 +85,9 @@ cur_frm.cscript.transaction = function(doc,cdt,cdn){
 }
 
 
-cur_frm.fields_dict.system_user.get_query = erpnext.profile_query;
+cur_frm.fields_dict.system_user.get_query = erpnext.utils.profile_query;
 
-cur_frm.fields_dict.approving_user.get_query = erpnext.profile_query;
+cur_frm.fields_dict.approving_user.get_query = erpnext.utils.profile_query;
 
 // System Role Trigger
 // -----------------------
@@ -112,3 +112,5 @@ cur_frm.fields_dict['master_name'].get_query = function(doc){
   else
     return 'SELECT `tabItem`.`name` FROM `tabItem` WHERE `tabItem`.`name` = "cheating done to avoid null" ORDER BY `tabItem`.`name` DESC LIMIT 50';
 }
+
+cur_frm.fields_dict.to_emp.get_query = erpnext.utils.employee_query;
