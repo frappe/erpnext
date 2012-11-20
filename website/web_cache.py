@@ -235,7 +235,7 @@ def delete_cache(page_name):
 			* blog is un-published
 	"""
 	import webnotes
-	webnotes.conn.sql("""delete from `tabWeb Cache` where name=%s""", page_name)
+	webnotes.conn.sql("""delete from `tabWeb Cache` where name=%s""", (page_name,))
 
 def refresh_cache(build=None):
 	"""delete and re-create web cache entries"""
