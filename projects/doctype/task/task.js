@@ -27,6 +27,8 @@ cur_frm.cscript.project = function(doc, cdt, cdn){
   if(doc.project) get_server_fields('get_project_details', '','', doc, cdt, cdn, 1);
 }
 
+
+// TODO: remove these? field doesn't exist, but custom field could exist
 cur_frm.fields_dict['customer'].get_query = function(doc,cdt,cdn){
   var cond='';
   if(doc.project) cond = 'ifnull(`tabProject`.customer, "") = `tabCustomer`.name AND ifnull(`tabProject`.name, "") = "'+doc.project+'" AND';

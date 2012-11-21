@@ -142,3 +142,6 @@ cur_frm.fields_dict['ref_rate_details'].grid.onrowadd = function(doc, cdt, cdn){
 	locals[cdt][cdn].ref_currency = sys_defaults.currency;
 	refresh_field('ref_currency',cdn,'ref_rate_details');
 }
+
+cur_frm.fields_dict.item_customer_details.grid.get_field("customer_name").get_query = 
+	erpnext.utils.customer_query;

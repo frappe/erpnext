@@ -273,7 +273,7 @@ class DocType:
 		self.exc_list = []
 		for sle in sll:
 			# block if stock level goes negative on any date
-			if val_method != 'Moving Average' or flt(allow_negative_stock) == 0:
+			if (val_method != 'Moving Average') or (cint(allow_negative_stock) == 0):
 				if self.validate_negative_stock(cqty, sle):
 					cqty += sle['actual_qty']
 					continue

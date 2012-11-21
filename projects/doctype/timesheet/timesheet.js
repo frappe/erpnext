@@ -45,3 +45,6 @@ cur_frm.fields_dict['timesheet_details'].grid.get_field("task_name").get_query =
   
   return repl('SELECT distinct `tabTask`.`subject` FROM `tabTask` WHERE %(cond)s `tabTask`.`subject` LIKE "%s" ORDER BY `tabTask`.`subject` ASC LIMIT 50', {cond:cond});
 }
+
+cur_frm.fields_dict.timesheet_details.grid.get_field("customer_name").get_query = 
+	erpnext.utils.customer_query;

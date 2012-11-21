@@ -28,3 +28,5 @@ cur_frm.cscript.refresh = function(doc) {
 		erpnext.show_task_gantt(cur_frm.gantt_area, cur_frm.docname);		
 	}
 }
+
+cur_frm.fields_dict.customer.get_query = erpnext.utils.customer_query;

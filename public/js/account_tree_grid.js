@@ -105,7 +105,7 @@ erpnext.AccountTreeGrid = wn.views.TreeGridReport.extend({
 				}
 				
 				me.init_account(d);
-			});			
+			});
 		}
 		this.set_indent();
 		this.prepare_balances();

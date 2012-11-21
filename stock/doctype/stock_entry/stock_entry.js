@@ -230,3 +230,5 @@ cur_frm.cscript.validate_items = function(doc) {
     validated = false;
   }
 }
+
+cur_frm.fields_dict.customer.get_query = erpnext.utils.customer_query;

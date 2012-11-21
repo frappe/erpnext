@@ -42,4 +42,4 @@ cur_frm.cscript.hide_dialog = function() {
 		cur_frm.contact_list.run();
 }
 
-
+cur_frm.fields_dict.customer.get_query = erpnext.utils.customer_query;

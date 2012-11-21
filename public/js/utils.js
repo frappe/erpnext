@@ -51,3 +51,35 @@ erpnext.utils.lead_query = function() {
 		case when company_name like \"%s%%\" then 0 else 1 end, \
 		lead_name asc limit 50";
 };
+
+// searches for customer
+erpnext.utils.customer_query = function() {
+	if(sys_defaults.cust_master_name == "Customer Name") {
+		var fields = ["name", "customer_group", "country", "territory"];
+	} else {
+		var fields = ["name", "customer_name", "customer_group", "country", "territory"];
+	}
+	
+	return "select " + fields.join(", ") + " from `tabCustomer` where docstatus < 2 and \
+		(%(key)s like \"%s\" or customer_name like \"%%%s\") \
+		order by \
+		case when name like \"%s%%\" then 0 else 1 end, \
+		case when customer_name like \"%s%%\" then 0 else 1 end, \
+		name, customer_name limit 50";
+};
+
+// searches for supplier
+erpnext.utils.supplier_query = function() {
+	if(sys_defaults.supp_master_name == "Supplier Name") {
+		var fields = ["name", "supplier_type"];
+	} else {
+		var fields = ["name", "supplier_name", "supplier_type"];
+	}
+	
+	return "select " + fields.join(", ") + " from `tabSupplier` where docstatus < 2 and \
+		(%(key)s like \"%s\" or supplier_name like \"%%%s\") \
+		order by \
+		case when name like \"%s%%\" then 0 else 1 end, \
+		case when supplier_name like \"%s%%\" then 0 else 1 end, \
+		name, supplier_name limit 50";
+};
