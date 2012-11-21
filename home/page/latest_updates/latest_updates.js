@@ -1,4 +1,16 @@
 erpnext.updates = [
+	["21st November 2012", [
+		"Tree Report: Added missing expand / collapse buttons.",
+		"List View: Do not show restricted records, as defined in Permission Manager.",
+		"Customer Link Field: Search by Customer Name instead of ID",
+		"Customer Link Field: Show only ID in auto-suggest \
+			if ID created using Customer Name (as defined in Global Defaults)",
+		"Letter Head: Fixed bug causing cursor position to reset in Content",
+	],
+	["20th November 2012", [
+		"Auto-suggest: Show main label in bold",
+		"Data Import Tool: Fixed #Name error faced by MS Excel users in import template",
+	]],
 	["19th November 2012", [
 		"Sales Order: Bugfix - Shipping Address should be a Link field.",
 		"Link Fields: Search Profile, Employee and Lead using Full Names instead of ID.",
