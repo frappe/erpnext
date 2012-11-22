@@ -69,7 +69,8 @@ erpnext.GeneralLedger = wn.views.GridReport.extend({
 			filter: function(val, item, opts) {
 				return item.company == val || val == opts.default_value;
 			}},
-		{fieldtype:"Select", label: "Account", link:"Account", default_value: "Select Account...",
+		{fieldtype:"Select", label: "Account", link:"Account", 
+			default_value: "Select Account...", chosen: true,
 			filter: function(val, item, opts, me) {
 				if(val == opts.default_value) {
 					return true;
@@ -120,7 +121,9 @@ erpnext.GeneralLedger = wn.views.GridReport.extend({
 			}
 			
 			// chosen
-			$filter.trigger("liszt:updated");
+			if(me.filter_inputs.company.get(0).opts.chosen) {
+				$filter.trigger("liszt:updated");
+			}
 			
 			me.filter_inputs.refresh.click();
 		});
