@@ -3,9 +3,9 @@
 
 	# These values are common in all dictionaries
 	{
-		u'creation': '2012-08-08 10:41:31',
+		u'creation': '2012-11-19 12:06:56',
 		u'docstatus': 0,
-		u'modified': '2012-11-16 12:26:14',
+		u'modified': '2012-11-21 17:12:54',
 		u'modified_by': u'Administrator',
 		u'owner': u'Administrator'
 	},
@@ -40,12 +40,14 @@
 
 	# These values are common for all DocPerm
 	{
+		'amend': 0,
 		u'doctype': u'DocPerm',
 		u'name': u'__common__',
 		'parent': u'Lead',
 		'parentfield': u'permissions',
 		'parenttype': u'DocType',
-		'read': 1
+		'read': 1,
+		'submit': 0
 	},
 
 	# DocType, Lead
@@ -146,7 +148,7 @@
 	{
 		'colour': u'White:FFF',
 		'depends_on': u"eval:doc.source == 'Existing Customer'",
-		'description': u'Source of th',
+		'description': u'Source of the Lead',
 		u'doctype': u'DocField',
 		'fieldname': u'customer',
 		'fieldtype': u'Link',
@@ -626,77 +628,81 @@
 
 	# DocPerm
 	{
+		'cancel': 0,
+		'create': 0,
+		u'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'All',
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'cancel': 0,
 		'create': 1,
 		u'doctype': u'DocPerm',
 		'permlevel': 0,
-		'role': u'Guest',
+		'role': u'Sales User',
 		'write': 1
 	},
 
 	# DocPerm
 	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		u'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Sales User',
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		u'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Sales Manager',
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
 		'cancel': 1,
 		'create': 1,
 		u'doctype': u'DocPerm',
 		'permlevel': 0,
 		'role': u'Sales Manager',
-		'submit': 0,
 		'write': 1
 	},
 
 	# DocPerm
 	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 1,
-		u'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Sales User',
-		'submit': 0,
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		u'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'All'
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
 		'cancel': 0,
 		'create': 1,
 		u'doctype': u'DocPerm',
 		'permlevel': 0,
 		'role': u'System Manager',
-		'submit': 0,
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'cancel': 0,
+		'create': 0,
+		u'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Sales Manager',
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'cancel': 0,
+		'create': 0,
+		u'doctype': u'DocPerm',
+		'permlevel': 1,
+		'role': u'Sales User',
+		'write': 0
+	},
+
+	# DocPerm
+	{
+		'cancel': 0,
+		'create': 1,
+		u'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'System Manager',
+		'write': 1
+	},
+
+	# DocPerm
+	{
+		'cancel': 0,
+		'create': 1,
+		u'doctype': u'DocPerm',
+		'permlevel': 0,
+		'role': u'Guest',
 		'write': 1
 	}
 ]

@@ -83,3 +83,4 @@ cur_frm.fields_dict['contact_person'].get_query = function(doc, cdt, cdn) {
   return 'SELECT name,CONCAT(first_name," ",ifnull(last_name,"")) As FullName,department,designation FROM tabContact WHERE customer = "'+ doc.customer +'" AND docstatus != 2 AND name LIKE "%s" ORDER BY name ASC LIMIT 50';
 }
 
+cur_frm.fields_dict.customer.get_query = erpnext.utils.customer_query;

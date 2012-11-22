@@ -18,3 +18,5 @@
 // =====================================================================
 cur_frm.add_fetch('customer','customer_name','customer_name');
 cur_frm.add_fetch('customer','address','customer_address');
+
+cur_frm.fields_dict.customer.get_query = erpnext.utils.customer_query;

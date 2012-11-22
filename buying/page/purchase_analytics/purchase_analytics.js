@@ -32,7 +32,7 @@ erpnext.PurchaseAnalytics = wn.views.TreeGridReport.extend({
 			parent: $(wrapper).find('.layout-main'),
 			appframe: wrapper.appframe,
 			doctypes: ["Item", "Item Group", "Supplier", "Supplier Type", "Company",
-				"Purchase Invoice", "Purchase Invoice Item"],
+				"Purchase Invoice", "Purchase Invoice Item", "Fiscal Year"],
 			tree_grid: { show: true }
 		});
 		

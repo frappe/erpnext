@@ -48,3 +48,8 @@ cur_frm.fields_dict['pp_details'].grid.get_field('bom_no').get_query = function(
   var d = locals[this.doctype][this.docname];
   return 'SELECT DISTINCT `tabBOM`.`name` FROM `tabBOM` WHERE `tabBOM`.`item` = "' + d.item_code + '" AND `tabBOM`.`is_active` = "Yes" AND `tabBOM`.docstatus = 1 AND `tabBOM`.`name` like "%s" ORDER BY `tabBOM`.`name` LIMIT 50';
 }
+
+cur_frm.fields_dict.customer.get_query = erpnext.utils.customer_query;
+
+cur_frm.fields_dict.pp_so_details.grid.get_field("customer").get_query =
+	erpnext.utils.customer_query;

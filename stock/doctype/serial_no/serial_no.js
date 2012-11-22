@@ -68,3 +68,7 @@ cur_frm.fields_dict['item_code'].get_query = function(doc,cdt,cdn) {
 	AND (ifnull(`tabItem`.`end_of_life`,"") = "" OR `tabItem`.`end_of_life` > NOW() OR `tabItem`.`end_of_life`="0000-00-00") \
 	AND `tabItem`.%(key)s LIKE "%s"  ORDER BY  `tabItem`.`name` ASC LIMIT 50';
 }
+
+cur_frm.fields_dict.customer.get_query = erpnext.utils.customer_query;
+
+cur_frm.fields_dict.supplier.get_query = erpnext.utils.supplier_query;

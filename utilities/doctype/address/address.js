@@ -15,8 +15,8 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 cur_frm.cscript.onload = function(doc, cdt, cdn) {
-	if(doc.customer) cur_frm.add_fetch('customer', 'customer_name', 'customer_name');
-	if(doc.supplier) cur_frm.add_fetch('supplier', 'supplier_name', 'supplier_name');
+	cur_frm.add_fetch('customer', 'customer_name', 'customer_name');
+	cur_frm.add_fetch('supplier', 'supplier_name', 'supplier_name');
 	
 	var route = wn.get_route();
 	if(route[1]=='Supplier') {
@@ -41,4 +41,6 @@ cur_frm.cscript.hide_dialog = function() {
 		cur_frm.address_list.run();
 }
 
+cur_frm.fields_dict.customer.get_query = erpnext.utils.customer_query;
 
+cur_frm.fields_dict.supplier.get_query = erpnext.utils.supplier_query;

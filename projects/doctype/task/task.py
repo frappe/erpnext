@@ -41,7 +41,8 @@ class DocType:
 		if cust:
 			ret = {'customer': cust and cust[0][0] or '', 'customer_name': cust and cust[0][1] or ''}
 			return ret
-	
+
+	# TODO: Remove these? as the field customer doesn't exists
 	def get_customer_details(self):
 		cust = sql("select customer_name from `tabCustomer` where name=%s", self.doc.customer)
 		if cust:

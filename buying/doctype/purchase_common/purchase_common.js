@@ -669,3 +669,5 @@ cur_frm.cscript.project_name = function(doc, cdt, cdn) {
 		refresh_field(cur_frm.cscript.fname);
 	}
 }
+
+cur_frm.fields_dict.supplier.get_query = erpnext.utils.supplier_query;

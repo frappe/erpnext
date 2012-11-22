@@ -190,3 +190,5 @@ EmailMessage = function(parent, args, list, idx) {
 }
 
 cur_frm.fields_dict.allocated_to.get_query = erpnext.utils.profile_query;
+
+cur_frm.fields_dict.customer.get_query = erpnext.utils.customer_query;
