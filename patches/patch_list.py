@@ -671,4 +671,8 @@ patch_list = [
 		'patch_module': 'patches.november_2012',
 		'patch_file': 'reset_appraisal_permissions',
 	},
+	{
+		'patch_module': 'patches.november_2012',
+		'patch_file': 'disable_cancelled_profiles',
+	},
 ]
