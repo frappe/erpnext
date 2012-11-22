@@ -1,6 +1,9 @@
 erpnext.updates = [
 	["22nd November 2012", [
 		"Support Ticket: Compose a reply using Markdown",
+		"Supplier Link Field: Search by Supplier Name instead of ID",
+		"Supplier Link Field: Show only ID in auto-suggest \
+			if ID created using Supplier Name (as defined in Global Defaults)",
 	]],
 	["21st November 2012", [
 		"Tree Report: Added missing expand / collapse buttons.",
