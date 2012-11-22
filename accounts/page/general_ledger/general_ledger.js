@@ -104,20 +104,37 @@ erpnext.GeneralLedger = wn.views.GridReport.extend({
 			var $filter = me.filter_inputs.account;
 			var company = $(this).val();
 			var default_company = me.filter_inputs.company.get(0).opts.default_value;
-			$filter.empty().add_options([$filter.get(0).opts.default_value].concat(
+			var default_account = $filter.get(0).opts.default_value;
+			var new_options = [default_account].concat(
 				$.map(wn.report_dump.data["Account"], function(ac) {
 					return (company===default_company || 
 						accounts_by_company[company].indexOf(ac.name)!=-1) ? 
 						ac.name : null;
-				})));
+				}));
+			var old_account = me.filter_inputs.account.val();
+
+			$filter.empty().add_options(new_options);
+			
+			if((old_account != default_account) && new_options.indexOf(old_account)!=-1) {
+				$filter.val(old_account);
+			}
+			
+			// chosen
+			$filter.trigger("liszt:updated");
+			
 			me.filter_inputs.refresh.click();
 		});
 		
 		this.filter_inputs.account && this.filter_inputs.account.change(function() {
 			me.filter_inputs.refresh.click();
 		});
+		
 	},
 	init_filter_values: function() {
+		this._super();
+		this.filter_inputs.company.change();
+	},
+	apply_filters_from_route: function() {
 		this._super();
 		this.filter_inputs.company.change();
 	},
@@ -134,7 +151,7 @@ erpnext.GeneralLedger = wn.views.GridReport.extend({
 		account = this.account_by_name[account];
 		item_account = this.account_by_name[item_account];
 		
-		return (item_account.lft >= account.lft && item_account.rgt <= account.rgt)			
+		return ((item_account.lft >= account.lft) && (item_account.rgt <= account.rgt));
 	},
 	prepare_data: function() {
 		// add Opening, Closing, Totals rows
