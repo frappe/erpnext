@@ -208,15 +208,17 @@ def get_data(rows, company_abbr):
 					for acc_idx in xrange(len(accounts)):
 						col_idx = len(columns) + acc_idx
 						if flt(r[col_idx]) != 0:
-							acc_dict[accounts[acc_idx]] = r[col_idx]
+							if not acc_dict.get(accounts[acc_idx]):
+								acc_dict[accounts[acc_idx]] = 0
+							acc_dict[accounts[acc_idx]] += flt(r[col_idx])
 						if flt(r[col_idx]) > 0:
 							total_debit += flt(r[col_idx])
 						else:
 							total_credit += abs(flt(r[col_idx]))
-							
+					
 					d['total_debit'] = total_debit
 					d['total_credit'] = total_credit
-					
+				
 				data.append([d, acc_dict])
 				
 
