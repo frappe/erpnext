@@ -145,3 +145,6 @@ cur_frm.fields_dict['ref_rate_details'].grid.onrowadd = function(doc, cdt, cdn){
 
 cur_frm.fields_dict.item_customer_details.grid.get_field("customer_name").get_query = 
 	erpnext.utils.customer_query;
+	
+cur_frm.fields_dict.item_supplier_details.grid.get_field("supplier").get_query = 
+	erpnext.utils.supplier_query;

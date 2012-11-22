@@ -42,3 +42,5 @@ cur_frm.cscript.hide_dialog = function() {
 }
 
 cur_frm.fields_dict.customer.get_query = erpnext.utils.customer_query;
+
+cur_frm.fields_dict.supplier.get_query = erpnext.utils.supplier_query;
