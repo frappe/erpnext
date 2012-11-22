@@ -83,7 +83,7 @@ class DocType:
 				and (ifnull(t4.is_pro_applicable, 'No') = 'Yes' or ifnull(t4.is_sub_contracted_item, 'No') = 'Yes') %s
 			order by t1.name desc
 		"""% (self.doc.company, cond), as_dict = 1)
-
+		
 		self.add_so_in_table(open_so)
 
 
@@ -286,7 +286,9 @@ class DocType:
 			if action == 'download_rm':
 				bom_dict[d.bom_no] = bom_dict.get(d.bom_no, 0) + flt(d.planned_qty)
 			elif not d.is_pro_created:
-				item_dict[d.item_code] = [(item_dict.get(d.item_code, 0) + flt(d.planned_qty)), d.bom_no, d.description, d.stock_uom]
+				item_dict[d.item_code] = [
+					(flt(item_dict.get(d.item_code, [0])[0]) + flt(d.planned_qty)),
+					d.bom_no, d.description, d.stock_uom]
 
 		if action == 'raise_pro_order':
 			for d in item_dict:
