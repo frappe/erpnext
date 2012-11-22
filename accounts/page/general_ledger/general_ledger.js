@@ -121,9 +121,9 @@ erpnext.GeneralLedger = wn.views.GridReport.extend({
 			}
 			
 			// chosen
-			if(me.filter_inputs.company.get(0).opts.chosen) {
-				$filter.trigger("liszt:updated");
-			}
+			// if(me.filter_inputs.company.get(0).opts.chosen) {
+			// 	$filter.trigger("liszt:updated");
+			// }
 			
 			me.filter_inputs.refresh.click();
 		});
