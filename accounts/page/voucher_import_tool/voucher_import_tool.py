@@ -90,8 +90,12 @@ def import_vouchers(common_values, data, start_idx, import_type):
 	
 	webnotes.conn.commit()
 	try:
+		jv = Document("Journal Voucher")
+		
 		webnotes.conn.begin()
 		for i in xrange(len(data)):
+			jv = Document("Journal Voucher")
+			
 			d = data[i][0]
 			if import_type == "Voucher Import: Two Accounts" and flt(d.get("amount")) == 0:
 				webnotes.message_log = ["Amount not specified"]
@@ -112,7 +116,6 @@ def import_vouchers(common_values, data, start_idx, import_type):
 				
 				d.company = common_values.company
 						
-				jv = Document("Journal Voucher")
 				map_fields(["voucher_type", "posting_date", "naming_series", 
 					"remarks:user_remark", "ref_number:cheque_no", "ref_date:cheque_date",
 					"is_opening", "due_date", "company"], d, jv.fields)
