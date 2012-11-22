@@ -1,4 +1,7 @@
 erpnext.updates = [
+	["22nd November 2012", [
+		"Support Ticket: Compose a reply using Markdown",
+	]],
 	["21st November 2012", [
 		"Tree Report: Added missing expand / collapse buttons.",
 		"List View: Do not show restricted records, as defined in Permission Manager.",
@@ -6,7 +9,7 @@ erpnext.updates = [
 		"Customer Link Field: Show only ID in auto-suggest \
 			if ID created using Customer Name (as defined in Global Defaults)",
 		"Letter Head: Fixed bug causing cursor position to reset in Content",
-	],
+	]],
 	["20th November 2012", [
 		"Auto-suggest: Show main label in bold",
 		"Data Import Tool: Fixed #Name error faced by MS Excel users in import template",

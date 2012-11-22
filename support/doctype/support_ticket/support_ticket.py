@@ -36,16 +36,19 @@ class DocType(TransactionBase):
 		if not self.doc.new_response:
 			webnotes.msgprint("Please write something as a response", raise_exception=1)
 		
+		import markdown2
+		self.doc.new_response = markdown2.markdown(self.doc.new_response)
+		
 		subject = '[' + self.doc.name + '] ' + (self.doc.subject or 'No Subject Specified')
 		
-		response = self.doc.new_response + '\n\n[Please do not change the subject while responding.]'
+		response = self.doc.new_response + '<p>[Please do not change the subject while responding.]</p>'
 
 		# add last response to new response
 		response += self.last_response()
 
 		signature = webnotes.conn.get_value('Email Settings',None,'support_signature')
 		if signature:
-			response += '\n\n' + signature
+			response += '<p>' + signature + '</p>'
 
 		from webnotes.utils.email_lib import sendmail
 		
