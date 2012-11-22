@@ -18,6 +18,9 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 	cur_frm.add_fetch('customer', 'customer_name', 'customer_name');
 	cur_frm.add_fetch('supplier', 'supplier_name', 'supplier_name');
 	
+	cur_frm.fields_dict.customer.get_query = erpnext.utils.customer_query;
+	cur_frm.fields_dict.supplier.get_query = erpnext.utils.supplier_query;
+	
 	var route = wn.get_route();
 	if(route[1]=='Supplier') {
 		var supplier = wn.container.page.frm.doc;
@@ -40,7 +43,3 @@ cur_frm.cscript.hide_dialog = function() {
 	if(cur_frm.address_list)
 		cur_frm.address_list.run();
 }
-
-cur_frm.fields_dict.customer.get_query = erpnext.utils.customer_query;
-
-cur_frm.fields_dict.supplier.get_query = erpnext.utils.supplier_query;

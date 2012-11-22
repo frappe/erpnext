@@ -14,6 +14,9 @@ cur_frm.cscript.onload = function(doc) {
 			company_name like \"%%%s\") \
 			order by lead_name asc limit 50";
 	};
+	
+	cur_frm.fields_dict.customer.get_query = erpnext.utils.customer_query;
+	cur_frm.fields_dict.supplier.get_query = erpnext.utils.supplier_query;
 }
 
 cur_frm.cscript.refresh = function(doc, dt, dn) {
@@ -137,7 +140,3 @@ cur_frm.cscript.hide_dialog = function() {
 	if(cur_frm.communication_list)
 		cur_frm.communication_list.run();
 }
-
-cur_frm.fields_dict.customer.get_query = erpnext.utils.customer_query;
-
-cur_frm.fields_dict.supplier.get_query = erpnext.utils.supplier_query;
