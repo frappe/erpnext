@@ -45,8 +45,8 @@ erpnext.GeneralLedger = wn.views.GridReport.extend({
 					open_btn: true,
 					doctype: "'Account'"
 				}},
-			{id: "against_accont", name: "Against Account", field: "against_account", 
-				width: 240, hidden: this.is_default("account")},
+			{id: "against_account", name: "Against Account", field: "against_account", 
+				width: 240, hidden: !this.account},
 
 			{id: "debit", name: "Debit", field: "debit", width: 100,
 				formatter: this.currency_formatter},
@@ -69,10 +69,9 @@ erpnext.GeneralLedger = wn.views.GridReport.extend({
 			filter: function(val, item, opts) {
 				return item.company == val || val == opts.default_value;
 			}},
-		{fieldtype:"Select", label: "Account", link:"Account", 
-			default_value: "Select Account...", chosen: true,
+		{fieldtype:"Link", label: "Account", link:"Account",
 			filter: function(val, item, opts, me) {
-				if(val == opts.default_value) {
+				if(!val) {
 					return true;
 				} else {
 					// true if GL Entry belongs to selected
@@ -99,38 +98,27 @@ erpnext.GeneralLedger = wn.views.GridReport.extend({
 		this._super();
 		var me = this;
 		
+		this.accounts_by_company = this.make_accounts_by_company();
 		// filter accounts options by company
-		var accounts_by_company = this.make_accounts_by_company();
 		this.filter_inputs.company && this.filter_inputs.company.change(function() {
-			var $filter = me.filter_inputs.account;
-			var company = $(this).val();
-			var default_company = me.filter_inputs.company.get(0).opts.default_value;
-			var default_account = $filter.get(0).opts.default_value;
-			var new_options = [default_account].concat(
-				$.map(wn.report_dump.data["Account"], function(ac) {
-					return (company===default_company || 
-						accounts_by_company[company].indexOf(ac.name)!=-1) ? 
-						ac.name : null;
-				}));
-			var old_account = me.filter_inputs.account.val();
-
-			$filter.empty().add_options(new_options);
-			
-			if((old_account != default_account) && new_options.indexOf(old_account)!=-1) {
-				$filter.val(old_account);
-			}
-			
-			// chosen
-			// if(me.filter_inputs.company.get(0).opts.chosen) {
-			// 	$filter.trigger("liszt:updated");
-			// }
-			
+			me.setup_account_filter(this);
 			me.filter_inputs.refresh.click();
 		});
+	},
+	setup_account_filter: function(company_filter) {
+		var me = this;
 		
-		this.filter_inputs.account && this.filter_inputs.account.change(function() {
-			me.filter_inputs.refresh.click();
-		});
+		var $account = me.filter_inputs.account;
+		var company = $(company_filter).val();
+		var default_company = this.filter_inputs.company.get(0).opts.default_value;
+		var opts = $account.get(0).opts;
+		opts.list = $.map(wn.report_dump.data["Account"], function(ac) {
+				return (company===default_company || 
+					me.accounts_by_company[company].indexOf(ac.name)!=-1) ? 
+					ac.name : null;
+			});
+		
+		this.set_autocomplete($account, opts.list);
 		
 	},
 	init_filter_values: function() {
@@ -151,6 +139,7 @@ erpnext.GeneralLedger = wn.views.GridReport.extend({
 		return accounts_by_company;
 	},
 	is_child_account: function(account, item_account) {
+		var opts = [account, item_account];
 		account = this.account_by_name[account];
 		item_account = this.account_by_name[item_account];
 		
@@ -188,7 +177,7 @@ erpnext.GeneralLedger = wn.views.GridReport.extend({
 		
 		$.each(data, function(i, item) {
 			if((me.is_default("company") ? true : me.apply_filter(item, "company")) &&
-				(!me.is_default("account") ? me.is_child_account(me.account, item.account) 
+				(me.account ? me.is_child_account(me.account, item.account) 
 				: true) && (me.voucher_no ? item.voucher_no==me.voucher_no : true)) {
 				var date = dateutil.str_to_obj(item.posting_date);
 				
@@ -218,7 +207,7 @@ erpnext.GeneralLedger = wn.views.GridReport.extend({
 		}
 							
 		
-		if(!me.is_default("account")) {
+		if(me.account) {
 			me.appframe.set_title("General Ledger: " + me.account);
 			
 			if(me.account_by_name[me.account].debit_or_credit == "Debit") {
@@ -261,7 +250,7 @@ erpnext.GeneralLedger = wn.views.GridReport.extend({
 	get_plot_data: function() {
 		var data = [];
 		var me = this;
-		if(me.is_default("account") || me.voucher_no) return false;
+		if(!me.account || me.voucher_no) return false;
 		var debit_or_credit = me.account_by_name[me.account].debit_or_credit;
 		var balance = debit_or_credit=="Debit" ? me.data[0].debit : me.data[0].credit;
 		data.push({
