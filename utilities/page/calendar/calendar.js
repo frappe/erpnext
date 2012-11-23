@@ -264,6 +264,7 @@ Calendar.CalEvent= function(doc, cal) {
 	
 	this.body = $("<div class='label cal_event'></div>")
 		.html(doc.description)
+		.attr("title", doc.description)
 		.css({"cursor":"pointer"})
 		.attr("data-event", doc.name)
 		.click(function() {
