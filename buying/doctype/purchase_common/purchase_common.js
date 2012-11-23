@@ -670,4 +670,4 @@ cur_frm.cscript.project_name = function(doc, cdt, cdn) {
 	}
 }
 
-cur_frm.fields_dict.supplier.get_query = erpnext.utils.supplier_query;
+cur_frm.fields_dict.supplier && (cur_frm.fields_dict.supplier.get_query = erpnext.utils.supplier_query);
