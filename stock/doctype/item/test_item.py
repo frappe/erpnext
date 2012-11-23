@@ -19,7 +19,7 @@ import unittest
 import webnotes
 import copy
 
-from webnotes.model.doclist import DocList
+from webnotes.model.wrapper import ModelWrapper
 from webnotes.model.doc import Document
 from webnotes.model.code import get_obj
 from webnotes.utils import flt
@@ -35,7 +35,7 @@ class TestItem(unittest.TestCase):
 		webnotes.conn.rollback()
 		
 	def testInsert(self):
-		d = DocList()
+		d = ModelWrapper()
 
 		count_before =  flt(sql("select count(*) from tab"+_doctype)[0][0])
 		if docok:
@@ -50,7 +50,7 @@ class TestItem(unittest.TestCase):
 	def testFailAssert(self):
 		if docnotok:
 			with self.assertRaises(Exception) as context:
-				d = DocList()
+				d = ModelWrapper()
 				d.doc = docnotok[0]
 				d.children = None
 				d.doc.fields['__islocal']=1

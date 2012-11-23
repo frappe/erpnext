@@ -20,7 +20,7 @@ import webnotes
 
 from webnotes.utils import add_days, add_months, add_years, cint, cstr, flt, get_defaults, getdate, has_common, month_name, now, nowdate, set_default, validate_email_add
 from webnotes.model.doc import Document, addchild, getchildren
-from webnotes.model.doclist import getlist
+from webnotes.model.wrapper import getlist
 from webnotes.model.code import get_obj
 from webnotes import msgprint, errprint
 

@@ -22,7 +22,7 @@ from webnotes.utils import add_days, add_months, add_years, cint, cstr, date_dif
 from webnotes.utils.email_lib import sendmail
 from webnotes.model import db_exists
 from webnotes.model.doc import Document, addchild, getchildren, make_autoname
-from webnotes.model.doclist import getlist, copy_doclist
+from webnotes.model.wrapper import getlist, copy_doclist
 from webnotes.model.code import get_obj, get_server_obj, run_server_obj, updatedb, check_syntax
 from webnotes import session, form, msgprint, errprint
 

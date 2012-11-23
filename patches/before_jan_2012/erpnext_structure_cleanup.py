@@ -21,7 +21,7 @@ from __future__ import unicode_literals
 import webnotes
 from webnotes.model import delete_doc
 from webnotes.modules import reload_doc
-from webnotes.modules.export_module import export_to_files
+from webnotes.modules.export_file import export_to_files
 sql = webnotes.conn.sql
 
 

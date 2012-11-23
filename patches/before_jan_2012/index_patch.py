@@ -24,7 +24,7 @@ sql = webnotes.conn.sql
 from webnotes.utils import cint, cstr
 
 def create_proper_index():
-	from webnotes.modules.export_module import export_to_files
+	from webnotes.modules.export_file import export_to_files
 
 	dt_index_fields={
 						'Purchase Receipt Item': ['prevdoc_docname', 'item_code', 'warehouse', 'prevdoc_detail_docname'], 

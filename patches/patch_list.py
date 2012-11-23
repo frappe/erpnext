@@ -675,4 +675,8 @@ patch_list = [
 		'patch_module': 'patches.november_2012',
 		'patch_file': 'disable_cancelled_profiles',
 	},
+	{
+		'patch_module': 'patches.november_2012',
+		'patch_file': 'remove_old_unbilled_items_report',
+	},
 ]
