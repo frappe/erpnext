@@ -25,7 +25,7 @@ webnotes.user = webnotes.profile.Profile()
 from webnotes.model.doc import Document
 from webnotes.model.code import get_obj
 from webnotes.utils import cstr, flt
-from webnotes.model.doclist import getlist
+from webnotes.model.wrapper import getlist
 sql = webnotes.conn.sql
 
 from sandbox.testdata.masters import *

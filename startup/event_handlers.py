@@ -53,7 +53,7 @@ def comment_added(doc):
 		'<i>"' + doc.comment + '"</i>', '#6B24B3')
 
 def doclist_all(doc, method):
-	"""doclist trigger called from webnotes.model.doclist on any event"""
+	"""doclist trigger called from webnotes.model.wrapper on any event"""
 	home.update_feed(doc, method)
 	
 def boot_session(bootinfo):

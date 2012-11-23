@@ -1,0 +1,20 @@
+[
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-11-23 16:46:22", 
+  "modified_by": "Administrator", 
+  "modified": "2012-11-23 17:55:12"
+ }, 
+ {
+  "name": "__common__", 
+  "ref_doctype": "Sales Invoice", 
+  "doctype": "Report", 
+  "is_standard": "Yes", 
+  "query": "select \n `tabDelivery Note`.`name` as \"Delivery Note:Link/Delivery Note:120\",\n `tabDelivery Note`.`status` as \"Status\",\n `tabDelivery Note`.`posting_date` as \"Date:Date\",\n `tabDelivery Note Item`.item_code as \"Item:Link/Item:120\",\n `tabDelivery Note Item`.description as \"Description\",\n `tabDelivery Note Item`.qty as \"Qty:Float\",\n `tabDelivery Note Item`.billed_qty as \"Billed Qty:Float\"\nfrom\n `tabDelivery Note`, `tabDelivery Note Item`\nwhere\n `tabDelivery Note Item`.`parent` = `tabDelivery Note`.`name`\n and `tabDelivery Note`.docstatus = 1\n and `tabDelivery Note Item`.billed_qty < `tabDelivery Note Item`.qty\norder by `tabDelivery Note`.posting_date asc"
+ }, 
+ {
+  "name": "Delivered Items To Be Billed", 
+  "doctype": "Report"
+ }
+]

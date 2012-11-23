@@ -67,7 +67,7 @@ class DocType(TransactionBase):
 				self.doc, self.doclist, """[['Purchase Request', 'Supplier Quotation'],
 				['Purchase Request Item', 'Supplier Quotation Item']]""")
 			
-			from webnotes.model.doclist import getlist
+			from webnotes.model.wrapper import getlist
 			for d in getlist(self.doclist, self.fname):
 				if d.item_code and not d.purchase_rate:
 					d.purchase_ref_rate = d.discount_rate = d.purchase_rate = 0.0

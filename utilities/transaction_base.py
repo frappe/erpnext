@@ -18,7 +18,7 @@ from __future__ import unicode_literals
 import webnotes
 from webnotes.utils import load_json, cint, cstr, flt, get_defaults
 from webnotes.model.doc import Document, addchild, getchildren
-from webnotes.model.doclist import getlist, copy_doclist
+from webnotes.model.wrapper import getlist, copy_doclist
 from webnotes.model.code import get_obj
 from webnotes import msgprint
 
