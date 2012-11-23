@@ -1,6 +1,7 @@
 import webnotes
 
 def execute():
-	webnotes.conn.sql("""delete from `tabSearch Criteria` where name='Delivery Note Itemwise Pending To Bill'""")
+	webnotes.delete_doc("Search Criteria", "delivery_note_itemwise_pending_to_bill")
+
 	from webnotes.modules import reload_doc
 	reload_doc("accounts", "report", "delivered_items_to_be_billed")
