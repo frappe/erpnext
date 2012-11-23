@@ -175,9 +175,11 @@ EmailMessage = function(parent, args, list, idx) {
 				wordWrap: 'break-word', textWrap: 'normal', overflowX: 'auto'}, 
 			
 			// newlines for text email
-			(this.content_type=='text/plain' ? this.mail
-				.replace(/\n[ ]*\n[\n\t ]*/g, '\n\n') // excess whitespace
-				.replace(/\n/g, '<br>') : this.mail)
+			(this.content_type=='text/plain'
+				? this.mail
+					.replace(/\n[ ]*\n[\n\t ]*/g, '\n') // excess whitespace
+					.replace(/\n/g, '<br>')
+				: this.mail)
 		);
 		
 		// show only first and last message
