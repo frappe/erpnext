@@ -1,6 +1,10 @@
 erpnext.updates = [
 	["23rd November 2012", [
 		"General Ledger: Auto-suggest Accounts for filtering",
+		"Calendar: User Interface Fixes, small text for events",
+		"Email Settings: Setup outgoing email without a login id \
+			(applicable for a local email server)",
+		"Delivered Items To Be Billed: New report in 'Accounts'",
 	]],
 	["22nd November 2012", [
 		"Support Ticket: Compose a reply using Markdown",
