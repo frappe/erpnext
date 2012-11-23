@@ -206,7 +206,7 @@ def get_data(rows, company_abbr):
 				if accounts:
 					total_debit = total_credit = 0
 					for acc_idx in xrange(len(accounts)):
-						col_idx = len(columns) + acc_idx
+						col_idx = len(columns) - 1 + acc_idx
 						if flt(r[col_idx]) != 0:
 							if not acc_dict.get(accounts[acc_idx]):
 								acc_dict[accounts[acc_idx]] = 0
