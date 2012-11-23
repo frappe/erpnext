@@ -1,4 +1,7 @@
 erpnext.updates = [
+	["23rd November 2012", [
+		"General Ledger: Auto-suggest Accounts for filtering",
+	]],
 	["22nd November 2012", [
 		"Support Ticket: Compose a reply using Markdown",
 		"Supplier Link Field: Search by Supplier Name instead of ID",
