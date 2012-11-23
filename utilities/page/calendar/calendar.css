@@ -1,5 +1,12 @@
 /**** CALENDAR ****/
 
+.cal_event {
+	text-overflow: ellipsis; 
+	white-space: nowrap; 
+	overflow: hidden;
+	margin-bottom: 3px;
+}
+
 div.cal_body {
 	margin: 16px;
 	background-color: #DDD;
@@ -62,7 +69,7 @@ div.cal_month_body {
 }
 
 .cal_month_headtable {
-	/*table-layout:fixed;*/
+	table-layout:fixed;
 	width: 100%;
 }
 
@@ -83,7 +90,7 @@ div.cal_month_body {
 
 table.cal_month_table {
 	border-collapse: collapse;
-	/*table-layout:fixed;*/
+	table-layout:fixed;
 	width: 100%;
 }
 
@@ -138,6 +145,7 @@ div.cal_day_unit{
 
 table.cal_week_table {
 	border-collapse: collapse;
+	table-layout: fixed;
 	width: 100%;
 }
 
@@ -154,16 +162,4 @@ div.cal_week_body {
 div.cal_week_unit{
 	width: 100%;
 	cursor:pointer;
-}
-
-div.cal_event_Public {
-	color: GREEN;
-}
-
-div.cal_event_Private {
-	color: BLUE;
-}
-
-div.cal_event_hover {
-	text-decoration: underline;
 }
