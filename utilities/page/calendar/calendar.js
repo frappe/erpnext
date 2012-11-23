@@ -115,8 +115,11 @@ Calendar.prototype.show_event = function(ev, cal_ev) {
 			this.widgets['Ref Link'].innerHTML = '';
 
 			if(this.ev.ref_type) {
-				$(repl('<span>Reference: <a href="#Form/%(ref_type)s/%(ref_name)s" \
-					onclick="cur_dialog.hide()">%(ref_type)s: %(ref_name)s</a></span>', this.ev))
+				$(repl('<table style="width: 100%;"><tr>\
+					<td style="width: 30%"><b>Reference:</b></td>\
+					<td><a href="#Form/%(ref_type)s/%(ref_name)s" \
+					onclick="cur_dialog.hide()">%(ref_type)s: %(ref_name)s</a></td>\
+				</tr></table>', this.ev))
 						.appendTo(this.widgets['Ref Link'])
 			}
 
@@ -256,30 +259,26 @@ Calendar.prototype.refresh = function(viewtype){//Sets the viewtype of the Calen
 //------------------------------------------------------
 
 Calendar.CalEvent= function(doc, cal) {
-	this.body = document.createElement('div');
-	this.link = $a(this.body, 'a', '', {}, locals['Event'][doc.name].description || '');
-	this.doc = doc;
 	var me = this;
+	me.doc = doc;
+	
+	this.body = $("<div class='label cal_event'></div>")
+		.html(doc.description)
+		.css({"cursor":"pointer"})
+		.attr("data-event", doc.name)
+		.click(function() {
+			var doc = locals["Event"][$(this).attr("data-event")];
+			cal.show_event(doc, me);
+		})
 
-	this.link.onclick = function() {
-		if(me.doc.name) {
-			cal.show_event(me.doc, me);
-		}
+	this.show = function(vu) {
+		me.body
+			.html(me.doc.description)
+			.css({"width": ($(vu.body).width()-10)})
+			.appendTo(vu.body)
+			.removeClass("label-success").removeClass("label-info")
+			.addClass(me.doc.event_type=="Public" ? "label-success" : "label-info")
 	}
-}
-
-Calendar.CalEvent.prototype.show = function(vu) {
-
-	var t = this.doc.event_type;
-	this.my_class = 'cal_event_'+ t;
-	
-	if(this.body.parentNode)
-		this.body.parentNode.removeChild(this.body);
-	vu.body.appendChild(this.body);
-	
-	// refresh
-	this.link.innerHTML = this.doc.description || '';
-	this.body.className = this.my_class;
 }
 
 
@@ -295,10 +294,13 @@ Calendar.View.prototype.init=function(cal) {
 
 
 Calendar.View.prototype.show=function() { 
-	this.get_events(); this.refresh(); this.body.style.display = 'block'; 
+	this.body.style.display = 'block';
+	this.get_events(); this.refresh();  
 }
 
-Calendar.View.prototype.hide=function() { this.body.style.display = 'none';}
+Calendar.View.prototype.hide=function() { 
+	this.body.style.display = 'none';
+}
 
 Calendar.View.prototype.next = function() {
 	var s = this.cal.selected_date;
@@ -349,7 +351,8 @@ Calendar.MonthView.prototype.create_table = function() {
 	var r = this.headtable.insertRow(0);
 	for(var j=0;j<7;j++) {
  		var cell = r.insertCell(j);
-		cell.innerHTML = erpnext.calendar.weekdays[j]; $w(cell, (100 / 7) + '%');
+		cell.innerHTML = erpnext.calendar.weekdays[j]; 
+		$w(cell, (100 / 7) + '%');
  	}
 
 	this.main = $a(this.body, 'div', 'cal_month_body');
@@ -480,7 +483,6 @@ Calendar.WeekView.prototype.create_table = function() {
 	var r = this.headtable.insertRow(0);
 	for(var j=0;j<8;j++) {
  		var cell = r.insertCell(j);
-		$w(cell, (100 / 8) + '%');
  	}
  	
  	// hour header
@@ -652,14 +654,24 @@ Calendar.ViewUnit.prototype.deselect=function() { this.selected = false; this.se
 Calendar.ViewUnit.prototype.setevent=function() { }
 
 Calendar.MonthViewUnit=function(parent) {
-	this.header = $a(parent, 'div' , "cal_month_date");
-	this.default_class = "cal_month_unit";
-	
+	var me = this;
+	this.header = $("<div class='cal_month_date'></div>")
+		.appendTo(parent)
+		.css({"cursor":"pointer"})
+		.click(function() {
+			me.body.onclick();
+		})
+		.bind("dblclick", function() {
+			me.body.ondblclick();
+		})
+		.get(0);
+
+	this.default_class = "cal_month_unit";	
 	this.init(parent);
 
 	this.onrefresh = function() {
 		this.header.innerHTML = this.day.getDate();
-	} 
+	}
 }
 Calendar.MonthViewUnit.prototype = new Calendar.ViewUnit();
 Calendar.MonthViewUnit.prototype.is_selected = function() {
