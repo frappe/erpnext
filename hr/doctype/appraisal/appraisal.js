@@ -20,8 +20,9 @@ cur_frm.add_fetch('employee', 'employee_name', 'employee_name');
 cur_frm.cscript.onload = function(doc,cdt,cdn){
 	if(!doc.status) 
 		set_multiple(cdt,cdn,{status:'Draft'});
-	if(doc.amended_from && doc.__islocal) 
-		cur_frm.cscript.refresh_appraisal_details(doc, cdt, cdn);
+	if(doc.amended_from && doc.__islocal) {
+		doc.status = "Draft";
+	}
 }
 
 cur_frm.cscript.onload_post_render = function(doc,cdt,cdn){
@@ -40,17 +41,6 @@ cur_frm.cscript.kra_template = function(doc, dt, dn) {
 		function() { 
 			cur_frm.refresh();
 		});
-}
-
-
-cur_frm.cscript.refresh_appraisal_details = function(doc, cdt, cdn){
-	var val = getchildren('Appraisal Goal', doc.name, 'appraisal_details', doc.doctype);
-	for(var i = 0; i<val.length; i++){
-		set_multiple('Appraisal Goal', val[i].name, {'target_achieved':'', 'score':'', 'scored_earned':''}, 'appraisal_details');
-	}
-	doc.total_score = '';
-	refresh_field('appraisal_details');
-	refresh_field('total_score');
 }
 
 cur_frm.cscript.calculate_total_score = function(doc,cdt,cdn){
@@ -77,7 +67,7 @@ cur_frm.cscript.score = function(doc,cdt,cdn){
 		refresh_field('score_earned', d.name, 'appraisal_details');
 	}
 	else{
-		d.score_earned = '';
+		d.score_earned = 0;
 		refresh_field('score_earned', d.name, 'appraisal_details');
 	}
 	cur_frm.cscript.calculate_total(doc,cdt,cdn);

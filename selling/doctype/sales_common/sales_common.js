@@ -29,6 +29,8 @@ cur_frm.cscript.load_taxes = function(doc, cdt, cdn, callback) {
 		if(callback) {
 			callback(doc, cdt, cdn);
 		}
+	} else if(doc.charge) {
+		cur_frm.cscript.get_charges(doc, cdt, cdn, callback);
 	} else {
 		$c_obj(make_doclist(doc.doctype, doc.name),'load_default_taxes','',function(r,rt){
 			refresh_field('other_charges');
@@ -374,12 +376,14 @@ cur_frm.fields_dict.charge.get_query = function(doc) {
 }
 
 // ********************* Get Charges ****************************
-cur_frm.cscript.get_charges = function(doc, cdt, cdn) {
+cur_frm.cscript.get_charges = function(doc, cdt, cdn, callback) {
 	$c_obj(make_doclist(doc.doctype,doc.name),
 		'get_other_charges',
 		'', 
-		function(r, rt) { cur_frm.cscript.calculate_charges(doc, cdt, cdn);}
-		,null,null,cur_frm.fields_dict.get_charges.input);
+		function(r, rt) {
+			cur_frm.cscript.calculate_charges(doc, cdt, cdn);
+			if(callback) callback(doc, cdt, cdn);
+		}, null,null,cur_frm.fields_dict.get_charges.input);
 }
 
 
