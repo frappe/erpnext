@@ -87,11 +87,15 @@ class DocType(TransactionBase):
 			Creates a new Communication record
 		"""
 		# add to Communication
-		from webnotes.model.doc import Document
-		d = Document('Communication')
+		import email.utils
+
+		d = webnotes.doc('Communication')
 		d.naming_series = "COMM-"
 		d.subject = self.doc.subject
 		d.email_address = from_email or webnotes.user.name
+		email_addr = email.utils.parseaddr(d.email_address)[1]
+		d.contact = webnotes.conn.get_value("Contact", {"email_id": email_addr}, "name") or None
+		d.lead = webnotes.conn.get_value("Lead", {"email_id": email_addr}, "name") or None
 		d.support_ticket = self.doc.name
 		d.content = response
 		d.communication_medium = "Email"

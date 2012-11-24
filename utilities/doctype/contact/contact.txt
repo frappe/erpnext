@@ -1,257 +1,301 @@
-# DocType, Contact
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-07-03 14:22:38',
-		'docstatus': 0,
-		'modified': '2012-08-02 13:16:48',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
-	},
-
-	# These values are common for all DocType
-	{
-		'_last_update': u'1327314958',
-		'allow_trash': 1,
-		'colour': u'White:FFF',
-		'default_print_format': u'Standard',
-		'doctype': 'DocType',
-		'document_type': u'Master',
-		'in_create': 0,
-		'in_dialog': 1,
-		'module': u'Utilities',
-		'name': '__common__',
-		'section_style': u'Simple',
-		'server_code_error': u' ',
-		'show_in_menu': 0,
-		'subject': u'%(first_name)s %(last_name)s - Email: %(email_id)s | Contact: %(phone)s | Mobile: %(mobile_no)s',
-		'version': 1
-	},
-
-	# These values are common for all DocField
-	{
-		'doctype': u'DocField',
-		'name': '__common__',
-		'parent': u'Contact',
-		'parentfield': u'fields',
-		'parenttype': u'DocType'
-	},
-
-	# DocType, Contact
-	{
-		'doctype': 'DocType',
-		'name': u'Contact'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'doctype': u'DocField',
-		'fieldname': u'contact_details',
-		'fieldtype': u'Section Break',
-		'label': u'Contact Details',
-		'oldfieldtype': u'Section Break',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'column_break0',
-		'fieldtype': u'Column Break',
-		'oldfieldtype': u'Column Break',
-		'permlevel': 0,
-		'width': u'50%'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'first_name',
-		'fieldtype': u'Data',
-		'label': u'First Name',
-		'oldfieldname': u'first_name',
-		'oldfieldtype': u'Data',
-		'permlevel': 0,
-		'reqd': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'last_name',
-		'fieldtype': u'Data',
-		'label': u'Last Name',
-		'oldfieldname': u'last_name',
-		'oldfieldtype': u'Data',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'depends_on': u'eval:!doc.supplier && !doc.sales_partner',
-		'doctype': u'DocField',
-		'fieldname': u'customer',
-		'fieldtype': u'Link',
-		'label': u'Customer',
-		'oldfieldname': u'customer',
-		'oldfieldtype': u'Link',
-		'options': u'Customer',
-		'permlevel': 0,
-		'print_hide': 0,
-		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'depends_on': u'eval:!doc.supplier && !doc.sales_partner',
-		'doctype': u'DocField',
-		'fieldname': u'customer_name',
-		'fieldtype': u'Data',
-		'label': u'Customer Name',
-		'permlevel': 1
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'depends_on': u'eval:!doc.customer && !doc.sales_partner',
-		'doctype': u'DocField',
-		'fieldname': u'supplier',
-		'fieldtype': u'Link',
-		'label': u'Supplier',
-		'options': u'Supplier',
-		'permlevel': 0,
-		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		'allow_on_submit': 0,
-		'colour': u'White:FFF',
-		'depends_on': u'eval:!doc.customer && !doc.sales_partner',
-		'doctype': u'DocField',
-		'fieldname': u'supplier_name',
-		'fieldtype': u'Data',
-		'label': u'Supplier Name',
-		'permlevel': 1
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'depends_on': u'eval:!doc.customer && !doc.supplier',
-		'doctype': u'DocField',
-		'fieldname': u'sales_partner',
-		'fieldtype': u'Link',
-		'label': u'Sales Partner',
-		'options': u'Sales Partner',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'default': u'0',
-		'depends_on': u'eval:(doc.customer || doc.supplier || doc.sales_partner)',
-		'doctype': u'DocField',
-		'fieldname': u'is_primary_contact',
-		'fieldtype': u'Check',
-		'label': u'Is Primary Contact',
-		'oldfieldname': u'is_primary_contact',
-		'oldfieldtype': u'Select',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'column_break1',
-		'fieldtype': u'Column Break',
-		'oldfieldtype': u'Column Break',
-		'permlevel': 0,
-		'width': u'50%'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'email_id',
-		'fieldtype': u'Data',
-		'label': u'Email Id',
-		'oldfieldname': u'email_id',
-		'oldfieldtype': u'Data',
-		'permlevel': 0,
-		'reqd': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'phone',
-		'fieldtype': u'Data',
-		'label': u'Phone',
-		'oldfieldname': u'contact_no',
-		'oldfieldtype': u'Data',
-		'permlevel': 0,
-		'reqd': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'mobile_no',
-		'fieldtype': u'Data',
-		'label': u'Mobile No',
-		'oldfieldname': u'mobile_no',
-		'oldfieldtype': u'Data',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'description': u'Enter department to which this Contact belongs',
-		'doctype': u'DocField',
-		'fieldname': u'department',
-		'fieldtype': u'Data',
-		'label': u'Department',
-		'options': u'Suggest',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'description': u'Enter designation of this Contact',
-		'doctype': u'DocField',
-		'fieldname': u'designation',
-		'fieldtype': u'Data',
-		'label': u'Designation',
-		'options': u'Suggest',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'unsubscribed',
-		'fieldtype': u'Check',
-		'label': u'Unsubscribed',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'trash_reason',
-		'fieldtype': u'Small Text',
-		'label': u'Trash Reason',
-		'oldfieldname': u'trash_reason',
-		'oldfieldtype': u'Small Text',
-		'permlevel': 1
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-08-06 11:15:46", 
+  "modified_by": "Administrator", 
+  "modified": "2012-11-24 15:10:53"
+ }, 
+ {
+  "in_create": 0, 
+  "default_print_format": "Standard", 
+  "doctype": "DocType", 
+  "module": "Utilities", 
+  "in_dialog": 1, 
+  "document_type": "Master", 
+  "name": "__common__"
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "Contact", 
+  "doctype": "DocField", 
+  "parenttype": "DocType", 
+  "parentfield": "fields"
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "Contact", 
+  "read": 1, 
+  "doctype": "DocPerm", 
+  "parenttype": "DocType", 
+  "parentfield": "permissions"
+ }, 
+ {
+  "name": "Contact", 
+  "doctype": "DocType"
+ }, 
+ {
+  "oldfieldtype": "Section Break", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Contact Details", 
+  "fieldname": "contact_details", 
+  "fieldtype": "Section Break", 
+  "permlevel": 0
+ }, 
+ {
+  "oldfieldtype": "Column Break", 
+  "doctype": "DocField", 
+  "width": "50%", 
+  "fieldname": "column_break0", 
+  "fieldtype": "Column Break", 
+  "permlevel": 0
+ }, 
+ {
+  "oldfieldtype": "Data", 
+  "doctype": "DocField", 
+  "label": "First Name", 
+  "oldfieldname": "first_name", 
+  "fieldname": "first_name", 
+  "fieldtype": "Data", 
+  "reqd": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "oldfieldtype": "Data", 
+  "doctype": "DocField", 
+  "label": "Last Name", 
+  "oldfieldname": "last_name", 
+  "fieldname": "last_name", 
+  "fieldtype": "Data", 
+  "permlevel": 0
+ }, 
+ {
+  "print_hide": 0, 
+  "oldfieldtype": "Link", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Customer", 
+  "oldfieldname": "customer", 
+  "permlevel": 0, 
+  "trigger": "Client", 
+  "fieldname": "customer", 
+  "fieldtype": "Link", 
+  "depends_on": "eval:!doc.supplier && !doc.sales_partner", 
+  "options": "Customer"
+ }, 
+ {
+  "depends_on": "eval:!doc.supplier && !doc.sales_partner", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Customer Name", 
+  "fieldname": "customer_name", 
+  "fieldtype": "Data", 
+  "permlevel": 1
+ }, 
+ {
+  "depends_on": "eval:!doc.customer && !doc.sales_partner", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Supplier", 
+  "trigger": "Client", 
+  "fieldname": "supplier", 
+  "fieldtype": "Link", 
+  "options": "Supplier", 
+  "permlevel": 0
+ }, 
+ {
+  "depends_on": "eval:!doc.customer && !doc.sales_partner", 
+  "colour": "White:FFF", 
+  "allow_on_submit": 0, 
+  "doctype": "DocField", 
+  "label": "Supplier Name", 
+  "fieldname": "supplier_name", 
+  "fieldtype": "Data", 
+  "permlevel": 1
+ }, 
+ {
+  "depends_on": "eval:!doc.customer && !doc.supplier", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Sales Partner", 
+  "options": "Sales Partner", 
+  "fieldname": "sales_partner", 
+  "fieldtype": "Link", 
+  "permlevel": 0
+ }, 
+ {
+  "default": "0", 
+  "oldfieldtype": "Select", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Is Primary Contact", 
+  "oldfieldname": "is_primary_contact", 
+  "fieldname": "is_primary_contact", 
+  "fieldtype": "Check", 
+  "depends_on": "eval:(doc.customer || doc.supplier || doc.sales_partner)", 
+  "permlevel": 0
+ }, 
+ {
+  "oldfieldtype": "Column Break", 
+  "doctype": "DocField", 
+  "width": "50%", 
+  "fieldname": "column_break1", 
+  "fieldtype": "Column Break", 
+  "permlevel": 0
+ }, 
+ {
+  "oldfieldtype": "Data", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Email Id", 
+  "oldfieldname": "email_id", 
+  "fieldname": "email_id", 
+  "fieldtype": "Data", 
+  "search_index": 1, 
+  "reqd": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "oldfieldtype": "Data", 
+  "doctype": "DocField", 
+  "label": "Phone", 
+  "oldfieldname": "contact_no", 
+  "fieldname": "phone", 
+  "fieldtype": "Data", 
+  "reqd": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "oldfieldtype": "Data", 
+  "doctype": "DocField", 
+  "label": "Mobile No", 
+  "oldfieldname": "mobile_no", 
+  "fieldname": "mobile_no", 
+  "fieldtype": "Data", 
+  "permlevel": 0
+ }, 
+ {
+  "description": "Enter department to which this Contact belongs", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Department", 
+  "options": "Suggest", 
+  "fieldname": "department", 
+  "fieldtype": "Data", 
+  "permlevel": 0
+ }, 
+ {
+  "description": "Enter designation of this Contact", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Designation", 
+  "options": "Suggest", 
+  "fieldname": "designation", 
+  "fieldtype": "Data", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Unsubscribed", 
+  "fieldname": "unsubscribed", 
+  "fieldtype": "Check", 
+  "permlevel": 0
+ }, 
+ {
+  "oldfieldtype": "Small Text", 
+  "doctype": "DocField", 
+  "label": "Trash Reason", 
+  "oldfieldname": "trash_reason", 
+  "fieldname": "trash_reason", 
+  "fieldtype": "Small Text", 
+  "permlevel": 1
+ }, 
+ {
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "write": 1, 
+  "role": "System Manager", 
+  "cancel": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "amend": 0, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "submit": 0, 
+  "write": 1, 
+  "role": "Sales Master Manager", 
+  "cancel": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "write": 1, 
+  "role": "Purchase Master Manager", 
+  "cancel": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "write": 1, 
+  "role": "Sales Manager", 
+  "permlevel": 0
+ }, 
+ {
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "write": 1, 
+  "role": "Purchase Manager", 
+  "permlevel": 0
+ }, 
+ {
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "write": 1, 
+  "role": "Maintenance Manager", 
+  "permlevel": 0
+ }, 
+ {
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "write": 1, 
+  "role": "Accounts Manager", 
+  "permlevel": 0
+ }, 
+ {
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "write": 1, 
+  "role": "Sales User", 
+  "permlevel": 0
+ }, 
+ {
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "write": 1, 
+  "role": "Purchase User", 
+  "permlevel": 0
+ }, 
+ {
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "write": 1, 
+  "role": "Maintenance User", 
+  "permlevel": 0
+ }, 
+ {
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "write": 1, 
+  "role": "Accounts User", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "All", 
+  "permlevel": 1
+ }
 ]
