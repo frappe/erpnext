@@ -29,6 +29,21 @@ class DocType(TransactionBase):
 	def autoname(self):
 		self.doc.name = make_autoname(self.doc.naming_series+'.#####')
 
+	def onload(self):
+		self.add_communication_list()
+		
+	def add_communication_list(self):
+		# remove communications if present
+		self.doclist = webnotes.doclist(self.doclist).get({"doctype": ["!=", "Communcation"]})
+		
+		comm_list = webnotes.conn.sql("""select * from tabCommunication 
+			where support_ticket=%s order by modified desc limit 20""", self.doc.name, as_dict=1)
+		
+		[d.update({"doctype":"Communication"}) for d in comm_list]
+		
+		self.doclist.extend(webnotes.doclist([webnotes.doc(fielddata=d) \
+			for d in comm_list]))
+			
 	def send_response(self):
 		"""
 			Adds a new response to the ticket and sends an email to the sender
@@ -61,6 +76,7 @@ class DocType(TransactionBase):
 		self.doc.new_response = None
 		webnotes.conn.set(self.doc, 'status', 'Waiting for Customer')
 		self.make_response_record(response)
+		self.add_communication_list()
 	
 	def last_response(self):
 		"""return last response"""

@@ -22,26 +22,15 @@
 // xoxoxoxo
 // -------- new reply --------
 
-var cs = cur_frm.cscript;
 $.extend(cur_frm.cscript, {
 	onload: function(doc, dt, dn) {
 		//
 		// help area
 		//
 		if(in_list(user_roles,'System Manager')) {
-			cur_frm.page_layout.footer.help_area.innerHTML = '';
-			new wn.widgets.Footer({
-				parent:cur_frm.page_layout.footer.help_area,
-				columns:2,
-				items: [
-					{
-						column: 0,
-						label:'Email Settings',
-						description:'Integrate your incoming support emails to support ticket',
-						onclick: function() { loaddoc('Email Settings','Email Settings'); }
-					}, 					
-				]
-			})			
+			cur_frm.page_layout.footer.help_area.innerHTML = '<hr>\
+				<p><a href="#Form/Email Settings/Email Settings">Email Settings</a><br>\
+				<span class="help">Integrate incoming support emails to Support Ticket</span></p>';
 		}
 		
 		if(!doc.customer) hide_field(['customer_name','address_display','contact_display','contact_mobile','contact_email']);		
@@ -71,30 +60,30 @@ $.extend(cur_frm.cscript, {
 	// make thread listing
 	//
 	make_listing: function(doc) {
-		cur_frm.fields_dict['thread_html'].wrapper.innerHTML = '';
+		var wrapper = cur_frm.fields_dict['thread_html'].wrapper;
+		$(wrapper)
+			.html("")
+			.css({"margin":"10px 0px"});
 		
-		// render first message
-		new EmailMessage($a(cur_frm.fields_dict['thread_html'].wrapper, 'div'), {
-			email_address: doc.raised_by,
-			creation: doc.creation,
-			content: doc.description,
-		}, null, -1)
-		
-		// render thread		
-		cur_frm.cscript.thread_list = new wn.ui.Listing({
-			parent: $a(cur_frm.fields_dict['thread_html'].wrapper, 'div'),
-			no_result_message: 'No responses yet',
-			get_query: function() {
-				return 'select content, email_address, creation '+
-				'from `tabCommunication` where support_ticket="'+doc.name+'" order by creation asc'
-			},
-			as_dict: 1,
-			render_row: function(parent, data, list, idx) {
-				new EmailMessage(parent, data, list, idx);
+		var comm_list = wn.model.get("Communication", {"support_ticket": doc.name})
+		comm_list.push({
+			"email_address": doc.raised_by,
+			"modified": doc.creation,
+			"content": doc.description});
+			
+		comm_list.sort(function(a, b) { return new Date(a.modified) > new Date(b.modified) 
+			? -1 : 1 })
+				
+		$.each(comm_list, function(i, c) {
+			var comm = new erpnext.CommunicationView({
+				doc: c,
+				support_ticket: doc,
+				parent: wrapper
+			});
+			if(i==0) {
+				comm.toggle();
 			}
 		});
-		cur_frm.cscript.thread_list.run();
-
 	},
 	
 	send: function(doc, dt, dn) {
@@ -140,55 +129,41 @@ $.extend(cur_frm.cscript, {
 	
 })
 
-
-
-EmailMessage = function(parent, args, list, idx) {
-	var me = this;
-	$.extend(this, args);
-	this.make = function() {
-		this.creation = wn.datetime.str_to_user(this.creation);
-		if(this.email_address)
-			this.email_address = this.email_address.replace('<', '&lt;').replace('>', '&gt;');
-		
-		// main wrapper
-		w = $a(parent, 'div', 'support-ticket-wrapper well');
-		//$(w).addClass('support-ticket-wrapper');
-
-		// sender and timestamp
-		$a($a(w, 'div', 'support-ticket-title'), 
-			'span', 'link_type', {}, repl('By %(email_address)s on %(creation)s:', this), 
-			function() {
-				// toggle message display on timestamp
-				if(me.message.style.display.toLowerCase()=='none') {
-					$ds(me.message);
-				} else {
-					$dh(me.message);
-				}
-			}
-		);
-		
-		// email text
-		this.message = $a(w, 'div', '', 
-			// style
-			{lineHeight:'1.7em', display:'none', padding: '7px', width: '575px',
-				wordWrap: 'break-word', textWrap: 'normal', overflowX: 'auto'}, 
-			
-			// newlines for text email
-			(this.content.indexOf("<br>")== -1 && this.content.indexOf("<p>")== -1)
-				? this.content.replace(/\n[ ]*\n[\n\t ]*/g, '\n') // excess whitespace
-					.replace(/\n/g, '<br>')
-				: this.content
-		);
-		
-		// show only first and last message
-		if(idx==-1 || list && list.data.length-1==idx) {
-			$ds(this.message)
+erpnext.CommunicationView = Class.extend({
+	init: function(opts) {
+		$.extend(this, opts);
+		this.prepare();
+		this.make();
+		this.toggle();
+	},
+	prepare: function() {
+		//this.doc.when = comment_when(this.doc.modified);
+		this.doc.when = this.doc.modified;
+		if(this.doc.content.indexOf("<br>")== -1 && this.doc.content.indexOf("<p>")== -1) {
+			this.doc.content = this.doc.content.replace(/\n/g, "<br>");
 		}
-		
+		this.doc.content = this.doc.content.split("=== In response to ===")[0];
+		this.doc.content = this.doc.content.split("-----Original Message-----")[0];
+	},
+	make: function() {
+		var me = this;
+		this.body = $(repl('<div class="communication" title="Click to Expand / Collapse">\
+				<p><b>%(email_address)s on %(when)s</b></p>\
+				<div class="comm-content" style="border-top: 1px solid #ddd; padding: 10px"></div>\
+			</div>', this.doc))
+			.appendTo(this.parent)
+			.css({"cursor":"pointer"})
+			.click(function() {
+				$(this).find(".comm-content").toggle();
+			});
+			
+		this.body.find(".comm-content").html(this.doc.content);
+	},
+	toggle: function() {
+		this.body.find(".comm-content").toggle();
 	}
-	this.make();
-}
+})
+
 
 cur_frm.fields_dict.allocated_to.get_query = erpnext.utils.profile_query;
-
 cur_frm.fields_dict.customer.get_query = erpnext.utils.customer_query;
