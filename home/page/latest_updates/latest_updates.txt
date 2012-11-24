@@ -1,43 +1,32 @@
-# Page, latest-updates
 [
-
-	# These values are common in all dictionaries
-	{
-		u'creation': '2012-11-13 11:55:09',
-		u'docstatus': 0,
-		u'modified': '2012-11-13 12:21:39',
-		u'modified_by': u'Administrator',
-		u'owner': u'Administrator'
-	},
-
-	# These values are common for all Page
-	{
-		u'doctype': u'Page',
-		'module': u'Home',
-		u'name': u'__common__',
-		'page_name': u'latest-updates',
-		'standard': u'Yes',
-		'title': u'Latest Updates'
-	},
-
-	# These values are common for all Page Role
-	{
-		u'doctype': u'Page Role',
-		u'name': u'__common__',
-		'parent': u'latest-updates',
-		'parentfield': u'roles',
-		'parenttype': u'Page',
-		'role': u'All'
-	},
-
-	# Page, latest-updates
-	{
-		u'doctype': u'Page',
-		u'name': u'latest-updates'
-	},
-
-	# Page Role
-	{
-		u'doctype': u'Page Role'
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-11-19 12:06:54", 
+  "modified_by": "Administrator", 
+  "modified": "2012-11-23 18:03:48"
+ }, 
+ {
+  "name": "__common__", 
+  "title": "Latest Updates", 
+  "doctype": "Page", 
+  "module": "Home", 
+  "standard": "Yes", 
+  "page_name": "latest-updates"
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "latest-updates", 
+  "doctype": "Page Role", 
+  "parenttype": "Page", 
+  "role": "All", 
+  "parentfield": "roles"
+ }, 
+ {
+  "name": "latest-updates", 
+  "doctype": "Page"
+ }, 
+ {
+  "doctype": "Page Role"
+ }
 ]
