@@ -64,7 +64,7 @@ class DocType(TransactionBase):
 	
 	def last_response(self):
 		"""return last response"""
-		tmp = webnotes.conn.sql("""select mail from `tabCommunication`
+		tmp = webnotes.conn.sql("""select content from `tabCommunication`
 			where support_ticket = %s order by creation desc limit 1
 			""", self.doc.name)
 			
