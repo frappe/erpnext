@@ -75,10 +75,9 @@ $.extend(cur_frm.cscript, {
 		
 		// render first message
 		new EmailMessage($a(cur_frm.fields_dict['thread_html'].wrapper, 'div'), {
-			from_email: doc.raised_by,
+			email_address: doc.raised_by,
 			creation: doc.creation,
-			mail: doc.description,
-			content_type: doc.content_type
+			content: doc.description,
 		}, null, -1)
 		
 		// render thread		
@@ -86,8 +85,8 @@ $.extend(cur_frm.cscript, {
 			parent: $a(cur_frm.fields_dict['thread_html'].wrapper, 'div'),
 			no_result_message: 'No responses yet',
 			get_query: function() {
-				return 'select mail, from_email, creation, content_type '+
-				'from `tabSupport Ticket Response` where parent="'+doc.name+'" order by creation asc'
+				return 'select content, email_address, creation '+
+				'from `tabCommunication` where support_ticket="'+doc.name+'" order by creation asc'
 			},
 			as_dict: 1,
 			render_row: function(parent, data, list, idx) {
@@ -148,8 +147,8 @@ EmailMessage = function(parent, args, list, idx) {
 	$.extend(this, args);
 	this.make = function() {
 		this.creation = wn.datetime.str_to_user(this.creation);
-		if(this.from_email)
-			this.from_email = this.from_email.replace('<', '&lt;').replace('>', '&gt;');
+		if(this.email_address)
+			this.email_address = this.email_address.replace('<', '&lt;').replace('>', '&gt;');
 		
 		// main wrapper
 		w = $a(parent, 'div', 'support-ticket-wrapper well');
@@ -157,7 +156,7 @@ EmailMessage = function(parent, args, list, idx) {
 
 		// sender and timestamp
 		$a($a(w, 'div', 'support-ticket-title'), 
-			'span', 'link_type', {}, repl('By %(from_email)s on %(creation)s:', this), 
+			'span', 'link_type', {}, repl('By %(email_address)s on %(creation)s:', this), 
 			function() {
 				// toggle message display on timestamp
 				if(me.message.style.display.toLowerCase()=='none') {
@@ -175,11 +174,10 @@ EmailMessage = function(parent, args, list, idx) {
 				wordWrap: 'break-word', textWrap: 'normal', overflowX: 'auto'}, 
 			
 			// newlines for text email
-			(this.content_type=='text/plain'
-				? this.mail
-					.replace(/\n[ ]*\n[\n\t ]*/g, '\n') // excess whitespace
+			(this.content.indexOf("<br>")== -1 && this.content.indexOf("<p>")== -1)
+				? this.content.replace(/\n[ ]*\n[\n\t ]*/g, '\n') // excess whitespace
 					.replace(/\n/g, '<br>')
-				: this.mail)
+				: this.content
 		);
 		
 		// show only first and last message

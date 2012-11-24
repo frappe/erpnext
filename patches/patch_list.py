@@ -679,4 +679,8 @@ patch_list = [
 		'patch_module': 'patches.november_2012',
 		'patch_file': 'remove_old_unbilled_items_report',
 	},
+	{
+		'patch_module': 'patches.november_2012',
+		'patch_file': 'support_ticket_response_to_communication',
+	},
 ]

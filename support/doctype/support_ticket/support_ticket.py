@@ -64,8 +64,8 @@ class DocType(TransactionBase):
 	
 	def last_response(self):
 		"""return last response"""
-		tmp = webnotes.conn.sql("""select mail from `tabSupport Ticket Response`
-			where parent = %s order by creation desc limit 1
+		tmp = webnotes.conn.sql("""select content from `tabCommunication`
+			where support_ticket = %s order by creation desc limit 1
 			""", self.doc.name)
 			
 		if not tmp:
@@ -84,17 +84,21 @@ class DocType(TransactionBase):
 		
 	def make_response_record(self, response, from_email = None, content_type='text/plain'):
 		"""
-			Creates a new Support Ticket Response record
+			Creates a new Communication record
 		"""
-		# add to Support Ticket Response
-		from webnotes.model.doc import Document
-		d = Document('Support Ticket Response')
-		d.from_email = from_email or webnotes.user.name
-		d.parent = self.doc.name
-		d.parenttype = "Support Ticket"
-		d.parentfield = "responses"
-		d.mail = response
-		d.content_type = content_type
+		# add to Communication
+		import email.utils
+
+		d = webnotes.doc('Communication')
+		d.naming_series = "COMM-"
+		d.subject = self.doc.subject
+		d.email_address = from_email or webnotes.user.name
+		email_addr = email.utils.parseaddr(d.email_address)[1]
+		d.contact = webnotes.conn.get_value("Contact", {"email_id": email_addr}, "name") or None
+		d.lead = webnotes.conn.get_value("Lead", {"email_id": email_addr}, "name") or None
+		d.support_ticket = self.doc.name
+		d.content = response
+		d.communication_medium = "Email"
 		d.save(1)
 		
 	def close_ticket(self):

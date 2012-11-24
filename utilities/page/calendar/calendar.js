@@ -241,9 +241,19 @@ Calendar.prototype.set_event = function(ev) {
 
 //------------------------------------------------------
 
-Calendar.prototype.refresh = function(viewtype){//Sets the viewtype of the Calendar and Calls the View class based on the viewtype
+Calendar.prototype.clear = function() {
+	this.events = {};
+	this.events_by_name = {};
+	locals.Event = {};
+}
+
+Calendar.prototype.refresh = function(viewtype, clear_events){//Sets the viewtype of the Calendar and Calls the View class based on the viewtype
  	if(viewtype)
  		this.viewtype = viewtype;
+
+	if(clear_events)
+		this.clear();
+		
  	// switch view if reqd
  	if(this.cur_view.viewtype!=this.viewtype) {
  		this.cur_view.hide();
@@ -252,6 +262,7 @@ Calendar.prototype.refresh = function(viewtype){//Sets the viewtype of the Calen
  		this.cur_view.show();
  	}
  	else{
+ 		this.cur_view.get_events();
  		this.cur_view.refresh(this);
  	}
 }
