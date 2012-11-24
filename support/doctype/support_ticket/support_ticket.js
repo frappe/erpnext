@@ -86,8 +86,8 @@ $.extend(cur_frm.cscript, {
 			parent: $a(cur_frm.fields_dict['thread_html'].wrapper, 'div'),
 			no_result_message: 'No responses yet',
 			get_query: function() {
-				return 'select mail, from_email, creation, content_type '+
-				'from `tabSupport Ticket Response` where parent="'+doc.name+'" order by creation asc'
+				return 'select content, email_address, creation '+
+				'from `tabCommunication` where support_ticket="'+doc.name+'" order by creation asc'
 			},
 			as_dict: 1,
 			render_row: function(parent, data, list, idx) {
