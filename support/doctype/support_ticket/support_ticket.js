@@ -149,13 +149,15 @@ erpnext.CommunicationView = Class.extend({
 		var me = this;
 		this.body = $(repl('<div class="communication" title="Click to Expand / Collapse">\
 				<p><b>%(email_address)s on %(when)s</b></p>\
-				<p class="comm-content" style="border-top: 1px solid #ddd">%(content)s</p>\
+				<div class="comm-content" style="border-top: 1px solid #ddd; padding: 10px"></div>\
 			</div>', this.doc))
 			.appendTo(this.parent)
 			.css({"cursor":"pointer"})
 			.click(function() {
 				$(this).find(".comm-content").toggle();
 			});
+			
+		this.body.find(".comm-content").html(this.doc.content);
 	},
 	toggle: function() {
 		this.body.find(".comm-content").toggle();
