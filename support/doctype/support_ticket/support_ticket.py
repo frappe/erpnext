@@ -105,26 +105,26 @@ class DocType(TransactionBase):
 		d = webnotes.doc('Communication')
 		d.subject = self.doc.subject
 		d.email_address = from_email or webnotes.user.name
-		email_addr = email.utils.parseaddr(d.email_address)[1]
 		self.set_lead_and_contact(d)
 		d.support_ticket = self.doc.name
 		d.content = response
 		d.communication_medium = "Email"
 		d.save(1)
 	
-	def set_lead_and_contact(self, d, email_addr):
+	def set_lead_and_contact(self, d):
+		email_addr = email.utils.parseaddr(d.email_address)
 		# set contact
 		if self.doc.contact:
 			d.contact = self.doc.contact
 		else:
-			d.contact = webnotes.conn.get_value("Contact", {"email_id": email_addr}, "name") or None
+			d.contact = webnotes.conn.get_value("Contact", {"email_id": email_addr[1]}, "name") or None
 			if d.contact:
 				webnotes.conn.set(self.doc, "contact", d.contact)
 
 		if self.doc.lead:
 			d.lead = self.doc.lead
 		else:
-			d.lead = webnotes.conn.get_value("Lead", {"email_id": email_addr}, "name") or None
+			d.lead = webnotes.conn.get_value("Lead", {"email_id": email_addr[1]}, "name") or None
 			if d.lead:
 				webnotes.conn.set(self.doc, "lead", d.lead)
 
