@@ -29,6 +29,21 @@ class DocType(TransactionBase):
 	def autoname(self):
 		self.doc.name = make_autoname(self.doc.naming_series+'.#####')
 
+	def onload(self):
+		self.add_communication_list()
+		
+	def add_communication_list(self):
+		# remove communications if present
+		self.doclist = webnotes.doclist(self.doclist).get({"doctype": ["!=", "Communcation"]})
+		
+		comm_list = webnotes.conn.sql("""select * from tabCommunication 
+			where support_ticket=%s order by modified desc limit 20""", self.doc.name, as_dict=1)
+		
+		[d.update({"doctype":"Communication"}) for d in comm_list]
+		
+		self.doclist.extend(webnotes.doclist([webnotes.doc(fielddata=d) \
+			for d in comm_list]))
+			
 	def send_response(self):
 		"""
 			Adds a new response to the ticket and sends an email to the sender
@@ -61,11 +76,12 @@ class DocType(TransactionBase):
 		self.doc.new_response = None
 		webnotes.conn.set(self.doc, 'status', 'Waiting for Customer')
 		self.make_response_record(response)
+		self.add_communication_list()
 	
 	def last_response(self):
 		"""return last response"""
-		tmp = webnotes.conn.sql("""select mail from `tabSupport Ticket Response`
-			where parent = %s order by creation desc limit 1
+		tmp = webnotes.conn.sql("""select content from `tabCommunication`
+			where support_ticket = %s order by creation desc limit 1
 			""", self.doc.name)
 			
 		if not tmp:
@@ -84,17 +100,21 @@ class DocType(TransactionBase):
 		
 	def make_response_record(self, response, from_email = None, content_type='text/plain'):
 		"""
-			Creates a new Support Ticket Response record
+			Creates a new Communication record
 		"""
-		# add to Support Ticket Response
-		from webnotes.model.doc import Document
-		d = Document('Support Ticket Response')
-		d.from_email = from_email or webnotes.user.name
-		d.parent = self.doc.name
-		d.parenttype = "Support Ticket"
-		d.parentfield = "responses"
-		d.mail = response
-		d.content_type = content_type
+		# add to Communication
+		import email.utils
+
+		d = webnotes.doc('Communication')
+		d.naming_series = "COMM-"
+		d.subject = self.doc.subject
+		d.email_address = from_email or webnotes.user.name
+		email_addr = email.utils.parseaddr(d.email_address)[1]
+		d.contact = webnotes.conn.get_value("Contact", {"email_id": email_addr}, "name") or None
+		d.lead = webnotes.conn.get_value("Lead", {"email_id": email_addr}, "name") or None
+		d.support_ticket = self.doc.name
+		d.content = response
+		d.communication_medium = "Email"
 		d.save(1)
 		
 	def close_ticket(self):

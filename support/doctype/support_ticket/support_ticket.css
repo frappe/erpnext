@@ -1,3 +1,18 @@
+.communication {
+	border: 1px solid #aaa; 
+	border-top: 0px;
+	padding: 7px; 
+	background-color: #f2f2f2
+}
+
+.communication:hover {
+	background-color: #fffff0;
+}
+
+.communication:first-child {
+	border-top: 1px solid #aaa; 
+}
+
 .support-ticket-wrapper {
 	margin-top: 10px;
 }

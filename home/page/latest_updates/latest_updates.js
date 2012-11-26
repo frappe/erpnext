@@ -1,4 +1,7 @@
 erpnext.updates = [
+	["24ht November 2012", [
+		"Support Ticket: Support Ticket Response is now Communication",
+	]],
 	["23rd November 2012", [
 		"General Ledger: Auto-suggest Accounts for filtering",
 		"Calendar: User Interface Fixes, small text for events",
