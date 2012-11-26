@@ -37,15 +37,9 @@ class DocType:
 		else:
 			self.doc.name = self.doc.first_name + (self.doc.last_name and ' ' + self.doc.last_name or '')
 
-#----------------------
-# Call to Validate
-#----------------------
 	def validate(self):
 		self.validate_primary_contact()
 
-#----------------------
-# Validate that there can only be one primary contact for particular customer, supplier
-#----------------------
 	def validate_primary_contact(self):
 		sql = webnotes.conn.sql
 		if self.doc.is_primary_contact == 1:
@@ -65,3 +59,9 @@ class DocType:
 			elif self.doc.sales_partner:
 				if not sql("select name from tabContact where is_primary_contact=1 and sales_partner = '%s'" % (self.doc.sales_partner)):
 					self.doc.is_primary_contact = 1
+
+	def on_trash(self):
+		webnotes.conn.sql("""update tabCommunication set contact='' where contact=%s""",
+			self.doc.name)
+		webnotes.conn.sql("""update `tabSupport Ticket` set contact='' where contact=%s""",
+			self.doc.name)

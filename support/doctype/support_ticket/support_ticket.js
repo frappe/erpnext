@@ -14,6 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+wn.require("public/app/js/communication.js");
+
+cur_frm.fields_dict.customer.get_query = erpnext.utils.customer_query;
+
 $.extend(cur_frm.cscript, {
 	onload: function(doc, dt, dn) {
 		cur_frm.last_reload = new Date();
@@ -22,8 +26,6 @@ $.extend(cur_frm.cscript, {
 				<p><a href="#Form/Email Settings/Email Settings">Email Settings</a><br>\
 				<span class="help">Integrate incoming support emails to Support Ticket</span></p>';
 		}
-		
-		if(!doc.customer) hide_field(['customer_name','address_display','contact_display','contact_mobile','contact_email']);		
 	},
 	
 	refresh: function(doc) {
@@ -53,19 +55,13 @@ $.extend(cur_frm.cscript, {
 	
 	make_listing: function(doc) {
 		var wrapper = cur_frm.fields_dict['thread_html'].wrapper;
-		$(wrapper)
-			.html("")
-			.css({"margin":"10px 0px"});
 		
 		var comm_list = wn.model.get("Communication", {"support_ticket": doc.name})
 		comm_list.push({
 			"email_address": doc.raised_by,
 			"modified": doc.creation,
 			"content": doc.description});
-			
-		comm_list.sort(function(a, b) { return new Date(a.modified) > new Date(b.modified) 
-			? -1 : 1 })
-		
+					
 		new erpnext.CommunicationView({
 			list: comm_list,
 			parent: wrapper
@@ -89,8 +85,8 @@ $.extend(cur_frm.cscript, {
 				cur_frm.refresh();
 			}
 		}
-		if(doc.customer) $c_obj(make_doclist(doc.doctype, doc.name), 'get_default_customer_address', '', callback);
-		if(doc.customer) unhide_field(['customer_name','address_display','contact_display','contact_mobile','contact_email']);
+		if(doc.customer) $c_obj(make_doclist(doc.doctype, doc.name), 
+			'get_default_customer_address', '', callback);
 	}, 
 	
 	'Close Ticket': function() {
@@ -116,52 +112,3 @@ $.extend(cur_frm.cscript, {
 	
 })
 
-erpnext.CommunicationView = Class.extend({
-	init: function(opts) {
-		this.comm_list = [];
-		$.extend(this, opts);
-		this.make();
-	},
-	make: function() {
-		var me = this;
-		this.make_body();
-		$.each(this.list, function(i, d) {
-			me.prepare(d);
-			me.make_line(d);
-		});
-		// show first
-		this.comm_list[0].find('.comm-content').toggle(true);
-	},
-	make_body: function() {
-		this.body = $("<table class='table table-bordered table-hover table-striped'>").appendTo(this.parent);
-	},
-	prepare: function(doc) {
-		//doc.when = comment_when(this.doc.modified);
-		doc.when = doc.modified;
-		if(doc.content.indexOf("<br>")== -1 && doc.content.indexOf("<p>")== -1) {
-			doc.content = doc.content.replace(/\n/g, "<br>");
-		}
-		doc.email_address = doc.email_address.replace(/</, "&lt;").replace(/>/, "&gt;");
-		doc.content = doc.content.split("=== In response to ===")[0];
-		doc.content = doc.content.split("-----Original Message-----")[0];
-	},
-	make_line: function(doc) {
-		var me = this;
-		var comm = $(repl('<tr><td title="Click to Expand / Collapse">\
-				<p><b>%(email_address)s on %(when)s</b></p>\
-				<div class="comm-content"></div>\
-			</td></tr>', doc))
-			.appendTo(this.body)
-			.css({"cursor":"pointer"})
-			.click(function() {
-				$(this).find(".comm-content").toggle();
-			});
-		
-		this.comm_list.push(comm);
-		comm.find(".comm-content").html(doc.content);
-	}
-})
-
-
-cur_frm.fields_dict.allocated_to.get_query = erpnext.utils.profile_query;
-cur_frm.fields_dict.customer.get_query = erpnext.utils.customer_query;

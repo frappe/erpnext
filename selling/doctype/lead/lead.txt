@@ -4,7 +4,7 @@
   "docstatus": 0, 
   "creation": "2012-11-02 17:16:46", 
   "modified_by": "Administrator", 
-  "modified": "2012-11-26 11:12:27"
+  "modified": "2012-11-26 18:13:22"
  }, 
  {
   "autoname": "naming_series:", 
@@ -200,7 +200,6 @@
  }, 
  {
   "doctype": "DocField", 
-  "label": "Communication History", 
   "fieldname": "communication_history", 
   "fieldtype": "Section Break", 
   "permlevel": 0
