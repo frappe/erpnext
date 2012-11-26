@@ -1,233 +1,184 @@
-# DocType, Newsletter
 [
-
-	# These values are common in all dictionaries
-	{
-		u'creation': '2012-08-23 18:49:12',
-		u'docstatus': 0,
-		u'modified': '2012-08-24 14:45:00',
-		u'modified_by': u'Administrator',
-		u'owner': u'Administrator'
-	},
-
-	# These values are common for all DocType
-	{
-		'description': u'Create and Send Newsletters',
-		u'doctype': u'DocType',
-		'document_type': u'Other',
-		'module': u'Support',
-		u'name': u'__common__',
-		'version': 1
-	},
-
-	# These values are common for all DocField
-	{
-		u'doctype': u'DocField',
-		u'name': u'__common__',
-		'parent': u'Newsletter',
-		'parentfield': u'fields',
-		'parenttype': u'DocType'
-	},
-
-	# These values are common for all DocPerm
-	{
-		u'doctype': u'DocPerm',
-		u'name': u'__common__',
-		'parent': u'Newsletter',
-		'parentfield': u'permissions',
-		'parenttype': u'DocType',
-		'read': 1
-	},
-
-	# DocType, Newsletter
-	{
-		u'doctype': u'DocType',
-		u'name': u'Newsletter'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'basic_info',
-		'fieldtype': u'Section Break',
-		'label': u'Basic Info',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'default': u'NL-',
-		u'doctype': u'DocField',
-		'fieldname': u'naming_series',
-		'fieldtype': u'Select',
-		'label': u'Naming Series',
-		'options': u'NL-',
-		'permlevel': 0,
-		'reqd': 1
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'description': u'A Lead with this email id should exist',
-		u'doctype': u'DocField',
-		'fieldname': u'test_email_id',
-		'fieldtype': u'Data',
-		'label': u'Test Email Id',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'test_send',
-		'fieldtype': u'Button',
-		'label': u'Test',
-		'options': u'test_send',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'column_break1',
-		'fieldtype': u'Column Break',
-		'label': u'Send To',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		u'doctype': u'DocField',
-		'fieldname': u'contacts',
-		'fieldtype': u'Check',
-		'label': u'All Contacts',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		u'doctype': u'DocField',
-		'fieldname': u'customer_contacts',
-		'fieldtype': u'Check',
-		'label': u'All Customer Contacts',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		u'doctype': u'DocField',
-		'fieldname': u'leads',
-		'fieldtype': u'Check',
-		'label': u'All Leads',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'active_leads',
-		'fieldtype': u'Check',
-		'label': u'All Active Leads',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'blog_subscribers',
-		'fieldtype': u'Check',
-		'label': u'All Blog Subscribers',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'newsletter_content',
-		'fieldtype': u'Section Break',
-		'label': u'Newsletter Content',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		u'doctype': u'DocField',
-		'fieldname': u'subject',
-		'fieldtype': u'Small Text',
-		'label': u'Subject',
-		'permlevel': 0,
-		'reqd': 1
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		u'doctype': u'DocField',
-		'fieldname': u'message',
-		'fieldtype': u'Code',
-		'label': u'Message',
-		'options': u'Markdown',
-		'permlevel': 0,
-		'reqd': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'newsletter_status',
-		'fieldtype': u'Section Break',
-		'label': u'Newsletter Status',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		u'doctype': u'DocField',
-		'fieldname': u'email_sent',
-		'fieldtype': u'Check',
-		'label': u'Email Sent?',
-		'no_copy': 1,
-		'permlevel': 1
-	},
-
-	# DocPerm
-	{
-		'cancel': 1,
-		'create': 1,
-		u'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Sales Manager',
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'cancel': 1,
-		'create': 1,
-		u'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Support Manager',
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		u'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Sales Manager'
-	},
-
-	# DocPerm
-	{
-		u'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Support Manager'
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-08-24 14:48:05", 
+  "modified_by": "Administrator", 
+  "modified": "2012-11-26 11:18:43"
+ }, 
+ {
+  "autoname": "naming_series:", 
+  "description": "Create and Send Newsletters", 
+  "doctype": "DocType", 
+  "module": "Support", 
+  "document_type": "Other", 
+  "name": "__common__"
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "Newsletter", 
+  "doctype": "DocField", 
+  "parenttype": "DocType", 
+  "parentfield": "fields"
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "Newsletter", 
+  "read": 1, 
+  "doctype": "DocPerm", 
+  "parenttype": "DocType", 
+  "parentfield": "permissions"
+ }, 
+ {
+  "name": "Newsletter", 
+  "doctype": "DocType"
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Basic Info", 
+  "fieldname": "basic_info", 
+  "fieldtype": "Section Break", 
+  "permlevel": 0
+ }, 
+ {
+  "default": "NL-", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Naming Series", 
+  "options": "NL-", 
+  "fieldname": "naming_series", 
+  "fieldtype": "Select", 
+  "reqd": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "description": "A Lead with this email id should exist", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Test Email Id", 
+  "fieldname": "test_email_id", 
+  "fieldtype": "Data", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Test", 
+  "options": "test_send", 
+  "fieldname": "test_send", 
+  "fieldtype": "Button", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Send To", 
+  "fieldname": "column_break1", 
+  "fieldtype": "Column Break", 
+  "permlevel": 0
+ }, 
+ {
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "All Contacts", 
+  "fieldname": "contacts", 
+  "fieldtype": "Check", 
+  "permlevel": 0
+ }, 
+ {
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "All Customer Contacts", 
+  "fieldname": "customer_contacts", 
+  "fieldtype": "Check", 
+  "permlevel": 0
+ }, 
+ {
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "All Leads", 
+  "fieldname": "leads", 
+  "fieldtype": "Check", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "All Active Leads", 
+  "fieldname": "active_leads", 
+  "fieldtype": "Check", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "All Blog Subscribers", 
+  "fieldname": "blog_subscribers", 
+  "fieldtype": "Check", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Newsletter Content", 
+  "fieldname": "newsletter_content", 
+  "fieldtype": "Section Break", 
+  "permlevel": 0
+ }, 
+ {
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Subject", 
+  "fieldname": "subject", 
+  "fieldtype": "Small Text", 
+  "reqd": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Message", 
+  "options": "Markdown", 
+  "fieldname": "message", 
+  "fieldtype": "Code", 
+  "reqd": 0, 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Newsletter Status", 
+  "fieldname": "newsletter_status", 
+  "fieldtype": "Section Break", 
+  "permlevel": 0
+ }, 
+ {
+  "no_copy": 1, 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Email Sent?", 
+  "fieldname": "email_sent", 
+  "fieldtype": "Check", 
+  "permlevel": 1
+ }, 
+ {
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "write": 1, 
+  "role": "Sales Manager", 
+  "cancel": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "write": 1, 
+  "role": "Support Manager", 
+  "cancel": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "Sales Manager", 
+  "permlevel": 1
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "Support Manager", 
+  "permlevel": 1
+ }
 ]

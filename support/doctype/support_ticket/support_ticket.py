@@ -26,9 +26,6 @@ class DocType(TransactionBase):
 		self.doc = doc
 		self.doclist = doclist
 
-	def autoname(self):
-		self.doc.name = make_autoname(self.doc.naming_series+'.#####')
-
 	def onload(self):
 		self.add_communication_list()
 		
@@ -106,7 +103,6 @@ class DocType(TransactionBase):
 		import email.utils
 
 		d = webnotes.doc('Communication')
-		d.naming_series = "COMM-"
 		d.subject = self.doc.subject
 		d.email_address = from_email or webnotes.user.name
 		email_addr = email.utils.parseaddr(d.email_address)[1]
@@ -117,6 +113,16 @@ class DocType(TransactionBase):
 		d.communication_medium = "Email"
 		d.save(1)
 		
+		if not d.lead and not d.contact:
+			self.make_lead(d, email_addr[0])
+	
+	def make_lead(self, d, real_name):
+		d = webnotes.doc("Lead")
+		d.lead_name = real_name or d.email_address
+		d.email_id = d.email_address
+		d.source = "Email"
+		d.save(1)
+	
 	def close_ticket(self):
 		webnotes.conn.set(self.doc,'status','Closed')
 		update_feed(self.doc)

@@ -4,9 +4,10 @@
   "docstatus": 0, 
   "creation": "2012-11-02 17:17:05", 
   "modified_by": "Administrator", 
-  "modified": "2012-11-24 16:41:45"
+  "modified": "2012-11-26 11:17:10"
  }, 
  {
+  "autoname": "naming_series:", 
   "allow_attach": 1, 
   "default_print_format": "Standard", 
   "search_fields": "status,customer,allocated_to,subject,raised_by", 
