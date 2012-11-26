@@ -1,1394 +1,1178 @@
-# DocType, Sales Order
 [
-
-	# These values are common in all dictionaries
-	{
-		u'creation': '2012-09-18 11:20:27',
-		u'docstatus': 0,
-		u'modified': '2012-09-26 13:05:20',
-		u'modified_by': u'Administrator',
-		u'owner': u'Administrator'
-	},
-
-	# These values are common for all DocType
-	{
-		'_last_update': u'1330670942',
-		'allow_attach': 1,
-		'colour': u'White:FFF',
-		'default_print_format': u'Standard',
-		u'doctype': u'DocType',
-		'document_type': u'Transaction',
-		'is_submittable': 1,
-		'is_transaction_doc': 1,
-		'issingle': 0,
-		'module': u'Selling',
-		u'name': u'__common__',
-		'read_only_onload': 1,
-		'search_fields': u'status,transaction_date,customer,customer_name, territory,order_type,company',
-		'section_style': u'Tabbed',
-		'server_code_error': u' ',
-		'show_in_menu': 0,
-		'subject': u'From %(customer_name)s on %(transaction_date)s worth %(currency)s %(grand_total_export)s | %(per_delivered)s% delivered | %(per_billed)s% billed',
-		'tag_fields': u'delivery_status,billing_status',
-		'version': 1
-	},
-
-	# These values are common for all DocField
-	{
-		u'doctype': u'DocField',
-		u'name': u'__common__',
-		'parent': u'Sales Order',
-		'parentfield': u'fields',
-		'parenttype': u'DocType'
-	},
-
-	# These values are common for all DocPerm
-	{
-		u'doctype': u'DocPerm',
-		u'name': u'__common__',
-		'parent': u'Sales Order',
-		'parentfield': u'permissions',
-		'parenttype': u'DocType'
-	},
-
-	# DocType, Sales Order
-	{
-		u'doctype': u'DocType',
-		u'name': u'Sales Order'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		u'doctype': u'DocField',
-		'fieldname': u'basic_info',
-		'fieldtype': u'Section Break',
-		'label': u'Basic Info',
-		'oldfieldtype': u'Section Break',
-		'permlevel': 0,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'column_break0',
-		'fieldtype': u'Column Break',
-		'in_filter': 0,
-		'oldfieldtype': u'Column Break',
-		'permlevel': 0,
-		'search_index': 0,
-		'width': u'50%'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'description': u'To manage multiple series please go to Setup > Manage Series',
-		u'doctype': u'DocField',
-		'fieldname': u'naming_series',
-		'fieldtype': u'Select',
-		'label': u'Series',
-		'no_copy': 1,
-		'oldfieldname': u'naming_series',
-		'oldfieldtype': u'Select',
-		'options': u'PI/2011/\nSO\nSO/10-11/\nSO1112',
-		'permlevel': 0,
-		'print_hide': 1,
-		'reqd': 1
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'description': u'Select Customer',
-		u'doctype': u'DocField',
-		'fieldname': u'customer',
-		'fieldtype': u'Link',
-		'in_filter': 1,
-		'label': u'Customer',
-		'oldfieldname': u'customer',
-		'oldfieldtype': u'Link',
-		'options': u'Customer',
-		'permlevel': 0,
-		'print_hide': 1,
-		'reqd': 1,
-		'search_index': 1,
-		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'customer_name',
-		'fieldtype': u'Data',
-		'hidden': 1,
-		'label': u'Name',
-		'permlevel': 1
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'address_display',
-		'fieldtype': u'Small Text',
-		'hidden': 1,
-		'label': u'Address',
-		'permlevel': 1
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'contact_display',
-		'fieldtype': u'Small Text',
-		'hidden': 1,
-		'label': u'Contact',
-		'permlevel': 1
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'contact_mobile',
-		'fieldtype': u'Text',
-		'hidden': 1,
-		'label': u'Mobile No',
-		'permlevel': 1
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'contact_email',
-		'fieldtype': u'Text',
-		'hidden': 1,
-		'label': u'Contact Email',
-		'permlevel': 1,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'default': u'Sales',
-		u'doctype': u'DocField',
-		'fieldname': u'order_type',
-		'fieldtype': u'Select',
-		'label': u'Order Type',
-		'oldfieldname': u'order_type',
-		'oldfieldtype': u'Select',
-		'options': u'\nSales\nMaintenance',
-		'permlevel': 0,
-		'print_hide': 1,
-		'reqd': 1
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'column_break1',
-		'fieldtype': u'Column Break',
-		'oldfieldtype': u'Column Break',
-		'permlevel': 0,
-		'width': u'50%'
-	},
-
-	# DocField
-	{
-		'default': u'Today',
-		'description': u'The date at which current entry is made in system.',
-		u'doctype': u'DocField',
-		'fieldname': u'transaction_date',
-		'fieldtype': u'Date',
-		'in_filter': 1,
-		'label': u'Sales Order Date',
-		'no_copy': 1,
-		'oldfieldname': u'transaction_date',
-		'oldfieldtype': u'Date',
-		'permlevel': 0,
-		'print_hide': 0,
-		'reqd': 1,
-		'search_index': 1,
-		'width': u'160px'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'depends_on': u"eval:doc.order_type == 'Sales'",
-		u'doctype': u'DocField',
-		'fieldname': u'delivery_date',
-		'fieldtype': u'Date',
-		'hidden': 0,
-		'in_filter': 1,
-		'label': u'Expected Delivery Date',
-		'oldfieldname': u'delivery_date',
-		'oldfieldtype': u'Date',
-		'permlevel': 0,
-		'print_hide': 1,
-		'reqd': 0,
-		'search_index': 1,
-		'width': u'160px'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'description': u'Purchase Order sent by customer',
-		u'doctype': u'DocField',
-		'fieldname': u'po_no',
-		'fieldtype': u'Data',
-		'hidden': 0,
-		'label': u'P.O. No',
-		'oldfieldname': u'po_no',
-		'oldfieldtype': u'Data',
-		'permlevel': 0,
-		'print_hide': 0,
-		'reqd': 0,
-		'width': u'100px'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'depends_on': u'eval:doc.po_no',
-		u'doctype': u'DocField',
-		'fieldname': u'po_date',
-		'fieldtype': u'Date',
-		'hidden': 0,
-		'label': u'P.O. Date',
-		'oldfieldname': u'po_date',
-		'oldfieldtype': u'Date',
-		'permlevel': 0,
-		'print_hide': 0,
-		'reqd': 0,
-		'width': u'100px'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		u'doctype': u'DocField',
-		'fieldname': u'shipping_address_name',
-		'fieldtype': u'Link',
-		'hidden': 1,
-		'in_filter': 1,
-		'label': u'Shipping Address Name',
-		'options': u'Address',
-		'permlevel': 1,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		u'doctype': u'DocField',
-		'fieldname': u'shipping_address',
-		'fieldtype': u'Small Text',
-		'hidden': 1,
-		'in_filter': 0,
-		'label': u'Shipping Address',
-		'permlevel': 1,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		u'doctype': u'DocField',
-		'fieldname': u'items',
-		'fieldtype': u'Section Break',
-		'label': u'Items',
-		'oldfieldtype': u'Section Break',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'allow_on_submit': 1,
-		'colour': u'White:FFF',
-		u'doctype': u'DocField',
-		'fieldname': u'sales_order_details',
-		'fieldtype': u'Table',
-		'label': u'Sales Order Items',
-		'oldfieldname': u'sales_order_details',
-		'oldfieldtype': u'Table',
-		'options': u'Sales Order Item',
-		'permlevel': 0,
-		'print_hide': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'section_break0',
-		'fieldtype': u'Section Break',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'col_break20',
-		'fieldtype': u'Column Break',
-		'permlevel': 0,
-		'width': u'50%'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'net_total',
-		'fieldtype': u'Currency',
-		'label': u'Net Total*',
-		'oldfieldname': u'net_total',
-		'oldfieldtype': u'Currency',
-		'permlevel': 1,
-		'print_hide': 0,
-		'reqd': 0,
-		'width': u'150px'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'recalculate_values',
-		'fieldtype': u'Button',
-		'label': u'Re-Calculate Values',
-		'oldfieldtype': u'Button',
-		'permlevel': 0,
-		'print_hide': 1,
-		'search_index': 0,
-		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'col_break_21',
-		'fieldtype': u'Column Break',
-		'permlevel': 0,
-		'width': u'50%'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'description': u'Quotation no against which this Sales Order is made ',
-		u'doctype': u'DocField',
-		'fieldname': u'quotation_no',
-		'fieldtype': u'Link',
-		'in_filter': 1,
-		'label': u'Quotation No',
-		'no_copy': 0,
-		'oldfieldname': u'quotation_no',
-		'oldfieldtype': u'Link',
-		'options': u'Quotation',
-		'permlevel': 0,
-		'print_hide': 1,
-		'search_index': 1,
-		'trigger': u'Client',
-		'width': u'150px'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'depends_on': u'eval:doc.quotation_no',
-		u'doctype': u'DocField',
-		'fieldname': u'quotation_date',
-		'fieldtype': u'Date',
-		'hidden': 1,
-		'label': u'Quotation Date',
-		'no_copy': 0,
-		'oldfieldname': u'quotation_date',
-		'oldfieldtype': u'Date',
-		'permlevel': 1,
-		'print_hide': 1,
-		'reqd': 0,
-		'width': u'100px'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'pull_quotation_details',
-		'fieldtype': u'Button',
-		'label': u'Pull Quotation Items',
-		'oldfieldtype': u'Button',
-		'options': u'pull_quotation_details',
-		'permlevel': 0,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'sec_break45',
-		'fieldtype': u'Section Break',
-		'label': u'Price List and Currency',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'description': u'Select the price list as entered in "Price List" master. This will pull the reference rates of items against this price list as specified in "Item" master.',
-		u'doctype': u'DocField',
-		'fieldname': u'price_list_name',
-		'fieldtype': u'Select',
-		'label': u'Price List',
-		'oldfieldname': u'price_list_name',
-		'oldfieldtype': u'Select',
-		'options': u'link:Price List',
-		'permlevel': 0,
-		'print_hide': 1,
-		'reqd': 1,
-		'trigger': u'Client',
-		'width': u'100px'
-	},
-
-	# DocField
-	{
-		'description': u'Select the currency in which price list is maintained',
-		u'doctype': u'DocField',
-		'fieldname': u'price_list_currency',
-		'fieldtype': u'Select',
-		'label': u'Price List Currency',
-		'options': u'link:Currency',
-		'permlevel': 0,
-		'print_hide': 1,
-		'reqd': 1
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'description': u"Rate at which Price list currency is converted to company's base currency",
-		u'doctype': u'DocField',
-		'fieldname': u'plc_conversion_rate',
-		'fieldtype': u'Float',
-		'label': u'Price List Currency Conversion Rate',
-		'permlevel': 0,
-		'print_hide': 1,
-		'reqd': 1
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'column_break2',
-		'fieldtype': u'Column Break',
-		'permlevel': 0,
-		'width': u'50%'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'description': u"Customer's currency",
-		u'doctype': u'DocField',
-		'fieldname': u'currency',
-		'fieldtype': u'Select',
-		'label': u'Currency',
-		'oldfieldname': u'currency',
-		'oldfieldtype': u'Select',
-		'options': u'link:Currency',
-		'permlevel': 0,
-		'print_hide': 1,
-		'reqd': 1,
-		'width': u'100px'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'default': u'1.00',
-		'description': u"Rate at which customer's currency is converted to company's base currency",
-		u'doctype': u'DocField',
-		'fieldname': u'conversion_rate',
-		'fieldtype': u'Float',
-		'label': u'Conversion Rate',
-		'oldfieldname': u'conversion_rate',
-		'oldfieldtype': u'Currency',
-		'permlevel': 0,
-		'print_hide': 1,
-		'reqd': 1,
-		'trigger': u'Client',
-		'width': u'100px'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		u'doctype': u'DocField',
-		'fieldname': u'taxes',
-		'fieldtype': u'Section Break',
-		'label': u'Taxes',
-		'oldfieldtype': u'Section Break',
-		'permlevel': 0,
-		'print_hide': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'charge',
-		'fieldtype': u'Link',
-		'label': u'Sales Taxes and Charges',
-		'oldfieldname': u'charge',
-		'oldfieldtype': u'Link',
-		'options': u'Sales Taxes and Charges Master',
-		'permlevel': 0,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'get_charges',
-		'fieldtype': u'Button',
-		'label': u'Get Taxes and Charges',
-		'oldfieldtype': u'Button',
-		'permlevel': 0,
-		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'other_charges',
-		'fieldtype': u'Table',
-		'label': u'Sales Taxes and Charges',
-		'oldfieldname': u'other_charges',
-		'oldfieldtype': u'Table',
-		'options': u'Sales Taxes and Charges',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'calculate_charges',
-		'fieldtype': u'Button',
-		'label': u'Calculate Taxes and Charges',
-		'oldfieldtype': u'Button',
-		'permlevel': 0,
-		'print_hide': 0,
-		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'other_charges_total',
-		'fieldtype': u'Currency',
-		'label': u'Taxes and Charges Total*',
-		'oldfieldname': u'other_charges_total',
-		'oldfieldtype': u'Currency',
-		'permlevel': 1,
-		'print_hide': 1,
-		'width': u'150px'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'other_charges_calculation',
-		'fieldtype': u'HTML',
-		'label': u'Taxes and Charges Calculation',
-		'oldfieldtype': u'HTML',
-		'permlevel': 0,
-		'print_hide': 0
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		u'doctype': u'DocField',
-		'fieldname': u'totals',
-		'fieldtype': u'Section Break',
-		'label': u'Totals',
-		'oldfieldtype': u'Section Break',
-		'permlevel': 0,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'grand_total',
-		'fieldtype': u'Currency',
-		'label': u'Grand Total*',
-		'oldfieldname': u'grand_total',
-		'oldfieldtype': u'Currency',
-		'permlevel': 1,
-		'print_hide': 1,
-		'reqd': 0,
-		'width': u'150px'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'rounded_total',
-		'fieldtype': u'Currency',
-		'label': u'Rounded Total',
-		'oldfieldname': u'rounded_total',
-		'oldfieldtype': u'Currency',
-		'permlevel': 1,
-		'print_hide': 1,
-		'width': u'150px'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'description': u'In Words will be visible once you save the Sales Order.',
-		u'doctype': u'DocField',
-		'fieldname': u'in_words',
-		'fieldtype': u'Data',
-		'label': u'In Words',
-		'oldfieldname': u'in_words',
-		'oldfieldtype': u'Data',
-		'permlevel': 1,
-		'print_hide': 1,
-		'width': u'200px'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'column_break3',
-		'fieldtype': u'Column Break',
-		'oldfieldtype': u'Column Break',
-		'permlevel': 0,
-		'print_hide': 1,
-		'width': u'50%'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'grand_total_export',
-		'fieldtype': u'Currency',
-		'label': u'Grand Total (Export)',
-		'oldfieldname': u'grand_total_export',
-		'oldfieldtype': u'Currency',
-		'permlevel': 1,
-		'print_hide': 0,
-		'reqd': 0,
-		'width': u'150px'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'rounded_total_export',
-		'fieldtype': u'Currency',
-		'label': u'Rounded Total (Export)',
-		'oldfieldname': u'rounded_total_export',
-		'oldfieldtype': u'Currency',
-		'permlevel': 1,
-		'print_hide': 0,
-		'width': u'150px'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		u'doctype': u'DocField',
-		'fieldname': u'in_words_export',
-		'fieldtype': u'Data',
-		'label': u'In Words (Export)',
-		'oldfieldname': u'in_words_export',
-		'oldfieldtype': u'Data',
-		'permlevel': 1,
-		'print_hide': 0,
-		'width': u'200px'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		u'doctype': u'DocField',
-		'fieldname': u'terms_section_break',
-		'fieldtype': u'Section Break',
-		'label': u'Terms and Conditions',
-		'oldfieldtype': u'Section Break',
-		'permlevel': 0,
-		'print_hide': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'tc_name',
-		'fieldtype': u'Link',
-		'label': u'Select Terms and Conditions',
-		'oldfieldname': u'tc_name',
-		'oldfieldtype': u'Link',
-		'options': u'Terms and Conditions',
-		'permlevel': 0,
-		'print_hide': 1,
-		'search_index': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'get_terms',
-		'fieldtype': u'Button',
-		'label': u'Get Terms and Conditions',
-		'oldfieldtype': u'Button',
-		'options': u'get_tc_details',
-		'permlevel': 0,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'terms_html',
-		'fieldtype': u'HTML',
-		'label': u'Terms and Conditions HTML',
-		'oldfieldtype': u'HTML',
-		'options': u'You can add Terms and Notes that will be printed in the Transaction',
-		'permlevel': 0,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'terms',
-		'fieldtype': u'Text Editor',
-		'label': u'Terms and Conditions Details',
-		'oldfieldname': u'terms',
-		'oldfieldtype': u'Text Editor',
-		'permlevel': 0,
-		'print_hide': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'contact_info',
-		'fieldtype': u'Section Break',
-		'label': u'Contact Info',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'col_break45',
-		'fieldtype': u'Column Break',
-		'permlevel': 0,
-		'width': u'50%'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'customer_address',
-		'fieldtype': u'Link',
-		'hidden': 0,
-		'in_filter': 1,
-		'label': u'Customer Address',
-		'options': u'Address',
-		'permlevel': 0,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'contact_person',
-		'fieldtype': u'Link',
-		'in_filter': 1,
-		'label': u'Contact Person',
-		'options': u'Contact',
-		'permlevel': 0,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'territory',
-		'fieldtype': u'Link',
-		'in_filter': 1,
-		'label': u'Territory',
-		'options': u'Territory',
-		'permlevel': 0,
-		'print_hide': 1,
-		'reqd': 1,
-		'search_index': 1
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'col_break46',
-		'fieldtype': u'Column Break',
-		'permlevel': 0,
-		'width': u'50%'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'description': u'Category of customer as entered in Customer master',
-		u'doctype': u'DocField',
-		'fieldname': u'customer_group',
-		'fieldtype': u'Link',
-		'in_filter': 1,
-		'label': u'Customer Group',
-		'options': u'Customer Group',
-		'permlevel': 0,
-		'print_hide': 1,
-		'reqd': 1,
-		'search_index': 1
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'description': u'Filling in additional information about the Sales Order will help you analyze your data better.',
-		u'doctype': u'DocField',
-		'fieldname': u'more_info',
-		'fieldtype': u'Section Break',
-		'label': u'More Info',
-		'oldfieldtype': u'Section Break',
-		'permlevel': 0,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'column_break4',
-		'fieldtype': u'Column Break',
-		'oldfieldtype': u'Column Break',
-		'permlevel': 0,
-		'print_hide': 1,
-		'width': u'50%'
-	},
-
-	# DocField
-	{
-		'allow_on_submit': 1,
-		u'doctype': u'DocField',
-		'fieldname': u'letter_head',
-		'fieldtype': u'Select',
-		'label': u'Letter Head',
-		'oldfieldname': u'letter_head',
-		'oldfieldtype': u'Select',
-		'options': u'link:Letter Head',
-		'permlevel': 0,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		'allow_on_submit': 1,
-		'colour': u'White:FFF',
-		u'doctype': u'DocField',
-		'fieldname': u'select_print_heading',
-		'fieldtype': u'Link',
-		'label': u'Select Print Heading',
-		'no_copy': 1,
-		'oldfieldname': u'select_print_heading',
-		'oldfieldtype': u'Link',
-		'options': u'Print Heading',
-		'permlevel': 0,
-		'print_hide': 1,
-		'report_hide': 1
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'depends_on': u"eval:doc.source == 'Campaign'",
-		u'doctype': u'DocField',
-		'fieldname': u'campaign',
-		'fieldtype': u'Link',
-		'label': u'Campaign',
-		'oldfieldname': u'campaign',
-		'oldfieldtype': u'Link',
-		'options': u'Campaign',
-		'permlevel': 0,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'amended_from',
-		'fieldtype': u'Data',
-		'hidden': 1,
-		'label': u'Amended From',
-		'no_copy': 1,
-		'oldfieldname': u'amended_from',
-		'oldfieldtype': u'Data',
-		'permlevel': 1,
-		'print_hide': 1,
-		'width': u'150px'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'description': u'The date at which current entry is corrected in the system.',
-		u'doctype': u'DocField',
-		'fieldname': u'amendment_date',
-		'fieldtype': u'Date',
-		'hidden': 1,
-		'label': u'Amendment Date',
-		'no_copy': 1,
-		'oldfieldname': u'amendment_date',
-		'oldfieldtype': u'Date',
-		'permlevel': 0,
-		'print_hide': 1,
-		'width': u'100px'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'description': u'Select the relevant company name if you have multiple companies.',
-		u'doctype': u'DocField',
-		'fieldname': u'company',
-		'fieldtype': u'Link',
-		'in_filter': 1,
-		'label': u'Company',
-		'oldfieldname': u'company',
-		'oldfieldtype': u'Link',
-		'options': u'Company',
-		'permlevel': 0,
-		'print_hide': 1,
-		'reqd': 1,
-		'search_index': 1,
-		'trigger': u'Client',
-		'width': u'150px'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'fiscal_year',
-		'fieldtype': u'Select',
-		'in_filter': 1,
-		'label': u'Fiscal Year',
-		'oldfieldname': u'fiscal_year',
-		'oldfieldtype': u'Select',
-		'options': u'link:Fiscal Year',
-		'permlevel': 0,
-		'print_hide': 1,
-		'reqd': 1,
-		'search_index': 1,
-		'width': u'150px'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'depends_on': u'eval:!doc.__islocal',
-		u'doctype': u'DocField',
-		'fieldname': u'cancel_reason',
-		'fieldtype': u'Data',
-		'label': u'Cancel Reason',
-		'no_column': 0,
-		'no_copy': 1,
-		'oldfieldname': u'cancel_reason',
-		'oldfieldtype': u'Data',
-		'permlevel': 1,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'column_break5',
-		'fieldtype': u'Column Break',
-		'oldfieldtype': u'Column Break',
-		'permlevel': 0,
-		'print_hide': 1,
-		'width': u'50%'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		u'doctype': u'DocField',
-		'fieldname': u'source',
-		'fieldtype': u'Select',
-		'label': u'Source',
-		'oldfieldname': u'source',
-		'oldfieldtype': u'Select',
-		'options': u"\nExisting Customer\nReference\nAdvertisement\nCold Calling\nExhibition\nSupplier Reference\nMass Mailing\nCustomer's Vendor\nCampaign",
-		'permlevel': 0,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'description': u'Track this Sales Order against any Project',
-		u'doctype': u'DocField',
-		'fieldname': u'project_name',
-		'fieldtype': u'Link',
-		'in_filter': 1,
-		'label': u'Project Name',
-		'oldfieldname': u'project_name',
-		'oldfieldtype': u'Link',
-		'options': u'Project',
-		'permlevel': 0,
-		'search_index': 1,
-		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		'default': u'Draft',
-		u'doctype': u'DocField',
-		'fieldname': u'status',
-		'fieldtype': u'Select',
-		'in_filter': 1,
-		'label': u'Status',
-		'no_copy': 1,
-		'oldfieldname': u'status',
-		'oldfieldtype': u'Select',
-		'options': u'\nDraft\nSubmitted\nStopped\nCancelled',
-		'permlevel': 1,
-		'print_hide': 1,
-		'reqd': 1,
-		'search_index': 1,
-		'width': u'100px'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'depends_on': u'eval:!doc.__islocal',
-		'description': u'% of materials delivered against this Sales Order',
-		u'doctype': u'DocField',
-		'fieldname': u'per_delivered',
-		'fieldtype': u'Currency',
-		'in_filter': 1,
-		'label': u'%  Delivered',
-		'no_copy': 1,
-		'oldfieldname': u'per_delivered',
-		'oldfieldtype': u'Currency',
-		'permlevel': 1,
-		'print_hide': 1,
-		'width': u'100px'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'depends_on': u'eval:!doc.__islocal',
-		'description': u'% of materials billed against this Sales Order',
-		u'doctype': u'DocField',
-		'fieldname': u'per_billed',
-		'fieldtype': u'Currency',
-		'in_filter': 1,
-		'label': u'% Amount Billed',
-		'no_copy': 1,
-		'oldfieldname': u'per_billed',
-		'oldfieldtype': u'Currency',
-		'permlevel': 1,
-		'print_hide': 1,
-		'width': u'100px'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'delivery_status',
-		'fieldtype': u'Select',
-		'hidden': 1,
-		'label': u'Delivery Status',
-		'no_column': 0,
-		'no_copy': 1,
-		'options': u'Delivered\nNot Delivered\nPartly Delivered\nClosed\nNot Applicable',
-		'permlevel': 0,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'billing_status',
-		'fieldtype': u'Select',
-		'hidden': 1,
-		'label': u'Billing Status',
-		'no_column': 0,
-		'no_copy': 1,
-		'options': u'Billed\nNot Billed\nPartly Billed\nClosed',
-		'permlevel': 0,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'description': u'Display all the individual items delivered with the main items',
-		u'doctype': u'DocField',
-		'fieldname': u'packing_list',
-		'fieldtype': u'Section Break',
-		'hidden': 0,
-		'label': u'Packing List',
-		'oldfieldtype': u'Section Break',
-		'permlevel': 0,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		u'doctype': u'DocField',
-		'fieldname': u'packing_details',
-		'fieldtype': u'Table',
-		'label': u'Packing Details',
-		'oldfieldname': u'packing_details',
-		'oldfieldtype': u'Table',
-		'options': u'Delivery Note Packing Item',
-		'permlevel': 1,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'sales_team_section_break',
-		'fieldtype': u'Section Break',
-		'label': u'Sales Team',
-		'oldfieldtype': u'Section Break',
-		'permlevel': 0,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'column_break6',
-		'fieldtype': u'Column Break',
-		'permlevel': 0,
-		'print_hide': 1,
-		'width': u'50%'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'description': u'Name as entered in Sales Partner master',
-		u'doctype': u'DocField',
-		'fieldname': u'sales_partner',
-		'fieldtype': u'Link',
-		'in_filter': 1,
-		'label': u'Sales Partner',
-		'oldfieldname': u'sales_partner',
-		'oldfieldtype': u'Link',
-		'options': u'Sales Partner',
-		'permlevel': 0,
-		'print_hide': 1,
-		'search_index': 1,
-		'trigger': u'Client',
-		'width': u'150px'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'column_break7',
-		'fieldtype': u'Column Break',
-		'permlevel': 0,
-		'print_hide': 1,
-		'width': u'50%'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'commission_rate',
-		'fieldtype': u'Currency',
-		'label': u'Commission Rate',
-		'oldfieldname': u'commission_rate',
-		'oldfieldtype': u'Currency',
-		'permlevel': 0,
-		'print_hide': 1,
-		'trigger': u'Client',
-		'width': u'100px'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'total_commission',
-		'fieldtype': u'Currency',
-		'label': u'Total Commission',
-		'oldfieldname': u'total_commission',
-		'oldfieldtype': u'Currency',
-		'permlevel': 0,
-		'print_hide': 1,
-		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'section_break1',
-		'fieldtype': u'Section Break',
-		'options': u'Simple',
-		'permlevel': 0,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'sales_team',
-		'fieldtype': u'Table',
-		'label': u'Sales Team1',
-		'oldfieldname': u'sales_team',
-		'oldfieldtype': u'Table',
-		'options': u'Sales Team',
-		'permlevel': 0,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'file_list',
-		'fieldtype': u'Text',
-		'hidden': 1,
-		'label': u'File List',
-		'no_copy': 1,
-		'permlevel': 0,
-		'print_hide': 1
-	},
-
-	# DocPerm
-	{
-		u'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Production Manager'
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		u'doctype': u'DocPerm',
-		'permlevel': 1,
-		'read': 1,
-		'role': u'Sales Manager',
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'amend': 1,
-		'cancel': 1,
-		'create': 1,
-		u'doctype': u'DocPerm',
-		'permlevel': 0,
-		'read': 1,
-		'role': u'Sales Manager',
-		'submit': 1,
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'amend': 1,
-		'cancel': 1,
-		'create': 1,
-		u'doctype': u'DocPerm',
-		'permlevel': 0,
-		'read': 1,
-		'role': u'Sales User',
-		'submit': 1,
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		u'doctype': u'DocPerm',
-		'permlevel': 1,
-		'read': 1,
-		'role': u'Sales User',
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		u'doctype': u'DocPerm',
-		'match': u'customer_name',
-		'permlevel': 0,
-		'read': 1,
-		'role': u'Customer'
-	},
-
-	# DocPerm
-	{
-		u'doctype': u'DocPerm',
-		'permlevel': 2,
-		'read': 1,
-		'role': u'Accounts User',
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'amend': 1,
-		'cancel': 1,
-		'create': 1,
-		u'doctype': u'DocPerm',
-		'permlevel': 0,
-		'read': 1,
-		'role': u'Maintenance Manager',
-		'submit': 1,
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		u'doctype': u'DocPerm',
-		'permlevel': 1,
-		'read': 1,
-		'role': u'Maintenance Manager'
-	},
-
-	# DocPerm
-	{
-		'amend': 1,
-		'cancel': 1,
-		'create': 1,
-		u'doctype': u'DocPerm',
-		'permlevel': 0,
-		'read': 1,
-		'role': u'Maintenance User',
-		'submit': 1,
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		u'doctype': u'DocPerm',
-		'permlevel': 1,
-		'read': 1,
-		'role': u'Maintenance User'
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-11-24 17:21:44", 
+  "modified_by": "Administrator", 
+  "modified": "2012-11-26 11:56:33"
+ }, 
+ {
+  "is_submittable": 1, 
+  "allow_attach": 1, 
+  "search_fields": "status,transaction_date,customer,customer_name, territory,order_type,company", 
+  "module": "Selling", 
+  "read_only_onload": 1, 
+  "autoname": "naming_series:", 
+  "document_type": "Transaction", 
+  "issingle": 0, 
+  "name": "__common__", 
+  "default_print_format": "Standard", 
+  "doctype": "DocType"
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "Sales Order", 
+  "doctype": "DocField", 
+  "parenttype": "DocType", 
+  "parentfield": "fields"
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "Sales Order", 
+  "read": 1, 
+  "doctype": "DocPerm", 
+  "parenttype": "DocType", 
+  "parentfield": "permissions"
+ }, 
+ {
+  "name": "Sales Order", 
+  "doctype": "DocType"
+ }, 
+ {
+  "print_hide": 1, 
+  "oldfieldtype": "Section Break", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Basic Info", 
+  "fieldname": "basic_info", 
+  "fieldtype": "Section Break", 
+  "permlevel": 0
+ }, 
+ {
+  "oldfieldtype": "Column Break", 
+  "doctype": "DocField", 
+  "width": "50%", 
+  "fieldname": "column_break0", 
+  "fieldtype": "Column Break", 
+  "search_index": 0, 
+  "permlevel": 0, 
+  "in_filter": 0
+ }, 
+ {
+  "print_hide": 1, 
+  "description": "To manage multiple series please go to Setup > Manage Series", 
+  "no_copy": 1, 
+  "oldfieldtype": "Select", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Series", 
+  "oldfieldname": "naming_series", 
+  "permlevel": 0, 
+  "fieldname": "naming_series", 
+  "fieldtype": "Select", 
+  "reqd": 1, 
+  "options": "PI/2011/\nSO\nSO/10-11/\nSO1112"
+ }, 
+ {
+  "print_hide": 1, 
+  "description": "Select Customer", 
+  "oldfieldtype": "Link", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Customer", 
+  "oldfieldname": "customer", 
+  "permlevel": 0, 
+  "trigger": "Client", 
+  "fieldname": "customer", 
+  "fieldtype": "Link", 
+  "search_index": 1, 
+  "reqd": 1, 
+  "in_filter": 1, 
+  "options": "Customer"
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Name", 
+  "fieldname": "customer_name", 
+  "fieldtype": "Data", 
+  "hidden": 1, 
+  "permlevel": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Address", 
+  "fieldname": "address_display", 
+  "fieldtype": "Small Text", 
+  "hidden": 1, 
+  "permlevel": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Contact", 
+  "fieldname": "contact_display", 
+  "fieldtype": "Small Text", 
+  "hidden": 1, 
+  "permlevel": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Mobile No", 
+  "fieldname": "contact_mobile", 
+  "fieldtype": "Text", 
+  "hidden": 1, 
+  "permlevel": 1
+ }, 
+ {
+  "print_hide": 1, 
+  "doctype": "DocField", 
+  "label": "Contact Email", 
+  "fieldname": "contact_email", 
+  "fieldtype": "Text", 
+  "hidden": 1, 
+  "permlevel": 1
+ }, 
+ {
+  "print_hide": 1, 
+  "default": "Sales", 
+  "oldfieldtype": "Select", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Order Type", 
+  "oldfieldname": "order_type", 
+  "permlevel": 0, 
+  "fieldname": "order_type", 
+  "fieldtype": "Select", 
+  "reqd": 1, 
+  "options": "\nSales\nMaintenance"
+ }, 
+ {
+  "oldfieldtype": "Column Break", 
+  "doctype": "DocField", 
+  "width": "50%", 
+  "fieldname": "column_break1", 
+  "fieldtype": "Column Break", 
+  "permlevel": 0
+ }, 
+ {
+  "print_hide": 0, 
+  "description": "The date at which current entry is made in system.", 
+  "width": "160px", 
+  "default": "Today", 
+  "oldfieldtype": "Date", 
+  "doctype": "DocField", 
+  "label": "Sales Order Date", 
+  "oldfieldname": "transaction_date", 
+  "no_copy": 1, 
+  "fieldname": "transaction_date", 
+  "fieldtype": "Date", 
+  "search_index": 1, 
+  "reqd": 1, 
+  "in_filter": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "print_hide": 1, 
+  "depends_on": "eval:doc.order_type == 'Sales'", 
+  "search_index": 1, 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Expected Delivery Date", 
+  "oldfieldname": "delivery_date", 
+  "width": "160px", 
+  "fieldname": "delivery_date", 
+  "fieldtype": "Date", 
+  "oldfieldtype": "Date", 
+  "reqd": 0, 
+  "hidden": 0, 
+  "permlevel": 0, 
+  "in_filter": 1
+ }, 
+ {
+  "print_hide": 0, 
+  "description": "Purchase Order sent by customer", 
+  "oldfieldtype": "Data", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "P.O. No", 
+  "oldfieldname": "po_no", 
+  "width": "100px", 
+  "fieldname": "po_no", 
+  "fieldtype": "Data", 
+  "reqd": 0, 
+  "hidden": 0, 
+  "permlevel": 0
+ }, 
+ {
+  "print_hide": 0, 
+  "oldfieldtype": "Date", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "P.O. Date", 
+  "oldfieldname": "po_date", 
+  "width": "100px", 
+  "fieldname": "po_date", 
+  "fieldtype": "Date", 
+  "depends_on": "eval:doc.po_no", 
+  "reqd": 0, 
+  "hidden": 0, 
+  "permlevel": 0
+ }, 
+ {
+  "print_hide": 1, 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Shipping Address Name", 
+  "options": "Address", 
+  "fieldname": "shipping_address_name", 
+  "fieldtype": "Link", 
+  "hidden": 1, 
+  "permlevel": 1, 
+  "in_filter": 1
+ }, 
+ {
+  "print_hide": 1, 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Shipping Address", 
+  "fieldname": "shipping_address", 
+  "fieldtype": "Small Text", 
+  "hidden": 1, 
+  "permlevel": 1, 
+  "in_filter": 0
+ }, 
+ {
+  "oldfieldtype": "Section Break", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Items", 
+  "fieldname": "items", 
+  "fieldtype": "Section Break", 
+  "permlevel": 0
+ }, 
+ {
+  "print_hide": 0, 
+  "oldfieldtype": "Table", 
+  "colour": "White:FFF", 
+  "allow_on_submit": 1, 
+  "doctype": "DocField", 
+  "label": "Sales Order Items", 
+  "oldfieldname": "sales_order_details", 
+  "options": "Sales Order Item", 
+  "fieldname": "sales_order_details", 
+  "fieldtype": "Table", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "section_break0", 
+  "fieldtype": "Section Break", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "width": "50%", 
+  "fieldname": "col_break20", 
+  "fieldtype": "Column Break", 
+  "permlevel": 0
+ }, 
+ {
+  "print_hide": 0, 
+  "oldfieldtype": "Currency", 
+  "doctype": "DocField", 
+  "label": "Net Total*", 
+  "oldfieldname": "net_total", 
+  "width": "150px", 
+  "fieldname": "net_total", 
+  "fieldtype": "Currency", 
+  "reqd": 0, 
+  "permlevel": 1
+ }, 
+ {
+  "print_hide": 1, 
+  "oldfieldtype": "Button", 
+  "doctype": "DocField", 
+  "label": "Re-Calculate Values", 
+  "trigger": "Client", 
+  "fieldname": "recalculate_values", 
+  "fieldtype": "Button", 
+  "search_index": 0, 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "width": "50%", 
+  "fieldname": "col_break_21", 
+  "fieldtype": "Column Break", 
+  "permlevel": 0
+ }, 
+ {
+  "print_hide": 1, 
+  "permlevel": 0, 
+  "description": "Quotation no against which this Sales Order is made ", 
+  "no_copy": 0, 
+  "oldfieldtype": "Link", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Quotation No", 
+  "oldfieldname": "quotation_no", 
+  "width": "150px", 
+  "trigger": "Client", 
+  "fieldname": "quotation_no", 
+  "fieldtype": "Link", 
+  "search_index": 1, 
+  "in_filter": 1, 
+  "options": "Quotation"
+ }, 
+ {
+  "print_hide": 1, 
+  "no_copy": 0, 
+  "oldfieldtype": "Date", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Quotation Date", 
+  "oldfieldname": "quotation_date", 
+  "width": "100px", 
+  "fieldname": "quotation_date", 
+  "fieldtype": "Date", 
+  "depends_on": "eval:doc.quotation_no", 
+  "reqd": 0, 
+  "hidden": 1, 
+  "permlevel": 1
+ }, 
+ {
+  "print_hide": 1, 
+  "oldfieldtype": "Button", 
+  "doctype": "DocField", 
+  "label": "Pull Quotation Items", 
+  "options": "pull_quotation_details", 
+  "fieldname": "pull_quotation_details", 
+  "fieldtype": "Button", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Price List and Currency", 
+  "fieldname": "sec_break45", 
+  "fieldtype": "Section Break", 
+  "permlevel": 0
+ }, 
+ {
+  "print_hide": 1, 
+  "description": "Select the price list as entered in \"Price List\" master. This will pull the reference rates of items against this price list as specified in \"Item\" master.", 
+  "permlevel": 0, 
+  "oldfieldtype": "Select", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Price List", 
+  "oldfieldname": "price_list_name", 
+  "width": "100px", 
+  "trigger": "Client", 
+  "fieldname": "price_list_name", 
+  "fieldtype": "Select", 
+  "reqd": 1, 
+  "options": "link:Price List"
+ }, 
+ {
+  "print_hide": 1, 
+  "description": "Select the currency in which price list is maintained", 
+  "doctype": "DocField", 
+  "label": "Price List Currency", 
+  "options": "link:Currency", 
+  "fieldname": "price_list_currency", 
+  "fieldtype": "Select", 
+  "reqd": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "print_hide": 1, 
+  "description": "Rate at which Price list currency is converted to company's base currency", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Price List Currency Conversion Rate", 
+  "fieldname": "plc_conversion_rate", 
+  "fieldtype": "Float", 
+  "reqd": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "width": "50%", 
+  "fieldname": "column_break2", 
+  "fieldtype": "Column Break", 
+  "permlevel": 0
+ }, 
+ {
+  "print_hide": 1, 
+  "description": "Customer's currency", 
+  "permlevel": 0, 
+  "oldfieldtype": "Select", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Currency", 
+  "oldfieldname": "currency", 
+  "width": "100px", 
+  "fieldname": "currency", 
+  "fieldtype": "Select", 
+  "reqd": 1, 
+  "options": "link:Currency"
+ }, 
+ {
+  "print_hide": 1, 
+  "description": "Rate at which customer's currency is converted to company's base currency", 
+  "default": "1.00", 
+  "oldfieldtype": "Currency", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Conversion Rate", 
+  "oldfieldname": "conversion_rate", 
+  "width": "100px", 
+  "trigger": "Client", 
+  "fieldname": "conversion_rate", 
+  "fieldtype": "Float", 
+  "reqd": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "print_hide": 0, 
+  "oldfieldtype": "Section Break", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Taxes", 
+  "fieldname": "taxes", 
+  "fieldtype": "Section Break", 
+  "permlevel": 0
+ }, 
+ {
+  "print_hide": 1, 
+  "oldfieldtype": "Link", 
+  "doctype": "DocField", 
+  "label": "Sales Taxes and Charges", 
+  "oldfieldname": "charge", 
+  "options": "Sales Taxes and Charges Master", 
+  "fieldname": "charge", 
+  "fieldtype": "Link", 
+  "permlevel": 0
+ }, 
+ {
+  "oldfieldtype": "Button", 
+  "doctype": "DocField", 
+  "label": "Get Taxes and Charges", 
+  "trigger": "Client", 
+  "fieldname": "get_charges", 
+  "fieldtype": "Button", 
+  "permlevel": 0
+ }, 
+ {
+  "oldfieldtype": "Table", 
+  "doctype": "DocField", 
+  "label": "Sales Taxes and Charges", 
+  "oldfieldname": "other_charges", 
+  "options": "Sales Taxes and Charges", 
+  "fieldname": "other_charges", 
+  "fieldtype": "Table", 
+  "permlevel": 0
+ }, 
+ {
+  "print_hide": 0, 
+  "oldfieldtype": "Button", 
+  "doctype": "DocField", 
+  "label": "Calculate Taxes and Charges", 
+  "trigger": "Client", 
+  "fieldname": "calculate_charges", 
+  "fieldtype": "Button", 
+  "permlevel": 0
+ }, 
+ {
+  "print_hide": 1, 
+  "oldfieldtype": "Currency", 
+  "doctype": "DocField", 
+  "label": "Taxes and Charges Total*", 
+  "oldfieldname": "other_charges_total", 
+  "width": "150px", 
+  "fieldname": "other_charges_total", 
+  "fieldtype": "Currency", 
+  "permlevel": 1
+ }, 
+ {
+  "print_hide": 0, 
+  "oldfieldtype": "HTML", 
+  "doctype": "DocField", 
+  "label": "Taxes and Charges Calculation", 
+  "fieldname": "other_charges_calculation", 
+  "fieldtype": "HTML", 
+  "permlevel": 0
+ }, 
+ {
+  "print_hide": 1, 
+  "oldfieldtype": "Section Break", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Totals", 
+  "fieldname": "totals", 
+  "fieldtype": "Section Break", 
+  "permlevel": 0
+ }, 
+ {
+  "print_hide": 1, 
+  "oldfieldtype": "Currency", 
+  "doctype": "DocField", 
+  "label": "Grand Total*", 
+  "oldfieldname": "grand_total", 
+  "width": "150px", 
+  "fieldname": "grand_total", 
+  "fieldtype": "Currency", 
+  "reqd": 0, 
+  "permlevel": 1
+ }, 
+ {
+  "print_hide": 1, 
+  "oldfieldtype": "Currency", 
+  "doctype": "DocField", 
+  "label": "Rounded Total", 
+  "oldfieldname": "rounded_total", 
+  "width": "150px", 
+  "fieldname": "rounded_total", 
+  "fieldtype": "Currency", 
+  "permlevel": 1
+ }, 
+ {
+  "print_hide": 1, 
+  "description": "In Words will be visible once you save the Sales Order.", 
+  "oldfieldtype": "Data", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "In Words", 
+  "oldfieldname": "in_words", 
+  "width": "200px", 
+  "fieldname": "in_words", 
+  "fieldtype": "Data", 
+  "permlevel": 1
+ }, 
+ {
+  "print_hide": 1, 
+  "oldfieldtype": "Column Break", 
+  "doctype": "DocField", 
+  "width": "50%", 
+  "fieldname": "column_break3", 
+  "fieldtype": "Column Break", 
+  "permlevel": 0
+ }, 
+ {
+  "print_hide": 0, 
+  "oldfieldtype": "Currency", 
+  "doctype": "DocField", 
+  "label": "Grand Total (Export)", 
+  "oldfieldname": "grand_total_export", 
+  "width": "150px", 
+  "fieldname": "grand_total_export", 
+  "fieldtype": "Currency", 
+  "reqd": 0, 
+  "permlevel": 1
+ }, 
+ {
+  "print_hide": 0, 
+  "oldfieldtype": "Currency", 
+  "doctype": "DocField", 
+  "label": "Rounded Total (Export)", 
+  "oldfieldname": "rounded_total_export", 
+  "width": "150px", 
+  "fieldname": "rounded_total_export", 
+  "fieldtype": "Currency", 
+  "permlevel": 1
+ }, 
+ {
+  "print_hide": 0, 
+  "oldfieldtype": "Data", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "In Words (Export)", 
+  "oldfieldname": "in_words_export", 
+  "width": "200px", 
+  "fieldname": "in_words_export", 
+  "fieldtype": "Data", 
+  "permlevel": 1
+ }, 
+ {
+  "print_hide": 0, 
+  "oldfieldtype": "Section Break", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Terms and Conditions", 
+  "fieldname": "terms_section_break", 
+  "fieldtype": "Section Break", 
+  "permlevel": 0
+ }, 
+ {
+  "print_hide": 1, 
+  "oldfieldtype": "Link", 
+  "doctype": "DocField", 
+  "label": "Select Terms and Conditions", 
+  "oldfieldname": "tc_name", 
+  "options": "Terms and Conditions", 
+  "fieldname": "tc_name", 
+  "fieldtype": "Link", 
+  "search_index": 0, 
+  "permlevel": 0
+ }, 
+ {
+  "print_hide": 1, 
+  "oldfieldtype": "Button", 
+  "doctype": "DocField", 
+  "label": "Get Terms and Conditions", 
+  "options": "get_tc_details", 
+  "fieldname": "get_terms", 
+  "fieldtype": "Button", 
+  "permlevel": 0
+ }, 
+ {
+  "print_hide": 1, 
+  "oldfieldtype": "HTML", 
+  "doctype": "DocField", 
+  "label": "Terms and Conditions HTML", 
+  "options": "You can add Terms and Notes that will be printed in the Transaction", 
+  "fieldname": "terms_html", 
+  "fieldtype": "HTML", 
+  "permlevel": 0
+ }, 
+ {
+  "print_hide": 0, 
+  "oldfieldtype": "Text Editor", 
+  "doctype": "DocField", 
+  "label": "Terms and Conditions Details", 
+  "oldfieldname": "terms", 
+  "fieldname": "terms", 
+  "fieldtype": "Text Editor", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Contact Info", 
+  "fieldname": "contact_info", 
+  "fieldtype": "Section Break", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "width": "50%", 
+  "fieldname": "col_break45", 
+  "fieldtype": "Column Break", 
+  "permlevel": 0
+ }, 
+ {
+  "print_hide": 1, 
+  "doctype": "DocField", 
+  "label": "Customer Address", 
+  "options": "Address", 
+  "fieldname": "customer_address", 
+  "fieldtype": "Link", 
+  "hidden": 0, 
+  "permlevel": 0, 
+  "in_filter": 1
+ }, 
+ {
+  "print_hide": 1, 
+  "doctype": "DocField", 
+  "label": "Contact Person", 
+  "options": "Contact", 
+  "fieldname": "contact_person", 
+  "fieldtype": "Link", 
+  "permlevel": 0, 
+  "in_filter": 1
+ }, 
+ {
+  "print_hide": 1, 
+  "search_index": 1, 
+  "doctype": "DocField", 
+  "label": "Territory", 
+  "options": "Territory", 
+  "fieldname": "territory", 
+  "fieldtype": "Link", 
+  "reqd": 1, 
+  "permlevel": 0, 
+  "in_filter": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "width": "50%", 
+  "fieldname": "col_break46", 
+  "fieldtype": "Column Break", 
+  "permlevel": 0
+ }, 
+ {
+  "print_hide": 1, 
+  "description": "Category of customer as entered in Customer master", 
+  "search_index": 1, 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Customer Group", 
+  "permlevel": 0, 
+  "fieldname": "customer_group", 
+  "fieldtype": "Link", 
+  "reqd": 1, 
+  "in_filter": 1, 
+  "options": "Customer Group"
+ }, 
+ {
+  "print_hide": 1, 
+  "description": "Filling in additional information about the Sales Order will help you analyze your data better.", 
+  "oldfieldtype": "Section Break", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "More Info", 
+  "fieldname": "more_info", 
+  "fieldtype": "Section Break", 
+  "permlevel": 0
+ }, 
+ {
+  "print_hide": 1, 
+  "oldfieldtype": "Column Break", 
+  "doctype": "DocField", 
+  "width": "50%", 
+  "fieldname": "column_break4", 
+  "fieldtype": "Column Break", 
+  "permlevel": 0
+ }, 
+ {
+  "print_hide": 1, 
+  "oldfieldtype": "Select", 
+  "allow_on_submit": 1, 
+  "doctype": "DocField", 
+  "label": "Letter Head", 
+  "oldfieldname": "letter_head", 
+  "options": "link:Letter Head", 
+  "fieldname": "letter_head", 
+  "fieldtype": "Select", 
+  "permlevel": 0
+ }, 
+ {
+  "print_hide": 1, 
+  "no_copy": 1, 
+  "oldfieldtype": "Link", 
+  "colour": "White:FFF", 
+  "allow_on_submit": 1, 
+  "doctype": "DocField", 
+  "label": "Select Print Heading", 
+  "oldfieldname": "select_print_heading", 
+  "permlevel": 0, 
+  "fieldname": "select_print_heading", 
+  "fieldtype": "Link", 
+  "options": "Print Heading", 
+  "report_hide": 1
+ }, 
+ {
+  "print_hide": 1, 
+  "oldfieldtype": "Link", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Campaign", 
+  "oldfieldname": "campaign", 
+  "options": "Campaign", 
+  "fieldname": "campaign", 
+  "fieldtype": "Link", 
+  "depends_on": "eval:doc.source == 'Campaign'", 
+  "permlevel": 0
+ }, 
+ {
+  "print_hide": 1, 
+  "no_copy": 1, 
+  "oldfieldtype": "Data", 
+  "doctype": "DocField", 
+  "label": "Amended From", 
+  "oldfieldname": "amended_from", 
+  "width": "150px", 
+  "fieldname": "amended_from", 
+  "fieldtype": "Data", 
+  "hidden": 1, 
+  "permlevel": 1
+ }, 
+ {
+  "print_hide": 1, 
+  "description": "The date at which current entry is corrected in the system.", 
+  "no_copy": 1, 
+  "oldfieldtype": "Date", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Amendment Date", 
+  "oldfieldname": "amendment_date", 
+  "width": "100px", 
+  "fieldname": "amendment_date", 
+  "fieldtype": "Date", 
+  "hidden": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "print_hide": 1, 
+  "description": "Select the relevant company name if you have multiple companies.", 
+  "permlevel": 0, 
+  "oldfieldtype": "Link", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Company", 
+  "oldfieldname": "company", 
+  "width": "150px", 
+  "trigger": "Client", 
+  "fieldname": "company", 
+  "fieldtype": "Link", 
+  "search_index": 1, 
+  "reqd": 1, 
+  "in_filter": 1, 
+  "options": "Company"
+ }, 
+ {
+  "print_hide": 1, 
+  "permlevel": 0, 
+  "oldfieldtype": "Select", 
+  "doctype": "DocField", 
+  "label": "Fiscal Year", 
+  "oldfieldname": "fiscal_year", 
+  "width": "150px", 
+  "fieldname": "fiscal_year", 
+  "fieldtype": "Select", 
+  "search_index": 1, 
+  "reqd": 1, 
+  "options": "link:Fiscal Year", 
+  "in_filter": 1
+ }, 
+ {
+  "print_hide": 1, 
+  "doctype": "DocField", 
+  "no_copy": 1, 
+  "depends_on": "eval:!doc.__islocal", 
+  "colour": "White:FFF", 
+  "oldfieldtype": "Data", 
+  "label": "Cancel Reason", 
+  "oldfieldname": "cancel_reason", 
+  "fieldname": "cancel_reason", 
+  "fieldtype": "Data", 
+  "no_column": 0, 
+  "permlevel": 1
+ }, 
+ {
+  "print_hide": 1, 
+  "oldfieldtype": "Column Break", 
+  "doctype": "DocField", 
+  "width": "50%", 
+  "fieldname": "column_break5", 
+  "fieldtype": "Column Break", 
+  "permlevel": 0
+ }, 
+ {
+  "print_hide": 1, 
+  "oldfieldtype": "Select", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Source", 
+  "oldfieldname": "source", 
+  "options": "\nExisting Customer\nReference\nAdvertisement\nCold Calling\nExhibition\nSupplier Reference\nMass Mailing\nCustomer's Vendor\nCampaign", 
+  "fieldname": "source", 
+  "fieldtype": "Select", 
+  "permlevel": 0
+ }, 
+ {
+  "description": "Track this Sales Order against any Project", 
+  "oldfieldtype": "Link", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Project Name", 
+  "oldfieldname": "project_name", 
+  "permlevel": 0, 
+  "trigger": "Client", 
+  "fieldname": "project_name", 
+  "fieldtype": "Link", 
+  "search_index": 1, 
+  "in_filter": 1, 
+  "options": "Project"
+ }, 
+ {
+  "print_hide": 1, 
+  "permlevel": 1, 
+  "width": "100px", 
+  "default": "Draft", 
+  "oldfieldtype": "Select", 
+  "doctype": "DocField", 
+  "label": "Status", 
+  "oldfieldname": "status", 
+  "no_copy": 1, 
+  "fieldname": "status", 
+  "fieldtype": "Select", 
+  "search_index": 1, 
+  "reqd": 1, 
+  "options": "\nDraft\nSubmitted\nStopped\nCancelled", 
+  "in_filter": 1
+ }, 
+ {
+  "print_hide": 1, 
+  "description": "% of materials delivered against this Sales Order", 
+  "no_copy": 1, 
+  "oldfieldtype": "Currency", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "%  Delivered", 
+  "oldfieldname": "per_delivered", 
+  "width": "100px", 
+  "fieldname": "per_delivered", 
+  "fieldtype": "Currency", 
+  "depends_on": "eval:!doc.__islocal", 
+  "in_filter": 1, 
+  "permlevel": 1
+ }, 
+ {
+  "print_hide": 1, 
+  "description": "% of materials billed against this Sales Order", 
+  "no_copy": 1, 
+  "oldfieldtype": "Currency", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "% Amount Billed", 
+  "oldfieldname": "per_billed", 
+  "width": "100px", 
+  "fieldname": "per_billed", 
+  "fieldtype": "Currency", 
+  "depends_on": "eval:!doc.__islocal", 
+  "in_filter": 1, 
+  "permlevel": 1
+ }, 
+ {
+  "print_hide": 1, 
+  "no_copy": 1, 
+  "doctype": "DocField", 
+  "label": "Delivery Status", 
+  "options": "Delivered\nNot Delivered\nPartly Delivered\nClosed\nNot Applicable", 
+  "fieldname": "delivery_status", 
+  "fieldtype": "Select", 
+  "no_column": 0, 
+  "hidden": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "print_hide": 1, 
+  "no_copy": 1, 
+  "doctype": "DocField", 
+  "label": "Billing Status", 
+  "options": "Billed\nNot Billed\nPartly Billed\nClosed", 
+  "fieldname": "billing_status", 
+  "fieldtype": "Select", 
+  "no_column": 0, 
+  "hidden": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "print_hide": 1, 
+  "description": "Display all the individual items delivered with the main items", 
+  "oldfieldtype": "Section Break", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Packing List", 
+  "fieldname": "packing_list", 
+  "fieldtype": "Section Break", 
+  "hidden": 0, 
+  "permlevel": 0
+ }, 
+ {
+  "print_hide": 1, 
+  "oldfieldtype": "Table", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Packing Details", 
+  "oldfieldname": "packing_details", 
+  "options": "Delivery Note Packing Item", 
+  "fieldname": "packing_details", 
+  "fieldtype": "Table", 
+  "permlevel": 1
+ }, 
+ {
+  "print_hide": 1, 
+  "oldfieldtype": "Section Break", 
+  "doctype": "DocField", 
+  "label": "Sales Team", 
+  "fieldname": "sales_team_section_break", 
+  "fieldtype": "Section Break", 
+  "permlevel": 0
+ }, 
+ {
+  "print_hide": 1, 
+  "doctype": "DocField", 
+  "width": "50%", 
+  "fieldname": "column_break6", 
+  "fieldtype": "Column Break", 
+  "permlevel": 0
+ }, 
+ {
+  "print_hide": 1, 
+  "description": "Name as entered in Sales Partner master", 
+  "permlevel": 0, 
+  "oldfieldtype": "Link", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Sales Partner", 
+  "oldfieldname": "sales_partner", 
+  "width": "150px", 
+  "trigger": "Client", 
+  "fieldname": "sales_partner", 
+  "fieldtype": "Link", 
+  "search_index": 1, 
+  "in_filter": 1, 
+  "options": "Sales Partner"
+ }, 
+ {
+  "print_hide": 1, 
+  "doctype": "DocField", 
+  "width": "50%", 
+  "fieldname": "column_break7", 
+  "fieldtype": "Column Break", 
+  "permlevel": 0
+ }, 
+ {
+  "print_hide": 1, 
+  "oldfieldtype": "Currency", 
+  "doctype": "DocField", 
+  "label": "Commission Rate", 
+  "oldfieldname": "commission_rate", 
+  "width": "100px", 
+  "trigger": "Client", 
+  "fieldname": "commission_rate", 
+  "fieldtype": "Currency", 
+  "permlevel": 0
+ }, 
+ {
+  "print_hide": 1, 
+  "oldfieldtype": "Currency", 
+  "doctype": "DocField", 
+  "label": "Total Commission", 
+  "oldfieldname": "total_commission", 
+  "trigger": "Client", 
+  "fieldname": "total_commission", 
+  "fieldtype": "Currency", 
+  "permlevel": 0
+ }, 
+ {
+  "print_hide": 1, 
+  "doctype": "DocField", 
+  "options": "Simple", 
+  "fieldname": "section_break1", 
+  "fieldtype": "Section Break", 
+  "permlevel": 0
+ }, 
+ {
+  "print_hide": 1, 
+  "oldfieldtype": "Table", 
+  "doctype": "DocField", 
+  "label": "Sales Team1", 
+  "oldfieldname": "sales_team", 
+  "options": "Sales Team", 
+  "fieldname": "sales_team", 
+  "fieldtype": "Table", 
+  "permlevel": 0
+ }, 
+ {
+  "print_hide": 1, 
+  "no_copy": 1, 
+  "doctype": "DocField", 
+  "label": "File List", 
+  "fieldname": "file_list", 
+  "fieldtype": "Text", 
+  "hidden": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "amend": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "submit": 1, 
+  "write": 1, 
+  "role": "Sales User", 
+  "cancel": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "amend": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "submit": 1, 
+  "write": 1, 
+  "role": "Maintenance User", 
+  "cancel": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "amend": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "submit": 0, 
+  "write": 0, 
+  "role": "Maintenance Manager", 
+  "cancel": 0, 
+  "permlevel": 1
+ }, 
+ {
+  "amend": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "submit": 1, 
+  "write": 1, 
+  "role": "Maintenance Manager", 
+  "cancel": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "amend": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "submit": 1, 
+  "write": 1, 
+  "role": "Sales Manager", 
+  "cancel": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "amend": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "submit": 0, 
+  "write": 0, 
+  "role": "Sales Manager", 
+  "cancel": 0, 
+  "permlevel": 1
+ }, 
+ {
+  "amend": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "submit": 0, 
+  "write": 1, 
+  "role": "Accounts User", 
+  "cancel": 0, 
+  "permlevel": 2
+ }, 
+ {
+  "amend": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "submit": 0, 
+  "write": 0, 
+  "role": "Customer", 
+  "cancel": 0, 
+  "permlevel": 0, 
+  "match": "customer"
+ }, 
+ {
+  "amend": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "submit": 0, 
+  "write": 0, 
+  "role": "Sales User", 
+  "cancel": 0, 
+  "permlevel": 1
+ }, 
+ {
+  "amend": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "submit": 0, 
+  "write": 0, 
+  "role": "Maintenance User", 
+  "cancel": 0, 
+  "permlevel": 1
+ }
 ]

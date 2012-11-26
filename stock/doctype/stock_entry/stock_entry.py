@@ -20,7 +20,7 @@ import webnotes
 
 from webnotes.utils import add_days, add_months, add_years, cint, cstr, date_diff, default_fields, flt, fmt_money, formatdate, getTraceback, get_defaults, get_first_day, get_last_day, getdate, has_common, month_name, now, nowdate, replace_newlines, sendmail, set_default, str_esc_quote, user_format, validate_email_add
 from webnotes.model import db_exists, delete_doc
-from webnotes.model.doc import Document, addchild, getchildren, make_autoname
+from webnotes.model.doc import Document, addchild, getchildren
 from webnotes.model.wrapper import getlist, copy_doclist
 from webnotes.model.code import get_obj, get_server_obj, run_server_obj, updatedb, check_syntax
 from webnotes import session, form, msgprint, errprint
@@ -40,12 +40,6 @@ class DocType(TransactionBase):
 		self.doclist = doclist
 		self.item_dict = {}
 		self.fname = 'mtn_details' 
-
-	# Autoname
-	# ---------
-	def autoname(self):
-		self.doc.name = make_autoname(self.doc.naming_series+'.#####')
-
   
 	# get item details
 	# ----------------

@@ -4,9 +4,10 @@
   "docstatus": 0, 
   "creation": "2012-11-02 17:16:46", 
   "modified_by": "Administrator", 
-  "modified": "2012-11-24 15:09:56"
+  "modified": "2012-11-26 11:12:27"
  }, 
  {
+  "autoname": "naming_series:", 
   "name": "__common__", 
   "default_print_format": "Standard", 
   "search_fields": "lead_name,lead_owner,status", 
@@ -121,7 +122,7 @@
   "search_index": 0, 
   "reqd": 0, 
   "in_filter": 1, 
-  "options": "\nAdvertisement\nBlog\nCampaign\nCall\nCustomer\nExhibition\nSupplier\nWebsite"
+  "options": "\nAdvertisement\nBlog\nCampaign\nCall\nCustomer\nExhibition\nSupplier\nWebsite\nEmail"
  }, 
  {
   "description": "Source of th", 
