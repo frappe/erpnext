@@ -22,6 +22,8 @@ wn.pages['stock-analytics'].onload = function(wrapper) {
 	});
 	
 	new erpnext.StockAnalytics(wrapper);
+	
+	wrapper.appframe.add_module_tab("Stock");
 }
 
 wn.require("app/js/stock_grid_report.js");

@@ -22,6 +22,8 @@ wn.pages['purchase-analytics'].onload = function(wrapper) {
 	});					
 	
 	new erpnext.PurchaseAnalytics(wrapper);
+	
+	wrapper.appframe.add_module_tab("Buying");
 }
 
 erpnext.PurchaseAnalytics = wn.views.TreeGridReport.extend({

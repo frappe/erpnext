@@ -139,7 +139,7 @@ cur_frm.cscript['Make Purchase Receipt'] = function() {
 //========================== Make Purchase Invoice =====================================================
 cur_frm.cscript['Make Purchase Invoice'] = function() {
 	n = createLocal('Purchase Invoice');
-	$c('dt_map', args={
+	$c('dt_map', {
 		'docs':compress_doclist([locals['Purchase Invoice'][n]]),
 		'from_doctype':cur_frm.doc.doctype,
 		'to_doctype':'Purchase Invoice',

@@ -21,6 +21,8 @@ wn.pages['sales-analytics'].onload = function(wrapper) {
 		single_column: true
 	});
 	new erpnext.SalesAnalytics(wrapper);
+	
+	wrapper.appframe.add_module_tab("Selling");
 }
 
 erpnext.SalesAnalytics = wn.views.TreeGridReport.extend({

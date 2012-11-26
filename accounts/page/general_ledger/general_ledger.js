@@ -22,6 +22,8 @@ wn.pages['general-ledger'].onload = function(wrapper) {
 	});
 	
 	erpnext.general_ledger = new erpnext.GeneralLedger(wrapper);
+	
+	wrapper.appframe.add_module_tab("Accounts");
 
 }
 
