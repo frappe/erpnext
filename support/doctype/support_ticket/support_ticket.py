@@ -112,7 +112,7 @@ class DocType(TransactionBase):
 		d.communication_medium = "Email"
 		d.save(1)
 	
-	def set_lead_and_contact(self, d):
+	def set_lead_and_contact(self, d, email_addr):
 		# set contact
 		if self.doc.contact:
 			d.contact = self.doc.contact
