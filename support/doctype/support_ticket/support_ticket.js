@@ -14,19 +14,9 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-// threading structure
-// -------- orginal message --------
-// xoxoxoxo
-// -------- reply 1 --------
-// -------- reply 2 --------
-// xoxoxoxo
-// -------- new reply --------
-
 $.extend(cur_frm.cscript, {
 	onload: function(doc, dt, dn) {
-		//
-		// help area
-		//
+		cur_frm.last_reload = new Date();
 		if(in_list(user_roles,'System Manager')) {
 			cur_frm.page_layout.footer.help_area.innerHTML = '<hr>\
 				<p><a href="#Form/Email Settings/Email Settings">Email Settings</a><br>\
@@ -37,6 +27,11 @@ $.extend(cur_frm.cscript, {
 	},
 	
 	refresh: function(doc) {
+		if(new Date() - cur_frm.last_reload > 20000) {
+			cur_frm.last_reload = new Date();
+			cur_frm.reload_doc();
+			return;
+		}
 		erpnext.hide_naming_series();
 		cur_frm.cscript.make_listing(doc);
 		if(!doc.__islocal) {											
@@ -56,9 +51,6 @@ $.extend(cur_frm.cscript, {
 		refresh_field('status');
 	},
 	
-	//
-	// make thread listing
-	//
 	make_listing: function(doc) {
 		var wrapper = cur_frm.fields_dict['thread_html'].wrapper;
 		$(wrapper)
@@ -73,17 +65,12 @@ $.extend(cur_frm.cscript, {
 			
 		comm_list.sort(function(a, b) { return new Date(a.modified) > new Date(b.modified) 
 			? -1 : 1 })
-				
-		$.each(comm_list, function(i, c) {
-			var comm = new erpnext.CommunicationView({
-				doc: c,
-				support_ticket: doc,
-				parent: wrapper
-			});
-			if(i==0) {
-				comm.toggle();
-			}
-		});
+		
+		new erpnext.CommunicationView({
+			list: comm_list,
+			parent: wrapper
+		})
+
 	},
 	
 	send: function(doc, dt, dn) {
@@ -131,36 +118,47 @@ $.extend(cur_frm.cscript, {
 
 erpnext.CommunicationView = Class.extend({
 	init: function(opts) {
+		this.comm_list = [];
 		$.extend(this, opts);
-		this.prepare();
 		this.make();
-		this.toggle();
-	},
-	prepare: function() {
-		//this.doc.when = comment_when(this.doc.modified);
-		this.doc.when = this.doc.modified;
-		if(this.doc.content.indexOf("<br>")== -1 && this.doc.content.indexOf("<p>")== -1) {
-			this.doc.content = this.doc.content.replace(/\n/g, "<br>");
-		}
-		this.doc.content = this.doc.content.split("=== In response to ===")[0];
-		this.doc.content = this.doc.content.split("-----Original Message-----")[0];
 	},
 	make: function() {
 		var me = this;
-		this.body = $(repl('<div class="communication" title="Click to Expand / Collapse">\
+		this.make_body();
+		$.each(this.list, function(i, d) {
+			me.prepare(d);
+			me.make_line(d);
+		});
+		// show first
+		this.comm_list[0].find('.comm-content').toggle(true);
+	},
+	make_body: function() {
+		this.body = $("<table class='table table-bordered table-hover table-striped'>").appendTo(this.parent);
+	},
+	prepare: function(doc) {
+		//doc.when = comment_when(this.doc.modified);
+		doc.when = doc.modified;
+		if(doc.content.indexOf("<br>")== -1 && doc.content.indexOf("<p>")== -1) {
+			doc.content = doc.content.replace(/\n/g, "<br>");
+		}
+		doc.email_address = doc.email_address.replace(/</, "&lt;").replace(/>/, "&gt;");
+		doc.content = doc.content.split("=== In response to ===")[0];
+		doc.content = doc.content.split("-----Original Message-----")[0];
+	},
+	make_line: function(doc) {
+		var me = this;
+		var comm = $(repl('<tr><td title="Click to Expand / Collapse">\
 				<p><b>%(email_address)s on %(when)s</b></p>\
-				<div class="comm-content" style="border-top: 1px solid #ddd; padding: 10px"></div>\
-			</div>', this.doc))
-			.appendTo(this.parent)
+				<div class="comm-content"></div>\
+			</td></tr>', doc))
+			.appendTo(this.body)
 			.css({"cursor":"pointer"})
 			.click(function() {
 				$(this).find(".comm-content").toggle();
 			});
-			
-		this.body.find(".comm-content").html(this.doc.content);
-	},
-	toggle: function() {
-		this.body.find(".comm-content").toggle();
+		
+		this.comm_list.push(comm);
+		comm.find(".comm-content").html(doc.content);
 	}
 })
 
