@@ -100,8 +100,6 @@ class DocType(TransactionBase):
 			Creates a new Communication record
 		"""
 		# add to Communication
-		import email.utils
-
 		d = webnotes.doc('Communication')
 		d.subject = self.doc.subject
 		d.email_address = from_email or webnotes.user.name
@@ -112,6 +110,7 @@ class DocType(TransactionBase):
 		d.save(1)
 	
 	def set_lead_and_contact(self, d):
+		import email.utils
 		email_addr = email.utils.parseaddr(d.email_address)
 		# set contact
 		if self.doc.contact:
