@@ -18,48 +18,28 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import add_days, add_months, add_years, cint, cstr, date_diff, default_fields, flt, fmt_money, formatdate, getTraceback, get_defaults, get_first_day, get_last_day, getdate, has_common, month_name, now, nowdate, replace_newlines, sendmail, set_default, str_esc_quote, user_format, validate_email_add
-from webnotes.model import db_exists
-from webnotes.model.doc import Document, addchild, getchildren, make_autoname
-from webnotes.model.wrapper import getlist, copy_doclist
-from webnotes.model.code import get_obj, get_server_obj, run_server_obj, updatedb, check_syntax
-from webnotes import session, form, msgprint, errprint
+from webnotes.utils import cint, cstr, flt, validate_email_add
+from webnotes.model.doc import Document, addchild
+from webnotes import session, msgprint
 
-set = webnotes.conn.set
 sql = webnotes.conn.sql
-get_value = webnotes.conn.get_value
-in_transaction = webnotes.conn.in_transaction
-convert_to_lists = webnotes.conn.convert_to_lists
 	
 # -----------------------------------------------------------------------------------------
 
+from utilities.transaction_base import TransactionBase
 
-class DocType:
+class DocType(TransactionBase):
 	def __init__(self, doc, doclist):
 		self.doc = doc
 		self.doclist = doclist
-	
-	#check status of lead
-	#------------------------
+
+	def onload(self):
+		self.add_communication_list()
+
 	def check_status(self):
 		chk = sql("select status from `tabLead` where name=%s", self.doc.name)
 		chk = chk and chk[0][0] or ''
 		return cstr(chk)
-
-
-	# Get item detail (will be removed later)
-	#=======================================
-	def get_item_detail(self,item_code):
-		it=sql("select item_name,brand,item_group,description,stock_uom from `tabItem` where name='%s'"%item_code)
-		if it:
-			ret = {
-			'item_name'	: it and it[0][0] or '',
-			'brand'			: it and it[0][1] or '',
-			'item_group' : it and it[0][2] or '',
-			'description': it and it[0][3] or '',
-			'uom' : it and it[0][4] or ''
-			}
-			return ret
 	
 	def validate(self):
 		if self.doc.status == 'Lead Lost' and not self.doc.order_lost_reason:
@@ -79,20 +59,6 @@ class DocType:
 		if self.doc.contact_date:
 			self.add_calendar_event()
 		
-		if not self.doc.naming_series:
-			if session['user'] == 'Guest':
-				import webnotes.model.doctype
-				docfield = webnotes.model.doctype.get('Lead')
-				series = [d.options for d in docfield if d.doctype == 'DocField' and d.fieldname == 'naming_series']
-				if series:
-					sr = series[0].split("\n")
-					set(self.doc, 'naming_series', sr[0])
-			else:
-				msgprint("Please specify naming series")
-				raise Exception
-
-	# Add to Calendar
-	# ===========================================================================
 	def add_calendar_event(self):
 		# delete any earlier event by this lead
 		sql("delete from tabEvent where ref_type='Lead' and ref_name=%s", self.doc.name)
@@ -113,3 +79,9 @@ class DocType:
 		event_user = addchild(ev, 'event_individuals', 'Event User')
 		event_user.person = self.doc.contact_by
 		event_user.save()
+
+	def on_trash(self):
+		webnotes.conn.sql("""update tabCommunication set lead='' where lead=%s""",
+			self.doc.name)
+		webnotes.conn.sql("""update `tabSupport Ticket` set contact='' where contact=%s""",
+			self.doc.name)

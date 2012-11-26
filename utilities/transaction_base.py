@@ -241,3 +241,18 @@ class TransactionBase:
 	def get_formatted_message(self, args):
 		""" get formatted message for auto notification"""
 		return get_obj('Notification Control').get_formatted_message(args)
+
+	def add_communication_list(self):
+		# remove communications if present
+		self.doclist = webnotes.doclist(self.doclist).get({
+			"doctype": ["!=", "Communcation"]})
+		
+		comm_list = webnotes.conn.sql("""select * from tabCommunication 
+			where %s=%s order by modified desc limit 20""" \
+			% (self.doc.doctype.replace(" ", "_").lower(), "%s"),
+			self.doc.name, as_dict=1)
+		
+		[d.update({"doctype":"Communication"}) for d in comm_list]
+		
+		self.doclist.extend(webnotes.doclist([webnotes.doc(fielddata=d) \
+			for d in comm_list]))

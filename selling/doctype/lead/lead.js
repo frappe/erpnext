@@ -16,6 +16,8 @@
 
 // Module CRM
 
+wn.require("public/app/js/communication.js");
+
 wn.require('app/utilities/doctype/sms_control/sms_control.js');
 wn.require('app/support/doctype/communication/communication.js');
 
@@ -41,8 +43,6 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 	if(user=='Guest') doc.naming_series = 'WebLead';
 	
 	cur_frm.add_fetch('customer', 'customer_name', 'company_name');
-
-	cur_frm.cscript.make_communication_body();
 	
 	if(cur_frm.fields_dict.lead_owner.df.options.match(/^Profile/)) {
 		cur_frm.fields_dict.lead_owner.get_query = erpnext.utils.profile_query;
@@ -67,32 +67,22 @@ cur_frm.cscript.refresh_custom_buttons = function(doc) {
 }
 
 cur_frm.cscript.refresh = function(doc, cdt, cdn) {
-	// custom buttons
-	//---------------
 	cur_frm.cscript.refresh_custom_buttons(doc);
-	
 	erpnext.hide_naming_series();
-	
-	if (!doc.__islocal) cur_frm.cscript.render_communication_list(doc, cdt, cdn);
+
+	new erpnext.CommunicationView({
+		list: wn.model.get("Communication", {"lead": doc.name}),
+		parent: cur_frm.fields_dict.communication_html.wrapper
+	})
+		
 }
 
 
-// Client Side Triggers
-// ===========================================================
-// ************ Status ******************
+
 cur_frm.cscript.status = function(doc, cdt, cdn){
 	cur_frm.cscript.refresh(doc, cdt, cdn);
 }
 
-//Trigger in Item Table
-//===================================
-cur_frm.cscript.item_code=function(doc,cdt,cdn){
-	var d = locals[cdt][cdn];
-	if (d.item_code) { get_server_fields('get_item_detail',d.item_code,'lead_item_detail',doc,cdt,cdn,1);}
-}
-
-// Create New Customer
-// ===============================================================
 cur_frm.cscript['Create Customer'] = function(){
 	var doc = cur_frm.doc;
 	$c('runserverobj',args={ 'method':'check_status', 'docs':compress_doclist(make_doclist(doc.doctype, doc.name))},

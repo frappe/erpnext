@@ -28,18 +28,6 @@ class DocType(TransactionBase):
 
 	def onload(self):
 		self.add_communication_list()
-		
-	def add_communication_list(self):
-		# remove communications if present
-		self.doclist = webnotes.doclist(self.doclist).get({"doctype": ["!=", "Communcation"]})
-		
-		comm_list = webnotes.conn.sql("""select * from tabCommunication 
-			where support_ticket=%s order by modified desc limit 20""", self.doc.name, as_dict=1)
-		
-		[d.update({"doctype":"Communication"}) for d in comm_list]
-		
-		self.doclist.extend(webnotes.doclist([webnotes.doc(fielddata=d) \
-			for d in comm_list]))
 			
 	def send_response(self):
 		"""
