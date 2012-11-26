@@ -133,7 +133,9 @@ erpnext.CommunicationView = Class.extend({
 		this.comm_list[0].find('.comm-content').toggle(true);
 	},
 	make_body: function() {
-		this.body = $("<table class='table table-bordered table-hover table-striped'>").appendTo(this.parent);
+		this.wrapper = $("<div><h4>Communication History</h4></div>").appendTo(this.parent);
+		this.body = $("<table class='table table-bordered table-hover table-striped'>")
+			.appendTo(this.body);
 	},
 	prepare: function(doc) {
 		//doc.when = comment_when(this.doc.modified);

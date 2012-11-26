@@ -49,7 +49,8 @@ def get_user_details(arg=None):
 	"""
 		Returns user first name, last name and bio
 	"""
-	return webnotes.conn.sql("select first_name, last_name, bio from tabProfile where name=%s", webnotes.user.name, as_dict=1)[0]
+	return webnotes.conn.sql("""select first_name, last_name, bio, email_signature
+		from tabProfile where name=%s""", webnotes.user.name, as_dict=1)[0]
 	
 @webnotes.whitelist()
 def set_user_details(arg=None):
