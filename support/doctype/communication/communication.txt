@@ -4,7 +4,7 @@
   "docstatus": 0, 
   "creation": "2012-11-14 12:25:16", 
   "modified_by": "Administrator", 
-  "modified": "2012-11-26 11:17:28"
+  "modified": "2012-11-26 12:41:59"
  }, 
  {
   "autoname": "naming_series:", 
@@ -12,7 +12,7 @@
   "name": "__common__", 
   "doctype": "DocType", 
   "module": "Support", 
-  "in_dialog": 1, 
+  "in_dialog": 0, 
   "document_type": "Master", 
   "description": "Keep a track of all communications"
  }, 

@@ -100,28 +100,45 @@ class DocType(TransactionBase):
 			Creates a new Communication record
 		"""
 		# add to Communication
-		import email.utils
-
 		d = webnotes.doc('Communication')
 		d.subject = self.doc.subject
 		d.email_address = from_email or webnotes.user.name
-		email_addr = email.utils.parseaddr(d.email_address)[1]
-		d.contact = webnotes.conn.get_value("Contact", {"email_id": email_addr}, "name") or None
-		d.lead = webnotes.conn.get_value("Lead", {"email_id": email_addr}, "name") or None
+		self.set_lead_and_contact(d)
 		d.support_ticket = self.doc.name
 		d.content = response
 		d.communication_medium = "Email"
 		d.save(1)
-		
-		if not d.lead and not d.contact:
-			self.make_lead(d, email_addr[0])
 	
+	def set_lead_and_contact(self, d):
+		import email.utils
+		email_addr = email.utils.parseaddr(d.email_address)
+		# set contact
+		if self.doc.contact:
+			d.contact = self.doc.contact
+		else:
+			d.contact = webnotes.conn.get_value("Contact", {"email_id": email_addr[1]}, "name") or None
+			if d.contact:
+				webnotes.conn.set(self.doc, "contact", d.contact)
+
+		if self.doc.lead:
+			d.lead = self.doc.lead
+		else:
+			d.lead = webnotes.conn.get_value("Lead", {"email_id": email_addr[1]}, "name") or None
+			if d.lead:
+				webnotes.conn.set(self.doc, "lead", d.lead)
+
+		# not linked to any lead / contact, create new lead
+		if not d.lead and not d.contact:
+			d.lead = self.make_lead(d, email_addr[0])
+			webnotes.conn.set(self.doc, "lead", d.lead)
+		
 	def make_lead(self, d, real_name):
 		d = webnotes.doc("Lead")
 		d.lead_name = real_name or d.email_address
 		d.email_id = d.email_address
 		d.source = "Email"
 		d.save(1)
+		return d.name
 	
 	def close_ticket(self):
 		webnotes.conn.set(self.doc,'status','Closed')

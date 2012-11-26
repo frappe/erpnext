@@ -4,7 +4,7 @@
   "docstatus": 0, 
   "creation": "2012-11-02 17:17:05", 
   "modified_by": "Administrator", 
-  "modified": "2012-11-26 11:17:10"
+  "modified": "2012-11-26 12:54:25"
  }, 
  {
   "autoname": "naming_series:", 
@@ -139,6 +139,22 @@
   "permlevel": 1
  }, 
  {
+  "doctype": "DocField", 
+  "label": "Lead", 
+  "options": "Lead", 
+  "fieldname": "lead", 
+  "fieldtype": "Link", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Contact", 
+  "options": "Contact", 
+  "fieldname": "contact", 
+  "fieldtype": "Link", 
+  "permlevel": 0
+ }, 
+ {
   "print_hide": 1, 
   "oldfieldtype": "Link", 
   "colour": "White:FFF", 
@@ -165,36 +181,6 @@
   "reqd": 0, 
   "permlevel": 2, 
   "in_filter": 1
- }, 
- {
-  "doctype": "DocField", 
-  "label": "Address", 
-  "fieldname": "address_display", 
-  "fieldtype": "Small Text", 
-  "permlevel": 2
- }, 
- {
-  "doctype": "DocField", 
-  "label": "Contact Name", 
-  "fieldname": "contact_display", 
-  "fieldtype": "Data", 
-  "permlevel": 2
- }, 
- {
-  "doctype": "DocField", 
-  "label": "Mobile No", 
-  "fieldname": "contact_mobile", 
-  "fieldtype": "Data", 
-  "permlevel": 2
- }, 
- {
-  "oldfieldtype": "Data", 
-  "doctype": "DocField", 
-  "label": "Contact Email", 
-  "oldfieldname": "contact_no", 
-  "fieldname": "contact_email", 
-  "fieldtype": "Data", 
-  "permlevel": 2
  }, 
  {
   "default": "Today", 
@@ -226,27 +212,13 @@
   "permlevel": 1
  }, 
  {
-  "depends_on": "eval:!doc.__islocal", 
-  "search_index": 1, 
-  "colour": "White:FFF", 
-  "doctype": "DocField", 
-  "label": "Allocated To", 
-  "oldfieldname": "allocated_to", 
-  "permlevel": 1, 
-  "fieldname": "allocated_to", 
-  "fieldtype": "Link", 
-  "oldfieldtype": "Link", 
-  "options": "Profile", 
-  "in_filter": 1
- }, 
- {
   "no_copy": 1, 
   "oldfieldtype": "Text", 
   "doctype": "DocField", 
   "label": "Resolution Details", 
   "oldfieldname": "resolution_details", 
   "fieldname": "resolution_details", 
-  "fieldtype": "Text", 
+  "fieldtype": "Small Text", 
   "depends_on": "eval:!doc.__islocal", 
   "permlevel": 1
  }, 
