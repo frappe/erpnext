@@ -39,11 +39,6 @@ class DocType:
 		self.doc = doc
 		self.doclist = doclist
 	
-	# Autoname
-	# ---------
-	def autoname(self):
-		self.doc.name = make_autoname(self.doc.naming_series+'.#####')
-	
 	#check status of lead
 	#------------------------
 	def check_status(self):

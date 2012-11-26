@@ -4,13 +4,14 @@
   "docstatus": 0, 
   "creation": "2012-11-14 12:25:16", 
   "modified_by": "Administrator", 
-  "modified": "2012-11-24 15:22:32"
+  "modified": "2012-11-26 11:17:28"
  }, 
  {
+  "autoname": "naming_series:", 
   "allow_attach": 1, 
+  "name": "__common__", 
   "doctype": "DocType", 
   "module": "Support", 
-  "name": "__common__", 
   "in_dialog": 1, 
   "document_type": "Master", 
   "description": "Keep a track of all communications"

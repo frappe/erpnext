@@ -45,10 +45,6 @@ class DocType():
 				where ifnull(blog_subscriber,0) = 1 and ifnull(email_id, '') != '' """
 		}
 		
-	def autoname(self):
-		from webnotes.model.doc import make_autoname
-		self.doc.name = make_autoname(self.doc.naming_series+ '.#####')
-		
 	def send_emails(self):
 		"""send emails to leads and customers"""		
 		# TODO: create unsubscribed check in customer
