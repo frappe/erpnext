@@ -146,4 +146,8 @@ class DocType(TransactionBase):
 
 	def reopen_ticket(self):
 		webnotes.conn.set(self.doc,'status','Open')		
-		update_feed(self.doc)		
+		update_feed(self.doc)
+		
+	def on_trash(self):
+		webnotes.conn.sql("""update `tabCommunication set support_ticket="" 
+			where support_ticket=%s`""", self.doc.name)
