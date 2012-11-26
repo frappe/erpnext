@@ -16,9 +16,7 @@
 
 $.extend(cur_frm.cscript, {
 	onload: function(doc, dt, dn) {
-		//
-		// help area
-		//
+		cur_frm.last_reload = new Date();
 		if(in_list(user_roles,'System Manager')) {
 			cur_frm.page_layout.footer.help_area.innerHTML = '<hr>\
 				<p><a href="#Form/Email Settings/Email Settings">Email Settings</a><br>\
@@ -29,6 +27,11 @@ $.extend(cur_frm.cscript, {
 	},
 	
 	refresh: function(doc) {
+		if(new Date() - cur_frm.last_reload > 20000) {
+			cur_frm.last_reload = new Date();
+			cur_frm.reload_doc();
+			return;
+		}
 		erpnext.hide_naming_series();
 		cur_frm.cscript.make_listing(doc);
 		if(!doc.__islocal) {											
