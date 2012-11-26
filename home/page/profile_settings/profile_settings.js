@@ -70,6 +70,8 @@ MyProfile = function(wrapper) {
 			fields: [
 				{fieldname:'first_name', fieldtype:'Data',label:'First Name',reqd:1},
 				{fieldname:'last_name', fieldtype:'Data',label:'Last Name'},
+				{fieldname:'email_signature', fieldtype:'Text',label:'Email Signature',
+					decription:'Will be appended to outgoing mail'},
 				{fieldname:'bio', fieldtype:'Text',label:'Bio'},
 				{fieldname:'update', fieldtype:'Button',label:'Update'}
 			]

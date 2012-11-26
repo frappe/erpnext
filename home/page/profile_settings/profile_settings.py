@@ -63,6 +63,7 @@ def set_user_details(arg=None):
 	arg_dict = load_json(arg)
 	if not 'bio' in arg_dict: arg_dict['bio'] = None
 	if not 'last_name' in arg_dict: arg_dict['last_name'] = None
+	if not 'email_signature' in arg_dict: arg_dict['email_signature'] = None
 	p.fields.update(arg_dict)
 	p.save()
 	webnotes.msgprint('Updated')
