@@ -19,8 +19,9 @@ erpnext.CommunicationView = Class.extend({
 		this.comm_list = [];
 		$.extend(this, opts);
 		
-		this.list.sort(function(a, b) { return new Date(a.modified) > new Date(b.modified) 
-			? -1 : 1 })
+		this.list.sort(function(a, b) { return 
+			(new Date(a.modified) > new Date(b.modified)) 
+			? -1 : 1; })
 				
 		this.make();
 	},
@@ -41,7 +42,9 @@ erpnext.CommunicationView = Class.extend({
 			
 		this.wrapper = $("<div><h4>Communication History</h4>\
 			<button class='btn btn-small'>Add Reply</button></p></div>")
-			.appendTo(this.parent);
+			.appendTo(this.parent).css({
+				"overflow-x": "auto",
+			});
 			
 		this.body = $("<table class='table table-bordered table-hover table-striped'>")
 			.appendTo(this.wrapper);
