@@ -33,21 +33,21 @@ class DocType(TransactionBase):
 		return webnotes.conn.get_value('Email Settings',None,'support_email')
 	
 	def get_subject(self, comm):
-		return '[' + self.doc.name + '] ' + (comm.doc.subject or 'No Subject Specified')
+		return '[' + self.doc.name + '] ' + (comm.subject or 'No Subject Specified')
 	
 	def get_content(self, comm):
 		signature = webnotes.conn.get_value('Email Settings',None,'support_signature')
-		content = comm.doc.content
+		content = comm.content
 		if signature:
 			content += '<p>' + signature + '</p>'
 		return content
 		
 	def on_communication_sent(self, comm):
 		webnotes.conn.set(self.doc, 'status', 'Waiting for Customer')
-		if comm.doc.lead and not self.doc.lead:
-			webnotes.conn.set(self.doc, 'lead', comm.doc.lead)
-		if comm.doc.contact and not self.doc.contact:
-			webnotes.conn.set(self.doc, 'contact', comm.doc.contact)
+		if comm.lead and not self.doc.lead:
+			webnotes.conn.set(self.doc, 'lead', comm.lead)
+		if comm.contact and not self.doc.contact:
+			webnotes.conn.set(self.doc, 'contact', comm.contact)
 	
 	def close_ticket(self):
 		webnotes.conn.set(self.doc,'status','Closed')

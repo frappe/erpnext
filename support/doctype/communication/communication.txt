@@ -4,7 +4,7 @@
   "docstatus": 0, 
   "creation": "2012-11-14 12:25:16", 
   "modified_by": "Administrator", 
-  "modified": "2012-11-27 12:24:43"
+  "modified": "2012-11-27 18:51:01"
  }, 
  {
   "autoname": "naming_series:", 
@@ -69,7 +69,7 @@
   "label": "Content", 
   "width": "400", 
   "fieldname": "content", 
-  "fieldtype": "Text", 
+  "fieldtype": "Text Editor", 
   "reqd": 0, 
   "permlevel": 0
  }, 
