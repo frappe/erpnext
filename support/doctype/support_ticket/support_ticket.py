@@ -58,5 +58,5 @@ class DocType(TransactionBase):
 		update_feed(self.doc)
 		
 	def on_trash(self):
-		webnotes.conn.sql("""update `tabCommunication` set support_ticket="" 
-			where support_ticket=%s`""", self.doc.name)
+		webnotes.conn.sql("""update `tabCommunication` set support_ticket=NULL 
+			where support_ticket=%s""", (self.doc.name,))

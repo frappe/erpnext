@@ -23,6 +23,8 @@ wn.pages['financial-analytics'].onload = function(wrapper) {
 		single_column: true
 	});
 	erpnext.trial_balance = new erpnext.FinancialAnalytics(wrapper, 'Financial Analytics');
+	
+	wrapper.appframe.add_module_tab("Accounts");
 }
 
 erpnext.FinancialAnalytics = erpnext.AccountTreeGrid.extend({

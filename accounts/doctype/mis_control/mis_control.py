@@ -248,11 +248,11 @@ class DocType:
 					# add rows for profit / loss in P/L
 					else:
 						if c[2]=='Debit':
-							self.return_data.append([1, 'Total Expenses (before Profit)'] + totals)
+							self.return_data.append([1, 'Total Expenses'] + totals)
 							self.return_data.append([5, 'Profit/Loss (Provisional)'] + level0_diff)
 							for i in range(len(totals)): # make totals
 								level0_diff[i] = flt(totals[i]) + level0_diff[i]
-							self.return_data.append([4, 'Total '+c[0]] + level0_diff)
+							self.return_data.append([4, 'Total Income'] + level0_diff)
 						else:
 							self.return_data.append([4, 'Total '+c[0]] + totals)
 	

@@ -55,4 +55,6 @@ wn.pages['trial-balance'].onload = function(wrapper) {
 		},
 	})
 	erpnext.trial_balance = new TrialBalance(wrapper, 'Trial Balance');
+	
+	wrapper.appframe.add_module_tab("Accounts");
 }

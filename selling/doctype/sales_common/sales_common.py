@@ -717,7 +717,7 @@ class StatusUpdater:
 		
 		tolerance = flt(get_value('Item',item_code,'tolerance') or 0)
 
-		if not(tolerance):
+		if not tolerance:
 			if self.global_tolerance == None:
 				self.global_tolerance = flt(get_value('Global Defaults',None,'tolerance') or 0)
 			tolerance = self.global_tolerance
@@ -732,7 +732,7 @@ class StatusUpdater:
 	
 		# check if overflow is within tolerance
 		tolerance = self.get_tolerance_for(item['item_code'])
-		overflow_percent = ((item[args['compare_field']] - item[args['compare_ref_field']]) / item[args['compare_ref_field']] * 100)
+		overflow_percent = ((item[args['compare_field']] - item[args['compare_ref_field']]) / item[args['compare_ref_field']]) * 100
 	
 		if overflow_percent - tolerance > 0.01:
 			item['max_allowed'] = flt(item[args['compare_ref_field']] * (100+tolerance)/100)
