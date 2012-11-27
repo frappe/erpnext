@@ -398,3 +398,7 @@ class DocType:
 		if par:
 			msgprint("BOM can not be cancelled, as it is a child item in following active BOM %s"% [d[0] for d in par])
 			raise Exception
+			
+		webnotes.conn.set(self.doc, "is_active", "No")
+		webnotes.conn.set(self.doc, "is_default", 0)
+		self.manage_default_bom()
