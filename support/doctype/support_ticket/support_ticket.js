@@ -58,13 +58,15 @@ $.extend(cur_frm.cscript, {
 		
 		var comm_list = wn.model.get("Communication", {"support_ticket": doc.name})
 		comm_list.push({
-			"email_address": doc.raised_by,
+			"sender": doc.raised_by,
 			"modified": doc.creation,
 			"content": doc.description});
 					
-		new erpnext.CommunicationView({
+		cur_frm.communication_view = new erpnext.CommunicationView({
 			list: comm_list,
-			parent: wrapper
+			parent: wrapper,
+			doc: doc,
+			email: doc.raised_by
 		})
 
 	},

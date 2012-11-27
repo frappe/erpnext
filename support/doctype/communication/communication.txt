@@ -4,7 +4,7 @@
   "docstatus": 0, 
   "creation": "2012-11-14 12:25:16", 
   "modified_by": "Administrator", 
-  "modified": "2012-11-26 12:41:59"
+  "modified": "2012-11-27 18:51:01"
  }, 
  {
   "autoname": "naming_series:", 
@@ -69,7 +69,7 @@
   "label": "Content", 
   "width": "400", 
   "fieldname": "content", 
-  "fieldtype": "Text", 
+  "fieldtype": "Text Editor", 
   "reqd": 0, 
   "permlevel": 0
  }, 
@@ -121,7 +121,6 @@
  {
   "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Related To", 
   "fieldname": "column_break3", 
   "fieldtype": "Column Break", 
   "permlevel": 0
@@ -191,6 +190,20 @@
  }, 
  {
   "doctype": "DocField", 
+  "label": "Recipients", 
+  "fieldname": "recipients", 
+  "fieldtype": "Data", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Sender", 
+  "fieldname": "sender", 
+  "fieldtype": "Data", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
   "label": "Communication Medium", 
   "options": "\nChat\nPhone\nEmail\nSMS\nVisit\nOther", 
   "fieldname": "communication_medium", 
@@ -201,13 +214,6 @@
   "doctype": "DocField", 
   "label": "Phone No.", 
   "fieldname": "phone_no", 
-  "fieldtype": "Data", 
-  "permlevel": 0
- }, 
- {
-  "doctype": "DocField", 
-  "label": "Email Address", 
-  "fieldname": "email_address", 
   "fieldtype": "Data", 
   "permlevel": 0
  }, 
