@@ -4,7 +4,7 @@
   "docstatus": 0, 
   "creation": "2012-11-02 17:16:46", 
   "modified_by": "Administrator", 
-  "modified": "2012-11-26 18:13:22"
+  "modified": "2012-11-27 18:27:47"
  }, 
  {
   "autoname": "naming_series:", 
@@ -35,23 +35,6 @@
  {
   "name": "Lead", 
   "doctype": "DocType"
- }, 
- {
-  "oldfieldtype": "Section Break", 
-  "colour": "White:FFF", 
-  "doctype": "DocField", 
-  "label": "Basic Info", 
-  "fieldname": "basic_info", 
-  "fieldtype": "Section Break", 
-  "permlevel": 0
- }, 
- {
-  "oldfieldtype": "Column Break", 
-  "doctype": "DocField", 
-  "width": "50%", 
-  "fieldname": "column_break0", 
-  "fieldtype": "Column Break", 
-  "permlevel": 0
  }, 
  {
   "description": "To manage multiple series please go to Setup > Manage Series", 
@@ -93,19 +76,27 @@
   "permlevel": 0
  }, 
  {
-  "description": "Name of organization from where lead has come", 
-  "oldfieldtype": "Data", 
+  "doctype": "DocField", 
+  "fieldname": "cb6", 
+  "fieldtype": "Column Break", 
+  "permlevel": 0
+ }, 
+ {
+  "permlevel": 0, 
+  "no_copy": 1, 
+  "oldfieldtype": "Select", 
   "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Company Name", 
-  "oldfieldname": "company_name", 
+  "label": "Status", 
+  "oldfieldname": "status", 
+  "default": "Open", 
   "trigger": "Client", 
-  "fieldname": "company_name", 
-  "fieldtype": "Data", 
-  "search_index": 0, 
-  "reqd": 0, 
-  "in_filter": 1, 
-  "permlevel": 0
+  "fieldname": "status", 
+  "fieldtype": "Select", 
+  "search_index": 1, 
+  "reqd": 1, 
+  "options": "\nOpen\nAttempted to Contact\nContact in Future\nContacted\nInterested\nNot interested\nLead Lost\nConverted", 
+  "in_filter": 1
  }, 
  {
   "description": "Source of the lead. If via a campaign, select \"Campaign\"", 
@@ -123,6 +114,45 @@
   "reqd": 0, 
   "in_filter": 1, 
   "options": "\nAdvertisement\nBlog\nCampaign\nCall\nCustomer\nExhibition\nSupplier\nWebsite\nEmail"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "communication_history", 
+  "fieldtype": "Section Break", 
+  "permlevel": 0
+ }, 
+ {
+  "allow_on_submit": 0, 
+  "oldfieldtype": "Table", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Communication HTML", 
+  "oldfieldname": "follow_up", 
+  "fieldname": "communication_html", 
+  "fieldtype": "HTML", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Lead Details", 
+  "fieldname": "sb8", 
+  "fieldtype": "Section Break", 
+  "permlevel": 0
+ }, 
+ {
+  "description": "Name of organization from where lead has come", 
+  "oldfieldtype": "Data", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Company Name", 
+  "oldfieldname": "company_name", 
+  "trigger": "Client", 
+  "fieldname": "company_name", 
+  "fieldtype": "Data", 
+  "search_index": 0, 
+  "reqd": 0, 
+  "in_filter": 1, 
+  "permlevel": 0
  }, 
  {
   "description": "Source of th", 
@@ -160,23 +190,6 @@
   "permlevel": 0
  }, 
  {
-  "permlevel": 0, 
-  "no_copy": 1, 
-  "oldfieldtype": "Select", 
-  "colour": "White:FFF", 
-  "doctype": "DocField", 
-  "label": "Status", 
-  "oldfieldname": "status", 
-  "default": "Open", 
-  "trigger": "Client", 
-  "fieldname": "status", 
-  "fieldtype": "Select", 
-  "search_index": 1, 
-  "reqd": 1, 
-  "options": "\nOpen\nAttempted to Contact\nContact in Future\nContacted\nInterested\nNot interested\nLead Lost\nConverted", 
-  "in_filter": 1
- }, 
- {
   "oldfieldtype": "Select", 
   "colour": "White:FFF", 
   "doctype": "DocField", 
@@ -196,23 +209,6 @@
   "oldfieldname": "remark", 
   "fieldname": "remark", 
   "fieldtype": "Small Text", 
-  "permlevel": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "communication_history", 
-  "fieldtype": "Section Break", 
-  "permlevel": 0
- }, 
- {
-  "oldfieldtype": "Table", 
-  "colour": "White:FFF", 
-  "allow_on_submit": 0, 
-  "doctype": "DocField", 
-  "label": "Communication HTML", 
-  "oldfieldname": "follow_up", 
-  "fieldname": "communication_html", 
-  "fieldtype": "HTML", 
   "permlevel": 0
  }, 
  {

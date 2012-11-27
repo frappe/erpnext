@@ -4,7 +4,7 @@
   "docstatus": 0, 
   "creation": "2012-11-02 17:17:05", 
   "modified_by": "Administrator", 
-  "modified": "2012-11-26 12:54:25"
+  "modified": "2012-11-27 18:21:06"
  }, 
  {
   "autoname": "naming_series:", 
@@ -95,22 +95,6 @@
   "fieldtype": "Text", 
   "depends_on": "eval:doc.__islocal", 
   "reqd": 0, 
-  "permlevel": 0
- }, 
- {
-  "depends_on": "eval:!doc.__islocal", 
-  "doctype": "DocField", 
-  "label": "New Response", 
-  "fieldname": "new_response", 
-  "fieldtype": "Text", 
-  "permlevel": 0
- }, 
- {
-  "depends_on": "eval:!doc.__islocal", 
-  "doctype": "DocField", 
-  "label": "Send", 
-  "fieldname": "send", 
-  "fieldtype": "Button", 
   "permlevel": 0
  }, 
  {

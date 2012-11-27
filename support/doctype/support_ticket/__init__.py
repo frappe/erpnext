@@ -79,13 +79,13 @@ class SupportMailbox(POP3Mailbox):
 				WHERE name=%s AND raised_by REGEXP %s
 				""" , (thread_id, '(' + email_id + ')'))
 			if exists and exists[0] and exists[0][0]:
-				from webnotes.model.code import get_obj
+				st = webnotes.get_obj('Support Ticket', thread_id)
 				
-				st = get_obj('Support Ticket', thread_id)
-				st.make_response_record(content, full_email_id, content_type)
+				from support.doctype.communication.communication import make
 				
-				# to update modified date
-				#webnotes.conn.set(st.doc, 'status', 'Open')
+				make(content=content, sender=full_email_id, doctype="Support Ticket",
+					name=thread_id, lead = st.doc.lead, contact=st.doc.contact)
+				
 				st.doc.status = 'Open'
 				st.doc.save()
 				

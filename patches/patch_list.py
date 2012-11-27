@@ -683,4 +683,12 @@ patch_list = [
 		'patch_module': 'patches.november_2012',
 		'patch_file': 'support_ticket_response_to_communication',
 	},
+	{
+		'patch_module': 'patches.november_2012',
+		'patch_file': 'cancelled_bom_patch',
+	},
+	{
+		'patch_module': 'patches.november_2012',
+		'patch_file': 'communication_sender_and_recipient',
+	},
 ]

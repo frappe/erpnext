@@ -4,14 +4,14 @@
   "docstatus": 0, 
   "creation": "2012-08-06 11:15:46", 
   "modified_by": "Administrator", 
-  "modified": "2012-11-24 15:10:53"
+  "modified": "2012-11-27 18:32:42"
  }, 
  {
   "in_create": 0, 
   "default_print_format": "Standard", 
   "doctype": "DocType", 
   "module": "Utilities", 
-  "in_dialog": 1, 
+  "in_dialog": 0, 
   "document_type": "Master", 
   "name": "__common__"
  }, 
@@ -35,23 +35,6 @@
   "doctype": "DocType"
  }, 
  {
-  "oldfieldtype": "Section Break", 
-  "colour": "White:FFF", 
-  "doctype": "DocField", 
-  "label": "Contact Details", 
-  "fieldname": "contact_details", 
-  "fieldtype": "Section Break", 
-  "permlevel": 0
- }, 
- {
-  "oldfieldtype": "Column Break", 
-  "doctype": "DocField", 
-  "width": "50%", 
-  "fieldname": "column_break0", 
-  "fieldtype": "Column Break", 
-  "permlevel": 0
- }, 
- {
   "oldfieldtype": "Data", 
   "doctype": "DocField", 
   "label": "First Name", 
@@ -68,6 +51,54 @@
   "oldfieldname": "last_name", 
   "fieldname": "last_name", 
   "fieldtype": "Data", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "cb00", 
+  "fieldtype": "Column Break", 
+  "permlevel": 0
+ }, 
+ {
+  "oldfieldtype": "Data", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Email Id", 
+  "oldfieldname": "email_id", 
+  "fieldname": "email_id", 
+  "fieldtype": "Data", 
+  "search_index": 1, 
+  "reqd": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "oldfieldtype": "Data", 
+  "doctype": "DocField", 
+  "label": "Phone", 
+  "oldfieldname": "contact_no", 
+  "fieldname": "phone", 
+  "fieldtype": "Data", 
+  "reqd": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "sb00", 
+  "fieldtype": "Section Break", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Communication HTML", 
+  "fieldname": "communication_html", 
+  "fieldtype": "HTML", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Contact Details", 
+  "fieldname": "contact_details", 
+  "fieldtype": "Section Break", 
   "permlevel": 0
  }, 
  {
@@ -105,9 +136,9 @@
   "permlevel": 0
  }, 
  {
+  "allow_on_submit": 0, 
   "depends_on": "eval:!doc.customer && !doc.sales_partner", 
   "colour": "White:FFF", 
-  "allow_on_submit": 0, 
   "doctype": "DocField", 
   "label": "Supplier Name", 
   "fieldname": "supplier_name", 
@@ -142,28 +173,6 @@
   "width": "50%", 
   "fieldname": "column_break1", 
   "fieldtype": "Column Break", 
-  "permlevel": 0
- }, 
- {
-  "oldfieldtype": "Data", 
-  "colour": "White:FFF", 
-  "doctype": "DocField", 
-  "label": "Email Id", 
-  "oldfieldname": "email_id", 
-  "fieldname": "email_id", 
-  "fieldtype": "Data", 
-  "search_index": 1, 
-  "reqd": 1, 
-  "permlevel": 0
- }, 
- {
-  "oldfieldtype": "Data", 
-  "doctype": "DocField", 
-  "label": "Phone", 
-  "oldfieldname": "contact_no", 
-  "fieldname": "phone", 
-  "fieldtype": "Data", 
-  "reqd": 1, 
   "permlevel": 0
  }, 
  {

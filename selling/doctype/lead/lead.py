@@ -24,8 +24,6 @@ from webnotes import session, msgprint
 
 sql = webnotes.conn.sql
 	
-# -----------------------------------------------------------------------------------------
-
 from utilities.transaction_base import TransactionBase
 
 class DocType(TransactionBase):
