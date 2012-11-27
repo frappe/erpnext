@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+wn.require("public/app/js/communication.js");
+
 //--------- ONLOAD -------------
 cur_frm.cscript.onload = function(doc, cdt, cdn) {	
 	cur_frm.add_fetch('customer', 'customer_name', 'customer_name');
@@ -38,6 +40,15 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 		var sp = wn.container.page.frm.doc;
 		doc.sales_partner = sp.name;
 	}
+}
+
+cur_frm.cscript.refresh = function() {
+	cur_frm.communication_view = new erpnext.CommunicationView({
+		list: wn.model.get("Communication", {"contact": doc.name}),
+		parent: cur_frm.fields_dict.communication_html.wrapper,
+		doc: doc,
+		email: doc.email_id
+	})	
 }
 
 cur_frm.cscript.hide_dialog = function() {

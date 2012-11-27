@@ -17,9 +17,7 @@
 // Module CRM
 
 wn.require("public/app/js/communication.js");
-
 wn.require('app/utilities/doctype/sms_control/sms_control.js');
-wn.require('app/support/doctype/communication/communication.js');
 
 cur_frm.cscript.onload = function(doc, cdt, cdn) {
 	if(user =='Guest'){
@@ -70,9 +68,11 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	cur_frm.cscript.refresh_custom_buttons(doc);
 	erpnext.hide_naming_series();
 
-	new erpnext.CommunicationView({
+	cur_frm.communication_view = new erpnext.CommunicationView({
 		list: wn.model.get("Communication", {"lead": doc.name}),
-		parent: cur_frm.fields_dict.communication_html.wrapper
+		parent: cur_frm.fields_dict.communication_html.wrapper,
+		doc: doc,
+		email: doc.email_id
 	})
 		
 }

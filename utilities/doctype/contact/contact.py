@@ -21,11 +21,15 @@ import webnotes
 from webnotes.model.doc import Document
 from webnotes import session, form, msgprint, errprint
 
-# -----------------------------------------------------------------------------------------
-class DocType:
+from utilities.transaction_base import TransactionBase
+
+class DocType(TransactionBase):	
 	def __init__(self, doc, doclist=[]):
 		self.doc = doc
 		self.doclist = doclist
+
+	def onload(self):
+		self.add_communication_list()
 
 	def autoname(self):
 		if self.doc.customer:
