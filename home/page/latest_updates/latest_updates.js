@@ -1,4 +1,7 @@
 erpnext.updates = [
+	["27th November 2012", [
+		"Communication: Made common communication thread and added it in Lead, Contact.",
+	]],
 	["26th November 2012", [
 		"Email: Added User Signature",
 		"Support Ticket: Added link to Lead / Contact. If incoming ticket is not from an existing Lead / Contact, create a new Lead",
