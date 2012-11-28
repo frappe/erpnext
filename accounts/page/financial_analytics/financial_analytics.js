@@ -76,7 +76,7 @@ erpnext.FinancialAnalytics = erpnext.AccountTreeGrid.extend({
 	},
 	init_filter_values: function() {
 		this._super();
-		this.filter_inputs.range.val('Weekly');
+		this.filter_inputs.range.val('Monthly');
 	},
 	prepare_balances: function() {
 		var me = this;
