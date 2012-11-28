@@ -691,4 +691,8 @@ patch_list = [
 		'patch_module': 'patches.november_2012',
 		'patch_file': 'communication_sender_and_recipient',
 	},
+	{
+		'patch_module': 'patches.november_2012',
+		'patch_file': 'update_delivered_billed_percentage_for_pos',
+	},
 ]
