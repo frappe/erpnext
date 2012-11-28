@@ -829,7 +829,22 @@ class StatusUpdater:
 				'status_field'			:'billing_status',
 				'keyword'				:'Billed'
 			})
-
+			
+			if cint(self.obj.doc.is_pos) == 1:
+				self.update_qty({
+					'target_field'			:'delivered_qty',
+					'target_dt'				:'Sales Order Item',
+					'target_parent_dt'		:'Sales Order',
+					'target_parent_field'	:'per_delivered',
+					'target_ref_field'		:'qty',
+					'source_dt'				:'Sales Invoice Item',
+					'source_field'			:'qty',
+					'join_field'			:'so_detail',
+					'percent_join_field'	:'sales_order',
+					'status_field'			:'delivery_status',
+					'keyword'				:'Delivered'
+				})
+				
 		if self.obj.doc.doctype=='Installation Note':
 			self.update_qty({
 				'target_field'			:'installed_qty',

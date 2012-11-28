@@ -395,6 +395,11 @@ class DocType(TransactionBase):
 			if not d.item_code:
 				msgprint("Please enter Item Code at line no : %s to update stock for POS or remove check from Update Stock in Basic Info Tab." % (d.idx))
 				raise Exception
+				
+	def validate_delivery_note(self):
+		for d in self.doclist.get({"parentfield": "entries"}):
+			if d.delivery_note:
+				msgprint("""POS can not be made against Delivery Note""", raise_exception=1)
 
 
 	def validate_write_off_account(self):
@@ -447,6 +452,7 @@ class DocType(TransactionBase):
 				sl.validate_serial_no(self, 'packing_details')
 				self.validate_item_code()
 				self.update_current_stock()
+				self.validate_delivery_note()
 		self.set_in_words()
 		if not self.doc.is_opening:
 			self.doc.is_opening = 'No'
@@ -505,7 +511,9 @@ class DocType(TransactionBase):
 			self.doclist = self.doc.clear_table(self.doclist, 'packing_details')
 			webnotes.conn.set(self.doc,'paid_amount',0)
 
-		webnotes.conn.set(self.doc,'outstanding_amount',flt(self.doc.grand_total) - flt(self.doc.total_advance) - flt(self.doc.paid_amount) - flt(self.doc.write_off_amount))
+		webnotes.conn.set(self.doc, 'outstanding_amount', 
+			flt(self.doc.grand_total) - flt(self.doc.total_advance) - 
+			flt(self.doc.paid_amount) - flt(self.doc.write_off_amount))
 
 		
 	def check_prev_docstatus(self):
@@ -533,7 +541,7 @@ class DocType(TransactionBase):
 			'posting_time'				: self.doc.posting_time,
 			'voucher_type'				: 'Sales Invoice',
 			'voucher_no'					: cstr(self.doc.name),
-			'voucher_detail_no'	 : cstr(d['name']), 
+			'voucher_detail_no'	 		: cstr(d['name']), 
 			'actual_qty'					: qty, 
 			'stock_uom'					 : st_uom and st_uom[0][0] or '',
 			'incoming_rate'			 : in_value,
@@ -604,13 +612,13 @@ class DocType(TransactionBase):
 				
 				self.update_stock_ledger(update_stock=1)
 		else:
-			self.check_prev_docstatus()
-			get_obj("Sales Common").update_prevdoc_detail(1,self)
-
 			# Check for Approving Authority
 			if not self.doc.recurring_id:
 				get_obj('Authorization Control').validate_approving_authority(self.doc.doctype, self.doc.company, self.doc.grand_total, self)
 
+		self.check_prev_docstatus()
+		get_obj("Sales Common").update_prevdoc_detail(1,self)
+		
 		# this sequence because outstanding may get -ve		
 		self.make_gl_entries()
 
@@ -628,11 +636,11 @@ class DocType(TransactionBase):
 				sl.update_serial_record(self, 'packing_details', is_submit = 0, is_incoming = 0)
 				
 				self.update_stock_ledger(update_stock = -1)
-		else:
-			sales_com_obj = get_obj(dt = 'Sales Common')
-			sales_com_obj.check_stop_sales_order(self)
-			self.check_next_docstatus()
-			sales_com_obj.update_prevdoc_detail(0,self)
+		
+		sales_com_obj = get_obj(dt = 'Sales Common')
+		sales_com_obj.check_stop_sales_order(self)
+		self.check_next_docstatus()
+		sales_com_obj.update_prevdoc_detail(0, self)
 
 		self.make_gl_entries(is_cancel=1)
 
