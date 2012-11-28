@@ -699,4 +699,8 @@ patch_list = [
 		'patch_module': 'patches.november_2012',
 		'patch_file': 'add_theme_to_profile',
 	},
+	{
+		'patch_module': 'patches.november_2012',
+		'patch_file': 'remove_basic_info',
+	},
 ]

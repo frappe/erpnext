@@ -2,7 +2,7 @@
  {
   "owner": "Administrator", 
   "docstatus": 0, 
-  "creation": "2012-11-24 17:21:44", 
+  "creation": "2012-11-28 11:26:20", 
   "modified_by": "Administrator", 
   "modified": "2012-11-26 11:56:33"
  }, 
@@ -37,16 +37,6 @@
  {
   "name": "Sales Order", 
   "doctype": "DocType"
- }, 
- {
-  "print_hide": 1, 
-  "oldfieldtype": "Section Break", 
-  "colour": "White:FFF", 
-  "doctype": "DocField", 
-  "label": "Basic Info", 
-  "fieldname": "basic_info", 
-  "fieldtype": "Section Break", 
-  "permlevel": 0
  }, 
  {
   "oldfieldtype": "Column Break", 
@@ -734,8 +724,8 @@
  }, 
  {
   "print_hide": 1, 
-  "oldfieldtype": "Select", 
   "allow_on_submit": 1, 
+  "oldfieldtype": "Select", 
   "doctype": "DocField", 
   "label": "Letter Head", 
   "oldfieldname": "letter_head", 
@@ -835,17 +825,17 @@
  }, 
  {
   "print_hide": 1, 
-  "doctype": "DocField", 
   "no_copy": 1, 
   "depends_on": "eval:!doc.__islocal", 
   "colour": "White:FFF", 
-  "oldfieldtype": "Data", 
+  "doctype": "DocField", 
   "label": "Cancel Reason", 
   "oldfieldname": "cancel_reason", 
+  "permlevel": 1, 
   "fieldname": "cancel_reason", 
   "fieldtype": "Data", 
   "no_column": 0, 
-  "permlevel": 1
+  "oldfieldtype": "Data"
  }, 
  {
   "print_hide": 1, 

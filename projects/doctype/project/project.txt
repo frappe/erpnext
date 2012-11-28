@@ -1,525 +1,432 @@
-# DocType, Project
 [
-
-	# These values are common in all dictionaries
-	{
-		u'creation': '2012-08-09 11:38:30',
-		u'docstatus': 0,
-		u'modified': '2012-11-14 17:04:57',
-		u'modified_by': u'Administrator',
-		u'owner': u'Administrator'
-	},
-
-	# These values are common for all DocType
-	{
-		'_last_update': u'1305714062',
-		'allow_attach': 1,
-		'allow_trash': 1,
-		'autoname': u'field:project_name',
-		'colour': u'White:FFF',
-		'default_print_format': u'Standard',
-		u'doctype': u'DocType',
-		'document_type': u'Master',
-		'max_attachments': 4,
-		'module': u'Projects',
-		u'name': u'__common__',
-		'search_fields': u'customer, status, priority, is_active',
-		'section_style': u'Tabbed',
-		'server_code_error': u' ',
-		'show_in_menu': 0,
-		'subject': u' ',
-		'tag_fields': u'status',
-		'version': 1
-	},
-
-	# These values are common for all DocField
-	{
-		u'doctype': u'DocField',
-		u'name': u'__common__',
-		'parent': u'Project',
-		'parentfield': u'fields',
-		'parenttype': u'DocType'
-	},
-
-	# These values are common for all DocPerm
-	{
-		'cancel': 1,
-		'create': 1,
-		u'doctype': u'DocPerm',
-		u'name': u'__common__',
-		'parent': u'Project',
-		'parentfield': u'permissions',
-		'parenttype': u'DocType',
-		'permlevel': 0,
-		'read': 1,
-		'role': u'Projects User',
-		'write': 1
-	},
-
-	# DocType, Project
-	{
-		u'doctype': u'DocType',
-		u'name': u'Project'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'description': u'Helps you keep track of your projects and links to Tasks. You can tag a task to a project to track its progress',
-		u'doctype': u'DocField',
-		'fieldname': u'basic_info',
-		'fieldtype': u'Section Break',
-		'label': u'Basic Info',
-		'oldfieldtype': u'Section Break',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'cb_project_status',
-		'fieldtype': u'Column Break',
-		'label': u'Status',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'description': u'Project will get saved and will be searchable with project name given',
-		u'doctype': u'DocField',
-		'fieldname': u'project_name',
-		'fieldtype': u'Data',
-		'label': u'Project Name',
-		'no_copy': 0,
-		'oldfieldname': u'project_name',
-		'oldfieldtype': u'Data',
-		'permlevel': 0,
-		'reqd': 1
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'default': u'Open',
-		u'doctype': u'DocField',
-		'fieldname': u'status',
-		'fieldtype': u'Select',
-		'in_filter': 1,
-		'label': u'Status',
-		'no_copy': 1,
-		'oldfieldname': u'status',
-		'oldfieldtype': u'Select',
-		'options': u'Open\nCompleted\nCancelled',
-		'permlevel': 0,
-		'reqd': 1,
-		'search_index': 1
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'is_active',
-		'fieldtype': u'Select',
-		'label': u'Is Active',
-		'no_copy': 0,
-		'oldfieldname': u'is_active',
-		'oldfieldtype': u'Select',
-		'options': u'Yes\nNo',
-		'permlevel': 0,
-		'search_index': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'priority',
-		'fieldtype': u'Select',
-		'label': u'Priority',
-		'no_copy': 0,
-		'oldfieldname': u'priority',
-		'oldfieldtype': u'Select',
-		'options': u'Medium\nLow\nHigh',
-		'permlevel': 0,
-		'search_index': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'cb_project_dates',
-		'fieldtype': u'Column Break',
-		'label': u'Dates',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'project_start_date',
-		'fieldtype': u'Date',
-		'in_filter': 1,
-		'label': u'Project Start Date',
-		'no_copy': 0,
-		'oldfieldname': u'project_start_date',
-		'oldfieldtype': u'Date',
-		'permlevel': 0,
-		'search_index': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'completion_date',
-		'fieldtype': u'Date',
-		'label': u'Completion Date',
-		'no_copy': 0,
-		'oldfieldname': u'completion_date',
-		'oldfieldtype': u'Date',
-		'permlevel': 0,
-		'search_index': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'act_completion_date',
-		'fieldtype': u'Date',
-		'label': u'Actual Completion Date',
-		'no_copy': 0,
-		'oldfieldname': u'act_completion_date',
-		'oldfieldtype': u'Date',
-		'permlevel': 0,
-		'search_index': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'project_type',
-		'fieldtype': u'Select',
-		'label': u'Project Type',
-		'no_copy': 0,
-		'oldfieldname': u'project_type',
-		'oldfieldtype': u'Data',
-		'options': u'Internal\nExternal\nOther',
-		'permlevel': 0,
-		'search_index': 0
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'description': u'Important dates and commitments in your project life cycle',
-		u'doctype': u'DocField',
-		'fieldname': u'sb_milestones',
-		'fieldtype': u'Section Break',
-		'label': u'Milestones',
-		'oldfieldtype': u'Section Break',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'description': u'Milestones will be added as Events in the Calendar',
-		u'doctype': u'DocField',
-		'fieldname': u'project_milestones',
-		'fieldtype': u'Table',
-		'label': u'Project Milestones',
-		'no_copy': 0,
-		'oldfieldname': u'project_milestones',
-		'oldfieldtype': u'Table',
-		'options': u'Project Milestone',
-		'permlevel': 0,
-		'search_index': 0
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'description': u'Tasks belonging to this Project.',
-		u'doctype': u'DocField',
-		'fieldname': u'sb_tasks',
-		'fieldtype': u'Section Break',
-		'label': u'Tasks',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'project_tasks',
-		'fieldtype': u'HTML',
-		'label': u'Project Tasks',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'section_break0',
-		'fieldtype': u'Section Break',
-		'label': u'Project Details',
-		'oldfieldtype': u'Section Break',
-		'options': u'Simple',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'notes',
-		'fieldtype': u'Text Editor',
-		'label': u'Notes',
-		'no_copy': 0,
-		'oldfieldname': u'notes',
-		'oldfieldtype': u'Text Editor',
-		'permlevel': 0,
-		'search_index': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'project_details',
-		'fieldtype': u'Section Break',
-		'label': u'Project Costing',
-		'oldfieldtype': u'Section Break',
-		'options': u'Simple',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'project_value',
-		'fieldtype': u'Currency',
-		'label': u'Project Value',
-		'no_copy': 0,
-		'oldfieldname': u'project_value',
-		'oldfieldtype': u'Currency',
-		'permlevel': 0,
-		'reqd': 0,
-		'search_index': 0,
-		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'est_material_cost',
-		'fieldtype': u'Currency',
-		'label': u'Estimated Material Cost',
-		'no_copy': 0,
-		'oldfieldname': u'est_material_cost',
-		'oldfieldtype': u'Currency',
-		'permlevel': 0,
-		'search_index': 0,
-		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'column_break0',
-		'fieldtype': u'Column Break',
-		'label': u'Margin',
-		'oldfieldtype': u'Column Break',
-		'permlevel': 0,
-		'width': u'50%'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'gross_margin_value',
-		'fieldtype': u'Currency',
-		'label': u'Gross Margin Value',
-		'no_copy': 0,
-		'oldfieldname': u'gross_margin_value',
-		'oldfieldtype': u'Currency',
-		'permlevel': 0,
-		'reqd': 0,
-		'search_index': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'per_gross_margin',
-		'fieldtype': u'Currency',
-		'label': u'Gross Margin %',
-		'no_copy': 0,
-		'oldfieldname': u'per_gross_margin',
-		'oldfieldtype': u'Currency',
-		'permlevel': 0,
-		'reqd': 0,
-		'search_index': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'customer_details',
-		'fieldtype': u'Section Break',
-		'label': u'Customer Details',
-		'oldfieldtype': u'Section Break',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'description': u'Select name of Customer to whom project belongs',
-		u'doctype': u'DocField',
-		'fieldname': u'customer',
-		'fieldtype': u'Link',
-		'in_filter': 1,
-		'label': u'Customer',
-		'no_copy': 0,
-		'oldfieldname': u'customer',
-		'oldfieldtype': u'Link',
-		'options': u'Customer',
-		'permlevel': 0,
-		'print_hide': 1,
-		'reqd': 0,
-		'search_index': 1,
-		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'customer_name',
-		'fieldtype': u'Data',
-		'in_filter': 1,
-		'label': u'Customer Name',
-		'no_copy': 0,
-		'oldfieldname': u'customer_name',
-		'oldfieldtype': u'Data',
-		'permlevel': 1,
-		'search_index': 1
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'customer_address',
-		'fieldtype': u'Small Text',
-		'label': u'Customer Address',
-		'no_copy': 0,
-		'oldfieldname': u'customer_address',
-		'oldfieldtype': u'Small Text',
-		'permlevel': 1,
-		'search_index': 0
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		u'doctype': u'DocField',
-		'fieldname': u'contact_person',
-		'fieldtype': u'Link',
-		'in_filter': 1,
-		'label': u'Contact Person',
-		'no_copy': 0,
-		'oldfieldname': u'contact_person',
-		'oldfieldtype': u'Link',
-		'options': u'Contact',
-		'permlevel': 0,
-		'reqd': 0,
-		'search_index': 0,
-		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		u'doctype': u'DocField',
-		'fieldname': u'territory',
-		'fieldtype': u'Link',
-		'in_filter': 1,
-		'label': u'Territory',
-		'oldfieldname': u'territory',
-		'oldfieldtype': u'Link',
-		'options': u'Territory',
-		'permlevel': 0,
-		'reqd': 0,
-		'search_index': 0,
-		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'contact_no',
-		'fieldtype': u'Data',
-		'label': u'Contact No',
-		'no_copy': 0,
-		'oldfieldname': u'contact_no',
-		'oldfieldtype': u'Data',
-		'permlevel': 1,
-		'search_index': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'email_id',
-		'fieldtype': u'Data',
-		'label': u'Email Id',
-		'no_copy': 0,
-		'oldfieldname': u'email_id',
-		'oldfieldtype': u'Data',
-		'permlevel': 1,
-		'search_index': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'customer_group',
-		'fieldtype': u'Link',
-		'label': u'Customer Group',
-		'no_copy': 0,
-		'oldfieldname': u'customer_group',
-		'oldfieldtype': u'Link',
-		'options': u'Customer Group',
-		'permlevel': 1,
-		'search_index': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'trash_reason',
-		'fieldtype': u'Small Text',
-		'hidden': 1,
-		'label': u'Trash Reason',
-		'no_copy': 0,
-		'oldfieldname': u'trash_reason',
-		'oldfieldtype': u'Small Text',
-		'permlevel': 0,
-		'print_hide': 1,
-		'search_index': 0
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		u'doctype': u'DocField',
-		'fieldname': u'file_list',
-		'fieldtype': u'Small Text',
-		'hidden': 1,
-		'label': u'File List',
-		'no_copy': 1,
-		'permlevel': 0,
-		'print_hide': 1,
-		'search_index': 0
-	},
-
-	# DocPerm
-	{
-		u'doctype': u'DocPerm'
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-11-28 11:26:18", 
+  "modified_by": "Administrator", 
+  "modified": "2012-11-14 17:04:57"
+ }, 
+ {
+  "autoname": "field:project_name", 
+  "allow_attach": 1, 
+  "default_print_format": "Standard", 
+  "search_fields": "customer, status, priority, is_active", 
+  "module": "Projects", 
+  "doctype": "DocType", 
+  "max_attachments": 4, 
+  "document_type": "Master", 
+  "name": "__common__"
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "Project", 
+  "doctype": "DocField", 
+  "parenttype": "DocType", 
+  "parentfield": "fields"
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "Project", 
+  "read": 1, 
+  "doctype": "DocPerm", 
+  "parenttype": "DocType", 
+  "parentfield": "permissions"
+ }, 
+ {
+  "name": "Project", 
+  "doctype": "DocType"
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Status", 
+  "fieldname": "cb_project_status", 
+  "fieldtype": "Column Break", 
+  "permlevel": 0
+ }, 
+ {
+  "description": "Project will get saved and will be searchable with project name given", 
+  "no_copy": 0, 
+  "oldfieldtype": "Data", 
+  "doctype": "DocField", 
+  "label": "Project Name", 
+  "oldfieldname": "project_name", 
+  "fieldname": "project_name", 
+  "fieldtype": "Data", 
+  "reqd": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "permlevel": 0, 
+  "no_copy": 1, 
+  "oldfieldtype": "Select", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Status", 
+  "oldfieldname": "status", 
+  "default": "Open", 
+  "fieldname": "status", 
+  "fieldtype": "Select", 
+  "search_index": 1, 
+  "reqd": 1, 
+  "options": "Open\nCompleted\nCancelled", 
+  "in_filter": 1
+ }, 
+ {
+  "no_copy": 0, 
+  "oldfieldtype": "Select", 
+  "doctype": "DocField", 
+  "label": "Is Active", 
+  "oldfieldname": "is_active", 
+  "options": "Yes\nNo", 
+  "fieldname": "is_active", 
+  "fieldtype": "Select", 
+  "search_index": 0, 
+  "permlevel": 0
+ }, 
+ {
+  "no_copy": 0, 
+  "oldfieldtype": "Select", 
+  "doctype": "DocField", 
+  "label": "Priority", 
+  "oldfieldname": "priority", 
+  "options": "Medium\nLow\nHigh", 
+  "fieldname": "priority", 
+  "fieldtype": "Select", 
+  "search_index": 0, 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Dates", 
+  "fieldname": "cb_project_dates", 
+  "fieldtype": "Column Break", 
+  "permlevel": 0
+ }, 
+ {
+  "no_copy": 0, 
+  "oldfieldtype": "Date", 
+  "doctype": "DocField", 
+  "label": "Project Start Date", 
+  "oldfieldname": "project_start_date", 
+  "fieldname": "project_start_date", 
+  "fieldtype": "Date", 
+  "search_index": 0, 
+  "permlevel": 0, 
+  "in_filter": 1
+ }, 
+ {
+  "no_copy": 0, 
+  "oldfieldtype": "Date", 
+  "doctype": "DocField", 
+  "label": "Completion Date", 
+  "oldfieldname": "completion_date", 
+  "fieldname": "completion_date", 
+  "fieldtype": "Date", 
+  "search_index": 0, 
+  "permlevel": 0
+ }, 
+ {
+  "no_copy": 0, 
+  "oldfieldtype": "Date", 
+  "doctype": "DocField", 
+  "label": "Actual Completion Date", 
+  "oldfieldname": "act_completion_date", 
+  "fieldname": "act_completion_date", 
+  "fieldtype": "Date", 
+  "search_index": 0, 
+  "permlevel": 0
+ }, 
+ {
+  "no_copy": 0, 
+  "oldfieldtype": "Data", 
+  "doctype": "DocField", 
+  "label": "Project Type", 
+  "oldfieldname": "project_type", 
+  "options": "Internal\nExternal\nOther", 
+  "fieldname": "project_type", 
+  "fieldtype": "Select", 
+  "search_index": 0, 
+  "permlevel": 0
+ }, 
+ {
+  "description": "Important dates and commitments in your project life cycle", 
+  "oldfieldtype": "Section Break", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Milestones", 
+  "fieldname": "sb_milestones", 
+  "fieldtype": "Section Break", 
+  "permlevel": 0
+ }, 
+ {
+  "description": "Milestones will be added as Events in the Calendar", 
+  "no_copy": 0, 
+  "oldfieldtype": "Table", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Project Milestones", 
+  "oldfieldname": "project_milestones", 
+  "permlevel": 0, 
+  "fieldname": "project_milestones", 
+  "fieldtype": "Table", 
+  "search_index": 0, 
+  "options": "Project Milestone"
+ }, 
+ {
+  "description": "Tasks belonging to this Project.", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Tasks", 
+  "fieldname": "sb_tasks", 
+  "fieldtype": "Section Break", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Project Tasks", 
+  "fieldname": "project_tasks", 
+  "fieldtype": "HTML", 
+  "permlevel": 0
+ }, 
+ {
+  "oldfieldtype": "Section Break", 
+  "doctype": "DocField", 
+  "label": "Project Details", 
+  "options": "Simple", 
+  "fieldname": "section_break0", 
+  "fieldtype": "Section Break", 
+  "permlevel": 0
+ }, 
+ {
+  "no_copy": 0, 
+  "oldfieldtype": "Text Editor", 
+  "doctype": "DocField", 
+  "label": "Notes", 
+  "oldfieldname": "notes", 
+  "fieldname": "notes", 
+  "fieldtype": "Text Editor", 
+  "search_index": 0, 
+  "permlevel": 0
+ }, 
+ {
+  "oldfieldtype": "Section Break", 
+  "doctype": "DocField", 
+  "label": "Project Costing", 
+  "options": "Simple", 
+  "fieldname": "project_details", 
+  "fieldtype": "Section Break", 
+  "permlevel": 0
+ }, 
+ {
+  "no_copy": 0, 
+  "oldfieldtype": "Currency", 
+  "doctype": "DocField", 
+  "label": "Project Value", 
+  "oldfieldname": "project_value", 
+  "trigger": "Client", 
+  "fieldname": "project_value", 
+  "fieldtype": "Currency", 
+  "search_index": 0, 
+  "reqd": 0, 
+  "permlevel": 0
+ }, 
+ {
+  "no_copy": 0, 
+  "oldfieldtype": "Currency", 
+  "doctype": "DocField", 
+  "label": "Estimated Material Cost", 
+  "oldfieldname": "est_material_cost", 
+  "trigger": "Client", 
+  "fieldname": "est_material_cost", 
+  "fieldtype": "Currency", 
+  "search_index": 0, 
+  "permlevel": 0
+ }, 
+ {
+  "oldfieldtype": "Column Break", 
+  "doctype": "DocField", 
+  "label": "Margin", 
+  "width": "50%", 
+  "fieldname": "column_break0", 
+  "fieldtype": "Column Break", 
+  "permlevel": 0
+ }, 
+ {
+  "no_copy": 0, 
+  "oldfieldtype": "Currency", 
+  "doctype": "DocField", 
+  "label": "Gross Margin Value", 
+  "oldfieldname": "gross_margin_value", 
+  "fieldname": "gross_margin_value", 
+  "fieldtype": "Currency", 
+  "search_index": 0, 
+  "reqd": 0, 
+  "permlevel": 0
+ }, 
+ {
+  "no_copy": 0, 
+  "oldfieldtype": "Currency", 
+  "doctype": "DocField", 
+  "label": "Gross Margin %", 
+  "oldfieldname": "per_gross_margin", 
+  "fieldname": "per_gross_margin", 
+  "fieldtype": "Currency", 
+  "search_index": 0, 
+  "reqd": 0, 
+  "permlevel": 0
+ }, 
+ {
+  "oldfieldtype": "Section Break", 
+  "doctype": "DocField", 
+  "label": "Customer Details", 
+  "fieldname": "customer_details", 
+  "fieldtype": "Section Break", 
+  "permlevel": 0
+ }, 
+ {
+  "print_hide": 1, 
+  "description": "Select name of Customer to whom project belongs", 
+  "no_copy": 0, 
+  "oldfieldtype": "Link", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Customer", 
+  "oldfieldname": "customer", 
+  "permlevel": 0, 
+  "trigger": "Client", 
+  "fieldname": "customer", 
+  "fieldtype": "Link", 
+  "search_index": 1, 
+  "reqd": 0, 
+  "in_filter": 1, 
+  "options": "Customer"
+ }, 
+ {
+  "no_copy": 0, 
+  "oldfieldtype": "Data", 
+  "doctype": "DocField", 
+  "label": "Customer Name", 
+  "oldfieldname": "customer_name", 
+  "fieldname": "customer_name", 
+  "fieldtype": "Data", 
+  "search_index": 1, 
+  "permlevel": 1, 
+  "in_filter": 1
+ }, 
+ {
+  "no_copy": 0, 
+  "oldfieldtype": "Small Text", 
+  "doctype": "DocField", 
+  "label": "Customer Address", 
+  "oldfieldname": "customer_address", 
+  "fieldname": "customer_address", 
+  "fieldtype": "Small Text", 
+  "search_index": 0, 
+  "permlevel": 1
+ }, 
+ {
+  "no_copy": 0, 
+  "oldfieldtype": "Link", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Contact Person", 
+  "oldfieldname": "contact_person", 
+  "permlevel": 0, 
+  "trigger": "Client", 
+  "fieldname": "contact_person", 
+  "fieldtype": "Link", 
+  "search_index": 0, 
+  "reqd": 0, 
+  "options": "Contact", 
+  "in_filter": 1
+ }, 
+ {
+  "oldfieldtype": "Link", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Territory", 
+  "oldfieldname": "territory", 
+  "permlevel": 0, 
+  "trigger": "Client", 
+  "fieldname": "territory", 
+  "fieldtype": "Link", 
+  "search_index": 0, 
+  "reqd": 0, 
+  "options": "Territory", 
+  "in_filter": 1
+ }, 
+ {
+  "no_copy": 0, 
+  "oldfieldtype": "Data", 
+  "doctype": "DocField", 
+  "label": "Contact No", 
+  "oldfieldname": "contact_no", 
+  "fieldname": "contact_no", 
+  "fieldtype": "Data", 
+  "search_index": 0, 
+  "permlevel": 1
+ }, 
+ {
+  "no_copy": 0, 
+  "oldfieldtype": "Data", 
+  "doctype": "DocField", 
+  "label": "Email Id", 
+  "oldfieldname": "email_id", 
+  "fieldname": "email_id", 
+  "fieldtype": "Data", 
+  "search_index": 0, 
+  "permlevel": 1
+ }, 
+ {
+  "no_copy": 0, 
+  "oldfieldtype": "Link", 
+  "doctype": "DocField", 
+  "label": "Customer Group", 
+  "oldfieldname": "customer_group", 
+  "options": "Customer Group", 
+  "fieldname": "customer_group", 
+  "fieldtype": "Link", 
+  "search_index": 0, 
+  "permlevel": 1
+ }, 
+ {
+  "print_hide": 1, 
+  "no_copy": 0, 
+  "oldfieldtype": "Small Text", 
+  "doctype": "DocField", 
+  "label": "Trash Reason", 
+  "oldfieldname": "trash_reason", 
+  "fieldname": "trash_reason", 
+  "fieldtype": "Small Text", 
+  "search_index": 0, 
+  "hidden": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "print_hide": 1, 
+  "no_copy": 1, 
+  "search_index": 0, 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "File List", 
+  "fieldname": "file_list", 
+  "fieldtype": "Small Text", 
+  "hidden": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "amend": 0, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "submit": 0, 
+  "write": 1, 
+  "role": "Projects User", 
+  "cancel": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "All", 
+  "permlevel": 1
+ }
 ]

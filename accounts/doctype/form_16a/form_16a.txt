@@ -1,437 +1,344 @@
-# DocType, Form 16A
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-03-27 14:35:41',
-		'docstatus': 0,
-		'modified': '2012-03-27 14:35:41',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
-	},
-
-	# These values are common for all DocType
-	{
-		'_last_update': u'1308123438',
-		'colour': u'White:FFF',
-		'doctype': 'DocType',
-		'in_create': 0,
-		'module': u'Accounts',
-		'name': '__common__',
-		'section_style': u'Simple',
-		'server_code_error': u' ',
-		'show_in_menu': 0,
-		'version': 75
-	},
-
-	# These values are common for all DocField
-	{
-		'doctype': u'DocField',
-		'name': '__common__',
-		'parent': u'Form 16A',
-		'parentfield': u'fields',
-		'parenttype': u'DocType'
-	},
-
-	# These values are common for all DocPerm
-	{
-		'doctype': u'DocPerm',
-		'name': '__common__',
-		'parent': u'Form 16A',
-		'parentfield': u'permissions',
-		'parenttype': u'DocType',
-		'read': 1
-	},
-
-	# DocType, Form 16A
-	{
-		'doctype': 'DocType',
-		'name': u'Form 16A'
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Accounts Manager',
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 1,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Accounts Manager',
-		'submit': 0,
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Accounts User',
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 1,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Accounts User',
-		'submit': 0,
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'create': 1,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'System Manager',
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'System Manager'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'basic_info',
-		'fieldtype': u'Section Break',
-		'label': u'Basic Info',
-		'oldfieldtype': u'Section Break',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'column_break0',
-		'fieldtype': u'Column Break',
-		'oldfieldtype': u'Column Break',
-		'permlevel': 0,
-		'width': u'50%'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'from_date',
-		'fieldtype': u'Date',
-		'label': u'From Date',
-		'oldfieldname': u'from_date',
-		'oldfieldtype': u'Date',
-		'permlevel': 0,
-		'reqd': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'to_date',
-		'fieldtype': u'Date',
-		'label': u'To Date',
-		'oldfieldname': u'to_date',
-		'oldfieldtype': u'Date',
-		'permlevel': 0,
-		'reqd': 1,
-		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'doctype': u'DocField',
-		'fieldname': u'tds_category',
-		'fieldtype': u'Link',
-		'in_filter': 1,
-		'label': u'TDS Category',
-		'oldfieldname': u'tds_category',
-		'oldfieldtype': u'Link',
-		'options': u'TDS Category',
-		'permlevel': 0,
-		'reqd': 1
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'doctype': u'DocField',
-		'fieldname': u'party_name',
-		'fieldtype': u'Link',
-		'hidden': 0,
-		'in_filter': 1,
-		'label': u'Party Name',
-		'oldfieldname': u'party_name',
-		'oldfieldtype': u'Link',
-		'options': u'Account',
-		'permlevel': 0,
-		'reqd': 1,
-		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'party_address',
-		'fieldtype': u'Small Text',
-		'label': u'Address',
-		'oldfieldname': u'party_address',
-		'oldfieldtype': u'Small Text',
-		'permlevel': 1,
-		'reqd': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'pan_number',
-		'fieldtype': u'Data',
-		'hidden': 0,
-		'label': u'PAN No',
-		'oldfieldname': u'pan_number',
-		'oldfieldtype': u'Data',
-		'permlevel': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'column_break1',
-		'fieldtype': u'Column Break',
-		'oldfieldtype': u'Column Break',
-		'permlevel': 0,
-		'width': u'50%'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'fiscal_year',
-		'fieldtype': u'Select',
-		'label': u'Fiscal Year',
-		'oldfieldname': u'fiscal_year',
-		'oldfieldtype': u'Select',
-		'options': u'link:Fiscal Year',
-		'permlevel': 0,
-		'reqd': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'company',
-		'fieldtype': u'Link',
-		'in_filter': 1,
-		'label': u'Company ',
-		'oldfieldname': u'company',
-		'oldfieldtype': u'Link',
-		'options': u'Company',
-		'permlevel': 0,
-		'reqd': 1,
-		'search_index': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'company_address',
-		'fieldtype': u'Small Text',
-		'label': u'Company Address',
-		'oldfieldname': u'company_address',
-		'oldfieldtype': u'Small Text',
-		'permlevel': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'registration_details',
-		'fieldtype': u'Small Text',
-		'label': u'Registration Details',
-		'oldfieldname': u'registration_details',
-		'oldfieldtype': u'Small Text',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'return_details',
-		'fieldtype': u'Section Break',
-		'label': u'Return Details',
-		'oldfieldtype': u'Section Break',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'get_return_details',
-		'fieldtype': u'Button',
-		'label': u'Get Return Details',
-		'oldfieldtype': u'Button',
-		'options': u'get_return_ack_details',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'form_16A_ack_details',
-		'fieldtype': u'Table',
-		'label': u'Form 16A Ack Details',
-		'oldfieldname': u'form_16A_ack_details',
-		'oldfieldtype': u'Table',
-		'options': u'Form 16A Ack Detail',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'payment_details',
-		'fieldtype': u'Section Break',
-		'label': u'Payment Details',
-		'oldfieldtype': u'Section Break',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'get_tds',
-		'fieldtype': u'Button',
-		'label': u'Get TDS',
-		'oldfieldtype': u'Button',
-		'options': u'get_tds',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'doctype': u'DocField',
-		'fieldname': u'form_16A_tax_details',
-		'fieldtype': u'Table',
-		'label': u'Tax Details',
-		'oldfieldname': u'form_16A_tax_details',
-		'oldfieldtype': u'Table',
-		'options': u'Form 16A Tax Detail',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'total_amount',
-		'fieldtype': u'Currency',
-		'label': u'Total Amount',
-		'oldfieldname': u'total_amount',
-		'oldfieldtype': u'Currency',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'in_words',
-		'fieldtype': u'Data',
-		'label': u'In Words',
-		'permlevel': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'section_break0',
-		'fieldtype': u'Section Break',
-		'oldfieldtype': u'Section Break',
-		'options': u'Simple',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'column_break2',
-		'fieldtype': u'Column Break',
-		'oldfieldtype': u'Column Break',
-		'permlevel': 0,
-		'width': u'50%'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'place',
-		'fieldtype': u'Data',
-		'label': u'Place',
-		'oldfieldname': u'place',
-		'oldfieldtype': u'Data',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'dt',
-		'fieldtype': u'Date',
-		'label': u'Date',
-		'oldfieldname': u'dt',
-		'oldfieldtype': u'Date',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'column_break3',
-		'fieldtype': u'Column Break',
-		'oldfieldtype': u'Column Break',
-		'permlevel': 0,
-		'width': u'50%'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'full_name',
-		'fieldtype': u'Data',
-		'label': u'Full Name',
-		'oldfieldname': u'full_name',
-		'oldfieldtype': u'Data',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'designation',
-		'fieldtype': u'Data',
-		'label': u'Designation',
-		'oldfieldname': u'designation',
-		'oldfieldtype': u'Data',
-		'permlevel': 0
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-07-03 13:29:51", 
+  "modified_by": "Administrator", 
+  "modified": "2012-03-27 14:35:41"
+ }, 
+ {
+  "in_create": 0, 
+  "doctype": "DocType", 
+  "module": "Accounts", 
+  "name": "__common__"
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "Form 16A", 
+  "doctype": "DocField", 
+  "parenttype": "DocType", 
+  "parentfield": "fields"
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "Form 16A", 
+  "read": 1, 
+  "doctype": "DocPerm", 
+  "parenttype": "DocType", 
+  "parentfield": "permissions"
+ }, 
+ {
+  "name": "Form 16A", 
+  "doctype": "DocType"
+ }, 
+ {
+  "oldfieldtype": "Column Break", 
+  "doctype": "DocField", 
+  "width": "50%", 
+  "fieldname": "column_break0", 
+  "fieldtype": "Column Break", 
+  "permlevel": 0
+ }, 
+ {
+  "oldfieldtype": "Date", 
+  "doctype": "DocField", 
+  "label": "From Date", 
+  "oldfieldname": "from_date", 
+  "fieldname": "from_date", 
+  "fieldtype": "Date", 
+  "reqd": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "oldfieldtype": "Date", 
+  "doctype": "DocField", 
+  "label": "To Date", 
+  "oldfieldname": "to_date", 
+  "trigger": "Client", 
+  "fieldname": "to_date", 
+  "fieldtype": "Date", 
+  "reqd": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "oldfieldtype": "Link", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "TDS Category", 
+  "oldfieldname": "tds_category", 
+  "options": "TDS Category", 
+  "fieldname": "tds_category", 
+  "fieldtype": "Link", 
+  "reqd": 1, 
+  "permlevel": 0, 
+  "in_filter": 1
+ }, 
+ {
+  "oldfieldtype": "Link", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Party Name", 
+  "oldfieldname": "party_name", 
+  "permlevel": 0, 
+  "trigger": "Client", 
+  "fieldname": "party_name", 
+  "fieldtype": "Link", 
+  "reqd": 1, 
+  "hidden": 0, 
+  "options": "Account", 
+  "in_filter": 1
+ }, 
+ {
+  "oldfieldtype": "Small Text", 
+  "doctype": "DocField", 
+  "label": "Address", 
+  "oldfieldname": "party_address", 
+  "fieldname": "party_address", 
+  "fieldtype": "Small Text", 
+  "reqd": 0, 
+  "permlevel": 1
+ }, 
+ {
+  "oldfieldtype": "Data", 
+  "doctype": "DocField", 
+  "label": "PAN No", 
+  "oldfieldname": "pan_number", 
+  "fieldname": "pan_number", 
+  "fieldtype": "Data", 
+  "hidden": 0, 
+  "permlevel": 1
+ }, 
+ {
+  "oldfieldtype": "Column Break", 
+  "doctype": "DocField", 
+  "width": "50%", 
+  "fieldname": "column_break1", 
+  "fieldtype": "Column Break", 
+  "permlevel": 0
+ }, 
+ {
+  "oldfieldtype": "Select", 
+  "doctype": "DocField", 
+  "label": "Fiscal Year", 
+  "oldfieldname": "fiscal_year", 
+  "options": "link:Fiscal Year", 
+  "fieldname": "fiscal_year", 
+  "fieldtype": "Select", 
+  "reqd": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "oldfieldtype": "Link", 
+  "doctype": "DocField", 
+  "label": "Company ", 
+  "oldfieldname": "company", 
+  "options": "Company", 
+  "fieldname": "company", 
+  "fieldtype": "Link", 
+  "search_index": 1, 
+  "reqd": 1, 
+  "permlevel": 0, 
+  "in_filter": 1
+ }, 
+ {
+  "oldfieldtype": "Small Text", 
+  "doctype": "DocField", 
+  "label": "Company Address", 
+  "oldfieldname": "company_address", 
+  "fieldname": "company_address", 
+  "fieldtype": "Small Text", 
+  "permlevel": 1
+ }, 
+ {
+  "oldfieldtype": "Small Text", 
+  "doctype": "DocField", 
+  "label": "Registration Details", 
+  "oldfieldname": "registration_details", 
+  "fieldname": "registration_details", 
+  "fieldtype": "Small Text", 
+  "permlevel": 0
+ }, 
+ {
+  "oldfieldtype": "Section Break", 
+  "doctype": "DocField", 
+  "label": "Return Details", 
+  "fieldname": "return_details", 
+  "fieldtype": "Section Break", 
+  "permlevel": 0
+ }, 
+ {
+  "oldfieldtype": "Button", 
+  "doctype": "DocField", 
+  "label": "Get Return Details", 
+  "options": "get_return_ack_details", 
+  "fieldname": "get_return_details", 
+  "fieldtype": "Button", 
+  "permlevel": 0
+ }, 
+ {
+  "oldfieldtype": "Table", 
+  "doctype": "DocField", 
+  "label": "Form 16A Ack Details", 
+  "oldfieldname": "form_16A_ack_details", 
+  "options": "Form 16A Ack Detail", 
+  "fieldname": "form_16A_ack_details", 
+  "fieldtype": "Table", 
+  "permlevel": 0
+ }, 
+ {
+  "oldfieldtype": "Section Break", 
+  "doctype": "DocField", 
+  "label": "Payment Details", 
+  "fieldname": "payment_details", 
+  "fieldtype": "Section Break", 
+  "permlevel": 0
+ }, 
+ {
+  "oldfieldtype": "Button", 
+  "doctype": "DocField", 
+  "label": "Get TDS", 
+  "options": "get_tds", 
+  "fieldname": "get_tds", 
+  "fieldtype": "Button", 
+  "permlevel": 0
+ }, 
+ {
+  "oldfieldtype": "Table", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Tax Details", 
+  "oldfieldname": "form_16A_tax_details", 
+  "options": "Form 16A Tax Detail", 
+  "fieldname": "form_16A_tax_details", 
+  "fieldtype": "Table", 
+  "permlevel": 0
+ }, 
+ {
+  "oldfieldtype": "Currency", 
+  "doctype": "DocField", 
+  "label": "Total Amount", 
+  "oldfieldname": "total_amount", 
+  "fieldname": "total_amount", 
+  "fieldtype": "Currency", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "In Words", 
+  "fieldname": "in_words", 
+  "fieldtype": "Data", 
+  "permlevel": 1
+ }, 
+ {
+  "oldfieldtype": "Section Break", 
+  "doctype": "DocField", 
+  "options": "Simple", 
+  "fieldname": "section_break0", 
+  "fieldtype": "Section Break", 
+  "permlevel": 0
+ }, 
+ {
+  "oldfieldtype": "Column Break", 
+  "doctype": "DocField", 
+  "width": "50%", 
+  "fieldname": "column_break2", 
+  "fieldtype": "Column Break", 
+  "permlevel": 0
+ }, 
+ {
+  "oldfieldtype": "Data", 
+  "doctype": "DocField", 
+  "label": "Place", 
+  "oldfieldname": "place", 
+  "fieldname": "place", 
+  "fieldtype": "Data", 
+  "permlevel": 0
+ }, 
+ {
+  "oldfieldtype": "Date", 
+  "doctype": "DocField", 
+  "label": "Date", 
+  "oldfieldname": "dt", 
+  "fieldname": "dt", 
+  "fieldtype": "Date", 
+  "permlevel": 0
+ }, 
+ {
+  "oldfieldtype": "Column Break", 
+  "doctype": "DocField", 
+  "width": "50%", 
+  "fieldname": "column_break3", 
+  "fieldtype": "Column Break", 
+  "permlevel": 0
+ }, 
+ {
+  "oldfieldtype": "Data", 
+  "doctype": "DocField", 
+  "label": "Full Name", 
+  "oldfieldname": "full_name", 
+  "fieldname": "full_name", 
+  "fieldtype": "Data", 
+  "permlevel": 0
+ }, 
+ {
+  "oldfieldtype": "Data", 
+  "doctype": "DocField", 
+  "label": "Designation", 
+  "oldfieldname": "designation", 
+  "fieldname": "designation", 
+  "fieldtype": "Data", 
+  "permlevel": 0
+ }, 
+ {
+  "amend": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "submit": 0, 
+  "write": 0, 
+  "role": "Accounts Manager", 
+  "cancel": 0, 
+  "permlevel": 1
+ }, 
+ {
+  "amend": 0, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "submit": 0, 
+  "write": 1, 
+  "role": "Accounts Manager", 
+  "cancel": 0, 
+  "permlevel": 0
+ }, 
+ {
+  "amend": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "submit": 0, 
+  "write": 0, 
+  "role": "Accounts User", 
+  "cancel": 0, 
+  "permlevel": 1
+ }, 
+ {
+  "amend": 0, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "submit": 0, 
+  "write": 1, 
+  "role": "Accounts User", 
+  "cancel": 0, 
+  "permlevel": 0
+ }, 
+ {
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "write": 1, 
+  "role": "System Manager", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "System Manager", 
+  "permlevel": 1
+ }
 ]

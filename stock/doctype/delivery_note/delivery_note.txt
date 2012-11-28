@@ -2,7 +2,7 @@
  {
   "owner": "Administrator", 
   "docstatus": 0, 
-  "creation": "2012-11-02 17:16:55", 
+  "creation": "2012-11-28 11:26:21", 
   "modified_by": "Administrator", 
   "modified": "2012-11-26 11:56:10"
  }, 
@@ -37,15 +37,6 @@
  {
   "name": "Delivery Note", 
   "doctype": "DocType"
- }, 
- {
-  "oldfieldtype": "Section Break", 
-  "colour": "White:FFF", 
-  "doctype": "DocField", 
-  "label": "Basic Info", 
-  "fieldname": "basic_info", 
-  "fieldtype": "Section Break", 
-  "permlevel": 0
  }, 
  {
   "oldfieldtype": "Column Break", 
@@ -784,8 +775,8 @@
  }, 
  {
   "print_hide": 1, 
-  "oldfieldtype": "Link", 
   "allow_on_submit": 1, 
+  "oldfieldtype": "Link", 
   "doctype": "DocField", 
   "label": "Letter Head", 
   "oldfieldname": "letter_head", 
@@ -851,8 +842,8 @@
  }, 
  {
   "print_hide": 1, 
-  "oldfieldtype": "Check", 
   "allow_on_submit": 1, 
+  "oldfieldtype": "Check", 
   "doctype": "DocField", 
   "label": "Print Without Amount", 
   "oldfieldname": "print_without_amount", 
@@ -924,9 +915,9 @@
  }, 
  {
   "print_hide": 1, 
+  "allow_on_submit": 0, 
   "no_copy": 1, 
   "oldfieldtype": "Data", 
-  "allow_on_submit": 0, 
   "doctype": "DocField", 
   "label": "Amended From", 
   "oldfieldname": "amended_from", 
@@ -1167,7 +1158,8 @@
   "write": 1, 
   "role": "Sales User", 
   "cancel": 1, 
-  "permlevel": 0
+  "permlevel": 0, 
+  "match": ""
  }, 
  {
   "amend": 0, 
@@ -1182,12 +1174,12 @@
  {
   "doctype": "DocPerm", 
   "role": "Customer", 
-  "permlevel": 0, 
-  "match": "customer_name"
+  "match": "customer_name", 
+  "permlevel": 0
  }, 
  {
-  "doctype": "DocPerm", 
   "write": 1, 
+  "doctype": "DocPerm", 
   "role": "All", 
   "permlevel": 2
  }, 
