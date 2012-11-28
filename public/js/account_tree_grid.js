@@ -84,12 +84,7 @@ erpnext.AccountTreeGrid = wn.views.TreeGridReport.extend({
 	},
 	prepare_data: function() {
 		var me = this;
-		if(this.data) {
-			// refresh -- only initialize
-			$.each(this.data, function(i, d) {
-				me.init_account(d);
-			})
-		} else {
+		if(!this.primary_data) {
 			// make accounts list
 			me.data = [];
 			me.parent_map = {};
@@ -103,10 +98,16 @@ erpnext.AccountTreeGrid = wn.views.TreeGridReport.extend({
 				if(d.parent_account) {
 					me.parent_map[d.name] = d.parent_account;
 				}
-				
-				me.init_account(d);
 			});
+			
+			me.primary_data = [].concat(me.data);
 		}
+		
+		me.data = [].concat(me.primary_data);
+		$.each(me.data, function(i, d) {
+			me.init_account(d);
+		});
+		
 		this.set_indent();
 		this.prepare_balances();
 		

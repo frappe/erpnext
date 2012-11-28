@@ -2,7 +2,7 @@
  {
   "owner": "Administrator", 
   "docstatus": 0, 
-  "creation": "2012-08-24 14:48:05", 
+  "creation": "2012-11-28 11:26:23", 
   "modified_by": "Administrator", 
   "modified": "2012-11-26 11:18:43"
  }, 
@@ -32,13 +32,6 @@
  {
   "name": "Newsletter", 
   "doctype": "DocType"
- }, 
- {
-  "doctype": "DocField", 
-  "label": "Basic Info", 
-  "fieldname": "basic_info", 
-  "fieldtype": "Section Break", 
-  "permlevel": 0
  }, 
  {
   "default": "NL-", 

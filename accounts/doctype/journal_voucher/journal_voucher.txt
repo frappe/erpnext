@@ -1,819 +1,676 @@
-# DocType, Journal Voucher
 [
-
-	# These values are common in all dictionaries
-	{
-		u'creation': '2012-10-02 18:51:46',
-		u'docstatus': 0,
-		u'modified': '2012-10-15 12:38:42',
-		u'modified_by': u'Administrator',
-		u'owner': u'Administrator'
-	},
-
-	# These values are common for all DocType
-	{
-		'_last_update': u'1311251040',
-		'colour': u'White:FFF',
-		'default_print_format': u'Standard',
-		u'doctype': u'DocType',
-		'is_submittable': 1,
-		'module': u'Accounts',
-		u'name': u'__common__',
-		'read_only_onload': 1,
-		'search_fields': u'voucher_type,posting_date, due_date, cheque_no',
-		'section_style': u'Tabbed',
-		'server_code_error': u' ',
-		'show_in_menu': 0,
-		'subject': u' ',
-		'tag_fields': u'voucher_type',
-		'version': 1
-	},
-
-	# These values are common for all DocField
-	{
-		u'doctype': u'DocField',
-		u'name': u'__common__',
-		'parent': u'Journal Voucher',
-		'parentfield': u'fields',
-		'parenttype': u'DocType'
-	},
-
-	# These values are common for all DocPerm
-	{
-		u'doctype': u'DocPerm',
-		u'name': u'__common__',
-		'parent': u'Journal Voucher',
-		'parentfield': u'permissions',
-		'parenttype': u'DocType',
-		'read': 1
-	},
-
-	# DocType, Journal Voucher
-	{
-		u'doctype': u'DocType',
-		u'name': u'Journal Voucher'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'basic_info',
-		'fieldtype': u'Section Break',
-		'label': u'Basic Info',
-		'oldfieldtype': u'Section Break',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'column_break0',
-		'fieldtype': u'Column Break',
-		'oldfieldtype': u'Column Break',
-		'permlevel': 0,
-		'width': u'50%'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'description': u'To manage multiple series please go to Setup > Manage Series',
-		u'doctype': u'DocField',
-		'fieldname': u'naming_series',
-		'fieldtype': u'Select',
-		'label': u'Series',
-		'no_copy': 1,
-		'oldfieldname': u'naming_series',
-		'oldfieldtype': u'Select',
-		'options': u'JV',
-		'permlevel': 0,
-		'print_hide': 1,
-		'reqd': 1
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'voucher_type',
-		'fieldtype': u'Select',
-		'in_filter': 1,
-		'label': u'Voucher Type',
-		'oldfieldname': u'voucher_type',
-		'oldfieldtype': u'Select',
-		'options': u'\nJournal Entry\nBank Voucher\nCash Voucher\nCredit Card Voucher\nDebit Note\nCredit Note\nContra Voucher\nExcise Voucher\nWrite Off Voucher',
-		'permlevel': 0,
-		'print_hide': 0,
-		'search_index': 1
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'column_break1',
-		'fieldtype': u'Column Break',
-		'oldfieldtype': u'Column Break',
-		'permlevel': 0,
-		'width': u'50%'
-	},
-
-	# DocField
-	{
-		'description': u'The date at which current entry will get or has actually executed.',
-		u'doctype': u'DocField',
-		'fieldname': u'posting_date',
-		'fieldtype': u'Date',
-		'in_filter': 1,
-		'label': u'Posting Date',
-		'no_copy': 1,
-		'oldfieldname': u'posting_date',
-		'oldfieldtype': u'Date',
-		'permlevel': 0,
-		'reqd': 1,
-		'search_index': 1
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'2_add_edit_gl_entries',
-		'fieldtype': u'Section Break',
-		'label': u'Journal Entries',
-		'oldfieldtype': u'Section Break',
-		'options': u'Simple',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'allow_on_submit': 1,
-		u'doctype': u'DocField',
-		'fieldname': u'entries',
-		'fieldtype': u'Table',
-		'label': u'Entries',
-		'oldfieldname': u'entries',
-		'oldfieldtype': u'Table',
-		'options': u'Journal Voucher Detail',
-		'permlevel': 0,
-		'print_hide': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'section_break99',
-		'fieldtype': u'Section Break',
-		'options': u'Simple',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'total_debit',
-		'fieldtype': u'Currency',
-		'in_filter': 1,
-		'label': u'Total Debit',
-		'no_copy': 1,
-		'oldfieldname': u'total_debit',
-		'oldfieldtype': u'Currency',
-		'permlevel': 1
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'total_credit',
-		'fieldtype': u'Currency',
-		'in_filter': 1,
-		'label': u'Total Credit',
-		'no_copy': 1,
-		'oldfieldname': u'total_credit',
-		'oldfieldtype': u'Currency',
-		'permlevel': 1
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'column_break99',
-		'fieldtype': u'Column Break',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'difference',
-		'fieldtype': u'Currency',
-		'label': u'Difference',
-		'no_copy': 1,
-		'oldfieldname': u'difference',
-		'oldfieldtype': u'Currency',
-		'permlevel': 1,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'get_balance',
-		'fieldtype': u'Button',
-		'label': u'Make Difference Entry',
-		'oldfieldtype': u'Button',
-		'permlevel': 0,
-		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'reference',
-		'fieldtype': u'Section Break',
-		'label': u'Reference',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'description': u'eg. Cheque Number',
-		u'doctype': u'DocField',
-		'fieldname': u'cheque_no',
-		'fieldtype': u'Data',
-		'in_filter': 1,
-		'label': u'Reference Number',
-		'no_copy': 1,
-		'oldfieldname': u'cheque_no',
-		'oldfieldtype': u'Data',
-		'permlevel': 0,
-		'search_index': 1
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'cheque_date',
-		'fieldtype': u'Date',
-		'label': u'Reference Date',
-		'no_copy': 1,
-		'oldfieldname': u'cheque_date',
-		'oldfieldtype': u'Date',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'clearance_date',
-		'fieldtype': u'Date',
-		'in_filter': 1,
-		'label': u'Clearance Date',
-		'no_copy': 1,
-		'oldfieldname': u'clearance_date',
-		'oldfieldtype': u'Date',
-		'permlevel': 1,
-		'print_hide': 0,
-		'search_index': 1
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'column_break98',
-		'fieldtype': u'Column Break',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'user_remark',
-		'fieldtype': u'Small Text',
-		'in_filter': 1,
-		'label': u'User Remark',
-		'no_copy': 1,
-		'oldfieldname': u'user_remark',
-		'oldfieldtype': u'Small Text',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'description': u'User Remark will be added to Auto Remark',
-		u'doctype': u'DocField',
-		'fieldname': u'remark',
-		'fieldtype': u'Small Text',
-		'label': u'Remark',
-		'no_copy': 1,
-		'oldfieldname': u'remark',
-		'oldfieldtype': u'Small Text',
-		'permlevel': 1,
-		'reqd': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'bill_no',
-		'fieldtype': u'Data',
-		'label': u'Bill No',
-		'oldfieldname': u'bill_no',
-		'oldfieldtype': u'Data',
-		'permlevel': 0,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'bill_date',
-		'fieldtype': u'Date',
-		'label': u'Bill Date',
-		'oldfieldname': u'bill_date',
-		'oldfieldtype': u'Date',
-		'permlevel': 0,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'due_date',
-		'fieldtype': u'Date',
-		'label': u'Due Date',
-		'oldfieldname': u'due_date',
-		'oldfieldtype': u'Date',
-		'permlevel': 0,
-		'print_hide': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'addtional_info',
-		'fieldtype': u'Section Break',
-		'label': u'More Info',
-		'oldfieldtype': u'Section Break',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'column_break2',
-		'fieldtype': u'Column Break',
-		'oldfieldtype': u'Column Break',
-		'permlevel': 0,
-		'width': u'50%'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'default': u'No',
-		u'doctype': u'DocField',
-		'fieldname': u'is_opening',
-		'fieldtype': u'Select',
-		'in_filter': 1,
-		'label': u'Is Opening',
-		'oldfieldname': u'is_opening',
-		'oldfieldtype': u'Select',
-		'options': u'No\nYes',
-		'permlevel': 0,
-		'print_hide': 1,
-		'search_index': 1,
-		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'description': u'For opening invoice entry, this date will reflect in the period-wise aging report.',
-		u'doctype': u'DocField',
-		'fieldname': u'aging_date',
-		'fieldtype': u'Date',
-		'label': u'Aging Date',
-		'no_copy': 0,
-		'oldfieldname': u'aging_date',
-		'oldfieldtype': u'Date',
-		'permlevel': 0,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'default': u'Accounts Receivable',
-		'depends_on': u"eval:doc.voucher_type == 'Write Off Voucher'",
-		u'doctype': u'DocField',
-		'fieldname': u'write_off_based_on',
-		'fieldtype': u'Select',
-		'label': u'Write Off Based On',
-		'options': u'Accounts Receivable\nAccounts Payable',
-		'permlevel': 0,
-		'print_hide': 1,
-		'report_hide': 1
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'depends_on': u"eval:doc.voucher_type == 'Write Off Voucher'",
-		u'doctype': u'DocField',
-		'fieldname': u'write_off_amount',
-		'fieldtype': u'Currency',
-		'label': u'Write Off Amount <=',
-		'permlevel': 0,
-		'print_hide': 1,
-		'report_hide': 1
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'depends_on': u"eval:doc.voucher_type == 'Write Off Voucher'",
-		u'doctype': u'DocField',
-		'fieldname': u'get_outstanding_invoices',
-		'fieldtype': u'Button',
-		'label': u'Get Outstanding Invoices',
-		'options': u'get_outstanding_invoices',
-		'permlevel': 0,
-		'print_hide': 1,
-		'trigger': u'Server'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'default': u'Today',
-		'description': u'Date of entry (not posting to ledgers)',
-		u'doctype': u'DocField',
-		'fieldname': u'voucher_date',
-		'fieldtype': u'Date',
-		'in_filter': 1,
-		'label': u'Voucher Date',
-		'no_copy': 1,
-		'oldfieldname': u'voucher_date',
-		'oldfieldtype': u'Date',
-		'permlevel': 0,
-		'print_hide': 0,
-		'reqd': 1,
-		'search_index': 1
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'column_break3',
-		'fieldtype': u'Column Break',
-		'oldfieldtype': u'Column Break',
-		'permlevel': 0,
-		'width': u'50%'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'pay_to_recd_from',
-		'fieldtype': u'Data',
-		'hidden': 0,
-		'label': u'Pay To / Recd From',
-		'no_copy': 1,
-		'permlevel': 0,
-		'print_hide': 0,
-		'report_hide': 1
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'total_amount',
-		'fieldtype': u'Data',
-		'hidden': 1,
-		'label': u'Total Amount',
-		'no_copy': 1,
-		'permlevel': 1,
-		'print_hide': 1,
-		'report_hide': 1
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'total_amount_in_words',
-		'fieldtype': u'Data',
-		'hidden': 1,
-		'label': u'Total Amount in Words',
-		'no_copy': 1,
-		'permlevel': 1,
-		'print_hide': 1,
-		'report_hide': 1
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'fiscal_year',
-		'fieldtype': u'Select',
-		'in_filter': 1,
-		'label': u'Fiscal Year',
-		'oldfieldname': u'fiscal_year',
-		'oldfieldtype': u'Select',
-		'options': u'link:Fiscal Year',
-		'permlevel': 0,
-		'print_hide': 1,
-		'reqd': 1,
-		'search_index': 1
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'company',
-		'fieldtype': u'Link',
-		'in_filter': 1,
-		'label': u'Company',
-		'oldfieldname': u'company',
-		'oldfieldtype': u'Link',
-		'options': u'Company',
-		'permlevel': 0,
-		'print_hide': 1,
-		'reqd': 1,
-		'search_index': 1
-	},
-
-	# DocField
-	{
-		'allow_on_submit': 1,
-		'colour': u'White:FFF',
-		u'doctype': u'DocField',
-		'fieldname': u'select_print_heading',
-		'fieldtype': u'Link',
-		'label': u'Select Print Heading',
-		'no_copy': 1,
-		'oldfieldname': u'select_print_heading',
-		'oldfieldtype': u'Link',
-		'options': u'Print Heading',
-		'permlevel': 0,
-		'print_hide': 1,
-		'report_hide': 1,
-		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'amended_from',
-		'fieldtype': u'Link',
-		'label': u'Amended From',
-		'no_copy': 1,
-		'oldfieldname': u'amended_from',
-		'oldfieldtype': u'Link',
-		'options': u'Journal Voucher',
-		'permlevel': 1,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		'description': u'The date at which current entry is corrected in the system.',
-		u'doctype': u'DocField',
-		'fieldname': u'amendment_date',
-		'fieldtype': u'Date',
-		'label': u'Amendment Date',
-		'no_copy': 1,
-		'oldfieldname': u'amendment_date',
-		'oldfieldtype': u'Date',
-		'permlevel': 0,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'cancel_reason',
-		'fieldtype': u'Data',
-		'label': u'Cancel Reason',
-		'no_copy': 1,
-		'oldfieldname': u'cancel_reason',
-		'oldfieldtype': u'Data',
-		'permlevel': 1,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'section_break0',
-		'fieldtype': u'Section Break',
-		'oldfieldtype': u'Section Break',
-		'options': u'Simple',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'allow_on_submit': 1,
-		u'doctype': u'DocField',
-		'fieldname': u'view_ledger_entry',
-		'fieldtype': u'Button',
-		'label': u'View Ledger Entry',
-		'oldfieldtype': u'Button',
-		'permlevel': 0,
-		'print_hide': 1,
-		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'tds',
-		'fieldtype': u'Section Break',
-		'label': u'TDS',
-		'oldfieldtype': u'Section Break',
-		'permlevel': 0,
-		'print_hide': 0
-	},
-
-	# DocField
-	{
-		'default': u'No',
-		u'doctype': u'DocField',
-		'fieldname': u'tds_applicable',
-		'fieldtype': u'Select',
-		'in_filter': 1,
-		'label': u'TDS Applicable',
-		'no_copy': 1,
-		'oldfieldname': u'tds_applicable',
-		'oldfieldtype': u'Select',
-		'options': u'\nYes\nNo',
-		'permlevel': 0,
-		'print_hide': 1,
-		'search_index': 1
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		u'doctype': u'DocField',
-		'fieldname': u'tds_category',
-		'fieldtype': u'Select',
-		'hidden': 0,
-		'in_filter': 1,
-		'label': u'TDS Category',
-		'no_copy': 1,
-		'oldfieldname': u'tds_category',
-		'oldfieldtype': u'Select',
-		'options': u'link:TDS Category',
-		'permlevel': 0,
-		'print_hide': 1,
-		'search_index': 1,
-		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		u'doctype': u'DocField',
-		'fieldname': u'supplier_account',
-		'fieldtype': u'Link',
-		'hidden': 0,
-		'label': u'Supplier Account',
-		'no_copy': 1,
-		'oldfieldname': u'supplier_account',
-		'oldfieldtype': u'Link',
-		'options': u'Account',
-		'permlevel': 0,
-		'print_hide': 1,
-		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		u'doctype': u'DocField',
-		'fieldname': u'get_tds',
-		'fieldtype': u'Button',
-		'label': u'Get TDS',
-		'no_copy': 0,
-		'oldfieldtype': u'Button',
-		'permlevel': 0,
-		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'description': u'Tax Code will be populated based on account head mentioned in TDS Category master',
-		u'doctype': u'DocField',
-		'fieldname': u'tax_code',
-		'fieldtype': u'Link',
-		'label': u'TDS Account Head',
-		'no_copy': 1,
-		'oldfieldname': u'tax_code',
-		'oldfieldtype': u'Link',
-		'options': u'Account',
-		'permlevel': 0,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'rate',
-		'fieldtype': u'Currency',
-		'label': u'Rate',
-		'no_copy': 1,
-		'oldfieldname': u'rate',
-		'oldfieldtype': u'Currency',
-		'permlevel': 0,
-		'print_hide': 1,
-		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'ded_amount',
-		'fieldtype': u'Currency',
-		'label': u'Amount',
-		'no_copy': 1,
-		'oldfieldname': u'ded_amount',
-		'oldfieldtype': u'Currency',
-		'permlevel': 0,
-		'print_hide': 1,
-		'trigger': u'Client'
-	},
-
-	# DocPerm
-	{
-		'amend': 1,
-		'cancel': 1,
-		'create': 1,
-		u'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Accounts User',
-		'submit': 1,
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		u'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Accounts User',
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		u'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Accounts Manager',
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'amend': 1,
-		'cancel': 1,
-		'create': 1,
-		u'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Accounts Manager',
-		'submit': 1,
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		u'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Auditor',
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		u'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Auditor',
-		'submit': 0,
-		'write': 0
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-10-16 12:29:32", 
+  "modified_by": "Administrator", 
+  "modified": "2012-10-15 12:38:42"
+ }, 
+ {
+  "is_submittable": 1, 
+  "name": "__common__", 
+  "default_print_format": "Standard", 
+  "search_fields": "voucher_type,posting_date, due_date, cheque_no", 
+  "module": "Accounts", 
+  "doctype": "DocType", 
+  "read_only_onload": 1
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "Journal Voucher", 
+  "doctype": "DocField", 
+  "parenttype": "DocType", 
+  "parentfield": "fields"
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "Journal Voucher", 
+  "read": 1, 
+  "doctype": "DocPerm", 
+  "parenttype": "DocType", 
+  "parentfield": "permissions"
+ }, 
+ {
+  "name": "Journal Voucher", 
+  "doctype": "DocType"
+ }, 
+ {
+  "oldfieldtype": "Column Break", 
+  "doctype": "DocField", 
+  "width": "50%", 
+  "fieldname": "column_break0", 
+  "fieldtype": "Column Break", 
+  "permlevel": 0
+ }, 
+ {
+  "print_hide": 1, 
+  "description": "To manage multiple series please go to Setup > Manage Series", 
+  "no_copy": 1, 
+  "oldfieldtype": "Select", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Series", 
+  "oldfieldname": "naming_series", 
+  "permlevel": 0, 
+  "fieldname": "naming_series", 
+  "fieldtype": "Select", 
+  "reqd": 1, 
+  "options": "JV"
+ }, 
+ {
+  "print_hide": 0, 
+  "oldfieldtype": "Select", 
+  "doctype": "DocField", 
+  "label": "Voucher Type", 
+  "oldfieldname": "voucher_type", 
+  "options": "\nJournal Entry\nBank Voucher\nCash Voucher\nCredit Card Voucher\nDebit Note\nCredit Note\nContra Voucher\nExcise Voucher\nWrite Off Voucher", 
+  "fieldname": "voucher_type", 
+  "fieldtype": "Select", 
+  "search_index": 1, 
+  "permlevel": 0, 
+  "in_filter": 1
+ }, 
+ {
+  "oldfieldtype": "Column Break", 
+  "doctype": "DocField", 
+  "width": "50%", 
+  "fieldname": "column_break1", 
+  "fieldtype": "Column Break", 
+  "permlevel": 0
+ }, 
+ {
+  "description": "The date at which current entry will get or has actually executed.", 
+  "no_copy": 1, 
+  "oldfieldtype": "Date", 
+  "doctype": "DocField", 
+  "label": "Posting Date", 
+  "oldfieldname": "posting_date", 
+  "fieldname": "posting_date", 
+  "fieldtype": "Date", 
+  "search_index": 1, 
+  "reqd": 1, 
+  "in_filter": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "oldfieldtype": "Section Break", 
+  "doctype": "DocField", 
+  "label": "Journal Entries", 
+  "options": "Simple", 
+  "fieldname": "2_add_edit_gl_entries", 
+  "fieldtype": "Section Break", 
+  "permlevel": 0
+ }, 
+ {
+  "print_hide": 0, 
+  "allow_on_submit": 1, 
+  "oldfieldtype": "Table", 
+  "doctype": "DocField", 
+  "label": "Entries", 
+  "oldfieldname": "entries", 
+  "options": "Journal Voucher Detail", 
+  "fieldname": "entries", 
+  "fieldtype": "Table", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "options": "Simple", 
+  "fieldname": "section_break99", 
+  "fieldtype": "Section Break", 
+  "permlevel": 0
+ }, 
+ {
+  "no_copy": 1, 
+  "oldfieldtype": "Currency", 
+  "doctype": "DocField", 
+  "label": "Total Debit", 
+  "oldfieldname": "total_debit", 
+  "fieldname": "total_debit", 
+  "fieldtype": "Currency", 
+  "permlevel": 1, 
+  "in_filter": 1
+ }, 
+ {
+  "no_copy": 1, 
+  "oldfieldtype": "Currency", 
+  "doctype": "DocField", 
+  "label": "Total Credit", 
+  "oldfieldname": "total_credit", 
+  "fieldname": "total_credit", 
+  "fieldtype": "Currency", 
+  "permlevel": 1, 
+  "in_filter": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break99", 
+  "fieldtype": "Column Break", 
+  "permlevel": 0
+ }, 
+ {
+  "print_hide": 1, 
+  "no_copy": 1, 
+  "oldfieldtype": "Currency", 
+  "doctype": "DocField", 
+  "label": "Difference", 
+  "oldfieldname": "difference", 
+  "fieldname": "difference", 
+  "fieldtype": "Currency", 
+  "permlevel": 1
+ }, 
+ {
+  "oldfieldtype": "Button", 
+  "doctype": "DocField", 
+  "label": "Make Difference Entry", 
+  "trigger": "Client", 
+  "fieldname": "get_balance", 
+  "fieldtype": "Button", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Reference", 
+  "fieldname": "reference", 
+  "fieldtype": "Section Break", 
+  "permlevel": 0
+ }, 
+ {
+  "description": "eg. Cheque Number", 
+  "no_copy": 1, 
+  "oldfieldtype": "Data", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Reference Number", 
+  "oldfieldname": "cheque_no", 
+  "fieldname": "cheque_no", 
+  "fieldtype": "Data", 
+  "search_index": 1, 
+  "in_filter": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "no_copy": 1, 
+  "oldfieldtype": "Date", 
+  "doctype": "DocField", 
+  "label": "Reference Date", 
+  "oldfieldname": "cheque_date", 
+  "fieldname": "cheque_date", 
+  "fieldtype": "Date", 
+  "permlevel": 0
+ }, 
+ {
+  "print_hide": 0, 
+  "no_copy": 1, 
+  "oldfieldtype": "Date", 
+  "doctype": "DocField", 
+  "label": "Clearance Date", 
+  "oldfieldname": "clearance_date", 
+  "fieldname": "clearance_date", 
+  "fieldtype": "Date", 
+  "search_index": 1, 
+  "permlevel": 1, 
+  "in_filter": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break98", 
+  "fieldtype": "Column Break", 
+  "permlevel": 0
+ }, 
+ {
+  "no_copy": 1, 
+  "oldfieldtype": "Small Text", 
+  "doctype": "DocField", 
+  "label": "User Remark", 
+  "oldfieldname": "user_remark", 
+  "fieldname": "user_remark", 
+  "fieldtype": "Small Text", 
+  "permlevel": 0, 
+  "in_filter": 1
+ }, 
+ {
+  "description": "User Remark will be added to Auto Remark", 
+  "no_copy": 1, 
+  "oldfieldtype": "Small Text", 
+  "doctype": "DocField", 
+  "label": "Remark", 
+  "oldfieldname": "remark", 
+  "fieldname": "remark", 
+  "fieldtype": "Small Text", 
+  "reqd": 0, 
+  "permlevel": 1
+ }, 
+ {
+  "print_hide": 1, 
+  "oldfieldtype": "Data", 
+  "doctype": "DocField", 
+  "label": "Bill No", 
+  "oldfieldname": "bill_no", 
+  "fieldname": "bill_no", 
+  "fieldtype": "Data", 
+  "permlevel": 0
+ }, 
+ {
+  "print_hide": 1, 
+  "oldfieldtype": "Date", 
+  "doctype": "DocField", 
+  "label": "Bill Date", 
+  "oldfieldname": "bill_date", 
+  "fieldname": "bill_date", 
+  "fieldtype": "Date", 
+  "permlevel": 0
+ }, 
+ {
+  "print_hide": 0, 
+  "oldfieldtype": "Date", 
+  "doctype": "DocField", 
+  "label": "Due Date", 
+  "oldfieldname": "due_date", 
+  "fieldname": "due_date", 
+  "fieldtype": "Date", 
+  "permlevel": 0
+ }, 
+ {
+  "oldfieldtype": "Section Break", 
+  "doctype": "DocField", 
+  "label": "More Info", 
+  "fieldname": "addtional_info", 
+  "fieldtype": "Section Break", 
+  "permlevel": 0
+ }, 
+ {
+  "oldfieldtype": "Column Break", 
+  "doctype": "DocField", 
+  "width": "50%", 
+  "fieldname": "column_break2", 
+  "fieldtype": "Column Break", 
+  "permlevel": 0
+ }, 
+ {
+  "print_hide": 1, 
+  "default": "No", 
+  "oldfieldtype": "Select", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Is Opening", 
+  "oldfieldname": "is_opening", 
+  "permlevel": 0, 
+  "trigger": "Client", 
+  "fieldname": "is_opening", 
+  "fieldtype": "Select", 
+  "search_index": 1, 
+  "options": "No\nYes", 
+  "in_filter": 1
+ }, 
+ {
+  "print_hide": 1, 
+  "description": "For opening invoice entry, this date will reflect in the period-wise aging report.", 
+  "no_copy": 0, 
+  "oldfieldtype": "Date", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Aging Date", 
+  "oldfieldname": "aging_date", 
+  "fieldname": "aging_date", 
+  "fieldtype": "Date", 
+  "permlevel": 0
+ }, 
+ {
+  "print_hide": 1, 
+  "default": "Accounts Receivable", 
+  "depends_on": "eval:doc.voucher_type == 'Write Off Voucher'", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Write Off Based On", 
+  "options": "Accounts Receivable\nAccounts Payable", 
+  "fieldname": "write_off_based_on", 
+  "fieldtype": "Select", 
+  "permlevel": 0, 
+  "report_hide": 1
+ }, 
+ {
+  "print_hide": 1, 
+  "depends_on": "eval:doc.voucher_type == 'Write Off Voucher'", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Write Off Amount <=", 
+  "fieldname": "write_off_amount", 
+  "fieldtype": "Currency", 
+  "permlevel": 0, 
+  "report_hide": 1
+ }, 
+ {
+  "print_hide": 1, 
+  "depends_on": "eval:doc.voucher_type == 'Write Off Voucher'", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Get Outstanding Invoices", 
+  "trigger": "Server", 
+  "fieldname": "get_outstanding_invoices", 
+  "fieldtype": "Button", 
+  "options": "get_outstanding_invoices", 
+  "permlevel": 0
+ }, 
+ {
+  "print_hide": 0, 
+  "description": "Date of entry (not posting to ledgers)", 
+  "default": "Today", 
+  "oldfieldtype": "Date", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Voucher Date", 
+  "oldfieldname": "voucher_date", 
+  "no_copy": 1, 
+  "fieldname": "voucher_date", 
+  "fieldtype": "Date", 
+  "search_index": 1, 
+  "reqd": 1, 
+  "in_filter": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "oldfieldtype": "Column Break", 
+  "doctype": "DocField", 
+  "width": "50%", 
+  "fieldname": "column_break3", 
+  "fieldtype": "Column Break", 
+  "permlevel": 0
+ }, 
+ {
+  "print_hide": 0, 
+  "no_copy": 1, 
+  "doctype": "DocField", 
+  "label": "Pay To / Recd From", 
+  "fieldname": "pay_to_recd_from", 
+  "fieldtype": "Data", 
+  "hidden": 0, 
+  "permlevel": 0, 
+  "report_hide": 1
+ }, 
+ {
+  "print_hide": 1, 
+  "no_copy": 1, 
+  "doctype": "DocField", 
+  "label": "Total Amount", 
+  "fieldname": "total_amount", 
+  "fieldtype": "Data", 
+  "hidden": 1, 
+  "permlevel": 1, 
+  "report_hide": 1
+ }, 
+ {
+  "print_hide": 1, 
+  "no_copy": 1, 
+  "doctype": "DocField", 
+  "label": "Total Amount in Words", 
+  "fieldname": "total_amount_in_words", 
+  "fieldtype": "Data", 
+  "hidden": 1, 
+  "permlevel": 1, 
+  "report_hide": 1
+ }, 
+ {
+  "print_hide": 1, 
+  "oldfieldtype": "Select", 
+  "doctype": "DocField", 
+  "label": "Fiscal Year", 
+  "oldfieldname": "fiscal_year", 
+  "permlevel": 0, 
+  "fieldname": "fiscal_year", 
+  "fieldtype": "Select", 
+  "search_index": 1, 
+  "reqd": 1, 
+  "options": "link:Fiscal Year", 
+  "in_filter": 1
+ }, 
+ {
+  "print_hide": 1, 
+  "oldfieldtype": "Link", 
+  "doctype": "DocField", 
+  "label": "Company", 
+  "oldfieldname": "company", 
+  "permlevel": 0, 
+  "fieldname": "company", 
+  "fieldtype": "Link", 
+  "search_index": 1, 
+  "reqd": 1, 
+  "options": "Company", 
+  "in_filter": 1
+ }, 
+ {
+  "print_hide": 1, 
+  "no_copy": 1, 
+  "oldfieldtype": "Link", 
+  "colour": "White:FFF", 
+  "allow_on_submit": 1, 
+  "doctype": "DocField", 
+  "label": "Select Print Heading", 
+  "oldfieldname": "select_print_heading", 
+  "permlevel": 0, 
+  "trigger": "Client", 
+  "fieldname": "select_print_heading", 
+  "fieldtype": "Link", 
+  "options": "Print Heading", 
+  "report_hide": 1
+ }, 
+ {
+  "print_hide": 1, 
+  "no_copy": 1, 
+  "oldfieldtype": "Link", 
+  "doctype": "DocField", 
+  "label": "Amended From", 
+  "oldfieldname": "amended_from", 
+  "options": "Journal Voucher", 
+  "fieldname": "amended_from", 
+  "fieldtype": "Link", 
+  "permlevel": 1
+ }, 
+ {
+  "print_hide": 1, 
+  "description": "The date at which current entry is corrected in the system.", 
+  "no_copy": 1, 
+  "oldfieldtype": "Date", 
+  "doctype": "DocField", 
+  "label": "Amendment Date", 
+  "oldfieldname": "amendment_date", 
+  "fieldname": "amendment_date", 
+  "fieldtype": "Date", 
+  "permlevel": 0
+ }, 
+ {
+  "print_hide": 1, 
+  "no_copy": 1, 
+  "oldfieldtype": "Data", 
+  "doctype": "DocField", 
+  "label": "Cancel Reason", 
+  "oldfieldname": "cancel_reason", 
+  "fieldname": "cancel_reason", 
+  "fieldtype": "Data", 
+  "permlevel": 1
+ }, 
+ {
+  "oldfieldtype": "Section Break", 
+  "doctype": "DocField", 
+  "options": "Simple", 
+  "fieldname": "section_break0", 
+  "fieldtype": "Section Break", 
+  "permlevel": 0
+ }, 
+ {
+  "print_hide": 1, 
+  "allow_on_submit": 1, 
+  "oldfieldtype": "Button", 
+  "doctype": "DocField", 
+  "label": "View Ledger Entry", 
+  "trigger": "Client", 
+  "fieldname": "view_ledger_entry", 
+  "fieldtype": "Button", 
+  "permlevel": 0
+ }, 
+ {
+  "print_hide": 0, 
+  "oldfieldtype": "Section Break", 
+  "doctype": "DocField", 
+  "label": "TDS", 
+  "fieldname": "tds", 
+  "fieldtype": "Section Break", 
+  "permlevel": 0
+ }, 
+ {
+  "print_hide": 1, 
+  "permlevel": 0, 
+  "no_copy": 1, 
+  "oldfieldtype": "Select", 
+  "doctype": "DocField", 
+  "label": "TDS Applicable", 
+  "oldfieldname": "tds_applicable", 
+  "default": "No", 
+  "fieldname": "tds_applicable", 
+  "fieldtype": "Select", 
+  "search_index": 1, 
+  "options": "\nYes\nNo", 
+  "in_filter": 1
+ }, 
+ {
+  "print_hide": 1, 
+  "no_copy": 1, 
+  "oldfieldtype": "Select", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "TDS Category", 
+  "oldfieldname": "tds_category", 
+  "permlevel": 0, 
+  "trigger": "Client", 
+  "fieldname": "tds_category", 
+  "fieldtype": "Select", 
+  "search_index": 1, 
+  "hidden": 0, 
+  "options": "link:TDS Category", 
+  "in_filter": 1
+ }, 
+ {
+  "print_hide": 1, 
+  "no_copy": 1, 
+  "oldfieldtype": "Link", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Supplier Account", 
+  "oldfieldname": "supplier_account", 
+  "permlevel": 0, 
+  "trigger": "Client", 
+  "fieldname": "supplier_account", 
+  "fieldtype": "Link", 
+  "hidden": 0, 
+  "options": "Account"
+ }, 
+ {
+  "no_copy": 0, 
+  "oldfieldtype": "Button", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Get TDS", 
+  "trigger": "Client", 
+  "fieldname": "get_tds", 
+  "fieldtype": "Button", 
+  "permlevel": 0
+ }, 
+ {
+  "print_hide": 1, 
+  "description": "Tax Code will be populated based on account head mentioned in TDS Category master", 
+  "no_copy": 1, 
+  "oldfieldtype": "Link", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "TDS Account Head", 
+  "oldfieldname": "tax_code", 
+  "permlevel": 0, 
+  "fieldname": "tax_code", 
+  "fieldtype": "Link", 
+  "options": "Account"
+ }, 
+ {
+  "print_hide": 1, 
+  "no_copy": 1, 
+  "oldfieldtype": "Currency", 
+  "doctype": "DocField", 
+  "label": "Rate", 
+  "oldfieldname": "rate", 
+  "trigger": "Client", 
+  "fieldname": "rate", 
+  "fieldtype": "Currency", 
+  "permlevel": 0
+ }, 
+ {
+  "print_hide": 1, 
+  "no_copy": 1, 
+  "oldfieldtype": "Currency", 
+  "doctype": "DocField", 
+  "label": "Amount", 
+  "oldfieldname": "ded_amount", 
+  "trigger": "Client", 
+  "fieldname": "ded_amount", 
+  "fieldtype": "Currency", 
+  "permlevel": 0
+ }, 
+ {
+  "amend": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "submit": 1, 
+  "write": 1, 
+  "cancel": 1, 
+  "role": "Accounts User", 
+  "permlevel": 0
+ }, 
+ {
+  "amend": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "submit": 0, 
+  "write": 0, 
+  "cancel": 0, 
+  "role": "Accounts User", 
+  "permlevel": 1
+ }, 
+ {
+  "amend": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "submit": 0, 
+  "write": 0, 
+  "cancel": 0, 
+  "role": "Accounts Manager", 
+  "permlevel": 1
+ }, 
+ {
+  "amend": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "submit": 1, 
+  "write": 1, 
+  "cancel": 1, 
+  "role": "Accounts Manager", 
+  "permlevel": 0
+ }, 
+ {
+  "amend": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "submit": 0, 
+  "write": 0, 
+  "cancel": 0, 
+  "role": "Auditor", 
+  "permlevel": 0
+ }, 
+ {
+  "amend": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "submit": 0, 
+  "write": 0, 
+  "cancel": 0, 
+  "role": "Auditor", 
+  "permlevel": 1
+ }
 ]

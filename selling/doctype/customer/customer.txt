@@ -1,575 +1,456 @@
-# DocType, Customer
 [
-
-	# These values are common in all dictionaries
-	{
-		u'creation': '2012-09-21 09:56:34',
-		u'docstatus': 0,
-		u'modified': '2012-09-28 12:31:42',
-		u'modified_by': u'Administrator',
-		u'owner': u'Administrator'
-	},
-
-	# These values are common for all DocType
-	{
-		'_last_update': u'1330501485',
-		'allow_print': 0,
-		'allow_trash': 1,
-		'colour': u'White:FFF',
-		'default_print_format': u'Standard',
-		u'doctype': u'DocType',
-		'document_type': u'Master',
-		'module': u'Selling',
-		u'name': u'__common__',
-		'search_fields': u'customer_name,customer_group,country,territory',
-		'section_style': u'Tabbed',
-		'server_code_error': u' ',
-		'show_in_menu': 0,
-		'subject': u'eval:"%(customer_name)s"=="%(name)s" ? "" : "%(customer_name)s"',
-		'tag_fields': u'customer_group,customer_type',
-		'version': 1
-	},
-
-	# These values are common for all DocField
-	{
-		u'doctype': u'DocField',
-		u'name': u'__common__',
-		'parent': u'Customer',
-		'parentfield': u'fields',
-		'parenttype': u'DocType'
-	},
-
-	# These values are common for all DocPerm
-	{
-		u'doctype': u'DocPerm',
-		u'name': u'__common__',
-		'parent': u'Customer',
-		'parentfield': u'permissions',
-		'parenttype': u'DocType',
-		'read': 1
-	},
-
-	# DocType, Customer
-	{
-		u'doctype': u'DocType',
-		u'name': u'Customer'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'description': u'Note: You Can Manage Multiple Address or Contacts via Addresses & Contacts',
-		u'doctype': u'DocField',
-		'fieldname': u'basic_info',
-		'fieldtype': u'Section Break',
-		'label': u'Basic Info',
-		'oldfieldtype': u'Section Break',
-		'permlevel': 0,
-		'reqd': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'customer_name',
-		'fieldtype': u'Data',
-		'hidden': 0,
-		'in_filter': 1,
-		'label': u'Customer Name',
-		'no_copy': 1,
-		'oldfieldname': u'customer_name',
-		'oldfieldtype': u'Data',
-		'permlevel': 0,
-		'print_hide': 0,
-		'report_hide': 0,
-		'reqd': 1,
-		'search_index': 1
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'customer_type',
-		'fieldtype': u'Select',
-		'label': u'Customer Type',
-		'oldfieldname': u'customer_type',
-		'oldfieldtype': u'Select',
-		'options': u'\nCompany\nIndividual',
-		'permlevel': 0,
-		'reqd': 1
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'naming_series',
-		'fieldtype': u'Select',
-		'label': u'Series',
-		'no_copy': 1,
-		'options': u'\nCUST\nCUSTMUM',
-		'permlevel': 0,
-		'print_hide': 0
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'description': u'Fetch lead which will be converted into customer.',
-		u'doctype': u'DocField',
-		'fieldname': u'lead_name',
-		'fieldtype': u'Link',
-		'hidden': 0,
-		'in_filter': 1,
-		'label': u'Lead Ref',
-		'no_copy': 1,
-		'oldfieldname': u'lead_name',
-		'oldfieldtype': u'Link',
-		'options': u'Lead',
-		'permlevel': 0,
-		'print_hide': 1,
-		'report_hide': 1,
-		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'column_break0',
-		'fieldtype': u'Column Break',
-		'permlevel': 0,
-		'width': u'50%'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'description': u'<a href="#!Sales Browser/Customer Group">To manage Customer Groups, click here</a>',
-		u'doctype': u'DocField',
-		'fieldname': u'customer_group',
-		'fieldtype': u'Link',
-		'hidden': 0,
-		'in_filter': 1,
-		'label': u'Customer Group',
-		'oldfieldname': u'customer_group',
-		'oldfieldtype': u'Link',
-		'options': u'Customer Group',
-		'permlevel': 0,
-		'print_hide': 0,
-		'reqd': 1,
-		'search_index': 1,
-		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'description': u'<a href="#!Sales Browser/Territory">To manage Territory, click here</a>',
-		u'doctype': u'DocField',
-		'fieldname': u'territory',
-		'fieldtype': u'Link',
-		'label': u'Territory',
-		'oldfieldname': u'territory',
-		'oldfieldtype': u'Link',
-		'options': u'Territory',
-		'permlevel': 0,
-		'print_hide': 1,
-		'reqd': 1,
-		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		u'doctype': u'DocField',
-		'fieldname': u'address_contacts',
-		'fieldtype': u'Section Break',
-		'label': u'Address & Contacts',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'depends_on': u'eval:doc.__islocal',
-		u'doctype': u'DocField',
-		'fieldname': u'address_desc',
-		'fieldtype': u'HTML',
-		'label': u'Address Desc',
-		'options': u'<em>Addresses will appear only when you save the customer</em>',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		u'doctype': u'DocField',
-		'fieldname': u'address_html',
-		'fieldtype': u'HTML',
-		'label': u'Address HTML',
-		'permlevel': 1
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'column_break1',
-		'fieldtype': u'Column Break',
-		'permlevel': 0,
-		'width': u'50%'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'depends_on': u'eval:doc.__islocal',
-		u'doctype': u'DocField',
-		'fieldname': u'contact_desc',
-		'fieldtype': u'HTML',
-		'label': u'Contact Desc',
-		'options': u'<em>Contact Details will appear only when you save the customer</em>',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		u'doctype': u'DocField',
-		'fieldname': u'contact_html',
-		'fieldtype': u'HTML',
-		'label': u'Contact HTML',
-		'oldfieldtype': u'HTML',
-		'permlevel': 1
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'communication_history',
-		'fieldtype': u'Section Break',
-		'label': u'Communication History',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'communication_html',
-		'fieldtype': u'HTML',
-		'label': u'Communication HTML',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		u'doctype': u'DocField',
-		'fieldname': u'more_info',
-		'fieldtype': u'Section Break',
-		'label': u'More Info',
-		'oldfieldtype': u'Section Break',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'column_break2',
-		'fieldtype': u'Column Break',
-		'permlevel': 0,
-		'width': u'50%'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'description': u'To create an Account Head under a different company, select the company and save customer.',
-		u'doctype': u'DocField',
-		'fieldname': u'company',
-		'fieldtype': u'Link',
-		'in_filter': 1,
-		'label': u'Company',
-		'oldfieldname': u'company',
-		'oldfieldtype': u'Link',
-		'options': u'Company',
-		'permlevel': 0,
-		'reqd': 1,
-		'search_index': 1
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'default_price_list',
-		'fieldtype': u'Link',
-		'label': u'Default Price List',
-		'options': u'Price List',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'description': u'This currency will get fetched in Sales transactions of this customer',
-		u'doctype': u'DocField',
-		'fieldname': u'default_currency',
-		'fieldtype': u'Select',
-		'label': u'Default Currency',
-		'no_copy': 1,
-		'options': u'link:Currency',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'description': u"Your Customer's TAX registration numbers (if applicable) or any general information",
-		u'doctype': u'DocField',
-		'fieldname': u'customer_details',
-		'fieldtype': u'Text',
-		'label': u'Customer Details',
-		'oldfieldname': u'customer_details',
-		'oldfieldtype': u'Code',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'column_break3',
-		'fieldtype': u'Column Break',
-		'permlevel': 0,
-		'width': u'50%'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'credit_days',
-		'fieldtype': u'Int',
-		'label': u'Credit Days',
-		'oldfieldname': u'credit_days',
-		'oldfieldtype': u'Int',
-		'permlevel': 2
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'credit_limit',
-		'fieldtype': u'Currency',
-		'label': u'Credit Limit',
-		'oldfieldname': u'credit_limit',
-		'oldfieldtype': u'Currency',
-		'permlevel': 2
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'website',
-		'fieldtype': u'Data',
-		'label': u'Website',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'sales_team_section_break',
-		'fieldtype': u'Section Break',
-		'label': u'Sales Team',
-		'oldfieldtype': u'Section Break',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'default_sales_partner',
-		'fieldtype': u'Link',
-		'label': u'Default Sales Partner',
-		'oldfieldname': u'default_sales_partner',
-		'oldfieldtype': u'Link',
-		'options': u'Sales Partner',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'default_commission_rate',
-		'fieldtype': u'Currency',
-		'label': u'Default Commission Rate',
-		'oldfieldname': u'default_commission_rate',
-		'oldfieldtype': u'Currency',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'sales_team',
-		'fieldtype': u'Table',
-		'label': u'Sales Team Details',
-		'oldfieldname': u'sales_team',
-		'oldfieldtype': u'Table',
-		'options': u'Sales Team',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'depends_on': u'eval:!doc.__islocal',
-		u'doctype': u'DocField',
-		'fieldname': u'transaction_history',
-		'fieldtype': u'Section Break',
-		'label': u'Transaction History',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'depends_on': u'eval:!doc.__islocal',
-		u'doctype': u'DocField',
-		'fieldname': u'history_html',
-		'fieldtype': u'HTML',
-		'label': u'History HTML',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		u'doctype': u'DocField',
-		'fieldname': u'trash_reason',
-		'fieldtype': u'Small Text',
-		'label': u'Trash Reason',
-		'oldfieldname': u'trash_reason',
-		'oldfieldtype': u'Small Text',
-		'permlevel': 1
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		u'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Sales Manager',
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		u'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Sales Manager',
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		u'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Sales User',
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		u'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Sales User',
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 1,
-		'create': 1,
-		u'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Sales Master Manager',
-		'submit': 0,
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		u'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Sales Master Manager',
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'cancel': 0,
-		'create': 0,
-		u'doctype': u'DocPerm',
-		'permlevel': 2,
-		'role': u'Accounts Manager',
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'cancel': 0,
-		'create': 0,
-		u'doctype': u'DocPerm',
-		'permlevel': 2,
-		'role': u'System Manager',
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'cancel': 0,
-		'create': 0,
-		u'doctype': u'DocPerm',
-		'permlevel': 2,
-		'role': u'All',
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'cancel': 1,
-		'create': 1,
-		u'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Accounts Manager',
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'cancel': 0,
-		'create': 0,
-		u'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'All',
-		'write': 0
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-10-02 11:27:30", 
+  "modified_by": "Administrator", 
+  "modified": "2012-09-28 12:31:42"
+ }, 
+ {
+  "name": "__common__", 
+  "default_print_format": "Standard", 
+  "allow_print": 0, 
+  "search_fields": "customer_name,customer_group,country,territory", 
+  "module": "Selling", 
+  "doctype": "DocType", 
+  "document_type": "Master"
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "Customer", 
+  "doctype": "DocField", 
+  "parenttype": "DocType", 
+  "parentfield": "fields"
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "Customer", 
+  "read": 1, 
+  "doctype": "DocPerm", 
+  "parenttype": "DocType", 
+  "parentfield": "permissions"
+ }, 
+ {
+  "name": "Customer", 
+  "doctype": "DocType"
+ }, 
+ {
+  "print_hide": 0, 
+  "no_copy": 1, 
+  "oldfieldtype": "Data", 
+  "doctype": "DocField", 
+  "label": "Customer Name", 
+  "oldfieldname": "customer_name", 
+  "fieldname": "customer_name", 
+  "fieldtype": "Data", 
+  "search_index": 1, 
+  "reqd": 1, 
+  "hidden": 0, 
+  "permlevel": 0, 
+  "report_hide": 0, 
+  "in_filter": 1
+ }, 
+ {
+  "oldfieldtype": "Select", 
+  "doctype": "DocField", 
+  "label": "Customer Type", 
+  "oldfieldname": "customer_type", 
+  "options": "\nCompany\nIndividual", 
+  "fieldname": "customer_type", 
+  "fieldtype": "Select", 
+  "reqd": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "print_hide": 0, 
+  "no_copy": 1, 
+  "doctype": "DocField", 
+  "label": "Series", 
+  "options": "\nCUST\nCUSTMUM", 
+  "fieldname": "naming_series", 
+  "fieldtype": "Select", 
+  "permlevel": 0
+ }, 
+ {
+  "print_hide": 1, 
+  "description": "Fetch lead which will be converted into customer.", 
+  "no_copy": 1, 
+  "oldfieldtype": "Link", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Lead Ref", 
+  "oldfieldname": "lead_name", 
+  "permlevel": 0, 
+  "trigger": "Client", 
+  "fieldname": "lead_name", 
+  "fieldtype": "Link", 
+  "hidden": 0, 
+  "in_filter": 1, 
+  "options": "Lead", 
+  "report_hide": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "width": "50%", 
+  "fieldname": "column_break0", 
+  "fieldtype": "Column Break", 
+  "permlevel": 0
+ }, 
+ {
+  "print_hide": 0, 
+  "description": "<a href=\"#!Sales Browser/Customer Group\">To manage Customer Groups, click here</a>", 
+  "oldfieldtype": "Link", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Customer Group", 
+  "oldfieldname": "customer_group", 
+  "permlevel": 0, 
+  "trigger": "Client", 
+  "fieldname": "customer_group", 
+  "fieldtype": "Link", 
+  "search_index": 1, 
+  "reqd": 1, 
+  "hidden": 0, 
+  "in_filter": 1, 
+  "options": "Customer Group"
+ }, 
+ {
+  "print_hide": 1, 
+  "description": "<a href=\"#!Sales Browser/Territory\">To manage Territory, click here</a>", 
+  "oldfieldtype": "Link", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Territory", 
+  "oldfieldname": "territory", 
+  "permlevel": 0, 
+  "trigger": "Client", 
+  "fieldname": "territory", 
+  "fieldtype": "Link", 
+  "reqd": 1, 
+  "options": "Territory"
+ }, 
+ {
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Address & Contacts", 
+  "fieldname": "address_contacts", 
+  "fieldtype": "Section Break", 
+  "permlevel": 0
+ }, 
+ {
+  "depends_on": "eval:doc.__islocal", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Address Desc", 
+  "options": "<em>Addresses will appear only when you save the customer</em>", 
+  "fieldname": "address_desc", 
+  "fieldtype": "HTML", 
+  "permlevel": 0
+ }, 
+ {
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Address HTML", 
+  "fieldname": "address_html", 
+  "fieldtype": "HTML", 
+  "permlevel": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "width": "50%", 
+  "fieldname": "column_break1", 
+  "fieldtype": "Column Break", 
+  "permlevel": 0
+ }, 
+ {
+  "depends_on": "eval:doc.__islocal", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Contact Desc", 
+  "options": "<em>Contact Details will appear only when you save the customer</em>", 
+  "fieldname": "contact_desc", 
+  "fieldtype": "HTML", 
+  "permlevel": 0
+ }, 
+ {
+  "oldfieldtype": "HTML", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Contact HTML", 
+  "fieldname": "contact_html", 
+  "fieldtype": "HTML", 
+  "permlevel": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Communication History", 
+  "fieldname": "communication_history", 
+  "fieldtype": "Section Break", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Communication HTML", 
+  "fieldname": "communication_html", 
+  "fieldtype": "HTML", 
+  "permlevel": 0
+ }, 
+ {
+  "oldfieldtype": "Section Break", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "More Info", 
+  "fieldname": "more_info", 
+  "fieldtype": "Section Break", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "width": "50%", 
+  "fieldname": "column_break2", 
+  "fieldtype": "Column Break", 
+  "permlevel": 0
+ }, 
+ {
+  "description": "To create an Account Head under a different company, select the company and save customer.", 
+  "oldfieldtype": "Link", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Company", 
+  "oldfieldname": "company", 
+  "permlevel": 0, 
+  "fieldname": "company", 
+  "fieldtype": "Link", 
+  "search_index": 1, 
+  "reqd": 1, 
+  "in_filter": 1, 
+  "options": "Company"
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Default Price List", 
+  "options": "Price List", 
+  "fieldname": "default_price_list", 
+  "fieldtype": "Link", 
+  "permlevel": 0
+ }, 
+ {
+  "description": "This currency will get fetched in Sales transactions of this customer", 
+  "no_copy": 1, 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Default Currency", 
+  "options": "link:Currency", 
+  "fieldname": "default_currency", 
+  "fieldtype": "Select", 
+  "permlevel": 0
+ }, 
+ {
+  "description": "Your Customer's TAX registration numbers (if applicable) or any general information", 
+  "oldfieldtype": "Code", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Customer Details", 
+  "oldfieldname": "customer_details", 
+  "fieldname": "customer_details", 
+  "fieldtype": "Text", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "width": "50%", 
+  "fieldname": "column_break3", 
+  "fieldtype": "Column Break", 
+  "permlevel": 0
+ }, 
+ {
+  "oldfieldtype": "Int", 
+  "doctype": "DocField", 
+  "label": "Credit Days", 
+  "oldfieldname": "credit_days", 
+  "fieldname": "credit_days", 
+  "fieldtype": "Int", 
+  "permlevel": 2
+ }, 
+ {
+  "oldfieldtype": "Currency", 
+  "doctype": "DocField", 
+  "label": "Credit Limit", 
+  "oldfieldname": "credit_limit", 
+  "fieldname": "credit_limit", 
+  "fieldtype": "Currency", 
+  "permlevel": 2
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Website", 
+  "fieldname": "website", 
+  "fieldtype": "Data", 
+  "permlevel": 0
+ }, 
+ {
+  "oldfieldtype": "Section Break", 
+  "doctype": "DocField", 
+  "label": "Sales Team", 
+  "fieldname": "sales_team_section_break", 
+  "fieldtype": "Section Break", 
+  "permlevel": 0
+ }, 
+ {
+  "oldfieldtype": "Link", 
+  "doctype": "DocField", 
+  "label": "Default Sales Partner", 
+  "oldfieldname": "default_sales_partner", 
+  "options": "Sales Partner", 
+  "fieldname": "default_sales_partner", 
+  "fieldtype": "Link", 
+  "permlevel": 0
+ }, 
+ {
+  "oldfieldtype": "Currency", 
+  "doctype": "DocField", 
+  "label": "Default Commission Rate", 
+  "oldfieldname": "default_commission_rate", 
+  "fieldname": "default_commission_rate", 
+  "fieldtype": "Currency", 
+  "permlevel": 0
+ }, 
+ {
+  "oldfieldtype": "Table", 
+  "doctype": "DocField", 
+  "label": "Sales Team Details", 
+  "oldfieldname": "sales_team", 
+  "options": "Sales Team", 
+  "fieldname": "sales_team", 
+  "fieldtype": "Table", 
+  "permlevel": 0
+ }, 
+ {
+  "depends_on": "eval:!doc.__islocal", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Transaction History", 
+  "fieldname": "transaction_history", 
+  "fieldtype": "Section Break", 
+  "permlevel": 0
+ }, 
+ {
+  "depends_on": "eval:!doc.__islocal", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "History HTML", 
+  "fieldname": "history_html", 
+  "fieldtype": "HTML", 
+  "permlevel": 0
+ }, 
+ {
+  "oldfieldtype": "Small Text", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Trash Reason", 
+  "oldfieldname": "trash_reason", 
+  "fieldname": "trash_reason", 
+  "fieldtype": "Small Text", 
+  "permlevel": 1
+ }, 
+ {
+  "amend": 0, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "submit": 0, 
+  "write": 1, 
+  "role": "Sales Master Manager", 
+  "cancel": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "amend": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "submit": 0, 
+  "write": 0, 
+  "role": "Sales Master Manager", 
+  "cancel": 0, 
+  "permlevel": 1
+ }, 
+ {
+  "amend": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "submit": 0, 
+  "write": 0, 
+  "role": "Sales Manager", 
+  "cancel": 0, 
+  "permlevel": 1
+ }, 
+ {
+  "amend": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "submit": 0, 
+  "write": 0, 
+  "role": "Sales Manager", 
+  "cancel": 0, 
+  "permlevel": 0
+ }, 
+ {
+  "amend": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "submit": 0, 
+  "write": 0, 
+  "role": "Sales User", 
+  "cancel": 0, 
+  "permlevel": 1
+ }, 
+ {
+  "amend": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "submit": 0, 
+  "write": 0, 
+  "role": "Sales User", 
+  "cancel": 0, 
+  "permlevel": 0
+ }, 
+ {
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "write": 1, 
+  "role": "Accounts Manager", 
+  "cancel": 0, 
+  "permlevel": 2
+ }, 
+ {
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "write": 1, 
+  "role": "System Manager", 
+  "cancel": 0, 
+  "permlevel": 2
+ }, 
+ {
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "write": 0, 
+  "role": "All", 
+  "cancel": 0, 
+  "permlevel": 2
+ }, 
+ {
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "write": 1, 
+  "role": "Accounts Manager", 
+  "cancel": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "write": 0, 
+  "role": "All", 
+  "cancel": 0, 
+  "permlevel": 1
+ }
 ]
