@@ -241,7 +241,6 @@ class DocType:
 							self.return_data.append([5, 'Profit/Loss (Provisional)'] + level0_diff)
 							for i in range(len(totals)): # make totals
 								level0_diff[i] = flt(totals[i]) + level0_diff[i]
-							self.return_data.append([4, 'Total '+c[0]] + level0_diff)
 						else:
 							self.return_data.append([4, 'Total '+c[0]] + totals)
 
@@ -252,7 +251,6 @@ class DocType:
 							self.return_data.append([5, 'Profit/Loss (Provisional)'] + level0_diff)
 							for i in range(len(totals)): # make totals
 								level0_diff[i] = flt(totals[i]) + level0_diff[i]
-							self.return_data.append([4, 'Total Income'] + level0_diff)
 						else:
 							self.return_data.append([4, 'Total '+c[0]] + totals)
 	
