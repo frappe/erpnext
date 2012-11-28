@@ -20,6 +20,10 @@ erpnext.CommunicationView = Class.extend({
 		this.comm_list = [];
 		$.extend(this, opts);
 		
+		if(this.doc.__islocal) {
+			return;
+		}
+		
 		this.list.sort(function(a, b) { return 
 			(new Date(a.modified) > new Date(b.modified)) 
 			? -1 : 1; })
@@ -69,14 +73,15 @@ erpnext.CommunicationView = Class.extend({
 				{label:"Subject", fieldtype:"Data", reqd: 1},
 				{label:"Message", fieldtype:"Text Editor", reqd: 1, fieldname:"content"},
 				{label:"Send Email", fieldtype:"Check"},
-				{label:"Send", fieldtype:"Button"},
+				{label:"Add Reply", fieldtype:"Button"},
 			]
 		});
 		
 		$(d.fields_dict.send_email.input).attr("checked", "checked")
-		$(d.fields_dict.send.input).click(function() {
+		$(d.fields_dict.add_reply.input).click(function() {
 			var args = d.get_values();
 			if(!args) return;
+			$(this).set_working();
 			wn.call({
 				method:"support.doctype.communication.communication.make",
 				args: $.extend(args, {
@@ -93,8 +98,15 @@ erpnext.CommunicationView = Class.extend({
 			});
 		});
 		
-		d.fields_dict.content.input.set_input("<p></p><p></p>=== In response to ===<p></p>" 
-			+ me.list[0].content)
+		if(me.list.length > 0) {
+			d.fields_dict.content.input.set_input("<p></p>"
+				+ (wn.boot.profile.email_signature || "")
+				+"<p></p>"
+				+"-----In response to-----<p></p>" 
+				+ me.list[0].content)			
+		} else {
+			
+		}
 		$(d.fields_dict.subject.input).val(this.doc.subject || "").change();
 		
 		d.show();
@@ -108,7 +120,7 @@ erpnext.CommunicationView = Class.extend({
 		}
 		if(!doc.sender) doc.sender = "[unknown sender]";
 		doc.sender = doc.sender.replace(/</, "&lt;").replace(/>/, "&gt;");
-		doc.content = doc.content.split("=== In response to ===")[0];
+		doc.content = doc.content.split("-----In response to-----")[0];
 		doc.content = doc.content.split("-----Original Message-----")[0];
 	},
 	make_line: function(doc) {
@@ -117,8 +129,8 @@ erpnext.CommunicationView = Class.extend({
 				<p><b>%(sender)s on %(when)s</b> \
 					<a href="#Form/Communication/%(name)s" style="font-size: 90%">\
 						Show Details</a></p>\
-				<div class="comm-content" style="border-top: 1px solid #ddd; padding: 10px; \
-					display: none;"></div>\
+				<div class="comm-content" style="border-top: 1px solid #ddd; \
+					padding: 10px; overflow-x: auto; display: none;"></div>\
 			</td></tr>', doc))
 			.appendTo(this.body)
 			.css({"cursor":"pointer"})
