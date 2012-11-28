@@ -691,4 +691,8 @@ patch_list = [
 		'patch_module': 'patches.november_2012',
 		'patch_file': 'communication_sender_and_recipient',
 	},
+	{
+		'patch_module': 'patches.november_2012',
+		'patch_file': 'add_theme_to_profile',
+	},
 ]

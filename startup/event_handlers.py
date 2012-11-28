@@ -82,8 +82,6 @@ def boot_session(bootinfo):
 		# if no company, show a dialog box to create a new company
 		bootinfo['setup_complete'] = webnotes.conn.sql("""select name from 
 			tabCompany limit 1""") and 'Yes' or 'No'
-			
-		bootinfo['user_background'] = webnotes.conn.get_value("Profile", webnotes.session['user'], 'background_image') or ''
 		
 		# load subscription info
 		import conf
