@@ -4,7 +4,7 @@ def execute():
 	
 	sc_obj = get_obj("Sales Common")
 	
-	si = webnotes.conn.sql("""select si.name 
+	si = webnotes.conn.sql("""select distinct si.name 
 		from `tabSales Invoice` si, `tabSales Invoice Item` si_item
 		where si_item.parent = si.name
 		and si.docstatus = 1
