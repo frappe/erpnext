@@ -4,7 +4,7 @@
   "docstatus": 0, 
   "creation": "2012-11-02 17:17:05", 
   "modified_by": "Administrator", 
-  "modified": "2012-11-27 18:21:06"
+  "modified": "2012-11-28 10:45:19"
  }, 
  {
   "autoname": "naming_series:", 
@@ -69,10 +69,16 @@
   "doctype": "DocField", 
   "label": "Subject", 
   "fieldname": "subject", 
-  "fieldtype": "Text", 
+  "fieldtype": "Data", 
   "reqd": 1, 
   "permlevel": 0, 
   "in_filter": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "cb00", 
+  "fieldtype": "Column Break", 
+  "permlevel": 0
  }, 
  {
   "oldfieldtype": "Data", 
@@ -85,6 +91,12 @@
   "reqd": 1, 
   "permlevel": 0, 
   "in_filter": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "sb00", 
+  "fieldtype": "Section Break", 
+  "permlevel": 0
  }, 
  {
   "oldfieldtype": "Text", 
