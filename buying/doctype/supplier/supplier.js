@@ -75,6 +75,13 @@ cur_frm.cscript.make_contact = function() {
 			parent: cur_frm.fields_dict['contact_html'].wrapper,
 			page_length: 2,
 			new_doctype: "Contact",
+			custom_new_doc: function(doctype) {
+				var contact = LocalDB.create('Contact');
+				contact = locals['Contact'][contact];
+				contact.supplier = cur_frm.doc.name;
+				contact.supplier_name = cur_frm.doc.supplier_name;
+				wn.set_route("Form", "Contact", contact.name);
+			},
 			get_query: function() {
 				return "select name, first_name, last_name, email_id, phone, mobile_no, department, designation, is_primary_contact from tabContact where supplier='"+cur_frm.docname+"' and docstatus != 2 order by is_primary_contact desc"
 			},

@@ -76,6 +76,12 @@ cur_frm.cscript.make_contact = function() {
 			parent: cur_frm.fields_dict['contact_html'].wrapper,
 			page_length: 2,
 			new_doctype: "Contact",
+			custom_new_doc: function(doctype) {
+				var contact = LocalDB.create('Contact');
+				contact = locals['Contact'][contact];
+				contact.sales_partner = cur_frm.doc.name;
+				wn.set_route("Form", "Contact", contact.name);
+			},
 			get_query: function() {
 				return "select name, first_name, last_name, email_id, phone, mobile_no, department, designation, is_primary_contact from tabContact where sales_partner='"+cur_frm.docname+"' and docstatus != 2 order by is_primary_contact desc"
 			},
@@ -92,7 +98,6 @@ cur_frm.cscript.make_contact = function() {
 		});
 	}
 	cur_frm.contact_list.run();
-
 }
 
 cur_frm.fields_dict['partner_target_details'].grid.get_field("item_group").get_query = function(doc, dt, dn) {

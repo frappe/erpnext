@@ -141,6 +141,43 @@ erpnext.FinancialAnalytics = erpnext.AccountTreeGrid.extend({
 		}
 		this.update_groups();
 		this.accounts_initialized = true;
+		
+		// show Net Profit / Loss
+		var net_profit = {
+			company: me.company,
+			id: "Net Profit / Loss",
+			name: "Net Profit / Loss",
+			indent: 0,
+			opening: 0,
+			checked: false,
+			is_pl_account: me.pl_or_bs=="Balance Sheet" ? "No" : "Yes",
+		};
+		
+		$.each(me.data, function(i, ac) {
+			if(!ac.parent_account && me.apply_filter(ac, "company")) {
+				if(me.pl_or_bs == "Balance Sheet") {
+					var valid_account = ac.is_pl_account!="Yes";
+					var do_addition_for = "Debit";
+				} else {
+					var valid_account = ac.is_pl_account=="Yes";
+					var do_addition_for = "Credit";
+				}
+				if(valid_account) {
+					$.each(me.columns, function(i, col) {
+						if(col.formatter==me.currency_formatter) {
+							if(!net_profit[col.field]) net_profit[col.field] = 0;
+							if(ac.debit_or_credit==do_addition_for) {
+								net_profit[col.field] += ac[col.field];
+							} else {
+								net_profit[col.field] -= ac[col.field];
+							}
+						}
+					});
+				}
+			}
+		});
+		
+		this.data.push(net_profit);
 	},
 	add_balance: function(field, account, gl) {
 		account[field] = flt(account[field]) + 
