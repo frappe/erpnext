@@ -2,9 +2,10 @@ def execute():
 	import webnotes
 	from webnotes.model.code import get_obj
 	
-	sc_obj = get_obj("Sales Common")
+	#sc_obj = get_obj("Sales Common")
+	from selling.doctype.sales_common import sales_common
 	
-	si = webnotes.conn.sql("""select si.name 
+	si = webnotes.conn.sql("""select distinct si.name 
 		from `tabSales Invoice` si, `tabSales Invoice Item` si_item
 		where si_item.parent = si.name
 		and si.docstatus = 1
@@ -12,4 +13,5 @@ def execute():
 		and ifnull(si_item.sales_order, '') != ''
 	""")
 	for d in si:
-		sc_obj.update_prevdoc_detail(1, get_obj("Sales Invoice", d[0], with_children=1))
+		sales_common.StatusUpdater(get_obj("Sales Invoice", d[0], with_children=1), \
+		 	1).update_all_qty()

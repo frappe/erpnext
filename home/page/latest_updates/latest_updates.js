@@ -1,4 +1,7 @@
 erpnext.updates = [
+	["28th November 2012", [
+		"Profile: Profile Settings (My Settings...) is now the Profile Form.",
+	]],
 	["27th November 2012", [
 		"Communication: Made common communication thread and added it in Lead, Contact.",
 	]],
