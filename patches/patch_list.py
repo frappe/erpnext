@@ -695,4 +695,8 @@ patch_list = [
 		'patch_module': 'patches.november_2012',
 		'patch_file': 'update_delivered_billed_percentage_for_pos',
 	},
+	{
+		'patch_module': 'patches.november_2012',
+		'patch_file': 'add_theme_to_profile',
+	},
 ]

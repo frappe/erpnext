@@ -27,17 +27,9 @@ erpnext.startup.start = function() {
 	console.log('Starting up...');
 	$('#startup_div').html('Starting up...').toggle(true);
 	
-	
 	erpnext.startup.set_globals();
-		
-	if(user != 'Guest'){
-		if(wn.boot.user_background) {
-			erpnext.set_user_background(wn.boot.user_background);
-		}
-		if(wn.boot.profile.defaults.theme) {
-			erpnext.set_theme(wn.boot.profile.defaults.theme[0]);
-		}
 
+	if(user != 'Guest'){
 		erpnext.setup_mousetrap();
 		
 		// always allow apps
@@ -141,11 +133,6 @@ erpnext.startup.set_periodic_updates = function() {
 	}
 
 	wn.updates.id = setInterval(erpnext.update_messages, 60000);
-}
-
-erpnext.set_user_background = function(src) {
-	set_style(repl('#body_div { background: url("files/%(src)s") repeat fixed;}',
-		{src:src}))
 }
 
 // subject, sender, description
