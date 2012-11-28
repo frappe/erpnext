@@ -93,6 +93,16 @@ cur_frm.cscript.make_contact = function() {
 		cur_frm.contact_list = new wn.ui.Listing({
 			parent: cur_frm.fields_dict['contact_html'].wrapper,
 			page_length: 2,
+			custom_new_doc: function(doctype) {
+				var contact = LocalDB.create('Contact');
+				contact = locals['Contact'][contact];
+				contact.customer = cur_frm.doc.name;
+				contact.customer_name = cur_frm.doc.customer_name;
+				if(cur_frm.doc.customer_type == 'Individual') {
+					contact.first_name = cur_frm.doc.customer_name;
+				}
+				wn.set_route("Form", "Contact", contact.name);
+			},
 			new_doctype: "Contact",
 			get_query: function() {
 				return "select name, first_name, last_name, email_id, phone, mobile_no, department, designation, is_primary_contact from tabContact where customer='"+cur_frm.docname+"' and docstatus != 2 order by is_primary_contact desc"
