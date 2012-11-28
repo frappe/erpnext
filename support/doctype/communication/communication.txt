@@ -2,7 +2,7 @@
  {
   "owner": "Administrator", 
   "docstatus": 0, 
-  "creation": "2012-11-14 12:25:16", 
+  "creation": "2012-11-28 11:26:11", 
   "modified_by": "Administrator", 
   "modified": "2012-11-27 18:51:01"
  }, 
@@ -35,13 +35,6 @@
  {
   "name": "Communication", 
   "doctype": "DocType"
- }, 
- {
-  "doctype": "DocField", 
-  "label": "Basic Info", 
-  "fieldname": "basic_info", 
-  "fieldtype": "Section Break", 
-  "permlevel": 0
  }, 
  {
   "default": "COMM-", 
