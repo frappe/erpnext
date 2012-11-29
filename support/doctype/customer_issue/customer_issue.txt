@@ -2,7 +2,7 @@
  {
   "owner": "harshada@webnotestech.com", 
   "docstatus": 0, 
-  "creation": "2012-11-24 17:21:45", 
+  "creation": "2012-11-28 11:26:23", 
   "modified_by": "Administrator", 
   "modified": "2012-11-26 11:19:39"
  }, 
@@ -33,14 +33,6 @@
  {
   "name": "Customer Issue", 
   "doctype": "DocType"
- }, 
- {
-  "oldfieldtype": "Section Break", 
-  "doctype": "DocField", 
-  "label": "Basic Info", 
-  "fieldname": "basic_info", 
-  "fieldtype": "Section Break", 
-  "permlevel": 0
  }, 
  {
   "no_copy": 1, 

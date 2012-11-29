@@ -94,7 +94,8 @@ KBQuestionView = function(w, qid, qtext) {
 			var v = $(me.input).val();
 			if(!v) { msgprint('Write something!'); return; }
 			me.btn.set_working();
-			$c_page('utilities', 'question_view', 'add_answer', {qid: qid, answer:v}, 
+			$c_page('utilities', 'question_view', 'add_answer', 
+				JSON.stringify({qid: qid, "answer":v}), 
 				function(r, rt) {
 					me.btn.done_working();
 					me.ans_list.list.run();
