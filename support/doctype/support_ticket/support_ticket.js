@@ -64,7 +64,7 @@ $.extend(cur_frm.cscript, {
 			list: comm_list,
 			parent: wrapper,
 			doc: doc,
-			email: doc.raised_by
+			recipients: doc.raised_by
 		})
 
 	},
