@@ -50,9 +50,8 @@ def move_customizations():
 	webnotes.conn.sql("""\
 		delete from `tabProperty Setter`
 		where doc_type='Communication Log'""")
-		
-	from webnotes.utils.cache import CacheItem
-	CacheItem('Communication').clear()
+
+	webnotes.clear_cache(doctype="Communication")
 
 def remove_communication_log():
 	import webnotes

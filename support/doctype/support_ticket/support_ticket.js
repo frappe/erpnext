@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-wn.require("public/app/js/communication.js");
-
 cur_frm.fields_dict.customer.get_query = erpnext.utils.customer_query;
 
 $.extend(cur_frm.cscript, {
@@ -62,7 +60,7 @@ $.extend(cur_frm.cscript, {
 			"modified": doc.creation,
 			"content": doc.description});
 					
-		cur_frm.communication_view = new erpnext.CommunicationView({
+		cur_frm.communication_view = new wn.views.CommunicationList({
 			list: comm_list,
 			parent: wrapper,
 			doc: doc,

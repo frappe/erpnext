@@ -6,9 +6,9 @@ from webnotes.utils import formatdate, flt
 def get_template():
 	"""download template"""
 	template_type = webnotes.form_dict.get('type')
-	from webnotes.model.doctype import get_field_property
-	naming_options = get_field_property("Journal Voucher", "naming_series", "options")
-	voucher_type = get_field_property("Journal Voucher", "voucher_type", "options")
+	from webnotes.model.doctype import get_property
+	naming_options = get_property("Journal Voucher", "naming_series", "options")
+	voucher_type = get_property("Journal Voucher", "voucher_type", "options")
 	if template_type=="Two Accounts":
 		extra_note = ""
 		columns = '''"Naming Series","Voucher Type","Posting Date","Amount","Debit Account","Credit Account","Cost Center","Against Sales Invoice","Against Purchase Invoice","Against Journal Voucher","Remarks","Due Date","Ref Number","Ref Date"'''
