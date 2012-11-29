@@ -1,4 +1,7 @@
 erpnext.updates = [
+	["29th November 2012", [
+		"EMail: Form Emails are now via Communication (with Rich Text Etc.).",
+	]],
 	["28th November 2012", [
 		"Profile: Profile Settings (My Settings...) is now the Profile Form.",
 		"Financial Analytics: Show Net Profit/Loss",
