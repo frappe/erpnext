@@ -34,15 +34,14 @@ def get_question(arg):
 	return cstr(webnotes.conn.sql("select question from tabQuestion where name=%s", arg)[0][0])
 
 @webnotes.whitelist()
-def add_answer(args):
-	args = load_json(args)
+def add_answer(arg):
+	arg = load_json(arg)
 	
 	from webnotes.model.doc import Document
-	
 	a = Document('Answer')
-	a.answer = args['answer']
-	a.question = args['qid']
+	a.answer = arg['answer']
+	a.question = arg['qid']
 	a.points = 1
 	a.save(1)
 	
-	webnotes.conn.set_value('Question', args['qid'], 'modified', now())
+	webnotes.conn.set_value('Question', arg['qid'], 'modified', now())
