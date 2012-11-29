@@ -32,142 +32,129 @@ class DocType:
 		self.doc = doc
 		self.doclist = doclist
 		self.item_dict = {}
-		
+
+	def get_so_details(self, so):
+		"""Pull other details from so"""
+		so = sql("""select transaction_date, customer, grand_total 
+			from `tabSales Order` where name = %s""", so, as_dict = 1)
+		ret = {
+			'sales_order_date': so and so[0]['transaction_date'] or '',
+			'customer' : so[0]['customer'] or '',
+			'grand_total': so[0]['grand_total']
+		}
+		return ret	
+			
 	def get_item_details(self, item_code):
 		""" Pull other item details from item master"""
 
-		item = sql("""select description, stock_uom, default_bom from `tabItem` where name = %s 
-			and (ifnull(end_of_life,'')='' or end_of_life = '0000-00-00' or end_of_life > now())""", item_code, as_dict =1 )
+		item = sql("""select description, stock_uom, default_bom 
+			from `tabItem` where name = %s""", item_code, as_dict =1)
 		ret = {
 			'description'	: item and item[0]['description'],
 			'stock_uom'		: item and item[0]['stock_uom'],
 			'bom_no'		: item and item[0]['default_bom']
 		}
 		return ret
-	
-
-	def get_so_details(self, so):
-		"""Pull other details from so"""
-		so = sql("select transaction_date, customer, grand_total from `tabSales Order` where name = %s", so, as_dict = 1)
-		ret = {
-			'sales_order_date': so and so[0]['transaction_date'] or '',
-			'customer' : so[0]['customer'] or '',
-			'grand_total': so[0]['grand_total']
-		}
-		return ret
-
 
 	def clear_so_table(self):
-		""" Clears sales order table"""
 		self.doclist = self.doc.clear_table(self.doclist, 'pp_so_details')
 
-
-
 	def clear_item_table(self):
-		""" Clears item table"""
 		self.doclist = self.doc.clear_table(self.doclist, 'pp_details')
-
-
-
-	def get_open_sales_orders(self):
-		""" Pull sales orders  which are pending to deliver based on criteria selected"""
-		cond = self.get_filter_condition()
-		open_so = sql("""
-			select 
-				distinct t1.name, t1.transaction_date, t1.customer, t1.grand_total 
-			from 
-				`tabSales Order` t1, `tabSales Order Item` t2, `tabDelivery Note Packing Item` t3, tabItem t4
-			where 
-				t1.name = t2.parent and t1.name = t3.parent and t3.parenttype = 'Sales Order' and t1.docstatus = 1 and t2.item_code = t3.parent_item 
-				and t4.name = t3.item_code and  t1.status != 'Stopped' and t1.company = '%s' and ifnull(t2.qty, 0) > ifnull(t2.delivered_qty, 0) 
-				and (ifnull(t4.is_pro_applicable, 'No') = 'Yes' or ifnull(t4.is_sub_contracted_item, 'No') = 'Yes') %s
-			order by t1.name desc
-		"""% (self.doc.company, cond), as_dict = 1)
 		
-		self.add_so_in_table(open_so)
-
-
-
 	def validate_company(self):
 		if not self.doc.company:
 			msgprint("Please enter Company", raise_exception=1)
 
-		
-
-	def get_filter_condition(self):
-		self.validate_company()
-
-		cond = ''
+	def get_open_sales_orders(self):
+		""" Pull sales orders  which are pending to deliver based on criteria selected"""
+		so_filter = item_filter = ""
 		if self.doc.from_date:
-			cond += ' and t1.transaction_date >= "' + self.doc.from_date + '"'
+			so_filter += ' and so.transaction_date >= "' + self.doc.from_date + '"'
 		if self.doc.to_date:
-			cond += ' and t1.transaction_date <= "' + self.doc.to_date + '"'
+			so_filter += ' and so.transaction_date <= "' + self.doc.to_date + '"'
 		if self.doc.customer:
-			cond += ' and t1.customer = "' + self.doc.customer + '"'
+			so_filter += ' and so.customer = "' + self.doc.customer + '"'
+			
 		if self.doc.fg_item:
-			cond += ' and t3.item_code = "' + self.doc.fg_item + '"'
-
-		return cond
-
-
+			item_filter += ' and item.name = "' + self.doc.fg_item + '"'
+		
+		open_so = sql("""
+			select distinct so.name, so.transaction_date, so.customer, so.grand_total
+			from `tabSales Order` so, `tabSales Order Item` so_item
+			where so_item.parent = so.name
+				and so.docstatus = 1 and so.status != "Stopped"
+				and so.company = 'Web Notes Technologies Pvt Ltd'
+				and ifnull(so_item.qty, 0) > ifnull(so_item.delivered_qty, 0) %s
+				and (exists (select * from `tabItem` item where item.name=so_item.item_code
+					and (ifnull(item.is_pro_applicable, 'No') = 'Yes' 
+						or ifnull(item.is_sub_contracted_item, 'No') = 'Yes') %s)
+					or exists (select * from `tabDelivery Note Packing Item` dnpi
+						where dnpi.parent = so.name and dnpi.parent_item = so_item.item_code
+							and exists (select * from `tabItem` item where item.name=dnpi.item_code
+								and (ifnull(item.is_pro_applicable, 'No') = 'Yes' 
+									or ifnull(item.is_sub_contracted_item, 'No') = 'Yes') %s)))
+			""" % (so_filter, item_filter, item_filter), as_dict=1)
+		
+		self.add_so_in_table(open_so)
 
 	def add_so_in_table(self, open_so):
 		""" Add sales orders in the table"""
-		so_list = []
-		for d in getlist(self.doclist, 'pp_so_details'):
-			so_list.append(d.sales_order)
+		so_list = [d.sales_order for d in getlist(self.doclist, 'pp_so_details')]
 		for r in open_so:
 			if cstr(r['name']) not in so_list:
-				pp_so = addchild(self.doc, 'pp_so_details', 'Production Plan Sales Order', 1, self.doclist)
+				pp_so = addchild(self.doc, 'pp_so_details', 
+					'Production Plan Sales Order', 1, self.doclist)
 				pp_so.sales_order = r['name']
 				pp_so.sales_order_date = cstr(r['transaction_date'])
 				pp_so.customer = cstr(r['customer'])
 				pp_so.grand_total = flt(r['grand_total'])
-
-
 
 	def get_items_from_so(self):
 		""" Pull items from Sales Order, only proction item
 			and subcontracted item will be pulled from Packing item 
 			and add items in the table
 		"""
-		so = self.get_included_so()
-		items = self.get_packing_items(so)
+		items = self.get_items()
 		self.add_items(items)
 
+	def get_items(self):
+		so_list = filter(None, [d.sales_order for d in getlist(self.doclist, 'pp_so_details')])
+		if not so_list:
+			msgprint("Please enter sales order in the above table", raise_exception=1)
+			
+		items = sql("""select distinct parent, item_code,
+			(qty - ifnull(delivered_qty, 0)) as pending_qty
+			from `tabSales Order Item` so_item
+			where parent in (%s) and docstatus = 1 and ifnull(qty, 0) > ifnull(delivered_qty, 0)
+			and exists (select * from `tabItem` item where item.name=so_item.item_code
+				and (ifnull(item.is_pro_applicable, 'No') = 'Yes' 
+					or ifnull(item.is_sub_contracted_item, 'No') = 'Yes'))""" % \
+			(", ".join(["%s"] * len(so_list))), tuple(so_list), as_dict=1)
+		
+		dnpi_items = sql("""select distinct dnpi.parent, dnpi.item_code,
+			(((so_item.qty - ifnull(so_item.delivered_qty, 0)) * dnpi.qty) / so_item.qty) 
+				as pending_qty
+			from `tabSales Order Item` so_item, `tabDelivery Note Packing Item` dnpi
+			where so_item.parent = dnpi.parent and so_item.docstatus = 1 
+			and dnpi.parent_item = so_item.item_code
+			and so_item.parent in (%s) and ifnull(so_item.qty, 0) > ifnull(so_item.delivered_qty, 0)
+			and exists (select * from `tabItem` item where item.name=dnpi.item_code
+				and (ifnull(item.is_pro_applicable, 'No') = 'Yes' 
+					or ifnull(item.is_sub_contracted_item, 'No') = 'Yes'))""" % \
+			(", ".join(["%s"] * len(so_list))), tuple(so_list), as_dict=1)
 
-	def get_included_so(self):
-		so = "'" + "','".join([cstr(d.sales_order) for d in getlist(self.doclist, 'pp_so_details') if d.include_in_plan]) + "'"
-		return so
-
-
-
-	def get_packing_items(self, so):
-		packing_items = sql("""
-			select 
-				t0.name, t2.parent_item, t2.item_code, 
-				(t1.qty - ifnull(t1.delivered_qty,0)) * (ifnull(t2.qty,0) / ifnull(t1.qty,1)) as 'pending_qty' 
-			from
-				`tabSales Order` t0, `tabSales Order Item` t1, `tabDelivery Note Packing Item` t2, `tabItem` t3
-			where 
-				t0.name = t1.parent and t0.name = t2.parent and t1.name = t2.parent_detail_docname
-				and t0.name in (%s) and t0.docstatus = 1 and t1.qty > ifnull(t1.delivered_qty,0) and t3.name = t2.item_code 
-				and (ifnull(t3.is_pro_applicable, 'No') = 'Yes' or ifnull(t3.is_sub_contracted_item, 'No') = 'Yes')
-		""" % so, as_dict=1)
-		return packing_items
+		return items + dnpi_items
 		
 
+	def add_items(self, items):
+		self.clear_item_table()
 
-	def add_items(self, packing_items):
-		for d in getlist(self.doclist, 'pp_details'):
-			if d.sales_order:
-				d.parent = ''
-
-		for p in packing_items:	
-			item_details = sql("select description, stock_uom, default_bom from tabItem where name=%s", p['item_code'])
+		for p in items:
+			item_details = sql("""select description, stock_uom, default_bom 
+				from tabItem where name=%s""", p['item_code'])
 			pi = addchild(self.doc, 'pp_details', 'Production Plan Item', 1, self.doclist)
-			pi.sales_order				= p['name']
-			pi.parent_packing_item		= p['parent_item']
+			pi.sales_order				= p['parent']
 			pi.item_code				= p['item_code']
 			pi.description				= item_details and item_details[0][0] or ''
 			pi.stock_uom				= item_details and item_details[0][1] or ''
@@ -176,16 +163,12 @@ class DocType:
 			pi.planned_qty				= flt(p['pending_qty'])
 	
 
-
 	def validate_data(self):
 		for d in getlist(self.doclist, 'pp_details'):
-			if not d.pro_created:
-				self.validate_bom_no(d)
-
-				if not flt(d.planned_qty):
-					msgprint("Please Enter Planned Qty for item: %s at row no: %s"% (d.item_code, d.idx), raise_exception=1)
-		return 'validated'
-
+			self.validate_bom_no(d)
+			if not flt(d.planned_qty):
+				msgprint("Please Enter Planned Qty for item: %s at row no: %s" %
+					(d.item_code, d.idx), raise_exception=1)
 				
 
 	def validate_bom_no(self, d):
@@ -206,13 +189,10 @@ class DocType:
 		self.get_raw_materials(bom_dict)
 		return self.get_csv()
 
-
-
-	
 	def get_raw_materials(self, bom_dict):
 		""" Get raw materials considering sub-assembly items """
 		for bom in bom_dict:
-			if self.doc.consider_sa_items == 'Yes':
+			if self.doc.use_multi_level_bom == 'No':
 				# Get all raw materials considering SA items as raw materials, 
 				# so no childs of SA items
 				fl_bom_items = sql("""
@@ -260,8 +240,6 @@ class DocType:
 
 		return item_list
 		
-
-
 	def raise_production_order(self):
 		"""It will raise production order (Draft) for all distinct FG items"""
 		self.validate_company()
@@ -274,8 +252,7 @@ class DocType:
 				d.is_pro_created = 1
 			msgprint("Following Production Order has been generated:\n" + '\n'.join(pro))
 		else :
-			msgprint("No Production Order is generated.")
-
+			msgprint("No Production Order generated.")
 
 
 	def get_distinct_bom(self, action):
@@ -298,7 +275,7 @@ class DocType:
 					'bom_no'			: item_dict[d][1],
 					'description'		: item_dict[d][2],
 					'stock_uom'			: item_dict[d][3],
-					'consider_sa_items' : self.doc.consider_sa_items
+					'consider_sa_items' : self.doc.use_multi_level_bom == "Yes" and "No" or "Yes"
 				})
 
 		return action == 'download_rm' and bom_dict or pp_items
