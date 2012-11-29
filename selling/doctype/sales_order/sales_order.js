@@ -92,6 +92,16 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 			cur_frm.add_custom_button('Unstop', cur_frm.cscript['Unstop Sales Order']);
 		}
 	}
+	
+	cur_frm.cscript.order_type(doc);
+}
+
+cur_frm.cscript.order_type = function(doc) {
+	if(doc.order_type == "Sales") {
+		cur_frm.toggle_reqd("delivery_date", 1);
+	} else {
+		cur_frm.toggle_reqd("delivery_date", 0);
+	}
 }
 
 //customer

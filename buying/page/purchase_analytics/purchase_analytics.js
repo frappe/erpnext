@@ -128,7 +128,7 @@ erpnext.PurchaseAnalytics = wn.views.TreeGridReport.extend({
 	},
 	init_filter_values: function() {
 		this._super();
-		this.filter_inputs.range.val('Weekly');
+		this.filter_inputs.range.val('Monthly');
 	},
 	prepare_data: function() {
 		var me = this;
