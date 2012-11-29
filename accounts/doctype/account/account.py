@@ -49,11 +49,6 @@ class DocType:
 			msgprint("Message: Please enter Master Name once the account is created.")
 
 			
-	# Rate is mandatory for tax account	 
-	def validate_rate_for_tax(self):
-		if self.doc.account_type == 'Tax' and not self.doc.tax_rate:
-			msgprint("Please Enter Rate", raise_exception=1)
-
 	# Fetch Parent Details and validation for account not to be created under ledger
 	def validate_parent(self):
 		if self.doc.parent_account:
@@ -135,7 +130,6 @@ class DocType:
 
 	def validate(self): 
 		self.validate_master_name()
-		self.validate_rate_for_tax()
 		self.validate_parent()
 		self.validate_duplicate_account()
 		self.validate_root_details()
