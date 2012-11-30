@@ -4,7 +4,7 @@
   "docstatus": 0, 
   "creation": "2012-09-10 12:22:26", 
   "modified_by": "Administrator", 
-  "modified": "2012-11-30 12:29:56"
+  "modified": "2012-11-30 16:39:08"
  }, 
  {
   "is_submittable": 1, 
@@ -1242,7 +1242,7 @@
  }, 
  {
   "print_hide": 1, 
-  "description": "Start date of the invoice period", 
+  "description": "Start date of current invoice's period", 
   "no_copy": 1, 
   "depends_on": "eval:doc.convert_into_recurring_invoice==1", 
   "colour": "White:FFF", 
@@ -1255,9 +1255,10 @@
  }, 
  {
   "print_hide": 1, 
-  "description": "End date of the invoice period", 
+  "description": "End date of current invoice's period", 
   "no_copy": 1, 
   "depends_on": "eval:doc.convert_into_recurring_invoice==1", 
+  "colour": "White:FFF", 
   "allow_on_submit": 1, 
   "doctype": "DocField", 
   "label": "Invoice Period To Date", 
