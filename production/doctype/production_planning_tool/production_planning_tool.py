@@ -23,9 +23,6 @@ from webnotes.model.code import get_obj
 from webnotes import msgprint, errprint
 
 sql = webnotes.conn.sql
-	
-# -----------------------------------------------------------------------------------------
-
 
 class DocType:
 	def __init__(self, doc, doclist=[]):
@@ -225,13 +222,17 @@ class DocType:
 				# get all raw materials with sub assembly childs					
 				fl_bom_items = sql("""
 					select 
-						item_code,ifnull(sum(qty_consumed_per_unit),0)*%s as qty, description, stock_uom
+						item_code,ifnull(sum(qty_consumed_per_unit),0)*%s as qty, 
+						description, stock_uom
 					from 
 						( 
-							select distinct fb.name, fb.description, fb.item_code, fb.qty_consumed_per_unit, fb.stock_uom 
+							select distinct fb.name, fb.description, fb.item_code,
+							 	fb.qty_consumed_per_unit, fb.stock_uom 
 							from `tabBOM Explosion Item` fb,`tabItem` it 
-							where it.name = fb.item_code and ifnull(it.is_pro_applicable, 'No') = 'No'
-							and ifnull(it.is_sub_contracted_item, 'No') = 'No' and fb.docstatus<2 and fb.parent=%s
+							where it.name = fb.item_code 
+							and ifnull(it.is_pro_applicable, 'No') = 'No'
+							and ifnull(it.is_sub_contracted_item, 'No') = 'No' 
+							and fb.docstatus<2 and fb.parent=%s
 						) a
 					group by item_code,stock_uom
 				""" , (flt(bom_dict[bom]), bom))
@@ -239,7 +240,8 @@ class DocType:
 				# Get all raw materials considering SA items as raw materials, 
 				# so no childs of SA items
 				fl_bom_items = sql("""
-					select item_code, ifnull(sum(qty_consumed_per_unit), 0) * '%s', description, stock_uom 
+					select item_code, ifnull(sum(qty_consumed_per_unit), 0) * '%s', 
+						description, stock_uom 
 					from `tabBOM Item` 
 					where parent = '%s' and docstatus < 2 
 					group by item_code
@@ -247,19 +249,19 @@ class DocType:
 
 			self.make_items_dict(fl_bom_items)
 
-
-
 	def make_items_dict(self, item_list):
 		for i in item_list:
 			self.item_dict[i[0]] = [(flt(self.item_dict.get(i[0], [0])[0]) + flt(i[1])), i[2], i[3]]
 
 
 	def get_csv(self):
-		item_list = [['Item Code', 'Description', 'Stock UOM', 'Required Qty', 'Warehouse', 'Quantity Requested for Purchase', 'Ordered Qty', 'Actual Qty']]
+		item_list = [['Item Code', 'Description', 'Stock UOM', 'Required Qty', 'Warehouse',
+		 	'Quantity Requested for Purchase', 'Ordered Qty', 'Actual Qty']]
 		for d in self.item_dict:
-			item_list.append([d, self.item_dict[d][1], self.item_dict[d][2], self.item_dict[d][0]]),
-			item_qty= sql("select warehouse, indented_qty, ordered_qty, actual_qty from `tabBin` where item_code = %s", d)
-			i_qty, o_qty, a_qty = 0,0,0
+			item_list.append([d, self.item_dict[d][1], self.item_dict[d][2], self.item_dict[d][0]])
+			item_qty= sql("""select warehouse, indented_qty, ordered_qty, actual_qty 
+				from `tabBin` where item_code = %s""", d)
+			i_qty, o_qty, a_qty = 0, 0, 0
 			for w in item_qty:
 				i_qty, o_qty, a_qty = i_qty + flt(w[1]), o_qty + flt(w[2]), a_qty + flt(w[3])
 				item_list.append(['', '', '', '', w[0], flt(w[1]), flt(w[2]), flt(w[3])])
