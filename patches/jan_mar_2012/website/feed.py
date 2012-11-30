@@ -16,7 +16,6 @@
 
 from __future__ import unicode_literals
 import webnotes
-from webnotes.model.doc import Document
 from webnotes.modules import reload_doc
 
 def execute():

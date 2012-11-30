@@ -14,22 +14,23 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# Please edit this list and import only required elements
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import add_days, add_months, add_years, cint, cstr,date_diff, default_fields, flt, fmt_money, formatdate,getTraceback, get_defaults, get_first_day, get_last_day, getdate, has_common,month_name, now, nowdate, replace_newlines, sendmail, set_default,str_esc_quote, user_format, validate_email_add
-from webnotes.model import db_exists
-from webnotes.model.doc import Document, addchild, getchildren, make_autoname
-from webnotes.model.wrapper import getlist, copy_doclist
-from webnotes.model.code import get_obj, get_server_obj, run_server_obj, updatedb, check_syntax
-from webnotes import session, form, msgprint, errprint
+from webnotes.utils import add_days, cint, cstr, date_diff, flt, getTraceback, getdate, now, nowdate, sendmail, validate_email_add
 
-in_transaction = webnotes.conn.in_transaction
-convert_to_lists = webnotes.conn.convert_to_lists
+from webnotes.utils import comma_and
+from webnotes import _
+from webnotes.model import db_exists
+from webnotes.model.doc import make_autoname
+from webnotes.model.wrapper import getlist, copy_doclist
+from webnotes.model.code import get_obj
+from webnotes import session, form, msgprint
+
 session = webnotes.session
 
-# -----------------------------------------------------------------------------------------
+month_map = {'Monthly': 1, 'Quarterly': 3, 'Half-yearly': 6, 'Yearly': 12}
+
 
 from utilities.transaction_base import TransactionBase
 
@@ -40,10 +41,92 @@ class DocType(TransactionBase):
 		self.tname = 'Sales Invoice Item'
 		self.fname = 'entries'
 
-
 	def autoname(self):
 		self.doc.name = make_autoname(self.doc.naming_series+ '.#####')
+		
+	def validate(self):
+		self.so_dn_required()
+		self.validate_proj_cust()
+		sales_com_obj = get_obj('Sales Common')
+		sales_com_obj.check_stop_sales_order(self)
+		sales_com_obj.check_active_sales_items(self)
+		sales_com_obj.check_conversion_rate(self)
+		sales_com_obj.validate_max_discount(self, 'entries')	 #verify whether rate is not greater than tolerance
+		sales_com_obj.get_allocated_sum(self)	# this is to verify that the allocated % of sales persons is 100%
+		sales_com_obj.validate_fiscal_year(self.doc.fiscal_year,self.doc.posting_date,'Posting Date')
+		self.validate_customer()
+		self.validate_customer_account()
+		self.validate_debit_acc()
+		self.validate_fixed_asset_account()
+		self.add_remarks()
+		if cint(self.doc.is_pos):
+			self.validate_pos()
+			self.validate_write_off_account()
+			if cint(self.doc.update_stock):
+				sl = get_obj('Stock Ledger')
+				sl.validate_serial_no(self, 'entries')
+				sl.validate_serial_no(self, 'packing_details')
+				self.validate_item_code()
+				self.update_current_stock()
+				self.validate_delivery_note()
+		self.set_in_words()
+		if not self.doc.is_opening:
+			self.doc.is_opening = 'No'
+		self.set_aging_date()
+		self.clear_advances()
+		self.set_against_income_account()
+		self.validate_c_form()
+		self.validate_recurring_invoice()
+		
+	def on_submit(self):
+		if cint(self.doc.is_pos) == 1:
+			if cint(self.doc.update_stock) == 1:
+				sl_obj = get_obj("Stock Ledger")
+				sl_obj.validate_serial_no_warehouse(self, 'entries')
+				sl_obj.validate_serial_no_warehouse(self, 'packing_details')
+				
+				sl_obj.update_serial_record(self, 'entries', is_submit = 1, is_incoming = 0)
+				sl_obj.update_serial_record(self, 'packing_details', is_submit = 1, is_incoming = 0)
+				
+				self.update_stock_ledger(update_stock=1)
+		else:
+			# Check for Approving Authority
+			if not self.doc.recurring_id:
+				get_obj('Authorization Control').validate_approving_authority(self.doc.doctype, self.doc.company, self.doc.grand_total, self)
 
+		self.check_prev_docstatus()
+		get_obj("Sales Common").update_prevdoc_detail(1,self)
+		
+		# this sequence because outstanding may get -ve		
+		self.make_gl_entries()
+
+		if not cint(self.doc.is_pos) == 1:
+			self.update_against_document_in_jv()
+
+		self.update_c_form()
+		
+		self.convert_to_recurring()
+
+
+	def on_cancel(self):
+		if cint(self.doc.is_pos) == 1:
+			if cint(self.doc.update_stock) == 1:
+				sl = get_obj('Stock Ledger')
+				sl.update_serial_record(self, 'entries', is_submit = 0, is_incoming = 0)
+				sl.update_serial_record(self, 'packing_details', is_submit = 0, is_incoming = 0)
+				
+				self.update_stock_ledger(update_stock = -1)
+		
+		sales_com_obj = get_obj(dt = 'Sales Common')
+		sales_com_obj.check_stop_sales_order(self)
+		self.check_next_docstatus()
+		sales_com_obj.update_prevdoc_detail(0, self)
+
+		self.make_gl_entries(is_cancel=1)
+
+	def on_update_after_submit(self):
+		self.validate_recurring_invoice()
+		self.convert_to_recurring()
 
 	def set_pos_fields(self):
 		"""Set retail related fields from pos settings"""
@@ -428,40 +511,6 @@ class DocType(TransactionBase):
 			d.projected_qty = bin and flt(bin[0]['projected_qty']) or 0
 	 
 	
-	def validate(self):
-		self.so_dn_required()
-		self.validate_proj_cust()
-		sales_com_obj = get_obj('Sales Common')
-		sales_com_obj.check_stop_sales_order(self)
-		sales_com_obj.check_active_sales_items(self)
-		sales_com_obj.check_conversion_rate(self)
-		sales_com_obj.validate_max_discount(self, 'entries')	 #verify whether rate is not greater than tolerance
-		sales_com_obj.get_allocated_sum(self)	# this is to verify that the allocated % of sales persons is 100%
-		sales_com_obj.validate_fiscal_year(self.doc.fiscal_year,self.doc.posting_date,'Posting Date')
-		self.validate_customer()
-		self.validate_customer_account()
-		self.validate_debit_acc()
-		self.validate_fixed_asset_account()
-		self.add_remarks()
-		if cint(self.doc.is_pos):
-			self.validate_pos()
-			self.validate_write_off_account()
-			if cint(self.doc.update_stock):
-				sl = get_obj('Stock Ledger')
-				sl.validate_serial_no(self, 'entries')
-				sl.validate_serial_no(self, 'packing_details')
-				self.validate_item_code()
-				self.update_current_stock()
-				self.validate_delivery_note()
-		self.set_in_words()
-		if not self.doc.is_opening:
-			self.doc.is_opening = 'No'
-		self.set_aging_date()
-		self.clear_advances()
-		self.set_against_income_account()
-		self.validate_c_form()
-
-
 	def get_warehouse(self):
 		w = webnotes.conn.sql("select warehouse from `tabPOS Setting` where ifnull(user,'') = '%s' and company = '%s'" % (session['user'], self.doc.company))
 		w = w and w[0][0] or ''
@@ -598,114 +647,255 @@ class DocType(TransactionBase):
 		if submit_jv:
 			msgprint("Journal Voucher : " + cstr(submit_jv[0][0]) + " has been created against " + cstr(self.doc.doctype) + ". So " + cstr(self.doc.doctype) + " cannot be Cancelled.")
 			raise Exception, "Validation Error."
-
-
-	def on_submit(self):
-		if cint(self.doc.is_pos) == 1:
-			if cint(self.doc.update_stock) == 1:
-				sl_obj = get_obj("Stock Ledger")
-				sl_obj.validate_serial_no_warehouse(self, 'entries')
-				sl_obj.validate_serial_no_warehouse(self, 'packing_details')
-				
-				sl_obj.update_serial_record(self, 'entries', is_submit = 1, is_incoming = 0)
-				sl_obj.update_serial_record(self, 'packing_details', is_submit = 1, is_incoming = 0)
-				
-				self.update_stock_ledger(update_stock=1)
-		else:
-			# Check for Approving Authority
+	
+	@property
+	def meta(self):
+		if not hasattr(self, "_meta"):
+			self._meta = webnotes.get_doctype(self.doc.doctype)
+		return self._meta
+	
+	def validate_recurring_invoice(self):
+		if self.doc.convert_into_recurring_invoice:
+			self.validate_notification_email_id()
+		
+			if not self.doc.recurring_type:
+				msgprint(_("Please select: ") + self.meta.get_label("recurring_type"),
+				raise_exception=1)
+		
+			elif not (self.doc.invoice_period_from_date and \
+					self.doc.invoice_period_to_date):
+				msgprint(comma_and([self.meta.get_label("invoice_period_from_date"),
+					self.meta.get_label("invoice_period_to_date")])
+					+ _(": Mandatory for a Recurring Invoice."),
+					raise_exception=True)
+	
+	def convert_to_recurring(self):
+		if self.doc.convert_into_recurring_invoice:
 			if not self.doc.recurring_id:
-				get_obj('Authorization Control').validate_approving_authority(self.doc.doctype, self.doc.company, self.doc.grand_total, self)
+				webnotes.conn.set(self.doc, "recurring_id",
+					make_autoname("RECINV/.#####"))
+			
+			self.set_next_date()
 
-		self.check_prev_docstatus()
-		get_obj("Sales Common").update_prevdoc_detail(1,self)
-		
-		# this sequence because outstanding may get -ve		
-		self.make_gl_entries()
-
-		if not cint(self.doc.is_pos) == 1:
-			self.update_against_document_in_jv()
-
-		self.update_c_form()
-
-
-	def on_cancel(self):
-		if cint(self.doc.is_pos) == 1:
-			if cint(self.doc.update_stock) == 1:
-				sl = get_obj('Stock Ledger')
-				sl.update_serial_record(self, 'entries', is_submit = 0, is_incoming = 0)
-				sl.update_serial_record(self, 'packing_details', is_submit = 0, is_incoming = 0)
-				
-				self.update_stock_ledger(update_stock = -1)
-		
-		sales_com_obj = get_obj(dt = 'Sales Common')
-		sales_com_obj.check_stop_sales_order(self)
-		self.check_next_docstatus()
-		sales_com_obj.update_prevdoc_detail(0, self)
-
-		self.make_gl_entries(is_cancel=1)
-
-	def set_default_recurring_values(self):
-		from webnotes.utils import cstr
-
-		owner_email = self.doc.owner
-		if owner_email.lower() == 'administrator':
-			owner_email = cstr(webnotes.conn.get_value("Profile", "Administrator", "email"))
-		
-		ret = {
-			'repeat_on_day_of_month' : getdate(self.doc.posting_date).day,
-			'notification_email_address' : ', '.join([owner_email, cstr(self.doc.contact_email)]),
-		}
-		return ret
-		
+		elif self.doc.recurring_id:
+			webnotes.conn.sql("""update `tabSales Invoice`
+				set convert_into_recurring_invoice = 0
+				where recurring_id = %s""", (self.doc.recurring_id,))
+			
 	def validate_notification_email_id(self):
 		if self.doc.notification_email_address:
+			email_list = filter(None, [cstr(email).strip() for email in
+				self.doc.notification_email_address.replace("\n", "").split(",")])
+			
 			from webnotes.utils import validate_email_add
-			for add in self.doc.notification_email_address.replace('\n', '').replace(' ', '').split(","):
-				if add and not validate_email_add(add):
-					msgprint("%s is not a valid email address" % add, raise_exception=1)
+			for email in email_list:
+				if not validate_email_add(email):
+					msgprint(self.meta.get_label("notification_email_address") \
+						+ " - " + _("Invalid Email Address") + ": \"%s\"" % email,
+						raise_exception=1)
+					
 		else:
 			msgprint("Notification Email Addresses not specified for recurring invoice",
 				raise_exception=1)
-		
-		
-	def on_update_after_submit(self):
-		self.convert_into_recurring()
-		
-		
-	def convert_into_recurring(self):
-		if self.doc.convert_into_recurring_invoice:
-			self.validate_notification_email_id()
-			
-			if not self.doc.recurring_type:
-				msgprint("Please select recurring type", raise_exception=1)
-			elif not self.doc.invoice_period_from_date or not self.doc.invoice_period_to_date:
-				msgprint("Invoice period from date and to date is mandatory for recurring invoice", raise_exception=1)
-			self.set_next_date()
-			if not self.doc.recurring_id:
-				webnotes.conn.set(self.doc, 'recurring_id', make_autoname('RECINV/.#####'))
-		elif self.doc.recurring_id:
-			webnotes.conn.sql("""update `tabSales Invoice` set convert_into_recurring_invoice = 0 where recurring_id = %s""", self.doc.recurring_id)
-
+				
 	def set_next_date(self):
 		""" Set next date on which auto invoice will be created"""
-
 		if not self.doc.repeat_on_day_of_month:
-			msgprint("""Please enter 'Repeat on Day of Month' field value. \nThe day of the month on which auto invoice 
-						will be generated e.g. 05, 28 etc.""", raise_exception=1)
-
-		import datetime
-		mcount = {'Monthly': 1, 'Quarterly': 3, 'Half-yearly': 6, 'Yearly': 12}
-		m = getdate(self.doc.posting_date).month + mcount[self.doc.recurring_type]
-		y = getdate(self.doc.posting_date).year
-		if m > 12:
-			m, y = m-12, y+1
-		try:
-			next_date = datetime.date(y, m, cint(self.doc.repeat_on_day_of_month))
-		except:
-			import calendar
-			last_day = calendar.monthrange(y, m)[1]
-			next_date = datetime.date(y, m, last_day)
-		next_date = next_date.strftime("%Y-%m-%d")
-
+			msgprint("""Please enter 'Repeat on Day of Month' field value. 
+				The day of the month on which auto invoice 
+				will be generated e.g. 05, 28 etc.""", raise_exception=1)
+		
+		next_date = get_next_date(self.doc.posting_date,
+			month_map[self.doc.recurring_type], cint(self.doc.repeat_on_day_of_month))
 		webnotes.conn.set(self.doc, 'next_date', next_date)
+	
+def get_next_date(dt, mcount, day=None):
+	import datetime
+	month = getdate(dt).month + mcount
+	year = getdate(dt).year
+	if not day:
+		day = getdate(dt).day
+	if month > 12:
+		month, year = m-12, y+1
+	try:
+		next_month_date = datetime.date(year, month, day)
+	except:
+		import calendar
+		last_day = calendar.monthrange(year, month)[1]
+		next_month_date = datetime.date(year, month, last_day)
+	return next_month_date.strftime("%Y-%m-%d")
+
+def manage_recurring_invoices():
+	""" 
+		Create recurring invoices on specific date by copying the original one
+		and notify the concerned people
+	"""
+	recurring_invoices = webnotes.conn.sql("""select name, recurring_id
+		from `tabSales Invoice` where ifnull(convert_into_recurring_invoice, 0)=1
+		and docstatus=1 and next_date=%s
+		and next_date <= ifnull(end_date, '2199-12-31')""", nowdate())
+	
+	exception_list = []
+	for ref_invoice, recurring_id in recurring_invoices:
+		if not webnotes.conn.sql("""select name from `tabSales Invoice`
+				where posting_date=%s and recurring_id=%s and docstatus=1""",
+				(nowdate(), recurring_id)):
+			try:
+				ref_wrapper = webnotes.model_wrapper('Sales Invoice', ref_invoice)
+				new_invoice_wrapper = make_new_invoice(ref_wrapper)
+				send_notification(new_invoice_wrapper)
+				webnotes.conn.commit()
+			except Exception, e:
+				webnotes.conn.rollback()
+
+				webnotes.conn.begin()
+				webnotes.conn.sql("update `tabSales Invoice` set \
+					convert_into_recurring_invoice = 0 where name = %s", ref_invoice)
+				notify_errors(ref_invoice, ref_wrapper.doc.owner)
+				webnotes.conn.commit()
+
+				exception_list.append(webnotes.getTraceback())
+			finally:
+				webnotes.conn.begin()
+			
+	if exception_list:
+		exception_message = "\n\n".join([cstr(d) for d in exception_list])
+		raise Exception, exception_message
+
+def make_new_invoice(ref_wrapper):
+	from webnotes.model.wrapper import clone
+	new_invoice = clone(ref_wrapper)
+	
+	mcount = month_map[ref_wrapper.doc.recurring_type]
+	
+	today = nowdate()
+	
+	new_invoice.doc.fields.update({
+		"posting_date": today,
+		"aging_date": today,
+		
+		"due_date": add_days(today, cint(date_diff(ref_wrapper.doc.due_date,
+			ref_wrapper.doc.posting_date))),
+			
+		"invoice_period_from_date": \
+			get_next_date(ref_wrapper.doc.invoice_period_from_date, mcount),
+			
+		"invoice_period_to_date": \
+			get_next_date(ref_wrapper.doc.invoice_period_to_date, mcount),
+		
+		"owner": ref_wrapper.doc.owner,
+	})
+	
+	new_invoice.submit()
+	
+	return new_invoice
+	
+def send_notification(new_rv):
+	"""Notify concerned persons about recurring invoice generation"""
+	subject = "Invoice : " + new_rv.doc.name
+
+	com = new_rv.doc.company   # webnotes.conn.get_value('Control Panel', '', 'letter_head')
+
+	hd = '''<div><h2>%s</h2></div>
+			<div><h3>Invoice: %s</h3></div>
+			<table cellspacing= "5" cellpadding="5"  width = "100%%">
+				<tr>
+					<td width = "50%%"><b>Customer</b><br>%s<br>%s</td>
+					<td width = "50%%">Invoice Date	   : %s<br>Invoice Period : %s to %s <br>Due Date	   : %s</td>
+				</tr>
+			</table>
+		''' % (com, new_rv.doc.name, new_rv.doc.customer_name, new_rv.doc.address_display, getdate(new_rv.doc.posting_date).strftime("%d-%m-%Y"), \
+		getdate(new_rv.doc.invoice_period_from_date).strftime("%d-%m-%Y"), getdate(new_rv.doc.invoice_period_to_date).strftime("%d-%m-%Y"),\
+		getdate(new_rv.doc.due_date).strftime("%d-%m-%Y"))
+	
+	
+	tbl = '''<table border="1px solid #CCC" width="100%%" cellpadding="0px" cellspacing="0px">
+				<tr>
+					<td width = "15%%" bgcolor="#CCC" align="left"><b>Item</b></td>
+					<td width = "40%%" bgcolor="#CCC" align="left"><b>Description</b></td>
+					<td width = "15%%" bgcolor="#CCC" align="center"><b>Qty</b></td>
+					<td width = "15%%" bgcolor="#CCC" align="center"><b>Rate</b></td>
+					<td width = "15%%" bgcolor="#CCC" align="center"><b>Amount</b></td>
+				</tr>
+		'''
+	for d in getlist(new_rv.doclist, 'entries'):
+		tbl += '<tr><td>' + d.item_code +'</td><td>' + d.description+'</td><td>' + cstr(d.qty) +'</td><td>' + cstr(d.basic_rate) +'</td><td>' + cstr(d.amount) +'</td></tr>'
+	tbl += '</table>'
+
+	totals ='''<table cellspacing= "5" cellpadding="5"  width = "100%%">
+					<tr>
+						<td width = "50%%"></td>
+						<td width = "50%%">
+							<table width = "100%%">
+								<tr>
+									<td width = "50%%">Net Total: </td><td>%s </td>
+								</tr><tr>
+									<td width = "50%%">Total Tax: </td><td>%s </td>
+								</tr><tr>
+									<td width = "50%%">Grand Total: </td><td>%s</td>
+								</tr><tr>
+									<td width = "50%%">In Words: </td><td>%s</td>
+								</tr>
+							</table>
+						</td>
+					</tr>
+					<tr><td>Terms and Conditions:</td></tr>
+					<tr><td>%s</td></tr>
+				</table>
+			''' % (new_rv.doc.net_total,
+			new_rv.doc.other_charges_total,new_rv.doc.grand_total,
+			new_rv.doc.in_words,new_rv.doc.terms)
+
+
+	msg = hd + tbl + totals
+	
+	sendmail(new_rv.doc.notification_email_address, subject=subject, msg = msg)
+		
+def notify_errors(inv, owner):
+	import webnotes
+	import website
+		
+	exception_msg = """
+		Dear User,
+
+		An error occured while creating recurring invoice from %s (at %s).
+
+		May be there are some invalid email ids mentioned in the invoice.
+
+		To stop sending repetitive error notifications from the system, we have unchecked
+		"Convert into Recurring" field in the invoice %s.
+
+
+		Please correct the invoice and make the invoice recurring again. 
+
+		<b>It is necessary to take this action today itself for the above mentioned recurring invoice \
+		to be generated. If delayed, you will have to manually change the "Repeat on Day of Month" field \
+		of this invoice for generating the recurring invoice.</b>
+
+		Regards,
+		Administrator
+		
+	""" % (inv, website.get_site_address(), inv)
+	subj = "[Urgent] Error while creating recurring invoice from %s" % inv
+
+	from webnotes.profile import get_system_managers
+	recipients = get_system_managers()
+	owner_email = webnotes.conn.get_value("Profile", owner, "email")
+	if not owner_email in recipients:
+		recipients.append(owner_email)
+
+	assign_task_to_owner(inv, exception_msg, recipients)
+	sendmail(recipients, subject=subj, msg = exception_msg)
+
+def assign_task_to_owner(inv, msg, users):
+	for d in users:
+		from webnotes.widgets.form import assign_to
+		args = {
+			'assign_to' 	:	d,
+			'doctype'		:	'Sales Invoice',
+			'name'			:	inv,
+			'description'	:	msg,
+			'priority'		:	'Urgent'
+		}
+		assign_to.add(args)
 

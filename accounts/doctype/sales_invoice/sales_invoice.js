@@ -25,7 +25,6 @@ cur_frm.pformat.print_heading = 'Invoice';
 wn.require('app/selling/doctype/sales_common/sales_common.js');
 wn.require('app/accounts/doctype/sales_taxes_and_charges_master/sales_taxes_and_charges_master.js');
 wn.require('app/utilities/doctype/sms_control/sms_control.js');
-wn.require('app/setup/doctype/notification_control/notification_control.js');
 
 // On Load
 // -------
@@ -94,8 +93,6 @@ cur_frm.cscript.hide_fields = function(doc, cdt, cdn) {
 		for(f in item_flds_normal) cur_frm.fields_dict['entries'].grid.set_column_disp(item_flds_normal[f], true);
 		for(f in item_flds_pos) cur_frm.fields_dict['entries'].grid.set_column_disp(item_flds_pos[f], false);
 	}
-	if (doc.docstatus==1) unhide_field('recurring_invoice');
-	else hide_field('recurring_invoice');
 
 	if(doc.customer) unhide_field('contact_section');
 	else hide_field('contact_section');
@@ -499,25 +496,34 @@ cur_frm.cscript.view_ledger_entry = function(){
 	wn.set_route('Report', 'GL Entry', 'General Ledger', 'Voucher No='+cur_frm.doc.name);
 }
 
-// Default values for recurring invoices
-cur_frm.cscript.convert_into_recurring_invoice = function(doc, dt, dn) {
-	if (doc.convert_into_recurring_invoice)
-		get_server_fields('set_default_recurring_values','','',doc, dt, dn, 0);
+cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
+	if(cint(wn.boot.notification_settings.sales_invoice)) {
+		cur_frm.email_doc(wn.boot.notification_settings.sales_invoice);
+	}
 }
 
-cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
-	var args = {
-		type: 'Sales Invoice',
-		doctype: 'Sales Invoice'
+cur_frm.cscript.convert_into_recurring_invoice = function(doc, dt, dn) {
+	// set default values for recurring invoices
+	if(doc.convert_into_recurring_invoice) {
+		var owner_email = doc.owner=="Administrator"
+			? wn.user_info("Administrator").email
+			: doc.owner;
+		
+		doc.notification_email_address = $.map([cstr(owner_email),
+			cstr(doc.contact_email)], function(v) { return v || null; }).join(", ");
+		doc.repeat_on_day_of_month = wn.datetime.str_to_obj(doc.posting_date).getDate();
 	}
-	cur_frm.cscript.notify(doc, args);
+		
+	refresh_many(["notification_email_address", "repeat_on_day_of_month"]);
 }
 
 cur_frm.cscript.invoice_period_from_date = function(doc, dt, dn) {
+	// set invoice_period_to_date
 	if(doc.invoice_period_from_date) {
-		var recurring_type_map = { 'Monthly': 1, 'Quarterly': 3, 'Half-yearly': 6, 'Yearly': 12 };
+		var recurring_type_map = {'Monthly': 1, 'Quarterly': 3, 'Half-yearly': 6,
+			'Yearly': 12};
 
-		var months = $(recurring_type_map).attr(doc.recurring_type);
+		var months = recurring_type_map[doc.recurring_type];
 		if(months) {
 			var to_date = wn.datetime.add_months(doc.invoice_period_from_date,
 				months);

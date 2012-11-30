@@ -17,8 +17,8 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import cint, cstr
-from webnotes import msgprint, errprint
+from webnotes.utils import cstr
+from webnotes import msgprint
 import webnotes.model.doctype
 
 sql = webnotes.conn.sql
@@ -90,8 +90,7 @@ class DocType:
 
 		self.doc.set_options = "\n".join(options)
 
-		from webnotes.utils.cache import CacheItem
-		CacheItem(doctype).clear()
+		webnotes.clear_cache(doctype=doctype)
 			
 	def check_duplicate(self):
 		from core.doctype.doctype.doctype import DocType

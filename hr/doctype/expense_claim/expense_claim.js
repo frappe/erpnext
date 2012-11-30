@@ -100,8 +100,6 @@ cur_frm.cscript.sanctioned_amount = function(doc,cdt,cdn){
 	cur_frm.cscript.calculate_total(doc,cdt,cdn);
 }
 
-wn.require('app/setup/doctype/notification_control/notification_control.js');
-
 cur_frm.cscript.approve = function(doc,cdt,cdn){
 	cur_frm.cscript.calculate_total(doc,cdt,cdn);
 
@@ -248,12 +246,9 @@ cur_frm.cscript.update_voucher = function(doc){
 }
 
 cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
-	var args = {
-		type: 'Expense Claim',
-		doctype: 'Expense Claim',
-		send_to: doc.exp_approver
+	if(cint(wn.boot.notification_settings.expense_claim)) {
+		cur_frm.email_doc(wn.boot.notification_settings.expense_claim);
 	}
-	cur_frm.cscript.notify(doc, args);
 }
 
 cur_frm.fields_dict.employee.get_query = erpnext.utils.employee_query;

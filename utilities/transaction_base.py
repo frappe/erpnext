@@ -16,11 +16,9 @@
 
 from __future__ import unicode_literals
 import webnotes
-from webnotes.utils import load_json, cint, cstr, flt, get_defaults
-from webnotes.model.doc import Document, addchild, getchildren
-from webnotes.model.wrapper import getlist, copy_doclist
-from webnotes.model.code import get_obj
-from webnotes import msgprint
+from webnotes.utils import load_json, cstr, flt, get_defaults
+from webnotes.model.doc import addchild
+from webnotes.model.wrapper import copy_doclist
 
 class TransactionBase:
 
@@ -238,10 +236,12 @@ class TransactionBase:
 		return dcc	
 	
 
-	def get_formatted_message(self, args):
-		""" get formatted message for auto notification"""
-		return get_obj('Notification Control').get_formatted_message(args)
-
+	def load_notification_message(self):
+		dt = self.doc.doctype.lower().replace(" ", "_")
+		if int(webnotes.conn.get_value("Notification Control", None, dt) or 0):
+			self.doc.fields["__notification_message"] = \
+				webnotes.conn.get_value("Notification Control", None, dt + "_message")
+				
 	def add_communication_list(self):
 		# remove communications if present
 		self.doclist = webnotes.doclist(self.doclist).get({

@@ -14,24 +14,18 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# Please edit this list and import only required elements
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import add_days, add_months, add_years, cint, cstr, date_diff, default_fields, flt, fmt_money, formatdate, getTraceback, get_defaults, get_first_day, get_last_day, getdate, has_common, month_name, now, nowdate, replace_newlines, sendmail, set_default, str_esc_quote, user_format, validate_email_add
+from webnotes.utils import cstr, flt, getdate, now
 from webnotes.model import db_exists, delete_doc
-from webnotes.model.doc import Document, addchild, getchildren
+from webnotes.model.doc import Document, addchild
 from webnotes.model.wrapper import getlist, copy_doclist
-from webnotes.model.code import get_obj, get_server_obj, run_server_obj, updatedb, check_syntax
-from webnotes import session, form, msgprint, errprint
+from webnotes.model.code import get_obj
+from webnotes import msgprint
 
-set = webnotes.conn.set
 sql = webnotes.conn.sql
-get_value = webnotes.conn.get_value
-in_transaction = webnotes.conn.in_transaction
-convert_to_lists = webnotes.conn.convert_to_lists
 	
-# -----------------------------------------------------------------------------------------
 from utilities.transaction_base import TransactionBase
 
 class DocType(TransactionBase):
@@ -154,25 +148,13 @@ class DocType(TransactionBase):
 
 
 
-	def get_raw_materials(self, bom_no, fg_qty, consider_sa_items_as_rm):
+	def get_raw_materials(self, bom_no, fg_qty, use_multi_level_bom):
 		""" 
 			get all items from flat bom except 
 			child items of sub-contracted and sub assembly items 
 			and sub assembly items itself.
 		"""
-		if consider_sa_items_as_rm == 'Yes':
-			# Get all raw materials considering SA items as raw materials, 
-			# so no childs of SA items
-			fl_bom_sa_items = sql("""
-				select item_code, ifnull(sum(qty_consumed_per_unit), 0) * '%s', description, stock_uom 
-				from `tabBOM Item` 
-				where parent = '%s' and docstatus < 2 
-				group by item_code
-			""" % (fg_qty, bom_no))
-			
-			self.make_items_dict(fl_bom_sa_items)
-
-		else:
+		if use_multi_level_bom:
 			# get all raw materials with sub assembly childs					
 			fl_bom_sa_child_item = sql("""
 				select 
@@ -187,6 +169,17 @@ class DocType(TransactionBase):
 				group by item_code,stock_uom
 			""" , (fg_qty, bom_no))
 			self.make_items_dict(fl_bom_sa_child_item)
+		else:
+			# Get all raw materials considering multi level BOM, 
+			# if multi level bom consider childs of Sub-Assembly items
+			fl_bom_sa_items = sql("""
+				select item_code, ifnull(sum(qty_consumed_per_unit), 0) * '%s', description, stock_uom 
+				from `tabBOM Item` 
+				where parent = '%s' and docstatus < 2 
+				group by item_code
+			""" % (fg_qty, bom_no))
+			
+			self.make_items_dict(fl_bom_sa_items)
 
 		# Update only qty remaining to be issued for production
 		if self.doc.process == 'Material Transfer':
@@ -214,12 +207,8 @@ class DocType(TransactionBase):
 		if self.doc.bom_no:
 			if not self.doc.fg_completed_qty:
 				msgprint("Please enter FG Completed Qty", raise_exception=1)
-			if not self.doc.consider_sa_items_as_raw_materials:
-				msgprint("Please confirm whether you want to consider sub assembly item as raw materials", raise_exception=1)	
 
 
-	# get items 
-	#------------------
 	def get_items(self):
 		if self.doc.purpose == 'Production Order':
 			pro_obj = self.doc.production_order and get_obj('Production Order', self.doc.production_order) or ''	
@@ -227,14 +216,14 @@ class DocType(TransactionBase):
 
 			bom_no = pro_obj.doc.bom_no
 			fg_qty = (self.doc.process == 'Backflush') and flt(self.doc.fg_completed_qty) or flt(pro_obj.doc.qty)
-			consider_sa_items_as_rm = pro_obj.doc.consider_sa_items
+			use_multi_level_bom = pro_obj.doc.use_multi_level_bom
 		elif self.doc.purpose == 'Other':
 			self.validate_bom_no()
 			bom_no = self.doc.bom_no
 			fg_qty = self.doc.fg_completed_qty
-			consider_sa_items_as_rm = self.doc.consider_sa_items_as_raw_materials
+			use_multi_level_bom = self.doc.use_multi_level_bom
 			
-		self.get_raw_materials(bom_no, fg_qty, consider_sa_items_as_rm)
+		self.get_raw_materials(bom_no, fg_qty, use_multi_level_bom)
 		self.doclist = self.doc.clear_table(self.doclist, 'mtn_details', 1)
 
 		sw = (self.doc.process == 'Backflush') and cstr(pro_obj.doc.wip_warehouse) or ''

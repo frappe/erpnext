@@ -1,120 +1,75 @@
-# DocType, Employee External Work History
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-03-27 14:35:59',
-		'docstatus': 0,
-		'modified': '2012-03-27 14:35:59',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
-	},
-
-	# These values are common for all DocType
-	{
-		'colour': u'White:FFF',
-		'doctype': 'DocType',
-		'istable': 1,
-		'module': u'HR',
-		'name': '__common__',
-		'section_style': u'Simple',
-		'server_code_error': u' ',
-		'show_in_menu': 0,
-		'version': 3
-	},
-
-	# These values are common for all DocField
-	{
-		'doctype': u'DocField',
-		'name': '__common__',
-		'parent': u'Employee External Work History',
-		'parentfield': u'fields',
-		'parenttype': u'DocType',
-		'permlevel': 0
-	},
-
-	# These values are common for all DocPerm
-	{
-		'create': 1,
-		'doctype': u'DocPerm',
-		'name': '__common__',
-		'parent': u'Employee External Work History',
-		'parentfield': u'permissions',
-		'parenttype': u'DocType',
-		'permlevel': 0,
-		'read': 1,
-		'role': u'All',
-		'write': 1
-	},
-
-	# DocType, Employee External Work History
-	{
-		'doctype': 'DocType',
-		'name': u'Employee External Work History'
-	},
-
-	# DocPerm
-	{
-		'doctype': u'DocPerm'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'company_name',
-		'fieldtype': u'Data',
-		'label': u'Company',
-		'oldfieldname': u'company_name',
-		'oldfieldtype': u'Data'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'designation',
-		'fieldtype': u'Data',
-		'label': u'Designation',
-		'oldfieldname': u'designation',
-		'oldfieldtype': u'Data'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'salary',
-		'fieldtype': u'Currency',
-		'label': u'Salary',
-		'oldfieldname': u'salary',
-		'oldfieldtype': u'Currency'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'address',
-		'fieldtype': u'Small Text',
-		'label': u'Address',
-		'oldfieldname': u'address',
-		'oldfieldtype': u'Small Text'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'contact',
-		'fieldtype': u'Data',
-		'label': u'Contact',
-		'oldfieldname': u'contact',
-		'oldfieldtype': u'Data'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'total_experience',
-		'fieldtype': u'Data',
-		'label': u'Total Experience',
-		'oldfieldname': u'total_experience',
-		'oldfieldtype': u'Data'
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-07-03 13:29:41", 
+  "modified_by": "Administrator", 
+  "modified": "2012-11-30 11:57:58"
+ }, 
+ {
+  "istable": 1, 
+  "name": "__common__", 
+  "doctype": "DocType", 
+  "module": "HR"
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "Employee External Work History", 
+  "doctype": "DocField", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "parentfield": "fields"
+ }, 
+ {
+  "name": "Employee External Work History", 
+  "doctype": "DocType"
+ }, 
+ {
+  "oldfieldtype": "Data", 
+  "doctype": "DocField", 
+  "label": "Company", 
+  "oldfieldname": "company_name", 
+  "fieldname": "company_name", 
+  "fieldtype": "Data"
+ }, 
+ {
+  "oldfieldtype": "Data", 
+  "doctype": "DocField", 
+  "label": "Designation", 
+  "oldfieldname": "designation", 
+  "fieldname": "designation", 
+  "fieldtype": "Data"
+ }, 
+ {
+  "oldfieldtype": "Currency", 
+  "doctype": "DocField", 
+  "label": "Salary", 
+  "oldfieldname": "salary", 
+  "fieldname": "salary", 
+  "fieldtype": "Currency"
+ }, 
+ {
+  "oldfieldtype": "Small Text", 
+  "doctype": "DocField", 
+  "label": "Address", 
+  "oldfieldname": "address", 
+  "fieldname": "address", 
+  "fieldtype": "Small Text"
+ }, 
+ {
+  "oldfieldtype": "Data", 
+  "doctype": "DocField", 
+  "label": "Contact", 
+  "oldfieldname": "contact", 
+  "fieldname": "contact", 
+  "fieldtype": "Data"
+ }, 
+ {
+  "oldfieldtype": "Data", 
+  "doctype": "DocField", 
+  "label": "Total Experience", 
+  "oldfieldname": "total_experience", 
+  "fieldname": "total_experience", 
+  "fieldtype": "Data"
+ }
 ]

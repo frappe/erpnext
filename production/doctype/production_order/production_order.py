@@ -14,24 +14,18 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# Please edit this list and import only required elements
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import add_days, add_months, add_years, cint, cstr, date_diff, default_fields, flt, fmt_money, formatdate, getTraceback, get_defaults, get_first_day, get_last_day, getdate, has_common, month_name, now, nowdate, replace_newlines, sendmail, set_default, str_esc_quote, user_format, validate_email_add
+from webnotes.utils import cstr, flt, now, nowdate
 from webnotes.model import db_exists
-from webnotes.model.doc import Document, addchild, getchildren, make_autoname
-from webnotes.model.wrapper import getlist, copy_doclist
-from webnotes.model.code import get_obj, get_server_obj, run_server_obj, updatedb, check_syntax
-from webnotes import session, form, msgprint, errprint
+from webnotes.model.doc import make_autoname
+from webnotes.model.wrapper import copy_doclist
+from webnotes.model.code import get_obj
+from webnotes import msgprint
 
-set = webnotes.conn.set
 sql = webnotes.conn.sql
-get_value = webnotes.conn.get_value
-in_transaction = webnotes.conn.in_transaction
-convert_to_lists = webnotes.conn.convert_to_lists
 
-# -----------------------------------------------------------------------------------------
 	
 
 class DocType:
@@ -72,6 +66,14 @@ class DocType:
 				msgprint("""Incorrect BOM: %s entered. 
 					May be BOM not exists or inactive or not submitted 
 					or for some other item.""" % cstr(self.doc.bom_no), raise_exception=1)
+					
+		if self.doc.sales_order:
+			if not webnotes.conn.sql("""select name from `tabSales Order` 
+					where name=%s and docstatus = 1""", self.doc.sales_order):
+				msgprint("Sales Order: %s is not valid" % self.doc.sales_order, raise_exception=1)
+				
+			get_obj("Production Control").validate_production_order_against_so(
+				self.doc.production_item, self.doc.sales_order, self.doc.qty, self.doc.name)
 
 
 	def stop_unstop(self, status):

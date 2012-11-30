@@ -14,24 +14,18 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# Please edit this list and import only required elements
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import add_days, add_months, add_years, cint, cstr, date_diff, default_fields, flt, fmt_money, formatdate, getTraceback, get_defaults, get_first_day, get_last_day, getdate, has_common, month_name, now, nowdate, replace_newlines, sendmail, set_default, str_esc_quote, user_format, validate_email_add
+from webnotes.utils import cstr, flt, get_defaults, now, nowdate
 from webnotes.model import db_exists
-from webnotes.model.doc import Document, addchild, getchildren, make_autoname
-from webnotes.model.wrapper import getlist, copy_doclist
-from webnotes.model.code import get_obj, get_server_obj, run_server_obj, updatedb, check_syntax
-from webnotes import session, form, msgprint, errprint
+from webnotes.model.doc import Document
+from webnotes.model.wrapper import copy_doclist
+from webnotes.model.code import get_obj
+from webnotes import msgprint
 
-set = webnotes.conn.set
 sql = webnotes.conn.sql
-get_value = webnotes.conn.get_value
-in_transaction = webnotes.conn.in_transaction
-convert_to_lists = webnotes.conn.convert_to_lists
 	
-# -----------------------------------------------------------------------------------------
 
 	
 class DocType:
@@ -73,7 +67,7 @@ class DocType:
 
 
 	#	Raise Production Order
-	def create_production_order(self,company, pp_items):
+	def create_production_order(self, items):
 		"""Create production order. Called from Production Planning Tool"""
 					 
 		default_values = { 
@@ -82,15 +76,20 @@ class DocType:
 			'wip_warehouse'		: '',
 			'fg_warehouse'		: '',
 			'status'			: 'Draft',
-			'company'			: company,
-			'fiscal_year'		: get_defaults()['fiscal_year'] 
+			'fiscal_year'		: get_defaults()['fiscal_year']
 		}
 		pro_list = []
 
-		for d in pp_items:
+		for item_so in items:
+			if item_so[1]:
+				self.validate_production_order_against_so(
+					item_so[0], item_so[1], items[item_so].get("qty"))
+				
 			pro_doc = Document('Production Order')
-			for key in d.keys():
-				pro_doc.fields[key] = d[key]
+			pro_doc.production_item = item_so[0]
+			pro_doc.sales_order = item_so[1]
+			for key in items[item_so]:
+				pro_doc.fields[key] = items[item_so][key]
 
 			for key in default_values:
 				pro_doc.fields[key] = default_values[key]
@@ -100,7 +99,30 @@ class DocType:
 			
 		return pro_list
 
-
+	def validate_production_order_against_so(self, item, sales_order, qty, pro_order=None):
+		# already ordered qty
+		ordered_qty_against_so = webnotes.conn.sql("""select sum(qty) from `tabProduction Order`
+			where production_item = %s and sales_order = %s and name != %s""", 
+			(item, sales_order, cstr(pro_order)))[0][0]
+		# qty including current
+		total_ordered_qty_against_so = flt(ordered_qty_against_so) + flt(qty)
+		
+		# get qty from Sales Order Item table
+		so_item_qty = webnotes.conn.sql("""select sum(qty) from `tabSales Order Item` 
+			where parent = %s and item_code = %s""", (sales_order, item))[0][0]
+		# get qty from Packing Item table
+		dnpi_qty = webnotes.conn.sql("""select sum(qty) from `tabDelivery Note Packing Item` 
+			where parent = %s and parenttype = 'Sales Order' and item_code = %s""", 
+			(sales_order, item))[0][0]
+		# total qty in SO
+		so_qty = flt(so_item_qty) + flt(dnpi_qty)
+		
+		if total_ordered_qty_against_so > so_qty:
+			msgprint("""Total production order qty for item: %s against sales order: %s \
+			 	will be %s, which is greater than sales order qty (%s). 
+				Please reduce qty or remove the item.""" %
+				(item, sales_order, total_ordered_qty_against_so, so_qty), raise_exception=1)
+		
 	def update_bom(self, bom_no):
 		main_bom_list = self.traverse_bom_tree(bom_no, 1)
 		main_bom_list.reverse()

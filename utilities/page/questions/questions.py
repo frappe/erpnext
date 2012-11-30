@@ -17,7 +17,7 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import load_json, cint, cstr
+from webnotes.utils import load_json
 import json
 
 @webnotes.whitelist()

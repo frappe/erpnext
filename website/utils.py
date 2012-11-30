@@ -16,7 +16,6 @@
 
 from __future__ import unicode_literals
 import webnotes
-from webnotes.model.doc import Document
 
 def scrub_page_name(page_name):
 	if page_name.endswith('.html'):

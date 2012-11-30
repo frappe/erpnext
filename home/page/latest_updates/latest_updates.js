@@ -1,4 +1,12 @@
 erpnext.updates = [
+	["30th November 2012", [
+		"Auto Notifications: System will prompt user with pre-set message for auto-notification.",
+		"Employee: Users with role Employee will only be able to see their Employee Records.",
+		"Leave Application: Users with role Employee can now apply for leaves. HR User will be able to set Approval or Rejection.",
+	]],
+	["29th November 2012", [
+		"EMail: Form Emails are now via Communication (with Rich Text Etc.).",
+	]],
 	["28th November 2012", [
 		"Profile: Profile Settings (My Settings...) is now the Profile Form.",
 		"Financial Analytics: Show Net Profit/Loss",

@@ -16,7 +16,6 @@
 
 from __future__ import unicode_literals
 import webnotes
-from webnotes.utils import cint
 import home
 
 		
@@ -76,6 +75,8 @@ def boot_session(bootinfo):
 		import webnotes.model.doctype
 		bootinfo['docs'] += webnotes.model.doctype.get('Event')
 		bootinfo['docs'] += webnotes.model.doctype.get('Search Criteria')
+		bootinfo['notification_settings'] = webnotes.doc("Notification Control", 
+			"Notification Control").get_values()
 		
 		bootinfo['modules_list'] = webnotes.conn.get_global('modules_list')
 		

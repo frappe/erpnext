@@ -116,8 +116,8 @@ def create_file_list():
 		obj.make_file_list()
 		from webnotes.model.db_schema import updatedb
 		updatedb(obj.doc.name)
-		from webnotes.utils.cache import CacheItem
-		CacheItem(obj.doc.name).clear()
+
+		webnotes.clear_cache(doctype=obj.doc.name)
 
 def change_to_decimal():
 	print "in change to decimal"

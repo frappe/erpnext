@@ -14,24 +14,18 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# Please edit this list and import only required elements
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import add_days, add_months, add_years, cint, cstr, date_diff, default_fields, flt, fmt_money, formatdate, getTraceback, get_defaults, get_first_day, get_last_day, load_json
+from webnotes.utils import cstr, load_json
 from webnotes.model import db_exists
-from webnotes.model.doc import Document, addchild, getchildren
+from webnotes.model.doc import Document, addchild
 from webnotes.model.wrapper import getlist, copy_doclist
-from webnotes.model.code import get_obj, get_server_obj, run_server_obj, updatedb, check_syntax
-from webnotes import session, form, msgprint, errprint
+from webnotes.model.code import get_obj
+from webnotes import msgprint
 
-set = webnotes.conn.set
 sql = webnotes.conn.sql
-get_value = webnotes.conn.get_value
-in_transaction = webnotes.conn.in_transaction
-convert_to_lists = webnotes.conn.convert_to_lists
 	
-# -----------------------------------------------------------------------------------------
 
 from utilities.transaction_base import TransactionBase
 
@@ -41,7 +35,10 @@ class DocType(TransactionBase):
 		self.doclist = doclist
 		self.tname = 'Quotation Item'
 		self.fname = 'quotation_details'
- 
+
+	def onload(self):
+		self.add_communication_list()
+		 
 	# Pull Opportunity Details
 	# --------------------
 	def pull_enq_details(self):

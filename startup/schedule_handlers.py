@@ -39,7 +39,7 @@ def execute_daily():
 	run_fn(send)
 
 	# run recurring invoices
-	from accounts.doctype.gl_control.gl_control import manage_recurring_invoices
+	from accounts.doctype.sales_invoice.sales_invoice import manage_recurring_invoices
 	run_fn(manage_recurring_invoices)
 
 	# send bulk emails

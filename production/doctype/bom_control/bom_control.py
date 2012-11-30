@@ -14,24 +14,16 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# Please edit this list and import only required elements
 from __future__ import unicode_literals
 import webnotes
 
 from webnotes.utils import cint, flt
 from webnotes.model import db_exists
-from webnotes.model.doc import Document, addchild, getchildren, make_autoname
-from webnotes.model.wrapper import getlist, copy_doclist
-from webnotes.model.code import get_obj, get_server_obj, run_server_obj, updatedb, check_syntax
-from webnotes import session, form, msgprint, errprint
+from webnotes.model.wrapper import copy_doclist
+from webnotes.model.code import get_obj
 
-set = webnotes.conn.set
 sql = webnotes.conn.sql
-get_value = webnotes.conn.get_value
-in_transaction = webnotes.conn.in_transaction
-convert_to_lists = webnotes.conn.convert_to_lists
 
-# -----------------------------------------------------------------------------------------
 
 	
 class DocType:

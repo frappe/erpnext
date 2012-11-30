@@ -25,7 +25,6 @@ cur_frm.cscript.sales_team_fname = "sales_team";
 wn.require('app/selling/doctype/sales_common/sales_common.js');
 wn.require('app/accounts/doctype/sales_taxes_and_charges_master/sales_taxes_and_charges_master.js');
 wn.require('app/utilities/doctype/sms_control/sms_control.js');
-wn.require('app/setup/doctype/notification_control/notification_control.js');
 
 
 // ONLOAD
@@ -369,9 +368,7 @@ cur_frm.fields_dict['territory'].get_query = function(doc,cdt,cdn) {
 }
 
 cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
-	var args = {
-		type: 'Sales Order',
-		doctype: 'Sales Order'
+	if(cint(wn.boot.notification_settings.sales_order)) {
+		cur_frm.email_doc(wn.boot.notification_settings.sales_order);
 	}
-	cur_frm.cscript.notify(doc, args);
 }

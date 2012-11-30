@@ -185,9 +185,9 @@ erpnext.AccountsChart = Class.extend({
 		// tax rate if tax
 		$(fd.account_type.input).change(function() {
 			if($(this).val()=='Tax') {
-				$(fd.tax_rate.wrapper).toggle(true);				
+				$(fd.tax_rate.wrapper).toggle(true);
 			} else {
-				$(fd.tax_rate.wrapper).toggle(false);				
+				$(fd.tax_rate.wrapper).toggle(false);
 			}
 		})
 		
@@ -214,6 +214,7 @@ erpnext.AccountsChart = Class.extend({
 		// show
 		d.onshow = function() {
 			$(fd.group_or_ledger.input).change();
+			$(fd.account_type.input).change();
 		}
 		d.show();
 	},

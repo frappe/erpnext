@@ -18,15 +18,7 @@
 cur_frm.cscript.onload = function(doc, dt, dn) {
   if (!doc.posting_date) doc.transaction_date = dateutil.obj_to_str(new Date());
   if (!doc.status) doc.status = 'Draft';
-
   cfn_set_fields(doc, dt, dn);
-
-  if (doc.origin != "MRP"){
-    doc.origin = "Manual";
-    set_field_permlevel('production_item', 0);
-    set_field_permlevel('bom_no', 0);
-    set_field_permlevel('consider_sa_items',0);
-  }
 }
 
 // ================================== Refresh ==========================================
@@ -48,15 +40,10 @@ var cfn_set_fields = function(doc, dt, dn) {
   }
 }
 
-
-// ==================================================================================================
-
 cur_frm.cscript.production_item = function(doc, dt, dn) {
   get_server_fields('get_item_detail',doc.production_item,'',doc,dt,dn,1);
 }
 
-// Stop PRODUCTION ORDER
-//
 cur_frm.cscript['Stop Production Order'] = function() {
   var doc = cur_frm.doc;
   var check = confirm("Do you really want to stop production order: " + doc.name);
@@ -65,8 +52,6 @@ cur_frm.cscript['Stop Production Order'] = function() {
 	}
 }
 
-// Unstop PRODUCTION ORDER
-//
 cur_frm.cscript['Unstop Production Order'] = function() {
   var doc = cur_frm.doc;
   var check = confirm("Do really want to unstop production order: " + doc.name);
@@ -97,8 +82,6 @@ cur_frm.cscript.make_se = function(doc, process) {
   loaddoc('Stock Entry', se.name);
 }
 
-
-// ==================================================================================================
 cur_frm.fields_dict['production_item'].get_query = function(doc) {
    return 'SELECT DISTINCT `tabItem`.`name`, `tabItem`.`description` FROM `tabItem` WHERE (IFNULL(`tabItem`.`end_of_life`,"") = "" OR `tabItem`.`end_of_life` = "0000-00-00" OR `tabItem`.`end_of_life` > NOW()) AND `tabItem`.docstatus != 2 AND `tabItem`.is_pro_applicable = "Yes" AND `tabItem`.%(key)s LIKE "%s" ORDER BY `tabItem`.`name` LIMIT 50';
 }

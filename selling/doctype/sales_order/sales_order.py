@@ -14,24 +14,17 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# Please edit this list and import only required elements
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import add_days, add_months, add_years, cint, cstr, date_diff, default_fields, flt, fmt_money, formatdate, getTraceback, get_defaults, get_first_day, get_last_day, getdate, has_common, month_name, now, nowdate, replace_newlines, sendmail, set_default, str_esc_quote, user_format, validate_email_add
+from webnotes.utils import cstr, date_diff, flt, getdate
 from webnotes.model import db_exists
-from webnotes.model.doc import Document, addchild, getchildren
 from webnotes.model.wrapper import getlist, copy_doclist
-from webnotes.model.code import get_obj, get_server_obj, run_server_obj, updatedb, check_syntax
-from webnotes import session, form, msgprint, errprint
+from webnotes.model.code import get_obj
+from webnotes import msgprint
 
-set = webnotes.conn.set
 sql = webnotes.conn.sql
-get_value = webnotes.conn.get_value
-in_transaction = webnotes.conn.in_transaction
-convert_to_lists = webnotes.conn.convert_to_lists
 	
-# -----------------------------------------------------------------------------------------
 
 from utilities.transaction_base import TransactionBase
 
@@ -337,9 +330,7 @@ class DocType(TransactionBase):
 						
 						#update enquiry
 						self.update_enquiry_status(d.prevdoc_docname, 'Quotation Sent')
-	
-	# Submit
-	# -------
+
 	def on_submit(self):
 		self.check_prev_docstatus()		
 		self.update_stock_ledger(update_stock = 1)
@@ -347,17 +338,11 @@ class DocType(TransactionBase):
 		update_customer = sql("update `tabCustomer` set last_sales_order = '%s', modified = '%s' where name = '%s'" %(self.doc.name, self.doc.modified, self.doc.customer))
 		get_obj('Sales Common').check_credit(self,self.doc.grand_total)
 		
-		# Check for Approving Authority
 		get_obj('Authorization Control').validate_approving_authority(self.doc.doctype, self.doc.grand_total, self)
 		
-		#update prevdoc status
 		self.update_prevdoc_status('submit')
-		# set SO status
 		set(self.doc, 'status', 'Submitted')
 	
- 
-# ON CANCEL
-# ===============================================================================================
 	def on_cancel(self):
 		# Cannot cancel stopped SO
 		if self.doc.status == 'Stopped':
@@ -366,13 +351,10 @@ class DocType(TransactionBase):
 		self.check_nextdoc_docstatus()
 		self.update_stock_ledger(update_stock = -1)
 		
-		#update prevdoc status
 		self.update_prevdoc_status('cancel')
 		
-		# ::::::::: SET SO STATUS ::::::::::
 		set(self.doc, 'status', 'Cancelled')
 		
-	# CHECK NEXT DOCSTATUS
 	# does not allow to cancel document if DN or RV made against it is SUBMITTED 
 	# ----------------------------------------------------------------------------
 	def check_nextdoc_docstatus(self):
@@ -380,18 +362,28 @@ class DocType(TransactionBase):
 		submit_dn = sql("select t1.name from `tabDelivery Note` t1,`tabDelivery Note Item` t2 where t1.name = t2.parent and t2.prevdoc_docname = '%s' and t1.docstatus = 1" % (self.doc.name))
 		if submit_dn:
 			msgprint("Delivery Note : " + cstr(submit_dn[0][0]) + " has been submitted against " + cstr(self.doc.doctype) + ". Please cancel Delivery Note : " + cstr(submit_dn[0][0]) + " first and then cancel "+ cstr(self.doc.doctype), raise_exception = 1)
+			
 		# Checks Sales Invoice
 		submit_rv = sql("select t1.name from `tabSales Invoice` t1,`tabSales Invoice Item` t2 where t1.name = t2.parent and t2.sales_order = '%s' and t1.docstatus = 1" % (self.doc.name))
 		if submit_rv:
 			msgprint("Sales Invoice : " + cstr(submit_rv[0][0]) + " has already been submitted against " +cstr(self.doc.doctype)+ ". Please cancel Sales Invoice : "+ cstr(submit_rv[0][0]) + " first and then cancel "+ cstr(self.doc.doctype), raise_exception = 1)
+			
 		#check maintenance schedule
 		submit_ms = sql("select t1.name from `tabMaintenance Schedule` t1, `tabMaintenance Schedule Item` t2 where t2.parent=t1.name and t2.prevdoc_docname = %s and t1.docstatus = 1",self.doc.name)
 		if submit_ms:
 			msgprint("Maintenance Schedule : " + cstr(submit_ms[0][0]) + " has already been submitted against " +cstr(self.doc.doctype)+ ". Please cancel Maintenance Schedule : "+ cstr(submit_ms[0][0]) + " first and then cancel "+ cstr(self.doc.doctype), raise_exception = 1)
+			
+		# check maintenance visit
 		submit_mv = sql("select t1.name from `tabMaintenance Visit` t1, `tabMaintenance Visit Purpose` t2 where t2.parent=t1.name and t2.prevdoc_docname = %s and t1.docstatus = 1",self.doc.name)
 		if submit_mv:
 			msgprint("Maintenance Visit : " + cstr(submit_mv[0][0]) + " has already been submitted against " +cstr(self.doc.doctype)+ ". Please cancel Maintenance Visit : " + cstr(submit_mv[0][0]) + " first and then cancel "+ cstr(self.doc.doctype), raise_exception = 1)
-
+		
+		# check production order
+		pro_order = sql("""select name from `tabProduction Order` where sales_order = %s and docstatus = 1""", self.doc.name)
+		if pro_order:
+			msgprint("""Production Order: %s exists against this sales order. 
+				Please cancel production order first and then cancel this sales order""" % 
+				pro_order[0][0], raise_exception=1)
 
 	def check_modified_date(self):
 		mod_db = sql("select modified from `tabSales Order` where name = '%s'" % self.doc.name)

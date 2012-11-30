@@ -16,7 +16,7 @@
 
 # add expense head columns
 from __future__ import unicode_literals
-from webnotes.utils import flt, cint, cstr
+from webnotes.utils import flt
 
 expense_acc = [c[0] for c in sql("""select distinct expense_head 
 									from `tabPurchase Invoice Item` 
