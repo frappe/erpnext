@@ -94,8 +94,6 @@ cur_frm.cscript.hide_fields = function(doc, cdt, cdn) {
 		for(f in item_flds_normal) cur_frm.fields_dict['entries'].grid.set_column_disp(item_flds_normal[f], true);
 		for(f in item_flds_pos) cur_frm.fields_dict['entries'].grid.set_column_disp(item_flds_pos[f], false);
 	}
-	if (doc.docstatus==1) unhide_field('recurring_invoice');
-	else hide_field('recurring_invoice');
 
 	if(doc.customer) unhide_field('contact_section');
 	else hide_field('contact_section');
@@ -499,12 +497,6 @@ cur_frm.cscript.view_ledger_entry = function(){
 	wn.set_route('Report', 'GL Entry', 'General Ledger', 'Voucher No='+cur_frm.doc.name);
 }
 
-// Default values for recurring invoices
-cur_frm.cscript.convert_into_recurring_invoice = function(doc, dt, dn) {
-	if (doc.convert_into_recurring_invoice)
-		get_server_fields('set_default_recurring_values','','',doc, dt, dn, 0);
-}
-
 cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
 	var args = {
 		type: 'Sales Invoice',
@@ -513,11 +505,28 @@ cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
 	cur_frm.cscript.notify(doc, args);
 }
 
-cur_frm.cscript.invoice_period_from_date = function(doc, dt, dn) {
-	if(doc.invoice_period_from_date) {
-		var recurring_type_map = { 'Monthly': 1, 'Quarterly': 3, 'Half-yearly': 6, 'Yearly': 12 };
+cur_frm.cscript.convert_into_recurring_invoice = function(doc, dt, dn) {
+	// set default values for recurring invoices
+	if(doc.convert_into_recurring_invoice) {
+		var owner_email = doc.owner=="Administrator"
+			? wn.user_info("Administrator").email
+			: doc.owner;
+		
+		doc.notification_email_address = $.map([cstr(owner_email),
+			cstr(doc.contact_email)], function(v) { return v || null; }).join(", ");
+		doc.repeat_on_day_of_month = wn.datetime.str_to_obj(doc.posting_date).getDate();
+	}
+		
+	refresh_many(["notification_email_address", "repeat_on_day_of_month"]);
+}
 
-		var months = $(recurring_type_map).attr(doc.recurring_type);
+cur_frm.cscript.invoice_period_from_date = function(doc, dt, dn) {
+	// set invoice_period_to_date
+	if(doc.invoice_period_from_date) {
+		var recurring_type_map = {'Monthly': 1, 'Quarterly': 3, 'Half-yearly': 6,
+			'Yearly': 12};
+
+		var months = recurring_type_map[doc.recurring_type];
 		if(months) {
 			var to_date = wn.datetime.add_months(doc.invoice_period_from_date,
 				months);
