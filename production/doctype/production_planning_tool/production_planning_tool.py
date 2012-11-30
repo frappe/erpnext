@@ -81,7 +81,7 @@ class DocType:
 			from `tabSales Order` so, `tabSales Order Item` so_item
 			where so_item.parent = so.name
 				and so.docstatus = 1 and so.status != "Stopped"
-				and so.company = 'Web Notes Technologies Pvt Ltd'
+				and so.company = %s
 				and ifnull(so_item.qty, 0) > ifnull(so_item.delivered_qty, 0) %s
 				and (exists (select * from `tabItem` item where item.name=so_item.item_code
 					and (ifnull(item.is_pro_applicable, 'No') = 'Yes' 
@@ -91,7 +91,7 @@ class DocType:
 							and exists (select * from `tabItem` item where item.name=dnpi.item_code
 								and (ifnull(item.is_pro_applicable, 'No') = 'Yes' 
 									or ifnull(item.is_sub_contracted_item, 'No') = 'Yes') %s)))
-			""" % (so_filter, item_filter, item_filter), as_dict=1)
+			""" % ('%s', so_filter, item_filter, item_filter), self.doc.company, as_dict=1)
 		
 		self.add_so_in_table(open_so)
 
