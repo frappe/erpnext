@@ -41,7 +41,10 @@ class DocType(TransactionBase):
 		self.doclist = doclist
 		self.tname = 'Quotation Item'
 		self.fname = 'quotation_details'
- 
+
+	def onload(self):
+		self.add_communication_list()
+		 
 	# Pull Opportunity Details
 	# --------------------
 	def pull_enq_details(self):

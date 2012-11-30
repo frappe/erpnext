@@ -18,25 +18,22 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import add_days, add_months, add_years, cint, cstr, date_diff, default_fields, flt, fmt_money, formatdate, getTraceback, get_defaults, get_first_day, get_last_day, getdate, has_common, month_name, now, nowdate, replace_newlines, sendmail, set_default, str_esc_quote, user_format, validate_email_add
-from webnotes.model import db_exists
-from webnotes.model.doc import Document, addchild, getchildren, make_autoname
-from webnotes.model.wrapper import getlist, copy_doclist
-from webnotes.model.code import get_obj, get_server_obj, run_server_obj, updatedb, check_syntax
-from webnotes import session, form, msgprint, errprint
+from webnotes.utils import cint, cstr, get_defaults
+from webnotes.model.code import get_obj
+from webnotes import form, msgprint
 
-set = webnotes.conn.set
 sql = webnotes.conn.sql
-get_value = webnotes.conn.get_value
-in_transaction = webnotes.conn.in_transaction
 convert_to_lists = webnotes.conn.convert_to_lists
 
-# -----------------------------------------------------------------------------------------
+from utilities.transaction_base import TransactionBase
 
-class DocType:
+class DocType(TransactionBase):
 	def __init__(self, doc, doclist=[]):
 		self.doc = doc
 		self.doclist = doclist
+
+	def onload(self):
+		self.add_communication_list()
 
 	def autoname(self):
 		#get default naming conventional from control panel
@@ -59,22 +56,17 @@ class DocType:
 		else:
 			self.doc.name = make_autoname(self.doc.naming_series+'.#####')
 
-	# ----------------------------------------
-	# update credit days and limit in account
-	# ----------------------------------------
 	def update_credit_days_limit(self):
 		sql("update tabAccount set credit_days = '%s' where name = '%s'" % (self.doc.credit_days, self.doc.name + " - " + self.get_company_abbr()))
-
 
 	def on_update(self):
 		if not self.doc.naming_series:
 			self.doc.naming_series = ''
 
-	
 		# create address
 		addr_flds = [self.doc.address_line1, self.doc.address_line2, self.doc.city, self.doc.state, self.doc.country, self.doc.pincode]
 		address_line = "\n".join(filter(lambda x : (x!='' and x!=None),addr_flds))
-		set(self.doc,'address', address_line)
+		webnotes.conn.set(self.doc,'address', address_line)
 
 		# create account head
 		self.create_account_head()
@@ -82,12 +74,9 @@ class DocType:
 		# update credit days and limit in account
 		self.update_credit_days_limit()
 
-
 	def check_state(self):
 		return "\n" + "\n".join([i[0] for i in sql("select state_name from `tabState` where `tabState`.country='%s' " % self.doc.country)])
 	
-	# ACCOUNTS
-	# -------------------------------------------
 	def get_payables_group(self):
 		g = sql("select payables_group from tabCompany where name=%s", self.doc.company)
 		g = g and g[0][0] or ''
@@ -116,7 +105,6 @@ class DocType:
 		
 		return self.doc.supplier_type + " - " + abbr
 
-
 	def validate(self):
 		#validation for Naming Series mandatory field...
 		if get_defaults()['supp_master_name'] == 'Naming Series':
@@ -124,9 +112,6 @@ class DocType:
 				msgprint("Series is Mandatory.")
 				raise Exception
 	
-	
-	# create accont head - in tree under zone + territory
-	# -------------------------------------------------------
 	def create_account_head(self):
 		if self.doc.company :
 			abbr = self.get_company_abbr() 
@@ -141,7 +126,6 @@ class DocType:
 				
 		else : 
 			msgprint("Please select Company under which you want to create account head")
-			
 			
 	def get_contacts(self,nm):
 		if nm:
@@ -172,16 +156,12 @@ class DocType:
 			from webnotes.model import delete_doc
 			delete_doc('Account', acc[0][0])
 			
-			
 	def on_trash(self):
 		self.delete_supplier_address()
 		self.delete_supplier_contact()
 		self.delete_supplier_communication()
 		self.delete_supplier_account()
 		
-		
-	# on rename
-	# ---------
 	def on_rename(self,newdn,olddn):
 		#update supplier_name if not naming series
 		if get_defaults().get('supp_master_name') == 'Supplier Name':

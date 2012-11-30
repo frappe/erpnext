@@ -125,7 +125,6 @@ class DocType(TransactionBase):
 	def on_update_after_submit(self):
 		self.convert_into_recurring()
 
-
 	def set_pos_fields(self):
 		"""Set retail related fields from pos settings"""
 		pos = webnotes.conn.sql("select * from `tabPOS Setting` where ifnull(user,'') = '%s' and company = '%s'" % (session['user'], self.doc.company), as_dict=1)

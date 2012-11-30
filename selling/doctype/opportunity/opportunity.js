@@ -15,7 +15,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 wn.require('app/utilities/doctype/sms_control/sms_control.js');
-wn.require('app/support/doctype/communication/communication.js');
 
 cur_frm.cscript.refresh = function(doc, cdt, cdn){
 	erpnext.hide_naming_series();
@@ -26,7 +25,6 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn){
 		cur_frm.add_custom_button('Opportunity Lost', cur_frm.cscript['Declare Opportunity Lost']);
 		cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms);
 	}
-	if(!doc.__islocal) cur_frm.cscript.render_communication_list(doc, cdt, cdn);
 }
 
 // ONLOAD
@@ -48,7 +46,14 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 		}
 	} 
 
-	cur_frm.cscript.make_communication_body();
+	if(!doc.__islocal) {
+		cur_frm.communication_view = new wn.views.CommunicationList({
+			list: wn.model.get("Communication", {"opportunity": doc.name}),
+			parent: cur_frm.fields_dict.communication_html.wrapper,
+			doc: doc,
+			email: doc.contact_email
+		});
+	}
 	
 	if(cur_frm.fields_dict.contact_by.df.options.match(/^Profile/)) {
 		cur_frm.fields_dict.contact_by.get_query = erpnext.utils.profile_query;

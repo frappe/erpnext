@@ -24,8 +24,6 @@ cur_frm.cscript.sales_team_fname = "sales_team";
 wn.require('app/selling/doctype/sales_common/sales_common.js');
 wn.require('app/accounts/doctype/sales_taxes_and_charges_master/sales_taxes_and_charges_master.js');
 wn.require('app/utilities/doctype/sms_control/sms_control.js');
-wn.require('app/setup/doctype/notification_control/notification_control.js');
-wn.require('app/support/doctype/communication/communication.js');
 
 // ONLOAD
 // ===================================================================================
@@ -49,7 +47,7 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 			hide_field(['customer','customer_address','contact_person', 'customer_name','contact_display', 'customer_group']);
 		}
 	}
-	cur_frm.cscript.make_communication_body();
+	//cur_frm.cscript.make_communication_body();
 	
 	if(cur_frm.fields_dict.contact_by.df.options.match(/^Profile/)) {
 		cur_frm.fields_dict.contact_by.get_query = erpnext.utils.profile_query;
@@ -104,7 +102,14 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	if(doc.customer || doc.lead) $(cur_frm.fields_dict.contact_section.row.wrapper).toggle(true);
 	else $(cur_frm.fields_dict.contact_section.row.wrapper).toggle(false);
 	
-	if (!doc.__islocal) cur_frm.cscript.render_communication_list(doc, cdt, cdn);
+	if (!doc.__islocal) {
+		cur_frm.communication_view = new wn.views.CommunicationList({
+			list: wn.model.get("Communication", {"quotation": doc.name}),
+			parent: cur_frm.fields_dict.communication_html.wrapper,
+			doc: doc,
+			email: doc.contact_email
+		});		
+	}
 }
 
 
@@ -333,9 +338,7 @@ cur_frm.fields_dict['quotation_details'].grid.get_field('item_code').get_query= 
 }
 
 cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
-	var args = {
-		type: 'Quotation',
-		doctype: 'Quotation'
+	if(cint(wn.boot.notification_settings.quotation)) {
+		cur_frm.email_doc(wn.boot.notification_settings.quotation_message);
 	}
-	cur_frm.cscript.notify(doc, args);
 }

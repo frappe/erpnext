@@ -2,11 +2,12 @@
  {
   "owner": "Administrator", 
   "docstatus": 0, 
-  "creation": "2012-07-18 20:34:42", 
+  "creation": "2012-11-02 17:17:04", 
   "modified_by": "Administrator", 
-  "modified": "2012-07-18 17:41:49"
+  "modified": "2012-11-30 10:53:32"
  }, 
  {
+  "autoname": "naming_series:", 
   "name": "__common__", 
   "search_fields": "supplier_name,supplier_type", 
   "module": "Buying", 
@@ -31,6 +32,16 @@
  {
   "name": "Supplier", 
   "doctype": "DocType"
+ }, 
+ {
+  "description": "Note: You Can Manage Multiple Address or Contacts via Addresses & Contacts", 
+  "oldfieldtype": "Section Break", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Basic Info", 
+  "fieldname": "basic_info", 
+  "fieldtype": "Section Break", 
+  "permlevel": 0
  }, 
  {
   "no_copy": 1, 
@@ -124,7 +135,6 @@
  }, 
  {
   "doctype": "DocField", 
-  "label": "Communication History", 
   "fieldname": "communication_history", 
   "fieldtype": "Section Break", 
   "permlevel": 0
@@ -246,8 +256,7 @@
   "write": 1, 
   "role": "Purchase Master Manager", 
   "cancel": 1, 
-  "permlevel": 0, 
-  "match": ""
+  "permlevel": 0
  }, 
  {
   "amend": 0, 

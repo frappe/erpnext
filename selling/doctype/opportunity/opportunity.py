@@ -18,21 +18,15 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import add_days, add_months, add_years, cint, cstr, date_diff, default_fields, flt, fmt_money, formatdate, getTraceback, get_defaults, get_first_day, get_last_day, getdate, has_common, month_name, now, nowdate, replace_newlines, sendmail, set_default, str_esc_quote, user_format, validate_email_add
+from webnotes.utils import add_days, add_years, cint, cstr, date_diff, flt, getdate
 from webnotes.model import db_exists
-from webnotes.model.doc import Document, addchild, getchildren, make_autoname
-from webnotes.model.wrapper import getlist, copy_doclist
-from webnotes.model.code import get_obj, get_server_obj, run_server_obj, updatedb, check_syntax
-from webnotes import session, form, msgprint, errprint
+from webnotes.model.doc import Document, addchild, make_autoname
+from webnotes.model.wrapper import getlist
+from webnotes.model.code import get_obj
+from webnotes import form, msgprint
 
-set = webnotes.conn.set
 sql = webnotes.conn.sql
-get_value = webnotes.conn.get_value
-in_transaction = webnotes.conn.in_transaction
-convert_to_lists = webnotes.conn.convert_to_lists
 	
-# -----------------------------------------------------------------------------------------
-
 from utilities.transaction_base import TransactionBase
 
 class DocType(TransactionBase):
@@ -42,8 +36,8 @@ class DocType(TransactionBase):
 		self.fname = 'enq_details'
 		self.tname = 'Opportunity Item'
 
-	def autoname(self):
-		self.doc.name = make_autoname(self.doc.naming_series+'.####')
+	def onload(self):
+		self.add_communication_list()
 		
 	def get_item_details(self, item_code):
 		item = sql("""select item_name, stock_uom, description_html, description, item_group, brand
@@ -94,8 +88,8 @@ class DocType(TransactionBase):
 		if self.doc.contact_date and self.doc.contact_date_ref != self.doc.contact_date:
 			if self.doc.contact_by:
 				self.add_calendar_event()
-			set(self.doc, 'contact_date_ref',self.doc.contact_date)
-		set(self.doc, 'status', 'Draft')
+			webnotes.conn.set(self.doc, 'contact_date_ref',self.doc.contact_date)
+		webnotes.conn.set(self.doc, 'status', 'Draft')
 
 	def add_calendar_event(self):
 		desc=''
@@ -169,7 +163,7 @@ class DocType(TransactionBase):
 		self.validate_lead_cust()
 
 	def on_submit(self):
-		set(self.doc, 'status', 'Submitted')
+		webnotes.conn.set(self.doc, 'status', 'Submitted')
 	
 	def on_cancel(self):
 		chk = sql("select t1.name from `tabQuotation` t1, `tabQuotation Item` t2 where t2.parent = t1.name and t1.docstatus=1 and (t1.status!='Order Lost' and t1.status!='Cancelled') and t2.prevdoc_docname = %s",self.doc.name)
@@ -177,7 +171,7 @@ class DocType(TransactionBase):
 			msgprint("Quotation No. "+cstr(chk[0][0])+" is submitted against this Opportunity. Thus can not be cancelled.")
 			raise Exception
 		else:
-			set(self.doc, 'status', 'Cancelled')
+			webnotes.conn.set(self.doc, 'status', 'Cancelled')
 		
 	def declare_enquiry_lost(self,arg):
 		chk = sql("select t1.name from `tabQuotation` t1, `tabQuotation Item` t2 where t2.parent = t1.name and t1.docstatus=1 and (t1.status!='Order Lost' and t1.status!='Cancelled') and t2.prevdoc_docname = %s",self.doc.name)
@@ -185,6 +179,6 @@ class DocType(TransactionBase):
 			msgprint("Quotation No. "+cstr(chk[0][0])+" is submitted against this Opportunity. Thus 'Opportunity Lost' can not be declared against it.")
 			raise Exception
 		else:
-			set(self.doc, 'status', 'Opportunity Lost')
-			set(self.doc, 'order_lost_reason', arg)
+			webnotes.conn.set(self.doc, 'status', 'Opportunity Lost')
+			webnotes.conn.set(self.doc, 'order_lost_reason', arg)
 			return 'true'

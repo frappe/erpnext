@@ -37,6 +37,8 @@ class DocType:
 				self.doc.name = make_autoname(self.doc.naming_series + '.####')
 			elif ret[0][0]=='Employee Number':
 				self.doc.name = make_autoname(self.doc.employee_number)
+
+		self.doc.employee = self.doc.name
 				
 	def get_retirement_date(self):		
 		import datetime
@@ -51,6 +53,7 @@ class DocType:
 		return ret_sal_struct and ret_sal_struct[0][0] or ''
 
 	def validate(self):
+		self.doc.employee = self.doc.name
 		self.validate_date()
 		self.validate_email()
 		self.validate_name()

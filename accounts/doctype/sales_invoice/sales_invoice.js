@@ -25,7 +25,6 @@ cur_frm.pformat.print_heading = 'Invoice';
 wn.require('app/selling/doctype/sales_common/sales_common.js');
 wn.require('app/accounts/doctype/sales_taxes_and_charges_master/sales_taxes_and_charges_master.js');
 wn.require('app/utilities/doctype/sms_control/sms_control.js');
-wn.require('app/setup/doctype/notification_control/notification_control.js');
 
 // On Load
 // -------
@@ -498,11 +497,9 @@ cur_frm.cscript.view_ledger_entry = function(){
 }
 
 cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
-	var args = {
-		type: 'Sales Invoice',
-		doctype: 'Sales Invoice'
+	if(cint(wn.boot.notification_settings.sales_invoice)) {
+		cur_frm.email_doc(wn.boot.notification_settings.sales_invoice);
 	}
-	cur_frm.cscript.notify(doc, args);
 }
 
 cur_frm.cscript.convert_into_recurring_invoice = function(doc, dt, dn) {

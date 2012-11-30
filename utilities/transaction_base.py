@@ -238,10 +238,12 @@ class TransactionBase:
 		return dcc	
 	
 
-	def get_formatted_message(self, args):
-		""" get formatted message for auto notification"""
-		return get_obj('Notification Control').get_formatted_message(args)
-
+	def load_notification_message(self):
+		dt = self.doc.doctype.lower().replace(" ", "_")
+		if int(webnotes.conn.get_value("Notification Control", None, dt) or 0):
+			self.doc.fields["__notification_message"] = \
+				webnotes.conn.get_value("Notification Control", None, dt + "_message")
+				
 	def add_communication_list(self):
 		# remove communications if present
 		self.doclist = webnotes.doclist(self.doclist).get({
