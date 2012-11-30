@@ -19,6 +19,9 @@ from __future__ import unicode_literals
 import webnotes
 
 from webnotes.utils import add_days, add_months, add_years, cint, cstr,date_diff, default_fields, flt, fmt_money, formatdate,getTraceback, get_defaults, get_first_day, get_last_day, getdate, has_common,month_name, now, nowdate, replace_newlines, sendmail, set_default,str_esc_quote, user_format, validate_email_add
+
+from webnotes.utils import comma_and
+from webnotes import _
 from webnotes.model import db_exists
 from webnotes.model.doc import Document, addchild, getchildren, make_autoname
 from webnotes.model.wrapper import getlist, copy_doclist
@@ -28,6 +31,8 @@ from webnotes import session, form, msgprint, errprint
 in_transaction = webnotes.conn.in_transaction
 convert_to_lists = webnotes.conn.convert_to_lists
 session = webnotes.session
+
+month_map = {'Monthly': 1, 'Quarterly': 3, 'Half-yearly': 6, 'Yearly': 12}
 
 # -----------------------------------------------------------------------------------------
 
@@ -75,6 +80,7 @@ class DocType(TransactionBase):
 		self.clear_advances()
 		self.set_against_income_account()
 		self.validate_c_form()
+		self.validate_recurring_invoice()
 		
 	def on_submit(self):
 		if cint(self.doc.is_pos) == 1:
@@ -123,7 +129,8 @@ class DocType(TransactionBase):
 		self.make_gl_entries(is_cancel=1)
 
 	def on_update_after_submit(self):
-		self.convert_into_recurring()
+		self.validate_recurring_invoice()
+		self.convert_to_recurring()
 
 	def set_pos_fields(self):
 		"""Set retail related fields from pos settings"""
@@ -644,29 +651,42 @@ class DocType(TransactionBase):
 		if submit_jv:
 			msgprint("Journal Voucher : " + cstr(submit_jv[0][0]) + " has been created against " + cstr(self.doc.doctype) + ". So " + cstr(self.doc.doctype) + " cannot be Cancelled.")
 			raise Exception, "Validation Error."
-			
+	
 	@property
 	def meta(self):
 		if not hasattr(self, "_meta"):
 			self._meta = webnotes.get_doctype(self.doc.doctype)
 		return self._meta
 	
-	def convert_into_recurring(self):
+	def validate_recurring_invoice(self):
 		if self.doc.convert_into_recurring_invoice:
 			self.validate_notification_email_id()
-			
+		
 			if not self.doc.recurring_type:
-				msgprint("Please select recurring type", raise_exception=1)
-			elif not self.doc.invoice_period_from_date or not self.doc.invoice_period_to_date:
-				msgprint("Invoice period from date and to date is mandatory for recurring invoice", raise_exception=1)
-			self.set_next_date()
+				msgprint(_("Please select: ") + self.meta.get_label("recurring_type"),
+				raise_exception=1)
+		
+			elif not (self.doc.invoice_period_from_date and \
+					self.doc.invoice_period_to_date):
+				msgprint(comma_and([self.meta.get_label("invoice_period_from_date"),
+					self.meta.get_label("invoice_period_to_date")])
+					+ _(": Mandatory for a Recurring Invoice."),
+					raise_exception=True)
+	
+	def convert_to_recurring(self):
+		if self.doc.convert_into_recurring_invoice:
 			if not self.doc.recurring_id:
-				webnotes.conn.set(self.doc, 'recurring_id', make_autoname('RECINV/.#####'))
+				webnotes.conn.set(self.doc, "recurring_id",
+					make_autoname("RECINV/.#####"))
+			
+			self.set_next_date()
+
 		elif self.doc.recurring_id:
-			webnotes.conn.sql("""update `tabSales Invoice` set convert_into_recurring_invoice = 0 where recurring_id = %s""", self.doc.recurring_id)
+			webnotes.conn.sql("""update `tabSales Invoice`
+				set convert_into_recurring_invoice = 0
+				where recurring_id = %s""", (self.doc.recurring_id,))
 			
 	def validate_notification_email_id(self):
-		
 		if self.doc.notification_email_address:
 			email_list = filter(None, [cstr(email).strip() for email in
 				self.doc.notification_email_address.replace("\n", "").split(",")])
@@ -674,105 +694,166 @@ class DocType(TransactionBase):
 			from webnotes.utils import validate_email_add
 			for email in email_list:
 				if not validate_email_add(email):
-					msgprint("%s is not a valid email address" % add, raise_exception=1)
+					msgprint(self.meta.get_label("notification_email_address") \
+						+ " - " + _("Invalid Email Address") + ": \"%s\"" % email,
+						raise_exception=1)
 					
-		else:
-			msgprint(
-			
-			_("Notification Email Addresses not specified for recurring invoice",
-				raise_exception=1)
-			
-			
-			
-			for add in self.doc.notification_email_address.replace('\n', '').replace(' ', '').split(","):
-				if add and not validate_email_add(add):
-					msgprint("%s is not a valid email address" % add, raise_exception=1)
 		else:
 			msgprint("Notification Email Addresses not specified for recurring invoice",
 				raise_exception=1)
-
-	
-
-
-
-	# def set_default_recurring_values(self):
-	# 	from webnotes.utils import cstr
-	# 
-	# 	owner_email = self.doc.owner
-	# 	if owner_email.lower() == 'administrator':
-	# 		owner_email = cstr(webnotes.conn.get_value("Profile", "Administrator", "email"))
-	# 	
-	# 	ret = {
-	# 		'repeat_on_day_of_month' : getdate(self.doc.posting_date).day,
-	# 		'notification_email_address' : ', '.join([owner_email, cstr(self.doc.contact_email)]),
-	# 	}
-	# 	return ret
-	# 	
-	
-		
-	
-
+				
 	def set_next_date(self):
 		""" Set next date on which auto invoice will be created"""
-
 		if not self.doc.repeat_on_day_of_month:
-			msgprint("""Please enter 'Repeat on Day of Month' field value. \nThe day of the month on which auto invoice 
-						will be generated e.g. 05, 28 etc.""", raise_exception=1)
-
-		import datetime
-		mcount = {'Monthly': 1, 'Quarterly': 3, 'Half-yearly': 6, 'Yearly': 12}
-		m = getdate(self.doc.posting_date).month + mcount[self.doc.recurring_type]
-		y = getdate(self.doc.posting_date).year
-		if m > 12:
-			m, y = m-12, y+1
-		try:
-			next_date = datetime.date(y, m, cint(self.doc.repeat_on_day_of_month))
-		except:
-			import calendar
-			last_day = calendar.monthrange(y, m)[1]
-			next_date = datetime.date(y, m, last_day)
-		next_date = next_date.strftime("%Y-%m-%d")
-
+			msgprint("""Please enter 'Repeat on Day of Month' field value. 
+				The day of the month on which auto invoice 
+				will be generated e.g. 05, 28 etc.""", raise_exception=1)
+		
+		next_date = get_next_date(self.doc.posting_date,
+			month_map[self.doc.recurring_type], cint(self.doc.repeat_on_day_of_month))
 		webnotes.conn.set(self.doc, 'next_date', next_date)
-
+	
+def get_next_date(dt, mcount, day=None):
+	import datetime
+	month = getdate(dt).month + mcount
+	year = getdate(dt).year
+	if not day:
+		day = getdate(dt).day
+	if month > 12:
+		month, year = m-12, y+1
+	try:
+		next_month_date = datetime.date(year, month, day)
+	except:
+		import calendar
+		last_day = calendar.monthrange(year, month)[1]
+		next_month_date = datetime.date(year, month, last_day)
+	return next_month_date.strftime("%Y-%m-%d")
 
 def manage_recurring_invoices():
 	""" 
 		Create recurring invoices on specific date by copying the original one
 		and notify the concerned people
-	"""	
-	rv = webnotes.conn.sql("""select name, recurring_id from `tabSales Invoice` \
-		where ifnull(convert_into_recurring_invoice, 0) = 1 and next_date = %s \
-		and next_date <= ifnull(end_date, '2199-12-31') and docstatus=1""", nowdate())
-	
+	"""
+	recurring_invoices = webnotes.conn.sql("""select name, recurring_id
+		from `tabSales Invoice` where ifnull(convert_into_recurring_invoice, 0)=1
+		and docstatus=1 and next_date=%s
+		and next_date <= ifnull(end_date, '2199-12-31')""", nowdate())
 	
 	exception_list = []
-	for d in rv:
-		if not webnotes.conn.sql("""select name from `tabSales Invoice` \
-			where posting_date = %s and recurring_id = %s and docstatus=1""", (nowdate(), d[1])):
+	for ref_invoice, recurring_id in recurring_invoices:
+		if not webnotes.conn.sql("""select name from `tabSales Invoice`
+				where posting_date=%s and recurring_id=%s and docstatus=1""",
+				(nowdate(), recurring_id)):
 			try:
-				prev_rv = get_obj('Sales Invoice', d[0], with_children=1)
-				new_rv = create_new_invoice(prev_rv)
-
-				send_notification(new_rv)
+				ref_wrapper = webnotes.model_wrapper('Sales Invoice', ref_invoice)
+				new_invoice_wrapper = make_new_invoice(ref_wrapper)
+				send_notification(new_invoice_wrapper)
 				webnotes.conn.commit()
 			except Exception, e:
 				webnotes.conn.rollback()
 
 				webnotes.conn.begin()
 				webnotes.conn.sql("update `tabSales Invoice` set \
-					convert_into_recurring_invoice = 0 where name = %s", d[0])
-				notify_errors(d[0], prev_rv.doc.owner)
+					convert_into_recurring_invoice = 0 where name = %s", ref_invoice)
+				notify_errors(ref_invoice, ref_wrapper.doc.owner)
 				webnotes.conn.commit()
 
-				exception_list.append(e)
+				exception_list.append(webnotes.getTraceback())
 			finally:
 				webnotes.conn.begin()
 			
 	if exception_list:
 		exception_message = "\n\n".join([cstr(d) for d in exception_list])
 		raise Exception, exception_message
+
+def make_new_invoice(ref_wrapper):
+	from webnotes.model.wrapper import clone
+	new_invoice = clone(ref_wrapper)
+	
+	mcount = month_map[ref_wrapper.doc.recurring_type]
+	
+	today = nowdate()
+	
+	new_invoice.doc.fields.update({
+		"posting_date": today,
+		"aging_date": today,
 		
+		"due_date": add_days(today, cint(date_diff(ref_wrapper.doc.due_date,
+			ref_wrapper.doc.posting_date))),
+			
+		"invoice_period_from_date": \
+			get_next_date(ref_wrapper.doc.invoice_period_from_date, mcount),
+			
+		"invoice_period_to_date": \
+			get_next_date(ref_wrapper.doc.invoice_period_to_date, mcount),
+		
+		"owner": ref_wrapper.doc.owner,
+	})
+	
+	new_invoice.submit()
+	
+	return new_invoice
+	
+def send_notification(new_rv):
+	"""Notify concerned persons about recurring invoice generation"""
+	subject = "Invoice : " + new_rv.doc.name
+
+	com = new_rv.doc.company   # webnotes.conn.get_value('Control Panel', '', 'letter_head')
+
+	hd = '''<div><h2>%s</h2></div>
+			<div><h3>Invoice: %s</h3></div>
+			<table cellspacing= "5" cellpadding="5"  width = "100%%">
+				<tr>
+					<td width = "50%%"><b>Customer</b><br>%s<br>%s</td>
+					<td width = "50%%">Invoice Date	   : %s<br>Invoice Period : %s to %s <br>Due Date	   : %s</td>
+				</tr>
+			</table>
+		''' % (com, new_rv.doc.name, new_rv.doc.customer_name, new_rv.doc.address_display, getdate(new_rv.doc.posting_date).strftime("%d-%m-%Y"), \
+		getdate(new_rv.doc.invoice_period_from_date).strftime("%d-%m-%Y"), getdate(new_rv.doc.invoice_period_to_date).strftime("%d-%m-%Y"),\
+		getdate(new_rv.doc.due_date).strftime("%d-%m-%Y"))
+	
+	
+	tbl = '''<table border="1px solid #CCC" width="100%%" cellpadding="0px" cellspacing="0px">
+				<tr>
+					<td width = "15%%" bgcolor="#CCC" align="left"><b>Item</b></td>
+					<td width = "40%%" bgcolor="#CCC" align="left"><b>Description</b></td>
+					<td width = "15%%" bgcolor="#CCC" align="center"><b>Qty</b></td>
+					<td width = "15%%" bgcolor="#CCC" align="center"><b>Rate</b></td>
+					<td width = "15%%" bgcolor="#CCC" align="center"><b>Amount</b></td>
+				</tr>
+		'''
+	for d in getlist(new_rv.doclist, 'entries'):
+		tbl += '<tr><td>' + d.item_code +'</td><td>' + d.description+'</td><td>' + cstr(d.qty) +'</td><td>' + cstr(d.basic_rate) +'</td><td>' + cstr(d.amount) +'</td></tr>'
+	tbl += '</table>'
+
+	totals ='''<table cellspacing= "5" cellpadding="5"  width = "100%%">
+					<tr>
+						<td width = "50%%"></td>
+						<td width = "50%%">
+							<table width = "100%%">
+								<tr>
+									<td width = "50%%">Net Total: </td><td>%s </td>
+								</tr><tr>
+									<td width = "50%%">Total Tax: </td><td>%s </td>
+								</tr><tr>
+									<td width = "50%%">Grand Total: </td><td>%s</td>
+								</tr><tr>
+									<td width = "50%%">In Words: </td><td>%s</td>
+								</tr>
+							</table>
+						</td>
+					</tr>
+					<tr><td>Terms and Conditions:</td></tr>
+					<tr><td>%s</td></tr>
+				</table>
+			''' % (new_rv.doc.net_total,
+			new_rv.doc.other_charges_total,new_rv.doc.grand_total,
+			new_rv.doc.in_words,new_rv.doc.terms)
+
+
+	msg = hd + tbl + totals
+	
+	sendmail(new_rv.doc.notification_email_address, subject=subject, msg = msg)
 		
 def notify_errors(inv, owner):
 	import webnotes
@@ -809,14 +890,9 @@ def notify_errors(inv, owner):
 
 	assign_task_to_owner(inv, exception_msg, recipients)
 	sendmail(recipients, subject=subj, msg = exception_msg)
-	
-	
 
 def assign_task_to_owner(inv, msg, users):
 	for d in users:
-		if d.lower() == 'administrator':
-			d = webnotes.conn.sql("select ifnull(email_id, '') \
-				from `tabProfile` where name = 'Administrator'")[0][0]
 		from webnotes.widgets.form import assign_to
 		args = {
 			'assign_to' 	:	d,
@@ -827,101 +903,3 @@ def assign_task_to_owner(inv, msg, users):
 		}
 		assign_to.add(args)
 
-
-def create_new_invoice(prev_rv):
-	# clone rv
-	new_rv = clone(prev_rv)
-
-	mdict = {'Monthly': 1, 'Quarterly': 3, 'Half-yearly': 6, 'Yearly': 12}
-	mcount = mdict[prev_rv.doc.recurring_type]
-
-	# update new rv 
-
-	new_rv.doc.posting_date = new_rv.doc.next_date
-	new_rv.doc.aging_date = new_rv.doc.next_date
-	new_rv.doc.due_date = add_days(new_rv.doc.next_date, cint(date_diff(prev_rv.doc.due_date, prev_rv.doc.posting_date)))
-	new_rv.doc.invoice_period_from_date = get_next_date(new_rv.doc.invoice_period_from_date, mcount)
-	new_rv.doc.invoice_period_to_date = get_next_date(new_rv.doc.invoice_period_to_date, mcount)
-	new_rv.doc.owner = prev_rv.doc.owner
-	new_rv.doc.save()
-
-	# submit and after submit
-	new_rv.submit()
-	new_rv.update_after_submit()
-
-	return new_rv
-
-def get_next_date(dt, mcount):
-	import datetime
-	m = getdate(dt).month + mcount
-	y = getdate(dt).year
-	d = getdate(dt).day
-	if m > 12:
-		m, y = m-12, y+1
-	try:
-		next_month_date = datetime.date(y, m, d)
-	except:
-		import calendar
-		last_day = calendar.monthrange(y, m)[1]
-		next_month_date = datetime.date(y, m, last_day)
-	return next_month_date.strftime("%Y-%m-%d")
-
-
-def send_notification(new_rv):
-	"""Notify concerned persons about recurring invoice generation"""
-	subject = "Invoice : " + new_rv.doc.name
-
-	com = new_rv.doc.company   # webnotes.conn.get_value('Control Panel', '', 'letter_head')
-
-	hd = '''<div><h2>%s</h2></div>
-			<div><h3>Invoice: %s</h3></div>
-			<table cellspacing= "5" cellpadding="5"  width = "100%%">
-				<tr>
-					<td width = "50%%"><b>Customer</b><br>%s<br>%s</td>
-					<td width = "50%%">Invoice Date	   : %s<br>Invoice Period : %s to %s <br>Due Date	   : %s</td>
-				</tr>
-			</table>
-		''' % (com, new_rv.doc.name, new_rv.doc.customer_name, new_rv.doc.address_display, getdate(new_rv.doc.posting_date).strftime("%d-%m-%Y"), \
-		getdate(new_rv.doc.invoice_period_from_date).strftime("%d-%m-%Y"), getdate(new_rv.doc.invoice_period_to_date).strftime("%d-%m-%Y"),\
-		getdate(new_rv.doc.due_date).strftime("%d-%m-%Y"))
-	
-	
-	tbl = '''<table border="1px solid #CCC" width="100%%" cellpadding="0px" cellspacing="0px">
-				<tr>
-					<td width = "15%%" bgcolor="#CCC" align="left"><b>Item</b></td>
-					<td width = "40%%" bgcolor="#CCC" align="left"><b>Description</b></td>
-					<td width = "15%%" bgcolor="#CCC" align="center"><b>Qty</b></td>
-					<td width = "15%%" bgcolor="#CCC" align="center"><b>Rate</b></td>
-					<td width = "15%%" bgcolor="#CCC" align="center"><b>Amount</b></td>
-				</tr>
-		'''
-	for d in getlist(new_rv.doclist, 'entries'):
-		tbl += '<tr><td>' + d.item_code +'</td><td>' + d.description+'</td><td>' + cstr(d.qty) +'</td><td>' + cstr(d.basic_rate) +'</td><td>' + cstr(d.amount) +'</td></tr>'
-	tbl += '</table>'
-
-	totals =''' <table cellspacing= "5" cellpadding="5"  width = "100%%">
-					<tr>
-						<td width = "50%%"></td>
-						<td width = "50%%">
-							<table width = "100%%">
-								<tr>
-									<td width = "50%%">Net Total: </td><td>%s </td>
-								</tr><tr>
-									<td width = "50%%">Total Tax: </td><td>%s </td>
-								</tr><tr>
-									<td width = "50%%">Grand Total: </td><td>%s</td>
-								</tr><tr>
-									<td width = "50%%">In Words: </td><td>%s</td>
-								</tr>
-							</table>
-						</td>
-					</tr>
-					<tr><td>Terms and Conditions:</td></tr>
-					<tr><td>%s</td></tr>
-				</table>
-			''' % (new_rv.doc.net_total, new_rv.doc.other_charges_total,new_rv.doc.grand_total, new_rv.doc.in_words,new_rv.doc.terms)
-
-
-	msg = hd + tbl + totals
-	recipients = new_rv.doc.notification_email_address.replace('\n', '').replace(' ', '').split(",")
-	sendmail(recipients, subject=subject, msg = msg)
