@@ -44,8 +44,8 @@ for r in res:
   for d1 in li:
     d2 = '%s'%d1
     
-    earn_ret=convert_to_lists(sql("select e_type,e_amount from `tabSalary Slip Earning` where parent = '%s'"%r[col_idx['ID']]))
-    ded_ret=convert_to_lists(sql("select d_type,d_amount from `tabSalary Slip Deduction` where parent = '%s'"%r[col_idx['ID']]))
+    earn_ret=webnotes.conn.convert_to_lists(sql("select e_type,e_amount from `tabSalary Slip Earning` where parent = '%s'"%r[col_idx['ID']]))
+    ded_ret=webnotes.conn.convert_to_lists(sql("select d_type,d_amount from `tabSalary Slip Deduction` where parent = '%s'"%r[col_idx['ID']]))
     
 
     for e in earn_ret:

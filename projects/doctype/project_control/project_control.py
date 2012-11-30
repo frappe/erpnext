@@ -54,7 +54,7 @@ class DocType:
 				pl.append(p4['name'])
 		
 		# milestones in the next 7 days for active projects
-		ml = convert_to_lists(sql("select t1.milestone_date, t1.milestone, t1.parent from `tabProject Milestone` t1, tabProject t2 where t1.parent = t2.name and t2.status='Open' and DATEDIFF(t1.milestone_date, CURDATE()) BETWEEN 0 AND 7 ORDER BY t1.milestone_date ASC"))
+		ml = webnotes.conn.convert_to_lists(sql("select t1.milestone_date, t1.milestone, t1.parent from `tabProject Milestone` t1, tabProject t2 where t1.parent = t2.name and t2.status='Open' and DATEDIFF(t1.milestone_date, CURDATE()) BETWEEN 0 AND 7 ORDER BY t1.milestone_date ASC"))
 
 		# percent of activity completed per project
 		comp = {}
@@ -112,7 +112,7 @@ class DocType:
 				(exp_end_date between '%(st)s' and '%(end)s') or 
 				(exp_start_date < '%(st)s' and exp_end_date > '%(end)s')) %(cond)s order by exp_start_date limit 100""" % {'st': start_date, 'end': end_date, 'cond':cl})
 
-		return convert_to_lists(tl)
+		return webnotes.conn.convert_to_lists(tl)
 	
 	def declare_proj_completed(self, arg):
 		chk = sql("select name from `tabTask` where project=%s and status='Open'", arg)
