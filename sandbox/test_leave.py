@@ -22,10 +22,7 @@ import webnotes.profile
 webnotes.user = webnotes.profile.Profile()
 
 
-from webnotes.model.doc import Document
 from webnotes.model.code import get_obj
-from webnotes.utils import cstr, flt
-from webnotes.model.wrapper import getlist
 sql = webnotes.conn.sql
 
 from sandbox.testdata import leaves

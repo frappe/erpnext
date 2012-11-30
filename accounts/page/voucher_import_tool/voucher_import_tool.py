@@ -1,6 +1,6 @@
 from __future__ import unicode_literals
 import webnotes
-from webnotes.utils import formatdate, flt
+from webnotes.utils import flt
 
 @webnotes.whitelist()
 def get_template():
@@ -64,7 +64,6 @@ def map_fields(field_list, source, target):
 def import_vouchers(common_values, data, start_idx, import_type):
 	from webnotes.model.doc import Document
 	from webnotes.model.wrapper import ModelWrapper
-	from webnotes.model.code import get_obj
 	from accounts.utils import get_fiscal_year
 	from webnotes.utils.dateutils import parse_date
 

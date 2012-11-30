@@ -17,10 +17,8 @@
 from __future__ import unicode_literals
 import webnotes
 import webnotes.model
-from webnotes import _, msgprint, DictObj
-from webnotes.utils import cint, formatdate, cstr, flt
-from webnotes.model.code import get_obj
-from webnotes.model.doc import make_autoname, Document
+from webnotes import _, DictObj
+from webnotes.utils import cint
 import json
 
 import stock.utils

@@ -14,28 +14,24 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# Please edit this list and import only required elements
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import add_days, add_months, add_years, cint, cstr, date_diff, default_fields, flt, fmt_money, formatdate, getTraceback, get_defaults, get_first_day, get_last_day, getdate, has_common, month_name, now, nowdate, replace_newlines, sendmail, set_default, str_esc_quote, user_format, validate_email_add
-from webnotes.model.doc import Document, addchild, getchildren, make_autoname
-from webnotes import session, msgprint, errprint
+from webnotes.utils import add_days, cint, cstr, getdate, now, nowdate
+from webnotes.model.doc import Document
+from webnotes import session, msgprint
 
 sql = webnotes.conn.sql
-convert_to_lists = webnotes.conn.convert_to_lists
 
 try: import json
 except: import simplejson as json
 
-# -----------------------------------------------------------------------------------------
 
 
 class DocType:
 	def __init__(self,d,dl):
 		self.doc, self.doclist = d,dl
-
-# --------------------------------------------------------------------------------------------------------
+---------------
 # ------------------------------------- Home page module details -----------------------------------------
 	
 	def delete_cache(self):

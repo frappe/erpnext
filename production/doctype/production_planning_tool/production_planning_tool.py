@@ -16,11 +16,11 @@
 
 from __future__ import unicode_literals
 import webnotes
-from webnotes.utils import cint, cstr, flt, getdate, now, nowdate
+from webnotes.utils import cstr, flt
 from webnotes.model.doc import addchild
 from webnotes.model.wrapper import getlist
 from webnotes.model.code import get_obj
-from webnotes import msgprint, errprint
+from webnotes import msgprint
 
 sql = webnotes.conn.sql
 

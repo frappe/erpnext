@@ -12,7 +12,7 @@ def get_product_list(args=None):
 		}
 	"""
 	import webnotes
-	from webnotes.utils import cstr, cint
+	from webnotes.utils import cstr
 	
 	if not args: args = webnotes.form_dict
 	

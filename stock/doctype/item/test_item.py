@@ -21,7 +21,6 @@ import copy
 
 from webnotes.model.wrapper import ModelWrapper
 from webnotes.model.doc import Document
-from webnotes.model.code import get_obj
 from webnotes.utils import flt
 
 sql = webnotes.conn.sql

@@ -17,7 +17,7 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import getdate, now, nowdate, validate_email_add
+from webnotes.utils import getdate, validate_email_add
 from webnotes.model.doc import make_autoname
 from webnotes import msgprint
 

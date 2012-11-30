@@ -16,7 +16,7 @@
 
 # add additional columns
 from __future__ import unicode_literals
-from webnotes.utils import flt, cint, cstr
+from webnotes.utils import flt
 
 cl = [c[0] for c in sql("""select distinct account_head 
 						   from `tabSales Taxes and Charges` 

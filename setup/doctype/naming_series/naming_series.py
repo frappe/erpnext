@@ -17,8 +17,8 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import cint, cstr
-from webnotes import msgprint, errprint
+from webnotes.utils import cstr
+from webnotes import msgprint
 import webnotes.model.doctype
 
 sql = webnotes.conn.sql

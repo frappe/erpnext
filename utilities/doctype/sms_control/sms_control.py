@@ -14,20 +14,17 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# Please edit this list and import only required elements
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import cint, flt, load_json, nowdate, cstr
+from webnotes.utils import load_json, nowdate, cstr
 from webnotes.model.code import get_obj
 from webnotes.model.doc import Document
-from webnotes import session, msgprint
+from webnotes import msgprint
 from webnotes.model.wrapper import getlist, copy_doclist
 
 sql = webnotes.conn.sql
-get_value = webnotes.conn.get_value
 	
-# -----------------------------------------------------------------------------------------
 class DocType:
 	def __init__(self, doc, doclist=[]):
 		self.doc = doc

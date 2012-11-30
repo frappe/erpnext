@@ -2,7 +2,6 @@ from __future__ import unicode_literals
 import webnotes
 import conf
 import webnotes.model
-from webnotes.model.code import get_obj
 from wnf import replace_code
 from termcolor import colored
 from webnotes.modules import reload_doc

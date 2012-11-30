@@ -14,15 +14,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# Please edit this list and import only required elements
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import add_days, add_months, add_years, cint, cstr, flt, get_defaults, getdate, has_common, month_name, now, nowdate, set_default, validate_email_add
-from webnotes.model.doc import Document, addchild, getchildren
-from webnotes.model.wrapper import getlist
+from webnotes.utils import cstr, flt, validate_email_add
+from webnotes.model.doc import Document
 from webnotes.model.code import get_obj
-from webnotes import msgprint, errprint
+from webnotes import msgprint
 
 sql = webnotes.conn.sql
 

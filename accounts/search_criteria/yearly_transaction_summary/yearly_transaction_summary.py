@@ -30,8 +30,7 @@ else:
   if from_date != "" and to_date != "":
     get_obj('MIS Control').dates(from_fiscal_year,from_date,to_date) # validate dates (i.e. dates should be between particular fiscal year)
 	
-# Add columns based on from and to fiscal year
-# --------------------------------------------------------------------------------------------------
+# Add columns based on from and to fiscal year---------
 columns = []
 columns.append(['ID','Data','150px',''])
 columns.append(['Description','Data','150px',''])

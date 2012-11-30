@@ -21,7 +21,7 @@ from __future__ import unicode_literals
 
 import webnotes
 sql = webnotes.conn.sql
-from webnotes.utils import cint, cstr
+from webnotes.utils import cstr
 
 def create_proper_index():
 	from webnotes.modules.export_file import export_to_files

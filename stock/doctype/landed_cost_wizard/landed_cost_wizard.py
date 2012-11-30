@@ -17,14 +17,13 @@
 from __future__ import unicode_literals
 import webnotes
 from webnotes.utils import cint, cstr, flt
-from webnotes.model.doc import addchild, getchildren
+from webnotes.model.doc import addchild
 from webnotes.model.wrapper import getlist
 from webnotes.model.code import get_obj
 from webnotes import msgprint
 
 sql = webnotes.conn.sql
 
-# -----------------------------------------------------------------------------------------
 
 class DocType:
 	def __init__(self, doc, doclist=[]):

@@ -16,7 +16,6 @@
 
 from __future__ import unicode_literals
 import webnotes
-from webnotes.model.doc import make_autoname
 
 from utilities.transaction_base import TransactionBase
 from home import update_feed
