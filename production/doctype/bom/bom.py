@@ -240,14 +240,12 @@ class DocType:
 				# add operation in op list
 				self.op.append(cstr(d.operation_no))
 
-
-
 	def validate_materials(self):
 		""" Validate raw material entries """
 		check_list = []
 		for m in getlist(self.doclist, 'bom_materials'):
 			# check if operation no not in op table
-			if m.operation_no not in self.op:
+			if cstr(m.operation_no) not in self.op:
 				msgprint("""Operation no: %s against item: %s at row no: %s is not present 
 					at Operations table"""% (m.operation_no, m.item_code, m.idx), raise_exception = 1)
 		
