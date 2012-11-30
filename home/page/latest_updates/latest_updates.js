@@ -1,4 +1,7 @@
 erpnext.updates = [
+	["30th November 2012", [
+		"Auto Notifications: System will prompt user with pre-set message for auto-notification.",
+	]],
 	["29th November 2012", [
 		"EMail: Form Emails are now via Communication (with Rich Text Etc.).",
 	]],
