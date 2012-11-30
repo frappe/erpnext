@@ -701,4 +701,8 @@ patch_list = [
 		'patch_module': 'patches.november_2012',
 		'patch_file': 'production_order_patch',
 	},
+	{
+		'patch_module': 'patches.november_2012',
+		'patch_file': 'gle_floating_point_issue',
+	},
 ]
