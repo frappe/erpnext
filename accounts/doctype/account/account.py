@@ -149,7 +149,7 @@ class DocType:
 	# Check user role for approval process
 	def get_authorized_user(self):
 		# Check logged-in user is authorized
-		if get_value('Global Defaults', None, 'credit_controller') in webnotes.user.get_roles():
+		if webnotes.conn.get_value('Global Defaults', None, 'credit_controller') in webnotes.user.get_roles():
 			return 1
 			
 	# Check Credit limit for customer
@@ -160,7 +160,7 @@ class DocType:
 		cr_limit = sql("select t1.credit_limit from tabCustomer t1, `tabAccount` t2 where t2.name='%s' and t1.name = t2.master_name" % account)
 		credit_limit = cr_limit and flt(cr_limit[0][0]) or 0
 		if not credit_limit:
-			credit_limit = get_value('Company', company, 'credit_limit')
+			credit_limit = webnotes.conn.get_value('Company', company, 'credit_limit')
 			credit_limit_from = 'global settings in the Company'
 		
 		# If outstanding greater than credit limit and not authorized person raise exception

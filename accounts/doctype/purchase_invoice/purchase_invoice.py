@@ -60,7 +60,7 @@ class DocType(TransactionBase):
 	def get_cust(self):
 		ret = {}
 		if self.doc.credit_to:
-			acc = get_value('Account',self.doc.credit_to,['master_name', 'credit_days'])
+			acc = webnotes.conn.get_value('Account',self.doc.credit_to,['master_name', 'credit_days'])
 			ret['supplier'] = acc[0]
 			ret['due_date'] = add_days(cstr(self.doc.posting_date), acc and cint(acc[1]) or 0)
 			
@@ -384,7 +384,7 @@ class DocType(TransactionBase):
 	# get tds rate
 	# -------------
 	def get_tds_rate(self):
-		return {'rate' : flt(get_value('Account', self.doc.tax_code, 'tax_rate'))}
+		return {'rate' : flt(webnotes.conn.get_value('Account', self.doc.tax_code, 'tax_rate'))}
 
 	# set aging date
 	#-------------------

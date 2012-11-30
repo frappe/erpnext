@@ -32,7 +32,7 @@ class DocType:
 		self.doc, self.doclist = d,dl
 
 	def get_stock_uom(self, item_code):
-		return {'current_stock_uom': cstr(get_value('Item', item_code, 'stock_uom'))}
+		return {'current_stock_uom': cstr(webnotes.conn.get_value('Item', item_code, 'stock_uom'))}
 	
 	def validate_mandatory(self):
 		if not cstr(self.doc.item_code):

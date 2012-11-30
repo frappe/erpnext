@@ -544,10 +544,10 @@ class DocType(TransactionBase):
 			raise Exception
 		
 		#check if tolerance added in item master
-		tolerance = flt(get_value('Item',item_code,'tolerance') or 0)
+		tolerance = flt(webnotes.conn.get_value('Item',item_code,'tolerance') or 0)
 		
 		if not(tolerance):
-			tolerance = flt(get_value('Global Defaults',None,'tolerance') or 0)
+			tolerance = flt(webnotes.conn.get_value('Global Defaults',None,'tolerance') or 0)
 
 		if is_submit:
 			qty = qty + flt(curr_qty)

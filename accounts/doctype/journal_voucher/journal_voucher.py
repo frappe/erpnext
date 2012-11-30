@@ -294,7 +294,7 @@ class DocType:
 			master_type, acc_type = chk_type and cstr(chk_type[0][0]) or '', chk_type and cstr(chk_type[0][1]) or ''
 			if master_type in ['Supplier', 'Customer']:
 				if not self.doc.pay_to_recd_from:
-					self.doc.pay_to_recd_from = get_value(master_type, ' - '.join(d.account.split(' - ')[:-1]), master_type == 'Customer' and 'customer_name' or 'supplier_name')
+					self.doc.pay_to_recd_from = webnotes.conn.get_value(master_type, ' - '.join(d.account.split(' - ')[:-1]), master_type == 'Customer' and 'customer_name' or 'supplier_name')
 			
 			if acc_type == 'Bank or Cash':
 				dcc = TransactionBase().get_company_currency(self.doc.company)

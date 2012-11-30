@@ -115,7 +115,7 @@ class DocType(TransactionBase):
 	# ====================
 	def get_invoice_details(self, obj = ''):
 		if obj.doc.company:
-			acc_head = webnotes.conn.sql("select name from `tabAccount` where name = '%s' and docstatus != 2" % (cstr(obj.doc.customer) + " - " + get_value('Company', obj.doc.company, 'abbr')))
+			acc_head = webnotes.conn.sql("select name from `tabAccount` where name = '%s' and docstatus != 2" % (cstr(obj.doc.customer) + " - " + webnotes.conn.get_value('Company', obj.doc.company, 'abbr')))
 			obj.doc.debit_to = acc_head and acc_head[0][0] or ''
 
 	
@@ -710,11 +710,11 @@ class StatusUpdater:
 		if self.tolerance.get(item_code):
 			return self.tolerance[item_code]
 		
-		tolerance = flt(get_value('Item',item_code,'tolerance') or 0)
+		tolerance = flt(webnotes.conn.get_value('Item',item_code,'tolerance') or 0)
 
 		if not tolerance:
 			if self.global_tolerance == None:
-				self.global_tolerance = flt(get_value('Global Defaults',None,'tolerance') or 0)
+				self.global_tolerance = flt(webnotes.conn.get_value('Global Defaults',None,'tolerance') or 0)
 			tolerance = self.global_tolerance
 		
 		self.tolerance[item_code] = tolerance

@@ -100,7 +100,7 @@ def append_colnames(name, colnames, coltypes, colwidths, coloptions, col_idx):
 
 
 # get start date
-start_date = get_value('Fiscal Year', fiscal_year, 'year_start_date')
+start_date = webnotes.conn.get_value('Fiscal Year', fiscal_year, 'year_start_date')
 if not start_date:
   msgprint("Please Define Year Start Date for Fiscal Year " + str(fiscal_year))
   raise Exception

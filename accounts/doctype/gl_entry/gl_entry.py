@@ -108,9 +108,9 @@ class DocType:
 	#----------------------------------------------------------------------------------------------
 	def check_freezing_date(self, adv_adj):
 		if not adv_adj:
-			acc_frozen_upto = get_value('Global Defaults', None, 'acc_frozen_upto')
+			acc_frozen_upto = webnotes.conn.get_value('Global Defaults', None, 'acc_frozen_upto')
 			if acc_frozen_upto:
-				bde_auth_role = get_value( 'Global Defaults', None,'bde_auth_role')
+				bde_auth_role = webnotes.conn.get_value( 'Global Defaults', None,'bde_auth_role')
 				if getdate(self.doc.posting_date) <= getdate(acc_frozen_upto) and not bde_auth_role in webnotes.user.get_roles():
 					msgprint("You are not authorized to do/modify back dated accounting entries before %s." % getdate(acc_frozen_upto).strftime('%d-%m-%Y'), raise_exception=1)
 

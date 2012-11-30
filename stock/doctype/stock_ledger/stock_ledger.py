@@ -75,8 +75,8 @@ class DocType:
 	def validate_serial_no(self, obj, fname):
 		"""check whether serial no is required"""
 		for d in getlist(obj.doclist, fname):
-			is_stock_item = get_value('Item', d.item_code, 'is_stock_item')
-			ar_required = get_value('Item', d.item_code, 'has_serial_no')
+			is_stock_item = webnotes.conn.get_value('Item', d.item_code, 'is_stock_item')
+			ar_required = webnotes.conn.get_value('Item', d.item_code, 'has_serial_no')
 			
 			# [bug fix] need to strip serial nos of all spaces and new lines for validation
 			serial_no = cstr(d.serial_no).strip()
@@ -237,7 +237,7 @@ class DocType:
 		for k in args.keys():
 			# adds warehouse_type
 			if k == 'warehouse':
-				sle.fields['warehouse_type'] = get_value('Warehouse' , args[k], 'warehouse_type')
+				sle.fields['warehouse_type'] = webnotes.conn.get_value('Warehouse' , args[k], 'warehouse_type')
 			sle.fields[k] = args[k]
 		sle_obj = get_obj(doc=sle)
 		
