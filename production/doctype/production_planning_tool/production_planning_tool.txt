@@ -4,7 +4,7 @@
   "docstatus": 0, 
   "creation": "2012-07-03 13:30:03", 
   "modified_by": "Administrator", 
-  "modified": "2012-11-29 17:52:20"
+  "modified": "2012-11-30 14:08:55"
  }, 
  {
   "read_only": 1, 
@@ -159,15 +159,14 @@
   "options": "clear_item_table"
  }, 
  {
-  "description": "If selected as \"No\", all sub-assembly items will be treated as a raw material. Otherwise, BOM for sub-assembly items will be considered for raw materials.", 
-  "default": "Yes", 
+  "description": "If checked, BOM for sub-assembly items will be considered for raw materials. Otherwise, all sub-assembly items will be treated as a raw material.", 
+  "default": "1", 
   "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Use multi-level BOM", 
+  "label": "Use Multi-Level BOM", 
   "reqd": 1, 
   "fieldname": "use_multi_level_bom", 
-  "fieldtype": "Select", 
-  "options": "No\nYes"
+  "fieldtype": "Check"
  }, 
  {
   "doctype": "DocField", 

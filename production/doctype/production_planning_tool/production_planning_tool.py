@@ -170,39 +170,58 @@ class DocType:
 				msgprint("Please Enter Planned Qty for item: %s at row no: %s" %
 					(d.item_code, d.idx), raise_exception=1)
 				
-
 	def validate_bom_no(self, d):
 		if not d.bom_no:
-			msgprint("Please enter bom no for item: %s at row no: %s" % (d.item_code, d.idx), raise_exception=1)
+			msgprint("Please enter bom no for item: %s at row no: %s" % 
+				(d.item_code, d.idx), raise_exception=1)
 		else:
-			bom = sql("""select name from `tabBOM` where item = %s and docstatus = 1 
-				and name = %s and ifnull(is_active, 'No') = 'Yes'""", (d.item_code, d.bom_no), as_dict = 1)
+			bom = sql("""select name from `tabBOM` where name = %s and item = %s 
+				and docstatus = 1 and ifnull(is_active, 'No') = 'Yes'""", 
+				(d.bom_no, d.item_code), as_dict = 1)
 			if not bom:
 				msgprint("""Incorrect BOM No: %s entered for item: %s at row no: %s
-					May be BOM is inactive or for other item or does not exists in the system"""% (d.bom_no, d.item_doce, d.idx))
+					May be BOM is inactive or for other item or does not exists in the system""" % 
+					(d.bom_no, d.item_doce, d.idx), raise_exception=1)
+
+	def raise_production_order(self):
+		"""It will raise production order (Draft) for all distinct FG items"""
+		self.validate_company()
+		self.validate_data()
+
+		items = self.get_distinct_items_and_boms()[1]
+		pro = get_obj('Production Control').create_production_order(items)
+		if pro:
+			msgprint("Following Production Order has been generated:\n" + '\n'.join(pro))
+		else :
+			msgprint("No Production Order generated.")
 
 
+	def get_distinct_items_and_boms(self):
+		""" Club similar BOM and item for processing"""
+		item_dict, bom_dict = {}, {}
+		for d in self.doclist.get({"parentfield": "pp_details"}):
+			bom_dict[d.bom_no] = bom_dict.get(d.bom_no, 0) + flt(d.planned_qty)
+			item_dict[(d.item_code, d.sales_order)] = {
+				"qty" : flt(item_dict.get((d.item_code, d.sales_order), {}).get("qty")) + \
+				 	flt(d.planned_qty),
+				"bom_no": d.bom_no,
+				"description": d.description,
+				"stock_uom": d.stock_uom,
+				"use_multi_level_bom": self.doc.use_multi_level_bom,
+				"company": self.doc.company,
+			}
+		return bom_dict, item_dict
 
 	def download_raw_materials(self):
 		""" Create csv data for required raw material to produce finished goods"""
-		bom_dict = self.get_distinct_bom(action = 'download_rm')
+		bom_dict = self.get_distinct_items_and_boms()[0]
 		self.get_raw_materials(bom_dict)
 		return self.get_csv()
 
 	def get_raw_materials(self, bom_dict):
 		""" Get raw materials considering sub-assembly items """
 		for bom in bom_dict:
-			if self.doc.use_multi_level_bom == 'No':
-				# Get all raw materials considering SA items as raw materials, 
-				# so no childs of SA items
-				fl_bom_items = sql("""
-					select item_code, ifnull(sum(qty_consumed_per_unit), 0) * '%s', description, stock_uom 
-					from `tabBOM Item` 
-					where parent = '%s' and docstatus < 2 
-					group by item_code
-				""" % (flt(bom_dict[bom]), bom))
-
-			else:
+			if self.doc.use_multi_level_bom:
 				# get all raw materials with sub assembly childs					
 				fl_bom_items = sql("""
 					select 
@@ -216,7 +235,16 @@ class DocType:
 						) a
 					group by item_code,stock_uom
 				""" , (flt(bom_dict[bom]), bom))
-			
+			else:
+				# Get all raw materials considering SA items as raw materials, 
+				# so no childs of SA items
+				fl_bom_items = sql("""
+					select item_code, ifnull(sum(qty_consumed_per_unit), 0) * '%s', description, stock_uom 
+					from `tabBOM Item` 
+					where parent = '%s' and docstatus < 2 
+					group by item_code
+				""" % (flt(bom_dict[bom]), bom))
+
 			self.make_items_dict(fl_bom_items)
 
 
@@ -239,43 +267,3 @@ class DocType:
 				item_list.append(['', '', '', '', 'Total', i_qty, o_qty, a_qty])
 
 		return item_list
-		
-	def raise_production_order(self):
-		"""It will raise production order (Draft) for all distinct FG items"""
-		self.validate_company()
-		self.validate_data()
-
-		pp_items = self.get_distinct_bom(action = 'raise_pro_order')
-		pro = get_obj(dt = 'Production Control').create_production_order(self.doc.company, pp_items)
-		if pro:
-			for d in getlist(self.doclist, 'pp_details'):
-				d.is_pro_created = 1
-			msgprint("Following Production Order has been generated:\n" + '\n'.join(pro))
-		else :
-			msgprint("No Production Order generated.")
-
-
-	def get_distinct_bom(self, action):
-		""" Club similar BOM and item for processing"""
-
-		bom_dict, item_dict, pp_items = {}, {}, []
-		for d in getlist(self.doclist, 'pp_details'):
-			if action == 'download_rm':
-				bom_dict[d.bom_no] = bom_dict.get(d.bom_no, 0) + flt(d.planned_qty)
-			elif not d.is_pro_created:
-				item_dict[d.item_code] = [
-					(flt(item_dict.get(d.item_code, [0])[0]) + flt(d.planned_qty)),
-					d.bom_no, d.description, d.stock_uom]
-
-		if action == 'raise_pro_order':
-			for d in item_dict:
-				pp_items.append({
-					'production_item'	: d, 
-					'qty'				: item_dict[d][0],
-					'bom_no'			: item_dict[d][1],
-					'description'		: item_dict[d][2],
-					'stock_uom'			: item_dict[d][3],
-					'consider_sa_items' : self.doc.use_multi_level_bom == "Yes" and "No" or "Yes"
-				})
-
-		return action == 'download_rm' and bom_dict or pp_items

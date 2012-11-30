@@ -72,6 +72,14 @@ class DocType:
 				msgprint("""Incorrect BOM: %s entered. 
 					May be BOM not exists or inactive or not submitted 
 					or for some other item.""" % cstr(self.doc.bom_no), raise_exception=1)
+					
+		if self.doc.sales_order:
+			if not webnotes.conn.sql("""select name from `tabSales Order` 
+					where name=%s and docstatus = 1""", self.doc.sales_order):
+				msgprint("Sales Order: %s is not valid" % self.doc.sales_order, raise_exception=1)
+				
+			get_obj("Production Control").validate_production_order_against_so(
+				self.doc.production_item, self.doc.sales_order, self.doc.qty, self.doc.name)
 
 
 	def stop_unstop(self, status):
