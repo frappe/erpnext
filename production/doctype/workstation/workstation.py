@@ -36,6 +36,6 @@ class DocType:
         sql("update `tabBOM Operation` set hour_rate = '%s' where parent = '%s' and workstation = '%s'"%( self.doc.hour_rate, bom_no[0], self.doc.name))
   
   def on_update(self):
-    set(self.doc, 'overhead', flt(self.doc.hour_rate_electricity) + flt(self.doc.hour_rate_consumable) + flt(self.doc.hour_rate_rent))
-    set(self.doc, 'hour_rate', flt(self.doc.hour_rate_labour) + flt(self.doc.overhead))
+    webnotes.conn.set(self.doc, 'overhead', flt(self.doc.hour_rate_electricity) + flt(self.doc.hour_rate_consumable) + flt(self.doc.hour_rate_rent))
+    webnotes.conn.set(self.doc, 'hour_rate', flt(self.doc.hour_rate_labour) + flt(self.doc.overhead))
     self.update_bom_operation()

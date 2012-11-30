@@ -133,7 +133,7 @@ class DocType(TransactionBase):
 	def validate(self):
 		self.validate_fiscal_year()
 		# Step 1:=> set status as "Draft"
-		set(self.doc, 'status', 'Draft')
+		webnotes.conn.set(self.doc, 'status', 'Draft')
 		
 		# Step 2:=> get Purchase Common Obj
 		pc_obj = get_obj(dt='Purchase Common')
@@ -213,7 +213,7 @@ class DocType(TransactionBase):
 	def update_status(self, status):
 		self.check_modified_date()
 		# step 1:=> Set Status
-		set(self.doc,'status',cstr(status))
+		webnotes.conn.set(self.doc,'status',cstr(status))
 
 		# step 2:=> Update Bin
 		self.update_bin(is_submit = (status == 'Submitted') and 1 or 0, is_stopped = 1)
@@ -243,7 +243,7 @@ class DocType(TransactionBase):
 		pc_obj.update_last_purchase_rate(self, is_submit = 1)
 
 		# Step 6 :=> Set Status
-		set(self.doc,'status','Submitted')
+		webnotes.conn.set(self.doc,'status','Submitted')
 	 
 	# On Cancel
 	# -------------------------------------------------------------------------------------------------------
@@ -267,7 +267,7 @@ class DocType(TransactionBase):
 			raise Exception
 
 		# 4.Set Status as Cancelled
-		set(self.doc,'status','Cancelled')
+		webnotes.conn.set(self.doc,'status','Cancelled')
 
 		# 5.Update Purchase Requests Pending Qty and accordingly it's Status 
 		pc_obj.update_prevdoc_detail(self,is_submit = 0)

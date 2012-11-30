@@ -256,7 +256,7 @@ class DocType(TransactionBase):
 		self.credit_limit()
 
 		# set DN status
-		set(self.doc, 'status', 'Submitted')
+		webnotes.conn.set(self.doc, 'status', 'Submitted')
 
 
 	def validate_packed_qty(self):
@@ -294,7 +294,7 @@ class DocType(TransactionBase):
 		
 		sales_com_obj.update_prevdoc_detail(0,self)
 		self.update_stock_ledger(update_stock = -1)
-		set(self.doc, 'status', 'Cancelled')
+		webnotes.conn.set(self.doc, 'status', 'Cancelled')
 		self.cancel_packing_slips()
 
 

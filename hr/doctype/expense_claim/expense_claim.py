@@ -65,9 +65,9 @@ class DocType:
 				raise Exception
 			d.save(1)
 		if self.doc.total_sanctioned_amount:
-			set(self.doc,'total_sanctioned_amount',self.doc.total_sanctioned_amount)
+			webnotes.conn.set(self.doc,'total_sanctioned_amount',self.doc.total_sanctioned_amount)
 		if self.doc.remark:
-			set(self.doc, 'remark', self.doc.remark)
+			webnotes.conn.set(self.doc, 'remark', self.doc.remark)
 	
 	def approve_voucher(self):
 		missing_count = 0
@@ -83,7 +83,7 @@ class DocType:
 			return cstr('No Amount')
 		self.update_voucher()
 		
-		set(self.doc, 'approval_status', 'Approved')		
+		webnotes.conn.set(self.doc, 'approval_status', 'Approved')		
 		# on approval notification
 		#get_obj('Notification Control').notify_contact('Expense Claim Approved', self.doc.doctype, self.doc.name, self.doc.email_id, self.doc.employee_name)
 
@@ -92,8 +92,8 @@ class DocType:
 	def reject_voucher(self):
 		
 		if self.doc.remark:
-			set(self.doc, 'remark', self.doc.remark)	 
-		set(self.doc, 'approval_status', 'Rejected')		
+			webnotes.conn.set(self.doc, 'remark', self.doc.remark)	 
+		webnotes.conn.set(self.doc, 'approval_status', 'Rejected')		
 
 		return cstr('Rejected')
 	
@@ -110,7 +110,7 @@ class DocType:
 		self.validate_fiscal_year()
 		
 	def on_update(self):
-		set(self.doc, 'approval_status', 'Draft')
+		webnotes.conn.set(self.doc, 'approval_status', 'Draft')
 	
 	def validate_exp_details(self):
 		if not getlist(self.doclist, 'expense_voucher_details'):
@@ -127,10 +127,10 @@ class DocType:
 		
 	def on_submit(self):
 		self.validate_exp_details()
-		set(self.doc, 'approval_status', 'Submitted')
+		webnotes.conn.set(self.doc, 'approval_status', 'Submitted')
 	
 	def on_cancel(self):
-		set(self.doc, 'approval_status', 'Cancelled')
+		webnotes.conn.set(self.doc, 'approval_status', 'Cancelled')
 
 	def get_formatted_message(self, args):
 		""" get formatted message for auto notification"""

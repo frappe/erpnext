@@ -81,10 +81,10 @@ class DocType:
   
   def on_update(self):
     self.calculate_total_hr()
-    set(self.doc, 'status', 'Draft')
+    webnotes.conn.set(self.doc, 'status', 'Draft')
   
   def on_submit(self):
-    set(self.doc, 'status', 'Submitted')
+    webnotes.conn.set(self.doc, 'status', 'Submitted')
   
   def on_cancel(self):
-    set(self.doc, 'status', 'Cancelled')
+    webnotes.conn.set(self.doc, 'status', 'Cancelled')

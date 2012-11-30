@@ -190,9 +190,9 @@ class DocType:
 	# ---------------------------------------------------
 	def set_default_groups(self):
 		if not self.doc.receivables_group:
-			set(self.doc, 'receivables_group', 'Accounts Receivable - '+self.doc.abbr)
+			webnotes.conn.set(self.doc, 'receivables_group', 'Accounts Receivable - '+self.doc.abbr)
 		if not self.doc.payables_group:
-			set(self.doc, 'payables_group', 'Accounts Payable - '+self.doc.abbr)
+			webnotes.conn.set(self.doc, 'payables_group', 'Accounts Payable - '+self.doc.abbr)
 			
 			
 	# Create default cost center

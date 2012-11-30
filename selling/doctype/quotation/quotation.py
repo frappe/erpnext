@@ -173,7 +173,7 @@ class DocType(TransactionBase):
 			else:
 				msgprint("Contact Date Cannot be before Last Contact Date")
 				raise Exception
-			#set(self.doc, 'contact_date_ref',self.doc.contact_date)
+			#webnotes.conn.set(self.doc, 'contact_date_ref',self.doc.contact_date)
 	
 
 	# Validate
@@ -199,10 +199,10 @@ class DocType(TransactionBase):
 		if self.doc.contact_date and self.doc.contact_date_ref != self.doc.contact_date:
 			if self.doc.contact_by:
 				self.add_calendar_event()
-			set(self.doc, 'contact_date_ref',self.doc.contact_date)
+			webnotes.conn.set(self.doc, 'contact_date_ref',self.doc.contact_date)
 		
 		# Set Quotation Status
-		set(self.doc, 'status', 'Draft')
+		webnotes.conn.set(self.doc, 'status', 'Draft')
 
 		# subject for follow
 		self.doc.subject = '[%(status)s] To %(customer)s worth %(currency)s %(grand_total)s' % self.doc.fields
@@ -274,8 +274,8 @@ class DocType(TransactionBase):
 			msgprint("Sales Order No. "+cstr(chk[0][0])+" is submitted against this Quotation. Thus 'Order Lost' can not be declared against it.")
 			raise Exception
 		else:
-			set(self.doc, 'status', 'Order Lost')
-			set(self.doc, 'order_lost_reason', arg)
+			webnotes.conn.set(self.doc, 'status', 'Order Lost')
+			webnotes.conn.set(self.doc, 'order_lost_reason', arg)
 			self.update_enquiry('order lost')
 			return 'true'
 	
@@ -291,15 +291,15 @@ class DocType(TransactionBase):
 	def on_submit(self):
 		self.check_item_table()
 		if not self.doc.amended_from:
-			set(self.doc, 'message', 'Quotation: '+self.doc.name+' has been sent')
+			webnotes.conn.set(self.doc, 'message', 'Quotation: '+self.doc.name+' has been sent')
 		else:
-			set(self.doc, 'message', 'Quotation has been amended. New Quotation no:'+self.doc.name)
+			webnotes.conn.set(self.doc, 'message', 'Quotation has been amended. New Quotation no:'+self.doc.name)
 		
 		# Check for Approving Authority
 		get_obj('Authorization Control').validate_approving_authority(self.doc.doctype, self.doc.company, self.doc.grand_total, self)
 
 		# Set Quotation Status
-		set(self.doc, 'status', 'Submitted')
+		webnotes.conn.set(self.doc, 'status', 'Submitted')
 		
 		#update enquiry status
 		self.update_enquiry('submit')
@@ -308,12 +308,12 @@ class DocType(TransactionBase):
 # ON CANCEL
 # ==========================================================================
 	def on_cancel(self):
-		set(self.doc, 'message', 'Quotation: '+self.doc.name+' has been cancelled')
+		webnotes.conn.set(self.doc, 'message', 'Quotation: '+self.doc.name+' has been cancelled')
 		
 		#update enquiry status
 		self.update_enquiry('cancel')
 		
-		set(self.doc,'status','Cancelled')
+		webnotes.conn.set(self.doc,'status','Cancelled')
 		
 	
 # SEND SMS
