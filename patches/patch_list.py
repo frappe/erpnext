@@ -280,11 +280,6 @@ patch_list = [
 	},
 	{
 		'patch_module': 'patches.april_2012',
-		'patch_file': 'change_cacheitem_schema',
-		'description': 'Modified datatype of `value` column from text to longtext'
-	},
-	{
-		'patch_module': 'patches.april_2012',
 		'patch_file': 'remove_default_from_rv_detail',
 		'description': ''
 	},
@@ -457,11 +452,6 @@ patch_list = [
 		'patch_module': 'patches.april_2012',
 		'patch_file': 'delete_about_contact',
 		'description': "delete depracated doctypes of website module"
-	},
-	{
-		'patch_module': 'patches.june_2012',
-		'patch_file': 'cache_item_table',
-		'description': "create cache item table again"
 	},
 	{
 		'patch_module': 'patches.july_2012',
@@ -698,6 +688,14 @@ patch_list = [
 	{
 		'patch_module': 'patches.november_2012',
 		'patch_file': 'add_theme_to_profile',
+	},
+	{
+		'patch_module': 'patches.november_2012',
+		'patch_file': 'add_employee_field_in_employee',
+	},
+	{
+		'patch_module': 'patches.november_2012',
+		'patch_file': 'leave_application_cleanup',
 	},
 	{
 		'patch_module': 'patches.november_2012',

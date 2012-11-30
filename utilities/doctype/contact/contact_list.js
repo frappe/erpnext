@@ -20,7 +20,7 @@ wn.doclistviews['Contact'] = wn.views.ListView.extend({
 		data.fullname = (data.first_name || '') + 
 						(data.last_name ? ' ' + data.last_name : '');
 		if(!data.fullname) data.fullname = data.name;
-		data.fullname = repl("<a href='#!Form/Contact/%(name)s'>%(fullname)s\
+		data.fullname = repl("<a href='#!Form/Contact/%(name)s'>%(name)s\
 							</a>", data);
 
 		// prepare description

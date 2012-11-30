@@ -15,9 +15,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 wn.require('app/setup/doctype/contact_control/contact_control.js');
-wn.require('app/support/doctype/communication/communication.js');
-
-/* ********************************* onload ********************************************* */
 
 cur_frm.cscript.onload = function(doc,dt,dn){
 	// history doctypes and scripts
@@ -32,8 +29,6 @@ cur_frm.cscript.onload = function(doc,dt,dn){
   	//cur_frm.cscript.make_sl_body();
 
 	cur_frm.cscript.load_defaults(doc, dt, dn);
-	
-	cur_frm.cscript.make_communication_body();
 }
 
 cur_frm.cscript.load_defaults = function(doc, dt, dn) {
@@ -47,8 +42,6 @@ cur_frm.cscript.load_defaults = function(doc, dt, dn) {
 cur_frm.add_fetch('lead_name', 'company_name', 'customer_name');
 cur_frm.add_fetch('default_sales_partner','commission_rate','default_commission_rate');
 
-/* ********************************* refresh ********************************************* */
-
 cur_frm.cscript.refresh = function(doc,dt,dn) {
 	if(sys_defaults.cust_master_name == 'Customer Name')
 		hide_field('naming_series');
@@ -57,16 +50,18 @@ cur_frm.cscript.refresh = function(doc,dt,dn) {
 
 	if(doc.__islocal){		
 		hide_field(['address_html','contact_html']);
-		//cur_frm.cscript.set_hl_msg(doc);
- 		//cur_frm.cscript.set_sl_msg(doc);
 	}else{
 		unhide_field(['address_html','contact_html']);
 		// make lists
 		cur_frm.cscript.make_address(doc,dt,dn);
 		cur_frm.cscript.make_contact(doc,dt,dn);
 		cur_frm.cscript.make_history(doc,dt,dn);
-		cur_frm.cscript.render_communication_list(doc, cdt, cdn);
-		//cur_frm.cscript.make_shipping_address(doc,dt,dn);
+
+		cur_frm.communication_view = new wn.views.CommunicationList({
+			list: wn.model.get("Communication", {"customer": doc.name}),
+			parent: cur_frm.fields_dict.communication_html.wrapper,
+			doc: doc
+		});
 	}
 }
 
@@ -117,11 +112,6 @@ cur_frm.cscript.make_contact = function() {
 
 }
 
-/* ********************************* client triggers ************************************** */
-
-// ---------------
-// customer group
-// ---------------
 cur_frm.fields_dict['customer_group'].get_query = function(doc,dt,dn) {
 	return 'SELECT `tabCustomer Group`.`name`, `tabCustomer Group`.`parent_customer_group` FROM `tabCustomer Group` WHERE `tabCustomer Group`.`is_group` = "No" AND `tabCustomer Group`.`docstatus`!= 2 AND `tabCustomer Group`.%(key)s LIKE "%s" ORDER BY	`tabCustomer Group`.`name` ASC LIMIT 50';
 }
@@ -130,8 +120,6 @@ cur_frm.fields_dict['customer_group'].get_query = function(doc,dt,dn) {
 cur_frm.fields_dict.lead_name.get_query = erpnext.utils.lead_query;
 
 
-// Transaction History
-// functions called by these functions are defined in communication.js
 cur_frm.cscript.make_qtn_list = function(parent, doc) {
 	cur_frm.cscript.get_common_list_view(parent, doc, 'Quotation');
 }
@@ -172,7 +160,6 @@ cur_frm.cscript.get_common_list_view = function(parent, doc, doctype) {
 	
 	cur_frm.cscript.render_list(doc, doctype, parent, ListView);
 }
-
 
 cur_frm.cscript.make_si_list = function(parent, doc) {
 	var ListView = wn.views.ListView.extend({

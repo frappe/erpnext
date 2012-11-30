@@ -2,11 +2,12 @@
  {
   "owner": "Administrator", 
   "docstatus": 0, 
-  "creation": "2012-10-02 11:27:30", 
+  "creation": "2012-11-02 17:16:46", 
   "modified_by": "Administrator", 
-  "modified": "2012-09-28 12:31:42"
+  "modified": "2012-11-30 10:54:38"
  }, 
  {
+  "autoname": "naming_series:", 
   "name": "__common__", 
   "default_print_format": "Standard", 
   "allow_print": 0, 
@@ -33,6 +34,17 @@
  {
   "name": "Customer", 
   "doctype": "DocType"
+ }, 
+ {
+  "description": "Note: You Can Manage Multiple Address or Contacts via Addresses & Contacts", 
+  "oldfieldtype": "Section Break", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Basic Info", 
+  "fieldname": "basic_info", 
+  "fieldtype": "Section Break", 
+  "reqd": 0, 
+  "permlevel": 0
  }, 
  {
   "print_hide": 0, 
@@ -183,7 +195,6 @@
  }, 
  {
   "doctype": "DocField", 
-  "label": "Communication History", 
   "fieldname": "communication_history", 
   "fieldtype": "Section Break", 
   "permlevel": 0
