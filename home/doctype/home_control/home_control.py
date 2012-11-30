@@ -238,14 +238,14 @@ class DocType:
 	# -------------------------------------------------------------------------------------------------------
 
 	def get_todo_reminder(self):
-		return convert_to_lists(sql("select name, description, date, priority,checked from `tabToDo` where owner=%s and date=%s and checked=1 order by priority, date", (session['user'], nowdate())))
+		return webnotes.conn.convert_to_lists(sql("select name, description, date, priority,checked from `tabToDo` where owner=%s and date=%s and checked=1 order by priority, date", (session['user'], nowdate())))
 		
 	# get user details
 	def get_users(self):
 		ret = {}
-		ret['usr'] = convert_to_lists(sql("select distinct name, concat_ws(' ', first_name, last_name), ifnull(messanger_status,'Available') from tabProfile where name=%s", session['user']))
-		ret['on'] = convert_to_lists(sql("select distinct t1.name, concat_ws(' ', t1.first_name, t1.last_name), ifnull(t1.messanger_status,'Available') from tabProfile t1, tabSessions t2 where t1.name = t2.user and t1.name not in('Guest',%s) and TIMESTAMPDIFF(HOUR,t2.lastupdate,NOW()) <= 1", session['user']))
-		ret['off'] = convert_to_lists(sql("select distinct t1.name, concat_ws(' ', t1.first_name, t1.last_name), ifnull(t1.messanger_status,'Offline') from tabProfile t1, tabSessions t2 where t1.name != t2.user and t1.name not in('Guest',%s) and t1.name not in(select distinct t1.name from tabProfile t1, tabSessions t2 where t1.name = t2.user and t1.name not in('Guest',%s) and (t1.messanger_status !='Invisible' or t1.messanger_status is null) and TIMESTAMPDIFF(HOUR,t2.lastupdate,NOW()) <= 1)", (session['user'], session['user'])))
+		ret['usr'] = webnotes.conn.convert_to_lists(sql("select distinct name, concat_ws(' ', first_name, last_name), ifnull(messanger_status,'Available') from tabProfile where name=%s", session['user']))
+		ret['on'] = webnotes.conn.convert_to_lists(sql("select distinct t1.name, concat_ws(' ', t1.first_name, t1.last_name), ifnull(t1.messanger_status,'Available') from tabProfile t1, tabSessions t2 where t1.name = t2.user and t1.name not in('Guest',%s) and TIMESTAMPDIFF(HOUR,t2.lastupdate,NOW()) <= 1", session['user']))
+		ret['off'] = webnotes.conn.convert_to_lists(sql("select distinct t1.name, concat_ws(' ', t1.first_name, t1.last_name), ifnull(t1.messanger_status,'Offline') from tabProfile t1, tabSessions t2 where t1.name != t2.user and t1.name not in('Guest',%s) and t1.name not in(select distinct t1.name from tabProfile t1, tabSessions t2 where t1.name = t2.user and t1.name not in('Guest',%s) and (t1.messanger_status !='Invisible' or t1.messanger_status is null) and TIMESTAMPDIFF(HOUR,t2.lastupdate,NOW()) <= 1)", (session['user'], session['user'])))
 
 		return ret
 		
@@ -268,7 +268,7 @@ class DocType:
 		show_list = ['Home','Setup','Accounts','Selling','Buying','Support','Stock','HR','Projects','Analysis','Production']
 		ml = filter(lambda x: x[0] in show_list, \
 			sql("select name, module_label, module_seq, is_hidden from `tabModule Def` where docstatus<2 order by module_seq asc, module_label asc"))
-		return convert_to_lists(ml)
+		return webnotes.conn.convert_to_lists(ml)
 			
 	def set_module_order(self,arg):
 		arg = eval(arg)
@@ -278,7 +278,7 @@ class DocType:
 	# -------------------------------------------------------------------------------------------------------
 
 	def get_bd_list(self):
-		bl = convert_to_lists(sql("select name,concat_ws(' ',first_name,last_name),birth_date from tabProfile where (birth_date is not null and birth_date != '') and (enabled is not null and enabled !='')"))
+		bl = webnotes.conn.convert_to_lists(sql("select name,concat_ws(' ',first_name,last_name),birth_date from tabProfile where (birth_date is not null and birth_date != '') and (enabled is not null and enabled !='')"))
 
 		nd = nowdate().split('-')
 		d = cint(nd[2])
