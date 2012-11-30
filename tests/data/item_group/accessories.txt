@@ -1,0 +1,27 @@
+# Item Group, Accessories
+[
+
+	# These values are common in all dictionaries
+	{
+		u'creation': '2012-08-07 09:55:59',
+		u'docstatus': 0,
+		u'modified': '2012-08-07 09:55:59',
+		u'modified_by': u'Administrator',
+		u'owner': u'Administrator'
+	},
+
+	# These values are common for all Item Group
+	{
+		u'doctype': 'Item Group',
+		'is_group': u'Yes',
+		'item_group_name': u'Accessories',
+		u'name': u'__common__',
+		'parent_item_group': u'All Item Groups'
+	},
+
+	# Item Group, Accessories
+	{
+		u'doctype': 'Item Group',
+		u'name': u'Accessories'
+	}
+]

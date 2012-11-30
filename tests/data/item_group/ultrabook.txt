@@ -1,0 +1,27 @@
+# Item Group, Ultrabook
+[
+
+	# These values are common in all dictionaries
+	{
+		u'creation': '2012-08-07 09:56:50',
+		u'docstatus': 0,
+		u'modified': '2012-08-07 09:56:50',
+		u'modified_by': u'Administrator',
+		u'owner': u'Administrator'
+	},
+
+	# These values are common for all Item Group
+	{
+		u'doctype': 'Item Group',
+		'is_group': u'No',
+		'item_group_name': u'Ultrabook',
+		u'name': u'__common__',
+		'parent_item_group': u'Laptops'
+	},
+
+	# Item Group, Ultrabook
+	{
+		u'doctype': 'Item Group',
+		u'name': u'Ultrabook'
+	}
+]
