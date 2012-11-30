@@ -1,358 +1,324 @@
-# DocType, Production Order
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-05-15 12:14:48',
-		'docstatus': 0,
-		'modified': '2012-05-28 19:03:56',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
-	},
-
-	# These values are common for all DocType
-	{
-		'_last_update': u'1325837006',
-		'colour': u'White:FFF',
-		'default_print_format': u'Standard',
-		'doctype': 'DocType',
-		'in_create': 0,
-		'is_submittable': 1,
-		'module': u'Production',
-		'name': '__common__',
-		'section_style': u'Tabbed',
-		'server_code_error': u' ',
-		'show_in_menu': 0,
-		'version': 1
-	},
-
-	# These values are common for all DocField
-	{
-		'doctype': u'DocField',
-		'name': '__common__',
-		'parent': u'Production Order',
-		'parentfield': u'fields',
-		'parenttype': u'DocType'
-	},
-
-	# These values are common for all DocPerm
-	{
-		'doctype': u'DocPerm',
-		'name': '__common__',
-		'parent': u'Production Order',
-		'parentfield': u'permissions',
-		'parenttype': u'DocType',
-		'read': 1
-	},
-
-	# DocType, Production Order
-	{
-		'doctype': 'DocType',
-		'name': u'Production Order'
-	},
-
-	# DocPerm
-	{
-		'amend': 1,
-		'cancel': 1,
-		'create': 1,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'System Manager',
-		'submit': 1,
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'All'
-	},
-
-	# DocPerm
-	{
-		'amend': 1,
-		'cancel': 1,
-		'create': 1,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Production Manager',
-		'submit': 1,
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'amend': 1,
-		'cancel': 1,
-		'create': 1,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Production User',
-		'submit': 1,
-		'write': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'column_break0',
-		'fieldtype': u'Column Break',
-		'permlevel': 0,
-		'width': u'50%'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'description': u'Item for which this Production Order is raised.',
-		'doctype': u'DocField',
-		'fieldname': u'production_item',
-		'fieldtype': u'Link',
-		'in_filter': 1,
-		'label': u'Production Item',
-		'oldfieldname': u'production_item',
-		'oldfieldtype': u'Link',
-		'options': u'Item',
-		'permlevel': 1,
-		'reqd': 1,
-		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'description',
-		'fieldtype': u'Text',
-		'label': u'Description',
-		'oldfieldname': u'description',
-		'oldfieldtype': u'Text',
-		'permlevel': 0,
-		'width': u'300px'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'stock_uom',
-		'fieldtype': u'Data',
-		'label': u'Stock UOM',
-		'oldfieldname': u'stock_uom',
-		'oldfieldtype': u'Data',
-		'permlevel': 1
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'description': u'Bill of Material which was considered for manufacturing the production item.',
-		'doctype': u'DocField',
-		'fieldname': u'bom_no',
-		'fieldtype': u'Link',
-		'label': u'BOM No',
-		'oldfieldname': u'bom_no',
-		'oldfieldtype': u'Link',
-		'options': u'BOM',
-		'permlevel': 1,
-		'reqd': 1,
-		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'description': u'Quantity of item for which Production Order is raised.',
-		'doctype': u'DocField',
-		'fieldname': u'qty',
-		'fieldtype': u'Currency',
-		'label': u'Qty',
-		'oldfieldname': u'qty',
-		'oldfieldtype': u'Currency',
-		'permlevel': 0,
-		'reqd': 1
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'description': u'The warehouse for finished goods where stock of produced items will be updated.',
-		'doctype': u'DocField',
-		'fieldname': u'fg_warehouse',
-		'fieldtype': u'Link',
-		'in_filter': 1,
-		'label': u'FG Warehouse',
-		'oldfieldname': u'fg_warehouse',
-		'oldfieldtype': u'Link',
-		'options': u'Warehouse',
-		'permlevel': 0,
-		'reqd': 1
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'description': u'The work in progress warehouse where raw materials will be operated upon to create finished goods.',
-		'doctype': u'DocField',
-		'fieldname': u'wip_warehouse',
-		'fieldtype': u'Link',
-		'in_filter': 1,
-		'label': u'WIP Warehouse',
-		'oldfieldname': u'wip_warehouse',
-		'oldfieldtype': u'Link',
-		'options': u'Warehouse',
-		'permlevel': 0,
-		'reqd': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'amended_from',
-		'fieldtype': u'Data',
-		'label': u'Amended From',
-		'no_copy': 1,
-		'oldfieldname': u'amended_from',
-		'oldfieldtype': u'Data',
-		'permlevel': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'amendment_date',
-		'fieldtype': u'Date',
-		'label': u'Amendment Date',
-		'no_copy': 1,
-		'oldfieldname': u'amendment_date',
-		'oldfieldtype': u'Date',
-		'permlevel': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'column_break1',
-		'fieldtype': u'Column Break',
-		'oldfieldtype': u'Column Break',
-		'permlevel': 0,
-		'width': u'50%'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'description': u'The date on which current entry will get or has actually executed.',
-		'doctype': u'DocField',
-		'fieldname': u'posting_date',
-		'fieldtype': u'Date',
-		'label': u'Posting Date',
-		'oldfieldname': u'posting_date',
-		'oldfieldtype': u'Date',
-		'permlevel': 0,
-		'reqd': 1
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'description': u'Select "Yes" if stock is maintained and tracked for sub-assembly items. Select "No" if you want child items of sub-assembly for material transfer.',
-		'doctype': u'DocField',
-		'fieldname': u'consider_sa_items',
-		'fieldtype': u'Select',
-		'in_filter': 1,
-		'label': u'Consider SA Items as raw material',
-		'oldfieldname': u'consider_sa_items',
-		'oldfieldtype': u'Select',
-		'options': u'\nYes\nNo',
-		'permlevel': 1,
-		'reqd': 1
-	},
-
-	# DocField
-	{
-		'description': u'Select name of the project if Production Order need to be created against any project',
-		'doctype': u'DocField',
-		'fieldname': u'project_name',
-		'fieldtype': u'Link',
-		'in_filter': 1,
-		'label': u'Project Name',
-		'oldfieldname': u'project_name',
-		'oldfieldtype': u'Link',
-		'options': u'Project',
-		'permlevel': 0,
-		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'origin',
-		'fieldtype': u'Select',
-		'in_filter': 1,
-		'label': u'Origin',
-		'no_copy': 1,
-		'oldfieldname': u'origin',
-		'oldfieldtype': u'Select',
-		'options': u'Manual\nMRP',
-		'permlevel': 1,
-		'reqd': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'status',
-		'fieldtype': u'Select',
-		'in_filter': 1,
-		'label': u'Status',
-		'no_copy': 1,
-		'oldfieldname': u'status',
-		'oldfieldtype': u'Select',
-		'options': u'\nDraft\nSubmitted\nStopped\nIn Process\nCompleted\nCancelled',
-		'permlevel': 1,
-		'reqd': 1,
-		'search_index': 1
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'description': u'Updated after finished goods are transferred to FG Warehouse through Stock Entry',
-		'doctype': u'DocField',
-		'fieldname': u'produced_qty',
-		'fieldtype': u'Currency',
-		'label': u'Produced Qty',
-		'no_copy': 1,
-		'oldfieldname': u'produced_qty',
-		'oldfieldtype': u'Currency',
-		'permlevel': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'company',
-		'fieldtype': u'Link',
-		'label': u'Company',
-		'oldfieldname': u'company',
-		'oldfieldtype': u'Link',
-		'options': u'Company',
-		'permlevel': 0,
-		'reqd': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'fiscal_year',
-		'fieldtype': u'Select',
-		'in_filter': 1,
-		'label': u'Fiscal Year',
-		'oldfieldname': u'fiscal_year',
-		'oldfieldtype': u'Select',
-		'options': u'link:Fiscal Year',
-		'permlevel': 0,
-		'reqd': 1
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-07-03 13:30:03", 
+  "modified_by": "Administrator", 
+  "modified": "2012-11-30 14:28:03"
+ }, 
+ {
+  "is_submittable": 1, 
+  "in_create": 0, 
+  "default_print_format": "Standard", 
+  "doctype": "DocType", 
+  "module": "Production", 
+  "name": "__common__"
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "Production Order", 
+  "doctype": "DocField", 
+  "parenttype": "DocType", 
+  "parentfield": "fields"
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "Production Order", 
+  "read": 1, 
+  "doctype": "DocPerm", 
+  "parenttype": "DocType", 
+  "parentfield": "permissions"
+ }, 
+ {
+  "name": "Production Order", 
+  "doctype": "DocType"
+ }, 
+ {
+  "doctype": "DocField", 
+  "width": "50%", 
+  "fieldname": "column_break0", 
+  "fieldtype": "Column Break", 
+  "permlevel": 0
+ }, 
+ {
+  "description": "Item for which this Production Order is raised.", 
+  "oldfieldtype": "Link", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Production Item", 
+  "oldfieldname": "production_item", 
+  "permlevel": 0, 
+  "trigger": "Client", 
+  "fieldname": "production_item", 
+  "fieldtype": "Link", 
+  "reqd": 1, 
+  "in_filter": 1, 
+  "options": "Item"
+ }, 
+ {
+  "description": "Bill of Material which was considered for manufacturing the production item.", 
+  "oldfieldtype": "Link", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "BOM No", 
+  "oldfieldname": "bom_no", 
+  "permlevel": 0, 
+  "trigger": "Client", 
+  "fieldname": "bom_no", 
+  "fieldtype": "Link", 
+  "reqd": 1, 
+  "options": "BOM"
+ }, 
+ {
+  "description": "Quantity of item for which Production Order is raised.", 
+  "oldfieldtype": "Currency", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Qty", 
+  "oldfieldname": "qty", 
+  "fieldname": "qty", 
+  "fieldtype": "Currency", 
+  "reqd": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "description": "The date on which current entry will get or has actually executed.", 
+  "oldfieldtype": "Date", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Posting Date", 
+  "oldfieldname": "posting_date", 
+  "fieldname": "posting_date", 
+  "fieldtype": "Date", 
+  "reqd": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "oldfieldtype": "Column Break", 
+  "doctype": "DocField", 
+  "width": "50%", 
+  "fieldname": "column_break1", 
+  "fieldtype": "Column Break", 
+  "permlevel": 0
+ }, 
+ {
+  "description": "The warehouse for finished goods where stock of produced items will be updated.", 
+  "oldfieldtype": "Link", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "FG Warehouse", 
+  "oldfieldname": "fg_warehouse", 
+  "permlevel": 0, 
+  "fieldname": "fg_warehouse", 
+  "fieldtype": "Link", 
+  "reqd": 1, 
+  "in_filter": 1, 
+  "options": "Warehouse"
+ }, 
+ {
+  "description": "The work in progress warehouse where raw materials will be operated upon to create finished goods.", 
+  "oldfieldtype": "Link", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "WIP Warehouse", 
+  "oldfieldname": "wip_warehouse", 
+  "permlevel": 0, 
+  "fieldname": "wip_warehouse", 
+  "fieldtype": "Link", 
+  "reqd": 1, 
+  "in_filter": 1, 
+  "options": "Warehouse"
+ }, 
+ {
+  "description": "If checked, BOM for sub-assembly items will be considered for getting raw materials. Otherwise, all sub-assembly items will be treated as a raw material.", 
+  "default": "1", 
+  "oldfieldtype": "Select", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Use Multi-Level BOM", 
+  "oldfieldname": "consider_sa_items", 
+  "fieldname": "use_multi_level_bom", 
+  "fieldtype": "Check", 
+  "reqd": 1, 
+  "in_filter": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "description": "Updated after finished goods are transferred to FG Warehouse through Stock Entry", 
+  "no_copy": 1, 
+  "oldfieldtype": "Currency", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Produced Qty", 
+  "oldfieldname": "produced_qty", 
+  "fieldname": "produced_qty", 
+  "fieldtype": "Currency", 
+  "permlevel": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "More Info", 
+  "fieldname": "more_info", 
+  "fieldtype": "Section Break", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "width": "50%", 
+  "fieldname": "column_break2", 
+  "fieldtype": "Column Break", 
+  "permlevel": 0
+ }, 
+ {
+  "no_copy": 1, 
+  "oldfieldtype": "Select", 
+  "doctype": "DocField", 
+  "label": "Origin", 
+  "oldfieldname": "origin", 
+  "options": "Manual\nMRP", 
+  "fieldname": "origin", 
+  "fieldtype": "Select", 
+  "reqd": 1, 
+  "permlevel": 0, 
+  "in_filter": 1
+ }, 
+ {
+  "no_copy": 1, 
+  "oldfieldtype": "Select", 
+  "doctype": "DocField", 
+  "label": "Status", 
+  "oldfieldname": "status", 
+  "permlevel": 1, 
+  "fieldname": "status", 
+  "fieldtype": "Select", 
+  "search_index": 1, 
+  "reqd": 1, 
+  "options": "\nDraft\nSubmitted\nStopped\nIn Process\nCompleted\nCancelled", 
+  "in_filter": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Sales Order", 
+  "options": "Sales Order", 
+  "fieldname": "sales_order", 
+  "fieldtype": "Link", 
+  "permlevel": 0
+ }, 
+ {
+  "description": "Select name of the project if Production Order need to be created against any project", 
+  "oldfieldtype": "Link", 
+  "label": "Project Name", 
+  "oldfieldname": "project_name", 
+  "trigger": "Client", 
+  "fieldname": "project_name", 
+  "fieldtype": "Link", 
+  "doctype": "DocField", 
+  "options": "Project", 
+  "permlevel": 0, 
+  "in_filter": 1
+ }, 
+ {
+  "oldfieldtype": "Link", 
+  "doctype": "DocField", 
+  "label": "Company", 
+  "oldfieldname": "company", 
+  "options": "Company", 
+  "fieldname": "company", 
+  "fieldtype": "Link", 
+  "reqd": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "oldfieldtype": "Select", 
+  "doctype": "DocField", 
+  "label": "Fiscal Year", 
+  "oldfieldname": "fiscal_year", 
+  "options": "link:Fiscal Year", 
+  "fieldname": "fiscal_year", 
+  "fieldtype": "Select", 
+  "reqd": 1, 
+  "permlevel": 0, 
+  "in_filter": 1
+ }, 
+ {
+  "no_copy": 1, 
+  "oldfieldtype": "Data", 
+  "doctype": "DocField", 
+  "label": "Amended From", 
+  "oldfieldname": "amended_from", 
+  "fieldname": "amended_from", 
+  "fieldtype": "Data", 
+  "permlevel": 1
+ }, 
+ {
+  "no_copy": 1, 
+  "oldfieldtype": "Date", 
+  "doctype": "DocField", 
+  "label": "Amendment Date", 
+  "oldfieldname": "amendment_date", 
+  "fieldname": "amendment_date", 
+  "fieldtype": "Date", 
+  "permlevel": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "width": "50%", 
+  "fieldname": "column_break3", 
+  "fieldtype": "Column Break", 
+  "permlevel": 0
+ }, 
+ {
+  "oldfieldtype": "Data", 
+  "doctype": "DocField", 
+  "label": "Stock UOM", 
+  "oldfieldname": "stock_uom", 
+  "fieldname": "stock_uom", 
+  "fieldtype": "Data", 
+  "permlevel": 1
+ }, 
+ {
+  "oldfieldtype": "Text", 
+  "doctype": "DocField", 
+  "label": "Production Item Description", 
+  "oldfieldname": "description", 
+  "width": "300px", 
+  "fieldname": "description", 
+  "fieldtype": "Text", 
+  "permlevel": 0
+ }, 
+ {
+  "amend": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "submit": 1, 
+  "write": 1, 
+  "role": "System Manager", 
+  "cancel": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "All", 
+  "permlevel": 1
+ }, 
+ {
+  "amend": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "submit": 1, 
+  "write": 1, 
+  "role": "Production Manager", 
+  "cancel": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "amend": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "submit": 1, 
+  "write": 1, 
+  "role": "Production User", 
+  "cancel": 1, 
+  "permlevel": 0
+ }
 ]

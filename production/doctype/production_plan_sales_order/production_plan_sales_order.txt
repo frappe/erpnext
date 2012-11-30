@@ -1,124 +1,84 @@
-# DocType, Production Plan Sales Order
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-03-27 14:36:04',
-		'docstatus': 0,
-		'modified': '2012-03-27 14:36:04',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
-	},
-
-	# These values are common for all DocType
-	{
-		'autoname': u'PP/.SO/.#####',
-		'colour': u'White:FFF',
-		'default_print_format': u'Standard',
-		'doctype': 'DocType',
-		'istable': 1,
-		'module': u'Production',
-		'name': '__common__',
-		'section_style': u'Simple',
-		'server_code_error': u' ',
-		'show_in_menu': 0,
-		'version': 5
-	},
-
-	# These values are common for all DocField
-	{
-		'doctype': u'DocField',
-		'name': '__common__',
-		'parent': u'Production Plan Sales Order',
-		'parentfield': u'fields',
-		'parenttype': u'DocType'
-	},
-
-	# These values are common for all DocPerm
-	{
-		'doctype': u'DocPerm',
-		'name': '__common__',
-		'parent': u'Production Plan Sales Order',
-		'parentfield': u'permissions',
-		'parenttype': u'DocType',
-		'read': 1,
-		'role': u'System Manager'
-	},
-
-	# DocType, Production Plan Sales Order
-	{
-		'doctype': 'DocType',
-		'name': u'Production Plan Sales Order'
-	},
-
-	# DocPerm
-	{
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'doctype': u'DocPerm',
-		'permlevel': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'sales_order',
-		'fieldtype': u'Link',
-		'label': u'Sales Order',
-		'oldfieldname': u'prevdoc_docname',
-		'oldfieldtype': u'Data',
-		'options': u'Sales Order',
-		'permlevel': 0,
-		'width': u'150px'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'sales_order_date',
-		'fieldtype': u'Date',
-		'label': u'Sales Order Date',
-		'oldfieldname': u'document_date',
-		'oldfieldtype': u'Date',
-		'permlevel': 1,
-		'width': u'100px'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'customer',
-		'fieldtype': u'Link',
-		'label': u'Customer',
-		'options': u'Customer',
-		'permlevel': 1,
-		'width': u'150px'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'grand_total',
-		'fieldtype': u'Currency',
-		'label': u'Grand Total',
-		'permlevel': 1,
-		'width': u'100px'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'include_in_plan',
-		'fieldtype': u'Check',
-		'label': u'Include In Plan',
-		'oldfieldname': u'include_in_plan',
-		'oldfieldtype': u'Check',
-		'permlevel': 0,
-		'width': u'100px'
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-07-03 13:30:04", 
+  "modified_by": "Administrator", 
+  "modified": "2012-11-29 17:49:15"
+ }, 
+ {
+  "istable": 1, 
+  "autoname": "PP/.SO/.#####", 
+  "name": "__common__", 
+  "default_print_format": "Standard", 
+  "doctype": "DocType", 
+  "module": "Production"
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "Production Plan Sales Order", 
+  "doctype": "DocField", 
+  "parenttype": "DocType", 
+  "parentfield": "fields"
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "Production Plan Sales Order", 
+  "read": 1, 
+  "doctype": "DocPerm", 
+  "parenttype": "DocType", 
+  "role": "System Manager", 
+  "parentfield": "permissions"
+ }, 
+ {
+  "name": "Production Plan Sales Order", 
+  "doctype": "DocType"
+ }, 
+ {
+  "oldfieldtype": "Data", 
+  "doctype": "DocField", 
+  "label": "Sales Order", 
+  "oldfieldname": "prevdoc_docname", 
+  "width": "150px", 
+  "options": "Sales Order", 
+  "fieldname": "sales_order", 
+  "fieldtype": "Link", 
+  "permlevel": 0
+ }, 
+ {
+  "oldfieldtype": "Date", 
+  "doctype": "DocField", 
+  "label": "SO Date", 
+  "oldfieldname": "document_date", 
+  "width": "120px", 
+  "fieldname": "sales_order_date", 
+  "fieldtype": "Date", 
+  "permlevel": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Customer", 
+  "width": "150px", 
+  "options": "Customer", 
+  "fieldname": "customer", 
+  "fieldtype": "Link", 
+  "permlevel": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Grand Total", 
+  "width": "120px", 
+  "fieldname": "grand_total", 
+  "fieldtype": "Currency", 
+  "permlevel": 1
+ }, 
+ {
+  "write": 1, 
+  "doctype": "DocPerm", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "permlevel": 1
+ }
 ]

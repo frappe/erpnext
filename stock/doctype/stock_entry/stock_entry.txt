@@ -2,9 +2,9 @@
  {
   "owner": "Administrator", 
   "docstatus": 0, 
-  "creation": "2012-11-02 17:16:56", 
+  "creation": "2012-11-28 11:26:22", 
   "modified_by": "Administrator", 
-  "modified": "2012-11-26 11:51:08"
+  "modified": "2012-11-30 14:10:02"
  }, 
  {
   "is_submittable": 1, 
@@ -195,14 +195,13 @@
   "permlevel": 0
  }, 
  {
-  "description": "Select \"Yes\" if stock is maintained and tracked for sub-assembly items. Select \"No\" if you want child items of sub-assembly for material transfer.", 
+  "description": "If checked, BOM for sub-assembly items will be considered for getting raw materials. Otherwise, all sub-assembly items will be treated as a raw material.", 
   "depends_on": "eval:doc.purpose == 'Other'", 
   "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Consider SA Items as Raw Materials", 
-  "options": "\nNo\nYes", 
-  "fieldname": "consider_sa_items_as_raw_materials", 
-  "fieldtype": "Select", 
+  "label": "Use Multi-Level BOM", 
+  "fieldname": "use_multi_level_bom", 
+  "fieldtype": "Check", 
   "permlevel": 0
  }, 
  {

@@ -697,4 +697,8 @@ patch_list = [
 		'patch_module': 'patches.november_2012',
 		'patch_file': 'leave_application_cleanup',
 	},
+	{
+		'patch_module': 'patches.november_2012',
+		'patch_file': 'production_order_patch',
+	},
 ]
