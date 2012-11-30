@@ -15,7 +15,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 wn.require('app/setup/doctype/contact_control/contact_control.js');
-wn.require('app/support/doctype/communication/communication.js');
 
 cur_frm.cscript.onload = function(doc,dt,dn){
 
@@ -29,7 +28,6 @@ cur_frm.cscript.onload = function(doc,dt,dn){
 	// make contact, history list body
 	//cur_frm.cscript.make_cl_body();
 	cur_frm.cscript.make_hl_body();
-	cur_frm.cscript.make_communication_body();
 }
 
 cur_frm.cscript.refresh = function(doc,dt,dn) {
@@ -46,8 +44,13 @@ cur_frm.cscript.refresh = function(doc,dt,dn) {
 		// make lists
 		cur_frm.cscript.make_address(doc,dt,dn);
 		cur_frm.cscript.make_contact(doc,dt,dn);
-		cur_frm.cscript.render_communication_list(doc, cdt, cdn);
 		cur_frm.cscript.make_history(doc,dt,dn);
+		
+		cur_frm.communication_view = new wn.views.CommunicationList({
+			list: wn.model.get("Communication", {"supplier": doc.name}),
+			parent: cur_frm.fields_dict.communication_html.wrapper,
+			doc: doc
+		})		
   }
 }
 

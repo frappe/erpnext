@@ -21,7 +21,6 @@ cur_frm.cscript.other_fname = "purchase_tax_details";
 wn.require('app/accounts/doctype/purchase_taxes_and_charges_master/purchase_taxes_and_charges_master.js');
 wn.require('app/buying/doctype/purchase_common/purchase_common.js');
 wn.require('app/utilities/doctype/sms_control/sms_control.js');
-wn.require('app/setup/doctype/notification_control/notification_control.js');
 
 cur_frm.cscript.onload = function(doc, cdt, cdn) {
 	// set missing values in parent doc
@@ -220,9 +219,7 @@ cur_frm.pformat.indent_no = function(doc, cdt, cdn){
 }
 
 cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
-	var args = {
-		type: 'Purchase Order',
-		doctype: 'Purchase Order'
+	if(cint(wn.boot.notification_settings.purchase_order)) {
+		cur_frm.email_doc(wn.boot.notification_settings.purchase_order);
 	}
-	cur_frm.cscript.notify(doc, args);
 }

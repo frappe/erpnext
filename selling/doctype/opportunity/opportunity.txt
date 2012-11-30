@@ -2,12 +2,13 @@
  {
   "owner": "Administrator", 
   "docstatus": 0, 
-  "creation": "2012-11-28 11:26:19", 
+  "creation": "2012-11-24 17:21:44", 
   "modified_by": "Administrator", 
-  "modified": "2012-11-16 12:27:49"
+  "modified": "2012-11-30 10:54:00"
  }, 
  {
   "is_submittable": 1, 
+  "autoname": "naming_series:", 
   "name": "__common__", 
   "default_print_format": "Standard", 
   "search_fields": "status,transaction_date,customer,lead,enquiry_type,territory,company", 
@@ -33,6 +34,16 @@
  {
   "name": "Opportunity", 
   "doctype": "DocType"
+ }, 
+ {
+  "description": "Enter customer enquiry for which you might raise a quotation in future", 
+  "oldfieldtype": "Section Break", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Basic Info", 
+  "fieldname": "basic_info", 
+  "fieldtype": "Section Break", 
+  "permlevel": 0
  }, 
  {
   "description": "To manage multiple series please go to Setup > Manage Series", 
@@ -154,15 +165,14 @@
   "oldfieldtype": "Section Break", 
   "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Communication History", 
   "fieldname": "communication_history", 
   "fieldtype": "Section Break", 
   "permlevel": 0
  }, 
  {
-  "allow_on_submit": 1, 
   "oldfieldtype": "Table", 
   "colour": "White:FFF", 
+  "allow_on_submit": 1, 
   "doctype": "DocField", 
   "label": "Communication HTML", 
   "oldfieldname": "follow_up", 

@@ -40,10 +40,8 @@ class DocType(TransactionBase):
 		self.tname = 'Sales Invoice Item'
 		self.fname = 'entries'
 
-
 	def autoname(self):
 		self.doc.name = make_autoname(self.doc.naming_series+ '.#####')
-
 
 	def set_pos_fields(self):
 		"""Set retail related fields from pos settings"""

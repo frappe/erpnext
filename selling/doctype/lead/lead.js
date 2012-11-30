@@ -73,7 +73,6 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 		doc: doc,
 		email: doc.email_id
 	})
-		
 }
 
 
