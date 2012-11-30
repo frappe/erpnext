@@ -24,7 +24,7 @@ from webnotes.model.wrapper import getlist, copy_doclist
 from webnotes.model.code import get_obj
 from webnotes import form, msgprint
 
-	
+get_value = webnotes.conn.get_value
 
 from utilities.transaction_base import TransactionBase
 

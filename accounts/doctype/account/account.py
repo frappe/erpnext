@@ -23,6 +23,7 @@ from webnotes.model.wrapper import copy_doclist
 from webnotes import msgprint
 
 sql = webnotes.conn.sql
+get_value = webnotes.conn.get_value
 
 class DocType:
 	def __init__(self,d,dl):
