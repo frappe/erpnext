@@ -49,7 +49,7 @@ class DocType:
 		tot = 0
 		for s in sr_nos:
 			serial_no = s.strip()
-			tot += flt(get_value('Serial No', serial_no, 'purchase_rate'))
+			tot += flt(webnotes.conn.get_value('Serial No', serial_no, 'purchase_rate'))
 		return tot / len(sr_nos)
 
 

@@ -341,7 +341,7 @@ class DocType(TransactionBase):
 		get_obj('Authorization Control').validate_approving_authority(self.doc.doctype, self.doc.grand_total, self)
 		
 		self.update_prevdoc_status('submit')
-		set(self.doc, 'status', 'Submitted')
+		webnotes.conn.set(self.doc, 'status', 'Submitted')
 	
 	def on_cancel(self):
 		# Cannot cancel stopped SO
@@ -353,7 +353,7 @@ class DocType(TransactionBase):
 		
 		self.update_prevdoc_status('cancel')
 		
-		set(self.doc, 'status', 'Cancelled')
+		webnotes.conn.set(self.doc, 'status', 'Cancelled')
 		
 	# does not allow to cancel document if DN or RV made against it is SUBMITTED 
 	# ----------------------------------------------------------------------------
@@ -395,14 +395,14 @@ class DocType(TransactionBase):
 	def stop_sales_order(self):
 		self.check_modified_date()
 		self.update_stock_ledger(update_stock = -1,clear = 1)
-		set(self.doc, 'status', 'Stopped')
+		webnotes.conn.set(self.doc, 'status', 'Stopped')
 		msgprint("""%s: %s has been Stopped. To make transactions against this Sales Order 
 			you need to Unstop it.""" % (self.doc.doctype, self.doc.name))
 
 	def unstop_sales_order(self):
 		self.check_modified_date()
 		self.update_stock_ledger(update_stock = 1,clear = 1)
-		set(self.doc, 'status', 'Submitted')
+		webnotes.conn.set(self.doc, 'status', 'Submitted')
 		msgprint("%s: %s has been Unstopped" % (self.doc.doctype, self.doc.name))
 
 

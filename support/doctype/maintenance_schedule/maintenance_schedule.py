@@ -102,7 +102,7 @@ class DocType(TransactionBase):
       for key in scheduled_date:
         if email_map[d.incharge_name]:
           self.add_calender_event(key["scheduled_date"],email_map[d.incharge_name],d.item_code)     
-    set(self.doc, 'status', 'Submitted')    
+    webnotes.conn.set(self.doc, 'status', 'Submitted')    
     
 
   def add_calender_event(self,scheduled_date,incharge_email,item_code):
@@ -274,7 +274,7 @@ class DocType(TransactionBase):
       sql("update `tabSerial No` set amc_expiry_date = '%s', maintenance_status = 'Under AMC' where name = '%s'"% (amc_end_date,x))
   
   def on_update(self):
-    set(self.doc, 'status', 'Draft')
+    webnotes.conn.set(self.doc, 'status', 'Draft')
   
   #validate that new maintenance start date does not clash with existing mntc end date
   #-------------------------------------------------------------------------------------------------
@@ -334,7 +334,7 @@ class DocType(TransactionBase):
     for d in getlist(self.doclist, 'item_maintenance_detail'):
       if d.serial_no:
         self.update_amc_date(d.serial_no, '')
-    set(self.doc, 'status', 'Cancelled')
+    webnotes.conn.set(self.doc, 'status', 'Cancelled')
     sql("delete from `tabEvent` where ref_type='Maintenance Schedule' and ref_name='%s' " %(self.doc.name))
   def on_trash(self):
     sql("delete from `tabEvent` where ref_type='Maintenance Schedule' and ref_name='%s' " %(self.doc.name))

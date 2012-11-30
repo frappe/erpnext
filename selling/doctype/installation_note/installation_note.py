@@ -171,7 +171,7 @@ class DocType(TransactionBase):
       raise Exception
   
   def on_update(self):
-    set(self.doc, 'status', 'Draft')
+    webnotes.conn.set(self.doc, 'status', 'Draft')
   
   def on_submit(self):
     valid_lst = []
@@ -187,7 +187,7 @@ class DocType(TransactionBase):
       
       sql("update `tabSerial No` set status = 'Installed' where name = '%s'" % x)
     
-    set(self.doc, 'status', 'Submitted')
+    webnotes.conn.set(self.doc, 'status', 'Submitted')
 
   
   def on_cancel(self):
@@ -204,4 +204,4 @@ class DocType(TransactionBase):
     for x in cur_s_no:
       sql("update `tabSerial No` set status = 'Delivered' where name = '%s'" % x)
       
-    set(self.doc, 'status', 'Cancelled')
+    webnotes.conn.set(self.doc, 'status', 'Cancelled')

@@ -52,7 +52,7 @@ class DocType(TransactionBase):
 			self.doc.name = make_autoname(self.doc.naming_series+'.#####')
 
 	def get_company_abbr(self):
-		return get_value('Company', self.doc.company, 'abbr')
+		return webnotes.conn.get_value('Company', self.doc.company, 'abbr')
 
 	def get_receivables_group(self):
 		g = sql("select receivables_group from tabCompany where name=%s", self.doc.company)

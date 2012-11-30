@@ -84,9 +84,9 @@ class DocType:
 	# Nobody can do SL Entries where posting date is before freezing date except authorized person
 	#----------------------------------------------------------------------------------------------
 	def check_stock_frozen_date(self):
-		stock_frozen_upto = get_value('Global Defaults', None, 'stock_frozen_upto') or ''
+		stock_frozen_upto = webnotes.conn.get_value('Global Defaults', None, 'stock_frozen_upto') or ''
 		if stock_frozen_upto:
-			stock_auth_role = get_value('Global Defaults', None,'stock_auth_role')
+			stock_auth_role = webnotes.conn.get_value('Global Defaults', None,'stock_auth_role')
 			if getdate(self.doc.posting_date) <= getdate(stock_frozen_upto) and not stock_auth_role in webnotes.user.get_roles():
 				msgprint("You are not authorized to do / modify back dated stock entries before %s" % getdate(stock_frozen_upto).strftime('%d-%m-%Y'), raise_exception=1)
 

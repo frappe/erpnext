@@ -148,11 +148,11 @@ class DocType(TransactionBase):
 	
 	def on_submit(self):
 		self.update_customer_issue(1)		
-		set(self.doc, 'status', 'Submitted')
+		webnotes.conn.set(self.doc, 'status', 'Submitted')
 	
 	def on_cancel(self):
 		self.check_if_last_visit()		
-		set(self.doc, 'status', 'Cancelled')
+		webnotes.conn.set(self.doc, 'status', 'Cancelled')
 
 	def on_update(self):
 		pass

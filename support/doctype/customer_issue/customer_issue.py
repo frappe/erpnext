@@ -52,7 +52,7 @@ class DocType(TransactionBase):
 			msgprint("Maintenance Visit No. "+lst1+" already created against this customer issue. So can not be Cancelled")
 			raise Exception
 		else:
-			set(self.doc, 'status', 'Cancelled')
+			webnotes.conn.set(self.doc, 'status', 'Cancelled')
 
 	def on_update(self):
 		pass

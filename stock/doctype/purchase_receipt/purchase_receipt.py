@@ -162,7 +162,7 @@ class DocType(TransactionBase):
 	def validate(self):
 		self.po_required()
 		self.validate_fiscal_year()
-		set(self.doc, 'status', 'Draft')			 # set status as "Draft"
+		webnotes.conn.set(self.doc, 'status', 'Draft')			 # set status as "Draft"
 		self.validate_accepted_rejected_qty()
 		self.validate_inspection()						 # Validate Inspection
 		get_obj('Stock Ledger').validate_serial_no(self, 'purchase_receipt_details')
@@ -301,7 +301,7 @@ class DocType(TransactionBase):
 		get_obj('Authorization Control').validate_approving_authority(self.doc.doctype, self.doc.company, self.doc.grand_total)
 
 		# Set status as Submitted
-		set(self.doc,'status', 'Submitted')
+		webnotes.conn.set(self.doc,'status', 'Submitted')
 		pc_obj = get_obj('Purchase Common')
 
 		# Update Previous Doc i.e. update pending_qty and Status accordingly
@@ -340,7 +340,7 @@ class DocType(TransactionBase):
 			raise Exception
 
 		# 2.Set Status as Cancelled
-		set(self.doc,'status','Cancelled')
+		webnotes.conn.set(self.doc,'status','Cancelled')
 
 		# 3. Cancel Serial No
 		get_obj('Stock Ledger').update_serial_record(self, 'purchase_receipt_details', is_submit = 0, is_incoming = 1)

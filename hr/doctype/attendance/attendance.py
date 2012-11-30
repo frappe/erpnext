@@ -41,7 +41,7 @@ class DocType:
     emp_nm = sql("select employee_name from `tabEmployee` where name=%s", self.doc.employee)
 
     #this is done because sometimes user entered wrong employee name while uploading employee attendance
-    set(self.doc, 'employee_name', emp_nm and emp_nm[0][0] or '')
+    webnotes.conn.set(self.doc, 'employee_name', emp_nm and emp_nm[0][0] or '')
 
     ret = { 'employee_name' : emp_nm and emp_nm[0][0] or ''}
     return ret
@@ -102,5 +102,5 @@ class DocType:
 
   def on_submit(self):
     #this is done because while uploading attendance chnage docstatus to 1 i.e. submit
-    set(self.doc,'docstatus',1)
+    webnotes.conn.set(self.doc,'docstatus',1)
     pass
