@@ -141,6 +141,9 @@ class DocType:
 	# ----------------
 	def save_entries(self, cancel, adv_adj, update_outstanding):
 		for le in self.entries:
+			# round off upto 2 decimal
+			le.debit, le.credit = round(le.debit, 2), round(le.credit, 2)
+			
 			#toggle debit, credit if negative entry
 			if flt(le.debit) < 0 or flt(le.credit) < 0:
 				tmp=le.debit
