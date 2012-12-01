@@ -141,7 +141,7 @@ class DocType:
 					'is_purchase_item'			:'Is Purchase Item',
 					'is_pro_applicable'		 :'Is Pro Applicable'}
 		for d in fl:
-			if cstr(self.doc.fields[d]) != 'Yes':
+			if cstr(self.doc.fields.get(d)) != 'Yes':
 				self.check_for_active_boms(check = fl[d])
 		self.check_ref_rate_detail()
 		self.fill_customer_code()

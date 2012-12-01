@@ -107,8 +107,7 @@ class DocType(TransactionBase):
 		#validation for Naming Series mandatory field...
 		if get_defaults()['supp_master_name'] == 'Naming Series':
 			if not self.doc.naming_series:
-				msgprint("Series is Mandatory.")
-				raise Exception
+				msgprint("Series is Mandatory.", raise_exception=1)
 	
 	def create_account_head(self):
 		if self.doc.company :
