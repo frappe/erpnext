@@ -214,3 +214,30 @@ cur_frm.cscript.delete_doc = function(doctype, name) {
 		}
 	});
 }
+
+// Render List
+cur_frm.cscript.render_list = function(doc, doctype, wrapper, ListView, make_new_doc) {
+	wn.model.with_doctype(doctype, function(r) {
+		if((r && r['403']) || wn.boot.profile.all_read.indexOf(doctype)===-1) {
+			return;
+		}
+		var RecordListView = wn.views.RecordListView.extend({
+			default_docstatus: ['0', '1', '2'],
+			default_filters: [
+				[doctype, doc.doctype.toLowerCase().replace(" ", "_"), '=', doc.name],
+			],
+		});
+		
+		if (make_new_doc) {
+			RecordListView = RecordListView.extend({
+				make_new_doc: make_new_doc,
+			});
+		}
+		
+		var record_list_view = new RecordListView(doctype, wrapper, ListView);
+		if (!cur_frm[doctype.toLowerCase().replace(" ", "_") + "_list"]) {
+			cur_frm[doctype.toLowerCase().replace(" ", "_") + "_list"] = record_list_view;
+		}
+	});
+}
+
