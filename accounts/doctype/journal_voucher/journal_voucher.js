@@ -27,6 +27,7 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 cur_frm.cscript.refresh = function(doc) {
 	cur_frm.cscript.is_opening(doc)
 	erpnext.hide_naming_series();
+	cur_frm.cscript.voucher_type(doc);
 }
 
 cur_frm.cscript.load_defaults = function(doc, cdt, cdn) {
@@ -211,6 +212,9 @@ cur_frm.cscript.view_ledger_entry = function(doc,cdt,cdn){
 
 cur_frm.cscript.voucher_type = function(doc, cdt, cdn) {
 	if(doc.voucher_type == 'Bank Voucher' && cstr(doc.company)) {
+		cur_frm.set_df_property("cheque_no", "reqd", true);
+		cur_frm.set_df_property("cheque_date", "reqd", true);
+
 		var children = getchildren('Journal Voucher Detail', doc.name, 'entries');
 		if(!children || children.length==0) {
 			$c('accounts.get_default_bank_account', {company: doc.company }, function(r, rt) {
@@ -221,5 +225,8 @@ cur_frm.cscript.voucher_type = function(doc, cdt, cdn) {
 				}
 			});
 		}
+	} else {
+		cur_frm.set_df_property("cheque_no", "reqd", false);
+		cur_frm.set_df_property("cheque_date", "reqd", false);		
 	}
 }
