@@ -54,9 +54,9 @@ class DocType:
 		r = []
 		if self.doc.cheque_no :
 			if self.doc.cheque_date:
-				r.append('Via cheque #%s dated %s' % (self.doc.cheque_no, formatdate(self.doc.cheque_date)))
+				r.append('Via Reference #%s dated %s' % (self.doc.cheque_no, formatdate(self.doc.cheque_date)))
 			else :
-				msgprint("Please enter cheque date")
+				msgprint("Please enter Reference date")
 				raise Exception
 		
 		for d in getlist(self.doclist, 'entries'):
