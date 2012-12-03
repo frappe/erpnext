@@ -43,19 +43,9 @@ class DocType(TransactionBase):
 	def autoname(self):
 		self.doc.name = make_autoname(self.doc.naming_series+'.#####')
 
-
-	# Client Trigger Functions
-	#----------------------------------------------------------------------------------------------------
-
-	def get_default_schedule_date(self):
-		get_obj(dt = 'Purchase Common').get_default_schedule_date(self)
-
-#-----------------Validation For Fiscal Year------------------------
 	def validate_fiscal_year(self):
 		get_obj(dt = 'Purchase Common').validate_fiscal_year(self.doc.fiscal_year,self.doc.posting_date,'Transaction Date')
 
-
-	# Get Item Details
 	def get_item_details(self, arg = ''):
 		if arg:
 			return get_obj(dt='Purchase Common').get_item_details(self,arg)
