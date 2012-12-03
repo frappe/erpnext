@@ -134,16 +134,6 @@ cur_frm.cscript.new_contact = function(){
 	loaddoc('Contact', tn);
 }
 
-//========================= Overloaded query for link batch_no =============================================================
-cur_frm.fields_dict['delivery_note_details'].grid.get_field('batch_no').get_query= function(doc, cdt, cdn) {
-	var d = locals[cdt][cdn];
-	if(d.item_code){
-		return "SELECT tabBatch.name, tabBatch.description FROM tabBatch WHERE tabBatch.docstatus != 2 AND tabBatch.item = '"+ d.item_code +"' AND `tabBatch`.`name` like '%s' ORDER BY `tabBatch`.`name` DESC LIMIT 50"
-	}
-	else{
-		alert("Please enter Item Code.");
-	}
-}
 
 // ***************** Get project name *****************
 cur_frm.fields_dict['project_name'].get_query = function(doc, cdt, cdn) {

@@ -35,8 +35,6 @@ class DocType(TransactionBase):
 		self.item_dict = {}
 		self.fname = 'mtn_details' 
   
-	# get item details
-	# ----------------
 	def get_item_details(self, arg):
 		import json
 		arg, actual_qty, in_rate = json.loads(arg), 0, 0
@@ -44,28 +42,24 @@ class DocType(TransactionBase):
 		item = sql("select stock_uom, description, item_name from `tabItem` where name = %s and (ifnull(end_of_life,'')='' or end_of_life ='0000-00-00' or end_of_life >	now())", (arg.get('item_code')), as_dict = 1)
 		if not item: 
 			msgprint("Item is not active", raise_exception=1)
-			
-		if arg.get('warehouse'):
-			actual_qty = self.get_as_on_stock(arg.get('item_code'), arg.get('warehouse'), self.doc.posting_date, self.doc.posting_time)
-			in_rate = self.get_incoming_rate(arg.get('item_code'), arg.get('warehouse'), self.doc.posting_date, self.doc.posting_time, arg.get('transfer_qty'), arg.get('serial_no')) or 0
-			
+						
 		ret = {
 			'uom'			      	: item and item[0]['stock_uom'] or '',
 			'stock_uom'			  	: item and item[0]['stock_uom'] or '',
 			'description'		  	: item and item[0]['description'] or '',
 			'item_name' 		  	: item and item[0]['item_name'] or '',
-			'actual_qty'		  	: actual_qty,
 			'qty'					: 0,
 			'transfer_qty'			: 0,
-			'incoming_rate'	  		: in_rate,
 			'conversion_factor'		: 1,
-     		'batch_no'          	: ''
+     		'batch_no'          	: '',
+			'actual_qty'			: 0,
+			'incoming_rate'			: 0
 		}
+		stock_and_rate = arg.get('warehouse') and self.get_warehouse_details(json.dumps(arg)) or {}
+		ret.update(stock_and_rate)
 		return ret
 
 
-	# Get UOM Details
-	# ----------------
 	def get_uom_details(self, arg = ''):
 		arg, ret = eval(arg), {}
 		uom = sql("select conversion_factor from `tabUOM Conversion Detail` where parent = %s and uom = %s", (arg['item_code'],arg['uom']), as_dict = 1)
@@ -78,28 +72,44 @@ class DocType(TransactionBase):
 				'transfer_qty'			: flt(arg['qty']) * flt(uom[0]['conversion_factor']),
 			}
 		return ret
-
 		
-
-	# get stock and incoming rate on posting date
-	# ---------------------------------------------
+	def get_warehouse_details(self, arg):
+		import json
+		arg, actual_qty, in_rate = json.loads(arg), 0, 0
+		ret = {
+			"actual_qty" : self.get_as_on_stock(arg.get('item_code'), arg.get('warehouse'),
+			 	self.doc.posting_date, self.doc.posting_time),
+			"incoming_rate" : 	self.get_incoming_rate(arg.get('item_code'), 
+			 	arg.get('warehouse'), self.doc.posting_date, self.doc.posting_time, 
+			 	arg.get('transfer_qty'), arg.get('serial_no'), arg.get('fg_item'),
+			 	arg.get('bom_no')) or 0
+		}
+		return ret
+			
+	
 	def get_stock_and_rate(self, bom_no = ''):
+		""" get stock and incoming rate on posting date"""
 		for d in getlist(self.doclist, 'mtn_details'):
 			# assign parent warehouse
-			d.s_warehouse = cstr(d.s_warehouse) or self.doc.purpose != 'Production Order' and self.doc.from_warehouse or ''
-			d.t_warehouse = cstr(d.t_warehouse) or self.doc.purpose != 'Production Order' and self.doc.to_warehouse or ''
+			d.s_warehouse = cstr(d.s_warehouse) or self.doc.purpose != 'Production Order' \
+				and self.doc.from_warehouse or ''
+			d.t_warehouse = cstr(d.t_warehouse) or self.doc.purpose != 'Production Order' \
+				and self.doc.to_warehouse or ''
 			
 			# get current stock at source warehouse
-			d.actual_qty = d.s_warehouse and self.get_as_on_stock(d.item_code, d.s_warehouse, self.doc.posting_date, self.doc.posting_time) or 0
+			d.actual_qty = self.get_as_on_stock(d.item_code, d.s_warehouse or d.t_warehouse, 
+				self.doc.posting_date, self.doc.posting_time) or 0
 
 			# get incoming rate
 			if not flt(d.incoming_rate):
-				d.incoming_rate = self.get_incoming_rate(d.item_code, d.s_warehouse, self.doc.posting_date, self.doc.posting_time, d.transfer_qty, d.serial_no, d.fg_item, d.bom_no or bom_no)
+				d.incoming_rate = self.get_incoming_rate(d.item_code, 
+					d.s_warehouse or d.t_warehouse, self.doc.posting_date, 
+					self.doc.posting_time, d.transfer_qty, d.serial_no, 
+					d.fg_item, d.bom_no or bom_no)
 
 
-	# Get stock qty on any date
-	# ---------------------------
 	def get_as_on_stock(self, item, wh, dt, tm):
+		"""Get stock qty on any date"""
 		bin = sql("select name from tabBin where item_code = %s and warehouse = %s", (item, wh))
 		bin_id = bin and bin[0][0] or ''
 		prev_sle = bin_id and get_obj('Bin', bin_id).get_prev_sle(dt, tm) or {}		
@@ -107,17 +117,15 @@ class DocType(TransactionBase):
 		return qty
 
 
-	# Get incoming rate
-	# -------------------
-	def get_incoming_rate(self, item, wh, dt, tm, qty = 0, serial_no = '', fg_item = 0, bom_no = ''):
+	def get_incoming_rate(self, item, wh, dt, tm, qty=0, serial_no='', fg_item=0, bom_no=''):
 		in_rate = 0
 		if fg_item and bom_no:
-			# re-calculate cost for production item from bom
-			get_obj('BOM Control').calculate_cost(bom_no)
-			bom_obj = get_obj('BOM', bom_no)
-			in_rate = flt(bom_obj.doc.total_cost) / (flt(bom_obj.doc.quantity) or 1)
+			in_rate = webnotes.conn.sql("""select ifnull(total_cost, 0) / ifnull(quantity, 1) 
+				from `tabBOM` where name = %s and docstatus=1""", bom_no, debug=1)
+			in_rate = in_rate and in_rate[0][0] or 0
 		elif wh:
-			in_rate = get_obj('Valuation Control').get_incoming_rate(dt, tm, item, wh, qty, serial_no)
+			in_rate = get_obj('Valuation Control').get_incoming_rate(dt, tm, 
+				item, wh, qty, serial_no)
 		
 		return in_rate
 
@@ -205,6 +213,10 @@ class DocType(TransactionBase):
 
 	def validate_bom_no(self):
 		if self.doc.bom_no:
+			if not webnotes.conn.sql("""select name from tabBOM where name = %s and docstatus = 1
+			 		and ifnull(is_active, 'No') = 'Yes'""", self.doc.bom_no):
+				msgprint("""BOM: %s not found, may be it has been cancelled or inactivated""" %
+					self.doc.bom_no, raise_exception=1)
 			if not self.doc.fg_completed_qty:
 				msgprint("Please enter FG Completed Qty", raise_exception=1)
 
@@ -215,7 +227,8 @@ class DocType(TransactionBase):
 			self.validate_for_production_order(pro_obj)
 
 			bom_no = pro_obj.doc.bom_no
-			fg_qty = (self.doc.process == 'Backflush') and flt(self.doc.fg_completed_qty) or flt(pro_obj.doc.qty)
+			fg_qty = (self.doc.process == 'Backflush') and flt(self.doc.fg_completed_qty) \
+				or flt(pro_obj.doc.qty)
 			use_multi_level_bom = pro_obj.doc.use_multi_level_bom
 		elif self.doc.purpose == 'Other':
 			self.validate_bom_no()
@@ -234,22 +247,30 @@ class DocType(TransactionBase):
 		if self.doc.process == 'Backflush':
 			sw = ''
 			tw = cstr(pro_obj.doc.fg_warehouse)	
-			fg_item_dict = {cstr(pro_obj.doc.production_item) : [self.doc.fg_completed_qty, pro_obj.doc.description, pro_obj.doc.stock_uom]}
+			fg_item_dict = {
+				cstr(pro_obj.doc.production_item) : [self.doc.fg_completed_qty,
+				 	pro_obj.doc.description, pro_obj.doc.stock_uom]
+			}
 		elif self.doc.purpose == 'Other' and self.doc.bom_no:
 			sw, tw = '', ''
 			item = sql("select item, description, uom from `tabBOM` where name = %s", self.doc.bom_no, as_dict=1)
-			fg_item_dict = {item[0]['item'] : [self.doc.fg_completed_qty, item[0]['description'], item[0]['uom']]}
+			fg_item_dict = {
+				item[0]['item'] : [self.doc.fg_completed_qty, 
+					item[0]['description'], item[0]['uom']]
+			}
 
 		if fg_item_dict:
 			self.add_to_stock_entry_detail(sw, tw, fg_item_dict, fg_item = 1, bom_no = bom_no)
+			
+		self.get_stock_and_rate()
 			
 
 
 	def validate_transfer_qty(self):
 		for d in getlist(self.doclist, 'mtn_details'):
 			if flt(d.transfer_qty) <= 0:
-				msgprint("Transfer Quantity can not be less than or equal to zero at Row No " + cstr(d.idx))
-				raise Exception
+				msgprint("Transfer Quantity can not be less than or equal to zero \
+				 at Row No " + cstr(d.idx), raise_exception=1)
 
 
 	def calc_amount(self):
@@ -326,8 +347,10 @@ class DocType(TransactionBase):
 		self.validate_incoming_rate()
 		self.validate_bom_belongs_to_item()
 		self.calc_amount()
-		get_obj('Sales Common').validate_fiscal_year(self.doc.fiscal_year,self.doc.posting_date,'Posting Date')
-		
+		get_obj('Sales Common').validate_fiscal_year(self.doc.fiscal_year, 
+			self.doc.posting_date, 'Posting Date')
+		if self.doc.purpose == 'Other':
+			self.validate_bom_no()
 	
 	# If target warehouse exists, incoming rate is mandatory
 	# --------------------------------------------------------
