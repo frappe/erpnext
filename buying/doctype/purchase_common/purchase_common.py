@@ -353,10 +353,9 @@ class DocType(TransactionBase):
 				raise Exception
 			
 			# validate stock item
-			if item[0][0]=='Yes':
-				if not d.warehouse:
-					msgprint("Warehouse is mandatory for %s, since it is a stock item" % d.item_code)
-					raise Exception
+			if item[0][0]=='Yes' and d.qty and not d.warehouse:
+					msgprint("Warehouse is mandatory for %s, since it is a stock item" %
+					 	d.item_code, raise_exception=1)
 			
 			# validate purchase item
 			if item[0][1] != 'Yes' and item[0][2] != 'Yes':
