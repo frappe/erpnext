@@ -2,6 +2,7 @@ import webnotes
 import email.utils
 
 def execute():
+	webnotes.reload_doc("core", "doctype", "communication")
 	webnotes.conn.commit()
 	for d in webnotes.conn.sql("""select owner, creation, modified, modified_by, parent, 
 		from_email, mail from `tabSupport Ticket Response`""", as_dict=1):

@@ -48,7 +48,7 @@ class DocType:
 			from `tabEmployee` t1, `tabSalary Structure` t2 
 			where t1.docstatus!=2 and t2.docstatus != 2 
 			and t1.name = t2.employee
-		%s """% cond, debug=1)
+		%s """% cond)
 
 		return emp_list
 		

@@ -4,7 +4,7 @@
   "docstatus": 0, 
   "creation": "2012-11-28 11:26:18", 
   "modified_by": "Administrator", 
-  "modified": "2012-11-14 17:04:57"
+  "modified": "2012-12-03 17:10:41"
  }, 
  {
   "autoname": "field:project_name", 

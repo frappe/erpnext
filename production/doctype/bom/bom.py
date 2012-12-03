@@ -152,7 +152,6 @@ class DocType:
 			sql("update `tabItem` set default_bom = %s where name = %s", (self.doc.name, self.doc.item))
 		else:
 			sql("update `tabItem` set default_bom = '' where name = %s and default_bom = %s", (self.doc.item, self.doc.name))
-	
 
 
 	def manage_active_bom(self):
@@ -193,24 +192,22 @@ class DocType:
 		total_op_cost = 0
 		for d in getlist(self.doclist, 'bom_operations'):
 			hour_rate = sql("select hour_rate from `tabWorkstation` where name = %s", cstr(d.workstation))
-			d.hour_rate = hour_rate and flt(hour_rate[0][0]) or 0
-			d.operating_cost = flt(d.hour_rate) * flt(d.time_in_mins) / 60
+			d.hour_rate = hour_rate and flt(hour_rate[0][0]) or d.hour_rate or 0
+			d.operating_cost = d.hour_rate and d.time_in_mins and \
+				flt(d.hour_rate) * flt(d.time_in_mins) / 60 or d.operating_cost
 			d.save()
 			total_op_cost += d.operating_cost
 		self.doc.operating_cost = total_op_cost
-
 
 
 	def calculate_rm_cost(self):
 		"""Fetch RM rate as per today's valuation rate and calculate totals"""
 		total_rm_cost = 0
 		for d in getlist(self.doclist, 'bom_materials'):
-			#if self.doc.rm_cost_as_per == 'Valuation Rate':
 			arg = {'item_code': d.item_code, 'qty': d.qty, 'bom_no': d.bom_no}
 			ret = self.get_bom_material_detail(cstr(arg))
 			for k in ret:
 				d.fields[k] = ret[k]
-
 			d.amount = flt(d.rate) * flt(d.qty)
 			d.save()
 			total_rm_cost += d.amount
@@ -284,14 +281,10 @@ class DocType:
 			check_list.append([cstr(item), cstr(op)])
 
 
-
-	#----- Document on Save function------
 	def validate(self):
 		self.validate_main_item()
 		self.validate_operations()
 		self.validate_materials()
-
-
 
 	def check_recursion(self):
 		""" Check whether reqursion occurs in any bom"""

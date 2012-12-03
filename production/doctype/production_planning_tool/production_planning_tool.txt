@@ -4,7 +4,7 @@
   "docstatus": 0, 
   "creation": "2012-07-03 13:30:03", 
   "modified_by": "Administrator", 
-  "modified": "2012-11-30 14:08:55"
+  "modified": "2012-12-03 15:39:44"
  }, 
  {
   "read_only": 1, 
@@ -164,7 +164,7 @@
   "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Use Multi-Level BOM", 
-  "reqd": 1, 
+  "reqd": 0, 
   "fieldname": "use_multi_level_bom", 
   "fieldtype": "Check"
  }, 
