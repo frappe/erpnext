@@ -24,13 +24,13 @@ def get_list(arg=None):
 	webnotes.form_dict['limit_page_length'] = int(webnotes.form_dict['limit_page_length'])
 	webnotes.form_dict['user'] = webnotes.session['user']
 
+	# set all messages as read
+	webnotes.conn.sql("""UPDATE `tabComment`
+	set docstatus = 1 where comment_doctype in ('My Company', 'Message')
+	and comment_docname = %s
+	""", webnotes.user.name)
+
 	if webnotes.form_dict['contact'] == webnotes.session['user']:
-		# set all messages as read
-		webnotes.conn.sql("""UPDATE `tabComment`
-		set docstatus = 1 where comment_doctype in ('My Company', 'Message')
-		and comment_docname = %s
-		""", webnotes.user.name)
-				
 		# return messages
 		return webnotes.conn.sql("""select * from `tabComment` 
 		where (owner=%(contact)s 

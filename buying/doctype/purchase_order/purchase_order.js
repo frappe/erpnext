@@ -220,6 +220,6 @@ cur_frm.pformat.indent_no = function(doc, cdt, cdn){
 
 cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
 	if(cint(wn.boot.notification_settings.purchase_order)) {
-		cur_frm.email_doc(wn.boot.notification_settings.purchase_order);
+		cur_frm.email_doc(wn.boot.notification_settings.purchase_order_message);
 	}
 }

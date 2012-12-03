@@ -369,6 +369,6 @@ cur_frm.fields_dict['territory'].get_query = function(doc,cdt,cdn) {
 
 cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
 	if(cint(wn.boot.notification_settings.sales_order)) {
-		cur_frm.email_doc(wn.boot.notification_settings.sales_order);
+		cur_frm.email_doc(wn.boot.notification_settings.sales_order_message);
 	}
 }

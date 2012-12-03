@@ -498,7 +498,7 @@ cur_frm.cscript.view_ledger_entry = function(){
 
 cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
 	if(cint(wn.boot.notification_settings.sales_invoice)) {
-		cur_frm.email_doc(wn.boot.notification_settings.sales_invoice);
+		cur_frm.email_doc(wn.boot.notification_settings.sales_invoice_message);
 	}
 }
 
