@@ -78,7 +78,7 @@ class DocType:
 	def validate_root_details(self):
 		#does not exists parent
 		if webnotes.conn.exists("Account", self.doc.name):
-			if not self.doc.get_value("Account", self.doc.name, "parent_account"):
+			if not webnotes.conn.get_value("Account", self.doc.name, "parent_account"):
 				webnotes.msgprint("Root cannot be edited.", raise_exception=1)
 			
 	def convert_group_to_ledger(self):
@@ -182,10 +182,13 @@ class DocType:
 	def on_rename(self,newdn,olddn):
 		company_abbr = sql("select tc.abbr from `tabAccount` ta, `tabCompany` tc where ta.company = tc.name and ta.name=%s", olddn)[0][0]
 		
-		newdnchk = newdn.split(" - ")	
+		parts = newdn.split(" - ")	
 
-		if newdnchk[-1].lower() != company_abbr.lower():
-			msgprint("Please add company abbreviation <b>%s</b>" %(company_abbr), raise_exception=1)
-		else:
-			account_name = " - ".join(newdnchk[:-1])
-			sql("update `tabAccount` set account_name = '%s' where name = '%s'" %(account_name,olddn))
+		if parts[-1].lower() != company_abbr.lower():
+			parts.append(company_abbr)
+
+		account_name = " - ".join(parts[:-1])
+		sql("update `tabAccount` set account_name = '%s' where name = '%s'" % \
+			(account_name,olddn))
+		
+		return " - ".join(parts)

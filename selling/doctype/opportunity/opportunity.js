@@ -94,8 +94,21 @@ cur_frm.cscript.lead_cust_show = function(doc,cdt,cdn){
 
 // customer
 cur_frm.cscript.customer = function(doc,dt,dn) {
-	if(doc.customer) get_server_fields('get_default_customer_address', JSON.stringify({customer: doc.customer}),'', doc, dt, dn, 1);
-	if(doc.customer) unhide_field(['customer_name','customer_address','contact_person','address_display','contact_display','contact_mobile','contact_email','territory','customer_group']);
+	if(doc.customer) {
+		cur_frm.call({
+			method: "get_default_customer_address",
+			args: { customer: doc.customer },
+			callback: function(r) {
+				if(!r.exc) {
+					cur_frm.refresh();
+				}
+			}
+		});
+		
+		unhide_field(["customer_name", "customer_address", "contact_person",
+			"address_display", "contact_display", "contact_mobile", "contact_email",
+			"territory", "customer_group"]);
+	}
 }
 
 cur_frm.cscript.customer_address = cur_frm.cscript.contact_person = function(doc,dt,dn) {		

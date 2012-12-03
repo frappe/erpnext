@@ -125,6 +125,7 @@ class DocType(TransactionBase):
 				parent_account = self.get_receivables_group()
 				arg = {'account_name':self.doc.name,'parent_account': parent_account, 'group_or_ledger':'Ledger', 'company':self.doc.company,'account_type':'','tax_rate':'0','master_type':'Customer','master_name':self.doc.name,'address':self.doc.address}
 				# create
+				
 				ac = get_obj('GL Control').add_ac(cstr(arg))
 				msgprint("Account Head created for "+ac)
 		else :
@@ -236,5 +237,11 @@ class DocType(TransactionBase):
 			for rec in update_fields:
 				sql("update `tab%s` set customer_name = '%s' where %s = '%s'" %(rec[0],newdn,rec[1],olddn))
 				
+		old_account = webnotes.conn.get_value("Account", {"master_type": "Customer",
+			"master_name": olddn})
+				
 		#update master_name in doctype account
 		sql("update `tabAccount` set master_name = '%s', master_type = 'Customer' where master_name = '%s'" %(newdn,olddn))
+		
+		from webnotes.model.rename_doc import rename_doc
+		rename_doc("Account", old_account, newdn)
