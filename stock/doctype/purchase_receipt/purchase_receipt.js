@@ -32,13 +32,8 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 
 cur_frm.cscript.onload_post_render = function(doc, dt, dn) {
 	var callback = function(doc, dt, dn) {
-		var callback1 = function(doc, dt, dn) {
-			if(doc.__islocal){ 
-				cur_frm.cscript.get_default_schedule_date(doc);
-			}
-		}
 		// defined in purchase_common.js
-		cur_frm.cscript.update_item_details(doc, dt, dn, callback1);	
+		cur_frm.cscript.update_item_details(doc, dt, dn, function(r,rt) { });	
 	}
 	cur_frm.cscript.dynamic_label(doc, dt, dn, callback);
 }
@@ -116,13 +111,6 @@ cur_frm.cscript.new_contact = function(){
 	locals['Contact'][tn].is_supplier = 1;
 	if(doc.supplier) locals['Contact'][tn].supplier = doc.supplier;
 	loaddoc('Contact', tn);
-}
-
-//======================= posting date =============================
-cur_frm.cscript.transaction_date = function(doc,cdt,cdn){
-	if(doc.__islocal){ 
-		cur_frm.cscript.get_default_schedule_date(doc);
-	}
 }
 
 // ***************** Get project name *****************
