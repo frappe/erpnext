@@ -1,160 +1,129 @@
-# DocType, Timesheet Detail
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-03-27 14:36:07',
-		'docstatus': 0,
-		'modified': '2012-03-27 14:36:07',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
-	},
-
-	# These values are common for all DocType
-	{
-		'autoname': u'TSD.#####',
-		'colour': u'White:FFF',
-		'doctype': 'DocType',
-		'module': u'Projects',
-		'name': '__common__',
-		'section_style': u'Simple',
-		'server_code_error': u' ',
-		'version': 15
-	},
-
-	# These values are common for all DocField
-	{
-		'doctype': u'DocField',
-		'name': '__common__',
-		'parent': u'Timesheet Detail',
-		'parentfield': u'fields',
-		'parenttype': u'DocType'
-	},
-
-	# DocType, Timesheet Detail
-	{
-		'doctype': 'DocType',
-		'name': u'Timesheet Detail'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'act_start_time',
-		'fieldtype': u'Time',
-		'label': u'Actual Start Time',
-		'oldfieldname': u'act_start_time',
-		'oldfieldtype': u'Time',
-		'permlevel': 0,
-		'reqd': 1,
-		'width': u'160px'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'act_end_time',
-		'fieldtype': u'Time',
-		'label': u'Actual End Time',
-		'oldfieldname': u'act_end_time',
-		'oldfieldtype': u'Time',
-		'permlevel': 0,
-		'reqd': 1,
-		'width': u'160px'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'activity_type',
-		'fieldtype': u'Link',
-		'label': u'Activity Type',
-		'options': u'Activity Type',
-		'permlevel': 0,
-		'reqd': 1,
-		'search_index': 0,
-		'width': u'200px'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'other_details',
-		'fieldtype': u'Text',
-		'label': u'Additional Info',
-		'oldfieldname': u'other_details',
-		'oldfieldtype': u'Text',
-		'permlevel': 0,
-		'width': u'200px'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'act_total_hrs',
-		'fieldtype': u'Data',
-		'label': u'Total Hours (Actual)',
-		'oldfieldname': u'act_total_hrs',
-		'oldfieldtype': u'Data',
-		'permlevel': 1,
-		'width': u'100px'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'customer_name',
-		'fieldtype': u'Link',
-		'label': u'Customer Name',
-		'oldfieldname': u'customer_name',
-		'oldfieldtype': u'Data',
-		'options': u'Customer',
-		'permlevel': 0,
-		'width': u'150px'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'project_name',
-		'fieldtype': u'Link',
-		'in_filter': 1,
-		'label': u'Project',
-		'oldfieldname': u'project_name',
-		'oldfieldtype': u'Link',
-		'options': u'Project',
-		'permlevel': 0,
-		'reqd': 0,
-		'search_index': 1,
-		'width': u'150px'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'task_id',
-		'fieldtype': u'Link',
-		'in_filter': 1,
-		'label': u'Task Id',
-		'oldfieldname': u'task_id',
-		'oldfieldtype': u'Link',
-		'options': u'Task',
-		'permlevel': 0,
-		'search_index': 1,
-		'width': u'150px'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'task_name',
-		'fieldtype': u'Link',
-		'label': u'Task Name',
-		'oldfieldname': u'task_name',
-		'oldfieldtype': u'Link',
-		'permlevel': 0,
-		'reqd': 0,
-		'search_index': 0,
-		'width': u'250px'
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-11-30 18:13:54", 
+  "modified_by": "Administrator", 
+  "modified": "2012-12-03 09:33:28"
+ }, 
+ {
+  "autoname": "TSD.#####", 
+  "name": "__common__", 
+  "doctype": "DocType", 
+  "module": "Projects"
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "Timesheet Detail", 
+  "doctype": "DocField", 
+  "parenttype": "DocType", 
+  "parentfield": "fields"
+ }, 
+ {
+  "name": "Timesheet Detail", 
+  "doctype": "DocType"
+ }, 
+ {
+  "oldfieldtype": "Time", 
+  "doctype": "DocField", 
+  "label": "Actual Start Time", 
+  "oldfieldname": "act_start_time", 
+  "width": "160px", 
+  "fieldname": "act_start_time", 
+  "fieldtype": "Time", 
+  "reqd": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "oldfieldtype": "Time", 
+  "doctype": "DocField", 
+  "label": "Actual End Time", 
+  "oldfieldname": "act_end_time", 
+  "width": "160px", 
+  "fieldname": "act_end_time", 
+  "fieldtype": "Time", 
+  "reqd": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "search_index": 0, 
+  "doctype": "DocField", 
+  "label": "Activity Type", 
+  "width": "200px", 
+  "options": "Activity Type", 
+  "fieldname": "activity_type", 
+  "fieldtype": "Link", 
+  "reqd": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "oldfieldtype": "Text", 
+  "doctype": "DocField", 
+  "label": "Additional Info", 
+  "oldfieldname": "other_details", 
+  "width": "200px", 
+  "fieldname": "other_details", 
+  "fieldtype": "Text", 
+  "permlevel": 0
+ }, 
+ {
+  "oldfieldtype": "Data", 
+  "doctype": "DocField", 
+  "label": "Total Hours (Actual)", 
+  "oldfieldname": "act_total_hrs", 
+  "width": "100px", 
+  "fieldname": "act_total_hrs", 
+  "fieldtype": "Data", 
+  "permlevel": 1
+ }, 
+ {
+  "oldfieldtype": "Data", 
+  "doctype": "DocField", 
+  "label": "Customer Name", 
+  "oldfieldname": "customer_name", 
+  "width": "150px", 
+  "options": "Customer", 
+  "fieldname": "customer_name", 
+  "fieldtype": "Link", 
+  "permlevel": 0
+ }, 
+ {
+  "permlevel": 0, 
+  "oldfieldtype": "Link", 
+  "doctype": "DocField", 
+  "label": "Project", 
+  "oldfieldname": "project_name", 
+  "width": "150px", 
+  "fieldname": "project_name", 
+  "fieldtype": "Link", 
+  "search_index": 1, 
+  "reqd": 0, 
+  "options": "Project", 
+  "in_filter": 1
+ }, 
+ {
+  "oldfieldtype": "Link", 
+  "doctype": "DocField", 
+  "label": "Task Id", 
+  "oldfieldname": "task_id", 
+  "width": "150px", 
+  "options": "Task", 
+  "fieldname": "task_id", 
+  "fieldtype": "Link", 
+  "search_index": 1, 
+  "permlevel": 0, 
+  "in_filter": 1
+ }, 
+ {
+  "oldfieldtype": "Link", 
+  "doctype": "DocField", 
+  "label": "Task Name", 
+  "oldfieldname": "task_name", 
+  "width": "250px", 
+  "fieldname": "task_name", 
+  "fieldtype": "Data", 
+  "search_index": 0, 
+  "reqd": 0, 
+  "permlevel": 0
+ }
 ]
