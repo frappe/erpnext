@@ -2,19 +2,20 @@
  {
   "owner": "Administrator", 
   "docstatus": 0, 
-  "creation": "2012-11-24 17:21:44", 
+  "creation": "2012-12-03 10:31:06", 
   "modified_by": "Administrator", 
-  "modified": "2012-11-30 10:54:00"
+  "modified": "2012-12-03 13:57:32"
  }, 
  {
   "is_submittable": 1, 
   "autoname": "naming_series:", 
-  "name": "__common__", 
+  "description": "Potential Sales Deal", 
   "default_print_format": "Standard", 
   "search_fields": "status,transaction_date,customer,lead,enquiry_type,territory,company", 
   "module": "Selling", 
   "doctype": "DocType", 
-  "document_type": "Transaction"
+  "document_type": "Transaction", 
+  "name": "__common__"
  }, 
  {
   "name": "__common__", 
@@ -34,16 +35,6 @@
  {
   "name": "Opportunity", 
   "doctype": "DocType"
- }, 
- {
-  "description": "Enter customer enquiry for which you might raise a quotation in future", 
-  "oldfieldtype": "Section Break", 
-  "colour": "White:FFF", 
-  "doctype": "DocField", 
-  "label": "Basic Info", 
-  "fieldname": "basic_info", 
-  "fieldtype": "Section Break", 
-  "permlevel": 0
  }, 
  {
   "description": "To manage multiple series please go to Setup > Manage Series", 
@@ -475,13 +466,23 @@
   "permlevel": 1
  }, 
  {
+  "amend": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "submit": 0, 
+  "write": 0, 
+  "cancel": 0, 
+  "role": "Sales Manager", 
+  "permlevel": 1
+ }, 
+ {
   "amend": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
   "submit": 1, 
   "write": 1, 
-  "role": "System Manager", 
   "cancel": 1, 
+  "role": "System Manager", 
   "permlevel": 0
  }, 
  {
@@ -495,8 +496,8 @@
   "doctype": "DocPerm", 
   "submit": 1, 
   "write": 1, 
-  "role": "Sales User", 
   "cancel": 1, 
+  "role": "Sales User", 
   "permlevel": 0
  }, 
  {
@@ -505,8 +506,8 @@
   "doctype": "DocPerm", 
   "submit": 0, 
   "write": 0, 
-  "role": "Sales User", 
   "cancel": 0, 
+  "role": "Sales User", 
   "permlevel": 1
  }, 
  {
@@ -515,18 +516,8 @@
   "doctype": "DocPerm", 
   "submit": 1, 
   "write": 1, 
-  "role": "Sales Manager", 
   "cancel": 1, 
-  "permlevel": 0
- }, 
- {
-  "amend": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "submit": 0, 
-  "write": 0, 
   "role": "Sales Manager", 
-  "cancel": 0, 
-  "permlevel": 1
+  "permlevel": 0
  }
 ]
