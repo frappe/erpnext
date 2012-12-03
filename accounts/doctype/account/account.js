@@ -23,6 +23,11 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 // Refresh
 // -----------------------------------------
 cur_frm.cscript.refresh = function(doc, cdt, cdn) {
+	if(doc.__islocal) {
+		msgprint("Please create new account from Chart of Accounts.");
+		throw "cannot create";
+	}
+
 	cur_frm.toggle_display('account_name', doc.__islocal);
 	
 	// hide fields if group
@@ -34,7 +39,7 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 		'is_pl_account', 'company'], false);
 
 	// read-only for root accounts
-  	root_acc = ['Application of Funds (Assets)','Expenses','Income','Source of Funds (Liabilities)'];
+  	root_acc = doc.parent ? false : true;
 	if(in_list(root_acc, doc.account_name)) {
 		cur_frm.perm = [[1,0,0], [1,0,0]];
 		cur_frm.set_intro("This is a root account and cannot be edited.");
@@ -48,7 +53,7 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 		cur_frm.cscript.account_type(doc, cdt, cdn);
 
 		// show / hide convert buttons
-		cur_frm.cscript.hide_unhide_group_ledger(doc);
+		cur_frm.cscript.add_toolbar_buttons(doc);
 	}
 }
 
@@ -76,7 +81,10 @@ cur_frm.cscript.account_type = function(doc, cdt, cdn) {
 
 // Hide/unhide group or ledger
 // -----------------------------------------
-cur_frm.cscript.hide_unhide_group_ledger = function(doc) {
+cur_frm.cscript.add_toolbar_buttons = function(doc) {
+	cur_frm.add_custom_button('Chart of Accounts', 
+		function() { wn.set_route("Accounts Browser", "Account"); }, 'icon-list')
+
 	if (cstr(doc.group_or_ledger) == 'Group') {
 		cur_frm.add_custom_button('Convert to Ledger', 
 			function() { cur_frm.cscript.convert_to_ledger(); }, 'icon-retweet')

@@ -1,0 +1,37 @@
+# Item, Android Jack S
+[
+
+	# These values are common in all dictionaries
+	{
+		u'creation': '2012-08-26 11:29:22',
+		u'docstatus': 0,
+		u'modified': '2012-08-26 11:29:22',
+		u'modified_by': u'Administrator',
+		u'owner': u'Administrator'
+	},
+
+	# These values are common for all Item
+	{
+		'description': u'Android Jack S',
+		'doctype': 'Item',
+		'has_batch_no': u'No',
+		'has_serial_no': u'No',
+		'inspection_required': u'No',
+		'is_purchase_item': u'Yes',
+		'is_sales_item': u'Yes',
+		'is_service_item': u'No',
+		'is_stock_item': u'Yes',
+		'item_code': u'Android Jack S',
+		'item_group': u'Android',
+		'item_name': u'Android Jack S',
+		u'name': u'__common__',
+		'stock_uom': u'Nos',
+		'default_warehouse': u'Default Warehouse'
+	},
+
+	# Item, Android Jack S
+	{
+		u'doctype': 'Item',
+		'name': u'Android Jack S'
+	}
+]

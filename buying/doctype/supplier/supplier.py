@@ -107,8 +107,7 @@ class DocType(TransactionBase):
 		#validation for Naming Series mandatory field...
 		if get_defaults()['supp_master_name'] == 'Naming Series':
 			if not self.doc.naming_series:
-				msgprint("Series is Mandatory.")
-				raise Exception
+				msgprint("Series is Mandatory.", raise_exception=1)
 	
 	def create_account_head(self):
 		if self.doc.company :
@@ -174,5 +173,11 @@ class DocType(TransactionBase):
 			for rec in update_fields:
 				sql("update `tab%s` set supplier_name = '%s' where %s = '%s'" %(rec[0],newdn,rec[1],olddn))
 				
+		old_account = webnotes.conn.get_value("Account", {"master_type": "Supplier",
+			"master_name": olddn})
+				
 		#update master_name in doctype account
 		sql("update `tabAccount` set master_name = '%s', master_type = 'Supplier' where master_name = '%s'" %(newdn,olddn))
+		
+		from webnotes.model.rename_doc import rename_doc
+		rename_doc("Account", old_account, newdn)
