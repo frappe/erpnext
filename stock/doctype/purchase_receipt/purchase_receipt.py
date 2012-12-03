@@ -230,7 +230,8 @@ class DocType(TransactionBase):
 					get_obj("Warehouse", d.warehouse).update_bin(args)
 
 				# UPDATE actual qty to warehouse by pr_qty
-				self.make_sl_entry(d, d.warehouse, flt(pr_qty), d.valuation_rate, is_submit)
+				if pr_qty:
+					self.make_sl_entry(d, d.warehouse, flt(pr_qty), d.valuation_rate, is_submit)
 				
 				# UPDATE actual to rejected warehouse by rejected qty
 				if flt(d.rejected_qty) > 0:
