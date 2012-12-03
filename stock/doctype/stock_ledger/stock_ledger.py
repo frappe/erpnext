@@ -98,9 +98,10 @@ class DocType:
 		return get_sr_no_list(sr_nos, qty, item_code)
 
 
-	def set_pur_serial_no_values(self, obj, serial_no, d, s, new_rec):
-		item_details = sql("select item_group, warranty_period from `tabItem` where name = '%s' and \
-			(ifnull(end_of_life,'')='' or end_of_life = '0000-00-00' or end_of_life > now()) " %(d.item_code), as_dict=1)
+	def set_pur_serial_no_values(self, obj, serial_no, d, s, new_rec, rejected=None):
+		item_details = sql("""select item_group, warranty_period 
+			from `tabItem` where name = '%s' and (ifnull(end_of_life,'')='' or 
+			end_of_life = '0000-00-00' or end_of_life > now()) """ %(d.item_code), as_dict=1)
 		
 		s.purchase_document_type	=	obj.doc.doctype
 		s.purchase_document_no		=	obj.doc.name
@@ -116,7 +117,8 @@ class DocType:
 		s.supplier					=	obj.doc.supplier
 		s.supplier_name				=	obj.doc.supplier_name
 		s.address_display			=	obj.doc.address_display or obj.doc.supplier_address
-		s.warehouse					=	d.warehouse or d.t_warehouse
+		s.warehouse					=	rejected and obj.doc.rejected_warehouse \
+			or d.warehouse or d.t_warehouse or ""
 		s.docstatus					=	0
 		s.status					=	'In Store'
 		s.modified					=	nowdate()
@@ -128,17 +130,17 @@ class DocType:
 		s.save(new_rec)
 
 
-	def update_serial_purchase_details(self, obj, d, serial_no, is_submit, purpose = ''):
+	def update_serial_purchase_details(self, obj, d, serial_no, is_submit, purpose = '', rejected=None):
 		exists = sql("select name, status, docstatus from `tabSerial No` where name = '%s'" % (serial_no))
 		if is_submit:
 			if exists and exists[0][2] != 2 and purpose not in ['Material Transfer', 'Sales Return']:
 				msgprint("Serial No: %s already %s" % (serial_no, exists and exists[0][1]), raise_exception = 1)
 			elif exists:
 				s = Document('Serial No', exists and exists[0][0])
-				self.set_pur_serial_no_values(obj, serial_no, d, s, new_rec = 0)
+				self.set_pur_serial_no_values(obj, serial_no, d, s, new_rec = 0, rejected=rejected)
 			else:
 				s = Document('Serial No')
-				self.set_pur_serial_no_values(obj, serial_no, d, s, new_rec = 1)
+				self.set_pur_serial_no_values(obj, serial_no, d, s, new_rec = 1, rejected=rejected)
 		else:
 			if exists and exists[0][1] == 'Delivered' and exists[0][2] != 2:
 				msgprint("Serial No: %s is already delivered, you can not cancel the document." % serial_no, raise_exception=1)
@@ -203,7 +205,7 @@ class DocType:
 			if fname == 'purchase_receipt_details' and d.rejected_qty and d.rejected_serial_no:
 				serial_nos = self.get_sr_no_list(d.rejected_serial_no)
 				for a in serial_nos:
-					self.update_serial_purchase_details(obj, d, a, is_submit)
+					self.update_serial_purchase_details(obj, d, a, is_submit, rejected=True)
 				
 				
 	def update_stock(self, values, is_amended = 'No'):
