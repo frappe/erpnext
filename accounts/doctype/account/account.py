@@ -61,10 +61,13 @@ class DocType:
 			elif par and not self.doc.is_pl_account:
 				self.doc.is_pl_account = par[0][2]
 				self.doc.debit_or_credit = par[0][3]
-		elif self.doc.account_name not in ['Income','Source of Funds (Liabilities)',\
-		 	'Expenses','Application of Funds (Assets)']:
-			msgprint("Parent Account is mandatory", raise_exception=1)
 
+	def validate_max_root_accounts(self):
+		if webnotes.conn.sql("""select count(*) from tabAccount where
+			company=%s and ifnull(parent_account,'')='' and docstatus != 2""",
+			self.doc.company)[0][0] > 4:
+			webnotes.msgprint("One company cannot have more than 4 root Accounts",
+				raise_exception=1)
 	
 	# Account name must be unique
 	def validate_duplicate_account(self):
@@ -74,21 +77,10 @@ class DocType:
 				
 	def validate_root_details(self):
 		#does not exists parent
-		if self.doc.account_name in ['Income','Source of Funds', 'Expenses','Application of Funds'] and self.doc.parent_account:
-			msgprint("You can not assign parent for root account", raise_exception=1)
-
-		# Debit / Credit
-		if self.doc.account_name in ['Income','Source of Funds']:
-			self.doc.debit_or_credit = 'Credit'
-		elif self.doc.account_name in ['Expenses','Application of Funds']:
-			self.doc.debit_or_credit = 'Debit'
-				
-		# Is PL Account 
-		if self.doc.account_name in ['Income','Expenses']:
-			self.doc.is_pl_account = 'Yes'
-		elif self.doc.account_name in ['Source of Funds','Application of Funds']:
-			self.doc.is_pl_account = 'No'
-
+		if webnotes.conn.exists("Account", self.doc.name):
+			if not self.doc.get_value("Account", self.doc.name, "parent_account"):
+				webnotes.msgprint("Root cannot be edited.", raise_exception=1)
+			
 	def convert_group_to_ledger(self):
 		if self.check_if_child_exists():
 			msgprint("Account: %s has existing child. You can not convert this account to ledger" % (self.doc.name), raise_exception=1)
@@ -144,6 +136,7 @@ class DocType:
 			
 	def on_update(self):
 		# update nsm
+		self.validate_max_root_accounts()
 		self.update_nsm_model()		
 
 	# Check user role for approval process

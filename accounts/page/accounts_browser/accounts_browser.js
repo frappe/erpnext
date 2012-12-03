@@ -52,6 +52,12 @@ pscript['onload_Accounts Browser'] = function(wrapper){
 			wrapper.$company_select.val(sys_defaults.company || r[0]).change();
 		}
 	});
+	
+	// refresh on rename
+	$(document).bind('rename', function(event, dt, old_name, new_name) {
+		if(erpnext.account_chart.ctype==dt)
+			wrapper.$company_select.change();
+	});	
 }
 
 pscript['onshow_Accounts Browser'] = function(wrapper){
@@ -71,6 +77,11 @@ erpnext.AccountsChart = Class.extend({
 		$(wrapper).find('.tree-area').empty();
 		var me = this;
 		me.ctype = ctype;
+		me.can_create = wn.boot.profile.can_create.indexOf(this.ctype);
+		me.can_delete = wn.model.can_delete(this.ctype);
+		me.can_write = wn.boot.profile.can_write.indexOf(this.ctype);
+		
+		
 		me.company = company;
 		this.tree = new wn.ui.Tree({
 			parent: $(wrapper).find('.tree-area'), 
@@ -116,17 +127,24 @@ erpnext.AccountsChart = Class.extend({
 		var node_links = [];
 		// edit
 		if (wn.boot.profile.can_read.indexOf(this.ctype) !== -1) {
-			node_links.push('<a href="#!Form/'+encodeURIComponent(this.ctype)+'/'
+			node_links.push('<a href="#Form/'+encodeURIComponent(this.ctype)+'/'
 				+encodeURIComponent(data.value)+'">Edit</a>');
 		}
 		if (data.expandable) {
-			if((wn.boot.profile.can_create.indexOf(this.ctype) !== -1) ||
-					(wn.boot.profile.in_create.indexOf(this.ctype) !== -1)) {
+			if(this.can_create) {
 				node_links.push('<a onclick="erpnext.account_chart.new_node();">Add Child</a>');
 			}
 		} else if (this.ctype === 'Account' && wn.boot.profile.can_read.indexOf("GL Entry") !== -1) {
 			node_links.push('<a onclick="erpnext.account_chart.show_ledger();">View Ledger</a>');
 		}
+
+		if (this.can_write !== -1) {
+			node_links.push('<a onclick="erpnext.account_chart.rename()">Rename</a>');
+		};
+	
+		if (this.can_delete !== -1) {
+			node_links.push('<a onclick="erpnext.account_chart.delete()">Delete</a>');
+		};
 		
 		link.toolbar.append(node_links.join(" | "));
 	},
@@ -134,6 +152,18 @@ erpnext.AccountsChart = Class.extend({
 		var me = this;
 		var node = me.selected_node();
 		wn.set_route("general-ledger", "account=" + node.data('label'));
+	},
+	rename: function() {
+		var me = this;
+		var node = me.selected_node();
+		wn.model.rename_doc("Account", node.data('label'));
+	},
+	delete: function() {
+		var me = this;
+		var node = me.selected_node();
+		wn.model.delete_doc("Account", node.data('label'), function() {
+			node.parent().remove();
+		});
 	},
 	new_node: function() {
 		if(this.ctype=='Account') {
@@ -216,6 +246,8 @@ erpnext.AccountsChart = Class.extend({
 			$(fd.group_or_ledger.input).change();
 			$(fd.account_type.input).change();
 		}
+		
+		$(fd.group_or_ledger.input).val("Ledger").change();
 		d.show();
 	},
 	
