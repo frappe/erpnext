@@ -4,7 +4,7 @@
   "docstatus": 0, 
   "creation": "2012-11-28 11:26:22", 
   "modified_by": "Administrator", 
-  "modified": "2012-11-30 14:10:02"
+  "modified": "2012-12-03 12:00:59"
  }, 
  {
   "is_submittable": 1, 
@@ -414,7 +414,9 @@
  }, 
  {
   "print_hide": 1, 
+  "description": "Get valuation rate and available stock at source/target warehouse on mentioned posting date-time. If serialized item, please press this button after entering serial nos.", 
   "oldfieldtype": "Button", 
+  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Get Stock and Rate", 
   "options": "get_stock_and_rate", 

@@ -304,6 +304,29 @@ cur_frm.cscript.barcode = function(doc, cdt, cdn) {
 	get_server_fields('get_barcode_details', d.barcode, cur_frm.cscript.fname, doc, cdt, cdn, 1, callback);
 }
 
+cur_frm.fields_dict[cur_frm.cscript.fname].grid.get_field('batch_no').get_query = 
+	function(doc, cdt, cdn) {
+		var d = locals[cdt][cdn];
+		if(d.item_code) {
+			if (d.warehouse) {
+				return "select batch_no from `tabStock Ledger Entry` sle \
+					where item_code = '" + d.item_code + "' and warehouse = '" + d.warehouse +
+					"' and ifnull(is_cancelled, 'No') = 'No' and batch_no like '%s' \
+					and exists(select * from `tabBatch` where \
+					name = sle.batch_no and expiry_date >= '" + doc.posting_date + 
+					"' and docstatus != 2) group by batch_no having sum(actual_qty) > 0 \
+					order by batch_no desc limit 50";
+			} else {
+				return "SELECT name FROM tabBatch WHERE docstatus != 2 AND item = '" + 
+					d.item_code + "' and expiry_date >= '" + doc.posting_date + 
+					"' AND name like '%s' ORDER BY name DESC LIMIT 50";
+			}		
+		} else {
+			msgprint("Please enter Item Code to get batch no");
+		}
+	}
+
+
 
 // *********************** QUANTITY ***************************
 cur_frm.cscript.qty = function(doc, cdt, cdn) { cur_frm.cscript.recalc(doc, 1); }

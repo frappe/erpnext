@@ -37,15 +37,12 @@ class DocType:
 
 			if (batch_bal + self.doc.actual_qty) < 0:
 				msgprint("""Not enough quantity (requested: %(actual_qty)s, current: %(batch_bal)s in Batch 
-		<b>%(batch_no)s</b> for Item <b>%(item_code)s</b> at Warehouse<b>%(warehouse)s</b> 
+		<b>%(batch_no)s</b> for Item <b>%(item_code)s</b> at Warehouse <b>%(warehouse)s</b> 
 		as on %(posting_date)s %(posting_time)s""" % self.doc.fields, raise_exception = 1)
 
 			self.doc.fields.pop('batch_bal')
 			 
 
-	# mandatory
-	# ---------
-	
 	def validate_mandatory(self):		
 		mandatory = ['warehouse','transaction_date','posting_date','voucher_type','voucher_no','actual_qty','company','fiscal_year']
 		for k in mandatory:
@@ -55,9 +52,6 @@ class DocType:
 				if not sql("select name from tabWarehouse where name = '%s'" % self.doc.fields.get(k)):
 					msgprint("Warehouse: '%s' does not exist in the system. Please check." % self.doc.fields.get(k), raise_exception = 1)
 
-	# validate for item
-	# -----------------
-	
 	def validate_item(self):
 		item_det = sql("select name, has_batch_no, docstatus from tabItem where name = '%s'" % self.doc.item_code)
 
