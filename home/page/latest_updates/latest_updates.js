@@ -1,7 +1,8 @@
 erpnext.updates = [
 	["3rd December 2012", [
+		"Linked With: Added new Linked with in all Forms.",
 		"Rename Tool: Documents that can be renamed will have a 'Rename' option in the sidebar (wherever applicable).",
-		"Chart of Accounts: Ability to rename / delete from Chart of Accouns.",
+		"Chart of Accounts: Ability to rename / delete from Chart of Accounts.",
 	]],
 	["30th November 2012", [
 		"Auto Notifications: System will prompt user with pre-set message for auto-notification.",
