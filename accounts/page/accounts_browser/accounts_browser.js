@@ -38,6 +38,7 @@ pscript['onload_Accounts Browser'] = function(wrapper){
 		.change(function() {
 			var ctype = wn.get_route()[1] || 'Account';
 			erpnext.account_chart = new erpnext.AccountsChart(ctype, $(this).val(), wrapper);
+			pscript.set_title(wrapper, ctype, $(this).val());
 		})
 		.appendTo(wrapper.appframe.$w.find('.appframe-toolbar'));
 		
@@ -60,16 +61,23 @@ pscript['onload_Accounts Browser'] = function(wrapper){
 	});	
 }
 
+pscript.set_title = function(wrapper, ctype, val) {
+	if(val) {
+		wrapper.appframe.set_title('Chart of '+ctype+'s' + " - " + cstr(val));
+	} else {
+		wrapper.appframe.set_title('Chart of '+ctype+'s');
+	}
+}
+
 pscript['onshow_Accounts Browser'] = function(wrapper){
 	// set route
 	var ctype = wn.get_route()[1] || 'Account';
 
-	wrapper.appframe.set_title('Chart of '+ctype+'s');
-
 	if(erpnext.account_chart && erpnext.account_chart.ctype != ctype) {
 		wrapper.$company_select.change();
-	} 
-
+	}
+	
+	pscript.set_title(wrapper, ctype);
 }
 
 erpnext.AccountsChart = Class.extend({
