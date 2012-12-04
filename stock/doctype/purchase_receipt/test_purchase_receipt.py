@@ -97,24 +97,24 @@ base_purchase_receipt = [
 		"doctype": "Purchase Receipt Item", 
 		"item_code": "Home Desktop 100",
 		"qty": 10, "received_qty": 10, "rejected_qty": 0, "purchase_rate": 50, 
-		"amount": 500, "warehouse": "Default Warehouse", "valuation_tax_amount": 250,
+		"amount": 500, "warehouse": "Default Warehouse",
 		"parentfield": "purchase_receipt_details",
 		"conversion_factor": 1, "uom": "Nos", "stock_uom": "Nos"
 	},
 	{
 		"doctype": "Purchase Taxes and Charges", "charge_type": "Actual",
-		"account_head": "Shipping Charges - %s" % abbr, "purchase_rate": 100, "tax_amount": 100,
+		"account_head": "Shipping Charges - %s" % abbr, "rate": 100, "tax_amount": 100,
 		"category": "Valuation and Total", "parentfield": "purchase_tax_details",
 		"cost_center": "Default Cost Center - %s" % abbr
 	}, 
 	{
 		"doctype": "Purchase Taxes and Charges", "charge_type": "Actual",
-		"account_head": "VAT - Test - %s" % abbr, "purchase_rate": 120, "tax_amount": 120,
+		"account_head": "VAT - Test - %s" % abbr, "rate": 120, "tax_amount": 120,
 		"category": "Total", "parentfield": "purchase_tax_details"
 	},
 	{
 		"doctype": "Purchase Taxes and Charges", "charge_type": "Actual",
-		"account_head": "Customs Duty - %s" % abbr, "purchase_rate": 150, "tax_amount": 150,
+		"account_head": "Customs Duty - %s" % abbr, "rate": 150, "tax_amount": 150,
 		"category": "Valuation", "parentfield": "purchase_tax_details",
 		"cost_center": "Default Cost Center - %s" % abbr
 	}
@@ -158,7 +158,6 @@ class TestPurchaseReceipt(unittest.TestCase):
 		load_data()
 		webnotes.conn.set_value("Global Defaults", None, "automatic_inventory_accounting", 1)
 		
-		
 	def test_purchase_receipt(self):
 		# warehouse does not have stock in hand specified
 		self.run_purchase_receipt_test(base_purchase_receipt,
@@ -169,9 +168,17 @@ class TestPurchaseReceipt(unittest.TestCase):
 			credit_account, stock_value):
 		from webnotes.model.doclist import DocList	
 		dl = webnotes.insert(DocList(purchase_receipt))
+		
+		from controllers.tax_controller import TaxController
+		tax_controller = TaxController(dl.doc, dl.doclist)
+		tax_controller.item_table_field = "purchase_receipt_details"
+		tax_controller.calculate_taxes_and_totals()
+		dl.doc = tax_controller.doc
+		dl.doclist = tax_controller.doclist
+		
 		dl.submit()
 		dl.load_from_db()
-						
+		
 		gle = webnotes.conn.sql("""select account, ifnull(debit, 0), ifnull(credit, 0)
 			from `tabGL Entry` where voucher_no = %s""", dl.doclist[0].name)
 		

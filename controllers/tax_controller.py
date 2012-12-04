@@ -72,6 +72,7 @@ class TaxController(TransactionController):
 		self.calculate_taxes()
 		self.calculate_totals()
 		self.set_amount_in_words()
+		self.cleanup()
 		
 	def calculate_item_values(self):
 		def _set_base(item, print_field, base_field):
@@ -104,12 +105,12 @@ class TaxController(TransactionController):
 						
 			item.fields[self.fmap.print_amount] = \
 				flt(item.fields.get(self.fmap.print_rate) * \
-				item.fields.get(self.fmap.qty),
+				item.fields.get("qty"),
 				self.precision.item[self.fmap.print_amount])
 				
 			_set_base(item, self.fmap.print_ref_rate, self.fmap.ref_rate)
 			_set_base(item, self.fmap.print_rate, self.fmap.rate)
-			_set_base(item, self.fmap.print_amount, self.fmap.amount)
+			_set_base(item, self.fmap.print_amount, "amount")
 			
 	def initialize_taxes(self):
 		for tax in self.tax_doclist:
@@ -431,3 +432,14 @@ class TaxController(TransactionController):
 			return flt(item_tax_map.get(tax.account_head), self.precision.tax.rate)
 		else:
 			return tax.rate
+			
+	def cleanup(self):
+		for f in ["taxes_and_charges_total_print", "rounded_total_in_words_print",
+				"rounded_total_print", "rounded_total_in_words"]:
+			del self.doc.fields[self.fmap.get(f) or f]
+		
+		for f in ["grand_total_print_for_current_item", "tax_amount_print",
+				"grand_total_for_current_item", "tax_amount_for_current_item",
+				"total_print"]:
+			for doc in self.doclist.get({"parentfield": self.fmap.taxes_and_charges}):
+				del doc.fields[self.fmap.get(f) or f]
