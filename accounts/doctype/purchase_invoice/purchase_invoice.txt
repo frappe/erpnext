@@ -2,12 +2,13 @@
  {
   "owner": "Administrator", 
   "docstatus": 0, 
-  "creation": "2012-11-28 11:26:17", 
+  "creation": "2012-12-03 17:26:39", 
   "modified_by": "Administrator", 
-  "modified": "2012-12-03 17:10:41"
+  "modified": "2012-12-04 17:15:28"
  }, 
  {
   "is_submittable": 1, 
+  "autoname": "naming_series:", 
   "allow_attach": 1, 
   "default_print_format": "Standard", 
   "search_fields": "posting_date, credit_to, fiscal_year, bill_no, grand_total, outstanding_amount", 
@@ -613,95 +614,6 @@
   "permlevel": 0
  }, 
  {
-  "print_hide": 1, 
-  "oldfieldtype": "Section Break", 
-  "doctype": "DocField", 
-  "label": "TDS", 
-  "fieldname": "tds", 
-  "fieldtype": "Section Break", 
-  "permlevel": 0
- }, 
- {
-  "print_hide": 1, 
-  "doctype": "DocField", 
-  "width": "50%", 
-  "fieldname": "column_break5", 
-  "fieldtype": "Column Break", 
-  "permlevel": 0
- }, 
- {
-  "print_hide": 1, 
-  "oldfieldtype": "Select", 
-  "doctype": "DocField", 
-  "label": "TDS Applicable", 
-  "oldfieldname": "tds_applicable", 
-  "options": "\nYes\nNo", 
-  "fieldname": "tds_applicable", 
-  "fieldtype": "Select", 
-  "permlevel": 0
- }, 
- {
-  "print_hide": 1, 
-  "oldfieldtype": "Select", 
-  "doctype": "DocField", 
-  "label": "TDS Category", 
-  "oldfieldname": "tds_category", 
-  "options": "link:TDS Category", 
-  "fieldname": "tds_category", 
-  "fieldtype": "Select", 
-  "permlevel": 0
- }, 
- {
-  "print_hide": 1, 
-  "oldfieldtype": "Button", 
-  "colour": "White:FFF", 
-  "doctype": "DocField", 
-  "label": "Get TDS", 
-  "trigger": "Client", 
-  "fieldname": "get_tds", 
-  "fieldtype": "Button", 
-  "permlevel": 0
- }, 
- {
-  "print_hide": 1, 
-  "doctype": "DocField", 
-  "width": "50%", 
-  "fieldname": "column_break6", 
-  "fieldtype": "Column Break", 
-  "permlevel": 0
- }, 
- {
-  "print_hide": 1, 
-  "oldfieldtype": "Link", 
-  "doctype": "DocField", 
-  "label": "TDS Account Head", 
-  "oldfieldname": "tax_code", 
-  "options": "Account", 
-  "fieldname": "tax_code", 
-  "fieldtype": "Link", 
-  "permlevel": 0
- }, 
- {
-  "print_hide": 1, 
-  "oldfieldtype": "Currency", 
-  "doctype": "DocField", 
-  "label": "Rate", 
-  "oldfieldname": "rate", 
-  "fieldname": "rate", 
-  "fieldtype": "Currency", 
-  "permlevel": 0
- }, 
- {
-  "print_hide": 1, 
-  "oldfieldtype": "Currency", 
-  "doctype": "DocField", 
-  "label": "TDS Amount", 
-  "oldfieldname": "ded_amount", 
-  "fieldname": "ded_amount", 
-  "fieldtype": "Currency", 
-  "permlevel": 0
- }, 
- {
   "oldfieldtype": "Section Break", 
   "doctype": "DocField", 
   "label": "Totals", 
@@ -762,29 +674,6 @@
  }, 
  {
   "print_hide": 1, 
-  "no_copy": 1, 
-  "oldfieldtype": "Currency", 
-  "doctype": "DocField", 
-  "label": "Total TDS On Voucher", 
-  "oldfieldname": "total_tds_on_voucher", 
-  "fieldname": "total_tds_on_voucher", 
-  "fieldtype": "Currency", 
-  "permlevel": 1
- }, 
- {
-  "print_hide": 1, 
-  "no_copy": 1, 
-  "oldfieldtype": "Currency", 
-  "colour": "White:FFF", 
-  "doctype": "DocField", 
-  "label": "TDS Amount On Advance", 
-  "oldfieldname": "tds_amount_on_advance", 
-  "fieldname": "tds_amount_on_advance", 
-  "fieldtype": "Currency", 
-  "permlevel": 1
- }, 
- {
-  "print_hide": 1, 
   "oldfieldtype": "Column Break", 
   "doctype": "DocField", 
   "width": "50%", 
@@ -809,7 +698,7 @@
   "no_copy": 1, 
   "oldfieldtype": "Currency", 
   "doctype": "DocField", 
-  "label": "Total Advance (Incl. TDS)", 
+  "label": "Total Advance", 
   "oldfieldname": "total_advance", 
   "fieldname": "total_advance", 
   "fieldtype": "Currency", 

@@ -117,23 +117,21 @@ class DocType:
 	def update_outstanding_amt(self):
 		# get final outstanding amt
 		bal = flt(sql("select sum(debit)-sum(credit) from `tabGL Entry` where against_voucher=%s and against_voucher_type=%s and ifnull(is_cancelled,'No') = 'No'", (self.doc.against_voucher, self.doc.against_voucher_type))[0][0] or 0.0)
-		tds = 0
 		
 		if self.doc.against_voucher_type=='Purchase Invoice':
 			# amount to debit
 			bal = -bal
 			
-			# Check if tds applicable
-			tds = sql("select total_tds_on_voucher from `tabPurchase Invoice` where name = '%s'" % self.doc.against_voucher)
-			tds = tds and flt(tds[0][0]) or 0
-		
 		# Validation : Outstanding can not be negative
-		if bal < 0 and not tds and self.doc.is_cancelled == 'No':
-			msgprint("Outstanding for Voucher %s will become %s. Outstanding cannot be less than zero. Please match exact outstanding." % (self.doc.against_voucher, fmt_money(bal)))
+		if bal < 0 and self.doc.is_cancelled == 'No':
+			msgprint("""Outstanding for Voucher %s will become %s. 
+				Outstanding cannot be less than zero. Please match exact outstanding.""" % 
+				 (self.doc.against_voucher, fmt_money(bal)))
 			raise Exception
 			
 		# Update outstanding amt on against voucher
-		sql("update `tab%s` set outstanding_amount=%s where name='%s'"% (self.doc.against_voucher_type,bal,self.doc.against_voucher))
+		sql("update `tab%s` set outstanding_amount=%s where name='%s'"%
+		 	(self.doc.against_voucher_type, bal, self.doc.against_voucher))
 		
 					
 	# Total outstanding can not be greater than credit limit for any time for any customer

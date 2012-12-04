@@ -20,20 +20,11 @@ cur_frm.cscript.other_fname = "purchase_tax_details";
 wn.require('app/accounts/doctype/purchase_taxes_and_charges_master/purchase_taxes_and_charges_master.js');
 wn.require('app/buying/doctype/purchase_common/purchase_common.js');
 
-// On Load
-// --------
 cur_frm.cscript.onload = function(doc,dt,dn) {
 	if(!doc.voucher_date) set_multiple(dt,dn,{voucher_date:get_today()});
-	if(!doc.posting_date) set_multiple(dt,dn,{posting_date:get_today()});  
-	
-	tds_flds = ['tds','tds_applicable','tds_category','get_tds','tax_code','rate','ded_amount','total_tds_on_voucher','tds_amount_on_advance'];
-	if(wn.control_panel.country == 'India') unhide_field(tds_flds);
-	else hide_field(tds_flds);
+	if(!doc.posting_date) set_multiple(dt,dn,{posting_date:get_today()});
 }
 
-
-//Onload post render
-//------------------------
 cur_frm.cscript.onload_post_render = function(doc, dt, dn) {
 	var callback = function(doc, dt, dn) {
 		var callback1 = function(doc, dt, dn) {
@@ -46,8 +37,6 @@ cur_frm.cscript.onload_post_render = function(doc, dt, dn) {
 	cur_frm.cscript.dynamic_label(doc, dt, dn, callback);
 }
 
-// Refresh
-// --------
 cur_frm.cscript.refresh = function(doc, dt, dn) {
 	
 	cur_frm.clear_custom_buttons();
@@ -67,7 +56,6 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 }
 
 
-//Supplier
 cur_frm.cscript.supplier = function(doc,dt,dn) {
 	var callback = function(r,rt) {
 			var doc = locals[cur_frm.doctype][cur_frm.docname];		
@@ -105,8 +93,6 @@ cur_frm.cscript.supplier_address = cur_frm.cscript.contact_person = function(doc
 	if(doc.supplier) get_server_fields('get_supplier_address', JSON.stringify({supplier: doc.supplier, address: doc.supplier_address, contact: doc.contact_person}),'', doc, dt, dn, 1);
 }
 
-
-
 cur_frm.fields_dict.supplier_address.on_new = function(dn) {
 	locals['Address'][dn].supplier = locals[cur_frm.doctype][cur_frm.docname].supplier;
 	locals['Address'][dn].supplier_name = locals[cur_frm.doctype][cur_frm.docname].supplier_name;
@@ -135,10 +121,6 @@ cur_frm.cscript.credit_to = function(doc,dt,dn) {
 	get_server_fields('get_cust', '', '', doc, dt, dn, 1, callback);
 }
 
-
-
-//Set expense_head and cost center on adding new row
-//----------------------------------------------
 cur_frm.fields_dict['entries'].grid.onrowadd = function(doc, cdt, cdn){
 	
 	cl = getchildren('Purchase Invoice Item', doc.name, cur_frm.cscript.fname, doc.doctype);
@@ -163,22 +145,16 @@ cur_frm.cscript.is_opening = function(doc, dt, dn) {
 }
 
 cur_frm.cscript.write_off_amount = function(doc) {
-	doc.total_amount_to_pay = flt(doc.grand_total) - flt(doc.ded_amount) - flt(doc.write_off_amount);
+	doc.total_amount_to_pay = flt(doc.grand_total) - flt(doc.write_off_amount);
 	doc.outstanding_amount = flt(doc.total_amount_to_pay) - flt(doc.total_advance);
 	refresh_many(['outstanding_amount', 'total_amount_to_pay']);
 }
 
-
-
-// Recalculate Button
-// -------------------
 cur_frm.cscript.recalculate = function(doc, cdt, cdn) {
 	cur_frm.cscript.calculate_tax(doc,cdt,cdn);
 	calc_total_advance(doc,cdt,cdn);
 }
 
-// Get Items Button
-// -----------------
 cur_frm.cscript.get_items = function(doc, dt, dn) {
 	var callback = function(r,rt) { 
 		unhide_field(['supplier_address', 'contact_person']);				
@@ -187,10 +163,6 @@ cur_frm.cscript.get_items = function(doc, dt, dn) {
 	$c_obj(make_doclist(dt,dn),'pull_details','',callback);
 }
 
-// ========== Purchase Invoice Items Table ============
-
-// Item Code
-// ----------
 cur_frm.cscript.item_code = function(doc,cdt,cdn){
 	var d = locals[cdt][cdn];
 	if(d.item_code){
@@ -198,49 +170,11 @@ cur_frm.cscript.item_code = function(doc,cdt,cdn){
 	}
 }
 
-// Rate in Deduct Taxes (TDS)
-// --------------------------
-cur_frm.cscript.rate = function(doc,dt,dn) {
-	//This is done as Purchase tax detail and PV detail both contain the same fieldname 'rate'
-	if(dt != 'Purchase Taxes and Charges')	 cur_frm.cscript.calc_amount(doc, 2);
-}
-
-// Amount
-// -------
-cur_frm.cscript.ded_amount = function(doc,dt,dn) {calculate_outstanding(doc);}
-
-// Get TDS Button
-// ---------------
-cur_frm.cscript.get_tds = function(doc, dt, dn) {
-	var callback = function(r,rt) {
-		cur_frm.refresh();
-		refresh_field('ded_amount');
-		//cur_frm.cscript.calc_total(locals[dt][dn]);
-	}
-	$c_obj(make_doclist(dt,dn), 'get_tds', '', callback);
-}
-
-// ===================== Advance Allocation ==================
-cur_frm.cscript.allocated_amount = function(doc,cdt,cdn){
-	var d = locals[cdt][cdn];
-	if (d.allocated_amount && d.tds_amount){
-		d.tds_allocated=flt(d.tds_amount*(d.allocated_amount/d.advance_amount))
-		refresh_field('tds_allocated', d.name, 'advance_allocation_details');
-	}
-	tot_tds=0
-	el = getchildren('Purchase Invoice Advance',doc.name,'advance_allocation_details')
-	for(var i in el){
-		tot_tds += el[i].tds_allocated
-	}
-	doc.tds_amount_on_advance = tot_tds
-	refresh_field('tds_amount_on_advance');
-	
+cur_frm.cscript.allocated_amount = function(doc,cdt,cdn) {
 	calc_total_advance(doc, cdt, cdn);
 }
 
 
-// Make Journal Voucher
-// --------------------
 cur_frm.cscript.make_bank_voucher = function() {
 	$c('accounts.get_default_bank_account', { company: cur_frm.doc.company }, function(r, rt) {
 		if(!r.exc) {
@@ -248,9 +182,6 @@ cur_frm.cscript.make_bank_voucher = function() {
 	}
 	});
 }
-
-
-/* ***************************** GET QUERY Functions *************************** */
 
 
 cur_frm.fields_dict['supplier_address'].get_query = function(doc, cdt, cdn) {
@@ -261,21 +192,14 @@ cur_frm.fields_dict['contact_person'].get_query = function(doc, cdt, cdn) {
 	return 'SELECT name,CONCAT(first_name," ",ifnull(last_name,"")) As FullName,department,designation FROM tabContact WHERE supplier = "'+ doc.supplier +'" AND docstatus != 2 AND name LIKE "%s" ORDER BY name ASC LIMIT 50';
 }
 
-// Item Code
-// ----------
 cur_frm.fields_dict['entries'].grid.get_field("item_code").get_query = function(doc, cdt, cdn) {
 	return 'SELECT tabItem.name, tabItem.description FROM tabItem WHERE tabItem.is_purchase_item="Yes" AND (IFNULL(`tabItem`.`end_of_life`,"") = "" OR `tabItem`.`end_of_life` ="0000-00-00" OR `tabItem`.`end_of_life` > NOW()) AND tabItem.docstatus != 2 AND tabItem.%(key)s LIKE "%s" LIMIT 50'
 }
 
-// Credit To
-// ----------
 cur_frm.fields_dict['credit_to'].get_query = function(doc) {
 	return 'SELECT tabAccount.name FROM tabAccount WHERE tabAccount.debit_or_credit="Credit" AND tabAccount.is_pl_account="No" AND tabAccount.group_or_ledger="Ledger" AND tabAccount.docstatus != 2 AND tabAccount.company="'+doc.company+'" AND tabAccount.%(key)s LIKE "%s"'
 }
 
-
-// Purchase Order
-// ---------------
 cur_frm.fields_dict['purchase_order_main'].get_query = function(doc) {
 	if (doc.supplier){
 		return 'SELECT `tabPurchase Order`.`name` FROM `tabPurchase Order` WHERE `tabPurchase Order`.`docstatus` = 1 AND `tabPurchase Order`.supplier = "'+ doc.supplier +'" AND `tabPurchase Order`.`status` != "Stopped" AND ifnull(`tabPurchase Order`.`per_billed`,0) < 100 AND `tabPurchase Order`.`company` = "' + doc.company + '" AND `tabPurchase Order`.%(key)s LIKE "%s" ORDER BY `tabPurchase Order`.`name` DESC LIMIT 50'
@@ -284,8 +208,6 @@ cur_frm.fields_dict['purchase_order_main'].get_query = function(doc) {
 	}
 }
 
-// Purchase Receipt
-// -----------------
 cur_frm.fields_dict['purchase_receipt_main'].get_query = function(doc) {
 	if (doc.supplier){
 		return 'SELECT `tabPurchase Receipt`.`name` FROM `tabPurchase Receipt` WHERE `tabPurchase Receipt`.`docstatus` = 1 AND `tabPurchase Receipt`.supplier = "'+ doc.supplier +'" AND `tabPurchase Receipt`.`status` != "Stopped" AND ifnull(`tabPurchase Receipt`.`per_billed`, 0) < 100 AND `tabPurchase Receipt`.`company` = "' + doc.company + '" AND `tabPurchase Receipt`.%(key)s LIKE "%s" ORDER BY `tabPurchase Receipt`.`name` DESC LIMIT 50'
@@ -299,10 +221,6 @@ cur_frm.fields_dict['select_print_heading'].get_query = function(doc, cdt, cdn) 
 	return 'SELECT `tabPrint Heading`.name FROM `tabPrint Heading` WHERE `tabPrint Heading`.docstatus !=2 AND `tabPrint Heading`.name LIKE "%s" ORDER BY `tabPrint Heading`.name ASC LIMIT 50';
 }
 
-
-// ================== Purchase Invoice Items Table ===================
-// Expense Head
-// -------------
 cur_frm.fields_dict['entries'].grid.get_field("expense_head").get_query = function(doc) {
 	return 'SELECT tabAccount.name FROM tabAccount WHERE (tabAccount.debit_or_credit="Debit" OR tabAccount.account_type = "Expense Account") AND tabAccount.group_or_ledger="Ledger" AND tabAccount.docstatus != 2 AND tabAccount.company="'+doc.company+'" AND tabAccount.%(key)s LIKE "%s"';
 }
@@ -317,9 +235,6 @@ cur_frm.cscript.expense_head = function(doc, cdt, cdn){
 	refresh_field('entries');
 }
 
-
-// Cost Center
-//-------------
 cur_frm.fields_dict['entries'].grid.get_field("cost_center").get_query = function(doc) {
 	return 'SELECT `tabCost Center`.`name` FROM `tabCost Center` WHERE `tabCost Center`.`company_name` = "' +doc.company+'" AND `tabCost Center`.%(key)s LIKE "%s" AND `tabCost Center`.`group_or_ledger` = "Ledger" AND `tabCost Center`.docstatus != 2 ORDER BY	`tabCost Center`.`name` ASC LIMIT 50';
 }
@@ -335,39 +250,21 @@ cur_frm.cscript.cost_center = function(doc, cdt, cdn){
 	refresh_field('entries');
 }
 
-
-// TDS Account Head
-cur_frm.fields_dict['tax_code'].get_query = function(doc) {
-	return "SELECT `tabTDS Category Account`.account_head FROM `tabTDS Category Account` WHERE `tabTDS Category Account`.parent = '"+doc.tds_category+"' AND `tabTDS Category Account`.company='"+doc.company+"' AND `tabTDS Category Account`.account_head LIKE '%s' ORDER BY `tabTDS Category Account`.account_head DESC LIMIT 50";
-}
-
-cur_frm.cscript.tax_code = function(doc, dt, dn) {
-	get_server_fields('get_tds_rate','','',doc, dt, dn, 0);
-}
-
-/* ***************************** UTILITY FUNCTIONS ************************ */
-// Calculate Advance
-// ------------------
 calc_total_advance = function(doc,cdt,cdn) {
 	var doc = locals[doc.doctype][doc.name];
 	var el = getchildren('Purchase Invoice Advance',doc.name,'advance_allocation_details')
-	var tot_tds=0;
 	var total_advance = 0;
 	for(var i in el) {
 		if (! el[i].allocated_amount == 0) {
 			total_advance += flt(el[i].allocated_amount);
-			tot_tds += flt(el[i].tds_allocated)
 		}
 	}
-	doc.total_amount_to_pay = flt(doc.grand_total) - flt(doc.ded_amount) - flt(doc.write_off_amount);
-	doc.tds_amount_on_advance = flt(tot_tds);
+	doc.total_amount_to_pay = flt(doc.grand_total) - flt(doc.write_off_amount);
 	doc.total_advance = flt(total_advance);
 	doc.outstanding_amount = flt(doc.total_amount_to_pay) - flt(total_advance);
-	refresh_many(['total_advance','outstanding_amount','tds_amount_on_advance', 'total_amount_to_pay']);
+	refresh_many(['total_advance','outstanding_amount', 'total_amount_to_pay']);
 }
 
-// Make JV
-// --------
 cur_frm.cscript.make_jv = function(doc, dt, dn, bank_account) {
 	var jv = LocalDB.create('Journal Voucher');
 	jv = locals['Journal Voucher'][jv];
@@ -392,7 +289,6 @@ cur_frm.cscript.make_jv = function(doc, dt, dn, bank_account) {
 	loaddoc('Journal Voucher', jv.name);
 }
 
-// ***************** Get project name *****************
 cur_frm.fields_dict['entries'].grid.get_field('project_name').get_query = function(doc, cdt, cdn) {
 	return 'SELECT `tabProject`.name FROM `tabProject` \
 		WHERE `tabProject`.status not in ("Completed", "Cancelled") \
@@ -409,7 +305,6 @@ cur_frm.cscript.select_print_heading = function(doc,cdt,cdn){
 		cur_frm.pformat.print_heading = "Purchase Invoice";
 }
 
-/****************** Get Accounting Entry *****************/
 cur_frm.cscript.view_ledger_entry = function(){
 	wn.set_route('Report', 'GL Entry', 'General Ledger', 'Voucher No='+cur_frm.doc.name);
 }
