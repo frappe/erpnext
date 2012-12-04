@@ -15,10 +15,14 @@
 // along with this program.	If not, see <http://www.gnu.org/licenses/>.
 
 // Settings
-cur_frm.cscript.onload = function(doc, cdt, cdn){
-	cur_frm.call_server('get_transactions', '', cur_frm.cscript.update_selects);
-	
-	cur_frm.cscript.select_doc_for_series(doc);
+cur_frm.cscript.onload_post_render = function(doc, cdt, cdn){
+	cur_frm.call({
+		method: 'get_transactions',
+		callback: function(r) {
+			cur_frm.cscript.update_selects(r);
+			cur_frm.cscript.select_doc_for_series(doc, cdt, cdn);
+		}
+	})
 }
 
 cur_frm.cscript.update_selects = function(r) {
@@ -47,7 +51,7 @@ cur_frm.cscript.update = function() {
 	cur_frm.call_server('update_series', '', cur_frm.cscript.update_selects)
 }
 
-cur_frm.cscript.prefix = function(doc) {
+cur_frm.cscript.prefix = function(doc, dt, dn) {
 	cur_frm.call_server('get_current', '', function(r) {
 		refresh_field('current_value');
 	})
