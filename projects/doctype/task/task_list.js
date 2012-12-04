@@ -4,6 +4,7 @@ wn.doclistviews['Task'] = wn.views.ListView.extend({
 		this._super(d);
 		this.fields = this.fields.concat([
 			'`tabTask`.subject',
+			'`tabTask`.modified',
 			'`tabTask`.status',
 			'`tabTask`.opening_date',
 			'`tabTask`.priority',
