@@ -900,7 +900,9 @@ def assign_task_to_owner(inv, msg, users):
 
 @webnotes.whitelist()
 def get_bank_cash_account(mode_of_payment):
+	val = webnotes.conn.get_value("Mode of Payment", mode_of_payment, "default_account")
+	if not val:
+		webnotes.msgprint("Default Account not set in Mode of Payment: ")
 	return {
-		"cash_bank_account": webnotes.conn.get_value("Mode of Payment", 
-			mode_of_payment, "default_account")
+		"cash_bank_account": val
 	}
