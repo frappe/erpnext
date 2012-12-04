@@ -17,7 +17,7 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import add_days, add_months, cint, cstr, month_name
+from webnotes.utils import add_days, add_months, cint, cstr
 from webnotes.model import db_exists
 from webnotes.model.wrapper import copy_doclist
 
