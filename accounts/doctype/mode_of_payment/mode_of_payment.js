@@ -14,13 +14,9 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
- 
-
-//--------- ONLOAD -------------
-cur_frm.cscript.onload = function(doc, cdt, cdn) {
-   
-}
-
-cur_frm.cscript.refresh = function(doc, cdt, cdn) {
-   
-}
+cur_frm.set_query("default_account", function(doc) {
+	return erpnext.queries.account({
+		account_type: "Bank or Cash",
+		company: doc.company
+	});
+});
