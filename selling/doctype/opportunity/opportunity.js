@@ -96,6 +96,7 @@ cur_frm.cscript.lead_cust_show = function(doc,cdt,cdn){
 cur_frm.cscript.customer = function(doc,dt,dn) {
 	if(doc.customer) {
 		cur_frm.call({
+			doc: cur_frm.doc,
 			method: "get_default_customer_address",
 			args: { customer: doc.customer },
 			callback: function(r) {

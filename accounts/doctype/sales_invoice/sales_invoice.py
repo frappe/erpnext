@@ -322,7 +322,6 @@ class DocType(TransactionBase):
 		if res:
 			get_obj('DocType Mapper', 'Project-Sales Invoice').dt_map('Project', 'Sales Invoice', self.doc.project_name, self.doc, self.doclist, "[['Project', 'Sales Invoice']]")
 
-
 	def get_company_abbr(self):
 		return webnotes.conn.sql("select abbr from tabCompany where name=%s", self.doc.company)[0][0]
 		
@@ -899,3 +898,11 @@ def assign_task_to_owner(inv, msg, users):
 		}
 		assign_to.add(args)
 
+@webnotes.whitelist()
+def get_bank_cash_account(mode_of_payment):
+	val = webnotes.conn.get_value("Mode of Payment", mode_of_payment, "default_account")
+	if not val:
+		webnotes.msgprint("Default Account not set in Mode of Payment: ")
+	return {
+		"cash_bank_account": val
+	}

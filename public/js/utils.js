@@ -83,3 +83,24 @@ erpnext.utils.supplier_query = function() {
 		case when supplier_name like \"%s%%\" then 0 else 1 end, \
 		name, supplier_name limit 50";
 };
+
+wn.provide("erpnext.queries");
+
+erpnext.queries.account = function(opts) {
+	if(!opts) 
+		opts = {};
+	if(!opts.group_or_ledger) 
+		opts.group_or_ledger = "Ledger";
+		
+	conditions = [];
+	$.each(opts, function(key, val) {
+		conditions.push("tabAccount.`" + key + "`='"+esc_quotes(val)+"'");
+	});
+	
+	return 'SELECT tabAccount.name, tabAccount.parent_account, tabAccount.debit_or_credit \
+		FROM tabAccount \
+		WHERE tabAccount.docstatus!=2 \
+		AND tabAccount.%(key)s LIKE "%s" ' + (conditions 
+			? (" AND " + conditions.join(" AND "))
+			: "")
+}
