@@ -42,13 +42,14 @@ class DocType(TransactionBase):
 			max_amount = max(amt_list)
 			
 			app_dtl = sql("select approving_user, approving_role from `tabAuthorization Rule` where transaction = %s and (value = %s or value > %s) and docstatus != 2 and based_on = %s and company = %s %s" % ('%s', '%s', '%s', '%s', '%s', condition), (doctype_name, flt(max_amount), total, based_on, company))
+			
 			if not app_dtl:
 				app_dtl = sql("select approving_user, approving_role from `tabAuthorization Rule` where transaction = %s and (value = %s or value > %s) and docstatus != 2 and based_on = %s and ifnull(company,'') = '' %s" % ('%s', '%s', '%s', '%s', condition), (doctype_name, flt(max_amount), total, based_on)) 
 			for d in app_dtl:
 				if(d[0]): appr_users.append(d[0])
 				if(d[1]): appr_roles.append(d[1])
-
-			if not has_common(appr_roles, webnotes.user.get_roles()) and not has_common(appr_users, session['user']):
+			
+			if not has_common(appr_roles, webnotes.user.get_roles()) and not has_common(appr_users, [session['user']]):
 				msg, add_msg = '',''
 				if max_amount:
 					dcc = TransactionBase().get_company_currency(self.doc.company)
@@ -79,6 +80,7 @@ class DocType(TransactionBase):
 		if chk == 1:
 			if based_on == 'Itemwise Discount': add_cond2 += " and ifnull(master_name,'') = ''"
 			appr = sql("select value from `tabAuthorization Rule` where transaction = %s and value <= %s and based_on = %s and company = %s and docstatus != 2 %s %s" % ('%s', '%s', '%s', '%s', cond, add_cond2), (doctype_name, total, based_on, company))
+			
 			if not appr:
 				appr = sql("select value from `tabAuthorization Rule` where transaction = %s and value <= %s and based_on = %s and ifnull(company,'') = '' and docstatus != 2 %s %s"% ('%s', '%s', '%s', cond, add_cond2), (doctype_name, total, based_on))
 			self.get_appr_user_role(appr, doctype_name, total, based_on, cond+add_cond2, item, company)
@@ -109,8 +111,6 @@ class DocType(TransactionBase):
 	# Check Approving Authority for transactions other than expense voucher and Appraisal
 	# -------------------------
 	def validate_approving_authority(self, doctype_name,company, total, doc_obj = ''):
-		if doctype_name == 'Purchase Invoice': doctype_name = 'Purchase Invoice'
-		elif doctype_name == 'Sales Invoice': doctype_name = 'Sales Invoice'
 		av_dis = 0
 		if doc_obj:
 			ref_rate, basic_rate = 0, 0
