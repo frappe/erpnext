@@ -1,5 +1,6 @@
 erpnext.updates = [
 	["4rd December 2012", [
+		"POS / Mode of Payment: Select default bank / cash account in Mode of Payment and it will be automatically selected in POS Invoice.",
 		"Email: Add contact name as 'Dear so-and-so' in Email.",
 		"Report Builder: Remember last column setup for users",
 		"Report Builder: Autoset column width (remember)",
