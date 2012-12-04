@@ -21,8 +21,6 @@ from webnotes import _, DictObj
 from webnotes.utils import cint
 import json
 
-import stock.utils
-
 from webnotes.model.controller import DocListController
 
 class TransactionController(DocListController):
