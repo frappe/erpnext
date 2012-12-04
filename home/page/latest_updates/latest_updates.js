@@ -1,4 +1,9 @@
 erpnext.updates = [
+	["4rd December 2012", [
+		"Email: Add contact name as 'Dear so-and-so' in Email.",
+		"Report Builder: Remember last column setup for users",
+		"Report Builder: Autoset column width (remember)",
+	]],
 	["3rd December 2012", [
 		"Linked With: Added new Linked with in all Forms.",
 		"Rename Tool: Documents that can be renamed will have a 'Rename' option in the sidebar (wherever applicable).",
