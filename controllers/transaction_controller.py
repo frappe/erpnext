@@ -90,6 +90,7 @@ class TransactionController(DocListController):
 					
 					"plc_exchange_rate": "plc_conversion_rate",
 					"tax_calculation": "other_charges_calculation",
+					"cost_center": "cost_center_other_charges",
 				})
 			else:
 				self._fmap = webnotes.DictObj({
@@ -113,5 +114,10 @@ class TransactionController(DocListController):
 					
 					"valuation_tax_amount": "item_tax_amount"
 				})
+				
+				if self.doc.doctype == "Purchase Invoice":
+					self._fmap.update({
+						"rate": "rate"
+					})
 			
 		return self._fmap or webnotes.DictObj()

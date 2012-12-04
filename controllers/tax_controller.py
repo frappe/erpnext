@@ -136,7 +136,7 @@ class TaxController(TransactionController):
 			self.doc.net_total += item.amount
 			self.doc.fields[self.fmap.net_total_print] += \
 				item.fields.get(self.fmap.print_amount)
-
+				
 		self.doc.net_total = flt(self.doc.net_total, self.precision.main.net_total)
 		self.doc.fields[self.fmap.net_total_print] = \
 			flt(self.doc.fields.get(self.fmap.net_total_print),
@@ -269,7 +269,7 @@ class TaxController(TransactionController):
 		self.doc.rounded_total = round(self.doc.grand_total)
 		self.doc.fields[self.fmap.rounded_total_print] = \
 			round(self.doc.fields.get(self.fmap.grand_total_print))
-		
+			
 	def set_amount_in_words(self):
 		from webnotes.utils import money_in_words
 		base_currency = webnotes.conn.get_value("Company", self.doc.currency,
@@ -434,12 +434,23 @@ class TaxController(TransactionController):
 			return tax.rate
 			
 	def cleanup(self):
+		def _del(f, doc):
+			if f in doc.fields:
+				del doc.fields[f]
+			elif self.fmap.get(f) and self.fmap.get(f) in doc.fields:
+				del doc.fields[self.fmap.get(f)]
+		
 		for f in ["taxes_and_charges_total_print", "rounded_total_in_words_print",
-				"rounded_total_print", "rounded_total_in_words"]:
-			del self.doc.fields[self.fmap.get(f) or f]
+				"rounded_total_print", "rounded_total_in_words", "rounded_total"]:
+			_del(f, self.doc)
 		
 		for f in ["grand_total_print_for_current_item", "tax_amount_print",
 				"grand_total_for_current_item", "tax_amount_for_current_item",
 				"total_print"]:
 			for doc in self.doclist.get({"parentfield": self.fmap.taxes_and_charges}):
-				del doc.fields[self.fmap.get(f) or f]
+				_del(f, doc)
+			
+		for f in ["item_tax_amount"]:
+			for doc in self.doclist.get({"parentfield": self.item_table_field}):
+				_del(f, doc)
+				
