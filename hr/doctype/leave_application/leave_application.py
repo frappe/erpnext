@@ -90,6 +90,9 @@ class DocType:
 			raise Exception
 
 	def validate(self):
+		if self.doc.leave_approver == self.doc.owner:
+			webnotes.msgprint("""Self Approval is not allowed.""", raise_exception=1)
+
 		self.validate_to_date()
 		self.validate_balance_leaves()
 		self.validate_leave_overlap()

@@ -27,10 +27,16 @@ class DocType:
 	def __init__(self, doc, doclist=[]):
 		self.doc = doc
 		self.doclist = doclist
-	
+
+	def validate(self):
+		if self.doc.exp_approver == self.doc.owner:
+			webnotes.msgprint("""Self Approval is not allowed.""", raise_exception=1)
+		self.validate_fiscal_year()
+		self.validate_exp_details()
+			
 	def on_submit(self):
-		if self.doc.status=="Draft":
-			webnotes.msgprint("""Please set status to 'Approved' or 'Rejected' before submitting""",
+		if self.doc.approval_status=="Draft":
+			webnotes.msgprint("""Please set Approval Status to 'Approved' or 'Rejected' before submitting""",
 				raise_exception=1)
 	
 	def validate_fiscal_year(self):
@@ -40,9 +46,6 @@ class DocType:
 		if str(self.doc.posting_date) < str(ysd) or str(self.doc.posting_date) > str(yed):
 			msgprint("Posting Date is not within the Fiscal Year selected")
 			raise Exception
-		
-	def validate(self):
-		self.validate_fiscal_year()
 			
 	def validate_exp_details(self):
 		if not getlist(self.doclist, 'expense_voucher_details'):
