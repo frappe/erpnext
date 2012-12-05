@@ -53,17 +53,13 @@ cur_frm.cscript.refresh = function(doc,cdt,cdn){
 		cur_frm.set_intro("Fill the form and save it")
 	} else {
 		if(doc.approval_status=="Draft") {		
-			if(in_list(user_roles, "HR User")) {
-				if(doc.approval_status=="Draft") {
-					cur_frm.set_intro("Please Approve (and Submit) or Reject, or re-assign to applicant for further review.");				
-				}
-			} else if(user==doc.exp_approver) {
+			if(user==doc.exp_approver) {
 				if(doc.approval_status=="Draft") {
 					cur_frm.set_intro("You are the Expense Approver for this record. Please Update the 'Status' and Save");
 					cur_frm.set_df_property("approval_status", "permlevel", 0);
 				}
 			} else {
-				cur_frm.set_intro("Expense Claim is pending approval.");
+				cur_frm.set_intro("Expense Claim is pending approval. Only the Expense Approver can update status.");
 			}
 		} else {
 			if(doc.approval_status=="Approved") {
@@ -109,7 +105,7 @@ cur_frm.cscript.sanctioned_amount = function(doc,cdt,cdn){
 }
 
 cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
-	if(cint(wn.boot.notification_settings.expense_claim)) {
+	if(cint(wn.boot.notification_settings && wn.boot.notification_settings.expense_claim)) {
 		cur_frm.email_doc(wn.boot.notification_settings.expense_claim_message);
 	}
 }

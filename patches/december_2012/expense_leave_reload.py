@@ -2,7 +2,7 @@ import webnotes
 
 def execute():
 	# new roles
-	roles = [r[0] for r in webnotes.conn.sql("""select name from tabRole""")]:
+	roles = [r[0] for r in webnotes.conn.sql("""select name from tabRole""")]
 	if not "Leave Approver" in roles:
 		webnotes.model_wrapper([{"doctype":"Role", "role_name":"Leave Approver", 
 			"__islocal":1, "module":"HR"}]).save()

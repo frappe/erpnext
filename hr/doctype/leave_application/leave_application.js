@@ -31,13 +31,11 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 		cur_frm.set_intro("Fill the form and save it")
 	} else {
 		if(doc.status=="Open") {
-			if(in_list(user_roles, "HR User")) {
-				cur_frm.set_intro("Please Approve (and Submit) or Reject, or re-assign to applicant for further review.");				
-			} else if(user==doc.leave_approver) {
+			if(user==doc.leave_approver) {
 				cur_frm.set_intro("You are the Leave Approver for this record. Please Update the 'Status' and Save");
 				cur_frm.set_df_property("status", "permlevel", 2);
 			} else {
-				cur_frm.set_intro("This Leave Application is pending approval.")
+				cur_frm.set_intro("This Leave Application is pending approval. Only the Leave Apporver can update status.")
 			}
 		} else {
  			if(doc.status=="Approved") {
