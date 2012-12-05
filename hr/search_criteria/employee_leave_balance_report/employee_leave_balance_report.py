@@ -15,6 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import unicode_literals
+
 leave_types = sql("""
 	SELECT name FROM `tabLeave Type`
 	WHERE
@@ -57,7 +58,7 @@ try:
 		if d[3] in colnames:
 			# If exists, then append the leave type data
 			if exists:
-				res[ind][colnames.index(d[3])] = d[4] - d[5]
+				res[ind][colnames.index(d[3])] = flt(d[4]) - flt(d[5])
 				res[ind][len(colnames)-1] = sum(res[ind][3:-1])
 			# Else create a new row in res
 			else:
@@ -65,7 +66,7 @@ try:
 				new_row[0] = d[0]
 				new_row[1] = d[1]
 				new_row[2] = d[2]
-				new_row[colnames.index(d[3])] = d[4] - d[5]
+				new_row[colnames.index(d[3])] = flt(d[4]) - flt(d[5])
 				new_row[len(colnames)-1] = sum(new_row[3:-1])
 				res.append(new_row)
 except Exception, e:
