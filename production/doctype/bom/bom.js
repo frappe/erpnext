@@ -8,11 +8,11 @@
 // 
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	See the
 // GNU General Public License for more details.
 // 
 // You should have received a copy of the GNU General Public License
-// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+// along with this program.	If not, see <http://www.gnu.org/licenses/>.
 
 // On REFRESH
 cur_frm.cscript.refresh = function(doc,dt,dn){
@@ -50,33 +50,42 @@ cur_frm.cscript.hour_rate = function(doc, dt, dn) {
 cur_frm.cscript.time_in_mins = cur_frm.cscript.hour_rate;
 
 
-cur_frm.cscript.item_code = function(doc,dt,dn) {
-	get_bom_material_detail(doc, dt, dn);
+cur_frm.cscript.item_code = function(doc, cdt, cdn) {
+	get_bom_material_detail(doc, cdt, cdn);
 }
 
 
-cur_frm.cscript.bom_no  = function(doc,dt,dn) {
-	get_bom_material_detail(doc, dt, dn);
+cur_frm.cscript.bom_no	= function(doc, cdt, cdn) {
+	get_bom_material_detail(doc, cdt, cdn);
 }
 
-
-var get_bom_material_detail= function(doc,dt,dn) {
-	var d = locals[dt][dn];
-	var callback = function(doc, dt, dn) {
-		calculate_rm_cost(doc, dt, dn);
-		calculate_total(doc);
-	}
-
-	var bom_no = (d.bom_no!=null) ? d.bom_no:''
+var get_bom_material_detail= function(doc, cdt, cdn) {
+	var d = locals[cdt][cdn];
 	if (d.item_code) {
-		arg = {'item_code': d.item_code, 'bom_no': bom_no, 'qty': d.qty};
-		get_server_fields('get_bom_material_detail', JSON.stringify(arg), 'bom_materials', doc, dt, dn, 1, callback);
+		wn.call({
+			doc: cur_frm.doc,
+			method: "get_bom_material_detail",
+			args: {
+				'item_code': d.item_code, 
+				'bom_no': d.bom_no != null ? d.bom_no: '',
+				'qty': d.qty
+			},
+			callback: function(r) {
+				d = locals[cdt][cdn];
+				$.extend(d, r.message);
+				refresh_field("bom_materials");
+				doc = locals[doc.doctype][doc.name];
+				calculate_rm_cost(doc, cdt, cdn);
+				calculate_total(doc);
+			},
+			freeze: true
+		});
 	}
 }
 
 
-cur_frm.cscript.qty = function(doc, dt, dn) {
-	calculate_rm_cost(doc, dt, dn);
+cur_frm.cscript.qty = function(doc, cdt, cdn) {
+	calculate_rm_cost(doc, cdt, cdn);
 	calculate_total(doc);
 }
 
@@ -84,9 +93,9 @@ cur_frm.cscript.qty = function(doc, dt, dn) {
 cur_frm.cscript.rate = cur_frm.cscript.qty;
 
 
-cur_frm.cscript.is_default = function(doc, dt, dn) {
+cur_frm.cscript.is_default = function(doc, cdt, cdn) {
 	if (doc.docstatus == 1)
-		$c_obj(make_doclist(dt, dn), 'manage_default_bom', '', '');
+		$c_obj(make_doclist(cdt, cdn), 'manage_default_bom', '', '');
 }
 
 
@@ -97,11 +106,11 @@ cur_frm.cscript.is_active = function(doc, dt, dn) {
 
 
 // Calculate Operating Cost
-var calculate_op_cost = function(doc, dt, dn) {  
+var calculate_op_cost = function(doc, dt, dn) {	
 	var op = getchildren('BOM Operation', doc.name, 'bom_operations');
 	total_op_cost = 0;
 	for(var i=0;i<op.length;i++) {
-		op_cost =  flt(op[i].hour_rate) * flt(op[i].time_in_mins) / 60;
+		op_cost =	flt(op[i].hour_rate) * flt(op[i].time_in_mins) / 60;
 		set_multiple('BOM Operation',op[i].name, {'operating_cost': op_cost}, 'bom_operations');
 		total_op_cost += op_cost;
 	}
@@ -111,11 +120,11 @@ var calculate_op_cost = function(doc, dt, dn) {
 
 
 // Calculate Raw Material Cost
-var calculate_rm_cost = function(doc, dt, dn) {  
+var calculate_rm_cost = function(doc, dt, dn) {	
 	var rm = getchildren('BOM Item', doc.name, 'bom_materials');
 	total_rm_cost = 0;
 	for(var i=0;i<rm.length;i++) {
-		amt =  flt(rm[i].rate) * flt(rm[i].qty);
+		amt =	flt(rm[i].rate) * flt(rm[i].qty);
 		set_multiple('BOM Item',rm[i].name, {'amount': amt}, 'bom_materials');
 		set_multiple('BOM Item',rm[i].name, {'qty_consumed_per_unit': flt(rm[i].qty)/flt(doc.quantity)}, 'bom_materials');
 		total_rm_cost += amt;
