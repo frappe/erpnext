@@ -28,6 +28,11 @@ class DocType:
 		self.doc = doc
 		self.doclist = doclist
 	
+	def on_submit(self):
+		if self.doc.status=="Draft":
+			webnotes.msgprint("""Please set status to 'Approved' or 'Rejected' before submitting""",
+				raise_exception=1)
+	
 	def validate_fiscal_year(self):
 		fy=sql("select year_start_date from `tabFiscal Year` where name='%s'"%self.doc.fiscal_year)
 		ysd=fy and fy[0][0] or ""

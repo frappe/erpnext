@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.	If not, see <http://www.gnu.org/licenses/>.
 
+cur_frm.add_fetch('employee','employee_name','employee_name');
+
 cur_frm.cscript.onload = function(doc, dt, dn) {
 	if(!doc.posting_date) 
 		set_multiple(dt,dn,{posting_date:get_today()});
@@ -50,8 +52,6 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 		cur_frm.savesubmit()
 	}
 }
-
-cur_frm.add_fetch('employee','employee_name','employee_name');
 
 cur_frm.cscript.employee = function (doc, dt, dn){
 	get_leave_balance(doc, dt, dn);
