@@ -105,7 +105,7 @@ cur_frm.cscript.sanctioned_amount = function(doc,cdt,cdn){
 }
 
 cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
-	if(cint(wn.boot.notification_settings.expense_claim)) {
+	if(cint(wn.boot.notification_settings && wn.boot.notification_settings.expense_claim)) {
 		cur_frm.email_doc(wn.boot.notification_settings.expense_claim_message);
 	}
 }
