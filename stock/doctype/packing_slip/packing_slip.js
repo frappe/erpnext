@@ -43,8 +43,8 @@ cur_frm.cscript.item_code = function(doc, cdt, cdn) {
 }
 
 
-cur_frm.cscript.onload = function(doc, cdt, cdn) {
-	if(doc.delivery_note) {
+cur_frm.cscript.onload_post_render = function(doc, cdt, cdn) {
+	if(doc.delivery_note && doc.__islocal) {
 		var ps_detail = getchildren('Packing Slip Item', doc.name, 'item_details');
 		if(!(flt(ps_detail[0].net_weight) && cstr(ps_detail[0].weight_uom))) {
 			cur_frm.cscript.update_item_details(doc);
