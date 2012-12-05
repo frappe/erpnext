@@ -1,10 +1,10 @@
 erpnext.updates = [
 	["5th December 2012", [
-		"[For indian customer only] Deprecated TDS related documents and fields. Old TDS amount added into tax table in Purchase Invoice and entries table in case of JV",
-		"Production Planning Tool: The field 'Allow SA items as raw material' has been renamed to 'Use multi-level BOM', 'Include in plan' column from SO table has been deleted",
 		"Production Order is now linked with sales order.",
+		"Production Planning Tool: The field 'Allow SA items as raw material' has been renamed to 'Use multi-level BOM', 'Include in plan' column from SO table has been deleted",
 		"Batch nos are now filtered with item and available qty",
-		"BOM: 'Update Costing' button has been deleted, once submitted cost are fixed."
+		"BOM: 'Update Costing' button has been deleted, once submitted cost are fixed.",
+		"[For indian customer only] Deprecated TDS related documents and fields. Old TDS amount added into tax table in Purchase Invoice and entries table in case of JV",
 	]],
 	["4th December 2012", [
 		"POS / Mode of Payment: Select default bank / cash account in Mode of Payment and it will be automatically selected in POS Invoice.",
