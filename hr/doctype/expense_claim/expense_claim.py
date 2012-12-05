@@ -46,5 +46,8 @@ class DocType:
 		
 @webnotes.whitelist()
 def get_approver_list():
-	return [r[0] for r in webnotes.conn.sql("""select distinct parent from `tabUserRole`
+	roles = [r[0] for r in webnotes.conn.sql("""select distinct parent from `tabUserRole`
 		where role='Expense Approver'""")]
+	if not roles:
+		webnotes.msgprint("No Expense Approvers. Please assign 'Expense Approver' Role to atleast one user.")
+	return roles

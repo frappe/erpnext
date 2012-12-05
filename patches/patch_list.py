@@ -713,4 +713,12 @@ patch_list = [
 		'patch_module': 'patches.december_2012',
 		'patch_file': 'expense_leave_reload',
 	},
+	{
+		'patch_module': 'patches.december_2012',
+		'patch_file': 'repost_ordered_qty',
+	},
+	{
+		'patch_module': 'patches.december_2012',
+		'patch_file': 'repost_projected_qty',
+	},
 ]
