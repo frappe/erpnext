@@ -27,7 +27,7 @@ wn.doclistviews['Purchase Order'] = wn.views.ListView.extend({
 			},
 			css: {'text-align':'right'}
 		},
-		{width: '8%', content: 'per_received', type:'bar-graph', label:'Delivered'},
+		{width: '8%', content: 'per_received', type:'bar-graph', label:'Received'},
 		{width: '8%', content: 'per_billed', type:'bar-graph', label:'Billed'},
 		{width: '12%', content:'transaction_date',
 			css: {'text-align': 'right', 'color':'#777'},
