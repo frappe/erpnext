@@ -35,9 +35,10 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 		if(doc.status=="Open") {
 			if(user==doc.leave_approver) {
 				cur_frm.set_intro("You are the Leave Approver for this record. Please Update the 'Status' and Save");
-				cur_frm.set_df_property("status", "permlevel", 2);
+				cur_frm.toggle_enable("status", true);
 			} else {
 				cur_frm.set_intro("This Leave Application is pending approval. Only the Leave Apporver can update status.")
+				cur_frm.toggle_enable("status", false);
 			}
 		} else {
  			if(doc.status=="Approved") {
@@ -92,7 +93,7 @@ get_leave_balance = function(doc, dt, dn) {
 		cur_frm.call({
 			method: "get_leave_balance",
 			args: {
-				employee: doc.name,
+				employee: doc.employee,
 				fiscal_year: doc.fiscal_year,
 				leave_type: doc.leave_type
 			}

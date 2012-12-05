@@ -63,7 +63,8 @@ class DocType:
 
 	def validate_balance_leaves(self):
 		if self.doc.from_date and self.doc.to_date and not self.is_lwp():
-			bal = get_leave_balance(self.doc.leave_type, self.doc.employee, self.doc.fiscal_year)
+			bal = get_leave_balance(self.doc.leave_type, self.doc.employee, 
+				self.doc.fiscal_year)["leave_balance"]
 			tot_leaves = self.get_total_leave_days()
 			bal, tot_leaves = bal, tot_leaves
 			webnotes.conn.set(self.doc,'leave_balance',flt(bal['leave_balance']))
@@ -106,17 +107,18 @@ class DocType:
 @webnotes.whitelist()
 def get_leave_balance(employee, leave_type, fiscal_year):
 	leave_all = webnotes.conn.sql("""select total_leaves_allocated 
-		from `tabLeave Allocation` where employee = '%s' and leave_type = '%s' 
-		and fiscal_year = '%s' and docstatus = 1""" % (employee, 
+		from `tabLeave Allocation` where employee = %s and leave_type = %s
+		and fiscal_year = %s and docstatus = 1""", (employee, 
 			leave_type, fiscal_year))
 
 	leave_all = leave_all and flt(leave_all[0][0]) or 0
+	
 	leave_app = webnotes.conn.sql("""select SUM(total_leave_days) 
 		from `tabLeave Application` 
-		where employee = '%s' 
-		and leave_type = '%s' and fiscal_year = '%s' 
-		and docstatus = 1""" % (employee, leave_type, fiscal_year))
+		where employee = %s and leave_type = %s and fiscal_year = %s
+		and docstatus = 1""", (employee, leave_type, fiscal_year))
 	leave_app = leave_app and flt(leave_app[0][0]) or 0
+
 	ret = {'leave_balance':leave_all - leave_app}
 	return ret
 
