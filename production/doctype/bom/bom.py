@@ -86,10 +86,13 @@ class DocType:
 
 
 
-	def get_bom_material_detail(self, arg):
+	def get_bom_material_detail(self):
 		""" Get raw material details like uom, desc and rate"""
+
+		arg = webnotes.form_dict.get('args')
 		import json
 		arg = json.loads(arg)
+		
 		item = self.get_item_det(arg['item_code'])
 		self.validate_rm_item(item)
 		
@@ -98,10 +101,10 @@ class DocType:
 
 		rate = self.get_rm_rate(arg)
 		ret_item = {
-					 'description'  : item and arg['description'] or '',
-					 'stock_uom'	: item and arg['stock_uom'] or '',
-					 'bom_no'		: arg['bom_no'],
-					 'rate'			: rate
+			 'description'  : item and arg['description'] or '',
+			 'stock_uom'	: item and arg['stock_uom'] or '',
+			 'bom_no'		: arg['bom_no'],
+			 'rate'			: rate
 		}
 		return ret_item
 
