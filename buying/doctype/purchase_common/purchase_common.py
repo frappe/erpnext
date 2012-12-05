@@ -182,39 +182,6 @@ class DocType(TransactionBase):
 		ret = { 'projected_qty' : bin and flt(bin[0]['projected_qty']) or 0 }
 		return ret
 
-	def get_uom_details(self, arg = ''):
-		"""fetches details on change of UOM"""
-		import json
-		arg, ret = json.loads(arg), {}
-	
-		uom = webnotes.conn.sql("""\
-			select conversion_factor
-			from `tabUOM Conversion Detail`
-			where parent = %s and uom = %s""", (arg['item_code'],arg['uom']), as_dict = 1)
-		
-		if not uom: return ret
-		
-		last_purchase_details, last_purchase_date = self.get_last_purchase_details(arg['item_code'], arg['doc_name'])
-
-		conversion_factor = flt(uom[0]['conversion_factor'])
-		conversion_rate = flt(arg['conversion_rate'])
-		purchase_ref_rate = last_purchase_details and \
-							(last_purchase_details['purchase_ref_rate'] * conversion_factor) or 0
-		purchase_rate = last_purchase_details and \
-						(last_purchase_details['purchase_rate'] * conversion_factor) or 0
-
-		ret = {
-			'conversion_factor': conversion_factor,
-			'qty': flt(arg['stock_qty']) / conversion_factor,
-			'purchase_ref_rate': purchase_ref_rate,
-			'purchase_rate': purchase_rate,
-			'import_ref_rate': purchase_ref_rate / conversion_rate,
-			'import_rate': purchase_rate / conversion_rate,
-		}
-		
-		return ret
-	
-		
 	# --- Last Purchase Rate related methods ---
 	
 	def update_last_purchase_rate(self, obj, is_submit):
@@ -683,3 +650,27 @@ class DocType(TransactionBase):
 			if d.prevdoc_doctype and d.prevdoc_docname:
 				dt = sql("select transaction_date from `tab%s` where name = '%s'" % (d.prevdoc_doctype, d.prevdoc_docname))
 				d.prevdoc_date = dt and dt[0][0].strftime('%Y-%m-%d') or ''
+
+@webnotes.whitelist()
+def get_uom_details(args=None):
+	"""fetches details on change of UOM"""
+	if not args:
+		return {}
+		
+	if isinstance(args, basestring):
+		import json
+		args = json.loads(args)
+
+	uom = webnotes.conn.sql("""select conversion_factor
+		from `tabUOM Conversion Detail` where parent = %s and uom = %s""", 
+		(args['item_code'], args['uom']), as_dict=1)
+
+	if not uom: return {}
+
+	conversion_factor = args.get("conversion_factor") or \
+		flt(uom[0]["conversion_factor"])
+	
+	return {
+		"conversion_factor": conversion_factor,
+		"qty": flt(args["stock_qty"]) / conversion_factor,
+	}
