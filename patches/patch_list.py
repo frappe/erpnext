@@ -709,4 +709,8 @@ patch_list = [
 		'patch_module': 'patches.december_2012',
 		'patch_file': 'deprecate_tds',
 	},
+	{
+		'patch_module': 'patches.december_2012',
+		'patch_file': 'expense_leave_reload',
+	},
 ]

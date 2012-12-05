@@ -15,79 +15,87 @@
 // along with this program.	If not, see <http://www.gnu.org/licenses/>.
 
 cur_frm.add_fetch('employee', 'company', 'company');
+cur_frm.add_fetch('employee','employee_name','employee_name');
 
 cur_frm.cscript.onload = function(doc,cdt,cdn){
-	// 
-	if(!doc.approval_status) set_multiple(cdt,cdn,{approval_status:'Draft'});
-	if(doc.employee) cur_frm.cscript.employee(doc,cdt,cdn);
-	
+	if(!doc.approval_status)
+		cur_frm.set_value("approval_status", "Draft")
+			
 	if (doc.__islocal) {
-		if(doc.amended_from) set_multiple(cdt,cdn,{approval_status:'Draft'});
-		var val = getchildren('Expense Claim Detail', doc.name, 'expense_voucher_details', doc.doctype);
-		for(var i = 0; i<val.length; i++){
-			val[i].sanctioned_amount ='';
-		}
-		doc.total_sanctioned_amount = '';
-		refresh_many(['sanctioned_amount', 'total_sanctioned_amount']);
+		cur_frm.set_value("posting_date", dateutil.get_today());
+		if(doc.amended_from) 
+			cur_frm.set_value("approval_status", "Draft");
+		cur_frm.cscript.clear_sanctioned(doc);
 	}
+
+	cur_frm.call({
+		method:"get_approver_list",
+		callback: function(r) {
+			cur_frm.set_df_property("exp_approver", "options", r.message);
+		}
+	});	
+}
+
+cur_frm.cscript.clear_sanctioned = function(doc) {
+	var val = getchildren('Expense Claim Detail', doc.name, 
+		'expense_voucher_details', doc.doctype);
+	for(var i = 0; i<val.length; i++){
+		val[i].sanctioned_amount ='';
+	}
+
+	doc.total_sanctioned_amount = '';
+	refresh_many(['sanctioned_amount', 'total_sanctioned_amount']);	
 }
 
 cur_frm.cscript.refresh = function(doc,cdt,cdn){
-	hide_field('calculate_total_amount');
-	if(user == doc.exp_approver && doc.approval_status == 'Submitted'){
-		unhide_field(['update_voucher', 'approve', 'reject', 'calculate_total_amount']);
-		cur_frm.fields_dict['expense_voucher_details'].grid.set_column_disp('sanctioned_amount', true);
-		set_field_permlevel('remark', 0);
+	cur_frm.set_intro("");
+	if(doc.__islocal && !in_list(user_roles, "HR User")) {
+		cur_frm.set_intro("Fill the form and save it")
 	} else {
-		hide_field(['update_voucher', 'approve', 'reject']);
-		cur_frm.fields_dict['expense_voucher_details'].grid.set_column_disp('sanctioned_amount', false);
-		set_field_permlevel('remark', 1);
+		if(doc.approval_status=="Draft") {		
+			if(in_list(user_roles, "HR User")) {
+				if(doc.approval_status=="Draft") {
+					cur_frm.set_intro("Please Approve (and Submit) or Reject, or re-assign to applicant for further review.");				
+				}
+			} else if(user==doc.exp_approver) {
+				if(doc.approval_status=="Draft") {
+					cur_frm.set_intro("You are the Expense Approver for this record. Please Update the 'Status' and Save");
+					cur_frm.set_df_property("approval_status", "permlevel", 0);
+				}
+			} else {
+				cur_frm.set_intro("Expense Claim is pending approval.");
+			}
+		} else {
+			if(doc.approval_status=="Approved") {
+				cur_frm.set_intro("Expense Claim has been approved.");
+			} else if(doc.approval_status=="Rejected") {
+				cur_frm.set_intro("Expense Claim has been rejected.");
+			}
+		}
 	}
-	if (doc.docstatus == 0) unhide_field('calculate_total_amount');
-}
+	
+	if(doc.approval_status=="Approved" && doc.docstatus==0) {
+		cur_frm.savesubmit()
+	}}
 
 cur_frm.cscript.validate = function(doc) {
-	if(cint(doc.docstatus) == 0) {
-		doc.approval_status = "Draft";
-	}
 	cur_frm.cscript.calculate_total(doc);
 }
 
-cur_frm.cscript.employee = function(doc,cdt,cdn){
-	if(doc.employee){
-		$c_obj(make_doclist(doc.doctype, doc.name),'set_approver','', function(r,rt){
-			if(r.message){
-				doc.employee_name = r.message['emp_nm'];
-				wn.meta.get_docfield(doc.doctype, 'exp_approver' , doc.name).options = r.message['app_lst'];				
-				refresh_many(['exp_approver','employee_name']);
-			}		
-		});
-	}
-}
-
 cur_frm.cscript.calculate_total = function(doc,cdt,cdn){
-	if(doc.approval_status == 'Draft'){
-		var val = getchildren('Expense Claim Detail', doc.name, 'expense_voucher_details', doc.doctype);
-		var total_claim =0;
-		for(var i = 0; i<val.length; i++){
-			val[i].sanctioned_amount = val[i].claim_amount;
-			total_claim = flt(total_claim)+flt(val[i].claim_amount);
-			refresh_field('sactioned_amount', val[i].name, 'expense_voucher_details'); 
+	doc.total_claimed_amount = 0;
+	doc.total_sanctioned_amount = 0;
+	$.each(wn.model.get("Expense Claim Detail", {parent:doc.name}), function(i, d) {
+		doc.total_claimed_amount += d.claim_amount;
+		if(d.sanctioned_amount==null) {
+			d.sanctioned_amount = d.claim_amount;
 		}
-		doc.total_claimed_amount = flt(total_claim);
-		refresh_field('total_claimed_amount');
-	}
-	else if(doc.approval_status == 'Submitted'){
-		var val = getchildren('Expense Claim Detail', doc.name, 'expense_voucher_details', doc.doctype);
-		var total_sanctioned = 0;
-		for(var i = 0; i<val.length; i++){
-			total_sanctioned = flt(total_sanctioned)+flt(val[i].sanctioned_amount);
-			refresh_field('sactioned_amount', val[i].name, 'expense_voucher_details'); 
-			
-		}
-		doc.total_sanctioned_amount = flt(total_sanctioned);
-		refresh_field('total_sanctioned_amount');
-	}
+		doc.total_sanctioned_amount += d.sanctioned_amount;
+	});
+	
+	refresh_field("total_claimed_amount");
+	refresh_field('total_sanctioned_amount');
+
 }
 
 cur_frm.cscript.calculate_total_amount = function(doc,cdt,cdn){
@@ -100,155 +108,8 @@ cur_frm.cscript.sanctioned_amount = function(doc,cdt,cdn){
 	cur_frm.cscript.calculate_total(doc,cdt,cdn);
 }
 
-cur_frm.cscript.approve = function(doc,cdt,cdn){
-	cur_frm.cscript.calculate_total(doc,cdt,cdn);
-
-	if(user == doc.exp_approver){
-		var approve_voucher_dialog;
-		
-		set_approve_voucher_dialog = function() {
-			approve_voucher_dialog = new Dialog(400, 200, 'Approve Voucher');
-			approve_voucher_dialog.make_body([
-				['HTML', 'Message', '<div class = "comment">You wont be able to do any changes after approving this expense voucher. Are you sure, you want to approve it ?</div>'],
-				['HTML', 'Response', '<div class = "comment" id="approve_voucher_dialog_response"></div>'],
-				['HTML', 'Approve Voucher', '<div></div>']
-			]);
-			
-			var approve_voucher_btn1 = $a($i(approve_voucher_dialog.widgets['Approve Voucher']), 'button', 'button');
-			approve_voucher_btn1.innerHTML = 'Yes';
-			approve_voucher_btn1.onclick = function(){ approve_voucher_dialog.add(); }
-			
-			var approve_voucher_btn2 = $a($i(approve_voucher_dialog.widgets['Approve Voucher']), 'button', 'button');
-			approve_voucher_btn2.innerHTML = 'No';
-			$y(approve_voucher_btn2,{marginLeft:'4px'});
-			approve_voucher_btn2.onclick = function(){ approve_voucher_dialog.hide();}
-			
-			approve_voucher_dialog.onshow = function() {
-				$i('approve_voucher_dialog_response').innerHTML = '';
-			}
-			
-			approve_voucher_dialog.add = function() {
-				// sending...
-				$i('approve_voucher_dialog_response').innerHTML = 'Processing...';
-				
-				$c_obj(make_doclist(this.doc.doctype, this.doc.name),'approve_voucher','', function(r,rt){
-					if(r.message == 'Approved'){
-						$i('approve_voucher_dialog_response').innerHTML = 'Approved';
-						refresh_field('approval_status');
-						hide_field(['update_voucher', 'approve', 'reject', 'calculate_total_amount']);
-						approve_voucher_dialog.hide();
-			var args = {
-				type: 'Expense Claim Approved',
-				doctype: 'Expense Claim',
-				contact_name: doc.employee_name,
-				send_to: doc.email_id
-			}
-			cur_frm.cscript.notify(doc, args);
-					}
-					else if(r.message == 'Incomplete'){
-						$i('approve_voucher_dialog_response').innerHTML = 'Incomplete Voucher';
-					}
-					else if(r.message == 'No Amount'){
-						$i('approve_voucher_dialog_response').innerHTML = 'Calculate total amount';
-					}
-				});
-			}
-		}	
-		
-		if(!approve_voucher_dialog){
-			set_approve_voucher_dialog();
-		}	
-		approve_voucher_dialog.doc = doc;
-		approve_voucher_dialog.cdt = cdt;
-		approve_voucher_dialog.cdn = cdn;
-		approve_voucher_dialog.show();
-		refresh_field('expense_voucher_details');
-		doc.__unsaved = 0;
-		cur_frm.refresh_header();
-	}else{
-		msgprint("Expense Claim can be approved by Approver only");
-	}
-}
-
-cur_frm.cscript.reject = function(doc,cdt,cdn){
-	cur_frm.cscript.calculate_total(doc,cdt,cdn);
-	
-	if(user == doc.exp_approver){
-		var reject_voucher_dialog;
-		
-		set_reject_voucher_dialog = function() {
-			reject_voucher_dialog = new Dialog(400, 200, 'Reject Voucher');
-			reject_voucher_dialog.make_body([
-				['HTML', 'Message', '<div class = "comment">You wont be able to do any changes after rejecting this expense voucher. Are you sure, you want to reject it ?</div>'],
-				['HTML', 'Response', '<div class = "comment" id="reject_voucher_dialog_response"></div>'],
-				['HTML', 'Reject Voucher', '<div></div>']
-			]);
-			
-			var reject_voucher_btn1 = $a($i(reject_voucher_dialog.widgets['Reject Voucher']), 'button', 'button');
-			reject_voucher_btn1.innerHTML = 'Yes';
-			reject_voucher_btn1.onclick = function(){ reject_voucher_dialog.add(); }
-			
-			var reject_voucher_btn2 = $a($i(reject_voucher_dialog.widgets['Reject Voucher']), 'button', 'button');
-			reject_voucher_btn2.innerHTML = 'No';
-			$y(reject_voucher_btn2,{marginLeft:'4px'});
-			reject_voucher_btn2.onclick = function(){ reject_voucher_dialog.hide();}
-			
-			reject_voucher_dialog.onshow = function() {
-				$i('reject_voucher_dialog_response').innerHTML = '';
-			}
-			
-			reject_voucher_dialog.add = function() {
-				// sending...
-				$i('reject_voucher_dialog_response').innerHTML = 'Processing...';
-				
-				$c_obj(make_doclist(this.doc.doctype, this.doc.name),'reject_voucher','', function(r,rt){
-					if(r.message == 'Rejected'){
-						$i('reject_voucher_dialog_response').innerHTML = 'Rejected';
-						refresh_field('approval_status');
-						hide_field(['update_voucher', 'approve', 'reject', 'calculate_total_amount']);
-						reject_voucher_dialog.hide();
-			var args = {
-				type: 'Expense Claim Rejected',
-				doctype: 'Expense Claim',
-				contact_name: doc.employee_name,
-				send_to: doc.email_id
-			}
-			cur_frm.cscript.notify(doc, args);
-					}
-				});
-			}
-		}	
-		
-		if(!reject_voucher_dialog){
-			set_reject_voucher_dialog();
-		}	
-		reject_voucher_dialog.doc = doc;
-		reject_voucher_dialog.cdt = cdt;
-		reject_voucher_dialog.cdn = cdn;
-		reject_voucher_dialog.show();
-		refresh_field('expense_voucher_details');
-		doc.__unsaved = 0;
-		cur_frm.refresh_header();
-	}else{
-		msgprint("Expense Claim can be rejected by Approver only");
-	}
-}
-
-//update follow up
-//=================================================================================
-cur_frm.cscript.update_voucher = function(doc){
-
-	$c_obj(make_doclist(doc.doctype, doc.name),'update_voucher','',function(r, rt){
-		refresh_field('expense_voucher_details');
-		doc.__unsaved = 0;
-		cur_frm.refresh_header();
-	});
-}
-
 cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
 	if(cint(wn.boot.notification_settings.expense_claim)) {
 		cur_frm.email_doc(wn.boot.notification_settings.expense_claim_message);
 	}
 }
-
-cur_frm.fields_dict.employee.get_query = erpnext.utils.employee_query;
