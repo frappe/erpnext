@@ -162,7 +162,7 @@ cur_frm.cscript.update_stock = function(doc, dt, dn) {
 
 cur_frm.cscript.warehouse = function(doc, cdt , cdn) {
 	var d = locals[cdt][cdn];
-	if (!d.item_code) {alert("please enter item code first"); return};
+	if (!d.item_code) { msgprint("please enter item code first"); return };
 	if (d.warehouse) {
 		arg = "{'item_code':'" + d.item_code + "','warehouse':'" + d.warehouse +"'}";
 		get_server_fields('get_actual_qty',arg,'entries',doc,cdt,cdn,1);

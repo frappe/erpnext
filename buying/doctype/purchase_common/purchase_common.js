@@ -95,12 +95,9 @@ var set_dynamic_label_par = function(doc, cdt, cdn, base_curr) {
 	cur_frm.fields_dict['conversion_rate'].label_area.innerHTML = "Conversion Rate (" + doc.currency +' -> '+ base_curr + ')';
 
 	if (doc.doctype == 'Purchase Invoice') {
-		cur_frm.fields_dict['total_tds_on_voucher'].label_area.innerHTML = 'Total TDS On Voucher (' + base_curr + ')';
 		cur_frm.fields_dict['outstanding_amount'].label_area.innerHTML = 'Outstanding Amount (' + base_curr + ')';
-		cur_frm.fields_dict['tds_amount_on_advance'].label_area.innerHTML = 'TDS Amount On Advance (' + base_curr + ')';
 		cur_frm.fields_dict['total_advance'].label_area.innerHTML = 'Total Advance (Incl. TDS) (' + base_curr + ')';
 		cur_frm.fields_dict['total_amount_to_pay'].label_area.innerHTML = 'Total Amount To Pay (' + base_curr + ')';
-		cur_frm.fields_dict['ded_amount'].label_area.innerHTML = 'TDS Amount (' + base_curr + ')';
 	} else cur_frm.fields_dict['rounded_total'].label_area.innerHTML = 'Rounded Total (' + base_curr + ')';
 
 }
@@ -122,7 +119,7 @@ var set_dynamic_label_child = function(doc, cdt, cdn, base_curr) {
 		$('[data-grid-fieldname="'+cur_frm.cscript.tname+'-rate"]').html('Rate ('+base_curr+')');
 		cur_frm.fields_dict[cur_frm.cscript.fname].grid.set_column_disp('rate', hide);
 		// advance table flds
-		adv_cols = {'advance_amount': 'Advance Amount', 'allocated_amount': 'Allocated Amount', 'tds_amount': 'TDS Amount', 'tds_allocated': 'TDS Allocated'}
+		adv_cols = {'advance_amount': 'Advance Amount', 'allocated_amount': 'Allocated Amount'}
 		for (d in adv_cols) $('[data-grid-fieldname="Purchase Invoice Advance-'+d+'"]').html(adv_cols[d]+' ('+base_curr+')');	
 	}
 	else {
@@ -656,16 +653,13 @@ cur_frm.cscript.calc_doc_values = function(doc, tname, fname, other_fname) {
 }
 
 var calculate_outstanding = function(doc) {
-	var t_tds_tax = 0.0;	
-	doc.total_tds_on_voucher = flt(doc.ded_amount);
-
 	// total amount to pay	
-	doc.total_amount_to_pay = flt(flt(doc.net_total) + flt(doc.other_charges_added) - flt(doc.other_charges_deducted) - flt(doc.total_tds_on_voucher));
+	doc.total_amount_to_pay = flt(flt(doc.net_total) + flt(doc.other_charges_added) - flt(doc.other_charges_deducted));
 	
 	// outstanding amount 
-	if(doc.docstatus==0) doc.outstanding_amount = flt(doc.net_total) + flt(doc.other_charges_added) - flt(doc.other_charges_deducted) - flt(doc.total_tds_on_voucher) - flt(doc.total_advance);
+	if(doc.docstatus==0) doc.outstanding_amount = flt(doc.net_total) + flt(doc.other_charges_added) - flt(doc.other_charges_deducted) - flt(doc.total_advance);
 	
-	refresh_many(['total_tds_on_voucher','total_amount_to_pay', 'outstanding_amount']);
+	refresh_many(['total_amount_to_pay', 'outstanding_amount']);
 }
 
 

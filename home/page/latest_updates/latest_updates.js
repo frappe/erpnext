@@ -1,5 +1,14 @@
 erpnext.updates = [
-	["4rd December 2012", [
+	["5th December 2012", [
+		"Leave Application: Now can set approver.",
+		"New Roles Added: Leave Approver and Expense Approver.",
+		"Production Order is now linked with sales order.",
+		"Production Planning Tool: The field 'Allow SA items as raw material' has been renamed to 'Use multi-level BOM', 'Include in plan' column from SO table has been deleted",
+		"Batch nos are now filtered with item and available qty",
+		"BOM: 'Update Costing' button has been deleted, once submitted cost are fixed.",
+		"[For indian customer only] Deprecated TDS related documents and fields. Old TDS amount added into tax table in Purchase Invoice and entries table in case of JV",
+	]],
+	["4th December 2012", [
 		"POS / Mode of Payment: Select default bank / cash account in Mode of Payment and it will be automatically selected in POS Invoice.",
 		"Email: Add contact name as 'Dear so-and-so' in Email.",
 		"Report Builder: Remember last column setup for users",
@@ -9,6 +18,7 @@ erpnext.updates = [
 		"Linked With: Added new Linked with in all Forms.",
 		"Rename Tool: Documents that can be renamed will have a 'Rename' option in the sidebar (wherever applicable).",
 		"Chart of Accounts: Ability to rename / delete from Chart of Accounts.",
+		"Delivery and Billing status now updated in sales order, if POS made against that sales order"
 	]],
 	["30th November 2012", [
 		"Auto Notifications: System will prompt user with pre-set message for auto-notification.",

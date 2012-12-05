@@ -204,7 +204,14 @@ class DocType:
 	# ADVANCE ALLOCATION
 	#-------------------
 	def get_advances(self, obj, account_head, table_name,table_field_name, dr_or_cr):
-		jv_detail = webnotes.conn.sql("select t1.name, t1.remark, t2.%s, t2.name, t1.ded_amount from `tabJournal Voucher` t1, `tabJournal Voucher Detail` t2 where t1.name = t2.parent and (t2.against_voucher is null or t2.against_voucher = '') and (t2.against_invoice is null or t2.against_invoice = '') and (t2.against_jv is null or t2.against_jv = '') and t2.account = '%s' and t2.is_advance = 'Yes' and t1.docstatus = 1 order by t1.voucher_date " % (dr_or_cr,account_head))
+		jv_detail = webnotes.conn.sql("""select t1.name, t1.remark, t2.%s, t2.name 
+			from `tabJournal Voucher` t1, `tabJournal Voucher Detail` t2 
+			where t1.name = t2.parent 
+			and (t2.against_voucher is null or t2.against_voucher = '')
+			and (t2.against_invoice is null or t2.against_invoice = '') 
+			and (t2.against_jv is null or t2.against_jv = '') 
+			and t2.account = '%s' and t2.is_advance = 'Yes' and t1.docstatus = 1 
+			order by t1.voucher_date """ % (dr_or_cr,account_head))
 		# clear advance table
 		obj.doclist = obj.doc.clear_table(obj.doclist,table_field_name)
 		# Create advance table
@@ -215,9 +222,7 @@ class DocType:
 			add.remarks = d[1]
 			add.advance_amount = flt(d[2])
 			add.allocate_amount = 0
-			if table_name == 'Purchase Invoice Advance':
-				add.tds_amount = flt(d[4])
-				
+			
 		return obj.doclist
 
 	# Clear rows which is not adjusted

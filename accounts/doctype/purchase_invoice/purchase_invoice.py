@@ -244,8 +244,6 @@ class DocType(TransactionBase):
 				raise Exception , "Validation Error"
 			if not self.doc.remarks:
 				self.doc.remarks = (self.doc.remarks or '') + "\n" + ("Against Bill %s dated %s" % (self.doc.bill_no, formatdate(self.doc.bill_date)))
-				if self.doc.ded_amount:
-					self.doc.remarks = (self.doc.remarks or '') + "\n" + ("Grand Total: %s, Tax Deduction Amount: %s" %(self.doc.grand_total, self.doc.ded_amount))
 		else:
 			if not self.doc.remarks:
 				self.doc.remarks = "No Remarks"
@@ -352,42 +350,6 @@ class DocType(TransactionBase):
 				msgprint("Purchase Receipt: " + cstr(d.purchase_receipt) + " conversion_rate : " + cstr(data[0]['conversion_rate']) + " does not match with conversion_rate of current document.")
 				raise Exception
 					
-	# Build tds table if applicable
-	#------------------------------
-	def get_tds(self):
-		if cstr(self.doc.is_opening) != 'Yes':
-			if not self.doc.credit_to:
-				msgprint("Please Enter Credit To account first")
-				raise Exception
-			else:
-				tds_applicable = sql("select tds_applicable from tabAccount where name = '%s'" % self.doc.credit_to)
-				if tds_applicable and cstr(tds_applicable[0][0]) == 'Yes':
-					if not self.doc.tds_applicable:
-						msgprint("Please enter whether TDS Applicable or not")
-						raise Exception
-					if self.doc.tds_applicable == 'Yes':
-						if not self.doc.tds_category:
-							msgprint("Please select TDS Category")
-							raise Exception
-						else:
-							get_obj('TDS Control').get_tds_amount(self)
-							self.doc.total_tds_on_voucher = self.doc.ded_amount
-							self.doc.total_amount_to_pay=flt(self.doc.grand_total) - flt(self.doc.ded_amount) - self.doc.write_off_amount
-							self.doc.outstanding_amount = self.doc.total_amount_to_pay - flt(self.doc.total_advance)
-					elif self.doc.tds_applicable == 'No':
-						self.doc.tds_category = ''
-						self.doc.tax_code = ''
-						self.doc.rate = 0
-						self.doc.ded_amount = 0
-						self.doc.total_tds_on_voucher = 0
-
-	# get tds rate
-	# -------------
-	def get_tds_rate(self):
-		return {'rate' : flt(webnotes.conn.get_value('Account', self.doc.tax_code, 'tax_rate'))}
-
-	# set aging date
-	#-------------------
 	def set_aging_date(self):
 		if self.doc.is_opening != 'Yes':
 			self.doc.aging_date = self.doc.posting_date
@@ -452,11 +414,7 @@ class DocType(TransactionBase):
 				self.po_list.append(d.purchase_order)
 			if not d.purhcase_receipt in self.pr_list:
 				self.pr_list.append(d.purchase_receipt)
-		# tds
-		get_obj('TDS Control').validate_first_entry(self)
-		if not flt(self.doc.ded_amount):
-			self.get_tds()
-			self.doc.save()
+
 
 		if not self.doc.is_opening:
 			self.doc.is_opening = 'No'
@@ -467,7 +425,8 @@ class DocType(TransactionBase):
 		self.set_against_expense_account()
 
 		#FY validation
-		get_obj('Sales Common').validate_fiscal_year(self.doc.fiscal_year,self.doc.posting_date,'Posting Date')
+		get_obj('Sales Common').validate_fiscal_year(self.doc.fiscal_year,
+		 	self.doc.posting_date,'Posting Date')
 		
 		self.validate_write_off_account()
 		
@@ -477,10 +436,9 @@ class DocType(TransactionBase):
 		 # get total in words
 		dcc = TransactionBase().get_company_currency(self.doc.company)
 		self.doc.in_words = pc_obj.get_total_in_words(dcc, self.doc.grand_total)
-		self.doc.in_words_import = pc_obj.get_total_in_words(self.doc.currency, self.doc.grand_total_import)
-# ***************************** SUBMIT *****************************
-	# Check Ref Document docstatus
-	# -----------------------------
+		self.doc.in_words_import = pc_obj.get_total_in_words(self.doc.currency,
+		 	self.doc.grand_total_import)
+
 	def check_prev_docstatus(self):
 		for d in getlist(self.doclist,'entries'):
 			if d.purchase_order:
@@ -495,7 +453,6 @@ class DocType(TransactionBase):
 					raise Exception , "Validation Error."
 					
 					
-	#--------------------------------------------------------------------
 	def update_against_document_in_jv(self):
 		"""
 			Links invoice and advance voucher:
@@ -524,9 +481,6 @@ class DocType(TransactionBase):
 			get_obj('GL Control').reconcile_against_document(lst)
 
 
-
-	# On Submit
-	#--------------------------------------------------------------------
 	def on_submit(self):
 		self.check_prev_docstatus()
 		
@@ -547,38 +501,18 @@ class DocType(TransactionBase):
 			use_mapper = (self.doc.write_off_account and self.doc.write_off_amount and 'Purchase Invoice with write off' or ''))
 
 
-
-
-# ********************************* CANCEL *********************************
-	# Check Next Document's docstatus
-	# --------------------------------
 	def check_next_docstatus(self):
 		submit_jv = sql("select t1.name from `tabJournal Voucher` t1,`tabJournal Voucher Detail` t2 where t1.name = t2.parent and t2.against_voucher = '%s' and t1.docstatus = 1" % (self.doc.name))
 		if submit_jv:
 			msgprint("Journal Voucher : " + cstr(submit_jv[0][0]) + " has been created against " + cstr(self.doc.doctype) + ". So " + cstr(self.doc.doctype) + " cannot be Cancelled.")
 			raise Exception, "Validation Error."
-		
-	# On Cancel
-	# ----------
+	
 	def on_cancel(self):
 		self.check_next_docstatus()
-
-		# Check whether tds payment voucher has been created against this voucher
-		self.check_tds_payment_voucher()
 		
 		self.make_gl_entries(is_cancel=1)
 		get_obj(dt = 'Purchase Common').update_prevdoc_detail(self, is_submit = 0)
 
-
-	# Check whether tds payment voucher has been created against this voucher
-	#---------------------------------------------------------------------------
-	def check_tds_payment_voucher(self):
-		tdsp =	sql("select parent from `tabTDS Payment Detail` where voucher_no = '%s' and docstatus = 1 and parent not like 'old%'")
-		if tdsp:
-			msgprint("TDS Payment voucher '%s' has been made against this voucher. Please cancel the payment voucher to proceed." % (tdsp and tdsp[0][0] or ''))
-			raise Exception
-
-	# on update
 	def on_update(self):
 		pass
 		

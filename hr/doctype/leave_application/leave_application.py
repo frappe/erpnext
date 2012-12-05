@@ -30,14 +30,6 @@ class DocType:
 		self.doc = doc
 		self.doclist = doclist 
 
-	def get_leave_balance(self):
-		leave_all = sql("select total_leaves_allocated from `tabLeave Allocation` where employee = '%s' and leave_type = '%s' and fiscal_year = '%s' and docstatus = 1" % (self.doc.employee, self.doc.leave_type, self.doc.fiscal_year))
-		leave_all = leave_all and flt(leave_all[0][0]) or 0
-		leave_app = sql("select SUM(total_leave_days) from `tabLeave Application` where employee = '%s' and leave_type = '%s' and fiscal_year = '%s' and docstatus = 1" % (self.doc.employee, self.doc.leave_type, self.doc.fiscal_year))
-		leave_app = leave_app and flt(leave_app[0][0]) or 0
-		ret = {'leave_balance':leave_all - leave_app}
-		return ret
-
 	def get_holidays(self):
 		"""
 			get total holidays
@@ -71,7 +63,7 @@ class DocType:
 
 	def validate_balance_leaves(self):
 		if self.doc.from_date and self.doc.to_date and not self.is_lwp():
-			bal = self.get_leave_balance()
+			bal = get_leave_balance(self.doc.leave_type, self.doc.employee, self.doc.fiscal_year)
 			tot_leaves = self.get_total_leave_days()
 			bal, tot_leaves = bal, tot_leaves
 			webnotes.conn.set(self.doc,'leave_balance',flt(bal['leave_balance']))
@@ -107,3 +99,29 @@ class DocType:
 		if self.doc.status != "Approved":
 			webnotes.msgprint("""Only Approved Leave Applications can be Submitted.""",
 				raise_exception=True)
+
+@webnotes.whitelist()
+def get_leave_balance(employee, leave_type, fiscal_year):
+	leave_all = webnotes.conn.sql("""select total_leaves_allocated 
+		from `tabLeave Allocation` where employee = '%s' and leave_type = '%s' 
+		and fiscal_year = '%s' and docstatus = 1""" % (employee, 
+			leave_type, fiscal_year))
+
+	leave_all = leave_all and flt(leave_all[0][0]) or 0
+	leave_app = webnotes.conn.sql("""select SUM(total_leave_days) 
+		from `tabLeave Application` 
+		where employee = '%s' 
+		and leave_type = '%s' and fiscal_year = '%s' 
+		and docstatus = 1""" % (employee, leave_type, fiscal_year))
+	leave_app = leave_app and flt(leave_app[0][0]) or 0
+	ret = {'leave_balance':leave_all - leave_app}
+	return ret
+
+@webnotes.whitelist()
+def get_approver_list():
+	roles = [r[0] for r in webnotes.conn.sql("""select distinct parent from `tabUserRole`
+		where role='Leave Approver'""")]
+	if not roles:
+		webnotes.msgprint("No Leave Approvers. Please assign 'Leave Approver' Role to atleast one user.")
+		
+	return roles
