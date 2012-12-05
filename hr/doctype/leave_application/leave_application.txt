@@ -2,9 +2,9 @@
  {
   "owner": "Administrator", 
   "docstatus": 0, 
-  "creation": "2012-12-03 10:13:48", 
+  "creation": "2012-12-05 14:11:53", 
   "modified_by": "Administrator", 
-  "modified": "2012-12-05 11:59:15"
+  "modified": "2012-12-05 17:38:26"
  }, 
  {
   "is_submittable": 1, 
@@ -254,12 +254,6 @@
  {
   "doctype": "DocPerm", 
   "role": "All", 
-  "permlevel": 3
- }, 
- {
-  "doctype": "DocPerm", 
-  "write": 1, 
-  "role": "HR User", 
   "permlevel": 3
  }
 ]
