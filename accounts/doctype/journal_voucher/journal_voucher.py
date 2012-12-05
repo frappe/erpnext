@@ -69,8 +69,6 @@ class DocType:
 				if bill_no and bill_no[0][0] and bill_no[0][0].lower().strip() not in ['na', 'not applicable', 'none']:
 					bill_no = bill_no and bill_no[0]
 					r.append('%s %s against Bill %s dated %s' % (bill_no[2] and cstr(bill_no[2]) or '', fmt_money(flt(d.debit)), bill_no[0], bill_no[1] and formatdate(bill_no[1].strftime('%Y-%m-%d')) or ''))
-		if self.doc.ded_amount:
-			r.append("TDS Amount: %s" % self.doc.ded_amount)
 	
 		if self.doc.user_remark:
 			r.append("User Remark : %s"%self.doc.user_remark)
@@ -156,58 +154,7 @@ class DocType:
 				master_type = self.get_master_type(d.account)
 				if (master_type == 'Customer' and flt(d.credit) > 0) or (master_type == 'Supplier' and flt(d.debit) > 0):
 					msgprint("Message: Please check Is Advance as 'Yes' against Account %s if this is an advance entry." % d.account)
-			
-	def get_tds_category_account(self):
-		for d in getlist(self.doclist,'entries'):
-			if flt(d.debit) > 0 and not d.against_voucher and d.is_advance == 'Yes':
-				acc = sql("select tds_applicable from `tabAccount` where name = '%s'" % d.account)
-				acc_tds_applicable = acc and acc[0][0] or 'No'
-				if acc_tds_applicable == 'Yes':
-					# TDS applicable field become mandatory for advance payment towards supplier or related party
-					if not self.doc.tds_applicable:
-						msgprint("Please select TDS Applicable or Not")
-						raise Exception
-						
-					# If TDS applicable, category and supplier account bocome mandatory
-					elif self.doc.tds_applicable == 'Yes':
-						self.validate_category_account(d.account)
-						if self.doc.ded_amount and not self.doc.tax_code:
-							msgprint("Please enter Tax Code in TDS section")
-							raise Exception
-
-					#If TDS not applicable, all related fields should blank
-					else:
-						self.set_fields_null()
-						
-				# If tds amount but tds applicability not mentioned in account master
-				elif self.doc.ded_amount:
-					msgprint("Please select TDS Applicable = 'Yes' in account head: '%s' if you want to deduct TDS." % self.doc.supplier_account)
-					raise Exception
-		
-	def validate_category_account(self, credit_account):
-		if not self.doc.tds_category:
-			msgprint("Please select TDS Category")
-			raise Exception
-			
-		if not self.doc.supplier_account:
-			self.doc.supplier_account = credit_account
-		elif self.doc.supplier_account and self.doc.supplier_account != credit_account:
-			msgprint("Supplier Account is not matching with the account mentioned in the table. Please select proper Supplier Account and click on 'Get TDS' button.")
-			raise Exception
-		
-	def set_fields_null(self):
-		self.doc.ded_amount = 0
-		self.doc.rate = 0
-		self.doc.tax_code = ''
-		self.doc.tds_category = ''
-		self.doc.supplier_account = ''
-		
-	def get_tds(self):
-		if cstr(self.doc.is_opening) != 'Yes':
-			if self.doc.total_debit > 0:
-				self.get_tds_category_account()
-				if self.doc.supplier_account and self.doc.tds_category:
-					get_obj('TDS Control').get_tds_amount(self)					
+				
 
 	def get_balance(self):
 		if not getlist(self.doclist,'entries'):
@@ -238,9 +185,6 @@ class DocType:
 				self.doc.total_debit += flt(d.debit)
 				self.doc.total_credit += flt(d.credit)
 
-			if self.doc.tds_applicable == 'Yes':
-				self.doc.total_credit = flt(self.doc.total_credit) + flt(self.doc.ded_amount)
-
 			self.doc.difference = flt(self.doc.total_debit) - flt(self.doc.total_credit)
 			
 	def get_against_account(self):
@@ -254,10 +198,7 @@ class DocType:
 			if flt(d.credit)>0 and (d.account not in credit_list): credit_list.append(d.account)
 
 		self.doc.total_debit = debit
-		if self.doc.tds_applicable == 'Yes':
-			self.doc.total_credit = credit + flt(self.doc.ded_amount)
-		else:
-			self.doc.total_credit = credit
+		self.doc.total_credit = credit
 
 		if abs(self.doc.total_debit-self.doc.total_credit) > 0.001:
 			msgprint("Debit must be equal to Credit. The difference is %s" % (self.doc.total_debit-self.doc.total_credit))
@@ -338,10 +279,7 @@ class DocType:
 		self.get_against_account()
 		self.validate_cheque_info()
 		self.create_remarks()
-		# tds
-		get_obj('TDS Control').validate_first_entry(self)
-		self.get_tds_category_account()
-
+		
 		self.validate_entries_for_advance()
 		self.set_aging_date()
 		
@@ -378,11 +316,4 @@ class DocType:
 					raise Exception
 	
 	def on_cancel(self):
-		self.check_tds_payment_voucher()
 		get_obj(dt='GL Control').make_gl_entries(self.doc, self.doclist, cancel=1)
-
-	def check_tds_payment_voucher(self):
-		tdsp =	sql("select parent from `tabTDS Payment Detail` where voucher_no = %s and docstatus = 1 and parent not like 'old%%'", self.doc.name)
-		if tdsp:
-			msgprint("TDS Payment voucher '%s' has been made against this voucher. Please cancel the payment voucher to proceed." % (tdsp and tdsp[0][0] or ''))
-			raise Exception

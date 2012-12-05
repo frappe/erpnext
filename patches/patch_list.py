@@ -705,4 +705,8 @@ patch_list = [
 		'patch_module': 'patches.november_2012',
 		'patch_file': 'gle_floating_point_issue',
 	},
+	{
+		'patch_module': 'patches.december_2012',
+		'patch_file': 'deprecate_tds',
+	},
 ]

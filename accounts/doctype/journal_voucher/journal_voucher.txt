@@ -2,12 +2,13 @@
  {
   "owner": "Administrator", 
   "docstatus": 0, 
-  "creation": "2012-10-16 12:29:32", 
+  "creation": "2012-12-03 17:26:38", 
   "modified_by": "Administrator", 
-  "modified": "2012-12-03 17:10:41"
+  "modified": "2012-12-04 18:47:42"
  }, 
  {
   "is_submittable": 1, 
+  "autoname": "naming_series:", 
   "name": "__common__", 
   "default_print_format": "Standard", 
   "search_fields": "voucher_type,posting_date, due_date, cheque_no", 
@@ -490,66 +491,6 @@
   "permlevel": 1
  }, 
  {
-  "oldfieldtype": "Section Break", 
-  "doctype": "DocField", 
-  "options": "Simple", 
-  "fieldname": "section_break0", 
-  "fieldtype": "Section Break", 
-  "permlevel": 0
- }, 
- {
-  "print_hide": 1, 
-  "allow_on_submit": 1, 
-  "oldfieldtype": "Button", 
-  "doctype": "DocField", 
-  "label": "View Ledger Entry", 
-  "trigger": "Client", 
-  "fieldname": "view_ledger_entry", 
-  "fieldtype": "Button", 
-  "permlevel": 0
- }, 
- {
-  "print_hide": 0, 
-  "oldfieldtype": "Section Break", 
-  "doctype": "DocField", 
-  "label": "TDS", 
-  "fieldname": "tds", 
-  "fieldtype": "Section Break", 
-  "permlevel": 0
- }, 
- {
-  "print_hide": 1, 
-  "permlevel": 0, 
-  "no_copy": 1, 
-  "oldfieldtype": "Select", 
-  "doctype": "DocField", 
-  "label": "TDS Applicable", 
-  "oldfieldname": "tds_applicable", 
-  "default": "No", 
-  "fieldname": "tds_applicable", 
-  "fieldtype": "Select", 
-  "search_index": 1, 
-  "options": "\nYes\nNo", 
-  "in_filter": 1
- }, 
- {
-  "print_hide": 1, 
-  "no_copy": 1, 
-  "oldfieldtype": "Select", 
-  "colour": "White:FFF", 
-  "doctype": "DocField", 
-  "label": "TDS Category", 
-  "oldfieldname": "tds_category", 
-  "permlevel": 0, 
-  "trigger": "Client", 
-  "fieldname": "tds_category", 
-  "fieldtype": "Select", 
-  "search_index": 1, 
-  "hidden": 0, 
-  "options": "link:TDS Category", 
-  "in_filter": 1
- }, 
- {
   "print_hide": 1, 
   "no_copy": 1, 
   "oldfieldtype": "Link", 
@@ -563,55 +504,6 @@
   "fieldtype": "Link", 
   "hidden": 0, 
   "options": "Account"
- }, 
- {
-  "no_copy": 0, 
-  "oldfieldtype": "Button", 
-  "colour": "White:FFF", 
-  "doctype": "DocField", 
-  "label": "Get TDS", 
-  "trigger": "Client", 
-  "fieldname": "get_tds", 
-  "fieldtype": "Button", 
-  "permlevel": 0
- }, 
- {
-  "print_hide": 1, 
-  "description": "Tax Code will be populated based on account head mentioned in TDS Category master", 
-  "no_copy": 1, 
-  "oldfieldtype": "Link", 
-  "colour": "White:FFF", 
-  "doctype": "DocField", 
-  "label": "TDS Account Head", 
-  "oldfieldname": "tax_code", 
-  "permlevel": 0, 
-  "fieldname": "tax_code", 
-  "fieldtype": "Link", 
-  "options": "Account"
- }, 
- {
-  "print_hide": 1, 
-  "no_copy": 1, 
-  "oldfieldtype": "Currency", 
-  "doctype": "DocField", 
-  "label": "Rate", 
-  "oldfieldname": "rate", 
-  "trigger": "Client", 
-  "fieldname": "rate", 
-  "fieldtype": "Currency", 
-  "permlevel": 0
- }, 
- {
-  "print_hide": 1, 
-  "no_copy": 1, 
-  "oldfieldtype": "Currency", 
-  "doctype": "DocField", 
-  "label": "Amount", 
-  "oldfieldname": "ded_amount", 
-  "trigger": "Client", 
-  "fieldname": "ded_amount", 
-  "fieldtype": "Currency", 
-  "permlevel": 0
  }, 
  {
   "amend": 1, 

@@ -148,6 +148,12 @@ cur_frm.cscript.is_pos = function(doc,dt,dn,callback){
 	}
 }
 
+cur_frm.cscript.mode_of_payment = function(doc) {
+	cur_frm.call({
+		method: "get_bank_cash_account",
+		args: { mode_of_payment: doc.mode_of_payment }
+	});
+}
 
 cur_frm.cscript.update_stock = function(doc, dt, dn) {
 	cur_frm.cscript.hide_fields(doc, dt, dn);
@@ -387,9 +393,9 @@ cur_frm.fields_dict['territory'].get_query = function(doc,cdt,cdn) {
 
 // Income Account in Details Table
 // --------------------------------
-cur_frm.fields_dict.entries.grid.get_field("income_account").get_query = function(doc) {
-	return 'SELECT tabAccount.name FROM tabAccount WHERE (tabAccount.debit_or_credit="Credit" OR tabAccount.account_type = "Income Account") AND tabAccount.group_or_ledger="Ledger" AND tabAccount.docstatus!=2 AND tabAccount.company="'+doc.company+'" AND tabAccount.%(key)s LIKE "%s"';
-}
+cur_frm.set_query("income_account", "entries", function(doc) {
+	return 'SELECT tabAccount.name FROM tabAccount WHERE (tabAccount.debit_or_credit="Credit" OR tabAccount.account_type = "Income Account") AND tabAccount.group_or_ledger="Ledger" AND tabAccount.docstatus!=2 AND tabAccount.company="'+doc.company+'" AND tabAccount.%(key)s LIKE "%s"';	
+})
 
 // warehouse in detail table
 //----------------------------

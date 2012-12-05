@@ -17,10 +17,6 @@
 cur_frm.cscript.onload = function(doc, cdt, cdn) {
 	if (!doc.voucher_date) doc.voucher_date = dateutil.obj_to_str(new Date());
 
-	var cp = wn.control_panel;
-	if(cp.country == 'India') $(cur_frm.fields_dict.tds.row.wrapper).toggle(true);
-	else $(cur_frm.fields_dict.tds.row.wrapper).toggle(false);
-
 	cur_frm.cscript.load_defaults(doc, cdt, cdn);
 }
 
@@ -28,6 +24,9 @@ cur_frm.cscript.refresh = function(doc) {
 	cur_frm.cscript.is_opening(doc)
 	erpnext.hide_naming_series();
 	cur_frm.cscript.voucher_type(doc);
+	if(doc.docstatus==1) { 
+		cur_frm.add_custom_button('View Ledger', cur_frm.cscript.view_ledger_entry);
+	}
 }
 
 cur_frm.cscript.load_defaults = function(doc, cdt, cdn) {
@@ -50,9 +49,6 @@ cur_frm.cscript.load_defaults = function(doc, cdt, cdn) {
 cur_frm.cscript.is_opening = function(doc, cdt, cdn) {
 	hide_field('aging_date');
 	if (doc.is_opening == 'Yes') unhide_field('aging_date');
-	
-	if(doc.docstatus==1) { unhide_field('view_ledger_entry'); }
-	else hide_field('view_ledger_entry');
 }
 
 cur_frm.fields_dict['entries'].grid.get_field('account').get_query = function(doc) {
@@ -91,12 +87,6 @@ cur_frm.fields_dict['entries'].grid.get_field('against_jv').get_query = function
 		and `tabJournal Voucher`.docstatus=1\
 		and `tabJournal Voucher`.voucher_type='Journal Entry'\
 		and `tabJournal Voucher Detail`.parent = `tabJournal Voucher`.name";
-}
-
-
-// TDS Account Head
-cur_frm.fields_dict['tax_code'].get_query = function(doc) {
-	return "SELECT `tabTDS Category Account`.account_head FROM `tabTDS Category Account` WHERE `tabTDS Category Account`.parent = '"+doc.tds_category+"' AND `tabTDS Category Account`.company='"+doc.company+"' AND `tabTDS Category Account`.account_head LIKE '%s' ORDER BY `tabTDS Category Account`.account_head DESC LIMIT 50";
 }
 
 //Set debit and credit to zero on adding new row
@@ -139,7 +129,6 @@ cur_frm.cscript.update_totals = function(doc) {
 		tc += flt(el[i].credit);
 	}
 	var doc = locals[doc.doctype][doc.name];
-	tc += flt(doc.ded_amount)
 	doc.total_debit = td;
 	doc.total_credit = tc;
 	doc.difference = flt(td - tc);
@@ -148,12 +137,7 @@ cur_frm.cscript.update_totals = function(doc) {
 
 cur_frm.cscript.debit = function(doc,dt,dn) { cur_frm.cscript.update_totals(doc); }
 cur_frm.cscript.credit = function(doc,dt,dn) { cur_frm.cscript.update_totals(doc); }
-cur_frm.cscript.ded_amount = function(doc,dt,dn) { cur_frm.cscript.update_totals(doc); }
-cur_frm.cscript.rate = function(doc,dt,dn) {
-	doc.ded_amount = doc.total_debit*doc.rate/100;
-	refresh_field('ded_amount');
-	cur_frm.cscript.update_totals(doc); 
-}
+
 cur_frm.cscript.get_balance = function(doc,dt,dn) {
 	cur_frm.cscript.update_totals(doc); 
 	$c_obj(make_doclist(dt,dn), 'get_balance', '', function(r, rt){
@@ -179,15 +163,6 @@ cur_frm.cscript.validate = function(doc,cdt,cdn) {
 	cur_frm.cscript.update_totals(doc);
 }
 
-// TDS
-// --------
-cur_frm.cscript.get_tds = function(doc, dt, dn) {
-	$c_obj(make_doclist(dt,dn), 'get_tds', '', function(r, rt){
-		cur_frm.refresh();
-		cur_frm.cscript.update_totals(doc);
-	});
-}
-
 // ***************** Get Print Heading based on Sales Invoice *****************
 cur_frm.fields_dict['select_print_heading'].get_query = function(doc, cdt, cdn) {
 	return 'SELECT `tabPrint Heading`.name FROM `tabPrint Heading` WHERE `tabPrint Heading`.docstatus !=2 AND `tabPrint Heading`.name LIKE "%s" ORDER BY `tabPrint Heading`.name ASC LIMIT 50';
@@ -204,7 +179,6 @@ cur_frm.cscript.select_print_heading = function(doc,cdt,cdn){
 		cur_frm.pformat.print_heading = "Journal Voucher";
 }
 
-/****************** Get Accounting Entry *****************/
 cur_frm.cscript.view_ledger_entry = function(doc,cdt,cdn){
 	wn.set_route('Report', 'GL Entry', 'General Ledger', 'Voucher No='+cur_frm.doc.name);	
 }
