@@ -49,7 +49,7 @@ class DocType:
     emp_query = "select name from `tabEmployee` "
     if flag == 1:
       emp_query += condition 
-    e = sql(emp_query)
+    e = sql(emp_query, debug=1)
     return e
 
   # ----------------
