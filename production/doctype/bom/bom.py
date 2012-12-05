@@ -31,7 +31,8 @@ class DocType:
 		self.doclist = doclist
 
 	def autoname(self):
-		last_name = sql("select max(name) from `tabBOM` where name like 'BOM/%s/%%'" % self.doc.item)
+		last_name = sql("""select max(name) from `tabBOM` 
+			where name like 'BOM/%s/%%'""" % self.doc.item)
 		if last_name:
 			idx = cint(cstr(last_name[0][0]).split('/')[-1]) + 1
 		else:
@@ -40,9 +41,10 @@ class DocType:
 
 
 	def get_item_det(self, item_code):
-		item = sql("""select name, is_asset_item, is_purchase_item, docstatus, is_sub_contracted_item,
-			description, stock_uom, default_bom, last_purchase_rate, standard_rate, is_manufactured_item from `tabItem` 
-			where item_code = %s""", item_code, as_dict = 1)
+		item = sql("""select name, is_asset_item, is_purchase_item, docstatus,
+		 	is_sub_contracted_item, description, stock_uom, default_bom, 
+			last_purchase_rate, standard_rate, is_manufactured_item 
+			from `tabItem` where item_code = %s""", item_code, as_dict = 1)
 
 		return item
 
@@ -86,8 +88,8 @@ class DocType:
 
 	def get_bom_material_detail(self, arg):
 		""" Get raw material details like uom, desc and rate"""
-
-		arg = eval(arg)
+		import json
+		arg = json.loads(arg)
 		item = self.get_item_det(arg['item_code'])
 		self.validate_rm_item(item)
 		

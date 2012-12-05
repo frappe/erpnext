@@ -67,7 +67,7 @@ var get_bom_material_detail= function(doc,dt,dn) {
 		calculate_total(doc);
 	}
 
-	var bom_no = (d.bom_no!=null) ? d.bom_no:''
+	var bom_no = (d.bom_no!=null) ? d.bom_no: ''
 	if (d.item_code) {
 		arg = {'item_code': d.item_code, 'bom_no': bom_no, 'qty': d.qty};
 		get_server_fields('get_bom_material_detail', JSON.stringify(arg), 'bom_materials', doc, dt, dn, 1, callback);
