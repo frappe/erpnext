@@ -211,13 +211,11 @@ cur_frm.cscript.uom = function(doc, cdt, cdn, args) {
 	});
 	
 	if(d.item_code && d.uom) {
-		wn.call({
+		cur_frm.call({
 			method: "buying.doctype.purchase_common.purchase_common.get_uom_details",
 			args: { args: args },
+			child: d,
 			callback: function(r) {
-				d = locals[cdt][cdn];
-				$.extend(d, r.message);
-				refresh_field(cur_frm.cscript.fname);
 				cur_frm.cscript.calc_amount(doc, 2);
 			}
 		});
