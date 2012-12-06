@@ -22,6 +22,7 @@ import os
 import conf
 import webnotes
 import website.utils
+from webnotes.utils import cstr
 
 template_map = {
 	'Web Page': 'html/web_page.html',
@@ -42,7 +43,6 @@ def get_page_html(page_name, comments=''):
 		comments += "\n\npage load status: cache"
 	
 	# insert comments
-	import webnotes.utils
 	html += """\n<!-- %s -->""" % webnotes.utils.cstr(comments)
 	
 	return html
