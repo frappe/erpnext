@@ -121,11 +121,6 @@ class DocType:
 							doc.fields[r] = ret[r]
 
 
-	# Get UOM Details
-	# ---------------------------------
-	def get_uom_details(self, arg = ''):
-		return get_obj(dt='Purchase Common').get_uom_details(arg)
-
 	# GET TERMS & CONDITIONS
 	#-----------------------------
 	def get_tc_details(self):

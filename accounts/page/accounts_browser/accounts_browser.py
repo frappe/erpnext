@@ -20,7 +20,7 @@ def get_companies():
 	else:
 		return [r[0] for r in webnotes.conn.sql("""select name from tabCompany
 			where docstatus!=2""")]
-	
+
 @webnotes.whitelist()
 def get_children():
 	args = webnotes.form_dict

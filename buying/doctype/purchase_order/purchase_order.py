@@ -69,10 +69,6 @@ class DocType(TransactionBase):
 
 
 
-	# Get UOM Details
-	def get_uom_details(self, arg = ''):
-		return get_obj('Purchase Common').get_uom_details(arg)
-
 	# get available qty at warehouse
 	def get_bin_details(self, arg = ''):
 		return get_obj(dt='Purchase Common').get_bin_details(arg)

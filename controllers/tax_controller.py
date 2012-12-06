@@ -140,7 +140,7 @@ class TaxController(TransactionController):
 		self.doc.net_total = flt(self.doc.net_total, self.precision.main.net_total)
 		self.doc.fields[self.fmap.net_total_print] = \
 			flt(self.doc.fields.get(self.fmap.net_total_print),
-			self.precision.main[self.fmap.net_total_print])
+			self.precision.main.get(self.fmap.net_total_print))
 			
 	def calculate_taxes(self):
 		for item in self.item_doclist:

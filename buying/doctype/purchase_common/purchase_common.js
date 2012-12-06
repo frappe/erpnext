@@ -199,23 +199,35 @@ cur_frm.cscript.update_stock_qty = function(doc,cdt,cdn){
 }
 
 //==================== UOM ======================================================================
-cur_frm.cscript.uom = function(doc, cdt, cdn) {
+cur_frm.cscript.uom = function(doc, cdt, cdn, args) {
+	if(!args) args = {};
+	
+	// args passed can contain conversion_factor
 	var d = locals[cdt][cdn];
-	if (d.item_code && d.uom) {
-		call_back = function(doc, cdt, cdn){
-			cur_frm.cscript.calc_amount(doc, 2);
-		}
-		str_arg = {'item_code':d.item_code, 'uom':d.uom, 'stock_qty':flt(d.stock_qty), 'qty': flt(d.qty), 'conversion_rate':doc.conversion_rate, 'doc_name': doc.name}
-		// Updates Conversion Factor, Qty and Purchase Rate
-		get_server_fields('get_uom_details',JSON.stringify(str_arg), fname, doc,cdt,cdn,1, call_back);
-		// don't make mistake of calling update_stock_qty() the get_uom_details returns stock_qty as per conversion factor properly
+	$.extend(args, {
+		item_code: d.item_code,
+		uom: d.uom,
+		stock_qty: flt(d.stock_qty),
+	});
+	
+	if(d.item_code && d.uom) {
+		cur_frm.call({
+			method: "buying.doctype.purchase_common.purchase_common.get_uom_details",
+			args: { args: args },
+			child: d,
+			callback: function(r) {
+				cur_frm.cscript.calc_amount(doc, 2);
+			}
+		});
 	}
 }
 
 
 //==================== Conversion factor =========================================================
 cur_frm.cscript.conversion_factor = function(doc, cdt, cdn) {
-	cur_frm.cscript.uom(doc, cdt, cdn);
+	var item = locals[cdt][cdn];
+	
+	cur_frm.cscript.uom(doc, cdt, cdn, { conversion_factor: item.conversion_factor });
 }
 
 //==================== stock qty ======================================================================

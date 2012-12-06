@@ -19,8 +19,8 @@ import webnotes
 from webnotes.utils import load_json, cstr, now
 
 @webnotes.whitelist()
-def update_item(args):
-	args = load_json(args)
+def update_item(arg):
+	args = load_json(arg)
 	
 	webnotes.conn.sql("update `tab%s` set `%s`=%s, modified=%s where name=%s" \
 		% (args['dt'], args['fn'], '%s', '%s', '%s'), (args['text'], now(), args['dn']))

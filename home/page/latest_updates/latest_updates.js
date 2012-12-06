@@ -1,5 +1,7 @@
 erpnext.updates = [
 	["5th December 2012", [
+		"Leave Application: Now can set approver.",
+		"New Roles Added: Leave Approver and Expense Approver.",
 		"Production Order is now linked with sales order.",
 		"Production Planning Tool: The field 'Allow SA items as raw material' has been renamed to 'Use multi-level BOM', 'Include in plan' column from SO table has been deleted",
 		"Batch nos are now filtered with item and available qty",
