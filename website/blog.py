@@ -20,7 +20,7 @@ def get_blog_list(args=None):
 				comment_doctype='Blog' and comment_docname=name) as comments
 		from `tabBlog`
 		where ifnull(published,0)=1
-		order by published desc, name asc"""
+		order by creation desc, name asc"""
 	
 	from webnotes.widgets.query_builder import add_limit_to_query
 	query, args = add_limit_to_query(query, args)
@@ -96,9 +96,7 @@ def add_comment(args=None):
 	comment = webnotes.widgets.form.comments.add_comment(args)
 	
 	# since comments are embedded in the page, clear the web cache
-	website.web_cache.clear_cache(args.get('page_name'),
-		args.get('comment_doctype'), args.get('comment_docname'))
-	
+	website.web_cache.clear_cache(args.get('page_name'))
 	
 	comment['comment_date'] = webnotes.utils.global_date_format(comment['creation'])
 	template_args = { 'comment_list': [comment], 'template': 'html/comment.html' }

@@ -48,17 +48,18 @@ def get_page_html(page_name, comments=''):
 	return html
 
 def load_into_cache(page_name):
+	args = prepare_args(page_name)
+	html = build_html(args)
+	webnotes.cache().set_value("page:" + page_name, html)
+	return html
+	
+def build_html(args):
 	templates_path = os.path.join(os.path.dirname(conf.__file__), 
 		'app', 'website', 'templates')
-	args = prepare_args(page_name)
 
 	from jinja2 import Environment, FileSystemLoader
 	jenv = Environment(loader = FileSystemLoader(templates_path))
 	html = jenv.get_template(args['template']).render(args)
-	return html
-		
-	html = build_html()	
-	webnotes.cache().set_value("page:" + page_name, html)
 	return html
 
 def prepare_args(page_name):
