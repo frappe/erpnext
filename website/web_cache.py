@@ -169,7 +169,7 @@ def clear_cache(page_name):
 	if page_name:
 		delete_page_cache(page_name)
 	else:
-		webnotes.cache().flush_keys("page:")
+		webnotes.cache().delete_keys("page:")
 	
 def delete_page_cache(page_name):
 	webnotes.cache().delete_value("page:" + page_name)
