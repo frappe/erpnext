@@ -31,6 +31,7 @@ def get_html(page_name, comments=''):
 	# load from cache, if auto cache clear is falsy
 	if not (hasattr(conf, 'auto_cache_clear') and conf.auto_cache_clear or 0):
 		html = load_from_cache(page_name)
+		comments += "\n\npage load status: from cache"
 
 	if not html:
 		html = load_into_cache(page_name)
@@ -82,7 +83,8 @@ def get_predefined_pages():
 	import conf
 	import website.utils
 	
-	pages_path = os.path.join(os.path.dirname(conf.__file__), 'app', 'website', 'templates', 'pages')
+	pages_path = os.path.join(os.path.dirname(conf.__file__), 'app', 
+		'website', 'templates', 'pages')
 	
 	page_list = []
 	
@@ -121,7 +123,8 @@ def get_home_page():
 
 def get_doc_fields(page_name):
 	import webnotes
-	doc_type, doc_name = webnotes.conn.get_value('Web Cache', page_name, ['doc_type', 'doc_name'])
+	doc_type, doc_name = webnotes.conn.get_value('Web Cache', page_name, 
+		['doc_type', 'doc_name'])
 	
 	import webnotes.model.code
 	obj = webnotes.model.code.get_obj(doc_type, doc_name)

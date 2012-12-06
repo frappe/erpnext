@@ -128,13 +128,11 @@ erpnext.AccountsChart = Class.extend({
 		
 		var node_links = [];
 		// edit
-		if (wn.boot.profile.can_read.indexOf(this.ctype) !== -1) {
+		if (wn.model.can_read(this.ctype) !== -1) {
 			node_links.push('<a onclick="erpnext.account_chart.open();">Edit</a>');
 		}
 		if (data.expandable) {
-			if(this.can_create) {
-				node_links.push('<a onclick="erpnext.account_chart.new_node();">Add Child</a>');
-			}
+			node_links.push('<a onclick="erpnext.account_chart.new_node();">Add Child</a>');
 		} else if (this.ctype === 'Account' && wn.boot.profile.can_read.indexOf("GL Entry") !== -1) {
 			node_links.push('<a onclick="erpnext.account_chart.show_ledger();">View Ledger</a>');
 		}
