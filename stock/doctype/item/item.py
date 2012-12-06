@@ -25,7 +25,7 @@ from webnotes import msgprint
 
 sql = webnotes.conn.sql
 
-class DocType():
+class DocType:
 	def __init__(self, doc, doclist=[]):
 		self.doc = doc
 		self.doclist = doclist
@@ -38,9 +38,13 @@ class DocType():
 		return ret
 
 	def on_update(self):
-		# webpage updates
-		from website.utils import update_page_name
-		update_page_name(self.doc, self.doc.item_name)
+		if self.doc.show_in_website:
+			# webpage updates
+			from website.utils import update_page_name
+			update_page_name(self.doc, self.doc.item_name)
+		elif self.doc.page_name:
+			from website.web_cache import clear_cache
+			clear_cache(self.doc.page_name)
 		
 		bin = sql("select stock_uom from `tabBin` where item_code = '%s' " % self.doc.item_code)
 		if bin and cstr(bin[0][0]) != cstr(self.doc.stock_uom):
@@ -80,8 +84,10 @@ class DocType():
 		sql("""delete from `tabStock Ledger Entry` 
 			where item_code=%s and is_cancelled='Yes' """, self.doc.item_code)
 		
-		self.delete_web_cache(self.doc.page_name)
-
+		if self.doc.page_name:
+			from website.web_cache import clear_cache
+			clear_cache(self.doc.page_name)
+		
 	# Check whether Ref Rate is not entered twice for same Price List and Currency
 	def check_ref_rate_detail(self):
 		check_list=[]
@@ -192,6 +198,9 @@ class DocType():
 
 	def on_rename(self,newdn,olddn):
 		sql("update tabItem set item_code = %s where name = %s", (newdn, olddn))
+		if self.doc.page_name:
+			from website.web_cache import clear_cache
+			clear_cache(self.doc.page_name)
 			
 	def prepare_template_args(self):
 		self.doc.web_description_html = self.doc.description or ''
