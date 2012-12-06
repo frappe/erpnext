@@ -53,12 +53,6 @@ pscript['onload_Accounts Browser'] = function(wrapper){
 			wrapper.$company_select.val(sys_defaults.company || r[0]).change();
 		}
 	});
-	
-	// refresh on rename
-	$(document).bind('rename', function(event, dt, old_name, new_name) {
-		if(erpnext.account_chart.ctype==dt)
-			wrapper.$company_select.change();
-	});	
 }
 
 pscript.set_title = function(wrapper, ctype, val) {
@@ -85,9 +79,9 @@ erpnext.AccountsChart = Class.extend({
 		$(wrapper).find('.tree-area').empty();
 		var me = this;
 		me.ctype = ctype;
-		me.can_create = wn.boot.profile.can_create.indexOf(this.ctype);
+		me.can_create = wn.model.can_create(this.ctype);
 		me.can_delete = wn.model.can_delete(this.ctype);
-		me.can_write = wn.boot.profile.can_write.indexOf(this.ctype);
+		me.can_write = wn.model.can_write(this.ctype);
 		
 		
 		me.company = company;
@@ -105,13 +99,13 @@ erpnext.AccountsChart = Class.extend({
 
 				if(link.toolbar) {
 					me.cur_toolbar = link.toolbar;
-					$(me.cur_toolbar).toggle(true);					
+					$(me.cur_toolbar).toggle(true);
 				}
 				
 				// bold
 				$('.balance-bold').removeClass('balance-bold'); // deselect
 				$(link).parent().find('.balance-area:first').addClass('balance-bold'); // select
-			
+
 			},
 			onrender: function(treenode) {
 				if (ctype == 'Account') {
@@ -135,8 +129,7 @@ erpnext.AccountsChart = Class.extend({
 		var node_links = [];
 		// edit
 		if (wn.boot.profile.can_read.indexOf(this.ctype) !== -1) {
-			node_links.push('<a href="#Form/'+encodeURIComponent(this.ctype)+'/'
-				+encodeURIComponent(data.value)+'">Edit</a>');
+			node_links.push('<a onclick="erpnext.account_chart.open();">Edit</a>');
 		}
 		if (data.expandable) {
 			if(this.can_create) {
@@ -146,15 +139,19 @@ erpnext.AccountsChart = Class.extend({
 			node_links.push('<a onclick="erpnext.account_chart.show_ledger();">View Ledger</a>');
 		}
 
-		if (this.can_write !== -1) {
+		if (this.can_write) {
 			node_links.push('<a onclick="erpnext.account_chart.rename()">Rename</a>');
 		};
 	
-		if (this.can_delete !== -1) {
+		if (this.can_delete) {
 			node_links.push('<a onclick="erpnext.account_chart.delete()">Delete</a>');
 		};
 		
 		link.toolbar.append(node_links.join(" | "));
+	},
+	open: function() {
+		var node = this.selected_node();
+		wn.set_route("Form", this.ctype, node.data("label"));
 	},
 	show_ledger: function() {
 		var me = this;
@@ -162,14 +159,14 @@ erpnext.AccountsChart = Class.extend({
 		wn.set_route("general-ledger", "account=" + node.data('label'));
 	},
 	rename: function() {
-		var me = this;
-		var node = me.selected_node();
-		wn.model.rename_doc("Account", node.data('label'));
+		var node = this.selected_node();
+		wn.model.rename_doc(this.ctype, node.data('label'), function(new_name) {
+			node.data('label', new_name).find(".tree-label").html(new_name);
+		});
 	},
 	delete: function() {
-		var me = this;
-		var node = me.selected_node();
-		wn.model.delete_doc("Account", node.data('label'), function() {
+		var node = this.selected_node();
+		wn.model.delete_doc(this.ctype, node.data('label'), function() {
 			node.parent().remove();
 		});
 	},
