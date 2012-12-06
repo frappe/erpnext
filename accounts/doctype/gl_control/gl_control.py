@@ -136,47 +136,58 @@ class DocType:
 			else:
 				self.entries.append(le)
 
-
-	# Save GL Entries
-	# ----------------
-	def save_entries(self, cancel, adv_adj, update_outstanding):
+	def manage_debit_credit(self, cancel):
+		total_debit, total_credit = 0, 0
 		for le in self.entries:
 			# round off upto 2 decimal
-			le.debit, le.credit = round(flt(le.debit), 2), round(flt(le.credit), 2)
-			
+			le.debit = flt(le.debit, 2)
+			le.credit = flt(le.credit, 2)
+
 			#toggle debit, credit if negative entry
 			if flt(le.debit) < 0 or flt(le.credit) < 0:
 				tmp=le.debit
 				le.debit, le.credit = abs(flt(le.credit)), abs(flt(tmp))
 			
-			# toggled debit/credit in two separate condition because both should be executed at the 
-			# time of cancellation when there is negative amount (tax discount)
+			# toggled debit/credit in two separate condition because both
+			# should be executed at the time of cancellation when there is 
+			# negative amount (tax discount)
 			if cancel:
 				tmp=le.debit
 				le.debit, le.credit = abs(flt(le.credit)), abs(flt(tmp))
+		
+			# update total debit / credit
+			total_debit += flt(le.debit, 2)
+			total_credit += flt(le.credit, 2)
+			
+		diff = flt(total_debit - total_credit, 2)
+		if abs(diff)==0.01:
+			if self.entries[0].debit:
+				self.entries[0].debit = self.entries[0].debit - diff
+			elif self.entries[0].credit:
+				self.entries[0].credit = self.entries[0].credit + diff
+		elif abs(diff) > 0.01 and not cancel:
+			# Due to old wrong entries(total debit!=total credit) some voucher should be cancelled
+			msgprint("""Debit and Credit not equal for this voucher: Diff (Debit) is %s""" %
+			 	diff, raise_exception=1)
 
-
+	def save_entries(self, cancel, adv_adj, update_outstanding):
+		self.manage_debit_credit(cancel)
+		
+		for le in self.entries:
 			le_obj = get_obj(doc=le)
 			# validate except on_cancel
 			if not cancel:
 				le_obj.validate()
 
-			# save
 			le.save(1)
 			le_obj.on_update(adv_adj, cancel, update_outstanding)
-
-			# update total debit / credit
-			self.td += flt(le.debit)
-			self.tc += flt(le.credit)
 			
 			
 	# Make Multiple Entries
-	# ---------------------
 	def make_gl_entries(self, doc, doclist, cancel=0, adv_adj = 0, use_mapper='', merge_entries = 1, update_outstanding='Yes'):
 		self.entries = []
 		# get entries
 		le_map_list = webnotes.conn.sql("select * from `tabGL Mapper Detail` where parent = %s", use_mapper or doc.doctype, as_dict=1)
-		self.td, self.tc = 0.0, 0.0
 		for le_map in le_map_list:
 			if le_map['table_field']:
 				for d in getlist(doclist,le_map['table_field']):
@@ -189,11 +200,7 @@ class DocType:
 		# save entries
 		self.save_entries(cancel, adv_adj, update_outstanding)
 
-		# check total debit / credit
-		# Due to old wrong entries (total debit != total credit) some voucher could be cancelled
-		if abs(self.td - self.tc) > 0.004 and not cancel:
-			msgprint("Debit and Credit not equal for this voucher: Diff (Debit) is %s" % (self.td-self.tc))
-			raise Exception
+		
 
 		# set as cancelled
 		if cancel:

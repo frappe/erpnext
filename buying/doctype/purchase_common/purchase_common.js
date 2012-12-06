@@ -21,7 +21,6 @@
 var tname = cur_frm.cscript.tname;
 var fname = cur_frm.cscript.fname;
 
-
 cur_frm.cscript.get_default_schedule_date = function(doc) {
 		var ch = getchildren( tname, doc.name, fname);
 		if (flt(ch.length) > 0){
