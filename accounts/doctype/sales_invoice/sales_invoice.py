@@ -902,7 +902,7 @@ def assign_task_to_owner(inv, msg, users):
 def get_bank_cash_account(mode_of_payment):
 	val = webnotes.conn.get_value("Mode of Payment", mode_of_payment, "default_account")
 	if not val:
-		webnotes.msgprint("Default Account not set in Mode of Payment: %s" % mode_of_payment)
+		webnotes.msgprint("Default Bank / Cash Account not set in Mode of Payment: %s. Please add a Default Account in Mode of Payment master." % mode_of_payment)
 	return {
 		"cash_bank_account": val
 	}
