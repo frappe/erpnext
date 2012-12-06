@@ -1,6 +1,7 @@
 erpnext.updates = [
 	["6th December 2012", [
 		"Rename: Cost Center, Item Group, Customer Group, Supplier Type, Territory, Sales Person can now be renamed.",
+		"Newsletter: Send newsletter to a list of email addresses.",
 	]],
 	["5th December 2012", [
 		"Leave Application: Now can set approver.",
