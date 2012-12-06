@@ -17,7 +17,7 @@ def get_blog_list(args=None):
 		select
 			name, content, owner, creation as creation,
 			title, (select count(name) from `tabComment` where
-				comment_doctype='Blog' and comment_docname=name) as comments
+				comment_doctype='Blog' and comment_docname=`tabBlog`.name) as comments
 		from `tabBlog`
 		where ifnull(published,0)=1
 		order by creation desc, name asc"""
