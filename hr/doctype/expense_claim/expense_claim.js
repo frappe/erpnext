@@ -54,10 +54,8 @@ cur_frm.cscript.refresh = function(doc,cdt,cdn){
 	} else {
 		if(doc.approval_status=="Draft") {		
 			if(user==doc.exp_approver) {
-				if(doc.approval_status=="Draft") {
-					cur_frm.set_intro("You are the Expense Approver for this record. Please Update the 'Status' and Save");
-					cur_frm.toggle_enable("approval_status", true);
-				}
+				cur_frm.set_intro("You are the Expense Approver for this record. Please Update the 'Status' and Save");
+				cur_frm.toggle_enable("approval_status", true);
 			} else {
 				cur_frm.set_intro("Expense Claim is pending approval. Only the Expense Approver can update status.");
 				cur_frm.toggle_enable("approval_status", false);
