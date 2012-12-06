@@ -15,12 +15,11 @@ def get_blog_list(args=None):
 	
 	query = """\
 		select
-			cache.name as name, cache.html as content,
-			blog.owner as owner, blog.creation as published,
-			blog.title as title, (select count(name) from `tabComment` where
-				comment_doctype='Blog' and comment_docname=blog.name) as comments
-		from `tabWeb Cache` cache, `tabBlog` blog
-		where cache.doc_type = 'Blog' and blog.page_name = cache.name
+			name, content, owner, creation as creation,
+			title, (select count(name) from `tabComment` where
+				comment_doctype='Blog' and comment_docname=name) as comments
+		from `tabBlog`
+		where ifnull(published,0)=1
 		order by published desc, name asc"""
 	
 	from webnotes.widgets.query_builder import add_limit_to_query
@@ -35,7 +34,7 @@ def get_blog_list(args=None):
 	for res in result:
 		from webnotes.utils import global_date_format, get_fullname
 		res['full_name'] = get_fullname(res['owner'])
-		res['published'] = global_date_format(res['published'])
+		res['published'] = global_date_format(res['creation'])
 		if not res['content']:
 			res['content'] = website.web_cache.get_html(res['name'])
 		res['content'] = split_blog_content(res['content'])

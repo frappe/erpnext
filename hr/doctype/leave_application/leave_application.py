@@ -64,11 +64,11 @@ class DocType:
 	def validate_balance_leaves(self):
 		if self.doc.from_date and self.doc.to_date and not self.is_lwp():
 			bal = get_leave_balance(self.doc.leave_type, self.doc.employee, 
-				self.doc.fiscal_year)["leave_balance"]
+				self.doc.fiscal_year)
 			tot_leaves = self.get_total_leave_days()
 			bal, tot_leaves = bal, tot_leaves
-			webnotes.conn.set(self.doc,'leave_balance',flt(bal['leave_balance']))
-			webnotes.conn.set(self.doc,'total_leave_days',flt(tot_leaves['total_leave_days']))
+			webnotes.conn.set(self.doc, 'leave_balance', flt(bal['leave_balance']))
+			webnotes.conn.set(self.doc, 'total_leave_days', flt(tot_leaves['total_leave_days']))
 			if flt(bal['leave_balance']) < flt(tot_leaves['total_leave_days']):
 				msgprint("Warning : There is not enough leave balance")
 

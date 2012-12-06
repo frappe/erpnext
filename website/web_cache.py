@@ -39,7 +39,7 @@ def get_page_html(page_name, comments=''):
 
 	if not html:
 		html = load_into_cache(page_name)
-		comments += "\n\npage load status: fresh"
+		comments += "\n\npage load status: cache"
 	
 	# insert comments
 	import webnotes.utils
