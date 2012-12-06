@@ -29,8 +29,8 @@ class DocType:
 		self.doclist = doclist
 
 	def validate(self):
-		if self.doc.exp_approver == self.doc.owner:
-			webnotes.msgprint("""Self Approval is not allowed.""", raise_exception=1)
+		# if self.doc.exp_approver == self.doc.owner:
+		# 	webnotes.msgprint("""Self Approval is not allowed.""", raise_exception=1)
 		self.validate_fiscal_year()
 		self.validate_exp_details()
 			
