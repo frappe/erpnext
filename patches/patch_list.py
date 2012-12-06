@@ -725,4 +725,8 @@ patch_list = [
 		'patch_module': 'patches.december_2012',
 		'patch_file': 'reload_debtors_creditors_ledger',
 	},
+	{
+		'patch_module': 'patches.december_2012',
+		'patch_file': 'website_cache_refactor',
+	},
 ]
