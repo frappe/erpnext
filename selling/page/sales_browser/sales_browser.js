@@ -84,9 +84,8 @@ erpnext.SalesChart = Class.extend({
 		// edit
 		var node_links = [];
 		
-		if (wn.boot.profile.can_read.indexOf(this.ctype) !== -1) {
-			node_links.push('<a href="#!Form/'+encodeURIComponent(this.ctype)+'/'
-				+encodeURIComponent(data.value)+'">Edit</a>');
+		if (wn.model.can_read(this.ctype)) {
+			node_links.push('<a onclick="erpnext.sales_chart.open();">Edit</a>');
 		}
 
 		if(data.expandable) {
@@ -95,6 +94,14 @@ erpnext.SalesChart = Class.extend({
 				node_links.push('<a onclick="erpnext.sales_chart.new_node();">Add Child</a>');
 			}
 		}
+
+		if (wn.model.can_write(this.ctype)) {
+			node_links.push('<a onclick="erpnext.sales_chart.rename()">Rename</a>');
+		};
+	
+		if (wn.model.can_delete(this.ctype)) {
+			node_links.push('<a onclick="erpnext.sales_chart.delete()">Delete</a>');
+		};
 		
 		link.toolbar.append(node_links.join(" | "));
 	},
@@ -107,11 +114,12 @@ erpnext.SalesChart = Class.extend({
 			fields: [
 				{fieldtype:'Data', fieldname: 'name_field', label:'New ' + me.ctype + ' Name', reqd:true},
 				{fieldtype:'Select', fieldname:'is_group', label:'Group Node',
-					options:'No\nYes', description:'Entries can made only against non-group (leaf) nodes'},
+					options:'No\nYes', description: "Further nodes can be only created under 'Group' type nodes"},
 				{fieldtype:'Button', fieldname:'create_new', label:'Create New' }
 			]
 		})		
 	
+		d.set_value("is_group", "No");
 		// create
 		$(d.fields_dict.create_new.input).click(function() {
 			var btn = this;
@@ -138,5 +146,22 @@ erpnext.SalesChart = Class.extend({
 	},
 	selected_node: function() {
 		return this.tree.$w.find('.tree-link.selected');
-	}
+	},
+	open: function() {
+		var node = this.selected_node();
+		wn.set_route("Form", this.ctype, node.data("label"));
+	},
+	rename: function() {
+		var node = this.selected_node();
+		wn.model.rename_doc(this.ctype, node.data('label'), function(new_name) {
+			console.log(new_name)
+			node.data('label', new_name).find(".tree-label").html(new_name);
+		});
+	},
+	delete: function() {
+		var node = this.selected_node();
+		wn.model.delete_doc(this.ctype, node.data('label'), function() {
+			node.parent().remove();
+		});
+	},
 });

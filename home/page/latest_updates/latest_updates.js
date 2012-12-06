@@ -1,10 +1,13 @@
 erpnext.updates = [
+	["6th December 2012", [
+		"Rename: Cost Center, Item Group, Customer Group, Supplier Type, Territory, Sales Person can now be renamed.",
+	]],
 	["5th December 2012", [
 		"Leave Application: Now can set approver.",
 		"New Roles Added: Leave Approver and Expense Approver.",
-		"Production Order is now linked with sales order.",
+		"Production Order: Now linked with Sales Order.",
 		"Production Planning Tool: The field 'Allow SA items as raw material' has been renamed to 'Use multi-level BOM', 'Include in plan' column from SO table has been deleted",
-		"Batch nos are now filtered with item and available qty",
+		"Batch Numbers: Batch nos are now filtered with Item and available qty at time of selection in transactions.",
 		"BOM: 'Update Costing' button has been deleted, once submitted cost are fixed.",
 		"[For indian customer only] Deprecated TDS related documents and fields. Old TDS amount added into tax table in Purchase Invoice and entries table in case of JV",
 	]],
