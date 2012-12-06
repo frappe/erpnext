@@ -20,7 +20,7 @@ def get_blog_list(args=None):
 				comment_doctype='Blog' and comment_docname=name) as comments
 		from `tabBlog`
 		where ifnull(published,0)=1
-		order by published desc, name asc"""
+		order by creation desc, name asc"""
 	
 	from webnotes.widgets.query_builder import add_limit_to_query
 	query, args = add_limit_to_query(query, args)
