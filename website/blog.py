@@ -36,7 +36,7 @@ def get_blog_list(args=None):
 		res['full_name'] = get_fullname(res['owner'])
 		res['published'] = global_date_format(res['creation'])
 		if not res['content']:
-			res['content'] = website.web_cache.get_html(res['name'])
+			res['content'] = website.web_cache.get_page_html(res['name'])
 		res['content'] = split_blog_content(res['content'])
 		res['content'] = res['content'][:1000]
 
