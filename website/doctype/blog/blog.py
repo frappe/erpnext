@@ -44,8 +44,7 @@ class DocType(website.web_page.Page):
 
 		# send the blog
 		send(recipients = recipients, doctype='Lead', email_field='email_id',
-			first_name_field = 'lead_name', last_name_field="", subject=self.doc.title,
-			message = markdown(content))
+			subject=self.doc.title, message = markdown(content))
 		
 		webnotes.conn.set(self.doc, 'email_sent', 1)
 		webnotes.msgprint("""Scheduled to send to %s subscribers""" % len(recipients))

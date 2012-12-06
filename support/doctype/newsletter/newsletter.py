@@ -18,6 +18,8 @@ from __future__ import unicode_literals
 
 import webnotes
 import webnotes.utils
+from webnotes.utils import cstr
+from webnotes.model.doc import Document
 
 class DocType():
 	def __init__(self, d, dl):
@@ -46,8 +48,7 @@ class DocType():
 		}
 		
 	def send_emails(self):
-		"""send emails to leads and customers"""		
-		# TODO: create unsubscribed check in customer
+		"""send emails to leads and customers"""
 		if self.doc.email_sent:
 			webnotes.msgprint("""Newsletter has already been sent""", raise_exception=1)
 		
@@ -67,6 +68,14 @@ class DocType():
 				
 			if self.doc.blog_subscribers:
 				self.send("blog_subscribers", "Lead")
+				
+		if self.doc.email_list:
+			email_list = [cstr(email).strip() for email in self.doc.email_list.split(",")]
+			for email in email_list:
+				if not webnotes.conn.exists({"doctype": "Lead", "email_id": email}):
+					create_lead(email)
+			
+			self.send(email_list, "Lead")
 		
 		webnotes.conn.set(self.doc, "email_sent", 1)
 		webnotes.msgprint("""Scheduled to send to %s""" % \
@@ -78,9 +87,8 @@ class DocType():
 		recipients = self.doc.test_email_id.split(",")
 		from webnotes.utils.email_lib.bulk import send
 		send(recipients = recipients, sender = sender, 
-			subject = self.doc.subject, message = self.get_message(),
-			doctype = doctype, email_field = args["email_field"],
-			first_name_field = args["first_name_field"], last_name_field = "")
+			subject = self.doc.subject, message = self.doc.message,
+			doctype = doctype, email_field = args["email_field"])
 		webnotes.msgprint("""Scheduled to send to %s""" % self.doc.test_email_id)
 		
 	def get_recipients(self, key):
@@ -89,21 +97,47 @@ class DocType():
 		self.all_recipients += recipients
 		return recipients
 		
-	def get_message(self):
-		if not hasattr(self, "message"):
-			import markdown2
-			self.message = markdown2.markdown(self.doc.message)
-		return self.message
-		
 	def send(self, query_key, doctype):
 		webnotes.conn.auto_commit_on_many_writes = True
-		recipients = self.get_recipients(query_key)
+		if isinstance(query_key, basestring) and self.query_map.has_key(query_key):
+			recipients = self.get_recipients(query_key)
+		else:
+			recipients = query_key
 		sender = webnotes.utils.get_email_id(self.doc.owner)
 		args = self.dt_map[doctype]
-		self.send_count[doctype] = self.send_count.setdefault(doctype, 0) + len(recipients)
+		self.send_count[doctype] = self.send_count.setdefault(doctype, 0) + \
+			len(recipients)
 		
 		from webnotes.utils.email_lib.bulk import send
 		send(recipients = recipients, sender = sender, 
-			subject = self.doc.subject, message = self.get_message(),
-			doctype = doctype, email_field = args["email_field"],
-			first_name_field = args["first_name_field"], last_name_field = "")
+			subject = self.doc.subject, message = self.doc.message,
+			doctype = doctype, email_field = args["email_field"])
+			
+lead_naming_series = None
+def create_lead(email):
+	"""create a lead if it does not exist"""
+	lead = Document("Lead")
+	lead.fields["__islocal"] = 1
+	lead.lead_name = email
+	lead.email_id = email
+	lead.status = "Open"
+	lead.naming_series = lead_naming_series or get_lead_naming_series()
+	lead.company = webnotes.conn.get_default("company")
+	lead.source = "Email"
+	lead.save()
+	
+def get_lead_naming_series():
+	"""gets lead's default naming series"""
+	global lead_naming_series
+	naming_series_field = webnotes.get_doctype("Lead").get_field("naming_series")
+	if naming_series_field.default:
+		lead_naming_series = naming_series_field.default
+	else:
+		latest_naming_series = webnotes.conn.sql("""select naming_series
+			from `tabLead` order by creation desc limit 1""")
+		if latest_naming_series:
+			lead_naming_series = latest_naming_series[0][0]
+		else:
+			lead_naming_series = filter(None, naming_series_field.options.split("\n"))[0]
+	
+	return lead_naming_series

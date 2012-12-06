@@ -119,8 +119,6 @@ def add_comment(args=None):
 	send(recipients=list(set(commentors + [blog['owner']])), 
 		doctype='Comment', 
 		email_field='comment_by', 
-		first_name_field="comment_by_fullname",
-		last_name_field="NA", 
 		subject='New Comment on Blog: ' + blog['title'], 
 		message='%(comment)s<p>By %(comment_by_fullname)s</p>' % args)
 	

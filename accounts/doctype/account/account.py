@@ -179,16 +179,16 @@ class DocType:
 		sql("delete from `tabGL Entry` where account = %s and ifnull(is_cancelled, 'No') = 'Yes'", self.doc.name)
 
 	# on rename
-	def on_rename(self,newdn,olddn):
-		company_abbr = sql("select tc.abbr from `tabAccount` ta, `tabCompany` tc where ta.company = tc.name and ta.name=%s", olddn)[0][0]
-		
-		parts = newdn.split(" - ")	
+	def on_rename(self, new, old):
+		company_abbr = webnotes.conn.get_value("Company", self.doc.company, "abbr")		
+		parts = new.split(" - ")	
 
 		if parts[-1].lower() != company_abbr.lower():
 			parts.append(company_abbr)
 
+		# rename account name
 		account_name = " - ".join(parts[:-1])
 		sql("update `tabAccount` set account_name = '%s' where name = '%s'" % \
-			(account_name,olddn))
-		
+			(account_name, old))
+
 		return " - ".join(parts)

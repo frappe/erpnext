@@ -159,7 +159,7 @@ class DocType(TransactionBase):
 		self.delete_supplier_communication()
 		self.delete_supplier_account()
 		
-	def on_rename(self,newdn,olddn):
+	def on_rename(self, new, old):
 		#update supplier_name if not naming series
 		if get_defaults().get('supp_master_name') == 'Supplier Name':
 			update_fields = [
@@ -171,13 +171,14 @@ class DocType(TransactionBase):
 			('Purchase Receipt', 'supplier'),
 			('Serial No', 'supplier')]
 			for rec in update_fields:
-				sql("update `tab%s` set supplier_name = '%s' where %s = '%s'" %(rec[0],newdn,rec[1],olddn))
+				sql("update `tab%s` set supplier_name = %s where `%s` = %s" % \
+					(rec[0], '%s', rec[1], '%s'), (new, old))
 				
-		old_account = webnotes.conn.get_value("Account", {"master_type": "Supplier",
-			"master_name": olddn})
-				
+		for account in webnotes.conn.sql("""select name, account_name from 
+			tabAccount where master_name=%s and master_type='Supplier'""", old, as_dict=1):
+			if account.account_name != new:
+				webnotes.rename_doc("Account", account.name, new)
+
 		#update master_name in doctype account
-		sql("update `tabAccount` set master_name = '%s', master_type = 'Supplier' where master_name = '%s'" %(newdn,olddn))
-		
-		from webnotes.model.rename_doc import rename_doc
-		rename_doc("Account", old_account, newdn)
+		webnotes.conn.sql("""update `tabAccount` set master_name = %s, 
+			master_type = 'Supplier' where master_name = %s""" , (new,old))
