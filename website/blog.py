@@ -147,19 +147,14 @@ def add_subscriber():
 def get_blog_content(blog_page_name):
 	import website.web_cache
 	content = website.web_cache.get_html(blog_page_name)
-	
 	content = split_blog_content(content)
-	
 	import webnotes.utils
 	content = webnotes.utils.escape_html(content)
-
 	return content
 	
 def split_blog_content(content):
 	content = content.split("<!-- begin blog content -->")
 	content = len(content) > 1 and content[1] or content[0]
-
 	content = content.split("<!-- end blog content -->")
 	content = content[0]
-
 	return content

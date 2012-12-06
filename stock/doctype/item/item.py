@@ -25,9 +25,7 @@ from webnotes import msgprint
 
 sql = webnotes.conn.sql
 
-
-
-class DocType:
+class DocType():
 	def __init__(self, doc, doclist=[]):
 		self.doc = doc
 		self.doclist = doclist
@@ -40,7 +38,9 @@ class DocType:
 		return ret
 
 	def on_update(self):
-		self.update_page_name()
+		# webpage updates
+		from website.utils import update_page_name
+		update_page_name(self.doc, self.doc.item_name)
 		
 		bin = sql("select stock_uom from `tabBin` where item_code = '%s' " % self.doc.item_code)
 		if bin and cstr(bin[0][0]) != cstr(self.doc.stock_uom):
@@ -73,8 +73,6 @@ class DocType:
 			child.uom = self.doc.stock_uom
 			child.conversion_factor = 1
 			child.save()
-
-		self.clear_web_cache()
 
 	# On delete 1. Delete BIN (if none of the corrosponding transactions present, it gets deleted. if present, rolled back due to exception)
 	def on_trash(self):
@@ -194,39 +192,6 @@ class DocType:
 
 	def on_rename(self,newdn,olddn):
 		sql("update tabItem set item_code = %s where name = %s", (newdn, olddn))
-
-	def delete_web_cache(self, page_name):
-		import website.web_cache
-		website.web_cache.delete_cache(page_name)
-
-	def clear_web_cache(self):
-		if hasattr(self, 'old_page_name') and self.old_page_name and \
-				self.doc.page_name != self.old_page_name:
-			self.delete_web_cache(self.doc.page_name)
-		
-		if self.doc.show_in_website:
-			import website.web_cache
-			website.web_cache.create_cache(self.doc.page_name, self.doc.doctype, self.doc.name)
-			website.web_cache.clear_cache(self.doc.page_name, self.doc.doctype, self.doc.name)
-		else:
-			self.delete_web_cache(self.doc.page_name)
-	
-	def update_page_name(self):
-		import website.utils
-		
-		# if same name, do not repeat twice
-		if self.doc.name == self.doc.item_name or not self.doc.item_name:
-			page_name = self.doc.name
-		else:
-			page_name = self.doc.name + " " + self.doc.item_name
-
-		self.doc.page_name = website.utils.page_name(page_name)
-
-		webnotes.conn.set_value('Item', self.doc.name, 'page_name', self.doc.page_name)
-	
-		# no need to check for uniqueness, as name is unique
-		
+			
 	def prepare_template_args(self):
-		import markdown2
-		self.doc.web_description_html = markdown2.markdown(self.doc.description or '',
-										extras=["wiki-tables"])
+		self.doc.web_description_html = self.doc.description or ''

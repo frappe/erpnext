@@ -16,16 +16,18 @@
 
 from __future__ import unicode_literals
 import webnotes
-import website.utils
-import website.web_page
 
-class DocType(website.web_page.Page):
+class DocType():
 	def __init__(self, d, dl):
-		super(DocType, self).__init__('Web Page')
 		self.doc, self.doclist = d, dl
 
+	def autoname(self):
+		from website.utils import page_name
+		self.doc.name = page_name(self.doc.title)
+
 	def on_update(self):
-		super(DocType, self).on_update()
+		from website.utils import update_page_name
+		update_page_name(self.doc, self.doc.title)
 		self.if_home_clear_cache()
 
 	def if_home_clear_cache(self):
@@ -33,9 +35,11 @@ class DocType(website.web_page.Page):
 		if webnotes.conn.get_value("Website Settings", None, "home_page")==self.doc.name:
 			from webnotes.sessions import clear_cache
 			clear_cache('Guest')
-			import website.web_cache
-			website.web_cache.clear_cache(self.doc.page_name)
-			website.web_cache.clear_cache('index')
+			
+			from website.web_cache import clear_cache
+			clear_cache(self.doc.page_name)
+			clear_cache('index')
 			
 	def prepare_template_args(self):
-		self.markdown_to_html(['head_section','main_section', 'side_section'])
+		self.doc.main_section_html = self.doc.main_section
+		self.doc.side_section_html = self.doc.side_section

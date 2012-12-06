@@ -17,21 +17,25 @@
 # html generation functions
 
 from __future__ import unicode_literals
+
+import os
+import conf
+import webnotes
+import website.utils
+
 template_map = {
 	'Web Page': 'html/web_page.html',
 	'Blog': 'html/blog_page.html',
 	'Item': 'html/product_page.html',
 }
 
-def get_html(page_name, comments=''):
-	import conf
-	
+def get_page_html(page_name, comments=''):
 	html = ''
 	
 	# load from cache, if auto cache clear is falsy
 	if not (hasattr(conf, 'auto_cache_clear') and conf.auto_cache_clear or 0):
-		html = load_from_cache(page_name)
-		comments += "\n\npage load status: from cache"
+		html = webnotes.cache().get_value("page:" + page_name)
+		comments += "\n\npage load status: fresh"
 
 	if not html:
 		html = load_into_cache(page_name)
@@ -43,9 +47,37 @@ def get_html(page_name, comments=''):
 	
 	return html
 
-def load_from_cache(page_name):
-	import webnotes
+def load_into_cache(page_name):
+	templates_path = os.path.join(os.path.dirname(conf.__file__), 
+		'app', 'website', 'templates')
+	args = prepare_args(page_name)
+
+	from jinja2 import Environment, FileSystemLoader
+	jenv = Environment(loader = FileSystemLoader(templates_path))
+	html = jenv.get_template(args['template']).render(args)
+	return html
+		
+	html = build_html()	
+	webnotes.cache().set_value("page:" + page_name, html)
+	return html
+
+def prepare_args(page_name):
+	if page_name == 'index':
+		page_name = get_home_page()
 	
+	if page_name in get_predefined_pages():
+		args = {
+			'template': 'pages/%s.html' % page_name,
+			'name': page_name,
+		}
+	else:
+		args = get_doc_fields(page_name)
+	
+	args.update(get_outer_env())
+	
+	return args	
+
+def load_from_cache(page_name):	
 	result = search_cache(page_name)
 
 	if not result:
@@ -58,61 +90,16 @@ def load_from_cache(page_name):
 
 	return result[0][0]
 
-def load_into_cache(page_name):
-	args = prepare_args(page_name)
-	
-	html = build_html(args)
-	
-	# create cache entry for predefined pages, if not exists
-	if page_name in get_predefined_pages():
-		create_cache(page_name)
-	
-	import webnotes
-	webnotes.conn.begin()
-	webnotes.conn.set_value('Web Cache', page_name, 'html', html)
-	webnotes.conn.commit()
-	
-	return html
-
-def get_predefined_pages():
-	"""
-		gets a list of predefined pages
-		they do not exist in `tabWeb Page`
-	"""
-	import os
-	import conf
-	import website.utils
-	
+def get_predefined_pages():	
 	pages_path = os.path.join(os.path.dirname(conf.__file__), 'app', 
 		'website', 'templates', 'pages')
-	
 	page_list = []
-	
 	for page in os.listdir(pages_path):
 		page_list.append(website.utils.scrub_page_name(page))
 
 	return page_list
 
-def prepare_args(page_name):
-	import webnotes
-	if page_name == 'index':
-		page_name = get_home_page()
-
-	if page_name in get_predefined_pages():
-		args = {
-			'template': 'pages/%s.html' % page_name,
-			'name': page_name,
-			'webnotes': webnotes
-		}
-	else:
-		args = get_doc_fields(page_name)
-	
-	args.update(get_outer_env())
-	
-	return args
-	
 def get_home_page():
-	import webnotes
 	doc_name = webnotes.conn.get_value('Website Settings', None, 'home_page')
 	if doc_name:
 		page_name = webnotes.conn.get_value('Web Page', doc_name, 'page_name')
@@ -122,12 +109,9 @@ def get_home_page():
 	return page_name
 
 def get_doc_fields(page_name):
-	import webnotes
-	doc_type, doc_name = webnotes.conn.get_value('Web Cache', page_name, 
-		['doc_type', 'doc_name'])
+	doc_type, doc_name = get_source_doc(page_name)
 	
-	import webnotes.model.code
-	obj = webnotes.model.code.get_obj(doc_type, doc_name)
+	obj = webnotes.get_obj(doc_type, doc_name)
 	
 	if hasattr(obj, 'prepare_template_args'):
 		obj.prepare_template_args()
@@ -137,12 +121,19 @@ def get_doc_fields(page_name):
 	
 	return args
 
-def get_outer_env():
-	"""
-		env dict for outer template
-	"""
-	import webnotes
+def get_source_doc(page_name):
+	"""get source doc for the given page name"""
+	for doctype in [('Web Page', 'published'), ('Blog', 'published'), 
+		('Item', 'show_in_website')]:
+		name = webnotes.conn.sql("""select name from `tab%s` where 
+			page_name=%s and ifnull(`%s`, 0)=1""" % (doctype[0], "%s", doctype[1]), 
+			page_name)
+		if name:
+			return doctype[0], name[0][0]
+			
+	return None, None
 	
+def get_outer_env():
 	all_top_items = webnotes.conn.sql("""\
 		select * from `tabTop Bar Item`
 		where parent='Website Settings' and parentfield='top_bar_items'
@@ -173,97 +164,11 @@ def get_outer_env():
 		'favicon': webnotes.conn.get_value('Website Settings', None, 'favicon')
 	}
 
-def build_html(args):
-	"""
-		build html using jinja2 templates
-	"""
-	import os
-	import conf
-	templates_path = os.path.join(os.path.dirname(conf.__file__), 'app', 'website', 'templates')
-	
-	from jinja2 import Environment, FileSystemLoader
-	jenv = Environment(loader = FileSystemLoader(templates_path))
-	html = jenv.get_template(args['template']).render(args)
-	return html
-
-# cache management
-def search_cache(page_name):
-	if not page_name: return ()
-	import webnotes
-	return webnotes.conn.sql("""\
-		select html, doc_type, doc_name
-		from `tabWeb Cache`
-		where name = %s""", page_name)
-
-def create_cache(page_name, doc_type=None, doc_name=None):
-	# check if a record already exists
-	result = search_cache(page_name)
-	if result: return
-	
-	# create a Web Cache record
-	import webnotes.model.doc
-	d = webnotes.model.doc.Document('Web Cache')
-	d.name = page_name
-	d.doc_type = doc_type
-	d.doc_name = doc_name
-	d.html = None
-	d.save()
-
 def clear_cache(page_name, doc_type=None, doc_name=None):
-	"""
-		* if no page name, clear whole cache
-		* if page_name, doc_type and doc_name match, clear cache's copy
-		* else, raise exception that such a page already exists
-	"""
-	import webnotes
-
-	if not page_name:
-		webnotes.conn.sql("""update `tabWeb Cache` set html = ''""")
-		return
-	
-	result = search_cache(page_name)
-
-	if not doc_type or (result and result[0][1] == doc_type and result[0][2] == doc_name):
-		webnotes.conn.set_value('Web Cache', page_name, 'html', '')
+	if page_name:
+		delete_page_cache(page_name)
 	else:
-		webnotes.msgprint("""Page with name "%s" already exists as a %s.
-			Please save it with another name.""" % (page_name, result[0][1]),
-			raise_exception=1)
-
-def delete_cache(page_name):
-	"""
-		delete entry of page_name from Web Cache
-		used when:
-			* web page is deleted
-			* blog is un-published
-	"""
-	import webnotes
-	webnotes.conn.sql("""delete from `tabWeb Cache` where name=%s""", (page_name,))
-
-def refresh_cache(build=None):
-	"""delete and re-create web cache entries"""
-	import webnotes
+		webnotes.cache().flush_keys("page:")
 	
-	# webnotes.conn.sql("delete from `tabWeb Cache`")
-	
-	clear_cache(None)
-	
-	query_map = {
-		'Web Page': """select page_name, name from `tabWeb Page` where docstatus=0""",
-		'Blog': """\
-			select page_name, name from `tabBlog`
-			where docstatus = 0 and ifnull(published, 0) = 1""",
-		'Item': """\
-			select page_name, name from `tabItem`
-			where docstatus = 0 and ifnull(show_in_website, 0) = 1""",
-	}
-
-	for dt in query_map:
-		if build and dt in build: 
-			for result in webnotes.conn.sql(query_map[dt], as_dict=1):
-				create_cache(result['page_name'], dt, result['name'])
-				load_into_cache(result['page_name'])
-			
-	for page_name in get_predefined_pages():
-		create_cache(page_name, None, None)
-		if build: load_into_cache(page_name)
+def delete_page_cache(page_name):
+	webnotes.cache().delete_value("page:" + page_name)

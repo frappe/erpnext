@@ -18,12 +18,18 @@ from __future__ import unicode_literals
 
 import webnotes
 import website.utils
-import website.web_page
 
-class DocType(website.web_page.Page):
+class DocType():
 	def __init__(self, d, dl):
-		super(DocType, self).__init__('Blog')
 		self.doc, self.doclist = d, dl
+
+	def autoname(self):
+		from website.utils import page_name
+		self.doc.name = page_name(self.doc.title)
+
+	def on_update(self):
+		from website.utils import update_page_name
+		update_page_name(self.doc, self.doc.title)
 
 	def send_emails(self):
 		"""send emails to subscribers"""
@@ -31,7 +37,6 @@ class DocType(website.web_page.Page):
 			webnotes.msgprint("""Blog Subscribers already updated""", raise_exception=1)
 		
 		from webnotes.utils.email_lib.bulk import send
-		from markdown2 import markdown
 		import webnotes.utils
 		
 		# get leads that are subscribed to the blog
@@ -40,22 +45,14 @@ class DocType(website.web_page.Page):
 
 		# make heading as link
 		content = '<h2><a href="%s/%s.html">%s</a></h2>\n\n%s' % (webnotes.utils.get_request_site_address(),
-			self.doc.page_name, self.doc.title, markdown(self.doc.content))
+			self.doc.page_name, self.doc.title, self.doc.content)
 
 		# send the blog
 		send(recipients = recipients, doctype='Lead', email_field='email_id',
-			subject=self.doc.title, message = markdown(content))
+			subject=self.doc.title, message = content)
 		
 		webnotes.conn.set(self.doc, 'email_sent', 1)
 		webnotes.msgprint("""Scheduled to send to %s subscribers""" % len(recipients))
-
-	def on_update(self):
-		super(DocType, self).on_update()
-		if not webnotes.utils.cint(self.doc.published):
-			self.delete_web_cache(self.doc.page_name)
-		else:
-			import website.blog
-			website.blog.get_blog_content(self.doc.page_name)
 
 	def prepare_template_args(self):
 		import webnotes.utils
@@ -68,8 +65,7 @@ class DocType(website.web_page.Page):
 		from webnotes.utils import global_date_format, get_fullname
 		self.doc.full_name = get_fullname(self.doc.owner)
 		self.doc.updated = global_date_format(self.doc.creation)
-
-		self.markdown_to_html(['content'])
+		self.doc.content_html = self.doc.content
 
 		comment_list = webnotes.conn.sql("""\
 			select comment, comment_by_fullname, creation
