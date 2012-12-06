@@ -1,31 +1,27 @@
-# Search Criteria, creditors_ledger
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-04-03 12:49:51',
-		'docstatus': 0,
-		'modified': '2012-04-03 12:49:51',
-		'modified_by': u'Administrator',
-		'owner': u'nabin@webnotestech.com'
-	},
-
-	# These values are common for all Search Criteria
-	{
-		'criteria_name': u"Creditor's Ledger",
-		'doc_type': u'GL Entry',
-		'doctype': 'Search Criteria',
-		'filters': u"{'GL Entry\x01Voucher Type':'','GL Entry\x01Is Cancelled':'','GL Entry\x01Is Opening':'','GL Entry\x01Fiscal Year':''}",
-		'module': u'Accounts',
-		'name': '__common__',
-		'page_len': 50,
-		'sort_order': u'DESC',
-		'standard': u'Yes'
-	},
-
-	# Search Criteria, creditors_ledger
-	{
-		'doctype': 'Search Criteria',
-		'name': u'creditors_ledger'
-	}
+ {
+  "owner": "nabin@erpnext.com", 
+  "docstatus": 0, 
+  "creation": "2012-05-14 18:05:41", 
+  "modified_by": "nabin@erpnext.com", 
+  "modified": "2012-12-06 11:36:09"
+ }, 
+ {
+  "custom_query": null, 
+  "report_script": null, 
+  "page_len": 50, 
+  "module": "Accounts", 
+  "standard": "Yes", 
+  "sort_order": "DESC", 
+  "filters": "{\"GL Entry\\u0001Voucher Type\":[],\"GL Entry\\u0001Is Cancelled\":[\"No\"],\"GL Entry\\u0001Is Opening\":[\"\"],\"GL Entry\\u0001Fiscal Year\":[\"\"]}", 
+  "doc_type": "GL Entry", 
+  "name": "__common__", 
+  "doctype": "Search Criteria", 
+  "sort_by": "`tabGL Entry`.`name`", 
+  "criteria_name": "Creditor's Ledger"
+ }, 
+ {
+  "name": "creditors_ledger", 
+  "doctype": "Search Criteria"
+ }
 ]
