@@ -164,7 +164,7 @@ def get_outer_env():
 		'favicon': webnotes.conn.get_value('Website Settings', None, 'favicon')
 	}
 
-def clear_cache(page_name, doc_type=None, doc_name=None):
+def clear_cache(page_name):
 	if page_name:
 		delete_page_cache(page_name)
 	else:

@@ -19,7 +19,7 @@ from __future__ import unicode_literals
 import webnotes
 import website.utils
 
-class DocType():
+class DocType:
 	def __init__(self, d, dl):
 		self.doc, self.doclist = d, dl
 
