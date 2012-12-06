@@ -20,6 +20,7 @@ import webnotes
 from webnotes.utils import cstr, get_defaults
 from webnotes.model.code import get_obj
 from webnotes import msgprint
+from webnotes.model.doc import make_autoname
 
 sql = webnotes.conn.sql
 
