@@ -73,7 +73,7 @@ def page_name(title):
 
 def update_page_name(doc, title):
 	"""set page_name and check if it is unique"""
-	webnotes.conn.sql(doc, "page_name", title)
+	webnotes.conn.set(doc, "page_name", page_name(title))
 	
 	res = webnotes.conn.sql("""\
 		select count(*) from `tab%s`

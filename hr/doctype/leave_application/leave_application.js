@@ -23,6 +23,7 @@ cur_frm.cscript.onload = function(doc, dt, dn) {
 		method:"get_approver_list",
 		callback: function(r) {
 			cur_frm.set_df_property("leave_approver", "options", r.message);
+			get_leave_balance(cur_frm.doc);
 		}
 	});
 }
