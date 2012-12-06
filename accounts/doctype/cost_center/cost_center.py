@@ -90,3 +90,17 @@ class DocType(DocTypeNestedSet):
 			
 		self.validate_mandatory()
 		self.validate_budget_details()
+		
+	def on_rename(self, new, old):
+		company_abbr = webnotes.conn.get_value("Company", self.doc.company_name, "abbr")		
+		parts = new.split(" - ")	
+
+		if parts[-1].lower() != company_abbr.lower():
+			parts.append(company_abbr)
+
+		# rename account name
+		cost_center_name = " - ".join(parts[:-1])
+		webnotes.conn.sql("update `tabCost Center` set cost_center_name = %s where name = %s", \
+			(cost_center_name, old))
+
+		return " - ".join(parts)	
