@@ -11,11 +11,11 @@ def execute():
 	from markdown2 import markdown
 
 	for page in webnotes.conn.sql("""select name, main_section from `tabWeb Page`"""):
-		m = markdown(page[1]).encode("utf8")
+		m = markdown(page[1] or "").encode("utf8")
 		webnotes.conn.set_value("Web Page", page[0], "main_section", m)
 
 	for page in webnotes.conn.sql("""select name, content from `tabBlog`"""):
-		m = markdown(page[1]).encode("utf8")
+		m = markdown(page[1] or "").encode("utf8")
 		webnotes.conn.set_value("Blog", page[0], "content", m)
 
 	# delete website cache
