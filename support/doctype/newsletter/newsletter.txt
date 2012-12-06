@@ -2,9 +2,9 @@
  {
   "owner": "Administrator", 
   "docstatus": 0, 
-  "creation": "2012-11-28 11:26:23", 
+  "creation": "2012-12-04 11:45:44", 
   "modified_by": "Administrator", 
-  "modified": "2012-12-03 17:10:41"
+  "modified": "2012-12-06 13:07:47"
  }, 
  {
   "autoname": "naming_series:", 
@@ -107,6 +107,15 @@
   "permlevel": 0
  }, 
  {
+  "description": "Comma separated list of email addresses", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Send to this list", 
+  "fieldname": "email_list", 
+  "fieldtype": "Text", 
+  "permlevel": 0
+ }, 
+ {
   "doctype": "DocField", 
   "label": "Newsletter Content", 
   "fieldname": "newsletter_content", 
@@ -126,9 +135,8 @@
   "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Message", 
-  "options": "Markdown", 
   "fieldname": "message", 
-  "fieldtype": "Code", 
+  "fieldtype": "Text Editor", 
   "reqd": 0, 
   "permlevel": 0
  }, 
