@@ -96,9 +96,7 @@ def add_comment(args=None):
 	comment = webnotes.widgets.form.comments.add_comment(args)
 	
 	# since comments are embedded in the page, clear the web cache
-	website.web_cache.clear_cache(args.get('page_name'),
-		args.get('comment_doctype'), args.get('comment_docname'))
-	
+	website.web_cache.clear_cache(args.get('page_name'))
 	
 	comment['comment_date'] = webnotes.utils.global_date_format(comment['creation'])
 	template_args = { 'comment_list': [comment], 'template': 'html/comment.html' }
