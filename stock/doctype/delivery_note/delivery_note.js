@@ -263,8 +263,6 @@ var set_print_hide= function(doc, cdt, cdn){
 	} else {
 		dn_fields['currency'].print_hide = 0;
 		dn_item_fields['export_rate'].print_hide = 0;
-		dn_item_fields['adj_rate'].print_hide = 0;
-		dn_item_fields['ref_rate'].print_hide = 0;
 		dn_item_fields['export_amount'].print_hide = 0;
 	}
 }
