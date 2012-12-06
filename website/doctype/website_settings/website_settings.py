@@ -20,11 +20,6 @@ class DocType:
 		self.doc, self.doclist = d, dl
 		
 	def validate(self):
-		"""
-			* set home page
-			* validate domain list
-			* clear cache
-		"""
 		self.set_home_page()
 
 	def on_update(self):
@@ -32,10 +27,9 @@ class DocType:
 		from webnotes.cms.make import make_web_core
 		make_web_core()
 		
-		# clear web cache
-		import website.web_cache
-		#website.web_cache.refresh_cache(build=['Blog'])
-		website.web_cache.refresh_cache()
+		# clear web cache (for menus!)
+		from website.web_cache import clear_cache
+		clear_cache()
 
 		from webnotes.sessions import clear_cache
 		clear_cache('Guest')

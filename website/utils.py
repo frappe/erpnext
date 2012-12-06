@@ -19,7 +19,6 @@ import webnotes
 
 def render(page_name):
 	"""render html page"""
-	import webnotes
 	try:
 		if page_name:
 			html = get_html(page_name)
@@ -37,13 +36,11 @@ def get_html(page_name):
 	page_name = scrub_page_name(page_name)
 	comments = get_comments(page_name)
 	
-	import website.web_cache
-	html = website.web_cache.get_html(page_name, comments)
+	from website.web_cache import get_page_html
+	html = get_page_html(page_name, comments)
 	return html
 
-def get_comments(page_name):
-	import webnotes
-	
+def get_comments(page_name):	
 	if page_name == '404':
 		comments = """error: %s""" % webnotes.getTraceback()
 	else:
@@ -60,9 +57,7 @@ def scrub_page_name(page_name):
 def make_template(doc, path, convert_fields = ['main_section', 'side_section']):
 	"""make template"""
 	import os, jinja2
-	
-	markdown(doc, convert_fields)
-	
+		
 	# write template
 	with open(path, 'r') as f:
 		temp = jinja2.Template(f.read())
@@ -75,3 +70,16 @@ def page_name(title):
 	name = title.lower()
 	name = re.sub('[~!@#$%^&*()<>,."\']', '', name)
 	return '-'.join(name.split()[:4])
+
+def update_page_name(doc, title):
+	"""set page_name and check if it is unique"""
+	webnotes.conn.sql(doc, "page_name", title)
+	
+	res = webnotes.conn.sql("""\
+		select count(*) from `tab%s`
+		where page_name=%s and name!=%s""" % (doc.doctype, '%s', '%s'),
+		(doc.page_name, doc.name))
+	if res and res[0][0] > 0:
+		webnotes.msgprint("""A %s with the same title already exists.
+			Please change the title of %s and save again."""
+			% (doc.doctype, doc.name), raise_exception=1)
