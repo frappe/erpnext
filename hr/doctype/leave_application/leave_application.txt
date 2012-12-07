@@ -2,9 +2,9 @@
  {
   "owner": "Administrator", 
   "docstatus": 0, 
-  "creation": "2012-12-07 15:15:24", 
+  "creation": "2012-12-07 18:27:12", 
   "modified_by": "Administrator", 
-  "modified": "2012-12-07 16:17:40"
+  "modified": "2012-12-07 18:47:48"
  }, 
  {
   "is_submittable": 1, 
@@ -160,7 +160,7 @@
   "search_index": 0, 
   "doctype": "DocField", 
   "label": "Fiscal Year", 
-  "options": "\n2008-2009\n2009-2010\n2010-2011\n2011-2012\n2012-2013\n2013-2014", 
+  "options": "Link:Fiscal Year", 
   "fieldname": "fiscal_year", 
   "fieldtype": "Select", 
   "reqd": 1, 
@@ -239,10 +239,5 @@
   "role": "Leave Approver", 
   "cancel": 0, 
   "permlevel": 2
- }, 
- {
-  "doctype": "DocPerm", 
-  "role": "All", 
-  "permlevel": 3
  }
 ]
