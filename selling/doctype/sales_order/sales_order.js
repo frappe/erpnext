@@ -66,11 +66,11 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 		if(doc.status != 'Stopped') {
 			cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms);
 			// delivery note
-			if(doc.per_delivered < 100 && doc.order_type=='Sales')
+			if(flt(doc.per_delivered, 2) < 100 && doc.order_type=='Sales')
 				cur_frm.add_custom_button('Make Delivery', cur_frm.cscript['Make Delivery Note']);
 			
 			// maintenance
-			if(doc.per_delivered < 100 && (doc.order_type !='Sales')) {
+			if(flt(doc.per_delivered, 2) < 100 && (doc.order_type !='Sales')) {
 				cur_frm.add_custom_button('Make Maint. Visit', cur_frm.cscript.make_maintenance_visit);
 				cur_frm.add_custom_button('Make Maint. Schedule', cur_frm.cscript['Make Maintenance Schedule']);
 			}
@@ -80,11 +80,11 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 				cur_frm.add_custom_button('Make ' + get_doctype_label('Purchase Request'), cur_frm.cscript['Make Purchase Request']);
 			
 			// sales invoice
-			if(doc.per_billed < 100)
+			if(flt(doc.per_billed, 2) < 100)
 				cur_frm.add_custom_button('Make Invoice', cur_frm.cscript['Make Sales Invoice']);
 			
 			// stop
-			if(doc.per_delivered < 100 || doc.per_billed < 100)
+			if(flt(doc.per_delivered, 2) < 100 || doc.per_billed < 100)
 				cur_frm.add_custom_button('Stop!', cur_frm.cscript['Stop Sales Order']);
 		} else {	
 			// un-stop

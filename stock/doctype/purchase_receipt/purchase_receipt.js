@@ -49,7 +49,7 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	if (!cur_frm.cscript.is_onload) cur_frm.cscript.dynamic_label(doc, cdt, cdn);
 
 	if(doc.docstatus == 1){
-		if (doc.per_billed < 100) cur_frm.add_custom_button('Make Purchase Invoice', cur_frm.cscript['Make Purchase Invoice']);
+		if (flt(doc.per_billed, 2) < 100) cur_frm.add_custom_button('Make Purchase Invoice', cur_frm.cscript['Make Purchase Invoice']);
 		cur_frm.add_custom_button('Send SMS', cur_frm.cscript['Send SMS']);
 	}
 	

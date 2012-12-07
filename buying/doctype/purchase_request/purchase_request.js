@@ -50,7 +50,7 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	erpnext.hide_naming_series();
 
 	if(doc.docstatus == 1 && doc.status != 'Stopped'){
-		if(doc.per_ordered < 100) {
+		if(flt(doc.per_ordered, 2) < 100) {
 			cur_frm.add_custom_button('Make Purchase Order', cur_frm.cscript['Make Purchase Order']);
 			cur_frm.add_custom_button('Stop Purchase Request', cur_frm.cscript['Stop Purchase Request']);
 		}

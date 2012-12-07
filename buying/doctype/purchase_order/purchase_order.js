@@ -49,9 +49,9 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 
 	if(doc.docstatus == 1 && doc.status != 'Stopped'){
 		cur_frm.add_custom_button('Send SMS', cur_frm.cscript['Send SMS']);
-		if(doc.per_received < 100) cur_frm.add_custom_button('Make Purchase Receipt', cur_frm.cscript['Make Purchase Receipt']);	
-		if(doc.per_billed < 100) cur_frm.add_custom_button('Make Invoice', cur_frm.cscript['Make Purchase Invoice']);
-		if(doc.per_billed < 100 || doc.per_received < 100) cur_frm.add_custom_button('Stop', cur_frm.cscript['Stop Purchase Order']);
+		if(flt(doc.per_received, 2) < 100) cur_frm.add_custom_button('Make Purchase Receipt', cur_frm.cscript['Make Purchase Receipt']);	
+		if(flt(doc.per_billed, 2) < 100) cur_frm.add_custom_button('Make Invoice', cur_frm.cscript['Make Purchase Invoice']);
+		if(flt(doc.per_billed, 2) < 100 || doc.per_received < 100) cur_frm.add_custom_button('Stop', cur_frm.cscript['Stop Purchase Order']);
 	}
 		
 	if(doc.docstatus == 1 && doc.status == 'Stopped')
