@@ -19,6 +19,9 @@ cur_frm.add_fetch('employee','employee_name','employee_name');
 cur_frm.cscript.onload = function(doc, dt, dn) {
 	if(!doc.posting_date) 
 		set_multiple(dt,dn,{posting_date:get_today()});
+	if(doc.__islocal) {
+		cur_frm.set_value("status", "Open")
+	}
 	cur_frm.call({
 		method:"get_approver_list",
 		callback: function(r) {
@@ -29,6 +32,9 @@ cur_frm.cscript.onload = function(doc, dt, dn) {
 }
 
 cur_frm.cscript.refresh = function(doc, dt, dn) {
+	if(doc.__islocal) {
+		cur_frm.set_value("status", "Open")
+	}
 	cur_frm.set_intro("");
 	if(doc.__islocal && !in_list(user_roles, "HR User")) {
 		cur_frm.set_intro("Fill the form and save it")
