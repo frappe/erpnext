@@ -19,7 +19,7 @@ def get_blog_list(args=None):
 	
 	query = """\
 		select
-			name, content, owner, creation as creation,
+			name, page_name, content, owner, creation as creation,
 			title, (select count(name) from `tabComment` where
 				comment_doctype='Blog' and comment_docname=`tabBlog`.name) as comments
 		from `tabBlog`
@@ -39,7 +39,7 @@ def get_blog_list(args=None):
 		res['full_name'] = get_fullname(res['owner'])
 		res['published'] = global_date_format(res['creation'])
 		if not res['content']:
-			res['content'] = website.utils.get_html(res['name'])
+			res['content'] = website.utils.get_html(res['page_name'])
 		res['content'] = split_blog_content(res['content'])
 		res['content'] = res['content'][:1000]
 
