@@ -95,7 +95,7 @@ def notify(arg=None):
 		fn = webnotes.user.name
 
 	url = get_url()
-	message = '''You have a message by <b>%s</b>:
+	message = '''You have a message from <b>%s</b>:
 	
 	%s
 	
@@ -106,7 +106,7 @@ def notify(arg=None):
 	sender = webnotes.user.name!='Administrator' and webnotes.user.name or 'support+admin_post@erpnext.com'
 	
 	from webnotes.utils.email_lib import sendmail
-	sendmail([arg['contact']], sender, message, fn + ' has posted a new comment')
+	sendmail([arg['contact']], sender, message, "You have a message from %s" % (fn,))
 	
 def get_url():
 	from webnotes.utils import get_request_site_address
