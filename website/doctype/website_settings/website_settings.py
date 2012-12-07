@@ -28,7 +28,7 @@ class DocType:
 		make_web_core()
 		
 		# clear web cache (for menus!)
-		from website.web_cache import clear_cache
+		from website.utils import clear_cache
 		clear_cache()
 
 		from webnotes.sessions import clear_cache

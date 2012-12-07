@@ -36,7 +36,7 @@ class DocType():
 			from webnotes.sessions import clear_cache
 			clear_cache('Guest')
 			
-			from website.web_cache import clear_cache
+			from website.utils import clear_cache
 			clear_cache(self.doc.page_name)
 			clear_cache('index')
 			
