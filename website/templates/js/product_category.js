@@ -6,7 +6,7 @@ erpnext.products.make_product_categories = function(wrapper) {
 
 	wrapper.category_list = new wn.ui.Listing({
 		parent: $(wrapper).find('.more-categories').get(0),
-		method: 'website.product.get_product_category_list',
+		method: 'website.helpers.product.get_product_category_list',
 		hide_refresh: true,
 		render_row: function(parent, data) {
 			parent.innerHTML = repl(

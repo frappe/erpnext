@@ -15,7 +15,7 @@ wn.provide('erpnext.blog');
 			var args = d.get_values();
 			if(!args) return;
 			wn.call({
-				method: 'website.blog.add_subscriber',
+				method: 'website.helpers.blog.add_subscriber',
 				args: args,
 				callback: function(r) {
 					if(r.exc) {

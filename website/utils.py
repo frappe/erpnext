@@ -21,10 +21,19 @@ import conf
 import webnotes
 from webnotes.utils import cstr
 
-template_map = {
-	'Web Page': 'html/web_page.html',
-	'Blog': 'html/blog_page.html',
-	'Item': 'html/product_page.html',
+page_map = {
+	'Web Page': webnotes._dict({
+		"template": 'html/web_page.html',
+		"condition_field": "published"
+	}),
+	'Blog': webnotes._dict({
+		"template": 'html/blog_page.html',
+		"condition_field": "published",
+	}),
+	'Item': webnotes._dict({
+		"template": 'html/product_page.html',
+		"condition_field": "show_in_website",
+	})
 }
 
 def render(page_name):
@@ -51,11 +60,12 @@ def get_html(page_name):
 	# load from cache, if auto cache clear is falsy
 	if not (hasattr(conf, 'auto_cache_clear') and conf.auto_cache_clear or 0):
 		html = webnotes.cache().get_value("page:" + page_name)
-		comments += "\nload status: fresh"
 
-	if not html:
-		html = load_into_cache(page_name)
+	if html:
 		comments += "\nload status: cache"
+	else:
+		html = load_into_cache(page_name)
+		comments += "\nload status: fresh"
 	
 	# insert comments
 	html += """\n<!-- %s -->""" % webnotes.utils.cstr(comments)
@@ -131,7 +141,7 @@ def prepare_args(page_name):
 	
 	return args	
 
-def get_template_pages():	
+def get_template_pages():
 	pages_path = os.path.join(os.path.dirname(conf.__file__), 'app', 
 		'website', 'templates', 'pages')
 	page_list = []
@@ -142,27 +152,25 @@ def get_template_pages():
 
 def get_doc_fields(page_name):
 	doc_type, doc_name = get_source_doc(page_name)
-	
 	obj = webnotes.get_obj(doc_type, doc_name)
-	
+
 	if hasattr(obj, 'prepare_template_args'):
 		obj.prepare_template_args()
-		
+
 	args = obj.doc.fields
-	args['template'] = template_map[doc_type]
+	args['template'] = page_map[doc_type].template
 	
 	return args
 
 def get_source_doc(page_name):
 	"""get source doc for the given page name"""
-	for doctype in [('Web Page', 'published'), ('Blog', 'published'), 
-		('Item', 'show_in_website')]:
+	for doctype in page_map:
 		name = webnotes.conn.sql("""select name from `tab%s` where 
-			page_name=%s and ifnull(`%s`, 0)=1""" % (doctype[0], "%s", doctype[1]), 
-			page_name)
+			page_name=%s and ifnull(%s, 0)=1""" % (doctype, "%s", 
+			page_map[doctype].condition_field), page_name)
 		if name:
-			return doctype[0], name[0][0]
-			
+			return doctype, name[0][0]
+
 	return None, None
 	
 def get_outer_env():
@@ -205,7 +213,7 @@ def get_home_page():
 
 	return page_name
 	
-def clear_cache(page_name):
+def clear_cache(page_name=None):
 	if page_name:
 		delete_page_cache(page_name)
 	else:
