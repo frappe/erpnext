@@ -17,4 +17,9 @@
 pscript.onload_Setup = function(wrapper) {
 	wrapper.appframe = new wn.ui.AppFrame($(wrapper).find('.appframe-area'), 'Setup');	
 	erpnext.module_page.hide_links(wrapper);
+	if(wn.boot.expires_on) {
+		$(wrapper).find(".layout-main")
+			.prepend("<div class='alert'>Your ERPNext account will expire on "
+				+ wn.datetime.global_date_format(wn.boot.expires_on) + "</div>");
+	}
 }
