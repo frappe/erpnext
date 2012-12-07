@@ -45,7 +45,7 @@ erpnext.products.make_product_list = function(wrapper) {
 		parent: $(wrapper).find('#products-list').get(0),
 		run_btn: $(wrapper).find('.products-search .btn').get(0),
 		no_toolbar: true,
-		method: 'website.product.get_product_list',
+		method: 'website.helpers.product.get_product_list',
 		get_args: function() {
 			return {
 				search: $('input[name="products-search"]').val() || '',

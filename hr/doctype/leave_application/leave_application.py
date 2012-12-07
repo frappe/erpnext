@@ -28,7 +28,21 @@ import datetime
 class DocType:
 	def __init__(self, doc, doclist):
 		self.doc = doc
-		self.doclist = doclist 
+		self.doclist = doclist
+		
+	def validate(self):
+		# if self.doc.leave_approver == self.doc.owner:
+		# 	webnotes.msgprint("""Self Approval is not allowed.""", raise_exception=1)
+
+		self.validate_to_date()
+		self.validate_balance_leaves()
+		self.validate_leave_overlap()
+		self.validate_max_days()
+		
+	def on_submit(self):
+		if self.doc.status != "Approved":
+			webnotes.msgprint("""Only Approved Leave Applications can be Submitted.""",
+				raise_exception=True)
 
 	def get_holidays(self):
 		"""
@@ -40,9 +54,7 @@ class DocType:
 		return tot_hol and flt(tot_hol[0][0]) or 0
 
 	def get_total_leave_days(self):
-		"""
-			Calculates total leave days based on input and holidays
-		"""
+		"""Calculates total leave days based on input and holidays"""
 		ret = {'total_leave_days' : 0.5}
 		if not self.doc.half_day:
 			tot_days = date_diff(self.doc.to_date, self.doc.from_date) + 1
@@ -53,24 +65,20 @@ class DocType:
 		return ret
 
 	def validate_to_date(self):
-		if self.doc.from_date and self.doc.to_date and (getdate(self.doc.to_date) < getdate(self.doc.from_date)):
+		if self.doc.from_date and self.doc.to_date and \
+				(getdate(self.doc.to_date) < getdate(self.doc.from_date)):
 			msgprint("To date cannot be before from date")
 			raise Exception
 			
-	def is_lwp(self):
-		lwp = sql("select is_lwp from `tabLeave Type` where name = %s", self.doc.leave_type)
-		return lwp and cint(lwp[0][0]) or 0
-
 	def validate_balance_leaves(self):
-		if self.doc.from_date and self.doc.to_date and not self.is_lwp():
-			bal = get_leave_balance(self.doc.leave_type, self.doc.employee, 
-				self.doc.fiscal_year)
-			tot_leaves = self.get_total_leave_days()
-			bal, tot_leaves = bal, tot_leaves
-			webnotes.conn.set(self.doc, 'leave_balance', flt(bal['leave_balance']))
-			webnotes.conn.set(self.doc, 'total_leave_days', flt(tot_leaves['total_leave_days']))
-			if flt(bal['leave_balance']) < flt(tot_leaves['total_leave_days']):
-				msgprint("Warning : There is not enough leave balance")
+		if self.doc.from_date and self.doc.to_date and not is_lwp(self.doc.leave_type):
+			self.doc.leave_balance = get_leave_balance(self.doc.employee,
+				self.doc.leave_type, self.doc.fiscal_year)["leave_balance"]
+			self.doc.total_leave_days = self.get_total_leave_days()["total_leave_days"]
+			
+			if self.doc.leave_balance - self.doc.total_leave_days < 0:
+				msgprint("There is not enough leave balance for Leave Type: %s" % \
+					(self.doc.leave_type,), raise_exception=1)
 
 	def validate_leave_overlap(self):
 		for d in sql("""select name, leave_type, posting_date, from_date, to_date 
@@ -90,36 +98,23 @@ class DocType:
 			msgprint("Sorry ! You cannot apply for %s for more than %s days" % (self.doc.leave_type, max_days))
 			raise Exception
 
-	def validate(self):
-		if self.doc.leave_approver == self.doc.owner:
-			webnotes.msgprint("""Self Approval is not allowed.""", raise_exception=1)
-
-		self.validate_to_date()
-		self.validate_balance_leaves()
-		self.validate_leave_overlap()
-		self.validate_max_days()
-		
-	def on_submit(self):
-		if self.doc.status != "Approved":
-			webnotes.msgprint("""Only Approved Leave Applications can be Submitted.""",
-				raise_exception=True)
 
 @webnotes.whitelist()
 def get_leave_balance(employee, leave_type, fiscal_year):
 	leave_all = webnotes.conn.sql("""select total_leaves_allocated 
 		from `tabLeave Allocation` where employee = %s and leave_type = %s
 		and fiscal_year = %s and docstatus = 1""", (employee, 
-			leave_type, fiscal_year))
-
+			leave_type, fiscal_year), debug=1)
+			
 	leave_all = leave_all and flt(leave_all[0][0]) or 0
 	
 	leave_app = webnotes.conn.sql("""select SUM(total_leave_days) 
 		from `tabLeave Application` 
 		where employee = %s and leave_type = %s and fiscal_year = %s
-		and docstatus = 1""", (employee, leave_type, fiscal_year))
+		and docstatus = 1""", (employee, leave_type, fiscal_year), debug=1)
 	leave_app = leave_app and flt(leave_app[0][0]) or 0
-
-	ret = {'leave_balance':leave_all - leave_app}
+	
+	ret = {'leave_balance': leave_all - leave_app}
 	return ret
 
 @webnotes.whitelist()
@@ -130,3 +125,7 @@ def get_approver_list():
 		webnotes.msgprint("No Leave Approvers. Please assign 'Leave Approver' Role to atleast one user.")
 		
 	return roles
+
+def is_lwp(leave_type):
+	lwp = sql("select is_lwp from `tabLeave Type` where name = %s", leave_type)
+	return lwp and cint(lwp[0][0]) or 0

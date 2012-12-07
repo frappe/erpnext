@@ -19,27 +19,34 @@ cur_frm.add_fetch('employee','employee_name','employee_name');
 cur_frm.cscript.onload = function(doc, dt, dn) {
 	if(!doc.posting_date) 
 		set_multiple(dt,dn,{posting_date:get_today()});
+	if(doc.__islocal) {
+		cur_frm.set_value("status", "Open")
+	}
 	cur_frm.call({
 		method:"get_approver_list",
 		callback: function(r) {
 			cur_frm.set_df_property("leave_approver", "options", r.message);
-			get_leave_balance(cur_frm.doc);
+			cur_frm.cscript.get_leave_balance(cur_frm.doc);
 		}
 	});
 }
 
 cur_frm.cscript.refresh = function(doc, dt, dn) {
+	if(doc.__islocal) {
+		cur_frm.set_value("status", "Open")
+	}
 	cur_frm.set_intro("");
 	if(doc.__islocal && !in_list(user_roles, "HR User")) {
 		cur_frm.set_intro("Fill the form and save it")
 	} else {
-		if(doc.status=="Open") {
+		if(doc.docstatus==0 && doc.status=="Open") {
 			if(user==doc.leave_approver) {
 				cur_frm.set_intro("You are the Leave Approver for this record. Please Update the 'Status' and Save");
 				cur_frm.toggle_enable("status", true);
 			} else {
 				cur_frm.set_intro("This Leave Application is pending approval. Only the Leave Apporver can update status.")
 				cur_frm.toggle_enable("status", false);
+				if(!doc.__islocal) cur_frm.frm_head.appframe.buttons.Submit.toggle(false);
 			}
 		} else {
  			if(doc.status=="Approved") {
@@ -56,21 +63,21 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 }
 
 cur_frm.cscript.employee = function (doc, dt, dn){
-	get_leave_balance(doc, dt, dn);
+	cur_frm.cscript.get_leave_balance(doc, dt, dn);
 }
 
 cur_frm.cscript.fiscal_year = function (doc, dt, dn){
-	get_leave_balance(doc, dt, dn);
+	cur_frm.cscript.get_leave_balance(doc, dt, dn);
 }
 
 cur_frm.cscript.leave_type = function (doc, dt, dn){
-	get_leave_balance(doc, dt, dn);
+	cur_frm.cscript.get_leave_balance(doc, dt, dn);
 }
 
 cur_frm.cscript.half_day = function(doc, dt, dn) {
 	if(doc.from_date) {
 		set_multiple(dt,dn,{to_date:doc.from_date});
-		calculate_total_days(doc, dt, dn);
+		cur_frm.cscript.calculate_total_days(doc, dt, dn);
 	}
 }
 
@@ -78,7 +85,7 @@ cur_frm.cscript.from_date = function(doc, dt, dn) {
 	if(cint(doc.half_day) == 1){
 		set_multiple(dt,dn,{to_date:doc.from_date});
 	}
-	calculate_total_days(doc, dt, dn);
+	cur_frm.cscript.calculate_total_days(doc, dt, dn);
 }
 
 cur_frm.cscript.to_date = function(doc, dt, dn) {
@@ -86,11 +93,11 @@ cur_frm.cscript.to_date = function(doc, dt, dn) {
 		msgprint("To Date should be same as From Date for Half Day leave");
 		set_multiple(dt,dn,{to_date:doc.from_date});		
 	}
-	calculate_total_days(doc, dt, dn);
+	cur_frm.cscript.calculate_total_days(doc, dt, dn);
 }
 	
-get_leave_balance = function(doc, dt, dn) {
-	if(doc.employee && doc.leave_type && doc.fiscal_year) {
+cur_frm.cscript.get_leave_balance = function(doc, dt, dn) {
+	if(doc.docstatus==0 && doc.employee && doc.leave_type && doc.fiscal_year) {
 		cur_frm.call({
 			method: "get_leave_balance",
 			args: {
@@ -98,16 +105,15 @@ get_leave_balance = function(doc, dt, dn) {
 				fiscal_year: doc.fiscal_year,
 				leave_type: doc.leave_type
 			}
-		})		
+		});
 	}
 }
 
-calculate_total_days = function(doc, dt, dn) {
+cur_frm.cscript.calculate_total_days = function(doc, dt, dn) {
 	if(doc.from_date && doc.to_date){
 		if(cint(doc.half_day) == 1) set_multiple(dt,dn,{total_leave_days:0.5});
 		else{
-			//d = new DateFn();
-			//set_multiple(dt,dn,{total_leave_days:d.get_diff(d.str_to_obj(doc.to_date),d.str_to_obj(doc.from_date))+1});
+			// server call is done to include holidays in leave days calculations
 			get_server_fields('get_total_leave_days', '', '', doc, dt, dn, 1);
 		}
 	}

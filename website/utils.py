@@ -15,7 +15,26 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import unicode_literals
+
+import os
+import conf
 import webnotes
+from webnotes.utils import cstr
+
+page_map = {
+	'Web Page': webnotes._dict({
+		"template": 'html/web_page.html',
+		"condition_field": "published"
+	}),
+	'Blog': webnotes._dict({
+		"template": 'html/blog_page.html',
+		"condition_field": "published",
+	}),
+	'Item': webnotes._dict({
+		"template": 'html/product_page.html',
+		"condition_field": "show_in_website",
+	})
+}
 
 def render(page_name):
 	"""render html page"""
@@ -36,8 +55,21 @@ def get_html(page_name):
 	page_name = scrub_page_name(page_name)
 	comments = get_comments(page_name)
 	
-	from website.web_cache import get_page_html
-	html = get_page_html(page_name, comments)
+	html = ''
+	
+	# load from cache, if auto cache clear is falsy
+	if not (hasattr(conf, 'auto_cache_clear') and conf.auto_cache_clear or 0):
+		html = webnotes.cache().get_value("page:" + page_name)
+
+	if html:
+		comments += "\nload status: cache"
+	else:
+		html = load_into_cache(page_name)
+		comments += "\nload status: fresh"
+	
+	# insert comments
+	html += """\n<!-- %s -->""" % webnotes.utils.cstr(comments)
+
 	return html
 
 def get_comments(page_name):	
@@ -53,16 +85,6 @@ def scrub_page_name(page_name):
 		page_name = page_name[:-5]
 
 	return page_name
-
-def make_template(doc, path, convert_fields = ['main_section', 'side_section']):
-	"""make template"""
-	import os, jinja2
-		
-	# write template
-	with open(path, 'r') as f:
-		temp = jinja2.Template(f.read())
-	
-	return temp.render(doc = doc.fields)
 
 def page_name(title):
 	"""make page name from title"""
@@ -83,3 +105,119 @@ def update_page_name(doc, title):
 		webnotes.msgprint("""A %s with the same title already exists.
 			Please change the title of %s and save again."""
 			% (doc.doctype, doc.name), raise_exception=1)
+
+	delete_page_cache(doc.page_name)
+
+def load_into_cache(page_name):
+	args = prepare_args(page_name)
+	html = build_html(args)
+	webnotes.cache().set_value("page:" + page_name, html)
+	return html
+
+def build_html(args):
+	from jinja2 import Environment, FileSystemLoader
+
+	templates_path = os.path.join(os.path.dirname(conf.__file__), 
+		'app', 'website', 'templates')
+	
+	jenv = Environment(loader = FileSystemLoader(templates_path))
+	html = jenv.get_template(args['template']).render(args)
+	
+	return html
+	
+def prepare_args(page_name):
+	if page_name == 'index':
+		page_name = get_home_page()
+	
+	if page_name in get_template_pages():
+		args = {
+			'template': 'pages/%s.html' % page_name,
+			'name': page_name,
+		}
+	else:
+		args = get_doc_fields(page_name)
+	
+	args.update(get_outer_env())
+	
+	return args	
+
+def get_template_pages():
+	pages_path = os.path.join(os.path.dirname(conf.__file__), 'app', 
+		'website', 'templates', 'pages')
+	page_list = []
+	for page in os.listdir(pages_path):
+		page_list.append(scrub_page_name(page))
+
+	return page_list
+
+def get_doc_fields(page_name):
+	doc_type, doc_name = get_source_doc(page_name)
+	obj = webnotes.get_obj(doc_type, doc_name)
+
+	if hasattr(obj, 'prepare_template_args'):
+		obj.prepare_template_args()
+
+	args = obj.doc.fields
+	args['template'] = page_map[doc_type].template
+	
+	return args
+
+def get_source_doc(page_name):
+	"""get source doc for the given page name"""
+	for doctype in page_map:
+		name = webnotes.conn.sql("""select name from `tab%s` where 
+			page_name=%s and ifnull(%s, 0)=1""" % (doctype, "%s", 
+			page_map[doctype].condition_field), page_name)
+		if name:
+			return doctype, name[0][0]
+
+	return None, None
+	
+def get_outer_env():
+	all_top_items = webnotes.conn.sql("""\
+		select * from `tabTop Bar Item`
+		where parent='Website Settings' and parentfield='top_bar_items'
+		order by idx asc""", as_dict=1)
+		
+	top_items = [d for d in all_top_items if not d['parent_label']]
+	
+	# attach child items to top bar
+	for d in all_top_items:
+		if d['parent_label']:
+			for t in top_items:
+				if t['label']==d['parent_label']:
+					if not 'child_items' in t:
+						t['child_items'] = []
+					t['child_items'].append(d)
+					break
+	
+	return {
+		'top_bar_items': top_items,
+	
+		'footer_items': webnotes.conn.sql("""\
+			select * from `tabTop Bar Item`
+			where parent='Website Settings' and parentfield='footer_items'
+			order by idx asc""", as_dict=1),
+			
+		'brand': webnotes.conn.get_value('Website Settings', None, 'brand_html') or 'ERPNext',
+		'copyright': webnotes.conn.get_value('Website Settings', None, 'copyright'),
+		'favicon': webnotes.conn.get_value('Website Settings', None, 'favicon')
+	}
+
+def get_home_page():
+	doc_name = webnotes.conn.get_value('Website Settings', None, 'home_page')
+	if doc_name:
+		page_name = webnotes.conn.get_value('Web Page', doc_name, 'page_name')
+	else:
+		page_name = 'login'
+
+	return page_name
+	
+def clear_cache(page_name=None):
+	if page_name:
+		delete_page_cache(page_name)
+	else:
+		webnotes.cache().delete_keys("page:")
+	
+def delete_page_cache(page_name):
+	webnotes.cache().delete_value("page:" + page_name)

@@ -53,7 +53,7 @@ erpnext.products.make_similar_products = function(wrapper) {
 		parent: $(wrapper).find('.similar-products').get(0),
 		hide_refresh: true,
 		page_length: 5,
-		method: 'website.product.get_similar_product_list',
+		method: 'website.helpers.product.get_similar_product_list',
 		get_args: function() {
 			return {
 				product_group: wrapper.product_group,

@@ -52,7 +52,7 @@ erpnext.blog.render_recent_list = function(wrapper) {
 	wrapper.recent_list = new wn.ui.Listing({
 		parent: $(wrapper).find('.recent-posts'),
 		no_toolbar: true,
-		method: 'website.blog.get_recent_blog_list',
+		method: 'website.helpers.blog.get_recent_blog_list',
 		get_args: function() {
 			return { name: '{{ name }}' }
 		},
@@ -139,7 +139,7 @@ erpnext.blog.add_comment = function(wrapper) {
 	args.page_name = '{{ page_name }}';
 	
 	wn.call({
-		method: 'website.blog.add_comment',
+		method: 'website.helpers.blog.add_comment',
 		args: args,
 		btn: this,
 		callback: function(r) {

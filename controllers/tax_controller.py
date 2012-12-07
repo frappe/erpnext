@@ -37,7 +37,7 @@ class TaxController(TransactionController):
 			{"parentfield": self.fmap.taxes_and_charges})
 			
 		for base_tax in master_tax_list:
-			tax = DictObj([[field, base_tax.fields.get(field)]
+			tax = _dict([[field, base_tax.fields.get(field)]
 				for field in base_tax.fields
 				if field not in webnotes.model.default_fields])
 			tax.update({

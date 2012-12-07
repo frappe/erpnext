@@ -1,3 +1,6 @@
+# Copyright (c) 2012 Web Notes Technologies Pvt Ltd.
+# License: GNU General Public License (v3). For more information see license.txt
+
 from __future__ import unicode_literals
 import webnotes
 
@@ -17,10 +20,10 @@ def get_blog_list(args=None):
 		select
 			name, content, owner, creation as creation,
 			title, (select count(name) from `tabComment` where
-				comment_doctype='Blog' and comment_docname=name) as comments
+				comment_doctype='Blog' and comment_docname=`tabBlog`.name) as comments
 		from `tabBlog`
 		where ifnull(published,0)=1
-		order by published desc, name asc"""
+		order by creation desc, name asc"""
 	
 	from webnotes.widgets.query_builder import add_limit_to_query
 	query, args = add_limit_to_query(query, args)
@@ -29,14 +32,13 @@ def get_blog_list(args=None):
 
 	# strip html tags from content
 	import webnotes.utils
-	import website.web_cache
 	
 	for res in result:
 		from webnotes.utils import global_date_format, get_fullname
 		res['full_name'] = get_fullname(res['owner'])
 		res['published'] = global_date_format(res['creation'])
 		if not res['content']:
-			res['content'] = website.web_cache.get_html(res['name'])
+			res['content'] = website.utils.get_html(res['name'])
 		res['content'] = split_blog_content(res['content'])
 		res['content'] = res['content'][:1000]
 
@@ -88,7 +90,6 @@ def add_comment(args=None):
 	import webnotes
 	import webnotes.utils, markdown2
 	import webnotes.widgets.form.comments	
-	import website.web_cache
 	
 	if not args: args = webnotes.form_dict
 	args['comment'] = unicode(markdown2.markdown(args.get('comment') or ''))
@@ -96,15 +97,13 @@ def add_comment(args=None):
 	comment = webnotes.widgets.form.comments.add_comment(args)
 	
 	# since comments are embedded in the page, clear the web cache
-	website.web_cache.clear_cache(args.get('page_name'),
-		args.get('comment_doctype'), args.get('comment_docname'))
-	
+	website.utils.clear_cache(args.get('page_name'))
 	
 	comment['comment_date'] = webnotes.utils.global_date_format(comment['creation'])
 	template_args = { 'comment_list': [comment], 'template': 'html/comment.html' }
 	
 	# get html of comment row
-	comment_html = website.web_cache.build_html(template_args)
+	comment_html = website.utils.build_html(template_args)
 	
 	# notify commentors 
 	commentors = [d[0] for d in webnotes.conn.sql("""select comment_by from tabComment where
@@ -144,8 +143,8 @@ def add_subscriber():
 	lead.save()
 		
 def get_blog_content(blog_page_name):
-	import website.web_cache
-	content = website.web_cache.get_html(blog_page_name)
+	import website.utils
+	content = website.utils.get_html(blog_page_name)
 	content = split_blog_content(content)
 	import webnotes.utils
 	content = webnotes.utils.escape_html(content)
