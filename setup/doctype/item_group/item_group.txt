@@ -2,9 +2,9 @@
  {
   "owner": "Administrator", 
   "docstatus": 0, 
-  "creation": "2012-07-12 23:29:44", 
+  "creation": "2012-12-06 15:57:00", 
   "modified_by": "Administrator", 
-  "modified": "2012-12-03 18:05:25"
+  "modified": "2012-12-07 14:55:49"
  }, 
  {
   "in_create": 1, 
@@ -24,6 +24,7 @@
   "parent": "Item Group", 
   "doctype": "DocField", 
   "parenttype": "DocType", 
+  "permlevel": 0, 
   "parentfield": "fields"
  }, 
  {
@@ -47,8 +48,7 @@
   "fieldname": "item_group_name", 
   "fieldtype": "Data", 
   "search_index": 0, 
-  "reqd": 1, 
-  "permlevel": 0
+  "reqd": 1
  }, 
  {
   "description": "Check this if you want to show in website", 
@@ -58,14 +58,30 @@
   "doctype": "DocField", 
   "label": "Show in Website", 
   "fieldname": "show_in_website", 
-  "fieldtype": "Check", 
-  "permlevel": 0
+  "fieldtype": "Check"
+ }, 
+ {
+  "depends_on": "show_in_website", 
+  "doctype": "DocField", 
+  "label": "Featured Items HTML", 
+  "fieldname": "featured_items_html", 
+  "fieldtype": "HTML", 
+  "options": "<h4>Featured Items</h4>"
+ }, 
+ {
+  "description": "Items Featured on the Item Group Page", 
+  "depends_on": "show_in_website", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Featured Items", 
+  "fieldname": "featured_items", 
+  "fieldtype": "Table", 
+  "options": "Featured Item"
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "cb0", 
-  "fieldtype": "Column Break", 
-  "permlevel": 0
+  "fieldtype": "Column Break"
  }, 
  {
   "no_copy": 0, 
@@ -73,7 +89,6 @@
   "doctype": "DocField", 
   "label": "Parent Item Group", 
   "oldfieldname": "parent_item_group", 
-  "permlevel": 0, 
   "trigger": "Client", 
   "fieldname": "parent_item_group", 
   "fieldtype": "Link", 
@@ -89,23 +104,11 @@
   "doctype": "DocField", 
   "label": "Has Child Node", 
   "oldfieldname": "is_group", 
-  "permlevel": 0, 
   "fieldname": "is_group", 
   "fieldtype": "Select", 
   "search_index": 0, 
   "reqd": 1, 
   "options": "\nYes\nNo"
- }, 
- {
-  "no_copy": 0, 
-  "oldfieldtype": "Small Text", 
-  "doctype": "DocField", 
-  "label": "Trash Reason", 
-  "oldfieldname": "trash_reason", 
-  "fieldname": "trash_reason", 
-  "fieldtype": "Small Text", 
-  "search_index": 0, 
-  "permlevel": 1
  }, 
  {
   "print_hide": 1, 
@@ -118,7 +121,6 @@
   "fieldtype": "Int", 
   "search_index": 1, 
   "hidden": 1, 
-  "permlevel": 0, 
   "report_hide": 0, 
   "in_filter": 1
  }, 
@@ -133,7 +135,6 @@
   "fieldtype": "Int", 
   "search_index": 1, 
   "hidden": 1, 
-  "permlevel": 0, 
   "report_hide": 0, 
   "in_filter": 1
  }, 
@@ -144,53 +145,12 @@
   "doctype": "DocField", 
   "label": "old_parent", 
   "oldfieldname": "old_parent", 
-  "permlevel": 0, 
   "fieldname": "old_parent", 
   "fieldtype": "Link", 
   "search_index": 0, 
   "hidden": 1, 
   "options": "Item Group", 
   "report_hide": 1
- }, 
- {
-  "amend": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "submit": 0, 
-  "write": 0, 
-  "cancel": 0, 
-  "role": "Material Manager", 
-  "permlevel": 1
- }, 
- {
-  "amend": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "submit": 0, 
-  "write": 0, 
-  "cancel": 0, 
-  "role": "Material Manager", 
-  "permlevel": 0
- }, 
- {
-  "amend": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "submit": 0, 
-  "write": 0, 
-  "cancel": 0, 
-  "role": "Material User", 
-  "permlevel": 1
- }, 
- {
-  "amend": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "submit": 0, 
-  "write": 0, 
-  "cancel": 0, 
-  "role": "Material User", 
-  "permlevel": 0
  }, 
  {
   "create": 1, 
@@ -206,6 +166,46 @@
   "write": 1, 
   "role": "Material Master Manager", 
   "cancel": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "amend": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "submit": 0, 
+  "write": 0, 
+  "role": "Material Manager", 
+  "cancel": 0, 
+  "permlevel": 1
+ }, 
+ {
+  "amend": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "submit": 0, 
+  "write": 0, 
+  "role": "Material Manager", 
+  "cancel": 0, 
+  "permlevel": 0
+ }, 
+ {
+  "amend": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "submit": 0, 
+  "write": 0, 
+  "role": "Material User", 
+  "cancel": 0, 
+  "permlevel": 1
+ }, 
+ {
+  "amend": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "submit": 0, 
+  "write": 0, 
+  "role": "Material User", 
+  "cancel": 0, 
   "permlevel": 0
  }
 ]

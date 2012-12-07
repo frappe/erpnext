@@ -4,11 +4,11 @@ wn.doclistviews['Task'] = wn.views.ListView.extend({
 		this._super(d);
 		this.fields = this.fields.concat([
 			'`tabTask`.subject',
+			'`tabTask`.project',
 			'`tabTask`.modified',
 			'`tabTask`.status',
 			'`tabTask`.opening_date',
 			'`tabTask`.priority',
-			'`tabTask`.allocated_to',
 		]);
 		this.stats = this.stats.concat(['status']);
 	},
@@ -42,9 +42,9 @@ wn.doclistviews['Task'] = wn.views.ListView.extend({
 		{width: '3%', content: 'check'},
 		{width: '5%', content: 'avatar_modified'},
 		{width: '20%', content:'name'},
-		{width: '10%', content:'status_html'},		
+		{width: '10%', content:'status_html'},
 		{width: '40%', content: 'subject+tags'},
-		{width: '20%', content: 'allocated_to'},
+		{width: '20%', content: 'project'},
 		{width: '12%', content:'modified', css: {'text-align': 'right', 'color':'#777'}}
 	]
 });
