@@ -2,18 +2,19 @@
  {
   "owner": "Administrator", 
   "docstatus": 0, 
-  "creation": "2012-12-07 11:51:20", 
+  "creation": "2012-12-07 15:15:24", 
   "modified_by": "Administrator", 
-  "modified": "2012-12-07 13:31:40"
+  "modified": "2012-12-07 16:17:40"
  }, 
  {
   "is_submittable": 1, 
   "autoname": "LAP/.#####", 
-  "name": "__common__", 
+  "description": "Apply / Approve Leaves", 
   "search_fields": "employee,employee_name,leave_type,from_date,to_date,total_leave_days,fiscal_year", 
   "module": "HR", 
   "doctype": "DocType", 
-  "document_type": "Transaction"
+  "document_type": "Transaction", 
+  "name": "__common__"
  }, 
  {
   "name": "__common__", 
@@ -36,7 +37,6 @@
  }, 
  {
   "default": "Open", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Status", 
   "no_copy": 1, 
@@ -47,7 +47,6 @@
  }, 
  {
   "description": "Leave can be approved by users with Role, \"Leave Approver\"", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Leave Approver", 
   "fieldname": "leave_approver", 
@@ -58,7 +57,7 @@
   "search_index": 1, 
   "doctype": "DocField", 
   "label": "Leave Type", 
-  "options": "\nCasual Leave", 
+  "options": "link:Leave Type", 
   "fieldname": "leave_type", 
   "fieldtype": "Select", 
   "reqd": 1, 
@@ -67,10 +66,8 @@
  }, 
  {
   "search_index": 1, 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "From Date", 
-  "trigger": "Client", 
   "fieldname": "from_date", 
   "fieldtype": "Date", 
   "reqd": 1, 
@@ -78,20 +75,16 @@
  }, 
  {
   "search_index": 1, 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "To Date", 
-  "trigger": "Client", 
   "fieldname": "to_date", 
   "fieldtype": "Date", 
   "reqd": 1, 
   "permlevel": 0
  }, 
  {
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Half Day", 
-  "trigger": "Client", 
   "fieldname": "half_day", 
   "fieldtype": "Check", 
   "permlevel": 0
@@ -155,7 +148,6 @@
  }, 
  {
   "default": "Today", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Posting Date", 
   "no_copy": 1, 
@@ -247,5 +239,10 @@
   "role": "Leave Approver", 
   "cancel": 0, 
   "permlevel": 2
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "All", 
+  "permlevel": 3
  }
 ]
