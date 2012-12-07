@@ -2,9 +2,9 @@
  {
   "owner": "Administrator", 
   "docstatus": 0, 
-  "creation": "2012-12-06 15:56:41", 
+  "creation": "2012-12-07 11:51:20", 
   "modified_by": "Administrator", 
-  "modified": "2012-12-07 10:23:53"
+  "modified": "2012-12-07 13:31:40"
  }, 
  {
   "is_submittable": 1, 
@@ -43,7 +43,7 @@
   "options": "Open\nApproved\nRejected", 
   "fieldname": "status", 
   "fieldtype": "Select", 
-  "permlevel": 3
+  "permlevel": 2
  }, 
  {
   "description": "Leave can be approved by users with Role, \"Leave Approver\"", 
@@ -58,7 +58,7 @@
   "search_index": 1, 
   "doctype": "DocField", 
   "label": "Leave Type", 
-  "options": "link:Leave Type", 
+  "options": "\nCasual Leave", 
   "fieldname": "leave_type", 
   "fieldtype": "Select", 
   "reqd": 1, 
@@ -105,17 +105,10 @@
  }, 
  {
   "doctype": "DocField", 
-  "label": "Leave Balance", 
-  "fieldname": "leave_balance", 
-  "fieldtype": "Currency", 
-  "permlevel": 1
- }, 
- {
-  "doctype": "DocField", 
-  "label": "Total Leave Days", 
-  "fieldname": "total_leave_days", 
-  "fieldtype": "Currency", 
-  "permlevel": 1
+  "label": "Reason", 
+  "fieldname": "description", 
+  "fieldtype": "Small Text", 
+  "permlevel": 0
  }, 
  {
   "search_index": 1, 
@@ -138,25 +131,27 @@
   "in_filter": 1
  }, 
  {
+  "no_copy": 1, 
   "doctype": "DocField", 
+  "label": "Leave Balance Before Application", 
+  "fieldname": "leave_balance", 
+  "fieldtype": "Currency", 
+  "permlevel": 1
+ }, 
+ {
+  "no_copy": 1, 
+  "doctype": "DocField", 
+  "label": "Total Leave Days", 
+  "fieldname": "total_leave_days", 
+  "fieldtype": "Currency", 
+  "permlevel": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "More Info", 
   "fieldname": "sb10", 
   "fieldtype": "Section Break", 
   "permlevel": 0
- }, 
- {
-  "doctype": "DocField", 
-  "label": "Reason", 
-  "width": "300px", 
-  "fieldname": "description", 
-  "fieldtype": "Text Editor", 
-  "permlevel": 0
- }, 
- {
-  "doctype": "DocField", 
-  "label": "HR Details", 
-  "fieldname": "sb12", 
-  "fieldtype": "Section Break", 
-  "permlevel": 2
  }, 
  {
   "default": "Today", 
@@ -173,7 +168,7 @@
   "search_index": 0, 
   "doctype": "DocField", 
   "label": "Fiscal Year", 
-  "options": "link:Fiscal Year", 
+  "options": "\n2008-2009\n2009-2010\n2010-2011\n2011-2012\n2012-2013\n2013-2014", 
   "fieldname": "fiscal_year", 
   "fieldtype": "Select", 
   "reqd": 1, 
@@ -181,6 +176,7 @@
   "in_filter": 1
  }, 
  {
+  "print_hide": 1, 
   "doctype": "DocField", 
   "label": "Letter Head", 
   "options": "Letter Head", 
@@ -251,10 +247,5 @@
   "role": "Leave Approver", 
   "cancel": 0, 
   "permlevel": 2
- }, 
- {
-  "doctype": "DocPerm", 
-  "role": "All", 
-  "permlevel": 3
  }
 ]

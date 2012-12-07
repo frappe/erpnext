@@ -52,13 +52,14 @@ cur_frm.cscript.refresh = function(doc,cdt,cdn){
 	if(doc.__islocal && !in_list(user_roles, "HR User")) {
 		cur_frm.set_intro("Fill the form and save it")
 	} else {
-		if(doc.approval_status=="Draft") {		
+		if(doc.docstatus==0 && doc.approval_status=="Draft") {
 			if(user==doc.exp_approver) {
 				cur_frm.set_intro("You are the Expense Approver for this record. Please Update the 'Status' and Save");
 				cur_frm.toggle_enable("approval_status", true);
 			} else {
 				cur_frm.set_intro("Expense Claim is pending approval. Only the Expense Approver can update status.");
 				cur_frm.toggle_enable("approval_status", false);
+				if(!doc.__islocal) cur_frm.frm_head.appframe.buttons.Submit.toggle(false);
 			}
 		} else {
 			if(doc.approval_status=="Approved") {
@@ -98,6 +99,9 @@ cur_frm.cscript.calculate_total_amount = function(doc,cdt,cdn){
 }
 cur_frm.cscript.claim_amount = function(doc,cdt,cdn){
 	cur_frm.cscript.calculate_total(doc,cdt,cdn);
+	
+	var child = locals[cdt][cdn];
+	refresh_field("sanctioned_amount", child.name, child.parentfield);
 }
 cur_frm.cscript.sanctioned_amount = function(doc,cdt,cdn){
 	cur_frm.cscript.calculate_total(doc,cdt,cdn);
