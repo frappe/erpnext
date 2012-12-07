@@ -60,9 +60,10 @@ def get_html(page_name):
 	# load from cache, if auto cache clear is falsy
 	if not (hasattr(conf, 'auto_cache_clear') and conf.auto_cache_clear or 0):
 		html = webnotes.cache().get_value("page:" + page_name)
-		comments += "\nload status: cache"
 
-	if not html:
+	if html:
+		comments += "\nload status: cache"
+	else:
 		html = load_into_cache(page_name)
 		comments += "\nload status: fresh"
 	
