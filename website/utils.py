@@ -212,7 +212,7 @@ def get_home_page():
 
 	return page_name
 	
-def clear_cache(page_name):
+def clear_cache(page_name=None):
 	if page_name:
 		delete_page_cache(page_name)
 	else:
