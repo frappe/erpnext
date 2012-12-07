@@ -179,7 +179,7 @@ def import_vouchers(common_values, data, start_idx, import_type):
 
 def get_common_values(rows):
 	start = False
-	common_values = webnotes.DictObj()
+	common_values = webnotes._dict()
 	
 	for r in rows:
 		if start:
@@ -200,7 +200,7 @@ def get_data(rows, company_abbr):
 		if r[0]:
 			if start_row and i >= start_row:
 				if not start_row_idx: start_row_idx = i
-				d, acc_dict = webnotes.DictObj(), webnotes.DictObj()
+				d, acc_dict = webnotes._dict(), webnotes._dict()
 				for cidx in xrange(len(columns)):
 					d[columns[cidx]] = r[cidx]
 					

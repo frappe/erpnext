@@ -18,7 +18,7 @@
 wn.pages['{{ name }}'].onload = function(wrapper) {
 	erpnext.blog_list = new wn.ui.Listing({
 		parent: $(wrapper).find('#blog-list').get(0),
-		method: 'website.blog.get_blog_list',
+		method: 'website.helpers.blog.get_blog_list',
 		hide_refresh: true,
 		no_toolbar: true,
 		render_row: function(parent, data) {

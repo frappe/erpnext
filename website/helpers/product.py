@@ -1,3 +1,6 @@
+# Copyright (c) 2012 Web Notes Technologies Pvt Ltd.
+# License: GNU General Public License (v3). For more information see license.txt
+
 from __future__ import unicode_literals
 import webnotes
 
