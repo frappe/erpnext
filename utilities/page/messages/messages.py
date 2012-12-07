@@ -94,21 +94,27 @@ def notify(arg=None):
 	else:
 		fn = webnotes.user.name
 
-	message = '''A new comment has been posted on your page by %s:
+	url = get_url()
+	message = '''You have a message by <b>%s</b>:
 	
-	<b>Comment:</b> %s
+	%s
 	
-	To answer, please login to your erpnext account!
-	''' % (fn, arg['txt'])
+	To answer, please login to your erpnext account at \
+	<a href=\"%s\" target='_blank'>%s</a>
+	''' % (fn, arg['txt'], url, url)
 	
-	from webnotes.model.code import get_obj
-	note = get_obj('Notification Control')
-	email_msg = note.prepare_message({
-		'type': 'New Comment',
-		'message': message
-	})
-
 	sender = webnotes.user.name!='Administrator' and webnotes.user.name or 'support+admin_post@erpnext.com'
 	
 	from webnotes.utils.email_lib import sendmail
-	sendmail([arg['contact']], sender, email_msg, fn + ' has posted a new comment')	
+	sendmail([arg['contact']], sender, message, fn + ' has posted a new comment')
+	
+def get_url():
+	from webnotes.utils import get_request_site_address
+	url = get_request_site_address()
+	if not url or "localhost" in url:
+		subdomain = webnotes.conn.get_value("Website Settings", "Website Settings",
+			"subdomain")
+		if subdomain:
+			if "http" not in subdomain:
+				url = "http://" + subdomain
+	return url
