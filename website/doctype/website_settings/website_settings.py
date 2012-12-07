@@ -24,8 +24,8 @@ class DocType:
 
 	def on_update(self):
 		# make js and css
-		from webnotes.cms.make import make_web_core
-		make_web_core()
+		from website.helpers.make_web_include_files import make
+		make()
 		
 		# clear web cache (for menus!)
 		from website.utils import clear_cache

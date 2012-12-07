@@ -45,6 +45,5 @@ class DocType:
 	
 	def on_update(self):
 		"""rebuild pages"""
-		from webnotes.cms.make import make_web_core
-		make_web_core()
-		
+		from website.helpers.make_web_include_files import make
+		make()		

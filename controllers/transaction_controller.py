@@ -17,7 +17,7 @@
 from __future__ import unicode_literals
 import webnotes
 import webnotes.model
-from webnotes import _, DictObj
+from webnotes import _, _dict
 from webnotes.utils import cint
 import json
 
@@ -32,7 +32,7 @@ class TransactionController(DocListController):
 	@property
 	def precision(self):
 		if not hasattr(self, "_precision"):
-			self._precision = DictObj()
+			self._precision = _dict()
 			self._precision.main = self.meta.get_precision_map()
 			self._precision.item = self.meta.get_precision_map(parentfield = \
 				self.item_table_field)
@@ -69,7 +69,7 @@ class TransactionController(DocListController):
 		if not hasattr(self, "_fmap"):
 			if self.doc.doctype in ["Lead", "Quotation", "Sales Order", "Sales Invoice",
 					"Delivery Note"]:
-				self._fmap = webnotes.DictObj(	{
+				self._fmap = webnotes._dict(	{
 					"exchange_rate": "conversion_rate",
 					"taxes_and_charges": "other_charges",
 					"taxes_and_charges_master": "charge",
@@ -93,7 +93,7 @@ class TransactionController(DocListController):
 					"cost_center": "cost_center_other_charges",
 				})
 			else:
-				self._fmap = webnotes.DictObj({
+				self._fmap = webnotes._dict({
 					"exchange_rate": "conversion_rate",
 					"taxes_and_charges": "purchase_tax_details",
 					"taxes_and_charges_master": "purchase_other_charges",
@@ -120,4 +120,4 @@ class TransactionController(DocListController):
 						"rate": "rate"
 					})
 			
-		return self._fmap or webnotes.DictObj()
+		return self._fmap or webnotes._dict()
