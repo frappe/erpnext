@@ -10,7 +10,7 @@ def make():
 	if not webnotes.conn:
 		webnotes.connect()
 	
-	home_page = website.utils.get_home_page('Guest')
+	home_page = website.utils.get_home_page()
 
 	fname = 'js/wn-web.js'
 	if os.path.basename(os.path.abspath('.'))!='public':
