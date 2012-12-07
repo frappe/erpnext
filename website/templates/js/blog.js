@@ -31,9 +31,9 @@ wn.pages['{{ name }}'].onload = function(wrapper) {
 			} 
 			
 			if(data.content && data.content.length==1000) {
-				data.content += repl('... <a href="%(name)s.html">(read on)</a>', data);
+				data.content += repl('... <a href="%(page_name)s.html">(read on)</a>', data);
 			}
-			parent.innerHTML = repl('<h2><a href="%(name)s.html">%(title)s</a></h2>\
+			parent.innerHTML = repl('<h2><a href="%(page_name)s.html">%(title)s</a></h2>\
 				<div class="help">%(comment_text)s</div>\
 				%(content)s<br /><br />', data);
 		},
