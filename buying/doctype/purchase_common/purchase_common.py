@@ -525,8 +525,12 @@ class DocType(TransactionBase):
 
 				if max_qty_plus_tol < qty:
 					reason = (curr_parent_doctype == 'Purchase Order') and 'Ordered' or (curr_parent_doctype == 'Purchase Receipt') and 'Received' or (curr_parent_doctype == 'Purchase Invoice') and 'Billed'
-					msgprint("error:Already %s Qty for %s is %s and maximum allowed Qty is %s" % (cstr(reason), item_code, cstr(flt(qty) - flt(curr_qty)) , cstr(max_qty_plus_tol)))
-					raise Exception
+					msg = "error: Already %s Qty for %s is %s and \
+						maximum allowed Qty is %s [against %s: %s]" % \
+						(cstr(reason), item_code,
+						cstr(flt(qty) - flt(curr_qty)) , cstr(max_qty_plus_tol),
+						cstr(ref_dt), cstr(ref_dn))
+					msgprint(msg, raise_exception=1)
 
 		# Update qty
 		#------------------
