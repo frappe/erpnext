@@ -17,6 +17,7 @@
 // Settings
 cur_frm.cscript.onload_post_render = function(doc, cdt, cdn){
 	cur_frm.call({
+		doc: cur_frm.doc,
 		method: 'get_transactions',
 		callback: function(r) {
 			cur_frm.cscript.update_selects(r);
