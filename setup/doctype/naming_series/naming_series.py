@@ -29,10 +29,15 @@ class DocType:
 
 	def get_transactions(self, arg=None):
 		return {
-			"transactions": "\n".join([''] + [i[0] for i in sql("""select `tabDocField`.`parent` 
-				FROM `tabDocField`, `tabDocType` WHERE `tabDocField`.`fieldname` = 'naming_series' 
-				and `tabDocType`.name=`tabDocField`.parent order by `tabDocField`.parent""")]),
-			"prefixes": "\n".join([''] + [i[0] for i in sql("""select name from tabSeries""")])}
+			"transactions": "\n".join([''] + [i[0] for i in 
+				sql("""select `tabDocField`.`parent` 
+					FROM `tabDocField`, `tabDocType`
+					WHERE `tabDocField`.`fieldname` = 'naming_series' 
+					and `tabDocType`.name=`tabDocField`.parent
+					order by `tabDocField`.parent""")]),
+			"prefixes": "\n".join([''] + [i[0] for i in 
+				sql("""select name from tabSeries""")])
+		}
 	
 	def scrub_options_list(self, ol):
 		options = filter(lambda x: x, [cstr(n.upper()).strip() for n in ol])
