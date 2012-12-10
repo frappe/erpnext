@@ -34,8 +34,6 @@ def delete_transactions():
 		for t in webnotes.conn.sql("select options from tabDocField where parent='%s' and fieldtype='Table'" % d):
 			webnotes.conn.sql("delete from `tab%s`" % (t))
 		webnotes.conn.sql("delete from `tab%s`" % (d))
-		webnotes.conn.sql("COMMIT")
-		webnotes.conn.sql("START TRANSACTION")
 		print "Deleted " + d
 	
 	
@@ -101,8 +99,6 @@ def delete_masters():
 			webnotes.conn.sql("delete from `tab%s`" % (t))
 		lst = '"'+'","'.join(masters[d])+ '"'
 		webnotes.conn.sql("delete from `tab%s` where name not in (%s)" % (d, lst))
-		webnotes.conn.sql("COMMIT")
-		webnotes.conn.sql("START TRANSACTION")
 		print "Deleted " + d
 
 
@@ -131,8 +127,6 @@ def delete_main_masters():
 		for t in webnotes.conn.sql("select options from tabDocField where parent='%s' and fieldtype='Table'" % d):
 			webnotes.conn.sql("delete from `tab%s`" % (t))
 		webnotes.conn.sql("delete from `tab%s`" % (d))
-		webnotes.conn.sql("COMMIT")
-		webnotes.conn.sql("START TRANSACTION")
 		print "Deleted " + d
 	
 
@@ -171,6 +165,7 @@ def reset_global_defaults():
 
 def run():
 	webnotes.connect()
+	webnotes.conn.begin()
 	
 	# Confirmation from user
 	confirm = ''
@@ -192,14 +187,17 @@ def run():
 	delete_transactions()
 	
 	if cleanup_type == '1':
+		print "Reset Transaction Series"
 		reset_transaction_series()
 	else:
 		delete_masters()
+		print "Reset All Series"
 		reset_all_series()
 		delete_main_masters()
 		reset_global_defaults()
 
 	print "System cleaned up succesfully"
+	webnotes.conn.commit()
 	webnotes.conn.close()
 
 
