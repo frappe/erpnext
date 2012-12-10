@@ -1,11 +1,10 @@
-.content {
-	width: 800px;
+.content, div#body_div {
+	width: 780px;
 }	
 
 div#body_div {
 	padding: 0px;
 	min-height: 400px;
-	width: 800px;
 	margin: 40px auto;
 	box-shadow: 1px 1px 3px 3px #ccc;
 }
@@ -24,6 +23,10 @@ p, li {
 	box-shadow: none;
 	-webkit-box-shadow: none;
 	-moz-box-shadow: none;
+}
+
+.layout-main {
+	min-height: 400px;
 }
 
 .layout-side-section {
@@ -58,10 +61,9 @@ footer {
 	border-right: 0px solid #777 !important;
 }
 
-.web-footer-powered {
+.web-footer-powered, .web-footer-powered a {
 	color: #888;
-	float: right;
-	margin-top: -12px;
+	margin-top: 20px;
 }
 
 .two-column {
