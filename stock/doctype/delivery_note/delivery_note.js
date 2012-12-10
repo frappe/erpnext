@@ -158,7 +158,7 @@ cur_frm.fields_dict['sales_order_no'].get_query = function(doc) {
 	if(doc.project_name){
 		cond += '`tabSales Order`.project_name ="'+doc.project_name+'"';
 	}
-	return repl('SELECT DISTINCT `tabSales Order`.`name` FROM `tabSales Order` WHERE `tabSales Order`.company = "%(company)s" and `tabSales Order`.`docstatus` = 1 and `tabSales Order`.`status` != "Stopped" and ifnull(`tabSales Order`.per_delivered,0) < 100 and %(cond)s `tabSales Order`.%(key)s LIKE "%s" ORDER BY `tabSales Order`.`name` DESC LIMIT 50', {company:doc.company,cond:cond})
+	return repl('SELECT DISTINCT `tabSales Order`.`name` FROM `tabSales Order` WHERE `tabSales Order`.company = "%(company)s" and `tabSales Order`.`docstatus` = 1 and `tabSales Order`.`status` != "Stopped" and ifnull(`tabSales Order`.per_delivered,0) < 99.99 and %(cond)s `tabSales Order`.%(key)s LIKE "%s" ORDER BY `tabSales Order`.`name` DESC LIMIT 50', {company:doc.company,cond:cond})
 }
 
 
@@ -208,7 +208,7 @@ cur_frm.cscript['Make Sales Invoice'] = function() {
 //-----------------------------------Make Installation Note----------------------------------------------
 cur_frm.cscript['Make Installation Note'] = function() {
 	var doc = cur_frm.doc;
-	if(doc.per_installed < 100){
+	if(doc.per_installed < 99.99){
 		n = createLocal('Installation Note');
 		$c('dt_map', args={
 			'docs':compress_doclist([locals['Installation Note'][n]]),

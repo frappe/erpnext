@@ -22,6 +22,8 @@ def send_message():
 	if not d.raised_by:
 		webnotes.msgprint('Please give us your email id so that we can write back to you', raise_exception=True)
 	
+	# make lead or contact
+	
 	d.save()
 	webnotes.msgprint('Thank you!')
 	
