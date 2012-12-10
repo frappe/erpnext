@@ -104,7 +104,7 @@ cur_frm.fields_dict['po_details'].grid.get_field('project_name').get_query = fun
 }
 
 cur_frm.fields_dict['indent_no'].get_query = function(doc) {
-	return 'SELECT DISTINCT `tabPurchase Request`.`name` FROM `tabPurchase Request` WHERE `tabPurchase Request`.company = "' + doc.company + '" and `tabPurchase Request`.`docstatus` = 1 and `tabPurchase Request`.`status` != "Stopped" and ifnull(`tabPurchase Request`.`per_ordered`,0) < 100 and `tabPurchase Request`.%(key)s LIKE "%s" ORDER BY `tabPurchase Request`.`name` DESC LIMIT 50';
+	return 'SELECT DISTINCT `tabPurchase Request`.`name` FROM `tabPurchase Request` WHERE `tabPurchase Request`.company = "' + doc.company + '" and `tabPurchase Request`.`docstatus` = 1 and `tabPurchase Request`.`status` != "Stopped" and ifnull(`tabPurchase Request`.`per_ordered`,0) < 99.99 and `tabPurchase Request`.%(key)s LIKE "%s" ORDER BY `tabPurchase Request`.`name` DESC LIMIT 50';
 }
 
 

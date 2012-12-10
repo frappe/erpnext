@@ -87,7 +87,7 @@ cur_frm.fields_dict['indent_no'].get_query = function(doc) {
 		where `tabPurchase Request`.company = \"" + doc.company +
 		"\" and `tabPurchase Request`.`docstatus` = 1 and \
 		`tabPurchase Request`.`status` != \"Stopped\" and \
-		ifnull(`tabPurchase Request`.`per_ordered`,0) < 100 and \
+		ifnull(`tabPurchase Request`.`per_ordered`,0) < 99.99 and \
 		`tabPurchase Request`.%(key)s LIKE \"%s\" \
 		order by `tabPurchase Request`.`name` desc limit 50";
 }
