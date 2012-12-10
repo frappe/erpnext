@@ -414,18 +414,29 @@ cur_frm.fields_dict.entries.grid.get_field("cost_center").get_query = function(d
 // -----------
 cur_frm.fields_dict.sales_order_main.get_query = function(doc) {
 	if (doc.customer)
-		return 'SELECT DISTINCT `tabSales Order`.`name` FROM `tabSales Order` WHERE `tabSales Order`.company = "' + doc.company + '" and `tabSales Order`.`docstatus` = 1 and `tabSales Order`.`status` != "Stopped" and ifnull(`tabSales Order`.per_billed,0) < 100 and `tabSales Order`.`customer` =	"' + doc.customer + '" and `tabSales Order`.%(key)s LIKE "%s" ORDER BY `tabSales Order`.`name` DESC LIMIT 50';
+		return 'SELECT DISTINCT `tabSales Order`.`name` FROM `tabSales Order` WHERE `tabSales Order`.company = "' + doc.company + '" and `tabSales Order`.`docstatus` = 1 and `tabSales Order`.`status` != "Stopped" and ifnull(`tabSales Order`.per_billed,0) < 99.99 and `tabSales Order`.`customer` =	"' + doc.customer + '" and `tabSales Order`.%(key)s LIKE "%s" ORDER BY `tabSales Order`.`name` DESC LIMIT 50';
 	else
-		return 'SELECT DISTINCT `tabSales Order`.`name` FROM `tabSales Order` WHERE `tabSales Order`.company = "' + doc.company + '" and `tabSales Order`.`docstatus` = 1 and `tabSales Order`.`status` != "Stopped" and ifnull(`tabSales Order`.per_billed,0) < 100 and `tabSales Order`.%(key)s LIKE "%s" ORDER BY `tabSales Order`.`name` DESC LIMIT 50';
+		return 'SELECT DISTINCT `tabSales Order`.`name` FROM `tabSales Order` WHERE `tabSales Order`.company = "' + doc.company + '" and `tabSales Order`.`docstatus` = 1 and `tabSales Order`.`status` != "Stopped" and ifnull(`tabSales Order`.per_billed,0) < 99.99 and `tabSales Order`.%(key)s LIKE "%s" ORDER BY `tabSales Order`.`name` DESC LIMIT 50';
 }
 
 // Delivery Note
 // --------------
 cur_frm.fields_dict.delivery_note_main.get_query = function(doc) {
 	if (doc.customer)
-		return 'SELECT DISTINCT `tabDelivery Note`.`name` FROM `tabDelivery Note` WHERE `tabDelivery Note`.company = "' + doc.company + '" and `tabDelivery Note`.`docstatus` = 1 and ifnull(`tabDelivery Note`.per_billed,0) < 100 and `tabDelivery Note`.`customer` =	"' + doc.customer + '" and `tabDelivery Note`.%(key)s LIKE "%s" ORDER BY `tabDelivery Note`.`name` DESC LIMIT 50';
+		return 'SELECT DISTINCT `tabDelivery Note`.`name` FROM `tabDelivery Note` \
+			WHERE `tabDelivery Note`.company = "' + doc.company 
+			+ '" and `tabDelivery Note`.`docstatus` = 1 and \
+			ifnull(`tabDelivery Note`.per_billed,0) < 99.99 and \
+			`tabDelivery Note`.`customer` =	"' 
+			+ doc.customer + '" and `tabDelivery Note`.%(key)s LIKE "%s" \
+			ORDER BY `tabDelivery Note`.`name` DESC LIMIT 50';
 	else
-		return 'SELECT DISTINCT `tabDelivery Note`.`name` FROM `tabDelivery Note` WHERE `tabDelivery Note`.company = "' + doc.company + '" and `tabDelivery Note`.`docstatus` = 1 and ifnull(`tabDelivery Note`.per_billed,0) < 100 and `tabDelivery Note`.%(key)s LIKE "%s" ORDER BY `tabDelivery Note`.`name` DESC LIMIT 50';
+		return 'SELECT DISTINCT `tabDelivery Note`.`name` FROM `tabDelivery Note` \
+			WHERE `tabDelivery Note`.company = "' + doc.company 
+			+ '" and `tabDelivery Note`.`docstatus` = 1 and \
+			ifnull(`tabDelivery Note`.per_billed,0) < 99.99 and \
+			`tabDelivery Note`.%(key)s LIKE "%s" \
+			ORDER BY `tabDelivery Note`.`name` DESC LIMIT 50';
 }
 
 
