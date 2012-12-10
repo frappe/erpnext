@@ -16,8 +16,8 @@
 
 from __future__ import unicode_literals
 import webnotes
-from webnotes.utils import cstr, flt
-from webnotes.model.doc import addchild
+from webnotes.utils import cstr, flt, nowdate, get_defaults
+from webnotes.model.doc import addchild, Document
 from webnotes.model.wrapper import getlist
 from webnotes.model.code import get_obj
 from webnotes import msgprint
@@ -186,7 +186,7 @@ class DocType:
 		self.validate_data()
 
 		items = self.get_distinct_items_and_boms()[1]
-		pro = get_obj('Production Control').create_production_order(items)
+		pro = self.create_production_order(items)
 		if pro:
 			msgprint("Following Production Order has been generated:\n" + '\n'.join(pro))
 		else :
@@ -199,15 +199,39 @@ class DocType:
 		for d in self.doclist.get({"parentfield": "pp_details"}):
 			bom_dict[d.bom_no] = bom_dict.get(d.bom_no, 0) + flt(d.planned_qty)
 			item_dict[(d.item_code, d.sales_order)] = {
-				"qty" : flt(item_dict.get((d.item_code, d.sales_order), {}).get("qty")) + \
-				 	flt(d.planned_qty),
-				"bom_no": d.bom_no,
-				"description": d.description,
-				"stock_uom": d.stock_uom,
+				"qty" 				: flt(item_dict.get((d.item_code, d.sales_order), \
+					{}).get("qty")) + flt(d.planned_qty),
+				"bom_no"			: d.bom_no,
+				"description"		: d.description,
+				"stock_uom"			: d.stock_uom,
 				"use_multi_level_bom": self.doc.use_multi_level_bom,
-				"company": self.doc.company,
+				"company"			: self.doc.company,
+				"posting_date"		: nowdate(),
+				"origin"			: "MRP",
+				"wip_warehouse"		: "",
+				"fg_warehouse"		: "",
+				"status"			: "Draft",
+				"fiscal_year"		: get_defaults()["fiscal_year"]
 			}
 		return bom_dict, item_dict
+		
+	def create_production_order(self, items):
+		"""Create production order. Called from Production Planning Tool"""
+
+		pro_list = []
+		for item_so in items:
+			pro_doc = Document('Production Order')
+			pro_doc.production_item = item_so[0]
+			pro_doc.sales_order = item_so[1]
+			for key in items[item_so]:
+				pro_doc.fields[key] = items[item_so][key]
+			
+			pro_doc.save(new = 1)
+			
+			get_obj("Production Order", pro_doc.name).validate_production_order_against_so()
+			pro_list.append(pro_doc.name)
+			
+		return pro_list
 
 	def download_raw_materials(self):
 		""" Create csv data for required raw material to produce finished goods"""

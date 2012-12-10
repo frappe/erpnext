@@ -18,6 +18,7 @@
 		'has_serial_no': u'No',
 		'inspection_required': u'No',
 		'is_purchase_item': u'Yes',
+		'is_manufactured_item': u'No',
 		'is_sales_item': u'Yes',
 		'is_service_item': u'No',
 		'is_stock_item': u'Yes',

@@ -92,12 +92,9 @@ cur_frm.fields_dict['project_name'].get_query = function(doc, dt, dn) {
 	  AND `tabProject`.name LIKE "%s" ORDER BY `tabProject`.name ASC LIMIT 50';
 }
 
-cur_frm.fields_dict['bom_no'].get_query = function(doc)  {
-  if (doc.production_item){
-    return 'SELECT DISTINCT `tabBOM`.`name` FROM `tabBOM` WHERE `tabBOM`.`is_active` = "Yes" AND `tabBOM`.docstatus = 1 AND `tabBOM`.`item` = "' + cstr(doc.production_item) + '" AND`tabBOM`.%(key)s LIKE "%s" ORDER BY `tabBOM`.`name` LIMIT 50';
-  }
-  else {
-    alert(" Please Enter Production Item First.")
-  }
-}
 
+cur_frm.set_query("bom_no", function(doc) {
+	if (doc.production_item) {
+		return erpnext.queries.bom({item: cstr(doc.production_item)});
+	} else msgprint(" Please enter Production Item first");
+});

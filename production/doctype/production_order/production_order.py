@@ -72,8 +72,33 @@ class DocType:
 					where name=%s and docstatus = 1""", self.doc.sales_order):
 				msgprint("Sales Order: %s is not valid" % self.doc.sales_order, raise_exception=1)
 				
-			get_obj("Production Control").validate_production_order_against_so(
-				self.doc.production_item, self.doc.sales_order, self.doc.qty, self.doc.name)
+			self.validate_production_order_against_so()
+				
+	
+	def validate_production_order_against_so(self):
+		# already ordered qty
+		ordered_qty_against_so = webnotes.conn.sql("""select sum(qty) from `tabProduction Order`
+			where production_item = %s and sales_order = %s and docstatus < 2""", 
+			(self.doc.production_item, self.doc.sales_order))[0][0]
+
+		
+		# get qty from Sales Order Item table
+		so_item_qty = webnotes.conn.sql("""select sum(qty) from `tabSales Order Item` 
+			where parent = %s and item_code = %s""", 
+			(self.doc.sales_order, self.doc.production_item))[0][0]
+		# get qty from Packing Item table
+		dnpi_qty = webnotes.conn.sql("""select sum(qty) from `tabDelivery Note Packing Item` 
+			where parent = %s and parenttype = 'Sales Order' and item_code = %s""", 
+			(self.doc.sales_order, self.doc.production_item))[0][0]
+		# total qty in SO
+		so_qty = flt(so_item_qty) + flt(dnpi_qty)
+		
+		if ordered_qty_against_so > so_qty:
+			msgprint("""Total production order qty for item: %s against sales order: %s \
+			 	will be %s, which is greater than sales order qty (%s). 
+				Please reduce qty or remove the item.""" %
+				(self.doc.production_item, self.doc.sales_order, 
+					ordered_qty_against_so, so_qty), raise_exception=1)
 
 
 	def stop_unstop(self, status):

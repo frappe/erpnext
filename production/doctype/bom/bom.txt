@@ -4,7 +4,7 @@
   "docstatus": 0, 
   "creation": "2012-07-03 13:30:03", 
   "modified_by": "Administrator", 
-  "modified": "2012-12-03 13:29:26"
+  "modified": "2012-12-10 12:03:14"
  }, 
  {
   "istable": 0, 
@@ -56,12 +56,10 @@
  {
   "description": "Select the item code for which Bill of Material is being created", 
   "oldfieldtype": "Link", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Item", 
   "oldfieldname": "item", 
   "permlevel": 0, 
-  "trigger": "Client", 
   "fieldname": "item", 
   "fieldtype": "Link", 
   "search_index": 1, 
@@ -72,7 +70,6 @@
  {
   "description": "Total quantity of items for which raw materials required and operations done will be defined", 
   "oldfieldtype": "Currency", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Quantity", 
   "oldfieldname": "quantity", 
@@ -91,7 +88,6 @@
  {
   "no_copy": 1, 
   "oldfieldtype": "Select", 
-  "colour": "White:FFF", 
   "allow_on_submit": 1, 
   "doctype": "DocField", 
   "label": "Is Active", 
@@ -104,10 +100,9 @@
   "options": "\nYes\nNo"
  }, 
  {
-  "allow_on_submit": 1, 
   "no_copy": 1, 
   "oldfieldtype": "Check", 
-  "colour": "White:FFF", 
+  "allow_on_submit": 1, 
   "doctype": "DocField", 
   "label": "Is Default", 
   "oldfieldname": "is_default", 
@@ -126,7 +121,6 @@
  {
   "description": "Specify the operations, operating cost and give a unique Operation no to your operations.", 
   "oldfieldtype": "Table", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "BOM Operations", 
   "oldfieldname": "bom_operations", 
@@ -154,7 +148,6 @@
  {
   "description": "Enter the raw materials required to manufacture the BOM item. Specify the operation no as entered in the previous tab which will be performed on the raw materials entered.", 
   "oldfieldtype": "Table", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "BOM Item", 
   "oldfieldname": "bom_materials", 
@@ -187,6 +180,12 @@
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "col_break24", 
+  "fieldtype": "Column Break", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
   "label": "Total Cost", 
   "fieldname": "total_cost", 
   "fieldtype": "Float", 
@@ -202,13 +201,12 @@
  {
   "description": "Select name of the project if BOM need to be created against any project", 
   "oldfieldtype": "Link", 
+  "doctype": "DocField", 
   "label": "Project Name", 
   "oldfieldname": "project_name", 
-  "trigger": "Client", 
+  "options": "Project", 
   "fieldname": "project_name", 
   "fieldtype": "Link", 
-  "doctype": "DocField", 
-  "options": "Project", 
   "permlevel": 0, 
   "in_filter": 1
  }, 
@@ -225,7 +223,6 @@
   "doctype": "DocField", 
   "label": "Item Description", 
   "oldfieldname": "description", 
-  "width": "300px", 
   "fieldname": "description", 
   "fieldtype": "Small Text", 
   "permlevel": 0
@@ -269,7 +266,6 @@
  {
   "no_copy": 1, 
   "oldfieldtype": "Text", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Remarks", 
   "oldfieldname": "remarks", 
@@ -292,7 +288,6 @@
   "permlevel": 1, 
   "no_copy": 1, 
   "oldfieldtype": "Table", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "BOM Explosion Item", 
   "oldfieldname": "flat_bom_details", 

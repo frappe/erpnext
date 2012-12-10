@@ -379,7 +379,7 @@ class DocType(TransactionBase):
 				d.t_warehouse = self.doc.to_warehouse
 
 			if not (d.s_warehouse or d.t_warehouse):
-				msgprint("Atleast one warehouse is mandatory for Stock Entry ")
+				msgprint("Atleast one warehouse is mandatory for Stock Entry")
 				raise Exception
 			if d.s_warehouse and not sql("select name from tabWarehouse where name = '%s'" % d.s_warehouse):
 				msgprint("Invalid Warehouse: %s" % self.doc.s_warehouse)
@@ -390,6 +390,7 @@ class DocType(TransactionBase):
 			if d.s_warehouse == d.t_warehouse:
 				msgprint("Source and Target Warehouse Cannot be Same.")
 				raise Exception
+				
 			if self.doc.purpose == 'Material Issue':
 				if not cstr(d.s_warehouse):
 					msgprint("Source Warehouse is Mandatory for Purpose => 'Material Issue'")
@@ -415,6 +416,7 @@ class DocType(TransactionBase):
 				if not cstr(d.s_warehouse):
 					msgprint("Please Enter Source Warehouse at Row No %s." % (cstr(d.idx)))
 					raise Exception
+			
 			if self.doc.process == 'Backflush':
 				if flt(d.fg_item):
 					if cstr(pro_obj.doc.production_item) != cstr(d.item_code):

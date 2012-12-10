@@ -51,10 +51,9 @@ cur_frm.fields_dict['pp_details'].grid.get_field('item_code').get_query = functi
 
 cur_frm.fields_dict['pp_details'].grid.get_field('bom_no').get_query = function(doc) {
 	var d = locals[this.doctype][this.docname];
-  	return 'SELECT DISTINCT `tabBOM`.`name` \
-		FROM `tabBOM` WHERE `tabBOM`.`item` = "' + d.item_code + 
-		'" AND `tabBOM`.`is_active` = "Yes" AND `tabBOM`.docstatus = 1 \
-		AND `tabBOM`.`name` like "%s" ORDER BY `tabBOM`.`name` LIMIT 50';
+	if (d.item_code) {
+		return erpnext.queries.bom({item: cstr(d.item_code)});
+	} else msgprint(" Please enter Item first");
 }
 
 cur_frm.fields_dict.customer.get_query = erpnext.utils.customer_query;

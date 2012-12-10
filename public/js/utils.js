@@ -104,3 +104,23 @@ erpnext.queries.account = function(opts) {
 			? (" AND " + conditions.join(" AND "))
 			: "")
 }
+
+erpnext.queries.bom = function(opts) {
+	conditions = [];
+	if (opts) {
+		$.each(opts, function(key, val) {
+			if (esc_quotes(val).charAt(0) != "!")
+				conditions.push("tabBOM.`" + key + "`='"+esc_quotes(val)+"'");
+			else
+				conditions.push("tabBOM.`" + key + "`!='"+esc_quotes(val).substr(1)+"'");
+		});
+	}
+	
+	return 'SELECT tabBOM.name, tabBOM.item \
+		FROM tabBOM \
+		WHERE tabBOM.docstatus=1 \
+		AND tabBOM.is_active="Yes" \
+		AND tabBOM.%(key)s LIKE "%s" ' + (conditions.length 
+			? (" AND " + conditions.join(" AND "))
+			: "")
+}

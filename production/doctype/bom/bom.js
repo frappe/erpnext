@@ -17,11 +17,11 @@
 // On REFRESH
 cur_frm.cscript.refresh = function(doc,dt,dn){
 	cur_frm.toggle_enable("item", doc.__islocal);
+	if (!doc.__islocal && doc.docstatus==0) {
+		cur_frm.set_intro("Submit the BOM to use it in production");
+	}
 }
 
-
-// Triggers
-//--------------------------------------------------------------------------------------------------
 cur_frm.cscript.item = function(doc, dt, dn) {
 	if (doc.item) {
 		get_server_fields('get_item_detail',doc.item,'',doc,dt,dn,1);
@@ -36,7 +36,8 @@ cur_frm.cscript.workstation = function(doc,dt,dn) {
 			calculate_op_cost(doc, dt, dn);
 			calculate_total(doc);
 		}
-		get_server_fields('get_workstation_details',d.workstation,'bom_operations',doc,dt,dn,1, callback);
+		get_server_fields('get_workstation_details', d.workstation, 
+			'bom_operations', doc, dt, dn, 1, callback);
 	}
 }
 
@@ -49,11 +50,9 @@ cur_frm.cscript.hour_rate = function(doc, dt, dn) {
 
 cur_frm.cscript.time_in_mins = cur_frm.cscript.hour_rate;
 
-
 cur_frm.cscript.item_code = function(doc, cdt, cdn) {
 	get_bom_material_detail(doc, cdt, cdn);
 }
-
 
 cur_frm.cscript.bom_no	= function(doc, cdt, cdn) {
 	get_bom_material_detail(doc, cdt, cdn);
@@ -89,9 +88,16 @@ cur_frm.cscript.qty = function(doc, cdt, cdn) {
 	calculate_total(doc);
 }
 
-
-cur_frm.cscript.rate = cur_frm.cscript.qty;
-
+cur_frm.cscript.rate = function(doc, cdt, cdn) {
+	var d = locals[cdt][cdn];
+	if (d.bom_no) {
+		msgprint("You can not change rate if BOM mentioned agianst any item");
+		get_bom_material_detail(doc, cdt, cdn);
+	} else {
+		calculate_rm_cost(doc, cdt, cdn);
+		calculate_total(doc);
+	}
+}
 
 cur_frm.cscript.is_default = function(doc, cdt, cdn) {
 	if (doc.docstatus == 1)
@@ -104,13 +110,11 @@ cur_frm.cscript.is_active = function(doc, dt, dn) {
 		$c_obj(make_doclist(dt, dn), 'manage_active_bom', '', '');
 }
 
-
-// Calculate Operating Cost
 var calculate_op_cost = function(doc, dt, dn) {	
 	var op = getchildren('BOM Operation', doc.name, 'bom_operations');
 	total_op_cost = 0;
 	for(var i=0;i<op.length;i++) {
-		op_cost =	flt(op[i].hour_rate) * flt(op[i].time_in_mins) / 60;
+		op_cost =	flt(flt(op[i].hour_rate) * flt(op[i].time_in_mins) / 60, 2);
 		set_multiple('BOM Operation',op[i].name, {'operating_cost': op_cost}, 'bom_operations');
 		total_op_cost += op_cost;
 	}
@@ -118,15 +122,14 @@ var calculate_op_cost = function(doc, dt, dn) {
 	refresh_field('operating_cost');
 }
 
-
-// Calculate Raw Material Cost
 var calculate_rm_cost = function(doc, dt, dn) {	
 	var rm = getchildren('BOM Item', doc.name, 'bom_materials');
 	total_rm_cost = 0;
 	for(var i=0;i<rm.length;i++) {
 		amt =	flt(rm[i].rate) * flt(rm[i].qty);
 		set_multiple('BOM Item',rm[i].name, {'amount': amt}, 'bom_materials');
-		set_multiple('BOM Item',rm[i].name, {'qty_consumed_per_unit': flt(rm[i].qty)/flt(doc.quantity)}, 'bom_materials');
+		set_multiple('BOM Item',rm[i].name, 
+			{'qty_consumed_per_unit': flt(rm[i].qty)/flt(doc.quantity)}, 'bom_materials');
 		total_rm_cost += amt;
 	}
 	doc.raw_material_cost = total_rm_cost;
@@ -142,7 +145,10 @@ var calculate_total = function(doc) {
 
 
 cur_frm.fields_dict['item'].get_query = function(doc) {
-	return 'SELECT DISTINCT `tabItem`.`name`, `tabItem`.description FROM `tabItem` WHERE is_manufactured_item = "Yes" and (IFNULL(`tabItem`.`end_of_life`,"") = "" OR `tabItem`.`end_of_life` = "0000-00-00" OR `tabItem`.`end_of_life` > NOW()) AND `tabItem`.`%(key)s` like "%s" ORDER BY `tabItem`.`name` LIMIT 50';
+	return 'SELECT DISTINCT `tabItem`.`name`, `tabItem`.description FROM `tabItem` \
+		WHERE is_manufactured_item = "Yes" and (IFNULL(`tabItem`.`end_of_life`,"") = "" OR \
+		 	`tabItem`.`end_of_life` = "0000-00-00" OR `tabItem`.`end_of_life` > NOW()) AND \
+		 	`tabItem`.`%(key)s` like "%s" ORDER BY `tabItem`.`name` LIMIT 50';
 }
 
 cur_frm.fields_dict['project_name'].get_query = function(doc, dt, dn) {
@@ -152,12 +158,18 @@ cur_frm.fields_dict['project_name'].get_query = function(doc, dt, dn) {
 }
 
 cur_frm.fields_dict['bom_materials'].grid.get_field('item_code').get_query = function(doc) {
-	return 'SELECT DISTINCT `tabItem`.`name`, `tabItem`.description FROM `tabItem` WHERE (IFNULL(`tabItem`.`end_of_life`,"") = "" OR `tabItem`.`end_of_life` = "0000-00-00" OR `tabItem`.`end_of_life` > NOW()) AND `tabItem`.`%(key)s` like "%s" ORDER BY `tabItem`.`name` LIMIT 50';
+	return 'SELECT DISTINCT `tabItem`.`name`, `tabItem`.description FROM `tabItem` \
+		WHERE (IFNULL(`tabItem`.`end_of_life`,"") = "" OR `tabItem`.`end_of_life` = "0000-00-00" \
+			OR `tabItem`.`end_of_life` > NOW()) AND `tabItem`.`%(key)s` like "%s" \
+		ORDER BY `tabItem`.`name` LIMIT 50';
 }
 
 cur_frm.fields_dict['bom_materials'].grid.get_field('bom_no').get_query = function(doc) {
 	var d = locals[this.doctype][this.docname];
-	return 'SELECT DISTINCT `tabBOM`.`name`, `tabBOM`.`remarks` FROM `tabBOM` WHERE `tabBOM`.`item` = "' + d.item_code + '" AND `tabBOM`.`is_active` = "Yes" AND `tabBOM`.docstatus = 1 AND `tabBOM`.`name` like "%s" ORDER BY `tabBOM`.`name` LIMIT 50';
+	return 'SELECT DISTINCT `tabBOM`.`name`, `tabBOM`.`remarks` FROM `tabBOM` \
+		WHERE `tabBOM`.`item` = "' + d.item_code + '" AND `tabBOM`.`is_active` = "Yes" AND \
+		 	`tabBOM`.docstatus = 1 AND `tabBOM`.`name` like "%s" \
+		ORDER BY `tabBOM`.`name` LIMIT 50';
 }
 
 cur_frm.cscript.validate = function(doc, dt, dn) {
