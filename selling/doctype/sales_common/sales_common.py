@@ -17,12 +17,12 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import add_days, cint, cstr, default_fields, flt, getdate, now, nowdate
+from webnotes.utils import add_days, cint, cstr, default_fields, flt, getdate, now, nowdate, formatdate
 from webnotes.model import db_exists
 from webnotes.model.doc import addchild
 from webnotes.model.wrapper import getlist, copy_doclist
 from webnotes.model.code import get_obj
-from webnotes import form, msgprint
+from webnotes import form, msgprint, _
 
 get_value = webnotes.conn.get_value
 
@@ -604,14 +604,15 @@ class DocType(TransactionBase):
 			exact_outstanding = flt(tot_outstanding) + flt(grand_total)
 			get_obj('Account',acc_head[0][0]).check_credit_limit(acc_head[0][0], obj.doc.company, exact_outstanding)
 
-	def validate_fiscal_year(self,fiscal_year,transaction_date,dn):
-		fy=webnotes.conn.sql("select year_start_date from `tabFiscal Year` where name='%s'"%fiscal_year)
-		ysd=fy and fy[0][0] or ""
-		yed=add_days(str(ysd),365)
-		if str(transaction_date) < str(ysd) or str(transaction_date) > str(yed):
-			msgprint("%s not within the fiscal year"%(dn))
-			raise Exception
-
+	def validate_fiscal_year(self, fiscal_year, transaction_date, label):
+		from accounts.utils import get_fiscal_year
+		if get_fiscal_year(transaction_date)[0] != fiscal_year:
+			msgprint(("%(label)s '%(posting_date)s': " + _("not within Fiscal Year") + \
+				": '%(fiscal_year)s'") % {
+					"label": label,
+					"posting_date": formatdate(transaction_date),
+					"fiscal_year": fiscal_year
+				}, raise_exception=1)
 
 	# get against document date	self.prevdoc_date_field
 	#-----------------------------
