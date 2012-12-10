@@ -729,4 +729,8 @@ patch_list = [
 		'patch_module': 'patches.december_2012',
 		'patch_file': 'website_cache_refactor',
 	},
+	{
+		'patch_module': 'patches.december_2012',
+		'patch_file': 'production_cleanup',
+	},
 ]
