@@ -15,20 +15,13 @@
 	<div class="layout-wrapper layout-wrapper-background">
 		<div class="web-content" id="content-blog">
 			
-			<div class="layout-main-section">
+			<div class="layout-main">
 				<h1>Blog</h1>
 				<br>
 				<div id="blog-list">
 					<!-- blog list will be generated dynamically -->
 				</div>
 			</div>
-			
-			<div class="layout-side-section">
-				{% block blog_subscribe %}
-					{% include "html/blog_subscribe.html" %}
-				{% endblock %}
-			</div>
-			<div style="clear: both"></div>
 		</div>
 	</div>
 {% endblock %}

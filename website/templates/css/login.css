@@ -1,7 +1,18 @@
 	<style>
 		#login_wrapper {
-			width: 300px !important;
-			margin: 20px auto;
+			width: 300px;
+			margin: 70px auto;
+		}
+
+		.layout-wrapper {
+			padding: 10px;
+			box-shadow: 1px 1px 3px 3px #ccc;
+			font-size: 12px;
+			min-height: 100px;
+		}
+
+		#login_wrapper h3 {
+			text-align: center;
 		}
 
 		.login-banner {
@@ -10,5 +21,12 @@
 		
 		.login-box td {
 			padding: 8px;
+		}
+		.login-footer {
+			text-align: center;
+			padding: 15px;
+		}
+		.login-footer, .login-footer a {
+			color: #999;
 		}
 	</style>

@@ -5,9 +5,12 @@
 {% extends "html/base.html" %}
 
 {% block body %}
-
 	<header>
-		<div class="navbar navbar-fixed-top navbar-inverse">
+	</header>
+	<div id="body_div">
+		<div class="navbar-wrapper">
+		<div class="navbar navbar-inverse" 
+			style="margin-bottom: 0px;">
 			<div class="navbar-inner">
 			<div class="container">
 				<a class="brand" href="index.html">{{ brand }}</a>
@@ -51,10 +54,10 @@
 				</ul>
 			</div>
 			</div>
-			</div>
-			<script>$('.dropdown-toggle').dropdown()</script>
-	</header>
-	<div id="body_div">
+		</div>
+		</div>
+		<script>$('.dropdown-toggle').dropdown()</script>
+			
 		<div class="content" id="page-{{ name }}" style="display: block;">
 		{% block content %}
 		{% endblock %}
@@ -68,8 +71,9 @@
 		{% endfor %}
 		</ul></div>
 		{% if copyright %}
-		<div class="web-footer-copyright">&copy; {{ copyright }}
+		<div class="web-footer-copyright">&copy; {{ copyright }}</div>
 		{% endif %}
+		<div class="web-footer-powered">Powered by <a href="https://erpnext.com">ERPNext.com</a></div>
 		</div>
 	</footer>
 

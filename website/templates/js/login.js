@@ -1,25 +1,7 @@
-// ERPNext - web based ERP (http://erpnext.com)
-// Copyright (C) 2012 Web Notes Technologies Pvt Ltd
-// 
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-// 
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-// 
-// You should have received a copy of the GNU General Public License
-// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 wn.provide('erpnext.login');
 
-wn.pages["{{ name }}"].onload = function(wrapper) {
-	var lw = $i('login_wrapper');
-	$bs(lw, '1px 1px 3px #888');
-
+$(document).ready(function(wrapper) {
 	$('#login_btn').click(erpnext.login.doLogin)
 		
 	$('#password').keypress(function(ev){
@@ -31,33 +13,32 @@ wn.pages["{{ name }}"].onload = function(wrapper) {
 		}
 	});
 	$(document).trigger('login_rendered');
-}
-
-// Login Callback
-erpnext.login.onLoginReply = function(r, rtext) {
-	$('#login_btn').done_working();
-    if(r.message=="Logged In"){
-        window.location.href='app.html' + (get_url_arg('page') ? ('?page='+get_url_arg('page')) : '');
-    } else {
-        $i('login_message').innerHTML = '<span style="color: RED;">'+(r.message)+'</span>';
-        //if(r.exc)alert(r.exc);
-    }
-}
-
+})
 
 // Login
 erpnext.login.doLogin = function(){
 
     var args = {};
-    args['usr']=$i("login_id").value;
-    args['pwd']=$i("password").value;
-    //if($i('remember_me').checked) 
-      //args['remember_me'] = 1;
+    args['usr']=$("#login_id").val();
+    args['pwd']=$("#password").val();
+
+	if(!args.usr || !args.pwd) {
+		msgprint("Sorry, you can't login if you don't enter both the email id and password.")
+	}
 
 	$('#login_btn').set_working();
 	$('#login_message').empty();
 	
-    $c("login", args, erpnext.login.onLoginReply);
+    $c("login", args, function(r, rtext) {
+		$('#login_btn').done_working();
+	    if(r.message=="Logged In"){
+	        window.location.href='app.html' + (get_url_arg('page') 
+				? ('?page='+get_url_arg('page')) : '');
+	    } else {
+	        $i('login_message').innerHTML = '<span style="color: RED;">'
+				+(r.message)+'</span>';
+	    }
+	});
 
 	return false;
 }

@@ -21,7 +21,7 @@ wn.pages['{{ name }}'].onload = function(wrapper) {
 	erpnext.blog.wrapper = wrapper;
 	
 	// sidebar
-	erpnext.blog.render_recent_list(wrapper);
+	//erpnext.blog.render_recent_list(wrapper);
 	
 	// unhide no-result if no comments found
 	erpnext.blog.toggle_no_result(wrapper);
