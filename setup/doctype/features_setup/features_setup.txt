@@ -5,7 +5,7 @@
 	{
 		'creation': '2012-04-13 11:56:31',
 		'docstatus': 0,
-		'modified': '2012-06-07 18:41:50',
+		'modified': '2012-12-10 18:30:00',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -274,7 +274,7 @@
 		'doctype': u'DocField',
 		'fieldname': u'production',
 		'fieldtype': u'Section Break',
-		'label': u'Production'
+		'label': u'Manufacturing'
 	},
 
 	# DocField

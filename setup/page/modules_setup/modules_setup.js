@@ -1,7 +1,7 @@
 wn.require('lib/js/lib/jquery/jquery.ui.sortable.js');
 
 $.extend(wn.pages.modules_setup, {
-	modules: ['Activity', 'Accounts', 'Selling', 'Buying', 'Stock', 'Production', 'Projects', 
+	modules: ['Activity', 'Accounts', 'Selling', 'Buying', 'Stock', 'Manufacturing', 'Projects', 
 		'Support', 'HR', 'Website', 'To Do', 'Messages', 'Calendar', 'Knowledge Base'],	
 	onload: function(wrapper) {
 		wn.pages.modules_setup.refresh_page(wn.boot.modules_list);
@@ -11,7 +11,6 @@ $.extend(wn.pages.modules_setup, {
 
 		// Hide Setup and Dashboard modules
 		ml.indexOf('Setup')!=-1 && ml.splice(ml.indexOf('Setup'), 1);
-		ml.indexOf('Dashboard')!=-1 && ml.splice(ml.indexOf('Dashboard'), 1);
 
 		// checked modules
 		for(i in ml) {
