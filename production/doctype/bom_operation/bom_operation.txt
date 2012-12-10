@@ -5,7 +5,7 @@
 	{
 		'creation': '2012-03-27 14:36:02',
 		'docstatus': 0,
-		'modified': '2012-03-27 14:36:02',
+		'modified': '2012-12-10 18:30:00',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -16,7 +16,7 @@
 		'default_print_format': u'Standard',
 		'doctype': 'DocType',
 		'istable': 1,
-		'module': u'Production',
+		'module': u'Manufacturing',
 		'name': '__common__',
 		'section_style': u'Simple',
 		'server_code_error': u' ',

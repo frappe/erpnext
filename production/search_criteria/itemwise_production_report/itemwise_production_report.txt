@@ -5,7 +5,7 @@
 	{
 		'creation': '2012-04-03 12:49:51',
 		'docstatus': 0,
-		'modified': '2012-04-03 12:49:51',
+		'modified': '2012-12-10 18:30:00',
 		'modified_by': u'Administrator',
 		'owner': u'jai@webnotestech.com'
 	},
@@ -17,7 +17,7 @@
 		'doc_type': u'Stock Entry Detail',
 		'doctype': 'Search Criteria',
 		'filters': u"{'Stock Entry\x01Saved':1,'Stock Entry\x01Submitted':1,'Stock Entry\x01Purpose':'Production Order','Stock Entry\x01Process':'Backflush','Stock Entry Detail\x01FG Item':1}",
-		'module': u'Production',
+		'module': u'Manufacturing',
 		'name': '__common__',
 		'page_len': 50,
 		'parent_doc_type': u'Stock Entry',

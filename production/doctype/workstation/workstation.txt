@@ -5,7 +5,7 @@
 	{
 		'creation': '2012-03-27 14:36:05',
 		'docstatus': 0,
-		'modified': '2012-03-27 18:46:49',
+		'modified': '2012-12-10 18:30:00',
 		'modified_by': u'Administrator',
 		'owner': u'Administrator'
 	},
@@ -20,7 +20,7 @@
 		'default_print_format': u'Standard',
 		'doctype': 'DocType',
 		'document_type': u'Master',
-		'module': u'Production',
+		'module': u'Manufacturing',
 		'name': '__common__',
 		'section_style': u'Simple',
 		'server_code_error': u' ',
@@ -76,7 +76,7 @@
 		'create': 1,
 		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'role': u'Production User',
+		'role': u'Manufacturing User',
 		'write': 1
 	},
 
@@ -86,7 +86,7 @@
 		'create': 1,
 		'doctype': u'DocPerm',
 		'permlevel': 0,
-		'role': u'Production User',
+		'role': u'Manufacturing User',
 		'write': 1
 	},
 
@@ -94,14 +94,14 @@
 	{
 		'doctype': u'DocPerm',
 		'permlevel': 1,
-		'role': u'Production Manager'
+		'role': u'Manufacturing Manager'
 	},
 
 	# DocPerm
 	{
 		'doctype': u'DocPerm',
 		'permlevel': 1,
-		'role': u'Production User'
+		'role': u'Manufacturing User'
 	},
 
 	# DocField

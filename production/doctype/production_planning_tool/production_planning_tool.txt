@@ -4,7 +4,7 @@
   "docstatus": 0, 
   "creation": "2012-07-03 13:30:03", 
   "modified_by": "Administrator", 
-  "modified": "2012-12-03 15:39:44"
+  "modified": "2012-12-10 18:30:00"
  }, 
  {
   "read_only": 1, 
@@ -12,7 +12,7 @@
   "in_create": 1, 
   "default_print_format": "Standard", 
   "doctype": "DocType", 
-  "module": "Production", 
+  "module": "Manufacturing", 
   "name": "__common__"
  }, 
  {
@@ -209,11 +209,11 @@
   "doctype": "DocPerm"
  }, 
  {
-  "role": "Production User", 
+  "role": "Manufacturing User", 
   "doctype": "DocPerm"
  }, 
  {
-  "role": "Production Manager", 
+  "role": "Manufacturing Manager", 
   "doctype": "DocPerm"
  }
 ]

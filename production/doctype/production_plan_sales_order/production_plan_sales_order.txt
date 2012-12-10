@@ -4,7 +4,7 @@
   "docstatus": 0, 
   "creation": "2012-07-03 13:30:04", 
   "modified_by": "Administrator", 
-  "modified": "2012-11-29 17:49:15"
+  "modified": "2012-12-10 18:30:00"
  }, 
  {
   "istable": 1, 
@@ -12,7 +12,7 @@
   "name": "__common__", 
   "default_print_format": "Standard", 
   "doctype": "DocType", 
-  "module": "Production"
+  "module": "Manufacturing"
  }, 
  {
   "name": "__common__", 
