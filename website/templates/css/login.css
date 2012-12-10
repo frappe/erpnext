@@ -1,7 +1,12 @@
 	<style>
 		#login_wrapper {
-			width: 300px !important;
-			margin: 20px auto;
+			height: 300px;
+			padding-top: 50px;
+		}
+
+
+		#login_wrapper h3 {
+			text-align: center;
 		}
 
 		.login-banner {

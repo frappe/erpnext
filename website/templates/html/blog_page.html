@@ -13,7 +13,7 @@
 	<div class="layout-wrapper layout-wrapper-background">
 		<div class="web-content" id="blog-{{ name }}">
 
-			<div class="layout-main-section">
+			<div class="layout-main">
 				
 				<h2>{{ title }}</h2>
 
@@ -38,19 +38,6 @@
 				</div>
 				<button class="btn add-comment">Add Comment</button>
 			</div>
-
-			<div class="layout-side-section">
-				<p><a href="blog.html">All Blogs</a></p>
-				<br />
-				{% block blog_subscribe %}
-					{% include "html/blog_subscribe.html" %}
-				{% endblock %}
-				<br />
-				<h4>Recent Posts</h4>
-				<div class="recent-posts" style="min-height: 100px;"></div>
-			</div>
-
-			<div style="clear: both"></div>
 		</div>
 	</div>
 {% endblock %}
