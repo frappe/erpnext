@@ -469,6 +469,8 @@ class DocType(TransactionBase):
 					"planned_qty": (is_submit and -1 or 1 ) * flt(self.doc.fg_completed_qty)
 				}
 				get_obj('Warehouse', pro_obj.doc.fg_warehouse).update_bin(args)
+			elif self.doc.process == 'Material Transfer':
+				pass
 				
 			pro_obj.doc.status = (flt(pro_obj.doc.qty)==flt(pro_obj.doc.produced_qty)) \
 				and 'Completed' or 'In Process'

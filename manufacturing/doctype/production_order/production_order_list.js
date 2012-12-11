@@ -7,7 +7,7 @@ wn.doclistviews['Production Order'] = wn.views.ListView.extend({
 			'`tabProduction Order`.fg_warehouse',
 			'`tabProduction Order`.stock_uom',
 			'IFNULL(`tabProduction Order`.qty, 0) as qty',
-			'`tabProduction Order`.posting_date',
+			'`tabProduction Order`.creation',
 			'`tabProduction Order`.status',
 		]);
 		this.stats = this.stats.concat(['company']);
@@ -15,7 +15,7 @@ wn.doclistviews['Production Order'] = wn.views.ListView.extend({
 
 	prepare_data: function(data) {
 		this._super(data);
-		data.posting_date = wn.datetime.str_to_user(data.posting_date);
+		data.creation = wn.datetime.str_to_user(data.creation);
 	},
 
 	columns: [
@@ -33,7 +33,7 @@ wn.doclistviews['Production Order'] = wn.views.ListView.extend({
 			},
 			css: {'text-align':'right'}
 		},
-		{width: '12%', content:'posting_date', css: {
+		{width: '12%', content:'creation', css: {
 			'text-align': 'right', 'color':'#777'
 		}},
 	]

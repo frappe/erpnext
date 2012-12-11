@@ -30,6 +30,9 @@ def rename_module():
 	
 	webnotes.conn.set_global("modules_list",
 		webnotes.conn.get_global('modules_list').replace("Production", "Manufacturing"))
+		
+	# set end of life to null if "0000-00-00"
+	webnotes.conn.sql("""update `tabItem` set end_of_life=null where end_of_life='0000-00-00'""")
 	
 def rebuilt_exploded_bom():
 	from webnotes.model.code import get_obj

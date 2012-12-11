@@ -35,20 +35,8 @@ class DocType:
 
 
 	def autoname(self):
-		p = self.doc.fiscal_year
-		self.doc.name = make_autoname('PRO/' + self.doc.fiscal_year[2:5]+self.doc.fiscal_year[7:9] + '/.######')
-
-
-	def get_item_detail(self, prod_item):
-		item = sql("""select description, stock_uom, default_bom from `tabItem` 
-		where (ifnull(end_of_life,'')='' or end_of_life = '0000-00-00' or end_of_life >	now()) and name = %s""", prod_item, as_dict = 1 )
-		ret = {
-			'description'		: item and item[0]['description'] or '',
-			'stock_uom'			: item and item[0]['stock_uom'] or '',
-			'default_bom'		: item and item[0]['default_bom'] or ''
-		}
-		return ret
-
+		self.doc.name = make_autoname('PRO/' + self.doc.fiscal_year[2:5] + 
+			self.doc.fiscal_year[7:9] + '/.######')
 
 	def validate(self):
 		if self.doc.production_item :
@@ -145,3 +133,20 @@ class DocType:
 			"planned_qty": flt(qty)
 		}
 		get_obj('Warehouse', self.doc.fg_warehouse).update_bin(args)
+
+@webnotes.whitelist()	
+def get_item_details(item):
+	res = webnotes.conn.sql("""select stock_uom
+		from `tabItem` where (ifnull(end_of_life, "")="" or end_of_life > now())
+		and name=%s""", (item,), as_dict=1)
+	
+	if not res:
+		return {}
+		
+	res = res[0]
+	bom = webnotes.conn.sql("""select name from `tabBOM` where item=%s 
+		and ifnull(is_default, 0)=1""", (item,))
+	if bom:
+		res.bom_no = bom[0][0]
+		
+	return res
