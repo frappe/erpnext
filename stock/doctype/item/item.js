@@ -103,26 +103,19 @@ cur_frm.fields_dict['item_group'].get_query = function(doc,cdt,cdn) {
 // a table with both image and attachment in HTML
 // in the "alternate_description" field
 cur_frm.cscript.add_image = function(doc, dt, dn) {
-	if(!doc.file_list) {
-		msgprint('Please attach a file first!');
+	if(!doc.image) {
+		msgprint('Please select an "Image" first');
 		return;
-	}
-
-	var f = doc.file_list.split('\n')[0];
-	var fname = f.split(',')[0];
-	var fid = f.split(',')[1];
-	if(!in_list(['jpg','jpeg','gif','png'], fname.split('.')[1].toLowerCase())) {
-		msgprint('File must be of extension jpg, jpeg, gif or png'); return;
 	}
 
 	doc.description_html = repl('<table style="width: 100%; table-layout: fixed;">'+
 	'<tr><td style="width:110px"><img src="%(imgurl)s" width="100px"></td>'+
 	'<td>%(desc)s</td></tr>'+
-	'</table>', {imgurl: wn.urllib.get_file_url(fid), desc:doc.description});
+	'</table>', {imgurl: wn.utils.get_file_link(doc.image), desc:doc.description});
 
 	refresh_field('description_html');
 }
-//===================== Quotation to validation - either customer or lead mandatory ====================
+// Quotation to validation - either customer or lead mandatory
 cur_frm.cscript.weight_to_validate = function(doc,cdt,cdn){
 
   if((doc.nett_weight || doc.gross_weight) && !doc.weight_uom)
@@ -131,13 +124,11 @@ cur_frm.cscript.weight_to_validate = function(doc,cdt,cdn){
     validated=0;
   }
 }
-//===================validation function =================================
 
 cur_frm.cscript.validate = function(doc,cdt,cdn){
   cur_frm.cscript.weight_to_validate(doc,cdt,cdn);
 }
 
-//===========Fill Default Currency in "Item Prices====================
 cur_frm.fields_dict['ref_rate_details'].grid.onrowadd = function(doc, cdt, cdn){
 	locals[cdt][cdn].ref_currency = sys_defaults.currency;
 	refresh_field('ref_currency',cdn,'ref_rate_details');

@@ -2,9 +2,9 @@
  {
   "owner": "Administrator", 
   "docstatus": 0, 
-  "creation": "2012-12-06 15:57:02", 
+  "creation": "2012-12-11 15:58:47", 
   "modified_by": "Administrator", 
-  "modified": "2012-12-11 15:56:37"
+  "modified": "2012-12-11 16:08:49"
  }, 
  {
   "allow_attach": 1, 
@@ -141,13 +141,20 @@
   "permlevel": 0
  }, 
  {
+  "doctype": "DocField", 
+  "label": "Image View", 
+  "options": "image", 
+  "fieldname": "image_view", 
+  "fieldtype": "Image", 
+  "permlevel": 0
+ }, 
+ {
   "oldfieldtype": "Text", 
   "doctype": "DocField", 
   "label": "Description", 
   "oldfieldname": "description", 
-  "width": "300px", 
   "fieldname": "description", 
-  "fieldtype": "Text", 
+  "fieldtype": "Small Text", 
   "search_index": 0, 
   "reqd": 1, 
   "permlevel": 0, 
@@ -157,13 +164,13 @@
   "doctype": "DocField", 
   "label": "Description HTML", 
   "fieldname": "description_html", 
-  "fieldtype": "Text", 
+  "fieldtype": "Small Text", 
   "permlevel": 0
  }, 
  {
-  "description": "Generates HTML to include image (1st attachment) in the description", 
+  "description": "Generates HTML to include selected image in the description", 
   "doctype": "DocField", 
-  "label": "Add Image", 
+  "label": "Generate Description HTML", 
   "fieldname": "add_image", 
   "fieldtype": "Button", 
   "permlevel": 0
@@ -790,10 +797,50 @@
   "permlevel": 0
  }, 
  {
+  "amend": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "submit": 0, 
+  "write": 0, 
+  "cancel": 0, 
+  "role": "Material Manager", 
+  "permlevel": 1
+ }, 
+ {
+  "amend": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "submit": 0, 
+  "write": 0, 
+  "cancel": 0, 
+  "role": "Material Manager", 
+  "permlevel": 0
+ }, 
+ {
+  "amend": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "submit": 0, 
+  "write": 0, 
+  "cancel": 0, 
+  "role": "Material User", 
+  "permlevel": 1
+ }, 
+ {
+  "amend": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "submit": 0, 
+  "write": 0, 
+  "cancel": 0, 
+  "role": "Material User", 
+  "permlevel": 0
+ }, 
+ {
   "create": 1, 
   "doctype": "DocPerm", 
   "write": 1, 
-  "role": "System Manager", 
+  "role": "Material Master Manager", 
   "cancel": 1, 
   "permlevel": 0
  }, 
@@ -808,7 +855,7 @@
   "create": 1, 
   "doctype": "DocPerm", 
   "write": 1, 
-  "role": "Material Master Manager", 
+  "role": "System Manager", 
   "cancel": 1, 
   "permlevel": 0
  }, 
@@ -816,45 +863,5 @@
   "doctype": "DocPerm", 
   "role": "System Manager", 
   "permlevel": 1
- }, 
- {
-  "amend": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "submit": 0, 
-  "write": 0, 
-  "role": "Material Manager", 
-  "cancel": 0, 
-  "permlevel": 1
- }, 
- {
-  "amend": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "submit": 0, 
-  "write": 0, 
-  "role": "Material Manager", 
-  "cancel": 0, 
-  "permlevel": 0
- }, 
- {
-  "amend": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "submit": 0, 
-  "write": 0, 
-  "role": "Material User", 
-  "cancel": 0, 
-  "permlevel": 1
- }, 
- {
-  "amend": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "submit": 0, 
-  "write": 0, 
-  "role": "Material User", 
-  "cancel": 0, 
-  "permlevel": 0
  }
 ]
