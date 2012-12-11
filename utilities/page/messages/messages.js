@@ -148,7 +148,7 @@ erpnext.Messages = Class.extend({
 						data-name="%(name)s">&times;</a>', data);
 				}
 				
-				if(data.owner==data.comment_docname) {
+				if(data.owner==data.comment_docname && data.parenttype!="Assignment") {
 					data.mark_html = "<div class='message-mark' title='Public'\
 						style='background-color: green'></div>"
 				}
