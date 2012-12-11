@@ -17,7 +17,6 @@
 		'allow_trash': 1,
 		'autoname': u'TASK.#####',
 		'colour': u'White:FFF',
-		'default_print_format': u'Standard',
 		u'doctype': u'DocType',
 		'document_type': u'Master',
 		'max_attachments': 5,

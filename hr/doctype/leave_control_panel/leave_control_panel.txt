@@ -17,7 +17,6 @@
 		'allow_email': 1,
 		'allow_print': 1,
 		'colour': u'White:FFF',
-		'default_print_format': u'Standard',
 		'doctype': 'DocType',
 		'hide_heading': 0,
 		'hide_toolbar': 0,

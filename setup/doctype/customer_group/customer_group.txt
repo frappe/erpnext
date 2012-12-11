@@ -14,7 +14,6 @@
   "read_only": 1, 
   "autoname": "field:customer_group_name", 
   "name": "__common__", 
-  "default_print_format": "Standard", 
   "allow_rename": 1, 
   "doctype": "DocType"
  }, 

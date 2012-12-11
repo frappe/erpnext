@@ -15,7 +15,6 @@
 		'_last_update': u'1317365120',
 		'autoname': u'LAL/.#####',
 		'colour': u'White:FFF',
-		'default_print_format': u'Standard',
 		u'doctype': u'DocType',
 		'is_submittable': 1,
 		'module': u'HR',

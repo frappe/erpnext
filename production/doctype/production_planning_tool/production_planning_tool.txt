@@ -10,7 +10,6 @@
   "read_only": 1, 
   "issingle": 1, 
   "in_create": 1, 
-  "default_print_format": "Standard", 
   "doctype": "DocType", 
   "module": "Production", 
   "name": "__common__"

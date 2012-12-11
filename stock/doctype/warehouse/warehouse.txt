@@ -9,7 +9,6 @@
  {
   "autoname": "field:warehouse_name", 
   "description": "A logical Warehouse against which stock entries are made.", 
-  "default_print_format": "Standard", 
   "allow_rename": 1, 
   "search_fields": "warehouse_type", 
   "module": "Stock", 

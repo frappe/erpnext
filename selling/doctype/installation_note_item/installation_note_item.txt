@@ -14,7 +14,6 @@
 	{
 		'autoname': u'IID/.#####',
 		'colour': u'White:FFF',
-		'default_print_format': u'Standard',
 		'doctype': 'DocType',
 		'istable': 1,
 		'module': u'Selling',

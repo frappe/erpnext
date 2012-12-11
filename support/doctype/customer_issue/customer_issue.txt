@@ -10,7 +10,6 @@
   "is_submittable": 1, 
   "autoname": "naming_series:", 
   "name": "__common__", 
-  "default_print_format": "Standard", 
   "search_fields": "status,customer,customer_name,allocated_to,allocated_on, territory", 
   "module": "Support", 
   "doctype": "DocType"

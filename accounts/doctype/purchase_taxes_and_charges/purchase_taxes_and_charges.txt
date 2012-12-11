@@ -15,7 +15,6 @@
 		'_last_update': u'1322549700',
 		'autoname': u'PVTD.######',
 		'colour': u'White:FFF',
-		'default_print_format': u'Standard',
 		u'doctype': u'DocType',
 		'hide_heading': 1,
 		'istable': 1,

@@ -10,7 +10,6 @@
   "istable": 1, 
   "autoname": "PPID/.#####", 
   "name": "__common__", 
-  "default_print_format": "Standard", 
   "doctype": "DocType", 
   "module": "Production"
  }, 

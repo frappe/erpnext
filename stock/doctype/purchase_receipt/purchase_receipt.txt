@@ -9,7 +9,6 @@
  {
   "is_submittable": 1, 
   "allow_attach": 1, 
-  "default_print_format": "Standard", 
   "search_fields": "status, posting_date, supplier", 
   "module": "Stock", 
   "doctype": "DocType", 

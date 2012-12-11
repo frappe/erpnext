@@ -15,7 +15,6 @@
 		'_last_update': u'1322549700',
 		'autoname': u'POS/.####',
 		'colour': u'White:FFF',
-		'default_print_format': u'Standard',
 		'doctype': 'DocType',
 		'module': u'Accounts',
 		'name': '__common__',
