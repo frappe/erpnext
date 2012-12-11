@@ -32,7 +32,7 @@ erpnext.ActivityFeed = Class.extend({
 	},
 	scrub_data: function(data) {
 		data.by = wn.user_info(data.owner).fullname;
-		data.imgsrc = wn.user_info(data.owner).image;
+		data.imgsrc = wn.utils.get_file_link(wn.user_info(data.owner).image);
 		
 		// feedtype
 		if(!data.feed_type) {
