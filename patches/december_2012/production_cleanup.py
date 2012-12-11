@@ -11,11 +11,18 @@ def delete_doctypes():
 	delete_doc("DocType", "BOM Control")
 	
 def rename_module():
+	webnotes.reload_doc("core", "doctype", "role")
+	webnotes.reload_doc("core", "doctype", "page")
+	webnotes.reload_doc("core", "doctype", "module_def")
+
 	webnotes.rename_doc("Role", "Production User", "Manufacturing User")
 	webnotes.rename_doc("Role", "Production Manager", "Manufacturing Manager")
-	
-	webnotes.rename_doc("Page", "production-home", "manufacturing-home")
-	
+
+	if webnotes.conn.exists("Page", "manufacturing-home"):
+		webnotes.delete_doc("Page", "production-home")
+	else:
+		webnotes.rename_doc("Page", "production-home", "manufacturing-home")
+
 	webnotes.rename_doc("Module Def", "Production", "Manufacturing")
 	
 	webnotes.conn.set_global("modules_list",
