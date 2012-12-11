@@ -525,5 +525,8 @@ patch_list = [
 	{
 		'patch_module': 'patches.december_2012',
 		'patch_file': 'production_cleanup',
+	{
+		'patch_module': 'patches.december_2012',
+		'patch_file': 'fix_default_print_format',
 	},
 ]

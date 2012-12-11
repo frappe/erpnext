@@ -19,7 +19,6 @@
   "hide_heading": 0, 
   "issingle": 0, 
   "name": "__common__", 
-  "default_print_format": "Standard", 
   "allow_rename": 0, 
   "doctype": "DocType", 
   "is_submittable": 1, 

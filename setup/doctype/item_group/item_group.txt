@@ -15,7 +15,6 @@
   "description": "Item Classification", 
   "issingle": 0, 
   "name": "__common__", 
-  "default_print_format": "Standard", 
   "allow_rename": 1, 
   "doctype": "DocType"
  }, 

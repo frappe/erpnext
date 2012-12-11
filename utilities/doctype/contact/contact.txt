@@ -8,7 +8,6 @@
  }, 
  {
   "in_create": 0, 
-  "default_print_format": "Standard", 
   "doctype": "DocType", 
   "module": "Utilities", 
   "in_dialog": 0, 

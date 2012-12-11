@@ -16,7 +16,6 @@
 		'allow_trash': 1,
 		'autoname': u'field:year',
 		'colour': u'White:FFF',
-		'default_print_format': u'Standard',
 		'description': u'**Fiscal Year** represents a Financial Year. All accounting entries and other major transactions are tracked against **Fiscal Year**.',
 		'doctype': 'DocType',
 		'document_type': u'Master',

@@ -9,7 +9,6 @@
  {
   "is_submittable": 1, 
   "in_create": 0, 
-  "default_print_format": "Standard", 
   "doctype": "DocType", 
   "module": "Manufacturing", 
   "name": "__common__"

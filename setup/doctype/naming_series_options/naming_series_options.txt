@@ -14,7 +14,6 @@
 	{
 		'autoname': u'__NSO.#####',
 		'colour': u'White:FFF',
-		'default_print_format': u'Standard',
 		'doctype': 'DocType',
 		'in_create': 1,
 		'module': u'Setup',

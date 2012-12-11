@@ -13,7 +13,6 @@
   "document_type": "Master", 
   "description": "Heads (or groups) against which Accounting Entries are made and balances are maintained.", 
   "name": "__common__", 
-  "default_print_format": "Standard", 
   "allow_rename": 1, 
   "doctype": "DocType", 
   "allow_copy": 1

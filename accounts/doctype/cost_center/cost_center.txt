@@ -14,7 +14,6 @@
   "description": "Track separate Income and Expense for product verticals or divisions.", 
   "autoname": "field:cost_center_name", 
   "name": "__common__", 
-  "default_print_format": "Standard", 
   "allow_rename": 1, 
   "doctype": "DocType", 
   "allow_copy": 1

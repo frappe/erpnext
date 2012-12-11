@@ -14,7 +14,6 @@
 	{
 		'autoname': u'INVTD.######',
 		'colour': u'White:FFF',
-		'default_print_format': u'Standard',
 		'doctype': 'DocType',
 		'hide_heading': 1,
 		'istable': 1,

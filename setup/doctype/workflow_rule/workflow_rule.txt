@@ -14,7 +14,6 @@
 	{
 		'autoname': u'field:rule_name',
 		'colour': u'White:FFF',
-		'default_print_format': u'Standard',
 		'doctype': 'DocType',
 		'document_type': u'Master',
 		'module': u'Setup',

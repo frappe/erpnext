@@ -14,7 +14,6 @@
 	{
 		'autoname': u'QUOD/.#####',
 		'colour': u'White:FFF',
-		'default_print_format': u'Standard',
 		'doctype': 'DocType',
 		'is_transaction_doc': 0,
 		'istable': 1,

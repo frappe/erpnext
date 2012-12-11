@@ -10,7 +10,6 @@
   "is_submittable": 1, 
   "autoname": "naming_series:", 
   "description": "Potential Sales Deal", 
-  "default_print_format": "Standard", 
   "search_fields": "status,transaction_date,customer,lead,enquiry_type,territory,company", 
   "module": "Selling", 
   "doctype": "DocType", 

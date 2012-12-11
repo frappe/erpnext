@@ -204,11 +204,10 @@ class DocType:
 			glc.add_cc(str(c))
 			
 			
-	# On update
-	# ---------------------------------------------------
 	def on_update(self):
 		self.set_letter_head()
-		ac = sql("select name from tabAccount where account_name='Income' and company=%s", self.doc.name)
+		ac = sql("select name from tabAccount where company=%s and docstatus<2 limit 1",
+			self.doc.name)
 		if not ac:
 			self.create_default_accounts()
 		self.set_default_groups()
@@ -216,8 +215,7 @@ class DocType:
 		if not cc:
 			self.create_default_cost_center()
 
-	# 
-	# ---------------------------------------------------	
+
 	def on_trash(self):
 		"""
 			Trash accounts and cost centers for this company if no gl entry exists

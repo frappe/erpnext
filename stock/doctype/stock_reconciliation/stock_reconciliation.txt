@@ -16,7 +16,6 @@
 		'allow_attach': 1,
 		'autoname': u'SR/.######',
 		'colour': u'White:FFF',
-		'default_print_format': u'Standard',
 		'doctype': 'DocType',
 		'is_submittable': 1,
 		'max_attachments': 1,
