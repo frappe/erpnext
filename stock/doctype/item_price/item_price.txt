@@ -1,81 +1,66 @@
-# DocType, Item Price
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-03-27 14:36:36',
-		'docstatus': 0,
-		'modified': '2012-03-27 14:36:36',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
-	},
-
-	# These values are common for all DocType
-	{
-		'autoname': u'RFD/.#####',
-		'colour': u'White:FFF',
-		'doctype': 'DocType',
-		'in_create': 1,
-		'istable': 1,
-		'module': u'Stock',
-		'name': '__common__',
-		'read_only': 0,
-		'section_style': u'Tray',
-		'server_code_error': u' ',
-		'show_in_menu': 0,
-		'version': 3
-	},
-
-	# These values are common for all DocField
-	{
-		'doctype': u'DocField',
-		'in_filter': 1,
-		'name': '__common__',
-		'parent': u'Item Price',
-		'parentfield': u'fields',
-		'parenttype': u'DocType',
-		'permlevel': 0,
-		'search_index': 1
-	},
-
-	# DocType, Item Price
-	{
-		'doctype': 'DocType',
-		'name': u'Item Price'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'price_list_name',
-		'fieldtype': u'Select',
-		'label': u'Price List Name',
-		'oldfieldname': u'price_list_name',
-		'oldfieldtype': u'Select',
-		'options': u'link:Price List',
-		'reqd': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'ref_rate',
-		'fieldtype': u'Currency',
-		'label': u'Ref Rate',
-		'oldfieldname': u'ref_rate',
-		'oldfieldtype': u'Currency',
-		'reqd': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'ref_currency',
-		'fieldtype': u'Select',
-		'label': u'Currency',
-		'oldfieldname': u'ref_currency',
-		'oldfieldtype': u'Select',
-		'options': u'link:Currency',
-		'reqd': 1
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-03-27 14:36:36", 
+  "modified_by": "Administrator", 
+  "modified": "2012-03-27 14:36:36"
+ }, 
+ {
+  "section_style": "Tray", 
+  "istable": 1, 
+  "in_create": 1, 
+  "module": "Stock", 
+  "server_code_error": " ", 
+  "read_only": 0, 
+  "autoname": "RFD/.#####", 
+  "name": "__common__", 
+  "colour": "White:FFF", 
+  "doctype": "DocType", 
+  "show_in_menu": 0, 
+  "version": 3
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "Item Price", 
+  "search_index": 1, 
+  "doctype": "DocField", 
+  "parenttype": "DocType", 
+  "in_filter": 1, 
+  "permlevel": 0, 
+  "parentfield": "fields"
+ }, 
+ {
+  "name": "Item Price", 
+  "doctype": "DocType"
+ }, 
+ {
+  "oldfieldtype": "Select", 
+  "doctype": "DocField", 
+  "label": "Price List Name", 
+  "oldfieldname": "price_list_name", 
+  "fieldname": "price_list_name", 
+  "fieldtype": "Select", 
+  "reqd": 1, 
+  "options": "link:Price List"
+ }, 
+ {
+  "oldfieldtype": "Currency", 
+  "doctype": "DocField", 
+  "label": "Ref Rate", 
+  "oldfieldname": "ref_rate", 
+  "fieldname": "ref_rate", 
+  "fieldtype": "Currency", 
+  "reqd": 0
+ }, 
+ {
+  "oldfieldtype": "Select", 
+  "doctype": "DocField", 
+  "label": "Currency", 
+  "oldfieldname": "ref_currency", 
+  "fieldname": "ref_currency", 
+  "fieldtype": "Select", 
+  "reqd": 1, 
+  "options": "link:Currency"
+ }
 ]

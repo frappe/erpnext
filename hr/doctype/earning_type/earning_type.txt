@@ -1,139 +1,112 @@
-# DocType, Earning Type
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-03-27 14:35:54',
-		'docstatus': 0,
-		'modified': '2012-03-27 14:35:54',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
-	},
-
-	# These values are common for all DocType
-	{
-		'allow_trash': 1,
-		'autoname': u'field:earning_name',
-		'colour': u'White:FFF',
-		'doctype': 'DocType',
-		'document_type': u'Master',
-		'module': u'HR',
-		'name': '__common__',
-		'section_style': u'Simple',
-		'server_code_error': u' ',
-		'show_in_menu': 0,
-		'version': 13
-	},
-
-	# These values are common for all DocField
-	{
-		'doctype': u'DocField',
-		'name': '__common__',
-		'parent': u'Earning Type',
-		'parentfield': u'fields',
-		'parenttype': u'DocType'
-	},
-
-	# These values are common for all DocPerm
-	{
-		'cancel': 1,
-		'create': 1,
-		'doctype': u'DocPerm',
-		'name': '__common__',
-		'parent': u'Earning Type',
-		'parentfield': u'permissions',
-		'parenttype': u'DocType',
-		'permlevel': 0,
-		'read': 1,
-		'write': 1
-	},
-
-	# DocType, Earning Type
-	{
-		'doctype': 'DocType',
-		'name': u'Earning Type'
-	},
-
-	# DocPerm
-	{
-		'doctype': u'DocPerm',
-		'role': u'System Manager'
-	},
-
-	# DocPerm
-	{
-		'doctype': u'DocPerm',
-		'role': u'HR User'
-	},
-
-	# DocPerm
-	{
-		'doctype': u'DocPerm',
-		'role': u'HR Manager'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'trash_reason',
-		'fieldtype': u'Small Text',
-		'label': u'Trash Reason',
-		'oldfieldname': u'trash_reason',
-		'oldfieldtype': u'Small Text',
-		'permlevel': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'earning_name',
-		'fieldtype': u'Data',
-		'label': u'Name',
-		'oldfieldname': u'earning_name',
-		'oldfieldtype': u'Data',
-		'permlevel': 0,
-		'reqd': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'description',
-		'fieldtype': u'Small Text',
-		'label': u'Description',
-		'oldfieldname': u'description',
-		'oldfieldtype': u'Small Text',
-		'permlevel': 0,
-		'reqd': 0,
-		'width': u'300px'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'doctype': u'DocField',
-		'fieldname': u'taxable',
-		'fieldtype': u'Select',
-		'label': u'Taxable',
-		'oldfieldname': u'taxable',
-		'oldfieldtype': u'Select',
-		'options': u'\nYes\nNo',
-		'permlevel': 0,
-		'reqd': 1,
-		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'depends_on': u"eval:doc.taxable=='No'",
-		'doctype': u'DocField',
-		'fieldname': u'exemption_limit',
-		'fieldtype': u'Currency',
-		'hidden': 1,
-		'label': u'Exemption Limit',
-		'oldfieldname': u'exemption_limit',
-		'oldfieldtype': u'Currency',
-		'permlevel': 0
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-03-27 14:35:54", 
+  "modified_by": "Administrator", 
+  "modified": "2012-03-27 14:35:54"
+ }, 
+ {
+  "section_style": "Simple", 
+  "module": "HR", 
+  "server_code_error": " ", 
+  "allow_trash": 1, 
+  "doctype": "DocType", 
+  "autoname": "field:earning_name", 
+  "document_type": "Master", 
+  "name": "__common__", 
+  "colour": "White:FFF", 
+  "show_in_menu": 0, 
+  "version": 13
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "Earning Type", 
+  "doctype": "DocField", 
+  "parenttype": "DocType", 
+  "parentfield": "fields"
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "Earning Type", 
+  "read": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "write": 1, 
+  "parenttype": "DocType", 
+  "cancel": 1, 
+  "permlevel": 0, 
+  "parentfield": "permissions"
+ }, 
+ {
+  "name": "Earning Type", 
+  "doctype": "DocType"
+ }, 
+ {
+  "role": "System Manager", 
+  "doctype": "DocPerm"
+ }, 
+ {
+  "role": "HR User", 
+  "doctype": "DocPerm"
+ }, 
+ {
+  "role": "HR Manager", 
+  "doctype": "DocPerm"
+ }, 
+ {
+  "oldfieldtype": "Small Text", 
+  "doctype": "DocField", 
+  "label": "Trash Reason", 
+  "oldfieldname": "trash_reason", 
+  "fieldname": "trash_reason", 
+  "fieldtype": "Small Text", 
+  "permlevel": 1
+ }, 
+ {
+  "oldfieldtype": "Data", 
+  "doctype": "DocField", 
+  "label": "Name", 
+  "oldfieldname": "earning_name", 
+  "fieldname": "earning_name", 
+  "fieldtype": "Data", 
+  "reqd": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "oldfieldtype": "Small Text", 
+  "doctype": "DocField", 
+  "label": "Description", 
+  "oldfieldname": "description", 
+  "width": "300px", 
+  "fieldname": "description", 
+  "fieldtype": "Small Text", 
+  "reqd": 0, 
+  "permlevel": 0
+ }, 
+ {
+  "oldfieldtype": "Select", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Taxable", 
+  "oldfieldname": "taxable", 
+  "trigger": "Client", 
+  "fieldname": "taxable", 
+  "fieldtype": "Select", 
+  "reqd": 1, 
+  "options": "\nYes\nNo", 
+  "permlevel": 0
+ }, 
+ {
+  "oldfieldtype": "Currency", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Exemption Limit", 
+  "oldfieldname": "exemption_limit", 
+  "fieldname": "exemption_limit", 
+  "fieldtype": "Currency", 
+  "depends_on": "eval:doc.taxable=='No'", 
+  "hidden": 1, 
+  "permlevel": 0
+ }
 ]

@@ -1,28 +1,21 @@
-# Page, attributions
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-03-01 12:30:42',
-		'docstatus': 0,
-		'modified': '2012-03-01 12:30:42',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
-	},
-
-	# These values are common for all Page
-	{
-		'doctype': 'Page',
-		'module': u'Home',
-		'name': '__common__',
-		'page_name': u'attributions',
-		'standard': u'Yes',
-		'title': u'Attributions'
-	},
-
-	# Page, attributions
-	{
-		'doctype': 'Page',
-		'name': u'attributions'
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-03-01 12:30:42", 
+  "modified_by": "Administrator", 
+  "modified": "2012-03-01 12:30:42"
+ }, 
+ {
+  "name": "__common__", 
+  "title": "Attributions", 
+  "module": "Home", 
+  "doctype": "Page", 
+  "page_name": "attributions", 
+  "standard": "Yes"
+ }, 
+ {
+  "name": "attributions", 
+  "doctype": "Page"
+ }
 ]

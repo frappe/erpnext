@@ -1,79 +1,56 @@
-# Page, Sales Browser
 [
-
-	# These values are common in all dictionaries
-	{
-		u'creation': '2012-06-14 15:07:26',
-		u'docstatus': 0,
-		u'modified': '2012-10-04 17:34:55',
-		u'modified_by': u'Administrator',
-		u'owner': u'Administrator'
-	},
-
-	# These values are common for all Page
-	{
-		u'doctype': u'Page',
-		'module': u'Selling',
-		u'name': u'__common__',
-		'page_name': u'Sales Browser',
-		'show_in_menu': 0,
-		'standard': u'Yes'
-	},
-
-	# These values are common for all Page Role
-	{
-		u'doctype': u'Page Role',
-		u'name': u'__common__',
-		'parent': u'Sales Browser',
-		'parentfield': u'roles',
-		'parenttype': u'Page'
-	},
-
-	# Page, Sales Browser
-	{
-		u'doctype': u'Page',
-		u'name': u'Sales Browser'
-	},
-
-	# Page Role
-	{
-		u'doctype': u'Page Role',
-		'role': u'Sales Master Manager'
-	},
-
-	# Page Role
-	{
-		u'doctype': u'Page Role',
-		'role': u'Material Master Manager'
-	},
-
-	# Page Role
-	{
-		u'doctype': u'Page Role',
-		'role': u'Accounts Manager'
-	},
-
-	# Page Role
-	{
-		u'doctype': u'Page Role',
-		'role': u'Sales Master Manager'
-	},
-
-	# Page Role
-	{
-		u'doctype': u'Page Role',
-		'role': u'Purchase Manager'
-	},
-
-	# Page Role
-	{
-		u'doctype': u'Page Role',
-		'role': u'Purchase Master Manager'
-	},
-
-	# Page Role
-	{
-		u'doctype': u'Page Role',
-		'role': u'Material Manager'
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-06-14 15:07:26", 
+  "modified_by": "Administrator", 
+  "modified": "2012-10-04 17:34:55"
+ }, 
+ {
+  "name": "__common__", 
+  "module": "Selling", 
+  "show_in_menu": 0, 
+  "page_name": "Sales Browser", 
+  "doctype": "Page", 
+  "standard": "Yes"
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "Sales Browser", 
+  "doctype": "Page Role", 
+  "parenttype": "Page", 
+  "parentfield": "roles"
+ }, 
+ {
+  "name": "Sales Browser", 
+  "doctype": "Page"
+ }, 
+ {
+  "role": "Sales Master Manager", 
+  "doctype": "Page Role"
+ }, 
+ {
+  "role": "Material Master Manager", 
+  "doctype": "Page Role"
+ }, 
+ {
+  "role": "Accounts Manager", 
+  "doctype": "Page Role"
+ }, 
+ {
+  "role": "Sales Master Manager", 
+  "doctype": "Page Role"
+ }, 
+ {
+  "role": "Purchase Manager", 
+  "doctype": "Page Role"
+ }, 
+ {
+  "role": "Purchase Master Manager", 
+  "doctype": "Page Role"
+ }, 
+ {
+  "role": "Material Manager", 
+  "doctype": "Page Role"
+ }
 ]

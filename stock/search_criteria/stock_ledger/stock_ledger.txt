@@ -1,36 +1,29 @@
-# Search Criteria, stock_ledger
 [
-
-	# These values are common in all dictionaries
-	{
-		u'creation': '2012-09-14 11:30:39',
-		u'docstatus': 0,
-		u'modified': '2012-11-06 10:27:11',
-		u'modified_by': u'Administrator',
-		u'owner': u'Administrator'
-	},
-
-	# These values are common for all Search Criteria
-	{
-		'add_col': u'`tabItem`.`item_name`\n`tabItem`.`description`',
-		'add_cond': u'`tabItem`.`name` = `tabStock Ledger Entry`.`item_code`',
-		'add_tab': u'`tabItem`',
-		'columns': u'Stock Ledger Entry\x01Item Code,Stock Ledger Entry\x01Warehouse,Stock Ledger Entry\x01Posting Date,Stock Ledger Entry\x01Posting Time,Stock Ledger Entry\x01Actual Quantity,Stock Ledger Entry\x01Bin Actual Qty After Transaction,Stock Ledger Entry\x01Voucher Type,Stock Ledger Entry\x01Voucher No',
-		'criteria_name': u'Stock Ledger',
-		'doc_type': u'Stock Ledger Entry',
-		u'doctype': u'Search Criteria',
-		'filters': u'{"Stock Ledger Entry\\u0001Warehouse Type":[],"Stock Ledger Entry\\u0001Company":[],"Stock Ledger Entry\\u0001Is Cancelled":["No"],"Stock Ledger Entry\\u0001Is Stock Entry":[]}',
-		'module': u'Stock',
-		u'name': u'__common__',
-		'page_len': 50,
-		'sort_by': u'`tabStock Ledger Entry`.`posting_date`, `tabStock Ledger Entry`.`posting_time`, `tabStock Ledger Entry`.`name`',
-		'sort_order': u'ASC',
-		'standard': u'Yes'
-	},
-
-	# Search Criteria, stock_ledger
-	{
-		u'doctype': u'Search Criteria',
-		u'name': u'stock_ledger'
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-09-14 11:30:39", 
+  "modified_by": "Administrator", 
+  "modified": "2012-11-06 10:27:11"
+ }, 
+ {
+  "add_col": "`tabItem`.`item_name`\n`tabItem`.`description`", 
+  "module": "Stock", 
+  "standard": "Yes", 
+  "sort_order": "ASC", 
+  "add_tab": "`tabItem`", 
+  "doc_type": "Stock Ledger Entry", 
+  "name": "__common__", 
+  "filters": "{\"Stock Ledger Entry\\u0001Warehouse Type\":[],\"Stock Ledger Entry\\u0001Company\":[],\"Stock Ledger Entry\\u0001Is Cancelled\":[\"No\"],\"Stock Ledger Entry\\u0001Is Stock Entry\":[]}", 
+  "add_cond": "`tabItem`.`name` = `tabStock Ledger Entry`.`item_code`", 
+  "doctype": "Search Criteria", 
+  "sort_by": "`tabStock Ledger Entry`.`posting_date`, `tabStock Ledger Entry`.`posting_time`, `tabStock Ledger Entry`.`name`", 
+  "page_len": 50, 
+  "criteria_name": "Stock Ledger", 
+  "columns": "Stock Ledger Entry\u0001Item Code,Stock Ledger Entry\u0001Warehouse,Stock Ledger Entry\u0001Posting Date,Stock Ledger Entry\u0001Posting Time,Stock Ledger Entry\u0001Actual Quantity,Stock Ledger Entry\u0001Bin Actual Qty After Transaction,Stock Ledger Entry\u0001Voucher Type,Stock Ledger Entry\u0001Voucher No"
+ }, 
+ {
+  "name": "stock_ledger", 
+  "doctype": "Search Criteria"
+ }
 ]

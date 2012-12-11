@@ -1,57 +1,44 @@
-# DocType, Stock Ledger
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-03-27 14:36:38',
-		'docstatus': 0,
-		'modified': '2012-03-27 14:36:38',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
-	},
-
-	# These values are common for all DocType
-	{
-		'colour': u'White:FFF',
-		'doctype': 'DocType',
-		'hide_toolbar': 1,
-		'in_create': 1,
-		'issingle': 1,
-		'module': u'Stock',
-		'name': '__common__',
-		'read_only': 1,
-		'section_style': u'Simple',
-		'server_code_error': u' ',
-		'show_in_menu': 0,
-		'version': 10
-	},
-
-	# These values are common for all DocPerm
-	{
-		'doctype': u'DocPerm',
-		'name': '__common__',
-		'parent': u'Stock Ledger',
-		'parentfield': u'permissions',
-		'parenttype': u'DocType',
-		'permlevel': 1,
-		'read': 1
-	},
-
-	# DocType, Stock Ledger
-	{
-		'doctype': 'DocType',
-		'name': u'Stock Ledger'
-	},
-
-	# DocPerm
-	{
-		'doctype': u'DocPerm',
-		'role': u'All'
-	},
-
-	# DocPerm
-	{
-		'doctype': u'DocPerm',
-		'role': u'Material User'
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-03-27 14:36:38", 
+  "modified_by": "Administrator", 
+  "modified": "2012-03-27 14:36:38"
+ }, 
+ {
+  "section_style": "Simple", 
+  "in_create": 1, 
+  "module": "Stock", 
+  "server_code_error": " ", 
+  "read_only": 1, 
+  "issingle": 1, 
+  "name": "__common__", 
+  "colour": "White:FFF", 
+  "doctype": "DocType", 
+  "show_in_menu": 0, 
+  "version": 10, 
+  "hide_toolbar": 1
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "Stock Ledger", 
+  "read": 1, 
+  "doctype": "DocPerm", 
+  "parenttype": "DocType", 
+  "permlevel": 1, 
+  "parentfield": "permissions"
+ }, 
+ {
+  "name": "Stock Ledger", 
+  "doctype": "DocType"
+ }, 
+ {
+  "role": "All", 
+  "doctype": "DocPerm"
+ }, 
+ {
+  "role": "Material User", 
+  "doctype": "DocPerm"
+ }
 ]

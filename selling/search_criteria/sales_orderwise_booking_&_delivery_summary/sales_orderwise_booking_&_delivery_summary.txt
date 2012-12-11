@@ -1,37 +1,30 @@
-# Search Criteria, sales_orderwise_booking_&_delivery_summary
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-04-03 12:49:52',
-		'docstatus': 0,
-		'modified': '2012-04-03 12:49:52',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
-	},
-
-	# These values are common for all Search Criteria
-	{
-		'add_col': u"SUM(CASE WHEN `tabSales Order`.`status` = 'Stopped' THEN (`tabSales Order Item`.`delivered_qty` * `tabSales Order Item`.`basic_rate`) ELSE (`tabSales Order Item`.`qty` * `tabSales Order Item`.`basic_rate`) END) AS 'Booking Total'\nSUM(`tabSales Order Item`.`delivered_qty` * `tabSales Order Item`.`basic_rate`) AS 'Delivered Amount'",
-		'columns': u'Sales Order\x01ID,Sales Order\x01Status,Sales Order\x01% Billed,Sales Order\x01Sales Order Date,Sales Order\x01Customer,Sales Order\x01Customer Name,Sales Order\x01Territory',
-		'criteria_name': u'Sales Orderwise Booking & Delivery Summary',
-		'description': u'Sales Orderwise Booking & Delivery Summary',
-		'doc_type': u'Sales Order Item',
-		'doctype': 'Search Criteria',
-		'filters': u"{'Sales Order\x01Submitted':1,'Sales Order\x01Status':'','Sales Order\x01Fiscal Year':''}",
-		'group_by': u'`tabSales Order`.`name`',
-		'module': u'Selling',
-		'name': '__common__',
-		'page_len': 50,
-		'parent_doc_type': u'Sales Order',
-		'sort_by': u'`tabSales Order`.`name`',
-		'sort_order': u'DESC',
-		'standard': u'Yes'
-	},
-
-	# Search Criteria, sales_orderwise_booking_&_delivery_summary
-	{
-		'doctype': 'Search Criteria',
-		'name': u'sales_orderwise_booking_&_delivery_summary'
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-04-03 12:49:52", 
+  "modified_by": "Administrator", 
+  "modified": "2012-04-03 12:49:52"
+ }, 
+ {
+  "add_col": "SUM(CASE WHEN `tabSales Order`.`status` = 'Stopped' THEN (`tabSales Order Item`.`delivered_qty` * `tabSales Order Item`.`basic_rate`) ELSE (`tabSales Order Item`.`qty` * `tabSales Order Item`.`basic_rate`) END) AS 'Booking Total'\nSUM(`tabSales Order Item`.`delivered_qty` * `tabSales Order Item`.`basic_rate`) AS 'Delivered Amount'", 
+  "parent_doc_type": "Sales Order", 
+  "module": "Selling", 
+  "standard": "Yes", 
+  "sort_order": "DESC", 
+  "filters": "{'Sales Order\u0001Submitted':1,'Sales Order\u0001Status':'','Sales Order\u0001Fiscal Year':''}", 
+  "description": "Sales Orderwise Booking & Delivery Summary", 
+  "doc_type": "Sales Order Item", 
+  "name": "__common__", 
+  "doctype": "Search Criteria", 
+  "sort_by": "`tabSales Order`.`name`", 
+  "group_by": "`tabSales Order`.`name`", 
+  "page_len": 50, 
+  "criteria_name": "Sales Orderwise Booking & Delivery Summary", 
+  "columns": "Sales Order\u0001ID,Sales Order\u0001Status,Sales Order\u0001% Billed,Sales Order\u0001Sales Order Date,Sales Order\u0001Customer,Sales Order\u0001Customer Name,Sales Order\u0001Territory"
+ }, 
+ {
+  "name": "sales_orderwise_booking_&_delivery_summary", 
+  "doctype": "Search Criteria"
+ }
 ]

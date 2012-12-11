@@ -1,38 +1,31 @@
-# Item, Nebula 7
 [
-
-	# These values are common in all dictionaries
-	{
-		u'creation': '2012-08-26 11:32:02',
-		u'docstatus': 0,
-		u'modified': '2012-08-26 11:32:02',
-		u'modified_by': u'Administrator',
-		u'owner': u'Administrator'
-	},
-
-	# These values are common for all Item
-	{
-		'description': u'Nebula 7',
-		'doctype': 'Item',
-		'has_batch_no': u'No',
-		'has_serial_no': u'No',
-		'inspection_required': u'No',
-		'is_sub_contracted_item': 'Yes',
-		'is_purchase_item': u'No',
-		'is_sales_item': u'Yes',
-		'is_service_item': u'No',
-		'is_stock_item': u'Yes',
-		'item_code': u'Nebula 7',
-		'item_group': u'Small Tablets',
-		'item_name': u'Nebula 7',
-		u'name': u'__common__',
-		'stock_uom': u'Nos',
-		'default_warehouse': u'Default Warehouse'
-	},
-
-	# Item, Nebula 7
-	{
-		u'doctype': 'Item',
-		'name': u'Nebula 7'
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-08-26 11:32:02", 
+  "modified_by": "Administrator", 
+  "modified": "2012-08-26 11:32:02"
+ }, 
+ {
+  "is_service_item": "No", 
+  "description": "Nebula 7", 
+  "item_code": "Nebula 7", 
+  "is_stock_item": "Yes", 
+  "inspection_required": "No", 
+  "is_purchase_item": "No", 
+  "name": "__common__", 
+  "item_name": "Nebula 7", 
+  "item_group": "Small Tablets", 
+  "doctype": "Item", 
+  "is_sales_item": "Yes", 
+  "is_sub_contracted_item": "Yes", 
+  "stock_uom": "Nos", 
+  "has_batch_no": "No", 
+  "has_serial_no": "No", 
+  "default_warehouse": "Default Warehouse"
+ }, 
+ {
+  "name": "Nebula 7", 
+  "doctype": "Item"
+ }
 ]

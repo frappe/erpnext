@@ -1,97 +1,76 @@
-# DocType, Designation
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-03-27 14:35:54',
-		'docstatus': 0,
-		'modified': '2012-03-27 14:35:54',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
-	},
-
-	# These values are common for all DocType
-	{
-		'allow_trash': 1,
-		'autoname': u'field:designation_name',
-		'colour': u'White:FFF',
-		'doctype': 'DocType',
-		'document_type': u'Master',
-		'module': u'HR',
-		'name': '__common__',
-		'section_style': u'Simple',
-		'server_code_error': u' ',
-		'show_in_menu': 0,
-		'version': 7
-	},
-
-	# These values are common for all DocField
-	{
-		'doctype': u'DocField',
-		'name': '__common__',
-		'parent': u'Designation',
-		'parentfield': u'fields',
-		'parenttype': u'DocType'
-	},
-
-	# These values are common for all DocPerm
-	{
-		'cancel': 1,
-		'create': 1,
-		'doctype': u'DocPerm',
-		'name': '__common__',
-		'parent': u'Designation',
-		'parentfield': u'permissions',
-		'parenttype': u'DocType',
-		'permlevel': 0,
-		'read': 1,
-		'write': 1
-	},
-
-	# DocType, Designation
-	{
-		'doctype': 'DocType',
-		'name': u'Designation'
-	},
-
-	# DocPerm
-	{
-		'doctype': u'DocPerm',
-		'role': u'System Manager'
-	},
-
-	# DocPerm
-	{
-		'doctype': u'DocPerm',
-		'role': u'HR User'
-	},
-
-	# DocPerm
-	{
-		'doctype': u'DocPerm',
-		'role': u'HR Manager'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'trash_reason',
-		'fieldtype': u'Small Text',
-		'label': u'Trash Reason',
-		'oldfieldname': u'trash_reason',
-		'oldfieldtype': u'Small Text',
-		'permlevel': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'designation_name',
-		'fieldtype': u'Data',
-		'label': u'Designation',
-		'oldfieldname': u'designation_name',
-		'oldfieldtype': u'Data',
-		'permlevel': 0,
-		'reqd': 1
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-03-27 14:35:54", 
+  "modified_by": "Administrator", 
+  "modified": "2012-03-27 14:35:54"
+ }, 
+ {
+  "section_style": "Simple", 
+  "module": "HR", 
+  "server_code_error": " ", 
+  "allow_trash": 1, 
+  "doctype": "DocType", 
+  "autoname": "field:designation_name", 
+  "document_type": "Master", 
+  "name": "__common__", 
+  "colour": "White:FFF", 
+  "show_in_menu": 0, 
+  "version": 7
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "Designation", 
+  "doctype": "DocField", 
+  "parenttype": "DocType", 
+  "parentfield": "fields"
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "Designation", 
+  "read": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "write": 1, 
+  "parenttype": "DocType", 
+  "cancel": 1, 
+  "permlevel": 0, 
+  "parentfield": "permissions"
+ }, 
+ {
+  "name": "Designation", 
+  "doctype": "DocType"
+ }, 
+ {
+  "role": "System Manager", 
+  "doctype": "DocPerm"
+ }, 
+ {
+  "role": "HR User", 
+  "doctype": "DocPerm"
+ }, 
+ {
+  "role": "HR Manager", 
+  "doctype": "DocPerm"
+ }, 
+ {
+  "oldfieldtype": "Small Text", 
+  "doctype": "DocField", 
+  "label": "Trash Reason", 
+  "oldfieldname": "trash_reason", 
+  "fieldname": "trash_reason", 
+  "fieldtype": "Small Text", 
+  "permlevel": 1
+ }, 
+ {
+  "oldfieldtype": "Data", 
+  "doctype": "DocField", 
+  "label": "Designation", 
+  "oldfieldname": "designation_name", 
+  "fieldname": "designation_name", 
+  "fieldtype": "Data", 
+  "reqd": 1, 
+  "permlevel": 0
+ }
 ]

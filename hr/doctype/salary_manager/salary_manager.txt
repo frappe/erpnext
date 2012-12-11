@@ -1,266 +1,207 @@
-# DocType, Salary Manager
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-03-27 14:35:59',
-		'docstatus': 0,
-		'modified': '2012-03-27 14:35:59',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
-	},
-
-	# These values are common for all DocType
-	{
-		'_last_update': u'1314253977',
-		'allow_copy': 1,
-		'allow_email': 1,
-		'allow_print': 1,
-		'colour': u'White:FFF',
-		'doctype': 'DocType',
-		'document_type': u'Other',
-		'issingle': 1,
-		'module': u'HR',
-		'name': '__common__',
-		'section_style': u'Simple',
-		'show_in_menu': 1,
-		'version': 30
-	},
-
-	# These values are common for all DocField
-	{
-		'doctype': u'DocField',
-		'name': '__common__',
-		'parent': u'Salary Manager',
-		'parentfield': u'fields',
-		'parenttype': u'DocType',
-		'permlevel': 0
-	},
-
-	# These values are common for all DocPerm
-	{
-		'create': 1,
-		'doctype': u'DocPerm',
-		'name': '__common__',
-		'parent': u'Salary Manager',
-		'parentfield': u'permissions',
-		'parenttype': u'DocType',
-		'permlevel': 0,
-		'read': 1,
-		'write': 1
-	},
-
-	# DocType, Salary Manager
-	{
-		'doctype': 'DocType',
-		'name': u'Salary Manager'
-	},
-
-	# DocPerm
-	{
-		'doctype': u'DocPerm',
-		'role': u'System Manager'
-	},
-
-	# DocPerm
-	{
-		'doctype': u'DocPerm',
-		'role': u'HR User'
-	},
-
-	# DocPerm
-	{
-		'doctype': u'DocPerm',
-		'role': u'HR Manager'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'doctype': u'DocField',
-		'fieldname': u'document_description',
-		'fieldtype': u'HTML',
-		'label': u'Document Description',
-		'options': u'<div class="field_description">You can generate multiple salary slips based on the selected criteria, submit and mail those to the employee directly from here</div>'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'section_break0',
-		'fieldtype': u'Section Break'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'column_break0',
-		'fieldtype': u'Column Break',
-		'width': u'50%'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'company',
-		'fieldtype': u'Select',
-		'label': u'Company',
-		'options': u'link:Company',
-		'reqd': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'branch',
-		'fieldtype': u'Link',
-		'label': u'Branch',
-		'options': u'Branch'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'department',
-		'fieldtype': u'Link',
-		'label': u'Department',
-		'options': u'Department'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'designation',
-		'fieldtype': u'Link',
-		'label': u'Designation',
-		'options': u'Designation'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'column_break1',
-		'fieldtype': u'Column Break',
-		'width': u'50%'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'grade',
-		'fieldtype': u'Select',
-		'label': u'Grade',
-		'options': u'link:Grade'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'doctype': u'DocField',
-		'fieldname': u'fiscal_year',
-		'fieldtype': u'Select',
-		'label': u'Fiscal Year',
-		'options': u'link:Fiscal Year',
-		'reqd': 1
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'doctype': u'DocField',
-		'fieldname': u'month',
-		'fieldtype': u'Select',
-		'label': u'Month',
-		'options': u'\n01\n02\n03\n04\n05\n06\n07\n08\n09\n10\n11\n12',
-		'reqd': 1
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'description': u'Check if you want to send salary slip in mail to each employee while submitting salary slip',
-		'doctype': u'DocField',
-		'fieldname': u'send_email',
-		'fieldtype': u'Check',
-		'label': u'Send Email'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'section_break1',
-		'fieldtype': u'Section Break'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'column_break2',
-		'fieldtype': u'Column Break',
-		'width': u'50%'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'description': u'Creates salary slip for above mentioned criteria.',
-		'doctype': u'DocField',
-		'fieldname': u'create_salary_slip',
-		'fieldtype': u'Button',
-		'label': u'Create Salary Slip',
-		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'column_break3',
-		'fieldtype': u'Column Break',
-		'width': u'25%'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'description': u'Submit all salary slips for the above selected criteria',
-		'doctype': u'DocField',
-		'fieldname': u'submit_salary_slip',
-		'fieldtype': u'Button',
-		'label': u'Submit Salary Slip',
-		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'column_break4',
-		'fieldtype': u'Column Break',
-		'width': u'25%'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'description': u'Create Bank Voucher for the total salary paid for the above selected criteria',
-		'doctype': u'DocField',
-		'fieldname': u'make_bank_voucher',
-		'fieldtype': u'Button',
-		'label': u'Make Bank Voucher',
-		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'section_break2',
-		'fieldtype': u'Section Break'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'activity_log',
-		'fieldtype': u'HTML',
-		'label': u'Activity Log'
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-03-27 14:35:59", 
+  "modified_by": "Administrator", 
+  "modified": "2012-03-27 14:35:59"
+ }, 
+ {
+  "section_style": "Simple", 
+  "allow_print": 1, 
+  "module": "HR", 
+  "doctype": "DocType", 
+  "document_type": "Other", 
+  "allow_email": 1, 
+  "issingle": 1, 
+  "name": "__common__", 
+  "colour": "White:FFF", 
+  "_last_update": "1314253977", 
+  "show_in_menu": 1, 
+  "version": 30, 
+  "allow_copy": 1
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "Salary Manager", 
+  "doctype": "DocField", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "parentfield": "fields"
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "Salary Manager", 
+  "read": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "write": 1, 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "parentfield": "permissions"
+ }, 
+ {
+  "name": "Salary Manager", 
+  "doctype": "DocType"
+ }, 
+ {
+  "role": "System Manager", 
+  "doctype": "DocPerm"
+ }, 
+ {
+  "role": "HR User", 
+  "doctype": "DocPerm"
+ }, 
+ {
+  "role": "HR Manager", 
+  "doctype": "DocPerm"
+ }, 
+ {
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Document Description", 
+  "fieldname": "document_description", 
+  "fieldtype": "HTML", 
+  "options": "<div class=\"field_description\">You can generate multiple salary slips based on the selected criteria, submit and mail those to the employee directly from here</div>"
+ }, 
+ {
+  "fieldname": "section_break0", 
+  "fieldtype": "Section Break", 
+  "doctype": "DocField"
+ }, 
+ {
+  "width": "50%", 
+  "fieldname": "column_break0", 
+  "fieldtype": "Column Break", 
+  "doctype": "DocField"
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Company", 
+  "fieldname": "company", 
+  "fieldtype": "Select", 
+  "reqd": 1, 
+  "options": "link:Company"
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Branch", 
+  "fieldname": "branch", 
+  "fieldtype": "Link", 
+  "options": "Branch"
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Department", 
+  "fieldname": "department", 
+  "fieldtype": "Link", 
+  "options": "Department"
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Designation", 
+  "fieldname": "designation", 
+  "fieldtype": "Link", 
+  "options": "Designation"
+ }, 
+ {
+  "width": "50%", 
+  "fieldname": "column_break1", 
+  "fieldtype": "Column Break", 
+  "doctype": "DocField"
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Grade", 
+  "fieldname": "grade", 
+  "fieldtype": "Select", 
+  "options": "link:Grade"
+ }, 
+ {
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Fiscal Year", 
+  "fieldname": "fiscal_year", 
+  "fieldtype": "Select", 
+  "reqd": 1, 
+  "options": "link:Fiscal Year"
+ }, 
+ {
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Month", 
+  "fieldname": "month", 
+  "fieldtype": "Select", 
+  "reqd": 1, 
+  "options": "\n01\n02\n03\n04\n05\n06\n07\n08\n09\n10\n11\n12"
+ }, 
+ {
+  "description": "Check if you want to send salary slip in mail to each employee while submitting salary slip", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Send Email", 
+  "fieldname": "send_email", 
+  "fieldtype": "Check"
+ }, 
+ {
+  "fieldname": "section_break1", 
+  "fieldtype": "Section Break", 
+  "doctype": "DocField"
+ }, 
+ {
+  "width": "50%", 
+  "fieldname": "column_break2", 
+  "fieldtype": "Column Break", 
+  "doctype": "DocField"
+ }, 
+ {
+  "description": "Creates salary slip for above mentioned criteria.", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Create Salary Slip", 
+  "trigger": "Client", 
+  "fieldname": "create_salary_slip", 
+  "fieldtype": "Button"
+ }, 
+ {
+  "width": "25%", 
+  "fieldname": "column_break3", 
+  "fieldtype": "Column Break", 
+  "doctype": "DocField"
+ }, 
+ {
+  "description": "Submit all salary slips for the above selected criteria", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Submit Salary Slip", 
+  "trigger": "Client", 
+  "fieldname": "submit_salary_slip", 
+  "fieldtype": "Button"
+ }, 
+ {
+  "width": "25%", 
+  "fieldname": "column_break4", 
+  "fieldtype": "Column Break", 
+  "doctype": "DocField"
+ }, 
+ {
+  "description": "Create Bank Voucher for the total salary paid for the above selected criteria", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Make Bank Voucher", 
+  "trigger": "Client", 
+  "fieldname": "make_bank_voucher", 
+  "fieldtype": "Button"
+ }, 
+ {
+  "fieldname": "section_break2", 
+  "fieldtype": "Section Break", 
+  "doctype": "DocField"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "activity_log", 
+  "fieldtype": "HTML", 
+  "label": "Activity Log"
+ }
 ]

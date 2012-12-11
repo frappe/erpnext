@@ -1,35 +1,28 @@
-# Search Criteria, gross_profit
 [
-
-	# These values are common in all dictionaries
-	{
-		u'creation': '2012-05-14 18:22:18',
-		u'docstatus': 0,
-		u'modified': '2012-09-24 14:11:39',
-		u'modified_by': u'Administrator',
-		u'owner': u'Administrator'
-	},
-
-	# These values are common for all Search Criteria
-	{
-		'columns': u'Delivery Note\x01ID,Delivery Note\x01Posting Date,Delivery Note\x01Posting Time,Delivery Note Item\x01Item Code,Delivery Note Item\x01Item Name,Delivery Note Item\x01Description,Delivery Note Item\x01Warehouse,Delivery Note\x01Project Name,Delivery Note Item\x01Quantity,Delivery Note Item\x01Rate*,Delivery Note Item\x01Amount*',
-		'criteria_name': u'Gross Profit',
-		'description': u'Invoice wise',
-		'doc_type': u'Delivery Note Item',
-		u'doctype': u'Search Criteria',
-		'filters': u'{"Delivery Note\\u0001Submitted":1,"Delivery Note\\u0001Status":[],"Delivery Note\\u0001Fiscal Year":[]}',
-		'module': u'Selling',
-		u'name': u'__common__',
-		'page_len': 50,
-		'parent_doc_type': u'Delivery Note',
-		'sort_by': u'`tabDelivery Note`.`name`',
-		'sort_order': u'DESC',
-		'standard': u'Yes'
-	},
-
-	# Search Criteria, gross_profit
-	{
-		u'doctype': u'Search Criteria',
-		u'name': u'gross_profit'
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-05-14 18:22:18", 
+  "modified_by": "Administrator", 
+  "modified": "2012-09-24 14:11:39"
+ }, 
+ {
+  "description": "Invoice wise", 
+  "parent_doc_type": "Delivery Note", 
+  "module": "Selling", 
+  "standard": "Yes", 
+  "sort_order": "DESC", 
+  "filters": "{\"Delivery Note\\u0001Submitted\":1,\"Delivery Note\\u0001Status\":[],\"Delivery Note\\u0001Fiscal Year\":[]}", 
+  "doc_type": "Delivery Note Item", 
+  "name": "__common__", 
+  "doctype": "Search Criteria", 
+  "sort_by": "`tabDelivery Note`.`name`", 
+  "page_len": 50, 
+  "criteria_name": "Gross Profit", 
+  "columns": "Delivery Note\u0001ID,Delivery Note\u0001Posting Date,Delivery Note\u0001Posting Time,Delivery Note Item\u0001Item Code,Delivery Note Item\u0001Item Name,Delivery Note Item\u0001Description,Delivery Note Item\u0001Warehouse,Delivery Note\u0001Project Name,Delivery Note Item\u0001Quantity,Delivery Note Item\u0001Rate*,Delivery Note Item\u0001Amount*"
+ }, 
+ {
+  "name": "gross_profit", 
+  "doctype": "Search Criteria"
+ }
 ]

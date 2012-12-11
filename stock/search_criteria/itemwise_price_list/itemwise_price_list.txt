@@ -1,34 +1,27 @@
-# Search Criteria, itemwise_price_list
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-04-03 12:49:51',
-		'docstatus': 0,
-		'modified': '2012-04-03 12:49:51',
-		'modified_by': u'Administrator',
-		'owner': u'harshada@webnotestech.com'
-	},
-
-	# These values are common for all Search Criteria
-	{
-		'columns': u'Item\x01Item Name,Item\x01Item Group,Item Price\x01Price List Name,Item Price\x01Ref Rate,Item Price\x01Currency',
-		'criteria_name': u'Itemwise Price List',
-		'doc_type': u'Item Price',
-		'doctype': 'Search Criteria',
-		'filters': u"{'Item\x01Saved':1,'Item Price\x01Price List Name':'','Item Price\x01Currency':''}",
-		'module': u'Stock',
-		'name': '__common__',
-		'page_len': 50,
-		'parent_doc_type': u'Item',
-		'sort_by': u'`tabItem`.`item_name`',
-		'sort_order': u'DESC',
-		'standard': u'Yes'
-	},
-
-	# Search Criteria, itemwise_price_list
-	{
-		'doctype': 'Search Criteria',
-		'name': u'itemwise_price_list'
-	}
+ {
+  "owner": "harshada@webnotestech.com", 
+  "docstatus": 0, 
+  "creation": "2012-04-03 12:49:51", 
+  "modified_by": "Administrator", 
+  "modified": "2012-04-03 12:49:51"
+ }, 
+ {
+  "parent_doc_type": "Item", 
+  "module": "Stock", 
+  "standard": "Yes", 
+  "sort_order": "DESC", 
+  "filters": "{'Item\u0001Saved':1,'Item Price\u0001Price List Name':'','Item Price\u0001Currency':''}", 
+  "doc_type": "Item Price", 
+  "name": "__common__", 
+  "doctype": "Search Criteria", 
+  "sort_by": "`tabItem`.`item_name`", 
+  "page_len": 50, 
+  "criteria_name": "Itemwise Price List", 
+  "columns": "Item\u0001Item Name,Item\u0001Item Group,Item Price\u0001Price List Name,Item Price\u0001Ref Rate,Item Price\u0001Currency"
+ }, 
+ {
+  "name": "itemwise_price_list", 
+  "doctype": "Search Criteria"
+ }
 ]

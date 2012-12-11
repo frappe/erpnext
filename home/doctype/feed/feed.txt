@@ -1,105 +1,80 @@
-# DocType, Feed
 [
-
-	# These values are common in all dictionaries
-	{
-		u'creation': '2012-07-03 13:29:42',
-		u'docstatus': 0,
-		u'modified': '2012-10-15 15:23:02',
-		u'modified_by': u'Administrator',
-		u'owner': u'Administrator'
-	},
-
-	# These values are common for all DocType
-	{
-		'autoname': u'_FEED.#####',
-		'colour': u'White:FFF',
-		u'doctype': u'DocType',
-		'module': u'Home',
-		u'name': u'__common__',
-		'section_style': u'Simple',
-		'show_in_menu': 0,
-		'version': 1
-	},
-
-	# These values are common for all DocField
-	{
-		u'doctype': u'DocField',
-		u'name': u'__common__',
-		'parent': u'Feed',
-		'parentfield': u'fields',
-		'parenttype': u'DocType',
-		'permlevel': 0
-	},
-
-	# These values are common for all DocPerm
-	{
-		u'doctype': u'DocPerm',
-		u'name': u'__common__',
-		'parent': u'Feed',
-		'parentfield': u'permissions',
-		'parenttype': u'DocType',
-		'permlevel': 0,
-		'read': 1,
-		'role': u'System Manager'
-	},
-
-	# DocType, Feed
-	{
-		u'doctype': u'DocType',
-		u'name': u'Feed'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'feed_type',
-		'fieldtype': u'Select',
-		'label': u'Feed Type'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'doc_type',
-		'fieldtype': u'Data',
-		'label': u'Doc Type'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'doc_name',
-		'fieldtype': u'Data',
-		'label': u'Doc Name'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'subject',
-		'fieldtype': u'Data',
-		'label': u'Subject'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'color',
-		'fieldtype': u'Data',
-		'label': u'Color'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'full_name',
-		'fieldtype': u'Data',
-		'label': u'Full Name'
-	},
-
-	# DocPerm
-	{
-		u'doctype': u'DocPerm'
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-07-03 13:29:42", 
+  "modified_by": "Administrator", 
+  "modified": "2012-10-15 15:23:02"
+ }, 
+ {
+  "section_style": "Simple", 
+  "name": "__common__", 
+  "colour": "White:FFF", 
+  "module": "Home", 
+  "doctype": "DocType", 
+  "version": 1, 
+  "autoname": "_FEED.#####", 
+  "show_in_menu": 0
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "Feed", 
+  "doctype": "DocField", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "parentfield": "fields"
+ }, 
+ {
+  "parent": "Feed", 
+  "read": 1, 
+  "name": "__common__", 
+  "doctype": "DocPerm", 
+  "parenttype": "DocType", 
+  "role": "System Manager", 
+  "permlevel": 0, 
+  "parentfield": "permissions"
+ }, 
+ {
+  "name": "Feed", 
+  "doctype": "DocType"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "feed_type", 
+  "fieldtype": "Select", 
+  "label": "Feed Type"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "doc_type", 
+  "fieldtype": "Data", 
+  "label": "Doc Type"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "doc_name", 
+  "fieldtype": "Data", 
+  "label": "Doc Name"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "subject", 
+  "fieldtype": "Data", 
+  "label": "Subject"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "color", 
+  "fieldtype": "Data", 
+  "label": "Color"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "full_name", 
+  "fieldtype": "Data", 
+  "label": "Full Name"
+ }, 
+ {
+  "doctype": "DocPerm"
+ }
 ]

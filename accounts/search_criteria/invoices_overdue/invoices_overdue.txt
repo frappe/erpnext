@@ -1,34 +1,27 @@
-# Search Criteria, invoices-overdue
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-04-03 12:49:51',
-		'docstatus': 0,
-		'modified': '2012-04-03 12:49:51',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
-	},
-
-	# These values are common for all Search Criteria
-	{
-		'add_cond': u'`tabSales Invoice`.due_date<now()\n`tabSales Invoice`.outstanding_amount!=0\n`tabSales Invoice`.docstatus=1',
-		'columns': u'Sales Invoice\x01ID,Sales Invoice\x01Debit To,Sales Invoice\x01Voucher Date,Sales Invoice\x01Due Date,Sales Invoice\x01Outstanding Amount',
-		'criteria_name': u'Invoices-Overdue',
-		'doc_type': u'Sales Invoice',
-		'doctype': 'Search Criteria',
-		'filters': u"{'Sales Invoice\x01Saved':1,'Sales Invoice\x01Submitted':1,'Sales Invoice\x01Is Opening':'','Sales Invoice\x01Fiscal Year':''}",
-		'module': u'Accounts',
-		'name': '__common__',
-		'page_len': 50,
-		'sort_by': u'`tabSales Invoice`.`name`',
-		'sort_order': u'DESC',
-		'standard': u'Yes'
-	},
-
-	# Search Criteria, invoices-overdue
-	{
-		'doctype': 'Search Criteria',
-		'name': u'invoices-overdue'
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-04-03 12:49:51", 
+  "modified_by": "Administrator", 
+  "modified": "2012-04-03 12:49:51"
+ }, 
+ {
+  "module": "Accounts", 
+  "standard": "Yes", 
+  "sort_order": "DESC", 
+  "filters": "{'Sales Invoice\u0001Saved':1,'Sales Invoice\u0001Submitted':1,'Sales Invoice\u0001Is Opening':'','Sales Invoice\u0001Fiscal Year':''}", 
+  "doc_type": "Sales Invoice", 
+  "name": "__common__", 
+  "add_cond": "`tabSales Invoice`.due_date<now()\n`tabSales Invoice`.outstanding_amount!=0\n`tabSales Invoice`.docstatus=1", 
+  "doctype": "Search Criteria", 
+  "sort_by": "`tabSales Invoice`.`name`", 
+  "page_len": 50, 
+  "criteria_name": "Invoices-Overdue", 
+  "columns": "Sales Invoice\u0001ID,Sales Invoice\u0001Debit To,Sales Invoice\u0001Voucher Date,Sales Invoice\u0001Due Date,Sales Invoice\u0001Outstanding Amount"
+ }, 
+ {
+  "name": "invoices-overdue", 
+  "doctype": "Search Criteria"
+ }
 ]

@@ -1,197 +1,162 @@
-# DocType, Stock Reconciliation
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-04-13 11:56:39',
-		'docstatus': 0,
-		'modified': '2012-05-10 11:54:52',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
-	},
-
-	# These values are common for all DocType
-	{
-		'_last_update': u'1321617741',
-		'allow_attach': 1,
-		'autoname': u'SR/.######',
-		'colour': u'White:FFF',
-		'doctype': 'DocType',
-		'is_submittable': 1,
-		'max_attachments': 1,
-		'module': u'Stock',
-		'name': '__common__',
-		'search_fields': u'reconciliation_date',
-		'section_style': u'Tray',
-		'server_code_error': u' ',
-		'show_in_menu': 0,
-		'subject': u'Date: %(reconciliation_date)s, Time: %(reconciliation_time)s',
-		'version': 1
-	},
-
-	# These values are common for all DocField
-	{
-		'doctype': u'DocField',
-		'name': '__common__',
-		'parent': u'Stock Reconciliation',
-		'parentfield': u'fields',
-		'parenttype': u'DocType'
-	},
-
-	# These values are common for all DocPerm
-	{
-		'doctype': u'DocPerm',
-		'name': '__common__',
-		'parent': u'Stock Reconciliation',
-		'parentfield': u'permissions',
-		'parenttype': u'DocType',
-		'read': 1
-	},
-
-	# DocType, Stock Reconciliation
-	{
-		'doctype': 'DocType',
-		'name': u'Stock Reconciliation'
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 1,
-		'create': 1,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Material Manager',
-		'submit': 1,
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 0,
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Material Manager',
-		'submit': 0,
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'cancel': 1,
-		'create': 1,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'System Manager',
-		'submit': 1,
-		'write': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'steps',
-		'fieldtype': u'HTML',
-		'label': u'Steps',
-		'options': u'<div class="field_description"><b>Steps:</b><br>1. Enter Reconciliation Date and Time<br>2. Save the document<br>3. Attach csv file as per template.<br>4. Submit the document<br>5. Enter tilde (~) sign if no difference in qty or valuation rate</div>',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'reconciliation_date',
-		'fieldtype': u'Date',
-		'in_filter': 0,
-		'label': u'Reconciliation Date',
-		'oldfieldname': u'reconciliation_date',
-		'oldfieldtype': u'Date',
-		'permlevel': 0,
-		'reqd': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'reconciliation_time',
-		'fieldtype': u'Time',
-		'in_filter': 0,
-		'label': u'Reconciliation Time',
-		'oldfieldname': u'reconciliation_time',
-		'oldfieldtype': u'Time',
-		'permlevel': 0,
-		'reqd': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'remark',
-		'fieldtype': u'Text',
-		'label': u'Remark',
-		'oldfieldname': u'remark',
-		'oldfieldtype': u'Text',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'download_template',
-		'fieldtype': u'Button',
-		'label': u'Download Template',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'file_list',
-		'fieldtype': u'Text',
-		'hidden': 1,
-		'label': u'File List',
-		'no_copy': 1,
-		'oldfieldname': u'file_list',
-		'oldfieldtype': u'Text',
-		'permlevel': 1,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'diff_info',
-		'fieldtype': u'Text',
-		'hidden': 1,
-		'label': u'Diff Info',
-		'permlevel': 0,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		'depends_on': u'eval:doc.amended_from',
-		'description': u'The date at which current entry is corrected in the system.',
-		'doctype': u'DocField',
-		'fieldname': u'amendment_date',
-		'fieldtype': u'Date',
-		'label': u'Amendment Date',
-		'no_copy': 1,
-		'permlevel': 0,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'amended_from',
-		'fieldtype': u'Link',
-		'label': u'Amended From',
-		'no_copy': 1,
-		'options': u'Sales Invoice',
-		'permlevel': 1,
-		'print_hide': 1
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-04-13 11:56:39", 
+  "modified_by": "Administrator", 
+  "modified": "2012-05-10 11:54:52"
+ }, 
+ {
+  "section_style": "Tray", 
+  "allow_attach": 1, 
+  "is_submittable": 1, 
+  "search_fields": "reconciliation_date", 
+  "module": "Stock", 
+  "server_code_error": " ", 
+  "subject": "Date: %(reconciliation_date)s, Time: %(reconciliation_time)s", 
+  "_last_update": "1321617741", 
+  "autoname": "SR/.######", 
+  "name": "__common__", 
+  "colour": "White:FFF", 
+  "doctype": "DocType", 
+  "show_in_menu": 0, 
+  "max_attachments": 1, 
+  "version": 1
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "Stock Reconciliation", 
+  "doctype": "DocField", 
+  "parenttype": "DocType", 
+  "parentfield": "fields"
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "Stock Reconciliation", 
+  "read": 1, 
+  "doctype": "DocPerm", 
+  "parenttype": "DocType", 
+  "parentfield": "permissions"
+ }, 
+ {
+  "name": "Stock Reconciliation", 
+  "doctype": "DocType"
+ }, 
+ {
+  "amend": 0, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "submit": 1, 
+  "write": 1, 
+  "role": "Material Manager", 
+  "cancel": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "amend": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "submit": 0, 
+  "write": 0, 
+  "role": "Material Manager", 
+  "cancel": 0, 
+  "permlevel": 1
+ }, 
+ {
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "submit": 1, 
+  "write": 1, 
+  "role": "System Manager", 
+  "cancel": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "options": "<div class=\"field_description\"><b>Steps:</b><br>1. Enter Reconciliation Date and Time<br>2. Save the document<br>3. Attach csv file as per template.<br>4. Submit the document<br>5. Enter tilde (~) sign if no difference in qty or valuation rate</div>", 
+  "fieldname": "steps", 
+  "fieldtype": "HTML", 
+  "label": "Steps", 
+  "permlevel": 0
+ }, 
+ {
+  "oldfieldtype": "Date", 
+  "doctype": "DocField", 
+  "label": "Reconciliation Date", 
+  "oldfieldname": "reconciliation_date", 
+  "fieldname": "reconciliation_date", 
+  "fieldtype": "Date", 
+  "reqd": 1, 
+  "permlevel": 0, 
+  "in_filter": 0
+ }, 
+ {
+  "oldfieldtype": "Time", 
+  "doctype": "DocField", 
+  "label": "Reconciliation Time", 
+  "oldfieldname": "reconciliation_time", 
+  "fieldname": "reconciliation_time", 
+  "fieldtype": "Time", 
+  "reqd": 1, 
+  "permlevel": 0, 
+  "in_filter": 0
+ }, 
+ {
+  "oldfieldtype": "Text", 
+  "doctype": "DocField", 
+  "label": "Remark", 
+  "oldfieldname": "remark", 
+  "fieldname": "remark", 
+  "fieldtype": "Text", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Download Template", 
+  "fieldname": "download_template", 
+  "fieldtype": "Button", 
+  "permlevel": 0
+ }, 
+ {
+  "print_hide": 1, 
+  "no_copy": 1, 
+  "oldfieldtype": "Text", 
+  "doctype": "DocField", 
+  "label": "File List", 
+  "oldfieldname": "file_list", 
+  "fieldname": "file_list", 
+  "fieldtype": "Text", 
+  "hidden": 1, 
+  "permlevel": 1
+ }, 
+ {
+  "print_hide": 1, 
+  "doctype": "DocField", 
+  "label": "Diff Info", 
+  "fieldname": "diff_info", 
+  "fieldtype": "Text", 
+  "hidden": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "print_hide": 1, 
+  "description": "The date at which current entry is corrected in the system.", 
+  "no_copy": 1, 
+  "depends_on": "eval:doc.amended_from", 
+  "doctype": "DocField", 
+  "label": "Amendment Date", 
+  "fieldname": "amendment_date", 
+  "fieldtype": "Date", 
+  "permlevel": 0
+ }, 
+ {
+  "print_hide": 1, 
+  "no_copy": 1, 
+  "doctype": "DocField", 
+  "label": "Amended From", 
+  "permlevel": 1, 
+  "fieldname": "amended_from", 
+  "fieldtype": "Link", 
+  "options": "Sales Invoice"
+ }
 ]

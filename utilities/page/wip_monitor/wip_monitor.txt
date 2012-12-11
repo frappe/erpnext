@@ -1,28 +1,21 @@
-# Page, WIP Monitor
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2010-12-14 10:23:29',
-		'docstatus': 0,
-		'modified': '2011-01-04 11:12:39',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
-	},
-
-	# These values are common for all Page
-	{
-		'doctype': 'Page',
-		'module': 'Utilities',
-		'name': '__common__',
-		'page_name': 'WIP Monitor',
-		'show_in_menu': 0,
-		'standard': 'Yes'
-	},
-
-	# Page, WIP Monitor
-	{
-		'doctype': 'Page',
-		'name': 'WIP Monitor'
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2010-12-14 10:23:29", 
+  "modified_by": "Administrator", 
+  "modified": "2011-01-04 11:12:39"
+ }, 
+ {
+  "name": "__common__", 
+  "module": "Utilities", 
+  "show_in_menu": 0, 
+  "page_name": "WIP Monitor", 
+  "doctype": "Page", 
+  "standard": "Yes"
+ }, 
+ {
+  "name": "WIP Monitor", 
+  "doctype": "Page"
+ }
 ]

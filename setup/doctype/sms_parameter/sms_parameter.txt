@@ -1,57 +1,44 @@
-# DocType, SMS Parameter
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-03-27 14:36:25',
-		'docstatus': 0,
-		'modified': '2012-03-27 14:36:25',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
-	},
-
-	# These values are common for all DocType
-	{
-		'colour': u'White:FFF',
-		'doctype': 'DocType',
-		'istable': 1,
-		'module': u'Setup',
-		'name': '__common__',
-		'section_style': u'Simple',
-		'show_in_menu': 0,
-		'version': 4
-	},
-
-	# These values are common for all DocField
-	{
-		'doctype': u'DocField',
-		'fieldtype': u'Data',
-		'name': '__common__',
-		'parent': u'SMS Parameter',
-		'parentfield': u'fields',
-		'parenttype': u'DocType',
-		'permlevel': 0,
-		'reqd': 1,
-		'width': u'150px'
-	},
-
-	# DocType, SMS Parameter
-	{
-		'doctype': 'DocType',
-		'name': u'SMS Parameter'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'parameter',
-		'label': u'Parameter'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'value',
-		'label': u'Value'
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-03-27 14:36:25", 
+  "modified_by": "Administrator", 
+  "modified": "2012-03-27 14:36:25"
+ }, 
+ {
+  "section_style": "Simple", 
+  "istable": 1, 
+  "name": "__common__", 
+  "colour": "White:FFF", 
+  "module": "Setup", 
+  "doctype": "DocType", 
+  "version": 4, 
+  "show_in_menu": 0
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "SMS Parameter", 
+  "width": "150px", 
+  "doctype": "DocField", 
+  "reqd": 1, 
+  "parenttype": "DocType", 
+  "fieldtype": "Data", 
+  "permlevel": 0, 
+  "parentfield": "fields"
+ }, 
+ {
+  "name": "SMS Parameter", 
+  "doctype": "DocType"
+ }, 
+ {
+  "fieldname": "parameter", 
+  "doctype": "DocField", 
+  "label": "Parameter"
+ }, 
+ {
+  "fieldname": "value", 
+  "doctype": "DocField", 
+  "label": "Value"
+ }
 ]

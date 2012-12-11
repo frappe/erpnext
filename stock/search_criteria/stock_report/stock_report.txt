@@ -1,33 +1,26 @@
-# Search Criteria, stock_report
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-04-03 12:49:53',
-		'docstatus': 0,
-		'modified': '2012-04-03 12:49:53',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
-	},
-
-	# These values are common for all Search Criteria
-	{
-		'columns': u'Stock Ledger Entry\x01ID',
-		'criteria_name': u'Stock Report',
-		'doc_type': u'Stock Ledger Entry',
-		'doctype': 'Search Criteria',
-		'filters': u"{'Stock Ledger Entry\x01Is Cancelled':'','Stock Ledger Entry\x01Is Stock Entry':''}",
-		'module': u'Stock',
-		'name': '__common__',
-		'page_len': 50,
-		'sort_by': u'`tabStock Ledger Entry`.`name`',
-		'sort_order': u'DESC',
-		'standard': u'Yes'
-	},
-
-	# Search Criteria, stock_report
-	{
-		'doctype': 'Search Criteria',
-		'name': u'stock_report'
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-04-03 12:49:53", 
+  "modified_by": "Administrator", 
+  "modified": "2012-04-03 12:49:53"
+ }, 
+ {
+  "module": "Stock", 
+  "standard": "Yes", 
+  "sort_order": "DESC", 
+  "filters": "{'Stock Ledger Entry\u0001Is Cancelled':'','Stock Ledger Entry\u0001Is Stock Entry':''}", 
+  "doctype": "Search Criteria", 
+  "doc_type": "Stock Ledger Entry", 
+  "name": "__common__", 
+  "sort_by": "`tabStock Ledger Entry`.`name`", 
+  "page_len": 50, 
+  "criteria_name": "Stock Report", 
+  "columns": "Stock Ledger Entry\u0001ID"
+ }, 
+ {
+  "name": "stock_report", 
+  "doctype": "Search Criteria"
+ }
 ]

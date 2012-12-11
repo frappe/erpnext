@@ -1,374 +1,293 @@
-# DocType, Email Digest
 [
-
-	# These values are common in all dictionaries
-	{
-		u'creation': '2012-09-18 10:50:53',
-		u'docstatus': 0,
-		u'modified': '2012-11-13 15:10:35',
-		u'modified_by': u'Administrator',
-		u'owner': u'Administrator'
-	},
-
-	# These values are common for all DocType
-	{
-		'_last_update': u'1324556758',
-		'autoname': u'Prompt',
-		'colour': u'White:FFF',
-		'description': u'Send regular summary reports via Email.',
-		u'doctype': u'DocType',
-		'document_type': u'System',
-		'module': u'Setup',
-		u'name': u'__common__',
-		'section_style': u'Simple',
-		'show_in_menu': 0,
-		'version': 1
-	},
-
-	# These values are common for all DocField
-	{
-		u'doctype': u'DocField',
-		u'name': u'__common__',
-		'parent': u'Email Digest',
-		'parentfield': u'fields',
-		'parenttype': u'DocType'
-	},
-
-	# These values are common for all DocPerm
-	{
-		u'doctype': u'DocPerm',
-		u'name': u'__common__',
-		'parent': u'Email Digest',
-		'parentfield': u'permissions',
-		'parenttype': u'DocType',
-		'read': 1,
-		'role': u'System Manager'
-	},
-
-	# DocType, Email Digest
-	{
-		u'doctype': u'DocType',
-		u'name': u'Email Digest'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'settings',
-		'fieldtype': u'Section Break',
-		'label': u'Email Digest Settings',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'column_break0',
-		'fieldtype': u'Column Break',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'enabled',
-		'fieldtype': u'Check',
-		'label': u'Enabled',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'company',
-		'fieldtype': u'Select',
-		'label': u'For Company',
-		'options': u'link:Company',
-		'permlevel': 0,
-		'reqd': 1
-	},
-
-	# DocField
-	{
-		'allow_on_submit': 0,
-		u'doctype': u'DocField',
-		'fieldname': u'frequency',
-		'fieldtype': u'Select',
-		'label': u'How frequently?',
-		'options': u'Daily\nWeekly\nMonthly',
-		'permlevel': 0,
-		'reqd': 1
-	},
-
-	# DocField
-	{
-		'depends_on': u'eval:doc.enabled',
-		u'doctype': u'DocField',
-		'fieldname': u'next_send',
-		'fieldtype': u'Data',
-		'label': u'Next email will be sent on:',
-		'permlevel': 1
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'column_break1',
-		'fieldtype': u'Column Break',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'description': u'Note: Email will not be sent to disabled users',
-		u'doctype': u'DocField',
-		'fieldname': u'recipient_list',
-		'fieldtype': u'Text',
-		'label': u'Recipients',
-		'permlevel': 1,
-		'reqd': 1
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'addremove_recipients',
-		'fieldtype': u'Button',
-		'label': u'Add/Remove Recipients',
-		'permlevel': 0,
-		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'description': u'Check all the items below that you want to send in this digest.',
-		u'doctype': u'DocField',
-		'fieldname': u'select_digest_content',
-		'fieldtype': u'Section Break',
-		'label': u'Select Digest Content',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		u'doctype': u'DocField',
-		'fieldname': u'new_leads',
-		'fieldtype': u'Check',
-		'label': u'New Leads',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'new_enquiries',
-		'fieldtype': u'Check',
-		'label': u'New Enquiries',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'new_quotations',
-		'fieldtype': u'Check',
-		'label': u'New Quotations',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'new_sales_orders',
-		'fieldtype': u'Check',
-		'label': u'New Sales Orders',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'new_delivery_notes',
-		'fieldtype': u'Check',
-		'label': u'New Delivery Notes',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'new_purchase_requests',
-		'fieldtype': u'Check',
-		'label': u'New Purchase Requests',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'new_supplier_quotations',
-		'fieldtype': u'Check',
-		'label': u'New Supplier Quotations',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'new_purchase_orders',
-		'fieldtype': u'Check',
-		'label': u'New Purchase Orders',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'new_purchase_receipts',
-		'fieldtype': u'Check',
-		'label': u'New Purchase Receipts',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'new_stock_entries',
-		'fieldtype': u'Check',
-		'label': u'New Stock Entries',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'new_support_tickets',
-		'fieldtype': u'Check',
-		'label': u'New Support Tickets',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'new_communications',
-		'fieldtype': u'Check',
-		'label': u'New Communications',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'new_projects',
-		'fieldtype': u'Check',
-		'label': u'New Projects',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'open_tickets',
-		'fieldtype': u'Check',
-		'label': u'Open Tickets',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'cb1',
-		'fieldtype': u'Column Break',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'income_year_to_date',
-		'fieldtype': u'Check',
-		'label': u'Income Year to Date',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'bank_balance',
-		'fieldtype': u'Check',
-		'label': u'Bank Balance',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'income',
-		'fieldtype': u'Check',
-		'label': u'Income',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'expenses_booked',
-		'fieldtype': u'Check',
-		'label': u'Expenses Booked',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'collections',
-		'fieldtype': u'Check',
-		'label': u'Collections',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'payments',
-		'fieldtype': u'Check',
-		'label': u'Payments',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'invoiced_amount',
-		'fieldtype': u'Check',
-		'label': u'Receivables',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'payables',
-		'fieldtype': u'Check',
-		'label': u'Payables',
-		'permlevel': 0
-	},
-
-	# DocPerm
-	{
-		'cancel': 1,
-		'create': 1,
-		u'doctype': u'DocPerm',
-		'permlevel': 0,
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		u'doctype': u'DocPerm',
-		'permlevel': 1
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-09-18 10:50:53", 
+  "modified_by": "Administrator", 
+  "modified": "2012-11-13 15:10:35"
+ }, 
+ {
+  "section_style": "Simple", 
+  "description": "Send regular summary reports via Email.", 
+  "module": "Setup", 
+  "doctype": "DocType", 
+  "autoname": "Prompt", 
+  "document_type": "System", 
+  "name": "__common__", 
+  "colour": "White:FFF", 
+  "_last_update": "1324556758", 
+  "show_in_menu": 0, 
+  "version": 1
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "Email Digest", 
+  "doctype": "DocField", 
+  "parenttype": "DocType", 
+  "parentfield": "fields"
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "Email Digest", 
+  "read": 1, 
+  "doctype": "DocPerm", 
+  "parenttype": "DocType", 
+  "role": "System Manager", 
+  "parentfield": "permissions"
+ }, 
+ {
+  "name": "Email Digest", 
+  "doctype": "DocType"
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Email Digest Settings", 
+  "fieldname": "settings", 
+  "fieldtype": "Section Break", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break0", 
+  "fieldtype": "Column Break", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Enabled", 
+  "fieldname": "enabled", 
+  "fieldtype": "Check", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "For Company", 
+  "options": "link:Company", 
+  "fieldname": "company", 
+  "fieldtype": "Select", 
+  "reqd": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "allow_on_submit": 0, 
+  "doctype": "DocField", 
+  "label": "How frequently?", 
+  "permlevel": 0, 
+  "fieldname": "frequency", 
+  "fieldtype": "Select", 
+  "reqd": 1, 
+  "options": "Daily\nWeekly\nMonthly"
+ }, 
+ {
+  "depends_on": "eval:doc.enabled", 
+  "doctype": "DocField", 
+  "label": "Next email will be sent on:", 
+  "fieldname": "next_send", 
+  "fieldtype": "Data", 
+  "permlevel": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break1", 
+  "fieldtype": "Column Break", 
+  "permlevel": 0
+ }, 
+ {
+  "description": "Note: Email will not be sent to disabled users", 
+  "doctype": "DocField", 
+  "label": "Recipients", 
+  "fieldname": "recipient_list", 
+  "fieldtype": "Text", 
+  "reqd": 1, 
+  "permlevel": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Add/Remove Recipients", 
+  "trigger": "Client", 
+  "fieldname": "addremove_recipients", 
+  "fieldtype": "Button", 
+  "permlevel": 0
+ }, 
+ {
+  "description": "Check all the items below that you want to send in this digest.", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Select Digest Content", 
+  "fieldname": "select_digest_content", 
+  "fieldtype": "Section Break", 
+  "permlevel": 0
+ }, 
+ {
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "New Leads", 
+  "fieldname": "new_leads", 
+  "fieldtype": "Check", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "New Enquiries", 
+  "fieldname": "new_enquiries", 
+  "fieldtype": "Check", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "New Quotations", 
+  "fieldname": "new_quotations", 
+  "fieldtype": "Check", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "New Sales Orders", 
+  "fieldname": "new_sales_orders", 
+  "fieldtype": "Check", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "New Delivery Notes", 
+  "fieldname": "new_delivery_notes", 
+  "fieldtype": "Check", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "New Purchase Requests", 
+  "fieldname": "new_purchase_requests", 
+  "fieldtype": "Check", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "New Supplier Quotations", 
+  "fieldname": "new_supplier_quotations", 
+  "fieldtype": "Check", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "New Purchase Orders", 
+  "fieldname": "new_purchase_orders", 
+  "fieldtype": "Check", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "New Purchase Receipts", 
+  "fieldname": "new_purchase_receipts", 
+  "fieldtype": "Check", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "New Stock Entries", 
+  "fieldname": "new_stock_entries", 
+  "fieldtype": "Check", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "New Support Tickets", 
+  "fieldname": "new_support_tickets", 
+  "fieldtype": "Check", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "New Communications", 
+  "fieldname": "new_communications", 
+  "fieldtype": "Check", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "New Projects", 
+  "fieldname": "new_projects", 
+  "fieldtype": "Check", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Open Tickets", 
+  "fieldname": "open_tickets", 
+  "fieldtype": "Check", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "cb1", 
+  "fieldtype": "Column Break", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Income Year to Date", 
+  "fieldname": "income_year_to_date", 
+  "fieldtype": "Check", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Bank Balance", 
+  "fieldname": "bank_balance", 
+  "fieldtype": "Check", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Income", 
+  "fieldname": "income", 
+  "fieldtype": "Check", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Expenses Booked", 
+  "fieldname": "expenses_booked", 
+  "fieldtype": "Check", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Collections", 
+  "fieldname": "collections", 
+  "fieldtype": "Check", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Payments", 
+  "fieldname": "payments", 
+  "fieldtype": "Check", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Receivables", 
+  "fieldname": "invoiced_amount", 
+  "fieldtype": "Check", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Payables", 
+  "fieldname": "payables", 
+  "fieldtype": "Check", 
+  "permlevel": 0
+ }, 
+ {
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "write": 1, 
+  "cancel": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "permlevel": 1, 
+  "doctype": "DocPerm"
+ }
 ]

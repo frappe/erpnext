@@ -1,28 +1,21 @@
-# Page, stock-home
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-02-21 13:23:22',
-		'docstatus': 0,
-		'modified': '2012-02-21 13:23:22',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
-	},
-
-	# These values are common for all Page
-	{
-		'doctype': 'Page',
-		'module': u'Stock',
-		'name': '__common__',
-		'page_name': u'stock-home',
-		'standard': u'Yes',
-		'title': u'Stock Home'
-	},
-
-	# Page, stock-home
-	{
-		'doctype': 'Page',
-		'name': u'stock-home'
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-02-21 13:23:22", 
+  "modified_by": "Administrator", 
+  "modified": "2012-02-21 13:23:22"
+ }, 
+ {
+  "name": "__common__", 
+  "title": "Stock Home", 
+  "module": "Stock", 
+  "doctype": "Page", 
+  "page_name": "stock-home", 
+  "standard": "Yes"
+ }, 
+ {
+  "name": "stock-home", 
+  "doctype": "Page"
+ }
 ]

@@ -1,92 +1,75 @@
-# DocType, Target Detail
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-03-27 14:36:25',
-		'docstatus': 0,
-		'modified': '2012-03-27 14:36:25',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
-	},
-
-	# These values are common for all DocType
-	{
-		'colour': u'White:FFF',
-		'doctype': 'DocType',
-		'istable': 1,
-		'module': u'Setup',
-		'name': '__common__',
-		'section_style': u'Tray',
-		'server_code_error': u' ',
-		'show_in_menu': 0,
-		'version': 15
-	},
-
-	# These values are common for all DocField
-	{
-		'doctype': u'DocField',
-		'name': '__common__',
-		'parent': u'Target Detail',
-		'parentfield': u'fields',
-		'parenttype': u'DocType',
-		'permlevel': 0
-	},
-
-	# DocType, Target Detail
-	{
-		'doctype': 'DocType',
-		'name': u'Target Detail'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'item_group',
-		'fieldtype': u'Link',
-		'in_filter': 1,
-		'label': u'Item Group',
-		'oldfieldname': u'item_group',
-		'oldfieldtype': u'Link',
-		'options': u'Item Group',
-		'reqd': 0,
-		'search_index': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'fiscal_year',
-		'fieldtype': u'Select',
-		'in_filter': 1,
-		'label': u'Fiscal Year',
-		'oldfieldname': u'fiscal_year',
-		'oldfieldtype': u'Select',
-		'options': u'link:Fiscal Year',
-		'reqd': 1,
-		'search_index': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'target_qty',
-		'fieldtype': u'Currency',
-		'label': u'Target Qty',
-		'oldfieldname': u'target_qty',
-		'oldfieldtype': u'Currency'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'target_amount',
-		'fieldtype': u'Currency',
-		'in_filter': 1,
-		'label': u'Target  Amount',
-		'oldfieldname': u'target_amount',
-		'oldfieldtype': u'Currency',
-		'reqd': 0,
-		'search_index': 1
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-03-27 14:36:25", 
+  "modified_by": "Administrator", 
+  "modified": "2012-03-27 14:36:25"
+ }, 
+ {
+  "section_style": "Tray", 
+  "istable": 1, 
+  "name": "__common__", 
+  "colour": "White:FFF", 
+  "module": "Setup", 
+  "show_in_menu": 0, 
+  "version": 15, 
+  "server_code_error": " ", 
+  "doctype": "DocType"
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "Target Detail", 
+  "doctype": "DocField", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "parentfield": "fields"
+ }, 
+ {
+  "name": "Target Detail", 
+  "doctype": "DocType"
+ }, 
+ {
+  "search_index": 1, 
+  "doctype": "DocField", 
+  "label": "Item Group", 
+  "oldfieldname": "item_group", 
+  "fieldname": "item_group", 
+  "fieldtype": "Link", 
+  "oldfieldtype": "Link", 
+  "reqd": 0, 
+  "options": "Item Group", 
+  "in_filter": 1
+ }, 
+ {
+  "search_index": 1, 
+  "doctype": "DocField", 
+  "label": "Fiscal Year", 
+  "oldfieldname": "fiscal_year", 
+  "fieldname": "fiscal_year", 
+  "fieldtype": "Select", 
+  "oldfieldtype": "Select", 
+  "reqd": 1, 
+  "options": "link:Fiscal Year", 
+  "in_filter": 1
+ }, 
+ {
+  "oldfieldtype": "Currency", 
+  "doctype": "DocField", 
+  "label": "Target Qty", 
+  "oldfieldname": "target_qty", 
+  "fieldname": "target_qty", 
+  "fieldtype": "Currency"
+ }, 
+ {
+  "search_index": 1, 
+  "doctype": "DocField", 
+  "label": "Target  Amount", 
+  "oldfieldname": "target_amount", 
+  "fieldname": "target_amount", 
+  "fieldtype": "Currency", 
+  "oldfieldtype": "Currency", 
+  "reqd": 0, 
+  "in_filter": 1
+ }
 ]

@@ -1,34 +1,27 @@
-# Search Criteria, total_target_variance_report
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-04-03 12:49:53',
-		'docstatus': 0,
-		'modified': '2012-04-03 12:49:53',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
-	},
-
-	# These values are common for all Search Criteria
-	{
-		'columns': u'Sales Person\x01ID,Sales Person\x01Owner,Sales Person\x01Sales Person,Sales Person\x01Country,Sales Person\x01State,Sales Person\x01lft,Sales Person\x01rgt,Target Detail\x01Item Group,Target Detail\x01Fiscal Year,Target Detail\x01Target  Amount',
-		'criteria_name': u'Total Target Variance Report',
-		'doc_type': u'Target Detail',
-		'doctype': 'Search Criteria',
-		'filters': u"{'Sales Person\x01Saved':1,'Sales Person\x01Submitted':1,'Sales Person\x01Country':'','Sales Person\x01State':'','Target Detail\x01Fiscal Year':''}",
-		'module': u'Selling',
-		'name': '__common__',
-		'page_len': 50,
-		'parent_doc_type': u'Sales Person',
-		'sort_by': u'`tabSales Person`.`name`',
-		'sort_order': u'DESC',
-		'standard': u'Yes'
-	},
-
-	# Search Criteria, total_target_variance_report
-	{
-		'doctype': 'Search Criteria',
-		'name': u'total_target_variance_report'
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-04-03 12:49:53", 
+  "modified_by": "Administrator", 
+  "modified": "2012-04-03 12:49:53"
+ }, 
+ {
+  "parent_doc_type": "Sales Person", 
+  "module": "Selling", 
+  "standard": "Yes", 
+  "sort_order": "DESC", 
+  "filters": "{'Sales Person\u0001Saved':1,'Sales Person\u0001Submitted':1,'Sales Person\u0001Country':'','Sales Person\u0001State':'','Target Detail\u0001Fiscal Year':''}", 
+  "doc_type": "Target Detail", 
+  "name": "__common__", 
+  "doctype": "Search Criteria", 
+  "sort_by": "`tabSales Person`.`name`", 
+  "page_len": 50, 
+  "criteria_name": "Total Target Variance Report", 
+  "columns": "Sales Person\u0001ID,Sales Person\u0001Owner,Sales Person\u0001Sales Person,Sales Person\u0001Country,Sales Person\u0001State,Sales Person\u0001lft,Sales Person\u0001rgt,Target Detail\u0001Item Group,Target Detail\u0001Fiscal Year,Target Detail\u0001Target  Amount"
+ }, 
+ {
+  "name": "total_target_variance_report", 
+  "doctype": "Search Criteria"
+ }
 ]

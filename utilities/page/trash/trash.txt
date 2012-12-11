@@ -1,72 +1,48 @@
-# Page, Trash
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2010-10-12 15:19:32',
-		'docstatus': 0,
-		'modified': '2010-12-30 11:44:36',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
-	},
-
-	# These values are common for all Page
-	{
-		'doctype': 'Page',
-		'module': 'Utilities',
-		'name': '__common__',
-		'page_name': 'Trash',
-		'show_in_menu': 0,
-		'standard': 'Yes'
-	},
-
-	# These values are common for all Page Role
-	{
-		'doctype': 'Page Role',
-		'name': '__common__',
-		'parent': 'Trash',
-		'parentfield': 'roles',
-		'parenttype': 'Page'
-	},
-
-	# Page, Trash
-	{
-		'doctype': 'Page',
-		'name': 'Trash'
-	},
-
-	# Page Role
-	{
-		'doctype': 'Page Role',
-		'idx': 1,
-		'role': 'Administrator'
-	},
-
-	# Page Role
-	{
-		'doctype': 'Page Role',
-		'idx': 2,
-		'role': 'Sales Master Manager'
-	},
-
-	# Page Role
-	{
-		'doctype': 'Page Role',
-		'idx': 3,
-		'role': 'Material Master Manager'
-	},
-
-	# Page Role
-	{
-		'doctype': 'Page Role',
-		'idx': 4,
-		'role': 'Purchase Master Manager'
-	},
-
-	# Page Role
-	{
-		'doctype': 'Page Role',
-		'idx': 5,
-		'role': 'Accounts Manager'
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2010-10-12 15:19:32", 
+  "modified_by": "Administrator", 
+  "modified": "2010-12-30 11:44:36"
+ }, 
+ {
+  "name": "__common__", 
+  "module": "Utilities", 
+  "show_in_menu": 0, 
+  "page_name": "Trash", 
+  "doctype": "Page", 
+  "standard": "Yes"
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "Trash", 
+  "doctype": "Page Role", 
+  "parenttype": "Page", 
+  "parentfield": "roles"
+ }, 
+ {
+  "name": "Trash", 
+  "doctype": "Page"
+ }, 
+ {
+  "role": "Administrator", 
+  "doctype": "Page Role"
+ }, 
+ {
+  "role": "Sales Master Manager", 
+  "doctype": "Page Role"
+ }, 
+ {
+  "role": "Material Master Manager", 
+  "doctype": "Page Role"
+ }, 
+ {
+  "role": "Purchase Master Manager", 
+  "doctype": "Page Role"
+ }, 
+ {
+  "role": "Accounts Manager", 
+  "doctype": "Page Role"
+ }
 ]

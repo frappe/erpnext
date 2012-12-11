@@ -1,33 +1,26 @@
-# Search Criteria, cost_center_wise_expense
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-04-03 12:49:50',
-		'docstatus': 0,
-		'modified': '2012-04-03 12:49:50',
-		'modified_by': u'Administrator',
-		'owner': u'swarnalata@webnotestech.com'
-	},
-
-	# These values are common for all Search Criteria
-	{
-		'criteria_name': u'Cost Center wise Expense',
-		'dis_filters': u'fiscal_year',
-		'doc_type': u'GL Entry',
-		'doctype': 'Search Criteria',
-		'filters': u"{'GL Entry\x01Voucher Type':'','GL Entry\x01Is Cancelled':'','GL Entry\x01Fiscal Year':'','GL Entry\x01Company':''}",
-		'module': u'Accounts',
-		'name': '__common__',
-		'page_len': 50,
-		'sort_by': u'`tabGL Entry`.`name`',
-		'sort_order': u'DESC',
-		'standard': u'Yes'
-	},
-
-	# Search Criteria, cost_center_wise_expense
-	{
-		'doctype': 'Search Criteria',
-		'name': u'cost_center_wise_expense'
-	}
+ {
+  "owner": "swarnalata@webnotestech.com", 
+  "docstatus": 0, 
+  "creation": "2012-04-03 12:49:50", 
+  "modified_by": "Administrator", 
+  "modified": "2012-04-03 12:49:50"
+ }, 
+ {
+  "module": "Accounts", 
+  "standard": "Yes", 
+  "sort_order": "DESC", 
+  "filters": "{'GL Entry\u0001Voucher Type':'','GL Entry\u0001Is Cancelled':'','GL Entry\u0001Fiscal Year':'','GL Entry\u0001Company':''}", 
+  "doctype": "Search Criteria", 
+  "dis_filters": "fiscal_year", 
+  "doc_type": "GL Entry", 
+  "name": "__common__", 
+  "sort_by": "`tabGL Entry`.`name`", 
+  "page_len": 50, 
+  "criteria_name": "Cost Center wise Expense"
+ }, 
+ {
+  "name": "cost_center_wise_expense", 
+  "doctype": "Search Criteria"
+ }
 ]

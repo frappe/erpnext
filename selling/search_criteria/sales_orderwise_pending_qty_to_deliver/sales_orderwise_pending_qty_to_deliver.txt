@@ -1,38 +1,31 @@
-# Search Criteria, sales_orderwise_pending_qty_to_deliver
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-04-03 12:49:52',
-		'docstatus': 0,
-		'modified': '2012-04-03 12:49:52',
-		'modified_by': u'Administrator',
-		'owner': u'dhanalekshmi@webnotestech.com'
-	},
-
-	# These values are common for all Search Criteria
-	{
-		'add_col': u'SUM(`tabSales Order Item`.`qty` - ifnull(`tabSales Order Item`.`delivered_qty`, 0)) AS "Pending Qty"',
-		'add_cond': u'`tabSales Order`.status != "Stopped"\n`tabSales Order Item`.`qty` > ifnull(`tabSales Order Item`.`delivered_qty`, 0)',
-		'columns': u'Sales Order\x01ID,Sales Order\x01Customer,Sales Order\x01Customer Name,Sales Order\x01Customer Address,Sales Order\x01Status,Sales Order\x01%  Delivered,Sales Order\x01% Billed,Sales Order\x01Sales Order Date,Sales Order\x01Territory,Sales Order\x01Email Id',
-		'criteria_name': u'Sales Orderwise Pending Qty To Deliver',
-		'description': u'Sales Orderwise Pending Qty To Deliver',
-		'doc_type': u'Sales Order Item',
-		'doctype': 'Search Criteria',
-		'filters': u"{'Sales Order\x01Saved':1,'Sales Order\x01Submitted':1,'Sales Order\x01Status':'','Sales Order\x01Fiscal Year':''}",
-		'group_by': u'`tabSales Order`.`name`',
-		'module': u'Selling',
-		'name': '__common__',
-		'page_len': 50,
-		'parent_doc_type': u'Sales Order',
-		'sort_by': u'`tabSales Order`.`name`',
-		'sort_order': u'DESC',
-		'standard': u'Yes'
-	},
-
-	# Search Criteria, sales_orderwise_pending_qty_to_deliver
-	{
-		'doctype': 'Search Criteria',
-		'name': u'sales_orderwise_pending_qty_to_deliver'
-	}
+ {
+  "owner": "dhanalekshmi@webnotestech.com", 
+  "docstatus": 0, 
+  "creation": "2012-04-03 12:49:52", 
+  "modified_by": "Administrator", 
+  "modified": "2012-04-03 12:49:52"
+ }, 
+ {
+  "add_col": "SUM(`tabSales Order Item`.`qty` - ifnull(`tabSales Order Item`.`delivered_qty`, 0)) AS \"Pending Qty\"", 
+  "parent_doc_type": "Sales Order", 
+  "module": "Selling", 
+  "standard": "Yes", 
+  "sort_order": "DESC", 
+  "filters": "{'Sales Order\u0001Saved':1,'Sales Order\u0001Submitted':1,'Sales Order\u0001Status':'','Sales Order\u0001Fiscal Year':''}", 
+  "description": "Sales Orderwise Pending Qty To Deliver", 
+  "doc_type": "Sales Order Item", 
+  "name": "__common__", 
+  "add_cond": "`tabSales Order`.status != \"Stopped\"\n`tabSales Order Item`.`qty` > ifnull(`tabSales Order Item`.`delivered_qty`, 0)", 
+  "doctype": "Search Criteria", 
+  "sort_by": "`tabSales Order`.`name`", 
+  "group_by": "`tabSales Order`.`name`", 
+  "page_len": 50, 
+  "criteria_name": "Sales Orderwise Pending Qty To Deliver", 
+  "columns": "Sales Order\u0001ID,Sales Order\u0001Customer,Sales Order\u0001Customer Name,Sales Order\u0001Customer Address,Sales Order\u0001Status,Sales Order\u0001%  Delivered,Sales Order\u0001% Billed,Sales Order\u0001Sales Order Date,Sales Order\u0001Territory,Sales Order\u0001Email Id"
+ }, 
+ {
+  "name": "sales_orderwise_pending_qty_to_deliver", 
+  "doctype": "Search Criteria"
+ }
 ]

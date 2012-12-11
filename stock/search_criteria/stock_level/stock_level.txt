@@ -1,36 +1,29 @@
-# Search Criteria, stock_level
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-04-03 12:49:53',
-		'docstatus': 0,
-		'modified': '2012-04-03 12:49:53',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
-	},
-
-	# These values are common for all Search Criteria
-	{
-		'add_col': u'`tabItem`.`item_name`\n`tabItem`.`description`',
-		'add_cond': u'`tabItem`.name = `tabBin`.item_code',
-		'add_tab': u'`tabItem`',
-		'columns': u'Bin\x01Warehouse,Bin\x01Item Code,Bin\x01UOM,Bin\x01Reserved Quantity,Bin\x01Actual Quantity,Bin\x01Ordered Quantity,Bin\x01Planned Qty,Bin\x01Projected Qty,Bin\x01Quantity Requested for Purchase,Bin\x01Valuation Rate,Bin\x01Stock Value',
-		'criteria_name': u'Stock Level',
-		'doc_type': u'Bin',
-		'doctype': 'Search Criteria',
-		'filters': u'{}',
-		'module': u'Stock',
-		'name': '__common__',
-		'page_len': 50,
-		'sort_by': u'`tabBin`.`warehouse`',
-		'sort_order': u'DESC',
-		'standard': u'Yes'
-	},
-
-	# Search Criteria, stock_level
-	{
-		'doctype': 'Search Criteria',
-		'name': u'stock_level'
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-04-03 12:49:53", 
+  "modified_by": "Administrator", 
+  "modified": "2012-04-03 12:49:53"
+ }, 
+ {
+  "add_col": "`tabItem`.`item_name`\n`tabItem`.`description`", 
+  "module": "Stock", 
+  "standard": "Yes", 
+  "sort_order": "DESC", 
+  "add_tab": "`tabItem`", 
+  "doc_type": "Bin", 
+  "name": "__common__", 
+  "filters": "{}", 
+  "add_cond": "`tabItem`.name = `tabBin`.item_code", 
+  "doctype": "Search Criteria", 
+  "sort_by": "`tabBin`.`warehouse`", 
+  "page_len": 50, 
+  "criteria_name": "Stock Level", 
+  "columns": "Bin\u0001Warehouse,Bin\u0001Item Code,Bin\u0001UOM,Bin\u0001Reserved Quantity,Bin\u0001Actual Quantity,Bin\u0001Ordered Quantity,Bin\u0001Planned Qty,Bin\u0001Projected Qty,Bin\u0001Quantity Requested for Purchase,Bin\u0001Valuation Rate,Bin\u0001Stock Value"
+ }, 
+ {
+  "name": "stock_level", 
+  "doctype": "Search Criteria"
+ }
 ]

@@ -1,27 +1,20 @@
-# Item Group, Small Tablets
 [
-
-	# These values are common in all dictionaries
-	{
-		u'creation': '2012-08-07 09:57:44',
-		u'docstatus': 0,
-		u'modified': '2012-08-07 09:57:44',
-		u'modified_by': u'Administrator',
-		u'owner': u'Administrator'
-	},
-
-	# These values are common for all Item Group
-	{
-		u'doctype': 'Item Group',
-		'is_group': u'No',
-		'item_group_name': u'Small Tablets',
-		u'name': u'__common__',
-		'parent_item_group': u'Tablets'
-	},
-
-	# Item Group, Small Tablets
-	{
-		u'doctype': 'Item Group',
-		u'name': u'Small Tablets'
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-08-07 09:57:44", 
+  "modified_by": "Administrator", 
+  "modified": "2012-08-07 09:57:44"
+ }, 
+ {
+  "name": "__common__", 
+  "item_group_name": "Small Tablets", 
+  "is_group": "No", 
+  "parent_item_group": "Tablets", 
+  "doctype": "Item Group"
+ }, 
+ {
+  "name": "Small Tablets", 
+  "doctype": "Item Group"
+ }
 ]

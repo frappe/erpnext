@@ -1,33 +1,26 @@
-# Search Criteria, customer_issues
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-04-03 12:49:51',
-		'docstatus': 0,
-		'modified': '2012-04-03 12:49:51',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
-	},
-
-	# These values are common for all Search Criteria
-	{
-		'columns': u'Customer Issue\x01ID,Customer Issue\x01Status,Customer Issue\x01Complaint Date,Customer Issue\x01Complaint,Customer Issue\x01Item Code,Customer Issue\x01Item Name,Customer Issue\x01Allocated To,Customer Issue\x01Allocated On,Customer Issue\x01Resolved By,Customer Issue\x01Resolution Date,Customer Issue\x01Customer Name,Customer Issue\x01Fiscal Year',
-		'criteria_name': u'Customer Issues',
-		'doc_type': u'Customer Issue',
-		'doctype': 'Search Criteria',
-		'filters': u"{'Customer Issue\x01Saved':1,'Customer Issue\x01Submitted':1,'Customer Issue\x01Status':'','Customer Issue\x01Fiscal Year':''}",
-		'module': u'Support',
-		'name': '__common__',
-		'page_len': 50,
-		'sort_by': u'`tabCustomer Issue`.`name`',
-		'sort_order': u'DESC',
-		'standard': u'Yes'
-	},
-
-	# Search Criteria, customer_issues
-	{
-		'doctype': 'Search Criteria',
-		'name': u'customer_issues'
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-04-03 12:49:51", 
+  "modified_by": "Administrator", 
+  "modified": "2012-04-03 12:49:51"
+ }, 
+ {
+  "module": "Support", 
+  "standard": "Yes", 
+  "sort_order": "DESC", 
+  "filters": "{'Customer Issue\u0001Saved':1,'Customer Issue\u0001Submitted':1,'Customer Issue\u0001Status':'','Customer Issue\u0001Fiscal Year':''}", 
+  "doctype": "Search Criteria", 
+  "doc_type": "Customer Issue", 
+  "name": "__common__", 
+  "sort_by": "`tabCustomer Issue`.`name`", 
+  "page_len": 50, 
+  "criteria_name": "Customer Issues", 
+  "columns": "Customer Issue\u0001ID,Customer Issue\u0001Status,Customer Issue\u0001Complaint Date,Customer Issue\u0001Complaint,Customer Issue\u0001Item Code,Customer Issue\u0001Item Name,Customer Issue\u0001Allocated To,Customer Issue\u0001Allocated On,Customer Issue\u0001Resolved By,Customer Issue\u0001Resolution Date,Customer Issue\u0001Customer Name,Customer Issue\u0001Fiscal Year"
+ }, 
+ {
+  "name": "customer_issues", 
+  "doctype": "Search Criteria"
+ }
 ]

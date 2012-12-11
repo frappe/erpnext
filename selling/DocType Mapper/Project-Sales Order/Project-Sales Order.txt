@@ -1,64 +1,49 @@
-# DocType Mapper, Project-Sales Order
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2010-09-01 15:47:59',
-		'docstatus': 0,
-		'modified': '2011-09-15 15:04:43',
-		'modified_by': 'Administrator',
-		'owner': 'ashwini@webnotestech.com'
-	},
-
-	# These values are common for all Table Mapper Detail
-	{
-		'doctype': 'Table Mapper Detail',
-		'from_table': 'Project',
-		'match_id': 0,
-		'name': '__common__',
-		'parent': 'Project-Sales Order',
-		'parentfield': 'table_mapper_details',
-		'parenttype': 'DocType Mapper',
-		'to_table': 'Sales Order',
-		'validation_logic': 'name is not null'
-	},
-
-	# These values are common for all Field Mapper Detail
-	{
-		'checking_operator': '=',
-		'doctype': 'Field Mapper Detail',
-		'from_field': 'customer',
-		'map': 'Yes',
-		'match_id': 0,
-		'name': '__common__',
-		'parent': 'Project-Sales Order',
-		'parentfield': 'field_mapper_details',
-		'parenttype': 'DocType Mapper',
-		'to_field': 'customer'
-	},
-
-	# These values are common for all DocType Mapper
-	{
-		'doctype': 'DocType Mapper',
-		'from_doctype': 'Project',
-		'module': 'Selling',
-		'name': '__common__',
-		'to_doctype': 'Sales Order'
-	},
-
-	# DocType Mapper, Project-Sales Order
-	{
-		'doctype': 'DocType Mapper',
-		'name': 'Project-Sales Order'
-	},
-
-	# Field Mapper Detail
-	{
-		'doctype': 'Field Mapper Detail'
-	},
-
-	# Table Mapper Detail
-	{
-		'doctype': 'Table Mapper Detail'
-	}
+ {
+  "owner": "ashwini@webnotestech.com", 
+  "docstatus": 0, 
+  "creation": "2010-09-01 15:47:59", 
+  "modified_by": "Administrator", 
+  "modified": "2011-09-15 15:04:43"
+ }, 
+ {
+  "match_id": 0, 
+  "parent": "Project-Sales Order", 
+  "name": "__common__", 
+  "doctype": "Table Mapper Detail", 
+  "parenttype": "DocType Mapper", 
+  "from_table": "Project", 
+  "to_table": "Sales Order", 
+  "validation_logic": "name is not null", 
+  "parentfield": "table_mapper_details"
+ }, 
+ {
+  "map": "Yes", 
+  "match_id": 0, 
+  "parent": "Project-Sales Order", 
+  "name": "__common__", 
+  "to_field": "customer", 
+  "doctype": "Field Mapper Detail", 
+  "parenttype": "DocType Mapper", 
+  "checking_operator": "=", 
+  "from_field": "customer", 
+  "parentfield": "field_mapper_details"
+ }, 
+ {
+  "name": "__common__", 
+  "to_doctype": "Sales Order", 
+  "module": "Selling", 
+  "doctype": "DocType Mapper", 
+  "from_doctype": "Project"
+ }, 
+ {
+  "name": "Project-Sales Order", 
+  "doctype": "DocType Mapper"
+ }, 
+ {
+  "doctype": "Field Mapper Detail"
+ }, 
+ {
+  "doctype": "Table Mapper Detail"
+ }
 ]

@@ -1,31 +1,24 @@
-# DocType, Valuation Control
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-03-27 14:36:40',
-		'docstatus': 0,
-		'modified': '2012-03-27 14:36:40',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
-	},
-
-	# These values are common for all DocType
-	{
-		'colour': u'White:FFF',
-		'doctype': 'DocType',
-		'in_create': 1,
-		'issingle': 1,
-		'module': u'Stock',
-		'name': '__common__',
-		'section_style': u'Simple',
-		'server_code_error': u' ',
-		'version': 4
-	},
-
-	# DocType, Valuation Control
-	{
-		'doctype': 'DocType',
-		'name': u'Valuation Control'
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-03-27 14:36:40", 
+  "modified_by": "Administrator", 
+  "modified": "2012-03-27 14:36:40"
+ }, 
+ {
+  "section_style": "Simple", 
+  "in_create": 1, 
+  "colour": "White:FFF", 
+  "module": "Stock", 
+  "server_code_error": " ", 
+  "version": 4, 
+  "doctype": "DocType", 
+  "issingle": 1, 
+  "name": "__common__"
+ }, 
+ {
+  "name": "Valuation Control", 
+  "doctype": "DocType"
+ }
 ]

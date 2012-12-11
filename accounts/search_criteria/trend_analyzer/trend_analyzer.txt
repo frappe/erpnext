@@ -1,33 +1,26 @@
-# Search Criteria, trend_analyzer
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-04-23 12:46:00',
-		'docstatus': 0,
-		'modified': '2012-05-04 12:49:43',
-		'modified_by': u'Administrator',
-		'owner': u'saumil@webnotestech.com'
-	},
-
-	# These values are common for all Search Criteria
-	{
-		'columns': u'Profile\x01ID,Profile\x01Owner',
-		'criteria_name': u'Trend Analyzer',
-		'doc_type': u'Profile',
-		'doctype': 'Search Criteria',
-		'filters': u'{}',
-		'module': u'Accounts',
-		'name': '__common__',
-		'page_len': 50,
-		'sort_by': u'`tabProfile`.`name`',
-		'sort_order': u'DESC',
-		'standard': u'Yes'
-	},
-
-	# Search Criteria, trend_analyzer
-	{
-		'doctype': 'Search Criteria',
-		'name': u'trend_analyzer'
-	}
+ {
+  "owner": "saumil@webnotestech.com", 
+  "docstatus": 0, 
+  "creation": "2012-04-23 12:46:00", 
+  "modified_by": "Administrator", 
+  "modified": "2012-05-04 12:49:43"
+ }, 
+ {
+  "module": "Accounts", 
+  "standard": "Yes", 
+  "sort_order": "DESC", 
+  "filters": "{}", 
+  "doctype": "Search Criteria", 
+  "doc_type": "Profile", 
+  "name": "__common__", 
+  "sort_by": "`tabProfile`.`name`", 
+  "page_len": 50, 
+  "criteria_name": "Trend Analyzer", 
+  "columns": "Profile\u0001ID,Profile\u0001Owner"
+ }, 
+ {
+  "name": "trend_analyzer", 
+  "doctype": "Search Criteria"
+ }
 ]

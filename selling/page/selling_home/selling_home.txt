@@ -1,43 +1,32 @@
-# Page, selling-home
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-02-20 15:46:39',
-		'docstatus': 0,
-		'modified': '2012-02-20 15:46:57',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
-	},
-
-	# These values are common for all Page
-	{
-		'doctype': 'Page',
-		'module': u'Selling',
-		'name': '__common__',
-		'page_name': u'selling-home',
-		'standard': u'Yes',
-		'title': u'Selling Home'
-	},
-
-	# These values are common for all Page Role
-	{
-		'doctype': u'Page Role',
-		'name': '__common__',
-		'parent': u'selling-home',
-		'parentfield': u'roles',
-		'parenttype': u'Page',
-		'role': u'All'
-	},
-
-	# Page, selling-home
-	{
-		'doctype': 'Page',
-		'name': u'selling-home'
-	},
-
-	# Page Role
-	{
-		'doctype': u'Page Role'
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-02-20 15:46:39", 
+  "modified_by": "Administrator", 
+  "modified": "2012-02-20 15:46:57"
+ }, 
+ {
+  "name": "__common__", 
+  "title": "Selling Home", 
+  "module": "Selling", 
+  "doctype": "Page", 
+  "page_name": "selling-home", 
+  "standard": "Yes"
+ }, 
+ {
+  "parent": "selling-home", 
+  "name": "__common__", 
+  "doctype": "Page Role", 
+  "parenttype": "Page", 
+  "role": "All", 
+  "parentfield": "roles"
+ }, 
+ {
+  "name": "selling-home", 
+  "doctype": "Page"
+ }, 
+ {
+  "doctype": "Page Role"
+ }
 ]

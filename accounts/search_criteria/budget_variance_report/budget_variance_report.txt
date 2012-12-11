@@ -1,33 +1,26 @@
-# Search Criteria, budget_variance_report
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-04-03 12:49:50',
-		'docstatus': 0,
-		'modified': '2012-04-03 12:49:50',
-		'modified_by': u'Administrator',
-		'owner': u'harshada@webnotestech.com'
-	},
-
-	# These values are common for all Search Criteria
-	{
-		'criteria_name': u'Budget Variance Report',
-		'doc_type': u'Budget Detail',
-		'doctype': 'Search Criteria',
-		'filters': u"{'Budget Detail\x01Fiscal Year':''}",
-		'module': u'Accounts',
-		'name': '__common__',
-		'page_len': 50,
-		'parent_doc_type': u'Cost Center',
-		'sort_by': u'`tabCost Center`.`lft`',
-		'sort_order': u'DESC',
-		'standard': u'Yes'
-	},
-
-	# Search Criteria, budget_variance_report
-	{
-		'doctype': 'Search Criteria',
-		'name': u'budget_variance_report'
-	}
+ {
+  "owner": "harshada@webnotestech.com", 
+  "docstatus": 0, 
+  "creation": "2012-04-03 12:49:50", 
+  "modified_by": "Administrator", 
+  "modified": "2012-04-03 12:49:50"
+ }, 
+ {
+  "parent_doc_type": "Cost Center", 
+  "module": "Accounts", 
+  "doctype": "Search Criteria", 
+  "sort_order": "DESC", 
+  "filters": "{'Budget Detail\u0001Fiscal Year':''}", 
+  "standard": "Yes", 
+  "doc_type": "Budget Detail", 
+  "name": "__common__", 
+  "sort_by": "`tabCost Center`.`lft`", 
+  "page_len": 50, 
+  "criteria_name": "Budget Variance Report"
+ }, 
+ {
+  "name": "budget_variance_report", 
+  "doctype": "Search Criteria"
+ }
 ]

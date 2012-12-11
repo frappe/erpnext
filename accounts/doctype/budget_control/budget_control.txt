@@ -1,31 +1,24 @@
-# DocType, Budget Control
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-03-27 14:35:41',
-		'docstatus': 0,
-		'modified': '2012-03-27 14:35:41',
-		'modified_by': u'Administrator',
-		'owner': u'nabin@webnotestech.com'
-	},
-
-	# These values are common for all DocType
-	{
-		'colour': u'White:FFF',
-		'doctype': 'DocType',
-		'issingle': 1,
-		'module': u'Accounts',
-		'name': '__common__',
-		'section_style': u'Simple',
-		'server_code_error': u' ',
-		'show_in_menu': 0,
-		'version': 23
-	},
-
-	# DocType, Budget Control
-	{
-		'doctype': 'DocType',
-		'name': u'Budget Control'
-	}
+ {
+  "owner": "nabin@webnotestech.com", 
+  "docstatus": 0, 
+  "creation": "2012-03-27 14:35:41", 
+  "modified_by": "Administrator", 
+  "modified": "2012-03-27 14:35:41"
+ }, 
+ {
+  "section_style": "Simple", 
+  "name": "__common__", 
+  "colour": "White:FFF", 
+  "module": "Accounts", 
+  "show_in_menu": 0, 
+  "version": 23, 
+  "server_code_error": " ", 
+  "doctype": "DocType", 
+  "issingle": 1
+ }, 
+ {
+  "name": "Budget Control", 
+  "doctype": "DocType"
+ }
 ]

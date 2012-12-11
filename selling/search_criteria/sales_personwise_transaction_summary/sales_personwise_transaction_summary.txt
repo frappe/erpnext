@@ -1,33 +1,26 @@
-# Search Criteria, sales_personwise_transaction_summary
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-04-03 12:49:52',
-		'docstatus': 0,
-		'modified': '2012-04-03 12:49:52',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
-	},
-
-	# These values are common for all Search Criteria
-	{
-		'columns': u'Sales Person\x01ID',
-		'criteria_name': u'Sales Personwise Transaction Summary',
-		'doc_type': u'Sales Person',
-		'doctype': 'Search Criteria',
-		'filters': u"{'Sales Person\x01Saved':1,'Sales Person\x01Submitted':1,'Sales Person\x01Country':'','Sales Person\x01State':''}",
-		'module': u'Selling',
-		'name': '__common__',
-		'page_len': 50,
-		'sort_by': u'`tabSales Person`.`name`',
-		'sort_order': u'DESC',
-		'standard': u'Yes'
-	},
-
-	# Search Criteria, sales_personwise_transaction_summary
-	{
-		'doctype': 'Search Criteria',
-		'name': u'sales_personwise_transaction_summary'
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-04-03 12:49:52", 
+  "modified_by": "Administrator", 
+  "modified": "2012-04-03 12:49:52"
+ }, 
+ {
+  "module": "Selling", 
+  "standard": "Yes", 
+  "sort_order": "DESC", 
+  "filters": "{'Sales Person\u0001Saved':1,'Sales Person\u0001Submitted':1,'Sales Person\u0001Country':'','Sales Person\u0001State':''}", 
+  "doctype": "Search Criteria", 
+  "doc_type": "Sales Person", 
+  "name": "__common__", 
+  "sort_by": "`tabSales Person`.`name`", 
+  "page_len": 50, 
+  "criteria_name": "Sales Personwise Transaction Summary", 
+  "columns": "Sales Person\u0001ID"
+ }, 
+ {
+  "name": "sales_personwise_transaction_summary", 
+  "doctype": "Search Criteria"
+ }
 ]

@@ -1,106 +1,85 @@
-# DocType, Workflow Rule Detail
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-03-27 14:36:26',
-		'docstatus': 0,
-		'modified': '2012-03-27 14:36:26',
-		'modified_by': u'Administrator',
-		'owner': u'swarnalata@webnotestech.com'
-	},
-
-	# These values are common for all DocType
-	{
-		'colour': u'White:FFF',
-		'doctype': 'DocType',
-		'istable': 1,
-		'module': u'Setup',
-		'name': '__common__',
-		'section_style': u'Simple',
-		'show_in_menu': 0,
-		'version': 9
-	},
-
-	# These values are common for all DocField
-	{
-		'doctype': u'DocField',
-		'name': '__common__',
-		'parent': u'Workflow Rule Detail',
-		'parentfield': u'fields',
-		'parenttype': u'DocType',
-		'permlevel': 0
-	},
-
-	# DocType, Workflow Rule Detail
-	{
-		'doctype': 'DocType',
-		'name': u'Workflow Rule Detail'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'rule_field',
-		'fieldtype': u'Select',
-		'label': u'Field',
-		'oldfieldname': u'rule_field',
-		'oldfieldtype': u'Select',
-		'options': u'[]',
-		'width': u'200px'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'operator',
-		'fieldtype': u'Select',
-		'label': u'Operator',
-		'oldfieldname': u'operator',
-		'oldfieldtype': u'Select',
-		'options': u'\nequal\nnot equal\ngreater than\ngreater than equal\nless than\nless than equal'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'value',
-		'fieldtype': u'Data',
-		'label': u'Value',
-		'oldfieldname': u'value',
-		'oldfieldtype': u'Data',
-		'width': u'100px'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'comparing_field',
-		'fieldtype': u'Select',
-		'label': u'Field from other forms',
-		'oldfieldname': u'comparing_field',
-		'oldfieldtype': u'Select'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'message',
-		'fieldtype': u'Data',
-		'label': u'Message when Cond. False',
-		'oldfieldname': u'message',
-		'oldfieldtype': u'Data',
-		'width': u'200px'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'exception',
-		'fieldtype': u'Select',
-		'label': u'Raise Exception',
-		'oldfieldname': u'exception',
-		'oldfieldtype': u'Select',
-		'options': u'\nYes\nNo'
-	}
+ {
+  "owner": "swarnalata@webnotestech.com", 
+  "docstatus": 0, 
+  "creation": "2012-03-27 14:36:26", 
+  "modified_by": "Administrator", 
+  "modified": "2012-03-27 14:36:26"
+ }, 
+ {
+  "section_style": "Simple", 
+  "istable": 1, 
+  "name": "__common__", 
+  "colour": "White:FFF", 
+  "module": "Setup", 
+  "doctype": "DocType", 
+  "version": 9, 
+  "show_in_menu": 0
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "Workflow Rule Detail", 
+  "doctype": "DocField", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "parentfield": "fields"
+ }, 
+ {
+  "name": "Workflow Rule Detail", 
+  "doctype": "DocType"
+ }, 
+ {
+  "oldfieldtype": "Select", 
+  "doctype": "DocField", 
+  "label": "Field", 
+  "oldfieldname": "rule_field", 
+  "width": "200px", 
+  "fieldname": "rule_field", 
+  "fieldtype": "Select", 
+  "options": "[]"
+ }, 
+ {
+  "oldfieldtype": "Select", 
+  "doctype": "DocField", 
+  "label": "Operator", 
+  "oldfieldname": "operator", 
+  "fieldname": "operator", 
+  "fieldtype": "Select", 
+  "options": "\nequal\nnot equal\ngreater than\ngreater than equal\nless than\nless than equal"
+ }, 
+ {
+  "oldfieldtype": "Data", 
+  "doctype": "DocField", 
+  "label": "Value", 
+  "oldfieldname": "value", 
+  "width": "100px", 
+  "fieldname": "value", 
+  "fieldtype": "Data"
+ }, 
+ {
+  "oldfieldtype": "Select", 
+  "doctype": "DocField", 
+  "label": "Field from other forms", 
+  "oldfieldname": "comparing_field", 
+  "fieldname": "comparing_field", 
+  "fieldtype": "Select"
+ }, 
+ {
+  "oldfieldtype": "Data", 
+  "doctype": "DocField", 
+  "label": "Message when Cond. False", 
+  "oldfieldname": "message", 
+  "width": "200px", 
+  "fieldname": "message", 
+  "fieldtype": "Data"
+ }, 
+ {
+  "oldfieldtype": "Select", 
+  "doctype": "DocField", 
+  "label": "Raise Exception", 
+  "oldfieldname": "exception", 
+  "fieldname": "exception", 
+  "fieldtype": "Select", 
+  "options": "\nYes\nNo"
+ }
 ]

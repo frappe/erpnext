@@ -1,28 +1,21 @@
-# Page, todo
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-02-23 13:59:03',
-		'docstatus': 0,
-		'modified': '2012-02-23 13:59:03',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
-	},
-
-	# These values are common for all Page
-	{
-		'doctype': 'Page',
-		'module': u'Utilities',
-		'name': '__common__',
-		'page_name': u'todo',
-		'standard': u'Yes',
-		'title': u'To Do'
-	},
-
-	# Page, todo
-	{
-		'doctype': 'Page',
-		'name': u'todo'
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-02-23 13:59:03", 
+  "modified_by": "Administrator", 
+  "modified": "2012-02-23 13:59:03"
+ }, 
+ {
+  "name": "__common__", 
+  "title": "To Do", 
+  "module": "Utilities", 
+  "doctype": "Page", 
+  "page_name": "todo", 
+  "standard": "Yes"
+ }, 
+ {
+  "name": "todo", 
+  "doctype": "Page"
+ }
 ]

@@ -1,34 +1,27 @@
-# Search Criteria, itemwise_sales_details
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-04-23 12:46:00',
-		'docstatus': 0,
-		'modified': '2012-05-03 18:18:31',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
-	},
-
-	# These values are common for all Search Criteria
-	{
-		'columns': u'Sales Order\x01ID,Sales Order\x01Customer,Sales Order Item\x01Item Code,Sales Order Item\x01Item Name,Sales Order Item\x01Quantity,Sales Order Item\x01Basic Rate*,Sales Order Item\x01Amount*,Sales Order Item\x01Delivered Qty,Sales Order Item\x01Billed Amt',
-		'criteria_name': u'Itemwise Sales Details',
-		'doc_type': u'Sales Order Item',
-		'doctype': 'Search Criteria',
-		'filters': u'{"Sales Order\\u0001Submitted":1,"Sales Order\\u0001Fiscal Year":[""],"Sales Order\\u0001Status":[""]}',
-		'module': u'Selling',
-		'name': '__common__',
-		'page_len': 50,
-		'parent_doc_type': u'Sales Order',
-		'sort_by': u'`tabSales Order`.`name`',
-		'sort_order': u'DESC',
-		'standard': u'Yes'
-	},
-
-	# Search Criteria, itemwise_sales_details
-	{
-		'doctype': 'Search Criteria',
-		'name': u'itemwise_sales_details'
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-04-23 12:46:00", 
+  "modified_by": "Administrator", 
+  "modified": "2012-05-03 18:18:31"
+ }, 
+ {
+  "parent_doc_type": "Sales Order", 
+  "module": "Selling", 
+  "standard": "Yes", 
+  "sort_order": "DESC", 
+  "filters": "{\"Sales Order\\u0001Submitted\":1,\"Sales Order\\u0001Fiscal Year\":[\"\"],\"Sales Order\\u0001Status\":[\"\"]}", 
+  "doc_type": "Sales Order Item", 
+  "name": "__common__", 
+  "doctype": "Search Criteria", 
+  "sort_by": "`tabSales Order`.`name`", 
+  "page_len": 50, 
+  "criteria_name": "Itemwise Sales Details", 
+  "columns": "Sales Order\u0001ID,Sales Order\u0001Customer,Sales Order Item\u0001Item Code,Sales Order Item\u0001Item Name,Sales Order Item\u0001Quantity,Sales Order Item\u0001Basic Rate*,Sales Order Item\u0001Amount*,Sales Order Item\u0001Delivered Qty,Sales Order Item\u0001Billed Amt"
+ }, 
+ {
+  "name": "itemwise_sales_details", 
+  "doctype": "Search Criteria"
+ }
 ]

@@ -1,134 +1,107 @@
-# DocType, BOM Operation
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-03-27 14:36:02',
-		'docstatus': 0,
-		'modified': '2012-12-10 18:30:00',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
-	},
-
-	# These values are common for all DocType
-	{
-		'colour': u'White:FFF',
-		'doctype': 'DocType',
-		'istable': 1,
-		'module': u'Manufacturing',
-		'name': '__common__',
-		'section_style': u'Simple',
-		'server_code_error': u' ',
-		'show_in_menu': 0,
-		'version': 8
-	},
-
-	# These values are common for all DocField
-	{
-		'doctype': u'DocField',
-		'name': '__common__',
-		'parent': u'BOM Operation',
-		'parentfield': u'fields',
-		'parenttype': u'DocType',
-		'permlevel': 0
-	},
-
-	# These values are common for all DocPerm
-	{
-		'doctype': u'DocPerm',
-		'name': '__common__',
-		'parent': u'BOM Operation',
-		'parentfield': u'permissions',
-		'parenttype': u'DocType',
-		'read': 1,
-		'role': u'System Manager'
-	},
-
-	# DocType, BOM Operation
-	{
-		'doctype': 'DocType',
-		'name': u'BOM Operation'
-	},
-
-	# DocPerm
-	{
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'doctype': u'DocPerm',
-		'permlevel': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'operation_no',
-		'fieldtype': u'Data',
-		'label': u'Operation No',
-		'oldfieldname': u'operation_no',
-		'oldfieldtype': u'Data',
-		'reqd': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'opn_description',
-		'fieldtype': u'Text',
-		'label': u'Opn Description',
-		'oldfieldname': u'opn_description',
-		'oldfieldtype': u'Text',
-		'reqd': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'workstation',
-		'fieldtype': u'Link',
-		'label': u'Workstation',
-		'oldfieldname': u'workstation',
-		'oldfieldtype': u'Link',
-		'options': u'Workstation',
-		'reqd': 0,
-		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'hour_rate',
-		'fieldtype': u'Currency',
-		'label': u'Hour Rate',
-		'oldfieldname': u'hour_rate',
-		'oldfieldtype': u'Currency',
-		'reqd': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'time_in_mins',
-		'fieldtype': u'Currency',
-		'label': u'Operation Time (mins)',
-		'oldfieldname': u'time_in_mins',
-		'oldfieldtype': u'Currency',
-		'reqd': 0
-	},
-
-	# DocField
-	{
-		'allow_on_submit': 0,
-		'doctype': u'DocField',
-		'fieldname': u'operating_cost',
-		'fieldtype': u'Currency',
-		'label': u'Operating Cost',
-		'oldfieldname': u'operating_cost',
-		'oldfieldtype': u'Currency',
-		'reqd': 0
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-03-27 14:36:02", 
+  "modified_by": "Administrator", 
+  "modified": "2012-12-10 18:30:00"
+ }, 
+ {
+  "section_style": "Simple", 
+  "istable": 1, 
+  "name": "__common__", 
+  "colour": "White:FFF", 
+  "module": "Manufacturing", 
+  "show_in_menu": 0, 
+  "version": 8, 
+  "server_code_error": " ", 
+  "doctype": "DocType"
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "BOM Operation", 
+  "doctype": "DocField", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "parentfield": "fields"
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "BOM Operation", 
+  "read": 1, 
+  "doctype": "DocPerm", 
+  "parenttype": "DocType", 
+  "role": "System Manager", 
+  "parentfield": "permissions"
+ }, 
+ {
+  "name": "BOM Operation", 
+  "doctype": "DocType"
+ }, 
+ {
+  "write": 1, 
+  "permlevel": 0, 
+  "doctype": "DocPerm"
+ }, 
+ {
+  "permlevel": 1, 
+  "doctype": "DocPerm"
+ }, 
+ {
+  "oldfieldtype": "Data", 
+  "doctype": "DocField", 
+  "label": "Operation No", 
+  "oldfieldname": "operation_no", 
+  "fieldname": "operation_no", 
+  "fieldtype": "Data", 
+  "reqd": 1
+ }, 
+ {
+  "oldfieldtype": "Text", 
+  "doctype": "DocField", 
+  "label": "Opn Description", 
+  "oldfieldname": "opn_description", 
+  "fieldname": "opn_description", 
+  "fieldtype": "Text", 
+  "reqd": 1
+ }, 
+ {
+  "oldfieldtype": "Link", 
+  "doctype": "DocField", 
+  "label": "Workstation", 
+  "oldfieldname": "workstation", 
+  "trigger": "Client", 
+  "fieldname": "workstation", 
+  "fieldtype": "Link", 
+  "reqd": 0, 
+  "options": "Workstation"
+ }, 
+ {
+  "oldfieldtype": "Currency", 
+  "doctype": "DocField", 
+  "label": "Hour Rate", 
+  "oldfieldname": "hour_rate", 
+  "fieldname": "hour_rate", 
+  "fieldtype": "Currency", 
+  "reqd": 0
+ }, 
+ {
+  "oldfieldtype": "Currency", 
+  "doctype": "DocField", 
+  "label": "Operation Time (mins)", 
+  "oldfieldname": "time_in_mins", 
+  "fieldname": "time_in_mins", 
+  "fieldtype": "Currency", 
+  "reqd": 0
+ }, 
+ {
+  "oldfieldtype": "Currency", 
+  "allow_on_submit": 0, 
+  "doctype": "DocField", 
+  "label": "Operating Cost", 
+  "oldfieldname": "operating_cost", 
+  "fieldname": "operating_cost", 
+  "fieldtype": "Currency", 
+  "reqd": 0
+ }
 ]

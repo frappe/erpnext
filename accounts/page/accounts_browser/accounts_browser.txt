@@ -1,49 +1,36 @@
-# Page, Accounts Browser
 [
-
-	# These values are common in all dictionaries
-	{
-		u'creation': '2012-06-14 15:07:28',
-		u'docstatus': 0,
-		u'modified': '2012-10-04 16:57:27',
-		u'modified_by': u'Administrator',
-		u'owner': u'Administrator'
-	},
-
-	# These values are common for all Page
-	{
-		u'doctype': u'Page',
-		'module': u'Accounts',
-		u'name': u'__common__',
-		'page_name': u'Accounts Browser',
-		'show_in_menu': 0,
-		'standard': u'Yes'
-	},
-
-	# These values are common for all Page Role
-	{
-		u'doctype': u'Page Role',
-		u'name': u'__common__',
-		'parent': u'Accounts Browser',
-		'parentfield': u'roles',
-		'parenttype': u'Page'
-	},
-
-	# Page, Accounts Browser
-	{
-		u'doctype': u'Page',
-		u'name': u'Accounts Browser'
-	},
-
-	# Page Role
-	{
-		u'doctype': u'Page Role',
-		'role': u'Accounts User'
-	},
-
-	# Page Role
-	{
-		u'doctype': u'Page Role',
-		'role': u'Accounts Manager'
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-06-14 15:07:28", 
+  "modified_by": "Administrator", 
+  "modified": "2012-10-04 16:57:27"
+ }, 
+ {
+  "name": "__common__", 
+  "module": "Accounts", 
+  "show_in_menu": 0, 
+  "page_name": "Accounts Browser", 
+  "doctype": "Page", 
+  "standard": "Yes"
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "Accounts Browser", 
+  "doctype": "Page Role", 
+  "parenttype": "Page", 
+  "parentfield": "roles"
+ }, 
+ {
+  "name": "Accounts Browser", 
+  "doctype": "Page"
+ }, 
+ {
+  "role": "Accounts User", 
+  "doctype": "Page Role"
+ }, 
+ {
+  "role": "Accounts Manager", 
+  "doctype": "Page Role"
+ }
 ]
