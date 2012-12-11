@@ -3,6 +3,7 @@ import webnotes
 def execute():
 	delete_doctypes()
 	rename_module()
+	rebuilt_exploded_bom()
 	
 def delete_doctypes():
 	from webnotes.model import delete_doc
@@ -20,4 +21,7 @@ def rename_module():
 	webnotes.conn.set_global("modules_list",
 		webnotes.conn.get_global('modules_list').replace("Production", "Manufacturing"))
 	
-	
+def rebuilt_exploded_bom():
+	from webnotes.model.code import get_obj
+	for bom in webnotes.conn.sql("""select name from `tabBOM` where docstatus < 2"""):
+		get_obj("BOM", bom[0], with_children=1).on_update()
