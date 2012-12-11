@@ -31,9 +31,8 @@ class DocType:
 		bom_list = self.get_parent_boms()
 		for bom in bom_list:
 			bom_obj = get_obj("BOM", bom, with_children=1)
-			bom_obj.update_cost_by_traversing()
-			bom_obj.update_flat_bom_by_traversing()
-		
+			bom_obj.on_update()
+
 	def validate_bom(self):
 		if cstr(self.doc.current_bom) == cstr(self.doc.new_bom):
 			msgprint("Current BOM and New BOM can not be same", raise_exception=1)

@@ -2,9 +2,9 @@
  {
   "owner": "Administrator", 
   "docstatus": 0, 
-  "creation": "2012-07-03 13:30:03", 
+  "creation": "2012-12-10 19:03:43", 
   "modified_by": "Administrator", 
-  "modified": "2012-12-10 18:30:00"
+  "modified": "2012-12-11 15:13:42"
  }, 
  {
   "istable": 0, 
@@ -179,12 +179,6 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "col_break24", 
-  "fieldtype": "Column Break", 
-  "permlevel": 0
- }, 
- {
-  "doctype": "DocField", 
   "label": "Total Cost", 
   "fieldname": "total_cost", 
   "fieldtype": "Float", 
@@ -222,6 +216,7 @@
   "doctype": "DocField", 
   "label": "Item Description", 
   "oldfieldname": "description", 
+  "width": "300px", 
   "fieldname": "description", 
   "fieldtype": "Small Text", 
   "permlevel": 0
@@ -275,7 +270,7 @@
  {
   "print_hide": 0, 
   "doctype": "DocField", 
-  "label": "BOM Explosion Items", 
+  "label": "Exploded BOM Items", 
   "options": "Simple", 
   "fieldname": "section_break0", 
   "fieldtype": "Section Break", 
@@ -288,7 +283,7 @@
   "no_copy": 1, 
   "oldfieldtype": "Table", 
   "doctype": "DocField", 
-  "label": "BOM Explosion Item", 
+  "label": "Exploded BOM Items", 
   "oldfieldname": "flat_bom_details", 
   "default": "No Toolbar", 
   "fieldname": "flat_bom_details", 
