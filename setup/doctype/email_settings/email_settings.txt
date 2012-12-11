@@ -17,7 +17,6 @@
 		'allow_email': 1,
 		'allow_print': 1,
 		'colour': u'White:FFF',
-		'default_print_format': u'Standard',
 		'description': u'Email Settings for Outgoing and Incoming Emails.',
 		'doctype': 'DocType',
 		'in_create': 1,

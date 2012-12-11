@@ -17,7 +17,6 @@
 		'allow_trash': 1,
 		'autoname': u'field:workstation_name',
 		'colour': u'White:FFF',
-		'default_print_format': u'Standard',
 		'doctype': 'DocType',
 		'document_type': u'Master',
 		'module': u'Production',

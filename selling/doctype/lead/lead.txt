@@ -9,7 +9,6 @@
  {
   "autoname": "naming_series:", 
   "name": "__common__", 
-  "default_print_format": "Standard", 
   "search_fields": "lead_name,lead_owner,status", 
   "module": "Selling", 
   "doctype": "DocType", 

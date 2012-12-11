@@ -9,7 +9,6 @@
  {
   "autoname": "naming_series:", 
   "allow_attach": 1, 
-  "default_print_format": "Standard", 
   "search_fields": "status,customer,allocated_to,subject,raised_by", 
   "module": "Support", 
   "doctype": "DocType", 

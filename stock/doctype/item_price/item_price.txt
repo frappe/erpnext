@@ -14,7 +14,6 @@
 	{
 		'autoname': u'RFD/.#####',
 		'colour': u'White:FFF',
-		'default_print_format': u'Standard',
 		'doctype': 'DocType',
 		'in_create': 1,
 		'istable': 1,

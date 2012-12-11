@@ -14,7 +14,6 @@
 	{
 		'_last_update': u'1317365120',
 		'colour': u'White:FFF',
-		'default_print_format': u'Standard',
 		'doctype': 'DocType',
 		'document_type': u'Master',
 		'is_submittable': 1,

@@ -15,7 +15,6 @@
 		'_last_update': u'1319016431',
 		'autoname': u'GL.#######',
 		'colour': u'White:FFF',
-		'default_print_format': u'Standard',
 		'doctype': 'DocType',
 		'in_create': 1,
 		'module': u'Accounts',

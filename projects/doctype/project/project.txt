@@ -9,7 +9,6 @@
  {
   "autoname": "field:project_name", 
   "allow_attach": 1, 
-  "default_print_format": "Standard", 
   "search_fields": "customer, status, priority, is_active", 
   "module": "Projects", 
   "doctype": "DocType", 

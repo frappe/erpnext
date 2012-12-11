@@ -15,7 +15,6 @@
   "read_only": 1, 
   "autoname": "field:territory_name", 
   "name": "__common__", 
-  "default_print_format": "Standard", 
   "allow_rename": 1, 
   "doctype": "DocType", 
   "name_case": "Title Case"

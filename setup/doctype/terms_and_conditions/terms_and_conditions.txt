@@ -16,7 +16,6 @@
 		'allow_trash': 1,
 		'autoname': u'field:title',
 		'colour': u'White:FFF',
-		'default_print_format': u'Standard',
 		'description': u'Standard Terms and Conditions that can be added to Sales and Purchases.\n\nExamples:\n\n1. Validity of the offer.\n1. Payment Terms (In Advance, On Credit, part advance etc).\n1. What is extra (or payable by the Customer).\n1. Safety / usage warning.\n1. Warranty if any.\n1. Returns Policy.\n1. Terms of shipping, if applicable.\n1. Ways of addressing disputes, indemnity, liability, etc.\n1. Address and Contact of your Company.',
 		'doctype': 'DocType',
 		'document_type': u'Master',

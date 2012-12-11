@@ -14,7 +14,6 @@
   "description": "Distinct unit of an Item", 
   "autoname": "field:serial_no", 
   "name": "__common__", 
-  "default_print_format": "Standard", 
   "allow_rename": 1, 
   "doctype": "DocType"
  }, 

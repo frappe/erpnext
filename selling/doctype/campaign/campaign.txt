@@ -16,7 +16,6 @@
 		'allow_trash': 1,
 		'autoname': u'field:campaign_name',
 		'colour': u'White:FFF',
-		'default_print_format': u'Standard',
 		'description': u'Keep Track of Sales Campaigns. Keep track of Leads, Quotations, Sales Order etc from Campaigns to gauge Return on Investment. ',
 		'doctype': 'DocType',
 		'document_type': u'Master',

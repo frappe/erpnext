@@ -10,7 +10,6 @@
   "istable": 1, 
   "autoname": "PP/.SO/.#####", 
   "name": "__common__", 
-  "default_print_format": "Standard", 
   "doctype": "DocType", 
   "module": "Production"
  }, 

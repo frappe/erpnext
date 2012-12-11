@@ -14,7 +14,6 @@
 	{
 		'autoname': u'_FEED.#####',
 		'colour': u'White:FFF',
-		'default_print_format': u'Standard',
 		u'doctype': u'DocType',
 		'module': u'Home',
 		u'name': u'__common__',
