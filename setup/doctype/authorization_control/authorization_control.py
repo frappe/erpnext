@@ -60,7 +60,7 @@ class DocType(TransactionBase):
 				if appr_users: add_msg = "Users : "+cstr(appr_users)
 				if appr_roles: add_msg = "Roles : "+cstr(appr_roles)
 				if appr_users and appr_roles: add_msg = "Users : "+cstr(appr_users)+" or "+"Roles : "+cstr(appr_roles)
-				msgprint("You do not have an authority to submit this %s %s. Please send for approval to %s" % (doctype_name, msg, add_msg))
+				msgprint("You are not authorize to submit this %s %s. Please send for approval to %s" % (doctype_name, msg, add_msg))
 				raise Exception
 
 
