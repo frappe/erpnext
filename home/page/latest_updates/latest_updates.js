@@ -1,6 +1,7 @@
 erpnext.updates = [
 	["12th December 2012", [
 		"Attachments: Attachments can be set as URLs or File Uploads. This will help if people want to share documents from Google Docs, Dropbox and other such services (esp for the Product listings on websites).",
+		"Global Defaults: Session Expiry can now be set in Global Defaults.",
 	]],
 	["6th December 2012", [
 		"Rename: Cost Center, Item Group, Customer Group, Supplier Type, Territory, Sales Person can now be renamed.",

@@ -25,14 +25,10 @@ def on_login_post_session(login_manager):
 		update login_from and delete parallel sessions
 	"""
 	# Clear previous sessions i.e. logout previous log-in attempts
-	exception_list = ['demo@erpnext.com', 'Administrator', 'Guest']
-	if webnotes.session['user'] not in exception_list:
-		sid_list = webnotes.conn.sql("""
-			DELETE FROM `tabSessions`
-			WHERE
-				user=%s AND
-				sid!=%s""", \
-			(webnotes.session['user'], webnotes.session['sid']), as_list=1)
+	allow_multiple_sessions = ['demo@erpnext.com', 'Administrator', 'Guest']
+	if webnotes.session['user'] not in allow_multiple_sessions:
+		from webnotes.sessions import clear_sessions
+		clear_sessions(webnotes.session.user, keep_current=True)
 
 		# check if account is expired
 		check_if_expired()
@@ -119,7 +115,7 @@ def check_if_expired():
 	from webnotes.utils import formatdate
 	msg = """Oops! Your subscription expired on <b>%s</b>.<br>""" % formatdate(conf.expires_on)
 	
-	if 'System Manager' in webnotes.user.roles:
+	if 'System Manager' in webnotes.user.get_roles():
 		msg += """Just drop in a mail at <b>support@erpnext.com</b> and
 			we will guide you to get your account re-activated."""
 	else:
