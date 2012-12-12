@@ -31,20 +31,29 @@ class DocType(DocTypeNestedSet):
 		self.nsm_parent_field = 'parent_customer_group';
 
 	def validate(self): 
-		if sql("select name from `tabCustomer Group` where name = %s and docstatus = 2", (self.doc.customer_group_name)):
+		if sql("select name from `tabCustomer Group` where name = %s and docstatus = 2", 
+		 		(self.doc.customer_group_name)):
 			msgprint("""Another %s record is trashed. 
-				To untrash please go to Setup & click on Trash."""%(self.doc.customer_group_name), raise_exception = 1)
-		self.validate_root_details("All Customer Groups", "parent_customer_group")
+				To untrash please go to Setup -> Recycle Bin.""" % 
+				(self.doc.customer_group_name), raise_exception = 1)
+				
+		super(DocType, self).validate()
+		
 
 	def on_trash(self):
-		cust = sql("select name from `tabCustomer` where ifnull(customer_group, '') = %s", self.doc.name)
+		cust = sql("select name from `tabCustomer` where ifnull(customer_group, '') = %s", 
+		 	self.doc.name)
 		cust = [d[0] for d in cust]
 		if cust:
-			msgprint("""Customer Group: %s can not be trashed/deleted because it is used in customer: %s. 
-				To trash/delete this, remove/change customer group in customer master""" % (self.doc.name, cust or ''), raise_exception=1)
+			msgprint("""Customer Group: %s can not be trashed/deleted \
+				because it is used in customer: %s. 
+				To trash/delete this, remove/change customer group in customer master""" %
+				(self.doc.name, cust or ''), raise_exception=1)
 
-		if sql("select name from `tabCustomer Group` where parent_customer_group = %s and docstatus != 2", self.doc.name):
-			msgprint("Child customer group exists for this customer group. You can not trash/cancel/delete this customer group.", raise_exception=1)
+		if sql("select name from `tabCustomer Group` where parent_customer_group = %s \
+				and docstatus != 2", self.doc.name):
+			msgprint("Child customer group exists for this customer group. \
+				You can not trash/cancel/delete this customer group.", raise_exception=1)
 
 		# rebuild tree
 		super(DocType, self).on_trash()

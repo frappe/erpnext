@@ -20,7 +20,7 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	cur_frm.toggle_enable(['group_or_ledger', 'company_name'], doc.__islocal);
 
 	if(!doc.__islocal && doc.group_or_ledger=='Group') {
-		intro_txt += '<p><b>Note:</b> This is Cost Center is a <i>Group</i>, \
+		intro_txt += '<p><b>Note:</b> This Cost Center is a <i>Group</i>, \
 			Accounting Entries are not allowed against groups.</p>';
 	}
 
