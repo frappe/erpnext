@@ -1,11 +1,14 @@
 from __future__ import unicode_literals
 import webnotes
 
+
 @webnotes.whitelist()
 def get_children():
 	ctype = webnotes.form_dict.get('ctype')
 	webnotes.form_dict['parent_field'] = 'parent_' + ctype.lower().replace(' ', '_')
-	
+	if not webnotes.form_dict.get('parent'):
+		webnotes.form_dict['parent'] = ''
+		
 	return webnotes.conn.sql("""select name as value, 
 		if(is_group='Yes', 1, 0) as expandable
 		from `tab%(ctype)s`

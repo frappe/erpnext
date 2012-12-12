@@ -39,8 +39,7 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 		'is_pl_account', 'company'], false);
 
 	// read-only for root accounts
-  	root_acc = doc.parent ? false : true;
-	if(in_list(root_acc, doc.account_name)) {
+	if(!doc.parent_account) {
 		cur_frm.perm = [[1,0,0], [1,0,0]];
 		cur_frm.set_intro("This is a root account and cannot be edited.");
 	} else {

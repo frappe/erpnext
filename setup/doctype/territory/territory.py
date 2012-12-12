@@ -33,3 +33,6 @@ class DocType(DocTypeNestedSet):
 			if not flt(d.target_qty) and not flt(d.target_amount):
 				msgprint("Either target qty or target amount is mandatory.")
 				raise Exception
+		
+		super(DocType, self).validate()
+		
