@@ -88,7 +88,7 @@ erpnext.Messages = Class.extend({
 		$('#message-title').html(contact==user ? "Everyone" :
 			wn.user_info(contact).fullname)
 
-		$('#avatar-image').attr("src", wn.user_info(contact).image);
+		$('#avatar-image').attr("src", wn.utils.get_file_link(wn.user_info(contact).image));
 
 		$("#show-everyone").toggle(contact!=user);
 		
@@ -129,7 +129,7 @@ erpnext.Messages = Class.extend({
 				
 				data.creation = dateutil.comment_when(data.creation);
 				data.comment_by_fullname = wn.user_info(data.owner).fullname;
-				data.image = wn.user_info(data.owner).image;
+				data.image = wn.utils.get_file_link(wn.user_info(data.owner).image);
 				data.mark_html = "";
 
 				data.reply_html = '';
@@ -148,7 +148,7 @@ erpnext.Messages = Class.extend({
 						data-name="%(name)s">&times;</a>', data);
 				}
 				
-				if(data.owner==data.comment_docname) {
+				if(data.owner==data.comment_docname && data.parenttype!="Assignment") {
 					data.mark_html = "<div class='message-mark' title='Public'\
 						style='background-color: green'></div>"
 				}
@@ -190,7 +190,7 @@ erpnext.Messages = Class.extend({
 					var p = r.message[i];
 					if(p.name != user) {
 						p.fullname = wn.user_info(p.name).fullname;
-						p.image = wn.user_info(p.name).image;
+						p.image = wn.utils.get_file_link(wn.user_info(p.name).image);
 						p.name = p.name.replace('@', '__at__');
 						p.status_color = p.has_session ? "green" : "#ddd";
 						p.status = p.has_session ? "Online" : "Offline";

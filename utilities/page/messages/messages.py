@@ -72,6 +72,7 @@ def post(arg=None):
 		arg.update(webnotes.form_dict)
 	from webnotes.model.doc import Document
 	d = Document('Comment')
+	d.parenttype = arg.get("parenttype")
 	d.comment = arg['txt']
 	d.comment_docname = arg['contact']
 	d.comment_doctype = 'Message'
