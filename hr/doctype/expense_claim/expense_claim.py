@@ -20,6 +20,7 @@ import webnotes
 from webnotes.utils import add_days
 from webnotes.model.wrapper import getlist
 from webnotes import form, msgprint
+from webnotes.model.code import get_obj
 
 sql = webnotes.conn.sql
 
@@ -36,8 +37,8 @@ class DocType:
 			
 	def on_submit(self):
 		if self.doc.approval_status=="Draft":
-			webnotes.msgprint("""Please set Approval Status to 'Approved' or 'Rejected' before submitting""",
-				raise_exception=1)
+			webnotes.msgprint("""Please set Approval Status to 'Approved' or \
+				'Rejected' before submitting""", raise_exception=1)
 	
 	def validate_fiscal_year(self):
 		fy=sql("select year_start_date from `tabFiscal Year` where name='%s'"%self.doc.fiscal_year)
@@ -57,5 +58,6 @@ def get_approver_list():
 	roles = [r[0] for r in webnotes.conn.sql("""select distinct parent from `tabUserRole`
 		where role='Expense Approver'""")]
 	if not roles:
-		webnotes.msgprint("No Expense Approvers. Please assign 'Expense Approver' Role to atleast one user.")
+		webnotes.msgprint("No Expense Approvers. Please assign 'Expense Approver' \
+			Role to atleast one user.")
 	return roles
