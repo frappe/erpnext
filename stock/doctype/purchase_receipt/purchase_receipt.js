@@ -150,7 +150,7 @@ cur_frm.fields_dict['select_print_heading'].get_query = function(doc, cdt, cdn) 
 cur_frm.cscript.received_qty = function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
 	ret = {
-			'qty' : 0,
+			'qty' : d.qty ? d.qty : d.received_qty,
 			'stock_qty': 0,
 			'rejected_qty' : 0
 		}
