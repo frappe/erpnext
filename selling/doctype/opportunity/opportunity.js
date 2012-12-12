@@ -51,7 +51,7 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 			list: wn.model.get("Communication", {"opportunity": doc.name}),
 			parent: cur_frm.fields_dict.communication_html.wrapper,
 			doc: doc,
-			email: doc.contact_email
+			recipients: doc.contact_email
 		});
 	}
 	

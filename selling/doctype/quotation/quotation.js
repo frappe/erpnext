@@ -107,7 +107,7 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 			list: wn.model.get("Communication", {"quotation": doc.name}),
 			parent: cur_frm.fields_dict.communication_html.wrapper,
 			doc: doc,
-			email: doc.contact_email
+			recipients: doc.contact_email
 		});		
 	}
 }
