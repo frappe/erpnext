@@ -230,7 +230,7 @@ def get_data(rows, company_abbr):
 				accounts = [c for c in rows[i+1] if c.endswith(" - " + company_abbr)]
 				
 				if accounts and (len(columns) != rows[i+1].index(accounts[0])):
-					raise Exception, """A non-account column cannot be after an account \
-						column. Please rectify it in the file and try again."""
+					raise Exception, """All account columns should be after standard columns and \
+						on the right. Please rectify it in the file and try again."""
 				
 	return data, start_row_idx
