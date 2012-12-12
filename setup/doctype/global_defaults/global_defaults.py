@@ -37,7 +37,8 @@ keydict = {
 	'currency_format':'default_currency_format',
 	'account_url':'account_url',
 	'allow_negative_stock' : 'allow_negative_stock',
-	'maintain_same_rate' : 'maintain_same_rate'
+	'maintain_same_rate' : 'maintain_same_rate',
+	'session_expiry': 'session_expiry'
 }
 
 class DocType:
@@ -46,6 +47,8 @@ class DocType:
 
 	def on_update(self):
 		"""update defaults"""
+		
+		self.validate_session_expiry()
 		
 		for key in keydict:
 			webnotes.conn.set_default(key, self.doc.fields.get(keydict[key], ''))
@@ -60,6 +63,15 @@ class DocType:
 			webnotes.conn.set_default('year_start_date', ysd.strftime('%Y-%m-%d'))
 			webnotes.conn.set_default('year_end_date', \
 				get_last_day(get_first_day(ysd,0,11)).strftime('%Y-%m-%d'))
-		
+	
+	def validate_session_expiry(self):
+		if self.doc.session_expiry:
+			from datetime import datetime
+			try:
+				datetime.strptime(self.doc.session_expiry, "%H:%M")
+			except ValueError:
+				webnotes.msgprint("""Session Expiry must be in format hh:mm""",
+					raise_exception=1)
+	
 	def get_defaults(self):
 		return webnotes.conn.get_defaults()

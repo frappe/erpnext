@@ -1,553 +1,428 @@
-# DocType, Global Defaults
 [
-
-	# These values are common in all dictionaries
-	{
-		u'creation': '2012-07-03 13:30:02',
-		u'docstatus': 0,
-		u'modified': '2012-10-26 16:42:29',
-		u'modified_by': u'Administrator',
-		u'owner': u'Administrator'
-	},
-
-	# These values are common for all DocType
-	{
-		'_last_update': u'1323855502',
-		'allow_copy': 1,
-		'allow_email': 1,
-		'allow_print': 1,
-		'colour': u'White:FFF',
-		u'doctype': u'DocType',
-		'hide_toolbar': 0,
-		'in_create': 1,
-		'issingle': 1,
-		'module': u'Setup',
-		u'name': u'__common__',
-		'read_only': 1,
-		'section_style': u'Tabbed',
-		'server_code_error': u' ',
-		'show_in_menu': 1,
-		'version': 1
-	},
-
-	# These values are common for all DocField
-	{
-		u'doctype': u'DocField',
-		u'name': u'__common__',
-		'parent': u'Global Defaults',
-		'parentfield': u'fields',
-		'parenttype': u'DocType',
-		'permlevel': 0
-	},
-
-	# These values are common for all DocPerm
-	{
-		u'doctype': u'DocPerm',
-		u'name': u'__common__',
-		'parent': u'Global Defaults',
-		'parentfield': u'permissions',
-		'parenttype': u'DocType',
-		'read': 1
-	},
-
-	# DocType, Global Defaults
-	{
-		u'doctype': u'DocType',
-		u'name': u'Global Defaults'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'company',
-		'fieldtype': u'Section Break',
-		'label': u'Company'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'default_company',
-		'fieldtype': u'Link',
-		'label': u'Default Company',
-		'options': u'Company',
-		'reqd': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'current_fiscal_year',
-		'fieldtype': u'Link',
-		'label': u'Current Fiscal Year',
-		'options': u'Fiscal Year',
-		'reqd': 1
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'date_format',
-		'fieldtype': u'Select',
-		'label': u'Date Format',
-		'options': u'yyyy-mm-dd\ndd-mm-yyyy\ndd/mm/yyyy\nmm/dd/yyyy\nmm-dd-yyyy'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'column_break1',
-		'fieldtype': u'Column Break',
-		'width': u'50%'
-	},
-
-	# DocField
-	{
-		'default': u'INR',
-		u'doctype': u'DocField',
-		'fieldname': u'default_currency',
-		'fieldtype': u'Select',
-		'label': u'Default Currency',
-		'options': u'link:Currency',
-		'reqd': 1
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'default_currency_format',
-		'fieldtype': u'Select',
-		'label': u'Default Currency Format',
-		'options': u'Lacs\nMillions'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'default_currency_fraction',
-		'fieldtype': u'Data',
-		'label': u'Default Currency Fraction'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'stock',
-		'fieldtype': u'Section Break',
-		'label': u'Stock'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'column_break2',
-		'fieldtype': u'Column Break',
-		'width': u'50%'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'default_item_group',
-		'fieldtype': u'Link',
-		'label': u'Default Item Group',
-		'options': u'Item Group'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'ighelp',
-		'fieldtype': u'HTML',
-		'label': u'IGHelp',
-		'options': u'<a href="#!Sales Browser/Item Group">To manage Item Groups, click here</a>'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'default_stock_uom',
-		'fieldtype': u'Link',
-		'label': u'Default Stock UOM',
-		'options': u'UOM'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'default_valuation_method',
-		'fieldtype': u'Select',
-		'label': u'Default Valuation Method',
-		'options': u'FIFO\nMoving Average'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'description': u'Applicable only if valuation method is moving average',
-		u'doctype': u'DocField',
-		'fieldname': u'allow_negative_stock',
-		'fieldtype': u'Check',
-		'label': u'Allow Negative Stock'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'default_warehouse_type',
-		'fieldtype': u'Link',
-		'label': u'Default Warehouse Type',
-		'options': u'Warehouse Type'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'auto_indent',
-		'fieldtype': u'Check',
-		'label': u'Raise Purchase Request when stock reaches re-order level'
-	},
-
-	# DocField
-	{
-		'default': u'1',
-		u'doctype': u'DocField',
-		'fieldname': u'column_break3',
-		'fieldtype': u'Column Break',
-		'width': u'50%'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'description': u'Percentage you are allowed to receive or deliver more against the quantity ordered. <p>For example: If you have ordered 100 units. and your Allowance is 10% then you are allowed to receive 110 units</p>',
-		u'doctype': u'DocField',
-		'fieldname': u'tolerance',
-		'fieldtype': u'Currency',
-		'label': u'Allowance Percent'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'description': u'Stock level frozen up to this date, nobody can do / modify entry except authorized person',
-		u'doctype': u'DocField',
-		'fieldname': u'stock_frozen_upto',
-		'fieldtype': u'Date',
-		'label': u'Stock Frozen Upto'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'description': u'Users with this role are allowed to do / modify stock entry before frozen date',
-		u'doctype': u'DocField',
-		'fieldname': u'stock_auth_role',
-		'fieldtype': u'Link',
-		'label': u'Authorized Role (Frozen Entry)',
-		'options': u'Role'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'accounts',
-		'fieldtype': u'Section Break',
-		'label': u'Accounts'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'description': u'Accounting entry frozen up to this date, nobody can do / modify entry except authorized person',
-		u'doctype': u'DocField',
-		'fieldname': u'acc_frozen_upto',
-		'fieldtype': u'Date',
-		'label': u'Accounts Frozen Upto'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'description': u'Users with this role are allowed to do / modify accounting entry before frozen date',
-		u'doctype': u'DocField',
-		'fieldname': u'bde_auth_role',
-		'fieldtype': u'Link',
-		'label': u'Authourized Role (Frozen Entry)',
-		'options': u'Role'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'credit_controller',
-		'fieldtype': u'Link',
-		'label': u'Credit Controller',
-		'options': u'Role'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'column_break4',
-		'fieldtype': u'Column Break'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'account_info',
-		'fieldtype': u'HTML',
-		'label': u'Account Info',
-		'options': u'<div class="help-box">For more accounting defaults, Open <a href="#!List/Company">Company</a></div>'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'selling',
-		'fieldtype': u'Section Break',
-		'label': u'Selling'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'default': u'Customer Name',
-		u'doctype': u'DocField',
-		'fieldname': u'cust_master_name',
-		'fieldtype': u'Select',
-		'label': u'Customer Master created by ',
-		'options': u'Customer Name\nNaming Series'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'default_customer_group',
-		'fieldtype': u'Link',
-		'label': u'Default Customer Group',
-		'options': u'Customer Group'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'cghelp',
-		'fieldtype': u'HTML',
-		'label': u'CGHelp',
-		'options': u'<a href="#!Sales Browser/Customer Group">To manage Customer Groups, click here</a>'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'default_territory',
-		'fieldtype': u'Link',
-		'label': u'Default Territory',
-		'options': u'Territory'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'territoryhelp',
-		'fieldtype': u'HTML',
-		'label': u'TerritoryHelp',
-		'options': u'<a href="#!Sales Browser/Territory">To manage Territory, click here</a>'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'column_break5',
-		'fieldtype': u'Column Break',
-		'width': u'50%'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'default_price_list',
-		'fieldtype': u'Link',
-		'label': u'Default Price List',
-		'options': u'Price List'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'default_price_list_currency',
-		'fieldtype': u'Link',
-		'label': u'Default Price List Currency',
-		'options': u'Currency'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'default': u'No',
-		u'doctype': u'DocField',
-		'fieldname': u'so_required',
-		'fieldtype': u'Select',
-		'label': u'Sales Order Required',
-		'options': u'No\nYes'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'default': u'No',
-		u'doctype': u'DocField',
-		'fieldname': u'dn_required',
-		'fieldtype': u'Select',
-		'label': u'Delivery Note Required',
-		'options': u'No\nYes'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'buying',
-		'fieldtype': u'Section Break',
-		'label': u'Buying'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'default_supplier_type',
-		'fieldtype': u'Link',
-		'label': u'Default Supplier Type',
-		'options': u'Supplier Type'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'default': u'Supplier Name',
-		u'doctype': u'DocField',
-		'fieldname': u'supp_master_name',
-		'fieldtype': u'Select',
-		'label': u'Supplier Master created by ',
-		'options': u'Supplier Name\nNaming Series'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'column_break6',
-		'fieldtype': u'Column Break',
-		'width': u'50%'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'default': u'No',
-		u'doctype': u'DocField',
-		'fieldname': u'po_required',
-		'fieldtype': u'Select',
-		'label': u'Purchase Order Required',
-		'options': u'No\nYes'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'default': u'No',
-		u'doctype': u'DocField',
-		'fieldname': u'pr_required',
-		'fieldtype': u'Select',
-		'label': u'Purchase Receipt Required',
-		'options': u'No\nYes'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'maintain_same_rate',
-		'fieldtype': u'Check',
-		'label': u'Maintain same rate throughout purchase cycle'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'hr',
-		'fieldtype': u'Section Break',
-		'label': u'HR',
-		'options': u'<div style="padding-top: 8px;" class="columnHeading">HR</div>'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'description': u'Employee record is created using selected field. ',
-		u'doctype': u'DocField',
-		'fieldname': u'emp_created_by',
-		'fieldtype': u'Select',
-		'label': u'Employee Records to be created by ',
-		'options': u'\nNaming Series\nEmployee Number'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'system',
-		'fieldtype': u'Section Break',
-		'label': u'System'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'sms_sender_name',
-		'fieldtype': u'Data',
-		'label': u'SMS Sender Name'
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 1,
-		u'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'System Manager',
-		'submit': 0,
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'create': 1,
-		u'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'System Manager',
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		u'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'All'
-	},
-
-	# DocPerm
-	{
-		u'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'System Manager',
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		u'doctype': u'DocPerm',
-		'permlevel': 2,
-		'role': u'System Manager',
-		'write': 1
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-10-26 16:49:40", 
+  "modified_by": "Administrator", 
+  "modified": "2012-12-12 14:13:31"
+ }, 
+ {
+  "in_create": 1, 
+  "allow_print": 1, 
+  "module": "Setup", 
+  "read_only": 1, 
+  "allow_email": 1, 
+  "issingle": 1, 
+  "name": "__common__", 
+  "doctype": "DocType", 
+  "hide_toolbar": 0, 
+  "allow_copy": 1
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "Global Defaults", 
+  "doctype": "DocField", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "parentfield": "fields"
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "Global Defaults", 
+  "read": 1, 
+  "doctype": "DocPerm", 
+  "parenttype": "DocType", 
+  "parentfield": "permissions"
+ }, 
+ {
+  "name": "Global Defaults", 
+  "doctype": "DocType"
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "General", 
+  "fieldname": "general", 
+  "fieldtype": "Section Break"
+ }, 
+ {
+  "description": "Session Expiry in Hours e.g. 06:00", 
+  "doctype": "DocField", 
+  "label": "Session Expiry", 
+  "fieldname": "session_expiry", 
+  "fieldtype": "Data"
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Company", 
+  "fieldname": "company", 
+  "fieldtype": "Section Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Default Company", 
+  "fieldname": "default_company", 
+  "fieldtype": "Link", 
+  "reqd": 0, 
+  "options": "Company"
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Current Fiscal Year", 
+  "fieldname": "current_fiscal_year", 
+  "fieldtype": "Link", 
+  "reqd": 1, 
+  "options": "Fiscal Year"
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Date Format", 
+  "fieldname": "date_format", 
+  "fieldtype": "Select", 
+  "options": "yyyy-mm-dd\ndd-mm-yyyy\ndd/mm/yyyy\nmm/dd/yyyy\nmm-dd-yyyy"
+ }, 
+ {
+  "doctype": "DocField", 
+  "width": "50%", 
+  "fieldname": "column_break1", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "default": "INR", 
+  "doctype": "DocField", 
+  "label": "Default Currency", 
+  "fieldname": "default_currency", 
+  "fieldtype": "Select", 
+  "reqd": 1, 
+  "options": "link:Currency"
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Default Currency Format", 
+  "fieldname": "default_currency_format", 
+  "fieldtype": "Select", 
+  "options": "Lacs\nMillions"
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Default Currency Fraction", 
+  "fieldname": "default_currency_fraction", 
+  "fieldtype": "Data"
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Stock", 
+  "fieldname": "stock", 
+  "fieldtype": "Section Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "width": "50%", 
+  "fieldname": "column_break2", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Default Item Group", 
+  "fieldname": "default_item_group", 
+  "fieldtype": "Link", 
+  "options": "Item Group"
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "IGHelp", 
+  "fieldname": "ighelp", 
+  "fieldtype": "HTML", 
+  "options": "<a href=\"#!Sales Browser/Item Group\">To manage Item Groups, click here</a>"
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Default Stock UOM", 
+  "fieldname": "default_stock_uom", 
+  "fieldtype": "Link", 
+  "options": "UOM"
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Default Valuation Method", 
+  "fieldname": "default_valuation_method", 
+  "fieldtype": "Select", 
+  "options": "FIFO\nMoving Average"
+ }, 
+ {
+  "description": "Applicable only if valuation method is moving average", 
+  "doctype": "DocField", 
+  "label": "Allow Negative Stock", 
+  "fieldname": "allow_negative_stock", 
+  "fieldtype": "Check"
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Default Warehouse Type", 
+  "fieldname": "default_warehouse_type", 
+  "fieldtype": "Link", 
+  "options": "Warehouse Type"
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Raise Purchase Request when stock reaches re-order level", 
+  "fieldname": "auto_indent", 
+  "fieldtype": "Check"
+ }, 
+ {
+  "default": "1", 
+  "doctype": "DocField", 
+  "width": "50%", 
+  "fieldname": "column_break3", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "description": "Percentage you are allowed to receive or deliver more against the quantity ordered. <p>For example: If you have ordered 100 units. and your Allowance is 10% then you are allowed to receive 110 units</p>", 
+  "doctype": "DocField", 
+  "label": "Allowance Percent", 
+  "fieldname": "tolerance", 
+  "fieldtype": "Currency"
+ }, 
+ {
+  "description": "Stock level frozen up to this date, nobody can do / modify entry except authorized person", 
+  "doctype": "DocField", 
+  "label": "Stock Frozen Upto", 
+  "fieldname": "stock_frozen_upto", 
+  "fieldtype": "Date"
+ }, 
+ {
+  "description": "Users with this role are allowed to do / modify stock entry before frozen date", 
+  "doctype": "DocField", 
+  "label": "Authorized Role (Frozen Entry)", 
+  "fieldname": "stock_auth_role", 
+  "fieldtype": "Link", 
+  "options": "Role"
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Accounts", 
+  "fieldname": "accounts", 
+  "fieldtype": "Section Break"
+ }, 
+ {
+  "description": "Accounting entry frozen up to this date, nobody can do / modify entry except authorized person", 
+  "doctype": "DocField", 
+  "label": "Accounts Frozen Upto", 
+  "fieldname": "acc_frozen_upto", 
+  "fieldtype": "Date"
+ }, 
+ {
+  "description": "Users with this role are allowed to do / modify accounting entry before frozen date", 
+  "doctype": "DocField", 
+  "label": "Authourized Role (Frozen Entry)", 
+  "fieldname": "bde_auth_role", 
+  "fieldtype": "Link", 
+  "options": "Role"
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Credit Controller", 
+  "fieldname": "credit_controller", 
+  "fieldtype": "Link", 
+  "options": "Role"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break4", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Account Info", 
+  "fieldname": "account_info", 
+  "fieldtype": "HTML", 
+  "options": "<div class=\"help-box\">For more accounting defaults, Open <a href=\"#!List/Company\">Company</a></div>"
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Selling", 
+  "fieldname": "selling", 
+  "fieldtype": "Section Break"
+ }, 
+ {
+  "default": "Customer Name", 
+  "doctype": "DocField", 
+  "label": "Customer Master created by ", 
+  "fieldname": "cust_master_name", 
+  "fieldtype": "Select", 
+  "options": "Customer Name\nNaming Series"
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Default Customer Group", 
+  "fieldname": "default_customer_group", 
+  "fieldtype": "Link", 
+  "options": "Customer Group"
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "CGHelp", 
+  "fieldname": "cghelp", 
+  "fieldtype": "HTML", 
+  "options": "<a href=\"#!Sales Browser/Customer Group\">To manage Customer Groups, click here</a>"
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Default Territory", 
+  "fieldname": "default_territory", 
+  "fieldtype": "Link", 
+  "options": "Territory"
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "TerritoryHelp", 
+  "fieldname": "territoryhelp", 
+  "fieldtype": "HTML", 
+  "options": "<a href=\"#!Sales Browser/Territory\">To manage Territory, click here</a>"
+ }, 
+ {
+  "doctype": "DocField", 
+  "width": "50%", 
+  "fieldname": "column_break5", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Default Price List", 
+  "fieldname": "default_price_list", 
+  "fieldtype": "Link", 
+  "options": "Price List"
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Default Price List Currency", 
+  "fieldname": "default_price_list_currency", 
+  "fieldtype": "Link", 
+  "options": "Currency"
+ }, 
+ {
+  "default": "No", 
+  "doctype": "DocField", 
+  "label": "Sales Order Required", 
+  "fieldname": "so_required", 
+  "fieldtype": "Select", 
+  "options": "No\nYes"
+ }, 
+ {
+  "default": "No", 
+  "doctype": "DocField", 
+  "label": "Delivery Note Required", 
+  "fieldname": "dn_required", 
+  "fieldtype": "Select", 
+  "options": "No\nYes"
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Buying", 
+  "fieldname": "buying", 
+  "fieldtype": "Section Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Default Supplier Type", 
+  "fieldname": "default_supplier_type", 
+  "fieldtype": "Link", 
+  "options": "Supplier Type"
+ }, 
+ {
+  "default": "Supplier Name", 
+  "doctype": "DocField", 
+  "label": "Supplier Master created by ", 
+  "fieldname": "supp_master_name", 
+  "fieldtype": "Select", 
+  "options": "Supplier Name\nNaming Series"
+ }, 
+ {
+  "doctype": "DocField", 
+  "width": "50%", 
+  "fieldname": "column_break6", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "default": "No", 
+  "doctype": "DocField", 
+  "label": "Purchase Order Required", 
+  "fieldname": "po_required", 
+  "fieldtype": "Select", 
+  "options": "No\nYes"
+ }, 
+ {
+  "default": "No", 
+  "doctype": "DocField", 
+  "label": "Purchase Receipt Required", 
+  "fieldname": "pr_required", 
+  "fieldtype": "Select", 
+  "options": "No\nYes"
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Maintain same rate throughout purchase cycle", 
+  "fieldname": "maintain_same_rate", 
+  "fieldtype": "Check"
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "HR", 
+  "fieldname": "hr", 
+  "fieldtype": "Section Break", 
+  "options": "<div style=\"padding-top: 8px;\" class=\"columnHeading\">HR</div>"
+ }, 
+ {
+  "description": "Employee record is created using selected field. ", 
+  "doctype": "DocField", 
+  "label": "Employee Records to be created by ", 
+  "fieldname": "emp_created_by", 
+  "fieldtype": "Select", 
+  "options": "\nNaming Series\nEmployee Number"
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "System", 
+  "fieldname": "system", 
+  "fieldtype": "Section Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "SMS Sender Name", 
+  "fieldname": "sms_sender_name", 
+  "fieldtype": "Data"
+ }, 
+ {
+  "amend": 0, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "submit": 0, 
+  "write": 1, 
+  "role": "System Manager", 
+  "cancel": 0, 
+  "permlevel": 0
+ }, 
+ {
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "write": 1, 
+  "role": "System Manager", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "write": 1, 
+  "role": "System Manager", 
+  "permlevel": 1
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "All", 
+  "permlevel": 1
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "write": 1, 
+  "role": "System Manager", 
+  "permlevel": 2
+ }
 ]
