@@ -79,7 +79,7 @@ cur_frm.cscript.make_contact = function() {
 			page_length: 2,
 			new_doctype: "Contact",
 			custom_new_doc: function(doctype) {
-				var contact = LocalDB.create('Contact');
+				var contact = wn.model.make_new_doc_and_get_name('Contact');
 				contact = locals['Contact'][contact];
 				contact.supplier = cur_frm.doc.name;
 				contact.supplier_name = cur_frm.doc.supplier_name;

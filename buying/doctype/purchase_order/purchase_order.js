@@ -122,9 +122,9 @@ cur_frm.cscript.get_last_purchase_rate = function(doc, cdt, cdn){
 
 //========================= Make Purchase Receipt =======================================================
 cur_frm.cscript['Make Purchase Receipt'] = function() {
-	n = createLocal('Purchase Receipt');
+	n = wn.model.make_new_doc_and_get_name('Purchase Receipt');
 	$c('dt_map', args={
-		'docs':compress_doclist([locals['Purchase Receipt'][n]]),
+		'docs':wn.model.compress([locals['Purchase Receipt'][n]]),
 		'from_doctype': cur_frm.doc.doctype,
 		'to_doctype':'Purchase Receipt',
 		'from_docname':cur_frm.doc.name,
@@ -137,9 +137,9 @@ cur_frm.cscript['Make Purchase Receipt'] = function() {
 
 //========================== Make Purchase Invoice =====================================================
 cur_frm.cscript['Make Purchase Invoice'] = function() {
-	n = createLocal('Purchase Invoice');
+	n = wn.model.make_new_doc_and_get_name('Purchase Invoice');
 	$c('dt_map', {
-		'docs':compress_doclist([locals['Purchase Invoice'][n]]),
+		'docs':wn.model.compress([locals['Purchase Invoice'][n]]),
 		'from_doctype':cur_frm.doc.doctype,
 		'to_doctype':'Purchase Invoice',
 		'from_docname': cur_frm.doc.name,
@@ -158,7 +158,7 @@ cur_frm.cscript['Stop Purchase Order'] = function() {
 	var check = confirm("Do you really want to STOP " + doc.name);
 
 	if (check) {
-		$c('runserverobj', args={'method':'update_status', 'arg': 'Stopped', 'docs': compress_doclist(make_doclist(doc.doctype, doc.name))}, function(r,rt) {
+		$c('runserverobj', args={'method':'update_status', 'arg': 'Stopped', 'docs': wn.model.compress(make_doclist(doc.doctype, doc.name))}, function(r,rt) {
 			cur_frm.refresh();
 		});	
 	}
@@ -171,7 +171,7 @@ cur_frm.cscript['Unstop Purchase Order'] = function() {
 	var check = confirm("Do you really want to UNSTOP " + doc.name);
 
 	if (check) {
-		$c('runserverobj', args={'method':'update_status', 'arg': 'Submitted', 'docs': compress_doclist(make_doclist(doc.doctype, doc.name))}, function(r,rt) {
+		$c('runserverobj', args={'method':'update_status', 'arg': 'Submitted', 'docs': wn.model.compress(make_doclist(doc.doctype, doc.name))}, function(r,rt) {
 			cur_frm.refresh();
 		});	
 	}

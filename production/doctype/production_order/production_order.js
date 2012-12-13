@@ -70,7 +70,7 @@ cur_frm.cscript['Backflush'] = function() {
 }
 
 cur_frm.cscript.make_se = function(doc, process) {
-  var se = LocalDB.create('Stock Entry');
+  var se = wn.model.make_new_doc_and_get_name('Stock Entry');
   se = locals['Stock Entry'][se];
   se.purpose = 'Production Order';
   se.process = process;

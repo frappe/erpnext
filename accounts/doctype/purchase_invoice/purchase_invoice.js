@@ -266,7 +266,7 @@ calc_total_advance = function(doc,cdt,cdn) {
 }
 
 cur_frm.cscript.make_jv = function(doc, dt, dn, bank_account) {
-	var jv = LocalDB.create('Journal Voucher');
+	var jv = wn.model.make_new_doc_and_get_name('Journal Voucher');
 	jv = locals['Journal Voucher'][jv];
 	jv.voucher_type = 'Bank Voucher';
 	jv.remark = repl('Payment against voucher %(vn)s for %(rem)s', {vn:doc.name, rem:doc.remarks});
@@ -276,13 +276,13 @@ cur_frm.cscript.make_jv = function(doc, dt, dn, bank_account) {
 	jv.company = doc.company;
 	
 	// debit to creditor
-	var d1 = LocalDB.add_child(jv, 'Journal Voucher Detail', 'entries');
+	var d1 = wn.model.add_child(jv, 'Journal Voucher Detail', 'entries');
 	d1.account = doc.credit_to;
 	d1.debit = doc.outstanding_amount;
 	d1.against_voucher = doc.name;
 	
 	// credit to bank
-	var d1 = LocalDB.add_child(jv, 'Journal Voucher Detail', 'entries');
+	var d1 = wn.model.add_child(jv, 'Journal Voucher Detail', 'entries');
 	d1.account = bank_account;
 	d1.credit = doc.outstanding_amount;
 	

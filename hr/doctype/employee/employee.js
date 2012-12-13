@@ -53,7 +53,7 @@ cur_frm.cscript['Make Salary Structure']=function(){
 }
 
 cur_frm.cscript.make_salary_structure = function(doc,dt,dn,det){
-	var st = LocalDB.create('Salary Structure');
+	var st = wn.model.make_new_doc_and_get_name('Salary Structure');
 	st = locals['Salary Structure'][st];
 	st.employee = doc.name;
 	st.employee_name = doc.employee_name;

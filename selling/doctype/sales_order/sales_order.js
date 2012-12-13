@@ -77,7 +77,7 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 
 			// indent
 			if(!doc.order_type || (doc.order_type == 'Sales'))
-				cur_frm.add_custom_button('Make ' + get_doctype_label('Purchase Request'), cur_frm.cscript['Make Purchase Request']);
+				cur_frm.add_custom_button('Make ' + wn._('Purchase Request'), cur_frm.cscript['Make Purchase Request']);
 			
 			// sales invoice
 			if(flt(doc.per_billed, 2) < 100)
@@ -163,7 +163,7 @@ cur_frm.cscript.pull_quotation_details = function(doc,dt,dn) {
 
 //================ create new contact ============================================================================
 cur_frm.cscript.new_contact = function(){
-	tn = createLocal('Contact');
+	tn = wn.model.make_new_doc_and_get_name('Contact');
 	locals['Contact'][tn].is_customer = 1;
 	if(doc.customer) locals['Contact'][tn].customer = doc.customer;
 	loaddoc('Contact', tn);
@@ -222,9 +222,9 @@ cur_frm.cscript['Make Maintenance Schedule'] = function() {
 		$c_obj(make_doclist(doc.doctype, doc.name),'check_maintenance_schedule','',
 			function(r,rt){
 				if(r.message == 'No'){
-					n = createLocal("Maintenance Schedule");
+					n = wn.model.make_new_doc_and_get_name("Maintenance Schedule");
 					$c('dt_map', args={
-									'docs':compress_doclist([locals["Maintenance Schedule"][n]]),
+									'docs':wn.model.compress([locals["Maintenance Schedule"][n]]),
 									'from_doctype':'Sales Order',
 									'to_doctype':'Maintenance Schedule',
 									'from_docname':doc.name,
@@ -251,9 +251,9 @@ cur_frm.cscript.make_maintenance_visit = function() {
 		$c_obj(make_doclist(doc.doctype, doc.name),'check_maintenance_visit','',
 			function(r,rt){
 				if(r.message == 'No'){
-					n = createLocal("Maintenance Visit");
+					n = wn.model.make_new_doc_and_get_name("Maintenance Visit");
 					$c('dt_map', args={
-									'docs':compress_doclist([locals["Maintenance Visit"][n]]),
+									'docs':wn.model.compress([locals["Maintenance Visit"][n]]),
 									'from_doctype':'Sales Order',
 									'to_doctype':'Maintenance Visit',
 									'from_docname':doc.name,
@@ -277,9 +277,9 @@ cur_frm.cscript.make_maintenance_visit = function() {
 cur_frm.cscript['Make Purchase Request'] = function() {
 	var doc = cur_frm.doc;
 	if (doc.docstatus == 1) { 
-	n = createLocal("Purchase Request");
+	n = wn.model.make_new_doc_and_get_name("Purchase Request");
 	$c('dt_map', args={
-					'docs':compress_doclist([locals["Purchase Request"][n]]),
+					'docs':wn.model.compress([locals["Purchase Request"][n]]),
 					'from_doctype':'Sales Order',
 					'to_doctype':'Purchase Request',
 					'from_docname':doc.name,
@@ -298,9 +298,9 @@ cur_frm.cscript['Make Purchase Request'] = function() {
 cur_frm.cscript['Make Delivery Note'] = function() {
 	var doc = cur_frm.doc;
 	if (doc.docstatus == 1) { 
-	n = createLocal("Delivery Note");
+	n = wn.model.make_new_doc_and_get_name("Delivery Note");
 	$c('dt_map', args={
-					'docs':compress_doclist([locals["Delivery Note"][n]]),
+					'docs':wn.model.compress([locals["Delivery Note"][n]]),
 					'from_doctype':'Sales Order',
 					'to_doctype':'Delivery Note',
 					'from_docname':doc.name,
@@ -319,9 +319,9 @@ cur_frm.cscript['Make Delivery Note'] = function() {
 cur_frm.cscript['Make Sales Invoice'] = function() {
 	var doc = cur_frm.doc;
 
-	n = createLocal('Sales Invoice');
+	n = wn.model.make_new_doc_and_get_name('Sales Invoice');
 	$c('dt_map', args={
-		'docs':compress_doclist([locals['Sales Invoice'][n]]),
+		'docs':wn.model.compress([locals['Sales Invoice'][n]]),
 		'from_doctype':doc.doctype,
 		'to_doctype':'Sales Invoice',
 		'from_docname':doc.name,
@@ -341,7 +341,7 @@ cur_frm.cscript['Stop Sales Order'] = function() {
 	var check = confirm("Are you sure you want to STOP " + doc.name);
 
 	if (check) {
-		$c('runserverobj', args={'method':'stop_sales_order', 'docs': compress_doclist(make_doclist(doc.doctype, doc.name))}, function(r,rt) {
+		$c('runserverobj', args={'method':'stop_sales_order', 'docs': wn.model.compress(make_doclist(doc.doctype, doc.name))}, function(r,rt) {
 			cur_frm.refresh();
 		});
 	}
@@ -355,7 +355,7 @@ cur_frm.cscript['Unstop Sales Order'] = function() {
 	var check = confirm("Are you sure you want to UNSTOP " + doc.name);
 
 	if (check) {
-		$c('runserverobj', args={'method':'unstop_sales_order', 'docs': compress_doclist(make_doclist(doc.doctype, doc.name))}, function(r,rt) {
+		$c('runserverobj', args={'method':'unstop_sales_order', 'docs': wn.model.compress(make_doclist(doc.doctype, doc.name))}, function(r,rt) {
 			cur_frm.refresh();
 		});
 	}

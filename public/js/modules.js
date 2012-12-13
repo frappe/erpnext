@@ -111,7 +111,7 @@ erpnext.module_page.hide_links = function(wrapper) {
 	$(wrapper).find('[href*="List/"]').each(function() {
 		var href = $(this).attr('href');
 		var dt = href.split('/')[1];
-		if(wn.boot.profile.all_read.indexOf(get_label_doctype(dt))==-1) {
+		if(wn.boot.profile.all_read.indexOf(dt)==-1) {
 			replace_link(this);
 		}
 	});
@@ -128,7 +128,7 @@ erpnext.module_page.hide_links = function(wrapper) {
 	$(wrapper).find('[href*="Form/"]').each(function() {
 		var href = $(this).attr('href');
 		var dt = href.split('/')[1];
-		if(wn.boot.profile.all_read.indexOf(get_label_doctype(dt))==-1) {
+		if(wn.boot.profile.all_read.indexOf(dt)==-1) {
 			replace_link(this);
 		}
 	});

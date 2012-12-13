@@ -180,9 +180,9 @@ cur_frm.cscript['Make Sales Order'] = function() {
 	var doc = cur_frm.doc;
 
 	if (doc.docstatus == 1) {
-		var n = createLocal("Sales Order");
+		var n = wn.model.make_new_doc_and_get_name("Sales Order");
 		$c('dt_map', args={
-			'docs':compress_doclist([locals["Sales Order"][n]]),
+			'docs':wn.model.compress([locals["Sales Order"][n]]),
 			'from_doctype':'Quotation',
 			'to_doctype':'Sales Order',
 			'from_docname':doc.name,

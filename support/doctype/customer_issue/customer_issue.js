@@ -71,9 +71,9 @@ cur_frm.cscript['Make Maintenance Visit'] = function() {
 		$c_obj(make_doclist(doc.doctype, doc.name),'check_maintenance_visit','',
 			function(r,rt){
 				if(r.message == 'No'){
-					n = createLocal("Maintenance Visit");
+					n = wn.model.make_new_doc_and_get_name("Maintenance Visit");
 					$c('dt_map', args={
-						'docs':compress_doclist([locals["Maintenance Visit"][n]]),
+						'docs':wn.model.compress([locals["Maintenance Visit"][n]]),
 						'from_doctype':'Customer Issue',
 						'to_doctype':'Maintenance Visit',
 						'from_docname':doc.name,

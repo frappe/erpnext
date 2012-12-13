@@ -116,7 +116,7 @@ cur_frm.cscript.periodicity = function(doc, cdt, cdn){
 
 cur_frm.cscript.generate_schedule = function(doc, cdt, cdn) {
   if (!doc.__islocal) {
-    $c('runserverobj', args={'method':'generate_schedule', 'docs':compress_doclist(make_doclist(cdt,cdn))},
+    $c('runserverobj', args={'method':'generate_schedule', 'docs':wn.model.compress(make_doclist(cdt,cdn))},
       function(r,rt){
         refresh_field('maintenance_schedule_detail');
       }

@@ -156,9 +156,9 @@ cur_frm.fields_dict['enquiry_details'].grid.get_field('item_code').get_query = f
 
 // Create New Quotation
 cur_frm.cscript['Create Quotation'] = function(){
-	n = createLocal("Quotation");
+	n = wn.model.make_new_doc_and_get_name("Quotation");
 	$c('dt_map', args={
-		'docs':compress_doclist([locals["Quotation"][n]]),
+		'docs':wn.model.compress([locals["Quotation"][n]]),
 		'from_doctype':'Opportunity',
 		'to_doctype':'Quotation',
 		'from_docname':cur_frm.docname,

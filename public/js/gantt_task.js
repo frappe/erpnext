@@ -79,7 +79,7 @@ erpnext.show_task_gantt = function(parent, project) {
 			$('<button class="btn"><i class="icon icon-plus"></i>\
 				Create a new Task</button>').click(function() {
 				wn.model.with_doctype('Task', function() {
-					var new_name = LocalDB.create('Task');
+					var new_name = wn.model.make_new_doc_and_get_name('Task');
 					if(project)
 						locals.Task[new_name].project = project;
 					wn.set_route('Form', 'Task', new_name);

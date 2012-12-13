@@ -55,7 +55,7 @@ cur_frm.cscript.make_history_list = function(parent,doc){
 // get sates on country trigger
 // -----------------------------
 cur_frm.cscript.get_states=function(doc,dt,dn){
-   $c('runserverobj', args={'method':'check_state', 'docs':compress_doclist(make_doclist(doc.doctype, doc.name))},
+   $c('runserverobj', args={'method':'check_state', 'docs':wn.model.compress(make_doclist(doc.doctype, doc.name))},
     function(r,rt){
       if(r.message) {
         set_field_options('state', r.message);

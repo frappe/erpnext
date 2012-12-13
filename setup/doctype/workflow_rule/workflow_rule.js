@@ -32,7 +32,7 @@ cur_frm.cscript.select_form = function(doc, cdt, cdn){
   var mydoc = doc
   
   var call_back_action = function(mydoc){
-    $c('runserverobj', args={'method':'field_label_list', 'docs':compress_doclist (make_doclist (mydoc.doctype,mydoc.name))},
+    $c('runserverobj', args={'method':'field_label_list', 'docs':wn.model.compress (make_doclist (mydoc.doctype,mydoc.name))},
     function(r, rt) {
       var doc = locals[mydoc.doctype][mydoc.name];
       cur_frm.fields_dict.workflow_action_details.grid.get_field("action_field").df.options = r.message;
@@ -41,7 +41,7 @@ cur_frm.cscript.select_form = function(doc, cdt, cdn){
   }
   
   var call_back_rule = function(mydoc){
-    $c('runserverobj', args={'method':'compare_field', 'docs':compress_doclist (make_doclist (mydoc.doctype,mydoc.name))},
+    $c('runserverobj', args={'method':'compare_field', 'docs':wn.model.compress (make_doclist (mydoc.doctype,mydoc.name))},
     function(r, rt) {
       var doc = locals[mydoc.doctype][mydoc.name];
       cur_frm.fields_dict.workflow_rule_details.grid.get_field("comparing_field").df.options = r.message;
@@ -50,7 +50,7 @@ cur_frm.cscript.select_form = function(doc, cdt, cdn){
     );
   }
   
-  $c('runserverobj', args={'method':'maindoc_field', 'docs':compress_doclist (make_doclist (doc.doctype,doc.name))},
+  $c('runserverobj', args={'method':'maindoc_field', 'docs':wn.model.compress (make_doclist (doc.doctype,doc.name))},
     function(r, rt) {
      var doc = locals[mydoc.doctype][mydoc.name];
      cur_frm.fields_dict.workflow_rule_details.grid.get_field("rule_field").df.options = r.message;

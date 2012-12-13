@@ -42,9 +42,9 @@ cur_frm.cscript['Make Salary Slip'] = function(){
   var doc = cur_frm.doc;  
   var callback = function(r,rt){
     ret = r.message;
-    n = createLocal("Salary Slip");
+    n = wn.model.make_new_doc_and_get_name("Salary Slip");
     $c('dt_map', args={
-      'docs':compress_doclist([locals["Salary Slip"][n]]),
+      'docs':wn.model.compress([locals["Salary Slip"][n]]),
       'from_doctype':'Salary Structure',
       'to_doctype':'Salary Slip',
       'from_docname':doc.name,
