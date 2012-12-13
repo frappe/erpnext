@@ -42,7 +42,7 @@ class DocType:
 
 	def get_item_det(self, item_code):
 		item = sql("""select name, is_asset_item, is_purchase_item, docstatus,
-		 	is_sub_contracted_item, description, stock_uom, default_bom, 
+		 	is_sub_contracted_item, stock_uom, default_bom, 
 			last_purchase_rate, standard_rate, is_manufactured_item 
 			from `tabItem` where item_code = %s""", item_code, as_dict = 1)
 
@@ -50,27 +50,13 @@ class DocType:
 
 
 	def get_item_detail(self, item_code):
-		""" Get stock uom and description for finished good item"""
-
-		item = self.get_item_det(item_code)
-		ret={
-			'description'	 : item and item[0]['description'] or '',
-			'uom'				: item and item[0]['stock_uom'] or ''
-		}
-		return ret
-
+		return { 'uom' : webnotes.conn.get_value("Item", item_code, "stock_uom")}
 
 	def get_workstation_details(self,workstation):
-		""" Fetch hour rate from workstation master"""
-
-		ws = sql("select hour_rate from `tabWorkstation` where name = %s", 
-			workstation , as_dict = 1)
-		return {'hour_rate'	: ws and flt(ws[0]['hour_rate']) or ''}
+		return {'hour_rate': webnotes.conn.get_value("Workstation", workstation, "hour_rate")}
 
 
 	def validate_rm_item(self, item):
-		""" Validate raw material items"""
-
 		if item[0]['name'] == self.doc.item:
 			msgprint("Item_code: %s in materials tab cannot be same as FG Item", 
 				item[0]['name'], raise_exception=1)
@@ -130,7 +116,6 @@ class DocType:
 			as per valuation method (MAR/FIFO) 
 			as on costing date	
 		"""
-
 		dt = self.doc.costing_date or nowdate()
 		time = self.doc.costing_date == nowdate() and now().split()[1] or '23:59'
 		warehouse = sql("select warehouse from `tabBin` where item_code = %s", arg['item_code'])

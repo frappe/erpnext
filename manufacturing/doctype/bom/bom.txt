@@ -2,9 +2,9 @@
  {
   "owner": "Administrator", 
   "docstatus": 0, 
-  "creation": "2012-12-10 19:03:43", 
+  "creation": "2012-12-12 10:17:41", 
   "modified_by": "Administrator", 
-  "modified": "2012-12-11 15:13:42"
+  "modified": "2012-12-13 11:43:11"
  }, 
  {
   "istable": 0, 
@@ -68,6 +68,7 @@
  }, 
  {
   "description": "Total quantity of items for which raw materials required and operations done will be defined", 
+  "default": "1", 
   "oldfieldtype": "Currency", 
   "doctype": "DocField", 
   "label": "Quantity", 
@@ -79,19 +80,28 @@
  }, 
  {
   "doctype": "DocField", 
+  "label": "Item UOM", 
+  "options": "link:UOM", 
+  "fieldname": "uom", 
+  "fieldtype": "Select", 
+  "permlevel": 1
+ }, 
+ {
+  "doctype": "DocField", 
   "width": "50%", 
   "fieldname": "column_break1", 
   "fieldtype": "Column Break", 
   "permlevel": 0
  }, 
  {
+  "permlevel": 0, 
   "no_copy": 1, 
   "oldfieldtype": "Select", 
   "allow_on_submit": 1, 
   "doctype": "DocField", 
   "label": "Is Active", 
   "oldfieldname": "is_active", 
-  "permlevel": 0, 
+  "default": "Yes", 
   "fieldname": "is_active", 
   "fieldtype": "Select", 
   "reqd": 1, 
@@ -204,36 +214,18 @@
   "in_filter": 1
  }, 
  {
-  "doctype": "DocField", 
-  "label": "Item UOM", 
-  "options": "link:UOM", 
-  "fieldname": "uom", 
-  "fieldtype": "Select", 
-  "permlevel": 1
- }, 
- {
-  "oldfieldtype": "Text", 
-  "doctype": "DocField", 
-  "label": "Item Description", 
-  "oldfieldname": "description", 
-  "width": "300px", 
-  "fieldname": "description", 
-  "fieldtype": "Small Text", 
-  "permlevel": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "col_break23", 
-  "fieldtype": "Column Break", 
-  "permlevel": 0
- }, 
- {
   "oldfieldtype": "Data", 
   "doctype": "DocField", 
   "label": "Maintained By", 
   "oldfieldname": "maintained_by", 
   "fieldname": "maintained_by", 
   "fieldtype": "Data", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "col_break23", 
+  "fieldtype": "Column Break", 
   "permlevel": 0
  }, 
  {
@@ -270,7 +262,7 @@
  {
   "print_hide": 0, 
   "doctype": "DocField", 
-  "label": "Exploded BOM Items", 
+  "label": "BOM Explosion Items", 
   "options": "Simple", 
   "fieldname": "section_break0", 
   "fieldtype": "Section Break", 
@@ -283,7 +275,7 @@
   "no_copy": 1, 
   "oldfieldtype": "Table", 
   "doctype": "DocField", 
-  "label": "Exploded BOM Items", 
+  "label": "BOM Explosion Item", 
   "oldfieldname": "flat_bom_details", 
   "default": "No Toolbar", 
   "fieldname": "flat_bom_details", 

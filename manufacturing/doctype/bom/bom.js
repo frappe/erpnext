@@ -19,7 +19,7 @@ cur_frm.cscript.refresh = function(doc,dt,dn){
 	cur_frm.toggle_enable("item", doc.__islocal);
 	if (!doc.__islocal && doc.docstatus==0) {
 		cur_frm.set_intro("Submit the BOM to use it in production");
-	}
+	} else cur_frm.set_intro("");
 }
 
 cur_frm.cscript.item = function(doc, dt, dn) {
@@ -164,8 +164,12 @@ cur_frm.fields_dict['bom_materials'].grid.get_field('item_code').get_query = fun
 		ORDER BY `tabItem`.`name` LIMIT 50';
 }
 
-cur_frm.fields_dict['bom_materials'].grid.get_field('bom_no').get_query = function(doc) {
-	var d = locals[this.doctype][this.docname];
+cur_frm.fields_dict['bom_materials'].grid.get_field('bom_no').get_query = function(doc, cdt, cdn) {
+	var d = locals[cdt][cdn];
+	msgprint('SELECT DISTINCT `tabBOM`.`name`, `tabBOM`.`remarks` FROM `tabBOM` \
+		WHERE `tabBOM`.`item` = "' + d.item_code + '" AND `tabBOM`.`is_active` = "Yes" AND \
+		 	`tabBOM`.docstatus = 1 AND `tabBOM`.`name` like "%s" \
+		ORDER BY `tabBOM`.`name` LIMIT 50');
 	return 'SELECT DISTINCT `tabBOM`.`name`, `tabBOM`.`remarks` FROM `tabBOM` \
 		WHERE `tabBOM`.`item` = "' + d.item_code + '" AND `tabBOM`.`is_active` = "Yes" AND \
 		 	`tabBOM`.docstatus = 1 AND `tabBOM`.`name` like "%s" \
