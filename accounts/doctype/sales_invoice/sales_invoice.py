@@ -174,16 +174,20 @@ class DocType(TransactionBase):
 	def get_customer_account(self):
 		"""Get Account Head to which amount needs to be Debited based on Customer"""
 		if not self.doc.company:
-			msgprint("Please select company first and re-select the customer after doing so", raise_exception=1)
+			msgprint("Please select company first and re-select the customer after doing so",
+			 	raise_exception=1)
+		if self.doc.customer:
+			acc_head = webnotes.conn.sql("""select name from `tabAccount` 
+				where (name = %s or (master_name = %s and master_type = 'customer')) 
+				and docstatus != 2""", 
+				(cstr(self.doc.customer) + " - " + self.get_company_abbr(), self.doc.customer))
 			
-		acc_head = webnotes.conn.sql("""select name from `tabAccount` 
-			where (name = %s or (master_name = %s and master_type = 'customer')) and docstatus != 2""", 
-			(cstr(self.doc.customer) + " - " + self.get_company_abbr(),self.doc.customer))
-			
-		if acc_head and acc_head[0][0]:
-			return acc_head[0][0]
-		else:
-			msgprint("%s does not have an Account Head in %s. You must first create it from the Customer Master" % (self.doc.customer, self.doc.company))
+			if acc_head and acc_head[0][0]:
+				return acc_head[0][0]
+			else:
+				msgprint("%s does not have an Account Head in %s. \
+					You must first create it from the Customer Master" % 
+					(self.doc.customer, self.doc.company))
 
 	def get_debit_to(self):
 		acc_head = self.get_customer_account()

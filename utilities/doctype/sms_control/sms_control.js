@@ -31,7 +31,6 @@ function SMSManager() {
 	this.show = function(contact, key, value, mobile_nos, message) {
 		this.message = message;
 		if (mobile_nos) {
-
 			me.number = mobile_nos;
 			me.show_dialog();
 		} else if (contact){
@@ -59,7 +58,6 @@ function SMSManager() {
 				{fieldname:'send', fieldtype:'Button', label:'Send'}
 			]
 		})
-		d.make();
 		d.fields_dict.send.input.onclick = function() {
 			var btn = d.fields_dict.send.input;
 			var v = me.dialog.get_values();
