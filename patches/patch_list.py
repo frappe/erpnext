@@ -737,4 +737,8 @@ patch_list = [
 		'patch_module': 'patches.december_2012',
 		'patch_file': 'file_list_rename',
 	},
+	{
+		'patch_module': 'patches.december_2012',
+		'patch_file': 'replace_createlocal',
+	},
 ]
