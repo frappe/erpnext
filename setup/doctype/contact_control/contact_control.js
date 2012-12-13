@@ -156,7 +156,7 @@ cur_frm.cscript.render_row_in_wrapper = function(wrapper, data, doctype) {
 	$wrapper.append(repl("\
 		<h4><a class='link_type'>%(fullname)s</a>%(primary)s</h4>\
 		<div class='description'>\
-			%(description)s\
+			<p>%(description)s</p>\
 			<p><a class='delete link_type'>delete this %(doctype)s</a></p>\
 		</div>", data));
 	

@@ -250,6 +250,7 @@ cur_frm.cscript['Declare Order Lost'] = function(){
 				if(r.message == 'true'){
 					$i('update_quotation_dialog_response').innerHTML = 'Done';
 					qtn_lost_dialog.hide();
+					cur_frm.refresh();
 				}
 			}
 			if(arg) $c_obj(make_doclist(cur_frm.doc.doctype, cur_frm.doc.name),'declare_order_lost',arg,call_back);

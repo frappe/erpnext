@@ -207,6 +207,7 @@ cur_frm.cscript['Declare Opportunity Lost'] = function(){
 				if(r.message == 'true'){
 					$i('update_enquiry_dialog_response').innerHTML = 'Done';
 					e_lost_dialog.hide();
+					cur_frm.refresh();
 				}
 			}
 			if(arg) {
