@@ -60,7 +60,6 @@ class DocType:
 		return ret
 
 
-
 	def get_workstation_details(self,workstation):
 		""" Fetch hour rate from workstation master"""
 
@@ -81,7 +80,6 @@ class DocType:
 
 		if not item or item[0]['docstatus'] == 2:
 			msgprint("Item %s does not exist in system" % item[0]['item_code'], raise_exception = 1)
-
 
 
 	def get_bom_material_detail(self):
@@ -146,7 +144,6 @@ class DocType:
 		return rate and flt(sum(rate))/len(rate) or 0
 
 
-
 	def manage_default_bom(self):
 		""" Uncheck others if current one is selected as default, 
 			update default bom in item master
@@ -156,68 +153,16 @@ class DocType:
 			sql("update `tabBOM` set is_default = 0 where name != %s and item=%s", 
 				(self.doc.name, self.doc.item))
 
-			# update default bom in Item Master
-			sql("update `tabItem` set default_bom = %s where name = %s", 
-				(self.doc.name, self.doc.item))
+			webnotes.conn.set_value("Item", self.doc.item, "default_bom", self.doc.name)
 		else:
 			sql("update `tabItem` set default_bom = '' where name = %s and default_bom = %s", 
 			 	(self.doc.item, self.doc.name))
 
 
-	def manage_active_bom(self):
-		""" Manage active/inactive """
-		if self.doc.is_active == 'Yes':
-			self.validate()
-		else:
-			self.check_active_parent_boms()
-
-
-
-	def check_active_parent_boms(self):
-		""" Check parent BOM before making it inactive """
-		act_pbom = sql("""select distinct t1.parent from `tabBOM Item` t1, `tabBOM` t2 
-			where t1.bom_no =%s and t2.name = t1.parent and t2.is_active = 'Yes' 
-			and t2.docstatus = 1 and t1.docstatus =1 """, self.doc.name)
-		if act_pbom and act_pbom[0][0]:
-			msgprint("""Sorry cannot inactivate as BOM: %s is child 
-				of one or many other active parent BOMs""" % self.doc.name, raise_exception=1)
-
-
-
-	def calculate_cost(self):
-		"""Calculate bom totals"""
-		self.calculate_op_cost()
-		self.calculate_rm_cost()
-		self.doc.total_cost = self.doc.raw_material_cost + self.doc.operating_cost
-		self.doc.modified = now()
-		self.doc.save()
-	
-
-	def calculate_op_cost(self):
-		"""Update workstation rate and calculates totals"""
-		total_op_cost = 0
-		for d in getlist(self.doclist, 'bom_operations'):
-			if d.hour_rate and d.time_in_mins:
-				d.operating_cost = flt(d.hour_rate) * flt(d.time_in_mins) / 60.0
-			d.save()
-			total_op_cost += flt(d.operating_cost)
-		self.doc.operating_cost = total_op_cost
-		
-
-
-	def calculate_rm_cost(self):
-		"""Fetch RM rate as per today's valuation rate and calculate totals"""
-		total_rm_cost = 0
-		for d in getlist(self.doclist, 'bom_materials'):
-			if d.bom_no:
-				d.rate = self.get_bom_unitcost(d.bom_no)
-			d.amount = flt(d.rate) * flt(d.qty)
-			d.qty_consumed_per_unit = flt(d.qty) / flt(self.doc.quantity)
-			d.save()
-			total_rm_cost += d.amount
-		self.doc.raw_material_cost = total_rm_cost
-
-
+	def validate(self):
+		self.validate_main_item()
+		self.validate_operations()
+		self.validate_materials()
 
 	def validate_main_item(self):
 		""" Validate main FG item"""
@@ -283,7 +228,6 @@ class DocType:
 			msgprint("""Incorrect BOM No: %s against item: %s at row no: %s.
 				It may be inactive or cancelled or for some other item.""" % 
 				(bom_no, item, idx), raise_exception = 1)
-				
 
 
 	def check_if_item_repeated(self, item, op, check_list):
@@ -294,10 +238,9 @@ class DocType:
 			check_list.append([cstr(item), cstr(op)])
 
 
-	def validate(self):
-		self.validate_main_item()
-		self.validate_operations()
-		self.validate_materials()
+	def on_update(self):
+		self.check_recursion()
+		self.update_cost_and_exploded_items()
 
 	def check_recursion(self):
 		""" Check whether recursion occurs in any bom"""
@@ -315,27 +258,91 @@ class DocType:
 							""" % (cstr(b), cstr(d[2]), self.doc.name), raise_exception = 1)
 					if b[0]:
 						bom_list.append(b[0])
+						
+	
+	def update_cost_and_exploded_items(self, calculate_cost=True):
+		bom_list = self.traverse_tree()
+		bom_list.reverse()
+		for bom in bom_list:
+			bom_obj = get_obj("BOM", bom, with_children=1)
+			if calculate_cost:
+				bom_obj.calculate_cost()
+			bom_obj.update_flat_bom()
+			
 
+	def traverse_tree(self):
+		def _get_childs(bom_no):
+			return [cstr(d[0]) for d in webnotes.conn.sql("""select bom_no from `tabBOM Item` 
+				where parent = %s and ifnull(bom_no, '') != ''""", bom_no)]
+				
+		bom_list, count = [self.doc.name], 0		
+		while(count < len(bom_list)):
+			for child_bom in _get_childs(bom_list[count]):
+				if child_bom not in bom_list:
+					bom_list.append(child_bom)
+			count += 1
+		return bom_list
+	
+	
+	def calculate_cost(self):
+		"""Calculate bom totals"""
+		self.calculate_op_cost()
+		self.calculate_rm_cost()
+		self.doc.total_cost = self.doc.raw_material_cost + self.doc.operating_cost
+		self.doc.modified = now()
+		self.doc.save()
+	
 
-	def on_update(self):
-		self.check_recursion()
-		self.update_cost_by_traversing()
-		self.update_flat_bom_by_traversing()
+	def calculate_op_cost(self):
+		"""Update workstation rate and calculates totals"""
+		total_op_cost = 0
+		for d in getlist(self.doclist, 'bom_operations'):
+			if d.hour_rate and d.time_in_mins:
+				d.operating_cost = flt(d.hour_rate) * flt(d.time_in_mins) / 60.0
+			d.save()
+			total_op_cost += flt(d.operating_cost)
+		self.doc.operating_cost = total_op_cost
 		
 
+	def calculate_rm_cost(self):
+		"""Fetch RM rate as per today's valuation rate and calculate totals"""
+		total_rm_cost = 0
+		for d in getlist(self.doclist, 'bom_materials'):
+			if d.bom_no:
+				d.rate = self.get_bom_unitcost(d.bom_no)
+			d.amount = flt(d.rate) * flt(d.qty)
+			d.qty_consumed_per_unit = flt(d.qty) / flt(self.doc.quantity)
+			d.save()
+			total_rm_cost += d.amount
+		self.doc.raw_material_cost = total_rm_cost
 
-	def add_to_flat_bom_detail(self):
-		"Add items to Flat BOM table"
-		self.doclist = self.doc.clear_table(self.doclist, 'flat_bom_details', 1)
-		for d in self.cur_flat_bom_items:
-			ch = addchild(self.doc, 'flat_bom_details', 'BOM Explosion Item', 1, self.doclist)
-			for i in d.keys():
-				ch.fields[i] = d[i]
-			ch.docstatus = self.doc.docstatus
-			ch.save(1)
-		self.doc.save()
+
+	def update_flat_bom(self):
+		""" Update Flat BOM, following will be correct data"""
+		self.get_flat_bom_items()
+		self.add_to_flat_bom_detail()
 
 
+	def get_flat_bom_items(self):
+		""" Get all raw materials including items from child bom"""
+		self.cur_flat_bom_items = []
+		for d in getlist(self.doclist, 'bom_materials'):
+			if d.bom_no:
+				self.get_child_flat_bom_items(d.bom_no, d.qty)
+			else:
+				self.cur_flat_bom_items.append({
+					'item_code'				: d.item_code, 
+					'description'			: d.description, 
+					'stock_uom'				: d.stock_uom, 
+					'qty'					: flt(d.qty),
+					'rate'					: flt(d.rate), 
+					'amount'				: flt(d.amount),
+					'parent_bom'			: d.parent,
+					'mat_detail_no'			: d.name,
+					'qty_consumed_per_unit' : flt(d.qty_consumed_per_unit)
+				})
+	
+	
 	def get_child_flat_bom_items(self, bom_no, qty):
 		""" Add all items from Flat BOM of child BOM"""
 		
@@ -357,31 +364,16 @@ class DocType:
 
 			})
 
-
-	def get_flat_bom_items(self):
-		""" Get all raw materials including items from child bom"""
-		self.cur_flat_bom_items = []
-		for d in getlist(self.doclist, 'bom_materials'):
-			if d.bom_no:
-				self.get_child_flat_bom_items(d.bom_no, d.qty)
-			else:
-				self.cur_flat_bom_items.append({
-					'item_code'				: d.item_code, 
-					'description'			: d.description, 
-					'stock_uom'				: d.stock_uom, 
-					'qty'					: flt(d.qty),
-					'rate'					: flt(d.rate), 
-					'amount'				: flt(d.amount),
-					'parent_bom'			: d.parent,
-					'mat_detail_no'			: d.name,
-					'qty_consumed_per_unit' : flt(d.qty_consumed_per_unit)
-				})
-
-
-	def update_flat_bom(self):
-		""" Update Flat BOM, following will be correct data"""
-		self.get_flat_bom_items()
-		self.add_to_flat_bom_detail()
+	def add_to_flat_bom_detail(self):
+		"Add items to Flat BOM table"
+		self.doclist = self.doc.clear_table(self.doclist, 'flat_bom_details', 1)
+		for d in self.cur_flat_bom_items:
+			ch = addchild(self.doc, 'flat_bom_details', 'BOM Explosion Item', 1, self.doclist)
+			for i in d.keys():
+				ch.fields[i] = d[i]
+			ch.docstatus = self.doc.docstatus
+			ch.save(1)
+		self.doc.save()
 
 
 	def get_parent_bom_list(self, bom_no):
@@ -391,6 +383,7 @@ class DocType:
 
 	def on_submit(self):
 		self.manage_default_bom()
+
 
 	def on_cancel(self):
 		# check if used in any other bom
@@ -404,30 +397,19 @@ class DocType:
 		webnotes.conn.set(self.doc, "is_active", "No")
 		webnotes.conn.set(self.doc, "is_default", 0)
 		self.manage_default_bom()
-		self.update_flat_bom_by_traversing()
-		
-	def traverse_tree(self):
-		def _get_childs(bom_no):
-			return [cstr(d[0]) for d in webnotes.conn.sql("""select bom_no from `tabBOM Item` 
-				where parent = %s and ifnull(bom_no, '') != ''""", bom_no)]
+		self.update_cost_and_exploded_items(calculate_cost=False)
 				
-		bom_list, count = [self.doc.name], 0		
-		while(count < len(bom_list)):
-			for child_bom in _get_childs(bom_list[count]):
-				if child_bom not in bom_list:
-					bom_list.append(child_bom)
-			count += 1
-			
-		return bom_list
-		
-	def update_cost_by_traversing(self):
-		bom_list = self.traverse_tree()
-		bom_list.reverse()
-		for bom in bom_list:
-			get_obj("BOM", bom, with_children=1).calculate_cost()
-			
-	def update_flat_bom_by_traversing(self):
-		bom_list = self.traverse_tree()
-		bom_list.reverse()
-		for bom in bom_list:
-			get_obj("BOM", bom, with_children=1).update_flat_bom()
+
+	def on_update_after_submit(self):
+		self.manage_default_bom()
+		self.validate_inactive_bom()
+	
+	
+	def validate_inactive_bom(self):
+		if self.doc.is_active == 'No':
+			act_pbom = sql("""select distinct t1.parent from `tabBOM Item` t1, `tabBOM` t2 
+				where t1.bom_no =%s and t2.name = t1.parent and t2.is_active = 'Yes' 
+				and t2.docstatus = 1 and t1.docstatus =1 """, self.doc.name)
+			if act_pbom and act_pbom[0][0]:
+				msgprint("""Sorry cannot inactivate as BOM: %s is child 
+					of one or many other active parent BOMs""" % self.doc.name, raise_exception=1)
