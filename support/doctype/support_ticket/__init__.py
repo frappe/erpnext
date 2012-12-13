@@ -135,7 +135,7 @@ class SupportMailbox(POP3Mailbox):
 		from webnotes.utils.file_manager import save_file, add_file_list
 		for attachment in attachment_list:
 			fid = save_file(attachment['filename'], attachment['content'], 'Support')
-			status = add_file_list('Support Ticket', doc.name, attachment['filename'], fid)
+			status = add_file_list('Support Ticket', doc.name, fid, fid)
 			if not status:
 				doc.description = doc.description \
 					+ "\nCould not attach: " + cstr(attachment['filename'])
