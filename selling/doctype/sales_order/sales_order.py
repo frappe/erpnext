@@ -194,11 +194,11 @@ class DocType(TransactionBase):
 	# Validations of Details Table
 	# -----------------------------
 	def validate_for_items(self):
-		check_list,flag = [],0
+		check_list, flag = [], 0
 		chk_dupl_itm = []
 		# Sales Order Items Validations
 		for d in getlist(self.doclist, 'sales_order_details'):
-			if cstr(self.doc.quotation_no) == cstr(d.prevdoc_docname):
+			if self.doc.quotation_no and cstr(self.doc.quotation_no) == cstr(d.prevdoc_docname):
 				flag = 1
 			if d.prevdoc_docname:
 				if self.doc.quotation_date and getdate(self.doc.quotation_date) > getdate(self.doc.transaction_date):
@@ -229,14 +229,13 @@ class DocType(TransactionBase):
 
 			# used for production plan
 			d.transaction_date = self.doc.transaction_date
-
-			# gets total projected qty of item in warehouse selected (this case arises when warehouse is selected b4 item)
-			tot_avail_qty = sql("select projected_qty from `tabBin` where item_code = '%s' and warehouse = '%s'" % (d.item_code,d.reserved_warehouse))
+			
+			tot_avail_qty = sql("select projected_qty from `tabBin` \
+				where item_code = '%s' and warehouse = '%s'" % (d.item_code,d.reserved_warehouse))
 			d.projected_qty = tot_avail_qty and flt(tot_avail_qty[0][0]) or 0
 		
-		if flag == 0:
-			msgprint("There are no items of the quotation selected.")
-			raise Exception
+		if getlist(self.doclist, 'sales_order_details') and self.doc.quotation_no and flag == 0:
+			msgprint("There are no items of the quotation selected", raise_exception=1)
 
 	# validate sales/ maintenance quotation against order type
 	#------------------------------------------------------------------
