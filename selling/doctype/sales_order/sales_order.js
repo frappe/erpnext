@@ -147,7 +147,7 @@ cur_frm.fields_dict['contact_person'].get_query = function(doc, cdt, cdn) {
 cur_frm.cscript.pull_quotation_details = function(doc,dt,dn) {
 	var callback = function(r,rt){
 		var doc = locals[cur_frm.doctype][cur_frm.docname];					
-		if(r.message){							
+		if(!r.exc){							
 			doc.quotation_no = r.message;			
 			if(doc.quotation_no) {					
 				unhide_field(['quotation_date', 'customer_address', 'contact_person', 'territory', 'customer_group']);
