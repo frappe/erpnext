@@ -2,23 +2,18 @@
  {
   "owner": "ashwini@webnotestech.com", 
   "docstatus": 0, 
-  "creation": "2012-03-27 14:35:53", 
+  "creation": "2012-07-03 13:30:41", 
   "modified_by": "Administrator", 
-  "modified": "2012-03-27 14:45:46"
+  "modified": "2012-12-13 14:23:24"
  }, 
  {
-  "section_style": "Simple", 
   "is_submittable": 1, 
+  "autoname": "naming_series:", 
+  "name": "__common__", 
   "search_fields": "employee, employee_name, att_date, status", 
   "module": "HR", 
   "doctype": "DocType", 
-  "server_code_error": " ", 
-  "document_type": "Master", 
-  "name": "__common__", 
-  "colour": "White:FFF", 
-  "_last_update": "1317365120", 
-  "show_in_menu": 0, 
-  "version": 75
+  "document_type": "Master"
  }, 
  {
   "name": "__common__", 
@@ -30,12 +25,11 @@
  {
   "name": "__common__", 
   "parent": "Attendance", 
-  "amend": 0, 
+  "read": 1, 
   "create": 1, 
   "submit": 1, 
   "doctype": "DocPerm", 
   "write": 1, 
-  "read": 1, 
   "parenttype": "DocType", 
   "cancel": 1, 
   "permlevel": 0, 
@@ -46,25 +40,13 @@
   "doctype": "DocType"
  }, 
  {
-  "role": "System Manager", 
-  "doctype": "DocPerm"
- }, 
- {
-  "role": "HR User", 
-  "doctype": "DocPerm"
- }, 
- {
-  "role": "HR Manager", 
-  "doctype": "DocPerm"
- }, 
- {
   "oldfieldtype": "Section Break", 
   "doctype": "DocField", 
   "label": "Attendance Details", 
-  "permlevel": 0, 
+  "options": "Simple", 
   "fieldname": "attendance_details", 
   "fieldtype": "Section Break", 
-  "options": "Simple"
+  "permlevel": 0
  }, 
  {
   "no_copy": 1, 
@@ -72,25 +54,23 @@
   "doctype": "DocField", 
   "label": "Naming Series", 
   "oldfieldname": "naming_series", 
-  "permlevel": 0, 
+  "options": "ATT", 
   "fieldname": "naming_series", 
   "fieldtype": "Select", 
   "reqd": 1, 
-  "options": "ATT"
+  "permlevel": 0
  }, 
  {
   "oldfieldtype": "Link", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Employee", 
   "oldfieldname": "employee", 
-  "permlevel": 0, 
-  "trigger": "Client", 
+  "options": "Employee", 
   "fieldname": "employee", 
   "fieldtype": "Link", 
   "search_index": 1, 
   "reqd": 1, 
-  "options": "Employee", 
+  "permlevel": 0, 
   "in_filter": 1
  }, 
  {
@@ -105,7 +85,6 @@
  {
   "no_copy": 1, 
   "oldfieldtype": "Select", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Status", 
   "oldfieldname": "status", 
@@ -120,7 +99,6 @@
  {
   "print_hide": 1, 
   "oldfieldtype": "Link", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Leave Type", 
   "oldfieldname": "leave_type", 
@@ -140,13 +118,13 @@
   "permlevel": 0
  }, 
  {
-  "search_index": 0, 
+  "oldfieldtype": "Date", 
   "doctype": "DocField", 
   "label": "Attendance Date", 
   "oldfieldname": "att_date", 
   "fieldname": "att_date", 
   "fieldtype": "Date", 
-  "oldfieldtype": "Date", 
+  "search_index": 0, 
   "reqd": 1, 
   "permlevel": 0, 
   "in_filter": 1
@@ -156,11 +134,11 @@
   "doctype": "DocField", 
   "label": "Fiscal Year", 
   "oldfieldname": "fiscal_year", 
-  "permlevel": 0, 
+  "options": "\n2012\n2013", 
   "fieldname": "fiscal_year", 
   "fieldtype": "Select", 
   "reqd": 1, 
-  "options": "link:Fiscal Year", 
+  "permlevel": 0, 
   "in_filter": 1
  }, 
  {
@@ -168,11 +146,11 @@
   "doctype": "DocField", 
   "label": "Company", 
   "oldfieldname": "company", 
-  "permlevel": 0, 
+  "options": "\nAlpha\nBeta\nDemo Company", 
   "fieldname": "company", 
   "fieldtype": "Select", 
   "reqd": 1, 
-  "options": "link:Company", 
+  "permlevel": 0, 
   "in_filter": 1
  }, 
  {
@@ -191,9 +169,21 @@
   "no_copy": 1, 
   "doctype": "DocField", 
   "label": "Amended From", 
-  "permlevel": 1, 
+  "options": "Attendance", 
   "fieldname": "amended_from", 
   "fieldtype": "Link", 
-  "options": "Sales Invoice"
+  "permlevel": 1
+ }, 
+ {
+  "role": "HR User", 
+  "doctype": "DocPerm"
+ }, 
+ {
+  "role": "HR Manager", 
+  "doctype": "DocPerm"
+ }, 
+ {
+  "role": "System Manager", 
+  "doctype": "DocPerm"
  }
 ]

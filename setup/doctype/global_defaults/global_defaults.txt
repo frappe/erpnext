@@ -2,25 +2,19 @@
  {
   "owner": "Administrator", 
   "docstatus": 0, 
-  "creation": "2012-07-03 13:30:02", 
+  "creation": "2012-10-26 16:49:40", 
   "modified_by": "Administrator", 
-  "modified": "2012-10-26 16:42:29"
+  "modified": "2012-12-12 14:13:31"
  }, 
  {
-  "section_style": "Tabbed", 
   "in_create": 1, 
   "allow_print": 1, 
   "module": "Setup", 
-  "doctype": "DocType", 
-  "server_code_error": " ", 
   "read_only": 1, 
   "allow_email": 1, 
   "issingle": 1, 
   "name": "__common__", 
-  "colour": "White:FFF", 
-  "_last_update": "1323855502", 
-  "show_in_menu": 1, 
-  "version": 1, 
+  "doctype": "DocType", 
   "hide_toolbar": 0, 
   "allow_copy": 1
  }, 
@@ -46,9 +40,22 @@
  }, 
  {
   "doctype": "DocField", 
+  "label": "General", 
+  "fieldname": "general", 
+  "fieldtype": "Section Break"
+ }, 
+ {
+  "description": "Session Expiry in Hours e.g. 06:00", 
+  "doctype": "DocField", 
+  "label": "Session Expiry", 
+  "fieldname": "session_expiry", 
+  "fieldtype": "Data"
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Company", 
   "fieldname": "company", 
-  "fieldtype": "Section Break", 
-  "label": "Company"
+  "fieldtype": "Section Break"
  }, 
  {
   "doctype": "DocField", 
@@ -74,10 +81,10 @@
   "options": "yyyy-mm-dd\ndd-mm-yyyy\ndd/mm/yyyy\nmm/dd/yyyy\nmm-dd-yyyy"
  }, 
  {
+  "doctype": "DocField", 
   "width": "50%", 
   "fieldname": "column_break1", 
-  "fieldtype": "Column Break", 
-  "doctype": "DocField"
+  "fieldtype": "Column Break"
  }, 
  {
   "default": "INR", 
@@ -97,21 +104,21 @@
  }, 
  {
   "doctype": "DocField", 
+  "label": "Default Currency Fraction", 
   "fieldname": "default_currency_fraction", 
-  "fieldtype": "Data", 
-  "label": "Default Currency Fraction"
+  "fieldtype": "Data"
  }, 
  {
   "doctype": "DocField", 
+  "label": "Stock", 
   "fieldname": "stock", 
-  "fieldtype": "Section Break", 
-  "label": "Stock"
+  "fieldtype": "Section Break"
  }, 
  {
+  "doctype": "DocField", 
   "width": "50%", 
   "fieldname": "column_break2", 
-  "fieldtype": "Column Break", 
-  "doctype": "DocField"
+  "fieldtype": "Column Break"
  }, 
  {
   "doctype": "DocField", 
@@ -143,7 +150,6 @@
  }, 
  {
   "description": "Applicable only if valuation method is moving average", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Allow Negative Stock", 
   "fieldname": "allow_negative_stock", 
@@ -158,9 +164,9 @@
  }, 
  {
   "doctype": "DocField", 
+  "label": "Raise Purchase Request when stock reaches re-order level", 
   "fieldname": "auto_indent", 
-  "fieldtype": "Check", 
-  "label": "Raise Purchase Request when stock reaches re-order level"
+  "fieldtype": "Check"
  }, 
  {
   "default": "1", 
@@ -171,7 +177,6 @@
  }, 
  {
   "description": "Percentage you are allowed to receive or deliver more against the quantity ordered. <p>For example: If you have ordered 100 units. and your Allowance is 10% then you are allowed to receive 110 units</p>", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Allowance Percent", 
   "fieldname": "tolerance", 
@@ -179,7 +184,6 @@
  }, 
  {
   "description": "Stock level frozen up to this date, nobody can do / modify entry except authorized person", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Stock Frozen Upto", 
   "fieldname": "stock_frozen_upto", 
@@ -187,7 +191,6 @@
  }, 
  {
   "description": "Users with this role are allowed to do / modify stock entry before frozen date", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Authorized Role (Frozen Entry)", 
   "fieldname": "stock_auth_role", 
@@ -196,13 +199,12 @@
  }, 
  {
   "doctype": "DocField", 
+  "label": "Accounts", 
   "fieldname": "accounts", 
-  "fieldtype": "Section Break", 
-  "label": "Accounts"
+  "fieldtype": "Section Break"
  }, 
  {
   "description": "Accounting entry frozen up to this date, nobody can do / modify entry except authorized person", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Accounts Frozen Upto", 
   "fieldname": "acc_frozen_upto", 
@@ -210,7 +212,6 @@
  }, 
  {
   "description": "Users with this role are allowed to do / modify accounting entry before frozen date", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Authourized Role (Frozen Entry)", 
   "fieldname": "bde_auth_role", 
@@ -225,9 +226,9 @@
   "options": "Role"
  }, 
  {
+  "doctype": "DocField", 
   "fieldname": "column_break4", 
-  "fieldtype": "Column Break", 
-  "doctype": "DocField"
+  "fieldtype": "Column Break"
  }, 
  {
   "doctype": "DocField", 
@@ -238,13 +239,12 @@
  }, 
  {
   "doctype": "DocField", 
+  "label": "Selling", 
   "fieldname": "selling", 
-  "fieldtype": "Section Break", 
-  "label": "Selling"
+  "fieldtype": "Section Break"
  }, 
  {
   "default": "Customer Name", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Customer Master created by ", 
   "fieldname": "cust_master_name", 
@@ -280,10 +280,10 @@
   "options": "<a href=\"#!Sales Browser/Territory\">To manage Territory, click here</a>"
  }, 
  {
+  "doctype": "DocField", 
   "width": "50%", 
   "fieldname": "column_break5", 
-  "fieldtype": "Column Break", 
-  "doctype": "DocField"
+  "fieldtype": "Column Break"
  }, 
  {
   "doctype": "DocField", 
@@ -301,7 +301,6 @@
  }, 
  {
   "default": "No", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Sales Order Required", 
   "fieldname": "so_required", 
@@ -310,7 +309,6 @@
  }, 
  {
   "default": "No", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Delivery Note Required", 
   "fieldname": "dn_required", 
@@ -319,9 +317,9 @@
  }, 
  {
   "doctype": "DocField", 
+  "label": "Buying", 
   "fieldname": "buying", 
-  "fieldtype": "Section Break", 
-  "label": "Buying"
+  "fieldtype": "Section Break"
  }, 
  {
   "doctype": "DocField", 
@@ -332,7 +330,6 @@
  }, 
  {
   "default": "Supplier Name", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Supplier Master created by ", 
   "fieldname": "supp_master_name", 
@@ -340,14 +337,13 @@
   "options": "Supplier Name\nNaming Series"
  }, 
  {
+  "doctype": "DocField", 
   "width": "50%", 
   "fieldname": "column_break6", 
-  "fieldtype": "Column Break", 
-  "doctype": "DocField"
+  "fieldtype": "Column Break"
  }, 
  {
   "default": "No", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Purchase Order Required", 
   "fieldname": "po_required", 
@@ -356,7 +352,6 @@
  }, 
  {
   "default": "No", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Purchase Receipt Required", 
   "fieldname": "pr_required", 
@@ -365,9 +360,9 @@
  }, 
  {
   "doctype": "DocField", 
+  "label": "Maintain same rate throughout purchase cycle", 
   "fieldname": "maintain_same_rate", 
-  "fieldtype": "Check", 
-  "label": "Maintain same rate throughout purchase cycle"
+  "fieldtype": "Check"
  }, 
  {
   "doctype": "DocField", 
@@ -378,7 +373,6 @@
  }, 
  {
   "description": "Employee record is created using selected field. ", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Employee Records to be created by ", 
   "fieldname": "emp_created_by", 
@@ -387,15 +381,15 @@
  }, 
  {
   "doctype": "DocField", 
+  "label": "System", 
   "fieldname": "system", 
-  "fieldtype": "Section Break", 
-  "label": "System"
+  "fieldtype": "Section Break"
  }, 
  {
   "doctype": "DocField", 
+  "label": "SMS Sender Name", 
   "fieldname": "sms_sender_name", 
-  "fieldtype": "Data", 
-  "label": "SMS Sender Name"
+  "fieldtype": "Data"
  }, 
  {
   "amend": 0, 
@@ -415,20 +409,20 @@
   "permlevel": 0
  }, 
  {
+  "doctype": "DocPerm", 
+  "write": 1, 
+  "role": "System Manager", 
+  "permlevel": 1
+ }, 
+ {
+  "doctype": "DocPerm", 
   "role": "All", 
-  "permlevel": 1, 
-  "doctype": "DocPerm"
+  "permlevel": 1
  }, 
  {
+  "doctype": "DocPerm", 
   "write": 1, 
   "role": "System Manager", 
-  "permlevel": 1, 
-  "doctype": "DocPerm"
- }, 
- {
-  "write": 1, 
-  "role": "System Manager", 
-  "permlevel": 2, 
-  "doctype": "DocPerm"
+  "permlevel": 2
  }
 ]

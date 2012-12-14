@@ -55,7 +55,7 @@ cur_frm.cscript.make_history_list = function(parent,doc){
 // get sates on country trigger
 // -----------------------------
 cur_frm.cscript.get_states=function(doc,dt,dn){
-   $c('runserverobj', args={'method':'check_state', 'docs':compress_doclist(make_doclist(doc.doctype, doc.name))},
+   $c('runserverobj', args={'method':'check_state', 'docs':wn.model.compress(make_doclist(doc.doctype, doc.name))},
     function(r,rt){
       if(r.message) {
         set_field_options('state', r.message);
@@ -156,7 +156,7 @@ cur_frm.cscript.render_row_in_wrapper = function(wrapper, data, doctype) {
 	$wrapper.append(repl("\
 		<h4><a class='link_type'>%(fullname)s</a>%(primary)s</h4>\
 		<div class='description'>\
-			%(description)s\
+			<p>%(description)s</p>\
 			<p><a class='delete link_type'>delete this %(doctype)s</a></p>\
 		</div>", data));
 	

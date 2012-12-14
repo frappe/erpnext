@@ -71,7 +71,7 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 		list: wn.model.get("Communication", {"lead": doc.name}),
 		parent: cur_frm.fields_dict.communication_html.wrapper,
 		doc: doc,
-		email: doc.email_id
+		recipients: doc.email_id
 	})
 }
 
@@ -83,15 +83,15 @@ cur_frm.cscript.status = function(doc, cdt, cdn){
 
 cur_frm.cscript['Create Customer'] = function(){
 	var doc = cur_frm.doc;
-	$c('runserverobj',args={ 'method':'check_status', 'docs':compress_doclist(make_doclist(doc.doctype, doc.name))},
+	$c('runserverobj',args={ 'method':'check_status', 'docs':wn.model.compress(make_doclist(doc.doctype, doc.name))},
 		function(r,rt){
 			if(r.message == 'Converted'){
 				msgprint("This lead is already converted to customer");
 			}
 			else{
-				n = createLocal("Customer");
+				n = wn.model.make_new_doc_and_get_name("Customer");
 				$c('dt_map', args={
-					'docs':compress_doclist([locals["Customer"][n]]),
+					'docs':wn.model.compress([locals["Customer"][n]]),
 					'from_doctype':'Lead',
 					'to_doctype':'Customer',
 					'from_docname':doc.name,
@@ -110,15 +110,15 @@ cur_frm.cscript['Create Customer'] = function(){
 // ===============================================================
 cur_frm.cscript['Create Opportunity'] = function(){
 	var doc = cur_frm.doc;
-	$c('runserverobj',args={ 'method':'check_status', 'docs':compress_doclist(make_doclist(doc.doctype, doc.name))},
+	$c('runserverobj',args={ 'method':'check_status', 'docs':wn.model.compress(make_doclist(doc.doctype, doc.name))},
 		function(r,rt){
 			if(r.message == 'Converted'){
 				msgprint("This lead is now converted to customer. Please create enquiry on behalf of customer");
 			}
 			else{
-				n = createLocal("Opportunity");
+				n = wn.model.make_new_doc_and_get_name("Opportunity");
 				$c('dt_map', args={
-					'docs':compress_doclist([locals["Opportunity"][n]]),
+					'docs':wn.model.compress([locals["Opportunity"][n]]),
 					'from_doctype':'Lead',
 					'to_doctype':'Opportunity',
 					'from_docname':doc.name,

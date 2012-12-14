@@ -21,7 +21,7 @@ cur_frm.cscript.onload = function(doc,cdt,cdn){
     }
     
     $c('runserverobj',args={'method' : 'get_months', 'docs' : 
-		compress_doclist(make_doclist(doc.doctype, doc.name))},callback1);
+		wn.model.compress(make_doclist(doc.doctype, doc.name))},callback1);
   }
 }
 

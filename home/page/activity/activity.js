@@ -36,7 +36,7 @@ erpnext.ActivityFeed = Class.extend({
 		
 		// feedtype
 		if(!data.feed_type) {
-			data.feed_type = get_doctype_label(data.doc_type);
+			data.feed_type = wn._(data.doc_type);
 			data.add_class = "label-info";
 			data.onclick = repl('onclick="window.location.href=\'#!List/%(feed_type)s\';"', data)
 		}

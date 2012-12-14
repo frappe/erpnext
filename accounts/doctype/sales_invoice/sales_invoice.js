@@ -29,7 +29,7 @@ wn.require('app/utilities/doctype/sms_control/sms_control.js');
 // On Load
 // -------
 cur_frm.cscript.onload = function(doc,dt,dn) {
-	if(!doc.customer && doc.debit_to) Meta.get_field(dt, 'debit_to', dn).print_hide = 0;
+	if(!doc.customer && doc.debit_to) wn.meta.get_docfield(dt, 'debit_to', dn).print_hide = 0;
 	if (doc.__islocal) {
 		//if(!doc.voucher_date) set_multiple(dt,dn,{voucher_date:get_today()});
 		if(!doc.due_date) set_multiple(dt,dn,{due_date:get_today()});
@@ -322,9 +322,9 @@ cur_frm.cscript.allocated_amount = function(doc,cdt,cdn){
 cur_frm.cscript['Make Delivery Note'] = function() {
 
 	var doc = cur_frm.doc
-	n = createLocal('Delivery Note');
+	n = wn.model.make_new_doc_and_get_name('Delivery Note');
 	$c('dt_map', args={
-		'docs':compress_doclist([locals['Delivery Note'][n]]),
+		'docs':wn.model.compress([locals['Delivery Note'][n]]),
 		'from_doctype':doc.doctype,
 		'to_doctype':'Delivery Note',
 		'from_docname':doc.name,
@@ -484,7 +484,7 @@ cur_frm.cscript.calc_adjustment_amount = function(doc,cdt,cdn) {
 // Make Journal Voucher
 // --------------------
 cur_frm.cscript.make_jv = function(doc, dt, dn, bank_account) {
-	var jv = LocalDB.create('Journal Voucher');
+	var jv = wn.model.make_new_doc_and_get_name('Journal Voucher');
 	jv = locals['Journal Voucher'][jv];
 	jv.voucher_type = 'Bank Voucher';
 
@@ -493,14 +493,14 @@ cur_frm.cscript.make_jv = function(doc, dt, dn, bank_account) {
 	jv.fiscal_year = doc.fiscal_year;
 
 	// debit to creditor
-	var d1 = LocalDB.add_child(jv, 'Journal Voucher Detail', 'entries');
+	var d1 = wn.model.add_child(jv, 'Journal Voucher Detail', 'entries');
 	d1.account = doc.debit_to;
 	d1.credit = doc.outstanding_amount;
 	d1.against_invoice = doc.name;
 
 
 	// credit to bank
-	var d1 = LocalDB.add_child(jv, 'Journal Voucher Detail', 'entries');
+	var d1 = wn.model.add_child(jv, 'Journal Voucher Detail', 'entries');
 	d1.account = bank_account;
 	d1.debit = doc.outstanding_amount;
 

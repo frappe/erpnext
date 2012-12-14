@@ -10,9 +10,10 @@ def get_companies():
 	# check if match permission exists
 	res = webnotes.conn.sql("""select role, `match` from `tabDocPerm`
 		where parent='Account' and permlevel=0 and `read`=1""", as_dict=1)
-		
+	
+	roles = webnotes.user.get_roles()
 	match = any((r["match"] for r in res 
-		if r["role"] in webnotes.user.roles and r["match"]=="company"))
+		if r["role"] in roles and r["match"]=="company"))
 	
 	# if match == company is specified and companies are specified in user defaults
 	if match and webnotes.user.get_defaults().get("company"):

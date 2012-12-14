@@ -24,7 +24,14 @@ pscript['onload_Sales Browser'] = function(wrapper){
 
 	wrapper.make_tree = function() {
 		var ctype = wn.get_route()[1] || 'Territory';
-		erpnext.sales_chart = new erpnext.SalesChart(ctype, wrapper);
+		wn.call({
+			method: 'selling.page.sales_browser.sales_browser.get_children',
+			args: {ctype: ctype},
+			callback: function(r) {
+				var root = r.message[0]["value"];
+				erpnext.sales_chart = new erpnext.SalesChart(ctype, root, wrapper);
+			}
+		});
 	}
 	
 	wrapper.make_tree();
@@ -42,20 +49,13 @@ pscript['onshow_Sales Browser'] = function(wrapper){
 };
 
 erpnext.SalesChart = Class.extend({
-	init: function(ctype, wrapper) {
-		var root_nodes = {
-			'Territory': 'All Territories',
-			'Item Group': 'All Item Groups',
-			'Customer Group': 'All Customer Groups',
-			'Sales Person': 'All Sales Persons'
-		}
-		
+	init: function(ctype, root, wrapper) {
 		$(wrapper).find('.tree-area').empty();
 		var me = this;
 		me.ctype = ctype;
 		this.tree = new wn.ui.Tree({
 			parent: $(wrapper).find('.tree-area'), 
-			label: root_nodes[ctype],
+			label: root,
 			args: {ctype: ctype},
 			method: 'selling.page.sales_browser.sales_browser.get_children',
 			click: function(link) {
@@ -72,7 +72,7 @@ erpnext.SalesChart = Class.extend({
 			}
 		});
 		this.tree.rootnode.$a
-			.data('node-data', {value: root_nodes[ctype], expandable:1})
+			.data('node-data', {value: root, expandable:1})
 			.click();		
 	},
 	make_link_toolbar: function(link) {

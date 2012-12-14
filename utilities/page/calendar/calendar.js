@@ -85,7 +85,7 @@ Calendar.prototype.show_event = function(ev, cal_ev) {
 			,['Text','Description']
 			,['HTML', 'Ref Link']
 			,['Check', 'Public Event']
-			,['Check', 'Cancel Event']
+			,['Check', 'Cancelled Event']
 			,['HTML', 'Event Link']
 			,['Button', 'Save']
 		])
@@ -106,7 +106,7 @@ Calendar.prototype.show_event = function(ev, cal_ev) {
 			this.widgets['Description'].value = cstr(this.ev.description);
 			
 			this.widgets['Public Event'].checked = false;
-			this.widgets['Cancel Event'].checked = false;
+			this.widgets['Cancelled Event'].checked = false;
 
 			if(this.ev.event_type=='Public')
 				this.widgets['Public Event'].checked = true;
@@ -134,7 +134,7 @@ Calendar.prototype.show_event = function(ev, cal_ev) {
 			
 			// save values
 			d.ev.description = d.widgets['Description'].value;
-			if(d.widgets['Cancel Event'].checked) 
+			if(d.widgets['Cancelled Event'].checked) 
 				d.ev.event_type='Cancel';
 			else if(d.widgets['Public Event'].checked) 
 				d.ev.event_type='Public';
@@ -154,7 +154,8 @@ Calendar.prototype.show_event = function(ev, cal_ev) {
 
 Calendar.prototype.save_event = function(doc) {
 	var me = this;
-	save_doclist('Event', doc.name, 'Save', function(r) { 
+	var doclist = new wn.model.DocList("Event", doc.name);
+	doclist.save("Save", function(r) {
 		var doc = locals['Event'][r.docname];
 		var cal = erpnext.calendar;
 		cal.cur_view.refresh();
@@ -162,15 +163,15 @@ Calendar.prototype.save_event = function(doc) {
 		// if cancelled, hide
 		if(doc.event_type=='Cancel') {
 			$(cal.events_by_name[doc.name].body).toggle(false);
-		}
-	});
+		}		
+	})
 }
 
 //------------------------------------------------------
 
 Calendar.prototype.add_event = function() {
 		
-	var ev = LocalDB.create('Event');
+	var ev = wn.model.make_new_doc_and_get_name('Event');
 	ev = locals['Event'][ev];
 	
 	ev.event_date = dateutil.obj_to_str(this.selected_date);

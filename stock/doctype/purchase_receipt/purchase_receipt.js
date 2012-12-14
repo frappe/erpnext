@@ -24,7 +24,7 @@ wn.require('app/utilities/doctype/sms_control/sms_control.js');
 
 //========================== On Load ================================================================
 cur_frm.cscript.onload = function(doc, cdt, cdn) {
-	if(!doc.fiscal_year && doc.__islocal){ set_default_values(doc);}
+	if(!doc.fiscal_year && doc.__islocal){ wn.model.set_default_values(doc);}
 	if (!doc.posting_date) doc.posting_date = dateutil.obj_to_str(new Date());
 	if (!doc.transaction_date) doc.transaction_date = dateutil.obj_to_str(new Date());
 	if (!doc.status) doc.status = 'Draft';
@@ -107,7 +107,7 @@ cur_frm.cscript.pull_purchase_order_details = function(doc, dt, dn) {
 
 //================ create new contact ============================================================================
 cur_frm.cscript.new_contact = function(){
-	tn = createLocal('Contact');
+	tn = wn.model.make_new_doc_and_get_name('Contact');
 	locals['Contact'][tn].is_supplier = 1;
 	if(doc.supplier) locals['Contact'][tn].supplier = doc.supplier;
 	loaddoc('Contact', tn);
@@ -150,9 +150,10 @@ cur_frm.fields_dict['select_print_heading'].get_query = function(doc, cdt, cdn) 
 cur_frm.cscript.received_qty = function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
 	ret = {
-			'qty' : 0,
+			'qty' : (flt(d.qty) && flt(d.qty) < flt(d.received_qty)) 
+			 	? flt(d.qty) : flt(d.received_qty),
 			'stock_qty': 0,
-			'rejected_qty' : 0
+			'rejected_qty' : 0,
 		}
 	set_multiple('Purchase Receipt Item', cdn, ret, 'purchase_receipt_details');
 	cur_frm.cscript.calc_amount(doc, 2);
@@ -240,9 +241,9 @@ cur_frm.fields_dict.purchase_receipt_details.grid.get_field("qa_no").get_query =
 
 // ================================ Make Purchase Invoice ==========================================
 cur_frm.cscript['Make Purchase Invoice'] = function() {
-	n = createLocal('Purchase Invoice');
+	n = wn.model.make_new_doc_and_get_name('Purchase Invoice');
 	$c('dt_map', args={
-		'docs':compress_doclist([locals['Purchase Invoice'][n]]),
+		'docs':wn.model.compress([locals['Purchase Invoice'][n]]),
 		'from_doctype': cur_frm.doc.doctype,
 		'to_doctype':'Purchase Invoice',
 		'from_docname': cur_frm.doc.name,

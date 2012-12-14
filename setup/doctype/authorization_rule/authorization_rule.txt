@@ -2,23 +2,17 @@
  {
   "owner": "Administrator", 
   "docstatus": 0, 
-  "creation": "2012-03-27 14:36:18", 
+  "creation": "2012-07-03 13:30:00", 
   "modified_by": "Administrator", 
-  "modified": "2012-03-27 14:36:18"
+  "modified": "2012-12-12 10:42:42"
  }, 
  {
-  "section_style": "Simple", 
+  "autoname": "AR.####", 
+  "name": "__common__", 
   "search_fields": "transaction,based_on,system_user,system_role,approving_user,approving_role", 
   "module": "Setup", 
   "doctype": "DocType", 
-  "allow_trash": 1, 
-  "document_type": "Master", 
-  "autoname": "AR.####", 
-  "name": "__common__", 
-  "colour": "White:FFF", 
-  "_last_update": "1308741898", 
-  "server_code_error": " ", 
-  "version": 58
+  "document_type": "Master"
  }, 
  {
   "name": "__common__", 
@@ -46,19 +40,13 @@
   "doctype": "DocType"
  }, 
  {
-  "doctype": "DocPerm"
- }, 
- {
-  "doctype": "DocPerm"
- }, 
- {
-  "search_index": 0, 
+  "oldfieldtype": "Link", 
   "doctype": "DocField", 
   "label": "Company", 
   "oldfieldname": "company", 
   "fieldname": "company", 
   "fieldtype": "Link", 
-  "oldfieldtype": "Link", 
+  "search_index": 0, 
   "reqd": 0, 
   "options": "Company"
  }, 
@@ -70,27 +58,26 @@
   "fieldname": "transaction", 
   "fieldtype": "Select", 
   "reqd": 1, 
-  "options": "\nDelivery Note\nPurchase Invoice\nPurchase Order\nPurchase Receipt\nQuotation\nSales Invoice\nSales Order\nStock Entry\nExpense Claim\nAppraisal"
+  "options": "\nDelivery Note\nPurchase Invoice\nPurchase Order\nPurchase Receipt\nQuotation\nSales Invoice\nSales Order\nStock Entry\nAppraisal"
  }, 
  {
   "oldfieldtype": "Select", 
   "doctype": "DocField", 
   "label": "Based On", 
   "oldfieldname": "based_on", 
-  "trigger": "Client", 
   "fieldname": "based_on", 
   "fieldtype": "Select", 
   "reqd": 1, 
-  "options": "\nGrand Total\nAverage Discount\nCustomerwise Discount\nItemwise Discount\nTotal Claimed Amount\nNot Applicable"
+  "options": "\nGrand Total\nAverage Discount\nCustomerwise Discount\nItemwise Discount\nNot Applicable"
  }, 
  {
   "oldfieldtype": "Link", 
   "doctype": "DocField", 
   "label": "Customer / Item Name", 
   "oldfieldname": "master_name", 
-  "trigger": "Client", 
   "fieldname": "master_name", 
-  "fieldtype": "Link"
+  "fieldtype": "Link", 
+  "options": "[Select]"
  }, 
  {
   "oldfieldtype": "Link", 
@@ -103,7 +90,6 @@
  }, 
  {
   "oldfieldtype": "Link", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Applicable To (User)", 
   "oldfieldname": "system_user", 
@@ -113,26 +99,24 @@
  }, 
  {
   "description": "This will be used for setting rule in HR module", 
-  "search_index": 0, 
-  "colour": "White:FFF", 
+  "oldfieldtype": "Link", 
   "doctype": "DocField", 
   "label": "Applicable To (Employee)", 
   "oldfieldname": "to_emp", 
   "fieldname": "to_emp", 
   "fieldtype": "Link", 
-  "oldfieldtype": "Link", 
+  "search_index": 0, 
   "options": "Employee"
  }, 
  {
   "description": "This will be used for setting rule in HR module", 
-  "search_index": 0, 
-  "colour": "White:FFF", 
+  "oldfieldtype": "Link", 
   "doctype": "DocField", 
   "label": "Applicable To (Designation)", 
   "oldfieldname": "to_designation", 
   "fieldname": "to_designation", 
   "fieldtype": "Link", 
-  "oldfieldtype": "Link", 
+  "search_index": 0, 
   "options": "Designation"
  }, 
  {
@@ -169,5 +153,11 @@
   "oldfieldname": "trash_reason", 
   "fieldname": "trash_reason", 
   "fieldtype": "Small Text"
+ }, 
+ {
+  "doctype": "DocPerm"
+ }, 
+ {
+  "doctype": "DocPerm"
  }
 ]

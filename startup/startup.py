@@ -48,7 +48,7 @@ def get_things_todo():
 	incomplete_todos = webnotes.conn.sql("""\
 		SELECT COUNT(*) FROM `tabToDo`
 		WHERE IFNULL(checked, 0) = 0
-		AND owner = %s""", webnotes.session.get('user'))
+		AND (owner = %s or assigned_by=%s)""", (webnotes.session.user, webnotes.session.user))
 	return incomplete_todos and cint(incomplete_todos[0][0]) or 0
 
 def get_todays_events():

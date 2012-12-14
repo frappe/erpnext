@@ -107,7 +107,7 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 			list: wn.model.get("Communication", {"quotation": doc.name}),
 			parent: cur_frm.fields_dict.communication_html.wrapper,
 			doc: doc,
-			email: doc.contact_email
+			recipients: doc.contact_email
 		});		
 	}
 }
@@ -180,9 +180,9 @@ cur_frm.cscript['Make Sales Order'] = function() {
 	var doc = cur_frm.doc;
 
 	if (doc.docstatus == 1) {
-		var n = createLocal("Sales Order");
+		var n = wn.model.make_new_doc_and_get_name("Sales Order");
 		$c('dt_map', args={
-			'docs':compress_doclist([locals["Sales Order"][n]]),
+			'docs':wn.model.compress([locals["Sales Order"][n]]),
 			'from_doctype':'Quotation',
 			'to_doctype':'Sales Order',
 			'from_docname':doc.name,
@@ -250,6 +250,7 @@ cur_frm.cscript['Declare Order Lost'] = function(){
 				if(r.message == 'true'){
 					$i('update_quotation_dialog_response').innerHTML = 'Done';
 					qtn_lost_dialog.hide();
+					cur_frm.refresh();
 				}
 			}
 			if(arg) $c_obj(make_doclist(cur_frm.doc.doctype, cur_frm.doc.name),'declare_order_lost',arg,call_back);

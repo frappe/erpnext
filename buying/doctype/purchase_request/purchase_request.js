@@ -86,9 +86,9 @@ cur_frm.cscript.qty = function(doc, cdt, cdn) {
 // Make Purchase Order
 cur_frm.cscript['Make Purchase Order'] = function() {
 	var doc = cur_frm.doc;
-	n = createLocal('Purchase Order');
+	n = wn.model.make_new_doc_and_get_name('Purchase Order');
 	$c('dt_map', args={
-		'docs':compress_doclist([locals['Purchase Order'][n]]),
+		'docs':wn.model.compress([locals['Purchase Order'][n]]),
 		'from_doctype':doc.doctype,
 		'to_doctype':'Purchase Order',
 		'from_docname':doc.name,
@@ -106,7 +106,7 @@ cur_frm.cscript['Stop Purchase Request'] = function() {
 	var check = confirm("Do you really want to STOP this Purchase Request?");
 
 	if (check) {
-		$c('runserverobj', args={'method':'update_status', 'arg': 'Stopped', 'docs': compress_doclist(make_doclist(doc.doctype, doc.name))}, function(r,rt) {
+		$c('runserverobj', args={'method':'update_status', 'arg': 'Stopped', 'docs': wn.model.compress(make_doclist(doc.doctype, doc.name))}, function(r,rt) {
 			cur_frm.refresh();
 		});
 	}
@@ -119,7 +119,7 @@ cur_frm.cscript['Unstop Purchase Request'] = function(){
 	var check = confirm("Do you really want to UNSTOP this Purchase Request?");
 	
 	if (check) {
-		$c('runserverobj', args={'method':'update_status', 'arg': 'Submitted','docs': compress_doclist(make_doclist(doc.doctype, doc.name))}, function(r,rt) {
+		$c('runserverobj', args={'method':'update_status', 'arg': 'Submitted','docs': wn.model.compress(make_doclist(doc.doctype, doc.name))}, function(r,rt) {
 			cur_frm.refresh();
 			
 		});
@@ -127,9 +127,9 @@ cur_frm.cscript['Unstop Purchase Request'] = function(){
 }
 
 cur_frm.cscript.make_supplier_quotation = function() {
-	var new_sq_name = createLocal("Supplier Quotation");
+	var new_sq_name = wn.model.make_new_doc_and_get_name("Supplier Quotation");
 	$c("dt_map", {
-		"docs": compress_doclist([locals['Supplier Quotation'][new_sq_name]]),
+		"docs": wn.model.compress([locals['Supplier Quotation'][new_sq_name]]),
 		"from_doctype": cur_frm.doc.doctype,
 		"to_doctype": "Supplier Quotation",
 		"from_docname": cur_frm.doc.name,

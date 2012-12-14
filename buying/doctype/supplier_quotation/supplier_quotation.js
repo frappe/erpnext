@@ -49,9 +49,9 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 }
 
 cur_frm.cscript.make_purchase_order = function() {
-	var new_po_name = createLocal("Purchase Order");
+	var new_po_name = wn.model.make_new_doc_and_get_name("Purchase Order");
 	$c("dt_map", {
-		"docs": compress_doclist([locals['Purchase Order'][new_po_name]]),
+		"docs": wn.model.compress([locals['Purchase Order'][new_po_name]]),
 		"from_doctype": cur_frm.doc.doctype,
 		"to_doctype": "Purchase Order",
 		"from_docname": cur_frm.doc.name,

@@ -28,7 +28,7 @@ cur_frm.cscript.create_salary_slip = function(doc, cdt, cdn) {
 		if (r.message)
 			display_activity_log(r.message);
 	}
-	$c('runserverobj', args={'method':'create_sal_slip','docs':compress_doclist(make_doclist (cdt, cdn))},callback);
+	$c('runserverobj', args={'method':'create_sal_slip','docs':wn.model.compress(make_doclist (cdt, cdn))},callback);
 }
 
 
@@ -42,7 +42,7 @@ cur_frm.cscript.submit_salary_slip = function(doc, cdt, cdn) {
 			if (r.message)
 				display_activity_log(r.message);
 		}
-		$c('runserverobj', args={'method':'submit_salary_slip','docs':compress_doclist(make_doclist (cdt, cdn))},callback);
+		$c('runserverobj', args={'method':'submit_salary_slip','docs':wn.model.compress(make_doclist (cdt, cdn))},callback);
 	}
 }
 
@@ -59,7 +59,7 @@ cur_frm.cscript.make_bank_voucher = function(doc,cdt,cdn){
 //-----------------------
 cur_frm.cscript.make_jv = function(doc, dt, dn) {
 	var call_back = function(r,rt){
-		var jv = LocalDB.create('Journal Voucher');
+		var jv = wn.model.make_new_doc_and_get_name('Journal Voucher');
 		jv = locals['Journal Voucher'][jv];
 		jv.voucher_type = 'Bank Voucher';
 		jv.user_remark = 'Payment of salary for the month: ' + doc.month + 'and fiscal year: ' + doc.fiscal_year;
@@ -68,12 +68,12 @@ cur_frm.cscript.make_jv = function(doc, dt, dn) {
 		jv.posting_date = dateutil.obj_to_str(new Date());
 
 		// credit to bank
-		var d1 = LocalDB.add_child(jv, 'Journal Voucher Detail', 'entries');
+		var d1 = wn.model.add_child(jv, 'Journal Voucher Detail', 'entries');
 		d1.account = r.message['default_bank_account'];
 		d1.credit = r.message['amount']
 
 		// debit to salary account
-		var d2 = LocalDB.add_child(jv, 'Journal Voucher Detail', 'entries');
+		var d2 = wn.model.add_child(jv, 'Journal Voucher Detail', 'entries');
 		d2.account = r.message['default_salary_account'];
 		d2.debit = r.message['amount']
 

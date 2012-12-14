@@ -33,14 +33,14 @@ cur_frm.cscript.load_defaults = function(doc, cdt, cdn) {
 	if(!cur_frm.doc.__islocal || !cur_frm.doc.company) { return; }
 
 	doc = locals[doc.doctype][doc.name];
-	var fields_to_refresh = LocalDB.set_default_values(doc);
+	var fields_to_refresh = wn.model.set_default_values(doc);
 	if(fields_to_refresh) { refresh_many(fields_to_refresh); }
 
 	fields_to_refresh = null;
 	var children = getchildren('Journal Voucher Detail', doc.name, 'entries');
 	if(!children) { return; }
 	for(var i=0; i<children.length; i++) {
-		LocalDB.set_default_values(children[i]);
+		wn.model.set_default_values(children[i]);
 	}
 	refresh_field('entries');
 }
@@ -193,7 +193,7 @@ cur_frm.cscript.voucher_type = function(doc, cdt, cdn) {
 		if(!children || children.length==0) {
 			$c('accounts.get_default_bank_account', {company: doc.company }, function(r, rt) {
 				if(!r.exc) {
-					var jvd = LocalDB.add_child(doc, 'Journal Voucher Detail', 'entries');
+					var jvd = wn.model.add_child(doc, 'Journal Voucher Detail', 'entries');
 					jvd.account = cstr(r.message);
 					refresh_field('entries');
 				}

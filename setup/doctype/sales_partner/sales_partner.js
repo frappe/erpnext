@@ -77,7 +77,7 @@ cur_frm.cscript.make_contact = function() {
 			page_length: 2,
 			new_doctype: "Contact",
 			custom_new_doc: function(doctype) {
-				var contact = LocalDB.create('Contact');
+				var contact = wn.model.make_new_doc_and_get_name('Contact');
 				contact = locals['Contact'][contact];
 				contact.sales_partner = cur_frm.doc.name;
 				wn.set_route("Form", "Contact", contact.name);
