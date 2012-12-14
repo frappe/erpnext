@@ -102,8 +102,7 @@ cur_frm.cscript['Update Finished Goods'] = function() {
 }
 
 cur_frm.cscript.make_se = function(doc, process) {
-	var se = LocalDB.create('Stock Entry');
-	se = locals['Stock Entry'][se];
+	var se = wn.model.get_new_doc("Stock Entry");
 	se.purpose = 'Production Order';
 	se.process = process;
 	se.production_order = doc.name;

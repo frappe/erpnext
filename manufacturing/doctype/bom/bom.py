@@ -108,7 +108,7 @@ class DocType:
 
 	def get_bom_unitcost(self, bom_no):
 		bom = sql("""select name, total_cost/quantity as unit_cost from `tabBOM`
-			where is_active = 'Yes' and name = %s""", bom_no, as_dict=1)
+			where is_active = 1 and name = %s""", bom_no, as_dict=1)
 		return bom and bom[0]['unit_cost'] or 0
 
 	def get_valuation_rate(self, arg):
@@ -134,7 +134,7 @@ class DocType:
 			update default bom in item master
 		"""
 
-		if self.doc.is_default and self.doc.is_active == 'Yes':
+		if self.doc.is_default and self.doc.is_active:
 			sql("update `tabBOM` set is_default = 0 where name != %s and item=%s", 
 				(self.doc.name, self.doc.item))
 
@@ -178,7 +178,7 @@ class DocType:
 		check_list = []
 		for m in getlist(self.doclist, 'bom_materials'):
 			# check if operation no not in op table
-			if cstr(m.operation_no) not in self.op:
+			if self.doc.track_operations and cstr(m.operation_no) not in self.op:
 				msgprint("""Operation no: %s against item: %s at row no: %s \
 					is not present at Operations table""" % 
 					(m.operation_no, m.item_code, m.idx), raise_exception = 1)
@@ -207,7 +207,7 @@ class DocType:
 	def validate_bom_no(self, item, bom_no, idx):
 		"""Validate BOM No of sub-contracted items"""
 		bom = sql("""select name from `tabBOM` where name = %s and item = %s 
-			and ifnull(is_active, 'No') = 'Yes'	and docstatus < 2 """, 
+			and is_active = 1 and docstatus < 2 """, 
 			(bom_no, item), as_dict =1)
 		if not bom:
 			msgprint("""Incorrect BOM No: %s against item: %s at row no: %s.
@@ -374,12 +374,12 @@ class DocType:
 		# check if used in any other bom
 		par = sql("""select t1.parent from `tabBOM Item` t1, `tabBOM` t2 
 			where t1.parent = t2.name and t1.bom_no = %s and t1.docstatus = 1 
-			and t2.is_active = 'Yes'""", self.doc.name)
+			and t2.is_active = 1""", self.doc.name)
 		if par:
 			msgprint("""BOM can not be cancelled, as it is a child item \
 				in following active BOM %s""" % [d[0] for d in par], raise_exception=1)
 			
-		webnotes.conn.set(self.doc, "is_active", "No")
+		webnotes.conn.set(self.doc, "is_active", 0)
 		webnotes.conn.set(self.doc, "is_default", 0)
 		self.manage_default_bom()
 		self.update_cost_and_exploded_items(calculate_cost=False)
@@ -391,9 +391,9 @@ class DocType:
 	
 	
 	def validate_inactive_bom(self):
-		if self.doc.is_active == 'No':
+		if not self.doc.is_active:
 			act_pbom = sql("""select distinct t1.parent from `tabBOM Item` t1, `tabBOM` t2 
-				where t1.bom_no =%s and t2.name = t1.parent and t2.is_active = 'Yes' 
+				where t1.bom_no =%s and t2.name = t1.parent and t2.is_active = 1 
 				and t2.docstatus = 1 and t1.docstatus =1 """, self.doc.name)
 			if act_pbom and act_pbom[0][0]:
 				msgprint("""Sorry cannot inactivate as BOM: %s is child 

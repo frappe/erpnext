@@ -119,7 +119,7 @@ erpnext.queries.bom = function(opts) {
 	return 'SELECT tabBOM.name, tabBOM.item \
 		FROM tabBOM \
 		WHERE tabBOM.docstatus=1 \
-		AND tabBOM.is_active="Yes" \
+		AND tabBOM.is_active=1 \
 		AND tabBOM.%(key)s LIKE "%s" ' + (conditions.length 
 			? (" AND " + conditions.join(" AND "))
 			: "")

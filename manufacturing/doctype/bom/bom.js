@@ -17,9 +17,40 @@
 // On REFRESH
 cur_frm.cscript.refresh = function(doc,dt,dn){
 	cur_frm.toggle_enable("item", doc.__islocal);
+	
 	if (!doc.__islocal && doc.docstatus==0) {
 		cur_frm.set_intro("Submit the BOM to use it in production");
 	} else cur_frm.set_intro("");
+	
+	cur_frm.cscript.track_operations(doc);
+	set_operation_no(doc);
+}
+
+cur_frm.cscript.track_operations = function(doc) {
+	cur_frm.fields_dict["bom_materials"].grid.set_column_disp("operation_no", doc.track_operations);
+	cur_frm.fields_dict["bom_materials"].grid.toggle_reqd("operation_no", doc.track_operations)
+}
+
+cur_frm.cscript.operation_no = function(doc, cdt, cdn) {
+	var child = locals[cdt][cdn];
+	if(child.parentfield=="bom_operations") set_operation_no(doc);
+}
+
+var set_operation_no = function(doc) {
+	var op_table = getchildren('BOM Operation', doc.name, 'bom_operations');
+	var operations = [];
+
+	for (var i=0, j=op_table.length; i<j; i++) {
+		var op = op_table[i].operation_no;
+		if (op && !inList(operations, op)) operations.push(op);
+	}
+	cur_frm.fields_dict["bom_materials"].grid.get_field("operation_no")
+		.df.options = operations.join("\n");
+	refresh_field("bom_materials");
+}
+
+cur_frm.fields_dict["bom_operations"].grid.on_row_delete = function(cdt, cdn){
+	set_operation_no(doc);
 }
 
 cur_frm.cscript.item = function(doc, dt, dn) {
@@ -27,7 +58,6 @@ cur_frm.cscript.item = function(doc, dt, dn) {
 		get_server_fields('get_item_detail',doc.item,'',doc,dt,dn,1);
 	}
 }
-
 
 cur_frm.cscript.workstation = function(doc,dt,dn) {
 	var d = locals[dt][dn];
@@ -167,11 +197,11 @@ cur_frm.fields_dict['bom_materials'].grid.get_field('item_code').get_query = fun
 cur_frm.fields_dict['bom_materials'].grid.get_field('bom_no').get_query = function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
 	msgprint('SELECT DISTINCT `tabBOM`.`name`, `tabBOM`.`remarks` FROM `tabBOM` \
-		WHERE `tabBOM`.`item` = "' + d.item_code + '" AND `tabBOM`.`is_active` = "Yes" AND \
+		WHERE `tabBOM`.`item` = "' + d.item_code + '" AND `tabBOM`.`is_active` = 1 AND \
 		 	`tabBOM`.docstatus = 1 AND `tabBOM`.`name` like "%s" \
 		ORDER BY `tabBOM`.`name` LIMIT 50');
 	return 'SELECT DISTINCT `tabBOM`.`name`, `tabBOM`.`remarks` FROM `tabBOM` \
-		WHERE `tabBOM`.`item` = "' + d.item_code + '" AND `tabBOM`.`is_active` = "Yes" AND \
+		WHERE `tabBOM`.`item` = "' + d.item_code + '" AND `tabBOM`.`is_active` = 1 AND \
 		 	`tabBOM`.docstatus = 1 AND `tabBOM`.`name` like "%s" \
 		ORDER BY `tabBOM`.`name` LIMIT 50';
 }

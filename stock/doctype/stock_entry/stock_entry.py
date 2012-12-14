@@ -214,7 +214,7 @@ class DocType(TransactionBase):
 	def validate_bom_no(self):
 		if self.doc.bom_no:
 			if not webnotes.conn.sql("""select name from tabBOM where name = %s and docstatus = 1
-			 		and ifnull(is_active, 'No') = 'Yes'""", self.doc.bom_no):
+			 		and is_active = 1""", self.doc.bom_no):
 				msgprint("""BOM: %s not found, may be it has been cancelled or inactivated""" %
 					self.doc.bom_no, raise_exception=1)
 			if not self.doc.fg_completed_qty:

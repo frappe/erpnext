@@ -52,7 +52,7 @@ cur_frm.cscript.show_in_website = function(doc, dt, dn) {
 
 cur_frm.fields_dict['default_bom'].get_query = function(doc) {
    //var d = locals[this.doctype][this.docname];
-   return 'SELECT DISTINCT `tabBOM`.`name` FROM `tabBOM` WHERE `tabBOM`.`item` = "' + doc.item_code + '"  AND `tabBOM`.`is_active` = "No" and `tabBOM`.docstatus != 2 AND `tabBOM`.%(key)s LIKE "%s" ORDER BY `tabBOM`.`name` LIMIT 50'
+   return 'SELECT DISTINCT `tabBOM`.`name` FROM `tabBOM` WHERE `tabBOM`.`item` = "' + doc.item_code + '"  AND ifnull(`tabBOM`.`is_active`, 0) = 0 and `tabBOM`.docstatus != 2 AND `tabBOM`.%(key)s LIKE "%s" ORDER BY `tabBOM`.`name` LIMIT 50'
 }
 
 

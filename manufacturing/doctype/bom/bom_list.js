@@ -17,7 +17,7 @@ wn.doclistviews['BOM'] = wn.views.ListView.extend({
 	prepare_data: function(data) {
 		this._super(data);
 		data.costing_date = wn.datetime.str_to_user(data.costing_date);
-		data.description = (data.is_active === 'Yes' ? '' : '[Inactive] ') + data.description;
+		data.description = (data.is_active ? '' : '[Inactive] ') + data.description;
 	},
 
 	columns: [

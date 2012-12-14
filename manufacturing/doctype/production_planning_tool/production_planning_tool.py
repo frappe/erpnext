@@ -173,7 +173,7 @@ class DocType:
 				(d.item_code, d.idx), raise_exception=1)
 		else:
 			bom = sql("""select name from `tabBOM` where name = %s and item = %s 
-				and docstatus = 1 and ifnull(is_active, 'No') = 'Yes'""", 
+				and docstatus = 1 and is_active = 1""", 
 				(d.bom_no, d.item_code), as_dict = 1)
 			if not bom:
 				msgprint("""Incorrect BOM No: %s entered for item: %s at row no: %s

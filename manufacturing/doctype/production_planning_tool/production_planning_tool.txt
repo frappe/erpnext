@@ -2,9 +2,9 @@
  {
   "owner": "jai@webnotestech.com", 
   "docstatus": 0, 
-  "creation": "2012-12-11 15:15:06", 
+  "creation": "2012-12-14 10:15:16", 
   "modified_by": "Administrator", 
-  "modified": "2012-12-11 16:13:59"
+  "modified": "2012-12-14 11:37:40"
  }, 
  {
   "read_only": 1, 
@@ -149,15 +149,6 @@
   "options": "clear_item_table"
  }, 
  {
-  "description": "If checked, BOM for sub-assembly items will be considered for getting raw materials. Otherwise, all sub-assembly items will be treated as a raw material.", 
-  "default": "1", 
-  "doctype": "DocField", 
-  "label": "Use Multi-Level BOM", 
-  "fieldname": "use_multi_level_bom", 
-  "fieldtype": "Check", 
-  "reqd": 0
- }, 
- {
   "doctype": "DocField", 
   "fieldname": "section_break3", 
   "fieldtype": "Section Break", 
@@ -182,6 +173,15 @@
   "width": "50%", 
   "fieldname": "column_break6", 
   "fieldtype": "Column Break"
+ }, 
+ {
+  "description": "If checked, BOM for sub-assembly items will be considered for getting raw materials. Otherwise, all sub-assembly items will be treated as a raw material.", 
+  "default": "1", 
+  "doctype": "DocField", 
+  "label": "Use Multi-Level BOM", 
+  "fieldname": "use_multi_level_bom", 
+  "fieldtype": "Check", 
+  "reqd": 0
  }, 
  {
   "description": "Download a report containing all raw materials with their latest inventory status", 
