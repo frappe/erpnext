@@ -2,9 +2,9 @@
  {
   "owner": "Administrator", 
   "docstatus": 0, 
-  "creation": "2012-07-03 13:30:04", 
+  "creation": "2012-12-14 10:15:16", 
   "modified_by": "Administrator", 
-  "modified": "2012-12-10 18:30:00"
+  "modified": "2012-12-14 16:53:30"
  }, 
  {
   "read_only": 0, 
@@ -67,7 +67,7 @@
   "label": "Amount", 
   "oldfieldname": "amount_as_per_sr", 
   "fieldname": "amount", 
-  "fieldtype": "Float"
+  "fieldtype": "Currency"
  }, 
  {
   "oldfieldtype": "Link", 

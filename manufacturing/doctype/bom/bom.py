@@ -38,23 +38,51 @@ class DocType:
 		else:
 			idx = 1
 		self.doc.name = 'BOM/' + self.doc.item + ('/%.3i' % idx)
+	
+	def validate(self):
+		self.clear_operations()
+		self.validate_main_item()
+		self.validate_operations()
+		self.validate_materials()
+		
+	def on_update(self):
+		self.check_recursion()
+		self.update_cost_and_exploded_items()
+	
+	def on_submit(self):
+		self.manage_default_bom()
 
+	def on_cancel(self):
+		# check if used in any other bom
+		par = sql("""select t1.parent from `tabBOM Item` t1, `tabBOM` t2 
+			where t1.parent = t2.name and t1.bom_no = %s and t1.docstatus = 1 
+			and t2.is_active = 1""", self.doc.name)
+		if par:
+			msgprint("""BOM can not be cancelled, as it is a child item \
+				in following active BOM %s""" % [d[0] for d in par], raise_exception=1)
+			
+		webnotes.conn.set(self.doc, "is_active", 0)
+		webnotes.conn.set(self.doc, "is_default", 0)
+		self.manage_default_bom()
+		self.update_cost_and_exploded_items(calculate_cost=False)
+				
+	def on_update_after_submit(self):
+		self.manage_default_bom()
+		self.validate_inactive_bom()
 
 	def get_item_det(self, item_code):
-		item = sql("""select name, is_asset_item, is_purchase_item, docstatus,
+		item = sql("""select name, is_asset_item, is_purchase_item, docstatus, description,
 		 	is_sub_contracted_item, stock_uom, default_bom, 
 			last_purchase_rate, standard_rate, is_manufactured_item 
 			from `tabItem` where item_code = %s""", item_code, as_dict = 1)
 
 		return item
 
-
-	def get_item_detail(self, item_code):
+	def get_item_details(self, item_code):
 		return { 'uom' : webnotes.conn.get_value("Item", item_code, "stock_uom")}
 
 	def get_workstation_details(self,workstation):
 		return {'hour_rate': webnotes.conn.get_value("Workstation", workstation, "hour_rate")}
-
 
 	def validate_rm_item(self, item):
 		if item[0]['name'] == self.doc.item:
@@ -66,7 +94,6 @@ class DocType:
 
 		if not item or item[0]['docstatus'] == 2:
 			msgprint("Item %s does not exist in system" % item[0]['item_code'], raise_exception = 1)
-
 
 	def get_bom_material_detail(self):
 		""" Get raw material details like uom, desc and rate"""
@@ -89,7 +116,6 @@ class DocType:
 			 'rate'			: rate
 		}
 		return ret_item
-
 
 	def get_rm_rate(self, arg):
 		"""	Get raw material rate as per selected method, if bom exists takes bom cost """
@@ -128,26 +154,26 @@ class DocType:
 
 		return rate and flt(sum(rate))/len(rate) or 0
 
-
 	def manage_default_bom(self):
 		""" Uncheck others if current one is selected as default, 
 			update default bom in item master
 		"""
-
 		if self.doc.is_default and self.doc.is_active:
-			sql("update `tabBOM` set is_default = 0 where name != %s and item=%s", 
-				(self.doc.name, self.doc.item))
-
+			from webnotes.model.utils import set_default
+			
+			set_default(self.doc, "item")
 			webnotes.conn.set_value("Item", self.doc.item, "default_bom", self.doc.name)
+			
 		else:
-			sql("update `tabItem` set default_bom = '' where name = %s and default_bom = %s", 
+			if not self.doc.is_active:
+				webnotes.conn.set(self.doc, "is_default", 0)
+			
+			sql("update `tabItem` set default_bom = null where name = %s and default_bom = %s", 
 			 	(self.doc.item, self.doc.name))
 
-
-	def validate(self):
-		self.validate_main_item()
-		self.validate_operations()
-		self.validate_materials()
+	def clear_operations(self):
+		if not self.doc.with_operations:
+			self.doclist = self.doc.clear_table(self.doclist, 'bom_operations')
 
 	def validate_main_item(self):
 		""" Validate main FG item"""
@@ -160,7 +186,6 @@ class DocType:
 				and item[0]['is_sub_contracted_item'] != 'Yes':
 			msgprint("""As Item: %s is not a manufactured / sub-contracted item, \
 				you can not make BOM for it""" % self.doc.item, raise_exception = 1)
-
 
 	def validate_operations(self):
 		""" Check duplicate operation no"""
@@ -178,7 +203,7 @@ class DocType:
 		check_list = []
 		for m in getlist(self.doclist, 'bom_materials'):
 			# check if operation no not in op table
-			if self.doc.track_operations and cstr(m.operation_no) not in self.op:
+			if self.doc.with_operations and cstr(m.operation_no) not in self.op:
 				msgprint("""Operation no: %s against item: %s at row no: %s \
 					is not present at Operations table""" % 
 					(m.operation_no, m.item_code, m.idx), raise_exception = 1)
@@ -203,17 +228,15 @@ class DocType:
 
 			self.check_if_item_repeated(m.item_code, m.operation_no, check_list)
 
-
 	def validate_bom_no(self, item, bom_no, idx):
 		"""Validate BOM No of sub-contracted items"""
 		bom = sql("""select name from `tabBOM` where name = %s and item = %s 
-			and is_active = 1 and docstatus < 2 """, 
+			and is_active=1 and docstatus=1""", 
 			(bom_no, item), as_dict =1)
 		if not bom:
 			msgprint("""Incorrect BOM No: %s against item: %s at row no: %s.
 				It may be inactive or cancelled or for some other item.""" % 
 				(bom_no, item, idx), raise_exception = 1)
-
 
 	def check_if_item_repeated(self, item, op, check_list):
 		if [cstr(item), cstr(op)] in check_list:
@@ -221,11 +244,6 @@ class DocType:
 				item, raise_exception = 1)
 		else:
 			check_list.append([cstr(item), cstr(op)])
-
-
-	def on_update(self):
-		self.check_recursion()
-		self.update_cost_and_exploded_items()
 
 	def check_recursion(self):
 		""" Check whether recursion occurs in any bom"""
@@ -243,7 +261,6 @@ class DocType:
 							""" % (cstr(b), cstr(d[2]), self.doc.name), raise_exception = 1)
 					if b[0]:
 						bom_list.append(b[0])
-						
 	
 	def update_cost_and_exploded_items(self, calculate_cost=True):
 		bom_list = self.traverse_tree()
@@ -252,9 +269,10 @@ class DocType:
 			bom_obj = get_obj("BOM", bom, with_children=1)
 			if calculate_cost:
 				bom_obj.calculate_cost()
-			bom_obj.update_flat_bom()
+			bom_obj.update_exploded_items()
+			if bom == self.doc.name:
+				self.doc, self.doclist = bom_obj.doc, bom_obj.doclist
 			
-
 	def traverse_tree(self):
 		def _get_childs(bom_no):
 			return [cstr(d[0]) for d in webnotes.conn.sql("""select bom_no from `tabBOM Item` 
@@ -268,7 +286,6 @@ class DocType:
 			count += 1
 		return bom_list
 	
-	
 	def calculate_cost(self):
 		"""Calculate bom totals"""
 		self.calculate_op_cost()
@@ -276,7 +293,6 @@ class DocType:
 		self.doc.total_cost = self.doc.raw_material_cost + self.doc.operating_cost
 		self.doc.modified = now()
 		self.doc.save()
-	
 
 	def calculate_op_cost(self):
 		"""Update workstation rate and calculates totals"""
@@ -288,7 +304,6 @@ class DocType:
 			total_op_cost += flt(d.operating_cost)
 		self.doc.operating_cost = total_op_cost
 		
-
 	def calculate_rm_cost(self):
 		"""Fetch RM rate as per today's valuation rate and calculate totals"""
 		total_rm_cost = 0
@@ -301,21 +316,19 @@ class DocType:
 			total_rm_cost += d.amount
 		self.doc.raw_material_cost = total_rm_cost
 
-
-	def update_flat_bom(self):
+	def update_exploded_items(self):
 		""" Update Flat BOM, following will be correct data"""
-		self.get_flat_bom_items()
-		self.add_to_flat_bom_detail()
+		self.get_exploded_items()
+		self.add_exploded_items()
 
-
-	def get_flat_bom_items(self):
+	def get_exploded_items(self):
 		""" Get all raw materials including items from child bom"""
-		self.cur_flat_bom_items = []
+		self.cur_exploded_items = []
 		for d in getlist(self.doclist, 'bom_materials'):
 			if d.bom_no:
-				self.get_child_flat_bom_items(d.bom_no, d.qty)
+				self.get_child_exploded_items(d.bom_no, d.qty)
 			else:
-				self.cur_flat_bom_items.append({
+				self.cur_exploded_items.append({
 					'item_code'				: d.item_code, 
 					'description'			: d.description, 
 					'stock_uom'				: d.stock_uom, 
@@ -327,8 +340,7 @@ class DocType:
 					'qty_consumed_per_unit' : flt(d.qty_consumed_per_unit)
 				})
 	
-	
-	def get_child_flat_bom_items(self, bom_no, qty):
+	def get_child_exploded_items(self, bom_no, qty):
 		""" Add all items from Flat BOM of child BOM"""
 		
 		child_fb_items = sql("""select item_code, description, stock_uom, qty, rate, 
@@ -336,7 +348,7 @@ class DocType:
 			from `tabBOM Explosion Item` where parent = '%s' and docstatus = 1""" %
 			bom_no, as_dict = 1)
 		for d in child_fb_items:
-			self.cur_flat_bom_items.append({
+			self.cur_exploded_items.append({
 				'item_code'				: d['item_code'], 
 				'description'			: d['description'], 
 				'stock_uom'				: d['stock_uom'], 
@@ -349,10 +361,10 @@ class DocType:
 
 			})
 
-	def add_to_flat_bom_detail(self):
+	def add_exploded_items(self):
 		"Add items to Flat BOM table"
 		self.doclist = self.doc.clear_table(self.doclist, 'flat_bom_details', 1)
-		for d in self.cur_flat_bom_items:
+		for d in self.cur_exploded_items:
 			ch = addchild(self.doc, 'flat_bom_details', 'BOM Explosion Item', 1, self.doclist)
 			for i in d.keys():
 				ch.fields[i] = d[i]
@@ -360,40 +372,14 @@ class DocType:
 			ch.save(1)
 		self.doc.save()
 
-
 	def get_parent_bom_list(self, bom_no):
 		p_bom = sql("select parent from `tabBOM Item` where bom_no = '%s'" % bom_no)
 		return p_bom and [i[0] for i in p_bom] or []
 
-
-	def on_submit(self):
-		self.manage_default_bom()
-
-
-	def on_cancel(self):
-		# check if used in any other bom
-		par = sql("""select t1.parent from `tabBOM Item` t1, `tabBOM` t2 
-			where t1.parent = t2.name and t1.bom_no = %s and t1.docstatus = 1 
-			and t2.is_active = 1""", self.doc.name)
-		if par:
-			msgprint("""BOM can not be cancelled, as it is a child item \
-				in following active BOM %s""" % [d[0] for d in par], raise_exception=1)
-			
-		webnotes.conn.set(self.doc, "is_active", 0)
-		webnotes.conn.set(self.doc, "is_default", 0)
-		self.manage_default_bom()
-		self.update_cost_and_exploded_items(calculate_cost=False)
-				
-
-	def on_update_after_submit(self):
-		self.manage_default_bom()
-		self.validate_inactive_bom()
-	
-	
 	def validate_inactive_bom(self):
 		if not self.doc.is_active:
 			act_pbom = sql("""select distinct t1.parent from `tabBOM Item` t1, `tabBOM` t2 
-				where t1.bom_no =%s and t2.name = t1.parent and t2.is_active = 1 
+				where t1.bom_no = %s and t2.name = t1.parent and t2.is_active = 1 
 				and t2.docstatus = 1 and t1.docstatus =1 """, self.doc.name)
 			if act_pbom and act_pbom[0][0]:
 				msgprint("""Sorry cannot inactivate as BOM: %s is child 

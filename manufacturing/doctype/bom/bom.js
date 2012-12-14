@@ -19,16 +19,16 @@ cur_frm.cscript.refresh = function(doc,dt,dn){
 	cur_frm.toggle_enable("item", doc.__islocal);
 	
 	if (!doc.__islocal && doc.docstatus==0) {
-		cur_frm.set_intro("Submit the BOM to use it in production");
+		cur_frm.set_intro("Submit the BOM to use it for manufacturing or repacking.");
 	} else cur_frm.set_intro("");
 	
-	cur_frm.cscript.track_operations(doc);
+	cur_frm.cscript.with_operations(doc);
 	set_operation_no(doc);
 }
 
-cur_frm.cscript.track_operations = function(doc) {
-	cur_frm.fields_dict["bom_materials"].grid.set_column_disp("operation_no", doc.track_operations);
-	cur_frm.fields_dict["bom_materials"].grid.toggle_reqd("operation_no", doc.track_operations)
+cur_frm.cscript.with_operations = function(doc) {
+	cur_frm.fields_dict["bom_materials"].grid.set_column_disp("operation_no", doc.with_operations);
+	cur_frm.fields_dict["bom_materials"].grid.toggle_reqd("operation_no", doc.with_operations)
 }
 
 cur_frm.cscript.operation_no = function(doc, cdt, cdn) {
@@ -44,8 +44,14 @@ var set_operation_no = function(doc) {
 		var op = op_table[i].operation_no;
 		if (op && !inList(operations, op)) operations.push(op);
 	}
+	
 	cur_frm.fields_dict["bom_materials"].grid.get_field("operation_no")
 		.df.options = operations.join("\n");
+	
+	$.each(getchildren("BOM Item", doc.name, "bom_materials"), function(i, v) {
+		if(!inList(operations, cstr(v.operation_no))) v.operation_no = null;
+	});
+	
 	refresh_field("bom_materials");
 }
 
@@ -55,7 +61,7 @@ cur_frm.fields_dict["bom_operations"].grid.on_row_delete = function(cdt, cdn){
 
 cur_frm.cscript.item = function(doc, dt, dn) {
 	if (doc.item) {
-		get_server_fields('get_item_detail',doc.item,'',doc,dt,dn,1);
+		get_server_fields('get_item_details',doc.item,'',doc,dt,dn,1);
 	}
 }
 
@@ -129,17 +135,6 @@ cur_frm.cscript.rate = function(doc, cdt, cdn) {
 	}
 }
 
-cur_frm.cscript.is_default = function(doc, cdt, cdn) {
-	if (doc.docstatus == 1)
-		$c_obj(make_doclist(cdt, cdn), 'manage_default_bom', '', '');
-}
-
-
-cur_frm.cscript.is_active = function(doc, dt, dn) {
-	if (!doc.__islocal)
-		$c_obj(make_doclist(dt, dn), 'manage_active_bom', '', '');
-}
-
 var calculate_op_cost = function(doc, dt, dn) {	
 	var op = getchildren('BOM Operation', doc.name, 'bom_operations');
 	total_op_cost = 0;
@@ -196,10 +191,6 @@ cur_frm.fields_dict['bom_materials'].grid.get_field('item_code').get_query = fun
 
 cur_frm.fields_dict['bom_materials'].grid.get_field('bom_no').get_query = function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
-	msgprint('SELECT DISTINCT `tabBOM`.`name`, `tabBOM`.`remarks` FROM `tabBOM` \
-		WHERE `tabBOM`.`item` = "' + d.item_code + '" AND `tabBOM`.`is_active` = 1 AND \
-		 	`tabBOM`.docstatus = 1 AND `tabBOM`.`name` like "%s" \
-		ORDER BY `tabBOM`.`name` LIMIT 50');
 	return 'SELECT DISTINCT `tabBOM`.`name`, `tabBOM`.`remarks` FROM `tabBOM` \
 		WHERE `tabBOM`.`item` = "' + d.item_code + '" AND `tabBOM`.`is_active` = 1 AND \
 		 	`tabBOM`.docstatus = 1 AND `tabBOM`.`name` like "%s" \

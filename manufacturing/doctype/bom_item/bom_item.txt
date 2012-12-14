@@ -4,7 +4,7 @@
   "docstatus": 0, 
   "creation": "2012-12-14 10:15:16", 
   "modified_by": "Administrator", 
-  "modified": "2012-12-14 13:11:49"
+  "modified": "2012-12-14 16:35:33"
  }, 
  {
   "istable": 1, 
@@ -103,7 +103,7 @@
   "oldfieldname": "amount_as_per_mar", 
   "width": "150px", 
   "fieldname": "amount", 
-  "fieldtype": "Float", 
+  "fieldtype": "Currency", 
   "permlevel": 1
  }, 
  {

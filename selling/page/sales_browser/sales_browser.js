@@ -154,7 +154,6 @@ erpnext.SalesChart = Class.extend({
 	rename: function() {
 		var node = this.selected_node();
 		wn.model.rename_doc(this.ctype, node.data('label'), function(new_name) {
-			console.log(new_name)
 			node.data('label', new_name).find(".tree-label").html(new_name);
 		});
 	},

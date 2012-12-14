@@ -42,6 +42,6 @@ def rebuilt_exploded_bom():
 		get_obj("BOM", bom[0], with_children=1).on_update()
 
 def cleanup_bom():
-	webnotes.conn.sql("""UPDATE `tabBOM` SET is_active = if(is_active='Yes', 1, 0), 
-		track_operations = 1""")
+	webnotes.conn.sql("""UPDATE `tabBOM` SET is_active = if(is_active in ('Yes', 1), 1, 0), 
+		with_operations = 1""")
 	
