@@ -33,6 +33,10 @@ page_map = {
 	'Item': webnotes._dict({
 		"template": 'html/product_page.html',
 		"condition_field": "show_in_website",
+	}),
+	'Item Group': webnotes._dict({
+		"template": "html/product_group.html",
+		"condition_field": "show_in_website"
 	})
 }
 

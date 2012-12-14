@@ -135,23 +135,6 @@ erpnext.startup.set_periodic_updates = function() {
 	wn.updates.id = setInterval(erpnext.update_messages, 60000);
 }
 
-// subject, sender, description
-erpnext.send_message = function(opts) {
-	if(opts.btn) {
-		$(opts.btn).start_working();
-	}
-	wn.call({
-		method: 'website.send_message',
-		args: opts,
-		callback: function(r) { 
-			if(opts.btn) {
-				$(opts.btn).done_working();
-			}
-			if(opts.callback)opts.callback(r) 
-		}
-	});
-}
-
 erpnext.hide_naming_series = function() {
 	if(cur_frm.fields_dict.naming_series) {
 		hide_field('naming_series');
