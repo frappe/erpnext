@@ -15,6 +15,10 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
+cur_frm.cscript.refresh = function(doc) {
+	cur_frm.disable_save();
+}
+
 cur_frm.set_query("current_bom", function(doc) {
 	return erpnext.queries.bom({name: "!" + doc.new_bom});
 });

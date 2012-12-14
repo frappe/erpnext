@@ -19,6 +19,10 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 	refresh_field("company");
 }
 
+cur_frm.cscript.refresh = function(doc) {
+	cur_frm.disable_save();
+}
+
 cur_frm.cscript.sales_order = function(doc,cdt,cdn) {
 	var d = locals[cdt][cdn];
 	if (d.sales_order) {
