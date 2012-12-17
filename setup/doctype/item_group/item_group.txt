@@ -2,9 +2,9 @@
  {
   "owner": "Administrator", 
   "docstatus": 0, 
-  "creation": "2012-12-06 15:57:00", 
+  "creation": "2012-12-07 15:15:28", 
   "modified_by": "Administrator", 
-  "modified": "2012-12-07 14:55:49"
+  "modified": "2012-12-17 15:00:01"
  }, 
  {
   "in_create": 1, 
@@ -53,7 +53,6 @@
   "description": "Check this if you want to show in website", 
   "no_copy": 0, 
   "search_index": 0, 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Show in Website", 
   "fieldname": "show_in_website", 
@@ -70,12 +69,18 @@
  {
   "description": "Items Featured on the Item Group Page", 
   "depends_on": "show_in_website", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Featured Items", 
   "fieldname": "featured_items", 
   "fieldtype": "Table", 
+  "hidden": 1, 
   "options": "Featured Item"
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Page Name", 
+  "fieldname": "page_name", 
+  "fieldtype": "Data"
  }, 
  {
   "doctype": "DocField", 
@@ -88,7 +93,6 @@
   "doctype": "DocField", 
   "label": "Parent Item Group", 
   "oldfieldname": "parent_item_group", 
-  "trigger": "Client", 
   "fieldname": "parent_item_group", 
   "fieldtype": "Link", 
   "search_index": 0, 
@@ -99,7 +103,6 @@
   "description": "Only leaf nodes are allowed in transaction", 
   "no_copy": 0, 
   "oldfieldtype": "Select", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Has Child Node", 
   "oldfieldname": "is_group", 
@@ -152,6 +155,46 @@
   "report_hide": 1
  }, 
  {
+  "amend": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "submit": 0, 
+  "write": 0, 
+  "cancel": 0, 
+  "role": "Material Manager", 
+  "permlevel": 1
+ }, 
+ {
+  "amend": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "submit": 0, 
+  "write": 0, 
+  "cancel": 0, 
+  "role": "Material Manager", 
+  "permlevel": 0
+ }, 
+ {
+  "amend": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "submit": 0, 
+  "write": 0, 
+  "cancel": 0, 
+  "role": "Material User", 
+  "permlevel": 1
+ }, 
+ {
+  "amend": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "submit": 0, 
+  "write": 0, 
+  "cancel": 0, 
+  "role": "Material User", 
+  "permlevel": 0
+ }, 
+ {
   "create": 1, 
   "doctype": "DocPerm", 
   "write": 1, 
@@ -165,46 +208,6 @@
   "write": 1, 
   "role": "Material Master Manager", 
   "cancel": 1, 
-  "permlevel": 0
- }, 
- {
-  "amend": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "submit": 0, 
-  "write": 0, 
-  "role": "Material Manager", 
-  "cancel": 0, 
-  "permlevel": 1
- }, 
- {
-  "amend": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "submit": 0, 
-  "write": 0, 
-  "role": "Material Manager", 
-  "cancel": 0, 
-  "permlevel": 0
- }, 
- {
-  "amend": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "submit": 0, 
-  "write": 0, 
-  "role": "Material User", 
-  "cancel": 0, 
-  "permlevel": 1
- }, 
- {
-  "amend": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "submit": 0, 
-  "write": 0, 
-  "role": "Material User", 
-  "cancel": 0, 
   "permlevel": 0
  }
 ]
