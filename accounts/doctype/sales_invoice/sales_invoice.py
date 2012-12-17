@@ -822,7 +822,9 @@ def send_notification(new_rv):
 				</tr>
 		'''
 	for d in getlist(new_rv.doclist, 'entries'):
-		tbl += '<tr><td>' + d.item_code +'</td><td>' + d.description+'</td><td>' + cstr(d.qty) +'</td><td>' + cstr(d.basic_rate) +'</td><td>' + cstr(d.amount) +'</td></tr>'
+		tbl += '<tr><td>' + cstr(d.item_code) +'</td><td>' + cstr(d.description) + \
+			'</td><td>' + cstr(d.qty) +'</td><td>' + cstr(d.basic_rate) + \
+			'</td><td>' + cstr(d.amount) +'</td></tr>'
 	tbl += '</table>'
 
 	totals ='''<table cellspacing= "5" cellpadding="5"  width = "100%%">
