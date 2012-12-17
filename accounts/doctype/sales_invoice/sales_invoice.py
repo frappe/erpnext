@@ -728,24 +728,25 @@ def get_next_date(dt, mcount, day=None):
 		next_month_date = datetime.date(year, month, last_day)
 	return next_month_date.strftime("%Y-%m-%d")
 
-def manage_recurring_invoices():
+def manage_recurring_invoices(next_date=None):
 	""" 
 		Create recurring invoices on specific date by copying the original one
 		and notify the concerned people
 	"""
+	next_date = next_date or nowdate()
 	recurring_invoices = webnotes.conn.sql("""select name, recurring_id
 		from `tabSales Invoice` where ifnull(convert_into_recurring_invoice, 0)=1
 		and docstatus=1 and next_date=%s
-		and next_date <= ifnull(end_date, '2199-12-31')""", nowdate())
+		and next_date <= ifnull(end_date, '2199-12-31')""", next_date)
 	
 	exception_list = []
 	for ref_invoice, recurring_id in recurring_invoices:
 		if not webnotes.conn.sql("""select name from `tabSales Invoice`
 				where posting_date=%s and recurring_id=%s and docstatus=1""",
-				(nowdate(), recurring_id)):
+				(next_date, recurring_id)):
 			try:
 				ref_wrapper = webnotes.model_wrapper('Sales Invoice', ref_invoice)
-				new_invoice_wrapper = make_new_invoice(ref_wrapper)
+				new_invoice_wrapper = make_new_invoice(ref_wrapper, next_date)
 				send_notification(new_invoice_wrapper)
 				webnotes.conn.commit()
 			except Exception, e:
@@ -765,19 +766,17 @@ def manage_recurring_invoices():
 		exception_message = "\n\n".join([cstr(d) for d in exception_list])
 		raise Exception, exception_message
 
-def make_new_invoice(ref_wrapper):
+def make_new_invoice(ref_wrapper, posting_date):
 	from webnotes.model.wrapper import clone
 	new_invoice = clone(ref_wrapper)
 	
 	mcount = month_map[ref_wrapper.doc.recurring_type]
-	
-	today = nowdate()
-	
-	new_invoice.doc.fields.update({
-		"posting_date": today,
-		"aging_date": today,
 		
-		"due_date": add_days(today, cint(date_diff(ref_wrapper.doc.due_date,
+	new_invoice.doc.fields.update({
+		"posting_date": posting_date,
+		"aging_date": posting_date,
+		
+		"due_date": add_days(posting_date, cint(date_diff(ref_wrapper.doc.due_date,
 			ref_wrapper.doc.posting_date))),
 			
 		"invoice_period_from_date": \
