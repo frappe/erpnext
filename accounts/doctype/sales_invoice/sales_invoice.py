@@ -719,7 +719,7 @@ def get_next_date(dt, mcount, day=None):
 	if not day:
 		day = getdate(dt).day
 	if month > 12:
-		month, year = m-12, y+1
+		month, year = month-12, year+1
 	try:
 		next_month_date = datetime.date(year, month, day)
 	except:

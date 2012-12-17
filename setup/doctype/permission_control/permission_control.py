@@ -51,7 +51,7 @@ class DocType:
 	# -------------------------------------------------------------------
 	def get_permissions(self,doctype):
 		import webnotes.model.doctype
-		doclist = webnotes.model.doctype.get(doctype)
+		doclist = webnotes.model.doctype.get(doctype).get_parent_doclist()
 		
 		ptype = [{
 				'role': perm.role,
