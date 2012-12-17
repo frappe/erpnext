@@ -7,10 +7,11 @@
 		"app/public/js/startup.css"
 	],
 	"public/js/all-web.js": [
-		"app/public/js/startup.js",
-		"app/public/js/conf.js"
+		"app/public/js/website_utils.js"
 	],
 	"public/js/all-app.js": [
+		"app/public/js/startup.js",
+		"app/public/js/conf.js",
 		"app/public/js/modules.js",
 		"app/public/js/toolbar.js",
 		"app/public/js/feature_setup.js",
