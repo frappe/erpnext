@@ -4,7 +4,7 @@
   "docstatus": 0, 
   "creation": "2012-12-17 14:56:32", 
   "modified_by": "Administrator", 
-  "modified": "2012-12-17 15:59:19"
+  "modified": "2012-12-17 16:02:00"
  }, 
  {
   "allow_attach": 1, 
@@ -787,7 +787,8 @@
   "permlevel": 0
  }, 
  {
-  "default": "Show Price in Website (if set)", 
+  "description": "Show Price in Website (if set)", 
+  "depends_on": "show_in_website", 
   "doctype": "DocField", 
   "label": "Website Price List", 
   "options": "Price List", 
@@ -797,6 +798,7 @@
  }, 
  {
   "description": "Show \"In Stock\" or \"Not in Stock\" based on stock available in this warehouse.", 
+  "depends_on": "show_in_website", 
   "doctype": "DocField", 
   "label": "Website Warehouse", 
   "options": "Warehouse", 
@@ -805,12 +807,14 @@
   "permlevel": 0
  }, 
  {
+  "depends_on": "show_in_website", 
   "doctype": "DocField", 
   "fieldname": "sb72", 
   "fieldtype": "Section Break", 
   "permlevel": 0
  }, 
  {
+  "depends_on": "show_in_website", 
   "doctype": "DocField", 
   "label": "Item Website Specifications", 
   "options": "Item Website Specification", 
