@@ -2,9 +2,9 @@
  {
   "owner": "Administrator", 
   "docstatus": 0, 
-  "creation": "2012-12-11 15:58:47", 
+  "creation": "2012-12-17 14:10:03", 
   "modified_by": "Administrator", 
-  "modified": "2012-12-11 16:08:49"
+  "modified": "2012-12-17 14:12:10"
  }, 
  {
   "allow_attach": 1, 
@@ -459,6 +459,7 @@
   "permlevel": 0
  }, 
  {
+  "no_copy": 1, 
   "oldfieldtype": "Table", 
   "doctype": "DocField", 
   "label": "UOM Conversion Details", 
@@ -802,8 +803,8 @@
   "doctype": "DocPerm", 
   "submit": 0, 
   "write": 0, 
-  "cancel": 0, 
   "role": "Material Manager", 
+  "cancel": 0, 
   "permlevel": 1
  }, 
  {
@@ -812,8 +813,8 @@
   "doctype": "DocPerm", 
   "submit": 0, 
   "write": 0, 
-  "cancel": 0, 
   "role": "Material Manager", 
+  "cancel": 0, 
   "permlevel": 0
  }, 
  {
@@ -822,8 +823,8 @@
   "doctype": "DocPerm", 
   "submit": 0, 
   "write": 0, 
-  "cancel": 0, 
   "role": "Material User", 
+  "cancel": 0, 
   "permlevel": 1
  }, 
  {
@@ -832,8 +833,8 @@
   "doctype": "DocPerm", 
   "submit": 0, 
   "write": 0, 
-  "cancel": 0, 
   "role": "Material User", 
+  "cancel": 0, 
   "permlevel": 0
  }, 
  {
