@@ -6,4 +6,8 @@
 		.comment-content {
 			margin-left: 20px;
 		}
+		
+		input {
+			width: 240px;
+		}
 	</style>

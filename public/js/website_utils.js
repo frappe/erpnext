@@ -43,3 +43,11 @@ function get_url_arg(name) {
 	else
 		return decodeURIComponent(results[1]);		
 }
+
+function repl(s, dict) {
+	if(s==null)return '';
+	for(key in dict) {
+		s = s.split("%("+key+")s").join(dict[key]);
+	}
+	return s;
+}

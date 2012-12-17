@@ -15,29 +15,54 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 // js inside blog page
-wn.pages['{{ name }}'].onload = function(wrapper) {
-	erpnext.blog_list = new wn.ui.Listing({
-		parent: $(wrapper).find('#blog-list').get(0),
-		method: 'website.helpers.blog.get_blog_list',
-		hide_refresh: true,
-		no_toolbar: true,
-		render_row: function(parent, data) {
-			if(!data.comments) {
-				data.comment_text = 'No comments yet.'
-			} else if (data.comments===1) {
-				data.comment_text = '1 comment.'
+
+$(document).ready(function() {
+	// make list of blogs
+	blog.get_list();
+	
+	$("#next-page").click(function() {
+		blog.get_list();
+	})
+});
+
+var blog = {
+	start: 0,
+	get_list: function() {
+		$.ajax({
+			method: "GET",
+			url: "server.py",
+			data: {
+				cmd: "website.helpers.blog.get_blog_list",
+				start: blog.start
+			},
+			dataType: "json",
+			success: function(data) {
+				blog.render(data.message);
+			}
+		});
+	},
+	render: function(data) {
+		var $wrap = $("#blog-list");
+		$.each(data, function(i, b) {
+			// comments
+			if(!b.comments) {
+				b.comment_text = 'No comments yet.'
+			} else if (b.comments===1) {
+				b.comment_text = '1 comment.'
 			} else {
-				data.comment_text = data.comments + ' comments.'
+				b.comment_text = b.comments + ' comments.'
 			} 
 			
-			if(data.content && data.content.length==1000) {
-				data.content += repl('... <a href="%(page_name)s.html">(read on)</a>', data);
-			}
-			parent.innerHTML = repl('<h2><a href="%(page_name)s.html">%(title)s</a></h2>\
+			$(repl('<h2><a href="%(page_name)s.html">%(title)s</a></h2>\
 				<div class="help">%(comment_text)s</div>\
-				%(content)s<br /><br />', data);
-		},
-		page_length: 10
-	});
-	erpnext.blog_list.run();
+				%(content)s<br />\
+				<p><a href="%(page_name)s">Read with comments...</a></p>\
+				<hr /><br />', b)).appendTo($wrap);
+		});
+		blog.start += data.length;
+		if(!data.length) {
+			$("#next-page").toggle(false)
+				.parent().append("<div class='alert'>Nothing more to show.</div>");
+		}
+	}
 }

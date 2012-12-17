@@ -2,7 +2,6 @@
 
 {% block javascript %}
 	{% include "js/blog.js" %}
-	{% include "js/blog_subscribe.js" %}
 {% endblock %}
 
 {% block css %}
@@ -18,8 +17,11 @@
 			<div class="layout-main">
 				<h1>Blog</h1>
 				<br>
-				<div id="blog-list">
+				<div id="blog-list" style="min-height: 400px;">
 					<!-- blog list will be generated dynamically -->
+				</div>
+				<div style="text-align: center;">
+					<button id="next-page" class="btn">More...</button>
 				</div>
 			</div>
 		</div>
