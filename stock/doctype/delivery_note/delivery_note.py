@@ -80,8 +80,8 @@ class DocType(TransactionBase):
 
 
 	def pull_project_customer(self):
-		res = sql("select customer from `tabProject` where name = '%s'"%self.doc.project_name)
-		if res:
+		res = sql("select customer from `tabProject` where name = '%s'" % self.doc.project_name)
+		if res and res[0][0]:
 			get_obj('DocType Mapper', 'Project-Delivery Note').dt_map('Project', 'Delivery Note', self.doc.project_name, self.doc, self.doclist, "[['Project', 'Delivery Note']]")
 
 

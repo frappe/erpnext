@@ -322,8 +322,9 @@ class DocType(TransactionBase):
 
 	
 	def pull_project_customer(self):
-		res = webnotes.conn.sql("select customer from `tabProject` where name = '%s'"%self.doc.project_name)
-		if res:
+		res = webnotes.conn.sql("select customer from `tabProject` where name = '%s'" %
+		 	self.doc.project_name)
+		if res and res[0][0]:
 			get_obj('DocType Mapper', 'Project-Sales Invoice').dt_map('Project', 'Sales Invoice', self.doc.project_name, self.doc, self.doclist, "[['Project', 'Sales Invoice']]")
 
 	def get_company_abbr(self):
