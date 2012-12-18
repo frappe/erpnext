@@ -95,7 +95,7 @@ EditableText = function(args) {
 		<textarea class="ed-text-input %(inp_class)s hide"></textarea>\
 		<div class="help hide"><br>Formatted as <a href="#markdown-reference"\
 		 	target="_blank">markdown</a></div>\
-		<button class="btn btn-small btn-info hide ed-text-save">Save</button>\
+		<button class="btn btn-info hide ed-text-save">Save</button>\
 		<a class="ed-text-cancel hide" style="cursor: pointer;">Cancel</a>\
 	</div>', args)).appendTo(me.parent);
 	

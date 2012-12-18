@@ -5,6 +5,25 @@ from __future__ import unicode_literals
 import webnotes
 
 @webnotes.whitelist(allow_guest=True)
+def get_product_info(item_code):
+	"""get product price / stock info"""
+	price_list = webnotes.conn.get_value("Item", item_code, "website_price_list")
+	warehouse = webnotes.conn.get_value("Item", item_code, "website_warehouse")
+	if warehouse:
+		in_stock = webnotes.conn.sql("""select actual_qty from tabBin where
+			item_code=%s and warehouse=%s""", (item_code, warehouse))
+		if in_stock:
+			in_stock = in_stock[0][0] > 0 and 1 or 0
+	else:
+		in_stock = -1
+	return {
+		"price": price_list and webnotes.conn.sql("""select ref_rate, ref_currency from
+			`tabItem Price` where parent=%s and price_list_name=%s""", 
+			(item_code, price_list), as_dict=1) or [],
+		"stock": in_stock
+	}
+
+@webnotes.whitelist(allow_guest=True)
 def get_product_list(args=None):
 	"""
 		args = {

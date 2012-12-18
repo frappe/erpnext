@@ -20,9 +20,10 @@
 	<div class="layout-wrapper layout-wrapper-background">
 		<div class="web-content" id="content-product-{{ name }}">
 			<div class="layout-main" style="padding: 30px;">
+				{% include 'html/product_search.html' %}
 				<h1>{{ item_name }}</h1>
 				<div class="product-page-content">
-					<br><br>
+					<div class="span6">
 					{% if website_image %}
 					<image class="item-main-image" src="files/{{ website_image }}" />
 					{% else %}
@@ -30,23 +31,34 @@
 					<span style="font-size: 11px">This is an auto-generated Image</span>
 					{% endif %}
 					<br><br>
-					<h3>Product Description</h3>
-					<div>
-					{{ web_long_description or web_short_description }}
 					</div>
-					<hr>
-					{% if obj.doclist.get({"doctype":"Item Website Specification"}) %}
-						<h3>Specifications</h3>
-						<table class="table table-striped table-bordered" style="width: 80%">
-						{% for d in obj.doclist.get(
-							{"doctype":"Item Website Specification"}) %}
-							<tr>
-								<td>{{ d.label }}</td>
-								<td>{{ d.description }}</td>
-							</tr>
-						{% endfor %}
-						</table>
-					{% endif %}
+					<div class="span3">
+						<div class="item-price hide">
+							<p>Price:</p>
+						</div>
+						<div class="item-stock"></div>
+					</div>
+					<div class="clearfix"></div>
+					<div class="span9">
+						<h3>Product Description</h3>
+						<div>
+						{{ web_long_description or web_short_description }}
+						</div>
+						<hr>
+						{% if obj.doclist.get({"doctype":"Item Website Specification"}) %}
+							<h3>Specifications</h3>
+							<table class="table table-striped table-bordered" style="width: 100%">
+							{% for d in obj.doclist.get(
+								{"doctype":"Item Website Specification"}) %}
+								<tr>
+									<td>{{ d.label }}</td>
+									<td>{{ d.description }}</td>
+								</tr>
+							{% endfor %}
+							</table>
+						{% endif %}
+					</div>
+					<div class="clearfix"></div>
 				</div>
 			</div>
 		</div>
