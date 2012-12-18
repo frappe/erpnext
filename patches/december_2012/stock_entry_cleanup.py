@@ -12,35 +12,35 @@ def custom_fields():
 			"fieldname": "is_excisable_goods",
 			"fieldtype": "Select",
 			"options": "\nYes\nNo",
-			"insert_after": "company"
+			"insert_after": "Company"
 		},
 		{
 			"label": "Excisable Goods",
 			"fieldname": "excisable_goods",
 			"fieldtype": "Select",
 			"options": "\nReturnable\nNon-Returnable)",
-			"insert_after": "amended_from"
+			"insert_after": "Amended From"
 		},
 		{
 			"label": "Under Rule",
 			"fieldname": "under_rule",
 			"fieldtype": "Select",
 			"options": "\nOrdinary\n57 AC (5) a\n57 F (2) Non-Exc.",
-			"insert_after": "remarks"
+			"insert_after": "Remarks"
 		},
 		{
 			"label": "Transporter",
 			"fieldname": "transporter",
 			"fieldtype": "Data",
 			"options": "",
-			"insert_after": "project_name"
+			"insert_after": "Project Name"
 		},
 		{
 			"label": "Transfer Date",
 			"fieldname": "transfer_date",
 			"fieldtype": "Date",
 			"options": "",
-			"insert_after": "select_print_heading"
+			"insert_after": "Select Print Heading"
 		},
 	]
 	
@@ -62,9 +62,13 @@ def create_custom_field(fld):
 	
 def deprecate_process():
 	webnotes.conn.sql("""update `tabStock Entry` 
-		set `purpose`="Production Order - Material Transfer"
+		set `purpose`="Material Transfer"
 		where process="Material Transfer" and purpose="Production Order" """)
 	
 	webnotes.conn.sql("""update `tabStock Entry` 
-		set `purpose`="Production Order - Update Finished Goods"
-		where process="Backflush" and purpose="Production Order" """)
+		set `purpose`="Manufacture/Repack"
+		where (process="Backflush" and purpose="Production Order") or purpose="Other" """)
+		
+	webnotes.conn.sql("""update `tabStock Entry` 
+		set `purpose`="Subcontract"
+		where process="Subcontracting" """)

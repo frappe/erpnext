@@ -47,6 +47,18 @@ class DocType(TransactionBase):
 		self.validate_incoming_rate()
 		self.validate_bom()
 		self.validate_finished_goods()
+		
+	def on_submit(self):
+		self.update_serial_no(1)
+		self.update_stock_ledger(0)
+		# update Production Order
+		self.update_production_order(1)
+
+	def on_cancel(self):
+		self.update_serial_no(0)
+		self.update_stock_ledger(1)
+		# update Production Order
+		self.update_production_order(0)
 					
 	def validate_serial_nos(self):
 		sl_obj = get_obj("Stock Ledger")
@@ -56,10 +68,8 @@ class DocType(TransactionBase):
 	def validate_warehouse(self, pro_obj):
 		"""perform various (sometimes conditional) validations on warehouse"""
 		
-		source_mandatory = ["Material Issue", "Material Transfer",
-			"Production Order - Material Transfer", "Purchase Return"]
-		target_mandatory = ["Material Receipt", "Material Transfer", 
-			"Production Order - Material Transfer", "Sales Return"]
+		source_mandatory = ["Material Issue", "Material Transfer", "Purchase Return"]
+		target_mandatory = ["Material Receipt", "Material Transfer", "Sales Return"]
 		
 		fg_qty = 0
 		for d in getlist(self.doclist, 'mtn_details'):
@@ -89,11 +99,15 @@ class DocType(TransactionBase):
 				if self.doc.purpose not in source_mandatory:
 					d.s_warehouse = None
 
-			if self.doc.purpose == "Production Order - Update Finished Goods":
-				if d.item_code == pro_obj.doc.item:
+			if self.doc.purpose == "Manufacture/Repack":
+				if d.bom_no:
 					d.s_warehouse = None
-
-					if cstr(d.t_warehouse) != pro_obj.doc.fg_warehouse:
+					
+					if not d.t_warehouse:
+						msgprint(_("Row # ") + "%s: " % cint(d.idx)
+							+ _("Target Warehouse") + _(" is mandatory"), raise_exception=1)
+					
+					elif pro_obj and cstr(d.t_warehouse) != pro_obj.doc.fg_warehouse:
 						msgprint(_("Row # ") + "%s: " % cint(d.idx)
 							+ _("Target Warehouse") + _(" should be same as that in ")
 							+ _("Production Order"), raise_exception=1)
@@ -104,18 +118,14 @@ class DocType(TransactionBase):
 						msgprint(_("Row # ") + "%s: " % cint(d.idx)
 							+ _("Source Warehouse") + _(" is mandatory"), raise_exception=1)
 				
-		# if self.doc.fg_completed_qty and flt(self.doc.fg_completed_qty) != flt(fg_qty):
-		# 	msgprint("The Total of FG Qty %s in Stock Entry Detail do not match with FG Completed Qty %s" % (flt(fg_qty), flt(self.doc.fg_completed_qty)))
-		# 	raise Exception
-		
 	def validate_production_order(self, pro_obj=None):
 		if not pro_obj:
-			pro_obj = get_obj('Production Order', self.doc.production_order)
+			if self.doc.production_order:
+				pro_obj = get_obj('Production Order', self.doc.production_order)
+			else:
+				return
 		
-		if self.doc.purpose == "Production Order - Material Transfer":
-			self.doc.fg_completed_qty = 0
-		
-		elif self.doc.purpose == "Production Order - Update Finished Goods":
+		if self.doc.purpose == "Manufacture/Repack":
 			if not flt(self.doc.fg_completed_qty):
 				msgprint(_("Manufacturing Quantity") + _(" is mandatory"), raise_exception=1)
 			
@@ -128,7 +138,7 @@ class DocType(TransactionBase):
 					+ _("Hence, maximum allowed Manufacturing Quantity")
 					+ " = %s." % flt(pro_obj.doc.qty) - flt(pro_obj.doc.produced_qty),
 					raise_exception=1)
-		else:
+		elif self.doc.purpose != "Material Transfer":
 			self.doc.production_order = None
 			
 	def get_stock_and_rate(self):
@@ -184,16 +194,88 @@ class DocType(TransactionBase):
 					+ _(" or the BOM is cancelled or inactive"), raise_exception=1)
 					
 	def validate_finished_goods(self):
+		"""validation: finished good quantity should be same as manufacturing quantity"""
 		for d in getlist(self.doclist, 'mtn_details'):
 			if d.bom_no and flt(d.transfer_qty) != flt(self.doc.fg_completed_qty):
-				
-				
+				msgprint(_("Row #") + " %s: " % d.idx 
+					+ _("Quantity as per Stock UOM should be equal to Manufacturing Quantity"),
+					raise_exception=1)
+					
+	def update_serial_no(self, is_submit):
+		"""Create / Update Serial No"""
+		sl_obj = get_obj('Stock Ledger')
+		if is_submit:
+			sl_obj.validate_serial_no_warehouse(self, 'mtn_details')
+		
+		for d in getlist(self.doclist, 'mtn_details'):
+			if d.serial_no:
+				serial_nos = sl_obj.get_sr_no_list(d.serial_no)
+				for x in serial_nos:
+					serial_no = x.strip()
+					if d.s_warehouse:
+						sl_obj.update_serial_delivery_details(self, d, serial_no, is_submit)
+					if d.t_warehouse:
+						sl_obj.update_serial_purchase_details(self, d, serial_no, is_submit,
+							self.doc.purpose)
+					
+					if self.doc.purpose == 'Purchase Return':
+						#delete_doc("Serial No", serial_no)
+						serial_doc = Document("Serial No", serial_no)
+						serial_doc.status = is_submit and 'Purchase Returned' or 'In Store'
+						serial_doc.docstatus = is_submit and 2 or 0
+						serial_doc.save()
+						
+	def update_stock_ledger(self, is_cancelled=0):
+		self.values = []			
+		for d in getlist(self.doclist, 'mtn_details'):
+			if cstr(d.s_warehouse):
+				self.add_to_values(d, cstr(d.s_warehouse), -flt(d.transfer_qty), is_cancelled)
+			if cstr(d.t_warehouse):
+				self.add_to_values(d, cstr(d.t_warehouse), flt(d.transfer_qty), is_cancelled)
+		get_obj('Stock Ledger', 'Stock Ledger').update_stock(self.values, 
+			self.doc.amended_from and 'Yes' or 'No')
 
+	def update_production_order(self, is_submit):
+		if self.doc.production_order:
+			# first perform some validations
+			# (they are here coz this fn is also called during on_cancel)
+			pro_obj = get_obj("Production Order", self.doc.production_order)
+			if flt(pro_obj.doc.docstatus) != 1:
+				msgprint("""You cannot do any transaction against 
+					Production Order : %s, as it's not submitted"""
+					% (pro_obj.doc.name), raise_exception=1)
+					
+			if pro_obj.doc.status == 'Stopped':
+				msgprint("""You cannot do any transaction against Production Order : %s, 
+					as it's status is 'Stopped'"""% (pro_obj.doc.name), raise_exception=1)
+					
+			if getdate(pro_obj.doc.posting_date) > getdate(self.doc.posting_date):
+				msgprint("""Posting Date of Stock Entry cannot be before Posting Date of 
+					Production Order: %s"""% cstr(self.doc.production_order), raise_exception=1)
+			
+			# update bin
+			if self.doc.purpose == "Manufacture/Repack":
+				pro_obj.doc.produced_qty = flt(pro_obj.doc.produced_qty) + \
+					(is_submit and 1 or -1 ) * flt(self.doc.fg_completed_qty)
+				args = {
+					"item_code": pro_obj.doc.production_item,
+					"posting_date": self.doc.posting_date,
+					"planned_qty": (is_submit and -1 or 1 ) * flt(self.doc.fg_completed_qty)
+				}
+				get_obj('Warehouse', pro_obj.doc.fg_warehouse).update_bin(args)
+			
+			# update production order status
+			pro_obj.doc.status = (flt(pro_obj.doc.qty)==flt(pro_obj.doc.produced_qty)) \
+				and 'Completed' or 'In Process'
+			pro_obj.doc.save()
+					
 	def get_item_details(self, arg):
 		import json
 		arg, actual_qty, in_rate = json.loads(arg), 0, 0
 
-		item = sql("select stock_uom, description, item_name from `tabItem` where name = %s and (ifnull(end_of_life,'')='' or end_of_life ='0000-00-00' or end_of_life >	now())", (arg.get('item_code')), as_dict = 1)
+		item = sql("""select stock_uom, description, item_name from `tabItem` 
+			where name = %s and (ifnull(end_of_life,'')='' or end_of_life ='0000-00-00' 
+			or end_of_life > now())""", (arg.get('item_code')), as_dict = 1)
 		if not item: 
 			msgprint("Item is not active", raise_exception=1)
 						
@@ -213,12 +295,13 @@ class DocType(TransactionBase):
 		ret.update(stock_and_rate)
 		return ret
 
-
 	def get_uom_details(self, arg = ''):
 		arg, ret = eval(arg), {}
-		uom = sql("select conversion_factor from `tabUOM Conversion Detail` where parent = %s and uom = %s", (arg['item_code'],arg['uom']), as_dict = 1)
+		uom = sql("""select conversion_factor from `tabUOM Conversion Detail` 
+			where parent = %s and uom = %s""", (arg['item_code'], arg['uom']), as_dict = 1)
 		if not uom:
-			msgprint("There is no Conversion Factor for UOM '%s' in Item '%s'" % (arg['uom'], arg['item_code']))
+			msgprint("There is no Conversion Factor for UOM '%s' in Item '%s'" % (arg['uom'],
+				arg['item_code']))
 			ret = {'uom' : ''}
 		else:
 			ret = {
@@ -233,13 +316,87 @@ class DocType(TransactionBase):
 		ret = {
 			"actual_qty" : self.get_as_on_stock(arg.get('item_code'), arg.get('warehouse'),
 			 	self.doc.posting_date, self.doc.posting_time),
-			"incoming_rate" : 	self.get_incoming_rate(arg.get('item_code'), 
+			"incoming_rate" : self.get_incoming_rate(arg.get('item_code'), 
 			 	arg.get('warehouse'), self.doc.posting_date, self.doc.posting_time, 
-			 	arg.get('transfer_qty'), arg.get('serial_no'), arg.get('fg_item'),
-			 	arg.get('bom_no')) or 0
+			 	arg.get('transfer_qty'), arg.get('serial_no'), arg.get('bom_no')) or 0
 		}
 		return ret
+		
+	def get_items(self):
+		self.doclist = self.doc.clear_table(self.doclist, 'mtn_details', 1)
+		
+		if self.doc.production_order:
+			# common validations
+			pro_obj = get_obj('Production Order', self.doc.production_order)
+			if pro_obj:
+				self.validate_production_order(pro_obj)
+
+				self.doc.bom_no = pro_obj.doc.bom_no
+				self.doc.fg_completed_qty = (self.doc.purpose == "Manufacture/Repack") \
+					and flt(self.doc.fg_completed_qty) \
+					or flt(pro_obj.doc.qty) - flt(pro_obj.doc.produced_qty)
+			else:
+				# invalid production order
+				self.doc.production_order = None
+		
+		if self.doc.bom_no:
+			if self.doc.purpose in ["Material Issue", "Material Transfer", "Manufacture/Repack",
+					"Subcontract"]:
+				self.get_raw_materials()
+
+				# add raw materials to Stock Entry Detail table
+				self.add_to_stock_entry_detail(self.doc.from_warehouse, self.doc.to_warehouse,
+					self.item_dict)
+
+			# add finished good item to Stock Entry Detail table
+			if self.doc.production_order:
+				self.add_to_stock_entry_detail(None, pro_obj.doc.fg_warehouse, {
+					cstr(pro_obj.doc.production_item): 
+						[self.doc.fg_completed_qty, pro_obj.doc.description, pro_obj.doc.stock_uom]
+				})
+			elif self.doc.purpose in ["Material Receipt", "Manufacture/Repack",
+					"Subcontract"]:
+				item = webnotes.conn.sql("""select item, description, uom from `tabBOM`
+					where name=%s""", (self.doc.bom_no,), as_dict=1)
+				self.add_to_stock_entry_detail(None, None, {
+					item[0]["item"] :
+						[self.doc.fg_completed_qty, item[0]["description"], item[0]["uom"]]
+				})
+		
+		self.get_stock_and_rate()
+	
+	def get_raw_materials(self):
+		""" 
+			get all items from flat bom except 
+			child items of sub-contracted and sub assembly items 
+			and sub assembly items itself.
+		"""
+		if self.doc.use_multi_level_bom:
+			# get all raw materials with sub assembly childs					
+			fl_bom_sa_child_item = sql("""select 
+					item_code,ifnull(sum(qty_consumed_per_unit),0)*%s as qty,description,stock_uom 
+				from (	select distinct fb.name, fb.description, fb.item_code,
+							fb.qty_consumed_per_unit, fb.stock_uom 
+						from `tabBOM Explosion Item` fb,`tabItem` it 
+						where it.name = fb.item_code and ifnull(it.is_pro_applicable, 'No') = 'No'
+						and ifnull(it.is_sub_contracted_item, 'No') = 'No' and fb.docstatus<2 
+						and fb.parent=%s
+					) a
+				group by item_code, stock_uom""" , (self.doc.fg_completed_qty, self.doc.bom_no))
+			self.make_items_dict(fl_bom_sa_child_item)
+		else:
+			# Get all raw materials considering multi level BOM, 
+			# if multi level bom consider childs of Sub-Assembly items
+			fl_bom_sa_items = sql("""select item_code, ifnull(sum(qty_consumed_per_unit), 0) * '%s',
+				description, stock_uom from `tabBOM Item` 
+				where parent = '%s' and docstatus < 2 
+				group by item_code""" % (self.doc.fg_completed_qty, self.doc.bom_no))
 			
+			self.make_items_dict(fl_bom_sa_items)
+
+		# Update only qty remaining to be issued for production
+		if self.doc.purpose == 'Material Transfer' and self.doc.production_order:
+			self.update_only_remaining_qty()
 	
 	def make_items_dict(self, items_list):
 		"""makes dict of unique items with it's qty"""
@@ -248,17 +405,15 @@ class DocType(TransactionBase):
 				self.item_dict[i[0]][0] = flt(self.item_dict[i[0]][0]) + flt(i[1])
 			else:
 				self.item_dict[i[0]] = [flt(i[1]), cstr(i[2]), cstr(i[3])]
-				
-
 
 	def update_only_remaining_qty(self):
 		""" Only pending raw material to be issued to shop floor """
 		already_issued_item = {}
 		result = sql("""select t1.item_code, sum(t1.qty)
 			from `tabStock Entry Detail` t1, `tabStock Entry` t2
-			where t1.parent = t2.name and t2.production_order = %s
-			and t2.purpose = 'Production Order - Material Transfer' 
-			and t2.docstatus = 1 group by t1.item_code""", self.doc.production_order)
+			where t1.parent = t2.name and t2.production_order = %s and t2.docstatus = 1
+			and t2.purpose = 'Material Transfer'
+			group by t1.item_code""", self.doc.production_order)
 		for t in result:
 			already_issued_item[t[0]] = flt(t[1])
 
@@ -267,231 +422,38 @@ class DocType(TransactionBase):
 			if self.item_dict[d][0] <= 0:
 				del self.item_dict[d]
 
-
-
-	def get_raw_materials(self, bom_no, fg_qty, use_multi_level_bom):
-		""" 
-			get all items from flat bom except 
-			child items of sub-contracted and sub assembly items 
-			and sub assembly items itself.
-		"""
-		if use_multi_level_bom:
-			# get all raw materials with sub assembly childs					
-			fl_bom_sa_child_item = sql("""
-				select 
-					item_code,ifnull(sum(qty_consumed_per_unit),0)*%s as qty,description,stock_uom 
-				from 
-					( 
-						select distinct fb.name, fb.description, fb.item_code, fb.qty_consumed_per_unit, fb.stock_uom 
-						from `tabBOM Explosion Item` fb,`tabItem` it 
-						where it.name = fb.item_code and ifnull(it.is_pro_applicable, 'No') = 'No'
-						and ifnull(it.is_sub_contracted_item, 'No') = 'No' and fb.docstatus<2 and fb.parent=%s
-					) a
-				group by item_code,stock_uom
-			""" , (fg_qty, bom_no))
-			self.make_items_dict(fl_bom_sa_child_item)
-		else:
-			# Get all raw materials considering multi level BOM, 
-			# if multi level bom consider childs of Sub-Assembly items
-			fl_bom_sa_items = sql("""
-				select item_code, ifnull(sum(qty_consumed_per_unit), 0) * '%s', description, stock_uom 
-				from `tabBOM Item` 
-				where parent = '%s' and docstatus < 2 
-				group by item_code
-			""" % (fg_qty, bom_no))
-			
-			self.make_items_dict(fl_bom_sa_items)
-
-		# Update only qty remaining to be issued for production
-		if self.doc.purpose == 'Production Order - Material Transfer':
-			self.update_only_remaining_qty()
-
-
-
 	def add_to_stock_entry_detail(self, source_wh, target_wh, item_dict, fg_item = 0, bom_no = ''):
 		for d in item_dict:
 			se_child = addchild(self.doc, 'mtn_details', 'Stock Entry Detail', 0, self.doclist)
 			se_child.s_warehouse = source_wh
 			se_child.t_warehouse = target_wh
-			se_child.fg_item = fg_item
 			se_child.item_code = cstr(d)
 			se_child.description = item_dict[d][1]
 			se_child.uom = item_dict[d][2]
 			se_child.stock_uom = item_dict[d][2]
-			se_child.reqd_qty = flt(item_dict[d][0])
 			se_child.qty = flt(item_dict[d][0])
 			se_child.transfer_qty = flt(item_dict[d][0])
 			se_child.conversion_factor = 1.00
 			if fg_item: se_child.bom_no = bom_no
 
-	def get_items(self):
-		bom_no = self.doc.bom_no
-		fg_qty = self.doc.fg_completed_qty
-		
-		if self.doc.purpose.startswith('Production Order'):
-			if not self.doc.production_order:
-				webnotes.msgprint(_("Please specify Production Order"), raise_exception=1)
-				
-			# common validations
-			pro_obj = get_obj('Production Order', self.doc.production_order)
-			if pro_obj:
-				self.validate_production_order(pro_obj)
-
-				bom_no = pro_obj.doc.bom_no
-				fg_qty = (self.doc.purpose == 'Production Order - Update Finished Goods') \
-				 	and flt(self.doc.fg_completed_qty) or flt(pro_obj.doc.qty)
-			
-		self.get_raw_materials(bom_no, fg_qty, self.doc.use_multi_level_bom)
-		self.doclist = self.doc.clear_table(self.doclist, 'mtn_details', 1)
-
-		# add raw materials to Stock Entry Detail table
-		self.add_to_stock_entry_detail(self.doc.from_warehouse, self.doc.to_warehouse,
-			self.item_dict)
-
-		# add finished good item to Stock Entry Detail table
-		if self.doc.production_order:
-			self.add_to_stock_entry_detail(None, pro_obj.doc.fg_warehouse, {
-				cstr(pro_obj.doc.production_item): 
-					[self.doc.fg_completed_qty, pro_obj.doc.description, pro_obj.doc.stock_uom]
-			})
-		elif self.doc.bom_no:
-			item = webnotes.conn.sql("""select item, description, uom from `tabBOM`
-				where name=%s""", (self.doc.bom_no,), as_dict=1)
-			self.add_to_stock_entry_detail(None, None, {
-				item[0]["item"] :
-					[self.doc.fg_completed_qty, item[0]["description"], item[0]["uom"]]
-			})
-		
-		
-		
-		
-		fg_item_dict = {}
-		if self.doc.purpose == 'Production Order - Update Finished Goods':
-			sw = ''
-			tw = cstr(pro_obj.doc.fg_warehouse)	
-			fg_item_dict = {
-				cstr(pro_obj.doc.production_item) : [self.doc.fg_completed_qty,
-				 	pro_obj.doc.description, pro_obj.doc.stock_uom]
-			}
-		elif self.doc.purpose == 'Other' and self.doc.bom_no:
-			sw, tw = '', ''
-			item = sql("select item, description, uom from `tabBOM` where name = %s", self.doc.bom_no, as_dict=1)
-			fg_item_dict = {
-				item[0]['item'] : [self.doc.fg_completed_qty, 
-					item[0]['description'], item[0]['uom']]
-			}
-
-		if fg_item_dict:
-			self.add_to_stock_entry_detail(sw, tw, fg_item_dict, fg_item = 1, bom_no = bom_no)
-			
-		self.get_stock_and_rate()
-			
-	def validate_qty_as_per_stock_uom(self):
-		for d in getlist(self.doclist, 'mtn_details'):
-			if flt(d.transfer_qty) <= 0:
-				msgprint("Row No #%s: Qty as per Stock UOM can not be less than \
-					or equal to zero" % cint(d.idx), raise_exception=1)
-
-
 	def add_to_values(self, d, wh, qty, is_cancelled):
 		self.values.append({
-				'item_code'			    : d.item_code,
-				'warehouse'			    : wh,
-				'posting_date'		  : self.doc.posting_date,
-				'posting_time'		  : self.doc.posting_time,
-				'voucher_type'		  : 'Stock Entry',
-				'voucher_no'		    : self.doc.name, 
-				'voucher_detail_no'	: d.name,
-				'actual_qty'		    : qty,
-				'incoming_rate'		  : flt(d.incoming_rate) or 0,
-				'stock_uom'			    : d.stock_uom,
-				'company'			      : self.doc.company,
-				'is_cancelled'		  : (is_cancelled ==1) and 'Yes' or 'No',
-				'batch_no'			    : d.batch_no,
-				'serial_no'         : d.serial_no
+			'item_code': d.item_code,
+			'warehouse': wh,
+			'posting_date': self.doc.posting_date,
+			'posting_time': self.doc.posting_time,
+			'voucher_type': 'Stock Entry',
+			'voucher_no': self.doc.name, 
+			'voucher_detail_no': d.name,
+			'actual_qty': qty,
+			'incoming_rate': flt(d.incoming_rate) or 0,
+			'stock_uom': d.stock_uom,
+			'company': self.doc.company,
+			'is_cancelled': (is_cancelled ==1) and 'Yes' or 'No',
+			'batch_no': d.batch_no,
+			'serial_no': d.serial_no
 		})
-
 	
-	def update_stock_ledger(self, is_cancelled=0):
-		self.values = []			
-		for d in getlist(self.doclist, 'mtn_details'):
-			if cstr(d.s_warehouse):
-				self.add_to_values(d, cstr(d.s_warehouse), -flt(d.transfer_qty), is_cancelled)
-			if cstr(d.t_warehouse):
-				self.add_to_values(d, cstr(d.t_warehouse), flt(d.transfer_qty), is_cancelled)
-		get_obj('Stock Ledger', 'Stock Ledger').update_stock(self.values, self.doc.amended_from and 'Yes' or 'No')
-
-	def update_production_order(self, is_submit):
-		if self.doc.production_order:
-			pro_obj = get_obj("Production Order", self.doc.production_order)
-			if flt(pro_obj.doc.docstatus) != 1:
-				msgprint("""You cannot do any transaction against 
-					Production Order : %s, as it's not submitted"""
-					% (pro_obj.doc.name), raise_exception=1)
-					
-			if pro_obj.doc.status == 'Stopped':
-				msgprint("""You cannot do any transaction against Production Order : %s, 
-					as it's status is 'Stopped'"""% (pro_obj.doc.name), raise_exception=1)
-					
-			if getdate(pro_obj.doc.posting_date) > getdate(self.doc.posting_date):
-				msgprint("""Posting Date of Stock Entry cannot be before Posting Date of 
-					Production Order: %s"""% cstr(self.doc.production_order), raise_exception=1)
-					
-			if self.doc.purpose == "Production Order - Update Finished Goods":
-				pro_obj.doc.produced_qty = flt(pro_obj.doc.produced_qty) + \
-					(is_submit and 1 or -1 ) * flt(self.doc.fg_completed_qty)
-				args = {
-					"item_code": pro_obj.doc.production_item,
-					"posting_date": self.doc.posting_date,
-					"planned_qty": (is_submit and -1 or 1 ) * flt(self.doc.fg_completed_qty)
-				}
-				get_obj('Warehouse', pro_obj.doc.fg_warehouse).update_bin(args)
-				
-			pro_obj.doc.status = (flt(pro_obj.doc.qty)==flt(pro_obj.doc.produced_qty)) \
-				and 'Completed' or 'In Process'
-			pro_obj.doc.save()
-	
-
-	# Create / Update Serial No
-	# ----------------------------------
-	def update_serial_no(self, is_submit):
-		sl_obj = get_obj('Stock Ledger')
-		if is_submit:
-			sl_obj.validate_serial_no_warehouse(self, 'mtn_details')
-		
-		for d in getlist(self.doclist, 'mtn_details'):
-			if d.serial_no:
-				serial_nos = sl_obj.get_sr_no_list(d.serial_no)
-				for x in serial_nos:
-					serial_no = x.strip()
-					if d.s_warehouse:
-						sl_obj.update_serial_delivery_details(self, d, serial_no, is_submit)
-					if d.t_warehouse:
-						sl_obj.update_serial_purchase_details(self, d, serial_no, is_submit, self.doc.purpose)
-					
-					if self.doc.purpose == 'Purchase Return':
-						#delete_doc("Serial No", serial_no)
-						serial_doc = Document("Serial No", serial_no)
-						serial_doc.status = is_submit and 'Purchase Returned' or 'In Store'
-						serial_doc.docstatus = is_submit and 2 or 0
-						serial_doc.save()
-
-
-	def on_submit(self):
-		self.validate_qty_as_per_stock_uom()
-		self.update_serial_no(1)
-		self.update_stock_ledger(0)
-		# update Production Order
-		self.update_production_order(1)
-
-
-	def on_cancel(self):
-		self.update_serial_no(0)
-		self.update_stock_ledger(1)
-		# update Production Order
-		self.update_production_order(0)
-		
-
 	def get_cust_values(self):
 		"""fetches customer details"""
 		if self.doc.delivery_note_no:
@@ -525,7 +487,8 @@ class DocType(TransactionBase):
 		return result and result[0] or {}
 		
 	def get_supp_addr(self):
-		res = sql("select supplier_name,address from `tabSupplier` where name = '%s'"%self.doc.supplier)
+		res = sql("""select supplier_name from `tabSupplier`
+			where name=%s""", self.doc.supplier)
 		addr = self.get_address_text(supplier = self.doc.supplier)
 		ret = {
 			'supplier_name' : res and res[0][0] or '',

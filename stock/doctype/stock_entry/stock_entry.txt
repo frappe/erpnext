@@ -2,9 +2,9 @@
  {
   "owner": "Administrator", 
   "docstatus": 0, 
-  "creation": "2012-12-17 11:42:09", 
+  "creation": "2012-12-18 13:47:41", 
   "modified_by": "Administrator", 
-  "modified": "2012-12-17 18:19:44"
+  "modified": "2012-12-18 17:17:16"
  }, 
  {
   "is_submittable": 1, 
@@ -74,8 +74,8 @@
   "report_hide": 0
  }, 
  {
-  "permlevel": 0, 
   "print_hide": 0, 
+  "permlevel": 0, 
   "no_copy": 0, 
   "oldfieldtype": "Select", 
   "allow_on_submit": 0, 
@@ -88,7 +88,7 @@
   "search_index": 0, 
   "reqd": 1, 
   "hidden": 0, 
-  "options": "Material Issue\nMaterial Receipt\nMaterial Transfer\nSales Return\nPurchase Return\nSubcontracting\nProduction Order - Material Transfer\nProduction Order - Update Finished Goods\nOther", 
+  "options": "Material Issue\nMaterial Receipt\nMaterial Transfer\nManufacture/Repack\nSubcontract\nSales Return\nPurchase Return", 
   "report_hide": 0, 
   "in_filter": 1
  }, 
@@ -231,7 +231,7 @@
  }, 
  {
   "print_hide": 1, 
-  "depends_on": "eval:doc.purpose.startsWith(\"Production Order\")", 
+  "depends_on": "eval:inList([\"Material Transfer\", \"Manufacture/Repack\"], doc.purpose)", 
   "no_copy": 0, 
   "search_index": 1, 
   "allow_on_submit": 0, 
@@ -249,7 +249,7 @@
   "in_filter": 1
  }, 
  {
-  "depends_on": "eval:!doc.purpose.startsWith(\"Production Order\")", 
+  "depends_on": "eval:!inList([\"Sales Return\", \"Purchase Return\"], doc.purpose)", 
   "doctype": "DocField", 
   "label": "BOM No", 
   "options": "BOM", 
@@ -259,51 +259,21 @@
  }, 
  {
   "print_hide": 1, 
+  "depends_on": "eval:!inList([\"Sales Return\", \"Purchase Return\"], doc.purpose)", 
   "no_copy": 0, 
-  "oldfieldtype": "Currency", 
+  "search_index": 0, 
   "allow_on_submit": 0, 
   "doctype": "DocField", 
   "label": "Manufacturing Quantity", 
   "oldfieldname": "fg_completed_qty", 
   "fieldname": "fg_completed_qty", 
   "fieldtype": "Currency", 
-  "search_index": 0, 
+  "oldfieldtype": "Currency", 
   "reqd": 0, 
   "hidden": 0, 
   "permlevel": 0, 
   "report_hide": 0, 
   "in_filter": 0
- }, 
- {
-  "description": "If checked, BOM for sub-assembly items will be considered for getting raw materials. Otherwise, all sub-assembly items will be treated as a raw material.", 
-  "doctype": "DocField", 
-  "label": "Use Multi-Level BOM", 
-  "fieldname": "use_multi_level_bom", 
-  "fieldtype": "Check", 
-  "permlevel": 0
- }, 
- {
-  "print_hide": 1, 
-  "no_copy": 0, 
-  "oldfieldtype": "Button", 
-  "allow_on_submit": 0, 
-  "doctype": "DocField", 
-  "label": "Get Items", 
-  "permlevel": 0, 
-  "fieldname": "get_items", 
-  "fieldtype": "Button", 
-  "search_index": 0, 
-  "reqd": 0, 
-  "hidden": 0, 
-  "options": "get_items", 
-  "report_hide": 0, 
-  "in_filter": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "cb1", 
-  "fieldtype": "Column Break", 
-  "permlevel": 0
  }, 
  {
   "print_hide": 1, 
@@ -326,17 +296,6 @@
  }, 
  {
   "print_hide": 1, 
-  "depends_on": "eval:doc.purpose==\"Sales Return\"", 
-  "doctype": "DocField", 
-  "label": "Sales Invoice No", 
-  "options": "Sales Invoice", 
-  "fieldname": "sales_invoice_no", 
-  "fieldtype": "Link", 
-  "hidden": 1, 
-  "permlevel": 0
- }, 
- {
-  "print_hide": 1, 
   "depends_on": "eval:doc.purpose==\"Purchase Return\"", 
   "no_copy": 0, 
   "search_index": 1, 
@@ -353,6 +312,51 @@
   "options": "Purchase Receipt", 
   "report_hide": 0, 
   "in_filter": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "cb1", 
+  "fieldtype": "Column Break", 
+  "permlevel": 0
+ }, 
+ {
+  "description": "If checked, BOM for sub-assembly items will be considered for getting raw materials. Otherwise, all sub-assembly items will be treated as a raw material.", 
+  "default": "1", 
+  "depends_on": "eval:!inList([\"Sales Return\", \"Purchase Return\"], doc.purpose)", 
+  "doctype": "DocField", 
+  "label": "Use Multi-Level BOM", 
+  "fieldname": "use_multi_level_bom", 
+  "fieldtype": "Check", 
+  "permlevel": 0
+ }, 
+ {
+  "print_hide": 1, 
+  "depends_on": "eval:!inList([\"Sales Return\", \"Purchase Return\"], doc.purpose)", 
+  "no_copy": 0, 
+  "search_index": 0, 
+  "allow_on_submit": 0, 
+  "doctype": "DocField", 
+  "label": "Get Items", 
+  "permlevel": 0, 
+  "fieldname": "get_items", 
+  "fieldtype": "Button", 
+  "oldfieldtype": "Button", 
+  "reqd": 0, 
+  "hidden": 0, 
+  "options": "get_items", 
+  "report_hide": 0, 
+  "in_filter": 0
+ }, 
+ {
+  "print_hide": 1, 
+  "depends_on": "eval:doc.purpose==\"Sales Return\"", 
+  "doctype": "DocField", 
+  "label": "Sales Invoice No", 
+  "options": "Sales Invoice", 
+  "fieldname": "sales_invoice_no", 
+  "fieldtype": "Link", 
+  "hidden": 1, 
+  "permlevel": 0
  }, 
  {
   "depends_on": "eval:(doc.purpose==\"Sales Return\" || doc.purpose==\"Purchase Return\")", 

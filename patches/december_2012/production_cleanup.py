@@ -3,8 +3,8 @@ import webnotes
 def execute():
 	delete_doctypes()
 	rename_module()
-	rebuilt_exploded_bom()
 	cleanup_bom()
+	rebuild_exploded_bom()
 	
 def delete_doctypes():
 	from webnotes.model import delete_doc
@@ -36,12 +36,14 @@ def rename_module():
 	# set end of life to null if "0000-00-00"
 	webnotes.conn.sql("""update `tabItem` set end_of_life=null where end_of_life='0000-00-00'""")
 	
-def rebuilt_exploded_bom():
+def rebuild_exploded_bom():
 	from webnotes.model.code import get_obj
 	for bom in webnotes.conn.sql("""select name from `tabBOM` where docstatus < 2"""):
 		get_obj("BOM", bom[0], with_children=1).on_update()
 
 def cleanup_bom():
-	webnotes.conn.sql("""UPDATE `tabBOM` SET is_active = if(is_active in ('Yes', 1), 1, 0), 
-		with_operations = 1""")
+	webnotes.conn.sql("""UPDATE `tabBOM` SET is_active = 1 where ifnull(is_active, 'No') = 'Yes'""")
+	webnotes.conn.sql("""UPDATE `tabBOM` SET is_active = 0 where ifnull(is_active, 'No') = 'No'""")
+	webnotes.reload_doc("manufacturing", "doctype", "bom")
+	webnotes.conn.sql("""update `tabBOM` set with_operations = 1""")
 	

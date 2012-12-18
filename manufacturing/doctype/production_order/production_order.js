@@ -93,21 +93,19 @@ cur_frm.cscript['Unstop Production Order'] = function() {
 
 cur_frm.cscript['Issue Raw Materials'] = function() {
 	var doc = cur_frm.doc;
-	cur_frm.cscript.make_se(doc, process = 'Material Transfer');
+	cur_frm.cscript.make_se(doc, 'Material Transfer');
 }
 
 cur_frm.cscript['Update Finished Goods'] = function() {
 	var doc = cur_frm.doc;
-	cur_frm.cscript.make_se(doc, process = 'Backflush');
+	cur_frm.cscript.make_se(doc, 'Manufacture/Repack');
 }
 
-cur_frm.cscript.make_se = function(doc, process) {
+cur_frm.cscript.make_se = function(doc, purpose) {
 	var se = wn.model.get_new_doc("Stock Entry");
-	se.purpose = 'Production Order';
-	se.process = process;
+	se.purpose = purpose;
 	se.production_order = doc.name;
 	se.company = doc.company;
-	
 	loaddoc('Stock Entry', se.name);
 }
 
