@@ -1,13 +1,13 @@
 
-wn.provide('erpnext.login');
+var login = {};
 
 $(document).ready(function(wrapper) {
-	$('#login_btn').click(erpnext.login.doLogin)
+	$('#login_btn').click(login.do_login)
 		
 	$('#password').keypress(function(ev){
 		if(ev.which==13 && $('#password').val()) {
 			$('form').submit(function() {
-				erpnext.login.doLogin();
+				login.do_login();
 				return false;
 			});
 		}
@@ -16,54 +16,60 @@ $(document).ready(function(wrapper) {
 })
 
 // Login
-erpnext.login.doLogin = function(){
+login.do_login = function(){
 
     var args = {};
     args['usr']=$("#login_id").val();
     args['pwd']=$("#password").val();
 
 	if(!args.usr || !args.pwd) {
-		msgprint("Sorry, you can't login if you don't enter both the email id and password.")
+		login.set_message("Both login and password required.");
 	}
 
-	$('#login_btn').set_working();
-	$('#login_message').empty();
+	$('#login_btn').attr("disabled", "disabled");
+	$('#login_message').toggle(false);
 	
-    $c("login", args, function(r, rtext) {
-		$('#login_btn').done_working();
-	    if(r.message=="Logged In"){
-	        window.location.href='app.html' + (get_url_arg('page') 
-				? ('?page='+get_url_arg('page')) : '');
-	    } else {
-	        $i('login_message').innerHTML = '<span style="color: RED;">'
-				+(r.message)+'</span>';
-	    }
-	});
-
+	$.ajax({
+		type: "POST",
+		url: "server.py",
+		data: {cmd:"login", usr:args.usr, pwd: args.pwd},
+		dataType: "json",
+		success: function(data) {
+			$('#login_btn').attr("disabled", false);
+			if(data.message=="Logged In") {
+				window.location.href = "app.html";
+			} else {
+				login.set_message(data.message);
+			}
+		}
+	})
+	
 	return false;
 }
 
-
-erpnext.login.show_forgot_password = function(){
+login.show_forgot_password = function(){
     // create dialog
-	var d = new wn.ui.Dialog({
-		title:"Forgot Password",
-		fields: [
-			{'label':'Email Id', 'fieldname':'email_id', 'fieldtype':'Data', 'reqd':true},
-			{'label':'Email Me A New Password', 'fieldname':'run', 'fieldtype':'Button'}
-		]
-	});
+	var login_id = $("#login_id").val();
+	if(!login_id || !valid_email(login_id)) {
+		login.set_message("Please set your login id (which is your email where the password will be sent);");
+		return;
+	}
+	login.set_message("Sending email with new password...");
+	$("#forgot-password").remove();
 
-	$(d.fields_dict.run.input).click(function() {
-		var values = d.get_values();
-		if(!values) return;
-		wn.call({
-			method:'reset_password',
-			args: { user: values.email_id },
-			callback: function() {
-				d.hide();
-			}
-		})
+	$.ajax({
+		method: "POST",
+		url: "server.py",
+		data: {
+			cmd: "reset_password",
+			user: login_id
+		},
+		success: function(data) {
+			login.set_message("A new password has been sent to your email id.", "GREEN");
+		}
 	})
-	d.show();
+}
+
+login.set_message = function(message, color) {
+    $('#login_message').html(message).toggle(true);	
 }

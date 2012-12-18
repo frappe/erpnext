@@ -33,6 +33,10 @@ page_map = {
 	'Item': webnotes._dict({
 		"template": 'html/product_page.html',
 		"condition_field": "show_in_website",
+	}),
+	'Item Group': webnotes._dict({
+		"template": "html/product_group.html",
+		"condition_field": "show_in_website"
 	})
 }
 
@@ -152,13 +156,14 @@ def get_template_pages():
 
 def get_doc_fields(page_name):
 	doc_type, doc_name = get_source_doc(page_name)
-	obj = webnotes.get_obj(doc_type, doc_name)
+	obj = webnotes.get_obj(doc_type, doc_name, with_children=True)
 
 	if hasattr(obj, 'prepare_template_args'):
 		obj.prepare_template_args()
 
 	args = obj.doc.fields
 	args['template'] = page_map[doc_type].template
+	args['obj'] = obj
 	
 	return args
 

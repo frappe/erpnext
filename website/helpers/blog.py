@@ -9,8 +9,7 @@ import website.utils
 def get_blog_list(args=None):
 	"""
 		args = {
-			'limit_start': 0,
-			'limit_page_length': 10,
+			'start': 0,
 		}
 	"""
 	import webnotes
@@ -24,11 +23,9 @@ def get_blog_list(args=None):
 				comment_doctype='Blog' and comment_docname=`tabBlog`.name) as comments
 		from `tabBlog`
 		where ifnull(published,0)=1
-		order by creation desc, name asc"""
-	
-	from webnotes.widgets.query_builder import add_limit_to_query
-	query, args = add_limit_to_query(query, args)
-	
+		order by creation desc, name asc
+		limit %s, 5""" % args.start
+		
 	result = webnotes.conn.sql(query, args, as_dict=1)
 
 	# strip html tags from content
@@ -41,38 +38,6 @@ def get_blog_list(args=None):
 		if not res['content']:
 			res['content'] = website.utils.get_html(res['page_name'])
 		res['content'] = split_blog_content(res['content'])
-		res['content'] = res['content'][:1000]
-
-	return result
-
-@webnotes.whitelist(allow_guest=True)
-def get_recent_blog_list(args=None):
-	"""
-		args = {
-			'limit_start': 0,
-			'limit_page_length': 5,
-			'name': '',
-		}
-	"""
-	import webnotes
-	
-	if not args: args = webnotes.form_dict
-	
-	query = """\
-		select name, page_name, title, left(content, 100) as content
-		from tabBlog
-		where ifnull(published,0)=1 and
-		name!=%(name)s order by creation desc"""
-	
-	from webnotes.widgets.query_builder import add_limit_to_query
-	query, args = add_limit_to_query(query, args)
-	
-	result = webnotes.conn.sql(query, args, as_dict=1)
-
-	# strip html tags from content
-	import webnotes.utils
-	for res in result:
-		res['content'] = webnotes.utils.strip_html(res['content'])
 
 	return result
 
