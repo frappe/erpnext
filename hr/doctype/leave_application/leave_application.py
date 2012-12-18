@@ -104,14 +104,14 @@ def get_leave_balance(employee, leave_type, fiscal_year):
 	leave_all = webnotes.conn.sql("""select total_leaves_allocated 
 		from `tabLeave Allocation` where employee = %s and leave_type = %s
 		and fiscal_year = %s and docstatus = 1""", (employee, 
-			leave_type, fiscal_year), debug=1)
+			leave_type, fiscal_year))
 			
 	leave_all = leave_all and flt(leave_all[0][0]) or 0
 	
 	leave_app = webnotes.conn.sql("""select SUM(total_leave_days) 
 		from `tabLeave Application` 
 		where employee = %s and leave_type = %s and fiscal_year = %s
-		and docstatus = 1""", (employee, leave_type, fiscal_year), debug=1)
+		and docstatus = 1""", (employee, leave_type, fiscal_year))
 	leave_app = leave_app and flt(leave_app[0][0]) or 0
 	
 	ret = {'leave_balance': leave_all - leave_app}
