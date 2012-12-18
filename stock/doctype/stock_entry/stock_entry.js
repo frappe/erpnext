@@ -14,28 +14,33 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.	If not, see <http://www.gnu.org/licenses/>.
 
-cur_frm.cscript.onload = function(doc, cdt, cdn) {
-	if (!doc.posting_date) doc.posting_date = dateutil.obj_to_str(new Date());
-	if (!doc.transfer_date) doc.transfer_date = dateutil.obj_to_str(new Date());
-	if(!doc.purpose) set_multiple(cdt, cdn, {purpose:'Material Issue'});
-	cfn_set_fields(doc, cdt, cdn);
+cur_frm.cscript.refresh = function(doc) { 
+	erpnext.hide_naming_series();
+	cur_frm.cscript.toggle_related_fields(doc);
 }
 
 
-var cfn_set_fields = function(doc, cdt, cdn) {
-	lst = ['supplier', 'supplier_name', 'supplier_address', 
-		'customer', 'customer_name', 'customer_address'];
-	if (in_list(['Material Issue', 'Material Transfer', 'Material Receipt', 'Sales Return',
-	 	'Purchase Return', 'Production Order', 'Subcontracting', 'Other'], doc.purpose)) {
-		hide_field(lst);
-		$(cur_frm.fields_dict.contact_section.row.wrapper).toggle(false);
-	} else unhide_field(lst);
+
+cur_frm.cscript.toggle_related_fields = function(doc) {
+	
+	
+	
+	
+	
+	
+	
+	if(doc.purpose.startswith("Production Order") || doc.purpose == "Other") {
+		
+		
+		
+		
+	}
+	
 
 	if (doc.purpose == 'Production Order' || doc.purpose == 'Other') {
 		unhide_field('get_items');
 		hide_field(['from_warehouse', 'to_warehouse','purchase_receipt_no', 
-			'delivery_note_no', 'sales_invoice_no','warehouse_html', 
-			'transporter', 'is_excisable_goods', 'excisable_goods']);
+			'delivery_note_no', 'sales_invoice_no','warehouse_html']);
 		if (doc.purpose=='Production Order') unhide_field(['production_order', 'process']);
 		else {
 			doc.production_order = doc.process = '';
@@ -81,16 +86,6 @@ var cfn_set_fields = function(doc, cdt, cdn) {
 	refresh_many(lst);
 }
 
-//Refresh
-cur_frm.cscript.refresh = function(doc, cdt, cdn) { 
-	erpnext.hide_naming_series();
-
-	//India related
-	excise_flds = ['is_excisable_goods', 'excisable_goods', 'under_rule'];
-	if(wn.control_panel.country == 'India') unhide_field(excise_flds);
-	else hide_field(excise_flds);
-}
-
 cur_frm.cscript.delivery_note_no = function(doc,cdt,cdn){
 	if(doc.delivery_note_no) get_server_fields('get_cust_values','','',doc,cdt,cdn,1);
 }
@@ -117,11 +112,11 @@ cur_frm.fields_dict['production_order'].get_query = function(doc) {
 }
 
 cur_frm.cscript.purpose = function(doc, cdt, cdn) {
-	cfn_set_fields(doc, cdt, cdn);
+	cur_frm.cscript.toggle_related_fields(doc, cdt, cdn);
 }
 
 cur_frm.cscript.process = function(doc, cdt, cdn) {
-	cfn_set_fields(doc, cdt, cdn);
+	cur_frm.cscript.toggle_related_fields(doc, cdt, cdn);
 }
 
 // item code - only if quantity present in source warehosue

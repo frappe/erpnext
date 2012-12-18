@@ -2,9 +2,9 @@
  {
   "owner": "Administrator", 
   "docstatus": 0, 
-  "creation": "2012-07-03 13:30:00", 
+  "creation": "2012-12-14 14:27:06", 
   "modified_by": "Administrator", 
-  "modified": "2012-12-12 10:42:42"
+  "modified": "2012-12-17 17:59:54"
  }, 
  {
   "autoname": "AR.####", 
@@ -58,7 +58,7 @@
   "fieldname": "transaction", 
   "fieldtype": "Select", 
   "reqd": 1, 
-  "options": "\nDelivery Note\nPurchase Invoice\nPurchase Order\nPurchase Receipt\nQuotation\nSales Invoice\nSales Order\nStock Entry\nAppraisal"
+  "options": "\nDelivery Note\nPurchase Invoice\nPurchase Order\nPurchase Receipt\nQuotation\nSales Invoice\nSales Order\nAppraisal"
  }, 
  {
   "oldfieldtype": "Select", 

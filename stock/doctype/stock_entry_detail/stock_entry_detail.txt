@@ -4,7 +4,7 @@
   "docstatus": 0, 
   "creation": "2012-07-03 13:29:47", 
   "modified_by": "Administrator", 
-  "modified": "2012-12-03 11:37:17"
+  "modified": "2012-12-17 16:12:42"
  }, 
  {
   "istable": 1, 
@@ -14,6 +14,7 @@
   "module": "Stock"
  }, 
  {
+  "read_only": 0, 
   "name": "__common__", 
   "parent": "Stock Entry Detail", 
   "doctype": "DocField", 
@@ -52,7 +53,6 @@
   "label": "Item Code", 
   "oldfieldname": "item_code", 
   "permlevel": 0, 
-  "trigger": "Client", 
   "fieldname": "item_code", 
   "fieldtype": "Link", 
   "search_index": 1, 
@@ -75,7 +75,6 @@
   "doctype": "DocField", 
   "label": "Qty", 
   "oldfieldname": "qty", 
-  "trigger": "Client", 
   "fieldname": "qty", 
   "fieldtype": "Currency", 
   "reqd": 1, 
@@ -83,15 +82,13 @@
  }, 
  {
   "oldfieldtype": "Link", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "UOM", 
   "oldfieldname": "uom", 
-  "trigger": "Client", 
+  "options": "UOM", 
   "fieldname": "uom", 
   "fieldtype": "Link", 
   "reqd": 1, 
-  "options": "UOM", 
   "permlevel": 0
  }, 
  {
@@ -130,10 +127,9 @@
   "doctype": "DocField", 
   "label": "Batch No", 
   "oldfieldname": "batch_no", 
-  "trigger": "Client", 
+  "options": "Batch", 
   "fieldname": "batch_no", 
   "fieldtype": "Link", 
-  "options": "Batch", 
   "permlevel": 0
  }, 
  {
@@ -174,7 +170,7 @@
  {
   "oldfieldtype": "Currency", 
   "doctype": "DocField", 
-  "label": "Stock Qty", 
+  "label": "Qty as per Stock UOM", 
   "oldfieldname": "transfer_qty", 
   "fieldname": "transfer_qty", 
   "fieldtype": "Currency", 
@@ -186,12 +182,12 @@
   "doctype": "DocField", 
   "label": "Stock UOM", 
   "oldfieldname": "stock_uom", 
-  "options": "UOM", 
+  "permlevel": 1, 
   "fieldname": "stock_uom", 
   "fieldtype": "Link", 
   "search_index": 0, 
   "reqd": 1, 
-  "permlevel": 1, 
+  "options": "UOM", 
   "in_filter": 0
  }, 
  {
