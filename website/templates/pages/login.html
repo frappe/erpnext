@@ -14,6 +14,7 @@
 {% block body %}
 	<div id='login_wrapper'>
 		<div class='layout-wrapper layout-main'>
+			<p id="login_message" class="alert" style="display: none;"></p>
 			<h3><i class="icon-lock" style="margin-top: 7px"></i> Login</h3>
 			<form autocomplete="on">
 				<table border="0" class="login-box">
@@ -33,15 +34,12 @@
 									class="btn btn-small btn-primary">Login</button>
 							</td>
 						</tr>
-						<tr>
-							<td>&nbsp;</td>
-							<td id="login_message">&nbsp;</td>
-						</tr>
 						</tbody>
 				</table>
 			</form>
-			<p style="text-align: center"><span class="link_type" 
-				onclick="erpnext.login.show_forgot_password()">Forgot Password</span></p>
+			<br>
+			<p style="text-align: center"><a id="forgot-password"
+				onclick="return login.show_forgot_password()">Forgot Password</a></p>
 		</div>
 		<div class="login-footer">
 			<a href="index.html">Home</a> | 

@@ -2,7 +2,6 @@
 
 {% block javascript %}
 	{% include "js/blog_page.js" %}
-	{% include "js/blog_subscribe.js" %}
 {% endblock %}
 
 {% block css %}
@@ -28,15 +27,32 @@
 				<div class="blog-comments">
 					
 					{% if not comment_list %}
-					<div class="no-result help hide">
+					<div class="alert no-comment">
 						<p>Be the first one to comment</p>
-						<br />
 					</div>
 					{% endif %}
 					
 					{% include 'html/comment.html' %}
 				</div>
-				<button class="btn add-comment">Add Comment</button>
+				<div><button class="btn add-comment">Add Comment</button></div>
+				<div style="display: none; margin-top: 10px;" 
+					id="comment-form" class="well">
+					<div class="alert" style="display:none;"></div>
+					<form>
+						<p>
+							<input name="comment_by_fullname" placeholder="Your Name" />
+						</p>
+						<p>
+							<input name="comment_by" placeholder="Your Email Id" />
+						</p>
+						<p>
+							<textarea name="comment" placeholder="Comment" />
+							</textarea>
+						</p>
+						<p>
+							<button class="btn btn-info" id="submit-comment">Submit</button>
+					</form>
+				</div>
 			</div>
 		</div>
 	</div>

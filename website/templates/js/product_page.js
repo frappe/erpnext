@@ -14,79 +14,30 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-{% include "js/product_category.js" %}
-
-wn.pages['{{ name }}'].onload = function(wrapper) {
-	wrapper.product_group = "{{ item_group }}";
-	wrapper.product_name = "{{ name }}";
-	erpnext.products.make_product_categories(wrapper);
-	erpnext.products.make_similar_products(wrapper);
-
-	// if website image missing, autogenerate one
-	var $img = $(wrapper).find('.product-page-content .img-area');
-	if ($img && $img.length > 0) {
-		$img.append(wn.dom.placeholder(160, "{{ item_name }}"));
-	}
-	
-	erpnext.products.adjust_page_height(wrapper);
-	
-}
-
-erpnext.products.adjust_page_height = function(wrapper) {
-	if (!wrapper) { wrapper = erpnext.products.wrapper; }
-	if (!wrapper) { return; }
-
-	// adjust page height based on sidebar height
-	var $main_page = $(wrapper).find('.layout-main-section');
-	var $sidebar = $(wrapper).find('.layout-side-section');
-	if ($sidebar.height() > $main_page.height()) {
-		$main_page.height($sidebar.height());
-	}
-}
-
-erpnext.products.make_similar_products = function(wrapper) {
-	if (!wrapper) { wrapper = erpnext.products.wrapper; }
-	if (!wrapper) { return; }
-	
-	// similar products
-	wrapper.similar = new wn.ui.Listing({
-		parent: $(wrapper).find('.similar-products').get(0),
-		hide_refresh: true,
-		page_length: 5,
-		method: 'website.helpers.product.get_similar_product_list',
-		get_args: function() {
-			return {
-				product_group: wrapper.product_group,
-				product_name: wrapper.product_name
-			}
+$(document).ready(function() {
+	$.ajax({
+		method: "GET",
+		url:"server.py",
+		dataType: "json",
+		data: {
+			cmd: "website.helpers.product.get_product_info",
+			item_code: "{{ name }}"
 		},
-		render_row: function(parent, data) {
-			if (!data.web_short_description) {
-				data.web_short_description = data.description;
+		success: function(data) {
+			if(data.message) {
+				if(data.message.price) {
+					$("<h4>").html(data.message.price[0].ref_currency + " " 
+						+ data.message.price[0].ref_rate).appendTo(".item-price");
+					$(".item-price").toggle(true);
+				}
+				if(data.message.stock==0) {
+					$(".item-stock").html("<div class='help'>Not in stock</div>")
+				}
+				else if(data.message.stock==1) {
+					$(".item-stock").html("<div style='color: green'>\
+						<i class='icon-check'></i> Available (in stock)</div>")
+				}
 			}
-			if(data.web_short_description.length > 100) {
-				data.web_short_description = 
-					data.web_short_description.substr(0,100) + '...';
-			}
-			parent.innerHTML = repl('\
-				<a href="%(page_name)s.html"><div class="img-area"></div></a>\
-				<div class="similar-product-description">\
-					<h5><a href="%(page_name)s.html">%(item_name)s</a></h5>\
-					<span>%(web_short_description)s</span>\
-				</div>\
-				<div style="clear:both"></div>', data);
-				
-			if(data.website_image) {
-				$(parent).find('.img-area').append(repl(
-					'<img src="files/%(website_image)s" />', data))
-			} else {
-				$(parent).find('.img-area').append(wn.dom.placeholder(55, 
-					data.item_name));
-			}
-			
-			// adjust page height, if sidebar height keeps increasing
-			erpnext.products.adjust_page_height(wrapper);
 		}
-	});
-	wrapper.similar.run();
-}
+	})
+})

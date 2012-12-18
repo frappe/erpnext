@@ -28,7 +28,7 @@ wn.pages.messages.onload = function(wrapper) {
 	</div><hr>\
 	<div id="post-message">\
 	<textarea style="width: 100%; height: 24px;"></textarea>\
-	<div><button class="btn btn-small">Post</button></div><hr>\
+	<div><button class="btn">Post</button></div><hr>\
 	</div>\
 	<div class="all-messages"></div>').appendTo($(wrapper).find('.layout-main-section'));
 	
@@ -182,7 +182,7 @@ erpnext.Messages = Class.extend({
 				var $body = $(me.wrapper).find('.layout-side-section');
 				$('<h4>Users</h4><hr>\
 					<div id="show-everyone">\
-						<a href="#messages/'+user+'" class="btn btn-small">\
+						<a href="#messages/'+user+'" class="btn">\
 							Show messages from everyone</a><hr></div>\
 				').appendTo($body);
 				r.message.sort(function(a, b) { return b.has_session - a.has_session; });

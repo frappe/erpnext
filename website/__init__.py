@@ -6,6 +6,8 @@ install_docs = [
 
 import webnotes
 
+max_tickets_per_hour = 200
+
 @webnotes.whitelist(allow_guest=True)
 def send_message():
 	from webnotes.model.doc import Document
@@ -17,15 +19,21 @@ def send_message():
 	d.raised_by = webnotes.form_dict.get('sender')
 	
 	if not d.description:
-		webnotes.msgprint('Please write something', raise_exception=True)
+		webnotes.response["message"] = 'Please write something'
+		return
 		
 	if not d.raised_by:
-		webnotes.msgprint('Please give us your email id so that we can write back to you', raise_exception=True)
+		webnotes.response["message"] = 'Email Id Required'
+		return
 	
-	# make lead or contact
+	# guest method, cap max writes per hour
+	if webnotes.conn.sql("""select count(*) from `tabSupport Ticket`
+		where TIMEDIFF(NOW(), modified) < '01:00:00'""")[0][0] > max_tickets_per_hour:
+		webnotes.response["message"] = "Sorry: we believe we have received an unreasonably high number of requests of this kind. Please try later"
+		return
 	
 	d.save()
-	webnotes.msgprint('Thank you!')
+	webnotes.response["message"] = 'Thank You'
 	
 def get_site_address():
 	from webnotes.utils import get_request_site_address

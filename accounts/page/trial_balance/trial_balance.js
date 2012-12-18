@@ -27,7 +27,7 @@ wn.pages['trial-balance'].onload = function(wrapper) {
 			var msgbox = msgprint('<p>Select To Download:</p>\
 				<p><input type="checkbox" name="with_groups" checked> Account Groups</p>\
 				<p><input type="checkbox" name="with_ledgers" checked> Account Ledgers</p>\
-				<p><button class="btn btn-info btn-small">Download</button>');
+				<p><button class="btn btn-info">Download</button>');
 
 			var me = this;
 
