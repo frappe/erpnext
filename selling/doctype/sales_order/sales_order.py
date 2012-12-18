@@ -59,7 +59,7 @@ class DocType(TransactionBase):
 	#-------------------------
 	def pull_project_customer(self):
 		res = sql("select customer from `tabProject` where name = '%s'"%self.doc.project_name)
-		if res:
+		if res and res[0][0]:
 			get_obj('DocType Mapper', 'Project-Sales Order').dt_map('Project', 'Sales Order', self.doc.project_name, self.doc, self.doclist, "[['Project', 'Sales Order']]")
 			
 	
