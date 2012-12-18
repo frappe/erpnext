@@ -20,15 +20,19 @@
 	<div class="layout-wrapper layout-wrapper-background">
 		<div class="web-content" id="content-product-{{ name }}">
 			<div class="layout-main" style="padding: 30px;">
-				{% include 'html/product_search.html' %}
+				{% include 'html/product_search_box.html' %}
 				<h1>{{ item_name }}</h1>
 				<div class="product-page-content">
 					<div class="span6">
 					{% if website_image %}
 					<image class="item-main-image" src="files/{{ website_image }}" />
 					{% else %}
-					<div class="img-area"></div>
-					<span style="font-size: 11px">This is an auto-generated Image</span>
+					<div class="img-area">
+						<div style='background-color: #eee; padding: 40px;
+							width: 32px; font-size: 32px; color: #888;'>
+						<i class='icon-camera'></i></div>
+					</div>
+					
 					{% endif %}
 					<br><br>
 					</div>
@@ -51,7 +55,7 @@
 							{% for d in obj.doclist.get(
 								{"doctype":"Item Website Specification"}) %}
 								<tr>
-									<td>{{ d.label }}</td>
+									<td style="min-width: 150px;">{{ d.label }}</td>
 									<td>{{ d.description }}</td>
 								</tr>
 							{% endfor %}

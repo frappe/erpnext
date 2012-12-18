@@ -1,0 +1,24 @@
+<div class="pull-right">
+	<form class="form-search">
+		<div class="input-append">
+			<input type="text" class="span2 search-query" id="product-search">
+			<button class="btn" id="btn-product-search">
+				<i class="icon-search"></i></button>
+		</div>
+	</form>
+	<script>
+		// redirect to product search page
+		$(document).ready(function() {
+			$("#btn-product-search").click(function() {
+				var txt = $("#product-search").val();
+				if(txt) {
+					window.location.href="product_search.html?q=" + txt;
+				}
+				return false;
+			});
+			$("#product-search").keypress(function(e) {
+				if(e.which==13) $("#product-search-btn").click();
+			})
+		})
+	</script>
+</div>
