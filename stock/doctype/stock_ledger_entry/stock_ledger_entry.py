@@ -44,7 +44,7 @@ class DocType:
 			 
 
 	def validate_mandatory(self):		
-		mandatory = ['warehouse','transaction_date','posting_date','voucher_type','voucher_no','actual_qty','company']
+		mandatory = ['warehouse','posting_date','voucher_type','voucher_no','actual_qty','company']
 		for k in mandatory:
 			if self.doc.fields.get(k)==None:
 				msgprint("Stock Ledger Entry: '%s' is mandatory" % k, raise_exception = 1)

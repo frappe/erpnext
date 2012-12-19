@@ -16,6 +16,40 @@
 
 wn.provide('erpnext.utils');
 
+// TODO
+erpnext.utils.Controller = Class.extend({
+	init: function(opts) {
+		$.extend(this, opts);
+	},
+	
+	onload_post_render: function() {
+		this.setup_defaults();
+	},
+	
+	setup_defaults: function() {
+		var me = this;
+		
+		var defaults = {
+			posting_date: wn.datetime.get_today(),
+		}
+		
+		$.each(defaults, function(k, v) {
+			if(!me.frm.doc[k]) me.frm.set_value(k, v);
+		});
+	},
+	
+	refresh: function() {
+		erpnext.hide_naming_series();
+		
+		if(this.frm.doc.__islocal && this.frm.fields_dict.naming_series 
+				&& !this.frm.doc.naming_series) {
+			var series_opts = $.map((this.frm.fields_dict.naming_series.df.options ||
+				"").split("\n"), function(v) { return v ? v : null; });
+			if (series_opts.length==1) this.frm.set_value("naming_series", series_opts[0]);
+		}
+	}
+});
+
 // searches for enabled profiles
 erpnext.utils.profile_query = function() {
 	return "select name, concat_ws(' ', first_name, middle_name, last_name) \

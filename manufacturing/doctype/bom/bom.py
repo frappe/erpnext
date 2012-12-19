@@ -20,7 +20,7 @@ from webnotes.utils import cint, cstr, flt, now, nowdate
 from webnotes.model.doc import Document, addchild
 from webnotes.model.wrapper import getlist
 from webnotes.model.code import get_obj
-from webnotes import msgprint
+from webnotes import msgprint, _
 
 sql = webnotes.conn.sql
 
@@ -47,28 +47,24 @@ class DocType:
 		
 	def on_update(self):
 		self.check_recursion()
-		self.update_cost_and_exploded_items()
+		self.calculate_cost()
+		self.update_exploded_items()
+		self.doc.save()
 	
 	def on_submit(self):
 		self.manage_default_bom()
 
 	def on_cancel(self):
-		# check if used in any other bom
-		par = sql("""select t1.parent from `tabBOM Item` t1, `tabBOM` t2 
-			where t1.parent = t2.name and t1.bom_no = %s and t1.docstatus = 1 
-			and t2.is_active = 1""", self.doc.name)
-		if par:
-			msgprint("""BOM can not be cancelled, as it is a child item \
-				in following active BOM %s""" % [d[0] for d in par], raise_exception=1)
-			
 		webnotes.conn.set(self.doc, "is_active", 0)
 		webnotes.conn.set(self.doc, "is_default", 0)
+
+		# check if used in any other bom
+		self.validate_bom_links()
 		self.manage_default_bom()
-		self.update_cost_and_exploded_items(calculate_cost=False)
 				
 	def on_update_after_submit(self):
+		self.validate_bom_links()
 		self.manage_default_bom()
-		self.validate_inactive_bom()
 
 	def get_item_det(self, item_code):
 		item = sql("""select name, is_asset_item, is_purchase_item, docstatus, description,
@@ -79,7 +75,9 @@ class DocType:
 		return item
 
 	def get_item_details(self, item_code):
-		return { 'uom' : webnotes.conn.get_value("Item", item_code, "stock_uom")}
+		res = sql("""select description, stock_uom as uom
+			from `tabItem` where item_code = %s""", item_code, as_dict = 1, debug=1)
+		return res and res[0] or {}
 
 	def get_workstation_details(self,workstation):
 		return {'hour_rate': webnotes.conn.get_value("Workstation", workstation, "hour_rate")}
@@ -158,7 +156,6 @@ class DocType:
 		""" Uncheck others if current one is selected as default, 
 			update default bom in item master
 		"""
-		webnotes.conn.set(self.doc, "is_default", cint(self.doc.is_default))
 		if self.doc.is_default and self.doc.is_active:
 			from webnotes.model.utils import set_default
 			set_default(self.doc, "item")
@@ -174,6 +171,8 @@ class DocType:
 	def clear_operations(self):
 		if not self.doc.with_operations:
 			self.doclist = self.doc.clear_table(self.doclist, 'bom_operations')
+			for d in self.doclist.get({"parentfield": "bom_materials"}):
+				d.operation_no = None
 
 	def validate_main_item(self):
 		""" Validate main FG item"""
@@ -209,8 +208,7 @@ class DocType:
 					(m.operation_no, m.item_code, m.idx), raise_exception = 1)
 		
 			item = self.get_item_det(m.item_code)
-			if item[0]['is_manufactured_item'] == 'Yes' or \
-					item[0]['is_sub_contracted_item'] == 'Yes':
+			if item[0]['is_manufactured_item'] == 'Yes':
 				if not m.bom_no:
 					msgprint("Please enter BOM No aginst item: %s at row no: %s" % 
 						(m.item_code, m.idx), raise_exception=1)
@@ -240,8 +238,8 @@ class DocType:
 
 	def check_if_item_repeated(self, item, op, check_list):
 		if [cstr(item), cstr(op)] in check_list:
-			msgprint("Item %s has been entered twice against same operation" % 
-				item, raise_exception = 1)
+			msgprint(_("Item") + " %s " % (item,) + _("has been entered atleast twice")
+				+ (cstr(op) and _(" against same operation") or ""), raise_exception=1)
 		else:
 			check_list.append([cstr(item), cstr(op)])
 
@@ -262,28 +260,24 @@ class DocType:
 					if b[0]:
 						bom_list.append(b[0])
 	
-	def update_cost_and_exploded_items(self, calculate_cost=True):
+	def update_cost_and_exploded_items(self):
 		bom_list = self.traverse_tree()
-		bom_list.reverse()
 		for bom in bom_list:
 			bom_obj = get_obj("BOM", bom, with_children=1)
-			if calculate_cost:
-				bom_obj.calculate_cost()
-			bom_obj.update_exploded_items()
-			if bom == self.doc.name:
-				self.doc, self.doclist = bom_obj.doc, bom_obj.doclist
+			bom_obj.on_update()
 			
 	def traverse_tree(self):
-		def _get_childs(bom_no):
+		def _get_children(bom_no):
 			return [cstr(d[0]) for d in webnotes.conn.sql("""select bom_no from `tabBOM Item` 
 				where parent = %s and ifnull(bom_no, '') != ''""", bom_no)]
 				
 		bom_list, count = [self.doc.name], 0		
 		while(count < len(bom_list)):
-			for child_bom in _get_childs(bom_list[count]):
+			for child_bom in _get_children(bom_list[count]):
 				if child_bom not in bom_list:
 					bom_list.append(child_bom)
 			count += 1
+		bom_list.reverse()
 		return bom_list
 	
 	def calculate_cost(self):
@@ -291,8 +285,6 @@ class DocType:
 		self.calculate_op_cost()
 		self.calculate_rm_cost()
 		self.doc.total_cost = self.doc.raw_material_cost + self.doc.operating_cost
-		self.doc.modified = now()
-		self.doc.save()
 
 	def calculate_op_cost(self):
 		"""Update workstation rate and calculates totals"""
@@ -370,17 +362,19 @@ class DocType:
 				ch.fields[i] = d[i]
 			ch.docstatus = self.doc.docstatus
 			ch.save(1)
-		self.doc.save()
 
 	def get_parent_bom_list(self, bom_no):
 		p_bom = sql("select parent from `tabBOM Item` where bom_no = '%s'" % bom_no)
 		return p_bom and [i[0] for i in p_bom] or []
 
-	def validate_inactive_bom(self):
+	def validate_bom_links(self):
 		if not self.doc.is_active:
-			act_pbom = sql("""select distinct t1.parent from `tabBOM Item` t1, `tabBOM` t2 
-				where t1.bom_no = %s and t2.name = t1.parent and t2.is_active = 1 
-				and t2.docstatus = 1 and t1.docstatus =1 """, self.doc.name)
+			act_pbom = sql("""select distinct bom_item.parent from `tabBOM Item` bom_item
+				where bom_item.bom_no = %s and bom_item.docstatus = 1
+				and exists (select * from `tabBOM` where name = bom_item.parent
+					and docstatus = 1 and is_active = 1)""", self.doc.name)
+
 			if act_pbom and act_pbom[0][0]:
-				msgprint("""Sorry cannot inactivate as BOM: %s is child 
-					of one or many other active parent BOMs""" % self.doc.name, raise_exception=1)
+				action = self.doc.docstatus < 2 and _("deactivate") or _("cancel")
+				msgprint(_("Cannot ") + action + _(": It is linked to other active BOM(s)"),
+					raise_exception=1)

@@ -14,10 +14,44 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.	If not, see <http://www.gnu.org/licenses/>.
 
-cur_frm.cscript.refresh = function(doc) { 
-	erpnext.hide_naming_series();
-	cur_frm.cscript.toggle_related_fields(doc);
-}
+wn.provide("erpnext.stock");
+
+erpnext.stock.StockEntry = erpnext.utils.Controller.extend({
+	onload_post_render: function() {
+		this._super();
+		if(this.frm.doc.__islocal && (this.frm.doc.production_order || this.frm.doc.bom_no) 
+			&& !getchildren('Stock Entry Detail', this.frm.doc.name, 'mtn_details').length) {
+				// if production order / bom is mentioned, get items
+				this.get_items();
+		}
+	},
+	
+	refresh: function() {
+		this._super();
+		this.toggle_related_fields(doc);
+		if (this.frm.doc.docstatus==1) this.frm.add_custom_button("Show Stock Ledger", 
+			this.show_stock_ledger)
+	},
+	
+	get_items: function() {
+		this.frm.call({
+			doc: this.frm.doc,
+			method: "get_items",
+			callback: function(r) {
+				if(!r.exc) refresh_field("mtn_details");
+			}
+		});
+	},
+	
+	qty: function(doc, cdt, cdn) {
+		var d = locals[cdt][cdn];
+		d.transfer_qty = flt(d.qty) * flt(d.conversion_factor);
+		refresh_field('mtn_details');
+	},
+	
+});
+
+cur_frm.cscript = new erpnext.stock.StockEntry({frm: cur_frm});
 
 cur_frm.cscript.toggle_related_fields = function(doc) {
 	if(doc.purpose == 'Purchase Return') {
@@ -32,6 +66,16 @@ cur_frm.cscript.toggle_related_fields = function(doc) {
 			doc.delivery_note_no = doc.sales_invoice_no = doc.supplier = 
 			doc.supplier_name = doc.supplier_address = doc.purchase_receipt_no = null;
 	}
+}
+
+cur_frm.cscript.show_stock_ledger = function() {
+	var args = {
+		voucher_no: cur_frm.doc.name,
+		from_date: wn.datetime.str_to_user(cur_frm.doc.posting_date),
+		to_date: wn.datetime.str_to_user(cur_frm.doc.posting_date)
+	};	
+	wn.set_route('stock-ledger', 
+		$.map(args, function(val, key) { return key+"="+val; }).join("&&"));
 }
 
 cur_frm.cscript.delivery_note_no = function(doc,cdt,cdn){
@@ -155,13 +199,6 @@ cur_frm.cscript.s_warehouse = function(doc, cdt, cdn) {
 }
 
 cur_frm.cscript.t_warehouse = cur_frm.cscript.s_warehouse;
-
-cur_frm.cscript.qty = function(doc, cdt, cdn) {
-	var d = locals[cdt][cdn];
-	set_multiple('Stock Entry Detail', d.name, 
-		{'transfer_qty': flt(d.qty) * flt(d.conversion_factor)}, 'mtn_details');
-	refresh_field('mtn_details');
-}
 
 cur_frm.cscript.uom = function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];

@@ -188,6 +188,8 @@ class DocType:
 		items = self.get_distinct_items_and_boms()[1]
 		pro = self.create_production_order(items)
 		if pro:
+			pro = ["""<a href="#Form/Production Order/%s" target="_blank">%s</a>""" % \
+				(p, p) for p in pro]
 			msgprint("Following Production Order has been generated:\n" + '\n'.join(pro))
 		else :
 			msgprint("No Production Order generated.")

@@ -47,8 +47,8 @@ class DocType:
 					% cstr(self.doc.production_item), raise_exception=1)
 
 		if self.doc.bom_no:
-			bom = sql("""select name from `tabBOM`	where name = %s and docstatus = 1 
-				and is_active = 'Yes' and item = %s"""
+			bom = sql("""select name from `tabBOM` where name=%s and docstatus=1 
+				and is_active=1 and item=%s"""
 				, (self.doc.bom_no, self.doc.production_item), as_dict =1)
 			if not bom:
 				msgprint("""Incorrect BOM: %s entered. 

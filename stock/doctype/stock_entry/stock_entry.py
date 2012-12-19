@@ -17,7 +17,7 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import cstr, flt, getdate, now
+from webnotes.utils import cstr, cint, flt, getdate, now
 from webnotes.model import db_exists, delete_doc
 from webnotes.model.doc import Document, addchild
 from webnotes.model.wrapper import getlist, copy_doclist
@@ -154,13 +154,15 @@ class DocType(TransactionBase):
 					d.s_warehouse or d.t_warehouse, self.doc.posting_date, 
 					self.doc.posting_time, d.transfer_qty, d.serial_no, d.bom_no)
 					
+			d.amount = flt(d.qty) * flt(d.incoming_rate)
+					
 	def get_as_on_stock(self, item_code, warehouse, posting_date, posting_time):
 		"""Get stock qty on any date"""
 		bin = sql("select name from tabBin where item_code = %s and warehouse = %s", 
 			(item_code, warehouse))
 		if bin:
 			prev_sle = get_obj('Bin', bin[0][0]).get_prev_sle(posting_date, posting_time)
-			return flt(prev_sle["bin_aqat"])
+			return flt(prev_sle.get("bin_aqat")) or 0
 		else:
 			return 0
 			
@@ -169,9 +171,10 @@ class DocType(TransactionBase):
 		in_rate = 0
 
 		if bom_no:
-			result = flt(webnotes.conn.sql("""select ifnull(total_cost, 0) / ifnull(quantity, 1) 
-				from `tabBOM` where name = %s and docstatus=1""", bom_no))
-			in_rate = result and result[0][0] or 0
+			result = webnotes.conn.sql("""select ifnull(total_cost, 0) / ifnull(quantity, 1) 
+				from `tabBOM` where name = %s and docstatus=1 and is_active=1""",
+				(bom_no,))
+			in_rate = result and flt(result[0][0]) or 0
 		elif warehouse:
 			in_rate = get_obj("Valuation Control").get_incoming_rate(posting_date, posting_time,
 				item_code, warehouse, qty, serial_no)
@@ -198,8 +201,9 @@ class DocType(TransactionBase):
 		for d in getlist(self.doclist, 'mtn_details'):
 			if d.bom_no and flt(d.transfer_qty) != flt(self.doc.fg_completed_qty):
 				msgprint(_("Row #") + " %s: " % d.idx 
-					+ _("Quantity as per Stock UOM should be equal to Manufacturing Quantity"),
-					raise_exception=1)
+					+ _("Quantity should be equal to Manufacturing Quantity. ")
+					+ _("To fetch items again, click on 'Get Items' button \
+						or update the Quantity manually."), raise_exception=1)
 					
 	def update_serial_no(self, is_submit):
 		"""Create / Update Serial No"""
@@ -249,10 +253,6 @@ class DocType(TransactionBase):
 				msgprint("""You cannot do any transaction against Production Order : %s, 
 					as it's status is 'Stopped'"""% (pro_obj.doc.name), raise_exception=1)
 					
-			if getdate(pro_obj.doc.posting_date) > getdate(self.doc.posting_date):
-				msgprint("""Posting Date of Stock Entry cannot be before Posting Date of 
-					Production Order: %s"""% cstr(self.doc.production_order), raise_exception=1)
-			
 			# update bin
 			if self.doc.purpose == "Manufacture/Repack":
 				pro_obj.doc.produced_qty = flt(pro_obj.doc.produced_qty) + \
@@ -348,20 +348,20 @@ class DocType(TransactionBase):
 				self.add_to_stock_entry_detail(self.doc.from_warehouse, self.doc.to_warehouse,
 					self.item_dict)
 
-			# add finished good item to Stock Entry Detail table
-			if self.doc.production_order:
+			# add finished good item to Stock Entry Detail table -- along with bom_no
+			if self.doc.production_order and self.doc.purpose == "Manufacture/Repack":
 				self.add_to_stock_entry_detail(None, pro_obj.doc.fg_warehouse, {
 					cstr(pro_obj.doc.production_item): 
 						[self.doc.fg_completed_qty, pro_obj.doc.description, pro_obj.doc.stock_uom]
-				})
-			elif self.doc.purpose in ["Material Receipt", "Manufacture/Repack",
-					"Subcontract"]:
+				}, bom_no=pro_obj.doc.bom_no)
+				
+			elif self.doc.purpose in ["Material Receipt", "Manufacture/Repack"]:
 				item = webnotes.conn.sql("""select item, description, uom from `tabBOM`
 					where name=%s""", (self.doc.bom_no,), as_dict=1)
-				self.add_to_stock_entry_detail(None, None, {
+				self.add_to_stock_entry_detail(None, self.doc.to_warehouse, {
 					item[0]["item"] :
 						[self.doc.fg_completed_qty, item[0]["description"], item[0]["uom"]]
-				})
+				}, bom_no=self.doc.bom_no)
 		
 		self.get_stock_and_rate()
 	
@@ -422,7 +422,7 @@ class DocType(TransactionBase):
 			if self.item_dict[d][0] <= 0:
 				del self.item_dict[d]
 
-	def add_to_stock_entry_detail(self, source_wh, target_wh, item_dict, fg_item = 0, bom_no = ''):
+	def add_to_stock_entry_detail(self, source_wh, target_wh, item_dict, bom_no=None):
 		for d in item_dict:
 			se_child = addchild(self.doc, 'mtn_details', 'Stock Entry Detail', 0, self.doclist)
 			se_child.s_warehouse = source_wh
@@ -434,7 +434,7 @@ class DocType(TransactionBase):
 			se_child.qty = flt(item_dict[d][0])
 			se_child.transfer_qty = flt(item_dict[d][0])
 			se_child.conversion_factor = 1.00
-			if fg_item: se_child.bom_no = bom_no
+			if bom_no: se_child.bom_no = bom_no
 
 	def add_to_values(self, d, wh, qty, is_cancelled):
 		self.values.append({

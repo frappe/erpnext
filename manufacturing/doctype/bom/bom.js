@@ -61,7 +61,7 @@ cur_frm.fields_dict["bom_operations"].grid.on_row_delete = function(cdt, cdn){
 
 cur_frm.cscript.item = function(doc, dt, dn) {
 	if (doc.item) {
-		get_server_fields('get_item_details',doc.item,'',doc,dt,dn,1);
+		get_server_fields('get_item_details', doc.item, '', doc, dt, dn, 1);
 	}
 }
 
@@ -92,6 +92,10 @@ cur_frm.cscript.item_code = function(doc, cdt, cdn) {
 
 cur_frm.cscript.bom_no	= function(doc, cdt, cdn) {
 	get_bom_material_detail(doc, cdt, cdn);
+}
+
+cur_frm.cscript.is_default = function(doc) {
+	if (doc.is_default) cur_frm.set_value("is_active", 1);
 }
 
 var get_bom_material_detail= function(doc, cdt, cdn) {

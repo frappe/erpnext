@@ -19,7 +19,6 @@ cur_frm.cscript.onload = function(doc, dt, dn) {
 	cfn_set_fields(doc, dt, dn);
 }
 
-// ================================== Refresh ==========================================
 cur_frm.cscript.refresh = function(doc, dt, dn) {
 	cur_frm.set_intro("");
 	cfn_set_fields(doc, dt, dn);
@@ -35,23 +34,6 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 				cur_frm.set_intro("This Production Order is in progress.");
 			}
 		}
-	}
-	
-	cur_frm.cscript.update_status_html(doc);
-}
-
-cur_frm.cscript.update_status_html = function(doc) {
-	$(cur_frm.get_field("status_html").wrapper).empty();
-	
-	if(doc.issued_qty) {
-		$(repl("<div class='progress'>\
-			<div class='bar bar-success' style='width: %(manufactured)s%' \
-				title='%(manufactured_qty)s %(uom)s manufactured'></div> \
-			</div>"), {
-				manufactured_qty: doc.produced_qty,
-				manufactured: Math.round((doc.produced_qty / doc.qty) * 100),
-				uom: doc.stock_uom,
-			}).appendTo(cur_frm.get_field("status_html").wrapper);
 	}
 }
 
@@ -106,6 +88,9 @@ cur_frm.cscript.make_se = function(doc, purpose) {
 	se.purpose = purpose;
 	se.production_order = doc.name;
 	se.company = doc.company;
+	se.fg_completed_qty = doc.qty - doc.produced_qty;
+	se.bom_no = doc.bom_no;
+	se.use_multi_level_bom = 1;
 	loaddoc('Stock Entry', se.name);
 }
 

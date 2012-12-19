@@ -18,7 +18,7 @@ from __future__ import unicode_literals
 import webnotes
 from webnotes.utils import cstr, flt
 from webnotes.model.code import get_obj
-from webnotes import msgprint
+from webnotes import msgprint, _
 	
 class DocType:
 	def __init__( self, doc, doclist=[]):
@@ -31,7 +31,9 @@ class DocType:
 		bom_list = self.get_parent_boms()
 		for bom in bom_list:
 			bom_obj = get_obj("BOM", bom, with_children=1)
-			bom_obj.on_update()
+			bom_obj.update_cost_and_exploded_items()
+			
+		webnotes.msgprint(_("BOM replaced"))
 
 	def validate_bom(self):
 		if cstr(self.doc.current_bom) == cstr(self.doc.new_bom):

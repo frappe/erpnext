@@ -2,9 +2,9 @@
  {
   "owner": "Administrator", 
   "docstatus": 0, 
-  "creation": "2012-12-14 10:15:15", 
+  "creation": "2012-12-19 12:29:06", 
   "modified_by": "Administrator", 
-  "modified": "2012-12-14 16:51:01"
+  "modified": "2012-12-19 15:52:47"
  }, 
  {
   "istable": 0, 
@@ -223,6 +223,13 @@
   "in_filter": 1
  }, 
  {
+  "doctype": "DocField", 
+  "label": "Item Desription", 
+  "fieldname": "description", 
+  "fieldtype": "Small Text", 
+  "permlevel": 1
+ }, 
+ {
   "print_hide": 1, 
   "no_copy": 1, 
   "doctype": "DocField", 
@@ -255,17 +262,6 @@
   "fieldtype": "Table", 
   "hidden": 0, 
   "options": "BOM Explosion Item"
- }, 
- {
-  "print_hide": 1, 
-  "description": "The date at which current entry is corrected in the system.", 
-  "no_copy": 1, 
-  "depends_on": "eval:doc.amended_from", 
-  "doctype": "DocField", 
-  "label": "Amendment Date", 
-  "fieldname": "amendment_date", 
-  "fieldtype": "Date", 
-  "permlevel": 0
  }, 
  {
   "create": 1, 
