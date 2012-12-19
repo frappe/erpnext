@@ -132,7 +132,9 @@ class DocType(TransactionBase):
 			msgprint("Please Select Company under which you want to create account head")
 
 	def update_credit_days_limit(self):
-		sql("update tabAccount set credit_days = '%s', credit_limit = '%s' where name = '%s'" % (self.doc.credit_days, self.doc.credit_limit, self.doc.name + " - " + self.get_company_abbr()))
+		sql("""update tabAccount set credit_days = %s, credit_limit = %s 
+			where name = %s""", (self.doc.credit_days or 0, self.doc.credit_limit or 0, 
+				self.doc.name + " - " + self.get_company_abbr()))
 
 	def create_lead_address_contact(self):
 		if self.doc.lead_name:
