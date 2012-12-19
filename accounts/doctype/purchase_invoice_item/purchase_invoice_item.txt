@@ -40,12 +40,12 @@
  }, 
  {
   "oldfieldtype": "Data", 
+  "search_index": 0, 
   "doctype": "DocField", 
   "label": "Item Name", 
   "oldfieldname": "item_name", 
   "fieldname": "item_name", 
   "fieldtype": "Data", 
-  "search_index": 0, 
   "reqd": 1, 
   "permlevel": 0, 
   "in_filter": 0
@@ -140,6 +140,7 @@
  }, 
  {
   "print_hide": 1, 
+  "permlevel": 0, 
   "oldfieldtype": "Link", 
   "doctype": "DocField", 
   "label": "Expense Head", 
@@ -149,7 +150,6 @@
   "fieldname": "expense_head", 
   "fieldtype": "Link", 
   "reqd": 1, 
-  "permlevel": 0
  }, 
  {
   "print_hide": 1, 
@@ -200,35 +200,35 @@
   "label": "Item Group", 
   "oldfieldname": "item_group", 
   "permlevel": 1, 
+  "options": "Item Group", 
   "fieldname": "item_group", 
   "fieldtype": "Link", 
   "search_index": 1, 
   "hidden": 1, 
-  "options": "Item Group", 
   "in_filter": 1
  }, 
  {
   "print_hide": 1, 
   "oldfieldtype": "Link", 
+  "search_index": 1, 
   "doctype": "DocField", 
   "label": "Pur Order", 
   "oldfieldname": "purchase_order", 
   "options": "Purchase Order", 
   "fieldname": "purchase_order", 
   "fieldtype": "Link", 
-  "search_index": 1, 
   "permlevel": 1, 
   "in_filter": 1
  }, 
  {
   "print_hide": 1, 
   "oldfieldtype": "Data", 
+  "search_index": 1, 
   "doctype": "DocField", 
   "label": "Purchase Order Item", 
   "oldfieldname": "po_detail", 
   "fieldname": "po_detail", 
   "fieldtype": "Data", 
-  "search_index": 1, 
   "hidden": 1, 
   "permlevel": 1, 
   "in_filter": 1
@@ -236,25 +236,25 @@
  {
   "print_hide": 1, 
   "oldfieldtype": "Link", 
+  "search_index": 1, 
   "doctype": "DocField", 
   "label": "Pur Receipt", 
   "oldfieldname": "purchase_receipt", 
   "options": "Purchase Receipt", 
   "fieldname": "purchase_receipt", 
   "fieldtype": "Link", 
-  "search_index": 1, 
   "permlevel": 1, 
   "in_filter": 1
  }, 
  {
   "print_hide": 1, 
   "oldfieldtype": "Data", 
+  "search_index": 1, 
   "doctype": "DocField", 
   "label": "PR Detail", 
   "oldfieldname": "pr_detail", 
   "fieldname": "pr_detail", 
   "fieldtype": "Data", 
-  "search_index": 1, 
   "hidden": 1, 
   "permlevel": 1, 
   "in_filter": 1

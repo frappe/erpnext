@@ -5,7 +5,7 @@ def execute():
 		where docstatus = 2""")
 	
 	for bom in cancelled_boms:
-		webnotes.conn.sql("""update `tabBOM` set is_default=0, is_active='No'
+		webnotes.conn.sql("""update `tabBOM` set is_default=0, is_active=0
 			where name=%s""", (bom[0],))
 		
 		webnotes.conn.sql("""update `tabItem` set default_bom=null

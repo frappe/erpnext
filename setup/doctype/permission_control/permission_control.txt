@@ -1,33 +1,26 @@
-# DocType, Permission Control
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-03-27 14:36:22',
-		'docstatus': 0,
-		'modified': '2012-03-27 14:36:22',
-		'modified_by': u'Administrator',
-		'owner': u'saumil@webnotestech.com'
-	},
-
-	# These values are common for all DocType
-	{
-		'colour': u'White:FFF',
-		'doctype': 'DocType',
-		'in_create': 1,
-		'issingle': 1,
-		'module': u'Setup',
-		'name': '__common__',
-		'read_only': 1,
-		'section_style': u'Simple',
-		'server_code_error': u' ',
-		'show_in_menu': 0,
-		'version': 15
-	},
-
-	# DocType, Permission Control
-	{
-		'doctype': 'DocType',
-		'name': u'Permission Control'
-	}
+ {
+  "owner": "saumil@webnotestech.com", 
+  "docstatus": 0, 
+  "creation": "2012-03-27 14:36:22", 
+  "modified_by": "Administrator", 
+  "modified": "2012-03-27 14:36:22"
+ }, 
+ {
+  "section_style": "Simple", 
+  "in_create": 1, 
+  "module": "Setup", 
+  "doctype": "DocType", 
+  "server_code_error": " ", 
+  "issingle": 1, 
+  "read_only": 1, 
+  "name": "__common__", 
+  "colour": "White:FFF", 
+  "show_in_menu": 0, 
+  "version": 15
+ }, 
+ {
+  "name": "Permission Control", 
+  "doctype": "DocType"
+ }
 ]

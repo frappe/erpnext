@@ -1,31 +1,24 @@
-# DocType, MIS Control
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-03-27 14:35:49',
-		'docstatus': 0,
-		'modified': '2012-03-27 14:35:49',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
-	},
-
-	# These values are common for all DocType
-	{
-		'colour': u'White:FFF',
-		'doctype': 'DocType',
-		'issingle': 1,
-		'module': u'Accounts',
-		'name': '__common__',
-		'section_style': u'Simple',
-		'server_code_error': u' ',
-		'show_in_menu': 0,
-		'version': 120
-	},
-
-	# DocType, MIS Control
-	{
-		'doctype': 'DocType',
-		'name': u'MIS Control'
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-03-27 14:35:49", 
+  "modified_by": "Administrator", 
+  "modified": "2012-03-27 14:35:49"
+ }, 
+ {
+  "section_style": "Simple", 
+  "name": "__common__", 
+  "colour": "White:FFF", 
+  "module": "Accounts", 
+  "show_in_menu": 0, 
+  "version": 120, 
+  "server_code_error": " ", 
+  "doctype": "DocType", 
+  "issingle": 1
+ }, 
+ {
+  "name": "MIS Control", 
+  "doctype": "DocType"
+ }
 ]

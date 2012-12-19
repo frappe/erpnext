@@ -1,32 +1,25 @@
-# DocType, Trash Control
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-03-27 14:36:47',
-		'docstatus': 0,
-		'modified': '2012-03-27 14:36:47',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
-	},
-
-	# These values are common for all DocType
-	{
-		'colour': u'White:FFF',
-		'doctype': 'DocType',
-		'in_create': 1,
-		'issingle': 1,
-		'module': u'Utilities',
-		'name': '__common__',
-		'read_only': 1,
-		'section_style': u'Simple',
-		'server_code_error': u' ',
-		'version': 35
-	},
-
-	# DocType, Trash Control
-	{
-		'doctype': 'DocType',
-		'name': u'Trash Control'
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-03-27 14:36:47", 
+  "modified_by": "Administrator", 
+  "modified": "2012-03-27 14:36:47"
+ }, 
+ {
+  "section_style": "Simple", 
+  "in_create": 1, 
+  "module": "Utilities", 
+  "server_code_error": " ", 
+  "doctype": "DocType", 
+  "issingle": 1, 
+  "read_only": 1, 
+  "name": "__common__", 
+  "colour": "White:FFF", 
+  "version": 35
+ }, 
+ {
+  "name": "Trash Control", 
+  "doctype": "DocType"
+ }
 ]

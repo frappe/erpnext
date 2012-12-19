@@ -1,28 +1,21 @@
-# Page, accounts-home
 [
-
-	# These values are common in all dictionaries
-	{
-		u'creation': '2012-06-14 15:07:28',
-		u'docstatus': 0,
-		u'modified': '2012-10-05 16:30:46',
-		u'modified_by': u'Administrator',
-		u'owner': u'Administrator'
-	},
-
-	# These values are common for all Page
-	{
-		u'doctype': u'Page',
-		'module': u'Accounts',
-		u'name': u'__common__',
-		'page_name': u'accounts-home',
-		'standard': u'Yes',
-		'title': u'Accounts Home'
-	},
-
-	# Page, accounts-home
-	{
-		u'doctype': u'Page',
-		u'name': u'accounts-home'
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-06-14 15:07:28", 
+  "modified_by": "Administrator", 
+  "modified": "2012-10-05 16:30:46"
+ }, 
+ {
+  "name": "__common__", 
+  "title": "Accounts Home", 
+  "module": "Accounts", 
+  "doctype": "Page", 
+  "page_name": "accounts-home", 
+  "standard": "Yes"
+ }, 
+ {
+  "name": "accounts-home", 
+  "doctype": "Page"
+ }
 ]

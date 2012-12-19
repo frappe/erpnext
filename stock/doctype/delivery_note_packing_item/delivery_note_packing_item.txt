@@ -1,208 +1,171 @@
-# DocType, Delivery Note Packing Item
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-06-11 12:10:10',
-		'docstatus': 0,
-		'modified': '2012-07-10 12:05:31',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
-	},
-
-	# These values are common for all DocType
-	{
-		'colour': u'White:FFF',
-		'doctype': 'DocType',
-		'istable': 1,
-		'module': u'Stock',
-		'name': '__common__',
-		'section_style': u'Tray',
-		'server_code_error': u' ',
-		'show_in_menu': 0,
-		'version': 1
-	},
-
-	# These values are common for all DocField
-	{
-		'doctype': u'DocField',
-		'name': '__common__',
-		'parent': u'Delivery Note Packing Item',
-		'parentfield': u'fields',
-		'parenttype': u'DocType'
-	},
-
-	# DocType, Delivery Note Packing Item
-	{
-		'doctype': 'DocType',
-		'name': u'Delivery Note Packing Item'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'parent_item',
-		'fieldtype': u'Link',
-		'label': u'Parent Item',
-		'oldfieldname': u'parent_item',
-		'oldfieldtype': u'Link',
-		'options': u'Item',
-		'permlevel': 1
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'doctype': u'DocField',
-		'fieldname': u'item_code',
-		'fieldtype': u'Link',
-		'in_filter': 1,
-		'label': u'Item Code',
-		'oldfieldname': u'item_code',
-		'oldfieldtype': u'Link',
-		'options': u'Item',
-		'permlevel': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'item_name',
-		'fieldtype': u'Data',
-		'in_filter': 1,
-		'label': u'Item Name',
-		'oldfieldname': u'item_name',
-		'oldfieldtype': u'Data',
-		'permlevel': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'parent_detail_docname',
-		'fieldtype': u'Data',
-		'hidden': 1,
-		'label': u'Parent Detail docname',
-		'no_copy': 1,
-		'oldfieldname': u'parent_detail_docname',
-		'oldfieldtype': u'Data',
-		'permlevel': 1,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'description',
-		'fieldtype': u'Text',
-		'label': u'Description',
-		'oldfieldname': u'description',
-		'oldfieldtype': u'Text',
-		'permlevel': 1,
-		'width': u'300px'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'warehouse',
-		'fieldtype': u'Link',
-		'label': u'Warehouse',
-		'oldfieldname': u'warehouse',
-		'oldfieldtype': u'Link',
-		'options': u'Warehouse',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'qty',
-		'fieldtype': u'Currency',
-		'label': u'Qty',
-		'oldfieldname': u'qty',
-		'oldfieldtype': u'Currency',
-		'permlevel': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'serial_no',
-		'fieldtype': u'Text',
-		'label': u'Serial No',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'batch_no',
-		'fieldtype': u'Data',
-		'label': u'Batch No',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'actual_qty',
-		'fieldtype': u'Currency',
-		'label': u'Actual Qty',
-		'no_copy': 1,
-		'oldfieldname': u'actual_qty',
-		'oldfieldtype': u'Currency',
-		'permlevel': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'projected_qty',
-		'fieldtype': u'Currency',
-		'label': u'Projected Qty',
-		'no_copy': 1,
-		'oldfieldname': u'projected_qty',
-		'oldfieldtype': u'Currency',
-		'permlevel': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'uom',
-		'fieldtype': u'Link',
-		'label': u'UOM',
-		'oldfieldname': u'uom',
-		'oldfieldtype': u'Link',
-		'options': u'UOM',
-		'permlevel': 1,
-		'search_index': 0
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'doctype': u'DocField',
-		'fieldname': u'prevdoc_doctype',
-		'fieldtype': u'Data',
-		'hidden': 1,
-		'label': u'Prevdoc DocType',
-		'oldfieldname': u'prevdoc_doctype',
-		'oldfieldtype': u'Data',
-		'permlevel': 1,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		'allow_on_submit': 1,
-		'doctype': u'DocField',
-		'fieldname': u'page_break',
-		'fieldtype': u'Check',
-		'label': u'Page Break',
-		'oldfieldname': u'page_break',
-		'oldfieldtype': u'Check',
-		'permlevel': 1
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-06-11 12:10:10", 
+  "modified_by": "Administrator", 
+  "modified": "2012-07-10 12:05:31"
+ }, 
+ {
+  "section_style": "Tray", 
+  "istable": 1, 
+  "name": "__common__", 
+  "colour": "White:FFF", 
+  "module": "Stock", 
+  "show_in_menu": 0, 
+  "version": 1, 
+  "server_code_error": " ", 
+  "doctype": "DocType"
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "Delivery Note Packing Item", 
+  "doctype": "DocField", 
+  "parenttype": "DocType", 
+  "parentfield": "fields"
+ }, 
+ {
+  "name": "Delivery Note Packing Item", 
+  "doctype": "DocType"
+ }, 
+ {
+  "oldfieldtype": "Link", 
+  "doctype": "DocField", 
+  "label": "Parent Item", 
+  "oldfieldname": "parent_item", 
+  "permlevel": 1, 
+  "fieldname": "parent_item", 
+  "fieldtype": "Link", 
+  "options": "Item"
+ }, 
+ {
+  "oldfieldtype": "Link", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Item Code", 
+  "oldfieldname": "item_code", 
+  "permlevel": 1, 
+  "fieldname": "item_code", 
+  "fieldtype": "Link", 
+  "options": "Item", 
+  "in_filter": 1
+ }, 
+ {
+  "oldfieldtype": "Data", 
+  "doctype": "DocField", 
+  "label": "Item Name", 
+  "oldfieldname": "item_name", 
+  "fieldname": "item_name", 
+  "fieldtype": "Data", 
+  "permlevel": 1, 
+  "in_filter": 1
+ }, 
+ {
+  "print_hide": 1, 
+  "no_copy": 1, 
+  "oldfieldtype": "Data", 
+  "doctype": "DocField", 
+  "label": "Parent Detail docname", 
+  "oldfieldname": "parent_detail_docname", 
+  "fieldname": "parent_detail_docname", 
+  "fieldtype": "Data", 
+  "hidden": 1, 
+  "permlevel": 1
+ }, 
+ {
+  "oldfieldtype": "Text", 
+  "doctype": "DocField", 
+  "label": "Description", 
+  "oldfieldname": "description", 
+  "width": "300px", 
+  "fieldname": "description", 
+  "fieldtype": "Text", 
+  "permlevel": 1
+ }, 
+ {
+  "oldfieldtype": "Link", 
+  "doctype": "DocField", 
+  "label": "Warehouse", 
+  "oldfieldname": "warehouse", 
+  "permlevel": 0, 
+  "fieldname": "warehouse", 
+  "fieldtype": "Link", 
+  "options": "Warehouse"
+ }, 
+ {
+  "oldfieldtype": "Currency", 
+  "doctype": "DocField", 
+  "label": "Qty", 
+  "oldfieldname": "qty", 
+  "fieldname": "qty", 
+  "fieldtype": "Currency", 
+  "permlevel": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Serial No", 
+  "fieldname": "serial_no", 
+  "fieldtype": "Text", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Batch No", 
+  "fieldname": "batch_no", 
+  "fieldtype": "Data", 
+  "permlevel": 0
+ }, 
+ {
+  "no_copy": 1, 
+  "oldfieldtype": "Currency", 
+  "doctype": "DocField", 
+  "label": "Actual Qty", 
+  "oldfieldname": "actual_qty", 
+  "fieldname": "actual_qty", 
+  "fieldtype": "Currency", 
+  "permlevel": 1
+ }, 
+ {
+  "no_copy": 1, 
+  "oldfieldtype": "Currency", 
+  "doctype": "DocField", 
+  "label": "Projected Qty", 
+  "oldfieldname": "projected_qty", 
+  "fieldname": "projected_qty", 
+  "fieldtype": "Currency", 
+  "permlevel": 1
+ }, 
+ {
+  "search_index": 0, 
+  "doctype": "DocField", 
+  "label": "UOM", 
+  "oldfieldname": "uom", 
+  "permlevel": 1, 
+  "fieldname": "uom", 
+  "fieldtype": "Link", 
+  "oldfieldtype": "Link", 
+  "options": "UOM"
+ }, 
+ {
+  "print_hide": 1, 
+  "oldfieldtype": "Data", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Prevdoc DocType", 
+  "oldfieldname": "prevdoc_doctype", 
+  "fieldname": "prevdoc_doctype", 
+  "fieldtype": "Data", 
+  "hidden": 1, 
+  "permlevel": 1
+ }, 
+ {
+  "oldfieldtype": "Check", 
+  "allow_on_submit": 1, 
+  "doctype": "DocField", 
+  "label": "Page Break", 
+  "oldfieldname": "page_break", 
+  "fieldname": "page_break", 
+  "fieldtype": "Check", 
+  "permlevel": 1
+ }
 ]

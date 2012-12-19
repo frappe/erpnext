@@ -1,291 +1,240 @@
-# DocType, Sales and Purchase Return Tool
 [
-
-	# These values are common in all dictionaries
-	{
-		u'creation': '2012-09-19 12:24:41',
-		u'docstatus': 0,
-		u'modified': '2012-10-02 10:40:14',
-		u'modified_by': u'Administrator',
-		u'owner': u'wasim@webnotestech.com'
-	},
-
-	# These values are common for all DocType
-	{
-		'colour': u'White:FFF',
-		u'doctype': u'DocType',
-		'is_transaction_doc': 0,
-		'issingle': 1,
-		'istable': 0,
-		'menu_index': 1,
-		'module': u'Stock',
-		u'name': u'__common__',
-		'parent_node': u'Materials',
-		'section_style': u'Simple',
-		'server_code_error': u' ',
-		'show_in_menu': 1,
-		'version': 1
-	},
-
-	# These values are common for all DocField
-	{
-		u'doctype': u'DocField',
-		u'name': u'__common__',
-		'parent': u'Sales and Purchase Return Tool',
-		'parentfield': u'fields',
-		'parenttype': u'DocType'
-	},
-
-	# These values are common for all DocPerm
-	{
-		u'doctype': u'DocPerm',
-		u'name': u'__common__',
-		'parent': u'Sales and Purchase Return Tool',
-		'parentfield': u'permissions',
-		'parenttype': u'DocType',
-		'read': 1
-	},
-
-	# DocType, Sales and Purchase Return Tool
-	{
-		u'doctype': u'DocType',
-		u'name': u'Sales and Purchase Return Tool'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'return_date',
-		'fieldtype': u'Date',
-		'label': u'Return Date',
-		'no_copy': 1,
-		'oldfieldname': u'return_date',
-		'oldfieldtype': u'Date',
-		'permlevel': 0,
-		'reqd': 1
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'return_type',
-		'fieldtype': u'Select',
-		'label': u'Return Type',
-		'no_copy': 1,
-		'oldfieldname': u'return_type',
-		'oldfieldtype': u'Select',
-		'options': u'\nSales Return\nPurchase Return',
-		'permlevel': 0,
-		'reqd': 1,
-		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'delivery_note_no',
-		'fieldtype': u'Link',
-		'hidden': 1,
-		'label': u'Delivery Note No',
-		'no_copy': 1,
-		'oldfieldname': u'delivery_note_no',
-		'oldfieldtype': u'Link',
-		'options': u'Delivery Note',
-		'permlevel': 0,
-		'reqd': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'sales_invoice_no',
-		'fieldtype': u'Link',
-		'hidden': 1,
-		'label': u'Sales Invoice No',
-		'options': u'Sales Invoice',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'purchase_receipt_no',
-		'fieldtype': u'Link',
-		'hidden': 1,
-		'label': u'Purchase Receipt No',
-		'no_copy': 1,
-		'oldfieldname': u'purchase_receipt_no',
-		'oldfieldtype': u'Link',
-		'options': u'Purchase Receipt',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'cust_supp',
-		'fieldtype': u'Data',
-		'hidden': 1,
-		'label': u'Customer/Supplier',
-		'permlevel': 1,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'cust_supp_name',
-		'fieldtype': u'Data',
-		'hidden': 1,
-		'label': u'Cust/Supp Name',
-		'permlevel': 1,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'cust_supp_address',
-		'fieldtype': u'Small Text',
-		'hidden': 1,
-		'label': u'Cust/Supp Address',
-		'permlevel': 1,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		u'doctype': u'DocField',
-		'fieldname': u'get_items',
-		'fieldtype': u'Button',
-		'hidden': 1,
-		'label': u'Get Items',
-		'oldfieldtype': u'Button',
-		'permlevel': 0,
-		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'return_details',
-		'fieldtype': u'Table',
-		'hidden': 1,
-		'label': u'Sales and Purchase Return Items',
-		'no_copy': 1,
-		'oldfieldname': u'return_details',
-		'oldfieldtype': u'Table',
-		'options': u'Sales and Purchase Return Item',
-		'permlevel': 1
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'make_stock_entry',
-		'fieldtype': u'Button',
-		'hidden': 1,
-		'label': u'Make Stock Entry',
-		'oldfieldtype': u'Button',
-		'permlevel': 0,
-		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'make_excise_invoice',
-		'fieldtype': u'Button',
-		'hidden': 1,
-		'label': u'Make Excise Invoice',
-		'oldfieldtype': u'Button',
-		'permlevel': 0,
-		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'make_credit_note',
-		'fieldtype': u'Button',
-		'hidden': 1,
-		'label': u'Make Credit Note',
-		'oldfieldtype': u'Button',
-		'permlevel': 0,
-		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'make_debit_note',
-		'fieldtype': u'Button',
-		'hidden': 1,
-		'label': u'Make Debit Note',
-		'oldfieldtype': u'Button',
-		'permlevel': 0,
-		'trigger': u'Client'
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 1,
-		u'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Material User',
-		'submit': 0,
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 1,
-		u'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Material Manager',
-		'submit': 0,
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 1,
-		u'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'System Manager',
-		'submit': 0,
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'create': 1,
-		u'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Accounts Manager',
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'create': 1,
-		u'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Accounts User',
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		u'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'All'
-	}
+ {
+  "owner": "wasim@webnotestech.com", 
+  "docstatus": 0, 
+  "creation": "2012-09-19 12:24:41", 
+  "modified_by": "Administrator", 
+  "modified": "2012-10-02 10:40:14"
+ }, 
+ {
+  "section_style": "Simple", 
+  "istable": 0, 
+  "module": "Stock", 
+  "doctype": "DocType", 
+  "issingle": 1, 
+  "name": "__common__", 
+  "colour": "White:FFF", 
+  "is_transaction_doc": 0, 
+  "server_code_error": " ", 
+  "show_in_menu": 1, 
+  "version": 1, 
+  "menu_index": 1, 
+  "parent_node": "Materials"
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "Sales and Purchase Return Tool", 
+  "doctype": "DocField", 
+  "parenttype": "DocType", 
+  "parentfield": "fields"
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "Sales and Purchase Return Tool", 
+  "read": 1, 
+  "doctype": "DocPerm", 
+  "parenttype": "DocType", 
+  "parentfield": "permissions"
+ }, 
+ {
+  "name": "Sales and Purchase Return Tool", 
+  "doctype": "DocType"
+ }, 
+ {
+  "no_copy": 1, 
+  "oldfieldtype": "Date", 
+  "doctype": "DocField", 
+  "label": "Return Date", 
+  "oldfieldname": "return_date", 
+  "fieldname": "return_date", 
+  "fieldtype": "Date", 
+  "reqd": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "no_copy": 1, 
+  "oldfieldtype": "Select", 
+  "doctype": "DocField", 
+  "label": "Return Type", 
+  "oldfieldname": "return_type", 
+  "trigger": "Client", 
+  "fieldname": "return_type", 
+  "fieldtype": "Select", 
+  "reqd": 1, 
+  "options": "\nSales Return\nPurchase Return", 
+  "permlevel": 0
+ }, 
+ {
+  "no_copy": 1, 
+  "oldfieldtype": "Link", 
+  "doctype": "DocField", 
+  "label": "Delivery Note No", 
+  "oldfieldname": "delivery_note_no", 
+  "options": "Delivery Note", 
+  "fieldname": "delivery_note_no", 
+  "fieldtype": "Link", 
+  "reqd": 0, 
+  "hidden": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Sales Invoice No", 
+  "permlevel": 0, 
+  "fieldname": "sales_invoice_no", 
+  "fieldtype": "Link", 
+  "hidden": 1, 
+  "options": "Sales Invoice"
+ }, 
+ {
+  "no_copy": 1, 
+  "oldfieldtype": "Link", 
+  "doctype": "DocField", 
+  "label": "Purchase Receipt No", 
+  "oldfieldname": "purchase_receipt_no", 
+  "permlevel": 0, 
+  "fieldname": "purchase_receipt_no", 
+  "fieldtype": "Link", 
+  "hidden": 1, 
+  "options": "Purchase Receipt"
+ }, 
+ {
+  "print_hide": 1, 
+  "doctype": "DocField", 
+  "label": "Customer/Supplier", 
+  "fieldname": "cust_supp", 
+  "fieldtype": "Data", 
+  "hidden": 1, 
+  "permlevel": 1
+ }, 
+ {
+  "print_hide": 1, 
+  "doctype": "DocField", 
+  "label": "Cust/Supp Name", 
+  "fieldname": "cust_supp_name", 
+  "fieldtype": "Data", 
+  "hidden": 1, 
+  "permlevel": 1
+ }, 
+ {
+  "print_hide": 1, 
+  "doctype": "DocField", 
+  "label": "Cust/Supp Address", 
+  "fieldname": "cust_supp_address", 
+  "fieldtype": "Small Text", 
+  "hidden": 1, 
+  "permlevel": 1
+ }, 
+ {
+  "oldfieldtype": "Button", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Get Items", 
+  "trigger": "Client", 
+  "fieldname": "get_items", 
+  "fieldtype": "Button", 
+  "hidden": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "no_copy": 1, 
+  "oldfieldtype": "Table", 
+  "doctype": "DocField", 
+  "label": "Sales and Purchase Return Items", 
+  "oldfieldname": "return_details", 
+  "permlevel": 1, 
+  "fieldname": "return_details", 
+  "fieldtype": "Table", 
+  "hidden": 1, 
+  "options": "Sales and Purchase Return Item"
+ }, 
+ {
+  "oldfieldtype": "Button", 
+  "doctype": "DocField", 
+  "label": "Make Stock Entry", 
+  "trigger": "Client", 
+  "fieldname": "make_stock_entry", 
+  "fieldtype": "Button", 
+  "hidden": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "oldfieldtype": "Button", 
+  "doctype": "DocField", 
+  "label": "Make Excise Invoice", 
+  "trigger": "Client", 
+  "fieldname": "make_excise_invoice", 
+  "fieldtype": "Button", 
+  "hidden": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "oldfieldtype": "Button", 
+  "doctype": "DocField", 
+  "label": "Make Credit Note", 
+  "trigger": "Client", 
+  "fieldname": "make_credit_note", 
+  "fieldtype": "Button", 
+  "hidden": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "oldfieldtype": "Button", 
+  "doctype": "DocField", 
+  "label": "Make Debit Note", 
+  "trigger": "Client", 
+  "fieldname": "make_debit_note", 
+  "fieldtype": "Button", 
+  "hidden": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "amend": 0, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "submit": 0, 
+  "write": 1, 
+  "role": "Material User", 
+  "cancel": 0, 
+  "permlevel": 0
+ }, 
+ {
+  "amend": 0, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "submit": 0, 
+  "write": 1, 
+  "role": "Material Manager", 
+  "cancel": 0, 
+  "permlevel": 0
+ }, 
+ {
+  "amend": 0, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "submit": 0, 
+  "write": 1, 
+  "role": "System Manager", 
+  "cancel": 0, 
+  "permlevel": 0
+ }, 
+ {
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "write": 1, 
+  "role": "Accounts Manager", 
+  "permlevel": 0
+ }, 
+ {
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "write": 1, 
+  "role": "Accounts User", 
+  "permlevel": 0
+ }, 
+ {
+  "role": "All", 
+  "permlevel": 1, 
+  "doctype": "DocPerm"
+ }
 ]

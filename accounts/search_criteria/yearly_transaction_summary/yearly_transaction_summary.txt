@@ -1,32 +1,25 @@
-# Search Criteria, yearly_transaction_summary
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-04-03 12:49:53',
-		'docstatus': 0,
-		'modified': '2012-04-03 12:49:53',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
-	},
-
-	# These values are common for all Search Criteria
-	{
-		'columns': u'Profile\x01ID',
-		'criteria_name': u'Yearly Transaction Summary',
-		'doc_type': u'Profile',
-		'doctype': 'Search Criteria',
-		'filters': u"{'DocType\x01Fiscal Year':'2009-2010','DocType\x01Company':'Alpha Company','DocType\x01Period':'Monthly'}",
-		'module': u'Accounts',
-		'name': '__common__',
-		'sort_by': u'`tabProfile`.`name`',
-		'sort_order': u'DESC',
-		'standard': u'Yes'
-	},
-
-	# Search Criteria, yearly_transaction_summary
-	{
-		'doctype': 'Search Criteria',
-		'name': u'yearly_transaction_summary'
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-04-03 12:49:53", 
+  "modified_by": "Administrator", 
+  "modified": "2012-04-03 12:49:53"
+ }, 
+ {
+  "module": "Accounts", 
+  "standard": "Yes", 
+  "sort_order": "DESC", 
+  "filters": "{'DocType\u0001Fiscal Year':'2009-2010','DocType\u0001Company':'Alpha Company','DocType\u0001Period':'Monthly'}", 
+  "doctype": "Search Criteria", 
+  "doc_type": "Profile", 
+  "name": "__common__", 
+  "sort_by": "`tabProfile`.`name`", 
+  "criteria_name": "Yearly Transaction Summary", 
+  "columns": "Profile\u0001ID"
+ }, 
+ {
+  "name": "yearly_transaction_summary", 
+  "doctype": "Search Criteria"
+ }
 ]

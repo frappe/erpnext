@@ -1,28 +1,21 @@
-# Page, buying-home
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-02-21 13:22:54',
-		'docstatus': 0,
-		'modified': '2012-02-21 13:22:54',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
-	},
-
-	# These values are common for all Page
-	{
-		'doctype': 'Page',
-		'module': u'Buying',
-		'name': '__common__',
-		'page_name': u'buying-home',
-		'standard': u'Yes',
-		'title': u'Buying Home'
-	},
-
-	# Page, buying-home
-	{
-		'doctype': 'Page',
-		'name': u'buying-home'
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-02-21 13:22:54", 
+  "modified_by": "Administrator", 
+  "modified": "2012-02-21 13:22:54"
+ }, 
+ {
+  "name": "__common__", 
+  "title": "Buying Home", 
+  "module": "Buying", 
+  "doctype": "Page", 
+  "page_name": "buying-home", 
+  "standard": "Yes"
+ }, 
+ {
+  "name": "buying-home", 
+  "doctype": "Page"
+ }
 ]

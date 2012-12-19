@@ -1,30 +1,23 @@
-# DocType, Plot Control
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-03-27 14:36:12',
-		'docstatus': 0,
-		'modified': '2012-03-27 14:36:12',
-		'modified_by': u'Administrator',
-		'owner': u'harshada@webnotestech.com'
-	},
-
-	# These values are common for all DocType
-	{
-		'colour': u'White:FFF',
-		'doctype': 'DocType',
-		'issingle': 1,
-		'module': u'Selling',
-		'name': '__common__',
-		'section_style': u'Simple',
-		'server_code_error': u' ',
-		'version': 215
-	},
-
-	# DocType, Plot Control
-	{
-		'doctype': 'DocType',
-		'name': u'Plot Control'
-	}
+ {
+  "owner": "harshada@webnotestech.com", 
+  "docstatus": 0, 
+  "creation": "2012-03-27 14:36:12", 
+  "modified_by": "Administrator", 
+  "modified": "2012-03-27 14:36:12"
+ }, 
+ {
+  "section_style": "Simple", 
+  "name": "__common__", 
+  "colour": "White:FFF", 
+  "module": "Selling", 
+  "doctype": "DocType", 
+  "version": 215, 
+  "server_code_error": " ", 
+  "issingle": 1
+ }, 
+ {
+  "name": "Plot Control", 
+  "doctype": "DocType"
+ }
 ]

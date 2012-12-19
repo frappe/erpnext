@@ -1,37 +1,30 @@
-# Search Criteria, delivered_items_to_be_install
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-04-03 12:49:51',
-		'docstatus': 0,
-		'modified': '2012-04-03 12:49:51',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
-	},
-
-	# These values are common for all Search Criteria
-	{
-		'add_col': u"(`tabDelivery Note Item`.`qty`- ifnull(`tabDelivery Note Item`.`installed_qty`, 0)) AS 'Pending to Install'",
-		'add_cond': u'`tabDelivery Note Item`.`qty` > ifnull(`tabDelivery Note Item`.`installed_qty`, 0)',
-		'columns': u'Delivery Note\x01ID,Delivery Note\x01Status,Delivery Note\x01Customer,Delivery Note\x01Customer Name,Delivery Note\x01Contact Person,Delivery Note\x01Voucher Date,Delivery Note Item\x01Item Code,Delivery Note Item\x01Item Name,Delivery Note Item\x01Quantity,Delivery Note Item\x01Installed Qty,Delivery Note\x01% Installed',
-		'criteria_name': u'Delivered Items to be Install',
-		'description': u'Delivered Items to be Install',
-		'doc_type': u'Delivery Note Item',
-		'doctype': 'Search Criteria',
-		'filters': u"{'Delivery Note\x01Saved':1,'Delivery Note\x01Submitted':1,'Delivery Note\x01Status':'','Delivery Note\x01Fiscal Year':''}",
-		'module': u'Selling',
-		'name': '__common__',
-		'page_len': 50,
-		'parent_doc_type': u'Delivery Note',
-		'sort_by': u'`tabDelivery Note`.`name`',
-		'sort_order': u'DESC',
-		'standard': u'Yes'
-	},
-
-	# Search Criteria, delivered_items_to_be_install
-	{
-		'doctype': 'Search Criteria',
-		'name': u'delivered_items_to_be_install'
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-04-03 12:49:51", 
+  "modified_by": "Administrator", 
+  "modified": "2012-04-03 12:49:51"
+ }, 
+ {
+  "add_col": "(`tabDelivery Note Item`.`qty`- ifnull(`tabDelivery Note Item`.`installed_qty`, 0)) AS 'Pending to Install'", 
+  "parent_doc_type": "Delivery Note", 
+  "module": "Selling", 
+  "standard": "Yes", 
+  "sort_order": "DESC", 
+  "filters": "{'Delivery Note\u0001Saved':1,'Delivery Note\u0001Submitted':1,'Delivery Note\u0001Status':'','Delivery Note\u0001Fiscal Year':''}", 
+  "description": "Delivered Items to be Install", 
+  "doc_type": "Delivery Note Item", 
+  "name": "__common__", 
+  "add_cond": "`tabDelivery Note Item`.`qty` > ifnull(`tabDelivery Note Item`.`installed_qty`, 0)", 
+  "doctype": "Search Criteria", 
+  "sort_by": "`tabDelivery Note`.`name`", 
+  "page_len": 50, 
+  "criteria_name": "Delivered Items to be Install", 
+  "columns": "Delivery Note\u0001ID,Delivery Note\u0001Status,Delivery Note\u0001Customer,Delivery Note\u0001Customer Name,Delivery Note\u0001Contact Person,Delivery Note\u0001Voucher Date,Delivery Note Item\u0001Item Code,Delivery Note Item\u0001Item Name,Delivery Note Item\u0001Quantity,Delivery Note Item\u0001Installed Qty,Delivery Note\u0001% Installed"
+ }, 
+ {
+  "name": "delivered_items_to_be_install", 
+  "doctype": "Search Criteria"
+ }
 ]

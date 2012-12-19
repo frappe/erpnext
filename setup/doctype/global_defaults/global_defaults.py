@@ -17,6 +17,7 @@
 from __future__ import unicode_literals
 """Global Defaults"""
 import webnotes
+from webnotes.utils import cint
 
 keydict = {
 	"fiscal_year": "current_fiscal_year",
@@ -66,12 +67,11 @@ class DocType:
 	
 	def validate_session_expiry(self):
 		if self.doc.session_expiry:
-			from datetime import datetime
-			try:
-				datetime.strptime(self.doc.session_expiry, "%H:%M")
-			except ValueError:
+			parts = self.doc.session_expiry.split(":")
+			if len(parts)!=2 or not (cint(parts[0]) or cint(parts[1])):
 				webnotes.msgprint("""Session Expiry must be in format hh:mm""",
 					raise_exception=1)
+				
 	
 	def get_defaults(self):
 		return webnotes.conn.get_defaults()

@@ -1,61 +1,48 @@
-# DocType, Series Detail
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-03-27 14:36:25',
-		'docstatus': 0,
-		'modified': '2012-03-27 14:36:25',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
-	},
-
-	# These values are common for all DocType
-	{
-		'colour': u'White:FFF',
-		'doctype': 'DocType',
-		'istable': 1,
-		'module': u'Setup',
-		'name': '__common__',
-		'section_style': u'Tray',
-		'show_in_menu': 0,
-		'version': 3
-	},
-
-	# These values are common for all DocField
-	{
-		'doctype': u'DocField',
-		'name': '__common__',
-		'parent': u'Series Detail',
-		'parentfield': u'fields',
-		'parenttype': u'DocType',
-		'permlevel': 0
-	},
-
-	# DocType, Series Detail
-	{
-		'doctype': 'DocType',
-		'name': u'Series Detail'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'series',
-		'fieldtype': u'Read Only',
-		'label': u'Series',
-		'oldfieldname': u'series',
-		'oldfieldtype': u'Read Only'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'remove',
-		'fieldtype': u'Check',
-		'label': u'Remove',
-		'oldfieldname': u'remove',
-		'oldfieldtype': u'Check',
-		'trigger': u'Client'
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-03-27 14:36:25", 
+  "modified_by": "Administrator", 
+  "modified": "2012-03-27 14:36:25"
+ }, 
+ {
+  "section_style": "Tray", 
+  "istable": 1, 
+  "name": "__common__", 
+  "colour": "White:FFF", 
+  "module": "Setup", 
+  "doctype": "DocType", 
+  "version": 3, 
+  "show_in_menu": 0
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "Series Detail", 
+  "doctype": "DocField", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "parentfield": "fields"
+ }, 
+ {
+  "name": "Series Detail", 
+  "doctype": "DocType"
+ }, 
+ {
+  "oldfieldtype": "Read Only", 
+  "doctype": "DocField", 
+  "label": "Series", 
+  "oldfieldname": "series", 
+  "fieldname": "series", 
+  "fieldtype": "Read Only"
+ }, 
+ {
+  "oldfieldtype": "Check", 
+  "doctype": "DocField", 
+  "label": "Remove", 
+  "oldfieldname": "remove", 
+  "trigger": "Client", 
+  "fieldname": "remove", 
+  "fieldtype": "Check"
+ }
 ]

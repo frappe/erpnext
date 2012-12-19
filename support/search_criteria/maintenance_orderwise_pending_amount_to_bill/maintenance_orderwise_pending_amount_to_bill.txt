@@ -1,36 +1,29 @@
-# Search Criteria, maintenance_orderwise_pending_amount_to_bill
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-04-03 12:49:51',
-		'docstatus': 0,
-		'modified': '2012-04-03 12:49:51',
-		'modified_by': u'Administrator',
-		'owner': u'ashwini@webnotestech.com'
-	},
-
-	# These values are common for all Search Criteria
-	{
-		'add_col': u"SUM((`tabSales Order Item`.`qty` - `tabSales Order Item`.`billed_qty`) * `tabSales Order Item`.`basic_rate`) AS 'Pending Amount'",
-		'add_cond': u"`tabSales Order`.status != 'Stopped'\n`tabSales Order`.order_type='Maintenance'",
-		'columns': u'Sales Order\x01ID,Sales Order\x01Customer,Sales Order\x01Customer Name,Sales Order\x01Customer Address,Sales Order\x01Status,Sales Order\x01% Billed,Sales Order\x01Sales Order Date',
-		'criteria_name': u'Maintenance Orderwise Pending Amount To Bill',
-		'doc_type': u'Sales Order Item',
-		'doctype': 'Search Criteria',
-		'filters': u"{'Sales Order\x01Saved':1,'Sales Order\x01Submitted':1,'Sales Order\x01Status':'','Sales Order\x01Fiscal Year':''}",
-		'module': u'Support',
-		'name': '__common__',
-		'page_len': 50,
-		'parent_doc_type': u'Sales Order',
-		'sort_by': u'`tabSales Order`.`name`',
-		'sort_order': u'DESC',
-		'standard': u'Yes'
-	},
-
-	# Search Criteria, maintenance_orderwise_pending_amount_to_bill
-	{
-		'doctype': 'Search Criteria',
-		'name': u'maintenance_orderwise_pending_amount_to_bill'
-	}
+ {
+  "owner": "ashwini@webnotestech.com", 
+  "docstatus": 0, 
+  "creation": "2012-04-03 12:49:51", 
+  "modified_by": "Administrator", 
+  "modified": "2012-04-03 12:49:51"
+ }, 
+ {
+  "add_col": "SUM((`tabSales Order Item`.`qty` - `tabSales Order Item`.`billed_qty`) * `tabSales Order Item`.`basic_rate`) AS 'Pending Amount'", 
+  "parent_doc_type": "Sales Order", 
+  "module": "Support", 
+  "standard": "Yes", 
+  "sort_order": "DESC", 
+  "filters": "{'Sales Order\u0001Saved':1,'Sales Order\u0001Submitted':1,'Sales Order\u0001Status':'','Sales Order\u0001Fiscal Year':''}", 
+  "doc_type": "Sales Order Item", 
+  "name": "__common__", 
+  "add_cond": "`tabSales Order`.status != 'Stopped'\n`tabSales Order`.order_type='Maintenance'", 
+  "doctype": "Search Criteria", 
+  "sort_by": "`tabSales Order`.`name`", 
+  "page_len": 50, 
+  "criteria_name": "Maintenance Orderwise Pending Amount To Bill", 
+  "columns": "Sales Order\u0001ID,Sales Order\u0001Customer,Sales Order\u0001Customer Name,Sales Order\u0001Customer Address,Sales Order\u0001Status,Sales Order\u0001% Billed,Sales Order\u0001Sales Order Date"
+ }, 
+ {
+  "name": "maintenance_orderwise_pending_amount_to_bill", 
+  "doctype": "Search Criteria"
+ }
 ]

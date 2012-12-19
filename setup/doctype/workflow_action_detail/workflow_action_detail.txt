@@ -1,61 +1,48 @@
-# DocType, Workflow Action Detail
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-03-27 14:36:26',
-		'docstatus': 0,
-		'modified': '2012-03-27 14:36:26',
-		'modified_by': u'Administrator',
-		'owner': u'swarnalata@webnotestech.com'
-	},
-
-	# These values are common for all DocType
-	{
-		'colour': u'White:FFF',
-		'doctype': 'DocType',
-		'istable': 1,
-		'module': u'Setup',
-		'name': '__common__',
-		'section_style': u'Simple',
-		'show_in_menu': 0,
-		'version': 5
-	},
-
-	# These values are common for all DocField
-	{
-		'doctype': u'DocField',
-		'name': '__common__',
-		'parent': u'Workflow Action Detail',
-		'parentfield': u'fields',
-		'parenttype': u'DocType',
-		'permlevel': 0,
-		'width': u'200px'
-	},
-
-	# DocType, Workflow Action Detail
-	{
-		'doctype': 'DocType',
-		'name': u'Workflow Action Detail'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'action_field',
-		'fieldtype': u'Select',
-		'label': u'Field',
-		'oldfieldname': u'action_field',
-		'oldfieldtype': u'Select'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'action_value',
-		'fieldtype': u'Data',
-		'label': u'Value',
-		'oldfieldname': u'action_value',
-		'oldfieldtype': u'Data'
-	}
+ {
+  "owner": "swarnalata@webnotestech.com", 
+  "docstatus": 0, 
+  "creation": "2012-03-27 14:36:26", 
+  "modified_by": "Administrator", 
+  "modified": "2012-03-27 14:36:26"
+ }, 
+ {
+  "section_style": "Simple", 
+  "istable": 1, 
+  "name": "__common__", 
+  "colour": "White:FFF", 
+  "module": "Setup", 
+  "doctype": "DocType", 
+  "version": 5, 
+  "show_in_menu": 0
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "Workflow Action Detail", 
+  "doctype": "DocField", 
+  "width": "200px", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "parentfield": "fields"
+ }, 
+ {
+  "name": "Workflow Action Detail", 
+  "doctype": "DocType"
+ }, 
+ {
+  "oldfieldtype": "Select", 
+  "doctype": "DocField", 
+  "label": "Field", 
+  "oldfieldname": "action_field", 
+  "fieldname": "action_field", 
+  "fieldtype": "Select"
+ }, 
+ {
+  "oldfieldtype": "Data", 
+  "doctype": "DocField", 
+  "label": "Value", 
+  "oldfieldname": "action_value", 
+  "fieldname": "action_value", 
+  "fieldtype": "Data"
+ }
 ]

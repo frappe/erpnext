@@ -1,28 +1,21 @@
-# Page, activity
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-02-29 11:59:13',
-		'docstatus': 0,
-		'modified': '2012-02-29 12:11:46',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
-	},
-
-	# These values are common for all Page
-	{
-		'doctype': 'Page',
-		'module': u'Home',
-		'name': '__common__',
-		'page_name': u'activity',
-		'standard': u'Yes',
-		'title': u'Activity'
-	},
-
-	# Page, activity
-	{
-		'doctype': 'Page',
-		'name': u'activity'
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-02-29 11:59:13", 
+  "modified_by": "Administrator", 
+  "modified": "2012-02-29 12:11:46"
+ }, 
+ {
+  "name": "__common__", 
+  "title": "Activity", 
+  "module": "Home", 
+  "doctype": "Page", 
+  "page_name": "activity", 
+  "standard": "Yes"
+ }, 
+ {
+  "name": "activity", 
+  "doctype": "Page"
+ }
 ]

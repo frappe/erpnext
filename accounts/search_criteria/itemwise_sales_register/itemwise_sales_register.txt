@@ -1,34 +1,27 @@
-# Search Criteria, itemwise_sales_register
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-04-03 12:49:51',
-		'docstatus': 0,
-		'modified': '2012-04-03 12:49:51',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
-	},
-
-	# These values are common for all Search Criteria
-	{
-		'columns': u'Sales Invoice Item\x01Item,Sales Invoice Item\x01Item Name,Sales Invoice Item\x01Item Group,Sales Invoice\x01ID,Sales Invoice\x01Voucher Date,Sales Invoice\x01Posting Date,Sales Invoice\x01Debit To,Sales Invoice Item\x01Cost Center,Sales Invoice\x01Territory,Sales Invoice Item\x01Income Account,Sales Invoice Item\x01Qty,Sales Invoice Item\x01Basic Rate*,Sales Invoice Item\x01Amount*',
-		'criteria_name': u'Itemwise Sales Register',
-		'doc_type': u'Sales Invoice Item',
-		'doctype': 'Search Criteria',
-		'filters': u"{'Sales Invoice\x01Submitted':1,'Sales Invoice\x01From Posting Date\x01lower':'','Sales Invoice\x01To Posting Date\x01upper':'','Sales Invoice\x01Is Opening':'','Sales Invoice\x01Company':'','Sales Invoice\x01Fiscal Year':''}",
-		'module': u'Accounts',
-		'name': '__common__',
-		'page_len': 50,
-		'parent_doc_type': u'Sales Invoice',
-		'sort_by': u'`tabSales Invoice Item`.`income_account`',
-		'sort_order': u'DESC',
-		'standard': u'Yes'
-	},
-
-	# Search Criteria, itemwise_sales_register
-	{
-		'doctype': 'Search Criteria',
-		'name': u'itemwise_sales_register'
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-04-03 12:49:51", 
+  "modified_by": "Administrator", 
+  "modified": "2012-04-03 12:49:51"
+ }, 
+ {
+  "parent_doc_type": "Sales Invoice", 
+  "module": "Accounts", 
+  "standard": "Yes", 
+  "sort_order": "DESC", 
+  "filters": "{'Sales Invoice\u0001Submitted':1,'Sales Invoice\u0001From Posting Date\u0001lower':'','Sales Invoice\u0001To Posting Date\u0001upper':'','Sales Invoice\u0001Is Opening':'','Sales Invoice\u0001Company':'','Sales Invoice\u0001Fiscal Year':''}", 
+  "doc_type": "Sales Invoice Item", 
+  "name": "__common__", 
+  "doctype": "Search Criteria", 
+  "sort_by": "`tabSales Invoice Item`.`income_account`", 
+  "page_len": 50, 
+  "criteria_name": "Itemwise Sales Register", 
+  "columns": "Sales Invoice Item\u0001Item,Sales Invoice Item\u0001Item Name,Sales Invoice Item\u0001Item Group,Sales Invoice\u0001ID,Sales Invoice\u0001Voucher Date,Sales Invoice\u0001Posting Date,Sales Invoice\u0001Debit To,Sales Invoice Item\u0001Cost Center,Sales Invoice\u0001Territory,Sales Invoice Item\u0001Income Account,Sales Invoice Item\u0001Qty,Sales Invoice Item\u0001Basic Rate*,Sales Invoice Item\u0001Amount*"
+ }, 
+ {
+  "name": "itemwise_sales_register", 
+  "doctype": "Search Criteria"
+ }
 ]

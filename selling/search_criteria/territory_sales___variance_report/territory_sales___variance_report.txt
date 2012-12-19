@@ -1,33 +1,26 @@
-# Search Criteria, territory_sales_-_variance_report
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-04-03 12:49:53',
-		'docstatus': 0,
-		'modified': '2012-04-03 12:49:53',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
-	},
-
-	# These values are common for all Search Criteria
-	{
-		'columns': u'Territory\x01ID',
-		'criteria_name': u'Territory Sales - Variance Report',
-		'doc_type': u'Territory',
-		'doctype': 'Search Criteria',
-		'filters': u"{'Territory\x01State':'','Territory\x01Based On':'Sales Order','Territory\x01Fiscal Year':'2009-2010','Territory\x01Company':'Alpha Company','Territory\x01Period':'Quarterly'}",
-		'module': u'Selling',
-		'name': '__common__',
-		'page_len': 50,
-		'sort_by': u'ID',
-		'sort_order': u'DESC',
-		'standard': u'Yes'
-	},
-
-	# Search Criteria, territory_sales_-_variance_report
-	{
-		'doctype': 'Search Criteria',
-		'name': u'territory_sales_-_variance_report'
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-04-03 12:49:53", 
+  "modified_by": "Administrator", 
+  "modified": "2012-04-03 12:49:53"
+ }, 
+ {
+  "module": "Selling", 
+  "standard": "Yes", 
+  "sort_order": "DESC", 
+  "filters": "{'Territory\u0001State':'','Territory\u0001Based On':'Sales Order','Territory\u0001Fiscal Year':'2009-2010','Territory\u0001Company':'Alpha Company','Territory\u0001Period':'Quarterly'}", 
+  "doctype": "Search Criteria", 
+  "doc_type": "Territory", 
+  "name": "__common__", 
+  "sort_by": "ID", 
+  "page_len": 50, 
+  "criteria_name": "Territory Sales - Variance Report", 
+  "columns": "Territory\u0001ID"
+ }, 
+ {
+  "name": "territory_sales_-_variance_report", 
+  "doctype": "Search Criteria"
+ }
 ]

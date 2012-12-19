@@ -1,34 +1,27 @@
-# Search Criteria, itemwise_purchase_details
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-04-11 13:16:55',
-		'docstatus': 0,
-		'modified': '2012-04-13 11:15:06',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
-	},
-
-	# These values are common for all Search Criteria
-	{
-		'columns': u'Purchase Order\x01ID,Purchase Order\x01Purchase Order Date,Purchase Order Item\x01Item Code,Purchase Order Item\x01Item Name,Purchase Order Item\x01Quantity,Purchase Order Item\x01Stock UOM,Purchase Order Item\x01Rate ,Purchase Order Item\x01Amount,Purchase Order\x01Net Total*,Purchase Order\x01Grand Total',
-		'criteria_name': u'Itemwise Purchase Details',
-		'doc_type': u'Purchase Order Item',
-		'doctype': 'Search Criteria',
-		'filters': u'{"Purchase Order\\u0001Submitted":1,"Purchase Order\\u0001Status":[],"Purchase Order\\u0001Fiscal Year":[]}',
-		'module': u'Buying',
-		'name': '__common__',
-		'page_len': 50,
-		'parent_doc_type': u'Purchase Order',
-		'sort_by': u'`tabPurchase Order`.`transaction_date`',
-		'sort_order': u'DESC',
-		'standard': u'Yes'
-	},
-
-	# Search Criteria, itemwise_purchase_details
-	{
-		'doctype': 'Search Criteria',
-		'name': u'itemwise_purchase_details'
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-04-11 13:16:55", 
+  "modified_by": "Administrator", 
+  "modified": "2012-04-13 11:15:06"
+ }, 
+ {
+  "parent_doc_type": "Purchase Order", 
+  "module": "Buying", 
+  "standard": "Yes", 
+  "sort_order": "DESC", 
+  "filters": "{\"Purchase Order\\u0001Submitted\":1,\"Purchase Order\\u0001Status\":[],\"Purchase Order\\u0001Fiscal Year\":[]}", 
+  "doc_type": "Purchase Order Item", 
+  "name": "__common__", 
+  "doctype": "Search Criteria", 
+  "sort_by": "`tabPurchase Order`.`transaction_date`", 
+  "page_len": 50, 
+  "criteria_name": "Itemwise Purchase Details", 
+  "columns": "Purchase Order\u0001ID,Purchase Order\u0001Purchase Order Date,Purchase Order Item\u0001Item Code,Purchase Order Item\u0001Item Name,Purchase Order Item\u0001Quantity,Purchase Order Item\u0001Stock UOM,Purchase Order Item\u0001Rate ,Purchase Order Item\u0001Amount,Purchase Order\u0001Net Total*,Purchase Order\u0001Grand Total"
+ }, 
+ {
+  "name": "itemwise_purchase_details", 
+  "doctype": "Search Criteria"
+ }
 ]

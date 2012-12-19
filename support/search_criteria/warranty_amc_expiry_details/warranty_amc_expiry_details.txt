@@ -1,33 +1,26 @@
-# Search Criteria, warranty-amc_expiry_details
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-04-03 12:49:53',
-		'docstatus': 0,
-		'modified': '2012-04-03 12:49:53',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
-	},
-
-	# These values are common for all Search Criteria
-	{
-		'columns': u'Serial No\x01ID,Serial No\x01Item Code,Serial No\x01Description,Serial No\x01Status,Serial No\x01Item Group,Serial No\x01Purchase Receipt No,Serial No\x01Delivery Note No,Serial No\x01Customer,Serial No\x01Customer Name,Serial No\x01AMC Expiry Date,Serial No\x01Warranty Expiry Date',
-		'criteria_name': u'Warranty/AMC Expiry Details',
-		'doc_type': u'Serial No',
-		'doctype': 'Search Criteria',
-		'filters': u"{'Serial No\x01Saved':1,'Serial No\x01Status':'','Serial No\x01Maintenance Status':''}",
-		'module': u'Support',
-		'name': '__common__',
-		'page_len': 50,
-		'sort_by': u'`tabSerial No`.`name`',
-		'sort_order': u'DESC',
-		'standard': u'Yes'
-	},
-
-	# Search Criteria, warranty-amc_expiry_details
-	{
-		'doctype': 'Search Criteria',
-		'name': u'warranty-amc_expiry_details'
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-04-03 12:49:53", 
+  "modified_by": "Administrator", 
+  "modified": "2012-04-03 12:49:53"
+ }, 
+ {
+  "module": "Support", 
+  "standard": "Yes", 
+  "sort_order": "DESC", 
+  "filters": "{'Serial No\u0001Saved':1,'Serial No\u0001Status':'','Serial No\u0001Maintenance Status':''}", 
+  "doctype": "Search Criteria", 
+  "doc_type": "Serial No", 
+  "name": "__common__", 
+  "sort_by": "`tabSerial No`.`name`", 
+  "page_len": 50, 
+  "criteria_name": "Warranty/AMC Expiry Details", 
+  "columns": "Serial No\u0001ID,Serial No\u0001Item Code,Serial No\u0001Description,Serial No\u0001Status,Serial No\u0001Item Group,Serial No\u0001Purchase Receipt No,Serial No\u0001Delivery Note No,Serial No\u0001Customer,Serial No\u0001Customer Name,Serial No\u0001AMC Expiry Date,Serial No\u0001Warranty Expiry Date"
+ }, 
+ {
+  "name": "warranty-amc_expiry_details", 
+  "doctype": "Search Criteria"
+ }
 ]

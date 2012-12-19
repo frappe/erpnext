@@ -1,33 +1,26 @@
-# Search Criteria, employee_appraisals
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-04-03 12:49:51',
-		'docstatus': 0,
-		'modified': '2012-04-03 12:49:51',
-		'modified_by': u'Administrator',
-		'owner': u'ashwini@webnotestech.com'
-	},
-
-	# These values are common for all Search Criteria
-	{
-		'columns': u'Appraisal\x01ID,Appraisal\x01Status,Appraisal\x01Employee,Appraisal\x01Employee Name,Appraisal\x01Start Date,Appraisal\x01End Date,Appraisal\x01Approver,Appraisal\x01Total Score',
-		'criteria_name': u'Employee Appraisals',
-		'doc_type': u'Appraisal',
-		'doctype': 'Search Criteria',
-		'filters': u"{'Appraisal\x01Saved':1,'Appraisal\x01Submitted':1,'Appraisal\x01Status':'','Appraisal\x01Fiscal Year':''}",
-		'module': u'HR',
-		'name': '__common__',
-		'page_len': 50,
-		'sort_by': u'`tabAppraisal`.`name`',
-		'sort_order': u'DESC',
-		'standard': u'Yes'
-	},
-
-	# Search Criteria, employee_appraisals
-	{
-		'doctype': 'Search Criteria',
-		'name': u'employee_appraisals'
-	}
+ {
+  "owner": "ashwini@webnotestech.com", 
+  "docstatus": 0, 
+  "creation": "2012-04-03 12:49:51", 
+  "modified_by": "Administrator", 
+  "modified": "2012-04-03 12:49:51"
+ }, 
+ {
+  "module": "HR", 
+  "standard": "Yes", 
+  "sort_order": "DESC", 
+  "filters": "{'Appraisal\u0001Saved':1,'Appraisal\u0001Submitted':1,'Appraisal\u0001Status':'','Appraisal\u0001Fiscal Year':''}", 
+  "doctype": "Search Criteria", 
+  "doc_type": "Appraisal", 
+  "name": "__common__", 
+  "sort_by": "`tabAppraisal`.`name`", 
+  "page_len": 50, 
+  "criteria_name": "Employee Appraisals", 
+  "columns": "Appraisal\u0001ID,Appraisal\u0001Status,Appraisal\u0001Employee,Appraisal\u0001Employee Name,Appraisal\u0001Start Date,Appraisal\u0001End Date,Appraisal\u0001Approver,Appraisal\u0001Total Score"
+ }, 
+ {
+  "name": "employee_appraisals", 
+  "doctype": "Search Criteria"
+ }
 ]

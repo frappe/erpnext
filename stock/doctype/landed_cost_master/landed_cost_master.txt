@@ -1,150 +1,117 @@
-# DocType, Landed Cost Master
 [
-
-	# These values are common in all dictionaries
-	{
-		u'creation': '2012-07-03 13:29:45',
-		u'docstatus': 0,
-		u'modified': '2012-09-17 10:53:26',
-		u'modified_by': u'Administrator',
-		u'owner': u'Administrator'
-	},
-
-	# These values are common for all DocType
-	{
-		'_last_update': u'1309508838',
-		'autoname': u'field:title',
-		'colour': u'White:FFF',
-		u'doctype': u'DocType',
-		'document_type': u'Master',
-		'module': u'Stock',
-		u'name': u'__common__',
-		'section_style': u'Simple',
-		'server_code_error': u' ',
-		'version': 1
-	},
-
-	# These values are common for all DocField
-	{
-		u'doctype': u'DocField',
-		u'name': u'__common__',
-		'parent': u'Landed Cost Master',
-		'parentfield': u'fields',
-		'parenttype': u'DocType'
-	},
-
-	# These values are common for all DocPerm
-	{
-		u'doctype': u'DocPerm',
-		u'name': u'__common__',
-		'parent': u'Landed Cost Master',
-		'parentfield': u'permissions',
-		'parenttype': u'DocType',
-		'read': 1
-	},
-
-	# DocType, Landed Cost Master
-	{
-		u'doctype': u'DocType',
-		u'name': u'Landed Cost Master'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'trash_reason',
-		'fieldtype': u'Small Text',
-		'label': u'Trash Reason',
-		'oldfieldname': u'trash_reason',
-		'oldfieldtype': u'Small Text',
-		'permlevel': 1
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'title',
-		'fieldtype': u'Data',
-		'label': u'Title',
-		'oldfieldname': u'title',
-		'oldfieldtype': u'Data',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'landed_cost_details',
-		'fieldtype': u'Section Break',
-		'label': u'Landed Cost Items',
-		'oldfieldtype': u'Section Break',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'landed_cost',
-		'fieldtype': u'Table',
-		'label': u'Landed Cost',
-		'oldfieldname': u'landed_cost',
-		'oldfieldtype': u'Table',
-		'options': u'Landed Cost Master Detail',
-		'permlevel': 0
-	},
-
-	# DocPerm
-	{
-		'create': 1,
-		u'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Purchase Manager',
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'create': 1,
-		u'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'System Manager',
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'create': 1,
-		u'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Purchase User',
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		u'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'All'
-	},
-
-	# DocPerm
-	{
-		u'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'System Manager'
-	},
-
-	# DocPerm
-	{
-		u'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Purchase User'
-	},
-
-	# DocPerm
-	{
-		u'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Purchase Manager'
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-07-03 13:29:45", 
+  "modified_by": "Administrator", 
+  "modified": "2012-09-17 10:53:26"
+ }, 
+ {
+  "section_style": "Simple", 
+  "module": "Stock", 
+  "doctype": "DocType", 
+  "autoname": "field:title", 
+  "document_type": "Master", 
+  "name": "__common__", 
+  "colour": "White:FFF", 
+  "_last_update": "1309508838", 
+  "server_code_error": " ", 
+  "version": 1
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "Landed Cost Master", 
+  "doctype": "DocField", 
+  "parenttype": "DocType", 
+  "parentfield": "fields"
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "Landed Cost Master", 
+  "read": 1, 
+  "doctype": "DocPerm", 
+  "parenttype": "DocType", 
+  "parentfield": "permissions"
+ }, 
+ {
+  "name": "Landed Cost Master", 
+  "doctype": "DocType"
+ }, 
+ {
+  "oldfieldtype": "Small Text", 
+  "doctype": "DocField", 
+  "label": "Trash Reason", 
+  "oldfieldname": "trash_reason", 
+  "fieldname": "trash_reason", 
+  "fieldtype": "Small Text", 
+  "permlevel": 1
+ }, 
+ {
+  "oldfieldtype": "Data", 
+  "doctype": "DocField", 
+  "label": "Title", 
+  "oldfieldname": "title", 
+  "fieldname": "title", 
+  "fieldtype": "Data", 
+  "permlevel": 0
+ }, 
+ {
+  "oldfieldtype": "Section Break", 
+  "doctype": "DocField", 
+  "label": "Landed Cost Items", 
+  "fieldname": "landed_cost_details", 
+  "fieldtype": "Section Break", 
+  "permlevel": 0
+ }, 
+ {
+  "oldfieldtype": "Table", 
+  "doctype": "DocField", 
+  "label": "Landed Cost", 
+  "oldfieldname": "landed_cost", 
+  "permlevel": 0, 
+  "fieldname": "landed_cost", 
+  "fieldtype": "Table", 
+  "options": "Landed Cost Master Detail"
+ }, 
+ {
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "write": 1, 
+  "role": "Purchase Manager", 
+  "permlevel": 0
+ }, 
+ {
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "write": 1, 
+  "role": "System Manager", 
+  "permlevel": 0
+ }, 
+ {
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "write": 1, 
+  "role": "Purchase User", 
+  "permlevel": 0
+ }, 
+ {
+  "role": "All", 
+  "permlevel": 1, 
+  "doctype": "DocPerm"
+ }, 
+ {
+  "role": "System Manager", 
+  "permlevel": 1, 
+  "doctype": "DocPerm"
+ }, 
+ {
+  "role": "Purchase User", 
+  "permlevel": 1, 
+  "doctype": "DocPerm"
+ }, 
+ {
+  "role": "Purchase Manager", 
+  "permlevel": 1, 
+  "doctype": "DocPerm"
+ }
 ]

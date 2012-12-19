@@ -1,73 +1,58 @@
-# DocType, Project Milestone
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-03-27 14:36:06',
-		'docstatus': 0,
-		'modified': '2012-03-27 14:36:06',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
-	},
-
-	# These values are common for all DocType
-	{
-		'colour': u'White:FFF',
-		'doctype': 'DocType',
-		'istable': 1,
-		'module': u'Projects',
-		'name': '__common__',
-		'section_style': u'Simple',
-		'server_code_error': u' ',
-		'version': 4
-	},
-
-	# These values are common for all DocField
-	{
-		'doctype': u'DocField',
-		'name': '__common__',
-		'parent': u'Project Milestone',
-		'parentfield': u'fields',
-		'parenttype': u'DocType',
-		'permlevel': 0
-	},
-
-	# DocType, Project Milestone
-	{
-		'doctype': 'DocType',
-		'name': u'Project Milestone'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'milestone_date',
-		'fieldtype': u'Date',
-		'label': u'Milestone Date',
-		'oldfieldname': u'milestone_date',
-		'oldfieldtype': u'Date'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'milestone',
-		'fieldtype': u'Text',
-		'label': u'Milestone',
-		'oldfieldname': u'milestone',
-		'oldfieldtype': u'Text',
-		'width': u'300px'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'status',
-		'fieldtype': u'Select',
-		'label': u'Status',
-		'no_copy': 1,
-		'oldfieldname': u'status',
-		'oldfieldtype': u'Select',
-		'options': u'Pending\nCompleted'
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-03-27 14:36:06", 
+  "modified_by": "Administrator", 
+  "modified": "2012-03-27 14:36:06"
+ }, 
+ {
+  "section_style": "Simple", 
+  "istable": 1, 
+  "name": "__common__", 
+  "colour": "White:FFF", 
+  "module": "Projects", 
+  "doctype": "DocType", 
+  "version": 4, 
+  "server_code_error": " "
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "Project Milestone", 
+  "doctype": "DocField", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "parentfield": "fields"
+ }, 
+ {
+  "name": "Project Milestone", 
+  "doctype": "DocType"
+ }, 
+ {
+  "oldfieldtype": "Date", 
+  "doctype": "DocField", 
+  "label": "Milestone Date", 
+  "oldfieldname": "milestone_date", 
+  "fieldname": "milestone_date", 
+  "fieldtype": "Date"
+ }, 
+ {
+  "oldfieldtype": "Text", 
+  "doctype": "DocField", 
+  "label": "Milestone", 
+  "oldfieldname": "milestone", 
+  "width": "300px", 
+  "fieldname": "milestone", 
+  "fieldtype": "Text"
+ }, 
+ {
+  "no_copy": 1, 
+  "oldfieldtype": "Select", 
+  "doctype": "DocField", 
+  "label": "Status", 
+  "oldfieldname": "status", 
+  "fieldname": "status", 
+  "fieldtype": "Select", 
+  "options": "Pending\nCompleted"
+ }
 ]

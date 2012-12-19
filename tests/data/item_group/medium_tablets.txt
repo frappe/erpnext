@@ -1,27 +1,20 @@
-# Item Group, Medium Tablets
 [
-
-	# These values are common in all dictionaries
-	{
-		u'creation': '2012-08-07 09:57:51',
-		u'docstatus': 0,
-		u'modified': '2012-08-07 09:57:51',
-		u'modified_by': u'Administrator',
-		u'owner': u'Administrator'
-	},
-
-	# These values are common for all Item Group
-	{
-		u'doctype': 'Item Group',
-		'is_group': u'No',
-		'item_group_name': u'Medium Tablets',
-		u'name': u'__common__',
-		'parent_item_group': u'Tablets'
-	},
-
-	# Item Group, Medium Tablets
-	{
-		u'doctype': 'Item Group',
-		u'name': u'Medium Tablets'
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-08-07 09:57:51", 
+  "modified_by": "Administrator", 
+  "modified": "2012-08-07 09:57:51"
+ }, 
+ {
+  "name": "__common__", 
+  "item_group_name": "Medium Tablets", 
+  "is_group": "No", 
+  "parent_item_group": "Tablets", 
+  "doctype": "Item Group"
+ }, 
+ {
+  "name": "Medium Tablets", 
+  "doctype": "Item Group"
+ }
 ]

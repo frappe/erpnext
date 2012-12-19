@@ -1,55 +1,40 @@
-# Page, sales-analytics
 [
-
-	# These values are common in all dictionaries
-	{
-		u'creation': '2012-09-21 20:15:12',
-		u'docstatus': 0,
-		u'modified': '2012-10-04 17:17:39',
-		u'modified_by': u'Administrator',
-		u'owner': u'Administrator'
-	},
-
-	# These values are common for all Page
-	{
-		u'doctype': u'Page',
-		'module': u'Selling',
-		u'name': u'__common__',
-		'page_name': u'sales-analytics',
-		'standard': u'Yes',
-		'title': u'Sales Analytics'
-	},
-
-	# These values are common for all Page Role
-	{
-		u'doctype': u'Page Role',
-		u'name': u'__common__',
-		'parent': u'sales-analytics',
-		'parentfield': u'roles',
-		'parenttype': u'Page'
-	},
-
-	# Page, sales-analytics
-	{
-		u'doctype': u'Page',
-		u'name': u'sales-analytics'
-	},
-
-	# Page Role
-	{
-		u'doctype': u'Page Role',
-		'role': u'Analytics'
-	},
-
-	# Page Role
-	{
-		u'doctype': u'Page Role',
-		'role': u'Sales Manager'
-	},
-
-	# Page Role
-	{
-		u'doctype': u'Page Role',
-		'role': u'Maintenance Manager'
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-09-21 20:15:12", 
+  "modified_by": "Administrator", 
+  "modified": "2012-10-04 17:17:39"
+ }, 
+ {
+  "name": "__common__", 
+  "title": "Sales Analytics", 
+  "module": "Selling", 
+  "doctype": "Page", 
+  "page_name": "sales-analytics", 
+  "standard": "Yes"
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "sales-analytics", 
+  "doctype": "Page Role", 
+  "parenttype": "Page", 
+  "parentfield": "roles"
+ }, 
+ {
+  "name": "sales-analytics", 
+  "doctype": "Page"
+ }, 
+ {
+  "role": "Analytics", 
+  "doctype": "Page Role"
+ }, 
+ {
+  "role": "Sales Manager", 
+  "doctype": "Page Role"
+ }, 
+ {
+  "role": "Maintenance Manager", 
+  "doctype": "Page Role"
+ }
 ]

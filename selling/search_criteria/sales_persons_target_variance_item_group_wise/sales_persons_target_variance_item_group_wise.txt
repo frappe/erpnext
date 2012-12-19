@@ -1,33 +1,26 @@
-# Search Criteria, sales_persons_target_variance_item_group_wise
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-04-03 12:49:52',
-		'docstatus': 0,
-		'modified': '2012-04-03 12:49:52',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
-	},
-
-	# These values are common for all Search Criteria
-	{
-		'criteria_name': u'Sales Persons Target Variance (Item Group wise)',
-		'doc_type': u'Target Detail',
-		'doctype': 'Search Criteria',
-		'filters': u"{'Sales Person\x01Country':'','Sales Person\x01State':'','Target Detail\x01Fiscal Year':''}",
-		'module': u'Selling',
-		'name': '__common__',
-		'page_len': 50,
-		'parent_doc_type': u'Sales Person',
-		'sort_by': u'`tabTarget Detail`.`target_amount`',
-		'sort_order': u'DESC',
-		'standard': u'Yes'
-	},
-
-	# Search Criteria, sales_persons_target_variance_item_group_wise
-	{
-		'doctype': 'Search Criteria',
-		'name': u'sales_persons_target_variance_item_group_wise'
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-04-03 12:49:52", 
+  "modified_by": "Administrator", 
+  "modified": "2012-04-03 12:49:52"
+ }, 
+ {
+  "parent_doc_type": "Sales Person", 
+  "module": "Selling", 
+  "doctype": "Search Criteria", 
+  "sort_order": "DESC", 
+  "filters": "{'Sales Person\u0001Country':'','Sales Person\u0001State':'','Target Detail\u0001Fiscal Year':''}", 
+  "standard": "Yes", 
+  "doc_type": "Target Detail", 
+  "name": "__common__", 
+  "sort_by": "`tabTarget Detail`.`target_amount`", 
+  "page_len": 50, 
+  "criteria_name": "Sales Persons Target Variance (Item Group wise)"
+ }, 
+ {
+  "name": "sales_persons_target_variance_item_group_wise", 
+  "doctype": "Search Criteria"
+ }
 ]

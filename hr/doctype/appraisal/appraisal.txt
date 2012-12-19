@@ -1,350 +1,293 @@
-# DocType, Appraisal
 [
-
-	# These values are common in all dictionaries
-	{
-		u'creation': '2012-11-16 10:33:39',
-		u'docstatus': 0,
-		u'modified': '2012-11-16 15:22:59',
-		u'modified_by': u'Administrator',
-		u'owner': u'ashwini@webnotestech.com'
-	},
-
-	# These values are common for all DocType
-	{
-		'_last_update': u'1316075905',
-		'autoname': u'APRSL.#####',
-		'colour': u'White:FFF',
-		u'doctype': u'DocType',
-		'is_submittable': 1,
-		'module': u'HR',
-		u'name': u'__common__',
-		'search_fields': u'status, employee, employee_name',
-		'section_style': u'Simple',
-		'server_code_error': u' ',
-		'show_in_menu': 0,
-		'version': 1
-	},
-
-	# These values are common for all DocField
-	{
-		u'doctype': u'DocField',
-		u'name': u'__common__',
-		'parent': u'Appraisal',
-		'parentfield': u'fields',
-		'parenttype': u'DocType'
-	},
-
-	# These values are common for all DocPerm
-	{
-		u'doctype': u'DocPerm',
-		u'name': u'__common__',
-		'parent': u'Appraisal',
-		'parentfield': u'permissions',
-		'parenttype': u'DocType',
-		'read': 1
-	},
-
-	# DocType, Appraisal
-	{
-		u'doctype': u'DocType',
-		u'name': u'Appraisal'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'employee_details',
-		'fieldtype': u'Section Break',
-		'label': u'Employee Details',
-		'oldfieldtype': u'Section Break',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'description': u'Select template from which you want to get the Goals',
-		u'doctype': u'DocField',
-		'fieldname': u'kra_template',
-		'fieldtype': u'Link',
-		'label': u'Appraisal Template',
-		'oldfieldname': u'kra_template',
-		'oldfieldtype': u'Link',
-		'options': u'Appraisal Template',
-		'permlevel': 0,
-		'reqd': 1
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'depends_on': u'kra_template',
-		'description': u'Select the Employee for whom you are creating the Appraisal.',
-		u'doctype': u'DocField',
-		'fieldname': u'employee',
-		'fieldtype': u'Link',
-		'in_filter': 1,
-		'label': u'For Employee',
-		'oldfieldname': u'employee',
-		'oldfieldtype': u'Link',
-		'options': u'Employee',
-		'permlevel': 0,
-		'reqd': 1,
-		'search_index': 1,
-		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		'depends_on': u'kra_template',
-		u'doctype': u'DocField',
-		'fieldname': u'employee_name',
-		'fieldtype': u'Data',
-		'in_filter': 1,
-		'label': u'For Employee Name',
-		'oldfieldname': u'employee_name',
-		'oldfieldtype': u'Data',
-		'permlevel': 1
-	},
-
-	# DocField
-	{
-		'depends_on': u'kra_template',
-		u'doctype': u'DocField',
-		'fieldname': u'column_break0',
-		'fieldtype': u'Column Break',
-		'oldfieldtype': u'Column Break',
-		'permlevel': 0,
-		'width': u'50%'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'default': u'Draft',
-		'depends_on': u'kra_template',
-		u'doctype': u'DocField',
-		'fieldname': u'status',
-		'fieldtype': u'Select',
-		'in_filter': 1,
-		'label': u'Status',
-		'no_copy': 1,
-		'oldfieldname': u'status',
-		'oldfieldtype': u'Select',
-		'options': u'\nDraft\nSubmitted\nCompleted\nCancelled',
-		'permlevel': 1,
-		'reqd': 1,
-		'search_index': 1
-	},
-
-	# DocField
-	{
-		'depends_on': u'kra_template',
-		u'doctype': u'DocField',
-		'fieldname': u'start_date',
-		'fieldtype': u'Date',
-		'in_filter': 1,
-		'label': u'Start Date',
-		'oldfieldname': u'start_date',
-		'oldfieldtype': u'Date',
-		'permlevel': 0,
-		'reqd': 1
-	},
-
-	# DocField
-	{
-		'depends_on': u'kra_template',
-		u'doctype': u'DocField',
-		'fieldname': u'end_date',
-		'fieldtype': u'Date',
-		'in_filter': 1,
-		'label': u'End Date',
-		'oldfieldname': u'end_date',
-		'oldfieldtype': u'Date',
-		'permlevel': 0,
-		'reqd': 1
-	},
-
-	# DocField
-	{
-		'depends_on': u'kra_template',
-		u'doctype': u'DocField',
-		'fieldname': u'section_break0',
-		'fieldtype': u'Section Break',
-		'label': u'Goals',
-		'oldfieldtype': u'Section Break',
-		'options': u'Simple',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'allow_on_submit': 0,
-		'colour': u'White:FFF',
-		u'doctype': u'DocField',
-		'fieldname': u'appraisal_details',
-		'fieldtype': u'Table',
-		'label': u'Appraisal Goals',
-		'oldfieldname': u'appraisal_details',
-		'oldfieldtype': u'Table',
-		'options': u'Appraisal Goal',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'allow_on_submit': 0,
-		u'doctype': u'DocField',
-		'fieldname': u'calculate_total_score',
-		'fieldtype': u'Button',
-		'label': u'Calculate Total Score',
-		'oldfieldtype': u'Button',
-		'options': u'calculate_total',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'total_score',
-		'fieldtype': u'Currency',
-		'label': u'Total Score (Out of 5)',
-		'no_copy': 1,
-		'oldfieldname': u'total_score',
-		'oldfieldtype': u'Currency',
-		'permlevel': 1
-	},
-
-	# DocField
-	{
-		'depends_on': u'kra_template',
-		u'doctype': u'DocField',
-		'fieldname': u'section_break1',
-		'fieldtype': u'Section Break',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'description': u'Any other comments, noteworthy effort that should go in the records.',
-		u'doctype': u'DocField',
-		'fieldname': u'comments',
-		'fieldtype': u'Text',
-		'label': u'Comments',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'depends_on': u'kra_template',
-		u'doctype': u'DocField',
-		'fieldname': u'other_details',
-		'fieldtype': u'Section Break',
-		'label': u'Other Details',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'company',
-		'fieldtype': u'Select',
-		'in_filter': 1,
-		'label': u'Company',
-		'oldfieldname': u'company',
-		'oldfieldtype': u'Link',
-		'options': u'link:Company',
-		'permlevel': 0,
-		'reqd': 1
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'fiscal_year',
-		'fieldtype': u'Select',
-		'in_filter': 1,
-		'label': u'Fiscal Year',
-		'oldfieldname': u'fiscal_year',
-		'oldfieldtype': u'Select',
-		'options': u'link:Fiscal Year',
-		'permlevel': 0,
-		'reqd': 1
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'amendment_date',
-		'fieldtype': u'Date',
-		'hidden': 1,
-		'label': u'Amendment Date',
-		'no_copy': 1,
-		'oldfieldname': u'amendment_date',
-		'oldfieldtype': u'Date',
-		'permlevel': 1,
-		'print_hide': 1,
-		'report_hide': 1,
-		'width': u'160px'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'amended_from',
-		'fieldtype': u'Data',
-		'hidden': 1,
-		'label': u'Amended From',
-		'no_copy': 1,
-		'oldfieldname': u'amended_from',
-		'oldfieldtype': u'Data',
-		'permlevel': 1,
-		'print_hide': 1,
-		'report_hide': 1,
-		'width': u'150px'
-	},
-
-	# DocPerm
-	{
-		'create': 1,
-		u'doctype': u'DocPerm',
-		'match': u'owner',
-		'permlevel': 0,
-		'role': u'Employee',
-		'submit': 0,
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'amend': 1,
-		'cancel': 1,
-		'create': 1,
-		u'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'System Manager',
-		'submit': 1,
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'amend': 1,
-		'cancel': 1,
-		'create': 1,
-		u'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'HR User',
-		'submit': 1,
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		u'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'All'
-	}
+ {
+  "owner": "ashwini@webnotestech.com", 
+  "docstatus": 0, 
+  "creation": "2012-11-16 10:33:39", 
+  "modified_by": "Administrator", 
+  "modified": "2012-11-16 15:22:59"
+ }, 
+ {
+  "section_style": "Simple", 
+  "is_submittable": 1, 
+  "search_fields": "status, employee, employee_name", 
+  "module": "HR", 
+  "doctype": "DocType", 
+  "server_code_error": " ", 
+  "autoname": "APRSL.#####", 
+  "name": "__common__", 
+  "colour": "White:FFF", 
+  "_last_update": "1316075905", 
+  "show_in_menu": 0, 
+  "version": 1
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "Appraisal", 
+  "doctype": "DocField", 
+  "parenttype": "DocType", 
+  "parentfield": "fields"
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "Appraisal", 
+  "read": 1, 
+  "doctype": "DocPerm", 
+  "parenttype": "DocType", 
+  "parentfield": "permissions"
+ }, 
+ {
+  "name": "Appraisal", 
+  "doctype": "DocType"
+ }, 
+ {
+  "oldfieldtype": "Section Break", 
+  "doctype": "DocField", 
+  "label": "Employee Details", 
+  "fieldname": "employee_details", 
+  "fieldtype": "Section Break", 
+  "permlevel": 0
+ }, 
+ {
+  "description": "Select template from which you want to get the Goals", 
+  "oldfieldtype": "Link", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Appraisal Template", 
+  "oldfieldname": "kra_template", 
+  "options": "Appraisal Template", 
+  "fieldname": "kra_template", 
+  "fieldtype": "Link", 
+  "reqd": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "description": "Select the Employee for whom you are creating the Appraisal.", 
+  "search_index": 1, 
+  "colour": "White:FFF", 
+  "oldfieldtype": "Link", 
+  "label": "For Employee", 
+  "oldfieldname": "employee", 
+  "permlevel": 0, 
+  "trigger": "Client", 
+  "fieldname": "employee", 
+  "fieldtype": "Link", 
+  "depends_on": "kra_template", 
+  "reqd": 1, 
+  "options": "Employee", 
+  "in_filter": 1
+ }, 
+ {
+  "oldfieldtype": "Data", 
+  "doctype": "DocField", 
+  "label": "For Employee Name", 
+  "oldfieldname": "employee_name", 
+  "fieldname": "employee_name", 
+  "fieldtype": "Data", 
+  "depends_on": "kra_template", 
+  "permlevel": 1, 
+  "in_filter": 1
+ }, 
+ {
+  "depends_on": "kra_template", 
+  "doctype": "DocField", 
+  "width": "50%", 
+  "fieldname": "column_break0", 
+  "fieldtype": "Column Break", 
+  "oldfieldtype": "Column Break", 
+  "permlevel": 0
+ }, 
+ {
+  "permlevel": 1, 
+  "depends_on": "kra_template", 
+  "no_copy": 1, 
+  "search_index": 1, 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Status", 
+  "oldfieldname": "status", 
+  "default": "Draft", 
+  "fieldname": "status", 
+  "fieldtype": "Select", 
+  "oldfieldtype": "Select", 
+  "reqd": 1, 
+  "options": "\nDraft\nSubmitted\nCompleted\nCancelled", 
+  "in_filter": 1
+ }, 
+ {
+  "oldfieldtype": "Date", 
+  "doctype": "DocField", 
+  "label": "Start Date", 
+  "oldfieldname": "start_date", 
+  "fieldname": "start_date", 
+  "fieldtype": "Date", 
+  "depends_on": "kra_template", 
+  "reqd": 1, 
+  "permlevel": 0, 
+  "in_filter": 1
+ }, 
+ {
+  "oldfieldtype": "Date", 
+  "doctype": "DocField", 
+  "label": "End Date", 
+  "oldfieldname": "end_date", 
+  "fieldname": "end_date", 
+  "fieldtype": "Date", 
+  "depends_on": "kra_template", 
+  "reqd": 1, 
+  "permlevel": 0, 
+  "in_filter": 1
+ }, 
+ {
+  "oldfieldtype": "Section Break", 
+  "doctype": "DocField", 
+  "label": "Goals", 
+  "permlevel": 0, 
+  "fieldname": "section_break0", 
+  "fieldtype": "Section Break", 
+  "depends_on": "kra_template", 
+  "options": "Simple"
+ }, 
+ {
+  "oldfieldtype": "Table", 
+  "colour": "White:FFF", 
+  "allow_on_submit": 0, 
+  "doctype": "DocField", 
+  "label": "Appraisal Goals", 
+  "oldfieldname": "appraisal_details", 
+  "permlevel": 0, 
+  "fieldname": "appraisal_details", 
+  "fieldtype": "Table", 
+  "options": "Appraisal Goal"
+ }, 
+ {
+  "oldfieldtype": "Button", 
+  "allow_on_submit": 0, 
+  "doctype": "DocField", 
+  "label": "Calculate Total Score", 
+  "permlevel": 0, 
+  "fieldname": "calculate_total_score", 
+  "fieldtype": "Button", 
+  "options": "calculate_total"
+ }, 
+ {
+  "no_copy": 1, 
+  "oldfieldtype": "Currency", 
+  "doctype": "DocField", 
+  "label": "Total Score (Out of 5)", 
+  "oldfieldname": "total_score", 
+  "fieldname": "total_score", 
+  "fieldtype": "Currency", 
+  "permlevel": 1
+ }, 
+ {
+  "depends_on": "kra_template", 
+  "doctype": "DocField", 
+  "fieldname": "section_break1", 
+  "fieldtype": "Section Break", 
+  "permlevel": 0
+ }, 
+ {
+  "description": "Any other comments, noteworthy effort that should go in the records.", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Comments", 
+  "fieldname": "comments", 
+  "fieldtype": "Text", 
+  "permlevel": 0
+ }, 
+ {
+  "depends_on": "kra_template", 
+  "doctype": "DocField", 
+  "label": "Other Details", 
+  "fieldname": "other_details", 
+  "fieldtype": "Section Break", 
+  "permlevel": 0
+ }, 
+ {
+  "oldfieldtype": "Link", 
+  "doctype": "DocField", 
+  "label": "Company", 
+  "oldfieldname": "company", 
+  "permlevel": 0, 
+  "fieldname": "company", 
+  "fieldtype": "Select", 
+  "reqd": 1, 
+  "options": "link:Company", 
+  "in_filter": 1
+ }, 
+ {
+  "oldfieldtype": "Select", 
+  "doctype": "DocField", 
+  "label": "Fiscal Year", 
+  "oldfieldname": "fiscal_year", 
+  "permlevel": 0, 
+  "fieldname": "fiscal_year", 
+  "fieldtype": "Select", 
+  "reqd": 1, 
+  "options": "link:Fiscal Year", 
+  "in_filter": 1
+ }, 
+ {
+  "print_hide": 1, 
+  "no_copy": 1, 
+  "oldfieldtype": "Date", 
+  "doctype": "DocField", 
+  "label": "Amendment Date", 
+  "oldfieldname": "amendment_date", 
+  "width": "160px", 
+  "fieldname": "amendment_date", 
+  "fieldtype": "Date", 
+  "hidden": 1, 
+  "permlevel": 1, 
+  "report_hide": 1
+ }, 
+ {
+  "print_hide": 1, 
+  "no_copy": 1, 
+  "oldfieldtype": "Data", 
+  "doctype": "DocField", 
+  "label": "Amended From", 
+  "oldfieldname": "amended_from", 
+  "width": "150px", 
+  "fieldname": "amended_from", 
+  "fieldtype": "Data", 
+  "hidden": 1, 
+  "permlevel": 1, 
+  "report_hide": 1
+ }, 
+ {
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "submit": 0, 
+  "write": 1, 
+  "role": "Employee", 
+  "permlevel": 0, 
+  "match": "owner"
+ }, 
+ {
+  "amend": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "submit": 1, 
+  "write": 1, 
+  "role": "System Manager", 
+  "cancel": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "amend": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "submit": 1, 
+  "write": 1, 
+  "role": "HR User", 
+  "cancel": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "role": "All", 
+  "permlevel": 1, 
+  "doctype": "DocPerm"
+ }
 ]

@@ -1,84 +1,65 @@
-# DocType, Contact Control
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-03-27 14:36:19',
-		'docstatus': 0,
-		'modified': '2012-03-27 14:36:19',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
-	},
-
-	# These values are common for all DocType
-	{
-		'colour': u'White:FFF',
-		'doctype': 'DocType',
-		'in_create': 1,
-		'issingle': 1,
-		'module': u'Setup',
-		'name': '__common__',
-		'read_only': 1,
-		'section_style': u'Simple',
-		'server_code_error': u' ',
-		'show_in_menu': 0,
-		'version': 25
-	},
-
-	# These values are common for all DocField
-	{
-		'doctype': u'DocField',
-		'fieldtype': u'Text',
-		'name': '__common__',
-		'parent': u'Contact Control',
-		'parentfield': u'fields',
-		'parenttype': u'DocType',
-		'permlevel': 0
-	},
-
-	# These values are common for all DocPerm
-	{
-		'create': 0,
-		'doctype': u'DocPerm',
-		'name': '__common__',
-		'parent': u'Contact Control',
-		'parentfield': u'permissions',
-		'parenttype': u'DocType',
-		'permlevel': 0,
-		'read': 1,
-		'role': u'System Manager',
-		'write': 1
-	},
-
-	# DocType, Contact Control
-	{
-		'doctype': 'DocType',
-		'name': u'Contact Control'
-	},
-
-	# DocPerm
-	{
-		'doctype': u'DocPerm'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'header',
-		'label': u'Header'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'customer_intro',
-		'label': u'Customer Intro'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'supplier_intro',
-		'label': u'Supplier Intro'
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-03-27 14:36:19", 
+  "modified_by": "Administrator", 
+  "modified": "2012-03-27 14:36:19"
+ }, 
+ {
+  "section_style": "Simple", 
+  "in_create": 1, 
+  "module": "Setup", 
+  "doctype": "DocType", 
+  "server_code_error": " ", 
+  "issingle": 1, 
+  "read_only": 1, 
+  "name": "__common__", 
+  "colour": "White:FFF", 
+  "show_in_menu": 0, 
+  "version": 25
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "Contact Control", 
+  "doctype": "DocField", 
+  "parenttype": "DocType", 
+  "fieldtype": "Text", 
+  "permlevel": 0, 
+  "parentfield": "fields"
+ }, 
+ {
+  "parent": "Contact Control", 
+  "read": 1, 
+  "name": "__common__", 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "write": 1, 
+  "parenttype": "DocType", 
+  "role": "System Manager", 
+  "permlevel": 0, 
+  "parentfield": "permissions"
+ }, 
+ {
+  "name": "Contact Control", 
+  "doctype": "DocType"
+ }, 
+ {
+  "doctype": "DocPerm"
+ }, 
+ {
+  "fieldname": "header", 
+  "doctype": "DocField", 
+  "label": "Header"
+ }, 
+ {
+  "fieldname": "customer_intro", 
+  "doctype": "DocField", 
+  "label": "Customer Intro"
+ }, 
+ {
+  "fieldname": "supplier_intro", 
+  "doctype": "DocField", 
+  "label": "Supplier Intro"
+ }
 ]

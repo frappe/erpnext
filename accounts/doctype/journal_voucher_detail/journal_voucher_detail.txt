@@ -1,187 +1,158 @@
-# DocType, Journal Voucher Detail
 [
-
-	# These values are common in all dictionaries
-	{
-		u'creation': '2012-05-03 18:41:39',
-		u'docstatus': 0,
-		u'modified': '2012-10-02 16:47:37',
-		u'modified_by': u'Administrator',
-		u'owner': u'Administrator'
-	},
-
-	# These values are common for all DocType
-	{
-		'autoname': u'JVD.######',
-		'colour': u'White:FFF',
-		u'doctype': u'DocType',
-		'istable': 1,
-		'module': u'Accounts',
-		u'name': u'__common__',
-		'section_style': u'Tray',
-		'server_code_error': u' ',
-		'show_in_menu': 0,
-		'version': 1
-	},
-
-	# These values are common for all DocField
-	{
-		u'doctype': u'DocField',
-		u'name': u'__common__',
-		'parent': u'Journal Voucher Detail',
-		'parentfield': u'fields',
-		'parenttype': u'DocType'
-	},
-
-	# DocType, Journal Voucher Detail
-	{
-		u'doctype': u'DocType',
-		u'name': u'Journal Voucher Detail'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'account',
-		'fieldtype': u'Link',
-		'in_filter': 1,
-		'label': u'Account',
-		'oldfieldname': u'account',
-		'oldfieldtype': u'Link',
-		'options': u'Account',
-		'permlevel': 0,
-		'reqd': 1,
-		'search_index': 1,
-		'trigger': u'Client',
-		'width': u'250px'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'debit',
-		'fieldtype': u'Currency',
-		'label': u'Debit',
-		'oldfieldname': u'debit',
-		'oldfieldtype': u'Currency',
-		'permlevel': 0,
-		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'credit',
-		'fieldtype': u'Currency',
-		'label': u'Credit',
-		'oldfieldname': u'credit',
-		'oldfieldtype': u'Currency',
-		'permlevel': 0,
-		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'cost_center',
-		'fieldtype': u'Link',
-		'in_filter': 1,
-		'label': u'Cost Center',
-		'oldfieldname': u'cost_center',
-		'oldfieldtype': u'Link',
-		'options': u'Cost Center',
-		'permlevel': 0,
-		'search_index': 0,
-		'width': u'180px'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'balance',
-		'fieldtype': u'Data',
-		'label': u'Account Balance',
-		'no_copy': 1,
-		'oldfieldname': u'balance',
-		'oldfieldtype': u'Data',
-		'permlevel': 1
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'against_voucher',
-		'fieldtype': u'Link',
-		'in_filter': 1,
-		'label': u'Against Purchase Invoice',
-		'no_copy': 1,
-		'oldfieldname': u'against_voucher',
-		'oldfieldtype': u'Link',
-		'options': u'Purchase Invoice',
-		'permlevel': 0,
-		'print_hide': 0,
-		'search_index': 1,
-		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'against_invoice',
-		'fieldtype': u'Link',
-		'in_filter': 1,
-		'label': u'Against Sales Invoice',
-		'no_copy': 1,
-		'oldfieldname': u'against_invoice',
-		'oldfieldtype': u'Link',
-		'options': u'Sales Invoice',
-		'permlevel': 0,
-		'print_hide': 0,
-		'search_index': 1,
-		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'against_jv',
-		'fieldtype': u'Link',
-		'in_filter': 1,
-		'label': u'Against Journal Voucher',
-		'no_copy': 1,
-		'oldfieldname': u'against_jv',
-		'oldfieldtype': u'Link',
-		'options': u'Journal Voucher',
-		'permlevel': 0,
-		'print_hide': 0,
-		'search_index': 1
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'is_advance',
-		'fieldtype': u'Select',
-		'label': u'Is Advance',
-		'no_copy': 1,
-		'oldfieldname': u'is_advance',
-		'oldfieldtype': u'Select',
-		'options': u'No\nYes',
-		'permlevel': 0,
-		'print_hide': 1
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'against_account',
-		'fieldtype': u'Text',
-		'hidden': 1,
-		'label': u'Against Account',
-		'no_copy': 1,
-		'oldfieldname': u'against_account',
-		'oldfieldtype': u'Text',
-		'permlevel': 0,
-		'print_hide': 1
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-05-03 18:41:39", 
+  "modified_by": "Administrator", 
+  "modified": "2012-10-02 16:47:37"
+ }, 
+ {
+  "section_style": "Tray", 
+  "istable": 1, 
+  "module": "Accounts", 
+  "server_code_error": " ", 
+  "doctype": "DocType", 
+  "autoname": "JVD.######", 
+  "name": "__common__", 
+  "colour": "White:FFF", 
+  "show_in_menu": 0, 
+  "version": 1
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "Journal Voucher Detail", 
+  "doctype": "DocField", 
+  "parenttype": "DocType", 
+  "parentfield": "fields"
+ }, 
+ {
+  "name": "Journal Voucher Detail", 
+  "doctype": "DocType"
+ }, 
+ {
+  "permlevel": 0, 
+  "oldfieldtype": "Link", 
+  "doctype": "DocField", 
+  "label": "Account", 
+  "oldfieldname": "account", 
+  "width": "250px", 
+  "trigger": "Client", 
+  "fieldname": "account", 
+  "fieldtype": "Link", 
+  "search_index": 1, 
+  "reqd": 1, 
+  "options": "Account", 
+  "in_filter": 1
+ }, 
+ {
+  "oldfieldtype": "Currency", 
+  "doctype": "DocField", 
+  "label": "Debit", 
+  "oldfieldname": "debit", 
+  "trigger": "Client", 
+  "fieldname": "debit", 
+  "fieldtype": "Currency", 
+  "permlevel": 0
+ }, 
+ {
+  "oldfieldtype": "Currency", 
+  "doctype": "DocField", 
+  "label": "Credit", 
+  "oldfieldname": "credit", 
+  "trigger": "Client", 
+  "fieldname": "credit", 
+  "fieldtype": "Currency", 
+  "permlevel": 0
+ }, 
+ {
+  "search_index": 0, 
+  "doctype": "DocField", 
+  "label": "Cost Center", 
+  "oldfieldname": "cost_center", 
+  "width": "180px", 
+  "options": "Cost Center", 
+  "fieldname": "cost_center", 
+  "fieldtype": "Link", 
+  "oldfieldtype": "Link", 
+  "permlevel": 0, 
+  "in_filter": 1
+ }, 
+ {
+  "no_copy": 1, 
+  "oldfieldtype": "Data", 
+  "doctype": "DocField", 
+  "label": "Account Balance", 
+  "oldfieldname": "balance", 
+  "fieldname": "balance", 
+  "fieldtype": "Data", 
+  "permlevel": 1
+ }, 
+ {
+  "print_hide": 0, 
+  "no_copy": 1, 
+  "oldfieldtype": "Link", 
+  "doctype": "DocField", 
+  "label": "Against Purchase Invoice", 
+  "oldfieldname": "against_voucher", 
+  "permlevel": 0, 
+  "trigger": "Client", 
+  "fieldname": "against_voucher", 
+  "fieldtype": "Link", 
+  "search_index": 1, 
+  "options": "Purchase Invoice", 
+  "in_filter": 1
+ }, 
+ {
+  "print_hide": 0, 
+  "no_copy": 1, 
+  "oldfieldtype": "Link", 
+  "doctype": "DocField", 
+  "label": "Against Sales Invoice", 
+  "oldfieldname": "against_invoice", 
+  "permlevel": 0, 
+  "trigger": "Client", 
+  "fieldname": "against_invoice", 
+  "fieldtype": "Link", 
+  "search_index": 1, 
+  "options": "Sales Invoice", 
+  "in_filter": 1
+ }, 
+ {
+  "print_hide": 0, 
+  "no_copy": 1, 
+  "oldfieldtype": "Link", 
+  "doctype": "DocField", 
+  "label": "Against Journal Voucher", 
+  "oldfieldname": "against_jv", 
+  "options": "Journal Voucher", 
+  "fieldname": "against_jv", 
+  "fieldtype": "Link", 
+  "search_index": 1, 
+  "permlevel": 0, 
+  "in_filter": 1
+ }, 
+ {
+  "print_hide": 1, 
+  "no_copy": 1, 
+  "oldfieldtype": "Select", 
+  "doctype": "DocField", 
+  "label": "Is Advance", 
+  "oldfieldname": "is_advance", 
+  "permlevel": 0, 
+  "fieldname": "is_advance", 
+  "fieldtype": "Select", 
+  "options": "No\nYes"
+ }, 
+ {
+  "print_hide": 1, 
+  "no_copy": 1, 
+  "oldfieldtype": "Text", 
+  "doctype": "DocField", 
+  "label": "Against Account", 
+  "oldfieldname": "against_account", 
+  "fieldname": "against_account", 
+  "fieldtype": "Text", 
+  "hidden": 1, 
+  "permlevel": 0
+ }
 ]

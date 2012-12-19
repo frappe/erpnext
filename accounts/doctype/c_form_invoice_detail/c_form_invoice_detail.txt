@@ -1,91 +1,72 @@
-# DocType, C-Form Invoice Detail
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-03-27 14:35:41',
-		'docstatus': 0,
-		'modified': '2012-03-27 14:35:41',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
-	},
-
-	# These values are common for all DocType
-	{
-		'colour': u'White:FFF',
-		'doctype': 'DocType',
-		'istable': 1,
-		'module': u'Accounts',
-		'name': '__common__',
-		'section_style': u'Simple',
-		'show_in_menu': 0,
-		'version': 5
-	},
-
-	# These values are common for all DocField
-	{
-		'doctype': u'DocField',
-		'name': '__common__',
-		'parent': u'C-Form Invoice Detail',
-		'parentfield': u'fields',
-		'parenttype': u'DocType'
-	},
-
-	# DocType, C-Form Invoice Detail
-	{
-		'doctype': 'DocType',
-		'name': u'C-Form Invoice Detail'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'invoice_no',
-		'fieldtype': u'Link',
-		'label': u'Invoice No',
-		'options': u'Sales Invoice',
-		'permlevel': 0,
-		'width': u'160px'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'invoice_date',
-		'fieldtype': u'Date',
-		'label': u'Invoice Date',
-		'permlevel': 1,
-		'width': u'120px'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'territory',
-		'fieldtype': u'Link',
-		'label': u'Territory',
-		'options': u'Territory',
-		'permlevel': 1,
-		'width': u'120px'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'net_total',
-		'fieldtype': u'Currency',
-		'label': u'Net Total',
-		'permlevel': 1,
-		'width': u'120px'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'grand_total',
-		'fieldtype': u'Currency',
-		'label': u'Grand Total',
-		'permlevel': 1,
-		'width': u'120px'
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-03-27 14:35:41", 
+  "modified_by": "Administrator", 
+  "modified": "2012-03-27 14:35:41"
+ }, 
+ {
+  "section_style": "Simple", 
+  "istable": 1, 
+  "name": "__common__", 
+  "colour": "White:FFF", 
+  "module": "Accounts", 
+  "doctype": "DocType", 
+  "version": 5, 
+  "show_in_menu": 0
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "C-Form Invoice Detail", 
+  "doctype": "DocField", 
+  "parenttype": "DocType", 
+  "parentfield": "fields"
+ }, 
+ {
+  "name": "C-Form Invoice Detail", 
+  "doctype": "DocType"
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Invoice No", 
+  "width": "160px", 
+  "options": "Sales Invoice", 
+  "fieldname": "invoice_no", 
+  "fieldtype": "Link", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Invoice Date", 
+  "width": "120px", 
+  "fieldname": "invoice_date", 
+  "fieldtype": "Date", 
+  "permlevel": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Territory", 
+  "width": "120px", 
+  "options": "Territory", 
+  "fieldname": "territory", 
+  "fieldtype": "Link", 
+  "permlevel": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Net Total", 
+  "width": "120px", 
+  "fieldname": "net_total", 
+  "fieldtype": "Currency", 
+  "permlevel": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Grand Total", 
+  "width": "120px", 
+  "fieldname": "grand_total", 
+  "fieldtype": "Currency", 
+  "permlevel": 1
+ }
 ]

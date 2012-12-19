@@ -33,7 +33,7 @@ erpnext.desktop.render = function() {
 		'Support': { sprite: 'support', label: 'Support'},
 		'HR': { sprite: 'hr', label: 'Human<br />Resources'},
 		'Projects':	{ sprite: 'project', label: 'Projects'},
-		'Production': { sprite: 'production', label: 'Production'},
+		'Manufacturing': { sprite: 'manufacturing', label: 'Manufacturing'},
 		'Website': { sprite: 'website', label: 'Website'},
 		'Activity': { sprite: 'feed', label: 'Activity'},
 		'Setup': { sprite: 'setting', label: 'Setup'},

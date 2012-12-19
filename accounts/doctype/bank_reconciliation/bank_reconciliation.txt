@@ -1,167 +1,134 @@
-# DocType, Bank Reconciliation
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-03-27 14:35:40',
-		'docstatus': 0,
-		'modified': '2012-03-27 14:35:40',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
-	},
-
-	# These values are common for all DocType
-	{
-		'_last_update': u'1294312169',
-		'allow_copy': 1,
-		'allow_email': 1,
-		'allow_print': 1,
-		'colour': u'White:FFF',
-		'doctype': 'DocType',
-		'hide_heading': 1,
-		'hide_toolbar': 1,
-		'issingle': 1,
-		'module': u'Accounts',
-		'name': '__common__',
-		'read_only': 1,
-		'section_style': u'Simple',
-		'server_code_error': u' ',
-		'show_in_menu': 0,
-		'version': 12
-	},
-
-	# These values are common for all DocField
-	{
-		'doctype': u'DocField',
-		'name': '__common__',
-		'parent': u'Bank Reconciliation',
-		'parentfield': u'fields',
-		'parenttype': u'DocType'
-	},
-
-	# These values are common for all DocPerm
-	{
-		'doctype': u'DocPerm',
-		'name': '__common__',
-		'parent': u'Bank Reconciliation',
-		'parentfield': u'permissions',
-		'parenttype': u'DocType',
-		'read': 1
-	},
-
-	# DocType, Bank Reconciliation
-	{
-		'doctype': 'DocType',
-		'name': u'Bank Reconciliation'
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'create': 1,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Accounts User',
-		'submit': 0,
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'All'
-	},
-
-	# DocPerm
-	{
-		'create': 1,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Accounts Manager',
-		'write': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'head_html',
-		'fieldtype': u'HTML',
-		'label': u'Head HTML',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'description': u'Select account head of the bank where cheque was deposited.',
-		'doctype': u'DocField',
-		'fieldname': u'bank_account',
-		'fieldtype': u'Link',
-		'label': u'Bank Account',
-		'options': u'Account',
-		'permlevel': 0,
-		'reqd': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'from_date',
-		'fieldtype': u'Date',
-		'label': u'From Date',
-		'permlevel': 0,
-		'reqd': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'to_date',
-		'fieldtype': u'Date',
-		'label': u'To Date',
-		'permlevel': 0,
-		'reqd': 1
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'doctype': u'DocField',
-		'fieldname': u'get_non_reconciled_entries',
-		'fieldtype': u'Button',
-		'label': u'Get Non Reconciled Entries',
-		'options': u'get_details',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'doctype': u'DocField',
-		'fieldname': u'entries',
-		'fieldtype': u'Table',
-		'label': u'Entries',
-		'options': u'Bank Reconciliation Detail',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'update_clearance_date',
-		'fieldtype': u'Button',
-		'label': u'Update Clearance Date',
-		'options': u'update_details',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'total_amount',
-		'fieldtype': u'Currency',
-		'label': u'Total Amount',
-		'permlevel': 1
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-03-27 14:35:40", 
+  "modified_by": "Administrator", 
+  "modified": "2012-03-27 14:35:40"
+ }, 
+ {
+  "section_style": "Simple", 
+  "allow_print": 1, 
+  "module": "Accounts", 
+  "doctype": "DocType", 
+  "server_code_error": " ", 
+  "read_only": 1, 
+  "allow_email": 1, 
+  "hide_heading": 1, 
+  "issingle": 1, 
+  "name": "__common__", 
+  "colour": "White:FFF", 
+  "_last_update": "1294312169", 
+  "show_in_menu": 0, 
+  "version": 12, 
+  "hide_toolbar": 1, 
+  "allow_copy": 1
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "Bank Reconciliation", 
+  "doctype": "DocField", 
+  "parenttype": "DocType", 
+  "parentfield": "fields"
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "Bank Reconciliation", 
+  "read": 1, 
+  "doctype": "DocPerm", 
+  "parenttype": "DocType", 
+  "parentfield": "permissions"
+ }, 
+ {
+  "name": "Bank Reconciliation", 
+  "doctype": "DocType"
+ }, 
+ {
+  "amend": 0, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "submit": 0, 
+  "write": 1, 
+  "role": "Accounts User", 
+  "cancel": 0, 
+  "permlevel": 0
+ }, 
+ {
+  "role": "All", 
+  "permlevel": 1, 
+  "doctype": "DocPerm"
+ }, 
+ {
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "write": 1, 
+  "role": "Accounts Manager", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Head HTML", 
+  "fieldname": "head_html", 
+  "fieldtype": "HTML", 
+  "permlevel": 0
+ }, 
+ {
+  "description": "Select account head of the bank where cheque was deposited.", 
+  "doctype": "DocField", 
+  "label": "Bank Account", 
+  "permlevel": 0, 
+  "fieldname": "bank_account", 
+  "fieldtype": "Link", 
+  "reqd": 1, 
+  "options": "Account"
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "From Date", 
+  "fieldname": "from_date", 
+  "fieldtype": "Date", 
+  "reqd": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "To Date", 
+  "fieldname": "to_date", 
+  "fieldtype": "Date", 
+  "reqd": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Get Non Reconciled Entries", 
+  "permlevel": 0, 
+  "fieldname": "get_non_reconciled_entries", 
+  "fieldtype": "Button", 
+  "options": "get_details"
+ }, 
+ {
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Entries", 
+  "permlevel": 0, 
+  "fieldname": "entries", 
+  "fieldtype": "Table", 
+  "options": "Bank Reconciliation Detail"
+ }, 
+ {
+  "doctype": "DocField", 
+  "options": "update_details", 
+  "fieldname": "update_clearance_date", 
+  "fieldtype": "Button", 
+  "label": "Update Clearance Date", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Total Amount", 
+  "fieldname": "total_amount", 
+  "fieldtype": "Currency", 
+  "permlevel": 1
+ }
 ]

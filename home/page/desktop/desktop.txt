@@ -1,28 +1,21 @@
-# Page, desktop
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-02-24 11:37:43',
-		'docstatus': 0,
-		'modified': '2012-02-24 11:37:43',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
-	},
-
-	# These values are common for all Page
-	{
-		'doctype': 'Page',
-		'module': u'Home',
-		'name': '__common__',
-		'page_name': u'desktop',
-		'standard': u'Yes',
-		'title': u'Desktop'
-	},
-
-	# Page, desktop
-	{
-		'doctype': 'Page',
-		'name': u'desktop'
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-02-24 11:37:43", 
+  "modified_by": "Administrator", 
+  "modified": "2012-02-24 11:37:43"
+ }, 
+ {
+  "name": "__common__", 
+  "title": "Desktop", 
+  "module": "Home", 
+  "doctype": "Page", 
+  "page_name": "desktop", 
+  "standard": "Yes"
+ }, 
+ {
+  "name": "desktop", 
+  "doctype": "Page"
+ }
 ]

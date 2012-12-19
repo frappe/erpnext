@@ -1,33 +1,26 @@
-# Search Criteria, monthly_attendance_details
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-04-03 12:49:51',
-		'docstatus': 0,
-		'modified': '2012-04-03 12:49:51',
-		'modified_by': u'Administrator',
-		'owner': u'harshada@webnotestech.com'
-	},
-
-	# These values are common for all Search Criteria
-	{
-		'columns': u'Attendance\x01Employee',
-		'criteria_name': u'Monthly Attendance Details',
-		'doc_type': u'Attendance',
-		'doctype': 'Search Criteria',
-		'filters': u"{'Attendance\x01Status':'','Attendance\x01Fiscal Year':''}",
-		'module': u'HR',
-		'name': '__common__',
-		'page_len': 50,
-		'sort_by': u'`tabAttendance`.`employee`',
-		'sort_order': u'DESC',
-		'standard': u'Yes'
-	},
-
-	# Search Criteria, monthly_attendance_details
-	{
-		'doctype': 'Search Criteria',
-		'name': u'monthly_attendance_details'
-	}
+ {
+  "owner": "harshada@webnotestech.com", 
+  "docstatus": 0, 
+  "creation": "2012-04-03 12:49:51", 
+  "modified_by": "Administrator", 
+  "modified": "2012-04-03 12:49:51"
+ }, 
+ {
+  "module": "HR", 
+  "standard": "Yes", 
+  "sort_order": "DESC", 
+  "filters": "{'Attendance\u0001Status':'','Attendance\u0001Fiscal Year':''}", 
+  "doctype": "Search Criteria", 
+  "doc_type": "Attendance", 
+  "name": "__common__", 
+  "sort_by": "`tabAttendance`.`employee`", 
+  "page_len": 50, 
+  "criteria_name": "Monthly Attendance Details", 
+  "columns": "Attendance\u0001Employee"
+ }, 
+ {
+  "name": "monthly_attendance_details", 
+  "doctype": "Search Criteria"
+ }
 ]

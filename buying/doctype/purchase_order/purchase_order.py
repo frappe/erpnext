@@ -299,7 +299,11 @@ class DocType(TransactionBase):
 			
 	def add_bom(self, d):
 		#----- fetching default bom from Bill of Materials instead of Item Master --
-		bom_det = sql("select t1.item, t2.item_code, t2.qty_consumed_per_unit, t2.moving_avg_rate, t2.value_as_per_mar, t2.stock_uom, t2.name, t2.parent from `tabBOM` t1, `tabBOM Item` t2 where t2.parent = t1.name and t1.item = '%s' and ifnull(t1.is_default,0) = 1 and t1.docstatus = 1" % d.item_code)
+		bom_det = sql("""select t1.item, t2.item_code, t2.qty_consumed_per_unit, 
+			t2.moving_avg_rate, t2.value_as_per_mar, t2.stock_uom, t2.name, t2.parent 
+			from `tabBOM` t1, `tabBOM Item` t2 
+			where t2.parent = t1.name and t1.item = %s 
+				and ifnull(t1.is_default,0) = 1 and t1.docstatus = 1""", (d.item_code,))
 		
 		if not bom_det:
 			msgprint("No default BOM exists for item: %s" % d.item_code)

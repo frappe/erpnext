@@ -1,57 +1,44 @@
-# DocType, SMS Control
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-03-27 14:36:47',
-		'docstatus': 0,
-		'modified': '2012-03-27 14:36:47',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
-	},
-
-	# These values are common for all DocType
-	{
-		'colour': u'White:FFF',
-		'doctype': 'DocType',
-		'in_create': 0,
-		'issingle': 1,
-		'module': u'Utilities',
-		'name': '__common__',
-		'section_style': u'Simple',
-		'server_code_error': u' ',
-		'show_in_menu': 0,
-		'version': 8
-	},
-
-	# These values are common for all DocPerm
-	{
-		'doctype': u'DocPerm',
-		'name': '__common__',
-		'parent': u'SMS Control',
-		'parentfield': u'permissions',
-		'parenttype': u'DocType',
-		'read': 1,
-		'role': u'System Manager'
-	},
-
-	# DocType, SMS Control
-	{
-		'doctype': 'DocType',
-		'name': u'SMS Control'
-	},
-
-	# DocPerm
-	{
-		'create': 1,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'doctype': u'DocPerm',
-		'permlevel': 1
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-03-27 14:36:47", 
+  "modified_by": "Administrator", 
+  "modified": "2012-03-27 14:36:47"
+ }, 
+ {
+  "section_style": "Simple", 
+  "in_create": 0, 
+  "module": "Utilities", 
+  "server_code_error": " ", 
+  "doctype": "DocType", 
+  "issingle": 1, 
+  "name": "__common__", 
+  "colour": "White:FFF", 
+  "show_in_menu": 0, 
+  "version": 8
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "SMS Control", 
+  "read": 1, 
+  "doctype": "DocPerm", 
+  "parenttype": "DocType", 
+  "role": "System Manager", 
+  "parentfield": "permissions"
+ }, 
+ {
+  "name": "SMS Control", 
+  "doctype": "DocType"
+ }, 
+ {
+  "write": 1, 
+  "create": 1, 
+  "permlevel": 0, 
+  "doctype": "DocPerm"
+ }, 
+ {
+  "permlevel": 1, 
+  "doctype": "DocPerm"
+ }
 ]

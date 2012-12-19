@@ -1,77 +1,62 @@
-# DocType, Market Segment
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-03-27 14:36:21',
-		'docstatus': 0,
-		'modified': '2012-03-27 14:36:21',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
-	},
-
-	# These values are common for all DocType
-	{
-		'allow_trash': 1,
-		'autoname': u'field:segment_name',
-		'colour': u'White:FFF',
-		'doctype': 'DocType',
-		'in_create': 1,
-		'module': u'Setup',
-		'name': '__common__',
-		'name_case': u'Title Case',
-		'read_only': 0,
-		'section_style': u'Simple',
-		'show_in_menu': 0,
-		'version': 1
-	},
-
-	# These values are common for all DocField
-	{
-		'doctype': u'DocField',
-		'name': '__common__',
-		'parent': u'Market Segment',
-		'parentfield': u'fields',
-		'parenttype': u'DocType'
-	},
-
-	# DocType, Market Segment
-	{
-		'doctype': 'DocType',
-		'name': u'Market Segment'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'trash_reason',
-		'fieldtype': u'Small Text',
-		'label': u'Trash Reason',
-		'oldfieldname': u'trash_reason',
-		'oldfieldtype': u'Small Text',
-		'permlevel': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'segment_name',
-		'fieldtype': u'Data',
-		'label': u'Segment Name',
-		'oldfieldname': u'segment_name',
-		'oldfieldtype': u'Data',
-		'permlevel': 0,
-		'reqd': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'details',
-		'fieldtype': u'Text',
-		'label': u'Details',
-		'oldfieldname': u'details',
-		'oldfieldtype': u'Text',
-		'permlevel': 0
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-03-27 14:36:21", 
+  "modified_by": "Administrator", 
+  "modified": "2012-03-27 14:36:21"
+ }, 
+ {
+  "section_style": "Simple", 
+  "in_create": 1, 
+  "module": "Setup", 
+  "allow_trash": 1, 
+  "read_only": 0, 
+  "autoname": "field:segment_name", 
+  "name": "__common__", 
+  "colour": "White:FFF", 
+  "doctype": "DocType", 
+  "show_in_menu": 0, 
+  "name_case": "Title Case", 
+  "version": 1
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "Market Segment", 
+  "doctype": "DocField", 
+  "parenttype": "DocType", 
+  "parentfield": "fields"
+ }, 
+ {
+  "name": "Market Segment", 
+  "doctype": "DocType"
+ }, 
+ {
+  "oldfieldtype": "Small Text", 
+  "doctype": "DocField", 
+  "label": "Trash Reason", 
+  "oldfieldname": "trash_reason", 
+  "fieldname": "trash_reason", 
+  "fieldtype": "Small Text", 
+  "permlevel": 1
+ }, 
+ {
+  "oldfieldtype": "Data", 
+  "doctype": "DocField", 
+  "label": "Segment Name", 
+  "oldfieldname": "segment_name", 
+  "fieldname": "segment_name", 
+  "fieldtype": "Data", 
+  "reqd": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "oldfieldtype": "Text", 
+  "doctype": "DocField", 
+  "label": "Details", 
+  "oldfieldname": "details", 
+  "fieldname": "details", 
+  "fieldtype": "Text", 
+  "permlevel": 0
+ }
 ]

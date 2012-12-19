@@ -1,34 +1,27 @@
-# Search Criteria, itemwise_receipt_details
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-04-11 13:16:55',
-		'docstatus': 0,
-		'modified': '2012-04-13 11:16:40',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
-	},
-
-	# These values are common for all Search Criteria
-	{
-		'columns': u'Purchase Receipt\x01ID,Purchase Receipt\x01Posting Date,Purchase Receipt Item\x01Item Code,Purchase Receipt Item\x01Item Name,Purchase Receipt Item\x01Accepted Quantity,Purchase Receipt Item\x01Rejected Quantity,Purchase Receipt Item\x01UOM,Purchase Receipt Item\x01Accepted Warehouse,Purchase Receipt Item\x01Rejected Warehouse,Purchase Receipt Item\x01Amount',
-		'criteria_name': u'Itemwise Receipt Details',
-		'doc_type': u'Purchase Receipt Item',
-		'doctype': 'Search Criteria',
-		'filters': u'{"Purchase Receipt\\u0001Submitted":1,"Purchase Receipt\\u0001Status":[""],"Purchase Receipt\\u0001Fiscal Year":[""]}',
-		'module': u'Stock',
-		'name': '__common__',
-		'page_len': 50,
-		'parent_doc_type': u'Purchase Receipt',
-		'sort_by': u'`tabPurchase Receipt`.`name`',
-		'sort_order': u'DESC',
-		'standard': u'Yes'
-	},
-
-	# Search Criteria, itemwise_receipt_details
-	{
-		'doctype': 'Search Criteria',
-		'name': u'itemwise_receipt_details'
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-04-11 13:16:55", 
+  "modified_by": "Administrator", 
+  "modified": "2012-04-13 11:16:40"
+ }, 
+ {
+  "parent_doc_type": "Purchase Receipt", 
+  "module": "Stock", 
+  "standard": "Yes", 
+  "sort_order": "DESC", 
+  "filters": "{\"Purchase Receipt\\u0001Submitted\":1,\"Purchase Receipt\\u0001Status\":[\"\"],\"Purchase Receipt\\u0001Fiscal Year\":[\"\"]}", 
+  "doc_type": "Purchase Receipt Item", 
+  "name": "__common__", 
+  "doctype": "Search Criteria", 
+  "sort_by": "`tabPurchase Receipt`.`name`", 
+  "page_len": 50, 
+  "criteria_name": "Itemwise Receipt Details", 
+  "columns": "Purchase Receipt\u0001ID,Purchase Receipt\u0001Posting Date,Purchase Receipt Item\u0001Item Code,Purchase Receipt Item\u0001Item Name,Purchase Receipt Item\u0001Accepted Quantity,Purchase Receipt Item\u0001Rejected Quantity,Purchase Receipt Item\u0001UOM,Purchase Receipt Item\u0001Accepted Warehouse,Purchase Receipt Item\u0001Rejected Warehouse,Purchase Receipt Item\u0001Amount"
+ }, 
+ {
+  "name": "itemwise_receipt_details", 
+  "doctype": "Search Criteria"
+ }
 ]

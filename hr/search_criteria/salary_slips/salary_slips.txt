@@ -1,33 +1,26 @@
-# Search Criteria, salary_slips
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-04-03 12:49:52',
-		'docstatus': 0,
-		'modified': '2012-04-03 12:49:52',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
-	},
-
-	# These values are common for all Search Criteria
-	{
-		'columns': u'Salary Slip\x01ID,Salary Slip\x01Fiscal Year,Salary Slip\x01Month,Salary Slip\x01Employee,Salary Slip\x01Employee Name,Salary Slip\x01Department,Salary Slip\x01Designation,Salary Slip\x01Branch,Salary Slip\x01Grade,Salary Slip\x01PF No.,Salary Slip\x01ESIC No.,Salary Slip\x01Leave Without Pay,Salary Slip\x01Bank Name,Salary Slip\x01Bank Account No.,Salary Slip\x01Payment days,Salary Slip\x01Arrear Amount,Salary Slip\x01Encashment Amount,Salary Slip\x01Gross Pay,Salary Slip\x01Total Deduction,Salary Slip\x01Net Pay',
-		'criteria_name': u'Salary Slips',
-		'doc_type': u'Salary Slip',
-		'doctype': 'Search Criteria',
-		'filters': u"{'Salary Slip\x01Saved':1,'Salary Slip\x01Submitted':1}",
-		'module': u'HR',
-		'name': '__common__',
-		'page_len': 50,
-		'sort_by': u'`tabSalary Slip`.`name`',
-		'sort_order': u'DESC',
-		'standard': u'Yes'
-	},
-
-	# Search Criteria, salary_slips
-	{
-		'doctype': 'Search Criteria',
-		'name': u'salary_slips'
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-04-03 12:49:52", 
+  "modified_by": "Administrator", 
+  "modified": "2012-04-03 12:49:52"
+ }, 
+ {
+  "module": "HR", 
+  "standard": "Yes", 
+  "sort_order": "DESC", 
+  "filters": "{'Salary Slip\u0001Saved':1,'Salary Slip\u0001Submitted':1}", 
+  "doctype": "Search Criteria", 
+  "doc_type": "Salary Slip", 
+  "name": "__common__", 
+  "sort_by": "`tabSalary Slip`.`name`", 
+  "page_len": 50, 
+  "criteria_name": "Salary Slips", 
+  "columns": "Salary Slip\u0001ID,Salary Slip\u0001Fiscal Year,Salary Slip\u0001Month,Salary Slip\u0001Employee,Salary Slip\u0001Employee Name,Salary Slip\u0001Department,Salary Slip\u0001Designation,Salary Slip\u0001Branch,Salary Slip\u0001Grade,Salary Slip\u0001PF No.,Salary Slip\u0001ESIC No.,Salary Slip\u0001Leave Without Pay,Salary Slip\u0001Bank Name,Salary Slip\u0001Bank Account No.,Salary Slip\u0001Payment days,Salary Slip\u0001Arrear Amount,Salary Slip\u0001Encashment Amount,Salary Slip\u0001Gross Pay,Salary Slip\u0001Total Deduction,Salary Slip\u0001Net Pay"
+ }, 
+ {
+  "name": "salary_slips", 
+  "doctype": "Search Criteria"
+ }
 ]

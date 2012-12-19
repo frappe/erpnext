@@ -1,75 +1,58 @@
-# DocType, Top Bar Item
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-04-02 16:02:43',
-		'docstatus': 0,
-		'modified': '2012-05-07 15:21:00',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
-	},
-
-	# These values are common for all DocType
-	{
-		'colour': u'White:FFF',
-		'doctype': 'DocType',
-		'istable': 1,
-		'module': u'Website',
-		'name': '__common__',
-		'section_style': u'Simple',
-		'show_in_menu': 0,
-		'version': 1
-	},
-
-	# These values are common for all DocField
-	{
-		'doctype': u'DocField',
-		'name': '__common__',
-		'parent': u'Top Bar Item',
-		'parentfield': u'fields',
-		'parenttype': u'DocType',
-		'permlevel': 0
-	},
-
-	# DocType, Top Bar Item
-	{
-		'doctype': 'DocType',
-		'name': u'Top Bar Item'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'label',
-		'fieldtype': u'Data',
-		'label': u'Label',
-		'width': u'120px'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'url',
-		'fieldtype': u'Data',
-		'label': u'URL',
-		'width': u'200px'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'target',
-		'fieldtype': u'Select',
-		'label': u'Target',
-		'options': u'\ntarget = "_blank"'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'parent_label',
-		'fieldtype': u'Select',
-		'label': u'Parent Label'
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-04-02 16:02:43", 
+  "modified_by": "Administrator", 
+  "modified": "2012-05-07 15:21:00"
+ }, 
+ {
+  "section_style": "Simple", 
+  "istable": 1, 
+  "name": "__common__", 
+  "colour": "White:FFF", 
+  "module": "Website", 
+  "doctype": "DocType", 
+  "version": 1, 
+  "show_in_menu": 0
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "Top Bar Item", 
+  "doctype": "DocField", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "parentfield": "fields"
+ }, 
+ {
+  "name": "Top Bar Item", 
+  "doctype": "DocType"
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Label", 
+  "width": "120px", 
+  "fieldname": "label", 
+  "fieldtype": "Data"
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "URL", 
+  "width": "200px", 
+  "fieldname": "url", 
+  "fieldtype": "Data"
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Target", 
+  "fieldname": "target", 
+  "fieldtype": "Select", 
+  "options": "\ntarget = \"_blank\""
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "parent_label", 
+  "fieldtype": "Select", 
+  "label": "Parent Label"
+ }
 ]

@@ -1,36 +1,29 @@
-# Search Criteria, itemwise_purchase_register
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-04-03 12:49:51',
-		'docstatus': 0,
-		'modified': '2012-04-03 12:49:51',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
-	},
-
-	# These values are common for all Search Criteria
-	{
-		'columns': u'Purchase Invoice\x01ID,Purchase Invoice\x01Credit To,Purchase Invoice\x01Company,Purchase Invoice Item\x01Item,Purchase Invoice Item\x01Item Name,Purchase Invoice Item\x01Expense Head,Purchase Invoice Item\x01Cost Center,Purchase Invoice Item\x01Qty,Purchase Invoice Item\x01Rate (Default Curr.),Purchase Invoice Item\x01Amount (Default Curr.)',
-		'criteria_name': u'Itemwise Purchase Register',
-		'description': u'Itemwise Purchase Register',
-		'dis_filters': u'fiscal_year',
-		'doc_type': u'Purchase Invoice Item',
-		'doctype': 'Search Criteria',
-		'filters': u"{'Purchase Invoice\x01Submitted':1,'Purchase Invoice\x01Is Opening':'No','Purchase Invoice\x01Company':'','Purchase Invoice\x01Fiscal Year':''}",
-		'module': u'Accounts',
-		'name': '__common__',
-		'page_len': 50,
-		'parent_doc_type': u'Purchase Invoice',
-		'sort_by': u'`tabPurchase Invoice`.`name`',
-		'sort_order': u'DESC',
-		'standard': u'Yes'
-	},
-
-	# Search Criteria, itemwise_purchase_register
-	{
-		'doctype': 'Search Criteria',
-		'name': u'itemwise_purchase_register'
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-04-03 12:49:51", 
+  "modified_by": "Administrator", 
+  "modified": "2012-04-03 12:49:51"
+ }, 
+ {
+  "description": "Itemwise Purchase Register", 
+  "parent_doc_type": "Purchase Invoice", 
+  "module": "Accounts", 
+  "standard": "Yes", 
+  "sort_order": "DESC", 
+  "filters": "{'Purchase Invoice\u0001Submitted':1,'Purchase Invoice\u0001Is Opening':'No','Purchase Invoice\u0001Company':'','Purchase Invoice\u0001Fiscal Year':''}", 
+  "dis_filters": "fiscal_year", 
+  "doc_type": "Purchase Invoice Item", 
+  "name": "__common__", 
+  "doctype": "Search Criteria", 
+  "sort_by": "`tabPurchase Invoice`.`name`", 
+  "page_len": 50, 
+  "criteria_name": "Itemwise Purchase Register", 
+  "columns": "Purchase Invoice\u0001ID,Purchase Invoice\u0001Credit To,Purchase Invoice\u0001Company,Purchase Invoice Item\u0001Item,Purchase Invoice Item\u0001Item Name,Purchase Invoice Item\u0001Expense Head,Purchase Invoice Item\u0001Cost Center,Purchase Invoice Item\u0001Qty,Purchase Invoice Item\u0001Rate (Default Curr.),Purchase Invoice Item\u0001Amount (Default Curr.)"
+ }, 
+ {
+  "name": "itemwise_purchase_register", 
+  "doctype": "Search Criteria"
+ }
 ]
