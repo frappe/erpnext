@@ -158,12 +158,12 @@ class DocType:
 		""" Uncheck others if current one is selected as default, 
 			update default bom in item master
 		"""
+		webnotes.conn.set(self.doc, "is_default", cint(self.doc.is_default))
 		if self.doc.is_default and self.doc.is_active:
 			from webnotes.model.utils import set_default
-			
 			set_default(self.doc, "item")
 			webnotes.conn.set_value("Item", self.doc.item, "default_bom", self.doc.name)
-			
+		
 		else:
 			if not self.doc.is_active:
 				webnotes.conn.set(self.doc, "is_default", 0)

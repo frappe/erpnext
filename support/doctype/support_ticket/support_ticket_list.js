@@ -15,7 +15,7 @@ wn.doclistviews['Support Ticket'] = wn.views.ListView.extend({
 	
 	label_style: {
 		"status": {
-			"Open": "danger",
+			"Open": "important",
 			"Closed": "success",
 			"Hold": "info",
 			"Waiting for Customer": "info"
