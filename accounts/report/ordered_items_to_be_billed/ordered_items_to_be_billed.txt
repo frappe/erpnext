@@ -2,16 +2,16 @@
  {
   "owner": "Administrator", 
   "docstatus": 0, 
-  "creation": "2012-12-14 10:22:40", 
+  "creation": "2012-12-14 14:27:05", 
   "modified_by": "Administrator", 
-  "modified": "2012-12-14 10:24:16"
+  "modified": "2012-12-19 11:52:26"
  }, 
  {
   "name": "__common__", 
   "ref_doctype": "Sales Invoice", 
   "doctype": "Report", 
   "is_standard": "Yes", 
-  "query": "select \n `tabSales Order`.`name` as \"Sales Order:Link/Sales Order:120\",\n `tabSales Order`.`customer` as \"Customer:Link/Customer:120\",\n `tabSales Order`.`status` as \"Status\",\n `tabSales Order`.`transaction_date` as \"Date:Date\",\n `tabSales Order Item`.item_code as \"Item:Link/Item:120\",\n `tabSales Order Item`.description as \"Description\",\n `tabSales Order Item`.qty as \"Qty:Float\",\n `tabSales Order Item`.billed_qty as \"Billed Qty:Float\"\nfrom\n `tabSales Order`, `tabSales Order Item`\nwhere\n `tabSales Order Item`.`parent` = `tabSales Order`.`name`\n and `tabSales Order`.docstatus = 1\n and ifnull(`tabSales Order Item`.billed_qty,0) < ifnull(`tabSales Order Item`.qty,0)\norder by `tabSales Order`.transaction_date asc"
+  "query": "select \n `tabSales Order`.`name` as \"Sales Order:Link/Sales Order:120\",\n `tabSales Order`.`customer` as \"Customer:Link/Customer:120\",\n `tabSales Order`.`status` as \"Status\",\n `tabSales Order`.`transaction_date` as \"Date:Date\",\n `tabSales Order Item`.item_code as \"Item:Link/Item:120\",\n `tabSales Order Item`.description as \"Description:Data:120\",\n `tabSales Order Item`.amount as \"Amount:Currency:110\",\n (`tabSales Order Item`.billed_amt * ifnull(`tabSales Order`.conversion_rate, 1)) as \"Billed Amount:Currency:110\",\n (ifnull(`tabSales Order Item`.amount, 0) - (ifnull(`tabSales Order Item`.billed_amt, 0) * ifnull(`tabSales Order`.conversion_rate, 1))) as \"Pending Amount:Currency:120\"\nfrom\n `tabSales Order`, `tabSales Order Item`\nwhere\n `tabSales Order Item`.`parent` = `tabSales Order`.`name`\n and `tabSales Order`.docstatus = 1\n and ifnull(`tabSales Order Item`.billed_amt,0) < ifnull(`tabSales Order Item`.export_amount,0)\norder by `tabSales Order`.transaction_date asc"
  }, 
  {
   "name": "Ordered Items To Be Billed", 
