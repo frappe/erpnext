@@ -48,7 +48,7 @@ def render(page_name):
 		else:
 			html = get_html('index')
 	except Exception, e:
-		html = get_html('404')
+		html = get_html('error')
 
 	from webnotes.handler import eprint, print_zip
 	eprint("Content-Type: text/html")
@@ -57,32 +57,29 @@ def render(page_name):
 def get_html(page_name):
 	"""get page html"""
 	page_name = scrub_page_name(page_name)
-	comments = get_comments(page_name)
 	
 	html = ''
 	
 	# load from cache, if auto cache clear is falsy
 	if not (hasattr(conf, 'auto_cache_clear') and conf.auto_cache_clear or 0):
 		html = webnotes.cache().get_value("page:" + page_name)
+		from_cache = True
 
-	if html:
-		comments += "\nload status: cache"
-	else:
+	if not html:
 		html = load_into_cache(page_name)
-		comments += "\nload status: fresh"
+		from_cache = False
 	
-	# insert comments
-	html += """\n<!-- %s -->""" % webnotes.utils.cstr(comments)
+	if not html:
+		html = get_html("404")
+
+	if page_name=="error":
+		html = html % {"error": webnotes.getTraceback()}
+	else:
+		comments = "\n\npage:"+page_name+\
+			"\nload status: " + (from_cache and "cache" or "fresh")
+		html += """\n<!-- %s -->""" % webnotes.utils.cstr(comments)
 
 	return html
-
-def get_comments(page_name):	
-	if page_name == '404':
-		comments = """error: %s""" % webnotes.getTraceback()
-	else:
-		comments = """page: %s""" % page_name
-		
-	return comments
 	
 def scrub_page_name(page_name):
 	if page_name.endswith('.html'):
@@ -114,6 +111,8 @@ def update_page_name(doc, title):
 
 def load_into_cache(page_name):
 	args = prepare_args(page_name)
+	if not args:
+		return ""
 	html = build_html(args)
 	webnotes.cache().set_value("page:" + page_name, html)
 	return html
@@ -141,6 +140,9 @@ def prepare_args(page_name):
 	else:
 		args = get_doc_fields(page_name)
 	
+	if not args:
+		return False
+	
 	args.update(get_outer_env())
 	
 	return args	
@@ -156,6 +158,9 @@ def get_template_pages():
 
 def get_doc_fields(page_name):
 	doc_type, doc_name = get_source_doc(page_name)
+	if not doc_type:
+		return False
+	
 	obj = webnotes.get_obj(doc_type, doc_name, with_children=True)
 
 	if hasattr(obj, 'prepare_template_args'):

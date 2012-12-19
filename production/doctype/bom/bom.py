@@ -149,7 +149,8 @@ class DocType:
 
 	def manage_default_bom(self):
 		""" Uncheck others if current one is selected as default, update default bom in item master"""
-
+		webnotes.conn.set(self.doc, "is_default", cint(self.doc.is_default))
+		
 		if self.doc.is_default and self.doc.is_active == 'Yes':
 			sql("update `tabBOM` set is_default = 0 where name != %s and item=%s", (self.doc.name, self.doc.item))
 

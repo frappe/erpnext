@@ -17,6 +17,9 @@
 
 cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	cur_frm.cscript.set_root_readonly(doc);
+	cur_frm.add_custom_button("Item Group Tree", function() {
+		wn.set_route("Sales Browser", "Item Group");
+	})
 }
 
 cur_frm.cscript.set_root_readonly = function(doc) {

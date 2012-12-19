@@ -33,7 +33,7 @@ KBItemToolbar = function(args, kb) {
 	
 	this.make_timestamp = function() {
 		this.line1.innerHTML = repl('By %(name)s | %(when)s', {
-			name: wn.utils.full_name(this.det.first_name, this.det.last_name),
+			name: wn.user_info(this.det.owner).fullname,
 			when: wn.datetime.comment_when(this.det.modified)
 		});
 		

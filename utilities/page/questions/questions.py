@@ -35,7 +35,7 @@ def get_questions():
 			conds += ' and t1._user_tags like "%'+ t +'%"'
 	
 	return webnotes.conn.sql("""select t1.name, t1.owner, t1.question, t1.modified, t1._user_tags,
-			t2.first_name, t2.last_name, (select count(*) from tabAnswer where
+			(select count(*) from tabAnswer where
 			tabAnswer.question = t1.name) as answers
 		from tabQuestion t1, tabProfile t2
 		where t1.docstatus!=2

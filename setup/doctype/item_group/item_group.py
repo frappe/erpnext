@@ -25,3 +25,20 @@ class DocType(DocTypeNestedSet):
 		self.doc = doc
 		self.doclist = doclist
 		self.nsm_parent_field = 'parent_item_group';
+	
+	def on_update(self):
+		if self.doc.show_in_website:
+			# webpage updates
+			from website.utils import update_page_name
+			page_name = self.doc.name
+			if webnotes.conn.get_value("Website Settings", None, 
+				"default_product_category")==self.doc.name:
+				page_name = "products"
+				
+			update_page_name(self.doc, self.doc.name)
+	
+	def prepare_template_args(self):
+		self.doc.sub_groups = webnotes.conn.sql("""select name, page_name
+			from `tabItem Group` where parent_item_group=%s 
+				and ifnull(show_in_website,0)=1""", self.doc.name, as_dict=1)
+	

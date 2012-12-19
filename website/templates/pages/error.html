@@ -1,0 +1,11 @@
+{% extends "html/outer.html" %}
+
+{% block content %}
+<div class="content">
+	<div class="layout-wrapper layout-main">
+		<h3><i class="icon-exclamation-sign"></i> Oops, a server error has occured</h3>
+		<br>
+		<pre>%(error)s</pre>
+	</div>
+</div>
+{% endblock %}
