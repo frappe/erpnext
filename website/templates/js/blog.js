@@ -59,10 +59,17 @@ var blog = {
 				<p><a href="%(page_name)s">Read with comments...</a></p>\
 				<hr /><br />', b)).appendTo($wrap);
 		});
-		blog.start += data.length;
+		blog.start += (data.length || 0);
 		if(!data.length) {
-			$("#next-page").toggle(false)
-				.parent().append("<div class='alert'>Nothing more to show.</div>");
+			if(blog.start) {
+				$("#next-page").toggle(false)
+					.parent().append("<div class='alert'>Nothing more to show.</div>");	
+			} else {
+				$("#next-page").toggle(false)
+					.parent().append("<div class='alert'>No blogs written yet.</div>");	
+			}
+		} else {
+			$("#next-page").toggle(true);
 		}
 	}
 }

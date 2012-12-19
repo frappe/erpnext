@@ -29,6 +29,7 @@ def get_product_list(args=None):
 	from webnotes.utils import cstr
 	
 	if not args: args = webnotes.form_dict
+	if not args.search: args.search = ""
 	
 	# base query
 	query = """\
@@ -37,10 +38,10 @@ def get_product_list(args=None):
 			web_short_description) as web_short_description
 		from `tabItem`
 		where docstatus = 0
-		and show_in_website = 1"""
+		and show_in_website = 1 """
 	
 	# search term condition
-	if args.get('search'):
+	if args.search:
 		query += """
 			and (
 				web_short_description like %(search)s or
@@ -54,7 +55,7 @@ def get_product_list(args=None):
 	# product group condition
 	if args.get('product_group') and args.get('product_group') != 'All Products':
 		query += """
-			and item_group = %(product_group)s"""
+			and item_group = %(product_group)s """
 	
 	# order by
 	query += """order by item_name asc, name asc limit %s, 10""" % args.start

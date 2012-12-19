@@ -56,7 +56,13 @@ $(document).ready(function() {
 			
 		}
 		if(data.length < 10) {
-			$(".more-btn").replaceWith("<div class='alert'>Nothing more to show</div>");
+			if(!table) {
+				$(".more-btn")
+					.replaceWith("<div class='alert'>No results found for your search.</div>");
+			} else {
+				$(".more-btn")
+					.replaceWith("<div class='alert'>Nothing more to show.</div>");
+			}
 		} else {
 			$(".more-btn").toggle(true)
 		}
@@ -78,8 +84,11 @@ $(document).ready(function() {
 			<div id="search-list">
 				
 			</div>
-			<div class="more-btn" style="text-align: middle; display: none;">
-				<button class="btn">More...</button>
+			<div style="text-align: center;">
+				<div class="more-btn" 
+					style="display: none; text-align: center;">
+					<button class="btn">More...</button>
+				</div>
 			</div>
 		</div>
 	</div>

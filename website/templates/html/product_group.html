@@ -1,1 +1,35 @@
 {% extends "html/page.html" %}
+
+{% block content %}
+
+<div class="layout-wrapper layout-wrapper-background">
+	<div class="web-content" id="content-product_group">
+		<div class="layout-main" style="padding: 30px;">
+			{% include 'html/product_search_box.html' %}
+			{% if description %}
+			<div>{{ description or ""}}</div>
+			{% else %}
+			<h3>{{ name }}</h3>
+			{% endif %}
+			{% if sub_groups %}
+			<div class="well">
+				<div class="container-fluid">
+				{% for d in sub_groups %}
+					<div class="span2">
+						<i class="icon-chevron-right"></i>
+						<a href="{{ d.page_name }}">{{ d.name }}</a></div>
+				{% endfor %}
+				</div>
+			</div>
+			{% endif %}
+			{% if obj.doclist.get({"doctype":"Featured Item"}) %}
+			<hr>
+			<h3>Featured Products</h3>
+			
+			{% endif %}
+			
+		</div>
+	</div>
+</div>
+
+{% endblock %}
