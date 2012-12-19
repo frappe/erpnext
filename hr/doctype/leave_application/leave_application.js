@@ -16,6 +16,7 @@
 
 cur_frm.add_fetch('employee','employee_name','employee_name');
 
+
 cur_frm.cscript.onload = function(doc, dt, dn) {
 	if(!doc.posting_date) 
 		set_multiple(dt,dn,{posting_date:get_today()});
