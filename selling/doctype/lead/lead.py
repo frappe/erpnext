@@ -80,5 +80,5 @@ class DocType(TransactionBase):
 	def on_trash(self):
 		webnotes.conn.sql("""update tabCommunication set lead='' where lead=%s""",
 			self.doc.name)
-		webnotes.conn.sql("""update `tabSupport Ticket` set contact='' where contact=%s""",
+		webnotes.conn.sql("""update `tabSupport Ticket` set lead='' where lead=%s""",
 			self.doc.name)

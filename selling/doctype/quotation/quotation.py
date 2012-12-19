@@ -195,58 +195,11 @@ class DocType(TransactionBase):
 		self.doc.in_words_export = sales_com_obj.get_total_in_words(self.doc.currency, self.doc.rounded_total_export)
 
 	def on_update(self):
-		# Add to calendar
-		if self.doc.contact_date and self.doc.contact_date_ref != self.doc.contact_date:
-			if self.doc.contact_by:
-				self.add_calendar_event()
-			webnotes.conn.set(self.doc, 'contact_date_ref',self.doc.contact_date)
-		
 		# Set Quotation Status
 		webnotes.conn.set(self.doc, 'status', 'Draft')
 
 		# subject for follow
 		self.doc.subject = '[%(status)s] To %(customer)s worth %(currency)s %(grand_total)s' % self.doc.fields
-
-	
-	# Add to Calendar
-	# ====================================================================================================================
-	def add_calendar_event(self):
-		desc=''
-		user_lst =[]
-		if self.doc.customer:
-			if self.doc.contact_person:
-				desc = 'Contact '+cstr(self.doc.contact_person)
-			else:
-				desc = 'Contact customer '+cstr(self.doc.customer)
-		elif self.doc.lead:
-			if self.doc.lead_name:
-				desc = 'Contact '+cstr(self.doc.lead_name)
-			else:
-				desc = 'Contact lead '+cstr(self.doc.lead)
-		desc = desc+ '.By : ' + cstr(self.doc.contact_by)
-		
-		if self.doc.to_discuss:
-			desc = desc+' To Discuss : ' + cstr(self.doc.to_discuss)
-		
-		ev = Document('Event')
-		ev.description = desc
-		ev.event_date = self.doc.contact_date
-		ev.event_hour = '10:00'
-		ev.event_type = 'Private'
-		ev.ref_type = 'Opportunity'
-		ev.ref_name = self.doc.name
-		ev.save(1)
-		
-		user_lst.append(self.doc.owner)
-		
-		chk = sql("select t1.name from `tabProfile` t1, `tabSales Person` t2 where t2.email_id = t1.name and t2.name=%s",self.doc.contact_by)
-		if chk:
-			user_lst.append(chk[0][0])
-		
-		for d in user_lst:
-			ch = addchild(ev, 'event_individuals', 'Event User', 0)
-			ch.person = d
-			ch.save(1)
 	
 	#update enquiry
 	#------------------
