@@ -49,6 +49,7 @@ def get_report_list():
 		where tabDocType.module=%s
 			and tabDocType.name = tabReport.ref_doctype
 			and tabReport.docstatus in (0, NULL)
+			and ifnull(tabReport.disabled,0) != 1
 			order by tabReport.name 
 			limit %s, %s""" % \
 		("%s", cint(limit_start), cint(limit_page_length)), (module,), as_dict=True)
