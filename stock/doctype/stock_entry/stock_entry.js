@@ -28,7 +28,7 @@ erpnext.stock.StockEntry = erpnext.utils.Controller.extend({
 	
 	refresh: function() {
 		this._super();
-		this.toggle_related_fields(doc);
+		this.toggle_related_fields(this.frm.doc);
 		if (this.frm.doc.docstatus==1) this.frm.add_custom_button("Show Stock Ledger", 
 			this.show_stock_ledger)
 	},
@@ -54,6 +54,15 @@ erpnext.stock.StockEntry = erpnext.utils.Controller.extend({
 cur_frm.cscript = new erpnext.stock.StockEntry({frm: cur_frm});
 
 cur_frm.cscript.toggle_related_fields = function(doc) {
+	disable_from_warehouse = inList(["Material Receipt", "Sales Return"], doc.purpose);
+	disable_to_warehouse = inList(["Material Issue", "Purchase Return"], doc.purpose)
+	
+	cur_frm.toggle_enable("from_warehouse", !disable_from_warehouse);
+	cur_frm.toggle_enable("to_warehouse", !disable_to_warehouse);
+		
+	cur_frm.fields_dict["mtn_details"].grid.set_column_disp("s_warehouse", !disable_from_warehouse);
+	cur_frm.fields_dict["mtn_details"].grid.set_column_disp("t_warehouse", !disable_to_warehouse);
+	
 	if(doc.purpose == 'Purchase Return') {
 		doc.customer = doc.customer_name = doc.customer_address = 
 			doc.delivery_note_no = doc.sales_invoice_no = null;

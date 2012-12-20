@@ -80,9 +80,6 @@ class DocType(TransactionBase):
 			if not (d.s_warehouse or d.t_warehouse):
 				msgprint(_("Atleast one warehouse is mandatory"), raise_exception=1)
 			
-			if d.s_warehouse == d.t_warehouse:
-				msgprint(_("Source and Target Warehouse cannot be same"), raise_exception=1)
-				
 			if self.doc.purpose in source_mandatory:
 				if not d.s_warehouse:
 					msgprint(_("Row # ") + "%s: " % cint(d.idx)
@@ -117,6 +114,11 @@ class DocType(TransactionBase):
 					if not d.s_warehouse:
 						msgprint(_("Row # ") + "%s: " % cint(d.idx)
 							+ _("Source Warehouse") + _(" is mandatory"), raise_exception=1)
+							
+			if d.s_warehouse == d.t_warehouse:
+				msgprint(_("Source and Target Warehouse cannot be same"), raise_exception=1)
+				
+
 				
 	def validate_production_order(self, pro_obj=None):
 		if not pro_obj:
