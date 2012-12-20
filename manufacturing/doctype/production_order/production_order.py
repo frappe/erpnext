@@ -33,11 +33,6 @@ class DocType:
 		self.doc = doc
 		self.doclist = doclist
 
-
-	def autoname(self):
-		self.doc.name = make_autoname('PRO/' + self.doc.fiscal_year[2:5] + 
-			self.doc.fiscal_year[7:9] + '/.######')
-
 	def validate(self):
 		if self.doc.production_item :
 			item_detail = sql("select name from `tabItem` where name = '%s' and docstatus != 2"

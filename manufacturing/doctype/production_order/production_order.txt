@@ -2,12 +2,13 @@
  {
   "owner": "Administrator", 
   "docstatus": 0, 
-  "creation": "2012-12-19 22:39:06", 
+  "creation": "2012-12-20 14:31:18", 
   "modified_by": "Administrator", 
-  "modified": "2012-12-20 13:57:10"
+  "modified": "2012-12-20 15:50:43"
  }, 
  {
   "is_submittable": 1, 
+  "autoname": "naming_series:", 
   "in_create": 0, 
   "doctype": "DocType", 
   "module": "Manufacturing", 
@@ -22,17 +23,32 @@
   "parentfield": "fields"
  }, 
  {
-  "name": "__common__", 
   "parent": "Production Order", 
   "read": 1, 
+  "cancel": 1, 
+  "name": "__common__", 
+  "amend": 1, 
+  "create": 1, 
   "doctype": "DocPerm", 
+  "submit": 1, 
+  "write": 1, 
   "parenttype": "DocType", 
   "role": "Manufacturing User", 
+  "permlevel": 0, 
   "parentfield": "permissions"
  }, 
  {
   "name": "Production Order", 
   "doctype": "DocType"
+ }, 
+ {
+  "default": "PRO", 
+  "doctype": "DocField", 
+  "label": "Series", 
+  "fieldname": "naming_series", 
+  "fieldtype": "Select", 
+  "reqd": 1, 
+  "options": "\nPRO"
  }, 
  {
   "read_only": 1, 
@@ -172,14 +188,6 @@
   "options": "Company"
  }, 
  {
-  "doctype": "DocField", 
-  "label": "Fiscal Year", 
-  "fieldname": "fiscal_year", 
-  "fieldtype": "Select", 
-  "reqd": 1, 
-  "options": "link:Fiscal Year"
- }, 
- {
   "read_only": 1, 
   "no_copy": 1, 
   "oldfieldtype": "Data", 
@@ -190,16 +198,6 @@
   "fieldtype": "Data"
  }, 
  {
-  "amend": 1, 
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "submit": 1, 
-  "write": 1, 
-  "cancel": 1, 
-  "permlevel": 0
- }, 
- {
-  "doctype": "DocPerm", 
-  "permlevel": 1
+  "doctype": "DocPerm"
  }
 ]
