@@ -26,13 +26,13 @@ report.customize_filters = function() {
 	for(var i=0;i<filter_list_main.length;i++) {
 		set_filter_property("Sales Invoice", filter_list_main[i], "filter_hide", 0);
 	}
-	filter_list_item = ["Item", "item Group", "Brand Name", "Cost Center"]
+	filter_list_item = ["Item", "Item Group", "Brand Name", "Cost Center"]
 	for(var i=0;i<filter_list_item.length;i++) {
 		set_filter_property("Sales Invoice Item", filter_list_item[i], "filter_hide", 0);
 	}
 	set_filter_property("Sales Invoice", "From Posting Date", "in_first_page", 1);
 	set_filter_property("Sales Invoice", "To Posting Date", "in_first_page", 1);
-	set_filter_property("Sales Invoice", "Item", "in_first_page", 1);
+	set_filter_property("Sales Invoice Item", "Item", "in_first_page", 1);
 	
 	set_filter_property("Sales Invoice", "From Posting Date", 
 		"report_default", sys_defaults.year_start_date);

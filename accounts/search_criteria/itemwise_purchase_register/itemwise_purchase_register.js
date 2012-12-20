@@ -32,7 +32,7 @@ report.customize_filters = function() {
 
 	set_filter_property("Purchase Invoice", "From Posting Date", "in_first_page", 1);
 	set_filter_property("Purchase Invoice", "To Posting Date", "in_first_page", 1);
-	set_filter_property("Purchase Invoice", "Item", "in_first_page", 1);
+	set_filter_property("Purchase Invoice Item", "Item", "in_first_page", 1);
 	
 	set_filter_property("Purchase Invoice", "From Posting Date", 
 		"report_default", sys_defaults.year_start_date);
