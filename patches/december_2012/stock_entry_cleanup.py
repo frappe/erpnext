@@ -1,6 +1,7 @@
 import webnotes
 def execute():
 	# removed following fields
+	webnotes.reload_doc("stock", "doctype", "stock_entry")
 	custom_fields()
 	deprecate_process()
 	webnotes.delete_doc("doctype", "sandbox")
