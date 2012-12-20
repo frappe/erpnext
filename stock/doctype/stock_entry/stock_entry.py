@@ -71,7 +71,9 @@ class DocType(TransactionBase):
 		source_mandatory = ["Material Issue", "Material Transfer", "Purchase Return"]
 		target_mandatory = ["Material Receipt", "Material Transfer", "Sales Return"]
 		
-		fg_qty = 0
+		validate_for_manufacture_repack = any([d.bom_no for d in self.doclist.get(
+			{"parentfield": "mtn_details"})])
+
 		for d in getlist(self.doclist, 'mtn_details'):
 			if not d.s_warehouse and not d.t_warehouse:
 				d.s_warehouse = self.doc.from_warehouse
@@ -97,26 +99,28 @@ class DocType(TransactionBase):
 					d.s_warehouse = None
 
 			if self.doc.purpose == "Manufacture/Repack":
-				if d.bom_no:
-					d.s_warehouse = None
+				if validate_for_manufacture_repack:
+					if d.bom_no:
+						d.s_warehouse = None
+						
+						if not d.t_warehouse:
+							msgprint(_("Row # ") + "%s: " % cint(d.idx)
+								+ _("Target Warehouse") + _(" is mandatory"), raise_exception=1)
+						
+						elif pro_obj and cstr(d.t_warehouse) != pro_obj.doc.fg_warehouse:
+							msgprint(_("Row # ") + "%s: " % cint(d.idx)
+								+ _("Target Warehouse") + _(" should be same as that in ")
+								+ _("Production Order"), raise_exception=1)
 					
-					if not d.t_warehouse:
-						msgprint(_("Row # ") + "%s: " % cint(d.idx)
-							+ _("Target Warehouse") + _(" is mandatory"), raise_exception=1)
-					
-					elif pro_obj and cstr(d.t_warehouse) != pro_obj.doc.fg_warehouse:
-						msgprint(_("Row # ") + "%s: " % cint(d.idx)
-							+ _("Target Warehouse") + _(" should be same as that in ")
-							+ _("Production Order"), raise_exception=1)
-				
-				else:
-					d.t_warehouse = None
-					if not d.s_warehouse:
-						msgprint(_("Row # ") + "%s: " % cint(d.idx)
-							+ _("Source Warehouse") + _(" is mandatory"), raise_exception=1)
-							
-			if d.s_warehouse == d.t_warehouse:
-				msgprint(_("Source and Target Warehouse cannot be same"), raise_exception=1)
+					else:
+						d.t_warehouse = None
+						if not d.s_warehouse:
+							msgprint(_("Row # ") + "%s: " % cint(d.idx)
+								+ _("Source Warehouse") + _(" is mandatory"), raise_exception=1)
+			
+			if cstr(d.s_warehouse) == cstr(d.t_warehouse):
+				msgprint(_("Source and Target Warehouse cannot be same"), 
+					raise_exception=1)
 				
 
 				
