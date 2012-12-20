@@ -1,6 +1,18 @@
 {% extends "html/page.html" %}
 
+{% block javascript %}
+{% include "js/product_list.js" %}
+{% endblock %}
+
 {% block content %}
+
+<script>
+$(document).ready(function() {
+	window.start = 0;
+	window.product_group = "{{ name }}";
+	window.get_product_list();
+});
+</script>
 
 <div class="layout-wrapper layout-wrapper-background">
 	<div class="web-content" id="content-product_group">
@@ -22,12 +34,17 @@
 				</div>
 			</div>
 			{% endif %}
-			{% if obj.doclist.get({"doctype":"Featured Item"}) %}
 			<hr>
-			<h3>Featured Products</h3>
-			
-			{% endif %}
-			
+			<h3>Products</h3>
+			<div id="search-list">
+				
+			</div>
+			<div style="text-align: center;">
+				<div class="more-btn" 
+					style="display: none; text-align: center;">
+					<button class="btn">More...</button>
+				</div>
+			</div>
 		</div>
 	</div>
 </div>

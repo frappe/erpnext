@@ -4,7 +4,7 @@
   "docstatus": 0, 
   "creation": "2012-07-12 23:29:36", 
   "modified_by": "Administrator", 
-  "modified": "2012-12-18 16:15:43"
+  "modified": "2012-12-20 14:28:46"
  }, 
  {
   "issingle": 1, 
@@ -63,15 +63,6 @@
   "doctype": "DocField", 
   "fieldname": "cb4", 
   "fieldtype": "Column Break", 
-  "permlevel": 0
- }, 
- {
-  "description": "Only Items / Groups under this Groups will be shown on the website. This will also represent the \"Products\" Home Page.", 
-  "doctype": "DocField", 
-  "label": "Default Product Category", 
-  "options": "Item Group", 
-  "fieldname": "default_product_category", 
-  "fieldtype": "Link", 
   "permlevel": 0
  }, 
  {

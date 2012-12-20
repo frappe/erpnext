@@ -4,7 +4,7 @@
   "docstatus": 0, 
   "creation": "2012-12-17 14:56:32", 
   "modified_by": "Administrator", 
-  "modified": "2012-12-18 14:23:19"
+  "modified": "2012-12-20 15:59:41"
  }, 
  {
   "allow_attach": 1, 
@@ -772,6 +772,15 @@
   "permlevel": 1
  }, 
  {
+  "description": "Products will be sorted by weight-age in default searches. More the weight-age, higher the product will appear in the list.", 
+  "search_index": 1, 
+  "doctype": "DocField", 
+  "label": "Weightage", 
+  "fieldname": "weightage", 
+  "fieldtype": "Int", 
+  "permlevel": 0
+ }, 
+ {
   "depends_on": "show_in_website", 
   "doctype": "DocField", 
   "label": "Image", 
@@ -823,18 +832,9 @@
   "permlevel": 0
  }, 
  {
-  "description": "Will appear in search", 
   "depends_on": "show_in_website", 
   "doctype": "DocField", 
-  "label": "Short Description", 
-  "fieldname": "web_short_description", 
-  "fieldtype": "Text Editor", 
-  "permlevel": 0
- }, 
- {
-  "depends_on": "show_in_website", 
-  "doctype": "DocField", 
-  "label": "Long Description", 
+  "label": "Website Description", 
   "fieldname": "web_long_description", 
   "fieldtype": "Text Editor", 
   "permlevel": 0

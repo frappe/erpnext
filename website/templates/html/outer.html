@@ -35,7 +35,11 @@
 								<ul class="dropdown-menu">
 								{% for child in page.child_items %}
 									<li data-label="{{ child.label }}">
-										<a href="{{ child.url }}" {{ child.target or '' }}>
+										<a {% if child.indent %}
+											style="padding-left: 
+												{{(int(child.indent)+1)*15 }}px"
+										{% endif %}
+										href="{{ child.url }}" {{ child.target or '' }}>
 											{{ child.label }}
 										</a>
 									</li>

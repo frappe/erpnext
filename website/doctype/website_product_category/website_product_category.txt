@@ -1,0 +1,43 @@
+[
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-12-20 14:21:35", 
+  "modified_by": "Administrator", 
+  "modified": "2012-12-20 15:00:25"
+ }, 
+ {
+  "istable": 1, 
+  "description": "Product Category for website", 
+  "doctype": "DocType", 
+  "module": "Website", 
+  "document_type": "Transaction", 
+  "name": "__common__"
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "Website Product Category", 
+  "doctype": "DocField", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "parentfield": "fields"
+ }, 
+ {
+  "name": "Website Product Category", 
+  "doctype": "DocType"
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Item Group", 
+  "fieldname": "item_group", 
+  "fieldtype": "Link", 
+  "options": "Item Group"
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Indent", 
+  "fieldname": "indent", 
+  "fieldtype": "Select", 
+  "options": "0\n1\n2\n3\n4\n5"
+ }
+]

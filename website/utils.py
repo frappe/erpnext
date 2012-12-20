@@ -169,6 +169,7 @@ def get_doc_fields(page_name):
 	args = obj.doc.fields
 	args['template'] = page_map[doc_type].template
 	args['obj'] = obj
+	args['int'] = int
 	
 	return args
 
@@ -201,9 +202,19 @@ def get_outer_env():
 					t['child_items'].append(d)
 					break
 	
+	if "products" in [d.url.split(".")[0] for d in top_items]:
+		# product categories
+		products = webnotes.conn.sql("""select t1.item_group as label, 
+			concat(t2.page_name, ".html") as url,
+			ifnull(t1.indent,0) as indent
+			from `tabWebsite Product Category` t1, `tabItem Group` t2 
+			where t1.item_group = t2.name
+			and ifnull(t2.show_in_website,0)=1 order by t1.idx""", as_dict=1)
+		products_item = filter(lambda d: d.url.split(".")[0]=="products", top_items)[0]			
+		products_item.child_items = products
+		
 	return {
 		'top_bar_items': top_items,
-	
 		'footer_items': webnotes.conn.sql("""\
 			select * from `tabTop Bar Item`
 			where parent='Website Settings' and parentfield='footer_items'
@@ -211,7 +222,8 @@ def get_outer_env():
 			
 		'brand': webnotes.conn.get_value('Website Settings', None, 'brand_html') or 'ERPNext',
 		'copyright': webnotes.conn.get_value('Website Settings', None, 'copyright'),
-		'favicon': webnotes.conn.get_value('Website Settings', None, 'favicon')
+		'favicon': webnotes.conn.get_value('Website Settings', None, 'favicon'),
+		'int':int
 	}
 
 def get_home_page():
