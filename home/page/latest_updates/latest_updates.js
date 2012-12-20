@@ -1,4 +1,7 @@
 erpnext.updates = [
+	["20th December 2012", [
+		"Website: Create Product Search Page, Product Group Page on the website."
+	]],
 	["14th December 2012", [
 		"Website Module: Major Refactor - removed framework code from website."
 	]],

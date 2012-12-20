@@ -27,7 +27,6 @@ erpnext.modules = {
 	'Setup': 'Setup',
 	'Activity': 'activity',
 	'To Do': 'todo',
-	'Core': 'setup',
 	'Calendar': 'calendar',
 	'Messages': 'messages',
 	'Knowledge Base': 'questions',

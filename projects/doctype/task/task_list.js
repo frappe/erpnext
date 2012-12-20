@@ -25,7 +25,8 @@ wn.doclistviews['Task'] = wn.views.ListView.extend({
 		this._super(data);
 		
 		data.label_style = this.label_style.status[data.status];
-		
+		if(data.label_style=="danger")
+			data.label_style = "important"
 		data.status_html = repl('<span class="label \
 			label-%(label_style)s">%(status)s</span>', data);
 

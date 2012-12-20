@@ -6,10 +6,10 @@
 	"public/css/all-app.css": [
 		"app/public/js/startup.css"
 	],
-	"public/js/all-web.js": [
+	"public/js/all-web.min.js": [
 		"app/public/js/website_utils.js"
 	],
-	"public/js/all-app.js": [
+	"public/js/all-app.min.js": [
 		"app/public/js/startup.js",
 		"app/public/js/conf.js",
 		"app/public/js/modules.js",
