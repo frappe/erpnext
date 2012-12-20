@@ -136,7 +136,7 @@ class DocType(TransactionBase):
 					+ _("Quantity already manufactured")
 					+ " = %s." % flt(pro_obj.doc.produced_qty)
 					+ _("Hence, maximum allowed Manufacturing Quantity")
-					+ " = %s." % flt(pro_obj.doc.qty) - flt(pro_obj.doc.produced_qty),
+					+ " = %s." % (flt(pro_obj.doc.qty) - flt(pro_obj.doc.produced_qty)),
 					raise_exception=1)
 		elif self.doc.purpose != "Material Transfer":
 			self.doc.production_order = None

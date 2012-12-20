@@ -2,9 +2,9 @@
  {
   "owner": "Administrator", 
   "docstatus": 0, 
-  "creation": "2012-12-19 12:29:07", 
+  "creation": "2012-12-19 22:39:06", 
   "modified_by": "Administrator", 
-  "modified": "2012-12-19 17:45:59"
+  "modified": "2012-12-20 13:57:10"
  }, 
  {
   "is_submittable": 1, 
@@ -22,18 +22,12 @@
   "parentfield": "fields"
  }, 
  {
+  "name": "__common__", 
   "parent": "Production Order", 
   "read": 1, 
-  "cancel": 1, 
-  "name": "__common__", 
-  "amend": 1, 
-  "create": 1, 
   "doctype": "DocPerm", 
-  "submit": 1, 
-  "write": 1, 
   "parenttype": "DocType", 
   "role": "Manufacturing User", 
-  "permlevel": 0, 
   "parentfield": "permissions"
  }, 
  {
@@ -82,7 +76,7 @@
  }, 
  {
   "read_only": 0, 
-  "description": "Update Planned Quantity in this Warehouse", 
+  "description": "Manufactured quantity will be updated in this warehouse", 
   "depends_on": "production_item", 
   "doctype": "DocField", 
   "label": "For Warehouse", 
@@ -112,7 +106,7 @@
  }, 
  {
   "read_only": 1, 
-  "description": "Automatically updated via Backflush (Stock Entry)", 
+  "description": "Automatically updated via Stock Entry of type Manufacture/Repack", 
   "no_copy": 1, 
   "oldfieldtype": "Currency", 
   "doctype": "DocField", 
@@ -196,6 +190,16 @@
   "fieldtype": "Data"
  }, 
  {
-  "doctype": "DocPerm"
+  "amend": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "submit": 1, 
+  "write": 1, 
+  "cancel": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "permlevel": 1
  }
 ]
