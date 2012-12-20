@@ -1,0 +1,65 @@
+[
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-12-20 14:05:00", 
+  "modified_by": "Administrator", 
+  "modified": "2012-12-20 15:46:15"
+ }, 
+ {
+  "issingle": 1, 
+  "description": "Settings for Product Catalog on the website", 
+  "doctype": "DocType", 
+  "module": "Website", 
+  "document_type": "Other", 
+  "name": "__common__"
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "Product Settings", 
+  "doctype": "DocField", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "parentfield": "fields"
+ }, 
+ {
+  "parent": "Product Settings", 
+  "read": 1, 
+  "name": "__common__", 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "write": 1, 
+  "parenttype": "DocType", 
+  "role": "Website Manager", 
+  "permlevel": 0, 
+  "parentfield": "permissions"
+ }, 
+ {
+  "name": "Product Settings", 
+  "doctype": "DocType"
+ }, 
+ {
+  "description": "Default: \"Product Search\"", 
+  "doctype": "DocField", 
+  "label": "Search Help", 
+  "fieldname": "search_help", 
+  "fieldtype": "Data"
+ }, 
+ {
+  "description": "List of Item Groups to be shown in \"All Products\" menu - in the sequence wanted and with number of indents (left spacing to show a tree effect).", 
+  "doctype": "DocField", 
+  "label": "Product Categories", 
+  "fieldname": "sb2", 
+  "fieldtype": "Section Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Website Product Categories", 
+  "fieldname": "website_product_categories", 
+  "fieldtype": "Table", 
+  "options": "Website Product Category"
+ }, 
+ {
+  "doctype": "DocPerm"
+ }
+]

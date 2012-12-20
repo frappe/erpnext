@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import webnotes
 
+
 @webnotes.whitelist(allow_guest=True)
 def get_product_info(item_code):
 	"""get product price / stock info"""
@@ -24,40 +25,37 @@ def get_product_info(item_code):
 	}
 
 @webnotes.whitelist(allow_guest=True)
-def get_product_list(args=None):
+def get_product_list(search=None, product_group=None, start=0):
 	import webnotes
 	from webnotes.utils import cstr
-	
-	if not args: args = webnotes.form_dict
-	if not args.search: args.search = ""
-	
+		
 	# base query
 	query = """\
 		select name, item_name, page_name, website_image, item_group, 
-			if(ifnull(web_short_description,'')='', web_long_description, 
-			web_short_description) as web_short_description
+			web_long_description as website_description
 		from `tabItem`
 		where docstatus = 0
 		and show_in_website = 1 """
 	
 	# search term condition
-	if args.search:
+	if search:
 		query += """
 			and (
-				web_short_description like %(search)s or
 				web_long_description like %(search)s or
-				description like %(search)s or
 				item_name like %(search)s or
 				name like %(search)s
 			)"""
-		args['search'] = "%" + cstr(args.get('search')) + "%"
+		search = "%" + cstr(search) + "%"
 	
 	# product group condition
-	if args.get('product_group') and args.get('product_group') != 'All Products':
+	if product_group:
 		query += """
 			and item_group = %(product_group)s """
 	
 	# order by
-	query += """order by item_name asc, name asc limit %s, 10""" % args.start
+	query += """order by item_name asc, name asc limit %s, 10""" % start
 
-	return webnotes.conn.sql(query, args, as_dict=1)
+	return webnotes.conn.sql(query, {
+		"search": search,
+		"product_group": product_group
+	}, as_dict=1)

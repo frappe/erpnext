@@ -39,6 +39,5 @@ class DocType(DocTypeNestedSet):
 	
 	def prepare_template_args(self):
 		self.doc.sub_groups = webnotes.conn.sql("""select name, page_name
-			from `tabItem Group` where parent_item_group=%s 
-				and ifnull(show_in_website,0)=1""", self.doc.name, as_dict=1)
-	
+			from `tabItem Group` where parent_item_group=%s
+			and ifnull(show_in_website,0)=1""", self.doc.name, as_dict=1)		

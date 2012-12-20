@@ -23,6 +23,9 @@
 		.login-box td {
 			padding: 8px;
 		}
+		.login-box td input {
+			margin-bottom: 0px;
+		}
 		.login-footer {
 			text-align: center;
 			padding: 15px;

@@ -10,6 +10,7 @@
 	<script>
 		// redirect to product search page
 		$(document).ready(function() {
+			$('.dropdown-toggle').dropdown()
 			$("#btn-product-search").click(function() {
 				var txt = $("#product-search").val();
 				if(txt) {
