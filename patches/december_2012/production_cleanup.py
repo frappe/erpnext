@@ -30,8 +30,10 @@ def rename_module():
 	if webnotes.conn.exists("Module Def", "Production"):
 		webnotes.rename_doc("Module Def", "Production", "Manufacturing")
 	
-	webnotes.conn.set_global("modules_list",
-		webnotes.conn.get_global('modules_list').replace("Production", "Manufacturing"))
+	modules_list = webnotes.conn.get_global('modules_list')
+	if modules_list:
+		webnotes.conn.set_global("modules_list", modules_list.replace("Production", 
+			"Manufacturing"))
 		
 	# set end of life to null if "0000-00-00"
 	webnotes.conn.sql("""update `tabItem` set end_of_life=null where end_of_life='0000-00-00'""")
