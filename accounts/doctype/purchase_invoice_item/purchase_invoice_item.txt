@@ -149,7 +149,7 @@
   "options": "Account", 
   "fieldname": "expense_head", 
   "fieldtype": "Link", 
-  "reqd": 1, 
+  "reqd": 1
  }, 
  {
   "print_hide": 1, 
