@@ -1,37 +1,30 @@
-# Search Criteria, pending_po_items_to_receive
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-04-03 12:49:52',
-		'docstatus': 0,
-		'modified': '2012-04-03 12:49:52',
-		'modified_by': u'Administrator',
-		'owner': u'dhanalekshmi@webnotestech.com'
-	},
-
-	# These values are common for all Search Criteria
-	{
-		'add_col': u'`tabPurchase Order Item`.qty - ifnull(`tabPurchase Order Item`.received_qty, 0) AS "Pending Quantity To Receive"\n(`tabPurchase Order Item`.qty - ifnull(`tabPurchase Order Item`.received_qty, 0)) * `tabPurchase Order Item`.purchase_rate AS "Pending Amount To Receive"',
-		'add_cond': u'`tabPurchase Order Item`.qty - ifnull(`tabPurchase Order Item`.received_qty, 0) > 0 \n`tabPurchase Order`.status != "Stopped"',
-		'columns': u'Purchase Order\x01ID,Purchase Order\x01Supplier,Purchase Order\x01Supplier Name,Purchase Order\x01Status,Purchase Order\x01PO Date,Purchase Order\x01Fiscal Year,Purchase Order Item\x01Purchase Request No,Purchase Order Item\x01Item Code,Purchase Order Item\x01Item Name,Purchase Order Item\x01Description,Purchase Order Item\x01Quantity,Purchase Order Item\x01UOM,Purchase Order Item\x01Received Qty',
-		'criteria_name': u'Pending PO Items To Receive',
-		'description': u'Pending PO Items To Receive',
-		'doc_type': u'Purchase Order Item',
-		'doctype': 'Search Criteria',
-		'filters': u"{'Purchase Order\x01Saved':1,'Purchase Order\x01Submitted':1,'Purchase Order\x01Status':'','Purchase Order\x01Fiscal Year':''}",
-		'module': u'Buying',
-		'name': '__common__',
-		'page_len': 50,
-		'parent_doc_type': u'Purchase Order',
-		'sort_by': u'`tabPurchase Order`.`name`',
-		'sort_order': u'DESC',
-		'standard': u'Yes'
-	},
-
-	# Search Criteria, pending_po_items_to_receive
-	{
-		'doctype': 'Search Criteria',
-		'name': u'pending_po_items_to_receive'
-	}
+ {
+  "owner": "dhanalekshmi@webnotestech.com", 
+  "docstatus": 0, 
+  "creation": "2012-04-03 12:49:52", 
+  "modified_by": "Administrator", 
+  "modified": "2012-04-03 12:49:52"
+ }, 
+ {
+  "add_col": "`tabPurchase Order Item`.qty - ifnull(`tabPurchase Order Item`.received_qty, 0) AS \"Pending Quantity To Receive\"\n(`tabPurchase Order Item`.qty - ifnull(`tabPurchase Order Item`.received_qty, 0)) * `tabPurchase Order Item`.purchase_rate AS \"Pending Amount To Receive\"", 
+  "parent_doc_type": "Purchase Order", 
+  "module": "Buying", 
+  "standard": "Yes", 
+  "sort_order": "DESC", 
+  "filters": "{'Purchase Order\u0001Saved':1,'Purchase Order\u0001Submitted':1,'Purchase Order\u0001Status':'','Purchase Order\u0001Fiscal Year':''}", 
+  "description": "Pending PO Items To Receive", 
+  "doc_type": "Purchase Order Item", 
+  "name": "__common__", 
+  "add_cond": "`tabPurchase Order Item`.qty - ifnull(`tabPurchase Order Item`.received_qty, 0) > 0 \n`tabPurchase Order`.status != \"Stopped\"", 
+  "doctype": "Search Criteria", 
+  "sort_by": "`tabPurchase Order`.`name`", 
+  "page_len": 50, 
+  "criteria_name": "Pending PO Items To Receive", 
+  "columns": "Purchase Order\u0001ID,Purchase Order\u0001Supplier,Purchase Order\u0001Supplier Name,Purchase Order\u0001Status,Purchase Order\u0001PO Date,Purchase Order\u0001Fiscal Year,Purchase Order Item\u0001Purchase Request No,Purchase Order Item\u0001Item Code,Purchase Order Item\u0001Item Name,Purchase Order Item\u0001Description,Purchase Order Item\u0001Quantity,Purchase Order Item\u0001UOM,Purchase Order Item\u0001Received Qty"
+ }, 
+ {
+  "name": "pending_po_items_to_receive", 
+  "doctype": "Search Criteria"
+ }
 ]

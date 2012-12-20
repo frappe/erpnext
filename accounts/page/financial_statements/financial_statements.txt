@@ -1,49 +1,36 @@
-# Page, Financial Statements
 [
-
-	# These values are common in all dictionaries
-	{
-		u'creation': '2012-06-14 15:07:28',
-		u'docstatus': 0,
-		u'modified': '2012-10-04 17:04:05',
-		u'modified_by': u'Administrator',
-		u'owner': u'Administrator'
-	},
-
-	# These values are common for all Page
-	{
-		u'doctype': u'Page',
-		'module': u'Accounts',
-		u'name': u'__common__',
-		'page_name': u'Financial Statements',
-		'show_in_menu': 0,
-		'standard': u'Yes'
-	},
-
-	# These values are common for all Page Role
-	{
-		u'doctype': u'Page Role',
-		u'name': u'__common__',
-		'parent': u'Financial Statements',
-		'parentfield': u'roles',
-		'parenttype': u'Page'
-	},
-
-	# Page, Financial Statements
-	{
-		u'doctype': u'Page',
-		u'name': u'Financial Statements'
-	},
-
-	# Page Role
-	{
-		u'doctype': u'Page Role',
-		'role': u'Accounts User'
-	},
-
-	# Page Role
-	{
-		u'doctype': u'Page Role',
-		'role': u'Accounts Manager'
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-06-14 15:07:28", 
+  "modified_by": "Administrator", 
+  "modified": "2012-10-04 17:04:05"
+ }, 
+ {
+  "name": "__common__", 
+  "module": "Accounts", 
+  "show_in_menu": 0, 
+  "page_name": "Financial Statements", 
+  "doctype": "Page", 
+  "standard": "Yes"
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "Financial Statements", 
+  "doctype": "Page Role", 
+  "parenttype": "Page", 
+  "parentfield": "roles"
+ }, 
+ {
+  "name": "Financial Statements", 
+  "doctype": "Page"
+ }, 
+ {
+  "role": "Accounts User", 
+  "doctype": "Page Role"
+ }, 
+ {
+  "role": "Accounts Manager", 
+  "doctype": "Page Role"
+ }
 ]

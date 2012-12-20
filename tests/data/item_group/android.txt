@@ -1,27 +1,20 @@
-# Item Group, Android
 [
-
-	# These values are common in all dictionaries
-	{
-		u'creation': '2012-08-07 09:57:11',
-		u'docstatus': 0,
-		u'modified': '2012-08-07 09:57:11',
-		u'modified_by': u'Administrator',
-		u'owner': u'Administrator'
-	},
-
-	# These values are common for all Item Group
-	{
-		u'doctype': 'Item Group',
-		'is_group': u'No',
-		'item_group_name': u'Android',
-		u'name': u'__common__',
-		'parent_item_group': u'Smartphones'
-	},
-
-	# Item Group, Android
-	{
-		u'doctype': 'Item Group',
-		u'name': u'Android'
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-08-07 09:57:11", 
+  "modified_by": "Administrator", 
+  "modified": "2012-08-07 09:57:11"
+ }, 
+ {
+  "name": "__common__", 
+  "item_group_name": "Android", 
+  "is_group": "No", 
+  "parent_item_group": "Smartphones", 
+  "doctype": "Item Group"
+ }, 
+ {
+  "name": "Android", 
+  "doctype": "Item Group"
+ }
 ]

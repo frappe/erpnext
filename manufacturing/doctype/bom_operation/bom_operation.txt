@@ -1,0 +1,101 @@
+[
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-12-14 10:15:16", 
+  "modified_by": "Administrator", 
+  "modified": "2012-12-14 16:06:37"
+ }, 
+ {
+  "istable": 1, 
+  "name": "__common__", 
+  "doctype": "DocType", 
+  "module": "Manufacturing"
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "BOM Operation", 
+  "doctype": "DocField", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "parentfield": "fields"
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "BOM Operation", 
+  "read": 1, 
+  "doctype": "DocPerm", 
+  "parenttype": "DocType", 
+  "role": "System Manager", 
+  "parentfield": "permissions"
+ }, 
+ {
+  "name": "BOM Operation", 
+  "doctype": "DocType"
+ }, 
+ {
+  "oldfieldtype": "Data", 
+  "doctype": "DocField", 
+  "label": "Operation No", 
+  "oldfieldname": "operation_no", 
+  "fieldname": "operation_no", 
+  "fieldtype": "Data", 
+  "reqd": 1
+ }, 
+ {
+  "oldfieldtype": "Text", 
+  "doctype": "DocField", 
+  "label": "Operation Description", 
+  "oldfieldname": "opn_description", 
+  "fieldname": "opn_description", 
+  "fieldtype": "Text", 
+  "reqd": 1
+ }, 
+ {
+  "oldfieldtype": "Link", 
+  "doctype": "DocField", 
+  "label": "Workstation", 
+  "oldfieldname": "workstation", 
+  "fieldname": "workstation", 
+  "fieldtype": "Link", 
+  "reqd": 0, 
+  "options": "Workstation"
+ }, 
+ {
+  "oldfieldtype": "Currency", 
+  "doctype": "DocField", 
+  "label": "Hour Rate", 
+  "oldfieldname": "hour_rate", 
+  "fieldname": "hour_rate", 
+  "fieldtype": "Currency", 
+  "reqd": 0
+ }, 
+ {
+  "oldfieldtype": "Currency", 
+  "doctype": "DocField", 
+  "label": "Operation Time (mins)", 
+  "oldfieldname": "time_in_mins", 
+  "fieldname": "time_in_mins", 
+  "fieldtype": "Currency", 
+  "reqd": 0
+ }, 
+ {
+  "oldfieldtype": "Currency", 
+  "allow_on_submit": 0, 
+  "doctype": "DocField", 
+  "label": "Operating Cost", 
+  "oldfieldname": "operating_cost", 
+  "fieldname": "operating_cost", 
+  "fieldtype": "Currency", 
+  "reqd": 0
+ }, 
+ {
+  "write": 1, 
+  "doctype": "DocPerm", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "permlevel": 1
+ }
+]

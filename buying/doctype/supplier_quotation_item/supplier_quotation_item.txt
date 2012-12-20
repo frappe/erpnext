@@ -160,11 +160,11 @@
   "doctype": "DocField", 
   "label": "Warehouse", 
   "oldfieldname": "warehouse", 
-  "options": "Warehouse", 
   "fieldname": "warehouse", 
   "fieldtype": "Link", 
   "reqd": 0, 
   "hidden": 0, 
+  "options": "Warehouse", 
   "permlevel": 0
  }, 
  {
@@ -222,12 +222,12 @@
  {
   "print_hide": 1, 
   "oldfieldtype": "Date", 
+  "search_index": 0, 
   "doctype": "DocField", 
   "label": "Purchase Request Date", 
   "oldfieldname": "prevdoc_date", 
   "fieldname": "prevdoc_date", 
   "fieldtype": "Date", 
-  "search_index": 0, 
   "hidden": 1, 
   "permlevel": 1, 
   "in_filter": 1
@@ -265,11 +265,11 @@
   "label": "Item Group", 
   "oldfieldname": "item_group", 
   "permlevel": 1, 
+  "options": "Item Group", 
   "fieldname": "item_group", 
   "fieldtype": "Link", 
   "search_index": 0, 
   "hidden": 1, 
-  "options": "Item Group", 
   "in_filter": 1
  }, 
  {

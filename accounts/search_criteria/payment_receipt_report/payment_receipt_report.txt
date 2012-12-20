@@ -1,33 +1,26 @@
-# Search Criteria, payment_receipt_report
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-04-03 12:49:51',
-		'docstatus': 0,
-		'modified': '2012-04-03 12:49:51',
-		'modified_by': u'Administrator',
-		'owner': u'jai@webnotestech.com'
-	},
-
-	# These values are common for all Search Criteria
-	{
-		'columns': u'GL Entry\x01ID,GL Entry\x01Owner,GL Entry\x01Posting Date,GL Entry\x01Account,GL Entry\x01Cost Center,GL Entry\x01Against Voucher,GL Entry\x01Voucher Type,GL Entry\x01Voucher No,GL Entry\x01Remarks,GL Entry\x01Is Cancelled,GL Entry\x01Is Opening,GL Entry\x01Fiscal Year,GL Entry\x01Company',
-		'criteria_name': u'Payment Receipt Report',
-		'doc_type': u'GL Entry',
-		'doctype': 'Search Criteria',
-		'filters': u"{'GL Entry\x01Voucher Type':'','GL Entry\x01Is Cancelled':'','GL Entry\x01Is Opening':'','GL Entry\x01Fiscal Year':''}",
-		'module': u'Accounts',
-		'name': '__common__',
-		'page_len': 50,
-		'sort_by': u'`tabGL Entry`.`name`',
-		'sort_order': u'DESC',
-		'standard': u'Yes'
-	},
-
-	# Search Criteria, payment_receipt_report
-	{
-		'doctype': 'Search Criteria',
-		'name': u'payment_receipt_report'
-	}
+ {
+  "owner": "jai@webnotestech.com", 
+  "docstatus": 0, 
+  "creation": "2012-04-03 12:49:51", 
+  "modified_by": "Administrator", 
+  "modified": "2012-04-03 12:49:51"
+ }, 
+ {
+  "module": "Accounts", 
+  "standard": "Yes", 
+  "sort_order": "DESC", 
+  "filters": "{'GL Entry\u0001Voucher Type':'','GL Entry\u0001Is Cancelled':'','GL Entry\u0001Is Opening':'','GL Entry\u0001Fiscal Year':''}", 
+  "doctype": "Search Criteria", 
+  "doc_type": "GL Entry", 
+  "name": "__common__", 
+  "sort_by": "`tabGL Entry`.`name`", 
+  "page_len": 50, 
+  "criteria_name": "Payment Receipt Report", 
+  "columns": "GL Entry\u0001ID,GL Entry\u0001Owner,GL Entry\u0001Posting Date,GL Entry\u0001Account,GL Entry\u0001Cost Center,GL Entry\u0001Against Voucher,GL Entry\u0001Voucher Type,GL Entry\u0001Voucher No,GL Entry\u0001Remarks,GL Entry\u0001Is Cancelled,GL Entry\u0001Is Opening,GL Entry\u0001Fiscal Year,GL Entry\u0001Company"
+ }, 
+ {
+  "name": "payment_receipt_report", 
+  "doctype": "Search Criteria"
+ }
 ]

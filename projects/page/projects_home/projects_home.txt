@@ -1,28 +1,21 @@
-# Page, projects-home
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-02-21 13:24:22',
-		'docstatus': 0,
-		'modified': '2012-02-21 13:24:22',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
-	},
-
-	# These values are common for all Page
-	{
-		'doctype': 'Page',
-		'module': u'Projects',
-		'name': '__common__',
-		'page_name': u'projects-home',
-		'standard': u'Yes',
-		'title': u'Projects Home'
-	},
-
-	# Page, projects-home
-	{
-		'doctype': 'Page',
-		'name': u'projects-home'
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-02-21 13:24:22", 
+  "modified_by": "Administrator", 
+  "modified": "2012-02-21 13:24:22"
+ }, 
+ {
+  "name": "__common__", 
+  "title": "Projects Home", 
+  "module": "Projects", 
+  "doctype": "Page", 
+  "page_name": "projects-home", 
+  "standard": "Yes"
+ }, 
+ {
+  "name": "projects-home", 
+  "doctype": "Page"
+ }
 ]

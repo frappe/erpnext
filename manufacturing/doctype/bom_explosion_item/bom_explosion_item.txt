@@ -1,0 +1,107 @@
+[
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-12-14 10:15:16", 
+  "modified_by": "Administrator", 
+  "modified": "2012-12-14 16:53:30"
+ }, 
+ {
+  "read_only": 0, 
+  "istable": 1, 
+  "autoname": "FBD/.######", 
+  "name": "__common__", 
+  "default_print_format": "Standard", 
+  "doctype": "DocType", 
+  "module": "Manufacturing"
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "BOM Explosion Item", 
+  "doctype": "DocField", 
+  "parenttype": "DocType", 
+  "permlevel": 1, 
+  "parentfield": "fields"
+ }, 
+ {
+  "name": "BOM Explosion Item", 
+  "doctype": "DocType"
+ }, 
+ {
+  "oldfieldtype": "Link", 
+  "doctype": "DocField", 
+  "label": "Item Code", 
+  "oldfieldname": "item_code", 
+  "fieldname": "item_code", 
+  "fieldtype": "Link", 
+  "options": "Item"
+ }, 
+ {
+  "oldfieldtype": "Text", 
+  "doctype": "DocField", 
+  "label": "Description", 
+  "oldfieldname": "description", 
+  "width": "300px", 
+  "fieldname": "description", 
+  "fieldtype": "Text"
+ }, 
+ {
+  "oldfieldtype": "Currency", 
+  "doctype": "DocField", 
+  "label": "Qty", 
+  "oldfieldname": "qty", 
+  "fieldname": "qty", 
+  "fieldtype": "Float"
+ }, 
+ {
+  "oldfieldtype": "Currency", 
+  "doctype": "DocField", 
+  "label": "Rate", 
+  "oldfieldname": "standard_rate", 
+  "fieldname": "rate", 
+  "fieldtype": "Float"
+ }, 
+ {
+  "oldfieldtype": "Currency", 
+  "doctype": "DocField", 
+  "label": "Amount", 
+  "oldfieldname": "amount_as_per_sr", 
+  "fieldname": "amount", 
+  "fieldtype": "Currency"
+ }, 
+ {
+  "oldfieldtype": "Link", 
+  "doctype": "DocField", 
+  "label": "Stock UOM", 
+  "oldfieldname": "stock_uom", 
+  "fieldname": "stock_uom", 
+  "fieldtype": "Link", 
+  "options": "UOM"
+ }, 
+ {
+  "oldfieldtype": "Link", 
+  "doctype": "DocField", 
+  "label": "Parent BOM", 
+  "oldfieldname": "parent_bom", 
+  "width": "250px", 
+  "fieldname": "parent_bom", 
+  "fieldtype": "Link", 
+  "hidden": 0, 
+  "options": "BOM"
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Mat Detail No", 
+  "fieldname": "mat_detail_no", 
+  "fieldtype": "Data", 
+  "hidden": 1
+ }, 
+ {
+  "no_copy": 0, 
+  "doctype": "DocField", 
+  "label": "Qty Consumed Per Unit", 
+  "fieldname": "qty_consumed_per_unit", 
+  "fieldtype": "Float", 
+  "hidden": 0
+ }
+]

@@ -1,55 +1,40 @@
-# Page, stock-ledger
 [
-
-	# These values are common in all dictionaries
-	{
-		u'creation': '2012-09-21 20:15:14',
-		u'docstatus': 0,
-		u'modified': '2012-10-04 17:25:35',
-		u'modified_by': u'Administrator',
-		u'owner': u'Administrator'
-	},
-
-	# These values are common for all Page
-	{
-		u'doctype': u'Page',
-		'module': u'Stock',
-		u'name': u'__common__',
-		'page_name': u'stock-ledger',
-		'standard': u'Yes',
-		'title': u'Stock Ledger'
-	},
-
-	# These values are common for all Page Role
-	{
-		u'doctype': u'Page Role',
-		u'name': u'__common__',
-		'parent': u'stock-ledger',
-		'parentfield': u'roles',
-		'parenttype': u'Page'
-	},
-
-	# Page, stock-ledger
-	{
-		u'doctype': u'Page',
-		u'name': u'stock-ledger'
-	},
-
-	# Page Role
-	{
-		u'doctype': u'Page Role',
-		'role': u'Analytics'
-	},
-
-	# Page Role
-	{
-		u'doctype': u'Page Role',
-		'role': u'Material Manager'
-	},
-
-	# Page Role
-	{
-		u'doctype': u'Page Role',
-		'role': u'Material User'
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-09-21 20:15:14", 
+  "modified_by": "Administrator", 
+  "modified": "2012-10-04 17:25:35"
+ }, 
+ {
+  "name": "__common__", 
+  "title": "Stock Ledger", 
+  "module": "Stock", 
+  "doctype": "Page", 
+  "page_name": "stock-ledger", 
+  "standard": "Yes"
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "stock-ledger", 
+  "doctype": "Page Role", 
+  "parenttype": "Page", 
+  "parentfield": "roles"
+ }, 
+ {
+  "name": "stock-ledger", 
+  "doctype": "Page"
+ }, 
+ {
+  "role": "Analytics", 
+  "doctype": "Page Role"
+ }, 
+ {
+  "role": "Material Manager", 
+  "doctype": "Page Role"
+ }, 
+ {
+  "role": "Material User", 
+  "doctype": "Page Role"
+ }
 ]

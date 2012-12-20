@@ -1,327 +1,266 @@
-# DocType, Task
 [
-
-	# These values are common in all dictionaries
-	{
-		u'creation': '2012-09-18 11:05:48',
-		u'docstatus': 0,
-		u'modified': '2012-10-29 14:24:55',
-		u'modified_by': u'Administrator',
-		u'owner': u'Administrator'
-	},
-
-	# These values are common for all DocType
-	{
-		'_last_update': u'1324880734',
-		'allow_attach': 1,
-		'allow_trash': 1,
-		'autoname': u'TASK.#####',
-		'colour': u'White:FFF',
-		u'doctype': u'DocType',
-		'document_type': u'Master',
-		'max_attachments': 5,
-		'module': u'Projects',
-		u'name': u'__common__',
-		'section_style': u'Tray',
-		'server_code_error': u' ',
-		'show_in_menu': 0,
-		'subject': u'%(subject)s',
-		'tag_fields': u'status',
-		'version': 1
-	},
-
-	# These values are common for all DocField
-	{
-		u'doctype': u'DocField',
-		u'name': u'__common__',
-		'parent': u'Task',
-		'parentfield': u'fields',
-		'parenttype': u'DocType',
-		'permlevel': 0
-	},
-
-	# These values are common for all DocPerm
-	{
-		u'doctype': u'DocPerm',
-		u'name': u'__common__',
-		'parent': u'Task',
-		'parentfield': u'permissions',
-		'parenttype': u'DocType',
-		'read': 1,
-		'role': u'Projects User'
-	},
-
-	# DocType, Task
-	{
-		u'doctype': u'DocType',
-		u'name': u'Task'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'task_details',
-		'fieldtype': u'Section Break',
-		'label': u'Task Details',
-		'oldfieldtype': u'Section Break',
-		'search_index': 0,
-		'width': u'50%'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'subject',
-		'fieldtype': u'Data',
-		'in_filter': 1,
-		'label': u'Subject',
-		'oldfieldname': u'subject',
-		'oldfieldtype': u'Data',
-		'reqd': 1
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'exp_start_date',
-		'fieldtype': u'Date',
-		'label': u'Expected Start Date',
-		'oldfieldname': u'exp_start_date',
-		'oldfieldtype': u'Date',
-		'reqd': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'exp_end_date',
-		'fieldtype': u'Date',
-		'in_filter': 1,
-		'label': u'Expected End Date',
-		'oldfieldname': u'exp_end_date',
-		'oldfieldtype': u'Date',
-		'reqd': 0,
-		'search_index': 1
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'column_break0',
-		'fieldtype': u'Column Break',
-		'oldfieldtype': u'Column Break',
-		'width': u'50%'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		u'doctype': u'DocField',
-		'fieldname': u'project',
-		'fieldtype': u'Link',
-		'label': u'Project',
-		'oldfieldname': u'project',
-		'oldfieldtype': u'Link',
-		'options': u'Project',
-		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		u'doctype': u'DocField',
-		'fieldname': u'status',
-		'fieldtype': u'Select',
-		'label': u'Status',
-		'no_copy': 1,
-		'oldfieldname': u'status',
-		'oldfieldtype': u'Select',
-		'options': u'Open\nWorking\nPending Review\nClosed\nCancelled',
-		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'priority',
-		'fieldtype': u'Select',
-		'in_filter': 1,
-		'label': u'Priority',
-		'oldfieldname': u'priority',
-		'oldfieldtype': u'Select',
-		'options': u'Low\nMedium\nHigh\nUrgent',
-		'reqd': 0,
-		'search_index': 1
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'section_break0',
-		'fieldtype': u'Section Break',
-		'oldfieldtype': u'Section Break',
-		'options': u'Simple'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'description',
-		'fieldtype': u'Text Editor',
-		'label': u'Details',
-		'oldfieldname': u'description',
-		'oldfieldtype': u'Text Editor',
-		'reqd': 0,
-		'width': u'300px'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'time_and_budget',
-		'fieldtype': u'Section Break',
-		'label': u'Time and Budget',
-		'oldfieldtype': u'Section Break'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'expected',
-		'fieldtype': u'Column Break',
-		'label': u'Expected',
-		'oldfieldtype': u'Column Break',
-		'width': u'50%'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'exp_total_hrs',
-		'fieldtype': u'Data',
-		'label': u'Total Hours (Expected)',
-		'oldfieldname': u'exp_total_hrs',
-		'oldfieldtype': u'Data',
-		'reqd': 0
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'allocated_budget',
-		'fieldtype': u'Currency',
-		'label': u'Allocated Budget',
-		'oldfieldname': u'allocated_budget',
-		'oldfieldtype': u'Currency'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'actual',
-		'fieldtype': u'Column Break',
-		'label': u'Actual',
-		'oldfieldtype': u'Column Break',
-		'width': u'50%'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'act_start_date',
-		'fieldtype': u'Date',
-		'label': u'Actual Start Date',
-		'oldfieldname': u'act_start_date',
-		'oldfieldtype': u'Date'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'act_end_date',
-		'fieldtype': u'Date',
-		'label': u'Actual End Date',
-		'oldfieldname': u'act_end_date',
-		'oldfieldtype': u'Date'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'act_total_hrs',
-		'fieldtype': u'Data',
-		'label': u'Total Hours (Actual)',
-		'oldfieldname': u'act_total_hrs',
-		'oldfieldtype': u'Data'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'actual_budget',
-		'fieldtype': u'Currency',
-		'label': u'Actual Budget',
-		'oldfieldname': u'actual_budget',
-		'oldfieldtype': u'Currency'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'more_details',
-		'fieldtype': u'Section Break',
-		'label': u'More Details'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'depends_on': u'eval:doc.status == "Closed" || doc.status == "Pending Review"',
-		u'doctype': u'DocField',
-		'fieldname': u'review_date',
-		'fieldtype': u'Date',
-		'hidden': 1,
-		'label': u'Review Date',
-		'oldfieldname': u'review_date',
-		'oldfieldtype': u'Date'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'depends_on': u'eval:doc.status == "Closed"',
-		u'doctype': u'DocField',
-		'fieldname': u'closing_date',
-		'fieldtype': u'Date',
-		'hidden': 1,
-		'label': u'Closing Date',
-		'oldfieldname': u'closing_date',
-		'oldfieldtype': u'Date'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'file_list',
-		'fieldtype': u'Text',
-		'hidden': 1,
-		'label': u'File List',
-		'no_copy': 1,
-		'print_hide': 1
-	},
-
-	# DocPerm
-	{
-		'cancel': 1,
-		'create': 1,
-		u'doctype': u'DocPerm',
-		'permlevel': 0,
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		u'doctype': u'DocPerm',
-		'permlevel': 1
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-09-18 11:05:48", 
+  "modified_by": "Administrator", 
+  "modified": "2012-10-29 14:24:55"
+ }, 
+ {
+  "section_style": "Tray", 
+  "allow_attach": 1, 
+  "tag_fields": "status", 
+  "module": "Projects", 
+  "server_code_error": " ", 
+  "allow_trash": 1, 
+  "doctype": "DocType", 
+  "document_type": "Master", 
+  "subject": "%(subject)s", 
+  "autoname": "TASK.#####", 
+  "name": "__common__", 
+  "colour": "White:FFF", 
+  "_last_update": "1324880734", 
+  "show_in_menu": 0, 
+  "max_attachments": 5, 
+  "version": 1
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "Task", 
+  "doctype": "DocField", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "parentfield": "fields"
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "Task", 
+  "read": 1, 
+  "doctype": "DocPerm", 
+  "parenttype": "DocType", 
+  "role": "Projects User", 
+  "parentfield": "permissions"
+ }, 
+ {
+  "name": "Task", 
+  "doctype": "DocType"
+ }, 
+ {
+  "oldfieldtype": "Section Break", 
+  "doctype": "DocField", 
+  "label": "Task Details", 
+  "width": "50%", 
+  "fieldname": "task_details", 
+  "fieldtype": "Section Break", 
+  "search_index": 0
+ }, 
+ {
+  "oldfieldtype": "Data", 
+  "doctype": "DocField", 
+  "label": "Subject", 
+  "oldfieldname": "subject", 
+  "fieldname": "subject", 
+  "fieldtype": "Data", 
+  "reqd": 1, 
+  "in_filter": 1
+ }, 
+ {
+  "oldfieldtype": "Date", 
+  "doctype": "DocField", 
+  "label": "Expected Start Date", 
+  "oldfieldname": "exp_start_date", 
+  "fieldname": "exp_start_date", 
+  "fieldtype": "Date", 
+  "reqd": 0
+ }, 
+ {
+  "search_index": 1, 
+  "doctype": "DocField", 
+  "label": "Expected End Date", 
+  "oldfieldname": "exp_end_date", 
+  "fieldname": "exp_end_date", 
+  "fieldtype": "Date", 
+  "oldfieldtype": "Date", 
+  "reqd": 0, 
+  "in_filter": 1
+ }, 
+ {
+  "oldfieldtype": "Column Break", 
+  "doctype": "DocField", 
+  "width": "50%", 
+  "fieldname": "column_break0", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "oldfieldtype": "Link", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Project", 
+  "oldfieldname": "project", 
+  "trigger": "Client", 
+  "fieldname": "project", 
+  "fieldtype": "Link", 
+  "options": "Project"
+ }, 
+ {
+  "no_copy": 1, 
+  "oldfieldtype": "Select", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Status", 
+  "oldfieldname": "status", 
+  "trigger": "Client", 
+  "fieldname": "status", 
+  "fieldtype": "Select", 
+  "options": "Open\nWorking\nPending Review\nClosed\nCancelled"
+ }, 
+ {
+  "search_index": 1, 
+  "doctype": "DocField", 
+  "label": "Priority", 
+  "oldfieldname": "priority", 
+  "fieldname": "priority", 
+  "fieldtype": "Select", 
+  "oldfieldtype": "Select", 
+  "reqd": 0, 
+  "options": "Low\nMedium\nHigh\nUrgent", 
+  "in_filter": 1
+ }, 
+ {
+  "oldfieldtype": "Section Break", 
+  "doctype": "DocField", 
+  "fieldname": "section_break0", 
+  "fieldtype": "Section Break", 
+  "options": "Simple"
+ }, 
+ {
+  "oldfieldtype": "Text Editor", 
+  "doctype": "DocField", 
+  "label": "Details", 
+  "oldfieldname": "description", 
+  "width": "300px", 
+  "fieldname": "description", 
+  "fieldtype": "Text Editor", 
+  "reqd": 0
+ }, 
+ {
+  "oldfieldtype": "Section Break", 
+  "doctype": "DocField", 
+  "label": "Time and Budget", 
+  "fieldname": "time_and_budget", 
+  "fieldtype": "Section Break"
+ }, 
+ {
+  "oldfieldtype": "Column Break", 
+  "doctype": "DocField", 
+  "label": "Expected", 
+  "width": "50%", 
+  "fieldname": "expected", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "oldfieldtype": "Data", 
+  "doctype": "DocField", 
+  "label": "Total Hours (Expected)", 
+  "oldfieldname": "exp_total_hrs", 
+  "fieldname": "exp_total_hrs", 
+  "fieldtype": "Data", 
+  "reqd": 0
+ }, 
+ {
+  "oldfieldtype": "Currency", 
+  "doctype": "DocField", 
+  "label": "Allocated Budget", 
+  "oldfieldname": "allocated_budget", 
+  "fieldname": "allocated_budget", 
+  "fieldtype": "Currency"
+ }, 
+ {
+  "oldfieldtype": "Column Break", 
+  "doctype": "DocField", 
+  "label": "Actual", 
+  "width": "50%", 
+  "fieldname": "actual", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "oldfieldtype": "Date", 
+  "doctype": "DocField", 
+  "label": "Actual Start Date", 
+  "oldfieldname": "act_start_date", 
+  "fieldname": "act_start_date", 
+  "fieldtype": "Date"
+ }, 
+ {
+  "oldfieldtype": "Date", 
+  "doctype": "DocField", 
+  "label": "Actual End Date", 
+  "oldfieldname": "act_end_date", 
+  "fieldname": "act_end_date", 
+  "fieldtype": "Date"
+ }, 
+ {
+  "oldfieldtype": "Data", 
+  "doctype": "DocField", 
+  "label": "Total Hours (Actual)", 
+  "oldfieldname": "act_total_hrs", 
+  "fieldname": "act_total_hrs", 
+  "fieldtype": "Data"
+ }, 
+ {
+  "oldfieldtype": "Currency", 
+  "doctype": "DocField", 
+  "label": "Actual Budget", 
+  "oldfieldname": "actual_budget", 
+  "fieldname": "actual_budget", 
+  "fieldtype": "Currency"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "more_details", 
+  "fieldtype": "Section Break", 
+  "label": "More Details"
+ }, 
+ {
+  "oldfieldtype": "Date", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Review Date", 
+  "oldfieldname": "review_date", 
+  "fieldname": "review_date", 
+  "fieldtype": "Date", 
+  "depends_on": "eval:doc.status == \"Closed\" || doc.status == \"Pending Review\"", 
+  "hidden": 1
+ }, 
+ {
+  "oldfieldtype": "Date", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Closing Date", 
+  "oldfieldname": "closing_date", 
+  "fieldname": "closing_date", 
+  "fieldtype": "Date", 
+  "depends_on": "eval:doc.status == \"Closed\"", 
+  "hidden": 1
+ }, 
+ {
+  "print_hide": 1, 
+  "no_copy": 1, 
+  "doctype": "DocField", 
+  "label": "File List", 
+  "fieldname": "file_list", 
+  "fieldtype": "Text", 
+  "hidden": 1
+ }, 
+ {
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "write": 1, 
+  "cancel": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "permlevel": 1, 
+  "doctype": "DocPerm"
+ }
 ]

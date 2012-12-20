@@ -1,35 +1,28 @@
-# Search Criteria, amc_summary
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-04-03 12:49:50',
-		'docstatus': 0,
-		'modified': '2012-04-03 12:49:50',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
-	},
-
-	# These values are common for all Search Criteria
-	{
-		'add_cond': u"`tabSerial No`.`territory` is not null\n`tabSerial No`.`territory` != ''\n`tabSerial No`.`status` not in ('In Store', 'Scrapped')",
-		'columns': u'Serial No\x01Territory',
-		'criteria_name': u'AMC Summary',
-		'doc_type': u'Serial No',
-		'doctype': 'Search Criteria',
-		'filters': u"{'Serial No\x01Saved':1,'Serial No\x01Status':''}",
-		'group_by': u'`tabSerial No`.`cost_center`',
-		'module': u'Support',
-		'name': '__common__',
-		'page_len': 50,
-		'sort_by': u'`tabSerial No`.`cost_center`',
-		'sort_order': u'ASC',
-		'standard': u'Yes'
-	},
-
-	# Search Criteria, amc_summary
-	{
-		'doctype': 'Search Criteria',
-		'name': u'amc_summary'
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-04-03 12:49:50", 
+  "modified_by": "Administrator", 
+  "modified": "2012-04-03 12:49:50"
+ }, 
+ {
+  "module": "Support", 
+  "standard": "Yes", 
+  "sort_order": "ASC", 
+  "filters": "{'Serial No\u0001Saved':1,'Serial No\u0001Status':''}", 
+  "doc_type": "Serial No", 
+  "name": "__common__", 
+  "add_cond": "`tabSerial No`.`territory` is not null\n`tabSerial No`.`territory` != ''\n`tabSerial No`.`status` not in ('In Store', 'Scrapped')", 
+  "doctype": "Search Criteria", 
+  "sort_by": "`tabSerial No`.`cost_center`", 
+  "group_by": "`tabSerial No`.`cost_center`", 
+  "page_len": 50, 
+  "criteria_name": "AMC Summary", 
+  "columns": "Serial No\u0001Territory"
+ }, 
+ {
+  "name": "amc_summary", 
+  "doctype": "Search Criteria"
+ }
 ]

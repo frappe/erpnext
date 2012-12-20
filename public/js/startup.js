@@ -152,8 +152,11 @@ erpnext.setup_mousetrap = function() {
 	});
 
 	Mousetrap.bind(["command+s", "ctrl+s"], function() {
-		if(cur_frm && !cur_frm.save_disabled)
+		if(cur_frm && !cur_frm.save_disabled && cint(cur_frm.doc.docstatus)===0)
 			cur_frm.save();
+		else if(cur_frm && !cur_frm.save_disabled && cint(cur_frm.doc.docstatus)===1
+				&& cur_frm.doc.__unsaved)
+			cur_frm.frm_head.appframe.buttons['Update'].click();
 		else if(wn.container.page.save_action)
 			wn.container.page.save_action();
 		return false;

@@ -1,102 +1,81 @@
-# DocType, Answer
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-03-27 14:36:01',
-		'docstatus': 0,
-		'modified': '2012-03-27 14:36:01',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
-	},
-
-	# These values are common for all DocType
-	{
-		'allow_attach': 0,
-		'allow_trash': 1,
-		'autoname': u'_ANS.#######',
-		'colour': u'White:FFF',
-		'doctype': 'DocType',
-		'in_create': 1,
-		'module': u'Utilities',
-		'name': '__common__',
-		'read_only': 1,
-		'section_style': u'Simple',
-		'server_code_error': u' ',
-		'show_in_menu': 0,
-		'version': 3
-	},
-
-	# These values are common for all DocField
-	{
-		'doctype': u'DocField',
-		'name': '__common__',
-		'parent': u'Answer',
-		'parentfield': u'fields',
-		'parenttype': u'DocType',
-		'permlevel': 0
-	},
-
-	# These values are common for all DocPerm
-	{
-		'cancel': 1,
-		'create': 1,
-		'doctype': u'DocPerm',
-		'name': '__common__',
-		'parent': u'Answer',
-		'parentfield': u'permissions',
-		'parenttype': u'DocType',
-		'permlevel': 0,
-		'read': 1,
-		'role': u'All',
-		'write': 1
-	},
-
-	# DocType, Answer
-	{
-		'doctype': 'DocType',
-		'name': u'Answer'
-	},
-
-	# DocPerm
-	{
-		'doctype': u'DocPerm'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'question',
-		'fieldtype': u'Link',
-		'label': u'Question',
-		'options': u'Question'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'answer',
-		'fieldtype': u'Text',
-		'label': u'Answer',
-		'oldfieldname': u'question',
-		'oldfieldtype': u'Text'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'points',
-		'fieldtype': u'Int',
-		'label': u'Points'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'_users_voted',
-		'fieldtype': u'Text',
-		'hidden': 1,
-		'label': u'Users Voted',
-		'print_hide': 1
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-03-27 14:36:01", 
+  "modified_by": "Administrator", 
+  "modified": "2012-03-27 14:36:01"
+ }, 
+ {
+  "section_style": "Simple", 
+  "allow_attach": 0, 
+  "module": "Utilities", 
+  "allow_trash": 1, 
+  "server_code_error": " ", 
+  "in_create": 1, 
+  "read_only": 1, 
+  "autoname": "_ANS.#######", 
+  "name": "__common__", 
+  "colour": "White:FFF", 
+  "doctype": "DocType", 
+  "show_in_menu": 0, 
+  "version": 3
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "Answer", 
+  "doctype": "DocField", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "parentfield": "fields"
+ }, 
+ {
+  "parent": "Answer", 
+  "read": 1, 
+  "doctype": "DocPerm", 
+  "cancel": 1, 
+  "name": "__common__", 
+  "create": 1, 
+  "write": 1, 
+  "parenttype": "DocType", 
+  "role": "All", 
+  "permlevel": 0, 
+  "parentfield": "permissions"
+ }, 
+ {
+  "name": "Answer", 
+  "doctype": "DocType"
+ }, 
+ {
+  "doctype": "DocPerm"
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Question", 
+  "fieldname": "question", 
+  "fieldtype": "Link", 
+  "options": "Question"
+ }, 
+ {
+  "oldfieldtype": "Text", 
+  "doctype": "DocField", 
+  "label": "Answer", 
+  "oldfieldname": "question", 
+  "fieldname": "answer", 
+  "fieldtype": "Text"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "points", 
+  "fieldtype": "Int", 
+  "label": "Points"
+ }, 
+ {
+  "print_hide": 1, 
+  "doctype": "DocField", 
+  "label": "Users Voted", 
+  "fieldname": "_users_voted", 
+  "fieldtype": "Text", 
+  "hidden": 1
+ }
 ]

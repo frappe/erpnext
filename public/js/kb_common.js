@@ -66,7 +66,6 @@ KBItemToolbar = function(args, kb) {
 
 	this.setup_del = function() {
 		$(this.line1).find('.del-link').click(function() {
-			console.log(1);
 			this.innerHTML = 'deleting...'; 
 			this.disabled = 1;
 			$c_page('utilities', 'questions', 'delete', {

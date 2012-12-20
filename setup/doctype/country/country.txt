@@ -1,95 +1,74 @@
-# DocType, Country
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-03-27 14:36:19',
-		'docstatus': 0,
-		'modified': '2012-03-27 14:36:19',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
-	},
-
-	# These values are common for all DocType
-	{
-		'autoname': u'field:country_name',
-		'colour': u'White:FFF',
-		'doctype': 'DocType',
-		'document_type': u'Master',
-		'in_create': 0,
-		'module': u'Setup',
-		'name': '__common__',
-		'read_only': 0,
-		'section_style': u'Simple',
-		'server_code_error': u' ',
-		'show_in_menu': 0,
-		'version': 11
-	},
-
-	# These values are common for all DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'country_name',
-		'fieldtype': u'Data',
-		'label': u'Country Name',
-		'name': '__common__',
-		'oldfieldname': u'country_name',
-		'oldfieldtype': u'Data',
-		'parent': u'Country',
-		'parentfield': u'fields',
-		'parenttype': u'DocType',
-		'permlevel': 0,
-		'reqd': 1
-	},
-
-	# These values are common for all DocPerm
-	{
-		'create': 1,
-		'doctype': u'DocPerm',
-		'name': '__common__',
-		'parent': u'Country',
-		'parentfield': u'permissions',
-		'parenttype': u'DocType',
-		'permlevel': 0,
-		'read': 1,
-		'write': 1
-	},
-
-	# DocType, Country
-	{
-		'doctype': 'DocType',
-		'name': u'Country'
-	},
-
-	# DocPerm
-	{
-		'amend': 0,
-		'cancel': 0,
-		'doctype': u'DocPerm',
-		'role': u'Sales Master Manager',
-		'submit': 0
-	},
-
-	# DocPerm
-	{
-		'doctype': u'DocPerm',
-		'role': u'Purchase Master Manager'
-	},
-
-	# DocPerm
-	{
-		'doctype': u'DocPerm',
-		'role': u'HR User'
-	},
-
-	# DocPerm
-	{
-		'doctype': u'DocPerm',
-		'role': u'HR Manager'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField'
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-03-27 14:36:19", 
+  "modified_by": "Administrator", 
+  "modified": "2012-03-27 14:36:19"
+ }, 
+ {
+  "section_style": "Simple", 
+  "in_create": 0, 
+  "module": "Setup", 
+  "server_code_error": " ", 
+  "document_type": "Master", 
+  "read_only": 0, 
+  "autoname": "field:country_name", 
+  "name": "__common__", 
+  "colour": "White:FFF", 
+  "doctype": "DocType", 
+  "show_in_menu": 0, 
+  "version": 11
+ }, 
+ {
+  "parent": "Country", 
+  "oldfieldtype": "Data", 
+  "oldfieldname": "country_name", 
+  "reqd": 1, 
+  "name": "__common__", 
+  "doctype": "DocField", 
+  "label": "Country Name", 
+  "parenttype": "DocType", 
+  "fieldname": "country_name", 
+  "fieldtype": "Data", 
+  "permlevel": 0, 
+  "parentfield": "fields"
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "Country", 
+  "read": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "write": 1, 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "parentfield": "permissions"
+ }, 
+ {
+  "name": "Country", 
+  "doctype": "DocType"
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "role": "Sales Master Manager", 
+  "doctype": "DocPerm", 
+  "submit": 0
+ }, 
+ {
+  "role": "Purchase Master Manager", 
+  "doctype": "DocPerm"
+ }, 
+ {
+  "role": "HR User", 
+  "doctype": "DocPerm"
+ }, 
+ {
+  "role": "HR Manager", 
+  "doctype": "DocPerm"
+ }, 
+ {
+  "doctype": "DocField"
+ }
 ]

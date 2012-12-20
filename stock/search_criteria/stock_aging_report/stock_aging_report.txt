@@ -1,34 +1,27 @@
-# Search Criteria, stock_aging_report
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-04-03 12:49:53',
-		'docstatus': 0,
-		'modified': '2012-04-03 12:49:53',
-		'modified_by': u'Administrator',
-		'owner': u'ashwini@webnotestech.com'
-	},
-
-	# These values are common for all Search Criteria
-	{
-		'add_cond': u"`tabSerial No`.status = 'In Store'",
-		'columns': u'Serial No\x01ID,Serial No\x01Item Code,Serial No\x01Description,Serial No\x01Item Group,Serial No\x01Purchase Date',
-		'criteria_name': u'Stock Aging Report',
-		'doc_type': u'Serial No',
-		'doctype': 'Search Criteria',
-		'filters': u"{'Serial No\x01Saved':1,'Serial No\x01Submitted':1,'Serial No\x01Status':'In Store','Serial No\x01Maintenance Status':''}",
-		'module': u'Stock',
-		'name': '__common__',
-		'page_len': 1000,
-		'sort_by': u'`tabSerial No`.`name`',
-		'sort_order': u'DESC',
-		'standard': u'Yes'
-	},
-
-	# Search Criteria, stock_aging_report
-	{
-		'doctype': 'Search Criteria',
-		'name': u'stock_aging_report'
-	}
+ {
+  "owner": "ashwini@webnotestech.com", 
+  "docstatus": 0, 
+  "creation": "2012-04-03 12:49:53", 
+  "modified_by": "Administrator", 
+  "modified": "2012-04-03 12:49:53"
+ }, 
+ {
+  "module": "Stock", 
+  "standard": "Yes", 
+  "sort_order": "DESC", 
+  "filters": "{'Serial No\u0001Saved':1,'Serial No\u0001Submitted':1,'Serial No\u0001Status':'In Store','Serial No\u0001Maintenance Status':''}", 
+  "doc_type": "Serial No", 
+  "name": "__common__", 
+  "add_cond": "`tabSerial No`.status = 'In Store'", 
+  "doctype": "Search Criteria", 
+  "sort_by": "`tabSerial No`.`name`", 
+  "page_len": 1000, 
+  "criteria_name": "Stock Aging Report", 
+  "columns": "Serial No\u0001ID,Serial No\u0001Item Code,Serial No\u0001Description,Serial No\u0001Item Group,Serial No\u0001Purchase Date"
+ }, 
+ {
+  "name": "stock_aging_report", 
+  "doctype": "Search Criteria"
+ }
 ]

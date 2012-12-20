@@ -1,36 +1,29 @@
-# Search Criteria, business_associate_commission_report
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-04-03 12:49:50',
-		'docstatus': 0,
-		'modified': '2012-04-03 12:49:50',
-		'modified_by': u'Administrator',
-		'owner': u'saumil@webnotestech.com'
-	},
-
-	# These values are common for all Search Criteria
-	{
-		'add_col': u"SUM(`tabSales Invoice`.`total_commission`) AS 'Total Commission'\nSUM(`tabSales Invoice`.`net_total`) AS 'Net Total'\n((SUM(`tabSales Invoice`.`total_commission`) / SUM(`tabSales Invoice`.`net_total`)) * 100) AS 'Average Commission Rate'",
-		'add_cond': u'`tabSales Invoice`.`net_total` > 0\n`tabSales Invoice`.`total_commission` > 0',
-		'columns': u'Sales Invoice\x01Business Associate',
-		'criteria_name': u'Business Associate Commission Report',
-		'description': u'Track total commission given to your Business Associate',
-		'doc_type': u'Sales Invoice',
-		'doctype': 'Search Criteria',
-		'filters': u"{'Sales Invoice\x01Submitted':1}",
-		'group_by': u'`tabSales Invoice`.sales_partner',
-		'module': u'Accounts',
-		'name': '__common__',
-		'page_len': 50,
-		'sort_order': u'DESC',
-		'standard': u'Yes'
-	},
-
-	# Search Criteria, business_associate_commission_report
-	{
-		'doctype': 'Search Criteria',
-		'name': u'business_associate_commission_report'
-	}
+ {
+  "owner": "saumil@webnotestech.com", 
+  "docstatus": 0, 
+  "creation": "2012-04-03 12:49:50", 
+  "modified_by": "Administrator", 
+  "modified": "2012-04-03 12:49:50"
+ }, 
+ {
+  "add_col": "SUM(`tabSales Invoice`.`total_commission`) AS 'Total Commission'\nSUM(`tabSales Invoice`.`net_total`) AS 'Net Total'\n((SUM(`tabSales Invoice`.`total_commission`) / SUM(`tabSales Invoice`.`net_total`)) * 100) AS 'Average Commission Rate'", 
+  "module": "Accounts", 
+  "standard": "Yes", 
+  "sort_order": "DESC", 
+  "filters": "{'Sales Invoice\u0001Submitted':1}", 
+  "description": "Track total commission given to your Business Associate", 
+  "doc_type": "Sales Invoice", 
+  "name": "__common__", 
+  "add_cond": "`tabSales Invoice`.`net_total` > 0\n`tabSales Invoice`.`total_commission` > 0", 
+  "doctype": "Search Criteria", 
+  "group_by": "`tabSales Invoice`.sales_partner", 
+  "page_len": 50, 
+  "criteria_name": "Business Associate Commission Report", 
+  "columns": "Sales Invoice\u0001Business Associate"
+ }, 
+ {
+  "name": "business_associate_commission_report", 
+  "doctype": "Search Criteria"
+ }
 ]

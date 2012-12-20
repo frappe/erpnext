@@ -1,58 +1,45 @@
-# DocType, Item Supplier
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-03-27 14:36:33',
-		'docstatus': 0,
-		'modified': '2012-03-27 14:36:33',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
-	},
-
-	# These values are common for all DocType
-	{
-		'colour': u'White:FFF',
-		'doctype': 'DocType',
-		'istable': 1,
-		'module': u'Stock',
-		'name': '__common__',
-		'section_style': u'Simple',
-		'show_in_menu': 0,
-		'version': 3
-	},
-
-	# These values are common for all DocField
-	{
-		'doctype': u'DocField',
-		'name': '__common__',
-		'parent': u'Item Supplier',
-		'parentfield': u'fields',
-		'parenttype': u'DocType',
-		'permlevel': 0
-	},
-
-	# DocType, Item Supplier
-	{
-		'doctype': 'DocType',
-		'name': u'Item Supplier'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'supplier',
-		'fieldtype': u'Link',
-		'label': u'Supplier',
-		'options': u'Supplier'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'supplier_part_no',
-		'fieldtype': u'Data',
-		'label': u'Supplier Part Number',
-		'width': u'200px'
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-03-27 14:36:33", 
+  "modified_by": "Administrator", 
+  "modified": "2012-03-27 14:36:33"
+ }, 
+ {
+  "section_style": "Simple", 
+  "istable": 1, 
+  "name": "__common__", 
+  "colour": "White:FFF", 
+  "module": "Stock", 
+  "doctype": "DocType", 
+  "version": 3, 
+  "show_in_menu": 0
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "Item Supplier", 
+  "doctype": "DocField", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "parentfield": "fields"
+ }, 
+ {
+  "name": "Item Supplier", 
+  "doctype": "DocType"
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Supplier", 
+  "fieldname": "supplier", 
+  "fieldtype": "Link", 
+  "options": "Supplier"
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Supplier Part Number", 
+  "width": "200px", 
+  "fieldname": "supplier_part_no", 
+  "fieldtype": "Data"
+ }
 ]

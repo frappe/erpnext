@@ -125,7 +125,6 @@ class DocType:
 		s.modified_by				=	session['user']
 		s.serial_no					=	serial_no
 		s.sle_exists				=	1
-		s.fiscal_year				=	obj.doc.fiscal_year
 		s.company					=	obj.doc.company
 		s.save(new_rec)
 

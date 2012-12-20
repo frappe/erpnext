@@ -1,0 +1,78 @@
+[
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-12-06 12:10:10", 
+  "modified_by": "Administrator", 
+  "modified": "2012-12-06 12:32:22"
+ }, 
+ {
+  "in_create": 1, 
+  "allow_print": 1, 
+  "module": "Production", 
+  "document_type": "Other", 
+  "description": "Replace a particular BOM in all other BOMs where it is used. It will replace the old BOM link, update cost and regenerate \"BOM Explosion Item\" table as per new BOM", 
+  "read_only": 1, 
+  "allow_email": 1, 
+  "hide_heading": 1, 
+  "issingle": 1, 
+  "name": "__common__", 
+  "doctype": "DocType", 
+  "hide_toolbar": 1, 
+  "allow_copy": 1
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "BOM Replace Tool", 
+  "doctype": "DocField", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "parentfield": "fields"
+ }, 
+ {
+  "parent": "BOM Replace Tool", 
+  "read": 1, 
+  "name": "__common__", 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "write": 1, 
+  "parenttype": "DocType", 
+  "role": "Administrator", 
+  "permlevel": 0, 
+  "parentfield": "permissions"
+ }, 
+ {
+  "name": "BOM Replace Tool", 
+  "doctype": "DocType"
+ }, 
+ {
+  "description": "The BOM which will be replaced", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Current BOM", 
+  "fieldname": "current_bom", 
+  "fieldtype": "Link", 
+  "reqd": 1, 
+  "options": "BOM"
+ }, 
+ {
+  "description": "The new BOM after replacement", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "New BOM", 
+  "fieldname": "new_bom", 
+  "fieldtype": "Link", 
+  "reqd": 1, 
+  "options": "BOM"
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Replace", 
+  "fieldname": "replace", 
+  "fieldtype": "Button", 
+  "options": "replace_bom"
+ }, 
+ {
+  "doctype": "DocPerm"
+ }
+]

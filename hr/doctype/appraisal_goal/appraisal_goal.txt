@@ -1,98 +1,81 @@
-# DocType, Appraisal Goal
 [
-
-	# These values are common in all dictionaries
-	{
-		u'creation': '2012-07-03 13:30:40',
-		u'docstatus': 0,
-		u'modified': '2012-11-15 17:50:24',
-		u'modified_by': u'Administrator',
-		u'owner': u'ashwini@webnotestech.com'
-	},
-
-	# These values are common for all DocType
-	{
-		'autoname': u'APRSLD.#####',
-		'colour': u'White:FFF',
-		u'doctype': u'DocType',
-		'istable': 1,
-		'module': u'HR',
-		u'name': u'__common__',
-		'section_style': u'Simple',
-		'server_code_error': u' ',
-		'version': 1
-	},
-
-	# These values are common for all DocField
-	{
-		u'doctype': u'DocField',
-		u'name': u'__common__',
-		'parent': u'Appraisal Goal',
-		'parentfield': u'fields',
-		'parenttype': u'DocType'
-	},
-
-	# DocType, Appraisal Goal
-	{
-		u'doctype': u'DocType',
-		u'name': u'Appraisal Goal'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'description': u'Key Responsibility Area',
-		u'doctype': u'DocField',
-		'fieldname': u'kra',
-		'fieldtype': u'Small Text',
-		'label': u'Goal',
-		'oldfieldname': u'kra',
-		'oldfieldtype': u'Small Text',
-		'permlevel': 0,
-		'reqd': 1,
-		'width': u'240px'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'per_weightage',
-		'fieldtype': u'Currency',
-		'label': u'Weightage (%)',
-		'oldfieldname': u'per_weightage',
-		'oldfieldtype': u'Currency',
-		'permlevel': 0,
-		'reqd': 1,
-		'width': u'70px'
-	},
-
-	# DocField
-	{
-		'allow_on_submit': 1,
-		'colour': u'White:FFF',
-		u'doctype': u'DocField',
-		'fieldname': u'score',
-		'fieldtype': u'Currency',
-		'label': u'Score (0-5)',
-		'no_copy': 1,
-		'oldfieldname': u'score',
-		'oldfieldtype': u'Select',
-		'options': u'\n0\n1\n2\n3\n4\n5',
-		'permlevel': 0,
-		'trigger': u'Client',
-		'width': u'70px'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'score_earned',
-		'fieldtype': u'Currency',
-		'label': u'Score Earned',
-		'no_copy': 1,
-		'oldfieldname': u'score_earned',
-		'oldfieldtype': u'Currency',
-		'permlevel': 1,
-		'width': u'70px'
-	}
+ {
+  "owner": "ashwini@webnotestech.com", 
+  "docstatus": 0, 
+  "creation": "2012-07-03 13:30:40", 
+  "modified_by": "Administrator", 
+  "modified": "2012-11-15 17:50:24"
+ }, 
+ {
+  "section_style": "Simple", 
+  "istable": 1, 
+  "name": "__common__", 
+  "colour": "White:FFF", 
+  "module": "HR", 
+  "server_code_error": " ", 
+  "version": 1, 
+  "doctype": "DocType", 
+  "autoname": "APRSLD.#####"
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "Appraisal Goal", 
+  "doctype": "DocField", 
+  "parenttype": "DocType", 
+  "parentfield": "fields"
+ }, 
+ {
+  "name": "Appraisal Goal", 
+  "doctype": "DocType"
+ }, 
+ {
+  "description": "Key Responsibility Area", 
+  "oldfieldtype": "Small Text", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Goal", 
+  "oldfieldname": "kra", 
+  "width": "240px", 
+  "fieldname": "kra", 
+  "fieldtype": "Small Text", 
+  "reqd": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "oldfieldtype": "Currency", 
+  "doctype": "DocField", 
+  "label": "Weightage (%)", 
+  "oldfieldname": "per_weightage", 
+  "width": "70px", 
+  "fieldname": "per_weightage", 
+  "fieldtype": "Currency", 
+  "reqd": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "permlevel": 0, 
+  "no_copy": 1, 
+  "oldfieldtype": "Select", 
+  "colour": "White:FFF", 
+  "allow_on_submit": 1, 
+  "doctype": "DocField", 
+  "label": "Score (0-5)", 
+  "oldfieldname": "score", 
+  "width": "70px", 
+  "trigger": "Client", 
+  "fieldname": "score", 
+  "fieldtype": "Currency", 
+  "options": "\n0\n1\n2\n3\n4\n5"
+ }, 
+ {
+  "no_copy": 1, 
+  "oldfieldtype": "Currency", 
+  "doctype": "DocField", 
+  "label": "Score Earned", 
+  "oldfieldname": "score_earned", 
+  "width": "70px", 
+  "fieldname": "score_earned", 
+  "fieldtype": "Currency", 
+  "permlevel": 1
+ }
 ]

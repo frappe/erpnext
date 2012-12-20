@@ -1,33 +1,26 @@
-# Search Criteria, collection_report
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-04-03 12:49:50',
-		'docstatus': 0,
-		'modified': '2012-04-03 12:49:50',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
-	},
-
-	# These values are common for all Search Criteria
-	{
-		'columns': u'Journal Voucher\x01ID,Journal Voucher\x01Posting Date,Journal Voucher\x01Company,Journal Voucher\x01Cheque No,Journal Voucher\x01Cheque Date,Journal Voucher Detail\x01Account,Journal Voucher Detail\x01Credit,Journal Voucher Detail\x01Against Receivable,Journal Voucher Detail\x01Is Advance',
-		'criteria_name': u'Collection Report',
-		'doc_type': u'Journal Voucher Detail',
-		'doctype': 'Search Criteria',
-		'filters': u"{'Journal Voucher\x01Saved':1,'Journal Voucher\x01Submitted':1,'Journal Voucher\x01Voucher Type':'','Journal Voucher\x01Is Opening':'','Journal Voucher\x01Company':'','Journal Voucher\x01TDS Applicable':'','Journal Voucher\x01TDS Category':'','GL Entry\x01Range 1':'30','GL Entry\x01Range 2':'45','GL Entry\x01Range 3':'60','GL Entry\x01Range 4':'90'}",
-		'module': u'Accounts',
-		'name': '__common__',
-		'parent_doc_type': u'Journal Voucher',
-		'sort_by': u'`tabJournal Voucher`.`name`',
-		'sort_order': u'DESC',
-		'standard': u'Yes'
-	},
-
-	# Search Criteria, collection_report
-	{
-		'doctype': 'Search Criteria',
-		'name': u'collection_report'
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-04-03 12:49:50", 
+  "modified_by": "Administrator", 
+  "modified": "2012-04-03 12:49:50"
+ }, 
+ {
+  "parent_doc_type": "Journal Voucher", 
+  "module": "Accounts", 
+  "doctype": "Search Criteria", 
+  "sort_order": "DESC", 
+  "filters": "{'Journal Voucher\u0001Saved':1,'Journal Voucher\u0001Submitted':1,'Journal Voucher\u0001Voucher Type':'','Journal Voucher\u0001Is Opening':'','Journal Voucher\u0001Company':'','Journal Voucher\u0001TDS Applicable':'','Journal Voucher\u0001TDS Category':'','GL Entry\u0001Range 1':'30','GL Entry\u0001Range 2':'45','GL Entry\u0001Range 3':'60','GL Entry\u0001Range 4':'90'}", 
+  "standard": "Yes", 
+  "doc_type": "Journal Voucher Detail", 
+  "name": "__common__", 
+  "sort_by": "`tabJournal Voucher`.`name`", 
+  "criteria_name": "Collection Report", 
+  "columns": "Journal Voucher\u0001ID,Journal Voucher\u0001Posting Date,Journal Voucher\u0001Company,Journal Voucher\u0001Cheque No,Journal Voucher\u0001Cheque Date,Journal Voucher Detail\u0001Account,Journal Voucher Detail\u0001Credit,Journal Voucher Detail\u0001Against Receivable,Journal Voucher Detail\u0001Is Advance"
+ }, 
+ {
+  "name": "collection_report", 
+  "doctype": "Search Criteria"
+ }
 ]

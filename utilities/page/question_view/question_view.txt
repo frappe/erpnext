@@ -1,27 +1,20 @@
-# Page, question-view
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2011-05-04 11:09:50',
-		'docstatus': 0,
-		'modified': '2011-03-29 13:54:27',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
-	},
-
-	# These values are common for all Page
-	{
-		'doctype': 'Page',
-		'module': 'Utilities',
-		'name': '__common__',
-		'page_name': 'Question View',
-		'standard': 'Yes'
-	},
-
-	# Page, question-view
-	{
-		'doctype': 'Page',
-		'name': 'question-view'
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2011-05-04 11:09:50", 
+  "modified_by": "Administrator", 
+  "modified": "2011-03-29 13:54:27"
+ }, 
+ {
+  "name": "__common__", 
+  "module": "Utilities", 
+  "standard": "Yes", 
+  "page_name": "Question View", 
+  "doctype": "Page"
+ }, 
+ {
+  "name": "question-view", 
+  "doctype": "Page"
+ }
 ]

@@ -1,142 +1,115 @@
-# DocType, Price List
 [
-
-	# These values are common in all dictionaries
-	{
-		u'creation': '2012-07-12 23:29:45',
-		u'docstatus': 0,
-		u'modified': '2012-11-15 10:50:52',
-		u'modified_by': u'Administrator',
-		u'owner': u'Administrator'
-	},
-
-	# These values are common for all DocType
-	{
-		'_last_update': u'1303100817',
-		'allow_attach': 0,
-		'allow_copy': 1,
-		'allow_email': 1,
-		'allow_print': 1,
-		'allow_trash': 1,
-		'autoname': u'field:price_list_name',
-		'colour': u'White:FFF',
-		'description': u'Price List Master',
-		u'doctype': u'DocType',
-		'document_type': u'Master',
-		'max_attachments': 1,
-		'module': u'Setup',
-		u'name': u'__common__',
-		'section_style': u'Simple',
-		'server_code_error': u' ',
-		'show_in_menu': 0,
-		'version': 1
-	},
-
-	# These values are common for all DocField
-	{
-		u'doctype': u'DocField',
-		u'name': u'__common__',
-		'parent': u'Price List',
-		'parentfield': u'fields',
-		'parenttype': u'DocType',
-		'permlevel': 0
-	},
-
-	# These values are common for all DocPerm
-	{
-		'amend': 0,
-		u'doctype': u'DocPerm',
-		u'name': u'__common__',
-		'parent': u'Price List',
-		'parentfield': u'permissions',
-		'parenttype': u'DocType',
-		'read': 1,
-		'submit': 0
-	},
-
-	# DocType, Price List
-	{
-		u'doctype': u'DocType',
-		u'name': u'Price List'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'price_list_name',
-		'fieldtype': u'Data',
-		'label': u'Price List Name',
-		'oldfieldname': u'price_list_name',
-		'oldfieldtype': u'Data',
-		'reqd': 1
-	},
-
-	# DocField
-	{
-		'depends_on': u'price_list_name',
-		u'doctype': u'DocField',
-		'fieldname': u'how_to_upload',
-		'fieldtype': u'HTML',
-		'label': u'How to upload',
-		'options': u'<div class="help">Use the <a href="#data-import-tool">Data Import Tool</a> to upload, update Item Prices in bulk:\n<ol> \n<li>Go to Data Import Tool.\n<li>Select "Item"\n<li>Check on "With Data"\n<li>Download "Item Price" from Child Tables.\n<li>Update the prices required and add new rows if required.\n<li>Check on "Overwrite"\n<li>Upload the modified sheet.\n</div>\n'
-	},
-
-	# DocField
-	{
-		u'doctype': u'DocField',
-		'fieldname': u'file_list',
-		'fieldtype': u'Text',
-		'hidden': 1,
-		'label': u'File List'
-	},
-
-	# DocPerm
-	{
-		'cancel': 0,
-		'create': 0,
-		u'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Sales Manager',
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'cancel': 0,
-		'create': 0,
-		u'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Sales Manager',
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'cancel': 0,
-		'create': 0,
-		u'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'Sales User',
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'cancel': 0,
-		'create': 0,
-		u'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Sales User',
-		'write': 0
-	},
-
-	# DocPerm
-	{
-		'cancel': 1,
-		'create': 1,
-		u'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Sales Master Manager',
-		'write': 1
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-07-12 23:29:45", 
+  "modified_by": "Administrator", 
+  "modified": "2012-11-15 10:50:52"
+ }, 
+ {
+  "section_style": "Simple", 
+  "allow_attach": 0, 
+  "allow_print": 1, 
+  "module": "Setup", 
+  "doctype": "DocType", 
+  "allow_trash": 1, 
+  "server_code_error": " ", 
+  "document_type": "Master", 
+  "description": "Price List Master", 
+  "allow_email": 1, 
+  "autoname": "field:price_list_name", 
+  "name": "__common__", 
+  "colour": "White:FFF", 
+  "_last_update": "1303100817", 
+  "show_in_menu": 0, 
+  "max_attachments": 1, 
+  "version": 1, 
+  "allow_copy": 1
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "Price List", 
+  "doctype": "DocField", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "parentfield": "fields"
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "Price List", 
+  "amend": 0, 
+  "doctype": "DocPerm", 
+  "submit": 0, 
+  "read": 1, 
+  "parenttype": "DocType", 
+  "parentfield": "permissions"
+ }, 
+ {
+  "name": "Price List", 
+  "doctype": "DocType"
+ }, 
+ {
+  "oldfieldtype": "Data", 
+  "doctype": "DocField", 
+  "label": "Price List Name", 
+  "oldfieldname": "price_list_name", 
+  "fieldname": "price_list_name", 
+  "fieldtype": "Data", 
+  "reqd": 1
+ }, 
+ {
+  "depends_on": "price_list_name", 
+  "doctype": "DocField", 
+  "label": "How to upload", 
+  "fieldname": "how_to_upload", 
+  "fieldtype": "HTML", 
+  "options": "<div class=\"help\">Use the <a href=\"#data-import-tool\">Data Import Tool</a> to upload, update Item Prices in bulk:\n<ol> \n<li>Go to Data Import Tool.\n<li>Select \"Item\"\n<li>Check on \"With Data\"\n<li>Download \"Item Price\" from Child Tables.\n<li>Update the prices required and add new rows if required.\n<li>Check on \"Overwrite\"\n<li>Upload the modified sheet.\n</div>\n"
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "File List", 
+  "fieldname": "file_list", 
+  "fieldtype": "Text", 
+  "hidden": 1
+ }, 
+ {
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "write": 0, 
+  "role": "Sales Manager", 
+  "cancel": 0, 
+  "permlevel": 1
+ }, 
+ {
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "write": 0, 
+  "role": "Sales Manager", 
+  "cancel": 0, 
+  "permlevel": 0
+ }, 
+ {
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "write": 0, 
+  "role": "Sales User", 
+  "cancel": 0, 
+  "permlevel": 1
+ }, 
+ {
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "write": 0, 
+  "role": "Sales User", 
+  "cancel": 0, 
+  "permlevel": 0
+ }, 
+ {
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "write": 1, 
+  "role": "Sales Master Manager", 
+  "cancel": 1, 
+  "permlevel": 0
+ }
 ]

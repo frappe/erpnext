@@ -1,55 +1,40 @@
-# Page, financial-analytics
 [
-
-	# These values are common in all dictionaries
-	{
-		u'creation': '2012-09-18 11:05:48',
-		u'docstatus': 0,
-		u'modified': '2012-10-04 17:02:43',
-		u'modified_by': u'Administrator',
-		u'owner': u'Administrator'
-	},
-
-	# These values are common for all Page
-	{
-		u'doctype': u'Page',
-		'module': u'Accounts',
-		u'name': u'__common__',
-		'page_name': u'financial-analytics',
-		'standard': u'Yes',
-		'title': u'Financial Analytics'
-	},
-
-	# These values are common for all Page Role
-	{
-		u'doctype': u'Page Role',
-		u'name': u'__common__',
-		'parent': u'financial-analytics',
-		'parentfield': u'roles',
-		'parenttype': u'Page'
-	},
-
-	# Page, financial-analytics
-	{
-		u'doctype': u'Page',
-		u'name': u'financial-analytics'
-	},
-
-	# Page Role
-	{
-		u'doctype': u'Page Role',
-		'role': u'Analytics'
-	},
-
-	# Page Role
-	{
-		u'doctype': u'Page Role',
-		'role': u'Accounts Manager'
-	},
-
-	# Page Role
-	{
-		u'doctype': u'Page Role',
-		'role': u'Accounts User'
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-09-18 11:05:48", 
+  "modified_by": "Administrator", 
+  "modified": "2012-10-04 17:02:43"
+ }, 
+ {
+  "name": "__common__", 
+  "title": "Financial Analytics", 
+  "module": "Accounts", 
+  "doctype": "Page", 
+  "page_name": "financial-analytics", 
+  "standard": "Yes"
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "financial-analytics", 
+  "doctype": "Page Role", 
+  "parenttype": "Page", 
+  "parentfield": "roles"
+ }, 
+ {
+  "name": "financial-analytics", 
+  "doctype": "Page"
+ }, 
+ {
+  "role": "Analytics", 
+  "doctype": "Page Role"
+ }, 
+ {
+  "role": "Accounts Manager", 
+  "doctype": "Page Role"
+ }, 
+ {
+  "role": "Accounts User", 
+  "doctype": "Page Role"
+ }
 ]

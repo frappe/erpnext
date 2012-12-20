@@ -1,27 +1,20 @@
-# Item Group, Lightweight
 [
-
-	# These values are common in all dictionaries
-	{
-		u'creation': '2012-08-07 09:56:57',
-		u'docstatus': 0,
-		u'modified': '2012-08-07 09:56:58',
-		u'modified_by': u'Administrator',
-		u'owner': u'Administrator'
-	},
-
-	# These values are common for all Item Group
-	{
-		u'doctype': 'Item Group',
-		'is_group': u'No',
-		'item_group_name': u'Lightweight',
-		u'name': u'__common__',
-		'parent_item_group': u'Laptops'
-	},
-
-	# Item Group, Lightweight
-	{
-		u'doctype': 'Item Group',
-		u'name': u'Lightweight'
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-08-07 09:56:57", 
+  "modified_by": "Administrator", 
+  "modified": "2012-08-07 09:56:58"
+ }, 
+ {
+  "name": "__common__", 
+  "item_group_name": "Lightweight", 
+  "is_group": "No", 
+  "parent_item_group": "Laptops", 
+  "doctype": "Item Group"
+ }, 
+ {
+  "name": "Lightweight", 
+  "doctype": "Item Group"
+ }
 ]

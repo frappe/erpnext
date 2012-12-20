@@ -1,33 +1,26 @@
-# Search Criteria, shortage_to_purchase_request
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-03-30 14:50:44',
-		'docstatus': 0,
-		'modified': '2012-03-30 14:50:44',
-		'modified_by': u'Administrator',
-		'owner': u'wasim@webnotestech.com'
-	},
-
-	# These values are common for all Search Criteria
-	{
-		'columns': u'Item\x01ID,Item\x01Item Name,Item\x01Description,Item\x01Lead Time Days',
-		'criteria_name': u'Shortage To Purchase Request',
-		'doc_type': u'Item',
-		'doctype': 'Search Criteria',
-		'filters': u"{'Item\x01Saved':1}",
-		'module': u'Stock',
-		'name': '__common__',
-		'page_len': 50,
-		'sort_by': u'`tabItem`.`name`',
-		'sort_order': u'DESC',
-		'standard': u'Yes'
-	},
-
-	# Search Criteria, shortage_to_purchase_request
-	{
-		'doctype': 'Search Criteria',
-		'name': u'shortage_to_purchase_request'
-	}
+ {
+  "owner": "wasim@webnotestech.com", 
+  "docstatus": 0, 
+  "creation": "2012-03-30 14:50:44", 
+  "modified_by": "Administrator", 
+  "modified": "2012-03-30 14:50:44"
+ }, 
+ {
+  "module": "Stock", 
+  "standard": "Yes", 
+  "sort_order": "DESC", 
+  "filters": "{'Item\u0001Saved':1}", 
+  "doctype": "Search Criteria", 
+  "doc_type": "Item", 
+  "name": "__common__", 
+  "sort_by": "`tabItem`.`name`", 
+  "page_len": 50, 
+  "criteria_name": "Shortage To Purchase Request", 
+  "columns": "Item\u0001ID,Item\u0001Item Name,Item\u0001Description,Item\u0001Lead Time Days"
+ }, 
+ {
+  "name": "shortage_to_purchase_request", 
+  "doctype": "Search Criteria"
+ }
 ]

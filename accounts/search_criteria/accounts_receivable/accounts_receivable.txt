@@ -1,32 +1,25 @@
-# Search Criteria, accounts_receivable
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-04-03 12:49:50',
-		'docstatus': 0,
-		'modified': '2012-04-03 12:49:50',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
-	},
-
-	# These values are common for all Search Criteria
-	{
-		'columns': u'GL Entry\x01Posting Date,GL Entry\x01Transaction Date,GL Entry\x01Account,GL Entry\x01Against Voucher,GL Entry\x01Voucher No',
-		'criteria_name': u'Accounts Receivable',
-		'doc_type': u'GL Entry',
-		'doctype': 'Search Criteria',
-		'filters': u"{'GL Entry\x01Is Cancelled':'No','GL Entry\x01Fiscal Year':'','GL Entry\x01Company':'','GL Entry\x01Range 1':'30','GL Entry\x01Range 2':'45','GL Entry\x01Range 3':'60','GL Entry\x01Range 4':'90'}",
-		'module': u'Accounts',
-		'name': '__common__',
-		'sort_by': u'`tabGL Entry`.`name`',
-		'sort_order': u'ASC',
-		'standard': u'Yes'
-	},
-
-	# Search Criteria, accounts_receivable
-	{
-		'doctype': 'Search Criteria',
-		'name': u'accounts_receivable'
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-04-03 12:49:50", 
+  "modified_by": "Administrator", 
+  "modified": "2012-04-03 12:49:50"
+ }, 
+ {
+  "module": "Accounts", 
+  "standard": "Yes", 
+  "sort_order": "ASC", 
+  "filters": "{'GL Entry\u0001Is Cancelled':'No','GL Entry\u0001Fiscal Year':'','GL Entry\u0001Company':'','GL Entry\u0001Range 1':'30','GL Entry\u0001Range 2':'45','GL Entry\u0001Range 3':'60','GL Entry\u0001Range 4':'90'}", 
+  "doctype": "Search Criteria", 
+  "doc_type": "GL Entry", 
+  "name": "__common__", 
+  "sort_by": "`tabGL Entry`.`name`", 
+  "criteria_name": "Accounts Receivable", 
+  "columns": "GL Entry\u0001Posting Date,GL Entry\u0001Transaction Date,GL Entry\u0001Account,GL Entry\u0001Against Voucher,GL Entry\u0001Voucher No"
+ }, 
+ {
+  "name": "accounts_receivable", 
+  "doctype": "Search Criteria"
+ }
 ]

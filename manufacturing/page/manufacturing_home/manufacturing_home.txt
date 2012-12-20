@@ -1,0 +1,21 @@
+[
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-02-21 13:24:34", 
+  "modified_by": "Administrator", 
+  "modified": "2012-12-10 18:30:00"
+ }, 
+ {
+  "name": "__common__", 
+  "title": "Manufacturing Home", 
+  "module": "Manufacturing", 
+  "doctype": "Page", 
+  "page_name": "manufacturing-home", 
+  "standard": "Yes"
+ }, 
+ {
+  "name": "manufacturing-home", 
+  "doctype": "Page"
+ }
+]

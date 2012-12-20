@@ -1,123 +1,94 @@
-# DocType, SMS Log
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-03-27 14:36:47',
-		'docstatus': 0,
-		'modified': '2012-03-27 14:36:47',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
-	},
-
-	# These values are common for all DocType
-	{
-		'autoname': u'SMSLOG/.########',
-		'colour': u'White:FFF',
-		'doctype': 'DocType',
-		'module': u'Utilities',
-		'name': '__common__',
-		'section_style': u'Simple',
-		'show_in_menu': 0,
-		'version': 3
-	},
-
-	# These values are common for all DocField
-	{
-		'doctype': u'DocField',
-		'name': '__common__',
-		'parent': u'SMS Log',
-		'parentfield': u'fields',
-		'parenttype': u'DocType',
-		'permlevel': 0
-	},
-
-	# These values are common for all DocPerm
-	{
-		'create': 0,
-		'doctype': u'DocPerm',
-		'name': '__common__',
-		'parent': u'SMS Log',
-		'parentfield': u'permissions',
-		'parenttype': u'DocType',
-		'permlevel': 0,
-		'read': 1,
-		'role': u'System Manager',
-		'write': 0
-	},
-
-	# DocType, SMS Log
-	{
-		'doctype': 'DocType',
-		'name': u'SMS Log'
-	},
-
-	# DocPerm
-	{
-		'doctype': u'DocPerm'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'column_break0',
-		'fieldtype': u'Column Break',
-		'width': u'50%'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'sender_name',
-		'fieldtype': u'Data',
-		'label': u'Sender Name'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'sent_on',
-		'fieldtype': u'Date',
-		'label': u'Sent On'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'receiver_list',
-		'fieldtype': u'Small Text',
-		'label': u'Receiver List'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'column_break1',
-		'fieldtype': u'Column Break',
-		'width': u'50%'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'no_of_requested_sms',
-		'fieldtype': u'Int',
-		'label': u'No of Requested SMS'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'no_of_sent_sms',
-		'fieldtype': u'Int',
-		'label': u'No of Sent SMS'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'message',
-		'fieldtype': u'Small Text',
-		'label': u'Message'
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-03-27 14:36:47", 
+  "modified_by": "Administrator", 
+  "modified": "2012-03-27 14:36:47"
+ }, 
+ {
+  "section_style": "Simple", 
+  "name": "__common__", 
+  "colour": "White:FFF", 
+  "module": "Utilities", 
+  "doctype": "DocType", 
+  "version": 3, 
+  "autoname": "SMSLOG/.########", 
+  "show_in_menu": 0
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "SMS Log", 
+  "doctype": "DocField", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "parentfield": "fields"
+ }, 
+ {
+  "parent": "SMS Log", 
+  "read": 1, 
+  "name": "__common__", 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "write": 0, 
+  "parenttype": "DocType", 
+  "role": "System Manager", 
+  "permlevel": 0, 
+  "parentfield": "permissions"
+ }, 
+ {
+  "name": "SMS Log", 
+  "doctype": "DocType"
+ }, 
+ {
+  "doctype": "DocPerm"
+ }, 
+ {
+  "width": "50%", 
+  "fieldname": "column_break0", 
+  "fieldtype": "Column Break", 
+  "doctype": "DocField"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "sender_name", 
+  "fieldtype": "Data", 
+  "label": "Sender Name"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "sent_on", 
+  "fieldtype": "Date", 
+  "label": "Sent On"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "receiver_list", 
+  "fieldtype": "Small Text", 
+  "label": "Receiver List"
+ }, 
+ {
+  "width": "50%", 
+  "fieldname": "column_break1", 
+  "fieldtype": "Column Break", 
+  "doctype": "DocField"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "no_of_requested_sms", 
+  "fieldtype": "Int", 
+  "label": "No of Requested SMS"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "no_of_sent_sms", 
+  "fieldtype": "Int", 
+  "label": "No of Sent SMS"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "message", 
+  "fieldtype": "Small Text", 
+  "label": "Message"
+ }
 ]

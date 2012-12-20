@@ -1,133 +1,106 @@
-# DocType, Other Income Detail
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-03-27 14:35:59',
-		'docstatus': 0,
-		'modified': '2012-03-27 14:35:59',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
-	},
-
-	# These values are common for all DocType
-	{
-		'colour': u'White:FFF',
-		'doctype': 'DocType',
-		'istable': 1,
-		'module': u'HR',
-		'name': '__common__',
-		'section_style': u'Simple',
-		'server_code_error': u' ',
-		'show_in_menu': 0,
-		'version': 6
-	},
-
-	# These values are common for all DocField
-	{
-		'doctype': u'DocField',
-		'name': '__common__',
-		'parent': u'Other Income Detail',
-		'parentfield': u'fields',
-		'parenttype': u'DocType'
-	},
-
-	# These values are common for all DocPerm
-	{
-		'doctype': u'DocPerm',
-		'name': '__common__',
-		'parent': u'Other Income Detail',
-		'parentfield': u'permissions',
-		'parenttype': u'DocType',
-		'read': 1,
-		'role': u'System Manager'
-	},
-
-	# DocType, Other Income Detail
-	{
-		'doctype': 'DocType',
-		'name': u'Other Income Detail'
-	},
-
-	# DocPerm
-	{
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'doctype': u'DocPerm',
-		'permlevel': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'particulars2',
-		'fieldtype': u'Small Text',
-		'label': u'Particulars',
-		'oldfieldname': u'particulars2',
-		'oldfieldtype': u'Small Text',
-		'permlevel': 1,
-		'reqd': 1,
-		'width': u'200px'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'under_section2',
-		'fieldtype': u'Data',
-		'label': u'Under Section',
-		'oldfieldname': u'under_section2',
-		'oldfieldtype': u'Data',
-		'permlevel': 1,
-		'reqd': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'max_limit2',
-		'fieldtype': u'Currency',
-		'label': u'Max. Limit',
-		'oldfieldname': u'max_limit2',
-		'oldfieldtype': u'Currency',
-		'permlevel': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'actual_amount2',
-		'fieldtype': u'Currency',
-		'label': u'Actual Amount',
-		'oldfieldname': u'actual_amount2',
-		'oldfieldtype': u'Currency',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'eligible_amount2',
-		'fieldtype': u'Currency',
-		'label': u'Eligible Amount',
-		'oldfieldname': u'eligible_amount2',
-		'oldfieldtype': u'Currency',
-		'permlevel': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'modified_amount2',
-		'fieldtype': u'Currency',
-		'label': u'Modified Amount',
-		'oldfieldname': u'modified_amount2',
-		'oldfieldtype': u'Currency',
-		'permlevel': 0
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-03-27 14:35:59", 
+  "modified_by": "Administrator", 
+  "modified": "2012-03-27 14:35:59"
+ }, 
+ {
+  "section_style": "Simple", 
+  "istable": 1, 
+  "name": "__common__", 
+  "colour": "White:FFF", 
+  "module": "HR", 
+  "show_in_menu": 0, 
+  "version": 6, 
+  "server_code_error": " ", 
+  "doctype": "DocType"
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "Other Income Detail", 
+  "doctype": "DocField", 
+  "parenttype": "DocType", 
+  "parentfield": "fields"
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "Other Income Detail", 
+  "read": 1, 
+  "doctype": "DocPerm", 
+  "parenttype": "DocType", 
+  "role": "System Manager", 
+  "parentfield": "permissions"
+ }, 
+ {
+  "name": "Other Income Detail", 
+  "doctype": "DocType"
+ }, 
+ {
+  "write": 1, 
+  "permlevel": 0, 
+  "doctype": "DocPerm"
+ }, 
+ {
+  "permlevel": 1, 
+  "doctype": "DocPerm"
+ }, 
+ {
+  "oldfieldtype": "Small Text", 
+  "doctype": "DocField", 
+  "label": "Particulars", 
+  "oldfieldname": "particulars2", 
+  "width": "200px", 
+  "fieldname": "particulars2", 
+  "fieldtype": "Small Text", 
+  "reqd": 1, 
+  "permlevel": 1
+ }, 
+ {
+  "oldfieldtype": "Data", 
+  "doctype": "DocField", 
+  "label": "Under Section", 
+  "oldfieldname": "under_section2", 
+  "fieldname": "under_section2", 
+  "fieldtype": "Data", 
+  "reqd": 1, 
+  "permlevel": 1
+ }, 
+ {
+  "oldfieldtype": "Currency", 
+  "doctype": "DocField", 
+  "label": "Max. Limit", 
+  "oldfieldname": "max_limit2", 
+  "fieldname": "max_limit2", 
+  "fieldtype": "Currency", 
+  "permlevel": 1
+ }, 
+ {
+  "oldfieldtype": "Currency", 
+  "doctype": "DocField", 
+  "label": "Actual Amount", 
+  "oldfieldname": "actual_amount2", 
+  "fieldname": "actual_amount2", 
+  "fieldtype": "Currency", 
+  "permlevel": 0
+ }, 
+ {
+  "oldfieldtype": "Currency", 
+  "doctype": "DocField", 
+  "label": "Eligible Amount", 
+  "oldfieldname": "eligible_amount2", 
+  "fieldname": "eligible_amount2", 
+  "fieldtype": "Currency", 
+  "permlevel": 1
+ }, 
+ {
+  "oldfieldtype": "Currency", 
+  "doctype": "DocField", 
+  "label": "Modified Amount", 
+  "oldfieldname": "modified_amount2", 
+  "fieldname": "modified_amount2", 
+  "fieldtype": "Currency", 
+  "permlevel": 0
+ }
 ]

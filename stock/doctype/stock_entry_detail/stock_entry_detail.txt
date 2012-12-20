@@ -2,9 +2,9 @@
  {
   "owner": "Administrator", 
   "docstatus": 0, 
-  "creation": "2012-07-03 13:29:47", 
+  "creation": "2012-12-18 13:47:41", 
   "modified_by": "Administrator", 
-  "modified": "2012-12-03 11:37:17"
+  "modified": "2012-12-18 17:08:52"
  }, 
  {
   "istable": 1, 
@@ -14,6 +14,7 @@
   "module": "Stock"
  }, 
  {
+  "read_only": 0, 
   "name": "__common__", 
   "parent": "Stock Entry Detail", 
   "doctype": "DocField", 
@@ -52,7 +53,6 @@
   "label": "Item Code", 
   "oldfieldname": "item_code", 
   "permlevel": 0, 
-  "trigger": "Client", 
   "fieldname": "item_code", 
   "fieldtype": "Link", 
   "search_index": 1, 
@@ -75,7 +75,6 @@
   "doctype": "DocField", 
   "label": "Qty", 
   "oldfieldname": "qty", 
-  "trigger": "Client", 
   "fieldname": "qty", 
   "fieldtype": "Currency", 
   "reqd": 1, 
@@ -83,15 +82,13 @@
  }, 
  {
   "oldfieldtype": "Link", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "UOM", 
   "oldfieldname": "uom", 
-  "trigger": "Client", 
+  "options": "UOM", 
   "fieldname": "uom", 
   "fieldtype": "Link", 
   "reqd": 1, 
-  "options": "UOM", 
   "permlevel": 0
  }, 
  {
@@ -130,22 +127,10 @@
   "doctype": "DocField", 
   "label": "Batch No", 
   "oldfieldname": "batch_no", 
-  "trigger": "Client", 
+  "options": "Batch", 
   "fieldname": "batch_no", 
   "fieldtype": "Link", 
-  "options": "Batch", 
   "permlevel": 0
- }, 
- {
-  "print_hide": 1, 
-  "oldfieldtype": "Currency", 
-  "doctype": "DocField", 
-  "label": "Reqd Qty", 
-  "oldfieldname": "reqd_qty", 
-  "fieldname": "reqd_qty", 
-  "fieldtype": "Currency", 
-  "permlevel": 3, 
-  "in_filter": 0
  }, 
  {
   "print_hide": 1, 
@@ -174,7 +159,7 @@
  {
   "oldfieldtype": "Currency", 
   "doctype": "DocField", 
-  "label": "Stock Qty", 
+  "label": "Qty as per Stock UOM", 
   "oldfieldname": "transfer_qty", 
   "fieldname": "transfer_qty", 
   "fieldtype": "Currency", 
@@ -186,32 +171,24 @@
   "doctype": "DocField", 
   "label": "Stock UOM", 
   "oldfieldname": "stock_uom", 
-  "options": "UOM", 
+  "permlevel": 1, 
   "fieldname": "stock_uom", 
   "fieldtype": "Link", 
   "search_index": 0, 
   "reqd": 1, 
-  "permlevel": 1, 
+  "options": "UOM", 
   "in_filter": 0
  }, 
  {
+  "print_hide": 1, 
   "description": "BOM No. for a Finished Good Item", 
+  "no_copy": 0, 
   "doctype": "DocField", 
   "label": "BOM No", 
   "options": "BOM", 
   "fieldname": "bom_no", 
   "fieldtype": "Link", 
+  "hidden": 1, 
   "permlevel": 0
- }, 
- {
-  "print_hide": 1, 
-  "oldfieldtype": "Check", 
-  "doctype": "DocField", 
-  "label": "FG Item", 
-  "oldfieldname": "fg_item", 
-  "fieldname": "fg_item", 
-  "fieldtype": "Check", 
-  "permlevel": 0, 
-  "in_filter": 1
  }
 ]

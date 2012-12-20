@@ -1,36 +1,29 @@
-# Search Criteria, projectwise_pending_qty_and_costs
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-04-03 12:49:52',
-		'docstatus': 0,
-		'modified': '2012-04-03 12:49:52',
-		'modified_by': u'Administrator',
-		'owner': u'ashwini@webnotestech.com'
-	},
-
-	# These values are common for all Search Criteria
-	{
-		'add_col': u"SUM(`tabSales Order Item`.`qty` - `tabSales Order Item`.`delivered_qty`) AS 'Pending Qty'\nSUM((`tabSales Order Item`.`qty` - `tabSales Order Item`.`delivered_qty`)* `tabSales Order Item`.basic_rate) AS 'Pending Amount'",
-		'add_cond': u'`tabSales Order Item`.`qty` > `tabSales Order Item`.`delivered_qty`\nIFNULL(`tabSales Order`.`project_name`,"")!=""\n`tabSales Order`.order_type = \'Sales\'',
-		'columns': u'Sales Order\x01ID,Sales Order\x01Project Name,Sales Order\x01Customer,Sales Order\x01Customer Name,Sales Order Item\x01Item Code,Sales Order Item\x01Item Name,Sales Order\x01%  Delivered,Sales Order\x01% Billed,Sales Order\x01Sales Order Date,Sales Order\x01Expected Delivery Date',
-		'criteria_name': u'Projectwise Pending Qty and Costs',
-		'doc_type': u'Sales Order Item',
-		'doctype': 'Search Criteria',
-		'filters': u"{'Sales Order\x01Submitted':1,'Sales Order\x01Status':'Submitted','Sales Order\x01Fiscal Year':''}",
-		'module': u'Projects',
-		'name': '__common__',
-		'page_len': 50,
-		'parent_doc_type': u'Sales Order',
-		'sort_by': u'`tabSales Order`.`name`',
-		'sort_order': u'DESC',
-		'standard': u'Yes'
-	},
-
-	# Search Criteria, projectwise_pending_qty_and_costs
-	{
-		'doctype': 'Search Criteria',
-		'name': u'projectwise_pending_qty_and_costs'
-	}
+ {
+  "owner": "ashwini@webnotestech.com", 
+  "docstatus": 0, 
+  "creation": "2012-04-03 12:49:52", 
+  "modified_by": "Administrator", 
+  "modified": "2012-04-03 12:49:52"
+ }, 
+ {
+  "add_col": "SUM(`tabSales Order Item`.`qty` - `tabSales Order Item`.`delivered_qty`) AS 'Pending Qty'\nSUM((`tabSales Order Item`.`qty` - `tabSales Order Item`.`delivered_qty`)* `tabSales Order Item`.basic_rate) AS 'Pending Amount'", 
+  "parent_doc_type": "Sales Order", 
+  "module": "Projects", 
+  "standard": "Yes", 
+  "sort_order": "DESC", 
+  "filters": "{'Sales Order\u0001Submitted':1,'Sales Order\u0001Status':'Submitted','Sales Order\u0001Fiscal Year':''}", 
+  "doc_type": "Sales Order Item", 
+  "name": "__common__", 
+  "add_cond": "`tabSales Order Item`.`qty` > `tabSales Order Item`.`delivered_qty`\nIFNULL(`tabSales Order`.`project_name`,\"\")!=\"\"\n`tabSales Order`.order_type = 'Sales'", 
+  "doctype": "Search Criteria", 
+  "sort_by": "`tabSales Order`.`name`", 
+  "page_len": 50, 
+  "criteria_name": "Projectwise Pending Qty and Costs", 
+  "columns": "Sales Order\u0001ID,Sales Order\u0001Project Name,Sales Order\u0001Customer,Sales Order\u0001Customer Name,Sales Order Item\u0001Item Code,Sales Order Item\u0001Item Name,Sales Order\u0001%  Delivered,Sales Order\u0001% Billed,Sales Order\u0001Sales Order Date,Sales Order\u0001Expected Delivery Date"
+ }, 
+ {
+  "name": "projectwise_pending_qty_and_costs", 
+  "doctype": "Search Criteria"
+ }
 ]

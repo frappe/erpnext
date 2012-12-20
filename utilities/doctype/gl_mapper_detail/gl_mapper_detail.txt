@@ -1,207 +1,162 @@
-# DocType, GL Mapper Detail
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-03-27 14:36:46',
-		'docstatus': 0,
-		'modified': '2012-03-27 14:36:46',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
-	},
-
-	# These values are common for all DocType
-	{
-		'autoname': u'GLMDetail.#####',
-		'colour': u'White:FFF',
-		'doctype': 'DocType',
-		'istable': 1,
-		'module': u'Utilities',
-		'name': '__common__',
-		'section_style': u'Tray',
-		'server_code_error': u' ',
-		'show_in_menu': 0,
-		'version': 4
-	},
-
-	# These values are common for all DocField
-	{
-		'doctype': u'DocField',
-		'fieldtype': u'Data',
-		'name': '__common__',
-		'oldfieldtype': u'Data',
-		'parent': u'GL Mapper Detail',
-		'parentfield': u'fields',
-		'parenttype': u'DocType',
-		'permlevel': 0
-	},
-
-	# DocType, GL Mapper Detail
-	{
-		'doctype': 'DocType',
-		'name': u'GL Mapper Detail'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'table_field',
-		'label': u'Table Field',
-		'oldfieldname': u'table_field'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'account',
-		'label': u'Account',
-		'oldfieldname': u'account',
-		'reqd': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'debit',
-		'label': u'Debit',
-		'oldfieldname': u'debit',
-		'reqd': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'credit',
-		'label': u'Credit',
-		'oldfieldname': u'credit',
-		'reqd': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'cost_center',
-		'label': u'Cost Center',
-		'oldfieldname': u'cost_center',
-		'reqd': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'against',
-		'label': u'Against',
-		'oldfieldname': u'against',
-		'reqd': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'remarks',
-		'label': u'Remarks',
-		'no_copy': 1,
-		'oldfieldname': u'remarks',
-		'reqd': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'voucher_type',
-		'label': u'Voucher Type',
-		'oldfieldname': u'voucher_type',
-		'reqd': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'voucher_no',
-		'label': u'Voucher No',
-		'oldfieldname': u'voucher_no',
-		'reqd': 1
-	},
-
-	# DocField
-	{
-		'description': u'The date at which current entry will get or has actually executed.',
-		'doctype': u'DocField',
-		'fieldname': u'posting_date',
-		'label': u'Posting Date',
-		'oldfieldname': u'posting_date',
-		'reqd': 1
-	},
-
-	# DocField
-	{
-		'description': u'The date at which current entry is made in system.',
-		'doctype': u'DocField',
-		'fieldname': u'transaction_date',
-		'label': u'Transaction Date',
-		'oldfieldname': u'transaction_date',
-		'reqd': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'aging_date',
-		'label': u'Aging Date',
-		'oldfieldname': u'aging_date',
-		'reqd': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'fiscal_year',
-		'in_filter': 1,
-		'label': u'Fiscal Year',
-		'oldfieldname': u'fiscal_year',
-		'reqd': 1,
-		'search_index': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'against_voucher',
-		'label': u'Against Voucher',
-		'oldfieldname': u'against_voucher'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'against_voucher_type',
-		'label': u'Against Voucher Type',
-		'oldfieldname': u'against_voucher_type'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'company',
-		'in_filter': 1,
-		'label': u'Company',
-		'oldfieldname': u'company',
-		'search_index': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'is_opening',
-		'label': u'Is Opening',
-		'oldfieldname': u'is_opening'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'is_advance',
-		'label': u'Is Advance',
-		'oldfieldname': u'is_advance'
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-03-27 14:36:46", 
+  "modified_by": "Administrator", 
+  "modified": "2012-03-27 14:36:46"
+ }, 
+ {
+  "section_style": "Tray", 
+  "istable": 1, 
+  "module": "Utilities", 
+  "server_code_error": " ", 
+  "doctype": "DocType", 
+  "autoname": "GLMDetail.#####", 
+  "name": "__common__", 
+  "colour": "White:FFF", 
+  "show_in_menu": 0, 
+  "version": 4
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "GL Mapper Detail", 
+  "oldfieldtype": "Data", 
+  "doctype": "DocField", 
+  "parenttype": "DocType", 
+  "fieldtype": "Data", 
+  "permlevel": 0, 
+  "parentfield": "fields"
+ }, 
+ {
+  "name": "GL Mapper Detail", 
+  "doctype": "DocType"
+ }, 
+ {
+  "oldfieldname": "table_field", 
+  "fieldname": "table_field", 
+  "doctype": "DocField", 
+  "label": "Table Field"
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Account", 
+  "oldfieldname": "account", 
+  "fieldname": "account", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Debit", 
+  "oldfieldname": "debit", 
+  "fieldname": "debit", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Credit", 
+  "oldfieldname": "credit", 
+  "fieldname": "credit", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Cost Center", 
+  "oldfieldname": "cost_center", 
+  "fieldname": "cost_center", 
+  "reqd": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Against", 
+  "oldfieldname": "against", 
+  "fieldname": "against", 
+  "reqd": 1
+ }, 
+ {
+  "no_copy": 1, 
+  "doctype": "DocField", 
+  "label": "Remarks", 
+  "oldfieldname": "remarks", 
+  "fieldname": "remarks", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Voucher Type", 
+  "oldfieldname": "voucher_type", 
+  "fieldname": "voucher_type", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Voucher No", 
+  "oldfieldname": "voucher_no", 
+  "fieldname": "voucher_no", 
+  "reqd": 1
+ }, 
+ {
+  "description": "The date at which current entry will get or has actually executed.", 
+  "doctype": "DocField", 
+  "label": "Posting Date", 
+  "oldfieldname": "posting_date", 
+  "fieldname": "posting_date", 
+  "reqd": 1
+ }, 
+ {
+  "description": "The date at which current entry is made in system.", 
+  "doctype": "DocField", 
+  "label": "Transaction Date", 
+  "oldfieldname": "transaction_date", 
+  "fieldname": "transaction_date", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Aging Date", 
+  "oldfieldname": "aging_date", 
+  "fieldname": "aging_date", 
+  "reqd": 1
+ }, 
+ {
+  "search_index": 0, 
+  "doctype": "DocField", 
+  "label": "Fiscal Year", 
+  "oldfieldname": "fiscal_year", 
+  "fieldname": "fiscal_year", 
+  "reqd": 1, 
+  "in_filter": 1
+ }, 
+ {
+  "oldfieldname": "against_voucher", 
+  "fieldname": "against_voucher", 
+  "doctype": "DocField", 
+  "label": "Against Voucher"
+ }, 
+ {
+  "oldfieldname": "against_voucher_type", 
+  "fieldname": "against_voucher_type", 
+  "doctype": "DocField", 
+  "label": "Against Voucher Type"
+ }, 
+ {
+  "search_index": 0, 
+  "doctype": "DocField", 
+  "label": "Company", 
+  "oldfieldname": "company", 
+  "fieldname": "company", 
+  "in_filter": 1
+ }, 
+ {
+  "oldfieldname": "is_opening", 
+  "fieldname": "is_opening", 
+  "doctype": "DocField", 
+  "label": "Is Opening"
+ }, 
+ {
+  "oldfieldname": "is_advance", 
+  "fieldname": "is_advance", 
+  "doctype": "DocField", 
+  "label": "Is Advance"
+ }
 ]

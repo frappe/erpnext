@@ -1,27 +1,20 @@
-# Page, questions
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2011-05-04 11:09:49',
-		'docstatus': 0,
-		'modified': '2011-03-29 13:53:57',
-		'modified_by': 'Administrator',
-		'owner': 'Administrator'
-	},
-
-	# These values are common for all Page
-	{
-		'doctype': 'Page',
-		'module': 'Utilities',
-		'name': '__common__',
-		'page_name': 'Questions',
-		'standard': 'Yes'
-	},
-
-	# Page, questions
-	{
-		'doctype': 'Page',
-		'name': 'questions'
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2011-05-04 11:09:49", 
+  "modified_by": "Administrator", 
+  "modified": "2011-03-29 13:53:57"
+ }, 
+ {
+  "name": "__common__", 
+  "module": "Utilities", 
+  "standard": "Yes", 
+  "page_name": "Questions", 
+  "doctype": "Page"
+ }, 
+ {
+  "name": "questions", 
+  "doctype": "Page"
+ }
 ]

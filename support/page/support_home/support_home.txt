@@ -1,28 +1,21 @@
-# Page, support-home
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-02-21 13:23:35',
-		'docstatus': 0,
-		'modified': '2012-02-21 13:23:35',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
-	},
-
-	# These values are common for all Page
-	{
-		'doctype': 'Page',
-		'module': u'Support',
-		'name': '__common__',
-		'page_name': u'support-home',
-		'standard': u'Yes',
-		'title': u'Support Home'
-	},
-
-	# Page, support-home
-	{
-		'doctype': 'Page',
-		'name': u'support-home'
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-02-21 13:23:35", 
+  "modified_by": "Administrator", 
+  "modified": "2012-02-21 13:23:35"
+ }, 
+ {
+  "name": "__common__", 
+  "title": "Support Home", 
+  "module": "Support", 
+  "doctype": "Page", 
+  "page_name": "support-home", 
+  "standard": "Yes"
+ }, 
+ {
+  "name": "support-home", 
+  "doctype": "Page"
+ }
 ]

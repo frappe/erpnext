@@ -1,55 +1,40 @@
-# Page, general-ledger
 [
-
-	# These values are common in all dictionaries
-	{
-		u'creation': '2012-09-14 11:25:48',
-		u'docstatus': 0,
-		u'modified': '2012-10-04 17:00:09',
-		u'modified_by': u'Administrator',
-		u'owner': u'Administrator'
-	},
-
-	# These values are common for all Page
-	{
-		u'doctype': u'Page',
-		'module': u'Accounts',
-		u'name': u'__common__',
-		'page_name': u'general-ledger',
-		'standard': u'Yes',
-		'title': u'General Ledger'
-	},
-
-	# These values are common for all Page Role
-	{
-		u'doctype': u'Page Role',
-		u'name': u'__common__',
-		'parent': u'general-ledger',
-		'parentfield': u'roles',
-		'parenttype': u'Page'
-	},
-
-	# Page, general-ledger
-	{
-		u'doctype': u'Page',
-		u'name': u'general-ledger'
-	},
-
-	# Page Role
-	{
-		u'doctype': u'Page Role',
-		'role': u'Analytics'
-	},
-
-	# Page Role
-	{
-		u'doctype': u'Page Role',
-		'role': u'Accounts Manager'
-	},
-
-	# Page Role
-	{
-		u'doctype': u'Page Role',
-		'role': u'Accounts User'
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-09-14 11:25:48", 
+  "modified_by": "Administrator", 
+  "modified": "2012-10-04 17:00:09"
+ }, 
+ {
+  "name": "__common__", 
+  "title": "General Ledger", 
+  "module": "Accounts", 
+  "doctype": "Page", 
+  "page_name": "general-ledger", 
+  "standard": "Yes"
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "general-ledger", 
+  "doctype": "Page Role", 
+  "parenttype": "Page", 
+  "parentfield": "roles"
+ }, 
+ {
+  "name": "general-ledger", 
+  "doctype": "Page"
+ }, 
+ {
+  "role": "Analytics", 
+  "doctype": "Page Role"
+ }, 
+ {
+  "role": "Accounts Manager", 
+  "doctype": "Page Role"
+ }, 
+ {
+  "role": "Accounts User", 
+  "doctype": "Page Role"
+ }
 ]

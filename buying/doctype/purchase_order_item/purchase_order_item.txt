@@ -263,12 +263,12 @@
  {
   "print_hide": 1, 
   "oldfieldtype": "Date", 
+  "search_index": 0, 
   "doctype": "DocField", 
   "label": "Purchase Request Date", 
   "oldfieldname": "prevdoc_date", 
   "fieldname": "prevdoc_date", 
   "fieldtype": "Date", 
-  "search_index": 0, 
   "hidden": 1, 
   "permlevel": 1, 
   "in_filter": 1
@@ -326,11 +326,11 @@
   "label": "Item Group", 
   "oldfieldname": "item_group", 
   "permlevel": 1, 
+  "options": "Item Group", 
   "fieldname": "item_group", 
   "fieldtype": "Link", 
   "search_index": 0, 
   "hidden": 1, 
-  "options": "Item Group", 
   "in_filter": 1
  }, 
  {
@@ -361,11 +361,11 @@
  {
   "print_hide": 1, 
   "default": "0.00", 
+  "no_copy": 1, 
   "oldfieldtype": "Currency", 
   "doctype": "DocField", 
   "label": "Billed Quantity", 
   "oldfieldname": "billed_qty", 
-  "no_copy": 1, 
   "fieldname": "billed_qty", 
   "fieldtype": "Currency", 
   "hidden": 0, 

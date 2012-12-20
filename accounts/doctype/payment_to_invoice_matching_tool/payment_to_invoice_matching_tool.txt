@@ -1,274 +1,217 @@
-# DocType, Payment to Invoice Matching Tool
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-03-27 14:35:42',
-		'docstatus': 0,
-		'modified': '2012-03-27 14:35:42',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
-	},
-
-	# These values are common for all DocType
-	{
-		'_last_update': u'1316509358',
-		'colour': u'White:FFF',
-		'doctype': 'DocType',
-		'document_type': u'Other',
-		'issingle': 1,
-		'module': u'Accounts',
-		'name': '__common__',
-		'section_style': u'Simple',
-		'show_in_menu': 1,
-		'version': 37
-	},
-
-	# These values are common for all DocField
-	{
-		'doctype': u'DocField',
-		'name': '__common__',
-		'parent': u'Payment to Invoice Matching Tool',
-		'parentfield': u'fields',
-		'parenttype': u'DocType'
-	},
-
-	# These values are common for all DocPerm
-	{
-		'doctype': u'DocPerm',
-		'name': '__common__',
-		'parent': u'Payment to Invoice Matching Tool',
-		'parentfield': u'permissions',
-		'parenttype': u'DocType',
-		'read': 1
-	},
-
-	# DocType, Payment to Invoice Matching Tool
-	{
-		'doctype': 'DocType',
-		'name': u'Payment to Invoice Matching Tool'
-	},
-
-	# DocPerm
-	{
-		'create': 1,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'System Manager',
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'create': 1,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Accounts Manager',
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'create': 1,
-		'doctype': u'DocPerm',
-		'permlevel': 0,
-		'role': u'Accounts User',
-		'write': 1
-	},
-
-	# DocPerm
-	{
-		'doctype': u'DocPerm',
-		'permlevel': 1,
-		'role': u'All'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'doctype': u'DocField',
-		'fieldname': u'column_break0',
-		'fieldtype': u'Column Break',
-		'permlevel': 0,
-		'width': u'50%'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'account',
-		'fieldtype': u'Link',
-		'label': u'Account',
-		'options': u'Account',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'voucher_type',
-		'fieldtype': u'Select',
-		'label': u'Voucher Type',
-		'options': u'Sales Invoice\nPurchase Invoice\nJournal Voucher',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'doctype': u'DocField',
-		'fieldname': u'voucher_no',
-		'fieldtype': u'Link',
-		'label': u'Voucher No',
-		'permlevel': 0,
-		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'column_break1',
-		'fieldtype': u'Column Break',
-		'permlevel': 0,
-		'width': u'50%'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'total_amount',
-		'fieldtype': u'Currency',
-		'label': u'Total Amount',
-		'permlevel': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'pending_amt_to_reconcile',
-		'fieldtype': u'Currency',
-		'label': u'Pending Amt To Reconcile',
-		'permlevel': 1
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'doctype': u'DocField',
-		'fieldname': u'payment_entries',
-		'fieldtype': u'Section Break',
-		'label': u'Payment Entries',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'doctype': u'DocField',
-		'fieldname': u'column_break2',
-		'fieldtype': u'Column Break',
-		'label': u"<div class = 'field_description'>Filter payment entries based on date:</div>",
-		'permlevel': 0,
-		'width': u'50%'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'from_date',
-		'fieldtype': u'Date',
-		'label': u'From Date',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'to_date',
-		'fieldtype': u'Date',
-		'label': u'To Date',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'doctype': u'DocField',
-		'fieldname': u'column_break3',
-		'fieldtype': u'Column Break',
-		'label': u"<div class = 'field_description'>Filter payment entries based on amount:</div>",
-		'permlevel': 0,
-		'width': u'50%'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'doctype': u'DocField',
-		'fieldname': u'amt_greater_than',
-		'fieldtype': u'Data',
-		'label': u'Amount >=',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'amt_less_than',
-		'fieldtype': u'Data',
-		'label': u'Amount <=',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'section_break0',
-		'fieldtype': u'Section Break',
-		'options': u'Simple',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'pull_payment_entries',
-		'fieldtype': u'Button',
-		'label': u'Pull Payment Entries',
-		'options': u'get_payment_entries',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'ir_payment_details',
-		'fieldtype': u'Table',
-		'label': u'Payment Entries',
-		'options': u'Payment to Invoice Matching Tool Detail',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'doctype': u'DocField',
-		'fieldname': u'reconcile_html',
-		'fieldtype': u'HTML',
-		'label': u'Reconcile HTML',
-		'options': u"<div class='field_description'>Select Payment Voucher and Amount to Reconcile in the above table and then click Reconcile button</div>",
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'doctype': u'DocField',
-		'fieldname': u'reconcile',
-		'fieldtype': u'Button',
-		'label': u'Reconcile',
-		'options': u'reconcile',
-		'permlevel': 0,
-		'trigger': u'Client'
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-03-27 14:35:42", 
+  "modified_by": "Administrator", 
+  "modified": "2012-03-27 14:35:42"
+ }, 
+ {
+  "section_style": "Simple", 
+  "module": "Accounts", 
+  "doctype": "DocType", 
+  "issingle": 1, 
+  "document_type": "Other", 
+  "name": "__common__", 
+  "colour": "White:FFF", 
+  "_last_update": "1316509358", 
+  "show_in_menu": 1, 
+  "version": 37
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "Payment to Invoice Matching Tool", 
+  "doctype": "DocField", 
+  "parenttype": "DocType", 
+  "parentfield": "fields"
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "Payment to Invoice Matching Tool", 
+  "read": 1, 
+  "doctype": "DocPerm", 
+  "parenttype": "DocType", 
+  "parentfield": "permissions"
+ }, 
+ {
+  "name": "Payment to Invoice Matching Tool", 
+  "doctype": "DocType"
+ }, 
+ {
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "write": 1, 
+  "role": "System Manager", 
+  "permlevel": 0
+ }, 
+ {
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "write": 1, 
+  "role": "Accounts Manager", 
+  "permlevel": 0
+ }, 
+ {
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "write": 1, 
+  "role": "Accounts User", 
+  "permlevel": 0
+ }, 
+ {
+  "role": "All", 
+  "permlevel": 1, 
+  "doctype": "DocPerm"
+ }, 
+ {
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "width": "50%", 
+  "fieldname": "column_break0", 
+  "fieldtype": "Column Break", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "options": "Account", 
+  "fieldname": "account", 
+  "fieldtype": "Link", 
+  "label": "Account", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "options": "Sales Invoice\nPurchase Invoice\nJournal Voucher", 
+  "fieldname": "voucher_type", 
+  "fieldtype": "Select", 
+  "label": "Voucher Type", 
+  "permlevel": 0
+ }, 
+ {
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Voucher No", 
+  "trigger": "Client", 
+  "fieldname": "voucher_no", 
+  "fieldtype": "Link", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "width": "50%", 
+  "fieldname": "column_break1", 
+  "fieldtype": "Column Break", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Total Amount", 
+  "fieldname": "total_amount", 
+  "fieldtype": "Currency", 
+  "permlevel": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Pending Amt To Reconcile", 
+  "fieldname": "pending_amt_to_reconcile", 
+  "fieldtype": "Currency", 
+  "permlevel": 1
+ }, 
+ {
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Payment Entries", 
+  "fieldname": "payment_entries", 
+  "fieldtype": "Section Break", 
+  "permlevel": 0
+ }, 
+ {
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "<div class = 'field_description'>Filter payment entries based on date:</div>", 
+  "width": "50%", 
+  "fieldname": "column_break2", 
+  "fieldtype": "Column Break", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "From Date", 
+  "fieldname": "from_date", 
+  "fieldtype": "Date", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "To Date", 
+  "fieldname": "to_date", 
+  "fieldtype": "Date", 
+  "permlevel": 0
+ }, 
+ {
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "<div class = 'field_description'>Filter payment entries based on amount:</div>", 
+  "width": "50%", 
+  "fieldname": "column_break3", 
+  "fieldtype": "Column Break", 
+  "permlevel": 0
+ }, 
+ {
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Amount >=", 
+  "fieldname": "amt_greater_than", 
+  "fieldtype": "Data", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Amount <=", 
+  "fieldname": "amt_less_than", 
+  "fieldtype": "Data", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "permlevel": 0, 
+  "fieldname": "section_break0", 
+  "fieldtype": "Section Break", 
+  "options": "Simple"
+ }, 
+ {
+  "doctype": "DocField", 
+  "options": "get_payment_entries", 
+  "fieldname": "pull_payment_entries", 
+  "fieldtype": "Button", 
+  "label": "Pull Payment Entries", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "options": "Payment to Invoice Matching Tool Detail", 
+  "fieldname": "ir_payment_details", 
+  "fieldtype": "Table", 
+  "label": "Payment Entries", 
+  "permlevel": 0
+ }, 
+ {
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Reconcile HTML", 
+  "permlevel": 0, 
+  "fieldname": "reconcile_html", 
+  "fieldtype": "HTML", 
+  "options": "<div class='field_description'>Select Payment Voucher and Amount to Reconcile in the above table and then click Reconcile button</div>"
+ }, 
+ {
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Reconcile", 
+  "permlevel": 0, 
+  "trigger": "Client", 
+  "fieldname": "reconcile", 
+  "fieldtype": "Button", 
+  "options": "reconcile"
+ }
 ]

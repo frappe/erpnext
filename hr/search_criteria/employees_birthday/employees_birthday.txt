@@ -1,33 +1,26 @@
-# Search Criteria, employees_birthday
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-04-03 12:49:51',
-		'docstatus': 0,
-		'modified': '2012-04-03 12:49:51',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
-	},
-
-	# These values are common for all Search Criteria
-	{
-		'columns': u'Employee\x01ID,Employee\x01Employee Name,Employee\x01Department,Employee\x01Gender,Employee\x01Date of Birth,Employee\x01Month of Birth',
-		'criteria_name': u"Employee's Birthday",
-		'doc_type': u'Employee',
-		'doctype': 'Search Criteria',
-		'filters': u"{'Employee\x01Saved':1,'Employee\x01Gender':'','Employee\x01Month of Birth':'May','Employee\x01Status':''}",
-		'module': u'HR',
-		'name': '__common__',
-		'page_len': 50,
-		'sort_by': u'`tabEmployee`.`name`',
-		'sort_order': u'DESC',
-		'standard': u'Yes'
-	},
-
-	# Search Criteria, employees_birthday
-	{
-		'doctype': 'Search Criteria',
-		'name': u'employees_birthday'
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-04-03 12:49:51", 
+  "modified_by": "Administrator", 
+  "modified": "2012-04-03 12:49:51"
+ }, 
+ {
+  "module": "HR", 
+  "standard": "Yes", 
+  "sort_order": "DESC", 
+  "filters": "{'Employee\u0001Saved':1,'Employee\u0001Gender':'','Employee\u0001Month of Birth':'May','Employee\u0001Status':''}", 
+  "doctype": "Search Criteria", 
+  "doc_type": "Employee", 
+  "name": "__common__", 
+  "sort_by": "`tabEmployee`.`name`", 
+  "page_len": 50, 
+  "criteria_name": "Employee's Birthday", 
+  "columns": "Employee\u0001ID,Employee\u0001Employee Name,Employee\u0001Department,Employee\u0001Gender,Employee\u0001Date of Birth,Employee\u0001Month of Birth"
+ }, 
+ {
+  "name": "employees_birthday", 
+  "doctype": "Search Criteria"
+ }
 ]

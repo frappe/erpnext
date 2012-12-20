@@ -1,37 +1,30 @@
-# Search Criteria, sales_register
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-04-11 17:36:48',
-		'docstatus': 0,
-		'modified': '2012-04-18 17:41:46',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
-	},
-
-	# These values are common for all Search Criteria
-	{
-		'add_col': u"`tabAccount`.`parent_account` AS 'Parent Account'\n`tabCustomer`.`territory` AS 'Territory'\n`tabCustomer`.`customer_details` AS 'Customer Details'",
-		'add_cond': u"ifnull(`tabSales Invoice`.`is_opening`, 'No') = 'No'\n`tabAccount`.name =`tabSales Invoice`.debit_to\n`tabCustomer`.`name` = `tabAccount`.`master_name`",
-		'add_tab': u'`tabAccount`\n`tabCustomer`',
-		'columns': u'Sales Invoice\x01ID,Sales Invoice\x01Posting Date,Sales Invoice\x01Debit To',
-		'criteria_name': u'Sales Register',
-		'dis_filters': u'fiscal_year',
-		'doc_type': u'Sales Invoice',
-		'doctype': 'Search Criteria',
-		'filters': u"{'Sales Invoice\x01Submitted':1,'Sales Invoice\x01Is Opening':''}",
-		'module': u'Accounts',
-		'name': '__common__',
-		'page_len': 50,
-		'sort_by': u'`Parent Account`',
-		'sort_order': u'DESC',
-		'standard': u'Yes'
-	},
-
-	# Search Criteria, sales_register
-	{
-		'doctype': 'Search Criteria',
-		'name': u'sales_register'
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-04-11 17:36:48", 
+  "modified_by": "Administrator", 
+  "modified": "2012-04-18 17:41:46"
+ }, 
+ {
+  "add_col": "`tabAccount`.`parent_account` AS 'Parent Account'\n`tabCustomer`.`territory` AS 'Territory'\n`tabCustomer`.`customer_details` AS 'Customer Details'", 
+  "module": "Accounts", 
+  "standard": "Yes", 
+  "sort_order": "DESC", 
+  "add_tab": "`tabAccount`\n`tabCustomer`", 
+  "dis_filters": "fiscal_year", 
+  "doc_type": "Sales Invoice", 
+  "name": "__common__", 
+  "filters": "{'Sales Invoice\u0001Submitted':1,'Sales Invoice\u0001Is Opening':''}", 
+  "add_cond": "ifnull(`tabSales Invoice`.`is_opening`, 'No') = 'No'\n`tabAccount`.name =`tabSales Invoice`.debit_to\n`tabCustomer`.`name` = `tabAccount`.`master_name`", 
+  "doctype": "Search Criteria", 
+  "sort_by": "`Parent Account`", 
+  "page_len": 50, 
+  "criteria_name": "Sales Register", 
+  "columns": "Sales Invoice\u0001ID,Sales Invoice\u0001Posting Date,Sales Invoice\u0001Debit To"
+ }, 
+ {
+  "name": "sales_register", 
+  "doctype": "Search Criteria"
+ }
 ]

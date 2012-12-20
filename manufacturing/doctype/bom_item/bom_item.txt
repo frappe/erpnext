@@ -1,0 +1,150 @@
+[
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-12-14 10:15:16", 
+  "modified_by": "Administrator", 
+  "modified": "2012-12-14 16:35:33"
+ }, 
+ {
+  "istable": 1, 
+  "name": "__common__", 
+  "doctype": "DocType", 
+  "module": "Manufacturing"
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "BOM Item", 
+  "doctype": "DocField", 
+  "parenttype": "DocType", 
+  "parentfield": "fields"
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "BOM Item", 
+  "read": 1, 
+  "doctype": "DocPerm", 
+  "parenttype": "DocType", 
+  "role": "System Manager", 
+  "parentfield": "permissions"
+ }, 
+ {
+  "name": "BOM Item", 
+  "doctype": "DocType"
+ }, 
+ {
+  "oldfieldtype": "Data", 
+  "doctype": "DocField", 
+  "label": "Operation No", 
+  "oldfieldname": "operation_no", 
+  "fieldname": "operation_no", 
+  "fieldtype": "Select", 
+  "reqd": 0, 
+  "permlevel": 0
+ }, 
+ {
+  "oldfieldtype": "Link", 
+  "doctype": "DocField", 
+  "label": "Item Code", 
+  "oldfieldname": "item_code", 
+  "options": "Item", 
+  "fieldname": "item_code", 
+  "fieldtype": "Link", 
+  "search_index": 1, 
+  "reqd": 1, 
+  "permlevel": 0, 
+  "in_filter": 1
+ }, 
+ {
+  "permlevel": 0, 
+  "oldfieldtype": "Link", 
+  "doctype": "DocField", 
+  "label": "BOM No", 
+  "oldfieldname": "bom_no", 
+  "width": "150px", 
+  "fieldname": "bom_no", 
+  "fieldtype": "Link", 
+  "search_index": 1, 
+  "reqd": 0, 
+  "options": "BOM", 
+  "in_filter": 1
+ }, 
+ {
+  "oldfieldtype": "Currency", 
+  "doctype": "DocField", 
+  "label": "Qty", 
+  "oldfieldname": "qty", 
+  "fieldname": "qty", 
+  "fieldtype": "Float", 
+  "reqd": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "oldfieldtype": "Data", 
+  "doctype": "DocField", 
+  "label": "Stock UOM", 
+  "oldfieldname": "stock_uom", 
+  "fieldname": "stock_uom", 
+  "fieldtype": "Data", 
+  "reqd": 1, 
+  "permlevel": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Rate", 
+  "fieldname": "rate", 
+  "fieldtype": "Float", 
+  "permlevel": 0
+ }, 
+ {
+  "oldfieldtype": "Currency", 
+  "doctype": "DocField", 
+  "label": "Amount", 
+  "oldfieldname": "amount_as_per_mar", 
+  "width": "150px", 
+  "fieldname": "amount", 
+  "fieldtype": "Currency", 
+  "permlevel": 1
+ }, 
+ {
+  "print_hide": 1, 
+  "oldfieldtype": "Currency", 
+  "doctype": "DocField", 
+  "label": "Scrap %", 
+  "oldfieldname": "scrap", 
+  "fieldname": "scrap", 
+  "fieldtype": "Currency", 
+  "permlevel": 0
+ }, 
+ {
+  "oldfieldtype": "Text", 
+  "doctype": "DocField", 
+  "label": "Item Description", 
+  "oldfieldname": "description", 
+  "width": "250px", 
+  "fieldname": "description", 
+  "fieldtype": "Text", 
+  "reqd": 0, 
+  "permlevel": 0
+ }, 
+ {
+  "print_hide": 1, 
+  "oldfieldtype": "Float", 
+  "doctype": "DocField", 
+  "label": "Qty Consumed Per Unit", 
+  "oldfieldname": "qty_consumed_per_unit", 
+  "fieldname": "qty_consumed_per_unit", 
+  "fieldtype": "Float", 
+  "hidden": 1, 
+  "permlevel": 1
+ }, 
+ {
+  "write": 1, 
+  "doctype": "DocPerm", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "permlevel": 1
+ }
+]

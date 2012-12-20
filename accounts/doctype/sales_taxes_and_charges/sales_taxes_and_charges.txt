@@ -1,223 +1,188 @@
-# DocType, Sales Taxes and Charges
 [
-
-	# These values are common in all dictionaries
-	{
-		'creation': '2012-07-04 16:40:13',
-		'docstatus': 0,
-		'modified': '2012-07-12 13:50:43',
-		'modified_by': u'Administrator',
-		'owner': u'Administrator'
-	},
-
-	# These values are common for all DocType
-	{
-		'autoname': u'INVTD.######',
-		'colour': u'White:FFF',
-		'doctype': 'DocType',
-		'hide_heading': 1,
-		'istable': 1,
-		'module': u'Accounts',
-		'name': '__common__',
-		'section_style': u'Tray',
-		'server_code_error': u' ',
-		'show_in_menu': 0,
-		'version': 1
-	},
-
-	# These values are common for all DocField
-	{
-		'doctype': u'DocField',
-		'name': '__common__',
-		'parent': u'Sales Taxes and Charges',
-		'parentfield': u'fields',
-		'parenttype': u'DocType'
-	},
-
-	# DocType, Sales Taxes and Charges
-	{
-		'doctype': 'DocType',
-		'name': u'Sales Taxes and Charges'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'charge_type',
-		'fieldtype': u'Select',
-		'label': u'Type',
-		'oldfieldname': u'charge_type',
-		'oldfieldtype': u'Select',
-		'options': u'\nActual\nOn Net Total\nOn Previous Row Amount\nOn Previous Row Total',
-		'permlevel': 0,
-		'reqd': 1,
-		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'account_head',
-		'fieldtype': u'Link',
-		'label': u'Account Head',
-		'oldfieldname': u'account_head',
-		'oldfieldtype': u'Link',
-		'options': u'Account',
-		'permlevel': 0,
-		'reqd': 1,
-		'search_index': 1,
-		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'cost_center_other_charges',
-		'fieldtype': u'Link',
-		'label': u'Cost Center',
-		'oldfieldname': u'cost_center_other_charges',
-		'oldfieldtype': u'Link',
-		'options': u'Cost Center',
-		'permlevel': 0
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'description',
-		'fieldtype': u'Small Text',
-		'label': u'Description',
-		'oldfieldname': u'description',
-		'oldfieldtype': u'Small Text',
-		'permlevel': 0,
-		'reqd': 1,
-		'width': u'300px'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'rate',
-		'fieldtype': u'Currency',
-		'label': u'Rate',
-		'oldfieldname': u'rate',
-		'oldfieldtype': u'Currency',
-		'permlevel': 0,
-		'reqd': 0,
-		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'tax_amount',
-		'fieldtype': u'Currency',
-		'label': u'Amount',
-		'oldfieldname': u'tax_amount',
-		'oldfieldtype': u'Currency',
-		'permlevel': 0,
-		'reqd': 0,
-		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'total',
-		'fieldtype': u'Currency',
-		'label': u'Total',
-		'oldfieldname': u'total',
-		'oldfieldtype': u'Currency',
-		'permlevel': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'row_id',
-		'fieldtype': u'Data',
-		'hidden': 0,
-		'label': u'Enter Row',
-		'oldfieldname': u'row_id',
-		'oldfieldtype': u'Data',
-		'permlevel': 0,
-		'trigger': u'Client'
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'doctype': u'DocField',
-		'fieldname': u'item_wise_tax_detail',
-		'fieldtype': u'Small Text',
-		'hidden': 1,
-		'label': u'Item Wise Tax Detail ',
-		'oldfieldname': u'item_wise_tax_detail',
-		'oldfieldtype': u'Small Text',
-		'permlevel': 1
-	},
-
-	# DocField
-	{
-		'doctype': u'DocField',
-		'fieldname': u'parenttype',
-		'fieldtype': u'Data',
-		'hidden': 1,
-		'in_filter': 1,
-		'label': u'Parenttype',
-		'oldfieldname': u'parenttype',
-		'oldfieldtype': u'Data',
-		'permlevel': 0,
-		'print_hide': 1,
-		'search_index': 1
-	},
-
-	# DocField
-	{
-		'colour': u'White:FFF',
-		'description': u'Cheating Field\nPlease do not delete ',
-		'doctype': u'DocField',
-		'fieldname': u'total_tax_amount',
-		'fieldtype': u'Currency',
-		'hidden': 1,
-		'label': u'Total Tax Amount',
-		'no_copy': 1,
-		'oldfieldname': u'total_tax_amount',
-		'oldfieldtype': u'Currency',
-		'permlevel': 0,
-		'print_hide': 1,
-		'report_hide': 1
-	},
-
-	# DocField
-	{
-		'description': u'Cheating Field\nPlease do not delete ',
-		'doctype': u'DocField',
-		'fieldname': u'total_amount',
-		'fieldtype': u'Currency',
-		'hidden': 1,
-		'label': u'Total Amount',
-		'no_copy': 1,
-		'oldfieldname': u'total_amount',
-		'oldfieldtype': u'Currency',
-		'permlevel': 0,
-		'print_hide': 1,
-		'report_hide': 1
-	},
-
-	# DocField
-	{
-		'allow_on_submit': 0,
-		'description': u'If checked, the tax amount will be considered as already included in the Print Rate / Print Amount',
-		'doctype': u'DocField',
-		'fieldname': u'included_in_print_rate',
-		'fieldtype': u'Check',
-		'label': u'Is this Tax included in Basic Rate?',
-		'no_column': 0,
-		'no_copy': 1,
-		'permlevel': 0,
-		'print_hide': 1,
-		'report_hide': 1,
-		'width': u'150px'
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-07-04 16:40:13", 
+  "modified_by": "Administrator", 
+  "modified": "2012-07-12 13:50:43"
+ }, 
+ {
+  "section_style": "Tray", 
+  "istable": 1, 
+  "module": "Accounts", 
+  "doctype": "DocType", 
+  "autoname": "INVTD.######", 
+  "show_in_menu": 0, 
+  "hide_heading": 1, 
+  "name": "__common__", 
+  "colour": "White:FFF", 
+  "server_code_error": " ", 
+  "version": 1
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "Sales Taxes and Charges", 
+  "doctype": "DocField", 
+  "parenttype": "DocType", 
+  "parentfield": "fields"
+ }, 
+ {
+  "name": "Sales Taxes and Charges", 
+  "doctype": "DocType"
+ }, 
+ {
+  "oldfieldtype": "Select", 
+  "doctype": "DocField", 
+  "label": "Type", 
+  "oldfieldname": "charge_type", 
+  "permlevel": 0, 
+  "trigger": "Client", 
+  "fieldname": "charge_type", 
+  "fieldtype": "Select", 
+  "reqd": 1, 
+  "options": "\nActual\nOn Net Total\nOn Previous Row Amount\nOn Previous Row Total"
+ }, 
+ {
+  "search_index": 1, 
+  "doctype": "DocField", 
+  "label": "Account Head", 
+  "oldfieldname": "account_head", 
+  "trigger": "Client", 
+  "fieldname": "account_head", 
+  "fieldtype": "Link", 
+  "oldfieldtype": "Link", 
+  "reqd": 1, 
+  "options": "Account", 
+  "permlevel": 0
+ }, 
+ {
+  "oldfieldtype": "Link", 
+  "doctype": "DocField", 
+  "label": "Cost Center", 
+  "oldfieldname": "cost_center_other_charges", 
+  "permlevel": 0, 
+  "fieldname": "cost_center_other_charges", 
+  "fieldtype": "Link", 
+  "options": "Cost Center"
+ }, 
+ {
+  "oldfieldtype": "Small Text", 
+  "doctype": "DocField", 
+  "label": "Description", 
+  "oldfieldname": "description", 
+  "width": "300px", 
+  "fieldname": "description", 
+  "fieldtype": "Small Text", 
+  "reqd": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "oldfieldtype": "Currency", 
+  "doctype": "DocField", 
+  "label": "Rate", 
+  "oldfieldname": "rate", 
+  "trigger": "Client", 
+  "fieldname": "rate", 
+  "fieldtype": "Currency", 
+  "reqd": 0, 
+  "permlevel": 0
+ }, 
+ {
+  "oldfieldtype": "Currency", 
+  "doctype": "DocField", 
+  "label": "Amount", 
+  "oldfieldname": "tax_amount", 
+  "trigger": "Client", 
+  "fieldname": "tax_amount", 
+  "fieldtype": "Currency", 
+  "reqd": 0, 
+  "permlevel": 0
+ }, 
+ {
+  "oldfieldtype": "Currency", 
+  "doctype": "DocField", 
+  "label": "Total", 
+  "oldfieldname": "total", 
+  "fieldname": "total", 
+  "fieldtype": "Currency", 
+  "permlevel": 1
+ }, 
+ {
+  "oldfieldtype": "Data", 
+  "doctype": "DocField", 
+  "label": "Enter Row", 
+  "oldfieldname": "row_id", 
+  "trigger": "Client", 
+  "fieldname": "row_id", 
+  "fieldtype": "Data", 
+  "hidden": 0, 
+  "permlevel": 0
+ }, 
+ {
+  "oldfieldtype": "Small Text", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Item Wise Tax Detail ", 
+  "oldfieldname": "item_wise_tax_detail", 
+  "fieldname": "item_wise_tax_detail", 
+  "fieldtype": "Small Text", 
+  "hidden": 1, 
+  "permlevel": 1
+ }, 
+ {
+  "print_hide": 1, 
+  "search_index": 1, 
+  "doctype": "DocField", 
+  "label": "Parenttype", 
+  "oldfieldname": "parenttype", 
+  "fieldname": "parenttype", 
+  "fieldtype": "Data", 
+  "oldfieldtype": "Data", 
+  "hidden": 1, 
+  "permlevel": 0, 
+  "in_filter": 1
+ }, 
+ {
+  "print_hide": 1, 
+  "description": "Cheating Field\nPlease do not delete ", 
+  "no_copy": 1, 
+  "oldfieldtype": "Currency", 
+  "colour": "White:FFF", 
+  "doctype": "DocField", 
+  "label": "Total Tax Amount", 
+  "oldfieldname": "total_tax_amount", 
+  "fieldname": "total_tax_amount", 
+  "fieldtype": "Currency", 
+  "hidden": 1, 
+  "permlevel": 0, 
+  "report_hide": 1
+ }, 
+ {
+  "print_hide": 1, 
+  "description": "Cheating Field\nPlease do not delete ", 
+  "no_copy": 1, 
+  "oldfieldtype": "Currency", 
+  "doctype": "DocField", 
+  "label": "Total Amount", 
+  "oldfieldname": "total_amount", 
+  "fieldname": "total_amount", 
+  "fieldtype": "Currency", 
+  "hidden": 1, 
+  "permlevel": 0, 
+  "report_hide": 1
+ }, 
+ {
+  "print_hide": 1, 
+  "description": "If checked, the tax amount will be considered as already included in the Print Rate / Print Amount", 
+  "no_copy": 1, 
+  "allow_on_submit": 0, 
+  "doctype": "DocField", 
+  "label": "Is this Tax included in Basic Rate?", 
+  "width": "150px", 
+  "fieldname": "included_in_print_rate", 
+  "fieldtype": "Check", 
+  "no_column": 0, 
+  "permlevel": 0, 
+  "report_hide": 1
+ }
 ]

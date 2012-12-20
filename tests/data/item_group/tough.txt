@@ -1,27 +1,20 @@
-# Item Group, Tough
 [
-
-	# These values are common in all dictionaries
-	{
-		u'creation': '2012-08-07 09:56:41',
-		u'docstatus': 0,
-		u'modified': '2012-08-07 09:56:41',
-		u'modified_by': u'Administrator',
-		u'owner': u'Administrator'
-	},
-
-	# These values are common for all Item Group
-	{
-		u'doctype': 'Item Group',
-		'is_group': u'No',
-		'item_group_name': u'Tough',
-		u'name': u'__common__',
-		'parent_item_group': u'Laptops'
-	},
-
-	# Item Group, Tough
-	{
-		u'doctype': 'Item Group',
-		u'name': u'Tough'
-	}
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-08-07 09:56:41", 
+  "modified_by": "Administrator", 
+  "modified": "2012-08-07 09:56:41"
+ }, 
+ {
+  "name": "__common__", 
+  "item_group_name": "Tough", 
+  "is_group": "No", 
+  "parent_item_group": "Laptops", 
+  "doctype": "Item Group"
+ }, 
+ {
+  "name": "Tough", 
+  "doctype": "Item Group"
+ }
 ]
