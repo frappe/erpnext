@@ -87,7 +87,6 @@ wn.get_module_color = function(module) {
 wn.provide('erpnext.module_page');
 
 erpnext.module_page.setup_page = function(module, wrapper) {
-	wrapper.appframe.set_marker(module);
 	erpnext.module_page.hide_links(wrapper);
 	erpnext.module_page.make_list(module, wrapper);
 	$(wrapper).find("a[title]").tooltip({
