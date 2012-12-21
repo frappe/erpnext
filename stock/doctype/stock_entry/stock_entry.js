@@ -34,6 +34,21 @@ erpnext.stock.StockEntry = erpnext.utils.Controller.extend({
 			this.show_stock_ledger)
 	},
 	
+	on_submit: function() {
+		this.clean_up();
+	},
+	
+	after_cancel: function() {
+		this.clean_up();
+	},
+	
+	clean_up: function() {
+		// Clear Production Order record from locals, because it is updated via Stock Entry
+		if(this.frm.doc.production_order && this.frm.doc.purpose == "Manufacture/Repack") {
+			wn.model.clear_doclist("Production Order", this.frm.doc.production_order);
+		}
+	},
+	
 	get_items: function() {
 		this.frm.call({
 			doc: this.frm.doc,
@@ -62,6 +77,7 @@ erpnext.stock.StockEntry = erpnext.utils.Controller.extend({
 	toggle_enable_bom: function() {
 		this.frm.toggle_enable("bom_no", !this.frm.doc.production_order);
 	},
+
 });
 
 cur_frm.cscript = new erpnext.stock.StockEntry({frm: cur_frm});
