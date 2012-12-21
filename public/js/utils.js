@@ -20,6 +20,7 @@ wn.provide('erpnext.utils');
 erpnext.utils.Controller = Class.extend({
 	init: function(opts) {
 		$.extend(this, opts);
+		this.setup && this.setup();
 	},
 	
 	onload_post_render: function() {
@@ -40,13 +41,6 @@ erpnext.utils.Controller = Class.extend({
 	
 	refresh: function() {
 		erpnext.hide_naming_series();
-		
-		if(this.frm.doc.__islocal && this.frm.fields_dict.naming_series 
-				&& !this.frm.doc.naming_series) {
-			var series_opts = $.map((this.frm.fields_dict.naming_series.df.options ||
-				"").split("\n"), function(v) { return v ? v : null; });
-			if (series_opts.length==1) this.frm.set_value("naming_series", series_opts[0]);
-		}
 	}
 });
 
