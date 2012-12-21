@@ -189,7 +189,7 @@ def get_outer_env():
 		select * from `tabTop Bar Item`
 		where parent='Website Settings' and parentfield='top_bar_items'
 		order by idx asc""", as_dict=1)
-		
+	
 	top_items = [d for d in all_top_items if not d['parent_label']]
 	
 	# attach child items to top bar
@@ -202,7 +202,7 @@ def get_outer_env():
 					t['child_items'].append(d)
 					break
 	
-	if "products" in [d.url.split(".")[0] for d in top_items]:
+	if top_items and ("products" in [d.url.split(".")[0] for d in top_items]):
 		# product categories
 		products = webnotes.conn.sql("""select t1.item_group as label, 
 			concat(t2.page_name, ".html") as url,

@@ -114,12 +114,14 @@ class DocType():
 			doctype = doctype, email_field = args["email_field"])
 			
 lead_naming_series = None
-def create_lead(email):
+def create_lead(email_id):
 	"""create a lead if it does not exist"""
+	from email.utils import parseaddr
+	real_name, email_id = parseaddr(email_id)
 	lead = Document("Lead")
 	lead.fields["__islocal"] = 1
-	lead.lead_name = email
-	lead.email_id = email
+	lead.lead_name = real_name or email_id
+	lead.email_id = email_id
 	lead.status = "Open"
 	lead.naming_series = lead_naming_series or get_lead_naming_series()
 	lead.company = webnotes.conn.get_default("company")
