@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+wn.home_page = "desktop";
 $.extend(wn.modules, {
 	"Selling": {
 		link: "selling-home",
@@ -62,7 +63,7 @@ $.extend(wn.modules, {
 		icon: "icon-group"
 	},
 	"Setup": {
-		link: "hr-home",
+		link: "Setup",
 		color: "#484848",
 		icon: "icon-wrench"
 	},
@@ -102,6 +103,8 @@ erpnext.module_page.setup_page = function(module, wrapper) {
 	$(wrapper).find("a[title]").tooltip({
 		delay: { show: 500, hide: 100 }
 	});	
+	wrapper.appframe.add_home_breadcrumb();
+	wrapper.appframe.add_breadcrumb(wn.modules[module].icon);
 }
 
 // hide list links where the user does

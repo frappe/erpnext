@@ -18,6 +18,8 @@ pscript.onload_questions = function(wrapper) {
 	body = $(wrapper).find('.layout-main-section').get(0);
 	
 	wrapper.appframe = new wn.ui.AppFrame($(wrapper).find('.layout-appframe'));
+	wrapper.appframe.add_home_breadcrumb();
+	wrapper.appframe.add_breadcrumb(wn.modules["Knowledge Base"].icon);
 	wrapper.appframe.title('Knowledge Base');
 	
 	// kb
