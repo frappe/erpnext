@@ -202,7 +202,7 @@ def get_outer_env():
 					t['child_items'].append(d)
 					break
 	
-	if top_items and ("products" in [d.url.split(".")[0] for d in top_items]):
+	if top_items and ("products" in [d.url.split(".")[0] for d in top_items if d.url]):
 		# product categories
 		products = webnotes.conn.sql("""select t1.item_group as label, 
 			concat(t2.page_name, ".html") as url,
