@@ -217,7 +217,7 @@ class DocType:
 
 			elif m.bom_no:
 				msgprint("""As Item %s is not a manufactured / sub-contracted item, \
-					you can enter BOM against it (Row No: %s).""" % 
+					you can not enter BOM against it (Row No: %s).""" % 
 					(m.item_code, m.idx), raise_exception = 1)
 
 			if flt(m.qty) <= 0:
