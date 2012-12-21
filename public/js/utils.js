@@ -20,6 +20,7 @@ wn.provide('erpnext.utils');
 erpnext.utils.Controller = Class.extend({
 	init: function(opts) {
 		$.extend(this, opts);
+		this.setup && this.setup();
 	},
 	
 	onload_post_render: function() {

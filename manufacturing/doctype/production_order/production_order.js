@@ -46,7 +46,7 @@ var cfn_set_fields = function(doc, dt, dn) {
 			cur_frm.add_custom_button('Unstop', cur_frm.cscript['Unstop Production Order']);
 
 		if (doc.status == 'Submitted' || doc.status == 'Material Transferred' || doc.status == 'In Process'){
-			cur_frm.add_custom_button('Issue Raw Materials', cur_frm.cscript['Issue Raw Materials']);
+			cur_frm.add_custom_button('Transfer Raw Materials', cur_frm.cscript['Transfer Raw Materials']);
 			cur_frm.add_custom_button('Update Finished Goods', cur_frm.cscript['Update Finished Goods']);
 		} 
 	}
@@ -74,7 +74,7 @@ cur_frm.cscript['Unstop Production Order'] = function() {
 			$c_obj(make_doclist(doc.doctype, doc.name), 'stop_unstop', 'Unstopped', function(r, rt) {cur_frm.refresh();});
 }
 
-cur_frm.cscript['Issue Raw Materials'] = function() {
+cur_frm.cscript['Transfer Raw Materials'] = function() {
 	var doc = cur_frm.doc;
 	cur_frm.cscript.make_se(doc, 'Material Transfer');
 }

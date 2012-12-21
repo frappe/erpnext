@@ -1,6 +1,13 @@
 erpnext.updates = [
+	["21st December 2012", [
+		"Manufacturing: For Material Transfer against Production Order, \
+			fetch quantity pending to be transferred for each item."
+	]],
 	["20th December 2012", [
-		"Website: Create Product Search Page, Product Group Page on the website."
+		"Website: Create Product Search Page, Product Group Page on the website.",
+		"Manufacturing: \
+			<a href=\"https://github.com/webnotes/erpnext/wiki/Changes-in-Manufacturing-Module\" \
+				target=\"_blank\">Refactored code, improved usability.</a>"
 	]],
 	["14th December 2012", [
 		"Website Module: Major Refactor - removed framework code from website."

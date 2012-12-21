@@ -29,6 +29,7 @@ erpnext.stock.StockEntry = erpnext.utils.Controller.extend({
 	refresh: function() {
 		this._super();
 		this.toggle_related_fields(this.frm.doc);
+		this.toggle_enable_bom();
 		if (this.frm.doc.docstatus==1) this.frm.add_custom_button("Show Stock Ledger", 
 			this.show_stock_ledger)
 	},
@@ -49,6 +50,18 @@ erpnext.stock.StockEntry = erpnext.utils.Controller.extend({
 		refresh_field('mtn_details');
 	},
 	
+	production_order: function() {
+		this.toggle_enable_bom();
+		
+		this.frm.call({
+			method: "get_production_order_details",
+			args: {production_order: this.frm.doc.production_order}
+		});
+	},
+	
+	toggle_enable_bom: function() {
+		this.frm.toggle_enable("bom_no", !this.frm.doc.production_order);
+	},
 });
 
 cur_frm.cscript = new erpnext.stock.StockEntry({frm: cur_frm});
@@ -62,7 +75,7 @@ cur_frm.cscript.toggle_related_fields = function(doc) {
 		
 	cur_frm.fields_dict["mtn_details"].grid.set_column_disp("s_warehouse", !disable_from_warehouse);
 	cur_frm.fields_dict["mtn_details"].grid.set_column_disp("t_warehouse", !disable_to_warehouse);
-	
+		
 	if(doc.purpose == 'Purchase Return') {
 		doc.customer = doc.customer_name = doc.customer_address = 
 			doc.delivery_note_no = doc.sales_invoice_no = null;

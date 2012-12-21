@@ -32,7 +32,6 @@ class DocType(TransactionBase):
 	def __init__(self, doc, doclist=[]):
 		self.doc = doc
 		self.doclist = doclist
-		self.item_dict = {}
 		self.fname = 'mtn_details' 
 		
 	def validate(self):
@@ -229,7 +228,6 @@ class DocType(TransactionBase):
 							self.doc.purpose)
 					
 					if self.doc.purpose == 'Purchase Return':
-						#delete_doc("Serial No", serial_no)
 						serial_doc = Document("Serial No", serial_no)
 						serial_doc.status = is_submit and 'Purchase Returned' or 'In Store'
 						serial_doc.docstatus = is_submit and 2 or 0
@@ -336,11 +334,7 @@ class DocType(TransactionBase):
 			pro_obj = get_obj('Production Order', self.doc.production_order)
 			if pro_obj:
 				self.validate_production_order(pro_obj)
-
 				self.doc.bom_no = pro_obj.doc.bom_no
-				self.doc.fg_completed_qty = (self.doc.purpose == "Manufacture/Repack") \
-					and flt(self.doc.fg_completed_qty) \
-					or flt(pro_obj.doc.qty) - flt(pro_obj.doc.produced_qty)
 			else:
 				# invalid production order
 				self.doc.production_order = None
@@ -348,12 +342,15 @@ class DocType(TransactionBase):
 		if self.doc.bom_no:
 			if self.doc.purpose in ["Material Issue", "Material Transfer", "Manufacture/Repack",
 					"Subcontract"]:
-				self.get_raw_materials()
+				if self.doc.production_order and self.doc.purpose == "Material Transfer":
+					item_dict = self.get_pending_raw_materials(pro_obj)
+				else:
+					item_dict = self.get_bom_raw_materials(self.doc.fg_completed_qty)
 
 				# add raw materials to Stock Entry Detail table
 				self.add_to_stock_entry_detail(self.doc.from_warehouse, self.doc.to_warehouse,
-					self.item_dict)
-
+					item_dict)
+					
 			# add finished good item to Stock Entry Detail table -- along with bom_no
 			if self.doc.production_order and self.doc.purpose == "Manufacture/Repack":
 				self.add_to_stock_entry_detail(None, pro_obj.doc.fg_warehouse, {
@@ -371,16 +368,28 @@ class DocType(TransactionBase):
 		
 		self.get_stock_and_rate()
 	
-	def get_raw_materials(self):
+	def get_bom_raw_materials(self, qty):
 		""" 
 			get all items from flat bom except 
 			child items of sub-contracted and sub assembly items 
 			and sub assembly items itself.
 		"""
+		# item dict = { item_code: [qty, description, stock_uom] }
+		item_dict = {}
+		
+		def _make_items_dict(items_list):
+			"""makes dict of unique items with it's qty"""
+			for item in items_list:
+				if item_dict.has_key(item.item_code):
+					item_dict[item.item_code][0] += flt(item.qty)
+				else:
+					item_dict[item.item_code] = [flt(item.qty), item.description, item.stock_uom]
+		
 		if self.doc.use_multi_level_bom:
 			# get all raw materials with sub assembly childs					
 			fl_bom_sa_child_item = sql("""select 
-					item_code,ifnull(sum(qty_consumed_per_unit),0)*%s as qty,description,stock_uom 
+					item_code,ifnull(sum(qty_consumed_per_unit),0)*%s as qty,
+					description,stock_uom 
 				from (	select distinct fb.name, fb.description, fb.item_code,
 							fb.qty_consumed_per_unit, fb.stock_uom 
 						from `tabBOM Explosion Item` fb,`tabItem` it 
@@ -388,45 +397,73 @@ class DocType(TransactionBase):
 						and ifnull(it.is_sub_contracted_item, 'No') = 'No' and fb.docstatus<2 
 						and fb.parent=%s
 					) a
-				group by item_code, stock_uom""" , (self.doc.fg_completed_qty, self.doc.bom_no))
-			self.make_items_dict(fl_bom_sa_child_item)
+				group by item_code, stock_uom""" , (qty, self.doc.bom_no), as_dict=1)
+			
+			if fl_bom_sa_child_item:
+				_make_items_dict(fl_bom_sa_child_item)
 		else:
 			# Get all raw materials considering multi level BOM, 
 			# if multi level bom consider childs of Sub-Assembly items
-			fl_bom_sa_items = sql("""select item_code, ifnull(sum(qty_consumed_per_unit), 0) * '%s',
+			fl_bom_sa_items = sql("""select item_code,
+				ifnull(sum(qty_consumed_per_unit), 0) * '%s' as qty,
 				description, stock_uom from `tabBOM Item` 
 				where parent = '%s' and docstatus < 2 
-				group by item_code""" % (self.doc.fg_completed_qty, self.doc.bom_no))
+				group by item_code""" % (qty, self.doc.bom_no), as_dict=1)
 			
-			self.make_items_dict(fl_bom_sa_items)
-
-		# Update only qty remaining to be issued for production
-		if self.doc.purpose == 'Material Transfer' and self.doc.production_order:
-			self.update_only_remaining_qty()
+			if fl_bom_sa_items:
+				_make_items_dict(fl_bom_sa_items)
+			
+		return item_dict
 	
-	def make_items_dict(self, items_list):
-		"""makes dict of unique items with it's qty"""
-		for i in items_list:
-			if self.item_dict.has_key(i[0]):
-				self.item_dict[i[0]][0] = flt(self.item_dict[i[0]][0]) + flt(i[1])
+	def get_pending_raw_materials(self, pro_obj):
+		"""
+			issue (item quantity) that is pending to issue or desire to transfer,
+			whichever is less
+		"""
+		item_qty = self.get_bom_raw_materials(1)
+		issued_item_qty = self.get_issued_qty()
+		
+		max_qty = flt(pro_obj.doc.qty)
+		only_pending_fetched = []
+		
+		for item in item_qty:
+			pending_to_issue = (max_qty * item_qty[item][0]) - issued_item_qty.get(item, 0)
+			desire_to_transfer = flt(self.doc.fg_completed_qty) * item_qty[item][0]
+			
+			if desire_to_transfer <= pending_to_issue:
+				item_qty[item][0] = desire_to_transfer
 			else:
-				self.item_dict[i[0]] = [flt(i[1]), cstr(i[2]), cstr(i[3])]
+				item_qty[item][0] = pending_to_issue
+				if pending_to_issue:
+					only_pending_fetched.append(item)
+		
+		# delete items with 0 qty
+		for item in item_qty:
+			if not item_qty[item][0]:
+				del item_qty[item]
+		
+		# show some message
+		if not len(item_qty):
+			webnotes.msgprint(_("""All items have already been transferred \
+				for this Production Order."""))
+			
+		elif only_pending_fetched:
+			webnotes.msgprint(_("""Only quantities pending to be transferred \
+				were fetched for the following items:\n""" + "\n".join(only_pending_fetched)))
 
-	def update_only_remaining_qty(self):
-		""" Only pending raw material to be issued to shop floor """
-		already_issued_item = {}
+		return item_qty
+
+	def get_issued_qty(self):
+		issued_item_qty = {}
 		result = sql("""select t1.item_code, sum(t1.qty)
 			from `tabStock Entry Detail` t1, `tabStock Entry` t2
 			where t1.parent = t2.name and t2.production_order = %s and t2.docstatus = 1
 			and t2.purpose = 'Material Transfer'
 			group by t1.item_code""", self.doc.production_order)
 		for t in result:
-			already_issued_item[t[0]] = flt(t[1])
-
-		for d in self.item_dict.keys():
-			self.item_dict[d][0] -= already_issued_item.get(d, 0)
-			if self.item_dict[d][0] <= 0:
-				del self.item_dict[d]
+			issued_item_qty[t[0]] = flt(t[1])
+		
+		return issued_item_qty
 
 	def add_to_stock_entry_detail(self, source_wh, target_wh, item_dict, bom_no=None):
 		for d in item_dict:
@@ -440,7 +477,9 @@ class DocType(TransactionBase):
 			se_child.qty = flt(item_dict[d][0])
 			se_child.transfer_qty = flt(item_dict[d][0])
 			se_child.conversion_factor = 1.00
-			if bom_no: se_child.bom_no = bom_no
+			
+			# to be assigned for finished item
+			se_child.bom_no = bom_no
 
 	def add_to_values(self, d, wh, qty, is_cancelled):
 		self.values.append({
@@ -500,3 +539,10 @@ class DocType(TransactionBase):
 			'supplier_name' : res and res[0][0] or '',
 			'supplier_address' : addr and addr[0] or ''}
 		return ret
+
+@webnotes.whitelist()
+def get_production_order_details(production_order):
+	result = webnotes.conn.sql("""select bom_no, 
+		ifnull(qty, 0) - ifnull(produced_qty, 0) as fg_completed_qty
+		from `tabProduction Order` where name = %s""", production_order, as_dict=1)
+	return result and result[0] or {}
