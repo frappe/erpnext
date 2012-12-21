@@ -44,8 +44,10 @@ erpnext.stock.StockEntry = erpnext.utils.Controller.extend({
 	
 	clean_up: function() {
 		// Clear Production Order record from locals, because it is updated via Stock Entry
-		if(this.frm.doc.production_order && this.frm.doc.purpose == "Manufacture/Repack") {
-			wn.model.clear_doclist("Production Order", this.frm.doc.production_order);
+		if(this.frm.doc.production_order && 
+				this.frm.doc.purpose == "Manufacture/Repack") {
+			wn.model.remove_from_locals("Production Order", 
+				this.frm.doc.production_order);
 		}
 	},
 	
