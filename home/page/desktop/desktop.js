@@ -1,74 +1,48 @@
 wn.provide('erpnext.desktop');
 
-erpnext.desktop.gradient = "<style>\
-	.case-%(name)s {\
-		background: %(start)s; /* Old browsers */\
-		background: -moz-radial-gradient(center, ellipse cover,  %(start)s 0%, %(middle)s 44%, %(end)s 100%); /* FF3.6+ */\
-		background: -webkit-gradient(radial, center center, 0px, center center, 100%, color-stop(0%,%(start)s), color-stop(44%,%(middle)s), color-stop(100%,%(end)s)); /* Chrome,Safari4+ */\
-		background: -webkit-radial-gradient(center, ellipse cover,  %(start)s 0%,%(middle)s 44%,%(end)s 100%); /* Chrome10+,Safari5.1+ */\
-		background: -o-radial-gradient(center, ellipse cover,  %(start)s 0%,%(middle)s 44%,%(end)s 100%); /* Opera 12+ */\
-		background: -ms-radial-gradient(center, ellipse cover,  %(start)s 0%,%(middle)s 44%,%(end)s 100%); /* IE10+ */\
-		background: radial-gradient(center, ellipse cover,  %(start)s 0%,%(middle)s 44%,%(end)s 100%); /* W3C */\
-	}\
-	</style>"
-
 erpnext.desktop.refresh = function() {
-	erpnext.desktop.add_classes();
 	erpnext.desktop.render();
-}
 
-erpnext.desktop.add_classes = function() {
-	$.each(wn.module_css_classes, function(i, v) {
-		v.name = i;
-		$(repl(erpnext.desktop.gradient, v)).appendTo('head');
+	$("#icon-grid").sortable({
+		update: function() {
+			new_order = [];
+			$("#icon-grid .case-wrapper").each(function(i, e) {
+				new_order.push($(this).attr("data-name"));
+			});
+			wn.user.set_default("_desktop_items", new_order);
+		}
 	});
 }
 
 erpnext.desktop.render = function() {
-	var icons = {
-		'Accounts': { sprite: 'account', label: 'Accounts'},
-		'Selling': { sprite: 'selling', label: 'Selling'},
-		'Stock': { sprite: 'stock', label: 'Stock'},
-		'Buying': { sprite: 'buying', label: 'Buying'},
-		'Support': { sprite: 'support', label: 'Support'},
-		'HR': { sprite: 'hr', label: 'Human<br />Resources'},
-		'Projects':	{ sprite: 'project', label: 'Projects'},
-		'Manufacturing': { sprite: 'manufacturing', label: 'Manufacturing'},
-		'Website': { sprite: 'website', label: 'Website'},
-		'Activity': { sprite: 'feed', label: 'Activity'},
-		'Setup': { sprite: 'setting', label: 'Setup'},
-		'To Do': { sprite: 'todo', label: 'To Do'},
-		'Messages': { sprite: 'messages', label: 'Messages'},
-		'Calendar': { sprite: 'calendar', label: 'Calendar'},
-		'Knowledge Base': { sprite: 'kb', label: 'Knowledge<br />Base'}
-	}
-
 	var add_icon = function(m) {
-		var icon = icons[m];
-		icon.link = erpnext.modules[m];
-		icon.gradient = wn.module_css_map[m];
+		var module = wn.modules[m];
+		if(!module.label) 
+			module.label = m;
+		module.name = m;
+		module.gradient_css = wn.get_gradient_css(module.color, 45);
 		
 		$('#icon-grid').append(repl('\
-			<div id="%(sprite)s" class="case-wrapper"><a href="#!%(link)s">\
-				<div class="case-border case-%(gradient)s">\
-					<div class="sprite-image sprite-%(sprite)s"></div>\
+			<div id="module-icon-%(link)s" class="case-wrapper" data-name="%(name)s"><a href="#%(link)s">\
+				<div class="case-border" style="%(gradient_css)s">\
+					<i class="%(icon)s"></i>\
 				</div></a>\
 				<div class="case-label">%(label)s</div>\
-			</div>', icon));		
+			</div>', module));
 	}
 	
-	// setup
-	for(var i in wn.boot.modules_list) {
-		var m = wn.boot.modules_list[i];
+	// modules
+	var modules_list = wn.user.get_default("_desktop_items") || wn.boot.modules_list;
+	$.each(modules_list, function(i, m) {
 		if(!in_list(['Setup', 'Core'], m) && wn.boot.profile.allow_modules.indexOf(m)!=-1)
 			add_icon(m);
-	}
+	})
 
-
+	// setup
 	if(user_roles.indexOf('System Manager')!=-1)
 		add_icon('Setup')
 
-	// apps
+	// notifications
 	erpnext.desktop.show_pending_notifications();
 
 }
@@ -100,12 +74,12 @@ erpnext.desktop.show_pending_notifications = function() {
 
 	}
 
-	add_circle('messages', 'unread_messages', 'Unread Messages');
-	add_circle('support', 'open_support_tickets', 'Open Support Tickets');
-	add_circle('todo', 'things_todo', 'Things To Do');
-	add_circle('calendar', 'todays_events', 'Todays Events');
-	add_circle('project', 'open_tasks', 'Open Tasks');
-	add_circle('kb', 'unanswered_questions', 'Unanswered Questions');
+	add_circle('module-icon-messages', 'unread_messages', 'Unread Messages');
+	add_circle('module-icon-support', 'open_support_tickets', 'Open Support Tickets');
+	add_circle('module-icon-todo', 'things_todo', 'Things To Do');
+	add_circle('module-icon-calendar', 'todays_events', 'Todays Events');
+	add_circle('module-icon-project', 'open_tasks', 'Open Tasks');
+	add_circle('module-icon-kb', 'unanswered_questions', 'Unanswered Questions');
 
 	erpnext.update_messages();
 

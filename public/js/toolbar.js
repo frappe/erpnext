@@ -59,7 +59,7 @@ erpnext.toolbar.add_modules = function() {
 		wn.boot.modules_list = JSON.parse(wn.boot.modules_list);	
 	}
 	else
-		wn.boot.modules_list = keys(erpnext.modules).sort();
+		wn.boot.modules_list = keys(wn.modules).sort();
 
 	// add to dropdown
 	for(var i in wn.boot.modules_list) {
@@ -68,8 +68,8 @@ erpnext.toolbar.add_modules = function() {
 		if(m!='Setup' && wn.boot.profile.allow_modules.indexOf(m)!=-1) {
 			args = {
 				module: m,
-				module_page: erpnext.modules[m],
-				module_label: m=='HR' ? 'Human Resources' : m
+				module_page: wn.modules[m].link,
+				module_label: wn.modules[m].label || m
 			}
 
 			$('.navbar .modules').append(repl('<li><a href="#!%(module_page)s" \
