@@ -22,7 +22,9 @@ wn.pages['sales-analytics'].onload = function(wrapper) {
 	});
 	new erpnext.SalesAnalytics(wrapper);
 	
-	wrapper.appframe.add_module_tab("Selling");
+	wrapper.appframe.add_home_breadcrumb()
+	wrapper.appframe.add_module_breadcrumb("Selling")
+	wrapper.appframe.add_breadcrumb("icon-bar-chart")
 }
 
 erpnext.SalesAnalytics = wn.views.TreeGridReport.extend({
