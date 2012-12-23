@@ -14,75 +14,86 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-erpnext.modules = {
-	'Selling': 'selling-home',
-	'Accounts': 'accounts-home',
-	'Stock': 'stock-home',
-	'Buying': 'buying-home',
-	'Support': 'support-home',
-	'Projects': 'projects-home',
-	'Manufacturing': 'manufacturing-home',
-	'Website': 'website-home',
-	'HR': 'hr-home',
-	'Setup': 'Setup',
-	'Activity': 'activity',
-	'To Do': 'todo',
-	'Calendar': 'calendar',
-	'Messages': 'messages',
-	'Knowledge Base': 'questions',
-}
-
-wn.provide('wn.modules');
-$.extend(wn.modules, erpnext.modules);
-wn.modules['Core'] = 'Setup';
-
-wn.module_css_classes  = {
-	'red': { start: '#A90329', middle: '#8F0222',	end: '#6D0019' },
-	'brown': { start: '#723e02', middle: '#633501', end: '#4a2700' },
-	'green': { start: '#4b5602', middle: '#3f4901', end: '#313800' },
-	'blue': { start: '#026584', middle: '#025770', end: '#004256' },
-	'yellow': { start: '#be7902', middle: '#a66a02', end: '#865500' },
-	'purple': { start: '#4d017d', middle: '#410169', end: '#310050' },
-	'ocean': { start: '#02a47e', middle: '#018d6c', end: '#006a51' },
-	'pink': { start: '#a40281', middle: '#8d016e', end: '#6a0053' },
-	'grey': { start: '#545454', middle: '#484848', end: '#363636' },
-	'dark-red': { start: '#68021a', middle: '#590116', end: '#440010' },
-	'leaf-green': { start: '#b0a400', middle: '#968c00', end: '#726a00' },
-	//'dark-blue': { start: '#023bae', middle: '#013295', end: '#002672' },
-	'bright-green': { start: '#03ad1f', middle: '#02941a', end: '#007213' },
-	'bright-yellow': { start: '#ffd65e', middle: '#febf04', end: '#ed9017' },
-	'peacock': { start: '#026584', middle: '#026584', end: '#322476' },
-	'violet': { start: '#50448e', middle: '#473b7f', end: '#3a3169' },
-	'ultra-dark-green': { start: '#014333', middle: '#01372b', end: '#002a20' },		
-}
-
-wn.module_css_map = {
-	'Accounts': 'blue',
-	'Selling': 'green',
-	'Stock': 'yellow',
-	'Buying': 'red',
-	'Support': 'purple',
-	'HR': 'ocean',
-	'Projects':	'violet',
-	'Manufacturing': 'dark-red',
-	'Website': 'leaf-green',
-	'Activity': 'brown',
-	'Setup': 'grey',
-	'To Do': 'bright-yellow',
-	'Messages': 'pink',
-	'Calendar': 'peacock',
-	'Knowledge Base': 'ultra-dark-green'
-}
-
-wn.get_module_color = function(module) {
-	try {
-		var color = wn.module_css_classes[wn.module_css_map[module]].middle;			
-	} catch(e) {
-		var color = "#000";
-	}
-	return color;	
-}
-
+wn.home_page = "desktop";
+$.extend(wn.modules, {
+	"Selling": {
+		link: "selling-home",
+		color: "#3f4901",
+		icon: "icon-tag"
+	},
+	"Accounts": {
+		link: "accounts-home",
+		color: "#025770",
+		icon: "icon-money"
+	},
+	"Stock": {
+		link: "stock-home",
+		color: "#a66a02",
+		icon: "icon-truck"
+	},
+	"Buying": {
+		link: "buying-home",
+		color: "#8F0222",
+		icon: "icon-shopping-cart"
+	},
+	"Support": {
+		link: "support-home",
+		color: "#410169",
+		icon: "icon-phone"
+	},
+	"Projects": {
+		link: "projects-home",
+		color: "#473b7f",
+		icon: "icon-tasks"
+	},
+	"Manufacturing": {
+		link: "manufacturing-home",
+		color: "#590116",
+		icon: "icon-magic"
+	},
+	"Website": {
+		link: "website-home",
+		color: "#968c00",
+		icon: "icon-globe"
+	},
+	"HR": {
+		link: "hr-home",
+		color: "#018d6c",
+		label: "Human Resources",
+		icon: "icon-group"
+	},
+	"Setup": {
+		link: "Setup",
+		color: "#484848",
+		icon: "icon-wrench"
+	},
+	"Activity": {
+		link: "activity",
+		color: "#633501",
+		icon: "icon-play"
+	},
+	"To Do": {
+		link: "todo",
+		color: "#febf04",
+		icon: "icon-check"
+	},
+	"Calendar": {
+		link: "calendar",
+		color: "#026584",
+		icon: "icon-calendar"
+	},
+	"Messages": {
+		link: "messages",
+		color: "#8d016e",
+		icon: "icon-comments"
+	},
+	"Knowledge Base": {
+		link: "questions",
+		color: "#01372b",
+		icon: "icon-question-sign"
+	},
+	
+});
 
 wn.provide('erpnext.module_page');
 
@@ -92,6 +103,8 @@ erpnext.module_page.setup_page = function(module, wrapper) {
 	$(wrapper).find("a[title]").tooltip({
 		delay: { show: 500, hide: 100 }
 	});	
+	wrapper.appframe.add_home_breadcrumb();
+	wrapper.appframe.add_breadcrumb(wn.modules[module].icon);
 }
 
 // hide list links where the user does

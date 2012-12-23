@@ -1,49 +1,13 @@
 /* Sprite CSS */
-.sprite-account{ background-position: 0 0; width: 32px; height: 40px; } 
-.sprite-buying{ background-position: 0 -90px; width: 40px; height: 40px; } 
-.sprite-calendar{ background-position: 0 -180px; width: 35px; height: 40px; } 
-.sprite-feed{ background-position: 0 -349px; width: 32px; height: 40px; } 
-.sprite-hr{ background-position: 0 -439px; width: 40px; height: 32px; } 
-.sprite-kb{ background-position: 0 -521px; width: 24px; height: 39px; } 
-.sprite-messages{ background-position: 0 -610px; width: 40px; height: 26px; } 
-.sprite-manufacturing{ background-position: 0 -686px; width: 40px; height: 33px; } 
-.sprite-project{ background-position: 0 -769px; width: 40px; height: 22px; } 
-.sprite-report{ background-position: 0 -841px; width: 29px; height: 40px; } 
-.sprite-selling{ background-position: 0 -931px; width: 34px; height: 40px; } 
-.sprite-setting{ background-position: 0 -1021px; width: 37px; height: 40px; } 
-.sprite-stock{ background-position: 0 -1111px; width: 34px; height: 39px; } 
-.sprite-support{ background-position: 0 -1200px; width: 40px; height: 40px; } 
-.sprite-todo{ background-position: 0 -1290px; width: 40px; height: 34px; } 
-.sprite-website{ background-position: 0 -1374px; width: 40px; height: 40px; } 
-
-.sprite-image { background-image: url("app/images/sprite-desktop.png"); }
-
-
-.sprite-account{ margin-top: 8px; margin-left: 12px; } 
-.sprite-selling{ margin-top: 8px; margin-left: 12px; } 
-.sprite-stock{ margin-top: 8px; margin-left: 8px; } 
-.sprite-buying{ margin-top: 8px; margin-left: 8px; } 
-.sprite-support{ margin-top: 8px; margin-left: 8px; } 
-.sprite-hr{ margin-top: 12px; margin-left: 8px; } 
-.sprite-project{ margin-top: 16px; margin-left: 8px; } 
-.sprite-manufacturing{ margin-top: 10px; margin-left: 8px; } 
-.sprite-website{ margin-top: 8px; margin-left: 8px; } 
-.sprite-setting{ margin-top: 8px; margin-left: 8px; } 
-.sprite-report{ margin-top: 8px; margin-left: 14px; } 
-
-.sprite-messages{ margin-top: 14px; margin-left: 8px; } 
-.sprite-todo{ margin-top: 10px; margin-left: 10px; } 
-.sprite-calendar{ margin-top: 8px; margin-left: 10px; } 
-.sprite-kb{ margin-top: 8px; margin-left: 16px; } 
-.sprite-feed{ margin-top: 8px; margin-left: 14px; } 
 
 .case-border {
 	border-radius: 10px;
 	-moz-border-radius: 10px;
 	-webkit-border-radius: 10px;
-	width: 56px;
-	height: 56px;
-	border: 4px solid white;
+	width: 32px;
+	height: 32px;
+	padding: 12px;
+	border: 2px solid white;
 	box-shadow: 0 0 4px 1px black;
 	-moz-box-shadow: 0 0 4px 1px black;
 	-webkit-box-shadow: 0 0 4px 1px black;
@@ -56,6 +20,12 @@
 	float: left;
 	width: 100px;
 	height: 100px;
+}
+
+.case-wrapper i {
+	font-size: 32px;
+	color: #f8f8f8;
+	margin-top: 8px;
 }
 
 .case-label {

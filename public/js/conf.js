@@ -7,7 +7,7 @@ erpnext.set_about = function() {
 		source: 'https://github.com/webnotes/erpnext',
 		publisher: 'Web Notes Technologies Pvt Ltd, Mumbai',
 		copyright: '&copy; Web Notes Technologies Pvt Ltd',
-		version: '2' //+ '.' + window._version_number
+		version: 'Please see git log for the release number'
 	});
 }
 

@@ -185,6 +185,8 @@ erpnext.todo.save = function(btn) {
 wn.pages.todo.onload = function(wrapper) {
 	// create app frame
 	wrapper.appframe = new wn.ui.AppFrame($(wrapper).find('.appframe-area'), 'To Do');
+	wrapper.appframe.add_home_breadcrumb();
+	wrapper.appframe.add_breadcrumb(wn.modules["To Do"].icon);
 	wrapper.appframe.add_button('Refresh', erpnext.todo.refresh, 'icon-refresh');
 	wrapper.appframe.add_button('Add', function() {
 		erpnext.todo.make_dialog({

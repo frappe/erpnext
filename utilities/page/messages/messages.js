@@ -31,6 +31,9 @@ wn.pages.messages.onload = function(wrapper) {
 	<div><button class="btn">Post</button></div><hr>\
 	</div>\
 	<div class="all-messages"></div>').appendTo($(wrapper).find('.layout-main-section'));
+
+	wrapper.appframe.add_home_breadcrumb();
+	wrapper.appframe.add_breadcrumb(wn.modules["Messages"].icon);
 	
 	erpnext.messages = new erpnext.Messages(wrapper);
 	erpnext.toolbar.set_new_comments(0);
