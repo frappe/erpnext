@@ -2,9 +2,9 @@
  {
   "owner": "Administrator", 
   "docstatus": 0, 
-  "creation": "2012-07-03 13:30:04", 
+  "creation": "2012-12-20 18:14:55", 
   "modified_by": "Administrator", 
-  "modified": "2012-12-10 18:30:00"
+  "modified": "2012-12-24 19:37:34"
  }, 
  {
   "istable": 1, 
@@ -18,6 +18,7 @@
   "parent": "Production Plan Item", 
   "doctype": "DocField", 
   "parenttype": "DocType", 
+  "permlevel": 0, 
   "parentfield": "fields"
  }, 
  {
@@ -25,14 +26,11 @@
   "doctype": "DocType"
  }, 
  {
-  "permlevel": 0, 
   "oldfieldtype": "Link", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Item Code", 
   "oldfieldname": "item_code", 
   "width": "150px", 
-  "trigger": "Client", 
   "fieldname": "item_code", 
   "fieldtype": "Link", 
   "reqd": 1, 
@@ -44,11 +42,10 @@
   "label": "BOM No", 
   "oldfieldname": "bom_no", 
   "width": "100px", 
-  "options": "BOM", 
   "fieldname": "bom_no", 
   "fieldtype": "Link", 
   "reqd": 1, 
-  "permlevel": 0
+  "options": "BOM"
  }, 
  {
   "default": "0.00", 
@@ -59,20 +56,20 @@
   "width": "100px", 
   "fieldname": "planned_qty", 
   "fieldtype": "Currency", 
-  "reqd": 1, 
-  "permlevel": 0
+  "reqd": 1
  }, 
  {
+  "read_only": 1, 
   "oldfieldtype": "Data", 
   "doctype": "DocField", 
   "label": "Sales Order", 
   "oldfieldname": "source_docname", 
-  "options": "Sales Order", 
   "fieldname": "sales_order", 
   "fieldtype": "Link", 
-  "permlevel": 1
+  "options": "Sales Order"
  }, 
  {
+  "read_only": 1, 
   "default": "0.00", 
   "oldfieldtype": "Currency", 
   "doctype": "DocField", 
@@ -81,10 +78,10 @@
   "width": "100px", 
   "fieldname": "so_pending_qty", 
   "fieldtype": "Currency", 
-  "reqd": 0, 
-  "permlevel": 1
+  "reqd": 0
  }, 
  {
+  "read_only": 1, 
   "oldfieldtype": "Data", 
   "doctype": "DocField", 
   "label": "UOM", 
@@ -92,17 +89,16 @@
   "width": "80px", 
   "fieldname": "stock_uom", 
   "fieldtype": "Data", 
-  "reqd": 1, 
-  "permlevel": 1
+  "reqd": 1
  }, 
  {
+  "read_only": 1, 
   "oldfieldtype": "Text", 
   "doctype": "DocField", 
   "label": "Description", 
   "oldfieldname": "description", 
   "width": "200px", 
   "fieldname": "description", 
-  "fieldtype": "Text", 
-  "permlevel": 1
+  "fieldtype": "Text"
  }
 ]
