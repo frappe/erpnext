@@ -543,6 +543,6 @@ class DocType(TransactionBase):
 @webnotes.whitelist()
 def get_production_order_details(production_order):
 	result = webnotes.conn.sql("""select bom_no, 
-		ifnull(qty, 0) - ifnull(produced_qty, 0) as fg_completed_qty
+		ifnull(qty, 0) - ifnull(produced_qty, 0) as fg_completed_qty, use_multi_level_bom
 		from `tabProduction Order` where name = %s""", production_order, as_dict=1)
 	return result and result[0] or {}

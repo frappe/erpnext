@@ -4,7 +4,7 @@
   "docstatus": 0, 
   "creation": "2012-12-20 14:31:18", 
   "modified_by": "Administrator", 
-  "modified": "2012-12-20 15:50:43"
+  "modified": "2012-12-24 18:39:00"
  }, 
  {
   "is_submittable": 1, 
@@ -141,6 +141,14 @@
   "fieldname": "stock_uom", 
   "fieldtype": "Data", 
   "depends_on": "production_item"
+ }, 
+ {
+  "description": "If checked, BOM for sub-assembly items will be considered for getting raw materials. Otherwise, all sub-assembly items will be treated as a raw material.", 
+  "default": "1", 
+  "doctype": "DocField", 
+  "label": "Use Multi-Level BOM", 
+  "fieldname": "use_multi_level_bom", 
+  "fieldtype": "Check"
  }, 
  {
   "read_only": 0, 
