@@ -1,7 +1,7 @@
 erpnext.updates = [
 	["21st December 2012", [
 		"Manufacturing: For Material Transfer against Production Order, \
-			fetch quantity pending to be transferred for each item."
+			fetch quantity pending to be transferred for each item.",
 		"Desktop: New Icons and now sortable by dragging."
 	]],
 	["20th December 2012", [

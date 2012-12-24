@@ -6,7 +6,9 @@ div#body_div {
 	padding: 0px;
 	min-height: 400px;
 	margin: 40px auto;
-	box-shadow: 1px 1px 3px 3px #ccc;
+	box-shadow: 1px 1px 3px 3px #bbb;
+	border-radius: 5px;
+	overflow: hidden;
 }
 
 .navbar-inner {
@@ -23,6 +25,7 @@ p, li {
 	box-shadow: none;
 	-webkit-box-shadow: none;
 	-moz-box-shadow: none;
+	border-radius: 0px 0px 5px 5px;
 }
 
 .layout-main {

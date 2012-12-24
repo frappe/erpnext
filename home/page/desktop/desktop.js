@@ -32,7 +32,7 @@ erpnext.desktop.render = function() {
 	}
 	
 	// modules
-	var modules_list = wn.user.get_default("_desktop_items") || wn.boot.modules_list;
+	var modules_list = wn.user.get_desktop_items();
 	$.each(modules_list, function(i, m) {
 		if(!in_list(['Setup', 'Core'], m) && wn.boot.profile.allow_modules.indexOf(m)!=-1)
 			add_icon(m);
@@ -75,11 +75,11 @@ erpnext.desktop.show_pending_notifications = function() {
 	}
 
 	add_circle('module-icon-messages', 'unread_messages', 'Unread Messages');
-	add_circle('module-icon-support', 'open_support_tickets', 'Open Support Tickets');
+	add_circle('module-icon-support-home', 'open_support_tickets', 'Open Support Tickets');
 	add_circle('module-icon-todo', 'things_todo', 'Things To Do');
 	add_circle('module-icon-calendar', 'todays_events', 'Todays Events');
-	add_circle('module-icon-project', 'open_tasks', 'Open Tasks');
-	add_circle('module-icon-kb', 'unanswered_questions', 'Unanswered Questions');
+	add_circle('module-icon-projects-home', 'open_tasks', 'Open Tasks');
+	add_circle('module-icon-questions', 'unanswered_questions', 'Unanswered Questions');
 
 	erpnext.update_messages();
 

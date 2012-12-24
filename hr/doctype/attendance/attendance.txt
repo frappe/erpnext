@@ -2,9 +2,9 @@
  {
   "owner": "ashwini@webnotestech.com", 
   "docstatus": 0, 
-  "creation": "2012-07-03 13:30:41", 
+  "creation": "2012-12-14 14:27:05", 
   "modified_by": "Administrator", 
-  "modified": "2012-12-13 14:23:24"
+  "modified": "2012-12-23 09:42:45"
  }, 
  {
   "is_submittable": 1, 
@@ -134,7 +134,7 @@
   "doctype": "DocField", 
   "label": "Fiscal Year", 
   "oldfieldname": "fiscal_year", 
-  "options": "\n2012\n2013", 
+  "options": "link:Fiscal Year", 
   "fieldname": "fiscal_year", 
   "fieldtype": "Select", 
   "reqd": 1, 
@@ -146,7 +146,7 @@
   "doctype": "DocField", 
   "label": "Company", 
   "oldfieldname": "company", 
-  "options": "\nAlpha\nBeta\nDemo Company", 
+  "options": "link:Company", 
   "fieldname": "company", 
   "fieldtype": "Select", 
   "reqd": 1, 
@@ -175,15 +175,15 @@
   "permlevel": 1
  }, 
  {
+  "role": "System Manager", 
+  "doctype": "DocPerm"
+ }, 
+ {
   "role": "HR User", 
   "doctype": "DocPerm"
  }, 
  {
   "role": "HR Manager", 
-  "doctype": "DocPerm"
- }, 
- {
-  "role": "System Manager", 
   "doctype": "DocPerm"
  }
 ]
