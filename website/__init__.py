@@ -11,13 +11,13 @@ max_tickets_per_hour = 200
 @webnotes.whitelist(allow_guest=True)
 def send_message():
 	from webnotes.model.doc import Document
-	args = webnotes.form_dict
 	
 	d = Document('Support Ticket')
 	d.subject = webnotes.form_dict.get('subject', 'Website Query')
 	d.description = webnotes.form_dict.get('message')
 	d.raised_by = webnotes.form_dict.get('sender')
-	
+	d.status = webnotes.form_dict.get("status") or "Open"
+
 	if not d.description:
 		webnotes.response["message"] = 'Please write something'
 		return
