@@ -36,7 +36,6 @@ class DocType(TransactionBase):
 		
 	def validate(self):
 		self.validate_serial_nos()
-
 		pro_obj = self.doc.production_order and \
 			get_obj('Production Order', self.doc.production_order) or None
 
