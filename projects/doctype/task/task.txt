@@ -2,27 +2,18 @@
  {
   "owner": "Administrator", 
   "docstatus": 0, 
-  "creation": "2012-09-18 11:05:48", 
+  "creation": "2012-10-29 14:30:00", 
   "modified_by": "Administrator", 
-  "modified": "2012-10-29 14:24:55"
+  "modified": "2012-12-24 10:46:06"
  }, 
  {
-  "section_style": "Tray", 
-  "allow_attach": 1, 
-  "tag_fields": "status", 
-  "module": "Projects", 
-  "server_code_error": " ", 
-  "allow_trash": 1, 
-  "doctype": "DocType", 
-  "document_type": "Master", 
-  "subject": "%(subject)s", 
   "autoname": "TASK.#####", 
-  "name": "__common__", 
-  "colour": "White:FFF", 
-  "_last_update": "1324880734", 
-  "show_in_menu": 0, 
+  "allow_attach": 1, 
+  "doctype": "DocType", 
+  "module": "Projects", 
   "max_attachments": 5, 
-  "version": 1
+  "document_type": "Master", 
+  "name": "__common__"
  }, 
  {
   "name": "__common__", 
@@ -74,13 +65,13 @@
   "reqd": 0
  }, 
  {
-  "search_index": 1, 
+  "oldfieldtype": "Date", 
   "doctype": "DocField", 
   "label": "Expected End Date", 
   "oldfieldname": "exp_end_date", 
   "fieldname": "exp_end_date", 
   "fieldtype": "Date", 
-  "oldfieldtype": "Date", 
+  "search_index": 1, 
   "reqd": 0, 
   "in_filter": 1
  }, 
@@ -93,11 +84,9 @@
  }, 
  {
   "oldfieldtype": "Link", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Project", 
   "oldfieldname": "project", 
-  "trigger": "Client", 
   "fieldname": "project", 
   "fieldtype": "Link", 
   "options": "Project"
@@ -105,23 +94,21 @@
  {
   "no_copy": 1, 
   "oldfieldtype": "Select", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Status", 
   "oldfieldname": "status", 
-  "trigger": "Client", 
   "fieldname": "status", 
   "fieldtype": "Select", 
   "options": "Open\nWorking\nPending Review\nClosed\nCancelled"
  }, 
  {
-  "search_index": 1, 
+  "oldfieldtype": "Select", 
   "doctype": "DocField", 
   "label": "Priority", 
   "oldfieldname": "priority", 
   "fieldname": "priority", 
   "fieldtype": "Select", 
-  "oldfieldtype": "Select", 
+  "search_index": 1, 
   "reqd": 0, 
   "options": "Low\nMedium\nHigh\nUrgent", 
   "in_filter": 1
@@ -217,13 +204,12 @@
  }, 
  {
   "doctype": "DocField", 
+  "label": "More Details", 
   "fieldname": "more_details", 
-  "fieldtype": "Section Break", 
-  "label": "More Details"
+  "fieldtype": "Section Break"
  }, 
  {
   "oldfieldtype": "Date", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Review Date", 
   "oldfieldname": "review_date", 
@@ -234,7 +220,6 @@
  }, 
  {
   "oldfieldtype": "Date", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Closing Date", 
   "oldfieldname": "closing_date", 
@@ -260,7 +245,7 @@
   "permlevel": 0
  }, 
  {
-  "permlevel": 1, 
-  "doctype": "DocPerm"
+  "doctype": "DocPerm", 
+  "permlevel": 1
  }
 ]
