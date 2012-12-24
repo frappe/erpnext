@@ -36,7 +36,6 @@ class DocType(TransactionBase):
 		
 	def validate(self):
 		self.validate_serial_nos()
-
 		pro_obj = self.doc.production_order and \
 			get_obj('Production Order', self.doc.production_order) or None
 
@@ -467,7 +466,8 @@ class DocType(TransactionBase):
 
 	def add_to_stock_entry_detail(self, source_wh, target_wh, item_dict, bom_no=None):
 		for d in item_dict:
-			se_child = addchild(self.doc, 'mtn_details', 'Stock Entry Detail', 0, self.doclist)
+			se_child = addchild(self.doc, 'mtn_details', 'Stock Entry Detail', 
+				self.doclist)
 			se_child.s_warehouse = source_wh
 			se_child.t_warehouse = target_wh
 			se_child.item_code = cstr(d)

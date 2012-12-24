@@ -70,7 +70,8 @@ class DocType:
 				raise Exception
 
 		if not cstr(self.doc.stock_uom) in check_list :
-			child = addchild( self.doc, 'uom_conversion_details', 'UOM Conversion Detail', 1, self.doclist)
+			child = addchild( self.doc, 'uom_conversion_details', 
+				'UOM Conversion Detail', self.doclist)
 			child.uom = self.doc.stock_uom
 			child.conversion_factor = 1
 			child.save()

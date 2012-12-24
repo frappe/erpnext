@@ -10,6 +10,7 @@
 			box-shadow: 1px 1px 3px 3px #ccc;
 			font-size: 12px;
 			min-height: 100px;
+			border-radius: 5px;
 		}
 
 		#login_wrapper h3 {

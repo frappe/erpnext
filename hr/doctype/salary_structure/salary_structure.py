@@ -70,7 +70,7 @@ class DocType:
   def make_table(self, doct_name, tab_fname, tab_name):
     list1 = sql("select name from `tab%s` where docstatus != 2" % doct_name)
     for li in list1:
-      child = addchild(self.doc, tab_fname, tab_name, 1, self.doclist)
+      child = addchild(self.doc, tab_fname, tab_name, self.doclist)
       if(tab_fname == 'earning_details'):
         child.e_type = cstr(li[0])
         child.modified_value = 0

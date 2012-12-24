@@ -11,7 +11,7 @@ def execute():
 
 	addr = get_obj('DocType', 'Address', with_children=1)
 	for d in role1+role2:
-		ch = addchild(addr.doc, 'permissions', 'DocPerm', 0)
+		ch = addchild(addr.doc, 'permissions', 'DocPerm')
 		ch.role = d
 		ch.read = 1
 		ch.write = 1

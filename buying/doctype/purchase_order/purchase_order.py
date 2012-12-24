@@ -314,7 +314,7 @@ class DocType(TransactionBase):
 			for i in bom_det:
 				if i and not sql("select name from `tabPurchase Order Item Supplied` where reference_name = '%s' and bom_detail_no = '%s' and parent = '%s' " %(d.name, i[6], self.doc.name)):
 
-					rm_child = addchild(self.doc, 'po_raw_material_details', 'Purchase Order Item Supplied', 1, self.doclist)
+					rm_child = addchild(self.doc, 'po_raw_material_details', 'Purchase Order Item Supplied', self.doclist)
 
 					rm_child.reference_name = d.name
 					rm_child.bom_detail_no = i and i[6] or ''

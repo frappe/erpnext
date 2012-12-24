@@ -42,7 +42,7 @@ class DocType:
 		self.doc.total_amount = 0.0
 
 		for d in dl:
-			nl = addchild(self.doc, 'entries', 'Bank Reconciliation Detail', 1, self.doclist)
+			nl = addchild(self.doc, 'entries', 'Bank Reconciliation Detail', self.doclist)
 			nl.posting_date = cstr(d[5])
 			nl.voucher_id = cstr(d[0])
 			nl.cheque_number = cstr(d[1])

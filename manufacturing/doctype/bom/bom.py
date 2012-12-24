@@ -357,7 +357,8 @@ class DocType:
 		"Add items to Flat BOM table"
 		self.doclist = self.doc.clear_table(self.doclist, 'flat_bom_details', 1)
 		for d in self.cur_exploded_items:
-			ch = addchild(self.doc, 'flat_bom_details', 'BOM Explosion Item', 1, self.doclist)
+			ch = addchild(self.doc, 'flat_bom_details', 'BOM Explosion Item', 
+				self.doclist)
 			for i in d.keys():
 				ch.fields[i] = d[i]
 			ch.docstatus = self.doc.docstatus

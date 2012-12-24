@@ -223,7 +223,7 @@ class DocType:
 		obj.doclist = obj.doc.clear_table(obj.doclist,table_field_name)
 		# Create advance table
 		for d in jv_detail:
-			add = addchild(obj.doc, table_field_name, table_name, 1, obj.doclist)
+			add = addchild(obj.doc, table_field_name, table_name, obj.doclist)
 			add.journal_voucher = d[0]
 			add.jv_detail_no = d[3]
 			add.remarks = d[1]
@@ -286,7 +286,7 @@ class DocType:
 		webnotes.conn.sql("update `tabJournal Voucher Detail` set %s = '%s', %s = '%s' where name = '%s'" % (dr_or_cr, flt(allocate), doctype == "Purchase Invoice" and 'against_voucher' or 'against_invoice',cstr(against_document_no), jv_detail_no))
 
 		# new entry with balance amount
-		add = addchild(jv_obj.doc, 'entries', 'Journal Voucher Detail', 1, jv_obj.doclist)
+		add = addchild(jv_obj.doc, 'entries', 'Journal Voucher Detail', jv_obj.doclist)
 		add.account = account_head
 		add.cost_center = cstr(jvd[0][1])
 		add.balance = cstr(jvd[0][2])
@@ -353,7 +353,7 @@ class DocType:
 		if d['allocated_amt'] < d['unadjusted_amt']:
 			jvd = webnotes.conn.sql("select cost_center, balance, against_account, is_advance from `tabJournal Voucher Detail` where name = '%s'" % d['voucher_detail_no'])
 			# new entry with balance amount
-			ch = addchild(jv_obj.doc, 'entries', 'Journal Voucher Detail', 1)
+			ch = addchild(jv_obj.doc, 'entries', 'Journal Voucher Detail')
 			ch.account = d['account']
 			ch.cost_center = cstr(jvd[0][0])
 			ch.balance = cstr(jvd[0][1])

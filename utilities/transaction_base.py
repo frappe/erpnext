@@ -220,7 +220,7 @@ class TransactionBase:
 		self.doclist = self.doc.clear_table(self.doclist,'sales_team')
 		idx = 0
 		for d in webnotes.conn.sql("select sales_person, allocated_percentage, allocated_amount, incentives from `tabSales Team` where parent = '%s'" % name):
-			ch = addchild(self.doc, 'sales_team', 'Sales Team', 1, self.doclist)
+			ch = addchild(self.doc, 'sales_team', 'Sales Team', self.doclist)
 			ch.sales_person = d and cstr(d[0]) or ''
 			ch.allocated_percentage = d and flt(d[1]) or 0
 			ch.allocated_amount = d and flt(d[2]) or 0

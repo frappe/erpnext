@@ -75,7 +75,7 @@ class DocType(TransactionBase):
 			obj.doclist = obj.doc.clear_table(obj.doclist,'sales_team')
 			idx = 0
 			for d in webnotes.conn.sql("select sales_person, allocated_percentage, allocated_amount, incentives from `tabSales Team` where parent = '%s'" % obj.doc.customer):
-				ch = addchild(obj.doc, 'sales_team', 'Sales Team', 1, obj.doclist)
+				ch = addchild(obj.doc, 'sales_team', 'Sales Team', obj.doclist)
 				ch.sales_person = d and cstr(d[0]) or ''
 				ch.allocated_percentage = d and flt(d[1]) or 0
 				ch.allocated_amount = d and flt(d[2]) or 0
@@ -265,8 +265,8 @@ class DocType(TransactionBase):
 				for field in default_fields:
 					if field in other: del other[field]
 
-				d = addchild(obj.doc, 'other_charges', 'Sales Taxes and Charges', 1,
-						obj.doclist)
+				d = addchild(obj.doc, 'other_charges', 'Sales Taxes and Charges',
+					obj.doclist)
 				d.fields.update(other)
 				d.rate = flt(d.rate)
 				d.tax_amount = flt(d.tax_rate)
@@ -481,7 +481,8 @@ class DocType(TransactionBase):
 				break
 
 		if not exists:
-			pi = addchild(obj.doc, 'packing_details', 'Delivery Note Packing Item', 1, obj.doclist)
+			pi = addchild(obj.doc, 'packing_details', 'Delivery Note Packing Item', 
+				obj.doclist)
 
 		pi.parent_item = line.item_code
 		pi.item_code = packing_item_code

@@ -7,7 +7,7 @@ def execute():
 	webnotes.conn.sql("delete from `tabDocPerm` where role = 'All' and permlevel = 0 and parent in ('Appraisal', 'Ticket', 'Project')")
 
 	appr = get_obj('DocType', 'Appraisal', with_children=1)
-	ch = addchild(appr.doc, 'permissions', 'DocPerm', 0)
+	ch = addchild(appr.doc, 'permissions', 'DocPerm')
 	ch.permlevel = 0
 	ch.role = 'Employee'
 	ch.read = 1

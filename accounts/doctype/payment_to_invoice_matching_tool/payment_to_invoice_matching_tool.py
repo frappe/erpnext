@@ -100,7 +100,7 @@ class DocType:
 	#--------------------------------------------------
 	def create_payment_table(self, gle):
 		for d in gle:
-			ch = addchild(self.doc, 'ir_payment_details', 'Payment to Invoice Matching Tool Detail', 1, self.doclist)
+			ch = addchild(self.doc, 'ir_payment_details', 'Payment to Invoice Matching Tool Detail', self.doclist)
 			ch.voucher_no = d.get('voucher_no')
 			ch.posting_date = d.get('posting_date')
 			ch.amt_due =  self.acc_type == 'debit' and flt(d.get('amt_due')) or -1*flt(d.get('amt_due'))

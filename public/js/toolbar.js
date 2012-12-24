@@ -60,7 +60,7 @@ erpnext.toolbar.add_modules = function() {
 	for(var i in modules_list) {
 		var m = modules_list[i]
 		
-		if(m!='Setup' && wn.boot.profile.allow_modules.indexOf(m)!=-1) {
+		if(m!='Setup' && wn.boot.profile.allow_modules.indexOf(m)!=-1 && wn.modules[m]) {
 			args = {
 				module: m,
 				module_page: wn.modules[m].link,
