@@ -210,7 +210,7 @@ def get_outer_env():
 			from `tabWebsite Product Category` t1, `tabItem Group` t2 
 			where t1.item_group = t2.name
 			and ifnull(t2.show_in_website,0)=1 order by t1.idx""", as_dict=1)
-		products_item = filter(lambda d: d.url.split(".")[0]=="products", top_items)[0]			
+		products_item = filter(lambda d: d.url and d.url.split(".")[0]=="products", top_items)[0]			
 		products_item.child_items = products
 		
 	return {
