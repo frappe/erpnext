@@ -101,7 +101,7 @@ class DocType:
 		for r in open_so:
 			if cstr(r['name']) not in so_list:
 				pp_so = addchild(self.doc, 'pp_so_details', 
-					'Production Plan Sales Order', 1, self.doclist)
+					'Production Plan Sales Order', self.doclist)
 				pp_so.sales_order = r['name']
 				pp_so.sales_order_date = cstr(r['transaction_date'])
 				pp_so.customer = cstr(r['customer'])
@@ -150,7 +150,7 @@ class DocType:
 		for p in items:
 			item_details = sql("""select description, stock_uom, default_bom 
 				from tabItem where name=%s""", p['item_code'])
-			pi = addchild(self.doc, 'pp_details', 'Production Plan Item', 1, self.doclist)
+			pi = addchild(self.doc, 'pp_details', 'Production Plan Item', self.doclist)
 			pi.sales_order				= p['parent']
 			pi.item_code				= p['item_code']
 			pi.description				= item_details and item_details[0][0] or ''

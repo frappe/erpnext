@@ -123,7 +123,7 @@ class DocType(TransactionBase):
 			user_lst.append(chk[0][0])
 		
 		for d in user_lst:
-			ch = addchild(ev, 'event_individuals', 'Event User', 0)
+			ch = addchild(ev, 'event_individuals', 'Event User')
 			ch.person = d
 			ch.save(1)
 

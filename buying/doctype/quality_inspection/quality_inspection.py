@@ -41,7 +41,7 @@ class DocType:
 		specification = sql("select specification, value from `tabItem Quality Inspection Parameter` \
 			where parent = '%s' order by idx" % (self.doc.item_code))
 		for d in specification:
-			child = addchild(self.doc, 'qa_specification_details', 'Quality Inspection Reading', 1, self.doclist)
+			child = addchild(self.doc, 'qa_specification_details', 'Quality Inspection Reading', self.doclist)
 			child.specification = d[0]
 			child.value = d[1]
 			child.status = 'Accepted'

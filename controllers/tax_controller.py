@@ -19,7 +19,7 @@ import webnotes
 import webnotes.model
 from webnotes import _, msgprint
 from webnotes.utils import cint, flt
-from webnotes.model.utils import round_doc
+from webnotes.model.utils import round_floats_in_doc
 import json
 
 from controllers.transaction_controller import TransactionController
@@ -83,7 +83,7 @@ class TaxController(TransactionController):
 				self.precision.item[base_field])
 		
 		for item in self.item_doclist:
-			round_doc(item, self.precision.item)
+			round_floats_in_doc(item, self.precision.item)
 			
 			if item.fields.get(self.fmap.discount) == 100:
 				if not item.fields.get(self.fmap.print_ref_rate):
@@ -126,7 +126,7 @@ class TaxController(TransactionController):
 			self.validate_included_tax(tax)
 			
 			# round relevant values
-			round_doc(tax, self.precision.tax)
+			round_floats_in_doc(tax, self.precision.tax)
 			
 	def calculate_net_total(self):
 		self.doc.net_total = 0

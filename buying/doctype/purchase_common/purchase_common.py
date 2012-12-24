@@ -612,7 +612,8 @@ class DocType(TransactionBase):
 		
 		idx = 0
 		for other in other_charge:
-			d =	addchild(obj.doc, 'purchase_tax_details', 'Purchase Taxes and Charges', 1, obj.doclist)
+			d =	addchild(obj.doc, 'purchase_tax_details', 'Purchase Taxes and Charges', 
+				obj.doclist)
 			d.category = other['category']
 			d.add_deduct_tax = other['add_deduct_tax']
 			d.charge_type = other['charge_type']

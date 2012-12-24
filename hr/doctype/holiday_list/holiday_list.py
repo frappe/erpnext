@@ -99,7 +99,7 @@ class DocType:
     yr_start_date, yr_end_date = self.get_fy_start_end_dates()
     date_list = self.get_weekly_off_date_list(yr_start_date, yr_end_date)
     for d in date_list:
-      ch = addchild(self.doc, 'holiday_list_details', 'Holiday', 1, self.doclist)
+      ch = addchild(self.doc, 'holiday_list_details', 'Holiday', self.doclist)
       ch.description = self.doc.weekly_off
       ch.holiday_date = d
 
