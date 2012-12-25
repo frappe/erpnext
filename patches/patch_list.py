@@ -554,4 +554,8 @@ patch_list = [
 		'patch_module': 'patches.december_2012',
 		'patch_file': 'production_order_naming_series',
 	},
+	{
+		'patch_module': 'patches.december_2012',
+		'patch_file': 'rebuild_item_group_tree',
+	},
 ]
