@@ -36,10 +36,6 @@ p, li {
 	padding: 8px;
 }
 
-footer {
-
-}
-
 .web-footer-menu {
 	margin-bottom: 7px;
 }
@@ -62,11 +58,6 @@ footer {
 
 .web-footer-menu ul li:last-child {
 	border-right: 0px solid #777 !important;
-}
-
-.web-footer-powered, .web-footer-powered a {
-	color: #888;
-	margin-top: 20px;
 }
 
 .two-column {

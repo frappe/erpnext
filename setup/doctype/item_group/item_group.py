@@ -37,7 +37,10 @@ class DocType(DocTypeNestedSet):
 				page_name = "products"
 				
 			update_page_name(self.doc, self.doc.name)
-	
+			
+			from website.helpers.product import invalidate_cache_for
+			invalidate_cache_for(self.doc.name)
+			
 	def prepare_template_args(self):
 		from website.helpers.product import get_product_list_for_group, \
 			get_parent_item_groups, get_group_item_count
@@ -51,4 +54,4 @@ class DocType(DocTypeNestedSet):
 			
 		self.doc.items = get_product_list_for_group(product_group = self.doc.name, limit=20)
 		self.parent_groups = get_parent_item_groups(self.doc.name)
-		
+	

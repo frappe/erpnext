@@ -2,9 +2,9 @@
  {
   "owner": "Administrator", 
   "docstatus": 0, 
-  "creation": "2012-11-30 18:14:18", 
+  "creation": "2012-12-07 15:15:17", 
   "modified_by": "Administrator", 
-  "modified": "2012-12-06 15:59:02"
+  "modified": "2012-12-25 17:04:19"
  }, 
  {
   "allow_attach": 1, 
@@ -26,9 +26,7 @@
   "name": "__common__", 
   "parent": "Web Page", 
   "read": 1, 
-  "submit": 0, 
   "doctype": "DocPerm", 
-  "amend": 0, 
   "parenttype": "DocType", 
   "role": "Website Manager", 
   "parentfield": "permissions"
@@ -38,30 +36,13 @@
   "doctype": "DocType"
  }, 
  {
-  "doctype": "DocField", 
-  "label": "Title and Style", 
-  "fieldname": "sb0", 
-  "fieldtype": "Section Break", 
-  "permlevel": 0
- }, 
- {
   "description": "Title / headline of your page", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Title", 
   "fieldname": "title", 
   "fieldtype": "Data", 
   "reqd": 1, 
   "permlevel": 0
- }, 
- {
-  "description": "Page url name (auto-generated) ", 
-  "colour": "White:FFF", 
-  "doctype": "DocField", 
-  "label": "Page Name", 
-  "fieldname": "page_name", 
-  "fieldtype": "Data", 
-  "permlevel": 1
  }, 
  {
   "doctype": "DocField", 
@@ -78,16 +59,15 @@
   "permlevel": 0
  }, 
  {
+  "description": "Page url name (auto-generated) (add \".html\")", 
   "doctype": "DocField", 
-  "label": "Layout", 
-  "options": "Single column\nTwo column", 
-  "fieldname": "layout", 
-  "fieldtype": "Select", 
-  "permlevel": 0
+  "label": "Page Name", 
+  "fieldname": "page_name", 
+  "fieldtype": "Data", 
+  "permlevel": 1
  }, 
  {
   "description": "Page content", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Content", 
   "fieldname": "sb1", 
@@ -95,8 +75,16 @@
   "permlevel": 0
  }, 
  {
+  "description": "Begin this page with a slideshow of images", 
+  "doctype": "DocField", 
+  "label": "Slideshow", 
+  "options": "Website Slideshow", 
+  "fieldname": "slideshow", 
+  "fieldtype": "Link", 
+  "permlevel": 0
+ }, 
+ {
   "description": "Content in markdown format that appears on the main side of your page", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Main Section", 
   "fieldname": "main_section", 
@@ -104,17 +92,7 @@
   "permlevel": 0
  }, 
  {
-  "description": "Content in markdown format that appears on the right side", 
-  "colour": "White:FFF", 
-  "doctype": "DocField", 
-  "label": "Side Section", 
-  "fieldname": "side_section", 
-  "fieldtype": "Text Editor", 
-  "permlevel": 0
- }, 
- {
   "description": "Link to other pages in the side bar and next section", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "More", 
   "fieldname": "sb2", 
@@ -131,7 +109,6 @@
  }, 
  {
   "description": "Add code as &lt;script&gt;", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Insert Code", 
   "fieldname": "insert_code", 
@@ -175,14 +152,10 @@
   "create": 1, 
   "doctype": "DocPerm", 
   "write": 1, 
-  "cancel": 1, 
   "permlevel": 0
  }, 
  {
-  "create": 0, 
   "doctype": "DocPerm", 
-  "write": 0, 
-  "cancel": 0, 
   "permlevel": 1
  }
 ]

@@ -1,7 +1,21 @@
-<div class="layout-wrapper layout-wrapper-appframe layout-attributions">
-	<div class="layout-appframe"></div>
+{% extends "html/outer.html" %}
+
+{% block header %}
+<style>
+.layout-attributions td:first-child {
+	width: 30%;
+}
+</style>
+{% endblock %}
+
+{% block title %}
+	ERPNext - Web Based, Open Source ERP
+{% endblock %}
+
+{% block content %}
+<div class="layout-attributions">
 	<div class="layout-main">
-	<h3>ERPNext is made using these Awesome Open Source Projects <i class="icon-heart" style="color: red"></i></h3>
+	<h3>This website is made using these Awesome Open Source Projects <i class="icon-heart" style="color: red"></i></h3>
 	<hr>
 	<table class="table table-bordered table-striped">
 		<tbody>
@@ -91,27 +105,8 @@
 		</tr>				
 		</tbody>
 	</table>
-	
-	<hr>
-	<h3>ERPNext License: GNU/General Public License</h3>
-	<div class="well">
-	<p><b>ERPNext - Open Source, web based ERP</b></p>
-	<p>Copyright &copy; 2012, Web Notes Technologies Pvt Ltd, India</p>
 
-	<p>This program is free software: you can redistribute it and/or modify
-	    it under the terms of the <b>GNU General Public License</b> as published by
-	    the Free Software Foundation, either version 3 of the License, or
-	    (at your option) any later version.</p>
-
-	    <p>This program is distributed in the hope that it will be useful,
-	    but WITHOUT ANY WARRANTY; without even the implied warranty of
-	    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-	    GNU General Public License for more details.</p>
-
- 		<p>For complete license see <a href="http://www.gnu.org/licenses/">http://www.gnu.org/licenses/</a></p>
-	</div>
-	<p class="alert">Note: A link to this page must be easily accessible and all other ERPNext branding must remain as it is.</p>
-	<hr>
-	<p>For more information please write to us at support@erpnext.com</p>
+	<p class="alert">Note: A link to this page must be easily accessible.</p>
 	</div>
 </div>
+{% endblock %}

@@ -41,5 +41,10 @@ class DocType():
 			clear_cache('index')
 			
 	def prepare_template_args(self):
-		self.doc.main_section_html = self.doc.main_section
-		self.doc.side_section_html = self.doc.side_section
+		if self.doc.slideshow:
+			slideshow = webnotes.model_wrapper("Website Slideshow", self.doc.slideshow)
+			self.slides = slideshow.doclist.get({"doctype":"Website Slideshow Item"})
+			self.doc.slideshow_header = slideshow.doc.header or ""
+			for s in self.slides:
+				if s.image and not s.image.lower().startswith("http"):
+					s.image = "files/" + s.image
