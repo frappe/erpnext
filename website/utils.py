@@ -123,6 +123,8 @@ def build_html(args):
 	templates_path = os.path.join(os.path.dirname(conf.__file__), 
 		'app', 'website', 'templates')
 	
+	args["len"] = len
+	
 	jenv = Environment(loader = FileSystemLoader(templates_path))
 	html = jenv.get_template(args['template']).render(args)
 	

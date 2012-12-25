@@ -182,15 +182,10 @@ class DocType:
 		ret = {
 			'file_group'	:	file and file[0]['file_group'] or '',
 			'description'	:	file and file[0]['description'] or ''
-
 		}
 		return ret
 
 	def check_if_sle_exists(self):
-		"""
-			checks if any stock ledger entry exists for this item
-		"""
-
 		sle = sql("select name from `tabStock Ledger Entry` where item_code = %s and ifnull(is_cancelled, 'No') = 'No'", self.doc.name)
 		return sle and 'exists' or 'not exists'
 
@@ -201,4 +196,5 @@ class DocType:
 			clear_cache(self.doc.page_name)
 			
 	def prepare_template_args(self):
-		self.doc.web_description_html = self.doc.description or ''
+		from website.helpers.product import get_parent_item_groups
+		self.parent_groups = get_parent_item_groups(self.doc.item_group) + [{"name":self.doc.name}]

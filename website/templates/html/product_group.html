@@ -1,50 +1,39 @@
 {% extends "html/page.html" %}
 
-{% block javascript %}
-{% include "js/product_list.js" %}
-{% endblock %}
+{% block title %}{{ name }}{% endblock %}
 
 {% block content %}
-
-<script>
-$(document).ready(function() {
-	window.start = 0;
-	window.product_group = "{{ name }}";
-	window.get_product_list();
-});
-</script>
 
 <div class="layout-wrapper layout-wrapper-background">
 	<div class="web-content" id="content-product_group">
 		<div class="layout-main" style="padding: 30px;">
 			{% include 'html/product_search_box.html' %}
+			{% include 'html/product_breadcrumbs.html' %}
 			{% if description %}
 			<div>{{ description or ""}}</div>
 			{% else %}
 			<h3>{{ name }}</h3>
 			{% endif %}
 			{% if sub_groups %}
-			<div class="well">
-				<div class="container-fluid">
+			<div class="well well-small">
+				<div class="container-fluid" style="padding-left: 0px; margin-left:-10px; line-height: 2em;">
 				{% for d in sub_groups %}
 					<div class="span2">
-						<i class="icon-chevron-right"></i>
-						<a href="{{ d.page_name }}">{{ d.name }}</a></div>
+						<a href="{{ d.page_name }}">{{ d.name }} ({{ d.count }})</a>
+					</div>
 				{% endfor %}
 				</div>
 			</div>
 			{% endif %}
-			<hr>
-			<h3>Products</h3>
+			{% if items %}
 			<div id="search-list">
-				
+				<table class="table">
+					{% for item in items %}
+						{{ item }}
+					{% endfor %}
+				</table>
 			</div>
-			<div style="text-align: center;">
-				<div class="more-btn" 
-					style="display: none; text-align: center;">
-					<button class="btn">More...</button>
-				</div>
-			</div>
+			{% endif %}
 		</div>
 	</div>
 </div>
