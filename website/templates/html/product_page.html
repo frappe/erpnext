@@ -12,7 +12,7 @@
 	{% if item_name != name %}
 		{{ item_name }} [{{ name }}]
 	{% else %}
-		{{ item_name }}
+		{{ item_name or name }}
 	{% endif %}
 {% endblock %}
 
@@ -21,19 +21,17 @@
 		<div class="web-content" id="content-product-{{ name }}">
 			<div class="layout-main" style="padding: 30px;">
 				{% include 'html/product_search_box.html' %}
-				<h1>{{ item_name }}</h1>
+				{% include 'html/product_breadcrumbs.html' %}
+				<h3>{{ item_name }}</h3>
 				<p class="help">Item Code: {{ name }}</p>
 				<div class="product-page-content">
 					<div class="span6">
 					{% if website_image %}
-					<image class="item-main-image" src="files/{{ website_image }}" />
+					<image class="item-main-image" src="{% if website_image.lower().startswith('http') %}{{ website_image}}{% else %}files/{{ website_image }}{% endif %}" />
 					{% else %}
 					<div class="img-area">
-						<div style='background-color: #eee; padding: 40px;
-							width: 32px; font-size: 32px; color: #888;' title='No Image'>
-						<i class='icon-camera'></i></div>
+						{% include 'html/product_missing_image.html' %}
 					</div>
-					
 					{% endif %}
 					<br><br>
 					</div>
@@ -57,7 +55,7 @@
 							{% for d in obj.doclist.get(
 								{"doctype":"Item Website Specification"}) %}
 								<tr>
-									<td style="min-width: 150px;">{{ d.label }}</td>
+									<td style="width: 30%;">{{ d.label }}</td>
 									<td>{{ d.description }}</td>
 								</tr>
 							{% endfor %}

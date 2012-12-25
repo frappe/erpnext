@@ -4,7 +4,7 @@ $.extend(wn.pages.modules_setup, {
 	modules: ['Activity', 'Accounts', 'Selling', 'Buying', 'Stock', 'Manufacturing', 'Projects', 
 		'Support', 'HR', 'Website', 'To Do', 'Messages', 'Calendar', 'Knowledge Base'],	
 	onload: function(wrapper) {
-		wn.pages.modules_setup.refresh_page(wn.boot.modules_list);
+		wn.pages.modules_setup.refresh_page(JSON.parse(wn.boot.modules_list || "[]"));
 	},
 	refresh_page: function(ml) {
 		$('#modules-list').empty();
@@ -29,8 +29,6 @@ $.extend(wn.pages.modules_setup, {
 					%(m)s</p>', {m:all[i]}));				
 			}
 		}
-		
-		$('#modules-list').sortable();
 		
 	},
 	update: function() {

@@ -1,0 +1,14 @@
+<tr>
+	<td style="width: 30%;">
+		{% if website_image %}
+		<img class="product-image" style="width: 80%;" src="{{ website_image }}">
+		{% else %}
+		{% include 'html/product_missing_image.html' %}
+		{% endif %}
+	</td>
+	<td>
+		<h4><a href="{{ page_name }}">{{ item_name }}</a></h4>
+		<p class="help">Item Code: {{ name }}</p>
+		<p>{{ website_description }}</p>
+	</td>
+</tr>

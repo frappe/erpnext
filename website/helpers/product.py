@@ -25,37 +25,78 @@ def get_product_info(item_code):
 	}
 
 @webnotes.whitelist(allow_guest=True)
-def get_product_list(search=None, product_group=None, start=0):
-	import webnotes
+def get_product_list(search=None, product_group=None, start=0, limit=10):
 	from webnotes.utils import cstr
 		
 	# base query
-	query = """\
-		select name, item_name, page_name, website_image, item_group, 
+	query = """select name, item_name, page_name, website_image, item_group, 
 			web_long_description as website_description
-		from `tabItem`
-		where docstatus = 0
-		and show_in_website = 1 """
+		from `tabItem` where docstatus = 0 and show_in_website = 1 """
 	
 	# search term condition
 	if search:
-		query += """
-			and (
-				web_long_description like %(search)s or
-				item_name like %(search)s or
-				name like %(search)s
-			)"""
+		query += """and (web_long_description like %(search)s or
+				item_name like %(search)s or name like %(search)s)"""
 		search = "%" + cstr(search) + "%"
 	
-	# product group condition
-	if product_group:
-		query += """
-			and item_group = %(product_group)s """
-	
 	# order by
-	query += """order by item_name asc, name asc limit %s, 10""" % start
+	query += """order by weightage desc, modified desc limit %s, %s""" % (start, limit)
 
-	return webnotes.conn.sql(query, {
+	data = webnotes.conn.sql(query, {
 		"search": search,
 		"product_group": product_group
 	}, as_dict=1)
+	
+	return [get_item_for_list_in_html(r) for r in data]
+
+
+def get_product_list_for_group(product_group=None, start=0, limit=10):
+	child_groups = ", ".join(['"' + i[0] + '"' for i in get_child_groups(product_group)])
+
+	# base query
+	query = """select name, item_name, page_name, website_image, item_group, 
+			web_long_description as website_description
+		from `tabItem` where docstatus = 0 and show_in_website = 1
+		and (item_group in (%s)
+			or name in (select parent from `tabWebsite Item Group` where item_group in (%s))) """ % (child_groups, child_groups)
+	
+	query += """order by weightage desc, modified desc limit %s, %s""" % (start, limit)
+
+	data = webnotes.conn.sql(query, {"product_group": product_group}, as_dict=1)
+
+	return [get_item_for_list_in_html(r) for r in data]
+
+def get_child_groups(item_group_name):
+	item_group = webnotes.doc("Item Group", item_group_name)
+	return webnotes.conn.sql("""select name 
+		from `tabItem Group` where lft>=%(lft)s and rgt<=%(rgt)s""" \
+			% item_group.fields)
+
+def get_group_item_count(item_group):
+	child_groups = ", ".join(['"' + i[0] + '"' for i in get_child_groups(item_group)])
+	return webnotes.conn.sql("""select count(*) from `tabItem` 
+		where docstatus = 0 and show_in_website = 1
+		and (item_group in (%s)
+			or name in (select parent from `tabWebsite Item Group` 
+				where item_group in (%s))) """ % (child_groups, child_groups))[0][0]
+
+def get_item_for_list_in_html(r):
+	from website.utils import build_html
+	scrub_item_for_list(r)
+	r.template = "html/product_in_list.html"
+	return build_html(r)
+
+def scrub_item_for_list(r):
+	if not r.website_description:
+		r.website_description = "No description given"
+	if len(r.website_description.split(" ")) > 24:
+		r.website_description = " ".join(r.website_description.split(" ")[:24]) + "..."
+	if r.website_image and not r.website_image.lower().startswith("http"):
+		r.website_image = "files/" + r.website_image
+
+def get_parent_item_groups(item_group_name):
+	item_group = webnotes.doc("Item Group", item_group_name)
+	return webnotes.conn.sql("""select name, page_name from `tabItem Group`
+		where lft <= %s and rgt >= %s 
+		and ifnull(show_in_website,0)=1
+		order by lft asc""", (item_group.lft, item_group.rgt), as_dict=True)
