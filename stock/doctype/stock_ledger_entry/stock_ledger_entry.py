@@ -28,6 +28,14 @@ class DocType:
 	def __init__(self, doc, doclist=[]):
 		self.doc = doc
 		self.doclist = doclist
+
+	def validate(self):
+		self.validate_mandatory()
+		self.validate_posting_time()
+		self.validate_item()
+		self.actual_amt_check()
+		self.check_stock_frozen_date()
+		self.scrub_posting_time()
 	
 	#check for item quantity available in stock
 	def actual_amt_check(self):
@@ -53,13 +61,19 @@ class DocType:
 					msgprint("Warehouse: '%s' does not exist in the system. Please check." % self.doc.fields.get(k), raise_exception = 1)
 
 	def validate_item(self):
-		item_det = sql("select name, has_batch_no, docstatus from tabItem where name = '%s'" % self.doc.item_code)
+		item_det = sql("""select name, has_batch_no, docstatus, 
+			ifnull(is_stock_item, 'No') from tabItem where name=%s""", 
+			self.doc.item_code)
 
 		# check item exists
 		if item_det:
 			item_det = item_det and item_det[0]
 		else:
 			msgprint("Item: '%s' does not exist in the system. Please check." % self.doc.item_code, raise_exception = 1)
+
+		if item_det[3]!='Yes':
+			webnotes.msgprint("""Item: "%s" is not a Stock Item.""" % self.doc.item_code,
+				raise_exception=1)
 			
 		# check if item is trashed
 		if cint(item_det[2])==2:
@@ -97,11 +111,3 @@ class DocType:
 		if len(self.doc.posting_time.split(':')) > 2:
 			self.doc.posting_time = '00:00'
 			
-
-	def validate(self):
-		self.validate_mandatory()
-		self.validate_posting_time()
-		self.validate_item()
-		self.actual_amt_check()
-		self.check_stock_frozen_date()
-		self.scrub_posting_time()

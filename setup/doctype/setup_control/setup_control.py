@@ -239,13 +239,13 @@ class DocType:
 	def add_roles(self, pr):
 		roles_list = ['Accounts Manager', 'Accounts User', 'Blogger', 'HR Manager', 'HR User', 'Maintenance User', 'Maintenance Manager', 'Material Manager', 'Material User', 'Material Master Manager', 'Manufacturing Manager', 'Manufacturing User', 'Projects User', 'Purchase Manager', 'Purchase User', 'Purchase Master Manager', 'Quality Manager', 'Sales Manager', 'Sales User', 'Sales Master Manager', 'Support Manager', 'Support Team', 'System Manager', 'Website Manager']
 		for r in roles_list:
-			d = addchild(pr, 'userroles', 'UserRole', 1)
+			d = addchild(pr, 'userroles', 'UserRole')
 			d.role = r
 			d.save(1)
 
 		# Add roles to Administrator profile
 		pr = Document('Profile','Administrator')
 		for r in roles_list:
-			d = addchild(pr,'userroles', 'UserRole', 1)
+			d = addchild(pr,'userroles', 'UserRole')
 			d.role = r
 			d.save(1)

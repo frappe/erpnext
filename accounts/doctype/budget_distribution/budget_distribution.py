@@ -31,7 +31,8 @@ class DocType:
 		'October','November','December']
     idx =1
     for m in month_list:
-      mnth = addchild(self.doc,'budget_distribution_details','Budget Distribution Detail',1,self.doclist)
+      mnth = addchild(self.doc, 'budget_distribution_details',
+        'Budget Distribution Detail', self.doclist)
       mnth.month = m or ''
       mnth.idx = idx
       idx += 1

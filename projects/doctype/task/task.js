@@ -14,15 +14,29 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-cur_frm.fields_dict['project'].get_query = function(doc,cdt,cdn){
-  var cond='';
-  if(doc.customer) cond = 'ifnull(`tabProject`.customer, "") = "'+doc.customer+'" AND';  
-  return repl('SELECT distinct `tabProject`.`name` FROM `tabProject` \
-  	WHERE %(cond)s `tabProject`.`name` LIKE "%s" \
-	ORDER BY `tabProject`.`name` ASC LIMIT 50', {cond:cond});
-}
+wn.provide("erpnext.projects");
+
+erpnext.projects.Task = erpnext.utils.Controller.extend({
+	setup: function() {
+		this.frm.fields_dict.project.get_query = function() {
+			return "select name from `tabProject` \
+				where %(key)s like \"%s\" \
+				order by name asc limit 50";
+		};
+	},
+
+	project: function() {
+		if(this.frm.doc.project) {
+			get_server_fields('get_project_details', '','', doc, cdt, cdn, 1);
+		}
+	},
+
+	after_save: function() {
+		this.frm.doc.project && wn.model.remove_from_locals("Project",
+			this.frm.doc.project);
+	},
+});
 
 
-cur_frm.cscript.project = function(doc, cdt, cdn){
-  if(doc.project) get_server_fields('get_project_details', '','', doc, cdt, cdn, 1);
-}
+cur_frm.cscript = new erpnext.projects.Task({frm: cur_frm});
+

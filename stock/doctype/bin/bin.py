@@ -350,7 +350,7 @@ class DocType:
 			reaches re-order level when %s %s was created""" % (doc_type,doc_name)
 		indent.save(1)
 		indent_obj = get_obj('Purchase Request',indent.name,with_children=1)
-		indent_details_child = addchild(indent_obj.doc,'indent_details','Purchase Request Item',0)
+		indent_details_child = addchild(indent_obj.doc,'indent_details','Purchase Request Item')
 		indent_details_child.item_code = self.doc.item_code
 		indent_details_child.uom = self.doc.stock_uom
 		indent_details_child.warehouse = self.doc.warehouse

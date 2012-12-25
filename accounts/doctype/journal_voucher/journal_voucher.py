@@ -174,7 +174,7 @@ class DocType:
 					
 			# Set the diff in a new row
 			if flag == 0 and (flt(diff) != 0):
-				jd = addchild(self.doc, 'entries', 'Journal Voucher Detail', 1, self.doclist)
+				jd = addchild(self.doc, 'entries', 'Journal Voucher Detail', self.doclist)
 				if diff>0:
 					jd.credit = flt(diff)
 				elif diff<0:
@@ -256,7 +256,7 @@ class DocType:
 		total = 0
 		for d in self.get_values():
 			total += flt(d[2])
-			jd = addchild(self.doc, 'entries', 'Journal Voucher Detail', 1, self.doclist)
+			jd = addchild(self.doc, 'entries', 'Journal Voucher Detail', self.doclist)
 			jd.account = cstr(d[1])
 			if self.doc.write_off_based_on == 'Accounts Receivable':
 				jd.credit = flt(d[2])
@@ -265,7 +265,7 @@ class DocType:
 				jd.debit = flt(d[2])
 				jd.against_voucher = cstr(d[0])
 			jd.save(1)
-		jd = addchild(self.doc, 'entries', 'Journal Voucher Detail', 1, self.doclist)
+		jd = addchild(self.doc, 'entries', 'Journal Voucher Detail', self.doclist)
 		if self.doc.write_off_based_on == 'Accounts Receivable':
 			jd.debit = total
 		elif self.doc.write_off_based_on == 'Accounts Payable':
