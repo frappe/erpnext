@@ -73,7 +73,7 @@ def get_html(page_name):
 		html = get_html("404")
 
 	if page_name=="error":
-		html = html % {"error": webnotes.getTraceback()}
+		html = html.replace("%(error)s", webnotes.getTraceback())
 	else:
 		comments = "\n\npage:"+page_name+\
 			"\nload status: " + (from_cache and "cache" or "fresh")
@@ -215,18 +215,24 @@ def get_outer_env():
 		products_item = filter(lambda d: d.url and d.url.split(".")[0]=="products", top_items)[0]			
 		products_item.child_items = products
 		
-	return {
+	ret = webnotes._dict({
 		'top_bar_items': top_items,
 		'footer_items': webnotes.conn.sql("""\
 			select * from `tabTop Bar Item`
 			where parent='Website Settings' and parentfield='footer_items'
 			order by idx asc""", as_dict=1),
 			
-		'brand': webnotes.conn.get_value('Website Settings', None, 'brand_html') or 'ERPNext',
-		'copyright': webnotes.conn.get_value('Website Settings', None, 'copyright'),
-		'favicon': webnotes.conn.get_value('Website Settings', None, 'favicon'),
 		'int':int
-	}
+	})
+	
+	settings = webnotes.doc("Website Settings", "Website Settings")
+	for k in ["brand_html", "copyright", "address"]:
+		if k in settings.fields:
+			ret[k] = settings.fields[k]
+
+	if not ret.brand_html:
+		ret.brand_html = "ERPNext"
+	return ret
 
 def get_home_page():
 	doc_name = webnotes.conn.get_value('Website Settings', None, 'home_page')

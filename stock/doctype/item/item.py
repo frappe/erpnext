@@ -40,9 +40,8 @@ class DocType:
 	def on_update(self):
 		if self.doc.show_in_website:
 			# webpage updates
-			from website.utils import update_page_name
-			update_page_name(self.doc, self.doc.item_name)
-		
+			self.update_website()
+			
 		bin = sql("select stock_uom from `tabBin` where item_code = '%s' " % self.doc.item_code)
 		if bin and cstr(bin[0][0]) != cstr(self.doc.stock_uom):
 			msgprint("Please Update Stock UOM with the help of Stock UOM Replace Utility.")
@@ -75,6 +74,16 @@ class DocType:
 			child.uom = self.doc.stock_uom
 			child.conversion_factor = 1
 			child.save()
+
+	def update_website(self):
+		from website.utils import update_page_name
+		update_page_name(self.doc, self.doc.item_name)
+		
+		from website.helpers.product import invalidate_cache_for
+		invalidate_cache_for(self.doc.item_group)
+
+		[invalidate_cache_for(d.item_group) for d in \
+			self.doclist.get({"doctype":"Website Item Group"})]
 
 	# On delete 1. Delete BIN (if none of the corrosponding transactions present, it gets deleted. if present, rolled back due to exception)
 	def on_trash(self):

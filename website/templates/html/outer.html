@@ -1,5 +1,5 @@
 {#
-	requires, brand, top_bar_items, footer_items, copyright, content
+	requires, brand_html, top_bar_items, footer_items, copyright, content, address
 #}
 
 {% extends "html/base.html" %}
@@ -13,7 +13,7 @@
 			style="margin-bottom: 0px;">
 			<div class="navbar-inner">
 			<div class="container">
-				<a class="brand" href="index.html">{{ brand }}</a>
+				<a class="brand" href="index.html">{{ brand_html }}</a>
 				<ul class="nav">
 					{% for page in top_bar_items %}
 						{% if not page.parent_label %}
@@ -77,7 +77,10 @@
 		{% if copyright %}
 		<div class="web-footer-copyright">&copy; {{ copyright }}</div>
 		{% endif %}
-		<div class="web-footer-powered">Powered by <a href="https://erpnext.com">ERPNext.com</a></div>
+		{% if address %}
+		{{ address }}
+		{% endif %}
+		<p><a style="font-size: 90%;" href="attributions.html">ERPNext Powered</a></p>
 		</div>
 	</footer>
 

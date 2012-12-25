@@ -100,3 +100,8 @@ def get_parent_item_groups(item_group_name):
 		where lft <= %s and rgt >= %s 
 		and ifnull(show_in_website,0)=1
 		order by lft asc""", (item_group.lft, item_group.rgt), as_dict=True)
+		
+def invalidate_cache_for(item_group):
+	from website.utils import delete_page_cache
+	for i in get_parent_item_groups(item_group):
+		delete_page_cache(i.page_name)

@@ -4,7 +4,7 @@
   "docstatus": 0, 
   "creation": "2012-07-12 23:29:36", 
   "modified_by": "Administrator", 
-  "modified": "2012-12-20 14:28:46"
+  "modified": "2012-12-25 15:41:48"
  }, 
  {
   "issingle": 1, 
@@ -104,10 +104,11 @@
   "permlevel": 0
  }, 
  {
+  "description": "Address and other legal information you may want to put in the footer.", 
   "doctype": "DocField", 
   "label": "Address", 
   "fieldname": "address", 
-  "fieldtype": "Text", 
+  "fieldtype": "Text Editor", 
   "permlevel": 0
  }, 
  {

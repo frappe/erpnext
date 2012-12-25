@@ -1,0 +1,59 @@
+[
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-12-25 16:48:49", 
+  "modified_by": "Administrator", 
+  "modified": "2012-12-25 16:55:40"
+ }, 
+ {
+  "istable": 1, 
+  "allow_attach": 0, 
+  "doctype": "DocType", 
+  "module": "Website", 
+  "max_attachments": 10, 
+  "name": "__common__"
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "Website Slideshow Item", 
+  "doctype": "DocField", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "parentfield": "fields"
+ }, 
+ {
+  "name": "Website Slideshow Item", 
+  "doctype": "DocType"
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Image", 
+  "fieldname": "image", 
+  "fieldtype": "Select", 
+  "options": "attach_files:"
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Heading", 
+  "width": "200px", 
+  "fieldname": "heading", 
+  "fieldtype": "Data"
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Description", 
+  "width": "200px", 
+  "fieldname": "description", 
+  "fieldtype": "Text"
+ }, 
+ {
+  "print_hide": 1, 
+  "no_copy": 1, 
+  "doctype": "DocField", 
+  "label": "File List", 
+  "fieldname": "file_list", 
+  "fieldtype": "Text", 
+  "hidden": 1
+ }
+]
