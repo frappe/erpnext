@@ -81,7 +81,7 @@ class SupportMailbox(POP3Mailbox):
 			if exists and exists[0] and exists[0][0]:
 				st = webnotes.get_obj('Support Ticket', thread_id)
 				
-				from support.doctype.communication.communication import make
+				from core.doctype.communication.communication import make
 				
 				make(content=content, sender=full_email_id, doctype="Support Ticket",
 					name=thread_id, lead = st.doc.lead, contact=st.doc.contact)
