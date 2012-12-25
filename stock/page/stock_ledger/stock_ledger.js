@@ -37,7 +37,7 @@ erpnext.StockLedger = erpnext.StockGridReport.extend({
 			page: wrapper,
 			parent: $(wrapper).find('.layout-main'),
 			appframe: wrapper.appframe,
-			doctypes: ["Item", "Item Group", "Warehouse", "Stock Ledger Entry"]			
+			doctypes: ["Item", "Item Group", "Warehouse", "Stock Ledger Entry", "Brand"],
 		})
 	},
 
@@ -54,6 +54,7 @@ erpnext.StockLedger = erpnext.StockGridReport.extend({
 				}},
 			{id: "warehouse", name: "Warehouse", field: "warehouse", width: 100,
 				link_formatter: {filter_input: "warehouse"}},
+			{id: "brand", name: "Brand", field: "brand", width: 100},
 			{id: "qty", name: "Qty", field: "qty", width: 100,
 				formatter: this.currency_formatter},
 			{id: "balance", name: "Balance Qty", field: "balance", width: 100,
@@ -74,13 +75,17 @@ erpnext.StockLedger = erpnext.StockGridReport.extend({
 		
 	},
 	filters: [
-		{fieldtype:"Select", label: "Warehouse", link:"Warehouse", default_value: "Select Warehouse...",
-			filter: function(val, item, opts) {
+		{fieldtype:"Select", label: "Warehouse", link:"Warehouse", 
+			default_value: "Select Warehouse...", filter: function(val, item, opts) {
 				return item.warehouse == val || val == opts.default_value;
 			}},
 		{fieldtype:"Select", label: "Item Code", link:"Item", default_value: "Select Item...",
 			filter: function(val, item, opts) {
 				return item.item_code == val || val == opts.default_value;
+			}},
+		{fieldtype:"Select", label: "Brand", link:"Brand", 
+			default_value: "Select Brand...", filter: function(val, item, opts) {
+				return val == opts.default_value || item.brand == val || item._show;
 			}},
 		{fieldtype:"Data", label: "Voucher No",
 			filter: function(val, item, opts) {
@@ -97,6 +102,28 @@ erpnext.StockLedger = erpnext.StockGridReport.extend({
 		{fieldtype:"Button", label: "Refresh", icon:"icon-refresh icon-white", cssClass:"btn-info"},
 		{fieldtype:"Button", label: "Reset Filters"}
 	],
+	
+	setup_filters: function() {
+		var me = this;
+		this._super();
+		
+		this.wrapper.bind("apply_filters_from_route", function() { me.toggle_enable_brand(); });
+		this.filter_inputs.item_code.change(function() { me.toggle_enable_brand(); });
+		
+		this.trigger_refresh_on_change(["item_code", "warehouse", "brand"]);
+	},
+	
+	toggle_enable_brand: function() {
+		if(this.filter_inputs.item_code.val() ==
+				this.filter_inputs.item_code.get(0).opts.default_value) {
+			this.filter_inputs.brand.removeAttr("disabled");
+		} else {
+			this.filter_inputs.brand
+				.val(this.filter_inputs.brand.get(0).opts.default_value)
+				.attr("disabled", "disabled");
+		}
+	},
+	
 	init_filter_values: function() {
 		this._super();
 		this.filter_inputs.warehouse.get(0).selectedIndex = 0;
@@ -136,6 +163,7 @@ erpnext.StockLedger = erpnext.StockGridReport.extend({
 			var wh = me.get_item_warehouse(sl.warehouse, sl.item_code);
 			sl.description = item.description;
 			sl.posting_datetime = sl.posting_date + " " + sl.posting_time;
+			sl.brand = item.brand;
 			var posting_datetime = dateutil.str_to_obj(sl.posting_datetime);
 			
 			var is_fifo = item.valuation_method ? item.valuation_method=="FIFO" 
@@ -145,7 +173,8 @@ erpnext.StockLedger = erpnext.StockGridReport.extend({
 			// opening, transactions, closing, total in, total out
 			var before_end = posting_datetime <= dateutil.str_to_obj(me.to_date + " 23:59:59");
 			if((!me.is_default("item_code") ? me.apply_filter(sl, "item_code") : true)
-				&& me.apply_filter(sl, "warehouse") && me.apply_filter(sl, "voucher_no")) {
+				&& me.apply_filter(sl, "warehouse") && me.apply_filter(sl, "voucher_no")
+				&& me.apply_filter(sl, "brand")) {
 				if(posting_datetime < dateutil.str_to_obj(me.from_date)) {
 					opening.balance += sl.qty;
 					opening.balance_value += value_diff;

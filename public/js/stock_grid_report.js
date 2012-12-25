@@ -41,12 +41,12 @@ erpnext.StockGridReport = wn.views.TreeGridReport.extend({
 			var value_diff = (rate * add_qty);
 		
 			if(add_qty)
-				wh.fifo_stack.push([add_qty, sl.incoming_rate, sl.posting_date]);					
+				wh.fifo_stack.push([add_qty, sl.incoming_rate, sl.posting_date]);
 		} else {
 			// outgoing
 					
 			if(is_fifo)	{
-				var value_diff = this.get_fifo_value_diff(wh, sl);				
+				var value_diff = this.get_fifo_value_diff(wh, sl);
 			} else {
 				// average rate for weighted average
 				var rate = (wh.balance_qty.toFixed(2) == 0.00 ? 0 : 
@@ -54,7 +54,7 @@ erpnext.StockGridReport = wn.views.TreeGridReport.extend({
 			
 				// no change in value if negative qty
 				if((wh.balance_qty + sl.qty).toFixed(2) >= 0.00)
-					var value_diff = (rate * sl.qty);			
+					var value_diff = (rate * sl.qty);
 				else 
 					var value_diff = -wh.balance_value;
 			}

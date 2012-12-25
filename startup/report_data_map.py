@@ -66,12 +66,18 @@ data_map = {
 		"order_by": "name",
 		"links": {
 			"parent_item_group": ["Item Group", "name"],
+			"brand": ["Brand", "name"]
 		}
 	},
 	"Item Group": {
 		"columns": ["name", "parent_item_group"],
 		"conditions": ["docstatus < 2"],
 		"order_by": "lft"
+	},
+	"Brand": {
+		"columns": ["name"],
+		"conditions": ["docstatus < 2"],
+		"order_by": "name"
 	},
 	"Warehouse": {
 		"columns": ["name"],
@@ -88,6 +94,11 @@ data_map = {
 			"warehouse": ["Warehouse", "name"]
 		},
 		"force_index": "posting_sort_index"		
+	},
+	"Stock Entry": {
+		"columns": ["name", "purpose"],
+		"conditions": ["docstatus=1"],
+		"order_by": "posting_date, posting_time, name",
 	},
 
 	# Sales

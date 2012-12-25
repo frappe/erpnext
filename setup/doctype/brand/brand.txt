@@ -2,28 +2,25 @@
  {
   "owner": "Administrator", 
   "docstatus": 0, 
-  "creation": "2012-03-27 14:36:19", 
+  "creation": "2012-07-03 13:30:03", 
   "modified_by": "Administrator", 
-  "modified": "2012-03-27 14:36:19"
+  "modified": "2012-12-25 13:20:51"
  }, 
  {
-  "section_style": "Simple", 
-  "module": "Setup", 
-  "server_code_error": " ", 
-  "allow_trash": 1, 
-  "doctype": "DocType", 
   "autoname": "field:brand", 
-  "document_type": "Master", 
   "name": "__common__", 
-  "colour": "White:FFF", 
-  "show_in_menu": 0, 
-  "version": 5
+  "doctype": "DocType", 
+  "module": "Setup", 
+  "in_dialog": 1, 
+  "document_type": "Master"
  }, 
  {
+  "read_only": 0, 
   "name": "__common__", 
   "parent": "Brand", 
   "doctype": "DocField", 
   "parenttype": "DocType", 
+  "permlevel": 0, 
   "parentfield": "fields"
  }, 
  {
@@ -32,76 +29,12 @@
   "read": 1, 
   "doctype": "DocPerm", 
   "parenttype": "DocType", 
+  "permlevel": 0, 
   "parentfield": "permissions"
  }, 
  {
   "name": "Brand", 
   "doctype": "DocType"
- }, 
- {
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "write": 1, 
-  "role": "System Manager", 
-  "cancel": 1, 
-  "permlevel": 0
- }, 
- {
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "write": 1, 
-  "role": "Material Master Manager", 
-  "cancel": 1, 
-  "permlevel": 0
- }, 
- {
-  "amend": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "submit": 0, 
-  "write": 0, 
-  "role": "Material Manager", 
-  "cancel": 0, 
-  "permlevel": 1
- }, 
- {
-  "amend": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "submit": 0, 
-  "write": 0, 
-  "role": "Material Manager", 
-  "cancel": 0, 
-  "permlevel": 0
- }, 
- {
-  "amend": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "submit": 0, 
-  "write": 0, 
-  "role": "Material User", 
-  "cancel": 0, 
-  "permlevel": 1
- }, 
- {
-  "amend": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "submit": 0, 
-  "write": 0, 
-  "role": "Material User", 
-  "cancel": 0, 
-  "permlevel": 0
- }, 
- {
-  "oldfieldtype": "Small Text", 
-  "doctype": "DocField", 
-  "label": "Trash Reason", 
-  "oldfieldname": "trash_reason", 
-  "fieldname": "trash_reason", 
-  "fieldtype": "Small Text", 
-  "permlevel": 1
  }, 
  {
   "oldfieldtype": "Data", 
@@ -110,8 +43,7 @@
   "oldfieldname": "brand", 
   "fieldname": "brand", 
   "fieldtype": "Data", 
-  "reqd": 1, 
-  "permlevel": 0
+  "reqd": 1
  }, 
  {
   "oldfieldtype": "Text", 
@@ -120,7 +52,22 @@
   "oldfieldname": "description", 
   "width": "300px", 
   "fieldname": "description", 
-  "fieldtype": "Text", 
-  "permlevel": 0
+  "fieldtype": "Text"
+ }, 
+ {
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "write": 1, 
+  "role": "Material Master Manager", 
+  "cancel": 1
+ }, 
+ {
+  "amend": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "submit": 0, 
+  "write": 0, 
+  "role": "Material User", 
+  "cancel": 0
  }
 ]
