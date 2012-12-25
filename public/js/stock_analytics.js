@@ -53,7 +53,7 @@ erpnext.StockAnalytics = erpnext.StockGridReport.extend({
 				formatter: this.check_formatter},
 			{id: "name", name: "Item", field: "name", width: 300,
 				formatter: this.tree_formatter},
-			{id: "brand", name: "Brand", field: "brand", width: 200},
+			{id: "brand", name: "Brand", field: "brand", width: 100},
 			{id: "opening", name: "Opening", field: "opening", hidden: true,
 				formatter: this.currency_formatter}
 		];
