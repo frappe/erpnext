@@ -41,7 +41,7 @@ class DocType:
 				d = d.replace(x, '')
 
 			# mobile no validation for erpnext gateway
-			if webnotes.conn.webnotes.conn.get_value('SMS Settings', None, 'sms_gateway_url'):
+			if webnotes.conn.get_value('SMS Settings', None, 'sms_gateway_url'):
 				mob_no = d
 			else:
 				if not d.startswith("0") and len(d) == 10:
