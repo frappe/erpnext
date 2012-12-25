@@ -38,7 +38,7 @@ erpnext.StockAgeing = erpnext.StockGridReport.extend({
 			page: wrapper,
 			parent: $(wrapper).find('.layout-main'),
 			appframe: wrapper.appframe,
-			doctypes: ["Item", "Warehouse", "Stock Ledger Entry", "Item Group"],
+			doctypes: ["Item", "Warehouse", "Stock Ledger Entry", "Item Group", "Brand"],
 		})
 	},
 	setup_columns: function() {
@@ -48,6 +48,7 @@ erpnext.StockAgeing = erpnext.StockGridReport.extend({
 					open_btn: true,
 					doctype: '"Item"'
 				}},
+			{id: "brand", name: "Brand", field: "brand", width: 100},
 			{id: "average_age", name: "Average Age", field: "average_age",
 				formatter: this.currency_formatter},
 			{id: "earliest", name: "Earliest", field: "earliest",
@@ -59,6 +60,10 @@ erpnext.StockAgeing = erpnext.StockGridReport.extend({
 	filters: [
 		{fieldtype:"Select", label: "Warehouse", link:"Warehouse", 
 			default_value: "Select Warehouse..."},
+		{fieldtype:"Select", label: "Brand", link:"Brand", 
+			default_value: "Select Brand...", filter: function(val, item, opts) {
+				return val == opts.default_value || item.brand == val;
+			}},
 		{fieldtype:"Select", label: "Plot By", 
 			options: ["Average Age", "Earliest", "Latest"]},
 		{fieldtype:"Date", label: "To Date"},
@@ -68,13 +73,7 @@ erpnext.StockAgeing = erpnext.StockGridReport.extend({
 	setup_filters: function() {
 		var me = this;
 		this._super();
-		
-		this.filter_inputs.warehouse.change(function() {
-			me.filter_inputs.refresh.click();
-		});
-		this.filter_inputs.plot_by.change(function() {
-			me.filter_inputs.refresh.click();
-		});
+		this.trigger_refresh_on_change(["warehouse", "plot_by", "brand"]);
 	},
 	init_filter_values: function() {
 		this._super();
@@ -84,15 +83,22 @@ erpnext.StockAgeing = erpnext.StockGridReport.extend({
 		var me = this;
 				
 		if(!this.data) {
-			me.data = wn.report_dump.data["Item"];
-			me.item_by_name = me.make_name_map(me.data);
+			me._data = wn.report_dump.data["Item"];
+			me.item_by_name = me.make_name_map(me._data);
 		}
+		
+		this.data = [].concat(this._data);
 		
 		$.each(this.data, function(i, d) {
 			me.reset_item_values(d);
 		});
 		
-		this.prepare_balances();		
+		this.prepare_balances();
+		
+		// filter out brand
+		this.data = $.map(this.data, function(d) {
+			return me.apply_filter(d, "brand") ? d : null;
+		});
 	},
 	prepare_balances: function() {
 		var me = this;
@@ -123,7 +129,7 @@ erpnext.StockAgeing = erpnext.StockGridReport.extend({
 					full_fifo_stack = full_fifo_stack.concat(wh.fifo_stack || [])
 				});
 			} else {
-				full_fifo_stack = me.get_item_warehouse(me.warehouse, item.name) || [];			
+				full_fifo_stack = me.get_item_warehouse(me.warehouse, item.name).fifo_stack || [];
 			}
 			
 			var age_qty = total_qty = 0.0;

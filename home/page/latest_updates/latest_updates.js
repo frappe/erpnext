@@ -1,4 +1,8 @@
 erpnext.updates = [
+	["25th December 2012", [
+		"Stock Balance Report: Inflow, outflow and balance of stock within a defined period",
+		"Stock Reports: Added Brand filter on some of the reports"
+	]],
 	["21st December 2012", [
 		"Manufacturing: For Material Transfer against Production Order, \
 			fetch quantity pending to be transferred for each item.",
