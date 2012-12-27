@@ -280,21 +280,8 @@ cur_frm.cscript.import_ref_rate = function(doc, cdt, cdn) {
 	cur_frm.cscript.calc_amount(doc, 5);
 }
 
-//==================== check if item table is blank ==============================================
-var is_item_table = function(doc,cdt,cdn) {
-	// Step 1 :=>Get all childrens/ rows from Detail Table
-	var cl = getchildren(tname, doc.name, fname);
-	// Step 2 :=> If there are no rows then set validated = false, this will stop further execution of code.
-	if (cl.length == 0) {
-		alert("There is no item in table"); validated = false;
-	}
-}
-
 //==================== Validate ====================================================================
 cur_frm.cscript.validate = function(doc, cdt, cdn) {
-	// Step 1:=> check if item table is blank
-	is_item_table(doc,cdt,cdn);
-	// Step 2:=> Calculate Amount
 	cur_frm.cscript.calc_amount(doc, 1);
 
 	// calculate advances if pv

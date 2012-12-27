@@ -22,14 +22,14 @@ from webnotes.model import db_exists
 from webnotes.model.doc import Document, addchild
 from webnotes.model.wrapper import getlist, copy_doclist
 from webnotes.model.code import get_obj
-from webnotes import form, msgprint
+from webnotes import form, msgprint, _
 
 sql = webnotes.conn.sql
 	
 from utilities.transaction_base import TransactionBase
 
 class DocType(TransactionBase):
-	def __init__(self, doc, doclist=[]):
+	def __init__(self, doc, doclist=None):
 		self.doc = doc
 		self.doclist = doclist
 
@@ -63,6 +63,11 @@ class DocType(TransactionBase):
 		}
 
 		self.msg = []
+
+	def is_item_table_empty(self, obj):
+		if not len(obj.doclist.get({"parentfield": obj.fname})):
+			msgprint(_("Hey there! You need to put at least one item in \
+				the item table."), raise_exception=True)
 
 
 	def get_default_schedule_date( self, obj):

@@ -220,10 +220,11 @@ class DocType(TransactionBase):
 
 	# On Submit
 	def on_submit(self):
-		pc_obj = get_obj(dt ='Purchase Common')
+		purchase_controller = webnotes.get_obj("Purchase Common")
+		purchase_controller.is_item_table_empty(self)
 		
 		# Step 1 :=> Update Previous Doc i.e. update pending_qty and Status accordingly
-		pc_obj.update_prevdoc_detail(self, is_submit = 1)
+		purchase_controller.update_prevdoc_detail(self, is_submit = 1)
 
 		# Step 2 :=> Update Bin 
 		self.update_bin(is_submit = 1, is_stopped = 0)
@@ -236,7 +237,7 @@ class DocType(TransactionBase):
 			"last_purchase_order", self.doc.name)
 
 		# Step 5 :=> Update last purchase rate
-		pc_obj.update_last_purchase_rate(self, is_submit = 1)
+		purchase_controller.update_last_purchase_rate(self, is_submit = 1)
 
 		# Step 6 :=> Set Status
 		webnotes.conn.set(self.doc,'status','Submitted')
