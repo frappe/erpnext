@@ -178,18 +178,10 @@ cur_frm.fields_dict['project_name'].get_query = function(doc, cdt, cdn) {
 	var cond = '';
 	if(doc.customer) cond = '(`tabProject`.customer = "'+doc.customer+'" OR IFNULL(`tabProject`.customer,"")="") AND';
 	return repl('SELECT `tabProject`.name FROM `tabProject` \
-	WHERE `tabProject`.status not in ("Completed", "Cancelled") \
-	AND %(cond)s `tabProject`.name LIKE "%s" ORDER BY `tabProject`.name ASC LIMIT 50', {cond:cond});
+		WHERE `tabProject`.status not in ("Completed", "Cancelled") \
+		AND %(cond)s `tabProject`.name LIKE "%s" \
+		ORDER BY `tabProject`.name ASC LIMIT 50', {cond:cond});
 }
-
-//---- get customer details ----------------------------
-cur_frm.cscript.project_name = function(doc,cdt,cdn){
-	$c_obj(make_doclist(doc.doctype, doc.name),'pull_project_customer','', function(r,rt){
-		refresh_many(['customer','customer_name', 'customer_address', 'contact_person', 'territory', 'contact_no', 'email_id', 'customer_group']);
-	});
-	
-}
-
 
 
 // *************** Customized link query for QUOTATION ***************************** 

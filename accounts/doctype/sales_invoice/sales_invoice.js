@@ -264,13 +264,6 @@ cur_frm.cscript.write_off_amount = function(doc) {
 }
 
 
-//---- get customer details ----------------------------
-cur_frm.cscript.project_name = function(doc,cdt,cdn){
-	$c_obj(make_doclist(doc.doctype, doc.name),'pull_project_customer','', function(r,rt){
-		refresh_many(['customer', 'customer_name','customer_address', 'territory']);
-	});
-}
-
 //Set debit and credit to zero on adding new row
 //----------------------------------------------
 cur_frm.fields_dict['entries'].grid.onrowadd = function(doc, cdt, cdn){
