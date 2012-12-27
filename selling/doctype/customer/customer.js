@@ -65,7 +65,11 @@ cur_frm.cscript.make_address = function() {
 				address.customer = cur_frm.doc.name;
 				address.customer_name = cur_frm.doc.customer_name;
 				address.address_title = cur_frm.doc.customer_name;
-				address.address_type = "Office";
+				
+				if(!(cur_frm.address_list.data && cur_frm.address_list.data.length)) {
+					address.address_type = "Office";
+				}
+
 				wn.set_route("Form", "Address", address.name);
 			},
 			get_query: function() {
