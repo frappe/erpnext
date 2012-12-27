@@ -284,15 +284,17 @@ class DocType(TransactionBase):
 
 	# on submit
 	def on_submit(self):
+		purchase_controller = webnotes.get_obj("Purchase Common")
+		purchase_controller.is_item_table_empty(self)
+
 		# Check for Approving Authority
 		get_obj('Authorization Control').validate_approving_authority(self.doc.doctype, self.doc.company, self.doc.grand_total)
 
 		# Set status as Submitted
 		webnotes.conn.set(self.doc,'status', 'Submitted')
-		pc_obj = get_obj('Purchase Common')
 
 		# Update Previous Doc i.e. update pending_qty and Status accordingly
-		pc_obj.update_prevdoc_detail(self, is_submit = 1)
+		purchase_controller.update_prevdoc_detail(self, is_submit = 1)
 
 		# Update Serial Record
 		get_obj('Stock Ledger').update_serial_record(self, 'purchase_receipt_details', is_submit = 1, is_incoming = 1)
@@ -301,7 +303,7 @@ class DocType(TransactionBase):
 		self.update_stock(is_submit = 1)
 
 		# Update last purchase rate
-		pc_obj.update_last_purchase_rate(self, 1)
+		purchase_controller.update_last_purchase_rate(self, 1)
 
 
 

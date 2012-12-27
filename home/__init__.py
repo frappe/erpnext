@@ -21,6 +21,7 @@ from webnotes import msgprint
 feed_dict = {
 	# Project
 	'Project':		       ['[%(status)s]', '#000080'],
+	'Task':		       ['[%(status)s] %(subject)s', '#000080'],
 
 	# Sales
 	'Lead':			 ['%(lead_name)s', '#000080'],
@@ -81,8 +82,9 @@ def make_feed(feedtype, doctype, name, owner, subject, color):
 	f.full_name = get_fullname(owner)
 	f.save()
 
-def update_feed(doc, method=None):   
+def update_feed(controller, method=None):   
 	"adds a new feed"
+	doc = controller.doc
 	if method in ['on_update', 'on_submit']:
 		subject, color = feed_dict.get(doc.doctype, [None, None])
 		if subject:			

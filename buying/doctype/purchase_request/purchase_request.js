@@ -50,22 +50,19 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	erpnext.hide_naming_series();
 
 	if(doc.docstatus == 1 && doc.status != 'Stopped'){
+		cur_frm.add_custom_button("Make Supplier Quotation", cur_frm.cscript.make_supplier_quotation);
 		if(flt(doc.per_ordered, 2) < 100) {
 			cur_frm.add_custom_button('Make Purchase Order', cur_frm.cscript['Make Purchase Order']);
 			cur_frm.add_custom_button('Stop Purchase Request', cur_frm.cscript['Stop Purchase Request']);
 		}
 		cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms);
-		cur_frm.add_custom_button("Make Supplier Quotation", cur_frm.cscript.make_supplier_quotation);
+		
 	}
  
 	if(doc.docstatus == 1 && doc.status == 'Stopped')
 		cur_frm.add_custom_button('Unstop Purchase Request', cur_frm.cscript['Unstop Purchase Request'])
 }
 
-//======================= validation ===================================
-cur_frm.cscript.validate = function(doc,cdt,cdn){
-	is_item_table(doc,cdt,cdn);
-}
 //======================= transaction date =============================
 cur_frm.cscript.transaction_date = function(doc,cdt,cdn){
 	if(doc.__islocal){ 

@@ -40,6 +40,10 @@ page_map = {
 	})
 }
 
+page_settings_map = {
+	"about": "About Us Settings"
+}
+
 def render(page_name):
 	"""render html page"""
 	try:
@@ -98,6 +102,10 @@ def update_page_name(doc, title):
 	"""set page_name and check if it is unique"""
 	webnotes.conn.set(doc, "page_name", page_name(title))
 	
+	standard_pages = get_template_pages()
+	if doc.page_name in standard_pages:
+		webnotes.conn.sql("""Page Name cannot be one of %s""" % ', '.join(standard_pages))
+	
 	res = webnotes.conn.sql("""\
 		select count(*) from `tab%s`
 		where page_name=%s and name!=%s""" % (doc.doctype, '%s', '%s'),
@@ -135,10 +143,12 @@ def prepare_args(page_name):
 		page_name = get_home_page()
 	
 	if page_name in get_template_pages():
-		args = {
+		args = webnotes._dict({
 			'template': 'pages/%s.html' % page_name,
 			'name': page_name,
-		}
+		})
+		if page_name in page_settings_map:
+			args.obj = webnotes.model_wrapper(page_settings_map[page_name]).obj
 	else:
 		args = get_doc_fields(page_name)
 	
@@ -226,12 +236,14 @@ def get_outer_env():
 	})
 	
 	settings = webnotes.doc("Website Settings", "Website Settings")
-	for k in ["brand_html", "copyright", "address"]:
+	for k in ["brand_html", "copyright", "address", "top_bar_background"]:
 		if k in settings.fields:
 			ret[k] = settings.fields[k]
 
 	if not ret.brand_html:
 		ret.brand_html = "ERPNext"
+	if not ret.top_bar_background:
+		ret.top_bar_background = "Black"
 	return ret
 
 def get_home_page():
@@ -251,3 +263,9 @@ def clear_cache(page_name=None):
 	
 def delete_page_cache(page_name):
 	webnotes.cache().delete_value("page:" + page_name)
+	
+def url_for_website(url):
+	if url and not url.lower().startswith("http"):
+		return "files/" + url
+	else:
+		return url

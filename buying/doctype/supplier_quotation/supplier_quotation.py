@@ -36,6 +36,9 @@ class DocType(TransactionBase):
 		self.doc.status = "Draft"
 
 	def on_submit(self):
+		purchase_controller = webnotes.get_obj("Purchase Common")
+		purchase_controller.is_item_table_empty(self)
+		
 		webnotes.conn.set(self.doc, "status", "Submitted")
 
 	def on_cancel(self):

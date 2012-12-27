@@ -2,26 +2,19 @@
  {
   "owner": "Administrator", 
   "docstatus": 0, 
-  "creation": "2012-07-03 13:30:54", 
+  "creation": "2012-07-12 23:29:44", 
   "modified_by": "Administrator", 
-  "modified": "2012-07-12 11:22:15"
+  "modified": "2012-12-27 14:03:00"
  }, 
  {
-  "section_style": "Tabbed", 
-  "description": "A **Sales Partner** is a third party distributor / dealer / commission agent / affiliate / reseller who sells the companies products for a commission. This is useful if you make the end sale to the **Customer**, involving your **Sales Partner**.\n\nIf you sell to your **Sales Partner** who in-turn sells it to the **Customer**, then you must make a **Customer** instead.", 
-  "module": "Setup", 
-  "server_code_error": " ", 
-  "allow_trash": 1, 
-  "document_type": "Master", 
-  "in_create": 0, 
   "read_only": 0, 
-  "_last_update": "1322549700", 
   "autoname": "field:partner_name", 
+  "in_create": 0, 
   "name": "__common__", 
-  "colour": "White:FFF", 
   "doctype": "DocType", 
-  "show_in_menu": 0, 
-  "version": 1
+  "module": "Setup", 
+  "document_type": "Master", 
+  "description": "A third party distributor / dealer / commission agent / affiliate / reseller who sells the companies products for a commission."
  }, 
  {
   "name": "__common__", 
@@ -43,84 +36,8 @@
   "doctype": "DocType"
  }, 
  {
-  "amend": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "submit": 0, 
-  "write": 0, 
-  "role": "Sales Manager", 
-  "cancel": 0, 
-  "permlevel": 1
- }, 
- {
-  "amend": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "submit": 0, 
-  "write": 0, 
-  "role": "Sales Manager", 
-  "cancel": 0, 
-  "permlevel": 0
- }, 
- {
-  "amend": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "submit": 0, 
-  "write": 0, 
-  "role": "Sales User", 
-  "cancel": 0, 
-  "permlevel": 1
- }, 
- {
-  "amend": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "submit": 0, 
-  "write": 0, 
-  "role": "Sales User", 
-  "cancel": 0, 
-  "permlevel": 0
- }, 
- {
-  "amend": 0, 
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "submit": 0, 
-  "write": 1, 
-  "role": "Sales Master Manager", 
-  "cancel": 1, 
-  "permlevel": 0
- }, 
- {
-  "amend": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "submit": 0, 
-  "write": 0, 
-  "role": "Sales Master Manager", 
-  "cancel": 0, 
-  "permlevel": 1
- }, 
- {
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "write": 1, 
-  "role": "System Manager", 
-  "cancel": 1, 
-  "permlevel": 0
- }, 
- {
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "write": 0, 
-  "role": "System Manager", 
-  "permlevel": 1
- }, 
- {
   "description": "Note: You Can Manage Multiple Address or Contacts via Addresses & Contacts", 
   "oldfieldtype": "Section Break", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Sales Partner Details", 
   "fieldname": "basic_info", 
@@ -128,27 +45,27 @@
   "permlevel": 0
  }, 
  {
-  "search_index": 1, 
+  "oldfieldtype": "Data", 
   "doctype": "DocField", 
   "label": "Sales Partner Name", 
   "oldfieldname": "partner_name", 
   "fieldname": "partner_name", 
   "fieldtype": "Data", 
-  "oldfieldtype": "Data", 
+  "search_index": 1, 
   "reqd": 1, 
   "permlevel": 0, 
   "in_filter": 1
  }, 
  {
-  "search_index": 0, 
+  "oldfieldtype": "Select", 
   "doctype": "DocField", 
   "label": "Partner Type", 
   "oldfieldname": "partner_type", 
-  "permlevel": 0, 
+  "options": "\nChannel Partner\nDistributor\nDealer\nAgent\nRetailer\nImplementation Partner\nReseller", 
   "fieldname": "partner_type", 
   "fieldtype": "Select", 
-  "oldfieldtype": "Select", 
-  "options": "\nChannel Partner\nDistributor\nDealer\nAgent\nRetailer\nImplementation Partner\nReseller", 
+  "search_index": 0, 
+  "permlevel": 0, 
   "in_filter": 1
  }, 
  {
@@ -187,13 +104,12 @@
  }, 
  {
   "depends_on": "eval:doc.__islocal", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Address Desc", 
-  "permlevel": 0, 
+  "options": "<em>Addresses will appear only when you save the customer</em>", 
   "fieldname": "address_desc", 
   "fieldtype": "HTML", 
-  "options": "<em>Addresses will appear only when you save the customer</em>"
+  "permlevel": 0
  }, 
  {
   "doctype": "DocField", 
@@ -210,13 +126,12 @@
  }, 
  {
   "depends_on": "eval:doc.__islocal", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Contact Desc", 
-  "permlevel": 0, 
+  "options": "<em>Contact Details will appear only when you save the customer</em>", 
   "fieldname": "contact_desc", 
   "fieldtype": "HTML", 
-  "options": "<em>Contact Details will appear only when you save the customer</em>"
+  "permlevel": 0
  }, 
  {
   "doctype": "DocField", 
@@ -238,31 +153,96 @@
   "doctype": "DocField", 
   "label": "Partner Target Detail", 
   "oldfieldname": "partner_target_details", 
-  "permlevel": 0, 
+  "options": "Target Detail", 
   "fieldname": "partner_target_details", 
   "fieldtype": "Table", 
   "reqd": 0, 
-  "options": "Target Detail"
+  "permlevel": 0
  }, 
  {
   "description": "Select Budget Distribution to unevenly distribute targets across months.", 
   "oldfieldtype": "Link", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Target Distribution", 
   "oldfieldname": "distribution_id", 
-  "permlevel": 0, 
+  "options": "Budget Distribution", 
   "fieldname": "distribution_id", 
   "fieldtype": "Link", 
-  "options": "Budget Distribution"
+  "permlevel": 0
  }, 
  {
-  "oldfieldtype": "Small Text", 
-  "doctype": "DocField", 
-  "label": "Trash Reason", 
-  "oldfieldname": "trash_reason", 
-  "fieldname": "trash_reason", 
-  "fieldtype": "Small Text", 
+  "amend": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "submit": 0, 
+  "write": 0, 
+  "role": "Sales Manager", 
+  "cancel": 0, 
+  "permlevel": 1
+ }, 
+ {
+  "amend": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "submit": 0, 
+  "write": 0, 
+  "role": "Sales Manager", 
+  "cancel": 0, 
+  "permlevel": 0
+ }, 
+ {
+  "amend": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "submit": 0, 
+  "write": 0, 
+  "role": "Sales User", 
+  "cancel": 0, 
+  "permlevel": 1
+ }, 
+ {
+  "amend": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "submit": 0, 
+  "write": 0, 
+  "role": "Sales User", 
+  "cancel": 0, 
+  "permlevel": 0
+ }, 
+ {
+  "amend": 0, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "submit": 0, 
+  "write": 1, 
+  "role": "Sales Master Manager", 
+  "cancel": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "amend": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "submit": 0, 
+  "write": 0, 
+  "role": "Sales Master Manager", 
+  "cancel": 0, 
+  "permlevel": 1
+ }, 
+ {
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "write": 1, 
+  "role": "System Manager", 
+  "cancel": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "write": 0, 
+  "role": "System Manager", 
   "permlevel": 1
  }
 ]

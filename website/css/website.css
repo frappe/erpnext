@@ -65,14 +65,6 @@ p, li {
 	float: left;
 }
 
-.website-missing-image {
-	background-color: #eee;
-	padding: 40px;
-	width: 32px;
-	font-size: 32px;
-	color: #888;
-}
-
 .clear {
 	clear: both;
 }

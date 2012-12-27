@@ -178,6 +178,9 @@ class DocType:
 				get_obj('Warehouse', d.warehouse).update_bin(args)		
 		
 	def on_submit(self):
+		purchase_controller = webnotes.get_obj("Purchase Common")
+		purchase_controller.is_item_table_empty(self)
+		
 		webnotes.conn.set(self.doc,'status','Submitted')
 		self.update_bin(is_submit = 1, is_stopped = 0)
 	

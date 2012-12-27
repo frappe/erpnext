@@ -17,31 +17,19 @@
 wn.require('app/setup/doctype/contact_control/contact_control.js');
 
 cur_frm.cscript.onload = function(doc,dt,dn){
-	// history doctypes and scripts
-	cur_frm.history_dict = {
-		'Sales Order' : 'cur_frm.cscript.make_so_list(this.body, this.doc)',
-		'Delivery Note' : 'cur_frm.cscript.make_dn_list(this.body, this.doc)',
-		'Sales Invoice' : 'cur_frm.cscript.make_si_list(this.body, this.doc)'
-	}
-	
-	// make contact, history list body
-	//cur_frm.cscript.make_cl_body();
-	cur_frm.cscript.make_hl_body();
+
 }
 
 cur_frm.cscript.refresh = function(doc,dt,dn){  
   
 	if(doc.__islocal){
 		hide_field(['address_html', 'contact_html']);
-		//cur_frm.cscript.set_cl_msg(doc);
-		//cur_frm.cscript.set_hl_msg(doc);		
 	}
 	else{
 		unhide_field(['address_html', 'contact_html']);
 		// make lists
 		cur_frm.cscript.make_address(doc,dt,dn);
 		cur_frm.cscript.make_contact(doc,dt,dn);
-		cur_frm.cscript.make_history(doc,dt,dn);
 	}
 }
 
@@ -51,7 +39,15 @@ cur_frm.cscript.make_address = function() {
 		cur_frm.address_list = new wn.ui.Listing({
 			parent: cur_frm.fields_dict['address_html'].wrapper,
 			page_length: 2,
-			new_doctype: "Address",			
+			new_doctype: "Address",
+			custom_new_doc: function(doctype) {
+				var address = wn.model.make_new_doc_and_get_name('Address');
+				address = locals['Address'][address];
+				address.sales_partner = cur_frm.doc.name;
+				address.address_title = cur_frm.doc.name;
+				address.address_type = "Office";
+				wn.set_route("Form", "Address", address.name);
+			},			
 			get_query: function() {
 				return "select name, address_type, address_line1, address_line2, city, state, country, pincode, fax, email_id, phone, is_primary_address, is_shipping_address from tabAddress where sales_partner='"+cur_frm.docname+"' and docstatus != 2 order by is_primary_address desc"
 			},
@@ -103,4 +99,3 @@ cur_frm.cscript.make_contact = function() {
 cur_frm.fields_dict['partner_target_details'].grid.get_field("item_group").get_query = function(doc, dt, dn) {
   return 'SELECT `tabItem Group`.`name`,`tabItem Group`.`parent_item_group` FROM `tabItem Group` WHERE `tabItem Group`.is_group="No" AND `tabItem Group`.docstatus != 2 AND `tabItem Group`.%(key)s LIKE "%s" LIMIT 50'
 }
-

@@ -1,0 +1,40 @@
+{% extends "html/page.html" %}
+
+{% block content %}
+<div class="layout-wrapper">
+	<div class="layout-main">
+	{% if obj.doc.company_introduction %}
+	{{ obj.doc.company_introduction }}
+	{% endif %}
+	{% if obj.doclist.get({"doctype":"Company History"}) %}
+	<h3>{{ obj.doc.company_history_heading or "Company History" }}</h3>
+	<table class="table table-bordered" style="width: 100%; table-layout: fixed">
+		<tbody>
+			{% for d in obj.doclist.get({"doctype":"Company History"}) %}
+			<tr>
+				<td style="width: 30%; text-align: right"><h4>{{ d.year }}</h4></td>
+				<td>{{ d.highlight }}</td>
+			</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+	{% endif %}
+	{% if obj.doclist.get({"doctype":"Employee"}) %}
+	<h3>{{ obj.doc.team_members_heading or "Team Members" }}</h3>
+	<table class="table table-bordered" style="width: 100%; table-layout: fixed">
+		<tbody>
+			{% for d in obj.doclist.get({"doctype":"Employee"}) %}
+			<tr>
+				<td style="text-align:right; width: 30%;">
+					<img src="{{ d.image }}" style=""></td>
+				<td><h4>{{ d.employee_name }}</h4>
+					{{ d.bio }}</td>
+			</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+	{% endif %}
+	{{ obj.doc.footer or "" }}
+	</div>
+</div>
+{% endblock %}
