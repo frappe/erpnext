@@ -9,7 +9,10 @@
 		<div class="layout-main" style="padding: 30px;">
 			{% include 'html/product_search_box.html' %}
 			{% include 'html/product_breadcrumbs.html' %}
-			{% if description %}
+			{% if slideshow %}<!-- slideshow -->
+			{% include "html/slideshow.html" %}
+			{% endif %}
+			{% if description %}<!-- description -->
 			<div>{{ description or ""}}</div>
 			{% else %}
 			<h3>{{ name }}</h3>

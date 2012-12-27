@@ -9,7 +9,7 @@
 	</header>
 	<div id="body_div">
 		<div class="navbar-wrapper">
-		<div class="navbar navbar-inverse" 
+		<div class="navbar{% if top_bar_background=="Black" %} navbar-inverse{% endif %}" 
 			style="margin-bottom: 0px;">
 			<div class="navbar-inner">
 			<div class="container">
@@ -61,7 +61,6 @@
 		</div>
 		</div>
 		<script>$('.dropdown-toggle').dropdown()</script>
-			
 		<div class="content" id="page-{{ name }}" style="display: block;">
 		{% block content %}
 		{% endblock %}

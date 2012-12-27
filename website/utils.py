@@ -226,12 +226,14 @@ def get_outer_env():
 	})
 	
 	settings = webnotes.doc("Website Settings", "Website Settings")
-	for k in ["brand_html", "copyright", "address"]:
+	for k in ["brand_html", "copyright", "address", "top_bar_background"]:
 		if k in settings.fields:
 			ret[k] = settings.fields[k]
 
 	if not ret.brand_html:
 		ret.brand_html = "ERPNext"
+	if not ret.top_bar_background:
+		ret.top_bar_background = "Black"
 	return ret
 
 def get_home_page():
@@ -251,3 +253,9 @@ def clear_cache(page_name=None):
 	
 def delete_page_cache(page_name):
 	webnotes.cache().delete_value("page:" + page_name)
+	
+def url_for_website(url):
+	if url and not url.lower().startswith("http"):
+		return "files/" + url
+	else:
+		return url

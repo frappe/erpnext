@@ -558,4 +558,8 @@ patch_list = [
 		'patch_module': 'patches.december_2012',
 		'patch_file': 'rebuild_item_group_tree',
 	},
+	{
+		'patch_module': 'patches.december_2012',
+		'patch_file': 'address_title',
+	},
 ]

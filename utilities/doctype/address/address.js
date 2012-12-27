@@ -20,26 +20,4 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 	
 	cur_frm.fields_dict.customer.get_query = erpnext.utils.customer_query;
 	cur_frm.fields_dict.supplier.get_query = erpnext.utils.supplier_query;
-	
-	var route = wn.get_route();
-	if(route[1]=='Supplier') {
-		var supplier = wn.container.page.frm.doc;
-		doc.supplier = supplier.name;
-		doc.supplier_name = supplier.supplier_name;
-		doc.address_type = 'Office';
-	} else if(route[1]=='Customer') {
-		var customer = wn.container.page.frm.doc;
-		doc.customer = customer.name;
-		doc.customer_name = customer.customer_name;
-		doc.address_type = 'Office';
-	} else if(route[1]=='Sales Partner') {
-		var sp = wn.container.page.frm.doc;
-		doc.sales_partner = sp.name;
-		doc.address_type = 'Office';				
-	}
-}
-
-cur_frm.cscript.hide_dialog = function() {
-	if(cur_frm.address_list)
-		cur_frm.address_list.run();
 }

@@ -131,7 +131,7 @@ def check_if_expired():
 
 def get_web_script():
 	"""returns web startup script"""
-	return webnotes.conn.get_value('Website Settings', None, 'startup_code') or ''
+	return webnotes.conn.get_value('Website Script', None, 'javascript') or ''
 
 def get_web_style():
 	"""returns web css"""

@@ -1,0 +1,21 @@
+{% if slideshow %}
+{{ slideshow_header }}
+<div id="myCarousel" class="carousel slide">
+	<div class="carousel-inner">
+		{% for slide in obj.slides %}
+		<div class="{% if slide.idx==1 %}active {% endif %}item">
+			<img src="{{ slide.image }}" />
+			<div class="carousel-caption">
+				<h4>{{ slide.heading }}</h4>
+				<p>{{ slide.description }}</p>
+			</div>
+		</div>
+		{% endfor %}
+	</div>
+	<a class="carousel-control left" href="#myCarousel"
+		data-slide="prev">&lsaquo;</a>
+	<a class="carousel-control right" href="#myCarousel" 
+		data-slide="next">&rsaquo;</a>
+	</div>
+	<script>$(".carousel").carousel();</script>
+{% endif %}

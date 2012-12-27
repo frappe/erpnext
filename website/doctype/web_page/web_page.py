@@ -42,9 +42,5 @@ class DocType():
 			
 	def prepare_template_args(self):
 		if self.doc.slideshow:
-			slideshow = webnotes.model_wrapper("Website Slideshow", self.doc.slideshow)
-			self.slides = slideshow.doclist.get({"doctype":"Website Slideshow Item"})
-			self.doc.slideshow_header = slideshow.doc.header or ""
-			for s in self.slides:
-				if s.image and not s.image.lower().startswith("http"):
-					s.image = "files/" + s.image
+			from website.helpers.slideshow import get_slideshow
+			get_slideshow(self)

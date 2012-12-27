@@ -17,17 +17,6 @@
 wn.require('app/setup/doctype/contact_control/contact_control.js');
 
 cur_frm.cscript.onload = function(doc,dt,dn){
-	// history doctypes and scripts
-	cur_frm.history_dict = {
-		'Quotation' : 'cur_frm.cscript.make_qtn_list(this.body, this.doc)',
-		'Sales Order' : 'cur_frm.cscript.make_so_list(this.body, this.doc)',
-		'Delivery Note' : 'cur_frm.cscript.make_dn_list(this.body, this.doc)',
-		'Sales Invoice' : 'cur_frm.cscript.make_si_list(this.body, this.doc)'
-	}
-	// make address, contact, shipping, history list body
-	cur_frm.cscript.make_hl_body();
-  	//cur_frm.cscript.make_sl_body();
-
 	cur_frm.cscript.load_defaults(doc, dt, dn);
 }
 
@@ -55,7 +44,6 @@ cur_frm.cscript.refresh = function(doc,dt,dn) {
 		// make lists
 		cur_frm.cscript.make_address(doc,dt,dn);
 		cur_frm.cscript.make_contact(doc,dt,dn);
-		cur_frm.cscript.make_history(doc,dt,dn);
 
 		cur_frm.communication_view = new wn.views.CommunicationList({
 			list: wn.model.get("Communication", {"customer": doc.name}),
@@ -71,6 +59,15 @@ cur_frm.cscript.make_address = function() {
 			parent: cur_frm.fields_dict['address_html'].wrapper,
 			page_length: 2,
 			new_doctype: "Address",
+			custom_new_doc: function(doctype) {
+				var address = wn.model.make_new_doc_and_get_name('Address');
+				address = locals['Address'][address];
+				address.customer = cur_frm.doc.name;
+				address.customer_name = cur_frm.doc.customer_name;
+				address.address_title = cur_frm.doc.customer_name;
+				address.address_type = "Office";
+				wn.set_route("Form", "Address", address.name);
+			},
 			get_query: function() {
 				return "select name, address_type, address_line1, address_line2, city, state, country, pincode, fax, email_id, phone, is_primary_address, is_shipping_address from tabAddress where customer='"+cur_frm.docname+"' and docstatus != 2 order by is_primary_address desc"
 			},
@@ -118,84 +115,3 @@ cur_frm.fields_dict['customer_group'].get_query = function(doc,dt,dn) {
 
 
 cur_frm.fields_dict.lead_name.get_query = erpnext.utils.lead_query;
-
-
-cur_frm.cscript.make_qtn_list = function(parent, doc) {
-	cur_frm.cscript.get_common_list_view(parent, doc, 'Quotation');
-}
-
-cur_frm.cscript.make_so_list = function(parent, doc) {
-	cur_frm.cscript.get_common_list_view(parent, doc, 'Sales Order');
-}
-
-cur_frm.cscript.make_dn_list = function(parent, doc) {
-	cur_frm.cscript.get_common_list_view(parent, doc, 'Delivery Note');
-}
-
-cur_frm.cscript.get_common_list_view = function(parent, doc, doctype) {
-	var ListView = wn.views.ListView.extend({
-		init: function(doclistview) {
-			this._super(doclistview);
-			this.fields = this.fields.concat([
-				"`tab" + doctype + "`.status",
-				"`tab" + doctype + "`.currency",
-				"ifnull(`tab" + doctype + "`.grand_total_export, 0) as grand_total_export",
-				
-			]);
-		},
-
-		prepare_data: function(data) {
-			this._super(data);
-			data.grand_total_export = data.currency + " " + fmt_money(data.grand_total_export)
-		},
-
-		columns: [
-			{width: '3%', content: 'docstatus'},
-			{width: '25%', content: 'name'},
-			{width: '25%', content: 'status'},
-			{width: '35%', content: 'grand_total_export', css: {'text-align': 'right'}},			
-			{width: '12%', content:'modified', css: {'text-align': 'right'}}		
-		],
-	});
-	
-	cur_frm.cscript.render_list(doc, doctype, parent, ListView);
-}
-
-cur_frm.cscript.make_si_list = function(parent, doc) {
-	var ListView = wn.views.ListView.extend({
-		init: function(doclistview) {
-			this._super(doclistview);
-			this.fields = this.fields.concat([
-				"ifnull(`tabSales Invoice`.outstanding_amount, 0) as outstanding_amount",
-				"`tabSales Invoice`.currency",
-				"ifnull(`tabSales Invoice`.conversion_rate, 0) as conversion_rate",
-				"ifnull(`tabSales Invoice`.grand_total_export, 0) as grand_total_export",
-				
-			]);
-		},
-
-		prepare_data: function(data) {
-			this._super(data);
-			if (data.outstanding_amount) {
-				data.outstanding_amount = data.currency + " " + 
-					fmt_money(flt(data.outstanding_amount)/flt(data.conversion_rate)) + 
-					" [outstanding]";
-				
-			} else {
-				data.outstanding_amount = '';
-			}
-			data.grand_total_export = data.currency + " " + fmt_money(data.grand_total_export);
-		},
-
-		columns: [
-			{width: '3%', content: 'docstatus'},
-			{width: '25%', content: 'name'},
-			{width: '25%', content: 'outstanding_amount',
-				css: {'text-align': 'right', 'color': '#777'}},
-			{width: '35%', content: 'grand_total_export', css: {'text-align': 'right'}},
-			{width: '12%', content:'modified', css: {'text-align': 'right'}}
-		],
-	});
-	
-	cur_frm.cscript.render_list(doc, 'Sales Invoice', parent, ListView);
-}

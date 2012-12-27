@@ -22,19 +22,25 @@
 			<div class="layout-main" style="padding: 30px;">
 				{% include 'html/product_search_box.html' %}
 				{% include 'html/product_breadcrumbs.html' %}
-				<h3>{{ item_name }}</h3>
+				<h3 itemprop="name">{{ item_name }}</h3>
 				<p class="help">Item Code: {{ name }}</p>
-				<div class="product-page-content">
-					<div class="span6">
-					{% if website_image %}
-					<image class="item-main-image" src="{% if website_image.lower().startswith('http') %}{{ website_image}}{% else %}files/{{ website_image }}{% endif %}" />
+				<div class="product-page-content" 
+					itemscope itemtype="http://schema.org/Product">
+					{% if slideshow %}
+						{% include "html/slideshow.html" %}
 					{% else %}
-					<div class="img-area">
-						{% include 'html/product_missing_image.html' %}
+					<div class="span6">
+						{% if website_image %}
+						<image itemprop="image" class="item-main-image" 
+							src="{{ website_image }}" />
+						{% else %}
+						<div class="img-area">
+							{% include 'html/product_missing_image.html' %}
+						</div>
+						{% endif %}
 					</div>
 					{% endif %}
 					<br><br>
-					</div>
 					<div class="span3">
 						<div class="item-price hide">
 							<p>Price:</p>
@@ -44,7 +50,7 @@
 					<div class="clearfix"></div>
 					<div class="span9">
 						<h3>Product Description</h3>
-						<div>
+						<div itemprop="description">
 						{{ web_long_description or web_short_description or 
 							"[No description given]" }}
 						</div>
