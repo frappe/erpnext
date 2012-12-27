@@ -25,23 +25,19 @@ class DocType:
 		self.doclist = doclist
 
 	def autoname(self):
-		if self.doc.customer:
-			self.doc.name = self.doc.customer + '-' + self.doc.address_type
-		elif self.doc.supplier:
-			self.doc.name = self.doc.supplier + '-' + self.doc.address_type
-		elif self.doc.sales_partner:
-			self.doc.name = self.doc.sales_partner + '-' + self.doc.address_type
-		elif self.doc.address_title:
-			self.doc.address_title = self.doc.address_title + "-" + self.doc.address_type
+		if not self.doc.address_title:
+			self.doc.address_title = self.doc.customer or self.doc.supplier or self.doc.sales_partner
+			
+		if self.doc.address_title:
+			self.doc.name = self.doc.address_title + "-" + self.doc.address_type
+			
+		else:
+			webnotes.msgprint("""Address Title is mandatory.""", raise_exception=True)
+		
 
 	def validate(self):
-		self.validate_for_whom()
 		self.validate_primary_address()
 		self.validate_shipping_address()
-
-	def validate_for_whom(self):
-		if not (self.doc.customer or self.doc.supplier or self.doc.sales_partner):
-			msgprint("Please enter value in atleast one of customer, supplier and sales partner field", raise_exception=1)
 	
 	def validate_primary_address(self):
 		"""Validate that there can only be one primary address for particular customer, supplier"""
