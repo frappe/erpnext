@@ -482,6 +482,9 @@ class DocType(TransactionBase):
 
 
 	def on_submit(self):
+		purchase_controller = webnotes.get_obj("Purchase Common")
+		purchase_controller.is_item_table_empty(self)
+
 		self.check_prev_docstatus()
 		
 		# Check for Approving Authority
@@ -492,8 +495,7 @@ class DocType(TransactionBase):
 		self.make_gl_entries()
 				
 		self.update_against_document_in_jv()
-		
-		get_obj(dt = 'Purchase Common').update_prevdoc_detail(self, is_submit = 1)
+		purchase_controller.update_prevdoc_detail(self, is_submit = 1)
 
 
 	def make_gl_entries(self, is_cancel = 0):

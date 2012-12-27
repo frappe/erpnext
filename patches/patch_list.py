@@ -566,4 +566,8 @@ patch_list = [
 		'patch_file': 'delete_form16_print_format',
 >>>>>>> a85b2e4ee349c544acb7a1949351e9a7c70f7b7c
 	},
+	{
+		'patch_module': 'patches.december_2012',
+		'patch_file': 'remove_project_mapper',
+	},
 ]
