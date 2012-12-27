@@ -1,6 +1,8 @@
 import webnotes
 
 def execute():
+	webnotes.reload_doc("utilities", "doctype", "address")
+
 	webnotes.conn.sql("""update tabAddress set address_title = customer_name where ifnull(customer_name,'')!=''""")
 	webnotes.conn.sql("""update tabAddress set address_title = supplier_name where ifnull(supplier_name,'')!=''""")
 	webnotes.conn.sql("""update tabAddress set address_title = sales_partner where ifnull(sales_partner,'')!=''""")	
