@@ -32,11 +32,13 @@ class DocType(DocTypeNestedSet):
 			# webpage updates
 			from website.utils import update_page_name
 			page_name = self.doc.name
-			if webnotes.conn.get_value("Website Settings", None, 
+			if webnotes.conn.get_value("Product Settings", None, 
 				"default_product_category")==self.doc.name:
 				page_name = "products"
+				from website.utils import clear_cache
+				clear_cache()
 				
-			update_page_name(self.doc, self.doc.name)
+			update_page_name(self.doc, page_name)
 			
 			from website.helpers.product import invalidate_cache_for
 			invalidate_cache_for(self.doc.name)

@@ -15,3 +15,7 @@ class DocType:
 			self.doc.query_options = ["Sales", "Support", "General"]
 		if self.doc.address:
 			self.address = webnotes.model_wrapper("Address", self.doc.address).doc
+			
+	def on_update(self):
+		from website.utils import clear_cache
+		clear_cache("about")

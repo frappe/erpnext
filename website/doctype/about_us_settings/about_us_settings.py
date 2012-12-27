@@ -16,3 +16,7 @@ class DocType:
 			emp.image = url_for_website(emp.image)
 			emp_list.append(emp)
 		self.doclist += emp_list
+	
+	def on_update(self):
+		from website.utils import clear_cache
+		clear_cache("about")
