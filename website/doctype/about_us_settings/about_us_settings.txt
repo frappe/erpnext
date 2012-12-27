@@ -4,7 +4,7 @@
   "docstatus": 0, 
   "creation": "2012-12-27 14:24:35", 
   "modified_by": "Administrator", 
-  "modified": "2012-12-27 15:51:11"
+  "modified": "2012-12-27 17:44:55"
  }, 
  {
   "issingle": 1, 
@@ -37,6 +37,13 @@
  {
   "name": "About Us Settings", 
   "doctype": "DocType"
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Help", 
+  "fieldname": "help", 
+  "fieldtype": "HTML", 
+  "options": "<div class=\"alert\">Link for About Us Page is \"about.html\"</div>"
  }, 
  {
   "description": "Introduce your company to the website visitor.", 

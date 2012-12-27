@@ -1,0 +1,56 @@
+{% extends "html/page.html" %}
+
+{% block javascript %}
+	{% include "js/contact.js" %}
+{% endblock %}
+
+{% block title %}
+Contact Us
+{% endblock %}
+
+{% block content %}
+<div class="layout-wrapper">
+	<div class="layout-main">
+		<div class="web-form span5 pull-left">
+			{{ obj.doc.introduction or "<h3>Contact Us</h3>"}}
+			<div class="span4" style="margin-left:0px;">
+				<p id="contact-alert" class="alert" 
+					style="display: none;">&nbsp;</p>
+			</div>
+			<div class="clearfix"></div>
+			<p><select class="span4" name="subject">
+				{% for option in obj.doc.query_options %}
+					<option value="{{ option }}">{{ option }}</option>
+				{% endfor %}
+			</select></p>
+			<p><input class="span4" name="email" type="text" placeholder="Your Email Address" /></p>
+			<p><textarea class="span4" rows="10" name="message"></textarea></p>
+			<p><button class="btn btn-primary btn-send">Send</button></p>
+		</div>
+		{% if obj.doc.address %}
+		<div class="pull-right span3" itemscope itemtype="http://schema.org/PostalAddress">
+			<h4>{{ obj.address.address_title }}</h4>
+			{% if obj.address.address_line1 %}
+				<p itemprop="streetAddress">{{ obj.address.address_line1 }}</p>
+			{% endif %}
+			{% if obj.address.address_line2 %}
+				<p itemprop="streetAddress">{{ obj.address.address_line2 }}</p>
+			{% endif %}
+			{% if obj.address.city %}
+				<p itemprop="addressLocality">{{ obj.address.city }}</p>
+			{% endif %}
+			{% if obj.address.state %}
+				<p itemprop="addressRegion">{{ obj.address.state }}</p>
+			{% endif %}
+			{% if obj.address.pincode %}
+				<p itemprop="postalCode">{{ obj.address.pincode }}</p>
+			{% endif %}
+			{% if obj.address.country %}
+				<p itemprop="addressCountry">{{ obj.address.country }}</p>
+			{% endif %}
+		</div>
+		{% endif %}
+		<div class="clearfix"></div>
+	</div>
+</div>
+{% endblock %}

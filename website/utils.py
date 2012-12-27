@@ -41,7 +41,8 @@ page_map = {
 }
 
 page_settings_map = {
-	"about": "About Us Settings"
+	"about": "About Us Settings",
+	"contact": "Contact Us Settings"
 }
 
 def render(page_name):

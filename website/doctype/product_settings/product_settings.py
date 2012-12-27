@@ -6,3 +6,8 @@ import webnotes
 class DocType:
 	def __init__(self, d, dl):
 		self.doc, self.doclist = d, dl
+		
+	def on_update(self):
+		"""clear web cache"""
+		from website.utils import clear_cache
+		clear_cache()
