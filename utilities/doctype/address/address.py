@@ -31,7 +31,8 @@ class DocType:
 			self.doc.name = self.doc.supplier + '-' + self.doc.address_type
 		elif self.doc.sales_partner:
 			self.doc.name = self.doc.sales_partner + '-' + self.doc.address_type
-			
+		elif self.doc.address_title:
+			self.doc.address_title = self.doc.address_title + "-" + self.doc.address_type
 
 	def validate(self):
 		self.validate_for_whom()

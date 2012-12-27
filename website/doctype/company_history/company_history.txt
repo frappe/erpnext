@@ -1,0 +1,40 @@
+[
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-12-27 14:25:38", 
+  "modified_by": "Administrator", 
+  "modified": "2012-12-27 14:25:38"
+ }, 
+ {
+  "istable": 1, 
+  "name": "__common__", 
+  "doctype": "DocType", 
+  "module": "Website"
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "Company History", 
+  "doctype": "DocField", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "parentfield": "fields"
+ }, 
+ {
+  "name": "Company History", 
+  "doctype": "DocType"
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Year", 
+  "fieldname": "year", 
+  "fieldtype": "Data"
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Highlight", 
+  "width": "300px", 
+  "fieldname": "highlight", 
+  "fieldtype": "Text"
+ }
+]

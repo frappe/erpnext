@@ -46,10 +46,6 @@ def comment_added(doc):
 	"""add comment to feed"""
 	home.make_feed('Comment', doc.comment_doctype, doc.comment_docname, doc.comment_by,
 		'<i>"' + doc.comment + '"</i>', '#6B24B3')
-
-def doclist_all(doc, method):
-	"""doclist trigger called from webnotes.model.wrapper on any event"""
-	home.update_feed(doc, method)
 	
 def boot_session(bootinfo):
 	"""boot session - send website info if guest"""

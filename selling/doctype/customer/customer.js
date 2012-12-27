@@ -48,7 +48,7 @@ cur_frm.cscript.refresh = function(doc,dt,dn) {
 		cur_frm.communication_view = new wn.views.CommunicationList({
 			list: wn.model.get("Communication", {"customer": doc.name}),
 			parent: cur_frm.fields_dict.communication_html.wrapper,
-			doc: doc
+			doc: doc,
 		});
 	}
 }
