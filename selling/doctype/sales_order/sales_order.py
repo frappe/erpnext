@@ -39,10 +39,6 @@ class DocType(TransactionBase):
 		self.partner_tname = 'Partner Target Detail'
 		self.territory_tname = 'Territory Target Detail'
 		
-# DOCTYPE TRIGGER FUNCTIONS
-# =============================
-	# Pull Quotation Items
-	# -----------------------
 	def pull_quotation_details(self):
 		self.doclist = self.doc.clear_table(self.doclist, 'other_charges')
 		self.doclist = self.doc.clear_table(self.doclist, 'sales_order_details')
@@ -55,29 +51,12 @@ class DocType(TransactionBase):
 
 		return cstr(self.doc.quotation_no)
 	
-	#pull project customer
-	#-------------------------
-	def pull_project_customer(self):
-		res = sql("select customer from `tabProject` where name = '%s'"%self.doc.project_name)
-		if res and res[0][0]:
-			get_obj('DocType Mapper', 'Project-Sales Order').dt_map('Project', 'Sales Order', self.doc.project_name, self.doc, self.doclist, "[['Project', 'Sales Order']]")
-			
-	
-	# Get contact person details based on customer selected
-	# ------------------------------------------------------
 	def get_contact_details(self):
 		get_obj('Sales Common').get_contact_details(self,0)
 
-	# Get Commission rate of Sales Partner
-	# -------------------------------------
 	def get_comm_rate(self, sales_partner):
 		return get_obj('Sales Common').get_comm_rate(sales_partner, self)
 
-
-# SALES ORDER DETAILS TRIGGER FUNCTIONS
-# ================================================================================
-	# Get Item Details
-	# ----------------
 	def get_item_details(self, args=None):
 		import json
 		args = args and json.loads(args) or {}
@@ -94,45 +73,24 @@ class DocType(TransactionBase):
 						if not doc.fields.get(r):
 							doc.fields[r] = ret[r]					
 
-
-	# Re-calculates Basic Rate & amount based on Price List Selected
-	# --------------------------------------------------------------
 	def get_adj_percent(self, arg=''):
 		get_obj('Sales Common').get_adj_percent(self)
 
-
-
-	# Get projected qty of item based on warehouse selected
-	# -----------------------------------------------------
 	def get_available_qty(self,args):
 		return get_obj('Sales Common').get_available_qty(eval(args))
 	
-# OTHER CHARGES TRIGGER FUNCTIONS
-# ====================================================================================
-	
-	# Get Tax rate if account type is TAX
-	# ------------------------------------
 	def get_rate(self,arg):
 		return get_obj('Sales Common').get_rate(arg)
 
-	# Load Default Charges
-	# ----------------------------------------------------------
 	def load_default_taxes(self):
 		self.doclist = get_obj('Sales Common').load_default_taxes(self)
 
-	# Pull details from other charges master (Get Sales Taxes and Charges Master)
-	# ----------------------------------------------------------
 	def get_other_charges(self):
 		self.doclist = get_obj('Sales Common').get_other_charges(self)
  
- 
-# GET TERMS & CONDITIONS
-# =====================================================================================
 	def get_tc_details(self):
 		return get_obj('Sales Common').get_tc_details(self)
 
-#check if maintenance schedule already generated
-#============================================
 	def check_maintenance_schedule(self):
 		nm = sql("select t1.name from `tabMaintenance Schedule` t1, `tabMaintenance Schedule Item` t2 where t2.parent=t1.name and t2.prevdoc_docname=%s and t1.docstatus=1", self.doc.name)
 		nm = nm and nm[0][0] or ''
@@ -140,8 +98,6 @@ class DocType(TransactionBase):
 		if not nm:
 			return 'No'
 
-#check if maintenance visit already generated
-#============================================
 	def check_maintenance_visit(self):
 		nm = sql("select t1.name from `tabMaintenance Visit` t1, `tabMaintenance Visit Purpose` t2 where t2.parent=t1.name and t2.prevdoc_docname=%s and t1.docstatus=1 and t1.completion_status='Fully Completed'", self.doc.name)
 		nm = nm and nm[0][0] or ''
@@ -149,20 +105,12 @@ class DocType(TransactionBase):
 		if not nm:
 			return 'No'
 
-# VALIDATE
-# =====================================================================================
-	# Fiscal Year Validation
-	# ----------------------
 	def validate_fiscal_year(self):
 		get_obj('Sales Common').validate_fiscal_year(self.doc.fiscal_year,self.doc.transaction_date,'Sales Order Date')
 	
-	# Validate values with reference document
-	#----------------------------------------
 	def validate_reference_value(self):
 		get_obj('DocType Mapper', 'Quotation-Sales Order', with_children = 1).validate_reference_value(self, self.doc.name)
 
-	# Validate Mandatory
-	# -------------------
 	def validate_mandatory(self):
 		# validate transaction date v/s delivery date
 		if self.doc.delivery_date:
@@ -174,9 +122,6 @@ class DocType(TransactionBase):
 			msgprint("Please Enter Amendment Date")
 			raise Exception
 	
-
-	# Validate P.O Date
-	# ------------------
 	def validate_po(self):
 		# validate p.o date v/s delivery date
 		if self.doc.po_date and self.doc.delivery_date and getdate(self.doc.po_date) > getdate(self.doc.delivery_date):
@@ -191,8 +136,6 @@ class DocType(TransactionBase):
 				msgprint("""Another Sales Order (%s) exists against same PO No and Customer. 
 					Please be sure, you are not making duplicate entry.""" % so[0][0])
 	
-	# Validations of Details Table
-	# -----------------------------
 	def validate_for_items(self):
 		check_list, flag = [], 0
 		chk_dupl_itm = []
@@ -237,8 +180,6 @@ class DocType(TransactionBase):
 		if getlist(self.doclist, 'sales_order_details') and self.doc.quotation_no and flag == 0:
 			msgprint("There are no items of the quotation selected", raise_exception=1)
 
-	# validate sales/ maintenance quotation against order type
-	#------------------------------------------------------------------
 	def validate_sales_mntc_quotation(self):
 		for d in getlist(self.doclist, 'sales_order_details'):
 			if d.prevdoc_docname:
@@ -255,18 +196,13 @@ class DocType(TransactionBase):
 		
 		self.validate_sales_mntc_quotation()
 
-	#check for does customer belong to same project as entered..
-	#-------------------------------------------------------------------------------------------------
 	def validate_proj_cust(self):
 		if self.doc.project_name and self.doc.customer_name:
 			res = sql("select name from `tabProject` where name = '%s' and (customer = '%s' or ifnull(customer,'')='')"%(self.doc.project_name, self.doc.customer))
 			if not res:
 				msgprint("Customer - %s does not belong to project - %s. \n\nIf you want to use project for multiple customers then please make customer details blank in project - %s."%(self.doc.customer,self.doc.project_name,self.doc.project_name))
 				raise Exception
-			 
-
-	# Validate
-	# ---------
+	
 	def validate(self):
 		self.validate_fiscal_year()
 		self.validate_order_type()
@@ -295,11 +231,6 @@ class DocType(TransactionBase):
 		if not self.doc.billing_status: self.doc.billing_status = 'Not Billed'
 		if not self.doc.delivery_status: self.doc.delivery_status = 'Not Delivered'
 		
-
-# ON SUBMIT
-# ===============================================================================================
-	# Checks Quotation Status
-	# ------------------------
 	def check_prev_docstatus(self):
 		for d in getlist(self.doclist, 'sales_order_details'):
 			cancel_quo = sql("select name from `tabQuotation` where docstatus = 2 and name = '%s'" % d.prevdoc_docname)
@@ -312,8 +243,6 @@ class DocType(TransactionBase):
 		if enq:
 			sql("update `tabOpportunity` set status = %s where name=%s",(flag,enq[0][0]))
 
-	#update status of quotation, enquiry
-	#----------------------------------------
 	def update_prevdoc_status(self, flag):
 		for d in getlist(self.doclist, 'sales_order_details'):
 			if d.prevdoc_docname:
@@ -354,8 +283,6 @@ class DocType(TransactionBase):
 		
 		webnotes.conn.set(self.doc, 'status', 'Cancelled')
 		
-	# does not allow to cancel document if DN or RV made against it is SUBMITTED 
-	# ----------------------------------------------------------------------------
 	def check_nextdoc_docstatus(self):
 		# Checks Delivery Note
 		submit_dn = sql("select t1.name from `tabDelivery Note` t1,`tabDelivery Note Item` t2 where t1.name = t2.parent and t2.prevdoc_docname = '%s' and t1.docstatus = 1" % (self.doc.name))
