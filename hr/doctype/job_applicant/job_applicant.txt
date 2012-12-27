@@ -1,0 +1,199 @@
+[
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-12-27 13:42:17", 
+  "modified_by": "Administrator", 
+  "modified": "2012-12-27 16:44:40"
+ }, 
+ {
+  "is_submittable": 0, 
+  "allow_attach": 1, 
+  "search_fields": "applicant_name, mobile_no, email_id", 
+  "module": "hr", 
+  "document_type": "Master", 
+  "description": "Job applicants for your organization", 
+  "autoname": "field:applicant_name", 
+  "name": "__common__", 
+  "allow_rename": 1, 
+  "doctype": "DocType", 
+  "name_case": "Title Case", 
+  "max_attachments": 4
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "Job Applicant", 
+  "doctype": "DocField", 
+  "parenttype": "DocType", 
+  "parentfield": "fields"
+ }, 
+ {
+  "execute": 1, 
+  "name": "__common__", 
+  "parent": "Job Applicant", 
+  "read": 1, 
+  "create": 1, 
+  "submit": 1, 
+  "doctype": "DocPerm", 
+  "write": 1, 
+  "cancel": 1, 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "parentfield": "permissions"
+ }, 
+ {
+  "name": "Job Applicant", 
+  "doctype": "DocType"
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Applicant Details", 
+  "fieldname": "sb1", 
+  "fieldtype": "Section Break", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "width": "50%", 
+  "fieldname": "cb1", 
+  "fieldtype": "Column Break", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Applicant Name", 
+  "fieldname": "applicant_name", 
+  "fieldtype": "Data", 
+  "reqd": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Applied For", 
+  "options": "Employment Type", 
+  "fieldname": "applied_for", 
+  "fieldtype": "Link", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Mobile No", 
+  "fieldname": "mobile_no", 
+  "fieldtype": "Data", 
+  "reqd": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Email ID", 
+  "fieldname": "email_id", 
+  "fieldtype": "Data", 
+  "permlevel": 0
+ }, 
+ {
+  "print_hide": 1, 
+  "no_copy": 1, 
+  "doctype": "DocField", 
+  "label": "File List", 
+  "fieldname": "file_list", 
+  "fieldtype": "Text", 
+  "hidden": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "cb2", 
+  "fieldtype": "Column Break", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Date of Application", 
+  "fieldname": "application_date", 
+  "fieldtype": "Date", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Interviewed By", 
+  "options": "Employee", 
+  "fieldname": "interviewed_by", 
+  "fieldtype": "Link", 
+  "permlevel": 0
+ }, 
+ {
+  "print_hide": 1, 
+  "no_copy": 1, 
+  "doctype": "DocField", 
+  "label": "Amended From", 
+  "options": "Sales Invoice", 
+  "fieldname": "amended_from", 
+  "fieldtype": "Link", 
+  "permlevel": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "sb2", 
+  "fieldtype": "Section Break", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Remarks", 
+  "fieldname": "remarks", 
+  "fieldtype": "Small Text", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Work Experience", 
+  "fieldname": "sb3", 
+  "fieldtype": "Section Break", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Weok Experience", 
+  "options": "Employee External Work History", 
+  "fieldname": "work_experience", 
+  "fieldtype": "Table", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Qualification", 
+  "fieldname": "sb4", 
+  "fieldtype": "Section Break", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Qulaification", 
+  "options": "Employee Education", 
+  "fieldname": "qualification", 
+  "fieldtype": "Table", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Communication History", 
+  "fieldname": "communication_history", 
+  "fieldtype": "Section Break", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Communication HTML", 
+  "fieldname": "communication_html", 
+  "fieldtype": "HTML", 
+  "permlevel": 0
+ }, 
+ {
+  "role": "HR Manager", 
+  "doctype": "DocPerm"
+ }, 
+ {
+  "role": "System Manager", 
+  "doctype": "DocPerm"
+ }
+]
