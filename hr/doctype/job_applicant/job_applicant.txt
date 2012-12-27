@@ -4,13 +4,13 @@
   "docstatus": 0, 
   "creation": "2012-12-27 13:42:17", 
   "modified_by": "Administrator", 
-  "modified": "2012-12-27 16:44:40"
+  "modified": "2012-12-27 17:08:04"
  }, 
  {
   "is_submittable": 0, 
   "allow_attach": 1, 
   "search_fields": "applicant_name, mobile_no, email_id", 
-  "module": "hr", 
+  "module": "HR", 
   "document_type": "Master", 
   "description": "Job applicants for your organization", 
   "autoname": "field:applicant_name", 
@@ -130,6 +130,14 @@
   "fieldname": "amended_from", 
   "fieldtype": "Link", 
   "permlevel": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Status", 
+  "options": "Applied\nShort Listed\nJoined", 
+  "fieldname": "applicant_status", 
+  "fieldtype": "Select", 
+  "permlevel": 0
  }, 
  {
   "doctype": "DocField", 
