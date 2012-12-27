@@ -51,6 +51,7 @@ $.extend(cur_frm.cscript, {
 		var comm_list = wn.model.get("Communication", {"support_ticket": doc.name})
 		comm_list.push({
 			"sender": doc.raised_by,
+			"creation": doc.creation,
 			"modified": doc.creation,
 			"content": doc.description});
 					
