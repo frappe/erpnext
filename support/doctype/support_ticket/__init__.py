@@ -89,7 +89,7 @@ class SupportMailbox(POP3Mailbox):
 				st.doc.status = 'Open'
 				st.doc.save()
 				
-				update_feed(st.doc, 'on_update')
+				update_feed(st, 'on_update')
 				# extract attachments
 				self.save_attachments(st.doc, mail.attachments)
 				return
