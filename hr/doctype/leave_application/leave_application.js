@@ -47,20 +47,22 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 			} else {
 				cur_frm.set_intro("This Leave Application is pending approval. Only the Leave Apporver can update status.")
 				cur_frm.toggle_enable("status", false);
-				if(!doc.__islocal) cur_frm.frm_head.appframe.buttons.Submit.remove();
+				if(!doc.__islocal) {
+					if(cur_frm.frm_head.appframe.buttons.Submit)
+						cur_frm.frm_head.appframe.buttons.Submit.remove();
+				}
 			}
 		} else {
  			if(doc.status=="Approved") {
 				cur_frm.set_intro("Leave application has been approved.");
+				if(cur_frm.doc.docstatus==0) {
+					cur_frm.set_intro("Please submit to update Leave Balance.");
+				}
 			} else if(doc.status=="Rejected") {
 				cur_frm.set_intro("Leave application has been rejected.");
 			}
 		}
-	}
-	
-	if(doc.status=="Approved" && doc.docstatus==0) {
-		cur_frm.savesubmit()
-	}
+	}	
 }
 
 cur_frm.cscript.employee = function (doc, dt, dn){
