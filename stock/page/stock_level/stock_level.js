@@ -25,13 +25,15 @@ wn.pages['stock-level'].onload = function(wrapper) {
 
 	wrapper.appframe.add_home_breadcrumb()
 	wrapper.appframe.add_module_breadcrumb("Stock")
-	wrapper.appframe.add_breadcrumb("icon-bar-chart")
+	wrapper.appframe.add_breadcrumb("icon-bar-chart");
 }
 
 wn.require("app/js/stock_grid_report.js");
 
 erpnext.StockLevel = erpnext.StockGridReport.extend({
 	init: function(wrapper) {
+		var me = this;
+		
 		this._super({
 			title: "Stock Level",
 			page: wrapper,
@@ -39,7 +41,24 @@ erpnext.StockLevel = erpnext.StockGridReport.extend({
 			appframe: wrapper.appframe,
 			doctypes: ["Item", "Warehouse", "Stock Ledger Entry", "Production Order", 
 				"Purchase Request Item", "Purchase Order Item", "Sales Order Item", "Brand"],
-		})
+		});
+		
+		this.wrapper.bind("make", function() {
+			wn.utils.set_footnote(me, me.wrapper.get(0),
+				"<ul> \
+					<li style='font-weight: bold;'> \
+						Projected Qty = Actual Qty + Planned Qty + Requested Qty \
+						+ Ordered Qty - Reserved Qty </li> \
+					<ul> \
+						<li>Actual Qty: Quantity available in the warehouse. </li> \
+						<li>Planned Qty: Quantity, for which, Production Order has been raised, \
+							but is pending to be manufactured. </li> \
+						<li>Requested Qty: Quantity requested for purchase, but not ordered. </li> \
+						<li>Ordered Qty: Quantity ordered for purchase, but not received.</li> \
+						<li>Reserved Qty: Quantity ordered for sale, but not delivered. </li> \
+					</ul> \
+				</ul>");
+		});
 	},
 	
 	setup_columns: function() {
