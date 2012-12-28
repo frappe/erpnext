@@ -34,6 +34,10 @@ class DocType:
 		self.doclist = doclist
 
 	def validate(self):
+		import utilities
+		utilities.validate_status(self.doc.status, ["Draft", "Submitted", "Stopped", 
+			"In Process", "Completed", "Cancelled"])
+
 		if self.doc.production_item :
 			item_detail = sql("select name from `tabItem` where name = '%s' and docstatus != 2"
 			 	% self.doc.production_item, as_dict = 1)

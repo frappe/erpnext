@@ -179,6 +179,10 @@ class DocType(TransactionBase):
 	# Validate
 	# --------
 	def validate(self):
+		import utilities
+		utilities.validate_status(self.doc.status, ["Draft", "Submitted", 
+			"Order Confirmed", "Order Lost", "Cancelled"])
+
 		self.validate_fiscal_year()
 		self.validate_mandatory()
 		self.set_last_contact_date()

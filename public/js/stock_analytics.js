@@ -70,7 +70,7 @@ erpnext.StockAnalytics = erpnext.StockGridReport.extend({
 		{fieldtype:"Select", label: "Brand", link:"Brand", 
 			default_value: "Select Brand...", filter: function(val, item, opts) {
 				return val == opts.default_value || item.brand == val || item._show;
-			}},
+			}, link_formatter: {filter_input: "brand"}},
 		{fieldtype:"Select", label: "Warehouse", link:"Warehouse", 
 			default_value: "Select Warehouse..."},
 		{fieldtype:"Date", label: "From Date"},

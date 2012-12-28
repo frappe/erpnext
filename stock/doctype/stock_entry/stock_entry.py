@@ -17,7 +17,7 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import cstr, cint, flt, getdate, now
+from webnotes.utils import cstr, cint, flt, getdate, now, comma_or
 from webnotes.model import db_exists, delete_doc
 from webnotes.model.doc import Document, addchild
 from webnotes.model.wrapper import getlist, copy_doclist
@@ -35,6 +35,8 @@ class DocType(TransactionBase):
 		self.fname = 'mtn_details' 
 		
 	def validate(self):
+		self.validate_purpose()
+
 		self.validate_serial_nos()
 		pro_obj = self.doc.production_order and \
 			get_obj('Production Order', self.doc.production_order) or None
@@ -57,6 +59,13 @@ class DocType(TransactionBase):
 		self.update_stock_ledger(1)
 		# update Production Order
 		self.update_production_order(0)
+
+	def validate_purpose(self):
+		valid_purposes = ["Material Issue", "Material Receipt", "Material Transfer", 
+			"Manufacture/Repack", "Subcontract", "Sales Return", "Purchase Return"]
+		if self.doc.purpose not in valid_purposes:
+			msgprint(_("Purpose must be one of ") + comma_or(valid_purposes),
+				raise_exception=True)
 					
 	def validate_serial_nos(self):
 		sl_obj = get_obj("Stock Ledger")

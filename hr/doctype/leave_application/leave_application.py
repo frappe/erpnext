@@ -33,6 +33,8 @@ class DocType:
 	def validate(self):
 		# if self.doc.leave_approver == self.doc.owner:
 		# 	webnotes.msgprint("""Self Approval is not allowed.""", raise_exception=1)
+		import utilities
+		utilities.validate_status(self.doc.status, ["Open", "Approved", "Rejected"])
 
 		self.validate_to_date()
 		self.validate_balance_leaves()

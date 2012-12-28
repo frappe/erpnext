@@ -141,8 +141,12 @@ class DocType:
 		self.validate_schedule_date()
 		self.validate_fiscal_year()
 		
-		# set status as "Draft"
-		webnotes.conn.set(self.doc, 'status', 'Draft')
+		if not self.doc.status:
+			self.doc.status = "Draft"
+
+		import utilities
+		utilities.validate_status(self.doc.status, ["Draft", "Submitted", "Stopped", 
+			"Cancelled"])
 
 		# Get Purchase Common Obj
 		pc_obj = get_obj(dt='Purchase Common')
