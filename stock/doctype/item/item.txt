@@ -4,7 +4,7 @@
   "docstatus": 0, 
   "creation": "2012-12-17 14:56:32", 
   "modified_by": "Administrator", 
-  "modified": "2012-12-25 13:52:47"
+  "modified": "2012-12-27 10:36:56"
  }, 
  {
   "allow_attach": 1, 
@@ -781,6 +781,17 @@
   "permlevel": 0
  }, 
  {
+  "description": "Show a slideshow at the top of the page", 
+  "depends_on": "show_in_website", 
+  "doctype": "DocField", 
+  "label": "Slideshow", 
+  "options": "Website Slideshow", 
+  "fieldname": "slideshow", 
+  "fieldtype": "Link", 
+  "permlevel": 0
+ }, 
+ {
+  "description": "Item Image (if not slideshow)", 
   "depends_on": "show_in_website", 
   "doctype": "DocField", 
   "label": "Image", 

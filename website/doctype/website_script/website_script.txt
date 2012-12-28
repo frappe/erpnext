@@ -1,0 +1,51 @@
+[
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-12-27 11:51:24", 
+  "modified_by": "Administrator", 
+  "modified": "2012-12-27 12:25:04"
+ }, 
+ {
+  "issingle": 1, 
+  "description": "Script to attach to all web pages.", 
+  "doctype": "DocType", 
+  "module": "Website", 
+  "document_type": "Other", 
+  "name": "__common__"
+ }, 
+ {
+  "parent": "Website Script", 
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "label": "Javascript", 
+  "parenttype": "DocType", 
+  "options": "Javascript", 
+  "fieldname": "javascript", 
+  "fieldtype": "Code", 
+  "permlevel": 0, 
+  "parentfield": "fields"
+ }, 
+ {
+  "parent": "Website Script", 
+  "read": 1, 
+  "name": "__common__", 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "write": 1, 
+  "parenttype": "DocType", 
+  "role": "Website Manager", 
+  "permlevel": 0, 
+  "parentfield": "permissions"
+ }, 
+ {
+  "name": "Website Script", 
+  "doctype": "DocType"
+ }, 
+ {
+  "doctype": "DocField"
+ }, 
+ {
+  "doctype": "DocPerm"
+ }
+]

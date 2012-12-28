@@ -32,11 +32,13 @@ class DocType(DocTypeNestedSet):
 			# webpage updates
 			from website.utils import update_page_name
 			page_name = self.doc.name
-			if webnotes.conn.get_value("Website Settings", None, 
+			if webnotes.conn.get_value("Product Settings", None, 
 				"default_product_category")==self.doc.name:
 				page_name = "products"
+				from website.utils import clear_cache
+				clear_cache()
 				
-			update_page_name(self.doc, self.doc.name)
+			update_page_name(self.doc, page_name)
 			
 			from website.helpers.product import invalidate_cache_for
 			invalidate_cache_for(self.doc.name)
@@ -54,4 +56,7 @@ class DocType(DocTypeNestedSet):
 			
 		self.doc.items = get_product_list_for_group(product_group = self.doc.name, limit=20)
 		self.parent_groups = get_parent_item_groups(self.doc.name)
-	
+
+		if self.doc.slideshow:
+			from website.helpers.slideshow import get_slideshow
+			get_slideshow(self)

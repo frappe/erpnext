@@ -1,0 +1,42 @@
+{% extends "html/page.html" %}
+
+{% block title %}
+About Us
+{% endblock %}
+
+{% block content %}
+<div class="layout-wrapper">
+	<div class="layout-main">
+	{{ obj.doc.company_introduction or "<h2>About Us</h2><p>Some Introduction about your company that you would like your website visitor to know. More people than you think will read your About page. People always like to know who the are doing business with. Be authentic and avoid using jargon like 'value added services' etc. Be sure to update your company history and list of key team members in Website > About Us Settings</p>" }}
+	{% if obj.doclist.get({"doctype":"Company History"}) %}
+	<h3>{{ obj.doc.company_history_heading or "Company History" }}</h3>
+	<table class="table table-bordered" style="width: 100%; table-layout: fixed">
+		<tbody>
+			{% for d in obj.doclist.get({"doctype":"Company History"}) %}
+			<tr>
+				<td style="width: 30%; text-align: right"><h4>{{ d.year }}</h4></td>
+				<td>{{ d.highlight }}</td>
+			</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+	{% endif %}
+	{% if obj.doclist.get({"doctype":"Employee"}) %}
+	<h3>{{ obj.doc.team_members_heading or "Team Members" }}</h3>
+	<table class="table table-bordered" style="width: 100%; table-layout: fixed">
+		<tbody>
+			{% for d in obj.doclist.get({"doctype":"Employee"}) %}
+			<tr itemscope itemtype="http://schema.org/Person">
+				<td style="text-align:right; width: 30%;">
+					<img src="{{ d.image }}" style="" itemprop="image"></td>
+				<td><h4 itemprop="name">{{ d.employee_name }}</h4>
+					<div itemprop="description">{{ d.bio }}</div></td>
+			</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+	{% endif %}
+	{{ obj.doc.footer or "" }}
+	</div>
+</div>
+{% endblock %}

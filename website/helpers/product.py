@@ -2,7 +2,10 @@
 # License: GNU General Public License (v3). For more information see license.txt
 
 from __future__ import unicode_literals
+
 import webnotes
+from webnotes.utils import cstr
+from website.utils import build_html, url_for_website, delete_page_cache
 
 
 @webnotes.whitelist(allow_guest=True)
@@ -26,8 +29,6 @@ def get_product_info(item_code):
 
 @webnotes.whitelist(allow_guest=True)
 def get_product_list(search=None, product_group=None, start=0, limit=10):
-	from webnotes.utils import cstr
-		
 	# base query
 	query = """select name, item_name, page_name, website_image, item_group, 
 			web_long_description as website_description
@@ -81,7 +82,6 @@ def get_group_item_count(item_group):
 				where item_group in (%s))) """ % (child_groups, child_groups))[0][0]
 
 def get_item_for_list_in_html(r):
-	from website.utils import build_html
 	scrub_item_for_list(r)
 	r.template = "html/product_in_list.html"
 	return build_html(r)
@@ -91,8 +91,7 @@ def scrub_item_for_list(r):
 		r.website_description = "No description given"
 	if len(r.website_description.split(" ")) > 24:
 		r.website_description = " ".join(r.website_description.split(" ")[:24]) + "..."
-	if r.website_image and not r.website_image.lower().startswith("http"):
-		r.website_image = "files/" + r.website_image
+	r.website_image = url_for_website(r.website_image)
 
 def get_parent_item_groups(item_group_name):
 	item_group = webnotes.doc("Item Group", item_group_name)
@@ -102,6 +101,5 @@ def get_parent_item_groups(item_group_name):
 		order by lft asc""", (item_group.lft, item_group.rgt), as_dict=True)
 		
 def invalidate_cache_for(item_group):
-	from website.utils import delete_page_cache
 	for i in get_parent_item_groups(item_group):
 		delete_page_cache(i.page_name)

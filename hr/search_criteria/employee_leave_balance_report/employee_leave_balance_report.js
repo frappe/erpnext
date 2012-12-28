@@ -26,7 +26,8 @@ report.customize_filters = function() {
 		ignore : 1,
 		options: 'Fiscal Year',
 		parent:'Leave Allocation',
-		in_first_page:1
+		in_first_page:1,
+		report_default: sys_defaults.fiscal_year
 	});
 	this.add_filter({
 		fieldname:'employee_name',

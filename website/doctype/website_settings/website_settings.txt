@@ -4,7 +4,7 @@
   "docstatus": 0, 
   "creation": "2012-07-12 23:29:36", 
   "modified_by": "Administrator", 
-  "modified": "2012-12-25 15:41:48"
+  "modified": "2012-12-27 12:27:02"
  }, 
  {
   "issingle": 1, 
@@ -78,6 +78,15 @@
   "label": "Top Bar", 
   "fieldname": "top_bar", 
   "fieldtype": "Section Break", 
+  "permlevel": 0
+ }, 
+ {
+  "description": "Background shade of the top menu bar", 
+  "doctype": "DocField", 
+  "label": "Top Bar Background", 
+  "options": "Black\nWhite", 
+  "fieldname": "top_bar_background", 
+  "fieldtype": "Select", 
   "permlevel": 0
  }, 
  {
@@ -169,22 +178,6 @@
   "fieldname": "file_list", 
   "fieldtype": "Text", 
   "hidden": 1, 
-  "permlevel": 0
- }, 
- {
-  "doctype": "DocField", 
-  "label": "Startup", 
-  "fieldname": "analytics", 
-  "fieldtype": "Section Break", 
-  "permlevel": 0
- }, 
- {
-  "description": "Bind events on startup and page change", 
-  "doctype": "DocField", 
-  "label": "Startup Code", 
-  "options": "Javascript", 
-  "fieldname": "startup_code", 
-  "fieldtype": "Code", 
   "permlevel": 0
  }, 
  {
