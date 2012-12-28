@@ -63,7 +63,7 @@ erpnext.StockAgeing = erpnext.StockGridReport.extend({
 		{fieldtype:"Select", label: "Brand", link:"Brand", 
 			default_value: "Select Brand...", filter: function(val, item, opts) {
 				return val == opts.default_value || item.brand == val;
-			}},
+			}, link_formatter: {filter_input: "brand"}},
 		{fieldtype:"Select", label: "Plot By", 
 			options: ["Average Age", "Earliest", "Latest"]},
 		{fieldtype:"Date", label: "To Date"},
