@@ -87,5 +87,5 @@ def update_feed(controller, method=None):
 	doc = controller.doc
 	if method in ['on_update', 'on_submit']:
 		subject, color = feed_dict.get(doc.doctype, [None, None])
-		if subject:			
+		if subject:
 			make_feed('', doc.doctype, doc.name, doc.owner, subject % doc.fields, color)
