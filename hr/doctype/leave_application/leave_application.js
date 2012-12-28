@@ -47,7 +47,10 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 			} else {
 				cur_frm.set_intro("This Leave Application is pending approval. Only the Leave Apporver can update status.")
 				cur_frm.toggle_enable("status", false);
-				if(!doc.__islocal) cur_frm.frm_head.appframe.buttons.Submit.remove();
+				if(!doc.__islocal) {
+					if(cur_frm.frm_head.appframe.buttons.Submit)
+						cur_frm.frm_head.appframe.buttons.Submit.remove();
+				}
 			}
 		} else {
  			if(doc.status=="Approved") {
