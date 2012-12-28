@@ -570,4 +570,8 @@ patch_list = [
 		'patch_module': 'patches.december_2012',
 		'patch_file': 'remove_project_mapper',
 	},
+	{
+		'patch_module': 'patches.december_2012',
+		'patch_file': 'update_print_width',
+	},
 ]
