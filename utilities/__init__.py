@@ -16,7 +16,8 @@
 
 from __future__ import unicode_literals
 import webnotes
-from webnotes.utils import cint
+from webnotes import _, msgprint
+from webnotes.utils import cint, comma_or
 
 @webnotes.whitelist()
 def get_sc_list(arg=None):
@@ -53,3 +54,7 @@ def get_report_list():
 			order by tabReport.name 
 			limit %s, %s""" % \
 		("%s", cint(limit_start), cint(limit_page_length)), (module,), as_dict=True)
+
+def validate_status(status, options):
+	if status not in options:
+		msgprint(_("Status must be one of ") + comma_or(options), raise_exception=True)

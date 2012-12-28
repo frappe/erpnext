@@ -19,7 +19,7 @@ import webnotes
 
 from webnotes.utils import getdate, validate_email_add
 from webnotes.model.doc import make_autoname
-from webnotes import msgprint
+from webnotes import msgprint, _
 
 sql = webnotes.conn.sql
 
@@ -39,6 +39,16 @@ class DocType:
 				self.doc.name = make_autoname(self.doc.employee_number)
 
 		self.doc.employee = self.doc.name
+
+	def validate(self):
+		import utilities
+		utilities.validate_status(self.doc.status, ["Active", "Left"])
+
+		self.doc.employee = self.doc.name
+		self.validate_date()
+		self.validate_email()
+		self.validate_name()
+		self.validate_status()
 				
 	def get_retirement_date(self):		
 		import datetime
@@ -52,13 +62,6 @@ class DocType:
 		ret_sal_struct=sql("select name from `tabSalary Structure` where employee='%s' and is_active = 'Yes' and docstatus!= 2"%nm)
 		return ret_sal_struct and ret_sal_struct[0][0] or ''
 
-	def validate(self):
-		self.doc.employee = self.doc.name
-		self.validate_date()
-		self.validate_email()
-		self.validate_name()
-		self.validate_status()
-	
 	def on_update(self):
 		self.update_user_default()
 	

@@ -41,9 +41,8 @@ class DocType(TransactionBase):
 	
 	def validate(self):
 		if session['user'] != 'Guest' and not self.doc.customer:
-			msgprint("Please select Customer from whom issue is raised")
-			raise Exception
-
+			msgprint("Please select Customer from whom issue is raised",
+				raise_exception=True)
 	
 	def on_cancel(self):
 		lst = sql("select t1.name from `tabMaintenance Visit` t1, `tabMaintenance Visit Purpose` t2 where t2.parent = t1.name and t2.prevdoc_docname = '%s' and	t1.docstatus!=2"%(self.doc.name))

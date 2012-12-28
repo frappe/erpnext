@@ -30,10 +30,16 @@ class DocType(TransactionBase):
 		self.doc.name = make_autoname(self.doc.naming_series + ".#####")
 		
 	def validate(self):
+		if not self.doc.status:
+			self.doc.status = "Draft"
+
+		import utilities
+		utilities.validate_status(self.doc.status, ["Draft", "Submitted", "Stopped", 
+			"Cancelled"])
+		
 		self.validate_fiscal_year()
 		self.validate_common()
 		self.set_in_words()
-		self.doc.status = "Draft"
 
 	def on_submit(self):
 		purchase_controller = webnotes.get_obj("Purchase Common")
