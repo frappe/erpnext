@@ -112,11 +112,7 @@ class SupportMailbox(POP3Mailbox):
 		except:
 			d.description = 'Unable to extract message'
 			d.save(1)
-
 		else:
-			# update feed
-			update_feed(d, 'on_update')
-
 			# send auto reply
 			if cint(self.email_settings.send_autoreply):
 				if "mailer-daemon" not in d.raised_by.lower():
