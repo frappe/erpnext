@@ -15,6 +15,7 @@ erpnext.desktop.refresh = function() {
 }
 
 erpnext.desktop.render = function() {
+	document.title = "Desktop";
 	var add_icon = function(m) {
 		var module = wn.modules[m];
 		if(!module.label) 

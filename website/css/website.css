@@ -18,7 +18,7 @@ div#body_div {
 }
 
 p, li {
-	line-height: 1.6em;
+	line-height: 1.5em;
 }
 
 .layout-wrapper {
@@ -30,10 +30,7 @@ p, li {
 
 .layout-main {
 	min-height: 400px;
-}
-
-.layout-side-section {
-	padding: 8px;
+	padding: 30px;
 }
 
 .web-footer-menu {
