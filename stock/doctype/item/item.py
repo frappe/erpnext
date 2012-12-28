@@ -128,16 +128,19 @@ class DocType:
 				else:
 					check_list.append(d.tax_type)
 
-	def check_for_active_boms(self, check):
-		if check in ['Is Active', 'Is Purchase Item']:
+	def check_for_active_boms(self, field_label):
+		if field_label in ['Is Active', 'Is Purchase Item']:
 			bom_mat = sql("select distinct t1.parent from `tabBOM Item` t1, `tabBOM` t2 where t1.item_code ='%s' and (t1.bom_no = '' or t1.bom_no is NULL) and t2.name = t1.parent and t2.is_active = 1 and t2.docstatus = 1 and t1.docstatus =1 " % self.doc.name )
 			if bom_mat and bom_mat[0][0]:
-				msgprint("%s should be 'Yes'. As Item %s is present in one or many Active BOMs." % (cstr(check), cstr(self.doc.name)))
+				msgprint("%s should be 'Yes'. As Item %s is present in one or many Active BOMs." % (cstr(field_label), cstr(self.doc.name)))
 				raise Exception
-		if check == 'Is Active' or ( check == 'Is Manufactured Item' and self.doc.is_sub_contracted_item != 'Yes') or (check ==	'Is Sub Contracted Item' and self.doc.is_manufactured_item != 'Yes') :
+		if ((field_label == 'Allow Production Order' 
+				and self.doc.is_sub_contracted_item != 'Yes') 
+				or (field_label == 'Is Sub Contracted Item' 
+				and self.doc.is_manufactured_item != 'Yes')):
 			bom = sql("select name from `tabBOM` where item = '%s' and is_active = 1" % cstr(self.doc.name))
 			if bom and bom[0][0]:
-				msgprint("%s should be 'Yes'. As Item %s is present in one or many Active BOMs." % (cstr(check), cstr(self.doc.name)))
+				msgprint("%s should be 'Yes'. As Item %s is present in one or many Active BOMs." % (cstr(field_label), cstr(self.doc.name)))
 				raise Exception
 				
 	def validate_barcode(self):
@@ -147,24 +150,21 @@ class DocType:
 				msgprint("Barcode: %s already used in item: %s" % (self.doc.barcode, cstr(duplicate[0][0])), raise_exception = 1)
 
 	def validate(self):
-		fl = {'is_manufactured_item'	:'Is Manufactured Item',
+		fl = {'is_manufactured_item'	:'Allow Bill of Materials',
 					'is_sub_contracted_item':'Is Sub Contracted Item',
 					'is_purchase_item'			:'Is Purchase Item',
-					'is_pro_applicable'		 :'Is Pro Applicable'}
+					'is_pro_applicable'		 :'Allow Production Order'}
 		for d in fl:
 			if cstr(self.doc.fields.get(d)) != 'Yes':
-				self.check_for_active_boms(check = fl[d])
+				self.check_for_active_boms(fl[d])
 		self.check_ref_rate_detail()
 		self.fill_customer_code()
 		self.check_item_tax()
 		self.validate_barcode()
-		if not self.doc.min_order_qty:
-			self.doc.min_order_qty = 0
 		self.check_non_asset_warehouse()
 
-		if self.doc.is_pro_applicable and self.doc.is_pro_applicable == 'Yes' and self.doc.is_manufactured_item and self.doc.is_manufactured_item != 'Yes':
-			msgprint("If making Production Order is allowed then, it should also allow to make Bill of Materials. Refer Manufacturing section.")
-			raise Exception
+		if cstr(self.doc.is_manufactured_item) == "No":
+			self.doc.is_pro_applicable = "No"
 
 		if self.doc.is_pro_applicable == 'Yes' and self.doc.is_stock_item == 'No':
 			msgprint("As Production Order can be made for this Item, then Is Stock Item Should be 'Yes' as we maintain it's stock. Refer Manufacturing and Inventory section.", raise_exception=1)
