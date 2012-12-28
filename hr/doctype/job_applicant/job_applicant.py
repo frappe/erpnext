@@ -24,7 +24,8 @@ class DocType(TransactionBase):
 	def add_calendar_event(self):
 		# delete any earlier event by this lead
 		event=sql("select name from tabEvent where ref_type='Job Applicant' and ref_name=%s",self.doc.name)
-		sql("delete from `tabEvent User` where parent=%s", event[0])
+		if event:
+			sql("delete from `tabEvent User` where parent=%s", event[0])
 		sql("delete from tabEvent where ref_type='Job Applicant' and ref_name=%s", self.doc.name)
 		# create new event
 		ev = Document('Event')
