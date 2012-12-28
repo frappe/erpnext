@@ -50,11 +50,11 @@ class DocType(TransactionBase):
 	
 	def close_ticket(self):
 		webnotes.conn.set(self.doc,'status','Closed')
-		update_feed(self.doc)
+		update_feed(self)
 
 	def reopen_ticket(self):
 		webnotes.conn.set(self.doc,'status','Open')		
-		update_feed(self.doc)
+		update_feed(self)
 		
 	def on_trash(self):
 		webnotes.conn.sql("""update `tabCommunication` set support_ticket=NULL 

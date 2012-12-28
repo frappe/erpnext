@@ -1,4 +1,14 @@
 erpnext.updates = [
+	["28th December 2012", [
+		"Workflow: Added System for Multi-level approval before Submission. \
+			<br>See video at <a href='https://www.youtube.com/watch?v=zuGv59_wJKw' \
+			target='_blank'>https://www.youtube.com/watch?v=zuGv59_wJKw</a>.",
+		"Stock Level Report: New report to see available and estimated qty of stock",
+	]],
+	["27th December 2012", [
+		"Website: Added auto-generated Contact Us and About Us Pages",
+		"Website: Added option to create slideshows and add them to Pages, Products and Product Groups",
+	]],
 	["25th December 2012", [
 		"Stock Balance Report: Inflow, outflow and balance of stock within a defined period",
 		"Stock Reports: Added Brand filter on some of the reports"
