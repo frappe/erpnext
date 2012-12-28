@@ -55,15 +55,14 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 		} else {
  			if(doc.status=="Approved") {
 				cur_frm.set_intro("Leave application has been approved.");
+				if(cur_frm.doc.docstatus==0) {
+					cur_frm.set_intro("Please submit to update Leave Balance.");
+				}
 			} else if(doc.status=="Rejected") {
 				cur_frm.set_intro("Leave application has been rejected.");
 			}
 		}
-	}
-	
-	if(doc.status=="Approved" && doc.docstatus==0) {
-		cur_frm.savesubmit()
-	}
+	}	
 }
 
 cur_frm.cscript.employee = function (doc, dt, dn){

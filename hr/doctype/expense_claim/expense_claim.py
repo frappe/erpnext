@@ -32,6 +32,11 @@ class DocType:
 	def validate(self):
 		# if self.doc.exp_approver == self.doc.owner:
 		# 	webnotes.msgprint("""Self Approval is not allowed.""", raise_exception=1)
+
+		if self.doc.status not in ("Draft", "Approved", "Rejected"):
+			webnotes.msgprint("Status must be one of 'Draft', 'Approved' or 'Rejected'", 
+				raise_exception=True)
+
 		self.validate_fiscal_year()
 		self.validate_exp_details()
 			
