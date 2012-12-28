@@ -205,5 +205,10 @@ class DocType:
 			clear_cache(self.doc.page_name)
 			
 	def prepare_template_args(self):
-		from website.helpers.product import get_parent_item_groups
+		from website.helpers.product import get_parent_item_groups, url_for_website
 		self.parent_groups = get_parent_item_groups(self.doc.item_group) + [{"name":self.doc.name}]
+		self.doc.website_image = url_for_website(self.doc.website_image)
+
+		if self.doc.slideshow:
+			from website.helpers.slideshow import get_slideshow
+			get_slideshow(self)

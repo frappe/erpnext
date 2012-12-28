@@ -560,6 +560,10 @@ patch_list = [
 	},
 	{
 		'patch_module': 'patches.december_2012',
+		'patch_file': 'address_title',
+	},
+	{
+		'patch_module': 'patches.december_2012',
 		'patch_file': 'delete_form16_print_format',
 	},
 	{
