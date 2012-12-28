@@ -109,6 +109,11 @@ class SupportMailbox(POP3Mailbox):
 		d.naming_series = opts and opts.split("\n")[0] or 'SUP'
 		try:
 			d.save(1)
+			try:
+				# extract attachments
+				self.save_attachments(d, mail.attachments)
+			except Exception, e:
+				self.description += "\n\n[Did not pull attachment]"
 		except:
 			d.description = 'Unable to extract message'
 			d.save(1)
@@ -118,8 +123,6 @@ class SupportMailbox(POP3Mailbox):
 				if "mailer-daemon" not in d.raised_by.lower():
 					self.send_auto_reply(d)
 
-			# extract attachments
-			self.save_attachments(d, mail.attachments)
 			
 	def save_attachments(self, doc, attachment_list=[]):
 		"""
