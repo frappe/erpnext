@@ -62,7 +62,7 @@ data_map = {
 	"Item": {
 		"columns": ["name", "if(item_name=name, '', item_name) as item_name", 
 			"item_group as parent_item_group", "stock_uom", "brand", "valuation_method"],
-		"conditions": ["docstatus < 2"],
+		# "conditions": ["docstatus < 2"],
 		"order_by": "name",
 		"links": {
 			"parent_item_group": ["Item Group", "name"],
