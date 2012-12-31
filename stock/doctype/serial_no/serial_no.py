@@ -65,9 +65,9 @@ class DocType(TransactionBase):
 	# validate
 	# ---------
 	def validate(self):
-		import utilities
-		utilities.validate_status(self.doc.status, ["In Store", "Delivered", 
-			"Not in Use", "Purchase Returned"])
+		# import utilities
+		# utilities.validate_status(self.doc.status, ["In Store", "Delivered", 
+		# 	"Not in Use", "Purchase Returned"])
 
 		self.validate_warranty_status()
 		self.validate_amc_status()

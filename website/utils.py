@@ -263,7 +263,8 @@ def clear_cache(page_name=None):
 		webnotes.cache().delete_keys("page:")
 	
 def delete_page_cache(page_name):
-	webnotes.cache().delete_value("page:" + page_name)
+	if page_name:
+		webnotes.cache().delete_value("page:" + page_name)
 	
 def url_for_website(url):
 	if url and not url.lower().startswith("http"):
