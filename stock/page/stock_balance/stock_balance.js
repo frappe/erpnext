@@ -110,8 +110,8 @@ erpnext.StockBalance = erpnext.StockAnalytics.extend({
 					item.opening += diff;
 				} else if(posting_datetime <= to_date) {
 					var ignore_inflow_outflow = this.is_default("warehouse")
-						&& item.voucher_type=="Stock Entry" 
-						&& this.stock_entry_map[item.voucher_no].purpose=="Material Transfer";
+						&& sl.voucher_type=="Stock Entry" 
+						&& this.stock_entry_map[sl.voucher_no].purpose=="Material Transfer";
 					
 					if(!ignore_inflow_outflow) {
 						if(diff < 0) {

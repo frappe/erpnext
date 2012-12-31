@@ -287,7 +287,11 @@ pscript.PermEngine.prototype.show_match_dialog=function(details) {
 		me.render_match_dialog(r, details);
 	}
 	// load the rules
-	$c_obj('Permission Control','get_defaults', details.match + '~~~' + (this.profiles ? 'No' : 'Yes'), callback); 
+	$c_obj('Permission Control','get_defaults', {
+			match: details.match,
+			profiles: this.profiles ? "No" : "Yes",
+			doctype: sel_val(me.type_select)
+		}, callback);
 }
 
 // --------------------------------------------
