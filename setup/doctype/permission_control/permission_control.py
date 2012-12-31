@@ -81,7 +81,12 @@ class DocType:
 	# get default values
 	# ------------------
 	def get_defaults(self, arg):
-		match_key, with_profiles = arg.split('~~~')
+		if isinstance(arg, basestring):
+			import json
+			arg = json.loads(arg)
+
+		match_key = arg["match"]
+		with_profiles = arg["profiles"]
 		
 		pl = ol = []
 	
@@ -89,7 +94,9 @@ class DocType:
 		dl = [a for a in sql("select parent, ifnull(parenttype,'') as parenttype, ifnull(defvalue,'') as defvalue from tabDefaultValue where defkey=%s order by parenttype desc, parent asc", match_key, as_dict=1)]
 
 		# options
-		tn = sql("select options from tabDocField where fieldname=%s and fieldtype='Link' and docstatus=0 limit 1", match_key)[0][0]
+		tn = webnotes.get_doctype(arg["doctype"]).get_options(match_key)
+
+		# tn = sql("select options from tabDocField where fieldname=%s and fieldtype='Link' and docstatus=0 limit 1", match_key)[0][0]
 		ol = [''] + [a[0] for a in sql("select name from `tab%s` where ifnull(docstatus,0)=0" % tn)]
 
 		# roles
