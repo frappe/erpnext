@@ -57,6 +57,7 @@ class DocType:
 	def validate(self):
 		if not self.doc.status:
 			self.doc.status = "Draft"
+
 		self.validate_dates()
 		self.validate_existing_appraisal()
 		self.calculate_total()

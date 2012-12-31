@@ -131,6 +131,9 @@ class DocType(TransactionBase):
 
 
 	def validate(self):
+		import utilities
+		utilities.validate_status(self.doc.status, ["Draft", "submitted", "Cancelled"])
+
 		self.so_required()
 		self.validate_fiscal_year()
 		self.validate_proj_cust()

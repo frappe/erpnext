@@ -148,7 +148,13 @@ class DocType(TransactionBase):
 	def validate(self):
 		self.po_required()
 		self.validate_fiscal_year()
-		webnotes.conn.set(self.doc, 'status', 'Draft')			 # set status as "Draft"
+
+		if not self.doc.status:
+			self.doc.status = "Draft"
+
+		import utilities
+		utilities.validate_status(self.doc.status, ["Draft", "Submitted", "Cancelled"])
+
 		self.validate_accepted_rejected_qty()
 		self.validate_inspection()						 # Validate Inspection
 		get_obj('Stock Ledger').validate_serial_no(self, 'purchase_receipt_details')

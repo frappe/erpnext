@@ -102,4 +102,5 @@ def get_parent_item_groups(item_group_name):
 		
 def invalidate_cache_for(item_group):
 	for i in get_parent_item_groups(item_group):
-		delete_page_cache(i.page_name)
+		if i.page_name:
+			delete_page_cache(i.page_name)

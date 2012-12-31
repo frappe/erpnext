@@ -226,8 +226,13 @@ class DocType(TransactionBase):
 		self.doc.in_words = sales_com_obj.get_total_in_words(dcc, self.doc.rounded_total)
 		self.doc.in_words_export = sales_com_obj.get_total_in_words(self.doc.currency, self.doc.rounded_total_export)
 		
-		# set SO status
-		self.doc.status='Draft'
+		if not self.doc.status:
+			self.doc.status = "Draft"
+
+		import utilities
+		utilities.validate_status(self.doc.status, ["Draft", "Submitted", "Stopped", 
+			"Cancelled"])
+
 		if not self.doc.billing_status: self.doc.billing_status = 'Not Billed'
 		if not self.doc.delivery_status: self.doc.delivery_status = 'Not Delivered'
 		

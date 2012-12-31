@@ -93,12 +93,56 @@ data_map = {
 			"item_code": ["Item", "name"],
 			"warehouse": ["Warehouse", "name"]
 		},
-		"force_index": "posting_sort_index"		
+		"force_index": "posting_sort_index"
 	},
 	"Stock Entry": {
 		"columns": ["name", "purpose"],
 		"conditions": ["docstatus=1"],
 		"order_by": "posting_date, posting_time, name",
+	},
+	"Production Order": {
+		"columns": ["production_item as item_code", 
+			"(ifnull(qty, 0) - ifnull(produced_qty, 0)) as qty", 
+			"fg_warehouse as warehouse"],
+		"conditions": ["docstatus=1", "status != 'Stopped'", "ifnull(fg_warehouse, '')!=''",
+			"ifnull(qty, 0) > ifnull(produced_qty, 0)"],
+		"links": {
+			"item_code": ["Item", "name"],
+			"warehouse": ["Warehouse", "name"]
+		},
+	},
+	"Purchase Request Item": {
+		"columns": ["item_code", "warehouse", 
+			"(ifnull(qty, 0) - ifnull(ordered_qty, 0)) as qty"],
+		"from": "`tabPurchase Request Item` item, `tabPurchase Request` main",
+		"conditions": ["item.parent = main.name", "main.docstatus=1", "main.status != 'Stopped'", 
+			"ifnull(warehouse, '')!=''", "ifnull(qty, 0) > ifnull(ordered_qty, 0)"],
+		"links": {
+			"item_code": ["Item", "name"],
+			"warehouse": ["Warehouse", "name"]
+		},
+	},
+	"Purchase Order Item": {
+		"columns": ["item_code", "warehouse", 
+			"(ifnull(qty, 0) - ifnull(received_qty, 0)) as qty"],
+		"from": "`tabPurchase Order Item` item, `tabPurchase Order` main",
+		"conditions": ["item.parent = main.name", "main.docstatus=1", "main.status != 'Stopped'", 
+			"ifnull(warehouse, '')!=''", "ifnull(qty, 0) > ifnull(received_qty, 0)"],
+		"links": {
+			"item_code": ["Item", "name"],
+			"warehouse": ["Warehouse", "name"]
+		},
+	},
+	"Sales Order Item": {
+		"columns": ["item_code", "(ifnull(qty, 0) - ifnull(delivered_qty, 0)) as qty", 
+			"reserved_warehouse as warehouse"],
+		"from": "`tabSales Order Item` item, `tabSales Order` main",
+		"conditions": ["item.parent = main.name", "main.docstatus=1", "main.status != 'Stopped'", 
+			"ifnull(reserved_warehouse, '')!=''", "ifnull(qty, 0) > ifnull(delivered_qty, 0)"],
+		"links": {
+			"item_code": ["Item", "name"],
+			"warehouse": ["Warehouse", "name"]
+		},
 	},
 
 	# Sales
