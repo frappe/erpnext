@@ -2,19 +2,15 @@
  {
   "owner": "Administrator", 
   "docstatus": 0, 
-  "creation": "2012-03-27 14:35:43", 
+  "creation": "2012-07-03 13:30:47", 
   "modified_by": "Administrator", 
-  "modified": "2012-03-27 14:35:43"
+  "modified": "2012-12-31 10:24:49"
  }, 
  {
-  "section_style": "Simple", 
   "istable": 1, 
   "name": "__common__", 
-  "colour": "White:FFF", 
-  "module": "Accounts", 
   "doctype": "DocType", 
-  "version": 14, 
-  "show_in_menu": 0
+  "module": "Accounts"
  }, 
  {
   "name": "__common__", 
@@ -28,15 +24,7 @@
   "doctype": "DocType"
  }, 
  {
-  "doctype": "DocField", 
-  "label": "Select", 
-  "width": "60px", 
-  "fieldname": "selected", 
-  "fieldtype": "Check", 
-  "reqd": 1, 
-  "permlevel": 0
- }, 
- {
+  "print_width": "140px", 
   "permlevel": 1, 
   "doctype": "DocField", 
   "label": "Voucher No", 
@@ -48,14 +36,14 @@
  }, 
  {
   "doctype": "DocField", 
-  "label": "Amt Due", 
+  "label": "Unmatched Amount", 
   "fieldname": "amt_due", 
   "fieldtype": "Currency", 
   "permlevel": 1
  }, 
  {
   "doctype": "DocField", 
-  "label": "Amt to be reconciled", 
+  "label": "Allocated Amount", 
   "fieldname": "amt_to_be_reconciled", 
   "fieldtype": "Currency", 
   "reqd": 1, 
@@ -70,7 +58,7 @@
  }, 
  {
   "doctype": "DocField", 
-  "label": "Total Amt", 
+  "label": "Total Amount", 
   "fieldname": "total_amt", 
   "fieldtype": "Currency", 
   "permlevel": 1
@@ -83,6 +71,7 @@
   "permlevel": 1
  }, 
  {
+  "print_width": "200px", 
   "doctype": "DocField", 
   "label": "Remarks", 
   "width": "200px", 
@@ -96,7 +85,6 @@
   "label": "Voucher Detail No", 
   "fieldname": "voucher_detail_no", 
   "fieldtype": "Data", 
-  "no_column": 0, 
   "reqd": 0, 
   "hidden": 1, 
   "permlevel": 1

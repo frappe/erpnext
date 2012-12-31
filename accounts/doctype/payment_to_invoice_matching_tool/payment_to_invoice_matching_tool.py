@@ -107,7 +107,6 @@ class DocType:
 			ch.total_amt = flt(d.get('total_amt'))
 			ch.against_account = d.get('against_account')
 			ch.remarks = d.get('remark')
-			ch.amt_to_be_reconciled = flt(ch.amt_due)
 			ch.voucher_detail_no = d.get('voucher_detail_no')
 			
 	#--------------------------------------------------
@@ -128,7 +127,7 @@ class DocType:
 		
 		lst = []
 		for d in getlist(self.doclist, 'ir_payment_details'):
-			if d.selected and flt(d.amt_to_be_reconciled) > 0:
+			if flt(d.amt_to_be_reconciled) > 0:
 				args = {
 					'voucher_no' : d.voucher_no,
 					'voucher_detail_no' : d.voucher_detail_no, 
@@ -146,6 +145,6 @@ class DocType:
 
 		if lst:
 			get_obj('GL Control').reconcile_against_document(lst)
-			msgprint("Successfully reconciled.")
+			msgprint("Successfully allocated.")
 		else:
-			msgprint("No payment entries selected.", raise_exception=1)
+			msgprint("No amount allocated.", raise_exception=1)

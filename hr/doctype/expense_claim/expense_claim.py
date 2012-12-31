@@ -34,7 +34,7 @@ class DocType:
 		# 	webnotes.msgprint("""Self Approval is not allowed.""", raise_exception=1)
 
 		import utilities
-		utilities.validate_status(self.doc.status, ["Draft", "Approved", "Rejected"])
+		utilities.validate_status(self.doc.approval_status, ["Draft", "Approved", "Rejected"])
 
 		self.validate_fiscal_year()
 		self.validate_exp_details()
