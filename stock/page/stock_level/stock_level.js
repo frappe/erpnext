@@ -84,10 +84,12 @@ erpnext.StockLevel = erpnext.StockGridReport.extend({
 			{id: "projected_qty", name: "Projected Qty", 
 				field: "projected_qty", width: 80, formatter: this.currency_formatter},
 			{id: "uom", name: "UOM", field: "uom", width: 60},
-			{id: "item_name", name: "Item Name", field: "item_name", width: 100,
-				formatter: this.text_formatter},
 			{id: "brand", name: "Brand", field: "brand", width: 100,
 				link_formatter: {filter_input: "brand"}},
+			{id: "item_name", name: "Item Name", field: "item_name", width: 100,
+				formatter: this.text_formatter},
+			{id: "description", name: "Description", field: "description", width: 200, 
+				formatter: this.text_formatter},
 		];
 	},
 	

@@ -60,7 +60,7 @@ data_map = {
 
 	# Stock
 	"Item": {
-		"columns": ["name", "if(item_name=name, '', item_name) as item_name", 
+		"columns": ["name", "if(item_name=name, '', item_name) as item_name", "description", 
 			"item_group as parent_item_group", "stock_uom", "brand", "valuation_method"],
 		# "conditions": ["docstatus < 2"],
 		"order_by": "name",
