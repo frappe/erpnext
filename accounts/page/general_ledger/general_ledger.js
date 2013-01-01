@@ -95,6 +95,7 @@ erpnext.GeneralLedger = wn.views.GridReport.extend({
 		{fieldtype:"Date", label: "To Date", filter: function(val, item) {
 			return dateutil.str_to_obj(val) >= dateutil.str_to_obj(item.posting_date);
 		}},
+		{fieldtype: "Check", label: "Group by Ledger"},
 		{fieldtype:"Button", label: "Refresh", icon:"icon-refresh icon-white", cssClass:"btn-info"},
 		{fieldtype:"Button", label: "Reset Filters"}
 	],
@@ -103,11 +104,21 @@ erpnext.GeneralLedger = wn.views.GridReport.extend({
 		var me = this;
 		
 		this.accounts_by_company = this.make_accounts_by_company();
+		
 		// filter accounts options by company
-		this.filter_inputs.company && this.filter_inputs.company.change(function() {
+		this.filter_inputs.company.change(function() {
 			me.setup_account_filter(this);
 			me.filter_inputs.refresh.click();
 		});
+		
+		this.filter_inputs.account.change(function() {
+			me.make_account_by_name();
+			me.filter_inputs.group_by_ledger
+				.parent().toggle(!!(me.account_by_name[$(this).val()] 
+					&& me.account_by_name[$(this).val()].group_or_ledger==="Group"));
+		});
+		
+		this.trigger_refresh_on_change(["group_by_ledger"]);
 	},
 	setup_account_filter: function(company_filter) {
 		var me = this;
@@ -127,11 +138,15 @@ erpnext.GeneralLedger = wn.views.GridReport.extend({
 	},
 	init_filter_values: function() {
 		this._super();
+		this.filter_inputs.group_by_ledger.parent().toggle(false);
 		this.filter_inputs.company.change();
+		this.filter_inputs.account.change();
 	},
 	apply_filters_from_route: function() {
 		this._super();
+		this.filter_inputs.group_by_ledger.parent().toggle(false);
 		this.filter_inputs.company.change();
+		this.filter_inputs.account.change();
 	},
 	make_accounts_by_company: function() {
 		var accounts_by_company = {};
@@ -155,10 +170,7 @@ erpnext.GeneralLedger = wn.views.GridReport.extend({
 		var data = wn.report_dump.data["GL Entry"];
 		var out = [];
 		
-		if(!this.account_by_name) {
-			this.account_by_name = this.make_name_map(wn.report_dump.data["Account"]);
-			this.make_voucher_acconuts_map();
-		}
+		this.make_account_by_name();
 		
 		var me = this;
 		
@@ -170,49 +182,66 @@ erpnext.GeneralLedger = wn.views.GridReport.extend({
 			return;
 		}
 		
-		var opening = {
-			account: "Opening", debit: 0.0, credit: 0.0, 
-				id:"_opening", _show: true, _style: "font-weight: bold"
-		}
-		var totals = {
-			account: "Totals", debit: 0.0, credit: 0.0, 
-				id:"_totals", _show: true, _style: "font-weight: bold"
-		}
-		
+		var opening = this.make_summary_row("Opening", this.account);
+		var totals = this.make_summary_row("Totals", this.account);
+
+		var grouped_ledgers = {};
+
 		$.each(data, function(i, item) {
 			if((me.is_default("company") ? true : me.apply_filter(item, "company")) &&
 				(me.account ? me.is_child_account(me.account, item.account) 
 				: true) && (me.voucher_no ? item.voucher_no==me.voucher_no : true)) {
 				var date = dateutil.str_to_obj(item.posting_date);
-				
+
+				// create grouping by ledger
+				if(!grouped_ledgers[item.account]) {
+					grouped_ledgers[item.account] = {
+						entries: [],
+						opening: me.make_summary_row("Opening", item.account),
+						totals: me.make_summary_row("Totals", item.account),
+						closing: me.make_summary_row("Closing (Opening + Totals)",
+							item.account)
+					};
+				}
+
 				if(date < from_date || item.is_opening=="Yes") {
 					opening.debit += item.debit;
 					opening.credit += item.credit;
+
+					grouped_ledgers[item.account].opening.debit += item.debit;
+					grouped_ledgers[item.account].opening.credit += item.credit;
 				} else if(date <= to_date) {
 					totals.debit += item.debit;
 					totals.credit += item.credit;
+
+					grouped_ledgers[item.account].totals.debit += item.debit;
+					grouped_ledgers[item.account].totals.credit += item.credit;
 				}
 
 				if(me.account) {
 					item.against_account = me.voucher_accounts[item.voucher_type + ":"
-						+ item.voucher_no][(item.debit > 0 ? "credits" : "debits")].join(", ");					
+						+ item.voucher_no][(item.debit > 0 ? "credits" : "debits")].join(", ");
 				}
 
 				if(me.apply_filters(item) && item.is_opening=="No") {
 					out.push(item);
+					grouped_ledgers[item.account].entries.push(item);
 				}
 			}
-		})
+		});
 
-		var closing = {
-			account: "Closing (Opening + Totals)", debit: opening.debit + totals.debit, 
-				credit: opening.credit + totals.credit, 
-				id:"_closing", _show: true, _style: "font-weight: bold"
-		}
-							
-		
+		var closing = this.make_summary_row("Closing (Opening + Totals)", this.account);
+		closing.debit = opening.debit + totals.debit;
+		closing.credit = opening.credit + totals.credit;
+
 		if(me.account) {
 			me.appframe.set_title("General Ledger: " + me.account);
+
+			// group by ledgers
+			if(this.account_by_name[this.account].group_or_ledger==="Group"
+				&& this.group_by_ledger) {
+					out = this.group_data_by_ledger(grouped_ledgers);
+			}
 			
 			if(me.account_by_name[me.account].debit_or_credit == "Debit") {
 				opening.debit -= opening.credit; opening.credit = 0;
@@ -221,13 +250,53 @@ erpnext.GeneralLedger = wn.views.GridReport.extend({
 				opening.credit -= opening.debit; opening.debit = 0;
 				closing.credit -= closing.debit; closing.debit = 0;
 			}
-			var out = [opening].concat(out).concat([totals, closing]);
+			out = [opening].concat(out).concat([totals, closing]);
 		} else {
 			me.appframe.set_title("General Ledger");
-			var out = out.concat([totals]);
+			out = out.concat([totals]);
 		}
-					
+
 		this.data = out;
+	},
+
+	group_data_by_ledger: function(grouped_ledgers) {
+		var out = []
+		$.each(Object.keys(grouped_ledgers).sort(), function(i, account) {
+			if(grouped_ledgers[account].entries.length) {
+				grouped_ledgers[account].closing.debit = 
+					grouped_ledgers[account].opening.debit
+					+ grouped_ledgers[account].totals.debit;
+
+				grouped_ledgers[account].closing.credit = 
+					grouped_ledgers[account].opening.credit
+					+ grouped_ledgers[account].totals.credit;
+
+				out = out.concat([grouped_ledgers[account].opening])
+					.concat(grouped_ledgers[account].entries)
+					.concat([grouped_ledgers[account].totals, 
+						grouped_ledgers[account].closing,
+						{id: "_blank" + i, _no_format: true, debit: "", credit: ""}]);
+			}
+		});
+		return [{id: "_blank_first", _no_format: true, debit: "", credit: ""}].concat(out);
+	},
+
+	make_summary_row: function(label, item_account) {
+		return {
+			account: label,
+			debit: 0.0,
+			credit: 0.0,
+			id: ["", label, item_account].join("_").replace(" ", "_").toLowerCase(),
+			_show: true,
+			_style: "font-weight: bold"
+		}
+	},
+
+	make_account_by_name: function() {
+		if(!this.account_by_name) {
+			this.account_by_name = this.make_name_map(wn.report_dump.data["Account"]);
+			this.make_voucher_acconuts_map();
+		}
 	},
 	
 	make_voucher_acconuts_map: function() {
