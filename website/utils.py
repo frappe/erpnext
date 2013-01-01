@@ -97,7 +97,7 @@ def page_name(title):
 	import re
 	name = title.lower()
 	name = re.sub('[~!@#$%^&*()<>,."\']', '', name)
-	return '-'.join(name.split()[:4])
+	return '-'.join(name.split()[:8])
 
 def update_page_name(doc, title):
 	"""set page_name and check if it is unique"""
@@ -145,7 +145,7 @@ def prepare_args(page_name):
 	
 	if page_name in get_template_pages():
 		args = webnotes._dict({
-			'template': 'pages/%s.html' % page_name,
+			'template': 'pages/%s' % page_name,
 			'name': page_name,
 		})
 		if page_name in page_settings_map:
@@ -218,7 +218,7 @@ def get_outer_env():
 	if top_items and ("products" in [d.url.split(".")[0] for d in top_items if d.url]):
 		# product categories
 		products = webnotes.conn.sql("""select t1.item_group as label, 
-			concat(t2.page_name, ".html") as url,
+			t2.page_name as url,
 			ifnull(t1.indent,0) as indent
 			from `tabWebsite Product Category` t1, `tabItem Group` t2 
 			where t1.item_group = t2.name

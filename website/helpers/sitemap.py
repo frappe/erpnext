@@ -31,7 +31,7 @@ def generate(domain):
 				order by modified desc""" % (doctype, d.condition_field))
 		
 			for p in pages:
-				page_url = os.path.join(domain, urllib.quote(p[0]) + '.html')
+				page_url = os.path.join(domain, urllib.quote(p[0]))
 				modified = p[1].strftime('%Y-%m-%d')
 				site_map += link_xml % (page_url, modified)
 

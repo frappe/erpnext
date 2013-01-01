@@ -53,7 +53,7 @@ var blog = {
 				b.comment_text = b.comments + ' comments.'
 			} 
 			
-			$(repl('<h2><a href="%(page_name)s.html">%(title)s</a></h2>\
+			$(repl('<h2><a href="%(page_name)s">%(title)s</a></h2>\
 				<div class="help">%(comment_text)s</div>\
 				%(content)s<br />\
 				<p><a href="%(page_name)s">Read with comments...</a></p>\
