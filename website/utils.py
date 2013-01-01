@@ -145,7 +145,7 @@ def prepare_args(page_name):
 	
 	if page_name in get_template_pages():
 		args = webnotes._dict({
-			'template': 'pages/%s' % page_name,
+			'template': 'pages/%s.html' % page_name,
 			'name': page_name,
 		})
 		if page_name in page_settings_map:
