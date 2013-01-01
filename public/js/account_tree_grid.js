@@ -51,20 +51,21 @@ erpnext.AccountTreeGrid = wn.views.TreeGridReport.extend({
 
 	},
 	filters: [
-		{fieldtype:"Select", label: "Company", link:"Company", default_value: "Select Company...",
+		{fieldtype: "Select", label: "Company", link:"Company", default_value: "Select Company...",
 			filter: function(val, item, opts, me) {
 				if (item.company == val || val == opts.default_value) {
 					return me.apply_zero_filter(val, item, opts, me);
 				}
 				return false;
 			}},
-		{fieldtype:"Select", label: "Fiscal Year", link:"Fiscal Year", 
+		{fieldtype: "Select", label: "Fiscal Year", link:"Fiscal Year", 
 			default_value: "Select Fiscal Year..."},
-		{fieldtype:"Date", label: "From Date"},
-		{fieldtype:"Label", label: "To"},
-		{fieldtype:"Date", label: "To Date"},
-		{fieldtype:"Button", label: "Refresh", icon:"icon-refresh icon-white", cssClass:"btn-info"},
-		{fieldtype:"Button", label: "Reset Filters"}
+		{fieldtype: "Date", label: "From Date"},
+		{fieldtype: "Label", label: "To"},
+		{fieldtype: "Date", label: "To Date"},
+		{fieldtype: "Button", label: "Refresh", icon:"icon-refresh icon-white",
+		 	cssClass:"btn-info"},
+		{fieldtype: "Button", label: "Reset Filters"},
 	],
 	setup_filters: function() {
 		this._super();
@@ -81,6 +82,7 @@ erpnext.AccountTreeGrid = wn.views.TreeGridReport.extend({
 			me.set_route();
 		});
 		me.show_zero_check()
+		if(me.ignore_closing_entry) me.ignore_closing_entry();
 	},
 	prepare_data: function() {
 		var me = this;
