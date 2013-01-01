@@ -104,18 +104,21 @@ erpnext.GeneralLedger = wn.views.GridReport.extend({
 		var me = this;
 		
 		this.accounts_by_company = this.make_accounts_by_company();
+		
 		// filter accounts options by company
-		this.filter_inputs.company && this.filter_inputs.company.change(function() {
+		this.filter_inputs.company.change(function() {
 			me.setup_account_filter(this);
 			me.filter_inputs.refresh.click();
 		});
-
-		this.filter_inputs.account && this.filter_inputs.group_by_ledger 
-			&& this.filter_inputs.account.change(function() {
-				me.make_account_by_name();
-				me.filter_inputs.group_by_ledger.parent()
-					.toggle(!!(me.account_by_name[$(this).val()] && me.account_by_name[$(this).val()].group_or_ledger==="Group"));
-			});
+		
+		this.filter_inputs.account.change(function() {
+			me.make_account_by_name();
+			me.filter_inputs.group_by_ledger
+				.parent().toggle(!!(me.account_by_name[$(this).val()] 
+					&& me.account_by_name[$(this).val()].group_or_ledger==="Group"));
+		});
+		
+		this.trigger_refresh_on_change(["group_by_ledger"]);
 	},
 	setup_account_filter: function(company_filter) {
 		var me = this;
@@ -135,11 +138,13 @@ erpnext.GeneralLedger = wn.views.GridReport.extend({
 	},
 	init_filter_values: function() {
 		this._super();
+		this.filter_inputs.group_by_ledger.parent().toggle(false);
 		this.filter_inputs.company.change();
 		this.filter_inputs.account.change();
 	},
 	apply_filters_from_route: function() {
 		this._super();
+		this.filter_inputs.group_by_ledger.parent().toggle(false);
 		this.filter_inputs.company.change();
 		this.filter_inputs.account.change();
 	},
@@ -215,7 +220,7 @@ erpnext.GeneralLedger = wn.views.GridReport.extend({
 
 				if(me.account) {
 					item.against_account = me.voucher_accounts[item.voucher_type + ":"
-						+ item.voucher_no][(item.debit > 0 ? "credits" : "debits")].join(", ");					
+						+ item.voucher_no][(item.debit > 0 ? "credits" : "debits")].join(", ");
 				}
 
 				if(me.apply_filters(item) && item.is_opening=="No") {
@@ -269,10 +274,11 @@ erpnext.GeneralLedger = wn.views.GridReport.extend({
 				out = out.concat([grouped_ledgers[account].opening])
 					.concat(grouped_ledgers[account].entries)
 					.concat([grouped_ledgers[account].totals, 
-						grouped_ledgers[account].closing]);
+						grouped_ledgers[account].closing,
+						{id: "_blank" + i, _no_format: true, debit: "", credit: ""}]);
 			}
 		});
-		return out;
+		return [{id: "_blank_first", _no_format: true, debit: "", credit: ""}].concat(out);
 	},
 
 	make_summary_row: function(label, item_account) {
