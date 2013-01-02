@@ -20,6 +20,7 @@ import webnotes
 import webnotes.utils
 from webnotes.utils import cstr
 from webnotes.model.doc import Document
+from webnotes import _
 
 class DocType():
 	def __init__(self, d, dl):
@@ -51,7 +52,7 @@ class DocType():
 		"""send emails to leads and customers"""
 		if self.doc.email_sent:
 			webnotes.msgprint("""Newsletter has already been sent""", raise_exception=1)
-		
+
 		self.all_recipients = []
 		self.send_count = {}
 		
@@ -82,8 +83,11 @@ class DocType():
 			", ".join(["%d %s(s)" % (self.send_count[s], s) for s in self.send_count]))
 			
 	def test_send(self, doctype="Lead"):
+		self.validate_send()
+
 		args = self.dt_map[doctype]
-		sender = webnotes.utils.get_email_id(self.doc.owner)
+
+		sender = self.doc.send_from or webnotes.utils.get_email_id(self.doc.owner)
 		recipients = self.doc.test_email_id.split(",")
 		from webnotes.utils.email_lib.bulk import send
 		send(recipients = recipients, sender = sender, 
@@ -98,12 +102,14 @@ class DocType():
 		return recipients
 		
 	def send(self, query_key, doctype):
+		self.validate_send()
+
 		webnotes.conn.auto_commit_on_many_writes = True
 		if isinstance(query_key, basestring) and self.query_map.has_key(query_key):
 			recipients = self.get_recipients(query_key)
 		else:
 			recipients = query_key
-		sender = webnotes.utils.get_email_id(self.doc.owner)
+		sender = self.doc.send_from or webnotes.utils.get_email_id(self.doc.owner)
 		args = self.dt_map[doctype]
 		self.send_count[doctype] = self.send_count.setdefault(doctype, 0) + \
 			len(recipients)
@@ -112,7 +118,17 @@ class DocType():
 		send(recipients = recipients, sender = sender, 
 			subject = self.doc.subject, message = self.doc.message,
 			doctype = doctype, email_field = args["email_field"])
-			
+
+	def validate_send(self):
+		if self.doc.fields.get("__islocal"):
+			webnotes.msgprint(_("""Please save the Newsletter before sending."""),
+				raise_exception=1)
+
+		import conf
+		if getattr(conf, "status", None) == "Trial":
+			webnotes.msgprint(_("""Sending newsletters is not allowed for Trial users, \
+				to prevent abuse of this feature."""), raise_exception=1)
+
 lead_naming_series = None
 def create_lead(email_id):
 	"""create a lead if it does not exist"""
