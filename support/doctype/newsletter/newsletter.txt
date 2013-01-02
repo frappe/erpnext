@@ -4,7 +4,7 @@
   "docstatus": 0, 
   "creation": "2013-01-01 13:46:34", 
   "modified_by": "Administrator", 
-  "modified": "2013-01-02 13:03:29"
+  "modified": "2013-01-02 13:47:36"
  }, 
  {
   "autoname": "naming_series:", 
