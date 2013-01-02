@@ -10,6 +10,7 @@ def get_feed(arg=None):
 		from tabFeed t1, tabDocPerm t2
 		where t1.doc_type = t2.parent
 		and t2.role in ('%s')
+		and t2.permlevel = 0
 		and ifnull(t2.`read`,0) = 1
 		order by t1.modified desc
 		limit %s, %s""" % ("','".join(webnotes.get_roles()), 
