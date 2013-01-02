@@ -574,4 +574,8 @@ patch_list = [
 		'patch_module': 'patches.december_2012',
 		'patch_file': 'update_print_width',
 	},
+	{
+		'patch_module': 'patches.january_2013',
+		'patch_file': 'deprecate_stock_search_criteria',
+	},
 ]
