@@ -5,7 +5,7 @@ erpnext.updates = [
 		"General Ledger: Now, on filter of any account group, you will have an option to see \
 			the report <b>grouped by ledgers</b> under that group and with opening \
 			and closing balance for each of them."
-	]]
+	]],
 	["28th December 2012", [
 		"Workflow: Added System for Multi-level approval before Submission. \
 			<br>See video at <a href='https://www.youtube.com/watch?v=zuGv59_wJKw' \
