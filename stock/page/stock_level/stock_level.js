@@ -143,32 +143,9 @@ erpnext.StockLevel = erpnext.StockGridReport.extend({
 
 		if(!this._data) {
 			this._data = [];
-			this.item_warehouse_map = [];
+			this.item_warehouse_map = {};
 			this.item_by_name = this.make_name_map(wn.report_dump.data["Item"]);
-			var sorted_item_list = Object.keys(this.item_by_name).sort();
-			$.each(sorted_item_list, function(i, item_code) {
-				var item = me.item_by_name[item_code];
-				$.each(wn.report_dump.data["Warehouse"], function(i, warehouse) {
-					// a list of item warehouse combination objects
-					var row = {
-						item_code: item_code,
-						warehouse: warehouse.name,
-						brand: item.brand,
-						item_name: item.item_name || item.name,
-						uom: item.stock_uom,
-						id: item_code + ":" + warehouse.name,
-					}
-					me.reset_item_values(row);
-					me._data.push(row);
-					me.item_warehouse_map[row.id] = row;
-				});
-			});
 			this.calculate_quantities();
-			
-			// filter out rows with zero values
-			this._data = $.map(this._data, function(d) {
-				return me.apply_zero_filter(null, d, null, me) ? d : null;
-			});
 		}
 		
 		this.data = [].concat(this._data);
@@ -189,16 +166,45 @@ erpnext.StockLevel = erpnext.StockGridReport.extend({
 			["Sales Order Item", "reserved_qty"]], 
 			function(i, v) {
 				$.each(wn.report_dump.data[v[0]], function(i, item) {
-					var row = me.item_warehouse_map[item.item_code + ":" + item.warehouse];
+					var row = me.get_row(item.item_code, item.warehouse);
 					row[v[1]] += flt(item.qty);
 				});
 			}
 		);
-		
+
+		// sort by item, warehouse
+		this._data = $.map(Object.keys(this.item_warehouse_map).sort(), function(key) {
+			return me.item_warehouse_map[key];
+		});
+
+		// calculate projected qty
 		$.each(this._data, function(i, row) {
 			row.projected_qty = row.actual_qty + row.planned_qty + row.requested_qty
 				+ row.ordered_qty - row.reserved_qty;
 		});
+
+		// filter out rows with zero values
+		this._data = $.map(this._data, function(d) {
+			return me.apply_zero_filter(null, d, null, me) ? d : null;
+		});
+	},
+
+	get_row: function(item_code, warehouse) {
+		var key = item_code + ":" + warehouse;
+		if(!this.item_warehouse_map[key]) {
+			var item = this.item_by_name[item_code];
+			var row = {
+				item_code: item_code,
+				warehouse: warehouse,
+				brand: item.brand,
+				item_name: item.item_name || item.name,
+				uom: item.stock_uom,
+				id: key,
+			}
+			this.reset_item_values(row);
+			this.item_warehouse_map[key] = row;
+		}
+		return this.item_warehouse_map[key];
 	},
 	
 	calculate_total: function() {

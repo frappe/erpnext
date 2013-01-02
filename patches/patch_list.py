@@ -348,10 +348,6 @@ patch_list = [
 	},
 	{
 		'patch_module': 'patches.september_2012',
-		'patch_file': 'reload_criteria_stock_ledger',
-	},
-	{
-		'patch_module': 'patches.september_2012',
 		'patch_file': 'all_permissions_patch',
 	},
 	{
@@ -429,10 +425,6 @@ patch_list = [
 	{
 		'patch_module': 'patches.november_2012',
 		'patch_file': 'custom_field_insert_after',
-	},
-	{
-		'patch_module': 'patches.november_2012',
-		'patch_file': 'reload_stock_ledger_report',
 	},
 	{
 		'patch_module': 'patches.november_2012',
