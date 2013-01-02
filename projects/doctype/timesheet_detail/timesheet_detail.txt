@@ -2,11 +2,12 @@
  {
   "owner": "Administrator", 
   "docstatus": 0, 
-  "creation": "2012-11-30 18:13:54", 
+  "creation": "2012-12-03 10:31:04", 
   "modified_by": "Administrator", 
-  "modified": "2012-12-03 09:33:28"
+  "modified": "2013-01-02 12:46:48"
  }, 
  {
+  "istable": 1, 
   "autoname": "TSD.#####", 
   "name": "__common__", 
   "doctype": "DocType", 
@@ -24,6 +25,7 @@
   "doctype": "DocType"
  }, 
  {
+  "print_width": "160px", 
   "oldfieldtype": "Time", 
   "doctype": "DocField", 
   "label": "Actual Start Time", 
@@ -35,6 +37,7 @@
   "permlevel": 0
  }, 
  {
+  "print_width": "160px", 
   "oldfieldtype": "Time", 
   "doctype": "DocField", 
   "label": "Actual End Time", 
@@ -46,17 +49,19 @@
   "permlevel": 0
  }, 
  {
+  "print_width": "200px", 
+  "permlevel": 0, 
   "search_index": 0, 
   "doctype": "DocField", 
   "label": "Activity Type", 
   "width": "200px", 
-  "options": "Activity Type", 
   "fieldname": "activity_type", 
   "fieldtype": "Link", 
   "reqd": 1, 
-  "permlevel": 0
+  "options": "Activity Type"
  }, 
  {
+  "print_width": "200px", 
   "oldfieldtype": "Text", 
   "doctype": "DocField", 
   "label": "Additional Info", 
@@ -67,6 +72,7 @@
   "permlevel": 0
  }, 
  {
+  "print_width": "100px", 
   "oldfieldtype": "Data", 
   "doctype": "DocField", 
   "label": "Total Hours (Actual)", 
@@ -77,6 +83,7 @@
   "permlevel": 1
  }, 
  {
+  "print_width": "150px", 
   "oldfieldtype": "Data", 
   "doctype": "DocField", 
   "label": "Customer Name", 
@@ -88,6 +95,7 @@
   "permlevel": 0
  }, 
  {
+  "print_width": "150px", 
   "permlevel": 0, 
   "oldfieldtype": "Link", 
   "doctype": "DocField", 
@@ -102,19 +110,21 @@
   "in_filter": 1
  }, 
  {
+  "print_width": "150px", 
+  "permlevel": 0, 
   "oldfieldtype": "Link", 
   "doctype": "DocField", 
   "label": "Task Id", 
   "oldfieldname": "task_id", 
   "width": "150px", 
-  "options": "Task", 
   "fieldname": "task_id", 
   "fieldtype": "Link", 
   "search_index": 1, 
-  "permlevel": 0, 
+  "options": "Task", 
   "in_filter": 1
  }, 
  {
+  "print_width": "250px", 
   "oldfieldtype": "Link", 
   "doctype": "DocField", 
   "label": "Task Name", 

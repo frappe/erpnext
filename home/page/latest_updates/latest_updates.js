@@ -1,4 +1,8 @@
 erpnext.updates = [
+	["2nd January 2013", [
+		"Permission Manager: New Design with better help and better advanced permission selection.",
+		"User Properties: Better way to set User Properties (defaults).",
+	]],
 	["1st January 2013", [
 		"Trial Balance: Added an option to see the report <b>without period closing entry</b>\
 			You will find this checkbox at the bottom of the report.",
