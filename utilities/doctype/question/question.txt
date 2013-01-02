@@ -2,24 +2,18 @@
  {
   "owner": "Administrator", 
   "docstatus": 0, 
-  "creation": "2012-03-27 14:36:01", 
+  "creation": "2012-07-03 13:30:42", 
   "modified_by": "Administrator", 
-  "modified": "2012-03-27 14:36:01"
+  "modified": "2013-01-01 18:58:55"
  }, 
  {
-  "section_style": "Simple", 
-  "allow_attach": 0, 
-  "module": "Utilities", 
-  "allow_trash": 1, 
-  "server_code_error": " ", 
-  "in_create": 1, 
   "read_only": 1, 
   "autoname": "QUES.#######", 
+  "in_create": 1, 
   "name": "__common__", 
-  "colour": "White:FFF", 
   "doctype": "DocType", 
-  "show_in_menu": 0, 
-  "version": 7
+  "module": "Utilities", 
+  "allow_attach": 0
  }, 
  {
   "name": "__common__", 
@@ -32,10 +26,10 @@
  {
   "parent": "Question", 
   "read": 1, 
-  "doctype": "DocPerm", 
   "cancel": 1, 
   "name": "__common__", 
   "create": 1, 
+  "doctype": "DocPerm", 
   "write": 1, 
   "parenttype": "DocType", 
   "role": "All", 
@@ -45,9 +39,6 @@
  {
   "name": "Question", 
   "doctype": "DocType"
- }, 
- {
-  "doctype": "DocPerm"
  }, 
  {
   "oldfieldtype": "Text", 
@@ -80,40 +71,10 @@
   "hidden": 1
  }, 
  {
-  "search_index": 0, 
   "doctype": "DocField", 
-  "label": "Tag 1", 
-  "oldfieldname": "tag_1", 
-  "fieldname": "tag_1", 
-  "fieldtype": "Link", 
-  "oldfieldtype": "Link", 
-  "options": "Question Tag"
- }, 
- {
-  "doctype": "DocField", 
+  "label": "Users Voted", 
   "fieldname": "_users_voted", 
-  "fieldtype": "Text", 
-  "label": "Users Voted"
- }, 
- {
-  "search_index": 0, 
-  "doctype": "DocField", 
-  "label": "Tag 2", 
-  "oldfieldname": "tag_2", 
-  "fieldname": "tag_2", 
-  "fieldtype": "Link", 
-  "oldfieldtype": "Link", 
-  "options": "Question Tag"
- }, 
- {
-  "search_index": 0, 
-  "doctype": "DocField", 
-  "label": "Tag 3", 
-  "oldfieldname": "tag_3", 
-  "fieldname": "tag_3", 
-  "fieldtype": "Link", 
-  "oldfieldtype": "Link", 
-  "options": "Question Tag"
+  "fieldtype": "Text"
  }, 
  {
   "oldfieldtype": "Text", 
@@ -123,5 +84,8 @@
   "fieldname": "file_list", 
   "fieldtype": "Text", 
   "hidden": 1
+ }, 
+ {
+  "doctype": "DocPerm"
  }
 ]
