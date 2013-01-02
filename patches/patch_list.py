@@ -568,19 +568,10 @@ patch_list = [
 	},
 	{
 		'patch_module': 'patches.january_2013',
-<<<<<<< HEAD
 		'patch_file': 'remove_bad_permissions',
 	},	
 	{
 		'patch_module': 'patches.january_2013',
 		'patch_file': 'deprecate_stock_search_criteria',
 	},
-=======
-		'patch_file': 'deprecate_stock_search_criteria',
-	},
-	{
-		'patch_module': 'patches.january_2013',
-		'patch_file': 'remove_bad_permissions',
-	},	
->>>>>>> 93a02a3995e93ec0915d99ecfeabf456b65591b4
 ]
