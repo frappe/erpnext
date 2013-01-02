@@ -243,13 +243,9 @@ erpnext.GeneralLedger = wn.views.GridReport.extend({
 					out = this.group_data_by_ledger(grouped_ledgers);
 			}
 			
-			if(me.account_by_name[me.account].debit_or_credit == "Debit") {
-				opening.debit -= opening.credit; opening.credit = 0;
-				closing.debit -= closing.credit; closing.credit = 0;
-			} else {
-				opening.credit -= opening.debit; opening.debit = 0;
-				closing.credit -= closing.debit; closing.debit = 0;
-			}
+			opening = me.get_balance(me.account_by_name[me.account].debit_or_credit, opening)
+			closing = me.get_balance(me.account_by_name[me.account].debit_or_credit, closing)
+			
 			out = [opening].concat(out).concat([totals, closing]);
 		} else {
 			me.appframe.set_title("General Ledger");
@@ -260,6 +256,7 @@ erpnext.GeneralLedger = wn.views.GridReport.extend({
 	},
 
 	group_data_by_ledger: function(grouped_ledgers) {
+		var me = this;
 		var out = []
 		$.each(Object.keys(grouped_ledgers).sort(), function(i, account) {
 			if(grouped_ledgers[account].entries.length) {
@@ -270,7 +267,14 @@ erpnext.GeneralLedger = wn.views.GridReport.extend({
 				grouped_ledgers[account].closing.credit = 
 					grouped_ledgers[account].opening.credit
 					+ grouped_ledgers[account].totals.credit;
-
+			
+				grouped_ledgers[account].opening = 
+					me.get_balance(me.account_by_name[me.account].debit_or_credit,
+					grouped_ledgers[account].opening)
+				grouped_ledgers[account].closing = 
+					me.get_balance(me.account_by_name[me.account].debit_or_credit, 
+					grouped_ledgers[account].closing)
+				
 				out = out.concat([grouped_ledgers[account].opening])
 					.concat(grouped_ledgers[account].entries)
 					.concat([grouped_ledgers[account].totals, 
@@ -279,6 +283,15 @@ erpnext.GeneralLedger = wn.views.GridReport.extend({
 			}
 		});
 		return [{id: "_blank_first", _no_format: true, debit: "", credit: ""}].concat(out);
+	},
+	
+	get_balance: function(debit_or_credit, balance) {
+		if(debit_or_credit == "Debit") {
+			balance.debit -= balance.credit; balance.credit = 0;
+		} else {
+			balance.credit -= balance.debit; balance.debit = 0;
+		}
+		return balance
 	},
 
 	make_summary_row: function(label, item_account) {
