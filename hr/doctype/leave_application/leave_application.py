@@ -32,10 +32,6 @@ class DocType:
 		
 	def validate(self):
 		# if self.doc.leave_approver == self.doc.owner:
-		# 	webnotes.msgprint("""Self Approval is not allowed.""", raise_exception=1)
-		import utilities
-		utilities.validate_status(self.doc.status, ["Open", "Approved", "Rejected"])
-
 		self.validate_to_date()
 		self.validate_balance_leaves()
 		self.validate_leave_overlap()
@@ -43,7 +39,7 @@ class DocType:
 		
 	def on_submit(self):
 		if self.doc.status != "Approved":
-			webnotes.msgprint("""Only Approved Leave Applications can be Submitted.""",
+			webnotes.msgprint("""Only Leave Applications with status 'Approved' can be Submitted.""",
 				raise_exception=True)
 
 	def get_holidays(self):
