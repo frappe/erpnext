@@ -2,9 +2,9 @@
  {
   "owner": "Administrator", 
   "docstatus": 0, 
-  "creation": "2012-08-06 20:00:38", 
+  "creation": "2012-12-19 22:38:55", 
   "modified_by": "Administrator", 
-  "modified": "2012-12-19 11:57:28"
+  "modified": "2013-01-04 13:13:47"
  }, 
  {
   "istable": 1, 
@@ -78,6 +78,7 @@
   "in_filter": 1
  }, 
  {
+  "print_width": "300px", 
   "oldfieldtype": "Small Text", 
   "doctype": "DocField", 
   "label": "Description", 
@@ -89,6 +90,7 @@
   "permlevel": 0
  }, 
  {
+  "print_width": "60px", 
   "default": "0.00", 
   "oldfieldtype": "Currency", 
   "doctype": "DocField", 
@@ -99,6 +101,20 @@
   "fieldtype": "Currency", 
   "reqd": 1, 
   "permlevel": 0
+ }, 
+ {
+  "print_hide": 0, 
+  "print_width": "100px", 
+  "permlevel": 0, 
+  "oldfieldtype": "Link", 
+  "doctype": "DocField", 
+  "label": "UOM", 
+  "oldfieldname": "uom", 
+  "width": "100px", 
+  "fieldname": "uom", 
+  "fieldtype": "Link", 
+  "reqd": 1, 
+  "options": "UOM"
  }, 
  {
   "print_hide": 1, 
@@ -146,6 +162,7 @@
  }, 
  {
   "print_hide": 1, 
+  "print_width": "100px", 
   "default": "0.00", 
   "oldfieldtype": "Currency", 
   "doctype": "DocField", 
@@ -194,20 +211,8 @@
   "in_filter": 1
  }, 
  {
-  "print_hide": 0, 
-  "oldfieldtype": "Link", 
-  "doctype": "DocField", 
-  "label": "UOM", 
-  "oldfieldname": "uom", 
-  "width": "100px", 
-  "options": "UOM", 
-  "fieldname": "uom", 
-  "fieldtype": "Link", 
-  "reqd": 1, 
-  "permlevel": 0
- }, 
- {
   "print_hide": 1, 
+  "print_width": "100px", 
   "oldfieldtype": "Currency", 
   "doctype": "DocField", 
   "label": "UOM Conversion Factor", 
@@ -221,6 +226,7 @@
  }, 
  {
   "print_hide": 1, 
+  "print_width": "100px", 
   "oldfieldtype": "Data", 
   "doctype": "DocField", 
   "label": "Stock UOM", 
@@ -247,6 +253,7 @@
  {
   "print_hide": 1, 
   "permlevel": 1, 
+  "print_width": "120px", 
   "no_copy": 0, 
   "oldfieldtype": "Link", 
   "doctype": "DocField", 
@@ -263,12 +270,12 @@
  {
   "print_hide": 1, 
   "oldfieldtype": "Date", 
-  "search_index": 0, 
   "doctype": "DocField", 
   "label": "Purchase Request Date", 
   "oldfieldname": "prevdoc_date", 
   "fieldname": "prevdoc_date", 
   "fieldtype": "Date", 
+  "search_index": 0, 
   "hidden": 1, 
   "permlevel": 1, 
   "in_filter": 1
@@ -326,15 +333,16 @@
   "label": "Item Group", 
   "oldfieldname": "item_group", 
   "permlevel": 1, 
-  "options": "Item Group", 
   "fieldname": "item_group", 
   "fieldtype": "Link", 
   "search_index": 0, 
   "hidden": 1, 
+  "options": "Item Group", 
   "in_filter": 1
  }, 
  {
   "print_hide": 1, 
+  "print_width": "100px", 
   "no_copy": 1, 
   "oldfieldtype": "Currency", 
   "doctype": "DocField", 
@@ -361,11 +369,11 @@
  {
   "print_hide": 1, 
   "default": "0.00", 
-  "no_copy": 1, 
   "oldfieldtype": "Currency", 
   "doctype": "DocField", 
   "label": "Billed Quantity", 
   "oldfieldname": "billed_qty", 
+  "no_copy": 1, 
   "fieldname": "billed_qty", 
   "fieldtype": "Currency", 
   "hidden": 0, 

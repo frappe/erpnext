@@ -130,6 +130,12 @@ erpnext.StockBalance = erpnext.StockAnalytics.extend({
 				}
 			}
 		}
+
+		// opening + diff = closing
+		// adding opening, since diff already added to closing		
+		$.each(me.item_by_name, function(key, item) {
+			item.closing += item.opening;
+		});
 	},
 	
 	update_groups: function() {

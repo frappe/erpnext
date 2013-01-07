@@ -215,6 +215,13 @@ data_map = {
 			"parent": ["Purchase Invoice", "name"],
 			"item_code": ["Item", "name"]
 		}
+	},
+	
+	# Support
+	"Support Ticket": {
+		"columns": ["name","status","creation","modified"],
+		"conditions": ["docstatus < 2"],
+		"order_by": "creation"
 	}
 	
 }
