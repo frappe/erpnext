@@ -69,26 +69,6 @@ class DocType:
 		""", (self.doc.item_code, self.doc.warehouse), as_dict=1)
 		return sle and sle[0] or None
 
-	def get_prev_sle(self, posting_date = '1900-01-01', posting_time = '12:00', sle_id = ''):
-		"""
-			get the last sle on or before the current time-bucket, 
-			to get actual qty before transaction, this function
-			is called from various transaction like stock entry, reco etc
-		"""
-		
-		sle = sql("""
-			select * from `tabStock Ledger Entry`
-			where item_code = %s
-			and warehouse = %s
-			and ifnull(is_cancelled, 'No') = 'No'
-			and name != %s
-			and timestamp(posting_date, posting_time) <= timestamp(%s, %s)
-			order by timestamp(posting_date, posting_time) desc, name desc
-			limit 1
-		""", (self.doc.item_code, self.doc.warehouse, sle_id, posting_date, posting_time), as_dict=1)
-
-		return sle and sle[0] or {}
-
 	def get_sle_prev_timebucket(self, posting_date = '1900-01-01', posting_time = '12:00'):
 		"""get previous stock ledger entry before current time-bucket"""
 		# get the last sle before the current time-bucket, so that all values
@@ -242,13 +222,14 @@ class DocType:
 		
 		# normal
 		else:
-			cqty = flt(prev_sle.get('bin_aqat', 0))
+			cqty = flt(prev_sle.get('qty_after_transaction', 0))
 			cval =flt(prev_sle.get('stock_value', 0))
 			val_rate = flt(prev_sle.get('valuation_rate', 0))
-			self.fcfs_bal = eval(prev_sle.get('fcfs_stack', '[]') or '[]')
+			self.fcfs_bal = eval(prev_sle.get('stock_queue', '[]') or '[]')
 
 		# get valuation method
-		val_method = get_obj('Valuation Control').get_valuation_method(self.doc.item_code)
+		from stock.utils import get_valuation_method
+		val_method = get_valuation_method(self.doc.item_code)
 
 		# allow negative stock (only for moving average method)
 		from webnotes.utils import get_defaults
@@ -289,7 +270,7 @@ class DocType:
 			stock_val = self.get_stock_value(val_method, cqty, val_rate, serial_nos) 
 			# update current sle 
 			sql("""update `tabStock Ledger Entry` 
-				set bin_aqat=%s, valuation_rate=%s, fcfs_stack=%s, stock_value=%s, 
+				set qty_after_transaction=%s, valuation_rate=%s, stock_queue=%s, stock_value=%s, 
 				incoming_rate = %s where name=%s""", \
 				(cqty, flt(val_rate), cstr(self.fcfs_bal), stock_val, in_rate, sle['name']))
 		

@@ -10,7 +10,7 @@
   "name": "__common__", 
   "ref_doctype": "Stock Ledger Entry", 
   "doctype": "Report", 
-  "json": "{\"filters\":[[\"Stock Ledger Entry\",\"is_cancelled\",\"=\",\"No\"]],\"columns\":[[\"item_code\",\"Stock Ledger Entry\"],[\"warehouse\",\"Stock Ledger Entry\"],[\"posting_date\",\"Stock Ledger Entry\"],[\"posting_time\",\"Stock Ledger Entry\"],[\"actual_qty\",\"Stock Ledger Entry\"],[\"bin_aqat\",\"Stock Ledger Entry\"],[\"voucher_type\",\"Stock Ledger Entry\"],[\"voucher_no\",\"Stock Ledger Entry\"]],\"sort_by\":\"Stock Ledger Entry.posting_date\",\"sort_order\":\"desc\",\"sort_by_next\":\"Stock Ledger Entry.posting_time\",\"sort_order_next\":\"desc\"}"
+  "json": "{\"filters\":[[\"Stock Ledger Entry\",\"is_cancelled\",\"=\",\"No\"]],\"columns\":[[\"item_code\",\"Stock Ledger Entry\"],[\"warehouse\",\"Stock Ledger Entry\"],[\"posting_date\",\"Stock Ledger Entry\"],[\"posting_time\",\"Stock Ledger Entry\"],[\"actual_qty\",\"Stock Ledger Entry\"],[\"qty_after_transaction\",\"Stock Ledger Entry\"],[\"voucher_type\",\"Stock Ledger Entry\"],[\"voucher_no\",\"Stock Ledger Entry\"]],\"sort_by\":\"Stock Ledger Entry.posting_date\",\"sort_order\":\"desc\",\"sort_by_next\":\"Stock Ledger Entry.posting_time\",\"sort_order_next\":\"desc\"}"
  }, 
  {
   "name": "Stock Ledger", 

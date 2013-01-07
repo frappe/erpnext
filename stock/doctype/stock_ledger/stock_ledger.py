@@ -23,22 +23,9 @@ from webnotes.model.doc import Document
 from webnotes.model.wrapper import getlist, copy_doclist
 from webnotes.model.code import get_obj
 from webnotes import session, msgprint
+from stock.utils import get_valid_serial_nos
 
 sql = webnotes.conn.sql
-
-
-def get_sr_no_list(sr_nos, qty = 0, item_code = ''):
-	serial_nos = cstr(sr_nos).strip().replace(',', '\n').split('\n')
-	valid_serial_nos = []
-	for val in serial_nos:
-		if val:
-			if val in valid_serial_nos:
-				msgprint("You have entered duplicate serial no: %s" % val, raise_exception=1)
-			else:
-				valid_serial_nos.append(val.strip())
-	if qty and cstr(sr_nos).strip() and len(valid_serial_nos) != abs(qty):
-		msgprint("Please enter serial nos for "+ cstr(abs(qty)) + " quantity against item code: " + item_code , raise_exception = 1)
-	return valid_serial_nos
 
 class DocType:
 	def __init__(self, doc, doclist=[]):
@@ -60,7 +47,7 @@ class DocType:
 		for d in getlist(obj.doclist, fname):
 			wh = d.warehouse or d.s_warehouse
 			if d.serial_no and wh:
-				serial_nos = self.get_sr_no_list(d.serial_no)
+				serial_nos = get_valid_serial_nos(d.serial_no)
 				for s in serial_nos:
 					s = s.strip()
 					sr_war = sql("select warehouse,name from `tabSerial No` where name = '%s'" % (s))
@@ -93,10 +80,6 @@ class DocType:
 			if fname == 'purchase_receipt_details' and flt(d.rejected_qty) > 0 and ar_required == 'Yes' and not d.rejected_serial_no:
 				msgprint("Rejected serial no is mandatory for rejected qty of item: "+ d.item_code, raise_exception = 1)
 				
-				
-	def get_sr_no_list(self, sr_nos, qty = 0, item_code = ''):
-		return get_sr_no_list(sr_nos, qty, item_code)
-
 
 	def set_pur_serial_no_values(self, obj, serial_no, d, s, new_rec, rejected=None):
 		item_details = sql("""select item_group, warranty_period 
@@ -193,7 +176,7 @@ class DocType:
 		import datetime
 		for d in getlist(obj.doclist, fname):
 			if d.serial_no:
-				serial_nos = self.get_sr_no_list(d.serial_no)
+				serial_nos = get_valid_serial_nos(d.serial_no)
 				for a in serial_nos:
 					serial_no = a.strip()
 					if is_incoming:
@@ -202,7 +185,7 @@ class DocType:
 						self.update_serial_delivery_details(obj, d, serial_no, is_submit)
 
 			if fname == 'purchase_receipt_details' and d.rejected_qty and d.rejected_serial_no:
-				serial_nos = self.get_sr_no_list(d.rejected_serial_no)
+				serial_nos = get_valid_serial_nos(d.rejected_serial_no)
 				for a in serial_nos:
 					self.update_serial_purchase_details(obj, d, a, is_submit, rejected=True)
 				
@@ -211,17 +194,17 @@ class DocType:
 		for v in values:
 			sle_id, serial_nos = '', ''
 			# get serial nos
-			if v["serial_no"]:
-				serial_nos = self.get_sr_no_list(v["serial_no"], v['actual_qty'], v['item_code'])
+			if v.get("serial_no"):
+				serial_nos = get_valid_serial_nos(v["serial_no"], v['actual_qty'], v['item_code'])
 
 			# reverse quantities for cancel
-			if v['is_cancelled'] == 'Yes':
+			if v.get('is_cancelled') == 'Yes':
 				v['actual_qty'] = -flt(v['actual_qty'])
 				# cancel matching entry
 				sql("update `tabStock Ledger Entry` set is_cancelled='Yes' where voucher_no=%s \
 					and voucher_type=%s", (v['voucher_no'], v['voucher_type']))
 
-			if v["actual_qty"]:
+			if v.get("actual_qty"):
 				sle_id = self.make_entry(v)
 
 			args = v.copy()

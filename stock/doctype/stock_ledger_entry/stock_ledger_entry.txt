@@ -2,29 +2,29 @@
  {
   "owner": "Administrator", 
   "docstatus": 0, 
-  "creation": "2012-03-27 14:36:38", 
+  "creation": "2012-05-03 17:35:06", 
   "modified_by": "Administrator", 
-  "modified": "2012-03-27 14:36:38"
+  "modified": "2013-01-07 14:15:47"
  }, 
  {
-  "section_style": "Simple", 
   "in_create": 1, 
+  "allow_print": 1, 
   "module": "Stock", 
-  "doctype": "DocType", 
-  "server_code_error": " ", 
+  "document_type": "Other", 
+  "allow_email": 1, 
   "autoname": "SLE/.########", 
   "name": "__common__", 
-  "colour": "White:FFF", 
-  "_last_update": "1322549701", 
-  "show_in_menu": 0, 
-  "version": 53, 
-  "hide_toolbar": 1
+  "doctype": "DocType", 
+  "hide_toolbar": 1, 
+  "allow_copy": 1
  }, 
  {
+  "read_only": 1, 
   "name": "__common__", 
   "parent": "Stock Ledger Entry", 
   "doctype": "DocField", 
   "parenttype": "DocType", 
+  "permlevel": 0, 
   "parentfield": "fields"
  }, 
  {
@@ -33,6 +33,7 @@
   "read": 1, 
   "doctype": "DocPerm", 
   "parenttype": "DocType", 
+  "permlevel": 0, 
   "parentfield": "permissions"
  }, 
  {
@@ -40,57 +41,27 @@
   "doctype": "DocType"
  }, 
  {
-  "role": "All", 
-  "permlevel": 1, 
-  "doctype": "DocPerm"
- }, 
- {
-  "amend": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "submit": 0, 
-  "write": 0, 
-  "role": "Material User", 
-  "cancel": 0, 
-  "permlevel": 1
- }, 
- {
-  "amend": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "submit": 0, 
-  "write": 0, 
-  "role": "Material User", 
-  "cancel": 0, 
-  "permlevel": 0
- }, 
- {
-  "role": "System Manager", 
-  "permlevel": 2, 
-  "doctype": "DocPerm"
- }, 
- {
-  "search_index": 1, 
+  "print_width": "100px", 
+  "oldfieldtype": "Link", 
   "doctype": "DocField", 
   "label": "Item Code", 
   "oldfieldname": "item_code", 
   "width": "100px", 
-  "options": "Item", 
   "fieldname": "item_code", 
   "fieldtype": "Link", 
-  "oldfieldtype": "Link", 
+  "search_index": 1, 
   "reqd": 0, 
-  "permlevel": 1, 
+  "options": "Item", 
   "in_filter": 1
  }, 
  {
+  "print_width": "100px", 
   "search_index": 0, 
   "doctype": "DocField", 
   "label": "Serial No", 
   "width": "100px", 
   "fieldname": "serial_no", 
   "fieldtype": "Text", 
-  "permlevel": 0, 
   "in_filter": 0
  }, 
  {
@@ -99,117 +70,101 @@
   "label": "Batch No", 
   "oldfieldname": "batch_no", 
   "fieldname": "batch_no", 
-  "fieldtype": "Data", 
-  "permlevel": 0
+  "fieldtype": "Data"
  }, 
  {
-  "search_index": 1, 
+  "print_width": "100px", 
+  "oldfieldtype": "Link", 
   "doctype": "DocField", 
   "label": "Warehouse", 
   "oldfieldname": "warehouse", 
   "width": "100px", 
-  "options": "Warehouse", 
   "fieldname": "warehouse", 
   "fieldtype": "Link", 
-  "oldfieldtype": "Link", 
-  "permlevel": 1, 
+  "search_index": 1, 
+  "options": "Warehouse", 
   "in_filter": 1
  }, 
  {
-  "search_index": 0, 
+  "oldfieldtype": "Select", 
   "doctype": "DocField", 
   "label": "Warehouse Type", 
   "oldfieldname": "warehouse_type", 
-  "permlevel": 1, 
   "fieldname": "warehouse_type", 
   "fieldtype": "Select", 
-  "oldfieldtype": "Select", 
+  "search_index": 0, 
   "options": "link:Warehouse Type", 
   "in_filter": 1
  }, 
  {
   "description": "The date at which current entry will get or has actually executed.", 
-  "search_index": 1, 
+  "print_width": "100px", 
+  "oldfieldtype": "Date", 
   "doctype": "DocField", 
   "label": "Posting Date", 
   "oldfieldname": "posting_date", 
   "width": "100px", 
   "fieldname": "posting_date", 
   "fieldtype": "Date", 
-  "oldfieldtype": "Date", 
+  "search_index": 1, 
   "reqd": 0, 
-  "permlevel": 1, 
   "in_filter": 1
  }, 
  {
-  "search_index": 0, 
+  "print_width": "100px", 
+  "oldfieldtype": "Time", 
   "doctype": "DocField", 
   "label": "Posting Time", 
   "oldfieldname": "posting_time", 
   "width": "100px", 
   "fieldname": "posting_time", 
   "fieldtype": "Time", 
-  "oldfieldtype": "Time", 
-  "permlevel": 1, 
+  "search_index": 0, 
   "in_filter": 0
  }, 
  {
-  "description": "The date at which current entry is made in system.", 
-  "search_index": 0, 
-  "doctype": "DocField", 
-  "label": "Transaction Date", 
-  "oldfieldname": "transaction_date", 
-  "width": "100px", 
-  "fieldname": "transaction_date", 
-  "fieldtype": "Date", 
-  "oldfieldtype": "Date", 
-  "permlevel": 1, 
-  "in_filter": 1
- }, 
- {
-  "search_index": 0, 
+  "print_width": "150px", 
+  "oldfieldtype": "Data", 
   "doctype": "DocField", 
   "label": "Voucher Type", 
   "oldfieldname": "voucher_type", 
   "width": "150px", 
   "fieldname": "voucher_type", 
   "fieldtype": "Data", 
-  "oldfieldtype": "Data", 
-  "permlevel": 1, 
+  "search_index": 0, 
   "in_filter": 1
  }, 
  {
-  "search_index": 0, 
+  "print_width": "150px", 
+  "oldfieldtype": "Data", 
   "doctype": "DocField", 
   "label": "Voucher No", 
   "oldfieldname": "voucher_no", 
   "width": "150px", 
   "fieldname": "voucher_no", 
   "fieldtype": "Data", 
-  "oldfieldtype": "Data", 
-  "permlevel": 1, 
+  "search_index": 0, 
   "in_filter": 1
  }, 
  {
+  "print_width": "150px", 
   "oldfieldtype": "Data", 
   "doctype": "DocField", 
   "label": "Voucher Detail No", 
   "oldfieldname": "voucher_detail_no", 
   "width": "150px", 
   "fieldname": "voucher_detail_no", 
-  "fieldtype": "Data", 
-  "permlevel": 1
+  "fieldtype": "Data"
  }, 
  {
+  "print_width": "150px", 
   "oldfieldtype": "Currency", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Actual Quantity", 
   "oldfieldname": "actual_qty", 
   "width": "150px", 
   "fieldname": "actual_qty", 
   "fieldtype": "Currency", 
-  "permlevel": 1, 
   "in_filter": 1
  }, 
  {
@@ -218,63 +173,38 @@
   "label": "Incoming Rate", 
   "oldfieldname": "incoming_rate", 
   "fieldname": "incoming_rate", 
-  "fieldtype": "Currency", 
-  "permlevel": 0
+  "fieldtype": "Currency"
  }, 
  {
+  "print_width": "150px", 
   "oldfieldtype": "Data", 
   "doctype": "DocField", 
   "label": "Stock UOM", 
   "oldfieldname": "stock_uom", 
   "width": "150px", 
   "fieldname": "stock_uom", 
-  "fieldtype": "Data", 
-  "permlevel": 1
+  "fieldtype": "Data"
  }, 
  {
+  "print_width": "150px", 
   "oldfieldtype": "Currency", 
   "doctype": "DocField", 
-  "label": "Bin Actual Qty After Transaction", 
+  "label": "Actual Qty After Transaction", 
   "oldfieldname": "bin_aqat", 
   "width": "150px", 
-  "fieldname": "bin_aqat", 
+  "fieldname": "qty_after_transaction", 
   "fieldtype": "Currency", 
-  "permlevel": 1, 
   "in_filter": 1
  }, 
  {
-  "print_hide": 1, 
-  "oldfieldtype": "Currency", 
-  "doctype": "DocField", 
-  "label": "Moving Average Rate", 
-  "oldfieldname": "ma_rate", 
-  "fieldname": "ma_rate", 
-  "fieldtype": "Currency", 
-  "hidden": 1, 
-  "permlevel": 0, 
-  "report_hide": 1
- }, 
- {
-  "print_hide": 1, 
-  "oldfieldtype": "Currency", 
-  "doctype": "DocField", 
-  "label": "FIFO Rate", 
-  "oldfieldname": "fcfs_rate", 
-  "fieldname": "fcfs_rate", 
-  "fieldtype": "Currency", 
-  "hidden": 1, 
-  "permlevel": 0, 
-  "report_hide": 1
- }, 
- {
+  "print_width": "150px", 
   "oldfieldtype": "Currency", 
   "doctype": "DocField", 
   "label": "Valuation Rate", 
   "oldfieldname": "valuation_rate", 
   "width": "150px", 
   "fieldname": "valuation_rate", 
-  "fieldtype": "Currency", 
-  "permlevel": 0
+  "fieldtype": "Currency"
  }, 
  {
   "oldfieldtype": "Currency", 
@@ -282,72 +212,79 @@
   "label": "Stock Value", 
   "oldfieldname": "stock_value", 
   "fieldname": "stock_value", 
-  "fieldtype": "Currency", 
-  "permlevel": 0
+  "fieldtype": "Currency"
  }, 
  {
   "print_hide": 1, 
   "oldfieldtype": "Text", 
   "doctype": "DocField", 
-  "label": "FIFO Stack", 
+  "label": "Stock Queue (FIFO)", 
   "oldfieldname": "fcfs_stack", 
-  "fieldname": "fcfs_stack", 
+  "fieldname": "stock_queue", 
   "fieldtype": "Text", 
   "search_index": 0, 
   "hidden": 1, 
-  "permlevel": 2, 
   "report_hide": 1, 
   "in_filter": 0
  }, 
  {
-  "search_index": 0, 
+  "print_width": "150px", 
+  "oldfieldtype": "Data", 
   "doctype": "DocField", 
   "label": "Company", 
   "oldfieldname": "company", 
   "width": "150px", 
-  "options": "link:Company", 
   "fieldname": "company", 
   "fieldtype": "Select", 
-  "oldfieldtype": "Data", 
-  "permlevel": 1, 
+  "search_index": 0, 
+  "options": "link:Company", 
   "in_filter": 1
  }, 
  {
-  "search_index": 0, 
+  "print_width": "150px", 
+  "oldfieldtype": "Data", 
   "doctype": "DocField", 
   "label": "Fiscal Year", 
   "oldfieldname": "fiscal_year", 
   "width": "150px", 
   "fieldname": "fiscal_year", 
   "fieldtype": "Data", 
-  "oldfieldtype": "Data", 
-  "permlevel": 1, 
+  "search_index": 0, 
   "in_filter": 1
  }, 
  {
-  "search_index": 0, 
+  "print_width": "100px", 
+  "oldfieldtype": "Select", 
   "doctype": "DocField", 
   "label": "Is Cancelled", 
   "oldfieldname": "is_cancelled", 
   "width": "100px", 
-  "options": "\nYes\nNo", 
   "fieldname": "is_cancelled", 
   "fieldtype": "Select", 
-  "oldfieldtype": "Select", 
-  "permlevel": 1, 
+  "search_index": 0, 
+  "options": "\nYes\nNo", 
   "in_filter": 1
  }, 
  {
-  "search_index": 0, 
-  "doctype": "DocField", 
-  "label": "Is Stock Entry", 
-  "oldfieldname": "is_stock_entry", 
-  "width": "100px", 
-  "options": "\nYes\nNo", 
-  "fieldname": "is_stock_entry", 
-  "fieldtype": "Select", 
-  "oldfieldtype": "Select", 
-  "permlevel": 1, 
-  "in_filter": 1
+  "amend": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "submit": 0, 
+  "write": 0, 
+  "cancel": 0, 
+  "role": "Sales User"
+ }, 
+ {
+  "amend": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "submit": 0, 
+  "write": 0, 
+  "cancel": 0, 
+  "role": "Material User"
+ }, 
+ {
+  "role": "Accounts Manager", 
+  "doctype": "DocPerm"
  }
 ]

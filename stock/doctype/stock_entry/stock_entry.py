@@ -23,6 +23,7 @@ from webnotes.model.doc import Document, addchild
 from webnotes.model.wrapper import getlist, copy_doclist
 from webnotes.model.code import get_obj
 from webnotes import msgprint, _
+from stock.utils import get_previous_sle, get_incoming_rate
 
 sql = webnotes.conn.sql
 	
@@ -129,8 +130,6 @@ class DocType(TransactionBase):
 				msgprint(_("Source and Target Warehouse cannot be same"), 
 					raise_exception=1)
 				
-
-				
 	def validate_production_order(self, pro_obj=None):
 		if not pro_obj:
 			if self.doc.production_order:
@@ -157,42 +156,24 @@ class DocType(TransactionBase):
 	def get_stock_and_rate(self):
 		"""get stock and incoming rate on posting date"""
 		for d in getlist(self.doclist, 'mtn_details'):
+			args = {
+				item_code: d.item_code,
+				warehouse: d.s_warehouse or d.t_warehouse,
+				posting_date: self.doc.posting_date,
+				posting_time: self.doc.posting_time,
+				qty: d.transfer_qty,
+				serial_no: d.serial_no,
+				bom_no: d.bom_no
+				
+			}
 			# get actual stock at source warehouse
-			d.actual_qty = self.get_as_on_stock(d.item_code, d.s_warehouse or d.t_warehouse, 
-				self.doc.posting_date, self.doc.posting_time)
-
+			d.actual_qty = get_previous_sle(args).get("qty_after_transaction") or 0
+			
 			# get incoming rate
 			if not flt(d.incoming_rate):
-				d.incoming_rate = self.get_incoming_rate(d.item_code, 
-					d.s_warehouse or d.t_warehouse, self.doc.posting_date, 
-					self.doc.posting_time, d.transfer_qty, d.serial_no, d.bom_no)
-					
+				d.incoming_rate = get_incoming_rate(args)
+				
 			d.amount = flt(d.qty) * flt(d.incoming_rate)
-					
-	def get_as_on_stock(self, item_code, warehouse, posting_date, posting_time):
-		"""Get stock qty on any date"""
-		bin = sql("select name from tabBin where item_code = %s and warehouse = %s", 
-			(item_code, warehouse))
-		if bin:
-			prev_sle = get_obj('Bin', bin[0][0]).get_prev_sle(posting_date, posting_time)
-			return flt(prev_sle.get("bin_aqat")) or 0
-		else:
-			return 0
-			
-	def get_incoming_rate(self, item_code=None, warehouse=None, 
-			posting_date=None, posting_time=None, qty=0, serial_no=None, bom_no=None):
-		in_rate = 0
-
-		if bom_no:
-			result = webnotes.conn.sql("""select ifnull(total_cost, 0) / ifnull(quantity, 1) 
-				from `tabBOM` where name = %s and docstatus=1 and is_active=1""",
-				(bom_no,))
-			in_rate = result and flt(result[0][0]) or 0
-		elif warehouse:
-			in_rate = get_obj("Valuation Control").get_incoming_rate(posting_date, posting_time,
-				item_code, warehouse, qty, serial_no)
-	
-		return in_rate
 		
 	def validate_incoming_rate(self):
 		for d in getlist(self.doclist, 'mtn_details'):
@@ -220,14 +201,15 @@ class DocType(TransactionBase):
 					
 	def update_serial_no(self, is_submit):
 		"""Create / Update Serial No"""
+		from stock.utils import get_valid_serial_nos
+		
 		sl_obj = get_obj('Stock Ledger')
 		if is_submit:
 			sl_obj.validate_serial_no_warehouse(self, 'mtn_details')
 		
 		for d in getlist(self.doclist, 'mtn_details'):
 			if d.serial_no:
-				serial_nos = sl_obj.get_sr_no_list(d.serial_no)
-				for x in serial_nos:
+				for x in get_valid_serial_nos(d.serial_no):
 					serial_no = x.strip()
 					if d.s_warehouse:
 						sl_obj.update_serial_delivery_details(self, d, serial_no, is_submit)
@@ -322,15 +304,17 @@ class DocType(TransactionBase):
 			}
 		return ret
 		
-	def get_warehouse_details(self, arg):
+	def get_warehouse_details(self, args):
 		import json
-		arg, actual_qty, in_rate = json.loads(arg), 0, 0
+		args, actual_qty, in_rate = json.loads(args), 0, 0
+		args.update({
+			posting_date: self.doc.posting_date,
+			posting_time: self.doc.posting_time
+		})
+		
 		ret = {
-			"actual_qty" : self.get_as_on_stock(arg.get('item_code'), arg.get('warehouse'),
-			 	self.doc.posting_date, self.doc.posting_time),
-			"incoming_rate" : self.get_incoming_rate(arg.get('item_code'), 
-			 	arg.get('warehouse'), self.doc.posting_date, self.doc.posting_time, 
-			 	arg.get('transfer_qty'), arg.get('serial_no'), arg.get('bom_no')) or 0
+			"actual_qty" : get_previous_sle(args).get("qty_after_transaction") or 0,
+			"incoming_rate" : get_incoming_rate(args)
 		}
 		return ret
 		
