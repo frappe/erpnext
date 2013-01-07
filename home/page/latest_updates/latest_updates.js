@@ -1,4 +1,8 @@
 erpnext.updates = [
+	["4th January 2013", [
+		"Support Analytics: Simple Tool to Plot Number Tickets and time to Closing",
+		"Workflow: Added Workflow Help",
+	]],
 	["2nd January 2013", [
 		"Permission Manager: New Design with better help and better advanced permission selection.",
 		"User Properties: Better way to set User Properties (defaults).",
