@@ -1,0 +1,23 @@
+[
+ "Voucher No", 
+ "Account", 
+ "Filter By Amount", 
+ "Pull Payment Entries", 
+ "Amount <=", 
+ "Voucher Type", 
+ "From Date", 
+ "Journal Voucher", 
+ "Payment to Invoice Matching Tool", 
+ "Help HTML", 
+ "Outstanding Amount", 
+ "Amount >=", 
+ "Sales Invoice", 
+ "Allocate", 
+ "Payment Entries", 
+ "Accounts", 
+ "To Date", 
+ "Update allocated amount in the above table and then click \"Allocate\" button", 
+ "Purchase Invoice", 
+ "Total Amount", 
+ "Filter By Date"
+]

@@ -16,7 +16,17 @@
 
 from __future__ import unicode_literals
 import webnotes
+from webnotes import _
 
 class DocType:
 	def __init__(self, d, dl):
 		self.doc, self.doclist = d, dl
+		
+	def validate(self):
+		self.doc.total_points = 0
+		for d in self.doclist.get({"doctype":"Appraisal Template Goal"}):
+			self.doc.total_points += int(d.weightage_per or 0)
+		
+		if self.doc.total_points != 100:
+			webnotes.msgprint(_("Total Points should be 100") + ":" + self.doc.total_points,
+				raise_exception=True)

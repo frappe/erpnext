@@ -21,6 +21,7 @@ erpnext.desktop.render = function() {
 		if(!module.label) 
 			module.label = m;
 		module.name = m;
+		module.label = wn._(module.label);
 		module.gradient_css = wn.get_gradient_css(module.color, 45);
 		
 		$('#icon-grid').append(repl('\
@@ -54,7 +55,7 @@ erpnext.desktop.show_pending_notifications = function() {
 		module.find('a:first').append(
 			repl('<div id="%(id)s" class="circle" title="%(title)s" style="display: None">\
 					<span class="circle-text"></span>\
-				 </div>', {id: id, title: title}));
+				 </div>', {id: id, title: wn._(title)}));
 		
 		var case_border = module.find('.case-border');
 		var circle = module.find('.circle');

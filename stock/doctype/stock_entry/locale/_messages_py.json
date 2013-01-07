@@ -1,0 +1,22 @@
+[
+ "Production Order", 
+ "All items have already been transferred \\\t\t\t\tfor this Production Order.", 
+ "Hence, maximum allowed Manufacturing Quantity", 
+ "Source and Target Warehouse cannot be same", 
+ " or the BOM is cancelled or inactive", 
+ "Purpose must be one of ", 
+ "Source Warehouse", 
+ "Quantity already manufactured", 
+ "Item", 
+ "Target Warehouse", 
+ "Manufacturing Quantity", 
+ " should be same as that in ", 
+ "For Item ", 
+ " is mandatory", 
+ "Quantity should be equal to Manufacturing Quantity. ", 
+ "Row #", 
+ "Row # ", 
+ "does not belong to BOM: ", 
+ "To fetch items again, click on 'Get Items' button \\\t\t\t\t\t\tor update the Quantity manually.", 
+ "Atleast one warehouse is mandatory"
+]

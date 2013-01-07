@@ -1,0 +1,14 @@
+[
+ "Amount", 
+ "Item Description", 
+ "BOM Item", 
+ "Scrap %", 
+ "Operation No", 
+ "Rate", 
+ "Qty", 
+ "BOM No", 
+ "Stock UOM", 
+ "Qty Consumed Per Unit", 
+ "Manufacturing", 
+ "Item Code"
+]
