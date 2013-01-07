@@ -114,16 +114,33 @@ erpnext.utils.supplier_query = function() {
 
 wn.provide("erpnext.queries");
 
+erpnext.queries.get_conditions = function(doctype, opts) {
+	conditions = [];
+	if (opts) {
+		$.each(opts, function(key, val) {
+			var lhs = "`tab" + doctype + "`.`" + key + "`";
+			
+			if(key.indexOf(doctype)!=-1) {
+				// with function
+				lhs = key;
+			}
+			
+			if (esc_quotes(val).charAt(0) != "!")
+				conditions.push(lhs + "='"+esc_quotes(val)+"'");
+			else
+				conditions.push(lhs + "!='"+esc_quotes(val).substr(1)+"'");
+		});
+	}
+	return conditions;
+}
+
 erpnext.queries.account = function(opts) {
 	if(!opts) 
 		opts = {};
 	if(!opts.group_or_ledger) 
 		opts.group_or_ledger = "Ledger";
 		
-	conditions = [];
-	$.each(opts, function(key, val) {
-		conditions.push("tabAccount.`" + key + "`='"+esc_quotes(val)+"'");
-	});
+	var conditions = erpnext.queries.get_conditions("Account", opts);
 	
 	return 'SELECT tabAccount.name, tabAccount.parent_account, tabAccount.debit_or_credit \
 		FROM tabAccount \
@@ -131,18 +148,29 @@ erpnext.queries.account = function(opts) {
 		AND tabAccount.%(key)s LIKE "%s" ' + (conditions 
 			? (" AND " + conditions.join(" AND "))
 			: "")
+		+ " LIMIT 50"
+}
+
+erpnext.queries.item = function(opts) {
+	var conditions = erpnext.queries.get_conditions("Item", opts);
+	
+	return 'SELECT tabItem.name, \
+		if(length(tabItem.item_name) > 40, \
+			concat(substr(tabItem.item_name, 1, 40), "..."), item_name) as item_name, \
+		if(length(tabItem.description) > 40, \
+			concat(substr(tabItem.description, 1, 40), "..."), description) as decription \
+		FROM tabItem \
+		WHERE tabItem.docstatus!=2 \
+		AND (ifnull(`tabItem`.`end_of_life`,"") in ("", "0000-00-00") \
+			OR `tabItem`.`end_of_life` > NOW()) \
+		AND tabItem.%(key)s LIKE "%s" ' + (conditions 
+			? (" AND " + conditions.join(" AND "))
+			: "")
+		+ " LIMIT 50"
 }
 
 erpnext.queries.bom = function(opts) {
-	conditions = [];
-	if (opts) {
-		$.each(opts, function(key, val) {
-			if (esc_quotes(val).charAt(0) != "!")
-				conditions.push("tabBOM.`" + key + "`='"+esc_quotes(val)+"'");
-			else
-				conditions.push("tabBOM.`" + key + "`!='"+esc_quotes(val).substr(1)+"'");
-		});
-	}
+	var conditions = erpnext.queries.get_conditions("BOM", opts);
 	
 	return 'SELECT tabBOM.name, tabBOM.item \
 		FROM tabBOM \
@@ -151,4 +179,6 @@ erpnext.queries.bom = function(opts) {
 		AND tabBOM.%(key)s LIKE "%s" ' + (conditions.length 
 			? (" AND " + conditions.join(" AND "))
 			: "")
+		+ " LIMIT 50"
+
 }
