@@ -117,8 +117,11 @@ class DocType:
 			return rate != "" and (flt(rate) - flt(previous_sle.get("valuation_rate"))) or 0.0
 			
 		def _get_incoming_rate(qty, valuation_rate, previous_qty, previous_valuation_rate):
-			return (qty * valuation_rate - previous_qty * previous_valuation_rate) \
-				/ flt(qty - previous_qty)
+			if previous_valuation_rate == 0:
+				return valuation_rate
+			else:
+				return (qty * valuation_rate - previous_qty * previous_valuation_rate) \
+					/ flt(qty - previous_qty)
 			
 		row_template = ["item_code", "warehouse", "qty", "valuation_rate"]
 		
@@ -126,42 +129,69 @@ class DocType:
 		for row_num, row in enumerate(data[1:]):
 			row = webnotes._dict(zip(row_template, row))
 			
-			args = {
+			args = webnotes._dict({
 				"__islocal": 1,
-				"item_code": row[0],
-				"warehouse": row[1],
+				"item_code": row.item_code,
+				"warehouse": row.warehouse,
 				"posting_date": self.doc.posting_date,
 				"posting_time": self.doc.posting_time,
 				"voucher_type": self.doc.doctype,
 				"voucher_no": self.doc.name,
 				"company": webnotes.conn.get_default("company")
-			}
+			})
 			previous_sle = get_previous_sle(args)
 			
-			qty_diff = _qty_diff(row[2], previous_sle)
+			qty_diff = _qty_diff(row.qty, previous_sle)
 						
-			if get_valuation_method(row[0]) == "Moving Average":
-				rate_diff = _rate_diff(row[3], previous_sle)
+			if get_valuation_method(row.item_code) == "Moving Average":
 				if qty_diff:
-					actual_qty = qty_diff,
-					if flt(previous_sle.valuation_rate):
-						incoming_rate = _get_incoming_rate(flt(row[2]), flt(row[3]),
-							flt(previous_sle.qty_after_transaction),
-							flt(previous_sle.valuation_rate))
-					else:
-						incoming_rate = row[3]
+					incoming_rate = _get_incoming_rate(flt(row.qty), flt(row.valuation_rate),
+						flt(previous_sle.qty_after_transaction),
+						flt(previous_sle.valuation_rate))
 					
-					webnotes.model_wrapper([args]).save()
-				elif rate_diff:
+					# create sle
+					webnotes.model_wrapper([args.update({
+						"actual_qty": qty_diff,
+						"incoming_rate": incoming_rate
+					})]).save()
+					
+				elif _rate_diff(row.valuation_rate, previous_sle) and \
+						previous_sle.qty_after_transaction >= 0:
 					# make +1, -1 entry
-					pass
+					incoming_rate = _get_incoming_rate(flt(previous_sle.qty_after_transaction) + 1,
+						flt(row.valuation_rate), flt(previous_sle.qty_after_transaction),
+						flt(previous_sle.valuation_rate))
+					
+					# +1 entry
+					webnotes.model_wrapper([args.copy().update({
+						"actual_qty": 1,
+						"incoming_rate": incoming_rate
+					})]).save()
+					
+					# -1 entry
+					webnotes.model_wrapper([args.update({"actual_qty": -1})]).save()
+				
+				# else:
+				# 	# show message that stock is negative, hence can't update valuation
 					
 			else:
 				# FIFO
-				# Make reverse entry
+				previous_stock_queue = json.loads(previous_sle.stock_queue)
 				
-				# make entry as per attachment
-				pass
+				if previous_stock_queue != [[row.qty, row.valuation_rate]]:
+					# make entry as per attachment
+					sle_wrapper = webnotes.model_wrapper([args.copy().update({
+						"actual_qty": row.qty,
+						"incoming_rate": row.valuation_rate
+					})])
+					sle_wrapper.save()
+				
+					# Make reverse entry
+					qty = sum((flt(fifo_item[0]) for fifo_item in previous_stock_queue))
+					webnotes.model_wrapper([args.update({"actual_qty": -1 * qty})]).save()
+				
+				
+				
 	
 		
 
