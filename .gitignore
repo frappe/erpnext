@@ -1,4 +1,5 @@
 *.pyc
+*.py~
 *.comp.js
 .DS_Store
 patch.log
