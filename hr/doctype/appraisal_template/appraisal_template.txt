@@ -4,7 +4,7 @@
   "docstatus": 0, 
   "creation": "2012-07-03 13:30:39", 
   "modified_by": "Administrator", 
-  "modified": "2013-01-07 15:11:55"
+  "modified": "2013-01-07 17:16:25"
  }, 
  {
   "autoname": "field:kra_title", 
@@ -40,7 +40,7 @@
  {
   "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "KRA Title", 
+  "label": "Appraisal Template Title", 
   "oldfieldname": "kra_title", 
   "fieldname": "kra_title", 
   "fieldtype": "Data", 

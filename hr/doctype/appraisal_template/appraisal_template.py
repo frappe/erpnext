@@ -25,8 +25,9 @@ class DocType:
 	def validate(self):
 		self.doc.total_points = 0
 		for d in self.doclist.get({"doctype":"Appraisal Template Goal"}):
-			self.doc.total_points += int(d.weightage_per or 0)
+			self.doc.total_points += int(d.per_weightage or 0)
 		
-		if self.doc.total_points != 100:
-			webnotes.msgprint(_("Total Points should be 100") + ":" + self.doc.total_points,
+		if int(self.doc.total_points) != 100:
+			webnotes.msgprint(_("Total (sum of) points distribution for all goals should be 100.") \
+				+ " " + _("Not") + " " + str(self.doc.total_points),
 				raise_exception=True)
