@@ -1,0 +1,20 @@
+[
+ "Valuation Rate", 
+ "Description", 
+ "Qty as per Stock UOM", 
+ "Stock UOM", 
+ "Conversion Factor", 
+ "BOM No. for a Finished Good Item", 
+ "Amount", 
+ "Source Warehouse", 
+ "Qty", 
+ "Serial No", 
+ "BOM No", 
+ "Target Warehouse", 
+ "Batch No", 
+ "Stock", 
+ "Actual Qty (at source/target)", 
+ "Item Code", 
+ "UOM", 
+ "Stock Entry Detail"
+]
