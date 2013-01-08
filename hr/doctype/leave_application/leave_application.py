@@ -46,9 +46,14 @@ class DocType:
 		"""
 			get total holidays
 		"""
-		tot_hol = sql("select count(*) from `tabHoliday` h1, `tabHoliday List` h2, `tabEmployee` e1 where e1.name = '%s' and h1.parent = h2.name and e1.holiday_list = h2.name and h1.holiday_date between '%s' and '%s'"% (self.doc.employee, self.doc.from_date, self.doc.to_date))
+		tot_hol = sql("""select count(*) from `tabHoliday` h1, `tabHoliday List` h2, `tabEmployee` e1 
+			where e1.name = %s and h1.parent = h2.name and e1.holiday_list = h2.name 
+			and h1.holiday_date between %s and %s""", (self.doc.employee, self.doc.from_date, self.doc.to_date))
 		if not tot_hol:
-			tot_hol = sql("select count(*) from `tabHoliday` h1, `tabHoliday List` h2 where h1.parent = h2.name and h1.holiday_date between '%s' and '%s' and ifnull(h2.is_default,0) = 1 and h2.fiscal_year = %s"% (self.doc.from_date, self.doc.to_date, self.doc.fiscal_year))
+			tot_hol = sql("""select count(*) from `tabHoliday` h1, `tabHoliday List` h2 
+				where h1.parent = h2.name and h1.holiday_date between %s and %s
+				and ifnull(h2.is_default,0) = 1 and h2.fiscal_year = %s""",
+				(self.doc.from_date, self.doc.to_date, self.doc.fiscal_year))
 		return tot_hol and flt(tot_hol[0][0]) or 0
 
 	def get_total_leave_days(self):
