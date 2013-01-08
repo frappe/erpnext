@@ -8,11 +8,11 @@
 # 
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	See the
 # GNU General Public License for more details.
 # 
 # You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# along with this program.	If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import unicode_literals
 import webnotes
@@ -26,101 +26,64 @@ from webnotes import msgprint
 sql = webnotes.conn.sql
 
 import datetime
-	
-
 
 class DocType:
-  def __init__(self,doc,doclist=[]):
-    self.doc = doc
-    self.doclist = doclist
+	def __init__(self,doc,doclist=[]):
+		self.doc = doc
+		self.doclist = doclist
 
-  # ---------
-  # autoname
-  # ---------
-  def autoname(self):
-    self.doc.name = make_autoname(self.doc.fiscal_year +"/"+ self.doc.holiday_list_name+"/.###")
+	def autoname(self):
+		self.doc.name = make_autoname(self.doc.fiscal_year +"/"+ self.doc.holiday_list_name+"/.###")
+		
+	def validate(self):
+		self.update_default_holiday_list()
+	
+	def get_weekly_off_dates(self):
+		self.validate_values()
+		yr_start_date, yr_end_date = self.get_fy_start_end_dates()
+		date_list = self.get_weekly_off_date_list(yr_start_date, yr_end_date)
+		for d in date_list:
+			ch = addchild(self.doc, 'holiday_list_details', 'Holiday', self.doclist)
+			ch.description = self.doc.weekly_off
+			ch.holiday_date = d
 
+	def validate_values(self):
+		if not self.doc.fiscal_year:
+			msgprint("Please select Fiscal Year")
+			raise Exception
+		if not self.doc.weekly_off:
+			msgprint("Please select weekly off day")
+			raise Exception
 
-# *************************************************** utilities ***********************************************
-  # ----------------
-  # validate values
-  # ----------------
-  def validate_values(self):
-    if not self.doc.fiscal_year:
-      msgprint("Please select Fiscal Year")
-      raise Exception
-    if not self.doc.weekly_off:
-      msgprint("Please select weekly off day")
-      raise Exception
+	def get_fy_start_end_dates(self):
+		return webnotes.conn.sql("""select year_start_date, 
+			subdate(adddate(year_start_date, interval 1 year), interval 1 day) 
+				as year_end_date
+			from `tabFiscal Year`
+			where name=%s""", (self.doc.fiscal_year,))[0]
 
+	def get_weekly_off_date_list(self, year_start_date, year_end_date):
+		from webnotes.utils import getdate
+		year_start_date, year_end_date = getdate(year_start_date), getdate(year_end_date)
+		
+		from dateutil import relativedelta
+		from datetime import timedelta
+		import calendar
+		
+		date_list = []
+		weekday = getattr(calendar, (self.doc.weekly_off).upper())
+		reference_date = year_start_date + relativedelta.relativedelta(weekday=weekday)
+			
+		while reference_date <= year_end_date:
+			date_list.append(reference_date)
+			reference_date += timedelta(days=7)
+		
+		return date_list
+	
+	def clear_table(self):
+		self.doclist = self.doc.clear_table(self.doclist, 'holiday_list_details')
 
-  # ------------------------------------
-  # get fiscal year start and end dates
-  # ------------------------------------
-  def get_fy_start_end_dates(self):
-    st_date = sql("select year_start_date from `tabFiscal Year` where name = '%s'" %(self.doc.fiscal_year))
-    st_date = st_date and st_date[0][0].strftime('%Y-%m-%d') or ''
-    ed_date = add_days(add_years(st_date,1), -1)
-    return st_date, ed_date
+	def update_default_holiday_list(self):
+		webnotes.conn.sql("""update `tabHoliday List` set is_default = 0 
+			where ifnull(is_default, 0) = 1 and fiscal_year = %s""", (self.doc.fiscal_year,))
 
-  # -------------------------
-  # get weekly off date list
-  # -------------------------
-  def get_weekly_off_date_list(self, yr_start_date, yr_end_date):
-    days_dict, dt_list, lst_st = {'Monday':0,'Tuesday':1,'Wednesday':2,'Thursday':3,'Friday':4,'Saturday':5,'Sunday':6}, [], ''
-
-    w = cint(days_dict[self.doc.weekly_off])    # Weekly Off Day No.
-
-    st_dt_weekday = getdate(yr_start_date).weekday()    # Year Start Date weekday()
-
-    if w == st_dt_weekday:     # Get Start Date
-      lst_st = yr_start_date
-      dt_list.append(lst_st)
-    elif w > st_dt_weekday:
-      lst_st = add_days(yr_start_date,w - st_dt_weekday)
-      dt_list.append(lst_st)
-    else:
-      lst_st = add_days(yr_start_date,6 - st_dt_weekday + 1)
-      dt_list.append(lst_st)
-
-    while getdate(lst_st) < getdate(yr_end_date):    # Get list of dates
-      lst_st = add_days(lst_st,7)
-      if getdate(lst_st) > getdate(yr_end_date):
-        break
-      dt_list.append(lst_st)
-
-    return dt_list
-
-  # ---------------------
-  # get weekly off dates
-  # ---------------------
-  def get_weekly_off_dates(self):
-    self.validate_values()
-    yr_start_date, yr_end_date = self.get_fy_start_end_dates()
-    date_list = self.get_weekly_off_date_list(yr_start_date, yr_end_date)
-    for d in date_list:
-      ch = addchild(self.doc, 'holiday_list_details', 'Holiday', self.doclist)
-      ch.description = self.doc.weekly_off
-      ch.holiday_date = d
-
-  # ------------
-  # clear table
-  # ------------
-  def clear_table(self):
-    self.doclist = self.doc.clear_table(self.doclist,'holiday_list_details')
-
-
-# ***************************************** validate *************************************************
-
-  # ---------------------------
-  # check default holiday list
-  # ---------------------------
-  def update_default_holiday_list(self):
-    sql("update `tabHoliday List` set is_default = 0 where ifnull(is_default, 0) = 1 and fiscal_year = '%s'" % (self.doc.fiscal_year))
-
-
-  # ---------
-  # validate
-  # ---------
-  def validate(self):
-    self.update_default_holiday_list()
