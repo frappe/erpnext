@@ -17,12 +17,17 @@
 from __future__ import unicode_literals
 def execute():
 	import webnotes
-	from webnotes.model.code import get_obj
-	bin = webnotes.conn.sql("select name from `tabBin`")
+	from stock.stock_ledger import update_entries_after
+	res = webnotes.conn.sql("select distinct item_code, warehouse from `tabStock Ledger Entry`")
 	i=0
-	for d in bin:
+	for d in res:
 	    try:
-	        get_obj('Bin', d[0]).update_entries_after('2000-01-01', '12:05')
+	        update_entries_after({
+				item_code: d[0],
+				warehouse: d[1],
+				posting_date: "2000-01-01",
+				posting_time: "12:00"
+			})
 	    except:
 	        pass
 	    i += 1

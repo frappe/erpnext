@@ -104,8 +104,9 @@ class DocType:
 		
 
 	def repost(self, item_code, warehouse=None):
+		self.repost_actual_qty(item_code, warehouse)
+		
 		bin = self.get_bin(item_code, warehouse)
-		self.repost_actual_qty(bin)
 		self.repost_reserved_qty(bin)
 		self.repost_indented_qty(bin)
 		self.repost_ordered_qty(bin)
@@ -115,8 +116,17 @@ class DocType:
 		bin.doc.save()
 			
 
-	def repost_actual_qty(self, bin):
-		bin.update_entries_after(posting_date = '0000-00-00', posting_time = '00:00')
+	def repost_actual_qty(self, item_code, warehouse=None):
+		from stock.stock_ledger import update_entries_after
+		if not warehouse:
+			warehouse = self.doc.name
+		
+		update_entries_after({
+			item_code: item_code,
+			warehouse: warehouse,
+			posting_date: '1900-01-01',
+			posting_time = '10:00'
+		})
 
 	def repost_reserved_qty(self, bin):
 		reserved_qty = webnotes.conn.sql("""

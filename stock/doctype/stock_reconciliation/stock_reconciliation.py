@@ -19,22 +19,17 @@ import webnotes
 import json
 from webnotes import msgprint, _
 from webnotes.utils import cstr, flt
+from webnotes.model.controller import DocListController
 
-
-
-class DocType:
-	def __init__(self, doc, doclist=[]):
-		self.doc = doc
-		self.doclist = doclist
-		
+class DocType(DocListController):
 	def validate(self):
 		self.validate_data()
 		
 	def on_submit(self):
-		self.create_stock_ledger_entries()
+		self.insert_stock_ledger_entries()
 		
 	def on_cancel(self):
-		pass
+		self.delete_stock_ledger_entries()
 		
 	def validate_data(self):
 		data = json.loads(self.doc.reconciliation_json)
@@ -105,23 +100,10 @@ class DocType:
 		except Exception, e:
 			self.validation_messages.append(_("Row # ") + ("%d: " % (row_num+2)) + cstr(e))
 			
-	def create_stock_ledger_entries(self):
+	def insert_stock_ledger_entries(self):
 		"""	find difference between current and expected entries
 			and create stock ledger entries based on the difference"""
 		from stock.utils import get_previous_sle, get_valuation_method
-
-		def _qty_diff(qty, previous_sle):
-			return qty != "" and (flt(qty) - flt(previous_sle.get("qty_after_transaction"))) or 0.0
-
-		def _rate_diff(rate, previous_sle):
-			return rate != "" and (flt(rate) - flt(previous_sle.get("valuation_rate"))) or 0.0
-			
-		def _get_incoming_rate(qty, valuation_rate, previous_qty, previous_valuation_rate):
-			if previous_valuation_rate == 0:
-				return valuation_rate
-			else:
-				return (qty * valuation_rate - previous_qty * previous_valuation_rate) \
-					/ flt(qty - previous_qty)
 			
 		row_template = ["item_code", "warehouse", "qty", "valuation_rate"]
 		
@@ -129,73 +111,106 @@ class DocType:
 		for row_num, row in enumerate(data[1:]):
 			row = webnotes._dict(zip(row_template, row))
 			
-			args = webnotes._dict({
-				"__islocal": 1,
+			previous_sle = get_previous_sle({
 				"item_code": row.item_code,
 				"warehouse": row.warehouse,
 				"posting_date": self.doc.posting_date,
-				"posting_time": self.doc.posting_time,
-				"voucher_type": self.doc.doctype,
-				"voucher_no": self.doc.name,
-				"company": webnotes.conn.get_default("company")
+				"posting_time": self.doc.posting_time
 			})
-			previous_sle = get_previous_sle(args)
 			
-			qty_diff = _qty_diff(row.qty, previous_sle)
-						
 			if get_valuation_method(row.item_code) == "Moving Average":
-				if qty_diff:
-					incoming_rate = _get_incoming_rate(flt(row.qty), flt(row.valuation_rate),
-						flt(previous_sle.qty_after_transaction),
-						flt(previous_sle.valuation_rate))
-					
-					# create sle
-					webnotes.model_wrapper([args.update({
-						"actual_qty": qty_diff,
-						"incoming_rate": incoming_rate
-					})]).save()
-					
-				elif _rate_diff(row.valuation_rate, previous_sle) and \
-						previous_sle.qty_after_transaction >= 0:
-					# make +1, -1 entry
-					incoming_rate = _get_incoming_rate(flt(previous_sle.qty_after_transaction) + 1,
-						flt(row.valuation_rate), flt(previous_sle.qty_after_transaction),
-						flt(previous_sle.valuation_rate))
-					
-					# +1 entry
-					webnotes.model_wrapper([args.copy().update({
-						"actual_qty": 1,
-						"incoming_rate": incoming_rate
-					})]).save()
-					
-					# -1 entry
-					webnotes.model_wrapper([args.update({"actual_qty": -1})]).save()
-				
-				# else:
-				# 	# show message that stock is negative, hence can't update valuation
+				self.sle_for_moving_avg(row, previous_sle)
 					
 			else:
-				# FIFO
-				previous_stock_queue = json.loads(previous_sle.stock_queue)
-				
-				if previous_stock_queue != [[row.qty, row.valuation_rate]]:
-					# make entry as per attachment
-					sle_wrapper = webnotes.model_wrapper([args.copy().update({
-						"actual_qty": row.qty,
-						"incoming_rate": row.valuation_rate
-					})])
-					sle_wrapper.save()
-				
-					# Make reverse entry
-					qty = sum((flt(fifo_item[0]) for fifo_item in previous_stock_queue))
-					webnotes.model_wrapper([args.update({"actual_qty": -1 * qty})]).save()
-				
-				
-				
-	
+				self.sle_for_fifo(row, previous_sle)
+					
+	def sle_for_moving_avg(self, row, previous_sle):
+		"""Insert Stock Ledger Entries for Moving Average valuation"""
+		def _get_incoming_rate(qty, valuation_rate, previous_qty, previous_valuation_rate):
+			if previous_valuation_rate == 0:
+				return valuation_rate
+			else:
+				return (qty * valuation_rate - previous_qty * previous_valuation_rate) \
+					/ flt(qty - previous_qty)
 		
+		change_in_qty = row.qty != "" and \
+			(flt(row.qty) != flt(previous_sle.get("qty_after_transaction")))
 
+		change_in_rate = row.valuation_rate != "" and \
+			(flt(row.valuation_rate) != flt(previous_sle.get("valuation_rate")))
+			
+		if change_in_qty:
+			incoming_rate = _get_incoming_rate(flt(row.qty), flt(row.valuation_rate),
+				flt(previous_sle.qty_after_transaction),
+				flt(previous_sle.valuation_rate))
+			
+			self.insert_entries({"actual_qty": qty_diff, "incoming_rate": incoming_rate}, row)
+			
+		elif change_in_rate and previous_sle.qty_after_transaction >= 0:
+
+			incoming_rate = _get_incoming_rate(flt(previous_sle.qty_after_transaction) + 1,
+				flt(row.valuation_rate), flt(previous_sle.qty_after_transaction),
+				flt(previous_sle.valuation_rate))
+			
+			# +1 entry
+			self.insert_entries({"actual_qty": 1, "incoming_rate": incoming_rate}, row)
+			
+			# -1 entry
+			self.insert_entries({"actual_qty": -1}, row)
 		
+	def sle_for_fifo(self, row, previous_sle):
+		"""Insert Stock Ledger Entries for FIFO valuation"""
+		previous_stock_queue = json.loads(previous_sle.stock_queue)
+		
+		if previous_stock_queue != [[row.qty, row.valuation_rate]]:
+			# make entry as per attachment
+			self.insert_entries({"actual_qty": row.qty, "incoming_rate": row.valuation_rate},
+				row)
+		
+			# Make reverse entry
+			qty = sum((flt(fifo_item[0]) for fifo_item in previous_stock_queue))
+			self.insert_entries({"actual_qty": -1 * qty}, row)
+	
+					
+	def insert_entries(self, opts, row):
+		"""Insert Stock Ledger Entries"""
+		args = {
+			"item_code": row.item_code,
+			"warehouse": row.warehouse,
+			"posting_date": self.doc.posting_date,
+			"posting_time": self.doc.posting_time,
+			"voucher_type": self.doc.doctype,
+			"voucher_no": self.doc.name,
+			"company": webnotes.conn.get_default("company"),
+			"is_cancelled": "No"
+		}
+		args.update(opts)
+		
+		return webnotes.model_wrapper([args]).insert()
+		
+	def delete_stock_ledger_entries(self):
+		"""	Delete Stock Ledger Entries related to this Stock Reconciliation
+			and repost future Stock Ledger Entries"""
+			
+		from stock.stock_ledger import update_entries_after
+			
+		existing_entries = webnotes.conn.sql("""select item_code, warehouse 
+			from `tabStock Ledger Entry` where voucher_type='Stock Reconciliation'
+			and voucher_no=%s""", self.doc.name, as_dict=1)
+		
+		# delete entries
+		webnotes.conn.sql("""delete from `tabStock Ledger Entry` 
+			where voucher_type='Stock Reconciliation' and voucher_no=%s""", self.doc.name)
+		
+		# repost future entries for selected item_code, warehouse
+		for entries in existing_entries:
+			update_entries_after({
+				item_code: entries.item_code,
+				warehouse: entries.warehouse,
+				posting_date: self.doc.posting_date,
+				posting_time: self.doc.posting_time
+			})
+	
 		
 @webnotes.whitelist()
 def upload():

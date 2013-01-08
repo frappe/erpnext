@@ -68,6 +68,14 @@ def get_previous_sle(args):
 		get the last sle on or before the current time-bucket, 
 		to get actual qty before transaction, this function
 		is called from various transaction like stock entry, reco etc
+		
+		args = {
+			"item_code": "ABC",
+			"warehouse": "XYZ",
+			"posting_date": "2012-12-12",
+			"posting_time": "12:00",
+			"sle": "name of reference Stock Ledger Entry"
+		}
 	"""
 	if not args.get("posting_date"):
 		args["posting_date"] = "1900-01-01"
