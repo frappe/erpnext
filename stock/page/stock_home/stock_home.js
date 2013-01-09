@@ -1,20 +1,206 @@
-// ERPNext - web based ERP (http://erpnext.com)
-// Copyright (C) 2012 Web Notes Technologies Pvt Ltd
-// 
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-// 
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-// 
-// You should have received a copy of the GNU General Public License
-// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+// ERPNext: Copyright 2013 Web Notes Technologies Pvt Ltd
+// GNU General Public License. See "license.txt"
+
+wn.module_page["Stock"] = [
+	{
+		title: wn._("Documents"),
+		icon: "icon-copy",
+		items: [
+			{
+				label: wn._("Stock Entry"),
+				description: wn._("Transfer stock from one warehouse to another."),
+				doctype:"Stock Entry"
+			},
+			{
+				label: wn._("Delivery Note"),
+				description: wn._("Delivery (shipment) to customers."),
+				doctype:"Delivery Note"
+			},
+			{
+				label: wn._("Purchase Receipt"),
+				description: wn._("Goods received from Suppliers."),
+				doctype:"Purchase Receipt"
+			},
+		]
+	},
+	{
+		title: wn._("Masters"),
+		icon: "icon-book",
+		items: [
+			{
+				label: wn._("Item"),
+				description: wn._("All Products or Services."),
+				doctype:"Item"
+			},
+			{
+				label: wn._("Serial No"),
+				description: wn._("Single unit of an Item."),
+				doctype:"Serial No"
+			},
+			{
+				label: wn._("Batch"),
+				description: wn._("Batch (lot) of an Item."),
+				doctype:"Batch"
+			},
+			{
+				label: wn._("Warehouse"),
+				description: wn._("Where items are stored."),
+				doctype:"Warehouse"
+			},
+		]
+	},
+	{
+		title: wn._("Tools"),
+		icon: "icon-wrench",
+		items: [
+			{
+				"doctype":"Stock Reconciliation",
+				"label": wn._("Stock Reconciliation"),
+				description: wn._("Upload stock balance via csv.")
+			},
+			{
+				"doctype":"Installation Note",
+				"label": wn._("Installation Note"),
+				description: wn._("Installation record for a Serial No.")
+			},
+			{
+				"label": wn._("Packing Slip"),
+				"doctype":"Packing Slip",
+				description: wn._("Split Delivery Note into packages.")
+			},
+			{
+				"doctype":"Price List",
+				"label": wn._("Price List"),
+				"description": wn._("Multiple Item Prices")
+			},
+			{
+				"doctype":"Quality Inspection",
+				"label": wn._("Quality Inspection"),
+				description: wn._("Incoming quality inspection.")
+			},
+			{
+				"doctype":"Landed Cost Master",
+				"label":"Landed Cost Master",
+				description: wn._("Transportatoin cost distribution template.")
+			},
+			{
+				"route":"#Form/Landed Cost Wizard/Landed Cost Wizard",
+				"label": wn._("Landed Cost Wizard"),
+				description: wn._("Distribute transport overhead across items."),
+				doctype: "Landed Cost Wizard"
+			},
+			{
+				"route":"#Form/Stock UOM Replace Utility/Stock UOM Replace Utility",
+				"label": wn._("UOM Replace Utility"),
+				"doctype": "Stock UOM Replace Utility"
+			},
+			{
+				"route":"#Form/Sales and Purchase Return Tool/Sales and Purchase Return Tool",
+				"label": wn._("Sales and Purchase Return Tool"),
+				doctype: "Sales and Purchase Return Tool",
+				description: wn._("Manage sales or purchase returns")
+			},
+		]
+	},
+	{
+		title: wn._("Setup"),
+		icon: "icon-cog",
+		items: [
+			{
+				"route":"Sales Browser/Item Group",
+				"label": wn._("Item Group"),
+				"description": wn._("Item classification.")
+			},
+			{
+				"doctype":"UOM",
+				"label": wn._("Unit of Measure") + " (UOM)",
+				"description": wn._("e.g. Kg, Unit, Nos, m")
+			},
+			{
+				"doctype":"Brand",
+				"label": wn._("Brand"),
+				"description": wn._("Brand master.")
+			},
+			{
+				"label": wn._("Warehouse Type"),
+				"doctype":"Warehouse Type",
+				"description": wn._("Types of warehouse")
+			}
+		]
+	},
+	{
+		title: wn._("Main Reports"),
+		right: true,
+		icon: "icon-table",
+		items: [
+			{
+				"label":wn._("Stock Ledger"),
+				page: "stock-ledger"
+			},
+			{
+				"label":wn._("Stock Balance"),
+				page: "stock-balance"
+			},
+			{
+				"page":"stock-level",
+				"label": wn._("Stock Level")
+			},
+			{
+				"page":"stock-ageing",
+				"label": wn._("Stock Ageing")
+			},
+		]
+	},
+	{
+		title: wn._("Analytics"),
+		right: true,
+		icon: "icon-bar-chart",
+		items: [
+			{
+				"label":wn._("Stock Analytics"),
+				page: "stock-analytics"
+			},
+		]
+	},
+	{
+		title: wn._("Reports"),
+		right: true,
+		icon: "icon-list",
+		items: [
+			{
+				"label":wn._("Stock Ledger"),
+				route: "Report2/Stock Ledger Entry/Stock Ledger",
+				doctype: "Stock Ledger Entry"
+			},
+			{
+				"label":wn._("Ordered Items To Be Delivered"),
+				route: "query-report/Ordered Items To Be Delivered",
+				doctype: "Delivery Note"
+			},
+			{
+				"label":wn._("Serial No Service Contract Expiry"),
+				route: "Report2/Serial No/Serial No Service Contract Expiry",
+				doctype: "Serial No"
+			},
+			{
+				"label":wn._("Serial No Status"),
+				route: "Report2/Serial No/Serial No Status",
+				doctype: "Serial No"
+			},
+			{
+				"label":wn._("Serial No Warranty Expiry"),
+				route: "Report2/Serial No/Serial No Warranty Expiry",
+				doctype: "Serial No"
+			},
+			{
+				"label":wn._("Item-Wise Price List"),
+				route: "query-report/Item-Wise Price List",
+				doctype: "Item"
+			},
+		]
+	}
+]
 
 pscript['onload_stock-home'] = function(wrapper) {
-	wrapper.appframe = new wn.ui.AppFrame($(wrapper).find('.appframe-area'), 'Stock');
-	erpnext.module_page.setup_page('Stock', wrapper);
+	wn.views.moduleview.make(wrapper, "Stock");
 }

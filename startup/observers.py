@@ -17,4 +17,5 @@
 observer_map = {
 	"*:on_update": "home.update_feed",
 	"*:on_submit": "home.update_feed",
+#	"*:on_update": "webnotes.widgets.moduleview.update_count"
 }

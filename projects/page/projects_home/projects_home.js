@@ -1,20 +1,52 @@
-// ERPNext - web based ERP (http://erpnext.com)
-// Copyright (C) 2012 Web Notes Technologies Pvt Ltd
-// 
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-// 
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-// 
-// You should have received a copy of the GNU General Public License
-// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+// ERPNext: Copyright 2013 Web Notes Technologies Pvt Ltd
+// GNU General Public License. See "license.txt"
+
+wn.module_page["Projects"] = [
+	{
+		title: wn._("Documents"),
+		icon: "icon-copy",
+		items: [
+			{
+				label: wn._("Task"),
+				description: wn._("Project activity / task."),
+				doctype:"Task"
+			},
+			{
+				label: wn._("Project"),
+				description: wn._("Project master."),
+				doctype:"Project"
+			},
+			{
+				label: wn._("Timesheet"),
+				description: wn._("Timesheet for tasks."),
+				doctype:"Timesheet"
+			},
+		]
+	},
+	{
+		title: wn._("Tools"),
+		icon: "icon-wrench",
+		items: [
+			{
+				page: "Projects",
+				label: wn._("Gantt Chart"),
+				"description":wn._("Gantt chart of all tasks.")
+			},
+		]
+	},
+	{
+		title: wn._("Masters"),
+		icon: "icon-book",
+		items: [
+			{
+				label: wn._("Activity Type"),
+				description: wn._("Types of activities for Time Sheets"),
+				doctype:"Activity Type"
+			},
+		]
+	},
+]
 
 pscript['onload_projects-home'] = function(wrapper) {
-	wrapper.appframe = new wn.ui.AppFrame($(wrapper).find('.appframe-area'), 'Projects');
-	erpnext.module_page.setup_page('Projects', wrapper);
+	wn.views.moduleview.make(wrapper, "Projects");
 }
