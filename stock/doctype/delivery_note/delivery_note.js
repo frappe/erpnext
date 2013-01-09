@@ -37,7 +37,9 @@ cur_frm.cscript.onload = function(doc, dt, dn) {
 	if(!doc.posting_time) doc.posting_time = wn.datetime.get_cur_time()
 		
 	if(doc.__islocal){
-		hide_field(['customer_address','contact_person','customer_name','address_display','contact_display','contact_mobile','contact_email','territory','customer_group']);
+		hide_field(['customer_address', 'contact_person', 'customer_name', 
+			'address_display', 'contact_display', 'contact_mobile', 
+			'contact_email', 'territory', 'customer_group']);
 	}	
 }
 

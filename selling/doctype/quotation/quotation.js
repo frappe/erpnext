@@ -93,7 +93,6 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	}
 
 	erpnext.hide_naming_series();
-	
 	cur_frm.toggle_display("contact_section", doc.customer || doc.lead);
 	
 	if (!doc.__islocal) {
@@ -118,8 +117,9 @@ cur_frm.cscript.customer = function(doc,dt,dn) {
 
 	if(doc.customer) $c_obj(make_doclist(doc.doctype, doc.name), 
 		'get_default_customer_address', '', callback);
-		
-	cur_frm.toggle_display("contact_section", doc.customer);
+	if(doc.customer) unhide_field(['customer_address','contact_person','territory', 'customer_group']);
+	cur_frm.toggle_display("contact_section", doc.customer || doc.lead);
+	
 }
 
 cur_frm.cscript.customer_address = cur_frm.cscript.contact_person = function(doc,dt,dn) {
@@ -133,6 +133,8 @@ cur_frm.cscript.customer_address = cur_frm.cscript.contact_person = function(doc
 cur_frm.fields_dict.lead.get_query = erpnext.utils.lead_query;
 
 cur_frm.cscript.lead = function(doc, cdt, cdn) {
+	cur_frm.toggle_display("contact_section", doc.customer || doc.lead);
+	
 	if(doc.lead) {
 		get_server_fields('get_lead_details', doc.lead,'', doc, cdt, cdn, 1);
 		unhide_field('territory');

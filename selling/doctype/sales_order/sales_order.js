@@ -36,9 +36,9 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 	// load default charges
 	
 	if(doc.__islocal && !doc.customer){
-			hide_field(['customer_address', 'contact_person', 'customer_name', 
-				'address_display', 'contact_display', 'contact_mobile', 
-				'contact_email', 'territory', 'customer_group']);
+		hide_field(['customer_address','contact_person', 'customer_name', 
+			'address_display', 'contact_display', 'contact_mobile', 
+			'contact_email', 'territory',  'customer_group']);
 	}
 }
 
@@ -111,6 +111,8 @@ cur_frm.cscript.customer = function(doc,dt,dn) {
 	var pl = doc.price_list_name;
 	var callback = function(r,rt) {
 		var callback2  = function(r, rt) {
+			if(doc.customer) 
+				unhide_field(['customer_address', 'contact_person', 'territory','customer_group']);
 			cur_frm.refresh();
 			
 			if(!onload && (pl != doc.price_list_name)) cur_frm.cscript.price_list_name(doc, dt, dn);
@@ -120,7 +122,8 @@ cur_frm.cscript.customer = function(doc,dt,dn) {
 		get_server_fields('get_shipping_address',doc.customer,'',doc, dt, dn, 0, callback2);
 			
 	}	 
-	if(doc.customer) $c_obj(make_doclist(doc.doctype, doc.name), 'get_default_customer_address', '', callback);
+	if(doc.customer) $c_obj(make_doclist(doc.doctype, doc.name), 
+		'get_default_customer_address', '', callback);
 }
 
 cur_frm.cscript.customer_address = cur_frm.cscript.contact_person = function(doc,dt,dn) {		
@@ -133,7 +136,8 @@ cur_frm.cscript.pull_quotation_details = function(doc,dt,dn) {
 		if(!r.exc){							
 			doc.quotation_no = r.message;			
 			if(doc.quotation_no) {					
-				unhide_field(['quotation_date', 'customer_address', 'contact_person', 'territory', 'customer_group']);
+				unhide_field(['quotation_date', 'customer_address', 
+					'contact_person', 'territory', 'customer_group']);
 				if(doc.customer) get_server_fields('get_shipping_address', doc.customer, '', doc, dt, dn, 0);
 			}			
 			cur_frm.refresh();
