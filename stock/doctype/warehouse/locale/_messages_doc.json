@@ -1,0 +1,23 @@
+[
+ "Address Line 1", 
+ "Address Line 2", 
+ "Merge Warehouses", 
+ "A logical Warehouse against which stock entries are made.", 
+ "PIN", 
+ "City", 
+ "Warehouse Detail", 
+ "Warehouse Contact Info", 
+ "Company", 
+ "This feature is for merging duplicate warehouses. It will replace all the links of this warehouse by \"Merge With\" warehouse. After merging you can delete this warehouse, as stock level for this warehouse will be zero.", 
+ "Merge", 
+ "Warehouse Name", 
+ "State", 
+ "Warehouse Type", 
+ "Mobile No", 
+ "Phone No", 
+ "Warehouse", 
+ "Email Id", 
+ "For Reference Only.", 
+ "Merge With", 
+ "Stock"
+]

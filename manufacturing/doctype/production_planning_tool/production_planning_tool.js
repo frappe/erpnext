@@ -45,12 +45,9 @@ cur_frm.cscript.download_materials_required = function(doc, cdt, cdn) {
 }
 
 cur_frm.fields_dict['pp_details'].grid.get_field('item_code').get_query = function(doc) {
-	return 'SELECT DISTINCT `tabItem`.`name`,`tabItem`.`item_name` \
-		FROM `tabItem` WHERE `tabItem`.is_pro_applicable = "Yes" \
-		AND (IFNULL(`tabItem`.`end_of_life`,"") = "" \
-			OR `tabItem`.`end_of_life`="0000-00-00" OR `tabItem`.`end_of_life` > NOW()) \
-		AND tabItem.%(key)s like "%s" \
-		ORDER BY `tabItem`.`name` LIMIT 50';
+ 	return erpnext.queries.item({
+		'ifnull(tabItem.is_pro_applicable, "No")': 'Yes'
+	});
 }
 
 cur_frm.fields_dict['pp_details'].grid.get_field('bom_no').get_query = function(doc) {

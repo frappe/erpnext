@@ -1,0 +1,23 @@
+[
+ "Item Tax Rate", 
+ "Item Name", 
+ "Description", 
+ "Basic Rate*", 
+ "Quotation Item", 
+ "Brand", 
+ "Amount", 
+ "Amount*", 
+ "Price List Rate*", 
+ "Rate", 
+ "Selling", 
+ "Item Group", 
+ "Page Break", 
+ "Customer's Item Code", 
+ "Against Docname", 
+ "Against Doctype", 
+ "Price List Rate", 
+ "Discount (%)", 
+ "Item Code", 
+ "UOM", 
+ "Quantity"
+]

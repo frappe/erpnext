@@ -28,8 +28,8 @@ def get_fiscal_year(date, verbose=1):
 		subdate(adddate(year_start_date, interval 1 year), interval 1 day) 
 			as year_end_date
 		from `tabFiscal Year`
-		where %s >= year_start_date and %s < adddate(year_start_date, interval 1 year)""",
-		(date, date))
+		where %s >= year_start_date and %s < adddate(year_start_date, interval 1 year)
+		order by year_start_date desc""", (date, date))
 	
 	if not fy:
 		error_msg = """%s not in any Fiscal Year""" % formatdate(date)
