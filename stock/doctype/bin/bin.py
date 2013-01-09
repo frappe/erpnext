@@ -45,10 +45,10 @@ class DocType:
 		if args.get("actual_qty"):
 			# update valuation and qty after transaction for post dated entry
 			update_entries_after({
-				item_code: self.doc.item_code,
-				warehouse: self.doc.warehouse,
-				posting_date: args.get("posting_date"),
-				posting_time: args.get("posting_time")
+				"item_code": self.doc.item_code,
+				"warehouse": self.doc.warehouse,
+				"posting_date": args.get("posting_date"),
+				"posting_time": args.get("posting_time")
 			})
 					
 	def update_qty(self, args):

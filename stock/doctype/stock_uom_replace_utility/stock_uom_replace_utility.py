@@ -91,7 +91,7 @@ class DocType:
 		if flt(self.doc.conversion_factor) != flt(1):
 			wh = sql("select name from `tabWarehouse`")
 			for w in wh:
-				update_entries_after({item_code: self.doc.item_code, warehouse: w[0]})
+				update_entries_after({"item_code": self.doc.item_code, "warehouse": w[0]})
 
 		# acknowledge user
 		msgprint("Item Valuation Updated Successfully.")

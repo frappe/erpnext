@@ -16,8 +16,9 @@
 
 import webnotes
 from webnotes import msgprint, _
-from webnotes.utils import cint
+from webnotes.utils import cint, flt, cstr
 from stock.utils import _msgprint, get_valuation_method
+import json
 
 # future reposting
 
@@ -67,7 +68,7 @@ def update_entries_after(args, verbose=1):
 		qty_after_transaction += flt(sle.actual_qty)
 		
 		# get stock value
-		if serial_nos:
+		if sle.serial_nos:
 			stock_value = qty_after_transaction * valuation_rate
 		elif valuation_method == "Moving Average":
 			stock_value = (qty_after_transaction > 0) and \
@@ -101,7 +102,7 @@ def get_sle_before_datetime(args):
 		entries between the cancelled entries in the same time-bucket
 	"""
 	sle = get_stock_ledger_entries(args,
-		["timestamp(posting_date, posting_time) < timestamp(%%(posting_date)s, %%(posting_time)s)"],
+		["timestamp(posting_date, posting_time) < timestamp(%(posting_date)s, %(posting_time)s)"],
 		"limit 1")
 	
 	return sle and sle[0] or webnotes._dict()
@@ -109,7 +110,7 @@ def get_sle_before_datetime(args):
 def get_sle_after_datetime(args):
 	"""get Stock Ledger Entries after a particular datetime, for reposting"""
 	return get_stock_ledger_entries(args,
-		["timestamp(posting_date, posting_time) > timestamp(%%(posting_date)s, %%(posting_time)s)"])
+		["timestamp(posting_date, posting_time) > timestamp(%(posting_date)s, %(posting_time)s)"])
 				
 def get_stock_ledger_entries(args, conditions=None, limit=None):
 	"""get stock ledger entries filtered by specific posting datetime conditions"""

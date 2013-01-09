@@ -8,8 +8,6 @@ def execute():
 	from stock.stock_ledger import update_entries_after
 	for d in res:
 		update_entries_after({
-			item_code: d.item_code,
-			warehouse: d.warehouse,
-			posting_date: '2000-01-01',
-			posting_time: '12:01'
+			"item_code": d.item_code,
+			"warehouse": d.warehouse,
 		})

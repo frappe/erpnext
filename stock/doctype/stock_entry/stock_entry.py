@@ -157,14 +157,13 @@ class DocType(TransactionBase):
 		"""get stock and incoming rate on posting date"""
 		for d in getlist(self.doclist, 'mtn_details'):
 			args = {
-				item_code: d.item_code,
-				warehouse: d.s_warehouse or d.t_warehouse,
-				posting_date: self.doc.posting_date,
-				posting_time: self.doc.posting_time,
-				qty: d.transfer_qty,
-				serial_no: d.serial_no,
-				bom_no: d.bom_no
-				
+				"item_code": d.item_code,
+				"warehouse": d.s_warehouse or d.t_warehouse,
+				"posting_date": self.doc.posting_date,
+				"posting_time": self.doc.posting_time,
+				"qty": d.transfer_qty,
+				"serial_no": d.serial_no,
+				"bom_no": d.bom_no
 			}
 			# get actual stock at source warehouse
 			d.actual_qty = get_previous_sle(args).get("qty_after_transaction") or 0
@@ -308,8 +307,8 @@ class DocType(TransactionBase):
 		import json
 		args, actual_qty, in_rate = json.loads(args), 0, 0
 		args.update({
-			posting_date: self.doc.posting_date,
-			posting_time: self.doc.posting_time
+			"posting_date": self.doc.posting_date,
+			"posting_time": self.doc.posting_time
 		})
 		
 		ret = {

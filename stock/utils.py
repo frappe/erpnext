@@ -77,12 +77,11 @@ def get_previous_sle(args):
 			"sle": "name of reference Stock Ledger Entry"
 		}
 	"""
-	if not args.get("posting_date"):
-		args["posting_date"] = "1900-01-01"
-	if not args.get("posting_time"):
-		args["posting_time"] = "12:00"
+	if not args.get("posting_date"): args["posting_date"] = "1900-01-01"
+	if not args.get("posting_time"): args["posting_time"] = "12:00"
+	if not args.get("sle"): args["sle"] = ""
 
-	sle = sql("""
+	sle = webnotes.conn.sql("""
 		select * from `tabStock Ledger Entry`
 		where item_code = %(item_code)s
 		and warehouse = %(warehouse)s

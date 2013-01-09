@@ -82,10 +82,10 @@ def cleanup_wrong_sle():
 			webnotes.conn.sql("update `tabStock Ledger Entry` set is_cancelled = 'Yes' where name = %s", d[3])
 			create_comment(d[3])
 			update_entries_after({
-				item_code: d[0],
-				warehouse: d[1],
-				posting_date: "2012-07-01",
-				posting_time: "12:05"
+				"item_code": d[0],
+				"warehouse": d[1],
+				"posting_date": "2012-07-01",
+				"posting_time": "12:05"
 			})
 			
 def create_comment(dn):

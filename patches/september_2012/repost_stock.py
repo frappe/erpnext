@@ -22,12 +22,7 @@ def execute():
 	i=0
 	for d in res:
 	    try:
-	        update_entries_after({
-				item_code: d[0],
-				warehouse: d[1],
-				posting_date: "2000-01-01",
-				posting_time: "12:00"
-			})
+	        update_entries_after({ "item_code": d[0], "warehouse": d[1]	})
 	    except:
 	        pass
 	    i += 1

@@ -121,12 +121,7 @@ class DocType:
 		if not warehouse:
 			warehouse = self.doc.name
 		
-		update_entries_after({
-			item_code: item_code,
-			warehouse: warehouse,
-			posting_date: '1900-01-01',
-			posting_time = '10:00'
-		})
+		update_entries_after({ "item_code": item_code, "warehouse": warehouse })
 
 	def repost_reserved_qty(self, bin):
 		reserved_qty = webnotes.conn.sql("""

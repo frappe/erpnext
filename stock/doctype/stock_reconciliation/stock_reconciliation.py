@@ -205,10 +205,10 @@ class DocType(DocListController):
 		# repost future entries for selected item_code, warehouse
 		for entries in existing_entries:
 			update_entries_after({
-				item_code: entries.item_code,
-				warehouse: entries.warehouse,
-				posting_date: self.doc.posting_date,
-				posting_time: self.doc.posting_time
+				"item_code": entries.item_code,
+				"warehouse": entries.warehouse,
+				"posting_date": self.doc.posting_date,
+				"posting_time": self.doc.posting_time
 			})
 	
 		
