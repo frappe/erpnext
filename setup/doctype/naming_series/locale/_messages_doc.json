@@ -1,0 +1,18 @@
+[
+ "Current Value", 
+ "Change the starting / current sequence number of an existing series.", 
+ "Series List for this Transaction", 
+ "Setup Series", 
+ "Check this if you want to force the user to select a series before saving. There will be no default if you check this.", 
+ "Setup", 
+ "Prefix", 
+ "Update", 
+ "Update Series Number", 
+ "Select Transaction", 
+ "Update Series", 
+ "User must always select", 
+ "Set prefix for numbering series on your transactions", 
+ "Help HTML", 
+ "Naming Series", 
+ "This is the number of the last created transaction with this prefix"
+]

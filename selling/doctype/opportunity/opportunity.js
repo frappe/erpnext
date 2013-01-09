@@ -149,9 +149,13 @@ cur_frm.cscript.lead = function(doc, cdt, cdn) {
 //=======================================
 cur_frm.fields_dict['enquiry_details'].grid.get_field('item_code').get_query = function(doc, cdt, cdn) {
 	if (doc.enquiry_type == 'Maintenance')
-		return 'SELECT tabItem.name,tabItem.item_name,tabItem.description FROM tabItem WHERE tabItem.is_service_item="Yes" AND (ifnull(`tabItem`.`end_of_life`,"") = "" OR `tabItem`.`end_of_life` > NOW() OR `tabItem`.`end_of_life`="0000-00-00") AND tabItem.%(key)s LIKE "%s" LIMIT 50';
+	 	return erpnext.queries.item({
+			'ifnull(tabItem.is_service_item, "No")': 'Yes'
+		});
 	else 
-		return 'SELECT tabItem.name,tabItem.item_name,tabItem.description FROM tabItem WHERE tabItem.is_sales_item="Yes" AND (ifnull(`tabItem`.`end_of_life`,"") = "" OR `tabItem`.`end_of_life` > NOW() OR `tabItem`.`end_of_life`="0000-00-00") AND tabItem.%(key)s LIKE "%s" LIMIT 50';
+ 		return erpnext.queries.item({
+			'ifnull(tabItem.is_sales_item, "No")': 'Yes'
+		});
 }
 
 // Create New Quotation

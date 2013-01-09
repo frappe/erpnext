@@ -1,0 +1,18 @@
+[
+ "Item Name", 
+ "Actual Qty", 
+ "Description", 
+ "Page Break", 
+ "UOM", 
+ "Qty", 
+ "Serial No", 
+ "Batch No", 
+ "Prevdoc DocType", 
+ "Warehouse", 
+ "Parent Detail docname", 
+ "Projected Qty", 
+ "Delivery Note Packing Item", 
+ "Item Code", 
+ "Parent Item", 
+ "Stock"
+]

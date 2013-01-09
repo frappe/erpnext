@@ -14,14 +14,12 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-// ************************************** onload ****************************************************
 cur_frm.cscript.onload = function(doc, cdt, cdn) {
   if(!doc.status) set_multiple(cdt, cdn, {status:'In Store'});
   if(doc.__islocal) hide_field(['supplier_name','address_display'])
 }
 
 
-// ************************************** refresh ***************************************************
 cur_frm.cscript.refresh = function(doc, cdt, cdn) {
   if(!doc.__islocal) {
     flds = ['item_code', 'warehouse', 'purchase_document_type', 'purchase_document_no', 'purchase_date', 'purchase_time', 'purchase_rate', 'supplier']
@@ -31,7 +29,6 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 }
 
 
-// ************************************** triggers **************************************************
 
 // item details
 // -------------
@@ -63,10 +60,9 @@ cur_frm.cscript.supplier = function(doc,dt,dn) {
 //item code
 //----------
 cur_frm.fields_dict['item_code'].get_query = function(doc,cdt,cdn) {
-  return 'SELECT `tabItem`.`name`,`tabItem`.`description` FROM `tabItem` \
-	WHERE `tabItem`.`docstatus`!= 2 AND ifnull(`tabItem`.`has_serial_no`, "No") = "Yes" \
-	AND (ifnull(`tabItem`.`end_of_life`,"") = "" OR `tabItem`.`end_of_life` > NOW() OR `tabItem`.`end_of_life`="0000-00-00") \
-	AND `tabItem`.%(key)s LIKE "%s"  ORDER BY  `tabItem`.`name` ASC LIMIT 50';
+ 	return erpnext.queries.item({
+		'ifnull(tabItem.has_serial_no, "No")': 'Yes'
+	});
 }
 
 cur_frm.fields_dict.customer.get_query = erpnext.utils.customer_query;

@@ -1,0 +1,16 @@
+[
+ "Reference Name", 
+ "Raw Material Item Code", 
+ "Amount", 
+ "Description", 
+ "Conversion Factor", 
+ "Required Qty", 
+ "Current Stock", 
+ "Consumed Qty", 
+ "Rate", 
+ "BOM Detail No", 
+ "Purchase Receipt Item Supplied", 
+ "Stock Uom", 
+ "Item Code", 
+ "Buying"
+]

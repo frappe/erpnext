@@ -174,10 +174,9 @@ var calculate_total = function(doc) {
 
 
 cur_frm.fields_dict['item'].get_query = function(doc) {
-	return 'SELECT DISTINCT `tabItem`.`name`, `tabItem`.description FROM `tabItem` \
-		WHERE is_manufactured_item = "Yes" and (IFNULL(`tabItem`.`end_of_life`,"") = "" OR \
-		 	`tabItem`.`end_of_life` = "0000-00-00" OR `tabItem`.`end_of_life` > NOW()) AND \
-		 	`tabItem`.`%(key)s` like "%s" ORDER BY `tabItem`.`name` LIMIT 50';
+	return erpnext.queries.item({
+		'ifnull(tabItem.is_manufactured_item, "No")': 'Yes'
+	})
 }
 
 cur_frm.fields_dict['project_name'].get_query = function(doc, dt, dn) {

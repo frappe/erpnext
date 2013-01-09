@@ -1,0 +1,13 @@
+[
+ "Mat Detail No", 
+ "Description", 
+ "BOM Explosion Item", 
+ "Stock UOM", 
+ "Amount", 
+ "Qty", 
+ "Rate", 
+ "Qty Consumed Per Unit", 
+ "Manufacturing", 
+ "Parent BOM", 
+ "Item Code"
+]

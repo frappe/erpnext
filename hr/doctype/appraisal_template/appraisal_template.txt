@@ -2,19 +2,15 @@
  {
   "owner": "ashwini@webnotestech.com", 
   "docstatus": 0, 
-  "creation": "2012-03-27 14:35:58", 
+  "creation": "2012-07-03 13:30:39", 
   "modified_by": "Administrator", 
-  "modified": "2012-03-27 14:35:58"
+  "modified": "2013-01-07 17:16:25"
  }, 
  {
-  "section_style": "Simple", 
-  "name": "__common__", 
-  "colour": "White:FFF", 
-  "module": "HR", 
-  "server_code_error": " ", 
-  "version": 3, 
-  "doctype": "DocType", 
   "autoname": "field:kra_title", 
+  "name": "__common__", 
+  "doctype": "DocType", 
+  "module": "HR", 
   "document_type": "Master"
  }, 
  {
@@ -26,13 +22,14 @@
   "parentfield": "fields"
  }, 
  {
-  "name": "__common__", 
   "parent": "Appraisal Template", 
   "read": 1, 
+  "name": "__common__", 
   "create": 1, 
   "doctype": "DocPerm", 
   "write": 1, 
   "parenttype": "DocType", 
+  "role": "HR User", 
   "permlevel": 0, 
   "parentfield": "permissions"
  }, 
@@ -41,31 +38,16 @@
   "doctype": "DocType"
  }, 
  {
-  "role": "System Manager", 
-  "doctype": "DocPerm"
- }, 
- {
-  "role": "HR Manager", 
-  "doctype": "DocPerm"
- }, 
- {
-  "role": "HR User", 
-  "doctype": "DocPerm"
- }, 
- {
-  "role": "System Manager", 
-  "doctype": "DocPerm"
- }, 
- {
   "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "KRA Title", 
+  "label": "Appraisal Template Title", 
   "oldfieldname": "kra_title", 
   "fieldname": "kra_title", 
   "fieldtype": "Data", 
   "reqd": 1
  }, 
  {
+  "print_width": "300px", 
   "oldfieldtype": "Small Text", 
   "doctype": "DocField", 
   "label": "Description", 
@@ -82,5 +64,14 @@
   "fieldname": "kra_sheet", 
   "fieldtype": "Table", 
   "options": "Appraisal Template Goal"
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Total Points", 
+  "fieldname": "total_points", 
+  "fieldtype": "Int"
+ }, 
+ {
+  "doctype": "DocPerm"
  }
 ]

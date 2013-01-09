@@ -167,9 +167,13 @@ cur_frm.cscript.conversion_rate = function(doc,cdt,cdn) {
 // Only Is Purchase Item = 'Yes' and Items not moved to trash are allowed.
 cur_frm.fields_dict[fname].grid.get_field("item_code").get_query = function(doc, cdt, cdn) {
 	if (doc.is_subcontracted =="Yes") {
-		return 'SELECT tabItem.name, tabItem.description FROM tabItem WHERE ifnull(tabItem.is_sub_contracted_item, "No")="Yes" AND (IFNULL(`tabItem`.`end_of_life`,"") = "" OR `tabItem`.`end_of_life` ="0000-00-00" OR `tabItem`.`end_of_life` > NOW()) AND tabItem.docstatus != 2 AND tabItem.%(key)s LIKE "%s" LIMIT 50'
+		return erpnext.queries.item({
+			'ifnull(tabItem.is_sub_contracted_item, "No")': 'Yes'
+		})
 	} else {
-		return 'SELECT tabItem.name, tabItem.description FROM tabItem WHERE ifnull(tabItem.is_purchase_item, "No")="Yes" AND (IFNULL(`tabItem`.`end_of_life`,"") = "" OR `tabItem`.`end_of_life` ="0000-00-00" OR `tabItem`.`end_of_life` > NOW()) AND tabItem.docstatus != 2 AND tabItem.%(key)s LIKE "%s" LIMIT 50'
+		return erpnext.queries.item({
+			'ifnull(tabItem.is_purchase_item, "No")': 'Yes'
+		})
 	}
 }
 
