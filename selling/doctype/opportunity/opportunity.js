@@ -25,6 +25,9 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn){
 		cur_frm.add_custom_button('Opportunity Lost', cur_frm.cscript['Declare Opportunity Lost']);
 		cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms);
 	}
+	
+	cur_frm.toggle_display("contact_info", doc.customer || doc.lead);
+	
 }
 
 // ONLOAD
@@ -79,7 +82,7 @@ cur_frm.cscript.enquiry_from = function(doc,cdt,cdn){
 }
 
 // hide - unhide fields based on lead or customer
-cur_frm.cscript.lead_cust_show = function(doc,cdt,cdn){
+cur_frm.cscript.lead_cust_show = function(doc,cdt,cdn){	
 	if(doc.enquiry_from == 'Lead'){
 		unhide_field(['lead']);
 		hide_field(['lead_name','customer','customer_address','contact_person','customer_name','address_display','contact_display','contact_mobile','contact_email','territory','customer_group']);
@@ -87,13 +90,15 @@ cur_frm.cscript.lead_cust_show = function(doc,cdt,cdn){
 	}
 	else if(doc.enquiry_from == 'Customer'){		
 		unhide_field(['customer']);
-		hide_field(['lead','lead_name','address_display','contact_display','contact_mobile','contact_email','territory']);		
+		hide_field(['lead','lead_name','address_display','contact_display','contact_mobile','contact_email','territory', 'customer_group']);		
 		doc.lead = doc.lead_name = doc.customer = doc.customer_address = doc.contact_person = doc.address_display = doc.contact_display = doc.contact_mobile = doc.contact_email = doc.territory = doc.customer_group = "";
 	}
 }
 
 // customer
 cur_frm.cscript.customer = function(doc,dt,dn) {
+	cur_frm.toggle_display("contact_info", doc.customer || doc.lead);
+	
 	if(doc.customer) {
 		cur_frm.call({
 			doc: cur_frm.doc,
@@ -127,11 +132,18 @@ cur_frm.fields_dict.contact_person.on_new = function(dn) {
 }
 
 cur_frm.fields_dict['customer_address'].get_query = function(doc, cdt, cdn) {
-	return 'SELECT name,address_line1,city FROM tabAddress WHERE customer = "'+ doc.customer +'" AND docstatus != 2 AND name LIKE "%s" ORDER BY name ASC LIMIT 50';
+	return 'SELECT name, address_line1, city FROM tabAddress \
+		WHERE customer = "'+ doc.customer +'" AND docstatus != 2 AND \
+		%(key)s LIKE "%s" ORDER BY name ASC LIMIT 50';
 }
 
 cur_frm.fields_dict['contact_person'].get_query = function(doc, cdt, cdn) {
-	return 'SELECT name,CONCAT(first_name," ",ifnull(last_name,"")) As FullName,department,designation FROM tabContact WHERE customer = "'+ doc.customer +'" AND docstatus != 2 AND name LIKE "%s" ORDER BY name ASC LIMIT 50';
+	if (!doc.customer) msgprint("Please select customer first");
+	else {
+		return 'SELECT name, CONCAT(first_name," ",ifnull(last_name,"")) As FullName, \
+		department, designation FROM tabContact WHERE customer = "'+ doc.customer + 
+		'" AND docstatus != 2 AND %(key)s LIKE "%s" ORDER BY name ASC LIMIT 50';
+	}
 }
 
 // lead
@@ -140,6 +152,8 @@ cur_frm.fields_dict['lead'].get_query = function(doc,cdt,cdn){
 }
 
 cur_frm.cscript.lead = function(doc, cdt, cdn) {
+	cur_frm.toggle_display("contact_info", doc.customer || doc.lead);
+	
 	if(doc.lead) get_server_fields('get_lead_details', doc.lead,'', doc, cdt, cdn, 1);
 	if(doc.lead) unhide_field(['lead_name','address_display','contact_mobile','contact_email','territory']);	
 }

@@ -94,8 +94,7 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 
 	erpnext.hide_naming_series();
 	
-	if(doc.customer || doc.lead) $(cur_frm.fields_dict.contact_section.row.wrapper).toggle(true);
-	else $(cur_frm.fields_dict.contact_section.row.wrapper).toggle(false);
+	cur_frm.toggle_display("contact_section", doc.customer || doc.lead);
 	
 	if (!doc.__islocal) {
 		cur_frm.communication_view = new wn.views.CommunicationList({
@@ -119,7 +118,8 @@ cur_frm.cscript.customer = function(doc,dt,dn) {
 
 	if(doc.customer) $c_obj(make_doclist(doc.doctype, doc.name), 
 		'get_default_customer_address', '', callback);
-	if(doc.customer) unhide_field(['customer_address','contact_person','territory', 'customer_group']);
+		
+	cur_frm.toggle_display("contact_section", doc.customer);
 }
 
 cur_frm.cscript.customer_address = cur_frm.cscript.contact_person = function(doc,dt,dn) {
@@ -128,24 +128,6 @@ cur_frm.cscript.customer_address = cur_frm.cscript.contact_person = function(doc
 		address: doc.customer_address, 
 		contact: doc.contact_person
 	}),'', doc, dt, dn, 1);
-}
-
-cur_frm.fields_dict.customer_address.on_new = function(dn) {
-	locals['Address'][dn].customer = locals[cur_frm.doctype][cur_frm.docname].customer;
-	locals['Address'][dn].customer_name = locals[cur_frm.doctype][cur_frm.docname].customer_name;
-}
-
-cur_frm.fields_dict.contact_person.on_new = function(dn) {
-	locals['Contact'][dn].customer = locals[cur_frm.doctype][cur_frm.docname].customer;
-	locals['Contact'][dn].customer_name = locals[cur_frm.doctype][cur_frm.docname].customer_name;
-}
-
-cur_frm.fields_dict['customer_address'].get_query = function(doc, cdt, cdn) {
-	return 'SELECT name,address_line1,city FROM tabAddress WHERE customer = "'+ doc.customer +'" AND docstatus != 2 AND name LIKE "%s" ORDER BY name ASC LIMIT 50';
-}
-
-cur_frm.fields_dict['contact_person'].get_query = function(doc, cdt, cdn) {
-	return 'SELECT name,CONCAT(first_name," ",ifnull(last_name,"")) As FullName,department,designation FROM tabContact WHERE customer = "'+ doc.customer +'" AND docstatus != 2 AND name LIKE "%s" ORDER BY name ASC LIMIT 50';
 }
 
 cur_frm.fields_dict.lead.get_query = erpnext.utils.lead_query;

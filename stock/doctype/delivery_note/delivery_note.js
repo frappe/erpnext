@@ -69,8 +69,7 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 		cur_frm.add_custom_button('Make Packing Slip', cur_frm.cscript['Make Packing Slip']);
 	}
 	
-	if(doc.customer) $(cur_frm.fields_dict.contact_info.row.wrapper).toggle(true);
-	else $(cur_frm.fields_dict.contact_info.row.wrapper).toggle(false);
+	cur_frm.toggle_display("contact_info", doc.customer);
 	
 	set_print_hide(doc, cdt, cdn);
 }
@@ -78,38 +77,25 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 
 //customer
 cur_frm.cscript.customer = function(doc,dt,dn,onload) {	
+	cur_frm.toggle_display("contact_info", doc.customer);
+	
 	var pl = doc.price_list_name;
 	var callback = function(r,rt) {
 			var doc = locals[cur_frm.doctype][cur_frm.docname];
-			if(doc.customer) unhide_field(['customer_address','contact_person','territory','customer_group']);
+			if(doc.customer)
+			 	unhide_field(['customer_address','contact_person','territory','customer_group']);
 			cur_frm.refresh();
 			if(!onload && (pl != doc.price_list_name)) cur_frm.cscript.price_list_name(doc, dt, dn); 
 	} 
 	var args = onload ? 'onload':''
-	if(doc.customer) $c_obj(make_doclist(doc.doctype, doc.name), 'get_default_customer_shipping_address', args, callback);
+	if(doc.customer) $c_obj(make_doclist(doc.doctype, doc.name),
+	 	'get_default_customer_shipping_address', args, callback);
 }
 
 cur_frm.cscript.customer_address = cur_frm.cscript.contact_person = function(doc,dt,dn) {		
 	if(doc.customer) get_server_fields('get_customer_address', JSON.stringify({customer: doc.customer, address: doc.customer_address, contact: doc.contact_person}),'', doc, dt, dn, 1);
 }
 
-cur_frm.fields_dict.customer_address.on_new = function(dn) {
-	locals['Address'][dn].customer = locals[cur_frm.doctype][cur_frm.docname].customer;
-	locals['Address'][dn].customer_name = locals[cur_frm.doctype][cur_frm.docname].customer_name;
-}
-
-cur_frm.fields_dict.contact_person.on_new = function(dn) {
-	locals['Contact'][dn].customer = locals[cur_frm.doctype][cur_frm.docname].customer;
-	locals['Contact'][dn].customer_name = locals[cur_frm.doctype][cur_frm.docname].customer_name;
-}
-
-cur_frm.fields_dict['customer_address'].get_query = function(doc, cdt, cdn) {
-	return 'SELECT name,address_line1,city FROM tabAddress WHERE customer = "'+ doc.customer +'" AND docstatus != 2 AND name LIKE "%s" ORDER BY name ASC LIMIT 50';
-}
-
-cur_frm.fields_dict['contact_person'].get_query = function(doc, cdt, cdn) {
-	return 'SELECT name,CONCAT(first_name," ",ifnull(last_name,"")) As FullName,department,designation FROM tabContact WHERE customer = "'+ doc.customer +'" AND docstatus != 2 AND name LIKE "%s" ORDER BY name ASC LIMIT 50';
-}
 
 cur_frm.cscript.get_items = function(doc,dt,dn) {
 	var callback = function(r,rt){
@@ -117,9 +103,12 @@ cur_frm.cscript.get_items = function(doc,dt,dn) {
 		if(r.message){							
 			doc.sales_order_no = r.message;			
 			if(doc.sales_order_no) {					
-					unhide_field(['customer_address','contact_person','territory','customer_group']);														
+				unhide_field(['customer_address','contact_person','territory','customer_group']);														
 			}			
-			refresh_many(['delivery_note_details','customer','customer_address','contact_person','customer_name','address_display','contact_display','contact_mobile','contact_email','territory','customer_group']);
+			
+			refresh_many(['delivery_note_details', 'customer', 'customer_address',
+			 	'contact_person', 'customer_name', 'address_display', 'contact_display',
+			 	'contact_mobile', 'contact_email', 'territory', 'customer_group']);
 		}
 	} 
  $c_obj(make_doclist(doc.doctype, doc.name),'pull_sales_order_details','',callback); 
