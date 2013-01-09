@@ -446,7 +446,7 @@ class DocType(TransactionBase):
 					only_pending_fetched.append(item)
 		
 		# delete items with 0 qty
-		for item in item_qty:
+		for item in item_qty.keys():
 			if not item_qty[item][0]:
 				del item_qty[item]
 		

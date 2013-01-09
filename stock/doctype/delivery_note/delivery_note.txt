@@ -2,9 +2,9 @@
  {
   "owner": "Administrator", 
   "docstatus": 0, 
-  "creation": "2012-11-28 11:26:21", 
+  "creation": "2012-12-03 17:26:43", 
   "modified_by": "Administrator", 
-  "modified": "2012-12-03 17:10:41"
+  "modified": "2013-01-09 12:52:30"
  }, 
  {
   "is_submittable": 1, 
@@ -19,6 +19,7 @@
   "doctype": "DocType"
  }, 
  {
+  "read_only": 0, 
   "name": "__common__", 
   "parent": "Delivery Note", 
   "doctype": "DocField", 
@@ -38,10 +39,10 @@
   "doctype": "DocType"
  }, 
  {
+  "print_width": "50%", 
   "oldfieldtype": "Column Break", 
   "doctype": "DocField", 
   "width": "50%", 
-  "trigger": "Client", 
   "fieldname": "column_break0", 
   "fieldtype": "Column Break", 
   "permlevel": 0
@@ -51,7 +52,6 @@
   "description": "To manage multiple series please go to Setup > Manage Series", 
   "no_copy": 1, 
   "oldfieldtype": "Select", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Series", 
   "oldfieldname": "naming_series", 
@@ -68,7 +68,6 @@
   "label": "Customer", 
   "oldfieldname": "customer", 
   "permlevel": 0, 
-  "trigger": "Client", 
   "fieldname": "customer", 
   "fieldtype": "Link", 
   "search_index": 1, 
@@ -86,6 +85,7 @@
  }, 
  {
   "print_hide": 1, 
+  "depends_on": "customer", 
   "doctype": "DocField", 
   "label": "Select Shipping Address", 
   "options": "Address", 
@@ -136,11 +136,11 @@
  }, 
  {
   "print_hide": 0, 
+  "permlevel": 0, 
   "description": "The date at which current entry will get or has actually executed.", 
-  "width": "100px", 
+  "print_width": "100px", 
   "default": "Today", 
   "oldfieldtype": "Date", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Posting Date", 
   "oldfieldname": "posting_date", 
@@ -150,7 +150,7 @@
   "search_index": 1, 
   "reqd": 1, 
   "in_filter": 1, 
-  "permlevel": 0
+  "width": "100px"
  }, 
  {
   "print_hide": 1, 
@@ -176,6 +176,7 @@
  }, 
  {
   "print_hide": 1, 
+  "print_width": "100px", 
   "no_copy": 0, 
   "oldfieldtype": "Data", 
   "doctype": "DocField", 
@@ -189,9 +190,9 @@
  }, 
  {
   "print_hide": 1, 
+  "print_width": "100px", 
   "no_copy": 0, 
   "oldfieldtype": "Data", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "P.O. Date", 
   "oldfieldname": "po_date", 
@@ -204,7 +205,6 @@
  }, 
  {
   "oldfieldtype": "Section Break", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Items", 
   "fieldname": "items", 
@@ -215,7 +215,6 @@
   "print_hide": 0, 
   "no_copy": 0, 
   "oldfieldtype": "Table", 
-  "colour": "White:FFF", 
   "allow_on_submit": 1, 
   "doctype": "DocField", 
   "label": "Delivery Note Items", 
@@ -248,6 +247,7 @@
  }, 
  {
   "print_hide": 0, 
+  "print_width": "150px", 
   "no_copy": 0, 
   "oldfieldtype": "Currency", 
   "doctype": "DocField", 
@@ -263,7 +263,6 @@
   "oldfieldtype": "Button", 
   "doctype": "DocField", 
   "label": "Re-Calculate Values", 
-  "trigger": "Client", 
   "fieldname": "recalculate_values", 
   "fieldtype": "Button", 
   "permlevel": 0
@@ -279,7 +278,6 @@
   "description": "You can make a delivery note from multiple sales orders. Select sales orders one by one and click on the button below.", 
   "no_copy": 0, 
   "oldfieldtype": "Link", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Sales Order No", 
   "oldfieldname": "sales_order_no", 
@@ -316,12 +314,10 @@
   "print_hide": 1, 
   "description": "Select the price list as entered in \"Price List\" master. This will pull the reference rates of items against this price list as specified in \"Item\" master.", 
   "oldfieldtype": "Select", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Price List", 
   "oldfieldname": "price_list_name", 
   "permlevel": 0, 
-  "trigger": "Client", 
   "fieldname": "price_list_name", 
   "fieldtype": "Select", 
   "reqd": 1, 
@@ -330,7 +326,6 @@
  {
   "print_hide": 1, 
   "description": "Select the currency in which price list is maintained", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Price List Currency", 
   "options": "link:Currency", 
@@ -342,7 +337,6 @@
  {
   "print_hide": 1, 
   "description": "Rate at which Price list currency is converted to company's base currency", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Price List Currency Conversion Rate", 
   "fieldname": "plc_conversion_rate", 
@@ -351,6 +345,7 @@
   "permlevel": 0
  }, 
  {
+  "print_width": "50%", 
   "doctype": "DocField", 
   "width": "50%", 
   "fieldname": "column_break2", 
@@ -361,7 +356,6 @@
   "print_hide": 1, 
   "description": "Customer's Currency", 
   "oldfieldtype": "Select", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Currency", 
   "oldfieldname": "currency", 
@@ -376,7 +370,6 @@
   "description": "Rate at which customer's currency is converted to company's base currency", 
   "no_copy": 0, 
   "oldfieldtype": "Currency", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Conversion Rate", 
   "oldfieldname": "conversion_rate", 
@@ -388,7 +381,6 @@
  }, 
  {
   "oldfieldtype": "Section Break", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Taxes", 
   "fieldname": "taxes", 
@@ -399,7 +391,6 @@
   "print_hide": 1, 
   "description": "If you have created a standard template in Sales Taxes and Charges Master, select one and click on the button below.", 
   "oldfieldtype": "Link", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Taxes and Charges", 
   "oldfieldname": "charge", 
@@ -413,7 +404,6 @@
   "oldfieldtype": "Button", 
   "doctype": "DocField", 
   "label": "Get Taxes and Charges", 
-  "trigger": "Client", 
   "fieldname": "get_charges", 
   "fieldtype": "Button", 
   "permlevel": 0
@@ -431,6 +421,7 @@
  }, 
  {
   "print_hide": 1, 
+  "print_width": "150px", 
   "oldfieldtype": "Currency", 
   "doctype": "DocField", 
   "label": "Taxes and Charges Total", 
@@ -445,7 +436,6 @@
   "oldfieldtype": "Button", 
   "doctype": "DocField", 
   "label": "Calculate Charges", 
-  "trigger": "Client", 
   "fieldname": "calculate_charges", 
   "fieldtype": "Button", 
   "permlevel": 0
@@ -461,7 +451,6 @@
  {
   "print_hide": 0, 
   "oldfieldtype": "Section Break", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Totals", 
   "fieldname": "totals", 
@@ -470,6 +459,7 @@
  }, 
  {
   "print_hide": 1, 
+  "print_width": "150px", 
   "no_copy": 0, 
   "oldfieldtype": "Currency", 
   "doctype": "DocField", 
@@ -483,6 +473,7 @@
  }, 
  {
   "print_hide": 1, 
+  "print_width": "150px", 
   "no_copy": 0, 
   "oldfieldtype": "Currency", 
   "doctype": "DocField", 
@@ -496,9 +487,9 @@
  {
   "print_hide": 1, 
   "description": "In Words will be visible once you save the Delivery Note.", 
+  "print_width": "200px", 
   "no_copy": 0, 
   "oldfieldtype": "Data", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "In Words", 
   "oldfieldname": "in_words", 
@@ -516,6 +507,7 @@
  }, 
  {
   "print_hide": 0, 
+  "print_width": "150px", 
   "no_copy": 0, 
   "oldfieldtype": "Currency", 
   "doctype": "DocField", 
@@ -529,6 +521,7 @@
  }, 
  {
   "print_hide": 0, 
+  "print_width": "150px", 
   "no_copy": 0, 
   "oldfieldtype": "Currency", 
   "doctype": "DocField", 
@@ -542,9 +535,9 @@
  {
   "print_hide": 0, 
   "description": "In Words (Export) will be visible once you save the Delivery Note.", 
+  "print_width": "150px", 
   "no_copy": 0, 
   "oldfieldtype": "Data", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "In Words (Export)", 
   "oldfieldname": "in_words_export", 
@@ -575,19 +568,16 @@
  {
   "print_hide": 1, 
   "oldfieldtype": "Button", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Get Terms and Conditions", 
-  "trigger": "Server", 
+  "options": "get_tc_details", 
   "fieldname": "get_terms", 
   "fieldtype": "Button", 
-  "options": "get_tc_details", 
   "permlevel": 0
  }, 
  {
   "print_hide": 1, 
   "oldfieldtype": "HTML", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Terms and Conditions HTML", 
   "options": "You can add Terms and Notes that will be printed in the Transaction", 
@@ -597,7 +587,6 @@
  }, 
  {
   "oldfieldtype": "Text Editor", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Terms and Conditions Details", 
   "oldfieldname": "terms", 
@@ -615,6 +604,7 @@
  }, 
  {
   "print_hide": 1, 
+  "print_width": "50%", 
   "doctype": "DocField", 
   "width": "50%", 
   "fieldname": "column_break4", 
@@ -623,20 +613,20 @@
  }, 
  {
   "print_hide": 1, 
+  "print_width": "150px", 
   "no_copy": 0, 
   "oldfieldtype": "Data", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Transporter Name", 
   "oldfieldname": "transporter_name", 
   "width": "150px", 
-  "trigger": "Client", 
   "fieldname": "transporter_name", 
   "fieldtype": "Data", 
   "reqd": 0, 
   "permlevel": 0
  }, 
  {
+  "print_width": "50%", 
   "doctype": "DocField", 
   "width": "50%", 
   "fieldname": "col_break34", 
@@ -646,9 +636,9 @@
  {
   "print_hide": 1, 
   "description": "Transporter lorry number", 
+  "print_width": "100px", 
   "no_copy": 0, 
   "oldfieldtype": "Data", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "LR No", 
   "oldfieldname": "lr_no", 
@@ -660,18 +650,18 @@
  }, 
  {
   "print_hide": 1, 
+  "permlevel": 0, 
   "description": "Date on which lorry started from your warehouse", 
-  "width": "100px", 
+  "print_width": "100px", 
   "default": "Today", 
   "oldfieldtype": "Date", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "LR Date", 
   "oldfieldname": "lr_date", 
   "no_copy": 0, 
   "fieldname": "lr_date", 
   "fieldtype": "Date", 
-  "permlevel": 0
+  "width": "100px"
  }, 
  {
   "doctype": "DocField", 
@@ -681,6 +671,7 @@
   "permlevel": 0
  }, 
  {
+  "print_width": "50%", 
   "doctype": "DocField", 
   "width": "50%", 
   "fieldname": "col_break20", 
@@ -698,6 +689,7 @@
   "in_filter": 1
  }, 
  {
+  "print_width": "50%", 
   "doctype": "DocField", 
   "width": "50%", 
   "fieldname": "col_break21", 
@@ -709,12 +701,12 @@
   "search_index": 1, 
   "doctype": "DocField", 
   "label": "Territory", 
-  "options": "Territory", 
+  "permlevel": 0, 
   "fieldname": "territory", 
   "fieldtype": "Link", 
   "reqd": 1, 
   "hidden": 0, 
-  "permlevel": 0, 
+  "options": "Territory", 
   "in_filter": 1
  }, 
  {
@@ -732,7 +724,6 @@
   "print_hide": 1, 
   "description": "Filling in Additional Information about the Delivery Note will help you analyze your data better.", 
   "oldfieldtype": "Section Break", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "More Info", 
   "fieldname": "more_info", 
@@ -742,8 +733,8 @@
  {
   "print_hide": 1, 
   "description": "Time at which items were delivered from warehouse", 
+  "print_width": "100px", 
   "oldfieldtype": "Time", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Posting Time", 
   "oldfieldname": "posting_time", 
@@ -758,24 +749,25 @@
  {
   "print_hide": 1, 
   "permlevel": 1, 
-  "width": "150px", 
+  "print_width": "150px", 
   "default": "Draft", 
   "oldfieldtype": "Select", 
   "doctype": "DocField", 
   "label": "Status", 
   "oldfieldname": "status", 
   "no_copy": 1, 
+  "options": "\nDraft\nSubmitted\nCancelled", 
   "fieldname": "status", 
   "fieldtype": "Select", 
   "search_index": 1, 
   "reqd": 1, 
-  "options": "\nDraft\nSubmitted\nCancelled", 
+  "width": "150px", 
   "in_filter": 1
  }, 
  {
   "print_hide": 1, 
-  "allow_on_submit": 1, 
   "oldfieldtype": "Link", 
+  "allow_on_submit": 1, 
   "doctype": "DocField", 
   "label": "Letter Head", 
   "oldfieldname": "letter_head", 
@@ -788,13 +780,11 @@
   "print_hide": 1, 
   "no_copy": 1, 
   "oldfieldtype": "Link", 
-  "colour": "White:FFF", 
   "allow_on_submit": 1, 
   "doctype": "DocField", 
   "label": "Select Print Heading", 
   "oldfieldname": "select_print_heading", 
   "permlevel": 0, 
-  "trigger": "Client", 
   "fieldname": "select_print_heading", 
   "fieldtype": "Link", 
   "options": "Print Heading", 
@@ -803,12 +793,10 @@
  {
   "description": "Track this Delivery Note against any Project", 
   "oldfieldtype": "Link", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Project Name", 
   "oldfieldname": "project_name", 
   "permlevel": 0, 
-  "trigger": "Client", 
   "fieldname": "project_name", 
   "fieldtype": "Link", 
   "search_index": 1, 
@@ -829,7 +817,6 @@
  {
   "print_hide": 1, 
   "oldfieldtype": "Link", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Campaign", 
   "oldfieldname": "campaign", 
@@ -841,18 +828,18 @@
  }, 
  {
   "print_hide": 1, 
-  "allow_on_submit": 1, 
   "oldfieldtype": "Check", 
+  "allow_on_submit": 1, 
   "doctype": "DocField", 
   "label": "Print Without Amount", 
   "oldfieldname": "print_without_amount", 
-  "trigger": "Client", 
   "fieldname": "print_without_amount", 
   "fieldtype": "Check", 
   "permlevel": 0
  }, 
  {
   "print_hide": 1, 
+  "print_width": "50%", 
   "oldfieldtype": "Column Break", 
   "doctype": "DocField", 
   "width": "50%", 
@@ -866,7 +853,6 @@
   "description": "% of materials billed against this Delivery Note", 
   "no_copy": 1, 
   "search_index": 1, 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "% Amount Billed", 
   "oldfieldname": "per_billed", 
@@ -893,7 +879,6 @@
   "description": "% of materials delivered against this Delivery Note", 
   "no_copy": 1, 
   "search_index": 1, 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "% Installed", 
   "oldfieldname": "per_installed", 
@@ -914,9 +899,10 @@
  }, 
  {
   "print_hide": 1, 
-  "allow_on_submit": 0, 
+  "print_width": "150px", 
   "no_copy": 1, 
   "oldfieldtype": "Data", 
+  "allow_on_submit": 0, 
   "doctype": "DocField", 
   "label": "Amended From", 
   "oldfieldname": "amended_from", 
@@ -928,6 +914,7 @@
  {
   "print_hide": 1, 
   "description": "The date at which current entry is corrected in the system.", 
+  "print_width": "100px", 
   "no_copy": 1, 
   "oldfieldtype": "Date", 
   "doctype": "DocField", 
@@ -943,7 +930,6 @@
   "description": "Required only for sample item.", 
   "no_copy": 1, 
   "oldfieldtype": "Link", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "To Warehouse", 
   "oldfieldname": "to_warehouse", 
@@ -956,7 +942,6 @@
  {
   "print_hide": 1, 
   "oldfieldtype": "Data", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Excise Page Number", 
   "oldfieldname": "excise_page", 
@@ -977,9 +962,9 @@
  {
   "print_hide": 1, 
   "description": "Select the relevant company name if you have multiple companies", 
+  "print_width": "150px", 
   "permlevel": 0, 
   "oldfieldtype": "Link", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Company", 
   "oldfieldname": "company", 
@@ -993,6 +978,7 @@
  }, 
  {
   "print_hide": 1, 
+  "print_width": "150px", 
   "permlevel": 0, 
   "oldfieldtype": "Select", 
   "doctype": "DocField", 
@@ -1010,7 +996,6 @@
   "print_hide": 1, 
   "no_copy": 1, 
   "oldfieldtype": "Data", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Cancel Reason", 
   "oldfieldname": "cancel_reason", 
@@ -1043,7 +1028,6 @@
  {
   "print_hide": 1, 
   "oldfieldtype": "Section Break", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Sales Team", 
   "fieldname": "sales_team_section_break", 
@@ -1052,6 +1036,7 @@
  }, 
  {
   "print_hide": 1, 
+  "print_width": "50%", 
   "doctype": "DocField", 
   "width": "50%", 
   "fieldname": "column_break6", 
@@ -1061,19 +1046,20 @@
  {
   "print_hide": 1, 
   "permlevel": 0, 
+  "print_width": "150px", 
   "no_copy": 0, 
   "oldfieldtype": "Link", 
   "doctype": "DocField", 
   "label": "Sales Partner", 
   "oldfieldname": "sales_partner", 
   "width": "150px", 
-  "trigger": "Client", 
   "fieldname": "sales_partner", 
   "fieldtype": "Link", 
   "options": "Sales Partner"
  }, 
  {
   "print_hide": 1, 
+  "print_width": "50%", 
   "doctype": "DocField", 
   "width": "50%", 
   "fieldname": "column_break7", 
@@ -1082,13 +1068,13 @@
  }, 
  {
   "print_hide": 1, 
+  "print_width": "100px", 
   "no_copy": 0, 
   "oldfieldtype": "Currency", 
   "doctype": "DocField", 
   "label": "Commission Rate (%)", 
   "oldfieldname": "commission_rate", 
   "width": "100px", 
-  "trigger": "Client", 
   "fieldname": "commission_rate", 
   "fieldtype": "Currency", 
   "permlevel": 0
@@ -1097,11 +1083,9 @@
   "print_hide": 1, 
   "no_copy": 0, 
   "oldfieldtype": "Currency", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Total Commission", 
   "oldfieldname": "total_commission", 
-  "trigger": "Client", 
   "fieldname": "total_commission", 
   "fieldtype": "Currency", 
   "permlevel": 0
@@ -1145,8 +1129,12 @@
   "permlevel": 0
  }, 
  {
+  "amend": 0, 
+  "create": 0, 
   "doctype": "DocPerm", 
+  "submit": 0, 
   "role": "Accounts User", 
+  "cancel": 0, 
   "permlevel": 1
  }, 
  {
@@ -1157,8 +1145,7 @@
   "write": 1, 
   "role": "Sales User", 
   "cancel": 1, 
-  "permlevel": 0, 
-  "match": ""
+  "permlevel": 0
  }, 
  {
   "amend": 0, 
@@ -1173,13 +1160,17 @@
  {
   "doctype": "DocPerm", 
   "role": "Customer", 
-  "match": "customer_name", 
-  "permlevel": 0
+  "permlevel": 0, 
+  "match": "customer_name"
  }, 
  {
-  "write": 1, 
+  "amend": 0, 
+  "create": 0, 
   "doctype": "DocPerm", 
+  "submit": 0, 
+  "write": 1, 
   "role": "All", 
+  "cancel": 0, 
   "permlevel": 2
  }, 
  {

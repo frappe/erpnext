@@ -193,7 +193,7 @@ cur_frm.fields_dict['contact_person'].get_query = function(doc, cdt, cdn) {
 }
 
 cur_frm.fields_dict['entries'].grid.get_field("item_code").get_query = function(doc, cdt, cdn) {
-	return return erpnext.queries.item({
+	return erpnext.queries.item({
 		'ifnull(tabItem.is_purchase_item, "No")': 'Yes'
 	})
 }

@@ -1,6 +1,6 @@
 erpnext.updates = [
 	["7th January 2013", [
-		"Language (backend): Integrated language libraries."
+		"Language (backend): Integrated language libraries."]],
 	["4th January 2013", [
 		"Support Analytics: Simple Tool to Plot Number Tickets and time to Closing",
 		"Workflow: Added Workflow Help",
