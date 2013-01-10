@@ -1,27 +1,185 @@
-// ERPNext - web based ERP (http://erpnext.com)
-// Copyright (C) 2012 Web Notes Technologies Pvt Ltd
-// 
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-// 
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-// 
-// You should have received a copy of the GNU General Public License
-// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+// ERPNext: Copyright 2013 Web Notes Technologies Pvt Ltd
+// GNU General Public License. See "license.txt"
 
-pscript.onload_Setup = function(wrapper) {
-	wrapper.appframe = new wn.ui.AppFrame($(wrapper).find('.appframe-area'), 'Setup');
-	wrapper.appframe.add_home_breadcrumb();
-	wrapper.appframe.add_breadcrumb(wn.modules["Setup"].icon);
-	
-	erpnext.module_page.hide_links(wrapper);
+wn.module_page["Setup"] = [
+	{
+		title: wn._("Organization"),
+		icon: "icon-building",
+		items: [
+			{
+				"label":wn._("Company"),
+				"doctype":"Company",
+				"description":wn._("List of companies (not customers / suppliers)")
+			},
+			{
+				"doctype":"Fiscal Year",
+				"label": wn._("Fiscal Year"),
+				"description":wn._("Financial Years for books of accounts")
+			},
+			{
+				"doctype":"Currency",
+				"label": wn._("Currency"),
+				"description": wn._("Currency Master")
+			},
+		]
+	},
+	{
+		title: wn._("Users"),
+		icon: "icon-group",
+		right: true,
+		items: [
+			{
+				"doctype":"Profile",
+				"label": wn._("Profile"),
+				"description": wn._("Add/remove users, set roles, passwords etc")
+			},
+			{
+				"page":"permission-manager",
+				label: wn._("Permission Manager"),
+				"description": wn._("Set permissions on transactions / masters")
+			},
+			{
+				"page":"user-properties",
+				label: wn._("User Properties"),
+				"description":wn._("Set default values for users (also used for permissions).")
+			},
+			{
+				"doctype":"Workflow",
+				label:wn._("Workfow"),
+				"description":wn._("Set workflow rules.")
+			},
+			{
+				"doctype":"Authorization Rule",
+				label:wn._("Authorization Rule"),
+				"description":wn._("Restrict submission rights based on amount")
+			},
+		]
+	},
+	{
+		title: wn._("Data"),
+		icon: "icon-table",
+		items: [
+			{
+				"page":"data-import-tool",
+				label: wn._("Data Import"),
+				"description":wn._("Import data from spreadsheet (csv) files")
+			},
+			{
+				"route":"Form/Global Defaults",
+				doctype: "Global Defaults",
+				label: wn._("Global Defaults"),
+				"description":wn._("Set default values for entry"),
+			},
+			{
+				"route":"Form/Naming Series/Naming Series",
+				doctype: "Naming Series",
+				label: wn._("Manage numbering series"),
+				"description":wn._("Set multiple numbering series for transactions")
+			},
+		]
+	},
+	{
+		title: wn._("Branding and Printing"),
+		icon: "icon-printer",
+		right: true,
+		items: [
+			{
+				"doctype":"Letter Head",
+				label:wn._("Letter Head"),
+				"description":wn._("Letter heads for print")
+			},
+			{
+				"doctype":"Print Format",
+				label:wn._("Print Format"),
+				"description":wn._("HTML print formats for quotes, invoices etc")
+			},
+			{
+				"doctype":"Print Heading",
+				label:wn._("Print Heading"),
+				"description":wn._("Add headers for standard print formats")
+			},
+			{
+				"route":"Form/Style Settings/Style Settings",
+				doctype:wn._("Style Settings"),
+				label:wn._("Style Settings"),
+				"description":wn._("Change background fonts etc")
+			}
+		]
+	},
+	{
+		title: wn._("Email Settings"),
+		icon: "icon-envelope",
+		items: [
+			{
+				"route":"Form/Email Settings/Email Settings",
+				doctype:"Email Settings",
+				label: wn._("Email Settings"),
+				"description":wn._("Out going mail server and support ticket mailbox")
+			},
+			{
+				"route":"Form/Notification Control/Notification Control",
+				doctype:"Notification Control",
+				label: wn._("Notification Control"),
+				"description":wn._("Prompt email sending to customers and suppliers"),
+			},
+			{
+				"doctype":"Email Digest",
+				label: wn._("Email Digest"),
+				"description":wn._("Daily, weekly, monthly email Digests")
+			},
+			{
+				"route":"Form/SMS Settings/SMS Settings",
+				doctype:"SMS Settings",
+				label: wn._("SMS Settings"),
+				"description":wn._("Setup outgoing SMS via your bulk SMS provider")
+			},
+			{
+				"route":"Form/SMS Center/SMS Center",
+				doctype:"SMS Center",
+				label: wn._("SMS Center"),
+				"description":wn._("Send bulk SMS to leads, customers, contacts")
+			},
+		]
+	},
+	{
+		title: wn._("Customize"),
+		icon: "icon-wrench",
+		items: [			
+			{
+				"route":"Form/Customize Form/Customize Form",
+				doctype:"Customize Form",
+				label: wn._("Customize Form"),
+				"description":wn._("Change entry properties (hide fields, make mandatory etc)")
+			},
+			{
+				"doctype":"Custom Field",
+				label: wn._("Custom Field"),
+				"description":wn._("Add fields to forms")
+			},
+			{
+				"doctype":"Custom Script",
+				label: wn._("Custom Script"),
+				"description":wn._("Add custom code to forms")
+			},
+			{
+				"route":"Form/Features Setup/Features Setup",
+				"description":wn._("Simplify entry forms by disabling features"),
+				doctype:"Features Setup",
+				label: wn._("Features Setup"),
+			},
+			{
+				"page":"modules_setup",
+				label: wn._("Show / Hide Modules"),
+				"description":wn._("Show, hide modules")
+			},
+		]
+	},
+]
+
+pscript['onload_Setup'] = function(wrapper) {
+	wn.views.moduleview.make(wrapper, "Setup");
 	if(wn.boot.expires_on) {
-		$(wrapper).find(".layout-main")
+		$(wrapper).find(".main-section")
 			.prepend("<div class='alert'>Your ERPNext account will expire on "
 				+ wn.datetime.global_date_format(wn.boot.expires_on) + "</div>");
 	}

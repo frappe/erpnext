@@ -2,9 +2,9 @@
  {
   "owner": "Administrator", 
   "docstatus": 0, 
-  "creation": "2012-12-03 10:13:46", 
+  "creation": "2013-01-02 16:17:01", 
   "modified_by": "Administrator", 
-  "modified": "2012-12-27 14:45:31"
+  "modified": "2013-01-09 14:46:42"
  }, 
  {
   "autoname": "naming_series:", 
@@ -150,6 +150,7 @@
   "permlevel": 0
  }, 
  {
+  "description": "You can enter any date manually", 
   "oldfieldtype": "Date", 
   "doctype": "DocField", 
   "label": "Date of Birth", 

@@ -15,6 +15,8 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 wn.home_page = "desktop";
+wn.provide("wn.module_page");
+
 $.extend(wn.modules, {
 	"Selling": {
 		link: "selling-home",

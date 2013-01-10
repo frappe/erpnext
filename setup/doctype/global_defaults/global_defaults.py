@@ -64,6 +64,9 @@ class DocType:
 			webnotes.conn.set_default('year_start_date', ysd.strftime('%Y-%m-%d'))
 			webnotes.conn.set_default('year_end_date', \
 				get_last_day(get_first_day(ysd,0,11)).strftime('%Y-%m-%d'))
+				
+		# clear cache
+		webnotes.clear_cache()
 	
 	def validate_session_expiry(self):
 		if self.doc.session_expiry:

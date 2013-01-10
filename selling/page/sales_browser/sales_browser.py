@@ -13,7 +13,7 @@ def get_children():
 		if(is_group='Yes', 1, 0) as expandable
 		from `tab%(ctype)s`
 		where docstatus < 2
-		and %(parent_field)s = "%(parent)s"
+		and ifnull(%(parent_field)s,'') = "%(parent)s"
 		order by name""" % webnotes.form_dict, as_dict=1)
 		
 @webnotes.whitelist()

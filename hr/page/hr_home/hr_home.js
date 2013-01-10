@@ -1,20 +1,147 @@
-// ERPNext - web based ERP (http://erpnext.com)
-// Copyright (C) 2012 Web Notes Technologies Pvt Ltd
-// 
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-// 
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-// 
-// You should have received a copy of the GNU General Public License
-// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+// ERPNext: Copyright 2013 Web Notes Technologies Pvt Ltd
+// GNU General Public License. See "license.txt"
+
+wn.module_page["HR"] = [
+	{
+		title: wn._("Documents"),
+		icon: "icon-copy",
+		items: [
+			{
+				label: wn._("Leave Application"),
+				description: wn._("Applications for leave."),
+				doctype:"Leave Application"
+			},
+			{
+				label: wn._("Expense Claim"),
+				description: wn._("Claims for expenses made on behalf of the organization."),
+				doctype:"Expense Claim"
+			},
+			{
+				label: wn._("Attendance"),
+				description: wn._("Attendance record."),
+				doctype:"Attendance"
+			},
+			{
+				label: wn._("Salary Slip"),
+				description: wn._("Monthly salary statement."),
+				doctype:"Salary Slip"
+			},
+			{
+				label: wn._("Appraisal"),
+				description: wn._("Performance appraisal."),
+				doctype:"Appraisal"
+			},
+		]
+	},
+	{
+		title: wn._("Masters"),
+		icon: "icon-book",
+		items: [
+			{
+				label: wn._("Employee"),
+				description: wn._("Employee records."),
+				doctype:"Employee"
+			},
+		]
+	},
+	{
+		title: wn._("Leave Setup"),
+		icon: "icon-cog",
+		items: [
+			{
+				"route":"Form/Attendance Control Panel/Attendance Control Panel",
+				"label":wn._("Upload attendance"),
+				"description":wn._("Upload attendance from a .csv file"),
+				doctype: "Attendance Control Panel"
+			},
+			{
+				"route":"Form/Leave Control Panel/Leave Control Panel",
+				"label": wn._("Leave Allocation Tool"),
+				"description": wn._("Allocate leaves for the year."),
+				doctype: "Leave Control Panel"
+			},
+			{
+				"label":wn._("Leave Allocation"),
+				"description":wn._("Leave allocations."),
+				doctype: "Leave Allocation"
+			},
+			{
+				"label":wn._("Leave Type"),
+				"description":wn._("Type of leaves like casual, sick etc."),
+				doctype: "Leave Type"
+			},
+			{
+				"label":wn._("Holiday List"),
+				"description":wn._("List of holidays."),
+				doctype: "Holiday List"
+			},
+		]
+	},
+	{
+		title: wn._("Payroll Setup"),
+		icon: "icon-cog",
+		items: [
+			{
+				"label": wn._("Salary Structure"),
+				"description": wn._("Monthly salary template."),
+				doctype: "Salary Structure"
+			},
+			{
+				"route":"Form/Salary Manager/Salary Manager",
+				"label":wn._("Process Payroll"),
+				"description":wn._("Generate Salary Slips"),
+				doctype: "Salary Manager"
+			},
+			{
+				"label": wn._("Earning Type"),
+				"description": wn._("Salary components."),
+				doctype: "Earning Type"
+			},
+			{
+				"label": wn._("Deduction Type"),
+				"description": wn._("Tax and other salary deductions."),
+				doctype: "Deduction Type"
+			},
+		]
+	},
+	{
+		title: wn._("Employee Setup"),
+		icon: "icon-cog",
+		items: [
+			{
+				"label": wn._("Employment Type"),
+				"description": wn._("Type of employment master."),
+				doctype: "Employment Type"
+			},	
+			{
+				"label": wn._("Appraisal Template"),
+				"description": wn._("Template for employee performance appraisals."),
+				doctype: "Appraisal Template"
+			},
+			{
+				"label": wn._("Expense Claim Type"),
+				"description": wn._("Types of Expense Claim."),
+				doctype: "Expense Claim Type"
+			},
+			{
+				"label": wn._("Branch"),
+				"description": wn._("Company branches."),
+				doctype: "Branch"
+			},
+			{
+				"label": wn._("Department"),
+				"description": wn._("Company departments."),
+				doctype: "Department"
+			},
+			{
+				"label": wn._("Grade"),
+				"description": wn._("Employee grades"),
+				doctype: "Grade"
+			},
+		]
+	}
+];
 
 pscript['onload_hr-home'] = function(wrapper) {
-	wrapper.appframe = new wn.ui.AppFrame($(wrapper).find('.appframe-area') ,'Human Resources');
-	erpnext.module_page.setup_page('HR', wrapper);
+	wn.views.moduleview.make(wrapper, "HR");
 }

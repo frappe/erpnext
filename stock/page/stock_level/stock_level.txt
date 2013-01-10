@@ -2,9 +2,9 @@
  {
   "owner": "Administrator", 
   "docstatus": 0, 
-  "creation": "2012-12-28 11:02:23", 
+  "creation": "2012-12-31 10:52:14", 
   "modified_by": "Administrator", 
-  "modified": "2012-12-28 11:02:23"
+  "modified": "2013-01-09 17:16:57"
  }, 
  {
   "name": "__common__", 
@@ -15,7 +15,22 @@
   "page_name": "stock-level"
  }, 
  {
+  "name": "__common__", 
+  "parent": "stock-level", 
+  "doctype": "Page Role", 
+  "parenttype": "Page", 
+  "parentfield": "roles"
+ }, 
+ {
   "name": "stock-level", 
   "doctype": "Page"
+ }, 
+ {
+  "role": "Material Manager", 
+  "doctype": "Page Role"
+ }, 
+ {
+  "role": "Analytics", 
+  "doctype": "Page Role"
  }
 ]

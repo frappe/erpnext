@@ -2,22 +2,18 @@
  {
   "owner": "Administrator", 
   "docstatus": 0, 
-  "creation": "2012-07-03 13:30:56", 
+  "creation": "2012-07-12 23:29:45", 
   "modified_by": "Administrator", 
-  "modified": "2012-07-12 16:20:36"
+  "modified": "2013-01-10 12:22:45"
  }, 
  {
-  "section_style": "Simple", 
-  "description": "Send automatic emails to Contacts on Submitting transactions.", 
-  "allow_print": 1, 
-  "module": "Setup", 
   "allow_email": 1, 
   "issingle": 1, 
+  "description": "Send automatic emails to Contacts on Submitting transactions.", 
   "name": "__common__", 
-  "colour": "White:FFF", 
+  "allow_print": 1, 
   "doctype": "DocType", 
-  "server_code_error": " ", 
-  "version": 1, 
+  "module": "Setup", 
   "allow_copy": 1
  }, 
  {
@@ -42,26 +38,14 @@
   "doctype": "DocType"
  }, 
  {
-  "write": 0, 
-  "create": 0, 
-  "role": "Guest", 
-  "doctype": "DocPerm"
- }, 
- {
-  "write": 1, 
-  "create": 1, 
-  "role": "System Manager", 
-  "doctype": "DocPerm"
- }, 
- {
-  "description": "When any of the checked transactions are \"Submitted\", an email is automatically sent to the associated \"Contact\" in that transaction, with the transaction as an attachment.", 
-  "colour": "White:FFF", 
+  "description": "When any of the checked transactions are \"Submitted\", an email pop-up automatically opened to send an email to the associated \"Contact\" in that transaction, with the transaction as an attachment. The user may or may not send the email.", 
   "doctype": "DocField", 
-  "label": "Send Email Automatically on Submission of", 
+  "label": "Prompt for Email on Submission of", 
   "fieldname": "send_autonotification_for", 
   "fieldtype": "Section Break"
  }, 
  {
+  "print_width": "50%", 
   "doctype": "DocField", 
   "label": "Sales", 
   "width": "50%", 
@@ -70,29 +54,30 @@
  }, 
  {
   "doctype": "DocField", 
+  "label": "Quotation", 
   "fieldname": "quotation", 
-  "fieldtype": "Check", 
-  "label": "Quotation"
+  "fieldtype": "Check"
  }, 
  {
   "doctype": "DocField", 
+  "label": "Sales Order", 
   "fieldname": "sales_order", 
-  "fieldtype": "Check", 
-  "label": "Sales Order"
+  "fieldtype": "Check"
  }, 
  {
   "doctype": "DocField", 
+  "label": "Delivery Note", 
   "fieldname": "delivery_note", 
-  "fieldtype": "Check", 
-  "label": "Delivery Note"
+  "fieldtype": "Check"
  }, 
  {
   "doctype": "DocField", 
+  "label": "Sales Invoice", 
   "fieldname": "sales_invoice", 
-  "fieldtype": "Check", 
-  "label": "Sales Invoice"
+  "fieldtype": "Check"
  }, 
  {
+  "print_width": "50%", 
   "doctype": "DocField", 
   "label": "Purchase", 
   "width": "50%", 
@@ -101,44 +86,41 @@
  }, 
  {
   "doctype": "DocField", 
+  "label": "Purchase Order", 
   "fieldname": "purchase_order", 
-  "fieldtype": "Check", 
-  "label": "Purchase Order"
+  "fieldtype": "Check"
  }, 
  {
   "doctype": "DocField", 
+  "label": "Purchase Receipt", 
   "fieldname": "purchase_receipt", 
-  "fieldtype": "Check", 
-  "label": "Purchase Receipt"
+  "fieldtype": "Check"
  }, 
  {
   "doctype": "DocField", 
+  "label": "Expense Claim", 
   "fieldname": "expense_claim", 
-  "fieldtype": "Check", 
-  "label": "Expense Claim"
+  "fieldtype": "Check"
  }, 
  {
   "description": "Customize the introductory text that goes as a part of that email. Each transaction has a separate introductory text.", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Customize the Notification", 
   "fieldname": "customize_the_notification", 
   "fieldtype": "Section Break"
  }, 
  {
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Select Transaction", 
-  "trigger": "Client", 
   "fieldname": "select_transaction", 
   "fieldtype": "Select", 
   "options": "\nQuotation\nSales Order\nDelivery Note\nSales Invoice\nPurchase Order\nPurchase Receipt\nExpense Claim\nExpense Claim Approved\nExpense Claim Rejected"
  }, 
  {
   "doctype": "DocField", 
+  "label": "Custom Message", 
   "fieldname": "custom_message", 
-  "fieldtype": "Text Editor", 
-  "label": "Custom Message"
+  "fieldtype": "Text Editor"
  }, 
  {
   "doctype": "DocField", 
@@ -210,5 +192,17 @@
   "fieldname": "expense_claim_rejected_message", 
   "fieldtype": "Text", 
   "hidden": 1
+ }, 
+ {
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "write": 0, 
+  "role": "Guest"
+ }, 
+ {
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "write": 1, 
+  "role": "System Manager"
  }
 ]

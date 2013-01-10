@@ -1,20 +1,106 @@
-// ERPNext - web based ERP (http://erpnext.com)
-// Copyright (C) 2012 Web Notes Technologies Pvt Ltd
-// 
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-// 
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-// 
-// You should have received a copy of the GNU General Public License
-// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+// ERPNext: Copyright 2013 Web Notes Technologies Pvt Ltd
+// GNU General Public License. See "license.txt"
+
+wn.module_page["Buying"] = [
+	{
+		title: wn._("Documents"),
+		icon: "icon-copy",
+		items: [
+			{
+				label: wn._("Purchase Request"),
+				description: wn._("Request for purchase."),
+				doctype:"Purchase Request"
+			},
+			{
+				label: wn._("Supplier Quotation"),
+				description: wn._("Track Quotations received from Suppliers."),
+				doctype:"Supplier Quotation"
+			},
+			{
+				label: wn._("Purchase Order"),
+				description: wn._("Purchase Orders given to Suppliers."),
+				doctype:"Purchase Order"
+			},
+		]
+	},
+	{
+		title: wn._("Masters"),
+		icon: "icon-book",
+		items: [
+		{
+			label: wn._("Supplier"),
+			description: wn._("Supplier database."),
+			doctype:"Supplier"
+		},
+		{
+			label: wn._("Contact"),
+			description: wn._("All Contacts."),
+			doctype:"Contact"
+		},
+		{
+			label: wn._("Address"),
+			description: wn._("All Addresses."),
+			doctype:"Address"
+		},
+		{
+			label: wn._("Item"),
+			description: wn._("All Products or Services."),
+			doctype:"Item"
+		},
+		]
+	},
+	{
+		title: wn._("Setup"),
+		icon: "icon-cog",
+		items: [
+			{
+				"label": wn._("Purchase Taxes and Charges Master"),
+				"doctype":"Purchase Taxes and Charges Master",
+				"description": wn._("Tax Template for Purchase")
+			},
+			{
+				"doctype":"Supplier Type",
+				"label": wn._("Supplier Type"),
+				"description": wn._("Supplier classification.")
+			},
+			{
+				"route":"Sales Browser/Item Group",
+				"label":wn._("Item Group"),
+				"description": wn._("Tree of item classification"),
+				doctype:"Item Group"
+			},
+			{
+				label: wn._("Terms and Conditions"),
+				description: wn._("Template of terms or contract."),
+				doctype:"Terms and Conditions"
+			},
+		]
+	},
+	{
+		title: wn._("Tools"),
+		icon: "icon-wrench",
+		items: [
+			{
+				"route":"Form/Sales and Purchase Return Tool/Sales and Purchase Return Tool",
+				"label":wn._("Purchase Returns"),
+				"description":wn._("Helper for managing return of goods (sales or purchase)"),
+				doctype: "Sales and Purchase Return Tool"
+			},
+		]
+	},
+	{
+		title: wn._("Analytics"),
+		right: true,
+		icon: "icon-bar-chart",
+		items: [
+			{
+				"label":wn._("Purchase Analytics"),
+				page: "purchase-analytics"
+			},
+		]
+	},
+]
 
 pscript['onload_buying-home'] = function(wrapper) {
-	wrapper.appframe = new wn.ui.AppFrame($(wrapper).find('.appframe-area'), 'Buying');
-	erpnext.module_page.setup_page('Buying', wrapper);
+	wn.views.moduleview.make(wrapper, "Buying");
 }
