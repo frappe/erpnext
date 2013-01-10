@@ -84,18 +84,19 @@ wn.module_page["Stock"] = [
 				description: wn._("Transportatoin cost distribution template.")
 			},
 			{
-				"route":"#Form/Landed Cost Wizard/Landed Cost Wizard",
+				"route":"Form/Landed Cost Wizard/Landed Cost Wizard",
 				"label": wn._("Landed Cost Wizard"),
 				description: wn._("Distribute transport overhead across items."),
 				doctype: "Landed Cost Wizard"
 			},
 			{
-				"route":"#Form/Stock UOM Replace Utility/Stock UOM Replace Utility",
+				"route":"Form/Stock UOM Replace Utility/Stock UOM Replace Utility",
 				"label": wn._("UOM Replace Utility"),
+				description: wn._("Change UOM for an Item."),
 				"doctype": "Stock UOM Replace Utility"
 			},
 			{
-				"route":"#Form/Sales and Purchase Return Tool/Sales and Purchase Return Tool",
+				"route":"Form/Sales and Purchase Return Tool/Sales and Purchase Return Tool",
 				"label": wn._("Sales and Purchase Return Tool"),
 				doctype: "Sales and Purchase Return Tool",
 				description: wn._("Manage sales or purchase returns")

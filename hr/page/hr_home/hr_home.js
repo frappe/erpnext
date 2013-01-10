@@ -87,7 +87,7 @@ wn.module_page["HR"] = [
 				doctype: "Salary Structure"
 			},
 			{
-				"route":"#Form/Salary Manager/Salary Manager",
+				"route":"Form/Salary Manager/Salary Manager",
 				"label":wn._("Process Payroll"),
 				"description":wn._("Generate Salary Slips"),
 				doctype: "Salary Manager"

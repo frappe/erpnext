@@ -46,13 +46,13 @@ wn.module_page["Accounts"] = [
 		icon: "icon-wrench",
 		items: [
 			{
-				"route":"#Form/Bank Reconciliation/Bank Reconciliation",
+				"route":"Form/Bank Reconciliation/Bank Reconciliation",
 				"label": wn._("Bank Reconciliation"),
 				"description": wn._("Update bank payment dates with journals."),
 				doctype: "Bank Reconciliation"
 			},
 			{
-				"route":"#Form/Payment to Invoice Matching Tool/Payment to Invoice Matching Tool",
+				"route":"Form/Payment to Invoice Matching Tool/Payment to Invoice Matching Tool",
 				"label": wn._("Payment Reconciliation"),
 				"description": wn._("Match non-linked Invoices and Payments."),
 				doctype: "Payment to Invoice Matching Tool"
@@ -64,7 +64,7 @@ wn.module_page["Accounts"] = [
 				description: "Close Balance Sheet and book Profit or Loss."
 			},
 			{
-				"route":"#Form/Sales and Purchase Return Tool/Sales and Purchase Return Tool",
+				"route":"Form/Sales and Purchase Return Tool/Sales and Purchase Return Tool",
 				"label": wn._("Sales and Purchase Return Tool"),
 				description: wn._("Manage sales or purchase returns"),
 				"doctype": "Sales and Purchase Return Tool"
