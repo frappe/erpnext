@@ -61,7 +61,8 @@ cur_frm.cscript.refresh = function(doc,cdt,cdn){
 			} else {
 				cur_frm.set_intro("Expense Claim is pending approval. Only the Expense Approver can update status.");
 				cur_frm.toggle_enable("approval_status", false);
-				if(!doc.__islocal) cur_frm.frm_head.appframe.buttons.Submit.toggle(false);
+				if(!doc.__islocal && cur_frm.frm_head.appframe.buttons.Submit) 
+					cur_frm.frm_head.appframe.buttons.Submit.toggle(false);
 			}
 		} else {
 			if(doc.approval_status=="Approved") {
