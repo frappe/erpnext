@@ -40,6 +40,7 @@ def update_entries_after(args, verbose=1):
 	qty_after_transaction = flt(previous_sle.get("qty_after_transaction"))
 	valuation_rate = flt(previous_sle.get("valuation_rate"))
 	stock_queue = json.loads(previous_sle.get("stock_queue") or "[]")
+	stock_value = 0.0
 
 	entries_to_fix = get_sle_after_datetime(previous_sle or \
 		{"item_code": args["item_code"], "warehouse": args["warehouse"]})
@@ -47,8 +48,7 @@ def update_entries_after(args, verbose=1):
 	valuation_method = get_valuation_method(args["item_code"])
 	
 	for sle in entries_to_fix:
-		if sle.serial_nos or valuation_method == "FIFO" or \
-				not cint(webnotes.conn.get_default("allow_negative_stock")):
+		if sle.serial_nos or not cint(webnotes.conn.get_default("allow_negative_stock")):
 			# validate negative stock for serialized items, fifo valuation 
 			# or when negative stock is not allowed for moving average
 			if not validate_negative_stock(qty_after_transaction, sle):
@@ -75,7 +75,7 @@ def update_entries_after(args, verbose=1):
 				(qty_after_transaction * valuation_rate) or 0
 		else:
 			stock_value = sum((flt(batch[0]) * flt(batch[1]) for batch in stock_queue))
-
+			
 		# update current sle
 		webnotes.conn.sql("""update `tabStock Ledger Entry`
 			set qty_after_transaction=%s, valuation_rate=%s, stock_queue=%s, stock_value=%s,
@@ -83,7 +83,7 @@ def update_entries_after(args, verbose=1):
 			json.dumps(stock_queue), stock_value, incoming_rate, sle.name))
 		
 	if _exceptions:
-		_raise_exceptions(args)
+		_raise_exceptions(args, verbose)
 	
 	# update bin
 	webnotes.conn.sql("""update `tabBin` set valuation_rate=%s, actual_qty=%s, stock_value=%s, 
@@ -103,16 +103,17 @@ def get_sle_before_datetime(args):
 	"""
 	sle = get_stock_ledger_entries(args,
 		["timestamp(posting_date, posting_time) < timestamp(%(posting_date)s, %(posting_time)s)"],
-		"limit 1")
+		"desc", "limit 1")
 	
 	return sle and sle[0] or webnotes._dict()
 	
 def get_sle_after_datetime(args):
 	"""get Stock Ledger Entries after a particular datetime, for reposting"""
 	return get_stock_ledger_entries(args,
-		["timestamp(posting_date, posting_time) > timestamp(%(posting_date)s, %(posting_time)s)"])
+		["timestamp(posting_date, posting_time) > timestamp(%(posting_date)s, %(posting_time)s)"],
+		"asc")
 				
-def get_stock_ledger_entries(args, conditions=None, limit=None):
+def get_stock_ledger_entries(args, conditions=None, order="desc", limit=None):
 	"""get stock ledger entries filtered by specific posting datetime conditions"""
 	if not args.get("posting_date"):
 		args["posting_date"] = "1900-01-01"
@@ -124,10 +125,11 @@ def get_stock_ledger_entries(args, conditions=None, limit=None):
 		and warehouse = %%(warehouse)s
 		and ifnull(is_cancelled, 'No') = 'No'
 		%(conditions)s
-		order by timestamp(posting_date, posting_time) desc, name desc
+		order by timestamp(posting_date, posting_time) %(order)s, name %(order)s
 		%(limit)s""" % {
 			"conditions": conditions and ("and " + " and ".join(conditions)) or "",
-			"limit": limit or ""
+			"limit": limit or "",
+			"order": order
 		}, args, as_dict=1)
 		
 def validate_negative_stock(qty_after_transaction, sle):
@@ -202,7 +204,7 @@ def get_fifo_values(qty_after_transaction, sle, stock_queue):
 	
 	if not stock_queue:
 		stock_queue.append([0, 0])
-	
+
 	if actual_qty > 0:
 		if stock_queue[-1][0] > 0:
 			stock_queue.append([actual_qty, incoming_rate])
@@ -213,6 +215,9 @@ def get_fifo_values(qty_after_transaction, sle, stock_queue):
 		incoming_cost = 0
 		qty_to_pop = abs(actual_qty)
 		while qty_to_pop:
+			if not stock_queue:
+				stock_queue.append([0, 0])
+			
 			batch = stock_queue[0]
 			
 			if 0 < batch[0] <= qty_to_pop:
@@ -233,10 +238,10 @@ def get_fifo_values(qty_after_transaction, sle, stock_queue):
 	stock_qty = sum((flt(batch[0]) for batch in stock_queue))
 
 	valuation_rate = stock_qty and (stock_value / flt(stock_qty)) or 0
-	
+
 	return valuation_rate, incoming_rate
 
-def _raise_exceptions(args):
+def _raise_exceptions(args, verbose=1):
 	deficiency = min(e["diff"] for e in _exceptions)
 	msg = """Negative stock error: 
 		Cannot complete this transaction because stock will start

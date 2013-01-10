@@ -20,12 +20,14 @@ import json
 from webnotes import msgprint, _
 from webnotes.utils import cstr, flt
 from webnotes.model.controller import DocListController
+from stock.stock_ledger import update_entries_after
 
 class DocType(DocListController):
 	def validate(self):
 		self.validate_data()
 		
 	def on_submit(self):
+		print "in stock reco"
 		self.insert_stock_ledger_entries()
 		
 	def on_cancel(self):
@@ -110,7 +112,6 @@ class DocType(DocListController):
 		data = json.loads(self.doc.reconciliation_json)
 		for row_num, row in enumerate(data[1:]):
 			row = webnotes._dict(zip(row_template, row))
-			
 			previous_sle = get_previous_sle({
 				"item_code": row.item_code,
 				"warehouse": row.warehouse,
@@ -118,13 +119,20 @@ class DocType(DocListController):
 				"posting_time": self.doc.posting_time
 			})
 			
+					
+			change_in_qty = row.qty != "" and \
+				(flt(row.qty) != flt(previous_sle.get("qty_after_transaction")))
+		
+			change_in_rate = row.valuation_rate != "" and \
+				(flt(row.valuation_rate) != flt(previous_sle.get("valuation_rate")))
+			
 			if get_valuation_method(row.item_code) == "Moving Average":
-				self.sle_for_moving_avg(row, previous_sle)
+				self.sle_for_moving_avg(row, previous_sle, change_in_qty, change_in_rate)
 					
 			else:
-				self.sle_for_fifo(row, previous_sle)
+				self.sle_for_fifo(row, previous_sle, change_in_qty, change_in_rate)
 					
-	def sle_for_moving_avg(self, row, previous_sle):
+	def sle_for_moving_avg(self, row, previous_sle, change_in_qty, change_in_rate):
 		"""Insert Stock Ledger Entries for Moving Average valuation"""
 		def _get_incoming_rate(qty, valuation_rate, previous_qty, previous_valuation_rate):
 			if previous_valuation_rate == 0:
@@ -132,12 +140,6 @@ class DocType(DocListController):
 			else:
 				return (qty * valuation_rate - previous_qty * previous_valuation_rate) \
 					/ flt(qty - previous_qty)
-		
-		change_in_qty = row.qty != "" and \
-			(flt(row.qty) != flt(previous_sle.get("qty_after_transaction")))
-
-		change_in_rate = row.valuation_rate != "" and \
-			(flt(row.valuation_rate) != flt(previous_sle.get("valuation_rate")))
 			
 		if change_in_qty:
 			incoming_rate = _get_incoming_rate(flt(row.qty), flt(row.valuation_rate),
@@ -158,23 +160,27 @@ class DocType(DocListController):
 			# -1 entry
 			self.insert_entries({"actual_qty": -1}, row)
 		
-	def sle_for_fifo(self, row, previous_sle):
+	def sle_for_fifo(self, row, previous_sle, change_in_qty, change_in_rate):
 		"""Insert Stock Ledger Entries for FIFO valuation"""
-		previous_stock_queue = json.loads(previous_sle.stock_queue)
+		previous_stock_queue = json.loads(previous_sle.stock_queue or "[]")
 		
-		if previous_stock_queue != [[row.qty, row.valuation_rate]]:
-			# make entry as per attachment
-			self.insert_entries({"actual_qty": row.qty, "incoming_rate": row.valuation_rate},
-				row)
+		if change_in_qty:
+			if previous_stock_queue != [[row.qty, row.valuation_rate]]:
+				# make entry as per attachment
+				self.insert_entries({"actual_qty": row.qty, "incoming_rate": row.valuation_rate}, row)
 		
-			# Make reverse entry
-			qty = sum((flt(fifo_item[0]) for fifo_item in previous_stock_queue))
-			self.insert_entries({"actual_qty": -1 * qty}, row)
-	
+				# Make reverse entry
+				qty = sum((flt(fifo_item[0]) for fifo_item in previous_stock_queue))
+				self.insert_entries({"actual_qty": -1 * qty, 
+					"incoming_rate": qty < 0 and row.valuation_rate or 0}, row)
+					
+		elif change_in_rate:
+			pass
 					
 	def insert_entries(self, opts, row):
 		"""Insert Stock Ledger Entries"""
 		args = {
+			"doctype": "Stock Ledger Entry",
 			"item_code": row.item_code,
 			"warehouse": row.warehouse,
 			"posting_date": self.doc.posting_date,
@@ -185,8 +191,12 @@ class DocType(DocListController):
 			"is_cancelled": "No"
 		}
 		args.update(opts)
+		print args
+		sle_wrapper = webnotes.model_wrapper([args]).insert()
+
+		update_entries_after(args)
 		
-		return webnotes.model_wrapper([args]).insert()
+		return sle_wrapper
 		
 	def delete_stock_ledger_entries(self):
 		"""	Delete Stock Ledger Entries related to this Stock Reconciliation
