@@ -2,20 +2,21 @@
  {
   "owner": "Administrator", 
   "docstatus": 0, 
-  "creation": "2013-01-04 13:57:25", 
+  "creation": "2013-01-09 11:24:35", 
   "modified_by": "Administrator", 
-  "modified": "2013-01-04 13:58:54"
+  "modified": "2013-01-10 19:26:28"
  }, 
  {
-  "is_submittable": 1, 
   "allow_attach": 0, 
+  "is_submittable": 1, 
   "allow_print": 1, 
   "search_fields": "reconciliation_date", 
   "module": "Stock", 
-  "allow_email": 1, 
-  "autoname": "SR/.######", 
-  "name": "__common__", 
   "doctype": "DocType", 
+  "autoname": "SR/.######", 
+  "description": "This tool helps you to update or fix the quantity and valuation of stock in the system. It is typically used to synchronise the system values and what actually exists in your warehouses.", 
+  "allow_email": 1, 
+  "name": "__common__", 
   "max_attachments": 1, 
   "allow_copy": 1
  }, 
@@ -33,7 +34,6 @@
   "read": 1, 
   "doctype": "DocPerm", 
   "parenttype": "DocType", 
-  "role": "Material Manager", 
   "parentfield": "permissions"
  }, 
  {
@@ -127,12 +127,13 @@
   "hidden": 1
  }, 
  {
-  "amend": 1, 
+  "amend": 0, 
   "create": 1, 
   "doctype": "DocPerm", 
   "submit": 1, 
   "write": 1, 
   "cancel": 1, 
+  "role": "Material Manager", 
   "permlevel": 0
  }, 
  {
@@ -142,6 +143,16 @@
   "submit": 0, 
   "write": 0, 
   "cancel": 0, 
+  "role": "Material Manager", 
   "permlevel": 1
+ }, 
+ {
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "submit": 1, 
+  "write": 1, 
+  "cancel": 1, 
+  "role": "System Manager", 
+  "permlevel": 0
  }
 ]

@@ -1,0 +1,35 @@
+import webnotes
+
+def execute():
+	webnotes.reload_doc("stock", "doctype", "stock_ledger_entry")
+	
+	rename_fields()
+	store_stock_reco_json()
+	
+def rename_fields():
+	args = [["Stock Ledger Entry", "bin_aqat", "qty_after_transaction"], 
+		["Stock Ledger Entry", "fcfs_stack", "stock_queue"]]
+	for doctype, old_fieldname, new_fieldname in args:
+		webnotes.conn.sql("""update `tab%s` set `%s`=`%s`""" % 
+			(doctype, new_fieldname, old_fieldname))
+			
+def store_stock_reco_json():
+	import os
+	import conf
+	import json
+	from webnotes.utils.datautils import read_csv_content
+	base_path = os.path.dirname(os.path.abspath(conf.__file__))
+	
+	for reco, file_list in webnotes.conn.sql("""select name, file_list 
+			from `tabStock Reconciliation`"""):
+		if file_list:
+			file_list = file_list.split("\n")
+			stock_reco_file = file_list[0].split(",")[1]
+			stock_reco_file = os.path.join(base_path, "public", "files", stock_reco_file)
+			if os.path.exists(stock_reco_file):
+				with open(stock_reco_file, "r") as open_reco_file:
+					content = open_reco_file.read()
+					content = read_csv_content(content)
+					webnotes.conn.set_value("Stock Reconciliation", reco, "reconciliation_json",
+						json.dumps(content, separators=(',', ': ')))
+	

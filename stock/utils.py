@@ -17,7 +17,7 @@
 import webnotes
 from webnotes import msgprint, _
 import json
-from webnotes.utils import flt
+from webnotes.utils import flt, cstr
 
 def validate_end_of_life(item_code, end_of_life=None, verbose=1):
 	if not end_of_life:
@@ -63,39 +63,9 @@ def _msgprint(msg, verbose):
 	else:
 		raise webnotes.ValidationError, msg
 
-def get_previous_sle(args):
-	"""
-		get the last sle on or before the current time-bucket, 
-		to get actual qty before transaction, this function
-		is called from various transaction like stock entry, reco etc
-		
-		args = {
-			"item_code": "ABC",
-			"warehouse": "XYZ",
-			"posting_date": "2012-12-12",
-			"posting_time": "12:00",
-			"sle": "name of reference Stock Ledger Entry"
-		}
-	"""
-	if not args.get("posting_date"): args["posting_date"] = "1900-01-01"
-	if not args.get("posting_time"): args["posting_time"] = "12:00"
-	if not args.get("sle"): args["sle"] = ""
-
-	sle = webnotes.conn.sql("""
-		select * from `tabStock Ledger Entry`
-		where item_code = %(item_code)s
-		and warehouse = %(warehouse)s
-		and ifnull(is_cancelled, 'No') = 'No'
-		and name != %(sle)s
-		and timestamp(posting_date, posting_time) <= timestamp(%(posting_date)s, %(posting_time)s)
-		order by timestamp(posting_date, posting_time) desc, name desc
-		limit 1
-	""", args, as_dict=1)
-
-	return sle and sle[0] or {}
-
 def get_incoming_rate(args):
 	"""Get Incoming Rate based on valuation method"""
+	from stock.stock_ledger import get_previous_sle
 		
 	in_rate = 0
 	if args.get("serial_no"):

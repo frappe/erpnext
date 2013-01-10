@@ -20,15 +20,25 @@ erpnext.stock.StockReconciliation = erpnext.utils.Controller.extend({
 		if(this.frm.doc.docstatus===0) {
 			this.show_download_template();
 			this.show_upload();
+			if(this.frm.doc.reconciliation_json) {
+				this.frm.set_intro("You can submit this Stock Reconciliation.");
+			} else {
+				this.frm.set_intro("Download the template, fill in data and \
+					upload it.");
+			}
 		}
-		if(this.frm.doc.reconciliation_json) this.show_reconciliation_data();
+		if(this.frm.doc.reconciliation_json) {
+			this.show_reconciliation_data();
+			this.show_download_reconciliation_data();
+		}
 	},
 	
 	show_download_template: function() {
 		var me = this;
 		this.frm.add_custom_button("Download Template", function() {
 			this.title = "Stock Reconcilation Template";
-			wn.downloadify([["Item Code", "Warehouse", "Quantity", "Valuation Rate"]], null, this);
+			wn.tools.downloadify([["Item Code", "Warehouse", "Quantity", "Valuation Rate"]], null,
+				this);
 			return false;
 		}, "icon-download");
 	},
@@ -42,7 +52,7 @@ erpnext.stock.StockReconciliation = erpnext.utils.Controller.extend({
 		wn.upload.make({
 			parent: $('#dit-upload-area'),
 			args: {
-				method: 'stock.doctype.stock_reconciliation.stock_reconciliation.upload',
+				method: 'stock.doctype.stock_reconciliation.stock_reconciliation.upload'
 			},
 			sample_url: "e.g. http://example.com/somefile.csv",
 			callback: function(r) {
@@ -51,6 +61,15 @@ erpnext.stock.StockReconciliation = erpnext.utils.Controller.extend({
 				me.show_reconciliation_data();
 			}
 		});
+	},
+	
+	show_download_reconciliation_data: function() {
+		var me = this;
+		this.frm.add_custom_button("Download Reconcilation Data", function() {
+			this.title = "Stock Reconcilation Data";
+			wn.tools.downloadify(JSON.parse(me.frm.doc.reconciliation_json), null, this);
+			return false;
+		}, "icon-download");
 	},
 	
 	show_reconciliation_data: function() {
@@ -62,8 +81,8 @@ erpnext.stock.StockReconciliation = erpnext.utils.Controller.extend({
 				var result = "";
 				
 				var _render = header
-					? function(col) { return "<th>" + col + "</th>" }
-					: function(col) { return "<td>" + col + "</td>" };
+					? function(col) { return "<th>" + col + "</th>"; }
+					: function(col) { return "<td>" + col + "</td>"; };
 				
 				$.each(data, function(i, row) {
 					result += "<tr>"
@@ -71,7 +90,7 @@ erpnext.stock.StockReconciliation = erpnext.utils.Controller.extend({
 						+ "</tr>";
 				});
 				return result;
-			}
+			};
 			
 			var $reconciliation_table = $("<div style='overflow-x: scroll;'>\
 					<table class='table table-striped table-bordered'>\
@@ -80,7 +99,7 @@ erpnext.stock.StockReconciliation = erpnext.utils.Controller.extend({
 					</table>\
 				</div>").appendTo($wrapper);
 		}
-	},
+	}
 });
 
 cur_frm.cscript = new erpnext.stock.StockReconciliation({frm: cur_frm});

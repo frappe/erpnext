@@ -19,8 +19,8 @@ from __future__ import unicode_literals
 import unittest
 import webnotes
 from webnotes.tests import insert_test_data
+from webnotes.utils import flt
 import json
-from accounts.utils import get_fiscal_year
 from pprint import pprint
 
 company = webnotes.conn.get_default("company")
@@ -35,39 +35,67 @@ class TestStockReconciliation(unittest.TestCase):
 		# print "Debug Log:", "\n--\n".join(webnotes.debug_log)
 		webnotes.conn.rollback()
 		
-	def test_reco_for_fifo(self):		
+	def test_reco_for_fifo(self):
 		# [[qty, valuation_rate, posting_date, posting_time]]
 		input_data = [
-			# [50, 1000, "2012-12-26", "12:00", 50000], 
-			# [5, 1000, "2012-12-26", "12:00", 5000], 
-			# [15, 1000, "2012-12-26", "12:00", 15000], 
-			# [25, 900, "2012-12-26", "12:00", 22500], 
-			# [20, 500, "2012-12-26", "12:00", 10000], 
-			# [50, 1000, "2013-01-01", "12:00", 50000], 
-			# [5, 1000, "2013-01-01", "12:00", 5000],
-			["", 800, "2012-12-26", "12:05", 12000],
-			# [20, "", "2012-12-26", "12:05", 16000]
+			[50, 1000, "2012-12-26", "12:00", 50000], 
+			[5, 1000, "2012-12-26", "12:00", 5000], 
+			[15, 1000, "2012-12-26", "12:00", 15000], 
+			[25, 900, "2012-12-26", "12:00", 22500], 
+			[20, 500, "2012-12-26", "12:00", 10000], 
+			[50, 1000, "2013-01-01", "12:00", 50000], 
+			[5, 1000, "2013-01-01", "12:00", 5000],
+			["", 1000, "2012-12-26", "12:05", 15000],
+			[20, "", "2012-12-26", "12:05", 16000],
+			[10, 2000, "2012-12-26", "12:10", 20000]
 		]
 			
 		for d in input_data:
 			self.insert_existing_sle("FIFO")
 			
-			reco = self.submit_stock_reconciliation(d[0], d[1], d[2], d[3])
+			self.submit_stock_reconciliation(d[0], d[1], d[2], d[3])
 		
-			res = webnotes.conn.sql("""select stock_queue from `tabStock Ledger Entry`
+			res = webnotes.conn.sql("""select stock_value from `tabStock Ledger Entry`
 				where item_code = 'Android Jack D' and warehouse = 'Default Warehouse'
 				and posting_date = %s and posting_time = %s order by name desc limit 1""", 
 				(d[2], d[3]))
 				
-			stock_value = sum([v[0]*v[1] for v in json.loads(res[0][0] or "[]")])
-			self.assertEqual(stock_value, d[4])
+			# stock_value = sum([v[0]*v[1] for v in json.loads(res and res[0][0] or "[]")])
+			self.assertEqual(res and flt(res[0][0]) or 0, d[4])
 			
 			self.tearDown()
 			self.setUp()
 					
 		
-	def atest_reco_for_moving_average(self):
-		webnotes.conn.set_value("Item", "Android Jack D", "valuation_method", "Moving Average")
+	def test_reco_for_moving_average(self):
+		# [[qty, valuation_rate, posting_date, posting_time]]
+		input_data = [
+			[50, 1000, "2012-12-26", "12:00", 50000], 
+			[5, 1000, "2012-12-26", "12:00", 5000], 
+			[15, 1000, "2012-12-26", "12:00", 15000], 
+			[25, 900, "2012-12-26", "12:00", 22500], 
+			[20, 500, "2012-12-26", "12:00", 10000], 
+			[50, 1000, "2013-01-01", "12:00", 50000], 
+			[5, 1000, "2013-01-01", "12:00", 5000],
+			["", 1000, "2012-12-26", "12:05", 15000],
+			[20, "", "2012-12-26", "12:05", 18000],
+			[10, 2000, "2012-12-26", "12:10", 20000]
+		]
+		
+		for d in input_data:
+			self.insert_existing_sle("Moving Average")
+			
+			self.submit_stock_reconciliation(d[0], d[1], d[2], d[3])
+		
+			res = webnotes.conn.sql("""select stock_value from `tabStock Ledger Entry`
+				where item_code = 'Android Jack D' and warehouse = 'Default Warehouse'
+				and posting_date = %s and posting_time = %s order by name desc limit 1""", 
+				(d[2], d[3]))
+				
+			self.assertEqual(res and flt(res[0][0], 4) or 0, d[4])
+			
+			self.tearDown()
+			self.setUp()
 		
 	def submit_stock_reconciliation(self, qty, rate, posting_date, posting_time):
 		return webnotes.model_wrapper([{

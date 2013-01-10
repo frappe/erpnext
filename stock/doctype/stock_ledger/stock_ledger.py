@@ -17,10 +17,9 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import add_days, cstr, flt, now, nowdate
-from webnotes.model import db_exists
+from webnotes.utils import add_days, cstr, flt, nowdate
 from webnotes.model.doc import Document
-from webnotes.model.wrapper import getlist, copy_doclist
+from webnotes.model.wrapper import getlist
 from webnotes.model.code import get_obj
 from webnotes import session, msgprint
 from stock.utils import get_valid_serial_nos
@@ -196,7 +195,7 @@ class DocType:
 			# get serial nos
 			if v.get("serial_no"):
 				serial_nos = get_valid_serial_nos(v["serial_no"], v['actual_qty'], v['item_code'])
-
+			
 			# reverse quantities for cancel
 			if v.get('is_cancelled') == 'Yes':
 				v['actual_qty'] = -flt(v['actual_qty'])
@@ -216,19 +215,13 @@ class DocType:
 
 
 	def make_entry(self, args):
-		sle = Document(doctype = 'Stock Ledger Entry')
-		for k in args.keys():
-			# adds warehouse_type
-			if k == 'warehouse':
-				sle.fields['warehouse_type'] = webnotes.conn.get_value('Warehouse' , args[k], 'warehouse_type')
-			sle.fields[k] = args[k]
-		sle_obj = get_obj(doc=sle)
-		
-		# validate
-		sle_obj.validate()
-		sle.save(new = 1)
-		return sle.name
-
+		args.update({"doctype": "Stock Ledger Entry"})
+		if args.get("warehouse"):
+			args["warehouse_type"] = webnotes.conn.get_value('Warehouse' , args["warehouse"],
+				'warehouse_type')
+		sle = webnotes.model_wrapper([args]).insert()
+		return sle.doc.name
+	
 	def repost(self):
 		"""
 		Repost everything!

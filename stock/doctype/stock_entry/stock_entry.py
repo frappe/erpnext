@@ -23,7 +23,8 @@ from webnotes.model.doc import Document, addchild
 from webnotes.model.wrapper import getlist, copy_doclist
 from webnotes.model.code import get_obj
 from webnotes import msgprint, _
-from stock.utils import get_previous_sle, get_incoming_rate
+from stock.utils import get_incoming_rate
+from stock.stock_ledger import get_previous_sle
 
 sql = webnotes.conn.sql
 	

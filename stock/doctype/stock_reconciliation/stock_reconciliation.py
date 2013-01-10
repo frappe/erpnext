@@ -27,7 +27,6 @@ class DocType(DocListController):
 		self.validate_data()
 		
 	def on_submit(self):
-		print "in stock reco"
 		self.insert_stock_ledger_entries()
 		
 	def on_cancel(self):
@@ -94,7 +93,8 @@ class DocType(DocListController):
 			if item.has_serial_no == "Yes":
 				raise webnotes.ValidationError, (_("Serialized Item: '") + item_code +
 					_("""' can not be managed using Stock Reconciliation.\
-					You can add/delete Serial No directly, to modify stock of this item."""))
+					You can add/delete Serial No directly, \
+					to modify stock of this item."""))
 		
 			# docstatus should be < 2
 			validate_cancelled_item(item_code, item.docstatus, verbose=0)
@@ -105,7 +105,8 @@ class DocType(DocListController):
 	def insert_stock_ledger_entries(self):
 		"""	find difference between current and expected entries
 			and create stock ledger entries based on the difference"""
-		from stock.utils import get_previous_sle, get_valuation_method
+		from stock.utils import get_valuation_method
+		from stock.stock_ledger import get_previous_sle
 			
 		row_template = ["item_code", "warehouse", "qty", "valuation_rate"]
 		
@@ -119,9 +120,8 @@ class DocType(DocListController):
 				"posting_time": self.doc.posting_time
 			})
 			
-					
 			change_in_qty = row.qty != "" and \
-				(flt(row.qty) != flt(previous_sle.get("qty_after_transaction")))
+				(flt(row.qty) - flt(previous_sle.get("qty_after_transaction")))
 		
 			change_in_rate = row.valuation_rate != "" and \
 				(flt(row.valuation_rate) != flt(previous_sle.get("valuation_rate")))
@@ -134,26 +134,33 @@ class DocType(DocListController):
 					
 	def sle_for_moving_avg(self, row, previous_sle, change_in_qty, change_in_rate):
 		"""Insert Stock Ledger Entries for Moving Average valuation"""
-		def _get_incoming_rate(qty, valuation_rate, previous_qty, previous_valuation_rate):
+		def _get_incoming_rate(qty, valuation_rate, previous_qty,
+				previous_valuation_rate):
 			if previous_valuation_rate == 0:
-				return valuation_rate
+				return flt(valuation_rate)
 			else:
+				if valuation_rate == "":
+					valuation_rate = previous_valuation_rate
+				
 				return (qty * valuation_rate - previous_qty * previous_valuation_rate) \
 					/ flt(qty - previous_qty)
-			
+		
 		if change_in_qty:
+			# if change in qty, irrespective of change in rate
 			incoming_rate = _get_incoming_rate(flt(row.qty), flt(row.valuation_rate),
 				flt(previous_sle.qty_after_transaction),
 				flt(previous_sle.valuation_rate))
 			
-			self.insert_entries({"actual_qty": qty_diff, "incoming_rate": incoming_rate}, row)
+			self.insert_entries({"actual_qty": change_in_qty, 
+				"incoming_rate": incoming_rate}, row)
 			
 		elif change_in_rate and previous_sle.qty_after_transaction >= 0:
-
-			incoming_rate = _get_incoming_rate(flt(previous_sle.qty_after_transaction) + 1,
+			# if no change in qty, but change in rate 
+			# and positive actual stock before this reconciliation
+			incoming_rate = _get_incoming_rate(flt(previous_sle.qty_after_transaction)+1,
 				flt(row.valuation_rate), flt(previous_sle.qty_after_transaction),
 				flt(previous_sle.valuation_rate))
-			
+				
 			# +1 entry
 			self.insert_entries({"actual_qty": 1, "incoming_rate": incoming_rate}, row)
 			
@@ -163,19 +170,37 @@ class DocType(DocListController):
 	def sle_for_fifo(self, row, previous_sle, change_in_qty, change_in_rate):
 		"""Insert Stock Ledger Entries for FIFO valuation"""
 		previous_stock_queue = json.loads(previous_sle.stock_queue or "[]")
-		
-		if change_in_qty:
+		previous_stock_qty = sum((batch[0] for batch in previous_stock_queue))
+		previous_stock_value = sum((batch[0] * batch[1] for batch in \
+			previous_stock_queue))
+			
+		def _insert_entries():
 			if previous_stock_queue != [[row.qty, row.valuation_rate]]:
 				# make entry as per attachment
-				self.insert_entries({"actual_qty": row.qty, "incoming_rate": row.valuation_rate}, row)
-		
+				self.insert_entries({"actual_qty": row.qty, 
+					"incoming_rate": flt(row.valuation_rate)}, row)
+				
 				# Make reverse entry
-				qty = sum((flt(fifo_item[0]) for fifo_item in previous_stock_queue))
-				self.insert_entries({"actual_qty": -1 * qty, 
-					"incoming_rate": qty < 0 and row.valuation_rate or 0}, row)
+				self.insert_entries({"actual_qty": -1 * previous_stock_qty, 
+					"incoming_rate": previous_stock_qty < 0 and \
+					flt(row.valuation_rate) or 0}, row)
 					
-		elif change_in_rate:
-			pass
+		if change_in_qty:
+			if row.valuation_rate == "":
+				# dont want change in valuation
+				if previous_stock_qty > 0:
+					# set valuation_rate as previous valuation_rate
+					row.valuation_rate = \
+						previous_stock_value / flt(previous_stock_qty)
+			
+			_insert_entries()
+					
+		elif change_in_rate and previous_stock_qty > 0:
+			# if no change in qty, but change in rate 
+			# and positive actual stock before this reconciliation
+			
+			row.qty = previous_stock_qty
+			_insert_entries()
 					
 	def insert_entries(self, opts, row):
 		"""Insert Stock Ledger Entries"""
@@ -191,7 +216,7 @@ class DocType(DocListController):
 			"is_cancelled": "No"
 		}
 		args.update(opts)
-		print args
+
 		sle_wrapper = webnotes.model_wrapper([args]).insert()
 
 		update_entries_after(args)

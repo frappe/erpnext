@@ -82,7 +82,6 @@ class DocType(TransactionBase):
 			self.make_stock_ledger_entry(1)
 			webnotes.conn.set(self.doc, 'sle_exists', 1)
 
-
 	def make_stock_ledger_entry(self, qty):
 		from webnotes.model.code import get_obj
 		values = [{
@@ -103,7 +102,7 @@ class DocType(TransactionBase):
 			'batch_no'				: '',
 			'serial_no'				: self.doc.name
 		}]
-		get_obj('Stock Ledger', 'Stock Ledger').update_stock(values)
+		get_obj('Stock Ledger').update_stock(values)
 
 
 	# ---------

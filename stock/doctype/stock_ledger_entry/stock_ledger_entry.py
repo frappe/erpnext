@@ -17,7 +17,7 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import cstr, cint, flt, cstr, getdate
+from webnotes.utils import cint, flt, getdate
 
 sql = webnotes.conn.sql
 msgprint = webnotes.msgprint

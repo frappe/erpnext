@@ -15,9 +15,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import webnotes
-from webnotes import msgprint, _
+from webnotes import msgprint
 from webnotes.utils import cint, flt, cstr
-from stock.utils import _msgprint, get_valuation_method
+from stock.utils import get_valuation_method
 import json
 
 # future reposting
@@ -48,14 +48,14 @@ def update_entries_after(args, verbose=1):
 	valuation_method = get_valuation_method(args["item_code"])
 	
 	for sle in entries_to_fix:
-		if sle.serial_nos or not cint(webnotes.conn.get_default("allow_negative_stock")):
+		if sle.serial_no or not cint(webnotes.conn.get_default("allow_negative_stock")):
 			# validate negative stock for serialized items, fifo valuation 
 			# or when negative stock is not allowed for moving average
 			if not validate_negative_stock(qty_after_transaction, sle):
 				qty_after_transaction += flt(sle.actual_qty)
 				continue
 
-		if sle.serial_nos:
+		if sle.serial_no:
 			valuation_rate, incoming_rate = get_serialized_values(qty_after_transaction, sle,
 				valuation_rate)
 		elif valuation_method == "Moving Average":
@@ -64,11 +64,11 @@ def update_entries_after(args, verbose=1):
 		else:
 			valuation_rate, incoming_rate = get_fifo_values(qty_after_transaction, sle,
 				stock_queue)
-		
+				
 		qty_after_transaction += flt(sle.actual_qty)
 		
 		# get stock value
-		if sle.serial_nos:
+		if sle.serial_no:
 			stock_value = qty_after_transaction * valuation_rate
 		elif valuation_method == "Moving Average":
 			stock_value = (qty_after_transaction > 0) and \
@@ -76,17 +76,21 @@ def update_entries_after(args, verbose=1):
 		else:
 			stock_value = sum((flt(batch[0]) * flt(batch[1]) for batch in stock_queue))
 			
+		# print sle.posting_date, qty_after_transaction, incoming_rate, valuation_rate
+			
 		# update current sle
 		webnotes.conn.sql("""update `tabStock Ledger Entry`
-			set qty_after_transaction=%s, valuation_rate=%s, stock_queue=%s, stock_value=%s,
-			incoming_rate = %s where name=%s""", (qty_after_transaction, valuation_rate,
+			set qty_after_transaction=%s, valuation_rate=%s, stock_queue=%s,
+			stock_value=%s, incoming_rate = %s where name=%s""", 
+			(qty_after_transaction, valuation_rate,
 			json.dumps(stock_queue), stock_value, incoming_rate, sle.name))
-		
+	
 	if _exceptions:
 		_raise_exceptions(args, verbose)
 	
 	# update bin
-	webnotes.conn.sql("""update `tabBin` set valuation_rate=%s, actual_qty=%s, stock_value=%s, 
+	webnotes.conn.sql("""update `tabBin` set valuation_rate=%s, actual_qty=%s,
+		stock_value=%s, 
 		projected_qty = (actual_qty + indented_qty + ordered_qty + planned_qty - reserved_qty)
 		where item_code=%s and warehouse=%s""", (valuation_rate, qty_after_transaction,
 		stock_value, args["item_code"], args["warehouse"]))
@@ -151,7 +155,7 @@ def validate_negative_stock(qty_after_transaction, sle):
 def get_serialized_values(qty_after_transaction, sle, valuation_rate):
 	incoming_rate = flt(sle.incoming_rate)
 	actual_qty = flt(sle.actual_qty)
-	serial_nos = cstr(sle.serial_nos).split("\n")
+	serial_no = cstr(sle.serial_no).split("\n")
 	
 	if incoming_rate < 0:
 		# wrong incoming rate
@@ -160,8 +164,8 @@ def get_serialized_values(qty_after_transaction, sle, valuation_rate):
 		# In case of delivery/stock issue, get average purchase rate
 		# of serial nos of current entry
 		incoming_rate = flt(webnotes.conn.sql("""select avg(ifnull(purchase_rate, 0))
-			from `tabSerial No` where name in (%s)""" % (", ".join(["%s"]*len(serial_nos))),
-			tuple(serial_nos))[0][0])
+			from `tabSerial No` where name in (%s)""" % (", ".join(["%s"]*len(serial_no))),
+			tuple(serial_no))[0][0])
 	
 	if incoming_rate and not valuation_rate:
 		valuation_rate = incoming_rate
@@ -173,29 +177,31 @@ def get_serialized_values(qty_after_transaction, sle, valuation_rate):
 				# calculate new valuation rate only if stock value is positive
 				# else it remains the same as that of previous entry
 				valuation_rate = new_stock_value / new_stock_qty
-		
+				
 	return valuation_rate, incoming_rate
 	
 def get_moving_average_values(qty_after_transaction, sle, valuation_rate):
 	incoming_rate = flt(sle.incoming_rate)
 	actual_qty = flt(sle.actual_qty)
 	
-	if not incoming_rate or actual_qty < 0:
+	if not incoming_rate:
 		# In case of delivery/stock issue in_rate = 0 or wrong incoming rate
 		incoming_rate = valuation_rate
 	
-	# val_rate is same as previous entry if :
-	# 1. actual qty is negative(delivery note / stock entry)
-	# 2. cancelled entry
-	# 3. val_rate is negative
-	# Otherwise it will be calculated as per moving average
+	elif qty_after_transaction < 0:
+		# if negative stock, take current valuation rate as incoming rate
+		valuation_rate = incoming_rate
+		
 	new_stock_qty = qty_after_transaction + actual_qty
 	new_stock_value = qty_after_transaction * valuation_rate + actual_qty * incoming_rate
-	if actual_qty > 0 and new_stock_qty > 0 and new_stock_value > 0:
+	
+	if new_stock_qty > 0 and new_stock_value > 0:
 		valuation_rate = new_stock_value / flt(new_stock_qty)
 	elif new_stock_qty <= 0:
 		valuation_rate = 0.0
-		
+	
+	# NOTE: val_rate is same as previous entry if new stock value is negative
+	
 	return valuation_rate, incoming_rate
 	
 def get_fifo_values(qty_after_transaction, sle, stock_queue):
@@ -256,3 +262,24 @@ def _raise_exceptions(args, verbose=1):
 		msgprint(msg, raise_exception=1)
 	else:
 		raise webnotes.ValidationError, msg
+		
+def get_previous_sle(args):
+	"""
+		get the last sle on or before the current time-bucket, 
+		to get actual qty before transaction, this function
+		is called from various transaction like stock entry, reco etc
+		
+		args = {
+			"item_code": "ABC",
+			"warehouse": "XYZ",
+			"posting_date": "2012-12-12",
+			"posting_time": "12:00",
+			"sle": "name of reference Stock Ledger Entry"
+		}
+	"""
+	if not args.get("sle"): args["sle"] = ""
+	
+	sle = get_stock_ledger_entries(args, ["name != %(sle)s",
+		"timestamp(posting_date, posting_time) <= timestamp(%(posting_date)s, %(posting_time)s)"],
+		"desc", "limit 1")
+	return sle and sle[0] or {}
