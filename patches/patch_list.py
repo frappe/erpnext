@@ -582,4 +582,8 @@ patch_list = [
 		'patch_module': 'patches.january_2013',
 		'patch_file': 'holiday_list_patch',
 	},
+	{
+		'patch_module': 'patches.january_2013',
+		'patch_file': 'report_permission',
+	},
 ]
