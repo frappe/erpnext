@@ -15,6 +15,7 @@
 		"app/public/js/modules.js",
 		"app/public/js/toolbar.js",
 		"app/public/js/feature_setup.js",
-		"app/public/js/utils.js"
+		"app/public/js/utils.js",
+		"app/public/js/queries.js"
 	],
 }
