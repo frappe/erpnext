@@ -151,8 +151,8 @@ wn.module_page["Selling"] = [
 		icon: "icon-list",
 		items: [
 			{
-				"label":wn._("Customer Addresses and Contacts"),
-				route: "query-report/Customer Addresses and Contacts"
+				"label":wn._("Customer Addresses And Contacts"),
+				route: "query-report/Customer Addresses And Contacts"
 			},
 			{
 				"label":wn._("Sales Orders Pending to be Delivered"),
