@@ -14,9 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.	If not, see <http://www.gnu.org/licenses/>.
 
+wn.require("public/app/js/stock_controller.js");
 wn.provide("erpnext.stock");
 
-erpnext.stock.StockEntry = erpnext.utils.Controller.extend({
+erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 	onload_post_render: function() {
 		this._super();
 		if(this.frm.doc.__islocal && (this.frm.doc.production_order || this.frm.doc.bom_no) 
@@ -30,8 +31,9 @@ erpnext.stock.StockEntry = erpnext.utils.Controller.extend({
 		this._super();
 		this.toggle_related_fields(this.frm.doc);
 		this.toggle_enable_bom();
-		if (this.frm.doc.docstatus==1) this.frm.add_custom_button("Show Stock Ledger", 
-			this.show_stock_ledger)
+		if (this.frm.doc.docstatus==1) {
+			this.show_stock_ledger();
+		}
 	},
 	
 	on_submit: function() {
@@ -106,16 +108,6 @@ cur_frm.cscript.toggle_related_fields = function(doc) {
 			doc.delivery_note_no = doc.sales_invoice_no = doc.supplier = 
 			doc.supplier_name = doc.supplier_address = doc.purchase_receipt_no = null;
 	}
-}
-
-cur_frm.cscript.show_stock_ledger = function() {
-	var args = {
-		voucher_no: cur_frm.doc.name,
-		from_date: wn.datetime.str_to_user(cur_frm.doc.posting_date),
-		to_date: wn.datetime.str_to_user(cur_frm.doc.posting_date)
-	};	
-	wn.set_route('stock-ledger', 
-		$.map(args, function(val, key) { return key+"="+val; }).join("&&"));
 }
 
 cur_frm.cscript.delivery_note_no = function(doc,cdt,cdn){

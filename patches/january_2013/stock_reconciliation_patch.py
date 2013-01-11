@@ -4,6 +4,7 @@ def execute():
 	webnotes.reload_doc("stock", "doctype", "stock_ledger_entry")
 	
 	rename_fields()
+	move_remarks_to_comments()
 	store_stock_reco_json()
 	
 def rename_fields():
@@ -12,6 +13,21 @@ def rename_fields():
 	for doctype, old_fieldname, new_fieldname in args:
 		webnotes.conn.sql("""update `tab%s` set `%s`=`%s`""" % 
 			(doctype, new_fieldname, old_fieldname))
+			
+def move_remarks_to_comments():
+	from webnotes.utils import get_fullname
+	result = webnotes.conn.sql("""select name, remark, modified_by from `tabStock Reconciliation`
+		where ifnull(remark, '')!=''""")
+	fullname_map = {}
+	for reco, remark, modified_by in result:
+		webnotes.model_wrapper([{
+			"doctype": "Comment",
+			"comment": remark,
+			"comment_by": modified_by,
+			"comment_by_fullname": fullname_map.setdefault(modified_by, get_fullname(modified_by)),
+			"comment_doctype": "Stock Reconciliation",
+			"comment_docname": reco
+		}]).insert()
 			
 def store_stock_reco_json():
 	import os
@@ -30,6 +46,7 @@ def store_stock_reco_json():
 				with open(stock_reco_file, "r") as open_reco_file:
 					content = open_reco_file.read()
 					content = read_csv_content(content)
-					webnotes.conn.set_value("Stock Reconciliation", reco, "reconciliation_json",
-						json.dumps(content, separators=(',', ': ')))
+					reconciliation_json = json.dumps(content, separators=(',', ': '))
+					webnotes.conn.sql("""update `tabStock Reconciliation`
+						set reconciliation_json=%s where name=%s""", (reconciliation_json, name))
 	

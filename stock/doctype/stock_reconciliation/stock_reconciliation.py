@@ -23,6 +23,9 @@ from webnotes.model.controller import DocListController
 from stock.stock_ledger import update_entries_after
 
 class DocType(DocListController):
+	def setup(self):
+		self.head_row = ["Item Code", "Warehouse", "Quantity", "Valuation Rate"]
+		
 	def validate(self):
 		self.validate_data()
 		
@@ -34,17 +37,22 @@ class DocType(DocListController):
 		
 	def validate_data(self):
 		data = json.loads(self.doc.reconciliation_json)
-		if data[0] != ["Item Code", "Warehouse", "Quantity", "Valuation Rate"]:
+		if self.head_row not in data:
 			msgprint(_("""Hey! You seem to be using the wrong template. \
 				Click on 'Download Template' button to get the correct template."""),
 				raise_exception=1)
+		
+		# remove the help part and save the json
+		if data.index(self.head_row) != 0:
+			data = data[data.index(self.head_row):]
+			self.doc.reconciliation_json = json.dumps(data)
 				
 		def _get_msg(row_num, msg):
 			return _("Row # ") + ("%d: " % (row_num+2)) + _(msg)
 		
 		self.validation_messages = []
 		item_warehouse_combinations = []
-		for row_num, row in enumerate(data[1:]):
+		for row_num, row in enumerate(data[data.index(self.head_row)+1:]):
 			# find duplicates
 			if [row[0], row[1]] in item_warehouse_combinations:
 				self.validation_messages.append(_get_msg(row_num, "Duplicate entry"))
@@ -111,7 +119,7 @@ class DocType(DocListController):
 		row_template = ["item_code", "warehouse", "qty", "valuation_rate"]
 		
 		data = json.loads(self.doc.reconciliation_json)
-		for row_num, row in enumerate(data[1:]):
+		for row_num, row in enumerate(data[data.index(self.head_row)+1:]):
 			row = webnotes._dict(zip(row_template, row))
 			previous_sle = get_previous_sle({
 				"item_code": row.item_code,
@@ -148,18 +156,19 @@ class DocType(DocListController):
 		if change_in_qty:
 			# if change in qty, irrespective of change in rate
 			incoming_rate = _get_incoming_rate(flt(row.qty), flt(row.valuation_rate),
-				flt(previous_sle.qty_after_transaction),
-				flt(previous_sle.valuation_rate))
+				flt(previous_sle.get("qty_after_transaction")),
+				flt(previous_sle.get("valuation_rate")))
 			
 			self.insert_entries({"actual_qty": change_in_qty, 
 				"incoming_rate": incoming_rate}, row)
 			
-		elif change_in_rate and previous_sle.qty_after_transaction >= 0:
+		elif change_in_rate and flt(previous_sle.get("qty_after_transaction")) >= 0:
 			# if no change in qty, but change in rate 
 			# and positive actual stock before this reconciliation
-			incoming_rate = _get_incoming_rate(flt(previous_sle.qty_after_transaction)+1,
-				flt(row.valuation_rate), flt(previous_sle.qty_after_transaction),
-				flt(previous_sle.valuation_rate))
+			incoming_rate = _get_incoming_rate(
+				flt(previous_sle.get("qty_after_transaction"))+1, flt(row.valuation_rate),
+				flt(previous_sle.get("qty_after_transaction")), 
+				flt(previous_sle.get("valuation_rate")))
 				
 			# +1 entry
 			self.insert_entries({"actual_qty": 1, "incoming_rate": incoming_rate}, row)
@@ -169,7 +178,7 @@ class DocType(DocListController):
 		
 	def sle_for_fifo(self, row, previous_sle, change_in_qty, change_in_rate):
 		"""Insert Stock Ledger Entries for FIFO valuation"""
-		previous_stock_queue = json.loads(previous_sle.stock_queue or "[]")
+		previous_stock_queue = json.loads(previous_sle.get("stock_queue") or "[]")
 		previous_stock_qty = sum((batch[0] for batch in previous_stock_queue))
 		previous_stock_value = sum((batch[0] * batch[1] for batch in \
 			previous_stock_queue))
@@ -181,9 +190,11 @@ class DocType(DocListController):
 					"incoming_rate": flt(row.valuation_rate)}, row)
 				
 				# Make reverse entry
-				self.insert_entries({"actual_qty": -1 * previous_stock_qty, 
-					"incoming_rate": previous_stock_qty < 0 and \
-					flt(row.valuation_rate) or 0}, row)
+				if previous_stock_qty:
+					self.insert_entries({"actual_qty": -1 * previous_stock_qty, 
+						"incoming_rate": previous_stock_qty < 0 and \
+						flt(row.valuation_rate) or 0}, row)
+					
 					
 		if change_in_qty:
 			if row.valuation_rate == "":
@@ -213,13 +224,17 @@ class DocType(DocListController):
 			"voucher_type": self.doc.doctype,
 			"voucher_no": self.doc.name,
 			"company": webnotes.conn.get_default("company"),
-			"is_cancelled": "No"
+			"is_cancelled": "No",
 		}
 		args.update(opts)
 
+		# create stock ledger entry
 		sle_wrapper = webnotes.model_wrapper([args]).insert()
+		
+		# update bin
+		webnotes.get_obj('Warehouse', row.warehouse).update_bin(args)
 
-		update_entries_after(args)
+		# update_entries_after(args)
 		
 		return sle_wrapper
 		

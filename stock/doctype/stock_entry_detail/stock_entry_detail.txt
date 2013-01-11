@@ -2,9 +2,9 @@
  {
   "owner": "Administrator", 
   "docstatus": 0, 
-  "creation": "2012-12-18 13:47:41", 
+  "creation": "2012-12-20 14:31:18", 
   "modified_by": "Administrator", 
-  "modified": "2012-12-18 17:08:52"
+  "modified": "2013-01-11 11:59:10"
  }, 
  {
   "istable": 1, 
@@ -26,6 +26,7 @@
   "doctype": "DocType"
  }, 
  {
+  "no_copy": 1, 
   "oldfieldtype": "Link", 
   "doctype": "DocField", 
   "label": "Source Warehouse", 
@@ -37,6 +38,7 @@
   "in_filter": 1
  }, 
  {
+  "no_copy": 1, 
   "oldfieldtype": "Link", 
   "doctype": "DocField", 
   "label": "Target Warehouse", 
@@ -61,6 +63,7 @@
   "in_filter": 1
  }, 
  {
+  "print_width": "300px", 
   "oldfieldtype": "Text", 
   "doctype": "DocField", 
   "label": "Description", 
