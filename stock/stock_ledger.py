@@ -43,7 +43,7 @@ def update_entries_after(args, verbose=1):
 	stock_value = 0.0
 
 	entries_to_fix = get_sle_after_datetime(previous_sle or \
-		{"item_code": args["item_code"], "warehouse": args["warehouse"]})
+		{"item_code": args["item_code"], "warehouse": args["warehouse"]}, for_update=True)
 		
 	valuation_method = get_valuation_method(args["item_code"])
 	
@@ -95,7 +95,7 @@ def update_entries_after(args, verbose=1):
 		where item_code=%s and warehouse=%s""", (valuation_rate, qty_after_transaction,
 		stock_value, args["item_code"], args["warehouse"]))
 		
-def get_sle_before_datetime(args):
+def get_sle_before_datetime(args, for_update=False):
 	"""
 		get previous stock ledger entry before current time-bucket
 
@@ -107,17 +107,18 @@ def get_sle_before_datetime(args):
 	"""
 	sle = get_stock_ledger_entries(args,
 		["timestamp(posting_date, posting_time) < timestamp(%(posting_date)s, %(posting_time)s)"],
-		"desc", "limit 1")
+		"desc", "limit 1", for_update=for_update)
 	
 	return sle and sle[0] or webnotes._dict()
 	
-def get_sle_after_datetime(args):
+def get_sle_after_datetime(args, for_update=False):
 	"""get Stock Ledger Entries after a particular datetime, for reposting"""
+	# NOTE: using for update of 
 	return get_stock_ledger_entries(args,
 		["timestamp(posting_date, posting_time) > timestamp(%(posting_date)s, %(posting_time)s)"],
-		"asc")
+		"asc", for_update=for_update)
 				
-def get_stock_ledger_entries(args, conditions=None, order="desc", limit=None):
+def get_stock_ledger_entries(args, conditions=None, order="desc", limit=None, for_update=False):
 	"""get stock ledger entries filtered by specific posting datetime conditions"""
 	if not args.get("posting_date"):
 		args["posting_date"] = "1900-01-01"
@@ -130,9 +131,10 @@ def get_stock_ledger_entries(args, conditions=None, order="desc", limit=None):
 		and ifnull(is_cancelled, 'No') = 'No'
 		%(conditions)s
 		order by timestamp(posting_date, posting_time) %(order)s, name %(order)s
-		%(limit)s""" % {
+		%(limit)s %(for_update)s""" % {
 			"conditions": conditions and ("and " + " and ".join(conditions)) or "",
 			"limit": limit or "",
+			"for_update": for_update and "for update" or "",
 			"order": order
 		}, args, as_dict=1)
 		
@@ -263,7 +265,7 @@ def _raise_exceptions(args, verbose=1):
 	else:
 		raise webnotes.ValidationError, msg
 		
-def get_previous_sle(args):
+def get_previous_sle(args, for_update=False):
 	"""
 		get the last sle on or before the current time-bucket, 
 		to get actual qty before transaction, this function
@@ -281,5 +283,5 @@ def get_previous_sle(args):
 	
 	sle = get_stock_ledger_entries(args, ["name != %(sle)s",
 		"timestamp(posting_date, posting_time) <= timestamp(%(posting_date)s, %(posting_time)s)"],
-		"desc", "limit 1")
+		"desc", "limit 1", for_update=for_update)
 	return sle and sle[0] or {}
