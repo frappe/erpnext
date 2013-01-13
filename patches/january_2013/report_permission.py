@@ -1,7 +1,7 @@
 import webnotes
 def execute():
 	webnotes.reload_doc("core", "doctype", "docperm")
-	webnotes.conn.sql("""update tabDocPerm set `report`=`write`""")
+	webnotes.conn.sql("""update tabDocPerm set `report`=`read`""")
 
 	# no report for singles
 	webnotes.conn.sql("""update tabDocPerm, tabDocType set tabDocPerm.`report`=0
