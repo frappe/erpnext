@@ -39,7 +39,9 @@ class DocType:
 				"doctype": "Bin",
 				"item_code": item_code,
 				"warehouse": warehouse,
-			}]).insert()
+			}])
+			bin_wrapper.ignore_permissions = 1
+			bin_wrapper.insert()
 			
 			bin_obj = bin_wrapper.make_obj()
 		else:

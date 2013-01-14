@@ -36,6 +36,9 @@ class DocType(DocListController):
 		self.delete_stock_ledger_entries()
 		
 	def validate_data(self):
+		if not self.doc.reconciliation_json:
+			return
+			
 		data = json.loads(self.doc.reconciliation_json)
 		if self.head_row not in data:
 			msgprint(_("""Hey! You seem to be using the wrong template. \
@@ -117,6 +120,9 @@ class DocType(DocListController):
 		from stock.stock_ledger import get_previous_sle
 			
 		row_template = ["item_code", "warehouse", "qty", "valuation_rate"]
+		
+		if not self.doc.reconciliation_json:
+			msgprint(_("""Stock Reconciliation file not uploaded"""), raise_exception=1)
 		
 		data = json.loads(self.doc.reconciliation_json)
 		for row_num, row in enumerate(data[data.index(self.head_row)+1:]):
@@ -229,13 +235,13 @@ class DocType(DocListController):
 		args.update(opts)
 
 		# create stock ledger entry
-		sle_wrapper = webnotes.model_wrapper([args]).insert()
+		sle_wrapper = webnotes.model_wrapper([args])
+		sle_wrapper.ignore_permissions = 1
+		sle_wrapper.insert()
 		
 		# update bin
 		webnotes.get_obj('Warehouse', row.warehouse).update_bin(args)
 
-		# update_entries_after(args)
-		
 		return sle_wrapper
 		
 	def delete_stock_ledger_entries(self):
