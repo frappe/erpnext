@@ -594,4 +594,8 @@ patch_list = [
 		'patch_module': 'patches.january_2013',
 		'patch_file': 'give_report_permission_on_read',
 	},
+	{
+		'patch_module': 'patches.january_2013',
+		'patch_file': 'update_closed_on',
+	},
 ]

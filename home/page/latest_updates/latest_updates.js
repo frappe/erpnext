@@ -1,6 +1,8 @@
 erpnext.updates = [
 	["14th January, 2013", [
-		"Stock Reconciliation: Ability to update Valuation Rate"
+		"Stock Reconciliation: Ability to update Valuation Rate",
+		"Time Field: Added Datetime and new Time Picker",
+		"Task, Support Ticket, Customer Issue: Added script to update resolution times"
 	]],
 	["10th January 2013", [
 		"Modules: New module pages with open item count and multi-lingual.",
