@@ -80,7 +80,7 @@ wn.module_page["Setup"] = [
 	},
 	{
 		title: wn._("Branding and Printing"),
-		icon: "icon-printer",
+		icon: "icon-print",
 		right: true,
 		items: [
 			{

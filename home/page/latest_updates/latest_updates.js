@@ -1,6 +1,7 @@
 erpnext.updates = [
 	["10th January 2013", [
-		"New module pages with open item count and multi-lingual."
+		"Modules: New module pages with open item count and multi-lingual.",
+		"Permissions: Added new 'Report' permission. Only users with report permissions will be allowed.",
 	]],
 	["7th January 2013", [
 		"Language (backend): Integrated language libraries."]],

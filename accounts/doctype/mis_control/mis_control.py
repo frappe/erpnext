@@ -53,11 +53,8 @@ class DocType:
 		ret['period'] = ['Annual','Half Yearly','Quarterly','Monthly']
 		
 		# ---- get companies ---------
-		res = sql("select name from `tabCompany`")
-		for r in res:
-			comp.append(r[0])
-		#comp.append(r[0] for r in res)
-		ret['company'] = comp
+		from accounts.page.accounts_browser.accounts_browser import get_companies
+		ret['company'] = get_companies()
 
 		#--- to get fiscal year and start_date of that fiscal year -----
 		res = sql("select name, year_start_date from `tabFiscal Year`")

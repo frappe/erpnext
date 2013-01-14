@@ -73,7 +73,7 @@ class DocType:
 			sql("update `tabBin` set stock_uom = '%s' where item_code = '%s'" % (self.doc.new_stock_uom, self.doc.item_code) )
 
 		# acknowledge user
-		msgprint(" All Bin's Updated Successfully.")
+		msgprint(" All Bins Updated Successfully.")
 			
 	def update_stock_ledger_entry(self):
 		# update stock ledger entry

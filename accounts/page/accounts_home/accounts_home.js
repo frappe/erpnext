@@ -146,6 +146,11 @@ wn.module_page["Accounts"] = [
 				"label":wn._("Financial Analytics"),
 				page: "financial-analytics"
 			},
+			{
+				"label":wn._("Trend Analyzer"),
+				route: "Report/Profile/Trend Analyzer",
+				doctype: "Sales Invoice"
+			},
 		]
 	},
 	{
