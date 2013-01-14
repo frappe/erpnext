@@ -89,11 +89,13 @@ def update_entries_after(args, verbose=1):
 	# update bin
 	if not webnotes.conn.exists({"doctype": "Bin", "item_code": args["item_code"], 
 			"warehouse": args["warehouse"]}):
-		webnotes.model_wrapper([{
+		bin_wrapper = webnotes.model_wrapper([{
 			"doctype": "Bin",
 			"item_code": args["item_code"],
 			"warehouse": args["warehouse"],
-		}]).insert()
+		}])
+		bin_wrapper.ignore_permissions = 1
+		bin_wrapper.insert()
 	
 	webnotes.conn.sql("""update `tabBin` set valuation_rate=%s, actual_qty=%s,
 		stock_value=%s, 

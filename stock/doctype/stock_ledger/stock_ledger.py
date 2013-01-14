@@ -219,7 +219,9 @@ class DocType:
 		if args.get("warehouse"):
 			args["warehouse_type"] = webnotes.conn.get_value('Warehouse' , args["warehouse"],
 				'warehouse_type')
-		sle = webnotes.model_wrapper([args]).insert()
+		sle = webnotes.model_wrapper([args])
+		sle.ignore_permissions = 1
+		sle.insert()
 		return sle.doc.name
 	
 	def repost(self):
