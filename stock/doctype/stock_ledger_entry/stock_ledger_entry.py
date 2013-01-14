@@ -17,10 +17,11 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import cstr, cint, flt, cstr, getdate
+from webnotes.utils import cint, flt, getdate
 
 sql = webnotes.conn.sql
 msgprint = webnotes.msgprint
+from accounts.utils import get_fiscal_year
 
 
 
@@ -31,11 +32,11 @@ class DocType:
 
 	def validate(self):
 		self.validate_mandatory()
-		self.validate_posting_time()
 		self.validate_item()
 		self.actual_amt_check()
 		self.check_stock_frozen_date()
 		self.scrub_posting_time()
+		self.doc.fiscal_year = get_fiscal_year(self.doc.posting_date)[0]
 	
 	#check for item quantity available in stock
 	def actual_amt_check(self):
@@ -98,13 +99,6 @@ class DocType:
 			if getdate(self.doc.posting_date) <= getdate(stock_frozen_upto) and not stock_auth_role in webnotes.user.get_roles():
 				msgprint("You are not authorized to do / modify back dated stock entries before %s" % getdate(stock_frozen_upto).strftime('%d-%m-%Y'), raise_exception=1)
 
-	def validate_posting_time(self):
-		""" Validate posting time format"""
-		if self.doc.posting_time and len(self.doc.posting_time.split(':')) > 3:
-			msgprint("Wrong format of posting time, can not complete the transaction. If you think \
-				you entered posting time correctly, please contact ERPNext support team.")
-			raise Exception
-	
 	def scrub_posting_time(self):
 		if not self.doc.posting_time or self.doc.posting_time == '00:0':
 			self.doc.posting_time = '00:00'

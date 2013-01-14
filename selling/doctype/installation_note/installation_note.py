@@ -23,6 +23,7 @@ from webnotes.model.doc import make_autoname
 from webnotes.model.wrapper import getlist, copy_doclist
 from webnotes.model.code import get_obj
 from webnotes import msgprint
+from stock.utils import get_valid_serial_nos
 
 sql = webnotes.conn.sql
 	
@@ -117,10 +118,8 @@ class DocType(TransactionBase):
 	#get list of serial no from previous_doc
 	#----------------------------------------------
 	def get_prevdoc_serial_no(self, prevdoc_detail_docname, prevdoc_docname):
-		from stock.doctype.stock_ledger.stock_ledger import get_sr_no_list
-	
 		res = sql("select serial_no from `tabDelivery Note Item` where name = '%s' and parent ='%s'" % (prevdoc_detail_docname, prevdoc_docname))
-		return get_sr_no_list(res[0][0])
+		return get_valid_serial_nos(res[0][0])
 		
 	#check if all serial nos from current record exist in resp delivery note
 	#---------------------------------------------------------------------------------
@@ -134,14 +133,12 @@ class DocType(TransactionBase):
 	#----------------------------------------
 	def validate_serial_no(self):
 		cur_s_no, prevdoc_s_no, sr_list = [], [], []
-		from stock.doctype.stock_ledger.stock_ledger import get_sr_no_list
-		
 		for d in getlist(self.doclist, 'installed_item_details'):
 			self.is_serial_no_added(d.item_code, d.serial_no)
 			
 			if d.serial_no:
 
-				sr_list = get_sr_no_list(d.serial_no, d.qty, d.item_code)
+				sr_list = get_valid_serial_nos(d.serial_no, d.qty, d.item_code)
 				self.is_serial_no_exist(d.item_code, sr_list)
 				
 				prevdoc_s_no = self.get_prevdoc_serial_no(d.prevdoc_detail_docname, d.prevdoc_docname)

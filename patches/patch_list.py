@@ -584,6 +584,10 @@ patch_list = [
 	},
 	{
 		'patch_module': 'patches.january_2013',
+		'patch_file': 'stock_reconciliation_patch',
+	},
+	{
+		'patch_module': 'patches.january_2013',
 		'patch_file': 'report_permission',
 	},
 	{

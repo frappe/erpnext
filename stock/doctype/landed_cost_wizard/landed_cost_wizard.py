@@ -219,6 +219,8 @@ class DocType:
 
 	def update_sle(self):
 		""" Recalculate valuation rate in all sle after pr posting date"""
+		from stock.stock_ledger import update_entries_after
+		
 		for pr in self.selected_pr:
 			pr_obj = get_obj('Purchase Receipt', pr, with_children = 1)
 			
@@ -229,11 +231,13 @@ class DocType:
 					self.update_serial_no(d.serial_no, d.valuation_rate)
 				sql("update `tabStock Ledger Entry` set incoming_rate = '%s' where voucher_detail_no = '%s'"%(flt(d.valuation_rate), d.name))
 				
-				bin = sql("select t1.name, t2.posting_date, t2.posting_time from `tabBin` t1, `tabStock Ledger Entry` t2 where t2.voucher_detail_no = '%s' and t2.item_code = t1.item_code and t2.warehouse = t1.warehouse LIMIT 1" % d.name)
+				res = sql("""select item_code, warehouse, posting_date, posting_time 
+					from `tabStock Ledger Entry` where voucher_detail_no = %s LIMIT 1""", 
+					d.name, as_dict=1)
 
 				# update valuation rate after pr posting date
-				if bin and bin[0][0]:
-					obj = get_obj('Bin', bin[0][0]).update_entries_after(bin[0][1], bin[0][2])
+				if res:
+					update_entries_after(res[0])
 
 	
 	def update_serial_no(self, sr_no, rate):

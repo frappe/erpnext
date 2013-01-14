@@ -77,6 +77,8 @@ class DocType:
 			
 	def update_stock_ledger_entry(self):
 		# update stock ledger entry
+		from stock.stock_ledger import update_entries_after
+		
 		if flt(self.doc.conversion_factor) != flt(1):
 			sql("update `tabStock Ledger Entry` set stock_uom = '%s', actual_qty = ifnull(actual_qty,0) * '%s' where item_code = '%s' " % (self.doc.new_stock_uom, self.doc.conversion_factor, self.doc.item_code))
 		else:
@@ -89,9 +91,7 @@ class DocType:
 		if flt(self.doc.conversion_factor) != flt(1):
 			wh = sql("select name from `tabWarehouse`")
 			for w in wh:
-				bin = sql("select name from `tabBin` where item_code = '%s' and warehouse = '%s'" % (self.doc.item_code, w[0])) 
-				if bin and bin[0][0]:
-					get_obj("Bin", bin[0][0]).update_entries_after(posting_date = '', posting_time = '')
+				update_entries_after({"item_code": self.doc.item_code, "warehouse": w[0]})
 
 		# acknowledge user
 		msgprint("Item Valuation Updated Successfully.")

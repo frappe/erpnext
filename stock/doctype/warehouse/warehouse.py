@@ -35,15 +35,13 @@ class DocType:
 				warehouse = %s", (item_code, warehouse))
 		bin = bin and bin[0][0] or ''
 		if not bin:
-			bin = Document('Bin')
-			bin.item_code = item_code
-			bin.stock_uom = webnotes.conn.get_value('Item', item_code, 'stock_uom')
-			bin.warehouse = warehouse
-			bin.warehouse_type = webnotes.conn.get_value("Warehouse", warehouse, "warehouse_type")
-			bin_obj = get_obj(doc=bin)
-			bin_obj.validate()
-			bin.save(1)
-			bin = bin.name
+			bin_wrapper = webnotes.model_wrapper([{
+				"doctype": "Bin",
+				"item_code": item_code,
+				"warehouse": warehouse,
+			}]).insert()
+			
+			bin_obj = bin_wrapper.make_obj()
 		else:
 			bin_obj = get_obj('Bin', bin)
 		return bin_obj
@@ -104,8 +102,9 @@ class DocType:
 		
 
 	def repost(self, item_code, warehouse=None):
+		self.repost_actual_qty(item_code, warehouse)
+		
 		bin = self.get_bin(item_code, warehouse)
-		self.repost_actual_qty(bin)
 		self.repost_reserved_qty(bin)
 		self.repost_indented_qty(bin)
 		self.repost_ordered_qty(bin)
@@ -115,8 +114,12 @@ class DocType:
 		bin.doc.save()
 			
 
-	def repost_actual_qty(self, bin):
-		bin.update_entries_after(posting_date = '0000-00-00', posting_time = '00:00')
+	def repost_actual_qty(self, item_code, warehouse=None):
+		from stock.stock_ledger import update_entries_after
+		if not warehouse:
+			warehouse = self.doc.name
+		
+		update_entries_after({ "item_code": item_code, "warehouse": warehouse })
 
 	def repost_reserved_qty(self, bin):
 		reserved_qty = webnotes.conn.sql("""

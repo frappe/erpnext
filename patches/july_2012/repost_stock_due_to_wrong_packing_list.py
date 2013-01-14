@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 import webnotes
+from stock.stock_ledger import update_entries_after
 
 def execute():
 	# add index
@@ -80,8 +81,13 @@ def cleanup_wrong_sle():
 		for d in sle:
 			webnotes.conn.sql("update `tabStock Ledger Entry` set is_cancelled = 'Yes' where name = %s", d[3])
 			create_comment(d[3])
-			repost_bin(d[0], d[1])
-	
+			update_entries_after({
+				"item_code": d[0],
+				"warehouse": d[1],
+				"posting_date": "2012-07-01",
+				"posting_time": "12:05"
+			})
+			
 def create_comment(dn):
 	from webnotes.model.doc import Document
 	cmt = Document('Comment')
@@ -92,10 +98,3 @@ def create_comment(dn):
 	cmt.comment_docname = dn
 	cmt.save(1)
 	
-	
-def repost_bin(item, wh):
-	from webnotes.model.code import get_obj	
-	bin = webnotes.conn.sql("select name from `tabBin` \
-		where item_code = %s and warehouse = %s", (item, wh))
-			
-	get_obj('Bin', bin[0][0]).update_entries_after(posting_date = '2012-07-01', posting_time = '12:05')

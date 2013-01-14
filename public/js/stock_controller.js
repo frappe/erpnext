@@ -14,35 +14,19 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-wn.provide('erpnext.utils');
+wn.provide("erpnext.stock");
 
-// TODO
-erpnext.utils.Controller = Class.extend({
-	init: function(opts) {
-		$.extend(this, opts);
-		this.setup && this.setup();
-	},
-	
-	onload_post_render: function() {
-		if(this.frm.doc.__islocal) {
-			this.setup_defaults();
-		}
-	},
-	
-	setup_defaults: function() {
+erpnext.stock.StockController = erpnext.utils.Controller.extend({
+	show_stock_ledger: function() {
 		var me = this;
-		
-		var defaults = {
-			posting_date: wn.datetime.get_today(),
-			posting_time: wn.datetime.now_time()
-		}
-		
-		$.each(defaults, function(k, v) {
-			if(!me.frm.doc[k]) me.frm.set_value(k, v);
-		});
-	},
-	
-	refresh: function() {
-		erpnext.hide_naming_series();
+		this.frm.add_custom_button("Show Stock Ledger", function() {
+			var args = {
+				voucher_no: cur_frm.doc.name,
+				from_date: wn.datetime.str_to_user(cur_frm.doc.posting_date),
+				to_date: wn.datetime.str_to_user(cur_frm.doc.posting_date)
+			};	
+			wn.set_route('stock-ledger', 
+				$.map(args, function(val, key) { return key+"="+val; }).join("&&"));
+		}, "icon-bar-chart");
 	}
 });
