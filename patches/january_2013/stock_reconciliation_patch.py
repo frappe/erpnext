@@ -10,7 +10,9 @@ def execute():
 	
 def rename_fields():
 	args = [["Stock Ledger Entry", "bin_aqat", "qty_after_transaction"], 
-		["Stock Ledger Entry", "fcfs_stack", "stock_queue"]]
+		["Stock Ledger Entry", "fcfs_stack", "stock_queue"],
+		["Stock Reconciliation", "reconciliation_date", "posting_date"],
+		["Stock Reconciliation", "reconciliation_time", "posting_time"]]
 	for doctype, old_fieldname, new_fieldname in args:
 		webnotes.conn.sql("""update `tab%s` set `%s`=`%s`""" % 
 			(doctype, new_fieldname, old_fieldname))
