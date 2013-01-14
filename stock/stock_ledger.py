@@ -56,13 +56,13 @@ def update_entries_after(args, verbose=1):
 				continue
 
 		if sle.serial_no:
-			valuation_rate, incoming_rate = get_serialized_values(qty_after_transaction, sle,
+			valuation_rate = get_serialized_values(qty_after_transaction, sle,
 				valuation_rate)
 		elif valuation_method == "Moving Average":
-			valuation_rate, incoming_rate = get_moving_average_values(qty_after_transaction, sle,
+			valuation_rate = get_moving_average_values(qty_after_transaction, sle,
 				valuation_rate)
 		else:
-			valuation_rate, incoming_rate = get_fifo_values(qty_after_transaction, sle,
+			valuation_rate = get_fifo_values(qty_after_transaction, sle,
 				stock_queue)
 				
 		qty_after_transaction += flt(sle.actual_qty)
@@ -75,15 +75,13 @@ def update_entries_after(args, verbose=1):
 				(qty_after_transaction * valuation_rate) or 0
 		else:
 			stock_value = sum((flt(batch[0]) * flt(batch[1]) for batch in stock_queue))
-			
-		# print sle.posting_date, qty_after_transaction, incoming_rate, valuation_rate
-			
+						
 		# update current sle
 		webnotes.conn.sql("""update `tabStock Ledger Entry`
 			set qty_after_transaction=%s, valuation_rate=%s, stock_queue=%s,
-			stock_value=%s, incoming_rate = %s where name=%s""", 
+			stock_value=%s where name=%s""", 
 			(qty_after_transaction, valuation_rate,
-			json.dumps(stock_queue), stock_value, incoming_rate, sle.name))
+			json.dumps(stock_queue), stock_value, sle.name))
 	
 	if _exceptions:
 		_raise_exceptions(args, verbose)
@@ -188,11 +186,11 @@ def get_serialized_values(qty_after_transaction, sle, valuation_rate):
 				# else it remains the same as that of previous entry
 				valuation_rate = new_stock_value / new_stock_qty
 				
-	return valuation_rate, incoming_rate
+	return valuation_rate
 	
 def get_moving_average_values(qty_after_transaction, sle, valuation_rate):
 	incoming_rate = flt(sle.incoming_rate)
-	actual_qty = flt(sle.actual_qty)
+	actual_qty = flt(sle.actual_qty)	
 	
 	if not incoming_rate:
 		# In case of delivery/stock issue in_rate = 0 or wrong incoming rate
@@ -212,7 +210,7 @@ def get_moving_average_values(qty_after_transaction, sle, valuation_rate):
 	
 	# NOTE: val_rate is same as previous entry if new stock value is negative
 	
-	return valuation_rate, incoming_rate
+	return valuation_rate
 	
 def get_fifo_values(qty_after_transaction, sle, stock_queue):
 	incoming_rate = flt(sle.incoming_rate)
@@ -255,7 +253,7 @@ def get_fifo_values(qty_after_transaction, sle, stock_queue):
 
 	valuation_rate = stock_qty and (stock_value / flt(stock_qty)) or 0
 
-	return valuation_rate, incoming_rate
+	return valuation_rate
 
 def _raise_exceptions(args, verbose=1):
 	deficiency = min(e["diff"] for e in _exceptions)
