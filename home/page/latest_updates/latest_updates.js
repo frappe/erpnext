@@ -1,4 +1,7 @@
 erpnext.updates = [
+	["14th January, 2013", [
+		"Stock Reconciliation: Ability to update Valuation Rate"
+	]],
 	["10th January 2013", [
 		"Modules: New module pages with open item count and multi-lingual.",
 		"Permissions: Added new 'Report' permission. Only users with report permissions will be allowed.",
@@ -162,8 +165,7 @@ erpnext.updates = [
 		"Query Report: Allow user to rename and save reports.",
 		"Employee Leave Balance Report: Bugfix"
 	]]
-]
-
+];
 
 wn.pages['latest-updates'].onload = function(wrapper) { 
 	wn.ui.make_app_page({
@@ -182,7 +184,7 @@ wn.pages['latest-updates'].onload = function(wrapper) {
 		$("<h4>" + day[0] + "</h4>").appendTo(parent);
 		$.each(day[1], function(j, item) {
 			$("<p>").html(item).appendTo(parent);
-		})
+		});
 		$("<hr>").appendTo(parent);
 	});
-}
+};
