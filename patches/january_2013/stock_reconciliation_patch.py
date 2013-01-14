@@ -15,19 +15,29 @@ def rename_fields():
 			
 def store_stock_reco_json():
 	import os
-	import conf
 	import json
 	from webnotes.utils.datautils import read_csv_content
-	base_path = os.path.dirname(os.path.abspath(conf.__file__))
+	from webnotes.utils import get_base_path
+	files_path = os.path.join(get_base_path(), "public", "files")
+	
+	list_of_files = os.listdir(files_path)
+	replaced_list_of_files = [f.replace("-", "") for f in list_of_files]
 	
 	for reco, file_list in webnotes.conn.sql("""select name, file_list 
 			from `tabStock Reconciliation`"""):
 		if file_list:
 			file_list = file_list.split("\n")
 			stock_reco_file = file_list[0].split(",")[1]
-			stock_reco_file = os.path.join(base_path, "public", "files", stock_reco_file)
-			if os.path.exists(stock_reco_file):
-				with open(stock_reco_file, "r") as open_reco_file:
+			stock_reco_file_path = os.path.join(files_path, stock_reco_file)
+			if not os.path.exists(stock_reco_file_path):
+				if stock_reco_file in replaced_list_of_files:
+					stock_reco_file_path = os.path.join(files_path,
+						list_of_files[replaced_list_of_files.index(stock_reco_file)])
+				else:
+					stock_reco_file_path = ""
+			
+			if stock_reco_file_path:
+				with open(stock_reco_file_path, "r") as open_reco_file:
 					content = open_reco_file.read()
 					content = read_csv_content(content)
 					webnotes.conn.set_value("Stock Reconciliation", reco, "reconciliation_json",
