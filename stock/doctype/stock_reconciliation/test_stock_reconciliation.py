@@ -36,7 +36,8 @@ class TestStockReconciliation(unittest.TestCase):
 		webnotes.conn.rollback()
 		
 	def test_reco_for_fifo(self):
-		# [[qty, valuation_rate, posting_date, posting_time, expected_stock_value, bin_qty]]
+		# [[qty, valuation_rate, posting_date, 
+		#		posting_time, expected_stock_value, bin_qty, bin_valuation]]
 		input_data = [
 			[50, 1000, "2012-12-26", "12:00", 50000, 45, 48000], 
 			[5, 1000, "2012-12-26", "12:00", 5000, 0, 0], 
@@ -73,20 +74,21 @@ class TestStockReconciliation(unittest.TestCase):
 			self.setUp()
 					
 		
-	def atest_reco_for_moving_average(self):
-		# [[qty, valuation_rate, posting_date, posting_time]]
+	def test_reco_for_moving_average(self):
+		# [[qty, valuation_rate, posting_date, 
+		#		posting_time, expected_stock_value, bin_qty, bin_valuation]]
 		input_data = [
-			[50, 1000, "2012-12-26", "12:00", 50000], 
-			[5, 1000, "2012-12-26", "12:00", 5000], 
-			[15, 1000, "2012-12-26", "12:00", 15000], 
-			[25, 900, "2012-12-26", "12:00", 22500], 
-			[20, 500, "2012-12-26", "12:00", 10000], 
-			[50, 1000, "2013-01-01", "12:00", 50000], 
-			[5, 1000, "2013-01-01", "12:00", 5000],
-			["", 1000, "2012-12-26", "12:05", 15000],
-			[20, "", "2012-12-26", "12:05", 18000],
-			[10, 2000, "2012-12-26", "12:10", 20000],
-			[1, 1000, "2012-12-01", "00:00", 1000],
+			[50, 1000, "2012-12-26", "12:00", 50000, 45, 48000], 
+			[5, 1000, "2012-12-26", "12:00", 5000, 0, 0], 
+			[15, 1000, "2012-12-26", "12:00", 15000, 10, 12000], 
+			[25, 900, "2012-12-26", "12:00", 22500, 20, 22500], 
+			[20, 500, "2012-12-26", "12:00", 10000, 15, 18000], 
+			[50, 1000, "2013-01-01", "12:00", 50000, 65, 68000], 
+			[5, 1000, "2013-01-01", "12:00", 5000, 20, 23000],
+			["", 1000, "2012-12-26", "12:05", 15000, 10, 12000],
+			[20, "", "2012-12-26", "12:05", 18000, 15, 18000],
+			[10, 2000, "2012-12-26", "12:10", 20000, 5, 6000],
+			[1, 1000, "2012-12-01", "00:00", 1000, 11, 13200],
 		]
 		
 		for d in input_data:
@@ -101,6 +103,12 @@ class TestStockReconciliation(unittest.TestCase):
 				
 			self.assertEqual(res and flt(res[0][0], 4) or 0, d[4])
 			
+			bin = webnotes.conn.sql("""select actual_qty, stock_value from `tabBin`
+				where item_code = 'Android Jack D' and warehouse = 'Default Warehouse'""")
+			
+			self.assertEqual(bin and [flt(bin[0][0]), flt(bin[0][1], 4)] or [], 
+				[flt(d[5]), flt(d[6])])
+						
 			self.tearDown()
 			self.setUp()
 			
