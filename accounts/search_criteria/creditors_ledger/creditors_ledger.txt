@@ -4,7 +4,7 @@
   "docstatus": 0, 
   "creation": "2012-05-14 18:05:41", 
   "modified_by": "nabin@erpnext.com", 
-  "modified": "2012-12-06 11:36:09"
+  "modified": "2012-12-06 11:36:10"
  }, 
  {
   "custom_query": null, 
@@ -18,7 +18,7 @@
   "name": "__common__", 
   "doctype": "Search Criteria", 
   "sort_by": "`tabGL Entry`.`name`", 
-  "criteria_name": "Creditor's Ledger"
+  "criteria_name": "Creditors Ledger"
  }, 
  {
   "name": "creditors_ledger", 
