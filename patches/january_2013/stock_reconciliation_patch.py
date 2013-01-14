@@ -58,8 +58,13 @@ def store_stock_reco_json():
 			if stock_reco_file_path:
 				with open(stock_reco_file_path, "r") as open_reco_file:
 					content = open_reco_file.read()
-					content = read_csv_content(content)
-					reconciliation_json = json.dumps(content, separators=(',', ': '))
-					webnotes.conn.sql("""update `tabStock Reconciliation`
-						set reconciliation_json=%s where name=%s""", (reconciliation_json, reco))
+					try:
+						content = read_csv_content(content)
+						reconciliation_json = json.dumps(content, separators=(',', ': '))
+						webnotes.conn.sql("""update `tabStock Reconciliation`
+							set reconciliation_json=%s where name=%s""", 
+							(reconciliation_json, reco))
+					except Exception:
+						# if not a valid CSV file, do nothing
+						pass
 	
