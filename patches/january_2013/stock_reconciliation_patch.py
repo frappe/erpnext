@@ -2,6 +2,7 @@ import webnotes
 
 def execute():
 	webnotes.reload_doc("stock", "doctype", "stock_ledger_entry")
+	webnotes.reload_doc("stock", "doctype", "stock_reconciliation")
 	
 	rename_fields()
 	move_remarks_to_comments()
