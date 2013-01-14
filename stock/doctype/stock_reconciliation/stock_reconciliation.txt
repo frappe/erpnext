@@ -2,9 +2,9 @@
  {
   "owner": "Administrator", 
   "docstatus": 0, 
-  "creation": "2013-01-09 11:24:35", 
+  "creation": "2013-01-11 12:04:17", 
   "modified_by": "Administrator", 
-  "modified": "2013-01-10 19:26:28"
+  "modified": "2013-01-11 15:36:21"
  }, 
  {
   "allow_attach": 0, 
@@ -29,11 +29,18 @@
   "parentfield": "fields"
  }, 
  {
-  "name": "__common__", 
   "parent": "Stock Reconciliation", 
   "read": 1, 
   "doctype": "DocPerm", 
+  "cancel": 1, 
+  "name": "__common__", 
+  "amend": 1, 
+  "create": 1, 
+  "submit": 1, 
+  "write": 1, 
   "parenttype": "DocType", 
+  "role": "Material Manager", 
+  "permlevel": 0, 
   "parentfield": "permissions"
  }, 
  {
@@ -78,22 +85,6 @@
   "fieldtype": "Column Break"
  }, 
  {
-  "read_only": 0, 
-  "oldfieldtype": "Text", 
-  "doctype": "DocField", 
-  "label": "Remark", 
-  "oldfieldname": "remark", 
-  "fieldname": "remark", 
-  "fieldtype": "Text"
- }, 
- {
-  "depends_on": "eval:doc.docstatus===0", 
-  "doctype": "DocField", 
-  "label": "Upload", 
-  "fieldname": "sb1", 
-  "fieldtype": "Section Break"
- }, 
- {
   "read_only": 1, 
   "print_hide": 1, 
   "doctype": "DocField", 
@@ -102,6 +93,7 @@
   "fieldtype": "HTML"
  }, 
  {
+  "depends_on": "reconciliation_json", 
   "doctype": "DocField", 
   "label": "Reconciliation Data", 
   "fieldname": "sb2", 
@@ -127,32 +119,6 @@
   "hidden": 1
  }, 
  {
-  "amend": 0, 
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "submit": 1, 
-  "write": 1, 
-  "cancel": 1, 
-  "role": "Material Manager", 
-  "permlevel": 0
- }, 
- {
-  "amend": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "submit": 0, 
-  "write": 0, 
-  "cancel": 0, 
-  "role": "Material Manager", 
-  "permlevel": 1
- }, 
- {
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "submit": 1, 
-  "write": 1, 
-  "cancel": 1, 
-  "role": "System Manager", 
-  "permlevel": 0
+  "doctype": "DocPerm"
  }
 ]

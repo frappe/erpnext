@@ -35,15 +35,13 @@ class DocType:
 				warehouse = %s", (item_code, warehouse))
 		bin = bin and bin[0][0] or ''
 		if not bin:
-			bin = Document('Bin')
-			bin.item_code = item_code
-			bin.stock_uom = webnotes.conn.get_value('Item', item_code, 'stock_uom')
-			bin.warehouse = warehouse
-			bin.warehouse_type = webnotes.conn.get_value("Warehouse", warehouse, "warehouse_type")
-			bin_obj = get_obj(doc=bin)
-			bin_obj.validate()
-			bin.save(1)
-			bin = bin.name
+			bin_wrapper = webnotes.model_wrapper([{
+				"doctype": "Bin",
+				"item_code": item_code,
+				"warehouse": warehouse,
+			}]).insert()
+			
+			bin_obj = bin_wrapper.make_obj()
 		else:
 			bin_obj = get_obj('Bin', bin)
 		return bin_obj

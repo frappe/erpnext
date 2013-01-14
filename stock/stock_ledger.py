@@ -89,6 +89,14 @@ def update_entries_after(args, verbose=1):
 		_raise_exceptions(args, verbose)
 	
 	# update bin
+	if not webnotes.conn.exists({"doctype": "Bin", "item_code": args["item_code"], 
+			"warehouse": args["warehouse"]}):
+		webnotes.model_wrapper([{
+			"doctype": "Bin",
+			"item_code": args["item_code"],
+			"warehouse": args["warehouse"],
+		}]).insert()
+	
 	webnotes.conn.sql("""update `tabBin` set valuation_rate=%s, actual_qty=%s,
 		stock_value=%s, 
 		projected_qty = (actual_qty + indented_qty + ordered_qty + planned_qty - reserved_qty)
@@ -209,7 +217,7 @@ def get_moving_average_values(qty_after_transaction, sle, valuation_rate):
 def get_fifo_values(qty_after_transaction, sle, stock_queue):
 	incoming_rate = flt(sle.incoming_rate)
 	actual_qty = flt(sle.actual_qty)
-	
+
 	if not stock_queue:
 		stock_queue.append([0, 0])
 

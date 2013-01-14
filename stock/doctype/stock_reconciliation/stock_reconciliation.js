@@ -13,9 +13,11 @@
 // 
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+wn.require("public/app/js/stock_controller.js");
 wn.provide("erpnext.stock");
 
-erpnext.stock.StockReconciliation = erpnext.utils.Controller.extend({
+erpnext.stock.StockReconciliation = erpnext.stock.StockController.extend({
 	refresh: function() {
 		if(this.frm.doc.docstatus===0) {
 			this.show_download_template();
@@ -23,22 +25,37 @@ erpnext.stock.StockReconciliation = erpnext.utils.Controller.extend({
 			if(this.frm.doc.reconciliation_json) {
 				this.frm.set_intro("You can submit this Stock Reconciliation.");
 			} else {
-				this.frm.set_intro("Download the template, fill in data and \
-					upload it.");
+				this.frm.set_intro("Download the Template, fill appropriate data and \
+					attach the modified file.");
 			}
+		} else if(this.frm.doc.docstatus == 1) {
+			this.frm.set_intro("Cancelling this Stock Reconciliation will nullify it's effect.");
+			this.show_stock_ledger();
+		} else {
+			this.frm.set_intro("");
 		}
-		if(this.frm.doc.reconciliation_json) {
-			this.show_reconciliation_data();
-			this.show_download_reconciliation_data();
-		}
+		this.show_reconciliation_data();
+		this.show_download_reconciliation_data();
 	},
 	
 	show_download_template: function() {
 		var me = this;
 		this.frm.add_custom_button("Download Template", function() {
 			this.title = "Stock Reconcilation Template";
-			wn.tools.downloadify([["Item Code", "Warehouse", "Quantity", "Valuation Rate"]], null,
-				this);
+			wn.tools.downloadify([["Stock Reconciliation"],
+				["----"],
+				["Stock Reconciliation can be used to update the stock on a particular date,"
+					+ " usually as per physical inventory."],
+				["When submitted, the system creates difference entries"
+					+ " to set the given stock and valuation on this date."],
+				["It can also be used to create opening stock entries and to fix stock value."],
+				["----"],
+				["Notes:"],
+				["Item Code and Warehouse should already exist."],
+				["You can update either Quantity or Valuation Rate or both."],
+				["If no change in either Quantity or Valuation Rate, leave the cell blank."],
+				["----"],
+				["Item Code", "Warehouse", "Quantity", "Valuation Rate"]], null, this);
 			return false;
 		}, "icon-download");
 	},
@@ -59,22 +76,25 @@ erpnext.stock.StockReconciliation = erpnext.utils.Controller.extend({
 				$wrapper.find(".dit-progress-area").toggle(false);
 				me.frm.set_value("reconciliation_json", JSON.stringify(r));
 				me.show_reconciliation_data();
+				me.frm.save();
 			}
 		});
 	},
 	
 	show_download_reconciliation_data: function() {
 		var me = this;
-		this.frm.add_custom_button("Download Reconcilation Data", function() {
-			this.title = "Stock Reconcilation Data";
-			wn.tools.downloadify(JSON.parse(me.frm.doc.reconciliation_json), null, this);
-			return false;
-		}, "icon-download");
+		if(this.frm.doc.reconciliation_json) {
+			this.frm.add_custom_button("Download Reconcilation Data", function() {
+				this.title = "Stock Reconcilation Data";
+				wn.tools.downloadify(JSON.parse(me.frm.doc.reconciliation_json), null, this);
+				return false;
+			}, "icon-download");
+		}
 	},
 	
 	show_reconciliation_data: function() {
+		var $wrapper = $(cur_frm.fields_dict.reconciliation_html.wrapper).empty();
 		if(this.frm.doc.reconciliation_json) {
-			var $wrapper = $(cur_frm.fields_dict.reconciliation_html.wrapper).empty();
 			var reconciliation_data = JSON.parse(this.frm.doc.reconciliation_json);
 
 			var _make = function(data, header) {
@@ -92,14 +112,14 @@ erpnext.stock.StockReconciliation = erpnext.utils.Controller.extend({
 				return result;
 			};
 			
-			var $reconciliation_table = $("<div style='overflow-x: scroll;'>\
+			var $reconciliation_table = $("<div style='overflow-x: auto;'>\
 					<table class='table table-striped table-bordered'>\
 					<thead>" + _make([reconciliation_data[0]], true) + "</thead>\
 					<tbody>" + _make(reconciliation_data.splice(1)) + "</tbody>\
 					</table>\
 				</div>").appendTo($wrapper);
 		}
-	}
+	},
 });
 
 cur_frm.cscript = new erpnext.stock.StockReconciliation({frm: cur_frm});
