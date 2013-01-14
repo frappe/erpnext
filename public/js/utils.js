@@ -24,7 +24,9 @@ erpnext.utils.Controller = Class.extend({
 	},
 	
 	onload_post_render: function() {
-		this.setup_defaults();
+		if(this.frm.doc.__islocal) {
+			this.setup_defaults();
+		}
 	},
 	
 	setup_defaults: function() {
