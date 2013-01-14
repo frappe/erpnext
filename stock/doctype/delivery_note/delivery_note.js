@@ -34,7 +34,6 @@ cur_frm.cscript.onload = function(doc, dt, dn) {
 	if(!doc.price_list_currency) {
 		set_multiple(dt, dn, {price_list_currency: doc.currency, plc_conversion_rate:1});
 	}
-	if(!doc.posting_time) doc.posting_time = wn.datetime.get_cur_time()
 		
 	if(doc.__islocal){
 		hide_field(['customer_address', 'contact_person', 'customer_name', 
