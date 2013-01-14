@@ -2,9 +2,9 @@
  {
   "owner": "harshada@webnotestech.com", 
   "docstatus": 0, 
-  "creation": "2012-11-28 11:26:23", 
+  "creation": "2013-01-10 16:34:30", 
   "modified_by": "Administrator", 
-  "modified": "2012-12-03 17:10:41"
+  "modified": "2013-01-14 12:41:48"
  }, 
  {
   "is_submittable": 1, 
@@ -27,6 +27,7 @@
   "read": 1, 
   "doctype": "DocPerm", 
   "parenttype": "DocType", 
+  "report": 1, 
   "parentfield": "permissions"
  }, 
  {
@@ -51,7 +52,6 @@
   "permlevel": 0, 
   "no_copy": 1, 
   "oldfieldtype": "Select", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Status", 
   "oldfieldname": "status", 
@@ -87,12 +87,10 @@
  {
   "print_hide": 1, 
   "oldfieldtype": "Link", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Customer", 
   "oldfieldname": "customer", 
   "permlevel": 0, 
-  "trigger": "Client", 
   "fieldname": "customer", 
   "fieldtype": "Link", 
   "search_index": 1, 
@@ -140,28 +138,24 @@
  }, 
  {
   "description": "Item, Warranty, AMC (Annual Maintenance Contract) details will be automatically fetched when Serial Number is selected.", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Serial No", 
-  "trigger": "Client", 
+  "options": "Serial No", 
   "fieldname": "serial_no", 
   "fieldtype": "Link", 
-  "options": "Serial No", 
   "permlevel": 0
  }, 
  {
   "oldfieldtype": "Link", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Item Code", 
   "oldfieldname": "item_code", 
-  "permlevel": 0, 
-  "trigger": "Client", 
+  "options": "Item", 
   "fieldname": "item_code", 
   "fieldtype": "Link", 
   "search_index": 1, 
   "reqd": 0, 
-  "options": "Item", 
+  "permlevel": 0, 
   "in_filter": 1
  }, 
  {
@@ -174,7 +168,6 @@
  }, 
  {
   "oldfieldtype": "Data", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Item Name", 
   "oldfieldname": "item_name", 
@@ -185,7 +178,6 @@
  }, 
  {
   "oldfieldtype": "Small Text", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Description", 
   "oldfieldname": "description", 
@@ -196,7 +188,6 @@
   "permlevel": 1
  }, 
  {
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Warranty / AMC Status", 
   "options": "\nUnder Warranty\nOut of Warranty\nUnder AMC\nOut of AMC", 
@@ -223,7 +214,6 @@
  {
   "description": "To assign this issue, use the \"Assign\" button in the sidebar.", 
   "oldfieldtype": "Section Break", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Resolution", 
   "options": "Simple", 
@@ -238,7 +228,7 @@
   "label": "Resolution Date", 
   "oldfieldname": "resolution_date", 
   "fieldname": "resolution_date", 
-  "fieldtype": "Date", 
+  "fieldtype": "Datetime", 
   "search_index": 1, 
   "permlevel": 0, 
   "in_filter": 1
@@ -249,7 +239,7 @@
   "doctype": "DocField", 
   "label": "Resolved By", 
   "oldfieldname": "resolved_by", 
-  "options": "Sales Person", 
+  "options": "Profile", 
   "fieldname": "resolved_by", 
   "fieldtype": "Link", 
   "search_index": 1, 
@@ -300,7 +290,6 @@
  {
   "print_hide": 1, 
   "oldfieldtype": "Link", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Territory", 
   "oldfieldname": "territory", 
@@ -373,12 +362,10 @@
  {
   "print_hide": 1, 
   "oldfieldtype": "Link", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Company", 
   "oldfieldname": "company", 
   "permlevel": 0, 
-  "trigger": "Client", 
   "fieldname": "company", 
   "fieldtype": "Link", 
   "search_index": 1, 

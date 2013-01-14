@@ -219,7 +219,7 @@ data_map = {
 	
 	# Support
 	"Support Ticket": {
-		"columns": ["name","status","creation","modified"],
+		"columns": ["name","status","creation","resolution_date","first_responded_on"],
 		"conditions": ["docstatus < 2"],
 		"order_by": "creation"
 	}

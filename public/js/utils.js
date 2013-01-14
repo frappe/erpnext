@@ -32,6 +32,7 @@ erpnext.utils.Controller = Class.extend({
 		
 		var defaults = {
 			posting_date: wn.datetime.get_today(),
+			posting_time: wn.datetime.now_time()
 		}
 		
 		$.each(defaults, function(k, v) {

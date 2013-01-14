@@ -15,15 +15,17 @@
 // along with this program.	If not, see <http://www.gnu.org/licenses/>.
 
 cur_frm.cscript.onload = function(doc,cdt,cdn){
-	if(!doc.status) set_multiple(dt,dn,{status:'Open'});	
+	if(!doc.status) 
+		set_multiple(dt,dn,{status:'Open'});	
 	if(doc.__islocal){		
 		hide_field(['customer_address','contact_person']);
-	}	 
+	} 
 }
 
 cur_frm.cscript.refresh = function(doc,ct,cdn){
 	if(doc.docstatus == 1 && (doc.status == 'Open' || doc.status == 'Work In Progress')) 
-		cur_frm.add_custom_button('Make Maintenance Visit', cur_frm.cscript['Make Maintenance Visit']);
+		cur_frm.add_custom_button('Make Maintenance Visit', 
+			cur_frm.cscript['Make Maintenance Visit']);
 }
 
 
@@ -109,11 +111,9 @@ cur_frm.add_fetch('serial_no', 'description', 'description');
 cur_frm.add_fetch('serial_no', 'maintenance_status', 'warranty_amc_status');
 cur_frm.add_fetch('serial_no', 'warranty_expiry_date', 'warranty_expiry_date');
 cur_frm.add_fetch('serial_no', 'amc_expiry_date', 'amc_expiry_date');
-if (cstr(doc.customer) == '') {
-	cur_frm.add_fetch('serial_no', 'customer', 'customer');
-	cur_frm.add_fetch('serial_no', 'customer_name', 'customer_name');
-	cur_frm.add_fetch('serial_no', 'delivery_address', 'customer_address');
-}
+cur_frm.add_fetch('serial_no', 'customer', 'customer');
+cur_frm.add_fetch('serial_no', 'customer_name', 'customer_name');
+cur_frm.add_fetch('serial_no', 'delivery_address', 'customer_address');
 
 // ----------
 // item code

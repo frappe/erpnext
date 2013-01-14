@@ -85,25 +85,26 @@ $.extend(cur_frm.cscript, {
 	}, 
 	
 	'Close Ticket': function() {
-		var doc = cur_frm.doc		
-		if(doc.name) 
-			$c_obj(make_doclist(doc.doctype, doc.name),'close_ticket','',function(r,rt) {
-				if(!r.exc) {
-					cur_frm.refresh();
-				}
-			});
+		cur_frm.cscript.set_status("Closed");
 	},
 	
 	'Re-Open Ticket': function() {
-		var doc = cur_frm.doc		
-		if(doc.name) 
-			$c_obj(make_doclist(doc.doctype, doc.name),'reopen_ticket','',function(r,rt) {
-				if(!r.exc) {
-					cur_frm.refresh();
-				}
-			});
-	}
+		cur_frm.cscript.set_status("Open");
+	},
 
+	set_status: function(status) {
+		wn.call({
+			method:"support.doctype.support_ticket.support_ticket.set_status",
+			args: {
+				name: cur_frm.doc.name,
+				status: status
+			},
+			callback: function(r) {
+				if(!r.exc) cur_frm.reload_doc();
+			}
+		})
+		
+	}
 	
 })
 

@@ -2,9 +2,9 @@
  {
   "owner": "Administrator", 
   "docstatus": 0, 
-  "creation": "2012-10-29 14:30:00", 
+  "creation": "2013-01-10 16:34:17", 
   "modified_by": "Administrator", 
-  "modified": "2013-01-02 12:40:26"
+  "modified": "2013-01-14 14:03:52"
  }, 
  {
   "autoname": "TASK.#####", 
@@ -28,6 +28,8 @@
   "parent": "Task", 
   "read": 1, 
   "doctype": "DocPerm", 
+  "submit": 0, 
+  "report": 1, 
   "parenttype": "DocType", 
   "role": "Projects User", 
   "parentfield": "permissions"
@@ -192,14 +194,6 @@
   "fieldtype": "Date"
  }, 
  {
-  "oldfieldtype": "Data", 
-  "doctype": "DocField", 
-  "label": "Total Hours (Actual)", 
-  "oldfieldname": "act_total_hrs", 
-  "fieldname": "act_total_hrs", 
-  "fieldtype": "Data"
- }, 
- {
   "oldfieldtype": "Currency", 
   "doctype": "DocField", 
   "label": "Actual Budget", 
@@ -253,7 +247,6 @@
   "amend": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
-  "submit": 0, 
   "cancel": 0, 
   "permlevel": 1
  }

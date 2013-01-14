@@ -100,14 +100,12 @@ class DocType:
 
 	def validate_posting_time(self):
 		""" Validate posting time format"""
-		if self.doc.posting_time and len(self.doc.posting_time.split(':')) > 2:
+		if self.doc.posting_time and len(self.doc.posting_time.split(':')) > 3:
 			msgprint("Wrong format of posting time, can not complete the transaction. If you think \
 				you entered posting time correctly, please contact ERPNext support team.")
 			raise Exception
 	
 	def scrub_posting_time(self):
 		if not self.doc.posting_time or self.doc.posting_time == '00:0':
-			self.doc.posting_time = '00:00'
-		if len(self.doc.posting_time.split(':')) > 2:
 			self.doc.posting_time = '00:00'
 			

@@ -21,6 +21,7 @@ import webnotes
 from webnotes.model import db_exists
 from webnotes.model.wrapper import copy_doclist
 from webnotes import session, msgprint
+from webnotes.utils import today
 
 sql = webnotes.conn.sql
 	
@@ -43,6 +44,11 @@ class DocType(TransactionBase):
 		if session['user'] != 'Guest' and not self.doc.customer:
 			msgprint("Please select Customer from whom issue is raised",
 				raise_exception=True)
+				
+		if self.doc.status=="Closed" and \
+			webnotes.conn.get_value("Customer Issue", self.doc.name, "status")!="Closed":
+			self.doc.resolution_date = today()
+			self.doc.resolved_by = webnotes.session.user
 	
 	def on_cancel(self):
 		lst = sql("select t1.name from `tabMaintenance Visit` t1, `tabMaintenance Visit Purpose` t2 where t2.parent = t1.name and t2.prevdoc_docname = '%s' and	t1.docstatus!=2"%(self.doc.name))

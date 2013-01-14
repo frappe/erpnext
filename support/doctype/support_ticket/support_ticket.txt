@@ -2,9 +2,9 @@
  {
   "owner": "Administrator", 
   "docstatus": 0, 
-  "creation": "2012-11-02 17:17:05", 
+  "creation": "2013-01-10 16:34:31", 
   "modified_by": "Administrator", 
-  "modified": "2012-11-28 10:45:19"
+  "modified": "2013-01-14 14:15:37"
  }, 
  {
   "autoname": "naming_series:", 
@@ -25,10 +25,11 @@
   "name": "__common__", 
   "parent": "Support Ticket", 
   "amend": 0, 
-  "submit": 0, 
   "doctype": "DocPerm", 
+  "submit": 0, 
   "read": 1, 
   "parenttype": "DocType", 
+  "report": 1, 
   "parentfield": "permissions"
  }, 
  {
@@ -52,7 +53,6 @@
   "permlevel": 1, 
   "no_copy": 1, 
   "oldfieldtype": "Select", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Status", 
   "oldfieldname": "status", 
@@ -117,7 +117,6 @@
   "permlevel": 1
  }, 
  {
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Additional Info", 
   "fieldname": "additional_info", 
@@ -152,12 +151,10 @@
  {
   "print_hide": 1, 
   "oldfieldtype": "Link", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Customer", 
   "oldfieldname": "customer", 
   "permlevel": 1, 
-  "trigger": "Client", 
   "fieldname": "customer", 
   "fieldtype": "Link", 
   "search_index": 1, 
@@ -218,31 +215,26 @@
   "permlevel": 1
  }, 
  {
-  "depends_on": "eval:!doc.__islocal", 
+  "doctype": "DocField", 
+  "label": "First Responded On", 
+  "fieldname": "first_responded_on", 
+  "fieldtype": "Datetime", 
+  "permlevel": 0
+ }, 
+ {
   "no_copy": 1, 
-  "search_index": 0, 
-  "colour": "White:FFF", 
+  "depends_on": "eval:!doc.__islocal", 
   "doctype": "DocField", 
   "label": "Resolution Date", 
   "oldfieldname": "resolution_date", 
   "fieldname": "resolution_date", 
-  "fieldtype": "Date", 
+  "fieldtype": "Datetime", 
+  "search_index": 0, 
   "oldfieldtype": "Date", 
   "permlevel": 1, 
   "in_filter": 0
  }, 
  {
-  "oldfieldtype": "Time", 
-  "doctype": "DocField", 
-  "label": "Resolution Time", 
-  "oldfieldname": "resolution_time", 
-  "fieldname": "resolution_time", 
-  "fieldtype": "Time", 
-  "depends_on": "eval:!doc.__islocal", 
-  "permlevel": 1
- }, 
- {
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Content Type", 
   "fieldname": "content_type", 

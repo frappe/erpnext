@@ -17,7 +17,7 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import getdate
+from webnotes.utils import getdate, today
 from webnotes.model import db_exists
 from webnotes.model.wrapper import copy_doclist
 from webnotes import msgprint
@@ -40,7 +40,7 @@ class DocType:
 		if cust:
 			ret = {'customer_name': cust and cust[0][0] or ''}
 			return ret
-
+	
 	def validate(self):
 		if self.doc.exp_start_date and self.doc.exp_end_date and getdate(self.doc.exp_start_date) > getdate(self.doc.exp_end_date):
 			msgprint("'Expected Start Date' can not be greater than 'Expected End Date'")
@@ -49,4 +49,14 @@ class DocType:
 		if self.doc.act_start_date and self.doc.act_end_date and getdate(self.doc.act_start_date) > getdate(self.doc.act_end_date):
 			msgprint("'Actual Start Date' can not be greater than 'Actual End Date'")
 			raise Exception
+			
+		self.update_status()
 
+	def update_status(self):
+		status = webnotes.conn.get_value("Task", self.doc.name, "status")
+		if self.doc.status=="Working" and status !="Working" and not self.doc.act_start_date:
+			self.doc.act_start_date = today()
+			
+		if self.doc.status=="Closed" and status != "Closed" and not self.doc.act_end_date:
+			self.doc.act_end_date = today()
+		
