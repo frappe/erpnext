@@ -58,5 +58,5 @@ def store_stock_reco_json():
 					content = read_csv_content(content)
 					reconciliation_json = json.dumps(content, separators=(',', ': '))
 					webnotes.conn.sql("""update `tabStock Reconciliation`
-						set reconciliation_json=%s where name=%s""", (reconciliation_json, name))
+						set reconciliation_json=%s where name=%s""", (reconciliation_json, reco))
 	
