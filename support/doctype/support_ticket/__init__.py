@@ -22,7 +22,7 @@ from webnotes.utils.email_lib.receive import POP3Mailbox
 
 class SupportMailbox(POP3Mailbox):
 	def __init__(self):
-		self.email_settings = webnotes.doc("Email Settings")
+		self.email_settings = webnotes.doc("Email Settings", "Email Settings")
 		s = webnotes.doc('Support Email Settings')
 		s.use_ssl = self.email_settings.support_use_ssl
 		s.host = self.email_settings.support_host
