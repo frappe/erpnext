@@ -4,10 +4,11 @@
   "docstatus": 0, 
   "creation": "2013-01-15 16:32:13", 
   "modified_by": "Administrator", 
-  "modified": "2013-01-15 17:08:46"
+  "modified": "2013-01-15 17:30:46"
  }, 
  {
   "autoname": "field:applicant_name", 
+  "allow_attach": 1, 
   "description": "Applicant for a Job", 
   "doctype": "DocType", 
   "module": "HR", 
@@ -83,6 +84,15 @@
   "label": "Thread HTML", 
   "fieldname": "thread_html", 
   "fieldtype": "HTML"
+ }, 
+ {
+  "print_hide": 1, 
+  "no_copy": 1, 
+  "doctype": "DocField", 
+  "label": "File List", 
+  "fieldname": "file_list", 
+  "fieldtype": "Text", 
+  "hidden": 1
  }, 
  {
   "doctype": "DocPerm"
