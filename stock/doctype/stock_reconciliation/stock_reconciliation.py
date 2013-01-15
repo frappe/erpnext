@@ -192,8 +192,9 @@ class DocType(DocListController):
 		def _insert_entries():
 			if previous_stock_queue != [[row.qty, row.valuation_rate]]:
 				# make entry as per attachment
-				self.insert_entries({"actual_qty": row.qty, 
-					"incoming_rate": flt(row.valuation_rate)}, row)
+				if row.qty:
+					self.insert_entries({"actual_qty": row.qty, 
+						"incoming_rate": flt(row.valuation_rate)}, row)
 				
 				# Make reverse entry
 				if previous_stock_qty:
