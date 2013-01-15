@@ -155,6 +155,8 @@ erpnext.StockLedger = erpnext.StockGridReport.extend({
 		
 		// initialize warehouse-item map
 		this.item_warehouse = {};
+		var from_datetime = dateutil.str_to_obj(me.from_date + " 00:00:00");
+		var to_datetime = dateutil.str_to_obj(me.to_date + " 23:59:59");
 		
 		// 
 		for(var i=0, j=data.length; i<j; i++) {
@@ -162,7 +164,7 @@ erpnext.StockLedger = erpnext.StockGridReport.extend({
 			var item = me.item_by_name[sl.item_code]
 			var wh = me.get_item_warehouse(sl.warehouse, sl.item_code);
 			sl.description = item.description;
-			sl.posting_datetime = sl.posting_date + " " + sl.posting_time;
+			sl.posting_datetime = sl.posting_date + " " + (sl.posting_time || "00:00:00");
 			sl.brand = item.brand;
 			var posting_datetime = dateutil.str_to_obj(sl.posting_datetime);
 			
@@ -171,11 +173,11 @@ erpnext.StockLedger = erpnext.StockGridReport.extend({
 			var value_diff = me.get_value_diff(wh, sl, is_fifo);
 
 			// opening, transactions, closing, total in, total out
-			var before_end = posting_datetime <= dateutil.str_to_obj(me.to_date + " 23:59:59");
+			var before_end = posting_datetime <= to_datetime;
 			if((!me.is_default("item_code") ? me.apply_filter(sl, "item_code") : true)
 				&& me.apply_filter(sl, "warehouse") && me.apply_filter(sl, "voucher_no")
 				&& me.apply_filter(sl, "brand")) {
-				if(posting_datetime < dateutil.str_to_obj(me.from_date)) {
+				if(posting_datetime < from_datetime) {
 					opening.balance += sl.qty;
 					opening.balance_value += value_diff;
 				} else if(before_end) {
@@ -190,7 +192,7 @@ erpnext.StockLedger = erpnext.StockGridReport.extend({
 			}
 			
 			if(!before_end) break;
-			
+
 			// apply filters
 			if(me.apply_filters(sl)) {
 				out.push(sl);
