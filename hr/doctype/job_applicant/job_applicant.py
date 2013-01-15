@@ -13,4 +13,8 @@ class DocType(TransactionBase):
 		
 	def on_communication_sent(self, comm):
 		webnotes.conn.set(self.doc, 'status', 'Replied')
+
+	def on_trash(self):
+		webnotes.conn.sql("""delete from `tabCommunication` 
+			where job_applicant=%s""", self.doc.name)
 		

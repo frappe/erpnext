@@ -34,6 +34,9 @@ class JobsMailbox(POP3Mailbox):
 		return name and name[0][0] or None
 	
 	def process_message(self, mail):
+		if mail.from_email == self.settings.email_id:
+			return
+			
 		name = self.get_existing_application(mail.from_email)
 		if name:
 			applicant = webnotes.model_wrapper("Job Applicant", name)
