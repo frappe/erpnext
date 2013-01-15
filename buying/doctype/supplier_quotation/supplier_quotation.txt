@@ -2,13 +2,14 @@
  {
   "owner": "Administrator", 
   "docstatus": 0, 
-  "creation": "2012-08-06 11:15:46", 
+  "creation": "2012-12-20 12:50:48", 
   "modified_by": "Administrator", 
-  "modified": "2012-12-10 18:30:00"
+  "modified": "2013-01-15 15:38:38"
  }, 
  {
-  "is_submittable": 1, 
+  "autoname": "naming_series:", 
   "allow_attach": 1, 
+  "is_submittable": 1, 
   "search_fields": "status, transaction_date, supplier,grand_total", 
   "module": "Buying", 
   "doctype": "DocType", 
@@ -29,6 +30,7 @@
   "read": 1, 
   "doctype": "DocPerm", 
   "parenttype": "DocType", 
+  "report": 1, 
   "parentfield": "permissions"
  }, 
  {
@@ -36,6 +38,7 @@
   "doctype": "DocType"
  }, 
  {
+  "print_width": "50%", 
   "oldfieldtype": "Column Break", 
   "doctype": "DocField", 
   "width": "50%", 
@@ -48,7 +51,6 @@
   "description": "To manage multiple series please go to Setup > Manage Series", 
   "no_copy": 1, 
   "oldfieldtype": "Select", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Series", 
   "oldfieldname": "naming_series", 
@@ -62,12 +64,10 @@
   "print_hide": 1, 
   "description": "Supplier (vendor) name as entered in supplier master", 
   "oldfieldtype": "Link", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Supplier", 
   "oldfieldname": "supplier", 
   "permlevel": 0, 
-  "trigger": "Client", 
   "fieldname": "supplier", 
   "fieldtype": "Link", 
   "search_index": 1, 
@@ -118,6 +118,7 @@
  }, 
  {
   "print_hide": 0, 
+  "print_width": "50%", 
   "oldfieldtype": "Column Break", 
   "doctype": "DocField", 
   "width": "50%", 
@@ -128,21 +129,18 @@
  {
   "description": "The date at which current entry is made in system.", 
   "oldfieldtype": "Date", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Quotation Date", 
   "oldfieldname": "transaction_date", 
-  "trigger": "Client", 
   "fieldname": "transaction_date", 
   "fieldtype": "Date", 
   "search_index": 1, 
   "reqd": 1, 
-  "in_filter": 1, 
-  "permlevel": 0
+  "permlevel": 0, 
+  "in_filter": 1
  }, 
  {
   "oldfieldtype": "Section Break", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Items", 
   "fieldname": "items", 
@@ -169,6 +167,7 @@
   "permlevel": 0
  }, 
  {
+  "print_width": "50%", 
   "doctype": "DocField", 
   "width": "50%", 
   "fieldname": "column_break2", 
@@ -202,12 +201,12 @@
   "oldfieldtype": "Button", 
   "doctype": "DocField", 
   "label": "Re-Calculate Values", 
-  "trigger": "Client", 
   "fieldname": "recalculate_values", 
   "fieldtype": "Button", 
   "permlevel": 0
  }, 
  {
+  "print_width": "50%", 
   "doctype": "DocField", 
   "width": "50%", 
   "fieldname": "column_break3", 
@@ -219,7 +218,6 @@
   "description": "Supplier's currency", 
   "no_copy": 0, 
   "oldfieldtype": "Select", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Currency", 
   "oldfieldname": "currency", 
@@ -234,12 +232,10 @@
   "description": "Rate at which supplier's currency is converted to company's base currency", 
   "no_copy": 1, 
   "oldfieldtype": "Currency", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Conversion Rate", 
   "oldfieldname": "conversion_rate", 
   "default": "1", 
-  "trigger": "Client", 
   "fieldname": "conversion_rate", 
   "fieldtype": "Currency", 
   "reqd": 1, 
@@ -251,7 +247,6 @@
   "description": "You can make a purchase order from multiple Purchase Requests. Select Purchase Requests one by one and click on the button below.", 
   "no_copy": 1, 
   "oldfieldtype": "Link", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Select Purchase Request", 
   "oldfieldname": "indent_no", 
@@ -273,7 +268,6 @@
  }, 
  {
   "oldfieldtype": "Section Break", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Taxes", 
   "fieldname": "taxes", 
@@ -285,14 +279,13 @@
   "description": "If you have created a standard template in Purchase Taxes and Charges Master, select one and click on the button below.", 
   "no_copy": 1, 
   "oldfieldtype": "Link", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Purchase Taxes and Charges", 
   "oldfieldname": "purchase_other_charges", 
-  "permlevel": 0, 
+  "options": "Purchase Taxes and Charges Master", 
   "fieldname": "purchase_other_charges", 
   "fieldtype": "Link", 
-  "options": "Purchase Taxes and Charges Master"
+  "permlevel": 0
  }, 
  {
   "print_hide": 1, 
@@ -320,7 +313,6 @@
   "oldfieldtype": "Button", 
   "doctype": "DocField", 
   "label": "Calculate Tax", 
-  "trigger": "Client", 
   "fieldname": "calculate_tax", 
   "fieldtype": "Button", 
   "permlevel": 0
@@ -348,7 +340,6 @@
  }, 
  {
   "oldfieldtype": "Section Break", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Totals", 
   "fieldname": "totals", 
@@ -380,7 +371,6 @@
   "print_hide": 1, 
   "description": "In Words will be visible once you save the Purchase Order.", 
   "oldfieldtype": "Data", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "In Words", 
   "oldfieldname": "in_words", 
@@ -433,7 +423,6 @@
  {
   "print_hide": 1, 
   "oldfieldtype": "Data", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "In Words(Import)", 
   "oldfieldname": "in_words_import", 
@@ -475,8 +464,8 @@
  }, 
  {
   "print_hide": 1, 
-  "allow_on_submit": 1, 
   "oldfieldtype": "Select", 
+  "allow_on_submit": 1, 
   "doctype": "DocField", 
   "label": "Letter Head", 
   "oldfieldname": "letter_head", 
@@ -563,7 +552,6 @@
   "print_hide": 1, 
   "no_copy": 1, 
   "oldfieldtype": "Select", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Status", 
   "oldfieldname": "status", 
@@ -616,7 +604,6 @@
   "description": "Select the relevant company name if you have multiple companies", 
   "no_copy": 0, 
   "oldfieldtype": "Link", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Company", 
   "oldfieldname": "company", 
@@ -647,7 +634,6 @@
   "print_hide": 1, 
   "no_copy": 1, 
   "oldfieldtype": "Link", 
-  "colour": "White:FFF", 
   "allow_on_submit": 1, 
   "doctype": "DocField", 
   "label": "Select Print Heading", 
@@ -660,6 +646,7 @@
  }, 
  {
   "print_hide": 1, 
+  "print_width": "50%", 
   "oldfieldtype": "Column Break", 
   "doctype": "DocField", 
   "width": "50%", 
@@ -671,7 +658,6 @@
   "print_hide": 1, 
   "no_copy": 1, 
   "oldfieldtype": "Data", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Cancel Reason", 
   "oldfieldname": "cancel_reason", 

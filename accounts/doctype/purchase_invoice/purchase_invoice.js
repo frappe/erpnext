@@ -163,13 +163,6 @@ cur_frm.cscript.get_items = function(doc, dt, dn) {
 	$c_obj(make_doclist(dt,dn),'pull_details','',callback);
 }
 
-cur_frm.cscript.item_code = function(doc,cdt,cdn){
-	var d = locals[cdt][cdn];
-	if(d.item_code){
-		get_server_fields('get_item_details',d.item_code,'entries',doc,cdt,cdn,1);
-	}
-}
-
 cur_frm.cscript.allocated_amount = function(doc,cdt,cdn) {
 	calc_total_advance(doc, cdt, cdn);
 }

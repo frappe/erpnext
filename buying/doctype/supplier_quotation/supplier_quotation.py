@@ -17,19 +17,16 @@
 from __future__ import unicode_literals
 import webnotes
 from webnotes.model.code import get_obj
-from utilities.transaction_base import TransactionBase
 
-class DocType(TransactionBase):
+from controllers.buying_controller import BuyingController
+class DocType(BuyingController):
 	def __init__(self, doc, doclist=None):
 		self.doc, self.doclist = doc, doclist or []
 		self.tname, self.fname = "Supplier Quotation Item", "quotation_items"
-
-	def autoname(self):
-		"""autoname based on naming series value"""
-		from webnotes.model.doc import make_autoname
-		self.doc.name = make_autoname(self.doc.naming_series + ".#####")
 		
 	def validate(self):
+		super(DocType, self).validate()
+		
 		if not self.doc.status:
 			self.doc.status = "Draft"
 
@@ -53,22 +50,6 @@ class DocType(TransactionBase):
 	def on_trash(self):
 		pass
 		
-	def get_item_details(self, args=None):
-		if args:
-			return get_obj(dt='Purchase Common').get_item_details(self, args)
-		else:
-			obj = get_obj('Purchase Common')
-			for doc in self.doclist:
-				if doc.fields.get('item_code'):
-					temp = {
-						'item_code': doc.fields.get('item_code'),
-						'warehouse': doc.fields.get('warehouse')
-					}
-					ret = obj.get_item_details(self, json.dumps(temp))
-					for r in ret:
-						if not doc.fields.get(r):
-							doc.fields[r] = ret[r]
-
 	def get_indent_details(self):
 		if self.doc.indent_no:
 			mapper = get_obj("DocType Mapper", "Purchase Request-Supplier Quotation")
@@ -102,6 +83,6 @@ class DocType(TransactionBase):
 		
 	def set_in_words(self):
 		pc = get_obj('Purchase Common')
-		company_currency = TransactionBase().get_company_currency(self.doc.company)
+		company_currency = super(DocType, self).get_company_currency(self.doc.company)
 		self.doc.in_words = pc.get_total_in_words(company_currency, self.doc.grand_total)
 		self.doc.in_words_import = pc.get_total_in_words(self.doc.currency, self.doc.grand_total_import)

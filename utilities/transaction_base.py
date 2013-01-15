@@ -20,7 +20,9 @@ from webnotes.utils import load_json, cstr, flt, get_defaults
 from webnotes.model.doc import addchild
 from webnotes.model.wrapper import copy_doclist
 
-class TransactionBase:
+from webnotes.model.controller import DocListController
+
+class TransactionBase(DocListController):
 
 	# Get Customer Default Primary Address - first load
 	# -----------------------

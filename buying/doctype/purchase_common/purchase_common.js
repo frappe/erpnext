@@ -18,6 +18,81 @@
 // ------
 // cur_frm.cscript.tname - Details table name
 // cur_frm.cscript.fname - Details fieldname
+
+wn.provide("erpnext.buying");
+
+erpnext.buying.BuyingController = erpnext.utils.Controller.extend({
+	setup: function() {
+		var me = this;
+		
+		this.frm.fields_dict.price_list_currency.get_query = function() {
+			return repl("select distinct ref_currency from `tabItem Price` \
+				where price_list_name=\"%(price_list_name)s\" and %(key)s like \"%s%%\"", 
+				{price_list_name: me.frm.doc.price_list_name});
+		};
+	},
+	
+	price_list_name: function() {
+		this.frm.toggle_reqd(["price_list_currency", "plc_conversion_rate"],
+			!!this.frm.doc.price_list_name);
+	},
+	
+	item_code: function(doc, cdt, cdn) {
+		var me = this;
+		var item = locals[cdt][cdn];
+		if(item.item_code) {
+			this.frm.call({
+				method: "buying.utils.get_item_details",
+				child: item,
+				args: {
+					args: {
+						doctype: me.frm.doc.doctype,
+						docname: me.frm.doc.name,
+						item_code: item.item_code,
+						warehouse: item.warehouse,
+						supplier: me.frm.doc.supplier,
+						conversion_rate: me.frm.doc.conversion_rate,
+						price_list_name: me.frm.doc.price_list_name,
+						price_list_currency: me.frm.doc.price_list_currency,
+						plc_conversion_rate: me.frm.doc.plc_conversion_rate
+					}
+				},
+			});
+		}
+	},
+	
+	update_item_details: function(doc, dt, dn, callback) {
+		if(!this.frm.doc.__islocal) return;
+		
+		var me = this;
+		var children = getchildren(this.tname, this.frm.doc.name, this.fname);
+		if(children && children.length) {
+			this.frm.call({
+				doc: me.frm.doc,
+				method: "update_item_details",
+				callback: function(r) {
+					if(!r.exc) {
+						refresh_field(me.fname);
+						me.load_defaults(me.frm.doc, dt, dn, callback);
+					}
+				}
+			})
+		} else {
+			this.load_taxes(doc, dt, dn, callback);
+		}
+	}
+});
+
+// to save previous state of cur_frm.cscript
+var prev_cscript = {};
+$.extend(prev_cscript, cur_frm.cscript);
+
+cur_frm.cscript = new erpnext.buying.BuyingController({frm: cur_frm});
+
+// combine new and previous states
+$.extend(cur_frm.cscript, prev_cscript);
+
+
 var tname = cur_frm.cscript.tname;
 var fname = cur_frm.cscript.fname;
 
@@ -64,23 +139,6 @@ cur_frm.cscript.load_defaults = function(doc, dt, dn, callback) {
 	cur_frm.cscript.load_taxes(doc, dt, dn, callback);
 }
 
-// Update existing item details
-cur_frm.cscript.update_item_details = function(doc, dt, dn, callback) {
-	if(!cur_frm.doc.__islocal) { return; }
-	var children = getchildren(cur_frm.cscript.tname, doc.name, cur_frm.cscript.fname);
-	if(children) {
-		$c_obj(make_doclist(doc.doctype, doc.name), 'get_item_details', '',
-		function(r, rt) {
-			if(!r.exc) {
-				refresh_field(cur_frm.cscript.fname);
-				doc = locals[doc.doctype][doc.name];
-				cur_frm.cscript.load_defaults(doc, dt, dn, callback);
-			}
-		});
-	} else {
-		cur_frm.cscript.load_taxes(doc, dt, dn, callback);
-	}
-}
 
 var set_dynamic_label_par = function(doc, cdt, cdn, base_curr) {
 	//parent flds
@@ -174,18 +232,6 @@ cur_frm.fields_dict[fname].grid.get_field("item_code").get_query = function(doc,
 		return erpnext.queries.item({
 			'ifnull(tabItem.is_purchase_item, "No")': 'Yes'
 		})
-	}
-}
-
-//==================== Get Item Code Details =====================================================
-cur_frm.cscript.item_code = function(doc,cdt,cdn) {
-	var d = locals[cdt][cdn];
-	if (d.item_code) {
-		temp = {
-			item_code: d.item_code || '',
-			warehouse: d.warehouse || ''
-		}
-		get_server_fields('get_item_details', JSON.stringify(temp), fname, doc, cdt, cdn, 1);
 	}
 }
 
