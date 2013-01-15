@@ -28,7 +28,7 @@ class SupportMailbox(POP3Mailbox):
 			"use_ssl": self.email_settings.support_use_ssl,
 			"host": self.email_settings.support_host,
 			"username": self.email_settings.support_username,
-			"password", self.email_settings.support_password
+			"password": self.email_settings.support_password
 		})
 	
 	def check_mails(self):
