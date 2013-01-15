@@ -49,11 +49,17 @@ $.extend(cur_frm.cscript, {
 		var wrapper = cur_frm.fields_dict['thread_html'].wrapper;
 		
 		var comm_list = wn.model.get("Communication", {"support_ticket": doc.name})
-		comm_list.push({
-			"sender": doc.raised_by,
-			"creation": doc.creation,
-			"modified": doc.creation,
-			"content": doc.description});
+
+		var sortfn = function (a, b) { return (b.creation > a.creation) ? 1 : -1; }
+		comm_list = comm_list.sort(sortfn);
+		
+		if(!comm_list.length || (comm_list[0].sender != doc.raised_by)) {
+			comm_list.push({
+				"sender": doc.raised_by,
+				"creation": doc.creation,
+				"modified": doc.creation,
+				"content": doc.description});
+		}
 					
 		cur_frm.communication_view = new wn.views.CommunicationList({
 			list: comm_list,

@@ -26,7 +26,7 @@ def execute_all():
 		* recurring invoice
 	"""
 	# pull emails
-	from support.doctype.support_ticket import get_support_mails
+	from support.doctype.support_ticket.get_support_mails import get_support_mails
 	run_fn(get_support_mails)
 	
 	# bulk email

@@ -87,7 +87,7 @@ class DocType():
 
 		args = self.dt_map[doctype]
 
-		sender = self.doc.send_from or webnotes.utils.get_email_id(self.doc.owner)
+		sender = self.doc.send_from or webnotes.utils.get_formatted_email(self.doc.owner)
 		recipients = self.doc.test_email_id.split(",")
 		from webnotes.utils.email_lib.bulk import send
 		send(recipients = recipients, sender = sender, 
@@ -109,7 +109,7 @@ class DocType():
 			recipients = self.get_recipients(query_key)
 		else:
 			recipients = query_key
-		sender = self.doc.send_from or webnotes.utils.get_email_id(self.doc.owner)
+		sender = self.doc.send_from or webnotes.utils.get_formatted_email(self.doc.owner)
 		args = self.dt_map[doctype]
 		self.send_count[doctype] = self.send_count.setdefault(doctype, 0) + \
 			len(recipients)
