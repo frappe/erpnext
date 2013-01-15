@@ -4,13 +4,13 @@
   "docstatus": 0, 
   "creation": "2013-01-14 15:14:40", 
   "modified_by": "Administrator", 
-  "modified": "2013-01-15 12:24:41"
+  "modified": "2013-01-15 12:25:13"
  }, 
  {
   "allow_attach": 0, 
   "is_submittable": 1, 
   "allow_print": 1, 
-  "search_fields": "reconciliation_date", 
+  "search_fields": "posting_date", 
   "module": "Stock", 
   "doctype": "DocType", 
   "autoname": "SR/.######", 
