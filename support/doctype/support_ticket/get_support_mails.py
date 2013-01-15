@@ -37,6 +37,8 @@ class SupportMailbox(POP3Mailbox):
 			time_to_sec(timediff(now(), lastupdate)) < 1800")
 	
 	def process_message(self, mail):
+		if mail.from_email == self.email_settings.fields.get('support_email'):
+			return
 		thread_id = mail.get_thread_id()
 		ticket = None
 
