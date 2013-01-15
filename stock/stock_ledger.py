@@ -248,8 +248,6 @@ def get_fifo_values(qty_after_transaction, sle, stock_queue):
 				batch[0] -= qty_to_pop
 				qty_to_pop = 0
 		
-		incoming_rate = incoming_cost / flt(abs(actual_qty))
-
 	stock_value = sum((flt(batch[0]) * flt(batch[1]) for batch in stock_queue))
 	stock_qty = sum((flt(batch[0]) for batch in stock_queue))
 
