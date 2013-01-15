@@ -2,15 +2,15 @@
  {
   "owner": "Administrator", 
   "docstatus": 0, 
-  "creation": "2013-01-11 12:04:17", 
+  "creation": "2013-01-14 15:14:40", 
   "modified_by": "Administrator", 
-  "modified": "2013-01-11 15:36:21"
+  "modified": "2013-01-15 12:25:13"
  }, 
  {
   "allow_attach": 0, 
   "is_submittable": 1, 
   "allow_print": 1, 
-  "search_fields": "reconciliation_date", 
+  "search_fields": "posting_date", 
   "module": "Stock", 
   "doctype": "DocType", 
   "autoname": "SR/.######", 
@@ -31,15 +31,16 @@
  {
   "parent": "Stock Reconciliation", 
   "read": 1, 
-  "doctype": "DocPerm", 
   "cancel": 1, 
   "name": "__common__", 
-  "amend": 1, 
+  "amend": 0, 
   "create": 1, 
+  "doctype": "DocPerm", 
   "submit": 1, 
   "write": 1, 
   "parenttype": "DocType", 
   "role": "Material Manager", 
+  "report": 1, 
   "permlevel": 0, 
   "parentfield": "permissions"
  }, 
@@ -115,7 +116,7 @@
   "doctype": "DocField", 
   "label": "Reconciliation JSON", 
   "fieldname": "reconciliation_json", 
-  "fieldtype": "Text", 
+  "fieldtype": "Long Text", 
   "hidden": 1
  }, 
  {
