@@ -4,9 +4,10 @@
   "docstatus": 0, 
   "creation": "2013-01-15 16:13:36", 
   "modified_by": "Administrator", 
-  "modified": "2013-01-15 16:13:36"
+  "modified": "2013-01-15 16:43:05"
  }, 
  {
+  "autoname": "field:job_title", 
   "description": "Description of a Job Opening", 
   "doctype": "DocType", 
   "module": "HR", 

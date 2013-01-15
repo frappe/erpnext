@@ -4,7 +4,7 @@
   "docstatus": 0, 
   "creation": "2013-01-15 16:32:13", 
   "modified_by": "Administrator", 
-  "modified": "2013-01-15 16:32:13"
+  "modified": "2013-01-15 17:08:46"
  }, 
  {
   "autoname": "field:applicant_name", 
@@ -46,6 +46,12 @@
   "fieldname": "applicant_name", 
   "fieldtype": "Data", 
   "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Email Id", 
+  "fieldname": "email_id", 
+  "fieldtype": "Data"
  }, 
  {
   "doctype": "DocField", 
