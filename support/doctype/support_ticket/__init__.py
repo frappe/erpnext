@@ -22,17 +22,7 @@ from webnotes.utils.email_lib.receive import POP3Mailbox
 
 class SupportMailbox(POP3Mailbox):
 	def __init__(self):
-		"""
-			settings_doc must contain
-			use_ssl, host, username, password
-		"""
-		from webnotes.model.doc import Document
-
-		# extract email settings
-		self.email_settings = Document('Email Settings','Email Settings')
-		if not self.email_settings.fields.get('sync_support_mails'): return
-		
-		s = Document('Support Email Settings')
+		s = webnotes.doc('Support Email Settings')
 		s.use_ssl = self.email_settings.support_use_ssl
 		s.host = self.email_settings.support_host
 		s.username = self.email_settings.support_username
@@ -41,36 +31,14 @@ class SupportMailbox(POP3Mailbox):
 		POP3Mailbox.__init__(self, s)
 	
 	def check_mails(self):
-		"""
-			returns true if there are active sessions
-		"""
 		self.auto_close_tickets()
-		return webnotes.conn.sql("select user from tabSessions where time_to_sec(timediff(now(), lastupdate)) < 1800")
+		return webnotes.conn.sql("select user from tabSessions where \
+			time_to_sec(timediff(now(), lastupdate)) < 1800")
 	
 	def process_message(self, mail):
-		"""
-			Updates message from support email as either new or reply
-		"""
 		from home import update_feed
-
-		content, content_type = '[Blank Email]', 'text/plain'
-		if mail.text_content:
-			content, content_type = mail.text_content, 'text/plain'
-		else:
-			content, content_type = mail.html_content, 'text/html'
 			
 		thread_list = mail.get_thread_id()
-
-		email_id = mail.mail['From']
-		if "<" in mail.mail['From']:
-			import re
-			re_result = re.findall('(?<=\<)(\S+)(?=\>)', mail.mail['From'])
-			if re_result and re_result[0]: 
-				email_id = re_result[0]
-		
-		from webnotes.utils import decode_email_header
-		
-		full_email_id = decode_email_header(mail.mail['From'])
 
 		for thread_id in thread_list:
 			exists = webnotes.conn.sql("""\
@@ -83,7 +51,8 @@ class SupportMailbox(POP3Mailbox):
 				
 				from core.doctype.communication.communication import make
 				
-				make(content=content, sender=full_email_id, doctype="Support Ticket",
+				make(content=mail.content, sender=mail.from_email, 
+					doctype="Support Ticket",
 					name=thread_id, lead = st.doc.lead, contact=st.doc.contact)
 				
 				st.doc.status = 'Open'
@@ -91,7 +60,7 @@ class SupportMailbox(POP3Mailbox):
 				
 				update_feed(st, 'on_update')
 				# extract attachments
-				self.save_attachments(st.doc, mail.attachments)
+				mail.save_attachments_in_doc(st.doc)
 				return
 				
 		from webnotes.model.doctype import get_property
@@ -99,21 +68,17 @@ class SupportMailbox(POP3Mailbox):
 		# new ticket
 		from webnotes.model.doc import Document
 		d = Document('Support Ticket')
-		d.description = content
+		d.description = mail.content
 		
-		d.subject = decode_email_header(mail.mail['Subject'])
+		d.subject = mail.mail['Subject']
 		
-		d.raised_by = full_email_id
-		d.content_type = content_type
+		d.raised_by = mail.from_email
+		d.content_type = mail.content_type
 		d.status = 'Open'
 		d.naming_series = opts and opts.split("\n")[0] or 'SUP'
 		try:
 			d.save(1)
-			try:
-				# extract attachments
-				self.save_attachments(d, mail.attachments)
-			except Exception, e:
-				self.description += "\n\n[Did not pull attachment]"
+			mail.save_attachments_in_doc(d)
 		except:
 			d.description = 'Unable to extract message'
 			d.save(1)
@@ -122,28 +87,8 @@ class SupportMailbox(POP3Mailbox):
 			if cint(self.email_settings.send_autoreply):
 				if "mailer-daemon" not in d.raised_by.lower():
 					self.send_auto_reply(d)
-
-			
-	def save_attachments(self, doc, attachment_list=[]):
-		"""
-			Saves attachments from email
-
-			attachment_list is a list of dict containing:
-			'filename', 'content', 'content-type'
-		"""
-		from webnotes.utils.file_manager import save_file, add_file_list
-		for attachment in attachment_list:
-			fid = save_file(attachment['filename'], attachment['content'], 'Support')
-			status = add_file_list('Support Ticket', doc.name, fid, fid)
-			if not status:
-				doc.description = doc.description \
-					+ "\nCould not attach: " + cstr(attachment['filename'])
-				doc.save()
 		
 	def send_auto_reply(self, d):
-		"""
-			Send auto reply to emails
-		"""
 		from webnotes.utils import cstr
 
 		signature = self.email_settings.fields.get('support_signature') or ''
@@ -167,16 +112,12 @@ Original Query:
 			msg = cstr(response))
 		
 	def auto_close_tickets(self):
-		"""
-			Auto Closes Waiting for Customer Support Ticket after 15 days
-		"""
-		webnotes.conn.sql("update `tabSupport Ticket` set status = 'Closed' where status = 'Waiting for Customer' and date_sub(curdate(),interval 15 Day) > modified")
+		webnotes.conn.sql("""update `tabSupport Ticket` set status = 'Closed' 
+			where status = 'Waiting for Customer' 
+			and date_sub(curdate(),interval 15 Day) > modified""")
 
 
 def get_support_mails():
-	"""
-		Gets new emails from support inbox and updates / creates Support Ticket records
-	"""
 	import webnotes
 	from webnotes.utils import cint
 	if cint(webnotes.conn.get_value('Email Settings', None, 'sync_support_mails')):
