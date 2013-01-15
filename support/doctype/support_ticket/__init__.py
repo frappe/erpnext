@@ -46,7 +46,7 @@ class SupportMailbox(POP3Mailbox):
 				SELECT name
 				FROM `tabSupport Ticket`
 				WHERE name=%s AND raised_by REGEXP %s
-				""" , (thread_id, '(' + email_id + ')'))
+				""" , (thread_id, '(' + mail.from_email + ')'))
 			if exists and exists[0] and exists[0][0]:
 				st = webnotes.get_obj('Support Ticket', thread_id)
 				
