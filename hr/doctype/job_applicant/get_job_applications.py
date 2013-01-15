@@ -44,9 +44,11 @@ class JobsMailbox(POP3Mailbox):
 				applicant.doc.status = "Open"
 			applicant.doc.save()
 		else:
+			name = (mail.from_real_name and (mail.from_real_name + "-" or "")) \
+				+ mail.from_email
 			applicant = webnotes.model_wrapper({
 				"doctype":"Job Applicant",
-				"applicant_name": mail.from_real_name or mail.from_email,
+				"applicant_name": name,
 				"email_id": mail.from_email,
 				"status": "Open"
 			})
