@@ -37,11 +37,15 @@ class JobsMailbox(POP3Mailbox):
 		name = self.get_existing_application(mail.from_email)
 		if name:
 			applicant = webnotes.model_wrapper("Job Applicant", name)
+			if applicant.doc.status!="Rejected":
+				applicant.doc.status = "Open"
+			applicant.doc.save()
 		else:
 			applicant = webnotes.model_wrapper({
 				"doctype":"Job Applicant",
 				"applicant_name": mail.from_real_name or mail.from_email,
-				"email_id": mail.from_email
+				"email_id": mail.from_email,
+				"status": "Open"
 			})
 			applicant.insert()
 		

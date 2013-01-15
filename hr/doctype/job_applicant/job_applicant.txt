@@ -4,7 +4,7 @@
   "docstatus": 0, 
   "creation": "2013-01-15 16:32:13", 
   "modified_by": "Administrator", 
-  "modified": "2013-01-15 17:30:46"
+  "modified": "2013-01-15 17:40:29"
  }, 
  {
   "autoname": "field:applicant_name", 
@@ -59,7 +59,7 @@
   "label": "Status", 
   "fieldname": "status", 
   "fieldtype": "Select", 
-  "options": "Open\nReject\nHold"
+  "options": "Open\nReplied\nRejected\nHold"
  }, 
  {
   "doctype": "DocField", 

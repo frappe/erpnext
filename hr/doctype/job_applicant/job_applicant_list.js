@@ -3,8 +3,8 @@ wn.doclistviews['Job Applicant'] = wn.views.ListView.extend({
 	init: function(d) {
 		this._super(d)
 		this.fields = this.fields.concat([
-			"`tabSupport Ticket`.status", 
-			'`tabSupport Ticket`.modified_by'
+			"`tabJob Applicant`.status", 
+			'`tabJob Applicant`.modified_by'
 			
 		]);
 		this.stats = this.stats.concat(['status']);
@@ -33,8 +33,8 @@ wn.doclistviews['Job Applicant'] = wn.views.ListView.extend({
 	columns: [
 		{width: '3%', content: 'check'},
 		{width: '5%', content:'avatar_modified'},
-		{width: '50%', content:'name'},
-		{width: '30%', content:'status_html'},		
+		{width: '30%', content:'name'},
+		{width: '50%', content:'status_html'},		
 		{width: '12%', content:'modified', css: {'text-align': 'right', 'color':'#777'}}
 	]
 
