@@ -1,4 +1,8 @@
 erpnext.updates = [
+	["16th January, 2013", [
+		"Job Applicant: Track Job Applicants and extract them from a mailbox like 'jobs@example.com'. See <a href='#Form/Jobs Email Settings'>Jobs Email Settings</a>.",
+		"Extract leads: Extract Leads from a mailbox like 'sales@example.com'. See <a href='#Form/Sales Email Settings'>Sales Email Settings</a>.",
+	]],
 	["14th January, 2013", [
 		"Stock Reconciliation: Ability to update Valuation Rate",
 		"Time Field: Added Datetime and new Time Picker",

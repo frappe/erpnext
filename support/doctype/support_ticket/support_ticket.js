@@ -53,7 +53,7 @@ $.extend(cur_frm.cscript, {
 		var sortfn = function (a, b) { return (b.creation > a.creation) ? 1 : -1; }
 		comm_list = comm_list.sort(sortfn);
 		
-		if(!comm_list.length || (comm_list[0].sender != doc.raised_by)) {
+		if(!comm_list.length || (comm_list[comm_list.length - 1].sender != doc.raised_by)) {
 			comm_list.push({
 				"sender": doc.raised_by,
 				"creation": doc.creation,

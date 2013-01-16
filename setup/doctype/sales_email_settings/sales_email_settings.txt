@@ -1,0 +1,89 @@
+[
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2013-01-16 10:25:26", 
+  "modified_by": "Administrator", 
+  "modified": "2013-01-16 10:25:26"
+ }, 
+ {
+  "issingle": 1, 
+  "description": "Email settings to extract Leads from sales email id e.g. \"sales@example.com\"", 
+  "doctype": "DocType", 
+  "module": "Setup", 
+  "name": "__common__"
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "Sales Email Settings", 
+  "doctype": "DocField", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "parentfield": "fields"
+ }, 
+ {
+  "parent": "Sales Email Settings", 
+  "read": 1, 
+  "name": "__common__", 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "write": 1, 
+  "parenttype": "DocType", 
+  "role": "System Manager", 
+  "permlevel": 0, 
+  "parentfield": "permissions"
+ }, 
+ {
+  "name": "Sales Email Settings", 
+  "doctype": "DocType"
+ }, 
+ {
+  "description": "Email settings to extract Leads from sales email id e.g. \"sales@example.com\"", 
+  "doctype": "DocField", 
+  "label": "POP3 Mail Settings", 
+  "fieldname": "pop3_mail_settings", 
+  "fieldtype": "Section Break"
+ }, 
+ {
+  "description": "Check to activate", 
+  "doctype": "DocField", 
+  "label": "Extract Emails", 
+  "fieldname": "extract_emails", 
+  "fieldtype": "Check"
+ }, 
+ {
+  "description": "Email Id where a job applicant will email e.g. \"jobs@example.com\"", 
+  "doctype": "DocField", 
+  "label": "Email Id", 
+  "fieldname": "email_id", 
+  "fieldtype": "Data"
+ }, 
+ {
+  "description": "POP3 server e.g. (pop.gmail.com)", 
+  "doctype": "DocField", 
+  "label": "Host", 
+  "fieldname": "host", 
+  "fieldtype": "Data"
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Use SSL", 
+  "fieldname": "use_ssl", 
+  "fieldtype": "Check"
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Username", 
+  "fieldname": "username", 
+  "fieldtype": "Data"
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Password", 
+  "fieldname": "password", 
+  "fieldtype": "Password"
+ }, 
+ {
+  "doctype": "DocPerm"
+ }
+]

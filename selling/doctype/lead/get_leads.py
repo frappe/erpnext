@@ -20,9 +20,9 @@ from webnotes.utils import cstr, cint
 from webnotes.utils.email_lib.receive import POP3Mailbox
 from core.doctype.communication.communication import make
 
-class JobsMailbox(POP3Mailbox):	
+class SalesMailbox(POP3Mailbox):	
 	def setup(self):
-		self.settings = webnotes.doc("Jobs Email Settings", "Jobs Email Settings")
+		self.settings = webnotes.doc("Sales Email Settings", "Sales Email Settings")
 	
 	def check_mails(self):
 		return webnotes.conn.sql("select user from tabSessions where \
@@ -32,29 +32,26 @@ class JobsMailbox(POP3Mailbox):
 		if mail.from_email == self.settings.email_id:
 			return
 			
-		name = webnotes.conn.get_value("Job Applicant", {"email_id": mail.from_email}, 
-			"name")
+		name = webnotes.conn.get_value("Lead", {"email_id": mail.from_email}, "name")
 		if name:
-			applicant = webnotes.model_wrapper("Job Applicant", name)
-			if applicant.doc.status!="Rejected":
-				applicant.doc.status = "Open"
-			applicant.doc.save()
+			lead = webnotes.model_wrapper("Lead", name)
+			lead.doc.status = "Open"
+			lead.doc.save()
 		else:
-			name = (mail.from_real_name and (mail.from_real_name + " - ") or "") \
-				+ mail.from_email
-			applicant = webnotes.model_wrapper({
-				"doctype":"Job Applicant",
-				"applicant_name": name,
+			lead = webnotes.model_wrapper({
+				"doctype":"Lead",
+				"lead_name": mail.from_real_name or mail.from_email,
 				"email_id": mail.from_email,
-				"status": "Open"
+				"status": "Open",
+				"source": "Email"
 			})
-			applicant.insert()
+			lead.insert()
 		
-		mail.save_attachments_in_doc(applicant.doc)
+		mail.save_attachments_in_doc(lead.doc)
 				
 		make(content=mail.content, sender=mail.from_email, 
-			doctype="Job Applicant", name=applicant.doc.name, set_lead=False)
+			doctype="Lead", name=lead.doc.name, lead=lead.doc.name)
 
-def get_job_applications():
-	if cint(webnotes.conn.get_value('Jobs Email Settings', None, 'extract_emails')):
-		JobsMailbox()
+def get_leads():
+	if cint(webnotes.conn.get_value('Sales Email Settings', None, 'extract_emails')):
+		SalesMailbox()

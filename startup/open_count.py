@@ -17,6 +17,7 @@ queries = {
 	"Purchase Invoice": {"docstatus":0},
 	"Leave Application": {"status":"Open"},
 	"Expense Claim": {"approval_status":"Draft"},
+	"Job Applicant": {"status":"Open"},
 	"Purchase Receipt": {"docstatus":0},
 	"Delivery Note": {"docstatus":0},
 	"Stock Entry": {"docstatus":0},

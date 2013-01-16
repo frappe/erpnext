@@ -1,6 +1,13 @@
 // For license information, please see license.txt
 
 cur_frm.cscript = {
+	onload: function(doc, dt, dn) {
+		if(in_list(user_roles,'System Manager')) {
+			cur_frm.page_layout.footer.help_area.innerHTML = '<hr>\
+				<p><a href="#Form/Jobs Email Settings">Jobs Email Settings</a><br>\
+				<span class="help">Automatically extract Job Applicants from a mail box e.g. "jobs@example.com"</span></p>';
+		}
+	},
 	refresh: function(doc) {
 		cur_frm.cscript.make_listing(doc);
 	},
