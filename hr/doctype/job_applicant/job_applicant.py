@@ -10,6 +10,9 @@ class DocType(TransactionBase):
 		
 	def onload(self):
 		self.add_communication_list()
+
+	def get_sender(self, comm):
+		return webnotes.conn.get_value('Jobs Email Settings',None,'email_id')
 		
 	def on_communication_sent(self, comm):
 		webnotes.conn.set(self.doc, 'status', 'Replied')

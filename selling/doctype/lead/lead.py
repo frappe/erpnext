@@ -80,6 +80,9 @@ class DocType(TransactionBase):
 	def on_communication_sent(self, comm):
 		webnotes.conn.set(self.doc, 'status', 'Replied')
 
+	def get_sender(self, comm):
+		return webnotes.conn.get_value('Sales Email Settings',None,'email_id')
+
 	def on_trash(self):
 		webnotes.conn.sql("""delete from tabCommunication where lead=%s""",
 			self.doc.name)
