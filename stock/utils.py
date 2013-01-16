@@ -78,12 +78,11 @@ def get_incoming_rate(args):
 		valuation_method = get_valuation_method(args.get("item_code"))
 		previous_sle = get_previous_sle(args)
 		if valuation_method == 'FIFO':
-			# get rate based on the last item value?
-			if args.get("qty"):
-				if not previous_sle:
-					return 0.0
-				stock_queue = json.loads(previous_sle.get('stock_queue', '[]'))
-				in_rate = stock_queue and get_fifo_rate(stock_queue) or 0
+			if not previous_sle:
+				return 0.0
+			previous_stock_queue = json.loads(previous_sle.get('stock_queue', '[]'))
+			in_rate = previous_stock_queue and \
+				get_fifo_rate(previous_stock_queue, args.get("qty")) or 0
 		elif valuation_method == 'Moving Average':
 			in_rate = previous_sle.get('valuation_rate') or 0
 	return in_rate
@@ -104,13 +103,29 @@ def get_valuation_method(item_code):
 		val_method = get_defaults().get('valuation_method', 'FIFO')
 	return val_method
 		
-def get_fifo_rate(stock_queue):
-	"""get FIFO (average) Rate from Stack"""
-	if not stock_queue:
-		return 0.0
-		
-	total = sum(f[0] for f in stock_queue)	
-	return total and sum(f[0] * f[1] for f in stock_queue) / flt(total) or 0.0
+def get_fifo_rate(previous_stock_queue, qty):
+	"""get FIFO (average) Rate from Queue"""
+	if qty >= 0:
+		total = sum(f[0] for f in previous_stock_queue)	
+		return total and sum(f[0] * f[1] for f in previous_stock_queue) / flt(total) or 0.0
+	else:
+		outgoing_cost = 0
+		qty_to_pop = abs(qty)
+		while qty_to_pop:
+			batch = previous_stock_queue[0]
+			if 0 < batch[0] <= qty_to_pop:
+				# if batch qty > 0
+				# not enough or exactly same qty in current batch, clear batch
+				outgoing_cost += flt(batch[0]) * flt(batch[1])
+				qty_to_pop -= batch[0]
+				previous_stock_queue.pop(0)
+			else:
+				# all from current batch
+				outgoing_cost += flt(qty_to_pop) * flt(batch[1])
+				batch[0] -= qty_to_pop
+				qty_to_pop = 0
+				
+		return outgoing_cost / abs(qty)
 	
 def get_valid_serial_nos(sr_nos, qty=0, item_code=''):
 	"""split serial nos, validate and return list of valid serial nos"""
