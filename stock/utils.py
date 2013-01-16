@@ -82,7 +82,7 @@ def get_incoming_rate(args):
 				return 0.0
 			previous_stock_queue = json.loads(previous_sle.get('stock_queue', '[]'))
 			in_rate = previous_stock_queue and \
-				get_fifo_rate(previous_stock_queue, args.get("qty")) or 0
+				get_fifo_rate(previous_stock_queue, args.get("qty") or 0) or 0
 		elif valuation_method == 'Moving Average':
 			in_rate = previous_sle.get('valuation_rate') or 0
 	return in_rate
