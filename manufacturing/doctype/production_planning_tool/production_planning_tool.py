@@ -16,7 +16,7 @@
 
 from __future__ import unicode_literals
 import webnotes
-from webnotes.utils import cstr, flt, nowdate, get_defaults
+from webnotes.utils import cstr, flt, nowdate
 from webnotes.model.doc import addchild, Document
 from webnotes.model.wrapper import getlist
 from webnotes.model.code import get_obj
@@ -210,7 +210,7 @@ class DocType:
 				"wip_warehouse"		: "",
 				"fg_warehouse"		: "",
 				"status"			: "Draft",
-				"fiscal_year"		: get_defaults()["fiscal_year"]
+				"fiscal_year"		: webnotes.conn.get_default("fiscal_year")
 			}
 		return bom_dict, item_dict
 		
@@ -239,18 +239,22 @@ class DocType:
 		return self.get_csv()
 
 	def get_raw_materials(self, bom_dict):
-		""" Get raw materials considering sub-assembly items """
+		""" Get raw materials considering sub-assembly items 
+			{
+				"item_code": [qty_required, description, stock_uom]
+			}
+		"""
 		for bom in bom_dict:
 			if self.doc.use_multi_level_bom:
 				# get all raw materials with sub assembly childs					
 				fl_bom_items = sql("""
 					select 
 						item_code,ifnull(sum(qty_consumed_per_unit),0)*%s as qty, 
-						description, stock_uom
+						description, stock_uom, min_order_qty
 					from 
 						( 
 							select distinct fb.name, fb.description, fb.item_code,
-							 	fb.qty_consumed_per_unit, fb.stock_uom 
+							 	fb.qty_consumed_per_unit, fb.stock_uom, it.min_order_qty 
 							from `tabBOM Explosion Item` fb,`tabItem` it 
 							where it.name = fb.item_code 
 							and ifnull(it.is_pro_applicable, 'No') = 'No'
@@ -263,18 +267,21 @@ class DocType:
 				# Get all raw materials considering SA items as raw materials, 
 				# so no childs of SA items
 				fl_bom_items = sql("""
-					select item_code, ifnull(sum(qty_consumed_per_unit), 0) * '%s', 
-						description, stock_uom 
-					from `tabBOM Item` 
-					where parent = '%s' and docstatus < 2 
+					select bom_item.item_code, 
+						ifnull(sum(bom_item.qty_consumed_per_unit), 0) * %s, 
+						bom_item.description, bom_item.stock_uom, item.min_order_qty
+					from `tabBOM Item` bom_item, tabItem item
+					where bom_item.parent = %s and bom_item.docstatus < 2 
+					and bom_item.item_code = item.name
 					group by item_code
-				""" % (flt(bom_dict[bom]), bom))
+				""", (flt(bom_dict[bom]), bom))
 
 			self.make_items_dict(fl_bom_items)
 
 	def make_items_dict(self, item_list):
 		for i in item_list:
-			self.item_dict[i[0]] = [(flt(self.item_dict.get(i[0], [0])[0]) + flt(i[1])), i[2], i[3]]
+			self.item_dict[i[0]] = [(flt(self.item_dict.get(i[0], [0])[0]) + flt(i[1])), 
+				i[2], i[3], i[4]]
 
 
 	def get_csv(self):
@@ -292,3 +299,62 @@ class DocType:
 				item_list.append(['', '', '', '', 'Total', i_qty, o_qty, a_qty])
 
 		return item_list
+		
+	def raise_purchase_request(self):
+		def _get_projected_qty(items):
+			item_projected_qty = webnotes.conn.sql("""select item_code, sum(projected_qty) 
+				from `tabBin` where item_code in (%s) group by item_code""" % 
+				(", ".join(["%s"]*len(items)),), tuple(items))
+				
+			return dict(item_projected_qty)
+			
+		item_dict = self.get_raw_materials()
+		item_projected_qty = _get_projected_qty(item_dict.keys())
+		
+		from accounts.utils import get_fiscal_year
+		fiscal_year = get_fiscal_year(nowdate())
+		
+		items_to_be_requested = []
+		for item in item_dict:
+			if flt(item_dict[item][0]) > item_projected_qty[item]:
+				# shortage
+				requested_qty = flt(item_dict[item][0]) - item_projected_qty[item]
+				# comsider minimum order qty
+				requested_qty = requested_qty > flt(item_dict[item][3]) and \
+					requested_qty or flt(item_dict[item][3])
+				items_to_be_requested.append({
+					"item_code": item, 
+					"qty": requested_qty, 
+					"description": item_dict[item][1],
+					"stock_uom": item_dict[item][2]
+				})
+		webnotes.errprint(items_to_be_requested)
+		self.insert_purchase_request(items_to_be_requested, fiscal_year)
+		
+	def insert_purchase_request(self, items, fiscal_year):
+		for item in items:
+			item_wrapper = webnotes.model_wrapper("Item", args.item_code)
+			pr = [
+				{
+					"doctype": "Purchase Request",
+					"naming_series": "IDT",
+					"transaction_date": nowdate(),
+					"status": "Draft",
+					"company": self.doc.company,
+					"fiscal_year": fiscal_year,
+					"requested_by": webnotes.session.user,
+					"remark": "Automatically raised from Production Planning Tool"
+				},
+				{
+					"doctype": "Purchase Request Item",
+					"item_code": item.item_code,
+					"item_name": item_wrapper.doc.item_name,
+					"description": item.description,
+					"uom": item.stock_uom,
+					"item_group": item_wrapper.doc.item_group,
+					"brand": item_wrapper.doc.brand,
+					"qty": item.qty,
+					
+					
+				}
+			]
