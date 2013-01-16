@@ -35,10 +35,7 @@ class DocType(DocTypeNestedSet):
 		 		(self.doc.customer_group_name)):
 			msgprint("""Another %s record is trashed. 
 				To untrash please go to Setup -> Recycle Bin.""" % 
-				(self.doc.customer_group_name), raise_exception = 1)
-				
-		super(DocType, self).validate()
-		
+				(self.doc.customer_group_name), raise_exception = 1)		
 
 	def on_trash(self):
 		cust = sql("select name from `tabCustomer` where ifnull(customer_group, '') = %s", 
