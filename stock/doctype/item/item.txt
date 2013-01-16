@@ -2,21 +2,21 @@
  {
   "owner": "Administrator", 
   "docstatus": 0, 
-  "creation": "2012-12-17 14:56:32", 
+  "creation": "2012-12-28 11:01:35", 
   "modified_by": "Administrator", 
-  "modified": "2012-12-27 10:36:56"
+  "modified": "2013-01-16 11:14:57"
  }, 
  {
   "allow_attach": 1, 
   "search_fields": "item_name,description,item_group,customer_code", 
   "module": "Stock", 
+  "doctype": "DocType", 
+  "autoname": "field:item_code", 
   "document_type": "Master", 
   "description": "A Product or a Service that is bought, sold or kept in stock.", 
-  "autoname": "field:item_code", 
   "name": "__common__", 
   "default_print_format": "Standard", 
   "allow_rename": 1, 
-  "doctype": "DocType", 
   "max_attachments": 1
  }, 
  {
@@ -30,7 +30,9 @@
   "name": "__common__", 
   "parent": "Item", 
   "read": 1, 
+  "submit": 0, 
   "doctype": "DocPerm", 
+  "report": 1, 
   "parenttype": "DocType", 
   "parentfield": "permissions"
  }, 
@@ -861,46 +863,6 @@
   "permlevel": 0
  }, 
  {
-  "amend": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "submit": 0, 
-  "write": 0, 
-  "cancel": 0, 
-  "role": "Material Manager", 
-  "permlevel": 1
- }, 
- {
-  "amend": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "submit": 0, 
-  "write": 0, 
-  "cancel": 0, 
-  "role": "Material Manager", 
-  "permlevel": 0
- }, 
- {
-  "amend": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "submit": 0, 
-  "write": 0, 
-  "cancel": 0, 
-  "role": "Material User", 
-  "permlevel": 1
- }, 
- {
-  "amend": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "submit": 0, 
-  "write": 0, 
-  "cancel": 0, 
-  "role": "Material User", 
-  "permlevel": 0
- }, 
- {
   "create": 1, 
   "doctype": "DocPerm", 
   "write": 1, 
@@ -909,23 +871,48 @@
   "permlevel": 0
  }, 
  {
+  "amend": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "write": 0, 
+  "role": "Material Manager", 
+  "cancel": 0, 
+  "permlevel": 0
+ }, 
+ {
+  "amend": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "write": 0, 
+  "role": "Material User", 
+  "cancel": 0, 
+  "permlevel": 0
+ }, 
+ {
+  "amend": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
   "write": 0, 
   "role": "Material Master Manager", 
+  "cancel": 0, 
   "permlevel": 1
  }, 
  {
-  "create": 1, 
+  "amend": 0, 
+  "create": 0, 
   "doctype": "DocPerm", 
-  "write": 1, 
-  "role": "System Manager", 
-  "cancel": 1, 
-  "permlevel": 0
+  "write": 0, 
+  "role": "Material Manager", 
+  "cancel": 0, 
+  "permlevel": 1
  }, 
  {
+  "amend": 0, 
+  "create": 0, 
   "doctype": "DocPerm", 
-  "role": "System Manager", 
+  "write": 0, 
+  "role": "Material User", 
+  "cancel": 0, 
   "permlevel": 1
  }
 ]

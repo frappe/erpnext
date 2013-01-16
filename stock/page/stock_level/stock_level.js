@@ -83,6 +83,10 @@ erpnext.StockLevel = erpnext.StockGridReport.extend({
 				field: "reserved_qty", width: 80, formatter: this.currency_formatter},
 			{id: "projected_qty", name: "Projected Qty", 
 				field: "projected_qty", width: 80, formatter: this.currency_formatter},
+			{id: "re_order_level", name: "Re-Order Level", 
+				field: "re_order_level", width: 80, formatter: this.currency_formatter},
+			{id: "re_order_qty", name: "Re-Order Qty", 
+				field: "re_order_qty", width: 80, formatter: this.currency_formatter},
 			{id: "uom", name: "UOM", field: "uom", width: 60},
 			{id: "brand", name: "Brand", field: "brand", width: 100,
 				link_formatter: {filter_input: "brand"}},
@@ -171,7 +175,7 @@ erpnext.StockLevel = erpnext.StockGridReport.extend({
 				});
 			}
 		);
-
+		
 		// sort by item, warehouse
 		this._data = $.map(Object.keys(this.item_warehouse_map).sort(), function(key) {
 			return me.item_warehouse_map[key];
@@ -202,6 +206,10 @@ erpnext.StockLevel = erpnext.StockGridReport.extend({
 				id: key,
 			}
 			this.reset_item_values(row);
+			
+			row["re_order_level"] = item.re_order_level
+			row["re_order_qty"] = item.re_order_qty
+			
 			this.item_warehouse_map[key] = row;
 		}
 		return this.item_warehouse_map[key];
