@@ -11,7 +11,7 @@ erpnext.send_message = function(opts) {
 		method: "POST",
 		url: "server.py",
 		data: {
-			cmd: "website.send_message",
+			cmd: "website.helpers.contact.send_message",
 			subject: opts.subject,
 			sender: opts.sender,
 			status: opts.status,
@@ -33,6 +33,8 @@ erpnext.send_message = function(opts) {
 function valid_email(id) { 
 	if(id.toLowerCase().search("[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?")==-1) 
 		return 0; else return 1; }
+
+var validate_email = valid_email;
 
 function get_url_arg(name) {
 	name = name.replace(/[\[]/,"\\\[").replace(/[\]]/,"\\\]");

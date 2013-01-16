@@ -77,8 +77,11 @@ class DocType(TransactionBase):
 		event_user.person = self.doc.contact_by
 		event_user.save()
 
+	def on_communication_sent(self, comm):
+		webnotes.conn.set(self.doc, 'status', 'Replied')
+
 	def on_trash(self):
-		webnotes.conn.sql("""update tabCommunication set lead='' where lead=%s""",
+		webnotes.conn.sql("""delete from tabCommunication where lead=%s""",
 			self.doc.name)
 		webnotes.conn.sql("""update `tabSupport Ticket` set lead='' where lead=%s""",
 			self.doc.name)

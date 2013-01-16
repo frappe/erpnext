@@ -2,9 +2,9 @@
  {
   "owner": "Administrator", 
   "docstatus": 0, 
-  "creation": "2012-11-02 17:16:46", 
+  "creation": "2013-01-10 16:34:18", 
   "modified_by": "Administrator", 
-  "modified": "2012-11-27 18:27:47"
+  "modified": "2013-01-16 10:51:58"
  }, 
  {
   "autoname": "naming_series:", 
@@ -29,6 +29,7 @@
   "doctype": "DocPerm", 
   "read": 1, 
   "parenttype": "DocType", 
+  "report": 1, 
   "parentfield": "permissions"
  }, 
  {
@@ -39,19 +40,17 @@
   "description": "To manage multiple series please go to Setup > Manage Series", 
   "no_copy": 1, 
   "oldfieldtype": "Select", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Naming Series", 
   "oldfieldname": "naming_series", 
-  "permlevel": 0, 
+  "options": "LEAD\nLEAD/10-11/\nLEAD/MUMBAI/", 
   "fieldname": "naming_series", 
   "fieldtype": "Select", 
   "reqd": 0, 
-  "options": "LEAD\nLEAD/10-11/\nLEAD/MUMBAI/"
+  "permlevel": 0
  }, 
  {
   "oldfieldtype": "Data", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Contact Name", 
   "oldfieldname": "lead_name", 
@@ -64,7 +63,6 @@
  }, 
  {
   "oldfieldtype": "Data", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Email Id", 
   "oldfieldname": "email_id", 
@@ -84,29 +82,25 @@
   "permlevel": 0, 
   "no_copy": 1, 
   "oldfieldtype": "Select", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Status", 
   "oldfieldname": "status", 
   "default": "Open", 
-  "trigger": "Client", 
   "fieldname": "status", 
   "fieldtype": "Select", 
   "search_index": 1, 
   "reqd": 1, 
-  "options": "\nOpen\nAttempted to Contact\nContact in Future\nContacted\nInterested\nNot interested\nLead Lost\nConverted", 
+  "options": "\nOpen\nReplied\nAttempted to Contact\nContact in Future\nContacted\nInterested\nNot interested\nLead Lost\nConverted", 
   "in_filter": 1
  }, 
  {
   "description": "Source of the lead. If via a campaign, select \"Campaign\"", 
   "no_copy": 1, 
   "oldfieldtype": "Select", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Source", 
   "oldfieldname": "source", 
   "permlevel": 0, 
-  "trigger": "Client", 
   "fieldname": "source", 
   "fieldtype": "Select", 
   "search_index": 0, 
@@ -121,9 +115,8 @@
   "permlevel": 0
  }, 
  {
-  "allow_on_submit": 0, 
   "oldfieldtype": "Table", 
-  "colour": "White:FFF", 
+  "allow_on_submit": 0, 
   "doctype": "DocField", 
   "label": "Communication HTML", 
   "oldfieldname": "follow_up", 
@@ -141,45 +134,41 @@
  {
   "description": "Name of organization from where lead has come", 
   "oldfieldtype": "Data", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Company Name", 
   "oldfieldname": "company_name", 
-  "trigger": "Client", 
   "fieldname": "company_name", 
   "fieldtype": "Data", 
   "search_index": 0, 
   "reqd": 0, 
-  "in_filter": 1, 
-  "permlevel": 0
+  "permlevel": 0, 
+  "in_filter": 1
  }, 
  {
   "description": "Source of th", 
   "oldfieldtype": "Link", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "From Customer", 
   "oldfieldname": "customer", 
-  "permlevel": 0, 
+  "options": "Customer", 
   "fieldname": "customer", 
   "fieldtype": "Link", 
   "depends_on": "eval:doc.source == 'Existing Customer'", 
   "hidden": 0, 
-  "options": "Customer"
+  "permlevel": 0
  }, 
  {
   "description": "Enter campaign name if the source of lead is campaign.", 
   "oldfieldtype": "Link", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Campaign Name", 
   "oldfieldname": "campaign_name", 
-  "permlevel": 0, 
+  "options": "Campaign", 
   "fieldname": "campaign_name", 
   "fieldtype": "Link", 
   "depends_on": "eval:doc.source == 'Campaign'", 
   "hidden": 0, 
-  "options": "Campaign"
+  "permlevel": 0
  }, 
  {
   "doctype": "DocField", 
@@ -190,7 +179,6 @@
  }, 
  {
   "oldfieldtype": "Select", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Lead Type", 
   "oldfieldname": "type", 
@@ -202,7 +190,6 @@
  }, 
  {
   "oldfieldtype": "Text", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Remark", 
   "oldfieldname": "remark", 
@@ -220,7 +207,6 @@
  }, 
  {
   "oldfieldtype": "Data", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Phone", 
   "oldfieldname": "contact_no", 
@@ -260,7 +246,6 @@
   "print_hide": 1, 
   "description": "<a href=\"javascript:cur_frm.cscript.TerritoryHelp();\">To manage Territory, click here</a>", 
   "oldfieldtype": "Link", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Territory", 
   "oldfieldname": "territory", 
@@ -313,17 +298,15 @@
   "doctype": "DocField", 
   "label": "Country", 
   "oldfieldname": "country", 
-  "trigger": "Client", 
+  "options": "link:Country", 
   "fieldname": "country", 
   "fieldtype": "Select", 
   "reqd": 0, 
-  "options": "link:Country", 
   "permlevel": 0
  }, 
  {
   "print_hide": 1, 
   "oldfieldtype": "Select", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "State", 
   "oldfieldname": "state", 
@@ -344,7 +327,6 @@
  }, 
  {
   "oldfieldtype": "Section Break", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "More Info", 
   "fieldname": "more_info", 
@@ -436,7 +418,6 @@
   "description": "Your sales person who will contact the lead in future", 
   "permlevel": 0, 
   "oldfieldtype": "Link", 
-  "colour": "White:FFF", 
   "allow_on_submit": 0, 
   "doctype": "DocField", 
   "label": "Next Contact By", 
@@ -453,7 +434,6 @@
   "description": "Your sales person will get a reminder on this date to contact the lead", 
   "no_copy": 1, 
   "oldfieldtype": "Date", 
-  "colour": "White:FFF", 
   "allow_on_submit": 0, 
   "doctype": "DocField", 
   "label": "Next Contact Date", 
@@ -470,7 +450,6 @@
   "description": "Date on which the lead was last contacted", 
   "no_copy": 1, 
   "oldfieldtype": "Date", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Last Contact Date", 
   "oldfieldname": "last_contact_date", 
@@ -481,7 +460,6 @@
  }, 
  {
   "oldfieldtype": "Link", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Company", 
   "oldfieldname": "company", 
@@ -563,21 +541,5 @@
   "role": "Sales User", 
   "cancel": 0, 
   "permlevel": 1
- }, 
- {
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "write": 1, 
-  "role": "System Manager", 
-  "cancel": 0, 
-  "permlevel": 0
- }, 
- {
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "write": 1, 
-  "role": "Guest", 
-  "cancel": 0, 
-  "permlevel": 0
  }
 ]
