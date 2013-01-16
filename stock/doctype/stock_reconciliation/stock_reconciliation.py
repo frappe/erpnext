@@ -55,7 +55,14 @@ class DocType(DocListController):
 		
 		self.validation_messages = []
 		item_warehouse_combinations = []
-		for row_num, row in enumerate(data[data.index(self.head_row)+1:]):
+		
+		# validate no of rows
+		rows = data[data.index(self.head_row)+1:]
+		if len(rows) > 100:
+			msgprint(_("""Sorry! We can only allow upto 100 rows for Stock Reconciliation."""),
+				raise_exception=True)
+		
+		for row_num, row in enumerate(rows):
 			# find duplicates
 			if [row[0], row[1]] in item_warehouse_combinations:
 				self.validation_messages.append(_get_msg(row_num, "Duplicate entry"))
@@ -248,8 +255,6 @@ class DocType(DocListController):
 	def delete_stock_ledger_entries(self):
 		"""	Delete Stock Ledger Entries related to this Stock Reconciliation
 			and repost future Stock Ledger Entries"""
-			
-		from stock.stock_ledger import update_entries_after
 			
 		existing_entries = webnotes.conn.sql("""select item_code, warehouse 
 			from `tabStock Ledger Entry` where voucher_type='Stock Reconciliation'
