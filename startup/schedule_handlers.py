@@ -33,7 +33,7 @@ def execute_all():
 	run_fn(get_job_applications)
 
 	from selling.doctype.lead.get_leads import get_leads
-	run_fn(get_job_applications)
+	run_fn(get_leads)
 
 	from webnotes.utils.email_lib.bulk import flush
 	run_fn(flush)
