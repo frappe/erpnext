@@ -54,7 +54,11 @@ erpnext.StockAgeing = erpnext.StockGridReport.extend({
 			{id: "earliest", name: "Earliest", field: "earliest",
 				formatter: this.currency_formatter},
 			{id: "latest", name: "Latest", field: "latest",
-				formatter: this.currency_formatter}
+				formatter: this.currency_formatter},
+			{id: "item_name", name: "Item Name", field: "item_name", 
+				width: 100, formatter: this.text_formatter},
+			{id: "description", name: "Description", field: "description", 
+				width: 200, formatter: this.text_formatter},
 		];
 	},
 	filters: [
