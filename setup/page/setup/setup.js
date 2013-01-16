@@ -117,6 +117,18 @@ wn.module_page["Setup"] = [
 				"description":wn._("Out going mail server and support ticket mailbox")
 			},
 			{
+				"route":"Form/Sales Email Settings",
+				doctype:"Sales Email Settings",
+				label: wn._("Sales Email Settings"),
+				"description":wn._("Extract Leads from sales email id e.g. sales@example.com")
+			},
+			{
+				"route":"Form/Jobs Email Settings",
+				doctype:"Jobs Email Settings",
+				label: wn._("Jobs Email Settings"),
+				"description":wn._("Extract Job Applicant from jobs email id e.g. jobs@example.com")
+			},
+			{
 				"route":"Form/Notification Control/Notification Control",
 				doctype:"Notification Control",
 				label: wn._("Notification Control"),

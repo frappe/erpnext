@@ -48,6 +48,12 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 	if(cur_frm.fields_dict.contact_by.df.options.match(/^Profile/)) {
 		cur_frm.fields_dict.contact_by.get_query = erpnext.utils.profile_query;
 	}
+
+	if(in_list(user_roles,'System Manager')) {
+		cur_frm.page_layout.footer.help_area.innerHTML = '<hr>\
+			<p><a href="#Form/Sales Email Settings">Sales Email Settings</a><br>\
+			<span class="help">Automatically extract Leads from a mail box e.g. "sales@example.com"</span></p>';
+	}
 }
 
 cur_frm.cscript.refresh_custom_buttons = function(doc) {
