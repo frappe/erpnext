@@ -18,11 +18,7 @@ from __future__ import unicode_literals
 import webnotes
 from webnotes.utils import flt, getdate
 from webnotes.model.doc import make_autoname
-from webnotes.model.wrapper import getlist, copy_doclist
-from webnotes import  msgprint
-
-sql = webnotes.conn.sql	
-
+from webnotes.model.wrapper import getlist
 
 class DocType:
 	def __init__(self,d,dl):
@@ -31,53 +27,57 @@ class DocType:
 	def autoname(self):
 		self.doc.name = make_autoname(self.doc.naming_series + '.#####')
 
+	def validate(self):
+		"""Validate invoice that c-form is applicable 
+			and no other c-form is received for that"""
+
+		for d in getlist(self.doclist, 'invoice_details'):
+			inv = webnotes.conn.sql("""select c_form_applicable, c_form_no from
+				`tabSales Invoice` where name = %s""", d.invoice_no)
+				
+			if not inv:
+				webnotes.msgprint("Invoice: %s is not exists in the system, please check." % 
+					d.invoice_no, raise_exception=1)
+					
+			elif inv[0][0] != 'Yes':
+				webnotes.msgprint("C-form is not applicable for Invoice: %s" % 
+					d.invoice_no, raise_exception=1)
+					
+			elif inv[0][1] and inv[0][1] != self.doc.name:
+				webnotes.msgprint("""Invoice %s is tagged in another C-form: %s.
+					If you want to change C-form no for this invoice,
+					please remove invoice no from the previous c-form and then try again""" % 
+					(d.invoice_no, inv[0][1]), raise_exception=1)
 
 	def on_update(self):
 		"""	Update C-Form No on invoices"""
-		
-		if len(getlist(self.doclist, 'invoice_details')):
-			inv = "'" + "', '".join([d.invoice_no for d in getlist(self.doclist, 'invoice_details')]) + "'"
-			sql("""update `tabSales Invoice` set c_form_no = '%s', modified ='%s'
-				where name in (%s)"""%(self.doc.name, self.doc.modified, inv))
-			sql("""update `tabSales Invoice` set c_form_no = '', modified = %s where name not
-				in (%s) and ifnull(c_form_no, '') = %s""", (self.doc.modified, self.doc.name, inv))
+		inv = [d.invoice_no for d in getlist(self.doclist, 'invoice_details')]
+		if inv:
+			webnotes.conn.sql("""update `tabSales Invoice` set c_form_no=%s, modified=%s 
+				where name in (%s)""" % ('%s', '%s', ', '.join(['%s'] * len(inv))), 
+				tuple([self.doc.name, self.doc.modified] + inv), debug=1)
+				
+			webnotes.conn.sql("""update `tabSales Invoice` set c_form_no = '', modified = %s 
+				where name not in (%s) and ifnull(c_form_no, '') = %s""" % 
+				('%s', ', '.join(['%s'*len(inv)]), '%s'),
+				tuple([self.doc.modified] + inv + [self.doc.name]), debug=1)
 		else:
-			msgprint("Please enter atleast 1 invoice in the table below", raise_exception=1)
+			webnotes.msgprint("Please enter atleast 1 invoice in the table", raise_exception=1)
 
-		self.calculate_total_invoiced_amount()
+		self.set_total_invoiced_amount()
 
-	def calculate_total_invoiced_amount(self):
-		total = 0
-		for d in getlist(self.doclist, 'invoice_details'):
-			total += flt(d.grand_total)
+	def set_total_invoiced_amount(self):
+		total = sum([flt(d.total) for d in getlist(self.doclist, 'invoice_details')])
 		webnotes.conn.set(self.doc, 'total_invoiced_amount', total)
-
 
 	def get_invoice_details(self, invoice_no):
 		"""	Pull details from invoices for referrence """
 
-		inv = sql("""select posting_date, territory, net_total, grand_total from
-			`tabSales Invoice` where name = %s""", invoice_no)	
-		ret = {
+		inv = webnotes.conn.sql("""select posting_date, territory, net_total, grand_total 
+			from `tabSales Invoice` where name = %s""", invoice_no)	
+		return {
 			'invoice_date' : inv and getdate(inv[0][0]).strftime('%Y-%m-%d') or '',
 			'territory'    : inv and inv[0][1] or '',
 			'net_total'    : inv and flt(inv[0][2]) or '',
 			'grand_total'  : inv and flt(inv[0][3]) or ''
 		}
-		return ret
-
-
-	def validate_invoice(self):
-		"""Validate invoice that c-form is applicable and no other c-form is
-		received for that"""
-
-		for d in getlist(self.doclist, 'invoice_details'):
-			inv = sql("""select c_form_applicable, c_form_no from
-				`tabSales Invoice` where name = %s""", invoice_no)
-			if not inv:
-				msgprint("Invoice: %s is not exists in the system, please check." % d.invoice_no, raise_exception=1)
-			elif inv[0][0] != 'Yes':
-				msgprint("C-form is not applicable for Invoice: %s" % d.invoice_no, raise_exception=1)
-			elif inv[0][1] and inv[0][1] != self.doc.name:
-				msgprint("""Invoice %s is tagged in another C-form: %s. \nIf you want to change C-form no for this invoice,
-					please remove invoice no from the previous c-form and then try again""" % (d.invoice_no, inv[0][1]), raise_exception=1)

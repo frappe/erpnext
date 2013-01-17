@@ -54,16 +54,13 @@ def update_entries_after(args, verbose=1):
 			if not validate_negative_stock(qty_after_transaction, sle):
 				qty_after_transaction += flt(sle.actual_qty)
 				continue
-
+				
 		if sle.serial_no:
-			valuation_rate = get_serialized_values(qty_after_transaction, sle,
-				valuation_rate)
+			valuation_rate = get_serialized_values(qty_after_transaction, sle, valuation_rate)
 		elif valuation_method == "Moving Average":
-			valuation_rate = get_moving_average_values(qty_after_transaction, sle,
-				valuation_rate)
+			valuation_rate = get_moving_average_values(qty_after_transaction, sle, valuation_rate)
 		else:
-			valuation_rate = get_fifo_values(qty_after_transaction, sle,
-				stock_queue)
+			valuation_rate = get_fifo_values(qty_after_transaction, sle, stock_queue)
 				
 		qty_after_transaction += flt(sle.actual_qty)
 		
