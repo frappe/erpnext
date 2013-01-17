@@ -123,7 +123,7 @@ class DocType(TransactionBase):
 			abbr = self.get_company_abbr()
 			if not sql("select name from tabAccount where name=%s", (self.doc.name + " - " + abbr)):
 				parent_account = self.get_receivables_group()
-				arg = {'account_name':self.doc.name,'parent_account': parent_account, 'group_or_ledger':'Ledger', 'company':self.doc.company,'account_type':'','tax_rate':'0','master_type':'Customer','master_name':self.doc.name,'address':self.doc.address}
+				arg = {'account_name':self.doc.name,'parent_account': parent_account, 'group_or_ledger':'Ledger', 'company':self.doc.company,'account_type':'','tax_rate':'0','master_type':'Customer','master_name':self.doc.name}
 				# create
 				
 				ac = get_obj('GL Control').add_ac(cstr(arg))
@@ -172,11 +172,6 @@ class DocType(TransactionBase):
 				pass
 
 	def on_update(self):
-		# create customer addr
-		#self.create_customer_address()
-		# create customer contact
-		#self.create_customer_contact()
-		# update lead status
 		self.update_lead_status()
 		# create account head
 		self.create_account_head()

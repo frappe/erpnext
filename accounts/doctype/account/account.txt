@@ -2,20 +2,20 @@
  {
   "owner": "Administrator", 
   "docstatus": 0, 
-  "creation": "2012-11-16 10:32:50", 
+  "creation": "2013-01-17 12:30:10", 
   "modified_by": "Administrator", 
-  "modified": "2012-12-03 11:26:49"
+  "modified": "2013-01-17 13:16:31"
  }, 
  {
   "in_create": 1, 
+  "allow_rename": 1, 
+  "description": "Heads (or groups) against which Accounting Entries are made and balances are maintained.", 
   "search_fields": "debit_or_credit, group_or_ledger", 
   "module": "Accounts", 
-  "document_type": "Master", 
-  "description": "Heads (or groups) against which Accounting Entries are made and balances are maintained.", 
-  "name": "__common__", 
-  "allow_rename": 1, 
   "doctype": "DocType", 
-  "allow_copy": 1
+  "allow_copy": 1, 
+  "document_type": "Master", 
+  "name": "__common__"
  }, 
  {
   "name": "__common__", 
@@ -28,8 +28,8 @@
   "name": "__common__", 
   "parent": "Account", 
   "amend": 0, 
-  "submit": 0, 
   "doctype": "DocPerm", 
+  "submit": 0, 
   "read": 1, 
   "parenttype": "DocType", 
   "parentfield": "permissions"
@@ -139,32 +139,28 @@
   "doctype": "DocField", 
   "label": "Parent Account", 
   "oldfieldname": "parent_account", 
-  "trigger": "Client", 
+  "options": "Account", 
   "fieldname": "parent_account", 
   "fieldtype": "Link", 
   "search_index": 1, 
-  "options": "Account", 
   "permlevel": 0
  }, 
  {
   "description": "Setting Account Type helps in selecting this Account in transactions.", 
   "oldfieldtype": "Select", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Account Type", 
   "oldfieldname": "account_type", 
-  "permlevel": 0, 
-  "trigger": "Client", 
+  "options": "\nFixed Asset Account\nBank or Cash\nExpense Account\nTax\nIncome Account\nChargeable", 
   "fieldname": "account_type", 
   "fieldtype": "Select", 
   "search_index": 0, 
-  "in_filter": 1, 
-  "options": "\nFixed Asset Account\nBank or Cash\nExpense Account\nTax\nIncome Account\nChargeable"
+  "permlevel": 0, 
+  "in_filter": 1
  }, 
  {
   "description": "Rate at which this tax is applied", 
   "oldfieldtype": "Currency", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Rate", 
   "oldfieldname": "tax_rate", 
@@ -177,7 +173,6 @@
  {
   "description": "If the account is frozen, entries are allowed for the \"Account Manager\" only.", 
   "oldfieldtype": "Select", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Frozen", 
   "oldfieldname": "freeze_account", 
@@ -189,7 +184,6 @@
  {
   "print_hide": 1, 
   "oldfieldtype": "Int", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Credit Days", 
   "oldfieldname": "credit_days", 
@@ -212,7 +206,6 @@
  {
   "description": "If this Account represents a Customer, Supplier or Employee, set it here.", 
   "oldfieldtype": "Select", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Master Type", 
   "oldfieldname": "master_type", 
@@ -226,98 +219,127 @@
   "doctype": "DocField", 
   "label": "Master Name", 
   "oldfieldname": "master_name", 
-  "trigger": "Client", 
+  "options": "[Select]", 
   "fieldname": "master_name", 
   "fieldtype": "Link", 
-  "options": "[Select]", 
+  "permlevel": 0
+ }, 
+ {
+  "read_only": 1, 
+  "print_hide": 1, 
+  "doctype": "DocField", 
+  "label": "Lft", 
+  "fieldname": "lft", 
+  "fieldtype": "Int", 
+  "hidden": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "read_only": 1, 
+  "print_hide": 1, 
+  "doctype": "DocField", 
+  "label": "Rgt", 
+  "fieldname": "rgt", 
+  "fieldtype": "Int", 
+  "hidden": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "read_only": 1, 
+  "print_hide": 1, 
+  "doctype": "DocField", 
+  "label": "Old Parent", 
+  "fieldname": "old_parent", 
+  "fieldtype": "Data", 
+  "hidden": 1, 
   "permlevel": 0
  }, 
  {
   "create": 0, 
   "doctype": "DocPerm", 
   "write": 1, 
-  "cancel": 0, 
   "role": "Auditor", 
+  "cancel": 0, 
   "permlevel": 0
  }, 
  {
   "create": 0, 
   "doctype": "DocPerm", 
   "write": 0, 
-  "cancel": 0, 
   "role": "Auditor", 
+  "cancel": 0, 
   "permlevel": 2
  }, 
  {
   "create": 0, 
   "doctype": "DocPerm", 
   "write": 0, 
-  "cancel": 0, 
   "role": "Auditor", 
+  "cancel": 0, 
   "permlevel": 1
  }, 
  {
   "create": 0, 
   "doctype": "DocPerm", 
   "write": 0, 
-  "cancel": 0, 
   "role": "Sales User", 
+  "cancel": 0, 
   "permlevel": 0
  }, 
  {
   "create": 0, 
   "doctype": "DocPerm", 
   "write": 0, 
-  "cancel": 0, 
   "role": "Purchase User", 
+  "cancel": 0, 
   "permlevel": 0
  }, 
  {
   "create": 0, 
   "doctype": "DocPerm", 
   "write": 1, 
-  "cancel": 0, 
   "role": "Accounts User", 
+  "cancel": 0, 
   "permlevel": 0
  }, 
  {
   "create": 1, 
   "doctype": "DocPerm", 
   "write": 1, 
-  "cancel": 1, 
   "role": "Accounts Manager", 
+  "cancel": 1, 
   "permlevel": 0
  }, 
  {
   "create": 0, 
   "doctype": "DocPerm", 
   "write": 0, 
-  "cancel": 0, 
   "role": "Accounts User", 
+  "cancel": 0, 
   "permlevel": 1
  }, 
  {
   "create": 0, 
   "doctype": "DocPerm", 
   "write": 0, 
-  "cancel": 0, 
   "role": "Accounts Manager", 
+  "cancel": 0, 
   "permlevel": 1
  }, 
  {
   "create": 0, 
   "doctype": "DocPerm", 
   "write": 1, 
-  "cancel": 0, 
   "role": "Accounts Manager", 
+  "cancel": 0, 
   "permlevel": 2
  }, 
  {
   "create": 0, 
   "doctype": "DocPerm", 
   "write": 0, 
-  "cancel": 0, 
   "role": "Accounts User", 
+  "cancel": 0, 
   "permlevel": 2
  }
 ]

@@ -2,35 +2,24 @@
  {
   "owner": "Administrator", 
   "docstatus": 0, 
-  "creation": "2012-03-27 14:36:19", 
+  "creation": "2013-01-17 17:02:24", 
   "modified_by": "Administrator", 
-  "modified": "2012-03-27 14:36:19"
+  "modified": "2013-01-17 17:04:08"
  }, 
  {
-  "section_style": "Simple", 
-  "in_create": 0, 
-  "module": "Setup", 
-  "server_code_error": " ", 
-  "document_type": "Master", 
   "read_only": 0, 
   "autoname": "field:country_name", 
-  "name": "__common__", 
-  "colour": "White:FFF", 
+  "in_create": 0, 
   "doctype": "DocType", 
-  "show_in_menu": 0, 
-  "version": 11
+  "module": "Setup", 
+  "document_type": "Master", 
+  "name": "__common__"
  }, 
  {
-  "parent": "Country", 
-  "oldfieldtype": "Data", 
-  "oldfieldname": "country_name", 
-  "reqd": 1, 
   "name": "__common__", 
+  "parent": "Country", 
   "doctype": "DocField", 
-  "label": "Country Name", 
   "parenttype": "DocType", 
-  "fieldname": "country_name", 
-  "fieldtype": "Data", 
   "permlevel": 0, 
   "parentfield": "fields"
  }, 
@@ -50,11 +39,32 @@
   "doctype": "DocType"
  }, 
  {
+  "oldfieldtype": "Data", 
+  "doctype": "DocField", 
+  "label": "Country Name", 
+  "oldfieldname": "country_name", 
+  "fieldname": "country_name", 
+  "fieldtype": "Data", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Date Format", 
+  "fieldname": "date_format", 
+  "fieldtype": "Data"
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Time Zones", 
+  "fieldname": "time_zones", 
+  "fieldtype": "Text"
+ }, 
+ {
   "amend": 0, 
-  "cancel": 0, 
-  "role": "Sales Master Manager", 
   "doctype": "DocPerm", 
-  "submit": 0
+  "submit": 0, 
+  "role": "Sales Master Manager", 
+  "cancel": 0
  }, 
  {
   "role": "Purchase Master Manager", 
@@ -67,8 +77,5 @@
  {
   "role": "HR Manager", 
   "doctype": "DocPerm"
- }, 
- {
-  "doctype": "DocField"
  }
 ]
