@@ -4,7 +4,7 @@
   "docstatus": 0, 
   "creation": "2013-01-17 11:11:23", 
   "modified_by": "Administrator", 
-  "modified": "2013-01-17 19:56:48"
+  "modified": "2013-01-17 20:25:22"
  }, 
  {
   "autoname": "naming_series:", 
@@ -241,6 +241,7 @@
   "permlevel": 0
  }, 
  {
+  "print_hide": 1, 
   "doctype": "DocField", 
   "label": "Price List", 
   "options": "Price List", 
@@ -249,6 +250,8 @@
   "permlevel": 0
  }, 
  {
+  "print_hide": 1, 
+  "depends_on": "price_list_name", 
   "doctype": "DocField", 
   "label": "Price List Currency", 
   "options": "Currency", 
@@ -257,6 +260,8 @@
   "permlevel": 0
  }, 
  {
+  "print_hide": 1, 
+  "depends_on": "price_list_name", 
   "doctype": "DocField", 
   "label": "Price List Exchange Rate", 
   "fieldname": "plc_conversion_rate", 

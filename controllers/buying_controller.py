@@ -28,7 +28,9 @@ class BuyingController(TransactionBase):
 		if self.meta.get_field("currency"):
 			self.company_currency = get_company_currency(self.doc.company)
 			self.validate_conversion_rate("currency", "conversion_rate")
-			self.validate_conversion_rate("price_list_currency", "plc_conversion_rate")
+			
+			if self.doc.price_list_name and self.doc.price_list_currency:
+				self.validate_conversion_rate("price_list_currency", "plc_conversion_rate")
 		
 	def update_item_details(self):
 		for item in self.doclist.get({"parentfield": self.fname}):

@@ -4,7 +4,7 @@
   "docstatus": 0, 
   "creation": "2013-01-17 11:11:23", 
   "modified_by": "Administrator", 
-  "modified": "2013-01-17 12:49:14"
+  "modified": "2013-01-17 20:26:53"
  }, 
  {
   "autoname": "naming_series:", 
@@ -36,15 +36,6 @@
  {
   "name": "Purchase Order", 
   "doctype": "DocType"
- }, 
- {
-  "print_width": "50%", 
-  "oldfieldtype": "Column Break", 
-  "doctype": "DocField", 
-  "width": "50%", 
-  "fieldname": "column_break0", 
-  "fieldtype": "Column Break", 
-  "permlevel": 0
  }, 
  {
   "print_hide": 1, 
@@ -300,6 +291,7 @@
   "permlevel": 0
  }, 
  {
+  "print_hide": 1, 
   "doctype": "DocField", 
   "label": "Price List", 
   "options": "Price List", 
@@ -308,6 +300,8 @@
   "permlevel": 0
  }, 
  {
+  "print_hide": 1, 
+  "depends_on": "price_list_name", 
   "doctype": "DocField", 
   "label": "Price List Currency", 
   "options": "Currency", 
@@ -316,6 +310,8 @@
   "permlevel": 0
  }, 
  {
+  "print_hide": 1, 
+  "depends_on": "price_list_name", 
   "doctype": "DocField", 
   "label": "Price List Exchange Rate", 
   "fieldname": "plc_conversion_rate", 
