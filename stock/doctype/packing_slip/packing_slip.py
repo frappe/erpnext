@@ -117,7 +117,7 @@ class DocType:
 			from `tabDelivery Note Item` dni
 			where parent=%s and item_code in (%s)
 			group by item_code""" % ("%s", ", ".join(["%s"]*len(items))),
-			tuple([self.doc.delivery_note] + items), as_dict=1, debug=1)
+			tuple([self.doc.delivery_note] + items), as_dict=1)
 			
 		ps_item_qty = dict([[d.item_code, d.qty] for d in self.doclist])
 
@@ -169,9 +169,6 @@ class DocType:
 			if (new_packed_qty < 0) or (new_packed_qty > flt(item['qty'])):
 				webnotes.msgprint("Invalid new packed quantity for item %s. \
 					Please try again or contact support@erpnext.com" % item['item_code'], raise_exception=1)
-			
-			delivery_note_item = webnotes.conn.get_value("Delivery Note Item", {
-				"parent": self.doc.delivery_note, "item_code": item["item_code"]})
 			
 			webnotes.conn.sql("""\
 				UPDATE `tabDelivery Note Item`
