@@ -97,7 +97,7 @@ def page_name(title):
 	import re
 	name = title.lower()
 	name = re.sub('[~!@#$%^&*()<>,."\']', '', name)
-	return '-'.join(name.split()[:8])
+	return '-'.join(name.split())
 
 def update_page_name(doc, title):
 	"""set page_name and check if it is unique"""
