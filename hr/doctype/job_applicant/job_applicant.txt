@@ -1,0 +1,100 @@
+[
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2013-01-15 16:32:13", 
+  "modified_by": "Administrator", 
+  "modified": "2013-01-15 17:40:29"
+ }, 
+ {
+  "autoname": "field:applicant_name", 
+  "allow_attach": 1, 
+  "description": "Applicant for a Job", 
+  "doctype": "DocType", 
+  "module": "HR", 
+  "document_type": "Transaction", 
+  "name": "__common__"
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "Job Applicant", 
+  "doctype": "DocField", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "parentfield": "fields"
+ }, 
+ {
+  "parent": "Job Applicant", 
+  "read": 1, 
+  "cancel": 1, 
+  "name": "__common__", 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "write": 1, 
+  "parenttype": "DocType", 
+  "role": "HR User", 
+  "report": 1, 
+  "permlevel": 0, 
+  "parentfield": "permissions"
+ }, 
+ {
+  "name": "Job Applicant", 
+  "doctype": "DocType"
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Applicant Name", 
+  "fieldname": "applicant_name", 
+  "fieldtype": "Data", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Email Id", 
+  "fieldname": "email_id", 
+  "fieldtype": "Data"
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Status", 
+  "fieldname": "status", 
+  "fieldtype": "Select", 
+  "options": "Open\nReplied\nRejected\nHold"
+ }, 
+ {
+  "doctype": "DocField", 
+  "width": "50%", 
+  "fieldname": "column_break_3", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Job Opening", 
+  "fieldname": "job_opening", 
+  "fieldtype": "Link", 
+  "options": "Job Opening"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "section_break_5", 
+  "fieldtype": "Section Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Thread HTML", 
+  "fieldname": "thread_html", 
+  "fieldtype": "HTML"
+ }, 
+ {
+  "print_hide": 1, 
+  "no_copy": 1, 
+  "doctype": "DocField", 
+  "label": "File List", 
+  "fieldname": "file_list", 
+  "fieldtype": "Text", 
+  "hidden": 1
+ }, 
+ {
+  "doctype": "DocPerm"
+ }
+]

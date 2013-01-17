@@ -1,0 +1,89 @@
+[
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2013-01-15 16:50:01", 
+  "modified_by": "Administrator", 
+  "modified": "2013-01-15 16:57:08"
+ }, 
+ {
+  "issingle": 1, 
+  "description": "Email settings for jobs email id \"jobs@example.com\"", 
+  "doctype": "DocType", 
+  "module": "Setup", 
+  "name": "__common__"
+ }, 
+ {
+  "name": "__common__", 
+  "parent": "Jobs Email Settings", 
+  "doctype": "DocField", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "parentfield": "fields"
+ }, 
+ {
+  "parent": "Jobs Email Settings", 
+  "read": 1, 
+  "name": "__common__", 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "write": 1, 
+  "parenttype": "DocType", 
+  "role": "System Manager", 
+  "permlevel": 0, 
+  "parentfield": "permissions"
+ }, 
+ {
+  "name": "Jobs Email Settings", 
+  "doctype": "DocType"
+ }, 
+ {
+  "description": "Settings to extract Job Applicants from a mailbox e.g. \"jobs@example.com\"", 
+  "doctype": "DocField", 
+  "label": "POP3 Mail Settings", 
+  "fieldname": "pop3_mail_settings", 
+  "fieldtype": "Section Break"
+ }, 
+ {
+  "description": "Check to activate", 
+  "doctype": "DocField", 
+  "label": "Extract Emails", 
+  "fieldname": "extract_emails", 
+  "fieldtype": "Check"
+ }, 
+ {
+  "description": "Email Id where a job applicant will email e.g. \"jobs@example.com\"", 
+  "doctype": "DocField", 
+  "label": "Email Id", 
+  "fieldname": "email_id", 
+  "fieldtype": "Data"
+ }, 
+ {
+  "description": "POP3 server e.g. (pop.gmail.com)", 
+  "doctype": "DocField", 
+  "label": "Host", 
+  "fieldname": "host", 
+  "fieldtype": "Data"
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Use SSL", 
+  "fieldname": "use_ssl", 
+  "fieldtype": "Check"
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Username", 
+  "fieldname": "username", 
+  "fieldtype": "Data"
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Password", 
+  "fieldname": "password", 
+  "fieldtype": "Password"
+ }, 
+ {
+  "doctype": "DocPerm"
+ }
+]

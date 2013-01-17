@@ -82,6 +82,7 @@ erpnext.desktop.show_pending_notifications = function() {
 	add_circle('module-icon-calendar', 'todays_events', 'Todays Events');
 	add_circle('module-icon-projects-home', 'open_tasks', 'Open Tasks');
 	add_circle('module-icon-questions', 'unanswered_questions', 'Unanswered Questions');
+	add_circle('module-icon-selling-home', 'open_leads', 'Open Leads');
 
 	erpnext.update_messages();
 

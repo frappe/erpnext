@@ -13,15 +13,12 @@ wn.doclistviews['Maintenance Visit'] = wn.views.ListView.extend({
 			
 		]);
 		this.stats = this.stats.concat(['completion_status', 'company']);
-		//this.show_hide_check_column();
 	},
 	
 	prepare_data: function(data) {
 		this._super(data);
 		data.mntc_date = wn.datetime.str_to_user(data.mntc_date);
-		data.mntc_time = wn.datetime.time_to_ampm(data.mntc_time);
-		data.date_time = "on " + data.mntc_date + " at " + 
-			data.mntc_time[0] + ":" + data.mntc_time[1] + " " + data.mntc_time[2];
+		data.date_time = "on " + data.mntc_date + " at " + data.mntc_time;
 		data.customer_name = data.customer_name + " " + data.date_time;
 		data.completion_status = data.completion_status + 
 			(data.maintenance_type ? " [" + data.maintenance_type + "]": "");

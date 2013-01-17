@@ -49,11 +49,17 @@ $.extend(cur_frm.cscript, {
 		var wrapper = cur_frm.fields_dict['thread_html'].wrapper;
 		
 		var comm_list = wn.model.get("Communication", {"support_ticket": doc.name})
-		comm_list.push({
-			"sender": doc.raised_by,
-			"creation": doc.creation,
-			"modified": doc.creation,
-			"content": doc.description});
+
+		var sortfn = function (a, b) { return (b.creation > a.creation) ? 1 : -1; }
+		comm_list = comm_list.sort(sortfn);
+		
+		if(!comm_list.length || (comm_list[comm_list.length - 1].sender != doc.raised_by)) {
+			comm_list.push({
+				"sender": doc.raised_by,
+				"creation": doc.creation,
+				"modified": doc.creation,
+				"content": doc.description});
+		}
 					
 		cur_frm.communication_view = new wn.views.CommunicationList({
 			list: comm_list,
@@ -63,16 +69,7 @@ $.extend(cur_frm.cscript, {
 		})
 
 	},
-	
-	send: function(doc, dt, dn) {
-		$c_obj(make_doclist(doc.doctype, doc.name), 'send_response', '', function(r,rt) {
-			locals[dt][dn].new_response = '';
-			if(!(r.exc || r.server_messages)) {
-				cur_frm.refresh();
-			}
-		});
-	},
-	
+		
 	customer: function(doc, dt, dn) {
 		var callback = function(r,rt) {
 			var doc = locals[cur_frm.doctype][cur_frm.docname];

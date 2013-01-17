@@ -26,10 +26,15 @@ def execute_all():
 		* recurring invoice
 	"""
 	# pull emails
-	from support.doctype.support_ticket import get_support_mails
+	from support.doctype.support_ticket.get_support_mails import get_support_mails
 	run_fn(get_support_mails)
-	
-	# bulk email
+
+	from hr.doctype.job_applicant.get_job_applications import get_job_applications
+	run_fn(get_job_applications)
+
+	from selling.doctype.lead.get_leads import get_leads
+	run_fn(get_leads)
+
 	from webnotes.utils.email_lib.bulk import flush
 	run_fn(flush)
 	

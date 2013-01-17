@@ -16,7 +16,10 @@ wn.doclistviews['Lead'] = wn.views.ListView.extend({
 		if(data.status=='Interested') {
 			data.label_type = 'success'
 		}
-		else if(['Open', 'Attempted to Contact', 'Contacted', 'Contact in Future'].indexOf(data.status)!=-1) {
+		if(data.status=="Open") {
+			data.label_type = "important"
+		}
+		else if(['Attempted to Contact', 'Contacted', 'Contact in Future'].indexOf(data.status)!=-1) {
 			data.label_type = 'info'
 		}
 		data.status_html = repl('<span class="label label-%(label_type)s">%(status)s</span>', data);

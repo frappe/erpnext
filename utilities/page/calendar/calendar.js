@@ -94,13 +94,11 @@ Calendar.prototype.show_event = function(ev, cal_ev) {
 		d.onshow = function() {
 			// heading
 			var c = me.selected_date;
-			var tmp = time_to_ampm(this.ev.event_hour);
-			tmp = tmp[0]+':'+tmp[1]+' '+tmp[2];
 			
 			this.widgets['Heading'].innerHTML = 
 				'<div style="text-align: center; padding:4px; font-size: 14px">'
 				+ erpnext.calendar.weekdays[c.getDay()] + ', ' + c.getDate() + ' ' + month_list_full[c.getMonth()] + ' ' + c.getFullYear() 
-				+ ' - <b>'+tmp+'</b></div>';
+				+ ' - <b>'+this.ev.event_hour+'</b></div>';
 			
 			// set
 			this.widgets['Description'].value = cstr(this.ev.description);
@@ -175,7 +173,7 @@ Calendar.prototype.add_event = function() {
 	ev = locals['Event'][ev];
 	
 	ev.event_date = dateutil.obj_to_str(this.selected_date);
-	ev.event_hour = this.selected_hour+':00';
+	ev.event_hour = this.selected_hour+':00:00';
 	ev.event_type = 'Private';
 
 	this.show_event(ev);
@@ -447,8 +445,7 @@ Calendar.DayView.prototype.create_table = function() {
  		for(var j=0;j<2;j++) {
  			var cell = r.insertCell(j);
 			if(j==0) {
-				var tmp = time_to_ampm((i)+':00');
-				cell.innerHTML = tmp[0]+':'+tmp[1]+' '+tmp[2];
+				cell.innerHTML = i+':00:00';
 				$w(cell, '10%');
 			} else {
 				cell.viewunit = new Calendar.DayViewUnit(cell);
@@ -510,9 +507,7 @@ Calendar.WeekView.prototype.create_table = function() {
  		for(var j=0;j<8;j++) {
  			var cell = r.insertCell(j);
 			if(j==0) {
-				var tmp = time_to_ampm(i+':00');
-				cell.innerHTML = tmp[0]+':'+tmp[1]+' '+tmp[2];
-
+				cell.innerHTML = i+':00:00';
 				$w(cell, '10%');
 			} else {
 				cell.viewunit = new Calendar.WeekViewUnit(cell);

@@ -31,6 +31,11 @@ wn.module_page["HR"] = [
 				description: wn._("Performance appraisal."),
 				doctype:"Appraisal"
 			},
+			{
+				label: wn._("Job Applicant"),
+				description: wn._("Applicant for a Job (extracted from jobs email)."),
+				doctype:"Job Applicant"
+			},
 		]
 	},
 	{
@@ -108,6 +113,11 @@ wn.module_page["HR"] = [
 		title: wn._("Employee Setup"),
 		icon: "icon-cog",
 		items: [
+			{
+				label: wn._("Job Opening"),
+				description: wn._("Opening for a Job."),
+				doctype:"Job Opening"
+			},
 			{
 				"label": wn._("Employment Type"),
 				"description": wn._("Type of employment master."),

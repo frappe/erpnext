@@ -25,6 +25,8 @@ from webnotes.model.code import get_obj
 from webnotes import msgprint, _
 from stock.utils import get_incoming_rate
 from stock.stock_ledger import get_previous_sle
+import json
+
 
 sql = webnotes.conn.sql
 	
@@ -157,23 +159,46 @@ class DocType(TransactionBase):
 	def get_stock_and_rate(self):
 		"""get stock and incoming rate on posting date"""
 		for d in getlist(self.doclist, 'mtn_details'):
-			args = {
+			args = webnotes._dict({
 				"item_code": d.item_code,
 				"warehouse": d.s_warehouse or d.t_warehouse,
 				"posting_date": self.doc.posting_date,
 				"posting_time": self.doc.posting_time,
-				"qty": d.transfer_qty,
+				"qty": d.s_warehouse and -1*d.transfer_qty or d.transfer_qty,
 				"serial_no": d.serial_no,
-				"bom_no": d.bom_no
-			}
+				"bom_no": d.bom_no,
+			})
 			# get actual stock at source warehouse
 			d.actual_qty = get_previous_sle(args).get("qty_after_transaction") or 0
 			
 			# get incoming rate
-			if not flt(d.incoming_rate):
-				d.incoming_rate = get_incoming_rate(args)
+			if not flt(d.incoming_rate) or self.doc.purpose == "Sales Return":
+				d.incoming_rate = self.get_incoming_rate(args)
 				
 			d.amount = flt(d.qty) * flt(d.incoming_rate)
+			
+	def get_incoming_rate(self, args):
+		if self.doc.purpose == "Sales Return" and \
+				(self.doc.delivery_note_no or self.doc.sales_invoice_no):
+			sle = webnotes.conn.sql("""select name, posting_date, posting_time, 
+				actual_qty, stock_value from `tabStock Ledger Entry` 
+				where voucher_type = %s and voucher_no = %s and 
+				item_code = %s and ifnull(is_cancelled, 'No') = 'No' limit 1""", 
+				((self.doc.delivery_note_no and "Delivery Note" or "Sales Invoice"),
+				self.doc.delivery_note_no or self.doc.sales_invoice_no, args.item_code), as_dict=1)
+			if sle:
+				args.update({
+					"posting_date": sle[0].posting_date,
+					"posting_time": sle[0].posting_time,
+					"sle": sle[0].name
+				})
+				previous_sle = get_previous_sle(args)
+				incoming_rate = (flt(sle[0].stock_value) - flt(previous_sle.get("stock_value"))) / \
+					flt(sle[0].actual_qty)
+		else:
+			incoming_rate = get_incoming_rate(args)
+			
+		return incoming_rate
 		
 	def validate_incoming_rate(self):
 		for d in getlist(self.doclist, 'mtn_details'):
@@ -264,8 +289,7 @@ class DocType(TransactionBase):
 			pro_obj.doc.save()
 					
 	def get_item_details(self, arg):
-		import json
-		arg, actual_qty, in_rate = json.loads(arg), 0, 0
+		arg = json.loads(arg)
 
 		item = sql("""select stock_uom, description, item_name from `tabItem` 
 			where name = %s and (ifnull(end_of_life,'')='' or end_of_life ='0000-00-00' 
@@ -305,16 +329,16 @@ class DocType(TransactionBase):
 		return ret
 		
 	def get_warehouse_details(self, args):
-		import json
-		args, actual_qty, in_rate = json.loads(args), 0, 0
+		args = json.loads(args)
 		args.update({
 			"posting_date": self.doc.posting_date,
-			"posting_time": self.doc.posting_time
+			"posting_time": self.doc.posting_time,
 		})
+		args = webnotes._dict(args)
 		
 		ret = {
 			"actual_qty" : get_previous_sle(args).get("qty_after_transaction") or 0,
-			"incoming_rate" : get_incoming_rate(args)
+			"incoming_rate" : self.get_incoming_rate(args)
 		}
 		return ret
 		

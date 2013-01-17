@@ -2,9 +2,9 @@
  {
   "owner": "jai@webnotestech.com", 
   "docstatus": 0, 
-  "creation": "2012-12-14 10:15:16", 
+  "creation": "2013-01-16 14:48:56", 
   "modified_by": "Administrator", 
-  "modified": "2012-12-14 11:37:40"
+  "modified": "2013-01-16 15:46:26"
  }, 
  {
   "read_only": 1, 
@@ -28,8 +28,10 @@
   "parent": "Production Planning Tool", 
   "read": 1, 
   "create": 1, 
+  "submit": 0, 
   "doctype": "DocPerm", 
   "write": 1, 
+  "report": 0, 
   "parenttype": "DocType", 
   "permlevel": 0, 
   "parentfield": "permissions"
@@ -68,9 +70,9 @@
  {
   "doctype": "DocField", 
   "label": "Company", 
+  "reqd": 1, 
   "fieldname": "company", 
   "fieldtype": "Link", 
-  "reqd": 1, 
   "options": "Company"
  }, 
  {
@@ -155,9 +157,18 @@
   "options": "Simple"
  }, 
  {
+  "description": "If checked, BOM for sub-assembly items will be considered for getting raw materials. Otherwise, all sub-assembly items will be treated as a raw material.", 
+  "default": "1", 
+  "doctype": "DocField", 
+  "label": "Use Multi-Level BOM", 
+  "reqd": 0, 
+  "fieldname": "use_multi_level_bom", 
+  "fieldtype": "Check"
+ }, 
+ {
   "doctype": "DocField", 
   "width": "50%", 
-  "fieldname": "column_break5", 
+  "fieldname": "cb5", 
   "fieldtype": "Column Break"
  }, 
  {
@@ -170,18 +181,9 @@
  }, 
  {
   "doctype": "DocField", 
-  "width": "50%", 
-  "fieldname": "column_break6", 
-  "fieldtype": "Column Break"
- }, 
- {
-  "description": "If checked, BOM for sub-assembly items will be considered for getting raw materials. Otherwise, all sub-assembly items will be treated as a raw material.", 
-  "default": "1", 
-  "doctype": "DocField", 
-  "label": "Use Multi-Level BOM", 
-  "fieldname": "use_multi_level_bom", 
-  "fieldtype": "Check", 
-  "reqd": 0
+  "fieldname": "sb5", 
+  "fieldtype": "Section Break", 
+  "options": "Simple"
  }, 
  {
   "description": "Download a report containing all raw materials with their latest inventory status", 
@@ -191,8 +193,18 @@
   "fieldtype": "Button"
  }, 
  {
-  "role": "System Manager", 
-  "doctype": "DocPerm"
+  "doctype": "DocField", 
+  "width": "50%", 
+  "fieldname": "column_break6", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "description": "Raise Purchase Request automatically for items which are \"Out of Stock\" considering already requested, already ordered qty and minimum order qty", 
+  "doctype": "DocField", 
+  "label": "Raise Purchase Request", 
+  "fieldname": "raise_purchase_request", 
+  "fieldtype": "Button", 
+  "options": "raise_purchase_request"
  }, 
  {
   "role": "Manufacturing User", 

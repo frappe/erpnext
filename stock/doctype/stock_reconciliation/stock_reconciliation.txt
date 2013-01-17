@@ -2,9 +2,9 @@
  {
   "owner": "Administrator", 
   "docstatus": 0, 
-  "creation": "2013-01-14 15:14:40", 
+  "creation": "2013-01-15 12:28:57", 
   "modified_by": "Administrator", 
-  "modified": "2013-01-15 12:25:13"
+  "modified": "2013-01-16 13:59:28"
  }, 
  {
   "allow_attach": 0, 
@@ -13,6 +13,7 @@
   "search_fields": "posting_date", 
   "module": "Stock", 
   "doctype": "DocType", 
+  "read_only_onload": 0, 
   "autoname": "SR/.######", 
   "description": "This tool helps you to update or fix the quantity and valuation of stock in the system. It is typically used to synchronise the system values and what actually exists in your warehouses.", 
   "allow_email": 1, 
@@ -33,7 +34,7 @@
   "read": 1, 
   "cancel": 1, 
   "name": "__common__", 
-  "amend": 0, 
+  "amend": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
   "submit": 1, 
