@@ -211,7 +211,6 @@ cur_frm.cscript.make_jv = function(doc, dr_or_cr, children) {
 	jv.fiscal_year = sys_defaults.fiscal_year;
 	jv.is_opening = 'No';
 	jv.posting_date = doc.return_date;
-	jv.voucher_date = dateutil.obj_to_str(new Date());
 
 	// Add children
 	if(children) {

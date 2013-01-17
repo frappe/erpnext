@@ -2,36 +2,24 @@
  {
   "owner": "Administrator", 
   "docstatus": 0, 
-  "creation": "2012-07-03 13:30:55", 
+  "creation": "2013-01-17 12:30:28", 
   "modified_by": "Administrator", 
-  "modified": "2012-07-11 16:11:45"
+  "modified": "2013-01-17 16:24:59"
  }, 
  {
-  "section_style": "Simple", 
-  "description": "**Currency** Master", 
-  "module": "Setup", 
-  "allow_trash": 1, 
-  "server_code_error": " ", 
-  "in_create": 0, 
   "read_only": 0, 
   "autoname": "field:currency_name", 
-  "name": "__common__", 
-  "colour": "White:FFF", 
+  "in_create": 0, 
+  "description": "**Currency** Master", 
   "doctype": "DocType", 
-  "show_in_menu": 0, 
-  "version": 1
+  "module": "Setup", 
+  "name": "__common__"
  }, 
  {
-  "parent": "Currency", 
-  "oldfieldtype": "Data", 
-  "oldfieldname": "currency_name", 
-  "reqd": 1, 
   "name": "__common__", 
+  "parent": "Currency", 
   "doctype": "DocField", 
-  "label": "Currency Name", 
   "parenttype": "DocType", 
-  "fieldname": "currency_name", 
-  "fieldtype": "Data", 
   "permlevel": 0, 
   "parentfield": "fields"
  }, 
@@ -39,9 +27,7 @@
   "name": "__common__", 
   "parent": "Currency", 
   "read": 1, 
-  "create": 1, 
   "doctype": "DocPerm", 
-  "write": 1, 
   "parenttype": "DocType", 
   "permlevel": 0, 
   "parentfield": "permissions"
@@ -51,25 +37,44 @@
   "doctype": "DocType"
  }, 
  {
-  "cancel": 1, 
-  "role": "Accounts Manager", 
+  "oldfieldtype": "Data", 
+  "doctype": "DocField", 
+  "label": "Currency Name", 
+  "oldfieldname": "currency_name", 
+  "fieldname": "currency_name", 
+  "fieldtype": "Data", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Fraction", 
+  "fieldname": "fraction", 
+  "fieldtype": "Data"
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Fraction Units", 
+  "fieldname": "fraction_units", 
+  "fieldtype": "Int"
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Symbol", 
+  "fieldname": "symbol", 
+  "fieldtype": "Data"
+ }, 
+ {
+  "amend": 0, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "submit": 0, 
+  "write": 1, 
+  "report": 1, 
+  "role": "System Manager", 
+  "cancel": 1
+ }, 
+ {
+  "role": "All", 
   "doctype": "DocPerm"
- }, 
- {
-  "amend": 0, 
-  "cancel": 1, 
-  "role": "Sales Master Manager", 
-  "doctype": "DocPerm", 
-  "submit": 0
- }, 
- {
-  "amend": 0, 
-  "cancel": 0, 
-  "role": "Purchase Master Manager", 
-  "doctype": "DocPerm", 
-  "submit": 0
- }, 
- {
-  "doctype": "DocField"
  }
 ]

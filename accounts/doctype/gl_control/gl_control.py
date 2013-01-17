@@ -218,7 +218,7 @@ class DocType:
 			and (t2.against_invoice is null or t2.against_invoice = '') 
 			and (t2.against_jv is null or t2.against_jv = '') 
 			and t2.account = '%s' and t2.is_advance = 'Yes' and t1.docstatus = 1 
-			order by t1.voucher_date """ % (dr_or_cr,account_head))
+			order by t1.posting_date""" % (dr_or_cr,account_head))
 		# clear advance table
 		obj.doclist = obj.doc.clear_table(obj.doclist,table_field_name)
 		# Create advance table

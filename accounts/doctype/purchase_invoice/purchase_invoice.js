@@ -21,7 +21,6 @@ wn.require('app/accounts/doctype/purchase_taxes_and_charges_master/purchase_taxe
 wn.require('app/buying/doctype/purchase_common/purchase_common.js');
 
 cur_frm.cscript.onload = function(doc,dt,dn) {
-	if(!doc.voucher_date) set_multiple(dt,dn,{voucher_date:get_today()});
 	if(!doc.posting_date) set_multiple(dt,dn,{posting_date:get_today()});
 }
 

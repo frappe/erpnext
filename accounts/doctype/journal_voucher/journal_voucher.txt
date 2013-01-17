@@ -2,14 +2,14 @@
  {
   "owner": "Administrator", 
   "docstatus": 0, 
-  "creation": "2012-12-03 17:26:38", 
+  "creation": "2013-01-17 12:30:11", 
   "modified_by": "Administrator", 
-  "modified": "2012-12-04 18:47:42"
+  "modified": "2013-01-17 14:27:43"
  }, 
  {
-  "is_submittable": 1, 
   "autoname": "naming_series:", 
   "name": "__common__", 
+  "is_submittable": 1, 
   "search_fields": "voucher_type,posting_date, due_date, cheque_no", 
   "module": "Accounts", 
   "doctype": "DocType", 
@@ -47,7 +47,6 @@
   "description": "To manage multiple series please go to Setup > Manage Series", 
   "no_copy": 1, 
   "oldfieldtype": "Select", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Series", 
   "oldfieldname": "naming_series", 
@@ -103,8 +102,8 @@
  }, 
  {
   "print_hide": 0, 
-  "allow_on_submit": 1, 
   "oldfieldtype": "Table", 
+  "allow_on_submit": 1, 
   "doctype": "DocField", 
   "label": "Entries", 
   "oldfieldname": "entries", 
@@ -163,7 +162,6 @@
   "oldfieldtype": "Button", 
   "doctype": "DocField", 
   "label": "Make Difference Entry", 
-  "trigger": "Client", 
   "fieldname": "get_balance", 
   "fieldtype": "Button", 
   "permlevel": 0
@@ -179,15 +177,14 @@
   "description": "eg. Cheque Number", 
   "no_copy": 1, 
   "oldfieldtype": "Data", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Reference Number", 
   "oldfieldname": "cheque_no", 
   "fieldname": "cheque_no", 
   "fieldtype": "Data", 
   "search_index": 1, 
-  "in_filter": 1, 
-  "permlevel": 0
+  "permlevel": 0, 
+  "in_filter": 1
  }, 
  {
   "no_copy": 1, 
@@ -291,12 +288,10 @@
   "print_hide": 1, 
   "default": "No", 
   "oldfieldtype": "Select", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Is Opening", 
   "oldfieldname": "is_opening", 
   "permlevel": 0, 
-  "trigger": "Client", 
   "fieldname": "is_opening", 
   "fieldtype": "Select", 
   "search_index": 1, 
@@ -308,7 +303,6 @@
   "description": "For opening invoice entry, this date will reflect in the period-wise aging report.", 
   "no_copy": 0, 
   "oldfieldtype": "Date", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Aging Date", 
   "oldfieldname": "aging_date", 
@@ -320,7 +314,6 @@
   "print_hide": 1, 
   "default": "Accounts Receivable", 
   "depends_on": "eval:doc.voucher_type == 'Write Off Voucher'", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Write Off Based On", 
   "options": "Accounts Receivable\nAccounts Payable", 
@@ -332,7 +325,6 @@
  {
   "print_hide": 1, 
   "depends_on": "eval:doc.voucher_type == 'Write Off Voucher'", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Write Off Amount <=", 
   "fieldname": "write_off_amount", 
@@ -343,30 +335,11 @@
  {
   "print_hide": 1, 
   "depends_on": "eval:doc.voucher_type == 'Write Off Voucher'", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Get Outstanding Invoices", 
-  "trigger": "Server", 
+  "options": "get_outstanding_invoices", 
   "fieldname": "get_outstanding_invoices", 
   "fieldtype": "Button", 
-  "options": "get_outstanding_invoices", 
-  "permlevel": 0
- }, 
- {
-  "print_hide": 0, 
-  "description": "Date of entry (not posting to ledgers)", 
-  "default": "Today", 
-  "oldfieldtype": "Date", 
-  "colour": "White:FFF", 
-  "doctype": "DocField", 
-  "label": "Voucher Date", 
-  "oldfieldname": "voucher_date", 
-  "no_copy": 1, 
-  "fieldname": "voucher_date", 
-  "fieldtype": "Date", 
-  "search_index": 1, 
-  "reqd": 1, 
-  "in_filter": 1, 
   "permlevel": 0
  }, 
  {
@@ -442,13 +415,11 @@
   "print_hide": 1, 
   "no_copy": 1, 
   "oldfieldtype": "Link", 
-  "colour": "White:FFF", 
   "allow_on_submit": 1, 
   "doctype": "DocField", 
   "label": "Select Print Heading", 
   "oldfieldname": "select_print_heading", 
   "permlevel": 0, 
-  "trigger": "Client", 
   "fieldname": "select_print_heading", 
   "fieldtype": "Link", 
   "options": "Print Heading", 
@@ -493,16 +464,14 @@
   "print_hide": 1, 
   "no_copy": 1, 
   "oldfieldtype": "Link", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Supplier Account", 
   "oldfieldname": "supplier_account", 
-  "permlevel": 0, 
-  "trigger": "Client", 
+  "options": "Account", 
   "fieldname": "supplier_account", 
   "fieldtype": "Link", 
   "hidden": 0, 
-  "options": "Account"
+  "permlevel": 0
  }, 
  {
   "amend": 1, 
@@ -510,8 +479,8 @@
   "doctype": "DocPerm", 
   "submit": 1, 
   "write": 1, 
-  "cancel": 1, 
   "role": "Accounts User", 
+  "cancel": 1, 
   "permlevel": 0
  }, 
  {
@@ -520,8 +489,8 @@
   "doctype": "DocPerm", 
   "submit": 0, 
   "write": 0, 
-  "cancel": 0, 
   "role": "Accounts User", 
+  "cancel": 0, 
   "permlevel": 1
  }, 
  {
@@ -530,8 +499,8 @@
   "doctype": "DocPerm", 
   "submit": 0, 
   "write": 0, 
-  "cancel": 0, 
   "role": "Accounts Manager", 
+  "cancel": 0, 
   "permlevel": 1
  }, 
  {
@@ -540,8 +509,8 @@
   "doctype": "DocPerm", 
   "submit": 1, 
   "write": 1, 
-  "cancel": 1, 
   "role": "Accounts Manager", 
+  "cancel": 1, 
   "permlevel": 0
  }, 
  {
@@ -550,8 +519,8 @@
   "doctype": "DocPerm", 
   "submit": 0, 
   "write": 0, 
-  "cancel": 0, 
   "role": "Auditor", 
+  "cancel": 0, 
   "permlevel": 0
  }, 
  {
@@ -560,8 +529,8 @@
   "doctype": "DocPerm", 
   "submit": 0, 
   "write": 0, 
-  "cancel": 0, 
   "role": "Auditor", 
+  "cancel": 0, 
   "permlevel": 1
  }
 ]

@@ -162,7 +162,6 @@ class DocType:
 		ac = Document('Account')
 		for d in self.fld_dict.keys():
 			ac.fields[d] = (d == 'parent_account' and lst[self.fld_dict[d]]) and lst[self.fld_dict[d]] +' - '+ self.doc.abbr or lst[self.fld_dict[d]]
-		ac.old_parent = ''
 		ac_obj = get_obj(doc=ac)
 		ac_obj.doc.freeze_account='No'
 		ac_obj.doc.master_type = ''
@@ -199,7 +198,7 @@ class DocType:
 	# ---------------------------------------------------
 	def create_default_cost_center(self):
 		glc = get_obj('GL Control')
-		cc_list = [{'cost_center_name':'Root','company_name':self.doc.name,'company_abbr':self.doc.abbr,'group_or_ledger':'Group','parent_cost_center':'','old_parent':''}, {'cost_center_name':'Default CC Ledger','company_name':self.doc.name,'company_abbr':self.doc.abbr,'group_or_ledger':'Ledger','parent_cost_center':'Root - ' + self.doc.abbr,'old_parent':''}]
+		cc_list = [{'cost_center_name':'Root','company_name':self.doc.name,'company_abbr':self.doc.abbr,'group_or_ledger':'Group','parent_cost_center':''}, {'cost_center_name':'Default CC Ledger','company_name':self.doc.name,'company_abbr':self.doc.abbr,'group_or_ledger':'Ledger','parent_cost_center':'Root - ' + self.doc.abbr}]
 		for c in cc_list:
 			glc.add_cc(str(c))
 			
