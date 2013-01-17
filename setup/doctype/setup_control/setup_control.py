@@ -50,33 +50,37 @@ class DocType:
 		master_dict = {'Fiscal Year':{
 			'year': curr_fiscal_year,
 			'year_start_date': fy_start_date,
-			'company': args.get('company_name')}}
+		}}
 		self.create_records(master_dict)
 		
 		# Company
-		master_dict = {'Company':{'company_name':args.get('company_name'),
-								  'abbr':args.get('company_abbr'),
-								  'default_currency':args.get('currency')
-								}}
+		master_dict = {'Company': {
+			'company_name':args.get('company_name'),
+			'abbr':args.get('company_abbr'),
+			'default_currency':args.get('currency')
+		}}
 		self.create_records(master_dict)
 		
-		def_args = {'current_fiscal_year':curr_fiscal_year,
-								'default_currency': args.get('currency'),
-								'default_company':args.get('company_name'),
-								'default_valuation_method':'FIFO',
-								'default_stock_uom':'Nos',
-								'date_format':'dd-mm-yyyy',
-								'default_currency_format':'Lacs',
-								'so_required':'No',
-								'dn_required':'No',
-								'po_required':'No',
-								'pr_required':'No',
-								'emp_created_by':'Naming Series',
-								'cust_master_name':'Customer Name', 
-								'supp_master_name':'Supplier Name',
-								'default_currency_format': \
-										(args.get('currency')=='INR') and 'Lacs' or 'Millions'
-					}
+		def_args = {
+			'current_fiscal_year':curr_fiscal_year,
+			'default_currency': args.get('currency'),
+			"default_fraction_currency": webnotes.conn.get_value("Currency", 
+				args.get("currency"), "fraction"),
+			'default_company':args.get('company_name'),
+			'default_valuation_method':'FIFO',
+			'default_stock_uom':'Nos',
+			'date_format': webnotes.conn.get_value("Country", 
+				args.get("country"), "date_format"),
+			'so_required':'No',
+			'dn_required':'No',
+			'po_required':'No',
+			'pr_required':'No',
+			'emp_created_by':'Naming Series',
+			'cust_master_name':'Customer Name', 
+			'supp_master_name':'Supplier Name',
+			'default_currency_format': \
+				(args.get('currency')=='INR') and 'Lacs' or 'Millions'
+		}
 
 		# Set 
 		self.set_defaults(def_args)
@@ -185,8 +189,6 @@ class DocType:
 		return fy, stdt, abbr
 
 
-	# Create Company and Fiscal Year
-	# ------------------------------- 
 	def create_records(self, master_dict):
 		for d in master_dict.keys():
 			rec = Document(d)
@@ -234,18 +236,12 @@ class DocType:
 				on duplicate key update `password`=password(%s)""", 
 				(user_email, pwd, pwd))
 				
-		self.add_roles(pr)
-	
-	def add_roles(self, pr):
-		roles_list = ['Accounts Manager', 'Accounts User', 'Blogger', 'HR Manager', 'HR User', 'Maintenance User', 'Maintenance Manager', 'Material Manager', 'Material User', 'Material Master Manager', 'Manufacturing Manager', 'Manufacturing User', 'Projects User', 'Purchase Manager', 'Purchase User', 'Purchase Master Manager', 'Quality Manager', 'Sales Manager', 'Sales User', 'Sales Master Manager', 'Support Manager', 'Support Team', 'System Manager', 'Website Manager']
-		for r in roles_list:
-			d = addchild(pr, 'userroles', 'UserRole')
-			d.role = r
-			d.save(1)
-
-		# Add roles to Administrator profile
-		pr = Document('Profile','Administrator')
-		for r in roles_list:
-			d = addchild(pr,'userroles', 'UserRole')
-			d.role = r
-			d.save(1)
+		self.add_all_roles_to(pr.name)
+				
+def add_all_roles_to(name):
+	profile = webnotes.doc("Profile", name)
+	for role in webnotes.conn.sql("""select name from tabRole"""):
+		if role[0] not in ["Administrator", "Guest", "All", "Customer", "Supplier", "Partner"]:
+			d = profile.addchild("userroles", "UserRole")
+			d.role = role[0]
+			d.insert()

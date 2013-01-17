@@ -53,9 +53,9 @@ erpnext.utils.lead_query = function() {
 // searches for customer
 erpnext.utils.customer_query = function() {
 	if(sys_defaults.cust_master_name == "Customer Name") {
-		var fields = ["name", "customer_group", "country", "territory"];
+		var fields = ["name", "customer_group", "territory"];
 	} else {
-		var fields = ["name", "customer_name", "customer_group", "country", "territory"];
+		var fields = ["name", "customer_name", "customer_group", "territory"];
 	}
 	
 	return "select " + fields.join(", ") + " from `tabCustomer` where docstatus < 2 and \

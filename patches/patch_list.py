@@ -16,586 +16,139 @@
 
 from __future__ import unicode_literals
 patch_list = [
-	{
-		'patch_module': 'patches.mar_2012',
-		'patch_file': 'so_rv_mapper_fix',
-		'description': 'SO-RV duplicate mapper entry removal'
-	},
-	{
-		'patch_module': 'patches.mar_2012',
-		'patch_file': 'clean_property_setter',
-		'description': 'Patch related to property setter cleanup' 
-	},
-	{
-		'patch_module': 'patches.jan_mar_2012',
-		'patch_file': 'sync_ref_db',
-		'description': 'Deletes non required doctypes'
-	},
-	{
-		'patch_module': 'patches.april_2012',
-		'patch_file': 'naming_series_patch',
-		'description': 'Move naming series options into property setter'
-	},
-	{
-		'patch_module': 'patches.jan_mar_2012',
-		'patch_file': 'rename_dt',
-		'description': 'Rename DocType Patch'
-	},
-	{
-		'patch_module': 'patches.mar_2012',
-		'patch_file': 'cleanup_control_panel',
-		'description': 'Remove email related fields from Control Panel' 
-	},
-	{
-		'patch_module': 'patches.mar_2012',
-		'patch_file': 'doctype_get_refactor',
-		'description': 'Patch related to doctype get refactoring' 
-	},
-	{
-		'patch_module': 'patches.mar_2012',
-		'patch_file': 'delete_docformat',
-		'description': 'Deletes DocFormat from database' 
-	},
-	{
-		'patch_module': 'patches.mar_2012',
-		'patch_file': 'usertags',
-		'description': 'Adds _user_tags columns to tables' 
-	},
-	{
-		'patch_module': 'patches.april_2012',
-		'patch_file': 'reload_c_form',
-		'description': 'Added attchemnt option and total field'
-	},
-	{
-		'patch_module': 'patches.april_2012',
-		'patch_file': 'after_sync_cleanup',
-		'description': 'cleanup after sync'
-	},
-	{
-		'patch_module': 'patches.april_2012',
-		'patch_file': 'remove_default_from_rv_detail',
-		'description': ''
-	},
-	{
-		'patch_module': 'patches.april_2012',
-		'patch_file': 'update_role_in_address',
-		'description': 'updated roles in address'
-	},
-	{
-		'patch_module': 'patches.april_2012',
-		'patch_file': 'update_permlevel_in_address',
-		'description': 'updated permlevel in address'
-	},
-	{
-		'patch_module': 'patches.april_2012',
-		'patch_file': 'update_appraisal_permission',
-		'description': 'updated permission in appraisal'
-	},
-	{
-		'patch_module': 'patches.april_2012',
-		'patch_file': 'serial_no_fixes',
-		'description': 'fixes for sle creation while import'
-	},
-	{
-		'patch_module': 'patches.april_2012',
-		'patch_file': 'repost_stock_for_posting_time',
-		'description': 'repost stock for posting time 00:00:seconds'
-	},
-	{
-		'patch_module': 'patches.may_2012',
-		'patch_file': 'cleanup_property_setter',
-		'description': 'cleanup_property_setter'
-	},
-	{
-		'patch_module': 'patches.may_2012',
-		'patch_file': 'rename_prev_doctype',
-		'description': 'rename prev doctype fix'
-	},
-	{
-		'patch_module': 'patches.may_2012',
-		'patch_file': 'cleanup_notification_control',
-		'description': 'cleanup notification control'
-	},
-	{
-		'patch_module': 'patches.may_2012',
-		'patch_file': 'renamedt_in_custom_search_criteria',
-		'description': 'raname dt in custom search criteria'
-	},
-	{
-		'patch_module': 'patches.may_2012',
-		'patch_file': 'stock_reco_patch',
-		'description': 'stock reco patch: store diff info in field'
-	},
-	{
-		'patch_module': 'patches.may_2012',
-		'patch_file': 'reload_reports',
-		'description': 'reload reports: itemwise sales/delivery details'
-	},
-	{
-		'patch_module': 'patches.may_2012',
-		'patch_file': 'page_role_series_fix',
-		'description': 'reset series of page role at max'
-	},
-	{
-		'patch_module': 'patches.may_2012',
-		'patch_file': 'reload_sales_invoice_pf',
-		'description': 'Reload sales invoice print formats'
-	},
-	{
-		'patch_module': 'patches.may_2012',
-		'patch_file': 'std_pf_readonly',
-		'description': 'Make standard print formats readonly for system manager'
-	},
-	{
-		'patch_module': 'patches.may_2012',
-		'patch_file': 'reload_so_pending_items',
-		'description': 'reload so pending items'
-	},
-	{
-		'patch_module': 'patches.may_2012',
-		'patch_file': 'customize_form_cleanup',
-		'description': 'cleanup customize form records'
-	},
-	{
-		'patch_module': 'patches.may_2012',
-		'patch_file': 'cs_server_readonly',
-		'description': 'Make server custom script readonly for system manager'
-	},
-	{
-		'patch_module': 'patches.may_2012',
-		'patch_file': 'clear_session_cache',
-		'description': 'clears session cache as shifting to json format'
-	},
-	{
-		'patch_module': 'patches.may_2012',
-		'patch_file': 'same_purchase_rate_patch',
-		'description': 'Main same rate throughout pur cycle: in global defaults, by default set true'
-	},
-	{
-		'patch_module': 'patches.may_2012',
-		'patch_file': 'create_report_manager_role',
-		'description': 'Create report manager role if not exists'
-	},
-	{
-		'patch_module': 'patches.may_2012',
-		'patch_file': 'reload_customer_address_contact',
-		'description': 'Reload report customer address contact'
-	},
-	{
-		'patch_module': 'patches.may_2012',
-		'patch_file': 'profile_perm_patch',
-		'description': 'Make profile readonly for role All'
-	},
-	{
-		'patch_module': 'patches.may_2012',
-		'patch_file': 'remove_euro_currency',
-		'description': 'Remove EURO currency and replace with EUR'
-	},
-	{
-		'patch_module': 'patches.may_2012',
-		'patch_file': 'remove_communication_log',
-		'description': 'Remove Communication Log and replace it with Communication'
-	},
-	{
-		'patch_module': 'patches.june_2012',
-		'patch_file': 'barcode_in_feature_setup',
-		'description': 'Track item by barcode'
-	},
-	{
-		'patch_module': 'patches.june_2012',
-		'patch_file': 'copy_uom_for_pur_inv_item',
-		'description': 'Copy uom for pur inv item from PO and PR item table'
-	},
-	{
-		'patch_module': 'patches.june_2012',
-		'patch_file': 'fetch_organization_from_lead',
-		'description': 'Fetch organization from lead in quote'
-	},
-	{
-		'patch_module': 'patches.june_2012',
-		'patch_file': 'reports_list_permission',
-		'description': 'allow read permission to all for report list'
-	},
-	{
-		'patch_module': 'patches.june_2012',
-		'patch_file': 'support_ticket_autoreply',
-		'description': 'New Send Autoreply checkbox in Email Settings'
-	},
-	{
-		'patch_module': 'patches.june_2012',
-		'patch_file': 'series_unique_patch',
-		'description': "add unique constraint to series table's name column"
-	},
-	{
-		'patch_module': 'patches.june_2012',
-		'patch_file': 'set_recurring_type',
-		'description': "set recurring type as monthly in old"
-	},
-	{
-		'patch_module': 'patches.june_2012',
-		'patch_file': 'alter_tabsessions',
-		'description': "alter tabsessions to change user column definition"
-	},
-	{
-		'patch_module': 'patches.june_2012',
-		'patch_file': 'delete_old_parent_entries',
-		'description': "delete entries of child table having parent like old_par%% or ''"
-	},
-	{
-		'patch_module': 'patches.april_2012',
-		'patch_file': 'delete_about_contact',
-		'description': "delete depracated doctypes of website module"
-	},
-	{
-		'patch_module': 'patches.july_2012',
-		'patch_file': 'reload_pr_po_mapper',
-		'description': "order date should be greater than equal to request date"
-	},
-	{
-		'patch_module': 'patches.july_2012',
-		'patch_file': 'address_contact_perms',
-		'description': "sync address contact perms"
-	},
-	{
-		'patch_module': 'patches.july_2012',
-		'patch_file': 'packing_list_cleanup_and_serial_no',
-		'description': "packing list cleanup and serial no status update"
-	},
-	{
-		'patch_module': 'patches.july_2012',
-		'patch_file': 'deprecate_import_data_control',
-		'description': "deprecate doctype - Import Data Control and page - Import Data"
-	},
-	{
-		'patch_module': 'patches.july_2012',
-		'patch_file': 'default_freeze_account',
-		'description': "set default freeze_account as 'No' where NULL"
-	},
-	{
-		'patch_module': 'patches.july_2012',
-		'patch_file': 'update_purchase_tax',
-		'description': "rename options in purchase taxes and charges"
-	},
-	{	'patch_module': 'patches.june_2012',
-		'patch_file': 'cms2',
-		'description': 'cms2 release patches'
-	},
-	{	'patch_module': 'patches.july_2012',
-		'patch_file': 'auth_table',
-		'description': 'create new __Auth table'
-	},
-	{
-		'patch_module': 'patches.july_2012',
-		'patch_file': 'remove_event_role_owner_match',
-		'description': "Remove Owner match from Event DocType's Permissions"
-	},
-	{
-		'patch_module': 'patches.july_2012',
-		'patch_file': 'deprecate_bulk_rename',
-		'description': "Remove Bulk Rename Tool"
-	},
-	{
-		'patch_module': 'patches.july_2012',
-		'patch_file': 'blog_guest_permission',
-	},
-	{
-		'patch_module': 'patches.july_2012',
-		'patch_file': 'bin_permission',
-	},
-	{
-		'patch_module': 'patches.july_2012',
-		'patch_file': 'project_patch_repeat',
-	},
-	{
-		'patch_module': 'patches.july_2012',
-		'patch_file': 'repost_stock_due_to_wrong_packing_list',
-	},
-	{
-		'patch_module': 'patches.july_2012',
-		'patch_file': 'supplier_quotation',
-	},
-	{
-		'patch_module': 'patches.august_2012',
-		'patch_file': 'report_supplier_quotations',
-	},
-	{
-		'patch_module': 'patches.august_2012',
-		'patch_file': 'task_allocated_to_assigned',
-	},
-	{
-		'patch_module': 'patches.august_2012',
-		'patch_file': 'change_profile_permission',
-	},
-	{
-		'patch_module': 'patches.august_2012',
-		'patch_file': 'changed_blog_date_format',
-	},
-	{
-		'patch_module': 'patches.august_2012',
-		'patch_file': 'repost_billed_amt',
-	},
-	{
-		'patch_module': 'patches.august_2012',
-		'patch_file': 'remove_cash_flow_statement',
-	},
-	{
-		'patch_module': 'patches.september_2012',
-		'patch_file': 'stock_report_permissions_for_accounts',
-	},
-	{
-		'patch_module': 'patches.september_2012',
-		'patch_file': 'communication_delete_permission',
-	},
-	{
-		'patch_module': 'patches.september_2012',
-		'patch_file': 'all_permissions_patch',
-	},
-	{
-		'patch_module': 'patches.september_2012',
-		'patch_file': 'customer_permission_patch',
-	},
-	{
-		'patch_module': 'patches.september_2012',
-		'patch_file': 'add_stock_ledger_entry_index',
-	},
-	{
-		'patch_module': 'patches.september_2012',
-		'patch_file': 'plot_patch',
-	},
-	{
-		'patch_module': 'patches.september_2012',
-		'patch_file': 'event_permission',
-	},
-	{
-		'patch_module': 'patches.september_2012',
-		'patch_file': 'repost_stock',
-	},
-	{
-		'patch_module': 'patches.september_2012',
-		'patch_file': 'reload_gross_profit',
-	},
-	{
-		'patch_module': 'patches.september_2012',
-		'patch_file': 'rebuild_trees',
-	},
-	{
-		'patch_module': 'patches.september_2012',
-		'patch_file': 'deprecate_account_balance',
-	},
-	{
-		'patch_module': 'patches.september_2012',
-		'patch_file': 'profile_delete_permission',
-	},
-	{
-		'patch_module': 'patches.october_2012',
-		'patch_file': 'update_permission',
-	},
-	{
-		'patch_module': 'patches.october_2012',
-		'patch_file': 'reload_gl_mapper',
-	},
-	{
-		'patch_module': 'patches.october_2012',
-		'patch_file': 'fix_wrong_vouchers',
-	},
-	{
-		'patch_module': 'patches.october_2012',
-		'patch_file': 'remove_old_customer_contact_address',
-	},
-	{
-		'patch_module': 'patches.october_2012',
-		'patch_file': 'company_fiscal_year_docstatus_patch',
-	},
-	{
-		'patch_module': 'patches.october_2012',
-		'patch_file': 'update_account_property',
-	},
-	{
-		'patch_module': 'patches.october_2012',
-		'patch_file': 'remove_old_trial_bal',
-	},
-	{
-		'patch_module': 'patches.october_2012',
-		'patch_file': 'fix_cancelled_gl_entries',
-	},
-	{
-		'patch_module': 'patches.october_2012',
-		'patch_file': 'custom_script_delete_permission',
-	},
-	{
-		'patch_module': 'patches.november_2012',
-		'patch_file': 'custom_field_insert_after',
-	},
-	{
-		'patch_module': 'patches.november_2012',
-		'patch_file': 'delete_item_sales_register1',
-	},
-	{
-		'patch_module': 'patches.november_2012',
-		'patch_file': 'rename_employee_leave_balance_report',
-	},
-	{
-		'patch_module': 'patches.november_2012',
-		'patch_file': 'report_permissions',
-	},
-	{
-		'patch_module': 'patches.november_2012',
-		'patch_file': 'customer_issue_allocated_to_assigned',
-	},
-	{
-		'patch_module': 'patches.november_2012',
-		'patch_file': 'reset_appraisal_permissions',
-	},
-	{
-		'patch_module': 'patches.november_2012',
-		'patch_file': 'disable_cancelled_profiles',
-	},
-	{
-		'patch_module': 'patches.november_2012',
-		'patch_file': 'remove_old_unbilled_items_report',
-	},
-	{
-		'patch_module': 'patches.november_2012',
-		'patch_file': 'support_ticket_response_to_communication',
-	},
-	{
-		'patch_module': 'patches.november_2012',
-		'patch_file': 'cancelled_bom_patch',
-	},
-	{
-		'patch_module': 'patches.november_2012',
-		'patch_file': 'communication_sender_and_recipient',
-	},
-	{
-		'patch_module': 'patches.november_2012',
-		'patch_file': 'update_delivered_billed_percentage_for_pos',
-	},
-	{
-		'patch_module': 'patches.november_2012',
-		'patch_file': 'add_theme_to_profile',
-	},
-	{
-		'patch_module': 'patches.november_2012',
-		'patch_file': 'add_employee_field_in_employee',
-	},
-	{
-		'patch_module': 'patches.november_2012',
-		'patch_file': 'leave_application_cleanup',
-	},
-	{
-		'patch_module': 'patches.november_2012',
-		'patch_file': 'production_order_patch',
-	},
-	{
-		'patch_module': 'patches.november_2012',
-		'patch_file': 'gle_floating_point_issue',
-	},
-	{
-		'patch_module': 'patches.december_2012',
-		'patch_file': 'deprecate_tds',
-	},
-	{
-		'patch_module': 'patches.december_2012',
-		'patch_file': 'expense_leave_reload',
-	},
-	{
-		'patch_module': 'patches.december_2012',
-		'patch_file': 'repost_ordered_qty',
-	},
-	{
-		'patch_module': 'patches.december_2012',
-		'patch_file': 'repost_projected_qty',
-	},
-	{
-		'patch_module': 'patches.december_2012',
-		'patch_file': 'reload_debtors_creditors_ledger',
-	},
-	{
-		'patch_module': 'patches.december_2012',
-		'patch_file': 'website_cache_refactor',
-	},
-	{
-		'patch_module': 'patches.december_2012',
-		'patch_file': 'production_cleanup',
-	},
-	{
-		'patch_module': 'patches.december_2012',
-		'patch_file': 'fix_default_print_format',
-	},
-	{
-		'patch_module': 'patches.december_2012',
-		'patch_file': 'file_list_rename',
-	},
-	{
-		'patch_module': 'patches.december_2012',
-		'patch_file': 'replace_createlocal',
-	},
-	{
-		'patch_module': 'patches.december_2012',
-		'patch_file': 'clear_web_cache',
-	},
-	{
-		'patch_module': 'patches.december_2012',
-		'patch_file': 'remove_quotation_next_contact',
-	},
-	{
-		'patch_module': 'patches.december_2012',
-		'patch_file': 'stock_entry_cleanup',
-	},
-	{
-		'patch_module': 'patches.december_2012',
-		'patch_file': 'production_order_naming_series',
-	},
-	{
-		'patch_module': 'patches.december_2012',
-		'patch_file': 'rebuild_item_group_tree',
-	},
-	{
-		'patch_module': 'patches.december_2012',
-		'patch_file': 'address_title',
-	},
-	{
-		'patch_module': 'patches.december_2012',
-		'patch_file': 'delete_form16_print_format',
-	},
-	{
-		'patch_module': 'patches.december_2012',
-		'patch_file': 'remove_project_mapper',
-	},
-	{
-		'patch_module': 'patches.december_2012',
-		'patch_file': 'update_print_width',
-	},
-	{
-		'patch_module': 'patches.january_2013',
-		'patch_file': 'remove_bad_permissions',
-	},	
-	{
-		'patch_module': 'patches.january_2013',
-		'patch_file': 'deprecate_stock_search_criteria',
-	},
-	{
-		'patch_module': 'patches.january_2013',
-		'patch_file': 'remove_support_search_criteria',
-	},
-	{
-		'patch_module': 'patches.january_2013',
-		'patch_file': 'holiday_list_patch',
-	},
-	{
-		'patch_module': 'patches.january_2013',
-		'patch_file': 'stock_reconciliation_patch',
-	},
-	{
-		'patch_module': 'patches.january_2013',
-		'patch_file': 'report_permission',
-	},
-	{
-		'patch_module': 'patches.january_2013',
-		'patch_file': 'give_report_permission_on_read',
-	},
-	{
-		'patch_module': 'patches.january_2013',
-		'patch_file': 'update_closed_on',
-	},
+ "patches.mar_2012.so_rv_mapper_fix", 
+ "patches.mar_2012.clean_property_setter", 
+ "patches.jan_mar_2012.sync_ref_db", 
+ "patches.april_2012.naming_series_patch", 
+ "patches.jan_mar_2012.rename_dt", 
+ "patches.mar_2012.cleanup_control_panel", 
+ "patches.mar_2012.doctype_get_refactor", 
+ "patches.mar_2012.delete_docformat", 
+ "patches.mar_2012.usertags", 
+ "patches.april_2012.reload_c_form", 
+ "patches.april_2012.after_sync_cleanup", 
+ "patches.april_2012.remove_default_from_rv_detail", 
+ "patches.april_2012.update_role_in_address", 
+ "patches.april_2012.update_permlevel_in_address", 
+ "patches.april_2012.update_appraisal_permission", 
+ "patches.april_2012.serial_no_fixes", 
+ "patches.april_2012.repost_stock_for_posting_time", 
+ "patches.may_2012.cleanup_property_setter", 
+ "patches.may_2012.rename_prev_doctype", 
+ "patches.may_2012.cleanup_notification_control", 
+ "patches.may_2012.renamedt_in_custom_search_criteria", 
+ "patches.may_2012.stock_reco_patch", 
+ "patches.may_2012.reload_reports", 
+ "patches.may_2012.page_role_series_fix", 
+ "patches.may_2012.reload_sales_invoice_pf", 
+ "patches.may_2012.std_pf_readonly", 
+ "patches.may_2012.reload_so_pending_items", 
+ "patches.may_2012.customize_form_cleanup", 
+ "patches.may_2012.cs_server_readonly", 
+ "patches.may_2012.clear_session_cache", 
+ "patches.may_2012.same_purchase_rate_patch", 
+ "patches.may_2012.create_report_manager_role", 
+ "patches.may_2012.reload_customer_address_contact", 
+ "patches.may_2012.profile_perm_patch", 
+ "patches.may_2012.remove_euro_currency", 
+ "patches.may_2012.remove_communication_log", 
+ "patches.june_2012.barcode_in_feature_setup", 
+ "patches.june_2012.copy_uom_for_pur_inv_item", 
+ "patches.june_2012.fetch_organization_from_lead", 
+ "patches.june_2012.reports_list_permission", 
+ "patches.june_2012.support_ticket_autoreply", 
+ "patches.june_2012.series_unique_patch", 
+ "patches.june_2012.set_recurring_type", 
+ "patches.june_2012.alter_tabsessions", 
+ "patches.june_2012.delete_old_parent_entries", 
+ "patches.april_2012.delete_about_contact", 
+ "patches.july_2012.reload_pr_po_mapper", 
+ "patches.july_2012.address_contact_perms", 
+ "patches.july_2012.packing_list_cleanup_and_serial_no", 
+ "patches.july_2012.deprecate_import_data_control", 
+ "patches.july_2012.default_freeze_account", 
+ "patches.july_2012.update_purchase_tax", 
+ "patches.june_2012.cms2", 
+ "patches.july_2012.auth_table", 
+ "patches.july_2012.remove_event_role_owner_match", 
+ "patches.july_2012.deprecate_bulk_rename", 
+ "patches.july_2012.blog_guest_permission", 
+ "patches.july_2012.bin_permission", 
+ "patches.july_2012.project_patch_repeat", 
+ "patches.july_2012.repost_stock_due_to_wrong_packing_list", 
+ "patches.july_2012.supplier_quotation", 
+ "patches.august_2012.report_supplier_quotations", 
+ "patches.august_2012.task_allocated_to_assigned", 
+ "patches.august_2012.change_profile_permission", 
+ "patches.august_2012.changed_blog_date_format", 
+ "patches.august_2012.repost_billed_amt", 
+ "patches.august_2012.remove_cash_flow_statement", 
+ "patches.september_2012.stock_report_permissions_for_accounts", 
+ "patches.september_2012.communication_delete_permission", 
+ "patches.september_2012.all_permissions_patch", 
+ "patches.september_2012.customer_permission_patch", 
+ "patches.september_2012.add_stock_ledger_entry_index", 
+ "patches.september_2012.plot_patch", 
+ "patches.september_2012.event_permission", 
+ "patches.september_2012.repost_stock", 
+ "patches.september_2012.reload_gross_profit", 
+ "patches.september_2012.rebuild_trees", 
+ "patches.september_2012.deprecate_account_balance", 
+ "patches.september_2012.profile_delete_permission", 
+ "patches.october_2012.update_permission", 
+ "patches.october_2012.reload_gl_mapper", 
+ "patches.october_2012.fix_wrong_vouchers", 
+ "patches.october_2012.remove_old_customer_contact_address", 
+ "patches.october_2012.company_fiscal_year_docstatus_patch", 
+ "patches.october_2012.update_account_property", 
+ "patches.october_2012.remove_old_trial_bal", 
+ "patches.october_2012.fix_cancelled_gl_entries", 
+ "patches.october_2012.custom_script_delete_permission", 
+ "patches.november_2012.custom_field_insert_after", 
+ "patches.november_2012.delete_item_sales_register1", 
+ "patches.november_2012.rename_employee_leave_balance_report", 
+ "patches.november_2012.report_permissions", 
+ "patches.november_2012.customer_issue_allocated_to_assigned", 
+ "patches.november_2012.reset_appraisal_permissions", 
+ "patches.november_2012.disable_cancelled_profiles", 
+ "patches.november_2012.remove_old_unbilled_items_report", 
+ "patches.november_2012.support_ticket_response_to_communication", 
+ "patches.november_2012.cancelled_bom_patch", 
+ "patches.november_2012.communication_sender_and_recipient", 
+ "patches.november_2012.update_delivered_billed_percentage_for_pos", 
+ "patches.november_2012.add_theme_to_profile", 
+ "patches.november_2012.add_employee_field_in_employee", 
+ "patches.november_2012.leave_application_cleanup", 
+ "patches.november_2012.production_order_patch", 
+ "patches.november_2012.gle_floating_point_issue", 
+ "patches.december_2012.deprecate_tds", 
+ "patches.december_2012.expense_leave_reload", 
+ "patches.december_2012.repost_ordered_qty", 
+ "patches.december_2012.repost_projected_qty", 
+ "patches.december_2012.reload_debtors_creditors_ledger", 
+ "patches.december_2012.website_cache_refactor", 
+ "patches.december_2012.production_cleanup", 
+ "patches.december_2012.fix_default_print_format", 
+ "patches.december_2012.file_list_rename", 
+ "patches.december_2012.replace_createlocal", 
+ "patches.december_2012.clear_web_cache", 
+ "patches.december_2012.remove_quotation_next_contact", 
+ "patches.december_2012.stock_entry_cleanup", 
+ "patches.december_2012.production_order_naming_series", 
+ "patches.december_2012.rebuild_item_group_tree", 
+ "patches.december_2012.address_title", 
+ "patches.december_2012.delete_form16_print_format", 
+ "patches.december_2012.remove_project_mapper", 
+ "patches.december_2012.update_print_width", 
+ "patches.january_2013.remove_bad_permissions", 
+ "patches.january_2013.deprecate_stock_search_criteria", 
+ "patches.january_2013.remove_support_search_criteria", 
+ "patches.january_2013.holiday_list_patch", 
+ "patches.january_2013.stock_reconciliation_patch", 
+ "patches.january_2013.report_permission", 
+ "patches.january_2013.give_report_permission_on_read", 
+ "patches.january_2013.update_closed_on",
+ "patches.january_2013.change_patch_structure",
+ "patches.january_2013.update_country_info",
+ "patches.january_2013.purchase_price_list",
 ]

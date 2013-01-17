@@ -4,7 +4,7 @@
   "docstatus": 0, 
   "creation": "2013-01-16 14:48:56", 
   "modified_by": "Administrator", 
-  "modified": "2013-01-16 15:46:26"
+  "modified": "2013-01-17 11:39:55"
  }, 
  {
   "read_only": 1, 
@@ -199,7 +199,14 @@
   "fieldtype": "Column Break"
  }, 
  {
-  "description": "Raise Purchase Request automatically for items which are \"Out of Stock\" considering already requested, already ordered qty and minimum order qty", 
+  "doctype": "DocField", 
+  "label": "Purchase Request For Warehouse", 
+  "fieldname": "purchase_request_for_warehouse", 
+  "fieldtype": "Link", 
+  "options": "Warehouse"
+ }, 
+ {
+  "description": "Items to be requested which are \"Out of Stock\" considering all warehouses based on projected qty and minimum order qty", 
   "doctype": "DocField", 
   "label": "Raise Purchase Request", 
   "fieldname": "raise_purchase_request", 

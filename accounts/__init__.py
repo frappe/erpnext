@@ -20,11 +20,6 @@ from webnotes.utils import flt
 from webnotes.model.code import get_obj
 from accounts.utils import get_balance_on
 
-install_docs = [
-	{"doctype":"Role", "role_name":"Accounts Manager", "name":"Accounts Manager"},
-	{"doctype":"Role", "role_name":"Accounts User", "name":"Accounts User"}
-]
-
 @webnotes.whitelist()
 def get_default_bank_account():
 	"""

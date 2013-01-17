@@ -85,7 +85,14 @@ class DocType(TransactionBase):
 		return g
 
 	def add_account(self, ac, par, abbr):
-		arg = {'account_name':ac,'parent_account':par, 'group_or_ledger':'Group', 'company':self.doc.company,'account_type':'','tax_rate':'0'}
+		arg = {
+			'account_name':ac,
+			'parent_account':par,
+			'group_or_ledger':'Group',
+			'company':self.doc.company,
+			'account_type':'',
+			'tax_rate':'0'
+		}
 		t = get_obj('GL Control').add_ac(cstr(arg))
 		msgprint("Created Group " + t)
 	

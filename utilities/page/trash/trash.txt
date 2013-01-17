@@ -9,7 +9,6 @@
  {
   "name": "__common__", 
   "module": "Utilities", 
-  "show_in_menu": 0, 
   "page_name": "Trash", 
   "doctype": "Page", 
   "standard": "Yes"

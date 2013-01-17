@@ -111,7 +111,7 @@ def get_fifo_rate(previous_stock_queue, qty):
 	else:
 		outgoing_cost = 0
 		qty_to_pop = abs(qty)
-		while qty_to_pop:
+		while qty_to_pop and previous_stock_queue:
 			batch = previous_stock_queue[0]
 			if 0 < batch[0] <= qty_to_pop:
 				# if batch qty > 0
@@ -124,8 +124,8 @@ def get_fifo_rate(previous_stock_queue, qty):
 				outgoing_cost += flt(qty_to_pop) * flt(batch[1])
 				batch[0] -= qty_to_pop
 				qty_to_pop = 0
-				
-		return outgoing_cost / abs(qty)
+		# if queue gets blank and qty_to_pop remaining, get average rate of full queue
+		return outgoing_cost / abs(qty) - qty_to_pop
 	
 def get_valid_serial_nos(sr_nos, qty=0, item_code=''):
 	"""split serial nos, validate and return list of valid serial nos"""

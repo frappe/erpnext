@@ -9,7 +9,6 @@
  {
   "name": "__common__", 
   "module": "Accounts", 
-  "show_in_menu": 0, 
   "page_name": "Accounts Browser", 
   "doctype": "Page", 
   "standard": "Yes"

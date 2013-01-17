@@ -299,7 +299,7 @@ cur_frm.fields_dict['quotation_details'].grid.get_field('item_code').get_query= 
 						and si_item.item_code = item.name \
 						and si.docstatus = 1 \
 						and si.customer = \"%(cust)s\" \
-					order by si.voucher_date desc \
+					order by si.posting_date desc \
 					limit 1 \
 				) as sales_rate, \
 				item.item_name, item.description \

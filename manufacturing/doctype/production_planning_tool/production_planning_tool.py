@@ -16,7 +16,7 @@
 
 from __future__ import unicode_literals
 import webnotes
-from webnotes.utils import cstr, flt, nowdate
+from webnotes.utils import cstr, flt, cint, nowdate, add_days
 from webnotes.model.doc import addchild, Document
 from webnotes.model.wrapper import getlist
 from webnotes.model.code import get_obj
@@ -275,7 +275,6 @@ class DocType:
 					and bom_item.item_code = item.name
 					group by item_code
 				""", (flt(bom_dict[bom]), bom))
-
 			self.make_items_dict(fl_bom_items)
 
 	def make_items_dict(self, item_list):
@@ -301,60 +300,82 @@ class DocType:
 		return item_list
 		
 	def raise_purchase_request(self):
-		def _get_projected_qty(items):
-			item_projected_qty = webnotes.conn.sql("""select item_code, sum(projected_qty) 
-				from `tabBin` where item_code in (%s) group by item_code""" % 
-				(", ".join(["%s"]*len(items)),), tuple(items))
-				
-			return dict(item_projected_qty)
+		"""
+			Raise Purchase Request if projected qty is less than qty required
+			Requested qty should be shortage qty considering minimum order qty
+		"""
+		if not self.doc.purchase_request_for_warehouse:
+			webnotes.msgprint("Please enter Warehouse for which Purchase Request will be raised",
+			 	raise_exception=1)
 			
-		item_dict = self.get_raw_materials()
-		item_projected_qty = _get_projected_qty(item_dict.keys())
+		bom_dict = self.get_distinct_items_and_boms()[0]
+		self.get_raw_materials(bom_dict)
+		item_projected_qty = self.get_projected_qty()
 		
 		from accounts.utils import get_fiscal_year
-		fiscal_year = get_fiscal_year(nowdate())
+		fiscal_year = get_fiscal_year(nowdate())[0]
 		
-		items_to_be_requested = []
-		for item in item_dict:
-			if flt(item_dict[item][0]) > item_projected_qty[item]:
+		items_to_be_requested = webnotes._dict()
+		for item in self.item_dict:
+			if flt(self.item_dict[item][0]) > item_projected_qty[item]:
 				# shortage
-				requested_qty = flt(item_dict[item][0]) - item_projected_qty[item]
+				requested_qty = flt(self.item_dict[item][0]) - item_projected_qty[item]
 				# comsider minimum order qty
-				requested_qty = requested_qty > flt(item_dict[item][3]) and \
-					requested_qty or flt(item_dict[item][3])
-				items_to_be_requested.append({
-					"item_code": item, 
-					"qty": requested_qty, 
-					"description": item_dict[item][1],
-					"stock_uom": item_dict[item][2]
-				})
-		webnotes.errprint(items_to_be_requested)
-		self.insert_purchase_request(items_to_be_requested, fiscal_year)
+				requested_qty = requested_qty > flt(self.item_dict[item][3]) and \
+					requested_qty or flt(self.item_dict[item][3])
+				items_to_be_requested[item] = requested_qty
 		
-	def insert_purchase_request(self, items, fiscal_year):
-		for item in items:
-			item_wrapper = webnotes.model_wrapper("Item", args.item_code)
-			pr = [
-				{
-					"doctype": "Purchase Request",
-					"naming_series": "IDT",
-					"transaction_date": nowdate(),
-					"status": "Draft",
-					"company": self.doc.company,
-					"fiscal_year": fiscal_year,
-					"requested_by": webnotes.session.user,
-					"remark": "Automatically raised from Production Planning Tool"
-				},
-				{
-					"doctype": "Purchase Request Item",
-					"item_code": item.item_code,
-					"item_name": item_wrapper.doc.item_name,
-					"description": item.description,
-					"uom": item.stock_uom,
-					"item_group": item_wrapper.doc.item_group,
-					"brand": item_wrapper.doc.brand,
-					"qty": item.qty,
-					
-					
-				}
-			]
+		self.insert_purchase_request(items_to_be_requested, fiscal_year)
+			
+	def get_projected_qty(self):
+		items = self.item_dict.keys()
+		item_projected_qty = webnotes.conn.sql("""select item_code, sum(projected_qty) 
+			from `tabBin` where item_code in (%s) group by item_code""" % 
+			(", ".join(["%s"]*len(items)),), tuple(items))
+
+		return dict(item_projected_qty)
+		
+	def insert_purchase_request(self, items_to_be_requested, fiscal_year):
+		purchase_request_list = []
+		if items_to_be_requested:
+			for item in items_to_be_requested:
+				item_wrapper = webnotes.model_wrapper("Item", item)
+				pr_doclist = [
+					{
+						"doctype": "Purchase Request",
+						"__islocal": 1,
+						"naming_series": "IDT",
+						"transaction_date": nowdate(),
+						"status": "Draft",
+						"company": self.doc.company,
+						"fiscal_year": fiscal_year,
+						"requested_by": webnotes.session.user,
+						"remark": "Automatically raised from Production Planning Tool"
+					},
+					{
+						"doctype": "Purchase Request Item",
+						"__islocal": 1,
+						"parentfield": "indent_details",
+						"item_code": item,
+						"item_name": item_wrapper.doc.item_name,
+						"description": item_wrapper.doc.description,
+						"uom": item_wrapper.doc.stock_uom,
+						"item_group": item_wrapper.doc.item_group,
+						"brand": item_wrapper.doc.brand,
+						"qty": items_to_be_requested[item],
+						"schedule_date": add_days(nowdate(), cint(item_wrapper.doc.lead_time_days)),
+						"warehouse": self.doc.purchase_request_for_warehouse
+					}
+				]
+				pr_wrapper = webnotes.model_wrapper(pr_doclist)
+				pr_wrapper.ignore_permissions = 1
+				pr_wrapper.submit()
+				purchase_request_list.append(pr_wrapper.doc.name)
+			
+			if purchase_request_list:
+				pur_req = ["""<a href="#Form/Purchase Request/%s" target="_blank">%s</a>""" % \
+					(p, p) for p in purchase_request_list]
+				webnotes.msgprint("Following Purchase Request created successfully: \n%s" % 
+					"\n".join(pur_req))
+		else:
+			webnotes.msgprint("Nothing to request")
