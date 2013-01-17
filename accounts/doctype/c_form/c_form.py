@@ -55,12 +55,12 @@ class DocType:
 		if inv:
 			webnotes.conn.sql("""update `tabSales Invoice` set c_form_no=%s, modified=%s 
 				where name in (%s)""" % ('%s', '%s', ', '.join(['%s'] * len(inv))), 
-				tuple([self.doc.name, self.doc.modified] + inv), debug=1)
+				tuple([self.doc.name, self.doc.modified] + inv))
 				
 			webnotes.conn.sql("""update `tabSales Invoice` set c_form_no = '', modified = %s 
 				where name not in (%s) and ifnull(c_form_no, '') = %s""" % 
 				('%s', ', '.join(['%s']*len(inv)), '%s'),
-				tuple([self.doc.modified] + inv + [self.doc.name]), debug=1)
+				tuple([self.doc.modified] + inv + [self.doc.name]))
 		else:
 			webnotes.msgprint("Please enter atleast 1 invoice in the table", raise_exception=1)
 
