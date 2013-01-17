@@ -21,6 +21,7 @@ from webnotes.utils import add_days, cint, cstr, flt, formatdate, get_defaults
 from webnotes.model.wrapper import getlist
 from webnotes.model.code import get_obj
 from webnotes import msgprint
+from setup.utils import get_company_currency
 
 sql = webnotes.conn.sql
 	
@@ -159,7 +160,7 @@ class DocType(BuyingController):
 	# Check Conversion Rate
 	# ----------------------
 	def check_conversion_rate(self):
-		default_currency = super(DocType, self).get_company_currency(self.doc.company)		
+		default_currency = get_company_currency(self.doc.company)		
 		if not default_currency:
 			msgprint('Message: Please enter default currency in Company Master')
 			raise Exception
@@ -370,7 +371,7 @@ class DocType(BuyingController):
 		pc_obj = get_obj(dt='Purchase Common')
 		
 		 # get total in words
-		dcc = super(DocType, self).get_company_currency(self.doc.company)
+		dcc = get_company_currency(self.doc.company)
 		self.doc.in_words = pc_obj.get_total_in_words(dcc, self.doc.grand_total)
 		self.doc.in_words_import = pc_obj.get_total_in_words(self.doc.currency,
 		 	self.doc.grand_total_import)

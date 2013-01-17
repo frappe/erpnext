@@ -22,6 +22,7 @@ from webnotes.model.doc import addchild
 from webnotes.model.wrapper import getlist
 from webnotes.model.code import get_obj
 from webnotes import msgprint
+from setup.utils import get_company_currency
 
 sql = webnotes.conn.sql
 
@@ -131,13 +132,12 @@ class DocType(BuyingController):
 		pc_obj = get_obj(dt='Purchase Common')
 		pc_obj.validate_for_items(self)
 		pc_obj.validate_mandatory(self)
-		pc_obj.validate_conversion_rate(self)
 		pc_obj.get_prevdoc_date(self)
 		pc_obj.validate_reference_value(self)
 		self.check_for_stopped_status(pc_obj)
 
 		# get total in words
-		dcc = super(DocType, self).get_company_currency(self.doc.company)
+		dcc = get_company_currency(self.doc.company)
 		self.doc.in_words = pc_obj.get_total_in_words(dcc, self.doc.grand_total)
 		self.doc.in_words_import = pc_obj.get_total_in_words(self.doc.currency, self.doc.grand_total_import)
 		# update valuation rate

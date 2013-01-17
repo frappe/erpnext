@@ -17,25 +17,16 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import cstr, flt, get_defaults, now, sendmail
-from webnotes.model import db_exists
+from webnotes.utils import cstr, flt, get_defaults
 from webnotes.model.doc import Document, addchild
-from webnotes.model.wrapper import getlist, copy_doclist
+from webnotes.model.wrapper import getlist
 from webnotes.model.code import get_obj
 from webnotes import msgprint
-from webnotes.utils.email_lib import sendmail
-
-
-from utilities.transaction_base import TransactionBase
 
 class DocType:
 	def __init__(self,d,dl):
 		self.doc, self.doclist = d, dl
 		self.entries = []
-
-	def get_company_currency(self,arg=''):
-		dcc = TransactionBase().get_company_currency(arg)
-		return dcc
 
 	def get_period_difference(self,arg, cost_center =''):
 		# used in General Ledger Page Report

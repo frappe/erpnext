@@ -17,6 +17,7 @@
 from __future__ import unicode_literals
 import webnotes
 from webnotes.model.code import get_obj
+from setup.utils import get_company_currency
 
 from controllers.buying_controller import BuyingController
 class DocType(BuyingController):
@@ -77,12 +78,11 @@ class DocType(BuyingController):
 		pc = get_obj('Purchase Common')
 		pc.validate_mandatory(self)
 		pc.validate_for_items(self)
-		pc.validate_conversion_rate(self)
 		pc.get_prevdoc_date(self)
 		pc.validate_reference_value(self)
 		
 	def set_in_words(self):
 		pc = get_obj('Purchase Common')
-		company_currency = super(DocType, self).get_company_currency(self.doc.company)
+		company_currency = get_company_currency(self.doc.company)
 		self.doc.in_words = pc.get_total_in_words(company_currency, self.doc.grand_total)
 		self.doc.in_words_import = pc.get_total_in_words(self.doc.currency, self.doc.grand_total_import)

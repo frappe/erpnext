@@ -26,6 +26,7 @@ from webnotes.model.doc import make_autoname
 from webnotes.model.wrapper import getlist, copy_doclist
 from webnotes.model.code import get_obj
 from webnotes import session, form, msgprint
+from setup.utils import get_company_currency
 
 session = webnotes.session
 
@@ -412,7 +413,7 @@ class DocType(TransactionBase):
 
 
 	def set_in_words(self):
-		dcc = TransactionBase().get_company_currency(self.doc.company)
+		dcc = get_company_currency(self.doc.company)
 		self.doc.in_words = get_obj('Sales Common').get_total_in_words(dcc, self.doc.rounded_total)
 		self.doc.in_words_export = get_obj('Sales Common').get_total_in_words(self.doc.currency, self.doc.rounded_total_export)
 
@@ -503,7 +504,7 @@ class DocType(TransactionBase):
 				d.actual_qty = bin and flt(bin[0]['actual_qty']) or 0
 
 		for d in getlist(self.doclist, 'packing_details'):
-			bin = sql("select actual_qty, projected_qty from `tabBin` where item_code =	%s and warehouse = %s", (d.item_code, d.warehouse), as_dict = 1)
+			bin = webnotes.conn.sql("select actual_qty, projected_qty from `tabBin` where item_code =	%s and warehouse = %s", (d.item_code, d.warehouse), as_dict = 1)
 			d.actual_qty = bin and flt(bin[0]['actual_qty']) or 0
 			d.projected_qty = bin and flt(bin[0]['projected_qty']) or 0
 	 
