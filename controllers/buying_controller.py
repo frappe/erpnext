@@ -16,13 +16,19 @@
 
 from __future__ import unicode_literals
 import webnotes
+from webnotes import _, msgprint
+from webnotes.utils import flt
 
 from buying.utils import get_item_details
+from setup.utils import get_company_currency
 
 from utilities.transaction_base import TransactionBase
 class BuyingController(TransactionBase):
 	def validate(self):
-		pass
+		if self.meta.get_field("currency"):
+			self.company_currency = get_company_currency(self.doc.company)
+			self.validate_conversion_rate("currency", "conversion_rate")
+			self.validate_conversion_rate("price_list_currency", "plc_conversion_rate")
 		
 	def update_item_details(self):
 		for item in self.doclist.get({"parentfield": self.fname}):
@@ -38,3 +44,25 @@ class BuyingController(TransactionBase):
 			for r in ret:
 				if not item.fields.get(r):
 					item.fields[r] = ret[r]
+	
+	def validate_conversion_rate(self, currency_field, conversion_rate_field):
+		"""common validation for currency and price list currency"""
+		
+		currency = self.doc.fields.get(currency_field)
+		conversion_rate = flt(self.doc.fields.get(conversion_rate_field))
+		conversion_rate_label = self.meta.get_label(conversion_rate_field)
+		
+		if conversion_rate == 0:
+			msgprint(conversion_rate_label + _(' cannot be 0'), raise_exception=True)
+		
+		# parenthesis for 'OR' are necessary as we want it to evaluate as 
+		# mandatory valid condition and (1st optional valid condition 
+		# 	or 2nd optional valid condition)
+		valid_conversion_rate = (conversion_rate and 
+			((currency == self.company_currency and conversion_rate == 1.00)
+				or (currency != self.company_currency and conversion_rate != 1.00)))
+
+		if not valid_conversion_rate:
+			msgprint(_('Please enter valid ') + conversion_rate_label + (': ') 
+				+ ("1 %s = [?] %s" % _(currency, self.company_currency)),
+				raise_exception=True)

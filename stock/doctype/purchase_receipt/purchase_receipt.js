@@ -22,6 +22,29 @@ wn.require('app/accounts/doctype/purchase_taxes_and_charges_master/purchase_taxe
 wn.require('app/buying/doctype/purchase_common/purchase_common.js');
 wn.require('app/utilities/doctype/sms_control/sms_control.js');
 
+erpnext.buying.PurchaseReceiptController = erpnext.buying.BuyingController.extend({
+	refresh: function() {
+		this._super();
+		
+		if(this.frm.doc.docstatus == 1) {
+			if(flt(this.frm.doc.per_billed, 2) < 100) {
+				cur_frm.add_custom_button('Make Purchase Invoice', 
+					cur_frm.cscript['Make Purchase Invoice']);
+			}
+			cur_frm.add_custom_button('Send SMS', cur_frm.cscript['Send SMS']);
+		}
+
+		if(wn.boot.control_panel.country == 'India') {
+			unhide_field(['challan_no', 'challan_date']);
+		}
+	}
+});
+
+var new_cscript = new erpnext.buying.PurchaseReceiptController({frm: cur_frm});
+
+// for backward compatibility: combine new and previous states
+$.extend(cur_frm.cscript, new_cscript);
+
 //========================== On Load ================================================================
 cur_frm.cscript.onload = function(doc, cdt, cdn) {
 	if(!doc.fiscal_year && doc.__islocal){ wn.model.set_default_values(doc);}
@@ -38,26 +61,6 @@ cur_frm.cscript.onload_post_render = function(doc, dt, dn) {
 	cur_frm.cscript.dynamic_label(doc, dt, dn, callback);
 }
 
-//========================== Refresh ===============================================================
-cur_frm.cscript.refresh = function(doc, cdt, cdn) { 
-	cur_frm.clear_custom_buttons();
-	
-	erpnext.hide_naming_series();
-	if(doc.supplier) $(cur_frm.fields_dict.contact_section.row.wrapper).toggle(true);
-	else $(cur_frm.fields_dict.contact_section.row.wrapper).toggle(false);
-
-	if (!cur_frm.cscript.is_onload) cur_frm.cscript.dynamic_label(doc, cdt, cdn);
-
-	if(doc.docstatus == 1){
-		if (flt(doc.per_billed, 2) < 100) cur_frm.add_custom_button('Make Purchase Invoice', cur_frm.cscript['Make Purchase Invoice']);
-		cur_frm.add_custom_button('Send SMS', cur_frm.cscript['Send SMS']);
-	}
-	
-	if(wn.boot.control_panel.country == 'India') {
-		unhide_field(['challan_no', 'challan_date']);
-	}
-}
-
 //Supplier
 cur_frm.cscript.supplier = function(doc,dt,dn) {
 	if (doc.supplier) {
@@ -65,7 +68,6 @@ cur_frm.cscript.supplier = function(doc,dt,dn) {
 			JSON.stringify({ supplier: doc.supplier }),'', doc, dt, dn, 1, function() {
 				cur_frm.refresh();
 			});
-		$(cur_frm.fields_dict.contact_section.row.wrapper).toggle(true);
 	}
 }
 

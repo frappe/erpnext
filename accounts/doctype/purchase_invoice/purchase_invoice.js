@@ -20,6 +20,28 @@ cur_frm.cscript.other_fname = "purchase_tax_details";
 wn.require('app/accounts/doctype/purchase_taxes_and_charges_master/purchase_taxes_and_charges_master.js');
 wn.require('app/buying/doctype/purchase_common/purchase_common.js');
 
+erpnext.buying.PurchaseInvoiceController = erpnext.buying.BuyingController.extend({
+	refresh: function(doc) {
+		this._super();
+		
+		// Show / Hide button
+		if(doc.docstatus==1 && doc.outstanding_amount > 0)
+			cur_frm.add_custom_button('Make Payment Entry', cur_frm.cscript.make_bank_voucher);
+
+		if(doc.docstatus==1) { 
+			cur_frm.add_custom_button('View Ledger', cur_frm.cscript.view_ledger_entry);
+		}
+		
+		cur_frm.cscript.is_opening(doc);
+	}
+});
+
+var new_cscript = new erpnext.buying.PurchaseInvoiceController({frm: cur_frm});
+
+// for backward compatibility: combine new and previous states
+$.extend(cur_frm.cscript, new_cscript);
+
+
 cur_frm.cscript.onload = function(doc,dt,dn) {
 	if(!doc.voucher_date) set_multiple(dt,dn,{voucher_date:get_today()});
 	if(!doc.posting_date) set_multiple(dt,dn,{posting_date:get_today()});
@@ -27,34 +49,13 @@ cur_frm.cscript.onload = function(doc,dt,dn) {
 
 cur_frm.cscript.onload_post_render = function(doc, dt, dn) {
 	var callback = function(doc, dt, dn) {
-		var callback1 = function(doc, dt, dn) {
-			if(doc.__islocal && doc.supplier) cur_frm.cscript.supplier(doc,dt,dn);
-		}
-	
-		// defined in purchase_common.js
-		cur_frm.cscript.update_item_details(doc, dt, dn, callback1);
+		if(doc.__islocal && doc.supplier) cur_frm.cscript.supplier(doc,dt,dn);
 	}
-	cur_frm.cscript.dynamic_label(doc, dt, dn, callback);
-}
 
-cur_frm.cscript.refresh = function(doc, dt, dn) {
+	// defined in purchase_common.js
+	cur_frm.cscript.update_item_details(doc, dt, dn, callback);
 	
-	cur_frm.clear_custom_buttons();
-	erpnext.hide_naming_series();
-
-	if (!cur_frm.cscript.is_onload) cur_frm.cscript.dynamic_label(doc, dt, dn);
-
-
-	// Show / Hide button
-	if(doc.docstatus==1 && doc.outstanding_amount > 0)
-		cur_frm.add_custom_button('Make Payment Entry', cur_frm.cscript.make_bank_voucher);
-	
-	if(doc.docstatus==1) { 
-		cur_frm.add_custom_button('View Ledger', cur_frm.cscript.view_ledger_entry);
-	}	
-	cur_frm.cscript.is_opening(doc, dt, dn);
 }
-
 
 cur_frm.cscript.supplier = function(doc,dt,dn) {
 	var callback = function(r,rt) {

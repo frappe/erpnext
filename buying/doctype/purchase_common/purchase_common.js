@@ -25,16 +25,61 @@ erpnext.buying.BuyingController = erpnext.utils.Controller.extend({
 	setup: function() {
 		var me = this;
 		
-		this.frm.fields_dict.price_list_currency.get_query = function() {
-			return repl("select distinct ref_currency from `tabItem Price` \
-				where price_list_name=\"%(price_list_name)s\" and %(key)s like \"%s%%\"", 
-				{price_list_name: me.frm.doc.price_list_name});
-		};
+		if(this.frm.fields_dict.price_list_name) {
+			this.frm.fields_dict.price_list_name.get_query = function() {
+				return repl("select distinct price_list_name from `tabItem Price` \
+					where for_buying = 1 and price_list_name like \"%s%%\"");
+			};
+		}
+		
+		if(this.frm.fields_dict.price_list_currency) {
+			this.frm.fields_dict.price_list_currency.get_query = function() {
+				return repl("select distinct ref_currency from `tabItem Price` \
+					where price_list_name=\"%(price_list_name)s\" and for_buying = 1 \
+					and ref_currency like \"%s%%\"", 
+					{price_list_name: me.frm.doc.price_list_name});
+			};
+		}
+	},
+	
+	refresh: function() {
+		this.frm.clear_custom_buttons();
+		erpnext.hide_naming_series();
+		
+		if(this.frm.fields_dict.supplier)
+			this.frm.toggle_display("contact_section", this.frm.doc.supplier);
+		
+		if(this.frm.fields_dict.currency)
+			this.set_dynamic_labels();
+		
+		// TODO: improve this
+		if(this.frm.doc.__islocal && this.frm.fields_dict.price_list_name 
+				&& this.frm.doc.price_list_name && this.frm.doc.price_list_currency) {
+			this.price_list_name();
+		}
 	},
 	
 	price_list_name: function() {
 		this.frm.toggle_reqd(["price_list_currency", "plc_conversion_rate"],
-			!!this.frm.doc.price_list_name);
+			!!(this.frm.doc.price_list_name));
+		
+		var me = this;
+		
+		if(this.frm.doc.price_list_name) {
+			// set price list currency
+			this.frm.call({
+				method: "setup.utils.get_price_list_currency",
+				args: {args: {
+					price_list_name: this.frm.doc.price_list_name,
+					use_for: "buying"
+				}},
+				callback: function(r) {
+					if(!r.exc && r.message.price_list_currency) {
+						me.price_list_currency();
+					}
+				}
+			});
+		}
 	},
 	
 	item_code: function(doc, cdt, cdn) {
@@ -80,6 +125,118 @@ erpnext.buying.BuyingController = erpnext.utils.Controller.extend({
 		} else {
 			this.load_taxes(doc, dt, dn, callback);
 		}
+	},
+	
+	currency: function() {
+		this.set_dynamic_labels();
+	},
+	
+	company: function() {
+		this.set_dynamic_labels();
+	},
+	
+	price_list_currency: function() {
+		this.set_dynamic_labels();
+		
+		if(this.frm.doc.price_list_currency === this.get_company_currency()) {
+			this.frm.set_value("plc_conversion_rate", 1.0);
+		}
+	},
+	
+	set_dynamic_labels: function(doc, dt, dn) {
+		var company_currency = this.get_company_currency();
+		
+		this.change_form_labels(company_currency);
+		this.change_grid_labels(company_currency);
+	},
+	
+	change_form_labels: function(company_currency) {
+		var me = this;
+		var field_label_map = {};
+		
+		var setup_field_label_map = function(fields_list, currency) {
+			$.each(fields_list, function(i, fname) {
+				var docfield = wn.meta.get_docfield(me.frm.doc.doctype, fname);
+				if(docfield) {
+					var label = wn._((docfield.label || "")).replace(/\([^\)]*\)/g, "");
+					field_label_map[fname] = label.trim() + " (" + currency + ")";
+				}
+			});
+		}
+		
+		setup_field_label_map(["net_total", "total_tax", "grand_total", "in_words",
+			"other_charges_added", "other_charges_deducted", 
+			"outstanding_amount", "total_advance", "total_amount_to_pay", "rounded_total"],
+			company_currency);
+		
+		setup_field_label_map(["net_total_import", "grand_total_import", "in_words_import",
+			"other_charges_added_import", "other_charges_deducted_import"], this.frm.doc.currency);
+		
+		setup_field_label_map(["conversion_rate"], 	"1 " + this.frm.doc.currency 
+			+ " = [?] " + company_currency);
+		
+		if(this.frm.doc.price_list_currency && this.frm.doc.price_list_currency!=company_currency) {
+			setup_field_label_map(["plc_conversion_rate"], 	"1 " + this.frm.doc.price_list_currency 
+				+ " = [?] " + company_currency);
+		}
+		
+		// toggle fields
+		this.frm.toggle_display(["conversion_rate", "net_total", "grand_total", 
+			"in_words", "other_charges_added", "other_charges_deducted"],
+			this.frm.doc.currency != company_currency);
+		
+		// set labels
+		$.each(field_label_map, function(fname, label) {
+			me.frm.fields_dict[fname].set_label(label);
+		});
+	},
+	
+	change_grid_labels: function(company_currency) {
+		var me = this;
+		var field_label_map = {};
+		
+		var setup_field_label_map = function(fields_list, currency, parentfield) {
+			var grid_doctype = me.frm.fields_dict[parentfield].grid.doctype;
+			$.each(fields_list, function(i, fname) {
+				var docfield = wn.meta.get_docfield(grid_doctype, fname);
+				if(docfield) {
+					field_label_map[grid_doctype + "-" + fname] = 
+						docfield.label + " (" + currency + ")";
+				}
+			});
+		}
+		
+		setup_field_label_map(["purchase_rate", "purchase_ref_rate", "amount", "rate"],
+			company_currency, this.fname);
+		
+		setup_field_label_map(["import_rate", "import_ref_rate", "import_amount"],
+			this.frm.doc.currency, this.fname);
+		
+		setup_field_label_map(["tax_amount", "total"], company_currency, this.other_fname);
+		
+		if(this.frm.fields_dict["advance_allocation_details"]) {
+			setup_field_label_map(["advance_amount", "allocated_amount"], company_currency,
+				"advance_allocation_details");
+		}
+		
+		// toggle columns
+		var item_grid = this.frm.fields_dict[this.fname].grid;
+		var hide = this.frm.doc.currency == company_currency;
+		$.each(["purchase_rate", "purchase_ref_rate", "amount", "rate"], function(i, fname) {
+			if(wn.meta.get_docfield(item_grid.doctype, fname))
+				item_grid.set_column_disp(fname, hide);
+		});
+		
+		// set labels
+		var $wrapper = $(this.frm.wrapper);
+		$.each(field_label_map, function(fname, label) {
+			$wrapper.find('[data-grid-fieldname="'+fname+'"]').text(label);
+		});
+	},
+	
+	get_company_currency: function() {
+		return (wn.boot.company[this.frm.doc.company].default_currency ||
+			sys_defaults['currency']);
 	}
 });
 
@@ -89,7 +246,7 @@ $.extend(prev_cscript, cur_frm.cscript);
 
 cur_frm.cscript = new erpnext.buying.BuyingController({frm: cur_frm});
 
-// combine new and previous states
+// for backward compatibility: combine new and previous states
 $.extend(cur_frm.cscript, prev_cscript);
 
 
@@ -138,83 +295,6 @@ cur_frm.cscript.load_defaults = function(doc, dt, dn, callback) {
 	refresh_field(cur_frm.cscript.fname);
 	cur_frm.cscript.load_taxes(doc, dt, dn, callback);
 }
-
-
-var set_dynamic_label_par = function(doc, cdt, cdn, base_curr) {
-	//parent flds
-	par_cols_base = {'net_total': 'Net Total', 'total_tax': 'Total Tax', 'grand_total':	'Grand Total', /*'rounded_total': 'Rounded Total',*/
-		'in_words': 'In Words', 'other_charges_added': 'Taxes and Charges Added', 'other_charges_deducted': 'Taxes and Charges Deducted'}
-	par_cols_import = {'net_total_import': 'Net Total', 'grand_total_import': 'Grand Total', 'in_words_import':	'In Words', 
-		'other_charges_added_import': 'Taxes and Charges Added', 'other_charges_deducted_import': 'Taxes and Charges Deducted'};
-
-	for (d in par_cols_base) cur_frm.fields_dict[d].label_area.innerHTML = par_cols_base[d]+' (' + base_curr + ')';
-	for (d in par_cols_import) cur_frm.fields_dict[d].label_area.innerHTML = par_cols_import[d]+' (' + doc.currency + ')';
-	cur_frm.fields_dict['conversion_rate'].label_area.innerHTML = "Conversion Rate (" + doc.currency +' -> '+ base_curr + ')';
-
-	if (doc.doctype == 'Purchase Invoice') {
-		cur_frm.fields_dict['outstanding_amount'].label_area.innerHTML = 'Outstanding Amount (' + base_curr + ')';
-		cur_frm.fields_dict['total_advance'].label_area.innerHTML = 'Total Advance (Incl. TDS) (' + base_curr + ')';
-		cur_frm.fields_dict['total_amount_to_pay'].label_area.innerHTML = 'Total Amount To Pay (' + base_curr + ')';
-	} else cur_frm.fields_dict['rounded_total'].label_area.innerHTML = 'Rounded Total (' + base_curr + ')';
-
-}
-
-
-var set_dynamic_label_child = function(doc, cdt, cdn, base_curr) {
-	// item table flds
-	item_cols_base = {'purchase_ref_rate': 'Ref Rate', 'amount': 'Amount'};
-	item_cols_import = {'import_rate': 'Rate', 'import_ref_rate': 'Ref Rate', 'import_amount': 'Amount'};
-		
-	for (d in item_cols_base) $('[data-grid-fieldname="'+cur_frm.cscript.tname+'-'+d+'"]').html(item_cols_base[d]+' ('+base_curr+')');
-	for (d in item_cols_import) $('[data-grid-fieldname="'+cur_frm.cscript.tname+'-'+d+'"]').html(item_cols_import[d]+' ('+doc.currency+')');
-		
-	var hide = (doc.currency == sys_defaults['currency']) ? false : true;
-	for (f in item_cols_base) {
-		cur_frm.fields_dict[cur_frm.cscript.fname].grid.set_column_disp(f, hide);
-	}
-	if (doc.doctype == 'Purchase Invoice') {
-		$('[data-grid-fieldname="'+cur_frm.cscript.tname+'-rate"]').html('Rate ('+base_curr+')');
-		cur_frm.fields_dict[cur_frm.cscript.fname].grid.set_column_disp('rate', hide);
-		// advance table flds
-		adv_cols = {'advance_amount': 'Advance Amount', 'allocated_amount': 'Allocated Amount'}
-		for (d in adv_cols) $('[data-grid-fieldname="Purchase Invoice Advance-'+d+'"]').html(adv_cols[d]+' ('+base_curr+')');	
-	}
-	else {
-		$('[data-grid-fieldname="'+cur_frm.cscript.tname+'-purchase_rate"]').html('Rate ('+base_curr+')');
-		cur_frm.fields_dict[cur_frm.cscript.fname].grid.set_column_disp('purchase_rate', hide);
-	}
-
-	//tax table flds
-	tax_cols = {'tax_amount': 'Amount', 'total': 'Aggregate Total'};
-	for (d in tax_cols) $('[data-grid-fieldname="Purchase Taxes and Charges-'+d+'"]').html(tax_cols[d]+' ('+base_curr+')');	
-}
-
-// Change label dynamically based on currency
-//------------------------------------------------------------------
-
-cur_frm.cscript.dynamic_label = function(doc, cdt, cdn, callback1) {
-	var base_currency = wn.boot.company[doc.company].default_currency || sys_defaults['currency'];
-	if (doc.currency === base_currency) {
-		set_multiple(cdt, cdn, {conversion_rate:1});
-		hide_field(['conversion_rate', 'net_total_import','grand_total_import',
-			'in_words_import', 'other_charges_added_import', 'other_charges_deducted_import']);
-	} else {
-		unhide_field(['conversion_rate', 'net_total_import','grand_total_import',
-			'in_words_import', 'other_charges_added_import', 'other_charges_deducted_import']);
-	}
-	
-	set_dynamic_label_par(doc, cdt, cdn, base_currency);
-	set_dynamic_label_child(doc, cdt, cdn, base_currency);
-	
-	if (callback1) callback1(doc, cdt, cdn);
-}
-
-cur_frm.cscript.currency = function(doc, cdt, cdn) {
-	cur_frm.cscript.dynamic_label(doc, cdt, cdn);
-}
-
-cur_frm.cscript.company = cur_frm.cscript.currency;
-
 
 // ======================== Conversion Rate ==========================================
 cur_frm.cscript.conversion_rate = function(doc,cdt,cdn) {
@@ -696,10 +776,6 @@ var calculate_outstanding = function(doc) {
 	refresh_many(['total_amount_to_pay', 'outstanding_amount']);
 }
 
-
-cur_frm.cscript.toggle_contact_section = function(doc) {
-	cur_frm.toggle_display("contact_section", doc.supplier);
-}
 
 cur_frm.cscript.project_name = function(doc, cdt, cdn) {
 	var item_doc = locals[cdt][cdn];

@@ -254,28 +254,6 @@ class DocType(BuyingController):
 				else:
 					chk_dupl_itm.append(f)
 
-	# validate conversion rate
-	def validate_conversion_rate(self, obj):
-		default_currency = super(DocType, self).get_company_currency(obj.doc.company)			
-		if not default_currency:
-			msgprint('Message: Please enter default currency in Company Master')
-			raise Exception
-			
-		if obj.doc.conversion_rate == 0:
-			msgprint('Conversion Rate cannot be 0', raise_exception=1)
-		elif not obj.doc.conversion_rate:
-			msgprint('Please specify Conversion Rate', raise_exception=1)
-		elif obj.doc.currency == default_currency and \
-				flt(obj.doc.conversion_rate) != 1.00:
-			msgprint("""Conversion Rate should be equal to 1.00, \
-						since the specified Currency and the company's currency \
-						are same""", raise_exception=1)
-		elif obj.doc.currency != default_currency and \
-				flt(obj.doc.conversion_rate) == 1.00:
-			msgprint("""Conversion Rate should not be equal to 1.00, \
-						since the specified Currency and the company's currency \
-						are different""", raise_exception=1)
-
 # Validate values with reference document
 	#---------------------------------------
 	def validate_reference_value(self, obj):

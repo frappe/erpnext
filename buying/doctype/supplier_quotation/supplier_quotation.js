@@ -23,6 +23,24 @@ cur_frm.cscript.other_fname = "purchase_tax_details";
 wn.require('app/accounts/doctype/purchase_taxes_and_charges_master/purchase_taxes_and_charges_master.js');
 wn.require('app/buying/doctype/purchase_common/purchase_common.js');
 
+erpnext.buying.SupplierQuotationController = erpnext.buying.BuyingController.extend({
+	refresh: function() {
+		this._super();
+		
+		cur_frm.cscript.load_taxes(this.frm.doc);
+
+		if (this.frm.doc.docstatus === 1) {
+			cur_frm.add_custom_button("Make Purchase Order", cur_frm.cscript.make_purchase_order);
+		}
+	}
+});
+
+var new_cscript = new erpnext.buying.SupplierQuotationController({frm: cur_frm});
+
+// for backward compatibility: combine new and previous states
+$.extend(cur_frm.cscript, new_cscript);
+
+
 cur_frm.cscript.onload = function(doc, dt, dn) {
 	// set missing values in parent doc
 	set_missing_values(doc, {
@@ -33,19 +51,6 @@ cur_frm.cscript.onload = function(doc, dt, dn) {
 		transaction_date: get_today(),
 		is_subcontracted: "No"
 	});
-}
-
-cur_frm.cscript.refresh = function(doc, dt, dn) {
-	erpnext.hide_naming_series();
-	cur_frm.cscript.dynamic_label(doc, dt, dn);
-	cur_frm.cscript.load_taxes(doc, dt, dn);
-	
-	cur_frm.cscript.toggle_contact_section(doc);
-	
-	cur_frm.clear_custom_buttons();
-	if (doc.docstatus === 1) {
-		cur_frm.add_custom_button("Make Purchase Order", cur_frm.cscript.make_purchase_order);
-	}
 }
 
 cur_frm.cscript.make_purchase_order = function() {

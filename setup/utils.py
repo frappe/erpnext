@@ -16,6 +16,8 @@
 
 from __future__ import unicode_literals
 import webnotes
+from webnotes import _, msgprint
+import json
 
 def get_company_currency(company):
 	currency = webnotes.conn.get_value("Company", company, "default_currency")
@@ -26,3 +28,22 @@ def get_company_currency(company):
 			and Global Defaults'), raise_exception=True)
 		
 	return currency
+
+@webnotes.whitelist()
+def get_price_list_currency(args):
+	"""
+		args = {
+			"price_list_name": "Something",
+			"use_for": "buying" or "selling"
+		}
+	"""
+	if isinstance(args, basestring):
+		args = json.loads(args)
+	
+	result = webnotes.conn.sql("""select ref_currency from `tabItem Price`
+		where price_list_name=%s and `%s`=1""" % ("%s", args.get("use_for")),
+		(args.get("price_list_name"),))
+	if result and len(result)==1:
+		return {"price_list_currency": result[0][0]}
+	else:
+		return {}

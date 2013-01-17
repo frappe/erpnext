@@ -82,7 +82,7 @@ def get_item_details(args):
 	
 	if args.doctype in ["Purchase Order", "Purchase Invoice", "Purchase Receipt"]:
 		# try fetching from price list
-		if args.price_list_name:
+		if args.price_list_name and args.price_list_currency:
 			rates_as_per_price_list = get_rates_as_per_price_list(args, item_wrapper.doclist)
 			if rates_as_per_price_list:
 				out.update(rates_as_per_price_list)

@@ -2,9 +2,9 @@
  {
   "owner": "Administrator", 
   "docstatus": 0, 
-  "creation": "2012-12-28 11:01:35", 
+  "creation": "2013-01-17 10:57:15", 
   "modified_by": "Administrator", 
-  "modified": "2013-01-16 11:14:57"
+  "modified": "2013-01-17 11:22:07"
  }, 
  {
   "allow_attach": 1, 
@@ -32,8 +32,9 @@
   "read": 1, 
   "submit": 0, 
   "doctype": "DocPerm", 
-  "report": 1, 
+  "amend": 0, 
   "parenttype": "DocType", 
+  "report": 1, 
   "parentfield": "permissions"
  }, 
  {
@@ -48,15 +49,6 @@
   "fieldname": "item", 
   "fieldtype": "Section Break", 
   "permlevel": 0
- }, 
- {
-  "oldfieldtype": "Small Text", 
-  "doctype": "DocField", 
-  "label": "Trash Reason", 
-  "oldfieldname": "trash_reason", 
-  "fieldname": "trash_reason", 
-  "fieldtype": "Small Text", 
-  "permlevel": 1
  }, 
  {
   "description": "Item will be saved by this name in the data base.", 
@@ -597,18 +589,6 @@
   "permlevel": 0
  }, 
  {
-  "description": "Create a price list from Price List master and enter standard ref rates against each of them. On selection of a price list in Quotation, Sales Order or Delivery Note, corresponding ref rate will be fetched for this item.", 
-  "oldfieldtype": "Table", 
-  "doctype": "DocField", 
-  "label": "Item Prices", 
-  "oldfieldname": "ref_rate_details", 
-  "options": "Item Price", 
-  "fieldname": "ref_rate_details", 
-  "fieldtype": "Table", 
-  "depends_on": "eval:doc.is_sales_item==\"Yes\"", 
-  "permlevel": 0
- }, 
- {
   "description": "For the convenience of customers, these codes can be used in print formats like Invoices and Delivery Notes", 
   "depends_on": "eval:doc.is_sales_item==\"Yes\"", 
   "doctype": "DocField", 
@@ -634,6 +614,25 @@
   "options": "Item Tax", 
   "fieldname": "item_tax", 
   "fieldtype": "Table", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Price Lists and Rates", 
+  "fieldname": "price_list_section", 
+  "fieldtype": "Section Break", 
+  "permlevel": 0
+ }, 
+ {
+  "description": "Create a price list from Price List master and enter standard ref rates against each of them. On selection of a price list in Quotation, Sales Order or Delivery Note, corresponding ref rate will be fetched for this item.", 
+  "oldfieldtype": "Table", 
+  "doctype": "DocField", 
+  "label": "Item Prices", 
+  "oldfieldname": "ref_rate_details", 
+  "options": "Item Price", 
+  "fieldname": "ref_rate_details", 
+  "fieldtype": "Table", 
+  "depends_on": "eval:doc.is_sales_item==\"Yes\"", 
   "permlevel": 0
  }, 
  {
@@ -691,6 +690,7 @@
   "permlevel": 0
  }, 
  {
+  "read_only": 1, 
   "no_copy": 1, 
   "oldfieldtype": "Link", 
   "doctype": "DocField", 
@@ -700,7 +700,7 @@
   "fieldname": "default_bom", 
   "fieldtype": "Link", 
   "depends_on": "eval:doc.is_manufactured_item==\"Yes\"", 
-  "permlevel": 1
+  "permlevel": 0
  }, 
  {
   "description": "Selecting \"Yes\" will allow you to make a Production Order for this item.", 
@@ -765,13 +765,14 @@
   "permlevel": 0
  }, 
  {
+  "read_only": 1, 
   "description": "website page link", 
   "depends_on": "show_in_website", 
   "doctype": "DocField", 
   "label": "Page Name", 
   "fieldname": "page_name", 
   "fieldtype": "Data", 
-  "permlevel": 1
+  "permlevel": 0
  }, 
  {
   "description": "Products will be sorted by weight-age in default searches. More the weight-age, higher the product will appear in the list.", 
@@ -866,53 +867,32 @@
   "create": 1, 
   "doctype": "DocPerm", 
   "write": 1, 
-  "role": "Material Master Manager", 
   "cancel": 1, 
-  "permlevel": 0
- }, 
- {
-  "amend": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "write": 0, 
-  "role": "Material Manager", 
-  "cancel": 0, 
-  "permlevel": 0
- }, 
- {
-  "amend": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "write": 0, 
-  "role": "Material User", 
-  "cancel": 0, 
-  "permlevel": 0
- }, 
- {
-  "amend": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "write": 0, 
   "role": "Material Master Manager", 
-  "cancel": 0, 
-  "permlevel": 1
+  "permlevel": 0
  }, 
  {
-  "amend": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
   "write": 0, 
-  "role": "Material Manager", 
   "cancel": 0, 
-  "permlevel": 1
- }, 
- {
-  "amend": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "write": 0, 
   "role": "Material User", 
+  "permlevel": 0
+ }, 
+ {
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "write": 0, 
   "cancel": 0, 
+  "role": "Material Master Manager", 
+  "permlevel": 1
+ }, 
+ {
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "write": 0, 
+  "cancel": 0, 
+  "role": "Material User", 
   "permlevel": 1
  }
 ]
