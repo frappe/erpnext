@@ -97,7 +97,14 @@ def page_name(title):
 	import re
 	name = title.lower()
 	name = re.sub('[~!@#$%^&*()<>,."\']', '', name)
-	return '-'.join(name.split())
+	name = re.sub('[:/]', '-', name)
+
+	name = '-'.join(name.split())
+
+	# replace repeating hyphens
+	name = re.sub(r"(-)\1+", r"\1", name)
+	
+	return name
 
 def update_page_name(doc, title):
 	"""set page_name and check if it is unique"""
