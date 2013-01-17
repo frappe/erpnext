@@ -129,7 +129,6 @@ class DocType:
 			le = Document('GL Entry')
 			for k in flist:
 				le.fields[k] = self.get_val(le_map[k], d, parent)
-
 			# if there is already an entry in this account then just add it to that entry
 			same_head = self.check_if_in_list(le)
 			if same_head and merge_entries:
@@ -162,7 +161,6 @@ class DocType:
 			# update total debit / credit
 			total_debit += flt(le.debit, 2)
 			total_credit += flt(le.credit, 2)
-			webnotes.errprint([le.account, le.debit, le.credit])
 			
 		diff = flt(total_debit - total_credit, 2)
 		if abs(diff)==0.01:
@@ -196,7 +194,6 @@ class DocType:
 		for le_map in le_map_list:
 			if le_map['table_field']:
 				for d in getlist(doclist,le_map['table_field']):
-					webnotes.errprint([d.fields])
 					# purchase_tax_details is the table of other charges in purchase cycle
 					if le_map['table_field'] != 'purchase_tax_details' or \
 							(le_map['table_field'] == 'purchase_tax_details' and \
@@ -207,8 +204,6 @@ class DocType:
 
 		# save entries
 		self.save_entries(cancel, adv_adj, update_outstanding)
-
-		
 
 		# set as cancelled
 		if cancel:
@@ -334,7 +329,6 @@ class DocType:
 			d['against_fld'] = against_fld[d['against_voucher_type']]
 
 			# cancel JV
-			webnotes.errprint("cancel")
 			jv_obj = get_obj('Journal Voucher', d['voucher_no'], with_children=1)
 			self.make_gl_entries(jv_obj.doc, jv_obj.doclist, cancel =1, adv_adj =1)
 
@@ -342,7 +336,6 @@ class DocType:
 			self.update_against_doc(d, jv_obj)
 
 			# re-submit JV
-			webnotes.errprint("resubmit")
 			jv_obj = get_obj('Journal Voucher', d['voucher_no'], with_children =1)
 			self.make_gl_entries(jv_obj.doc, jv_obj.doclist, cancel = 0, adv_adj =1)
 
