@@ -17,14 +17,11 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import cstr, flt, get_defaults, now, sendmail
-from webnotes.model import db_exists
+from webnotes.utils import cstr, flt, get_defaults
 from webnotes.model.doc import Document, addchild
-from webnotes.model.wrapper import getlist, copy_doclist
+from webnotes.model.wrapper import getlist
 from webnotes.model.code import get_obj
 from webnotes import msgprint
-from webnotes.utils.email_lib import sendmail
-
 
 from utilities.transaction_base import TransactionBase
 
@@ -55,9 +52,6 @@ class DocType:
 
 		return flt(bal)
 
-
-	# Add a new account
-	# -----------------
 	def add_ac(self,arg):
 		arg = eval(arg)
 		ac = Document('Account')
@@ -113,14 +107,23 @@ class DocType:
 	# Make a dictionary(le) for every gl entry and append to a list(self.entries)
 	#----------------------------------------------------------------------------
 	def make_single_entry(self,parent,d,le_map,cancel, merge_entries):
-		if self.get_val(le_map['account'], d, parent) and (self.get_val(le_map['debit'], d, parent) or self.get_val(le_map['credit'], d, parent)):
-			flist = ['account','cost_center','against','debit','credit','remarks','voucher_type','voucher_no','posting_date','fiscal_year','against_voucher','against_voucher_type','company','is_opening', 'aging_date']
+		if self.get_val(le_map['account'], d, parent) and \
+				(self.get_val(le_map['debit'], d, parent) \
+				or self.get_val(le_map['credit'], d, parent)):
+			flist = ['account', 'cost_center', 'against', 'debit', 'credit', 'remarks',
+			 	'voucher_type', 'voucher_no', 'posting_date', 'fiscal_year', 'against_voucher',
+			 	'against_voucher_type', 'company', 'is_opening', 'aging_date']
 
 			# Check budget before gl entry
 			#check budget only if account is expense account
-			is_expense_acct = webnotes.conn.sql("select name from tabAccount where is_pl_account='Yes' and debit_or_credit='Debit' and name=%s",self.get_val(le_map['account'], d, parent))
+			is_expense_acct = webnotes.conn.sql("""select name from tabAccount 
+				where is_pl_account='Yes' and debit_or_credit='Debit' 
+				and name=%s""",self.get_val(le_map['account'], d, parent))
+				
 			if is_expense_acct and self.get_val(le_map['cost_center'], d, parent):
-				get_obj('Budget Control').check_budget([self.get_val(le_map[k], d, parent) for k in flist if k in ['account','cost_center','debit','credit','posting_date','fiscal_year','company']],cancel)
+				get_obj('Budget Control').check_budget([self.get_val(le_map[k], d, parent) 
+					for k in flist if k in ['account', 'cost_center', 'debit', 
+					'credit', 'posting_date', 'fiscal_year', 'company']],cancel)
 
 			# Create new GL entry object and map values
 			le = Document('GL Entry')
@@ -135,6 +138,7 @@ class DocType:
 				same_head.credit = flt(same_head.credit) + flt(le.credit)
 			else:
 				self.entries.append(le)
+				
 
 	def manage_debit_credit(self, cancel):
 		total_debit, total_credit = 0, 0
@@ -158,6 +162,7 @@ class DocType:
 			# update total debit / credit
 			total_debit += flt(le.debit, 2)
 			total_credit += flt(le.credit, 2)
+			webnotes.errprint([le.account, le.debit, le.credit])
 			
 		diff = flt(total_debit - total_credit, 2)
 		if abs(diff)==0.01:
@@ -191,8 +196,11 @@ class DocType:
 		for le_map in le_map_list:
 			if le_map['table_field']:
 				for d in getlist(doclist,le_map['table_field']):
+					webnotes.errprint([d.fields])
 					# purchase_tax_details is the table of other charges in purchase cycle
-					if le_map['table_field'] != 'purchase_tax_details' or (le_map['table_field'] == 'purchase_tax_details' and d.fields.get('category') != 'Valuation'):
+					if le_map['table_field'] != 'purchase_tax_details' or \
+							(le_map['table_field'] == 'purchase_tax_details' and \
+							d.fields.get('category') != 'Valuation'):
 						self.make_single_entry(doc,d,le_map,cancel, merge_entries)
 			else:
 				self.make_single_entry(None,doc,le_map,cancel, merge_entries)
@@ -309,9 +317,6 @@ class DocType:
 		return
 
 
-######################################################################################################################
-
-	#------------------------------------------
 	def reconcile_against_document(self, args):
 		"""
 			Cancel JV, Update aginst document, split if required and resubmit jv
@@ -329,6 +334,7 @@ class DocType:
 			d['against_fld'] = against_fld[d['against_voucher_type']]
 
 			# cancel JV
+			webnotes.errprint("cancel")
 			jv_obj = get_obj('Journal Voucher', d['voucher_no'], with_children=1)
 			self.make_gl_entries(jv_obj.doc, jv_obj.doclist, cancel =1, adv_adj =1)
 
@@ -336,10 +342,10 @@ class DocType:
 			self.update_against_doc(d, jv_obj)
 
 			# re-submit JV
+			webnotes.errprint("resubmit")
 			jv_obj = get_obj('Journal Voucher', d['voucher_no'], with_children =1)
 			self.make_gl_entries(jv_obj.doc, jv_obj.doclist, cancel = 0, adv_adj =1)
 
-	#------------------------------------------
 	def update_against_doc(self, d, jv_obj):
 		"""
 			Updates against document, if partial amount splits into rows
@@ -347,9 +353,10 @@ class DocType:
 
 		webnotes.conn.sql("""
 			update `tabJournal Voucher Detail` t1, `tabJournal Voucher` t2	
-			set t1.%(dr_or_cr)s = '%(allocated_amt)s', t1.%(against_fld)s = '%(against_voucher)s', t2.modified = now() 
+			set t1.%(dr_or_cr)s = '%(allocated_amt)s', 
+			t1.%(against_fld)s = '%(against_voucher)s', t2.modified = now() 
 			where t1.name = '%(voucher_detail_no)s' and t1.parent = t2.name""" % d)
-
+		
 		if d['allocated_amt'] < d['unadjusted_amt']:
 			jvd = webnotes.conn.sql("select cost_center, balance, against_account, is_advance from `tabJournal Voucher Detail` where name = '%s'" % d['voucher_detail_no'])
 			# new entry with balance amount
@@ -364,7 +371,6 @@ class DocType:
 			ch.docstatus = 1
 			ch.save(1)
 
-	#------------------------------------------
 	def check_if_jv_modified(self, args):
 		"""
 			check if there is already a voucher reference
