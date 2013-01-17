@@ -15,8 +15,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 cur_frm.cscript.onload = function(doc, cdt, cdn) {
-	if (!doc.voucher_date) doc.voucher_date = dateutil.obj_to_str(new Date());
-
 	cur_frm.cscript.load_defaults(doc, cdt, cdn);
 }
 

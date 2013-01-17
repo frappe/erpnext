@@ -31,7 +31,6 @@ wn.require('app/utilities/doctype/sms_control/sms_control.js');
 cur_frm.cscript.onload = function(doc,dt,dn) {
 	if(!doc.customer && doc.debit_to) wn.meta.get_docfield(dt, 'debit_to', dn).print_hide = 0;
 	if (doc.__islocal) {
-		//if(!doc.voucher_date) set_multiple(dt,dn,{voucher_date:get_today()});
 		if(!doc.due_date) set_multiple(dt,dn,{due_date:get_today()});
 		if(!doc.posting_date) set_multiple(dt,dn,{posting_date:get_today()});
 		if(!doc.currency && sys_defaults.currency) set_multiple(dt,dn,{currency:sys_defaults.currency});
