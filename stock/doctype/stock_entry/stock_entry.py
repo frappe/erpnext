@@ -178,6 +178,7 @@ class DocType(TransactionBase):
 			d.amount = flt(d.qty) * flt(d.incoming_rate)
 			
 	def get_incoming_rate(self, args):
+		incoming_rate = 0
 		if self.doc.purpose == "Sales Return" and \
 				(self.doc.delivery_note_no or self.doc.sales_invoice_no):
 			sle = webnotes.conn.sql("""select name, posting_date, posting_time, 

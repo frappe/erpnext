@@ -2,23 +2,21 @@
  {
   "owner": "Administrator", 
   "docstatus": 0, 
-  "creation": "2011-12-14 11:40:47", 
+  "creation": "2012-07-03 13:29:54", 
   "modified_by": "Administrator", 
-  "modified": "2012-04-06 17:29:50"
+  "modified": "2013-01-18 12:57:44"
  }, 
  {
-  "section_style": "Simple", 
+  "autoname": "naming_series:", 
   "allow_attach": 1, 
-  "module": "Accounts", 
+  "is_submittable": 1, 
   "doctype": "DocType", 
-  "name": "__common__", 
-  "colour": "White:FFF", 
-  "_last_update": "1333712835", 
-  "show_in_menu": 0, 
+  "module": "Accounts", 
   "max_attachments": 3, 
-  "version": 19
+  "name": "__common__"
  }, 
  {
+  "read_only": 0, 
   "name": "__common__", 
   "parent": "C-Form", 
   "doctype": "DocField", 
@@ -29,8 +27,10 @@
   "name": "__common__", 
   "parent": "C-Form", 
   "read": 1, 
+  "submit": 0, 
   "doctype": "DocPerm", 
   "parenttype": "DocType", 
+  "report": 1, 
   "parentfield": "permissions"
  }, 
  {
@@ -38,26 +38,7 @@
   "doctype": "DocType"
  }, 
  {
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "write": 1, 
-  "role": "Accounts User", 
-  "permlevel": 0
- }, 
- {
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "submit": 0, 
-  "write": 1, 
-  "role": "Accounts Manager", 
-  "permlevel": 0
- }, 
- {
-  "role": "All", 
-  "permlevel": 1, 
-  "doctype": "DocPerm"
- }, 
- {
+  "print_width": "50%", 
   "doctype": "DocField", 
   "width": "50%", 
   "fieldname": "column_break0", 
@@ -67,11 +48,11 @@
  {
   "doctype": "DocField", 
   "label": "Series", 
-  "permlevel": 0, 
+  "options": "\nC-FORM/", 
   "fieldname": "naming_series", 
   "fieldtype": "Select", 
   "reqd": 1, 
-  "options": "\nC-FORM/"
+  "permlevel": 0
  }, 
  {
   "doctype": "DocField", 
@@ -92,13 +73,14 @@
  {
   "doctype": "DocField", 
   "label": "Customer", 
-  "permlevel": 0, 
+  "options": "Customer", 
   "fieldname": "customer", 
   "fieldtype": "Link", 
   "reqd": 1, 
-  "options": "Customer"
+  "permlevel": 0
  }, 
  {
+  "print_width": "50%", 
   "doctype": "DocField", 
   "width": "50%", 
   "fieldname": "column_break1", 
@@ -107,28 +89,28 @@
  }, 
  {
   "doctype": "DocField", 
-  "permlevel": 0, 
+  "label": "Company", 
+  "options": "link:Company", 
   "fieldname": "company", 
   "fieldtype": "Select", 
-  "label": "Company", 
-  "options": "link:Company"
+  "permlevel": 0
  }, 
  {
   "doctype": "DocField", 
   "label": "Fiscal Year", 
-  "permlevel": 0, 
+  "options": "link:Fiscal Year", 
   "fieldname": "fiscal_year", 
   "fieldtype": "Select", 
   "reqd": 1, 
-  "options": "link:Fiscal Year"
+  "permlevel": 0
  }, 
  {
   "doctype": "DocField", 
-  "permlevel": 0, 
+  "label": "Quarter", 
+  "options": "\nI\nII\nIII\nIV", 
   "fieldname": "quarter", 
   "fieldtype": "Select", 
-  "label": "Quarter", 
-  "options": "\nI\nII\nIII\nIV"
+  "permlevel": 0
  }, 
  {
   "doctype": "DocField", 
@@ -141,11 +123,11 @@
  {
   "doctype": "DocField", 
   "label": "State", 
-  "permlevel": 0, 
+  "options": "link:State\ncountry='India'", 
   "fieldname": "state", 
   "fieldtype": "Select", 
   "reqd": 1, 
-  "options": "link:State\ncountry='India'"
+  "permlevel": 0
  }, 
  {
   "doctype": "DocField", 
@@ -155,11 +137,11 @@
  }, 
  {
   "doctype": "DocField", 
-  "permlevel": 0, 
+  "label": "Invoice Details", 
+  "options": "C-Form Invoice Detail", 
   "fieldname": "invoice_details", 
   "fieldtype": "Table", 
-  "label": "Invoice Details", 
-  "options": "C-Form Invoice Detail"
+  "permlevel": 0
  }, 
  {
   "print_hide": 0, 
@@ -177,5 +159,37 @@
   "fieldtype": "Text", 
   "hidden": 1, 
   "permlevel": 0
+ }, 
+ {
+  "print_hide": 1, 
+  "no_copy": 1, 
+  "doctype": "DocField", 
+  "label": "Amended From", 
+  "options": "Sales Invoice", 
+  "fieldname": "amended_from", 
+  "fieldtype": "Link", 
+  "permlevel": 1
+ }, 
+ {
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "write": 1, 
+  "role": "Accounts User", 
+  "permlevel": 0
+ }, 
+ {
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "write": 1, 
+  "role": "Accounts Manager", 
+  "permlevel": 0
+ }, 
+ {
+  "amend": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "role": "All", 
+  "cancel": 0, 
+  "permlevel": 1
  }
 ]
