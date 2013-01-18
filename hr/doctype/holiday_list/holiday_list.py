@@ -42,10 +42,13 @@ class DocType:
 		self.validate_values()
 		yr_start_date, yr_end_date = self.get_fy_start_end_dates()
 		date_list = self.get_weekly_off_date_list(yr_start_date, yr_end_date)
-		for d in date_list:
+		last_idx = max([cint(d.idx) for d in self.doclist.get(
+			{"parentfield": "holiday_list_details"})] or [0,])
+		for i, d in enumerate(date_list):
 			ch = addchild(self.doc, 'holiday_list_details', 'Holiday', self.doclist)
 			ch.description = self.doc.weekly_off
 			ch.holiday_date = d
+			ch.idx = last_idx + i + 1
 
 	def validate_values(self):
 		if not self.doc.fiscal_year:
