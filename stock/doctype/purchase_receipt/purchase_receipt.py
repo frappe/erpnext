@@ -223,7 +223,6 @@ class DocType(BuyingController):
 		self.values.append({
 			'item_code'					: d.fields.has_key('item_code') and d.item_code or d.rm_item_code,
 			'warehouse'					: wh,
-			'transaction_date'			: getdate(self.doc.modified).strftime('%Y-%m-%d'),
 			'posting_date'				: self.doc.posting_date,
 			'posting_time'				: self.doc.posting_time,
 			'voucher_type'				: 'Purchase Receipt',

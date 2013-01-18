@@ -208,10 +208,6 @@ class DocType(BuyingController):
 		# Step 3 :=> Check For Approval Authority
 		get_obj('Authorization Control').validate_approving_authority(self.doc.doctype, self.doc.company, self.doc.grand_total)
 		
-		# Step 4 :=> Update Current PO No. in Supplier as last_purchase_order.
-		update_supplier = webnotes.conn.set_value("Supplier", self.doc.supplier,
-			"last_purchase_order", self.doc.name)
-
 		# Step 5 :=> Update last purchase rate
 		purchase_controller.update_last_purchase_rate(self, is_submit = 1)
 

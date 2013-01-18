@@ -119,14 +119,15 @@ class DocType(BuyingController):
 		
 		import webnotes.utils
 		this_purchase_date = webnotes.utils.getdate(obj.doc.fields.get('posting_date') or obj.doc.fields.get('transaction_date'))
-
+		
 		for d in getlist(obj.doclist,obj.fname):
 			# get last purchase details
 			last_purchase_details = get_last_purchase_details(d.item_code, obj.doc.name)
 
 			# compare last purchase date and this transaction's date
 			last_purchase_rate = None
-			if last_purchase_details.last_purchase_date > this_purchase_date:
+			if last_purchase_details and \
+					(last_purchase_details.purchase_date > this_purchase_date):
 				last_purchase_rate = last_purchase_details['purchase_rate']
 			elif is_submit == 1:
 				# even if this transaction is the latest one, it should be submitted
@@ -467,7 +468,6 @@ class DocType(BuyingController):
 	# get against document date	
 	#-----------------------------
 	def get_prevdoc_date(self, obj):
-		import datetime
 		for d in getlist(obj.doclist, obj.fname):
 			if d.prevdoc_doctype and d.prevdoc_docname:
 				dt = sql("select transaction_date from `tab%s` where name = '%s'" % (d.prevdoc_doctype, d.prevdoc_docname))
