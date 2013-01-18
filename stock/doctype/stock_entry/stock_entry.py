@@ -17,10 +17,9 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import cstr, cint, flt, getdate, now, comma_or
-from webnotes.model import db_exists, delete_doc
+from webnotes.utils import cstr, cint, flt, comma_or
 from webnotes.model.doc import Document, addchild
-from webnotes.model.wrapper import getlist, copy_doclist
+from webnotes.model.wrapper import getlist
 from webnotes.model.code import get_obj
 from webnotes import msgprint, _
 from stock.utils import get_incoming_rate
@@ -51,6 +50,7 @@ class DocType(TransactionBase):
 		self.validate_incoming_rate()
 		self.validate_bom()
 		self.validate_finished_goods()
+		self.validate_return_reference_doc()
 		
 	def on_submit(self):
 		self.update_serial_no(1)
@@ -85,6 +85,15 @@ class DocType(TransactionBase):
 		validate_for_manufacture_repack = any([d.bom_no for d in self.doclist.get(
 			{"parentfield": "mtn_details"})])
 
+		if self.doc.purpose in source_mandatory and self.doc.purpose not in target_mandatory:
+			self.doc.to_warehouse = None
+			for d in getlist(self.doclist, 'mtn_details'):
+				d.t_warehouse = None
+		elif self.doc.purpose in target_mandatory and self.doc.purpose not in source_mandatory:
+			self.doc.from_warehouse = None
+			for d in getlist(self.doclist, 'mtn_details'):
+				d.s_warehouse = None
+
 		for d in getlist(self.doclist, 'mtn_details'):
 			if not d.s_warehouse and not d.t_warehouse:
 				d.s_warehouse = self.doc.from_warehouse
@@ -93,21 +102,13 @@ class DocType(TransactionBase):
 			if not (d.s_warehouse or d.t_warehouse):
 				msgprint(_("Atleast one warehouse is mandatory"), raise_exception=1)
 			
-			if self.doc.purpose in source_mandatory:
-				if not d.s_warehouse:
-					msgprint(_("Row # ") + "%s: " % cint(d.idx)
-						+ _("Source Warehouse") + _(" is mandatory"), raise_exception=1)
-
-				if self.doc.purpose not in target_mandatory:
-					d.t_warehouse = None
+			if self.doc.purpose in source_mandatory and not d.s_warehouse:
+				msgprint(_("Row # ") + "%s: " % cint(d.idx)
+					+ _("Source Warehouse") + _(" is mandatory"), raise_exception=1)
 				
-			if self.doc.purpose in target_mandatory:
-				if not d.t_warehouse:
-					msgprint(_("Row # ") + "%s: " % cint(d.idx)
-						+ _("Target Warehouse") + _(" is mandatory"), raise_exception=1)
-						
-				if self.doc.purpose not in source_mandatory:
-					d.s_warehouse = None
+			if self.doc.purpose in target_mandatory and not d.t_warehouse:
+				msgprint(_("Row # ") + "%s: " % cint(d.idx)
+					+ _("Target Warehouse") + _(" is mandatory"), raise_exception=1)
 
 			if self.doc.purpose == "Manufacture/Repack":
 				if validate_for_manufacture_repack:
@@ -225,7 +226,28 @@ class DocType(TransactionBase):
 					+ _("Quantity should be equal to Manufacturing Quantity. ")
 					+ _("To fetch items again, click on 'Get Items' button \
 						or update the Quantity manually."), raise_exception=1)
+						
+	def validate_return_reference_doc(self):
+		""" validate item with reference doc"""
+		ref_doctype = ref_docname = ""
+		if self.doc.purpose == "Sales Return" and \
+				(self.doc.delivery_note_no or self.doc.sales_invoice_no):
+			ref_doctype = self.doc.delivery_note_no and "Delivery Note" or "Sales Invoice"
+			ref_docname = self.doc.delivery_note_no or self.doc.sales_invoice_no
+		elif self.doc.purpose == "Purchase Return" and self.doc.purchase_receipt_no:
+			ref_doctype = "Purchase Receipt"
+			ref_docname = self.doc.purchase_receipt_no
+			
+		if ref_doctype and ref_docname:
+			for item in self.doclist.get({"parentfield": "mtn_details"}):
+				ref_exists = webnotes.conn.sql("""select name from `tab%s` 
+					where parent = %s and item_code = %s and docstatus=1""" % 
+					(ref_doctype + " Item", '%s', '%s'), (ref_docname, item.item_code))
 					
+				if not ref_exists:
+					msgprint(_("Item: '") + item.item_code + _("' does not exists in ") +
+						ref_doctype + ": " + ref_docname, raise_exception=1)
+			
 	def update_serial_no(self, is_submit):
 		"""Create / Update Serial No"""
 		from stock.utils import get_valid_serial_nos
