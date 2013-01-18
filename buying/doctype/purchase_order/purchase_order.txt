@@ -2,9 +2,9 @@
  {
   "owner": "Administrator", 
   "docstatus": 0, 
-  "creation": "2013-01-17 11:11:23", 
+  "creation": "2013-01-18 12:46:59", 
   "modified_by": "Administrator", 
-  "modified": "2013-01-17 20:26:53"
+  "modified": "2013-01-18 13:24:20"
  }, 
  {
   "autoname": "naming_series:", 
@@ -30,7 +30,6 @@
   "read": 1, 
   "doctype": "DocPerm", 
   "parenttype": "DocType", 
-  "report": 1, 
   "parentfield": "permissions"
  }, 
  {
@@ -292,6 +291,7 @@
  }, 
  {
   "print_hide": 1, 
+  "description": "Consider this Price List for fetching rate. (only which have \"For Buying\" as checked)", 
   "doctype": "DocField", 
   "label": "Price List", 
   "options": "Price List", 
@@ -852,61 +852,17 @@
   "permlevel": 0
  }, 
  {
-  "amend": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "submit": 0, 
-  "write": 0, 
-  "cancel": 0, 
-  "role": "Material User", 
-  "permlevel": 1
- }, 
- {
-  "amend": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "submit": 0, 
-  "write": 0, 
-  "cancel": 0, 
-  "role": "Material User", 
-  "permlevel": 0
- }, 
- {
-  "amend": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "submit": 0, 
-  "write": 0, 
-  "cancel": 0, 
-  "role": "Purchase Manager", 
-  "permlevel": 1
- }, 
- {
   "amend": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
   "submit": 1, 
   "write": 1, 
-  "cancel": 1, 
-  "role": "Purchase Manager", 
-  "permlevel": 0
- }, 
- {
-  "amend": 1, 
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "submit": 1, 
-  "write": 1, 
-  "cancel": 1, 
   "role": "Purchase User", 
+  "cancel": 1, 
   "permlevel": 0
  }, 
  {
-  "amend": 0, 
-  "create": 0, 
   "doctype": "DocPerm", 
-  "submit": 0, 
-  "cancel": 0, 
   "role": "All", 
   "permlevel": 1
  }, 
@@ -917,13 +873,49 @@
   "match": "supplier"
  }, 
  {
+  "doctype": "DocPerm", 
+  "write": 1, 
+  "role": "All", 
+  "permlevel": 2
+ }, 
+ {
   "amend": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
   "submit": 0, 
-  "write": 1, 
+  "write": 0, 
+  "role": "Purchase Manager", 
   "cancel": 0, 
-  "role": "All", 
-  "permlevel": 2
+  "permlevel": 1
+ }, 
+ {
+  "amend": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "submit": 1, 
+  "write": 1, 
+  "role": "Purchase Manager", 
+  "cancel": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "amend": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "submit": 0, 
+  "write": 0, 
+  "role": "Material User", 
+  "cancel": 0, 
+  "permlevel": 1
+ }, 
+ {
+  "amend": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "submit": 0, 
+  "write": 0, 
+  "role": "Material User", 
+  "cancel": 0, 
+  "permlevel": 0
  }
 ]

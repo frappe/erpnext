@@ -2,9 +2,9 @@
  {
   "owner": "Administrator", 
   "docstatus": 0, 
-  "creation": "2013-01-15 18:42:58", 
+  "creation": "2013-01-18 12:46:57", 
   "modified_by": "Administrator", 
-  "modified": "2013-01-17 20:24:23"
+  "modified": "2013-01-18 13:25:16"
  }, 
  {
   "autoname": "naming_series:", 
@@ -29,7 +29,6 @@
   "read": 1, 
   "doctype": "DocPerm", 
   "parenttype": "DocType", 
-  "report": 1, 
   "parentfield": "permissions"
  }, 
  {
@@ -280,6 +279,7 @@
  }, 
  {
   "print_hide": 1, 
+  "description": "Consider this Price List for fetching rate. (only which have \"For Buying\" as checked)", 
   "doctype": "DocField", 
   "label": "Price List", 
   "options": "Price List", 
@@ -799,22 +799,12 @@
   "permlevel": 0
  }, 
  {
-  "amend": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "submit": 0, 
-  "write": 0, 
-  "role": "Accounts Manager", 
-  "cancel": 0, 
-  "permlevel": 1
- }, 
- {
   "amend": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
   "submit": 1, 
   "write": 1, 
-  "role": "Accounts Manager", 
+  "role": "Accounts User", 
   "cancel": 1, 
   "permlevel": 0
  }, 
@@ -824,15 +814,6 @@
   "doctype": "DocPerm", 
   "submit": 0, 
   "write": 0, 
-  "role": "Accounts User", 
-  "cancel": 0, 
-  "permlevel": 1
- }, 
- {
-  "amend": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "submit": 0, 
   "role": "Purchase User", 
   "cancel": 0, 
   "permlevel": 1
@@ -848,19 +829,64 @@
   "permlevel": 0
  }, 
  {
-  "amend": 1, 
-  "create": 1, 
+  "amend": 0, 
+  "create": 0, 
   "doctype": "DocPerm", 
-  "submit": 1, 
-  "write": 1, 
-  "role": "Accounts User", 
-  "cancel": 1, 
-  "permlevel": 0
- }, 
- {
-  "doctype": "DocPerm", 
+  "submit": 0, 
+  "write": 0, 
   "role": "Supplier", 
+  "cancel": 0, 
   "permlevel": 0, 
   "match": "supplier"
+ }, 
+ {
+  "amend": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "submit": 0, 
+  "write": 0, 
+  "role": "Accounts Manager", 
+  "cancel": 0, 
+  "permlevel": 1
+ }, 
+ {
+  "amend": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "submit": 1, 
+  "write": 1, 
+  "role": "Accounts Manager", 
+  "cancel": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "amend": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "submit": 0, 
+  "write": 0, 
+  "role": "Accounts User", 
+  "cancel": 0, 
+  "permlevel": 1
+ }, 
+ {
+  "amend": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "submit": 0, 
+  "write": 0, 
+  "role": "Auditor", 
+  "cancel": 0, 
+  "permlevel": 1
+ }, 
+ {
+  "amend": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "submit": 0, 
+  "write": 0, 
+  "role": "Auditor", 
+  "cancel": 0, 
+  "permlevel": 0
  }
 ]
