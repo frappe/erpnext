@@ -172,7 +172,7 @@ class DocType(TransactionBase):
 			d.actual_qty = get_previous_sle(args).get("qty_after_transaction") or 0
 			
 			# get incoming rate
-			if not flt(d.incoming_rate) or self.doc.purpose == "Sales Return":
+			if not flt(d.incoming_rate):
 				d.incoming_rate = self.get_incoming_rate(args)
 				
 			d.amount = flt(d.qty) * flt(d.incoming_rate)
