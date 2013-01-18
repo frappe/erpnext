@@ -25,7 +25,8 @@ cur_frm.cscript.onload = function(doc) {
 cur_frm.cscript.refresh = function(doc) {
 	if(!doc.__islocal) {
 		hide_field("naming_series");
-		cur_frm.add_custom_button('Make Salary Structure', cur_frm.cscript['Make Salary Structure']);
+		cur_frm.add_custom_button('Make Salary Structure', 
+			cur_frm.cscript['Make Salary Structure']);
 	}
 }
 
@@ -44,15 +45,19 @@ cur_frm.cscript.salutation = function(doc,dt,dn) {
 }
 
 cur_frm.cscript['Make Salary Structure']=function(){
-	$c_obj(make_doclist (doc.doctype,doc.name),'check_sal_structure',cur_frm.doc.name,function(r, rt) {
-		if(r.message)
-			alert("You have already created Active salary structure.\nIf you want to create new one, please ensure that no active salary structure exist.\nTo inactive salary structure select 'Is Active' as 'No'.");
-		else
-			cur_frm.cscript.make_salary_structure(cur_frm.doc); 
-	});
+	$c_obj(make_doclist (cur_frm.doc.doctype, cur_frm.doc.name), 'check_sal_structure',
+	 	cur_frm.doc.name, function(r, rt) {
+			if(r.message)
+				msgprint("You have already created Active salary structure.\n \
+					If you want to create new one, please ensure that no active salary structure \
+					 exist.\nTo inactive salary structure select 'Is Active' as 'No'.");
+			else
+				cur_frm.cscript.make_salary_structure(cur_frm.doc); 
+		}
+	);
 }
 
-cur_frm.cscript.make_salary_structure = function(doc,dt,dn,det){
+cur_frm.cscript.make_salary_structure = function(doc, dt, dn, det){
 	var st = wn.model.make_new_doc_and_get_name('Salary Structure');
 	st = locals['Salary Structure'][st];
 	st.employee = doc.name;

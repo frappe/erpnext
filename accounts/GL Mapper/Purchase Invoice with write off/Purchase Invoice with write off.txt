@@ -2,9 +2,9 @@
  {
   "owner": "Administrator", 
   "docstatus": 0, 
-  "creation": "2012-10-03 11:29:52", 
+  "creation": "2012-10-03 11:26:38", 
   "modified_by": "Administrator", 
-  "modified": "2012-10-03 11:08:09"
+  "modified": "2013-01-18 10:38:40"
  }, 
  {
   "doc_type": "Purchase Invoice with write off", 
@@ -24,7 +24,9 @@
  }, 
  {
   "account": "expense_head", 
+  "doctype": "GL Mapper Detail", 
   "company": "parent:company", 
+  "debit": "amount", 
   "fiscal_year": "parent:fiscal_year", 
   "against": "parent:credit_to", 
   "voucher_type": "parent:doctype", 
@@ -32,17 +34,17 @@
   "table_field": "entries", 
   "transaction_date": "parent:voucher_date", 
   "aging_date": "parent:aging_date", 
-  "doctype": "GL Mapper Detail", 
-  "remarks": "parent:remarks", 
   "is_opening": "parent:is_opening", 
+  "remarks": "parent:remarks", 
+  "posting_date": "parent:posting_date", 
   "voucher_no": "parent:name", 
-  "debit": "amount", 
-  "cost_center": "cost_center", 
-  "posting_date": "parent:posting_date"
+  "cost_center": "cost_center"
  }, 
  {
   "account": "account_head", 
+  "doctype": "GL Mapper Detail", 
   "company": "parent:company", 
+  "debit": "value:d.fields.get('category') != 'Valuation' and d.fields.get('add_deduct_tax') == 'Add' and d.fields.get('tax_amount') or 0", 
   "fiscal_year": "parent:fiscal_year", 
   "against": "parent:credit_to", 
   "voucher_type": "parent:doctype", 
@@ -50,63 +52,45 @@
   "table_field": "purchase_tax_details", 
   "transaction_date": "parent:voucher_date", 
   "aging_date": "parent:aging_date", 
-  "doctype": "GL Mapper Detail", 
-  "remarks": "parent:remarks", 
   "is_opening": "parent:is_opening", 
+  "remarks": "parent:remarks", 
+  "posting_date": "parent:posting_date", 
   "voucher_no": "parent:name", 
-  "debit": "value:d.fields.get('category') != 'Valuation' and d.fields.get('add_deduct_tax') == 'Add' and d.fields.get('tax_amount') or 0", 
-  "cost_center": "cost_center", 
-  "posting_date": "parent:posting_date"
- }, 
- {
-  "account": "tax_code", 
-  "company": "company", 
-  "fiscal_year": "fiscal_year", 
-  "against": "credit_to", 
-  "voucher_type": "doctype", 
-  "credit": "ded_amount", 
-  "debit": "value:0", 
-  "transaction_date": "voucher_date", 
-  "aging_date": "aging_date", 
-  "doctype": "GL Mapper Detail", 
-  "remarks": "remarks", 
-  "is_opening": "is_opening", 
-  "voucher_no": "name", 
-  "posting_date": "posting_date"
+  "cost_center": "cost_center"
  }, 
  {
   "account": "credit_to", 
+  "doctype": "GL Mapper Detail", 
   "against_voucher": "name", 
   "against_voucher_type": "value:'Purchase Invoice'", 
   "company": "company", 
+  "debit": "value:0", 
   "fiscal_year": "fiscal_year", 
   "against": "against_expense_account", 
   "voucher_type": "doctype", 
   "credit": "total_amount_to_pay", 
-  "debit": "value:0", 
   "transaction_date": "voucher_date", 
   "aging_date": "aging_date", 
-  "doctype": "GL Mapper Detail", 
-  "remarks": "remarks", 
   "is_opening": "is_opening", 
-  "voucher_no": "name", 
-  "posting_date": "posting_date"
+  "remarks": "remarks", 
+  "posting_date": "posting_date", 
+  "voucher_no": "name"
  }, 
  {
   "account": "write_off_account", 
+  "doctype": "GL Mapper Detail", 
   "company": "company", 
+  "debit": "value:0", 
   "fiscal_year": "fiscal_year", 
   "against": "credit_to", 
   "voucher_type": "doctype", 
   "credit": "write_off_amount", 
-  "debit": "value:0", 
   "transaction_date": "voucher_date", 
   "aging_date": "aging_date", 
-  "doctype": "GL Mapper Detail", 
-  "remarks": "remarks", 
   "is_opening": "is_opening", 
+  "remarks": "remarks", 
+  "posting_date": "posting_date", 
   "voucher_no": "name", 
-  "cost_center": "write_off_cost_center", 
-  "posting_date": "posting_date"
+  "cost_center": "write_off_cost_center"
  }
 ]
