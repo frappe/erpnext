@@ -2,9 +2,9 @@
  {
   "owner": "Administrator", 
   "docstatus": 0, 
-  "creation": "2012-10-03 11:29:52", 
+  "creation": "2012-10-03 11:26:38", 
   "modified_by": "Administrator", 
-  "modified": "2012-10-03 11:07:26"
+  "modified": "2013-01-18 10:39:38"
  }, 
  {
   "doc_type": "Purchase Invoice", 
@@ -57,22 +57,6 @@
   "posting_date": "parent:posting_date", 
   "voucher_no": "parent:name", 
   "cost_center": "cost_center"
- }, 
- {
-  "account": "tax_code", 
-  "doctype": "GL Mapper Detail", 
-  "company": "company", 
-  "debit": "value:0", 
-  "fiscal_year": "fiscal_year", 
-  "against": "credit_to", 
-  "voucher_type": "doctype", 
-  "credit": "ded_amount", 
-  "transaction_date": "voucher_date", 
-  "aging_date": "aging_date", 
-  "is_opening": "is_opening", 
-  "remarks": "remarks", 
-  "posting_date": "posting_date", 
-  "voucher_no": "name"
  }, 
  {
   "account": "credit_to", 

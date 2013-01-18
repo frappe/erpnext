@@ -2,9 +2,9 @@
  {
   "owner": "Administrator", 
   "docstatus": 0, 
-  "creation": "2012-05-01 12:46:31", 
+  "creation": "2012-04-17 11:29:12", 
   "modified_by": "Administrator", 
-  "modified": "2012-05-01 09:16:31"
+  "modified": "2013-01-18 10:39:49"
  }, 
  {
   "doc_type": "Journal Voucher", 
@@ -12,9 +12,27 @@
   "doctype": "GL Mapper"
  }, 
  {
-  "name": "__common__", 
   "parent": "Journal Voucher", 
+  "company": "parent:company", 
+  "fiscal_year": "parent:fiscal_year", 
+  "voucher_type": "parent:doctype", 
+  "debit": "debit", 
+  "is_advance": "is_advance", 
+  "remarks": "parent:remark", 
+  "cost_center": "cost_center", 
+  "account": "account", 
+  "voucher_no": "parent:name", 
+  "aging_date": "parent:aging_date", 
+  "name": "__common__", 
+  "against_voucher": "value:d.against_voucher or d.against_invoice or d.against_jv or ''", 
+  "against_voucher_type": "value:(d.against_voucher and 'Purchase Invoice') or (d.against_invoice and 'Sales Invoice') or (d.against_jv and 'Journal Voucher') or ''", 
   "doctype": "GL Mapper Detail", 
+  "against": "against_account", 
+  "credit": "credit", 
+  "table_field": "entries", 
+  "transaction_date": "parent:voucher_date", 
+  "is_opening": "parent:is_opening", 
+  "posting_date": "parent:posting_date", 
   "parenttype": "GL Mapper", 
   "parentfield": "fields"
  }, 
@@ -23,40 +41,6 @@
   "doctype": "GL Mapper"
  }, 
  {
-  "account": "account", 
-  "doctype": "GL Mapper Detail", 
-  "credit": "credit", 
-  "against_voucher_type": "value:(d.against_voucher and 'Purchase Invoice') or (d.against_invoice and 'Sales Invoice') or (d.against_jv and 'Journal Voucher') or ''", 
-  "company": "parent:company", 
-  "debit": "debit", 
-  "fiscal_year": "parent:fiscal_year", 
-  "against": "against_account", 
-  "voucher_type": "parent:doctype", 
-  "against_voucher": "value:d.against_voucher or d.against_invoice or d.against_jv or ''", 
-  "table_field": "entries", 
-  "transaction_date": "parent:voucher_date", 
-  "is_advance": "is_advance", 
-  "aging_date": "parent:aging_date", 
-  "is_opening": "parent:is_opening", 
-  "remarks": "parent:remark", 
-  "posting_date": "parent:posting_date", 
-  "voucher_no": "parent:name", 
-  "cost_center": "cost_center"
- }, 
- {
-  "account": "tax_code", 
-  "doctype": "GL Mapper Detail", 
-  "company": "company", 
-  "debit": "value:0", 
-  "fiscal_year": "fiscal_year", 
-  "against": "supplier_account", 
-  "voucher_type": "doctype", 
-  "credit": "ded_amount", 
-  "transaction_date": "voucher_date", 
-  "aging_date": "aging_date", 
-  "is_opening": "is_opening", 
-  "remarks": "remark", 
-  "posting_date": "posting_date", 
-  "voucher_no": "name"
+  "doctype": "GL Mapper Detail"
  }
 ]
