@@ -172,7 +172,7 @@ class DocType(TransactionBase):
 			d.actual_qty = get_previous_sle(args).get("qty_after_transaction") or 0
 			
 			# get incoming rate
-			if not flt(d.incoming_rate) or self.doc.purpose == "Sales Return":
+			if not flt(d.incoming_rate):
 				d.incoming_rate = self.get_incoming_rate(args)
 				
 			d.amount = flt(d.qty) * flt(d.incoming_rate)
@@ -182,7 +182,7 @@ class DocType(TransactionBase):
 		if self.doc.purpose == "Sales Return" and \
 				(self.doc.delivery_note_no or self.doc.sales_invoice_no):
 			sle = webnotes.conn.sql("""select name, posting_date, posting_time, 
-				actual_qty, stock_value from `tabStock Ledger Entry` 
+				actual_qty, stock_value, warehouse from `tabStock Ledger Entry` 
 				where voucher_type = %s and voucher_no = %s and 
 				item_code = %s and ifnull(is_cancelled, 'No') = 'No' limit 1""", 
 				((self.doc.delivery_note_no and "Delivery Note" or "Sales Invoice"),
@@ -191,7 +191,8 @@ class DocType(TransactionBase):
 				args.update({
 					"posting_date": sle[0].posting_date,
 					"posting_time": sle[0].posting_time,
-					"sle": sle[0].name
+					"sle": sle[0].name,
+					"warehouse": sle[0].warehouse,
 				})
 				previous_sle = get_previous_sle(args)
 				incoming_rate = (flt(sle[0].stock_value) - flt(previous_sle.get("stock_value"))) / \
