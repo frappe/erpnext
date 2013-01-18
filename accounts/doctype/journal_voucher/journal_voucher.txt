@@ -2,9 +2,9 @@
  {
   "owner": "Administrator", 
   "docstatus": 0, 
-  "creation": "2013-01-17 12:30:11", 
+  "creation": "2013-01-18 10:46:42", 
   "modified_by": "Administrator", 
-  "modified": "2013-01-17 14:27:43"
+  "modified": "2013-01-18 17:44:58"
  }, 
  {
   "autoname": "naming_series:", 
@@ -28,6 +28,7 @@
   "read": 1, 
   "doctype": "DocPerm", 
   "parenttype": "DocType", 
+  "report": 1, 
   "parentfield": "permissions"
  }, 
  {
@@ -102,8 +103,8 @@
  }, 
  {
   "print_hide": 0, 
-  "oldfieldtype": "Table", 
   "allow_on_submit": 1, 
+  "oldfieldtype": "Table", 
   "doctype": "DocField", 
   "label": "Entries", 
   "oldfieldname": "entries", 
@@ -461,26 +462,13 @@
   "permlevel": 1
  }, 
  {
-  "print_hide": 1, 
-  "no_copy": 1, 
-  "oldfieldtype": "Link", 
-  "doctype": "DocField", 
-  "label": "Supplier Account", 
-  "oldfieldname": "supplier_account", 
-  "options": "Account", 
-  "fieldname": "supplier_account", 
-  "fieldtype": "Link", 
-  "hidden": 0, 
-  "permlevel": 0
- }, 
- {
   "amend": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
   "submit": 1, 
   "write": 1, 
-  "role": "Accounts User", 
   "cancel": 1, 
+  "role": "Accounts User", 
   "permlevel": 0
  }, 
  {
@@ -489,8 +477,8 @@
   "doctype": "DocPerm", 
   "submit": 0, 
   "write": 0, 
-  "role": "Accounts User", 
   "cancel": 0, 
+  "role": "Accounts User", 
   "permlevel": 1
  }, 
  {
@@ -499,8 +487,8 @@
   "doctype": "DocPerm", 
   "submit": 0, 
   "write": 0, 
-  "role": "Accounts Manager", 
   "cancel": 0, 
+  "role": "Accounts Manager", 
   "permlevel": 1
  }, 
  {
@@ -509,8 +497,8 @@
   "doctype": "DocPerm", 
   "submit": 1, 
   "write": 1, 
-  "role": "Accounts Manager", 
   "cancel": 1, 
+  "role": "Accounts Manager", 
   "permlevel": 0
  }, 
  {
@@ -519,8 +507,8 @@
   "doctype": "DocPerm", 
   "submit": 0, 
   "write": 0, 
-  "role": "Auditor", 
   "cancel": 0, 
+  "role": "Auditor", 
   "permlevel": 0
  }, 
  {
@@ -529,8 +517,8 @@
   "doctype": "DocPerm", 
   "submit": 0, 
   "write": 0, 
-  "role": "Auditor", 
   "cancel": 0, 
+  "role": "Auditor", 
   "permlevel": 1
  }
 ]
