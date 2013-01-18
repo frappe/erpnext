@@ -28,14 +28,14 @@ erpnext.buying.BuyingController = erpnext.utils.Controller.extend({
 		if(this.frm.fields_dict.price_list_name) {
 			this.frm.fields_dict.price_list_name.get_query = function() {
 				return repl("select distinct price_list_name from `tabItem Price` \
-					where for_buying = 1 and price_list_name like \"%s%%\"");
+					where buying = 1 and price_list_name like \"%s%%\"");
 			};
 		}
 		
 		if(this.frm.fields_dict.price_list_currency) {
 			this.frm.fields_dict.price_list_currency.get_query = function() {
 				return repl("select distinct ref_currency from `tabItem Price` \
-					where price_list_name=\"%(price_list_name)s\" and for_buying = 1 \
+					where price_list_name=\"%(price_list_name)s\" and buying = 1 \
 					and ref_currency like \"%s%%\"", 
 					{price_list_name: me.frm.doc.price_list_name});
 			};

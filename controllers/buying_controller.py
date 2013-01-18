@@ -66,5 +66,5 @@ class BuyingController(TransactionBase):
 
 		if not valid_conversion_rate:
 			msgprint(_('Please enter valid ') + conversion_rate_label + (': ') 
-				+ ("1 %s = [?] %s" % _(currency, self.company_currency)),
+				+ ("1 %s = [?] %s" % (currency, self.company_currency)),
 				raise_exception=True)
