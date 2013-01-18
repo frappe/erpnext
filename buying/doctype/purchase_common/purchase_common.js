@@ -74,8 +74,15 @@ erpnext.buying.BuyingController = erpnext.utils.Controller.extend({
 					use_for: "buying"
 				}},
 				callback: function(r) {
-					if(!r.exc && r.message.price_list_currency) {
-						me.price_list_currency();
+					if(!r.exc) {
+						// for now, setting it as 1.0
+						if(me.frm.doc.price_list_currency === me.get_company_currency())
+							me.frm.set_value("plc_conversion_rate", 1.0);
+						else if(me.frm.doc.price_list_currency === me.frm.doc.currency)
+							me.frm.set_value("plc_conversion_rate", me.frm.doc.conversion_rate);
+						
+						if(r.message.price_list_currency)
+							me.price_list_currency();
 					}
 				}
 			});

@@ -80,7 +80,8 @@ def get_item_details(args):
 	out.purchase_ref_rate = out.discount_rate = out.purchase_rate = \
 		out.import_ref_rate = out.import_rate = 0.0
 	
-	if args.doctype in ["Purchase Order", "Purchase Invoice", "Purchase Receipt"]:
+	if args.doctype in ["Purchase Order", "Purchase Invoice", "Purchase Receipt", 
+			"Supplier Quotation"]:
 		# try fetching from price list
 		if args.price_list_name and args.price_list_currency:
 			rates_as_per_price_list = get_rates_as_per_price_list(args, item_wrapper.doclist)
@@ -100,7 +101,8 @@ def get_rates_as_per_price_list(args, item_doclist=None):
 		item_doclist = webnotes.model_wrapper("Item", args.item_code).doclist
 	
 	result = item_doclist.get({"parentfield": "ref_rate_details", 
-		"price_list_name": args.price_list_name, "ref_currency": args.price_list_currency})
+		"price_list_name": args.price_list_name, "ref_currency": args.price_list_currency,
+		"buying": 1})
 		
 	if result:
 		purchase_ref_rate = flt(result[0].ref_rate) * flt(args.plc_conversion_rate)
