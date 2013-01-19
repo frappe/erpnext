@@ -2,9 +2,9 @@
  {
   "owner": "jai@webnotestech.com", 
   "docstatus": 0, 
-  "creation": "2013-01-16 14:48:56", 
+  "creation": "2013-01-19 10:23:35", 
   "modified_by": "Administrator", 
-  "modified": "2013-01-17 11:39:55"
+  "modified": "2013-01-19 10:31:03"
  }, 
  {
   "read_only": 1, 
@@ -31,8 +31,8 @@
   "submit": 0, 
   "doctype": "DocPerm", 
   "write": 1, 
-  "report": 0, 
   "parenttype": "DocType", 
+  "report": 1, 
   "permlevel": 0, 
   "parentfield": "permissions"
  }, 
@@ -70,9 +70,9 @@
  {
   "doctype": "DocField", 
   "label": "Company", 
-  "reqd": 1, 
   "fieldname": "company", 
   "fieldtype": "Link", 
+  "reqd": 1, 
   "options": "Company"
  }, 
  {
@@ -161,9 +161,9 @@
   "default": "1", 
   "doctype": "DocField", 
   "label": "Use Multi-Level BOM", 
-  "reqd": 0, 
   "fieldname": "use_multi_level_bom", 
-  "fieldtype": "Check"
+  "fieldtype": "Check", 
+  "reqd": 0
  }, 
  {
   "doctype": "DocField", 
@@ -181,9 +181,9 @@
  }, 
  {
   "doctype": "DocField", 
+  "label": "Materials Requirement Planning (MRP)", 
   "fieldname": "sb5", 
-  "fieldtype": "Section Break", 
-  "options": "Simple"
+  "fieldtype": "Section Break"
  }, 
  {
   "description": "Download a report containing all raw materials with their latest inventory status", 
@@ -212,6 +212,10 @@
   "fieldname": "raise_purchase_request", 
   "fieldtype": "Button", 
   "options": "raise_purchase_request"
+ }, 
+ {
+  "role": "System Manager", 
+  "doctype": "DocPerm"
  }, 
  {
   "role": "Manufacturing User", 

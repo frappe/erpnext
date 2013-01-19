@@ -29,7 +29,15 @@ class DocType:
 	def __init__(self, doc, doclist=[]):
 		self.doc = doc
 		self.doclist = doclist
-	
+
+	def validate(self):
+		if not self.doc.status:
+			self.doc.status = "Draft"
+
+		self.validate_dates()
+		self.validate_existing_appraisal()
+		self.calculate_total()
+
 	def get_employee_name(self):
 		emp_nm = sql("select employee_name from `tabEmployee` where name=%s", self.doc.employee)
 		emp_nm= emp_nm and emp_nm[0][0] or ''
@@ -47,25 +55,19 @@ class DocType:
 			raise Exception
 	
 	def validate_existing_appraisal(self):
-		chk = sql("select name from `tabAppraisal` where employee=%s and (status='Submitted' or status='Completed') and ((start_date>=%s and start_date<=%s) or (end_date>=%s and end_date<=%s))",(self.doc.employee,self.doc.start_date,self.doc.end_date,self.doc.start_date,self.doc.end_date))
+		chk = sql("""select name from `tabAppraisal` where employee=%s 
+			and (status='Submitted' or status='Completed') 
+			and ((start_date>=%s and start_date<=%s) 
+			or (end_date>=%s and end_date<=%s))""",(self.doc.employee,self.doc.start_date,self.doc.end_date,self.doc.start_date,self.doc.end_date))
 		if chk:
 			msgprint("You have already created Appraisal "\
 				+cstr(chk[0][0])+" in the current date range for employee "\
 				+cstr(self.doc.employee_name))
 			raise Exception
-		
-	def validate(self):
-		if not self.doc.status:
-			self.doc.status = "Draft"
-
-		self.validate_dates()
-		self.validate_existing_appraisal()
-		self.calculate_total()
 	
 	def calculate_total(self):
 		total, total_w  = 0, 0
 		for d in getlist(self.doclist, 'appraisal_details'):
-			
 			if d.score:
 				d.score_earned = flt(d.score) * flt(d.per_weightage) / 100
 				total = total + d.score_earned
@@ -74,9 +76,12 @@ class DocType:
 		if int(total_w) != 100:
 			msgprint("Total weightage assigned should be 100%. It is :" + str(total_w) + "%", 
 				raise_exception=1)
+
+		if webnotes.conn.get_default("employee", webnotes.session.user) != self.doc.employee:
 		
-		if total==0:
-			msgprint("Total can't be zero. You must atleast give some points!", raise_exception=1)
+			if total==0:
+				msgprint("Total can't be zero. You must atleast give some points!", raise_exception=1)
+
 		self.doc.total_score = total
 			
 	def on_submit(self):

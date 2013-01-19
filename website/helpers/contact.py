@@ -50,7 +50,7 @@ def send_message(subject="Website Query", message="", sender="", status="Open"):
 		lead.ignore_permissions = True
 		lead.insert()
 	
-	make(content=message, sender=sender, 
+	make(content=message, sender=sender, subject=subject,
 		doctype="Lead", name=lead.doc.name, lead=lead.doc.name)
 
 	
