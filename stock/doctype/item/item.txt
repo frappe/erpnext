@@ -2,9 +2,9 @@
  {
   "owner": "Administrator", 
   "docstatus": 0, 
-  "creation": "2012-12-28 11:01:35", 
+  "creation": "2013-01-16 11:35:56", 
   "modified_by": "Administrator", 
-  "modified": "2013-01-16 11:14:57"
+  "modified": "2013-01-19 12:09:54"
  }, 
  {
   "allow_attach": 1, 
@@ -32,8 +32,9 @@
   "read": 1, 
   "submit": 0, 
   "doctype": "DocPerm", 
-  "report": 1, 
   "parenttype": "DocType", 
+  "report": 1, 
+  "permlevel": 0, 
   "parentfield": "permissions"
  }, 
  {
@@ -431,6 +432,7 @@
   "permlevel": 1
  }, 
  {
+  "read_only": 1, 
   "no_copy": 1, 
   "oldfieldtype": "Currency", 
   "doctype": "DocField", 
@@ -439,7 +441,7 @@
   "fieldname": "last_purchase_rate", 
   "fieldtype": "Currency", 
   "depends_on": "eval:doc.is_purchase_item==\"Yes\"", 
-  "permlevel": 1
+  "permlevel": 0
  }, 
  {
   "oldfieldtype": "Currency", 
@@ -691,6 +693,7 @@
   "permlevel": 0
  }, 
  {
+  "read_only": 1, 
   "no_copy": 1, 
   "oldfieldtype": "Link", 
   "doctype": "DocField", 
@@ -700,7 +703,7 @@
   "fieldname": "default_bom", 
   "fieldtype": "Link", 
   "depends_on": "eval:doc.is_manufactured_item==\"Yes\"", 
-  "permlevel": 1
+  "permlevel": 0
  }, 
  {
   "description": "Selecting \"Yes\" will allow you to make a Production Order for this item.", 
@@ -765,21 +768,23 @@
   "permlevel": 0
  }, 
  {
+  "read_only": 1, 
   "description": "website page link", 
   "depends_on": "show_in_website", 
   "doctype": "DocField", 
   "label": "Page Name", 
   "fieldname": "page_name", 
   "fieldtype": "Data", 
-  "permlevel": 1
+  "permlevel": 0
  }, 
  {
   "description": "Products will be sorted by weight-age in default searches. More the weight-age, higher the product will appear in the list.", 
-  "search_index": 1, 
+  "depends_on": "show_in_website", 
   "doctype": "DocField", 
   "label": "Weightage", 
   "fieldname": "weightage", 
   "fieldtype": "Int", 
+  "search_index": 1, 
   "permlevel": 0
  }, 
  {
@@ -863,56 +868,26 @@
   "permlevel": 0
  }, 
  {
+  "amend": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "write": 0, 
+  "role": "Material Manager", 
+  "cancel": 0
+ }, 
+ {
+  "amend": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "write": 0, 
+  "role": "Material User", 
+  "cancel": 0
+ }, 
+ {
   "create": 1, 
   "doctype": "DocPerm", 
   "write": 1, 
   "role": "Material Master Manager", 
-  "cancel": 1, 
-  "permlevel": 0
- }, 
- {
-  "amend": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "write": 0, 
-  "role": "Material Manager", 
-  "cancel": 0, 
-  "permlevel": 0
- }, 
- {
-  "amend": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "write": 0, 
-  "role": "Material User", 
-  "cancel": 0, 
-  "permlevel": 0
- }, 
- {
-  "amend": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "write": 0, 
-  "role": "Material Master Manager", 
-  "cancel": 0, 
-  "permlevel": 1
- }, 
- {
-  "amend": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "write": 0, 
-  "role": "Material Manager", 
-  "cancel": 0, 
-  "permlevel": 1
- }, 
- {
-  "amend": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "write": 0, 
-  "role": "Material User", 
-  "cancel": 0, 
-  "permlevel": 1
+  "cancel": 1
  }
 ]

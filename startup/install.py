@@ -94,7 +94,8 @@ def import_country_and_currency():
 				"currency_name": country.currency,
 				"fraction": country.currency_fraction,
 				"symbol": country.currency_symbol,
-				"fraction_units": country.currency_fraction_units
+				"fraction_units": country.currency_fraction_units,
+				"number_format": country.number_format
 			}).insert()
 
 def import_defaults():
