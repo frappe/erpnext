@@ -17,12 +17,11 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import cstr, flt, get_defaults, getdate
+from webnotes.utils import cstr, flt, get_defaults
 from webnotes.model.doc import addchild
 from webnotes.model.wrapper import getlist
 from webnotes.model.code import get_obj
 from webnotes import msgprint
-from setup.utils import get_company_currency
 
 sql = webnotes.conn.sql
 
@@ -136,10 +135,6 @@ class DocType(BuyingController):
 		pc_obj.validate_reference_value(self)
 		self.check_for_stopped_status(pc_obj)
 
-		# get total in words
-		dcc = get_company_currency(self.doc.company)
-		self.doc.in_words = pc_obj.get_total_in_words(dcc, self.doc.grand_total)
-		self.doc.in_words_import = pc_obj.get_total_in_words(self.doc.currency, self.doc.grand_total_import)
 		# update valuation rate
 		self.update_valuation_rate()
 

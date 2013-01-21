@@ -37,7 +37,6 @@ class DocType(BuyingController):
 		
 		self.validate_fiscal_year()
 		self.validate_common()
-		self.set_in_words()
 
 	def on_submit(self):
 		purchase_controller = webnotes.get_obj("Purchase Common")
@@ -80,9 +79,3 @@ class DocType(BuyingController):
 		pc.validate_for_items(self)
 		pc.get_prevdoc_date(self)
 		pc.validate_reference_value(self)
-		
-	def set_in_words(self):
-		pc = get_obj('Purchase Common')
-		company_currency = get_company_currency(self.doc.company)
-		self.doc.in_words = pc.get_total_in_words(company_currency, self.doc.grand_total)
-		self.doc.in_words_import = pc.get_total_in_words(self.doc.currency, self.doc.grand_total_import)

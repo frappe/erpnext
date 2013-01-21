@@ -47,3 +47,9 @@ def get_price_list_currency(args):
 		return {"price_list_currency": result[0][0]}
 	else:
 		return {}
+
+@webnotes.whitelist()
+def get_total_in_words(amount, currency):
+	from webnotes.utils import money_in_words
+	fraction = webnotes.conn.get_value("Currency", currency, "fraction")
+	return money_in_words(amount, currency, fraction)

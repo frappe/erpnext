@@ -456,14 +456,6 @@ class DocType(BuyingController):
 		}
 		#msgprint(ret)
 		return ret
-
-
-				
-	# Get total in words
-	# ==================================================================	
-	def get_total_in_words(self, currency, amount):
-		from webnotes.utils import money_in_words
-		return money_in_words(amount, currency)	
 	
 	# get against document date	
 	#-----------------------------
