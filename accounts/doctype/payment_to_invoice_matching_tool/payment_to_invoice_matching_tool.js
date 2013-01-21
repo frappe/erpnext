@@ -40,7 +40,7 @@ cur_frm.fields_dict.voucher_no.get_query = function(doc) {
 			and ifnull(gle.is_cancelled, 'No') = 'No'\
 			and (select sum(debit) - sum(credit) from `tabGL Entry` \
 				where against_voucher_type = '%(dt)s' and against_voucher = gle.voucher_no \
-				and ifnull(is_cancelled, 'No') = 'No') > 0 \
+				and ifnull(is_cancelled, 'No') = 'No') != 0 \
 			ORDER BY gle.posting_date DESC, gle.voucher_no DESC LIMIT 50 \
 		", {dt:doc.voucher_type, acc:doc.account});
 	}
