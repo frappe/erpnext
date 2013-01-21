@@ -176,9 +176,9 @@ class DocType:
 			if flag == 0 and (flt(diff) != 0):
 				jd = addchild(self.doc, 'entries', 'Journal Voucher Detail', self.doclist)
 				if diff>0:
-					jd.credit = flt(diff)
+					jd.credit = flt(abs(diff))
 				elif diff<0:
-					jd.debit = flt(diff)
+					jd.debit = flt(abs(diff))
 					
 			# Set the total debit, total credit and difference
 			for d in getlist(self.doclist,'entries'):
