@@ -18,4 +18,4 @@ class DocType:
 			
 	def on_update(self):
 		from website.utils import clear_cache
-		clear_cache("about")
+		clear_cache("contact")

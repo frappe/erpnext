@@ -56,7 +56,7 @@ def get_item_details(args):
 		"conversion_factor": 1,
 		"warehouse": args.warehouse or item.default_warehouse,
 		"item_tax_rate": json.dumps(dict(([d.tax_type, d.tax_rate] for d in 
-			item_wrapper.doclist.get({"parentfield": "ref_rate_details"})))),
+			item_wrapper.doclist.get({"parentfield": "item_tax"})))),
 		"batch_no": None,
 		"expense_head": item.purchase_account,
 		"cost_center": item.cost_center
