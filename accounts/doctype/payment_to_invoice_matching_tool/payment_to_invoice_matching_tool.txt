@@ -2,9 +2,9 @@
  {
   "owner": "Administrator", 
   "docstatus": 0, 
-  "creation": "2012-07-03 13:30:46", 
+  "creation": "2013-01-16 14:48:54", 
   "modified_by": "Administrator", 
-  "modified": "2012-12-31 10:34:43"
+  "modified": "2013-01-21 11:52:11"
  }, 
  {
   "issingle": 1, 
@@ -25,7 +25,9 @@
   "name": "__common__", 
   "parent": "Payment to Invoice Matching Tool", 
   "read": 1, 
+  "submit": 0, 
   "doctype": "DocPerm", 
+  "report": 0, 
   "parenttype": "DocType", 
   "parentfield": "permissions"
  }, 
@@ -197,8 +199,11 @@
   "permlevel": 0
  }, 
  {
+  "amend": 0, 
+  "create": 0, 
   "doctype": "DocPerm", 
   "role": "All", 
+  "cancel": 0, 
   "permlevel": 1
  }
 ]

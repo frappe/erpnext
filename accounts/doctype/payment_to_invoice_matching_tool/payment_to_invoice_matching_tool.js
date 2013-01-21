@@ -33,12 +33,15 @@ cur_frm.cscript.refresh = function(doc) {
 cur_frm.fields_dict.voucher_no.get_query = function(doc) {
 	if (!doc.account) msgprint("Please select Account first");
 	else {
-		return repl("select voucher_no, posting_date \
-			from `tabGL Entry` where ifnull(is_cancelled, 'No') = 'No'\
-			and account = '%(acc)s' \
-			and voucher_type = '%(dt)s' \
-			and voucher_no LIKE '%s' \
-			ORDER BY posting_date DESC, voucher_no DESC LIMIT 50 \
+		return repl("select gle.voucher_no, gle.posting_date \
+			from `tabGL Entry` gle where gle.account = '%(acc)s' \
+			and gle.voucher_type = '%(dt)s' \
+			and gle.voucher_no LIKE '%s' \
+			and ifnull(gle.is_cancelled, 'No') = 'No'\
+			and (select sum(debit) - sum(credit) from `tabGL Entry` \
+				where against_voucher_type = '%(dt)s' and against_voucher = gle.voucher_no \
+				and ifnull(is_cancelled, 'No') = 'No') > 0 \
+			ORDER BY gle.posting_date DESC, gle.voucher_no DESC LIMIT 50 \
 		", {dt:doc.voucher_type, acc:doc.account});
 	}
 }
