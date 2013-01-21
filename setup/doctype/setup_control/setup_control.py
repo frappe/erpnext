@@ -236,7 +236,7 @@ class DocType:
 				on duplicate key update `password`=password(%s)""", 
 				(user_email, pwd, pwd))
 				
-		self.add_all_roles_to(pr.name)
+		add_all_roles_to(pr.name)
 				
 def add_all_roles_to(name):
 	profile = webnotes.doc("Profile", name)
