@@ -79,9 +79,9 @@ erpnext.StockLedger = erpnext.StockGridReport.extend({
 			default_value: "Select Warehouse...", filter: function(val, item, opts) {
 				return item.warehouse == val || val == opts.default_value;
 			}},
-		{fieldtype:"Select", label: "Item Code", link:"Item", default_value: "Select Item...",
+		{fieldtype:"Link", label: "Item Code", link:"Item", default_value: "Select Item...",
 			filter: function(val, item, opts) {
-				return item.item_code == val || val == opts.default_value;
+				return item.item_code == val || !val;
 			}},
 		{fieldtype:"Select", label: "Brand", link:"Brand", 
 			default_value: "Select Brand...", filter: function(val, item, opts) {
