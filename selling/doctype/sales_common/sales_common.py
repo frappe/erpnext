@@ -23,6 +23,7 @@ from webnotes.model.doc import addchild
 from webnotes.model.wrapper import getlist, copy_doclist
 from webnotes.model.code import get_obj
 from webnotes import form, msgprint, _
+from setup.utils import get_company_currency
 
 get_value = webnotes.conn.get_value
 
@@ -351,7 +352,7 @@ class DocType(TransactionBase):
 	# Check Conversion Rate (i.e. it will not allow conversion rate to be 1 for Currency other than default currency set in Global Defaults)
 	# ===========================================================================
 	def check_conversion_rate(self, obj):
-		default_currency = TransactionBase().get_company_currency(obj.doc.company)
+		default_currency = get_company_currency(obj.doc.company)
 		if not default_currency:
 			msgprint('Message: Please enter default currency in Company Master')
 			raise Exception		

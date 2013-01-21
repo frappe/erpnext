@@ -17,12 +17,11 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import cstr, load_json
-from webnotes.model import db_exists
-from webnotes.model.doc import Document
-from webnotes.model.wrapper import getlist, copy_doclist
+from webnotes.utils import cstr, getdate
+from webnotes.model.wrapper import getlist
 from webnotes.model.code import get_obj
 from webnotes import msgprint
+from setup.utils import get_company_currency
 
 sql = webnotes.conn.sql
 	
@@ -194,7 +193,7 @@ class DocType(TransactionBase):
 		sales_com_obj.check_conversion_rate(self)
 		
 		# Get total in words
-		dcc = TransactionBase().get_company_currency(self.doc.company)
+		dcc = get_company_currency(self.doc.company)
 		self.doc.in_words = sales_com_obj.get_total_in_words(dcc, self.doc.rounded_total)
 		self.doc.in_words_export = sales_com_obj.get_total_in_words(self.doc.currency, self.doc.rounded_total_export)
 

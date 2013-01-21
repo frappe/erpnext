@@ -18,9 +18,9 @@ from __future__ import unicode_literals
 import webnotes
 
 from webnotes.utils import cstr, flt, has_common, make_esc
-from webnotes.model import db_exists
-from webnotes.model.wrapper import getlist, copy_doclist
+from webnotes.model.wrapper import getlist
 from webnotes import session, msgprint
+from setup.utils import get_company_currency
 
 sql = webnotes.conn.sql
 	
@@ -52,7 +52,7 @@ class DocType(TransactionBase):
 			if not has_common(appr_roles, webnotes.user.get_roles()) and not has_common(appr_users, [session['user']]):
 				msg, add_msg = '',''
 				if max_amount:
-					dcc = TransactionBase().get_company_currency(self.doc.company)
+					dcc = get_company_currency(self.doc.company)
 					if based_on == 'Grand Total': msg = "since Grand Total exceeds %s. %s" % (dcc, flt(max_amount))
 					elif based_on == 'Itemwise Discount': msg = "since Discount exceeds %s for Item Code : %s" % (cstr(max_amount)+'%', item)
 					elif based_on == 'Average Discount' or based_on == 'Customerwise Discount': msg = "since Discount exceeds %s" % (cstr(max_amount)+'%')

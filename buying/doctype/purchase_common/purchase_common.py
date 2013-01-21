@@ -17,18 +17,17 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import add_days, cint, cstr, flt, getdate, now
-from webnotes.model import db_exists
-from webnotes.model.doc import Document, addchild
-from webnotes.model.wrapper import getlist, copy_doclist
+from webnotes.utils import add_days, cint, cstr, flt
+from webnotes.model.doc import addchild
+from webnotes.model.wrapper import getlist
 from webnotes.model.code import get_obj
-from webnotes import form, msgprint, _
+from webnotes import msgprint, _
+from buying.utils import get_last_purchase_details
 
 sql = webnotes.conn.sql
 	
-from utilities.transaction_base import TransactionBase
-
-class DocType(TransactionBase):
+from controllers.buying_controller import BuyingController
+class DocType(BuyingController):
 	def __init__(self, doc, doclist=None):
 		self.doc = doc
 		self.doclist = doclist
@@ -105,80 +104,6 @@ class DocType(TransactionBase):
 		r = sql("select terms from `tabTerms and Conditions` where name = %s", obj.doc.tc_name)
 		if r: obj.doc.terms = r[0][0]
 
-	# Get Item Details
-	def get_item_details(self, obj, arg =''):
-		import json
-		arg = json.loads(arg)
-		item = sql("select item_name,item_group, brand, description, min_order_qty, stock_uom, default_warehouse,lead_time_days from `tabItem` where name = %s and (ifnull(end_of_life,'')='' or end_of_life = '0000-00-00' or end_of_life >	now())", (arg['item_code']), as_dict = 1)
-		tax = sql("select tax_type, tax_rate from `tabItem Tax` where parent = %s" , arg['item_code'])
-		t = {}
-		for x in tax: t[x[0]] = flt(x[1])
-		# get warehouse 
-		if arg['warehouse']:
-			wh = arg['warehouse']
-		else:
-			wh = item and item[0]['default_warehouse'] or ''
-			
-		ret = {
-			'item_name': item and item[0]['item_name'] or '',
-			'item_group': item and item[0]['item_group'] or '',
-			'brand': item and item[0]['brand'] or '',
-			'description': item and item[0]['description'] or '',
-			'qty': 0,
-			'uom': item and item[0]['stock_uom'] or '',
-			'stock_uom': item and item[0]['stock_uom'] or '',
-			'conversion_factor': '1',
-			'warehouse': wh,
-			'item_tax_rate': json.dumps(t),
-			'batch_no': '',
-			'discount_rate': 0
-		}
-		
-		# get min_order_qty from item
-		if obj.doc.doctype == 'Purchase Request':
-			ret['min_order_qty'] = item and flt(item[0]['min_order_qty']) or 0
-		
-		# get projected qty from bin
-		if ret['warehouse']:
-			bin = sql("select projected_qty from `tabBin` where item_code = %s and warehouse = %s", (arg['item_code'], ret['warehouse']), as_dict=1)
-			ret['projected_qty'] = bin and flt(bin[0]['projected_qty']) or 0
-
-		# get schedule date, lead time date
-		if obj.doc.transaction_date and item and item[0]['lead_time_days']:
-			ret['schedule_date'] =	cstr(add_days(obj.doc.transaction_date, cint(item[0]['lead_time_days'])))
-			ret['lead_time_date'] = cstr(add_days(obj.doc.transaction_date, cint(item[0]['lead_time_days'])))
-		
-		# get last purchase rate as per stock uom and default currency for following list of doctypes
-		if obj.doc.doctype in ['Purchase Order', 'Purchase Receipt']:
-			last_purchase_details, last_purchase_date = self.get_last_purchase_details(arg['item_code'], obj.doc.name)
-
-			if last_purchase_details:
-				# updates ret with purchase_ref_rate, discount_rate, purchase_rate
-				conversion_rate = flt(obj.doc.fields.get('conversion_rate'))
-				ret.update(last_purchase_details)
-				ret.update({
-					'import_ref_rate': flt(last_purchase_details['purchase_ref_rate']) / conversion_rate,
-					'import_rate': flt(last_purchase_details['purchase_rate']) / conversion_rate,
-				})
-			else:
-				# set these values as blank in the form
-				ret.update({
-					'purchase_ref_rate': 0,
-					'discount_rate': 0,
-					'purchase_rate': 0,
-					'import_ref_rate': 0,
-					'import_rate': 0,
-				})
-		
-		if obj.doc.doctype == 'Purchase Order':
-			supplier_part_no = webnotes.conn.sql("""\
-				select supplier_part_no from `tabItem Supplier`
-				where parent = %s and parenttype = 'Item' and
-				supplier = %s""", (arg['item_code'], obj.doc.supplier))
-			if supplier_part_no and supplier_part_no[0][0]:
-				ret['supplier_part_no'] = supplier_part_no[0][0]
-		
-		return ret
 
 	# Get Available Qty at Warehouse
 	def get_bin_details( self, arg = ''):
@@ -194,14 +119,15 @@ class DocType(TransactionBase):
 		
 		import webnotes.utils
 		this_purchase_date = webnotes.utils.getdate(obj.doc.fields.get('posting_date') or obj.doc.fields.get('transaction_date'))
-
+		
 		for d in getlist(obj.doclist,obj.fname):
 			# get last purchase details
-			last_purchase_details, last_purchase_date = self.get_last_purchase_details(d.item_code, obj.doc.name)
+			last_purchase_details = get_last_purchase_details(d.item_code, obj.doc.name)
 
 			# compare last purchase date and this transaction's date
 			last_purchase_rate = None
-			if last_purchase_date > this_purchase_date:
+			if last_purchase_details and \
+					(last_purchase_details.purchase_date > this_purchase_date):
 				last_purchase_rate = last_purchase_details['purchase_rate']
 			elif is_submit == 1:
 				# even if this transaction is the latest one, it should be submitted
@@ -220,7 +146,7 @@ class DocType(TransactionBase):
 		
 		for d in getlist(obj.doclist, obj.fname):
 			if d.item_code:
-				last_purchase_details, last_purchase_date = self.get_last_purchase_details(d.item_code, doc_name)
+				last_purchase_details = get_last_purchase_details(d.item_code, doc_name)
 
 				if last_purchase_details:
 					d.purchase_ref_rate = last_purchase_details['purchase_ref_rate'] * (flt(d.conversion_factor) or 1.0)
@@ -238,58 +164,6 @@ class DocType(TransactionBase):
 						d.purchase_ref_rate = d.purchase_rate = d.import_ref_rate \
 							= d.import_rate = item_last_purchase_rate
 			
-	def get_last_purchase_details(self, item_code, doc_name):
-		import webnotes
-		import webnotes.utils
-
-		# get last purchase order item details
-		last_po_item = webnotes.conn.sql("""\
-			select po.name, po.transaction_date, po_item.conversion_factor, po_item.purchase_ref_rate, 
-				po_item.discount_rate, po_item.purchase_rate
-			from `tabPurchase Order` po, `tabPurchase Order Item` po_item
-			where po.docstatus = 1 and po_item.item_code = %s and po.name != %s and 
-				po.name = po_item.parent
-			order by po.transaction_date desc, po.name desc
-			limit 1""", (item_code, doc_name), as_dict=1)
-		
-		# get last purchase receipt item details		
-		last_pr_item = webnotes.conn.sql("""\
-			select pr.name, pr.posting_date, pr.posting_time, pr_item.conversion_factor,
-				pr_item.purchase_ref_rate, pr_item.discount_rate, pr_item.purchase_rate
-			from `tabPurchase Receipt` pr, `tabPurchase Receipt Item` pr_item
-			where pr.docstatus = 1 and pr_item.item_code = %s and pr.name != %s and
-				pr.name = pr_item.parent
-			order by pr.posting_date desc, pr.posting_time desc, pr.name desc
-			limit 1""", (item_code, doc_name), as_dict=1)
-
-		# get the latest of the two
-		po_date_obj = webnotes.utils.getdate(last_po_item and last_po_item[0]['transaction_date'] or '2000-01-01')
-		pr_date_obj = webnotes.utils.getdate(last_pr_item and last_pr_item[0]['posting_date'] or '2000-01-01')
-		
-		# if both exists, return true
-		both_exists = last_po_item and last_pr_item
-		
-		# get the last purchased item, by comparing dates		
-		if (both_exists and po_date_obj > pr_date_obj) or (not both_exists and last_po_item):
-			last_purchase_item = last_po_item[0]
-			last_purchase_date = po_date_obj
-		elif both_exists or (not both_exists and last_pr_item):
-			last_purchase_item = last_pr_item[0]
-			last_purchase_date = pr_date_obj
-		else:
-			# if none exists
-			return None, webnotes.utils.getdate('2000-01-01')
-			
-		# prepare last purchase details, dividing by conversion factor
-		conversion_factor = flt(last_purchase_item['conversion_factor'])
-		last_purchase_details = {
-			'purchase_ref_rate': flt(last_purchase_item['purchase_ref_rate']) / conversion_factor,
-			'purchase_rate': flt(last_purchase_item['purchase_rate']) / conversion_factor,
-			'discount_rate': flt(last_purchase_item['discount_rate']),
-		}
-		
-		return last_purchase_details, last_purchase_date	
-
 	# validation
 	# -------------------------------------------------------------------------------------------------------
 	
@@ -380,67 +254,6 @@ class DocType(TransactionBase):
 						Please change any of the field value to enter the item twice.""" % d.item_code, raise_exception = 1)
 				else:
 					chk_dupl_itm.append(f)
-
-	# validate conversion rate
-	def validate_conversion_rate(self, obj):
-		default_currency = TransactionBase().get_company_currency(obj.doc.company)			
-		if not default_currency:
-			msgprint('Message: Please enter default currency in Company Master')
-			raise Exception
-			
-		if obj.doc.conversion_rate == 0:
-			msgprint('Conversion Rate cannot be 0', raise_exception=1)
-		elif not obj.doc.conversion_rate:
-			msgprint('Please specify Conversion Rate', raise_exception=1)
-		elif obj.doc.currency == default_currency and \
-				flt(obj.doc.conversion_rate) != 1.00:
-			msgprint("""Conversion Rate should be equal to 1.00, \
-						since the specified Currency and the company's currency \
-						are same""", raise_exception=1)
-		elif obj.doc.currency != default_currency and \
-				flt(obj.doc.conversion_rate) == 1.00:
-			msgprint("""Conversion Rate should not be equal to 1.00, \
-						since the specified Currency and the company's currency \
-						are different""", raise_exception=1)
-
-	def validate_doc(self, obj, prevdoc_doctype, prevdoc_docname):
-		if prevdoc_docname :
-			get_name = sql("select name from `tab%s` where name = '%s'" % (prevdoc_doctype, prevdoc_docname))
-			name = get_name and get_name[0][0] or ''
-			if name:	#check for incorrect docname
-				dt = sql("select company, docstatus from `tab%s` where name = '%s'" % (prevdoc_doctype, name))
-				company_name = dt and cstr(dt[0][0]) or ''
-				docstatus = dt and dt[0][1] or 0
-				
-				# check for docstatus 
-				if (docstatus != 1):
-					msgprint(cstr(prevdoc_doctype) + ": " + cstr(prevdoc_docname) + " is not Submitted Document.")
-					raise Exception
-
-				# check for company
-				if (company_name != obj.doc.company):
-					msgprint(cstr(prevdoc_doctype) + ": " + cstr(prevdoc_docname) + " does not belong to the Company: " + cstr(obj.doc.company))
-					raise Exception
-
-				if prevdoc_doctype in ['Purchase Order', 'Purchase Receipt']:
-					dt = sql("select supplier, currency from `tab%s` where name = '%s'" % (prevdoc_doctype, name))
-					supplier = dt and dt[0][0] or ''
-					currency = dt and dt[0][1] or ''
-						
-					# check for supplier
-					if (supplier != obj.doc.supplier):
-						msgprint("Purchase Order: " + cstr(d.prevdoc_docname) + " supplier :" + cstr(supplier) + " does not match with supplier of current document.")
-						raise Exception
-					 
-					# check for curency
-					if (currency != obj.doc.currency):
-						msgprint("Purchase Order: " + cstr(d.prevdoc_docname) + " currency :" + cstr(currency) + " does not match with currency of current document.")
-						raise Exception
-
-			else: # if not name than
-				msgprint(cstr(prevdoc_doctype) + ": " + cstr(prevdoc_docname) + " is not a valid " + cstr(prevdoc_doctype))
-				raise Exception
-				
 
 # Validate values with reference document
 	#---------------------------------------
@@ -655,7 +468,6 @@ class DocType(TransactionBase):
 	# get against document date	
 	#-----------------------------
 	def get_prevdoc_date(self, obj):
-		import datetime
 		for d in getlist(obj.doclist, obj.fname):
 			if d.prevdoc_doctype and d.prevdoc_docname:
 				dt = sql("select transaction_date from `tab%s` where name = '%s'" % (d.prevdoc_doctype, d.prevdoc_docname))

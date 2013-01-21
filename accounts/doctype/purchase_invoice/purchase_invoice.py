@@ -18,27 +18,19 @@ from __future__ import unicode_literals
 import webnotes
 
 from webnotes.utils import add_days, cint, cstr, flt, formatdate, get_defaults
-from webnotes.model import db_exists
-from webnotes.model.doc import Document, make_autoname
-from webnotes.model.wrapper import getlist, copy_doclist
+from webnotes.model.wrapper import getlist
 from webnotes.model.code import get_obj
-from webnotes import form, msgprint
+from webnotes import msgprint
+from setup.utils import get_company_currency
 
 sql = webnotes.conn.sql
 	
-
-from utilities.transaction_base import TransactionBase
-
-class DocType(TransactionBase):
+from controllers.buying_controller import BuyingController
+class DocType(BuyingController):
 	def __init__(self,d,dl):
 		self.doc, self.doclist = d, dl 
 		self.tname = 'Purchase Invoice Item'
 		self.fname = 'entries'
-
-	# Autoname
-	# ---------
-	def autoname(self):
-		self.doc.name = make_autoname(self.doc.naming_series+'.####')
 
 
 # ************************** Trigger Functions ****************************
@@ -106,64 +98,7 @@ class DocType(TransactionBase):
 				item = webnotes.conn.sql("select purchase_account, cost_center from tabItem where name = '%s'" %(d.item_code), as_dict=1)
 				d.expense_head = item and item[0]['purchase_account'] or ''
 				d.cost_center = item and item[0]['cost_center'] or ''
-			
 
-	# Get Item Details
-	# -----------------		
-	def get_item_details(self, arg=None):
-		if arg:
-			return self.get_pv_details(arg)
-		else:
-			for doc in self.doclist:
-				if doc.fields.get('item_code'):
-					ret = self.get_pv_details(doc.item_code)
-					for r in ret:
-						if not doc.fields.get(r):
-							doc.fields[r] = ret[r]
-
-
-	def get_pv_details(self, arg):
-		import json
-		item_det = sql("select item_name, brand, description, item_group, purchase_account, cost_center, stock_uom from tabItem where name=%s",arg,as_dict=1)
-		
-		tax = sql("select tax_type, tax_rate from `tabItem Tax` where parent = %s" , arg)
-		t = {}
-		for x in tax: t[x[0]] = flt(x[1])
-		ret = {
-			'item_name': item_det and item_det[0]['item_name'] or '',
-			'brand': item_det and item_det[0]['brand'] or '',
-			'description': item_det and item_det[0]['description'] or '',
-			'item_group': item_det and item_det[0]['item_group'] or '',
-			'rate': 0.00,
-			'purchase_ref_rate': 0.00,
-			'import_ref_rate': 0.00,
-			'import_rate': 0.00,
-			'qty': 0.00,
-			'amount': 0.00,
-			'discount_rate': 0.00,
-			'expense_head': item_det and item_det[0]['purchase_account'] or '',
-			'cost_center': item_det and item_det[0]['cost_center'] or '',
-			'item_tax_rate': json.dumps(t),
-			'uom': item_det and item_det[0]['stock_uom'] or ''
-		}
-		
-		# get last purchase rate
-		last_purchase_details, last_purchase_date = get_obj('Purchase Common').get_last_purchase_details(arg, self.doc.name)
-		if last_purchase_details:
-			purchase_ref_rate = last_purchase_details['purchase_ref_rate']
-			purchase_rate = last_purchase_details['purchase_rate']
-			conversion_rate = self.doc.conversion_rate or 1.0
-			ret.update({
-				'purchase_ref_rate': purchase_ref_rate,
-				'discount_rate': last_purchase_details['discount_rate'],
-				'rate': purchase_rate,
-				'import_ref_rate': purchase_ref_rate / conversion_rate,
-				'import_rate': purchase_rate / conversion_rate,
-			})	
-
-		return ret
-
-		
 	# Advance Allocation
 	# -------------------
 	def get_advances(self):
@@ -225,7 +160,7 @@ class DocType(TransactionBase):
 	# Check Conversion Rate
 	# ----------------------
 	def check_conversion_rate(self):
-		default_currency = TransactionBase().get_company_currency(self.doc.company)		
+		default_currency = get_company_currency(self.doc.company)		
 		if not default_currency:
 			msgprint('Message: Please enter default currency in Company Master')
 			raise Exception
@@ -394,6 +329,8 @@ class DocType(TransactionBase):
 	# VALIDATE
 	# ====================================================================================
 	def validate(self):
+		super(DocType, self).validate()
+		
 		self.po_required()
 		self.pr_required()
 		self.check_active_purchase_items()
@@ -434,7 +371,7 @@ class DocType(TransactionBase):
 		pc_obj = get_obj(dt='Purchase Common')
 		
 		 # get total in words
-		dcc = TransactionBase().get_company_currency(self.doc.company)
+		dcc = get_company_currency(self.doc.company)
 		self.doc.in_words = pc_obj.get_total_in_words(dcc, self.doc.grand_total)
 		self.doc.in_words_import = pc_obj.get_total_in_words(self.doc.currency,
 		 	self.doc.grand_total_import)

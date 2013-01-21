@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+wn.provide("erpnext.buying");
+
 cur_frm.cscript.tname = "Purchase Order Item";
 cur_frm.cscript.fname = "po_details";
 cur_frm.cscript.other_fname = "purchase_tax_details";
@@ -21,6 +23,35 @@ cur_frm.cscript.other_fname = "purchase_tax_details";
 wn.require('app/accounts/doctype/purchase_taxes_and_charges_master/purchase_taxes_and_charges_master.js');
 wn.require('app/buying/doctype/purchase_common/purchase_common.js');
 wn.require('app/utilities/doctype/sms_control/sms_control.js');
+
+erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend({
+	refresh: function(doc, cdt, cdn) {
+		this._super();
+		
+		if(doc.docstatus == 1 && doc.status != 'Stopped'){
+			cur_frm.add_custom_button('Send SMS', cur_frm.cscript['Send SMS']);
+			if(flt(doc.per_received, 2) < 100) cur_frm.add_custom_button('Make Purchase Receipt', cur_frm.cscript['Make Purchase Receipt']);	
+			if(flt(doc.per_billed, 2) < 100) cur_frm.add_custom_button('Make Invoice', cur_frm.cscript['Make Purchase Invoice']);
+			if(flt(doc.per_billed, 2) < 100 || doc.per_received < 100) cur_frm.add_custom_button('Stop', cur_frm.cscript['Stop Purchase Order']);
+		}
+
+		if(doc.docstatus == 1 && doc.status == 'Stopped')
+			cur_frm.add_custom_button('Unstop Purchase Order', cur_frm.cscript['Unstop Purchase Order']);
+			
+	},
+	
+	onload_post_render: function(doc, dt, dn) {
+		var callback = function(doc, dt, dn) {
+			if(doc.__islocal) cur_frm.cscript.get_default_schedule_date(doc);
+		}
+		this.update_item_details(doc, dt, dn, callback);
+	}
+});
+
+var new_cscript = new erpnext.buying.PurchaseOrderController({frm: cur_frm});
+
+// for backward compatibility: combine new and previous states
+$.extend(cur_frm.cscript, new_cscript);
 
 cur_frm.cscript.onload = function(doc, cdt, cdn) {
 	// set missing values in parent doc
@@ -32,32 +63,6 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 		transaction_date: get_today(),
 		is_subcontracted: "No"
 	});
-}
-
-cur_frm.cscript.onload_post_render = function(doc, dt, dn) {
-	var callback = function(doc, dt, dn) {
-		if(doc.__islocal) cur_frm.cscript.get_default_schedule_date(doc);
-	}
-	cur_frm.cscript.update_item_details(doc, dt, dn, callback);
-}
-
-cur_frm.cscript.refresh = function(doc, cdt, cdn) { 
-	cur_frm.clear_custom_buttons();
-	erpnext.hide_naming_series();
-
-	cur_frm.cscript.dynamic_label(doc, cdt, cdn);
-
-	if(doc.docstatus == 1 && doc.status != 'Stopped'){
-		cur_frm.add_custom_button('Send SMS', cur_frm.cscript['Send SMS']);
-		if(flt(doc.per_received, 2) < 100) cur_frm.add_custom_button('Make Purchase Receipt', cur_frm.cscript['Make Purchase Receipt']);	
-		if(flt(doc.per_billed, 2) < 100) cur_frm.add_custom_button('Make Invoice', cur_frm.cscript['Make Purchase Invoice']);
-		if(flt(doc.per_billed, 2) < 100 || doc.per_received < 100) cur_frm.add_custom_button('Stop', cur_frm.cscript['Stop Purchase Order']);
-	}
-		
-	if(doc.docstatus == 1 && doc.status == 'Stopped')
-		cur_frm.add_custom_button('Unstop Purchase Order', cur_frm.cscript['Unstop Purchase Order']);
-	
-	cur_frm.cscript.toggle_contact_section(doc);
 }
 
 cur_frm.cscript.supplier = function(doc,dt,dn) {

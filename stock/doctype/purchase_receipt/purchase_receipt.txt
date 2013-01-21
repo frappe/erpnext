@@ -2,13 +2,14 @@
  {
   "owner": "Administrator", 
   "docstatus": 0, 
-  "creation": "2012-07-17 13:24:57", 
+  "creation": "2013-01-18 12:47:03", 
   "modified_by": "Administrator", 
-  "modified": "2012-12-03 17:10:41"
+  "modified": "2013-01-18 13:25:36"
  }, 
  {
-  "is_submittable": 1, 
+  "autoname": "naming_series:", 
   "allow_attach": 1, 
+  "is_submittable": 1, 
   "search_fields": "status, posting_date, supplier", 
   "module": "Stock", 
   "doctype": "DocType", 
@@ -36,6 +37,7 @@
   "doctype": "DocType"
  }, 
  {
+  "print_width": "50%", 
   "oldfieldtype": "Column Break", 
   "doctype": "DocField", 
   "width": "50%", 
@@ -48,7 +50,6 @@
   "description": "To manage multiple series please go to Setup > Manage Series", 
   "no_copy": 1, 
   "oldfieldtype": "Select", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Series", 
   "oldfieldname": "naming_series", 
@@ -60,15 +61,14 @@
  }, 
  {
   "print_hide": 1, 
+  "print_width": "150px", 
   "permlevel": 0, 
   "oldfieldtype": "Link", 
-  "colour": "White:FFF", 
   "allow_on_submit": 0, 
   "doctype": "DocField", 
   "label": "Supplier", 
   "oldfieldname": "supplier", 
   "width": "150px", 
-  "trigger": "Client", 
   "fieldname": "supplier", 
   "fieldtype": "Link", 
   "search_index": 1, 
@@ -118,6 +118,7 @@
   "permlevel": 1
  }, 
  {
+  "print_width": "50%", 
   "oldfieldtype": "Column Break", 
   "doctype": "DocField", 
   "width": "50%", 
@@ -128,9 +129,9 @@
  {
   "print_hide": 1, 
   "description": "The date at which current entry will get or has actually executed.", 
+  "print_width": "100px", 
   "no_copy": 1, 
   "oldfieldtype": "Date", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Posting Date", 
   "oldfieldname": "posting_date", 
@@ -145,9 +146,9 @@
  {
   "print_hide": 1, 
   "description": "Time at which materials were received", 
+  "print_width": "100px", 
   "no_copy": 1, 
   "oldfieldtype": "Time", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Posting Time", 
   "oldfieldname": "posting_time", 
@@ -161,9 +162,9 @@
  }, 
  {
   "print_hide": 0, 
+  "print_width": "100px", 
   "no_copy": 1, 
   "oldfieldtype": "Data", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Challan No", 
   "oldfieldname": "challan_no", 
@@ -176,9 +177,9 @@
  }, 
  {
   "print_hide": 0, 
+  "print_width": "100px", 
   "no_copy": 1, 
   "oldfieldtype": "Date", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Challan Date", 
   "oldfieldname": "challan_date", 
@@ -191,7 +192,6 @@
  }, 
  {
   "oldfieldtype": "Section Break", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Items", 
   "fieldname": "items", 
@@ -200,8 +200,8 @@
  }, 
  {
   "print_hide": 0, 
-  "allow_on_submit": 1, 
   "oldfieldtype": "Table", 
+  "allow_on_submit": 1, 
   "doctype": "DocField", 
   "label": "Purchase Receipt Items", 
   "oldfieldname": "purchase_receipt_details", 
@@ -213,42 +213,10 @@
  }, 
  {
   "oldfieldtype": "Section Break", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "options": "Simple", 
   "fieldname": "section_break0", 
   "fieldtype": "Section Break", 
-  "permlevel": 0
- }, 
- {
-  "print_hide": 1, 
-  "oldfieldtype": "Currency", 
-  "doctype": "DocField", 
-  "label": "Net Total", 
-  "oldfieldname": "net_total", 
-  "width": "150px", 
-  "fieldname": "net_total", 
-  "fieldtype": "Currency", 
-  "reqd": 1, 
-  "permlevel": 1
- }, 
- {
-  "print_hide": 1, 
-  "oldfieldtype": "Currency", 
-  "doctype": "DocField", 
-  "label": "Net Total (Import)", 
-  "oldfieldname": "net_total_import", 
-  "fieldname": "net_total_import", 
-  "fieldtype": "Currency", 
-  "permlevel": 1
- }, 
- {
-  "oldfieldtype": "Button", 
-  "doctype": "DocField", 
-  "label": "Re-Calculate Values", 
-  "trigger": "Client", 
-  "fieldname": "recalculate_values", 
-  "fieldtype": "Button", 
   "permlevel": 0
  }, 
  {
@@ -262,6 +230,83 @@
   "permlevel": 0
  }, 
  {
+  "doctype": "DocField", 
+  "fieldname": "column_break_18", 
+  "fieldtype": "Column Break", 
+  "permlevel": 0
+ }, 
+ {
+  "oldfieldtype": "Button", 
+  "doctype": "DocField", 
+  "label": "Re-Calculate Values", 
+  "fieldname": "recalculate_values", 
+  "fieldtype": "Button", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "section_break_20", 
+  "fieldtype": "Section Break", 
+  "permlevel": 0
+ }, 
+ {
+  "print_hide": 0, 
+  "description": "You can make a purchase receipt from multiple purchase orders. Select purchase orders one by one and click on the button below.", 
+  "no_copy": 1, 
+  "oldfieldtype": "Link", 
+  "doctype": "DocField", 
+  "label": "Purchase Order", 
+  "oldfieldname": "purchase_order_no", 
+  "options": "Purchase Order", 
+  "fieldname": "purchase_order_no", 
+  "fieldtype": "Link", 
+  "permlevel": 0
+ }, 
+ {
+  "print_hide": 1, 
+  "oldfieldtype": "Button", 
+  "doctype": "DocField", 
+  "label": "Pull Purchase Order Details", 
+  "options": "get_po_details", 
+  "fieldname": "pull_purchase_order_details", 
+  "fieldtype": "Button", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "label": "Currency & Price List", 
+  "fieldname": "currency_price_list", 
+  "fieldtype": "Section Break", 
+  "permlevel": 0
+ }, 
+ {
+  "print_hide": 1, 
+  "description": "Supplier's currency", 
+  "oldfieldtype": "Select", 
+  "doctype": "DocField", 
+  "label": "Currency", 
+  "oldfieldname": "currency", 
+  "options": "link:Currency", 
+  "fieldname": "currency", 
+  "fieldtype": "Select", 
+  "reqd": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "print_hide": 1, 
+  "description": "Rate at which supplier's currency is converted to company's base currency", 
+  "default": "1.00", 
+  "oldfieldtype": "Currency", 
+  "doctype": "DocField", 
+  "label": "Exchange Rate", 
+  "oldfieldname": "conversion_rate", 
+  "fieldname": "conversion_rate", 
+  "fieldtype": "Float", 
+  "reqd": 1, 
+  "permlevel": 0
+ }, 
+ {
+  "print_width": "50%", 
   "oldfieldtype": "Column Break", 
   "doctype": "DocField", 
   "width": "50%", 
@@ -271,62 +316,37 @@
  }, 
  {
   "print_hide": 1, 
-  "description": "Supplier's currency", 
-  "oldfieldtype": "Select", 
-  "colour": "White:FFF", 
+  "description": "Consider this Price List for fetching rate. (only which have \"For Buying\" as checked)", 
   "doctype": "DocField", 
-  "label": "Currency", 
-  "oldfieldname": "currency", 
-  "permlevel": 0, 
-  "fieldname": "currency", 
-  "fieldtype": "Select", 
-  "reqd": 1, 
-  "options": "link:Currency"
- }, 
- {
-  "print_hide": 1, 
-  "description": "Rate at which supplier's currency is converted to company's base currency", 
-  "default": "1.00", 
-  "oldfieldtype": "Currency", 
-  "colour": "White:FFF", 
-  "doctype": "DocField", 
-  "label": "Conversion Rate", 
-  "oldfieldname": "conversion_rate", 
-  "trigger": "Client", 
-  "fieldname": "conversion_rate", 
-  "fieldtype": "Float", 
-  "reqd": 1, 
+  "label": "Price List", 
+  "options": "Price List", 
+  "fieldname": "price_list_name", 
+  "fieldtype": "Link", 
   "permlevel": 0
  }, 
  {
-  "print_hide": 0, 
-  "description": "You can make a purchase receipt from multiple purchase orders. Select purchase orders one by one and click on the button below.", 
-  "no_copy": 1, 
-  "oldfieldtype": "Link", 
-  "colour": "White:FFF", 
+  "print_hide": 1, 
+  "depends_on": "price_list_name", 
   "doctype": "DocField", 
-  "label": "Purchase Order", 
-  "oldfieldname": "purchase_order_no", 
-  "permlevel": 0, 
-  "fieldname": "purchase_order_no", 
+  "label": "Price List Currency", 
+  "options": "Currency", 
+  "fieldname": "price_list_currency", 
   "fieldtype": "Link", 
-  "options": "Purchase Order"
+  "hidden": 0, 
+  "permlevel": 0
  }, 
  {
   "print_hide": 1, 
-  "oldfieldtype": "Button", 
-  "colour": "White:FFF", 
+  "depends_on": "price_list_name", 
   "doctype": "DocField", 
-  "label": "Pull Purchase Order Details", 
-  "options": "get_po_details", 
-  "fieldname": "pull_purchase_order_details", 
-  "fieldtype": "Button", 
+  "label": "Price List Exchange Rate", 
+  "fieldname": "plc_conversion_rate", 
+  "fieldtype": "Float", 
   "permlevel": 0
  }, 
  {
   "description": "Add / Edit Taxes and Charges", 
   "oldfieldtype": "Section Break", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Taxes", 
   "fieldname": "taxes", 
@@ -337,7 +357,6 @@
   "print_hide": 1, 
   "description": "If you have created a standard template in Purchase Taxes and Charges Master, select one and click on the button below.", 
   "oldfieldtype": "Link", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Purchase Taxes and Charges", 
   "oldfieldname": "purchase_other_charges", 
@@ -371,20 +390,9 @@
   "oldfieldtype": "Button", 
   "doctype": "DocField", 
   "label": "Calculate Tax", 
-  "trigger": "Client", 
   "fieldname": "calculate_tax", 
   "fieldtype": "Button", 
   "permlevel": 0
- }, 
- {
-  "print_hide": 1, 
-  "oldfieldtype": "Currency", 
-  "doctype": "DocField", 
-  "label": "Total Tax", 
-  "oldfieldname": "total_tax", 
-  "fieldname": "total_tax", 
-  "fieldtype": "Currency", 
-  "permlevel": 1
  }, 
  {
   "print_hide": 1, 
@@ -398,7 +406,6 @@
  {
   "description": "Detailed Breakup of the totals", 
   "oldfieldtype": "Section Break", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Totals", 
   "fieldname": "totals", 
@@ -409,81 +416,10 @@
   "print_hide": 1, 
   "oldfieldtype": "Currency", 
   "doctype": "DocField", 
-  "label": "Grand Total", 
-  "oldfieldname": "grand_total", 
-  "fieldname": "grand_total", 
+  "label": "Net Total (Import)", 
+  "oldfieldname": "net_total_import", 
+  "fieldname": "net_total_import", 
   "fieldtype": "Currency", 
-  "permlevel": 1
- }, 
- {
-  "print_hide": 1, 
-  "oldfieldtype": "Currency", 
-  "colour": "White:FFF", 
-  "doctype": "DocField", 
-  "label": "Rounded Total", 
-  "oldfieldname": "rounded_total", 
-  "fieldname": "rounded_total", 
-  "fieldtype": "Currency", 
-  "permlevel": 1
- }, 
- {
-  "print_hide": 1, 
-  "description": "In Words will be visible once you save the Purchase Receipt.", 
-  "oldfieldtype": "Data", 
-  "colour": "White:FFF", 
-  "doctype": "DocField", 
-  "label": "In Words", 
-  "oldfieldname": "in_words", 
-  "fieldname": "in_words", 
-  "fieldtype": "Data", 
-  "permlevel": 1
- }, 
- {
-  "print_hide": 1, 
-  "oldfieldtype": "Currency", 
-  "doctype": "DocField", 
-  "label": "Taxes and Charges Added", 
-  "oldfieldname": "other_charges_added", 
-  "fieldname": "other_charges_added", 
-  "fieldtype": "Currency", 
-  "permlevel": 1
- }, 
- {
-  "print_hide": 1, 
-  "oldfieldtype": "Currency", 
-  "doctype": "DocField", 
-  "label": "Taxes and Charges Deducted", 
-  "oldfieldname": "other_charges_deducted", 
-  "fieldname": "other_charges_deducted", 
-  "fieldtype": "Currency", 
-  "permlevel": 1
- }, 
- {
-  "doctype": "DocField", 
-  "width": "50%", 
-  "fieldname": "column_break3", 
-  "fieldtype": "Column Break", 
-  "permlevel": 0
- }, 
- {
-  "print_hide": 1, 
-  "oldfieldtype": "Currency", 
-  "doctype": "DocField", 
-  "label": "Grand Total (Import)", 
-  "oldfieldname": "grand_total_import", 
-  "fieldname": "grand_total_import", 
-  "fieldtype": "Currency", 
-  "permlevel": 1
- }, 
- {
-  "print_hide": 1, 
-  "oldfieldtype": "Data", 
-  "colour": "White:FFF", 
-  "doctype": "DocField", 
-  "label": "In Words (Import)", 
-  "oldfieldname": "in_words_import", 
-  "fieldname": "in_words_import", 
-  "fieldtype": "Data", 
   "permlevel": 1
  }, 
  {
@@ -507,9 +443,110 @@
   "permlevel": 1
  }, 
  {
+  "print_hide": 1, 
+  "oldfieldtype": "Currency", 
+  "doctype": "DocField", 
+  "label": "Grand Total (Import)", 
+  "oldfieldname": "grand_total_import", 
+  "fieldname": "grand_total_import", 
+  "fieldtype": "Currency", 
+  "permlevel": 1
+ }, 
+ {
+  "print_hide": 1, 
+  "oldfieldtype": "Data", 
+  "doctype": "DocField", 
+  "label": "In Words (Import)", 
+  "oldfieldname": "in_words_import", 
+  "fieldname": "in_words_import", 
+  "fieldtype": "Data", 
+  "permlevel": 1
+ }, 
+ {
+  "print_width": "50%", 
+  "doctype": "DocField", 
+  "width": "50%", 
+  "fieldname": "column_break3", 
+  "fieldtype": "Column Break", 
+  "permlevel": 0
+ }, 
+ {
+  "print_hide": 1, 
+  "print_width": "150px", 
+  "oldfieldtype": "Currency", 
+  "doctype": "DocField", 
+  "label": "Net Total", 
+  "oldfieldname": "net_total", 
+  "width": "150px", 
+  "fieldname": "net_total", 
+  "fieldtype": "Currency", 
+  "reqd": 1, 
+  "permlevel": 1
+ }, 
+ {
+  "print_hide": 1, 
+  "oldfieldtype": "Currency", 
+  "doctype": "DocField", 
+  "label": "Taxes and Charges Added", 
+  "oldfieldname": "other_charges_added", 
+  "fieldname": "other_charges_added", 
+  "fieldtype": "Currency", 
+  "permlevel": 1
+ }, 
+ {
+  "print_hide": 1, 
+  "oldfieldtype": "Currency", 
+  "doctype": "DocField", 
+  "label": "Taxes and Charges Deducted", 
+  "oldfieldname": "other_charges_deducted", 
+  "fieldname": "other_charges_deducted", 
+  "fieldtype": "Currency", 
+  "permlevel": 1
+ }, 
+ {
+  "print_hide": 1, 
+  "oldfieldtype": "Currency", 
+  "doctype": "DocField", 
+  "label": "Total Tax", 
+  "oldfieldname": "total_tax", 
+  "fieldname": "total_tax", 
+  "fieldtype": "Currency", 
+  "permlevel": 1
+ }, 
+ {
+  "print_hide": 1, 
+  "oldfieldtype": "Currency", 
+  "doctype": "DocField", 
+  "label": "Grand Total", 
+  "oldfieldname": "grand_total", 
+  "fieldname": "grand_total", 
+  "fieldtype": "Currency", 
+  "permlevel": 1
+ }, 
+ {
+  "print_hide": 1, 
+  "oldfieldtype": "Currency", 
+  "doctype": "DocField", 
+  "label": "Rounded Total", 
+  "oldfieldname": "rounded_total", 
+  "fieldname": "rounded_total", 
+  "fieldtype": "Currency", 
+  "permlevel": 1
+ }, 
+ {
+  "print_hide": 1, 
+  "description": "In Words will be visible once you save the Purchase Receipt.", 
+  "oldfieldtype": "Data", 
+  "doctype": "DocField", 
+  "label": "In Words", 
+  "oldfieldname": "in_words", 
+  "fieldname": "in_words", 
+  "fieldtype": "Data", 
+  "permlevel": 1
+ }, 
+ {
   "description": "Add Terms and Conditions for the Purchase Receipt. You can also prepare a Terms and Conditions Master and use the Template.", 
   "oldfieldtype": "Section Break", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Terms and Conditions", 
   "fieldname": "terms_section_break", 
@@ -572,6 +609,12 @@
   "permlevel": 0
  }, 
  {
+  "doctype": "DocField", 
+  "fieldname": "column_break_57", 
+  "fieldtype": "Column Break", 
+  "permlevel": 0
+ }, 
+ {
   "print_hide": 1, 
   "doctype": "DocField", 
   "label": "Contact Person", 
@@ -583,7 +626,6 @@
  {
   "description": "Filing in Additional Information about the Purchase Receipt will help you analyze your data better.", 
   "oldfieldtype": "Section Break", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "More Info", 
   "fieldname": "more_info", 
@@ -593,9 +635,9 @@
  {
   "print_hide": 1, 
   "permlevel": 1, 
+  "print_width": "150px", 
   "no_copy": 1, 
   "oldfieldtype": "Select", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Status", 
   "oldfieldname": "status", 
@@ -612,7 +654,6 @@
   "description": "% of materials billed against this Purchase Receipt", 
   "no_copy": 1, 
   "oldfieldtype": "Currency", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "% Billed", 
   "oldfieldname": "per_billed", 
@@ -626,17 +667,18 @@
   "description": "Select \"Yes\" for sub - contracting items", 
   "default": "No", 
   "oldfieldtype": "Select", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Is Subcontracted", 
   "oldfieldname": "is_subcontracted", 
-  "permlevel": 0, 
+  "options": "\nYes\nNo", 
   "fieldname": "is_subcontracted", 
   "fieldtype": "Select", 
-  "options": "\nYes\nNo"
+  "permlevel": 0
  }, 
  {
   "print_hide": 1, 
+  "permlevel": 1, 
+  "print_width": "150px", 
   "no_copy": 1, 
   "oldfieldtype": "Data", 
   "doctype": "DocField", 
@@ -646,26 +688,11 @@
   "fieldname": "amended_from", 
   "fieldtype": "Data", 
   "hidden": 1, 
-  "permlevel": 1
- }, 
- {
-  "print_hide": 1, 
-  "description": "The date at which current entry is corrected in the system.", 
-  "no_copy": 1, 
-  "oldfieldtype": "Date", 
-  "doctype": "DocField", 
-  "label": "Amendment Date", 
-  "oldfieldname": "amendment_date", 
-  "width": "100px", 
-  "fieldname": "amendment_date", 
-  "fieldtype": "Date", 
-  "hidden": 1, 
-  "permlevel": 0
+  "options": "Purchase Receipt"
  }, 
  {
   "print_hide": 1, 
   "oldfieldtype": "Data", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Range", 
   "oldfieldname": "range", 
@@ -700,13 +727,11 @@
   "print_hide": 1, 
   "no_copy": 1, 
   "oldfieldtype": "Link", 
-  "colour": "White:FFF", 
   "allow_on_submit": 1, 
   "doctype": "DocField", 
   "label": "Select Print Heading", 
   "oldfieldname": "select_print_heading", 
   "permlevel": 0, 
-  "trigger": "Client", 
   "fieldname": "select_print_heading", 
   "fieldtype": "Link", 
   "options": "Print Heading", 
@@ -716,9 +741,9 @@
   "print_hide": 1, 
   "permlevel": 0, 
   "description": "Select the relevant company name if you have multiple companies", 
+  "print_width": "150px", 
   "no_copy": 0, 
   "oldfieldtype": "Link", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Company", 
   "oldfieldname": "company", 
@@ -733,6 +758,7 @@
  }, 
  {
   "print_hide": 1, 
+  "print_width": "150px", 
   "permlevel": 0, 
   "oldfieldtype": "Select", 
   "doctype": "DocField", 
@@ -748,6 +774,7 @@
  }, 
  {
   "print_hide": 1, 
+  "print_width": "50%", 
   "oldfieldtype": "Column Break", 
   "doctype": "DocField", 
   "width": "50%", 
@@ -757,9 +784,9 @@
  }, 
  {
   "print_hide": 1, 
+  "print_width": "30%", 
   "permlevel": 0, 
   "oldfieldtype": "HTML", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Other Details", 
   "width": "30%", 
@@ -774,7 +801,6 @@
   "description": "Warehouse where you are maintaining stock of rejected items", 
   "no_copy": 1, 
   "oldfieldtype": "Link", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Rejected Warehouse", 
   "oldfieldname": "rejected_warehouse", 
@@ -788,9 +814,9 @@
   "print_hide": 1, 
   "permlevel": 0, 
   "description": "Supplier warehouse where you have issued raw materials for sub - contracting", 
+  "print_width": "50px", 
   "no_copy": 1, 
   "oldfieldtype": "Link", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Supplier Warehouse", 
   "oldfieldname": "supplier_warehouse", 
@@ -803,7 +829,6 @@
   "print_hide": 1, 
   "no_copy": 1, 
   "oldfieldtype": "Data", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Cancel Reason", 
   "oldfieldname": "cancel_reason", 
@@ -849,9 +874,9 @@
  {
   "print_hide": 0, 
   "description": "Transporter lorry number", 
+  "print_width": "100px", 
   "no_copy": 1, 
   "oldfieldtype": "Data", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "LR No", 
   "oldfieldname": "lr_no", 
@@ -863,9 +888,9 @@
  {
   "print_hide": 0, 
   "description": "Date on which lorry started from supplier warehouse", 
+  "print_width": "100px", 
   "no_copy": 1, 
   "oldfieldtype": "Date", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "LR Date", 
   "oldfieldname": "lr_date", 
@@ -875,6 +900,7 @@
   "permlevel": 0
  }, 
  {
+  "print_width": "50%", 
   "doctype": "DocField", 
   "width": "50%", 
   "fieldname": "column_break5", 
@@ -885,7 +911,6 @@
   "print_hide": 1, 
   "description": "Following table will show values if items are sub - contracted. These values will be fetched from the master of \"Bill of Materials\" of sub - contracted items.", 
   "oldfieldtype": "Section Break", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Raw Material Details", 
   "fieldname": "raw_material_details", 
@@ -922,8 +947,7 @@
   "write": 1, 
   "role": "Purchase User", 
   "cancel": 1, 
-  "permlevel": 0, 
-  "match": ""
+  "permlevel": 0
  }, 
  {
   "doctype": "DocPerm", 
@@ -933,12 +957,12 @@
  {
   "doctype": "DocPerm", 
   "role": "Supplier", 
-  "match": "supplier", 
-  "permlevel": 0
+  "permlevel": 0, 
+  "match": "supplier"
  }, 
  {
-  "write": 1, 
   "doctype": "DocPerm", 
+  "write": 1, 
   "role": "All", 
   "permlevel": 2
  }, 

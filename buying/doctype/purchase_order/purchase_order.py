@@ -17,57 +17,66 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import cstr, date_diff, flt, get_defaults, now
-from webnotes.model import db_exists
-from webnotes.model.doc import addchild, make_autoname
-from webnotes.model.wrapper import getlist, copy_doclist
+from webnotes.utils import cstr, flt, get_defaults
+from webnotes.model.doc import addchild
+from webnotes.model.wrapper import getlist
 from webnotes.model.code import get_obj
 from webnotes import msgprint
+from buying.utils import get_last_purchase_details
+from setup.utils import get_company_currency
 
 sql = webnotes.conn.sql
 	
-
-from utilities.transaction_base import TransactionBase
-
-class DocType(TransactionBase):
+from controllers.buying_controller import BuyingController
+class DocType(BuyingController):
 	def __init__(self, doc, doclist=[]):
 		self.doc = doc
 		self.doclist = doclist
 		self.defaults = get_defaults()
 		self.tname = 'Purchase Order Item'
 		self.fname = 'po_details'
+		
+		# Validate
+	def validate(self):
+		super(DocType, self).validate()
+		
+		self.validate_fiscal_year()
 
-	# Autoname
-	# ---------
-	def autoname(self):
-		self.doc.name = make_autoname(self.doc.naming_series+'.#####')
+		if not self.doc.status:
+			self.doc.status = "Draft"
+
+		import utilities
+		utilities.validate_status(self.doc.status, ["Draft", "Submitted", "Stopped", 
+			"Cancelled"])
+
+		# Step 2:=> get Purchase Common Obj
+		pc_obj = get_obj(dt='Purchase Common')
+		
+		# Step 3:=> validate mandatory
+		pc_obj.validate_mandatory(self)
+
+		# Step 4:=> validate for items
+		pc_obj.validate_for_items(self)
+
+		# Get po date
+		pc_obj.get_prevdoc_date(self)
+		
+		# validate_doc
+		self.validate_doc(pc_obj)
+		
+		# Check for stopped status
+		self.check_for_stopped_status(pc_obj)
+		
+		 # get total in words
+		dcc = get_company_currency(self.doc.company)
+		self.doc.in_words = pc_obj.get_total_in_words(dcc, self.doc.grand_total)
+		self.doc.in_words_import = pc_obj.get_total_in_words(self.doc.currency, self.doc.grand_total_import)
 
 	def get_default_schedule_date(self):
 		get_obj(dt = 'Purchase Common').get_default_schedule_date(self)
 		
 	def validate_fiscal_year(self):
 		get_obj(dt = 'Purchase Common').validate_fiscal_year(self.doc.fiscal_year,self.doc.transaction_date,'PO Date')
-
-
-	# Get Item Details
-	def get_item_details(self, arg =''):
-		import json
-		if arg:
-			return get_obj(dt='Purchase Common').get_item_details(self,arg)
-		else:
-			obj = get_obj('Purchase Common')
-			for doc in self.doclist:
-				if doc.fields.get('item_code'):
-					temp = {
-						'item_code': doc.fields.get('item_code'),
-						'warehouse': doc.fields.get('warehouse')
-					}
-					ret = obj.get_item_details(self, json.dumps(temp))
-					for r in ret:
-						if not doc.fields.get(r):
-							doc.fields[r] = ret[r]
-
-
 
 	# get available qty at warehouse
 	def get_bin_details(self, arg = ''):
@@ -80,7 +89,7 @@ class DocType(TransactionBase):
 			pcomm = get_obj('Purchase Common')
 			for d in getlist(self.doclist, 'po_details'):
 				if d.item_code and not d.purchase_rate:
-					last_purchase_details, last_purchase_date = pcomm.get_last_purchase_details(d.item_code, self.doc.name)
+					last_purchase_details = get_last_purchase_details(d.item_code, self.doc.name)
 					if last_purchase_details:
 						conversion_factor = d.conversion_factor or 1.0
 						conversion_rate = self.doc.fields.get('conversion_rate') or 1.0
@@ -125,44 +134,6 @@ class DocType(TransactionBase):
 				pc_obj.check_for_stopped_status( d.prevdoc_doctype, d.prevdoc_docname)
 
 		
-	# Validate
-	def validate(self):
-		self.validate_fiscal_year()
-
-		if not self.doc.status:
-			self.doc.status = "Draft"
-
-		import utilities
-		utilities.validate_status(self.doc.status, ["Draft", "Submitted", "Stopped", 
-			"Cancelled"])
-
-		# Step 2:=> get Purchase Common Obj
-		pc_obj = get_obj(dt='Purchase Common')
-		
-		# Step 3:=> validate mandatory
-		pc_obj.validate_mandatory(self)
-
-		# Step 4:=> validate for items
-		pc_obj.validate_for_items(self)
-
-		# Step 5:=> validate conversion rate
-		pc_obj.validate_conversion_rate(self)
-		
-		# Get po date
-		pc_obj.get_prevdoc_date(self)
-		
-		# validate_doc
-		self.validate_doc(pc_obj)
-		
-		# Check for stopped status
-		self.check_for_stopped_status(pc_obj)
-		
-		 # get total in words
-		dcc = TransactionBase().get_company_currency(self.doc.company)
-		self.doc.in_words = pc_obj.get_total_in_words(dcc, self.doc.grand_total)
-		self.doc.in_words_import = pc_obj.get_total_in_words(self.doc.currency, self.doc.grand_total_import)
-	
-
 	def update_bin(self, is_submit, is_stopped = 0):
 		pc_obj = get_obj('Purchase Common')
 		for d in getlist(self.doclist, 'po_details'):
@@ -237,10 +208,6 @@ class DocType(TransactionBase):
 		# Step 3 :=> Check For Approval Authority
 		get_obj('Authorization Control').validate_approving_authority(self.doc.doctype, self.doc.company, self.doc.grand_total)
 		
-		# Step 4 :=> Update Current PO No. in Supplier as last_purchase_order.
-		update_supplier = webnotes.conn.set_value("Supplier", self.doc.supplier,
-			"last_purchase_order", self.doc.name)
-
 		# Step 5 :=> Update last purchase rate
 		purchase_controller.update_last_purchase_rate(self, is_submit = 1)
 

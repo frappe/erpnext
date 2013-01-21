@@ -17,30 +17,22 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import cstr, date_diff, flt, get_defaults, now
-from webnotes.model import db_exists
-from webnotes.model.doc import make_autoname
-from webnotes.model.wrapper import getlist, copy_doclist
+from webnotes.utils import cstr, flt, get_defaults
+from webnotes.model.wrapper import getlist
 from webnotes.model.code import get_obj
 from webnotes import msgprint
 
 sql = webnotes.conn.sql
 	
 
-
-class DocType:
+from controllers.buying_controller import BuyingController
+class DocType(BuyingController):
 	def __init__(self, doc, doclist=[]):
 		self.doc = doc
 		self.doclist = doclist
 		self.defaults = get_defaults()
 		self.tname = 'Purchase Request Item'
 		self.fname = 'indent_details'
-
-	# Autoname
-	# ---------
-	def autoname(self):
-		self.doc.name = make_autoname(self.doc.naming_series+'.#####')
-
 
 	def get_default_schedule_date(self):
 		get_obj(dt = 'Purchase Common').get_default_schedule_date(self)
@@ -102,25 +94,6 @@ class DocType:
 	def validate_fiscal_year(self):
 		get_obj(dt = 'Purchase Common').validate_fiscal_year(self.doc.fiscal_year,self.doc.transaction_date,'Purchase Request Date')
 
-	# get item details
-	# ---------------------------------
-	def get_item_details(self, arg =''):
-		if arg:
-			return get_obj(dt='Purchase Common').get_item_details(self,arg)
-		else:
-			obj = get_obj('Purchase Common')
-			for doc in self.doclist:
-				if doc.fields.get('item_code'):
-					temp = {
-						'item_code': doc.fields.get('item_code'),
-						'warehouse': doc.fields.get('warehouse')
-					}
-					ret = obj.get_item_details(self, json.dumps(temp))
-					for r in ret:
-						if not doc.fields.get(r):
-							doc.fields[r] = ret[r]
-
-
 	# GET TERMS & CONDITIONS
 	#-----------------------------
 	def get_tc_details(self):
@@ -138,6 +111,8 @@ class DocType:
 	# Validate
 	# ---------------------
 	def validate(self):
+		super(DocType, self).validate()
+		
 		self.validate_schedule_date()
 		self.validate_fiscal_year()
 		

@@ -62,11 +62,6 @@ class DocType(TransactionBase):
 		if not self.doc.naming_series:
 			self.doc.naming_series = ''
 
-		# create address
-		addr_flds = [self.doc.address_line1, self.doc.address_line2, self.doc.city, self.doc.state, self.doc.country, self.doc.pincode]
-		address_line = "\n".join(filter(lambda x : (x!='' and x!=None),addr_flds))
-		webnotes.conn.set(self.doc,'address', address_line)
-
 		# create account head
 		self.create_account_head()
 
@@ -124,7 +119,16 @@ class DocType(TransactionBase):
 			if not sql("select name from tabAccount where name=%s", (self.doc.name + " - " + abbr)):
 				parent_account = self.get_parent_account(abbr)
 				
-				arg = {'account_name':self.doc.name,'parent_account': parent_account, 'group_or_ledger':'Ledger', 'company':self.doc.company,'account_type':'','tax_rate':'0','master_type':'Supplier','master_name':self.doc.name,'address':self.doc.address}
+				arg = {
+					'account_name': self.doc.name,
+					'parent_account': parent_account,
+					'group_or_ledger':'Ledger',
+					'company': self.doc.company,
+					'account_type': '',
+					'tax_rate': '0',
+					'master_type': 'Supplier',
+					'master_name': self.doc.name,
+				}
 				# create
 				ac = get_obj('GL Control').add_ac(cstr(arg))
 				msgprint("Created Account Head: "+ac)

@@ -18,18 +18,16 @@ from __future__ import unicode_literals
 import webnotes
 
 from webnotes.utils import cstr, flt, get_defaults, getdate
-from webnotes.model import db_exists
-from webnotes.model.doc import addchild, make_autoname
-from webnotes.model.wrapper import getlist, copy_doclist
+from webnotes.model.doc import addchild
+from webnotes.model.wrapper import getlist
 from webnotes.model.code import get_obj
 from webnotes import msgprint
+from setup.utils import get_company_currency
 
 sql = webnotes.conn.sql
 
-
-from utilities.transaction_base import TransactionBase
-
-class DocType(TransactionBase):
+from controllers.buying_controller import BuyingController
+class DocType(BuyingController):
 	def __init__(self, doc, doclist=[]):
 		self.doc = doc
 		self.doclist = doclist
@@ -38,31 +36,8 @@ class DocType(TransactionBase):
 		self.fname = 'purchase_receipt_details'
 		self.count = 0
 
-	# Autoname
-	# ---------
-	def autoname(self):
-		self.doc.name = make_autoname(self.doc.naming_series+'.#####')
-
 	def validate_fiscal_year(self):
 		get_obj(dt = 'Purchase Common').validate_fiscal_year(self.doc.fiscal_year,self.doc.posting_date,'Transaction Date')
-
-	def get_item_details(self, arg = ''):
-		if arg:
-			return get_obj(dt='Purchase Common').get_item_details(self,arg)
-		else:
-			import json
-			obj = get_obj('Purchase Common')
-			for doc in self.doclist:
-				if doc.fields.get('item_code'):
-					temp = {
-						'item_code': doc.fields.get('item_code'),
-						'warehouse': doc.fields.get('warehouse')
-					}
-					ret = obj.get_item_details(self, json.dumps(temp))
-					for r in ret:
-						if not doc.fields.get(r):
-							doc.fields[r] = ret[r]
-
 
 	# GET TERMS & CONDITIONS
 	# =====================================================================================
@@ -125,14 +100,6 @@ class DocType(TransactionBase):
 				#d.valuation_rate = (flt(d.purchase_rate) + ((flt(d.amount) * (total_b_cost)) / (self.doc.net_total * flt(d.qty))) + (flt(d.rm_supp_cost) / flt(d.qty))) / flt(d.conversion_factor)
 				d.valuation_rate = (flt(d.purchase_rate) + ((flt(d.amount) * (total_b_cost)) / (self.doc.net_total * flt(d.qty))) + (flt(d.rm_supp_cost) / flt(d.qty)) + (flt(d.item_tax_amount)/flt(d.qty))) / flt(d.conversion_factor)
 
-	# Check for Stopped status
-	def check_for_stopped_status(self, pc_obj):
-		check_list =[]
-		for d in getlist(self.doclist, 'purchase_receipt_details'):
-			if d.fields.has_key('prevdoc_docname') and d.prevdoc_docname and d.prevdoc_docname not in check_list:
-				check_list.append(d.prevdoc_docname)
-				pc_obj.check_for_stopped_status( d.prevdoc_doctype, d.prevdoc_docname)
-
 	#check in manage account if purchase order required or not.
 	# ====================================================================================
 	def po_required(self):
@@ -146,6 +113,8 @@ class DocType(TransactionBase):
 
 	# validate
 	def validate(self):
+		super(DocType, self).validate()
+		
 		self.po_required()
 		self.validate_fiscal_year()
 
@@ -163,13 +132,12 @@ class DocType(TransactionBase):
 		pc_obj = get_obj(dt='Purchase Common')
 		pc_obj.validate_for_items(self)
 		pc_obj.validate_mandatory(self)
-		pc_obj.validate_conversion_rate(self)
 		pc_obj.get_prevdoc_date(self)
 		pc_obj.validate_reference_value(self)
 		self.check_for_stopped_status(pc_obj)
 
 		# get total in words
-		dcc = TransactionBase().get_company_currency(self.doc.company)
+		dcc = get_company_currency(self.doc.company)
 		self.doc.in_words = pc_obj.get_total_in_words(dcc, self.doc.grand_total)
 		self.doc.in_words_import = pc_obj.get_total_in_words(self.doc.currency, self.doc.grand_total_import)
 		# update valuation rate
@@ -255,7 +223,6 @@ class DocType(TransactionBase):
 		self.values.append({
 			'item_code'					: d.fields.has_key('item_code') and d.item_code or d.rm_item_code,
 			'warehouse'					: wh,
-			'transaction_date'			: getdate(self.doc.modified).strftime('%Y-%m-%d'),
 			'posting_date'				: self.doc.posting_date,
 			'posting_time'				: self.doc.posting_time,
 			'voucher_type'				: 'Purchase Receipt',
@@ -286,7 +253,6 @@ class DocType(TransactionBase):
 			if d.fields.has_key('prevdoc_docname') and d.prevdoc_docname and d.prevdoc_docname not in check_list:
 				check_list.append(d.prevdoc_docname)
 				pc_obj.check_for_stopped_status( d.prevdoc_doctype, d.prevdoc_docname)
-
 
 	# on submit
 	def on_submit(self):

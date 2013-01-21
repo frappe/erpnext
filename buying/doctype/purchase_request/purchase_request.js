@@ -19,6 +19,31 @@ cur_frm.cscript.fname = "indent_details";
 
 wn.require('app/buying/doctype/purchase_common/purchase_common.js');
 wn.require('app/utilities/doctype/sms_control/sms_control.js');
+
+erpnext.buying.PurchaseRequestController = erpnext.buying.BuyingController.extend({
+	refresh: function(doc) {
+		this._super();
+		
+		if(doc.docstatus == 1 && doc.status != 'Stopped'){
+			cur_frm.add_custom_button("Make Supplier Quotation", cur_frm.cscript.make_supplier_quotation);
+			if(flt(doc.per_ordered, 2) < 100) {
+				cur_frm.add_custom_button('Make Purchase Order', cur_frm.cscript['Make Purchase Order']);
+				cur_frm.add_custom_button('Stop Purchase Request', cur_frm.cscript['Stop Purchase Request']);
+			}
+			cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms);
+
+		}
+
+		if(doc.docstatus == 1 && doc.status == 'Stopped')
+			cur_frm.add_custom_button('Unstop Purchase Request', cur_frm.cscript['Unstop Purchase Request'])
+	}
+});
+
+var new_cscript = new erpnext.buying.PurchaseRequestController({frm: cur_frm});
+
+// for backward compatibility: combine new and previous states
+$.extend(cur_frm.cscript, new_cscript);
+
 	
 //========================== On Load =================================================
 cur_frm.cscript.onload = function(doc, cdt, cdn) {
@@ -41,26 +66,6 @@ cur_frm.cscript.get_item_defaults = function(doc) {
 		if (flt(ch.length) > 0){
 			$c_obj(make_doclist(doc.doctype, doc.name), 'get_item_defaults', '', function(r, rt) {refresh_field('indent_details'); });
 		}
-}
-
-
-//======================= Refresh =====================================
-cur_frm.cscript.refresh = function(doc, cdt, cdn) { 
-	cur_frm.clear_custom_buttons();
-	erpnext.hide_naming_series();
-
-	if(doc.docstatus == 1 && doc.status != 'Stopped'){
-		cur_frm.add_custom_button("Make Supplier Quotation", cur_frm.cscript.make_supplier_quotation);
-		if(flt(doc.per_ordered, 2) < 100) {
-			cur_frm.add_custom_button('Make Purchase Order', cur_frm.cscript['Make Purchase Order']);
-			cur_frm.add_custom_button('Stop Purchase Request', cur_frm.cscript['Stop Purchase Request']);
-		}
-		cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms);
-		
-	}
- 
-	if(doc.docstatus == 1 && doc.status == 'Stopped')
-		cur_frm.add_custom_button('Unstop Purchase Request', cur_frm.cscript['Unstop Purchase Request'])
 }
 
 //======================= transaction date =============================
