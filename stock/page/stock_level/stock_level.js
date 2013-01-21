@@ -200,6 +200,7 @@ erpnext.StockLevel = erpnext.StockGridReport.extend({
 			var row = {
 				item_code: item_code,
 				warehouse: warehouse,
+				description: item.description,
 				brand: item.brand,
 				item_name: item.item_name || item.name,
 				uom: item.stock_uom,
