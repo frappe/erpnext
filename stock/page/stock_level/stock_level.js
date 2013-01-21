@@ -98,9 +98,9 @@ erpnext.StockLevel = erpnext.StockGridReport.extend({
 	},
 	
 	filters: [
-		{fieldtype:"Select", label: "Item Code", link:"Item", default_value: "Select Item...",
+		{fieldtype:"Link", label: "Item Code", link:"Item", default_value: "Select Item...",
 			filter: function(val, item, opts) {
-				return item.item_code == val || val == opts.default_value;
+				return item.item_code == val || !val;
 			}},
 			
 		{fieldtype:"Select", label: "Warehouse", link:"Warehouse", 
