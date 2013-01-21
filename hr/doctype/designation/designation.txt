@@ -9,13 +9,13 @@
  {
   "section_style": "Simple", 
   "module": "HR", 
-  "server_code_error": " ", 
-  "allow_trash": 1, 
   "doctype": "DocType", 
-  "autoname": "field:designation_name", 
+  "allow_trash": 1, 
   "document_type": "Master", 
+  "autoname": "field:designation_name", 
   "name": "__common__", 
   "colour": "White:FFF", 
+  "server_code_error": " ", 
   "show_in_menu": 0, 
   "version": 7
  }, 
@@ -27,14 +27,15 @@
   "parentfield": "fields"
  }, 
  {
+  "report": 1, 
   "name": "__common__", 
   "parent": "Designation", 
   "read": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
   "write": 1, 
-  "parenttype": "DocType", 
   "cancel": 1, 
+  "parenttype": "DocType", 
   "permlevel": 0, 
   "parentfield": "permissions"
  }, 

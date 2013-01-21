@@ -12,15 +12,15 @@
   "allow_print": 0, 
   "search_fields": "item", 
   "module": "Manufacturing", 
+  "doctype": "DocType", 
+  "issingle": 0, 
   "document_type": "Master", 
   "allow_attach": 0, 
   "read_only": 0, 
   "allow_email": 0, 
   "hide_heading": 0, 
-  "issingle": 0, 
   "name": "__common__", 
   "allow_rename": 0, 
-  "doctype": "DocType", 
   "is_submittable": 1, 
   "hide_toolbar": 0, 
   "allow_copy": 0
@@ -50,13 +50,13 @@
   "doctype": "DocField", 
   "label": "Item", 
   "oldfieldname": "item", 
-  "permlevel": 0, 
+  "options": "Item", 
   "fieldname": "item", 
   "fieldtype": "Link", 
   "search_index": 1, 
   "reqd": 1, 
-  "in_filter": 1, 
-  "options": "Item"
+  "permlevel": 0, 
+  "in_filter": 1
  }, 
  {
   "doctype": "DocField", 
@@ -101,21 +101,21 @@
   "oldfieldtype": "Section Break", 
   "doctype": "DocField", 
   "label": "Operations", 
-  "options": "Specify the operations, operating cost and give a unique Operation no to your operations.", 
+  "permlevel": 0, 
   "fieldname": "operations", 
   "fieldtype": "Section Break", 
   "depends_on": "with_operations", 
-  "permlevel": 0
+  "options": "Specify the operations, operating cost and give a unique Operation no to your operations."
  }, 
  {
   "oldfieldtype": "Table", 
   "doctype": "DocField", 
   "label": "BOM Operations", 
   "oldfieldname": "bom_operations", 
-  "options": "BOM Operation", 
+  "permlevel": 0, 
   "fieldname": "bom_operations", 
   "fieldtype": "Table", 
-  "permlevel": 0
+  "options": "BOM Operation"
  }, 
  {
   "oldfieldtype": "Section Break", 
@@ -130,10 +130,10 @@
   "doctype": "DocField", 
   "label": "BOM Item", 
   "oldfieldname": "bom_materials", 
-  "options": "BOM Item", 
+  "permlevel": 0, 
   "fieldname": "bom_materials", 
   "fieldtype": "Table", 
-  "permlevel": 0
+  "options": "BOM Item"
  }, 
  {
   "oldfieldtype": "Section Break", 
@@ -145,10 +145,10 @@
  }, 
  {
   "doctype": "DocField", 
-  "label": "Rate Of Materials Based On", 
   "options": "Valuation Rate\nLast Purchase Rate", 
   "fieldname": "rm_cost_as_per", 
   "fieldtype": "Select", 
+  "label": "Rate Of Materials Based On", 
   "permlevel": 0
  }, 
  {
@@ -199,10 +199,10 @@
  }, 
  {
   "doctype": "DocField", 
-  "label": "Item UOM", 
   "options": "link:UOM", 
   "fieldname": "uom", 
   "fieldtype": "Select", 
+  "label": "Item UOM", 
   "permlevel": 1
  }, 
  {
@@ -216,10 +216,10 @@
   "doctype": "DocField", 
   "label": "Project Name", 
   "oldfieldname": "project_name", 
-  "options": "Project", 
+  "permlevel": 0, 
   "fieldname": "project_name", 
   "fieldtype": "Link", 
-  "permlevel": 0, 
+  "options": "Project", 
   "in_filter": 1
  }, 
  {
@@ -234,10 +234,10 @@
   "no_copy": 1, 
   "doctype": "DocField", 
   "label": "Amended From", 
-  "options": "BOM", 
+  "permlevel": 1, 
   "fieldname": "amended_from", 
   "fieldtype": "Link", 
-  "permlevel": 1
+  "options": "BOM"
  }, 
  {
   "print_hide": 0, 
@@ -251,58 +251,61 @@
  }, 
  {
   "print_hide": 1, 
-  "permlevel": 1, 
   "no_copy": 1, 
   "oldfieldtype": "Table", 
   "doctype": "DocField", 
   "label": "Materials Required (Exploded)", 
   "oldfieldname": "flat_bom_details", 
   "default": "No Toolbar", 
+  "options": "BOM Explosion Item", 
   "fieldname": "flat_bom_details", 
   "fieldtype": "Table", 
   "hidden": 0, 
-  "options": "BOM Explosion Item"
+  "permlevel": 1
  }, 
  {
   "create": 1, 
   "doctype": "DocPerm", 
   "submit": 1, 
   "write": 1, 
+  "cancel": 1, 
   "role": "System Manager", 
-  "cancel": 1, 
+  "report": 1, 
   "permlevel": 0
  }, 
  {
-  "doctype": "DocPerm", 
   "role": "System Manager", 
-  "permlevel": 1
+  "permlevel": 1, 
+  "doctype": "DocPerm"
  }, 
  {
   "create": 1, 
   "doctype": "DocPerm", 
   "submit": 1, 
   "write": 1, 
-  "role": "Manufacturing Manager", 
   "cancel": 1, 
+  "role": "Manufacturing Manager", 
+  "report": 1, 
   "permlevel": 0
  }, 
  {
-  "doctype": "DocPerm", 
   "role": "Manufacturing Manager", 
-  "permlevel": 1
+  "permlevel": 1, 
+  "doctype": "DocPerm"
  }, 
  {
   "create": 1, 
   "doctype": "DocPerm", 
   "submit": 1, 
   "write": 1, 
-  "role": "Manufacturing User", 
   "cancel": 1, 
+  "role": "Manufacturing User", 
+  "report": 1, 
   "permlevel": 0
  }, 
  {
-  "doctype": "DocPerm", 
   "role": "Manufacturing User", 
-  "permlevel": 1
+  "permlevel": 1, 
+  "doctype": "DocPerm"
  }
 ]

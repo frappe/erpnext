@@ -9,8 +9,8 @@
  {
   "istable": 1, 
   "name": "__common__", 
-  "doctype": "DocType", 
-  "module": "Manufacturing"
+  "module": "Manufacturing", 
+  "doctype": "DocType"
  }, 
  {
   "name": "__common__", 
@@ -91,11 +91,12 @@
  }, 
  {
   "write": 1, 
-  "doctype": "DocPerm", 
-  "permlevel": 0
+  "report": 1, 
+  "permlevel": 0, 
+  "doctype": "DocPerm"
  }, 
  {
-  "doctype": "DocPerm", 
-  "permlevel": 1
+  "permlevel": 1, 
+  "doctype": "DocPerm"
  }
 ]

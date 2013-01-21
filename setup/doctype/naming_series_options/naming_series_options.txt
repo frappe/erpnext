@@ -11,12 +11,12 @@
   "in_create": 1, 
   "module": "Setup", 
   "doctype": "DocType", 
-  "autoname": "__NSO.#####", 
-  "show_in_menu": 0, 
   "read_only": 0, 
+  "autoname": "__NSO.#####", 
   "name": "__common__", 
   "colour": "White:FFF", 
   "server_code_error": " ", 
+  "show_in_menu": 0, 
   "version": 5
  }, 
  {
@@ -32,6 +32,7 @@
   "read": 1, 
   "name": "__common__", 
   "doctype": "DocPerm", 
+  "report": 1, 
   "parenttype": "DocType", 
   "role": "System Manager", 
   "permlevel": 0, 

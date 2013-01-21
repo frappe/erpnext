@@ -9,8 +9,8 @@
  {
   "istable": 1, 
   "name": "__common__", 
-  "doctype": "DocType", 
-  "module": "Manufacturing"
+  "module": "Manufacturing", 
+  "doctype": "DocType"
  }, 
  {
   "name": "__common__", 
@@ -47,26 +47,26 @@
   "doctype": "DocField", 
   "label": "Item Code", 
   "oldfieldname": "item_code", 
-  "options": "Item", 
+  "permlevel": 0, 
   "fieldname": "item_code", 
   "fieldtype": "Link", 
   "search_index": 1, 
   "reqd": 1, 
-  "permlevel": 0, 
+  "options": "Item", 
   "in_filter": 1
  }, 
  {
-  "permlevel": 0, 
   "oldfieldtype": "Link", 
   "doctype": "DocField", 
   "label": "BOM No", 
   "oldfieldname": "bom_no", 
   "width": "150px", 
+  "options": "BOM", 
   "fieldname": "bom_no", 
   "fieldtype": "Link", 
   "search_index": 1, 
   "reqd": 0, 
-  "options": "BOM", 
+  "permlevel": 0, 
   "in_filter": 1
  }, 
  {
@@ -140,11 +140,12 @@
  }, 
  {
   "write": 1, 
-  "doctype": "DocPerm", 
-  "permlevel": 0
+  "report": 1, 
+  "permlevel": 0, 
+  "doctype": "DocPerm"
  }, 
  {
-  "doctype": "DocPerm", 
-  "permlevel": 1
+  "permlevel": 1, 
+  "doctype": "DocPerm"
  }
 ]

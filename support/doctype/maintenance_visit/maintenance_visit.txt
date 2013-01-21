@@ -8,17 +8,17 @@
  }, 
  {
   "section_style": "Simple", 
-  "tag_fields": "completion_status,maintenance_type", 
   "is_submittable": 1, 
+  "tag_fields": "completion_status,maintenance_type", 
   "search_fields": "status,maintenance_type,customer,customer_name, address,mntc_date,company,fiscal_year", 
   "module": "Support", 
-  "doctype": "DocType", 
   "server_code_error": " ", 
-  "subject": "To %(customer_name)s on %(mntc_date)s", 
   "autoname": "MV.#####", 
+  "subject": "To %(customer_name)s on %(mntc_date)s", 
+  "_last_update": "1322549701", 
   "name": "__common__", 
   "colour": "White:FFF", 
-  "_last_update": "1322549701", 
+  "doctype": "DocType", 
   "show_in_menu": 0, 
   "version": 1
  }, 
@@ -47,6 +47,7 @@
   "doctype": "DocPerm", 
   "submit": 1, 
   "write": 1, 
+  "report": 1, 
   "role": "System Manager", 
   "cancel": 1, 
   "permlevel": 0
@@ -62,6 +63,7 @@
   "doctype": "DocPerm", 
   "submit": 1, 
   "write": 1, 
+  "report": 1, 
   "role": "Maintenance Manager", 
   "cancel": 1, 
   "permlevel": 0
@@ -77,6 +79,7 @@
   "doctype": "DocPerm", 
   "submit": 1, 
   "write": 1, 
+  "report": 1, 
   "role": "Maintenance User", 
   "cancel": 1, 
   "permlevel": 0
@@ -90,10 +93,10 @@
   "oldfieldtype": "Section Break", 
   "doctype": "DocField", 
   "label": "Customer Details", 
-  "permlevel": 0, 
+  "options": "Simple", 
   "fieldname": "customer_details", 
   "fieldtype": "Section Break", 
-  "options": "Simple"
+  "permlevel": 0
  }, 
  {
   "oldfieldtype": "Column Break", 
@@ -191,21 +194,21 @@
   "oldfieldtype": "Section Break", 
   "doctype": "DocField", 
   "label": "Maintenance Details", 
-  "permlevel": 0, 
+  "options": "Simple", 
   "fieldname": "maintenance_details", 
   "fieldtype": "Section Break", 
-  "options": "Simple"
+  "permlevel": 0
  }, 
  {
   "oldfieldtype": "Select", 
   "doctype": "DocField", 
   "label": "Completion Status", 
   "oldfieldname": "completion_status", 
-  "permlevel": 0, 
+  "options": "\nPartially Completed\nFully Completed", 
   "fieldname": "completion_status", 
   "fieldtype": "Select", 
   "reqd": 1, 
-  "options": "\nPartially Completed\nFully Completed"
+  "permlevel": 0
  }, 
  {
   "default": "Unscheduled", 
@@ -236,12 +239,12 @@
   "doctype": "DocField", 
   "label": "Sales Order No", 
   "oldfieldname": "sales_order_no", 
+  "permlevel": 0, 
   "trigger": "Client", 
   "fieldname": "sales_order_no", 
   "fieldtype": "Link", 
   "oldfieldtype": "Link", 
   "options": "Sales Order", 
-  "permlevel": 0, 
   "in_filter": 1
  }, 
  {
@@ -250,12 +253,12 @@
   "doctype": "DocField", 
   "label": "Customer Issue No", 
   "oldfieldname": "customer_issue_no", 
+  "permlevel": 0, 
   "trigger": "Client", 
   "fieldname": "customer_issue_no", 
   "fieldtype": "Link", 
   "oldfieldtype": "Link", 
   "options": "Customer Issue", 
-  "permlevel": 0, 
   "in_filter": 1
  }, 
  {
@@ -272,10 +275,10 @@
   "oldfieldtype": "Button", 
   "doctype": "DocField", 
   "label": "Get Items", 
-  "permlevel": 0, 
+  "options": "fetch_items", 
   "fieldname": "get_items", 
   "fieldtype": "Button", 
-  "options": "fetch_items", 
+  "permlevel": 0, 
   "report_hide": 1
  }, 
  {
@@ -291,10 +294,10 @@
   "doctype": "DocField", 
   "label": "Maintenance Visit Purpose", 
   "oldfieldname": "maintenance_visit_details", 
-  "permlevel": 0, 
+  "options": "Maintenance Visit Purpose", 
   "fieldname": "maintenance_visit_details", 
   "fieldtype": "Table", 
-  "options": "Maintenance Visit Purpose"
+  "permlevel": 0
  }, 
  {
   "oldfieldtype": "Section Break", 
@@ -320,6 +323,7 @@
   "permlevel": 0
  }, 
  {
+  "permlevel": 1, 
   "default": "Draft", 
   "oldfieldtype": "Data", 
   "colour": "White:FFF", 
@@ -327,11 +331,10 @@
   "label": "Status", 
   "oldfieldname": "status", 
   "no_copy": 1, 
-  "options": "\nDraft\nCancelled\nSubmitted", 
   "fieldname": "status", 
   "fieldtype": "Data", 
   "reqd": 1, 
-  "permlevel": 1
+  "options": "\nDraft\nCancelled\nSubmitted"
  }, 
  {
   "print_hide": 1, 
@@ -363,12 +366,12 @@
   "doctype": "DocField", 
   "label": "Company", 
   "oldfieldname": "company", 
-  "options": "link:Company", 
+  "permlevel": 0, 
   "fieldname": "company", 
   "fieldtype": "Select", 
   "search_index": 0, 
   "reqd": 1, 
-  "permlevel": 0, 
+  "options": "link:Company", 
   "in_filter": 1
  }, 
  {
@@ -377,12 +380,12 @@
   "doctype": "DocField", 
   "label": "Fiscal Year", 
   "oldfieldname": "fiscal_year", 
-  "options": "link:Fiscal Year", 
+  "permlevel": 0, 
   "fieldname": "fiscal_year", 
   "fieldtype": "Select", 
   "search_index": 0, 
   "reqd": 1, 
-  "permlevel": 0, 
+  "options": "link:Fiscal Year", 
   "in_filter": 1
  }, 
  {
@@ -396,19 +399,19 @@
   "print_hide": 1, 
   "doctype": "DocField", 
   "label": "Customer Address", 
-  "options": "Address", 
+  "permlevel": 0, 
   "fieldname": "customer_address", 
   "fieldtype": "Link", 
-  "permlevel": 0
+  "options": "Address"
  }, 
  {
   "print_hide": 1, 
   "doctype": "DocField", 
   "label": "Contact Person", 
-  "options": "Contact", 
+  "permlevel": 0, 
   "fieldname": "contact_person", 
   "fieldtype": "Link", 
-  "permlevel": 0
+  "options": "Contact"
  }, 
  {
   "doctype": "DocField", 
@@ -420,18 +423,18 @@
   "print_hide": 1, 
   "doctype": "DocField", 
   "label": "Territory", 
-  "options": "Territory", 
+  "permlevel": 0, 
   "fieldname": "territory", 
   "fieldtype": "Link", 
-  "permlevel": 0
+  "options": "Territory"
  }, 
  {
   "print_hide": 1, 
   "doctype": "DocField", 
   "label": "Customer Group", 
-  "options": "Customer Group", 
+  "permlevel": 0, 
   "fieldname": "customer_group", 
   "fieldtype": "Link", 
-  "permlevel": 0
+  "options": "Customer Group"
  }
 ]

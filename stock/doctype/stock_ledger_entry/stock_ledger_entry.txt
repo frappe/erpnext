@@ -32,6 +32,7 @@
   "parent": "Stock Ledger Entry", 
   "read": 1, 
   "doctype": "DocPerm", 
+  "report": 1, 
   "parenttype": "DocType", 
   "permlevel": 0, 
   "parentfield": "permissions"
@@ -271,8 +272,8 @@
   "doctype": "DocPerm", 
   "submit": 0, 
   "write": 0, 
-  "cancel": 0, 
-  "role": "Sales User"
+  "role": "Sales User", 
+  "cancel": 0
  }, 
  {
   "amend": 0, 
@@ -280,8 +281,8 @@
   "doctype": "DocPerm", 
   "submit": 0, 
   "write": 0, 
-  "cancel": 0, 
-  "role": "Material User"
+  "role": "Material User", 
+  "cancel": 0
  }, 
  {
   "role": "Accounts Manager", 

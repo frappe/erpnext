@@ -1,4 +1,10 @@
 erpnext.updates = [
+	["21st January, 2013", [
+		"Number Formatting: Added Number Format to Global Defaults & Currency",
+	]],
+	["18th January, 2013", [
+		"Buying: Added Price List to purchase cycle",
+	]],
 	["16th January, 2013", [
 		"Job Applicant: Track Job Applicants and extract them from a mailbox like 'jobs@example.com'. See <a href='#Form/Jobs Email Settings'>Jobs Email Settings</a>.",
 		"Extract leads: Extract Leads from a mailbox like 'sales@example.com'. See <a href='#Form/Sales Email Settings'>Sales Email Settings</a>.",

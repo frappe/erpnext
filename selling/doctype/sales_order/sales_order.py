@@ -17,11 +17,11 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import cstr, date_diff, flt, getdate
-from webnotes.model import db_exists
-from webnotes.model.wrapper import getlist, copy_doclist
+from webnotes.utils import cstr, flt, getdate
+from webnotes.model.wrapper import getlist
 from webnotes.model.code import get_obj
 from webnotes import msgprint
+from setup.utils import get_company_currency
 
 sql = webnotes.conn.sql
 	
@@ -222,7 +222,7 @@ class DocType(TransactionBase):
 		self.doclist = sales_com_obj.make_packing_list(self,'sales_order_details')
 
 				# get total in words
-		dcc = TransactionBase().get_company_currency(self.doc.company)		
+		dcc = get_company_currency(self.doc.company)		
 		self.doc.in_words = sales_com_obj.get_total_in_words(dcc, self.doc.rounded_total)
 		self.doc.in_words_export = sales_com_obj.get_total_in_words(self.doc.currency, self.doc.rounded_total_export)
 		

@@ -12,10 +12,10 @@
   "name": "__common__", 
   "colour": "White:FFF", 
   "module": "HR", 
-  "show_in_menu": 0, 
-  "version": 7, 
   "server_code_error": " ", 
-  "doctype": "DocType"
+  "version": 7, 
+  "doctype": "DocType", 
+  "show_in_menu": 0
  }, 
  {
   "name": "__common__", 
@@ -27,6 +27,7 @@
  {
   "parent": "Salary Slip Earning", 
   "read": 1, 
+  "report": 1, 
   "name": "__common__", 
   "create": 1, 
   "doctype": "DocPerm", 
@@ -44,15 +45,15 @@
   "doctype": "DocPerm"
  }, 
  {
-  "permlevel": 0, 
   "oldfieldtype": "Data", 
   "doctype": "DocField", 
   "label": "Type", 
   "oldfieldname": "e_type", 
   "width": "200px", 
+  "options": "Earning Type", 
   "fieldname": "e_type", 
   "fieldtype": "Link", 
-  "options": "Earning Type"
+  "permlevel": 0
  }, 
  {
   "oldfieldtype": "Currency", 

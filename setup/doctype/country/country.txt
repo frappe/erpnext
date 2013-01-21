@@ -1,81 +1,82 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-01-19 10:23:30", 
   "docstatus": 0, 
-  "creation": "2013-01-17 17:02:24", 
+  "modified": "2013-01-21 15:56:50", 
   "modified_by": "Administrator", 
-  "modified": "2013-01-17 17:04:08"
+  "owner": "Administrator"
  }, 
  {
-  "read_only": 0, 
   "autoname": "field:country_name", 
-  "in_create": 0, 
   "doctype": "DocType", 
-  "module": "Setup", 
   "document_type": "Master", 
-  "name": "__common__"
+  "in_create": 0, 
+  "module": "Setup", 
+  "name": "__common__", 
+  "read_only": 0
  }, 
  {
-  "name": "__common__", 
-  "parent": "Country", 
   "doctype": "DocField", 
-  "parenttype": "DocType", 
-  "permlevel": 0, 
-  "parentfield": "fields"
- }, 
- {
   "name": "__common__", 
   "parent": "Country", 
-  "read": 1, 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
   "create": 1, 
   "doctype": "DocPerm", 
-  "write": 1, 
+  "name": "__common__", 
+  "parent": "Country", 
+  "parentfield": "permissions", 
   "parenttype": "DocType", 
   "permlevel": 0, 
-  "parentfield": "permissions"
+  "read": 1, 
+  "report": 1, 
+  "submit": 0, 
+  "write": 1
  }, 
  {
-  "name": "Country", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "Country"
  }, 
  {
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Country Name", 
-  "oldfieldname": "country_name", 
   "fieldname": "country_name", 
   "fieldtype": "Data", 
+  "label": "Country Name", 
+  "oldfieldname": "country_name", 
+  "oldfieldtype": "Data", 
   "reqd": 1
  }, 
  {
   "doctype": "DocField", 
-  "label": "Date Format", 
   "fieldname": "date_format", 
-  "fieldtype": "Data"
+  "fieldtype": "Data", 
+  "label": "Date Format"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Time Zones", 
   "fieldname": "time_zones", 
-  "fieldtype": "Text"
+  "fieldtype": "Text", 
+  "label": "Time Zones"
  }, 
  {
   "amend": 0, 
+  "cancel": 0, 
   "doctype": "DocPerm", 
-  "submit": 0, 
-  "role": "Sales Master Manager", 
-  "cancel": 0
+  "role": "Sales Master Manager"
  }, 
  {
-  "role": "Purchase Master Manager", 
-  "doctype": "DocPerm"
+  "doctype": "DocPerm", 
+  "role": "Purchase Master Manager"
  }, 
  {
-  "role": "HR User", 
-  "doctype": "DocPerm"
+  "doctype": "DocPerm", 
+  "role": "HR User"
  }, 
  {
-  "role": "HR Manager", 
-  "doctype": "DocPerm"
+  "doctype": "DocPerm", 
+  "role": "HR Manager"
  }
 ]

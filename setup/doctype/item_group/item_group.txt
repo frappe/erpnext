@@ -7,18 +7,18 @@
   "modified": "2012-12-27 18:50:20"
  }, 
  {
-  "in_create": 1, 
+  "allow_attach": 1, 
   "search_fields": "parent_item_group", 
   "module": "Setup", 
+  "doctype": "DocType", 
   "autoname": "field:item_group_name", 
   "document_type": "Master", 
-  "allow_attach": 1, 
+  "description": "Item Classification", 
   "issingle": 0, 
   "name": "__common__", 
   "allow_rename": 1, 
-  "description": "Item Classification", 
-  "doctype": "DocType", 
-  "max_attachments": 3
+  "max_attachments": 3, 
+  "in_create": 1
  }, 
  {
   "name": "__common__", 
@@ -59,9 +59,9 @@
   "fieldtype": "Data"
  }, 
  {
-  "doctype": "DocField", 
   "fieldname": "cb0", 
-  "fieldtype": "Column Break"
+  "fieldtype": "Column Break", 
+  "doctype": "DocField"
  }, 
  {
   "no_copy": 0, 
@@ -90,9 +90,9 @@
  }, 
  {
   "doctype": "DocField", 
-  "label": "Website Settings", 
   "fieldname": "sb9", 
-  "fieldtype": "Section Break"
+  "fieldtype": "Section Break", 
+  "label": "Website Settings"
  }, 
  {
   "description": "Check this if you want to show in website", 
@@ -177,8 +177,8 @@
   "doctype": "DocPerm", 
   "submit": 0, 
   "write": 0, 
-  "cancel": 0, 
   "role": "Material Manager", 
+  "cancel": 0, 
   "permlevel": 1
  }, 
  {
@@ -187,8 +187,9 @@
   "doctype": "DocPerm", 
   "submit": 0, 
   "write": 0, 
-  "cancel": 0, 
+  "report": 1, 
   "role": "Material Manager", 
+  "cancel": 0, 
   "permlevel": 0
  }, 
  {
@@ -197,8 +198,8 @@
   "doctype": "DocPerm", 
   "submit": 0, 
   "write": 0, 
-  "cancel": 0, 
   "role": "Material User", 
+  "cancel": 0, 
   "permlevel": 1
  }, 
  {
@@ -207,24 +208,27 @@
   "doctype": "DocPerm", 
   "submit": 0, 
   "write": 0, 
-  "cancel": 0, 
+  "report": 1, 
   "role": "Material User", 
+  "cancel": 0, 
   "permlevel": 0
  }, 
  {
   "create": 1, 
   "doctype": "DocPerm", 
   "write": 1, 
+  "cancel": 1, 
   "role": "System Manager", 
-  "cancel": 1, 
+  "report": 1, 
   "permlevel": 0
  }, 
  {
   "create": 1, 
   "doctype": "DocPerm", 
   "write": 1, 
-  "role": "Material Master Manager", 
   "cancel": 1, 
+  "role": "Material Master Manager", 
+  "report": 1, 
   "permlevel": 0
  }
 ]

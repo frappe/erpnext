@@ -11,11 +11,11 @@
   "description": "Send regular summary reports via Email.", 
   "module": "Setup", 
   "doctype": "DocType", 
-  "autoname": "Prompt", 
   "document_type": "System", 
+  "_last_update": "1324556758", 
+  "autoname": "Prompt", 
   "name": "__common__", 
   "colour": "White:FFF", 
-  "_last_update": "1324556758", 
   "show_in_menu": 0, 
   "version": 1
  }, 
@@ -62,21 +62,21 @@
  {
   "doctype": "DocField", 
   "label": "For Company", 
-  "options": "link:Company", 
+  "permlevel": 0, 
   "fieldname": "company", 
   "fieldtype": "Select", 
   "reqd": 1, 
-  "permlevel": 0
+  "options": "link:Company"
  }, 
  {
   "allow_on_submit": 0, 
   "doctype": "DocField", 
   "label": "How frequently?", 
-  "permlevel": 0, 
+  "options": "Daily\nWeekly\nMonthly", 
   "fieldname": "frequency", 
   "fieldtype": "Select", 
   "reqd": 1, 
-  "options": "Daily\nWeekly\nMonthly"
+  "permlevel": 0
  }, 
  {
   "depends_on": "eval:doc.enabled", 
@@ -284,6 +284,7 @@
   "doctype": "DocPerm", 
   "write": 1, 
   "cancel": 1, 
+  "report": 1, 
   "permlevel": 0
  }, 
  {

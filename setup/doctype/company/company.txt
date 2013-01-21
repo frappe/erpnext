@@ -7,11 +7,11 @@
   "modified": "2012-12-03 11:26:05"
  }, 
  {
-  "autoname": "field:company_name", 
   "description": "Legal Entity / Subsidiary with a separate Chart of Accounts belonging to the Organization.", 
+  "autoname": "field:company_name", 
   "allow_rename": 1, 
-  "doctype": "DocType", 
   "module": "Setup", 
+  "doctype": "DocType", 
   "document_type": "Master", 
   "name": "__common__"
  }, 
@@ -85,11 +85,11 @@
  {
   "doctype": "DocField", 
   "label": "Default Currency", 
-  "options": "link:Currency", 
+  "permlevel": 0, 
   "fieldname": "default_currency", 
   "fieldtype": "Select", 
   "reqd": 1, 
-  "permlevel": 0
+  "options": "link:Currency"
  }, 
  {
   "no_copy": 1, 
@@ -97,12 +97,12 @@
   "doctype": "DocField", 
   "label": "Default Bank Account", 
   "oldfieldname": "default_bank_account", 
+  "permlevel": 0, 
   "trigger": "Client", 
   "fieldname": "default_bank_account", 
   "fieldtype": "Link", 
   "depends_on": "eval:!doc.__islocal", 
-  "options": "Account", 
-  "permlevel": 0
+  "options": "Account"
  }, 
  {
   "no_copy": 1, 
@@ -110,12 +110,12 @@
   "doctype": "DocField", 
   "label": "Receivables Group", 
   "oldfieldname": "receivables_group", 
+  "permlevel": 0, 
   "trigger": "Client", 
   "fieldname": "receivables_group", 
   "fieldtype": "Link", 
   "depends_on": "eval:!doc.__islocal", 
-  "options": "Account", 
-  "permlevel": 0
+  "options": "Account"
  }, 
  {
   "no_copy": 1, 
@@ -123,12 +123,12 @@
   "doctype": "DocField", 
   "label": "Payables Group", 
   "oldfieldname": "payables_group", 
+  "permlevel": 0, 
   "trigger": "Client", 
   "fieldname": "payables_group", 
   "fieldtype": "Link", 
   "depends_on": "eval:!doc.__islocal", 
-  "options": "Account", 
-  "permlevel": 0
+  "options": "Account"
  }, 
  {
   "oldfieldtype": "Column Break", 
@@ -164,22 +164,22 @@
   "doctype": "DocField", 
   "label": "If Yearly Budget Exceeded", 
   "oldfieldname": "yearly_bgt_flag", 
-  "options": "\nWarn\nIgnore\nStop", 
+  "permlevel": 0, 
   "fieldname": "yearly_bgt_flag", 
   "fieldtype": "Select", 
   "depends_on": "eval:!doc.__islocal", 
-  "permlevel": 0
+  "options": "\nWarn\nIgnore\nStop"
  }, 
  {
   "oldfieldtype": "Select", 
   "doctype": "DocField", 
   "label": "If Monthly Budget Exceeded", 
   "oldfieldname": "monthly_bgt_flag", 
-  "options": "\nWarn\nIgnore\nStop", 
+  "permlevel": 0, 
   "fieldname": "monthly_bgt_flag", 
   "fieldtype": "Select", 
   "depends_on": "eval:!doc.__islocal", 
-  "permlevel": 0
+  "options": "\nWarn\nIgnore\nStop"
  }, 
  {
   "description": "For reference only.", 
@@ -212,30 +212,30 @@
   "doctype": "DocField", 
   "label": "Phone No", 
   "oldfieldname": "phone_no", 
-  "options": "Phone", 
+  "permlevel": 0, 
   "fieldname": "phone_no", 
   "fieldtype": "Data", 
-  "permlevel": 0
+  "options": "Phone"
  }, 
  {
   "oldfieldtype": "Data", 
   "doctype": "DocField", 
   "label": "Fax", 
   "oldfieldname": "fax", 
-  "options": "Phone", 
+  "permlevel": 0, 
   "fieldname": "fax", 
   "fieldtype": "Data", 
-  "permlevel": 0
+  "options": "Phone"
  }, 
  {
   "oldfieldtype": "Data", 
   "doctype": "DocField", 
   "label": "Email", 
   "oldfieldname": "email", 
-  "options": "Email", 
+  "permlevel": 0, 
   "fieldname": "email", 
   "fieldtype": "Data", 
-  "permlevel": 0
+  "options": "Email"
  }, 
  {
   "oldfieldtype": "Data", 
@@ -284,6 +284,7 @@
   "doctype": "DocPerm", 
   "submit": 0, 
   "write": 1, 
+  "report": 1, 
   "role": "System Manager", 
   "cancel": 1, 
   "permlevel": 0
@@ -294,14 +295,15 @@
   "doctype": "DocPerm", 
   "submit": 0, 
   "write": 1, 
+  "report": 1, 
   "role": "System Manager", 
   "cancel": 1, 
   "permlevel": 0
  }, 
  {
-  "doctype": "DocPerm", 
-  "role": "All", 
   "cancel": 0, 
-  "permlevel": 1
+  "role": "All", 
+  "permlevel": 1, 
+  "doctype": "DocPerm"
  }
 ]

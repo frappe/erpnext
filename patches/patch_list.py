@@ -152,4 +152,5 @@ patch_list = [
 	"patches.january_2013.update_country_info",
 	"patches.january_2013.remove_tds_entry_from_gl_mapper",
 	"patches.january_2013.update_number_format",
+	"patches.january_2013.purchase_price_list",
 ]

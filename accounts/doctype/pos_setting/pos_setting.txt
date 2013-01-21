@@ -10,12 +10,12 @@
   "section_style": "Simple", 
   "module": "Accounts", 
   "doctype": "DocType", 
+  "server_code_error": " ", 
   "autoname": "POS/.####", 
-  "show_in_menu": 0, 
   "name": "__common__", 
   "colour": "White:FFF", 
   "_last_update": "1322549700", 
-  "server_code_error": " ", 
+  "show_in_menu": 0, 
   "version": 1
  }, 
  {
@@ -32,6 +32,7 @@
   "read": 1, 
   "doctype": "DocPerm", 
   "parenttype": "DocType", 
+  "report": 1, 
   "permlevel": 0, 
   "parentfield": "permissions"
  }, 

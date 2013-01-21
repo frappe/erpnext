@@ -10,14 +10,14 @@
   "section_style": "Tabbed", 
   "description": "**Fiscal Year** represents a Financial Year. All accounting entries and other major transactions are tracked against **Fiscal Year**.", 
   "module": "Accounts", 
-  "doctype": "DocType", 
-  "allow_trash": 1, 
   "server_code_error": " ", 
-  "document_type": "Master", 
+  "allow_trash": 1, 
   "autoname": "field:year", 
+  "document_type": "Master", 
+  "_last_update": "1322549700", 
   "name": "__common__", 
   "colour": "White:FFF", 
-  "_last_update": "1322549700", 
+  "doctype": "DocType", 
   "show_in_menu": 0, 
   "version": 1
  }, 
@@ -29,15 +29,16 @@
   "parentfield": "fields"
  }, 
  {
+  "report": 1, 
   "name": "__common__", 
   "parent": "Fiscal Year", 
   "read": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
   "write": 1, 
-  "cancel": 1, 
   "parenttype": "DocType", 
   "role": "System Manager", 
+  "cancel": 1, 
   "permlevel": 0, 
   "parentfield": "permissions"
  }, 
@@ -100,10 +101,10 @@
   "doctype": "DocField", 
   "label": "Year Closed", 
   "oldfieldname": "is_fiscal_year_closed", 
-  "options": "\nNo\nYes", 
+  "permlevel": 0, 
   "fieldname": "is_fiscal_year_closed", 
   "fieldtype": "Select", 
   "reqd": 0, 
-  "permlevel": 0
+  "options": "\nNo\nYes"
  }
 ]

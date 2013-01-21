@@ -20,7 +20,9 @@ from webnotes.utils import load_json, cstr, flt, get_defaults
 from webnotes.model.doc import addchild
 from webnotes.model.wrapper import copy_doclist
 
-class TransactionBase:
+from webnotes.model.controller import DocListController
+
+class TransactionBase(DocListController):
 
 	# Get Customer Default Primary Address - first load
 	# -----------------------
@@ -227,14 +229,6 @@ class TransactionBase:
 			ch.incentives = d and flt(d[3]) or 0
 			ch.idx = idx
 			idx += 1
-			
-	# Get Company Specific Default Currency
-	# -------------------------------------
-	def get_company_currency(self, name):
-		ret = webnotes.conn.sql("select default_currency from tabCompany where name = '%s'" %(name))
-		dcc = ret and ret[0][0] or get_defaults()['currency']						
-		return dcc	
-	
 
 	def load_notification_message(self):
 		dt = self.doc.doctype.lower().replace(" ", "_")

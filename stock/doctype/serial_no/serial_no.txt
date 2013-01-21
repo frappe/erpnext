@@ -7,15 +7,15 @@
   "modified": "2012-12-03 11:39:34"
  }, 
  {
-  "allow_attach": 1, 
-  "search_fields": "item_code,status", 
-  "module": "Stock", 
   "document_type": "Master", 
   "description": "Distinct unit of an Item", 
   "autoname": "field:serial_no", 
-  "name": "__common__", 
   "allow_rename": 1, 
-  "doctype": "DocType"
+  "name": "__common__", 
+  "module": "Stock", 
+  "doctype": "DocType", 
+  "search_fields": "item_code,status", 
+  "allow_attach": 1
  }, 
  {
   "name": "__common__", 
@@ -123,12 +123,12 @@
   "doctype": "DocField", 
   "label": "Item Group", 
   "oldfieldname": "item_group", 
-  "options": "Item Group", 
+  "permlevel": 1, 
   "fieldname": "item_group", 
   "fieldtype": "Link", 
   "search_index": 0, 
   "reqd": 1, 
-  "permlevel": 1, 
+  "options": "Item Group", 
   "in_filter": 0
  }, 
  {
@@ -136,12 +136,12 @@
   "doctype": "DocField", 
   "label": "Brand", 
   "oldfieldname": "brand", 
-  "options": "Brand", 
+  "permlevel": 1, 
   "fieldname": "brand", 
   "fieldtype": "Link", 
   "search_index": 0, 
   "reqd": 0, 
-  "permlevel": 1, 
+  "options": "Brand", 
   "in_filter": 0
  }, 
  {
@@ -162,10 +162,10 @@
   "no_copy": 1, 
   "doctype": "DocField", 
   "label": "Purchase Document Type", 
-  "options": "\nPurchase Receipt\nStock Entry", 
+  "permlevel": 0, 
   "fieldname": "purchase_document_type", 
   "fieldtype": "Select", 
-  "permlevel": 0
+  "options": "\nPurchase Receipt\nStock Entry"
  }, 
  {
   "no_copy": 1, 
@@ -226,22 +226,22 @@
   "doctype": "DocField", 
   "label": "Warehouse", 
   "oldfieldname": "warehouse", 
-  "permlevel": 0, 
+  "options": "Warehouse", 
   "fieldname": "warehouse", 
   "fieldtype": "Link", 
   "search_index": 1, 
   "reqd": 0, 
-  "options": "Warehouse", 
+  "permlevel": 0, 
   "in_filter": 1
  }, 
  {
   "no_copy": 1, 
   "doctype": "DocField", 
   "label": "Supplier", 
-  "options": "Supplier", 
+  "permlevel": 0, 
   "fieldname": "supplier", 
   "fieldtype": "Link", 
-  "permlevel": 0, 
+  "options": "Supplier", 
   "in_filter": 1
  }, 
  {
@@ -280,10 +280,10 @@
   "no_copy": 1, 
   "doctype": "DocField", 
   "label": "Delivery Document Type", 
-  "options": "\nDelivery Note\nSales Invoice\nStock Entry", 
+  "permlevel": 1, 
   "fieldname": "delivery_document_type", 
   "fieldtype": "Select", 
-  "permlevel": 1, 
+  "options": "\nDelivery Note\nSales Invoice\nStock Entry", 
   "in_filter": 1
  }, 
  {
@@ -328,11 +328,11 @@
   "doctype": "DocField", 
   "label": "Is Cancelled", 
   "oldfieldname": "is_cancelled", 
-  "options": "\nYes\nNo", 
+  "permlevel": 0, 
   "fieldname": "is_cancelled", 
   "fieldtype": "Select", 
   "hidden": 1, 
-  "permlevel": 0, 
+  "options": "\nYes\nNo", 
   "report_hide": 1
  }, 
  {
@@ -385,10 +385,10 @@
   "doctype": "DocField", 
   "label": "Territory", 
   "oldfieldname": "territory", 
-  "permlevel": 1, 
+  "options": "Territory", 
   "fieldname": "territory", 
   "fieldtype": "Link", 
-  "options": "Territory", 
+  "permlevel": 1, 
   "report_hide": 0, 
   "in_filter": 1
  }, 
@@ -407,17 +407,17 @@
   "permlevel": 0
  }, 
  {
-  "permlevel": 0, 
   "no_copy": 0, 
   "oldfieldtype": "Select", 
   "doctype": "DocField", 
   "label": "Maintenance Status", 
   "oldfieldname": "maintenance_status", 
   "width": "150px", 
+  "options": "\nUnder Warranty\nOut of Warranty\nUnder AMC\nOut of AMC", 
   "fieldname": "maintenance_status", 
   "fieldtype": "Select", 
   "search_index": 1, 
-  "options": "\nUnder Warranty\nOut of Warranty\nUnder AMC\nOut of AMC", 
+  "permlevel": 0, 
   "in_filter": 1
  }, 
  {
@@ -480,22 +480,22 @@
   "search_index": 1, 
   "doctype": "DocField", 
   "label": "Company", 
-  "options": "link:Company", 
+  "permlevel": 0, 
   "fieldname": "company", 
   "fieldtype": "Select", 
   "reqd": 1, 
-  "permlevel": 0, 
+  "options": "link:Company", 
   "in_filter": 1
  }, 
  {
   "search_index": 1, 
   "doctype": "DocField", 
   "label": "Fiscal Year", 
-  "options": "link:Fiscal Year", 
+  "permlevel": 0, 
   "fieldname": "fiscal_year", 
   "fieldtype": "Select", 
   "reqd": 1, 
-  "permlevel": 0, 
+  "options": "link:Fiscal Year", 
   "in_filter": 1
  }, 
  {
@@ -544,6 +544,7 @@
   "doctype": "DocPerm", 
   "submit": 0, 
   "write": 0, 
+  "report": 1, 
   "role": "Material Manager", 
   "cancel": 0, 
   "permlevel": 0
@@ -564,6 +565,7 @@
   "doctype": "DocPerm", 
   "submit": 0, 
   "write": 0, 
+  "report": 1, 
   "role": "Material User", 
   "cancel": 0, 
   "permlevel": 0
@@ -572,26 +574,28 @@
   "create": 1, 
   "doctype": "DocPerm", 
   "write": 1, 
-  "role": "System Manager", 
   "cancel": 1, 
+  "role": "System Manager", 
+  "report": 1, 
   "permlevel": 0
  }, 
  {
   "create": 1, 
   "doctype": "DocPerm", 
   "write": 1, 
-  "role": "Material Master Manager", 
   "cancel": 1, 
+  "role": "Material Master Manager", 
+  "report": 1, 
   "permlevel": 0
  }, 
  {
-  "doctype": "DocPerm", 
   "role": "System Manager", 
-  "permlevel": 1
+  "permlevel": 1, 
+  "doctype": "DocPerm"
  }, 
  {
-  "doctype": "DocPerm", 
   "role": "Sales Master Manager", 
-  "permlevel": 1
+  "permlevel": 1, 
+  "doctype": "DocPerm"
  }
 ]

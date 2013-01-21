@@ -23,16 +23,10 @@ from webnotes.model.wrapper import getlist
 from webnotes.model.code import get_obj
 from webnotes import msgprint
 
-from utilities.transaction_base import TransactionBase
-
 class DocType:
 	def __init__(self,d,dl):
 		self.doc, self.doclist = d, dl
 		self.entries = []
-
-	def get_company_currency(self,arg=''):
-		dcc = TransactionBase().get_company_currency(arg)
-		return dcc
 
 	def get_period_difference(self,arg, cost_center =''):
 		# used in General Ledger Page Report

@@ -7,11 +7,11 @@
   "modified": "2012-12-06 12:12:46"
  }, 
  {
-  "in_create": 1, 
+  "description": "Track separate Income and Expense for product verticals or divisions.", 
   "search_fields": "name,parent_cost_center", 
   "module": "Accounts", 
   "document_type": "Master", 
-  "description": "Track separate Income and Expense for product verticals or divisions.", 
+  "in_create": 1, 
   "autoname": "field:cost_center_name", 
   "name": "__common__", 
   "allow_rename": 1, 
@@ -72,12 +72,12 @@
   "doctype": "DocField", 
   "label": "Parent Cost Center", 
   "oldfieldname": "parent_cost_center", 
+  "permlevel": 0, 
   "trigger": "Client", 
   "fieldname": "parent_cost_center", 
   "fieldtype": "Link", 
   "reqd": 1, 
-  "options": "Cost Center", 
-  "permlevel": 0
+  "options": "Cost Center"
  }, 
  {
   "oldfieldtype": "Link", 
@@ -85,12 +85,12 @@
   "doctype": "DocField", 
   "label": "Company", 
   "oldfieldname": "company_name", 
+  "permlevel": 0, 
   "trigger": "Client", 
   "fieldname": "company_name", 
   "fieldtype": "Link", 
   "reqd": 1, 
-  "options": "Company", 
-  "permlevel": 0
+  "options": "Company"
  }, 
  {
   "oldfieldtype": "Data", 
@@ -143,10 +143,10 @@
   "doctype": "DocField", 
   "label": "Distribution Id", 
   "oldfieldname": "distribution_id", 
-  "options": "Budget Distribution", 
+  "permlevel": 0, 
   "fieldname": "distribution_id", 
   "fieldtype": "Link", 
-  "permlevel": 0
+  "options": "Budget Distribution"
  }, 
  {
   "description": "Add rows to set annual budgets on Accounts.", 
@@ -155,10 +155,10 @@
   "doctype": "DocField", 
   "label": "Budget Details", 
   "oldfieldname": "budget_details", 
-  "options": "Budget Detail", 
+  "permlevel": 0, 
   "fieldname": "budget_details", 
   "fieldtype": "Table", 
-  "permlevel": 0
+  "options": "Budget Detail"
  }, 
  {
   "print_hide": 1, 
@@ -198,11 +198,11 @@
   "doctype": "DocField", 
   "label": "old_parent", 
   "oldfieldname": "old_parent", 
-  "permlevel": 0, 
+  "options": "Cost Center", 
   "fieldname": "old_parent", 
   "fieldtype": "Link", 
   "hidden": 1, 
-  "options": "Cost Center", 
+  "permlevel": 0, 
   "report_hide": 1
  }, 
  {
@@ -221,6 +221,7 @@
   "doctype": "DocPerm", 
   "submit": 0, 
   "write": 1, 
+  "report": 1, 
   "role": "Accounts Manager", 
   "cancel": 1, 
   "permlevel": 0
@@ -241,6 +242,7 @@
   "doctype": "DocPerm", 
   "submit": 0, 
   "write": 0, 
+  "report": 1, 
   "role": "Accounts User", 
   "cancel": 0, 
   "permlevel": 0
@@ -249,13 +251,14 @@
   "create": 1, 
   "doctype": "DocPerm", 
   "write": 1, 
-  "role": "System Manager", 
   "cancel": 1, 
+  "role": "System Manager", 
+  "report": 1, 
   "permlevel": 0
  }, 
  {
-  "doctype": "DocPerm", 
   "role": "All", 
-  "permlevel": 1
+  "permlevel": 1, 
+  "doctype": "DocPerm"
  }
 ]

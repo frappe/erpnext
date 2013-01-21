@@ -8,13 +8,13 @@
  }, 
  {
   "section_style": "Simple", 
-  "module": "Manufacturing", 
   "doctype": "DocType", 
-  "allow_trash": 1, 
+  "module": "Manufacturing", 
   "server_code_error": " ", 
+  "allow_trash": 1, 
+  "autoname": "field:workstation_name", 
   "document_type": "Master", 
   "allow_email": 0, 
-  "autoname": "field:workstation_name", 
   "name": "__common__", 
   "colour": "White:FFF", 
   "_last_update": "1322125389", 
@@ -44,8 +44,9 @@
   "create": 1, 
   "doctype": "DocPerm", 
   "write": 1, 
-  "role": "System Manager", 
   "cancel": 1, 
+  "role": "System Manager", 
+  "report": 1, 
   "permlevel": 0
  }, 
  {
@@ -57,16 +58,18 @@
   "create": 1, 
   "doctype": "DocPerm", 
   "write": 1, 
-  "role": "Manufacturing User", 
   "cancel": 1, 
+  "role": "Manufacturing User", 
+  "report": 1, 
   "permlevel": 0
  }, 
  {
   "create": 1, 
   "doctype": "DocPerm", 
   "write": 1, 
-  "role": "Manufacturing User", 
   "cancel": 1, 
+  "role": "Manufacturing User", 
+  "report": 1, 
   "permlevel": 0
  }, 
  {
@@ -103,11 +106,11 @@
   "doctype": "DocField", 
   "label": "Warehouse", 
   "oldfieldname": "warehouse", 
-  "permlevel": 0, 
+  "options": "Warehouse", 
   "fieldname": "warehouse", 
   "fieldtype": "Link", 
   "reqd": 1, 
-  "options": "Warehouse"
+  "permlevel": 0
  }, 
  {
   "oldfieldtype": "Text", 
@@ -135,12 +138,12 @@
   "doctype": "DocField", 
   "label": "Capacity Units", 
   "oldfieldname": "capacity_units", 
-  "permlevel": 0, 
+  "options": "\nUnits/Shifts\nUnits/Hour", 
   "fieldname": "capacity_units", 
   "fieldtype": "Select", 
   "reqd": 0, 
   "hidden": 1, 
-  "options": "\nUnits/Shifts\nUnits/Hour"
+  "permlevel": 0
  }, 
  {
   "oldfieldtype": "Currency", 

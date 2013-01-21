@@ -2,31 +2,24 @@
  {
   "owner": "Administrator", 
   "docstatus": 0, 
-  "creation": "2012-03-27 14:36:36", 
+  "creation": "2013-01-15 18:43:18", 
   "modified_by": "Administrator", 
-  "modified": "2012-03-27 14:36:36"
+  "modified": "2013-01-17 17:53:42"
  }, 
  {
-  "section_style": "Tray", 
-  "istable": 1, 
-  "in_create": 1, 
-  "module": "Stock", 
-  "server_code_error": " ", 
   "read_only": 0, 
+  "istable": 1, 
   "autoname": "RFD/.#####", 
-  "name": "__common__", 
-  "colour": "White:FFF", 
+  "in_create": 1, 
   "doctype": "DocType", 
-  "show_in_menu": 0, 
-  "version": 3
+  "module": "Stock", 
+  "name": "__common__"
  }, 
  {
   "name": "__common__", 
   "parent": "Item Price", 
-  "search_index": 1, 
   "doctype": "DocField", 
   "parenttype": "DocType", 
-  "in_filter": 1, 
   "permlevel": 0, 
   "parentfield": "fields"
  }, 
@@ -40,9 +33,11 @@
   "label": "Price List Name", 
   "oldfieldname": "price_list_name", 
   "fieldname": "price_list_name", 
-  "fieldtype": "Select", 
+  "fieldtype": "Link", 
+  "search_index": 1, 
   "reqd": 1, 
-  "options": "link:Price List"
+  "options": "Price List", 
+  "in_filter": 1
  }, 
  {
   "oldfieldtype": "Currency", 
@@ -51,7 +46,9 @@
   "oldfieldname": "ref_rate", 
   "fieldname": "ref_rate", 
   "fieldtype": "Currency", 
-  "reqd": 0
+  "search_index": 0, 
+  "reqd": 0, 
+  "in_filter": 1
  }, 
  {
   "oldfieldtype": "Select", 
@@ -60,7 +57,23 @@
   "oldfieldname": "ref_currency", 
   "fieldname": "ref_currency", 
   "fieldtype": "Select", 
+  "search_index": 1, 
   "reqd": 1, 
-  "options": "link:Currency"
+  "options": "link:Currency", 
+  "in_filter": 1
+ }, 
+ {
+  "description": "Allow this price in sales related forms", 
+  "doctype": "DocField", 
+  "label": "For Selling", 
+  "fieldname": "selling", 
+  "fieldtype": "Check"
+ }, 
+ {
+  "description": "Allow this price in purchase related forms", 
+  "doctype": "DocField", 
+  "label": "For Buying", 
+  "fieldname": "buying", 
+  "fieldtype": "Check"
  }
 ]
