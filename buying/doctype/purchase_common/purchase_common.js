@@ -482,7 +482,10 @@ cur_frm.cscript.calc_amount = function(doc, n) {
 
 		if(n == 1){ 
 			set_multiple(tname, cl[i].name, {'purchase_ref_rate':flt(cl[i].import_ref_rate)*flt(doc.conversion_rate)}, fname);
-		set_multiple(tname, cl[i].name, {'discount_rate': flt(flt( flt( flt(cl[i].import_ref_rate) - flt(cl[i].import_rate) ) * 100 )/flt(cl[i].import_ref_rate)) }, fname);
+		set_multiple(tname, cl[i].name, {
+			'discount_rate': flt(cl[i].import_ref_rate) ? 
+				flt(flt( flt( flt(cl[i].import_ref_rate) - flt(cl[i].import_rate) ) * 100 )/ 
+					flt(cl[i].import_ref_rate))	: 0 }, fname);
 		tmp[rate_fld] = flt(doc.conversion_rate) * flt(cl[i].import_rate);
 			set_multiple(tname, cl[i].name, tmp, fname);
 
@@ -491,7 +494,10 @@ cur_frm.cscript.calc_amount = function(doc, n) {
 
 		}else if(n == 2){
 		set_multiple(tname, cl[i].name, {'purchase_ref_rate':flt(cl[i].import_ref_rate)*flt(doc.conversion_rate)}, fname);
-		set_multiple(tname, cl[i].name, {'discount_rate': flt(flt( flt( flt(cl[i].purchase_ref_rate) - flt(cl[i][rate_fld]) ) * 100 )/flt(cl[i].purchase_ref_rate)) }, fname);
+		set_multiple(tname, cl[i].name, {
+			'discount_rate': flt(cl[i].purchase_ref_rate) ? 
+				flt(flt( flt( flt(cl[i].purchase_ref_rate) - flt(cl[i][rate_fld]) ) * 100 )/
+				flt(cl[i].purchase_ref_rate)) : 0 }, fname);
 			set_multiple(tname, cl[i].name, {'amount': flt(flt(cl[i].qty) * flt(cl[i][rate_fld])),}, fname);
 		set_multiple(tname, cl[i].name, {'import_rate': flt(flt(cl[i][rate_fld]) / flt(doc.conversion_rate)) }, fname);
 			set_multiple(tname, cl[i].name, {'import_amount': flt(flt(cl[i].qty) *	flt(cl[i][rate_fld]) / flt(doc.conversion_rate))}, fname);
