@@ -10,14 +10,14 @@
   "section_style": "Simple", 
   "description": "Standard tax template that can be applied to all Purchase Transactions. This template can contain list of tax heads and also other expense heads like \"Shipping\", \"Insurance\", \"Handling\" etc.\n\n#### Note\n\nThe tax rate you define here will be the standard tax rate for all **Items**. If there are **Items** that have different rates, they must be added in the **Item Tax** table in the **Item** master.\n\n#### Description of Columns\n\n1. Calculation Type: \n    - This can be on **Net Total** (that is the sum of basic amount).\n    - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.\n    - **Actual** (as mentioned).\n2. Account Head: The Account ledger under which this tax will be booked\n3. Cost Center: If the tax / charge is an income (like shipping) or expense it needs to be booked against a Cost Center.\n4. Description: Description of the tax (that will be printed in invoices / quotes).\n5. Rate: Tax rate.\n6. Amount: Tax amount.\n7. Total: Cumulative total to this point.\n8. Enter Row: If based on \"Previous Row Total\" you can select the row number which will be taken as a base for this calculation (default is the previous row).\n9. Consider Tax or Charge for: In this section you can specify if the tax / charge is only for valuation (not a part of total) or only for total (does not add value to the item) or for both.\n10. Add or Deduct: Whether you want to add or deduct the tax.", 
   "module": "Accounts", 
-  "doctype": "DocType", 
-  "allow_trash": 1, 
   "server_code_error": " ", 
-  "document_type": "Master", 
+  "allow_trash": 1, 
   "autoname": "field:title", 
+  "document_type": "Master", 
+  "_last_update": "1325570646", 
   "name": "__common__", 
   "colour": "White:FFF", 
-  "_last_update": "1325570646", 
+  "doctype": "DocType", 
   "show_in_menu": 0, 
   "version": 1
  }, 
@@ -52,6 +52,7 @@
   "doctype": "DocPerm", 
   "submit": 0, 
   "write": 0, 
+  "report": 1, 
   "role": "Purchase Manager", 
   "cancel": 0, 
   "permlevel": 0
@@ -60,8 +61,9 @@
   "create": 1, 
   "doctype": "DocPerm", 
   "write": 1, 
-  "role": "System Manager", 
   "cancel": 1, 
+  "role": "System Manager", 
+  "report": 1, 
   "permlevel": 0
  }, 
  {
@@ -69,8 +71,9 @@
   "doctype": "DocPerm", 
   "submit": 0, 
   "write": 1, 
-  "role": "Purchase Master Manager", 
   "cancel": 1, 
+  "role": "Purchase Master Manager", 
+  "report": 1, 
   "permlevel": 0
  }, 
  {

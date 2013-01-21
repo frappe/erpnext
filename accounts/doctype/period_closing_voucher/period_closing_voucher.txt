@@ -11,12 +11,12 @@
   "is_submittable": 1, 
   "search_fields": "posting_date, fiscal_year", 
   "module": "Accounts", 
-  "doctype": "DocType", 
   "server_code_error": " ", 
   "autoname": "PCE/.###", 
+  "_last_update": "1311621379", 
   "name": "__common__", 
   "colour": "White:FFF", 
-  "_last_update": "1311621379", 
+  "doctype": "DocType", 
   "show_in_menu": 0, 
   "version": 1
  }, 
@@ -85,6 +85,7 @@
   "doctype": "DocPerm", 
   "submit": 1, 
   "write": 1, 
+  "report": 1, 
   "role": "System Manager", 
   "cancel": 1, 
   "permlevel": 0
@@ -94,8 +95,9 @@
   "doctype": "DocPerm", 
   "submit": 1, 
   "write": 1, 
-  "role": "Accounts Manager", 
   "cancel": 1, 
+  "role": "Accounts Manager", 
+  "report": 1, 
   "permlevel": 0
  }, 
  {
@@ -130,11 +132,11 @@
   "doctype": "DocField", 
   "label": "Closing Fiscal Year", 
   "oldfieldname": "fiscal_year", 
-  "permlevel": 0, 
+  "options": "link:Fiscal Year", 
   "fieldname": "fiscal_year", 
   "fieldtype": "Select", 
   "reqd": 1, 
-  "options": "link:Fiscal Year"
+  "permlevel": 0
  }, 
  {
   "no_copy": 1, 
@@ -161,11 +163,11 @@
   "doctype": "DocField", 
   "label": "Company", 
   "oldfieldname": "company", 
-  "permlevel": 0, 
+  "options": "link:Company", 
   "fieldname": "company", 
   "fieldtype": "Select", 
   "reqd": 1, 
-  "options": "link:Company"
+  "permlevel": 0
  }, 
  {
   "oldfieldtype": "Column Break", 
@@ -180,21 +182,21 @@
   "doctype": "DocField", 
   "label": "Closing Account Head", 
   "oldfieldname": "closing_account_head", 
+  "permlevel": 0, 
   "trigger": "Client", 
   "fieldname": "closing_account_head", 
   "fieldtype": "Link", 
   "reqd": 1, 
-  "options": "Account", 
-  "permlevel": 0
+  "options": "Account"
  }, 
  {
   "oldfieldtype": "HTML", 
   "doctype": "DocField", 
   "label": "CoA Help", 
-  "permlevel": 0, 
+  "options": "<a href=\"#!Accounts Browser/Account\">To manage Account Head, click here</a>", 
   "fieldname": "coa_help", 
   "fieldtype": "HTML", 
-  "options": "<a href=\"#!Accounts Browser/Account\">To manage Account Head, click here</a>"
+  "permlevel": 0
  }, 
  {
   "oldfieldtype": "Small Text", 

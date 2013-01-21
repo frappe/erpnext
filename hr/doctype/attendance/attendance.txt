@@ -7,13 +7,13 @@
   "modified": "2012-12-23 09:42:45"
  }, 
  {
+  "document_type": "Master", 
   "is_submittable": 1, 
-  "autoname": "naming_series:", 
   "name": "__common__", 
-  "search_fields": "employee, employee_name, att_date, status", 
+  "autoname": "naming_series:", 
   "module": "HR", 
   "doctype": "DocType", 
-  "document_type": "Master"
+  "search_fields": "employee, employee_name, att_date, status"
  }, 
  {
   "name": "__common__", 
@@ -31,8 +31,9 @@
   "doctype": "DocPerm", 
   "write": 1, 
   "parenttype": "DocType", 
-  "cancel": 1, 
+  "report": 1, 
   "permlevel": 0, 
+  "cancel": 1, 
   "parentfield": "permissions"
  }, 
  {
@@ -43,10 +44,10 @@
   "oldfieldtype": "Section Break", 
   "doctype": "DocField", 
   "label": "Attendance Details", 
-  "options": "Simple", 
+  "permlevel": 0, 
   "fieldname": "attendance_details", 
   "fieldtype": "Section Break", 
-  "permlevel": 0
+  "options": "Simple"
  }, 
  {
   "no_copy": 1, 
@@ -54,23 +55,23 @@
   "doctype": "DocField", 
   "label": "Naming Series", 
   "oldfieldname": "naming_series", 
-  "options": "ATT", 
+  "permlevel": 0, 
   "fieldname": "naming_series", 
   "fieldtype": "Select", 
   "reqd": 1, 
-  "permlevel": 0
+  "options": "ATT"
  }, 
  {
   "oldfieldtype": "Link", 
   "doctype": "DocField", 
   "label": "Employee", 
   "oldfieldname": "employee", 
-  "options": "Employee", 
+  "permlevel": 0, 
   "fieldname": "employee", 
   "fieldtype": "Link", 
   "search_index": 1, 
   "reqd": 1, 
-  "permlevel": 0, 
+  "options": "Employee", 
   "in_filter": 1
  }, 
  {
@@ -88,12 +89,12 @@
   "doctype": "DocField", 
   "label": "Status", 
   "oldfieldname": "status", 
-  "permlevel": 0, 
+  "options": "\nPresent\nAbsent\nHalf Day", 
   "fieldname": "status", 
   "fieldtype": "Select", 
   "search_index": 1, 
   "reqd": 1, 
-  "options": "\nPresent\nAbsent\nHalf Day", 
+  "permlevel": 0, 
   "in_filter": 1
  }, 
  {
@@ -102,11 +103,11 @@
   "doctype": "DocField", 
   "label": "Leave Type", 
   "oldfieldname": "leave_type", 
-  "options": "Leave Type", 
+  "permlevel": 0, 
   "fieldname": "leave_type", 
   "fieldtype": "Link", 
   "hidden": 1, 
-  "permlevel": 0, 
+  "options": "Leave Type", 
   "report_hide": 1
  }, 
  {
@@ -134,11 +135,11 @@
   "doctype": "DocField", 
   "label": "Fiscal Year", 
   "oldfieldname": "fiscal_year", 
-  "options": "link:Fiscal Year", 
+  "permlevel": 0, 
   "fieldname": "fiscal_year", 
   "fieldtype": "Select", 
   "reqd": 1, 
-  "permlevel": 0, 
+  "options": "link:Fiscal Year", 
   "in_filter": 1
  }, 
  {
@@ -146,11 +147,11 @@
   "doctype": "DocField", 
   "label": "Company", 
   "oldfieldname": "company", 
-  "options": "link:Company", 
+  "permlevel": 0, 
   "fieldname": "company", 
   "fieldtype": "Select", 
   "reqd": 1, 
-  "permlevel": 0, 
+  "options": "link:Company", 
   "in_filter": 1
  }, 
  {
@@ -169,10 +170,10 @@
   "no_copy": 1, 
   "doctype": "DocField", 
   "label": "Amended From", 
-  "options": "Attendance", 
+  "permlevel": 1, 
   "fieldname": "amended_from", 
   "fieldtype": "Link", 
-  "permlevel": 1
+  "options": "Attendance"
  }, 
  {
   "role": "System Manager", 

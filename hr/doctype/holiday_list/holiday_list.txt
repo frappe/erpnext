@@ -9,12 +9,12 @@
  {
   "section_style": "Simple", 
   "module": "HR", 
-  "server_code_error": " ", 
-  "allow_trash": 1, 
   "doctype": "DocType", 
+  "allow_trash": 1, 
   "document_type": "Master", 
   "name": "__common__", 
   "colour": "White:FFF", 
+  "server_code_error": " ", 
   "show_in_menu": 0, 
   "version": 17
  }, 
@@ -28,10 +28,11 @@
  {
   "parent": "Holiday List", 
   "read": 1, 
-  "doctype": "DocPerm", 
+  "report": 1, 
   "cancel": 1, 
   "name": "__common__", 
   "create": 1, 
+  "doctype": "DocPerm", 
   "write": 1, 
   "parenttype": "DocType", 
   "role": "HR Manager", 
@@ -76,11 +77,11 @@
   "doctype": "DocField", 
   "label": "Fiscal Year", 
   "oldfieldname": "fiscal_year", 
-  "permlevel": 0, 
+  "options": "link:Fiscal Year", 
   "fieldname": "fiscal_year", 
   "fieldtype": "Select", 
   "reqd": 1, 
-  "options": "link:Fiscal Year", 
+  "permlevel": 0, 
   "in_filter": 1
  }, 
  {
@@ -88,10 +89,10 @@
   "no_copy": 1, 
   "doctype": "DocField", 
   "label": "Weekly Off", 
-  "permlevel": 0, 
+  "options": "\nSunday\nMonday\nTuesday\nWednesday\nThursday\nFriday\nSaturday", 
   "fieldname": "weekly_off", 
   "fieldtype": "Select", 
-  "options": "\nSunday\nMonday\nTuesday\nWednesday\nThursday\nFriday\nSaturday", 
+  "permlevel": 0, 
   "report_hide": 1
  }, 
  {
@@ -107,11 +108,11 @@
   "doctype": "DocField", 
   "label": "Holidays", 
   "oldfieldname": "holiday_list_details", 
-  "permlevel": 0, 
+  "options": "Holiday", 
   "fieldname": "holiday_list_details", 
   "fieldtype": "Table", 
   "reqd": 0, 
-  "options": "Holiday"
+  "permlevel": 0
  }, 
  {
   "doctype": "DocField", 

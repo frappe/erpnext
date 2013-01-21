@@ -12,10 +12,10 @@
   "name": "__common__", 
   "colour": "White:FFF", 
   "module": "HR", 
-  "show_in_menu": 0, 
-  "version": 9, 
   "server_code_error": " ", 
-  "doctype": "DocType"
+  "version": 9, 
+  "doctype": "DocType", 
+  "show_in_menu": 0
  }, 
  {
   "name": "__common__", 
@@ -28,6 +28,7 @@
  {
   "parent": "Salary Slip Deduction", 
   "read": 1, 
+  "report": 1, 
   "name": "__common__", 
   "create": 1, 
   "doctype": "DocPerm", 
@@ -45,15 +46,15 @@
   "doctype": "DocPerm"
  }, 
  {
-  "permlevel": 0, 
   "oldfieldtype": "Data", 
   "doctype": "DocField", 
   "label": "Type", 
   "oldfieldname": "d_type", 
   "width": "200px", 
+  "options": "Deduction Type", 
   "fieldname": "d_type", 
   "fieldtype": "Link", 
-  "options": "Deduction Type"
+  "permlevel": 0
  }, 
  {
   "oldfieldtype": "Currency", 

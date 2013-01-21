@@ -9,12 +9,12 @@
  {
   "section_style": "Simple", 
   "name": "__common__", 
+  "autoname": "field:expense_type", 
   "colour": "White:FFF", 
   "module": "HR", 
   "server_code_error": " ", 
   "version": 5, 
   "doctype": "DocType", 
-  "autoname": "field:expense_type", 
   "document_type": "Master"
  }, 
  {
@@ -32,6 +32,7 @@
   "create": 1, 
   "doctype": "DocPerm", 
   "write": 1, 
+  "report": 1, 
   "parenttype": "DocType", 
   "permlevel": 0, 
   "parentfield": "permissions"

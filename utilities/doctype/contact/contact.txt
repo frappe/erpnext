@@ -8,8 +8,8 @@
  }, 
  {
   "in_create": 0, 
-  "doctype": "DocType", 
   "module": "Utilities", 
+  "doctype": "DocType", 
   "in_dialog": 0, 
   "document_type": "Master", 
   "name": "__common__"
@@ -107,12 +107,12 @@
   "doctype": "DocField", 
   "label": "Customer", 
   "oldfieldname": "customer", 
-  "permlevel": 0, 
   "trigger": "Client", 
   "fieldname": "customer", 
   "fieldtype": "Link", 
   "depends_on": "eval:!doc.supplier && !doc.sales_partner", 
-  "options": "Customer"
+  "options": "Customer", 
+  "permlevel": 0
  }, 
  {
   "depends_on": "eval:!doc.supplier && !doc.sales_partner", 
@@ -128,16 +128,16 @@
   "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Supplier", 
+  "permlevel": 0, 
   "trigger": "Client", 
   "fieldname": "supplier", 
   "fieldtype": "Link", 
-  "options": "Supplier", 
-  "permlevel": 0
+  "options": "Supplier"
  }, 
  {
-  "allow_on_submit": 0, 
   "depends_on": "eval:!doc.customer && !doc.sales_partner", 
   "colour": "White:FFF", 
+  "allow_on_submit": 0, 
   "doctype": "DocField", 
   "label": "Supplier Name", 
   "fieldname": "supplier_name", 
@@ -149,10 +149,10 @@
   "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Sales Partner", 
-  "options": "Sales Partner", 
+  "permlevel": 0, 
   "fieldname": "sales_partner", 
   "fieldtype": "Link", 
-  "permlevel": 0
+  "options": "Sales Partner"
  }, 
  {
   "default": "0", 
@@ -188,20 +188,20 @@
   "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Department", 
-  "options": "Suggest", 
+  "permlevel": 0, 
   "fieldname": "department", 
   "fieldtype": "Data", 
-  "permlevel": 0
+  "options": "Suggest"
  }, 
  {
   "description": "Enter designation of this Contact", 
   "colour": "White:FFF", 
   "doctype": "DocField", 
   "label": "Designation", 
-  "options": "Suggest", 
+  "permlevel": 0, 
   "fieldname": "designation", 
   "fieldtype": "Data", 
-  "permlevel": 0
+  "options": "Suggest"
  }, 
  {
   "doctype": "DocField", 
@@ -223,8 +223,9 @@
   "create": 1, 
   "doctype": "DocPerm", 
   "write": 1, 
-  "role": "System Manager", 
   "cancel": 1, 
+  "role": "System Manager", 
+  "report": 1, 
   "permlevel": 0
  }, 
  {
@@ -233,6 +234,7 @@
   "doctype": "DocPerm", 
   "submit": 0, 
   "write": 1, 
+  "report": 1, 
   "role": "Sales Master Manager", 
   "cancel": 1, 
   "permlevel": 0
@@ -241,8 +243,9 @@
   "create": 1, 
   "doctype": "DocPerm", 
   "write": 1, 
-  "role": "Purchase Master Manager", 
   "cancel": 1, 
+  "role": "Purchase Master Manager", 
+  "report": 1, 
   "permlevel": 0
  }, 
  {
@@ -250,6 +253,7 @@
   "doctype": "DocPerm", 
   "write": 1, 
   "role": "Sales Manager", 
+  "report": 1, 
   "permlevel": 0
  }, 
  {
@@ -257,6 +261,7 @@
   "doctype": "DocPerm", 
   "write": 1, 
   "role": "Purchase Manager", 
+  "report": 1, 
   "permlevel": 0
  }, 
  {
@@ -264,6 +269,7 @@
   "doctype": "DocPerm", 
   "write": 1, 
   "role": "Maintenance Manager", 
+  "report": 1, 
   "permlevel": 0
  }, 
  {
@@ -271,6 +277,7 @@
   "doctype": "DocPerm", 
   "write": 1, 
   "role": "Accounts Manager", 
+  "report": 1, 
   "permlevel": 0
  }, 
  {
@@ -278,6 +285,7 @@
   "doctype": "DocPerm", 
   "write": 1, 
   "role": "Sales User", 
+  "report": 1, 
   "permlevel": 0
  }, 
  {
@@ -285,6 +293,7 @@
   "doctype": "DocPerm", 
   "write": 1, 
   "role": "Purchase User", 
+  "report": 1, 
   "permlevel": 0
  }, 
  {
@@ -292,6 +301,7 @@
   "doctype": "DocPerm", 
   "write": 1, 
   "role": "Maintenance User", 
+  "report": 1, 
   "permlevel": 0
  }, 
  {
@@ -299,11 +309,12 @@
   "doctype": "DocPerm", 
   "write": 1, 
   "role": "Accounts User", 
+  "report": 1, 
   "permlevel": 0
  }, 
  {
-  "doctype": "DocPerm", 
   "role": "All", 
-  "permlevel": 1
+  "permlevel": 1, 
+  "doctype": "DocPerm"
  }
 ]

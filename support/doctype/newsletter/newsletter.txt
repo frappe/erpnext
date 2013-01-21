@@ -7,10 +7,10 @@
   "modified": "2013-01-02 13:47:36"
  }, 
  {
-  "autoname": "naming_series:", 
   "description": "Create and Send Newsletters", 
-  "doctype": "DocType", 
+  "autoname": "naming_series:", 
   "module": "Support", 
+  "doctype": "DocType", 
   "document_type": "Other", 
   "name": "__common__"
  }, 
@@ -45,11 +45,11 @@
   "default": "NL-", 
   "doctype": "DocField", 
   "label": "Naming Series", 
-  "options": "NL-", 
+  "permlevel": 0, 
   "fieldname": "naming_series", 
   "fieldtype": "Select", 
   "reqd": 1, 
-  "permlevel": 0
+  "options": "NL-"
  }, 
  {
   "doctype": "DocField", 
@@ -150,10 +150,10 @@
  }, 
  {
   "doctype": "DocField", 
-  "label": "Test", 
   "options": "test_send", 
   "fieldname": "test_send", 
   "fieldtype": "Button", 
+  "label": "Test", 
   "permlevel": 0
  }, 
  {
@@ -175,26 +175,28 @@
   "create": 1, 
   "doctype": "DocPerm", 
   "write": 1, 
-  "role": "Sales Manager", 
   "cancel": 1, 
+  "role": "Sales Manager", 
+  "report": 1, 
   "permlevel": 0
  }, 
  {
   "create": 1, 
   "doctype": "DocPerm", 
   "write": 1, 
-  "role": "Support Manager", 
   "cancel": 1, 
+  "role": "Support Manager", 
+  "report": 1, 
   "permlevel": 0
  }, 
  {
-  "doctype": "DocPerm", 
   "role": "Sales Manager", 
-  "permlevel": 1
+  "permlevel": 1, 
+  "doctype": "DocPerm"
  }, 
  {
-  "doctype": "DocPerm", 
   "role": "Support Manager", 
-  "permlevel": 1
+  "permlevel": 1, 
+  "doctype": "DocPerm"
  }
 ]

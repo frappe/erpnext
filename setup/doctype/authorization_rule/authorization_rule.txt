@@ -7,12 +7,12 @@
   "modified": "2012-12-17 17:59:54"
  }, 
  {
-  "autoname": "AR.####", 
+  "document_type": "Master", 
   "name": "__common__", 
-  "search_fields": "transaction,based_on,system_user,system_role,approving_user,approving_role", 
+  "autoname": "AR.####", 
   "module": "Setup", 
   "doctype": "DocType", 
-  "document_type": "Master"
+  "search_fields": "transaction,based_on,system_user,system_role,approving_user,approving_role"
  }, 
  {
   "name": "__common__", 
@@ -32,6 +32,7 @@
   "cancel": 1, 
   "parenttype": "DocType", 
   "role": "System Manager", 
+  "report": 1, 
   "permlevel": 0, 
   "parentfield": "permissions"
  }, 

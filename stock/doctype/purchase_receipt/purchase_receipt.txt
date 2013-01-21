@@ -7,14 +7,14 @@
   "modified": "2013-01-18 13:25:36"
  }, 
  {
-  "autoname": "naming_series:", 
-  "allow_attach": 1, 
+  "document_type": "Transaction", 
   "is_submittable": 1, 
-  "search_fields": "status, posting_date, supplier", 
+  "allow_attach": 1, 
+  "autoname": "naming_series:", 
   "module": "Stock", 
   "doctype": "DocType", 
   "read_only_onload": 1, 
-  "document_type": "Transaction", 
+  "search_fields": "status, posting_date, supplier", 
   "name": "__common__"
  }, 
  {
@@ -53,11 +53,11 @@
   "doctype": "DocField", 
   "label": "Series", 
   "oldfieldname": "naming_series", 
-  "permlevel": 0, 
+  "options": "\nGRN", 
   "fieldname": "naming_series", 
   "fieldtype": "Select", 
   "reqd": 1, 
-  "options": "\nGRN"
+  "permlevel": 0
  }, 
  {
   "print_hide": 1, 
@@ -140,8 +140,8 @@
   "fieldtype": "Date", 
   "search_index": 1, 
   "reqd": 1, 
-  "in_filter": 1, 
-  "permlevel": 0
+  "permlevel": 0, 
+  "in_filter": 1
  }, 
  {
   "print_hide": 1, 
@@ -157,8 +157,8 @@
   "fieldtype": "Time", 
   "search_index": 0, 
   "reqd": 1, 
-  "in_filter": 0, 
-  "permlevel": 0
+  "permlevel": 0, 
+  "in_filter": 0
  }, 
  {
   "print_hide": 0, 
@@ -205,11 +205,11 @@
   "doctype": "DocField", 
   "label": "Purchase Receipt Items", 
   "oldfieldname": "purchase_receipt_details", 
-  "options": "Purchase Receipt Item", 
+  "permlevel": 0, 
   "fieldname": "purchase_receipt_details", 
   "fieldtype": "Table", 
   "reqd": 0, 
-  "permlevel": 0
+  "options": "Purchase Receipt Item"
  }, 
  {
   "oldfieldtype": "Section Break", 
@@ -224,10 +224,10 @@
   "oldfieldtype": "Button", 
   "doctype": "DocField", 
   "label": "Get Current Stock", 
-  "options": "get_current_stock", 
+  "permlevel": 0, 
   "fieldname": "get_current_stock", 
   "fieldtype": "Button", 
-  "permlevel": 0
+  "options": "get_current_stock"
  }, 
  {
   "doctype": "DocField", 
@@ -257,20 +257,20 @@
   "doctype": "DocField", 
   "label": "Purchase Order", 
   "oldfieldname": "purchase_order_no", 
-  "options": "Purchase Order", 
+  "permlevel": 0, 
   "fieldname": "purchase_order_no", 
   "fieldtype": "Link", 
-  "permlevel": 0
+  "options": "Purchase Order"
  }, 
  {
   "print_hide": 1, 
   "oldfieldtype": "Button", 
   "doctype": "DocField", 
   "label": "Pull Purchase Order Details", 
-  "options": "get_po_details", 
+  "permlevel": 0, 
   "fieldname": "pull_purchase_order_details", 
   "fieldtype": "Button", 
-  "permlevel": 0
+  "options": "get_po_details"
  }, 
  {
   "doctype": "DocField", 
@@ -286,11 +286,11 @@
   "doctype": "DocField", 
   "label": "Currency", 
   "oldfieldname": "currency", 
-  "options": "link:Currency", 
+  "permlevel": 0, 
   "fieldname": "currency", 
   "fieldtype": "Select", 
   "reqd": 1, 
-  "permlevel": 0
+  "options": "link:Currency"
  }, 
  {
   "print_hide": 1, 
@@ -319,21 +319,21 @@
   "description": "Consider this Price List for fetching rate. (only which have \"For Buying\" as checked)", 
   "doctype": "DocField", 
   "label": "Price List", 
-  "options": "Price List", 
+  "permlevel": 0, 
   "fieldname": "price_list_name", 
   "fieldtype": "Link", 
-  "permlevel": 0
+  "options": "Price List"
  }, 
  {
   "print_hide": 1, 
   "depends_on": "price_list_name", 
   "doctype": "DocField", 
   "label": "Price List Currency", 
-  "options": "Currency", 
+  "permlevel": 0, 
   "fieldname": "price_list_currency", 
   "fieldtype": "Link", 
   "hidden": 0, 
-  "permlevel": 0
+  "options": "Currency"
  }, 
  {
   "print_hide": 1, 
@@ -360,30 +360,30 @@
   "doctype": "DocField", 
   "label": "Purchase Taxes and Charges", 
   "oldfieldname": "purchase_other_charges", 
-  "options": "Purchase Taxes and Charges Master", 
+  "permlevel": 0, 
   "fieldname": "purchase_other_charges", 
   "fieldtype": "Link", 
-  "permlevel": 0
+  "options": "Purchase Taxes and Charges Master"
  }, 
  {
   "print_hide": 1, 
   "oldfieldtype": "Button", 
   "doctype": "DocField", 
   "label": "Get Tax Detail", 
-  "options": "get_purchase_tax_details", 
+  "permlevel": 0, 
   "fieldname": "get_tax_detail", 
   "fieldtype": "Button", 
-  "permlevel": 0
+  "options": "get_purchase_tax_details"
  }, 
  {
   "oldfieldtype": "Table", 
   "doctype": "DocField", 
   "label": "Purchase Taxes and Charges", 
   "oldfieldname": "purchase_tax_details", 
-  "options": "Purchase Taxes and Charges", 
+  "permlevel": 0, 
   "fieldname": "purchase_tax_details", 
   "fieldtype": "Table", 
-  "permlevel": 0
+  "options": "Purchase Taxes and Charges"
  }, 
  {
   "print_hide": 1, 
@@ -559,29 +559,29 @@
   "doctype": "DocField", 
   "label": "Select Terms and Conditions", 
   "oldfieldname": "tc_name", 
-  "options": "Terms and Conditions", 
+  "permlevel": 0, 
   "fieldname": "tc_name", 
   "fieldtype": "Link", 
-  "permlevel": 0
+  "options": "Terms and Conditions"
  }, 
  {
   "oldfieldtype": "Button", 
   "doctype": "DocField", 
   "label": "Get Terms and Conditions", 
-  "options": "get_tc_details", 
+  "permlevel": 0, 
   "fieldname": "get_terms", 
   "fieldtype": "Button", 
-  "permlevel": 0
+  "options": "get_tc_details"
  }, 
  {
   "print_hide": 1, 
   "oldfieldtype": "HTML", 
   "doctype": "DocField", 
   "label": "Terms and Conditions HTML", 
-  "options": "You can add Terms and Notes that will be printed in the Transaction", 
+  "permlevel": 0, 
   "fieldname": "terms_html", 
   "fieldtype": "HTML", 
-  "permlevel": 0
+  "options": "You can add Terms and Notes that will be printed in the Transaction"
  }, 
  {
   "oldfieldtype": "Text Editor", 
@@ -603,10 +603,10 @@
   "print_hide": 1, 
   "doctype": "DocField", 
   "label": "Supplier Address", 
-  "options": "Address", 
+  "permlevel": 0, 
   "fieldname": "supplier_address", 
   "fieldtype": "Link", 
-  "permlevel": 0
+  "options": "Address"
  }, 
  {
   "doctype": "DocField", 
@@ -618,10 +618,10 @@
   "print_hide": 1, 
   "doctype": "DocField", 
   "label": "Contact Person", 
-  "options": "Contact", 
+  "permlevel": 0, 
   "fieldname": "contact_person", 
   "fieldtype": "Link", 
-  "permlevel": 0
+  "options": "Contact"
  }, 
  {
   "description": "Filing in Additional Information about the Purchase Receipt will help you analyze your data better.", 
@@ -670,10 +670,10 @@
   "doctype": "DocField", 
   "label": "Is Subcontracted", 
   "oldfieldname": "is_subcontracted", 
-  "options": "\nYes\nNo", 
+  "permlevel": 0, 
   "fieldname": "is_subcontracted", 
   "fieldtype": "Select", 
-  "permlevel": 0
+  "options": "\nYes\nNo"
  }, 
  {
   "print_hide": 1, 
@@ -731,10 +731,10 @@
   "doctype": "DocField", 
   "label": "Select Print Heading", 
   "oldfieldname": "select_print_heading", 
-  "permlevel": 0, 
+  "options": "Print Heading", 
   "fieldname": "select_print_heading", 
   "fieldtype": "Link", 
-  "options": "Print Heading", 
+  "permlevel": 0, 
   "report_hide": 1
  }, 
  {
@@ -753,8 +753,8 @@
   "search_index": 1, 
   "reqd": 1, 
   "hidden": 0, 
-  "in_filter": 1, 
-  "options": "Company"
+  "options": "Company", 
+  "in_filter": 1
  }, 
  {
   "print_hide": 1, 
@@ -785,16 +785,16 @@
  {
   "print_hide": 1, 
   "print_width": "30%", 
-  "permlevel": 0, 
   "oldfieldtype": "HTML", 
   "doctype": "DocField", 
   "label": "Other Details", 
   "width": "30%", 
+  "options": "<div class='columnHeading'>Other Details</div>", 
   "fieldname": "other_details", 
   "fieldtype": "HTML", 
   "reqd": 0, 
   "hidden": 1, 
-  "options": "<div class='columnHeading'>Other Details</div>"
+  "permlevel": 0
  }, 
  {
   "print_hide": 1, 
@@ -804,11 +804,11 @@
   "doctype": "DocField", 
   "label": "Rejected Warehouse", 
   "oldfieldname": "rejected_warehouse", 
-  "permlevel": 0, 
+  "options": "Warehouse", 
   "fieldname": "rejected_warehouse", 
   "fieldtype": "Link", 
   "reqd": 0, 
-  "options": "Warehouse"
+  "permlevel": 0
  }, 
  {
   "print_hide": 1, 
@@ -924,10 +924,10 @@
   "doctype": "DocField", 
   "label": "Purchase Receipt Item Supplieds", 
   "oldfieldname": "pr_raw_material_details", 
-  "options": "Purchase Receipt Item Supplied", 
+  "permlevel": 1, 
   "fieldname": "pr_raw_material_details", 
   "fieldtype": "Table", 
-  "permlevel": 1
+  "options": "Purchase Receipt Item Supplied"
  }, 
  {
   "print_hide": 1, 
@@ -945,26 +945,28 @@
   "doctype": "DocPerm", 
   "submit": 1, 
   "write": 1, 
+  "report": 1, 
   "role": "Purchase User", 
   "cancel": 1, 
   "permlevel": 0
  }, 
  {
-  "doctype": "DocPerm", 
   "role": "Purchase User", 
-  "permlevel": 1
+  "permlevel": 1, 
+  "doctype": "DocPerm"
  }, 
  {
   "doctype": "DocPerm", 
   "role": "Supplier", 
+  "report": 1, 
   "permlevel": 0, 
   "match": "supplier"
  }, 
  {
-  "doctype": "DocPerm", 
   "write": 1, 
   "role": "All", 
-  "permlevel": 2
+  "permlevel": 2, 
+  "doctype": "DocPerm"
  }, 
  {
   "amend": 0, 
@@ -982,6 +984,7 @@
   "doctype": "DocPerm", 
   "submit": 1, 
   "write": 1, 
+  "report": 1, 
   "role": "Material Manager", 
   "cancel": 1, 
   "permlevel": 0
@@ -1002,6 +1005,7 @@
   "doctype": "DocPerm", 
   "submit": 1, 
   "write": 1, 
+  "report": 1, 
   "role": "Material User", 
   "cancel": 1, 
   "permlevel": 0

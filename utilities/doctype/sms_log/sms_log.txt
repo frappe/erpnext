@@ -9,11 +9,11 @@
  {
   "section_style": "Simple", 
   "name": "__common__", 
+  "autoname": "SMSLOG/.########", 
   "colour": "White:FFF", 
   "module": "Utilities", 
   "doctype": "DocType", 
   "version": 3, 
-  "autoname": "SMSLOG/.########", 
   "show_in_menu": 0
  }, 
  {
@@ -27,6 +27,7 @@
  {
   "parent": "SMS Log", 
   "read": 1, 
+  "report": 1, 
   "name": "__common__", 
   "create": 0, 
   "doctype": "DocPerm", 

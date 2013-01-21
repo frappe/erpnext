@@ -8,16 +8,16 @@
  }, 
  {
   "section_style": "Simple", 
-  "description": "Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**. \n\nThe package **Item** will have \"Is Stock Item\" as \"No\" and \"Is Sales Item\" as \"Yes\".\n\nFor Example: If you are selling Laptops and Backpacks separately and have a special price if the customer buys both, then the Laptop + Backpack will be a new Sales BOM Item.\n\nNote: BOM = Bill of Materials", 
   "is_submittable": 0, 
+  "description": "Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**. \n\nThe package **Item** will have \"Is Stock Item\" as \"No\" and \"Is Sales Item\" as \"Yes\".\n\nFor Example: If you are selling Laptops and Backpacks separately and have a special price if the customer buys both, then the Laptop + Backpack will be a new Sales BOM Item.\n\nNote: BOM = Bill of Materials", 
   "module": "Stock", 
-  "doctype": "DocType", 
-  "allow_trash": 1, 
   "server_code_error": " ", 
+  "allow_trash": 1, 
   "document_type": "Master", 
+  "_last_update": "1322549701", 
   "name": "__common__", 
   "colour": "White:FFF", 
-  "_last_update": "1322549701", 
+  "doctype": "DocType", 
   "show_in_menu": 0, 
   "version": 1
  }, 
@@ -33,8 +33,8 @@
   "name": "__common__", 
   "parent": "Sales BOM", 
   "read": 1, 
-  "doctype": "DocPerm", 
   "submit": 0, 
+  "doctype": "DocPerm", 
   "amend": 0, 
   "parenttype": "DocType", 
   "parentfield": "permissions"
@@ -55,6 +55,7 @@
   "create": 1, 
   "doctype": "DocPerm", 
   "write": 1, 
+  "report": 1, 
   "role": "Material Manager", 
   "cancel": 1, 
   "permlevel": 0
@@ -71,6 +72,7 @@
   "create": 0, 
   "doctype": "DocPerm", 
   "write": 0, 
+  "report": 1, 
   "role": "Material User", 
   "cancel": 0, 
   "permlevel": 0
@@ -79,6 +81,7 @@
   "create": 1, 
   "doctype": "DocPerm", 
   "write": 1, 
+  "report": 1, 
   "role": "Sales User", 
   "cancel": 1, 
   "permlevel": 0

@@ -7,13 +7,13 @@
   "modified": "2012-12-03 11:24:31"
  }, 
  {
-  "autoname": "field:warehouse_name", 
+  "document_type": "Master", 
   "description": "A logical Warehouse against which stock entries are made.", 
+  "autoname": "field:warehouse_name", 
   "allow_rename": 1, 
-  "search_fields": "warehouse_type", 
   "module": "Stock", 
   "doctype": "DocType", 
-  "document_type": "Master", 
+  "search_fields": "warehouse_type", 
   "name": "__common__"
  }, 
  {
@@ -59,11 +59,11 @@
   "doctype": "DocField", 
   "label": "Warehouse Type", 
   "oldfieldname": "warehouse_type", 
-  "options": "Warehouse Type", 
+  "permlevel": 0, 
   "fieldname": "warehouse_type", 
   "fieldtype": "Link", 
   "reqd": 1, 
-  "permlevel": 0
+  "options": "Warehouse Type"
  }, 
  {
   "oldfieldtype": "Link", 
@@ -71,11 +71,11 @@
   "doctype": "DocField", 
   "label": "Company", 
   "oldfieldname": "company", 
-  "options": "Company", 
+  "permlevel": 0, 
   "fieldname": "company", 
   "fieldtype": "Link", 
   "search_index": 1, 
-  "permlevel": 0, 
+  "options": "Company", 
   "in_filter": 1
  }, 
  {
@@ -103,20 +103,20 @@
   "doctype": "DocField", 
   "label": "Phone No", 
   "oldfieldname": "phone_no", 
-  "options": "Phone", 
+  "permlevel": 0, 
   "fieldname": "phone_no", 
   "fieldtype": "Data", 
-  "permlevel": 0
+  "options": "Phone"
  }, 
  {
   "oldfieldtype": "Int", 
   "doctype": "DocField", 
   "label": "Mobile No", 
   "oldfieldname": "mobile_no", 
-  "options": "Phone", 
+  "permlevel": 0, 
   "fieldname": "mobile_no", 
   "fieldtype": "Data", 
-  "permlevel": 0
+  "options": "Phone"
  }, 
  {
   "oldfieldtype": "Column Break", 
@@ -159,10 +159,10 @@
   "doctype": "DocField", 
   "label": "State", 
   "oldfieldname": "state", 
-  "options": "Suggest", 
+  "permlevel": 0, 
   "fieldname": "state", 
   "fieldtype": "Data", 
-  "permlevel": 0
+  "options": "Suggest"
  }, 
  {
   "oldfieldtype": "Int", 
@@ -184,10 +184,10 @@
  }, 
  {
   "doctype": "DocField", 
-  "label": "Merge With", 
   "options": "Warehouse", 
   "fieldname": "merge_with", 
   "fieldtype": "Link", 
+  "label": "Merge With", 
   "permlevel": 2
  }, 
  {
@@ -203,8 +203,8 @@
   "doctype": "DocPerm", 
   "submit": 0, 
   "write": 0, 
-  "cancel": 0, 
   "role": "Material User", 
+  "cancel": 0, 
   "permlevel": 2
  }, 
  {
@@ -213,8 +213,9 @@
   "doctype": "DocPerm", 
   "submit": 0, 
   "write": 0, 
-  "cancel": 0, 
+  "report": 1, 
   "role": "Material User", 
+  "cancel": 0, 
   "permlevel": 0
  }, 
  {
@@ -223,8 +224,8 @@
   "doctype": "DocPerm", 
   "submit": 0, 
   "write": 0, 
-  "cancel": 0, 
   "role": "Material User", 
+  "cancel": 0, 
   "permlevel": 1
  }, 
  {
@@ -233,8 +234,8 @@
   "doctype": "DocPerm", 
   "submit": 0, 
   "write": 0, 
-  "cancel": 0, 
   "role": "Material Manager", 
+  "cancel": 0, 
   "permlevel": 2
  }, 
  {
@@ -243,8 +244,9 @@
   "doctype": "DocPerm", 
   "submit": 0, 
   "write": 0, 
-  "cancel": 0, 
+  "report": 1, 
   "role": "Material Manager", 
+  "cancel": 0, 
   "permlevel": 0
  }, 
  {
@@ -253,14 +255,14 @@
   "doctype": "DocPerm", 
   "submit": 0, 
   "write": 0, 
-  "cancel": 0, 
   "role": "Material Manager", 
+  "cancel": 0, 
   "permlevel": 1
  }, 
  {
-  "doctype": "DocPerm", 
   "role": "All", 
-  "permlevel": 1
+  "permlevel": 1, 
+  "doctype": "DocPerm"
  }, 
  {
   "amend": 0, 
@@ -268,21 +270,23 @@
   "doctype": "DocPerm", 
   "submit": 0, 
   "write": 1, 
-  "cancel": 1, 
+  "report": 1, 
   "role": "Material Master Manager", 
+  "cancel": 1, 
   "permlevel": 0
  }, 
  {
-  "doctype": "DocPerm", 
   "role": "Material Master Manager", 
-  "permlevel": 1
+  "permlevel": 1, 
+  "doctype": "DocPerm"
  }, 
  {
   "create": 1, 
   "doctype": "DocPerm", 
   "write": 1, 
-  "role": "System Manager", 
   "cancel": 1, 
+  "role": "System Manager", 
+  "report": 1, 
   "permlevel": 0
  }, 
  {

@@ -11,12 +11,12 @@
   "description": "**Budget Distribution** helps you distribute your budget across months if you have seasonality in your business.\n\nTo distribute a budget using this distribution, set this **Budget Distribution** in the **Cost Center**", 
   "module": "Accounts", 
   "allow_trash": 1, 
-  "server_code_error": " ", 
   "autoname": "field:distribution_id", 
+  "show_in_menu": 0, 
   "name": "__common__", 
   "colour": "White:FFF", 
   "doctype": "DocType", 
-  "show_in_menu": 0, 
+  "server_code_error": " ", 
   "name_case": "Title Case", 
   "version": 1
  }, 
@@ -43,8 +43,9 @@
   "create": 1, 
   "doctype": "DocPerm", 
   "write": 1, 
-  "role": "System Manager", 
   "cancel": 1, 
+  "role": "System Manager", 
+  "report": 1, 
   "permlevel": 0
  }, 
  {
@@ -64,6 +65,7 @@
   "doctype": "DocPerm", 
   "submit": 0, 
   "write": 1, 
+  "report": 1, 
   "role": "Accounts Manager", 
   "cancel": 1, 
   "permlevel": 0
@@ -100,11 +102,11 @@
   "doctype": "DocField", 
   "label": "Fiscal Year", 
   "oldfieldname": "fiscal_year", 
-  "permlevel": 0, 
+  "options": "link:Fiscal Year", 
   "fieldname": "fiscal_year", 
   "fieldtype": "Select", 
   "oldfieldtype": "Select", 
-  "options": "link:Fiscal Year", 
+  "permlevel": 0, 
   "in_filter": 1
  }, 
  {
@@ -112,10 +114,10 @@
   "doctype": "DocField", 
   "label": "Budget Distribution Details", 
   "oldfieldname": "budget_distribution_details", 
-  "permlevel": 0, 
+  "options": "Budget Distribution Detail", 
   "fieldname": "budget_distribution_details", 
   "fieldtype": "Table", 
-  "options": "Budget Distribution Detail"
+  "permlevel": 0
  }, 
  {
   "oldfieldtype": "Small Text", 

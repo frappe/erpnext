@@ -11,12 +11,12 @@
   "in_create": 1, 
   "search_fields": "voucher_no,account,posting_date,against_voucher", 
   "module": "Accounts", 
-  "doctype": "DocType", 
   "server_code_error": " ", 
   "autoname": "GL.#######", 
+  "_last_update": "1319016431", 
   "name": "__common__", 
   "colour": "White:FFF", 
-  "_last_update": "1319016431", 
+  "doctype": "DocType", 
   "show_in_menu": 0, 
   "version": 103
  }, 
@@ -35,6 +35,7 @@
   "create": 0, 
   "doctype": "DocPerm", 
   "write": 0, 
+  "report": 1, 
   "parenttype": "DocType", 
   "parentfield": "permissions"
  }, 

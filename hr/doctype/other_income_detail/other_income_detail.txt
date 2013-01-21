@@ -12,10 +12,10 @@
   "name": "__common__", 
   "colour": "White:FFF", 
   "module": "HR", 
-  "show_in_menu": 0, 
-  "version": 6, 
   "server_code_error": " ", 
-  "doctype": "DocType"
+  "version": 6, 
+  "doctype": "DocType", 
+  "show_in_menu": 0
  }, 
  {
   "name": "__common__", 
@@ -39,6 +39,7 @@
  }, 
  {
   "write": 1, 
+  "report": 1, 
   "permlevel": 0, 
   "doctype": "DocPerm"
  }, 

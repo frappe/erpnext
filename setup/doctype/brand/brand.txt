@@ -7,10 +7,10 @@
   "modified": "2012-12-25 13:20:51"
  }, 
  {
-  "autoname": "field:brand", 
   "name": "__common__", 
-  "doctype": "DocType", 
+  "autoname": "field:brand", 
   "module": "Setup", 
+  "doctype": "DocType", 
   "in_dialog": 1, 
   "document_type": "Master"
  }, 
@@ -29,6 +29,7 @@
   "read": 1, 
   "doctype": "DocPerm", 
   "parenttype": "DocType", 
+  "report": 1, 
   "permlevel": 0, 
   "parentfield": "permissions"
  }, 

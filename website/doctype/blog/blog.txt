@@ -8,8 +8,8 @@
  }, 
  {
   "allow_attach": 1, 
-  "doctype": "DocType", 
   "module": "Website", 
+  "doctype": "DocType", 
   "max_attachments": 5, 
   "name": "__common__"
  }, 
@@ -25,6 +25,7 @@
   "parent": "Blog", 
   "read": 1, 
   "doctype": "DocPerm", 
+  "report": 1, 
   "parenttype": "DocType", 
   "permlevel": 0, 
   "parentfield": "permissions"
@@ -83,16 +84,16 @@
   "permlevel": 0
  }, 
  {
-  "create": 1, 
-  "doctype": "DocPerm", 
   "write": 1, 
-  "role": "Website Manager"
+  "create": 1, 
+  "role": "Website Manager", 
+  "doctype": "DocPerm"
  }, 
  {
-  "create": 1, 
-  "doctype": "DocPerm", 
   "write": 1, 
-  "role": "Blogger"
+  "create": 1, 
+  "role": "Blogger", 
+  "doctype": "DocPerm"
  }, 
  {
   "write": 0, 

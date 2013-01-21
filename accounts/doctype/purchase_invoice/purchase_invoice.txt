@@ -7,13 +7,13 @@
   "modified": "2013-01-18 13:25:16"
  }, 
  {
-  "autoname": "naming_series:", 
-  "allow_attach": 1, 
   "is_submittable": 1, 
-  "search_fields": "posting_date, credit_to, fiscal_year, bill_no, grand_total, outstanding_amount", 
+  "allow_attach": 1, 
+  "autoname": "naming_series:", 
   "module": "Accounts", 
   "doctype": "DocType", 
   "read_only_onload": 1, 
+  "search_fields": "posting_date, credit_to, fiscal_year, bill_no, grand_total, outstanding_amount", 
   "name": "__common__"
  }, 
  {
@@ -70,8 +70,8 @@
   "fieldtype": "Link", 
   "search_index": 1, 
   "reqd": 1, 
-  "in_filter": 1, 
-  "options": "Account"
+  "options": "Account", 
+  "in_filter": 1
  }, 
  {
   "oldfieldtype": "Data", 
@@ -128,18 +128,18 @@
  {
   "print_hide": 1, 
   "description": "The date at which current entry will get or has actually executed.", 
-  "default": "Today", 
+  "no_copy": 0, 
   "oldfieldtype": "Date", 
   "doctype": "DocField", 
   "label": "Posting Date", 
   "oldfieldname": "posting_date", 
-  "no_copy": 0, 
+  "default": "Today", 
   "fieldname": "posting_date", 
   "fieldtype": "Date", 
   "search_index": 1, 
   "reqd": 1, 
-  "in_filter": 1, 
-  "permlevel": 0
+  "permlevel": 0, 
+  "in_filter": 1
  }, 
  {
   "print_hide": 1, 
@@ -152,8 +152,8 @@
   "fieldtype": "Data", 
   "search_index": 1, 
   "reqd": 1, 
-  "in_filter": 1, 
-  "permlevel": 0
+  "permlevel": 0, 
+  "in_filter": 1
  }, 
  {
   "print_hide": 1, 
@@ -182,10 +182,10 @@
   "doctype": "DocField", 
   "label": "Entries", 
   "oldfieldname": "entries", 
-  "options": "Purchase Invoice Item", 
+  "permlevel": 0, 
   "fieldname": "entries", 
   "fieldtype": "Table", 
-  "permlevel": 0
+  "options": "Purchase Invoice Item"
  }, 
  {
   "doctype": "DocField", 
@@ -203,10 +203,10 @@
  }, 
  {
   "doctype": "DocField", 
-  "options": "Simple", 
+  "permlevel": 0, 
   "fieldname": "section_break_17", 
   "fieldtype": "Section Break", 
-  "permlevel": 0
+  "options": "Simple"
  }, 
  {
   "print_hide": 1, 
@@ -215,10 +215,10 @@
   "doctype": "DocField", 
   "label": "Purchase Order", 
   "oldfieldname": "purchase_order_main", 
-  "options": "Purchase Order", 
+  "permlevel": 0, 
   "fieldname": "purchase_order_main", 
   "fieldtype": "Link", 
-  "permlevel": 0
+  "options": "Purchase Order"
  }, 
  {
   "print_hide": 1, 
@@ -227,19 +227,19 @@
   "doctype": "DocField", 
   "label": "Purchase Receipt", 
   "oldfieldname": "purchase_receipt_main", 
-  "options": "Purchase Receipt", 
+  "permlevel": 0, 
   "fieldname": "purchase_receipt_main", 
   "fieldtype": "Link", 
-  "permlevel": 0
+  "options": "Purchase Receipt"
  }, 
  {
   "oldfieldtype": "Button", 
   "doctype": "DocField", 
   "label": "Get Items", 
-  "options": "pull_details", 
+  "permlevel": 0, 
   "fieldname": "get_items", 
   "fieldtype": "Button", 
-  "permlevel": 0
+  "options": "pull_details"
  }, 
  {
   "doctype": "DocField", 
@@ -254,10 +254,10 @@
   "doctype": "DocField", 
   "label": "Currency", 
   "oldfieldname": "currency", 
-  "options": "link:Currency", 
+  "permlevel": 0, 
   "fieldname": "currency", 
   "fieldtype": "Select", 
-  "permlevel": 0
+  "options": "link:Currency"
  }, 
  {
   "print_hide": 1, 
@@ -282,20 +282,20 @@
   "description": "Consider this Price List for fetching rate. (only which have \"For Buying\" as checked)", 
   "doctype": "DocField", 
   "label": "Price List", 
-  "options": "Price List", 
+  "permlevel": 0, 
   "fieldname": "price_list_name", 
   "fieldtype": "Link", 
-  "permlevel": 0
+  "options": "Price List"
  }, 
  {
   "print_hide": 1, 
   "depends_on": "price_list_name", 
   "doctype": "DocField", 
   "label": "Price List Currency", 
-  "options": "Currency", 
+  "permlevel": 0, 
   "fieldname": "price_list_currency", 
   "fieldtype": "Link", 
-  "permlevel": 0
+  "options": "Currency"
  }, 
  {
   "print_hide": 1, 
@@ -321,30 +321,30 @@
   "doctype": "DocField", 
   "label": "Purchase Taxes and Charges", 
   "oldfieldname": "purchase_other_charges", 
-  "options": "Purchase Taxes and Charges Master", 
+  "permlevel": 0, 
   "fieldname": "purchase_other_charges", 
   "fieldtype": "Link", 
-  "permlevel": 0
+  "options": "Purchase Taxes and Charges Master"
  }, 
  {
   "print_hide": 1, 
   "oldfieldtype": "Button", 
   "doctype": "DocField", 
   "label": "Get Tax Detail", 
-  "options": "get_purchase_tax_details", 
+  "permlevel": 0, 
   "fieldname": "get_tax_detail", 
   "fieldtype": "Button", 
-  "permlevel": 0
+  "options": "get_purchase_tax_details"
  }, 
  {
   "oldfieldtype": "Table", 
   "doctype": "DocField", 
   "label": "Purchase Taxes and Charges", 
   "oldfieldname": "purchase_tax_details", 
-  "options": "Purchase Taxes and Charges", 
+  "permlevel": 0, 
   "fieldname": "purchase_tax_details", 
   "fieldtype": "Table", 
-  "permlevel": 0
+  "options": "Purchase Taxes and Charges"
  }, 
  {
   "print_hide": 1, 
@@ -387,20 +387,20 @@
   "doctype": "DocField", 
   "label": "Supplier", 
   "oldfieldname": "supplier", 
-  "options": "Supplier", 
+  "permlevel": 0, 
   "fieldname": "supplier", 
   "fieldtype": "Link", 
   "hidden": 0, 
-  "permlevel": 0
+  "options": "Supplier"
  }, 
  {
   "depends_on": "eval:doc.supplier", 
   "doctype": "DocField", 
   "label": "Supplier Address", 
-  "options": "Address", 
+  "permlevel": 0, 
   "fieldname": "supplier_address", 
   "fieldtype": "Link", 
-  "permlevel": 0
+  "options": "Address"
  }, 
  {
   "doctype": "DocField", 
@@ -414,10 +414,10 @@
   "depends_on": "eval:doc.supplier", 
   "doctype": "DocField", 
   "label": "Contact Person", 
-  "options": "Contact", 
+  "permlevel": 0, 
   "fieldname": "contact_person", 
   "fieldtype": "Link", 
-  "permlevel": 0
+  "options": "Contact"
  }, 
  {
   "oldfieldtype": "Section Break", 
@@ -589,10 +589,10 @@
   "depends_on": "eval:flt(doc.write_off_amount)!=0", 
   "doctype": "DocField", 
   "label": "Write Off Account", 
-  "options": "Account", 
+  "permlevel": 0, 
   "fieldname": "write_off_account", 
   "fieldtype": "Link", 
-  "permlevel": 0
+  "options": "Account"
  }, 
  {
   "print_hide": 1, 
@@ -600,10 +600,10 @@
   "depends_on": "eval:flt(doc.write_off_amount)!=0", 
   "doctype": "DocField", 
   "label": "Write Off Cost Center", 
-  "options": "Account", 
+  "permlevel": 0, 
   "fieldname": "write_off_cost_center", 
   "fieldtype": "Link", 
-  "permlevel": 0
+  "options": "Account"
  }, 
  {
   "print_hide": 1, 
@@ -632,10 +632,10 @@
   "oldfieldtype": "Button", 
   "doctype": "DocField", 
   "label": "Get Advances Paid", 
-  "options": "get_advances", 
+  "permlevel": 0, 
   "fieldname": "get_advances_paid", 
   "fieldtype": "Button", 
-  "permlevel": 0
+  "options": "get_advances"
  }, 
  {
   "print_hide": 1, 
@@ -644,10 +644,10 @@
   "doctype": "DocField", 
   "label": "Purchase Invoice Advances", 
   "oldfieldname": "advance_allocation_details", 
-  "options": "Purchase Invoice Advance", 
+  "permlevel": 0, 
   "fieldname": "advance_allocation_details", 
   "fieldtype": "Table", 
-  "permlevel": 0
+  "options": "Purchase Invoice Advance"
  }, 
  {
   "print_hide": 1, 
@@ -665,11 +665,11 @@
   "doctype": "DocField", 
   "label": "Is Opening", 
   "oldfieldname": "is_opening", 
-  "permlevel": 0, 
+  "options": "No\nYes", 
   "fieldname": "is_opening", 
   "fieldtype": "Select", 
   "search_index": 1, 
-  "options": "No\nYes", 
+  "permlevel": 0, 
   "in_filter": 1
  }, 
  {
@@ -690,10 +690,10 @@
   "doctype": "DocField", 
   "label": "Amended From", 
   "oldfieldname": "amended_from", 
-  "options": "Purchase Invoice", 
+  "permlevel": 1, 
   "fieldname": "amended_from", 
   "fieldtype": "Link", 
-  "permlevel": 1
+  "options": "Purchase Invoice"
  }, 
  {
   "print_hide": 1, 
@@ -703,10 +703,10 @@
   "doctype": "DocField", 
   "label": "Select Print Heading", 
   "oldfieldname": "select_print_heading", 
-  "permlevel": 0, 
+  "options": "Print Heading", 
   "fieldname": "select_print_heading", 
   "fieldtype": "Link", 
-  "options": "Print Heading", 
+  "permlevel": 0, 
   "report_hide": 1
  }, 
  {
@@ -727,10 +727,10 @@
   "doctype": "DocField", 
   "label": "Mode of Payment", 
   "oldfieldname": "mode_of_payment", 
-  "options": "link:Mode of Payment", 
+  "permlevel": 0, 
   "fieldname": "mode_of_payment", 
   "fieldtype": "Select", 
-  "permlevel": 0
+  "options": "link:Mode of Payment"
  }, 
  {
   "doctype": "DocField", 
@@ -744,11 +744,11 @@
   "doctype": "DocField", 
   "label": "Company", 
   "oldfieldname": "company", 
-  "options": "Company", 
+  "permlevel": 0, 
   "fieldname": "company", 
   "fieldtype": "Link", 
   "search_index": 1, 
-  "permlevel": 0, 
+  "options": "Company", 
   "in_filter": 1
  }, 
  {
@@ -757,11 +757,11 @@
   "doctype": "DocField", 
   "label": "Fiscal Year", 
   "oldfieldname": "fiscal_year", 
-  "options": "link:Fiscal Year", 
+  "permlevel": 0, 
   "fieldname": "fiscal_year", 
   "fieldtype": "Select", 
   "search_index": 1, 
-  "permlevel": 0, 
+  "options": "link:Fiscal Year", 
   "in_filter": 1
  }, 
  {
@@ -804,6 +804,7 @@
   "doctype": "DocPerm", 
   "submit": 1, 
   "write": 1, 
+  "report": 1, 
   "role": "Accounts User", 
   "cancel": 1, 
   "permlevel": 0
@@ -824,6 +825,7 @@
   "doctype": "DocPerm", 
   "submit": 0, 
   "write": 1, 
+  "report": 1, 
   "role": "Purchase User", 
   "cancel": 0, 
   "permlevel": 0
@@ -834,8 +836,9 @@
   "doctype": "DocPerm", 
   "submit": 0, 
   "write": 0, 
-  "role": "Supplier", 
   "cancel": 0, 
+  "role": "Supplier", 
+  "report": 1, 
   "permlevel": 0, 
   "match": "supplier"
  }, 
@@ -855,6 +858,7 @@
   "doctype": "DocPerm", 
   "submit": 1, 
   "write": 1, 
+  "report": 1, 
   "role": "Accounts Manager", 
   "cancel": 1, 
   "permlevel": 0
@@ -885,6 +889,7 @@
   "doctype": "DocPerm", 
   "submit": 0, 
   "write": 0, 
+  "report": 1, 
   "role": "Auditor", 
   "cancel": 0, 
   "permlevel": 0

@@ -10,13 +10,13 @@
   "section_style": "Simple", 
   "is_submittable": 1, 
   "module": "Selling", 
-  "doctype": "DocType", 
   "server_code_error": " ", 
-  "subject": "At %(customer_name)s on %(inst_date)s", 
   "autoname": "IN/.####", 
+  "subject": "At %(customer_name)s on %(inst_date)s", 
+  "_last_update": "1306480044", 
   "name": "__common__", 
   "colour": "White:FFF", 
-  "_last_update": "1306480044", 
+  "doctype": "DocType", 
   "show_in_menu": 0, 
   "version": 98
  }, 
@@ -45,6 +45,7 @@
   "doctype": "DocPerm", 
   "submit": 1, 
   "write": 1, 
+  "report": 1, 
   "role": "System Manager", 
   "cancel": 1, 
   "permlevel": 0
@@ -60,6 +61,7 @@
   "doctype": "DocPerm", 
   "submit": 1, 
   "write": 1, 
+  "report": 1, 
   "role": "Sales User", 
   "cancel": 1, 
   "permlevel": 0
@@ -70,6 +72,7 @@
   "doctype": "DocPerm", 
   "submit": 1, 
   "write": 1, 
+  "report": 1, 
   "role": "Sales Manager", 
   "cancel": 1, 
   "permlevel": 0
@@ -106,11 +109,11 @@
   "doctype": "DocField", 
   "label": "Series", 
   "oldfieldname": "naming_series", 
-  "permlevel": 0, 
+  "options": "\nIN", 
   "fieldname": "naming_series", 
   "fieldtype": "Select", 
   "reqd": 1, 
-  "options": "\nIN"
+  "permlevel": 0
  }, 
  {
   "print_hide": 1, 
@@ -118,31 +121,31 @@
   "doctype": "DocField", 
   "label": "Customer", 
   "oldfieldname": "customer", 
+  "permlevel": 0, 
   "trigger": "Client", 
   "fieldname": "customer", 
   "fieldtype": "Link", 
   "oldfieldtype": "Link", 
   "reqd": 1, 
-  "options": "Customer", 
-  "permlevel": 0
+  "options": "Customer"
  }, 
  {
   "print_hide": 1, 
   "doctype": "DocField", 
   "label": "Customer Address", 
-  "options": "Address", 
+  "permlevel": 0, 
   "fieldname": "customer_address", 
   "fieldtype": "Link", 
-  "permlevel": 0
+  "options": "Address"
  }, 
  {
   "print_hide": 1, 
   "doctype": "DocField", 
   "label": "Contact Person", 
-  "options": "Contact", 
+  "permlevel": 0, 
   "fieldname": "contact_person", 
   "fieldtype": "Link", 
-  "permlevel": 0
+  "options": "Contact"
  }, 
  {
   "search_index": 0, 
@@ -190,21 +193,21 @@
   "search_index": 1, 
   "doctype": "DocField", 
   "label": "Territory", 
-  "permlevel": 0, 
+  "options": "Territory", 
   "fieldname": "territory", 
   "fieldtype": "Link", 
   "reqd": 1, 
-  "options": "Territory", 
+  "permlevel": 0, 
   "in_filter": 1
  }, 
  {
   "print_hide": 1, 
   "doctype": "DocField", 
   "label": "Customer Group", 
-  "options": "Customer Group", 
+  "permlevel": 0, 
   "fieldname": "customer_group", 
   "fieldtype": "Link", 
-  "permlevel": 0
+  "options": "Customer Group"
  }, 
  {
   "oldfieldtype": "Column Break", 
@@ -236,17 +239,17 @@
  }, 
  {
   "print_hide": 1, 
+  "permlevel": 1, 
   "default": "Draft", 
   "oldfieldtype": "Select", 
   "doctype": "DocField", 
   "label": "Status", 
   "oldfieldname": "status", 
   "no_copy": 1, 
-  "options": "Draft\nSubmitted\nCancelled", 
   "fieldname": "status", 
   "fieldtype": "Select", 
   "reqd": 1, 
-  "permlevel": 1
+  "options": "Draft\nSubmitted\nCancelled"
  }, 
  {
   "print_hide": 1, 
@@ -271,11 +274,11 @@
   "doctype": "DocField", 
   "label": "Fiscal Year", 
   "oldfieldname": "fiscal_year", 
-  "options": "link:Fiscal Year", 
+  "permlevel": 0, 
   "fieldname": "fiscal_year", 
   "fieldtype": "Select", 
   "reqd": 1, 
-  "permlevel": 0, 
+  "options": "link:Fiscal Year", 
   "in_filter": 1
  }, 
  {
@@ -330,10 +333,10 @@
   "oldfieldtype": "Section Break", 
   "doctype": "DocField", 
   "label": "Item Details", 
-  "permlevel": 0, 
+  "options": "Simple", 
   "fieldname": "item_details", 
   "fieldtype": "Section Break", 
-  "options": "Simple"
+  "permlevel": 0
  }, 
  {
   "print_hide": 0, 
@@ -356,20 +359,20 @@
   "oldfieldtype": "Button", 
   "doctype": "DocField", 
   "label": "Get Items", 
-  "permlevel": 0, 
+  "options": "pull_delivery_note_details", 
   "fieldname": "get_items", 
   "fieldtype": "Button", 
   "hidden": 0, 
-  "options": "pull_delivery_note_details"
+  "permlevel": 0
  }, 
  {
   "oldfieldtype": "Table", 
   "doctype": "DocField", 
   "label": "Installation Note Item", 
   "oldfieldname": "installed_item_details", 
-  "permlevel": 0, 
+  "options": "Installation Note Item", 
   "fieldname": "installed_item_details", 
   "fieldtype": "Table", 
-  "options": "Installation Note Item"
+  "permlevel": 0
  }
 ]

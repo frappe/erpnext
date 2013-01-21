@@ -8,11 +8,11 @@
  }, 
  {
   "read_only": 0, 
-  "autoname": "field:partner_name", 
   "in_create": 0, 
+  "autoname": "field:partner_name", 
   "name": "__common__", 
-  "doctype": "DocType", 
   "module": "Setup", 
+  "doctype": "DocType", 
   "document_type": "Master", 
   "description": "A third party distributor / dealer / commission agent / affiliate / reseller who sells the companies products for a commission."
  }, 
@@ -61,11 +61,11 @@
   "doctype": "DocField", 
   "label": "Partner Type", 
   "oldfieldname": "partner_type", 
-  "options": "\nChannel Partner\nDistributor\nDealer\nAgent\nRetailer\nImplementation Partner\nReseller", 
+  "permlevel": 0, 
   "fieldname": "partner_type", 
   "fieldtype": "Select", 
   "search_index": 0, 
-  "permlevel": 0, 
+  "options": "\nChannel Partner\nDistributor\nDealer\nAgent\nRetailer\nImplementation Partner\nReseller", 
   "in_filter": 1
  }, 
  {
@@ -89,11 +89,11 @@
  {
   "doctype": "DocField", 
   "label": "Territory", 
-  "options": "Territory", 
+  "permlevel": 0, 
   "fieldname": "territory", 
   "fieldtype": "Link", 
   "reqd": 1, 
-  "permlevel": 0
+  "options": "Territory"
  }, 
  {
   "doctype": "DocField", 
@@ -106,10 +106,10 @@
   "depends_on": "eval:doc.__islocal", 
   "doctype": "DocField", 
   "label": "Address Desc", 
-  "options": "<em>Addresses will appear only when you save the customer</em>", 
+  "permlevel": 0, 
   "fieldname": "address_desc", 
   "fieldtype": "HTML", 
-  "permlevel": 0
+  "options": "<em>Addresses will appear only when you save the customer</em>"
  }, 
  {
   "doctype": "DocField", 
@@ -128,10 +128,10 @@
   "depends_on": "eval:doc.__islocal", 
   "doctype": "DocField", 
   "label": "Contact Desc", 
-  "options": "<em>Contact Details will appear only when you save the customer</em>", 
+  "permlevel": 0, 
   "fieldname": "contact_desc", 
   "fieldtype": "HTML", 
-  "permlevel": 0
+  "options": "<em>Contact Details will appear only when you save the customer</em>"
  }, 
  {
   "doctype": "DocField", 
@@ -153,11 +153,11 @@
   "doctype": "DocField", 
   "label": "Partner Target Detail", 
   "oldfieldname": "partner_target_details", 
-  "options": "Target Detail", 
+  "permlevel": 0, 
   "fieldname": "partner_target_details", 
   "fieldtype": "Table", 
   "reqd": 0, 
-  "permlevel": 0
+  "options": "Target Detail"
  }, 
  {
   "description": "Select Budget Distribution to unevenly distribute targets across months.", 
@@ -165,10 +165,10 @@
   "doctype": "DocField", 
   "label": "Target Distribution", 
   "oldfieldname": "distribution_id", 
-  "options": "Budget Distribution", 
+  "permlevel": 0, 
   "fieldname": "distribution_id", 
   "fieldtype": "Link", 
-  "permlevel": 0
+  "options": "Budget Distribution"
  }, 
  {
   "amend": 0, 
@@ -186,6 +186,7 @@
   "doctype": "DocPerm", 
   "submit": 0, 
   "write": 0, 
+  "report": 1, 
   "role": "Sales Manager", 
   "cancel": 0, 
   "permlevel": 0
@@ -206,6 +207,7 @@
   "doctype": "DocPerm", 
   "submit": 0, 
   "write": 0, 
+  "report": 1, 
   "role": "Sales User", 
   "cancel": 0, 
   "permlevel": 0
@@ -216,6 +218,7 @@
   "doctype": "DocPerm", 
   "submit": 0, 
   "write": 1, 
+  "report": 1, 
   "role": "Sales Master Manager", 
   "cancel": 1, 
   "permlevel": 0
@@ -234,8 +237,9 @@
   "create": 1, 
   "doctype": "DocPerm", 
   "write": 1, 
+  "cancel": 1, 
   "role": "System Manager", 
-  "cancel": 1, 
+  "report": 1, 
   "permlevel": 0
  }, 
  {

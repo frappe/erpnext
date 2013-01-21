@@ -9,11 +9,11 @@
  {
   "section_style": "Simple", 
   "name": "__common__", 
+  "autoname": "_FEED.#####", 
   "colour": "White:FFF", 
   "module": "Home", 
   "doctype": "DocType", 
   "version": 1, 
-  "autoname": "_FEED.#####", 
   "show_in_menu": 0
  }, 
  {
@@ -29,6 +29,7 @@
   "read": 1, 
   "name": "__common__", 
   "doctype": "DocPerm", 
+  "report": 1, 
   "parenttype": "DocType", 
   "role": "System Manager", 
   "permlevel": 0, 

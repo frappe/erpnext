@@ -8,16 +8,16 @@
  }, 
  {
   "section_style": "Simple", 
+  "doctype": "DocType", 
   "allow_attach": 0, 
   "allow_print": 1, 
   "module": "Setup", 
-  "doctype": "DocType", 
-  "allow_trash": 1, 
   "server_code_error": " ", 
+  "allow_trash": 1, 
+  "autoname": "field:price_list_name", 
   "document_type": "Master", 
   "description": "Price List Master", 
   "allow_email": 1, 
-  "autoname": "field:price_list_name", 
   "name": "__common__", 
   "colour": "White:FFF", 
   "_last_update": "1303100817", 
@@ -38,8 +38,8 @@
   "name": "__common__", 
   "parent": "Price List", 
   "amend": 0, 
-  "doctype": "DocPerm", 
   "submit": 0, 
+  "doctype": "DocPerm", 
   "read": 1, 
   "parenttype": "DocType", 
   "parentfield": "permissions"
@@ -84,6 +84,7 @@
   "create": 0, 
   "doctype": "DocPerm", 
   "write": 0, 
+  "report": 1, 
   "role": "Sales Manager", 
   "cancel": 0, 
   "permlevel": 0
@@ -100,6 +101,7 @@
   "create": 0, 
   "doctype": "DocPerm", 
   "write": 0, 
+  "report": 1, 
   "role": "Sales User", 
   "cancel": 0, 
   "permlevel": 0
@@ -108,6 +110,7 @@
   "create": 1, 
   "doctype": "DocPerm", 
   "write": 1, 
+  "report": 1, 
   "role": "Sales Master Manager", 
   "cancel": 1, 
   "permlevel": 0

@@ -10,11 +10,11 @@
   "section_style": "Simple", 
   "module": "Stock", 
   "doctype": "DocType", 
-  "autoname": "field:title", 
   "document_type": "Master", 
+  "_last_update": "1309508838", 
+  "autoname": "field:title", 
   "name": "__common__", 
   "colour": "White:FFF", 
-  "_last_update": "1309508838", 
   "server_code_error": " ", 
   "version": 1
  }, 
@@ -68,16 +68,17 @@
   "doctype": "DocField", 
   "label": "Landed Cost", 
   "oldfieldname": "landed_cost", 
-  "permlevel": 0, 
+  "options": "Landed Cost Master Detail", 
   "fieldname": "landed_cost", 
   "fieldtype": "Table", 
-  "options": "Landed Cost Master Detail"
+  "permlevel": 0
  }, 
  {
   "create": 1, 
   "doctype": "DocPerm", 
   "write": 1, 
   "role": "Purchase Manager", 
+  "report": 1, 
   "permlevel": 0
  }, 
  {
@@ -85,6 +86,7 @@
   "doctype": "DocPerm", 
   "write": 1, 
   "role": "System Manager", 
+  "report": 1, 
   "permlevel": 0
  }, 
  {
@@ -92,6 +94,7 @@
   "doctype": "DocPerm", 
   "write": 1, 
   "role": "Purchase User", 
+  "report": 1, 
   "permlevel": 0
  }, 
  {

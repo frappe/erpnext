@@ -13,10 +13,10 @@
   "doctype": "DocType", 
   "allow_trash": 1, 
   "autoname": "field:warehouse_type", 
-  "show_in_menu": 0, 
   "name": "__common__", 
   "colour": "White:FFF", 
   "server_code_error": " ", 
+  "show_in_menu": 0, 
   "version": 6
  }, 
  {
@@ -30,8 +30,8 @@
   "name": "__common__", 
   "parent": "Warehouse Type", 
   "read": 1, 
-  "doctype": "DocPerm", 
   "submit": 0, 
+  "doctype": "DocPerm", 
   "amend": 0, 
   "parenttype": "DocType", 
   "parentfield": "permissions"
@@ -44,6 +44,7 @@
   "create": 1, 
   "doctype": "DocPerm", 
   "write": 1, 
+  "report": 1, 
   "role": "Material Master Manager", 
   "cancel": 1, 
   "permlevel": 0
@@ -60,6 +61,7 @@
   "create": 0, 
   "doctype": "DocPerm", 
   "write": 0, 
+  "report": 1, 
   "role": "Material Manager", 
   "cancel": 0, 
   "permlevel": 0
@@ -76,6 +78,7 @@
   "create": 0, 
   "doctype": "DocPerm", 
   "write": 0, 
+  "report": 1, 
   "role": "Material User", 
   "cancel": 0, 
   "permlevel": 0

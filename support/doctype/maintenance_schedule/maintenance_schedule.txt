@@ -11,12 +11,12 @@
   "is_submittable": 1, 
   "search_fields": "status,customer,customer_name, sales_order_no", 
   "module": "Support", 
-  "doctype": "DocType", 
   "server_code_error": " ", 
   "autoname": "MS.#####", 
+  "_last_update": "1322549701", 
   "name": "__common__", 
   "colour": "White:FFF", 
-  "_last_update": "1322549701", 
+  "doctype": "DocType", 
   "show_in_menu": 0, 
   "version": 156
  }, 
@@ -45,6 +45,7 @@
   "doctype": "DocPerm", 
   "submit": 1, 
   "write": 1, 
+  "report": 1, 
   "role": "System Manager", 
   "cancel": 1, 
   "permlevel": 0
@@ -60,6 +61,7 @@
   "doctype": "DocPerm", 
   "submit": 1, 
   "write": 1, 
+  "report": 1, 
   "role": "Maintenance Manager", 
   "cancel": 1, 
   "permlevel": 0
@@ -73,10 +75,10 @@
   "oldfieldtype": "Section Break", 
   "doctype": "DocField", 
   "label": "Customer Details", 
-  "permlevel": 0, 
+  "options": "Simple", 
   "fieldname": "customer_details", 
   "fieldtype": "Section Break", 
-  "options": "Simple"
+  "permlevel": 0
  }, 
  {
   "oldfieldtype": "Column Break", 
@@ -104,19 +106,19 @@
   "print_hide": 1, 
   "doctype": "DocField", 
   "label": "Customer Address", 
-  "options": "Address", 
+  "permlevel": 0, 
   "fieldname": "customer_address", 
   "fieldtype": "Link", 
-  "permlevel": 0
+  "options": "Address"
  }, 
  {
   "print_hide": 1, 
   "doctype": "DocField", 
   "label": "Contact Person", 
-  "options": "Contact", 
+  "permlevel": 0, 
   "fieldname": "contact_person", 
   "fieldtype": "Link", 
-  "permlevel": 0
+  "options": "Contact"
  }, 
  {
   "search_index": 0, 
@@ -224,12 +226,12 @@
   "doctype": "DocField", 
   "label": "Company", 
   "oldfieldname": "company", 
-  "options": "Company", 
+  "permlevel": 0, 
   "fieldname": "company", 
   "fieldtype": "Link", 
   "oldfieldtype": "Link", 
   "reqd": 1, 
-  "permlevel": 0, 
+  "options": "Company", 
   "in_filter": 1
  }, 
  {
@@ -237,31 +239,31 @@
   "doctype": "DocField", 
   "label": "Territory", 
   "oldfieldname": "territory", 
-  "options": "Territory", 
+  "permlevel": 0, 
   "fieldname": "territory", 
   "fieldtype": "Link", 
   "oldfieldtype": "Link", 
   "reqd": 1, 
-  "permlevel": 0, 
+  "options": "Territory", 
   "in_filter": 1
  }, 
  {
   "doctype": "DocField", 
   "label": "Customer Group", 
-  "options": "Customer Group", 
+  "permlevel": 0, 
   "fieldname": "customer_group", 
   "fieldtype": "Link", 
   "reqd": 1, 
-  "permlevel": 0
+  "options": "Customer Group"
  }, 
  {
   "oldfieldtype": "Section Break", 
   "doctype": "DocField", 
   "label": "Items", 
-  "permlevel": 0, 
+  "options": "Simple", 
   "fieldname": "items", 
   "fieldtype": "Section Break", 
-  "options": "Simple"
+  "permlevel": 0
  }, 
  {
   "search_index": 1, 
@@ -269,22 +271,22 @@
   "doctype": "DocField", 
   "label": "Sales Order No", 
   "oldfieldname": "sales_order_no", 
+  "permlevel": 0, 
   "trigger": "Client", 
   "fieldname": "sales_order_no", 
   "fieldtype": "Link", 
   "oldfieldtype": "Link", 
   "options": "Sales Order", 
-  "permlevel": 0, 
   "in_filter": 1
  }, 
  {
   "oldfieldtype": "Button", 
   "doctype": "DocField", 
   "label": "Get Items", 
-  "permlevel": 0, 
+  "options": "pull_sales_order_detail", 
   "fieldname": "get_items", 
   "fieldtype": "Button", 
-  "options": "pull_sales_order_detail", 
+  "permlevel": 0, 
   "report_hide": 1
  }, 
  {
@@ -292,19 +294,19 @@
   "doctype": "DocField", 
   "label": "Maintenance Schedule Item", 
   "oldfieldname": "item_maintenance_detail", 
-  "permlevel": 0, 
+  "options": "Maintenance Schedule Item", 
   "fieldname": "item_maintenance_detail", 
   "fieldtype": "Table", 
-  "options": "Maintenance Schedule Item"
+  "permlevel": 0
  }, 
  {
   "oldfieldtype": "Section Break", 
   "doctype": "DocField", 
   "label": "Schedule", 
-  "permlevel": 0, 
+  "options": "Simple", 
   "fieldname": "schedule", 
   "fieldtype": "Section Break", 
-  "options": "Simple"
+  "permlevel": 0
  }, 
  {
   "oldfieldtype": "Button", 
@@ -321,9 +323,9 @@
   "doctype": "DocField", 
   "label": "Maintenance Schedule Detail", 
   "oldfieldname": "maintenance_schedule_detail", 
-  "permlevel": 1, 
+  "options": "Maintenance Schedule Detail", 
   "fieldname": "maintenance_schedule_detail", 
   "fieldtype": "Table", 
-  "options": "Maintenance Schedule Detail"
+  "permlevel": 1
  }
 ]

@@ -11,13 +11,13 @@
   "is_submittable": 1, 
   "search_fields": "status, owner, timesheet_date", 
   "module": "Projects", 
-  "server_code_error": " ", 
-  "subject": "%(owner)s", 
   "autoname": "TimeSheet.#####", 
+  "show_in_menu": 0, 
+  "subject": "%(owner)s", 
   "name": "__common__", 
   "colour": "White:FFF", 
   "doctype": "DocType", 
-  "show_in_menu": 0, 
+  "server_code_error": " ", 
   "version": 69
  }, 
  {
@@ -45,6 +45,7 @@
   "doctype": "DocPerm", 
   "submit": 1, 
   "write": 1, 
+  "report": 1, 
   "role": "Projects User", 
   "cancel": 1, 
   "permlevel": 0
@@ -60,6 +61,7 @@
   "doctype": "DocPerm", 
   "submit": 1, 
   "write": 1, 
+  "report": 1, 
   "role": "System Manager", 
   "cancel": 1, 
   "permlevel": 0
@@ -110,12 +112,12 @@
   "doctype": "DocField", 
   "label": "Timesheet By", 
   "oldfieldname": "owner", 
-  "options": "Profile", 
+  "permlevel": 0, 
   "fieldname": "owner", 
   "fieldtype": "Link", 
   "oldfieldtype": "Link", 
   "reqd": 1, 
-  "permlevel": 0, 
+  "options": "Profile", 
   "in_filter": 1
  }, 
  {
@@ -155,19 +157,19 @@
  }, 
  {
   "doctype": "DocField", 
-  "permlevel": 0, 
+  "options": "Simple", 
   "fieldname": "section_break0", 
   "fieldtype": "Section Break", 
-  "options": "Simple"
+  "permlevel": 0
  }, 
  {
   "oldfieldtype": "Table", 
   "doctype": "DocField", 
   "label": "Timesheet Details", 
   "oldfieldname": "timesheet_details", 
-  "permlevel": 0, 
+  "options": "Timesheet Detail", 
   "fieldname": "timesheet_details", 
   "fieldtype": "Table", 
-  "options": "Timesheet Detail"
+  "permlevel": 0
  }
 ]

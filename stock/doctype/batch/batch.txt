@@ -9,13 +9,13 @@
  {
   "section_style": "Simple", 
   "module": "Stock", 
-  "server_code_error": " ", 
-  "allow_trash": 1, 
   "doctype": "DocType", 
-  "autoname": "field:batch_id", 
+  "allow_trash": 1, 
   "document_type": "Master", 
+  "autoname": "field:batch_id", 
   "name": "__common__", 
   "colour": "White:FFF", 
+  "server_code_error": " ", 
   "version": 12
  }, 
  {
@@ -43,6 +43,7 @@
   "doctype": "DocPerm", 
   "write": 1, 
   "cancel": 1, 
+  "report": 1, 
   "permlevel": 0
  }, 
  {
@@ -111,10 +112,10 @@
   "doctype": "DocField", 
   "label": "Item", 
   "oldfieldname": "item", 
-  "permlevel": 0, 
+  "options": "Item", 
   "fieldname": "item", 
   "fieldtype": "Link", 
   "reqd": 1, 
-  "options": "Item"
+  "permlevel": 0
  }
 ]
