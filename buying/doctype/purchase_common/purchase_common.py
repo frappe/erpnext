@@ -17,12 +17,11 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import add_days, cint, cstr, flt, getdate, now
-from webnotes.model import db_exists
-from webnotes.model.doc import Document, addchild
-from webnotes.model.wrapper import getlist, copy_doclist
+from webnotes.utils import add_days, cint, cstr, flt
+from webnotes.model.doc import addchild
+from webnotes.model.wrapper import getlist
 from webnotes.model.code import get_obj
-from webnotes import form, msgprint, _
+from webnotes import msgprint, _
 
 sql = webnotes.conn.sql
 	
@@ -405,60 +404,67 @@ class DocType(TransactionBase):
 
 	def validate_doc(self, obj, prevdoc_doctype, prevdoc_docname):
 		if prevdoc_docname :
-			get_name = sql("select name from `tab%s` where name = '%s'" % (prevdoc_doctype, prevdoc_docname))
+			get_name = sql("select name from `tab%s` where name = '%s'" % 
+				(prevdoc_doctype, prevdoc_docname))
 			name = get_name and get_name[0][0] or ''
 			if name:	#check for incorrect docname
-				dt = sql("select company, docstatus from `tab%s` where name = '%s'" % (prevdoc_doctype, name))
+				dt = sql("select company, docstatus from `tab%s` where name = '%s'" %
+				 	(prevdoc_doctype, name))
 				company_name = dt and cstr(dt[0][0]) or ''
 				docstatus = dt and dt[0][1] or 0
 				
 				# check for docstatus 
 				if (docstatus != 1):
-					msgprint(cstr(prevdoc_doctype) + ": " + cstr(prevdoc_docname) + " is not Submitted Document.")
+					msgprint(cstr(prevdoc_doctype) + ": " + cstr(prevdoc_docname) + 
+						" is not Submitted Document.")
 					raise Exception
 
 				# check for company
 				if (company_name != obj.doc.company):
-					msgprint(cstr(prevdoc_doctype) + ": " + cstr(prevdoc_docname) + " does not belong to the Company: " + cstr(obj.doc.company))
+					msgprint(cstr(prevdoc_doctype) + ": " + cstr(prevdoc_docname) + 
+						" does not belong to the Company: " + cstr(obj.doc.company))
 					raise Exception
 
 				if prevdoc_doctype in ['Purchase Order', 'Purchase Receipt']:
-					dt = sql("select supplier, currency from `tab%s` where name = '%s'" % (prevdoc_doctype, name))
+					dt = sql("select supplier, currency from `tab%s` where name = '%s'" %
+					 	(prevdoc_doctype, name))
 					supplier = dt and dt[0][0] or ''
 					currency = dt and dt[0][1] or ''
 						
 					# check for supplier
 					if (supplier != obj.doc.supplier):
-						msgprint("Purchase Order: " + cstr(d.prevdoc_docname) + " supplier :" + cstr(supplier) + " does not match with supplier of current document.")
+						msgprint("Purchase Order: " + cstr(prevdoc_docname) + " supplier :" + 
+						 	cstr(supplier) + " does not match with supplier of current document.")
 						raise Exception
 					 
 					# check for curency
 					if (currency != obj.doc.currency):
-						msgprint("Purchase Order: " + cstr(d.prevdoc_docname) + " currency :" + cstr(currency) + " does not match with currency of current document.")
+						msgprint("Purchase Order: " + cstr(prevdoc_docname) + " currency :" + 
+						 	cstr(currency) + " does not match with currency of current document.")
 						raise Exception
 
 			else: # if not name than
-				msgprint(cstr(prevdoc_doctype) + ": " + cstr(prevdoc_docname) + " is not a valid " + cstr(prevdoc_doctype))
+				msgprint(cstr(prevdoc_doctype) + ": " + cstr(prevdoc_docname) + 
+					" is not a valid " + cstr(prevdoc_doctype))
 				raise Exception
 				
-
-# Validate values with reference document
-	#---------------------------------------
 	def validate_reference_value(self, obj):
 		ref_doc = []
 		for d in getlist(obj.doclist, obj.fname):
 			if d.prevdoc_doctype and d.prevdoc_docname and d.prevdoc_doctype not in ref_doc:
 				mapper_name = d.prevdoc_doctype + '-' + obj.doc.doctype
-				get_obj('DocType Mapper', mapper_name, with_children = 1).validate_reference_value(obj, obj.doc.name)
+				get_obj('DocType Mapper', mapper_name, with_children = 1).\
+					validate_reference_value(obj, obj.doc.name)
 				ref_doc.append(d.prevdoc_doctype)
 
 
 	# Check for Stopped status 
 	def check_for_stopped_status(self, doctype, docname):
-		stopped = sql("select name from `tab%s` where name = '%s' and status = 'Stopped'" % ( doctype, docname))
+		stopped = sql("select name from `tab%s` where name = '%s' and status = 'Stopped'" % 
+			( doctype, docname))
 		if stopped:
-			msgprint("One cannot do any transaction against %s : %s, it's status is 'Stopped'" % ( doctype, docname))
-			raise Exception
+			msgprint("One cannot do any transaction against %s : %s, it's status is 'Stopped'" % 
+				( doctype, docname), raise_exception=1)
 			
 	# Check Docstatus of Next DocType on Cancel AND of Previous DocType on Submit
 	def check_docstatus(self, check, doctype, docname , detail_doctype = ''):
@@ -631,9 +637,6 @@ class DocType(TransactionBase):
 			idx += 1
 		return obj.doclist
 
-
-	# Get Tax rate if account type is TAX
-	# =========================================================================
 	def get_rate(self, arg, obj):
 		arg = eval(arg)
 		rate = sql("select account_type, tax_rate from `tabAccount` where name = '%s'" %(arg['account_head']), as_dict=1)
@@ -643,19 +646,12 @@ class DocType(TransactionBase):
 		}
 		#msgprint(ret)
 		return ret
-
-
-				
-	# Get total in words
-	# ==================================================================	
+	
 	def get_total_in_words(self, currency, amount):
 		from webnotes.utils import money_in_words
 		return money_in_words(amount, currency)	
 	
-	# get against document date	
-	#-----------------------------
 	def get_prevdoc_date(self, obj):
-		import datetime
 		for d in getlist(obj.doclist, obj.fname):
 			if d.prevdoc_doctype and d.prevdoc_docname:
 				dt = sql("select transaction_date from `tab%s` where name = '%s'" % (d.prevdoc_doctype, d.prevdoc_docname))
