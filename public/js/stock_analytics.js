@@ -144,7 +144,10 @@ erpnext.StockAnalytics = erpnext.StockGridReport.extend({
 				
 				if(me.value_or_qty!="Quantity") {
 					var wh = me.get_item_warehouse(sl.warehouse, sl.item_code);
-					var is_fifo = item.valuation_method == "FIFO";
+					var valuation_method = item.valuation_method ? 
+						item.valuation_method : sys_defaults.valuation_method;
+					var is_fifo = valuation_method == "FIFO";
+					
 					var diff = me.get_value_diff(wh, sl, is_fifo);
 				} else {
 					var diff = sl.qty;

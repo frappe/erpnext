@@ -74,7 +74,9 @@ erpnext.StockBalance = erpnext.StockAnalytics.extend({
 				return val == opts.default_value || item.brand == val || item._show;
 			}, link_formatter: {filter_input: "brand"}},
 		{fieldtype:"Select", label: "Warehouse", link:"Warehouse", 
-			default_value: "Select Warehouse..."},
+			default_value: "Select Warehouse...", filter: function(val, item, opts, me) {
+				return me.apply_zero_filter(val, item, opts, me);
+			}},
 		{fieldtype:"Date", label: "From Date"},
 		{fieldtype:"Label", label: "To"},
 		{fieldtype:"Date", label: "To Date"},
@@ -107,7 +109,9 @@ erpnext.StockBalance = erpnext.StockAnalytics.extend({
 			if(me.is_default("warehouse") ? true : me.warehouse == sl.warehouse) {
 				var item = me.item_by_name[sl.item_code];
 				var wh = me.get_item_warehouse(sl.warehouse, sl.item_code);
-				var is_fifo = item.valuation_method == "FIFO";
+				var valuation_method = item.valuation_method ? 
+					item.valuation_method : sys_defaults.valuation_method;
+				var is_fifo = valuation_method == "FIFO";
 
 				var qty_diff = sl.qty;
 				var value_diff = me.get_value_diff(wh, sl, is_fifo);
