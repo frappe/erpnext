@@ -42,14 +42,25 @@ erpnext.StockBalance = erpnext.StockAnalytics.extend({
 		this.columns = [
 			{id: "name", name: "Item", field: "name", width: 300,
 				formatter: this.tree_formatter},
-			{id: "opening", name: "Opening", field: "opening", width: 100, 
+				
+			{id: "opening_qty", name: "Opening Qty", field: "opening_qty", width: 100, 
 				formatter: this.currency_formatter},
-			{id: "inflow", name: "In", field: "inflow", width: 100, 
+			{id: "inflow_qty", name: "In Qty", field: "inflow_qty", width: 100, 
 				formatter: this.currency_formatter},
-			{id: "outflow", name: "Out", field: "outflow", width: 100, 
+			{id: "outflow_qty", name: "Out Qty", field: "outflow_qty", width: 100, 
 				formatter: this.currency_formatter},
-			{id: "closing", name: "Closing", field: "closing", width: 100, 
+			{id: "closing_qty", name: "Closing Qty", field: "closing_qty", width: 100, 
 				formatter: this.currency_formatter},
+				
+			{id: "opening_value", name: "Opening Value", field: "opening_value", width: 100, 
+				formatter: this.currency_formatter},
+			{id: "inflow_value", name: "In Value", field: "inflow_value", width: 100, 
+				formatter: this.currency_formatter},
+			{id: "outflow_value", name: "Out Value", field: "outflow_value", width: 100, 
+				formatter: this.currency_formatter},
+			{id: "closing_value", name: "Closing Value", field: "closing_value", width: 100, 
+				formatter: this.currency_formatter},
+				
 			{id: "brand", name: "Brand", field: "brand", width: 100},
 			{id: "item_name", name: "Item Name", field: "item_name", width: 100},
 			{id: "description", name: "Description", field: "description", width: 200, 
@@ -58,17 +69,14 @@ erpnext.StockBalance = erpnext.StockAnalytics.extend({
 	},
 	
 	filters: [
-		{fieldtype:"Select", label: "Value or Qty", options:["Value (Weighted Average)", 
-			"Value (FIFO)", "Quantity"],
-			filter: function(val, item, opts, me) {
-				return me.apply_zero_filter(val, item, opts, me);
-			}},
 		{fieldtype:"Select", label: "Brand", link:"Brand", 
 			default_value: "Select Brand...", filter: function(val, item, opts) {
 				return val == opts.default_value || item.brand == val || item._show;
 			}, link_formatter: {filter_input: "brand"}},
 		{fieldtype:"Select", label: "Warehouse", link:"Warehouse", 
-			default_value: "Select Warehouse..."},
+			default_value: "Select Warehouse...", filter: function(val, item, opts, me) {
+				return me.apply_zero_filter(val, item, opts, me);
+			}},
 		{fieldtype:"Date", label: "From Date"},
 		{fieldtype:"Label", label: "To"},
 		{fieldtype:"Date", label: "To Date"},
@@ -100,31 +108,37 @@ erpnext.StockBalance = erpnext.StockAnalytics.extend({
 			
 			if(me.is_default("warehouse") ? true : me.warehouse == sl.warehouse) {
 				var item = me.item_by_name[sl.item_code];
-				
-				if(me.value_or_qty!="Quantity") {
-					var wh = me.get_item_warehouse(sl.warehouse, sl.item_code);
-					var is_fifo = this.value_or_qty== "Value (FIFO)";
-					var diff = me.get_value_diff(wh, sl, is_fifo);
-				} else {
-					var diff = sl.qty;
-				}
+				var wh = me.get_item_warehouse(sl.warehouse, sl.item_code);
+				var valuation_method = item.valuation_method ? 
+					item.valuation_method : sys_defaults.valuation_method;
+				var is_fifo = valuation_method == "FIFO";
+
+				var qty_diff = sl.qty;
+				var value_diff = me.get_value_diff(wh, sl, is_fifo);
 
 				if(posting_datetime < from_date) {
-					item.opening += diff;
+					item.opening_qty += qty_diff;
+					item.opening_value += value_diff;
 				} else if(posting_datetime <= to_date) {
 					var ignore_inflow_outflow = this.is_default("warehouse")
 						&& sl.voucher_type=="Stock Entry" 
 						&& this.stock_entry_map[sl.voucher_no].purpose=="Material Transfer";
 					
 					if(!ignore_inflow_outflow) {
-						if(diff < 0) {
-							item.outflow += Math.abs(diff);
+						if(qty_diff < 0) {
+							item.outflow_qty += Math.abs(qty_diff);
 						} else {
-							item.inflow += diff;
+							item.inflow_qty += qty_diff;
+						}
+						if(value_diff < 0) {
+							item.outflow_value += Math.abs(value_diff);
+						} else {
+							item.inflow_value += value_diff;
 						}
 					}
 					
-					item.closing += diff;
+					item.closing_qty += qty_diff;
+					item.closing_value += value_diff;
 				} else {
 					break;
 				}
@@ -134,7 +148,8 @@ erpnext.StockBalance = erpnext.StockAnalytics.extend({
 		// opening + diff = closing
 		// adding opening, since diff already added to closing		
 		$.each(me.item_by_name, function(key, item) {
-			item.closing += item.opening;
+			item.closing_qty += item.opening_qty;
+			item.closing_value += item.opening_value;
 		});
 	},
 	

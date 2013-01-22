@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:19", 
   "docstatus": 0, 
-  "modified": "2013-01-22 14:56:40", 
+  "modified": "2013-01-22 15:23:24", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -52,7 +52,7 @@
   "no_copy": 1, 
   "oldfieldname": "naming_series", 
   "oldfieldtype": "Select", 
-  "options": "ENQUIRY\nENQ", 
+  "options": "OPPT", 
   "reqd": 1
  }, 
  {

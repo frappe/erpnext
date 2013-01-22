@@ -62,8 +62,7 @@ erpnext.StockAnalytics = erpnext.StockGridReport.extend({
 		this.columns = std_columns.concat(this.columns);
 	},
 	filters: [
-		{fieldtype:"Select", label: "Value or Qty", options:["Value (Weighted Average)", 
-			"Value (FIFO)", "Quantity"],
+		{fieldtype:"Select", label: "Value or Qty", options:["Value", "Quantity"],
 			filter: function(val, item, opts, me) {
 				return me.apply_zero_filter(val, item, opts, me);
 			}},
@@ -145,7 +144,10 @@ erpnext.StockAnalytics = erpnext.StockGridReport.extend({
 				
 				if(me.value_or_qty!="Quantity") {
 					var wh = me.get_item_warehouse(sl.warehouse, sl.item_code);
-					var is_fifo = this.value_or_qty== "Value (FIFO)";
+					var valuation_method = item.valuation_method ? 
+						item.valuation_method : sys_defaults.valuation_method;
+					var is_fifo = valuation_method == "FIFO";
+					
 					var diff = me.get_value_diff(wh, sl, is_fifo);
 				} else {
 					var diff = sl.qty;
