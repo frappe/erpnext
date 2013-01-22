@@ -31,6 +31,9 @@ class BuyingController(TransactionBase):
 			
 			if self.doc.price_list_name and self.doc.price_list_currency:
 				self.validate_conversion_rate("price_list_currency", "plc_conversion_rate")
+				
+			# set total in words
+			self.set_total_in_words()
 		
 	def update_item_details(self):
 		for item in self.doclist.get({"parentfield": self.fname}):
@@ -68,3 +71,12 @@ class BuyingController(TransactionBase):
 			msgprint(_('Please enter valid ') + conversion_rate_label + (': ') 
 				+ ("1 %s = [?] %s" % (currency, self.company_currency)),
 				raise_exception=True)
+
+	def set_total_in_words(self):
+		from webnotes.utils import money_in_words
+		company_currency = get_company_currency(self.doc.company)
+		if self.meta.get_field("in_words"):
+			self.doc.in_words = money_in_words(self.doc.grand_total, company_currency)
+		if self.meta.get_field("in_words_import"):
+			self.doc.in_words_import = money_in_words(self.doc.grand_total_import,
+		 		self.doc.currency)

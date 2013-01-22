@@ -17,25 +17,21 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import add_days, cint, cstr, date_diff, flt, getTraceback, getdate, now, nowdate, sendmail, validate_email_add
-
+from webnotes.utils import add_days, cint, cstr, date_diff, flt, getdate, nowdate, sendmail
 from webnotes.utils import comma_and
-from webnotes import _
-from webnotes.model import db_exists
 from webnotes.model.doc import make_autoname
-from webnotes.model.wrapper import getlist, copy_doclist
+from webnotes.model.wrapper import getlist
 from webnotes.model.code import get_obj
-from webnotes import session, form, msgprint
-from setup.utils import get_company_currency
+from webnotes import _, msgprint
 
 session = webnotes.session
 
 month_map = {'Monthly': 1, 'Quarterly': 3, 'Half-yearly': 6, 'Yearly': 12}
 
 
-from utilities.transaction_base import TransactionBase
+from controllers.selling_controller import SellingController
 
-class DocType(TransactionBase):
+class DocType(SellingController):
 	def __init__(self,d,dl):
 		self.doc, self.doclist = d, dl
 		self.log = []
@@ -46,6 +42,8 @@ class DocType(TransactionBase):
 		self.doc.name = make_autoname(self.doc.naming_series+ '.#####')
 		
 	def validate(self):
+		super(DocType, self).validate()
+		
 		self.so_dn_required()
 		self.validate_proj_cust()
 		sales_com_obj = get_obj('Sales Common')
@@ -70,7 +68,6 @@ class DocType(TransactionBase):
 				self.validate_item_code()
 				self.update_current_stock()
 				self.validate_delivery_note()
-		self.set_in_words()
 		if not self.doc.is_opening:
 			self.doc.is_opening = 'No'
 		self.set_aging_date()
@@ -253,11 +250,14 @@ class DocType(TransactionBase):
 			ret = get_obj('Sales Common').get_item_details(args, self)
 			return self.get_pos_details(args, ret)
 		else:
-			obj = get_obj('Sales Common')
 			for doc in self.doclist:
 				if doc.fields.get('item_code'):
-					arg = {'item_code':doc.fields.get('item_code'), 'income_account':doc.fields.get('income_account'), 
-						'cost_center': doc.fields.get('cost_center'), 'warehouse': doc.fields.get('warehouse')};
+					arg = {
+						'item_code':doc.fields.get('item_code'), 	
+						'income_account':doc.fields.get('income_account'), 
+						'cost_center': doc.fields.get('cost_center'), 
+						'warehouse': doc.fields.get('warehouse')
+					};
 
 					ret = self.get_pos_details(arg)
 					for r in ret:
@@ -410,13 +410,6 @@ class DocType(TransactionBase):
 			elif item and item[0][1] == 'Yes' and not acc[0][0] == 'Fixed Asset Account':
 				msgprint("Please select income head with account type 'Fixed Asset Account' as Item %s is an asset item" % d.item_code)
 				raise Exception
-
-
-	def set_in_words(self):
-		dcc = get_company_currency(self.doc.company)
-		self.doc.in_words = get_obj('Sales Common').get_total_in_words(dcc, self.doc.rounded_total)
-		self.doc.in_words_export = get_obj('Sales Common').get_total_in_words(self.doc.currency, self.doc.rounded_total_export)
-
 
 	def clear_advances(self):
 		get_obj('GL Control').clear_advances(self, 'Sales Invoice Advance','advance_adjustment_details')
@@ -744,7 +737,7 @@ def manage_recurring_invoices(next_date=None):
 				new_invoice_wrapper = make_new_invoice(ref_wrapper, next_date)
 				send_notification(new_invoice_wrapper)
 				webnotes.conn.commit()
-			except Exception, e:
+			except:
 				webnotes.conn.rollback()
 
 				webnotes.conn.begin()

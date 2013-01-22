@@ -21,14 +21,13 @@ from webnotes.utils import cstr, flt, getdate
 from webnotes.model.wrapper import getlist
 from webnotes.model.code import get_obj
 from webnotes import msgprint
-from setup.utils import get_company_currency
 
 sql = webnotes.conn.sql
 	
 
-from utilities.transaction_base import TransactionBase
+from controllers.selling_controller import SellingController
 
-class DocType(TransactionBase):
+class DocType(SellingController):
 	def __init__(self, doc, doclist=None):
 		self.doc = doc
 		if not doclist: doclist = []
@@ -204,6 +203,8 @@ class DocType(TransactionBase):
 				raise Exception
 	
 	def validate(self):
+		super(DocType, self).validate()
+		
 		self.validate_fiscal_year()
 		self.validate_order_type()
 		self.validate_mandatory()
@@ -215,16 +216,9 @@ class DocType(TransactionBase):
 		sales_com_obj.check_active_sales_items(self)
 		sales_com_obj.check_conversion_rate(self)
 
-				# verify whether rate is not greater than max_discount
 		sales_com_obj.validate_max_discount(self,'sales_order_details')
-				# this is to verify that the allocated % of sales persons is 100%
 		sales_com_obj.get_allocated_sum(self)
 		self.doclist = sales_com_obj.make_packing_list(self,'sales_order_details')
-
-				# get total in words
-		dcc = get_company_currency(self.doc.company)		
-		self.doc.in_words = sales_com_obj.get_total_in_words(dcc, self.doc.rounded_total)
-		self.doc.in_words_export = sales_com_obj.get_total_in_words(self.doc.currency, self.doc.rounded_total_export)
 		
 		if not self.doc.status:
 			self.doc.status = "Draft"
@@ -268,7 +262,8 @@ class DocType(TransactionBase):
 		self.check_prev_docstatus()		
 		self.update_stock_ledger(update_stock = 1)
 		# update customer's last sales order no.
-		update_customer = sql("update `tabCustomer` set last_sales_order = '%s', modified = '%s' where name = '%s'" %(self.doc.name, self.doc.modified, self.doc.customer))
+		sql("""update `tabCustomer` set last_sales_order = '%s', modified = '%s' 
+			where name = '%s'""" % (self.doc.name, self.doc.modified, self.doc.customer))
 		get_obj('Sales Common').check_credit(self,self.doc.grand_total)
 		
 		get_obj('Authorization Control').validate_approving_authority(self.doc.doctype, self.doc.grand_total, self)

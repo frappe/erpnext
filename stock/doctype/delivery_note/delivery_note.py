@@ -21,14 +21,13 @@ from webnotes.utils import cstr, flt, getdate
 from webnotes.model.wrapper import getlist
 from webnotes.model.code import get_obj
 from webnotes import msgprint
-from setup.utils import get_company_currency
 
 sql = webnotes.conn.sql
 
 
-from utilities.transaction_base import TransactionBase
+from controllers.selling_controller import SellingController
 
-class DocType(TransactionBase):
+class DocType(SellingController):
 	def __init__(self, doc, doclist=[]):
 		self.doc = doc
 		self.doclist = doclist
@@ -131,6 +130,8 @@ class DocType(TransactionBase):
 
 
 	def validate(self):
+		super(DocType, self).validate()
+		
 		import utilities
 		utilities.validate_status(self.doc.status, ["Draft", "submitted", "Cancelled"])
 
@@ -144,14 +145,9 @@ class DocType(TransactionBase):
 		self.validate_mandatory()
 		self.validate_reference_value()
 		self.validate_for_items()
-		sales_com_obj.validate_max_discount(self, 'delivery_note_details')						 #verify whether rate is not greater than max discount
-		sales_com_obj.get_allocated_sum(self)	# this is to verify that the allocated % of sales persons is 100%
+		sales_com_obj.validate_max_discount(self, 'delivery_note_details')
+		sales_com_obj.get_allocated_sum(self)
 		sales_com_obj.check_conversion_rate(self)
-		
-		# Get total in Words
-		dcc = get_company_currency(self.doc.company)
-		self.doc.in_words = sales_com_obj.get_total_in_words(dcc, self.doc.rounded_total)
-		self.doc.in_words_export = sales_com_obj.get_total_in_words(self.doc.currency, self.doc.rounded_total_export)
 
 		# Set actual qty for each item in selected warehouse
 		self.update_current_stock()

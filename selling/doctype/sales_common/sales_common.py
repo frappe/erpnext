@@ -17,12 +17,11 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import add_days, cint, cstr, default_fields, flt, getdate, now, nowdate, formatdate
-from webnotes.model import db_exists
+from webnotes.utils import cint, cstr, flt, getdate, nowdate, formatdate
 from webnotes.model.doc import addchild
-from webnotes.model.wrapper import getlist, copy_doclist
+from webnotes.model.wrapper import getlist
 from webnotes.model.code import get_obj
-from webnotes import form, msgprint, _
+from webnotes import msgprint, _
 from setup.utils import get_company_currency
 
 get_value = webnotes.conn.get_value
@@ -546,17 +545,10 @@ class DocType(TransactionBase):
 			tuple(delete_list))
 			
 		return obj.doclist
-
-	# Get total in words
-	# ==================================================================	
-	def get_total_in_words(self, currency, amount):
-		from webnotes.utils import money_in_words
-		return money_in_words(amount, currency)
 		
 
-	# Get month based on date (required in sales person and sales partner)
-	# ========================================================================
 	def get_month(self,date):
+		"""Get month based on date (required in sales person and sales partner)"""
 		month_list = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
 		month_idx = cint(cstr(date).split('-')[1])-1
 		return month_list[month_idx]
@@ -616,10 +608,7 @@ class DocType(TransactionBase):
 					"fiscal_year": fiscal_year
 				}, raise_exception=1)
 
-	# get against document date	self.prevdoc_date_field
-	#-----------------------------
 	def get_prevdoc_date(self, obj):
-		import datetime
 		for d in getlist(obj.doclist, obj.fname):
 			if d.prevdoc_doctype and d.prevdoc_docname:
 				if d.prevdoc_doctype == 'Sales Invoice':

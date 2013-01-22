@@ -16,16 +16,16 @@
 
 from __future__ import unicode_literals
 import webnotes
-
+from webnotes import _
 from webnotes.utils import cstr, validate_email_add
 from webnotes.model.doc import Document, addchild
 from webnotes import session, msgprint
 
 sql = webnotes.conn.sql
 	
-from utilities.transaction_base import TransactionBase
+from controllers.selling_controller import SellingController
 
-class DocType(TransactionBase):
+class DocType(SellingController):
 	def __init__(self, doc, doclist):
 		self.doc = doc
 		self.doclist = doclist
@@ -51,10 +51,23 @@ class DocType(TransactionBase):
 			if not validate_email_add(self.doc.email_id):
 				msgprint('Please enter valid email id.')
 				raise Exception
+				
 	
 	def on_update(self):
 		if self.doc.contact_date:
 			self.add_calendar_event()
+			
+		self.check_email_id_is_unique()
+
+	def check_email_id_is_unique(self):
+		if self.doc.email_id:
+			# validate email is unique
+			email_list = webnotes.conn.sql("""select name from tabLead where email_id=%s""", 
+				self.doc.email_id)
+			if len(email_list) > 1:
+				items = [e[0] for e in email_list if e[0]!=self.doc.name]
+				webnotes.msgprint(_("""Email Id must be unique, already exists for: """) + \
+					", ".join(items), raise_exception=True)
 		
 	def add_calendar_event(self):
 		# delete any earlier event by this lead
