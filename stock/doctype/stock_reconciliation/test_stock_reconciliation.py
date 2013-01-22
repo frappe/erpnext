@@ -21,7 +21,6 @@ import webnotes
 from webnotes.tests import insert_test_data
 from webnotes.utils import flt
 import json
-from pprint import pprint
 
 company = webnotes.conn.get_default("company")
 

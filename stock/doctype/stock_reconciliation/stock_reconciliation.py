@@ -141,11 +141,18 @@ class DocType(DocListController):
 				"posting_time": self.doc.posting_time
 			})
 			
+			# check valuation rate mandatory
+			if row.qty != "" and not row.valuation_rate and \
+					flt(previous_sle.get("qty_after_transaction")) <= 0:
+				webnotes.msgprint(_("As existing qty for item: ") + row.item_code + 
+					_(" is less than equals to zero in the system, \
+						valuation rate is mandatory for this item"), raise_exception=1)
+			
 			change_in_qty = row.qty != "" and \
 				(flt(row.qty) - flt(previous_sle.get("qty_after_transaction")))
-		
+			
 			change_in_rate = row.valuation_rate != "" and \
-				(flt(row.valuation_rate) != flt(previous_sle.get("valuation_rate")))
+				(flt(row.valuation_rate) - flt(previous_sle.get("valuation_rate")))
 			
 			if get_valuation_method(row.item_code) == "Moving Average":
 				self.sle_for_moving_avg(row, previous_sle, change_in_qty, change_in_rate)
@@ -162,7 +169,6 @@ class DocType(DocListController):
 			else:
 				if valuation_rate == "":
 					valuation_rate = previous_valuation_rate
-				
 				return (qty * valuation_rate - previous_qty * previous_valuation_rate) \
 					/ flt(qty - previous_qty)
 		
@@ -175,7 +181,7 @@ class DocType(DocListController):
 			self.insert_entries({"actual_qty": change_in_qty, 
 				"incoming_rate": incoming_rate}, row)
 			
-		elif change_in_rate and flt(previous_sle.get("qty_after_transaction")) >= 0:
+		elif change_in_rate and flt(previous_sle.get("qty_after_transaction")) > 0:
 			# if no change in qty, but change in rate 
 			# and positive actual stock before this reconciliation
 			incoming_rate = _get_incoming_rate(
@@ -241,7 +247,6 @@ class DocType(DocListController):
 			"is_cancelled": "No",
 		}
 		args.update(opts)
-
 		# create stock ledger entry
 		sle_wrapper = webnotes.model_wrapper([args])
 		sle_wrapper.ignore_permissions = 1
