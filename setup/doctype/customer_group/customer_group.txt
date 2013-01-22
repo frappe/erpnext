@@ -1,196 +1,157 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-01-10 16:34:23", 
   "docstatus": 0, 
-  "creation": "2012-07-12 23:29:45", 
+  "modified": "2013-01-22 14:55:59", 
   "modified_by": "Administrator", 
-  "modified": "2012-12-06 10:28:54"
+  "owner": "Administrator"
  }, 
  {
-  "read_only": 1, 
+  "allow_rename": 1, 
+  "autoname": "field:customer_group_name", 
+  "doctype": "DocType", 
   "document_type": "Master", 
   "in_create": 1, 
-  "autoname": "field:customer_group_name", 
-  "allow_rename": 1, 
   "module": "Setup", 
-  "doctype": "DocType", 
-  "search_fields": "name,parent_customer_group", 
-  "name": "__common__"
+  "name": "__common__", 
+  "read_only": 1, 
+  "search_fields": "name,parent_customer_group"
  }, 
  {
+  "doctype": "DocField", 
   "name": "__common__", 
   "parent": "Customer Group", 
-  "doctype": "DocField", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "parentfield": "fields"
- }, 
- {
-  "name": "__common__", 
-  "parent": "Customer Group", 
-  "amend": 0, 
-  "submit": 0, 
-  "doctype": "DocPerm", 
-  "read": 1, 
-  "parenttype": "DocType", 
-  "parentfield": "permissions"
- }, 
- {
-  "name": "Customer Group", 
-  "doctype": "DocType"
- }, 
- {
-  "oldfieldtype": "Small Text", 
-  "doctype": "DocField", 
-  "label": "Trash Reason", 
-  "oldfieldname": "trash_reason", 
-  "fieldname": "trash_reason", 
-  "fieldtype": "Small Text", 
-  "permlevel": 1
- }, 
- {
-  "no_copy": 1, 
-  "oldfieldtype": "Data", 
-  "doctype": "DocField", 
-  "label": "Customer Group Name", 
-  "oldfieldname": "customer_group_name", 
-  "fieldname": "customer_group_name", 
-  "fieldtype": "Data", 
-  "reqd": 1, 
   "permlevel": 0
  }, 
  {
-  "oldfieldtype": "Link", 
-  "colour": "White:FFF", 
-  "doctype": "DocField", 
-  "label": "Parent Customer Group", 
-  "oldfieldname": "parent_customer_group", 
+  "amend": 0, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Customer Group", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
   "permlevel": 0, 
-  "trigger": "Client", 
+  "read": 1, 
+  "report": 1, 
+  "submit": 0
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Customer Group"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "trash_reason", 
+  "fieldtype": "Small Text", 
+  "label": "Trash Reason", 
+  "oldfieldname": "trash_reason", 
+  "oldfieldtype": "Small Text", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "customer_group_name", 
+  "fieldtype": "Data", 
+  "label": "Customer Group Name", 
+  "no_copy": 1, 
+  "oldfieldname": "customer_group_name", 
+  "oldfieldtype": "Data", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "parent_customer_group", 
   "fieldtype": "Link", 
-  "reqd": 1, 
-  "options": "Customer Group"
+  "label": "Parent Customer Group", 
+  "oldfieldname": "parent_customer_group", 
+  "oldfieldtype": "Link", 
+  "options": "Customer Group", 
+  "reqd": 1
  }, 
  {
   "description": "Only leaf nodes are allowed in transaction", 
-  "oldfieldtype": "Select", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Has Child Node", 
-  "oldfieldname": "is_group", 
-  "permlevel": 0, 
   "fieldname": "is_group", 
   "fieldtype": "Select", 
-  "reqd": 1, 
-  "options": "\nYes\nNo"
+  "label": "Has Child Node", 
+  "oldfieldname": "is_group", 
+  "oldfieldtype": "Select", 
+  "options": "\nYes\nNo", 
+  "reqd": 1
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "cb0", 
-  "fieldtype": "Column Break", 
-  "permlevel": 0
+  "fieldtype": "Column Break"
  }, 
  {
   "description": "This Price List will be selected as default for all Customers under this Group.", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Default Price List", 
-  "permlevel": 0, 
   "fieldname": "default_price_list", 
   "fieldtype": "Link", 
+  "label": "Default Price List", 
   "options": "Price List"
  }, 
  {
-  "print_hide": 1, 
-  "no_copy": 1, 
-  "oldfieldtype": "Int", 
   "doctype": "DocField", 
-  "label": "lft", 
-  "oldfieldname": "lft", 
   "fieldname": "lft", 
   "fieldtype": "Int", 
-  "search_index": 1, 
   "hidden": 1, 
-  "permlevel": 0, 
-  "report_hide": 1
+  "label": "lft", 
+  "no_copy": 1, 
+  "oldfieldname": "lft", 
+  "oldfieldtype": "Int", 
+  "print_hide": 1, 
+  "report_hide": 1, 
+  "search_index": 1
  }, 
  {
-  "print_hide": 1, 
-  "no_copy": 1, 
-  "oldfieldtype": "Int", 
   "doctype": "DocField", 
-  "label": "rgt", 
-  "oldfieldname": "rgt", 
   "fieldname": "rgt", 
   "fieldtype": "Int", 
-  "search_index": 1, 
   "hidden": 1, 
-  "permlevel": 0, 
-  "report_hide": 1
+  "label": "rgt", 
+  "no_copy": 1, 
+  "oldfieldname": "rgt", 
+  "oldfieldtype": "Int", 
+  "print_hide": 1, 
+  "report_hide": 1, 
+  "search_index": 1
  }, 
  {
-  "print_hide": 1, 
-  "no_copy": 1, 
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "old_parent", 
-  "oldfieldname": "old_parent", 
-  "options": "Customer Group", 
   "fieldname": "old_parent", 
   "fieldtype": "Link", 
   "hidden": 1, 
-  "permlevel": 0, 
+  "label": "old_parent", 
+  "no_copy": 1, 
+  "oldfieldname": "old_parent", 
+  "oldfieldtype": "Data", 
+  "options": "Customer Group", 
+  "print_hide": 1, 
   "report_hide": 1
  }, 
  {
+  "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
-  "write": 0, 
   "role": "Sales Manager", 
-  "cancel": 0, 
-  "permlevel": 1
+  "write": 0
  }, 
  {
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "write": 0, 
-  "report": 1, 
-  "role": "Sales Manager", 
   "cancel": 0, 
-  "permlevel": 0
- }, 
- {
   "create": 0, 
   "doctype": "DocPerm", 
-  "write": 0, 
-  "role": "Sales Master Manager", 
-  "cancel": 0, 
-  "permlevel": 1
- }, 
- {
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "write": 0, 
   "role": "Sales User", 
-  "cancel": 0, 
-  "permlevel": 1
+  "write": 0
  }, 
  {
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "write": 0, 
-  "report": 1, 
-  "role": "Sales User", 
-  "cancel": 0, 
-  "permlevel": 0
- }, 
- {
+  "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
-  "write": 1, 
-  "report": 1, 
   "role": "Sales Master Manager", 
-  "cancel": 1, 
-  "permlevel": 0
+  "write": 1
  }
 ]

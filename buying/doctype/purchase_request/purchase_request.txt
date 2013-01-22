@@ -1,430 +1,351 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-01-21 18:19:20", 
   "docstatus": 0, 
-  "creation": "2012-12-03 17:56:31", 
+  "modified": "2013-01-22 14:56:44", 
   "modified_by": "Administrator", 
-  "modified": "2013-01-15 15:34:47"
+  "owner": "Administrator"
  }, 
  {
-  "autoname": "naming_series:", 
   "allow_attach": 1, 
-  "is_submittable": 1, 
   "allow_print": 0, 
-  "search_fields": "status,transaction_date,sales_order_no", 
-  "module": "Buying", 
+  "autoname": "naming_series:", 
   "doctype": "DocType", 
+  "is_submittable": 1, 
+  "module": "Buying", 
+  "name": "__common__", 
   "read_only_onload": 1, 
-  "name": "__common__"
+  "search_fields": "status,transaction_date,sales_order_no"
  }, 
  {
-  "name": "__common__", 
-  "parent": "Purchase Request", 
   "doctype": "DocField", 
-  "parenttype": "DocType", 
-  "parentfield": "fields"
- }, 
- {
   "name": "__common__", 
   "parent": "Purchase Request", 
-  "read": 1, 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "amend": 1, 
+  "cancel": 1, 
+  "create": 1, 
   "doctype": "DocPerm", 
-  "report": 1, 
+  "name": "__common__", 
+  "parent": "Purchase Request", 
+  "parentfield": "permissions", 
   "parenttype": "DocType", 
-  "parentfield": "permissions"
- }, 
- {
-  "name": "Purchase Request", 
-  "doctype": "DocType"
- }, 
- {
-  "print_hide": 1, 
-  "description": "To manage multiple series please go to Setup > Manage Series", 
-  "no_copy": 1, 
-  "oldfieldtype": "Select", 
-  "doctype": "DocField", 
-  "label": "Series", 
-  "oldfieldname": "naming_series", 
   "permlevel": 0, 
+  "read": 1, 
+  "report": 1, 
+  "submit": 1, 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Purchase Request"
+ }, 
+ {
+  "description": "To manage multiple series please go to Setup > Manage Series", 
+  "doctype": "DocField", 
   "fieldname": "naming_series", 
   "fieldtype": "Select", 
-  "reqd": 1, 
-  "options": "IDT"
+  "label": "Series", 
+  "no_copy": 1, 
+  "oldfieldname": "naming_series", 
+  "oldfieldtype": "Select", 
+  "options": "IDT", 
+  "print_hide": 1, 
+  "reqd": 1
  }, 
  {
   "description": "The date at which current entry is made in system.", 
-  "print_width": "100px", 
-  "no_copy": 1, 
-  "oldfieldtype": "Date", 
   "doctype": "DocField", 
-  "label": "Transaction Date", 
-  "oldfieldname": "transaction_date", 
-  "width": "100px", 
   "fieldname": "transaction_date", 
   "fieldtype": "Date", 
-  "search_index": 1, 
-  "reqd": 1, 
   "in_filter": 1, 
-  "permlevel": 0
+  "label": "Transaction Date", 
+  "no_copy": 1, 
+  "oldfieldname": "transaction_date", 
+  "oldfieldtype": "Date", 
+  "print_width": "100px", 
+  "reqd": 1, 
+  "search_index": 1, 
+  "width": "100px"
  }, 
  {
-  "oldfieldtype": "Section Break", 
   "doctype": "DocField", 
-  "label": "Items", 
   "fieldname": "items", 
   "fieldtype": "Section Break", 
-  "permlevel": 0
+  "label": "Items", 
+  "oldfieldtype": "Section Break"
  }, 
  {
-  "no_copy": 0, 
-  "oldfieldtype": "Table", 
   "allow_on_submit": 1, 
   "doctype": "DocField", 
-  "label": "Purchase Requisition Details", 
-  "oldfieldname": "indent_details", 
-  "options": "Purchase Request Item", 
   "fieldname": "indent_details", 
   "fieldtype": "Table", 
-  "permlevel": 0
+  "label": "Purchase Requisition Details", 
+  "no_copy": 0, 
+  "oldfieldname": "indent_details", 
+  "oldfieldtype": "Table", 
+  "options": "Purchase Request Item"
  }, 
  {
   "doctype": "DocField", 
-  "options": "Simple", 
   "fieldname": "section_break1", 
   "fieldtype": "Section Break", 
-  "permlevel": 0
+  "options": "Simple"
  }, 
  {
-  "print_width": "50%", 
   "doctype": "DocField", 
-  "width": "50%", 
   "fieldname": "column_break4", 
   "fieldtype": "Column Break", 
-  "permlevel": 0
+  "print_width": "50%", 
+  "width": "50%"
  }, 
  {
-  "permlevel": 0, 
   "description": "One or multiple Sales Order no which generated this Purchase Requisition", 
-  "print_width": "100px", 
-  "no_copy": 1, 
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Sales Order No", 
-  "oldfieldname": "sales_order_no", 
-  "width": "100px", 
   "fieldname": "sales_order_no", 
   "fieldtype": "Link", 
-  "options": "Sales Order"
+  "label": "Sales Order No", 
+  "no_copy": 1, 
+  "oldfieldname": "sales_order_no", 
+  "oldfieldtype": "Data", 
+  "options": "Sales Order", 
+  "print_width": "100px", 
+  "width": "100px"
  }, 
  {
-  "print_width": "50%", 
   "doctype": "DocField", 
-  "width": "50%", 
   "fieldname": "column_break5", 
   "fieldtype": "Column Break", 
-  "permlevel": 0
+  "print_width": "50%", 
+  "width": "50%"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Pull Sales Order Items", 
-  "options": "pull_so_details", 
   "fieldname": "pull_sales_order_details", 
   "fieldtype": "Button", 
-  "permlevel": 0
+  "label": "Pull Sales Order Items", 
+  "options": "pull_so_details"
  }, 
  {
-  "description": "Filing in Additional Information about the Purchase Requisition will help you analyze your data better.", 
   "default": "Give additional details about the indent.", 
-  "oldfieldtype": "Section Break", 
+  "description": "Filing in Additional Information about the Purchase Requisition will help you analyze your data better.", 
   "doctype": "DocField", 
-  "label": "More Info", 
   "fieldname": "more_info", 
   "fieldtype": "Section Break", 
-  "permlevel": 0
+  "label": "More Info", 
+  "oldfieldtype": "Section Break"
  }, 
  {
-  "print_width": "50%", 
-  "oldfieldtype": "Column Break", 
   "doctype": "DocField", 
-  "width": "50%", 
   "fieldname": "column_break1", 
   "fieldtype": "Column Break", 
-  "permlevel": 0
+  "oldfieldtype": "Column Break", 
+  "print_width": "50%", 
+  "width": "50%"
  }, 
  {
-  "print_hide": 1, 
   "description": "Select the relevant company name if you have multiple companies", 
-  "print_width": "150px", 
-  "permlevel": 0, 
-  "oldfieldtype": "Link", 
   "doctype": "DocField", 
-  "label": "Company", 
-  "oldfieldname": "company", 
-  "width": "150px", 
   "fieldname": "company", 
   "fieldtype": "Link", 
-  "search_index": 1, 
-  "reqd": 1, 
   "in_filter": 1, 
-  "options": "Company"
- }, 
- {
+  "label": "Company", 
+  "oldfieldname": "company", 
+  "oldfieldtype": "Link", 
+  "options": "Company", 
   "print_hide": 1, 
   "print_width": "150px", 
-  "permlevel": 0, 
-  "oldfieldtype": "Select", 
+  "reqd": 1, 
+  "search_index": 1, 
+  "width": "150px"
+ }, 
+ {
   "doctype": "DocField", 
-  "label": "Fiscal Year", 
-  "oldfieldname": "fiscal_year", 
-  "width": "150px", 
   "fieldname": "fiscal_year", 
   "fieldtype": "Select", 
-  "search_index": 1, 
-  "reqd": 1, 
+  "in_filter": 1, 
+  "label": "Fiscal Year", 
+  "oldfieldname": "fiscal_year", 
+  "oldfieldtype": "Select", 
   "options": "link:Fiscal Year", 
-  "in_filter": 1
+  "print_hide": 1, 
+  "print_width": "150px", 
+  "reqd": 1, 
+  "search_index": 1, 
+  "width": "150px"
  }, 
  {
   "description": "Name of the entity who has requested for the Purchase Requisition", 
-  "print_width": "100px", 
-  "no_copy": 1, 
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Requested By", 
-  "oldfieldname": "requested_by", 
-  "width": "100px", 
   "fieldname": "requested_by", 
   "fieldtype": "Data", 
-  "permlevel": 0
+  "label": "Requested By", 
+  "no_copy": 1, 
+  "oldfieldname": "requested_by", 
+  "oldfieldtype": "Data", 
+  "print_width": "100px", 
+  "width": "100px"
  }, 
  {
-  "print_hide": 1, 
   "description": "After cancelling the Purchase Requisition, a dialog box will ask you reason for cancellation which will be reflected in this field", 
-  "no_copy": 1, 
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Cancel Reason", 
-  "oldfieldname": "cancel_reason", 
   "fieldname": "cancel_reason", 
   "fieldtype": "Data", 
-  "permlevel": 1
+  "label": "Cancel Reason", 
+  "no_copy": 1, 
+  "oldfieldname": "cancel_reason", 
+  "oldfieldtype": "Data", 
+  "print_hide": 1, 
+  "read_only": 1
  }, 
  {
-  "print_width": "50%", 
-  "oldfieldtype": "Column Break", 
   "doctype": "DocField", 
-  "width": "50%", 
   "fieldname": "column_break2", 
   "fieldtype": "Column Break", 
-  "permlevel": 0
+  "oldfieldtype": "Column Break", 
+  "print_width": "50%", 
+  "width": "50%"
  }, 
  {
-  "print_hide": 1, 
   "allow_on_submit": 1, 
-  "oldfieldtype": "Select", 
   "doctype": "DocField", 
-  "label": "Letter Head", 
-  "oldfieldname": "letter_head", 
-  "options": "link:Letter Head", 
   "fieldname": "letter_head", 
   "fieldtype": "Select", 
-  "permlevel": 0
+  "label": "Letter Head", 
+  "oldfieldname": "letter_head", 
+  "oldfieldtype": "Select", 
+  "options": "link:Letter Head", 
+  "print_hide": 1
  }, 
  {
-  "print_hide": 1, 
-  "permlevel": 1, 
-  "print_width": "100px", 
-  "no_copy": 1, 
-  "oldfieldtype": "Select", 
   "doctype": "DocField", 
-  "label": "Status", 
-  "oldfieldname": "status", 
-  "width": "100px", 
   "fieldname": "status", 
   "fieldtype": "Select", 
-  "search_index": 1, 
-  "reqd": 0, 
+  "in_filter": 1, 
+  "label": "Status", 
+  "no_copy": 1, 
+  "oldfieldname": "status", 
+  "oldfieldtype": "Select", 
   "options": "\nDraft\nSubmitted\nStopped\nCancelled", 
-  "in_filter": 1
+  "print_hide": 1, 
+  "print_width": "100px", 
+  "read_only": 1, 
+  "reqd": 0, 
+  "search_index": 1, 
+  "width": "100px"
  }, 
  {
-  "print_hide": 1, 
   "description": "% of materials ordered against this Purchase Requisition", 
-  "no_copy": 1, 
-  "oldfieldtype": "Currency", 
   "doctype": "DocField", 
-  "label": "% Ordered", 
-  "oldfieldname": "per_ordered", 
   "fieldname": "per_ordered", 
   "fieldtype": "Currency", 
-  "permlevel": 1
+  "label": "% Ordered", 
+  "no_copy": 1, 
+  "oldfieldname": "per_ordered", 
+  "oldfieldtype": "Currency", 
+  "print_hide": 1, 
+  "read_only": 1
  }, 
  {
-  "print_hide": 1, 
-  "print_width": "150px", 
-  "no_copy": 1, 
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Amended From", 
-  "oldfieldname": "amended_from", 
-  "width": "150px", 
   "fieldname": "amended_from", 
   "fieldtype": "Data", 
-  "permlevel": 1
+  "label": "Amended From", 
+  "no_copy": 1, 
+  "oldfieldname": "amended_from", 
+  "oldfieldtype": "Data", 
+  "print_hide": 1, 
+  "print_width": "150px", 
+  "read_only": 1, 
+  "width": "150px"
  }, 
  {
-  "print_hide": 1, 
   "description": "The date at which current entry is corrected in the system.", 
-  "print_width": "100px", 
-  "no_copy": 1, 
-  "oldfieldtype": "Date", 
   "doctype": "DocField", 
-  "label": "Amendment Date", 
-  "oldfieldname": "amendment_date", 
-  "width": "100px", 
   "fieldname": "amendment_date", 
   "fieldtype": "Date", 
-  "permlevel": 0
+  "label": "Amendment Date", 
+  "no_copy": 1, 
+  "oldfieldname": "amendment_date", 
+  "oldfieldtype": "Date", 
+  "print_hide": 1, 
+  "print_width": "100px", 
+  "width": "100px"
  }, 
  {
-  "print_hide": 0, 
-  "print_width": "150px", 
-  "no_copy": 1, 
-  "oldfieldtype": "Small Text", 
   "doctype": "DocField", 
-  "label": "Remarks", 
-  "oldfieldname": "remark", 
-  "width": "150px", 
   "fieldname": "remark", 
   "fieldtype": "Small Text", 
-  "permlevel": 0
+  "label": "Remarks", 
+  "no_copy": 1, 
+  "oldfieldname": "remark", 
+  "oldfieldtype": "Small Text", 
+  "print_hide": 0, 
+  "print_width": "150px", 
+  "width": "150px"
  }, 
  {
   "description": "Add Terms and Conditions for the Purchase Requisition. You can also prepare a Terms and Conditions Master and use the Template", 
-  "oldfieldtype": "Section Break", 
   "doctype": "DocField", 
-  "label": "Terms and Conditions", 
   "fieldname": "terms_section_break", 
   "fieldtype": "Section Break", 
-  "permlevel": 0
+  "label": "Terms and Conditions", 
+  "oldfieldtype": "Section Break"
  }, 
  {
-  "print_hide": 1, 
-  "oldfieldtype": "Link", 
   "doctype": "DocField", 
-  "label": "Select Terms and Conditions", 
-  "oldfieldname": "tc_name", 
-  "options": "Terms and Conditions", 
   "fieldname": "tc_name", 
   "fieldtype": "Link", 
-  "permlevel": 0, 
+  "label": "Select Terms and Conditions", 
+  "oldfieldname": "tc_name", 
+  "oldfieldtype": "Link", 
+  "options": "Terms and Conditions", 
+  "print_hide": 1, 
   "report_hide": 1
  }, 
  {
-  "oldfieldtype": "Button", 
   "doctype": "DocField", 
-  "label": "Get Terms and Conditions", 
-  "options": "get_tc_details", 
   "fieldname": "get_terms", 
   "fieldtype": "Button", 
-  "permlevel": 0
+  "label": "Get Terms and Conditions", 
+  "oldfieldtype": "Button", 
+  "options": "get_tc_details"
  }, 
  {
-  "oldfieldtype": "Text Editor", 
   "doctype": "DocField", 
-  "label": "Terms and Conditions Content", 
-  "oldfieldname": "terms", 
   "fieldname": "terms", 
   "fieldtype": "Text Editor", 
-  "permlevel": 0
+  "label": "Terms and Conditions Content", 
+  "oldfieldname": "terms", 
+  "oldfieldtype": "Text Editor"
  }, 
  {
-  "print_hide": 1, 
-  "no_copy": 1, 
   "doctype": "DocField", 
-  "label": "File List", 
   "fieldname": "file_list", 
   "fieldtype": "Text", 
   "hidden": 1, 
-  "permlevel": 0
+  "label": "File List", 
+  "no_copy": 1, 
+  "print_hide": 1
  }, 
  {
-  "amend": 0, 
-  "create": 0, 
   "doctype": "DocPerm", 
-  "submit": 0, 
-  "write": 0, 
-  "role": "Purchase Manager", 
-  "cancel": 0, 
-  "permlevel": 1
+  "role": "Purchase User"
  }, 
  {
-  "amend": 1, 
-  "create": 1, 
   "doctype": "DocPerm", 
-  "submit": 1, 
-  "write": 1, 
-  "role": "Purchase Manager", 
-  "cancel": 1, 
-  "permlevel": 0
+  "role": "Purchase Manager"
  }, 
  {
-  "amend": 0, 
-  "create": 0, 
   "doctype": "DocPerm", 
-  "submit": 0, 
-  "write": 0, 
-  "role": "Material Manager", 
-  "cancel": 0, 
-  "permlevel": 1
+  "role": "Material Manager"
  }, 
  {
-  "amend": 1, 
-  "create": 1, 
   "doctype": "DocPerm", 
-  "submit": 1, 
-  "write": 1, 
-  "role": "Material Manager", 
-  "cancel": 1, 
-  "permlevel": 0
- }, 
- {
-  "amend": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "submit": 0, 
-  "write": 0, 
-  "role": "Material User", 
-  "cancel": 0, 
-  "permlevel": 1
- }, 
- {
-  "amend": 1, 
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "submit": 1, 
-  "write": 1, 
-  "role": "Material User", 
-  "cancel": 1, 
-  "permlevel": 0
- }, 
- {
-  "amend": 1, 
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "submit": 1, 
-  "write": 1, 
-  "role": "Purchase User", 
-  "cancel": 1, 
-  "permlevel": 0
- }, 
- {
-  "amend": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "submit": 0, 
-  "role": "Purchase User", 
-  "cancel": 0, 
-  "permlevel": 1
+  "role": "Material User"
  }
 ]

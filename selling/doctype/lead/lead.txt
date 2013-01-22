@@ -1,545 +1,475 @@
 [
  {
-  "owner": "Administrator", 
-  "docstatus": 0, 
   "creation": "2013-01-10 16:34:18", 
+  "docstatus": 0, 
+  "modified": "2013-01-22 14:56:03", 
   "modified_by": "Administrator", 
-  "modified": "2013-01-16 10:51:58"
+  "owner": "Administrator"
  }, 
  {
   "autoname": "naming_series:", 
-  "name": "__common__", 
-  "search_fields": "lead_name,lead_owner,status", 
-  "module": "Selling", 
   "doctype": "DocType", 
-  "document_type": "Master"
+  "document_type": "Master", 
+  "module": "Selling", 
+  "name": "__common__", 
+  "search_fields": "lead_name,lead_owner,status"
  }, 
  {
-  "name": "__common__", 
-  "parent": "Lead", 
   "doctype": "DocField", 
-  "parenttype": "DocType", 
-  "parentfield": "fields"
- }, 
- {
   "name": "__common__", 
   "parent": "Lead", 
-  "amend": 0, 
-  "submit": 0, 
-  "doctype": "DocPerm", 
-  "read": 1, 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "report": 1, 
-  "parentfield": "permissions"
+  "permlevel": 0
  }, 
  {
-  "name": "Lead", 
-  "doctype": "DocType"
+  "amend": 0, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Lead", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 1, 
+  "submit": 0, 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Lead"
  }, 
  {
   "description": "To manage multiple series please go to Setup > Manage Series", 
-  "no_copy": 1, 
-  "oldfieldtype": "Select", 
   "doctype": "DocField", 
-  "label": "Naming Series", 
-  "oldfieldname": "naming_series", 
-  "options": "LEAD\nLEAD/10-11/\nLEAD/MUMBAI/", 
   "fieldname": "naming_series", 
   "fieldtype": "Select", 
-  "reqd": 0, 
-  "permlevel": 0
+  "label": "Naming Series", 
+  "no_copy": 1, 
+  "oldfieldname": "naming_series", 
+  "oldfieldtype": "Select", 
+  "options": "LEAD\nLEAD/10-11/\nLEAD/MUMBAI/", 
+  "reqd": 0
  }, 
  {
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Contact Name", 
-  "oldfieldname": "lead_name", 
   "fieldname": "lead_name", 
   "fieldtype": "Data", 
-  "search_index": 1, 
+  "in_filter": 1, 
+  "label": "Contact Name", 
+  "oldfieldname": "lead_name", 
+  "oldfieldtype": "Data", 
   "reqd": 1, 
-  "permlevel": 0, 
-  "in_filter": 1
+  "search_index": 1
  }, 
  {
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Email Id", 
-  "oldfieldname": "email_id", 
   "fieldname": "email_id", 
   "fieldtype": "Data", 
-  "search_index": 1, 
+  "label": "Email Id", 
+  "oldfieldname": "email_id", 
+  "oldfieldtype": "Data", 
   "reqd": 0, 
-  "permlevel": 0
+  "search_index": 1
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "cb6", 
-  "fieldtype": "Column Break", 
-  "permlevel": 0
+  "fieldtype": "Column Break"
  }, 
  {
-  "permlevel": 0, 
-  "no_copy": 1, 
-  "oldfieldtype": "Select", 
-  "doctype": "DocField", 
-  "label": "Status", 
-  "oldfieldname": "status", 
   "default": "Open", 
+  "doctype": "DocField", 
   "fieldname": "status", 
   "fieldtype": "Select", 
-  "search_index": 1, 
-  "reqd": 1, 
+  "in_filter": 1, 
+  "label": "Status", 
+  "no_copy": 1, 
+  "oldfieldname": "status", 
+  "oldfieldtype": "Select", 
   "options": "\nOpen\nReplied\nAttempted to Contact\nContact in Future\nContacted\nInterested\nNot interested\nLead Lost\nConverted", 
-  "in_filter": 1
+  "reqd": 1, 
+  "search_index": 1
  }, 
  {
   "description": "Source of the lead. If via a campaign, select \"Campaign\"", 
-  "no_copy": 1, 
-  "oldfieldtype": "Select", 
   "doctype": "DocField", 
-  "label": "Source", 
-  "oldfieldname": "source", 
-  "permlevel": 0, 
   "fieldname": "source", 
   "fieldtype": "Select", 
-  "search_index": 0, 
-  "reqd": 0, 
   "in_filter": 1, 
-  "options": "\nAdvertisement\nBlog\nCampaign\nCall\nCustomer\nExhibition\nSupplier\nWebsite\nEmail"
+  "label": "Source", 
+  "no_copy": 1, 
+  "oldfieldname": "source", 
+  "oldfieldtype": "Select", 
+  "options": "\nAdvertisement\nBlog\nCampaign\nCall\nCustomer\nExhibition\nSupplier\nWebsite\nEmail", 
+  "reqd": 0, 
+  "search_index": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "communication_history", 
-  "fieldtype": "Section Break", 
-  "permlevel": 0
+  "fieldtype": "Section Break"
  }, 
  {
-  "oldfieldtype": "Table", 
   "allow_on_submit": 0, 
   "doctype": "DocField", 
-  "label": "Communication HTML", 
-  "oldfieldname": "follow_up", 
   "fieldname": "communication_html", 
   "fieldtype": "HTML", 
-  "permlevel": 0
+  "label": "Communication HTML", 
+  "oldfieldname": "follow_up", 
+  "oldfieldtype": "Table"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Lead Details", 
   "fieldname": "sb8", 
   "fieldtype": "Section Break", 
-  "permlevel": 0
+  "label": "Lead Details"
  }, 
  {
   "description": "Name of organization from where lead has come", 
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Company Name", 
-  "oldfieldname": "company_name", 
   "fieldname": "company_name", 
   "fieldtype": "Data", 
-  "search_index": 0, 
+  "in_filter": 1, 
+  "label": "Company Name", 
+  "oldfieldname": "company_name", 
+  "oldfieldtype": "Data", 
   "reqd": 0, 
-  "permlevel": 0, 
-  "in_filter": 1
+  "search_index": 0
  }, 
  {
+  "depends_on": "eval:doc.source == 'Existing Customer'", 
   "description": "Source of th", 
-  "oldfieldtype": "Link", 
   "doctype": "DocField", 
-  "label": "From Customer", 
-  "oldfieldname": "customer", 
-  "options": "Customer", 
   "fieldname": "customer", 
   "fieldtype": "Link", 
-  "depends_on": "eval:doc.source == 'Existing Customer'", 
   "hidden": 0, 
-  "permlevel": 0
+  "label": "From Customer", 
+  "oldfieldname": "customer", 
+  "oldfieldtype": "Link", 
+  "options": "Customer"
  }, 
  {
+  "depends_on": "eval:doc.source == 'Campaign'", 
   "description": "Enter campaign name if the source of lead is campaign.", 
-  "oldfieldtype": "Link", 
   "doctype": "DocField", 
-  "label": "Campaign Name", 
-  "oldfieldname": "campaign_name", 
-  "options": "Campaign", 
   "fieldname": "campaign_name", 
   "fieldtype": "Link", 
-  "depends_on": "eval:doc.source == 'Campaign'", 
   "hidden": 0, 
-  "permlevel": 0
+  "label": "Campaign Name", 
+  "oldfieldname": "campaign_name", 
+  "oldfieldtype": "Link", 
+  "options": "Campaign"
  }, 
  {
   "doctype": "DocField", 
-  "width": "50%", 
   "fieldname": "column_break1", 
   "fieldtype": "Column Break", 
-  "permlevel": 0
+  "width": "50%"
  }, 
  {
-  "oldfieldtype": "Select", 
   "doctype": "DocField", 
-  "label": "Lead Type", 
-  "oldfieldname": "type", 
-  "options": "\nClient\nChannel Partner\nConsultant", 
   "fieldname": "type", 
   "fieldtype": "Select", 
-  "permlevel": 0, 
-  "in_filter": 1
+  "in_filter": 1, 
+  "label": "Lead Type", 
+  "oldfieldname": "type", 
+  "oldfieldtype": "Select", 
+  "options": "\nClient\nChannel Partner\nConsultant"
  }, 
  {
-  "oldfieldtype": "Text", 
   "doctype": "DocField", 
-  "label": "Remark", 
-  "oldfieldname": "remark", 
   "fieldname": "remark", 
   "fieldtype": "Small Text", 
-  "permlevel": 0
+  "label": "Remark", 
+  "oldfieldname": "remark", 
+  "oldfieldtype": "Text"
  }, 
  {
-  "oldfieldtype": "Column Break", 
   "doctype": "DocField", 
-  "label": "Contact Info", 
   "fieldname": "contact_info", 
   "fieldtype": "Section Break", 
-  "permlevel": 0
+  "label": "Contact Info", 
+  "oldfieldtype": "Column Break"
  }, 
  {
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Phone", 
-  "oldfieldname": "contact_no", 
   "fieldname": "phone", 
   "fieldtype": "Data", 
-  "reqd": 0, 
-  "permlevel": 0
+  "label": "Phone", 
+  "oldfieldname": "contact_no", 
+  "oldfieldtype": "Data", 
+  "reqd": 0
  }, 
  {
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Mobile No.", 
-  "oldfieldname": "mobile_no", 
   "fieldname": "mobile_no", 
   "fieldtype": "Data", 
-  "permlevel": 0
+  "label": "Mobile No.", 
+  "oldfieldname": "mobile_no", 
+  "oldfieldtype": "Data"
  }, 
  {
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Fax", 
-  "oldfieldname": "fax", 
   "fieldname": "fax", 
   "fieldtype": "Data", 
-  "permlevel": 0
+  "label": "Fax", 
+  "oldfieldname": "fax", 
+  "oldfieldtype": "Data"
  }, 
  {
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Website", 
-  "oldfieldname": "website", 
   "fieldname": "website", 
   "fieldtype": "Data", 
-  "permlevel": 0
+  "label": "Website", 
+  "oldfieldname": "website", 
+  "oldfieldtype": "Data"
  }, 
  {
-  "print_hide": 1, 
   "description": "<a href=\"javascript:cur_frm.cscript.TerritoryHelp();\">To manage Territory, click here</a>", 
-  "oldfieldtype": "Link", 
   "doctype": "DocField", 
-  "label": "Territory", 
-  "oldfieldname": "territory", 
-  "options": "Territory", 
   "fieldname": "territory", 
   "fieldtype": "Link", 
-  "permlevel": 0
+  "label": "Territory", 
+  "oldfieldname": "territory", 
+  "oldfieldtype": "Link", 
+  "options": "Territory", 
+  "print_hide": 1
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "column_break2", 
-  "fieldtype": "Column Break", 
-  "permlevel": 0
+  "fieldtype": "Column Break"
  }, 
  {
-  "print_hide": 1, 
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Address Line 1", 
-  "oldfieldname": "address_line1", 
   "fieldname": "address_line1", 
   "fieldtype": "Data", 
-  "reqd": 0, 
-  "permlevel": 0
+  "label": "Address Line 1", 
+  "oldfieldname": "address_line1", 
+  "oldfieldtype": "Data", 
+  "print_hide": 1, 
+  "reqd": 0
  }, 
  {
-  "print_hide": 1, 
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Address Line 2", 
-  "oldfieldname": "address_line2", 
   "fieldname": "address_line2", 
   "fieldtype": "Data", 
-  "permlevel": 0
+  "label": "Address Line 2", 
+  "oldfieldname": "address_line2", 
+  "oldfieldtype": "Data", 
+  "print_hide": 1
  }, 
  {
-  "print_hide": 1, 
-  "oldfieldtype": "Select", 
   "doctype": "DocField", 
-  "label": "City", 
-  "oldfieldname": "city", 
   "fieldname": "city", 
   "fieldtype": "Data", 
-  "reqd": 0, 
-  "permlevel": 0
+  "label": "City", 
+  "oldfieldname": "city", 
+  "oldfieldtype": "Select", 
+  "print_hide": 1, 
+  "reqd": 0
  }, 
  {
-  "print_hide": 1, 
-  "oldfieldtype": "Select", 
   "doctype": "DocField", 
-  "label": "Country", 
-  "oldfieldname": "country", 
-  "options": "link:Country", 
   "fieldname": "country", 
   "fieldtype": "Select", 
-  "reqd": 0, 
-  "permlevel": 0
+  "label": "Country", 
+  "oldfieldname": "country", 
+  "oldfieldtype": "Select", 
+  "options": "link:Country", 
+  "print_hide": 1, 
+  "reqd": 0
  }, 
  {
-  "print_hide": 1, 
-  "oldfieldtype": "Select", 
   "doctype": "DocField", 
-  "label": "State", 
-  "oldfieldname": "state", 
-  "options": "Suggest", 
   "fieldname": "state", 
   "fieldtype": "Data", 
-  "permlevel": 0
+  "label": "State", 
+  "oldfieldname": "state", 
+  "oldfieldtype": "Select", 
+  "options": "Suggest", 
+  "print_hide": 1
  }, 
  {
-  "print_hide": 1, 
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Pin Code", 
-  "oldfieldname": "pincode", 
   "fieldname": "pincode", 
   "fieldtype": "Data", 
-  "permlevel": 0
+  "label": "Pin Code", 
+  "oldfieldname": "pincode", 
+  "oldfieldtype": "Data", 
+  "print_hide": 1
  }, 
  {
-  "oldfieldtype": "Section Break", 
   "doctype": "DocField", 
-  "label": "More Info", 
   "fieldname": "more_info", 
   "fieldtype": "Section Break", 
-  "permlevel": 0
+  "label": "More Info", 
+  "oldfieldtype": "Section Break"
  }, 
  {
   "default": "__user", 
-  "oldfieldtype": "Link", 
   "doctype": "DocField", 
-  "label": "Lead Owner", 
-  "oldfieldname": "lead_owner", 
-  "options": "Profile", 
   "fieldname": "lead_owner", 
   "fieldtype": "Link", 
-  "search_index": 1, 
-  "permlevel": 0, 
-  "in_filter": 1
+  "in_filter": 1, 
+  "label": "Lead Owner", 
+  "oldfieldname": "lead_owner", 
+  "oldfieldtype": "Link", 
+  "options": "Profile", 
+  "search_index": 1
  }, 
  {
-  "oldfieldtype": "Select", 
   "doctype": "DocField", 
-  "label": "Market Segment", 
-  "oldfieldname": "market_segment", 
-  "permlevel": 0, 
   "fieldname": "market_segment", 
   "fieldtype": "Select", 
-  "search_index": 0, 
-  "reqd": 0, 
   "hidden": 0, 
+  "in_filter": 1, 
+  "label": "Market Segment", 
+  "oldfieldname": "market_segment", 
+  "oldfieldtype": "Select", 
   "options": "\nLower Income\nMiddle Income\nUpper Income", 
-  "in_filter": 1
+  "reqd": 0, 
+  "search_index": 0
  }, 
  {
-  "oldfieldtype": "Link", 
   "doctype": "DocField", 
-  "label": "Industry", 
-  "oldfieldname": "industry", 
-  "options": "Industry Type", 
   "fieldname": "industry", 
   "fieldtype": "Link", 
-  "permlevel": 0
+  "label": "Industry", 
+  "oldfieldname": "industry", 
+  "oldfieldtype": "Link", 
+  "options": "Industry Type"
  }, 
  {
-  "oldfieldtype": "Select", 
   "doctype": "DocField", 
-  "label": "Request Type", 
-  "oldfieldname": "request_type", 
-  "options": "\nProduct Enquiry\nRequest for Information\nSuggestions\nOther", 
   "fieldname": "request_type", 
   "fieldtype": "Select", 
-  "permlevel": 0
+  "label": "Request Type", 
+  "oldfieldname": "request_type", 
+  "oldfieldtype": "Select", 
+  "options": "\nProduct Enquiry\nRequest for Information\nSuggestions\nOther"
  }, 
  {
-  "oldfieldtype": "Select", 
   "doctype": "DocField", 
-  "label": "Fiscal Year", 
-  "oldfieldname": "fiscal_year", 
-  "options": "link:Fiscal Year", 
   "fieldname": "fiscal_year", 
   "fieldtype": "Select", 
   "hidden": 1, 
-  "permlevel": 0, 
-  "in_filter": 1
+  "in_filter": 1, 
+  "label": "Fiscal Year", 
+  "oldfieldname": "fiscal_year", 
+  "oldfieldtype": "Select", 
+  "options": "link:Fiscal Year"
  }, 
  {
-  "oldfieldtype": "Column Break", 
   "doctype": "DocField", 
-  "width": "50%", 
   "fieldname": "column_break3", 
   "fieldtype": "Column Break", 
-  "permlevel": 0
+  "oldfieldtype": "Column Break", 
+  "width": "50%"
  }, 
  {
-  "oldfieldtype": "Link", 
   "allow_on_submit": 0, 
+  "depends_on": "eval:doc.status == 'Lead Lost'", 
   "doctype": "DocField", 
-  "label": "Lost Reason", 
-  "oldfieldname": "order_lost_reason", 
-  "options": "Quotation Lost Reason", 
   "fieldname": "order_lost_reason", 
   "fieldtype": "Link", 
-  "depends_on": "eval:doc.status == 'Lead Lost'", 
   "hidden": 0, 
-  "permlevel": 0
+  "label": "Lost Reason", 
+  "oldfieldname": "order_lost_reason", 
+  "oldfieldtype": "Link", 
+  "options": "Quotation Lost Reason"
  }, 
  {
-  "print_hide": 0, 
-  "description": "Your sales person who will contact the lead in future", 
-  "permlevel": 0, 
-  "oldfieldtype": "Link", 
   "allow_on_submit": 0, 
+  "description": "Your sales person who will contact the lead in future", 
   "doctype": "DocField", 
-  "label": "Next Contact By", 
-  "oldfieldname": "contact_by", 
-  "width": "100px", 
   "fieldname": "contact_by", 
   "fieldtype": "Link", 
-  "reqd": 0, 
   "hidden": 0, 
   "in_filter": 1, 
-  "options": "Profile"
+  "label": "Next Contact By", 
+  "oldfieldname": "contact_by", 
+  "oldfieldtype": "Link", 
+  "options": "Profile", 
+  "print_hide": 0, 
+  "reqd": 0, 
+  "width": "100px"
  }, 
  {
-  "description": "Your sales person will get a reminder on this date to contact the lead", 
-  "no_copy": 1, 
-  "oldfieldtype": "Date", 
   "allow_on_submit": 0, 
+  "description": "Your sales person will get a reminder on this date to contact the lead", 
   "doctype": "DocField", 
-  "label": "Next Contact Date", 
-  "oldfieldname": "contact_date", 
-  "width": "100px", 
   "fieldname": "contact_date", 
   "fieldtype": "Date", 
-  "reqd": 0, 
   "in_filter": 1, 
-  "permlevel": 0
+  "label": "Next Contact Date", 
+  "no_copy": 1, 
+  "oldfieldname": "contact_date", 
+  "oldfieldtype": "Date", 
+  "reqd": 0, 
+  "width": "100px"
  }, 
  {
-  "print_hide": 1, 
+  "depends_on": "eval:!doc.__islocal", 
   "description": "Date on which the lead was last contacted", 
-  "no_copy": 1, 
-  "oldfieldtype": "Date", 
   "doctype": "DocField", 
-  "label": "Last Contact Date", 
-  "oldfieldname": "last_contact_date", 
   "fieldname": "last_contact_date", 
   "fieldtype": "Date", 
-  "depends_on": "eval:!doc.__islocal", 
-  "permlevel": 1
+  "label": "Last Contact Date", 
+  "no_copy": 1, 
+  "oldfieldname": "last_contact_date", 
+  "oldfieldtype": "Date", 
+  "print_hide": 1, 
+  "read_only": 1
  }, 
  {
-  "oldfieldtype": "Link", 
   "doctype": "DocField", 
-  "label": "Company", 
-  "oldfieldname": "company", 
-  "options": "Company", 
   "fieldname": "company", 
   "fieldtype": "Link", 
-  "reqd": 0, 
-  "permlevel": 0
+  "label": "Company", 
+  "oldfieldname": "company", 
+  "oldfieldtype": "Link", 
+  "options": "Company", 
+  "reqd": 0
  }, 
  {
-  "print_hide": 1, 
-  "no_copy": 1, 
-  "oldfieldtype": "Small Text", 
   "doctype": "DocField", 
-  "label": "Trash Reason", 
-  "oldfieldname": "trash_reason", 
   "fieldname": "trash_reason", 
   "fieldtype": "Small Text", 
-  "permlevel": 1
+  "label": "Trash Reason", 
+  "no_copy": 1, 
+  "oldfieldname": "trash_reason", 
+  "oldfieldtype": "Small Text", 
+  "print_hide": 1, 
+  "read_only": 1
  }, 
  {
   "doctype": "DocField", 
-  "label": "Unsubscribed", 
   "fieldname": "unsubscribed", 
   "fieldtype": "Check", 
-  "permlevel": 0
+  "label": "Unsubscribed"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Blog Subscriber", 
   "fieldname": "blog_subscriber", 
   "fieldtype": "Check", 
-  "permlevel": 0
+  "label": "Blog Subscriber"
  }, 
  {
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "write": 0, 
-  "role": "All", 
   "cancel": 0, 
-  "permlevel": 1
+  "doctype": "DocPerm", 
+  "role": "Sales User"
  }, 
  {
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "write": 1, 
-  "role": "Sales User", 
-  "cancel": 0, 
-  "permlevel": 0
- }, 
- {
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "write": 1, 
-  "role": "Sales Manager", 
   "cancel": 1, 
-  "permlevel": 0
+  "doctype": "DocPerm", 
+  "role": "Sales Manager"
  }, 
  {
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "write": 1, 
-  "role": "System Manager", 
   "cancel": 0, 
-  "permlevel": 0
- }, 
- {
-  "create": 0, 
   "doctype": "DocPerm", 
-  "write": 0, 
-  "role": "Sales Manager", 
-  "cancel": 0, 
-  "permlevel": 1
- }, 
- {
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "write": 0, 
-  "role": "Sales User", 
-  "cancel": 0, 
-  "permlevel": 1
+  "role": "System Manager"
  }
 ]

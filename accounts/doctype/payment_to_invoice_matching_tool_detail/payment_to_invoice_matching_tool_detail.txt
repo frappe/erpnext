@@ -1,92 +1,92 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-01-10 16:34:07", 
   "docstatus": 0, 
-  "creation": "2012-07-03 13:30:47", 
+  "modified": "2013-01-22 14:47:04", 
   "modified_by": "Administrator", 
-  "modified": "2012-12-31 10:24:49"
+  "owner": "Administrator"
  }, 
  {
-  "istable": 1, 
-  "name": "__common__", 
   "doctype": "DocType", 
-  "module": "Accounts"
+  "istable": 1, 
+  "module": "Accounts", 
+  "name": "__common__"
  }, 
  {
+  "doctype": "DocField", 
   "name": "__common__", 
   "parent": "Payment to Invoice Matching Tool Detail", 
-  "doctype": "DocField", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "parentfield": "fields"
- }, 
- {
-  "name": "Payment to Invoice Matching Tool Detail", 
-  "doctype": "DocType"
- }, 
- {
-  "print_width": "140px", 
-  "permlevel": 1, 
-  "doctype": "DocField", 
-  "label": "Voucher No", 
-  "width": "140px", 
-  "fieldname": "voucher_no", 
-  "fieldtype": "Link", 
-  "reqd": 0, 
-  "options": "Journal Voucher"
- }, 
- {
-  "doctype": "DocField", 
-  "label": "Unmatched Amount", 
-  "fieldname": "amt_due", 
-  "fieldtype": "Currency", 
-  "permlevel": 1
- }, 
- {
-  "doctype": "DocField", 
-  "label": "Allocated Amount", 
-  "fieldname": "amt_to_be_reconciled", 
-  "fieldtype": "Currency", 
-  "reqd": 1, 
   "permlevel": 0
  }, 
  {
+  "doctype": "DocType", 
+  "name": "Payment to Invoice Matching Tool Detail"
+ }, 
+ {
   "doctype": "DocField", 
-  "label": "Posting Date", 
+  "fieldname": "voucher_no", 
+  "fieldtype": "Link", 
+  "label": "Voucher No", 
+  "options": "Journal Voucher", 
+  "print_width": "140px", 
+  "read_only": 1, 
+  "reqd": 0, 
+  "width": "140px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "amt_due", 
+  "fieldtype": "Currency", 
+  "label": "Unmatched Amount", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "amt_to_be_reconciled", 
+  "fieldtype": "Currency", 
+  "label": "Allocated Amount", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "posting_date", 
   "fieldtype": "Date", 
-  "permlevel": 1
+  "label": "Posting Date", 
+  "read_only": 1
  }, 
  {
   "doctype": "DocField", 
-  "label": "Total Amount", 
   "fieldname": "total_amt", 
   "fieldtype": "Currency", 
-  "permlevel": 1
+  "label": "Total Amount", 
+  "read_only": 1
  }, 
  {
   "doctype": "DocField", 
-  "label": "Against Account", 
   "fieldname": "against_account", 
   "fieldtype": "Data", 
-  "permlevel": 1
+  "label": "Against Account", 
+  "read_only": 1
  }, 
  {
-  "print_width": "200px", 
   "doctype": "DocField", 
-  "label": "Remarks", 
-  "width": "200px", 
   "fieldname": "remarks", 
   "fieldtype": "Small Text", 
-  "permlevel": 1
+  "label": "Remarks", 
+  "print_width": "200px", 
+  "read_only": 1, 
+  "width": "200px"
  }, 
  {
-  "print_hide": 1, 
   "doctype": "DocField", 
-  "label": "Voucher Detail No", 
   "fieldname": "voucher_detail_no", 
   "fieldtype": "Data", 
-  "reqd": 0, 
   "hidden": 1, 
-  "permlevel": 1
+  "label": "Voucher Detail No", 
+  "print_hide": 1, 
+  "read_only": 1, 
+  "reqd": 0
  }
 ]

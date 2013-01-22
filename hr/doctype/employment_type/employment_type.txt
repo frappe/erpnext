@@ -1,77 +1,72 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-01-10 16:34:14", 
   "docstatus": 0, 
-  "creation": "2012-03-27 14:35:55", 
+  "modified": "2013-01-22 14:46:42", 
   "modified_by": "Administrator", 
-  "modified": "2012-03-27 14:35:55"
+  "owner": "Administrator"
  }, 
  {
-  "section_style": "Simple", 
-  "module": "HR", 
-  "doctype": "DocType", 
-  "allow_trash": 1, 
-  "document_type": "Master", 
   "autoname": "field:employee_type_name", 
-  "name": "__common__", 
-  "colour": "White:FFF", 
-  "server_code_error": " ", 
-  "show_in_menu": 0, 
-  "version": 16
+  "doctype": "DocType", 
+  "document_type": "Master", 
+  "module": "HR", 
+  "name": "__common__"
  }, 
  {
+  "doctype": "DocField", 
   "name": "__common__", 
   "parent": "Employment Type", 
-  "doctype": "DocField", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "parentfield": "fields"
- }, 
- {
-  "report": 1, 
-  "name": "__common__", 
-  "parent": "Employment Type", 
-  "read": 1, 
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "write": 1, 
-  "cancel": 1, 
-  "parenttype": "DocType", 
-  "permlevel": 0, 
-  "parentfield": "permissions"
- }, 
- {
-  "name": "Employment Type", 
-  "doctype": "DocType"
- }, 
- {
-  "role": "System Manager", 
-  "doctype": "DocPerm"
- }, 
- {
-  "role": "HR User", 
-  "doctype": "DocPerm"
- }, 
- {
-  "role": "HR Manager", 
-  "doctype": "DocPerm"
- }, 
- {
-  "oldfieldtype": "Data", 
-  "doctype": "DocField", 
-  "label": "Employment Type", 
-  "oldfieldname": "employee_type_name", 
-  "fieldname": "employee_type_name", 
-  "fieldtype": "Data", 
-  "reqd": 1, 
   "permlevel": 0
  }, 
  {
-  "oldfieldtype": "Small Text", 
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Employment Type", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 1, 
+  "submit": 0, 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Employment Type"
+ }, 
+ {
   "doctype": "DocField", 
-  "label": "Trash Reason", 
-  "oldfieldname": "trash_reason", 
+  "fieldname": "employee_type_name", 
+  "fieldtype": "Data", 
+  "label": "Employment Type", 
+  "oldfieldname": "employee_type_name", 
+  "oldfieldtype": "Data", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "trash_reason", 
   "fieldtype": "Small Text", 
-  "permlevel": 1
+  "label": "Trash Reason", 
+  "oldfieldname": "trash_reason", 
+  "oldfieldtype": "Small Text", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "System Manager"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "HR User"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "HR Manager"
  }
 ]

@@ -1,115 +1,108 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-01-10 16:34:19", 
   "docstatus": 0, 
-  "creation": "2012-03-27 14:36:08", 
+  "modified": "2013-01-22 13:41:28", 
   "modified_by": "Administrator", 
-  "modified": "2012-03-27 14:36:08"
+  "owner": "Administrator"
  }, 
  {
-  "section_style": "Simple", 
+  "doctype": "DocType", 
   "istable": 1, 
-  "name": "__common__", 
-  "colour": "White:FFF", 
   "module": "Selling", 
-  "show_in_menu": 0, 
-  "version": 59, 
-  "server_code_error": " ", 
-  "doctype": "DocType"
+  "name": "__common__"
  }, 
  {
+  "doctype": "DocField", 
   "name": "__common__", 
   "parent": "Opportunity Item", 
-  "doctype": "DocField", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "permlevel": 0, 
-  "parentfield": "fields"
+  "permlevel": 0
  }, 
  {
-  "name": "Opportunity Item", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "Opportunity Item"
  }, 
  {
-  "oldfieldtype": "Link", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Item Code", 
-  "oldfieldname": "item_code", 
-  "trigger": "Client", 
   "fieldname": "item_code", 
   "fieldtype": "Link", 
-  "reqd": 0, 
-  "options": "Item"
+  "label": "Item Code", 
+  "oldfieldname": "item_code", 
+  "oldfieldtype": "Link", 
+  "options": "Item", 
+  "reqd": 0
  }, 
  {
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Item Name", 
-  "oldfieldname": "item_name", 
   "fieldname": "item_name", 
   "fieldtype": "Data", 
+  "label": "Item Name", 
+  "oldfieldname": "item_name", 
+  "oldfieldtype": "Data", 
   "reqd": 1
  }, 
  {
-  "oldfieldtype": "Text", 
   "doctype": "DocField", 
-  "label": "Description", 
-  "oldfieldname": "description", 
-  "width": "300px", 
   "fieldname": "description", 
   "fieldtype": "Text", 
-  "reqd": 1
+  "label": "Description", 
+  "oldfieldname": "description", 
+  "oldfieldtype": "Text", 
+  "reqd": 1, 
+  "width": "300px"
  }, 
  {
-  "print_hide": 1, 
-  "search_index": 0, 
   "doctype": "DocField", 
-  "label": "Item Group", 
-  "oldfieldname": "item_group", 
   "fieldname": "item_group", 
   "fieldtype": "Link", 
-  "oldfieldtype": "Link", 
   "hidden": 1, 
-  "options": "Item Group"
+  "label": "Item Group", 
+  "oldfieldname": "item_group", 
+  "oldfieldtype": "Link", 
+  "options": "Item Group", 
+  "print_hide": 1, 
+  "search_index": 0
  }, 
  {
-  "print_hide": 1, 
-  "search_index": 0, 
   "doctype": "DocField", 
-  "label": "Brand", 
-  "oldfieldname": "brand", 
   "fieldname": "brand", 
   "fieldtype": "Link", 
-  "oldfieldtype": "Link", 
   "hidden": 1, 
-  "options": "Brand"
+  "label": "Brand", 
+  "oldfieldname": "brand", 
+  "oldfieldtype": "Link", 
+  "options": "Brand", 
+  "print_hide": 1, 
+  "search_index": 0
  }, 
  {
-  "print_hide": 1, 
-  "oldfieldtype": "Currency", 
   "doctype": "DocField", 
-  "label": "Basic Rate", 
-  "oldfieldname": "basic_rate", 
   "fieldname": "basic_rate", 
   "fieldtype": "Currency", 
-  "hidden": 1
+  "hidden": 1, 
+  "label": "Basic Rate", 
+  "oldfieldname": "basic_rate", 
+  "oldfieldtype": "Currency", 
+  "print_hide": 1
  }, 
  {
-  "oldfieldtype": "Currency", 
   "doctype": "DocField", 
+  "fieldname": "qty", 
+  "fieldtype": "Float", 
   "label": "Qty", 
   "oldfieldname": "qty", 
-  "fieldname": "qty", 
-  "fieldtype": "Currency"
+  "oldfieldtype": "Currency"
  }, 
  {
-  "search_index": 0, 
   "doctype": "DocField", 
-  "label": "UOM", 
-  "oldfieldname": "uom", 
   "fieldname": "uom", 
   "fieldtype": "Link", 
+  "label": "UOM", 
+  "oldfieldname": "uom", 
   "oldfieldtype": "Link", 
-  "options": "UOM"
+  "options": "UOM", 
+  "search_index": 0
  }
 ]

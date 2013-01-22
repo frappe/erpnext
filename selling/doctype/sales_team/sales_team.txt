@@ -1,105 +1,99 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-01-10 16:34:22", 
   "docstatus": 0, 
-  "creation": "2012-03-27 14:36:17", 
+  "modified": "2013-01-22 13:47:40", 
   "modified_by": "Administrator", 
-  "modified": "2012-03-27 14:36:17"
+  "owner": "Administrator"
  }, 
  {
-  "section_style": "Tray", 
+  "doctype": "DocType", 
   "istable": 1, 
-  "name": "__common__", 
-  "colour": "White:FFF", 
   "module": "Selling", 
-  "show_in_menu": 0, 
-  "version": 5, 
-  "server_code_error": " ", 
-  "doctype": "DocType"
+  "name": "__common__"
  }, 
  {
+  "doctype": "DocField", 
   "name": "__common__", 
   "parent": "Sales Team", 
-  "doctype": "DocField", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "permlevel": 0, 
-  "parentfield": "fields"
+  "permlevel": 0
  }, 
  {
-  "name": "Sales Team", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "Sales Team"
  }, 
  {
-  "oldfieldtype": "Link", 
   "doctype": "DocField", 
-  "label": "Sales Person", 
-  "oldfieldname": "sales_person", 
-  "width": "200px", 
   "fieldname": "sales_person", 
   "fieldtype": "Link", 
-  "search_index": 1, 
-  "reqd": 1, 
+  "in_filter": 1, 
+  "label": "Sales Person", 
+  "oldfieldname": "sales_person", 
+  "oldfieldtype": "Link", 
   "options": "Sales Person", 
-  "in_filter": 1
+  "reqd": 1, 
+  "search_index": 1, 
+  "width": "200px"
  }, 
  {
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
+  "fieldname": "sales_designation", 
+  "fieldtype": "Data", 
   "label": "Designation", 
   "oldfieldname": "sales_designation", 
-  "width": "100px", 
-  "fieldname": "sales_designation", 
-  "fieldtype": "Data"
+  "oldfieldtype": "Data", 
+  "width": "100px"
  }, 
  {
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Contact No.", 
-  "oldfieldname": "contact_no", 
-  "width": "100px", 
   "fieldname": "contact_no", 
   "fieldtype": "Data", 
-  "hidden": 1
+  "hidden": 1, 
+  "label": "Contact No.", 
+  "oldfieldname": "contact_no", 
+  "oldfieldtype": "Data", 
+  "width": "100px"
  }, 
  {
-  "oldfieldtype": "Currency", 
   "doctype": "DocField", 
+  "fieldname": "allocated_percentage", 
+  "fieldtype": "Float", 
   "label": "Allocated (%)", 
   "oldfieldname": "allocated_percentage", 
-  "width": "100px", 
-  "trigger": "Client", 
-  "fieldname": "allocated_percentage", 
-  "fieldtype": "Currency", 
-  "reqd": 0
+  "oldfieldtype": "Currency", 
+  "reqd": 0, 
+  "width": "100px"
  }, 
  {
-  "oldfieldtype": "Currency", 
   "doctype": "DocField", 
-  "label": "Allocated Amount", 
-  "oldfieldname": "allocated_amount", 
-  "width": "120px", 
   "fieldname": "allocated_amount", 
   "fieldtype": "Currency", 
-  "reqd": 0
+  "label": "Allocated Amount", 
+  "oldfieldname": "allocated_amount", 
+  "oldfieldtype": "Currency", 
+  "reqd": 0, 
+  "width": "120px"
  }, 
  {
-  "print_hide": 1, 
-  "search_index": 1, 
   "doctype": "DocField", 
-  "label": "Parenttype", 
-  "oldfieldname": "parenttype", 
   "fieldname": "parenttype", 
   "fieldtype": "Data", 
-  "oldfieldtype": "Data", 
   "hidden": 1, 
-  "in_filter": 1
+  "in_filter": 1, 
+  "label": "Parenttype", 
+  "oldfieldname": "parenttype", 
+  "oldfieldtype": "Data", 
+  "print_hide": 1, 
+  "search_index": 1
  }, 
  {
-  "oldfieldtype": "Currency", 
   "doctype": "DocField", 
+  "fieldname": "incentives", 
+  "fieldtype": "Currency", 
   "label": "Incentives", 
   "oldfieldname": "incentives", 
-  "fieldname": "incentives", 
-  "fieldtype": "Currency"
+  "oldfieldtype": "Currency"
  }
 ]

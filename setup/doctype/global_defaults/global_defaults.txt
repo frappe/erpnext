@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:23", 
   "docstatus": 0, 
-  "modified": "2013-01-21 16:32:30", 
+  "modified": "2013-01-22 14:56:02", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -34,7 +34,9 @@
   "parenttype": "DocType", 
   "read": 1, 
   "report": 0, 
-  "submit": 0
+  "role": "System Manager", 
+  "submit": 0, 
+  "write": 1
  }, 
  {
   "doctype": "DocType", 
@@ -188,7 +190,7 @@
   "description": "Percentage you are allowed to receive or deliver more against the quantity ordered. <p>For example: If you have ordered 100 units. and your Allowance is 10% then you are allowed to receive 110 units</p>", 
   "doctype": "DocField", 
   "fieldname": "tolerance", 
-  "fieldtype": "Currency", 
+  "fieldtype": "Float", 
   "label": "Allowance Percent"
  }, 
  {
@@ -403,25 +405,10 @@
  {
   "create": 1, 
   "doctype": "DocPerm", 
-  "permlevel": 0, 
-  "role": "System Manager", 
-  "write": 1
+  "permlevel": 0
  }, 
  {
   "doctype": "DocPerm", 
-  "permlevel": 1, 
-  "role": "System Manager", 
-  "write": 1
- }, 
- {
-  "doctype": "DocPerm", 
-  "permlevel": 1, 
-  "role": "All"
- }, 
- {
-  "doctype": "DocPerm", 
-  "permlevel": 2, 
-  "role": "System Manager", 
-  "write": 1
+  "permlevel": 2
  }
 ]

@@ -1,202 +1,175 @@
 [
  {
-  "owner": "wasim@webnotestech.com", 
+  "creation": "2013-01-10 16:34:08", 
   "docstatus": 0, 
-  "creation": "2012-09-18 11:20:24", 
+  "modified": "2013-01-22 14:47:56", 
   "modified_by": "Administrator", 
-  "modified": "2012-09-28 12:27:43"
+  "owner": "wasim@webnotestech.com"
  }, 
  {
-  "section_style": "Tray", 
+  "autoname": "PVTD.######", 
+  "doctype": "DocType", 
+  "hide_heading": 1, 
   "istable": 1, 
   "module": "Accounts", 
-  "doctype": "DocType", 
-  "server_code_error": " ", 
-  "hide_heading": 1, 
-  "autoname": "PVTD.######", 
-  "name": "__common__", 
-  "colour": "White:FFF", 
-  "_last_update": "1322549700", 
-  "show_in_menu": 0, 
-  "version": 1
+  "name": "__common__"
  }, 
  {
+  "doctype": "DocField", 
   "name": "__common__", 
   "parent": "Purchase Taxes and Charges", 
-  "doctype": "DocField", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "parentfield": "fields"
+  "permlevel": 0
  }, 
  {
-  "name": "Purchase Taxes and Charges", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "Purchase Taxes and Charges"
  }, 
  {
-  "oldfieldtype": "Select", 
   "doctype": "DocField", 
-  "label": "Type", 
-  "oldfieldname": "charge_type", 
-  "permlevel": 0, 
-  "trigger": "Client", 
   "fieldname": "charge_type", 
   "fieldtype": "Select", 
-  "reqd": 1, 
-  "options": "\nActual\nOn Net Total\nOn Previous Row Amount\nOn Previous Row Total"
+  "label": "Type", 
+  "oldfieldname": "charge_type", 
+  "oldfieldtype": "Select", 
+  "options": "\nActual\nOn Net Total\nOn Previous Row Amount\nOn Previous Row Total", 
+  "reqd": 1
  }, 
  {
-  "oldfieldtype": "Link", 
   "doctype": "DocField", 
-  "label": "Account Head", 
-  "oldfieldname": "account_head", 
-  "permlevel": 0, 
-  "trigger": "Client", 
   "fieldname": "account_head", 
   "fieldtype": "Link", 
-  "reqd": 1, 
-  "options": "Account"
+  "label": "Account Head", 
+  "oldfieldname": "account_head", 
+  "oldfieldtype": "Link", 
+  "options": "Account", 
+  "reqd": 1
  }, 
  {
-  "oldfieldtype": "Link", 
   "doctype": "DocField", 
-  "label": "Cost Center", 
-  "oldfieldname": "cost_center", 
-  "permlevel": 0, 
-  "trigger": "Client", 
   "fieldname": "cost_center", 
   "fieldtype": "Link", 
+  "label": "Cost Center", 
+  "oldfieldname": "cost_center", 
+  "oldfieldtype": "Link", 
   "options": "Cost Center"
  }, 
  {
-  "oldfieldtype": "Small Text", 
   "doctype": "DocField", 
-  "label": "Description", 
-  "oldfieldname": "description", 
-  "width": "300px", 
   "fieldname": "description", 
   "fieldtype": "Small Text", 
+  "label": "Description", 
+  "oldfieldname": "description", 
+  "oldfieldtype": "Small Text", 
   "reqd": 1, 
-  "permlevel": 0
+  "width": "300px"
  }, 
  {
-  "oldfieldtype": "Currency", 
   "doctype": "DocField", 
-  "label": "Rate", 
-  "oldfieldname": "rate", 
-  "trigger": "Client", 
   "fieldname": "rate", 
   "fieldtype": "Currency", 
-  "reqd": 0, 
-  "permlevel": 0
+  "label": "Rate", 
+  "oldfieldname": "rate", 
+  "oldfieldtype": "Currency", 
+  "reqd": 0
  }, 
  {
-  "oldfieldtype": "Currency", 
   "doctype": "DocField", 
-  "label": "Amount", 
-  "oldfieldname": "tax_amount", 
-  "trigger": "Client", 
   "fieldname": "tax_amount", 
   "fieldtype": "Currency", 
-  "reqd": 0, 
-  "permlevel": 0
+  "label": "Amount", 
+  "oldfieldname": "tax_amount", 
+  "oldfieldtype": "Currency", 
+  "reqd": 0
  }, 
  {
-  "oldfieldtype": "Currency", 
   "doctype": "DocField", 
-  "label": "Total", 
-  "oldfieldname": "total", 
   "fieldname": "total", 
   "fieldtype": "Currency", 
-  "permlevel": 1
+  "label": "Total", 
+  "oldfieldname": "total", 
+  "oldfieldtype": "Currency", 
+  "read_only": 1
  }, 
  {
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Enter Row", 
-  "oldfieldname": "row_id", 
-  "trigger": "Client", 
   "fieldname": "row_id", 
   "fieldtype": "Data", 
   "hidden": 0, 
-  "permlevel": 0
+  "label": "Enter Row", 
+  "oldfieldname": "row_id", 
+  "oldfieldtype": "Data"
  }, 
  {
   "default": "Valuation and Total", 
-  "oldfieldtype": "Select", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Consider Tax or Charge for", 
-  "oldfieldname": "category", 
-  "options": "Valuation and Total\nValuation\nTotal", 
   "fieldname": "category", 
   "fieldtype": "Select", 
-  "reqd": 1, 
-  "permlevel": 0
+  "label": "Consider Tax or Charge for", 
+  "oldfieldname": "category", 
+  "oldfieldtype": "Select", 
+  "options": "Valuation and Total\nValuation\nTotal", 
+  "reqd": 1
  }, 
  {
   "default": "Add", 
-  "oldfieldtype": "Select", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Add or Deduct", 
-  "oldfieldname": "add_deduct_tax", 
-  "trigger": "Client", 
   "fieldname": "add_deduct_tax", 
   "fieldtype": "Select", 
-  "reqd": 1, 
+  "label": "Add or Deduct", 
+  "oldfieldname": "add_deduct_tax", 
+  "oldfieldtype": "Select", 
   "options": "Add\nDeduct", 
-  "permlevel": 0
+  "reqd": 1
  }, 
  {
-  "print_hide": 1, 
-  "oldfieldtype": "Small Text", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Item Wise Tax Detail ", 
-  "oldfieldname": "item_wise_tax_detail", 
   "fieldname": "item_wise_tax_detail", 
   "fieldtype": "Small Text", 
   "hidden": 1, 
-  "permlevel": 1
+  "label": "Item Wise Tax Detail ", 
+  "oldfieldname": "item_wise_tax_detail", 
+  "oldfieldtype": "Small Text", 
+  "print_hide": 1, 
+  "read_only": 1
  }, 
  {
-  "print_hide": 1, 
-  "search_index": 0, 
   "doctype": "DocField", 
-  "label": "Parenttype", 
-  "oldfieldname": "parenttype", 
   "fieldname": "parenttype", 
   "fieldtype": "Data", 
-  "oldfieldtype": "Data", 
   "hidden": 1, 
-  "permlevel": 0, 
-  "in_filter": 1
+  "in_filter": 1, 
+  "label": "Parenttype", 
+  "oldfieldname": "parenttype", 
+  "oldfieldtype": "Data", 
+  "print_hide": 1, 
+  "search_index": 0
  }, 
  {
-  "print_hide": 1, 
   "description": "Cheating Field\nPlease do not delete ", 
-  "no_copy": 1, 
-  "oldfieldtype": "Currency", 
   "doctype": "DocField", 
-  "label": "Total +Tax", 
-  "oldfieldname": "total_tax_amount", 
   "fieldname": "total_tax_amount", 
   "fieldtype": "Currency", 
   "hidden": 1, 
-  "permlevel": 0, 
+  "label": "Total +Tax", 
+  "no_copy": 1, 
+  "oldfieldname": "total_tax_amount", 
+  "oldfieldtype": "Currency", 
+  "print_hide": 1, 
   "report_hide": 1
  }, 
  {
-  "print_hide": 1, 
   "description": "Cheating Field\nPlease do not delete ", 
-  "no_copy": 1, 
-  "oldfieldtype": "Currency", 
   "doctype": "DocField", 
-  "label": "Tax Amount", 
-  "oldfieldname": "total_amount", 
   "fieldname": "total_amount", 
   "fieldtype": "Currency", 
   "hidden": 1, 
-  "permlevel": 0, 
+  "label": "Tax Amount", 
+  "no_copy": 1, 
+  "oldfieldname": "total_amount", 
+  "oldfieldtype": "Currency", 
+  "print_hide": 1, 
   "report_hide": 1
  }
 ]

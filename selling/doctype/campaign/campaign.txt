@@ -1,133 +1,96 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-01-10 16:34:18", 
   "docstatus": 0, 
-  "creation": "2012-07-03 13:30:38", 
+  "modified": "2013-01-22 14:55:58", 
   "modified_by": "Administrator", 
-  "modified": "2012-07-12 13:21:52"
+  "owner": "Administrator"
  }, 
  {
-  "section_style": "Simple", 
-  "description": "Keep Track of Sales Campaigns. Keep track of Leads, Quotations, Sales Order etc from Campaigns to gauge Return on Investment. ", 
-  "module": "Selling", 
-  "server_code_error": " ", 
-  "allow_trash": 1, 
   "autoname": "field:campaign_name", 
-  "document_type": "Master", 
-  "_last_update": "1326102553", 
-  "name": "__common__", 
-  "colour": "White:FFF", 
+  "description": "Keep Track of Sales Campaigns. Keep track of Leads, Quotations, Sales Order etc from Campaigns to gauge Return on Investment. ", 
   "doctype": "DocType", 
-  "show_in_menu": 0, 
-  "version": 1
+  "document_type": "Master", 
+  "module": "Selling", 
+  "name": "__common__"
  }, 
  {
-  "name": "__common__", 
-  "parent": "Campaign", 
   "doctype": "DocField", 
-  "parenttype": "DocType", 
-  "parentfield": "fields"
- }, 
- {
   "name": "__common__", 
   "parent": "Campaign", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
   "amend": 0, 
-  "submit": 0, 
   "doctype": "DocPerm", 
-  "read": 1, 
+  "name": "__common__", 
+  "parent": "Campaign", 
+  "parentfield": "permissions", 
   "parenttype": "DocType", 
-  "parentfield": "permissions"
- }, 
- {
-  "name": "Campaign", 
-  "doctype": "DocType"
- }, 
- {
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "write": 0, 
-  "role": "Sales Manager", 
-  "cancel": 0, 
-  "permlevel": 1
- }, 
- {
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "write": 0, 
+  "permlevel": 0, 
+  "read": 1, 
   "report": 1, 
-  "role": "Sales Manager", 
-  "cancel": 0, 
-  "permlevel": 0
+  "submit": 0
  }, 
  {
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "write": 0, 
-  "role": "Sales Master Manager", 
-  "cancel": 0, 
-  "permlevel": 1
+  "doctype": "DocType", 
+  "name": "Campaign"
  }, 
  {
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "write": 0, 
-  "role": "Sales User", 
-  "cancel": 0, 
-  "permlevel": 1
- }, 
- {
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "write": 0, 
-  "report": 1, 
-  "role": "Sales User", 
-  "cancel": 0, 
-  "permlevel": 0
- }, 
- {
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "write": 1, 
-  "report": 1, 
-  "role": "Sales Master Manager", 
-  "cancel": 1, 
-  "permlevel": 0
- }, 
- {
-  "oldfieldtype": "Small Text", 
   "doctype": "DocField", 
-  "label": "Trash Reason", 
-  "oldfieldname": "trash_reason", 
   "fieldname": "trash_reason", 
   "fieldtype": "Small Text", 
-  "permlevel": 1
+  "label": "Trash Reason", 
+  "oldfieldname": "trash_reason", 
+  "oldfieldtype": "Small Text", 
+  "read_only": 1
  }, 
  {
-  "oldfieldtype": "Section Break", 
   "doctype": "DocField", 
-  "label": "Campaign", 
   "fieldname": "campaign", 
   "fieldtype": "Section Break", 
-  "permlevel": 0
+  "label": "Campaign", 
+  "oldfieldtype": "Section Break"
  }, 
  {
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Campaign Name", 
-  "oldfieldname": "campaign_name", 
   "fieldname": "campaign_name", 
   "fieldtype": "Data", 
-  "reqd": 1, 
-  "permlevel": 0
+  "label": "Campaign Name", 
+  "oldfieldname": "campaign_name", 
+  "oldfieldtype": "Data", 
+  "reqd": 1
  }, 
  {
-  "oldfieldtype": "Text", 
   "doctype": "DocField", 
-  "label": "Description", 
-  "oldfieldname": "description", 
-  "width": "300px", 
   "fieldname": "description", 
   "fieldtype": "Text", 
-  "permlevel": 0
+  "label": "Description", 
+  "oldfieldname": "description", 
+  "oldfieldtype": "Text", 
+  "width": "300px"
+ }, 
+ {
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "role": "Sales Manager", 
+  "write": 0
+ }, 
+ {
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "role": "Sales User", 
+  "write": 0
+ }, 
+ {
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "role": "Sales Master Manager", 
+  "write": 1
  }
 ]

@@ -24,7 +24,7 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
   if(!doc.__islocal) {
     flds = ['item_code', 'warehouse', 'purchase_document_type', 'purchase_document_no', 'purchase_date', 'purchase_time', 'purchase_rate', 'supplier']
     for(i=0;i<flds.length;i++) 
-      set_field_permlevel(flds[i], 1);
+      cur_frm.set_df_property(flds[i], 'read_only', 1);
   }
 }
 

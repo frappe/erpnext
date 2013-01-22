@@ -1,103 +1,105 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-01-10 16:34:32", 
   "docstatus": 0, 
-  "creation": "2012-12-27 14:24:35", 
+  "modified": "2013-01-22 14:12:16", 
   "modified_by": "Administrator", 
-  "modified": "2012-12-27 17:44:55"
+  "owner": "Administrator"
  }, 
  {
-  "issingle": 1, 
   "description": "Settings for the About Us Page", 
   "doctype": "DocType", 
-  "module": "Website", 
   "document_type": "Master", 
+  "issingle": 1, 
+  "module": "Website", 
   "name": "__common__"
  }, 
  {
+  "doctype": "DocField", 
   "name": "__common__", 
   "parent": "About Us Settings", 
-  "doctype": "DocField", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "permlevel": 0, 
-  "parentfield": "fields"
+  "permlevel": 0
  }, 
  {
-  "parent": "About Us Settings", 
-  "read": 1, 
-  "name": "__common__", 
   "create": 1, 
   "doctype": "DocPerm", 
-  "write": 1, 
+  "name": "__common__", 
+  "parent": "About Us Settings", 
+  "parentfield": "permissions", 
   "parenttype": "DocType", 
-  "role": "Website Manager", 
   "permlevel": 0, 
-  "parentfield": "permissions"
+  "read": 1, 
+  "report": 1, 
+  "role": "Website Manager", 
+  "submit": 0, 
+  "write": 1
  }, 
  {
-  "name": "About Us Settings", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "About Us Settings"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Help", 
   "fieldname": "help", 
   "fieldtype": "HTML", 
+  "label": "Help", 
   "options": "<div class=\"alert\">Link for About Us Page is \"about.html\"</div>"
  }, 
  {
   "description": "Introduce your company to the website visitor.", 
   "doctype": "DocField", 
-  "label": "Company Introduction", 
   "fieldname": "company_introduction", 
-  "fieldtype": "Text Editor"
+  "fieldtype": "Text Editor", 
+  "label": "Company Introduction"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Company History", 
   "fieldname": "sb0", 
-  "fieldtype": "Section Break"
+  "fieldtype": "Section Break", 
+  "label": "Company History"
  }, 
  {
   "description": "\"Company History\"", 
   "doctype": "DocField", 
-  "label": "Company History Heading", 
   "fieldname": "company_history_heading", 
-  "fieldtype": "Data"
+  "fieldtype": "Data", 
+  "label": "Company History Heading"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Company History", 
   "fieldname": "company_history", 
   "fieldtype": "Table", 
+  "label": "Company History", 
   "options": "Company History"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Team Members", 
   "fieldname": "sb1", 
-  "fieldtype": "Section Break"
+  "fieldtype": "Section Break", 
+  "label": "Team Members"
  }, 
  {
   "description": "\"Team Members\" or \"Management\"", 
   "doctype": "DocField", 
-  "label": "Team Members Heading", 
   "fieldname": "team_members_heading", 
-  "fieldtype": "Data"
+  "fieldtype": "Data", 
+  "label": "Team Members Heading"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Team Members", 
   "fieldname": "team_members", 
   "fieldtype": "Table", 
+  "label": "Team Members", 
   "options": "About Us Team Member"
  }, 
  {
   "description": "More content for the bottom of the page.", 
   "doctype": "DocField", 
-  "label": "Footer", 
   "fieldname": "footer", 
-  "fieldtype": "Text Editor"
+  "fieldtype": "Text Editor", 
+  "label": "Footer"
  }, 
  {
   "doctype": "DocPerm"

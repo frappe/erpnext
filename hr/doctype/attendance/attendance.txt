@@ -1,190 +1,177 @@
 [
  {
-  "owner": "ashwini@webnotestech.com", 
+  "creation": "2013-01-10 16:34:13", 
   "docstatus": 0, 
-  "creation": "2012-12-14 14:27:05", 
+  "modified": "2013-01-22 14:16:20", 
   "modified_by": "Administrator", 
-  "modified": "2012-12-23 09:42:45"
+  "owner": "ashwini@webnotestech.com"
  }, 
  {
+  "autoname": "naming_series:", 
+  "doctype": "DocType", 
   "document_type": "Master", 
   "is_submittable": 1, 
-  "name": "__common__", 
-  "autoname": "naming_series:", 
   "module": "HR", 
-  "doctype": "DocType", 
+  "name": "__common__", 
   "search_fields": "employee, employee_name, att_date, status"
  }, 
  {
+  "doctype": "DocField", 
   "name": "__common__", 
   "parent": "Attendance", 
-  "doctype": "DocField", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "parentfield": "fields"
+  "permlevel": 0
  }, 
  {
-  "name": "__common__", 
-  "parent": "Attendance", 
-  "read": 1, 
   "create": 1, 
-  "submit": 1, 
   "doctype": "DocPerm", 
-  "write": 1, 
+  "name": "__common__", 
+  "parent": "Attendance", 
+  "parentfield": "permissions", 
   "parenttype": "DocType", 
-  "report": 1, 
   "permlevel": 0, 
-  "cancel": 1, 
-  "parentfield": "permissions"
+  "read": 1, 
+  "write": 1
  }, 
  {
-  "name": "Attendance", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "Attendance"
  }, 
  {
-  "oldfieldtype": "Section Break", 
   "doctype": "DocField", 
-  "label": "Attendance Details", 
-  "permlevel": 0, 
   "fieldname": "attendance_details", 
   "fieldtype": "Section Break", 
+  "label": "Attendance Details", 
+  "oldfieldtype": "Section Break", 
   "options": "Simple"
  }, 
  {
-  "no_copy": 1, 
-  "oldfieldtype": "Select", 
   "doctype": "DocField", 
-  "label": "Naming Series", 
-  "oldfieldname": "naming_series", 
-  "permlevel": 0, 
   "fieldname": "naming_series", 
   "fieldtype": "Select", 
-  "reqd": 1, 
-  "options": "ATT"
+  "label": "Naming Series", 
+  "no_copy": 1, 
+  "oldfieldname": "naming_series", 
+  "oldfieldtype": "Select", 
+  "options": "ATT", 
+  "reqd": 1
  }, 
  {
-  "oldfieldtype": "Link", 
   "doctype": "DocField", 
-  "label": "Employee", 
-  "oldfieldname": "employee", 
-  "permlevel": 0, 
   "fieldname": "employee", 
   "fieldtype": "Link", 
-  "search_index": 1, 
-  "reqd": 1, 
+  "in_filter": 1, 
+  "label": "Employee", 
+  "oldfieldname": "employee", 
+  "oldfieldtype": "Link", 
   "options": "Employee", 
-  "in_filter": 1
+  "reqd": 1, 
+  "search_index": 1
  }, 
  {
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Employee Name", 
-  "oldfieldname": "employee_name", 
   "fieldname": "employee_name", 
   "fieldtype": "Data", 
-  "permlevel": 0
+  "label": "Employee Name", 
+  "oldfieldname": "employee_name", 
+  "oldfieldtype": "Data"
  }, 
  {
-  "no_copy": 1, 
-  "oldfieldtype": "Select", 
   "doctype": "DocField", 
-  "label": "Status", 
-  "oldfieldname": "status", 
-  "options": "\nPresent\nAbsent\nHalf Day", 
   "fieldname": "status", 
   "fieldtype": "Select", 
-  "search_index": 1, 
+  "in_filter": 1, 
+  "label": "Status", 
+  "no_copy": 1, 
+  "oldfieldname": "status", 
+  "oldfieldtype": "Select", 
+  "options": "\nPresent\nAbsent\nHalf Day", 
   "reqd": 1, 
-  "permlevel": 0, 
-  "in_filter": 1
+  "search_index": 1
  }, 
  {
-  "print_hide": 1, 
-  "oldfieldtype": "Link", 
   "doctype": "DocField", 
-  "label": "Leave Type", 
-  "oldfieldname": "leave_type", 
-  "permlevel": 0, 
   "fieldname": "leave_type", 
   "fieldtype": "Link", 
   "hidden": 1, 
+  "label": "Leave Type", 
+  "oldfieldname": "leave_type", 
+  "oldfieldtype": "Link", 
   "options": "Leave Type", 
+  "print_hide": 1, 
   "report_hide": 1
  }, 
  {
-  "oldfieldtype": "Column Break", 
   "doctype": "DocField", 
-  "width": "50%", 
   "fieldname": "column_break0", 
   "fieldtype": "Column Break", 
-  "permlevel": 0
+  "oldfieldtype": "Column Break", 
+  "width": "50%"
  }, 
  {
-  "oldfieldtype": "Date", 
   "doctype": "DocField", 
-  "label": "Attendance Date", 
-  "oldfieldname": "att_date", 
   "fieldname": "att_date", 
   "fieldtype": "Date", 
-  "search_index": 0, 
+  "in_filter": 1, 
+  "label": "Attendance Date", 
+  "oldfieldname": "att_date", 
+  "oldfieldtype": "Date", 
   "reqd": 1, 
-  "permlevel": 0, 
-  "in_filter": 1
+  "search_index": 0
  }, 
  {
-  "oldfieldtype": "Select", 
   "doctype": "DocField", 
-  "label": "Fiscal Year", 
-  "oldfieldname": "fiscal_year", 
-  "permlevel": 0, 
   "fieldname": "fiscal_year", 
   "fieldtype": "Select", 
-  "reqd": 1, 
+  "in_filter": 1, 
+  "label": "Fiscal Year", 
+  "oldfieldname": "fiscal_year", 
+  "oldfieldtype": "Select", 
   "options": "link:Fiscal Year", 
-  "in_filter": 1
+  "reqd": 1
  }, 
  {
-  "oldfieldtype": "Link", 
   "doctype": "DocField", 
-  "label": "Company", 
-  "oldfieldname": "company", 
-  "permlevel": 0, 
   "fieldname": "company", 
   "fieldtype": "Select", 
-  "reqd": 1, 
+  "in_filter": 1, 
+  "label": "Company", 
+  "oldfieldname": "company", 
+  "oldfieldtype": "Link", 
   "options": "link:Company", 
-  "in_filter": 1
+  "reqd": 1
  }, 
  {
-  "print_hide": 1, 
-  "description": "The date at which current entry is corrected in the system.", 
-  "no_copy": 1, 
   "depends_on": "eval:doc.amended_from", 
+  "description": "The date at which current entry is corrected in the system.", 
   "doctype": "DocField", 
-  "label": "Amendment Date", 
   "fieldname": "amendment_date", 
   "fieldtype": "Date", 
-  "permlevel": 0
+  "label": "Amendment Date", 
+  "no_copy": 1, 
+  "print_hide": 1
  }, 
  {
-  "print_hide": 1, 
-  "no_copy": 1, 
   "doctype": "DocField", 
-  "label": "Amended From", 
-  "permlevel": 1, 
   "fieldname": "amended_from", 
   "fieldtype": "Link", 
-  "options": "Attendance"
+  "label": "Amended From", 
+  "no_copy": 1, 
+  "options": "Attendance", 
+  "print_hide": 1, 
+  "read_only": 1
  }, 
  {
-  "role": "System Manager", 
-  "doctype": "DocPerm"
- }, 
- {
+  "cancel": 1, 
+  "doctype": "DocPerm", 
+  "report": 1, 
   "role": "HR User", 
-  "doctype": "DocPerm"
+  "submit": 1
  }, 
  {
-  "role": "HR Manager", 
-  "doctype": "DocPerm"
+  "doctype": "DocPerm", 
+  "match": "owner", 
+  "role": "Employee"
  }
 ]

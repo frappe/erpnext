@@ -1,104 +1,104 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-01-19 10:23:34", 
   "docstatus": 0, 
-  "creation": "2013-01-16 14:48:56", 
+  "modified": "2013-01-22 14:00:34", 
   "modified_by": "Administrator", 
-  "modified": "2013-01-17 11:21:46"
+  "owner": "Administrator"
  }, 
  {
-  "istable": 1, 
   "autoname": "PPID/.#####", 
-  "name": "__common__", 
   "doctype": "DocType", 
-  "module": "Manufacturing"
+  "istable": 1, 
+  "module": "Manufacturing", 
+  "name": "__common__"
  }, 
  {
+  "doctype": "DocField", 
   "name": "__common__", 
   "parent": "Production Plan Item", 
-  "doctype": "DocField", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "permlevel": 0, 
-  "parentfield": "fields"
+  "permlevel": 0
  }, 
  {
-  "name": "Production Plan Item", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "Production Plan Item"
  }, 
  {
-  "oldfieldtype": "Link", 
   "doctype": "DocField", 
-  "label": "Item Code", 
-  "oldfieldname": "item_code", 
-  "width": "150px", 
   "fieldname": "item_code", 
   "fieldtype": "Link", 
+  "label": "Item Code", 
+  "oldfieldname": "item_code", 
+  "oldfieldtype": "Link", 
+  "options": "Item", 
   "reqd": 1, 
-  "options": "Item"
+  "width": "150px"
  }, 
  {
-  "oldfieldtype": "Link", 
   "doctype": "DocField", 
-  "label": "BOM No", 
-  "oldfieldname": "bom_no", 
-  "width": "100px", 
   "fieldname": "bom_no", 
   "fieldtype": "Link", 
+  "label": "BOM No", 
+  "oldfieldname": "bom_no", 
+  "oldfieldtype": "Link", 
+  "options": "BOM", 
   "reqd": 1, 
-  "options": "BOM"
+  "width": "100px"
  }, 
  {
   "default": "0.00", 
-  "oldfieldtype": "Currency", 
   "doctype": "DocField", 
+  "fieldname": "planned_qty", 
+  "fieldtype": "Float", 
   "label": "Planned Qty", 
   "oldfieldname": "planned_qty", 
-  "width": "100px", 
-  "fieldname": "planned_qty", 
-  "fieldtype": "Currency", 
-  "reqd": 1
+  "oldfieldtype": "Currency", 
+  "reqd": 1, 
+  "width": "100px"
  }, 
  {
-  "read_only": 1, 
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Sales Order", 
-  "oldfieldname": "source_docname", 
   "fieldname": "sales_order", 
   "fieldtype": "Link", 
-  "options": "Sales Order"
+  "label": "Sales Order", 
+  "oldfieldname": "source_docname", 
+  "oldfieldtype": "Data", 
+  "options": "Sales Order", 
+  "read_only": 1
  }, 
  {
-  "read_only": 1, 
   "default": "0.00", 
-  "oldfieldtype": "Currency", 
   "doctype": "DocField", 
+  "fieldname": "so_pending_qty", 
+  "fieldtype": "Float", 
   "label": "SO Pending Qty", 
   "oldfieldname": "prevdoc_reqd_qty", 
-  "width": "100px", 
-  "fieldname": "so_pending_qty", 
-  "fieldtype": "Currency", 
-  "reqd": 0
+  "oldfieldtype": "Currency", 
+  "read_only": 1, 
+  "reqd": 0, 
+  "width": "100px"
  }, 
  {
-  "read_only": 1, 
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "UOM", 
-  "oldfieldname": "stock_uom", 
-  "width": "80px", 
   "fieldname": "stock_uom", 
   "fieldtype": "Data", 
-  "reqd": 1
+  "label": "UOM", 
+  "oldfieldname": "stock_uom", 
+  "oldfieldtype": "Data", 
+  "read_only": 1, 
+  "reqd": 1, 
+  "width": "80px"
  }, 
  {
-  "read_only": 1, 
-  "oldfieldtype": "Text", 
   "doctype": "DocField", 
+  "fieldname": "description", 
+  "fieldtype": "Text", 
   "label": "Description", 
   "oldfieldname": "description", 
-  "width": "200px", 
-  "fieldname": "description", 
-  "fieldtype": "Text"
+  "oldfieldtype": "Text", 
+  "read_only": 1, 
+  "width": "200px"
  }
 ]

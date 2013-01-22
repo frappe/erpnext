@@ -1,48 +1,47 @@
 [
  {
-  "owner": "wasim@webnotestech.com", 
+  "creation": "2013-01-10 16:34:28", 
   "docstatus": 0, 
-  "creation": "2012-07-03 13:29:45", 
+  "modified": "2013-01-22 14:56:03", 
   "modified_by": "Administrator", 
-  "modified": "2012-09-17 10:54:21"
+  "owner": "wasim@webnotestech.com"
  }, 
  {
-  "section_style": "Simple", 
-  "module": "Stock", 
-  "server_code_error": " ", 
   "doctype": "DocType", 
   "issingle": 1, 
-  "_last_update": "1321441191", 
-  "name": "__common__", 
-  "colour": "White:FFF", 
-  "show_in_menu": 1, 
-  "version": 1
+  "module": "Stock", 
+  "name": "__common__"
  }, 
  {
+  "doctype": "DocField", 
   "name": "__common__", 
   "parent": "Landed Cost Wizard", 
-  "doctype": "DocField", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Landed Cost Wizard", 
+  "parentfield": "permissions", 
   "parenttype": "DocType", 
   "permlevel": 0, 
-  "parentfield": "fields"
- }, 
- {
-  "name": "__common__", 
-  "parent": "Landed Cost Wizard", 
   "read": 1, 
-  "doctype": "DocPerm", 
-  "parenttype": "DocType", 
-  "parentfield": "permissions"
+  "report": 1, 
+  "submit": 0, 
+  "write": 1
  }, 
  {
-  "name": "Landed Cost Wizard", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "Landed Cost Wizard"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Process", 
   "fieldname": "process", 
   "fieldtype": "HTML", 
+  "label": "Process", 
   "options": "<div class=\"field_description\"><b>Process:</b><br>1. Fetch and select Purchase Receipt<br>2. Enter extra costs<br>3. Click on Update Landed Cost button<br> 4. Cost will be added into other charges table of selected PR proportionately based on net total<br>5. Item Valuation Rate will be recalculated</div>"
  }, 
  {
@@ -53,38 +52,38 @@
  }, 
  {
   "doctype": "DocField", 
-  "label": "From PR Date", 
   "fieldname": "from_pr_date", 
   "fieldtype": "Date", 
+  "label": "From PR Date", 
   "reqd": 1
  }, 
  {
   "doctype": "DocField", 
-  "label": "To PR Date", 
   "fieldname": "to_pr_date", 
   "fieldtype": "Date", 
+  "label": "To PR Date", 
   "reqd": 1
  }, 
  {
   "doctype": "DocField", 
-  "label": "Currency", 
   "fieldname": "currency", 
   "fieldtype": "Select", 
-  "reqd": 1, 
-  "options": "link:Currency"
+  "label": "Currency", 
+  "options": "link:Currency", 
+  "reqd": 1
  }, 
  {
   "doctype": "DocField", 
-  "label": "Get Purchase Receipt", 
   "fieldname": "get_purchase_receipt", 
   "fieldtype": "Button", 
+  "label": "Get Purchase Receipt", 
   "options": "get_purchase_receipts"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Landed Cost Purchase Receipts", 
   "fieldname": "lc_pr_details", 
   "fieldtype": "Table", 
+  "label": "Landed Cost Purchase Receipts", 
   "options": "Landed Cost Purchase Receipt"
  }, 
  {
@@ -95,75 +94,44 @@
  }, 
  {
   "doctype": "DocField", 
-  "label": "Select Landed Cost Items Master", 
   "fieldname": "landed_cost", 
   "fieldtype": "Link", 
+  "label": "Select Landed Cost Items Master", 
   "options": "Landed Cost Master"
  }, 
  {
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Get Details", 
   "fieldname": "get_details", 
   "fieldtype": "Button", 
+  "label": "Get Details", 
   "options": "get_landed_cost_master_details"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Landed Cost Items", 
   "fieldname": "landed_cost_details", 
   "fieldtype": "Table", 
+  "label": "Landed Cost Items", 
   "options": "Landed Cost Item"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Update PR", 
   "fieldname": "update_pr", 
   "fieldtype": "Button", 
+  "label": "Update PR", 
   "options": "update_landed_cost"
  }, 
  {
   "amend": 0, 
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "submit": 0, 
-  "write": 1, 
-  "role": "Purchase Manager", 
   "cancel": 0, 
-  "permlevel": 0
- }, 
- {
-  "create": 1, 
   "doctype": "DocPerm", 
-  "write": 1, 
-  "role": "System Manager", 
-  "permlevel": 0
+  "role": "Purchase Manager"
  }, 
  {
-  "create": 1, 
   "doctype": "DocPerm", 
-  "write": 1, 
-  "role": "Purchase User", 
-  "permlevel": 0
+  "role": "System Manager"
  }, 
  {
-  "role": "All", 
-  "permlevel": 1, 
-  "doctype": "DocPerm"
- }, 
- {
-  "role": "System Manager", 
-  "permlevel": 1, 
-  "doctype": "DocPerm"
- }, 
- {
-  "role": "Purchase User", 
-  "permlevel": 1, 
-  "doctype": "DocPerm"
- }, 
- {
-  "role": "Purchase Manager", 
-  "permlevel": 1, 
-  "doctype": "DocPerm"
+  "doctype": "DocPerm", 
+  "role": "Purchase User"
  }
 ]

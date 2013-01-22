@@ -1,146 +1,133 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-01-10 16:34:31", 
   "docstatus": 0, 
-  "creation": "2012-03-27 14:36:41", 
+  "modified": "2013-01-22 14:47:03", 
   "modified_by": "Administrator", 
-  "modified": "2012-03-27 14:36:41"
+  "owner": "Administrator"
  }, 
  {
-  "section_style": "Simple", 
+  "autoname": "IMD.#####", 
+  "doctype": "DocType", 
   "istable": 1, 
   "module": "Support", 
-  "server_code_error": " ", 
-  "doctype": "DocType", 
-  "autoname": "IMD.#####", 
-  "name": "__common__", 
-  "colour": "White:FFF", 
-  "show_in_menu": 0, 
-  "version": 9
+  "name": "__common__"
  }, 
  {
+  "doctype": "DocField", 
   "name": "__common__", 
   "parent": "Maintenance Schedule Item", 
-  "doctype": "DocField", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "parentfield": "fields"
+  "permlevel": 0
  }, 
  {
-  "name": "Maintenance Schedule Item", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "Maintenance Schedule Item"
  }, 
  {
-  "oldfieldtype": "Link", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Item Code", 
-  "oldfieldname": "item_code", 
-  "permlevel": 0, 
-  "trigger": "Client", 
   "fieldname": "item_code", 
   "fieldtype": "Link", 
-  "search_index": 1, 
-  "reqd": 1, 
+  "in_filter": 1, 
+  "label": "Item Code", 
+  "oldfieldname": "item_code", 
+  "oldfieldtype": "Link", 
   "options": "Item", 
-  "in_filter": 1
+  "reqd": 1, 
+  "search_index": 1
  }, 
  {
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Item Name", 
-  "oldfieldname": "item_name", 
   "fieldname": "item_name", 
   "fieldtype": "Data", 
-  "permlevel": 1
+  "label": "Item Name", 
+  "oldfieldname": "item_name", 
+  "oldfieldtype": "Data", 
+  "read_only": 1
  }, 
  {
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Description", 
-  "oldfieldname": "description", 
-  "width": "300px", 
   "fieldname": "description", 
   "fieldtype": "Data", 
-  "permlevel": 1
+  "label": "Description", 
+  "oldfieldname": "description", 
+  "oldfieldtype": "Data", 
+  "read_only": 1, 
+  "width": "300px"
  }, 
  {
-  "search_index": 1, 
   "doctype": "DocField", 
-  "label": "Start Date", 
-  "oldfieldname": "start_date", 
   "fieldname": "start_date", 
   "fieldtype": "Date", 
+  "in_filter": 1, 
+  "label": "Start Date", 
+  "oldfieldname": "start_date", 
   "oldfieldtype": "Date", 
   "reqd": 1, 
-  "permlevel": 0, 
-  "in_filter": 1
+  "search_index": 1
  }, 
  {
-  "search_index": 1, 
   "doctype": "DocField", 
-  "label": "End Date", 
-  "oldfieldname": "end_date", 
   "fieldname": "end_date", 
   "fieldtype": "Date", 
+  "in_filter": 1, 
+  "label": "End Date", 
+  "oldfieldname": "end_date", 
   "oldfieldtype": "Date", 
   "reqd": 1, 
-  "permlevel": 0, 
-  "in_filter": 1
+  "search_index": 1
  }, 
  {
-  "oldfieldtype": "Select", 
   "doctype": "DocField", 
-  "label": "Periodicity", 
-  "oldfieldname": "periodicity", 
-  "permlevel": 0, 
   "fieldname": "periodicity", 
   "fieldtype": "Select", 
+  "label": "Periodicity", 
+  "oldfieldname": "periodicity", 
+  "oldfieldtype": "Select", 
   "options": "\nWeekly\nMonthly\nQuarterly\nHalf Yearly\nYearly\nRandom"
  }, 
  {
-  "oldfieldtype": "Int", 
   "doctype": "DocField", 
-  "label": "No of Visits", 
-  "oldfieldname": "no_of_visits", 
   "fieldname": "no_of_visits", 
   "fieldtype": "Int", 
-  "reqd": 1, 
-  "permlevel": 0
+  "label": "No of Visits", 
+  "oldfieldname": "no_of_visits", 
+  "oldfieldtype": "Int", 
+  "reqd": 1
  }, 
  {
-  "search_index": 0, 
   "doctype": "DocField", 
-  "label": "Incharge Name", 
-  "oldfieldname": "incharge_name", 
-  "options": "Sales Person", 
   "fieldname": "incharge_name", 
   "fieldtype": "Link", 
+  "in_filter": 1, 
+  "label": "Incharge Name", 
+  "oldfieldname": "incharge_name", 
   "oldfieldtype": "Link", 
+  "options": "Sales Person", 
   "reqd": 1, 
-  "permlevel": 0, 
-  "in_filter": 1
+  "search_index": 0
  }, 
  {
-  "oldfieldtype": "Small Text", 
   "doctype": "DocField", 
-  "label": "Serial No", 
-  "oldfieldname": "serial_no", 
   "fieldname": "serial_no", 
   "fieldtype": "Small Text", 
-  "permlevel": 0
+  "label": "Serial No", 
+  "oldfieldname": "serial_no", 
+  "oldfieldtype": "Small Text"
  }, 
  {
-  "print_hide": 1, 
-  "no_copy": 1, 
-  "search_index": 1, 
   "doctype": "DocField", 
-  "label": "Against Docname", 
-  "oldfieldname": "prevdoc_docname", 
-  "width": "150px", 
   "fieldname": "prevdoc_docname", 
   "fieldtype": "Data", 
+  "in_filter": 1, 
+  "label": "Against Docname", 
+  "no_copy": 1, 
+  "oldfieldname": "prevdoc_docname", 
   "oldfieldtype": "Data", 
-  "permlevel": 1, 
-  "in_filter": 1
+  "print_hide": 1, 
+  "read_only": 1, 
+  "search_index": 1, 
+  "width": "150px"
  }
 ]

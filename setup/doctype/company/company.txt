@@ -1,309 +1,260 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-01-10 16:34:22", 
   "docstatus": 0, 
-  "creation": "2012-08-10 13:00:45", 
+  "modified": "2013-01-22 14:55:58", 
   "modified_by": "Administrator", 
-  "modified": "2012-12-03 11:26:05"
+  "owner": "Administrator"
  }, 
  {
-  "description": "Legal Entity / Subsidiary with a separate Chart of Accounts belonging to the Organization.", 
-  "autoname": "field:company_name", 
   "allow_rename": 1, 
-  "module": "Setup", 
+  "autoname": "field:company_name", 
+  "description": "Legal Entity / Subsidiary with a separate Chart of Accounts belonging to the Organization.", 
   "doctype": "DocType", 
   "document_type": "Master", 
+  "module": "Setup", 
   "name": "__common__"
  }, 
  {
+  "doctype": "DocField", 
   "name": "__common__", 
   "parent": "Company", 
-  "doctype": "DocField", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "parentfield": "fields"
+  "permlevel": 0
  }, 
  {
-  "name": "__common__", 
-  "parent": "Company", 
-  "read": 1, 
+  "amend": 0, 
+  "cancel": 1, 
+  "create": 1, 
   "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Company", 
+  "parentfield": "permissions", 
   "parenttype": "DocType", 
-  "parentfield": "permissions"
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 1, 
+  "role": "System Manager", 
+  "submit": 0, 
+  "write": 1
  }, 
  {
-  "name": "Company", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "Company"
  }, 
  {
-  "oldfieldtype": "Section Break", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Company Details", 
   "fieldname": "details", 
   "fieldtype": "Section Break", 
-  "permlevel": 0
+  "label": "Company Details", 
+  "oldfieldtype": "Section Break"
  }, 
  {
-  "no_copy": 0, 
-  "oldfieldtype": "Data", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Company", 
-  "oldfieldname": "company_name", 
   "fieldname": "company_name", 
   "fieldtype": "Data", 
-  "reqd": 1, 
-  "permlevel": 0
+  "label": "Company", 
+  "no_copy": 0, 
+  "oldfieldname": "company_name", 
+  "oldfieldtype": "Data", 
+  "reqd": 1
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "cb0", 
-  "fieldtype": "Column Break", 
-  "permlevel": 0
+  "fieldtype": "Column Break"
  }, 
  {
   "description": "Please Enter Abbreviation or Short Name properly as it will be added as Suffix to all Account Heads.", 
-  "no_copy": 0, 
-  "oldfieldtype": "Data", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Abbr", 
-  "oldfieldname": "abbr", 
   "fieldname": "abbr", 
   "fieldtype": "Data", 
-  "reqd": 1, 
-  "permlevel": 0
+  "label": "Abbr", 
+  "no_copy": 0, 
+  "oldfieldname": "abbr", 
+  "oldfieldtype": "Data", 
+  "reqd": 1
  }, 
  {
-  "oldfieldtype": "Section Break", 
   "doctype": "DocField", 
-  "label": "Default Settings", 
   "fieldname": "default_settings", 
   "fieldtype": "Section Break", 
-  "permlevel": 0
+  "label": "Default Settings", 
+  "oldfieldtype": "Section Break"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Default Currency", 
-  "permlevel": 0, 
   "fieldname": "default_currency", 
   "fieldtype": "Select", 
-  "reqd": 1, 
-  "options": "link:Currency"
+  "label": "Default Currency", 
+  "options": "link:Currency", 
+  "reqd": 1
  }, 
  {
-  "no_copy": 1, 
-  "oldfieldtype": "Link", 
+  "depends_on": "eval:!doc.__islocal", 
   "doctype": "DocField", 
-  "label": "Default Bank Account", 
-  "oldfieldname": "default_bank_account", 
-  "permlevel": 0, 
-  "trigger": "Client", 
   "fieldname": "default_bank_account", 
   "fieldtype": "Link", 
-  "depends_on": "eval:!doc.__islocal", 
+  "label": "Default Bank Account", 
+  "no_copy": 1, 
+  "oldfieldname": "default_bank_account", 
+  "oldfieldtype": "Link", 
   "options": "Account"
  }, 
  {
-  "no_copy": 1, 
-  "oldfieldtype": "Link", 
+  "depends_on": "eval:!doc.__islocal", 
   "doctype": "DocField", 
-  "label": "Receivables Group", 
-  "oldfieldname": "receivables_group", 
-  "permlevel": 0, 
-  "trigger": "Client", 
   "fieldname": "receivables_group", 
   "fieldtype": "Link", 
-  "depends_on": "eval:!doc.__islocal", 
+  "label": "Receivables Group", 
+  "no_copy": 1, 
+  "oldfieldname": "receivables_group", 
+  "oldfieldtype": "Link", 
   "options": "Account"
  }, 
  {
-  "no_copy": 1, 
-  "oldfieldtype": "Link", 
+  "depends_on": "eval:!doc.__islocal", 
   "doctype": "DocField", 
-  "label": "Payables Group", 
-  "oldfieldname": "payables_group", 
-  "permlevel": 0, 
-  "trigger": "Client", 
   "fieldname": "payables_group", 
   "fieldtype": "Link", 
-  "depends_on": "eval:!doc.__islocal", 
+  "label": "Payables Group", 
+  "no_copy": 1, 
+  "oldfieldname": "payables_group", 
+  "oldfieldtype": "Link", 
   "options": "Account"
  }, 
  {
-  "oldfieldtype": "Column Break", 
   "doctype": "DocField", 
-  "width": "50%", 
   "fieldname": "column_break0", 
   "fieldtype": "Column Break", 
-  "permlevel": 0
+  "oldfieldtype": "Column Break", 
+  "width": "50%"
  }, 
  {
-  "oldfieldtype": "Int", 
+  "depends_on": "eval:!doc.__islocal", 
   "doctype": "DocField", 
-  "label": "Credit Days", 
-  "oldfieldname": "credit_days", 
   "fieldname": "credit_days", 
   "fieldtype": "Int", 
-  "depends_on": "eval:!doc.__islocal", 
-  "permlevel": 0
+  "label": "Credit Days", 
+  "oldfieldname": "credit_days", 
+  "oldfieldtype": "Int"
  }, 
  {
-  "oldfieldtype": "Currency", 
+  "depends_on": "eval:!doc.__islocal", 
   "doctype": "DocField", 
-  "label": "Credit Limit", 
-  "oldfieldname": "credit_limit", 
   "fieldname": "credit_limit", 
   "fieldtype": "Currency", 
-  "depends_on": "eval:!doc.__islocal", 
-  "permlevel": 0
+  "label": "Credit Limit", 
+  "oldfieldname": "credit_limit", 
+  "oldfieldtype": "Currency"
  }, 
  {
-  "oldfieldtype": "Select", 
-  "colour": "White:FFF", 
+  "depends_on": "eval:!doc.__islocal", 
   "doctype": "DocField", 
-  "label": "If Yearly Budget Exceeded", 
-  "oldfieldname": "yearly_bgt_flag", 
-  "permlevel": 0, 
   "fieldname": "yearly_bgt_flag", 
   "fieldtype": "Select", 
-  "depends_on": "eval:!doc.__islocal", 
+  "label": "If Yearly Budget Exceeded", 
+  "oldfieldname": "yearly_bgt_flag", 
+  "oldfieldtype": "Select", 
   "options": "\nWarn\nIgnore\nStop"
  }, 
  {
-  "oldfieldtype": "Select", 
+  "depends_on": "eval:!doc.__islocal", 
   "doctype": "DocField", 
-  "label": "If Monthly Budget Exceeded", 
-  "oldfieldname": "monthly_bgt_flag", 
-  "permlevel": 0, 
   "fieldname": "monthly_bgt_flag", 
   "fieldtype": "Select", 
-  "depends_on": "eval:!doc.__islocal", 
+  "label": "If Monthly Budget Exceeded", 
+  "oldfieldname": "monthly_bgt_flag", 
+  "oldfieldtype": "Select", 
   "options": "\nWarn\nIgnore\nStop"
  }, 
  {
   "description": "For reference only.", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Company Info", 
   "fieldname": "company_info", 
   "fieldtype": "Section Break", 
-  "permlevel": 0
+  "label": "Company Info"
  }, 
  {
-  "oldfieldtype": "Small Text", 
   "doctype": "DocField", 
-  "label": "Address", 
-  "oldfieldname": "address", 
   "fieldname": "address", 
   "fieldtype": "Small Text", 
-  "permlevel": 0
+  "label": "Address", 
+  "oldfieldname": "address", 
+  "oldfieldtype": "Small Text"
  }, 
  {
-  "oldfieldtype": "Column Break", 
   "doctype": "DocField", 
-  "width": "50%", 
   "fieldname": "column_break1", 
   "fieldtype": "Column Break", 
-  "permlevel": 0
+  "oldfieldtype": "Column Break", 
+  "width": "50%"
  }, 
  {
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Phone No", 
-  "oldfieldname": "phone_no", 
-  "permlevel": 0, 
   "fieldname": "phone_no", 
   "fieldtype": "Data", 
+  "label": "Phone No", 
+  "oldfieldname": "phone_no", 
+  "oldfieldtype": "Data", 
   "options": "Phone"
  }, 
  {
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Fax", 
-  "oldfieldname": "fax", 
-  "permlevel": 0, 
   "fieldname": "fax", 
   "fieldtype": "Data", 
+  "label": "Fax", 
+  "oldfieldname": "fax", 
+  "oldfieldtype": "Data", 
   "options": "Phone"
  }, 
  {
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Email", 
-  "oldfieldname": "email", 
-  "permlevel": 0, 
   "fieldname": "email", 
   "fieldtype": "Data", 
+  "label": "Email", 
+  "oldfieldname": "email", 
+  "oldfieldtype": "Data", 
   "options": "Email"
  }, 
  {
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Website", 
-  "oldfieldname": "website", 
   "fieldname": "website", 
   "fieldtype": "Data", 
-  "permlevel": 0
+  "label": "Website", 
+  "oldfieldname": "website", 
+  "oldfieldtype": "Data"
  }, 
  {
   "description": "Company registration numbers for your reference. Example: VAT Registration Numbers etc.", 
-  "oldfieldtype": "Section Break", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Registration Info", 
-  "width": "50%", 
   "fieldname": "registration_info", 
   "fieldtype": "Section Break", 
-  "permlevel": 0
+  "label": "Registration Info", 
+  "oldfieldtype": "Section Break", 
+  "width": "50%"
  }, 
  {
   "description": "Company registration numbers for your reference. Tax numbers etc.", 
-  "oldfieldtype": "Code", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Registration Details", 
-  "oldfieldname": "registration_details", 
   "fieldname": "registration_details", 
   "fieldtype": "Code", 
-  "permlevel": 0
+  "label": "Registration Details", 
+  "oldfieldname": "registration_details", 
+  "oldfieldtype": "Code"
  }, 
  {
-  "no_copy": 1, 
-  "oldfieldtype": "Small Text", 
   "doctype": "DocField", 
-  "label": "Trash Reason", 
-  "oldfieldname": "trash_reason", 
   "fieldname": "trash_reason", 
   "fieldtype": "Small Text", 
-  "permlevel": 1
+  "label": "Trash Reason", 
+  "no_copy": 1, 
+  "oldfieldname": "trash_reason", 
+  "oldfieldtype": "Small Text", 
+  "read_only": 1
  }, 
  {
-  "amend": 0, 
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "submit": 0, 
-  "write": 1, 
-  "report": 1, 
-  "role": "System Manager", 
-  "cancel": 1, 
-  "permlevel": 0
- }, 
- {
-  "amend": 0, 
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "submit": 0, 
-  "write": 1, 
-  "report": 1, 
-  "role": "System Manager", 
-  "cancel": 1, 
-  "permlevel": 0
- }, 
- {
-  "cancel": 0, 
-  "role": "All", 
-  "permlevel": 1, 
   "doctype": "DocPerm"
  }
 ]

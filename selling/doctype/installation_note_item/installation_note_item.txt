@@ -1,127 +1,120 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-01-10 16:34:18", 
   "docstatus": 0, 
-  "creation": "2012-03-27 14:36:10", 
+  "modified": "2013-01-22 14:47:00", 
   "modified_by": "Administrator", 
-  "modified": "2012-03-27 14:36:10"
+  "owner": "Administrator"
  }, 
  {
-  "section_style": "Simple", 
+  "autoname": "IID/.#####", 
+  "doctype": "DocType", 
   "istable": 1, 
   "module": "Selling", 
-  "server_code_error": " ", 
-  "doctype": "DocType", 
-  "autoname": "IID/.#####", 
-  "name": "__common__", 
-  "colour": "White:FFF", 
-  "show_in_menu": 0, 
-  "version": 25
+  "name": "__common__"
  }, 
  {
+  "doctype": "DocField", 
   "name": "__common__", 
   "parent": "Installation Note Item", 
-  "doctype": "DocField", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "parentfield": "fields"
+  "permlevel": 0
  }, 
  {
-  "name": "Installation Note Item", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "Installation Note Item"
  }, 
  {
-  "oldfieldtype": "Link", 
   "doctype": "DocField", 
-  "label": "Item Code", 
-  "oldfieldname": "item_code", 
-  "permlevel": 0, 
   "fieldname": "item_code", 
   "fieldtype": "Link", 
-  "reqd": 1, 
-  "options": "Item"
+  "label": "Item Code", 
+  "oldfieldname": "item_code", 
+  "oldfieldtype": "Link", 
+  "options": "Item", 
+  "reqd": 1
  }, 
  {
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Description", 
-  "oldfieldname": "description", 
-  "width": "300px", 
   "fieldname": "description", 
   "fieldtype": "Data", 
-  "permlevel": 1
+  "label": "Description", 
+  "oldfieldname": "description", 
+  "oldfieldtype": "Data", 
+  "read_only": 1, 
+  "width": "300px"
  }, 
  {
-  "print_hide": 0, 
-  "oldfieldtype": "Date", 
   "doctype": "DocField", 
-  "label": "Delivery Date", 
-  "oldfieldname": "prevdoc_date", 
   "fieldname": "prevdoc_date", 
   "fieldtype": "Date", 
   "hidden": 0, 
-  "permlevel": 1
+  "label": "Delivery Date", 
+  "oldfieldname": "prevdoc_date", 
+  "oldfieldtype": "Date", 
+  "print_hide": 0, 
+  "read_only": 1
  }, 
  {
-  "oldfieldtype": "Small Text", 
   "doctype": "DocField", 
-  "label": "Serial No", 
-  "oldfieldname": "serial_no", 
-  "width": "180px", 
   "fieldname": "serial_no", 
   "fieldtype": "Small Text", 
-  "permlevel": 0
+  "label": "Serial No", 
+  "oldfieldname": "serial_no", 
+  "oldfieldtype": "Small Text", 
+  "width": "180px"
  }, 
  {
-  "print_hide": 1, 
-  "no_copy": 1, 
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Against Document Detail No", 
-  "oldfieldname": "prevdoc_detail_docname", 
-  "width": "150px", 
   "fieldname": "prevdoc_detail_docname", 
   "fieldtype": "Data", 
   "hidden": 1, 
-  "permlevel": 1
+  "label": "Against Document Detail No", 
+  "no_copy": 1, 
+  "oldfieldname": "prevdoc_detail_docname", 
+  "oldfieldtype": "Data", 
+  "print_hide": 1, 
+  "read_only": 1, 
+  "width": "150px"
  }, 
  {
-  "print_hide": 1, 
-  "no_copy": 1, 
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Against Document No", 
-  "oldfieldname": "prevdoc_docname", 
-  "width": "150px", 
   "fieldname": "prevdoc_docname", 
   "fieldtype": "Data", 
-  "search_index": 1, 
   "hidden": 1, 
-  "permlevel": 1, 
-  "in_filter": 1
+  "in_filter": 1, 
+  "label": "Against Document No", 
+  "no_copy": 1, 
+  "oldfieldname": "prevdoc_docname", 
+  "oldfieldtype": "Data", 
+  "print_hide": 1, 
+  "read_only": 1, 
+  "search_index": 1, 
+  "width": "150px"
  }, 
  {
-  "print_hide": 1, 
-  "no_copy": 1, 
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Document Type", 
-  "oldfieldname": "prevdoc_doctype", 
-  "width": "150px", 
   "fieldname": "prevdoc_doctype", 
   "fieldtype": "Data", 
-  "search_index": 1, 
   "hidden": 1, 
-  "permlevel": 1, 
-  "in_filter": 1
+  "in_filter": 1, 
+  "label": "Document Type", 
+  "no_copy": 1, 
+  "oldfieldname": "prevdoc_doctype", 
+  "oldfieldtype": "Data", 
+  "print_hide": 1, 
+  "read_only": 1, 
+  "search_index": 1, 
+  "width": "150px"
  }, 
  {
-  "oldfieldtype": "Currency", 
   "doctype": "DocField", 
+  "fieldname": "qty", 
+  "fieldtype": "Float", 
   "label": "Installed Qty", 
   "oldfieldname": "qty", 
-  "fieldname": "qty", 
-  "fieldtype": "Currency", 
-  "reqd": 1, 
-  "permlevel": 0
+  "oldfieldtype": "Currency", 
+  "reqd": 1
  }
 ]

@@ -1,72 +1,68 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-01-10 16:34:06", 
   "docstatus": 0, 
-  "creation": "2012-03-27 14:35:41", 
+  "modified": "2013-01-22 14:18:52", 
   "modified_by": "Administrator", 
-  "modified": "2012-03-27 14:35:41"
+  "owner": "Administrator"
  }, 
  {
-  "section_style": "Simple", 
-  "istable": 1, 
-  "name": "__common__", 
-  "colour": "White:FFF", 
-  "module": "Accounts", 
   "doctype": "DocType", 
-  "version": 5, 
-  "show_in_menu": 0
+  "istable": 1, 
+  "module": "Accounts", 
+  "name": "__common__"
  }, 
  {
+  "doctype": "DocField", 
   "name": "__common__", 
   "parent": "C-Form Invoice Detail", 
-  "doctype": "DocField", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "parentfield": "fields"
- }, 
- {
-  "name": "C-Form Invoice Detail", 
-  "doctype": "DocType"
- }, 
- {
-  "doctype": "DocField", 
-  "label": "Invoice No", 
-  "width": "160px", 
-  "options": "Sales Invoice", 
-  "fieldname": "invoice_no", 
-  "fieldtype": "Link", 
   "permlevel": 0
  }, 
  {
+  "doctype": "DocType", 
+  "name": "C-Form Invoice Detail"
+ }, 
+ {
   "doctype": "DocField", 
-  "label": "Invoice Date", 
-  "width": "120px", 
+  "fieldname": "invoice_no", 
+  "fieldtype": "Link", 
+  "label": "Invoice No", 
+  "options": "Sales Invoice", 
+  "width": "160px"
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "invoice_date", 
   "fieldtype": "Date", 
-  "permlevel": 1
+  "label": "Invoice Date", 
+  "read_only": 1, 
+  "width": "120px"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Territory", 
-  "width": "120px", 
-  "options": "Territory", 
   "fieldname": "territory", 
   "fieldtype": "Link", 
-  "permlevel": 1
+  "label": "Territory", 
+  "options": "Territory", 
+  "read_only": 1, 
+  "width": "120px"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Net Total", 
-  "width": "120px", 
   "fieldname": "net_total", 
   "fieldtype": "Currency", 
-  "permlevel": 1
+  "label": "Net Total", 
+  "read_only": 1, 
+  "width": "120px"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Grand Total", 
-  "width": "120px", 
   "fieldname": "grand_total", 
   "fieldtype": "Currency", 
-  "permlevel": 1
+  "label": "Grand Total", 
+  "read_only": 1, 
+  "width": "120px"
  }
 ]

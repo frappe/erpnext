@@ -1,139 +1,132 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-01-10 16:34:18", 
   "docstatus": 0, 
-  "creation": "2012-12-03 10:31:04", 
+  "modified": "2013-01-22 14:50:09", 
   "modified_by": "Administrator", 
-  "modified": "2013-01-02 12:46:48"
+  "owner": "Administrator"
  }, 
  {
-  "istable": 1, 
   "autoname": "TSD.#####", 
-  "name": "__common__", 
   "doctype": "DocType", 
-  "module": "Projects"
+  "istable": 1, 
+  "module": "Projects", 
+  "name": "__common__"
  }, 
  {
+  "doctype": "DocField", 
   "name": "__common__", 
   "parent": "Timesheet Detail", 
-  "doctype": "DocField", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "parentfield": "fields"
+  "permlevel": 0
  }, 
  {
-  "name": "Timesheet Detail", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "Timesheet Detail"
  }, 
  {
-  "print_width": "160px", 
-  "oldfieldtype": "Time", 
   "doctype": "DocField", 
-  "label": "Actual Start Time", 
-  "oldfieldname": "act_start_time", 
-  "width": "160px", 
   "fieldname": "act_start_time", 
   "fieldtype": "Time", 
+  "label": "Actual Start Time", 
+  "oldfieldname": "act_start_time", 
+  "oldfieldtype": "Time", 
+  "print_width": "160px", 
   "reqd": 1, 
-  "permlevel": 0
+  "width": "160px"
  }, 
  {
-  "print_width": "160px", 
-  "oldfieldtype": "Time", 
   "doctype": "DocField", 
-  "label": "Actual End Time", 
-  "oldfieldname": "act_end_time", 
-  "width": "160px", 
   "fieldname": "act_end_time", 
   "fieldtype": "Time", 
+  "label": "Actual End Time", 
+  "oldfieldname": "act_end_time", 
+  "oldfieldtype": "Time", 
+  "print_width": "160px", 
   "reqd": 1, 
-  "permlevel": 0
+  "width": "160px"
  }, 
  {
-  "print_width": "200px", 
-  "permlevel": 0, 
-  "search_index": 0, 
   "doctype": "DocField", 
-  "label": "Activity Type", 
-  "width": "200px", 
   "fieldname": "activity_type", 
   "fieldtype": "Link", 
+  "label": "Activity Type", 
+  "options": "Activity Type", 
+  "print_width": "200px", 
   "reqd": 1, 
-  "options": "Activity Type"
+  "search_index": 0, 
+  "width": "200px"
  }, 
  {
-  "print_width": "200px", 
-  "oldfieldtype": "Text", 
   "doctype": "DocField", 
-  "label": "Additional Info", 
-  "oldfieldname": "other_details", 
-  "width": "200px", 
   "fieldname": "other_details", 
   "fieldtype": "Text", 
-  "permlevel": 0
+  "label": "Additional Info", 
+  "oldfieldname": "other_details", 
+  "oldfieldtype": "Text", 
+  "print_width": "200px", 
+  "width": "200px"
  }, 
  {
-  "print_width": "100px", 
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Total Hours (Actual)", 
-  "oldfieldname": "act_total_hrs", 
-  "width": "100px", 
   "fieldname": "act_total_hrs", 
   "fieldtype": "Data", 
-  "permlevel": 1
+  "label": "Total Hours (Actual)", 
+  "oldfieldname": "act_total_hrs", 
+  "oldfieldtype": "Data", 
+  "print_width": "100px", 
+  "read_only": 1, 
+  "width": "100px"
  }, 
  {
-  "print_width": "150px", 
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Customer Name", 
-  "oldfieldname": "customer_name", 
-  "width": "150px", 
-  "options": "Customer", 
   "fieldname": "customer_name", 
   "fieldtype": "Link", 
-  "permlevel": 0
+  "label": "Customer Name", 
+  "oldfieldname": "customer_name", 
+  "oldfieldtype": "Data", 
+  "options": "Customer", 
+  "print_width": "150px", 
+  "width": "150px"
  }, 
  {
-  "print_width": "150px", 
-  "permlevel": 0, 
-  "oldfieldtype": "Link", 
   "doctype": "DocField", 
-  "label": "Project", 
-  "oldfieldname": "project_name", 
-  "width": "150px", 
   "fieldname": "project_name", 
   "fieldtype": "Link", 
-  "search_index": 1, 
-  "reqd": 0, 
+  "in_filter": 1, 
+  "label": "Project", 
+  "oldfieldname": "project_name", 
+  "oldfieldtype": "Link", 
   "options": "Project", 
-  "in_filter": 1
+  "print_width": "150px", 
+  "reqd": 0, 
+  "search_index": 1, 
+  "width": "150px"
  }, 
  {
-  "print_width": "150px", 
-  "permlevel": 0, 
-  "oldfieldtype": "Link", 
   "doctype": "DocField", 
-  "label": "Task Id", 
-  "oldfieldname": "task_id", 
-  "width": "150px", 
   "fieldname": "task_id", 
   "fieldtype": "Link", 
-  "search_index": 1, 
+  "in_filter": 1, 
+  "label": "Task Id", 
+  "oldfieldname": "task_id", 
+  "oldfieldtype": "Link", 
   "options": "Task", 
-  "in_filter": 1
+  "print_width": "150px", 
+  "search_index": 1, 
+  "width": "150px"
  }, 
  {
-  "print_width": "250px", 
-  "oldfieldtype": "Link", 
   "doctype": "DocField", 
-  "label": "Task Name", 
-  "oldfieldname": "task_name", 
-  "width": "250px", 
   "fieldname": "task_name", 
   "fieldtype": "Data", 
-  "search_index": 0, 
+  "label": "Task Name", 
+  "oldfieldname": "task_name", 
+  "oldfieldtype": "Link", 
+  "print_width": "250px", 
   "reqd": 0, 
-  "permlevel": 0
+  "search_index": 0, 
+  "width": "250px"
  }
 ]

@@ -1,44 +1,37 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-01-10 16:34:32", 
   "docstatus": 0, 
-  "creation": "2012-03-27 14:36:47", 
+  "modified": "2013-01-22 14:57:24", 
   "modified_by": "Administrator", 
-  "modified": "2012-03-27 14:36:47"
+  "owner": "Administrator"
  }, 
  {
-  "section_style": "Simple", 
-  "in_create": 0, 
-  "module": "Utilities", 
-  "server_code_error": " ", 
   "doctype": "DocType", 
+  "in_create": 0, 
   "issingle": 1, 
-  "name": "__common__", 
-  "colour": "White:FFF", 
-  "show_in_menu": 0, 
-  "version": 8
+  "module": "Utilities", 
+  "name": "__common__"
  }, 
  {
+  "create": 1, 
+  "doctype": "DocPerm", 
   "name": "__common__", 
   "parent": "SMS Control", 
-  "read": 1, 
-  "doctype": "DocPerm", 
+  "parentfield": "permissions", 
   "parenttype": "DocType", 
-  "role": "System Manager", 
-  "parentfield": "permissions"
- }, 
- {
-  "name": "SMS Control", 
-  "doctype": "DocType"
- }, 
- {
-  "write": 1, 
-  "create": 1, 
   "permlevel": 0, 
-  "doctype": "DocPerm"
+  "read": 1, 
+  "report": 1, 
+  "role": "System Manager", 
+  "submit": 0, 
+  "write": 1
  }, 
  {
-  "permlevel": 1, 
+  "doctype": "DocType", 
+  "name": "SMS Control"
+ }, 
+ {
   "doctype": "DocPerm"
  }
 ]

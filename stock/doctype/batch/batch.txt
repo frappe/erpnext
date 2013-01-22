@@ -1,121 +1,108 @@
 [
  {
-  "owner": "harshada@webnotestech.com", 
+  "creation": "2013-01-10 16:34:25", 
   "docstatus": 0, 
-  "creation": "2012-03-27 14:36:26", 
+  "modified": "2013-01-22 14:55:57", 
   "modified_by": "Administrator", 
-  "modified": "2012-03-27 14:36:26"
+  "owner": "harshada@webnotestech.com"
  }, 
  {
-  "section_style": "Simple", 
-  "module": "Stock", 
-  "doctype": "DocType", 
-  "allow_trash": 1, 
-  "document_type": "Master", 
   "autoname": "field:batch_id", 
-  "name": "__common__", 
-  "colour": "White:FFF", 
-  "server_code_error": " ", 
-  "version": 12
+  "doctype": "DocType", 
+  "document_type": "Master", 
+  "module": "Stock", 
+  "name": "__common__"
  }, 
  {
-  "name": "__common__", 
-  "parent": "Batch", 
   "doctype": "DocField", 
-  "parenttype": "DocType", 
-  "parentfield": "fields"
- }, 
- {
   "name": "__common__", 
   "parent": "Batch", 
-  "read": 1, 
-  "doctype": "DocPerm", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "role": "Material Master Manager", 
-  "parentfield": "permissions"
+  "permlevel": 0
  }, 
  {
-  "name": "Batch", 
-  "doctype": "DocType"
- }, 
- {
+  "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
-  "write": 1, 
-  "cancel": 1, 
+  "name": "__common__", 
+  "parent": "Batch", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
   "report": 1, 
-  "permlevel": 0
+  "role": "Material Master Manager", 
+  "submit": 0, 
+  "write": 1
  }, 
  {
-  "permlevel": 1, 
-  "doctype": "DocPerm"
+  "doctype": "DocType", 
+  "name": "Batch"
  }, 
  {
-  "oldfieldtype": "Small Text", 
   "doctype": "DocField", 
-  "label": "Trash Reason", 
-  "oldfieldname": "trash_reason", 
   "fieldname": "trash_reason", 
   "fieldtype": "Small Text", 
-  "permlevel": 1
+  "label": "Trash Reason", 
+  "oldfieldname": "trash_reason", 
+  "oldfieldtype": "Small Text", 
+  "read_only": 1
  }, 
  {
-  "no_copy": 1, 
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Batch ID", 
-  "oldfieldname": "batch_id", 
   "fieldname": "batch_id", 
   "fieldtype": "Data", 
-  "reqd": 1, 
-  "permlevel": 0
+  "label": "Batch ID", 
+  "no_copy": 1, 
+  "oldfieldname": "batch_id", 
+  "oldfieldtype": "Data", 
+  "reqd": 1
  }, 
  {
-  "oldfieldtype": "Small Text", 
   "doctype": "DocField", 
-  "label": "Description", 
-  "oldfieldname": "description", 
-  "width": "300px", 
   "fieldname": "description", 
   "fieldtype": "Small Text", 
-  "permlevel": 0
+  "label": "Description", 
+  "oldfieldname": "description", 
+  "oldfieldtype": "Small Text", 
+  "width": "300px"
  }, 
  {
-  "oldfieldtype": "Date", 
   "doctype": "DocField", 
-  "label": "Batch Started Date", 
-  "oldfieldname": "start_date", 
   "fieldname": "start_date", 
   "fieldtype": "Date", 
-  "permlevel": 0
+  "label": "Batch Started Date", 
+  "oldfieldname": "start_date", 
+  "oldfieldtype": "Date"
  }, 
  {
-  "oldfieldtype": "Date", 
   "doctype": "DocField", 
-  "label": "Batch Finished Date", 
-  "oldfieldname": "finished_date", 
   "fieldname": "finished_date", 
   "fieldtype": "Date", 
-  "permlevel": 0
+  "label": "Batch Finished Date", 
+  "oldfieldname": "finished_date", 
+  "oldfieldtype": "Date"
  }, 
  {
-  "oldfieldtype": "Date", 
   "doctype": "DocField", 
-  "label": "Expiry Date", 
-  "oldfieldname": "expiry_date", 
   "fieldname": "expiry_date", 
   "fieldtype": "Date", 
-  "permlevel": 0
+  "label": "Expiry Date", 
+  "oldfieldname": "expiry_date", 
+  "oldfieldtype": "Date"
  }, 
  {
-  "oldfieldtype": "Link", 
   "doctype": "DocField", 
-  "label": "Item", 
-  "oldfieldname": "item", 
-  "options": "Item", 
   "fieldname": "item", 
   "fieldtype": "Link", 
-  "reqd": 1, 
-  "permlevel": 0
+  "label": "Item", 
+  "oldfieldname": "item", 
+  "oldfieldtype": "Link", 
+  "options": "Item", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocPerm"
  }
 ]

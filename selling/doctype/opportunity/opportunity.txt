@@ -1,8 +1,8 @@
 [
  {
-  "creation": "2013-01-18 12:35:41", 
+  "creation": "2013-01-10 16:34:19", 
   "docstatus": 0, 
-  "modified": "2013-01-22 12:08:56", 
+  "modified": "2013-01-22 15:23:24", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -21,22 +21,29 @@
   "name": "__common__", 
   "parent": "Opportunity", 
   "parentfield": "fields", 
-  "parenttype": "DocType"
+  "parenttype": "DocType", 
+  "permlevel": 0
  }, 
  {
+  "amend": 1, 
+  "cancel": 1, 
+  "create": 1, 
   "doctype": "DocPerm", 
   "name": "__common__", 
   "parent": "Opportunity", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
-  "read": 1
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 1, 
+  "submit": 1, 
+  "write": 1
  }, 
  {
   "doctype": "DocType", 
   "name": "Opportunity"
  }, 
  {
-  "default": "OPPTY", 
   "description": "To manage multiple series please go to Setup > Manage Series", 
   "doctype": "DocField", 
   "fieldname": "naming_series", 
@@ -45,8 +52,7 @@
   "no_copy": 1, 
   "oldfieldname": "naming_series", 
   "oldfieldtype": "Select", 
-  "options": "\nOPPTY", 
-  "permlevel": 0, 
+  "options": "OPPT", 
   "reqd": 1
  }, 
  {
@@ -57,7 +63,6 @@
   "oldfieldname": "enquiry_from", 
   "oldfieldtype": "Select", 
   "options": "\nLead\nCustomer", 
-  "permlevel": 0, 
   "print_hide": 1, 
   "report_hide": 0, 
   "reqd": 1
@@ -72,7 +77,6 @@
   "oldfieldname": "customer", 
   "oldfieldtype": "Link", 
   "options": "Customer", 
-  "permlevel": 0, 
   "print_hide": 1, 
   "reqd": 0, 
   "search_index": 0
@@ -87,7 +91,6 @@
   "oldfieldname": "lead", 
   "oldfieldtype": "Link", 
   "options": "Lead", 
-  "permlevel": 0, 
   "print_hide": 1
  }, 
  {
@@ -95,7 +98,6 @@
   "fieldname": "column_break0", 
   "fieldtype": "Column Break", 
   "oldfieldtype": "Column Break", 
-  "permlevel": 0, 
   "width": "50%"
  }, 
  {
@@ -108,7 +110,7 @@
   "oldfieldname": "status", 
   "oldfieldtype": "Select", 
   "options": "\nDraft\nSubmitted\nQuotation Sent\nOrder Confirmed\nOpportunity Lost\nCancelled", 
-  "permlevel": 1, 
+  "read_only": 1, 
   "reqd": 1
  }, 
  {
@@ -119,7 +121,6 @@
   "oldfieldname": "enquiry_type", 
   "oldfieldtype": "Select", 
   "options": "\nSales\nMaintenance", 
-  "permlevel": 0, 
   "reqd": 1
  }, 
  {
@@ -127,8 +128,7 @@
   "fieldname": "items", 
   "fieldtype": "Section Break", 
   "label": "Items", 
-  "oldfieldtype": "Section Break", 
-  "permlevel": 0
+  "oldfieldtype": "Section Break"
  }, 
  {
   "description": "Items which do not exist in Item master can also be entered on customer's request", 
@@ -138,16 +138,14 @@
   "label": "Opportunity Items", 
   "oldfieldname": "enquiry_details", 
   "oldfieldtype": "Table", 
-  "options": "Opportunity Item", 
-  "permlevel": 0
+  "options": "Opportunity Item"
  }, 
  {
   "description": "Keep a track of communication related to this enquiry which will help for future reference.", 
   "doctype": "DocField", 
   "fieldname": "communication_history", 
   "fieldtype": "Section Break", 
-  "oldfieldtype": "Section Break", 
-  "permlevel": 0
+  "oldfieldtype": "Section Break"
  }, 
  {
   "allow_on_submit": 1, 
@@ -156,15 +154,13 @@
   "fieldtype": "HTML", 
   "label": "Communication HTML", 
   "oldfieldname": "follow_up", 
-  "oldfieldtype": "Table", 
-  "permlevel": 0
+  "oldfieldtype": "Table"
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "contact_info", 
   "fieldtype": "Section Break", 
-  "label": "Contact Info", 
-  "permlevel": 0
+  "label": "Contact Info"
  }, 
  {
   "doctype": "DocField", 
@@ -173,7 +169,6 @@
   "in_filter": 1, 
   "label": "Contact Person", 
   "options": "Contact", 
-  "permlevel": 0, 
   "print_hide": 1
  }, 
  {
@@ -183,7 +178,6 @@
   "in_filter": 1, 
   "label": "Customer Address", 
   "options": "Address", 
-  "permlevel": 0, 
   "print_hide": 1
  }, 
  {
@@ -191,8 +185,8 @@
   "fieldname": "customer_name", 
   "fieldtype": "Data", 
   "label": "Customer Name", 
-  "permlevel": 1, 
-  "print_hide": 0
+  "print_hide": 0, 
+  "read_only": 1
  }, 
  {
   "doctype": "DocField", 
@@ -202,34 +196,33 @@
   "label": "Address", 
   "oldfieldname": "address", 
   "oldfieldtype": "Small Text", 
-  "permlevel": 1
+  "read_only": 1
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "column_break3", 
-  "fieldtype": "Column Break", 
-  "permlevel": 0
+  "fieldtype": "Column Break"
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "contact_display", 
   "fieldtype": "Small Text", 
   "label": "Contact", 
-  "permlevel": 1
+  "read_only": 1
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "contact_email", 
   "fieldtype": "Text", 
   "label": "Contact Email", 
-  "permlevel": 1
+  "read_only": 1
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "contact_mobile", 
   "fieldtype": "Text", 
   "label": "Contact Mobile No", 
-  "permlevel": 1
+  "read_only": 1
  }, 
  {
   "doctype": "DocField", 
@@ -239,7 +232,7 @@
   "label": "Name", 
   "oldfieldname": "lead_name", 
   "oldfieldtype": "Data", 
-  "permlevel": 1
+  "read_only": 1
  }, 
  {
   "depends_on": "eval:doc.enquiry_from==\"Customer\"", 
@@ -253,7 +246,6 @@
   "oldfieldname": "customer_group", 
   "oldfieldtype": "Link", 
   "options": "Customer Group", 
-  "permlevel": 0, 
   "print_hide": 1, 
   "reqd": 0, 
   "search_index": 1
@@ -266,7 +258,6 @@
   "in_filter": 1, 
   "label": "Territory", 
   "options": "Territory", 
-  "permlevel": 0, 
   "print_hide": 1, 
   "reqd": 0, 
   "search_index": 1
@@ -277,15 +268,13 @@
   "fieldname": "more_info", 
   "fieldtype": "Section Break", 
   "label": "More Info", 
-  "oldfieldtype": "Section Break", 
-  "permlevel": 0
+  "oldfieldtype": "Section Break"
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "column_break1", 
   "fieldtype": "Column Break", 
   "oldfieldtype": "Column Break", 
-  "permlevel": 0, 
   "width": "50%"
  }, 
  {
@@ -297,7 +286,6 @@
   "label": "Opportunity Date", 
   "oldfieldname": "transaction_date", 
   "oldfieldtype": "Date", 
-  "permlevel": 0, 
   "reqd": 1, 
   "width": "50px"
  }, 
@@ -310,7 +298,6 @@
   "oldfieldname": "fiscal_year", 
   "oldfieldtype": "Select", 
   "options": "link:Fiscal Year", 
-  "permlevel": 0, 
   "print_hide": 1, 
   "reqd": 1, 
   "search_index": 1
@@ -322,8 +309,7 @@
   "label": "Source", 
   "oldfieldname": "source", 
   "oldfieldtype": "Select", 
-  "options": "\nExisting Customer\nReference\nAdvertisement\nCold Calling\nExhibition\nSupplier Reference\nMass Mailing\nCustomer's Vendor\nCampaign\nWalk In", 
-  "permlevel": 0
+  "options": "\nExisting Customer\nReference\nAdvertisement\nCold Calling\nExhibition\nSupplier Reference\nMass Mailing\nCustomer's Vendor\nCampaign\nWalk In"
  }, 
  {
   "description": "Enter name of campaign if source of enquiry is campaign", 
@@ -333,8 +319,7 @@
   "label": "Campaign", 
   "oldfieldname": "campaign", 
   "oldfieldtype": "Link", 
-  "options": "Campaign", 
-  "permlevel": 0
+  "options": "Campaign"
  }, 
  {
   "depends_on": "eval:!doc.__islocal", 
@@ -345,7 +330,7 @@
   "no_copy": 1, 
   "oldfieldname": "order_lost_reason", 
   "oldfieldtype": "Small Text", 
-  "permlevel": 1, 
+  "read_only": 1, 
   "report_hide": 0
  }, 
  {
@@ -357,7 +342,6 @@
   "oldfieldname": "company", 
   "oldfieldtype": "Link", 
   "options": "Company", 
-  "permlevel": 0, 
   "print_hide": 1, 
   "reqd": 1, 
   "search_index": 1
@@ -367,7 +351,6 @@
   "fieldname": "column_break2", 
   "fieldtype": "Column Break", 
   "oldfieldtype": "Column Break", 
-  "permlevel": 0, 
   "width": "50%"
  }, 
  {
@@ -380,7 +363,6 @@
   "oldfieldname": "contact_by", 
   "oldfieldtype": "Link", 
   "options": "Profile", 
-  "permlevel": 0, 
   "width": "75px"
  }, 
  {
@@ -390,8 +372,7 @@
   "fieldtype": "Date", 
   "label": "Next Contact Date", 
   "oldfieldname": "contact_date", 
-  "oldfieldtype": "Date", 
-  "permlevel": 0
+  "oldfieldtype": "Date"
  }, 
  {
   "allow_on_submit": 0, 
@@ -404,8 +385,8 @@
   "no_copy": 1, 
   "oldfieldname": "last_contact_date", 
   "oldfieldtype": "Date", 
-  "permlevel": 1, 
-  "print_hide": 1
+  "print_hide": 1, 
+  "read_only": 1
  }, 
  {
   "doctype": "DocField", 
@@ -414,8 +395,7 @@
   "label": "To Discuss", 
   "no_copy": 1, 
   "oldfieldname": "to_discuss", 
-  "oldfieldtype": "Small Text", 
-  "permlevel": 0
+  "oldfieldtype": "Small Text"
  }, 
  {
   "doctype": "DocField", 
@@ -425,8 +405,8 @@
   "no_copy": 1, 
   "oldfieldname": "amended_from", 
   "oldfieldtype": "Data", 
-  "permlevel": 1, 
   "print_hide": 1, 
+  "read_only": 1, 
   "width": "150px"
  }, 
  {
@@ -437,63 +417,20 @@
   "no_copy": 1, 
   "oldfieldname": "amendment_date", 
   "oldfieldtype": "Date", 
-  "permlevel": 1, 
   "print_hide": 1, 
+  "read_only": 1, 
   "width": "150px"
  }, 
  {
-  "amend": 0, 
-  "cancel": 0, 
-  "create": 0, 
   "doctype": "DocPerm", 
-  "permlevel": 1, 
-  "role": "Sales Manager", 
-  "submit": 0, 
-  "write": 0
- }, 
- {
-  "amend": 1, 
-  "cancel": 1, 
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "permlevel": 0, 
-  "role": "System Manager", 
-  "submit": 1, 
-  "write": 1
- }, 
- {
-  "doctype": "DocPerm", 
-  "permlevel": 1, 
   "role": "System Manager"
  }, 
  {
-  "amend": 1, 
-  "cancel": 1, 
-  "create": 1, 
   "doctype": "DocPerm", 
-  "permlevel": 0, 
-  "role": "Sales User", 
-  "submit": 1, 
-  "write": 1
+  "role": "Sales User"
  }, 
  {
-  "amend": 0, 
-  "cancel": 0, 
-  "create": 0, 
   "doctype": "DocPerm", 
-  "permlevel": 1, 
-  "role": "Sales User", 
-  "submit": 0, 
-  "write": 0
- }, 
- {
-  "amend": 1, 
-  "cancel": 1, 
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "permlevel": 0, 
-  "role": "Sales Manager", 
-  "submit": 1, 
-  "write": 1
+  "role": "Sales Manager"
  }
 ]

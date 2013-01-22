@@ -1,289 +1,275 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-01-10 16:34:08", 
   "docstatus": 0, 
-  "creation": "2012-12-19 22:38:53", 
+  "modified": "2013-01-22 14:47:52", 
   "modified_by": "Administrator", 
-  "modified": "2013-01-04 13:15:09"
+  "owner": "Administrator"
  }, 
  {
-  "istable": 1, 
   "autoname": "EVD.######", 
-  "name": "__common__", 
   "doctype": "DocType", 
-  "module": "Accounts"
+  "istable": 1, 
+  "module": "Accounts", 
+  "name": "__common__"
  }, 
  {
+  "doctype": "DocField", 
   "name": "__common__", 
   "parent": "Purchase Invoice Item", 
-  "doctype": "DocField", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "parentfield": "fields"
+  "permlevel": 0
  }, 
  {
-  "name": "Purchase Invoice Item", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "Purchase Invoice Item"
  }, 
  {
-  "print_hide": 1, 
-  "oldfieldtype": "Link", 
   "doctype": "DocField", 
-  "label": "Item", 
-  "oldfieldname": "item_code", 
-  "permlevel": 0, 
   "fieldname": "item_code", 
   "fieldtype": "Link", 
-  "search_index": 1, 
-  "reqd": 0, 
+  "in_filter": 1, 
+  "label": "Item", 
+  "oldfieldname": "item_code", 
+  "oldfieldtype": "Link", 
   "options": "Item", 
-  "in_filter": 1
+  "print_hide": 1, 
+  "reqd": 0, 
+  "search_index": 1
  }, 
  {
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Item Name", 
-  "oldfieldname": "item_name", 
   "fieldname": "item_name", 
   "fieldtype": "Data", 
-  "search_index": 0, 
+  "in_filter": 0, 
+  "label": "Item Name", 
+  "oldfieldname": "item_name", 
+  "oldfieldtype": "Data", 
   "reqd": 1, 
-  "permlevel": 0, 
-  "in_filter": 0
+  "search_index": 0
  }, 
  {
-  "print_width": "300px", 
-  "oldfieldtype": "Text", 
   "doctype": "DocField", 
-  "label": "Description", 
-  "oldfieldname": "description", 
-  "width": "300px", 
   "fieldname": "description", 
   "fieldtype": "Text", 
-  "permlevel": 0
+  "label": "Description", 
+  "oldfieldname": "description", 
+  "oldfieldtype": "Text", 
+  "print_width": "300px", 
+  "width": "300px"
  }, 
  {
-  "print_hide": 0, 
-  "oldfieldtype": "Currency", 
   "doctype": "DocField", 
+  "fieldname": "qty", 
+  "fieldtype": "Float", 
   "label": "Qty", 
   "oldfieldname": "qty", 
-  "fieldname": "qty", 
-  "fieldtype": "Currency", 
-  "reqd": 1, 
-  "permlevel": 0
+  "oldfieldtype": "Currency", 
+  "print_hide": 0, 
+  "reqd": 1
  }, 
  {
-  "print_hide": 1, 
   "doctype": "DocField", 
-  "label": "UOM", 
-  "options": "UOM", 
   "fieldname": "uom", 
   "fieldtype": "Link", 
-  "permlevel": 0
+  "label": "UOM", 
+  "options": "UOM", 
+  "print_hide": 1
  }, 
  {
-  "print_hide": 1, 
   "doctype": "DocField", 
-  "label": "Ref Rate ", 
   "fieldname": "import_ref_rate", 
   "fieldtype": "Currency", 
-  "permlevel": 0
+  "label": "Ref Rate ", 
+  "print_hide": 1
  }, 
  {
-  "print_hide": 0, 
   "doctype": "DocField", 
-  "label": "Discount %", 
   "fieldname": "discount_rate", 
-  "fieldtype": "Currency", 
-  "permlevel": 0
+  "fieldtype": "Float", 
+  "label": "Discount %", 
+  "print_hide": 0
  }, 
  {
-  "print_hide": 0, 
-  "oldfieldtype": "Currency", 
   "doctype": "DocField", 
-  "label": "Rate ", 
-  "oldfieldname": "import_rate", 
   "fieldname": "import_rate", 
   "fieldtype": "Currency", 
-  "reqd": 1, 
-  "permlevel": 0
+  "label": "Rate ", 
+  "oldfieldname": "import_rate", 
+  "oldfieldtype": "Currency", 
+  "print_hide": 0, 
+  "reqd": 1
  }, 
  {
-  "oldfieldtype": "Currency", 
   "doctype": "DocField", 
-  "label": "Amount", 
-  "oldfieldname": "import_amount", 
   "fieldname": "import_amount", 
   "fieldtype": "Currency", 
-  "reqd": 1, 
-  "permlevel": 1
+  "label": "Amount", 
+  "oldfieldname": "import_amount", 
+  "oldfieldtype": "Currency", 
+  "read_only": 1, 
+  "reqd": 1
  }, 
  {
-  "print_hide": 1, 
   "doctype": "DocField", 
-  "label": "Ref Rate *", 
   "fieldname": "purchase_ref_rate", 
   "fieldtype": "Currency", 
-  "permlevel": 0
+  "label": "Ref Rate *", 
+  "print_hide": 1
  }, 
  {
-  "print_hide": 1, 
-  "oldfieldtype": "Currency", 
   "doctype": "DocField", 
-  "label": "Rate *(Default Curr.)", 
-  "oldfieldname": "rate", 
   "fieldname": "rate", 
   "fieldtype": "Currency", 
-  "reqd": 1, 
-  "permlevel": 0
+  "label": "Rate *(Default Curr.)", 
+  "oldfieldname": "rate", 
+  "oldfieldtype": "Currency", 
+  "print_hide": 1, 
+  "reqd": 1
  }, 
  {
-  "print_hide": 1, 
-  "oldfieldtype": "Currency", 
   "doctype": "DocField", 
-  "label": "Amount (Default Curr.)", 
-  "oldfieldname": "amount", 
   "fieldname": "amount", 
   "fieldtype": "Currency", 
-  "reqd": 1, 
-  "permlevel": 1
+  "label": "Amount (Default Curr.)", 
+  "oldfieldname": "amount", 
+  "oldfieldtype": "Currency", 
+  "print_hide": 1, 
+  "read_only": 1, 
+  "reqd": 1
  }, 
  {
-  "print_hide": 1, 
-  "print_width": "120px", 
-  "permlevel": 0, 
-  "oldfieldtype": "Link", 
   "doctype": "DocField", 
-  "label": "Expense Head", 
-  "oldfieldname": "expense_head", 
-  "width": "120px", 
   "fieldname": "expense_head", 
   "fieldtype": "Link", 
-  "reqd": 1, 
-  "options": "Account"
- }, 
- {
+  "label": "Expense Head", 
+  "oldfieldname": "expense_head", 
+  "oldfieldtype": "Link", 
+  "options": "Account", 
   "print_hide": 1, 
   "print_width": "120px", 
-  "oldfieldtype": "Link", 
+  "reqd": 1, 
+  "width": "120px"
+ }, 
+ {
   "doctype": "DocField", 
-  "label": "Cost Center", 
-  "oldfieldname": "cost_center", 
-  "width": "120px", 
-  "options": "Cost Center", 
   "fieldname": "cost_center", 
   "fieldtype": "Link", 
-  "permlevel": 0
+  "label": "Cost Center", 
+  "oldfieldname": "cost_center", 
+  "oldfieldtype": "Link", 
+  "options": "Cost Center", 
+  "print_hide": 1, 
+  "print_width": "120px", 
+  "width": "120px"
  }, 
  {
-  "print_hide": 1, 
   "doctype": "DocField", 
-  "label": "Project Name", 
-  "options": "Project", 
   "fieldname": "project_name", 
   "fieldtype": "Link", 
-  "permlevel": 0, 
-  "in_filter": 1
+  "in_filter": 1, 
+  "label": "Project Name", 
+  "options": "Project", 
+  "print_hide": 1
  }, 
  {
-  "print_hide": 1, 
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Brand", 
-  "oldfieldname": "brand", 
   "fieldname": "brand", 
   "fieldtype": "Data", 
   "hidden": 1, 
-  "permlevel": 0
+  "label": "Brand", 
+  "oldfieldname": "brand", 
+  "oldfieldtype": "Data", 
+  "print_hide": 1
  }, 
  {
-  "print_hide": 1, 
-  "oldfieldtype": "Link", 
   "doctype": "DocField", 
-  "label": "Item Group", 
-  "oldfieldname": "item_group", 
-  "permlevel": 1, 
   "fieldname": "item_group", 
   "fieldtype": "Link", 
-  "search_index": 1, 
   "hidden": 1, 
+  "in_filter": 1, 
+  "label": "Item Group", 
+  "oldfieldname": "item_group", 
+  "oldfieldtype": "Link", 
   "options": "Item Group", 
-  "in_filter": 1
+  "print_hide": 1, 
+  "read_only": 1, 
+  "search_index": 1
  }, 
  {
-  "print_hide": 1, 
-  "oldfieldtype": "Link", 
   "doctype": "DocField", 
-  "label": "Pur Order", 
-  "oldfieldname": "purchase_order", 
-  "options": "Purchase Order", 
   "fieldname": "purchase_order", 
   "fieldtype": "Link", 
-  "search_index": 1, 
-  "permlevel": 1, 
-  "in_filter": 1
+  "in_filter": 1, 
+  "label": "Pur Order", 
+  "oldfieldname": "purchase_order", 
+  "oldfieldtype": "Link", 
+  "options": "Purchase Order", 
+  "print_hide": 1, 
+  "read_only": 1, 
+  "search_index": 1
  }, 
  {
-  "print_hide": 1, 
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Purchase Order Item", 
-  "oldfieldname": "po_detail", 
   "fieldname": "po_detail", 
   "fieldtype": "Data", 
-  "search_index": 1, 
   "hidden": 1, 
-  "permlevel": 1, 
-  "in_filter": 1
+  "in_filter": 1, 
+  "label": "Purchase Order Item", 
+  "oldfieldname": "po_detail", 
+  "oldfieldtype": "Data", 
+  "print_hide": 1, 
+  "read_only": 1, 
+  "search_index": 1
  }, 
  {
-  "print_hide": 1, 
-  "oldfieldtype": "Link", 
   "doctype": "DocField", 
-  "label": "Pur Receipt", 
-  "oldfieldname": "purchase_receipt", 
-  "options": "Purchase Receipt", 
   "fieldname": "purchase_receipt", 
   "fieldtype": "Link", 
-  "search_index": 1, 
-  "permlevel": 1, 
-  "in_filter": 1
+  "in_filter": 1, 
+  "label": "Pur Receipt", 
+  "oldfieldname": "purchase_receipt", 
+  "oldfieldtype": "Link", 
+  "options": "Purchase Receipt", 
+  "print_hide": 1, 
+  "read_only": 1, 
+  "search_index": 1
  }, 
  {
-  "print_hide": 1, 
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "PR Detail", 
-  "oldfieldname": "pr_detail", 
   "fieldname": "pr_detail", 
   "fieldtype": "Data", 
-  "search_index": 1, 
   "hidden": 1, 
-  "permlevel": 1, 
-  "in_filter": 1
+  "in_filter": 1, 
+  "label": "PR Detail", 
+  "oldfieldname": "pr_detail", 
+  "oldfieldtype": "Data", 
+  "print_hide": 1, 
+  "read_only": 1, 
+  "search_index": 1
  }, 
  {
-  "print_hide": 1, 
   "description": "Tax detail table fetched from item master as a string and stored in this field.\nUsed for Taxes and Charges", 
-  "oldfieldtype": "Small Text", 
   "doctype": "DocField", 
-  "label": "Item Tax Rate", 
-  "oldfieldname": "item_tax_rate", 
   "fieldname": "item_tax_rate", 
   "fieldtype": "Small Text", 
   "hidden": 1, 
-  "permlevel": 1, 
+  "label": "Item Tax Rate", 
+  "oldfieldname": "item_tax_rate", 
+  "oldfieldtype": "Small Text", 
+  "print_hide": 1, 
+  "read_only": 1, 
   "report_hide": 1
  }, 
  {
-  "print_hide": 1, 
-  "no_copy": 1, 
   "allow_on_submit": 1, 
   "doctype": "DocField", 
-  "label": "Page Break", 
   "fieldname": "page_break", 
   "fieldtype": "Check", 
-  "permlevel": 0, 
+  "label": "Page Break", 
+  "no_copy": 1, 
+  "print_hide": 1, 
   "report_hide": 1
  }
 ]

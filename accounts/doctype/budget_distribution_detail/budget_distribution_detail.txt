@@ -1,51 +1,46 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-01-10 16:34:05", 
   "docstatus": 0, 
-  "creation": "2012-07-03 13:30:47", 
+  "modified": "2013-01-22 14:41:34", 
   "modified_by": "Administrator", 
-  "modified": "2012-07-11 14:32:16"
+  "owner": "Administrator"
  }, 
  {
-  "section_style": "Tray", 
+  "autoname": "BDD/.#####", 
+  "doctype": "DocType", 
   "istable": 1, 
   "module": "Accounts", 
-  "server_code_error": " ", 
-  "doctype": "DocType", 
-  "autoname": "BDD/.#####", 
-  "name": "__common__", 
-  "colour": "White:FFF", 
-  "show_in_menu": 0, 
-  "version": 1
+  "name": "__common__"
  }, 
  {
+  "doctype": "DocField", 
   "name": "__common__", 
   "parent": "Budget Distribution Detail", 
-  "doctype": "DocField", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "parentfield": "fields"
+  "permlevel": 0
  }, 
  {
-  "name": "Budget Distribution Detail", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "Budget Distribution Detail"
  }, 
  {
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Month", 
-  "oldfieldname": "month", 
   "fieldname": "month", 
   "fieldtype": "Data", 
-  "reqd": 1, 
-  "permlevel": 2
+  "label": "Month", 
+  "oldfieldname": "month", 
+  "oldfieldtype": "Data", 
+  "read_only": 1, 
+  "reqd": 1
  }, 
  {
-  "oldfieldtype": "Currency", 
   "doctype": "DocField", 
+  "fieldname": "percentage_allocation", 
+  "fieldtype": "Float", 
   "label": "Percentage Allocation", 
   "oldfieldname": "percentage_allocation", 
-  "fieldname": "percentage_allocation", 
-  "fieldtype": "Currency", 
-  "permlevel": 0
+  "oldfieldtype": "Currency"
  }
 ]

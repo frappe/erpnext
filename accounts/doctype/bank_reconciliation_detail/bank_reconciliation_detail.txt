@@ -1,106 +1,101 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-01-10 16:34:05", 
   "docstatus": 0, 
-  "creation": "2012-03-27 14:35:41", 
+  "modified": "2013-01-22 14:16:42", 
   "modified_by": "Administrator", 
-  "modified": "2012-03-27 14:35:41"
+  "owner": "Administrator"
  }, 
  {
-  "section_style": "Tray", 
-  "istable": 1, 
-  "name": "__common__", 
-  "colour": "White:FFF", 
-  "module": "Accounts", 
   "doctype": "DocType", 
-  "version": 5, 
-  "show_in_menu": 0
+  "istable": 1, 
+  "module": "Accounts", 
+  "name": "__common__"
  }, 
  {
+  "doctype": "DocField", 
   "name": "__common__", 
-  "parent": "Bank Reconciliation Detail", 
   "no_copy": 0, 
-  "search_index": 0, 
-  "doctype": "DocField", 
+  "parent": "Bank Reconciliation Detail", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "parentfield": "fields"
- }, 
- {
-  "name": "Bank Reconciliation Detail", 
-  "doctype": "DocType"
- }, 
- {
-  "oldfieldtype": "Link", 
-  "doctype": "DocField", 
-  "label": "Voucher ID", 
-  "oldfieldname": "voucher_id", 
   "permlevel": 0, 
+  "search_index": 0
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Bank Reconciliation Detail"
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "voucher_id", 
   "fieldtype": "Link", 
+  "label": "Voucher ID", 
+  "oldfieldname": "voucher_id", 
+  "oldfieldtype": "Link", 
   "options": "Journal Voucher"
  }, 
  {
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Against Account", 
-  "oldfieldname": "against_account", 
   "fieldname": "against_account", 
   "fieldtype": "Data", 
-  "permlevel": 1
+  "label": "Against Account", 
+  "oldfieldname": "against_account", 
+  "oldfieldtype": "Data", 
+  "read_only": 1
  }, 
  {
   "description": "The date at which current entry will get or has actually executed.", 
-  "oldfieldtype": "Date", 
   "doctype": "DocField", 
-  "label": "Posting Date", 
-  "oldfieldname": "posting_date", 
   "fieldname": "posting_date", 
   "fieldtype": "Date", 
-  "permlevel": 1
+  "label": "Posting Date", 
+  "oldfieldname": "posting_date", 
+  "oldfieldtype": "Date", 
+  "read_only": 1
  }, 
  {
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Cheque Number", 
-  "oldfieldname": "cheque_number", 
   "fieldname": "cheque_number", 
   "fieldtype": "Data", 
-  "permlevel": 1
+  "label": "Cheque Number", 
+  "oldfieldname": "cheque_number", 
+  "oldfieldtype": "Data", 
+  "read_only": 1
  }, 
  {
-  "oldfieldtype": "Date", 
   "doctype": "DocField", 
-  "label": "Cheque Date", 
-  "oldfieldname": "cheque_date", 
   "fieldname": "cheque_date", 
   "fieldtype": "Date", 
-  "permlevel": 1
+  "label": "Cheque Date", 
+  "oldfieldname": "cheque_date", 
+  "oldfieldtype": "Date", 
+  "read_only": 1
  }, 
  {
-  "oldfieldtype": "Currency", 
   "doctype": "DocField", 
-  "label": "Debit", 
-  "oldfieldname": "debit", 
   "fieldname": "debit", 
   "fieldtype": "Currency", 
-  "permlevel": 1
+  "label": "Debit", 
+  "oldfieldname": "debit", 
+  "oldfieldtype": "Currency", 
+  "read_only": 1
  }, 
  {
-  "oldfieldtype": "Currency", 
   "doctype": "DocField", 
-  "label": "Credit", 
-  "oldfieldname": "credit", 
   "fieldname": "credit", 
   "fieldtype": "Currency", 
-  "permlevel": 1
+  "label": "Credit", 
+  "oldfieldname": "credit", 
+  "oldfieldtype": "Currency", 
+  "read_only": 1
  }, 
  {
-  "oldfieldtype": "Date", 
   "doctype": "DocField", 
-  "label": "Clearance Date", 
-  "oldfieldname": "clearance_date", 
   "fieldname": "clearance_date", 
   "fieldtype": "Date", 
-  "permlevel": 0
+  "label": "Clearance Date", 
+  "oldfieldname": "clearance_date", 
+  "oldfieldtype": "Date"
  }
 ]

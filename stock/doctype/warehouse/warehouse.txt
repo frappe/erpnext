@@ -1,299 +1,239 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-01-10 16:34:30", 
   "docstatus": 0, 
-  "creation": "2012-10-26 14:47:52", 
+  "modified": "2013-01-22 15:07:00", 
   "modified_by": "Administrator", 
-  "modified": "2012-12-03 11:24:31"
+  "owner": "Administrator"
  }, 
  {
-  "document_type": "Master", 
-  "description": "A logical Warehouse against which stock entries are made.", 
-  "autoname": "field:warehouse_name", 
   "allow_rename": 1, 
-  "module": "Stock", 
+  "autoname": "field:warehouse_name", 
+  "description": "A logical Warehouse against which stock entries are made.", 
   "doctype": "DocType", 
-  "search_fields": "warehouse_type", 
-  "name": "__common__"
+  "document_type": "Master", 
+  "module": "Stock", 
+  "name": "__common__", 
+  "search_fields": "warehouse_type"
  }, 
  {
-  "name": "__common__", 
-  "parent": "Warehouse", 
   "doctype": "DocField", 
-  "parenttype": "DocType", 
-  "parentfield": "fields"
- }, 
- {
   "name": "__common__", 
   "parent": "Warehouse", 
-  "read": 1, 
+  "parentfield": "fields", 
+  "parenttype": "DocType"
+ }, 
+ {
   "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Warehouse", 
+  "parentfield": "permissions", 
   "parenttype": "DocType", 
-  "parentfield": "permissions"
+  "read": 1, 
+  "report": 1, 
+  "submit": 0
  }, 
  {
-  "name": "Warehouse", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "Warehouse"
  }, 
  {
-  "oldfieldtype": "Section Break", 
   "doctype": "DocField", 
-  "label": "Warehouse Detail", 
   "fieldname": "warehouse_detail", 
   "fieldtype": "Section Break", 
+  "label": "Warehouse Detail", 
+  "oldfieldtype": "Section Break", 
   "permlevel": 0
  }, 
  {
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Warehouse Name", 
-  "oldfieldname": "warehouse_name", 
   "fieldname": "warehouse_name", 
   "fieldtype": "Data", 
-  "reqd": 1, 
-  "permlevel": 0
+  "label": "Warehouse Name", 
+  "oldfieldname": "warehouse_name", 
+  "oldfieldtype": "Data", 
+  "permlevel": 0, 
+  "reqd": 1
  }, 
  {
-  "oldfieldtype": "Link", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Warehouse Type", 
-  "oldfieldname": "warehouse_type", 
-  "permlevel": 0, 
   "fieldname": "warehouse_type", 
   "fieldtype": "Link", 
-  "reqd": 1, 
-  "options": "Warehouse Type"
+  "label": "Warehouse Type", 
+  "oldfieldname": "warehouse_type", 
+  "oldfieldtype": "Link", 
+  "options": "Warehouse Type", 
+  "permlevel": 0, 
+  "reqd": 1
  }, 
  {
-  "oldfieldtype": "Link", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Company", 
-  "oldfieldname": "company", 
-  "permlevel": 0, 
   "fieldname": "company", 
   "fieldtype": "Link", 
-  "search_index": 1, 
+  "in_filter": 1, 
+  "label": "Company", 
+  "oldfieldname": "company", 
+  "oldfieldtype": "Link", 
   "options": "Company", 
-  "in_filter": 1
+  "permlevel": 0, 
+  "search_index": 1
  }, 
  {
   "description": "For Reference Only.", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Warehouse Contact Info", 
   "fieldname": "warehouse_contact_info", 
   "fieldtype": "Section Break", 
+  "label": "Warehouse Contact Info", 
   "permlevel": 0
  }, 
  {
-  "print_hide": 0, 
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Email Id", 
-  "oldfieldname": "email_id", 
   "fieldname": "email_id", 
   "fieldtype": "Data", 
   "hidden": 1, 
+  "label": "Email Id", 
+  "oldfieldname": "email_id", 
+  "oldfieldtype": "Data", 
+  "permlevel": 0, 
+  "print_hide": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "phone_no", 
+  "fieldtype": "Data", 
+  "label": "Phone No", 
+  "oldfieldname": "phone_no", 
+  "oldfieldtype": "Int", 
+  "options": "Phone", 
   "permlevel": 0
  }, 
  {
-  "oldfieldtype": "Int", 
   "doctype": "DocField", 
-  "label": "Phone No", 
-  "oldfieldname": "phone_no", 
-  "permlevel": 0, 
-  "fieldname": "phone_no", 
-  "fieldtype": "Data", 
-  "options": "Phone"
- }, 
- {
-  "oldfieldtype": "Int", 
-  "doctype": "DocField", 
-  "label": "Mobile No", 
-  "oldfieldname": "mobile_no", 
-  "permlevel": 0, 
   "fieldname": "mobile_no", 
   "fieldtype": "Data", 
-  "options": "Phone"
+  "label": "Mobile No", 
+  "oldfieldname": "mobile_no", 
+  "oldfieldtype": "Int", 
+  "options": "Phone", 
+  "permlevel": 0
  }, 
  {
-  "oldfieldtype": "Column Break", 
   "doctype": "DocField", 
   "fieldname": "column_break0", 
   "fieldtype": "Column Break", 
+  "oldfieldtype": "Column Break", 
   "permlevel": 0
  }, 
  {
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Address Line 1", 
-  "oldfieldname": "address_line_1", 
   "fieldname": "address_line_1", 
   "fieldtype": "Data", 
+  "label": "Address Line 1", 
+  "oldfieldname": "address_line_1", 
+  "oldfieldtype": "Data", 
   "permlevel": 0
  }, 
  {
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Address Line 2", 
-  "oldfieldname": "address_line_2", 
   "fieldname": "address_line_2", 
   "fieldtype": "Data", 
+  "label": "Address Line 2", 
+  "oldfieldname": "address_line_2", 
+  "oldfieldtype": "Data", 
   "permlevel": 0
  }, 
  {
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "City", 
-  "oldfieldname": "city", 
   "fieldname": "city", 
   "fieldtype": "Data", 
-  "reqd": 0, 
+  "label": "City", 
+  "oldfieldname": "city", 
+  "oldfieldtype": "Data", 
+  "permlevel": 0, 
+  "reqd": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "state", 
+  "fieldtype": "Data", 
+  "label": "State", 
+  "oldfieldname": "state", 
+  "oldfieldtype": "Select", 
+  "options": "Suggest", 
   "permlevel": 0
  }, 
  {
-  "oldfieldtype": "Select", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "State", 
-  "oldfieldname": "state", 
-  "permlevel": 0, 
-  "fieldname": "state", 
-  "fieldtype": "Data", 
-  "options": "Suggest"
- }, 
- {
-  "oldfieldtype": "Int", 
-  "doctype": "DocField", 
-  "label": "PIN", 
-  "oldfieldname": "pin", 
   "fieldname": "pin", 
   "fieldtype": "Int", 
+  "label": "PIN", 
+  "oldfieldname": "pin", 
+  "oldfieldtype": "Int", 
   "permlevel": 0
  }, 
  {
   "description": "This feature is for merging duplicate warehouses. It will replace all the links of this warehouse by \"Merge With\" warehouse. After merging you can delete this warehouse, as stock level for this warehouse will be zero.", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Merge Warehouses", 
   "fieldname": "merge_warehouses_section", 
   "fieldtype": "Section Break", 
+  "label": "Merge Warehouses", 
   "permlevel": 2
  }, 
  {
   "doctype": "DocField", 
-  "options": "Warehouse", 
   "fieldname": "merge_with", 
   "fieldtype": "Link", 
   "label": "Merge With", 
+  "options": "Warehouse", 
   "permlevel": 2
  }, 
  {
   "doctype": "DocField", 
-  "label": "Merge", 
   "fieldname": "merge", 
   "fieldtype": "Button", 
+  "label": "Merge", 
   "permlevel": 2
  }, 
  {
   "amend": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "submit": 0, 
-  "write": 0, 
-  "role": "Material User", 
-  "cancel": 0, 
-  "permlevel": 2
- }, 
- {
-  "amend": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "submit": 0, 
-  "write": 0, 
-  "report": 1, 
-  "role": "Material User", 
-  "cancel": 0, 
-  "permlevel": 0
- }, 
- {
-  "amend": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "submit": 0, 
-  "write": 0, 
-  "role": "Material User", 
-  "cancel": 0, 
-  "permlevel": 1
- }, 
- {
-  "amend": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "submit": 0, 
-  "write": 0, 
-  "role": "Material Manager", 
-  "cancel": 0, 
-  "permlevel": 2
- }, 
- {
-  "amend": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "submit": 0, 
-  "write": 0, 
-  "report": 1, 
-  "role": "Material Manager", 
-  "cancel": 0, 
-  "permlevel": 0
- }, 
- {
-  "amend": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "submit": 0, 
-  "write": 0, 
-  "role": "Material Manager", 
-  "cancel": 0, 
-  "permlevel": 1
- }, 
- {
-  "role": "All", 
-  "permlevel": 1, 
-  "doctype": "DocPerm"
- }, 
- {
-  "amend": 0, 
+  "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
-  "submit": 0, 
-  "write": 1, 
-  "report": 1, 
+  "permlevel": 0, 
   "role": "Material Master Manager", 
+  "write": 1
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "permlevel": 0, 
+  "role": "Material User", 
+  "write": 0
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "permlevel": 2, 
+  "role": "Material User", 
+  "write": 0
+ }, 
+ {
   "cancel": 1, 
-  "permlevel": 0
- }, 
- {
-  "role": "Material Master Manager", 
-  "permlevel": 1, 
-  "doctype": "DocPerm"
- }, 
- {
   "create": 1, 
   "doctype": "DocPerm", 
-  "write": 1, 
-  "cancel": 1, 
+  "permlevel": 0, 
   "role": "System Manager", 
-  "report": 1, 
-  "permlevel": 0
+  "write": 1
  }, 
  {
   "create": 0, 
   "doctype": "DocPerm", 
-  "write": 1, 
+  "permlevel": 2, 
   "role": "System Manager", 
-  "permlevel": 2
+  "write": 1
  }
 ]

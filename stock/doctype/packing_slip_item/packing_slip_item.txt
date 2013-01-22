@@ -1,90 +1,84 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-01-10 16:34:28", 
   "docstatus": 0, 
-  "creation": "2012-03-27 14:36:34", 
+  "modified": "2013-01-22 14:47:04", 
   "modified_by": "Administrator", 
-  "modified": "2012-03-27 14:36:34"
+  "owner": "Administrator"
  }, 
  {
-  "section_style": "Simple", 
-  "istable": 1, 
-  "name": "__common__", 
-  "colour": "White:FFF", 
-  "module": "Stock", 
-  "doctype": "DocType", 
-  "version": 9, 
   "autoname": "PSD/.#######", 
-  "show_in_menu": 0
+  "doctype": "DocType", 
+  "istable": 1, 
+  "module": "Stock", 
+  "name": "__common__"
  }, 
  {
+  "doctype": "DocField", 
   "name": "__common__", 
   "parent": "Packing Slip Item", 
-  "doctype": "DocField", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "parentfield": "fields"
+  "permlevel": 0
  }, 
  {
-  "name": "Packing Slip Item", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "Packing Slip Item"
  }, 
  {
-  "permlevel": 0, 
   "doctype": "DocField", 
-  "label": "Item Code", 
-  "width": "100px", 
   "fieldname": "item_code", 
   "fieldtype": "Link", 
+  "label": "Item Code", 
+  "options": "Item", 
   "reqd": 1, 
-  "options": "Item"
+  "width": "100px"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Item Name", 
-  "width": "200px", 
   "fieldname": "item_name", 
   "fieldtype": "Data", 
-  "permlevel": 1
+  "label": "Item Name", 
+  "read_only": 1, 
+  "width": "200px"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Quantity", 
-  "width": "100px", 
   "fieldname": "qty", 
-  "fieldtype": "Currency", 
+  "fieldtype": "Float", 
+  "label": "Quantity", 
   "reqd": 1, 
-  "permlevel": 0
+  "width": "100px"
  }, 
  {
   "doctype": "DocField", 
-  "label": "UOM", 
-  "width": "100px", 
   "fieldname": "stock_uom", 
   "fieldtype": "Data", 
-  "permlevel": 1
+  "label": "UOM", 
+  "read_only": 1, 
+  "width": "100px"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Net Weight", 
-  "width": "100px", 
   "fieldname": "net_weight", 
   "fieldtype": "Float", 
-  "permlevel": 1
+  "label": "Net Weight", 
+  "read_only": 1, 
+  "width": "100px"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Weight UOM", 
-  "width": "100px", 
-  "options": "UOM", 
   "fieldname": "weight_uom", 
   "fieldtype": "Link", 
-  "permlevel": 1
+  "label": "Weight UOM", 
+  "options": "UOM", 
+  "read_only": 1, 
+  "width": "100px"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Page Break", 
   "fieldname": "page_break", 
   "fieldtype": "Check", 
-  "permlevel": 0
+  "label": "Page Break"
  }
 ]

@@ -1,107 +1,108 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-01-10 16:34:16", 
   "docstatus": 0, 
-  "creation": "2012-12-14 10:15:16", 
+  "modified": "2013-01-22 14:18:20", 
   "modified_by": "Administrator", 
-  "modified": "2012-12-14 16:53:30"
+  "owner": "Administrator"
  }, 
  {
-  "read_only": 0, 
-  "istable": 1, 
   "autoname": "FBD/.######", 
-  "name": "__common__", 
   "default_print_format": "Standard", 
   "doctype": "DocType", 
-  "module": "Manufacturing"
+  "istable": 1, 
+  "module": "Manufacturing", 
+  "name": "__common__", 
+  "read_only": 0
  }, 
  {
+  "doctype": "DocField", 
   "name": "__common__", 
   "parent": "BOM Explosion Item", 
-  "doctype": "DocField", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "permlevel": 1, 
-  "parentfield": "fields"
+  "permlevel": 0, 
+  "read_only": 1
  }, 
  {
-  "name": "BOM Explosion Item", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "BOM Explosion Item"
  }, 
  {
-  "oldfieldtype": "Link", 
   "doctype": "DocField", 
-  "label": "Item Code", 
-  "oldfieldname": "item_code", 
   "fieldname": "item_code", 
   "fieldtype": "Link", 
+  "label": "Item Code", 
+  "oldfieldname": "item_code", 
+  "oldfieldtype": "Link", 
   "options": "Item"
  }, 
  {
-  "oldfieldtype": "Text", 
   "doctype": "DocField", 
+  "fieldname": "description", 
+  "fieldtype": "Text", 
   "label": "Description", 
   "oldfieldname": "description", 
-  "width": "300px", 
-  "fieldname": "description", 
-  "fieldtype": "Text"
+  "oldfieldtype": "Text", 
+  "width": "300px"
  }, 
  {
-  "oldfieldtype": "Currency", 
   "doctype": "DocField", 
+  "fieldname": "qty", 
+  "fieldtype": "Float", 
   "label": "Qty", 
   "oldfieldname": "qty", 
-  "fieldname": "qty", 
-  "fieldtype": "Float"
+  "oldfieldtype": "Currency"
  }, 
  {
-  "oldfieldtype": "Currency", 
   "doctype": "DocField", 
+  "fieldname": "rate", 
+  "fieldtype": "Float", 
   "label": "Rate", 
   "oldfieldname": "standard_rate", 
-  "fieldname": "rate", 
-  "fieldtype": "Float"
+  "oldfieldtype": "Currency"
  }, 
  {
-  "oldfieldtype": "Currency", 
   "doctype": "DocField", 
+  "fieldname": "amount", 
+  "fieldtype": "Currency", 
   "label": "Amount", 
   "oldfieldname": "amount_as_per_sr", 
-  "fieldname": "amount", 
-  "fieldtype": "Currency"
+  "oldfieldtype": "Currency"
  }, 
  {
-  "oldfieldtype": "Link", 
   "doctype": "DocField", 
-  "label": "Stock UOM", 
-  "oldfieldname": "stock_uom", 
   "fieldname": "stock_uom", 
   "fieldtype": "Link", 
+  "label": "Stock UOM", 
+  "oldfieldname": "stock_uom", 
+  "oldfieldtype": "Link", 
   "options": "UOM"
  }, 
  {
-  "oldfieldtype": "Link", 
   "doctype": "DocField", 
-  "label": "Parent BOM", 
-  "oldfieldname": "parent_bom", 
-  "width": "250px", 
   "fieldname": "parent_bom", 
   "fieldtype": "Link", 
   "hidden": 0, 
-  "options": "BOM"
+  "label": "Parent BOM", 
+  "oldfieldname": "parent_bom", 
+  "oldfieldtype": "Link", 
+  "options": "BOM", 
+  "width": "250px"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Mat Detail No", 
   "fieldname": "mat_detail_no", 
   "fieldtype": "Data", 
-  "hidden": 1
+  "hidden": 1, 
+  "label": "Mat Detail No"
  }, 
  {
-  "no_copy": 0, 
   "doctype": "DocField", 
-  "label": "Qty Consumed Per Unit", 
   "fieldname": "qty_consumed_per_unit", 
   "fieldtype": "Float", 
-  "hidden": 0
+  "hidden": 0, 
+  "label": "Qty Consumed Per Unit", 
+  "no_copy": 0
  }
 ]

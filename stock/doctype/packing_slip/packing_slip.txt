@@ -1,285 +1,219 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-01-10 16:34:28", 
   "docstatus": 0, 
-  "creation": "2012-05-15 12:15:08", 
+  "modified": "2013-01-22 14:56:40", 
   "modified_by": "Administrator", 
-  "modified": "2012-06-29 12:24:16"
+  "owner": "Administrator"
  }, 
  {
-  "section_style": "Simple", 
-  "is_submittable": 1, 
-  "description": "Generate packing slips for packages to be delivered. Used to notify package number, package contents and its weight.", 
-  "search_fields": "delivery_note", 
-  "module": "Stock", 
-  "read_only_onload": 1, 
   "autoname": "PS.#######", 
-  "document_type": "Transaction", 
-  "subject": "[%(delivery_note)s] Case Nos: %(from_case_no)s - %(to_case_no)s  |  Net Weight: %(net_weight_pkg)s %(net_weight_uom)s  |  Gross Weight: %(gross_weight_pkg)s %(gross_weight_uom)s", 
-  "_last_update": "1328091392", 
-  "name": "__common__", 
-  "colour": "White:FFF", 
-  "is_transaction_doc": 1, 
+  "description": "Generate packing slips for packages to be delivered. Used to notify package number, package contents and its weight.", 
   "doctype": "DocType", 
-  "show_in_menu": 0, 
-  "version": 1
+  "document_type": "Transaction", 
+  "is_submittable": 1, 
+  "module": "Stock", 
+  "name": "__common__", 
+  "read_only_onload": 1, 
+  "search_fields": "delivery_note"
  }, 
  {
-  "name": "__common__", 
-  "parent": "Packing Slip", 
   "doctype": "DocField", 
-  "parenttype": "DocType", 
-  "parentfield": "fields"
- }, 
- {
   "name": "__common__", 
   "parent": "Packing Slip", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "amend": 1, 
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Packing Slip", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
   "read": 1, 
-  "doctype": "DocPerm", 
-  "parenttype": "DocType", 
-  "parentfield": "permissions"
- }, 
- {
-  "name": "Packing Slip", 
-  "doctype": "DocType"
- }, 
- {
-  "amend": 1, 
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "submit": 1, 
-  "write": 1, 
   "report": 1, 
-  "role": "Material User", 
-  "cancel": 1, 
-  "permlevel": 0
- }, 
- {
-  "amend": 1, 
-  "create": 1, 
-  "doctype": "DocPerm", 
   "submit": 1, 
-  "write": 1, 
-  "report": 1, 
-  "role": "Sales User", 
-  "cancel": 1, 
-  "permlevel": 0
+  "write": 1
  }, 
  {
-  "amend": 1, 
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "submit": 1, 
-  "write": 1, 
-  "report": 1, 
-  "role": "Material Master Manager", 
-  "cancel": 1, 
-  "permlevel": 0
- }, 
- {
-  "amend": 1, 
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "submit": 1, 
-  "write": 1, 
-  "report": 1, 
-  "role": "Material Manager", 
-  "cancel": 1, 
-  "permlevel": 0
- }, 
- {
-  "amend": 1, 
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "submit": 1, 
-  "write": 1, 
-  "report": 1, 
-  "role": "Sales Manager", 
-  "cancel": 1, 
-  "permlevel": 0
- }, 
- {
-  "role": "All", 
-  "permlevel": 1, 
-  "doctype": "DocPerm"
+  "doctype": "DocType", 
+  "name": "Packing Slip"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Packing Slip Items", 
   "fieldname": "packing_slip_details", 
   "fieldtype": "Section Break", 
-  "permlevel": 0
+  "label": "Packing Slip Items"
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "column_break0", 
-  "fieldtype": "Column Break", 
-  "permlevel": 0
+  "fieldtype": "Column Break"
  }, 
  {
   "description": "Indicates that the package is a part of this delivery", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Delivery Note", 
-  "options": "Delivery Note", 
   "fieldname": "delivery_note", 
   "fieldtype": "Link", 
-  "reqd": 1, 
-  "permlevel": 0
+  "label": "Delivery Note", 
+  "options": "Delivery Note", 
+  "reqd": 1
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "column_break1", 
-  "fieldtype": "Column Break", 
-  "permlevel": 0
+  "fieldtype": "Column Break"
  }, 
  {
-  "print_hide": 1, 
-  "no_copy": 0, 
   "doctype": "DocField", 
-  "label": "Series", 
-  "options": "PS", 
   "fieldname": "naming_series", 
   "fieldtype": "Select", 
-  "reqd": 1, 
-  "permlevel": 0
+  "label": "Series", 
+  "no_copy": 0, 
+  "options": "PS", 
+  "print_hide": 1, 
+  "reqd": 1
  }, 
  {
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "fieldname": "section_break0", 
-  "fieldtype": "Section Break", 
-  "permlevel": 0
+  "fieldtype": "Section Break"
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "column_break2", 
-  "fieldtype": "Column Break", 
-  "permlevel": 0
+  "fieldtype": "Column Break"
  }, 
  {
   "description": "Identification of the package for the delivery (for print)", 
-  "no_copy": 1, 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "From Package No.", 
-  "width": "50px", 
   "fieldname": "from_case_no", 
   "fieldtype": "Data", 
+  "label": "From Package No.", 
+  "no_copy": 1, 
   "reqd": 1, 
-  "permlevel": 0
+  "width": "50px"
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "column_break3", 
-  "fieldtype": "Column Break", 
-  "permlevel": 0
+  "fieldtype": "Column Break"
  }, 
  {
   "description": "If more than one package of the same type (for print)", 
-  "no_copy": 1, 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "To Package No.", 
-  "width": "50px", 
   "fieldname": "to_case_no", 
   "fieldtype": "Data", 
-  "permlevel": 0
+  "label": "To Package No.", 
+  "no_copy": 1, 
+  "width": "50px"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Package Item Details", 
   "fieldname": "package_item_details", 
   "fieldtype": "Section Break", 
-  "permlevel": 0
+  "label": "Package Item Details"
  }, 
  {
   "doctype": "DocField", 
-  "options": "Packing Slip Item", 
   "fieldname": "item_details", 
   "fieldtype": "Table", 
   "label": "Items", 
-  "permlevel": 0
+  "options": "Packing Slip Item"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Package Weight Details", 
   "fieldname": "package_weight_details", 
   "fieldtype": "Section Break", 
-  "permlevel": 0
+  "label": "Package Weight Details"
  }, 
  {
   "description": "The net weight of this package. (calculated automatically as sum of net weight of items)", 
-  "no_copy": 1, 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Net Weight", 
   "fieldname": "net_weight_pkg", 
-  "fieldtype": "Currency", 
-  "permlevel": 1
+  "fieldtype": "Float", 
+  "label": "Net Weight", 
+  "no_copy": 1, 
+  "read_only": 1
  }, 
  {
-  "no_copy": 1, 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Net Weight UOM", 
   "fieldname": "net_weight_uom", 
   "fieldtype": "Data", 
-  "permlevel": 1
+  "label": "Net Weight UOM", 
+  "no_copy": 1, 
+  "read_only": 1
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "column_break4", 
-  "fieldtype": "Column Break", 
-  "permlevel": 0
+  "fieldtype": "Column Break"
  }, 
  {
   "description": "The gross weight of the package. Usually net weight + packaging material weight. (for print)", 
-  "no_copy": 1, 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Gross Weight", 
   "fieldname": "gross_weight_pkg", 
-  "fieldtype": "Currency", 
-  "permlevel": 0
+  "fieldtype": "Float", 
+  "label": "Gross Weight", 
+  "no_copy": 1
  }, 
  {
-  "no_copy": 1, 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Gross Weight UOM", 
-  "options": "UOM", 
   "fieldname": "gross_weight_uom", 
   "fieldtype": "Link", 
-  "permlevel": 0
+  "label": "Gross Weight UOM", 
+  "no_copy": 1, 
+  "options": "UOM"
  }, 
  {
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Misc Details", 
   "fieldname": "misc_details", 
   "fieldtype": "Section Break", 
-  "permlevel": 0
+  "label": "Misc Details"
  }, 
  {
-  "print_hide": 1, 
-  "no_copy": 1, 
   "doctype": "DocField", 
-  "label": "Amended From", 
-  "options": "Packing Slip", 
   "fieldname": "amended_from", 
   "fieldtype": "Link", 
-  "permlevel": 1
+  "label": "Amended From", 
+  "no_copy": 1, 
+  "options": "Packing Slip", 
+  "print_hide": 1, 
+  "read_only": 1
  }, 
  {
-  "print_hide": 1, 
-  "description": "The date at which current entry is corrected in the system.", 
-  "no_copy": 1, 
   "depends_on": "eval:doc.amended_from", 
+  "description": "The date at which current entry is corrected in the system.", 
   "doctype": "DocField", 
-  "label": "Amendment Date", 
   "fieldname": "amendment_date", 
   "fieldtype": "Date", 
-  "permlevel": 0
+  "label": "Amendment Date", 
+  "no_copy": 1, 
+  "print_hide": 1
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "Material User"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "Sales User"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "Material Master Manager"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "Material Manager"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "Sales Manager"
  }
 ]
