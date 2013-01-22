@@ -267,8 +267,19 @@ def clear_cache(page_name=None):
 	if page_name:
 		delete_page_cache(page_name)
 	else:
-		webnotes.cache().delete_keys("page:")
-	
+		cache = webnotes.cache()
+		for p in get_all_pages():
+			cache.delete_value("page:" + p)
+
+def get_all_pages():
+	all_pages = get_template_pages()
+	all_pages += page_settings_map.keys()
+	for doctype in page_map:
+		all_pages += [p[0] for p in webnotes.conn.sql("""select distinct page_name 
+			from `tab%s`""" % doctype) if p[0]]
+
+	return all_pages
+
 def delete_page_cache(page_name):
 	if page_name:
 		webnotes.cache().delete_value("page:" + page_name)
