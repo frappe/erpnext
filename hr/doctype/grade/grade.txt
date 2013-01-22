@@ -1,78 +1,72 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-01-10 16:34:14", 
   "docstatus": 0, 
-  "creation": "2012-03-27 14:35:57", 
+  "modified": "2013-01-22 14:46:59", 
   "modified_by": "Administrator", 
-  "modified": "2012-03-27 14:35:57"
+  "owner": "Administrator"
  }, 
  {
-  "section_style": "Simple", 
-  "module": "HR", 
-  "doctype": "DocType", 
-  "allow_trash": 1, 
-  "document_type": "Master", 
   "autoname": "field:grade_name", 
-  "name": "__common__", 
-  "colour": "White:FFF", 
-  "server_code_error": " ", 
-  "show_in_menu": 0, 
-  "version": 7
+  "doctype": "DocType", 
+  "document_type": "Master", 
+  "module": "HR", 
+  "name": "__common__"
  }, 
  {
-  "name": "__common__", 
-  "parent": "Grade", 
   "doctype": "DocField", 
-  "parenttype": "DocType", 
-  "parentfield": "fields"
- }, 
- {
-  "report": 1, 
   "name": "__common__", 
   "parent": "Grade", 
-  "read": 1, 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
-  "write": 1, 
-  "cancel": 1, 
+  "name": "__common__", 
+  "parent": "Grade", 
+  "parentfield": "permissions", 
   "parenttype": "DocType", 
   "permlevel": 0, 
-  "parentfield": "permissions"
+  "read": 1, 
+  "report": 1, 
+  "submit": 0, 
+  "write": 1
  }, 
  {
-  "name": "Grade", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "Grade"
  }, 
  {
-  "role": "System Manager", 
-  "doctype": "DocPerm"
- }, 
- {
-  "role": "HR User", 
-  "doctype": "DocPerm", 
-  "submit": 0
- }, 
- {
-  "role": "HR Manager", 
-  "doctype": "DocPerm"
- }, 
- {
-  "oldfieldtype": "Small Text", 
   "doctype": "DocField", 
-  "label": "Trash Reason", 
-  "oldfieldname": "trash_reason", 
   "fieldname": "trash_reason", 
   "fieldtype": "Small Text", 
-  "permlevel": 1
+  "label": "Trash Reason", 
+  "oldfieldname": "trash_reason", 
+  "oldfieldtype": "Small Text", 
+  "read_only": 1
  }, 
  {
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Grade", 
-  "oldfieldname": "grade_name", 
   "fieldname": "grade_name", 
   "fieldtype": "Data", 
-  "reqd": 1, 
-  "permlevel": 0
+  "label": "Grade", 
+  "oldfieldname": "grade_name", 
+  "oldfieldtype": "Data", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "System Manager"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "HR User"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "HR Manager"
  }
 ]

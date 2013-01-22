@@ -1,525 +1,436 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-01-10 16:34:19", 
   "docstatus": 0, 
-  "creation": "2012-12-03 10:31:06", 
+  "modified": "2013-01-22 14:56:40", 
   "modified_by": "Administrator", 
-  "modified": "2012-12-03 17:10:41"
+  "owner": "Administrator"
  }, 
  {
+  "autoname": "naming_series:", 
+  "description": "Potential Sales Deal", 
+  "doctype": "DocType", 
   "document_type": "Transaction", 
   "is_submittable": 1, 
-  "description": "Potential Sales Deal", 
-  "autoname": "naming_series:", 
   "module": "Selling", 
-  "doctype": "DocType", 
-  "search_fields": "status,transaction_date,customer,lead,enquiry_type,territory,company", 
-  "name": "__common__"
+  "name": "__common__", 
+  "search_fields": "status,transaction_date,customer,lead,enquiry_type,territory,company"
  }, 
  {
-  "name": "__common__", 
-  "parent": "Opportunity", 
   "doctype": "DocField", 
-  "parenttype": "DocType", 
-  "parentfield": "fields"
- }, 
- {
   "name": "__common__", 
   "parent": "Opportunity", 
-  "read": 1, 
-  "doctype": "DocPerm", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "parentfield": "permissions"
+  "permlevel": 0
  }, 
  {
-  "name": "Opportunity", 
-  "doctype": "DocType"
+  "amend": 1, 
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Opportunity", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 1, 
+  "submit": 1, 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Opportunity"
  }, 
  {
   "description": "To manage multiple series please go to Setup > Manage Series", 
-  "no_copy": 1, 
-  "oldfieldtype": "Select", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Naming Series", 
-  "oldfieldname": "naming_series", 
-  "options": "ENQUIRY\nENQ", 
   "fieldname": "naming_series", 
   "fieldtype": "Select", 
-  "reqd": 1, 
-  "permlevel": 0
+  "label": "Naming Series", 
+  "no_copy": 1, 
+  "oldfieldname": "naming_series", 
+  "oldfieldtype": "Select", 
+  "options": "ENQUIRY\nENQ", 
+  "reqd": 1
  }, 
  {
-  "print_hide": 1, 
-  "oldfieldtype": "Select", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Opportunity From", 
-  "oldfieldname": "enquiry_from", 
-  "permlevel": 0, 
-  "trigger": "Client", 
   "fieldname": "enquiry_from", 
   "fieldtype": "Select", 
-  "reqd": 1, 
+  "label": "Opportunity From", 
+  "oldfieldname": "enquiry_from", 
+  "oldfieldtype": "Select", 
   "options": "\nLead\nCustomer", 
-  "report_hide": 0
+  "print_hide": 1, 
+  "report_hide": 0, 
+  "reqd": 1
  }, 
  {
-  "print_hide": 1, 
-  "oldfieldtype": "Link", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Customer", 
-  "oldfieldname": "customer", 
-  "permlevel": 0, 
-  "trigger": "Client", 
   "fieldname": "customer", 
   "fieldtype": "Link", 
-  "search_index": 0, 
-  "reqd": 0, 
   "hidden": 0, 
+  "in_filter": 1, 
+  "label": "Customer", 
+  "oldfieldname": "customer", 
+  "oldfieldtype": "Link", 
   "options": "Customer", 
-  "in_filter": 1
+  "print_hide": 1, 
+  "reqd": 0, 
+  "search_index": 0
  }, 
  {
-  "print_hide": 1, 
-  "oldfieldtype": "Link", 
   "doctype": "DocField", 
-  "label": "Lead", 
-  "oldfieldname": "lead", 
-  "trigger": "Client", 
   "fieldname": "lead", 
   "fieldtype": "Link", 
   "hidden": 0, 
+  "in_filter": 1, 
+  "label": "Lead", 
+  "oldfieldname": "lead", 
+  "oldfieldtype": "Link", 
   "options": "Lead", 
-  "permlevel": 0, 
-  "in_filter": 1
+  "print_hide": 1
  }, 
  {
-  "oldfieldtype": "Column Break", 
   "doctype": "DocField", 
-  "width": "50%", 
   "fieldname": "column_break0", 
   "fieldtype": "Column Break", 
-  "permlevel": 0
+  "oldfieldtype": "Column Break", 
+  "width": "50%"
  }, 
  {
-  "no_copy": 1, 
-  "oldfieldtype": "Select", 
-  "colour": "White:FFF", 
-  "doctype": "DocField", 
-  "label": "Status", 
-  "oldfieldname": "status", 
   "default": "Draft", 
-  "options": "\nDraft\nSubmitted\nQuotation Sent\nOrder Confirmed\nOpportunity Lost\nCancelled", 
+  "doctype": "DocField", 
   "fieldname": "status", 
   "fieldtype": "Select", 
-  "reqd": 1, 
-  "permlevel": 1
+  "label": "Status", 
+  "no_copy": 1, 
+  "oldfieldname": "status", 
+  "oldfieldtype": "Select", 
+  "options": "\nDraft\nSubmitted\nQuotation Sent\nOrder Confirmed\nOpportunity Lost\nCancelled", 
+  "read_only": 1, 
+  "reqd": 1
  }, 
  {
-  "oldfieldtype": "Select", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Opportunity Type", 
-  "oldfieldname": "enquiry_type", 
-  "permlevel": 0, 
   "fieldname": "enquiry_type", 
   "fieldtype": "Select", 
-  "reqd": 1, 
-  "options": "\nSales\nMaintenance"
+  "label": "Opportunity Type", 
+  "oldfieldname": "enquiry_type", 
+  "oldfieldtype": "Select", 
+  "options": "\nSales\nMaintenance", 
+  "reqd": 1
  }, 
  {
-  "oldfieldtype": "Section Break", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Items", 
   "fieldname": "items", 
   "fieldtype": "Section Break", 
-  "permlevel": 0
+  "label": "Items", 
+  "oldfieldtype": "Section Break"
  }, 
  {
   "description": "Items which do not exist in Item master can also be entered on customer's request", 
-  "oldfieldtype": "Table", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Opportunity Items", 
-  "oldfieldname": "enquiry_details", 
-  "permlevel": 0, 
   "fieldname": "enquiry_details", 
   "fieldtype": "Table", 
+  "label": "Opportunity Items", 
+  "oldfieldname": "enquiry_details", 
+  "oldfieldtype": "Table", 
   "options": "Opportunity Item"
  }, 
  {
   "description": "Keep a track of communication related to this enquiry which will help for future reference.", 
-  "oldfieldtype": "Section Break", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
   "fieldname": "communication_history", 
   "fieldtype": "Section Break", 
-  "permlevel": 0
+  "oldfieldtype": "Section Break"
  }, 
  {
-  "oldfieldtype": "Table", 
-  "colour": "White:FFF", 
   "allow_on_submit": 1, 
   "doctype": "DocField", 
-  "label": "Communication HTML", 
-  "oldfieldname": "follow_up", 
   "fieldname": "communication_html", 
   "fieldtype": "HTML", 
-  "permlevel": 0
+  "label": "Communication HTML", 
+  "oldfieldname": "follow_up", 
+  "oldfieldtype": "Table"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Contact Info", 
   "fieldname": "contact_info", 
   "fieldtype": "Section Break", 
-  "permlevel": 0
+  "label": "Contact Info"
  }, 
  {
-  "print_hide": 1, 
   "doctype": "DocField", 
-  "label": "Contact Person", 
-  "permlevel": 0, 
-  "trigger": "Client", 
   "fieldname": "contact_person", 
   "fieldtype": "Link", 
+  "in_filter": 1, 
+  "label": "Contact Person", 
   "options": "Contact", 
-  "in_filter": 1
+  "print_hide": 1
  }, 
  {
-  "print_hide": 1, 
   "doctype": "DocField", 
-  "label": "Customer Address", 
-  "permlevel": 0, 
-  "trigger": "Client", 
   "fieldname": "customer_address", 
   "fieldtype": "Link", 
+  "in_filter": 1, 
+  "label": "Customer Address", 
   "options": "Address", 
-  "in_filter": 1
+  "print_hide": 1
  }, 
  {
-  "print_hide": 0, 
   "doctype": "DocField", 
-  "label": "Customer Name", 
   "fieldname": "customer_name", 
   "fieldtype": "Data", 
-  "permlevel": 1
+  "label": "Customer Name", 
+  "print_hide": 0, 
+  "read_only": 1
  }, 
  {
-  "oldfieldtype": "Small Text", 
   "doctype": "DocField", 
-  "label": "Address", 
-  "oldfieldname": "address", 
   "fieldname": "address_display", 
   "fieldtype": "Small Text", 
   "hidden": 0, 
-  "permlevel": 1
+  "label": "Address", 
+  "oldfieldname": "address", 
+  "oldfieldtype": "Small Text", 
+  "read_only": 1
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "column_break3", 
-  "fieldtype": "Column Break", 
-  "permlevel": 0
+  "fieldtype": "Column Break"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Contact", 
   "fieldname": "contact_display", 
   "fieldtype": "Small Text", 
-  "permlevel": 1
+  "label": "Contact", 
+  "read_only": 1
  }, 
  {
   "doctype": "DocField", 
-  "label": "Contact Email", 
   "fieldname": "contact_email", 
   "fieldtype": "Text", 
-  "permlevel": 1
+  "label": "Contact Email", 
+  "read_only": 1
  }, 
  {
   "doctype": "DocField", 
-  "label": "Contact Mobile No", 
   "fieldname": "contact_mobile", 
   "fieldtype": "Text", 
-  "permlevel": 1
+  "label": "Contact Mobile No", 
+  "read_only": 1
  }, 
  {
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Name", 
-  "oldfieldname": "lead_name", 
   "fieldname": "lead_name", 
   "fieldtype": "Data", 
   "hidden": 0, 
-  "permlevel": 1
+  "label": "Name", 
+  "oldfieldname": "lead_name", 
+  "oldfieldtype": "Data", 
+  "read_only": 1
  }, 
  {
-  "print_hide": 1, 
-  "doctype": "DocField", 
+  "depends_on": "eval:doc.enquiry_from==\"Customer\"", 
   "description": "<a href=\"#Sales Browser/Customer Group\">To manage Territory, click here</a>", 
-  "search_index": 1, 
-  "colour": "White:FFF", 
-  "oldfieldtype": "Link", 
-  "label": "Customer Group", 
-  "oldfieldname": "customer_group", 
-  "permlevel": 0, 
-  "trigger": "Client", 
+  "doctype": "DocField", 
   "fieldname": "customer_group", 
   "fieldtype": "Link", 
-  "depends_on": "eval:doc.enquiry_from==\"Customer\"", 
-  "reqd": 0, 
   "hidden": 0, 
+  "in_filter": 1, 
+  "label": "Customer Group", 
+  "oldfieldname": "customer_group", 
+  "oldfieldtype": "Link", 
   "options": "Customer Group", 
-  "in_filter": 1
+  "print_hide": 1, 
+  "reqd": 0, 
+  "search_index": 1
  }, 
  {
-  "print_hide": 1, 
   "description": "<a href=\"#Sales Browser/Territory\">To manage Territory, click here</a>", 
-  "search_index": 1, 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Territory", 
-  "permlevel": 0, 
-  "trigger": "Client", 
   "fieldname": "territory", 
   "fieldtype": "Link", 
-  "reqd": 0, 
+  "in_filter": 1, 
+  "label": "Territory", 
   "options": "Territory", 
-  "in_filter": 1
+  "print_hide": 1, 
+  "reqd": 0, 
+  "search_index": 1
  }, 
  {
   "description": "Filing in Additional Information about the Opportunity will help you analyze your data better.", 
-  "oldfieldtype": "Section Break", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "More Info", 
   "fieldname": "more_info", 
   "fieldtype": "Section Break", 
-  "permlevel": 0
+  "label": "More Info", 
+  "oldfieldtype": "Section Break"
  }, 
  {
-  "oldfieldtype": "Column Break", 
   "doctype": "DocField", 
-  "width": "50%", 
   "fieldname": "column_break1", 
   "fieldtype": "Column Break", 
-  "permlevel": 0
+  "oldfieldtype": "Column Break", 
+  "width": "50%"
  }, 
  {
-  "description": "The date at which current entry is made in system.", 
   "default": "Today", 
-  "oldfieldtype": "Date", 
+  "description": "The date at which current entry is made in system.", 
   "doctype": "DocField", 
-  "label": "Opportunity Date", 
-  "oldfieldname": "transaction_date", 
-  "width": "50px", 
   "fieldname": "transaction_date", 
   "fieldtype": "Date", 
+  "label": "Opportunity Date", 
+  "oldfieldname": "transaction_date", 
+  "oldfieldtype": "Date", 
   "reqd": 1, 
-  "permlevel": 0
+  "width": "50px"
  }, 
  {
-  "print_hide": 1, 
-  "oldfieldtype": "Select", 
   "doctype": "DocField", 
-  "label": "Fiscal Year", 
-  "oldfieldname": "fiscal_year", 
-  "options": "link:Fiscal Year", 
   "fieldname": "fiscal_year", 
   "fieldtype": "Select", 
-  "search_index": 1, 
+  "in_filter": 1, 
+  "label": "Fiscal Year", 
+  "oldfieldname": "fiscal_year", 
+  "oldfieldtype": "Select", 
+  "options": "link:Fiscal Year", 
+  "print_hide": 1, 
   "reqd": 1, 
-  "permlevel": 0, 
-  "in_filter": 1
+  "search_index": 1
  }, 
  {
-  "oldfieldtype": "Select", 
   "doctype": "DocField", 
-  "label": "Source", 
-  "oldfieldname": "source", 
-  "permlevel": 0, 
   "fieldname": "source", 
   "fieldtype": "Select", 
+  "label": "Source", 
+  "oldfieldname": "source", 
+  "oldfieldtype": "Select", 
   "options": "\nExisting Customer\nReference\nAdvertisement\nCold Calling\nExhibition\nSupplier Reference\nMass Mailing\nCustomer's Vendor\nCampaign\nWalk In"
  }, 
  {
   "description": "Enter name of campaign if source of enquiry is campaign", 
-  "oldfieldtype": "Link", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Campaign", 
-  "oldfieldname": "campaign", 
-  "permlevel": 0, 
   "fieldname": "campaign", 
   "fieldtype": "Link", 
+  "label": "Campaign", 
+  "oldfieldname": "campaign", 
+  "oldfieldtype": "Link", 
   "options": "Campaign"
  }, 
  {
-  "no_copy": 1, 
-  "oldfieldtype": "Small Text", 
-  "colour": "White:FFF", 
+  "depends_on": "eval:!doc.__islocal", 
   "doctype": "DocField", 
-  "label": "Quotation Lost Reason", 
-  "oldfieldname": "order_lost_reason", 
   "fieldname": "order_lost_reason", 
   "fieldtype": "Small Text", 
-  "depends_on": "eval:!doc.__islocal", 
-  "permlevel": 1, 
+  "label": "Quotation Lost Reason", 
+  "no_copy": 1, 
+  "oldfieldname": "order_lost_reason", 
+  "oldfieldtype": "Small Text", 
+  "read_only": 1, 
   "report_hide": 0
  }, 
  {
-  "print_hide": 1, 
-  "oldfieldtype": "Link", 
   "doctype": "DocField", 
-  "label": "Company", 
-  "oldfieldname": "company", 
-  "options": "Company", 
   "fieldname": "company", 
   "fieldtype": "Link", 
-  "search_index": 1, 
+  "in_filter": 1, 
+  "label": "Company", 
+  "oldfieldname": "company", 
+  "oldfieldtype": "Link", 
+  "options": "Company", 
+  "print_hide": 1, 
   "reqd": 1, 
-  "permlevel": 0, 
-  "in_filter": 1
+  "search_index": 1
  }, 
  {
-  "oldfieldtype": "Column Break", 
   "doctype": "DocField", 
-  "width": "50%", 
   "fieldname": "column_break2", 
   "fieldtype": "Column Break", 
-  "permlevel": 0
+  "oldfieldtype": "Column Break", 
+  "width": "50%"
  }, 
  {
   "description": "Your sales person who will contact the customer in future", 
-  "oldfieldtype": "Link", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Next Contact By", 
-  "oldfieldname": "contact_by", 
-  "width": "75px", 
-  "options": "Profile", 
   "fieldname": "contact_by", 
   "fieldtype": "Link", 
-  "permlevel": 0, 
-  "in_filter": 1
+  "in_filter": 1, 
+  "label": "Next Contact By", 
+  "oldfieldname": "contact_by", 
+  "oldfieldtype": "Link", 
+  "options": "Profile", 
+  "width": "75px"
  }, 
  {
   "description": "Your sales person will get a reminder on this date to contact the customer", 
-  "oldfieldtype": "Date", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Next Contact Date", 
-  "oldfieldname": "contact_date", 
   "fieldname": "contact_date", 
   "fieldtype": "Date", 
-  "permlevel": 0
+  "label": "Next Contact Date", 
+  "oldfieldname": "contact_date", 
+  "oldfieldtype": "Date"
  }, 
  {
-  "print_hide": 1, 
-  "description": "Date on which the lead was last contacted", 
-  "no_copy": 1, 
-  "oldfieldtype": "Date", 
-  "colour": "White:FFF", 
   "allow_on_submit": 0, 
+  "depends_on": "eval:!doc.__islocal", 
+  "description": "Date on which the lead was last contacted", 
   "doctype": "DocField", 
-  "label": "Last Contact Date", 
-  "oldfieldname": "last_contact_date", 
   "fieldname": "last_contact_date", 
   "fieldtype": "Date", 
-  "depends_on": "eval:!doc.__islocal", 
-  "permlevel": 1
+  "label": "Last Contact Date", 
+  "no_copy": 1, 
+  "oldfieldname": "last_contact_date", 
+  "oldfieldtype": "Date", 
+  "print_hide": 1, 
+  "read_only": 1
  }, 
  {
-  "no_copy": 1, 
-  "oldfieldtype": "Small Text", 
   "doctype": "DocField", 
-  "label": "To Discuss", 
-  "oldfieldname": "to_discuss", 
   "fieldname": "to_discuss", 
   "fieldtype": "Small Text", 
-  "permlevel": 0
+  "label": "To Discuss", 
+  "no_copy": 1, 
+  "oldfieldname": "to_discuss", 
+  "oldfieldtype": "Small Text"
  }, 
  {
-  "print_hide": 1, 
-  "no_copy": 1, 
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Amended From", 
-  "oldfieldname": "amended_from", 
-  "width": "150px", 
   "fieldname": "amended_from", 
   "fieldtype": "Data", 
-  "permlevel": 1
+  "label": "Amended From", 
+  "no_copy": 1, 
+  "oldfieldname": "amended_from", 
+  "oldfieldtype": "Data", 
+  "print_hide": 1, 
+  "read_only": 1, 
+  "width": "150px"
  }, 
  {
-  "print_hide": 1, 
-  "no_copy": 1, 
-  "oldfieldtype": "Date", 
   "doctype": "DocField", 
-  "label": "Amendment Date", 
-  "oldfieldname": "amendment_date", 
-  "width": "150px", 
   "fieldname": "amendment_date", 
   "fieldtype": "Date", 
-  "permlevel": 1
+  "label": "Amendment Date", 
+  "no_copy": 1, 
+  "oldfieldname": "amendment_date", 
+  "oldfieldtype": "Date", 
+  "print_hide": 1, 
+  "read_only": 1, 
+  "width": "150px"
  }, 
  {
-  "amend": 0, 
-  "create": 0, 
   "doctype": "DocPerm", 
-  "submit": 0, 
-  "write": 0, 
-  "role": "Sales Manager", 
-  "cancel": 0, 
-  "permlevel": 1
+  "role": "System Manager"
  }, 
  {
-  "amend": 1, 
-  "create": 1, 
   "doctype": "DocPerm", 
-  "submit": 1, 
-  "write": 1, 
-  "report": 1, 
-  "role": "System Manager", 
-  "cancel": 1, 
-  "permlevel": 0
+  "role": "Sales User"
  }, 
  {
-  "role": "System Manager", 
-  "permlevel": 1, 
-  "doctype": "DocPerm"
- }, 
- {
-  "amend": 1, 
-  "create": 1, 
   "doctype": "DocPerm", 
-  "submit": 1, 
-  "write": 1, 
-  "report": 1, 
-  "role": "Sales User", 
-  "cancel": 1, 
-  "permlevel": 0
- }, 
- {
-  "amend": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "submit": 0, 
-  "write": 0, 
-  "role": "Sales User", 
-  "cancel": 0, 
-  "permlevel": 1
- }, 
- {
-  "amend": 1, 
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "submit": 1, 
-  "write": 1, 
-  "report": 1, 
-  "role": "Sales Manager", 
-  "cancel": 1, 
-  "permlevel": 0
+  "role": "Sales Manager"
  }
 ]

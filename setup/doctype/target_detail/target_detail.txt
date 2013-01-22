@@ -1,75 +1,70 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-01-10 16:34:24", 
   "docstatus": 0, 
-  "creation": "2012-03-27 14:36:25", 
+  "modified": "2013-01-22 13:48:39", 
   "modified_by": "Administrator", 
-  "modified": "2012-03-27 14:36:25"
+  "owner": "Administrator"
  }, 
  {
-  "section_style": "Tray", 
+  "doctype": "DocType", 
   "istable": 1, 
-  "name": "__common__", 
-  "colour": "White:FFF", 
   "module": "Setup", 
-  "show_in_menu": 0, 
-  "version": 15, 
-  "server_code_error": " ", 
-  "doctype": "DocType"
+  "name": "__common__"
  }, 
  {
+  "doctype": "DocField", 
   "name": "__common__", 
   "parent": "Target Detail", 
-  "doctype": "DocField", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "permlevel": 0, 
-  "parentfield": "fields"
+  "permlevel": 0
  }, 
  {
-  "name": "Target Detail", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "Target Detail"
  }, 
  {
-  "search_index": 1, 
   "doctype": "DocField", 
-  "label": "Item Group", 
-  "oldfieldname": "item_group", 
   "fieldname": "item_group", 
   "fieldtype": "Link", 
+  "in_filter": 1, 
+  "label": "Item Group", 
+  "oldfieldname": "item_group", 
   "oldfieldtype": "Link", 
-  "reqd": 0, 
   "options": "Item Group", 
-  "in_filter": 1
+  "reqd": 0, 
+  "search_index": 1
  }, 
  {
-  "search_index": 1, 
   "doctype": "DocField", 
-  "label": "Fiscal Year", 
-  "oldfieldname": "fiscal_year", 
   "fieldname": "fiscal_year", 
   "fieldtype": "Select", 
+  "in_filter": 1, 
+  "label": "Fiscal Year", 
+  "oldfieldname": "fiscal_year", 
   "oldfieldtype": "Select", 
-  "reqd": 1, 
   "options": "link:Fiscal Year", 
-  "in_filter": 1
+  "reqd": 1, 
+  "search_index": 1
  }, 
  {
-  "oldfieldtype": "Currency", 
   "doctype": "DocField", 
+  "fieldname": "target_qty", 
+  "fieldtype": "Float", 
   "label": "Target Qty", 
   "oldfieldname": "target_qty", 
-  "fieldname": "target_qty", 
-  "fieldtype": "Currency"
+  "oldfieldtype": "Currency"
  }, 
  {
-  "search_index": 1, 
   "doctype": "DocField", 
-  "label": "Target  Amount", 
-  "oldfieldname": "target_amount", 
   "fieldname": "target_amount", 
   "fieldtype": "Currency", 
+  "in_filter": 1, 
+  "label": "Target  Amount", 
+  "oldfieldname": "target_amount", 
   "oldfieldtype": "Currency", 
   "reqd": 0, 
-  "in_filter": 1
+  "search_index": 1
  }
 ]

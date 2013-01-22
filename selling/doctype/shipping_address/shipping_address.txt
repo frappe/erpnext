@@ -1,144 +1,119 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-01-10 16:34:22", 
   "docstatus": 0, 
-  "creation": "2012-03-27 14:36:17", 
+  "modified": "2013-01-22 14:57:24", 
   "modified_by": "Administrator", 
-  "modified": "2012-03-27 14:36:17"
+  "owner": "Administrator"
  }, 
  {
-  "section_style": "Simple", 
-  "search_fields": "customer, ship_to, shipping_address", 
-  "module": "Selling", 
-  "allow_trash": 1, 
-  "document_type": "Master", 
   "autoname": "SA.#####", 
-  "name": "__common__", 
-  "colour": "White:FFF", 
   "doctype": "DocType", 
-  "show_in_menu": 0, 
-  "version": 8
+  "document_type": "Master", 
+  "module": "Selling", 
+  "name": "__common__", 
+  "search_fields": "customer, ship_to, shipping_address"
  }, 
  {
-  "name": "__common__", 
-  "parent": "Shipping Address", 
   "doctype": "DocField", 
-  "parenttype": "DocType", 
-  "parentfield": "fields"
- }, 
- {
   "name": "__common__", 
   "parent": "Shipping Address", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Shipping Address", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
   "read": 1, 
-  "doctype": "DocPerm", 
-  "parenttype": "DocType", 
-  "parentfield": "permissions"
- }, 
- {
-  "name": "Shipping Address", 
-  "doctype": "DocType"
- }, 
- {
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "write": 1, 
-  "cancel": 1, 
-  "role": "Sales Master Manager", 
   "report": 1, 
-  "permlevel": 0
+  "submit": 0, 
+  "write": 1
  }, 
  {
-  "role": "Sales Master Manager", 
-  "permlevel": 1, 
-  "doctype": "DocPerm"
- }, 
- {
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "write": 1, 
-  "cancel": 1, 
-  "role": "Sales Manager", 
-  "report": 1, 
-  "permlevel": 0
- }, 
- {
-  "role": "Sales Manager", 
-  "permlevel": 1, 
-  "doctype": "DocPerm"
+  "doctype": "DocType", 
+  "name": "Shipping Address"
  }, 
  {
   "doctype": "DocField", 
-  "width": "50%", 
   "fieldname": "column_break0", 
   "fieldtype": "Column Break", 
-  "permlevel": 0
+  "width": "50%"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Customer", 
-  "permlevel": 0, 
   "fieldname": "customer", 
   "fieldtype": "Link", 
-  "reqd": 1, 
-  "options": "Customer"
+  "label": "Customer", 
+  "options": "Customer", 
+  "reqd": 1
  }, 
  {
   "doctype": "DocField", 
-  "label": "Customer Name", 
   "fieldname": "customer_name", 
   "fieldtype": "Data", 
-  "permlevel": 1
+  "label": "Customer Name", 
+  "read_only": 1
  }, 
  {
   "doctype": "DocField", 
-  "label": "Customer Address", 
   "fieldname": "customer_address", 
   "fieldtype": "Text", 
-  "permlevel": 1
+  "label": "Customer Address", 
+  "read_only": 1
  }, 
  {
   "doctype": "DocField", 
-  "label": "Ship To", 
   "fieldname": "ship_to", 
   "fieldtype": "Data", 
-  "reqd": 1, 
-  "permlevel": 0
+  "label": "Ship To", 
+  "reqd": 1
  }, 
  {
   "doctype": "DocField", 
-  "label": "Shipping Address", 
   "fieldname": "shipping_address", 
   "fieldtype": "Text", 
-  "reqd": 1, 
-  "permlevel": 0
+  "label": "Shipping Address", 
+  "reqd": 1
  }, 
  {
   "doctype": "DocField", 
-  "width": "50%", 
   "fieldname": "column_break1", 
   "fieldtype": "Column Break", 
-  "permlevel": 0
+  "width": "50%"
  }, 
  {
   "doctype": "DocField", 
-  "options": "Yes\nNo", 
   "fieldname": "is_primary_address", 
   "fieldtype": "Select", 
   "label": "Is Primary Address", 
-  "permlevel": 0
+  "options": "Yes\nNo"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Shipping Details", 
   "fieldname": "shipping_details", 
   "fieldtype": "Text Editor", 
-  "permlevel": 0
+  "label": "Shipping Details"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Trash Reason", 
   "fieldname": "trash_reason", 
   "fieldtype": "Small Text", 
-  "permlevel": 1
+  "label": "Trash Reason", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "Sales Master Manager"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "Sales Manager"
  }
 ]

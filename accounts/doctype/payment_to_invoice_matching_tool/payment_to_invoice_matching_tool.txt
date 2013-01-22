@@ -1,209 +1,180 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-01-21 18:19:17", 
   "docstatus": 0, 
-  "creation": "2013-01-16 14:48:54", 
+  "modified": "2013-01-22 14:56:41", 
   "modified_by": "Administrator", 
-  "modified": "2013-01-21 11:52:11"
+  "owner": "Administrator"
  }, 
  {
-  "issingle": 1, 
-  "name": "__common__", 
   "doctype": "DocType", 
-  "module": "Accounts", 
   "document_type": "Other", 
-  "hide_toolbar": 1
+  "hide_toolbar": 1, 
+  "issingle": 1, 
+  "module": "Accounts", 
+  "name": "__common__"
  }, 
  {
-  "name": "__common__", 
-  "parent": "Payment to Invoice Matching Tool", 
   "doctype": "DocField", 
-  "parenttype": "DocType", 
-  "parentfield": "fields"
- }, 
- {
   "name": "__common__", 
   "parent": "Payment to Invoice Matching Tool", 
-  "read": 1, 
-  "submit": 0, 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "create": 1, 
   "doctype": "DocPerm", 
-  "report": 0, 
+  "name": "__common__", 
+  "parent": "Payment to Invoice Matching Tool", 
+  "parentfield": "permissions", 
   "parenttype": "DocType", 
-  "parentfield": "permissions"
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 1, 
+  "submit": 0, 
+  "write": 1
  }, 
  {
-  "name": "Payment to Invoice Matching Tool", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "Payment to Invoice Matching Tool"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Account", 
-  "options": "Account", 
   "fieldname": "account", 
   "fieldtype": "Link", 
-  "reqd": 1, 
-  "permlevel": 0
+  "label": "Account", 
+  "options": "Account", 
+  "reqd": 1
  }, 
  {
   "doctype": "DocField", 
-  "label": "Voucher Type", 
-  "options": "Sales Invoice\nPurchase Invoice\nJournal Voucher", 
   "fieldname": "voucher_type", 
   "fieldtype": "Select", 
-  "reqd": 1, 
-  "permlevel": 0
+  "label": "Voucher Type", 
+  "options": "Sales Invoice\nPurchase Invoice\nJournal Voucher", 
+  "reqd": 1
  }, 
  {
   "doctype": "DocField", 
-  "label": "Voucher No", 
-  "options": "[Select]", 
   "fieldname": "voucher_no", 
   "fieldtype": "Link", 
-  "reqd": 1, 
-  "permlevel": 0
+  "label": "Voucher No", 
+  "options": "[Select]", 
+  "reqd": 1
  }, 
  {
   "doctype": "DocField", 
-  "label": "Pull Payment Entries", 
-  "options": "get_payment_entries", 
   "fieldname": "pull_payment_entries", 
   "fieldtype": "Button", 
-  "permlevel": 0
+  "label": "Pull Payment Entries", 
+  "options": "get_payment_entries"
  }, 
  {
-  "print_width": "50%", 
   "doctype": "DocField", 
-  "width": "50%", 
   "fieldname": "column_break1", 
   "fieldtype": "Column Break", 
-  "permlevel": 0
+  "print_width": "50%", 
+  "width": "50%"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Total Amount", 
   "fieldname": "total_amount", 
   "fieldtype": "Currency", 
-  "permlevel": 1
+  "label": "Total Amount", 
+  "read_only": 1
  }, 
  {
   "doctype": "DocField", 
-  "label": "Outstanding Amount", 
   "fieldname": "pending_amt_to_reconcile", 
   "fieldtype": "Currency", 
-  "permlevel": 1
+  "label": "Outstanding Amount", 
+  "read_only": 1
  }, 
  {
   "doctype": "DocField", 
-  "label": "Payment Entries", 
   "fieldname": "payment_entries", 
   "fieldtype": "Section Break", 
-  "permlevel": 0
+  "label": "Payment Entries"
  }, 
  {
   "description": "Update allocated amount in the above table and then click \"Allocate\" button", 
   "doctype": "DocField", 
-  "label": "Payment Entries", 
-  "options": "Payment to Invoice Matching Tool Detail", 
   "fieldname": "ir_payment_details", 
   "fieldtype": "Table", 
-  "permlevel": 0
+  "label": "Payment Entries", 
+  "options": "Payment to Invoice Matching Tool Detail"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Allocate", 
-  "options": "reconcile", 
   "fieldname": "reconcile", 
   "fieldtype": "Button", 
-  "permlevel": 0
+  "label": "Allocate", 
+  "options": "reconcile"
  }, 
  {
   "doctype": "DocField", 
-  "options": "Simple", 
   "fieldname": "section_break0", 
   "fieldtype": "Section Break", 
-  "permlevel": 0
+  "options": "Simple"
  }, 
  {
-  "print_width": "50%", 
   "doctype": "DocField", 
-  "label": "Filter By Date", 
-  "width": "50%", 
   "fieldname": "column_break2", 
   "fieldtype": "Column Break", 
-  "permlevel": 0
+  "label": "Filter By Date", 
+  "print_width": "50%", 
+  "width": "50%"
  }, 
  {
   "doctype": "DocField", 
-  "label": "From Date", 
   "fieldname": "from_date", 
   "fieldtype": "Date", 
-  "permlevel": 0
+  "label": "From Date"
  }, 
  {
   "doctype": "DocField", 
-  "label": "To Date", 
   "fieldname": "to_date", 
   "fieldtype": "Date", 
-  "permlevel": 0
+  "label": "To Date"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Help HTML", 
-  "options": "Click \"Pull Payment Entries\" to refresh the table with filters.", 
   "fieldname": "help_html", 
   "fieldtype": "HTML", 
-  "permlevel": 0
+  "label": "Help HTML", 
+  "options": "Click \"Pull Payment Entries\" to refresh the table with filters."
  }, 
  {
-  "print_width": "50%", 
   "doctype": "DocField", 
-  "label": "Filter By Amount", 
-  "width": "50%", 
   "fieldname": "column_break3", 
   "fieldtype": "Column Break", 
-  "permlevel": 0
+  "label": "Filter By Amount", 
+  "print_width": "50%", 
+  "width": "50%"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Amount >=", 
   "fieldname": "amt_greater_than", 
   "fieldtype": "Data", 
-  "permlevel": 0
+  "label": "Amount >="
  }, 
  {
   "doctype": "DocField", 
-  "label": "Amount <=", 
   "fieldname": "amt_less_than", 
   "fieldtype": "Data", 
-  "permlevel": 0
+  "label": "Amount <="
  }, 
  {
-  "create": 1, 
   "doctype": "DocPerm", 
-  "write": 1, 
-  "role": "System Manager", 
-  "permlevel": 0
+  "role": "System Manager"
  }, 
  {
-  "create": 1, 
   "doctype": "DocPerm", 
-  "write": 1, 
-  "role": "Accounts Manager", 
-  "permlevel": 0
+  "role": "Accounts Manager"
  }, 
  {
-  "create": 1, 
   "doctype": "DocPerm", 
-  "write": 1, 
-  "role": "Accounts User", 
-  "permlevel": 0
- }, 
- {
-  "amend": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "role": "All", 
-  "cancel": 0, 
-  "permlevel": 1
+  "role": "Accounts User"
  }
 ]

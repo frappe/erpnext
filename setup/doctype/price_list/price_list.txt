@@ -1,118 +1,91 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-01-10 16:34:23", 
   "docstatus": 0, 
-  "creation": "2012-07-12 23:29:45", 
+  "modified": "2013-01-22 14:56:41", 
   "modified_by": "Administrator", 
-  "modified": "2012-11-15 10:50:52"
+  "owner": "Administrator"
  }, 
  {
-  "section_style": "Simple", 
-  "doctype": "DocType", 
   "allow_attach": 0, 
-  "allow_print": 1, 
-  "module": "Setup", 
-  "server_code_error": " ", 
-  "allow_trash": 1, 
-  "autoname": "field:price_list_name", 
-  "document_type": "Master", 
-  "description": "Price List Master", 
+  "allow_copy": 1, 
   "allow_email": 1, 
-  "name": "__common__", 
-  "colour": "White:FFF", 
-  "_last_update": "1303100817", 
-  "show_in_menu": 0, 
+  "allow_print": 1, 
+  "autoname": "field:price_list_name", 
+  "description": "Price List Master", 
+  "doctype": "DocType", 
+  "document_type": "Master", 
   "max_attachments": 1, 
-  "version": 1, 
-  "allow_copy": 1
+  "module": "Setup", 
+  "name": "__common__"
  }, 
  {
+  "doctype": "DocField", 
   "name": "__common__", 
   "parent": "Price List", 
-  "doctype": "DocField", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "amend": 0, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Price List", 
+  "parentfield": "permissions", 
   "parenttype": "DocType", 
   "permlevel": 0, 
-  "parentfield": "fields"
- }, 
- {
-  "name": "__common__", 
-  "parent": "Price List", 
-  "amend": 0, 
-  "submit": 0, 
-  "doctype": "DocPerm", 
   "read": 1, 
-  "parenttype": "DocType", 
-  "parentfield": "permissions"
+  "report": 1, 
+  "submit": 0
  }, 
  {
-  "name": "Price List", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "Price List"
  }, 
  {
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Price List Name", 
-  "oldfieldname": "price_list_name", 
   "fieldname": "price_list_name", 
   "fieldtype": "Data", 
+  "label": "Price List Name", 
+  "oldfieldname": "price_list_name", 
+  "oldfieldtype": "Data", 
   "reqd": 1
  }, 
  {
   "depends_on": "price_list_name", 
   "doctype": "DocField", 
-  "label": "How to upload", 
   "fieldname": "how_to_upload", 
   "fieldtype": "HTML", 
+  "label": "How to upload", 
   "options": "<div class=\"help\">Use the <a href=\"#data-import-tool\">Data Import Tool</a> to upload, update Item Prices in bulk:\n<ol> \n<li>Go to Data Import Tool.\n<li>Select \"Item\"\n<li>Check on \"With Data\"\n<li>Download \"Item Price\" from Child Tables.\n<li>Update the prices required and add new rows if required.\n<li>Check on \"Overwrite\"\n<li>Upload the modified sheet.\n</div>\n"
  }, 
  {
   "doctype": "DocField", 
-  "label": "File List", 
   "fieldname": "file_list", 
   "fieldtype": "Text", 
-  "hidden": 1
+  "hidden": 1, 
+  "label": "File List"
  }, 
  {
+  "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
-  "write": 0, 
   "role": "Sales Manager", 
-  "cancel": 0, 
-  "permlevel": 1
+  "write": 0
  }, 
  {
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "write": 0, 
-  "report": 1, 
-  "role": "Sales Manager", 
   "cancel": 0, 
-  "permlevel": 0
- }, 
- {
   "create": 0, 
   "doctype": "DocPerm", 
-  "write": 0, 
   "role": "Sales User", 
-  "cancel": 0, 
-  "permlevel": 1
+  "write": 0
  }, 
  {
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "write": 0, 
-  "report": 1, 
-  "role": "Sales User", 
-  "cancel": 0, 
-  "permlevel": 0
- }, 
- {
+  "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
-  "write": 1, 
-  "report": 1, 
   "role": "Sales Master Manager", 
-  "cancel": 1, 
-  "permlevel": 0
+  "write": 1
  }
 ]

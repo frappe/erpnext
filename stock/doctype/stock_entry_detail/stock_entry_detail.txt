@@ -1,197 +1,197 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-01-14 16:33:34", 
   "docstatus": 0, 
-  "creation": "2012-12-20 14:31:18", 
+  "modified": "2013-01-22 14:50:07", 
   "modified_by": "Administrator", 
-  "modified": "2013-01-11 11:59:10"
+  "owner": "Administrator"
  }, 
  {
-  "istable": 1, 
   "autoname": "MTND/.######", 
-  "name": "__common__", 
   "doctype": "DocType", 
-  "module": "Stock"
+  "istable": 1, 
+  "module": "Stock", 
+  "name": "__common__"
  }, 
  {
-  "read_only": 0, 
+  "doctype": "DocField", 
   "name": "__common__", 
   "parent": "Stock Entry Detail", 
-  "doctype": "DocField", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "parentfield": "fields"
+  "permlevel": 0
  }, 
  {
-  "name": "Stock Entry Detail", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "Stock Entry Detail"
  }, 
  {
-  "no_copy": 1, 
-  "oldfieldtype": "Link", 
   "doctype": "DocField", 
-  "label": "Source Warehouse", 
-  "oldfieldname": "s_warehouse", 
-  "options": "Warehouse", 
   "fieldname": "s_warehouse", 
   "fieldtype": "Link", 
-  "permlevel": 0, 
-  "in_filter": 1
+  "in_filter": 1, 
+  "label": "Source Warehouse", 
+  "no_copy": 1, 
+  "oldfieldname": "s_warehouse", 
+  "oldfieldtype": "Link", 
+  "options": "Warehouse", 
+  "read_only": 0
  }, 
  {
-  "no_copy": 1, 
-  "oldfieldtype": "Link", 
   "doctype": "DocField", 
-  "label": "Target Warehouse", 
-  "oldfieldname": "t_warehouse", 
-  "options": "Warehouse", 
   "fieldname": "t_warehouse", 
   "fieldtype": "Link", 
-  "permlevel": 0, 
-  "in_filter": 1
+  "in_filter": 1, 
+  "label": "Target Warehouse", 
+  "no_copy": 1, 
+  "oldfieldname": "t_warehouse", 
+  "oldfieldtype": "Link", 
+  "options": "Warehouse", 
+  "read_only": 0
  }, 
  {
-  "oldfieldtype": "Link", 
   "doctype": "DocField", 
-  "label": "Item Code", 
-  "oldfieldname": "item_code", 
-  "permlevel": 0, 
   "fieldname": "item_code", 
   "fieldtype": "Link", 
-  "search_index": 1, 
-  "reqd": 1, 
+  "in_filter": 1, 
+  "label": "Item Code", 
+  "oldfieldname": "item_code", 
+  "oldfieldtype": "Link", 
   "options": "Item", 
-  "in_filter": 1
+  "read_only": 0, 
+  "reqd": 1, 
+  "search_index": 1
  }, 
  {
-  "print_width": "300px", 
-  "oldfieldtype": "Text", 
   "doctype": "DocField", 
-  "label": "Description", 
-  "oldfieldname": "description", 
-  "width": "300px", 
   "fieldname": "description", 
   "fieldtype": "Text", 
-  "permlevel": 0
+  "label": "Description", 
+  "oldfieldname": "description", 
+  "oldfieldtype": "Text", 
+  "print_width": "300px", 
+  "read_only": 0, 
+  "width": "300px"
  }, 
  {
-  "oldfieldtype": "Currency", 
   "doctype": "DocField", 
+  "fieldname": "qty", 
+  "fieldtype": "Float", 
   "label": "Qty", 
   "oldfieldname": "qty", 
-  "fieldname": "qty", 
-  "fieldtype": "Currency", 
-  "reqd": 1, 
-  "permlevel": 0
+  "oldfieldtype": "Currency", 
+  "read_only": 0, 
+  "reqd": 1
  }, 
  {
-  "oldfieldtype": "Link", 
   "doctype": "DocField", 
-  "label": "UOM", 
-  "oldfieldname": "uom", 
-  "options": "UOM", 
   "fieldname": "uom", 
   "fieldtype": "Link", 
-  "reqd": 1, 
-  "permlevel": 0
+  "label": "UOM", 
+  "oldfieldname": "uom", 
+  "oldfieldtype": "Link", 
+  "options": "UOM", 
+  "read_only": 0, 
+  "reqd": 1
  }, 
  {
-  "oldfieldtype": "Currency", 
   "doctype": "DocField", 
-  "label": "Valuation Rate", 
-  "oldfieldname": "incoming_rate", 
   "fieldname": "incoming_rate", 
   "fieldtype": "Currency", 
-  "reqd": 0, 
-  "permlevel": 0
+  "label": "Valuation Rate", 
+  "oldfieldname": "incoming_rate", 
+  "oldfieldtype": "Currency", 
+  "read_only": 0, 
+  "reqd": 0
  }, 
  {
-  "oldfieldtype": "Currency", 
   "doctype": "DocField", 
-  "label": "Amount", 
-  "oldfieldname": "amount", 
   "fieldname": "amount", 
   "fieldtype": "Currency", 
-  "permlevel": 1
+  "label": "Amount", 
+  "oldfieldname": "amount", 
+  "oldfieldtype": "Currency", 
+  "read_only": 1
  }, 
  {
-  "no_copy": 1, 
-  "oldfieldtype": "Text", 
   "doctype": "DocField", 
-  "label": "Serial No", 
-  "oldfieldname": "serial_no", 
   "fieldname": "serial_no", 
   "fieldtype": "Text", 
-  "reqd": 0, 
-  "permlevel": 0
+  "label": "Serial No", 
+  "no_copy": 1, 
+  "oldfieldname": "serial_no", 
+  "oldfieldtype": "Text", 
+  "read_only": 0, 
+  "reqd": 0
  }, 
  {
-  "print_hide": 1, 
-  "oldfieldtype": "Link", 
   "doctype": "DocField", 
-  "label": "Batch No", 
-  "oldfieldname": "batch_no", 
-  "options": "Batch", 
   "fieldname": "batch_no", 
   "fieldtype": "Link", 
-  "permlevel": 0
- }, 
- {
+  "label": "Batch No", 
+  "oldfieldname": "batch_no", 
+  "oldfieldtype": "Link", 
+  "options": "Batch", 
   "print_hide": 1, 
-  "no_copy": 1, 
-  "oldfieldtype": "Read Only", 
-  "doctype": "DocField", 
-  "label": "Actual Qty (at source/target)", 
-  "oldfieldname": "actual_qty", 
-  "fieldname": "actual_qty", 
-  "fieldtype": "Read Only", 
-  "search_index": 1, 
-  "reqd": 0, 
-  "permlevel": 1, 
-  "in_filter": 1
+  "read_only": 0
  }, 
  {
-  "oldfieldtype": "Currency", 
   "doctype": "DocField", 
+  "fieldname": "actual_qty", 
+  "fieldtype": "Float", 
+  "in_filter": 1, 
+  "label": "Actual Qty (at source/target)", 
+  "no_copy": 1, 
+  "oldfieldname": "actual_qty", 
+  "oldfieldtype": "Read Only", 
+  "print_hide": 1, 
+  "read_only": 1, 
+  "reqd": 0, 
+  "search_index": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "conversion_factor", 
+  "fieldtype": "Float", 
   "label": "Conversion Factor", 
   "oldfieldname": "conversion_factor", 
-  "fieldname": "conversion_factor", 
-  "fieldtype": "Currency", 
-  "reqd": 1, 
-  "permlevel": 1
+  "oldfieldtype": "Currency", 
+  "read_only": 1, 
+  "reqd": 1
  }, 
  {
-  "oldfieldtype": "Currency", 
   "doctype": "DocField", 
+  "fieldname": "transfer_qty", 
+  "fieldtype": "Float", 
   "label": "Qty as per Stock UOM", 
   "oldfieldname": "transfer_qty", 
-  "fieldname": "transfer_qty", 
-  "fieldtype": "Currency", 
-  "reqd": 1, 
-  "permlevel": 1
+  "oldfieldtype": "Currency", 
+  "read_only": 1, 
+  "reqd": 1
  }, 
  {
-  "oldfieldtype": "Link", 
   "doctype": "DocField", 
-  "label": "Stock UOM", 
-  "oldfieldname": "stock_uom", 
-  "permlevel": 1, 
   "fieldname": "stock_uom", 
   "fieldtype": "Link", 
-  "search_index": 0, 
-  "reqd": 1, 
+  "in_filter": 0, 
+  "label": "Stock UOM", 
+  "oldfieldname": "stock_uom", 
+  "oldfieldtype": "Link", 
   "options": "UOM", 
-  "in_filter": 0
+  "read_only": 1, 
+  "reqd": 1, 
+  "search_index": 0
  }, 
  {
-  "print_hide": 1, 
   "description": "BOM No. for a Finished Good Item", 
-  "no_copy": 0, 
   "doctype": "DocField", 
-  "label": "BOM No", 
-  "options": "BOM", 
   "fieldname": "bom_no", 
   "fieldtype": "Link", 
   "hidden": 1, 
-  "permlevel": 0
+  "label": "BOM No", 
+  "no_copy": 0, 
+  "options": "BOM", 
+  "print_hide": 1, 
+  "read_only": 0
  }
 ]

@@ -1,118 +1,52 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-01-10 16:34:09", 
   "docstatus": 0, 
-  "creation": "2012-07-03 13:30:46", 
+  "modified": "2013-01-22 14:57:23", 
   "modified_by": "Administrator", 
-  "modified": "2012-07-12 13:43:32"
+  "owner": "Administrator"
  }, 
  {
-  "section_style": "Tabbed", 
-  "description": "Standard tax template that can be applied to all Sales Transactions. This template can contain list of tax heads and also other expense / income heads like \"Shipping\", \"Insurance\", \"Handling\" etc.\n\n#### Note\n\nThe tax rate you define here will be the standard tax rate for all **Items**. If there are **Items** that have different rates, they must be added in the **Item Tax** table in the **Item** master.\n\n#### Description of Columns\n\n1. Calculation Type: \n    - This can be on **Net Total** (that is the sum of basic amount).\n    - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.\n    - **Actual** (as mentioned).\n2. Account Head: The Account ledger under which this tax will be booked\n3. Cost Center: If the tax / charge is an income (like shipping) or expense it needs to be booked against a Cost Center.\n4. Description: Description of the tax (that will be printed in invoices / quotes).\n5. Rate: Tax rate.\n6. Amount: Tax amount.\n7. Total: Cumulative total to this point.\n8. Enter Row: If based on \"Previous Row Total\" you can select the row number which will be taken as a base for this calculation (default is the previous row).\n9. Is this Tax included in Basic Rate?: If you check this, it means that this tax will not be shown below the item table, but will be included in the Basic Rate in your main item table. This is useful where you want give a flat price (inclusive of all taxes) price to customers.", 
-  "module": "Accounts", 
-  "server_code_error": " ", 
-  "allow_trash": 1, 
   "autoname": "field:title", 
-  "document_type": "Master", 
-  "_last_update": "1322549700", 
-  "name": "__common__", 
-  "colour": "White:FFF", 
+  "description": "Standard tax template that can be applied to all Sales Transactions. This template can contain list of tax heads and also other expense / income heads like \"Shipping\", \"Insurance\", \"Handling\" etc.\n\n#### Note\n\nThe tax rate you define here will be the standard tax rate for all **Items**. If there are **Items** that have different rates, they must be added in the **Item Tax** table in the **Item** master.\n\n#### Description of Columns\n\n1. Calculation Type: \n    - This can be on **Net Total** (that is the sum of basic amount).\n    - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.\n    - **Actual** (as mentioned).\n2. Account Head: The Account ledger under which this tax will be booked\n3. Cost Center: If the tax / charge is an income (like shipping) or expense it needs to be booked against a Cost Center.\n4. Description: Description of the tax (that will be printed in invoices / quotes).\n5. Rate: Tax rate.\n6. Amount: Tax amount.\n7. Total: Cumulative total to this point.\n8. Enter Row: If based on \"Previous Row Total\" you can select the row number which will be taken as a base for this calculation (default is the previous row).\n9. Is this Tax included in Basic Rate?: If you check this, it means that this tax will not be shown below the item table, but will be included in the Basic Rate in your main item table. This is useful where you want give a flat price (inclusive of all taxes) price to customers.", 
   "doctype": "DocType", 
-  "show_in_menu": 0, 
-  "version": 1
+  "document_type": "Master", 
+  "module": "Accounts", 
+  "name": "__common__"
  }, 
  {
+  "doctype": "DocField", 
   "name": "__common__", 
   "parent": "Sales Taxes and Charges Master", 
-  "doctype": "DocField", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Sales Taxes and Charges Master", 
+  "parentfield": "permissions", 
   "parenttype": "DocType", 
   "permlevel": 0, 
-  "parentfield": "fields"
- }, 
- {
-  "name": "__common__", 
-  "parent": "Sales Taxes and Charges Master", 
   "read": 1, 
-  "doctype": "DocPerm", 
-  "parenttype": "DocType", 
-  "parentfield": "permissions"
- }, 
- {
-  "name": "Sales Taxes and Charges Master", 
-  "doctype": "DocType"
- }, 
- {
-  "amend": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "submit": 0, 
-  "write": 0, 
-  "role": "Sales Master Manager", 
-  "cancel": 0, 
-  "permlevel": 1
- }, 
- {
-  "amend": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "submit": 0, 
-  "write": 0, 
-  "role": "Sales User", 
-  "cancel": 0, 
-  "permlevel": 1
- }, 
- {
-  "amend": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "submit": 0, 
-  "write": 0, 
   "report": 1, 
-  "role": "Sales User", 
-  "cancel": 0, 
-  "permlevel": 0
+  "submit": 0
  }, 
  {
-  "amend": 0, 
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "submit": 0, 
-  "write": 1, 
-  "report": 1, 
-  "role": "Accounts Manager", 
-  "cancel": 1, 
-  "permlevel": 0
+  "doctype": "DocType", 
+  "name": "Sales Taxes and Charges Master"
  }, 
  {
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "write": 1, 
-  "cancel": 1, 
-  "role": "System Manager", 
-  "report": 1, 
-  "permlevel": 0
- }, 
- {
-  "amend": 0, 
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "submit": 0, 
-  "write": 1, 
-  "report": 1, 
-  "role": "Sales Master Manager", 
-  "cancel": 1, 
-  "permlevel": 0
- }, 
- {
-  "search_index": 0, 
   "doctype": "DocField", 
-  "label": "Title", 
-  "oldfieldname": "title", 
   "fieldname": "title", 
   "fieldtype": "Data", 
+  "in_filter": 1, 
+  "label": "Title", 
+  "oldfieldname": "title", 
   "oldfieldtype": "Data", 
   "reqd": 1, 
-  "in_filter": 1
+  "search_index": 0
  }, 
  {
   "doctype": "DocField", 
@@ -122,25 +56,55 @@
  }, 
  {
   "description": "* Will be calculated in the transaction.", 
-  "oldfieldtype": "Table", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Sales Taxes and Charges Master", 
-  "oldfieldname": "other_charges", 
   "fieldname": "other_charges", 
   "fieldtype": "Table", 
+  "label": "Sales Taxes and Charges Master", 
+  "oldfieldname": "other_charges", 
+  "oldfieldtype": "Table", 
   "options": "Sales Taxes and Charges"
  }, 
  {
-  "search_index": 0, 
   "doctype": "DocField", 
-  "label": "Company", 
-  "oldfieldname": "company", 
   "fieldname": "company", 
   "fieldtype": "Link", 
+  "in_filter": 1, 
+  "label": "Company", 
+  "oldfieldname": "company", 
   "oldfieldtype": "Link", 
-  "reqd": 1, 
   "options": "Company", 
-  "in_filter": 1
+  "reqd": 1, 
+  "search_index": 0
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "role": "Sales User", 
+  "write": 0
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "role": "Accounts Manager", 
+  "write": 1
+ }, 
+ {
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "role": "System Manager", 
+  "write": 1
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "role": "Sales Master Manager", 
+  "write": 1
  }
 ]

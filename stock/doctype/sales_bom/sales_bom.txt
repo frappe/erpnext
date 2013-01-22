@@ -1,98 +1,42 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-01-10 16:34:29", 
   "docstatus": 0, 
-  "creation": "2012-07-03 13:30:44", 
+  "modified": "2013-01-22 14:57:23", 
   "modified_by": "Administrator", 
-  "modified": "2012-07-12 18:00:16"
+  "owner": "Administrator"
  }, 
  {
-  "section_style": "Simple", 
-  "is_submittable": 0, 
   "description": "Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**. \n\nThe package **Item** will have \"Is Stock Item\" as \"No\" and \"Is Sales Item\" as \"Yes\".\n\nFor Example: If you are selling Laptops and Backpacks separately and have a special price if the customer buys both, then the Laptop + Backpack will be a new Sales BOM Item.\n\nNote: BOM = Bill of Materials", 
-  "module": "Stock", 
-  "server_code_error": " ", 
-  "allow_trash": 1, 
-  "document_type": "Master", 
-  "_last_update": "1322549701", 
-  "name": "__common__", 
-  "colour": "White:FFF", 
   "doctype": "DocType", 
-  "show_in_menu": 0, 
-  "version": 1
+  "document_type": "Master", 
+  "is_submittable": 0, 
+  "module": "Stock", 
+  "name": "__common__"
  }, 
  {
+  "doctype": "DocField", 
   "name": "__common__", 
   "parent": "Sales BOM", 
-  "doctype": "DocField", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "amend": 0, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Sales BOM", 
+  "parentfield": "permissions", 
   "parenttype": "DocType", 
   "permlevel": 0, 
-  "parentfield": "fields"
- }, 
- {
-  "name": "__common__", 
-  "parent": "Sales BOM", 
   "read": 1, 
-  "submit": 0, 
-  "doctype": "DocPerm", 
-  "amend": 0, 
-  "parenttype": "DocType", 
-  "parentfield": "permissions"
- }, 
- {
-  "name": "Sales BOM", 
-  "doctype": "DocType"
- }, 
- {
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "write": 1, 
-  "role": "Material Manager", 
-  "cancel": 0, 
-  "permlevel": 1
- }, 
- {
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "write": 1, 
   "report": 1, 
-  "role": "Material Manager", 
-  "cancel": 1, 
-  "permlevel": 0
+  "submit": 0
  }, 
  {
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "write": 0, 
-  "role": "Material User", 
-  "cancel": 0, 
-  "permlevel": 1
- }, 
- {
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "write": 0, 
-  "report": 1, 
-  "role": "Material User", 
-  "cancel": 0, 
-  "permlevel": 0
- }, 
- {
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "write": 1, 
-  "report": 1, 
-  "role": "Sales User", 
-  "cancel": 1, 
-  "permlevel": 0
- }, 
- {
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "write": 0, 
-  "role": "Sales User", 
-  "cancel": 0, 
-  "permlevel": 1
+  "doctype": "DocType", 
+  "name": "Sales BOM"
  }, 
  {
   "doctype": "DocField", 
@@ -102,33 +46,52 @@
  }, 
  {
   "description": "The Item that represents the Package. This Item must have \"Is Stock Item\" as \"No\" and \"Is Sales Item\" as \"Yes\"", 
-  "no_copy": 1, 
-  "oldfieldtype": "Data", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Parent Item", 
-  "oldfieldname": "new_item_code", 
   "fieldname": "new_item_code", 
   "fieldtype": "Link", 
-  "reqd": 1, 
-  "options": "Item"
+  "label": "Parent Item", 
+  "no_copy": 1, 
+  "oldfieldname": "new_item_code", 
+  "oldfieldtype": "Data", 
+  "options": "Item", 
+  "reqd": 1
  }, 
  {
   "description": "List items that form the package.", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Package Items", 
   "fieldname": "item_section", 
-  "fieldtype": "Section Break"
+  "fieldtype": "Section Break", 
+  "label": "Package Items"
  }, 
  {
-  "oldfieldtype": "Table", 
   "doctype": "DocField", 
-  "label": "Sales BOM Items", 
-  "oldfieldname": "sales_bom_items", 
   "fieldname": "sales_bom_items", 
   "fieldtype": "Table", 
-  "reqd": 1, 
-  "options": "Sales BOM Item"
+  "label": "Sales BOM Items", 
+  "oldfieldname": "sales_bom_items", 
+  "oldfieldtype": "Table", 
+  "options": "Sales BOM Item", 
+  "reqd": 1
+ }, 
+ {
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "role": "Material Manager", 
+  "write": 1
+ }, 
+ {
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "role": "Material User", 
+  "write": 0
+ }, 
+ {
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "role": "Sales User", 
+  "write": 1
  }
 ]

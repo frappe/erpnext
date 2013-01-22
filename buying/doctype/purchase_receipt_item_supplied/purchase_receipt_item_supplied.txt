@@ -1,146 +1,139 @@
 [
  {
-  "owner": "wasim@webnotestech.com", 
+  "creation": "2013-01-10 16:34:10", 
   "docstatus": 0, 
-  "creation": "2012-03-27 14:35:50", 
+  "modified": "2013-01-22 14:47:55", 
   "modified_by": "Administrator", 
-  "modified": "2012-03-27 14:35:50"
+  "owner": "wasim@webnotestech.com"
  }, 
  {
-  "section_style": "Simple", 
+  "doctype": "DocType", 
+  "hide_toolbar": 0, 
   "istable": 1, 
   "module": "Buying", 
-  "server_code_error": " ", 
-  "doctype": "DocType", 
-  "name": "__common__", 
-  "colour": "White:FFF", 
-  "show_in_menu": 0, 
-  "version": 17, 
-  "hide_toolbar": 0
+  "name": "__common__"
  }, 
  {
+  "doctype": "DocField", 
   "name": "__common__", 
   "parent": "Purchase Receipt Item Supplied", 
-  "doctype": "DocField", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "parentfield": "fields"
+  "permlevel": 0
  }, 
  {
-  "name": "Purchase Receipt Item Supplied", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "Purchase Receipt Item Supplied"
  }, 
  {
-  "search_index": 0, 
   "doctype": "DocField", 
-  "label": "Reference Name", 
-  "oldfieldname": "reference_name", 
   "fieldname": "reference_name", 
   "fieldtype": "Data", 
-  "oldfieldtype": "Data", 
   "hidden": 0, 
-  "permlevel": 1, 
-  "in_filter": 0
+  "in_filter": 0, 
+  "label": "Reference Name", 
+  "oldfieldname": "reference_name", 
+  "oldfieldtype": "Data", 
+  "read_only": 1, 
+  "search_index": 0
  }, 
  {
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "BOM Detail No", 
-  "oldfieldname": "bom_detail_no", 
   "fieldname": "bom_detail_no", 
   "fieldtype": "Data", 
-  "permlevel": 1
+  "label": "BOM Detail No", 
+  "oldfieldname": "bom_detail_no", 
+  "oldfieldtype": "Data", 
+  "read_only": 1
  }, 
  {
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Item Code", 
-  "oldfieldname": "main_item_code", 
   "fieldname": "main_item_code", 
   "fieldtype": "Data", 
-  "permlevel": 1
+  "label": "Item Code", 
+  "oldfieldname": "main_item_code", 
+  "oldfieldtype": "Data", 
+  "read_only": 1
  }, 
  {
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Raw Material Item Code", 
-  "oldfieldname": "rm_item_code", 
   "fieldname": "rm_item_code", 
   "fieldtype": "Data", 
-  "permlevel": 0
+  "label": "Raw Material Item Code", 
+  "oldfieldname": "rm_item_code", 
+  "oldfieldtype": "Data"
  }, 
  {
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Description", 
-  "oldfieldname": "description", 
-  "width": "300px", 
   "fieldname": "description", 
   "fieldtype": "Data", 
-  "permlevel": 1
+  "label": "Description", 
+  "oldfieldname": "description", 
+  "oldfieldtype": "Data", 
+  "read_only": 1, 
+  "width": "300px"
  }, 
  {
-  "oldfieldtype": "Currency", 
   "doctype": "DocField", 
+  "fieldname": "required_qty", 
+  "fieldtype": "Float", 
   "label": "Required Qty", 
   "oldfieldname": "required_qty", 
-  "fieldname": "required_qty", 
-  "fieldtype": "Currency", 
-  "permlevel": 1
+  "oldfieldtype": "Currency", 
+  "read_only": 1
  }, 
  {
-  "oldfieldtype": "Currency", 
   "doctype": "DocField", 
+  "fieldname": "consumed_qty", 
+  "fieldtype": "Float", 
   "label": "Consumed Qty", 
   "oldfieldname": "consumed_qty", 
-  "fieldname": "consumed_qty", 
-  "fieldtype": "Currency", 
-  "reqd": 1, 
-  "permlevel": 0
+  "oldfieldtype": "Currency", 
+  "reqd": 1
  }, 
  {
-  "oldfieldtype": "Currency", 
   "doctype": "DocField", 
-  "label": "Rate", 
-  "oldfieldname": "rate", 
   "fieldname": "rate", 
   "fieldtype": "Currency", 
-  "permlevel": 0
+  "label": "Rate", 
+  "oldfieldname": "rate", 
+  "oldfieldtype": "Currency"
  }, 
  {
-  "oldfieldtype": "Currency", 
   "doctype": "DocField", 
+  "fieldname": "conversion_factor", 
+  "fieldtype": "Float", 
+  "hidden": 1, 
   "label": "Conversion Factor", 
   "oldfieldname": "conversion_factor", 
-  "fieldname": "conversion_factor", 
-  "fieldtype": "Currency", 
-  "hidden": 1, 
-  "permlevel": 1
+  "oldfieldtype": "Currency", 
+  "read_only": 1
  }, 
  {
-  "oldfieldtype": "Currency", 
   "doctype": "DocField", 
-  "label": "Amount", 
-  "oldfieldname": "amount", 
   "fieldname": "amount", 
   "fieldtype": "Currency", 
-  "permlevel": 1
+  "label": "Amount", 
+  "oldfieldname": "amount", 
+  "oldfieldtype": "Currency", 
+  "read_only": 1
  }, 
  {
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Stock Uom", 
-  "oldfieldname": "stock_uom", 
   "fieldname": "stock_uom", 
   "fieldtype": "Data", 
-  "permlevel": 1
+  "label": "Stock Uom", 
+  "oldfieldname": "stock_uom", 
+  "oldfieldtype": "Data", 
+  "read_only": 1
  }, 
  {
-  "oldfieldtype": "Currency", 
   "doctype": "DocField", 
-  "label": "Current Stock", 
-  "oldfieldname": "current_stock", 
   "fieldname": "current_stock", 
   "fieldtype": "Currency", 
-  "permlevel": 1
+  "label": "Current Stock", 
+  "oldfieldname": "current_stock", 
+  "oldfieldtype": "Currency", 
+  "read_only": 1
  }
 ]

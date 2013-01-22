@@ -1,202 +1,180 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-01-10 16:34:33", 
   "docstatus": 0, 
-  "creation": "2012-07-12 23:29:36", 
+  "modified": "2013-01-22 14:59:43", 
   "modified_by": "Administrator", 
-  "modified": "2012-12-27 12:27:02"
+  "owner": "Administrator"
  }, 
  {
-  "issingle": 1, 
   "allow_attach": 1, 
   "doctype": "DocType", 
-  "module": "Website", 
-  "max_attachments": 10, 
   "document_type": "Other", 
+  "issingle": 1, 
+  "max_attachments": 10, 
+  "module": "Website", 
   "name": "__common__"
  }, 
  {
+  "doctype": "DocField", 
   "name": "__common__", 
   "parent": "Website Settings", 
-  "doctype": "DocField", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "parentfield": "fields"
+  "permlevel": 0
  }, 
  {
-  "name": "__common__", 
-  "parent": "Website Settings", 
-  "read": 1, 
+  "create": 1, 
   "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Website Settings", 
+  "parentfield": "permissions", 
   "parenttype": "DocType", 
-  "parentfield": "permissions"
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 0, 
+  "submit": 0, 
+  "write": 1
  }, 
  {
-  "name": "Website Settings", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "Website Settings"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Landing Page", 
   "fieldname": "sb0", 
   "fieldtype": "Section Break", 
-  "permlevel": 0
+  "label": "Landing Page"
  }, 
  {
   "description": "The \"Web Page\" that is the website home page", 
   "doctype": "DocField", 
-  "label": "Home Page", 
-  "options": "Web Page", 
   "fieldname": "home_page", 
   "fieldtype": "Link", 
-  "reqd": 1, 
-  "permlevel": 0
+  "label": "Home Page", 
+  "options": "Web Page", 
+  "reqd": 1
  }, 
  {
   "description": "The name of your company / website as you want to appear on browser title bar. All pages will have this as the prefix to the title.", 
   "doctype": "DocField", 
-  "label": "Title Prefix", 
   "fieldname": "title_prefix", 
   "fieldtype": "Data", 
-  "permlevel": 0
+  "label": "Title Prefix"
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "cb4", 
-  "fieldtype": "Column Break", 
-  "permlevel": 0
+  "fieldtype": "Column Break"
  }, 
  {
   "description": "If checked, the Home page will be the default Item Group for the website.", 
   "doctype": "DocField", 
-  "label": "Home Page is Products", 
   "fieldname": "home_page_is_products", 
   "fieldtype": "Check", 
-  "permlevel": 0
+  "label": "Home Page is Products"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Top Bar", 
   "fieldname": "top_bar", 
   "fieldtype": "Section Break", 
-  "permlevel": 0
+  "label": "Top Bar"
  }, 
  {
   "description": "Background shade of the top menu bar", 
   "doctype": "DocField", 
-  "label": "Top Bar Background", 
-  "options": "Black\nWhite", 
   "fieldname": "top_bar_background", 
   "fieldtype": "Select", 
-  "permlevel": 0
+  "label": "Top Bar Background", 
+  "options": "Black\nWhite"
  }, 
  {
   "description": "Brand is what appears on the top-right of the toolbar. If it is an image, make sure it\nhas a transparent background and use the &lt;img /&gt; tag. Keep size as 200px x 30px", 
   "doctype": "DocField", 
-  "label": "Brand HTML", 
   "fieldname": "brand_html", 
   "fieldtype": "Text", 
-  "permlevel": 0
+  "label": "Brand HTML"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Top Bar Items", 
-  "options": "Top Bar Item", 
   "fieldname": "top_bar_items", 
   "fieldtype": "Table", 
-  "permlevel": 0
+  "label": "Top Bar Items", 
+  "options": "Top Bar Item"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Footer", 
   "fieldname": "footer", 
   "fieldtype": "Section Break", 
-  "permlevel": 0
+  "label": "Footer"
  }, 
  {
   "description": "Address and other legal information you may want to put in the footer.", 
   "doctype": "DocField", 
-  "label": "Address", 
   "fieldname": "address", 
   "fieldtype": "Text Editor", 
-  "permlevel": 0
+  "label": "Address"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Copyright", 
   "fieldname": "copyright", 
   "fieldtype": "Data", 
-  "permlevel": 0
+  "label": "Copyright"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Footer Items", 
-  "options": "Top Bar Item", 
   "fieldname": "footer_items", 
   "fieldtype": "Table", 
-  "permlevel": 0
+  "label": "Footer Items", 
+  "options": "Top Bar Item"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Misc", 
   "fieldname": "misc_section", 
   "fieldtype": "Section Break", 
-  "permlevel": 0
+  "label": "Misc"
  }, 
  {
   "description": "An icon file with .ico extension. Should be 16 x 16 px. Generated using a favicon generator. [<a href=\"http://favicon-generator.org/\" target=\"_blank\">favicon-generator.org</a>]", 
   "doctype": "DocField", 
-  "label": "FavIcon", 
-  "options": "attach_files:", 
   "fieldname": "favicon", 
   "fieldtype": "Select", 
-  "permlevel": 0
+  "label": "FavIcon", 
+  "options": "attach_files:"
  }, 
  {
   "description": "Sub-domain provided by erpnext.com", 
   "doctype": "DocField", 
-  "label": "Subdomain", 
   "fieldname": "subdomain", 
   "fieldtype": "Text", 
-  "reqd": 0, 
-  "permlevel": 1
+  "label": "Subdomain", 
+  "read_only": 1, 
+  "reqd": 0
  }, 
  {
   "description": "Enter domain names associated to this website, each on a new line", 
   "doctype": "DocField", 
-  "label": "Domain List", 
   "fieldname": "domain_list", 
   "fieldtype": "Text", 
-  "reqd": 0, 
   "hidden": 1, 
-  "permlevel": 0
+  "label": "Domain List", 
+  "reqd": 0
  }, 
  {
-  "print_hide": 1, 
-  "no_copy": 1, 
   "doctype": "DocField", 
-  "label": "File List", 
   "fieldname": "file_list", 
   "fieldtype": "Text", 
   "hidden": 1, 
-  "permlevel": 0
- }, 
- {
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "write": 1, 
-  "role": "System Manager", 
-  "permlevel": 0
- }, 
- {
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "write": 1, 
-  "role": "Website Manager", 
-  "permlevel": 0
+  "label": "File List", 
+  "no_copy": 1, 
+  "print_hide": 1
  }, 
  {
   "doctype": "DocPerm", 
-  "role": "All", 
-  "permlevel": 1
+  "role": "System Manager"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "Website Manager"
  }
 ]

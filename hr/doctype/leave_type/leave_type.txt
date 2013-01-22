@@ -1,115 +1,106 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-01-10 16:34:15", 
   "docstatus": 0, 
-  "creation": "2012-03-27 14:35:59", 
+  "modified": "2013-01-22 14:47:02", 
   "modified_by": "Administrator", 
-  "modified": "2012-03-27 14:35:59"
+  "owner": "Administrator"
  }, 
  {
-  "section_style": "Simple", 
-  "module": "HR", 
-  "doctype": "DocType", 
-  "allow_trash": 1, 
-  "document_type": "Master", 
   "autoname": "field:leave_type_name", 
-  "name": "__common__", 
-  "colour": "White:FFF", 
-  "server_code_error": " ", 
-  "show_in_menu": 0, 
-  "version": 23
+  "doctype": "DocType", 
+  "document_type": "Master", 
+  "module": "HR", 
+  "name": "__common__"
  }, 
  {
-  "name": "__common__", 
-  "parent": "Leave Type", 
   "doctype": "DocField", 
-  "parenttype": "DocType", 
-  "parentfield": "fields"
- }, 
- {
-  "report": 1, 
   "name": "__common__", 
   "parent": "Leave Type", 
-  "read": 1, 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
-  "write": 1, 
-  "cancel": 1, 
+  "name": "__common__", 
+  "parent": "Leave Type", 
+  "parentfield": "permissions", 
   "parenttype": "DocType", 
   "permlevel": 0, 
-  "parentfield": "permissions"
+  "read": 1, 
+  "report": 1, 
+  "submit": 0, 
+  "write": 1
  }, 
  {
-  "name": "Leave Type", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "Leave Type"
  }, 
  {
-  "role": "System Manager", 
-  "doctype": "DocPerm"
- }, 
- {
-  "role": "HR User", 
-  "doctype": "DocPerm"
- }, 
- {
-  "role": "HR Manager", 
-  "doctype": "DocPerm"
- }, 
- {
-  "oldfieldtype": "Small Text", 
   "doctype": "DocField", 
-  "label": "Trash Reason", 
-  "oldfieldname": "trash_reason", 
   "fieldname": "trash_reason", 
   "fieldtype": "Small Text", 
-  "permlevel": 1
+  "label": "Trash Reason", 
+  "oldfieldname": "trash_reason", 
+  "oldfieldtype": "Small Text", 
+  "read_only": 1
  }, 
  {
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Leave Type Name", 
-  "oldfieldname": "leave_type_name", 
   "fieldname": "leave_type_name", 
   "fieldtype": "Data", 
-  "reqd": 1, 
-  "permlevel": 0
+  "label": "Leave Type Name", 
+  "oldfieldname": "leave_type_name", 
+  "oldfieldtype": "Data", 
+  "reqd": 1
  }, 
  {
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Max Days Leave Allowed", 
-  "oldfieldname": "max_days_allowed", 
   "fieldname": "max_days_allowed", 
   "fieldtype": "Data", 
-  "reqd": 0, 
-  "permlevel": 0
+  "label": "Max Days Leave Allowed", 
+  "oldfieldname": "max_days_allowed", 
+  "oldfieldtype": "Data", 
+  "reqd": 0
  }, 
  {
-  "oldfieldtype": "Check", 
   "doctype": "DocField", 
-  "label": "Is Carry Forward", 
-  "oldfieldname": "is_carry_forward", 
   "fieldname": "is_carry_forward", 
   "fieldtype": "Check", 
-  "permlevel": 0
+  "label": "Is Carry Forward", 
+  "oldfieldname": "is_carry_forward", 
+  "oldfieldtype": "Check"
  }, 
  {
-  "print_hide": 1, 
-  "oldfieldtype": "Check", 
   "doctype": "DocField", 
-  "label": "Is Encash", 
-  "oldfieldname": "is_encash", 
   "fieldname": "is_encash", 
   "fieldtype": "Check", 
   "hidden": 1, 
-  "permlevel": 0, 
+  "label": "Is Encash", 
+  "oldfieldname": "is_encash", 
+  "oldfieldtype": "Check", 
+  "print_hide": 1, 
   "report_hide": 1
  }, 
  {
   "doctype": "DocField", 
-  "label": "Is LWP", 
   "fieldname": "is_lwp", 
   "fieldtype": "Check", 
-  "permlevel": 0
+  "label": "Is LWP"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "System Manager"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "HR User"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "HR Manager"
  }
 ]

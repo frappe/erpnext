@@ -1,138 +1,98 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-01-10 16:34:24", 
   "docstatus": 0, 
-  "creation": "2012-07-03 13:30:54", 
+  "modified": "2013-01-22 14:57:26", 
   "modified_by": "Administrator", 
-  "modified": "2012-07-12 11:37:56"
+  "owner": "Administrator"
  }, 
  {
-  "section_style": "Simple", 
-  "description": "Standard Terms and Conditions that can be added to Sales and Purchases.\n\nExamples:\n\n1. Validity of the offer.\n1. Payment Terms (In Advance, On Credit, part advance etc).\n1. What is extra (or payable by the Customer).\n1. Safety / usage warning.\n1. Warranty if any.\n1. Returns Policy.\n1. Terms of shipping, if applicable.\n1. Ways of addressing disputes, indemnity, liability, etc.\n1. Address and Contact of your Company.", 
-  "module": "Setup", 
-  "server_code_error": " ", 
-  "allow_trash": 1, 
   "autoname": "field:title", 
-  "document_type": "Master", 
-  "_last_update": "1322549700", 
-  "name": "__common__", 
-  "colour": "White:FFF", 
+  "description": "Standard Terms and Conditions that can be added to Sales and Purchases.\n\nExamples:\n\n1. Validity of the offer.\n1. Payment Terms (In Advance, On Credit, part advance etc).\n1. What is extra (or payable by the Customer).\n1. Safety / usage warning.\n1. Warranty if any.\n1. Returns Policy.\n1. Terms of shipping, if applicable.\n1. Ways of addressing disputes, indemnity, liability, etc.\n1. Address and Contact of your Company.", 
   "doctype": "DocType", 
-  "show_in_menu": 0, 
-  "version": 1
+  "document_type": "Master", 
+  "module": "Setup", 
+  "name": "__common__"
  }, 
  {
-  "name": "__common__", 
-  "parent": "Terms and Conditions", 
   "doctype": "DocField", 
-  "parenttype": "DocType", 
-  "parentfield": "fields"
- }, 
- {
   "name": "__common__", 
   "parent": "Terms and Conditions", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Terms and Conditions", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
   "read": 1, 
-  "doctype": "DocPerm", 
-  "parenttype": "DocType", 
-  "parentfield": "permissions"
- }, 
- {
-  "name": "Terms and Conditions", 
-  "doctype": "DocType"
- }, 
- {
-  "amend": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "submit": 0, 
-  "write": 0, 
-  "role": "Sales Master Manager", 
-  "cancel": 0, 
-  "permlevel": 1
- }, 
- {
-  "amend": 0, 
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "submit": 0, 
-  "write": 1, 
   "report": 1, 
-  "role": "Sales Master Manager", 
-  "cancel": 1, 
-  "permlevel": 0
+  "submit": 0
  }, 
  {
-  "amend": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "submit": 0, 
-  "write": 0, 
-  "role": "Sales User", 
-  "cancel": 0, 
-  "permlevel": 1
+  "doctype": "DocType", 
+  "name": "Terms and Conditions"
  }, 
  {
-  "amend": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "submit": 0, 
-  "write": 0, 
-  "report": 1, 
-  "role": "Sales User", 
-  "cancel": 0, 
-  "permlevel": 0
- }, 
- {
-  "role": "All", 
-  "permlevel": 1, 
-  "doctype": "DocPerm"
- }, 
- {
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "write": 1, 
-  "cancel": 1, 
-  "role": "System Manager", 
-  "report": 1, 
-  "permlevel": 0
- }, 
- {
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "write": 1, 
-  "cancel": 1, 
-  "role": "Accounts User", 
-  "report": 1, 
-  "permlevel": 0
- }, 
- {
-  "oldfieldtype": "Small Text", 
   "doctype": "DocField", 
-  "label": "Trash Reason", 
-  "oldfieldname": "trash_reason", 
   "fieldname": "trash_reason", 
   "fieldtype": "Small Text", 
-  "permlevel": 1
+  "label": "Trash Reason", 
+  "oldfieldname": "trash_reason", 
+  "oldfieldtype": "Small Text", 
+  "read_only": 1
  }, 
  {
-  "search_index": 0, 
   "doctype": "DocField", 
-  "label": "Title", 
-  "oldfieldname": "title", 
   "fieldname": "title", 
   "fieldtype": "Data", 
+  "in_filter": 1, 
+  "label": "Title", 
+  "oldfieldname": "title", 
   "oldfieldtype": "Data", 
   "reqd": 1, 
-  "permlevel": 0, 
-  "in_filter": 1
+  "search_index": 0
  }, 
  {
-  "oldfieldtype": "Text Editor", 
   "doctype": "DocField", 
-  "label": "Terms and Conditions", 
-  "oldfieldname": "terms", 
   "fieldname": "terms", 
   "fieldtype": "Text Editor", 
-  "permlevel": 0
+  "label": "Terms and Conditions", 
+  "oldfieldname": "terms", 
+  "oldfieldtype": "Text Editor"
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "role": "Sales Master Manager", 
+  "write": 1
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "role": "Sales User", 
+  "write": 0
+ }, 
+ {
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "role": "System Manager", 
+  "write": 1
+ }, 
+ {
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "role": "Accounts User", 
+  "write": 1
  }
 ]

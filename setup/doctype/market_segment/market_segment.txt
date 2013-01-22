@@ -1,62 +1,56 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-01-10 16:34:23", 
   "docstatus": 0, 
-  "creation": "2012-03-27 14:36:21", 
+  "modified": "2013-01-22 14:47:03", 
   "modified_by": "Administrator", 
-  "modified": "2012-03-27 14:36:21"
+  "owner": "Administrator"
  }, 
  {
-  "section_style": "Simple", 
+  "autoname": "field:segment_name", 
+  "doctype": "DocType", 
   "in_create": 1, 
   "module": "Setup", 
-  "allow_trash": 1, 
-  "read_only": 0, 
-  "autoname": "field:segment_name", 
   "name": "__common__", 
-  "colour": "White:FFF", 
-  "doctype": "DocType", 
-  "show_in_menu": 0, 
   "name_case": "Title Case", 
-  "version": 1
+  "read_only": 0
  }, 
  {
+  "doctype": "DocField", 
   "name": "__common__", 
   "parent": "Market Segment", 
-  "doctype": "DocField", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "parentfield": "fields"
+  "permlevel": 0
  }, 
  {
-  "name": "Market Segment", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "Market Segment"
  }, 
  {
-  "oldfieldtype": "Small Text", 
   "doctype": "DocField", 
-  "label": "Trash Reason", 
-  "oldfieldname": "trash_reason", 
   "fieldname": "trash_reason", 
   "fieldtype": "Small Text", 
-  "permlevel": 1
+  "label": "Trash Reason", 
+  "oldfieldname": "trash_reason", 
+  "oldfieldtype": "Small Text", 
+  "read_only": 1
  }, 
  {
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Segment Name", 
-  "oldfieldname": "segment_name", 
   "fieldname": "segment_name", 
   "fieldtype": "Data", 
-  "reqd": 1, 
-  "permlevel": 0
+  "label": "Segment Name", 
+  "oldfieldname": "segment_name", 
+  "oldfieldtype": "Data", 
+  "reqd": 1
  }, 
  {
-  "oldfieldtype": "Text", 
   "doctype": "DocField", 
-  "label": "Details", 
-  "oldfieldname": "details", 
   "fieldname": "details", 
   "fieldtype": "Text", 
-  "permlevel": 0
+  "label": "Details", 
+  "oldfieldname": "details", 
+  "oldfieldtype": "Text"
  }
 ]

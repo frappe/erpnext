@@ -1,44 +1,22 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-01-10 16:34:30", 
   "docstatus": 0, 
-  "creation": "2012-03-27 14:36:38", 
+  "modified": "2013-01-22 14:57:24", 
   "modified_by": "Administrator", 
-  "modified": "2012-03-27 14:36:38"
+  "owner": "Administrator"
  }, 
  {
-  "section_style": "Simple", 
-  "in_create": 1, 
-  "module": "Stock", 
-  "server_code_error": " ", 
-  "read_only": 1, 
-  "issingle": 1, 
-  "name": "__common__", 
-  "colour": "White:FFF", 
   "doctype": "DocType", 
-  "show_in_menu": 0, 
-  "version": 10, 
-  "hide_toolbar": 1
- }, 
- {
+  "hide_toolbar": 1, 
+  "in_create": 1, 
+  "issingle": 1, 
+  "module": "Stock", 
   "name": "__common__", 
-  "parent": "Stock Ledger", 
-  "read": 1, 
-  "doctype": "DocPerm", 
-  "parenttype": "DocType", 
-  "permlevel": 1, 
-  "parentfield": "permissions"
+  "read_only": 1
  }, 
  {
-  "name": "Stock Ledger", 
-  "doctype": "DocType"
- }, 
- {
-  "role": "All", 
-  "doctype": "DocPerm"
- }, 
- {
-  "role": "Material User", 
-  "doctype": "DocPerm"
+  "doctype": "DocType", 
+  "name": "Stock Ledger"
  }
 ]

@@ -1,118 +1,85 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-01-10 16:34:30", 
   "docstatus": 0, 
-  "creation": "2012-03-27 14:36:40", 
+  "modified": "2013-01-22 13:57:23", 
   "modified_by": "Administrator", 
-  "modified": "2012-03-27 14:36:40"
+  "owner": "Administrator"
  }, 
  {
-  "section_style": "Simple", 
-  "in_create": 0, 
-  "module": "Stock", 
-  "server_code_error": " ", 
   "doctype": "DocType", 
+  "in_create": 0, 
   "issingle": 1, 
-  "read_only": 0, 
+  "module": "Stock", 
   "name": "__common__", 
-  "colour": "White:FFF", 
-  "version": 25
+  "read_only": 0
  }, 
  {
+  "doctype": "DocField", 
   "name": "__common__", 
   "parent": "Stock UOM Replace Utility", 
-  "doctype": "DocField", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "parentfield": "fields"
+  "permlevel": 0
  }, 
  {
+  "create": 1, 
+  "doctype": "DocPerm", 
   "name": "__common__", 
   "parent": "Stock UOM Replace Utility", 
-  "read": 1, 
-  "doctype": "DocPerm", 
+  "parentfield": "permissions", 
   "parenttype": "DocType", 
-  "parentfield": "permissions"
- }, 
- {
-  "name": "Stock UOM Replace Utility", 
-  "doctype": "DocType"
- }, 
- {
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "write": 1, 
-  "role": "System Manager", 
-  "permlevel": 0
- }, 
- {
-  "write": 0, 
-  "role": "System Manager", 
-  "permlevel": 1, 
-  "doctype": "DocPerm"
- }, 
- {
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "write": 1, 
-  "role": "Material Master Manager", 
-  "permlevel": 0
- }, 
- {
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "write": 1, 
-  "role": "Material Manager", 
-  "permlevel": 0
- }, 
- {
-  "role": "Material Master Manager", 
-  "permlevel": 1, 
-  "doctype": "DocPerm"
- }, 
- {
-  "role": "Material Manager", 
-  "permlevel": 1, 
-  "doctype": "DocPerm"
- }, 
- {
-  "colour": "White:FFF", 
-  "doctype": "DocField", 
-  "label": "Item", 
   "permlevel": 0, 
-  "trigger": "Client", 
+  "read": 1, 
+  "report": 0, 
+  "submit": 0, 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Stock UOM Replace Utility"
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "item_code", 
   "fieldtype": "Link", 
+  "label": "Item", 
   "options": "Item"
  }, 
  {
   "doctype": "DocField", 
-  "options": "UOM", 
   "fieldname": "current_stock_uom", 
   "fieldtype": "Link", 
   "label": "Current Stock UOM", 
-  "permlevel": 1
+  "options": "UOM", 
+  "read_only": 1
  }, 
  {
   "doctype": "DocField", 
-  "options": "UOM", 
   "fieldname": "new_stock_uom", 
   "fieldtype": "Link", 
   "label": "New Stock UOM", 
-  "permlevel": 0
+  "options": "UOM"
  }, 
  {
   "doctype": "DocField", 
-  "options": "update_stock_uom", 
   "fieldname": "update", 
   "fieldtype": "Button", 
   "label": "Update", 
-  "permlevel": 0
+  "options": "update_stock_uom"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Conversion Factor", 
   "fieldname": "conversion_factor", 
-  "fieldtype": "Currency", 
-  "permlevel": 0
+  "fieldtype": "Float", 
+  "label": "Conversion Factor"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "Material Master Manager"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "Material Manager"
  }
 ]

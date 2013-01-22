@@ -1,378 +1,316 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-01-10 16:34:18", 
   "docstatus": 0, 
-  "creation": "2012-03-27 14:36:09", 
+  "modified": "2013-01-22 14:56:02", 
   "modified_by": "Administrator", 
-  "modified": "2012-03-27 18:48:02"
+  "owner": "Administrator"
  }, 
  {
-  "section_style": "Simple", 
+  "autoname": "IN/.####", 
+  "doctype": "DocType", 
   "is_submittable": 1, 
   "module": "Selling", 
-  "server_code_error": " ", 
-  "autoname": "IN/.####", 
-  "subject": "At %(customer_name)s on %(inst_date)s", 
-  "_last_update": "1306480044", 
-  "name": "__common__", 
-  "colour": "White:FFF", 
-  "doctype": "DocType", 
-  "show_in_menu": 0, 
-  "version": 98
+  "name": "__common__"
  }, 
  {
-  "name": "__common__", 
-  "parent": "Installation Note", 
   "doctype": "DocField", 
-  "parenttype": "DocType", 
-  "parentfield": "fields"
- }, 
- {
   "name": "__common__", 
   "parent": "Installation Note", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "amend": 1, 
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Installation Note", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
   "read": 1, 
-  "doctype": "DocPerm", 
-  "parenttype": "DocType", 
-  "parentfield": "permissions"
- }, 
- {
-  "name": "Installation Note", 
-  "doctype": "DocType"
- }, 
- {
-  "amend": 1, 
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "submit": 1, 
-  "write": 1, 
   "report": 1, 
-  "role": "System Manager", 
-  "cancel": 1, 
-  "permlevel": 0
- }, 
- {
-  "role": "System Manager", 
-  "permlevel": 1, 
-  "doctype": "DocPerm"
- }, 
- {
-  "amend": 1, 
-  "create": 1, 
-  "doctype": "DocPerm", 
   "submit": 1, 
-  "write": 1, 
-  "report": 1, 
-  "role": "Sales User", 
-  "cancel": 1, 
-  "permlevel": 0
+  "write": 1
  }, 
  {
-  "amend": 1, 
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "submit": 1, 
-  "write": 1, 
-  "report": 1, 
-  "role": "Sales Manager", 
-  "cancel": 1, 
-  "permlevel": 0
+  "doctype": "DocType", 
+  "name": "Installation Note"
  }, 
  {
-  "role": "Sales User", 
-  "permlevel": 1, 
-  "doctype": "DocPerm"
- }, 
- {
-  "role": "Sales Manager", 
-  "permlevel": 1, 
-  "doctype": "DocPerm"
- }, 
- {
-  "oldfieldtype": "Section Break", 
   "doctype": "DocField", 
-  "label": "Installation Note", 
   "fieldname": "installation_note", 
   "fieldtype": "Section Break", 
-  "permlevel": 0
+  "label": "Installation Note", 
+  "oldfieldtype": "Section Break"
  }, 
  {
-  "oldfieldtype": "Column Break", 
   "doctype": "DocField", 
-  "width": "50%", 
   "fieldname": "column_break0", 
   "fieldtype": "Column Break", 
-  "permlevel": 0
+  "oldfieldtype": "Column Break", 
+  "width": "50%"
  }, 
  {
-  "no_copy": 1, 
-  "oldfieldtype": "Select", 
   "doctype": "DocField", 
-  "label": "Series", 
-  "oldfieldname": "naming_series", 
-  "options": "\nIN", 
   "fieldname": "naming_series", 
   "fieldtype": "Select", 
-  "reqd": 1, 
-  "permlevel": 0
+  "label": "Series", 
+  "no_copy": 1, 
+  "oldfieldname": "naming_series", 
+  "oldfieldtype": "Select", 
+  "options": "\nIN", 
+  "reqd": 1
  }, 
  {
-  "print_hide": 1, 
-  "search_index": 1, 
   "doctype": "DocField", 
-  "label": "Customer", 
-  "oldfieldname": "customer", 
-  "permlevel": 0, 
-  "trigger": "Client", 
   "fieldname": "customer", 
   "fieldtype": "Link", 
+  "label": "Customer", 
+  "oldfieldname": "customer", 
   "oldfieldtype": "Link", 
+  "options": "Customer", 
+  "print_hide": 1, 
   "reqd": 1, 
-  "options": "Customer"
+  "search_index": 1
  }, 
  {
-  "print_hide": 1, 
   "doctype": "DocField", 
-  "label": "Customer Address", 
-  "permlevel": 0, 
   "fieldname": "customer_address", 
   "fieldtype": "Link", 
-  "options": "Address"
+  "label": "Customer Address", 
+  "options": "Address", 
+  "print_hide": 1
  }, 
  {
-  "print_hide": 1, 
   "doctype": "DocField", 
-  "label": "Contact Person", 
-  "permlevel": 0, 
   "fieldname": "contact_person", 
   "fieldtype": "Link", 
-  "options": "Contact"
+  "label": "Contact Person", 
+  "options": "Contact", 
+  "print_hide": 1
  }, 
  {
-  "search_index": 0, 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Name", 
-  "oldfieldname": "customer_name", 
   "fieldname": "customer_name", 
   "fieldtype": "Data", 
+  "label": "Name", 
+  "oldfieldname": "customer_name", 
   "oldfieldtype": "Data", 
+  "read_only": 1, 
   "reqd": 0, 
-  "permlevel": 1
+  "search_index": 0
  }, 
  {
   "doctype": "DocField", 
-  "label": "Address", 
   "fieldname": "address_display", 
   "fieldtype": "Small Text", 
-  "permlevel": 1
+  "label": "Address", 
+  "read_only": 1
  }, 
  {
   "doctype": "DocField", 
-  "label": "Contact", 
   "fieldname": "contact_display", 
   "fieldtype": "Small Text", 
-  "permlevel": 1
+  "label": "Contact", 
+  "read_only": 1
  }, 
  {
   "doctype": "DocField", 
-  "label": "Mobile No", 
   "fieldname": "contact_mobile", 
   "fieldtype": "Text", 
-  "permlevel": 1
+  "label": "Mobile No", 
+  "read_only": 1
  }, 
  {
-  "print_hide": 1, 
   "doctype": "DocField", 
-  "label": "Contact Email", 
   "fieldname": "contact_email", 
   "fieldtype": "Text", 
-  "permlevel": 1
+  "label": "Contact Email", 
+  "print_hide": 1, 
+  "read_only": 1
  }, 
  {
-  "print_hide": 1, 
-  "search_index": 1, 
   "doctype": "DocField", 
-  "label": "Territory", 
-  "options": "Territory", 
   "fieldname": "territory", 
   "fieldtype": "Link", 
+  "in_filter": 1, 
+  "label": "Territory", 
+  "options": "Territory", 
+  "print_hide": 1, 
   "reqd": 1, 
-  "permlevel": 0, 
-  "in_filter": 1
+  "search_index": 1
  }, 
  {
-  "print_hide": 1, 
   "doctype": "DocField", 
-  "label": "Customer Group", 
-  "permlevel": 0, 
   "fieldname": "customer_group", 
   "fieldtype": "Link", 
-  "options": "Customer Group"
+  "label": "Customer Group", 
+  "options": "Customer Group", 
+  "print_hide": 1
  }, 
  {
-  "oldfieldtype": "Column Break", 
   "doctype": "DocField", 
-  "width": "50%", 
   "fieldname": "column_break1", 
   "fieldtype": "Column Break", 
-  "permlevel": 0
+  "oldfieldtype": "Column Break", 
+  "width": "50%"
  }, 
  {
-  "search_index": 1, 
   "doctype": "DocField", 
-  "label": "Installation Date", 
-  "oldfieldname": "inst_date", 
   "fieldname": "inst_date", 
   "fieldtype": "Date", 
+  "label": "Installation Date", 
+  "oldfieldname": "inst_date", 
   "oldfieldtype": "Date", 
   "reqd": 1, 
-  "permlevel": 0
+  "search_index": 1
  }, 
  {
-  "oldfieldtype": "Time", 
   "doctype": "DocField", 
-  "label": "Installation Time", 
-  "oldfieldname": "inst_time", 
   "fieldname": "inst_time", 
   "fieldtype": "Time", 
-  "permlevel": 0
+  "label": "Installation Time", 
+  "oldfieldname": "inst_time", 
+  "oldfieldtype": "Time"
  }, 
  {
-  "print_hide": 1, 
-  "permlevel": 1, 
   "default": "Draft", 
-  "oldfieldtype": "Select", 
   "doctype": "DocField", 
-  "label": "Status", 
-  "oldfieldname": "status", 
-  "no_copy": 1, 
   "fieldname": "status", 
   "fieldtype": "Select", 
-  "reqd": 1, 
-  "options": "Draft\nSubmitted\nCancelled"
+  "label": "Status", 
+  "no_copy": 1, 
+  "oldfieldname": "status", 
+  "oldfieldtype": "Select", 
+  "options": "Draft\nSubmitted\nCancelled", 
+  "print_hide": 1, 
+  "read_only": 1, 
+  "reqd": 1
  }, 
  {
-  "print_hide": 1, 
   "description": "Select the relevant company name if you have multiple companies.", 
-  "oldfieldtype": "Select", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Company", 
-  "oldfieldname": "company", 
-  "permlevel": 0, 
-  "trigger": "Client", 
   "fieldname": "company", 
   "fieldtype": "Select", 
-  "search_index": 0, 
-  "reqd": 1, 
+  "in_filter": 1, 
+  "label": "Company", 
+  "oldfieldname": "company", 
+  "oldfieldtype": "Select", 
   "options": "link:Company", 
-  "in_filter": 1
+  "print_hide": 1, 
+  "reqd": 1, 
+  "search_index": 0
  }, 
  {
-  "print_hide": 1, 
-  "oldfieldtype": "Select", 
   "doctype": "DocField", 
-  "label": "Fiscal Year", 
-  "oldfieldname": "fiscal_year", 
-  "permlevel": 0, 
   "fieldname": "fiscal_year", 
   "fieldtype": "Select", 
-  "reqd": 1, 
+  "in_filter": 1, 
+  "label": "Fiscal Year", 
+  "oldfieldname": "fiscal_year", 
+  "oldfieldtype": "Select", 
   "options": "link:Fiscal Year", 
-  "in_filter": 1
+  "print_hide": 1, 
+  "reqd": 1
  }, 
  {
-  "print_hide": 1, 
-  "no_copy": 1, 
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Amended From", 
-  "oldfieldname": "amended_from", 
   "fieldname": "amended_from", 
   "fieldtype": "Data", 
-  "permlevel": 1
+  "label": "Amended From", 
+  "no_copy": 1, 
+  "oldfieldname": "amended_from", 
+  "oldfieldtype": "Data", 
+  "print_hide": 1, 
+  "read_only": 1
  }, 
  {
-  "print_hide": 1, 
   "description": "The date at which current entry is corrected in the system.", 
-  "no_copy": 1, 
-  "oldfieldtype": "Date", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Amendment Date", 
-  "oldfieldname": "amendment_date", 
   "fieldname": "amendment_date", 
   "fieldtype": "Date", 
   "hidden": 1, 
-  "permlevel": 0
+  "label": "Amendment Date", 
+  "no_copy": 1, 
+  "oldfieldname": "amendment_date", 
+  "oldfieldtype": "Date", 
+  "print_hide": 1
  }, 
  {
-  "print_hide": 1, 
-  "oldfieldtype": "Small Text", 
   "doctype": "DocField", 
-  "label": "Remarks", 
-  "oldfieldname": "remarks", 
   "fieldname": "remarks", 
   "fieldtype": "Small Text", 
-  "permlevel": 0
+  "label": "Remarks", 
+  "oldfieldname": "remarks", 
+  "oldfieldtype": "Small Text", 
+  "print_hide": 1
  }, 
  {
-  "print_hide": 1, 
-  "no_copy": 1, 
-  "oldfieldtype": "Data", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Cancel Reason", 
-  "oldfieldname": "cancel_reason", 
   "fieldname": "cancel_reason", 
   "fieldtype": "Data", 
   "hidden": 1, 
-  "permlevel": 1
+  "label": "Cancel Reason", 
+  "no_copy": 1, 
+  "oldfieldname": "cancel_reason", 
+  "oldfieldtype": "Data", 
+  "print_hide": 1, 
+  "read_only": 1
  }, 
  {
-  "oldfieldtype": "Section Break", 
   "doctype": "DocField", 
-  "label": "Item Details", 
-  "options": "Simple", 
   "fieldname": "item_details", 
   "fieldtype": "Section Break", 
-  "permlevel": 0
+  "label": "Item Details", 
+  "oldfieldtype": "Section Break", 
+  "options": "Simple"
  }, 
  {
-  "print_hide": 0, 
-  "no_copy": 1, 
-  "oldfieldtype": "Link", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Delivery Note No", 
-  "oldfieldname": "delivery_note_no", 
-  "permlevel": 0, 
-  "trigger": "Client", 
   "fieldname": "delivery_note_no", 
   "fieldtype": "Link", 
-  "search_index": 1, 
+  "label": "Delivery Note No", 
+  "no_copy": 1, 
+  "oldfieldname": "delivery_note_no", 
+  "oldfieldtype": "Link", 
+  "options": "Delivery Note", 
+  "print_hide": 0, 
   "reqd": 1, 
-  "options": "Delivery Note"
+  "search_index": 1
  }, 
  {
-  "print_hide": 1, 
-  "oldfieldtype": "Button", 
   "doctype": "DocField", 
-  "label": "Get Items", 
-  "options": "pull_delivery_note_details", 
   "fieldname": "get_items", 
   "fieldtype": "Button", 
   "hidden": 0, 
-  "permlevel": 0
+  "label": "Get Items", 
+  "oldfieldtype": "Button", 
+  "options": "pull_delivery_note_details", 
+  "print_hide": 1
  }, 
  {
-  "oldfieldtype": "Table", 
   "doctype": "DocField", 
-  "label": "Installation Note Item", 
-  "oldfieldname": "installed_item_details", 
-  "options": "Installation Note Item", 
   "fieldname": "installed_item_details", 
   "fieldtype": "Table", 
-  "permlevel": 0
+  "label": "Installation Note Item", 
+  "oldfieldname": "installed_item_details", 
+  "oldfieldtype": "Table", 
+  "options": "Installation Note Item"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "System Manager"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "Sales User"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "Sales Manager"
  }
 ]

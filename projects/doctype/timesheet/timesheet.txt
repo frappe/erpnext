@@ -1,175 +1,144 @@
 [
  {
-  "owner": "ashwini@webnotestech.com", 
+  "creation": "2013-01-10 16:34:17", 
   "docstatus": 0, 
-  "creation": "2012-03-27 14:36:07", 
+  "modified": "2013-01-22 14:57:26", 
   "modified_by": "Administrator", 
-  "modified": "2012-03-27 18:47:10"
+  "owner": "ashwini@webnotestech.com"
  }, 
  {
-  "section_style": "Simple", 
-  "is_submittable": 1, 
-  "search_fields": "status, owner, timesheet_date", 
-  "module": "Projects", 
   "autoname": "TimeSheet.#####", 
-  "show_in_menu": 0, 
-  "subject": "%(owner)s", 
-  "name": "__common__", 
-  "colour": "White:FFF", 
   "doctype": "DocType", 
-  "server_code_error": " ", 
-  "version": 69
+  "is_submittable": 1, 
+  "module": "Projects", 
+  "name": "__common__", 
+  "search_fields": "status, owner, timesheet_date"
  }, 
  {
-  "name": "__common__", 
-  "parent": "Timesheet", 
   "doctype": "DocField", 
-  "parenttype": "DocType", 
-  "parentfield": "fields"
- }, 
- {
   "name": "__common__", 
   "parent": "Timesheet", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "amend": 1, 
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Timesheet", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
   "read": 1, 
-  "doctype": "DocPerm", 
-  "parenttype": "DocType", 
-  "parentfield": "permissions"
- }, 
- {
-  "name": "Timesheet", 
-  "doctype": "DocType"
- }, 
- {
-  "amend": 1, 
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "submit": 1, 
-  "write": 1, 
   "report": 1, 
-  "role": "Projects User", 
-  "cancel": 1, 
-  "permlevel": 0
- }, 
- {
-  "role": "Projects User", 
-  "permlevel": 1, 
-  "doctype": "DocPerm"
- }, 
- {
-  "amend": 1, 
-  "create": 1, 
-  "doctype": "DocPerm", 
   "submit": 1, 
-  "write": 1, 
-  "report": 1, 
-  "role": "System Manager", 
-  "cancel": 1, 
-  "permlevel": 0
+  "write": 1
  }, 
  {
-  "role": "System Manager", 
-  "permlevel": 1, 
-  "doctype": "DocPerm"
+  "doctype": "DocType", 
+  "name": "Timesheet"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Timesheet Details", 
   "fieldname": "timesheet_details_section_break", 
   "fieldtype": "Section Break", 
-  "permlevel": 0
+  "label": "Timesheet Details"
  }, 
  {
   "default": "Draft", 
-  "oldfieldtype": "Select", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Status", 
-  "oldfieldname": "status", 
-  "permlevel": 1, 
   "fieldname": "status", 
   "fieldtype": "Select", 
-  "search_index": 1, 
-  "reqd": 1, 
+  "in_filter": 0, 
+  "label": "Status", 
+  "oldfieldname": "status", 
+  "oldfieldtype": "Select", 
   "options": "\nDraft\nSubmitted\nCancelled", 
-  "in_filter": 0
+  "read_only": 1, 
+  "reqd": 1, 
+  "search_index": 1
  }, 
  {
   "default": "Today", 
-  "oldfieldtype": "Date", 
-  "colour": "White:FFF", 
   "doctype": "DocField", 
-  "label": "Timesheet Date", 
-  "oldfieldname": "timesheet_date", 
   "fieldname": "timesheet_date", 
   "fieldtype": "Date", 
-  "search_index": 1, 
+  "in_filter": 1, 
+  "label": "Timesheet Date", 
+  "oldfieldname": "timesheet_date", 
+  "oldfieldtype": "Date", 
   "reqd": 1, 
-  "permlevel": 0, 
-  "in_filter": 1
+  "search_index": 1
  }, 
  {
-  "search_index": 0, 
   "doctype": "DocField", 
-  "label": "Timesheet By", 
-  "oldfieldname": "owner", 
-  "permlevel": 0, 
   "fieldname": "owner", 
   "fieldtype": "Link", 
+  "in_filter": 1, 
+  "label": "Timesheet By", 
+  "oldfieldname": "owner", 
   "oldfieldtype": "Link", 
-  "reqd": 1, 
   "options": "Profile", 
-  "in_filter": 1
+  "reqd": 1, 
+  "search_index": 0
  }, 
  {
-  "print_hide": 1, 
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Amended From", 
-  "oldfieldname": "amended_from", 
   "fieldname": "amended_from", 
   "fieldtype": "Data", 
   "hidden": 1, 
-  "permlevel": 1
+  "label": "Amended From", 
+  "oldfieldname": "amended_from", 
+  "oldfieldtype": "Data", 
+  "print_hide": 1, 
+  "read_only": 1
  }, 
  {
-  "print_hide": 1, 
-  "oldfieldtype": "Date", 
   "doctype": "DocField", 
-  "label": "Amendment Date", 
-  "oldfieldname": "amendment_date", 
   "fieldname": "amendment_date", 
   "fieldtype": "Date", 
   "hidden": 1, 
-  "permlevel": 1
+  "label": "Amendment Date", 
+  "oldfieldname": "amendment_date", 
+  "oldfieldtype": "Date", 
+  "print_hide": 1, 
+  "read_only": 1
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "column_break0", 
-  "fieldtype": "Column Break", 
-  "permlevel": 0
+  "fieldtype": "Column Break"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Notes", 
   "fieldname": "notes", 
   "fieldtype": "Text", 
-  "permlevel": 0
+  "label": "Notes"
  }, 
  {
   "doctype": "DocField", 
-  "options": "Simple", 
   "fieldname": "section_break0", 
   "fieldtype": "Section Break", 
-  "permlevel": 0
+  "options": "Simple"
  }, 
  {
-  "oldfieldtype": "Table", 
   "doctype": "DocField", 
-  "label": "Timesheet Details", 
-  "oldfieldname": "timesheet_details", 
-  "options": "Timesheet Detail", 
   "fieldname": "timesheet_details", 
   "fieldtype": "Table", 
-  "permlevel": 0
+  "label": "Timesheet Details", 
+  "oldfieldname": "timesheet_details", 
+  "oldfieldtype": "Table", 
+  "options": "Timesheet Detail"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "Projects User"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "System Manager"
  }
 ]

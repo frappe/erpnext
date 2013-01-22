@@ -1,195 +1,184 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-01-19 10:23:34", 
   "docstatus": 0, 
-  "creation": "2012-07-03 13:29:54", 
+  "modified": "2013-01-22 14:55:58", 
   "modified_by": "Administrator", 
-  "modified": "2013-01-18 12:57:44"
+  "owner": "Administrator"
  }, 
  {
-  "autoname": "naming_series:", 
   "allow_attach": 1, 
-  "is_submittable": 1, 
+  "autoname": "naming_series:", 
   "doctype": "DocType", 
-  "module": "Accounts", 
+  "is_submittable": 1, 
   "max_attachments": 3, 
+  "module": "Accounts", 
   "name": "__common__"
  }, 
  {
-  "read_only": 0, 
+  "doctype": "DocField", 
   "name": "__common__", 
   "parent": "C-Form", 
-  "doctype": "DocField", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "parentfield": "fields"
+  "permlevel": 0
  }, 
  {
-  "name": "__common__", 
-  "parent": "C-Form", 
-  "read": 1, 
-  "submit": 0, 
+  "create": 1, 
   "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "C-Form", 
+  "parentfield": "permissions", 
   "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
   "report": 1, 
-  "parentfield": "permissions"
+  "submit": 0, 
+  "write": 1
  }, 
  {
-  "name": "C-Form", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "C-Form"
  }, 
  {
-  "print_width": "50%", 
   "doctype": "DocField", 
-  "width": "50%", 
   "fieldname": "column_break0", 
   "fieldtype": "Column Break", 
-  "permlevel": 0
+  "print_width": "50%", 
+  "read_only": 0, 
+  "width": "50%"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Series", 
-  "options": "\nC-FORM/", 
   "fieldname": "naming_series", 
   "fieldtype": "Select", 
-  "reqd": 1, 
-  "permlevel": 0
+  "label": "Series", 
+  "options": "\nC-FORM/", 
+  "read_only": 0, 
+  "reqd": 1
  }, 
  {
   "doctype": "DocField", 
-  "label": "C-Form No", 
   "fieldname": "c_form_no", 
   "fieldtype": "Data", 
-  "reqd": 1, 
-  "permlevel": 0
+  "label": "C-Form No", 
+  "read_only": 0, 
+  "reqd": 1
  }, 
  {
   "doctype": "DocField", 
-  "label": "Received Date", 
   "fieldname": "received_date", 
   "fieldtype": "Date", 
-  "reqd": 1, 
-  "permlevel": 0
+  "label": "Received Date", 
+  "read_only": 0, 
+  "reqd": 1
  }, 
  {
   "doctype": "DocField", 
-  "label": "Customer", 
-  "options": "Customer", 
   "fieldname": "customer", 
   "fieldtype": "Link", 
-  "reqd": 1, 
-  "permlevel": 0
+  "label": "Customer", 
+  "options": "Customer", 
+  "read_only": 0, 
+  "reqd": 1
  }, 
  {
-  "print_width": "50%", 
   "doctype": "DocField", 
-  "width": "50%", 
   "fieldname": "column_break1", 
   "fieldtype": "Column Break", 
-  "permlevel": 0
+  "print_width": "50%", 
+  "read_only": 0, 
+  "width": "50%"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Company", 
-  "options": "link:Company", 
   "fieldname": "company", 
   "fieldtype": "Select", 
-  "permlevel": 0
+  "label": "Company", 
+  "options": "link:Company", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
-  "label": "Fiscal Year", 
-  "options": "link:Fiscal Year", 
   "fieldname": "fiscal_year", 
   "fieldtype": "Select", 
-  "reqd": 1, 
-  "permlevel": 0
+  "label": "Fiscal Year", 
+  "options": "link:Fiscal Year", 
+  "read_only": 0, 
+  "reqd": 1
  }, 
  {
   "doctype": "DocField", 
-  "label": "Quarter", 
-  "options": "\nI\nII\nIII\nIV", 
   "fieldname": "quarter", 
   "fieldtype": "Select", 
-  "permlevel": 0
+  "label": "Quarter", 
+  "options": "\nI\nII\nIII\nIV", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
-  "label": "Total Amount", 
   "fieldname": "total_amount", 
   "fieldtype": "Currency", 
-  "reqd": 1, 
-  "permlevel": 0
+  "label": "Total Amount", 
+  "read_only": 0, 
+  "reqd": 1
  }, 
  {
   "doctype": "DocField", 
-  "label": "State", 
-  "options": "link:State\ncountry='India'", 
   "fieldname": "state", 
   "fieldtype": "Select", 
-  "reqd": 1, 
-  "permlevel": 0
+  "label": "State", 
+  "options": "link:State\ncountry='India'", 
+  "read_only": 0, 
+  "reqd": 1
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "section_break0", 
   "fieldtype": "Section Break", 
-  "permlevel": 0
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
-  "label": "Invoice Details", 
-  "options": "C-Form Invoice Detail", 
   "fieldname": "invoice_details", 
   "fieldtype": "Table", 
-  "permlevel": 0
+  "label": "Invoice Details", 
+  "options": "C-Form Invoice Detail", 
+  "read_only": 0
  }, 
  {
-  "print_hide": 0, 
   "doctype": "DocField", 
-  "label": "Total Invoiced Amount", 
   "fieldname": "total_invoiced_amount", 
   "fieldtype": "Currency", 
-  "permlevel": 1
+  "label": "Total Invoiced Amount", 
+  "print_hide": 0, 
+  "read_only": 1
  }, 
  {
-  "print_hide": 1, 
   "doctype": "DocField", 
-  "label": "File List", 
   "fieldname": "file_list", 
   "fieldtype": "Text", 
   "hidden": 1, 
-  "permlevel": 0
+  "label": "File List", 
+  "print_hide": 1, 
+  "read_only": 0
  }, 
  {
-  "print_hide": 1, 
-  "no_copy": 1, 
   "doctype": "DocField", 
-  "label": "Amended From", 
-  "options": "Sales Invoice", 
   "fieldname": "amended_from", 
   "fieldtype": "Link", 
-  "permlevel": 1
+  "label": "Amended From", 
+  "no_copy": 1, 
+  "options": "Sales Invoice", 
+  "print_hide": 1, 
+  "read_only": 1
  }, 
  {
-  "create": 1, 
   "doctype": "DocPerm", 
-  "write": 1, 
-  "role": "Accounts User", 
-  "permlevel": 0
+  "role": "Accounts User"
  }, 
  {
-  "create": 1, 
   "doctype": "DocPerm", 
-  "write": 1, 
-  "role": "Accounts Manager", 
-  "permlevel": 0
- }, 
- {
-  "amend": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "role": "All", 
-  "cancel": 0, 
-  "permlevel": 1
+  "role": "Accounts Manager"
  }
 ]

@@ -1,134 +1,120 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-01-10 16:34:32", 
   "docstatus": 0, 
-  "creation": "2012-07-03 13:30:57", 
+  "modified": "2013-01-22 14:57:25", 
   "modified_by": "Administrator", 
-  "modified": "2013-01-08 12:00:51"
+  "owner": "Administrator"
  }, 
  {
-  "issingle": 1, 
   "allow_attach": 1, 
-  "name": "__common__", 
+  "description": "Set your background color, font and image (tiled)", 
   "doctype": "DocType", 
-  "module": "Website", 
+  "issingle": 1, 
   "max_attachments": 1, 
-  "description": "Set your background color, font and image (tiled)"
+  "module": "Website", 
+  "name": "__common__"
  }, 
  {
+  "doctype": "DocField", 
   "name": "__common__", 
   "parent": "Style Settings", 
-  "doctype": "DocField", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "parentfield": "fields"
- }, 
- {
-  "name": "__common__", 
-  "parent": "Style Settings", 
-  "read": 1, 
-  "doctype": "DocPerm", 
-  "parenttype": "DocType", 
-  "role": "Website Manager", 
-  "parentfield": "permissions"
- }, 
- {
-  "name": "Style Settings", 
-  "doctype": "DocType"
- }, 
- {
-  "description": "If image is selected, color will be ignored (attach first)", 
-  "doctype": "DocField", 
-  "label": "Background Image", 
-  "options": "attach_files:", 
-  "fieldname": "background_image", 
-  "fieldtype": "Select", 
-  "permlevel": 0
- }, 
- {
-  "description": "Solid background color (default light gray)", 
-  "doctype": "DocField", 
-  "label": "Background Color", 
-  "fieldname": "background_color", 
-  "fieldtype": "Data", 
-  "permlevel": 0
- }, 
- {
-  "print_width": "50%", 
-  "doctype": "DocField", 
-  "width": "50%", 
-  "fieldname": "cb0", 
-  "fieldtype": "Column Break", 
-  "permlevel": 0
- }, 
- {
-  "doctype": "DocField", 
-  "label": "Font", 
-  "options": "\nHelvetica Neue\nLucida Grande\nVerdana\nArial\nGeorgia\nTahoma", 
-  "fieldname": "font", 
-  "fieldtype": "Select", 
-  "permlevel": 0
- }, 
- {
-  "doctype": "DocField", 
-  "label": "Font Size", 
-  "options": "\n12px\n13px\n14px\n15px\n16px", 
-  "fieldname": "font_size", 
-  "fieldtype": "Select", 
-  "permlevel": 0
- }, 
- {
-  "doctype": "DocField", 
-  "label": "Heading Font", 
-  "options": "\nHelvetica Neue\nLucida Grande\nVerdana\nArial\nGeorgia\nTahoma\nLato\nOpen Sans", 
-  "fieldname": "heading_font", 
-  "fieldtype": "Select", 
-  "permlevel": 0
- }, 
- {
-  "doctype": "DocField", 
-  "label": "CSS", 
-  "fieldname": "css", 
-  "fieldtype": "Section Break", 
-  "permlevel": 0
- }, 
- {
-  "description": "add your own CSS (careful!)", 
-  "doctype": "DocField", 
-  "label": "Add CSS", 
-  "fieldname": "add_css", 
-  "fieldtype": "Code", 
-  "permlevel": 0
- }, 
- {
-  "description": "Auto generated", 
-  "doctype": "DocField", 
-  "label": "Custom CSS", 
-  "fieldname": "custom_css", 
-  "fieldtype": "Code", 
-  "permlevel": 1
- }, 
- {
-  "print_hide": 1, 
-  "no_copy": 1, 
-  "doctype": "DocField", 
-  "label": "File List", 
-  "fieldname": "file_list", 
-  "fieldtype": "Text", 
-  "hidden": 1, 
   "permlevel": 0
  }, 
  {
   "create": 1, 
   "doctype": "DocPerm", 
-  "write": 1, 
-  "permlevel": 0
+  "name": "__common__", 
+  "parent": "Style Settings", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 1, 
+  "role": "Website Manager", 
+  "submit": 0, 
+  "write": 1
  }, 
  {
-  "amend": 0, 
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "submit": 0, 
-  "cancel": 0, 
-  "permlevel": 1
+  "doctype": "DocType", 
+  "name": "Style Settings"
+ }, 
+ {
+  "description": "If image is selected, color will be ignored (attach first)", 
+  "doctype": "DocField", 
+  "fieldname": "background_image", 
+  "fieldtype": "Select", 
+  "label": "Background Image", 
+  "options": "attach_files:"
+ }, 
+ {
+  "description": "Solid background color (default light gray)", 
+  "doctype": "DocField", 
+  "fieldname": "background_color", 
+  "fieldtype": "Data", 
+  "label": "Background Color"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "cb0", 
+  "fieldtype": "Column Break", 
+  "print_width": "50%", 
+  "width": "50%"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "font", 
+  "fieldtype": "Select", 
+  "label": "Font", 
+  "options": "\nHelvetica Neue\nLucida Grande\nVerdana\nArial\nGeorgia\nTahoma"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "font_size", 
+  "fieldtype": "Select", 
+  "label": "Font Size", 
+  "options": "\n12px\n13px\n14px\n15px\n16px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "heading_font", 
+  "fieldtype": "Select", 
+  "label": "Heading Font", 
+  "options": "\nHelvetica Neue\nLucida Grande\nVerdana\nArial\nGeorgia\nTahoma\nLato\nOpen Sans"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "css", 
+  "fieldtype": "Section Break", 
+  "label": "CSS"
+ }, 
+ {
+  "description": "add your own CSS (careful!)", 
+  "doctype": "DocField", 
+  "fieldname": "add_css", 
+  "fieldtype": "Code", 
+  "label": "Add CSS"
+ }, 
+ {
+  "description": "Auto generated", 
+  "doctype": "DocField", 
+  "fieldname": "custom_css", 
+  "fieldtype": "Code", 
+  "label": "Custom CSS", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "file_list", 
+  "fieldtype": "Text", 
+  "hidden": 1, 
+  "label": "File List", 
+  "no_copy": 1, 
+  "print_hide": 1
+ }, 
+ {
+  "doctype": "DocPerm"
  }
 ]

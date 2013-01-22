@@ -1,125 +1,114 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-01-10 16:34:14", 
   "docstatus": 0, 
-  "creation": "2012-03-27 14:35:57", 
+  "modified": "2013-01-22 14:47:00", 
   "modified_by": "Administrator", 
-  "modified": "2012-03-27 14:35:57"
+  "owner": "Administrator"
  }, 
  {
-  "section_style": "Simple", 
-  "module": "HR", 
   "doctype": "DocType", 
-  "allow_trash": 1, 
   "document_type": "Master", 
-  "name": "__common__", 
-  "colour": "White:FFF", 
-  "server_code_error": " ", 
-  "show_in_menu": 0, 
-  "version": 17
+  "module": "HR", 
+  "name": "__common__"
  }, 
  {
-  "name": "__common__", 
-  "parent": "Holiday List", 
   "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Holiday List", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "parentfield": "fields"
+  "permlevel": 0
  }, 
  {
-  "parent": "Holiday List", 
-  "read": 1, 
-  "report": 1, 
   "cancel": 1, 
-  "name": "__common__", 
   "create": 1, 
   "doctype": "DocPerm", 
-  "write": 1, 
+  "name": "__common__", 
+  "parent": "Holiday List", 
+  "parentfield": "permissions", 
   "parenttype": "DocType", 
-  "role": "HR Manager", 
   "permlevel": 0, 
-  "parentfield": "permissions"
+  "read": 1, 
+  "report": 1, 
+  "role": "HR Manager", 
+  "submit": 0, 
+  "write": 1
  }, 
  {
-  "name": "Holiday List", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "Holiday List"
  }, 
  {
-  "doctype": "DocPerm"
- }, 
- {
-  "oldfieldtype": "Small Text", 
   "doctype": "DocField", 
-  "label": "Trash Reason", 
-  "oldfieldname": "trash_reason", 
   "fieldname": "trash_reason", 
   "fieldtype": "Small Text", 
-  "permlevel": 1
+  "label": "Trash Reason", 
+  "oldfieldname": "trash_reason", 
+  "oldfieldtype": "Small Text", 
+  "read_only": 1
  }, 
  {
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Holiday List Name", 
-  "oldfieldname": "holiday_list_name", 
   "fieldname": "holiday_list_name", 
   "fieldtype": "Data", 
-  "reqd": 1, 
-  "permlevel": 0
+  "label": "Holiday List Name", 
+  "oldfieldname": "holiday_list_name", 
+  "oldfieldtype": "Data", 
+  "reqd": 1
  }, 
  {
   "doctype": "DocField", 
-  "label": "Default", 
   "fieldname": "is_default", 
   "fieldtype": "Check", 
-  "permlevel": 0
+  "label": "Default"
  }, 
  {
-  "oldfieldtype": "Link", 
   "doctype": "DocField", 
-  "label": "Fiscal Year", 
-  "oldfieldname": "fiscal_year", 
-  "options": "link:Fiscal Year", 
   "fieldname": "fiscal_year", 
   "fieldtype": "Select", 
-  "reqd": 1, 
-  "permlevel": 0, 
-  "in_filter": 1
+  "in_filter": 1, 
+  "label": "Fiscal Year", 
+  "oldfieldname": "fiscal_year", 
+  "oldfieldtype": "Link", 
+  "options": "link:Fiscal Year", 
+  "reqd": 1
  }, 
  {
-  "print_hide": 1, 
-  "no_copy": 1, 
   "doctype": "DocField", 
-  "label": "Weekly Off", 
-  "options": "\nSunday\nMonday\nTuesday\nWednesday\nThursday\nFriday\nSaturday", 
   "fieldname": "weekly_off", 
   "fieldtype": "Select", 
-  "permlevel": 0, 
+  "label": "Weekly Off", 
+  "no_copy": 1, 
+  "options": "\nSunday\nMonday\nTuesday\nWednesday\nThursday\nFriday\nSaturday", 
+  "print_hide": 1, 
   "report_hide": 1
  }, 
  {
   "doctype": "DocField", 
-  "options": "get_weekly_off_dates", 
   "fieldname": "get_weekly_off_dates", 
   "fieldtype": "Button", 
   "label": "Get Weekly Off Dates", 
-  "permlevel": 0
+  "options": "get_weekly_off_dates"
  }, 
  {
-  "oldfieldtype": "Table", 
   "doctype": "DocField", 
-  "label": "Holidays", 
-  "oldfieldname": "holiday_list_details", 
-  "options": "Holiday", 
   "fieldname": "holiday_list_details", 
   "fieldtype": "Table", 
-  "reqd": 0, 
-  "permlevel": 0
+  "label": "Holidays", 
+  "oldfieldname": "holiday_list_details", 
+  "oldfieldtype": "Table", 
+  "options": "Holiday", 
+  "reqd": 0
  }, 
  {
   "doctype": "DocField", 
-  "options": "clear_table", 
   "fieldname": "clear_table", 
   "fieldtype": "Button", 
   "label": "Clear Table", 
-  "permlevel": 0
+  "options": "clear_table"
+ }, 
+ {
+  "doctype": "DocPerm"
  }
 ]

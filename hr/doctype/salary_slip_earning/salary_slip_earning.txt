@@ -1,85 +1,75 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-01-10 16:34:15", 
   "docstatus": 0, 
-  "creation": "2012-03-27 14:36:00", 
+  "modified": "2013-01-22 14:47:59", 
   "modified_by": "Administrator", 
-  "modified": "2012-03-27 14:36:00"
+  "owner": "Administrator"
  }, 
  {
-  "section_style": "Simple", 
-  "istable": 1, 
-  "name": "__common__", 
-  "colour": "White:FFF", 
-  "module": "HR", 
-  "server_code_error": " ", 
-  "version": 7, 
   "doctype": "DocType", 
-  "show_in_menu": 0
+  "istable": 1, 
+  "module": "HR", 
+  "name": "__common__"
  }, 
  {
-  "name": "__common__", 
-  "parent": "Salary Slip Earning", 
   "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Salary Slip Earning", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "parentfield": "fields"
+  "permlevel": 0
  }, 
  {
-  "parent": "Salary Slip Earning", 
-  "read": 1, 
-  "report": 1, 
-  "name": "__common__", 
   "create": 1, 
   "doctype": "DocPerm", 
-  "write": 1, 
+  "name": "__common__", 
+  "parent": "Salary Slip Earning", 
+  "parentfield": "permissions", 
   "parenttype": "DocType", 
-  "role": "System Manager", 
   "permlevel": 0, 
-  "parentfield": "permissions"
+  "read": 1, 
+  "report": 1, 
+  "role": "System Manager", 
+  "submit": 0, 
+  "write": 1
  }, 
  {
-  "name": "Salary Slip Earning", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "Salary Slip Earning"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "e_type", 
+  "fieldtype": "Link", 
+  "label": "Type", 
+  "oldfieldname": "e_type", 
+  "oldfieldtype": "Data", 
+  "options": "Earning Type", 
+  "width": "200px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "e_amount", 
+  "fieldtype": "Currency", 
+  "label": "Amount", 
+  "oldfieldname": "e_amount", 
+  "oldfieldtype": "Currency", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "e_modified_amount", 
+  "fieldtype": "Currency", 
+  "label": "Modified Amount"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "e_depends_on_lwp", 
+  "fieldtype": "Check", 
+  "label": "Depends on LWP"
  }, 
  {
   "doctype": "DocPerm"
- }, 
- {
-  "oldfieldtype": "Data", 
-  "doctype": "DocField", 
-  "label": "Type", 
-  "oldfieldname": "e_type", 
-  "width": "200px", 
-  "options": "Earning Type", 
-  "fieldname": "e_type", 
-  "fieldtype": "Link", 
-  "permlevel": 0
- }, 
- {
-  "oldfieldtype": "Currency", 
-  "doctype": "DocField", 
-  "label": "Amount", 
-  "oldfieldname": "e_amount", 
-  "fieldname": "e_amount", 
-  "fieldtype": "Currency", 
-  "permlevel": 1
- }, 
- {
-  "colour": "White:FFF", 
-  "doctype": "DocField", 
-  "label": "Modified Amount", 
-  "trigger": "Client", 
-  "fieldname": "e_modified_amount", 
-  "fieldtype": "Currency", 
-  "permlevel": 0
- }, 
- {
-  "colour": "White:FFF", 
-  "doctype": "DocField", 
-  "label": "Depends on LWP", 
-  "trigger": "Client", 
-  "fieldname": "e_depends_on_lwp", 
-  "fieldtype": "Check", 
-  "permlevel": 0
  }
 ]

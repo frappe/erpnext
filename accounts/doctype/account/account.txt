@@ -1,350 +1,312 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-01-19 10:23:33", 
   "docstatus": 0, 
-  "creation": "2013-01-17 12:30:10", 
+  "modified": "2013-01-22 15:05:18", 
   "modified_by": "Administrator", 
-  "modified": "2013-01-17 13:16:31"
+  "owner": "Administrator"
  }, 
  {
-  "in_create": 1, 
-  "allow_rename": 1, 
-  "name": "__common__", 
-  "module": "Accounts", 
-  "doctype": "DocType", 
   "allow_copy": 1, 
-  "search_fields": "debit_or_credit, group_or_ledger", 
+  "allow_rename": 1, 
+  "description": "Heads (or groups) against which Accounting Entries are made and balances are maintained.", 
+  "doctype": "DocType", 
   "document_type": "Master", 
-  "description": "Heads (or groups) against which Accounting Entries are made and balances are maintained."
+  "in_create": 1, 
+  "module": "Accounts", 
+  "name": "__common__", 
+  "search_fields": "debit_or_credit, group_or_ledger"
  }, 
  {
-  "name": "__common__", 
-  "parent": "Account", 
   "doctype": "DocField", 
-  "parenttype": "DocType", 
-  "parentfield": "fields"
- }, 
- {
   "name": "__common__", 
   "parent": "Account", 
-  "read": 1, 
-  "submit": 0, 
-  "doctype": "DocPerm", 
+  "parentfield": "fields", 
+  "parenttype": "DocType"
+ }, 
+ {
   "amend": 0, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Account", 
+  "parentfield": "permissions", 
   "parenttype": "DocType", 
-  "parentfield": "permissions"
+  "read": 1, 
+  "report": 1, 
+  "submit": 0
  }, 
  {
-  "name": "Account", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "Account"
  }, 
  {
-  "oldfieldtype": "Section Break", 
   "doctype": "DocField", 
-  "label": "Account Details", 
   "fieldname": "properties", 
   "fieldtype": "Section Break", 
+  "label": "Account Details", 
+  "oldfieldtype": "Section Break", 
   "permlevel": 0
  }, 
  {
   "doctype": "DocField", 
-  "width": "50%", 
   "fieldname": "column_break0", 
   "fieldtype": "Column Break", 
-  "permlevel": 0
+  "permlevel": 0, 
+  "width": "50%"
  }, 
  {
-  "no_copy": 1, 
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Account Name", 
-  "oldfieldname": "account_name", 
   "fieldname": "account_name", 
   "fieldtype": "Data", 
-  "search_index": 1, 
+  "in_filter": 1, 
+  "label": "Account Name", 
+  "no_copy": 1, 
+  "oldfieldname": "account_name", 
+  "oldfieldtype": "Data", 
+  "permlevel": 0, 
+  "read_only": 1, 
   "reqd": 1, 
-  "permlevel": 1, 
-  "in_filter": 1
+  "search_index": 1
  }, 
  {
-  "print_hide": 1, 
-  "oldfieldtype": "Int", 
   "doctype": "DocField", 
-  "label": "Level", 
-  "oldfieldname": "level", 
   "fieldname": "level", 
   "fieldtype": "Int", 
   "hidden": 1, 
-  "permlevel": 1
+  "label": "Level", 
+  "oldfieldname": "level", 
+  "oldfieldtype": "Int", 
+  "permlevel": 0, 
+  "print_hide": 1, 
+  "read_only": 1
  }, 
  {
   "default": "Ledger", 
-  "oldfieldtype": "Select", 
   "doctype": "DocField", 
-  "label": "Group or Ledger", 
-  "oldfieldname": "group_or_ledger", 
-  "options": "\nLedger\nGroup", 
   "fieldname": "group_or_ledger", 
   "fieldtype": "Select", 
-  "search_index": 1, 
+  "in_filter": 1, 
+  "label": "Group or Ledger", 
+  "oldfieldname": "group_or_ledger", 
+  "oldfieldtype": "Select", 
+  "options": "\nLedger\nGroup", 
+  "permlevel": 0, 
+  "read_only": 1, 
   "reqd": 1, 
-  "permlevel": 1, 
-  "in_filter": 1
+  "search_index": 1
  }, 
  {
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Debit or Credit", 
-  "oldfieldname": "debit_or_credit", 
   "fieldname": "debit_or_credit", 
   "fieldtype": "Data", 
-  "search_index": 1, 
-  "permlevel": 1, 
-  "in_filter": 1
+  "in_filter": 1, 
+  "label": "Debit or Credit", 
+  "oldfieldname": "debit_or_credit", 
+  "oldfieldtype": "Data", 
+  "permlevel": 0, 
+  "read_only": 1, 
+  "search_index": 1
  }, 
  {
-  "oldfieldtype": "Select", 
   "doctype": "DocField", 
-  "label": "Is PL Account", 
-  "oldfieldname": "is_pl_account", 
-  "permlevel": 1, 
   "fieldname": "is_pl_account", 
   "fieldtype": "Select", 
-  "search_index": 1, 
+  "in_filter": 1, 
+  "label": "Is PL Account", 
+  "oldfieldname": "is_pl_account", 
+  "oldfieldtype": "Select", 
   "options": "Yes\nNo", 
-  "in_filter": 1
+  "permlevel": 0, 
+  "read_only": 1, 
+  "search_index": 1
  }, 
  {
-  "oldfieldtype": "Link", 
   "doctype": "DocField", 
-  "label": "Company", 
-  "oldfieldname": "company", 
-  "permlevel": 1, 
   "fieldname": "company", 
   "fieldtype": "Link", 
-  "search_index": 1, 
-  "reqd": 1, 
+  "in_filter": 1, 
+  "label": "Company", 
+  "oldfieldname": "company", 
+  "oldfieldtype": "Link", 
   "options": "Company", 
-  "in_filter": 1
+  "permlevel": 0, 
+  "read_only": 1, 
+  "reqd": 1, 
+  "search_index": 1
  }, 
  {
   "doctype": "DocField", 
-  "width": "50%", 
   "fieldname": "column_break1", 
   "fieldtype": "Column Break", 
-  "permlevel": 0
+  "permlevel": 0, 
+  "width": "50%"
  }, 
  {
-  "oldfieldtype": "Link", 
   "doctype": "DocField", 
-  "label": "Parent Account", 
-  "oldfieldname": "parent_account", 
-  "permlevel": 0, 
   "fieldname": "parent_account", 
   "fieldtype": "Link", 
-  "search_index": 1, 
-  "options": "Account"
+  "label": "Parent Account", 
+  "oldfieldname": "parent_account", 
+  "oldfieldtype": "Link", 
+  "options": "Account", 
+  "permlevel": 0, 
+  "search_index": 1
  }, 
  {
   "description": "Setting Account Type helps in selecting this Account in transactions.", 
-  "oldfieldtype": "Select", 
   "doctype": "DocField", 
-  "label": "Account Type", 
-  "oldfieldname": "account_type", 
-  "permlevel": 0, 
   "fieldname": "account_type", 
   "fieldtype": "Select", 
-  "search_index": 0, 
+  "in_filter": 1, 
+  "label": "Account Type", 
+  "oldfieldname": "account_type", 
+  "oldfieldtype": "Select", 
   "options": "\nFixed Asset Account\nBank or Cash\nExpense Account\nTax\nIncome Account\nChargeable", 
-  "in_filter": 1
+  "permlevel": 0, 
+  "search_index": 0
  }, 
  {
   "description": "Rate at which this tax is applied", 
-  "oldfieldtype": "Currency", 
   "doctype": "DocField", 
-  "label": "Rate", 
-  "oldfieldname": "tax_rate", 
   "fieldname": "tax_rate", 
   "fieldtype": "Currency", 
-  "reqd": 0, 
   "hidden": 0, 
-  "permlevel": 0
+  "label": "Rate", 
+  "oldfieldname": "tax_rate", 
+  "oldfieldtype": "Currency", 
+  "permlevel": 0, 
+  "reqd": 0
  }, 
  {
   "description": "If the account is frozen, entries are allowed for the \"Account Manager\" only.", 
-  "oldfieldtype": "Select", 
   "doctype": "DocField", 
-  "label": "Frozen", 
-  "oldfieldname": "freeze_account", 
-  "permlevel": 2, 
   "fieldname": "freeze_account", 
   "fieldtype": "Select", 
-  "options": "No\nYes"
+  "label": "Frozen", 
+  "oldfieldname": "freeze_account", 
+  "oldfieldtype": "Select", 
+  "options": "No\nYes", 
+  "permlevel": 2
  }, 
  {
-  "print_hide": 1, 
-  "oldfieldtype": "Int", 
   "doctype": "DocField", 
-  "label": "Credit Days", 
-  "oldfieldname": "credit_days", 
   "fieldname": "credit_days", 
   "fieldtype": "Int", 
   "hidden": 1, 
-  "permlevel": 0
+  "label": "Credit Days", 
+  "oldfieldname": "credit_days", 
+  "oldfieldtype": "Int", 
+  "permlevel": 0, 
+  "print_hide": 1
  }, 
  {
-  "print_hide": 1, 
-  "oldfieldtype": "Currency", 
   "doctype": "DocField", 
-  "label": "Credit Limit", 
-  "oldfieldname": "credit_limit", 
   "fieldname": "credit_limit", 
   "fieldtype": "Currency", 
   "hidden": 1, 
-  "permlevel": 0
+  "label": "Credit Limit", 
+  "oldfieldname": "credit_limit", 
+  "oldfieldtype": "Currency", 
+  "permlevel": 0, 
+  "print_hide": 1
  }, 
  {
   "description": "If this Account represents a Customer, Supplier or Employee, set it here.", 
-  "oldfieldtype": "Select", 
   "doctype": "DocField", 
-  "label": "Master Type", 
-  "oldfieldname": "master_type", 
-  "permlevel": 0, 
   "fieldname": "master_type", 
   "fieldtype": "Select", 
-  "options": "\nSupplier\nCustomer\nEmployee"
+  "label": "Master Type", 
+  "oldfieldname": "master_type", 
+  "oldfieldtype": "Select", 
+  "options": "\nSupplier\nCustomer\nEmployee", 
+  "permlevel": 0
  }, 
  {
-  "oldfieldtype": "Link", 
   "doctype": "DocField", 
-  "label": "Master Name", 
-  "oldfieldname": "master_name", 
-  "permlevel": 0, 
   "fieldname": "master_name", 
   "fieldtype": "Link", 
-  "options": "[Select]"
+  "label": "Master Name", 
+  "oldfieldname": "master_name", 
+  "oldfieldtype": "Link", 
+  "options": "[Select]", 
+  "permlevel": 0
  }, 
  {
-  "read_only": 1, 
-  "print_hide": 1, 
   "doctype": "DocField", 
-  "label": "Lft", 
   "fieldname": "lft", 
   "fieldtype": "Int", 
   "hidden": 1, 
-  "permlevel": 0
+  "label": "Lft", 
+  "permlevel": 0, 
+  "print_hide": 1, 
+  "read_only": 1
  }, 
  {
-  "read_only": 1, 
-  "print_hide": 1, 
   "doctype": "DocField", 
-  "label": "Rgt", 
   "fieldname": "rgt", 
   "fieldtype": "Int", 
   "hidden": 1, 
-  "permlevel": 0
+  "label": "Rgt", 
+  "permlevel": 0, 
+  "print_hide": 1, 
+  "read_only": 1
  }, 
  {
-  "read_only": 1, 
-  "print_hide": 1, 
   "doctype": "DocField", 
-  "label": "Old Parent", 
   "fieldname": "old_parent", 
   "fieldtype": "Data", 
   "hidden": 1, 
-  "permlevel": 0
+  "label": "Old Parent", 
+  "permlevel": 0, 
+  "print_hide": 1, 
+  "read_only": 1
  }, 
  {
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "write": 1, 
-  "report": 1, 
-  "role": "Auditor", 
   "cancel": 0, 
-  "permlevel": 0
- }, 
- {
   "create": 0, 
   "doctype": "DocPerm", 
-  "write": 0, 
+  "permlevel": 0, 
   "role": "Auditor", 
-  "cancel": 0, 
-  "permlevel": 2
+  "write": 1
  }, 
  {
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "write": 0, 
-  "role": "Auditor", 
   "cancel": 0, 
-  "permlevel": 1
- }, 
- {
   "create": 0, 
   "doctype": "DocPerm", 
-  "write": 0, 
-  "report": 1, 
+  "permlevel": 0, 
   "role": "Sales User", 
-  "cancel": 0, 
-  "permlevel": 0
+  "write": 0
  }, 
  {
+  "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
-  "write": 0, 
-  "report": 1, 
+  "permlevel": 0, 
   "role": "Purchase User", 
-  "cancel": 0, 
-  "permlevel": 0
+  "write": 0
  }, 
  {
+  "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
-  "write": 1, 
-  "report": 1, 
+  "permlevel": 0, 
   "role": "Accounts User", 
-  "cancel": 0, 
-  "permlevel": 0
+  "write": 1
  }, 
  {
+  "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
-  "write": 1, 
-  "report": 1, 
+  "permlevel": 0, 
   "role": "Accounts Manager", 
-  "cancel": 1, 
-  "permlevel": 0
+  "write": 1
  }, 
  {
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "write": 0, 
-  "role": "Accounts User", 
   "cancel": 0, 
-  "permlevel": 1
- }, 
- {
   "create": 0, 
   "doctype": "DocPerm", 
-  "write": 0, 
+  "permlevel": 2, 
   "role": "Accounts Manager", 
-  "cancel": 0, 
-  "permlevel": 1
- }, 
- {
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "write": 1, 
-  "role": "Accounts Manager", 
-  "cancel": 0, 
-  "permlevel": 2
- }, 
- {
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "write": 0, 
-  "role": "Accounts User", 
-  "cancel": 0, 
-  "permlevel": 2
+  "write": 1
  }
 ]

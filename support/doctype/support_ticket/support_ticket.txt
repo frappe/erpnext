@@ -1,295 +1,277 @@
 [
  {
-  "owner": "Administrator", 
-  "docstatus": 0, 
   "creation": "2013-01-10 16:34:31", 
+  "docstatus": 0, 
+  "modified": "2013-01-22 14:57:25", 
   "modified_by": "Administrator", 
-  "modified": "2013-01-14 14:15:37"
+  "owner": "Administrator"
  }, 
  {
-  "autoname": "naming_series:", 
   "allow_attach": 1, 
-  "search_fields": "status,customer,allocated_to,subject,raised_by", 
-  "module": "Support", 
+  "autoname": "naming_series:", 
   "doctype": "DocType", 
-  "name": "__common__"
+  "module": "Support", 
+  "name": "__common__", 
+  "search_fields": "status,customer,allocated_to,subject,raised_by"
  }, 
  {
+  "doctype": "DocField", 
   "name": "__common__", 
   "parent": "Support Ticket", 
-  "doctype": "DocField", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "parentfield": "fields"
- }, 
- {
-  "name": "__common__", 
-  "parent": "Support Ticket", 
-  "amend": 0, 
-  "doctype": "DocPerm", 
-  "submit": 0, 
-  "read": 1, 
-  "parenttype": "DocType", 
-  "report": 1, 
-  "parentfield": "permissions"
- }, 
- {
-  "name": "Support Ticket", 
-  "doctype": "DocType"
- }, 
- {
-  "print_hide": 1, 
-  "no_copy": 1, 
-  "search_index": 0, 
-  "doctype": "DocField", 
-  "label": "Naming Series", 
-  "options": "SUP", 
-  "fieldname": "naming_series", 
-  "fieldtype": "Select", 
-  "reqd": 0, 
-  "hidden": 0, 
   "permlevel": 0
  }, 
  {
-  "permlevel": 1, 
-  "no_copy": 1, 
-  "oldfieldtype": "Select", 
-  "doctype": "DocField", 
-  "label": "Status", 
-  "oldfieldname": "status", 
-  "default": "Open", 
-  "fieldname": "status", 
-  "fieldtype": "Select", 
-  "search_index": 1, 
-  "reqd": 0, 
-  "options": "\nOpen\nTo Reply\nWaiting for Customer\nHold\nClosed", 
-  "in_filter": 0
+  "amend": 0, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Support Ticket", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "read": 1, 
+  "report": 1, 
+  "submit": 0
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Support Ticket"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Subject", 
+  "fieldname": "naming_series", 
+  "fieldtype": "Select", 
+  "hidden": 0, 
+  "label": "Naming Series", 
+  "no_copy": 1, 
+  "options": "SUP", 
+  "print_hide": 1, 
+  "reqd": 0, 
+  "search_index": 0
+ }, 
+ {
+  "default": "Open", 
+  "doctype": "DocField", 
+  "fieldname": "status", 
+  "fieldtype": "Select", 
+  "in_filter": 0, 
+  "label": "Status", 
+  "no_copy": 1, 
+  "oldfieldname": "status", 
+  "oldfieldtype": "Select", 
+  "options": "\nOpen\nTo Reply\nWaiting for Customer\nHold\nClosed", 
+  "read_only": 1, 
+  "reqd": 0, 
+  "search_index": 1
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "subject", 
   "fieldtype": "Data", 
-  "reqd": 1, 
-  "permlevel": 0, 
-  "in_filter": 1
+  "in_filter": 1, 
+  "label": "Subject", 
+  "reqd": 1
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "cb00", 
-  "fieldtype": "Column Break", 
-  "permlevel": 0
+  "fieldtype": "Column Break"
  }, 
  {
-  "oldfieldtype": "Data", 
+  "depends_on": "eval:doc.__islocal", 
   "doctype": "DocField", 
-  "label": "Raised By (Email)", 
-  "oldfieldname": "raised_by", 
   "fieldname": "raised_by", 
   "fieldtype": "Data", 
-  "depends_on": "eval:doc.__islocal", 
-  "reqd": 1, 
-  "permlevel": 0, 
-  "in_filter": 1
+  "in_filter": 1, 
+  "label": "Raised By (Email)", 
+  "oldfieldname": "raised_by", 
+  "oldfieldtype": "Data", 
+  "reqd": 1
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "sb00", 
-  "fieldtype": "Section Break", 
-  "permlevel": 0
+  "fieldtype": "Section Break"
  }, 
  {
-  "oldfieldtype": "Text", 
+  "depends_on": "eval:doc.__islocal", 
   "doctype": "DocField", 
-  "label": "Description", 
-  "oldfieldname": "problem_description", 
   "fieldname": "description", 
   "fieldtype": "Text", 
-  "depends_on": "eval:doc.__islocal", 
-  "reqd": 0, 
-  "permlevel": 0
+  "label": "Description", 
+  "oldfieldname": "problem_description", 
+  "oldfieldtype": "Text", 
+  "reqd": 0
  }, 
  {
   "depends_on": "eval:!doc.__islocal", 
   "doctype": "DocField", 
-  "label": "Thread HTML", 
   "fieldname": "thread_html", 
   "fieldtype": "HTML", 
-  "permlevel": 1
+  "label": "Thread HTML", 
+  "read_only": 1
  }, 
  {
   "doctype": "DocField", 
-  "label": "Additional Info", 
   "fieldname": "additional_info", 
   "fieldtype": "Section Break", 
-  "permlevel": 1
+  "label": "Additional Info", 
+  "read_only": 1
  }, 
  {
-  "oldfieldtype": "Column Break", 
+  "depends_on": "eval:!doc.__islocal", 
   "doctype": "DocField", 
-  "width": "50%", 
   "fieldname": "column_break0", 
   "fieldtype": "Column Break", 
-  "depends_on": "eval:!doc.__islocal", 
-  "permlevel": 1
+  "oldfieldtype": "Column Break", 
+  "read_only": 1, 
+  "width": "50%"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Lead", 
-  "options": "Lead", 
   "fieldname": "lead", 
   "fieldtype": "Link", 
-  "permlevel": 0
+  "label": "Lead", 
+  "options": "Lead"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Contact", 
-  "options": "Contact", 
   "fieldname": "contact", 
   "fieldtype": "Link", 
-  "permlevel": 0
+  "label": "Contact", 
+  "options": "Contact"
  }, 
  {
-  "print_hide": 1, 
-  "oldfieldtype": "Link", 
   "doctype": "DocField", 
-  "label": "Customer", 
-  "oldfieldname": "customer", 
-  "permlevel": 1, 
   "fieldname": "customer", 
   "fieldtype": "Link", 
-  "search_index": 1, 
-  "reqd": 0, 
+  "in_filter": 1, 
+  "label": "Customer", 
+  "oldfieldname": "customer", 
+  "oldfieldtype": "Link", 
   "options": "Customer", 
-  "in_filter": 1
+  "print_hide": 1, 
+  "read_only": 1, 
+  "reqd": 0, 
+  "search_index": 1
  }, 
  {
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Customer Name", 
-  "oldfieldname": "customer_name", 
   "fieldname": "customer_name", 
   "fieldtype": "Data", 
-  "search_index": 0, 
+  "in_filter": 1, 
+  "label": "Customer Name", 
+  "oldfieldname": "customer_name", 
+  "oldfieldtype": "Data", 
+  "read_only": 1, 
   "reqd": 0, 
-  "permlevel": 2, 
-  "in_filter": 1
+  "search_index": 0
  }, 
  {
   "default": "Today", 
-  "oldfieldtype": "Date", 
   "doctype": "DocField", 
-  "label": "Opening Date", 
-  "oldfieldname": "opening_date", 
-  "no_copy": 1, 
   "fieldname": "opening_date", 
   "fieldtype": "Date", 
-  "permlevel": 1
+  "label": "Opening Date", 
+  "no_copy": 1, 
+  "oldfieldname": "opening_date", 
+  "oldfieldtype": "Date", 
+  "read_only": 1
  }, 
  {
-  "no_copy": 1, 
-  "oldfieldtype": "Time", 
   "doctype": "DocField", 
-  "label": "Opening Time", 
-  "oldfieldname": "opening_time", 
   "fieldname": "opening_time", 
   "fieldtype": "Time", 
-  "permlevel": 1
+  "label": "Opening Time", 
+  "no_copy": 1, 
+  "oldfieldname": "opening_time", 
+  "oldfieldtype": "Time", 
+  "read_only": 1
  }, 
  {
-  "oldfieldtype": "Column Break", 
+  "depends_on": "eval:!doc.__islocal", 
   "doctype": "DocField", 
   "fieldname": "column_break1", 
   "fieldtype": "Column Break", 
-  "depends_on": "eval:!doc.__islocal", 
-  "permlevel": 1
+  "oldfieldtype": "Column Break", 
+  "read_only": 1
  }, 
  {
-  "no_copy": 1, 
-  "oldfieldtype": "Text", 
+  "depends_on": "eval:!doc.__islocal", 
   "doctype": "DocField", 
-  "label": "Resolution Details", 
-  "oldfieldname": "resolution_details", 
   "fieldname": "resolution_details", 
   "fieldtype": "Small Text", 
-  "depends_on": "eval:!doc.__islocal", 
-  "permlevel": 1
+  "label": "Resolution Details", 
+  "no_copy": 1, 
+  "oldfieldname": "resolution_details", 
+  "oldfieldtype": "Text", 
+  "read_only": 1
  }, 
  {
   "doctype": "DocField", 
-  "label": "First Responded On", 
   "fieldname": "first_responded_on", 
   "fieldtype": "Datetime", 
-  "permlevel": 0
+  "label": "First Responded On"
  }, 
  {
-  "no_copy": 1, 
   "depends_on": "eval:!doc.__islocal", 
   "doctype": "DocField", 
-  "label": "Resolution Date", 
-  "oldfieldname": "resolution_date", 
   "fieldname": "resolution_date", 
   "fieldtype": "Datetime", 
-  "search_index": 0, 
+  "in_filter": 0, 
+  "label": "Resolution Date", 
+  "no_copy": 1, 
+  "oldfieldname": "resolution_date", 
   "oldfieldtype": "Date", 
-  "permlevel": 1, 
-  "in_filter": 0
+  "read_only": 1, 
+  "search_index": 0
  }, 
  {
   "doctype": "DocField", 
-  "label": "Content Type", 
   "fieldname": "content_type", 
   "fieldtype": "Data", 
   "hidden": 1, 
-  "permlevel": 0
+  "label": "Content Type"
  }, 
  {
-  "print_hide": 1, 
-  "no_copy": 1, 
   "doctype": "DocField", 
-  "label": "File List", 
   "fieldname": "file_list", 
   "fieldtype": "Text", 
   "hidden": 1, 
-  "permlevel": 0
+  "label": "File List", 
+  "no_copy": 1, 
+  "print_hide": 1
  }, 
  {
+  "cancel": 0, 
   "create": 1, 
   "doctype": "DocPerm", 
-  "write": 1, 
+  "permlevel": 0, 
   "role": "Guest", 
-  "cancel": 0, 
-  "permlevel": 0
+  "write": 1
  }, 
  {
+  "cancel": 0, 
   "create": 1, 
   "doctype": "DocPerm", 
-  "write": 1, 
+  "permlevel": 0, 
   "role": "Customer", 
-  "cancel": 0, 
-  "permlevel": 0
+  "write": 1
  }, 
  {
+  "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
-  "write": 1, 
+  "permlevel": 0, 
   "role": "Support Team", 
-  "cancel": 1, 
-  "permlevel": 0
+  "write": 1
  }, 
  {
+  "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
-  "write": 1, 
+  "permlevel": 2, 
   "role": "Support Team", 
-  "cancel": 0, 
-  "permlevel": 1
- }, 
- {
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "write": 0, 
-  "role": "Support Team", 
-  "cancel": 0, 
-  "permlevel": 2
+  "write": 0
  }
 ]

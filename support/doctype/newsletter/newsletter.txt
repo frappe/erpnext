@@ -1,202 +1,172 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-01-10 16:34:31", 
   "docstatus": 0, 
-  "creation": "2013-01-01 13:46:34", 
+  "modified": "2013-01-22 14:56:40", 
   "modified_by": "Administrator", 
-  "modified": "2013-01-02 13:47:36"
+  "owner": "Administrator"
  }, 
  {
-  "description": "Create and Send Newsletters", 
   "autoname": "naming_series:", 
-  "module": "Support", 
+  "description": "Create and Send Newsletters", 
   "doctype": "DocType", 
   "document_type": "Other", 
+  "module": "Support", 
   "name": "__common__"
  }, 
  {
-  "name": "__common__", 
-  "parent": "Newsletter", 
   "doctype": "DocField", 
-  "parenttype": "DocType", 
-  "parentfield": "fields"
- }, 
- {
   "name": "__common__", 
   "parent": "Newsletter", 
-  "read": 1, 
-  "doctype": "DocPerm", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "parentfield": "permissions"
+  "permlevel": 0
  }, 
  {
-  "name": "Newsletter", 
-  "doctype": "DocType"
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Newsletter", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 1, 
+  "submit": 0, 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Newsletter"
  }, 
  {
   "description": "Select who you want to send this newsletter to", 
   "doctype": "DocField", 
-  "label": "Send To", 
   "fieldname": "send_to", 
   "fieldtype": "Section Break", 
-  "permlevel": 0
+  "label": "Send To"
  }, 
  {
   "default": "NL-", 
   "doctype": "DocField", 
-  "label": "Naming Series", 
-  "permlevel": 0, 
   "fieldname": "naming_series", 
   "fieldtype": "Select", 
-  "reqd": 1, 
-  "options": "NL-"
+  "label": "Naming Series", 
+  "options": "NL-", 
+  "reqd": 1
  }, 
  {
   "doctype": "DocField", 
-  "label": "All Contacts", 
   "fieldname": "contacts", 
   "fieldtype": "Check", 
-  "permlevel": 0
+  "label": "All Contacts"
  }, 
  {
   "doctype": "DocField", 
-  "label": "All Customer Contacts", 
   "fieldname": "customer_contacts", 
   "fieldtype": "Check", 
-  "permlevel": 0
+  "label": "All Customer Contacts"
  }, 
  {
   "doctype": "DocField", 
-  "label": "All Leads", 
   "fieldname": "leads", 
   "fieldtype": "Check", 
-  "permlevel": 0
+  "label": "All Leads"
  }, 
  {
   "doctype": "DocField", 
-  "label": "All Active Leads", 
   "fieldname": "active_leads", 
   "fieldtype": "Check", 
-  "permlevel": 0
+  "label": "All Active Leads"
  }, 
  {
   "doctype": "DocField", 
-  "label": "All Blog Subscribers", 
   "fieldname": "blog_subscribers", 
   "fieldtype": "Check", 
-  "permlevel": 0
+  "label": "All Blog Subscribers"
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "column_break1", 
-  "fieldtype": "Column Break", 
-  "permlevel": 0
+  "fieldtype": "Column Break"
  }, 
  {
   "description": "Comma separated list of email addresses", 
   "doctype": "DocField", 
-  "label": "Send to this list", 
   "fieldname": "email_list", 
   "fieldtype": "Text", 
-  "permlevel": 0
+  "label": "Send to this list"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Newsletter Content", 
   "fieldname": "newsletter_content", 
   "fieldtype": "Section Break", 
-  "permlevel": 0
+  "label": "Newsletter Content"
  }, 
  {
   "description": "If specified, send the newsletter using this email address", 
-  "no_copy": 1, 
   "doctype": "DocField", 
-  "label": "Send From", 
   "fieldname": "send_from", 
   "fieldtype": "Data", 
-  "permlevel": 0
+  "label": "Send From", 
+  "no_copy": 1
  }, 
  {
   "doctype": "DocField", 
-  "label": "Subject", 
   "fieldname": "subject", 
   "fieldtype": "Small Text", 
-  "reqd": 1, 
-  "permlevel": 0
+  "label": "Subject", 
+  "reqd": 1
  }, 
  {
   "doctype": "DocField", 
-  "label": "Message", 
   "fieldname": "message", 
   "fieldtype": "Text Editor", 
-  "reqd": 0, 
-  "permlevel": 0
+  "label": "Message", 
+  "reqd": 0
  }, 
  {
   "description": "Check how the newsletter looks in an email by sending it to your email.", 
   "doctype": "DocField", 
-  "label": "Test the Newsletter", 
   "fieldname": "test_the_newsletter", 
   "fieldtype": "Section Break", 
-  "permlevel": 0
+  "label": "Test the Newsletter"
  }, 
  {
   "description": "A Lead with this email id should exist", 
   "doctype": "DocField", 
-  "label": "Test Email Id", 
   "fieldname": "test_email_id", 
   "fieldtype": "Data", 
-  "permlevel": 0
+  "label": "Test Email Id"
  }, 
  {
   "doctype": "DocField", 
-  "options": "test_send", 
   "fieldname": "test_send", 
   "fieldtype": "Button", 
   "label": "Test", 
-  "permlevel": 0
+  "options": "test_send"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Newsletter Status", 
   "fieldname": "newsletter_status", 
   "fieldtype": "Section Break", 
-  "permlevel": 0
+  "label": "Newsletter Status"
  }, 
  {
-  "no_copy": 1, 
   "doctype": "DocField", 
-  "label": "Email Sent?", 
   "fieldname": "email_sent", 
   "fieldtype": "Check", 
-  "permlevel": 1
+  "label": "Email Sent?", 
+  "no_copy": 1, 
+  "read_only": 1
  }, 
  {
-  "create": 1, 
   "doctype": "DocPerm", 
-  "write": 1, 
-  "cancel": 1, 
-  "role": "Sales Manager", 
-  "report": 1, 
-  "permlevel": 0
+  "role": "Sales Manager"
  }, 
  {
-  "create": 1, 
   "doctype": "DocPerm", 
-  "write": 1, 
-  "cancel": 1, 
-  "role": "Support Manager", 
-  "report": 1, 
-  "permlevel": 0
- }, 
- {
-  "role": "Sales Manager", 
-  "permlevel": 1, 
-  "doctype": "DocPerm"
- }, 
- {
-  "role": "Support Manager", 
-  "permlevel": 1, 
-  "doctype": "DocPerm"
+  "role": "Support Manager"
  }
 ]

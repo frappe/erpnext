@@ -1,115 +1,108 @@
 [
  {
-  "owner": "wasim@webnotestech.com", 
+  "creation": "2013-01-10 16:34:20", 
   "docstatus": 0, 
-  "creation": "2012-03-27 14:36:14", 
+  "modified": "2013-01-22 14:47:59", 
   "modified_by": "Administrator", 
-  "modified": "2012-03-27 14:36:14"
+  "owner": "wasim@webnotestech.com"
  }, 
  {
-  "section_style": "Simple", 
+  "doctype": "DocType", 
   "istable": 1, 
-  "name": "__common__", 
-  "colour": "White:FFF", 
   "module": "Selling", 
-  "show_in_menu": 0, 
-  "version": 8, 
-  "server_code_error": " ", 
-  "doctype": "DocType"
+  "name": "__common__"
  }, 
  {
+  "doctype": "DocField", 
   "name": "__common__", 
   "parent": "Sales and Purchase Return Item", 
-  "doctype": "DocField", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "parentfield": "fields"
+  "permlevel": 0
  }, 
  {
-  "name": "Sales and Purchase Return Item", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "Sales and Purchase Return Item"
  }, 
  {
-  "oldfieldtype": "Link", 
   "doctype": "DocField", 
-  "label": "Item Code", 
-  "oldfieldname": "item_code", 
-  "permlevel": 1, 
   "fieldname": "item_code", 
   "fieldtype": "Link", 
-  "reqd": 1, 
-  "options": "Item"
+  "label": "Item Code", 
+  "oldfieldname": "item_code", 
+  "oldfieldtype": "Link", 
+  "options": "Item", 
+  "read_only": 1, 
+  "reqd": 1
  }, 
  {
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Description", 
-  "oldfieldname": "description", 
-  "width": "300px", 
   "fieldname": "description", 
   "fieldtype": "Data", 
-  "permlevel": 1
+  "label": "Description", 
+  "oldfieldname": "description", 
+  "oldfieldtype": "Data", 
+  "read_only": 1, 
+  "width": "300px"
  }, 
  {
-  "search_index": 0, 
   "doctype": "DocField", 
-  "label": "UOM", 
-  "oldfieldname": "uom", 
-  "permlevel": 1, 
   "fieldname": "uom", 
   "fieldtype": "Link", 
+  "label": "UOM", 
+  "oldfieldname": "uom", 
   "oldfieldtype": "Link", 
-  "options": "UOM"
+  "options": "UOM", 
+  "read_only": 1, 
+  "search_index": 0
  }, 
  {
-  "oldfieldtype": "Currency", 
   "doctype": "DocField", 
-  "label": "Rate", 
-  "oldfieldname": "rate", 
   "fieldname": "rate", 
   "fieldtype": "Currency", 
-  "permlevel": 1
+  "label": "Rate", 
+  "oldfieldname": "rate", 
+  "oldfieldtype": "Currency", 
+  "read_only": 1
  }, 
  {
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Qty", 
-  "oldfieldname": "qty", 
   "fieldname": "qty", 
   "fieldtype": "Data", 
-  "permlevel": 1
+  "label": "Qty", 
+  "oldfieldname": "qty", 
+  "oldfieldtype": "Data", 
+  "read_only": 1
  }, 
  {
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Returned Qty", 
-  "oldfieldname": "returned_qty", 
   "fieldname": "returned_qty", 
   "fieldtype": "Data", 
-  "reqd": 1, 
-  "permlevel": 0
+  "label": "Returned Qty", 
+  "oldfieldname": "returned_qty", 
+  "oldfieldtype": "Data", 
+  "reqd": 1
  }, 
  {
   "doctype": "DocField", 
-  "label": "Serial No", 
   "fieldname": "serial_no", 
   "fieldtype": "Small Text", 
-  "permlevel": 0
+  "label": "Serial No"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Batch No", 
   "fieldname": "batch_no", 
   "fieldtype": "Data", 
-  "permlevel": 0
+  "label": "Batch No"
  }, 
  {
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Detail Name", 
-  "oldfieldname": "detail_name", 
   "fieldname": "detail_name", 
   "fieldtype": "Data", 
   "hidden": 1, 
-  "permlevel": 1
+  "label": "Detail Name", 
+  "oldfieldname": "detail_name", 
+  "oldfieldtype": "Data", 
+  "read_only": 1
  }
 ]

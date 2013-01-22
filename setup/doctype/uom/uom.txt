@@ -1,114 +1,86 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-01-10 16:34:24", 
   "docstatus": 0, 
-  "creation": "2012-03-27 14:36:26", 
+  "modified": "2013-01-22 14:57:26", 
   "modified_by": "Administrator", 
-  "modified": "2012-03-27 14:36:26"
+  "owner": "Administrator"
  }, 
  {
-  "section_style": "Tabbed", 
-  "module": "Setup", 
-  "server_code_error": " ", 
-  "allow_trash": 1, 
   "autoname": "field:uom_name", 
-  "document_type": "Master", 
-  "_last_update": "1307707462", 
-  "name": "__common__", 
-  "colour": "White:FFF", 
   "doctype": "DocType", 
-  "show_in_menu": 0, 
-  "version": 5
+  "document_type": "Master", 
+  "module": "Setup", 
+  "name": "__common__"
  }, 
  {
-  "name": "__common__", 
-  "parent": "UOM", 
   "doctype": "DocField", 
-  "parenttype": "DocType", 
-  "parentfield": "fields"
- }, 
- {
   "name": "__common__", 
   "parent": "UOM", 
-  "read": 1, 
-  "submit": 0, 
-  "doctype": "DocPerm", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
   "amend": 0, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "UOM", 
+  "parentfield": "permissions", 
   "parenttype": "DocType", 
-  "parentfield": "permissions"
- }, 
- {
-  "name": "UOM", 
-  "doctype": "DocType"
- }, 
- {
-  "create": 1, 
-  "doctype": "DocPerm", 
-  "write": 1, 
+  "permlevel": 0, 
+  "read": 1, 
   "report": 1, 
-  "role": "Material Master Manager", 
-  "cancel": 1, 
-  "permlevel": 0
+  "submit": 0
  }, 
  {
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "write": 0, 
-  "role": "Material Manager", 
-  "cancel": 0, 
-  "permlevel": 1
+  "doctype": "DocType", 
+  "name": "UOM"
  }, 
  {
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "write": 0, 
-  "report": 1, 
-  "role": "Material Manager", 
-  "cancel": 0, 
-  "permlevel": 0
- }, 
- {
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "write": 0, 
-  "role": "Material User", 
-  "cancel": 0, 
-  "permlevel": 1
- }, 
- {
-  "create": 0, 
-  "doctype": "DocPerm", 
-  "write": 0, 
-  "report": 1, 
-  "role": "Material User", 
-  "cancel": 0, 
-  "permlevel": 0
- }, 
- {
-  "oldfieldtype": "Small Text", 
   "doctype": "DocField", 
-  "label": "Trash Reason", 
-  "oldfieldname": "trash_reason", 
   "fieldname": "trash_reason", 
   "fieldtype": "Small Text", 
-  "permlevel": 1
+  "label": "Trash Reason", 
+  "oldfieldname": "trash_reason", 
+  "oldfieldtype": "Small Text", 
+  "read_only": 1
  }, 
  {
-  "oldfieldtype": "Section Break", 
   "doctype": "DocField", 
-  "label": "UOM Details", 
   "fieldname": "uom_details", 
   "fieldtype": "Section Break", 
-  "permlevel": 0
+  "label": "UOM Details", 
+  "oldfieldtype": "Section Break"
  }, 
  {
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "UOM Name", 
-  "oldfieldname": "uom_name", 
   "fieldname": "uom_name", 
   "fieldtype": "Data", 
-  "reqd": 1, 
-  "permlevel": 0
+  "label": "UOM Name", 
+  "oldfieldname": "uom_name", 
+  "oldfieldtype": "Data", 
+  "reqd": 1
+ }, 
+ {
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "role": "Material Master Manager", 
+  "write": 1
+ }, 
+ {
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "role": "Material Manager", 
+  "write": 0
+ }, 
+ {
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "role": "Material User", 
+  "write": 0
  }
 ]

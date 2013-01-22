@@ -1,93 +1,99 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-01-19 11:14:50", 
   "docstatus": 0, 
-  "creation": "2013-01-19 10:23:31", 
+  "modified": "2013-01-22 15:07:36", 
   "modified_by": "Administrator", 
-  "modified": "2013-01-19 11:10:45"
+  "owner": "Administrator"
  }, 
  {
-  "read_only": 0, 
   "autoname": "field:currency_name", 
-  "in_create": 0, 
   "description": "**Currency** Master", 
   "doctype": "DocType", 
+  "in_create": 0, 
   "module": "Setup", 
-  "name": "__common__"
+  "name": "__common__", 
+  "read_only": 0
  }, 
  {
-  "name": "__common__", 
-  "parent": "Currency", 
   "doctype": "DocField", 
-  "parenttype": "DocType", 
-  "permlevel": 0, 
-  "parentfield": "fields"
- }, 
- {
   "name": "__common__", 
   "parent": "Currency", 
-  "read": 1, 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
   "create": 1, 
-  "submit": 0, 
   "doctype": "DocPerm", 
-  "write": 1, 
+  "name": "__common__", 
+  "parent": "Currency", 
+  "parentfield": "permissions", 
   "parenttype": "DocType", 
-  "report": 1, 
   "permlevel": 0, 
-  "parentfield": "permissions"
+  "read": 1, 
+  "report": 1, 
+  "submit": 0, 
+  "write": 1
  }, 
  {
-  "name": "Currency", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "Currency"
  }, 
  {
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Currency Name", 
-  "oldfieldname": "currency_name", 
   "fieldname": "currency_name", 
   "fieldtype": "Data", 
+  "label": "Currency Name", 
+  "oldfieldname": "currency_name", 
+  "oldfieldtype": "Data", 
   "reqd": 1
  }, 
  {
   "doctype": "DocField", 
-  "label": "Fraction", 
+  "fieldname": "enabled", 
+  "fieldtype": "Check", 
+  "label": "Enabled"
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "fraction", 
-  "fieldtype": "Data"
+  "fieldtype": "Data", 
+  "label": "Fraction"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Fraction Units", 
   "fieldname": "fraction_units", 
-  "fieldtype": "Int"
+  "fieldtype": "Int", 
+  "label": "Fraction Units"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Symbol", 
   "fieldname": "symbol", 
-  "fieldtype": "Data"
+  "fieldtype": "Data", 
+  "label": "Symbol"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Number Format", 
   "fieldname": "number_format", 
-  "fieldtype": "Data"
+  "fieldtype": "Data", 
+  "label": "Number Format"
  }, 
  {
   "cancel": 1, 
-  "role": "Accounts Manager", 
-  "doctype": "DocPerm"
+  "doctype": "DocPerm", 
+  "role": "Accounts Manager"
  }, 
  {
   "amend": 0, 
+  "cancel": 1, 
   "doctype": "DocPerm", 
-  "role": "Sales Master Manager", 
-  "cancel": 1
+  "role": "Sales Master Manager"
  }, 
  {
   "amend": 0, 
+  "cancel": 0, 
   "doctype": "DocPerm", 
-  "role": "Purchase Master Manager", 
-  "cancel": 0
+  "role": "Purchase Master Manager"
  }
 ]

@@ -15,7 +15,8 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 cur_frm.cscript.refresh = function(doc, cdt, cdn) {
-  if(doc.abbr && !doc.__islocal) set_field_permlevel('abbr',1);
+	if(doc.abbr && !doc.__islocal)
+		cur_frm.set_df_property("abbr", "read_only", 1)
 }
 
 cur_frm.cscript.has_special_chars = function(t) {

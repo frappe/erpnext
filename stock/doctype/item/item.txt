@@ -1,892 +1,813 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-01-21 18:19:22", 
   "docstatus": 0, 
-  "creation": "2013-01-17 10:57:15", 
+  "modified": "2013-01-22 14:47:00", 
   "modified_by": "Administrator", 
-  "modified": "2013-01-17 11:22:07"
+  "owner": "Administrator"
  }, 
  {
   "allow_attach": 1, 
-  "search_fields": "item_name,description,item_group,customer_code", 
-  "module": "Stock", 
-  "doctype": "DocType", 
-  "autoname": "field:item_code", 
-  "document_type": "Master", 
-  "description": "A Product or a Service that is bought, sold or kept in stock.", 
-  "name": "__common__", 
-  "default_print_format": "Standard", 
   "allow_rename": 1, 
-  "max_attachments": 1
+  "autoname": "field:item_code", 
+  "default_print_format": "Standard", 
+  "description": "A Product or a Service that is bought, sold or kept in stock.", 
+  "doctype": "DocType", 
+  "document_type": "Master", 
+  "max_attachments": 1, 
+  "module": "Stock", 
+  "name": "__common__", 
+  "search_fields": "item_name,description,item_group,customer_code"
  }, 
  {
-  "name": "__common__", 
-  "parent": "Item", 
   "doctype": "DocField", 
-  "parenttype": "DocType", 
-  "parentfield": "fields"
- }, 
- {
   "name": "__common__", 
   "parent": "Item", 
-  "read": 1, 
-  "submit": 0, 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
   "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Item", 
+  "parentfield": "permissions", 
   "parenttype": "DocType", 
-  "report": 1, 
   "permlevel": 0, 
-  "amend": 0, 
-  "parentfield": "permissions"
+  "read": 1, 
+  "report": 1, 
+  "submit": 0
  }, 
  {
-  "name": "Item", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "Item"
  }, 
  {
-  "no_copy": 0, 
-  "oldfieldtype": "Section Break", 
   "doctype": "DocField", 
-  "label": "Item", 
   "fieldname": "item", 
   "fieldtype": "Section Break", 
-  "permlevel": 0
+  "label": "Item", 
+  "no_copy": 0, 
+  "oldfieldtype": "Section Break"
  }, 
  {
   "description": "Item will be saved by this name in the data base.", 
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Item Code", 
-  "oldfieldname": "item_code", 
   "fieldname": "item_code", 
   "fieldtype": "Data", 
-  "search_index": 0, 
+  "in_filter": 0, 
+  "label": "Item Code", 
+  "oldfieldname": "item_code", 
+  "oldfieldtype": "Data", 
   "reqd": 1, 
-  "permlevel": 0, 
-  "in_filter": 0
+  "search_index": 0
  }, 
  {
-  "oldfieldtype": "Data", 
   "doctype": "DocField", 
-  "label": "Item Name", 
-  "oldfieldname": "item_name", 
   "fieldname": "item_name", 
   "fieldtype": "Data", 
-  "search_index": 1, 
+  "in_filter": 1, 
+  "label": "Item Name", 
+  "oldfieldname": "item_name", 
+  "oldfieldtype": "Data", 
   "reqd": 1, 
-  "permlevel": 0, 
-  "in_filter": 1
+  "search_index": 1
  }, 
  {
   "description": "<a href=\"#!Sales Browser/Item Group\">Manage Item Groups</a>", 
-  "oldfieldtype": "Link", 
   "doctype": "DocField", 
-  "label": "Item Group", 
-  "oldfieldname": "item_group", 
-  "options": "Item Group", 
   "fieldname": "item_group", 
   "fieldtype": "Link", 
-  "reqd": 1, 
-  "permlevel": 0, 
-  "in_filter": 1
+  "in_filter": 1, 
+  "label": "Item Group", 
+  "oldfieldname": "item_group", 
+  "oldfieldtype": "Link", 
+  "options": "Item Group", 
+  "reqd": 1
  }, 
  {
   "description": "Unit of measurement of this item (e.g. Kg, Unit, No, Pair).", 
-  "oldfieldtype": "Link", 
   "doctype": "DocField", 
-  "label": "Default Unit of Measure", 
-  "oldfieldname": "stock_uom", 
-  "options": "UOM", 
   "fieldname": "stock_uom", 
   "fieldtype": "Link", 
-  "reqd": 0, 
-  "permlevel": 0
+  "label": "Default Unit of Measure", 
+  "oldfieldname": "stock_uom", 
+  "oldfieldtype": "Link", 
+  "options": "UOM", 
+  "reqd": 0
  }, 
  {
-  "print_hide": 1, 
-  "oldfieldtype": "Link", 
   "doctype": "DocField", 
-  "label": "Brand", 
-  "oldfieldname": "brand", 
-  "options": "Brand", 
   "fieldname": "brand", 
   "fieldtype": "Link", 
-  "reqd": 0, 
   "hidden": 0, 
-  "permlevel": 0
+  "label": "Brand", 
+  "oldfieldname": "brand", 
+  "oldfieldtype": "Link", 
+  "options": "Brand", 
+  "print_hide": 1, 
+  "reqd": 0
  }, 
  {
   "doctype": "DocField", 
-  "label": "Barcode", 
   "fieldname": "barcode", 
   "fieldtype": "Data", 
-  "permlevel": 0
+  "label": "Barcode"
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "column_break0", 
-  "fieldtype": "Column Break", 
-  "permlevel": 0
+  "fieldtype": "Column Break"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Image", 
-  "options": "attach_files:", 
   "fieldname": "image", 
   "fieldtype": "Select", 
-  "permlevel": 0
+  "label": "Image", 
+  "options": "attach_files:"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Image View", 
-  "options": "image", 
   "fieldname": "image_view", 
   "fieldtype": "Image", 
-  "permlevel": 0
+  "label": "Image View", 
+  "options": "image"
  }, 
  {
-  "oldfieldtype": "Text", 
   "doctype": "DocField", 
-  "label": "Description", 
-  "oldfieldname": "description", 
   "fieldname": "description", 
   "fieldtype": "Small Text", 
-  "search_index": 0, 
+  "in_filter": 0, 
+  "label": "Description", 
+  "oldfieldname": "description", 
+  "oldfieldtype": "Text", 
   "reqd": 1, 
-  "permlevel": 0, 
-  "in_filter": 0
+  "search_index": 0
  }, 
  {
   "doctype": "DocField", 
-  "label": "Description HTML", 
   "fieldname": "description_html", 
   "fieldtype": "Small Text", 
-  "permlevel": 0
+  "label": "Description HTML"
  }, 
  {
   "description": "Generates HTML to include selected image in the description", 
   "doctype": "DocField", 
-  "label": "Generate Description HTML", 
   "fieldname": "add_image", 
   "fieldtype": "Button", 
-  "permlevel": 0
+  "label": "Generate Description HTML"
  }, 
  {
-  "oldfieldtype": "Section Break", 
   "doctype": "DocField", 
-  "label": "Inventory", 
   "fieldname": "inventory", 
   "fieldtype": "Section Break", 
-  "permlevel": 0
+  "label": "Inventory", 
+  "oldfieldtype": "Section Break"
  }, 
  {
-  "description": "Select \"Yes\" if you are maintaining stock of this item in your Inventory.", 
   "default": "Yes", 
-  "oldfieldtype": "Select", 
+  "description": "Select \"Yes\" if you are maintaining stock of this item in your Inventory.", 
   "doctype": "DocField", 
-  "label": "Is Stock Item", 
-  "oldfieldname": "is_stock_item", 
-  "options": "\nYes\nNo", 
   "fieldname": "is_stock_item", 
   "fieldtype": "Select", 
-  "reqd": 1, 
-  "permlevel": 0
+  "label": "Is Stock Item", 
+  "oldfieldname": "is_stock_item", 
+  "oldfieldtype": "Select", 
+  "options": "\nYes\nNo", 
+  "reqd": 1
  }, 
  {
+  "depends_on": "eval:doc.is_stock_item==\"Yes\"", 
   "description": "Mandatory if Stock Item is \"Yes\"", 
-  "oldfieldtype": "Link", 
   "doctype": "DocField", 
-  "label": "Default Reserved Warehouse", 
-  "oldfieldname": "default_warehouse", 
-  "options": "Warehouse", 
   "fieldname": "default_warehouse", 
   "fieldtype": "Link", 
-  "depends_on": "eval:doc.is_stock_item==\"Yes\"", 
-  "permlevel": 0
+  "label": "Default Reserved Warehouse", 
+  "oldfieldname": "default_warehouse", 
+  "oldfieldtype": "Link", 
+  "options": "Warehouse"
  }, 
  {
+  "depends_on": "eval:doc.is_stock_item==\"Yes\"", 
   "description": "Percentage variation in quantity to be allowed while receiving or delivering this item.", 
-  "oldfieldtype": "Currency", 
   "doctype": "DocField", 
+  "fieldname": "tolerance", 
+  "fieldtype": "Float", 
   "label": "Allowance Percent", 
   "oldfieldname": "tolerance", 
-  "fieldname": "tolerance", 
-  "fieldtype": "Currency", 
-  "depends_on": "eval:doc.is_stock_item==\"Yes\"", 
-  "permlevel": 0
+  "oldfieldtype": "Currency"
  }, 
  {
+  "depends_on": "eval:doc.is_stock_item==\"Yes\"", 
   "description": "The system will generate a Purchase Request automatically when stock quantity goes below re-order level in warehouse of type \"Stores\" or \"Reserved Warehouse\".", 
-  "oldfieldtype": "Currency", 
   "doctype": "DocField", 
+  "fieldname": "re_order_level", 
+  "fieldtype": "Float", 
   "label": "Re-Order Level", 
   "oldfieldname": "re_order_level", 
-  "fieldname": "re_order_level", 
-  "fieldtype": "Currency", 
-  "depends_on": "eval:doc.is_stock_item==\"Yes\"", 
-  "permlevel": 0
+  "oldfieldtype": "Currency"
  }, 
  {
+  "depends_on": "eval:doc.is_stock_item==\"Yes\"", 
   "description": "The quantity for the Purchase Request when the stock goes below re-order level.", 
-  "depends_on": "eval:doc.is_stock_item==\"Yes\"", 
   "doctype": "DocField", 
-  "label": "Re-Order Qty", 
   "fieldname": "re_order_qty", 
-  "fieldtype": "Currency", 
-  "permlevel": 0
+  "fieldtype": "Float", 
+  "label": "Re-Order Qty"
  }, 
  {
-  "description": "Send an email to users of role \"Material Manager\" and \"Purchase Manager\" when re-order level is crossed.", 
   "depends_on": "eval:doc.is_stock_item==\"Yes\"", 
+  "description": "Send an email to users of role \"Material Manager\" and \"Purchase Manager\" when re-order level is crossed.", 
   "doctype": "DocField", 
-  "label": "Notify by Email on Re-order", 
   "fieldname": "email_notify", 
   "fieldtype": "Check", 
-  "permlevel": 0
+  "label": "Notify by Email on Re-order"
  }, 
  {
   "depends_on": "eval:doc.is_stock_item==\"Yes\"", 
   "doctype": "DocField", 
-  "label": "Valuation Method", 
-  "options": "\nFIFO\nMoving Average", 
   "fieldname": "valuation_method", 
   "fieldtype": "Select", 
-  "permlevel": 0
+  "label": "Valuation Method", 
+  "options": "\nFIFO\nMoving Average"
  }, 
  {
-  "description": "You can enter the minimum quantity of this item to be ordered.", 
   "default": "0.00", 
-  "oldfieldtype": "Currency", 
+  "depends_on": "eval:doc.is_stock_item==\"Yes\"", 
+  "description": "You can enter the minimum quantity of this item to be ordered.", 
   "doctype": "DocField", 
+  "fieldname": "min_order_qty", 
+  "fieldtype": "Float", 
+  "hidden": 0, 
   "label": "Minimum Order Qty", 
   "oldfieldname": "min_order_qty", 
-  "fieldname": "min_order_qty", 
-  "fieldtype": "Currency", 
-  "depends_on": "eval:doc.is_stock_item==\"Yes\"", 
-  "hidden": 0, 
-  "permlevel": 0
+  "oldfieldtype": "Currency"
  }, 
  {
-  "oldfieldtype": "Column Break", 
+  "depends_on": "eval:doc.is_stock_item==\"Yes\"", 
   "doctype": "DocField", 
-  "width": "50%", 
   "fieldname": "column_break1", 
   "fieldtype": "Column Break", 
-  "depends_on": "eval:doc.is_stock_item==\"Yes\"", 
-  "permlevel": 0
+  "oldfieldtype": "Column Break", 
+  "width": "50%"
  }, 
  {
-  "description": "Select \"Yes\" if this item is used for some internal purpose in your company.", 
   "default": "No", 
-  "oldfieldtype": "Select", 
+  "depends_on": "eval:doc.is_stock_item==\"Yes\"", 
+  "description": "Select \"Yes\" if this item is used for some internal purpose in your company.", 
   "doctype": "DocField", 
-  "label": "Is Asset Item", 
-  "oldfieldname": "is_asset_item", 
-  "permlevel": 0, 
   "fieldname": "is_asset_item", 
   "fieldtype": "Select", 
-  "depends_on": "eval:doc.is_stock_item==\"Yes\"", 
-  "reqd": 1, 
-  "options": "\nYes\nNo"
+  "label": "Is Asset Item", 
+  "oldfieldname": "is_asset_item", 
+  "oldfieldtype": "Select", 
+  "options": "\nYes\nNo", 
+  "reqd": 1
  }, 
  {
   "default": "No", 
-  "oldfieldtype": "Select", 
+  "depends_on": "eval:doc.is_stock_item==\"Yes\"", 
   "doctype": "DocField", 
-  "label": "Has Batch No", 
-  "oldfieldname": "has_batch_no", 
-  "options": "\nYes\nNo", 
   "fieldname": "has_batch_no", 
   "fieldtype": "Select", 
-  "depends_on": "eval:doc.is_stock_item==\"Yes\"", 
-  "reqd": 1, 
-  "permlevel": 0
+  "label": "Has Batch No", 
+  "oldfieldname": "has_batch_no", 
+  "oldfieldtype": "Select", 
+  "options": "\nYes\nNo", 
+  "reqd": 1
  }, 
  {
-  "description": "Selecting \"Yes\" will give a unique identity to each entity of this item which can be viewed in the Serial No master.", 
   "default": "No", 
-  "oldfieldtype": "Select", 
+  "depends_on": "eval:doc.is_stock_item==\"Yes\"", 
+  "description": "Selecting \"Yes\" will give a unique identity to each entity of this item which can be viewed in the Serial No master.", 
   "doctype": "DocField", 
-  "label": "Has Serial No", 
-  "oldfieldname": "has_serial_no", 
-  "permlevel": 0, 
   "fieldname": "has_serial_no", 
   "fieldtype": "Select", 
-  "depends_on": "eval:doc.is_stock_item==\"Yes\"", 
-  "reqd": 1, 
   "in_filter": 1, 
-  "options": "\nYes\nNo"
+  "label": "Has Serial No", 
+  "oldfieldname": "has_serial_no", 
+  "oldfieldtype": "Select", 
+  "options": "\nYes\nNo", 
+  "reqd": 1
  }, 
  {
-  "oldfieldtype": "Data", 
+  "depends_on": "eval:doc.is_stock_item==\"Yes\"", 
   "doctype": "DocField", 
-  "label": "Warranty Period (in days)", 
-  "oldfieldname": "warranty_period", 
   "fieldname": "warranty_period", 
   "fieldtype": "Data", 
-  "depends_on": "eval:doc.is_stock_item==\"Yes\"", 
-  "permlevel": 0
+  "label": "Warranty Period (in days)", 
+  "oldfieldname": "warranty_period", 
+  "oldfieldtype": "Data"
  }, 
  {
-  "oldfieldtype": "Date", 
+  "depends_on": "eval:doc.is_stock_item==\"Yes\"", 
   "doctype": "DocField", 
-  "label": "End of Life", 
-  "oldfieldname": "end_of_life", 
   "fieldname": "end_of_life", 
   "fieldtype": "Date", 
-  "depends_on": "eval:doc.is_stock_item==\"Yes\"", 
-  "permlevel": 0
+  "label": "End of Life", 
+  "oldfieldname": "end_of_life", 
+  "oldfieldtype": "Date"
  }, 
  {
-  "description": "Net Weight of each Item", 
   "depends_on": "eval:doc.is_stock_item==\"Yes\"", 
+  "description": "Net Weight of each Item", 
   "doctype": "DocField", 
-  "label": "Net Weight", 
   "fieldname": "net_weight", 
   "fieldtype": "Float", 
-  "permlevel": 0
+  "label": "Net Weight"
  }, 
  {
   "depends_on": "eval:doc.is_stock_item==\"Yes\"", 
   "doctype": "DocField", 
-  "label": "Weight UOM", 
-  "options": "UOM", 
   "fieldname": "weight_uom", 
   "fieldtype": "Link", 
-  "permlevel": 0
+  "label": "Weight UOM", 
+  "options": "UOM"
  }, 
  {
-  "oldfieldtype": "Section Break", 
   "doctype": "DocField", 
-  "label": "Purchase Details", 
   "fieldname": "purchase_details", 
   "fieldtype": "Section Break", 
-  "permlevel": 0
+  "label": "Purchase Details", 
+  "oldfieldtype": "Section Break"
  }, 
  {
-  "description": "Selecting \"Yes\" will allow this item to appear in Purchase Order , Purchase Receipt.", 
   "default": "Yes", 
-  "oldfieldtype": "Select", 
+  "description": "Selecting \"Yes\" will allow this item to appear in Purchase Order , Purchase Receipt.", 
   "doctype": "DocField", 
-  "label": "Is Purchase Item", 
-  "oldfieldname": "is_purchase_item", 
-  "options": "\nYes\nNo", 
   "fieldname": "is_purchase_item", 
   "fieldtype": "Select", 
-  "reqd": 1, 
-  "permlevel": 0
+  "label": "Is Purchase Item", 
+  "oldfieldname": "is_purchase_item", 
+  "oldfieldtype": "Select", 
+  "options": "\nYes\nNo", 
+  "reqd": 1
  }, 
  {
+  "depends_on": "eval:doc.is_purchase_item==\"Yes\"", 
   "description": "Lead Time days is number of days by which this item is expected in your warehouse. This days is fetched in Purchase Request when you select this item.", 
-  "no_copy": 1, 
-  "oldfieldtype": "Int", 
   "doctype": "DocField", 
-  "label": "Lead Time Days", 
-  "oldfieldname": "lead_time_days", 
   "fieldname": "lead_time_days", 
   "fieldtype": "Int", 
-  "depends_on": "eval:doc.is_purchase_item==\"Yes\"", 
-  "permlevel": 0
+  "label": "Lead Time Days", 
+  "no_copy": 1, 
+  "oldfieldname": "lead_time_days", 
+  "oldfieldtype": "Int"
  }, 
  {
+  "depends_on": "eval:doc.is_purchase_item==\"Yes\"", 
   "description": "Default Purchase Account in which cost of the item will be debited.", 
-  "oldfieldtype": "Link", 
   "doctype": "DocField", 
-  "label": "Default Expense Account", 
-  "oldfieldname": "purchase_account", 
-  "options": "Account", 
   "fieldname": "purchase_account", 
   "fieldtype": "Link", 
-  "depends_on": "eval:doc.is_purchase_item==\"Yes\"", 
-  "permlevel": 0
+  "label": "Default Expense Account", 
+  "oldfieldname": "purchase_account", 
+  "oldfieldtype": "Link", 
+  "options": "Account"
  }, 
  {
+  "depends_on": "eval:doc.is_purchase_item==\"Yes\"", 
   "description": "Default Cost Center for tracking expense for this item.", 
-  "oldfieldtype": "Link", 
   "doctype": "DocField", 
-  "label": "Default Cost Center", 
-  "oldfieldname": "cost_center", 
-  "options": "Cost Center", 
   "fieldname": "cost_center", 
   "fieldtype": "Link", 
-  "depends_on": "eval:doc.is_purchase_item==\"Yes\"", 
-  "permlevel": 0
+  "label": "Default Cost Center", 
+  "oldfieldname": "cost_center", 
+  "oldfieldtype": "Link", 
+  "options": "Cost Center"
  }, 
  {
+  "depends_on": "eval:doc.is_purchase_item==\"Yes\"", 
   "description": "Buying Cost will be updated from Purchase Orders and Purchase Receipts. <br>The buying cost will calculated by moving average method.", 
-  "no_copy": 1, 
-  "oldfieldtype": "Currency", 
   "doctype": "DocField", 
-  "label": "Buying Cost", 
-  "oldfieldname": "buying_cost", 
   "fieldname": "buying_cost", 
   "fieldtype": "Currency", 
-  "depends_on": "eval:doc.is_purchase_item==\"Yes\"", 
-  "permlevel": 1
+  "label": "Buying Cost", 
+  "no_copy": 1, 
+  "oldfieldname": "buying_cost", 
+  "oldfieldtype": "Currency", 
+  "read_only": 1
  }, 
  {
-  "read_only": 1, 
-  "no_copy": 1, 
-  "oldfieldtype": "Currency", 
+  "depends_on": "eval:doc.is_purchase_item==\"Yes\"", 
   "doctype": "DocField", 
-  "label": "Last Purchase Rate", 
-  "oldfieldname": "last_purchase_rate", 
   "fieldname": "last_purchase_rate", 
   "fieldtype": "Currency", 
-  "depends_on": "eval:doc.is_purchase_item==\"Yes\"", 
-  "permlevel": 0
+  "label": "Last Purchase Rate", 
+  "no_copy": 1, 
+  "oldfieldname": "last_purchase_rate", 
+  "oldfieldtype": "Currency", 
+  "read_only": 1
  }, 
  {
-  "oldfieldtype": "Currency", 
+  "depends_on": "eval:doc.is_purchase_item==\"Yes\"", 
   "doctype": "DocField", 
-  "label": "Standard Rate", 
-  "oldfieldname": "standard_rate", 
   "fieldname": "standard_rate", 
   "fieldtype": "Currency", 
-  "depends_on": "eval:doc.is_purchase_item==\"Yes\"", 
-  "permlevel": 0
+  "label": "Standard Rate", 
+  "oldfieldname": "standard_rate", 
+  "oldfieldtype": "Currency"
  }, 
  {
-  "oldfieldtype": "Column Break", 
+  "depends_on": "eval:doc.is_purchase_item==\"Yes\"", 
   "doctype": "DocField", 
-  "width": "50%", 
   "fieldname": "column_break2", 
   "fieldtype": "Column Break", 
-  "depends_on": "eval:doc.is_purchase_item==\"Yes\"", 
-  "permlevel": 0
+  "oldfieldtype": "Column Break", 
+  "width": "50%"
  }, 
  {
-  "no_copy": 1, 
-  "oldfieldtype": "Table", 
+  "depends_on": "eval:doc.is_purchase_item==\"Yes\"", 
   "doctype": "DocField", 
-  "label": "UOM Conversion Details", 
-  "oldfieldname": "uom_conversion_details", 
-  "options": "UOM Conversion Detail", 
   "fieldname": "uom_conversion_details", 
   "fieldtype": "Table", 
-  "depends_on": "eval:doc.is_purchase_item==\"Yes\"", 
-  "permlevel": 0
+  "label": "UOM Conversion Details", 
+  "no_copy": 1, 
+  "oldfieldname": "uom_conversion_details", 
+  "oldfieldtype": "Table", 
+  "options": "UOM Conversion Detail"
  }, 
  {
   "depends_on": "eval:doc.is_purchase_item==\"Yes\"", 
   "doctype": "DocField", 
-  "label": "Manufacturer", 
   "fieldname": "manufacturer", 
   "fieldtype": "Data", 
-  "permlevel": 0
+  "label": "Manufacturer"
  }, 
  {
   "depends_on": "eval:doc.is_purchase_item==\"Yes\"", 
   "doctype": "DocField", 
-  "label": "Manufacturer Part Number", 
   "fieldname": "manufacturer_part_no", 
   "fieldtype": "Data", 
-  "permlevel": 0
+  "label": "Manufacturer Part Number"
  }, 
  {
   "depends_on": "eval:doc.is_purchase_item==\"Yes\"", 
   "doctype": "DocField", 
-  "label": "Item Supplier Details", 
-  "options": "Item Supplier", 
   "fieldname": "item_supplier_details", 
   "fieldtype": "Table", 
-  "permlevel": 0
+  "label": "Item Supplier Details", 
+  "options": "Item Supplier"
  }, 
  {
-  "oldfieldtype": "Section Break", 
   "doctype": "DocField", 
-  "label": "Sales Details", 
   "fieldname": "sales_details", 
   "fieldtype": "Section Break", 
-  "permlevel": 0
+  "label": "Sales Details", 
+  "oldfieldtype": "Section Break"
  }, 
  {
-  "description": "Selecting \"Yes\" will allow this item to figure in Sales Order, Delivery Note", 
   "default": "Yes", 
-  "oldfieldtype": "Select", 
+  "description": "Selecting \"Yes\" will allow this item to figure in Sales Order, Delivery Note", 
   "doctype": "DocField", 
-  "label": "Is Sales Item", 
-  "oldfieldname": "is_sales_item", 
-  "permlevel": 0, 
   "fieldname": "is_sales_item", 
   "fieldtype": "Select", 
-  "reqd": 1, 
   "in_filter": 1, 
-  "options": "\nYes\nNo"
+  "label": "Is Sales Item", 
+  "oldfieldname": "is_sales_item", 
+  "oldfieldtype": "Select", 
+  "options": "\nYes\nNo", 
+  "reqd": 1
  }, 
  {
-  "description": "Select \"Yes\" if this item represents some work like training, designing, consulting etc.", 
   "default": "No", 
-  "oldfieldtype": "Select", 
+  "depends_on": "eval:doc.is_sales_item==\"Yes\"", 
+  "description": "Select \"Yes\" if this item represents some work like training, designing, consulting etc.", 
   "doctype": "DocField", 
-  "label": "Is Service Item", 
-  "oldfieldname": "is_service_item", 
-  "permlevel": 0, 
   "fieldname": "is_service_item", 
   "fieldtype": "Select", 
-  "depends_on": "eval:doc.is_sales_item==\"Yes\"", 
-  "reqd": 1, 
   "in_filter": 1, 
-  "options": "\nYes\nNo"
+  "label": "Is Service Item", 
+  "oldfieldname": "is_service_item", 
+  "oldfieldtype": "Select", 
+  "options": "\nYes\nNo", 
+  "reqd": 1
  }, 
  {
-  "description": "Select \"Yes\" if this item is to be sent to a customer or received from a supplier as a sample. Delivery notes and Purchase Receipts will update stock levels but there will be no invoice against this item.", 
   "default": "No", 
-  "oldfieldtype": "Select", 
+  "depends_on": "eval:doc.is_sales_item==\"Yes\"", 
+  "description": "Select \"Yes\" if this item is to be sent to a customer or received from a supplier as a sample. Delivery notes and Purchase Receipts will update stock levels but there will be no invoice against this item.", 
   "doctype": "DocField", 
-  "label": "Allow Samples", 
-  "oldfieldname": "is_sample_item", 
-  "permlevel": 0, 
   "fieldname": "is_sample_item", 
   "fieldtype": "Select", 
-  "depends_on": "eval:doc.is_sales_item==\"Yes\"", 
-  "reqd": 1, 
-  "options": "\nYes\nNo"
+  "label": "Allow Samples", 
+  "oldfieldname": "is_sample_item", 
+  "oldfieldtype": "Select", 
+  "options": "\nYes\nNo", 
+  "reqd": 1
  }, 
  {
-  "oldfieldtype": "Currency", 
+  "depends_on": "eval:doc.is_sales_item==\"Yes\"", 
   "doctype": "DocField", 
+  "fieldname": "max_discount", 
+  "fieldtype": "Float", 
   "label": "Max Discount (%)", 
   "oldfieldname": "max_discount", 
-  "fieldname": "max_discount", 
-  "fieldtype": "Currency", 
-  "depends_on": "eval:doc.is_sales_item==\"Yes\"", 
-  "permlevel": 0
+  "oldfieldtype": "Currency"
  }, 
  {
   "depends_on": "eval:doc.is_sales_item==\"Yes\"", 
   "doctype": "DocField", 
-  "label": "Default Income Account", 
-  "options": "Account", 
   "fieldname": "default_income_account", 
   "fieldtype": "Link", 
-  "permlevel": 0
+  "label": "Default Income Account", 
+  "options": "Account"
  }, 
  {
   "depends_on": "eval:doc.is_sales_item==\"Yes\"", 
   "doctype": "DocField", 
-  "label": "Cost Center", 
-  "options": "Cost Center", 
   "fieldname": "default_sales_cost_center", 
   "fieldtype": "Link", 
-  "permlevel": 0
+  "label": "Cost Center", 
+  "options": "Cost Center"
  }, 
  {
-  "oldfieldtype": "Currency", 
+  "depends_on": "eval:doc.is_sales_item==\"Yes\"", 
   "doctype": "DocField", 
-  "label": "Sales Rate", 
-  "oldfieldname": "sales_rate", 
   "fieldname": "sales_rate", 
   "fieldtype": "Currency", 
-  "depends_on": "eval:doc.is_sales_item==\"Yes\"", 
   "hidden": 1, 
-  "permlevel": 0
+  "label": "Sales Rate", 
+  "oldfieldname": "sales_rate", 
+  "oldfieldtype": "Currency"
  }, 
  {
-  "oldfieldtype": "Column Break", 
+  "depends_on": "eval:doc.is_sales_item==\"Yes\"", 
   "doctype": "DocField", 
-  "width": "50%", 
   "fieldname": "column_break3", 
   "fieldtype": "Column Break", 
-  "depends_on": "eval:doc.is_sales_item==\"Yes\"", 
-  "permlevel": 0
+  "oldfieldtype": "Column Break", 
+  "width": "50%"
  }, 
  {
-  "description": "For the convenience of customers, these codes can be used in print formats like Invoices and Delivery Notes", 
   "depends_on": "eval:doc.is_sales_item==\"Yes\"", 
+  "description": "For the convenience of customers, these codes can be used in print formats like Invoices and Delivery Notes", 
   "doctype": "DocField", 
-  "label": "Customer Codes", 
-  "options": "Item Customer Detail", 
   "fieldname": "item_customer_details", 
   "fieldtype": "Table", 
-  "permlevel": 0
+  "label": "Customer Codes", 
+  "options": "Item Customer Detail"
  }, 
  {
-  "oldfieldtype": "Section Break", 
   "doctype": "DocField", 
-  "label": "Item Tax", 
   "fieldname": "item_tax_section_break", 
   "fieldtype": "Section Break", 
-  "permlevel": 0
+  "label": "Item Tax", 
+  "oldfieldtype": "Section Break"
  }, 
  {
-  "oldfieldtype": "Table", 
   "doctype": "DocField", 
-  "label": "Item Tax1", 
-  "oldfieldname": "item_tax", 
-  "options": "Item Tax", 
   "fieldname": "item_tax", 
   "fieldtype": "Table", 
-  "permlevel": 0
+  "label": "Item Tax1", 
+  "oldfieldname": "item_tax", 
+  "oldfieldtype": "Table", 
+  "options": "Item Tax"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Price Lists and Rates", 
   "fieldname": "price_list_section", 
   "fieldtype": "Section Break", 
-  "permlevel": 0
+  "label": "Price Lists and Rates"
  }, 
  {
+  "depends_on": "eval:doc.is_sales_item==\"Yes\"", 
   "description": "Create a price list from Price List master and enter standard ref rates against each of them. On selection of a price list in Quotation, Sales Order or Delivery Note, corresponding ref rate will be fetched for this item.", 
-  "oldfieldtype": "Table", 
   "doctype": "DocField", 
-  "label": "Item Prices", 
-  "oldfieldname": "ref_rate_details", 
-  "options": "Item Price", 
   "fieldname": "ref_rate_details", 
   "fieldtype": "Table", 
-  "depends_on": "eval:doc.is_sales_item==\"Yes\"", 
-  "permlevel": 0
+  "label": "Item Prices", 
+  "oldfieldname": "ref_rate_details", 
+  "oldfieldtype": "Table", 
+  "options": "Item Price"
  }, 
  {
-  "oldfieldtype": "Section Break", 
   "doctype": "DocField", 
-  "label": "Inspection Criteria", 
   "fieldname": "inspection_criteria", 
   "fieldtype": "Section Break", 
-  "permlevel": 0
+  "label": "Inspection Criteria", 
+  "oldfieldtype": "Section Break"
  }, 
  {
   "default": "No", 
-  "oldfieldtype": "Select", 
   "doctype": "DocField", 
-  "label": "Inspection Required", 
-  "oldfieldname": "inspection_required", 
-  "no_copy": 0, 
-  "options": "\nYes\nNo", 
   "fieldname": "inspection_required", 
   "fieldtype": "Select", 
-  "reqd": 1, 
-  "permlevel": 0
+  "label": "Inspection Required", 
+  "no_copy": 0, 
+  "oldfieldname": "inspection_required", 
+  "oldfieldtype": "Select", 
+  "options": "\nYes\nNo", 
+  "reqd": 1
  }, 
  {
+  "depends_on": "eval:doc.inspection_required==\"Yes\"", 
   "description": "Quality Inspection Parameters", 
-  "oldfieldtype": "Table", 
   "doctype": "DocField", 
-  "label": "Item Quality Inspection Parameter", 
-  "oldfieldname": "item_specification_details", 
-  "options": "Item Quality Inspection Parameter", 
   "fieldname": "item_specification_details", 
   "fieldtype": "Table", 
-  "depends_on": "eval:doc.inspection_required==\"Yes\"", 
-  "permlevel": 0
+  "label": "Item Quality Inspection Parameter", 
+  "oldfieldname": "item_specification_details", 
+  "oldfieldtype": "Table", 
+  "options": "Item Quality Inspection Parameter"
  }, 
  {
-  "oldfieldtype": "Section Break", 
   "doctype": "DocField", 
-  "label": "Manufacturing", 
   "fieldname": "manufacturing", 
   "fieldtype": "Section Break", 
-  "permlevel": 0
+  "label": "Manufacturing", 
+  "oldfieldtype": "Section Break"
  }, 
  {
-  "description": "Selecting \"Yes\" will allow you to create Bill of Material showing raw material and operational costs incurred to manufacture this item.", 
   "default": "No", 
-  "oldfieldtype": "Select", 
+  "description": "Selecting \"Yes\" will allow you to create Bill of Material showing raw material and operational costs incurred to manufacture this item.", 
   "doctype": "DocField", 
-  "label": "Allow Bill of Materials", 
-  "oldfieldname": "is_manufactured_item", 
-  "options": "\nYes\nNo", 
   "fieldname": "is_manufactured_item", 
   "fieldtype": "Select", 
-  "reqd": 1, 
-  "permlevel": 0
+  "label": "Allow Bill of Materials", 
+  "oldfieldname": "is_manufactured_item", 
+  "oldfieldtype": "Select", 
+  "options": "\nYes\nNo", 
+  "reqd": 1
  }, 
  {
-  "read_only": 1, 
-  "no_copy": 1, 
-  "oldfieldtype": "Link", 
+  "depends_on": "eval:doc.is_manufactured_item==\"Yes\"", 
   "doctype": "DocField", 
-  "label": "Default BOM", 
-  "oldfieldname": "default_bom", 
-  "options": "BOM", 
   "fieldname": "default_bom", 
   "fieldtype": "Link", 
-  "depends_on": "eval:doc.is_manufactured_item==\"Yes\"", 
-  "permlevel": 0
+  "label": "Default BOM", 
+  "no_copy": 1, 
+  "oldfieldname": "default_bom", 
+  "oldfieldtype": "Link", 
+  "options": "BOM", 
+  "read_only": 1
  }, 
  {
-  "description": "Selecting \"Yes\" will allow you to make a Production Order for this item.", 
   "default": "No", 
-  "oldfieldtype": "Select", 
+  "depends_on": "eval:doc.is_manufactured_item==\"Yes\"", 
+  "description": "Selecting \"Yes\" will allow you to make a Production Order for this item.", 
   "doctype": "DocField", 
-  "label": "Allow Production Order", 
-  "oldfieldname": "is_pro_applicable", 
-  "permlevel": 0, 
   "fieldname": "is_pro_applicable", 
   "fieldtype": "Select", 
-  "depends_on": "eval:doc.is_manufactured_item==\"Yes\"", 
-  "reqd": 1, 
-  "options": "\nYes\nNo"
+  "label": "Allow Production Order", 
+  "oldfieldname": "is_pro_applicable", 
+  "oldfieldtype": "Select", 
+  "options": "\nYes\nNo", 
+  "reqd": 1
  }, 
  {
-  "description": "Select \"Yes\" if you supply raw materials to your supplier to manufacture this item.", 
   "default": "No", 
-  "oldfieldtype": "Select", 
+  "description": "Select \"Yes\" if you supply raw materials to your supplier to manufacture this item.", 
   "doctype": "DocField", 
-  "label": "Is Sub Contracted Item", 
-  "oldfieldname": "is_sub_contracted_item", 
-  "options": "\nYes\nNo", 
   "fieldname": "is_sub_contracted_item", 
   "fieldtype": "Select", 
-  "reqd": 1, 
-  "permlevel": 0
+  "label": "Is Sub Contracted Item", 
+  "oldfieldname": "is_sub_contracted_item", 
+  "oldfieldtype": "Select", 
+  "options": "\nYes\nNo", 
+  "reqd": 1
  }, 
  {
-  "print_hide": 1, 
-  "no_copy": 1, 
   "doctype": "DocField", 
-  "label": "File List", 
   "fieldname": "file_list", 
   "fieldtype": "Text", 
   "hidden": 1, 
-  "permlevel": 0
+  "label": "File List", 
+  "no_copy": 1, 
+  "print_hide": 1
  }, 
  {
-  "print_hide": 1, 
-  "no_copy": 1, 
   "doctype": "DocField", 
-  "label": "Customer Code", 
   "fieldname": "customer_code", 
   "fieldtype": "Data", 
   "hidden": 1, 
-  "permlevel": 0, 
-  "in_filter": 1
+  "in_filter": 1, 
+  "label": "Customer Code", 
+  "no_copy": 1, 
+  "print_hide": 1
  }, 
  {
   "doctype": "DocField", 
-  "label": "Website", 
   "fieldname": "website_section", 
   "fieldtype": "Section Break", 
-  "permlevel": 0
+  "label": "Website"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Show in Website", 
   "fieldname": "show_in_website", 
   "fieldtype": "Check", 
-  "permlevel": 0
+  "label": "Show in Website"
  }, 
  {
-  "read_only": 1, 
-  "description": "website page link", 
   "depends_on": "show_in_website", 
+  "description": "website page link", 
   "doctype": "DocField", 
-  "label": "Page Name", 
   "fieldname": "page_name", 
   "fieldtype": "Data", 
-  "permlevel": 0
+  "label": "Page Name", 
+  "read_only": 1
  }, 
  {
-  "description": "Products will be sorted by weight-age in default searches. More the weight-age, higher the product will appear in the list.", 
   "depends_on": "show_in_website", 
+  "description": "Products will be sorted by weight-age in default searches. More the weight-age, higher the product will appear in the list.", 
   "doctype": "DocField", 
-  "label": "Weightage", 
   "fieldname": "weightage", 
   "fieldtype": "Int", 
-  "search_index": 1, 
-  "permlevel": 0
+  "label": "Weightage", 
+  "search_index": 1
  }, 
  {
-  "description": "Show a slideshow at the top of the page", 
   "depends_on": "show_in_website", 
+  "description": "Show a slideshow at the top of the page", 
   "doctype": "DocField", 
-  "label": "Slideshow", 
-  "options": "Website Slideshow", 
   "fieldname": "slideshow", 
   "fieldtype": "Link", 
-  "permlevel": 0
+  "label": "Slideshow", 
+  "options": "Website Slideshow"
  }, 
  {
-  "description": "Item Image (if not slideshow)", 
   "depends_on": "show_in_website", 
+  "description": "Item Image (if not slideshow)", 
   "doctype": "DocField", 
-  "label": "Image", 
-  "options": "attach_files:", 
   "fieldname": "website_image", 
   "fieldtype": "Select", 
-  "permlevel": 0
+  "label": "Image", 
+  "options": "attach_files:"
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "cb72", 
-  "fieldtype": "Column Break", 
-  "permlevel": 0
+  "fieldtype": "Column Break"
  }, 
  {
-  "description": "Show Price in Website (if set)", 
   "depends_on": "show_in_website", 
+  "description": "Show Price in Website (if set)", 
   "doctype": "DocField", 
-  "label": "Website Price List", 
-  "options": "Price List", 
   "fieldname": "website_price_list", 
   "fieldtype": "Link", 
-  "permlevel": 0
+  "label": "Website Price List", 
+  "options": "Price List"
  }, 
  {
-  "description": "Show \"In Stock\" or \"Not in Stock\" based on stock available in this warehouse.", 
   "depends_on": "show_in_website", 
+  "description": "Show \"In Stock\" or \"Not in Stock\" based on stock available in this warehouse.", 
   "doctype": "DocField", 
-  "label": "Website Warehouse", 
-  "options": "Warehouse", 
   "fieldname": "website_warehouse", 
   "fieldtype": "Link", 
-  "permlevel": 0
+  "label": "Website Warehouse", 
+  "options": "Warehouse"
  }, 
  {
-  "description": "List this Item in multiple groups on the website.", 
   "depends_on": "show_in_website", 
+  "description": "List this Item in multiple groups on the website.", 
   "doctype": "DocField", 
-  "label": "Website Item Groups", 
-  "options": "Website Item Group", 
   "fieldname": "website_item_groups", 
   "fieldtype": "Table", 
-  "permlevel": 0
+  "label": "Website Item Groups", 
+  "options": "Website Item Group"
  }, 
  {
   "depends_on": "show_in_website", 
   "doctype": "DocField", 
   "fieldname": "sb72", 
-  "fieldtype": "Section Break", 
-  "permlevel": 0
+  "fieldtype": "Section Break"
  }, 
  {
   "depends_on": "show_in_website", 
   "doctype": "DocField", 
-  "label": "Item Website Specifications", 
-  "options": "Item Website Specification", 
   "fieldname": "item_website_specifications", 
   "fieldtype": "Table", 
-  "permlevel": 0
+  "label": "Item Website Specifications", 
+  "options": "Item Website Specification"
  }, 
  {
   "depends_on": "show_in_website", 
   "doctype": "DocField", 
-  "label": "Website Description", 
   "fieldname": "web_long_description", 
   "fieldtype": "Text Editor", 
-  "permlevel": 0
+  "label": "Website Description"
  }, 
  {
   "amend": 0, 
+  "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
-  "write": 0, 
   "role": "Material Manager", 
-  "cancel": 0
+  "write": 0
  }, 
  {
   "amend": 0, 
+  "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
-  "write": 0, 
   "role": "Material User", 
-  "cancel": 0
+  "write": 0
  }, 
  {
+  "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
-  "write": 1, 
   "role": "Material Master Manager", 
-  "cancel": 1
+  "write": 1
  }
 ]

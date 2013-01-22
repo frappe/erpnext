@@ -1,103 +1,100 @@
 [
  {
-  "owner": "Administrator", 
+  "creation": "2013-01-10 16:34:32", 
   "docstatus": 0, 
-  "creation": "2012-11-30 18:14:18", 
+  "modified": "2013-01-22 14:16:45", 
   "modified_by": "Administrator", 
-  "modified": "2012-12-06 16:33:36"
+  "owner": "Administrator"
  }, 
  {
   "allow_attach": 1, 
-  "module": "Website", 
   "doctype": "DocType", 
   "max_attachments": 5, 
+  "module": "Website", 
   "name": "__common__"
  }, 
  {
+  "doctype": "DocField", 
   "name": "__common__", 
   "parent": "Blog", 
-  "doctype": "DocField", 
+  "parentfield": "fields", 
   "parenttype": "DocType", 
-  "parentfield": "fields"
+  "permlevel": 0
  }, 
  {
+  "doctype": "DocPerm", 
   "name": "__common__", 
   "parent": "Blog", 
-  "read": 1, 
-  "doctype": "DocPerm", 
-  "report": 1, 
+  "parentfield": "permissions", 
   "parenttype": "DocType", 
   "permlevel": 0, 
-  "parentfield": "permissions"
+  "read": 1, 
+  "report": 1, 
+  "submit": 0
  }, 
  {
-  "name": "Blog", 
-  "doctype": "DocType"
+  "doctype": "DocType", 
+  "name": "Blog"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Title", 
   "fieldname": "title", 
   "fieldtype": "Data", 
-  "reqd": 1, 
-  "permlevel": 0
+  "label": "Title", 
+  "reqd": 1
  }, 
  {
   "doctype": "DocField", 
-  "label": "Published", 
   "fieldname": "published", 
   "fieldtype": "Check", 
-  "permlevel": 0
+  "label": "Published"
  }, 
  {
   "doctype": "DocField", 
-  "label": "Content", 
   "fieldname": "content", 
   "fieldtype": "Text Editor", 
-  "reqd": 0, 
-  "permlevel": 0
+  "label": "Content", 
+  "reqd": 0
  }, 
  {
   "doctype": "DocField", 
-  "label": "Page Name", 
   "fieldname": "page_name", 
   "fieldtype": "Data", 
   "hidden": 1, 
-  "permlevel": 1
+  "label": "Page Name", 
+  "read_only": 1
  }, 
  {
   "doctype": "DocField", 
-  "label": "Email Sent", 
   "fieldname": "email_sent", 
   "fieldtype": "Check", 
   "hidden": 1, 
-  "permlevel": 0
+  "label": "Email Sent"
  }, 
  {
-  "print_hide": 1, 
-  "no_copy": 1, 
   "doctype": "DocField", 
-  "label": "File List", 
   "fieldname": "file_list", 
   "fieldtype": "Text", 
   "hidden": 1, 
-  "permlevel": 0
+  "label": "File List", 
+  "no_copy": 1, 
+  "print_hide": 1
  }, 
  {
-  "write": 1, 
   "create": 1, 
+  "doctype": "DocPerm", 
   "role": "Website Manager", 
-  "doctype": "DocPerm"
+  "write": 1
  }, 
  {
-  "write": 1, 
   "create": 1, 
+  "doctype": "DocPerm", 
   "role": "Blogger", 
-  "doctype": "DocPerm"
+  "write": 1
  }, 
  {
-  "write": 0, 
+  "doctype": "DocPerm", 
   "role": "Guest", 
-  "doctype": "DocPerm"
+  "write": 0
  }
 ]
